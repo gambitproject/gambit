@@ -12,18 +12,18 @@
 #endif   // __GNUG__
 
 class EFOutcome   {
-  friend class BaseEfg;
+  friend class Efg;
 
   protected:
     int number;
     gString name;
-    BaseEfg *E;
+    Efg *E;
 
-    EFOutcome(BaseEfg *e, int n) : number(n), E(e)   { }
+    EFOutcome(Efg *e, int n) : number(n), E(e)   { }
     ~EFOutcome()   { }
   
   public:
-    BaseEfg *BelongsTo(void) const   { return E; }
+    Efg *BelongsTo(void) const   { return E; }
 
     const gString &GetName(void) const   { return name; }
     void SetName(const gString &s)       { name = s; }

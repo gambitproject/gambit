@@ -1,8 +1,8 @@
-//#
-//# FILE: grid.h -- Interface to grid-solve module
-//#
-//# $Id$
-//#
+//
+// FILE: grid.h -- Interface to grid-solve module
+//
+// $Id$
+//
 
 #ifndef GRID_H
 #define GRID_H
@@ -23,7 +23,7 @@ class GridParams   {
 
 class GridSolveModule  {
 	private:
-		const Nfg<double> &N;
+		const Nfg &N;
 		const NFSupport &S;
 		const GridParams &params;
 		gArray<int> num_strats;
@@ -40,7 +40,7 @@ class GridSolveModule  {
 		// could use norms other then the simple one
 		virtual double Distance(const gVector<double> &a,const gVector<double> &b) const;
 	public:
-		GridSolveModule(const Nfg<double> &, const GridParams &, const NFSupport &);
+		GridSolveModule(const Nfg &, const GridParams &, const NFSupport &);
 		virtual ~GridSolveModule();
 		void GridSolve(void);
 };

@@ -1,7 +1,7 @@
 //
 // FILE: efstrat.cc -- Implementation of supports for the extensive form
 //
-// $Id$
+// @(#)efstrat.cc	2.4 6/4/97
 //
 
 #include "efg.h"
@@ -238,7 +238,7 @@ bool EFActionSet::IsValid(void) const
 // EFSupport: Constructors, Destructors, Operators
 //--------------------------------------------------
 
-EFSupport::EFSupport(const BaseEfg &E) : befg(&E), sets(E.NumPlayers())
+EFSupport::EFSupport(const Efg &E) : befg(&E), sets(E.NumPlayers())
 {
   for (int i = 1; i <= sets.Length(); i++)
     sets[i] = new EFActionSet(*(E.Players()[i]));
@@ -298,14 +298,14 @@ const gArray<Action *> &EFSupport::Actions(int pl, int iset) const
   return sets[pl]->ActionList(iset);
 }
 
-const BaseEfg &EFSupport::BelongsTo(void) const
+const Efg &EFSupport::BelongsTo(void) const
 {
   return *befg;
 }
 
 int EFSupport::Find(Action *a) const
 {
-  if (a->BelongsTo()->BelongsTo() != befg)   return 0;
+  if (a->BelongsTo()->Game() != befg)   return 0;
 
   int pl = a->BelongsTo()->GetPlayer()->GetNumber();
 

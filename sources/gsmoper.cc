@@ -880,16 +880,8 @@ Portion *GSM_Equal_Nfg(Portion** param)
  			       param[1]->Spec().Type );
   }
 
-// This occurs when games are of different subtype
-  if (param[0]->Spec().Type != param[0]->Spec().Type)
-    return new BoolPortion(false);
-
-  if (param[0]->Spec().Type == porNFG_FLOAT)
-    return new BoolPortion(((NfgPortion<double> *) param[0])->Value() ==
-			      ((NfgPortion<double> *) param[1])->Value());
-  else
-    return new BoolPortion(((NfgPortion<gRational> *) param[0])->Value() ==
-			      ((NfgPortion<gRational> *) param[1])->Value());
+  return new BoolPortion(((NfgPortion *) param[0])->Value() ==
+			      ((NfgPortion *) param[1])->Value());
 
 }
 
@@ -1066,16 +1058,8 @@ Portion* GSM_NotEqual_Nfg(Portion** param)
  			       param[1]->Spec().Type );
   }
 
-// This occurs when games are of different subtype
-  if (param[0]->Spec().Type != param[0]->Spec().Type)
-    return new BoolPortion(true);
-
-  if (param[0]->Spec().Type == porNFG_FLOAT)
-    return new BoolPortion(((NfgPortion<double> *) param[0])->Value() !=
-			      ((NfgPortion<double> *) param[1])->Value());
-  else
-    return new BoolPortion(((NfgPortion<gRational> *) param[0])->Value() !=
-			      ((NfgPortion<gRational> *) param[1])->Value());
+  return new BoolPortion(((NfgPortion *) param[0])->Value() !=
+			      ((NfgPortion *) param[1])->Value());
 }
 
 Portion* GSM_NotEqual_NfSupport(Portion** param)
@@ -1606,16 +1590,9 @@ Portion* GSM_Write_Nfg(Portion** param)
 {
   assert(param[1]->Spec().Type & porNFG);
   gOutput& s = ((OutputPortion*) param[0])->Value();
-  
-  if (param[1]->Spec().Type == porNFG_FLOAT)   {
-    Nfg<double> *nfg = ((NfgPortion<double> *) param[1])->Value();
-    nfg->WriteNfgFile(s);
-  }
-  else  {
-    Nfg<gRational> *nfg = ((NfgPortion<gRational> *) param[1])->Value();
-    nfg->WriteNfgFile(s);
-  }
-    
+  Nfg *nfg = ((NfgPortion *) param[1])->Value();
+
+  nfg->WriteNfgFile(s);
 
   // swap the first parameter with the return value, so things like
   //   Output["..."] << x << y  would work
@@ -1630,7 +1607,7 @@ Portion* GSM_Write_EfgFloat(Portion** param)
   assert(param[1]->Spec().Type & porEFG);
   gOutput& s = ((OutputPortion*) param[0])->Value();
 
-  Efg<double> *efg = (Efg<double> *) ((EfgPortion*) param[1])->Value();
+  Efg *efg = ((EfgPortion*) param[1])->Value();
 
   efg->WriteEfgFile(s);
 
@@ -1647,7 +1624,7 @@ Portion* GSM_Write_EfgRational(Portion** param)
   assert(param[1]->Spec().Type & porEFG);
   gOutput& s = ((OutputPortion*) param[0])->Value();
 
-  Efg<gRational> *efg = (Efg<gRational> *) ((EfgPortion*) param[1])->Value();
+  Efg *efg = ((EfgPortion*) param[1])->Value();
 
   efg->WriteEfgFile(s);
 
@@ -2181,7 +2158,7 @@ Portion *GSM_Mixed_NfgFloat(Portion **param)
   Portion* p1;
   Portion* p2;
 
-  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion<double>*) param[0])->Value();
+  Nfg &N = * ((NfgPortion*) param[0])->Value();
   MixedSolution<double> *P = new MixedSolution<double>(N);
 
   if(((ListPortion*) param[1])->Length() != N.NumPlayers())
@@ -2236,7 +2213,7 @@ Portion *GSM_Mixed_NfgRational(Portion **param)
   Portion* p1;
   Portion* p2;
 
-  Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion<gRational>*) param[0])->Value();
+  Nfg &N = * ((NfgPortion*) param[0])->Value();
   MixedSolution<gRational> *P = new MixedSolution<gRational>(N);
 
   if(((ListPortion*) param[1])->Length() != N.NumPlayers())
@@ -2291,7 +2268,7 @@ Portion *GSM_Behav_EfgFloat(Portion **param)
   Portion* p2;
   Portion* p3;
 
-  Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
+  Efg &E = *((EfgPortion*) param[0])->Value();
   BehavSolution<double> *P = new BehavSolution<double>(E);
 
   if(((ListPortion*) param[1])->Length() != E.NumPlayers())
@@ -2368,7 +2345,7 @@ Portion *GSM_Behav_EfgRational(Portion **param)
   Portion* p2;
   Portion* p3;
 
-  Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
+  Efg &E = *((EfgPortion*) param[0])->Value();
   BehavSolution<gRational> *P = new BehavSolution<gRational>(E);
 
   if(((ListPortion*) param[1])->Length() != E.NumPlayers())
@@ -2446,8 +2423,8 @@ Portion* GSM_Read_MixedFloat(Portion** param)
 {
   Portion* sub_param[2];
   Portion* owner = 
-    new NfgValPortion<double>(& ((MixedSolution<double>*) 
-		       ((MixedPortion<double>*) param[1])->Value())->BelongsTo());
+    new NfgValPortion(& ((MixedSolution<double>*)
+		       ((MixedPortion<double>*) param[1])->Value())->Game());
 
   sub_param[0] = param[1];
   sub_param[1] = 0;
@@ -2482,8 +2459,8 @@ Portion* GSM_Read_MixedRational(Portion** param)
 {
   Portion* sub_param[2];
   Portion* owner = 
-    new NfgValPortion<gRational>(& ((MixedSolution<gRational>*) 
-		       ((MixedPortion<gRational>*) param[1])->Value())->BelongsTo());
+    new NfgValPortion(& ((MixedSolution<gRational>*)
+		       ((MixedPortion<gRational>*) param[1])->Value())->Game());
 
   sub_param[0] = param[1];
   sub_param[1] = 0;
@@ -3788,7 +3765,7 @@ void Init_gsmoper(GSM* gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Write", 11);
+  FuncObj = new FuncDescObj("Write", 10);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Write_numerical, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("output", porOUTPUT,
@@ -3808,7 +3785,7 @@ void Init_gsmoper(GSM* gsm)
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("x", porMIXED));
 
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Write_Behav, 
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Write_Behav,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
@@ -3821,45 +3798,38 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(4, 1, ParamInfoType("x", porNFG,
 					    REQUIRED ));
   
-  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Write_EfgFloat, 
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Write_EfgFloat,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(5, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(5, 1, ParamInfoType("x", porEFG_FLOAT));
+  FuncObj->SetParamInfo(5, 1, ParamInfoType("x", porEFG));
 
-  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Write_EfgRational, 
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Write_list,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(6, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(6, 1, ParamInfoType("x", porEFG_RATIONAL));
-
-  
-  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Write_list, 
-				       porOUTPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(7, 0, ParamInfoType("output", porOUTPUT,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(7, 1, ParamInfoType
+  FuncObj->SetParamInfo(6, 1, ParamInfoType
 			("x", PortionSpec(porBOOL | porINTEGER | porFLOAT | 
 					  porTEXT | porRATIONAL | porMIXED |
 					  porBEHAV, 1)));
 
-  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Write_NfSupport, 
+  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Write_NfSupport,
+				       porOUTPUT, 2, 0, funcNONLISTABLE));
+  FuncObj->SetParamInfo(7, 0, ParamInfoType("output", porOUTPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(7, 1, ParamInfoType("x", porNFSUPPORT));
+
+  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Write_EfSupport,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(8, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(8, 1, ParamInfoType("x", porNFSUPPORT));
+  FuncObj->SetParamInfo(8, 1, ParamInfoType("x", porEFSUPPORT));
 
-  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Write_EfSupport, 
+  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Write_Strategy,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(9, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(9, 1, ParamInfoType("x", porEFSUPPORT));
-
-  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_Write_Strategy, 
-				       porOUTPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(10, 0, ParamInfoType("output", porOUTPUT,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(10, 1, ParamInfoType("x", porSTRATEGY));
+  FuncObj->SetParamInfo(9, 1, ParamInfoType("x", porSTRATEGY));
 
   gsm->AddFunction(FuncObj);
 

@@ -13,7 +13,7 @@
 #include "glist.h"
 #include "mixed.h"
 
-template <class T> int FindPureNash(const Nfg<T> &N,
+template <class T> int FindPureNash(const Nfg &N,
 				    const NFSupport &S,
 				    gList<MixedSolution<T> > &eqs)
 {
@@ -28,7 +28,7 @@ template <class T> int FindPureNash(const Nfg<T> &N,
       T current = N.Payoff(citer.GetOutcome(), pl);
       for (int i = 1; i <= S.NumStrats(pl); i++)  {
 	niter.Next(pl);
-	if (N.Payoff(niter.GetOutcome(), pl) > current)  {
+	if ((T) N.Payoff(niter.GetOutcome(), pl) > current)  {
 	  flag = 0;
 	  break;
 	}

@@ -8,9 +8,9 @@
 #include "rational.h"
 
 
-template int FindPureNash(const Efg<double> &, const EFSupport &,
+template int FindPureNash(const Efg &, const EFSupport &,
 			  gList<BehavSolution<double> > &);
-template int FindPureNash(const Efg<gRational> &, const EFSupport &,
+template int FindPureNash(const Efg &, const EFSupport &,
 			  gList<BehavSolution<gRational> > &);
 
 

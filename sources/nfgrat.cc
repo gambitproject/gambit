@@ -6,19 +6,7 @@
 
 #include "rational.h"
 #include "nfg.imp"
-#include "readnfg.imp"
 #include "mixedsol.imp"
-
-template class Nfg<gRational>;
-DataType Nfg<gRational>::Type(void) const { return gRATIONAL; }
-gRational Nfg<gRational>::NullPayoff(void) const  { return gRational(0); }
-
-template class NfgFile<gRational>;
-
-NfgFile<gRational>::NfgFile(gInput &f, Nfg<gRational> *& N)
-  : NfgFileReader(f, fooD, N), type(gRATIONAL), fooD(0)
-{ }
-
 
 template class MixedProfile<gRational>;
 template gOutput &operator<<(gOutput &, const MixedProfile<gRational> &);

@@ -11,43 +11,9 @@
 
 bool Dominates(const EFSupport &S, int pl, int iset, int a, int b, bool strong,gStatus &status)
 {
-	const BaseEfg &E = S.BelongsTo();
+	const Efg &E = S.BelongsTo();
 
-	switch (E.Type())   {
-		case gDOUBLE:  {
-			EfgContIter<double> A(S), B(S);
-
-			A.Freeze(pl, iset);
-			A.Set(pl, iset, a);
-			B.Freeze(pl, iset);
-			B.Set(pl, iset, b);
-
-			if (strong)  {
-	do  {
-		double ap = A.Payoff(pl);
-		double bp = B.Payoff(pl);
-		if (ap <= bp)  return false;
-		A.NextContingency();
-	} while (B.NextContingency() && !status.Get());
-
-	return true;
-			}
-
-			bool equal = true;
-
-			do   {
-	double ap = A.Payoff(pl);
-	double bp = B.Payoff(pl);
-	if (ap < bp)   return false;
-	else if (ap > bp)  equal = false;
-	A.NextContingency();
-			} while (B.NextContingency() && !status.Get());
-
-			return (!equal);
-		}
-
-	case gRATIONAL:  {
-    EfgContIter<gRational> A(S), B(S);
+  EfgContIter<gRational> A(S), B(S);
     
     A.Freeze(pl, iset);
     A.Set(pl, iset, a);
@@ -76,11 +42,6 @@ bool Dominates(const EFSupport &S, int pl, int iset, int a, int b, bool strong,g
 		} while (B.NextContingency() && !status.Get());
 
 		return (!equal);
-	}
-		default:
-			assert(0);
-			return false;
-	}
 }
 
 

@@ -1,8 +1,8 @@
-//#
-//# FILE: simpdiv.h -- Interface to Simpdiv solution module
-//#
-//# $Id$
-//#
+//
+// FILE: simpdiv.h -- Interface to Simpdiv solution module
+//
+// $Id$
+//
 
 #ifndef SIMPDIV_H
 #define SIMPDIV_H
@@ -25,7 +25,7 @@ class SimpdivParams     {
 
 template <class T> class SimpdivModule  {
   private:
-    const Nfg<T> &N;
+    const Nfg &N;
     const SimpdivParams &params;
     const NFSupport &support;
 
@@ -51,7 +51,7 @@ template <class T> class SimpdivModule  {
     int get_b(int j, int h);
   
   public:
-    SimpdivModule(const Nfg<T> &N, const SimpdivParams &, const NFSupport &);
+    SimpdivModule(const Nfg &N, const SimpdivParams &, const NFSupport &);
     virtual ~SimpdivModule();
 
     int NumEvals(void) const  { return nevals; }

@@ -9,17 +9,17 @@
 
 #include "garray.h"
 #include "gstring.h"
-
-class NFGameForm;
+#include "grblock.h"
+#include "rational.h"
 
 class NFOutcome   {
-  friend class NFGameForm;
+  friend class Nfg;
   private:
     int number;
-    NFGameForm *nfg;
+    Nfg *nfg;
     gString name;
 
-    NFOutcome(int n, NFGameForm *N) : number(n), nfg(N)  { }
+    NFOutcome(int n, Nfg *N) : number(n), nfg(N)  { }
     NFOutcome(int n, const NFOutcome &c) 
       : number(n), nfg(c.nfg),name(c.name) { }
     ~NFOutcome() { }
@@ -30,7 +30,7 @@ class NFOutcome   {
     const gString &GetName(void) const   { return name; }
     void SetName(const gString &s)   { name = s; }
 
-    NFGameForm *BelongsTo(void) const   { return nfg; }
+    Nfg *Game(void) const   { return nfg; }
 };
 
 #include "gblock.h"
@@ -38,14 +38,17 @@ class NFOutcome   {
 class NFPlayer;
 class Strategy;
 class StrategyProfile;
-class NFPayoffs;
 
 #ifndef NFG_ONLY
-template <class T> class Lexicon;
-template <class T> class Efg;
+class Lexicon;
+class Efg;
 #endif   // NFG_ONLY
 
-class NFGameForm  {
+class Nfg  {
+#ifndef NFG_ONLY
+friend class Lexicon;
+friend void SetEfg(Nfg *, Efg *);
+#endif   // NFG_ONLY
 protected:
   gString title;
   gArray<int> dimensions;
@@ -55,23 +58,29 @@ protected:
 
   gArray<NFOutcome *> results;
 
-  NFPayoffs *paytable;
+  gRectBlock<gRational> payoffs;
+#ifndef NFG_ONLY
+  Efg *efg;
+#endif  // NFG_ONLY
 
   // PRIVATE AUXILIARY MEMBER FUNCTIONS
   void IndexStrategies(void);
   int Product(const gArray<int> &);
 
+  void BreakLink(void);
+
+
 public:
   // CONSTRUCTORS, DESTRUCTORS, CONSTRUCTIVE OPERATORS
-  NFGameForm(const NFPayoffs &p, const gArray<int> &dim);
-  NFGameForm(const NFGameForm &b);
-  ~NFGameForm();
+  Nfg(const gArray<int> &dim);
+  Nfg(const Nfg &b);
+  ~Nfg();
     
   // GENERAL DATA ACCESS AND MANIPULATION  
   void SetTitle(const gString &s);
   const gString &GetTitle(void) const;
 
-  NFPayoffs *PayoffTable(void) const   { return paytable; }
+  void WriteNfgFile(gOutput &) const;
 
   // PLAYERS AND STRATEGIES
   int NumPlayers(void) const;
@@ -97,87 +106,21 @@ public:
 
   void SetOutcome(int index, NFOutcome *outcome)  { results[index] = outcome; }
   NFOutcome *GetOutcome(int index) const   { return results[index]; }
-};
 
+  void SetPayoff(NFOutcome *, int pl, const gRational &value);
+  gRational Payoff(NFOutcome *, int pl) const;
 
-class NFPayoffs   {
-  friend class NFGameForm;
-  private:
-    virtual void BreakLink(void) = 0;
-    virtual void NewOutcome(void) = 0;
-    virtual void DeleteOutcome(int) = 0;
-
-  public:
-    virtual ~NFPayoffs()  { }
-    virtual DataType Type(void) const = 0;
-    virtual bool IsConstSum(void) const = 0;
-};
-
-template <class T> class MixedProfile;
-template <class T> class NfgFile;
-
-#include "gpvector.h"
-#include "grblock.h"
-
-template <class T> class Nfg : public NFPayoffs  {
-  friend class MixedProfile<T>;
-  friend class NfgFile<T>;
-#ifndef NFG_ONLY
-  friend class Lexicon<T>;
-  friend void SetEfg(Nfg<T> *, Efg<T> *);
-#endif  // NFG_ONLY
-
-private:
-  NFGameForm *gameform;
-#ifndef NFG_ONLY
-  Efg<T> *efg;
-#endif  // NFG_ONLY
-  gRectBlock<T> payoffs;
-
-  void BreakLink(void);
-  void NewOutcome(void);
-  void DeleteOutcome(int);
-
-  T NullPayoff(void) const;
-
-public:
-  Nfg(const gArray<int> &dim);
-  Nfg(const Nfg<T> &n);
-  virtual ~Nfg();
-
-  // returns the type of the nfg, DOUBLE or RATIONAL
-  DataType Type(void) const;
-  NFGameForm &GameForm(void) const   { return *gameform; }
-
-  int NumPlayers(void) const   { return gameform->NumPlayers(); }
-  const gArray<NFPlayer *> &Players(void) const
-    { return gameform->Players(); }
-
-  int NumStrats(int pl) const  { return gameform->NumStrats(pl); }
-  const gArray<int> &NumStrats(void) const  { return gameform->NumStrats(); }
-
-  const gArray<NFOutcome *> &Outcomes(void) const 
-    { return gameform->Outcomes(); }
-  int NumOutcomes(void) const   { return gameform->NumOutcomes(); }
-
-  void SetPayoff(NFOutcome *, int pl, const T &value);
-  T Payoff(NFOutcome *, int pl) const;
-
-  void WriteNfgFile(gOutput &) const;
+    // defined in nfgutils.cc
+  friend void RandomNfg(Nfg &);
+  friend bool IsConstSum(const Nfg &);
+  friend gRational MinPayoff(const Nfg &, int pl = 0);
+  friend gRational MaxPayoff(const Nfg &, int pl = 0);
 
 #ifndef NFG_ONLY
-  Efg<T> *AssociatedEfg(void) const   { return efg; }
+  Efg *AssociatedEfg(void) const   { return efg; }
 #endif   // NFG_ONLY
-
-  bool IsConstSum(void) const   { return ::IsConstSum(*this); }
-
-  // defined in nfgutils.cc
-  friend void RandomNfg(Nfg<T> &);
-  friend bool IsConstSum(const Nfg<T> &);
-  friend T MinPayoff(const Nfg<T> &, int pl = 0);
-  friend T MaxPayoff(const Nfg<T> &, int pl = 0);
 };
 
-int ReadNfgFile(gInput &, Nfg<double> *&, Nfg<gRational> *&);
+int ReadNfgFile(gInput &, Nfg *&);
 
 #endif    // NFG_H

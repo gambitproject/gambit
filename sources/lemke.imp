@@ -11,10 +11,10 @@
 
 #include "lemke.h"
 
-template <class T> gMatrix<T> Make_A1(const Nfg<T> &, const NFSupport &);
-template <class T> gVector<T> Make_b1(const Nfg<T> &, const NFSupport &);
-template <class T> gMatrix<T> Make_A2(const Nfg<T> &, const NFSupport &);
-template <class T> gVector<T> Make_b2(const Nfg<T> &, const NFSupport &);
+template <class T> gMatrix<T> Make_A1(const Nfg &, const NFSupport &, const T &);
+template <class T> gVector<T> Make_b1(const Nfg &, const NFSupport &, const T &);
+template <class T> gMatrix<T> Make_A2(const Nfg &, const NFSupport &, const T &);
+template <class T> gVector<T> Make_b2(const Nfg &, const NFSupport &, const T &);
 
 
 //---------------------------------------------------------------------------
@@ -40,10 +40,10 @@ template <class T> int LemkeModule<T>::Lemke(int dup)
 
   List.Flush();
 
-  gMatrix<T> A1(Make_A1(NF, support));
-  gVector<T> b1(Make_b1(NF, support));
-  gMatrix<T> A2(Make_A2(NF, support));
-  gVector<T> b2(Make_b2(NF, support));
+  gMatrix<T> A1 = Make_A1(NF, support, (T) 0);
+  gVector<T> b1 = Make_b1(NF, support, (T) 0);
+  gMatrix<T> A2 = Make_A2(NF, support, (T) 0);
+  gVector<T> b2 = Make_b2(NF, support, (T) 0);
   LHTableau<T> B(A1,A2,b1,b2);
   epsilon = B.Epsilon();
   if ( params.stopAfter!=1 || dup==0)
@@ -61,7 +61,7 @@ template <class T> int LemkeModule<T>::Lemke(int dup)
   }
 //  if(params.trace >= 1)
 //    (*params.tracefile) << "\nN Pivots = " << npivots << "\n";
-  
+
   if(params.status.Get()) params.status.Reset();
   AddSolutions();
   time = watch.Elapsed();
@@ -192,7 +192,7 @@ template <class T> long LemkeModule<T>::NumPivots(void) const
 //-------------------------------------------------------------------------
 
 template <class T>
-LemkeModule<T>::LemkeModule(const Nfg<T> &N, const LemkeParams &p,
+LemkeModule<T>::LemkeModule(const Nfg &N, const LemkeParams &p,
 			    const NFSupport &S)
   : NF(N), support(S), params(p), npivots(0), epsilon(0),
     num_strats(S.NumStrats(1) + S.NumStrats(2))

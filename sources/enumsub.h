@@ -15,12 +15,12 @@ template <class T> class EnumBySubgame : public SubgameSolver<T>  {
     int npivots;
     EnumParams params;
 
-    int SolveSubgame(const Efg<T> &, const EFSupport &,
+    int SolveSubgame(const Efg &, const EFSupport &,
 		     gList<BehavSolution<T> > &);
     EfgAlgType AlgorithmID() const { return EfgAlg_ENUMSUB; }    
 
   public:
-    EnumBySubgame(const Efg<T> &E, const EFSupport &,
+    EnumBySubgame(const Efg &E, const EFSupport &,
 		  const EnumParams &, int max = 0);
     virtual ~EnumBySubgame();
 

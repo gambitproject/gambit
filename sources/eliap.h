@@ -1,7 +1,7 @@
 //
 // FILE: eliap.h -- Interface to extensive form Liapunov solution module
 //
-// $Id$
+// @(#)eliap.h	2.1 3/24/97
 //
 
 #ifndef ELIAP_H
@@ -28,7 +28,7 @@ class EFLiapParams  {
 };
 
 
-bool Liap(const Efg<double> &, EFLiapParams &,
+bool Liap(const Efg &, EFLiapParams &,
 	  const BehavProfile<double> &, gList<BehavSolution<double> > &,
 	  long &nevals, long &niters);
 
@@ -40,12 +40,12 @@ class EFLiapBySubgame : public SubgameSolver<double>  {
     EFLiapParams params;
     BehavProfile<double> start;
     
-    int SolveSubgame(const Efg<double> &, const EFSupport &,
+    int SolveSubgame(const Efg &, const EFSupport &,
 		     gList<BehavSolution<double> > &);
     EfgAlgType AlgorithmID() const { return EfgAlg_ELIAPSUB; }    
 
   public:
-    EFLiapBySubgame(const Efg<double> &E, const EFLiapParams &,
+    EFLiapBySubgame(const Efg &E, const EFLiapParams &,
 		    const BehavProfile<double> &, int max = 0);
     virtual ~EFLiapBySubgame();
 

@@ -1,7 +1,7 @@
 //
 // FILE: egobit.h -- Interface to extensive form Gobit solution module
 //
-// $Id$
+// @(#)egobit.h	2.1 3/24/97
 //
 
 #ifndef EGOBIT_H
@@ -28,7 +28,7 @@ class EFGobitParams   {
 };
 
 
-void Gobit(const Efg<double> &, EFGobitParams &,
+void Gobit(const Efg &, EFGobitParams &,
 	   const BehavProfile<double> &, gList<BehavSolution<double> > &,
 	   long &nevals, long &nits);
 

@@ -11,18 +11,19 @@
 #include "glist.h"
 
 typedef gArray<int> Correspondence;
+class Nfg;
 
-template <class T> class Lexicon   {
+class Lexicon   {
   public:
-    Nfg<T> *N;
+    Nfg *N;
     gArray<gList<Correspondence *> > strategies;
 
-    Lexicon(const Efg<T> &);
+    Lexicon(const Efg &);
     ~Lexicon();
 
     void MakeStrategy(class EFPlayer *p);
     void MakeReducedStrats(const class EFSupport &, class EFPlayer *, class Node *, class Node *);
-    void MakeLink(Efg<T> *, Nfg<T> *);
+    void MakeLink(Efg *, Nfg *);
 };
 
 

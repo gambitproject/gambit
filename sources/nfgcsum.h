@@ -31,7 +31,7 @@ class ZSumParams     {
 
 template <class T> class ZSumModule  {
 private:
-  const Nfg<T> &NF;
+  const Nfg &NF;
   const ZSumParams &params;
   const NFSupport &support;
   gMatrix<T> *A;
@@ -42,7 +42,7 @@ private:
   gList<BFS<T> > List;
 
 public:
-  ZSumModule(const Nfg<T> &N, const ZSumParams &p, const NFSupport &);
+  ZSumModule(const Nfg &N, const ZSumParams &p, const NFSupport &);
   virtual ~ZSumModule();
 
   bool IsConstSum();

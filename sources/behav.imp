@@ -15,529 +15,6 @@
 #include "gvector.h"
 
   
-//------------------------------------------------------------------------
-//           ChanceInfoset<T>: Member function definitions
-//------------------------------------------------------------------------
-
-template <class T> class ChanceInfoset : public Infoset  {
-  friend class BaseEfg;
-  friend class Efg<double>;
-  friend class Efg<gRational>;
-  friend class BehavProfile<double>;
-  friend class BehavProfile<gRational>;
-
-  private:
-    gBlock<T> probs;
-
-    ChanceInfoset(BaseEfg *E, int n, EFPlayer *p, int br);
-    virtual ~ChanceInfoset()    { }
-
-    void PrintActions(gOutput &f) const;
-
-  public:
-    Action *InsertAction(int where);
-    void RemoveAction(int which);
-
-    void SetActionProb(int i, const T &value)  { probs[i] = value; }
-    const T &GetActionProb(int i) const   { return probs[i]; }
-    const gArray<T> &GetActionProbs(void) const  { return probs; }
-};
-
-
-template <class T>
-ChanceInfoset<T>::ChanceInfoset(BaseEfg *E, int n, EFPlayer *p, int br)
-  : Infoset(E, n, p, br), probs(br)
-{
-  for (int i = 1; i <= br; probs[i++] = (T) 1 / (T) br);
-}
-
-template <class T> Action *ChanceInfoset<T>::InsertAction(int where)
-{ 
-  Action *action = Infoset::InsertAction(where);
-  probs.Insert((T) 0, where);
-  return action;
-}
-
-template <class T> void ChanceInfoset<T>::RemoveAction(int which)
-{
-  Infoset::RemoveAction(which);
-  probs.Remove(which);
-}
-
-template <class T> void ChanceInfoset<T>::PrintActions(gOutput &f) const
-{ 
-  f << "{ ";
-  for (int i = 1; i <= actions.Length(); i++)
-    f << '"' << actions[i]->GetName() << "\" " << probs[i] << ' ';
-  f << "}";
-}
-
-//------------------------------------------------------------------------
-//      Efg<T>: Constructor, destructors, constructive operators
-//------------------------------------------------------------------------
-
-template <class T> Efg<T>::Efg(void)
-#ifndef EFG_ONLY
- : lexicon(0)
-#endif   // EFG_ONLY
-{ root = new Node(this, 0); }
-
-template <class T> void Efg<T>::CopySubtree(Node *n, Node *m)
-{
-  n->name = m->name;
-
-  if (m->gameroot == m)
-    n->gameroot = n;
-
-  if (m->outcome)
-    n->outcome = outcomes[m->outcome->GetNumber()];
-
-  if (m->infoset)   {
-    EFPlayer *p;
-    if (m->infoset->player->number)
-      p = players[m->infoset->player->number];
-    else 
-      p = chance;
-
-    Infoset *s = p->Infosets()[m->infoset->number];
-    AppendNode(n, s);
-    
-    for (int i = 1; i <= n->children.Length(); i++)
-      CopySubtree(n->children[i], m->children[i]);
-  }
-}
-
-template <class T> Efg<T>::Efg(const BaseEfg &E)
-#ifdef EFG_ONLY
-  : BaseEfg(E), payoffs(E.NumOutcomes(), E.NumPlayers())
-#else
-  : BaseEfg(E), lexicon(0), payoffs(E.NumOutcomes(), E.NumPlayers())
-#endif   // EFG_ONLY
-{
-  int i;
-  
-  for (i = 1; i <= E.GetChance()->NumInfosets(); i++)   {
-    ChanceInfoset<T> *t = (ChanceInfoset<T> *) E.GetChance()->Infosets()[i];
-    ChanceInfoset<T> *s = new ChanceInfoset<T>(this, i, chance,
-					       t->NumActions());
-    s->name = t->GetName();
-    for (int act = 1; act <= s->probs.Length(); act++)
-      s->actions[act]->name = t->actions[act]->name;
-    chance->infosets.Append(s);
-  }
-
-  root = new Node(this, 0);
-  CopySubtree(root, E.RootNode());
-
-  sortisets = true;
-  SortInfosets();
-}
-
-template <class T> Efg<T>::Efg(const Efg<T> &E)
-#ifdef EFG_ONLY
-  : BaseEfg(E), payoffs(E.payoffs)
-#else
-  : BaseEfg(E), lexicon(0), payoffs(E.payoffs)
-#endif   // EFG_ONLY
-{
-  int i;
-
-  for (i = 1; i <= E.chance->infosets.Length(); i++)   {
-    ChanceInfoset<T> *t = (ChanceInfoset<T> *) E.chance->infosets[i];
-    ChanceInfoset<T> *s = new ChanceInfoset<T>(this, i, chance,
-					       t->actions.Length());
-    s->name = t->name;
-    for (int j = 1; j <= s->probs.Length(); j++)  {
-      s->probs[j] = t->probs[j];
-      s->actions[j]->name = t->actions[j]->name;
-    }
-    chance->infosets.Append(s);
-  }
-
-  root = new Node(this, 0);
-  CopySubtree(root, E.root);
-
-  sortisets = true;
-  SortInfosets();
-}
-
-//
-// This function creates a new Efg out of an Efg, treating it as if
-// it were rooted at node 'n'.
-// This is designed to be used as a way of extracting subgames, but
-// there is no restriction that 'n' be a subgame root.
-//
-// Use with care, if at all!
-//
-template <class T> Efg<T>::Efg(const Efg<T> &E, Node *n)
-#ifdef EFG_ONLY
-  : BaseEfg(E), payoffs(E.payoffs)
-#else
-  : BaseEfg(E), lexicon(0), payoffs(E.payoffs)
-#endif   // EFG_ONLY
-{
-  int i;
-
-  assert(n->BelongsTo() == (BaseEfg *) &E);
-
-  for (i = 1; i <= E.chance->infosets.Length(); i++)   {
-    ChanceInfoset<T> *t = (ChanceInfoset<T> *) E.chance->infosets[i];
-    ChanceInfoset<T> *s = new ChanceInfoset<T>(this, i, chance,
-					       t->actions.Length());
-    s->name = t->name;
-    for (int j = 1; j <= s->probs.Length(); j++)  {
-      s->probs[j] = t->probs[j];
-      s->actions[j]->name = t->actions[j]->name;
-    }
-    chance->infosets.Append(s);
-  }
-
-  root = new Node(this, 0);
-  CopySubtree(root, n);
-
-  for (int pl = 1; pl <= players.Length(); pl++)   {
-    for (i = 1; i <= players[pl]->infosets.Length(); i++)  {
-      if (players[pl]->infosets[i]->members.Length() == 0)
-	delete players[pl]->infosets.Remove(i--);
-    }
-  }     
-
-  sortisets = true;
-  SortInfosets();
-}
-
-template <class T> Efg<T>::~Efg()
-{ 
-#ifndef EFG_ONLY
-  if (lexicon)   delete lexicon;
-  lexicon = 0;
-#endif   // EFG_ONLY
-}
-
-//------------------------------------------------------------------------
-//            Efg<T>: Private and protected member functions
-//------------------------------------------------------------------------
-
-#include "lexicon.h"
-
-template <class T> void Efg<T>::DeleteLexicon(void)
-{
-#ifndef EFG_ONLY
-  if (lexicon)   delete lexicon;
-  lexicon = 0;
-#endif   // EFG_ONLY
-}
-
-template <class T> Infoset *Efg<T>::CreateInfoset(int n, EFPlayer *p, int br)
-{
-  Infoset *s = (p->IsChance()) ? new ChanceInfoset<T>(this, n, p, br) :
-               new Infoset(this, n, p, br);
-  p->infosets.Append(s);
-  return s;
-}
-
-template <class T> Node *Efg<T>::CreateNode(Node *parent)
-{ return new Node(this, parent); }
-
-template <class T> Infoset *Efg<T>::CreateInfoset(EFPlayer *p, int br)
-{
-  assert(p && p->BelongsTo() == this);
-  return CreateInfoset(p->infosets.Length() + 1, p, br);
-}
-
-template <class T> EFOutcome *Efg<T>::CreateOutcomeByIndex(int index)
-{
-  gVector<T> zeroes(NumPlayers());
-  zeroes = (T) 0;
-  payoffs.AddRow(zeroes);
-
-  BaseEfg::NewOutcome(index);
-  return outcomes[outcomes.Length()];
-}
-
-template <class T> EFPlayer *Efg<T>::NewPlayer(void)
-{
-  EFPlayer *ret = new EFPlayer(this, players.Length() + 1);
-  players.Append(ret);
-
-  gVector<T> zeroes(NumOutcomes());
-  zeroes = (T) 0;
-  payoffs.AddColumn(zeroes);
-  DeleteLexicon();
-  return ret;
-}
-
-//------------------------------------------------------------------------
-//                 Efg<T>: Operations on outcomes
-//------------------------------------------------------------------------
-
-template <class T> EFOutcome *Efg<T>::NewOutcome(void)
-{
-  gVector<T> zeroes(NumPlayers());
-  zeroes = (T) 0;
-  payoffs.AddRow(zeroes);
-
-  BaseEfg::NewOutcome(outcomes.Length() + 1);
-  return outcomes[outcomes.Length()];
-}
-
-template <class T> void Efg<T>::SetPayoff(EFOutcome *outc, int pl, const T &value)
-{
-  payoffs(outc->GetNumber(), pl) = value;
-}
-
-template <class T> T Efg<T>::Payoff(EFOutcome *outc, int pl) const
-{
-  return payoffs(outc->GetNumber(), pl);
-}
-
-template <class T> gVector<T> Efg<T>::Payoff(EFOutcome *outc) const
-{
-  gVector<T> ret(NumPlayers());
-  payoffs.GetRow(outc->GetNumber(), ret);
-  return ret;
-}
-
-template <class T> void Efg<T>::SetChanceProb(Infoset *infoset,
-					      int act, const T &value)
-{
-  if (infoset->IsChanceInfoset())  
-    ((ChanceInfoset<T> *) infoset)->SetActionProb(act, value);
-}
-
-template <class T> T Efg<T>::GetChanceProb(Infoset *infoset, int act) const
-{
-  if (infoset->IsChanceInfoset())
-    return ((ChanceInfoset<T> *) infoset)->GetActionProb(act);
-  else
-    return (T) 0;
-}
-
-template <class T> gArray<T> Efg<T>::GetChanceProbs(Infoset *infoset) const
-{
-  if (infoset->IsChanceInfoset())
-    return ((ChanceInfoset<T> *) infoset)->GetActionProbs();
-  else
-    return gArray<T>(infoset->NumActions());
-}
-
-template <class T> bool Efg<T>::IsConstSum(void) const
-{
-  int pl, index;
-  T cvalue = (T) 0;
-  T eps;
-  gEpsilon(eps);
-
-  if (outcomes.Length() == 0)  return true;
-
-  for (pl = 1; pl <= players.Length(); pl++)
-    cvalue += payoffs(1, pl);
-  
-  for (index = 2; index <= outcomes.Length(); index++)  {
-    T thisvalue = (T) 0;
-    
-    for (pl = 1; pl <= players.Length(); pl++)
-      thisvalue += payoffs(index, pl);
-
-    if (thisvalue > cvalue + eps || thisvalue < cvalue - eps)
-      return false;
-  }
-
-  return true;
-}
-
-template <class T> T Efg<T>::MinPayoff(int pl) const
-{
-  int index, p, p1, p2;
-  T minpay;
-
-  if (NumOutcomes() == 0)  return (T) 0;
-  
-  if(pl) { p1=p2=pl;}
-  else {p1=1;p2=players.Length();}
-
-  minpay = payoffs(1, p1);
-  
-  for (index = 1; index <= outcomes.Length(); index++)  {
-    for (p = p1; p <= p2; p++)
-      if (payoffs(index, p) < minpay)
-	minpay = payoffs(index, p);
-  }
-  return minpay;
-}
-
-template <class T> T Efg<T>::MaxPayoff(int pl) const
-{
-  int index, p, p1, p2;
-  T maxpay;
-
-  if (NumOutcomes() == 0)  return (T) 0;
-  
-  if(pl) { p1=p2=pl;}
-  else {p1=1;p2=players.Length();}
-
-  maxpay = payoffs(1, p1);
-
-  for (index = 1; index <= outcomes.Length(); index++)  {
-    for (p = p1; p <= p2; p++)
-      if (payoffs(index, p) > maxpay)
-	maxpay = payoffs(index, p);
-  }
-  return maxpay;
-}
-
-
-template <class T> void Efg<T>::WriteEfgFile(gOutput &f, Node *n) const
-{
-  if (n->children.Length() == 0)   {
-    f << "t \"" << EscapeQuotes(n->name) << "\" ";
-    if (n->outcome)  {
-      f << n->outcome->GetNumber() << " \"" <<
-	EscapeQuotes(n->outcome->GetName()) << "\" ";
-      f << "{ ";
-      for (int pl = 1; pl <= NumPlayers(); pl++)
-	f << payoffs(n->outcome->GetNumber(), pl) << ' ';
-      f << "}\n";
-    }
-    else
-      f << "0\n";
-  }
-  
-  else if (n->infoset->player->number)   {
-    f << "p \"" << EscapeQuotes(n->name) << "\" " <<
-      n->infoset->player->number << ' ';
-    f << n->infoset->number << " \"" <<
-      EscapeQuotes(n->infoset->name) << "\" ";
-    n->infoset->PrintActions(f);
-    f << " ";
-    if (n->outcome)  {
-      f << n->outcome->GetNumber() << " \"" <<
-	EscapeQuotes(n->outcome->GetName()) << "\" ";
-      f << "{ ";
-      for (int pl = 1; pl <= NumPlayers(); pl++)
-	f << payoffs(n->outcome->GetNumber(), pl) << ' ';
-      f << "}\n";
-    }
-    else
-      f << "0\n";
-  }
-  
-  else   {    // chance node
-    f << "c \"" << n->name << "\" ";
-    f << n->infoset->number << " \"" <<
-      EscapeQuotes(n->infoset->name) << "\" ";
-    n->infoset->PrintActions(f);
-    f << " ";
-    if (n->outcome)  {
-      f << n->outcome->GetNumber() << " \"" <<
-	EscapeQuotes(n->outcome->GetName()) << "\" ";
-      f << "{ ";
-      for (int pl = 1; pl <= NumPlayers(); pl++)
-	f << payoffs(n->outcome->GetNumber(), pl) << ' ';
-      f << "}\n";
-    }
-    else
-      f << "0\n";
-  }
-
-  for (int i = 1; i <= n->children.Length(); i++)
-    WriteEfgFile(f, n->children[i]);
-}
-
-template <class T> void Efg<T>::WriteEfgFile(gOutput &f) const
-{
-  f << "EFG 2 " << ((Type() == gDOUBLE) ? 'D' : 'R');
-  f << " \"" << EscapeQuotes(title) << "\" { ";
-  for (int i = 1; i <= players.Length(); i++)
-    f << '"' << EscapeQuotes(players[i]->name) << "\" ";
-  f << "}\n\n";
-
-  WriteEfgFile(f, root);
-}
-
-
-
-//------------------------------------------------------------------------
-//                   Efg<T>: Payoff computation
-//------------------------------------------------------------------------
-
-template <class T>
-void Efg<T>::Payoff(Node *n, T prob, const gPVector<int> &profile,
-			gVector<T> &payoff) const
-{
-  if (n->outcome)
-    for (int i = 1; i <= players.Length(); i++)
-      payoff[i] += prob * payoffs(n->outcome->GetNumber(), i);
-  
-  if (n->infoset && n->infoset->player->IsChance())
-    for (int i = 1; i <= n->children.Length(); i++)
-      Payoff(n->children[i],
-	     prob * ((ChanceInfoset<T> &) *n->infoset).probs[i],
-	     profile, payoff);
-  else if (n->infoset)
-    Payoff(n->children[profile(n->infoset->player->number,n->infoset->number)],
-	   prob, profile, payoff);
-}
-
-template <class T>
-void Efg<T>::InfosetProbs(Node *n, T prob, const gPVector<int> &profile,
-			  gPVector<T> &probs) const
-{
-  if (n->infoset && n->infoset->player->IsChance())
-    for (int i = 1; i <= n->children.Length(); i++)
-      InfosetProbs(n->children[i],
-		   prob * ((ChanceInfoset<T> &) *n->infoset).probs[i],
-		   profile, probs);
-  else if (n->infoset)  {
-    probs(n->infoset->player->number, n->infoset->number) += prob;
-    InfosetProbs(n->children[profile(n->infoset->player->number,n->infoset->number)],
-		 prob, profile, probs);
-  }
-}
-
-template <class T>
-void Efg<T>::Payoff(const gPVector<int> &profile, gVector<T> &payoff) const
-{
-  ((gVector<T> &) payoff).operator=((T) 0);
-  Payoff(root, (T) 1.0, profile, payoff);
-}
-
-template <class T>
-void Efg<T>::InfosetProbs(const gPVector<int> &profile,
-			  gPVector<T> &probs) const
-{
-  ((gVector<T> &) probs).operator=((T) 0);
-  InfosetProbs(root, (T) 1.0, profile, probs);
-}
-
-template <class T>
-void Efg<T>::Payoff(Node *n, T prob, const gArray<gArray<int> *> &profile,
-		    gVector<T> &payoff) const
-{
-  if (n->outcome)
-    for (int i = 1; i <= players.Length(); i++)
-      payoff[i] += prob * payoffs(n->outcome->GetNumber(), i);
-  
-  if (n->infoset && n->infoset->player->IsChance())
-    for (int i = 1; i <= n->children.Length(); i++)
-      Payoff(n->children[i],
-	     prob * ((ChanceInfoset<T> &) *n->infoset).probs[i],
-	     profile, payoff);
-  else if (n->infoset)
-    Payoff(n->children[(*profile[n->infoset->player->number])[n->infoset->number]],
-	   prob, profile, payoff);
-}
-
-template <class T>
-void Efg<T>::Payoff(const gArray<gArray<int> *> &profile,
-		    gVector<T> &payoff) const
-{
-  ((gVector<T> &) payoff).operator=((T) 0);
-  Payoff(root, (T) 1.0, profile, payoff);
-}
-
-
-
 
 //-------------------------------------------------------------------------
 //                    BehavProfile<T> member functions
@@ -567,14 +44,14 @@ template <class T> BehavNode<T>::~BehavNode()
        delete children[child++]);
 }
 
-template <class T> BehavProfile<T>::BehavProfile(const Efg<T> &EF)
+template <class T> BehavProfile<T>::BehavProfile(const Efg &EF)
   : gDPVector<T>(EF.NumActions()), E(&EF),
     root(new BehavNode<T>(EF.RootNode(), EF.NumPlayers())), support(EF)
 {
   Centroid();
 }
 
-template <class T> BehavProfile<T>::BehavProfile(const Efg<T> &EF,
+template <class T> BehavProfile<T>::BehavProfile(const Efg &EF,
 						 const gDPVector<T> &profile)
   : gDPVector<T>(profile), E(&EF),
     root(new BehavNode<T>(EF.RootNode(), EF.NumPlayers())), support(EF)
@@ -586,7 +63,7 @@ template <class T> BehavProfile<T>::BehavProfile(const BehavProfile<T> &p)
     support(p.support)
 { }
 
-template <class T> BehavProfile<T>::BehavProfile(const Efg<T> &EF,
+template <class T> BehavProfile<T>::BehavProfile(const Efg &EF,
 						 const EFSupport &s)
   : gDPVector<T>(s.NumActions()), E(&EF),
     root(new BehavNode<T>(EF.RootNode(), EF.NumPlayers())), support(s)
@@ -737,12 +214,12 @@ template <class T>
 void BehavProfile<T>::Payoff(Node *n, T prob, int pl, T &value) const
 {
   if (n->outcome)
-    value += prob * E->Payoff(n->outcome, pl);
+    value += prob * (T) ((Efg *) E)->Payoff(n->outcome, pl);
   if (n->children.Length())  {
     if (n->infoset->player->number == 0)  {
       for (int i = 1; i <= n->children.Length(); i++)
 	Payoff(n->children[i],
-	       prob * ((ChanceInfoset<T> *) n->infoset)->probs[i],
+	       prob * (T) E->GetChanceProb(n->infoset, i),
 	       pl, value);
     }
     else  {
@@ -775,8 +252,11 @@ void BehavProfile<T>::CondPayoff(BehavNode<T> *n, T prob, gPVector<T> &probs,
   int pl = (n->node->infoset) ? n->node->infoset->player->number : -1;
   int iset = (n->node->infoset) ? n->node->infoset->number : 0;
   
-  if (n->node->outcome)  
-    n->scratch += E->Payoff(n->node->outcome);
+  if (n->node->outcome)  {
+    for (int i = 1; i <= E->NumPlayers(); i++)
+      n->scratch[i] += (T) ((Efg *) E)->Payoff(n->node->outcome, i);
+  }
+
   int i, nc;
   for (i = 1, nc = n->children.Length(); i <= nc; i++)
     n->children[i]->scratch = n->scratch;
@@ -790,12 +270,12 @@ void BehavProfile<T>::CondPayoff(BehavNode<T> *n, T prob, gPVector<T> &probs,
   if (n->node->infoset->player->number == 0)   {
     for (i = 1; i <= nc; i++)  {
       CondPayoff(n->children[i],
-		 prob * ((ChanceInfoset<T> *) n->node->infoset)->probs[i],
+		 prob * (T) E->GetChanceProb(n->node->infoset, i),
 		 probs, payoff);
       
       for (int j = 1; j <= n->scratch.Length(); j++)
 	tmp[j] += 
-	((ChanceInfoset<T> *) n->node->infoset)->probs[i] *
+	(T) E->GetChanceProb(n->node->infoset, i) *
 	n->children[i]->scratch[j];
     }
     n->scratch = tmp;
@@ -874,7 +354,7 @@ void BehavProfile<T>::NodeRealizProbs(BehavNode<T> *n, T prob, int &index,
 	anum = support.Find(n->node->infoset->actions[i]);
       
       newprob = ((pl) ? (*this)(pl, n->node->infoset->number, anum) :
-		 ((ChanceInfoset<T> *) n->node->infoset)->probs[i]);
+		 (T) E->GetChanceProb(n->node->infoset, i));
       NodeRealizProbs(n->children[i], prob * newprob, ++index,
 		      NRProbs);
     }
@@ -888,7 +368,7 @@ void BehavProfile<T>::NodeRealizProbs(BehavNode<T> *n, T prob, int &index,
 	anum = support.Find(n->node->infoset->actions[i]);
       
       newprob = ((pl) ? (*this)(pl, n->node->infoset->number, anum) :
-		 ((ChanceInfoset<T> *) n->node->infoset)->probs[i]);
+		 (T) E->GetChanceProb(n->node->infoset, i));
       
       NodeRealizProbs(n->children[nc], prob * newprob, ++index,
 		      NRProbs);
@@ -933,7 +413,7 @@ void BehavProfile<T>::Beliefs(Node *n, T prob,
 
   if (pl == 0)  {
     for (i = 1; i <= nc; i++)  {
-      newprob = ((ChanceInfoset<T> *) n->infoset)->probs[i];
+      newprob = E->GetChanceProb(n->infoset, i);
       Beliefs(n->children[i], prob * newprob, BProbs, gpv);
     }
 
@@ -951,10 +431,10 @@ void BehavProfile<T>::Beliefs(Node *n, T prob,
 
 template <class T> gDPVector<T> BehavProfile<T>::Beliefs(void) const
 {
-  gDPVector<T> BProbs(((Efg<T> *)E)->NumMembers());
+  gDPVector<T> BProbs(E->NumMembers());
   BProbs = (T)0;
-  gDPVector<T> payoff(((Efg<T> *)E)->NumActions());
-  gPVector<T> probs(((Efg<T> *)E)->NumActions().Lengths());
+  gDPVector<T> payoff(E->NumActions());
+  gPVector<T> probs(E->NumActions().Lengths());
   CondPayoff( payoff, probs);
   Beliefs ( E->RootNode(), (T)1, BProbs, probs);
 //  gout << "\nBProbs: " << BProbs; 
@@ -972,7 +452,7 @@ void BehavProfile<T>::NodeValues(BehavNode<T> *n, int pl,
   int child, tindex = index;
 
   if (n->node->outcome)
-    n->nval += E->Payoff(n->node->outcome, pl);
+    n->nval += (T) ((Efg *) E)->Payoff(n->node->outcome, pl);
 
   for (child = 1; child <= n->children.Length(); child++)
     n->children[child]->nval = n->nval;
@@ -987,7 +467,7 @@ void BehavProfile<T>::NodeValues(BehavNode<T> *n, int pl,
   if (n->node->infoset->player->number == 0)  {
     for (int i = 1; i <= n->children.Length(); i++)   {
       NodeValues(n->children[i], pl, valarray, ++index);
-      value += ((ChanceInfoset<T> *) n->node->infoset)->probs[i] *
+      value += (T) E->GetChanceProb(n->node->infoset, i) *
 	         n->children[i]->nval;
     }
 
@@ -1001,7 +481,7 @@ void BehavProfile<T>::NodeValues(BehavNode<T> *n, int pl,
       int anum = support.Find(n->node->infoset->actions[i]);
       NodeValues(n->children[i], pl, valarray, ++index);
       value += ((npl) ? (*this)(npl, iset, anum) :
-		((ChanceInfoset<T> *) n->node->infoset)->probs[i]) *
+		(T) E->GetChanceProb(n->node->infoset, i)) *
 		  n->children[i]->nval;
     }
     else

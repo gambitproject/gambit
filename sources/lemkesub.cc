@@ -1,7 +1,7 @@
 //
 // FILE: lemkesub.cc -- Instantiation of LemkeBySubgame
 //
-// $Id$
+// @(#)lemkesub.cc	2.2 6/22/97
 //
 
 #include "rational.h"

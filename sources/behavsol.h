@@ -54,9 +54,9 @@ protected:
   void EvalEquilibria(void);
 
 public:
-  BehavSolution(const Efg<T> &);
-  BehavSolution(const Efg<T> &, const gDPVector<T> &);
-  BehavSolution(const Efg<T> &, const EFSupport &);
+  BehavSolution(const Efg &);
+  BehavSolution(const Efg &, const gDPVector<T> &);
+  BehavSolution(const Efg &, const EFSupport &);
   BehavSolution(const BehavProfile<T> &, EfgAlgType creator = EfgAlg_USER);
   BehavSolution(const BehavSolution<T> &);
   virtual ~BehavSolution();

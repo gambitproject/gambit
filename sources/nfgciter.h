@@ -26,7 +26,7 @@ friend class NfgIter;
 private:
   NFSupport support;
   gArray<int> current_strat;
-  NFGameForm *N;
+  Nfg *N;
   StrategyProfile profile;
   gBlock<int> frozen, thawed;
   

@@ -7,11 +7,6 @@
 #include "rational.h"
 #include "efg.imp"
 
-template class Efg<gRational>;
-DataType Efg<gRational>::Type(void) const   { return gRATIONAL; }
-
-template class ChanceInfoset<gRational>;
-
 template class BehavNode<gRational>;
 template class BehavProfile<gRational>;
 template gOutput &operator<<(gOutput &, const BehavProfile<gRational> &);
@@ -30,11 +25,6 @@ template class EfgIter<gRational>;
 #include "efgciter.imp"
 
 template class EfgContIter<gRational>;
-
-#include "readefg.imp"
-
-template class EfgFile<gRational>;
-template int ReadEfgFile(gInput &, Efg<gRational> *&);
 
 #include "garray.imp"
 

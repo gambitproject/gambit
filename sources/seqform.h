@@ -1,7 +1,7 @@
 //
 // FILE: seqform.h -- Interface to Sequence Form solution module
 //
-// $Id$ 
+// $Id$
 //
 
 #ifndef SEQFORM_H
@@ -29,7 +29,7 @@ class SeqFormParams     {
 
 template <class T> class SeqFormModule  {
 private:
-  const Efg<T> &EF;
+  const Efg &EF;
   const EFSupport &support;
   const SeqFormParams &params;
   gMatrix<T> *A;
@@ -43,7 +43,7 @@ private:
   gList< BehavSolution<T> > solutions;
 
 public:
-  SeqFormModule(const Efg<T> &E, const SeqFormParams &p, 
+  SeqFormModule(const Efg &E, const SeqFormParams &p,
 		const EFSupport &);
   virtual ~SeqFormModule();
   
@@ -70,12 +70,12 @@ template <class T> class SeqFormBySubgame : public SubgameSolver<T>  {
     int npivots;
     SeqFormParams params;
 
-    int SolveSubgame(const Efg<T> &, const EFSupport &,
+    int SolveSubgame(const Efg &, const EFSupport &,
 		     gList<BehavSolution<T> > &);
     EfgAlgType AlgorithmID() const { return EfgAlg_SEQFORMSUB; }    
 
   public:
-    SeqFormBySubgame(const Efg<T> &E, const EFSupport &,
+    SeqFormBySubgame(const Efg &E, const EFSupport &,
                      const SeqFormParams &, int max = 0);
     virtual ~SeqFormBySubgame();
 

@@ -11,11 +11,11 @@
 #include "nfgciter.h"
 
 
-template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
+Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S)
 {
-  Nfg<T> *N = new Nfg<T>(S.NumStrats());
+  Nfg *N = new Nfg(S.NumStrats());
   
-  N->GameForm().SetTitle(nfg.GameForm().GetTitle());
+  N->SetTitle(nfg.GetTitle());
 
   for (int pl = 1; pl <= N->NumPlayers(); pl++)  {
     NFPlayer *player = N->Players()[pl];
@@ -25,7 +25,7 @@ template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
   }
 
   for (int outc = 1; outc <= nfg.NumOutcomes(); outc++)  {
-    NFOutcome *outcome = N->GameForm().NewOutcome();
+    NFOutcome *outcome = N->NewOutcome();
 
     outcome->SetName(nfg.Outcomes()[outc]->GetName());
 
@@ -34,7 +34,7 @@ template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
   }
 
   NfgContIter oiter(S);
-  NFSupport newS(N->GameForm());
+  NFSupport newS(*N);
   NfgContIter niter(newS);
   
   do   {
@@ -46,43 +46,41 @@ template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
   return N;
 }
 
-template <class T> bool IsConstSum(const Nfg<T> &nfg)
+bool IsConstSum(const Nfg &nfg)
 {
   int pl, index;
-  T cvalue = (T) 0;
-  T eps;
-  gEpsilon(eps);
+  gRational cvalue = (gRational) 0;
 
   if (nfg.NumOutcomes() == 0)  return true;
 
-  for (pl = 1; pl <= nfg.gameform->NumPlayers(); pl++)
+  for (pl = 1; pl <= nfg.NumPlayers(); pl++)
     cvalue += nfg.payoffs(1, pl);
   
   for (index = 2; index <= nfg.payoffs.NumRows(); index++)  {
-    T thisvalue = (T) 0;
+    gRational thisvalue = (gRational) 0;
 
-    for (pl = 1; pl <= nfg.gameform->NumPlayers(); pl++)
+    for (pl = 1; pl <= nfg.NumPlayers(); pl++)
       thisvalue += nfg.payoffs(index, pl);
 
-    if (thisvalue > cvalue + eps || thisvalue < cvalue - eps)
+    if (thisvalue > cvalue || thisvalue < cvalue)
       return false;
   }
   
   return true;
 }
 
-template <class T> T MinPayoff(const Nfg<T> &nfg, int player)
+gRational MinPayoff(const Nfg &nfg, int player)
 {
   int index, p, p1, p2;
-  T minpay;
+  gRational minpay;
   
-  if (nfg.NumOutcomes() == 0)  return (T) 0;
+  if (nfg.NumOutcomes() == 0)  return (gRational) 0;
 
   if (player) 
     p1 = p2 = player;
   else   {
     p1 = 1;
-    p2 = nfg.gameform->NumPlayers();
+    p2 = nfg.NumPlayers();
   }
 
   minpay = nfg.payoffs(1, p1);
@@ -94,18 +92,18 @@ template <class T> T MinPayoff(const Nfg<T> &nfg, int player)
   return minpay;
 }
 
-template <class T> T MaxPayoff(const Nfg<T> &nfg, int player)
+gRational MaxPayoff(const Nfg &nfg, int player)
 {
   int index, p, p1, p2;
-  T maxpay;
+  gRational maxpay;
 
-  if (nfg.NumOutcomes() == 0)  return (T) 0;
+  if (nfg.NumOutcomes() == 0)  return (gRational) 0;
 
   if (player) 
     p1 = p2 = player;
   else   {
     p1 = 1;
-    p2 = nfg.gameform->NumPlayers();
+    p2 = nfg.NumPlayers();
   }
 
   maxpay = nfg.payoffs(1, p1);
@@ -117,25 +115,12 @@ template <class T> T MaxPayoff(const Nfg<T> &nfg, int player)
   return maxpay;
 }
 
-template <class T> void RandomNfg(Nfg<T> &nfg)
+void RandomNfg(Nfg &nfg)
 {
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)
     for (int outc = 1; outc <= nfg.payoffs.NumRows(); outc++)
-      nfg.payoffs(outc, pl) = (T) Uniform();
+      nfg.payoffs(outc, pl) = (gRational) Uniform();
 }  
 
-#include "rational.h"
 
-template void RandomNfg(Nfg<double> &nfg);
-template void RandomNfg(Nfg<gRational> &nfg);
 
-template Nfg<double> *CompressNfg(const Nfg<double> &, const NFSupport &);
-template Nfg<gRational> *CompressNfg(const Nfg<gRational> &, const NFSupport &);
-
-template bool IsConstSum(const Nfg<double> &nfg);
-template double MinPayoff(const Nfg<double> &nfg, int player);
-template double MaxPayoff(const Nfg<double> &nfg, int player);
-
-template bool IsConstSum(const Nfg<gRational> &nfg);
-template gRational MinPayoff(const Nfg<gRational> &nfg, int player);
-template gRational MaxPayoff(const Nfg<gRational> &nfg, int player);

@@ -7,7 +7,7 @@
 #include "efgciter.h"
 #include "efgiter.h"
 
-template <class T> EfgIter<T>::EfgIter(Efg<T> &efg)
+template <class T> EfgIter<T>::EfgIter(Efg &efg)
   : _efg(&efg), _support(efg),
     _efgidx(_efg->NumInfosets()), _supidx(_efgidx),
     _payoff(_efg->NumPlayers())
@@ -16,7 +16,7 @@ template <class T> EfgIter<T>::EfgIter(Efg<T> &efg)
 }
 
 template <class T> EfgIter<T>::EfgIter(const EFSupport &s)
-  : _efg((Efg<T> *) &s.BelongsTo()), _support(s),
+  : _efg((Efg *) &s.BelongsTo()), _support(s),
     _efgidx(_efg->NumInfosets()), _supidx(_efgidx),
     _payoff(_efg->NumPlayers())
 {
@@ -87,15 +87,17 @@ template <class T> int EfgIter<T>::Set(int pl, int iset, int act)
   return 1;
 }
 
-template <class T> const T &EfgIter<T>::Payoff(int pl) const
+template <class T> T EfgIter<T>::Payoff(int pl) const
 {
-  _efg->Payoff(_efgidx, (gVector<T> &) _payoff);
+  _efg->Payoff(_efgidx, (gVector<gRational> &) _payoff);
   return _payoff[pl];
 }
 
 template <class T> void EfgIter<T>::Payoff(gVector<T> &payoff) const
 {
-  _efg->Payoff(_efgidx, payoff);
+  _efg->Payoff(_efgidx, _payoff);
+  for (int pl = 1; pl <= _efg->NumPlayers(); pl++)
+    payoff[pl] = _payoff[pl];
 }
 
 template <class T> void EfgIter<T>::Dump(gOutput &f) const

@@ -11,19 +11,16 @@
 #pragma interface
 #endif   // __GNUG__
 
-#include "rational.h"
 #include "gvector.h"
 
 #include "efplayer.h"
 
 class Node;
 
-template <class T> class Lexicon;
+class Lexicon;
 
 class Action   {
-  friend class BaseEfg;
-  friend class Efg<double>;
-  friend class Efg<gRational>;
+  friend class Efg;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
   friend class Infoset;
@@ -45,17 +42,14 @@ class Action   {
 };
 
 class Infoset   {
-  friend class BaseEfg;
+  friend class Efg;
   friend class EFPlayer;
-  friend class Efg<double>;
-  friend class Efg<gRational>;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
-  friend class Lexicon<double>;
-  friend class Lexicon<gRational>;
+  friend class Lexicon;
 
   protected:
-    BaseEfg *E;
+    Efg *E;
     int number;
     gString name;
     EFPlayer *player;
@@ -63,13 +57,13 @@ class Infoset   {
     gBlock<Node *> members;
     int flag, whichbranch;
     
-    Infoset(BaseEfg *e, int n, EFPlayer *p, int br);
+    Infoset(Efg *e, int n, EFPlayer *p, int br);
     virtual ~Infoset();  
 
     virtual void PrintActions(gOutput &f) const;
 
   public:
-    BaseEfg *BelongsTo(void) const   { return E; }
+    Efg *Game(void) const   { return E; }
 
     bool IsChanceInfoset(void) const   { return (player->IsChance()); }
 
@@ -97,4 +91,3 @@ class Infoset   {
 
 
 #endif   //# INFOSET_H
-

@@ -13,15 +13,16 @@
 
 #include "gdpvect.h"
 
-template <class T> class Efg;
 class Infoset;
 template <class T> class BehavNode;
+class Nfg;
+template <class T> class MixedProfile;
 
 template <class T> class BehavProfile : public gDPVector<T>  {
-friend void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
-			 const Efg<T> &E, BehavProfile<T> &bp);
+friend void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
+			 const Efg &E, BehavProfile<T> &bp);
   protected:
-    const Efg<T> *E;
+    const Efg *E;
     BehavNode<T> *root;
     gArray<BehavNode<T> *> nodes;
 
@@ -38,15 +39,15 @@ friend void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
 		 gPVector<T> &gpv) const;
 
   public:
-    BehavProfile(const Efg<T> &);
-    BehavProfile(const Efg<T> &, const gDPVector<T> &);
-    BehavProfile(const Efg<T> &, const EFSupport &);
+    BehavProfile(const Efg &);
+    BehavProfile(const Efg &, const gDPVector<T> &);
+    BehavProfile(const Efg &, const EFSupport &);
     BehavProfile(const BehavProfile<T> &);
     virtual ~BehavProfile();
 
     BehavProfile<T> &operator=(const BehavProfile<T> &);
 
-    Efg<T> &BelongsTo(void) const   { return const_cast< Efg<T>& >( *E ); }
+    Efg &BelongsTo(void) const   { return const_cast< Efg& >( *E ); }
 
     const T &GetValue(Infoset *s, int act) const;
 

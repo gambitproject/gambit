@@ -1,5 +1,9 @@
+//
 // File: grid.cc -- Implementation of the GridSolve algorithm
+//
 // $Id$
+//
+
 /*
 Here is how it should be done for three person games
 (extension to more players is done in an analagous fashion.)
@@ -78,7 +82,7 @@ private:
 	gArray<double> sums;
 	bool Inc1(int row);
 public:
-	MixedProfileGrid(const Nfg<double> &N,const NFSupport &S,double step);
+	MixedProfileGrid(const Nfg &N,const NFSupport &S,double step);
 	MixedProfileGrid(const MixedProfileGrid &P);
 	bool Inc(void);
 	void SetStatic(int static_player);
@@ -86,7 +90,7 @@ public:
 };
 
 
-MixedProfileGrid::MixedProfileGrid(const Nfg<double> &N,const NFSupport &S, double step_):
+MixedProfileGrid::MixedProfileGrid(const Nfg &N,const NFSupport &S, double step_):
 											MixedProfile<double>(N,S),step(step_),sums(0)
 {
 int i;
@@ -265,8 +269,8 @@ void GridSolveModule::OutputHeader(gOutput &out)
       for (int i=1;i<=N.NumStrats(1);i++)  {
 	for (int j=1;j<=N.NumStrats(2);j++) {
 	  profile[1]=i;profile[2]=j;
-	  out << N.Payoff(N.GameForm().GetOutcome(profile), 1) << ' ' <<
-	         N.Payoff(N.GameForm().GetOutcome(profile), 2) << ' ';
+	  out << N.Payoff(N.GetOutcome(profile), 1) << ' ' <<
+	         N.Payoff(N.GetOutcome(profile), 2) << ' ';
 	}
 	out<<'\n';
       }
@@ -279,7 +283,7 @@ void GridSolveModule::OutputHeader(gOutput &out)
   out<<1<<'\n'<<params.tol1<<'\n'<<params.delp1<<'\n';
 
   out<<"DataFormat:\n";
-  int numcols = N.GameForm().ProfileLength() + 2;
+  int numcols = N.ProfileLength() + 2;
   out << numcols<<' '; // Format: Lambda, ObjFunc, Prob1,0..1,n1 , Prob2,0..2,n2 , ...
   for (int i = 1; i <= numcols; i++) out << i << ' ';
 
@@ -357,7 +361,7 @@ else								// now redo the search on a finer grid around this point
 return true;
 }
 
-GridSolveModule::GridSolveModule(const Nfg<double> &N_, const GridParams &P,
+GridSolveModule::GridSolveModule(const Nfg &N_, const GridParams &P,
                                  const NFSupport &S_)
   : N(N_), S(S_), params(P), P_calc(N_,S_), tmp(max(S.NumStrats()))
 {

@@ -13,7 +13,8 @@
 //                        LemkeHowson Tableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> gMatrix<T> Make_A1(const Nfg<T> &N, const NFSupport &S)
+template <class T> gMatrix<T> Make_A1(const Nfg &N, const NFSupport &S,
+                                      const T &)
 {
   int n1, n2, i,j;
   n1=S.NumStrats(1);
@@ -22,11 +23,11 @@ template <class T> gMatrix<T> Make_A1(const Nfg<T> &N, const NFSupport &S)
   NfgIter iter(S); 
   T min; 
 
-  min = MinPayoff(N) - (T) 1; 
+  min = (T) MinPayoff(N) - (T) 1;
   
   for (i = 1; i <= n1; i++)  {
     for (j = 1; j <= n2; j++)  {
-      A1(i, n1 + j) = N.Payoff(iter.GetOutcome(), 1) - min;
+      A1(i, n1 + j) = (T) N.Payoff(iter.GetOutcome(), 1) - min;
       iter.Next(2);
     }
     iter.Next(1);
@@ -38,7 +39,8 @@ template <class T> gMatrix<T> Make_A1(const Nfg<T> &N, const NFSupport &S)
   return A1;
 }
 
-template <class T> gMatrix<T> Make_A2(const Nfg<T> &N, const NFSupport &S)
+template <class T> gMatrix<T> Make_A2(const Nfg &N, const NFSupport &S,
+                                      const T &)
 {
   int n1, n2, i,j;
   n1=S.NumStrats(1);
@@ -47,11 +49,11 @@ template <class T> gMatrix<T> Make_A2(const Nfg<T> &N, const NFSupport &S)
   NfgIter iter(S); 
   T min; 
 
-  min = MinPayoff(N) - (T) 1; 
+  min = (T) MinPayoff(N) - (T) 1;
 
   for (i = 1; i <= n1; i++)  {
     for (j = 1; j <= n2; j++)  {
-      A2(n1 + j, i) = N.Payoff(iter.GetOutcome(), 2) - min;
+      A2(n1 + j, i) = (T) N.Payoff(iter.GetOutcome(), 2) - min;
       iter.Next(2);
     }
     iter.Next(1);
@@ -63,7 +65,7 @@ template <class T> gMatrix<T> Make_A2(const Nfg<T> &N, const NFSupport &S)
   return A2;
 }
 
-template <class T> gVector<T> Make_b1(const Nfg<T> &, const NFSupport &S)
+template <class T> gVector<T> Make_b1(const Nfg &, const NFSupport &S, const T &)
 {
   int n1, n2, i;
   n1=S.NumStrats(1);
@@ -78,7 +80,7 @@ template <class T> gVector<T> Make_b1(const Nfg<T> &, const NFSupport &S)
   return b1;
 }
 
-template <class T> gVector<T> Make_b2(const Nfg<T> &, const NFSupport &S)
+template <class T> gVector<T> Make_b2(const Nfg &, const NFSupport &S, const T &)
 {
   int n1, n2, i;
   n1=S.NumStrats(1);
@@ -94,11 +96,11 @@ template <class T> gVector<T> Make_b2(const Nfg<T> &, const NFSupport &S)
 }
 
 template <class T> LHTableau<T> 
-::LHTableau(const Nfg<T> &N, const NFSupport &S) 
-  : T1(Make_A1(N,S), Make_b1(N,S)), T2(Make_A2(N,S),Make_b2(N, S)),
+::LHTableau(const Nfg &N, const NFSupport &S)
+  : T1(Make_A1(N,S,(T)0), Make_b1(N,S,(T)0)), T2(Make_A2(N,S,(T)0),Make_b2(N, S,(T)0)),
 //    tmpcol(1,S.NumStrats(1)+S.NumStrats(2)),
-    tmp1(Make_b1(N,S)),
-    tmp2(Make_b2(N, S)),solution(1,S.NumStrats(1)+S.NumStrats(2))
+    tmp1(Make_b1(N,S,(T)0)),
+    tmp2(Make_b2(N, S,(T)0)),solution(1,S.NumStrats(1)+S.NumStrats(2))
 { }
 
 template <class T> LHTableau<T> 
@@ -361,14 +363,14 @@ template <class T> int LHTableau<T>::LemkePath(int dup)
 
 template class LHTableau<double>;
 template class LHTableau<gRational>;
-template gMatrix<double> Make_A1(const Nfg<double> &, const NFSupport &);
-template gMatrix<gRational> Make_A1(const Nfg<gRational> &, const NFSupport &);
-template gVector<double> Make_b1(const Nfg<double> &, const NFSupport &);
-template gVector<gRational> Make_b1(const Nfg<gRational> &, const NFSupport &);
-template gMatrix<double> Make_A2(const Nfg<double> &, const NFSupport &);
-template gMatrix<gRational> Make_A2(const Nfg<gRational> &, const NFSupport &);
-template gVector<double> Make_b2(const Nfg<double> &, const NFSupport &);
-template gVector<gRational> Make_b2(const Nfg<gRational> &, const NFSupport &);
+template gMatrix<double> Make_A1(const Nfg &, const NFSupport &, const double &);
+template gMatrix<gRational> Make_A1(const Nfg &, const NFSupport &, const gRational &);
+template gVector<double> Make_b1(const Nfg &, const NFSupport &, const double &);
+template gVector<gRational> Make_b1(const Nfg &, const NFSupport &, const gRational &);
+template gMatrix<double> Make_A2(const Nfg &, const NFSupport &, const double &);
+template gMatrix<gRational> Make_A2(const Nfg &, const NFSupport &, const gRational &);
+template gVector<double> Make_b2(const Nfg &, const NFSupport &, const double &);
+template gVector<gRational> Make_b2(const Nfg &, const NFSupport &, const gRational &);
 
 
 

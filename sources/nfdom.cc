@@ -10,8 +10,7 @@
 #include "rational.h"
 #include "gstatus.h"
 
-template <class T>
-bool Dominates(const Nfg<T> &N,
+bool Dominates(const Nfg &N,
 	       const NFSupport &S, int pl, int a, int b, bool strong)
 {
   NfgContIter A(S), B(S);
@@ -23,8 +22,8 @@ bool Dominates(const Nfg<T> &N,
   
   if (strong)  {
     do  {
-      T ap = N.Payoff(A.GetOutcome(), pl);
-      T bp = N.Payoff(B.GetOutcome(), pl);
+      gRational ap = N.Payoff(A.GetOutcome(), pl);
+      gRational bp = N.Payoff(B.GetOutcome(), pl);
       if (ap <= bp)  return false;
       A.NextContingency();
     } while (B.NextContingency());
@@ -35,8 +34,8 @@ bool Dominates(const Nfg<T> &N,
   bool equal = true;
   
   do   {
-    T ap = N.Payoff(A.GetOutcome(), pl);
-    T bp = N.Payoff(B.GetOutcome(), pl);
+    gRational ap = N.Payoff(A.GetOutcome(), pl);
+    gRational bp = N.Payoff(B.GetOutcome(), pl);
     if (ap < bp)   return false;
     else if (ap > bp)  equal = false;
     A.NextContingency();
@@ -45,8 +44,7 @@ bool Dominates(const Nfg<T> &N,
   return (!equal);
 }
 
-template <class T>
-bool ComputeDominated(const Nfg<T> &N, const NFSupport &S, NFSupport &newS,
+bool ComputeDominated(const Nfg &N, const NFSupport &S, NFSupport &newS,
 		      int pl, bool strong,
 		      gOutput &tracefile, gStatus &status)
 {
@@ -57,8 +55,8 @@ bool ComputeDominated(const Nfg<T> &N, const NFSupport &S, NFSupport &newS,
 
   int min, dis;
   double d1,d2;
-  d1 = (double)(pl-1)/(double)S.BelongsTo().NumPlayers();
-  d2 = (double)pl/(double)S.BelongsTo().NumPlayers();
+  d1 = (double)(pl-1)/(double)S.Game().NumPlayers();
+  d2 = (double)pl/(double)S.Game().NumPlayers();
   for (min = 0, dis = S.NumStrats(pl) - 1; min <= dis && !status.Get(); )  {
     int pp;
     double s1 = (double)min/(double)(dis+1);
@@ -108,8 +106,7 @@ bool ComputeDominated(const Nfg<T> &N, const NFSupport &S, NFSupport &newS,
 }
 
 
-template <class T> 
-NFSupport *ComputeDominated(const Nfg<T> &N, NFSupport &S, bool strong,
+NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, bool strong,
 			    const gArray<int> &players,
 			    gOutput &tracefile, gStatus &status)
 {
@@ -130,31 +127,5 @@ NFSupport *ComputeDominated(const Nfg<T> &N, NFSupport &S, bool strong,
   return newS;
 }
 
-
-template
-bool Dominates(const Nfg<double> &N,
-	       const NFSupport &S, int pl, int a, int b, bool strong);
-template
-bool Dominates(const Nfg<gRational> &N,
-	       const NFSupport &S, int pl, int a, int b, bool strong);
-
-template
-bool ComputeDominated(const Nfg<double> &N, const NFSupport &S, NFSupport &newS,
-		      int pl, bool strong,
-		      gOutput &tracefile, gStatus &status);
-template
-bool ComputeDominated(const Nfg<gRational> &N, const NFSupport &S, NFSupport &newS,
-		      int pl, bool strong,
-		      gOutput &tracefile, gStatus &status);
-
-
-template
-NFSupport *ComputeDominated(const Nfg<double> &N, NFSupport &S, bool strong,
-			    const gArray<int> &players,
-			    gOutput &tracefile, gStatus &status);
-template
-NFSupport *ComputeDominated(const Nfg<gRational> &N, NFSupport &S, bool strong,
-			    const gArray<int> &players,
-			    gOutput &tracefile, gStatus &status);
 
 

@@ -13,13 +13,13 @@ template <class T> class EfgContIter;
 
 template <class T> class EfgIter    {
   private:
-    Efg<T> *_efg;
+    Efg *_efg;
     EFSupport _support;
     gPVector<int> _efgidx, _supidx;
-    gVector<T> _payoff;
+    mutable gVector<gRational> _payoff;
 
   public:
-    EfgIter(Efg<T> &);
+    EfgIter(Efg &);
     EfgIter(const EFSupport &);
     EfgIter(const EfgIter<T> &);
     EfgIter(const EfgContIter<T> &);
@@ -31,7 +31,7 @@ template <class T> class EfgIter    {
     int Next(int p, int iset);
     int Set(int p, int iset, int act);
   
-    const T &Payoff(int p) const;
+    T Payoff(int p) const;
     void Payoff(gVector<T> &) const;
 
     const EFSupport &GetEFSupport(void) const;

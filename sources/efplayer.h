@@ -11,26 +11,22 @@
 #pragma interface
 #endif   // __GNUG__
 
-class gRational;
-
 class EFPlayer   {
-  friend class BaseEfg;
-  friend class Efg<double>;
-  friend class Efg<gRational>;
+  friend class Efg;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
   private:
     int number;
     gString name;
-    BaseEfg *E;
+    Efg *E;
     
     gBlock<Infoset *> infosets;
 
-    EFPlayer(BaseEfg *e, int n) : number(n), E(e)  { }
+    EFPlayer(Efg *e, int n) : number(n), E(e)  { }
     ~EFPlayer();
 
   public:
-    BaseEfg *BelongsTo(void) const   { return E; }
+    Efg *Game(void) const   { return E; }
   
     const gString &GetName(void) const   { return name; }
     void SetName(const gString &s)       { name = s; }

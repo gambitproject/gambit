@@ -16,7 +16,7 @@ NFLiapParams::NFLiapParams(gStatus &s)
 class NFLiapFunc : public gC2Function<double>   {
   private:
     long _nevals;
-    const Nfg<double> &_nfg;
+    const Nfg &_nfg;
     MixedProfile<double> _p;
 
     double Value(const gVector<double> &);
@@ -27,13 +27,13 @@ class NFLiapFunc : public gC2Function<double>   {
     bool Hessian(const gVector<double> &, gMatrix<double> &);
 
   public:
-    NFLiapFunc(const Nfg<double> &, const MixedProfile<double> &);
+    NFLiapFunc(const Nfg &, const MixedProfile<double> &);
     virtual ~NFLiapFunc();
     
     long NumEvals(void) const  { return _nevals; }
 };
 
-NFLiapFunc::NFLiapFunc(const Nfg<double> &N,
+NFLiapFunc::NFLiapFunc(const Nfg &N,
 		       const MixedProfile<double> &start)
   : _nevals(0L), _nfg(N), _p(start)
 { }
@@ -137,7 +137,7 @@ static void PickRandomProfile(MixedProfile<double> &p)
 {
   double sum, tmp;
 
-  for (int pl = 1; pl <= p.BelongsTo().NumPlayers(); pl++)  {
+  for (int pl = 1; pl <= p.Game().NumPlayers(); pl++)  {
     sum = 0.0;
     int st;
     
@@ -160,7 +160,7 @@ extern bool DFP(gPVector<double> &p,
 		gStatus &status = gstatus);
 
 
-bool Liap(const Nfg<double> &N, NFLiapParams &params,
+bool Liap(const Nfg &N, NFLiapParams &params,
 	  const MixedProfile<double> &start,
 	  gList<MixedSolution<double> > &solutions,
 	  long &nevals, long &niters)

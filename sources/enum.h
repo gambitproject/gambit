@@ -1,8 +1,8 @@
-//#
-//# FILE: enum.h -- Interface to Nash Enum solution module
-//#
-//# $Id$
-//#
+//
+// FILE: enum.h -- Interface to Nash Enum solution module
+//
+// $Id$
+//
 
 //
 // Enum implements the procedure described in 
@@ -37,7 +37,7 @@ public:
 template <class T> class EnumModule  {
 private:
   T eps;
-  const Nfg<T> &NF;
+  const Nfg &NF;
   const NFSupport &support;
   EnumParams params;
   int rows,cols,level;
@@ -49,7 +49,7 @@ private:
 //  void AddSolution(const gPVector<T> &s);
   
 public:
-  EnumModule(const Nfg<T> &N, const EnumParams &p, const NFSupport &s); 
+  EnumModule(const Nfg &N, const EnumParams &p, const NFSupport &s); 
   
   int Enum(void);
   

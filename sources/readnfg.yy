@@ -15,8 +15,7 @@
 %define MEMBERS      gInput &infile;  \
                      gString last_name;  gRational last_rational; \
                      gString title; \
-                     Nfg<double> *& Ndbl;  \
-                     Nfg<gRational> *& Nrat; \
+                     Nfg *& Nrat; \
                      int ncont, pl, cont; \
                      gList<gString> names; \
                      gList<gRational> numbers; \
@@ -29,9 +28,9 @@
 					    const gRational &) = 0; \
                      virtual ~NfgFileReader();
 
-%define CONSTRUCTOR_PARAM     gInput &f, Nfg<double> *& Nd, Nfg<gRational> *& Nr
+%define CONSTRUCTOR_PARAM     gInput &f, Nfg *& Nr
 
-%define CONSTRUCTOR_INIT      : infile(f), Ndbl(Nd), Nrat(Nr)
+%define CONSTRUCTOR_INIT      : infile(f), Nrat(Nr)
 
 %token LBRACE
 %token RBRACE
@@ -44,10 +43,7 @@
 nfgfile:      header 
               { if (!CreateNfg(names, numbers, stratnames))  return 1;
 		names.Flush();  numbers.Flush();  stratnames.Flush();
-	        if (Ndbl)
-                  Ndbl->GameForm().SetTitle(title);
-                else
-                  Nrat->GameForm().SetTitle(title);
+	        Nrat->SetTitle(title);
               }              
               body  { return 0; }
 
@@ -92,18 +88,10 @@ payofflist:   payoff
           |   payofflist payoff
 
 payoff:       NUMBER
-              { if (Ndbl)   {
-                  if (pl > Ndbl->NumPlayers())   {
-		    cont++;
-		    pl = 1;
-                  }
-                }
-                else  {
-                  if (pl > Nrat->NumPlayers())   {
+                {  if (pl > Nrat->NumPlayers())   {
 		    cont++;
 		    pl = 1;
 		  }	
-                } 
 		if (cont > ncont)  YYERROR;
 		SetPayoff(cont, pl, last_rational);
 		pl++;
@@ -172,63 +160,98 @@ int NfgFileReader::yylex(void)
 
 NfgFileReader::~NfgFileReader()   { }
 
-void NfgFileType(gInput &f, bool &valid, DataType &type)
+#include "nfplayer.h"
+#include "nfstrat.h"
+
+class NfgFile : public NfgFileReader   {
+  private:
+    Nfg *fooR;
+
+  public:
+    NfgFile(gInput &, Nfg *&);
+    virtual ~NfgFile();
+
+    int Parse(void);
+    bool CreateNfg(const gList<gString> &, const gList<gRational> &,
+		   const gList<gString> &);
+    void SetPayoff(int cont, int pl, const gRational &);
+};
+
+NfgFile::NfgFile(gInput &f, Nfg *& N)
+  : NfgFileReader(f, N), fooR(N)
+{ }
+
+NfgFile::~NfgFile()
+{ }
+
+bool NfgFile::CreateNfg(const gList<gString> &players,
+			const gList<gRational> &dims,
+			const gList<gString> &strats)
 {
-  f.seekp(0);
-  static char *prologue = { "NFG 1 " };
-  char c;
-  for (unsigned int i = 0; i < strlen(prologue); i++)   {
-    f.get(c);
-    if (c != prologue[i])   {
-      valid = false;
-      return;
-    }
+  if (players.Length() != dims.Length())   return false;
+
+  gArray<int> dim(dims.Length());
+  ncont = 1;
+  int i;
+  for (i = 1; i <= dim.Length(); i++)  {
+    dim[i] = (int) dims[i];
+    ncont *= dim[i];
+    if (dim[i] <= 0)   return false;
+  }
+  
+  Nrat = new Nfg(dim);
+  int strat = 1;
+  for (i = 1; i <= dim.Length(); i++)  {
+    Nrat->Players()[i]->SetName(players[i]);
+    if (strats.Length() > 0)
+      for (int j = 1; j <= dim[i]; j++)
+	Nrat->Strategies(i)[j]->name = strats[strat++];
   }
 
-  f.get(c);
-  switch (c)   {
-    case 'D':
-      valid = true;
-      type = gDOUBLE;
-      return;
-    case 'R':
-      valid = true;
-      type = gRATIONAL;
-      return;
-    default:
-      valid = false;
-      return;
-  }
+  return true;
 }
 
-// for NfgFile<T>
-#include "readnfg.imp"
-
-int ReadNfgFile(gInput &f, Nfg<double> *& Ndbl, Nfg<gRational> *& Nrat)
+void NfgFile::SetPayoff(int cont, int pl,
+			const gRational &value)
 {
-  assert(!Ndbl && !Nrat);
+  if (pl == 1)
+    Nrat->SetOutcome(cont, Nrat->NewOutcome());
+  Nrat->SetPayoff(Nrat->GetOutcome(cont), pl, value);
+}
 
-  bool valid;
-  DataType type;
-  NfgFileType(f, valid, type);
 
-  if (!valid)   return 0;
-
-  if (type == gDOUBLE)   {
-    NfgFile<double> R(f, Ndbl);
-
-    if (R.Parse())   {
-      if (Ndbl)   { delete Ndbl;  Ndbl = 0; }
-      return 0;
-    }
+int NfgFile::Parse(void)
+{
+  infile.seekp(0);
+  static char *prologue = { "NFG 1 " };
+  char c;
+  for (unsigned int i = 0; i < strlen(prologue); i++)  {
+    infile.get(c);
+    if (c != prologue[i])  return 1;
   }
-  else  {
-    NfgFile<gRational> R(f, Nrat);
 
-    if (R.Parse())   {
-      if (Nrat)   { delete Nrat;  Nrat = 0; }
-      return 0;
-    }
+  infile.get(c);
+  switch (c)   {
+    case 'D':
+      break;
+    case 'R':
+      break;
+    default:
+      return 1;
+  }
+  return yyparse();
+}
+
+
+int ReadNfgFile(gInput &f, Nfg *& Nrat)
+{
+  assert(!Nrat);
+
+  NfgFile R(f, Nrat);
+
+  if (R.Parse())   {
+    if (Nrat)   { delete Nrat;  Nrat = 0; }
+    return 0;
   }
    
   return 1;

@@ -10,20 +10,20 @@
 class Strategy;
 
 class NFPlayer {
-  friend class NFGameForm;
+  friend class Nfg;
 
 private:
   int number;
   gString name;
-  NFGameForm *N;
+  Nfg *N;
   
   gArray<Strategy *> strategies;
 
 public:
-  NFPlayer(int n, NFGameForm *no, int num);
+  NFPlayer(int n, Nfg *no, int num);
   ~NFPlayer();
 
-  NFGameForm &BelongsTo(void) const;
+  Nfg &Game(void) const;
   
   const gString &GetName(void) const;
   void SetName(const gString &s);

@@ -17,7 +17,7 @@
 //-------------------------------------------------------------------------
 
 template <class T>
-ZSumModule<T>::ZSumModule(const Nfg<T> &N, const ZSumParams &p,
+ZSumModule<T>::ZSumModule(const Nfg &N, const ZSumParams &p,
 			  const NFSupport &S)
   : NF(N), params(p), support(S), A(0), b(0), c(0), npivots(0)
 { }
@@ -41,11 +41,11 @@ template <class T> void ZSumModule<T>::Make_Abc()
   c = new gVector<T>(1,m+1);
   NfgIter iter(support);
 
-  minpay = MinPayoff(NF) - (T) 1; 
+  minpay = (T) MinPayoff(NF) - (T) 1;
 
   for (i = 1; i <= k; i++)  {
     for (j = 1; j <= m; j++)  {
-      (*A)(i, j) = minpay - NF.Payoff(iter.GetOutcome(), 1);
+      (*A)(i, j) = minpay - (T) NF.Payoff(iter.GetOutcome(), 1);
 ;
       iter.Next(1);
     }

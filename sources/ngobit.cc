@@ -1,7 +1,7 @@
 //
 // FILE: ngobit.cc -- Implementation of gobit on normal form games
 //
-// $Id$
+// @(#)ngobit.cc	2.3.1.1 7/16/97
 //
 
 #include <math.h>
@@ -28,7 +28,7 @@ NFGobitParams::NFGobitParams(gOutput &out, gOutput &pxi, gStatus &s)
 class NFGobitFunc : public gC2Function<double>  {
   private:
     long _nevals;
-    const Nfg<double> &_nfg;
+    const Nfg &_nfg;
     double _Lambda;
     gVector<double> **_scratch;
     MixedProfile<double> _p;
@@ -41,7 +41,7 @@ class NFGobitFunc : public gC2Function<double>  {
     bool Hessian(const gVector<double> &, gMatrix<double> &);
 
   public:
-    NFGobitFunc(const Nfg<double> &, const MixedProfile<double> &);
+    NFGobitFunc(const Nfg &, const MixedProfile<double> &);
     virtual ~NFGobitFunc();
     
     void SetLambda(double l)   { _Lambda = l; }
@@ -49,7 +49,7 @@ class NFGobitFunc : public gC2Function<double>  {
 };
 
 
-NFGobitFunc::NFGobitFunc(const Nfg<double> &N,
+NFGobitFunc::NFGobitFunc(const Nfg &N,
 			 const MixedProfile<double> &start)
   : _nevals(0L), _nfg(N), _p(start)
 {
@@ -132,7 +132,7 @@ double NFGobitFunc::Value(const gVector<double> &v)
 
 
 
-static void WritePXIHeader(gOutput &pxifile, const Nfg<double> &N,
+static void WritePXIHeader(gOutput &pxifile, const Nfg &N,
 			   const NFGobitParams &params)
 {
   pxifile << "Dimensionality:\n";
@@ -146,7 +146,7 @@ static void WritePXIHeader(gOutput &pxifile, const Nfg<double> &N,
   pxifile << "\n" << params.maxLam << "\n" << params.delLam;
   pxifile << "\n" << 0 << "\n" << 1 << "\n" << params.powLam << "\n";
   
-  int numcols = N.GameForm().ProfileLength() + 2;
+  int numcols = N.ProfileLength() + 2;
 
   pxifile << "DataFormat:\n" << numcols;
   
@@ -163,7 +163,7 @@ extern bool DFP(gPVector<double> &p, gC2Function<double> &func,
 		gStatus &status = gstatus);
 
 
-void Gobit(const Nfg<double> &N, NFGobitParams &params,
+void Gobit(const Nfg &N, NFGobitParams &params,
 	   const MixedProfile<double> &start,
 	   gList<MixedSolution<double> > &solutions,
 	   long &nevals, long &nits)

@@ -14,7 +14,7 @@
 // NfgIter:  Constructors, Destructors, Operators
 //--------------------------------------------------------------------------
 
-NfgIter::NfgIter(NFGameForm &nfg)
+NfgIter::NfgIter(Nfg &nfg)
   : support(nfg),
     N(&nfg), current_strat(nfg.NumPlayers()), profile(nfg)
 {
@@ -22,7 +22,7 @@ NfgIter::NfgIter(NFGameForm &nfg)
 }
 
 NfgIter::NfgIter(const NFSupport &s) 
-  : support(s), N((NFGameForm *) &s.BelongsTo()),
+  : support(s), N((Nfg *) &s.Game()),
     current_strat(N->NumPlayers()), profile(*N)
 {
   First();

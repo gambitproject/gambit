@@ -13,18 +13,18 @@
 #include "glist.h"
 
 // returns a glist of all nodes in the extensive form
-void Nodes (const BaseEfg &befg, gList <Node *> &list);
+void Nodes (const Efg &befg, gList <Node *> &list);
 
-void Nodes (const BaseEfg &befg, Node *n, gList <Node *> &list);
+void Nodes (const Efg &befg, Node *n, gList <Node *> &list);
 
 // returns a glist of the Terminal Nodes in the extensive form 
-void TerminalNodes (const BaseEfg &befg, gList <Node *> &list);
+void TerminalNodes (const Efg &befg, gList <Node *> &list);
 
 // returns a glist of the NonTerminal Nodes in the extensive form
-void NonTerminalNodes (const BaseEfg &befg, gList <Node *> &list);
+void NonTerminalNodes (const Efg &befg, gList <Node *> &list);
 
 // returns the number of nodes in the extensive form
-int NumNodes (const BaseEfg &befg);
+int NumNodes (const Efg &befg);
 
 // returns the number of nodes given a starting node
 int CountNodes (Node *n);
@@ -33,23 +33,23 @@ int CountNodes (Node *n);
 Action* LastAction( Node* node );
 
 // returns the list of nodes which are marked as the roots of subgames
-void MarkedSubgameRoots(const BaseEfg &efg, gList<Node *> &list);
+void MarkedSubgameRoots(const Efg &efg, gList<Node *> &list);
 
 // returns the list of nodes which are valid roots of subgames
-void LegalSubgameRoots(const BaseEfg &efg, gList<Node *> &list);
+void LegalSubgameRoots(const Efg &efg, gList<Node *> &list);
 void LegalSubgameRoots(Node *, gList<Node *> &);
 
-bool AllSubgamesMarked(const BaseEfg &efg);
+bool AllSubgamesMarked(const Efg &efg);
 
 // returns the list of nodes which are roots of child subgames
 void ChildSubgames(Node *, gList<Node *> &);
 
 // determines if a game is perfect recall.  
 // if not, returns a pair of infosets violating the definition
-bool IsPerfectRecall(const BaseEfg &, Infoset *&, Infoset *&);
+bool IsPerfectRecall(const Efg &, Infoset *&, Infoset *&);
 
 
-template <class T> Efg<T> *CompressEfg(const Efg<T> &, const EFSupport &);
+Efg *CompressEfg(const Efg &, const EFSupport &);
 
 #endif // EFGUTILS_H
 

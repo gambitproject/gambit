@@ -15,12 +15,12 @@ template <class T> class SimpdivBySubgame : public SubgameSolver<T>  {
     int nevals;
     SimpdivParams params;
 
-    int SolveSubgame(const Efg<T> &, const EFSupport &, 
+    int SolveSubgame(const Efg &, const EFSupport &,
 		     gList<BehavSolution<T> > &);
     EfgAlgType AlgorithmID() const { return EfgAlg_SIMPDIVSUB; }    
 
   public:
-    SimpdivBySubgame(const Efg<T> &E, const EFSupport &,
+    SimpdivBySubgame(const Efg &E, const EFSupport &,
 		     const SimpdivParams &, int max = 0);
     virtual ~SimpdivBySubgame();
 

@@ -1,7 +1,7 @@
 //
 // FILE: efgutils.cc -- useful global functions for the extensive form
 //
-// $Id$
+// @(#)efgutils.cc	2.4 6/22/97
 //
 
 #include "efgutils.h"
@@ -40,7 +40,7 @@ static void LSRDoChild(Node *n, gList<Node *> &list)
 {
   for (int i = 1; i <= n->NumChildren(); i++)
     LSRDoChild(n->GetChild(i), list);
-  if (n->BelongsTo()->IsLegalSubgame(n))   list.Append(n);
+  if (n->Game()->IsLegalSubgame(n))   list.Append(n);
 }
 
 static void CSDoChild(Node *n, gList<Node *> &list)
@@ -62,37 +62,37 @@ int CountNodes (Node *n)
   return num;
 }
 
-void Nodes (const BaseEfg &befg, gList <Node *> &list)
+void Nodes (const Efg &befg, gList <Node *> &list)
 {
   list.Flush();
   NDoChild(befg.RootNode(), list); 
 }
 
-void Nodes (const BaseEfg &, Node *n, gList <Node *> &list)
+void Nodes (const Efg &, Node *n, gList <Node *> &list)
 {
   list.Flush();
   NDoChild(n, list);
 }
 
-void TerminalNodes (const BaseEfg &befg, gList <Node *> &list)
+void TerminalNodes (const Efg &befg, gList <Node *> &list)
 {
   list.Flush();
   TNDoChild(befg.RootNode(), list);
 }
 
-void NonTerminalNodes (const BaseEfg &befg, gList <Node *> &list)
+void NonTerminalNodes (const Efg &befg, gList <Node *> &list)
 {
   list.Flush();
   NTNDoChild(befg.RootNode(), list);
 }
 
-void MarkedSubgameRoots(const BaseEfg &efg, gList<Node *> &list)
+void MarkedSubgameRoots(const Efg &efg, gList<Node *> &list)
 {
   list.Flush();
   MSRDoChild(efg.RootNode(), list);
 }
 
-void LegalSubgameRoots(const BaseEfg &efg, gList<Node *> &list)
+void LegalSubgameRoots(const Efg &efg, gList<Node *> &list)
 {
   list.Flush();
   LSRDoChild(efg.RootNode(), list);
@@ -104,7 +104,7 @@ void LegalSubgameRoots(Node *n, gList<Node *> &list)
   LSRDoChild(n, list);
 }
 
-bool AllSubgamesMarked(const BaseEfg &efg)
+bool AllSubgamesMarked(const Efg &efg)
 {
   gList<Node *> marked, valid;
 
@@ -122,7 +122,7 @@ void ChildSubgames(Node *n, gList<Node *> &list)
     CSDoChild(n->GetChild(i), list);
 }
 
-int NumNodes (const BaseEfg &befg)
+int NumNodes (const Efg &befg)
 {
   return (CountNodes(befg.RootNode()));
 }
@@ -139,7 +139,7 @@ Action *LastAction(Node *node)
 }
 
 
-bool IsPerfectRecall(const BaseEfg &efg, Infoset *&s1, Infoset *&s2)
+bool IsPerfectRecall(const Efg &efg, Infoset *&s1, Infoset *&s2)
 {
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)   {
     EFPlayer *player = efg.Players()[pl];
@@ -195,9 +195,9 @@ bool IsPerfectRecall(const BaseEfg &efg, Infoset *&s1, Infoset *&s2)
   return true;
 }
 
-template <class T> Efg<T> *CompressEfg(const Efg<T> &efg, const EFSupport &S)
+Efg *CompressEfg(const Efg &efg, const EFSupport &S)
 {
-  Efg<T> *newefg = new Efg<T>(efg);
+  Efg *newefg = new Efg(efg);
 
   for (int pl = 1; pl <= newefg->NumPlayers(); pl++)   { 
     EFPlayer *player = newefg->Players()[pl];
@@ -218,17 +218,10 @@ template <class T> Efg<T> *CompressEfg(const Efg<T> &efg, const EFSupport &S)
 #include "rational.h"
 // prototype in efg.h
 
-template <class T> void RandomEfg(Efg<T> &efg)
+void RandomEfg(Efg &efg)
 {
   for (int i = 1; i <= efg.NumPlayers(); i++)
     for (int j = 1; j <= efg.NumOutcomes(); j++)
-      efg.SetPayoff(efg.outcomes[j], i, (T) Uniform());
+      efg.SetPayoff(efg.outcomes[j], i, Uniform());
 }
-
-template void RandomEfg(Efg<double> &efg);
-template void RandomEfg(Efg<gRational> &efg);
-
-template Efg<double> *CompressEfg(const Efg<double> &, const EFSupport &);
-template Efg<gRational> *CompressEfg(const Efg<gRational> &, const EFSupport &);
-
 

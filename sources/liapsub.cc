@@ -6,10 +6,7 @@
 
 #include "liapsub.h"
 
-extern void BehavToMixed(const Efg<double> &, const BehavProfile<double> &,
-			 const Nfg<double> &, MixedProfile<double> &);
-
-int NFLiapBySubgame::SolveSubgame(const Efg<double> &E, const EFSupport &sup,
+int NFLiapBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 				   gList<BehavSolution<double> > &solns)
 {
   BehavProfile<double> bp(E, sup);
@@ -29,9 +26,9 @@ int NFLiapBySubgame::SolveSubgame(const Efg<double> &E, const EFSupport &sup,
     }
   }
 
-  Nfg<double> *N = MakeReducedNfg((Efg<double> &) E, EFSupport(E));
+  Nfg *N = MakeReducedNfg(E, EFSupport(E));
 
-  NFSupport *S = new NFSupport(N->GameForm());
+  NFSupport *S = new NFSupport(*N);
 
   ViewNormal(*N, S);
 
@@ -57,7 +54,7 @@ int NFLiapBySubgame::SolveSubgame(const Efg<double> &E, const EFSupport &sup,
   return params.status.Get();
 }
 
-NFLiapBySubgame::NFLiapBySubgame(const Efg<double> &E, const NFLiapParams &p,
+NFLiapBySubgame::NFLiapBySubgame(const Efg &E, const NFLiapParams &p,
 				 const BehavProfile<double> &s, int max)
   : SubgameSolver<double>(E, s.Support(), max),
     nevals(0), subgame_number(0),

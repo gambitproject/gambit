@@ -16,17 +16,17 @@ class Action;
 class EFPlayer;
 
 class EFActionSet;
-class BaseEfg;  
+class Efg;  
 
 
 class EFSupport {
   protected:
     gString name;
-    const BaseEfg *befg;
+    const Efg *befg;
     gArray<EFActionSet *> sets;
 
 public:
-  EFSupport ( const BaseEfg &);
+  EFSupport ( const Efg &);
   EFSupport ( const EFSupport &);
   virtual ~EFSupport();
   EFSupport &operator=(const EFSupport &);
@@ -48,8 +48,8 @@ public:
   bool RemoveAction(Action *);
   void AddAction(Action *);
 
-  // Returns the BaseEfg associated with this Support.
-  const BaseEfg &BelongsTo(void) const;
+  // Returns the Efg associated with this Support.
+  const Efg &BelongsTo(void) const;
 
   // Checks to see that every infoset in the support has at least one
   // action in it.

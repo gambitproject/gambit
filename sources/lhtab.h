@@ -1,8 +1,8 @@
-//#
-//# FILE: lhtab.h -- Lemke-Howson Tableau class
-//#
-//# $Id$
-//#
+//
+// FILE: lhtab.h -- Lemke-Howson Tableau class
+//
+// $Id$
+//
 
 #ifndef LHTAB_H
 #define LHTAB_H
@@ -10,7 +10,7 @@
 // includes
 #include "lemketab.h"
 
-template <class T> class Nfg;
+class Nfg;
 class NFSupport;
 
 /* 
@@ -30,7 +30,7 @@ protected:
   gVector<T> solution;
 public:
       // constructors and destructors
-  LHTableau(const Nfg<T> &, const NFSupport &); 
+  LHTableau(const Nfg &, const NFSupport &);
   LHTableau(const gMatrix<T> &A1, const gMatrix<T> &A2, 
 	    const gVector<T> &b1, const gVector<T> &b2); 
   LHTableau(const LHTableau<T>&);

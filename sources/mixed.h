@@ -10,16 +10,14 @@
 #include "gmisc.h"
 #include "nfstrat.h"
 
-class BaseNfg;
-
 #include "gpvector.h"
 
-template <class T> class Nfg;
+class Nfg;
 
 template <class T> class MixedProfile : public gPVector<T>  {
 
   private:
-    const Nfg<T> *N;
+    const Nfg *N;
     NFSupport support;
 
     // Private Payoff functions
@@ -33,15 +31,15 @@ template <class T> class MixedProfile : public gPVector<T>  {
 		gVector<T> &value) const;
     
   public:
-    MixedProfile(const Nfg<T> &);
-    MixedProfile(const Nfg<T> &, const NFSupport &);
-    MixedProfile(const Nfg<T> &, const gPVector<T> &);
+    MixedProfile(const Nfg &);
+    MixedProfile(const Nfg &, const NFSupport &);
+    MixedProfile(const Nfg &, const gPVector<T> &);
     MixedProfile(const MixedProfile<T> &);
     virtual ~MixedProfile();
 
     MixedProfile<T> &operator=(const MixedProfile<T> &);
 
-    Nfg<T> &BelongsTo(void) const  { return (Nfg<T> &) *N; }
+    Nfg &Game(void) const  { return const_cast<Nfg &>(*N); }
 
     T LiapValue(void) const;
     void Regret(gPVector<T> &value) const;

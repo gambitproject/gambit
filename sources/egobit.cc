@@ -1,7 +1,7 @@
 //
 // FILE: egobit.cc -- Implementation of gobit on extensive form games
 //
-// $Id$
+// @(#)egobit.cc	2.3 4/2/97
 //
 
 #include <math.h>
@@ -30,7 +30,7 @@ class EFGobitFunc : public gFunction<double>   {
   private:
     long _nevals;
     bool _domain_err;
-    const Efg<double> &_efg;
+    const Efg &_efg;
     double _Lambda;
     gPVector<double> _probs;
     BehavProfile<double> _p, _cpay;
@@ -39,7 +39,7 @@ class EFGobitFunc : public gFunction<double>   {
     double Value(const gVector<double> &);
 
   public:
-    EFGobitFunc(const Efg<double> &, const BehavProfile<double> &);
+    EFGobitFunc(const Efg &, const BehavProfile<double> &);
     virtual ~EFGobitFunc();
     
     void SetLambda(double l)   { _Lambda = l; }
@@ -47,7 +47,7 @@ class EFGobitFunc : public gFunction<double>   {
     bool DomainErr(void) const { return _domain_err;}
 };
 
-EFGobitFunc::EFGobitFunc(const Efg<double> &E,
+EFGobitFunc::EFGobitFunc(const Efg &E,
 			 const BehavProfile<double> &start)
   : _nevals(0L), _domain_err(false), _efg(E), _probs(E.NumInfosets()),
     _p(start), _cpay(E)
@@ -125,7 +125,7 @@ double EFGobitFunc::Value(const gVector<double> &v)
 }
 
 
-static void WritePXIHeader(gOutput &pxifile, const Efg<double> &E,
+static void WritePXIHeader(gOutput &pxifile, const Efg &E,
 			   const EFGobitParams &params)
 {
   int pl, iset, nisets = 0;
@@ -187,7 +187,7 @@ extern bool Powell(gPVector<double> &p, gMatrix<double> &xi,
 
 
 
-void Gobit(const Efg<double> &E, EFGobitParams &params,
+void Gobit(const Efg &E, EFGobitParams &params,
 	   const BehavProfile<double> &start,
 	   gList<BehavSolution<double> > &solutions,
 	   long &nevals, long &nits)

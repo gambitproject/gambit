@@ -15,21 +15,18 @@
 #pragma interface
 #endif   // __GNUG__
 
-template <class T> class Lexicon;
+class Lexicon;
 
 class Node    {
-  friend class BaseEfg;
-  friend class Efg<double>;
-  friend class Efg<gRational>;
+  friend class Efg;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
-  friend class Lexicon<double>;
-  friend class Lexicon<gRational>;
+  friend class Lexicon;
   
   protected:
     bool mark;
     int number;
-    BaseEfg *E;
+    Efg *E;
     gString name;
     Infoset *infoset;
     Node *parent;
@@ -37,11 +34,11 @@ class Node    {
     gBlock<Node *> children;
     Node *whichbranch, *ptr, *gameroot;
 
-    Node(BaseEfg *e, Node *p);
+    Node(Efg *e, Node *p);
     ~Node();
 
   public:
-    BaseEfg *BelongsTo(void) const   { return E; }
+    Efg *Game(void) const   { return E; }
 
     int NumChildren(void) const    { return children.Length(); }
     Infoset *GetInfoset(void) const   { return infoset; }

@@ -19,21 +19,21 @@ EFLiapParams::EFLiapParams(gStatus &s)
 class EFLiapFunc : public gFunction<double>  {
   private:
     long _nevals;
-    const Efg<double> &_efg;
+    const Efg &_efg;
     BehavProfile<double> _p;
     gDPVector<double> _cpay;
 
     double Value(const gVector<double> &x);
 
   public:
-    EFLiapFunc(const Efg<double> &, const BehavProfile<double> &);
+    EFLiapFunc(const Efg &, const BehavProfile<double> &);
     virtual ~EFLiapFunc();
     
     long NumEvals(void) const  { return _nevals; }
 };
 
 
-EFLiapFunc::EFLiapFunc(const Efg<double> &E,
+EFLiapFunc::EFLiapFunc(const Efg &E,
 		       const BehavProfile<double> &start)
   : _nevals(0L), _efg(E), _p(start), _cpay(E.NumActions())
 { }
@@ -145,7 +145,7 @@ extern bool Powell(gPVector<double> &p,
 		   gStatus &status = gstatus);
 
 
-bool Liap(const Efg<double> &E, EFLiapParams &params,
+bool Liap(const Efg &E, EFLiapParams &params,
 	  const BehavProfile<double> &start,
 	  gList<BehavSolution<double> > &solutions,
 	  long &nevals, long &niters)
@@ -209,7 +209,7 @@ bool Liap(const Efg<double> &E, EFLiapParams &params,
 
 
 
-int EFLiapBySubgame::SolveSubgame(const Efg<double> &E, const EFSupport &sup,
+int EFLiapBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 				  gList<BehavSolution<double> > &solns)
 {
   BehavProfile<double> bp(E, sup);
@@ -237,9 +237,9 @@ int EFLiapBySubgame::SolveSubgame(const Efg<double> &E, const EFSupport &sup,
   return params.status.Get();
 }
 
-extern void MarkedSubgameRoots(const BaseEfg &, gList<Node *> &);
+extern void MarkedSubgameRoots(const Efg &, gList<Node *> &);
 
-EFLiapBySubgame::EFLiapBySubgame(const Efg<double> &E, const EFLiapParams &p,
+EFLiapBySubgame::EFLiapBySubgame(const Efg &E, const EFLiapParams &p,
 				 const BehavProfile<double> &s, int max)
   : SubgameSolver<double>(E, s.Support(), max),
     nevals(0), subgame_number(0),

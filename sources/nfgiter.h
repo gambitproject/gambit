@@ -1,14 +1,13 @@
 //
 // FILE: nfgiter.h -- Normal form iterator class
 //
-// @(#)nfgiter.h	2.7 4/3/97
+// $Id$
 //
 
 #ifndef NFGITER_H
 #define NFGITER_H
 
 template <class T> class gArray;
-template <class T> class Nfg;
 
 class StrategyProfile;
 #include "nfstrat.h"
@@ -23,12 +22,12 @@ class NFOutcome;
 class NfgIter    {
 private:
   NFSupport support;
-  NFGameForm *N;
+  Nfg *N;
   gArray<int> current_strat;
   StrategyProfile profile;
 
 public:
-  NfgIter(NFGameForm &);
+  NfgIter(Nfg &);
   NfgIter(const NFSupport &s);
   NfgIter(const NfgIter &);
   NfgIter(const NfgContIter &);

@@ -47,9 +47,9 @@ protected:
   void EvalEquilibria();
   
 public:
-  MixedSolution(const Nfg<T> &);
-  MixedSolution(const Nfg<T> &, const NFSupport &);
-  MixedSolution(const Nfg<T> &, const gPVector<T> &);
+  MixedSolution(const Nfg &);
+  MixedSolution(const Nfg &, const NFSupport &);
+  MixedSolution(const Nfg &, const gPVector<T> &);
   MixedSolution(const MixedProfile<T> &, NfgAlgType creator = NfgAlg_USER);
   MixedSolution(const MixedSolution<T> &);
   

@@ -28,7 +28,7 @@ class LemkeParams     {
 
 template <class T> class LemkeModule  {
 private:
-  const Nfg<T> &NF;
+  const Nfg &NF;
   const NFSupport &support;
   const LemkeParams &params;
   long npivots;
@@ -39,7 +39,7 @@ private:
   gList<MixedSolution<T> > solutions;
 
 public:
-  LemkeModule(const Nfg<T> &N, const LemkeParams &p, const NFSupport &);
+  LemkeModule(const Nfg &N, const LemkeParams &p, const NFSupport &);
   virtual ~LemkeModule();
   
   int Lemke(int dup = 0);

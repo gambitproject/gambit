@@ -1,7 +1,7 @@
 //
 // FILE: gmisc.h -- Miscellaneous generally-useful functions
 //
-// $Id$ 
+// $Id$
 //
 
 #ifndef GMISC_H
@@ -15,14 +15,10 @@ typedef unsigned long ulong;
 typedef unsigned short ushort;
 
 
-typedef enum { DT_ERROR, DT_DOUBLE, DT_RATIONAL, DT_MIXED }  DataType;
-const DataType gDOUBLE = DT_DOUBLE;
-const DataType gRATIONAL = DT_RATIONAL;
+typedef enum { precERROR, precDOUBLE, precRATIONAL, precMIXED }  Precision;
 
 typedef enum { T_NO=0, T_YES=1, T_DONTKNOW=2 } TriState;
 
-//#include "gambitio.h"
-//#include "gstring.h"
 class gString;
 class gOutput;
 gString NameTriState(TriState i);

@@ -12,6 +12,7 @@
 #include "glist.h"
 
 #include "gpvector.h"
+#include "grblock.h"
 
 
 class EFOutcome;
@@ -20,16 +21,22 @@ class Infoset;
 class Node;
 class Action;
 class EFSupport;
+class Lexicon;
+class Nfg;
+template <class T> class BehavProfile;
+template <class T> class MixedProfile;
 
-class BaseEfg     {
-  
+class Efg     {
+
 private:
   // this is used to track memory leakage; #define MEMCHECK to use it
 #ifdef MEMCHECK
   static int _NumObj;
-#endif   // MEMCHECK  
+#endif   // MEMCHECK
 
 friend class EfgFileReader;
+friend class EfgFile;
+friend class Nfg;
 
 protected:
     bool sortisets;
@@ -38,19 +45,21 @@ protected:
     gBlock<EFOutcome *> outcomes;
     Node *root;
     EFPlayer *chance;
+    gRectBlock<gRational> payoffs;
+#ifndef EFG_ONLY
+    Nfg *afg;
+#endif  EFG_ONLY
+    Lexicon *lexicon;
 
-       //# PROTECTED CONSTRUCTORS -- FOR DERIVED CLASS USE ONLY
-    BaseEfg(void);
-    BaseEfg(const BaseEfg &);
+
+    // this is for use with the copy constructor
+    void CopySubtree(Node *, Node *);
 
     void CopySubtree(Node *, Node *, Node *);
     void MarkSubtree(Node *);
     void UnmarkSubtree(Node *);
 
-    void DisplayTree(gOutput &, Node *) const;
-
-    virtual Infoset *CreateInfoset(int n, EFPlayer *pl, int br) = 0;
-    virtual Node *CreateNode(Node *parent) = 0;
+    Infoset *CreateInfoset(int n, EFPlayer *pl, int br);
 
     void SortInfosets(void);
     void NumberNodes(Node *, int &);
@@ -59,12 +68,20 @@ protected:
     Infoset *GetInfosetByIndex(EFPlayer *p, int index) const;
     Infoset *CreateInfosetByIndex(EFPlayer *p, int index, int br);
     EFOutcome *GetOutcomeByIndex(int index) const;
-    virtual EFOutcome *CreateOutcomeByIndex(int index) = 0;
+    EFOutcome *CreateOutcomeByIndex(int index);
     void Reindex(void);
-    
-    virtual void DeleteLexicon(void) = 0;
+
+    void DeleteLexicon(void) { };
 
     EFOutcome *NewOutcome(int index);
+
+    void WriteEfgFile(gOutput &, Node *) const;
+
+    void Payoff(Node *n, gRational, const gPVector<int> &, gVector<gRational> &) const;
+    void Payoff(Node *n, gRational, const gArray<gArray<int> *> &, gVector<gRational> &) const;
+
+    void InfosetProbs(Node *n, gRational, const gPVector<int> &, gPVector<gRational> &) const;
+
 
 // These are used in identification of subgames
     void MarkTree(Node *, Node *);
@@ -72,19 +89,23 @@ protected:
     void MarkSubgame(Node *, Node *);
 
   public:
+    Efg(void);
+    Efg(const Efg &, Node * = 0);
+
        //# DESTRUCTOR
-    virtual ~BaseEfg();
+    ~Efg();
 
        //# TITLE ACCESS AND MANIPULATION
     void SetTitle(const gString &s);
     const gString &GetTitle(void) const;
 
        //# WRITING DATA FILES
-    void DisplayTree(gOutput &) const;
+    void WriteEfgFile(gOutput &f) const;
 
        //# DATA ACCESS -- GENERAL INFORMATION
-    virtual DataType Type(void) const = 0;
-    virtual bool IsConstSum(void) const = 0;
+    bool IsConstSum(void) const;
+    gRational MinPayoff(int pl = 0) const;
+    gRational MaxPayoff(int pl = 0) const;
 
     Node *RootNode(void) const;
     bool IsSuccessor(const Node *n, const Node *from) const;
@@ -92,15 +113,15 @@ protected:
 
        //# DATA ACCESS -- PLAYERS
     int NumPlayers(void) const;
-
     EFPlayer *GetChance(void) const;
-    virtual EFPlayer *NewPlayer(void) = 0;
+    EFPlayer *NewPlayer(void);
     const gArray<EFPlayer *> &Players(void) const  { return players; }
 
        //# DATA ACCESS -- OUTCOMES
     int NumOutcomes(void) const;
     const gArray<EFOutcome *> &Outcomes(void) const  { return outcomes; }
-    void DeleteOutcome(EFOutcome *c);  
+    EFOutcome *NewOutcome(void);
+    void DeleteOutcome(EFOutcome *c);
  
        //# EDITING OPERATIONS
     Infoset *AppendNode(Node *n, EFPlayer *p, int br);
@@ -109,7 +130,7 @@ protected:
     Infoset *InsertNode(Node *n, EFPlayer *p, int br);
     Infoset *InsertNode(Node *n, Infoset *s);
 
-    virtual Infoset *CreateInfoset(EFPlayer *pl, int br) = 0;
+    Infoset *CreateInfoset(EFPlayer *pl, int br);
     bool DeleteEmptyInfoset(Infoset *);
     Infoset *JoinInfoset(Infoset *s, Node *n);
     Infoset *LeaveInfoset(Node *n);
@@ -128,6 +149,15 @@ protected:
 
     void Reveal(Infoset *, const gArray<EFPlayer *> &);
 
+    void SetChanceProb(Infoset *, int, const gRational &);
+    gRational GetChanceProb(Infoset *, int) const;
+    gArray<gRational> GetChanceProbs(Infoset *) const;
+
+    void SetPayoff(EFOutcome *, int pl, const gRational &value);
+    gRational Payoff(EFOutcome *, int pl) const;
+    gVector<gRational> Payoff(EFOutcome *) const;
+
+
     // Unmarks all subgames in the subtree rooted at n
     void UnmarkSubgames(Node *n);
     bool IsLegalSubgame(Node *n);
@@ -142,112 +172,37 @@ protected:
     gArray<int> NumInfosets(void) const;
     gPVector<int> NumActions(void) const;
     gPVector<int> NumMembers(void) const;
+
+        //# COMPUTING VALUES OF PROFILES
+    void Payoff(const gPVector<int> &profile, gVector<gRational> &payoff) const;
+    void Payoff(const gArray<gArray<int> *> &profile, 
+		gVector<gRational> &payoff) const;
+
+    void InfosetProbs(const gPVector<int> &profile, gPVector<gRational> &prob) const;
+
+    // defined in efgutils.cc
+    friend void RandomEfg(Efg &);
+#ifndef EFG_ONLY
+    // This function put in to facilitate error-detection in MixedToBehav[]
+    friend Nfg *AssociatedNfg(Efg *E);
+    friend Nfg *AssociatedAfg(Efg *E);
+#endif   // EFG_ONLY
+
+#ifndef EFG_ONLY
+    friend Nfg *MakeReducedNfg(Efg &, const EFSupport &);
+    friend Nfg *MakeAfg(Efg &);
+    friend void MixedToBehav(const Nfg &N, const MixedProfile<double> &mp,
+		             const Efg &E, BehavProfile<double> &bp);
+    friend void BehavToMixed(const Efg &, const BehavProfile<double> &,
+			     const Nfg &, MixedProfile<double> &);
+    friend void MixedToBehav(const Nfg &N, const MixedProfile<gRational> &mp,
+		             const Efg &E, BehavProfile<gRational> &bp);
+    friend void BehavToMixed(const Efg &, const BehavProfile<gRational> &,
+			     const Nfg &, MixedProfile<gRational> &);
+#endif   // EFG_ONLY
 };
 
 #include "behav.h"
-
-template <class T> class EfgFile;
-template <class T> class BehavProfile;
-
-
-#ifndef EFG_ONLY
-template <class T> class Nfg;
-template <class T> class MixedProfile;
-template <class T> class Lexicon;
-#endif   // EFG_ONLY
-
-#include "grblock.h"
-
-template <class T> class Efg : public BaseEfg   {
-#ifndef EFG_ONLY
-  friend class BaseNfg;
-  friend class Nfg<T>;
-#endif   // EFG_ONLY
-  friend class EfgFile<T>;
-  private:
-#ifndef EFG_ONLY
-    Lexicon<T> *lexicon;
-    Nfg<T> *afg;
-#endif  EFG_ONLY
-    gRectBlock<T> payoffs;
-
-    Efg<T> &operator=(const Efg<T> &);
-
-    void Payoff(Node *n, T, const gPVector<int> &, gVector<T> &) const;
-    void Payoff(Node *n, T, const gArray<gArray<int> *> &, gVector<T> &) const;
-
-    void InfosetProbs(Node *n, T, const gPVector<int> &, gPVector<T> &) const;
-
-    Infoset *CreateInfoset(int n, EFPlayer *pl, int br);
-    Node *CreateNode(Node *parent);
-    EFOutcome *CreateOutcomeByIndex(int index);
-
-
-    // this is for use with the copy constructor
-    void CopySubtree(Node *, Node *);
-
-    void DeleteLexicon(void);
-
-    void WriteEfgFile(gOutput &, Node *) const;
-
-  public:
-	//# CONSTRUCTORS AND DESTRUCTOR
-    Efg(void);
-    Efg(const BaseEfg &);
-    Efg(const Efg<T> &);
-    Efg(const Efg<T> &, Node *);
-    virtual ~Efg(); 
-
-	//# DATA ACCESS -- GENERAL INFORMATION
-    DataType Type(void) const;
-    bool IsConstSum(void) const;
-    T MinPayoff(int pl = 0) const;
-    T MaxPayoff(int pl = 0) const;
-
-    void WriteEfgFile(gOutput &f) const;
-
-
-    EFPlayer *NewPlayer(void);
-
-        //# DATA ACCESS -- OUTCOMES
-    EFOutcome *NewOutcome(void);
-
-    Infoset *CreateInfoset(EFPlayer *pl, int br);
-
-    void SetPayoff(EFOutcome *, int pl, const T &value);
-    T Payoff(EFOutcome *, int pl) const;
-    gVector<T> Payoff(EFOutcome *) const;
-
-    void SetChanceProb(Infoset *, int, const T &);
-    T GetChanceProb(Infoset *, int) const;
-    gArray<T> GetChanceProbs(Infoset *) const;
-
-        //# COMPUTING VALUES OF PROFILES
-
-    void Payoff(const gPVector<int> &profile, gVector<T> &payoff) const;
-    void Payoff(const gArray<gArray<int> *> &profile, 
-		gVector<T> &payoff) const;
-
-    void InfosetProbs(const gPVector<int> &profile, gPVector<T> &prob) const;
-
-#ifndef EFG_ONLY
-    friend Nfg<T> *MakeReducedNfg(Efg<T> &, const EFSupport &);
-    friend Nfg<T> *MakeAfg(Efg<T> &);
-    friend void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
-		             const Efg<T> &E, BehavProfile<T> &bp);
-    friend void BehavToMixed(const Efg<T> &, const BehavProfile<T> &,
-			     const Nfg<T> &, MixedProfile<T> &);
-#endif   // EFG_ONLY 
-   
-    // defined in efgutils.cc
-    friend void RandomEfg(Efg<T> &);
-
-#ifndef EFG_ONLY
-    // This function put in to facilitate error-detection in MixedToBehav[]
-    friend Nfg<T> *AssociatedNfg(Efg<T> *E);
-    friend Nfg<T> *AssociatedAfg(Efg<T> *E);
-#endif   // EFG_ONLY
-};
 
 #include "efplayer.h"
 #include "infoset.h"
@@ -255,8 +210,7 @@ template <class T> class Efg : public BaseEfg   {
 #include "outcome.h"
 
 // These functions are provided in readefg.y/readefg.cc
-template <class T> int ReadEfgFile(gInput &, Efg<T> *&);
-void EfgFileType(gInput &f, bool &valid, DataType &type);
+int ReadEfgFile(gInput &, Efg *&);
 
 #endif   // EFG_H
 

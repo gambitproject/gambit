@@ -21,7 +21,7 @@ template class gStack<Node *>;
 %define MEMBERS    gInput &infile; \
                    gString last_name;  gRational last_rational;  \
                    int last_int, iset_idx; \
-                   BaseEfg *& E; \
+                   Efg *& E; \
                    gStack<Node *> path; \
                    gList<gString> actions; \
                    gList<gRational> values; \
@@ -39,7 +39,7 @@ template class gStack<Node *>;
 					     const gList<gRational> &) = 0;
 
 
-%define CONSTRUCTOR_PARAM    gInput &f, BaseEfg *& e
+%define CONSTRUCTOR_PARAM    gInput &f, Efg *& e
 
 %define CONSTRUCTOR_INIT     : infile(f), E(e), path(32)
 
@@ -276,34 +276,99 @@ int EfgFileReader::yylex(void)
 
 EfgFileReader::~EfgFileReader()   { }
 
-void EfgFileType(gInput &f, bool &valid, DataType &type)
+
+
+class EfgFile : public EfgFileReader    {
+  public:
+    EfgFile(gInput &, Efg *&);
+    virtual ~EfgFile();
+
+    int Parse(void);
+
+    EFOutcome *NewOutcome(void);
+    void SetOutcome(EFOutcome *, const gList<gRational> &);
+    void SetActionProbs(Infoset *, const gList<gRational> &);
+    bool CheckActionProbs(Infoset *, const gList<gRational> &);
+    bool CheckOutcome(EFOutcome *, const gList<gRational> &);
+};
+
+EfgFile::EfgFile(gInput &f, Efg *& E)
+  : EfgFileReader(f, E)
+{ }
+
+EfgFile::~EfgFile()
+{ }
+
+EFOutcome *EfgFile::NewOutcome(void)
 {
-  f.seekp(0);
+  return E->NewOutcome();
+}
+
+void EfgFile::SetOutcome(EFOutcome *c,
+			 const gList<gRational> &p)
+{
+  int outc;
+  for (outc = 1; E->Outcomes()[outc] != c; outc++);
+  for (int i = 1; i <= p.Length(); i++)
+    E->payoffs(outc, i) = p[i];
+}
+
+void EfgFile::SetActionProbs(Infoset *s,
+			     const gList<gRational> &p)
+{
+  for (int i = 1; i <= p.Length(); i++)
+    E->SetChanceProb(s, i, p[i]);
+}
+
+bool EfgFile::CheckActionProbs(Infoset *s,
+			       const gList<gRational> &p)
+{
+  for (int i = 1; i <= p.Length(); i++)
+    if (E->GetChanceProb(s, i) != p[i])  return false;
+  return true;
+}
+
+bool EfgFile::CheckOutcome(EFOutcome *c,
+			   const gList<gRational> &p)
+{
+  int outc;
+  for (outc = 1; E->Outcomes()[outc] != c; outc++);
+  for (int i = 1; i <= p.Length(); i++)
+    if (E->payoffs(outc, i) != p[i])   return false;
+  return true;
+}
+
+int EfgFile::Parse(void)
+{
+  infile.seekp(0);
   static char *prologue = { "EFG 2 " };
   char c;
-  for (unsigned int i = 0; i < strlen(prologue); i++)  {
-    f.get(c);
-    if (c != prologue[i])   {
-      valid = false;
-      return;
-    }
+  for (unsigned int i = 0; i < strlen(prologue); i++)   {
+    infile.get(c);
+    if (c != prologue[i])   return 1;
   }
 
-  f.get(c);
-  switch (c)   {
-    case 'D':
-      valid = true;
-      type = gDOUBLE;
-      return;
-    case 'R':
-      valid = true;
-      type = gRATIONAL;
-      return;
-    default:
-      valid = false;
-      return;
-  }
+  infile.get(c);
+  if (c != 'D' && c != 'R')   return 1;
+  return yyparse();
 }
+
+int ReadEfgFile(gInput &f, Efg *& E)
+{
+  assert(!E);
+
+  E = new Efg;
+
+  EfgFile R(f, E);
+  
+  if (R.Parse())  {
+    if (E)  {  delete E;  E = 0; }
+    return 0;
+  }
+
+  return 1;
+}
+
 
 
 

@@ -17,12 +17,12 @@ class NFLiapBySubgame : public SubgameSolver<double>  {
     NFLiapParams params;
     BehavProfile<double> start;
 
-    int SolveSubgame(const Efg<double> &, const EFSupport &,
+    int SolveSubgame(const Efg &, const EFSupport &,
 		      gList<BehavSolution<double> > &);
     EfgAlgType AlgorithmID() const { return EfgAlg_NLIAPSUB; }    
 
   public:
-    NFLiapBySubgame(const Efg<double> &E, const NFLiapParams &,
+    NFLiapBySubgame(const Efg &E, const NFLiapParams &,
 		    const BehavProfile<double> &, int max = 0);
     virtual ~NFLiapBySubgame();
 

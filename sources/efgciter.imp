@@ -8,7 +8,7 @@
 
 template <class T> EfgContIter<T>::EfgContIter(const EFSupport &s)
   : _frozen_pl(0), _frozen_iset(0),
-    _efg((Efg<T> *) &s.BelongsTo()), _support(s),
+    _efg((Efg *) &s.BelongsTo()), _support(s),
     _efgidx(_efg->NumInfosets()), _supidx(_efgidx),
     _payoff(_efg->NumPlayers())
 {
@@ -112,9 +112,9 @@ template <class T> int EfgContIter<T>::NextContingency(void)
   return 0;
 }
 
-template <class T> const T &EfgContIter<T>::Payoff(int pl) const
+template <class T> T EfgContIter<T>::Payoff(int pl) const
 {
-  _efg->Payoff(_efgidx, (gVector<T> &) _payoff);
+  _efg->Payoff(_efgidx, _payoff);
   return _payoff[pl];
 }
 

@@ -11,7 +11,7 @@
 #include "gmisc.h"
 
 template <class T> 
-BehavSolution<T>::BehavSolution(const Efg<T>& e)
+BehavSolution<T>::BehavSolution(const Efg& e)
   : BehavProfile<T>(e),
   _Creator(EfgAlg_USER),
   _IsNash(T_DONTKNOW),
@@ -30,7 +30,7 @@ BehavSolution<T>::BehavSolution(const Efg<T>& e)
 
 
 template <class T> 
-BehavSolution<T>::BehavSolution(const Efg<T>& e, const gDPVector<T>& v)
+BehavSolution<T>::BehavSolution(const Efg& e, const gDPVector<T>& v)
   : BehavProfile<T>(e, v),
   _Creator(EfgAlg_USER),
   _IsNash(T_DONTKNOW),
@@ -48,7 +48,7 @@ BehavSolution<T>::BehavSolution(const Efg<T>& e, const gDPVector<T>& v)
 }
 
 template <class T> 
-BehavSolution<T>::BehavSolution(const Efg<T> &E, const EFSupport& s)
+BehavSolution<T>::BehavSolution(const Efg &E, const EFSupport& s)
   : BehavProfile<T>(E, s),
   _Creator(EfgAlg_USER),
   _IsNash(T_DONTKNOW),

@@ -2,7 +2,7 @@
 // FILE: nfg.cc -- Implementation of normal form member functions
 //              -- and Implementation of NFPlayer member functions
 //
-// $Id$
+// @(#)nfg.cc	2.15.1.2 7/17/97
 //
 
 #include "rational.h"
@@ -13,20 +13,20 @@
 
 
 //----------------------------------------------------
-// NFGameForm: Constructors, Destructors, Operators
+// Nfg: Constructors, Destructors, Operators
 //----------------------------------------------------
 
 
-int NFGameForm::Product(const gArray<int> &dim)
+int Nfg::Product(const gArray<int> &dim)
 {
   int accum = 1;
   for (int i = 1; i <= dim.Length(); accum *= dim[i++]);
   return accum;
 }
   
-NFGameForm::NFGameForm(const NFPayoffs &pay, const gArray<int> &dim)
+Nfg::Nfg(const gArray<int> &dim)
   : dimensions(dim), players(dim.Length()), results(Product(dim)),
-    paytable((NFPayoffs *) &pay)
+    payoffs(0, dim.Length())
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new NFPlayer(pl, this, dim[pl]);
@@ -40,10 +40,10 @@ NFGameForm::NFGameForm(const NFPayoffs &pay, const gArray<int> &dim)
        results[cont++] = (NFOutcome *) 0);
 }
 
-NFGameForm::NFGameForm(const NFGameForm &b)
+Nfg::Nfg(const Nfg &b)
   : title(b.title), dimensions(b.dimensions),
     players(b.players.Length()), outcomes(b.outcomes.Length()),
-    results(b.results.Length()), paytable(b.paytable)
+    results(b.results.Length()), payoffs(b.payoffs)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new NFPlayer(pl, this, dimensions[pl]);
@@ -65,71 +65,142 @@ NFGameForm::NFGameForm(const NFGameForm &b)
                      outcomes[b.results[cont]->GetNumber()] : (NFOutcome *) 0;
 }
 
+#ifndef NFG_ONLY
+#include "efg.h"
+#include "lexicon.h"
+#endif   // NFG_ONLY
 
-NFGameForm::~NFGameForm()
+Nfg::~Nfg()
 {
   for (int pl = 1; pl <= players.Length(); pl++)
     delete players[pl];
   for (int outc = 1; outc <= outcomes.Length(); outc++)
     delete outcomes[outc];
+
+#ifndef NFG_ONLY
+  if (efg)  {
+    Efg *tmp = efg;
+    // note that Lexicon dtor unsets the efg member...
+
+    delete efg->lexicon;
+    tmp->lexicon = 0;
+  }
+  efg = 0;
+#endif   // NFG_ONLY
+
 }
 
+void Nfg::BreakLink(void)
+{
+#ifndef NFG_ONLY
+  if (efg)  {
+    Efg *tmp = efg;
+    // note that Lexicon dtor unsets the efg member...
+
+    delete efg->lexicon;
+    tmp->lexicon = 0;
+  }
+  efg = 0;
+#endif   // NFG_ONLY
+}
 
 //-------------------------------
-// NFGameForm: Member Functions
+// Nfg: Member Functions
 //-------------------------------
 
+#include "nfgiter.h"
 
-NFOutcome *NFGameForm::NewOutcome(void)
+void Nfg::WriteNfgFile(gOutput &f) const
+{
+  int i;
+
+
+  f << "NFG 1 R";
+  f << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
+
+  for (i = 1; i <= NumPlayers(); i++)
+    f << '"' << EscapeQuotes(Players()[i]->GetName()) << "\" ";
+
+  f << "}\n\n{ ";
+  
+  for (i = 1; i <= NumPlayers(); i++)   {
+    NFPlayer *player = Players()[i];
+    f << "{ ";
+    for (int j = 1; j <= player->NumStrats(); j++)
+      f << '"' << EscapeQuotes(player->Strategies()[j]->name) << "\" ";
+    f << "}\n";
+  }
+  
+  f << "}\n\n";
+
+
+  int ncont = 1;
+  for (i = 1; i <= NumPlayers(); i++)
+    ncont *= NumStrats(i);
+
+  for (i = 1; i <= ncont; i++)
+    for (int j = 1; j <= NumPlayers(); j++)
+      if (GetOutcome(i))
+	f << Payoff(GetOutcome(i), j) << ' ';
+      else
+	f << 0 << ' ';
+
+  f << '\n';
+}
+
+NFOutcome *Nfg::NewOutcome(void)
 {
   NFOutcome *outcome = new NFOutcome(outcomes.Length() + 1, this);
   outcomes.Append(outcome);
 
-  paytable->NewOutcome();
+  gVector<gRational> zeroes(NumPlayers());
+  zeroes = (gRational) 0;
+  payoffs.AddRow(zeroes);
 
   return outcome;
 }
 
-void NFGameForm::DeleteOutcome(NFOutcome *outcome)
+void Nfg::DeleteOutcome(NFOutcome *outcome)
 {
-  paytable->DeleteOutcome(outcome->GetNumber());
+  payoffs.RemoveRow(outcome->GetNumber());
   delete outcomes.Remove(outcome->GetNumber());
+
   for (int outc = 1; outc <= outcomes.Length(); outc++)
     outcomes[outc]->number = outc;
 }
 
-const gArray<Strategy *> &NFGameForm::Strategies(int p) const
+const gArray<Strategy *> &Nfg::Strategies(int p) const
 {
   return (players[p]->Strategies());
 }
 
-void NFGameForm::SetTitle(const gString &s) 
+void Nfg::SetTitle(const gString &s) 
 { 
   title = s; 
 }
 
-const gString &NFGameForm::GetTitle(void) const 
+const gString &Nfg::GetTitle(void) const 
 { 
   return title; 
 }
 
-int NFGameForm::NumPlayers(void) const 
+int Nfg::NumPlayers(void) const 
 { 
   return (players.Length()); 
 }
 
-const gArray<NFPlayer *> &NFGameForm::Players(void) const
+const gArray<NFPlayer *> &Nfg::Players(void) const
 {
   return players;
 }
 
-int NFGameForm::NumStrats(int pl) const
+int Nfg::NumStrats(int pl) const
 {
   return ((pl > 0 && pl <= NumPlayers()) ? 
 	  (players[pl])->strategies.Length() : 0);
 }
 
-int NFGameForm::ProfileLength(void) const
+int Nfg::ProfileLength(void) const
 {
   int nprof = 0;
   for (int i = 1; i <= players.Length(); i++)
@@ -137,23 +208,23 @@ int NFGameForm::ProfileLength(void) const
   return nprof;
 }
 
-void NFGameForm::SetOutcome(const gArray<int> &profile, NFOutcome *outcome)
+void Nfg::SetOutcome(const gArray<int> &profile, NFOutcome *outcome)
 {
   int index = 1;
   for (int i = 1; i <= profile.Length(); i++)
     index += players[i]->strategies[profile[i]]->index;
   results[index] = outcome;
-  paytable->BreakLink();
+  BreakLink();
 }
 
 
-void NFGameForm::SetOutcome(const StrategyProfile &p, NFOutcome *outcome)
+void Nfg::SetOutcome(const StrategyProfile &p, NFOutcome *outcome)
 {
   results[p.index + 1] = outcome;
-  paytable->BreakLink();
+  BreakLink();
 }
 
-NFOutcome *NFGameForm::GetOutcome(const gArray<int> &profile) const 
+NFOutcome *Nfg::GetOutcome(const gArray<int> &profile) const 
 {
   int index = 1;
   for (int i = 1; i <= profile.Length(); i++)
@@ -161,17 +232,30 @@ NFOutcome *NFGameForm::GetOutcome(const gArray<int> &profile) const
   return results[index];
 }
 
-NFOutcome *NFGameForm::GetOutcome(const StrategyProfile &p) const
+NFOutcome *Nfg::GetOutcome(const StrategyProfile &p) const
 {
   return results[p.index + 1];
 }
 
+void Nfg::SetPayoff(NFOutcome *outcome,
+					            int pl, const gRational &value)
+{
+  if (outcome)   payoffs(outcome->GetNumber(), pl) = value;
+}
+
+gRational Nfg::Payoff(NFOutcome *outcome, int pl) const
+{
+  if (outcome)
+	  return payoffs(outcome->GetNumber(), pl);
+  else
+	  return (gRational) 0;
+}
 
 // ---------------------------------------
-// NFGameForm: Private member functions
+// Nfg: Private member functions
 // ---------------------------------------
 
-void NFGameForm::IndexStrategies(void)
+void Nfg::IndexStrategies(void)
 {
   long offset = 1L;
 
@@ -191,7 +275,7 @@ void NFGameForm::IndexStrategies(void)
 // NFPlayer: Member functions 
 // --------------------------
 
-NFPlayer::NFPlayer(int n, NFGameForm *N, int num)
+NFPlayer::NFPlayer(int n, Nfg *N, int num)
 : number(n), N(N), strategies(num)
 { 
   for (int j = 1; j <= num; j++)
@@ -204,7 +288,7 @@ NFPlayer::~NFPlayer()
     delete strategies[j];
 }
 
-NFGameForm &NFPlayer::BelongsTo(void) const
+Nfg &NFPlayer::Game(void) const
 {
   return *N;
 }

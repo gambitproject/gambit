@@ -8,10 +8,6 @@
 
 
 #include "efg.imp"
-template class Efg<double>;
-DataType Efg<double>::Type(void) const    { return gDOUBLE; }
-
-template class ChanceInfoset<double>;
 
 template class BehavNode<double>;
 template class BehavProfile<double>;
@@ -30,11 +26,6 @@ template class EfgIter<double>;
 #include "efgciter.imp"
 
 template class EfgContIter<double>;
-
-#include "readefg.imp"
-
-template class EfgFile<double>;
-template int ReadEfgFile(gInput &, Efg<double> *&);
 
 #include "garray.imp"
 

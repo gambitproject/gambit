@@ -1,7 +1,7 @@
 //
 // FILE: algfunc.cc -- Solution algorithm functions for GCL
 //
-// @(#)algfunc.cc	2.16 6/23/97
+// $Id$
 //
 
 #include "gsm.h"
@@ -80,32 +80,18 @@ Behav_ListPortion<gRational>::Behav_ListPortion(
 // AgentForm
 //-------------
 
-static Portion *GSM_AgentForm_Float(Portion **param)
+
+static Portion *GSM_AgentForm(Portion **param)
 {
-  Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
+  Efg &E = *((EfgPortion*) param[0])->Value();
   gWatch watch;
 
-  Nfg<double> *N = MakeAfg(E);
-  
-  ((FloatPortion *) param[1])->Value() = watch.Elapsed();
-  
-  if (N)
-    return new NfgValPortion<double>(N);
-  else
-    return new ErrorPortion("Conversion to agent form failed");
-}
-
-static Portion *GSM_AgentForm_Rational(Portion **param)
-{
-  Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
-  gWatch watch;
-
-  Nfg<gRational> *N = MakeAfg(E);
+  Nfg *N = MakeAfg(E);
   
   ((FloatPortion *) param[1])->Value() = watch.Elapsed();
 
   if (N)
-    return new NfgValPortion<gRational>(N);
+    return new NfgValPortion(N);
   else
     return new ErrorPortion("Conversion to agent form failed");
 }
@@ -118,8 +104,8 @@ static Portion *GSM_Behav_Float(Portion **param)
 {
   MixedSolution<double> &mp = * (MixedSolution<double>*) ((MixedPortion<double>*) param[0])->Value();
 
-  Nfg<double> &N = mp.BelongsTo(); 
-  const Efg<double> &E = *(const Efg<double> *) N.AssociatedEfg();
+  Nfg &N = mp.Game();
+  const Efg &E = *(const Efg *) N.AssociatedEfg();
 
   BehavSolution<double> *bp = new BehavSolution<double>(E);
   MixedToBehav(N, mp, E, *bp);
@@ -132,8 +118,8 @@ static Portion *GSM_Behav_Rational(Portion **param)
   MixedSolution<gRational> &mp = 
     * (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[0])->Value();
 
-  Nfg<gRational> &N = mp.BelongsTo(); 
-  const Efg<gRational> &E = *(const Efg<gRational> *) N.AssociatedEfg();
+  Nfg &N = mp.Game();
+  const Efg &E = *N.AssociatedEfg();
 
   BehavSolution<gRational> *bp = new BehavSolution<gRational>(E);
   MixedToBehav(N, mp, E, *bp);
@@ -150,7 +136,6 @@ static Portion *GSM_Behav_Rational(Portion **param)
 static Portion *GSM_EnumMixed_Nfg(Portion **param)
 {
   NFSupport* S = ((NfSupportPortion*) param[0])->Value();
-  NFPayoffs *N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por = 0;
 
   EnumParams EP;
@@ -159,29 +144,12 @@ static Portion *GSM_EnumMixed_Nfg(Portion **param)
 
   EP.tracefile = &((OutputPortion *) param[4])->Value();
   EP.trace = ((IntPortion *) param[5])->Value();
-  
-  switch(N->Type())   {
-  case gDOUBLE:
-    {
-      EnumModule<double> EM(* (Nfg<double>*) N, EP, *S);
-      EM.Enum();
-      ((IntPortion *) param[2])->Value() = EM.NumPivots();
-      ((FloatPortion *) param[3])->Value() = EM.Time();
-      por = new Mixed_ListPortion<double>(EM.GetSolutions());
-    }
-    break;
-  case gRATIONAL:
-    {
-      EnumModule<gRational> EM(* (Nfg<gRational>*) N, EP, *S);
-      EM.Enum();
-      ((IntPortion *) param[2])->Value() = EM.NumPivots();
-      ((FloatPortion *) param[3])->Value() = EM.Time();
-      por = new Mixed_ListPortion<gRational>(EM.GetSolutions());
-    }
-    break;
-  default:
-    assert(0);
-  }
+
+  EnumModule<double> EM(S->Game(), EP, *S);
+  EM.Enum();
+  ((IntPortion *) param[2])->Value() = EM.NumPivots();
+  ((FloatPortion *) param[3])->Value() = EM.Time();
+  por = new Mixed_ListPortion<double>(EM.GetSolutions());
 
   assert(por != 0);
   return por;
@@ -193,7 +161,7 @@ static Portion *GSM_EnumMixed_Nfg(Portion **param)
 static Portion *GSM_EnumMixed_Efg(Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
-  const BaseEfg &E = support.BelongsTo();
+  const Efg &E = support.BelongsTo();
 
   if (!((BoolPortion *) param[1])->Value())
     return new ErrorPortion("algorithm not implemented for extensive forms");
@@ -206,36 +174,15 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
   
   Portion *por;
 
-  switch (E.Type())  {
-    case gDOUBLE:
-    {
-      EnumBySubgame<double> EM((const Efg<double> &) E, support, EP);
-  
-      EM.Solve();
-      gList<BehavSolution<double> > solns(EM.GetSolutions());
+  EnumBySubgame<double> EM(E, support, EP);
 
-      ((IntPortion *) param[3])->Value() = EM.NumPivots();
-      ((FloatPortion *) param[4])->Value() = EM.Time();
+  EM.Solve();
+  gList<BehavSolution<double> > solns(EM.GetSolutions());
 
-      por = new Behav_ListPortion<double>(solns);
-      break;
-    }
-    case gRATIONAL:
-    {
-      EnumBySubgame<gRational> EM((const Efg<gRational> &) E, support, EP);
-  
-      EM.Solve();
-      gList<BehavSolution<gRational> > solns(EM.GetSolutions());
+  ((IntPortion *) param[3])->Value() = EM.NumPivots();
+  ((FloatPortion *) param[4])->Value() = EM.Time();
 
-      ((IntPortion *) param[3])->Value() = EM.NumPivots();
-      ((FloatPortion *) param[4])->Value() = EM.Time();
-
-      por = new Behav_ListPortion<gRational>(solns);
-      break;
-    }
-    default:
-      assert(0);
-  }
+  por = new Behav_ListPortion<double>(solns);
 
   return por;
 }
@@ -250,30 +197,13 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
 static Portion *GSM_EnumPure_Nfg(Portion **param)
 {
   NFSupport* S = ((NfSupportPortion*) param[0])->Value();
-  NFPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por;
 
   gWatch watch;
 
-  switch(N->Type())
-  {
-  case gDOUBLE:
-    {
-      gList<MixedSolution<double> > solns;
-      FindPureNash(* (Nfg<double>*) N, *S, solns);
-      por = new Mixed_ListPortion<double>(solns);
-    }
-    break;
-  case gRATIONAL:
-    {
-      gList<MixedSolution<gRational> > solns;
-      FindPureNash(* (Nfg<gRational>*) N, *S, solns);
-      por = new Mixed_ListPortion<gRational>(solns);
-    }
-    break;
-  default:
-    assert(0);
-  }
+  gList<MixedSolution<double> > solns;
+  FindPureNash(S->Game(), *S, solns);
+  por = new Mixed_ListPortion<double>(solns);
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
@@ -286,54 +216,26 @@ static Portion *GSM_EnumPure_Nfg(Portion **param)
 static Portion *GSM_EnumPure_Efg(Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
-  const BaseEfg &E = support.BelongsTo();
+  const Efg &E = support.BelongsTo();
 
   Portion *por;
   
-  switch (E.Type())  {
-    case gDOUBLE:
-    {
       gList<BehavSolution<double> > solns;
 
       if (((BoolPortion *) param[1])->Value())   {
-	PureNashBySubgame<double> M((const Efg<double> &) E, support);
+	PureNashBySubgame<double> M(E, support);
 	M.Solve();
 	solns = M.GetSolutions();
 	((FloatPortion *) param[3])->Value() = M.Time();
       }
       else  {
-	EfgPSNEBySubgame<double> M((const Efg<double> &) E, support);
+	EfgPSNEBySubgame<double> M(E, support);
 	M.Solve();
 	solns = M.GetSolutions();
 	((FloatPortion *) param[3])->Value() = M.Time();
       }
 
       por = new Behav_ListPortion<double>(solns);
-      break;
-    }
-    case gRATIONAL:
-    {
-      gList<BehavSolution<gRational> > solns;
-
-      if (((BoolPortion *) param[1])->Value())   {
-	PureNashBySubgame<gRational> M((const Efg<gRational> &) E, support);
-	M.Solve();
-	solns = M.GetSolutions();
-	((FloatPortion *) param[3])->Value() = M.Time();
-      }
-      else  {
-	EfgPSNEBySubgame<gRational> M((const Efg<gRational> &) E, support);
-	M.Solve();
-	solns = M.GetSolutions();
-	((FloatPortion *) param[3])->Value() = M.Time();
-      }
-
-      por = new Behav_ListPortion<gRational>(solns);
-      break;
-    }
-    default:
-      assert(0);
-  }
 
   return por;
 }
@@ -347,7 +249,6 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
 static Portion *GSM_GobitGrid_Support(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  NFPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por = 0;
 
   GridParams GP;
@@ -369,23 +270,13 @@ static Portion *GSM_GobitGrid_Support(Portion **param)
   GP.multi_grid = 0;
   if(GP.delp2 > 0.0 && GP.tol2 > 0.0)GP.multi_grid = 1;
   
-  switch(N->Type())  {
-    case gDOUBLE:  {
-	GridSolveModule GM(* (Nfg<double>*) N, GP, S);
+	GridSolveModule GM(S.Game(), GP, S);
 	GM.GridSolve();
 	// ((IntPortion *) param[10])->Value() = GM.NumEvals();
 	// ((FloatPortion *) param[11])->Value() = GM.Time();
 	gList<MixedSolution<double> > solns;
 	por = new Mixed_ListPortion<double>(solns);
 	if (GP.pxifile != &gnull)  delete GP.pxifile;
-      }
-      break;
-    case gRATIONAL:
-      return new ErrorPortion("The rational version of GobitGridSolve is not implemented");
-      break;
-    default:
-      assert(0);
-  }
 
   assert(por != 0);
   return por;
@@ -403,8 +294,8 @@ static Portion *GSM_Gobit_Start(Portion **param)
   if (param[0]->Spec().Type == porMIXED_FLOAT)  {
     MixedSolution<double> &start = 
       * (MixedSolution<double> *) ((MixedPortion<double> *) param[0])->Value();
-    Nfg<double> &N = start.BelongsTo();
-  
+    Nfg &N = start.Game();
+
     NFGobitParams NP;
     if (((TextPortion *) param[1])->Value() != "")
       NP.pxifile = new gFileOutput(((TextPortion *) param[1])->Value());
@@ -440,7 +331,7 @@ static Portion *GSM_Gobit_Start(Portion **param)
   else  {     // BEHAV_FLOAT  
     BehavSolution<double>& start = 
       * (BehavSolution<double> *) ((BehavPortion<double> *) param[0])->Value();
-    Efg<double> &E = start.BelongsTo();
+    Efg &E = start.BelongsTo();
   
     EFGobitParams EP;
     if(((TextPortion*) param[1])->Value() != "")
@@ -487,7 +378,6 @@ static Portion *GSM_Gobit_Start(Portion **param)
 static Portion *GSM_Lcp_Nfg(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  NFPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por = 0;
 
   LemkeParams LP;
@@ -496,28 +386,12 @@ static Portion *GSM_Lcp_Nfg(Portion **param)
   LP.tracefile = &((OutputPortion *) param[4])->Value();
   LP.trace = ((IntPortion *) param[5])->Value();
   
-  switch(N->Type())  {
-  case gDOUBLE:
-    {
-      LemkeModule<double> LS(* (Nfg<double>*) N, LP, S);
-      LS.Lemke();
-      ((IntPortion *) param[2])->Value() = LS.NumPivots();
-      ((FloatPortion *) param[3])->Value() = LS.Time();
-      por = new Mixed_ListPortion<double>(LS.GetSolutions());
-    }
-    break;
-  case gRATIONAL:
-    {
-      LemkeModule<gRational> LS(* (Nfg<gRational>*) N, LP, S);
-      LS.Lemke();
-      ((IntPortion *) param[2])->Value() = LS.NumPivots();
-      ((FloatPortion *) param[3])->Value() = LS.Time();
-      por = new Mixed_ListPortion<gRational>(LS.GetSolutions());
-    }
-    break;
-  default:
-    assert(0);
-  }
+  LemkeModule<gRational> LS(S.Game(), LP, S);
+  LS.Lemke();
+  ((IntPortion *) param[2])->Value() = LS.NumPivots();
+  ((FloatPortion *) param[3])->Value() = LS.Time();
+  por = new Mixed_ListPortion<gRational>(LS.GetSolutions());
+
   assert(por != 0);
   return por;
 }
@@ -574,12 +448,7 @@ static Portion *GSM_Lcp_Efg(Portion **param)
   SP.tracefile = &((OutputPortion *) param[5])->Value();
   SP.trace = ((IntPortion *) param[6])->Value();
 
-  switch(S.BelongsTo().Type())
-  {
-  case gDOUBLE:
-    {
-      // getting E from S.BelongsTo() doesn't work for some reason...
-      Efg<double>* E = (Efg<double>*) &S.BelongsTo();
+      const Efg* E = &S.BelongsTo();
       gList<BehavSolution<double> > solns;
       
       SeqFormModule<double> SM(*E, SP, S);
@@ -590,27 +459,6 @@ static Portion *GSM_Lcp_Efg(Portion **param)
       
       ((IntPortion *) param[3])->Value() = SM.NumPivots();
       ((FloatPortion *) param[4])->Value() = SM.Time();
-    }
-    break;
-  case gRATIONAL:
-    {
-      // getting E from S.BelongsTo() doesn't work for some reason...
-      Efg<gRational>* E = (Efg<gRational>*) &S.BelongsTo();
-      gList<BehavSolution<gRational> > solns;
-      
-      SeqFormModule<gRational> SM(*E, SP, S);
-      SM.Lemke();
-      
-      solns = SM.GetSolutions();
-      por = new Behav_ListPortion<gRational>(solns);
-      
-      ((IntPortion *) param[3])->Value() = SM.NumPivots();
-      ((FloatPortion *) param[4])->Value() = SM.Time();
-    }
-    break;
-  default:
-    assert(0);
-  }
 
   return por;
 }
@@ -627,7 +475,7 @@ static Portion *GSM_Liap_BehavFloat(Portion **param)
 {
   BehavSolution<double> &start = 
     * (BehavSolution<double> *) ((BehavPortion<double> *) param[0])->Value();
-  Efg<double> &E = start.BelongsTo();
+  Efg &E = start.BelongsTo();
   
   if (((BoolPortion *) param[1])->Value())   {
     NFLiapParams LP;
@@ -687,7 +535,7 @@ static Portion *GSM_Liap_MixedFloat(Portion **param)
 {
   MixedSolution<double> &start = 
     * (MixedSolution<double> *) ((MixedPortion<double> *) param[0])->Value();
-  Nfg<double> &N = start.BelongsTo();
+  Nfg &N = start.Game();
 
   NFLiapParams params;
   
@@ -724,7 +572,7 @@ static Portion *GSM_Liap_MixedFloat(Portion **param)
 static Portion *GSM_Lp_Nfg(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  NFPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
+  Nfg *N = (Nfg *) &S.Game();
   Portion* por = 0;
 
   ZSumParams ZP;
@@ -732,38 +580,16 @@ static Portion *GSM_Lp_Nfg(Portion **param)
   ZP.tracefile = &((OutputPortion *) param[3])->Value();
   ZP.trace = ((IntPortion *) param[4])->Value();
 
-  switch(N->Type())  {
-  case gDOUBLE:
-    {
-      if (((Nfg<double> *) N)->NumPlayers() > 2 ||
-	  !IsConstSum((Nfg<double> &) *N))
-	return new ErrorPortion("Only valid for two-person zero-sum games");
+  if (N->NumPlayers() > 2 || !IsConstSum(*N))
+	  return new ErrorPortion("Only valid for two-person zero-sum games");
 
-      ZSumModule<double> ZM(* (Nfg<double>*) N, ZP, S);
-      ZM.ZSum();
-      ((IntPortion *) param[1])->Value() = ZM.NumPivots();
-      ((FloatPortion *) param[2])->Value() = ZM.Time();
-      gList<MixedSolution<double> > solns;
-      ZM.GetSolutions(solns);  por = new Mixed_ListPortion<double>(solns);
-    }
-    break;
-  case gRATIONAL:
-    {
-      if (((Nfg<gRational> *) N)->NumPlayers() > 2 ||
-	  !IsConstSum((Nfg<gRational> &) *N))
-	return new ErrorPortion("Only valid for two-person zero-sum games");
-
-      ZSumModule<gRational> ZM(*(Nfg<gRational>*) N, ZP, S);
-      ZM.ZSum();
-      ((IntPortion *) param[1])->Value() = ZM.NumPivots();
-      ((FloatPortion *) param[2])->Value() = ZM.Time();
-      gList<MixedSolution<gRational> > solns;
-      ZM.GetSolutions(solns);  por = new Mixed_ListPortion<gRational>(solns);
-    }
-    break;
-  default:
-    assert(0);
-  }
+  ZSumModule<gRational> ZM(*N, ZP, S);
+  ZM.ZSum();
+  ((IntPortion *) param[1])->Value() = ZM.NumPivots();
+  ((FloatPortion *) param[2])->Value() = ZM.Time();
+  gList<MixedSolution<gRational> > solns;
+  ZM.GetSolutions(solns);
+  por = new Mixed_ListPortion<gRational>(solns);
 
   assert(por != 0);
   return por;
@@ -831,16 +657,13 @@ Portion* GSM_Lp_ListRational(Portion** param)
 static Portion *GSM_Lp_Efg(Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
-  const BaseEfg &E = support.BelongsTo();
+  const Efg &E = support.BelongsTo();
   
   if (E.NumPlayers() > 2 || !E.IsConstSum())
     return new ErrorPortion("Only valid for two-person zero-sum games");
 
   Portion *por;
-  
-  switch (E.Type())  {
-    case gDOUBLE:
-    {
+
       gList<BehavSolution<double> > solns;
   
       if (((BoolPortion *) param[1])->Value())   {
@@ -849,7 +672,7 @@ static Portion *GSM_Lp_Efg(Portion **param)
 	ZP.tracefile = &((OutputPortion *) param[4])->Value();
 	ZP.trace = ((IntPortion *) param[5])->Value();
 
-	ZSumBySubgame<double> ZM((const Efg<double> &) E, support, ZP);
+	ZSumBySubgame<double> ZM(E, support, ZP);
 
 	ZM.Solve();
 
@@ -864,7 +687,7 @@ static Portion *GSM_Lp_Efg(Portion **param)
 	ZP.tracefile = &((OutputPortion *) param[4])->Value();
 	ZP.trace = ((IntPortion *) param[5])->Value();
 
-	CSSeqFormBySubgame<double> ZM((const Efg<double> &) E, support, ZP);
+	CSSeqFormBySubgame<double> ZM(E, support, ZP);
 
 	ZM.Solve();
 
@@ -875,49 +698,6 @@ static Portion *GSM_Lp_Efg(Portion **param)
       }
 
       por = new Behav_ListPortion<double>(solns);
-      break;
-    }
-    case gRATIONAL:
-    {
-      gList<BehavSolution<gRational> > solns;
-  
-      if (((BoolPortion *) param[1])->Value())   {
-	ZSumParams ZP;
-
-	ZP.tracefile = &((OutputPortion *) param[4])->Value();
-	ZP.trace = ((IntPortion *) param[5])->Value();
-
-	ZSumBySubgame<gRational> ZM((const Efg<gRational> &) E, support, ZP);
-
-	ZM.Solve();
-
-	solns = ZM.GetSolutions();
-
-	((IntPortion *) param[2])->Value() = ZM.NumPivots();
-	((FloatPortion *) param[3])->Value() = ZM.Time();
-      }
-      else  {
-	CSSeqFormParams ZP;
-
-	ZP.tracefile = &((OutputPortion *) param[4])->Value();
-	ZP.trace = ((IntPortion *) param[5])->Value();
-
-	CSSeqFormBySubgame<gRational> ZM((const Efg<gRational> &) E, support, ZP);
-
-	ZM.Solve();
-
-	solns = ZM.GetSolutions();
-
-	((IntPortion *) param[2])->Value() = ZM.NumPivots();
-	((FloatPortion *) param[3])->Value() = ZM.Time();
-      }
-
-      por = new Behav_ListPortion<gRational>(solns);
-      break;
-    } 
-    default:
-      assert(0); 
-  }
 
   return por;
 }
@@ -927,35 +707,21 @@ static Portion *GSM_Lp_Efg(Portion **param)
 // Nfg
 //---------
 
-static Portion *GSM_Nfg_Float(Portion **param)
+static Portion *GSM_Nfg(Portion **param)
 {
-  Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
+  Efg &E = * ((EfgPortion*) param[0])->Value();
   gWatch watch;
 
-  Nfg<double> *N = MakeReducedNfg(E, EFSupport(E));
-  
+  Nfg *N = MakeReducedNfg(E, EFSupport(E));
+
   ((FloatPortion *) param[1])->Value() = watch.Elapsed();
-  
+
   if (N)
-    return new NfgValPortion<double>(N);
+    return new NfgValPortion(N);
   else
     return new ErrorPortion("Conversion to reduced nfg failed");
 }
 
-static Portion *GSM_Nfg_Rational(Portion **param)
-{
-  Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
-  gWatch watch;
-
-  Nfg<gRational> *N = MakeReducedNfg(E, EFSupport(E));
-  
-  ((FloatPortion *) param[1])->Value() = watch.Elapsed();
-
-  if (N)
-    return new NfgValPortion<gRational>(N);
-  else
-    return new ErrorPortion("Conversion to reduced nfg failed");
-}
 
 
 //----------
@@ -964,7 +730,7 @@ static Portion *GSM_Nfg_Rational(Portion **param)
 
 Portion* GSM_Payoff_BehavFloat(Portion** param)
 {
-  BehavSolution<double>* bp = 
+  BehavSolution<double>* bp =
     (BehavSolution<double>*) ((BehavPortion<double>*) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
 
@@ -973,7 +739,7 @@ Portion* GSM_Payoff_BehavFloat(Portion** param)
 
 Portion* GSM_Payoff_BehavRational(Portion** param)
 {
-  BehavSolution<gRational>* bp = 
+  BehavSolution<gRational>* bp =
     (BehavSolution<gRational>*) ((BehavPortion<gRational>*) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
 
@@ -982,7 +748,7 @@ Portion* GSM_Payoff_BehavRational(Portion** param)
 
 Portion* GSM_Payoff_MixedFloat(Portion** param)
 {
-  MixedSolution<double>* mp = 
+  MixedSolution<double>* mp =
     (MixedSolution<double>*) ((MixedPortion<double>*) param[0])->Value();
   NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
 
@@ -991,7 +757,7 @@ Portion* GSM_Payoff_MixedFloat(Portion** param)
 
 Portion* GSM_Payoff_MixedRational(Portion** param)
 {
-  MixedSolution<gRational>* mp = 
+  MixedSolution<gRational>* mp =
     (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[0])->Value();
   NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
 
@@ -1007,7 +773,6 @@ Portion* GSM_Payoff_MixedRational(Portion** param)
 static Portion *GSM_Simpdiv_Nfg(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  NFPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por = 0;
 
   SimpdivParams SP;
@@ -1018,29 +783,11 @@ static Portion *GSM_Simpdiv_Nfg(Portion **param)
   SP.tracefile = &((OutputPortion *) param[6])->Value();
   SP.trace = ((IntPortion *) param[7])->Value();
 
-  switch(N->Type())
-  {
-  case gDOUBLE:
-    {
-      SimpdivModule<double> SM(* (Nfg<double>*) N, SP, S);
-      SM.Simpdiv();
-      ((IntPortion *) param[4])->Value() = SM.NumEvals();
-      ((FloatPortion *) param[5])->Value() = SM.Time();
-      por = new Mixed_ListPortion<double>(SM.GetSolutions());
-    }
-    break;
-  case gRATIONAL:
-    {
-      SimpdivModule<gRational> SM(* (Nfg<gRational>*) N, SP, S);
-      SM.Simpdiv();
-      ((IntPortion *) param[4])->Value() = SM.NumEvals();
-      ((FloatPortion *) param[5])->Value() = SM.Time();
-      por = new Mixed_ListPortion<gRational>(SM.GetSolutions());
-    }
-    break;
-  default:
-    assert(0);
-  }
+  SimpdivModule<gRational> SM(S.Game(), SP, S);
+  SM.Simpdiv();
+  ((IntPortion *) param[4])->Value() = SM.NumEvals();
+  ((FloatPortion *) param[5])->Value() = SM.Time();
+  por = new Mixed_ListPortion<gRational>(SM.GetSolutions());
 
   assert(por != 0);
   return por;
@@ -1051,9 +798,9 @@ static Portion *GSM_Simpdiv_Nfg(Portion **param)
 static Portion *GSM_Simpdiv_Efg(Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
-  const BaseEfg &E = support.BelongsTo();
-  
-  if (!((BoolPortion *) param[1])->Value())  
+  const Efg &E = support.BelongsTo();
+
+  if (!((BoolPortion *) param[1])->Value())
     return new ErrorPortion("algorithm not implemented for extensive forms");
 
   SimpdivParams SP;
@@ -1065,34 +812,14 @@ static Portion *GSM_Simpdiv_Efg(Portion **param)
   SP.trace = ((IntPortion *) param[8])->Value();
 
   Portion *por;
-  
-  switch (E.Type())  {
-    case gDOUBLE:
-    {
-      SimpdivBySubgame<double> SM((const Efg<double> &) E, support, SP);
+
+      SimpdivBySubgame<double> SM(E, support, SP);
       SM.Solve();
 
       ((IntPortion *) param[5])->Value() = SM.NumEvals();
       ((FloatPortion *) param[6])->Value() = SM.Time();
-  
+
       por = new Behav_ListPortion<double>(SM.GetSolutions());
-      break;
-    }
-    case gRATIONAL:
-    {
-      SimpdivBySubgame<gRational> SM((const Efg<gRational> &) E, support, SP);
-      SM.Solve();
-
-      ((IntPortion *) param[5])->Value() = SM.NumEvals();
-      ((FloatPortion *) param[6])->Value() = SM.Time();
-  
-      por = new Behav_ListPortion<gRational>(SM.GetSolutions());
-      break;
-    }
-    default:
-      assert(0);
-  }
-
   return por;
 }
 
@@ -1101,7 +828,7 @@ Portion* GSM_VertEnum_Float( Portion** param )
   gMatrix<double>* A = ListToMatrix_Float((ListPortion*) param[0]);
   gVector<double>* b = ListToVector_Float((ListPortion*) param[1]);
   gVector<double>* start = ListToVector_Float((ListPortion*) param[2]);
-  
+
   gList< gVector< double > > verts;
 
   if( start->Length() == 0 ) {
@@ -1171,15 +898,10 @@ void Init_algfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
-  FuncObj = new FuncDescObj("AgentForm", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_AgentForm_Float, porNFG_FLOAT, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG_FLOAT));
+  FuncObj = new FuncDescObj("AgentForm", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_AgentForm, porNFG, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("time", porFLOAT,
-					    new FloatPortion(0), BYREF));
-  
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_AgentForm_Rational, porNFG_RATIONAL, 2));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("efg", porEFG_RATIONAL));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("time", porFLOAT,
 					    new FloatPortion(0), BYREF));
   gsm->AddFunction(FuncObj);
 
@@ -1504,15 +1226,10 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Nfg", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Nfg_Float, porNFG_FLOAT, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG_FLOAT));
+  FuncObj = new FuncDescObj("Nfg", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Nfg, porNFG, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("time", porFLOAT,
-					    new FloatPortion(0), BYREF));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Nfg_Rational, porNFG_RATIONAL, 2));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("efg", porEFG_RATIONAL));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("time", porFLOAT,
 					    new FloatPortion(0), BYREF));
   gsm->AddFunction(FuncObj);
 
@@ -1535,8 +1252,8 @@ void Init_algfunc(GSM *gsm)
 				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("profile", porMIXED_FLOAT));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("player", porNFPLAYER));
-  
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Payoff_MixedRational, 
+
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Payoff_MixedRational,
 				       porRATIONAL, 2,
 				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("profile", porMIXED_RATIONAL));
@@ -1547,7 +1264,7 @@ void Init_algfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("SimpDivSolve", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Simpdiv_Nfg, 
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Simpdiv_Nfg,
 				       PortionSpec(porMIXED, 1), 8));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("stopAfter", porINTEGER,
@@ -1561,12 +1278,12 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 5, ParamInfoType("time", porFLOAT,
 					    new FloatPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 6, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
+					    new OutputRefPortion(gnull),
 					    BYREF));
   FuncObj->SetParamInfo(0, 7, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Simpdiv_Efg, 
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Simpdiv_Efg,
 				       PortionSpec(porBEHAV, 1), 9));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEFSUPPORT));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("asNfg", porBOOL,
@@ -1582,7 +1299,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 6, ParamInfoType("time", porFLOAT,
 					    new FloatPortion(0.0), BYREF));
   FuncObj->SetParamInfo(1, 7, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
+					    new OutputRefPortion(gnull),
 					    BYREF));
   FuncObj->SetParamInfo(1, 8, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -1592,7 +1309,7 @@ void Init_algfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("VertEnum", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_VertEnum_Float, 
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_VertEnum_Float,
 				       PortionSpec(porFLOAT, 2), 3));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("A", PortionSpec(porFLOAT,2),
 					    REQUIRED, BYVAL));
@@ -1601,7 +1318,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 2, ParamInfoType("start", PortionSpec(porFLOAT,1),
 					    new ListValPortion(), BYVAL));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_VertEnum_Rational, 
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_VertEnum_Rational,
 				       PortionSpec(porRATIONAL, 2), 3));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("A", PortionSpec(porRATIONAL,2),
 					    REQUIRED, BYVAL));

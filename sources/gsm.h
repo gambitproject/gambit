@@ -29,7 +29,7 @@ class gRational;
 
 class Node;
 class Infoset;
-class BaseEfg;
+class Efg;
 
 template <class T> class gList;
 template <class T> class gStack;
@@ -185,13 +185,13 @@ public:
   void UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec );  
 
   // Unassigns a SINGLE given element of an Efg
-  void UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data );
+  void UnAssignEfgElement( Efg* game, PortionSpec spec, void* data );
 
   // This function will unassign an infoset and all associated actions
-  void UnAssignEfgInfoset( BaseEfg* game, Infoset* infoset );
+  void UnAssignEfgInfoset( Efg* game, Infoset* infoset );
 
   // This function will unassign the subtree rooted by the given node
-  void UnAssignEfgSubTree( BaseEfg* game, Node* node ); 
+  void UnAssignEfgSubTree( Efg* game, Node* node ); 
 
 
   // void SetVerbose( bool verbose ) { _Verbose = verbose; }

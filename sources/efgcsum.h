@@ -30,7 +30,7 @@ class CSSeqFormParams     {
 
 template <class T> class CSSeqFormModule  {
 private:
-  const Efg<T> &EF;
+  const Efg &EF;
   const CSSeqFormParams &params;
   const EFSupport &support;
   gMatrix<T> *A;
@@ -43,7 +43,7 @@ private:
   void FillTableau(const Node *, T ,int ,int , int ,int );
 
 public:
-  CSSeqFormModule(const Efg<T> &E, const CSSeqFormParams &p, const EFSupport &);
+  CSSeqFormModule(const Efg &E, const CSSeqFormParams &p, const EFSupport &);
   virtual ~CSSeqFormModule();
 
   bool IsConstSum();
@@ -69,12 +69,12 @@ template <class T> class CSSeqFormBySubgame : public SubgameSolver<T>  {
     long npivots;
     CSSeqFormParams params;
 
-    int SolveSubgame(const Efg<T> &, const EFSupport &,
+    int SolveSubgame(const Efg &, const EFSupport &,
 		     gList<BehavSolution<T> > &);
     EfgAlgType AlgorithmID() const { return EfgAlg_CSSEQFORM; }    
 
   public:
-    CSSeqFormBySubgame(const Efg<T> &E, const EFSupport &,
+    CSSeqFormBySubgame(const Efg &E, const EFSupport &,
 		       const CSSeqFormParams &, int max = 0);
     virtual ~CSSeqFormBySubgame();
 

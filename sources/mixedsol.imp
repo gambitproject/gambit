@@ -1,7 +1,7 @@
 //
 // FILE: mixedsol.imp -- Mixed strategy profile classes
 //
-// $Id$
+// @(#)mixedsol.imp	2.2 3/24/97
 //
 
 #include "assert.h"
@@ -9,7 +9,7 @@
 #include "gmisc.h"
 
 template <class T> 
-MixedSolution<T>::MixedSolution(const Nfg<T>& n)
+MixedSolution<T>::MixedSolution(const Nfg& n)
   : MixedProfile<T>(n),
   _Creator(NfgAlg_USER),
   _IsNash(T_DONTKNOW),
@@ -25,7 +25,7 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n)
 }
 
 template <class T>
-MixedSolution<T>::MixedSolution(const Nfg<T>& n, const NFSupport& s)
+MixedSolution<T>::MixedSolution(const Nfg& n, const NFSupport& s)
 : MixedProfile<T>(n, s),
 	_Creator(NfgAlg_USER),
 	_IsNash(T_DONTKNOW),
@@ -40,7 +40,7 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n, const NFSupport& s)
 }
 
 template <class T>
-MixedSolution<T>::MixedSolution(const Nfg<T>& n, const gPVector<T>& v)
+MixedSolution<T>::MixedSolution(const Nfg& n, const gPVector<T>& v)
 : MixedProfile<T>(n, v),
 	_Creator(NfgAlg_USER),
 	_IsNash(T_DONTKNOW),
