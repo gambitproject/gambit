@@ -1,42 +1,43 @@
 //
-// FILE: efgcsum.h -- Interface to Constant Sum Extensive Form Game Solver 
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Interface of algorithm to compute behavior strategy equilibria
+// of constant sum extensive form games via linear programming
 //
 
 #ifndef EFGCSUM_H
 #define EFGCSUM_H
 
-#include "base/base.h"
-#include "algutils.h"
 #include "numerical/tableau.h"
 #include "numerical/lpsolve.h"
-#include "behavsol.h"
+#include "efgalgorithm.h"
 
-class CSSeqFormParams : public AlgParams {
-public:
-  CSSeqFormParams(void);
-};
-
-#include "subsolve.h"
-
-#ifdef UNUSED
-class efgLpSolve : public SubgameSolver  {
+template <class T> class efgLp : public efgNashAlgorithm {
 private:
-  long npivots;
-  CSSeqFormParams params;
+  T maxpay, minpay;
+  int ns1,ns2,ni1,ni2;
+  gList<BFS<T> > List;
+  gList<Infoset *> isets1, isets2;
 
-  void SolveSubgame(const FullEfg &, const EFSupport &,
-		    gList<BehavSolution> &, gStatus &);
-  EfgAlgType AlgorithmID(void) const { return algorithmEfg_LP_EFG; }    
+  void FillTableau(const EFSupport &,
+		   gMatrix<T> &, const Node *, T ,int ,int , int ,int );
+  void GetSolutions(const EFSupport &, gList<BehavSolution> &) const;
+  int Add_BFS(/*const*/ LPSolve<T> &B);
+  
+  void GetProfile(const EFSupport &, gDPVector<T> &v, const BFS<T> &sol,
+		  const Node *n, int s1,int s2) const;
 
 public:
-  efgLpSolve(const CSSeqFormParams &, int max = 0);
-  virtual ~efgLpSolve();
-  
-  long NumPivots(void) const  { return npivots; }
+  efgLp(void);
+  virtual ~efgLp() { }
+
+  gText GetAlgorithm(void) const { return "Lp"; }
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
 };
-#endif  // UNUSED
+
 
 #endif    // EFGCSUM_H
 

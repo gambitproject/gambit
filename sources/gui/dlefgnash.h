@@ -23,7 +23,7 @@ private:
   gOrdMap<wxTreeItemId, panelEfgNashAlgorithm *> m_algorithms;
 
   // Private auxiliary functions
-  void LoadAlgorithms(void);
+  void LoadAlgorithms(const efgGame &);
 
   // Event handlers
   void OnSelectionChanged(wxTreeEvent &);

@@ -1,170 +1,93 @@
 //
-// FILE: efgcsum.imp -- Constant Sum Extensive Form Game Solution Module
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of algorithm to compute behavior strategy equilibria
+// of constant sum extensive form games via linear programming
 //
-
-#include "base/base.h"
-#include "math/gpvector.h"
-#include "game/efgutils.h"
 
 #include "efgcsum.h"
 
 //-------------------------------------------------------------------------
-//                    CSSeqFormModule<T>: Member functions
+//                      efgLp<T>: Member functions
 //-------------------------------------------------------------------------
 
-template <class T> class CSSeqFormModule  {
-private:
-  const efgGame &EF;
-  const CSSeqFormParams &params;
-  const EFSupport &support;
-  gMatrix<T> *A;
-  gVector<T> *b, *c;
-  T maxpay, minpay;
-  long npivots;
-  double time;
-  int ns1,ns2,ni1,ni2;
-  gList<BFS<T> > List;
-  gList<Infoset *> isets1, isets2;
-
-  void FillTableau(const Node *, T ,int ,int , int ,int );
-
-public:
-  CSSeqFormModule(const EFSupport &, const CSSeqFormParams &p);
-  virtual ~CSSeqFormModule();
-
-  bool IsConstSum();
-  
-  int CSSeqForm(gStatus &, int dup = 0);
-
-  void Make_Abc();
-  
-  int Add_BFS(/*const*/ LPSolve<T> &B);
-  long NumPivots(void) const;
-  double Time(void) const;
-  
-  void GetProfile(gDPVector<T> &v, const BFS<T> &sol,
-		  const Node *n, int s1,int s2) const;
-  void GetSolutions(gList<BehavSolution> &) const;
-};
-
-
 template <class T>
-CSSeqFormModule<T>::CSSeqFormModule(const EFSupport &S,
-				    const CSSeqFormParams &p)
-				    
-  : EF(S.GetGame()), params(p), support(S), A(0), b(0), c(0), npivots(0), 
-    ns1(S.NumSequences(1)), ns2(S.NumSequences(2)),
-    ni1(EF.Players()[1]->NumInfosets()+1),  
-    ni2(EF.Players()[2]->NumInfosets()+1), 
-    isets1(S.ReachableInfosets(EF.Players()[1])),
-    isets2(S.ReachableInfosets(EF.Players()[2])) 
+efgLp<T>::efgLp(void)
 { }
 
-template <class T> CSSeqFormModule<T>::~CSSeqFormModule()
-{ if(A) delete A; if(b) delete b; if(c) delete c;}
-
-template <class T> bool CSSeqFormModule<T>::IsConstSum()
-{ 
-  return EF.IsConstSum();
-}
-
-template <class T> void CSSeqFormModule<T>::Make_Abc()
-{
-  A = new gMatrix<T>(1,ns1+ni2,1,ns2+ni1);
-  b = new gVector<T>(1,ns1+ni2);
-  c = new gVector<T>(1,ns2+ni1);
-
-  maxpay = EF.MaxPayoff() + gNumber(1);
-  minpay = EF.MinPayoff() - gNumber(1);
-
-  (*A) = (T)0;
-  T prob = (T)1;
-  FillTableau(EF.RootNode(),prob,1,1,0,0);
-  (*A)(1,ns2+1) = -(T)1;
-  (*A)(ns1+1,1) = (T)1;
-
-  (*b) = (T)0;
-  (*b)[ns1+1] = (T)1;
-
-  (*c) = (T)0;
-  (*c)[ns2+1] = -(T)1;
-
-  // gout.SetWidth(1).SetPrec(1);
-  // gout << "\nA";
-  // A->Dump(gout);
-  // gout << "\nb";
-  // b->Dump(gout);
-  // gout << "\nc";
-  // c->Dump(gout);
-}
-
-template <class T> int CSSeqFormModule<T>::CSSeqForm(gStatus &p_status,
-						     int /*dup*/)
+template <class T> 
+gList<BehavSolution> efgLp<T>::Solve(const EFSupport &p_support,
+				     gStatus &p_status)
 {
   BFS<T> cbfs((T) 0);
   
-  if (EF.NumPlayers() != 2)   return 0;
-  if(!IsConstSum()) return 0;
-  Infoset *bad1, *bad2;
-  if(!IsPerfectRecall(EF,bad1,bad2)) return 0;
-  gWatch watch;
+  ns1 = p_support.NumSequences(1);
+  ns2 = p_support.NumSequences(2);
+  ni1 = p_support.GetGame().Players()[1]->NumInfosets()+1;  
+  ni2 = p_support.GetGame().Players()[2]->NumInfosets()+1; 
+  isets1 = p_support.ReachableInfosets(p_support.GetGame().Players()[1]);
+  isets2 = p_support.ReachableInfosets(p_support.GetGame().Players()[2]); 
+
+  if (p_support.GetGame().NumPlayers() != 2 ||
+      !p_support.GetGame().IsConstSum() ||
+      !IsPerfectRecall(p_support.GetGame())) {
+    return gList<BehavSolution>();
+  }
   
   List.Flush();
   
-  Make_Abc();
-  LPSolve<T> LP(*A,*b,*c,ni2,p_status);
-  if(!LP.IsAborted()) 
+  gMatrix<T> A(1,ns1+ni2,1,ns2+ni1);
+  gVector<T> b(1,ns1+ni2);
+  gVector<T> c(1,ns2+ni1);
+
+  maxpay = p_support.GetGame().MaxPayoff() + gNumber(1);
+  minpay = p_support.GetGame().MinPayoff() - gNumber(1);
+
+  A = (T)0;
+  T prob = (T)1;
+  FillTableau(p_support, A, p_support.GetGame().RootNode(),prob,1,1,0,0);
+  A(1,ns2+1) = -(T)1;
+  A(ns1+1,1) = (T)1;
+
+  b = (T)0;
+  b[ns1+1] = (T)1;
+
+  c = (T)0;
+  c[ns2+1] = -(T)1;
+
+  LPSolve<T> LP(A,b,c,ni2,p_status);
+  if (!LP.IsAborted()) {
     Add_BFS(LP); 
-  
-  npivots = LP.NumPivots();
-  time = watch.Elapsed();
-  return List.Length();
+  }
+
+  gList<BehavSolution> solutions;
+  GetSolutions(p_support, solutions);
+  return solutions;
 }
 
 
-template <class T> int CSSeqFormModule<T>::Add_BFS(/*const*/ LPSolve<T> &lp)
+template <class T> int efgLp<T>::Add_BFS(/*const*/ LPSolve<T> &lp)
 {
   BFS<T> cbfs((T) 0);
-//  T value = (T)0;
 
-  if (params.stopAfter == 1)
-  {
-    lp.OptBFS(cbfs);
-    if (List.Contains(cbfs))  return 0;
-    List.Append(cbfs);
-  }
-  else if (params.stopAfter == 0)
-  {
-    gList<BFS <T> > bList = lp.GetAll();
-
-    for (int k = 1; k <= bList.Length(); k++)
-    {
-      cbfs = bList[k];
-      if (List.Contains(cbfs))  return 0;
-      List.Append(cbfs);
-    }
-  }
-  else
-  {
-    gList<BFS <T> > bList = lp.GetAll();
-
-    for (int k = 1; k <= bList.Length() && k <= params.stopAfter; k++)
-    {
-      cbfs = bList[k];
-      if (List.Contains(cbfs))  return 0;
-      List.Append(cbfs);
-    }
-  }
+  // LPSolve<T>::GetAll() does not currently work correctly; for now,
+  // LpSolve is restricted to returning only one equilibrium 
+  lp.OptBFS(cbfs);
+  if (List.Contains(cbfs))  return 0;
+  List.Append(cbfs);
   return 1;
 }
 
 
 
-template <class T> 
-void CSSeqFormModule<T>::GetProfile(gDPVector<T> &v, const BFS<T> &sol,
-				    const Node *n, int s1,int s2) const
+template <class T> void efgLp<T>::GetProfile(const EFSupport &p_support,
+					     gDPVector<T> &v,
+					     const BFS<T> &sol,
+					     const Node *n,
+					     int s1,int s2) const
 {
   
   int i,pl,inf,snew;
@@ -172,16 +95,16 @@ void CSSeqFormModule<T>::GetProfile(gDPVector<T> &v, const BFS<T> &sol,
 //  eps = tab->Epsilon();
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
-      for(i=1;i<=EF.NumChildren(n);i++)
-	GetProfile(v,sol,n->GetChild(i),s1,s2);
+      for(i=1;i<=n->Game()->NumChildren(n);i++)
+	GetProfile(p_support,v,sol,n->GetChild(i),s1,s2);
     }
     pl = n->GetPlayer()->GetNumber();
     if(pl==2) {
     inf= isets2.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=support.NumActions(isets2[i]); 
-      for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
+	snew+=p_support.NumActions(isets2[i]); 
+      for(i=1;i<=p_support.NumActions(n->GetInfoset());i++) {
 	v(pl,inf,i) = (T)0;
 	if(sol.IsDefined(s1)) {
 	  if(sol(s1)>eps) {
@@ -191,15 +114,15 @@ void CSSeqFormModule<T>::GetProfile(gDPVector<T> &v, const BFS<T> &sol,
 	    }
 	  } 
 	} 
-	GetProfile(v,sol,n->GetChild(support.Actions(n->GetInfoset())[i]->GetNumber()),snew+i,s2);
+	GetProfile(p_support,v,sol,n->GetChild(p_support.Actions(n->GetInfoset())[i]->GetNumber()),snew+i,s2);
       }
     }
     if(pl==1) {
     inf= isets1.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=support.NumActions(isets1[i]); 
-      for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
+	snew+=p_support.NumActions(isets1[i]); 
+      for(i=1;i<=p_support.NumActions(n->GetInfoset());i++) {
 	v(pl,inf,i) = (T)0;
 	if(sol.IsDefined(-s2)) {
 	  if(sol(-s2)>eps) {
@@ -209,7 +132,7 @@ void CSSeqFormModule<T>::GetProfile(gDPVector<T> &v, const BFS<T> &sol,
 	    }
 	  } 
 	} 
-	GetProfile(v,sol,n->GetChild(support.Actions(n->GetInfoset())[i]->GetNumber()),s1,snew+i);
+	GetProfile(p_support,v,sol,n->GetChild(p_support.Actions(n->GetInfoset())[i]->GetNumber()),s1,snew+i);
       }
     }
   }
@@ -217,19 +140,20 @@ void CSSeqFormModule<T>::GetProfile(gDPVector<T> &v, const BFS<T> &sol,
 
 
 template <class T>
-void CSSeqFormModule<T>::FillTableau(const Node *n, T prob,
-				     int s1, int s2, int i1, int i2)
+void efgLp<T>::FillTableau(const EFSupport &p_support,
+			   gMatrix<T> &A, const Node *n, T prob,
+			   int s1, int s2, int i1, int i2)
 {
   int i,snew;
-  if (EF.GetOutcome(n)) {
-    (*A)(s1,s2) = gNumber((*A)(s1,s2)) +
-       gNumber(prob) * EF.Payoff(n, EF.Players()[1]) - gNumber(minpay);
+  if (n->Game()->GetOutcome(n)) {
+    A(s1,s2) = gNumber(A(s1,s2)) +
+      gNumber(prob) * n->Game()->Payoff(n, n->Game()->Players()[1]) - gNumber(minpay);
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
-      for(i=1;i<=EF.NumChildren(n);i++)
-	FillTableau(n->GetChild(i),
-		    gNumber(prob) * EF.GetChanceProb(n->GetInfoset(), i),
+      for(i=1;i<=n->Game()->NumChildren(n);i++)
+	FillTableau(p_support, A, n->GetChild(i),
+		    gNumber(prob) * n->Game()->GetChanceProb(n->GetInfoset(), i),
 		    s1,s2,i1,i2);
     }
     int pl = n->GetPlayer()->GetNumber();
@@ -237,48 +161,36 @@ void CSSeqFormModule<T>::FillTableau(const Node *n, T prob,
       i1=isets1.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<i1;i++)
-	snew+=support.NumActions(isets1[i]);
-      (*A)(s1,ns2+i1+1) = (T) +1;
-      for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
-	(*A)(snew+i,ns2+i1+1) = (T) -1;
-	FillTableau(n->GetChild(support.Actions(n->GetInfoset())[i]->GetNumber()),prob,snew+i,s2,i1,i2);
+	snew+=p_support.NumActions(isets1[i]);
+      A(s1,ns2+i1+1) = (T) +1;
+      for(i=1;i<=p_support.NumActions(n->GetInfoset());i++) {
+	A(snew+i,ns2+i1+1) = (T) -1;
+	FillTableau(p_support, A, n->GetChild(p_support.Actions(n->GetInfoset())[i]->GetNumber()),prob,snew+i,s2,i1,i2);
       }
     }
     if(pl==2) {
       i2=isets2.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<i2;i++)
-	snew+=support.NumActions(isets2[i]);
-      (*A)(ns1+i2+1,s2) = (T) -1;
-      for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
-	(*A)(ns1+i2+1,snew+i) = (T) +1;
-	FillTableau(n->GetChild(support.Actions(n->GetInfoset())[i]->GetNumber()),prob,s1,snew+i,i1,i2);
+	snew+=p_support.NumActions(isets2[i]);
+      A(ns1+i2+1,s2) = (T) -1;
+      for(i=1;i<=p_support.NumActions(n->GetInfoset());i++) {
+	A(ns1+i2+1,snew+i) = (T) +1;
+	FillTableau(p_support, A, n->GetChild(p_support.Actions(n->GetInfoset())[i]->GetNumber()),prob,s1,snew+i,i1,i2);
       }
     }
   }
 }
 
 template <class T>
-void CSSeqFormModule<T>::GetSolutions(gList<BehavSolution> &solutions) const
+void efgLp<T>::GetSolutions(const EFSupport &p_support,
+			    gList<BehavSolution> &solutions) const
 {
-  solutions.Flush();
-
   for (int i = 1; i <= List.Length(); i++)    {
-    BehavProfile<T> profile(support);
-    GetProfile(profile.GetDPVector(),List[i],EF.RootNode(),1,1);
+    BehavProfile<T> profile(p_support);
+    GetProfile(p_support, profile.GetDPVector(),List[i],p_support.GetGame().RootNode(),1,1);
     solutions.Append(BehavSolution(profile, algorithmEfg_LP_EFG));
-    // turning this over to BehavSolution:
-    //    solutions[index].SetIsNash(triTRUE);  
   }
 
 }
 
-template <class T> long CSSeqFormModule<T>::NumPivots(void) const
-{
-  return npivots;
-}
-
-template <class T> double CSSeqFormModule<T>::Time(void) const
-{
-  return time;
-}

@@ -39,7 +39,7 @@ public:
   bool GetFullGraph(void) const { return m_fullGraph; }
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
 
-  gText GetAlgorithm(void) const { return "Qre[EFG]"; }
+  gText GetAlgorithm(void) const { return "Qre"; }
   gList<BehavSolution> Solve(const EFSupport &, gStatus &);
 };
 

@@ -1,47 +1,48 @@
 //
-// FILE: eliap.h -- Interface to extensive form Liapunov solution module
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Compute Nash equilibria by minimizing Liapunov function
 //
 
 #ifndef ELIAP_H
 #define ELIAP_H
 
-#include "base/base.h"
-#include "algutils.h"
+#include "efgalgorithm.h"
 
-#include "game/efg.h"
-#include "behavsol.h"
-
-#include "subsolve.h"
-
-class EFLiapParams : public FuncMinParams {
-public:
-  int nTries;
-  
-  EFLiapParams(void);
-};
-
-#ifdef UNUSED
-class efgLiapSolve : public SubgameSolver  {
+class efgLiap : public efgNashAlgorithm {
 private:
-  int nevals, subgame_number;
-  gPVector<int> infoset_subgames;
-  EFLiapParams params;
-  BehavProfile<gNumber> start;
-    
-  void SolveSubgame(const FullEfg &, const EFSupport &,
-		    gList<BehavSolution> &, gStatus &);
-  EfgAlgType AlgorithmID(void) const { return algorithmEfg_LIAP_EFG; }    
+  int m_stopAfter, m_numTries, m_maxits1, m_maxitsN;
+  double m_tol1, m_tolN;
 
 public:
-  efgLiapSolve(const Efg::Game &, const EFLiapParams &,
-	       const BehavProfile<gNumber> &, int max = 0);
-  virtual ~efgLiapSolve();
-  
-  int NumEvals(void) const   { return nevals; }
+  efgLiap(void);
+  virtual ~efgLiap() { }
+
+  int StopAfter(void) const { return m_stopAfter; }
+  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
+
+  int NumTries(void) const { return m_numTries; }
+  void SetNumTries(int p_numTries) { m_numTries = m_numTries; }
+
+  int Maxits1(void) const { return m_maxits1; }
+  void SetMaxits1(int p_maxits1) { m_maxits1 = p_maxits1; }
+
+  double Tol1(void) const { return m_tol1; }
+  void SetTol1(double p_tol1) { m_tol1 = p_tol1; }
+
+  int MaxitsN(void) const { return m_maxitsN; }
+  void SetMaxitsN(int p_maxitsN) { m_maxitsN = p_maxitsN; }
+
+  double TolN(void) const { return m_tolN; }
+  void SetTolN(double p_tolN) { m_tolN = p_tolN; }
+
+  gText GetAlgorithm(void) const { return "Liap"; }
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
 };
-#endif  // UNUSED
+
 
 #endif    // ELIAP_H
 

@@ -1,16 +1,15 @@
 //
-// FILE: eliap.cc -- Extensive Form Liapunov module
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Compute Nash equilibria by minimizing Liapunov function
 //
 
 #include "eliap.h"
 #include "math/gmatrix.h"
 #include "numerical/gfunc.h"
-
-EFLiapParams::EFLiapParams(void)
-  : nTries(10)
-{ }
 
 class EFLiapFunc : public gFunction<double>  {
   private:
@@ -101,22 +100,24 @@ extern bool Powell(gPVector<double> &p,
 		   gStatus &status);
 
 
-bool Liap(const efgGame &E, EFLiapParams &params,
-	  const BehavProfile<double> &start,
-	  gList<BehavSolution> &solutions, gStatus &p_status,
-	  long &nevals, long &niters)
+efgLiap::efgLiap(void)
+  : m_stopAfter(1), m_numTries(10), m_maxits1(100), m_maxitsN(20),
+    m_tol1(2.0e-10), m_tolN(1.0e-10)
+{ }
+
+gList<BehavSolution> efgLiap::Solve(const EFSupport &p_support,
+				    gStatus &p_status)
 {
   static const double ALPHA = .00000001;
 
-  EFLiapFunc F(E, start);
-
-  BehavProfile<double> p(start);
+  BehavProfile<double> p(p_support);
+  EFLiapFunc F(p_support.GetGame(), p);
 
   // if starting vector not interior, perturb it towards centroid
   int kk;
   for(kk=1;kk <= p.Length() && p[kk]>ALPHA;kk++);
   if(kk<=p.Length()) {
-    BehavProfile<double> c(start.Support());
+    BehavProfile<double> c(p_support);
     for(int k=1;k<=p.Length();k++)
       p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
   }
@@ -126,21 +127,20 @@ bool Liap(const efgGame &E, EFLiapParams &params,
   double value;
   int iter;
 
-  for (int i = 1; (params.nTries == 0 || i <= params.nTries) &&
-       (params.stopAfter==0 || solutions.Length() < params.stopAfter); 
+  gList<BehavSolution> solutions;
+  
+  for (int i = 1; (m_numTries == 0 || i <= m_numTries) &&
+       (m_stopAfter == 0 || solutions.Length() < m_stopAfter); 
        i++)   {
     p_status.Get();
     if (i > 1)  PickRandomProfile(p);
 
     InitMatrix(xi, p.Lengths());
     
-    if(params.trace>0)
-      *params.tracefile << "\nTry #: " << i << " p: ";
-    
     gPVector<double> pvect(p.GetPVector());
     if (Powell(pvect, xi, F, value, iter,
-	       params.maxits1, params.tol1, params.maxitsN, 
-	       params.tolN,*params.tracefile, params.trace-1, true, 
+	       m_maxits1, m_tol1, m_maxitsN, 
+	       m_tolN, gnull, 0, true, 
 	       p_status)) {
       p = pvect;
       bool add = true;
@@ -152,79 +152,11 @@ bool Liap(const efgGame &E, EFLiapParams &params,
       }
 
       if (add)  {
-	if(params.trace>0)
-	  *params.tracefile << p;
-	
-	AddSolution(solutions, p, value, pow(params.tolN,.5));
+	AddSolution(solutions, p, value, pow(m_tolN,.5));
       }
     }
   }
 
-  nevals = F.NumEvals();
-  niters = 0L;
-
-  return (solutions.Length() > 0);
+  return solutions;
 }
-
-
-
-//------------------------------------------
-// Interfacing to solve-by-subgame code
-//------------------------------------------
-#ifdef UNUSED
-void efgLiapSolve::SolveSubgame(const efgGame &E, const EFSupport &sup,
-				gList<BehavSolution> &solns,
-				gStatus &p_status)
-{
-  BehavProfile<double> bp(sup);
-  
-  subgame_number++;
-
-  gArray<int> infosets(infoset_subgames.Lengths());
-
-  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
-    int niset = 1;
-    for (int iset = 1; iset <= infosets[pl]; iset++)  {
-      if (infoset_subgames(pl, iset) == subgame_number)  {
-	for (int act = 1; act <= bp.Support().NumActions(pl, niset); act++)
-	  bp(pl, niset, act) = start(pl, iset, act);
-	niset++;
-      }
-    }
-  }
-
-  long this_nevals, this_niters;
-
-  Liap(E, params, bp, solns, p_status, this_nevals, this_niters);
-
-  nevals += this_nevals;
-}
-
-extern void MarkedSubgameRoots(const efgGame &, gList<Node *> &);
-
-efgLiapSolve::efgLiapSolve(const efgGame &E, const EFLiapParams &p,
-			   const BehavProfile<gNumber> &s, int max)
-  : SubgameSolver(max), nevals(0), subgame_number(0),
-    infoset_subgames(E.NumInfosets()), params(p), start(s)
-{
-  gList<Node *> subroots;
-  MarkedSubgameRoots(E, subroots);
-
-  for (int pl = 1; pl <= E.NumPlayers(); pl++)   {
-    EFPlayer *player = E.Players()[pl];
-    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
-      int index;
-
-      Infoset *infoset = player->Infosets()[iset];
-      Node *member = infoset->Members()[1];
-
-      for (index = 1; index <= subroots.Length() &&
-	   member->GetSubgameRoot() != subroots[index]; index++);
-
-      infoset_subgames(pl, iset) = index;
-    }
-  }   
-
-}
-#endif  // UNUSED
 

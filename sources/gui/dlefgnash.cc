@@ -21,6 +21,12 @@
 #include "nash/enum.h"
 #include "nash/seqform.h"
 #include "nash/lemke.h"
+#include "nash/efgcsum.h"
+#include "nash/nfgcsum.h"
+#include "nash/eliap.h"
+#include "nash/nliap.h"
+#include "nash/efgalleq.h"
+#include "nash/nfgalleq.h"
 #include "nash/efgqre.h"
 #include "nash/simpdiv.h"
 
@@ -367,7 +373,342 @@ efgNashAlgorithm *panelEfgLcp::GetAlgorithm(void) const
 }
 
 //========================================================================
-//                        class panelEfgQre
+//                         class panelEfgLp
+//========================================================================
+
+class panelEfgLp : public panelEfgNashAlgorithm {
+private:
+  wxRadioBox *m_solveUsing, *m_precision;
+  wxCheckBox *m_findAll;
+  wxSpinCtrl *m_stopAfter;
+
+  // Private event handlers
+  void OnFindAll(wxCommandEvent &);
+
+public:
+  panelEfgLp(wxWindow *);
+
+  efgNashAlgorithm *GetAlgorithm(void) const;
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(panelEfgLp, panelEfgNashAlgorithm)
+  EVT_CHECKBOX(idCHECKBOX_FINDALL, panelEfgLp::OnFindAll)
+END_EVENT_TABLE()
+
+panelEfgLp::panelEfgLp(wxWindow *p_parent)
+  : panelEfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  wxString solveChoices[] = { "Extensive form", "Normal form" };
+  m_solveUsing = new wxRadioBox(this, -1, "Find equilibria using",
+				wxDefaultPosition, wxDefaultSize,
+				2, solveChoices, 1, wxRA_SPECIFY_ROWS);
+  topSizer->Add(m_solveUsing, 0, wxALL | wxCENTER, 5);
+
+  wxString precisionChoices[] = { "Floating point", "Rational" };
+  m_precision = new wxRadioBox(this, -1, "Precision",
+			       wxDefaultPosition, wxDefaultSize,
+			       2, precisionChoices, 1, wxRA_SPECIFY_ROWS);
+  topSizer->Add(m_precision, 0, wxALL | wxCENTER, 5);
+
+  // The "find all" feature of LpSolve currently does not work;
+  // therefore, the controls are disabled in this version
+  wxStaticBox *stopAfterBox = new wxStaticBox(this, wxID_STATIC,
+					      "Number to find");
+  wxStaticBoxSizer *stopAfterSizer = new wxStaticBoxSizer(stopAfterBox,
+							  wxHORIZONTAL);
+  m_findAll = new wxCheckBox(this, idCHECKBOX_FINDALL, "Find all");
+  m_findAll->SetValue(false);
+  m_findAll->Enable(false);
+  stopAfterSizer->Add(m_findAll, 0, wxALL | wxCENTER, 5);
+  stopAfterSizer->Add(new wxStaticText(this, wxID_STATIC, "Stop after"),
+		      0, wxALL | wxCENTER, 5);
+  m_stopAfter = new wxSpinCtrl(this, -1, "1",
+			       wxDefaultPosition, wxDefaultSize,
+			       wxSP_ARROW_KEYS, 1, 10000);
+  m_stopAfter->Enable(false);
+  stopAfterSizer->Add(m_stopAfter, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+void panelEfgLp::OnFindAll(wxCommandEvent &)
+{
+  m_stopAfter->Enable(!m_findAll->GetValue());
+}
+
+efgNashAlgorithm *panelEfgLp::GetAlgorithm(void) const
+{
+  SubgameSolver *algorithm = new SubgameSolver;
+
+  if (m_solveUsing->GetSelection() == 0) {
+    if (m_precision->GetSelection() == 0) {
+      algorithm->SetAlgorithm(new efgLp<double>);
+    }
+    else {
+      algorithm->SetAlgorithm(new efgLp<gRational>);
+    }
+  }
+  else {
+    if (m_precision->GetSelection() == 0) {
+      algorithm->SetAlgorithm(new nfgLp<double>);
+    }
+    else {
+      algorithm->SetAlgorithm(new nfgLp<gRational>);
+    }
+  }
+  return algorithm;
+}
+
+//========================================================================
+//                        class panelEfgLiap
+//========================================================================
+
+class panelEfgLiap : public panelEfgNashAlgorithm {
+private:
+  wxRadioBox *m_solveUsing;
+  wxCheckBox *m_findAll;
+  wxSpinCtrl *m_stopAfter, *m_numTries;
+  wxSpinCtrl *m_maxits1, *m_tol1, *m_maxitsN, *m_tolN;
+
+  // Private event handlers
+  void OnFindAll(wxCommandEvent &);
+
+public:
+  panelEfgLiap(wxWindow *);
+
+  efgNashAlgorithm *GetAlgorithm(void) const;
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(panelEfgLiap, panelEfgNashAlgorithm)
+  EVT_CHECKBOX(idCHECKBOX_FINDALL, panelEfgLiap::OnFindAll)
+END_EVENT_TABLE()
+
+panelEfgLiap::panelEfgLiap(wxWindow *p_parent)
+  : panelEfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  wxString solveChoices[] = { "Extensive form", "Normal form" };
+  m_solveUsing = new wxRadioBox(this, -1, "Find equilibria using",
+				wxDefaultPosition, wxDefaultSize,
+				2, solveChoices, 1, wxRA_SPECIFY_ROWS);
+  topSizer->Add(m_solveUsing, 0, wxALL | wxCENTER, 5);
+
+  wxStaticBox *stopAfterBox = new wxStaticBox(this, wxID_STATIC,
+					      "Number to find");
+  wxStaticBoxSizer *stopAfterSizer = new wxStaticBoxSizer(stopAfterBox,
+							  wxHORIZONTAL);
+  m_findAll = new wxCheckBox(this, idCHECKBOX_FINDALL, "Find all");
+  m_findAll->SetValue(false);
+  stopAfterSizer->Add(m_findAll, 0, wxALL | wxCENTER, 5);
+  stopAfterSizer->Add(new wxStaticText(this, wxID_STATIC, "Stop after"),
+		      0, wxALL | wxCENTER, 5);
+  m_stopAfter = new wxSpinCtrl(this, -1, "1",
+			       wxDefaultPosition, wxDefaultSize,
+			       wxSP_ARROW_KEYS, 1, 10000);
+  stopAfterSizer->Add(m_stopAfter, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
+
+  wxStaticBox *algorithmBox = new wxStaticBox(this, wxID_STATIC,
+					      "Algorithm behavior");
+  wxStaticBoxSizer *algorithmSizer = new wxStaticBoxSizer(algorithmBox,
+							  wxHORIZONTAL);
+  algorithmSizer->Add(new wxStaticText(this, wxID_STATIC,
+				       "Number of restarts"),
+		      0, wxALL | wxCENTER, 5);
+  m_numTries = new wxSpinCtrl(this, -1, "20",
+			      wxDefaultPosition, wxDefaultSize,
+			      wxSP_ARROW_KEYS, 1, 10000);
+  algorithmSizer->Add(m_numTries, 0, wxALL, 5);
+  topSizer->Add(algorithmSizer, 0, wxALL | wxCENTER, 5);
+
+  wxStaticBox *funcminBox = new wxStaticBox(this, wxID_STATIC,
+					    "Function minimization behavior");
+  wxStaticBoxSizer *funcminSizer = new wxStaticBoxSizer(funcminBox,
+							wxVERTICAL);
+  wxFlexGridSizer *paramSizer = new wxFlexGridSizer(2);
+  paramSizer->Add(new wxStaticText(this, wxID_STATIC,
+				   "Maximum iterations for line search"),
+		  0, wxALL | wxCENTER, 5);
+  m_maxits1 = new wxSpinCtrl(this, -1, "100",
+			     wxDefaultPosition, wxDefaultSize,
+			     wxSP_ARROW_KEYS, 10, 10000);
+  paramSizer->Add(m_maxits1, 0, wxALL | wxCENTER, 5);
+  
+  paramSizer->Add(new wxStaticText(this, wxID_STATIC,
+				   "Tolerance for line search (in digits)"),
+		  0, wxALL | wxCENTER, 5);
+  m_tol1 = new wxSpinCtrl(this, -1, "10",
+			  wxDefaultPosition, wxDefaultSize,
+			  wxSP_ARROW_KEYS, 2, 20);
+  paramSizer->Add(m_tol1, 0, wxALL | wxCENTER, 5);
+
+  paramSizer->Add(new wxStaticText(this, wxID_STATIC,
+				   "Maximum iterations in minimization"),
+		  0, wxALL | wxCENTER, 5);
+  m_maxitsN = new wxSpinCtrl(this, -1, "20",
+			     wxDefaultPosition, wxDefaultSize,
+			     wxSP_ARROW_KEYS, 10, 1000);
+  paramSizer->Add(m_maxitsN, 0, wxALL | wxCENTER, 5);
+  
+  paramSizer->Add(new wxStaticText(this, wxID_STATIC,
+				   "Tolerance in minimization (in digits)"),
+		  0, wxALL | wxCENTER, 5);
+  m_tolN = new wxSpinCtrl(this, -1, "10",
+			  wxDefaultPosition, wxDefaultSize,
+			  wxSP_ARROW_KEYS, 2, 20);
+  paramSizer->Add(m_tolN, 0, wxALL | wxCENTER, 5);
+
+  funcminSizer->Add(paramSizer, 0, wxALL, 5);
+  
+  topSizer->Add(funcminSizer, 0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+void panelEfgLiap::OnFindAll(wxCommandEvent &)
+{
+  m_stopAfter->Enable(!m_findAll->GetValue());
+}
+
+efgNashAlgorithm *panelEfgLiap::GetAlgorithm(void) const
+{
+  SubgameSolver *algorithm = new SubgameSolver;
+
+  if (m_solveUsing->GetSelection() == 0) {
+    efgLiap *subAlgorithm = new efgLiap;
+    subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
+			       0 : m_stopAfter->GetValue());
+    subAlgorithm->SetNumTries(m_numTries->GetValue());
+    subAlgorithm->SetMaxits1(m_maxits1->GetValue());
+    subAlgorithm->SetTol1(pow(10.0, (double) -m_tol1->GetValue()));
+    subAlgorithm->SetMaxitsN(m_maxitsN->GetValue());
+    subAlgorithm->SetTolN(pow(10.0, (double) -m_tolN->GetValue()));
+    algorithm->SetAlgorithm(subAlgorithm);
+
+  }
+  else {
+    nfgLiap *subAlgorithm = new nfgLiap;
+    subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
+			       0 : m_stopAfter->GetValue());
+    subAlgorithm->SetNumTries(m_numTries->GetValue());
+    subAlgorithm->SetMaxits1(m_maxits1->GetValue());
+    subAlgorithm->SetTol1(pow(10.0, (double) -m_tol1->GetValue()));
+    subAlgorithm->SetMaxitsN(m_maxitsN->GetValue());
+    subAlgorithm->SetTolN(pow(10.0, (double) -m_tolN->GetValue()));
+    algorithm->SetAlgorithm(subAlgorithm);
+  }
+  return algorithm;
+}
+
+//========================================================================
+//                      class panelEfgPolEnum
+//========================================================================
+
+class panelEfgPolEnum : public panelEfgNashAlgorithm {
+private:
+  wxRadioBox *m_solveUsing;
+  wxCheckBox *m_findAll;
+  wxSpinCtrl *m_stopAfter;
+
+  // Private event handlers
+  void OnFindAll(wxCommandEvent &);
+
+public:
+  panelEfgPolEnum(wxWindow *);
+
+  efgNashAlgorithm *GetAlgorithm(void) const;
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(panelEfgPolEnum, panelEfgNashAlgorithm)
+  EVT_CHECKBOX(idCHECKBOX_FINDALL, panelEfgPolEnum::OnFindAll)
+END_EVENT_TABLE()
+
+panelEfgPolEnum::panelEfgPolEnum(wxWindow *p_parent)
+  : panelEfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  wxString solveChoices[] = { "Extensive form", "Normal form" };
+  m_solveUsing = new wxRadioBox(this, -1, "Find equilibria using",
+				wxDefaultPosition, wxDefaultSize,
+				2, solveChoices, 1, wxRA_SPECIFY_ROWS);
+  topSizer->Add(m_solveUsing, 0, wxALL | wxCENTER, 5);
+
+  wxStaticBox *stopAfterBox = new wxStaticBox(this, wxID_STATIC,
+					      "Number to find");
+  wxStaticBoxSizer *stopAfterSizer = new wxStaticBoxSizer(stopAfterBox,
+							  wxHORIZONTAL);
+  m_findAll = new wxCheckBox(this, idCHECKBOX_FINDALL, "Find all");
+  m_findAll->SetValue(false);
+  stopAfterSizer->Add(m_findAll, 0, wxALL | wxCENTER, 5);
+  stopAfterSizer->Add(new wxStaticText(this, wxID_STATIC, "Stop after"),
+		      0, wxALL | wxCENTER, 5);
+  m_stopAfter = new wxSpinCtrl(this, -1, "1",
+			       wxDefaultPosition, wxDefaultSize,
+			       wxSP_ARROW_KEYS, 1, 10000);
+  stopAfterSizer->Add(m_stopAfter, 0, wxALL, 5);
+  topSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+void panelEfgPolEnum::OnFindAll(wxCommandEvent &)
+{
+  m_stopAfter->Enable(!m_findAll->GetValue());
+}
+
+efgNashAlgorithm *panelEfgPolEnum::GetAlgorithm(void) const
+{
+  SubgameSolver *algorithm = new SubgameSolver;
+
+  if (m_solveUsing->GetSelection() == 0) {
+    efgPolEnum *subAlgorithm = new efgPolEnum;
+    subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
+			       0 : m_stopAfter->GetValue());
+    algorithm->SetAlgorithm(subAlgorithm);
+  }
+  else {
+    nfgPolEnum *subAlgorithm = new nfgPolEnum;
+    subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
+			       0 : m_stopAfter->GetValue());
+    algorithm->SetAlgorithm(subAlgorithm);
+  }
+  return algorithm;
+}
+
+//========================================================================
+//                         class panelEfgQre
 //========================================================================
 
 class panelEfgQre : public panelEfgNashAlgorithm {
@@ -380,37 +721,139 @@ public:
 panelEfgQre::panelEfgQre(wxWindow *p_parent)
   : panelEfgNashAlgorithm(p_parent)
 {
-  (void) new wxStaticText(this, wxID_STATIC, "QreSolve");
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
   Show(false);
 }
 
 efgNashAlgorithm *panelEfgQre::GetAlgorithm(void) const
 {
-  return new efgQre;
+  efgQre *algorithm = new efgQre;
+  algorithm->SetFullGraph(false);
+  algorithm->SetMaxLambda(1000);
+  return algorithm;
 }
 
 //========================================================================
 //                       class panelEfgSimpdiv
 //========================================================================
 
+const int idCHECKBOX_USELEASH = 2002;
+
 class panelEfgSimpdiv : public panelEfgNashAlgorithm {
+private:
+  wxRadioBox *m_solveUsing, *m_precision;
+  wxCheckBox *m_useLeash;
+  wxSpinCtrl *m_leashLength, *m_numRestarts;
+
+  // Private event handlers
+  void OnFindAll(wxCommandEvent &);
+  void OnUseLeash(wxCommandEvent &);
+
 public:
   panelEfgSimpdiv(wxWindow *);
 
   efgNashAlgorithm *GetAlgorithm(void) const;
+
+  DECLARE_EVENT_TABLE()
 };
+
+BEGIN_EVENT_TABLE(panelEfgSimpdiv, panelEfgNashAlgorithm)
+  EVT_CHECKBOX(idCHECKBOX_USELEASH, panelEfgSimpdiv::OnUseLeash)
+END_EVENT_TABLE()
 
 panelEfgSimpdiv::panelEfgSimpdiv(wxWindow *p_parent)
   : panelEfgNashAlgorithm(p_parent)
 {
-  (void) new wxStaticText(this, wxID_STATIC, "SimpdivSolve");
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  wxString solveChoices[] = { "Extensive form", "Normal form" };
+  m_solveUsing = new wxRadioBox(this, -1, "Find equilibria using",
+				wxDefaultPosition, wxDefaultSize,
+				2, solveChoices, 1, wxRA_SPECIFY_ROWS);
+  m_solveUsing->SetSelection(1);
+  m_solveUsing->Enable(false);
+  topSizer->Add(m_solveUsing, 0, wxALL | wxCENTER, 5);
+
+  wxString precisionChoices[] = { "Floating point", "Rational" };
+  m_precision = new wxRadioBox(this, -1, "Precision",
+			       wxDefaultPosition, wxDefaultSize,
+			       2, precisionChoices, 1, wxRA_SPECIFY_ROWS);
+  topSizer->Add(m_precision, 0, wxALL | wxCENTER, 5);
+
+  wxStaticBox *algorithmBox = new wxStaticBox(this, wxID_STATIC,
+					      "Algorithm behavior");
+  wxStaticBoxSizer *algorithmSizer = new wxStaticBoxSizer(algorithmBox,
+							  wxVERTICAL);
+  
+  wxBoxSizer *leashSizer = new wxBoxSizer(wxHORIZONTAL);
+  m_useLeash = new wxCheckBox(this, idCHECKBOX_USELEASH, "Use leash");
+  m_useLeash->SetValue(false);
+  leashSizer->Add(m_useLeash, 0, wxALL | wxCENTER, 5);
+  leashSizer->Add(new wxStaticText(this, wxID_STATIC, "Leash length"),
+		  0, wxALL | wxCENTER, 5);
+  m_leashLength = new wxSpinCtrl(this, -1, "100",
+				 wxDefaultPosition, wxDefaultSize,
+				 wxSP_ARROW_KEYS, 1, 10000);
+  m_leashLength->Enable(false);
+  leashSizer->Add(m_leashLength, 0, wxALL | wxCENTER, 5);
+  algorithmSizer->Add(leashSizer, 0, wxALL | wxCENTER, 5);
+
+  wxBoxSizer *restartSizer = new wxBoxSizer(wxHORIZONTAL);
+  restartSizer->Add(new wxStaticText(this, wxID_STATIC, "Number of restarts"),
+		    0, wxALL | wxCENTER, 5);
+  m_numRestarts = new wxSpinCtrl(this, -1, "20",
+				 wxDefaultPosition, wxDefaultSize,
+				 wxSP_ARROW_KEYS, 1, 10000);
+  restartSizer->Add(m_numRestarts, 0, wxALL | wxCENTER, 5);
+  algorithmSizer->Add(restartSizer, 0, wxALL | wxCENTER, 5);
+
+  topSizer->Add(algorithmSizer, 0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
   Show(false);
+}
+
+void panelEfgSimpdiv::OnUseLeash(wxCommandEvent &)
+{
+  m_leashLength->Enable(m_useLeash->GetValue());
 }
 
 efgNashAlgorithm *panelEfgSimpdiv::GetAlgorithm(void) const
 {
   SubgameSolver *algorithm = new SubgameSolver;
-  algorithm->SetAlgorithm(new nfgSimpdiv<double>);
+
+  if (m_precision->GetSelection() == 0) {
+    nfgSimpdiv<double> *subAlgorithm = new nfgSimpdiv<double>;
+    subAlgorithm->SetLeashLength((m_useLeash->GetValue()) ?
+				 m_leashLength->GetValue() : 0);
+    subAlgorithm->SetNumRestarts(m_numRestarts->GetValue());
+    algorithm->SetAlgorithm(subAlgorithm);
+  }
+  else {
+    nfgSimpdiv<gRational> *subAlgorithm = new nfgSimpdiv<gRational>;
+    subAlgorithm->SetLeashLength((m_useLeash->GetValue()) ?
+				 m_leashLength->GetValue() : 0);
+    subAlgorithm->SetNumRestarts(m_numRestarts->GetValue());
+    algorithm->SetAlgorithm(subAlgorithm);
+  }
   return algorithm;
 }
 
@@ -436,7 +879,7 @@ dialogEfgNash::dialogEfgNash(wxWindow *p_parent, const EFSupport &p_support)
   wxBoxSizer *algPanelSizer = new wxBoxSizer(wxHORIZONTAL);
   m_algorithmTree = new wxTreeCtrl(this, idTREECTRL_ALGORITHMS,
 				   wxDefaultPosition, wxSize(200, 400));
-  LoadAlgorithms();
+  LoadAlgorithms(p_support.GetGame());
   algPanelSizer->Add(m_algorithmTree, 1, wxALL | wxEXPAND, 5);
 
   m_fooPanel = new wxPanel(this, -1, wxDefaultPosition, wxSize(400, 400));
@@ -459,7 +902,7 @@ dialogEfgNash::dialogEfgNash(wxWindow *p_parent, const EFSupport &p_support)
   Layout();
 }
 
-void dialogEfgNash::LoadAlgorithms(void)
+void dialogEfgNash::LoadAlgorithms(const efgGame &p_efg)
 {
   wxTreeItemId id;
 
@@ -480,15 +923,24 @@ void dialogEfgNash::LoadAlgorithms(void)
   id = m_algorithmTree->AppendItem(custom, "EnumPure");
   m_algorithms.Define(id, new panelEfgEnumPure(this));
 
-  id = m_algorithmTree->AppendItem(custom, "EnumMixed");
-  m_algorithms.Define(id, new panelEfgEnumMixed(this));
+  if (p_efg.NumPlayers() == 2) {
+    id = m_algorithmTree->AppendItem(custom, "EnumMixed");
+    m_algorithms.Define(id, new panelEfgEnumMixed(this));
 
-  id = m_algorithmTree->AppendItem(custom, "LcpSolve");
-  m_algorithms.Define(id, new panelEfgLcp(this));
+    id = m_algorithmTree->AppendItem(custom, "LcpSolve");
+    m_algorithms.Define(id, new panelEfgLcp(this));
 
-  id = m_algorithmTree->AppendItem(custom, "LpSolve");
+    if (p_efg.IsConstSum()) {
+      id = m_algorithmTree->AppendItem(custom, "LpSolve");
+      m_algorithms.Define(id, new panelEfgLp(this));
+    }
+  }
+
+  id = m_algorithmTree->AppendItem(custom, "LiapSolve");
+  m_algorithms.Define(id, new panelEfgLiap(this));
 
   id = m_algorithmTree->AppendItem(custom, "PolEnumSolve");
+  m_algorithms.Define(id, new panelEfgPolEnum(this));
 
   id = m_algorithmTree->AppendItem(custom, "QreSolve");
   m_algorithms.Define(id, new panelEfgQre(this));

@@ -1,43 +1,34 @@
 //
-// FILE: efgalleq.h -- enumerates all Nash equilibria, assuming genericity
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Enumerates all Nash equilibria in an extensive form game, via solving
+// systems of polynomial equations
 //
 
 #ifndef EFGALLEQ_H
 #define EFGALLEQ_H
 
-#include "base/base.h"
-#include "base/gstatus.h"
-#include "game/efg.h"
-#include "game/behav.h"
-#include "game/efgensup.h"
-#include "behavsol.h"
-#include "epolenum.h" 
-#include "subsolve.h"
+#include "efgalgorithm.h"
 
-int AllEFNashSolve(const EFSupport &, const EfgPolEnumParams &, 
-		   gList<BehavSolution> &, gStatus &,
-		   long &nevals, double &time,
-		   gList<const EFSupport> &singular_supports);
-
-
-#ifdef UNUSED
-class efgPolEnumSolve : public SubgameSolver  {
+class efgPolEnum : public efgNashAlgorithm {
 private:
-  int npivots;
-  EfgPolEnumParams params;
-  gArray<gNumber> values;
-
-  void SolveSubgame(const FullEfg &, const EFSupport &,
-		    gList<BehavSolution> &, gStatus &);
-  EfgAlgType AlgorithmID(void) const { return algorithmEfg_POLENUM_EFG; }    
+  int m_stopAfter;
 
 public:
-  efgPolEnumSolve(const EfgPolEnumParams &, int max = 0);
-  virtual ~efgPolEnumSolve();
+  efgPolEnum(void);
+  virtual ~efgPolEnum() { }
+
+  int StopAfter(void) const { return m_stopAfter; }
+  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
+
+  gText GetAlgorithm(void) const { return "PolEnum"; }
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
 };
-#endif  // UNUSED
+  
+
 
 #endif    // EFGALLEQ_H
 

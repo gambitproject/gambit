@@ -1074,7 +1074,7 @@ nfgNashAlgorithm *panelNfgQre::GetAlgorithm(void) const
 //                       class panelNfgSimpdiv
 //========================================================================
 
-const int idCHECKBOX_USELEASH = 2001;
+const int idCHECKBOX_USELEASH = 2002;
 
 class panelNfgSimpdiv : public panelNfgNashAlgorithm {
 private:
