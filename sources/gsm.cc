@@ -942,134 +942,72 @@ void GSM::_BindCheck( void ) const
 #endif // NDEBUG
 
 
-bool GSM::_BindCheck( const gString& param_name ) const
+bool GSM::_Bind( const gString& param_name ) const
 {
-  CallFuncObj*  func;
-  int           new_index;
-  bool          result = true;
-
-#ifndef NDEBUG
-  _BindCheck();
-#endif // NDEBUG
-  
-  func = _CallFuncStack->Peek();
-  result = func->SetCurrParamIndex( param_name );
-    
-  return result;
+  return _CallFuncStack->Peek()->SetCurrParamIndex( param_name );
 }
 
 
 bool GSM::InitCallFunction( const gString& funcname )
 {
-  CallFuncObj*  func;
-  bool          result = true;
-
   if( _FuncTable->IsDefined( funcname ) )
   {
-    func = new CallFuncObj( (*_FuncTable)( funcname ), _StdOut, _StdErr );
-    _CallFuncStack->Push( func );
+    _CallFuncStack->Push
+      ( new CallFuncObj( (*_FuncTable)( funcname ), _StdOut, _StdErr ) );
+    return true;
   }
   else // ( !_FuncTable->IsDefined( funcname ) )
   {
     _ErrorMessage( _StdErr, 25, 0, 0, funcname );
-    result = false;
+    return false;
   }
-  return result;
 }
 
 
 bool GSM::Bind( const gString& param_name )
 {
-  CallFuncObj*       func;
-  Portion*           param;
-  bool               result    = true;
-
-#ifndef NDEBUG
-  _BindCheck();
-#endif // NDEBUG
-
-  if( param_name != "" )
-    result = _BindCheck( param_name );
-
-  if( result )
-  {
-    param = _Pop();
-    
-    param = _ResolveRef( param );
-    if( param->IsValid() )
-    {
-      func = _CallFuncStack->Pop();
-      result = func->SetCurrParam( param, true );
-      _CallFuncStack->Push( func );
-    }
-    else
-    {
-      _CallFuncStack->Peek()->SetErrorOccurred();
-      _ErrorMessage( _StdErr, 59 );
-      delete param;
-      result = false;
-    }
-  }
-
-  return result;
+  return BindRef( param_name, AUTO_VAL_OR_REF );
 }
 
 
 bool GSM::BindVal( const gString& param_name )
 {
-  CallFuncObj* func;
   Portion*     param;
-  Portion*     org_param;
   bool         result = true;
 
 #ifndef NDEBUG
   _BindCheck();
 #endif // NDEBUG
 
-
   if( param_name != "" )
-    result = _BindCheck( param_name );
+    result = _Bind( param_name );
 
   if( result )
   {
-    param = _Pop();
-    
-    org_param = _ResolveRef( param );
-    if( org_param->IsValid() )
+    param = _ResolveRef( _Pop() );
+
+    if( param->IsValid() )
     {
-      param = org_param->ValCopy();
-      delete org_param;
-      
-      func = _CallFuncStack->Pop();
-
       if( param->Type() != porREFERENCE )
-      {
-	result = func->SetCurrParam( param );       
-      }
+	result = _CallFuncStack->Peek()->SetCurrParam( param->ValCopy() );
       else
-      {
-	delete param;
-	result = func->SetCurrParam( 0 );
-      }
-
-      _CallFuncStack->Push( func );
+	result = _CallFuncStack->Peek()->SetCurrParam( 0 );
     }
     else
     {
       _CallFuncStack->Peek()->SetErrorOccurred();
       _ErrorMessage( _StdErr, 59 );
-      delete param;
       result = false;
     }
+    delete param;
   }
 
   return result;
 }
 
 
-bool GSM::BindRef( const gString& param_name )
+bool GSM::BindRef( const gString& param_name, bool auto_val_or_ref )
 {
-  CallFuncObj*       func;
   Portion*           param;
   bool               result    = true;
 
@@ -1078,18 +1016,15 @@ bool GSM::BindRef( const gString& param_name )
 #endif // NDEBUG
 
   if( param_name != "" )
-    result = _BindCheck( param_name );
+    result = _Bind( param_name );
 
   if( result )
   {
-    param = _Pop();
-    
-    param = _ResolveRef( param );
+    param = _ResolveRef( _Pop() );
+
     if( param->IsValid() )
     {
-      func = _CallFuncStack->Pop();
-      result = func->SetCurrParam( param );
-      _CallFuncStack->Push( func );
+      result = _CallFuncStack->Peek()->SetCurrParam( param, auto_val_or_ref );
     }
     else
     {
@@ -1109,10 +1044,8 @@ bool GSM::CallFunction( void )
 {
   CallFuncObj*        func;
   Portion**           param;
-  int                 num_params;
   int                 index;
-  gString             ref;
-  ReferencePortion*  refp;
+  ReferencePortion*   refp;
   Portion*            return_value;
   bool                define_result;
   bool                result = true;
@@ -1128,35 +1061,30 @@ bool GSM::CallFunction( void )
 
   func = _CallFuncStack->Pop();
 
-  num_params = func->NumParams();
-  param = new Portion*[ num_params ];
+  param = new Portion*[ func->NumParams() ];
 
   return_value = func->CallFunction( this, param );
 
-  if( return_value == 0 )
-  {
-    return_value = new ErrorPortion;
+  assert( return_value != 0 );
+
+  if( return_value->Type() == porERROR )
     result = false;
-  }
 
   _Push( return_value );
   
 
-  for( index = 0; index < num_params; index++ )
+  for( index = 0; index < func->NumParams(); index++ )
   {
     refp = func->GetParamRef( index );
 
+    assert( (refp == 0) == (param[index] == 0) );
+
     if( refp != 0 )
     {
-      assert( param[ index ] != 0 );
       define_result = _VarDefine( refp->Value(), param[ index ] );
       if( !define_result )
 	result = false;
       delete refp;
-    }
-    else
-    {
-      assert( param[ index ] == 0 );
     }
   }
 

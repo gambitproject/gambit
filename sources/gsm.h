@@ -53,7 +53,7 @@ private:
   bool _BinaryOperation ( const gString& funcname );
 
   void _BindCheck ( void ) const;
-  bool _BindCheck ( const gString& param_name ) const;
+  bool _Bind ( const gString& param_name ) const;
 
   bool     _VarIsDefined ( const gString& var_name ) const;
   bool     _VarDefine    ( const gString& var_name, Portion* p );
@@ -137,10 +137,11 @@ public:
   bool AddFunction( FuncDescObj* func );
 
   bool InitCallFunction ( const gString& funcname );
-  bool Bind             ( const gString& param_name = "" );
-  bool BindVal          ( const gString& param_name = "" );
-  bool BindRef          ( const gString& param_name = "" );
-  bool CallFunction     ( void );
+  bool Bind           ( const gString& param_name = "" );
+  bool BindVal        ( const gString& param_name = "" );
+  bool BindRef        ( const gString& param_name = "", 
+		       bool auto_val_or_ref = false );
+  bool CallFunction   ( void );
 
   int Execute( gList<Instruction*>& program, 
 	      bool user_func = false );

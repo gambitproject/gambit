@@ -1405,6 +1405,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
     {
       _ErrorMessage( _StdErr, 20, 0, _FuncName );
       _ErrorOccurred = true;
+      result = new ErrorPortion;
     }
     else if( result->Type() == porERROR )
     {
@@ -1412,7 +1413,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       result->Output( _StdErr );
       _StdErr << "\n";
       delete result;
-      result = 0;
+      result = new ErrorPortion;
       _ErrorOccurred = true;
     }
   }
