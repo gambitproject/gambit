@@ -379,7 +379,7 @@ if (ch==WXK_F3)
 		if (IsDelete(ev))
 		{
 			if (cell.editing==FALSE) cell.editing=TRUE;
-			cell.str.remove(cell.str.length()-1);
+			if (cell.str.length()) cell.str.remove(cell.str.length()-1);
 		}
 		top_frame->SetStatusText(cell.str);
 	}

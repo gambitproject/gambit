@@ -218,6 +218,8 @@ public:
 	void SupportChanged(void);
 	// Gives access to the parent to the private draw_settings. Used for SolnShow
 	TreeDrawSettings &DrawSettings(void) {return draw_settings;}
+	// Gives access to the parent to the current cursor node
+	const Node *Cursor(void) const {return cursor;}
 };
 
 template <class T> class ExtensiveShow;
