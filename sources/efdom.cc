@@ -8,6 +8,7 @@
 #include "efgciter.h"
 #include "rational.h"
 #include "gstatus.h"
+#include "gsm.h"
 
 // The following computes whether action a dominates action b.
 // If `conditional' is false, then the computation is with respect
@@ -19,12 +20,12 @@
 // infoset where a and b might be chosen.
 
 bool Dominates(const EFSupport &S, 
-			    int pl, 
-			    int iset, 
-			    int a, int b, 
-			    bool strong,
-			    bool conditional,
-			    gStatus &status)
+	       const int pl, 
+	       const int iset, 
+	       const int a, const int b, 
+	       const bool strong,
+	       const bool conditional,
+	       const gStatus &status)
 {
   const Infoset *infoset = S.Game().GetInfosetByIndex(pl,iset);
 
@@ -37,19 +38,9 @@ bool Dominates(const EFSupport &S,
       return false;
   }
 
-    //DEBUG
-  //    gout << "Got here with conditional being true...\n";
-
   const EFSupportWithActiveNodes SAct(S);
-
-    //DEBUG
-  //    gout << "Got past the construction of SAct...\n";
-
   const Action *aAct = S.Actions(pl,iset)[a];
   const Action *bAct = S.Actions(pl,iset)[b];
-
-    //DEBUG
-  //    gout << "Got to the point of defining nodelist...\n";
 
   gList<const Node *> nodelist = SAct.ReachableNodesInInfoset(infoset);  
   if (nodelist.Length() == 0)
@@ -57,14 +48,8 @@ bool Dominates(const EFSupport &S,
                                           // I suggest checking for this 
                                           // prior to entry
 
-    //DEBUG
-  // gout << "Got past the definition of nodelist...\n";
-
   bool equal = true;
   for (int n = 1; n <= nodelist.Length(); n++) {
-
-    //DEBUG
-    //    gout << "Got to the loop over nodes...\n";
 
     gList<const Infoset *> L;
     L += S.ReachableInfosets(nodelist[n],aAct);
@@ -90,6 +75,66 @@ bool Dominates(const EFSupport &S,
   if (strong) return true;
   else return (!equal);
 }
+
+// Another window to the computation above.
+
+bool Dominates(const EFSupport &S, 
+	       const Action *a, const Action *b,
+	       const bool strong,
+	       const bool conditional,
+	       const gStatus &status)
+{
+  const Infoset *infoset = a->BelongsTo();
+  if (infoset != b->BelongsTo())
+    throw gclRuntimeError("Dominates(..) needs actions in same infoset.\n");
+  const EFPlayer *player = infoset->GetPlayer();
+
+  return Dominates(S,player->GetNumber(),infoset->GetNumber(),
+		   a->GetNumber(),b->GetNumber(),
+		   strong, conditional, status);
+}
+
+bool SomeListElementDominates(const EFSupport &S, 
+			      const gList<const Action *> &l,
+			      const Action *a, 
+			      const bool strong,
+			      const bool conditional,
+			      const gStatus &status)
+{
+  for (int i = 1; i <= l.Length(); i++)
+    if (l[i] != a)
+      if (Dominates(S,l[i],a,strong,conditional,status))
+	return true;
+  return false;
+}
+
+bool InfosetHasDominatedElement(const EFSupport &S, 
+				const Infoset *i,
+				const bool strong,
+				const bool conditional,
+				const gStatus &status)
+{
+  gList<const Action *> actions = S.ListOfActions(i);
+  for (int i = 1; i <= actions.Length(); i++)
+    if (SomeListElementDominates(S,actions,actions[i],
+				 strong,conditional,gstatus))
+      return true;
+
+  return false;
+}
+
+// Subsupports of a given support are _path equivalent_ if they
+// agree on every infoset that can be reached under either, hence both,
+// of them.  The next routine outputs one support for each equivalence
+// class.  It is not for use in solution routines, but is instead a 
+// prototype of the eventual path enumerator, which will also perform
+// dominance elimination.
+
+// I am reluctant to embark on this until EFSupportWith... has been upgraded.
+
+
+// The code below is old, and uses indexing mechanisms that I do not
+// understand, which look error-prone. amm-8/98
 
 bool ComputeDominated(EFSupport &S, EFSupport &T,
 					int pl, int iset, bool strong,
