@@ -22,13 +22,6 @@ template <class T> class gNode;
 
 #include "glist.imp"
 
-//template class gList< gString >;
-//template class gNode< gString >;
-//template class gList< int >;
-//template class gNode< int >;
-//template class gList< NewInstr* >;
-//template class gNode< NewInstr* >;
-
 template class gList< void* >;
 template class gNode< void* >;
 
@@ -38,16 +31,12 @@ template class gNode< Portion* >;
 template class gList< FuncDescObj* >;
 template class gNode< FuncDescObj* >;
 
-template class gList< gList< NewInstr* >* >;
-template class gNode< gList< NewInstr* >* >;
-
-
 
 #include "hash.imp"
 
 template class HashTable< gString, Portion* >;
 template class HashTable< gString, FuncDescObj* >;
-template class HashTable< gList< NewInstr* >*, int >;
+template class HashTable< gclExpression*, int >;
 template class HashTable< void*, int >;
 
 
@@ -113,6 +102,6 @@ template <class T> RefCountHashTable<T>::~RefCountHashTable()
 
 
 
-template class RefCountHashTable< gList< NewInstr* >* >;
+template class RefCountHashTable< gclExpression* >;
 template class RefCountHashTable< void* >;
 

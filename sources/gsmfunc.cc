@@ -2,7 +2,7 @@
 // FILE: gsmfunc.cc -- handles initialization of defined functions for GSM
 //                     companion to GSM
 //
-// @(#)gsmfunc.cc	2.3 4/28/97
+// $Id$
 //
 
 #include <assert.h>
@@ -131,7 +131,7 @@ Portion* CallFuncObj::CallNormalFunction( GSM* gsm, Portion** param )
   {
     if(!_FuncInfo[_FuncIndex].UserDefined)
       result = _FuncInfo[_FuncIndex].FuncPtr( param );
-    else
+    else 
       result = gsm->ExecuteUserFunc(*(_FuncInfo[_FuncIndex].FuncInstr), 
 				    _FuncInfo[_FuncIndex], param );
   }
@@ -373,20 +373,13 @@ FuncInfoType::FuncInfoType
       ParamInfo[i] = paraminfo[i];
 }
 
-FuncInfoType::FuncInfoType
-(
- gList<NewInstr*>* funcinstr,
- PortionSpec returnspec,
- int numparams,
- ParamInfoType* paraminfo,
- FuncFlagType flag
-)
-:
- UserDefined(true),
- FuncInstr(funcinstr),
- ReturnSpec(returnspec),
- Flag(flag),
- NumParams(numparams)
+FuncInfoType::FuncInfoType(gclExpression* funcinstr,
+			   PortionSpec returnspec,
+			   int numparams,
+			   ParamInfoType* paraminfo,
+			   FuncFlagType flag)
+  : UserDefined(true), FuncInstr(funcinstr), ReturnSpec(returnspec),
+    Flag(flag), NumParams(numparams)
 {
   int i;
   ParamInfo = new ParamInfoType[NumParams];
@@ -402,7 +395,7 @@ FuncInfoType::~FuncInfoType()
 //                   Function descriptor objects
 //---------------------------------------------------------------------
 
-RefCountHashTable< gList< NewInstr* >* > FuncDescObj::_RefCountTable;
+RefCountHashTable< gclExpression* > FuncDescObj::_RefCountTable;
 
 
 FuncDescObj::FuncDescObj(FuncDescObj& func)
@@ -462,7 +455,7 @@ FuncDescObj::~FuncDescObj()
 {
   int index;
   int f_index;
-  NewInstr* NewInstr;
+//  NewInstr* NewInstr;
   
   for(f_index = 0; f_index < _NumFuncs; f_index++)
   {
@@ -479,11 +472,14 @@ FuncDescObj::~FuncDescObj()
       {
 	_RefCountTable.Remove(_FuncInfo[f_index].FuncInstr);
 	assert(_FuncInfo[f_index].FuncInstr != 0);
+/*
 	while(_FuncInfo[f_index].FuncInstr->Length() > 0)
 	{
 	  NewInstr = _FuncInfo[f_index].FuncInstr->Remove(1);
 	  delete NewInstr;
 	}
+	delete _FuncInfo[f_index].FuncInstr;
+	*/
 	delete _FuncInfo[f_index].FuncInstr;
       }
     }

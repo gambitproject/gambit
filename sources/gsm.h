@@ -12,12 +12,11 @@
 #include "gambitio.h"
 #include "gstring.h"
 #include "gsmincl.h"
+#include "gsminstr.h"
 
-class NewInstr;
 class FuncDescObj;
 class CallFuncObj;
 class Portion;
-class Reference_Portion;
 class RefHashTable;
 class FunctionHashTable;
 class FuncInfoType;
@@ -39,6 +38,8 @@ template <class T> class RefCountHashTable;
 
 class GSM
 {
+friend class gclFunctionCall;
+friend class gclVarName;
 private:
   static int _NumObj;
 
@@ -59,19 +60,10 @@ private:
   gStack< RefHashTable* >*               _RefTableStack;
   FunctionHashTable*                             _FuncTable;
 
-  Portion* _ResolveRef             ( Portion* p );
-
   void _BindCheck ( void ) const;
   bool _Bind ( const gString& param_name ) const;
 
-  bool     _VarIsDefined ( const gString& var_name ) const;
-  bool     _VarDefine    ( const gString& var_name, Portion* p );
-  Portion* _VarValue     ( const gString& var_name ) const;
   Portion* _VarRemove    ( const gString& var_name );
-
-  int      _Depth( void ) const;
-  void     _Push( Portion* p );
-  Portion* _Pop( void );
 
   static void _ErrorMessage
     (
@@ -95,56 +87,31 @@ public:
       gOutput& s_err = gerr );
   ~GSM();
 
-  int Depth    ( void ) const;
-  int MaxDepth ( void ) const;
-
-
   static int& GameRefCount(void*);
 
-
-  bool Push(Portion* data);
-  bool Push ( const bool&      data );
-  bool Push ( const long&      data );
-  bool Push ( const double&    data );
-  bool Push ( const gRational& data );
-  bool Push ( const gString&   data );
-  bool Push ( const Precision& data );
-  bool Push ( gInput&    data );
-  bool Push ( gOutput&   data );
-
-  bool PushList ( const int num_of_elements );
-
   bool PushRef  ( const gString& ref );
-  bool Assign   ( void );
-  bool UnAssign ( void );
+  Portion* _ResolveRef             ( Portion* p );
+
+  bool Assign   ( Portion *, Portion * );
+  bool VarDefine  ( const gString& var_name, Portion* p );
+  bool VarIsDefined ( const gString& var_name ) const;
+  Portion* VarValue     ( const gString& var_name ) const;
+  bool UnAssign ( Portion * );
+  Portion* UnAssignExt( Portion * );
 
   bool AddFunction( FuncDescObj* func );
   bool DeleteFunction( FuncDescObj* func );
 
-  bool InitCallFunction ( const gString& funcname );
-  bool Bind           ( const gString& param_name = "" );
-  bool BindVal        ( const gString& param_name = "" );
-  bool BindRef        ( const gString& param_name = "", 
-		       bool auto_val_or_ref = false );
-  bool CallFunction   ( void );
-
-  int Execute( gList<NewInstr*>& program, 
-	      bool user_func = false );
-  Portion* ExecuteUserFunc( gList<NewInstr*>& program, 
+  Portion *Execute(gclExpression *, bool user_func = false );
+  Portion* ExecuteUserFunc( gclExpression& program, 
 			   const FuncInfoType& func_info,
 			   Portion** param );
-  
-  void Dump   ( void );
-
-  bool Pop    ( void );
-  void Flush  ( void );
   void Clear  ( void );
 
   Portion* PopValue( void );
 
   Portion* Help(gString text, bool udf, bool bif, bool getdesc = false );
   Portion* HelpVars(gString text);
-  Portion* UnAssignExt( void );
 
   void InvalidateGameProfile( void* game, bool IsEfg );
   void UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec );  
@@ -157,11 +124,6 @@ public:
 
   // This function will unassign the subtree rooted by the given node
   void UnAssignEfgSubTree( Efg* game, Node* node ); 
-
-
-  // void SetVerbose( bool verbose ) { _Verbose = verbose; }
-  // bool Verbose( void ) const { return _Verbose; }
-
 };
 
 

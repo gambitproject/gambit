@@ -1,9 +1,9 @@
-//#
-//# FILE: gsmfunc.h -- definition of FuncDescObj, Function Descriptor Object
-//#                    companion to GSM
-//#
-//# $Id$
-//#
+//
+// FILE: gsmfunc.h -- definition of FuncDescObj, Function Descriptor Object
+//                    companion to GSM
+//
+// $Id$
+//
 
 
 
@@ -48,11 +48,11 @@ class CallFuncObj;
 
 class gInteger;
 class GSM;
-class NewInstr;
 class Portion;
 class ListPortion;
 class ReferencePortion;
 class gString;
+class gclExpression;
 
 template <class T> class gList;
 template <class T> class RefCountHashTable;
@@ -89,7 +89,7 @@ public:
   union
   {
     Portion*             (*FuncPtr)(Portion **);
-    gList<NewInstr*>*    FuncInstr;
+    gclExpression*      FuncInstr;
   };
   PortionSpec          ReturnSpec;
   FuncFlagType         Flag;
@@ -109,7 +109,7 @@ public:
      );
   FuncInfoType
     (
-     gList<NewInstr*>* funcinstr,
+     gclExpression* funcinstr,
      PortionSpec returnspec,
      int numparams,
      ParamInfoType* paraminfo = 0,
@@ -124,7 +124,7 @@ class FuncDescObj
 {
 private:
 
-  static RefCountHashTable< gList< NewInstr* >* > _RefCountTable;
+  static RefCountHashTable< gclExpression* > _RefCountTable;
 
 protected:
   FuncDescObj( FuncDescObj& func );

@@ -23,8 +23,6 @@ template class gStack< RefHashTable* >;
 
 #include "garray.imp"
 #include "gslist.imp"
-class NewInstr;
-template class gArray<NewInstr*>;
 class FuncDescObj;
 template class gSortList<FuncDescObj*>;
 template class gListSorter<FuncDescObj*>;
@@ -160,7 +158,6 @@ GSM::~GSM()
   assert(_CallFuncStack->Depth() == 0);
   delete _CallFuncStack;
 
-  Flush();
   delete _FuncTable;
 
   assert(_RefTableStack->Depth() == 1);
@@ -174,133 +171,6 @@ GSM::~GSM()
 }
 
 
-int GSM::Depth(void) const
-{
-  return _Depth();
-}
-
-
-int GSM::MaxDepth(void) const
-{
-  return _StackStack->Peek()->MaxDepth();
-}
-
-
-
-//------------------------------------------------------------------------
-//                           Push() functions
-//------------------------------------------------------------------------
-
-
-bool GSM::Push(Portion* p)
-{
-  _Push(p);
-  return true;
-}
-
-bool GSM::Push(const bool& data)
-{
-  _Push(new BoolPortion(data));
-  return true;
-}
-
-
-bool GSM::Push(const long& data)
-{
-  _Push(new IntPortion(data));
-  return true;
-}
-
-
-bool GSM::Push(const double& data)
-{
-  _Push(new NumberPortion(data));
-  return true;
-}
-
-
-bool GSM::Push(const gRational& data)
-{
-  _Push(new NumberPortion(data));
-  return true;
-}
-
-
-bool GSM::Push(const gString& data)
-{
-  _Push(new TextPortion(data));
-  return true;
-}
-
-bool GSM::Push(const Precision& data)
-{
-  _Push(new PrecisionPortion(data));
-  return true;
-}
-
-bool GSM::Push(gInput& data)
-{
-  _Push(new InputRefPortion(data));
-  return true;
-}
-
-bool GSM::Push(gOutput& data)
-{
-  _Push(new OutputRefPortion(data));
-  return true;
-}
-
-
-bool GSM::PushList(const int num_of_elements)
-{ 
-  int            i;
-  Portion*       p;
-  ListPortion*  list;
-  int            insert_result;
-  bool           result = true;
-
-#ifndef NDEBUG
-  if(num_of_elements < 0)
-  {
-    gerr << "  Illegal number of elements requested to PushList()\n";
-  }
-  assert(num_of_elements >= 0);
-
-  if(num_of_elements > _Depth())
-  {
-    gerr << "  Not enough elements in GSM to PushList()\n";
-  }
-  assert(num_of_elements <= Depth());
-#endif // NDEBUG
-
-  list = new ListValPortion;
-  for(i = 1; i <= num_of_elements; i++)
-  {
-    p = _Pop();
-    p = _ResolveRef(p);
-
-    if(p->Spec().Type != porREFERENCE)
-    {
-      insert_result = list->Insert(p->ValCopy(), 1);
-      delete p;
-      if(insert_result == 0)
-      {
-	_ErrorMessage(_StdErr, 35);
-	result = false;
-      }
-    }
-    else
-    {
-      _ErrorMessage(_StdErr, 49, 0, 0, ((ReferencePortion*) p)->Value());
-      delete p;
-      result = false;
-    }
-  }
-  _Push(list);
-
-  return result;
-}
-
 
 
 //--------------------------------------------------------------------
@@ -309,25 +179,23 @@ bool GSM::PushList(const int num_of_elements)
 
 
 
-bool GSM::_VarIsDefined(const gString& var_name) const
+bool GSM::VarIsDefined(const gString& var_name) const
 {
-  bool result;
-
   assert(var_name != "");
 
-  result = _RefTableStack->Peek()->IsDefined(var_name);
-  return result;
+  return _RefTableStack->Peek()->IsDefined(var_name);
 }
 
 
-bool GSM::_VarDefine(const gString& var_name, Portion* p)
+bool GSM::VarDefine(const gString& var_name, Portion* p)
 {
   Portion* old_value = 0;
   bool type_match = true;
-  bool read_only = false;
   bool result = true;
 
   assert(var_name != "");
+
+  p = _ResolveRef(p);
 
   if(_RefTableStack->Peek()->IsDefined(var_name))
   {
@@ -358,13 +226,7 @@ bool GSM::_VarDefine(const gString& var_name, Portion* p)
     }
   }
 
-  if(read_only)
-  {
-    _ErrorMessage(_StdErr, 46, 0, 0, var_name);
-    delete p;
-    result = false;
-  }
-  else if(!type_match)
+  if(!type_match)
   {
     _ErrorMessage(_StdErr, 42, 0, 0, var_name);
     delete p;
@@ -380,13 +242,10 @@ bool GSM::_VarDefine(const gString& var_name, Portion* p)
 }
 
 
-Portion* GSM::_VarValue(const gString& var_name) const
+Portion* GSM::VarValue(const gString& var_name) const
 {
-  Portion* result;
-
   assert(var_name != "");
-  result = (*_RefTableStack->Peek())(var_name);
-  return result;
+  return (*_RefTableStack->Peek())(var_name);
 }
 
 
@@ -401,47 +260,17 @@ Portion* GSM::_VarRemove(const gString& var_name)
   return p;
 }
 
-
-
-int GSM::_Depth(void) const
-{
-  return _StackStack->Peek()->Depth();
-}
-
-void GSM::_Push(Portion* p)
-{
-  _StackStack->Peek()->Push(p);
-}
-
-Portion* GSM::_Pop(void)
-{
-  return _StackStack->Peek()->Pop();
-}
-
 //---------------------------------------------------------------------
 //     Reference related functions
 //---------------------------------------------------------------------
 
 
-bool GSM::PushRef(const gString& ref)
+bool GSM::Assign(Portion *p1, Portion *p2)
 {
-  assert(ref != "");
-  _Push(new ReferencePortion(ref));
-  return true;
-}
-
-
-
-bool GSM::Assign(void)
-{
-  Portion* p2;
-  Portion* p1;
   Portion* p_old;
   bool result = true;
   gString varname;
 
-  p2 = _Pop();
-  p1 = _Pop();
   if(p1->Spec().Type == porREFERENCE)
     varname = ((ReferencePortion*) p1)->Value();
 
@@ -452,8 +281,7 @@ bool GSM::Assign(void)
   if(p1->Original() == p2->Original())
   {
     delete p2;
-    _Push(p1);
-    return true;
+    return p1;
   }
 
   PortionSpec p1Spec(p1->Spec());
@@ -473,10 +301,12 @@ bool GSM::Assign(void)
       delete p_old;
     }      
     delete p1;
+/*
     if( _VarDefine(varname, p2) )
       _Push(p2->RefCopy());
     else
       _Push( new ErrorPortion );
+    */
   }
   else if( p1Spec == p2Spec && 
 	   p1Spec.Type != porNULL && 
@@ -553,7 +383,7 @@ bool GSM::Assign(void)
       }
       if(result)
       {
-	_Push(p1);
+//	_Push(p1);
 	delete p2;
       }
     }
@@ -564,7 +394,7 @@ bool GSM::Assign(void)
       if(!(p1Spec.Type & (porINPUT|porOUTPUT)))
       {
 	((ListPortion*) p1)->AssignFrom(p2);
-	_Push(p1);
+//	_Push(p1);
 	delete p2;
       }
       else // error: assigning to (list of) INPUT or OUTPUT
@@ -598,10 +428,12 @@ bool GSM::Assign(void)
       }
       assert(varname != "");
       delete p1;
+/*
       if( _VarDefine(varname, p2) )
 	_Push(p2->RefCopy());
       else
 	_Push( new ErrorPortion );
+      */
     }
     else // error: changing the type of variable
     {
@@ -617,8 +449,9 @@ bool GSM::Assign(void)
     result = false;
   }
 
-  if(!result)
-  { delete p2; delete p1; }
+//  if(!result)
+//  { delete p2; delete p1; }
+
   return result;
 }
 
@@ -626,63 +459,41 @@ bool GSM::Assign(void)
 
 
 
-bool GSM::UnAssign(void)
+bool GSM::UnAssign(Portion *p)
 {
-  Portion* p;
-
-#ifndef NDEBUG
-  if(_Depth() < 1)
-  {
-    gerr << "  Not enough operands to execute UnAssign[]\n";
-  }
-  assert(_Depth() >= 1);
-#endif // NDEBUG
-
-  p = _Pop();
   if(p->Spec().Type == porREFERENCE)
   {
-    if(_VarIsDefined(((ReferencePortion*) p)->Value()))
+    if(VarIsDefined(((ReferencePortion*) p)->Value()))
     {
-//      _Push(_VarRemove(((ReferencePortion*) p)->Value()));
       delete _VarRemove(((ReferencePortion *) p)->Value());
       delete p;
-      _Push(new BoolPortion(true));
+//      _Push(new BoolPortion(true));
       return true;
     }
     else
     {
       delete p;
-      _Push(new BoolPortion(false));
+//      _Push(new BoolPortion(false));
       return true;
     }
   }
   else
   {
-    _Push(p);
+//    _Push(p);
     _ErrorMessage(_StdErr, 53);
     return false;
   }
 }
 
 
-Portion* GSM::UnAssignExt(void)
+Portion* GSM::UnAssignExt(Portion *p)
 {
-  Portion* p;
   gString txt;
 
-#ifndef NDEBUG
-  if(_Depth() < 1)
-  {
-    gerr << "  Not enough operands to execute UnAssign[]\n";
-  }
-  assert(_Depth() >= 1);
-#endif // NDEBUG
-
-  p = _Pop();
   if(p->Spec().Type == porREFERENCE)
   {
     gString varname = ((ReferencePortion*) p)->Value(); 
-    if(_VarIsDefined( varname ) )
+    if(VarIsDefined( varname ) )
     {
       delete p;
       delete _VarRemove( varname );
@@ -696,7 +507,7 @@ Portion* GSM::UnAssignExt(void)
   }
   else
   {
-    _Push(p);
+//    _Push(p);
     txt = "UnAssign[] called on a non-reference value";
     return new ErrorPortion(txt);
   }
@@ -716,13 +527,13 @@ Portion* GSM::_ResolveRef(Portion* p)
   {
     ref = ((ReferencePortion*) p)->Value();
 
-    if(!_VarIsDefined(ref))
+    if(!VarIsDefined(ref))
     {
       result = p;
     }
     else
     {
-      result = _VarValue(ref)->RefCopy();
+      result = VarValue(ref)->RefCopy();
       delete p;
 
       /* temporary
@@ -794,387 +605,22 @@ bool GSM::DeleteFunction(FuncDescObj* func)
 
 
 
-#ifndef NDEBUG
-void GSM::_BindCheck(void) const
-{
-  if(_CallFuncStack->Depth() <= 0)
-  {
-    gerr << "  The CallFunction() subsystem was not initialized by\n";
-    gerr << "  calling InitCallFunction() first\n";
-  }
-  assert(_CallFuncStack->Depth() > 0);
-
-  if(_Depth() <= 0)
-  {
-    gerr << "  No value found to assign to a function parameter\n";
-  }
-  assert(_Depth() > 0);
-}
-#endif // NDEBUG
-
-
-bool GSM::_Bind(const gString& param_name) const
-{
-  return _CallFuncStack->Peek()->SetCurrParamIndex(param_name);
-}
-
-
-bool GSM::InitCallFunction(const gString& funcname)
-{
-  if(_FuncTable->IsDefined(funcname))
-  {
-    _CallFuncStack->Push
-      (new CallFuncObj((*_FuncTable)(funcname), _StdOut, _StdErr));
-    return true;
-  }
-  else // (!_FuncTable->IsDefined(funcname))
-  {
-    _ErrorMessage(_StdErr, 25, 0, 0, funcname);
-    return false;
-  }
-}
-
-
-bool GSM::Bind(const gString& param_name)
-{
-  return BindRef(param_name, AUTO_VAL_OR_REF);
-}
-
-
-bool GSM::BindVal(const gString& param_name)
-{
-  Portion*     param;
-  bool         result = true;
-
-#ifndef NDEBUG
-  _BindCheck();
-#endif // NDEBUG
-
-  if(param_name != "")
-    result = _Bind(param_name);
-
-  if(result)
-  {
-    param = _ResolveRef(_Pop());
-
-    if(param->Spec().Type != porREFERENCE)
-      result = _CallFuncStack->Peek()->SetCurrParam(param->ValCopy());
-    else
-      result = _CallFuncStack->Peek()->SetCurrParam(0);
-
-    /* temporary
-    if(param->IsValid())
-    {
-      if(param->Spec().Type != porREFERENCE)
-	result = _CallFuncStack->Peek()->SetCurrParam(param->ValCopy());
-      else
-	result = _CallFuncStack->Peek()->SetCurrParam(0);
-    }
-    else
-    {
-      _CallFuncStack->Peek()->SetErrorOccurred();
-      _ErrorMessage(_StdErr, 61);
-      result = false;
-    }
-    */
-
-    delete param;
-  }
-
-  return result;
-}
-
-
-bool GSM::BindRef(const gString& param_name, bool auto_val_or_ref)
-{
-  Portion*           param;
-  bool               result    = true;
-
-#ifndef NDEBUG
-  _BindCheck();
-#endif // NDEBUG
-
-  if(param_name != "")
-    result = _Bind(param_name);
-
-  if(result)
-  {
-    param = _ResolveRef(_Pop());
-
-    result = _CallFuncStack->Peek()->SetCurrParam(param, auto_val_or_ref);
-
-    /*
-    if(param->IsValid())
-    {
-      result = _CallFuncStack->Peek()->SetCurrParam(param, auto_val_or_ref);
-    }
-    else
-    {
-      _CallFuncStack->Peek()->SetErrorOccurred();
-      _ErrorMessage(_StdErr, 59);
-      delete param;
-      result = false;
-    }
-    */
-  }
-
-  return result;
-}
-
-
-
-bool GSM::CallFunction(void)
-{
-  CallFuncObj*        func;
-  Portion**           param;
-  int                 index;
-  ReferencePortion*   refp;
-  Portion*            return_value;
-  bool                define_result;
-  bool                result = true;
-
-#ifndef NDEBUG
-  if(_CallFuncStack->Depth() <= 0)
-  {
-    gerr << "  The CallFunction() subsystem was not initialized by\n";
-    gerr << "  calling InitCallFunction() first\n";
-  }
-  assert(_CallFuncStack->Depth() > 0);
-#endif // NDEBUG
-
-  func = _CallFuncStack->Pop();
-
-  param = new Portion*[func->NumParams()];
-
-  return_value = func->CallFunction( this, param );
-
-  assert(return_value != 0);
-
-  if(return_value->Spec().Type == porERROR)
-    result = false;
-
-
-  _Push(return_value);
-  
-
-  for(index = 0; index < func->NumParams(); index++)
-  {
-    refp = func->GetParamRef(index);
-
-    assert((refp == 0) == (param[index] == 0));
-
-    if(refp != 0)
-    {
-      define_result = _VarDefine(refp->Value(), param[index]);
-      if(!define_result)
-	result = false;
-      delete refp;
-    }
-  }
-
-  if(result==false)
-  {
-    _StdErr << "Function call stack: " << _CallFuncStack->Depth() << ": ";
-    func->Dump(_StdErr);
-  }
-
-  delete func;
-
-  delete[] param;
-  
-  return result;
-}
-
-
 
 //----------------------------------------------------------------------------
 //                       Execute function
 //----------------------------------------------------------------------------
 
-int GSM::Execute(gList< NewInstr* >& prog, bool user_func)
+Portion *GSM::Execute(gclExpression *expr, bool /*user_func*/)
 {
-  int             result          = rcSUCCESS;
-  bool            instr_success   = false;
-  bool            done            = false;
   Portion*        p               = 0;
-  NewInstr*       instr           = 0;
-  int             program_counter = 1;
-  int             program_length  = prog.Length();
-  int             initial_num_of_funcs = _CallFuncStack->Depth();
-  int             i               = 0;
-  CallFuncObj*    funcobj         = 0;
 
-  gArray<NewInstr*> program(prog.Length());
-  for(i=1; i<=prog.Length(); i++)
-    program[i] = prog[i];
+  p = expr->Evaluate();
 
-
-  while((program_counter <= program_length) && (!done))
-  {
-    instr = program[program_counter];
-    switch(instr->Code)
-    {
-    case iQUIT:
-      instr_success = true;
-      result = rcQUIT;
-      done = true;
-      break;
-
-    case iIF_GOTO:
-      p = _Pop();
-      if(p->Spec().Type == porBOOL)
-      {
-	if(((BoolPortion*) p)->Value())
-	{
-	  program_counter = instr->IntVal;
-	  assert(program_counter >= 1 && program_counter <= program_length);
-	}
-	else
-	{
-	  program_counter++;
-	}
-	delete p;
-	instr_success = true;
-      }
-#ifndef NDEBUG
-      else
-      {
-	gerr << "NewInstr IfGoto called on a non-boolean data type\n";
-	assert(p->Spec().Type == porBOOL);	
-	_Push(p);
-	program_counter++;
-	instr_success = false;
-      }
-#endif // NDEBUG
-      break;
-
-    case iGOTO:
-      program_counter = instr->IntVal;
-      assert(program_counter >= 1 && program_counter <= program_length);
-      instr_success = true;
-      break;
-
-    default:
-      switch(instr->Code)
-      {
-      case iNOP:
-	instr_success = true;
-	break;
-	
-      case iPUSHREF:
-	instr_success = PushRef(instr->TextVal);
-	break;
-
-      case iPUSH_BOOL:
-	_Push(new BoolPortion(instr->BoolVal));
-	instr_success = true;
-	break;
-      case iPUSH_INTEGER:
-	_Push(new IntPortion(instr->IntVal));
-	instr_success = true;
-	break;
-      case iPUSH_FLOAT:
-	_Push(new NumberPortion(instr->FloatVal));
-	instr_success = true;
-	break;
-
-      case iPUSH_TEXT:
-	_Push(new TextPortion(instr->TextVal));
-	instr_success = true;
-	break;
-
-      case iPUSH_PREC:
-        _Push(new PrecisionPortion(instr->PrecVal));
-        instr_success = true;
-        break;
-
-      case iPUSHINPUT:
-	_Push(new InputRefPortion(*(instr->InputVal)));
-	instr_success = true;
-	break;
-      case iPUSHOUTPUT:
-	_Push(new OutputRefPortion(*(instr->OutputVal)));
-	instr_success = true;
-	break;
-      case iPUSHLIST:
-	instr_success = PushList(instr->IntVal);
-	break;
-
-      case iASSIGN:
-	instr_success = Assign();
-	break;
-      case iUNASSIGN:
-	instr_success = UnAssign();
-	break;
-
-      case iINIT_CALL_FUNCTION:
-	instr_success = InitCallFunction(instr->TextVal);
-	break;
-      case iBIND:
-	instr_success = Bind(instr->TextVal);
-	break;
-      case iBINDREF:
-	instr_success = BindRef(instr->TextVal);
-	break;
-      case iBINDVAL:
-	instr_success = BindVal(instr->TextVal);
-	break;
-      case iCALL_FUNCTION:
-	instr_success = CallFunction();
-	break;
-
-      case iPOP:
-	instr_success = Pop();
-	break;
-      case iDUMP:
-	Dump();
-	instr_success = true;
-	break;
-      case iFLUSH:
-	Flush();
-	instr_success = true;
-	break;
-	
-      default:
-	assert(0);
-      }
-      program_counter++;
-    }
-
-    if(!instr_success)
-    {
-      result = instr->LineNumber;
-      done = true;
-      break;
-    }
-  }
-
-
-  for(i = _CallFuncStack->Depth(); i > initial_num_of_funcs; i--)
-  {
-    funcobj = _CallFuncStack->Pop();
-    delete funcobj;
-  }
-  assert(_CallFuncStack->Depth() == initial_num_of_funcs);
-
-
-
-  if(!user_func)
-  {
-    while(prog.Length() > 0)
-    {
-      delete prog.Remove(1);
-    }
-  }
-
-  return result;
+  return p;
 }
 
 
-
-
-
-Portion* GSM::ExecuteUserFunc(gList< NewInstr* >& program, 
+Portion* GSM::ExecuteUserFunc(gclExpression& program, 
 			      const FuncInfoType& func_info,
 			      Portion** param)
 {
@@ -1191,7 +637,7 @@ Portion* GSM::ExecuteUserFunc(gList< NewInstr* >& program,
   {
     if(param[i] != 0 && param[i]->Spec().Type != porREFERENCE)
     {
-      if( _VarDefine(func_info.ParamInfo[i].Name, param[i]) )
+      if( VarDefine(func_info.ParamInfo[i].Name, param[i]) )
 	param[i] = param[i]->RefCopy();
       else
 	param[i] = new ErrorPortion;
@@ -1199,33 +645,22 @@ Portion* GSM::ExecuteUserFunc(gList< NewInstr* >& program,
   }
 
 
-  rc_result = Execute(program, true);
+  result = Execute(&program, true);
 
+  rc_result = rcSUCCESS;
 
   switch(rc_result)
   {
   case rcSUCCESS:
-    switch(_Depth())
-    {
-    case 0:
-      result = 
-	new ErrorPortion((gString)
-			 "Error: No return value");
-      break;
-
-    default:
-      result = _Pop();
-      result = _ResolveRef(result);
-      result_copy = result->ValCopy();
-      delete result;
-      result = result_copy;
-      result_copy = 0;
-      if(result->Spec().Type == porERROR)
-      {
-	delete result;
-	result = 0;
-      }
-      break;
+    result = _ResolveRef(result);
+    result_copy = result->ValCopy();
+    delete result;
+    result = result_copy;
+    result_copy = 0;
+    if(result->Spec().Type == porERROR)  {
+      gout << result << '\n'; 
+//      delete result;
+//      result = 0;
     }
     break;
   case rcQUIT:
@@ -1244,18 +679,17 @@ Portion* GSM::ExecuteUserFunc(gList< NewInstr* >& program,
 				" in source code");
     else
       result = 0;
-    Dump();
     break;
-  }
+    }
 
 
   for(i = 0; i < func_info.NumParams; i++)
   {
     if(func_info.ParamInfo[i].PassByReference)
     {
-      if(_VarIsDefined(func_info.ParamInfo[i].Name))
+      if(VarIsDefined(func_info.ParamInfo[i].Name))
       {
-	assert(_VarValue(func_info.ParamInfo[i].Name) != 0);
+	assert(VarValue(func_info.ParamInfo[i].Name) != 0);
 	delete param[i];
 	param[i] = _VarRemove(func_info.ParamInfo[i].Name);
       }
@@ -1263,7 +697,6 @@ Portion* GSM::ExecuteUserFunc(gList< NewInstr* >& program,
   }
 
 
-  Flush();
   delete _StackStack->Pop();
   delete _RefTableStack->Pop();
 
@@ -1272,121 +705,19 @@ Portion* GSM::ExecuteUserFunc(gList< NewInstr* >& program,
 
 
 
-
 //----------------------------------------------------------------------------
 //                   miscellaneous functions
 //----------------------------------------------------------------------------
 
 
-
-void GSM::Dump(void)
-{
-  int  i;
-
-  assert(_Depth() >= 0);
-
-  if(_Depth() == 0)
-  {
-    _StdOut << "Stack : NULL\n";
-  }
-  else
-  {
-    for(i = _Depth() - 1; i >= 0; i--)
-    {
-      _StdOut << "Stack element " << i << " : ";
-//      Output();
-      Pop();
-    }
-  }
-
-  assert(_Depth() == 0);
-}
-
-
-bool GSM::Pop(void)
-{
-  Portion* p;
-  bool result = false;
-
-  assert(_Depth() >= 0);
-
-  if(_Depth() > 0)
-  {
-//    if( _Verbose )  {
-//     Output();
-//      delete _Pop();
-//    }
-//    else
-//    {
-      p = _Pop();
-      delete p;
-//    }
-    result = true;
-  }
-  else
-  {
-    result = true;
-  }
-  return result;
-}
-
-
-Portion* GSM::PopValue( void )
-{
-  assert(_Depth() >= 0);
-  Portion* p = 0;
-  Portion* p_old = 0;
-
-  if(_Depth() > 0)
-  {
-    p = _ResolveRef( _Pop() );
-    assert( p );
-    if( p->IsReference() )
-    {
-      p_old = p;
-      p = p_old->ValCopy();
-      delete p_old;
-    }
-  }
-  return p;
-}
-
-
-void GSM::Flush(void)
-{
-  int       i;
-
-  assert(_Depth() >= 0);
-  for(i = _Depth() - 1; i >= 0; i--)
-  {
-    delete _Pop();
-/*
-    result = Pop();
-    assert(result == true);
-    */
-  }
-
-  assert(_Depth() == 0);
-}
-
-
 void GSM::Clear(void)
 {
-  Flush();
-
   assert(_RefTableStack->Depth() > 0);
   delete _RefTableStack->Pop();
-  //delete _RefTableStack;
 
-  //_RefTableStack = new gStack< RefHashTable* >(1);
   _RefTableStack->Push(new RefHashTable);
 
 }
-
-
-
-
-
 
 
 

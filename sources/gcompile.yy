@@ -36,11 +36,16 @@ template class gStack<int>;
 template class gStack<char>;
 template class gStack<gInput *>;
 template class gStack<unsigned int>;
+template class gStack<gclExpression *>;
+template class gStack<gclFunctionCall *>;
 
 #include "glist.imp"
 
 template class gList<bool>;
 template class gNode<bool>;
+
+template class gList<gclExpression *>;
+template class gNode<gclExpression *>;
 
 extern GSM* _gsm;  // defined at the end of gsm.cc
 gStack<gString> GCL_InputFileNames(4);
@@ -50,55 +55,56 @@ gStack<gString> GCL_InputFileNames(4);
 %name GCLCompiler
 
 %define MEMBERS   \
-  int index; \
-  gString input_text; \
-  bool force_output, bval, triv, semi; \
-  int statementcount; \
-  gInteger ival; \
-  double dval; \
-  gString tval, formal, funcname, funcdesc,  paramtype, functype;  \
-  gString funcbody; \
-  bool record_funcbody; \
-  gList<NewInstr*> program, *function, *optparam; \
-  gList<gString> formals, types; \
-  gList<bool> refs; \
-  gList<Portion*> portions; \
-  gStack<gString> formalstack; \
-  gStack<int> labels, listlen; \
-  gStack<char> matching; \
-  gStack<gInput *> inputs; \
-  gStack<int> lines; \
-  int fakeCRLFs; \
   GSM& gsm; \
-  bool quit; \
-  bool in_funcdecl; \
+  bool record_funcbody, in_funcdecl, fakesemi; \
+  int fakeCRLFs; \
+  gString funcbody, funcname, funcdesc, paramtype, functype; \
+  gList<gString> formals, types; \
+  gList<Portion *> portions; \
+  gList<bool> refs; \
+  gStack<int> lines; \
+  gStack<gInput *> inputs; \
+  gStack<char> matching; \
+  gStack<gString> funcnames; \
+  gString tval; \
+  gclExpression *exprtree; \
+  bool bval; \
+  double dval; \
+  int ival; \
   \
   char nextchar(void); \
   void ungetchar(char c); \
   \
-  void emit(NewInstr*); \
-  bool DefineFunction(void); \
+  gclExpression *DefineFunction(gclExpression *expr); \
   bool DeleteFunction(void); \
   void RecoverFromError(void); \
-  int ProgLength(void); \
   \
   int Parse(void); \
   int Execute(void); \
   void LoadInputs( const char* name ); 
 
-%define CONSTRUCTOR_INIT     : record_funcbody(false), \
-                               function(0), \
-                               optparam(0), \
-                               formalstack(4), \
-                               labels(4), \
-                               listlen(4), matching(4), \
-                               lines(4), \
-                               fakeCRLFs(0), \
-                               gsm(*_gsm), quit(false), in_funcdecl(false)
+%define CONSTRUCTOR_INIT     : gsm(*_gsm), in_funcdecl(false), \
+                               fakesemi(false), fakeCRLFs(1)
 
 %define CONSTRUCTOR_CODE       GCL_InputFileNames.Push("stdin"); \
                                lines.Push(1); \
                                LoadInputs( "gclini.gcl" );
+
+%union  {
+  gclExpression *eval;
+  gclExpressionList *lval;
+  gclParameterList *pval;
+  gclReqParameterList *rpval; 
+  gclOptParameterList *opval;
+  gclListConstant *lcval;
+}
+
+%type <eval> expression constant function include
+%type <lval> expressionlist parameter
+%type <pval> parameterlist
+%type <rpval> reqparameterlist 
+%type <opval> optparameterlist
+%type <lcval> list listels
 
 %token LOR
 %token LAND
@@ -160,373 +166,215 @@ gStack<gString> GCL_InputFileNames(4);
 %token CRLF
 %token EOC
 
+%left  UWRITE
+%right  ASSIGN
+%left  WRITE  READ
+%left  LNOT
+%left  LOR
+%left  LAND
+%nonassoc  EQU  NEQ  LTN  LEQ  GTN  GEQ
+%left  PLUS  MINUS  AMPER
+%left  STAR  SLASH  PERCENT  DIV  DOT  CARET
+%left  UMINUS
+%left  HASH  UNDERSCORE
+
+
 %%
 
-program: 
-              toplevel EOC 	
-              { return 0; }
-       |      error EOC   { RecoverFromError();  return 1; }
-       |      error CRLF  { RecoverFromError();  return 1; }
-//       |      include    { return 0; }     
+program: expressionlist  EOC  { exprtree = $1; return 0; }
+       | error EOC    { RecoverFromError(); return 1; }
+       | error CRLF   { RecoverFromError(); return 1; }
+       ;
+ 
+expressionlist:  expression   { $$ = new gclExpressionList($1); }
+              |  expressionlist sep expression
+                     { $1->Append($3); $$ = $1; }
 
-toplevel:     statements
+sep:    SEMI | CRLFs
 
-statements:   statement               
-          |   statements sep statement
+CRLFs:   CRLF 
+     |   CRLFs CRLF
 
-sep:          SEMI    { semi = true; }
-   |          CRLF    { semi = false; }
+include:         INCLUDE LBRACK TEXT RBRACK
+                   { ++fakeCRLFs; fakesemi = true; LoadInputs(tval); 
+                     $$ = new gclConstExpr(new BoolPortion(true)); }
 
-
-funcdecl:     DEFFUNC { if (in_funcdecl)  YYERROR;  in_funcdecl = true; }
-               LBRACK { gcmdline.SetPrompt( false ); }
-              NAME
-              { funcname = tval; function = new gList<NewInstr*>; 
-                statementcount = 0; }
-              LBRACK formallist RBRACK TYPEopt COMMA 
-              { funcbody = ""; record_funcbody = true; }
-              statements 
-              { record_funcbody = false; 
-                if( funcbody.length() > 0 )
-                  funcbody.remove( funcbody.length() - 1 );
-              }
-              optfuncdesc
-              RBRACK   { in_funcdecl = false;
-			 if (!DefineFunction())  YYERROR; 
-                         gcmdline.SetPrompt( true ); } 
-
-optfuncdesc:  | { funcdesc = ""; }
-              COMMA CRLFopt TEXT CRLFopt 
-              { funcdesc = tval; }
-
-delfunc:      DELFUNC { if (in_funcdecl)  YYERROR;  in_funcdecl = true; }
-   	      LBRACK NAME
-              { funcname = tval; function = new gList<NewInstr*>; 
-                statementcount = 0; }
-              LBRACK formallist RBRACK TYPEopt
-              RBRACK   { in_funcdecl = false;
-	                 if (!DeleteFunction())  YYERROR; } 
-
-TYPEopt:      { functype = "ANYTYPE" }
-          |   TYPEDEF { paramtype = ""; } typename 
-              { functype = paramtype; }
-		
-formallist:
-          |   formalparams
-
-formalparams: formalparam
-            | formalparams CRLFopt COMMA CRLFopt formalparam
-
-formalparam:  NAME { formals.Append(tval); } binding 
-              { paramtype = ""; } typename 
-              { types.Append(paramtype); portions.Append(REQUIRED); } 
-            | LBRACE NAME { formals.Append(tval); } binding
-              { paramtype = ""; types.Append(paramtype); }
-              optparam RBRACE
-
-optparam:     { assert( optparam == 0 );
-                optparam = new gList<NewInstr*>; }
-              expression 
-              { 
-                if( gsm.Execute( *optparam ) == rcSUCCESS )
-                {
-                  Portion* _p_ = gsm.PopValue();
-                  assert( _p_ != 0 );
-                  if( _p_->Spec().Type != porREFERENCE )
-                    portions.Append( _p_ );
-                  else
-                    portions.Append( REQUIRED );
-                }
-                else
-                  portions.Append( REQUIRED );
-                delete optparam;
-                optparam = 0;
-              }
-
-
-
-typename:     starname
-            | NAME { paramtype += tval; } optparen
-
-starname:     NAME  { paramtype += tval; } STAR { paramtype += '*'; }
-
-optparen:
-        |     LPAREN { paramtype += '('; }  typename
-              RPAREN { paramtype += ')'; }
-
-binding:      RARROW    { refs.Append(false); }
-       |      DBLARROW  { refs.Append(true); }
-
-statement:    |  expression { triv = false; }
-
-
-include:      INCLUDE LBRACK TEXT RBRACK
-              { ++fakeCRLFs; LoadInputs(tval); }
-
-
-conditional:  IF { gcmdline.SetPrompt( false ); }
-              LBRACK CRLFopt expression CRLFopt COMMA 
-              { emit(new NewInstr(iINIT_CALL_FUNCTION, "Not"));
-                emit(new NewInstr(iBIND));
-                emit(new NewInstr(iCALL_FUNCTION));  emit(0);
-                labels.Push(ProgLength()); } statements 
-              { emit(0);
-		if (function)
-		  (*function)[labels.Pop()] = 
-                    new NewInstr(iIF_GOTO, (long) ProgLength() + 1);
-		else
-		  program[labels.Pop()] = 
-                    new NewInstr(iIF_GOTO, (long) ProgLength() + 1);
-		labels.Push(ProgLength());
-	      }
-              alternative RBRACK
-              { emit(new NewInstr(iNOP));
-		if (function)
-		  (*function)[labels.Pop()] = 
-                    new NewInstr(iGOTO, (long) ProgLength());
-		else
-		  program[labels.Pop()] = 
-                    new NewInstr(iGOTO, (long) ProgLength());
-              } 
-              { gcmdline.SetPrompt( true ); }
-
-alternative:   
-           |  COMMA statements
-
-CRLFopt:    | CRLFs
-
-CRLFs:     CRLF | CRLFs CRLF
-
-whileloop:    WHILE { gcmdline.SetPrompt( false ); }
-              LBRACK CRLFopt { labels.Push(ProgLength() + 1); }
-              expression { emit(new NewInstr(iINIT_CALL_FUNCTION, "Not"));
-                           emit(new NewInstr(iBIND));
-                           emit(new NewInstr(iCALL_FUNCTION));  emit(0);
-			   labels.Push(ProgLength()); }
-              CRLFopt COMMA statements RBRACK 
-              { if (function)
-		  (*function)[labels.Pop()] = 
-                    new NewInstr(iIF_GOTO, (long) ProgLength() + 2);
-		else
-		  program[labels.Pop()] = 
-                    new NewInstr(iIF_GOTO, (long) ProgLength() + 2);
-		emit(new NewInstr(iGOTO, (long) labels.Pop()));
-		emit(new NewInstr(iNOP));
-              }
-              { gcmdline.SetPrompt( true ); }
-
-forloop:      FOR { gcmdline.SetPrompt( false ); }
-              LBRACK CRLFopt exprlist CRLFopt COMMA CRLFopt 
-              { labels.Push(ProgLength() + 1); }
-              expression CRLFopt COMMA CRLFopt
-              {  index = labels.Pop();   // index is loc of begin of guard eval
-                 emit(new NewInstr(iINIT_CALL_FUNCTION, "Not"));
-                 emit(new NewInstr(iBIND));
-                 emit(new NewInstr(iCALL_FUNCTION)); 
-                 // slot for guard-false jump
-                 emit(0); labels.Push(ProgLength());
-                 // push location of increment 
-                 labels.Push(ProgLength() + 2);
-                 // slot for guard-true jump
-                 emit(0); 
-                 labels.Push(ProgLength()); labels.Push(index);
-              }
-              exprlist CRLFopt COMMA
-              { // emit jump to beginning of guard eval
-                emit(new NewInstr(iGOTO, (long) labels.Pop())); 
-                // link guard-true jump
-                if (function)
-                  (*function)[labels.Pop()] = 
-                    new NewInstr(iGOTO, (long) ProgLength() + 1);
-		else
-		  program[labels.Pop()] = 
-                    new NewInstr(iGOTO, (long) ProgLength() + 1);
-                semi = false;
-              }
-              statements RBRACK
-              { 
-                // emit jump to beginning of increment step
-                emit(new NewInstr(iGOTO, (long) labels.Pop()));
-		// link guard-false branch to end of code
-                if (function)
-		  (*function)[labels.Pop()] = 
-                    new NewInstr(iIF_GOTO, (long) ProgLength() + 1);
-		else
-		  program[labels.Pop()] = 
-                    new NewInstr(iIF_GOTO, (long) ProgLength() + 1);
-		emit(new NewInstr(iNOP));
-	      }
-              { gcmdline.SetPrompt( true ); }
-
-exprlist:     expression  { emit(new NewInstr(iPOP)); }
-        |     exprlist SEMI expression  { emit(new NewInstr(iPOP)); }
-
-expression:   Ea
-          |   WRITE
-                { emit(new NewInstr(iPUSH_BOOL, true));
-                  emit(new NewInstr(iINIT_CALL_FUNCTION, "Print"));
-                  emit(new NewInstr(iBIND));
-                  emit(new NewInstr(iCALL_FUNCTION)); }
-          |   WRITE expression  
-                { emit(new NewInstr(iINIT_CALL_FUNCTION, "Print"));
-                  emit(new NewInstr(iBIND));
-                  emit(new NewInstr(iCALL_FUNCTION)); }
-          |   Ea ASSIGN expression { emit(new NewInstr(iASSIGN)); }
-          |   Ea ASSIGN { emit(new NewInstr(iUNASSIGN)); }
-          |   conditional
-          |   whileloop
-          |   forloop
-          |   funcdecl { emit(new NewInstr(iPUSH_BOOL, (bool)true)); }  
-          |   delfunc   { emit(new NewInstr(iPUSH_BOOL, (bool)true)); }
-          |   include   { emit(new NewInstr(iPUSH_BOOL, (bool)true)); }
+expression:      constant
+          |      function
+          |      include
+          |      LPAREN expression RPAREN   { $$ = $2; }
+          |      expression ASSIGN expression 
+              { $$ = new gclAssignment($1, $3); }
+	  |      expression ASSIGN
+              { $$ = new gclUnAssignment($1); }
+          |      WRITE expression   %prec UWRITE
+              { $$ = new gclFunctionCall("Print", $2); } 
+          |      expression HASH expression
+              { $$ = new gclFunctionCall("NthChild", $1, $3); }
+          |      expression UNDERSCORE expression
+              { $$ = new gclFunctionCall("NthElement", $1, $3); }
+          |      expression PLUS expression
+              { $$ = new gclFunctionCall("Plus", $1, $3); }
+          |      expression MINUS expression
+              { $$ = new gclFunctionCall("Minus", $1, $3); }
+          |      expression AMPER expression  
+              { $$ = new gclFunctionCall("Concat", $1, $3); }
+          |      PLUS expression    %prec UMINUS
+              { $$ = $2; }
+          |      MINUS expression   %prec UMINUS
+              { $$ = new gclFunctionCall("Negate", $2); }
+          |      expression STAR expression
+              { $$ = new gclFunctionCall("Times", $1, $3); }
+          |      expression SLASH expression
+              { $$ = new gclFunctionCall("Divide", $1, $3); }
+          |      expression PERCENT expression
+              { $$ = new gclFunctionCall("Modulus", $1, $3); }
+          |      expression DIV expression
+              { $$ = new gclFunctionCall("IntegerDivide", $1, $3); }
+          |      expression DOT expression
+              { $$ = new gclFunctionCall("Dot", $1, $3); }
+          |      expression CARET expression
+              { $$ = new gclFunctionCall("Power", $1, $3); }
+          |      expression EQU expression
+              { $$ = new gclFunctionCall("Equal", $1, $3); }
+          |      expression NEQ expression
+              { $$ = new gclFunctionCall("NotEqual", $1, $3); }
+          |      expression LTN expression
+              { $$ = new gclFunctionCall("Less", $1, $3); }
+          |      expression LEQ expression
+              { $$ = new gclFunctionCall("LessEqual", $1, $3); }
+          |      expression GTN expression
+              { $$ = new gclFunctionCall("Greater", $1, $3); }
+          |      expression GEQ expression
+              { $$ = new gclFunctionCall("GreaterEqual", $1, $3); }
+          |      LNOT expression
+              { $$ = new gclFunctionCall("Not", $2); }
+          |      expression LAND expression
+              { $$ = new gclFunctionCall("And", $1, $3); }
+          |      expression LOR expression
+              { $$ = new gclFunctionCall("Or", $1, $3); }
+	  |      expression WRITE expression
+              { $$ = new gclFunctionCall("Write", $1, $3); }
+          |      expression READ expression
+              { $$ = new gclFunctionCall("Read", $1, $3); }
           ;
 
-Ea:           E0
-  |           Ea IOop   { emit(new NewInstr(iBIND)); }
-                   E0   { emit(new NewInstr(iBIND));
-                          emit(new NewInstr(iCALL_FUNCTION));  }
-  ; 
+function:        IF LBRACK expressionlist COMMA expressionlist COMMA
+                           expressionlist RBRACK
+              { $$ = new gclConditional($3, $5, $7); } 
+        |        IF LBRACK expressionlist COMMA expressionlist RBRACK
+              { $$ = new gclConditional($3, $5, 
+				new gclConstExpr(new BoolPortion(false))); }
+        |        WHILE LBRACK expressionlist COMMA expressionlist RBRACK
+              { $$ = new gclWhileExpr($3, $5); }
+	|        FOR LBRACK expressionlist COMMA expressionlist COMMA
+                            expressionlist COMMA expressionlist RBRACK
+              { $$ = new gclForExpr($3, $5, $7, $9); }
+        |        DEFFUNC { if (in_funcdecl) YYERROR;  in_funcdecl = true; }
+                  LBRACK  { gcmdline.SetPrompt(false); } signature COMMA 
+                  { funcbody = ""; record_funcbody = true; }
+                  expressionlist RBRACK
+                  { record_funcbody = false; in_funcdecl = false;
+                    $$ = DefineFunction($8);
+	            gcmdline.SetPrompt(true); }
+        |        NAME LBRACK  { funcnames.Push(tval); } parameterlist RBRACK
+              { $$ = new gclFunctionCall(funcnames.Pop(), $4); }
 
-IOop:         WRITE   { emit(new NewInstr(iINIT_CALL_FUNCTION, "Write")); }
-    |         READ    { emit(new NewInstr(iINIT_CALL_FUNCTION, "Read")); }
-    ;   
+parameterlist:     { $$ = new gclParameterList; }
+             |     reqparameterlist  { $$ = new gclParameterList($1); }
+             |     optparameterlist  { $$ = new gclParameterList($1); }
+             |     reqparameterlist COMMA optparameterlist
+                        { $$ = new gclParameterList($1, $3); }
 
-E0:           E1
-  |           E0 LOR  { emit(new NewInstr(iINIT_CALL_FUNCTION, "Or"));
-                        emit(new NewInstr(iBIND));  }
-                  E1  { emit(new NewInstr(iBIND));
-                        emit(new NewInstr(iCALL_FUNCTION)); }
-  ;
+reqparameterlist:  parameter  { $$ = new gclReqParameterList($1); }
+             |     reqparameterlist COMMA parameter  { $1->Append($3); }
 
-E1:           E2
-  |           E1 LAND  { emit(new NewInstr(iINIT_CALL_FUNCTION, "And"));
-                         emit(new NewInstr(iBIND));  }
-                   E2  { emit(new NewInstr(iBIND));
-                         emit(new NewInstr(iCALL_FUNCTION)); }
-  ;
+parameter:       expressionlist
 
-E2:           E3
-  |           LNOT E2   { emit(new NewInstr(iINIT_CALL_FUNCTION, "Not"));
-                          emit(new NewInstr(iBIND));
-                          emit(new NewInstr(iCALL_FUNCTION));  }
-  ;
+optparameterlist:  NAME  { funcnames.Push(tval); } arrow expressionlist
+                         { $$ = new gclOptParameterList(funcnames.Pop(), $4); }
+                |  optparameterlist COMMA NAME  { funcnames.Push(tval); }
+	              arrow expressionlist
+                         { $1->Append(funcnames.Pop(), $6); }
 
-E3:           E4       
-  |           E3 relop { emit(new NewInstr(iBIND)); }
-                    E4 { emit(new NewInstr(iBIND));
-                         emit(new NewInstr(iCALL_FUNCTION)); }
-  ;
+arrow:         RARROW | DBLARROW
 
-relop:        EQU    { emit(new NewInstr(iINIT_CALL_FUNCTION, "Equal")); } 
-  |           NEQ    { emit(new NewInstr(iINIT_CALL_FUNCTION, "NotEqual")); }
-  |           LTN    { emit(new NewInstr(iINIT_CALL_FUNCTION, "Less")); }
-  |           LEQ    { emit(new NewInstr(iINIT_CALL_FUNCTION, "LessEqual")); }
-  |           GTN    { emit(new NewInstr(iINIT_CALL_FUNCTION, "Greater")); } 
-  |           GEQ    { emit(new NewInstr(iINIT_CALL_FUNCTION, "GreaterEqual")); }
-  ;
+constant:        BOOLEAN 
+          { $$ = new gclConstExpr(new BoolPortion(bval)); }
+        |        INTEGER   
+          { $$ = new gclConstExpr(new IntPortion(ival)); }
+        |        FLOAT
+          { $$ = new gclConstExpr(new NumberPortion(dval)); }
+        |        TEXT
+          { $$ = new gclConstExpr(new TextPortion(tval)); }
+        |        STDIN
+          { $$ = new gclConstExpr(new InputRefPortion(gin)); }
+        |        STDOUT
+          { $$ = new gclConstExpr(new OutputRefPortion(gout)); }
+        |        gNULL
+          { $$ = new gclConstExpr(new OutputRefPortion(gnull)); }
+        |        MACHINEPREC
+          { $$ = new gclConstExpr(new PrecisionPortion(precDOUBLE)); }
+        |        RATIONALPREC
+          { $$ = new gclConstExpr(new PrecisionPortion(precRATIONAL)); }
+        |        NAME
+          { $$ = new gclVarName(tval); }
+        |        list   { $$ = $1; }
+        |        QUIT
+          { $$ = new gclQuitExpression; }
+        ;
 
-E4:           E5
-  |           E4 addop { emit(new NewInstr(iBIND)); }
-                    E5 { emit(new NewInstr(iBIND));
-                         emit(new NewInstr(iCALL_FUNCTION)); }
-  ;
+list:            LBRACE RBRACE  { $$ = new gclListConstant; }
+    |            LBRACE listels RBRACE  { $$ = $2; }
+    ;
 
-addop:        PLUS   { emit(new NewInstr(iINIT_CALL_FUNCTION, "Plus")); }
-     |        MINUS  { emit(new NewInstr(iINIT_CALL_FUNCTION, "Minus")); }
-     |        AMPER  { emit(new NewInstr(iINIT_CALL_FUNCTION, "Concat")); }
-     ;
+listels:         expression   { $$ = new gclListConstant($1); }
+       |         listels COMMA expression  { $1->Append($3); }
+       ;
 
-E5:           E6
-  |           E5 mulop { emit(new NewInstr(iBIND)); } 
-                    E6 { emit(new NewInstr(iBIND));
-                         emit(new NewInstr(iCALL_FUNCTION)); }
-  ;
 
-mulop:        STAR       { emit(new NewInstr(iINIT_CALL_FUNCTION, "Times")); }
-  |           SLASH      { emit(new NewInstr(iINIT_CALL_FUNCTION, "Divide")); }
-  |           PERCENT    { emit(new NewInstr(iINIT_CALL_FUNCTION, "Modulus")); }
-  |           DIV        { emit(new NewInstr(iINIT_CALL_FUNCTION, "IntegerDivide")); }
-  |           DOT        { emit(new NewInstr(iINIT_CALL_FUNCTION, "Dot")); }
-  |           CARET      { emit(new NewInstr(iINIT_CALL_FUNCTION, "Power")); } 
-  ;
+signature:       NAME  { funcname = tval; }   LBRACK
+                   formallist RBRACK TYPEopt
 
-E6:           PLUS E7
-  |           MINUS   { emit(new NewInstr(iINIT_CALL_FUNCTION, "Negate")); }
-                    E7    { emit(new NewInstr(iBIND));
-                            emit(new NewInstr(iCALL_FUNCTION));  }
-  |           E7
-  ;
+TYPEopt:         { functype = "ANYTYPE"; }
+       |         TYPEDEF  { paramtype = ""; } typename
+                 { functype = paramtype; }
 
-E7:           E8
-  |           E7 indexop  { emit(new NewInstr(iBIND)); }
-                      E8  { emit(new NewInstr(iBIND));
-                            emit(new NewInstr(iCALL_FUNCTION)); }
-  |           E7 DBLLBRACK expression RBRACK RBRACK 
-                 { emit(new NewInstr(iINIT_CALL_FUNCTION, "NthElement"));
-                   emit(new NewInstr(iBIND));
-                   emit(new NewInstr(iBIND));
-		   emit(new NewInstr(iCALL_FUNCTION)); }
-  ;
+typename:        starname
+        |        NAME  { paramtype += tval; } optparen
 
-indexop:      HASH     { emit(new NewInstr(iINIT_CALL_FUNCTION, "NthChild")); }
-       |      UNDERSCORE { emit(new NewInstr(iINIT_CALL_FUNCTION, "NthElement")); }
+optparen:        
+        |        LPAREN { paramtype += '('; } typename
+                 RPAREN { paramtype += ')'; }
 
-E8:           E9   
-  |           LPAREN expression RPAREN
-  |           NAME          { emit(new NewInstr(iPUSHREF, tval)); }
-  |           function      { emit(new NewInstr(iCALL_FUNCTION)); }
-  |           { gcmdline.SetPrompt( false ); }
-              list
-              { gcmdline.SetPrompt( true ); }
-                                { emit(new NewInstr(iPUSHLIST, 
-                                (long) listlen.Pop())); }
-  ;
+starname:        NAME  { paramtype += tval; } STAR { paramtype += '*'; }
 
-E9:           BOOLEAN  { emit(new NewInstr(iPUSH_BOOL, bval)); }
-  |           INTEGER  { emit(new NewInstr(iPUSH_INTEGER, ival.as_long())); }
-  |           FLOAT    { emit(new NewInstr(iPUSH_FLOAT, dval)); }
-  |           TEXT     { emit(new NewInstr(iPUSH_TEXT, tval)); }
-  |           STDIN    { emit(new NewInstr(iPUSHINPUT, &gin)); }
-  |           STDOUT   { emit(new NewInstr(iPUSHOUTPUT, &gout)); }
-  |           gNULL    { emit(new NewInstr(iPUSHOUTPUT, &gnull)); }
-  |           MACHINEPREC { emit(new NewInstr(iPUSH_PREC, precDOUBLE)); }
-  |           RATIONALPREC { emit(new NewInstr(iPUSH_PREC, precRATIONAL)); }
-  |           QUIT     { emit(new NewInstr(iQUIT)); }
-  ;
+formallist:      
+          |      formalparams
 
-function:     NAME LBRACK { emit(new NewInstr(iINIT_CALL_FUNCTION, tval)); } 
-              arglist RBRACK
+formalparams:    formalparam
+            |    formalparams COMMA formalparam
 
-arglist:
-       |      unnamed_args
-       |      unnamed_args COMMA named_args
-       |      named_args
+formalparam:     NAME  { formals.Append(tval); }  binding
+                 { paramtype = ""; }  typename
+                 { types.Append(paramtype); portions.Append(REQUIRED); }
+           |     LBRACE NAME  { formals.Append(tval); }  binding
+                 { paramtype = ""; types.Append(paramtype); }
+                 expression RBRACE
+                 { {
+                   Portion *_p_ = $6->Evaluate();
+                   if (_p_->Spec().Type != porREFERENCE)
+                     portions.Append(_p_);
+                   else  {
+                     delete _p_;
+	             portions.Append(REQUIRED);
+                   }
+                   delete $6;
+                 } }    
 
-unnamed_args: unnamed_arg
-            | unnamed_args COMMA unnamed_arg
+binding:         RARROW    { refs.Append(false); }
+       |         DBLARROW  { refs.Append(true); }
 
-unnamed_arg:  expression  { emit(new NewInstr(iBIND)); }
-
-named_args:   named_arg
-          |   named_args COMMA named_arg
-
-named_arg:    NAME RARROW { formalstack.Push(tval); } expression
-                           { emit(new NewInstr(iBINDVAL, formalstack.Pop())); }
-         |    NAME DBLARROW  { formalstack.Push(tval); } name_or_io
-                           { emit(new NewInstr(iBINDREF, formalstack.Pop())); }
-
-name_or_io:   NAME     { emit(new NewInstr(iPUSHREF, tval)); }
-         |    STDIN    { emit(new NewInstr(iPUSHINPUT, &gin)); }
-         |    STDOUT   { emit(new NewInstr(iPUSHOUTPUT, &gout)); }
-         |    gNULL    { emit(new NewInstr(iPUSHOUTPUT, &gnull)); }
-
-list:         LBRACE CRLFopt  { listlen.Push(0); } listels CRLFopt RBRACE 
-    |         LBRACE CRLFopt  { listlen.Push(0); } RBRACE 
-
-listels:      listel
-       |      listels CRLFopt COMMA CRLFopt listel
-
-listel:       expression   { listlen.Push(listlen.Pop() + 1); }
 
 %%
 
@@ -543,13 +391,15 @@ char GCLCompiler::nextchar(void)
     lines.Pop();
   }
 
-  if( fakeCRLFs > 0 )
-  {
+  if (fakeCRLFs > 0)  {
     --fakeCRLFs;
     c = '\n';
   }
-  else
-  {
+  else if (fakesemi)  {
+    fakesemi = false;
+    c = ';';
+  }
+  else  {
     if (inputs.Depth() == 0)
       // gin >> c;
       gcmdline >> c;
@@ -593,7 +443,7 @@ static struct tokens toktable[] =
     { STAR, "*" }, { SLASH, "/" }, { ASSIGN, ":=" }, { SEMI, ";" },
     { LBRACK, "[" }, { DBLLBRACK, "[[" }, { RBRACK, "]" },
     { LBRACE, "{" }, { RBRACE, "}" }, { RARROW, "->" },
-    { LARROW, "<-" }, { COMMA, "," }, { HASH, "#" },
+    { LARROW, "<-" }, { DBLARROW, "<->" }, { COMMA, "," }, { HASH, "#" },
     { DOT, "." }, { CARET, "^" }, { UNDERSCORE, "_" },
     { AMPER, "&" }, { WRITE, "<<" }, { READ, ">>" },
     { IF, "If" }, { WHILE, "While" }, { FOR, "For" },
@@ -651,11 +501,6 @@ int GCLCompiler::yylex(void)
 {
   char c;
 
-  if (force_output)  {
-    force_output = false;
-    return WRITE;
-  }	
-
 I_dont_believe_Im_doing_this:
 
   while (1)  {
@@ -663,11 +508,14 @@ I_dont_believe_Im_doing_this:
     do  {
       c = nextchar();
     }  while (isspace(c) && c != CR);
+    if (c == CR && (matching.Depth() || inputs.Depth() > 0))
+      continue;
+ 
     if (c == '/')  {
       if ((d = nextchar()) == '/')  {
 	while ((d = nextchar()) != CR);
-	if (matching.Depth())
-	  return CRLF;
+	if (matching.Depth() || inputs.Depth() > 1)
+	  goto I_dont_believe_Im_doing_this;
 	else
 	  return EOC;
       }
@@ -728,9 +576,9 @@ I_dont_believe_Im_doing_this:
     else if (s == "Quit")   return QUIT;
     else if (s == "NewFunction")   return DEFFUNC;
     else if (s == "DeleteFunction")   return DELFUNC;
-    else if (s == "Include")   return INCLUDE;
     else if (s == "Machine")   return MACHINEPREC;
     else if (s == "Rational")  return RATIONALPREC;
+    else if (s == "Include")   return INCLUDE;
     else  { tval = s; return NAME; }
   }
 
@@ -860,7 +708,10 @@ I_dont_believe_Im_doing_this:
                 if (c == '|')  return LOR;
                 else   { ungetchar(c);  return '|'; }
     case CR:    if (matching.Depth())
-                  return CRLF;
+                  //return CRLF;
+                  goto I_dont_believe_Im_doing_this;
+                else if (inputs.Depth() > 0)
+                  goto I_dont_believe_Im_doing_this;
     case EOF:   return EOC;
     default:    if ((inputs.Depth() == 0 && gcmdline.eof()) ||
                     (inputs.Depth() > 0 && inputs.Peek()->eof())) return EOC;
@@ -872,7 +723,7 @@ int GCLCompiler::Parse(void)
 {
   int command = 1;
 
-  while (!quit && (inputs.Depth() > 0 || !gcmdline.eof()))  {
+  while ((inputs.Depth() > 0 || !gcmdline.eof()))  {
 
     while (inputs.Depth() && inputs.Peek()->eof())  {
       delete inputs.Pop();
@@ -880,58 +731,20 @@ int GCLCompiler::Parse(void)
       lines.Pop();
     }
 
-    if (inputs.Depth() == 0)  {
-      // gout << "GCL" << command << ": ";
-      /*
-      if (gsm.Verbose())  {
-        gout << "<< ";
-	force_output = true;
-      }	
-      */
-    }
     matching.Flush();
     if (!yyparse())  {
-      if (Execute() == rcQUIT)  quit = true;
+      Execute();
+      if (exprtree)   delete exprtree;
       if (inputs.Depth() == 0) command++;
     }
-    else 
-      while (program.Length() > 0)   delete program.Remove(1);
   }
   gsm.Clear();
   return 1;
 }
 
 
-void GCLCompiler::emit(NewInstr* op)
-{
-  // the encoding for the line number is decoded in GSM::ExecuteUserFunc()
-  if(op) op->LineNumber = statementcount * 65536 + lines.Peek();
-  if( optparam )
-    optparam->Append( op );
-  else if (function)
-    function->Append(op);
-  else
-    program.Append(op);
-}
-
-int GCLCompiler::ProgLength(void)
-{
-  return (function) ? function->Length() : program.Length();
-}
-
 void GCLCompiler::RecoverFromError(void)
 {
-  if (function)   {
-    while (function->Length())   delete function->Remove(1);
-    delete function;  function = 0;
-    formals.Flush();
-    types.Flush();
-    refs.Flush();
-    portions.Flush();
-  }
-  labels.Flush();
-  listlen.Flush();
-
   while (inputs.Depth())   {
     delete inputs.Pop();
     GCL_InputFileNames.Pop();
@@ -939,10 +752,16 @@ void GCLCompiler::RecoverFromError(void)
   }
 
   gcmdline.ResetPrompt();
+
+  in_funcdecl = false;
+  formals.Flush();
+  types.Flush();
+  refs.Flush();
+  portions.Flush();
 }
     
 
-bool GCLCompiler::DefineFunction(void)
+gclExpression *GCLCompiler::DefineFunction(gclExpression *expr)
 {
   FuncDescObj *func = new FuncDescObj(funcname, 1);
   bool error = false;
@@ -952,7 +771,7 @@ bool GCLCompiler::DefineFunction(void)
   funcspec = TextToPortionSpec(functype);
   if (funcspec.Type != porERROR) {
     FuncInfoType funcinfo = 
-      FuncInfoType(function, funcspec, formals.Length());
+      FuncInfoType(expr, funcspec, formals.Length());
     funcinfo.Desc = funcbody;
     if( funcdesc.length() > 0 )
       funcinfo.Desc += "\n\n" + funcdesc;
@@ -965,8 +784,6 @@ bool GCLCompiler::DefineFunction(void)
       PortionSpecToText(funcspec) << " as return type in declaration of " << 
       funcname << "[]\n";
   }
-
-//  function->Dump(gout);
 
   for (int i = 1; i <= formals.Length(); i++)   {
     PortionSpec spec;
@@ -995,19 +812,21 @@ bool GCLCompiler::DefineFunction(void)
   }
 
 
-  if( !error )
-    gsm.AddFunction(func);
   formals.Flush();
   types.Flush();
   refs.Flush();
   portions.Flush();
-  function = 0;
-  return !error;
+//  function = 0;
+  if (!error)
+    return new gclFunctionDef(func, expr);
+  else
+    return new gclConstExpr(new BoolPortion(false));;
 }
 
 
 bool GCLCompiler::DeleteFunction(void)
 {
+/*
   FuncDescObj *func = new FuncDescObj(funcname, 1);
   bool error = false;
 
@@ -1059,23 +878,20 @@ bool GCLCompiler::DeleteFunction(void)
   portions.Flush();
   function = 0;
   return !error;
+*/
+  return false;
 }
 
 
 int GCLCompiler::Execute(void)
 {
-#ifdef ASSEMBLY
-  program.Dump(gout);   gout << '\n';
-#endif   // ASSEMBLY
-  int result = gsm.Execute(program);
-  gsm.Flush();
-  return result;
+  delete gsm.Execute(exprtree); 
+  return rcSUCCESS;
 }
 
 
 void GCLCompiler::LoadInputs( const char* name )
 {
-
   extern char* _SourceDir;
   const char* SOURCE = _SourceDir; 
   assert( SOURCE );

@@ -14,74 +14,215 @@
 
 #include "gstring.h"
 #include "gmisc.h"
+#include "portion.h"
 
-//-------------------------------------------------------------------
-//                      Opcodes
-//-------------------------------------------------------------------
-
-typedef enum
-{
-  iUNDEFINED,
-
-  iNOP,
-
-  iQUIT, iIF_GOTO, iGOTO, iCLEAR,
-
-  iPUSH_BOOL, iPUSH_FLOAT, iPUSH_RATIONAL, iPUSH_INTEGER, iPUSH_TEXT,
-  iPUSHINPUT, iPUSHOUTPUT, iPUSH_PREC,
-  iPUSHLIST, iPUSHREF,
-  iASSIGN, iUNASSIGN,
-
-  iINIT_CALL_FUNCTION, iBIND, iBINDREF, iBINDVAL, iCALL_FUNCTION,
-
-  iPOP, iDUMP, iFLUSH,
-  iHELP
-} Opcode;
-
-
-//--------------------------------------------------------------------
-//                       NewInstr class
-//--------------------------------------------------------------------
-//   This is the new general purpose instruction class.
-//   The instructions are decoded and run by GSM::Execute().
-//   GSM::Execute() is located in gsm.h,cc
-//
-
-class NewInstr
-{
-public:
-  Opcode Code;
-  union 
-  {
-    bool      BoolVal;
-    long      IntVal;
-    double    FloatVal;
-    gInput*   InputVal;
-    gOutput*  OutputVal;
-    Precision PrecVal;
-  };
-  gString TextVal;
-  long LineNumber;
-  
-  NewInstr(Opcode code, const bool& v = false)
-    : Code(code), BoolVal(v), LineNumber(0) {}
-  NewInstr(Opcode code, const long& v)
-    : Code(code), IntVal(v), LineNumber(0) {}
-  NewInstr(Opcode code, const double& v)
-    : Code(code), FloatVal(v), LineNumber(0) {}
-  NewInstr(Opcode code, const gString& v)
-    : Code(code), TextVal(v), LineNumber(0) {}
-  NewInstr(Opcode code, const Precision& v)
-    : Code(code), PrecVal(v), LineNumber(0) {}
-  NewInstr(Opcode code, gInput* v)
-    : Code(code), InputVal(v), LineNumber(0) {}
-  NewInstr(Opcode code, gOutput* v)
-    : Code(code), OutputVal(v), LineNumber(0) {}
-  ~NewInstr() {}
+class gclExpression     {
+  public:
+    virtual ~gclExpression()  { }
+    
+    virtual Portion *Evaluate(void) = 0;
 };
 
-class gOutput;
-gOutput& operator << ( gOutput& s, NewInstr* p );
+
+class gclQuitExpression : public gclExpression  {
+  public:
+    gclQuitExpression(void)  { }
+    virtual ~gclQuitExpression()  { } 
+
+    Portion *Evaluate(void);
+};
+
+class gclExpressionList : public gclExpression  {
+  private:
+    gList<gclExpression *> exprs;
+
+  public: 
+    gclExpressionList(gclExpression *);
+    virtual ~gclExpressionList();
+  
+    void Prepend(gclExpression *);
+    void Append(gclExpression *);
+
+    Portion *Evaluate(void);
+};
+  
+
+class gclReqParameterList  {
+  private:
+    gList<gclExpression *> exprs;
+
+  public: 
+    gclReqParameterList(void);
+    gclReqParameterList(gclExpression *);
+    ~gclReqParameterList();
+  
+    void Append(gclExpression *);
+
+    int NumParams(void) const;
+    gclExpression *operator[](int index) const;
+};
+
+
+class gclOptParameterList  {
+  private:
+    gList<gString> names;
+    gList<gclExpression *> exprs;
+
+  public: 
+    gclOptParameterList(void);
+    gclOptParameterList(const gString &, gclExpression *);
+    virtual ~gclOptParameterList();
+  
+    void Append(const gString &, gclExpression *);
+
+    int NumParams(void) const;
+    gclExpression *operator[](int index) const;
+    gString FormalName(int index) const;
+};
+
+class gclParameterList   {
+  friend class gclFunctionCall;
+  private:
+    gclReqParameterList *req;
+    gclOptParameterList *opt;
+
+  public:
+    gclParameterList(void);
+    gclParameterList(gclReqParameterList *r);
+    gclParameterList(gclOptParameterList *o);
+    gclParameterList(gclReqParameterList *r, gclOptParameterList *o);
+    ~gclParameterList();
+};
+
+
+class gclFunctionCall : public gclExpression   {
+  private:
+    gString name;
+    gclParameterList *params;
+
+  public:
+    gclFunctionCall(const gString &name);
+    gclFunctionCall(const gString &name, gclExpression *op);
+    gclFunctionCall(const gString &name,
+                    gclExpression *op1, gclExpression *op2);
+    gclFunctionCall(const gString &name, gclParameterList *params);
+    virtual ~gclFunctionCall();
+
+    Portion *Evaluate(void);
+};
+
+
+class gclAssignment : public gclExpression  {
+  private:
+    gclExpression *variable, *value;
+
+  public:
+    gclAssignment(gclExpression *value, gclExpression *var);
+    virtual ~gclAssignment();
+
+    Portion *Evaluate(void);
+};
+
+class gclUnAssignment : public gclExpression  {
+  private:
+    gclExpression *variable;
+
+  public:
+    gclUnAssignment(gclExpression *var);
+    virtual ~gclUnAssignment();
+
+    Portion *Evaluate(void);
+};
+
+class FuncDescObj;
+
+class gclFunctionDef : public gclExpression  {
+  private:
+    FuncDescObj *func;
+    gclExpression *body;
+
+  public:
+    gclFunctionDef(FuncDescObj *f, gclExpression *b);
+    virtual ~gclFunctionDef();
+
+    Portion *Evaluate(void);
+};
+
+class gclConstExpr : public gclExpression    {
+  private:
+    Portion *value;
+
+  public:
+    gclConstExpr(Portion *value);
+    virtual ~gclConstExpr();
+
+    Portion *Evaluate(void);
+};
+
+class gclListConstant : public gclExpression  {
+  private:
+    gList<gclExpression *> values;
+
+  public:
+    gclListConstant(void);
+    gclListConstant(gclExpression *);
+    virtual ~gclListConstant();
+
+    void Append(gclExpression *);
+
+    Portion *Evaluate(void);
+};
+
+
+class gclVarName : public gclExpression   {
+  private:
+    Portion *value;
+
+  public:
+    gclVarName(const gString &);
+    virtual ~gclVarName();
+
+    Portion *Evaluate(void);
+};
+
+
+class gclConditional : public gclExpression  {
+  private:
+    gclExpression *guard, *truebr, *falsebr;
+
+  public:
+    gclConditional(gclExpression *guard, gclExpression *iftrue);
+    gclConditional(gclExpression *guard,
+                   gclExpression *iftrue, gclExpression *iffalse);
+    virtual ~gclConditional();
+
+    Portion *Evaluate(void);
+};
+
+class gclWhileExpr : public gclExpression  {
+  private:
+    gclExpression *guard, *body;
+
+  public:
+    gclWhileExpr(gclExpression *guard, gclExpression *body);
+    virtual ~gclWhileExpr();
+
+    Portion *Evaluate(void);
+};
+
+class gclForExpr : public gclExpression  {
+  private:
+    gclExpression *init, *guard, *step, *body;
+
+  public:
+    gclForExpr(gclExpression *init, gclExpression *guard,
+               gclExpression *step, gclExpression *body);
+    virtual ~gclForExpr();
+
+    Portion *Evaluate(void);
+};
 
 
 #endif // GSMINSTR_H
+
+
