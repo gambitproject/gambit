@@ -161,6 +161,7 @@ bool IsPerfectRecall(const BaseEfg &efg)
 	Infoset *iset2 = player->InfosetList()[j];
 
 	bool precedes = false;
+	int action = 0;
 	
 	for (int m = 1; m <= iset2->NumMembers(); m++)  {
 	  int n;
@@ -168,6 +169,14 @@ bool IsPerfectRecall(const BaseEfg &efg)
 	    if (efg.IsPredecessor(iset1->GetMemberList()[n],
 				  iset2->GetMemberList()[m]))  {
 	      precedes = true;
+	      for (int act = 1; act <= iset1->NumActions(); act++)  {
+		if (efg.IsPredecessor(iset1->GetMemberList()[n]->GetChild(act),
+				      iset2->GetMemberList()[m]))  {
+		  if (action != 0 && action != act)
+		    return false;
+		  action = act;
+		}
+	      }
 	      break;
 	    }
 	  }
@@ -175,6 +184,8 @@ bool IsPerfectRecall(const BaseEfg &efg)
 	  if (n > iset1->NumMembers() && precedes)
 	    return false;
 	}
+	
+
       }
     }
   }
