@@ -614,7 +614,7 @@ Portion* List_Portion::Subscript( Portion* p ) const
 //---------------------------------------------------------------------
 
 
-Nfg_Portion::Nfg_Portion( Nfg& value )
+Nfg_Portion::Nfg_Portion( BaseNormalForm& value )
 {
   _RefTable = new RefHashTable;
   _Value = &value;
@@ -630,7 +630,7 @@ Nfg_Portion::~Nfg_Portion()
 }
 
 
-Nfg& Nfg_Portion::Value( void )
+BaseNormalForm& Nfg_Portion::Value( void )
 { return *_Value; }
 
 PortionType Nfg_Portion::Type( void ) const
@@ -642,16 +642,18 @@ Portion* Nfg_Portion::Copy( void ) const
 
 void Nfg_Portion::MakeCopyOfData( Portion* p )
 {
+/*
   Portion::MakeCopyOfData( p );
-  _Value = new Nfg;
+  _Value = new BaseNormalForm;
   _Value->value = ( (Nfg_Portion*) p )->_Value->value;
+  */
 }
 
 
 bool Nfg_Portion::Operation( Portion* p, OperationMode mode )
 {
   bool  result = true;
-  Nfg&  p_value = *( ( (Nfg_Portion*) p )->_Value );
+  BaseNormalForm&  p_value = *( ( (Nfg_Portion*) p )->_Value );
 
   if( p == 0 )      // unary operations
   {
@@ -675,7 +677,7 @@ bool Nfg_Portion::Operation( Portion* p, OperationMode mode )
 
 
 void Nfg_Portion::Output( gOutput& s ) const
-{ s << "(Nfg) " << _Value->value; }
+{ _Value->DisplayNfg(s); }
 
 
 

@@ -124,6 +124,7 @@ bool GSM::Push( const gString& data )
 
 
 // This function is only temporarily here for testing reasons
+/*
 bool GSM::GenerateNfg( const double& data )
 {
   Nfg_Portion* p;
@@ -133,7 +134,7 @@ bool GSM::GenerateNfg( const double& data )
   _Stack->Push( p );
   return true;
 }
-
+*/
 
 
 

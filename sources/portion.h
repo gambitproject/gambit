@@ -17,7 +17,6 @@
 #include "gblock.h"
 #include "rational.h"
 #include "gstring.h"
-#include "nfg.h"
 
 
 typedef enum 
@@ -193,19 +192,21 @@ class List_Portion : public Portion
 };
 
 
+#include "normal.h"
+
 class Nfg_Portion : public Portion
 {
  private:
-  Nfg*           _Value;
+  BaseNormalForm *_Value;
   RefHashTable*  _RefTable;
 
  public:
-  Nfg_Portion( Nfg& value );
+  Nfg_Portion( BaseNormalForm& value );
   ~Nfg_Portion();
 
   // Only the passing by reference version of Value() is provided in 
   // order to eliminate unecessary copying
-  Nfg&        Value          ( void );
+  BaseNormalForm& Value          ( void );
   Portion*    Copy           ( void ) const;
   void        MakeCopyOfData ( Portion* p );
   PortionType Type           ( void ) const;
