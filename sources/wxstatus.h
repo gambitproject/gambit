@@ -23,13 +23,13 @@ public:
     ~wxStatus();
 
     // functions for gProgress::gOutput
-    int      GetWidth(void)      { return Width; }
-    gOutput &SetWidth(int w)     { Width = w; return *this; }
-    int      GetPrec(void)       { return Prec; }
-    gOutput &SetPrec(int p)      { Prec = p; return *this; }
-    gOutput &SetExpMode(void)    { Represent = 'e'; return *this; }
-    gOutput &SetFloatMode(void)  { Represent = 'f'; return *this; }
-    char GetRepMode(void)        { return Represent; }
+    int      GetWidth(void) const     { return Width; }
+    gOutput &SetWidth(int w)          { Width = w; return *this; }
+    int      GetPrec(void)  const     { return Prec; }
+    gOutput &SetPrec(int p)           { Prec = p; return *this; }
+    gOutput &SetExpMode(void)         { Represent = 'e'; return *this; }
+    gOutput &SetFloatMode(void)       { Represent = 'f'; return *this; }
+    char GetRepMode(void)   const     { return Represent; }
 
     gOutput &operator<<(int x);
     gOutput &operator<<(unsigned int x);
