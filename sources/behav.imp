@@ -84,7 +84,10 @@ template <class T> void ChanceInfoset<T>::PrintActions(gOutput &f) const
 //      Efg<T>: Constructor, destructors, constructive operators
 //------------------------------------------------------------------------
 
-template <class T> Efg<T>::Efg(void) : lexicon(0)
+template <class T> Efg<T>::Efg(void)
+#ifndef EFG_ONLY
+ : lexicon(0)
+#endif   // EFG_ONLY
 { root = new TypedNode<T>(this, 0, 0); }
 
 template <class T> void Efg<T>::CopySubtree(Node *n, Node *m)
@@ -113,7 +116,11 @@ template <class T> void Efg<T>::CopySubtree(Node *n, Node *m)
 }
 
 template <class T> Efg<T>::Efg(const BaseEfg &E)
+#ifdef EFG_ONLY
+  : BaseEfg(E)
+#else
   : BaseEfg(E), lexicon(0)
+#endif   // EFG_ONLY
 {
   int i;
   
@@ -142,7 +149,11 @@ template <class T> Efg<T>::Efg(const BaseEfg &E)
 }
 
 template <class T> Efg<T>::Efg(const Efg<T> &E)
+#ifdef EFG_ONLY
+  : BaseEfg(E)
+#else
   : BaseEfg(E), lexicon(0)
+#endif   // EFG_ONLY
 {
   int i;
 
@@ -178,7 +189,11 @@ template <class T> Efg<T>::Efg(const Efg<T> &E)
 // Use with care, if at all!
 //
 template <class T> Efg<T>::Efg(const Efg<T> &E, Node *n)
+#ifdef EFG_ONLY
+  : BaseEfg(E)
+#else
   : BaseEfg(E), lexicon(0)
+#endif   // EFG_ONLY
 {
   int i;
 
@@ -216,8 +231,10 @@ template <class T> Efg<T>::Efg(const Efg<T> &E, Node *n)
 
 template <class T> Efg<T>::~Efg()
 { 
+#ifndef EFG_ONLY
   if (lexicon)   delete lexicon;
   lexicon = 0;
+#endif   // EFG_ONLY
 }
 
 //------------------------------------------------------------------------
@@ -228,8 +245,10 @@ template <class T> Efg<T>::~Efg()
 
 template <class T> void Efg<T>::DeleteLexicon(void)
 {
+#ifndef EFG_ONLY
   if (lexicon)   delete lexicon;
   lexicon = 0;
+#endif   // EFG_ONLY
 }
 
 template <class T> Infoset *Efg<T>::CreateInfoset(int n, EFPlayer *p, int br)

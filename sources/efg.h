@@ -19,7 +19,6 @@ class EFPlayer;
 class Infoset;
 class Node;
 class Action;
-class BaseNfg;
 class EFSupport;
 
 class BaseEfg     {
@@ -29,7 +28,6 @@ private:
   static int _NumObj;
   
 friend class EfgFileReader;
-friend class BaseNfg;  
 
 protected:
     bool sortisets;
@@ -158,17 +156,24 @@ template <class T> class OutcomeVector;
 
 template <class T> class Efg;
 template <class T> class BehavProfile;
+
+
+#ifndef EFG_ONLY
 template <class T> class Nfg;
 template <class T> class MixedProfile;
 template <class T> class Lexicon;
+#endif   // EFG_ONLY
 
 template <class T> class Efg : public BaseEfg   {
+#ifndef EFG_ONLY
   friend class BaseNfg;
   friend class Nfg<T>;
+#endif   // EFG_ONLY
   private:
+#ifndef EFG_ONLY
     Lexicon<T> *lexicon;
     Nfg<T> *afg;
-
+#endif  EFG_ONLY
     Efg<T> &operator=(const Efg<T> &);
 
     void Payoff(Node *n, T, const gPVector<int> &, gVector<T> &) const;
@@ -214,19 +219,23 @@ template <class T> class Efg : public BaseEfg   {
 
     void InfosetProbs(const gPVector<int> &profile, gPVector<T> &prob) const;
 
+#ifndef EFG_ONLY
     friend Nfg<T> *MakeReducedNfg(Efg<T> &, const EFSupport &);
     friend Nfg<T> *MakeAfg(Efg<T> &);
     friend void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
 		             const Efg<T> &E, BehavProfile<T> &bp);
     friend void BehavToMixed(const Efg<T> &, const BehavProfile<T> &,
 			     const Nfg<T> &, MixedProfile<T> &);
-    
+#endif   // EFG_ONLY 
+   
     // defined in efgutils.cc
     friend void RandomEfg(Efg<T> &);
 
+#ifndef EFG_ONLY
     // This function put in to facilitate error-detection in MixedToBehav[]
     friend Nfg<T> *AssociatedNfg(Efg<T> *E);
     friend Nfg<T> *AssociatedAfg(Efg<T> *E);
+#endif   // EFG_ONLY
 };
 
 #include "efplayer.h"

@@ -14,7 +14,11 @@
 //---------------------------------------------------------------
 
 template <class T> Nfg<T>::Nfg(const gArray<int> &dim)
-  : gameform(new BaseNfg(*this, dim)), efg(0), payoffs(1, dim.Length())
+  : gameform(new BaseNfg(*this, dim)),
+#ifndef NFG_ONLY
+    efg(0),
+#endif   // NFG_ONLY
+    payoffs(1, dim.Length())
 {
   gVector<T> zeroes(dim.Length());
   zeroes = (T) 0;
@@ -22,14 +26,21 @@ template <class T> Nfg<T>::Nfg(const gArray<int> &dim)
 }
 
 template <class T> Nfg<T>::Nfg(const Nfg<T> &N)
-  : gameform(new BaseNfg(*N.gameform)), efg(0), payoffs(N.payoffs)
+  : gameform(new BaseNfg(*N.gameform)),
+#ifndef NFG_ONLY
+    efg(0),
+#endif   // NFG_ONLY
+    payoffs(N.payoffs)
 { }
 
+#ifndef NFG_ONLY
 #include "lexicon.h"
 #include "efg.h"
+#endif   // NFG_ONLY
 
 template <class T> Nfg<T>::~Nfg()
 {
+#ifndef NFG_ONLY
   if (efg)  {
     Efg<T> *tmp = efg;
     // note that Lexicon dtor unsets the efg member...
@@ -38,6 +49,7 @@ template <class T> Nfg<T>::~Nfg()
     tmp->lexicon = 0;
   }
   efg = 0;
+#endif   // NFG_ONLY
 }
 
 
@@ -172,6 +184,7 @@ void Nfg<T>::WriteNfgFile(gOutput &f) const
 
 template <class T> void Nfg<T>::BreakLink(void)
 {
+#ifndef NFG_ONLY
   if (efg)  {
     Efg<T> *tmp = efg;
     // note that Lexicon dtor unsets the efg member...
@@ -180,6 +193,7 @@ template <class T> void Nfg<T>::BreakLink(void)
     tmp->lexicon = 0;
   }
   efg = 0;
+#endif   // NFG_ONLY
 }
 
 #include "gpvector.h"

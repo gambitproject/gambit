@@ -40,8 +40,10 @@ class Strategy;
 class StrategyProfile;
 class NfgPayoffs;
 
+#ifndef NFG_ONLY
 template <class T> class Lexicon;
 template <class T> class Efg;
+#endif   // NFG_ONLY
 
 class BaseNfg {
 protected:
@@ -121,11 +123,16 @@ template <class T> class Nfg : public NfgPayoffs  {
 
 friend class MixedProfile<T>;
 friend class NfgFile<T>;
+#ifndef NFG_ONLY
 friend class Lexicon<T>;
 friend void SetEfg(Nfg<T> *, Efg<T> *);
+#endif  // NFG_ONLY
+
 private:
   BaseNfg *gameform;
+#ifndef NFG_ONLY
   Efg<T> *efg;
+#endif  // NFG_ONLY
   gRectBlock<T> payoffs;
 
   void BreakLink(void);
@@ -161,7 +168,9 @@ public:
 
   void WriteNfgFile(gOutput &) const;
 
+#ifndef NFG_ONLY
   Efg<T> *AssociatedEfg(void) const   { return efg; }
+#endif   // NFG_ONLY
 
   // defined in nfgutils.cc
   friend void RandomNfg(Nfg<T> &);
