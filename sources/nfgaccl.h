@@ -4,10 +4,14 @@
 #include "accels.h"
 #include "nfgconst.h"
 
-#define 	NUM_NFG_EVENTS	9
+#define 	NUM_NFG_EVENTS	13
 AccelEvent nfg_events[NUM_NFG_EVENTS]=
 {
 AccelEvent("Save",NFG_FILE_SAVE),
+AccelEvent("OutcomeAttach",NFG_EDIT_OUTCOMES_ATTACH),
+AccelEvent("OutcomeDetach",NFG_EDIT_OUTCOMES_DETACH),
+AccelEvent("OutcomeLabel",NFG_EDIT_OUTCOMES_LABEL),
+AccelEvent("OutcomePayoffs",NFG_EDIT_OUTCOMES_PAYOFFS),
 AccelEvent("Solve",NFG_SOLVE_SOLVE_MENU),
 AccelEvent("Inspect",NFG_SOLVE_INSPECT_MENU),
 AccelEvent("Compress",NFG_SOLVE_COMPRESS_MENU),
