@@ -39,7 +39,7 @@
 #include "nfgprint.h"
 #include "profile.h"
 #include "nfgnavigate.h"
-#include "nfgoutcome.h"
+#include "outcomes.h"
 #include "nfgsupport.h"
 #include "id.h"
 

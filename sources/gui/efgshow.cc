@@ -53,7 +53,7 @@
 #include "efgshow.h"
 #include "profile.h"
 #include "efgnavigate.h"
-#include "efgoutcome.h"
+#include "outcomes.h"
 #include "efgsupport.h"
 #include "nfgshow.h"
 
@@ -152,7 +152,7 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxFrame(p_parent, -1, "", wxPoint(0, 0), wxSize(600, 400)),
     gbtGameView(p_doc),
     m_treeWindow(0),
-    m_outcomeWindow(0), m_supportWindow(0)
+    m_supportWindow(0)
 {
   SetSizeHints(300, 300);
 
@@ -191,9 +191,7 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   m_infoNotebook = new wxNotebook(m_nodeSashWindow, idINFONOTEBOOK);
 
   (void) new gbtEfgNavigateFrame(m_doc, this);
-
-  m_outcomeWindow = new EfgOutcomeWindow(m_doc, m_infoNotebook);
-  m_infoNotebook->AddPage(m_outcomeWindow, "Outcomes");
+  (void) new gbtOutcomeFrame(m_doc, this);
 
   m_supportWindow = new EfgSupportWindow(m_doc, m_infoNotebook);
   m_supportWindow->SetSize(200, 200);
@@ -256,7 +254,9 @@ void EfgShow::OnUpdate(gbtGameView *)
 		  !cursor.IsNull() && !cursor.GetInfoset().IsNull());
 
   menuBar->Check(GBT_MENU_VIEW_NFG_REDUCED, m_doc->ShowNfg());
+  menuBar->Check(GBT_MENU_VIEW_PROFILES, m_doc->ShowProfiles());
   menuBar->Check(GBT_MENU_VIEW_NAVIGATION, m_doc->ShowEfgNavigate());
+  menuBar->Check(GBT_MENU_VIEW_OUTCOMES, m_doc->ShowOutcomes());
   menuBar->Check(GBT_MENU_VIEW_SUPPORT_REACHABLE,
 		 m_doc->GetPreferences().RootReachable());
 
@@ -933,29 +933,13 @@ void EfgShow::OnViewCursor(wxCommandEvent &)
 
 void EfgShow::OnViewOutcomes(wxCommandEvent &)
 {
-  if (m_nodeSashWindow->IsShown() && m_infoNotebook->GetSelection() != 1) {
-    m_infoNotebook->SetSelection(1);
-    GetMenuBar()->Check(GBT_MENU_VIEW_OUTCOMES, true);
-    GetMenuBar()->Check(GBT_MENU_VIEW_SUPPORTS, false);
-  }
-  else if (m_nodeSashWindow->IsShown()) {
-    m_nodeSashWindow->Show(false);
-    GetMenuBar()->Check(GBT_MENU_VIEW_OUTCOMES, false);
-  }
-  else {
-    m_nodeSashWindow->Show(true);
-    m_infoNotebook->SetSelection(1);
-    GetMenuBar()->Check(GBT_MENU_VIEW_OUTCOMES, true);
-  }
-
-  AdjustSizes();
+  m_doc->SetShowOutcomes(!m_doc->ShowOutcomes());
 }
 
 void EfgShow::OnViewSupports(wxCommandEvent &)
 {
   if (m_nodeSashWindow->IsShown() && m_infoNotebook->GetSelection() != 2) {
     m_infoNotebook->SetSelection(2);
-    GetMenuBar()->Check(GBT_MENU_VIEW_OUTCOMES, false);
     GetMenuBar()->Check(GBT_MENU_VIEW_SUPPORTS, true);
   }
   else if (m_nodeSashWindow->IsShown()) {

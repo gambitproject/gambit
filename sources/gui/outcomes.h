@@ -4,10 +4,7 @@
 // $Date$
 //
 // DESCRIPTION:
-// Declaration of extensive form outcome palette window
-//
-// This file is part of Gambit
-// Copyright (c) 2002, The Gambit Project
+// Declaration of outcome palette window
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,35 +21,35 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef EFGOUTCOME_H
-#define EFGOUTCOME_H
+#ifndef OUTCOMES_H
+#define OUTCOMES_H
 
 #include "wx/grid.h"
-#include "efgshow.h"
+#include "nfgshow.h"
 
-class EfgOutcomeWindow : public wxGrid, public gbtGameView {
+class gbtOutcomeWindow;
+
+class gbtOutcomeFrame : public wxFrame, public gbtGameView {
 private:
-  wxMenu *m_menu;
+  gbtOutcomeWindow *m_grid;
 
-  void OnChar(wxKeyEvent &);
-  void OnCellChanged(wxGridEvent &);
-  void OnCellRightClick(wxGridEvent &);
-  void OnLabelRightClick(wxGridEvent &);
+  // Event handlers
+  void OnClose(wxCloseEvent &);
+  void OnOutcomeNew(wxCommandEvent &);
+  void OnOutcomeDelete(wxCommandEvent &);
+  void OnOutcomeAttach(wxCommandEvent &);
+  void OnOutcomeDetach(wxCommandEvent &);
 
-  void OnPopupOutcomeNew(wxCommandEvent &);
-  void OnPopupOutcomeDelete(wxCommandEvent &);
-  void OnPopupOutcomeAttach(wxCommandEvent &);
-  void OnPopupOutcomeDetach(wxCommandEvent &);
-
+  // Overriding view members
   bool IsEfgView(void) const { return true; }
-  bool IsNfgView(void) const { return false; }
+  bool IsNfgView(void) const { return true; }
   void OnUpdate(gbtGameView *);
-    
+
 public:
-  EfgOutcomeWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
-  virtual ~EfgOutcomeWindow() { }
+  gbtOutcomeFrame(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtOutcomeFrame();
 
   DECLARE_EVENT_TABLE()
 };
 
-#endif   // EFGOUTCOME_H
+#endif  // OUTCOMES_H

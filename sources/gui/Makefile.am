@@ -57,13 +57,10 @@ gambit_SOURCES = \
 	dlreport.h \
 	dlspinctrl.cc \
 	dlspinctrl.h \
-	efgconst.h \
 	efglayout.cc \
 	efglayout.h \
 	efgnavigate.cc \
 	efgnavigate.h \
-	efgoutcome.cc \
-	efgoutcome.h \
 	efgprint.cc \
 	efgprint.h \
 	efgshow.cc \
@@ -74,11 +71,8 @@ gambit_SOURCES = \
 	gambit.h \
 	gamedoc.cc \
 	gamedoc.h \
-	nfgconst.h \
 	nfgnavigate.cc \
 	nfgnavigate.h \
-	nfgoutcome.cc \
-	nfgoutcome.h \
 	nfgprint.cc \
 	nfgprint.h \
 	nfgshow.cc \
@@ -93,6 +87,8 @@ gambit_SOURCES = \
 	prefs.h \
 	profile.cc \
 	profile.h \
+	outcomes.cc \
+	outcomes.h \
 	treewin.cc \
 	treewin.h \
 	valnumber.cc \
