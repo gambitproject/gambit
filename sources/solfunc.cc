@@ -649,6 +649,39 @@ Portion *GSM_IsNash_MixedRational(Portion **param)
   return new BoolValPortion(P->IsNash() == T_YES);
 }
 
+
+//----------------
+// IsntNash
+//----------------
+
+Portion *GSM_IsntNash_BehavFloat(Portion **param)
+{
+  BehavSolution<double> *P = 
+    (BehavSolution<double>*) ( (BehavPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsNash() == T_NO);
+}
+
+Portion *GSM_IsntNash_BehavRational(Portion **param)
+{
+  BehavSolution<gRational> *P = 
+    (BehavSolution<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsNash() == T_NO);
+}
+
+Portion *GSM_IsntNash_MixedFloat(Portion **param)
+{
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsNash() == T_NO);
+}
+
+Portion *GSM_IsntNash_MixedRational(Portion **param)
+{
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsNash() == T_NO);
+}
+
 //----------------
 // IsntPerfect
 //----------------
@@ -1649,6 +1682,27 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetParamInfo(2, 0, ParamInfoType("strategy", porMIXED_FLOAT, 
 					    REQUIRED, BYREF));
   FuncObj->SetFuncInfo(3, FuncInfoType(GSM_IsNash_MixedRational, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("strategy", porMIXED_RATIONAL, 
+					    REQUIRED,BYREF));
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("IsntNash", 4);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsntNash_BehavFloat, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT, 
+					    REQUIRED, BYREF));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_IsntNash_BehavRational, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL, 
+					    REQUIRED, BYREF));
+
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_IsntNash_MixedFloat, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("strategy", porMIXED_FLOAT, 
+					    REQUIRED, BYREF));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_IsntNash_MixedRational, 
 				       porBOOL, 1));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("strategy", porMIXED_RATIONAL, 
 					    REQUIRED,BYREF));
