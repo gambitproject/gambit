@@ -18,10 +18,10 @@ AddMove[entIset, node ];
 AddMove[incIset, node#1 ];
 AddMove[NewInfoset[incumbent,{""} ], node#2 ];
 // attach outcomes 
-SetOutcome[node#1#1,Float[NewOutcome[efg]]];
-SetOutcome[node#1#2,Float[NewOutcome[efg]]];
-SetOutcome[node#2#1,Float[NewOutcome[efg]]];
-pay:=Payoffs[Outcome[node#1#1]];
+SetOutcome[node#1#1,NewOutcome[efg]];
+SetOutcome[node#1#2,NewOutcome[efg]];
+SetOutcome[node#2#1,NewOutcome[efg]];
+pay:=Float[Payoffs[Outcome[node#1#1]]];
 entnum:=PlayerNumber[efg,entrant];
 incnum:=PlayerNumber[efg,incumbent];
 a:=0.5;b:=0.5;

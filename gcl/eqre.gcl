@@ -29,7 +29,7 @@ NewFunction[EQre[filename->TEXT],
   GetListFormat[lf<->lf];
 
   e := LoadEfg[filename+".efg"];
-  in := Input[filename+".agg"];
+  in := Input[filename+".exp"];
 
   // read in range of lambdas for QRE estimation
   in >> min >> max >> del;
