@@ -42,11 +42,13 @@ template<class T> gRectangle<T>::~gRectangle()
 //                          rectangle -- operators
 //--------------------------------------------------------------------------
 
+
 template<class T> gRectangle<T>& 
-                          gRectangle<T>::operator = (const gRectangle<T>& rhs)
+gRectangle<T>::operator = (const gRectangle<T>& /* rhs */)
 {
   gout << "For const'ness, operator = not allowed for gRectangles\n";
   exit (0);
+  return *this;
 }
 
 
