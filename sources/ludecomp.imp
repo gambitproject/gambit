@@ -371,7 +371,7 @@ void LUdecomp<T>::factor()
 {
   int min=mat.MinRow(), max= mat.MaxRow();
   int k, row, col;
-  T temp, tmax;
+  T temp;
 
   for(k=min; k<=max; k++)
     {
