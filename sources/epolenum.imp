@@ -209,9 +209,9 @@ Prob(int p,int seq, const gVector<gDouble> &x) const
     return x[kk+seq-iset].ToDouble();
   else {    
     for(j=1;j<seq;j++) {
-      if((SF.Constraints(p))(iset+1,j)==-1)
+      if((SF.Constraints(p))(iset+1,j)==-(gNumber)1)
 	value-=Prob(p,j,x);
-      if((SF.Constraints(p))(iset+1,j)==1)
+      if((SF.Constraints(p))(iset+1,j)==(gNumber)1)
 	value+=Prob(p,j,x);
     }
     return value;
@@ -248,9 +248,9 @@ template <class T> gPoly<T> EfgPolEnumModule<T>::Prob(int p, int seq) const
   }
   else {
     for(j=1;j<seq;j++) {
-      if((SF.Constraints(p))(iset+1,j)==-1)
+      if((SF.Constraints(p))(iset+1,j)==(gNumber)-1)
 	equation-=Prob(p,j);
-      if((SF.Constraints(p))(iset+1,j)==1)
+      if((SF.Constraints(p))(iset+1,j)==(gNumber)1)
 	equation+=Prob(p,j);
     }
   }
@@ -266,7 +266,7 @@ EfgPolEnumModule<T>::Payoff(int pl) const
   gPoly<T> equation(&Space,&Lex);
   while (index.Turn()) {
     pay=SF.Payoff(index.CurrentIndices(),pl);
-    if( pay !=0) {
+    if( pay !=(gNumber)0) {
       gPoly<T> term(&Space,(T)pay,&Lex);
       int k;
       for(k=1;k<=EF.NumPlayers();k++) 

@@ -40,6 +40,35 @@ int PolEnum(const NFSupport &support, const PolEnumParams &params,
 #include "rational.h"
 #include "double.h"
 
+gPoly<gDouble> 
+PolEnumModule<gDouble>::Equation(int i, int strat1, int strat2) const
+{
+  StrategyProfile profile(NF);
+
+  NfgContIter A(support), B(support);
+  A.Freeze(i);
+  A.Set(i, strat1);
+  B.Freeze(i);
+  B.Set(i, strat2);
+  gPoly<gDouble> equation(&Space,&Lex);
+  do {
+    gPoly<gDouble> term(&Space,(gDouble)1,&Lex);
+    profile = A.Profile();
+    int k;
+    for(k=1;k<=NF.NumPlayers();k++) 
+      if(i!=k) 
+	term*=Prob(k,support.Find(profile[k]));
+    gDouble coeff,ap,bp;
+    ap = (double)NF.Payoff(A.GetOutcome(), i).Evaluate(values);
+    bp = (double)NF.Payoff(B.GetOutcome(), i).Evaluate(values);
+    coeff = ap - bp;
+    term*=coeff;
+    equation+=term;
+    A.NextContingency();
+  } while (B.NextContingency());
+  return equation;
+}
+
 template class PolEnumModule<double>;
 template class PolEnumModule<gDouble>;
 template class PolEnumModule<gRational>;

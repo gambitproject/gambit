@@ -228,8 +228,8 @@ PolEnumModule<T>::Equation(int i, int strat1, int strat2) const
       if(i!=k) 
 	term*=Prob(k,support.Find(profile[k]));
     T coeff,ap,bp;
-    ap = (T)NF.Payoff(A.GetOutcome(), i).Evaluate(values);
-    bp = (T)NF.Payoff(B.GetOutcome(), i).Evaluate(values);
+    ap = NF.Payoff(A.GetOutcome(), i).Evaluate(values);
+    bp = NF.Payoff(B.GetOutcome(), i).Evaluate(values);
     coeff = ap - bp;
     term*=coeff;
     equation+=term;
