@@ -16,6 +16,8 @@
  */
 class guiPagedDialog : public guiAutoDialog {
 private:
+  void OnOK(wxCommandEvent &);
+
   void OnNext(wxCommandEvent &);
   void OnBack(wxCommandEvent &);
 

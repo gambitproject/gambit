@@ -23,6 +23,7 @@ const int idNEXT_BUTTON = 5002;
 BEGIN_EVENT_TABLE(guiPagedDialog, wxDialog)
   EVT_BUTTON(idBACK_BUTTON, OnBack)
   EVT_BUTTON(idNEXT_BUTTON, OnNext)
+  EVT_BUTTON(wxID_OK, OnOK)
 END_EVENT_TABLE()
 
 //========================================================================
@@ -104,18 +105,6 @@ guiPagedDialog::~guiPagedDialog()
   delete [] m_dataFields;
 }
 
-/*
-void guiPagedDialog::OnOk(void)
-{
-  //  guiAutoDialog::OnOk();
-  int entry = 0;
-  for (int i = m_pageNumber * s_itemsPerPage;
-       i < m_numFields; i++, entry++) {
-    m_dataValues[i + 1] = m_dataFields[entry]->GetValue();
-  }
-}
-*/
-
 void guiPagedDialog::OnBack(wxCommandEvent &)
 {
   int entry = 0;
@@ -180,4 +169,14 @@ void guiPagedDialog::SetValue(int p_index, const gText &p_value)
   m_dataValues[p_index] = p_value;
   if ((p_index - 1) / s_itemsPerPage == m_pageNumber)
     m_dataFields[(p_index - 1) % s_itemsPerPage]->SetValue((char *) p_value);
+}
+
+void guiPagedDialog::OnOK(wxCommandEvent &p_event)
+{
+  wxDialog::OnOK(p_event);
+  int entry = 0;
+  for (int i = m_pageNumber * s_itemsPerPage;
+       i < m_numFields; i++, entry++) {
+    m_dataValues[i + 1] = m_dataFields[entry]->GetValue();
+  }
 }

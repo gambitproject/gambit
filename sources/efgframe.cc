@@ -34,6 +34,8 @@
 #include "dialogelim.h"
 #include "dialogefgeditsupport.h"
 #include "dialogsupportselect.h"
+#include "dialogefgoutcome.h"
+#include "dialoginfosets.h"
 
 #include "dialogenumpure.h"
 #include "dialogenummixed.h"
@@ -75,6 +77,8 @@ const int EFG_EDIT_DELETE = 2500;
 const int EFG_EDIT_COPY = 2501;
 const int EFG_EDIT_PASTE = 2502;
 const int EFG_EDIT_PROPERTIES = 2503;
+const int EFG_EDIT_LABEL = 2504;
+const int EFG_EDIT_PLAYERS = 2505;
 const int EFG_VIEW_ZOOM_IN = 2600;
 const int EFG_VIEW_ZOOM_OUT = 2601;
 const int EFG_FILE_SAVE = 2700;
@@ -83,6 +87,9 @@ BEGIN_EVENT_TABLE(guiEfgFrame, gambitGameView)
   EVT_MENU(EFG_FILE_SAVE, OnFileSave)
   EVT_MENU(EFG_EDIT_COPY, OnEditCopy)
   EVT_MENU(EFG_EDIT_PASTE, OnEditPaste)
+  EVT_MENU(EFG_EDIT_PROPERTIES, OnEditProperties)
+  EVT_MENU(EFG_EDIT_LABEL, OnEditLabel)
+  EVT_MENU(EFG_EDIT_PLAYERS, OnEditPlayers)
   EVT_MENU(EFG_SUPPORTS_UNDOMINATED, OnSupportsUndominated)
   EVT_MENU(EFG_SUPPORTS_NEW, OnSupportsNew)
   EVT_MENU(EFG_SUPPORTS_EDIT, OnSupportsEdit)
@@ -132,7 +139,8 @@ guiEfgFrame::guiEfgFrame(wxMDIParentFrame *p_parent, FullEfg *p_efg,
   editMenu->Append(EFG_EDIT_DELETE, "&Delete");
   editMenu->AppendSeparator();
   editMenu->Append(EFG_EDIT_PROPERTIES, "P&roperties...");
-  editMenu->Append(GAME_EDIT_LABEL, "Game &Label");
+  editMenu->Append(EFG_EDIT_LABEL, "Game &Label");
+  editMenu->Append(EFG_EDIT_PLAYERS, "Pla&yers");
 
   wxMenu *supportsMenu = new wxMenu;
   supportsMenu->Append(EFG_SUPPORTS_UNDOMINATED, "&Undominated");
@@ -217,17 +225,39 @@ void guiEfgFrame::OnEditPaste(wxCommandEvent &)
   m_efgView->OnPaste();
 }
 
-void guiEfgFrame::OnEditPropertiesEfg(wxCommandEvent &)
+void guiEfgFrame::OnEditProperties(wxCommandEvent &)
 {
-  /*
-  if (m_tree->SelectedOutcome()) {
-    dialogEfgOutcome dialog(this, *GetEfg(), m_tree->SelectedOutcome());
+  if (m_efgView->SelectedOutcome()) {
+    EFOutcome *outcome = m_efgView->SelectedOutcome();
+    dialogEfgOutcome dialog(this, *m_efgView->GetEfg(), outcome);
 
     if (dialog.ShowModal() == wxID_OK) {
-
+      outcome->SetName(dialog.Name());
+      for (int pl = 1; pl <= m_efgView->GetEfg()->NumPlayers(); pl++) {
+	m_efgView->GetEfg()->SetPayoff(outcome, pl, dialog.Payoffs()[pl]);
+      }
+      m_efgView->OnOutcomeChanged(outcome);
     }
   }
-  */
+}
+
+void guiEfgFrame::OnEditLabel(wxCommandEvent &)
+{
+  wxTextEntryDialog dialog(this, "New game label", "Game label", GetTitle());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    m_efgView->GetEfg()->SetTitle(dialog.GetValue().c_str());
+    if (m_nfgView) {
+      m_nfgView->GetNfg()->SetTitle(dialog.GetValue().c_str());
+    }
+    SetTitle(dialog.GetValue());
+  }
+}
+
+void guiEfgFrame::OnEditPlayers(wxCommandEvent &)
+{
+  dialogInfosets dialog(this, *m_efgView->GetEfg());
+  dialog.ShowModal();
 }
 
 void guiEfgFrame::OnSupportsUndominated(wxCommandEvent &)

@@ -40,6 +40,7 @@
 
 #include "guistatus.h"
 
+const int NFG_EDIT_LABEL = 2000;
 const int NFG_EDIT_PLAYERS = 2001;
 const int NFG_SUPPORTS_UNDOMINATED = 2100;
 const int NFG_SUPPORTS_NEW = 2101;
@@ -60,7 +61,8 @@ const int NFG_SOLVE_CUSTOM_QREGRID = 2210;
 const int NFG_VIEW_SOLUTIONS = 2300;
 
 BEGIN_EVENT_TABLE(guiNfgFrame, gambitGameView)
-  EVT_MENU(NFG_EDIT_PLAYERS, gambitGameView::OnEditPlayers)
+  EVT_MENU(NFG_EDIT_LABEL, OnEditLabel)
+  EVT_MENU(NFG_EDIT_PLAYERS, OnEditPlayers)
   EVT_MENU(NFG_SUPPORTS_UNDOMINATED, OnSupportsNfgUndominated)
   EVT_MENU(NFG_SUPPORTS_NEW, OnSupportsNfgNew)
   EVT_MENU(NFG_SUPPORTS_EDIT, OnSupportsNfgEdit)
@@ -152,6 +154,23 @@ guiNfgFrame::guiNfgFrame(wxMDIParentFrame *p_parent, Nfg *p_nfg,
 
 guiNfgFrame::~guiNfgFrame()
 { }
+
+void guiNfgFrame::OnEditLabel(wxCommandEvent &)
+{
+
+}
+
+void guiNfgFrame::OnEditPlayers(wxCommandEvent &)
+{
+  /*
+  for (int pl = 1; pl <= GetNfg()->NumPlayers(); pl++) {
+    m_nfgView->GetNfg()->Players()[pl]->SetName(m_infoPanel->GetPlayerName(pl));
+  }
+  */
+
+  dialogStrategies dialog(this, *m_nfgView->GetNfg());
+  dialog.ShowModal();
+}
 
 void guiNfgFrame::OnSolveNfgCustomEnumPure(wxCommandEvent &)
 {

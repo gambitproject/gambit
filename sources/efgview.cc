@@ -158,7 +158,7 @@ void guiEfgView::OnPaste(void)
       return;
     }
     
-    if (currentNode->NumChildren() > 0) {
+    if (m_efg->NumChildren(currentNode) > 0) {
       return;
     }
     
@@ -188,6 +188,7 @@ void guiEfgView::OnProperties(void)
 void guiEfgView::OnOutcomeChanged(EFOutcome *p_outcome)
 {
   m_tree->OnOutcomeChanged(p_outcome);
+  m_propertyView->SetOutcome(p_outcome);
 }
 
 void guiEfgView::OnNodeChanged(Node *p_node)
@@ -218,6 +219,9 @@ void guiEfgView::OnSelectedOutcome(EFOutcome *p_outcome, bool p_selected)
   m_infoPanel->Show(!p_selected);
   Arrange();
 }
+
+EFOutcome *guiEfgView::SelectedOutcome(void) const
+{ return m_tree->SelectedOutcome(); }
 
 void guiEfgView::OnSelectedNode(Node *p_node, bool p_selected)
 {

@@ -63,6 +63,7 @@ public:
   
   void OnSelectedOutcome(EFOutcome *, bool);
   void OnOutcomeChanged(EFOutcome *);
+  EFOutcome *SelectedOutcome(void) const;
 
   void OnSelectedNode(Node *, bool);
   void OnNodeChanged(Node *);

@@ -29,6 +29,9 @@ private:
 
   void OnEditCopy(wxCommandEvent &);
   void OnEditPaste(wxCommandEvent &);
+  void OnEditLabel(wxCommandEvent &);
+  void OnEditPlayers(wxCommandEvent &);
+  void OnEditProperties(wxCommandEvent &);
 
   void OnSupportsUndominated(wxCommandEvent &);
   void OnSupportsNew(wxCommandEvent &);
@@ -50,9 +53,6 @@ public:
   void OnSolveEfgStandard(wxCommandEvent &);
 
   void OnEditDeleteEfg(wxCommandEvent &);
-  void OnEditLabel(wxCommandEvent &);
-  void OnEditPlayers(wxCommandEvent &);
-  void OnEditPropertiesEfg(wxCommandEvent &);
 
   void OnViewZoomIn(wxCommandEvent &);
   void OnViewZoomOut(wxCommandEvent &);

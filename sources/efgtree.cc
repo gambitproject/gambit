@@ -443,16 +443,18 @@ int guiEfgTree::LayoutSubtree(Node *p_node, int p_level,
 			      int &p_maxX, int &p_maxY, int &p_minY,
 			      int &p_ycoord)
 {
-  gArray<int> childCoords(p_node->NumChildren());
+  int numChildren = m_efg.NumChildren(p_node);
+  gArray<int> childCoords(numChildren);
   int xCoord, yCoord;
 
-  if (p_node->NumChildren() > 0) {
-    for (int child = 1; child <= p_node->NumChildren(); child++) {
+
+  if (numChildren > 0) {
+    for (int child = 1; child <= numChildren; child++) {
       childCoords[child] = LayoutSubtree(p_node->GetChild(child), 
 					 p_level + 1, p_maxX,
 					 p_maxY, p_minY, p_ycoord);
     }
-    yCoord = (childCoords[1] + childCoords[p_node->NumChildren()]) / 2;
+    yCoord = (childCoords[1] + childCoords[numChildren]) / 2;
   }
   else {
     yCoord = p_ycoord;
@@ -471,7 +473,7 @@ int guiEfgTree::LayoutSubtree(Node *p_node, int p_level,
   object = new OutcomeEntry(this, p_node, xCoord, yCoord);
   m_objects.Append(object);
 
-  for (int child = 1; child <= p_node->NumChildren(); child++) {
+  for (int child = 1; child <= numChildren; child++) {
     object = new BranchEntry(this,
 			     p_node, child, xCoord + m_settings->NodeLength(),
 			     yCoord, childCoords[child]);
@@ -494,19 +496,14 @@ void guiEfgTree::LayoutTree(void)
   int ycoord = TOP_MARGIN;
 
   LayoutSubtree(m_efg.RootNode(), 0, m_maxX, m_maxY, m_minY, ycoord);
-  wxMessageBox((char *) (ToText(m_maxX) + " " + ToText(m_maxY) + " " + ToText(m_zoomFactor)));
   ComputeScrollbars();
-  wxMessageBox("ok");
 }
 
 void guiEfgTree::ComputeScrollbars(void)
 {
-  SetScrollbars(20, 20, 50, 50);
-  /*
   SetScrollbars(20, 20, 
 		(m_maxX + m_settings->NodeLength() + 50) * m_zoomFactor / 20 + 1,
 		m_maxY * m_zoomFactor / 20 + 1);
-  */
 }
 
 TreeObject *guiEfgTree::HitTest(int p_x, int p_y) const
@@ -562,7 +559,7 @@ void guiEfgTree::OnLeftUp(wxMouseEvent &p_event)
     NodeEntry *nodeEntry = (NodeEntry *) object;
     if (nodeEntry != m_selection && 
 	m_selection->Type() == treeNODE &&
-	nodeEntry->GetNode()->NumChildren() == 0) {
+	m_efg.NumChildren(nodeEntry->GetNode()) == 0) {
       m_parent->GetEfg()->CopyTree(((NodeEntry *) m_selection)->GetNode(),
 				   nodeEntry->GetNode());
       OnTreeChanged();
