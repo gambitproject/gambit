@@ -134,6 +134,50 @@ A segmentation fault has occurred
 
 (the file is in the directory ~rdm/gambit/test)
 
+//------------------------------
+
+Bug C24:  Conversion to normal form loses precision. 
+
+42 mill:/home/mill/rdm/gambit/test !!
+newgcl
+Include["gclini.gcl"]
+Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
+GCL1:= << e:=LoadEfg["../efg/testr.efg"]
+(Efg) "Test extensive form game"
+GCL2:= <<  Payoffs[Outcomes[e]]          
+{ { 0, 0 },
+  { 3, 2 },
+  { 2, 4 },
+  { 0, 1 },
+  { 2, 2 },
+  { 1, 4 } }
+GCL3:= << Payoffs[Nfg[e]]               
+{ { { 3.000000, 2.000000 }, { 0.000000, 0.000000 }, { 0.000000, 0.000000 }, { 0.000000, 1.000000 } },
+  { { 0.000000, 0.000000 }, { 2.000000, 4.000000 }, { 0.000000, 0.000000 }, { 0.000000, 1.000000 } },
+  { { 0.000000, 0.000000 }, { 0.000000, 0.000000 }, { 2.000000, 2.000000 }, { 0.000000, 0.000000 } },
+  { { 2.000000, 4.000000 }, { 2.000000, 4.000000 }, { 0.000000, 0.000000 }, { 1.000000, 4.000000 } } }
+
+//------------------------------
+
+Bug C25:  Saving games loses precision.  
+
+
+  GCL1:= << n:=NewNfg[{2,2},True]
+  (Nfg) ""
+  GCL2:= << SetPayoffs[Outcomes[n]_1,{1.0123456789,0.0}]
+  (NFOutcome) 0x83917b0 "11"
+  GCL3:= << SetNumericFormat[precis->10]
+  True
+  GCL4:= << Payoffs[n]
+  { { { 1.0123456789, 0.0000000000 }, { 0, 0 } },
+    { { 0, 0 }, { 0, 0 } } }
+  GCL5:= << SaveNfg[n,"junk"]
+  (Nfg) ""
+  GCL6:= << nn:=LoadNfg["junk"]
+  (Nfg) ""
+  GCL7:= << Payoffs[nn]        
+  { { { 1.0123460000, 0.0000000000 }, { 0, 0 } },
+    { { 0, 0 }, { 0, 0 } } }
 
 
 
