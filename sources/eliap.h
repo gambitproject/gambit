@@ -15,12 +15,11 @@
 
 #include "subsolve.h"
 
-class EFLiapParams : public AlgParams {
-  public:
-    int nTries, stopAfter, maxits1, maxitsN;
-    double tol1, tolN;
-
-    EFLiapParams();
+class EFLiapParams : public FuncMinParams {
+public:
+  int nTries, stopAfter;
+  
+  EFLiapParams(gStatus & = gstatus);
 };
 
 class efgLiapSolve : public SubgameSolver  {

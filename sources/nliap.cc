@@ -8,9 +8,8 @@
 
 #include "gfunc.h"
 
-NFLiapParams::NFLiapParams()
-  : AlgParams(), nTries(10), stopAfter(1), maxits1(100), maxitsN(20),
-    tol1(2.0e-10), tolN(1.0e-10) 
+NFLiapParams::NFLiapParams(gStatus &s)
+  : FuncMinParams(s), nTries(10), stopAfter(1)
 { }
 
 class NFLiapFunc : public gC2Function<double>   {

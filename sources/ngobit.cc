@@ -11,15 +11,13 @@
 #include "gfunc.h"
 #include "gmatrix.h"
 
-NFQreParams::NFQreParams()
-  : AlgParams(), powLam(1), maxits1(100), maxitsN(20),
-    minLam(0.01), maxLam(30.0), delLam(0.01), tol1(2.0e-10), tolN(1.0e-10),
+NFQreParams::NFQreParams(gStatus &s)
+  : FuncMinParams(s), powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
     fullGraph(false), pxifile(&gnull)
 { }
 
-NFQreParams::NFQreParams(gOutput &out, gOutput &pxi)
-  : AlgParams(), powLam(1), maxits1(100), maxitsN(20),
-    minLam(0.01), maxLam(30.0), delLam(0.01), tol1(2.0e-10), tolN(1.0e-10),
+NFQreParams::NFQreParams(gOutput &out, gOutput &pxi, gStatus &s)
+  : FuncMinParams(s), powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
     fullGraph(false), pxifile(&pxi)
 { }
 

@@ -13,14 +13,15 @@
 #include "efg.h"
 #include "behavsol.h"
 
-class EFQreParams : public AlgParams  {
-  public:
-    int powLam, maxits1, maxitsN;
-    double minLam, maxLam, delLam, tol1, tolN;
-    bool fullGraph;
-    gOutput *pxifile;
-    EFQreParams();
-    EFQreParams(gOutput &out, gOutput &pxi);
+class EFQreParams : public FuncMinParams  {
+public:
+  int powLam;
+  double minLam, maxLam, delLam;
+  bool fullGraph;
+  gOutput *pxifile;
+  
+  EFQreParams(gStatus & = gstatus);
+  EFQreParams(gOutput &out, gOutput &pxi, gStatus & = gstatus);
 };
 
 

@@ -13,15 +13,15 @@
 #include "nfg.h"
 #include "mixedsol.h"
 
-class NFQreParams : public AlgParams {
-  public:
-    int powLam, maxits1, maxitsN;
-    double minLam, maxLam, delLam, tol1, tolN;
-    bool fullGraph;
-    gOutput *pxifile;
-
-    NFQreParams();
-    NFQreParams(gOutput &out, gOutput &pxi);
+class NFQreParams : public FuncMinParams {
+public:
+  int powLam;
+  double minLam, maxLam, delLam;
+  bool fullGraph;
+  gOutput *pxifile;
+  
+  NFQreParams(gStatus & = gstatus);
+  NFQreParams(gOutput &out, gOutput &pxi,gStatus & = gstatus);
 };
 
 

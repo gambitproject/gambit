@@ -15,12 +15,11 @@
 #include "mixed.h"
 #include "mixedsol.h"
 
-class NFLiapParams : public AlgParams  {
+class NFLiapParams : public FuncMinParams  {
 public:
-  int nTries, stopAfter, maxits1, maxitsN;
-  double tol1, tolN;
+  int nTries, stopAfter;
   
-  NFLiapParams();
+  NFLiapParams(gStatus & = gstatus);
 };
 
 

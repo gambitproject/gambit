@@ -9,9 +9,8 @@
 #include "gfunc.h"
 #include "gmatrix.h"
 
-EFLiapParams::EFLiapParams()
-  : AlgParams(), nTries(10), stopAfter(1), maxits1(100), maxitsN(20),
-    tol1(2.0e-10), tolN(1.0e-10)
+EFLiapParams::EFLiapParams(gStatus &s)
+  : FuncMinParams(s), nTries(10), stopAfter(1)
 { }
 
 class EFLiapFunc : public gFunction<double>  {
