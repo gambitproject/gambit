@@ -559,16 +559,16 @@ Portion* GSM_List_Nfg( Portion** param )
   if( param[0]->Spec().Type == porNFG_FLOAT )
   {
     Nfg<double>& nfg = 
-      * (Nfg<double>*) (((NfgPortion*) param[0])->Value());
+      * (Nfg<double>*) (((NfgPortion<double> *) param[0])->Value());
     for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
-      p->Append( new NfgValPortion( new Nfg<double>( nfg ) ) );  
+      p->Append( new NfgValPortion<double>( new Nfg<double>( nfg ) ) );  
   }
   else if( param[0]->Spec().Type == porNFG_RATIONAL )
   {
     Nfg<gRational>& nfg = 
-      * (Nfg<gRational>*) (((NfgPortion*) param[0])->Value());
+      * (Nfg<gRational>*) (((NfgPortion<gRational> *) param[0])->Value());
     for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
-      p->Append( new NfgValPortion( new Nfg<gRational>( nfg ) ) );  
+      p->Append( new NfgValPortion<gRational>( new Nfg<gRational>( nfg ) ) );  
   }
   else
     assert( 0 );

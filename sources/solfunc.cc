@@ -540,7 +540,11 @@ static Portion* GSM_Game_NfgTypes(Portion** param)
 {
   if (param[0]->Game())  {
     assert(!param[0]->GameIsEfg());
-    return new NfgValPortion((BaseNfg*) param[0]->Game());
+    BaseNfg *nfg = (BaseNfg *) param[0]->Game();
+    if (nfg->Type() == DOUBLE)
+      return new NfgValPortion<double>((Nfg<double> *) nfg);
+    else
+      return new NfgValPortion<gRational>((Nfg<gRational> *) nfg);
   }
   else
     return 0;

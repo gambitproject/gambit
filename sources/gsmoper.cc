@@ -875,8 +875,18 @@ Portion *GSM_Equal_Nfg(Portion** param)
     return new BoolValPortion( param[0]->Spec().Type == 
  			       param[1]->Spec().Type );
   }
-  return new BoolValPortion(((NfgPortion *) param[0])->Value() ==
-			    ((NfgPortion *) param[1])->Value());
+
+// This occurs when games are of different subtype
+  if (param[0]->Spec().Type != param[0]->Spec().Type)
+    return new BoolValPortion(false);
+
+  if (param[0]->Spec().Type == porNFG_FLOAT)
+    return new BoolValPortion(((NfgPortion<double> *) param[0])->Value() ==
+			      ((NfgPortion<double> *) param[1])->Value());
+  else
+    return new BoolValPortion(((NfgPortion<gRational> *) param[0])->Value() ==
+			      ((NfgPortion<gRational> *) param[1])->Value());
+
 }
 
 Portion* GSM_Equal_NfPlayer(Portion** param)
@@ -1045,8 +1055,23 @@ Portion* GSM_NotEqual_Strategy(Portion** param)
 
 Portion* GSM_NotEqual_Nfg(Portion** param)
 {
-  return new BoolValPortion(((NfgPortion *) param[0])->Value() !=
-			    ((NfgPortion *) param[1])->Value());
+  if ((param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type != 
+ 			       param[1]->Spec().Type );
+  }
+
+// This occurs when games are of different subtype
+  if (param[0]->Spec().Type != param[0]->Spec().Type)
+    return new BoolValPortion(true);
+
+  if (param[0]->Spec().Type == porNFG_FLOAT)
+    return new BoolValPortion(((NfgPortion<double> *) param[0])->Value() !=
+			      ((NfgPortion<double> *) param[1])->Value());
+  else
+    return new BoolValPortion(((NfgPortion<gRational> *) param[0])->Value() !=
+			      ((NfgPortion<gRational> *) param[1])->Value());
 }
 
 Portion* GSM_NotEqual_NfSupport(Portion** param)
@@ -1606,12 +1631,16 @@ Portion* GSM_Write_Nfg(Portion** param)
 {
   assert(param[1]->Spec().Type & porNFG);
   gOutput& s = ((OutputPortion*) param[0])->Value();
-
-  BaseNfg* nfg = ((NfgPortion*) param[1])->Value();
-  // nfg->DisplayNfg(s);
-
-  nfg->WriteNfgFile(s);
-
+  
+  if (param[1]->Spec().Type == porNFG_FLOAT)   {
+    Nfg<double> *nfg = ((NfgPortion<double> *) param[1])->Value();
+    nfg->WriteNfgFile(s);
+  }
+  else  {
+    Nfg<gRational> *nfg = ((NfgPortion<gRational> *) param[1])->Value();
+    nfg->WriteNfgFile(s);
+  }
+    
 
   // swap the first parameter with the return value, so things like
   //   Output["..."] << x << y  would work
@@ -2161,7 +2190,7 @@ Portion *GSM_Mixed_NfgFloat(Portion **param)
   Portion* p1;
   Portion* p2;
 
-  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
+  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion<double>*) param[0])->Value();
   MixedSolution<double> *P = new MixedSolution<double>(N);
 
   if(((ListPortion*) param[1])->Length() != N.NumPlayers())
@@ -2219,7 +2248,7 @@ Portion *GSM_Mixed_NfgRational(Portion **param)
   Portion* p1;
   Portion* p2;
 
-  Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
+  Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion<gRational>*) param[0])->Value();
   MixedSolution<gRational> *P = new MixedSolution<gRational>(N);
 
   if(((ListPortion*) param[1])->Length() != N.NumPlayers())
@@ -2437,7 +2466,7 @@ Portion* GSM_Read_MixedFloat(Portion** param)
 {
   Portion* sub_param[2];
   Portion* owner = 
-    new NfgValPortion(& ((MixedSolution<double>*) 
+    new NfgValPortion<double>(& ((MixedSolution<double>*) 
 		       ((MixedPortion<double>*) param[1])->Value())->BelongsTo());
 
   sub_param[0] = param[1];
@@ -2473,7 +2502,7 @@ Portion* GSM_Read_MixedRational(Portion** param)
 {
   Portion* sub_param[2];
   Portion* owner = 
-    new NfgValPortion(& ((MixedSolution<gRational>*) 
+    new NfgValPortion<gRational>(& ((MixedSolution<gRational>*) 
 		       ((MixedPortion<gRational>*) param[1])->Value())->BelongsTo());
 
   sub_param[0] = param[1];

@@ -88,7 +88,7 @@ static Portion *GSM_AgentForm_Float(Portion **param)
   ((FloatPortion *) param[1])->Value() = watch.Elapsed();
   
   if (N)
-    return new NfgValPortion(N);
+    return new NfgValPortion<double>(N);
   else
     return new ErrorPortion("Conversion to agent form failed");
 }
@@ -103,7 +103,7 @@ static Portion *GSM_AgentForm_Rational(Portion **param)
   ((FloatPortion *) param[1])->Value() = watch.Elapsed();
 
   if (N)
-    return new NfgValPortion(N);
+    return new NfgValPortion<gRational>(N);
   else
     return new ErrorPortion("Conversion to agent form failed");
 }
@@ -950,7 +950,7 @@ static Portion *GSM_Nfg_Float(Portion **param)
   ((FloatPortion *) param[1])->Value() = watch.Elapsed();
   
   if (N)
-    return new NfgValPortion(N);
+    return new NfgValPortion<double>(N);
   else
     return new ErrorPortion("Conversion to reduced nfg failed");
 }
@@ -965,7 +965,7 @@ static Portion *GSM_Nfg_Rational(Portion **param)
   ((FloatPortion *) param[1])->Value() = watch.Elapsed();
 
   if (N)
-    return new NfgValPortion(N);
+    return new NfgValPortion<gRational>(N);
   else
     return new ErrorPortion("Conversion to reduced nfg failed");
 }

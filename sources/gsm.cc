@@ -583,8 +583,12 @@ bool GSM::Assign(void)
 
 
       case porNFG_FLOAT:
+	((NfgPortion<double>*) p1)->Value() = ((NfgPortion<double>*) p2)->Value();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
+	p1->Original()->SetGame(p2->Game(), false);
+	break;
       case porNFG_RATIONAL:
-	((NfgPortion*) p1)->Value() = ((NfgPortion*) p2)->Value();
+	((NfgPortion<gRational>*) p1)->Value() = ((NfgPortion<gRational>*) p2)->Value();
 	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	p1->Original()->SetGame(p2->Game(), false);
 	break;

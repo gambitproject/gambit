@@ -159,8 +159,9 @@ void* Portion::Game(void) const
     switch(Spec().Type)
     {
     case porNFG_FLOAT:
+      return ((NfgPortion<double> *) this)->Value();
     case porNFG_RATIONAL:
-      return ((NfgPortion*) this)->Value();
+      return ((NfgPortion<gRational> *) this)->Value();
     case porEFG_FLOAT:
     case porEFG_RATIONAL:
       return ((EfgPortion*) this)->Value();
@@ -1743,78 +1744,51 @@ bool BehavRefPortion::IsReference(void) const
 
 
 
-NfgPortion::NfgPortion(void)
-{ 
-}
-
-NfgPortion::~NfgPortion()
+NfgPortion<double>::NfgPortion(void)
 { }
 
-BaseNfg*& NfgPortion::Value(void) const
+NfgPortion<double>::~NfgPortion()
+{ }
+
+Nfg<double> *& NfgPortion<double>::Value(void) const
 { return *_Value; }
 
-PortionSpec NfgPortion::Spec(void) const
+PortionSpec NfgPortion<double>::Spec(void) const
 { 
   assert((*_Value) != 0);
-  switch((*_Value)->Type())
-  {
-  case DOUBLE:
-    return PortionSpec(porNFG_FLOAT);
-  case RATIONAL:
-    return PortionSpec(porNFG_RATIONAL);
-  default:
-    assert(0);
-  }
-  return PortionSpec(porUNDEFINED);
+  return PortionSpec(porNFG_FLOAT);
 }
 
-DataType NfgPortion::SubType( void ) const
+DataType NfgPortion<double>::SubType(void) const
 {
-  assert( Value() );
-  return Value()->Type();
+  assert(Value());
+  return DOUBLE;
 }
 
 
-void NfgPortion::Output(gOutput& s) const
+void NfgPortion<double>::Output(gOutput& s) const
 {
   Portion::Output(s);
   assert(*_Value);
   s << "(Nfg) \"" << (*_Value)->GetTitle() << "\""; 
 }
 
-gString NfgPortion::OutputString( void ) const
+gString NfgPortion<double>::OutputString( void ) const
 {
   return "(Nfg)";
 }
 
-Portion* NfgPortion::ValCopy(void) const
+Portion* NfgPortion<double>::ValCopy(void) const
 { 
-  Portion* p = new NfgValPortion(*_Value); 
+  Portion* p = new NfgValPortion<double>(*_Value); 
   // don't call SetGame() here because they are called in constructor
   // p->SetGame(Game(), GameIsEfg());
   return p;
-
-  /*
-  switch((*_Value)->Type())
-  {
-  case DOUBLE:
-    return new NfgValPortion
-      (new Nfg<double>(* (Nfg<double>*) (*_Value))); 
-    break;
-  case RATIONAL:
-    return new NfgValPortion
-      (new Nfg<gRational>(* (Nfg<gRational>*) (*_Value))); 
-    break;
-  default:
-    assert(0);
-  }
-  return 0;
-  */
 }
 
-Portion* NfgPortion::RefCopy(void) const
+Portion* NfgPortion<double>::RefCopy(void) const
 { 
-  Portion* p = new NfgRefPortion(*_Value); 
+  Portion* p = new NfgRefPortion<double>(*_Value); 
   // don't call SetGame() here because they are called in constructor
   // p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
@@ -1823,38 +1797,114 @@ Portion* NfgPortion::RefCopy(void) const
 
 
 
-NfgValPortion::NfgValPortion(BaseNfg* value)
+NfgValPortion<double>::NfgValPortion(Nfg<double> *value)
 {
-  _Value = new BaseNfg*(value);
+  _Value = new Nfg<double>*(value);
   SetGame(*_Value, false);
 }
 
-NfgValPortion::~NfgValPortion()
+NfgValPortion<double>::~NfgValPortion()
 { 
-  //delete *_Value;
   delete _Value; 
 }
 
-bool NfgValPortion::IsReference(void) const
+bool NfgValPortion<double>::IsReference(void) const
 { return false; }
 
 
-NfgRefPortion::NfgRefPortion(BaseNfg*& value)
+NfgRefPortion<double>::NfgRefPortion(Nfg<double> *&value)
 {
   _Value = &value; 
   SetGame(*_Value, false);
 }
 
-NfgRefPortion::~NfgRefPortion()
+NfgRefPortion<double>::~NfgRefPortion()
 { }
 
-bool NfgRefPortion::IsReference(void) const
+bool NfgRefPortion<double>::IsReference(void) const
 { return true; }
 
 
 
+NfgPortion<gRational>::NfgPortion(void)
+{ }
+
+NfgPortion<gRational>::~NfgPortion()
+{ }
+
+Nfg<gRational> *& NfgPortion<gRational>::Value(void) const
+{ return *_Value; }
+
+PortionSpec NfgPortion<gRational>::Spec(void) const
+{ 
+  assert((*_Value) != 0);
+  return PortionSpec(porNFG_RATIONAL);
+}
+
+DataType NfgPortion<gRational>::SubType(void) const
+{
+  assert(Value());
+  return RATIONAL;
+}
 
 
+void NfgPortion<gRational>::Output(gOutput& s) const
+{
+  Portion::Output(s);
+  assert(*_Value);
+  s << "(Nfg) \"" << (*_Value)->GetTitle() << "\""; 
+}
+
+gString NfgPortion<gRational>::OutputString( void ) const
+{
+  return "(Nfg)";
+}
+
+Portion* NfgPortion<gRational>::ValCopy(void) const
+{ 
+  Portion* p = new NfgValPortion<gRational>(*_Value); 
+  // don't call SetGame() here because they are called in constructor
+  // p->SetGame(Game(), GameIsEfg());
+  return p;
+}
+
+Portion* NfgPortion<gRational>::RefCopy(void) const
+{ 
+  Portion* p = new NfgRefPortion<gRational>(*_Value); 
+  // don't call SetGame() here because they are called in constructor
+  // p->SetGame(Game(), GameIsEfg());
+  p->SetOriginal(Original());
+  return p;
+}
+
+
+
+NfgValPortion<gRational>::NfgValPortion(Nfg<gRational> *value)
+{
+  _Value = new Nfg<gRational>*(value);
+  SetGame(*_Value, false);
+}
+
+NfgValPortion<gRational>::~NfgValPortion()
+{ 
+  delete _Value; 
+}
+
+bool NfgValPortion<gRational>::IsReference(void) const
+{ return false; }
+
+
+NfgRefPortion<gRational>::NfgRefPortion(Nfg<gRational> *&value)
+{
+  _Value = &value; 
+  SetGame(*_Value, false);
+}
+
+NfgRefPortion<gRational>::~NfgRefPortion()
+{ }
+
+bool NfgRefPortion<gRational>::IsReference(void) const
+{ return true; }
 
 
 
@@ -2729,3 +2779,10 @@ TEMPLATE class MixedRefPortion<double>;
 TEMPLATE class MixedPortion<gRational>;
 TEMPLATE class MixedValPortion<gRational>;
 TEMPLATE class MixedRefPortion<gRational>;
+
+TEMPLATE class NfgPortion<double>;
+TEMPLATE class NfgValPortion<double>;
+TEMPLATE class NfgRefPortion<double>;
+TEMPLATE class NfgPortion<gRational>;
+TEMPLATE class NfgValPortion<gRational>;
+TEMPLATE class NfgRefPortion<gRational>;

@@ -875,39 +875,36 @@ public:
 
 class BaseNfg;
 
-class NfgPortion : public Portion
-{
+template <class T> class NfgPortion : public Portion   {
 protected:
-  BaseNfg** _Value;
+  Nfg<T> ** _Value;
   NfgPortion(void);
 
 public:
   virtual ~NfgPortion();
 
-  BaseNfg*& Value(void) const;
+  Nfg<T> *& Value(void) const;
   PortionSpec Spec(void) const;
-  DataType SubType( void ) const;
+  DataType SubType(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gString OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
 
 
-class NfgValPortion : public NfgPortion
-{
+template <class T> class NfgValPortion : public NfgPortion<T>  {
 public:
-  NfgValPortion(BaseNfg* value);
+  NfgValPortion(Nfg<T> *value);
   virtual ~NfgValPortion();
   bool IsReference(void) const;
 };
 
-class NfgRefPortion : public NfgPortion
-{
+template <class T> class NfgRefPortion : public NfgPortion<T>  {
 public:
-  NfgRefPortion(BaseNfg*& value);
+  NfgRefPortion(Nfg<T> *&value);
   virtual ~NfgRefPortion();
   bool IsReference(void) const;
 };
