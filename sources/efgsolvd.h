@@ -171,9 +171,9 @@ protected:
 	wxWriteResource(SOLN_SECT,"Efg-Interactive-Solns",pick_solns,defaults_file);
 }
 virtual void Warn(const char *warning) // only warn when solving
-{if (solving) wxMessageBox(warning,"Standard Solution");}
+{if (solving) wxMessageBox((char *)warning,"Standard Solution");}
 public:
-	EfgSolveSettings(const BaseEfg &ef_,bool solving_=true):ef(ef_),solving(solving_)
+	EfgSolveSettings(const BaseEfg &ef_,bool solving_=true):solving(solving_),ef(ef_)
 	{
 	result=SD_SAVE;
 	defaults_file="gambit.ini";
@@ -234,7 +234,7 @@ private:
 	{((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_SAVE);}
 	static void cancel_button_func(wxButton &ob,wxEvent &)
 	{((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_CANCEL);}
-	static void algorithm_box_func(wxRadioBox &ob,wxEvent &)
+	static void algorithm_box_func(wxRadioBox &,wxEvent &)
 	{/*((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_ALGORITHM);*/}
 	static void help_button_func(wxButton &,wxEvent &)
 	{wxHelpContents(EFG_CUSTOM_HELP);}
