@@ -32,6 +32,7 @@
 
 // For MixedSolution; when gbtCorBranch goes abstract, should be removed
 #include "nash/mixedsol.h"
+#include "nash/behavsol.h"
 
 //
 // gbtCorBranch is meant to encapsulate the idea of a branch of a
@@ -39,13 +40,58 @@
 // QREs.  This must be improved and generalized once API is stable.
 //
 class gbtCorBranch {
+public:
+  // Returns the number of dimensions of the product of simplices
+  virtual int NumDimensions(void) const = 0;
+  // Returns the number of data points in the branch
+  virtual int NumData(void) const = 0;
+
+  // Get the value in the 'p_dim'th dimension of the 'p_index'th point 
+  virtual double GetValue(int p_index, int p_dim) const = 0;
+  // Get the parameter of the 'p_index'th point
+  virtual double GetParameter(int p_index) const = 0;
+
+  // Get the maximum value of the parameter
+  virtual double GetMaxParameter(void) const = 0;
+  // Get the minimum value of the parameter
+  virtual double GetMinParameter(void) const = 0;
+};
+
+class gbtCorBranchMixed : public gbtCorBranch {
 private:
   gList<MixedSolution> m_data;
 
 public:
   // Constructors
-  gbtCorBranch(void);
-  gbtCorBranch(const gList<MixedSolution> &);
+  gbtCorBranchMixed(void);
+  gbtCorBranchMixed(const gList<MixedSolution> &);
+  virtual ~gbtCorBranchMixed() { }
+
+  // Returns the number of dimensions of the product of simplices
+  int NumDimensions(void) const;
+  // Returns the number of data points in the branch
+  int NumData(void) const;
+
+  // Get the value in the 'p_dim'th dimension of the 'p_index'th point 
+  double GetValue(int p_index, int p_dim) const;
+  // Get the parameter of the 'p_index'th point
+  double GetParameter(int p_index) const;
+
+  // Get the maximum value of the parameter
+  double GetMaxParameter(void) const;
+  // Get the minimum value of the parameter
+  double GetMinParameter(void) const;
+};
+
+class gbtCorBranchBehav : public gbtCorBranch {
+private:
+  gList<BehavSolution> m_data;
+
+public:
+  // Constructors
+  gbtCorBranchBehav(void);
+  gbtCorBranchBehav(const gList<BehavSolution> &);
+  virtual ~gbtCorBranchBehav() { }
 
   // Returns the number of dimensions of the product of simplices
   int NumDimensions(void) const;
@@ -119,7 +165,7 @@ public:
 
 class gbtCorPlotWindow : public wxScrolledWindow {
 private:
-  gbtCorBranch m_cor;
+  gbtCorBranch *m_cor;
   gbtCorPlotXAxis m_xAxis;
   gbtCorPlotYAxis m_yAxis;
 
@@ -143,8 +189,8 @@ public:
 		   const wxSize & = wxDefaultSize);
   virtual ~gbtCorPlotWindow();
 
-  void SetCorrespondence(const gbtCorBranch &);
-  const gbtCorBranch &GetCorrespondence(void) const;
+  void SetCorrespondence(gbtCorBranch *);
+  gbtCorBranch *GetCorrespondence(void) const;
 
   DECLARE_EVENT_TABLE()
 };

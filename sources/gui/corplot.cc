@@ -69,46 +69,79 @@
 // goals in the future development of this code.
 
 //========================================================================
-//                   Implementation of gbtCorBranch
+//                  Implementation of gbtCorBranchMixed
 //========================================================================
 
-// gbtCorBranch is intended to represent a branch of a correspondence.
-// This implement hardcodes the assumption it is just a list of
-// MixedSolutions computed via QRE.  In future, this should be made
-// abstract as appropriate.
-
 //------------------------------------------------------------------------
-//                       gbtCorBranch: Lifecycle
+//                     gbtCorBranchMixed: Lifecycle
 //------------------------------------------------------------------------
 
-gbtCorBranch::gbtCorBranch(void)
+gbtCorBranchMixed::gbtCorBranchMixed(void)
 { }
 
-gbtCorBranch::gbtCorBranch(const gList<MixedSolution> &p_data)
+gbtCorBranchMixed::gbtCorBranchMixed(const gList<MixedSolution> &p_data)
   : m_data(p_data)
 { }
 
 //------------------------------------------------------------------------
-//                      gbtCorBranch: Data access
+//                    gbtCorBranchMixed: Data access
 //------------------------------------------------------------------------
 
-int gbtCorBranch::NumDimensions(void) const
+int gbtCorBranchMixed::NumDimensions(void) const
 { return m_data[1].Profile()->Length(); }
 
-int gbtCorBranch::NumData(void) const
+int gbtCorBranchMixed::NumData(void) const
 { return m_data.Length(); }
 
-double gbtCorBranch::GetValue(int p_index, int p_dim) const
+double gbtCorBranchMixed::GetValue(int p_index, int p_dim) const
 { return (*m_data[p_index].Profile())[p_dim]; }
 
-double gbtCorBranch::GetParameter(int p_index) const
+double gbtCorBranchMixed::GetParameter(int p_index) const
 { return m_data[p_index].QreLambda(); }
 
-double gbtCorBranch::GetMaxParameter(void) const
+double gbtCorBranchMixed::GetMaxParameter(void) const
 { return m_data[m_data.Length()].QreLambda(); }
 
-double gbtCorBranch::GetMinParameter(void) const
+double gbtCorBranchMixed::GetMinParameter(void) const
 { return 0.0; }
+
+//========================================================================
+//                  Implementation of gbtCorBranchBehav
+//========================================================================
+
+//------------------------------------------------------------------------
+//                     gbtCorBranchBehav: Lifecycle
+//------------------------------------------------------------------------
+
+gbtCorBranchBehav::gbtCorBranchBehav(void)
+{ }
+
+gbtCorBranchBehav::gbtCorBranchBehav(const gList<BehavSolution> &p_data)
+  : m_data(p_data)
+{ }
+
+//------------------------------------------------------------------------
+//                    gbtCorBranchBehav: Data access
+//------------------------------------------------------------------------
+
+int gbtCorBranchBehav::NumDimensions(void) const
+{ return m_data[1].Profile()->Length(); }
+
+int gbtCorBranchBehav::NumData(void) const
+{ return m_data.Length(); }
+
+double gbtCorBranchBehav::GetValue(int p_index, int p_dim) const
+{ return (*m_data[p_index].Profile())[p_dim]; }
+
+double gbtCorBranchBehav::GetParameter(int p_index) const
+{ return m_data[p_index].QreLambda(); }
+
+double gbtCorBranchBehav::GetMaxParameter(void) const
+{ return m_data[m_data.Length()].QreLambda(); }
+
+double gbtCorBranchBehav::GetMinParameter(void) const
+{ return 0.0; }
+
 
 //========================================================================
 //                 Implementation of gbtCorPlotXAxis
@@ -194,7 +227,7 @@ void gbtCorPlotWindow::DrawXAxis(wxDC &p_dc)
     int xCoord = m_marginX + i * (plotWidth / m_xAxis.NumDivisions());
     p_dc.DrawLine(xCoord, height - m_marginY - c_tickWidth,
 		  xCoord, height - m_marginY + c_tickWidth);
-    double value = m_cor.GetMinParameter() + cumstep - 1.0;
+    double value = m_cor->GetMinParameter() + cumstep - 1.0;
     wxString label = wxString::Format((value < 10000.0) ? "%6.2f" : "%6.2e", 
 				      value);
     wxCoord textWidth, textHeight;
@@ -234,9 +267,9 @@ void gbtCorPlotWindow::DrawYAxis(wxDC &p_dc)
 void gbtCorPlotWindow::DrawDimension(wxDC &p_dc, int p_dim)
 {
   int lastX = -1, lastY = -1;
-  for (int i = 1; i <= m_cor.NumData(); i++) {
+  for (int i = 1; i <= m_cor->NumData(); i++) {
     int x, y;
-    DataToXY(m_cor.GetParameter(i), m_cor.GetValue(i, p_dim), x, y);
+    DataToXY(m_cor->GetParameter(i), m_cor->GetValue(i, p_dim), x, y);
     if (lastX >= 0) {
       p_dc.DrawLine(lastX, lastY, x, y);
     }
@@ -253,7 +286,7 @@ void gbtCorPlotWindow::OnPaint(wxPaintEvent &)
   dc.Clear();
   DrawXAxis(dc);
   DrawYAxis(dc);
-  for (int i = 1; i <= m_cor.NumDimensions(); i++) {
+  for (int i = 1; i <= m_cor->NumDimensions(); i++) {
     DrawDimension(dc, i);
   }
 }
@@ -262,13 +295,13 @@ void gbtCorPlotWindow::OnPaint(wxPaintEvent &)
 //                   gbtCorPlotWindow: Accessors
 //------------------------------------------------------------------------
 
-void gbtCorPlotWindow::SetCorrespondence(const gbtCorBranch &p_cor)
+void gbtCorPlotWindow::SetCorrespondence(gbtCorBranch *p_cor)
 { 
   m_cor = p_cor; 
-  m_xAxis.SetMaxValue(m_cor.GetMaxParameter());
+  m_xAxis.SetMaxValue(m_cor->GetMaxParameter());
 }
 
-const gbtCorBranch &gbtCorPlotWindow::GetCorrespondence(void) const
+gbtCorBranch *gbtCorPlotWindow::GetCorrespondence(void) const
 { return m_cor; }
 
 

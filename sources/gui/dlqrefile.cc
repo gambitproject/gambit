@@ -85,7 +85,7 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
   gbtCorPlotWindow *plotWindow = new gbtCorPlotWindow(m_notebook,
 						      wxPoint(0, 0),
 						      wxSize(500, 300));
-  plotWindow->SetCorrespondence(p_profiles);
+  plotWindow->SetCorrespondence(new gbtCorBranchMixed(p_profiles));
   m_notebook->AddPage(plotWindow, "Plot");
 
   topSizer->Add(new wxButton(this, idBUTTON_PXIFILE, "Export to PXI file..."),
@@ -113,16 +113,17 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
     m_behavProfiles(p_profiles)
 {
   SetAutoLayout(true);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
   m_notebook = new wxNotebook(this, -1);
   wxPanel *listPanel = new wxPanel(m_notebook, -1);
   m_notebook->AddPage(listPanel, "QREs");
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(new wxNotebookSizer(m_notebook));
+  topSizer->Add(new wxNotebookSizer(m_notebook), 0, wxALL, 5);
 
-  m_qreList = new wxListCtrl(listPanel, -1, wxDefaultPosition, wxSize(500, 300),
-			     wxLC_REPORT | wxLC_SINGLE_SEL);
+  wxBoxSizer *listPanelSizer = new wxBoxSizer(wxVERTICAL);
+  m_qreList = new wxListCtrl(listPanel, -1, wxDefaultPosition,
+			     wxSize(500, 300), wxLC_REPORT | wxLC_SINGLE_SEL);
   m_qreList->InsertColumn(0, "Lambda");
 
   int maxColumn = 0;
@@ -143,6 +144,15 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
       m_qreList->SetItem(i - 1, j, (char *) ToText(profile[j]));
     }
   }
+  listPanelSizer->Add(m_qreList, 0, wxALL, 0);
+  listPanel->SetAutoLayout(true);
+  listPanel->SetSizer(listPanelSizer);
+
+  gbtCorPlotWindow *plotWindow = new gbtCorPlotWindow(m_notebook,
+						      wxPoint(0, 0),
+						      wxSize(500, 300));
+  plotWindow->SetCorrespondence(new gbtCorBranchBehav(p_profiles));
+  m_notebook->AddPage(plotWindow, "Plot");
 
   topSizer->Add(new wxButton(this, idBUTTON_PXIFILE, "Export to PXI file..."),
 		0, wxALL | wxCENTER, 5);
