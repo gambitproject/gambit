@@ -758,6 +758,22 @@ Portion *GSM_NextSibling(Portion **param)
   return por;
 }
 
+//----------
+// Nodes
+//----------
+
+Portion *GSM_Nodes(Portion **param)
+{
+  BaseEfg *efg = ((EfgPortion *) param[0])->Value();
+
+  gList<Node *> nodes;
+  Nodes(*efg, nodes);
+
+  Portion *por = ArrayToList(nodes);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
+}
+
 //---------------
 // NthChild
 //---------------
@@ -1513,6 +1529,13 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("NextSibling", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NextSibling, porNODE, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
+  gsm->AddFunction(FuncObj);
+
+  
+  FuncObj = new FuncDescObj("Nodes", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Nodes,
+				       PortionSpec(porNODE, 1), 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
   gsm->AddFunction(FuncObj);
 
 

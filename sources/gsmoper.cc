@@ -1765,10 +1765,366 @@ Portion* GSM_Read_List_Text(Portion** param)
 }
 
 
+//----------------------------------------------------------------
+// The following functions were from solfunc.cc, but no longer
+// correspond to built-in function.  However, they got used
+// here as well...
+//----------------------------------------------------------------
+
+template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
+
+Portion *GSM_ListForm_BehavFloat(Portion **param)
+{
+  BehavSolution<double> *P = 
+    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+  return gDPVectorToList(* (gDPVector<double>*) P);
+}
 
 
-extern Portion* GSM_ListForm_MixedFloat(Portion** param);
-extern Portion* GSM_Mixed_NfgFloat(Portion **param);
+Portion *GSM_ListForm_BehavRational(Portion **param)
+{
+  BehavSolution<gRational> *P = 
+    (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
+  return gDPVectorToList(* (gDPVector<gRational>*) P);
+}
+
+Portion *GSM_ListForm_MixedFloat(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p1;
+  Portion* p2;
+  Portion* por;
+
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+
+  por = new ListValPortion();
+
+  for(i = 1; i <= P->Lengths().Length(); i++)
+  {
+    p1 = new ListValPortion();
+
+    for(j = 1; j <= P->Lengths()[i]; j++)
+    {
+      p2 = new FloatValPortion((*P)(i, j));
+      ((ListValPortion*) p1)->Append(p2);
+    }
+
+    ((ListValPortion*) por)->Append(p1);
+  }
+
+  return por;
+}
+
+
+Portion *GSM_ListForm_MixedRational(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p1;
+  Portion* p2;
+  Portion* por;
+
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
+
+  por = new ListValPortion();
+
+  for(i = 1; i <= P->Lengths().Length(); i++)
+  {
+    p1 = new ListValPortion();
+
+    for(j = 1; j <= P->Lengths()[i]; j++)
+    {
+      p2 = new RationalValPortion((*P)(i, j));
+      ((ListValPortion*) p1)->Append(p2);
+    }
+
+    ((ListValPortion*) por)->Append(p1);
+  }
+
+  return por;
+}
+
+Portion *GSM_Mixed_NfgFloat(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p1;
+  Portion* p2;
+
+  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
+  MixedSolution<double> *P = new MixedSolution<double>(N);
+
+  if(((ListPortion*) param[1])->Length() != N.NumPlayers())
+  {
+    delete P;
+    return new ErrorPortion("Mismatching number of players");
+  }
+  
+  for(i = 1; i <= N.NumPlayers(); i++)
+  {
+    p1 = ((ListPortion*) param[1])->SubscriptCopy(i);
+    if(p1->Spec().ListDepth == 0)
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion("Mismatching dimensionality");
+    }
+    if(((ListPortion*) p1)->Length() != N.NumStrats(i))
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion("Mismatching number of strategies");
+    }
+
+    for(j = 1; j <= N.NumStrats(i); j++)
+    {
+      p2 = ((ListPortion*) p1)->SubscriptCopy(j);
+      if(p2->Spec().Type != porFLOAT)
+      {
+	delete p2;
+	delete p1;
+	delete P;
+	return new ErrorPortion("Mismatching dimensionality");
+      }
+      
+      (*P)(i, j) = ((FloatPortion*) p2)->Value();
+      
+      delete p2;
+    }
+    delete p1;
+  }
+
+
+  Portion* por = new MixedValPortion(P);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
+}
+
+
+
+Portion *GSM_Mixed_NfgRational(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p1;
+  Portion* p2;
+
+  Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
+  MixedSolution<gRational> *P = new MixedSolution<gRational>(N);
+
+  if(((ListPortion*) param[1])->Length() != N.NumPlayers())
+  {
+    delete P;
+    return new ErrorPortion("Mismatching number of players");
+  }
+  
+  for(i = 1; i <= N.NumPlayers(); i++)
+  {
+    p1 = ((ListPortion*) param[1])->SubscriptCopy(i);
+    if(p1->Spec().ListDepth == 0)
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion("Mismatching dimensionality");
+    }
+    if(((ListPortion*) p1)->Length() != N.NumStrats(i))
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion("Mismatching number of strategies");
+    }
+
+    for(j = 1; j <= N.NumStrats(i); j++)
+    {
+      p2 = ((ListPortion*) p1)->SubscriptCopy(j);
+      if(p2->Spec().Type != porRATIONAL)
+      {
+	delete p2;
+	delete p1;
+	delete P;
+	return new ErrorPortion("Mismatching dimensionality");
+      }
+      
+      (*P)(i, j) = ((RationalPortion*) p2)->Value();
+      
+      delete p2;
+    }
+    delete p1;
+  }
+
+
+  Portion* por = new MixedValPortion(P);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
+}
+
+Portion *GSM_Behav_EfgFloat(Portion **param)
+{
+  int i;
+  int j;
+  int k;
+  Portion* p1;
+  Portion* p2;
+  Portion* p3;
+
+  Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
+  BehavSolution<double> *P = new BehavSolution<double>(E);
+
+  if(((ListPortion*) param[1])->Length() != E.NumPlayers())
+  {
+    delete P;
+    return new ErrorPortion("Mismatching number of players");
+  }
+  
+  for(i = 1; i <= E.NumPlayers(); i++)
+  {
+    p1 = ((ListPortion*) param[1])->SubscriptCopy(i);
+    if(p1->Spec().ListDepth == 0)
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion("Mismatching dimensionality");
+    }
+    if(((ListPortion*) p1)->Length() != E.PlayerList()[i]->NumInfosets())
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion("Mismatching number of infosets");
+    }
+
+    for(j = 1; j <= E.PlayerList()[i]->NumInfosets(); j++)
+    {
+      p2 = ((ListPortion*) p1)->SubscriptCopy(j);
+      if(p2->Spec().ListDepth == 0)
+      {
+	delete p2;
+	delete p1;
+	delete P;
+	return new ErrorPortion("Mismatching dimensionality");
+      }
+      if(((ListPortion*) p2)->Length() !=
+	 E.PlayerList()[i]->InfosetList()[j]->NumActions())
+      {
+	delete p2;
+	delete p1;
+	delete P;
+	return new ErrorPortion("Mismatching number of actions");
+      }
+
+      for(k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++)
+      {
+	p3 = ((ListPortion*) p2)->SubscriptCopy(k);
+	if(p3->Spec().Type != porFLOAT)
+	{
+	  delete p3;
+	  delete p2;
+	  delete p1;
+	  delete P;
+	  return new ErrorPortion("Mismatching dimensionality");
+	}
+      
+	(*P)(i, j, k) = ((FloatPortion*) p3)->Value();
+
+	delete p3;
+      }
+      delete p2;
+    }
+    delete p1;
+  }
+
+  Portion* por = new BehavValPortion(P);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
+
+}
+
+Portion *GSM_Behav_EfgRational(Portion **param)
+{
+  int i;
+  int j;
+  int k;
+  Portion* p1;
+  Portion* p2;
+  Portion* p3;
+
+  Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
+  BehavSolution<gRational> *P = new BehavSolution<gRational>(E);
+
+  if(((ListPortion*) param[1])->Length() != E.NumPlayers())
+  {
+    delete P;
+    return new ErrorPortion("Mismatching number of players");
+  }
+  
+  for(i = 1; i <= E.NumPlayers(); i++)
+  {
+    p1 = ((ListPortion*) param[1])->SubscriptCopy(i);
+    if(p1->Spec().ListDepth == 0)
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion("Mismatching dimensionality");
+    }
+    if(((ListPortion*) p1)->Length() != E.PlayerList()[i]->NumInfosets())
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion("Mismatching number of infosets");
+    }
+
+    for(j = 1; j <= E.PlayerList()[i]->NumInfosets(); j++)
+    {
+      p2 = ((ListPortion*) p1)->SubscriptCopy(j);
+      if(p2->Spec().ListDepth == 0)
+      {
+	delete p2;
+	delete p1;
+	delete P;
+	return new ErrorPortion("Mismatching dimensionality");
+      }
+      if(((ListPortion*) p2)->Length() !=
+	 E.PlayerList()[i]->InfosetList()[j]->NumActions())
+      {
+	delete p2;
+	delete p1;
+	delete P;
+	return new ErrorPortion("Mismatching number of actions");
+      }
+
+      for(k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++)
+      {
+	p3 = ((ListPortion*) p2)->SubscriptCopy(k);
+	if(p3->Spec().Type != porRATIONAL)
+	{
+	  delete p3;
+	  delete p2;
+	  delete p1;
+	  delete P;
+	  return new ErrorPortion("Mismatching dimensionality");
+	}
+      
+	(*P)(i, j, k) = ((RationalPortion*) p3)->Value();
+
+	delete p3;
+      }
+      delete p2;
+    }
+    delete p1;
+  }
+
+  Portion* por = new BehavValPortion(P);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
+}
+
+
+//----------------------------------------------------------
+// End of transplanted functions
+//----------------------------------------------------------
+
 
 Portion* GSM_Read_MixedFloat(Portion** param)
 {
@@ -1796,8 +2152,6 @@ Portion* GSM_Read_MixedFloat(Portion** param)
 }
 
 
-extern Portion* GSM_ListForm_MixedRational(Portion** param);
-extern Portion* GSM_Mixed_NfgRational(Portion **param);
 
 Portion* GSM_Read_MixedRational(Portion** param)
 {
