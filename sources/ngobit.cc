@@ -1,8 +1,12 @@
 //#
 //# FILE: gobit.cc -- Gobit module
 //#
-//# @(#)gobit.cc	1.4 10/27/94
+//# $Id$
 //#
+
+#ifdef __GNUG__
+#pragma implementation "gobit.h"
+#endif   // __GNUG__
 
 #include "gambitio.h"
 #include "normal.h"
@@ -12,6 +16,9 @@
 #include "solution.h"
 #include "gfunct.h"
 #include "gobit.h"
+
+GobitParams::GobitParams(void) : plev(0), nequilib(1)
+{ }
 
 class BaseGobit {
 public:
@@ -228,7 +235,7 @@ int GobitSolver::Gobit(void)
     break;
     */
   }
-  T->Gobit(params.number);
+  T->Gobit(params.nequilib);
 
   if (params.outfile != "")
     delete outfile;

@@ -4,6 +4,10 @@
 //# $Id$
 //#
 
+#ifdef __GNUG__
+#pragma implementation "lemke.h"
+#endif   // __GNUG__
+
 #include "gambitio.h"
 #include "normal.h"
 #include "normiter.h"
@@ -13,6 +17,8 @@
 #include "solution.h"
 #include "lemke.h"
 
+LemkeParams::LemkeParams(void) : dup_strat(0), plev(0)
+{ }
 
 //
 // Here is the LemkeSolution class.  To be used, it needs to have private

@@ -4,20 +4,26 @@
 //# $Id$
 //#
 
+#ifdef __GNUG__
+#pragma implementation "grid.h"
+#endif   // __GNUG__
+
 #include "rational.h"
-#include "nfrep.h"
 #include "normal.h"
 #include "normiter.h"
 #include "probvect.h"
 #include "equdata.h"
 #include "stpwatch.h"
+#include "grid.h"
+
+GridParams::GridParams(void) : plev(0)   { }
 
 // Controls if solutions are displayed on gout as they are obtained
 #define SCREEN_OUTPUT
 
 template <class T> class GridSolveModule   {
   private:
-    NFRep<T> &rep;
+    NormalForm<T> &rep;
     FileHeader header;
     gVector<T> p, x, q_calc, y;
     gOutput &out;
@@ -27,8 +33,8 @@ template <class T> class GridSolveModule   {
     void OutputResult(gOutput &out,T l,T dist,gVector<T> &q,gVector<T> &p);
 
   public:
-    GridSolveModule(NFRep<T> &r,gInput &in,gOutput &out);
-    GridSolveModule(NFRep<T> &r,gOutput &out,T _merror=-1.0,T _qstep=-1.0,
+    GridSolveModule(NormalForm<T> &r,gInput &in,gOutput &out);
+    GridSolveModule(NormalForm<T> &r,gOutput &out,T _merror=-1.0,T _qstep=-1.0,
 		    T _estep=-1.0,T _estart=-1.0,T _estop=-1.0,int _data_type=-1);
     ~GridSolveModule()   { }
     void SetUpdateFunc(void (*upd)(void)) { update_func = upd; }
@@ -40,14 +46,14 @@ template <class T> class GridSolveModule   {
 };
 
 template <class T>
-GridSolveModule<T>::GridSolveModule(NFRep<T> &r, gInput &params, gOutput &_out)
+GridSolveModule<T>::GridSolveModule(NormalForm<T> &r, gInput &params, gOutput &_out)
   : rep(r), header(params), out(_out), x(r.NumStrats(1)), p(r.NumStrats(1)),
     y(r.NumStrats(2)), q_calc(r.NumStrats(2)), update_func(0)
 {
 }
 
 template <class T>
-GridSolveModule<T>::GridSolveModule(NFRep<T> &r, gOutput &_out,
+GridSolveModule<T>::GridSolveModule(NormalForm<T> &r, gOutput &_out,
 				    T _merror, T _qstep, T _estep, T _estart,
 				    T _estop, int _data_type)
   : rep(r), out(_out), x(r.NumStrats(1)), p(r.NumStrats(1)),
@@ -167,6 +173,12 @@ delete pv;
 return 1;
 }
 
+//
+// Note: reading from the parameter file is currently not available...
+// This will be reactivated soon, hopefully.
+//
+
+/*
 int NormalForm::GridSolve(const gString &param_file,
                           const gString &out_file)
 {
@@ -187,30 +199,38 @@ int NormalForm::GridSolve(const gString &param_file,
       return 0;
   }
 }
+*/
 
 // Grid Solve, allows to set most parameters from the function call
-int NormalForm::GridSolve(const gString &out_file,
-			  double _merror, double _qstep,
-			  double _estep, double _estart, double _estop,
-			  int _data_type)
+int GridSolver::GridSolve(void)
 {
-  gFileOutput out((char *) out_file);
-  switch (type)  {
+  gOutput *outfile = &gout;
+
+  if (params.outfile != "")
+    outfile = new gFileOutput((char *) params.outfile);
+
+  switch (nf.Type())  {
     case DOUBLE:  {
-      GridSolveModule<double> M((NFRep<double> &) *data,out,_merror,_qstep,
-			_estep,_estart,_estop,_data_type);
+      GridSolveModule<double> M((NormalForm<double> &) nf, *outfile,
+				(double) params.tol, (double) params.delp,
+				(double) params.delLam,(double) params.minLam, 
+				(double) params.maxLam, params.type);
       M.GridSolve();
-      return 1;
+      break;
     }
     case RATIONAL:  {
-      GridSolveModule<Rational> M((NFRep<Rational> &) *data,out,(Rational)_merror,(Rational)_qstep,
-			(Rational)_estep,(Rational)_estart,(Rational)_estop,_data_type);
+      GridSolveModule<gRational> M((NormalForm<Rational> &) nf, *outfile,
+				  params.tol, params.delp,
+				  params.delLam, params.minLam,
+				  params.maxLam, params.type);
       M.GridSolve();
-      return 1;
+      break;
     }
-    default:
-      return 0;
-    }
+  }
+
+  if (params.outfile != "")   delete outfile;
+
+  return 1;
 }
 
 

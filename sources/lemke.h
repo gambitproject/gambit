@@ -7,15 +7,18 @@
 #ifndef LEMKE_H
 #define LEMKE_H
 
+#ifdef __GNUG__
+#pragma interface
+#endif   // __GNUG__
+
 #include "normal.h"
 
 class LemkeParams     {
   public:
-    int dup_strat;
-    int plev;
+    int dup_strat, plev, nequilib, maxdepth;
     gString outfile, errfile;
     
-    LemkeParams(void) : dup_strat(0), plev(0)   { }
+    LemkeParams(void);
 };
 
 class LemkeSolver  {
@@ -23,6 +26,7 @@ class LemkeSolver  {
     const BaseNormalForm &nf;
     LemkeParams params;
     int npivots;
+    gRational time;
 
   public:
     LemkeSolver(const BaseNormalForm &N, const LemkeParams &p) 
@@ -32,6 +36,7 @@ class LemkeSolver  {
     int Lemke(void);
     
     int NumPivots(void) const    { return npivots; }
+    gRational Time(void) const    { return time; }
 
     LemkeParams &Parameters(void)   { return params; }
 };

@@ -1,20 +1,24 @@
 //#
 //# FILE: simpdiv.h -- Interface to Simpdiv solution module
 //#
-//# @(#)simpdiv.h	1.1 11/22/94
+//# $Id$
 //#
 
 #ifndef SIMPDIV_H
 #define SIMPDIV_H
 
+#ifdef __GNUG__
+#pragma interface
+#endif   // __GNUG__
+
 #include "normal.h"
 
 class SimpdivParams     {
   public:
-    int plev,number,ndivs,leashlength;
+    int plev, number, ndivs, leash;
     gString outfile, errfile;
     
-    SimpdivParams(void) : number(1), plev(0),ndivs(20),leashlength(0)   { }
+    SimpdivParams(void);
 };
 
 class SimpdivSolver  {
@@ -22,6 +26,7 @@ class SimpdivSolver  {
     const BaseNormalForm &nf;
     SimpdivParams params;
     int nevals;
+    gRational time;
 
   public:
     SimpdivSolver(const BaseNormalForm &N, const SimpdivParams &p) 
@@ -31,6 +36,7 @@ class SimpdivSolver  {
     int Simpdiv(void);
     
     int NumEvals(void) const    { return nevals; }
+    gRational Time(void) const   { return time; }
 
     SimpdivParams &Parameters(void)   { return params; }
 };

@@ -1,20 +1,25 @@
 //#
 //# FILE: gobit.h -- Interface to Gobit solution module
 //#
-//# @(#)gobit.h	1.1 11/22/94
+//# $Id$
 //#
 
 #ifndef GOBIT_H
 #define GOBIT_H
 
+#ifdef __GNUG__
+#pragma interface
+#endif   // __GNUG__
+
 #include "normal.h"
 
 class GobitParams     {
   public:
-    int plev,number;
+    int plev, nequilib, type, maxitsDFP, maxitsBrent;
+    gRational minLam, maxLam, delLam, tolDFP, tolBrent;
     gString outfile, errfile;
     
-    GobitParams(void) :  plev(0),number(1)   { }
+    GobitParams(void);
 };
 
 class GobitSolver  {

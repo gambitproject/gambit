@@ -7,14 +7,20 @@
 #ifndef LIAP_H
 #define LIAP_H
 
+#ifdef __GNUG__
+#pragma interface
+#endif   // __GNUG__
+
 #include "normal.h"
+#include "gnumber.h"
 
 class LiapParams     {
   public:
-    int plev,number;
+    int plev, ntries, nequilib, maxitsDFP, maxitsBrent;
+    gRational tolDFP, tolBrent;
     gString outfile, errfile;
     
-    LiapParams(void) : number(0), plev(2)   { }
+    LiapParams(void);
 };
 
 class LiapSolver  {

@@ -1,11 +1,15 @@
 //#
 //# FILE: liap.cc -- Liapunov module
 //#
-//# @(#)liap.cc	1.7 11/10/94
+//# $Id$
 //#
 
 #define MAXIT 10
 #define TOL (T)(.00000001)
+
+#ifdef __GNUG__
+#pragma implementation "liap.h"
+#endif   // __GNUG__
 
 #include <stdlib.h>
 #include "gambitio.h"
@@ -16,6 +20,9 @@
 #include "solution.h"
 #include "gfunct.h"
 #include "liap.h"
+
+LiapParams::LiapParams(void) : nequilib(1), plev(2)
+{ }
 
 class BaseLiap {
 public:
@@ -183,7 +190,7 @@ int LiapSolver::Liap(void)
   }
   gout << "\nLiapSolver::Liap() Loc 3";
 
-  T->Liap(params.number);
+  T->Liap(params.nequilib);
   gout << "\nLiapSolver::Liap() Loc 4";
   nits=T->Nits();
   nevals= T->Nevals();

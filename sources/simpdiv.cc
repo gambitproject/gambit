@@ -1,15 +1,22 @@
-/*  SIMPDIV.CC    Mixed strategy Algorithm for GAMBIT       2/14/91
-*/
+//#
+//# FILE: simpdiv.cc -- Mixed strategy algorithm for Gambit
+//#
+//# $Id$
+//#
 
-/*
-simpdiv is a simplicial subdivision algorithm with restart, for finding
-mixed strategy solutions to general finite n-person games.  It is based on
-van Der Laan, Talman and van Der Heyden, Math in Oper Res, 1987,
-code was written by R. McKelvey
-*/
+//
+// simpdiv is a simplicial subdivision algorithm with restart, for finding
+// mixed strategy solutions to general finite n-person games.  It is based on
+// van Der Laan, Talman and van Der Heyden, Math in Oper Res, 1987,
+// code was written by R. McKelvey
+//
 
 #define TOL 1.0e-10
 #define MAXIT 10000
+
+#ifdef __GNUG__
+#pragma implementation "simpdiv.h"
+#endif   // __GNUG__
 
 #include "gambitio.h"
 #include "normal.h"
@@ -20,6 +27,9 @@ code was written by R. McKelvey
 #include "mixed.h"
 #include "solution.h"
 #include "simpdiv.h"
+
+SimpdivParams::SimpdivParams(void) : number(1), plev(0), ndivs(20), leash(0)
+{ }
 
 class BaseSimpdiv {
 public:
@@ -484,20 +494,23 @@ int SimpdivSolver::Simpdiv(void)
     errfile = outfile;
  
   switch (nf.Type())   {
-  case DOUBLE:
-    T = new SimpdivModule<double>((NormalForm<double> &) nf, 
-				  *outfile, *errfile, params.plev,
-				  params.ndivs,params.leashlength);
-    break;
+    case DOUBLE:
+      T = new SimpdivModule<double>((NormalForm<double> &) nf, 
+				    *outfile, *errfile, params.plev,
+				    params.ndivs, params.leash);
+      break;
 
- case RATIONAL:
-    T = new SimpdivModule<gRational>((NormalForm<gRational> &) nf, 
-				     *outfile, *errfile, params.plev,
-				   params.ndivs,params.leashlength);
-    break;
+    case RATIONAL:
+      T = new SimpdivModule<gRational>((NormalForm<gRational> &) nf, 
+				       *outfile, *errfile, params.plev,
+				       params.ndivs, params.leash);
+      break;
   }
+
   T->Simpdiv(1);
-  nevals=T->Nevals();
+
+  nevals = T->Nevals();
+
   if (params.outfile != "")
     delete outfile;
   if (params.errfile != "" && params.errfile != params.outfile)
