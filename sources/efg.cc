@@ -1076,9 +1076,12 @@ Infoset *FullEfg::SplitInfoset(Node *n)
     ns->members.Append(nn);
     nn->infoset = ns;
   }
-  for (i = 1; i <= s->actions.Length(); i++)
+  for (i = 1; i <= s->actions.Length(); i++) {
     ns->actions[i]->name = s->actions[i]->name;
-
+    if (p == chance) {
+      SetChanceProb(ns, i, GetChanceProb(s, i));
+    }
+  }
   DeleteLexicon();
   SortInfosets();
   NotifyClients(true, true);
