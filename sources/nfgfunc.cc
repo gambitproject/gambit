@@ -14,6 +14,7 @@
 #include "glist.h"
 #include "mixed.h"
 
+#include "gwatch.h"
 
 //
 // Implementations of these are provided as necessary in gsmutils.cc
@@ -21,33 +22,11 @@
 Portion *ArrayToList(const gArray<NFPlayer *> &);
 Portion *ArrayToList(const gArray<Strategy *> &);
 
-Portion *GSM_IsConstSumNfg(Portion **param)
-{
-  BaseNfg &N = * ((NfgPortion *) param[0])->Value();
-  return new BoolValPortion(N.IsConstSum());
-}
 
-Portion *GSM_NumPlayersNfg(Portion **param)
-{
-  BaseNfg &N = * ((NfgPortion*) param[0])->Value();
-  return new IntValPortion(N.NumPlayers());
-}
 
-Portion *GSM_NameNfg(Portion **param)
-{
-  BaseNfg &N = * ((NfgPortion*) param[0])->Value();
-  return new TextValPortion(N.GetTitle());
-}
-
-Portion *GSM_PlayersNfg(Portion **param)
-{
-  BaseNfg &N = *((NfgPortion*) param[0])->Value();
-
-  Portion* p = ArrayToList(N.PlayerList());
-  p->SetOwner( param[ 0 ]->Original() );
-  p->AddDependency();
-  return p;
-}
+//---------------
+// AddStrategy
+//---------------
 
 Portion *GSM_AddStrategy(Portion **param)
 {
@@ -62,180 +41,26 @@ Portion *GSM_AddStrategy(Portion **param)
   return por;
 }
 
-Portion *GSM_RemoveStrategy(Portion **param)
+//---------------
+// CompressNfg
+//---------------
+
+Portion *GSM_CompressNfg(Portion **param)
 {
-  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
-  Strategy *s = ((StrategyPortion *) param[1])->Value();
-  
-  S->GetNFStrategySet(s->nfp->GetNumber())->RemoveStrategy(s);
-
-  Portion* por = new NfSupportValPortion(S);
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
-  return por;
+  Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
+  Nfg<double> *M = new Nfg<double>(N);
+  return new NfgValPortion(M);
 }
-
-Portion* GSM_NameNfPlayer( Portion** param )
-{
-  NFPlayer *p = ( (NfPlayerPortion*) param[ 0 ] )->Value();
-  return new TextValPortion( p->GetName() );
-}
-
-Portion* GSM_NameStrategy( Portion** param )
-{
-  Strategy *s = ( (StrategyPortion*) param[ 0 ] )->Value();
-  return new TextValPortion( s->name );
-}
-
-Portion *GSM_SetNameNfg(Portion **param)
-{
-  BaseNfg &N = * ((NfgPortion*) param[0])->Value();
-  gString name = ((TextPortion *) param[1])->Value();
-  N.SetTitle(name);
-  return param[0]->ValCopy();
-}
-
-Portion *GSM_SetNameNfPlayer(Portion **param)
-{
-  NFPlayer *p = ((NfPlayerPortion *) param[0])->Value();
-  gString name = ((TextPortion *) param[1])->Value();
-  p->SetName(name);
-  return param[0]->ValCopy();
-}
-
-Portion *GSM_SetNameStrategy(Portion **param)
-{
-  Strategy *s = ((StrategyPortion *) param[0])->Value();
-  gString name = ((TextPortion *) param[1])->Value();
-  s->name = name;
-  return param[0]->ValCopy();
-}
-
-
-
-
-
-
-Portion *GSM_NumStrats( Portion** param )
-{
-  int i;
-  gArray< int > dim;
-
-  NFPlayer* P = (NFPlayer *) ((NfPlayerPortion *) param[0])->Value();
-  NFSupport* s = ( (NfSupportPortion*) param[ 1 ] )->Value();
-
-  if( s == 0 )
-    return new IntValPortion( P->StrategyList().Length() );
-  else
-  {
-    dim = s->SupportDimensions();
-    for( i = 1; i <= dim.Length(); i++ )
-    {
-      if( &( s->GetNFStrategySet( i )->GetPlayer() ) == P )
-	return new IntValPortion( s->NumStrats( i ) );
-    }
-  }
-  return new ErrorPortion( "Specified player is not found in the support" );
-}
-
-
-Portion *GSM_Strategies(Portion **param)
-{
-  int i;
-  gArray< int > dim;
-  Portion* por = 0;
-
-  NFPlayer *P = (NFPlayer *) ((NfPlayerPortion *) param[0])->Value();
-  NFSupport* s = ( (NfSupportPortion*) param[ 1 ] )->Value();
-
-  if( s == 0 )
-    por = ArrayToList(P->StrategyList());
-  else
-  {
-    dim = s->SupportDimensions();
-    for( i = 1; i <= dim.Length(); i++ )
-    {
-      if( &( s->GetNFStrategySet( i )->GetPlayer() ) == P )
-      {
-	por = ArrayToList( s->GetStrategy( i ) );
-	break;
-      }
-    }
-  }
-
-  if( por != 0 )
-  {
-    por->SetOwner(param[0]->Owner());
-    por->AddDependency();
-  }
-  else
-  {
-    por = new ErrorPortion( "Specified player is not found in the support" );
-  }
-  return por;
-}
-
-
-#include "gwatch.h"
-
-
-
-
-//---------------------- ElimDom ----------------------------//
 
 extern NFSupport *ComputeDominated(NFSupport &S, bool strong, 
 				   const gArray<int> &players,
 				   gOutput &tracefile);
 
-Portion *GSM_ElimDom(Portion **param)
-{
-  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
-  bool strong = ((BoolPortion *) param[1])->Value();
-  
-  gWatch watch;
-  gBlock<int> players(S->BelongsTo().NumPlayers());
-  int i;
-  for (i = 1; i <= players.Length(); i++)   players[i] = i;
+//--------------
+// ElimAllDom
+//--------------
 
-  NFSupport *T = ComputeDominated(*S, strong, players, gout);
-
-  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
-  
-  Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
-
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
-  return por;
-}
-
-
-Portion *GSM_ElimDom_Nfg(Portion **param)
-{
-  NFSupport *S = new NFSupport( * ((NfgPortion *) param[0])->Value() );
-  bool strong = ((BoolPortion *) param[1])->Value();
-  
-  gWatch watch;
-  gBlock<int> players(S->BelongsTo().NumPlayers());
-  int i;
-  for (i = 1; i <= players.Length(); i++)   players[i] = i;
-
-  NFSupport *T = ComputeDominated(*S, strong, players, gout);
-
-  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
-  
-  Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
-
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
-  return por;
-}
-
-
-
-
-//---------------------------- ElimAllDom ---------------------------//
-
-Portion *GSM_ElimAllDom(Portion **param)
+Portion *GSM_ElimAllDom_NfSupport(Portion **param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   bool strong = ((BoolPortion *) param[1])->Value();
@@ -288,7 +113,84 @@ Portion *GSM_ElimAllDom_Nfg(Portion **param)
   return por;
 }
 
- 
+//-------------
+// ElimDom
+//-------------
+
+Portion *GSM_ElimDom_NfSupport(Portion **param)
+{
+  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  bool strong = ((BoolPortion *) param[1])->Value();
+  
+  gWatch watch;
+  gBlock<int> players(S->BelongsTo().NumPlayers());
+  int i;
+  for (i = 1; i <= players.Length(); i++)   players[i] = i;
+
+  NFSupport *T = ComputeDominated(*S, strong, players, gout);
+
+  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
+  
+  Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
+
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+
+
+Portion *GSM_ElimDom_Nfg(Portion **param)
+{
+  NFSupport *S = new NFSupport( * ((NfgPortion *) param[0])->Value() );
+  bool strong = ((BoolPortion *) param[1])->Value();
+  
+  gWatch watch;
+  gBlock<int> players(S->BelongsTo().NumPlayers());
+  int i;
+  for (i = 1; i <= players.Length(); i++)   players[i] = i;
+
+  NFSupport *T = ComputeDominated(*S, strong, players, gout);
+
+  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
+  
+  Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
+
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+
+//----------
+// Float
+//----------
+
+extern Nfg<double> *ConvertNfg(const Nfg<gRational> &);
+
+Portion *GSM_Float_Nfg(Portion **param)
+{
+  Nfg<gRational> &orig = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
+  Nfg<double> *N = ConvertNfg(orig);
+
+  if (N)
+    return new NfgValPortion(N);
+  else
+    return new ErrorPortion("Conversion failed.");
+}
+
+//--------------
+// IsConstSum
+//--------------
+
+Portion *GSM_IsConstSum_Nfg(Portion **param)
+{
+  BaseNfg &N = * ((NfgPortion *) param[0])->Value();
+  return new BoolValPortion(N.IsConstSum());
+}
+
+//-----------
+// LoadNfg
+//-----------
+
 Portion *GSM_LoadNfg(Portion **param)
 {
   gString file = ((TextPortion *) param[0])->Value();
@@ -331,38 +233,31 @@ Portion *GSM_LoadNfg(Portion **param)
 
 }
 
-Portion *GSM_CompressNfg(Portion **param)
+//--------
+// Name
+//--------
+
+Portion *GSM_Name_Nfg(Portion **param)
 {
-  Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
-  Nfg<double> *M = new Nfg<double>(N);
-  return new NfgValPortion(M);
+  BaseNfg &N = * ((NfgPortion*) param[0])->Value();
+  return new TextValPortion(N.GetTitle());
 }
 
-extern Nfg<double> *ConvertNfg(const Nfg<gRational> &);
-
-Portion *GSM_FloatNfg(Portion **param)
+Portion* GSM_Name_NfPlayer( Portion** param )
 {
-  Nfg<gRational> &orig = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
-  Nfg<double> *N = ConvertNfg(orig);
-
-  if (N)
-    return new NfgValPortion(N);
-  else
-    return new ErrorPortion("Conversion failed.");
+  NFPlayer *p = ( (NfPlayerPortion*) param[ 0 ] )->Value();
+  return new TextValPortion( p->GetName() );
 }
 
-extern Nfg<gRational> *ConvertNfg(const Nfg<double> &);
-
-Portion *GSM_RationalNfg(Portion **param)
+Portion* GSM_Name_Strategy( Portion** param )
 {
-  Nfg<double> &orig = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
-  Nfg<gRational> *N = ConvertNfg(orig);
-
-  if (N)
-    return new NfgValPortion(N);
-  else
-    return new ErrorPortion("Conversion failed.");
+  Strategy *s = ( (StrategyPortion*) param[ 0 ] )->Value();
+  return new TextValPortion( s->name );
 }
+
+//----------
+// NewNfg
+//----------
 
 Portion *GSM_NewNfg(Portion **param)
 {
@@ -385,43 +280,12 @@ Portion *GSM_NewNfg(Portion **param)
   return new NfgValPortion(N);
 }
 
-Portion *GSM_RandomNfgFloat(Portion **param)
-{
-  Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
-  
-  RandomNfg(N);
-  return param[0]->RefCopy();
-}
 
-Portion *GSM_RandomNfgRational(Portion **param)
-{
-  Nfg<gRational> &N = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
-  
-  RandomNfg(N);
-  return param[0]->RefCopy();
-}
+//--------------
+// NewSupport
+//--------------
 
-Portion *GSM_RandomNfgSeedFloat(Portion **param)
-{
-  Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
-  int seed = ((IntPortion *) param[1])->Value();
-
-  SetSeed(seed);
-  RandomNfg(N);
-  return param[0]->RefCopy();
-}
-
-Portion *GSM_RandomNfgSeedRational(Portion **param)
-{
-  Nfg<gRational> &N = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
-  int seed = ((IntPortion *) param[1])->Value();
-
-  SetSeed(seed);
-  RandomNfg(N);
-  return param[0]->RefCopy();
-}  
-
-Portion *GSM_NewNFSupport(Portion **param)
+Portion *GSM_NewSupport_Nfg(Portion **param)
 {
   BaseNfg &N = * ((NfgPortion *) param[0])->Value();
   Portion *p = new NfSupportValPortion(new NFSupport(N));
@@ -431,8 +295,134 @@ Portion *GSM_NewNFSupport(Portion **param)
   return p;
 }
 
+//--------------
+// NumPlayers
+//--------------
 
-//---------------------------- SaveNfg ------------------------//
+Portion *GSM_NumPlayers_Nfg(Portion **param)
+{
+  BaseNfg &N = * ((NfgPortion*) param[0])->Value();
+  return new IntValPortion(N.NumPlayers());
+}
+
+//-------------
+// NumStrats
+//-------------
+
+Portion *GSM_NumStrats( Portion** param )
+{
+  int i;
+  gArray< int > dim;
+
+  NFPlayer* P = (NFPlayer *) ((NfPlayerPortion *) param[0])->Value();
+  NFSupport* s = ( (NfSupportPortion*) param[ 1 ] )->Value();
+
+  if( s == 0 )
+    return new IntValPortion( P->StrategyList().Length() );
+  else
+  {
+    dim = s->SupportDimensions();
+    for( i = 1; i <= dim.Length(); i++ )
+    {
+      if( &( s->GetNFStrategySet( i )->GetPlayer() ) == P )
+	return new IntValPortion( s->NumStrats( i ) );
+    }
+  }
+  return new ErrorPortion( "Specified player is not found in the support" );
+}
+
+
+//------------
+// Players
+//------------
+
+Portion *GSM_Players_Nfg(Portion **param)
+{
+  BaseNfg &N = *((NfgPortion*) param[0])->Value();
+
+  Portion* p = ArrayToList(N.PlayerList());
+  p->SetOwner( param[ 0 ]->Original() );
+  p->AddDependency();
+  return p;
+}
+
+//-------------
+// RandomNfg
+//-------------
+
+Portion *GSM_RandomNfg_Float(Portion **param)
+{
+  Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
+  
+  RandomNfg(N);
+  return param[0]->RefCopy();
+}
+
+Portion *GSM_RandomNfg_Rational(Portion **param)
+{
+  Nfg<gRational> &N = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
+  
+  RandomNfg(N);
+  return param[0]->RefCopy();
+}
+
+Portion *GSM_RandomNfg_SeedFloat(Portion **param)
+{
+  Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
+  int seed = ((IntPortion *) param[1])->Value();
+
+  SetSeed(seed);
+  RandomNfg(N);
+  return param[0]->RefCopy();
+}
+
+Portion *GSM_RandomNfg_SeedRational(Portion **param)
+{
+  Nfg<gRational> &N = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
+  int seed = ((IntPortion *) param[1])->Value();
+
+  SetSeed(seed);
+  RandomNfg(N);
+  return param[0]->RefCopy();
+}  
+
+//------------
+// Rational
+//------------
+
+extern Nfg<gRational> *ConvertNfg(const Nfg<double> &);
+
+Portion *GSM_Rational_Nfg(Portion **param)
+{
+  Nfg<double> &orig = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
+  Nfg<gRational> *N = ConvertNfg(orig);
+
+  if (N)
+    return new NfgValPortion(N);
+  else
+    return new ErrorPortion("Conversion failed.");
+}
+
+//------------------
+// RemoveStrategy
+//------------------
+
+Portion *GSM_RemoveStrategy(Portion **param)
+{
+  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  Strategy *s = ((StrategyPortion *) param[1])->Value();
+  
+  S->GetNFStrategySet(s->nfp->GetNumber())->RemoveStrategy(s);
+
+  Portion* por = new NfSupportValPortion(S);
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+
+//------------
+// SaveNfg
+//------------
 
 Portion *GSM_SaveNfg(Portion **param)
 {
@@ -448,551 +438,106 @@ Portion *GSM_SaveNfg(Portion **param)
   return param[0]->RefCopy();
 }
 
-Portion *GSM_SaveNfg_Support(Portion **param)
+
+//------------
+// SetName
+//------------
+
+Portion *GSM_SetName_Nfg(Portion **param)
 {
-  NFSupport& S = * ( (NfSupportPortion*) param[ 0 ] )->Value();
-  BaseNfg* N = (BaseNfg*) &( S.BelongsTo() );
-  gString file = ((TextPortion *) param[1])->Value();
-  gFileOutput f(file);
+  BaseNfg &N = * ((NfgPortion*) param[0])->Value();
+  gString name = ((TextPortion *) param[1])->Value();
+  N.SetTitle(name);
+  return param[0]->ValCopy();
+}
 
-  if (!f.IsValid())
-    return new ErrorPortion("Unable to open file for output");
+Portion *GSM_SetName_NfPlayer(Portion **param)
+{
+  NFPlayer *p = ((NfPlayerPortion *) param[0])->Value();
+  gString name = ((TextPortion *) param[1])->Value();
+  p->SetName(name);
+  return param[0]->ValCopy();
+}
 
-  N->WriteNfgFile(f);
-
-  Portion* por = param[ 0 ]->ValCopy();
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
-  return por;
+Portion *GSM_SetName_Strategy(Portion **param)
+{
+  Strategy *s = ((StrategyPortion *) param[0])->Value();
+  gString name = ((TextPortion *) param[1])->Value();
+  s->name = name;
+  return param[0]->ValCopy();
 }
 
 
-//--------------------------- List ---------------------------//
+//--------------
+// Strategies
+//--------------
 
-
-Portion *GSM_List_MixedFloat(Portion **param)
+Portion *GSM_Strategies(Portion **param)
 {
   int i;
-  int j;
-  Portion* p1;
-  Portion* p2;
-  Portion* por;
+  gArray< int > dim;
+  Portion* por = 0;
 
-  MixedSolution<double> *P = 
-    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+  NFPlayer *P = (NFPlayer *) ((NfPlayerPortion *) param[0])->Value();
+  NFSupport* s = ( (NfSupportPortion*) param[ 1 ] )->Value();
 
-  por = new ListValPortion();
-
-  for( i = 1; i <= P->Lengths().Length(); i++ )
+  if( s == 0 )
+    por = ArrayToList(P->StrategyList());
+  else
   {
-    p1 = new ListValPortion();
-
-    for( j = 1; j <= P->Lengths()[i]; j++ )
+    dim = s->SupportDimensions();
+    for( i = 1; i <= dim.Length(); i++ )
     {
-      p2 = new FloatValPortion( (*P)( i, j ) );
-      ((ListValPortion*) p1)->Append( p2 );
-    }
-
-    ((ListValPortion*) por)->Append( p1 );
-  }
-
-  return por;
-}
-
-
-Portion *GSM_List_MixedRational(Portion **param)
-{
-  int i;
-  int j;
-  Portion* p1;
-  Portion* p2;
-  Portion* por;
-
-  MixedSolution<gRational> *P = 
-    (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
-
-  por = new ListValPortion();
-
-  for( i = 1; i <= P->Lengths().Length(); i++ )
-  {
-    p1 = new ListValPortion();
-
-    for( j = 1; j <= P->Lengths()[i]; j++ )
-    {
-      p2 = new RationalValPortion( (*P)( i, j ) );
-      ((ListValPortion*) p1)->Append( p2 );
-    }
-
-    ((ListValPortion*) por)->Append( p1 );
-  }
-
-  return por;
-}
-
-
-
-
-
-//---------------------- Mixed -------------------//
-
-
-Portion *GSM_Mixed_NfgFloat(Portion **param)
-{
-  int i;
-  int j;
-  Portion* p1;
-  Portion* p2;
-
-  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
-  MixedSolution<double> *P = new MixedSolution<double>(N);
-
-  if( ( (ListPortion*) param[1] )->Length() != N.NumPlayers() )
-  {
-    delete P;
-    return new ErrorPortion( "Mismatching number of players" );
-  }
-  
-  for( i = 1; i <= N.NumPlayers(); i++ )
-  {
-    p1 = ( (ListPortion*) param[1] )->Subscript( i );
-    if( p1->Type() != porLIST )
-    {
-      delete p1;
-      delete P;
-      return new ErrorPortion( "Mismatching dimensionality" );
-    }
-    if( ( (ListPortion*) p1 )->Length() != N.NumStrats( i ) )
-    {
-      delete p1;
-      delete P;
-      return new ErrorPortion( "Mismatching number of strategies" );
-    }
-
-    for( j = 1; j <= N.NumStrats( i ); j++ )
-    {
-      p2 = ( (ListPortion*) p1 )->Subscript( j );
-      if( p2->Type() != porFLOAT )
+      if( &( s->GetNFStrategySet( i )->GetPlayer() ) == P )
       {
-	delete p2;
-	delete p1;
-	delete P;
-	return new ErrorPortion( "Mismatching dimensionality" );
-      }
-      
-      (*P)( i, j ) = ( (FloatPortion*) p2 )->Value();
-      
-      delete p2;
-    }
-    delete p1;
-  }
-
-
-  Portion* por = new MixedValPortion(P);
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
-  return por;
-}
-
-
-
-Portion *GSM_Mixed_NfgRational(Portion **param)
-{
-  int i;
-  int j;
-  Portion* p1;
-  Portion* p2;
-
-  Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
-  MixedSolution<gRational> *P = new MixedSolution<gRational>(N);
-
-  if( ( (ListPortion*) param[1] )->Length() != N.NumPlayers() )
-  {
-    delete P;
-    return new ErrorPortion( "Mismatching number of players" );
-  }
-  
-  for( i = 1; i <= N.NumPlayers(); i++ )
-  {
-    p1 = ( (ListPortion*) param[1] )->Subscript( i );
-    if( p1->Type() != porLIST )
-    {
-      delete p1;
-      delete P;
-      return new ErrorPortion( "Mismatching dimensionality" );
-    }
-    if( ( (ListPortion*) p1 )->Length() != N.NumStrats( i ) )
-    {
-      delete p1;
-      delete P;
-      return new ErrorPortion( "Mismatching number of strategies" );
-    }
-
-    for( j = 1; j <= N.NumStrats( i ); j++ )
-    {
-      p2 = ( (ListPortion*) p1 )->Subscript( j );
-      if( p2->Type() != porRATIONAL )
-      {
-	delete p2;
-	delete p1;
-	delete P;
-	return new ErrorPortion( "Mismatching dimensionality" );
-      }
-      
-      (*P)( i, j ) = ( (RationalPortion*) p2 )->Value();
-      
-      delete p2;
-    }
-    delete p1;
-  }
-
-
-  Portion* por = new MixedValPortion(P);
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
-  return por;
-}
-
-
-
-Portion* GSM_Mixed_NFSupport( Portion** param )
-{
-  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
-  gArray<int> dim = S->SupportDimensions();
-  BaseMixedProfile *P;
-  Portion* por;
-  PortionType datatype;
-  int i;
-  int j;
-  Portion* p1;
-  Portion* p2;
-
-  switch( param[ 0 ]->Owner()->Type() )
-  {
-  case porNFG_FLOAT:
-    P = new MixedSolution<double>((Nfg<double> &) S->BelongsTo(), *S);
-    datatype = porFLOAT;
-    break;
-  case porNFG_RATIONAL:
-    P = new MixedSolution<gRational>((Nfg<gRational> &) S->BelongsTo(), *S);
-    datatype = porRATIONAL;
-    break;
-  default:
-    assert( 0 );
-  }
-
-
-  if( ( (ListPortion*) param[1] )->Length() != dim.Length() )
-  {
-    delete P;
-    return new ErrorPortion( "Mismatching number of players" );
-  }
-  
-  for( i = 1; i <= dim.Length(); i++ )
-  {
-    p1 = ( (ListPortion*) param[1] )->Subscript( i );
-    if( p1->Type() != porLIST )
-    {
-      delete p1;
-      delete P;
-      return new ErrorPortion( "Mismatching dimensionality" );
-    }
-    if( ( (ListPortion*) p1 )->Length() != dim[ i ] )
-    {
-      delete p1;
-      delete P;
-      return new ErrorPortion( "Mismatching number of strategies" );
-    }
-    
-    for( j = 1; j <= dim[ i ]; j++ )
-    {
-      p2 = ( (ListPortion*) p1 )->Subscript( j );
-      if( p2->Type() != datatype )
-      {
-	delete p2;
-	delete p1;
-	delete P;
-	return new ErrorPortion( "Mismatching dimensionality" );
-      }
-      
-      switch( datatype )
-      {
-      case porFLOAT:
-	( * (MixedSolution<double>*) P )( i, j ) = 
-	  ( (FloatPortion*) p2 )->Value();
+	por = ArrayToList( s->GetStrategy( i ) );
 	break;
-      case porRATIONAL:
-	( * (MixedSolution<gRational>*) P )( i, j ) = 
-	  ( (RationalPortion*) p2 )->Value();
-	break;
-      default:
-	assert( 0 );
       }
-      
-      delete p2;
     }
-    delete p1;
   }
-  
-  por = new MixedValPortion(P);
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+
+  if( por != 0 )
+  {
+    por->SetOwner(param[0]->Owner());
+    por->AddDependency();
+  }
+  else
+  {
+    por = new ErrorPortion( "Specified player is not found in the support" );
+  }
   return por;
 }
-
-
-//----------------------- SetComponent ---------------------------//
-
-Portion *GSM_SetComponent_MixedFloat(Portion **param)
-{
-  int i;
-  int j;
-  Portion* p2;
-  int PlayerNum = 0;
-
-  MixedSolution<double>* P = 
-    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  Nfg<double>& N = * P->BelongsTo();
-  gArray< NFPlayer* > player = N.PlayerList();
-  
-  for( i = 1; i <= N.NumPlayers(); i++ )
-  {
-    if( ( (NfPlayerPortion*) param[ 1 ] )->Value() == player[ i ] )
-    {
-      PlayerNum = i;
-      break;
-    }
-  }
-  
-  if( !PlayerNum )
-    return new ErrorPortion( "No such player found" );
-
-  if( ( (ListPortion*) param[ 2 ] )->Length() != N.NumStrats( PlayerNum ) )
-    return new ErrorPortion( "Mismatching number of strategies" );
-
-  for( j = 1; j <= N.NumStrats( PlayerNum ); j++ )
-  {
-    p2 = ( (ListPortion*) param[ 2 ] )->Subscript( j );
-    if( p2->Type() == porLIST )
-    {
-      delete p2;
-      return new ErrorPortion( "Mismatching dimensionality" );
-    }
-
-    assert( p2->Type() == porFLOAT );
-    (*P)( PlayerNum, j ) = ( (FloatPortion*) p2 )->Value();
-
-    delete p2;
-  }
-
-  return param[ 0 ]->RefCopy();
-}
-
-
-Portion *GSM_SetComponent_MixedRational(Portion **param)
-{
-  int i;
-  int j;
-  Portion* p2;
-  int PlayerNum = 0;
-
-  MixedSolution<gRational>* P = 
-    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  Nfg<gRational>& N = * P->BelongsTo();
-  gArray< NFPlayer* > player = N.PlayerList();
-  
-  for( i = 1; i <= N.NumPlayers(); i++ )
-  {
-    if( ( (NfPlayerPortion*) param[ 1 ] )->Value() == player[ i ] )
-    {
-      PlayerNum = i;
-      break;
-    }
-  }
-  
-  if( !PlayerNum )
-    return new ErrorPortion( "No such player found" );
-
-  if( ( (ListPortion*) param[ 2 ] )->Length() != N.NumStrats( PlayerNum ) )
-    return new ErrorPortion( "Mismatching number of strategies" );
-
-  for( j = 1; j <= N.NumStrats( PlayerNum ); j++ )
-  {
-    p2 = ( (ListPortion*) param[ 2 ] )->Subscript( j );
-    if( p2->Type() == porLIST )
-    {
-      delete p2;
-      return new ErrorPortion( "Mismatching dimensionality" );
-    }
-
-    assert( p2->Type() == porRATIONAL );
-    (*P)( i, j ) = ( (RationalPortion*) p2 )->Value();
-
-    delete p2;
-  }
-
-  return param[ 0 ]->RefCopy();
-}
-
-
-//-------------------- MixedSolution data members --------------------//
-
-//------------ IsNash ---------------//
-
-Portion *GSM_IsNash_MixedFloat(Portion **param)
-{
-  MixedSolution<double> *P = 
-    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new BoolValPortion(P->IsNash() == T_YES);
-}
-
-Portion *GSM_IsNash_MixedRational(Portion **param)
-{
-  MixedSolution<gRational> *P = 
-    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new BoolValPortion(P->IsNash() == T_YES);
-}
-
-//------------ IsPerfect, IsProper ----------------//
-
-Portion *GSM_IsPerfect_MixedFloat(Portion **param)
-{
-  MixedSolution<double> *P = 
-    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new BoolValPortion(P->IsPerfect() == T_YES);
-}
-
-Portion *GSM_IsPerfect_MixedRational(Portion **param)
-{
-  MixedSolution<gRational> *P = 
-    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new BoolValPortion(P->IsPerfect() == T_YES);
-}
-
-Portion *GSM_IsProper_MixedFloat(Portion **param)
-{
-  MixedSolution<double> *P = 
-    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new BoolValPortion(P->IsProper() == T_YES);
-}
-
-Portion *GSM_IsProper_MixedRational(Portion **param)
-{
-  MixedSolution<gRational> *P = 
-    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new BoolValPortion(P->IsProper() == T_YES);
-}
-
-//---------- IsntPerfect, IsntProper ------------//
-
-Portion *GSM_IsntPerfect_MixedFloat(Portion **param)
-{
-  MixedSolution<double> *P = 
-    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new BoolValPortion(P->IsPerfect() == T_NO);
-}
-
-Portion *GSM_IsntPerfect_MixedRational(Portion **param)
-{
-  MixedSolution<gRational> *P = 
-    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new BoolValPortion(P->IsPerfect() == T_NO);
-}
-
-Portion *GSM_IsntProper_MixedFloat(Portion **param)
-{
-  MixedSolution<double> *P = 
-    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new BoolValPortion(P->IsProper() == T_NO);
-}
-
-Portion *GSM_IsntProper_MixedRational(Portion **param)
-{
-  MixedSolution<gRational> *P = 
-    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new BoolValPortion(P->IsProper() == T_NO);
-}
-
-//------------- Support -------------//
-
-Portion* GSM_Support_MixedFloat(Portion** param)
-{
-  MixedSolution<double> *P = 
-    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new NfSupportValPortion(new NFSupport(P->Support()));
-}
-
-Portion* GSM_Support_MixedRational(Portion** param)
-{
-  MixedSolution<gRational> *P = 
-    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new NfSupportValPortion(new NFSupport(P->Support()));
-}
-
-
-//-------------- LiapValue ---------------//
-
-Portion *GSM_LiapValue_MixedFloat(Portion **param)
-{
-  MixedSolution<double> *P = 
-    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new FloatValPortion(P->LiapValue());
-}
-
-Portion *GSM_LiapValue_MixedRational(Portion **param)
-{
-  MixedSolution<gRational> *P = 
-    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new RationalValPortion(P->LiapValue());
-}
-
-
-
-//---------------------------------------------------------------------
 
 
 void Init_nfgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
-  //--------------------- ElimDom ---------------------------//
 
-  FuncObj = new FuncDescObj("ElimDom");
-  FuncObj->SetFuncInfo(GSM_ElimDom, 5);
-  FuncObj->SetParamInfo(GSM_ElimDom, 0, "support", porNF_SUPPORT);
-  FuncObj->SetParamInfo(GSM_ElimDom, 1, "strong", porBOOL,
-			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_ElimDom, 2, "time", porFLOAT,
-			new FloatValPortion(0.0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimDom, 3, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimDom, 4, "traceLevel", porINTEGER,
-			new IntValPortion(0));
-
-  FuncObj->SetFuncInfo(GSM_ElimDom_Nfg, 5);
-  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 0, "nfg", porNFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 1, "strong", porBOOL,
-			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 2, "time", porFLOAT,
-			new FloatValPortion(0.0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 3, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 4, "traceLevel", porINTEGER,
-			new IntValPortion(0));
+  FuncObj = new FuncDescObj("AddStrategy");
+  FuncObj->SetFuncInfo(GSM_AddStrategy, 2);
+  FuncObj->SetParamInfo(GSM_AddStrategy, 0, "support", porNF_SUPPORT);
+  FuncObj->SetParamInfo(GSM_AddStrategy, 1, "strategy", porSTRATEGY);
   gsm->AddFunction(FuncObj);
 
 
+  FuncObj = new FuncDescObj("CompressNfg");
+  FuncObj->SetFuncInfo(GSM_CompressNfg, 1);
+  FuncObj->SetParamInfo(GSM_CompressNfg, 0, "nfg", porNFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
 
   FuncObj = new FuncDescObj("ElimAllDom");
-  FuncObj->SetFuncInfo(GSM_ElimAllDom, 5);
-  FuncObj->SetParamInfo(GSM_ElimAllDom, 0, "support", porNF_SUPPORT);
-  FuncObj->SetParamInfo(GSM_ElimAllDom, 1, "strong", porBOOL,
+  FuncObj->SetFuncInfo(GSM_ElimAllDom_NfSupport, 5);
+  FuncObj->SetParamInfo(GSM_ElimAllDom_NfSupport, 0, "support", porNF_SUPPORT);
+  FuncObj->SetParamInfo(GSM_ElimAllDom_NfSupport, 1, "strong", porBOOL,
 			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_ElimAllDom, 2, "time", porFLOAT,
+  FuncObj->SetParamInfo(GSM_ElimAllDom_NfSupport, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimAllDom, 3, "traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(GSM_ElimAllDom_NfSupport, 3, "traceFile", porOUTPUT,
 			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimAllDom, 4, "traceLevel", porINTEGER,
+  FuncObj->SetParamInfo(GSM_ElimAllDom_NfSupport, 4, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
   FuncObj->SetFuncInfo(GSM_ElimAllDom_Nfg, 5);
@@ -1009,13 +554,64 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  //----------------------------------------------------------//
+  FuncObj = new FuncDescObj("ElimDom");
+  FuncObj->SetFuncInfo(GSM_ElimDom_NfSupport, 5);
+  FuncObj->SetParamInfo(GSM_ElimDom_NfSupport, 0, "support", porNF_SUPPORT);
+  FuncObj->SetParamInfo(GSM_ElimDom_NfSupport, 1, "strong", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_ElimDom_NfSupport, 2, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimDom_NfSupport, 3, "traceFile", porOUTPUT,
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimDom_NfSupport, 4, "traceLevel", porINTEGER,
+			new IntValPortion(0));
 
-  FuncObj = new FuncDescObj("CompressNfg");
-  FuncObj->SetFuncInfo(GSM_CompressNfg, 1);
-  FuncObj->SetParamInfo(GSM_CompressNfg, 0, "nfg", porNFG_FLOAT,
+  FuncObj->SetFuncInfo(GSM_ElimDom_Nfg, 5);
+  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 0, "nfg", porNFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 1, "strong", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 2, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 3, "traceFile", porOUTPUT,
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 4, "traceLevel", porINTEGER,
+			new IntValPortion(0));
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("Float");
+  FuncObj->SetFuncInfo(GSM_Float_Nfg, 1);
+  FuncObj->SetParamInfo(GSM_Float_Nfg, 0, "nfg", porNFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("IsConstSum");
+  FuncObj->SetFuncInfo(GSM_IsConstSum_Nfg, 1);
+  FuncObj->SetParamInfo(GSM_IsConstSum_Nfg, 0, "nfg", porNFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("LoadNfg");
+  FuncObj->SetFuncInfo(GSM_LoadNfg, 1);
+  FuncObj->SetParamInfo(GSM_LoadNfg, 0, "file", porTEXT);
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("Name");
+  FuncObj->SetFuncInfo(GSM_Name_Nfg, 1);
+  FuncObj->SetParamInfo(GSM_Name_Nfg, 0, "x", porNFG, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE );
+
+  FuncObj->SetFuncInfo(GSM_Name_NfPlayer, 1);
+  FuncObj->SetParamInfo(GSM_Name_NfPlayer, 0, "x", porPLAYER_NFG);
+
+  FuncObj->SetFuncInfo(GSM_Name_Strategy, 1);
+  FuncObj->SetParamInfo(GSM_Name_Strategy, 0, "x", porSTRATEGY);
+  gsm->AddFunction(FuncObj);
+
 
   FuncObj = new FuncDescObj("NewNfg");
   FuncObj->SetFuncInfo(GSM_NewNfg, 2);
@@ -1024,55 +620,20 @@ void Init_nfgfunc(GSM *gsm)
 			new BoolValPortion(false));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Float");
-  FuncObj->SetFuncInfo(GSM_FloatNfg, 1);
-  FuncObj->SetParamInfo(GSM_FloatNfg, 0, "nfg", porNFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("Rational");
-  FuncObj->SetFuncInfo(GSM_RationalNfg, 1);
-  FuncObj->SetParamInfo(GSM_RationalNfg, 0, "nfg", porNFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("RandomNfg");
-  FuncObj->SetFuncInfo(GSM_RandomNfgFloat, 1);
-  FuncObj->SetParamInfo(GSM_RandomNfgFloat, 0, "nfg", porNFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-
-  FuncObj->SetFuncInfo(GSM_RandomNfgRational, 1);
-  FuncObj->SetParamInfo(GSM_RandomNfgRational, 0, "nfg", porNFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-
-  FuncObj->SetFuncInfo(GSM_RandomNfgSeedFloat, 2);
-  FuncObj->SetParamInfo(GSM_RandomNfgSeedFloat, 0, "nfg", porNFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_RandomNfgSeedFloat, 1, "seed", porINTEGER);
-
-  FuncObj->SetFuncInfo(GSM_RandomNfgSeedRational, 2);
-  FuncObj->SetParamInfo(GSM_RandomNfgSeedRational, 0, "nfg", porNFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_RandomNfgSeedRational, 1, "seed", porINTEGER);
-  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NewSupport");
-  FuncObj->SetFuncInfo(GSM_NewNFSupport, 1);
-  FuncObj->SetParamInfo(GSM_NewNFSupport, 0, "nfg", porNFG,
+  FuncObj->SetFuncInfo(GSM_NewSupport_Nfg, 1);
+  FuncObj->SetParamInfo(GSM_NewSupport_Nfg, 0, "nfg", porNFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("AddStrategy");
-  FuncObj->SetFuncInfo(GSM_AddStrategy, 2);
-  FuncObj->SetParamInfo(GSM_AddStrategy, 0, "support", porNF_SUPPORT);
-  FuncObj->SetParamInfo(GSM_AddStrategy, 1, "strategy", porSTRATEGY);
+
+  FuncObj = new FuncDescObj("NumPlayers");
+  FuncObj->SetFuncInfo(GSM_NumPlayers_Nfg, 1);
+  FuncObj->SetParamInfo(GSM_NumPlayers_Nfg, 0, "nfg", porNFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("RemoveStrategy");
-  FuncObj->SetFuncInfo(GSM_RemoveStrategy, 2);
-  FuncObj->SetParamInfo(GSM_RemoveStrategy, 0, "support", porNF_SUPPORT);
-  FuncObj->SetParamInfo(GSM_RemoveStrategy, 1, "strategy", porSTRATEGY);
-  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NumStrats");
   FuncObj->SetFuncInfo(GSM_NumStrats, 2);
@@ -1081,205 +642,78 @@ void Init_nfgfunc(GSM *gsm)
 			new NfSupportValPortion( 0 ) );
   gsm->AddFunction(FuncObj);
 
+
+  FuncObj = new FuncDescObj("Players");
+  FuncObj->SetFuncInfo(GSM_Players_Nfg, 1);
+  FuncObj->SetParamInfo(GSM_Players_Nfg, 0, "nfg", porNFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("RandomNfg");
+  FuncObj->SetFuncInfo(GSM_RandomNfg_Float, 1);
+  FuncObj->SetParamInfo(GSM_RandomNfg_Float, 0, "nfg", porNFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_RandomNfg_Rational, 1);
+  FuncObj->SetParamInfo(GSM_RandomNfg_Rational, 0, "nfg", porNFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_RandomNfg_SeedFloat, 2);
+  FuncObj->SetParamInfo(GSM_RandomNfg_SeedFloat, 0, "nfg", porNFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_RandomNfg_SeedFloat, 1, "seed", porINTEGER);
+
+  FuncObj->SetFuncInfo(GSM_RandomNfg_SeedRational, 2);
+  FuncObj->SetParamInfo(GSM_RandomNfg_SeedRational, 0, "nfg", porNFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_RandomNfg_SeedRational, 1, "seed", porINTEGER);
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("Rational");
+  FuncObj->SetFuncInfo(GSM_Rational_Nfg, 1);
+  FuncObj->SetParamInfo(GSM_Rational_Nfg, 0, "nfg", porNFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("RemoveStrategy");
+  FuncObj->SetFuncInfo(GSM_RemoveStrategy, 2);
+  FuncObj->SetParamInfo(GSM_RemoveStrategy, 0, "support", porNF_SUPPORT);
+  FuncObj->SetParamInfo(GSM_RemoveStrategy, 1, "strategy", porSTRATEGY);
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("SaveNfg");
+  FuncObj->SetFuncInfo(GSM_SaveNfg, 2);
+  FuncObj->SetParamInfo(GSM_SaveNfg, 0, "nfg", porNFG, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SaveNfg, 1, "file", porTEXT);
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("SetName");
+  FuncObj->SetFuncInfo(GSM_SetName_Nfg, 2);
+  FuncObj->SetParamInfo(GSM_SetName_Nfg, 0, "x", porNFG, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetName_Nfg, 1, "name", porTEXT);
+
+  FuncObj->SetFuncInfo(GSM_SetName_NfPlayer, 2);
+  FuncObj->SetParamInfo(GSM_SetName_NfPlayer, 0, "x", porPLAYER_NFG);
+  FuncObj->SetParamInfo(GSM_SetName_NfPlayer, 1, "name", porTEXT);
+
+  FuncObj->SetFuncInfo(GSM_SetName_Strategy, 2);
+  FuncObj->SetParamInfo(GSM_SetName_Strategy, 0, "x", porSTRATEGY);
+  FuncObj->SetParamInfo(GSM_SetName_Strategy, 1, "name", porTEXT);
+  gsm->AddFunction(FuncObj);
+
+
   FuncObj = new FuncDescObj("Strategies");
   FuncObj->SetFuncInfo(GSM_Strategies, 2);
   FuncObj->SetParamInfo(GSM_Strategies, 0, "player", porPLAYER_NFG);
   FuncObj->SetParamInfo(GSM_Strategies, 1, "support", porNF_SUPPORT, 
 			new NfSupportValPortion( 0 ) );
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("LoadNfg");
-  FuncObj->SetFuncInfo(GSM_LoadNfg, 1);
-  FuncObj->SetParamInfo(GSM_LoadNfg, 0, "file", porTEXT);
-  gsm->AddFunction(FuncObj);
-
-
-  //------------------------ SaveNfg ----------------------------//
-
-  FuncObj = new FuncDescObj("SaveNfg");
-
-  FuncObj->SetFuncInfo(GSM_SaveNfg, 2);
-  FuncObj->SetParamInfo(GSM_SaveNfg, 0, "nfg", porNFG, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_SaveNfg, 1, "file", porTEXT);
-
-  FuncObj->SetFuncInfo(GSM_SaveNfg_Support, 2);
-  FuncObj->SetParamInfo(GSM_SaveNfg_Support, 0, "support", porNF_SUPPORT );
-  FuncObj->SetParamInfo(GSM_SaveNfg_Support, 1, "file", porTEXT);
-
-  gsm->AddFunction(FuncObj);
-
-
-  //----------------------- Mixed --------------------------//
-  FuncObj = new FuncDescObj( "Mixed" );
-  FuncObj->SetFuncInfo( GSM_Mixed_NfgFloat, 2 );
-  FuncObj->SetParamInfo(GSM_Mixed_NfgFloat, 0, "nfg", porNFG_FLOAT, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_Mixed_NfgFloat, 
-			1, "list", porLIST | porFLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2);
-
-  FuncObj->SetFuncInfo( GSM_Mixed_NfgRational, 2 );
-  FuncObj->SetParamInfo(GSM_Mixed_NfgRational, 0, "nfg", porNFG_RATIONAL, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_Mixed_NfgRational, 
-			1, "list", porLIST | porRATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2);
-
-  FuncObj->SetFuncInfo( GSM_Mixed_NFSupport, 2 );
-  FuncObj->SetParamInfo(GSM_Mixed_NFSupport, 0, "support", porNF_SUPPORT );
-  FuncObj->SetParamInfo(GSM_Mixed_NFSupport, 
-			1, "list", porLIST | porFLOAT | porRATIONAL );
-  gsm->AddFunction( FuncObj );
-
-  
-  //--------------------- SetComponent -------------------------//
-  FuncObj = new FuncDescObj( "SetComponent" );
-
-  FuncObj->SetFuncInfo( GSM_SetComponent_MixedFloat, 3 );
-  FuncObj->SetParamInfo( GSM_SetComponent_MixedFloat, 
-			0, "mixed", porMIXED_FLOAT, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo( GSM_SetComponent_MixedFloat, 
-			1, "player", porPLAYER_NFG );
-  FuncObj->SetParamInfo( GSM_SetComponent_MixedFloat, 
-			2, "list", porLIST | porFLOAT );
-
-  FuncObj->SetFuncInfo( GSM_SetComponent_MixedRational, 3 );
-  FuncObj->SetParamInfo( GSM_SetComponent_MixedRational, 
-			0, "mixed", porMIXED_RATIONAL, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo( GSM_SetComponent_MixedRational, 
-			1, "player", porPLAYER_NFG );
-  FuncObj->SetParamInfo( GSM_SetComponent_MixedRational, 
-			2, "list", porLIST | porRATIONAL );
-
-  gsm->AddFunction( FuncObj );
-
-
-  //------------------------- MixedSolution member functions ----------//
-
-  //----------------------- IsNash ------------------------//
-
-  FuncObj = new FuncDescObj("IsNash");
-  FuncObj->SetFuncInfo(GSM_IsNash_MixedFloat, 1);
-  FuncObj->SetParamInfo(GSM_IsNash_MixedFloat, 0, "strategy",
-			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_IsNash_MixedRational, 1);
-  FuncObj->SetParamInfo(GSM_IsNash_MixedRational, 0, "strategy",
-			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("IsPerfect");
-  FuncObj->SetFuncInfo(GSM_IsPerfect_MixedFloat, 1);
-  FuncObj->SetParamInfo(GSM_IsPerfect_MixedFloat, 0, "strategy",
-			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_IsPerfect_MixedRational, 1);
-  FuncObj->SetParamInfo(GSM_IsPerfect_MixedRational, 0, "strategy",
-			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("IsProper");
-  FuncObj->SetFuncInfo(GSM_IsProper_MixedFloat, 1);
-  FuncObj->SetParamInfo(GSM_IsProper_MixedFloat, 0, "strategy",
-			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_IsProper_MixedRational, 1);
-  FuncObj->SetParamInfo(GSM_IsProper_MixedRational, 0, "strategy",
-			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("IsntPerfect");
-  FuncObj->SetFuncInfo(GSM_IsntPerfect_MixedFloat, 1);
-  FuncObj->SetParamInfo(GSM_IsntPerfect_MixedFloat, 0, "strategy",
-			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_IsntPerfect_MixedRational, 1);
-  FuncObj->SetParamInfo(GSM_IsntPerfect_MixedRational, 0, "strategy",
-			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("IsntProper");
-  FuncObj->SetFuncInfo(GSM_IsntProper_MixedFloat, 1);
-  FuncObj->SetParamInfo(GSM_IsntProper_MixedFloat, 0, "strategy",
-			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_IsntProper_MixedRational, 1);
-  FuncObj->SetParamInfo(GSM_IsntProper_MixedRational, 0, "strategy",
-			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("Support");
-  FuncObj->SetFuncInfo(GSM_Support_MixedFloat, 1);
-  FuncObj->SetParamInfo(GSM_Support_MixedFloat, 0, "strategy",
-			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_Support_MixedRational, 1);
-  FuncObj->SetParamInfo(GSM_Support_MixedRational, 0, "strategy",
-			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("LiapValue");
-  FuncObj->SetFuncInfo(GSM_LiapValue_MixedFloat, 1);
-  FuncObj->SetParamInfo(GSM_LiapValue_MixedFloat, 0, "strategy",
-			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);  
-  FuncObj->SetFuncInfo(GSM_LiapValue_MixedRational, 1);
-  FuncObj->SetParamInfo(GSM_LiapValue_MixedRational, 0, "strategy",
-			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
-  gsm->AddFunction(FuncObj);
-
-
-  //----------------------- List --------------------------//
-  FuncObj = new FuncDescObj( "ListForm" );
-  FuncObj->SetFuncInfo( GSM_List_MixedFloat, 1 );
-  FuncObj->SetParamInfo(GSM_List_MixedFloat, 
-			0, "mixed", porMIXED_FLOAT );
-  FuncObj->SetFuncInfo( GSM_List_MixedRational, 1 );
-  FuncObj->SetParamInfo(GSM_List_MixedRational, 
-			0, "mixed", porMIXED_RATIONAL );
-  gsm->AddFunction( FuncObj );
-
-  FuncObj = new FuncDescObj("SetName");
-  FuncObj->SetFuncInfo(GSM_SetNameNfg, 2);
-  FuncObj->SetParamInfo(GSM_SetNameNfg, 0, "x", porNFG, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_SetNameNfg, 1, "name", porTEXT);
-
-  FuncObj->SetFuncInfo(GSM_SetNameNfPlayer, 2);
-  FuncObj->SetParamInfo(GSM_SetNameNfPlayer, 0, "x", porPLAYER_NFG);
-  FuncObj->SetParamInfo(GSM_SetNameNfPlayer, 1, "name", porTEXT);
-
-  FuncObj->SetFuncInfo(GSM_SetNameStrategy, 2);
-  FuncObj->SetParamInfo(GSM_SetNameStrategy, 0, "x", porSTRATEGY);
-  FuncObj->SetParamInfo(GSM_SetNameStrategy, 1, "name", porTEXT);
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("Name");
-  FuncObj->SetFuncInfo(GSM_NameNfPlayer, 1);
-  FuncObj->SetParamInfo(GSM_NameNfPlayer, 0, "x", porPLAYER_NFG);
-
-  FuncObj->SetFuncInfo(GSM_NameStrategy, 1);
-  FuncObj->SetParamInfo(GSM_NameStrategy, 0, "x", porSTRATEGY);
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("IsConstSum");
-  FuncObj->SetFuncInfo(GSM_IsConstSumNfg, 1);
-  FuncObj->SetParamInfo(GSM_IsConstSumNfg, 0, "nfg", porNFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("Name");
-  FuncObj->SetFuncInfo(GSM_NameNfg, 1);
-  FuncObj->SetParamInfo(GSM_NameNfg, 0, "x", porNFG, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE );
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("NumPlayers");
-  FuncObj->SetFuncInfo(GSM_NumPlayersNfg, 1);
-  FuncObj->SetParamInfo(GSM_NumPlayersNfg, 0, "nfg", porNFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("Players");
-  FuncObj->SetFuncInfo(GSM_PlayersNfg, 1);
-  FuncObj->SetParamInfo(GSM_PlayersNfg, 0, "nfg", porNFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 }
 

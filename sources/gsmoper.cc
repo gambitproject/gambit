@@ -1844,7 +1844,7 @@ Portion* GSM_Read_List_Text( Portion** param )
 
 
 
-extern Portion* GSM_List_MixedFloat( Portion** param );
+extern Portion* GSM_ListForm_MixedFloat( Portion** param );
 extern Portion* GSM_Mixed_NfgFloat( Portion **param );
 
 Portion* GSM_Read_MixedFloat( Portion** param )
@@ -1853,7 +1853,7 @@ Portion* GSM_Read_MixedFloat( Portion** param )
   Portion* owner = param[1]->Owner();
   sub_param[0] = param[1];
   sub_param[1] = 0;
-  Portion* list = GSM_List_MixedFloat( sub_param );
+  Portion* list = GSM_ListForm_MixedFloat( sub_param );
   sub_param[0] = param[0];
   sub_param[1] = list;
   Portion* result = GSM_Read_List_Float( sub_param );
@@ -1869,7 +1869,7 @@ Portion* GSM_Read_MixedFloat( Portion** param )
 }
 
 
-extern Portion* GSM_List_MixedRational( Portion** param );
+extern Portion* GSM_ListForm_MixedRational( Portion** param );
 extern Portion* GSM_Mixed_NfgRational( Portion **param );
 
 Portion* GSM_Read_MixedRational( Portion** param )
@@ -1878,7 +1878,7 @@ Portion* GSM_Read_MixedRational( Portion** param )
   Portion* owner = param[1]->Owner();
   sub_param[0] = param[1];
   sub_param[1] = 0;
-  Portion* list = GSM_List_MixedRational( sub_param );
+  Portion* list = GSM_ListForm_MixedRational( sub_param );
   sub_param[0] = param[0];
   sub_param[1] = list;
   Portion* result = GSM_Read_List_Rational( sub_param );
@@ -1895,7 +1895,7 @@ Portion* GSM_Read_MixedRational( Portion** param )
 
 
 
-extern Portion* GSM_List_BehavFloat( Portion** param );
+extern Portion* GSM_ListForm_BehavFloat( Portion** param );
 extern Portion* GSM_Behav_EfgFloat( Portion **param );
 
 Portion* GSM_Read_BehavFloat( Portion** param )
@@ -1904,7 +1904,7 @@ Portion* GSM_Read_BehavFloat( Portion** param )
   Portion* owner = param[1]->Owner();
   sub_param[0] = param[1];
   sub_param[1] = 0;
-  Portion* list = GSM_List_BehavFloat( sub_param );
+  Portion* list = GSM_ListForm_BehavFloat( sub_param );
   sub_param[0] = param[0];
   sub_param[1] = list;
   Portion* result = GSM_Read_List_Float( sub_param );
@@ -1920,7 +1920,7 @@ Portion* GSM_Read_BehavFloat( Portion** param )
 }
 
 
-extern Portion* GSM_List_BehavRational( Portion** param );
+extern Portion* GSM_ListForm_BehavRational( Portion** param );
 extern Portion* GSM_Behav_EfgRational( Portion **param );
 
 Portion* GSM_Read_BehavRational( Portion** param )
@@ -1929,7 +1929,7 @@ Portion* GSM_Read_BehavRational( Portion** param )
   Portion* owner = param[1]->Owner();
   sub_param[0] = param[1];
   sub_param[1] = 0;
-  Portion* list = GSM_List_BehavRational( sub_param );
+  Portion* list = GSM_ListForm_BehavRational( sub_param );
   sub_param[0] = param[0];
   sub_param[1] = list;
   Portion* result = GSM_Read_List_Rational( sub_param );

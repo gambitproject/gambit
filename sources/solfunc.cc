@@ -613,6 +613,7 @@ Portion *GSM_InfosetProbsRational(Portion **param)
   return ret;
 }
 
+
 //----------------
 // IsNash
 //----------------
@@ -631,9 +632,95 @@ Portion *GSM_IsNash_BehavRational(Portion **param)
   return new IntValPortion(P->IsNash());
 }
 
-//--------------------
+Portion *GSM_IsNash_MixedFloat(Portion **param)
+{
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsNash() == T_YES);
+}
+
+Portion *GSM_IsNash_MixedRational(Portion **param)
+{
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsNash() == T_YES);
+}
+
+//----------------
+// IsntPerfect
+//----------------
+
+Portion *GSM_IsntPerfect_MixedFloat(Portion **param)
+{
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsPerfect() == T_NO);
+}
+
+Portion *GSM_IsntPerfect_MixedRational(Portion **param)
+{
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsPerfect() == T_NO);
+}
+
+//--------------
+// IsntProper
+//--------------
+
+Portion *GSM_IsntProper_MixedFloat(Portion **param)
+{
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsProper() == T_NO);
+}
+
+Portion *GSM_IsntProper_MixedRational(Portion **param)
+{
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsProper() == T_NO);
+}
+
+//-------------
+// IsPerfect
+//-------------
+
+Portion *GSM_IsPerfect_MixedFloat(Portion **param)
+{
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsPerfect() == T_YES);
+}
+
+Portion *GSM_IsPerfect_MixedRational(Portion **param)
+{
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsPerfect() == T_YES);
+}
+
+//------------
+// IsProper
+//------------
+
+Portion *GSM_IsProper_MixedFloat(Portion **param)
+{
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsProper() == T_YES);
+}
+
+Portion *GSM_IsProper_MixedRational(Portion **param)
+{
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsProper() == T_YES);
+}
+
+//----------------
 // IsSequential
-//--------------------
+//----------------
 
 Portion *GSM_IsSequential_BehavFloat(Portion **param)
 {
@@ -685,11 +772,26 @@ Portion *GSM_LiapValue_BehavRational(Portion **param)
   return new RationalValPortion(P->LiapValue());
 }
 
+
+Portion *GSM_LiapValue_MixedFloat(Portion **param)
+{
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new FloatValPortion(P->LiapValue());
+}
+
+Portion *GSM_LiapValue_MixedRational(Portion **param)
+{
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new RationalValPortion(P->LiapValue());
+}
+
 //---------------
-// List
+// ListForm
 //---------------
 
-Portion *GSM_List_BehavFloat(Portion **param)
+Portion *GSM_ListForm_BehavFloat(Portion **param)
 {
   int i;
   int j;
@@ -727,7 +829,7 @@ Portion *GSM_List_BehavFloat(Portion **param)
 }
 
 
-Portion *GSM_List_BehavRational(Portion **param)
+Portion *GSM_ListForm_BehavRational(Portion **param)
 {
   int i;
   int j;
@@ -761,6 +863,272 @@ Portion *GSM_List_BehavRational(Portion **param)
 
   return por;
 
+}
+
+Portion *GSM_ListForm_MixedFloat(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p1;
+  Portion* p2;
+  Portion* por;
+
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+
+  por = new ListValPortion();
+
+  for( i = 1; i <= P->Lengths().Length(); i++ )
+  {
+    p1 = new ListValPortion();
+
+    for( j = 1; j <= P->Lengths()[i]; j++ )
+    {
+      p2 = new FloatValPortion( (*P)( i, j ) );
+      ((ListValPortion*) p1)->Append( p2 );
+    }
+
+    ((ListValPortion*) por)->Append( p1 );
+  }
+
+  return por;
+}
+
+
+Portion *GSM_ListForm_MixedRational(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p1;
+  Portion* p2;
+  Portion* por;
+
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
+
+  por = new ListValPortion();
+
+  for( i = 1; i <= P->Lengths().Length(); i++ )
+  {
+    p1 = new ListValPortion();
+
+    for( j = 1; j <= P->Lengths()[i]; j++ )
+    {
+      p2 = new RationalValPortion( (*P)( i, j ) );
+      ((ListValPortion*) p1)->Append( p2 );
+    }
+
+    ((ListValPortion*) por)->Append( p1 );
+  }
+
+  return por;
+}
+
+//----------
+// Mixed
+//----------
+
+Portion *GSM_Mixed_NfgFloat(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p1;
+  Portion* p2;
+
+  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
+  MixedSolution<double> *P = new MixedSolution<double>(N);
+
+  if( ( (ListPortion*) param[1] )->Length() != N.NumPlayers() )
+  {
+    delete P;
+    return new ErrorPortion( "Mismatching number of players" );
+  }
+  
+  for( i = 1; i <= N.NumPlayers(); i++ )
+  {
+    p1 = ( (ListPortion*) param[1] )->Subscript( i );
+    if( p1->Type() != porLIST )
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion( "Mismatching dimensionality" );
+    }
+    if( ( (ListPortion*) p1 )->Length() != N.NumStrats( i ) )
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion( "Mismatching number of strategies" );
+    }
+
+    for( j = 1; j <= N.NumStrats( i ); j++ )
+    {
+      p2 = ( (ListPortion*) p1 )->Subscript( j );
+      if( p2->Type() != porFLOAT )
+      {
+	delete p2;
+	delete p1;
+	delete P;
+	return new ErrorPortion( "Mismatching dimensionality" );
+      }
+      
+      (*P)( i, j ) = ( (FloatPortion*) p2 )->Value();
+      
+      delete p2;
+    }
+    delete p1;
+  }
+
+
+  Portion* por = new MixedValPortion(P);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
+}
+
+
+
+Portion *GSM_Mixed_NfgRational(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p1;
+  Portion* p2;
+
+  Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
+  MixedSolution<gRational> *P = new MixedSolution<gRational>(N);
+
+  if( ( (ListPortion*) param[1] )->Length() != N.NumPlayers() )
+  {
+    delete P;
+    return new ErrorPortion( "Mismatching number of players" );
+  }
+  
+  for( i = 1; i <= N.NumPlayers(); i++ )
+  {
+    p1 = ( (ListPortion*) param[1] )->Subscript( i );
+    if( p1->Type() != porLIST )
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion( "Mismatching dimensionality" );
+    }
+    if( ( (ListPortion*) p1 )->Length() != N.NumStrats( i ) )
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion( "Mismatching number of strategies" );
+    }
+
+    for( j = 1; j <= N.NumStrats( i ); j++ )
+    {
+      p2 = ( (ListPortion*) p1 )->Subscript( j );
+      if( p2->Type() != porRATIONAL )
+      {
+	delete p2;
+	delete p1;
+	delete P;
+	return new ErrorPortion( "Mismatching dimensionality" );
+      }
+      
+      (*P)( i, j ) = ( (RationalPortion*) p2 )->Value();
+      
+      delete p2;
+    }
+    delete p1;
+  }
+
+
+  Portion* por = new MixedValPortion(P);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
+}
+
+
+
+Portion* GSM_Mixed_NFSupport( Portion** param )
+{
+  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  gArray<int> dim = S->SupportDimensions();
+  BaseMixedProfile *P;
+  Portion* por;
+  PortionType datatype;
+  int i;
+  int j;
+  Portion* p1;
+  Portion* p2;
+
+  switch( param[ 0 ]->Owner()->Type() )
+  {
+  case porNFG_FLOAT:
+    P = new MixedSolution<double>((Nfg<double> &) S->BelongsTo(), *S);
+    datatype = porFLOAT;
+    break;
+  case porNFG_RATIONAL:
+    P = new MixedSolution<gRational>((Nfg<gRational> &) S->BelongsTo(), *S);
+    datatype = porRATIONAL;
+    break;
+  default:
+    assert( 0 );
+  }
+
+
+  if( ( (ListPortion*) param[1] )->Length() != dim.Length() )
+  {
+    delete P;
+    return new ErrorPortion( "Mismatching number of players" );
+  }
+  
+  for( i = 1; i <= dim.Length(); i++ )
+  {
+    p1 = ( (ListPortion*) param[1] )->Subscript( i );
+    if( p1->Type() != porLIST )
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion( "Mismatching dimensionality" );
+    }
+    if( ( (ListPortion*) p1 )->Length() != dim[ i ] )
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion( "Mismatching number of strategies" );
+    }
+    
+    for( j = 1; j <= dim[ i ]; j++ )
+    {
+      p2 = ( (ListPortion*) p1 )->Subscript( j );
+      if( p2->Type() != datatype )
+      {
+	delete p2;
+	delete p1;
+	delete P;
+	return new ErrorPortion( "Mismatching dimensionality" );
+      }
+      
+      switch( datatype )
+      {
+      case porFLOAT:
+	( * (MixedSolution<double>*) P )( i, j ) = 
+	  ( (FloatPortion*) p2 )->Value();
+	break;
+      case porRATIONAL:
+	( * (MixedSolution<gRational>*) P )( i, j ) = 
+	  ( (RationalPortion*) p2 )->Value();
+	break;
+      default:
+	assert( 0 );
+      }
+      
+      delete p2;
+    }
+    delete p1;
+  }
+  
+  por = new MixedValPortion(P);
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
 }
 
 //----------------
@@ -922,6 +1290,97 @@ Portion *GSM_SetComponent_BehavRational(Portion **param)
   return param[ 0 ]->RefCopy();
 }
 
+Portion *GSM_SetComponent_MixedFloat(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p2;
+  int PlayerNum = 0;
+
+  MixedSolution<double>* P = 
+    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  Nfg<double>& N = * P->BelongsTo();
+  gArray< NFPlayer* > player = N.PlayerList();
+  
+  for( i = 1; i <= N.NumPlayers(); i++ )
+  {
+    if( ( (NfPlayerPortion*) param[ 1 ] )->Value() == player[ i ] )
+    {
+      PlayerNum = i;
+      break;
+    }
+  }
+  
+  if( !PlayerNum )
+    return new ErrorPortion( "No such player found" );
+
+  if( ( (ListPortion*) param[ 2 ] )->Length() != N.NumStrats( PlayerNum ) )
+    return new ErrorPortion( "Mismatching number of strategies" );
+
+  for( j = 1; j <= N.NumStrats( PlayerNum ); j++ )
+  {
+    p2 = ( (ListPortion*) param[ 2 ] )->Subscript( j );
+    if( p2->Type() == porLIST )
+    {
+      delete p2;
+      return new ErrorPortion( "Mismatching dimensionality" );
+    }
+
+    assert( p2->Type() == porFLOAT );
+    (*P)( PlayerNum, j ) = ( (FloatPortion*) p2 )->Value();
+
+    delete p2;
+  }
+
+  return param[ 0 ]->RefCopy();
+}
+
+
+Portion *GSM_SetComponent_MixedRational(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p2;
+  int PlayerNum = 0;
+
+  MixedSolution<gRational>* P = 
+    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  Nfg<gRational>& N = * P->BelongsTo();
+  gArray< NFPlayer* > player = N.PlayerList();
+  
+  for( i = 1; i <= N.NumPlayers(); i++ )
+  {
+    if( ( (NfPlayerPortion*) param[ 1 ] )->Value() == player[ i ] )
+    {
+      PlayerNum = i;
+      break;
+    }
+  }
+  
+  if( !PlayerNum )
+    return new ErrorPortion( "No such player found" );
+
+  if( ( (ListPortion*) param[ 2 ] )->Length() != N.NumStrats( PlayerNum ) )
+    return new ErrorPortion( "Mismatching number of strategies" );
+
+  for( j = 1; j <= N.NumStrats( PlayerNum ); j++ )
+  {
+    p2 = ( (ListPortion*) param[ 2 ] )->Subscript( j );
+    if( p2->Type() == porLIST )
+    {
+      delete p2;
+      return new ErrorPortion( "Mismatching dimensionality" );
+    }
+
+    assert( p2->Type() == porRATIONAL );
+    (*P)( i, j ) = ( (RationalPortion*) p2 )->Value();
+
+    delete p2;
+  }
+
+  return param[ 0 ]->RefCopy();
+}
+
 //---------------
 // Support
 //---------------
@@ -931,6 +1390,13 @@ Portion* GSM_Support_Behav(Portion** param)
   BaseBehavProfile *P = ((BehavPortion*) param[0])->Value();
   return new EfSupportValPortion(new EFSupport(P->GetEFSupport()));
 }
+
+Portion* GSM_Support_Mixed(Portion** param)
+{
+  BaseMixedProfile *P = ((MixedPortion *) param[0])->Value();
+  return new NfSupportValPortion(new NFSupport(P->GetNFSupport()));
+}
+
 
 
 
@@ -1061,6 +1527,53 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_IsNash_BehavRational, 1);
   FuncObj->SetParamInfo(GSM_IsNash_BehavRational, 0, "strategy",
 			porBEHAV_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_IsNash_MixedFloat, 1);
+  FuncObj->SetParamInfo(GSM_IsNash_MixedFloat, 0, "strategy",
+			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(GSM_IsNash_MixedRational, 1);
+  FuncObj->SetParamInfo(GSM_IsNash_MixedRational, 0, "strategy",
+			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("IsntPerfect");
+  FuncObj->SetFuncInfo(GSM_IsntPerfect_MixedFloat, 1);
+  FuncObj->SetParamInfo(GSM_IsntPerfect_MixedFloat, 0, "strategy",
+			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(GSM_IsntPerfect_MixedRational, 1);
+  FuncObj->SetParamInfo(GSM_IsntPerfect_MixedRational, 0, "strategy",
+			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("IsntProper");
+  FuncObj->SetFuncInfo(GSM_IsntProper_MixedFloat, 1);
+  FuncObj->SetParamInfo(GSM_IsntProper_MixedFloat, 0, "strategy",
+			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(GSM_IsntProper_MixedRational, 1);
+  FuncObj->SetParamInfo(GSM_IsntProper_MixedRational, 0, "strategy",
+			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("IsPerfect");
+  FuncObj->SetFuncInfo(GSM_IsPerfect_MixedFloat, 1);
+  FuncObj->SetParamInfo(GSM_IsPerfect_MixedFloat, 0, "strategy",
+			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(GSM_IsPerfect_MixedRational, 1);
+  FuncObj->SetParamInfo(GSM_IsPerfect_MixedRational, 0, "strategy",
+			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("IsProper");
+  FuncObj->SetFuncInfo(GSM_IsProper_MixedFloat, 1);
+  FuncObj->SetParamInfo(GSM_IsProper_MixedFloat, 0, "strategy",
+			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(GSM_IsProper_MixedRational, 1);
+  FuncObj->SetParamInfo(GSM_IsProper_MixedRational, 0, "strategy",
+			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
 
@@ -1091,16 +1604,52 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_LiapValue_BehavRational, 1);
   FuncObj->SetParamInfo(GSM_LiapValue_BehavRational, 0, "strategy",
 			porBEHAV_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_LiapValue_MixedFloat, 1);
+  FuncObj->SetParamInfo(GSM_LiapValue_MixedFloat, 0, "strategy",
+			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);  
+  FuncObj->SetFuncInfo(GSM_LiapValue_MixedRational, 1);
+  FuncObj->SetParamInfo(GSM_LiapValue_MixedRational, 0, "strategy",
+			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
    
-  FuncObj = new FuncDescObj( "ListForm" );
-  FuncObj->SetFuncInfo( GSM_List_BehavFloat, 1 );
-  FuncObj->SetParamInfo(GSM_List_BehavFloat, 
+  FuncObj = new FuncDescObj("ListForm");
+  FuncObj->SetFuncInfo( GSM_ListForm_BehavFloat, 1 );
+  FuncObj->SetParamInfo(GSM_ListForm_BehavFloat, 
 			0, "behav", porBEHAV_FLOAT );
-  FuncObj->SetFuncInfo( GSM_List_BehavRational, 1 );
-  FuncObj->SetParamInfo(GSM_List_BehavRational, 
+  FuncObj->SetFuncInfo( GSM_ListForm_BehavRational, 1 );
+  FuncObj->SetParamInfo(GSM_ListForm_BehavRational, 
 			0, "behav", porBEHAV_RATIONAL );
+
+  FuncObj->SetFuncInfo( GSM_ListForm_MixedFloat, 1 );
+  FuncObj->SetParamInfo(GSM_ListForm_MixedFloat, 
+			0, "mixed", porMIXED_FLOAT );
+  FuncObj->SetFuncInfo( GSM_ListForm_MixedRational, 1 );
+  FuncObj->SetParamInfo(GSM_ListForm_MixedRational, 
+			0, "mixed", porMIXED_RATIONAL );
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj( "Mixed" );
+  FuncObj->SetFuncInfo( GSM_Mixed_NfgFloat, 2 );
+  FuncObj->SetParamInfo(GSM_Mixed_NfgFloat, 0, "nfg", porNFG_FLOAT, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_Mixed_NfgFloat, 
+			1, "list", porLIST | porFLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2);
+
+  FuncObj->SetFuncInfo( GSM_Mixed_NfgRational, 2 );
+  FuncObj->SetParamInfo(GSM_Mixed_NfgRational, 0, "nfg", porNFG_RATIONAL, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_Mixed_NfgRational, 
+			1, "list", porLIST | porRATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2);
+
+  FuncObj->SetFuncInfo( GSM_Mixed_NFSupport, 2 );
+  FuncObj->SetParamInfo(GSM_Mixed_NFSupport, 0, "support", porNF_SUPPORT );
+  FuncObj->SetParamInfo(GSM_Mixed_NFSupport, 
+			1, "list", porLIST | porFLOAT | porRATIONAL );
   gsm->AddFunction( FuncObj );
 
 
@@ -1145,6 +1694,26 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetParamInfo( GSM_SetComponent_BehavRational,
 			2, "list", porLIST | porRATIONAL );
 
+  FuncObj = new FuncDescObj( "SetComponent" );
+
+  FuncObj->SetFuncInfo( GSM_SetComponent_MixedFloat, 3 );
+  FuncObj->SetParamInfo( GSM_SetComponent_MixedFloat, 
+			0, "mixed", porMIXED_FLOAT, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo( GSM_SetComponent_MixedFloat, 
+			1, "player", porPLAYER_NFG );
+  FuncObj->SetParamInfo( GSM_SetComponent_MixedFloat, 
+			2, "list", porLIST | porFLOAT );
+
+  FuncObj->SetFuncInfo( GSM_SetComponent_MixedRational, 3 );
+  FuncObj->SetParamInfo( GSM_SetComponent_MixedRational, 
+			0, "mixed", porMIXED_RATIONAL, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo( GSM_SetComponent_MixedRational, 
+			1, "player", porPLAYER_NFG );
+  FuncObj->SetParamInfo( GSM_SetComponent_MixedRational, 
+			2, "list", porLIST | porRATIONAL );
+
   gsm->AddFunction( FuncObj );
 
 
@@ -1152,5 +1721,10 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_Support_Behav, 1);
   FuncObj->SetParamInfo(GSM_Support_Behav, 0, "strategy",
 			porBEHAV, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_Support_Mixed, 1);
+  FuncObj->SetParamInfo(GSM_Support_Mixed, 0, "strategy",
+			porMIXED, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 }
+
