@@ -18,7 +18,8 @@ template <class T> class SubgameSolver   {
 
     gArray<gArray<Infoset *> *> infosets;
 
-    void FindSubgames(Node *, gList<BehavProfile<T> > &);
+    void FindSubgames(Node *, gList<BehavProfile<T> > &,
+		      gList<Outcome *> &);
 
   protected:
     virtual void SolveSubgame(const Efg<T> &, gList<BehavProfile<T> > &) = 0;
@@ -30,7 +31,7 @@ template <class T> class SubgameSolver   {
     void Solve(void);
 
     double Time(void) const   { return time; }
-    const gList<BehavProfile<T> > GetSolutions(void) const
+    const gList<BehavProfile<T> > &GetSolutions(void) const
       { return solutions; }
 };
 

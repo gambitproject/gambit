@@ -15,31 +15,57 @@
 //-------------------------------------------------------------------------
 
 template <class T>
-void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns)
+void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns,
+				    gList<Outcome *> &values)
 {
   int i;
-  
-  solns.Append(solution);
-  ((gVector<T> &) solns[1]).operator=((T) 0);
+
+  gList<BehavProfile<T> > thissolns;
+  thissolns.Append(solution);
+  ((gVector<T> &) thissolns[1]).operator=((T) 0);
 
   gList<Node *> subroots;
   ChildSubgames(n, subroots);
 
+  gList<gArray<Outcome *> > subrootvalues;
+  subrootvalues.Append(gArray<Outcome *>(subroots.Length()));
+
   for (i = 1; i <= subroots.Length(); i++)  {
     gList<BehavProfile<T> > subsolns;
-    FindSubgames(subroots[i], subsolns);
+    gList<Outcome *> subvalues;
 
+    FindSubgames(subroots[i], subsolns, subvalues);
+    
     if (subsolns.Length() == 0)  {
       solns.Flush();
       return;
     }
 
-    solns[1] += subsolns[1];
+    assert(subvalues.Length() == subsolns.Length());
+
+    gList<BehavProfile<T> > newsolns;
+    gList<gArray<Outcome *> > newsubrootvalues;
+	
+    for (int soln = 1; soln <= thissolns.Length(); soln++)
+      for (int subsoln = 1; subsoln <= subsolns.Length(); subsoln++)  {
+	BehavProfile<T> bp(thissolns[soln]);
+	bp += subsolns[subsoln];
+	newsolns.Append(bp);
+
+	newsubrootvalues.Append(subrootvalues[soln]);
+	newsubrootvalues[newsubrootvalues.Length()][i] = subvalues[subsoln];
+      }
+
+    thissolns = newsolns;
+    subrootvalues = newsubrootvalues;
   }
 
   assert(n->GetSubgameRoot() == n);
 
-  if (n->GetSubgameRoot() == n)  {
+  for (int soln = 1; soln <= thissolns.Length(); soln++)   {
+    for (i = 1; i <= subroots.Length(); i++)
+      subroots[i]->SetOutcome(subrootvalues[soln][i]);
+
     Efg<T> foo(efg, n);
 
     gList<BehavProfile<T> > sol;
@@ -54,46 +80,56 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns)
 
     gList<Node *> nodes;
     Nodes(efg, n, nodes);
-        
-    for (int pl = 1; pl <= foo.NumPlayers(); pl++)  {
-      EFPlayer *p = foo.PlayerList()[pl];
-      int index;
 
-      for (index = 1; index <= nodes.Length() &&
-	   nodes[index]->GetPlayer() != efg.PlayerList()[pl]; index++);
+    for (int solno = 1; solno <= sol.Length(); solno++)  {
+      solns.Append(thissolns[soln]);
 
-      if (index > nodes.Length())  continue;
+      for (int pl = 1; pl <= foo.NumPlayers(); pl++)  {
+	EFPlayer *p = foo.PlayerList()[pl];
+	int index;
 
-      int base;
+	for (index = 1; index <= nodes.Length() &&
+	     nodes[index]->GetPlayer() != efg.PlayerList()[pl]; index++);
 
-      for (base = 1; base <= efg.PlayerList()[pl]->NumInfosets(); base++)
-	if (efg.PlayerList()[pl]->InfosetList()[base] ==
-	    nodes[index]->GetInfoset())  break;
-      
-      assert(base <= efg.PlayerList()[pl]->NumInfosets());
+	if (index > nodes.Length())  continue;
 
-      for (int iset = 1; iset <= p->NumInfosets(); iset++)  {
-	for (index = 1; index <= infosets[pl]->Length(); index++)
-	  if ((*infosets[pl])[index] == efg.PlayerList()[pl]->InfosetList()[iset + base - 1])
-	    break;
+	int base;
 
-	assert(index <= infosets[pl]->Length());
+	for (base = 1; base <= efg.PlayerList()[pl]->NumInfosets(); base++)
+	  if (efg.PlayerList()[pl]->InfosetList()[base] ==
+	      nodes[index]->GetInfoset())  break;
+	
+	assert(base <= efg.PlayerList()[pl]->NumInfosets());
 
-	for (int act = 1; act <= p->InfosetList()[iset]->NumActions();
-	     act++)
-	  solns[1](pl, index, act) = sol[1](pl, iset, act);
+	for (int iset = 1; iset <= p->NumInfosets(); iset++)  {
+	  for (index = 1; index <= infosets[pl]->Length(); index++)
+	    if ((*infosets[pl])[index] == efg.PlayerList()[pl]->InfosetList()[iset + base - 1])
+	      break;
+
+	  assert(index <= infosets[pl]->Length());
+	  
+	  for (int act = 1; act <= p->InfosetList()[iset]->NumActions();
+	       act++)
+	    solns[solns.Length()](pl, index, act) = sol[solno](pl, iset, act);
+	}
       }
-    }
+    
+      gVector<T> subval(foo.NumPlayers());
+      for (i = 1; i <= foo.NumPlayers(); i++)  {
+	subval[i] = sol[solno].Payoff(i);
+	if (n->GetOutcome())
+	  subval[i] += ((OutcomeVector<T> &) *n->GetOutcome())[i];
+      }
+
+      OutcomeVector<T> *ov = efg.NewOutcome();
+      for (i = 1; i <= efg.NumPlayers(); i++)
+	(*ov)[i] = subval[i];
  
-    OutcomeVector<T> *outc = (n->GetOutcome()) ?
-        ((OutcomeVector<T> *) n->GetOutcome()) : efg.NewOutcome();
+      values.Append(ov);
+    }
+  }
 
-    for (i = 1; i <= foo.NumPlayers(); i++)
-      (*outc)[i] += sol[1].Payoff(i);
-
-    efg.DeleteTree(n);
-    n->SetOutcome(outc);
-  }    
+  efg.DeleteTree(n);
 }
 
 template <class T> SubgameSolver<T>::SubgameSolver(const Efg<T> &E)
@@ -116,9 +152,11 @@ void SubgameSolver<T>::Solve(void)
 
   solutions.Flush();
 
+  gList<Outcome *> values;
+
   ((gVector<T> &) solution).operator=((T) 0);
 
-  FindSubgames(efg.RootNode(), solutions);
+  FindSubgames(efg.RootNode(), solutions, values);
 
   time = watch.Elapsed();
 }
@@ -437,7 +475,24 @@ TEMPLATE class ZSumBySubgame<gRational>;
 
 TEMPLATE class gArray<gArray<Infoset *> *>;
 
+#include "glist.imp"
 
+TEMPLATE class gList<gVector<double> >;
+TEMPLATE class gNode<gVector<double> >;
+TEMPLATE class gList<gVector<gRational> >;
+TEMPLATE class gNode<gVector<gRational> >;
+
+TEMPLATE class gList<Outcome *>;
+TEMPLATE class gNode<Outcome *>;
+
+TEMPLATE class gList<gArray<Outcome *> >;
+TEMPLATE class gNode<gArray<Outcome *> >;
+
+
+TEMPLATE int operator==(const gArray<Outcome *> &, const gArray<Outcome *> &);
+TEMPLATE int operator!=(const gArray<Outcome *> &, const gArray<Outcome *> &);
+
+TEMPLATE gOutput &operator<<(gOutput &, const gArray<Outcome *> &);
 
 
 
