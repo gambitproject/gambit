@@ -29,7 +29,7 @@ NFSupport *ComputeMixedDominated(NFSupport &S,
       status.Get();
       int pl = players[i];
       
-      any |= ComputeMixedDominated<gRational>(S, *newS, pl, strong,
+      any |= ComputeMixedDominated(S, *newS, pl, strong,
 				  (gRational)0, tracefile, status);
     }
   }
@@ -38,7 +38,7 @@ NFSupport *ComputeMixedDominated(NFSupport &S,
       status.Get();
       int pl = players[i];
       
-      any |= ComputeMixedDominated<double>(S, *newS, pl, strong,
+      any |= ComputeMixedDominated(S, *newS, pl, strong,
 				  (double)0, tracefile, status);
     }
   }
@@ -59,9 +59,9 @@ bool IsMixedDominated(const NFSupport &S,Strategy *str,
 {
   bool ret = false;
   if(precision == precRATIONAL) 
-    ret =  IsMixedDominated<gRational>(S, str, strong, (gRational)0, tracefile);
+    ret =  IsMixedDominated(S, str, strong, (gRational)0, tracefile);
   else if (precision == precDOUBLE) 
-    ret =  IsMixedDominated<double>(S, str, strong, (double)0, tracefile);
+    ret =  IsMixedDominated(S, str, strong, (double)0, tracefile);
   
   return ret;
 }
@@ -91,14 +91,14 @@ bool IsMixedDominated(const MixedProfile<gNumber> &sol, int pl,
     MixedProfile<gRational> p(sol.Support());
     for (int i = 1; i <= p.Length(); i++)
       p[i] = sol[i];
-    ret =  IsMixedDominated<gRational>(p, pl, strong, tracefile);
+    ret =  IsMixedDominated(p, pl, strong, tracefile);
   }
   else if (precision == precDOUBLE) {
     MixedProfile<double> p(sol.Support());
     for (int i = 1; i <= p.Length(); i++)
       p[i] = sol[i];
     
-    ret =  IsMixedDominated<double>(p, pl, strong, tracefile);
+    ret =  IsMixedDominated(p, pl, strong, tracefile);
   }
   
   return ret;
