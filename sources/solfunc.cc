@@ -1,7 +1,7 @@
 //
 // FILE: solfunc.cc -- GCL functions on profiles and solutions
 //
-// $Id$
+// @(#)solfunc.cc	1.31 1/27/97
 //
 
 #include "gsm.h"
@@ -242,7 +242,7 @@ static Portion *GSM_ActionValues_Rational(Portion **param)
   gVector<gRational> ret(s->NumActions());
   for (int i = 1; i <= s->NumActions(); i++)  {
     if (bp->GetEFSupport().Find(s->GetActionList()[i]) &&
-        probs(s->GetPlayer()->GetNumber(), s->GetNumber()) > 0)
+        probs(s->GetPlayer()->GetNumber(), s->GetNumber()) > (gRational)0)
       por->Append(new RationalValPortion(values(s->GetPlayer()->GetNumber(), s->GetNumber(),
 		      bp->GetEFSupport().Find(s->GetActionList()[i]))));
     else
