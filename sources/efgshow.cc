@@ -307,6 +307,8 @@ void EfgShow::SolveStandard(void)
   }
 
   try {
+    wxWriteResource("Soln-Defaults", "Efg-Interactive-Solns",
+		    FALSE, "gambit.ini");
     if (markSubgames)  
       tw->SubgameMarkAll();
     else

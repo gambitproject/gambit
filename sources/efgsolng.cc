@@ -51,6 +51,8 @@ guiSubgameSolver::guiSubgameSolver(EfgShowInterface *p_parent, const Efg &p_efg,
     m_eliminate(p_eliminate), m_iterative(p_iterative), m_strong(p_strong)
 {
   MarkedSubgameRoots(p_efg, m_subgameRoots);
+  wxGetResource("Soln-Defaults", "Efg-Interactive-Solns",
+		&m_pickSoln, "gambit.ini");
 }
 
 //
