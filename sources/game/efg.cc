@@ -1045,7 +1045,7 @@ gbtEfgNode gbtEfgGame::MoveTree(gbtEfgNode src, gbtEfgNode dest)
     int srcChild = src.rep->m_parent->m_children.Find(src.rep);
     int destChild = src.rep->m_parent->m_children.Find(dest.rep);
     src.rep->m_parent->m_children[srcChild] = dest.rep;
-    src.rep->m_parent->m_children[destChild] = dest.rep;
+    src.rep->m_parent->m_children[destChild] = src.rep;
   }
   else {
     gbt_efg_node_rep *parent = src.rep->m_parent; 
