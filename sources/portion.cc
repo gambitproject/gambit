@@ -10,6 +10,7 @@
 #include "basic.h"
 
 #include "portion.h"
+#include "gsm.h"
 #include "gsmhash.h"
 
 //---------------------------------------------------------------------
@@ -25,6 +26,7 @@ int Portion::_NumPortions = 0;
 
 Portion::Portion()
 {
+  _GSM = 0;
   _Temporary = true;
   _ShadowOf = 0;
 
@@ -48,6 +50,30 @@ Portion::~Portion()
 }
 
 
+void Portion::Error( const char* string ) const
+{
+  if( _GSM != 0 )
+    _GSM->StdErr() << string;
+  else
+    gerr << string;
+}
+
+
+void Portion::Error( const int integer ) const
+{
+  if( _GSM != 0 )
+    _GSM->StdErr() << integer;
+  else
+    gerr << integer;
+}
+
+
+void Portion::SetGSM( GSM* gsm )
+{
+  _GSM = gsm;
+}
+
+
 bool& Portion::Temporary( void )
 { return _Temporary; }
 
@@ -65,8 +91,8 @@ void Portion::MakeCopyOfData( Portion* p )
 #ifndef NDEBUG
   if( this->Type() != p->Type() )
   {
-    gerr << "Portion Error: attempting to MakeCopyOfData() a different\n";
-    gerr << "               Portion type\n";
+    Error( "Portion Error: attempting to MakeCopyOfData() a different\n" );
+    Error( "               Portion type\n" );
   }
   assert( this->Type() == p->Type() );
 #endif // NDEBUG
@@ -76,7 +102,7 @@ void Portion::MakeCopyOfData( Portion* p )
 
 bool Portion::Operation( Portion* p, OperationMode mode )
 {
-  gerr << "Portion Error: attempted to execute an unsupported operation\n";
+  Error( "Portion Error: attempted to execute an unsupported operation\n" );
   if( p !=0 )
   {
     delete p;
@@ -180,7 +206,7 @@ template <class T>
       }
       else
       {
-	gerr << "Portion Error: division by zero\n";
+	Error( "Portion Error: division by zero\n" );
 	_Value = 0;
 	result = false;
       }
@@ -200,7 +226,7 @@ template <class T>
       }
       else
       {
-	gerr << "Portion Error: division by zero\n";
+	Error( "Portion Error: division by zero\n" );
 	_Value = 0;
 	result = false;
       }
@@ -224,7 +250,7 @@ template <class T>
       }
       else
       {
-	gerr << "Portion Error: division by zero\n";
+	Error( "Portion Error: division by zero\n" );
 	_Value = 0;
 	result = false;
       }
@@ -714,8 +740,8 @@ int List_Portion::Insert( Portion* item, int index )
 
   if( item->Type() == porREFERENCE )
   {
-    gerr << "Portion Error: attempted to insert a Reference_Portion into\n";
-    gerr << "               a List_Portion\n";
+    Error( "Portion Error: attempted to insert a Reference_Portion into\n" );
+    Error( "               a List_Portion\n" );
     result = 0;
   }
   
@@ -728,12 +754,13 @@ int List_Portion::Insert( Portion* item, int index )
       else
 	_DataType = item->Type();
       item->ParentList() = this;
+      item->SetGSM( _GSM );
       result = _Value.Insert( item, index );
     }
     else
     {
-      gerr << "Portion Error: attempted to insert an Error_Portion\n";
-      gerr << "               into a List_Portion.\n";
+      Error( "Portion Error: attempted to insert an Error_Portion\n" );
+      Error( "               into a List_Portion.\n" );
       delete item;
       result = 0;
     }
@@ -743,14 +770,15 @@ int List_Portion::Insert( Portion* item, int index )
     type_match = TypeCheck( item );
     if( !type_match )
     {
-      gerr << "Portion Error: attempted to insert conflicting Portion types\n";
-      gerr << "               into a List_Portion.\n";
+      Error( "Portion Error: attempted to insert conflicting Portion\n" );
+      Error( "               types into a List_Portion.\n" );
       delete item;
       result = 0;
     }
     else
     {
       item->ParentList() = this;
+      item->SetGSM( _GSM );
       result = _Value.Insert( item, index );
     }
   }
@@ -798,15 +826,18 @@ bool List_Portion::SetSubscript( int index, Portion *p )
     }
     else
     {
-      gerr << "List_Portion Error: an out-of-range subscript specified\n";
-      gerr << "       Valid range: " << 1 << " to " << _Value.Length() << "\n";
-      gerr << "       Subscript specified: " << index << "\n";
+      Error( "List_Portion Error: an out-of-range subscript specified\n" );
+      Error( "       Valid range:  1 to " );
+      Error( _Value.Length() );
+      Error( "\n       Subscript specified: " );
+      Error( index );
+      Error( "\n" );
     }
   }
   else
   {
-    gerr << "Portion Error: attempted to set an element of a List_Portion\n";
-    gerr << "               to one with a conflicting Portion type\n";
+    Error( "Portion Error: attempted to set an element of a List_Portion\n" );
+    Error( "               to one with a conflicting Portion type\n" );
     delete p;
   }
   return result;
@@ -821,10 +852,12 @@ Portion* List_Portion::GetSubscript( int index ) const
   }
   else
   {
-    gerr << "List_Portion Error: an out-of-range subscript specified\n";
-    gerr << "       Valid range: " << 1 << " to " << _Value.Length() << "\n";
-    gerr << "       Subscript specified: " << index << "\n";
-    return 0;
+    Error( "List_Portion Error: an out-of-range subscript specified\n" );
+    Error( "       Valid range:  1 to " );
+    Error( _Value.Length() );
+    Error( "\n       Subscript specified: " );
+    Error( index );
+    Error( "\n" );
   }
 }
 
@@ -911,12 +944,13 @@ template <class T>
 #ifndef NDEBUG
   if( p->Type() == porREFERENCE )
   {
-    gerr << "Portion Error: attempted to Assign a Reference_Portion as the\n";
-    gerr << "               value of a sub-reference in a Nfg_Portion type\n";
+    Error( "Portion Error: attempted to Assign a Reference_Portion as the\n" );
+    Error( "               value of a sub-reference in a Nfg_Portion type\n" );
   }
   assert( p->Type() != porREFERENCE );
 #endif // NDEBUG
 
+  p->SetGSM( _GSM );
   _RefTable->Define( ref, p );
 
   return true;
@@ -950,8 +984,10 @@ template <class T>
   }
   else
   {
-    gerr << "Portion Error: attempted to access an undefined reference\n";
-    gerr << "               \"" << ref << "\"\n";
+    Error( "Portion Error: attempted to access an undefined reference\n" );
+    Error( "               \"" );
+    Error( ref );
+    Error( "\"\n" );
   }
 
   return result;
@@ -1042,12 +1078,13 @@ template <class T>
 #ifndef NDEBUG
   if( p->Type() == porREFERENCE )
   {
-    gerr << "Portion Error: attempted to Assign a Reference_Portion as the\n";
-    gerr << "               value of a sub-reference in a Efg_Portion type\n";
+    Error( "Portion Error: attempted to Assign a Reference_Portion as the\n" );
+    Error( "               value of a sub-reference in a Efg_Portion type\n" );
   }
   assert( p->Type() != porREFERENCE );
 #endif // NDEBUG
 
+  p->SetGSM( _GSM );
   _RefTable->Define( ref, p );
 
   return true;
@@ -1081,8 +1118,10 @@ template <class T>
   }
   else
   {
-    gerr << "Portion Error: attempted to access an undefined reference\n";
-    gerr << "               \"" << ref << "\"\n";
+    Error( "Portion Error: attempted to access an undefined reference\n" );
+    Error( "               \"" );
+    Error( ref );
+    Error( "\"\n" );
   }
 
   return result;

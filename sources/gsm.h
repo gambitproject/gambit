@@ -30,6 +30,9 @@ class Instruction;
 class GSM
 {
  private:
+  gOutput&                         _StdOut;
+  gOutput&                         _StdErr;
+
   gGrowableStack< Portion* >*      _Stack;
   gGrowableStack< CallFuncObj* >*  _CallFuncStack;
   RefHashTable*                    _RefTable;
@@ -51,8 +54,10 @@ class GSM
 
 
  public:
-  GSM( int size );
+  GSM( int size, gOutput& s_out = gout, gOutput& s_err = gerr );
   ~GSM();
+
+  gOutput& StdErr( void ) const;
 
   int Depth    ( void ) const;
   int MaxDepth ( void ) const;

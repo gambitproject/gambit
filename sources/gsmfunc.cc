@@ -245,8 +245,8 @@ gString FuncDescObj::FuncName( void ) const
 /*******************************************************************/
 
   
-CallFuncObj::CallFuncObj( FuncDescObj* func )
-     :FuncDescObj( *func )
+CallFuncObj::CallFuncObj( FuncDescObj* func, gOutput& s_err )
+     :FuncDescObj( *func ), _StdErr( s_err )
 {
   int index;
   int f_index;
@@ -330,7 +330,7 @@ int CallFuncObj::FindParamName( const gString& param_name )
     }
     else if( _FuncIndex != TempFuncIndex )
     {
-      gerr << "CallFuncObj Error: conflicting variable name specification\n";
+      _StdErr << "CallFuncObj Error: conflicting variable name specification\n";
       _FuncIndex = -1;
       _ErrorOccurred = true;
     }
@@ -391,24 +391,24 @@ bool CallFuncObj::SetCurrParam( Portion *param )
 	}
 	else
 	{
-	  gerr << "CallFuncObj Error: parameter type mismatch\n";
+	  _StdErr << "CallFuncObj Error: parameter type mismatch\n";
 	  result = false;
 	}
       }
       else
       {
-	gerr << "CalFuncObj Error: multiple definitions found for parameter ";
-	gerr << "\"" << _FuncInfo[_FuncIndex].ParamInfo[_CurrParamIndex].Name;
-	gerr << "\"\n";
-	gerr << "                  while executing CallFunction() on\n";
-	gerr << "                  function \"" << _FuncName << "\" )\n";
+	_StdErr << "CalFuncObj Error: multiple definitions found for parameter ";
+	_StdErr << "\"" << _FuncInfo[_FuncIndex].ParamInfo[_CurrParamIndex].Name;
+	_StdErr << "\"\n";
+	_StdErr << "                  while executing CallFunction() on\n";
+	_StdErr << "                  function \"" << _FuncName << "\" )\n";
 	result = false;
       }
     }
     else // ( _CurrParamIndex >= _NumParams )
     {
-      gerr << "CallFuncObj Error: too many parameters specified for\n";
-      gerr << "                   function \"" << _FuncName << "\"\n";
+      _StdErr << "CallFuncObj Error: too many parameters specified for\n";
+      _StdErr << "                   function \"" << _FuncName << "\"\n";
       result = false;
     }
   }
@@ -531,16 +531,16 @@ Portion* CallFuncObj::CallFunction( Portion **param )
       }
       if ( param_sets_matched > 1 )
       {
-	gerr << "CallFuncObj Error: function \"" << _FuncName << "\" called";
-	gerr << " with ambiguous parameters\n";
+	_StdErr << "CallFuncObj Error: function \"" << _FuncName << "\" called";
+	_StdErr << " with ambiguous parameters\n";
 	_ErrorOccurred = true;
       }
     }
     else // ( !params_defined )
     {
-      gerr << "CallFuncObj Error: no defined parameters; function call\n";
-      gerr << "                   ambiguous for function \"" << _FuncName;
-      gerr << "\"\n";
+      _StdErr << "CallFuncObj Error: no defined parameters; function call\n";
+      _StdErr << "                   ambiguous for function \"" << _FuncName;
+      _StdErr << "\"\n";
       _ErrorOccurred = true;
     }
   }
@@ -549,8 +549,8 @@ Portion* CallFuncObj::CallFunction( Portion **param )
   { 
     if( _FuncIndex < 0 || _FuncIndex >= _NumFuncs )
     {
-      gerr << "CallFuncObj Error: no matching parameter list found for\n";
-      gerr << "                   function \"" + _FuncName + "\"\n";
+      _StdErr << "CallFuncObj Error: no matching parameter list found for\n";
+      _StdErr << "                   function \"" + _FuncName + "\"\n";
       _ErrorOccurred = true;
     }
   }
@@ -570,10 +570,10 @@ Portion* CallFuncObj::CallFunction( Portion **param )
 	}
 	else
 	{
-	  gerr << "GSM Error: required parameter \"" << 
+	  _StdErr << "GSM Error: required parameter \"" << 
 	    _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name;
-	  gerr << "\"" << " not found while executing CallFunction()\n";
-	  gerr << "           on function \"" << _FuncName << "\"\n";
+	  _StdErr << "\"" << " not found while executing CallFunction()\n";
+	  _StdErr << "           on function \"" << _FuncName << "\"\n";
 	  _ErrorOccurred = true;
 	}
       }
@@ -583,10 +583,10 @@ Portion* CallFuncObj::CallFunction( Portion **param )
 	{
 	  if( !_FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference )
 	  {
-	    gerr << "GSM Error: required parameter \"" << 
+	    _StdErr << "GSM Error: required parameter \"" << 
 	      _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name;
-	    gerr << "\"" << " undefined while executing CallFunction()\n";
-	    gerr << "           on function \"" << _FuncName << "\"\n";
+	    _StdErr << "\"" << " undefined while executing CallFunction()\n";
+	    _StdErr << "           on function \"" << _FuncName << "\"\n";
 	    _ErrorOccurred = true;
 	  }
 	  else if( _RunTimeParamInfo[ index ].Ref != 0 )
@@ -612,8 +612,8 @@ Portion* CallFuncObj::CallFunction( Portion **param )
       _ErrorOccurred = true;
     else if( result->Type() == porERROR )
     {
-      result->Output( gerr );
-      gerr << "\n";
+      result->Output( _StdErr );
+      _StdErr << "\n";
       delete result;
       result = 0;
       _ErrorOccurred = true;

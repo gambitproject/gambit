@@ -21,6 +21,9 @@
 #define PASS_BY_REFERENCE true
 
 
+class GSM;
+
+
 class FuncDescObj
 {
  protected:
@@ -64,7 +67,7 @@ class FuncDescObj
      const bool        pass_by_reference = false
      );
 
-  gString     FuncName             ( void ) const;
+  gString FuncName ( void ) const;
 };
 
 
@@ -79,6 +82,9 @@ class CallFuncObj : public FuncDescObj
     Reference_Portion* Ref;
     Portion*           ShadowOf;
   };
+
+  gOutput&              _StdErr;
+
   int                   _FuncIndex;
   int                   _NumParams;
   int                   _NumParamsDefined;
@@ -88,7 +94,7 @@ class CallFuncObj : public FuncDescObj
   bool                  _ErrorOccurred;
 
  public:
-  CallFuncObj( FuncDescObj* func );
+  CallFuncObj( FuncDescObj* func, gOutput& s_err );
   ~CallFuncObj();
 
   int         NumParams ( void ) const;

@@ -1,14 +1,10 @@
 
 
-#include <stdio.h>
-
 #include "gsm.h"
-#include "rational.h"
-#include "gstring.h"
 
 
 
-// #define CRASHTEST
+#define CRASHTEST
 
 
 int main( void )
@@ -31,8 +27,11 @@ int main( void )
   gString *name;
   GSM *machine;
 
+  gOutput* sout = new gFileOutput( "sout" );
+  gOutput* serr = new gFileOutput( "serr" );
 
-  machine = new GSM( 32 );
+
+  machine = new GSM( 32, *sout, *serr );
 
   gList< Instruction* > program;
 
@@ -41,7 +40,6 @@ int main( void )
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
-/*
 
   gout << "\n";
   machine->Push( d_1 );
@@ -1700,12 +1698,29 @@ int main( void )
   machine->Dump();
 #endif // CRASHTEST
 
-*/
 
 
-  machine->PushStream( "stdout" );
+
+  machine->PushRef( "x1" );
+  machine->PushStream( "stdout1" );
+  machine->Assign();
   machine->Dump();
 
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "x2" );
+  machine->Bind();
+  machine->InitCallFunction( "NewStream" );
+  machine->Push( "stdout2" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "x1" );
+  machine->PushRef( "x2" );
+  machine->Assign();
+  machine->Dump();
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
@@ -1713,6 +1728,8 @@ int main( void )
 
   gout << "\nDeleting machine\n";
   delete machine;
+  delete sout;
+  delete serr;
 
   return 0;
 }

@@ -75,8 +75,9 @@ typedef unsigned int PortionType;
 
 
 class RefHashTable;
-class GSM;
 class List_Portion;
+class GSM;
+
 
 
 class Portion
@@ -86,14 +87,20 @@ class Portion
   static int _NumPortions;
 
  protected:
+  GSM*       _GSM;
   bool       _Temporary;
   // the following two are only used by List operations (so far)
   Portion*       _ShadowOf;
   List_Portion*  _ParentList;
 
+  void Error( const char* string ) const;
+  void Error( const int integer ) const;
+
  public:
   Portion();
   virtual ~Portion();
+
+  void SetGSM ( GSM* gsm );
 
   bool&               Temporary      ( void );
   Portion*&           ShadowOf       ( void );
