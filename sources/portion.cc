@@ -1199,36 +1199,43 @@ int Output_Portion::_NumObj = 0;
 
 RefCountHashTable< gOutput* > Output_Portion::_RefCountTable;
 
-Output_Portion::Output_Portion( gOutput& value )
+Output_Portion::Output_Portion( gOutput& value, bool var_static )
 {
+  _Static = var_static;
   _Value = &value;
-  if( !_RefCountTable.IsDefined( _Value ) )
+  if( !_Static )
   {
-    _RefCountTable.Define( _Value, 1 );
+    if( !_RefCountTable.IsDefined( _Value ) )
+    {
+      _RefCountTable.Define( _Value, 1 );
 #ifdef MEMCHECK
-    _NumObj++;
-    gout << ">>> gOutput Ctor - count: " << _NumObj << "\n";
+      _NumObj++;
+      gout << ">>> gOutput Ctor - count: " << _NumObj << "\n";
 #endif // MEMCHECK
-  }
-  else
-  {
-    _RefCountTable( _Value )++;
+    }
+    else
+    {
+      _RefCountTable( _Value )++;
+    }
   }
 }
 
 Output_Portion::~Output_Portion()
 {
-  assert( _RefCountTable.IsDefined( _Value ) );
-  assert( _RefCountTable( _Value ) > 0 );
-  _RefCountTable( _Value )--;
-  if( _RefCountTable( _Value ) == 0 )
+  if( !_Static )
   {
-    _RefCountTable.Remove( _Value );
-    delete _Value;
+    assert( _RefCountTable.IsDefined( _Value ) );
+    assert( _RefCountTable( _Value ) > 0 );
+    _RefCountTable( _Value )--;
+    if( _RefCountTable( _Value ) == 0 )
+    {
+      _RefCountTable.Remove( _Value );
+      delete _Value;
 #ifdef MEMCHECK
-    _NumObj--;
-    gout << ">>> gOutput Dtor - count: " << _NumObj << "\n";
+      _NumObj--;
+      gout << ">>> gOutput Dtor - count: " << _NumObj << "\n";
 #endif // MEMCHECK
+    }
   }
 }
 
@@ -1260,36 +1267,43 @@ int Input_Portion::_NumObj = 0;
 
 RefCountHashTable< gInput* > Input_Portion::_RefCountTable;
 
-Input_Portion::Input_Portion( gInput& value )
+Input_Portion::Input_Portion( gInput& value, bool var_static )
 {
+  _Static = var_static;
   _Value = &value;
-  if( !_RefCountTable.IsDefined( _Value ) )
+  if( !_Static )
   {
-    _RefCountTable.Define( _Value, 1 );
+    if( !_RefCountTable.IsDefined( _Value ) )
+    {
+      _RefCountTable.Define( _Value, 1 );
 #ifdef MEMCHECK
-    _NumObj++;
-    gout << ">>> gInput Ctor - count: " << _NumObj << "\n";
+      _NumObj++;
+      gout << ">>> gInput Ctor - count: " << _NumObj << "\n";
 #endif // MEMCHECK
-  }
-  else
-  {
-    _RefCountTable( _Value )++;
+    }
+    else
+    {
+      _RefCountTable( _Value )++;
+    }
   }
 }
 
 Input_Portion::~Input_Portion()
 {
-  assert( _RefCountTable.IsDefined( _Value ) );
-  assert( _RefCountTable( _Value ) > 0 );
-  _RefCountTable( _Value )--;
-  if( _RefCountTable( _Value ) == 0 )
+  if( !_Static )
   {
-    _RefCountTable.Remove( _Value );
-    delete _Value;
+    assert( _RefCountTable.IsDefined( _Value ) );
+    assert( _RefCountTable( _Value ) > 0 );
+    _RefCountTable( _Value )--;
+    if( _RefCountTable( _Value ) == 0 )
+    {
+      _RefCountTable.Remove( _Value );
+      delete _Value;
 #ifdef MEMCHECK
-    _NumObj--;
-    gout << ">>> gInput Dtor - count: " << _NumObj << "\n";
+      _NumObj--;
+      gout << ">>> gInput Dtor - count: " << _NumObj << "\n";
 #endif // MEMCHECK
+    }
   }
 }
 

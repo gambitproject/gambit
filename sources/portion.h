@@ -406,7 +406,7 @@ class Output_Portion : public Portion
   gOutput* _Value;
 
  public:
-  Output_Portion( gOutput& value );
+  Output_Portion( gOutput& value, bool var_static = false );
   ~Output_Portion();
 
   gOutput&      Value          ( void );
@@ -424,7 +424,7 @@ class Input_Portion : public Portion
   gInput* _Value;
 
  public:
-  Input_Portion( gInput& value );
+  Input_Portion( gInput& value, bool var_static = false );
   ~Input_Portion();
 
   gInput&       Value          ( void );

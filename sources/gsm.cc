@@ -37,7 +37,6 @@ Portion* _DefaultEfgShadow = 0;
 GSM::GSM( int size, gOutput& s_out, gOutput& s_err )
 :_StdOut( s_out ), _StdErr( s_err )
 {
-  
 #ifndef NDEBUG
   if( size <= 0 )
     _ErrorMessage( _StdErr, 1, size );
@@ -55,6 +54,10 @@ GSM::GSM( int size, gOutput& s_out, gOutput& s_err )
   
   _FuncTable     = new FunctionHashTable;
   InitFunctions();  // This function is located in gsmfunc.cc
+
+  _VarDefine( "OUTPUT" , new Output_Portion( gout, true ) );
+  _VarDefine( "INPUT" , new Input_Portion( gin, true ) );
+  _VarDefine( "NULL" , new Output_Portion( gnull, true ) );
 }
 
 
