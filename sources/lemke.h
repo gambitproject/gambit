@@ -26,7 +26,7 @@ template <class T> class LemkeModule  {
   private:
     const NormalForm<T> &nf;
     const LemkeParams &params;
-    int npivots;
+    long npivots;
     double time;
     gList<gPVector<T> > solutions;
 
@@ -36,7 +36,7 @@ template <class T> class LemkeModule  {
 
     int Lemke(void);
     
-    int NumPivots(void) const;
+    long NumPivots(void) const;
     double Time(void) const;
 
     const gList<gPVector<T> > &GetSolutions(void) const;
@@ -47,7 +47,7 @@ template <class T> class LemkeModule  {
 //
 template <class T> int Lemke(const NormalForm<T> &N, const LemkeParams &p,
 			     gList<gPVector<T> > &solutions,
-			     int &npivots, gRational &time);
+			     long &npivots, gRational &time);
 				   
 #endif    // LEMKE_H
 

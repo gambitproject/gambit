@@ -33,12 +33,13 @@ template <class T> class LemkeTableau : public gTableau<T>
     const NormalForm<T> &N;
     int num_strats;
     gOutput &output;
-    int printlevel,num_pivots;
+    int printlevel;
+    long npivots;
     BFS_List List;
    
     int Lemke_Step(int);
     int At_CBFS(void) const;
-    int All_Lemke(BFS_List &List, int j);
+    int All_Lemke(BFS_List &List, int j, long &np);
     int Exit_Row(int col);
     void Pivot(int, int);
  
@@ -47,7 +48,8 @@ template <class T> class LemkeTableau : public gTableau<T>
     virtual ~LemkeTableau();
 
     int Lemke(int);
-    int NumPivots(void) const;
+    long NumPivots(void) const;
+    long &NumPivots(void);
     void GetSolutions(gList<gPVector<T> > &) const;
 };
 
@@ -64,7 +66,7 @@ LemkeTableau<T>::LemkeTableau(const NormalForm<T> &NF,
 		   NF.NumStrats(1) + NF.NumStrats(2)),
 		   N(NF), num_strats(NF.NumStrats(1) + NF.NumStrats(2)),
 		   output(ofile), printlevel(plev),
-		   num_pivots(0)
+		   npivots(0)
 {
   NormalIter<T> iter(N);
   T min = (T) 0, x;
@@ -148,7 +150,7 @@ template <class T> void LemkeTableau<T>::Pivot(int row, int col)
      // then set the row'th entry to 0, making the whole column zero.
   Tableau.SwitchColumns(col, num_strats + 1);
   Tableau(row, num_strats + 1) = 0;
-  num_pivots++;
+  npivots++;
 }
 
 //
@@ -163,9 +165,9 @@ template <class T> int LemkeTableau<T>::Lemke(int Duplicate_Label)
   int i;
 
   List = BFS_List();
-
+  
   if (Duplicate_Label == 0)
-    All_Lemke(List, 0);
+    All_Lemke(List, 0, npivots);
   else  {
     Lemke_Step(Duplicate_Label);
     for (i = 1; i <= num_strats; i++)
@@ -181,7 +183,7 @@ template <class T> int LemkeTableau<T>::Lemke(int Duplicate_Label)
     }
 
   }
-  if(printlevel >= 1)output << "\nN Pivots = " << num_pivots << "\n";
+  if(printlevel >= 1)output << "\nN Pivots = " << npivots << "\n";
 
   return List.Length();
 }
@@ -244,10 +246,12 @@ template <class T> int LemkeTableau<T>::At_CBFS(void) const
 // From each new accessible equilibrium, it follows
 // all possible paths, adding any new equilibria to the List.  
 //
-template <class T> int LemkeTableau<T>::All_Lemke(BFS_List &List, int j)
+template <class T> int LemkeTableau<T>::All_Lemke(BFS_List &List, int j, long &np)
 {
   BFS<T> cbfs((T) 0);
   int i;
+
+  np+=NumPivots();
 
   for (i = 1; i <= num_strats; i++)
     if (Row_Labels[i] > 0)
@@ -282,11 +286,10 @@ template <class T> int LemkeTableau<T>::All_Lemke(BFS_List &List, int j)
   for (i = 1; i <= num_strats; i++)
     if (i != j)  {
       LemkeTableau<T> Tcopy(*this);
+      Tcopy.NumPivots()= 0;
       Tcopy.Lemke_Step(i);
-
       if (printlevel >= 3)      Tcopy.Dump(output);
-      Tcopy.All_Lemke(List, i);
-
+      Tcopy.All_Lemke(List, i,np);
       if (printlevel >= 3)      Tcopy.Dump(output);
     }
   return 1;
@@ -390,9 +393,14 @@ void LemkeTableau<T>::GetSolutions(gList<gPVector<T> > &solutions) const
   }
 }
 
-template <class T> int LemkeTableau<T>::NumPivots(void) const
+template <class T> long LemkeTableau<T>::NumPivots(void) const
 {
-  return num_pivots;
+  return npivots;
+}
+
+template <class T> long &LemkeTableau<T>::NumPivots(void)
+{
+  return npivots;
 }
 
 #ifdef __GNUG__
@@ -411,7 +419,7 @@ class LemkeTableau<gRational>;
 
 template <class T>
 LemkeModule<T>::LemkeModule(const NormalForm<T> &N, const LemkeParams &p)
-  : nf(N), params(p)
+  : nf(N), params(p), npivots(0)
 { }
 
 template <class T> LemkeModule<T>::~LemkeModule()
@@ -430,14 +438,13 @@ template <class T> int LemkeModule<T>::Lemke(void)
   LT.Lemke((params.nequilib == 1) ? 1 : 0);
 
   time = watch.Elapsed();
-  npivots = LT.NumPivots();
-
+  npivots += LT.NumPivots();
   LT.GetSolutions(solutions);
 
   return 1;
 }
 
-template <class T> int LemkeModule<T>::NumPivots(void) const
+template <class T> long LemkeModule<T>::NumPivots(void) const
 {
   return npivots;
 }
@@ -471,7 +478,7 @@ class LemkeModule<gRational>;
 template <class T>
 int Lemke(const NormalForm<T> &N, const LemkeParams &p,
 	  gList<gPVector<T> > &solutions,
-	  int &npivots, gRational &time)
+	  long &npivots, gRational &time)
 {
   LemkeModule<T> LM(N, p);
   int result = LM.Lemke();
@@ -486,15 +493,15 @@ int Lemke(const NormalForm<T> &N, const LemkeParams &p,
 
 #ifdef __GNUG__
 template int Lemke(const NormalForm<double> &, const LemkeParams &,
-		   gList<gPVector<double> > &, int &, gRational &);
+		   gList<gPVector<double> > &, long &, gRational &);
 template int Lemke(const NormalForm<gRational> &, const LemkeParams &,
-		   gList<gPVector<gRational> > &, int &, gRational &);
+		   gList<gPVector<gRational> > &, long &, gRational &);
 #elif defined __BORLANDC__
 #pragma option -Jgd
 int Lemke(const NormalForm<double> &, const LemkeParams &,
-	  gList<gPVector<double> > &, int &, gRational &);
+	  gList<gPVector<double> > &, long &, gRational &);
 int Lemke(const NormalForm<gRational> &, const LemkeParams &,
-	  gList<gPVector<gRational> > &, int &, gRational &);
+	  gList<gPVector<gRational> > &, long &, gRational &);
 #pragma option -Jgx
 #endif   // __GNUG__, __BORLANDC__
 
