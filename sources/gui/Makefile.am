@@ -15,8 +15,8 @@ gambit_SOURCES = \
 	dleditbehav.h \
 	dleditcont.cc \
 	dleditcont.h \
-	dleditefg.cc \
-	dleditefg.h \
+	dleditgame.cc \
+	dleditgame.h \
 	dleditmixed.cc \
 	dleditmixed.h \
 	dleditmove.cc \
@@ -45,8 +45,6 @@ gambit_SOURCES = \
 	dlnewgame.h \
 	dlnfgnash.cc \
 	dlnfgnash.h \
-	dlnfgproperties.cc \
-	dlnfgproperties.h \
 	dlnfgqre.cc \
 	dlnfgqre.h \
 	dlnfgstrategies.cc \

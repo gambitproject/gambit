@@ -59,7 +59,7 @@
 #include "dlefgreveal.h"
 #include "dleditnode.h"
 #include "dleditmove.h"
-#include "dleditefg.h"
+#include "dleditgame.h"
 #include "dlefglayout.h"
 #include "dlefglegend.h"
 #include "dlefgcolor.h"
@@ -874,19 +874,9 @@ void EfgShow::OnEditMove(wxCommandEvent &)
 
 void EfgShow::OnEditGame(wxCommandEvent &)
 {
-  dialogEditEfg dialog(this, m_doc->GetEfg(), m_doc->GetFilename());
+  gbtDialogEditGame dialog(this, m_doc);
   if (dialog.ShowModal() == wxID_OK) {
-    m_doc->GetEfg().SetTitle(dialog.GetGameTitle().c_str());
-    m_doc->GetEfg().SetComment(dialog.GetComment().c_str());
-    for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
-      if (pl > m_doc->GetEfg().NumPlayers()) {
-	m_doc->GetEfg().NewPlayer().SetLabel(dialog.GetPlayerName(pl).c_str());
-      }
-      else {
-	m_doc->GetEfg().GetPlayer(pl).SetLabel(dialog.GetPlayerName(pl).c_str());
-      }
-    }
-    m_doc->UpdateViews(this, true, false);
+    m_doc->Submit(dialog.GetCommand());
   }
 }
 

@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Dialog for viewing and editing properties of a normal form game
+// Dialog for viewing and editing properties of a game
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,33 +24,32 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef DLNFGPROPERTIES_H
-#define DLNFGPROPERTIES_H
+#ifndef DLEDITEFG_H
+#define DLEDITEFG_H
 
-#include "wx/notebook.h"
+#include "wx/grid.h"
+#include "gamedoc.h"
 
-class dialogNfgProperties : public wxDialog {
+class gbtDialogEditGame : public wxDialog {
 private:
-  gbtNfgGame m_nfg;
-  wxNotebook *m_notebook;
+  gbtGameDocument *m_doc;
+  wxTextCtrl *m_title, *m_comment;
+  wxGrid *m_players;
 
   // Event handlers
   void OnOK(wxCommandEvent &);
+  void OnAddPlayer(wxCommandEvent &);
 
 public:
   // Lifecycle
-  dialogNfgProperties(wxWindow *p_parent, gbtNfgGame p_nfg, const wxString &);
+  gbtDialogEditGame(wxWindow *p_parent, gbtGameDocument *);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  wxString GetGameTitle(void) const;
-  wxString GetComment(void) const;
-
-  int NumPlayers(void) const;
-  wxString GetPlayerName(int pl) const;
+  gbtGameCommand *GetCommand(void) const;
 
   DECLARE_EVENT_TABLE()
 };
 
 
-#endif  // DLEFGPROPERTIES_H
+#endif  // DLEDITEFG_H
 

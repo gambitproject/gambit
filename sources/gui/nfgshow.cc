@@ -53,7 +53,7 @@
 #include "dlefgcolor.h"
 #include "dlnfgstrategies.h"
 #include "dleditcont.h"
-#include "dlnfgproperties.h"
+#include "dleditgame.h"
 #include "dleditmixed.h"
 #include "dlelimmixed.h"
 #include "dlnfgnash.h"
@@ -594,14 +594,9 @@ void NfgShow::OnEditContingency(wxCommandEvent &)
 
 void NfgShow::OnEditGame(wxCommandEvent &)
 {
-  dialogNfgProperties dialog(this, m_doc->GetNfg(), m_doc->GetFilename());
+  gbtDialogEditGame dialog(this, m_doc);
   if (dialog.ShowModal() == wxID_OK) {
-    m_doc->GetNfg().SetTitle(dialog.GetGameTitle().c_str());
-    m_doc->GetNfg().SetComment(dialog.GetComment().c_str());
-    for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
-      m_doc->GetNfg().GetPlayer(pl).SetLabel(dialog.GetPlayerName(pl).c_str());
-    }
-    m_doc->UpdateViews(0, true, true);
+    m_doc->Submit(dialog.GetCommand());
   }
 }
 

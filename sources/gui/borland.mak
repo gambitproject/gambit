@@ -23,7 +23,7 @@ gambit_SOURCES = \
         dlch.cc \
 	dleditbehav.cc \
 	dleditcont.cc \
-	dleditefg.cc \
+	dleditgame.cc \
 	dleditmixed.cc \
 	dleditmove.cc \
 	dleditnode.cc \
@@ -38,7 +38,6 @@ gambit_SOURCES = \
 	dlinsertmove.cc \
 	dlnewgame.cc \
 	dlnfgnash.cc \
-	dlnfgproperties.cc \
 	dlnfgqre.cc \
 	dlnfgstrategies.cc \
 	dlqrefile.cc \
