@@ -595,13 +595,28 @@ public:
 panelNfgQre::panelNfgQre(wxWindow *p_parent)
   : panelNfgNashAlgorithm(p_parent)
 {
-  (void) new wxStaticText(this, wxID_STATIC, "QreSolve");
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
   Show(false);
 }
 
 nfgNashAlgorithm *panelNfgQre::GetAlgorithm(void) const
 {
-  return new nfgQre;
+  nfgQre *algorithm = new nfgQre;
+  algorithm->SetFullGraph(false);
+  algorithm->SetMaxLambda(1000);
+  return algorithm;
 }
 
 //========================================================================
@@ -792,7 +807,7 @@ void dialogNfgNash::LoadAlgorithms(const Nfg &p_nfg)
   
   id = m_algorithmTree->AppendItem(custom, "QreSolve");
   m_algorithms.Define(id, new panelNfgQre(this));
-  m_algorithmTree->AppendItem(custom, "QreGridSolve");
+
   id = m_algorithmTree->AppendItem(custom, "SimpdivSolve");
   m_algorithms.Define(id, new panelNfgSimpdiv(this));
 

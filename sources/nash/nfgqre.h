@@ -24,10 +24,6 @@ private:
   double m_maxLam, m_stepSize;
   bool m_fullGraph;
 
-  // Execute one step of the homotopy
-  void SolveStep(MixedProfile<double> &p_profile, double &p_nu,
-		 double, double) const;
-		 
 public:
   nfgQre(void);
   virtual ~nfgQre() { }

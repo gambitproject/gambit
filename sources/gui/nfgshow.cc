@@ -40,6 +40,7 @@
 #include "dleditmixed.h"
 #include "dlelimmixed.h"
 #include "dlnfgnash.h"
+#include "dlnfgqre.h"
 
 //=====================================================================
 //                 Implementation of class NfgShow
@@ -80,6 +81,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_FORMAT_LOAD, NfgShow::OnFormatLoad)
   EVT_MENU(NFG_TOOLS_DOMINANCE, NfgShow::OnToolsDominance)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM, NfgShow::OnToolsEquilibrium)
+  EVT_MENU(NFG_TOOLS_QRE, NfgShow::OnToolsQre)
   EVT_MENU(wxID_HELP_CONTENTS, NfgShow::OnHelpContents)
   EVT_MENU(wxID_HELP_INDEX, NfgShow::OnHelpIndex)
   EVT_MENU(wxID_ABOUT, NfgShow::OnHelpAbout)
@@ -377,6 +379,8 @@ void NfgShow::MakeMenus(void)
 		       "Find undominated strategies");
   toolsMenu->Append(NFG_TOOLS_EQUILIBRIUM, "&Equilibrium",
 		    "Compute Nash equilibria (and refinements)");
+  toolsMenu->Append(NFG_TOOLS_QRE, "&Qre",
+		    "Compute quantal response equilibria");
   
   wxMenu *helpMenu = new wxMenu;
   helpMenu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
@@ -774,7 +778,7 @@ void NfgShow::OnFormatLoad(wxCommandEvent &)
 }
 
 //----------------------------------------------------------------------
-//            NfgShow: Menu handlers - Tools->Dominance
+//                 NfgShow: Menu handlers - Tools
 //----------------------------------------------------------------------
 
 void NfgShow::OnToolsDominance(wxCommandEvent &)
@@ -839,10 +843,6 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
   }
 }
 
-//----------------------------------------------------------------------
-//          NfgShow: Menu handlers - Tools->Equilibrium menu
-//----------------------------------------------------------------------
-
 void NfgShow::OnToolsEquilibrium(wxCommandEvent &)
 { 
   dialogNfgNash dialog(this, *m_currentSupport);
@@ -880,6 +880,15 @@ void NfgShow::OnToolsEquilibrium(wxCommandEvent &)
     catch (...) { }
 
     delete algorithm;
+  }
+}
+
+void NfgShow::OnToolsQre(wxCommandEvent &)
+{
+  dialogNfgQre dialog(this, *m_currentSupport);
+
+  if (dialog.ShowModal() == wxID_OK) {
+
   }
 }
 

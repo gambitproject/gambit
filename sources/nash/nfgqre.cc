@@ -214,8 +214,9 @@ static void QreJacobian(const NFSupport &p_support,
   }
 }
 
-void TracePath(const MixedProfile<double> &p_start,
-	       double p_startLambda, double p_maxLambda)
+MixedProfile<double> TracePath(const MixedProfile<double> &p_start,
+			       double p_startLambda, double p_maxLambda,
+			       gStatus &p_status)
 {
 #ifdef USE_CORRECTOR
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
@@ -243,14 +244,19 @@ void TracePath(const MixedProfile<double> &p_start,
   q.GetRow(q.NumRows(), t);
   
   double omega = 1.0;     // orientation along the curve
-  
+  int niters = 0;
+
   while (x[x.Length()] >= 0.0 && x[x.Length()] < p_maxLambda) {
-    gout << "Point: " << x << '\n';
+    if (niters++ % 25 == 0) {
+      p_status.Get();
+      p_status.SetProgress(x[x.Length()] / p_maxLambda,
+			   gText("Lambda = ") + ToText(x[x.Length()]));
+    }
+
 #ifdef USE_CORRECTOR
     bool accept = true;
 
     if (fabs(h) <= c_hmin) {
-      gout << "Failure at minimal stepsize\n";
       return;
     }
 #endif  // USE_CORRECTOR
@@ -319,32 +325,11 @@ void TracePath(const MixedProfile<double> &p_start,
     h = fabs(h / decel);
 #endif   // USE_CORRECTOR
 
-    gout << x[x.Last()] << ": ";
-    for (int i = 1; i < x.Length(); i++) {
-      gout << (x[x.Last()] * (u[i] - x[i]) / h) << ' ';
-    }
-    gout << '\n';
-
-    gout << x[x.Last()] << ": ";
-    for (int i = 1; i < x.Length(); i++) {
-      gout << ((u[i] - x[i]) / h) << ' ';
-    }
-    gout << '\n';
-
     MixedProfile<double> foo(p_start), bar(p_start);
     for (int i = 1; i <= foo.Length(); i++) {
       foo[i] = x[i];
       bar[i] = u[i];
     }
-    gout << x[x.Last()] << ": ";
-    for (int pl = 1; pl <= p_start.Game().NumPlayers(); pl++) {
-      for (int st = 1; st <= p_start.Support().NumStrats(pl); st++) {
-	gout << (foo(pl, st) * 
-		 (foo.Payoff(pl, pl, st) - foo.Payoff(pl, pl, 1)));
-	gout << ' ';
-      }
-    }
-    gout << '\n';
 
     // PC step was successful; update and iterate
     for (int i = 1; i <= x.Length(); i++) {
@@ -357,26 +342,28 @@ void TracePath(const MixedProfile<double> &p_start,
     }
     q.GetRow(q.NumRows(), t);  // new tangent
   }
+
+  MixedProfile<double> foo(p_start);
+  for (int i = 1; i <= foo.Length(); i++) {
+    foo[i] = x[i];
+  }
+  return foo;
 }
 
 nfgQre::nfgQre(void)
   : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
 { }
 
-void nfgQre::SolveStep(MixedProfile<double> &p_profile, double &p_nu,
-		       double p_initialSign, double p_stepsize) const
-{
-}
-
 gList<MixedSolution> nfgQre::Solve(const NFSupport &p_support,
 				   gStatus &p_status)
 {
   gList<MixedSolution> solutions;
-  MixedProfile<double> profile(p_support);
+  MixedProfile<double> start(p_support);
   WritePXIHeader(gnull, p_support.Game());
 
   try {
-    TracePath(profile, 0.0, m_maxLam);
+    MixedProfile<double> profile = TracePath(start, 0.0, m_maxLam, p_status);
+    solutions.Append(MixedSolution(profile));
 
 #ifdef UNUSED
       // Write out the QreValue as 0 in the PXI file; not generally
@@ -409,4 +396,9 @@ gList<MixedSolution> nfgQre::Solve(const NFSupport &p_support,
 
   return solutions;
 }
+
+
+
+
+
 

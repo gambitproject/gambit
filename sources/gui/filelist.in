@@ -15,6 +15,7 @@ gambit_SOURCES = \
 	dlnewgame.cc \
 	dlnfgnash.cc \
 	dlnfgproperties.cc \
+	dlnfgqre.cc \
 	dlnfgstrategies.cc \
 	dlspinctrl.cc \
 	efglayout.cc \
