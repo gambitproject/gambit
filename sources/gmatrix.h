@@ -9,6 +9,7 @@
 
 #include "gambitio.h"
 #include "grarray.h"
+#include "gblock.h"
 #include "gvector.h"
 
 template <class T> class gMatrix : public gRectArray<T>  {
@@ -66,6 +67,8 @@ template <class T> class gMatrix : public gRectArray<T>  {
   void GetColumn(int, gVector<T>&) const;
   void SetColumn(int, const gVector<T>&);
 
+  gMatrix<T> GetSubMatrix(const gBlock<int> &, const gBlock<int> &) const;
+  gMatrix<T> GetSlice(int, int, int, int) const;
   gMatrix<T> Invert(void) const;
   gMatrix<T> ExternalPivot(int, int) const;
   void Pivot(int, int);

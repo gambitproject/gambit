@@ -554,8 +554,6 @@ gMatrix<T>::SetColumn(int col, const gVector<T> &v)
 // being just in case...
 //
 
-#ifdef UNUSED
-
 template<class T> gMatrix<T>
 gMatrix<T>::GetSlice(int rl, int rh, int cl, int ch) const
 {
@@ -602,8 +600,6 @@ gMatrix<T>::GetSubMatrix(const gBlock<int> &rowV,
     }
   return m;
 }
-
-#endif // UNUSED
 
 template<class T> gMatrix<T>
 gMatrix<T>::Invert(void) const
@@ -752,8 +748,6 @@ gMatrix<T>::Pivot(int row, int col)
     }
 }
 
-#ifdef UNUSED
-
 template<class T> T
 gMatrix<T>::Determinant(void) const
 {
@@ -782,8 +776,6 @@ gMatrix<T>::Determinant(void) const
     }
   return result;
 }
-
-#endif   // UNUSED
 
 template <class T> gOutput &operator<<(gOutput &to, const gMatrix<T> &M)
 {
