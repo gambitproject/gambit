@@ -8,6 +8,7 @@
 #define EQUISOLV_H
 
 #include "quiksolv.h"
+#include "simplex.h"
 
 
 // ***********************
