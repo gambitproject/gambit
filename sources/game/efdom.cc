@@ -74,10 +74,13 @@ bool EFSupport::Dominates(const Action *a, const Action *b,
 
   else {
     gList<const Node *> nodelist = SAct.ReachableNodesInInfoset(infoset);  
-    if (nodelist.Length() == 0) 
-      nodelist = infoset->ListOfMembers();  // This may not be a good idea;
-                                            // I suggest checking for this 
-                                            // prior to entry
+    if (nodelist.Length() == 0) {
+      // This may not be a good idea; I suggest checking for this 
+      // prior to entry
+      for (int i = 1; i <= infoset->NumMembers(); i++) {
+	nodelist.Append(infoset->Members()[i]);
+      }
+    }
     
     for (int n = 1; n <= nodelist.Length(); n++) {
       

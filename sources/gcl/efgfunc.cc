@@ -1063,7 +1063,7 @@ static Portion *GSM_SfgStrats(GSM &, Portion **param)
 
   ListPortion *por = new ListPortion;
   for (int i=1;i<=sfg.NumSequences(p);i++) {
-    gList<const Action *> h((sfg.GetSequence(p,i))->History());
+    gList<Action *> h((sfg.GetSequence(p,i))->History());
     ListPortion *por1 = new ListPortion;
     for(int j=1;j<=h.Length();j++)
       por1->Append(new ActionPortion((Action *)h[j]));

@@ -222,22 +222,6 @@ void Infoset::RemoveAction(int which)
     actions[which]->number = which;
 }
 
-const gList<Action *> Infoset::ListOfActions(void) const
-{
-  gList<Action *> answer;
-  for (int i = 1; i <= actions.Length(); i++) 
-    answer += actions[i];
-  return answer;
-}
-
-const gList<const Node *> Infoset::ListOfMembers(void) const
-{
-  gList<const Node *> answer;
-  for (int i = 1; i <= members.Length(); i++) 
-    answer += members[i];
-  return answer;
-}
-
 //------------------------------------------------------------------------
 //           ChanceInfoset: Member function definitions
 //------------------------------------------------------------------------
@@ -905,17 +889,6 @@ bool efgGame::IsPredecessor(const Node *n, const Node *of) const
   while (of && n != of)    of = of->parent;
 
   return (n == of);
-}
-
-gArray<int> efgGame::PathToNode(const Node *p_node) const
-{
-  gBlock<int> ret;
-  const Node *n = p_node;
-  while (n->GetParent()) {
-    ret.Insert(p_node->GetAction()->GetNumber(), 1);
-    n = n->GetParent();
-  }
-  return ret;
 }
 
 void efgGame::DescendantNodes(const Node* n, 

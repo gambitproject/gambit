@@ -60,9 +60,9 @@ static void DeviationInfosets(gList<Infoset *> &answer,
       }
       answer.Insert(iset,insert);
     }
-    gList<Action *> action_list = iset->ListOfActions();
-    for (int j = 1; j <= action_list.Length(); j++) {
-      DeviationInfosets(answer,big_supp,pl,child,action_list[j]);
+    const gArray<Action *> &actions = iset->Actions();
+    for (int j = 1; j <= actions.Length(); j++) {
+      DeviationInfosets(answer,big_supp,pl,child,actions[j]);
     }
   }
 }
@@ -74,9 +74,9 @@ static gList<Infoset *> DeviationInfosets(const EFSupport &big_supp,
 {
   gList<Infoset *> answer;
   
-  gList<const Node *> node_list = iset->ListOfMembers();
-  for (int i = 1; i <= node_list.Length(); i++) {
-    DeviationInfosets(answer,big_supp,pl,node_list[i],act);
+  const gArray<Node *> &nodes = iset->Members();
+  for (int i = 1; i <= nodes.Length(); i++) {
+    DeviationInfosets(answer,big_supp,pl,nodes[i],act);
   }
 
   return answer;

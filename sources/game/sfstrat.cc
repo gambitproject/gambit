@@ -35,11 +35,11 @@
 #include "base/garray.imp"
 #include "base/gblock.imp"
 
-gList<const Action *> Sequence::History(void) const 
+gList<Action *> Sequence::History(void) const 
 { 
-  gList<const Action *> h;
-  const Action * a = action;
-  const Sequence * s = (this);
+  gList<Action *> h;
+  Action *a = action;
+  const Sequence *s = this;
   while(a) {
     h.Append(a);
     s = s->parent;

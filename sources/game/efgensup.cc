@@ -553,7 +553,7 @@ bool ActionCursorForSupport::
 InfosetGuaranteedActiveByPriorCommitments(const EFSupportWithActiveInfo *S,
 					  const Infoset *infoset)
 {
-  gList<const Node *> members = infoset->ListOfMembers();
+  const gArray<Node *> &members = infoset->Members();
   for (int i = 1; i <= members.Length(); i++) {
     const Node* current = members[i];
     if ( current == S->GetGame().RootNode() )

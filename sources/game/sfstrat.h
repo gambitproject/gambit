@@ -56,7 +56,7 @@ public:
   const gText &GetName(void) const   { return name; }
   void SetName(const gText &s)       { name = s; }
   
-  gList<const Action *> History(void) const;
+  gList<Action *> History(void) const;
   int GetNumber(void) const        { return number; }
   Action *GetAction(void) const  {return action; }
   const Infoset *GetInfoset(void) const   { if(action) return action->BelongsTo();return 0; }

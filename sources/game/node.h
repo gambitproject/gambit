@@ -79,8 +79,6 @@ class Node    {
 	else  return infoset->GetPlayer(); }
     Action *GetAction(void) const; // returns null if root node
     Node *GetChild(int i) const    { return children[i]; }
-    Node *GetChild(const Action& a) const    
-      { return children[a.GetNumber()]; }
     Node *GetChild(const Action* a) const    
     { return children[a->GetNumber()]; }
     Node *GetParent(void) const    { return parent; }

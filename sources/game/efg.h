@@ -134,7 +134,6 @@ public:
   Node *RootNode(void) const;
   bool IsSuccessor(const Node *n, const Node *from) const;
   bool IsPredecessor(const Node *n, const Node *of) const;
-  gArray<int> PathToNode(const Node *) const;
   //    const Node* Consequence(const Node&, Action&) const;
   gList<Node *> DescendantNodes(const Node&, const EFSupport&) const;
   gList<const Node*> NonterminalDescendants(const Node&, 
