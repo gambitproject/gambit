@@ -223,9 +223,11 @@ void TreeWindow::AdjustScrollbarSteps(void)
   int scrollX, scrollY;
   GetViewStart(&scrollX, &scrollY);
 
+  const int OUTCOME_LENGTH = 60;
+
   SetScrollbars(50, 50,
-		(int) ((m_layout.MaxX() + draw_settings.NodeLength() + 
-			draw_settings.OutcomeLength()) * m_zoom / 50 + 1),
+		(int) ((m_layout.MaxX() + draw_settings.NodeSize() + 
+			OUTCOME_LENGTH) * m_zoom / 50 + 1),
 		(int) (m_layout.MaxY() * m_zoom / 50 + 1),
 		scrollX, scrollY);
 }
@@ -284,8 +286,9 @@ void TreeWindow::EnsureCursorVisible(void)
   if (xx < 0) {
     xScroll -= -xx / 50 + 1;
   }
-  CalcScrolledPosition((int) (entry->x * m_zoom + draw_settings.NodeLength() +
-			      draw_settings.OutcomeLength()),
+  const int OUTCOME_LENGTH = 60;
+  CalcScrolledPosition((int) (entry->x * m_zoom + draw_settings.NodeSize() +
+			      OUTCOME_LENGTH),
 		       (int) (entry->y * m_zoom), &xx, &yy);
   if (xx > width) {
     xScroll += (xx - width) / 50 + 1;

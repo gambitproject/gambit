@@ -1,32 +1,26 @@
 //
-// FILE: dllayout.h -- Declaration of tree-layout parameter dialog
+// $Source$
+// $Revision$
+// $Date$
 //
-// $Id$
+// DESCRIPTION:
+// Declaration of dialog to set layout parameters
 //
 
 #ifndef DLLAYOUT_H
 #define DLLAYOUT_H
 
-#include "wx/spinctrl.h"
+#include "wx/notebook.h"
 
-class dialogLayout : public guiAutoDialog {
+class dialogLayout : public wxDialog {
 private:
-  wxSpinCtrl *m_nodeLength, *m_branchLength, *m_ySpacing;
-  wxRadioBox *m_infosetStyle;
-
-  const char *HelpString(void) const { return "Prefs Menu (efg)"; }
+  wxNotebook *m_notebook;
 
 public:
-  dialogLayout(wxWindow *p_parent,
-	       int p_nodeLength, int p_branchLength,
-	       int p_ySpacing, int p_infosetStyle);
+  dialogLayout(wxWindow *p_parent, const TreeDrawSettings &);
   virtual ~dialogLayout() { }
 
-  int NodeLength(void) const { return m_nodeLength->GetValue(); }
-  int BranchLength(void) const { return m_branchLength->GetValue(); }
-  int YSpacing(void) const { return m_ySpacing->GetValue(); }
-
-  int InfosetStyle(void) const { return m_infosetStyle->GetSelection(); }
+  void GetSettings(TreeDrawSettings &);
 };
 
 #endif  // DLLAYOUT_H

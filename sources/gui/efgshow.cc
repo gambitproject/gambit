@@ -1683,11 +1683,11 @@ void EfgShow::OnFormatLegend(wxCommandEvent &)
   dialogLegends dialog(this, m_treeWindow->DrawSettings());
 
   if (dialog.ShowModal() == wxID_OK) {
-    m_treeWindow->DrawSettings().SetLabelNodeAbove(dialog.GetNodeAbove());
-    m_treeWindow->DrawSettings().SetLabelNodeBelow(dialog.GetNodeBelow());
-    m_treeWindow->DrawSettings().SetLabelNodeRight(dialog.GetNodeAfter());
-    m_treeWindow->DrawSettings().SetLabelBranchAbove(dialog.GetBranchAbove());
-    m_treeWindow->DrawSettings().SetLabelBranchBelow(dialog.GetBranchBelow());
+    m_treeWindow->DrawSettings().SetNodeAboveLabel(dialog.GetNodeAbove());
+    m_treeWindow->DrawSettings().SetNodeBelowLabel(dialog.GetNodeBelow());
+    m_treeWindow->DrawSettings().SetNodeRightLabel(dialog.GetNodeAfter());
+    m_treeWindow->DrawSettings().SetBranchAboveLabel(dialog.GetBranchAbove());
+    m_treeWindow->DrawSettings().SetBranchBelowLabel(dialog.GetBranchBelow());
     m_treeWindow->RefreshLabels();
   }
 }
@@ -1752,17 +1752,10 @@ void EfgShow::OnFormatDisplayLayout(wxCommandEvent &)
 {
   TreeDrawSettings &settings = m_treeWindow->DrawSettings();
 
-  dialogLayout dialog(this,
-		      settings.NodeLength(),
-		      settings.BranchLength(), settings.YSpacing(),
-		      settings.ShowInfosets());
+  dialogLayout dialog(this, settings);
 
   if (dialog.ShowModal() == wxID_OK) {
-    settings.SetNodeLength(dialog.NodeLength());
-    settings.SetBranchLength(dialog.BranchLength());
-    settings.SetYSpacing(dialog.YSpacing());
-    settings.SetShowInfosets(dialog.InfosetStyle());
-
+    dialog.GetSettings(settings);
     m_treeWindow->RefreshLayout();
     m_treeWindow->Refresh();
   }
