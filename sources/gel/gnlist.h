@@ -85,25 +85,9 @@ public:
 
 
   void Remove( int i );
+  int Depth(void) const;
 
-  int Depth( void ) const
-  {
-    if( m_Dim.Length() <= 1 )
-      return 0;
 
-    int i = 0;
-    int n = NumElements();
-    int mindepth = 1;
-    if( 0 < n )
-      mindepth = NthElement( 1 ).Depth() + 1;
-    for( i = 2; i <= n; ++i )
-    {
-      int depth = NthElement( i ).Depth() + 1;
-      if( depth < mindepth )
-	mindepth = depth;
-    }
-    return mindepth;
-  }
 
 
   //----------------------------------------------------------

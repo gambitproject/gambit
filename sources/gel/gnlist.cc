@@ -11,7 +11,6 @@
 
 
 #include "gnlist.h"
-#include "glist.imp"
 
 
 //---------------------------------------------------------------
@@ -90,6 +89,7 @@ void gNestedList<T>::GetElementInfo( int el,
   }
 
 }
+
 
 template <class T> 
 void gNestedList<T>::Output( gOutput& out ) const 
@@ -173,7 +173,7 @@ gNestedList<T> gNestedList<T>::NthElement( int el ) const
 
 
 
-template <class T> 
+template <class T>
 int gNestedList<T>::NumElements( void ) const
 {
   int num = 0;
@@ -234,7 +234,7 @@ void gNestedList<T>::Remove( int el )
   bool islist = false;
 
   // get the index values for the given element number
-  GetElementInfo( el, islist, k_start, k_end, el_start, el_end );  
+  GetElementInfo( el, islist, k_start, k_end, el_start, el_end );
 
 
   if( !islist )
@@ -256,9 +256,26 @@ void gNestedList<T>::Remove( int el )
   }
 }
 
+template <class T> int gNestedList<T>::Depth( void ) const
+{
+  if( m_Dim.Length() <= 1 )
+    return 0;
+
+  int i = 0;
+  int n = NumElements();
+  int mindepth = 1;
+  if( 0 < n )
+    mindepth = NthElement( 1 ).Depth() + 1;
+  for( i = 2; i <= n; ++i )   {
+    int depth = NthElement( i ).Depth() + 1;
+    if( depth < mindepth )
+	    mindepth = depth;
+  }
+  return mindepth;
+}
 
 
-void gNestedList<gTriState *>::Output( gOutput& out ) const 
+void gNestedList<gTriState *>::Output( gOutput& out ) const
 {
   int i;
   int j;
@@ -323,7 +340,7 @@ void gNestedList<gTriState *>::Output( gOutput& out ) const
   }
 }
 
-void gNestedList<gNumber *>::Output( gOutput& out ) const 
+void gNestedList<gNumber *>::Output( gOutput& out ) const
 {
   int i;
   int j;
@@ -367,6 +384,7 @@ void gNestedList<gNumber *>::Output( gOutput& out ) const
   }
 }
 
+
 void gNestedList<gText *>::Output( gOutput& out ) const 
 {
   int i;
@@ -402,7 +420,7 @@ void gNestedList<gText *>::Output( gOutput& out ) const
       }
       if( m_Dim[i] > 0 )
 	out << "{ ";
-      else if( i == m_Dim.Length() || 
+      else if( i == m_Dim.Length() ||
 	       ( i < m_Dim.Length() && m_Dim[i+1] == -1 ) )
 	out << "} ";
       else
@@ -448,23 +466,6 @@ template class gNestedList<NFSupport *>;
 template class gNestedList<MixedSolution *>;
 template class gNestedList<gInput *>;
 template class gNestedList<gOutput *>;
-
-template class gList<gNestedList<Efg *> >;
-template class gList<gNestedList<Node *> >;
-template class gList<gNestedList<Infoset *> >;
-template class gList<gNestedList<Action *> >;
-template class gList<gNestedList<EFPlayer *> >;
-template class gList<gNestedList<EFOutcome *> >;
-template class gList<gNestedList<EFSupport *> >;
-template class gList<gNestedList<BehavSolution *> >;
-template class gList<gNestedList<Nfg *> >;
-template class gList<gNestedList<Strategy *> >;
-template class gList<gNestedList<NFPlayer *> >;
-template class gList<gNestedList<NFOutcome *> >;
-template class gList<gNestedList<NFSupport *> >;
-template class gList<gNestedList<MixedSolution *> >;
-template class gList<gNestedList<gInput *> >;
-template class gList<gNestedList<gOutput *> >;
 
 template gOutput &operator<<(gOutput &, const gNestedList<gNumber *> &);
 template gOutput &operator<<(gOutput &, const gNestedList<gText *> &);
