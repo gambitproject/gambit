@@ -5,6 +5,8 @@
 //
 
 
+#include "gstatus.h"
+
 #include "gsminstr.h"
 #include "gstream.h"
 #include "gcmdline.h"
@@ -219,6 +221,8 @@ Portion *gclFunctionCall::Evaluate(void)
 {
   if (!_gsm._FuncTable->IsDefined(name))  
     throw gclRuntimeError("Undefined function " + name);
+
+  gstatus.Get();
 
   CallFuncObj *call = new CallFuncObj((*_gsm._FuncTable)(name), 
 				      m_line, m_file);
@@ -502,6 +506,9 @@ Portion *gclWhileExpr::Evaluate(void)
 
     delete guardval;
     delete ret;
+
+    gstatus.Get();
+
     ret = body->Evaluate();
   }
 }
@@ -567,6 +574,9 @@ Portion *gclForExpr::Evaluate(void)
 
     delete guardval;
     delete ret;
+
+    gstatus.Get();
+
     ret = body->Evaluate();
 
     try   {
