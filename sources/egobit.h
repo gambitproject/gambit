@@ -12,8 +12,8 @@
 
 template <class T> class EFGobitParams : public GobitParams<T>  {
   public:
-    EFGobitParams(void);
-    EFGobitParams(gOutput &out, gOutput &err, gOutput &pxi);
+		EFGobitParams(gStatus &status_=gstatus);
+    EFGobitParams(gOutput &out, gOutput &err, gOutput &pxi,gStatus &status_=gstatus);
 };
 
 
