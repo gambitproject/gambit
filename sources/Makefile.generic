@@ -156,6 +156,24 @@ ifndef GUI
 endif
 	$(MAKE) gui_$(GUI)_$(SYSNAME) GUI=$(GUI) SYSNAME=$(SYSNAME)
 
+wxgcl_$(GUI)_$(SYSNAME):	$(OBJDIR) $(WXGCL_OBJECTS)
+	cd $(OBJDIR); \
+	$(CC) $(WXGCL_OBJECTS) $(LIBDIR) $(GUILIBS) \
+	    -o ../wxgcl_$(GUI)_$(SYSNAME); cd ..
+
+wxgcl:
+ifndef SYSNAME
+	@echo usage: $(MAKE) SYSNAME=\<sysname\> GUI=\<gui\>
+	@echo Must specify a SYSNAME e.g. linux, solaris, hp
+	@exit 1
+endif
+ifndef GUI
+	@echo usage: $(MAKE) SYSNAME=\<sysname\> GUI=\<gui\>
+	@echo Must specify a GUI e.g. gtk, motif
+	@exit 1
+endif
+	$(MAKE) wxgcl_$(GUI)_$(SYSNAME) GUI=$(GUI) SYSNAME=$(SYSNAME)
+
 readefg.cc:  readefg.yy
 	bison++ -d -h readefg.h -o readefg.cc readefg.yy
 

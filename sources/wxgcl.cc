@@ -19,6 +19,8 @@ public:
 
 DECLARE_APP(GclApp)
 
+IMPLEMENT_APP(GclApp)
+
 class GclFrame : public wxFrame {
 private:
   wxTextCtrl *m_outputWindow, *m_inputWindow;
@@ -99,8 +101,8 @@ void GclFrame::OnCloseWindow(wxCloseEvent &)
 GSM* _gsm;
 char* _SourceDir = NULL;
 char* _ExePath = NULL;
-
+/*
 gFileInput _gin(stdin);
 gInput &gin = _gin;
-
+*/
 
