@@ -8,219 +8,428 @@
 #include "normal.h"
 #include "normiter.h"
 
-// DumbTableau definitions
 
-template <class T> DumbTableau<T>::DumbTableau(void)
-  : A() , b()
+// Basis method definitions
+
+template <class T> Basis<T>::Basis(void)
+:  A(0)
 { }
 
-template <class T> DumbTableau<T>::
-DumbTableau(int rl,int rh, int cl, int ch ) 
-  : A(rl,rh,cl,ch) , b(rl,rh) { }
+template <class T> 
+Basis<T>::Basis(const gMatrix<T> &A)
+:  A(&A), label(A.MinRow(), A.MaxRow())
+{
+  for(int i=label.First(); i<=label.Last(); i++)
+    label[i]= -i;
+}
 
-template <class T> DumbTableau<T>
-::DumbTableau(const gMatrix<T>& A, const gVector<T>& b) 
-  : A(A) , b(b)
+
+template <class T>
+Basis<T>::Basis(const Basis<T> &bas)
+: label(bas.label), A(bas.A)
 { }
 
-template <class T>DumbTableau<T>::~DumbTableau(void)
+template <class T>
+Basis<T>::~Basis()
 { }
 
-template <class T> int DumbTableau<T>::MinRow(void) const
+template <class T>
+Basis<T>& Basis<T>::operator=(const Basis<T> &code)
 {
-return A.MinRow();
-}
-
-template <class T> int DumbTableau<T>::MaxRow(void) const
-{
-return A.MaxRow();
-}
-
-template <class T> int DumbTableau<T>::MinCol(void) const
-{
-return A.MinCol();
-}
-
-template <class T> int DumbTableau<T>::MaxCol(void) const
-{
-return A.MaxCol();
-}
-
-template <class T> T &DumbTableau<T>::Set_A(int r, int c)
-{
-return A(r,c);
-}
-
-template <class T> T &DumbTableau<T>::Set_b(int r)
-{
-return b[r];
-}
-
-template <class T> const T &DumbTableau<T>::Get_A(int r, int c) const
-{
-return A(r,c);
-}
-
-template <class T> const T &DumbTableau<T>::Get_b(int r) const
-{
-return b[r];
+  if(this != &code) {
+    A = code.A;
+    label= code.label; }
+  return *this;
 }
 
 
+/*
+template <class T> void Basis<T>::NewBasis()
+{
+  for(int i=label.First(); i<=label.Last(); i++)
+    label[i]= -i;
+}
+
+template <class T>
+void Basis<T>::NewBasis(const gBlock<int> &v)
+{
+  assert( v.First()==label.First() && v.First()==label.First() );
+
+  for(int i=v.First(); i<=v.Last(); i++) {
+    if( v[i]<0 ) {
+      assert( A->CheckRow(-v[i]) );
+      label[i]= v[i];
+    }
+    else {
+      assert( A->CheckColumn(v[i]) );
+      label[i]= v[i];
+    }
+  }
+}
+*/
+
+//
+// ordinary Basis methods:
+//
+
+template <class T>
+void Basis<T>::Change(int index, int col)
+{
+  if( col<0 ) {
+    assert( A->CheckRow(-col) );
+    label[index]= col;
+  }
+  else {
+    assert( A->CheckColumn(col) );
+    label[index]= col;
+  }
+}
+
+template <class T>
+void Basis<T>::Swap(int a, int b)
+{
+  int tc= label[a];
+  label[a]=label[b];
+  label[b]= tc;
+}
+
+template <class T>
+bool Basis<T>::Member(int col) const
+{
+  for(int i=label.First(); i<=label.Last(); i++)
+    if(label[i]==col )
+      return 1;
+  return 0;
+}
+
+template <class T>
+int Basis<T>::Find(int col) const
+{
+  for(int i=label.First(); i<=label.Last(); i++)
+    if( label[i]==col )
+      return i; // returns Tableau index
+  assert(0); // couldn't find column (also, assumes there are no duplicates)
+}
+
+template <class T>
+int Basis<T>::Label(int index) const
+{
+  return  label[index];
+}
+
+template <class T>
+void Basis<T>::BasisSelect(const gVector<T> &rowv, gVector<T> &colv) const
+{
+  assert(A->CheckColumn(colv) && A->CheckRow(rowv));
+
+  for(int i=label.First(); i<=label.Last(); i++) {
+    if(label[i]<0)
+      colv[i]= 0;
+    else
+      colv[i]= rowv[label[i]];
+  }
+}
+
+template <class T>
+void Basis<T>::BasisSelect(const gVector<T> &unitv,
+			    const gVector<T> &rowv,
+			    gVector<T> &colv ) const
+{
+  assert(A->CheckColumn(colv)
+      && A->CheckColumn(unitv)
+      && A->CheckRow(rowv) );
+
+  for(int i=label.First(); i<=label.Last(); i++) {
+    if(label[i]<0)
+      colv[i]= unitv[label[i]];
+    else
+      colv[i]= rowv[label[i]];
+  }
+}
+
+template <class T> gOutput &operator<<(gOutput &to, const Basis<T> &v)
+{
+  v.Dump(to); return to;
+}
+
+template <class T>
+void Basis<T>::Dump(gOutput &to) const
+{ 
+  to << "{";
+  for(int i=label.First();i<=label.Last();i++) {
+    to << "  " << label[i];  
+  }
+  to << " }";
+}
+
+//
 // Tableau method definitions
+//
+
+// Constructors and Destructor
+
+template <class T> Tableau<T>::Tableau(void)
+: A(0), b(0),  B(1), npivots(0)
+{ };
+
 
 template <class T>
-Tableau<T>::Tableau(DumbTableau<T> &tab)
-: dtab(&tab),
-  basis(tab),
-  B(tab.MinRow(), tab.MaxRow()),
-  solution(tab.MinRow(),tab.MaxRow()),creator(0)
+Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
+: A(&A), b(&b), basis(A),  B(A.MinRow(), A.MaxRow()),
+  solution(A.MinRow(),A.MaxRow()),npivots(0)
 //  dual(tab.MinRow(),tab.MaxRow()),
 //  unitcost(tab.MinRow(),tab.MaxRow()),
 //	cost(tab.MinCol(),tab.MaxCol()),
 //  costdefined(0)
 {
-  B.refactor(tab.A, basis.label);
-  B.solve(tab.b, solution);
+  B.refactor(A, basis.label);
+  B.solve(b, solution);
 };
-
-template <class T>
-Tableau<T>::Tableau(int rl, int rh, int cl, int ch)
-  : basis(rl,rh), B(rl,rh),
-  solution(rl,rh), creator(1)
-//  dual(tab.MinRow(),tab.MaxRow()),
-//  unitcost(tab.MinRow(),tab.MaxRow()),
-//	cost(tab.MinCol(),tab.MaxCol()),
-//  costdefined(0)
-{
-  dtab = new DumbTableau<T>(rl,rh,cl,ch);
-  basis.dtab=dtab;
-//  B.refactor(dtab->A, basis.label);
-//  B.solve(dtab->b, solution);
-};
-
-template <class T>
-Tableau<T>::Tableau(DumbTableau<T> &tab, const Basis<T> &code)
-: dtab(&tab),
-  basis(code),
-  B(tab.MinRow(), tab.MaxRow()),
-  solution(tab.MinRow(),tab.MaxRow()),creator(0)
-//  dual(tab.MinRow(),tab.MaxRow()),
-//  unitcost(tab.MinRow(),tab.MaxRow()),
-//  cost(tab.MinCol(),tab.MaxCol()),
-//  costdefined(0)
-// , tmpcol(tab.MinRow(),tab.MaxRow())
-{
-  B.refactor(tab.A, code.label);
-  B.solve(tab.b, solution);
-};
-
-template <class T>
-Tableau<T>::Tableau(DumbTableau<T> &tab, const gVector<T> &c, const Basis<T> &code)
-: dtab(&tab),
-  basis(code),
-  B(tab.MinRow(), tab.MaxRow()),
-  solution(tab.MinRow(),tab.MaxRow()),creator(0)
-//  unitcost(tab.MinRow(),tab.MaxRow()),
-//  cost(c),
-//  dual(tab.MinRow(),tab.MaxRow()),
-//	costdefined(1)
-// , tmpcol(tab.MinRow(),tab.MaxRow())
-{
-  assert( c.First()==tab.MinCol() && c.Last()==tab.MaxCol() );
-
-  B.refactor(tab.A, code.label);
-  B.solve(tab.b, solution);
-
-//  unitcost= (T)0;
-//  SolveDual();
-}
-
-template <class T>
-Tableau<T>::Tableau(DumbTableau<T> &tab,
-		const gVector<T> &uc,
-		const gVector<T> &c,
-		const Basis<T> &code)
-: dtab(&tab),
-  basis(code),
-  B(tab.MinRow(), tab.MaxRow()),
-  solution(tab.MinRow(),tab.MaxRow()), creator(0)
-//  unitcost(uc),
-//  cost(c),
-//  dual(tab.MinRow(),tab.MaxRow()),
-//  costdefined(1)
-// , tmpcol(tab.MinRow(),tab.MaxRow())
-{
-  assert( uc.First()==MinRow() && uc.Last()==MaxRow() );
-  assert( c.First()==MinCol() && c.Last()==MaxCol() );
-
-  B.refactor(tab.A, code.label);
-  B.solve(tab.b, solution);
-
-//  SolveDual();
-}
 
 
 template <class T>
 Tableau<T>::Tableau(const Tableau<T> &orig)
-: dtab(orig.dtab),
-  basis(orig.basis),
-  B(orig.B),
-  solution(orig.solution),
+: A(orig.A),b(orig.b), basis(orig.basis),
+  B(orig.B), solution(orig.solution), npivots(0)
 //  unitcost(orig.unitcost),
 //  cost(orig.cost),
 //  dual(orig.dual),
 //  costdefined(orig.costdefined),
-  creator(0) // copy does not create new dtab
+//  creator(0) // copy does not create new dtab
 // , tmpcol(orig.tmpcol)
-{
-}
+{ }
+
+template <class T> Tableau<T>::~Tableau()
+{ }
 
 template <class T>
 Tableau<T>& Tableau<T>::operator=(const Tableau<T> &orig)
 {
-  assert( dtab==orig.dtab );
-  basis= orig.basis;
-  B= orig.B;
-  solution= orig.solution;
+//  assert( A==orig.A );
+  if(this!= &orig) {
+    A = orig.A;
+    b = orig.b;
+    basis= orig.basis;
+    B= orig.B;
+    solution= orig.solution;
+    npivots = orig.npivots;
 //  unitcost= orig.unitcost;
 //  cost= orig.cost;
 //  dual= orig.dual;
 //  costdefined= orig.costdefined;
-  creator=0; // copy does not create new dtab
+//    creator=0; // copy does not create new dtab
+  }
+  return *this;
 }
 
-template <class T> Tableau<T>::~Tableau()
-{
-  if(creator) delete dtab;
-}
-
-
+//
 // checking functions
-
-template <class T>
-int Tableau<T>::MinRow() const
-{ return dtab->A.MinRow(); }
-
-template <class T>
-int Tableau<T>::MaxRow() const
-{ return dtab->A.MaxRow(); }
+//
 
 template <class T>
 bool Tableau<T>::ColIndex(int x) const
 { return MinCol()<=x && x<=MaxCol(); }
 
 template <class T>
-int Tableau<T>::MinCol() const 
-{ return dtab->A.MinCol(); }
-
-template <class T>
-int Tableau<T>::MaxCol() const
-{ return dtab->A.MaxCol(); }
-
-template <class T>
 bool Tableau<T>::RowIndex(int x) const
 { return MinCol()<=x && x<=MaxCol(); }
+
+template <class T>
+int Tableau<T>::MinRow() const { return A->MinRow(); }
+
+template <class T>
+int Tableau<T>::MaxRow() const { return A->MaxRow(); }
+
+template <class T>
+int Tableau<T>::MinCol() const { return A->MinCol(); }
+
+template <class T>
+int Tableau<T>::MaxCol() const { return A->MaxCol(); }
+
+
+template <class T>
+bool Tableau<T>::Member(int i) const
+{ return basis.Member(i);}
+
+template <class T>
+int Tableau<T>::Label(int i) const
+{ return basis.Label(i);}
+
+template <class T>
+int Tableau<T>::Find(int i) const
+{ return basis.Find(i);}
+
+
+//
+// pivoting operations
+//
+
+template <class T>
+int Tableau<T>::CanPivot(int outlabel, int inlabel)
+{
+  gVector<T> tmpcol(MinRow(),MaxRow());
+  SolveColumn(inlabel,tmpcol);
+  if(tmpcol[basis.Find(outlabel)] == (T)0) return 0;
+  return 1;  
+}
+
+template <class T>
+void Tableau<T>::Pivot(int outrow,int inlabel)
+{
+  assert( RowIndex(outrow) );
+  assert( (inlabel<0) ? RowIndex(-inlabel) : ColIndex(inlabel) );
+
+  gVector<T> tmpcol(MinRow(),MaxRow());
+
+  for(int i=outrow; i<MaxRow(); i++)
+    basis.Swap(i,i+1);
+  basis.Change(MaxRow(), inlabel);
+
+  if( inlabel<0 )
+    { tmpcol=(T)0; tmpcol[-inlabel]=(T)1; }
+  else
+    A->GetColumn(inlabel, tmpcol);
+  B.update(outrow, tmpcol);
+
+  B.solve(*b, solution);
+  npivots++;
+//  if( costdefined )
+//    SolveDual();
+}
+
+template <class T>
+void Tableau<T>::CompPivot(int outlabel, int inlabel)
+{
+    Pivot(basis.Find(outlabel),inlabel);
+    Pivot(basis.Find(-inlabel),-outlabel);
+}
+
+template <class T> long Tableau<T>::NumPivots() const
+{ return npivots; }
+
+template <class T> long &Tableau<T>::NumPivots()
+{ return npivots; }
+
+//
+// raw Tableau functions
+//
+
+template <class T> void Tableau<T>::Refactor()
+{
+  B.refactor(*A, basis.label);
+  B.solve(*b, solution);
+//  if( costdefined )
+//    SolveDual();
+}
+
+template <class T>
+void Tableau<T>::Solve(const gVector<T> &in, gVector<T> &out) const
+{
+  B.solve(in,out);
+}
+
+template <class T>
+void Tableau<T>::SolveT(const gVector<T> &in, gVector<T> &out) const
+{
+  B.solveT(in,out);
+}
+
+template <class T>
+void Tableau<T>::Multiply(const gVector<T> &in, gVector<T>&out) const
+{
+  gVector<T> tmprow(MinCol(),MaxCol());
+  gVector<T> tmpcol(MinRow(),MaxRow());
+
+  for(int i=MinRow(); i<=MaxRow(); i++)
+    {
+      A->GetRow(i,tmprow);
+      basis.BasisSelect(tmprow,tmpcol);
+      out[i]=  tmpcol*in;
+      for(int j=MinRow(); j<=MaxRow(); j++)
+	if( basis.label[j]<0 && basis.label[j]==i )
+	  out[i]+= in[j];
+    }
+}
+
+template <class T>
+void Tableau<T>::MultiplyT(const gVector<T> &in, gVector<T> &out) const
+{
+  gVector<T> tmpcol(MinRow(),MaxRow());
+  for(int i=out.First(); i<=out.Last(); i++)
+    {
+      if( basis.label[i]<0 )
+	{ tmpcol= (T)0; tmpcol[-basis.label[i]]=0; }
+      else
+	{ A->GetColumn(basis.label[i],tmpcol); }
+      out[i]= in*tmpcol;
+    }
+}
+
+template <class T>
+void Tableau<T>::BasisVector(gVector<T> &out) const
+{
+  out= solution;
+}
+
+template <class T>
+void Tableau<T>::SolveColumn(int col, gVector<T> &out) const
+{
+  gVector<T> tmpcol(MinRow(),MaxRow());
+  if( col<0 ) {
+    tmpcol= (T)0;
+    tmpcol[-col]=1;
+  }
+  else
+    A->GetColumn(col,tmpcol);
+  B.solve(tmpcol,out);
+}
+
+/*
+template <class T>
+void Tableau<T>::SetBasis(const Basis<T> &in)
+{
+  basis= in;
+  B.refactor(template->A, code.basis);
+  B.solve(template->b, solution);
+  if( costdefined )
+    SolveDual();
+}
+*/
+
+template <class T>
+void Tableau<T>::GetBasis(Basis<T> &out) const
+{
+  out= basis;
+}
+
+// miscellaneous functions
+
+template <class T>
+bool Tableau<T>::IsNash() const
+{ for(int i=solution.First();i<=solution.Last();i++)
+    if(solution[i]>(T) 0) return 0;
+  return 1;
+}
+
+template <class T>
+BFS<T> Tableau<T>::GetBFS() const
+{
+  BFS<T> cbfs((T) 0);
+  for(int i=basis.label.First();i<=basis.label.Last();i++) {
+    if(Member(i)) 
+      cbfs.Define(i,solution[basis.Find(i)]);
+  }
+  return cbfs;
+}
+
+template <class T> gOutput &operator<<(gOutput &to, const Tableau<T> &v)
+{
+  v.Dump(to); return to;
+}
+
+template <class T>
+void Tableau<T>::Dump(gOutput &to) const
+{ basis.Dump(to);to << "\n";solution.Dump(to); }
 
 
 // cost-based functions
@@ -288,7 +497,7 @@ T Tableau<T>::RelativeCost(int col) const
   else
     {
       gVector<T> tmpcol(MinRow(),MaxRow());
-      dtab->A.GetColumn(col, tmpcol);
+      A->GetColumn(col, tmpcol);
       return cost[col] - dual*tmpcol;
     }
 }
@@ -298,11 +507,11 @@ void Tableau<T>::RelativeCostVector(gVector<T> &relunitcost,
 				  gVector<T> &relcost) const
 {
   assert(costdefined);
-  assert(dtab->A.CheckColumn(relunitcost));
-  assert(dtab->A.CheckRow(relcost));
+  assert(A->CheckColumn(relunitcost));
+  assert(A->CheckRow(relcost));
 
   relunitcost= unitcost - dual;
-  relcost= cost - dual*dtab->A;
+  relcost= cost - dual*A;
 }
 
 template <class T>
@@ -314,378 +523,6 @@ void Tableau<T>::SolveDual()
   B.solveT(tmpcol,dual);
 }
 */
-
-// non-cost-based functions
-
-template <class T>
-void Tableau<T>::BasisVector(gVector<T> &out) const
-{
-  out= solution;
-}
-
-template <class T>
-void Tableau<T>::SolveColumn(int col, gVector<T> &out) const
-{
-  gVector<T> tmpcol(MinRow(),MaxRow());
-  if( col<0 )
-    {
-      tmpcol= (T)0;
-      tmpcol[-col]=1;
-    }
-  else
-    dtab->A.GetColumn(col,tmpcol);
-  B.solve(tmpcol,out);
-}
-
-/*
-template <class T>
-void Tableau<T>::SetBasis(const Basis<T> &in)
-{
-  basis= in;
-  B.refactor(template->A, code.basis);
-  B.solve(template->b, solution);
-  if( costdefined )
-    SolveDual();
-}
-*/
-
-template <class T> void Tableau<T>::Refactor()
-{
-  B.refactor(dtab->A, basis.label);
-  B.solve(dtab->b, solution);
-//  if( costdefined )
-//    SolveDual();
-}
-
-
-template <class T>
-void Tableau<T>::GetBasis(Basis<T> &out) const
-{
-  out= basis;
-}
-
-template <class T>
-int Tableau<T>::CanPivot(int outlabel, int inlabel)
-{
-  gVector<T> tmpcol(MinRow(),MaxRow());
-  SolveColumn(inlabel,tmpcol);
-  if(tmpcol[basis.find(outlabel)] == (T)0) return 0;
-  return 1;  
-}
-
-template <class T>
-void Tableau<T>::CompPivot(int outlabel, int inlabel)
-{
-    Pivot(basis.find(outlabel),inlabel);
-    Pivot(basis.find(-inlabel),-outlabel);
-}
-
-template <class T>
-void Tableau<T>::Pivot(int outrow,int inlabel)
-{
-  assert( RowIndex(outrow) );
-  assert( (inlabel<0) ? RowIndex(-inlabel) : ColIndex(inlabel) );
-
-  gVector<T> tmpcol(MinRow(),MaxRow());
-
-  for(int i=outrow; i<MaxRow(); i++)
-    basis.swap(i,i+1);
-  basis.change(MaxRow(), inlabel);
-
-  if( inlabel<0 )
-    { tmpcol=(T)0; tmpcol[-inlabel]=(T)1; }
-  else
-    dtab->A.GetColumn(inlabel, tmpcol);
-  B.update(outrow, tmpcol);
-
-  B.solve(dtab->b, solution);
-//  if( costdefined )
-//    SolveDual();
-}
-
-
-// raw Tableau functions
-
-template <class T>
-void Tableau<T>::Solve(const gVector<T> &in, gVector<T> &out) const
-{
-  B.solve(in,out);
-}
-
-template <class T>
-void Tableau<T>::SolveT(const gVector<T> &in, gVector<T> &out) const
-{
-  B.solveT(in,out);
-}
-
-template <class T>
-void Tableau<T>::Multiply(const gVector<T> &in, gVector<T>&out) const
-{
-  gVector<T> tmprow(MinCol(),MaxCol());
-  gVector<T> tmpcol(MinRow(),MaxRow());
-
-  for(int i=MinRow(); i<=MaxRow(); i++)
-    {
-      dtab->A.GetRow(i,tmprow);
-      basis.BasisSelect(tmprow,tmpcol);
-      out[i]=  tmpcol*in;
-      for(int j=MinRow(); j<=MaxRow(); j++)
-	if( basis.label[j]<0 && basis.label[j]==i )
-	  out[i]+= in[j];
-    }
-}
-
-template <class T>
-void Tableau<T>::MultiplyT(const gVector<T> &in, gVector<T> &out) const
-{
-  gVector<T> tmpcol(MinRow(),MaxRow());
-  for(int i=out.First(); i<=out.Last(); i++)
-    {
-      if( basis.label[i]<0 )
-	{ tmpcol= (T)0; tmpcol[-basis.label[i]]=0; }
-      else
-	{ dtab->A.GetColumn(basis.label[i],tmpcol); }
-      out[i]= in*tmpcol;
-    }
-}
-
-template <class T>
-bool Tableau<T>::IsNash() const
-{ for(int i=solution.First();i<=solution.Last();i++)
-    if(solution[i]>(T) 0) return 0;
-  return 1;
-}
-
-template <class T>
-BFS<T> Tableau<T>::GetBFS() const
-{
-  BFS<T> cbfs((T) 0);
-  for(int i=basis.label.First();i<=basis.label.Last();i++) {
-    if(Member(i)) 
-      cbfs.Define(i,solution[basis.find(i)]);
-  }
-  return cbfs;
-}
-
-template <class T> gOutput &operator<<(gOutput &to, const Tableau<T> &v)
-{
-  v.Dump(to); return to;
-}
-
-template <class T>
-void Tableau<T>::Dump(gOutput &to) const
-{ basis.Dump(to);to << "\n";solution.Dump(to); }
-
-template <class T>
-void DumbTableau<T>::Dump(gOutput &to) const
-{ A.Dump(to);b.Dump(to); }
-
-template <class T>
-bool Tableau<T>::Member(int i) const
-{ return basis.member(i);}
-
-template <class T>
-int Tableau<T>::Label(int i) const
-{ return basis.Label(i);}
-
-template <class T>
-int Tableau<T>::Find(int i) const
-{ return basis.find(i);}
-
-
-
-
-// Basis method definitions
-
-template <class T>
-Basis<T>::Basis(void)
-:  label(1,1), dtab(0)
-{ }
-
-template <class T>
-Basis<T>::Basis(int min, int max)
-:  label(min,max), dtab(0)
-{ 
-  for(int i=label.First(); i<=label.Last(); i++)
-    label[i]= -i;
-}
-
-template <class T>
-Basis<T>::Basis(const DumbTableau<T> &tab)
-:  label(tab.MinRow(),tab.MaxRow())
-{
-  dtab= &tab;
-
-  for(int i=label.First(); i<=label.Last(); i++)
-    label[i]= -i;
-}
-
-template <class T>
-Basis<T>::Basis(const DumbTableau<T> &tab, const gBlock<int> &v)
-: label(tab.MinRow(),tab.MaxRow()),
-  dtab(&tab)
-{
-  assert( v.First()==label.First() && v.Last()==label.Last() );
-
-  for(int i=v.First(); i<=v.Last(); i++)
-    {
-      if( v[i]<0 )
-	{
-	  assert( tab.A.CheckRow(-v[i]) );
-	  label[i]= v[i];
-	}
-      else
-	{
-	  assert( tab.A.CheckColumn(v[i]) );
-	  label[i]= v[i];
-	}
-    }
-}
-
-template <class T>
-Basis<T>::Basis(const Basis<T> &code)
-: label(code.label),
-  dtab(code.dtab)
-{
-}
-
-
-template <class T>
-void Basis<T>::NewBasis()
-{
-  for(int i=label.First(); i<=label.Last(); i++)
-    label[i]= -i;
-}
-
-template <class T>
-void Basis<T>::NewBasis(const gBlock<int> &v)
-{
-  assert( v.First()==label.First() && v.First()==label.First() );
-
-  for(int i=v.First(); i<=v.Last(); i++)
-    {
-      if( v[i]<0 )
-	{
-	  assert( dtab->A.CheckRow(-v[i]) );
-	  label[i]= v[i];
-	}
-      else
-	{
-	  assert( dtab->A.CheckColumn(v[i]) );
-	  label[i]= v[i];
-	}
-    }
-}
-
-template <class T>
-Basis<T>& Basis<T>::operator=(const Basis<T> &code)
-{
-  assert( dtab==code.dtab );
-
-  label= code.label;
-}
-
-template <class T>
-Basis<T>::~Basis()
-{
-}
-
-
-// ordinary Basis methods:
-
-template <class T>
-void Basis<T>::change(int index, int col)
-{
-  if( col<0 )
-    {
-      assert( dtab->A.CheckRow(-col) );
-      label[index]= col;
-    }
-  else
-    {
-      assert( dtab->A.CheckColumn(col) );
-      label[index]= col;
-    }
-}
-
-template <class T>
-void Basis<T>::swap(int a, int b)
-{
-  int tc= label[a];
-  label[a]=label[b];
-  label[b]= tc;
-}
-
-template <class T>
-bool Basis<T>::member(int col) const
-{
-  for(int i=label.First(); i<=label.Last(); i++)
-    if(label[i]==col )
-      return 1;
-  return 0;
-}
-
-template <class T>
-int Basis<T>::find(int col) const
-{
-  for(int i=label.First(); i<=label.Last(); i++)
-    if( label[i]==col )
-      return i; // returns Tableau index
-  assert(0); // couldn't find column (also, assumes there are no duplicates)
-}
-
-template <class T>
-int Basis<T>::Label(int index) const
-{
-  return  label[index];
-}
-
-template <class T>
-void Basis<T>::BasisSelect(const gVector<T> &rowv, gVector<T> &colv) const
-{
-  assert(dtab->A.CheckColumn(colv) && dtab->A.CheckRow(rowv));
-
-  for(int i=label.First(); i<=label.Last(); i++)
-    {
-      if(label[i]<0)
-	colv[i]= 0;
-      else
-	colv[i]= rowv[label[i]];
-    }
-}
-
-template <class T>
-void Basis<T>::BasisSelect(const gVector<T> &unitv,
-			    const gVector<T> &rowv,
-			    gVector<T> &colv ) const
-{
-  assert(dtab->A.CheckColumn(colv)
-      && dtab->A.CheckColumn(unitv)
-      && dtab->A.CheckRow(rowv) );
-
-  for(int i=label.First(); i<=label.Last(); i++)
-    {
-      if(label[i]<0)
-	colv[i]= unitv[label[i]];
-      else
-	colv[i]= rowv[label[i]];
-    }
-}
-
-template <class T> gOutput &operator<<(gOutput &to, const Basis<T> &v)
-{
-  v.Dump(to); return to;
-}
-
-template <class T>
-void Basis<T>::Dump(gOutput &to) const
-{ 
-  to << "{";
-  for(int i=label.First();i<=label.Last();i++) {
-    to << "  " << label[i];  
-  }
-  to << " }";
-}
 
 
 

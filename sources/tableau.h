@@ -13,60 +13,32 @@
 #include "ludecomp.h"
 #include "gtableau.h"
 
-template <class T> class DumbTableau;
-template <class T> class Tableau;
 template <class T> class Basis;
+template <class T> class Tableau;
 
-
-template <class T> class DumbTableau {
-friend class Tableau<T>;
-friend class Basis<T>;
-protected:
-  gMatrix<T> A;
-  gVector<T> b;
-public:
-  DumbTableau(void);
-  DumbTableau(int rl, int rh, int cl, int ch);
-  DumbTableau(const gMatrix<T>&, const gVector<T>&);
-  ~DumbTableau();
-
-  int MinRow(void) const;
-  int MinCol(void) const;
-  int MaxRow(void) const;
-  int MaxCol(void) const;
-  T &Set_A(int r,int c);
-  T &Set_b(int r);
-  const T &Get_A(int r,int c) const;
-  const T &Get_b(int r) const;
-  void Dump(gOutput &) const;
-};
-
-
-template <class T>
-class Basis {
+template <class T> class Basis {
 friend class Tableau<T>;
 protected:
-  const DumbTableau<T> *dtab;
+  const gMatrix<T> *A;
   gBlock<int> label;    
 public:
   Basis(void);
-  Basis(int min, int max);
-  Basis(const DumbTableau<T> &); // initial Tableau is unit matrix
-  Basis(const DumbTableau<T> &, const gBlock<int> &);
-      // use negative index convention
-  Basis<T>& operator=(const Basis<T>&);
+  Basis(const gMatrix<T> &A);
   Basis(const Basis<T> &);
   ~Basis();
+
+  Basis<T>& operator=(const Basis<T>&);
   
-  void NewBasis();
-  void NewBasis(const gBlock<int> &);
-  void change(int index, int label);
+//  void NewBasis();
+//  void NewBasis(const gBlock<int> &);
+
+  void Change(int index, int label);
       // change Basis member index to label
-  void swap(int,int); // switch two Basis elements
+  void Swap(int,int); // switch two Basis elements
   
-  bool member(int label) const;
+  bool Member(int label) const;
       // return true iff label is a Basis member
-  int find(int label) const;
+  int Find(int label) const;
       // finds Basis index corresponding to label number,
       // fails assert if label not in Basis
   int Label(int index) const;
@@ -81,46 +53,72 @@ public:
 };
 
 template <class T> class Tableau {
- private:
-  //gVector<T> tmpcol; // temporary column vector, to avoid allocation
-
+private:
+//gVector<T> tmpcol; // temporary column vector, to avoid allocation
 //  void SolveDual();
 
   bool ColIndex(int) const;
   bool RowIndex(int) const;
- protected:
-  DumbTableau<T> *dtab;
+  long npivots;
+protected:
+  const gMatrix<T> *A;
+  const gVector<T> *b;
   Basis<T> basis;
   LUdecomp<T> B;
   gVector<T> solution;
-
+  
 //  gVector<T> unitcost;
 //  gVector<T> cost;
 //  gVector<T> dual;
 //  bool costdefined;
-  bool creator;
-
- public:
-  Tableau(DumbTableau<T> &);
-  Tableau(int minr, int maxr, int minc, int maxc); // creates dtab
-  Tableau(DumbTableau<T> &, const Basis<T> &);
-  Tableau(DumbTableau<T> &, const gVector<T> &cost, const Basis<T> &);
-    // unit column cost == 0
-  Tableau(DumbTableau<T> &,
-	const gVector<T> &unitcost,
-	const gVector<T> &cost,
-	const Basis<T> &); // unit column cost given
+//  bool creator;
+  
+public:
+// constructors and destructors
+  Tableau(void);
+  Tableau(const gMatrix<T> &A, const gVector<T> &b); 
   Tableau(const Tableau<T>&);
-  Tableau<T>& operator=(const Tableau<T>&);
   virtual ~Tableau();
+  
+  Tableau<T>& operator=(const Tableau<T>&);
 
-  int MinCol() const;
-  int MaxCol() const;
+// information
   int MinRow() const;
   int MaxRow() const;
+  int MinCol() const;
+  int MaxCol() const;
+  
+  bool Member(int i) const;
+  int Label(int i) const;   // return variable in i'th position of Tableau
+  int Find(int i) const;  // return Tableau position of variable i
 
-  // cost-based functions
+// pivoting
+  int CanPivot(int outgoing,int incoming);
+  void Pivot(int outrow,int inlabel);
+  // perform pivot operation -- outgoing is row, incoming is column
+  void CompPivot(int outlabel,int inlabel);
+  long NumPivots() const;
+  long &NumPivots();
+
+
+// raw Tableau functions
+  void Refactor();
+  void Solve(const gVector<T> &, gVector<T> &) const;
+  void SolveT(const gVector<T> &, gVector<T> &) const;
+  void Multiply(const gVector<T> &, gVector<T>& ) const;
+  void MultiplyT(const gVector<T> &, gVector<T> &) const;
+  void BasisVector(gVector<T> &) const; // column vector
+  void SolveColumn(int, gVector<T> &) const;
+//  void SetBasis( const Basis<T> &); // set new Tableau
+  void GetBasis( Basis<T> & ) const; // return Basis for current Tableau
+  
+// miscellaneous functions
+  bool IsNash(void) const;
+  BFS<T> GetBFS(void) const;
+  void Dump(gOutput &) const;
+
 /*
+// cost-based functions
   void SetCost(const gVector<T>& ); // unit column cost := 0
   void SetCost(const gVector<T>&, const gVector<T>& ); // DumbTableau row
   void GetCost(gVector<T>&, gVector<T>& ) const; // DumbTableau row
@@ -132,30 +130,6 @@ template <class T> class Tableau {
   void DualVector(gVector<T> &) const; // column vector
 */
 
-  // non-cost-based functions
-  void BasisVector(gVector<T> &) const; // column vector
-  void SolveColumn(int, gVector<T> &) const;
-    // DumbTableau column in terms of Tableau
-  bool Member(int i) const;
-  int Label(int i) const;   // return variable in i'th position of Tableau
-  int Find(int i) const;  // return Tableau position of variable i
-  int CanPivot(int outgoing,int incoming);
-  void Pivot(int outrow,int inlabel);
-    // perform pivot operation -- outgoing is row, incoming is column
-  void CompPivot(int outlabel,int inlabel);
-  void SetBasis( const Basis<T> &); // set new Tableau
-  void GetBasis( Basis<T> & ) const; // return Basis for current Tableau
-
-  // raw Tableau functions
-  void Refactor();
-  void Solve(const gVector<T> &, gVector<T> &) const;
-  void SolveT(const gVector<T> &, gVector<T> &) const;
-  void Multiply(const gVector<T> &, gVector<T>& ) const;
-  void MultiplyT(const gVector<T> &, gVector<T> &) const;
-
-	BFS<T> GetBFS(void) const;
-	bool IsNash(void) const;
-  void Dump(gOutput &) const;
 };
 
 
