@@ -33,7 +33,7 @@ SeqFormParams::SeqFormParams(void)
 
 template <class T>
 SeqFormModule<T>::SeqFormModule(const ExtForm<T> &E, const SeqFormParams &p)
-  : EF(E), params(p), npivots(0), maxpay(0), A(0), b(0)
+  : EF(E), params(p), A(0), b(0), maxpay((T) 0), npivots(0)
 { 
   int ntot;
   ns1=NumSequences(1);

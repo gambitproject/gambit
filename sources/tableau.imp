@@ -26,7 +26,7 @@ Basis<T>::Basis(const gMatrix<T> &A)
 
 template <class T>
 Basis<T>::Basis(const Basis<T> &bas)
-: label(bas.label), A(bas.A)
+: A(bas.A), label(bas.label)
 { }
 
 template <class T>
@@ -109,6 +109,7 @@ int Basis<T>::Find(int col) const
     if( label[i]==col )
       return i; // returns Tableau index
   assert(0); // couldn't find column (also, assumes there are no duplicates)
+  return 0;
 }
 
 template <class T>
@@ -169,14 +170,14 @@ void Basis<T>::Dump(gOutput &to) const
 // Constructors and Destructor
 
 template <class T> Tableau<T>::Tableau(void)
-: A(0), b(0),  B(1), npivots(0)
-{ };
+: npivots(0), A(0), b(0),  B(1)
+{ }
 
 
 template <class T>
 Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
-: A(&A), b(&b), basis(A),  B(A.MinRow(), A.MaxRow()),
-  solution(A.MinRow(),A.MaxRow()),npivots(0)
+: npivots(0), A(&A), b(&b), basis(A),  B(A.MinRow(), A.MaxRow()),
+  solution(A.MinRow(),A.MaxRow())
 //  dual(tab.MinRow(),tab.MaxRow()),
 //  unitcost(tab.MinRow(),tab.MaxRow()),
 //	cost(tab.MinCol(),tab.MaxCol()),
@@ -189,8 +190,8 @@ Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
 
 template <class T>
 Tableau<T>::Tableau(const Tableau<T> &orig)
-: A(orig.A),b(orig.b), basis(orig.basis),
-  B(orig.B), solution(orig.solution), npivots(0)
+: npivots(0), A(orig.A),b(orig.b), basis(orig.basis),
+  B(orig.B), solution(orig.solution)
 //  unitcost(orig.unitcost),
 //  cost(orig.cost),
 //  dual(orig.dual),

@@ -49,7 +49,7 @@ template <class T> int LTableau<T>::PivotIn(int inlabel)
 template <class T> int LTableau<T>::ExitIndex(int inlabel) const
 {
   gBlock<int> BestSet;
-  int i, c, c_col,c_row;
+  int i, c;
   T ratio, tempmax;
   gVector<T> incol(MinRow(), MaxRow());
   gVector<T> col(MinRow(), MaxRow());
