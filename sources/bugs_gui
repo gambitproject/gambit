@@ -5,18 +5,12 @@ GUI Bugs:
 Bug D3: Bugs in Outcome interface
 
 For the extensive form, the outcome window does not stay on top when you
-attach outcomes to the game.
+select nodes while attaching outcomes to the game.
 
 For the normal form, there are two outcome windows, one accessed by
-Solve->Outcomes, and the other by double click (Ctrl click on Linux).
-Why are there two different interfaces?  We should improve the editing
-capabilities in the first interface, and ditch the other.  Note that
-right now, the editing on the normal form outcomes (in the first
-interface) suffers from the same problems as in extensive form.  
-
-In the normal form outcome window, I was unable to switch the setting
-to the long format using the Solve->Outcomes->Opt->Long/CompactFormat
-setting.
+Edit->Outcomes, and the other by double click (Ctrl click on Linux).
+Why are there two different interfaces?  We should ditch the Ctrl-click
+editing dialog and simply have it bring up the Edit->Outcomes dialog.
 
 //------------------------------
 
@@ -35,12 +29,23 @@ NOTE: This is almost certainly due to the lack of the "wxhelp" program in
 the user's path.  Also, the WXHELPFILES environment variable has to point
 to a directory where the help files live.
 
+NOTE2: There is a wxhelp2 program which can run HTML files.  This
+needs to be compiled for Linux and tested on the gambit HTML files
+(in hss: ~gambit/public_html/guiman).  We also need to decide which
+help formats we will be supporting on Unix and Windows.
+
 //------------------------------
 
 Bug D5: Saving files
 
 When saving a file in the GUI, it should remember the current
 name of the file, and use the same name when saving the file. 
+
+When overwriting an existing file, the GUI should always prompt
+for a new label.
+
+There are other instances of the File Selector dialog that should 
+also be looked at to make sure they behave as expected.
 
 //------------------------------
 
@@ -57,8 +62,10 @@ machine):
    Current serial number in output stream:  391
 
 We should either fix this, or deliver a more informative error messsage.
-
-NOTE: This bug can be very difficult to reproduce.
+It is unlikely that it can be fixed because it's a known problem with 
+wxWindows, but it can be avoided by running netscape with a private colormap
+using "netscape -install".  Uncaught exceptions should bring up a dialog
+which suggests doing this (this is lame, but better than nothing).
 
 //------------------------------
 
@@ -93,6 +100,36 @@ by effectively putting the infinite loop at the top.  I thought this
 should deal with the first problem too (games with no proper subgames.) 
 But I will have to look at the code to see what this actually does. 
 Perhaps it is not implemented correctly. 
+
+
+Bug D9: Need color coding of payoffs in outcome window
+
+The outcome editing window should color-code the payoffs for
+each player in the same way that they're displayed in the nfg 
+and efg displays.
+
+
+Bug D10: Drag and drop of outcomes don't always work in NFG
+
+When there are so many outcomes that you have to scroll to select
+the desired one, dragging and dropping of the outcome doesn't work.
+E.g. try 8x8.nfg.
+
+
+Bug D11: guiman.tex needs to be updated and recompiled.
+
+We get TeX errors when running latex on this file.
+
+
+Bug D12: Does Windows help support HTML?
+
+This isn't a bug, but since wxhelp2 supports html it would be convenient
+to use HTML for all our help files.  If Windows help supports HTML this
+would be much easier.
+
+
+
+
 
 
 -------------  older bugs that still remain ---------------
