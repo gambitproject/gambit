@@ -698,10 +698,7 @@ void EfOutcomePortion::Output(gOutput& s) const
   
   s << "(EFOutcome) " << *_Value;
   if(*_Value)
-  {
-    s << " \"" << (*_Value)->GetName() << "\" ";
-    (*_Value)->PrintValues(s);
-  }
+    s << " \"" << (*_Value)->GetName() << "\"\n";
 }
 
 gString EfOutcomePortion::OutputString( void ) const

@@ -1656,13 +1656,29 @@ Portion* GSM_Write_Nfg(Portion** param)
 }
 
 
-Portion* GSM_Write_Efg(Portion** param)
+Portion* GSM_Write_EfgFloat(Portion** param)
 {
   assert(param[1]->Spec().Type & porEFG);
   gOutput& s = ((OutputPortion*) param[0])->Value();
 
-  BaseEfg* efg = ((EfgPortion*) param[1])->Value();
-  // efg->DisplayEfg(s);
+  Efg<double> *efg = (Efg<double> *) ((EfgPortion*) param[1])->Value();
+
+  efg->WriteEfgFile(s);
+
+
+  // swap the first parameter with the return value, so things like
+  //   Output["..."] << x << y  would work
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
+}
+
+Portion* GSM_Write_EfgRational(Portion** param)
+{
+  assert(param[1]->Spec().Type & porEFG);
+  gOutput& s = ((OutputPortion*) param[0])->Value();
+
+  Efg<gRational> *efg = (Efg<gRational> *) ((EfgPortion*) param[1])->Value();
 
   efg->WriteEfgFile(s);
 
@@ -3798,7 +3814,7 @@ void Init_gsmoper(GSM* gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Write", 10);
+  FuncObj = new FuncDescObj("Write", 11);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Write_numerical, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("output", porOUTPUT,
@@ -3831,39 +3847,45 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(4, 1, ParamInfoType("x", porNFG,
 					    REQUIRED ));
   
-  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Write_Efg, 
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Write_EfgFloat, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(5, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(5, 1, ParamInfoType("x", porEFG,
-					    REQUIRED ));
-  
-  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Write_list, 
+  FuncObj->SetParamInfo(5, 1, ParamInfoType("x", porEFG_FLOAT));
+
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Write_EfgRational, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(6, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(6, 1, ParamInfoType
+  FuncObj->SetParamInfo(6, 1, ParamInfoType("x", porEFG_RATIONAL));
+
+  
+  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Write_list, 
+				       porOUTPUT, 2, 0, funcNONLISTABLE));
+  FuncObj->SetParamInfo(7, 0, ParamInfoType("output", porOUTPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(7, 1, ParamInfoType
 			("x", PortionSpec(porBOOL | porINTEGER | porFLOAT | 
 					  porTEXT | porRATIONAL | porMIXED |
 					  porBEHAV, 1)));
 
-  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Write_NfSupport, 
-				       porOUTPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(7, 0, ParamInfoType("output", porOUTPUT,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(7, 1, ParamInfoType("x", porNFSUPPORT));
-
-  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Write_EfSupport, 
+  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Write_NfSupport, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(8, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(8, 1, ParamInfoType("x", porEFSUPPORT));
+  FuncObj->SetParamInfo(8, 1, ParamInfoType("x", porNFSUPPORT));
 
-  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Write_Strategy, 
+  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Write_EfSupport, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(9, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(9, 1, ParamInfoType("x", porSTRATEGY));
+  FuncObj->SetParamInfo(9, 1, ParamInfoType("x", porEFSUPPORT));
+
+  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_Write_Strategy, 
+				       porOUTPUT, 2, 0, funcNONLISTABLE));
+  FuncObj->SetParamInfo(10, 0, ParamInfoType("output", porOUTPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(10, 1, ParamInfoType("x", porSTRATEGY));
 
   gsm->AddFunction(FuncObj);
 

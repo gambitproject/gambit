@@ -184,7 +184,8 @@ BaseEfg::BaseEfg(void)
 
 BaseEfg::BaseEfg(const BaseEfg &E)
   : sortisets(false), title(E.title),
-    players(E.players.Length()), chance(new EFPlayer(this, 0))
+    players(E.players.Length()), outcomes(E.outcomes.Length()),
+    chance(new EFPlayer(this, 0))
 {
   for (int i = 1; i <= players.Length(); i++)  {
     (players[i] = new EFPlayer(this, i))->name = E.players[i]->name;
@@ -197,6 +198,9 @@ BaseEfg::BaseEfg(const BaseEfg &E)
       players[i]->infosets.Append(s);
     }      
   }
+  
+  for (int outc = 1; outc <= E.NumOutcomes(); outc++)  
+    (outcomes[outc] = new EFOutcome(this, outc))->name = E.outcomes[outc]->name;
 
 #ifdef MEMCHECK
   _NumObj++;
@@ -369,62 +373,6 @@ void BaseEfg::DisplayTree(gOutput &f) const
   DisplayTree(f, root);
 }
 
-void BaseEfg::WriteEfgFile(gOutput &f, Node *n) const
-{
-  if (n->children.Length() == 0)   {
-    f << "t \"" << n->name << "\" ";
-    if (n->outcome)  {
-      f << n->outcome->number << " \"" << n->outcome->name << "\" ";
-      n->outcome->PrintValues(f);
-      f << '\n';
-    }
-    else
-      f << "0\n";
-  }
-  
-  else if (n->infoset->player->number)   {
-    f << "p \"" << n->name << "\" " << n->infoset->player->number << ' ';
-    f << n->infoset->number << " \"" << n->infoset->name << "\" ";
-    n->infoset->PrintActions(f);
-    f << " ";
-    if (n->outcome)  {
-      f << n->outcome->number << " \"" << n->outcome->name << "\" ";
-      n->outcome->PrintValues(f);
-      f << '\n';
-    }
-    else
-      f << "0\n";
-  }
-  
-  else   {    // chance node
-    f << "c \"" << n->name << "\" ";
-    f << n->infoset->number << " \"" << n->infoset->name << "\" ";
-    n->infoset->PrintActions(f);
-    f << " ";
-    if (n->outcome)  {
-      f << n->outcome->number << " \"" << n->outcome->name << "\" ";
-      n->outcome->PrintValues(f);
-      f << '\n';
-    }
-    else
-      f << "0\n";
-  }
-
-  for (int i = 1; i <= n->children.Length(); i++)
-    WriteEfgFile(f, n->children[i]);
-}
-
-void BaseEfg::WriteEfgFile(gOutput &f) const
-{
-  f << "EFG 2 " << ((Type() == DOUBLE) ? 'D' : 'R');
-  f << " \"" << title << "\" { ";
-  for (int i = 1; i <= players.Length(); i++)
-    f << '"' << players[i]->name << "\" ";
-  f << "}\n\n";
-
-  WriteEfgFile(f, root);
-}
-
 
 //------------------------------------------------------------------------
 //                    BaseEfg: General data access
@@ -457,6 +405,12 @@ bool BaseEfg::IsPredecessor(const Node *n, const Node *of) const
   return (n == of);
 }
 
+EFOutcome *BaseEfg::NewOutcome(int index)
+{
+  outcomes.Append(new EFOutcome(this, index));
+  return outcomes[outcomes.Length()];
+} 
+
 //------------------------------------------------------------------------
 //                     BaseEfg: Operations on players
 //------------------------------------------------------------------------
@@ -464,17 +418,6 @@ bool BaseEfg::IsPredecessor(const Node *n, const Node *of) const
 EFPlayer *BaseEfg::GetChance(void) const
 {
   return chance;
-}
-
-EFPlayer *BaseEfg::NewPlayer(void)
-{
-  EFPlayer *ret = new EFPlayer(this, players.Length() + 1);
-  players.Append(ret);
-  root->Resize(players.Length());
-  for (int i = 1; i <= outcomes.Length(); i++)
-    outcomes[i]->Resize(players.Length());
-  DeleteLexicon();
-  return ret;
 }
 
 Infoset *BaseEfg::AppendNode(Node *n, EFPlayer *p, int count)

@@ -15,8 +15,6 @@ template <class T> class BehavProfile;
 class BehavProfile<double>;
 template <class T> class Efg;
 class Efg<double>;
-template <class T> class OutcomeVector;
-class OutcomeVector<double>;
 template <class T> class ChanceInfoset;
 class ChanceInfoset<double>;
 class Node;
@@ -38,7 +36,6 @@ DataType Efg<gRational>::Type(void) const   { return RATIONAL; }
 
 TEMPLATE class TypedNode<gRational>;
 TEMPLATE class ChanceInfoset<gRational>;
-TEMPLATE class OutcomeVector<gRational>;
 TEMPLATE class BehavProfile<gRational>;
 TEMPLATE gOutput &operator<<(gOutput &, const BehavProfile<gRational> &);
 

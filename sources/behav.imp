@@ -14,33 +14,6 @@
 
 #include "gvector.h"
 
-template <class T> class OutcomeVector : public EFOutcome, private gVector<T>   {
-  friend class Efg<T>;
-
-  private:
-    OutcomeVector(BaseEfg *E, int n, int pl)
-      : EFOutcome(E, n), gVector<T>(pl)  { }
-    OutcomeVector(BaseEfg *E, const OutcomeVector<T> &v)
-      : EFOutcome(E, v.number), gVector<T>(v)   { name = v.name; }
-    ~OutcomeVector()    { }
-
-    void Resize(int pl);    
-
-    void PrintValues(gOutput &f) const
-      { Dump(f); }
-};
-
-template <class T> void OutcomeVector<T>::Resize(int pl)
-{
-  T *newdata = new T[pl] - 1;
-  int i;
-  for (i = 1; i <= pl; newdata[i++] = (T) 0.0);
-  for (i = 1; i <= gmin(pl, maxdex); i++)
-    newdata[i] = data[i];
-  delete [] (data + 1);
-  data = newdata;
-  maxdex = pl;
-}
   
 //------------------------------------------------------------------------
 //                   TypedNode<T>: Class definition
@@ -136,19 +109,12 @@ template <class T> void Efg<T>::CopySubtree(Node *n, Node *m)
 
 template <class T> Efg<T>::Efg(const BaseEfg &E)
 #ifdef EFG_ONLY
-  : BaseEfg(E)
+  : BaseEfg(E), payoffs(E.NumOutcomes(), E.NumPlayers())
 #else
-  : BaseEfg(E), lexicon(0)
+  : BaseEfg(E), lexicon(0), payoffs(E.NumOutcomes(), E.NumPlayers())
 #endif   // EFG_ONLY
 {
   int i;
-  
-  for (i = 1; i <= E.NumOutcomes(); i++)  {
-    OutcomeVector<T> *c = new OutcomeVector<T>(this, i, E.NumPlayers());
-    c->name = E.Outcomes()[i]->GetName();
-    outcomes.Append(c);
-  }
-
   
   for (i = 1; i <= E.GetChance()->NumInfosets(); i++)   {
     ChanceInfoset<T> *t = (ChanceInfoset<T> *) E.GetChance()->Infosets()[i];
@@ -169,17 +135,13 @@ template <class T> Efg<T>::Efg(const BaseEfg &E)
 
 template <class T> Efg<T>::Efg(const Efg<T> &E)
 #ifdef EFG_ONLY
-  : BaseEfg(E)
+  : BaseEfg(E), payoffs(E.payoffs)
 #else
-  : BaseEfg(E), lexicon(0)
+  : BaseEfg(E), lexicon(0), payoffs(E.payoffs)
 #endif   // EFG_ONLY
 {
   int i;
 
-  for (i = 1; i <= E.outcomes.Length(); i++)
-    outcomes.Append(new OutcomeVector<T>(this, 
-					 (OutcomeVector<T> &) *E.outcomes[i]));
-  
   for (i = 1; i <= E.chance->infosets.Length(); i++)   {
     ChanceInfoset<T> *t = (ChanceInfoset<T> *) E.chance->infosets[i];
     ChanceInfoset<T> *s = new ChanceInfoset<T>(this, i, chance,
@@ -209,19 +171,15 @@ template <class T> Efg<T>::Efg(const Efg<T> &E)
 //
 template <class T> Efg<T>::Efg(const Efg<T> &E, Node *n)
 #ifdef EFG_ONLY
-  : BaseEfg(E)
+  : BaseEfg(E), payoffs(E.payoffs)
 #else
-  : BaseEfg(E), lexicon(0)
+  : BaseEfg(E), lexicon(0), payoffs(E.payoffs)
 #endif   // EFG_ONLY
 {
   int i;
 
   assert(n->BelongsTo() == (BaseEfg *) &E);
 
-  for (i = 1; i <= E.outcomes.Length(); i++)
-    outcomes.Append(new OutcomeVector<T>(this, 
-					 (OutcomeVector<T> &) *E.outcomes[i]));
-  
   for (i = 1; i <= E.chance->infosets.Length(); i++)   {
     ChanceInfoset<T> *t = (ChanceInfoset<T> *) E.chance->infosets[i];
     ChanceInfoset<T> *s = new ChanceInfoset<T>(this, i, chance,
@@ -289,10 +247,24 @@ template <class T> Infoset *Efg<T>::CreateInfoset(EFPlayer *p, int br)
 
 template <class T> EFOutcome *Efg<T>::CreateOutcomeByIndex(int index)
 {
-  OutcomeVector<T> *ret = new OutcomeVector<T>(this, index,
-					       players.Length());
-  for (int i = 1; i <= players.Length(); (*ret)[i++] = (T) 0);
-  outcomes.Append(ret);
+  gVector<T> zeroes(NumPlayers());
+  zeroes = (T) 0;
+  payoffs.AddRow(zeroes);
+
+  BaseEfg::NewOutcome(index);
+  return outcomes[outcomes.Length()];
+}
+
+template <class T> EFPlayer *Efg<T>::NewPlayer(void)
+{
+  EFPlayer *ret = new EFPlayer(this, players.Length() + 1);
+  players.Append(ret);
+  root->Resize(players.Length());
+
+  gVector<T> zeroes(NumOutcomes());
+  zeroes = (T) 0;
+  payoffs.AddColumn(zeroes);
+  DeleteLexicon();
   return ret;
 }
 
@@ -302,26 +274,29 @@ template <class T> EFOutcome *Efg<T>::CreateOutcomeByIndex(int index)
 
 template <class T> EFOutcome *Efg<T>::NewOutcome(void)
 {
-  OutcomeVector<T> *ret = new OutcomeVector<T>(this, outcomes.Length() + 1,
-					       players.Length());
-  for (int i = 1; i <= players.Length(); (*ret)[i++] = (T) 0);
-  outcomes.Append(ret);
-  return ret;
+  gVector<T> zeroes(NumPlayers());
+  zeroes = (T) 0;
+  payoffs.AddRow(zeroes);
+
+  BaseEfg::NewOutcome(outcomes.Length() + 1);
+  return outcomes[outcomes.Length()];
 }
 
 template <class T> void Efg<T>::SetPayoff(EFOutcome *outc, int pl, const T &value)
 {
-  ((OutcomeVector<T> &) *outc)[pl] = value;
+  payoffs(outc->GetNumber(), pl) = value;
 }
 
 template <class T> T Efg<T>::Payoff(EFOutcome *outc, int pl) const
 {
-  return ((OutcomeVector<T> &) *outc)[pl];
+  return payoffs(outc->GetNumber(), pl);
 }
 
-template <class T> const gVector<T> &Efg<T>::Payoff(EFOutcome *outc) const
+template <class T> gVector<T> Efg<T>::Payoff(EFOutcome *outc) const
 {
-  return (gVector<T> &)(OutcomeVector<T> &) *outc;
+  gVector<T> ret(NumPlayers());
+  payoffs.GetRow(outc->GetNumber(), ret);
+  return ret;
 }
 
 template <class T> bool Efg<T>::IsConstSum(void) const
@@ -334,13 +309,13 @@ template <class T> bool Efg<T>::IsConstSum(void) const
   if (outcomes.Length() == 0)  return true;
 
   for (pl = 1; pl <= players.Length(); pl++)
-    cvalue += ((OutcomeVector<T> &) *outcomes[1])[pl];
+    cvalue += payoffs(1, pl);
   
   for (index = 2; index <= outcomes.Length(); index++)  {
     T thisvalue = (T) 0;
     
     for (pl = 1; pl <= players.Length(); pl++)
-      thisvalue += ((OutcomeVector<T> &) *outcomes[index])[pl];
+      thisvalue += payoffs(index, pl);
 
     if (thisvalue > cvalue + eps || thisvalue < cvalue - eps)
       return false;
@@ -357,12 +332,12 @@ template <class T> T Efg<T>::MinPayoff(int pl) const
   if(pl) { p1=p2=pl;}
   else {p1=1;p2=players.Length();}
 
-  minpay = ((OutcomeVector<T> &) *outcomes[1])[p1];
+  minpay = payoffs(1, p1);
   
   for (index = 1; index <= outcomes.Length(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (((OutcomeVector<T> &) *outcomes[index])[p] < minpay)
-	minpay = ((OutcomeVector<T> &) *outcomes[index])[p];
+      if (payoffs(index, p) < minpay)
+	minpay = payoffs(index, p);
   }
   return minpay;
 }
@@ -375,16 +350,78 @@ template <class T> T Efg<T>::MaxPayoff(int pl) const
   if(pl) { p1=p2=pl;}
   else {p1=1;p2=players.Length();}
 
-  maxpay = ((OutcomeVector<T> &) *outcomes[1])[p1];
+  maxpay = payoffs(1, p1);
 
   for (index = 1; index <= outcomes.Length(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (((OutcomeVector<T> &) *outcomes[index])[p] > maxpay)
-	maxpay = ((OutcomeVector<T> &) *outcomes[index])[p];
+      if (payoffs(index, p) > maxpay)
+	maxpay = payoffs(index, p);
   }
   return maxpay;
 }
 
+
+template <class T> void Efg<T>::WriteEfgFile(gOutput &f, Node *n) const
+{
+  if (n->children.Length() == 0)   {
+    f << "t \"" << n->name << "\" ";
+    if (n->outcome)  {
+      f << n->outcome->GetNumber() << " \"" << n->outcome->GetName() << "\" ";
+      f << "{ ";
+      for (int pl = 1; pl <= NumPlayers(); pl++)
+	f << payoffs(n->outcome->GetNumber(), pl) << ' ';
+      f << "}\n";
+    }
+    else
+      f << "0\n";
+  }
+  
+  else if (n->infoset->player->number)   {
+    f << "p \"" << n->name << "\" " << n->infoset->player->number << ' ';
+    f << n->infoset->number << " \"" << n->infoset->name << "\" ";
+    n->infoset->PrintActions(f);
+    f << " ";
+    if (n->outcome)  {
+      f << n->outcome->GetNumber() << " \"" << n->outcome->GetName() << "\" ";
+      f << "{ ";
+      for (int pl = 1; pl <= NumPlayers(); pl++)
+	f << payoffs(n->outcome->GetNumber(), pl) << ' ';
+      f << "}\n";
+    }
+    else
+      f << "0\n";
+  }
+  
+  else   {    // chance node
+    f << "c \"" << n->name << "\" ";
+    f << n->infoset->number << " \"" << n->infoset->name << "\" ";
+    n->infoset->PrintActions(f);
+    f << " ";
+    if (n->outcome)  {
+      f << n->outcome->GetNumber() << " \"" << n->outcome->GetName() << "\" ";
+      f << "{ ";
+      for (int pl = 1; pl <= NumPlayers(); pl++)
+	f << payoffs(n->outcome->GetNumber(), pl) << ' ';
+      f << "}\n";
+    }
+    else
+      f << "0\n";
+  }
+
+  for (int i = 1; i <= n->children.Length(); i++)
+    WriteEfgFile(f, n->children[i]);
+}
+
+template <class T> void Efg<T>::WriteEfgFile(gOutput &f) const
+{
+  f << "EFG 2 " << ((Type() == DOUBLE) ? 'D' : 'R');
+  f << " \"" << title << "\" { ";
+  for (int i = 1; i <= players.Length(); i++)
+    f << '"' << players[i]->name << "\" ";
+  f << "}\n\n";
+
+  WriteEfgFile(f, root);
+}
 
 
 
@@ -398,7 +435,7 @@ void Efg<T>::Payoff(Node *n, T prob, const gPVector<int> &profile,
 {
   if (n->outcome)
     for (int i = 1; i <= players.Length(); i++)
-      payoff[i] += prob * ((OutcomeVector<T> &) *n->outcome)[i];
+      payoff[i] += prob * payoffs(n->outcome->GetNumber(), i);
   
   if (n->infoset && n->infoset->player->IsChance())
     for (int i = 1; i <= n->children.Length(); i++)
@@ -447,7 +484,7 @@ void Efg<T>::Payoff(Node *n, T prob, const gArray<gArray<int> *> &profile,
 {
   if (n->outcome)
     for (int i = 1; i <= players.Length(); i++)
-      payoff[i] += prob * ((OutcomeVector<T> &) *n->outcome)[i];
+      payoff[i] += prob * payoffs(n->outcome->GetNumber(), i);
   
   if (n->infoset && n->infoset->player->IsChance())
     for (int i = 1; i <= n->children.Length(); i++)

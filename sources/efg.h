@@ -50,7 +50,6 @@ protected:
     void UnmarkSubtree(Node *);
 
     void DisplayTree(gOutput &, Node *) const;
-    void WriteEfgFile(gOutput &, Node *) const;
 
     virtual Infoset *CreateInfoset(int n, EFPlayer *pl, int br) = 0;
     virtual Node *CreateNode(Node *parent) = 0;
@@ -71,6 +70,8 @@ protected:
     
     virtual void DeleteLexicon(void) = 0;
 
+    EFOutcome *NewOutcome(int index);
+
 // These are used in identification of subgames
     void MarkTree(Node *, Node *);
     bool CheckTree(Node *, Node *);
@@ -86,7 +87,6 @@ protected:
 
        //# WRITING DATA FILES
     void DisplayTree(gOutput &) const;
-    void WriteEfgFile(gOutput &f) const;
 
        //# DATA ACCESS -- GENERAL INFORMATION
     virtual DataType Type(void) const = 0;
@@ -100,7 +100,7 @@ protected:
     int NumPlayers(void) const;
 
     EFPlayer *GetChance(void) const;
-    EFPlayer *NewPlayer(void);
+    virtual EFPlayer *NewPlayer(void) = 0;
     const gArray<EFPlayer *> &Players(void) const  { return players; }
 
        //# DATA ACCESS -- OUTCOMES
@@ -162,6 +162,8 @@ template <class T> class MixedProfile;
 template <class T> class Lexicon;
 #endif   // EFG_ONLY
 
+#include "grblock.h"
+
 template <class T> class Efg : public BaseEfg   {
 #ifndef EFG_ONLY
   friend class BaseNfg;
@@ -172,6 +174,8 @@ template <class T> class Efg : public BaseEfg   {
     Lexicon<T> *lexicon;
     Nfg<T> *afg;
 #endif  EFG_ONLY
+    gRectBlock<T> payoffs;
+
     Efg<T> &operator=(const Efg<T> &);
 
     void Payoff(Node *n, T, const gPVector<int> &, gVector<T> &) const;
@@ -189,6 +193,7 @@ template <class T> class Efg : public BaseEfg   {
 
     void DeleteLexicon(void);
 
+    void WriteEfgFile(gOutput &, Node *) const;
 
   public:
 	//# CONSTRUCTORS AND DESTRUCTOR
@@ -204,6 +209,11 @@ template <class T> class Efg : public BaseEfg   {
     T MinPayoff(int pl = 0) const;
     T MaxPayoff(int pl = 0) const;
 
+    void WriteEfgFile(gOutput &f) const;
+
+
+    EFPlayer *NewPlayer(void);
+
         //# DATA ACCESS -- OUTCOMES
     EFOutcome *NewOutcome(void);
 
@@ -211,7 +221,7 @@ template <class T> class Efg : public BaseEfg   {
 
     void SetPayoff(EFOutcome *, int pl, const T &value);
     T Payoff(EFOutcome *, int pl) const;
-    const gVector<T> &Payoff(EFOutcome *) const;
+    gVector<T> Payoff(EFOutcome *) const;
 
         //# COMPUTING VALUES OF PROFILES
 

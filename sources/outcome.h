@@ -20,7 +20,7 @@ class EFOutcome   {
     BaseEfg *E;
 
     EFOutcome(BaseEfg *e, int n) : number(n), E(e)   { }
-    virtual ~EFOutcome()   { }
+    ~EFOutcome()   { }
   
   public:
     BaseEfg *BelongsTo(void) const   { return E; }
@@ -29,9 +29,6 @@ class EFOutcome   {
     void SetName(const gString &s)       { name = s; }
 
     int GetNumber(void) const   { return number; }
-
-    virtual void Resize(int pl) = 0;
-    virtual void PrintValues(gOutput &) const = 0;
 };
 
 #endif    // OUTCOME_H

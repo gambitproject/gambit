@@ -1055,7 +1055,10 @@ static Portion *GSM_SaveEfg(Portion **param)
   if (!f.IsValid())
     return new ErrorPortion("Cannot open file for writing");
 
-  E->WriteEfgFile(f);
+  if (E->Type() == DOUBLE)
+    ((Efg<double> *) E)->WriteEfgFile(f);
+  else
+    ((Efg<gRational> *) E)->WriteEfgFile(f);
 
   return param[0]->ValCopy();
 }
