@@ -47,6 +47,7 @@ template <class K, class T> class HashTable
   T    Remove     ( K key );
   T    operator() ( K key ) const;
   T&   operator() ( K key );
+  const gList<K>* Key() const;
   const gList<T>* Value() const;
 
   //This function should be called in the destructor of decendents classes

@@ -16,10 +16,12 @@
 #include "gblock.h"
 
 
+extern GSM& _gsm;
+
 /*
 Portion* GSM_Assign_Undefined( Portion** param )
 {
-  assert(0);
+  // assert(0);
   assert( param[0] == 0 );
   if( param[1]->Type() & (porINPUT|porOUTPUT) )
   {
@@ -39,17 +41,15 @@ Portion* GSM_Assign_Undefined( Portion** param )
   }
   return param[0]->RefCopy();
 }
+*/
 
-
-
-
+/*
 Portion* GSM_Assign( Portion** param )
 {
   assert(0);
   Portion* result = 0;
 
-  assert( param[0] != 0 );
-  assert( param[1] != 0 );
+  assert( param[0] != 0 );  assert( param[1] != 0 );
 
   if( param[ 0 ]->Type() == param[ 1 ]->Type() )
   {    
@@ -91,6 +91,21 @@ Portion* GSM_Assign( Portion** param )
 }
 */
 
+/*
+Portion* GSM_Assign(Portion** param)
+{
+  _gsm.PushRef(param[0]->Original()->VarName());
+  _gsm.Push(param[1]->ValCopy());
+  _gsm.Assign();
+  return param[1]->RefCopy();
+}
+
+Portion* GSM_UnAssign(Portion** param)
+{
+  _gsm.PushRef(param[0]->Original()->VarName());
+  return _gsm.UnAssignExt();
+}
+*/
 
 Portion* GSM_Fake(Portion**)
 {
@@ -2060,12 +2075,14 @@ Portion *GSM_Version(Portion **)
 }
 
 
-/*
-extern GSM& _gsm;
-
 Portion* GSM_Help(Portion** param)
 {
   return _gsm.Help(((TextPortion*) param[0])->Value());
+}
+
+Portion* GSM_HelpVars(Portion** param)
+{
+  return _gsm.HelpVars(((TextPortion*) param[0])->Value());
 }
 
 Portion* GSM_Clear(Portion**)
@@ -2073,7 +2090,7 @@ Portion* GSM_Clear(Portion**)
   _gsm.Clear();
   return new BoolValPortion(true);
 }
-*/
+
 
 
 void Init_gsmoper( GSM* gsm )
@@ -2086,6 +2103,7 @@ void Init_gsmoper( GSM* gsm )
   gsm->AddFunction(FuncObj);
 
   //---------------------- Assign ------------------------
+
 /*
   FuncObj = new FuncDescObj( (gString) "Assign" );
   FuncObj->SetFuncInfo( GSM_Assign, 2, 
@@ -2093,15 +2111,15 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetParamInfo( GSM_Assign, 0, "x", porANYTYPE,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetParamInfo( GSM_Assign, 1, "y", porANYTYPE );
-
+  
   FuncObj->SetFuncInfo( GSM_Assign_Undefined, 2,
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
   FuncObj->SetParamInfo( GSM_Assign_Undefined, 0, "x", porUNDEFINED, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetParamInfo( GSM_Assign_Undefined, 1, "y", porANYTYPE );
+
   gsm->AddFunction( FuncObj );
 */
-
 
 
   ParamInfoType xy_Int[] =
@@ -2710,36 +2728,27 @@ void Init_gsmoper( GSM* gsm )
 
   //---------------- faked functions -----------------//
 
-/*
   FuncObj = new FuncDescObj( (gString) "Help" );
   FuncObj->SetFuncInfo( GSM_Help, 1 );
   FuncObj->SetParamInfo( GSM_Help, 0, "x", porTEXT );
   gsm->AddFunction( FuncObj );
 
+  FuncObj = new FuncDescObj( (gString) "HelpVars" );
+  FuncObj->SetFuncInfo( GSM_HelpVars, 1 );
+  FuncObj->SetParamInfo( GSM_HelpVars, 0, "x", porTEXT );
+  gsm->AddFunction( FuncObj );
+
   FuncObj = new FuncDescObj( (gString) "Clear" );
   FuncObj->SetFuncInfo( GSM_Clear, 0 );
   gsm->AddFunction( FuncObj );
-*/
 
-
-  FuncObj = new FuncDescObj( (gString) "Assign" );
-  FuncObj->SetFuncInfo( GSM_Fake, 2 );
-  FuncObj->SetParamInfo( GSM_Fake, 0, "x", porANYTYPE,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Fake, 1, "y", porANYTYPE );
-  gsm->AddFunction( FuncObj );
-
-  FuncObj = new FuncDescObj( (gString) "Include" );
-  FuncObj->SetFuncInfo( GSM_Fake, 1 );
-  FuncObj->SetParamInfo( GSM_Fake, 0, "file", porTEXT );
-  gsm->AddFunction( FuncObj );
-
+/*
   FuncObj = new FuncDescObj( (gString) "UnAssign" );
-  FuncObj->SetFuncInfo( GSM_Fake, 1 );
-  FuncObj->SetParamInfo( GSM_Fake, 0, "x", porANYTYPE,
+  FuncObj->SetFuncInfo( GSM_UnAssign, 1 );
+  FuncObj->SetParamInfo( GSM_UnAssign, 0, "x", porANYTYPE,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction( FuncObj );
-
+*/
 }
 
 

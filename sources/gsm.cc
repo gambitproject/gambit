@@ -47,6 +47,49 @@ TEMPLATE class gStack< RefHashTable* >;
 
 
 
+
+
+#include "gslist.h"
+
+class gFuncListSorter : public gListSorter<FuncDescObj*>
+{
+protected:
+  CompareResult Compare(FuncDescObj* const& a, FuncDescObj* const& b) const
+  {
+    if((a->FuncName()) < (b->FuncName()))
+      return GreaterThan;
+    else if((a->FuncName()) > (b->FuncName()))
+      return LessThan;
+    else
+      return Equal;
+  }
+public:
+  gFuncListSorter(gSortList<FuncDescObj*>& list)
+    : gListSorter<FuncDescObj*>(list)
+    {}
+};
+
+class gTextListSorter : public gListSorter<gString>
+{
+protected:
+  CompareResult Compare(gString const& a, gString const& b) const
+  {
+    if(a < b)
+      return GreaterThan;
+    else if(a > b)
+      return LessThan;
+    else
+      return Equal;
+  }
+public:
+  gTextListSorter(gSortList<gString>& list)
+    : gListSorter<gString>(list)
+    {}
+};
+
+
+
+
 //--------------------------------------------------------------------
 //              implementation of GSM (Stack machine)
 //--------------------------------------------------------------------
@@ -117,6 +160,13 @@ int GSM::MaxDepth( void ) const
 //------------------------------------------------------------------------
 //                           Push() functions
 //------------------------------------------------------------------------
+
+
+bool GSM::Push(Portion* p)
+{
+  _Push(p);
+  return true;
+}
 
 bool GSM::Push( const bool& data )
 {
@@ -571,6 +621,8 @@ bool GSM::Assign( void )
 
 
 
+
+
 bool GSM::UnAssign( void )
 {
   Portion* p;
@@ -604,6 +656,48 @@ bool GSM::UnAssign( void )
     _Push( p );
     _ErrorMessage( _StdErr, 53 );
     return false;
+  }
+}
+
+
+Portion* GSM::UnAssignExt( void )
+{
+  Portion* p;
+  gString txt;
+
+#ifndef NDEBUG
+  if( _Depth() < 1 )
+  {
+    gerr << "  Not enough operands to execute UnAssign[]\n";
+  }
+  assert( _Depth() >= 1 );
+#endif // NDEBUG
+
+  p = _Pop();
+  if( p->Type() == porREFERENCE )
+  {
+    if( _VarIsDefined( ( (ReferencePortion*) p )->Value() ) )
+    {
+      delete p;
+      p = _VarRemove( ( (ReferencePortion*) p )->Value() );
+      return p;
+    }
+    else
+    {
+      _Push( p );
+      txt = "UnAssign[] called on undefined reference \"";
+      txt += ((ReferencePortion*) p)->Value();
+      txt += "\"\n";
+      p = new ErrorPortion(txt);
+      return p;
+    }
+  }
+  else
+  {
+    _Push( p );
+    txt = "UnAssign[] called on a non-reference value\n";
+    p = new ErrorPortion(txt);
+    return p;
   }
 }
 
@@ -1793,11 +1887,8 @@ void GSM::Clear( void )
 
 
 
-void GSM::Help(void)
+Portion* GSM::Help(gString funcname)
 {
-  Portion* p = _Pop();
-  assert(p->Type() == porTEXT);
-  gString funcname = ((TextPortion*) p)->Value();
   int i;
   int j;
   int fk;
@@ -1810,16 +1901,19 @@ void GSM::Help(void)
   FuncDescObj *func;
   gList<FuncDescObj*> funclist;
   gSortList<FuncDescObj*> funcslist;
-
-
+  Portion* result = 0;
 
   if( _FuncTable->IsDefined( funcname ) )
   {
     func = (*_FuncTable)( funcname );
-    func->Dump(_StdOut);
+    gList<gString> list = func->FuncList();
+    result = new ListValPortion();
+    for(i=1; i<=list.Length(); i++)
+      ((ListPortion*) result)->Append(new TextValPortion(list[i]));
   }
   else
   {
+    funcname = funcname.dncase();
     for(i=0; i<_FuncTable->NumBuckets(); i++)
       for(j=1; j<=funcs[i].Length(); j++)
 	funclist.Append(funcs[i][j]);
@@ -1864,7 +1958,6 @@ void GSM::Help(void)
 	match = true;
       if(match)
       {	
-	// _StdOut << ' ' << funclist[i]->FuncName() << "[]\n";
 	func = funclist[i];
 	funcslist.Append(func);
 	found++;
@@ -1872,22 +1965,118 @@ void GSM::Help(void)
     }
 
     gFuncListSorter sorter(funcslist);
-    _StdOut << ' ' << found << " match(es) found\n";
     if(found==1)
-      func->Dump(_StdOut);
+    {
+      gList<gString> list = func->FuncList();
+      result = new ListValPortion();
+      for(i=1; i<=list.Length(); i++)
+	((ListPortion*) result)->Append(new TextValPortion(list[i]));
+    }
     else
     {
-      _StdOut << "Sorting function list...\n";
       sorter.Sort();
+      result = new ListValPortion();
       for(i=1; i<=funcslist.Length(); i++)
-	//funcslist[i]->Dump(_StdOut);
-	_StdOut << ' ' << funcslist[i]->FuncName() << "[]\n";
+	((ListPortion*) result)->
+	  Append(new TextValPortion(funcslist[i]->FuncName()));
+    }
+  }
+
+  if(!result)
+    result = new ErrorPortion("No match found");      
+  return result;
+}
+
+
+Portion* GSM::HelpVars(gString varname)
+{
+  int i;
+  int j;
+  int fk;
+  int ck;
+  int cfk;
+  bool match;
+  int found = 0;
+  gString curname;
+  const gList<gString>* vars = _RefTableStack->Peek()->Key();
+  gString var;
+  gList<gString> varlist;
+  gSortList<gString> varslist;
+  Portion* result = 0;
+
+  if( _RefTableStack->Peek()->IsDefined( varname ) )
+  {
+    result = new ListValPortion();
+    ((ListPortion*) result)->Append(new TextValPortion(varname + ":" + PortionTypeToText( (*(_RefTableStack->Peek()))(varname)->Type() )));
+  }
+  else
+  {
+    varname = varname.dncase();
+    for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
+      for(j=1; j<=vars[i].Length(); j++)
+	varlist.Append(vars[i][j]);
+
+    for(i=1; i<=varlist.Length(); i++)
+    {
+      match = true;
+      curname = varlist[i].dncase();
+      fk = 0; 
+      ck = 0;
+      cfk = -1;
+      while(match && (fk<varname.length()) && (ck<curname.length()))
+      {
+	if(varname[fk]=='*')
+	{
+	  if(fk+1==varname.length())
+	    break;
+	  cfk = fk;
+	  fk++;
+	  while(ck<curname.length() && varname[fk]!=curname[ck])
+	    ck++;
+	  if(ck==curname.length())
+	  { match = false; break; }	  
+	}
+	
+	if(varname[fk]==curname[ck])
+	{ fk++; ck++; }
+	else if(varname[fk]=='?')
+	{ fk++; ck++; }
+	else
+	{
+	  if(cfk<0)
+	    match = false;
+	  else
+	  { fk = cfk; }
+	}
+      }
+
+      if((fk>=varname.length()) != (ck>=curname.length()))	
+	match = false;
+      if(fk+1==varname.length() && varname[fk]=='*')
+	match = true;
+      if(match)
+      {	
+	var = varlist[i];
+	varslist.Append(var);
+	found++;
+      }      
     }
 
-    delete p;
-
+    gTextListSorter sorter(varslist);
+    sorter.Sort();
+    result = new ListValPortion();
+    for(i=1; i<=varslist.Length(); i++)
+      ((ListPortion*) result)->Append(new TextValPortion(varslist[i] + ":" + PortionTypeToText( (*(_RefTableStack->Peek()))(varslist[i])->Type() )));
   }
+
+  if(!result)
+    result = new ErrorPortion("No match found");      
+  return result;
 }
+
+
+
+
 
 //-----------------------------------------------------------------------
 //                         _ErrorMessage
@@ -1982,4 +2171,10 @@ void GSM::_ErrorMessage
 TEMPLATE class gArray<Instruction*>;
 TEMPLATE class gSortList<FuncDescObj*>;
 TEMPLATE class gListSorter<FuncDescObj*>;
+TEMPLATE class gSortList<gString>;
+TEMPLATE class gListSorter<gString>;
+
+
+GSM __gsm__(256);
+GSM& _gsm = __gsm__;
 

@@ -69,13 +69,14 @@ bool Quit::Execute( GSM& ) const
 void Quit::Output( gOutput& s ) const
 { s << "Quit"; }
 
+/*
 Opcode Clear::Type( void ) const
 { return iCLEAR; }
 bool Clear::Execute( GSM& gsm ) const
 { gsm.Clear(); return true; }
 void Clear::Output( gOutput& s ) const
 { s << "Clear"; }
-
+*/
 
 IfGoto::IfGoto( int index )
      : _InstructionIndex( index )
@@ -481,6 +482,7 @@ void Flush::Output( gOutput& s ) const
 { s << "Flush"; }
 
 
+/*
 Opcode Help::Type( void ) const
 { return iHELP; }
 bool Help::Execute( GSM& gsm ) const
@@ -490,7 +492,7 @@ bool Help::Execute( GSM& gsm ) const
 }
 void Help::Output( gOutput& s ) const
 { s << "Help"; }
-
+*/
 
 //--------------------------------------------------------------------------
 

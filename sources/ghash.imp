@@ -176,6 +176,11 @@ template <class K, class T> T& HashTable<K, T>::operator()( K key )
   }
 }
 
+template <class K, class T> const gList<K>* HashTable<K, T>::Key() const
+{
+  return key_bucket;
+}
+
 template <class K, class T> const gList<T>* HashTable<K, T>::Value() const
 {
   return value_bucket;

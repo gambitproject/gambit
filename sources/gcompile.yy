@@ -21,6 +21,8 @@
 #include "gsminstr.h"
 #include "gsmfunc.h"
 
+extern GSM& _gsm;  // defined at the end of gsm.cc
+
 %}
 
 %name GCLCompiler
@@ -44,7 +46,7 @@
   gStack<gInput *> inputs; \
   gStack<gString> filenames; \
   gStack<int> lines; \
-  GSM gsm; \
+  GSM& gsm; \
   bool quit; \
   \
   char nextchar(void); \
@@ -62,7 +64,7 @@
                                labels(4), \
                                listlen(4), matching(4), \
                                filenames(4), lines(4), \
-                               gsm(256), quit(false)
+                               gsm(_gsm), quit(false)
 
 %define CONSTRUCTOR_CODE       filenames.Push("stdin"); lines.Push(1); \
                                inputs.Push(new gFileInput("gclini.gcl")); \
@@ -117,8 +119,6 @@
 %token INCLUDE
 %token ASSIGNFUNC
 %token UNASSIGN
-%token CLEAR
-%token HELP
 
 %token NAME
 %token BOOLEAN
@@ -144,7 +144,6 @@ program:
 toplevel:     statements
         |     include toplevel
         |     funcdecl toplevel
-        |     clearstmt toplevel
 
 statements:   statement
           |   statements sep statement
@@ -152,8 +151,6 @@ statements:   statement
 sep:          SEMI    { semi = true; }
    |          CRLF    { semi = false; 
                         if (!triv)  { emit(new Display); } }
-
-clearstmt:    CLEAR LBRACK RBRACK  { emit(new Clear); }
 
 
 funcdecl:     DEFFUNC LBRACK NAME
@@ -193,8 +190,8 @@ statement:    { triv = true; statementcount++; }
          |    forloop   { triv = false; }
          |    assignment
          |    unassignment
-         |    helpstmt
          |    QUIT     { triv = false; quit = true; emit(new Quit); }
+
 
 assignment:   ASSIGNFUNC LBRACK NAME { emit(new PushRef(tval)); }
               COMMA expression RBRACK { emit(new Assign); }
@@ -204,10 +201,6 @@ unassignment: UNASSIGN LBRACK NAME RBRACK
 		emit(new UnAssign);
 	      }
 
-helpstmt:     HELP LBRACK TEXT RBRACK
-              { emit(new Push<gString>(tval));
-		emit(new Help);
-	      }
 
 include:      INCLUDE LBRACK TEXT RBRACK
               { inputs.Push(new gFileInput(tval));
@@ -461,7 +454,6 @@ static struct tokens toktable[] =
     { DOT, "." }, { CARET, "^" }, { AMPER, "&" }, { WRITE, "<<" }, { READ, ">>" },
     { IF, "If" }, { WHILE, "While" }, { FOR, "For" },
     { QUIT, "Quit" }, { DEFFUNC, "NewFunction" }, { INCLUDE, "Include" },
-    { CLEAR, "Clear" }, { HELP, "Help" },
     { PERCENT, "%" }, { DIV, "DIV" }, { LPAREN, "(" }, { RPAREN, ")" },
     { CRLF, "carriage return" }, { EOC, "carriage return" }, { 0, 0 }
 };
@@ -582,11 +574,8 @@ I_dont_believe_Im_doing_this:
     else if (s == "For")    return FOR;
     else if (s == "Quit")   return QUIT;
     else if (s == "NewFunction")   return DEFFUNC;
-    else if (s == "Include")   return INCLUDE;
-    else if (s == "Assign")  return ASSIGNFUNC;
-    else if (s == "UnAssign")  return UNASSIGN;
-    else if (s == "Help") return HELP;
-    else if (s == "Clear")   return CLEAR;
+    else if (s == "Assign")   return ASSIGNFUNC;
+    else if (s == "UnAssign")   return UNASSIGN;
     else  { tval = s; return NAME; }
   }
 

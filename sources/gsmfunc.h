@@ -185,6 +185,7 @@ public:
 
   gString FuncName ( void ) const;
 
+  gList<gString> FuncList(void) const;
   void Dump(gOutput& f, int i) const;
   void Dump(gOutput& f) const;
 };

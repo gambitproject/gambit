@@ -93,7 +93,6 @@ void Portion::Output( gOutput& s ) const
 
 
 
-
 #ifdef MEMCHECK
 int Portion::_NumObj = 0;
 #endif
@@ -269,7 +268,7 @@ Portion* IntPortion::ValCopy( void ) const
 
 Portion* IntPortion::RefCopy( void ) const
 { 
-  Portion* p = new IntRefPortion( *_Value ); 
+  Portion* p = new IntRefPortion( *_Value );
   p->SetOriginal( Original() );
   return p;
 }

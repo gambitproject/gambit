@@ -766,24 +766,72 @@ gString FuncDescObj::FuncName( void ) const
   return _FuncName;
 }
 
+
+gList<gString> FuncDescObj::FuncList(void) const
+{
+  gList<gString> list;
+  gString f;
+  int i;
+  int j;
+
+  for(i = 0; i < _NumFuncs; i++)
+  {  
+    f = _FuncName + '[';
+    for(j = 0; j < _FuncInfo[i].NumParams; j++)
+    {
+      if(j != 0) f += ", ";
+      if(_FuncInfo[i].ParamInfo[j].DefaultValue) f += '{';
+      f += _FuncInfo[i].ParamInfo[j].Name;
+      if(_FuncInfo[i].ParamInfo[j].PassByReference) f += '<';
+      f += "->";
+    if(_FuncInfo[i].ParamInfo[j].DefaultValue)
+    {
+      switch(_FuncInfo[i].ParamInfo[j].DefaultValue->Type())
+      {
+      case porBOOL:
+	if(((BoolPortion*) _FuncInfo[i].ParamInfo[j].DefaultValue)->Value())
+	  f += "True";
+	else
+	  f += "False";
+	break;
+      case porINTEGER:
+	f += ToString(((IntPortion*) 
+		       _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
+	break;
+      case porFLOAT:
+	f += ToString(((FloatPortion*) 
+		       _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
+	break;
+      case porRATIONAL:
+	f += ToString(((RationalPortion*) 
+		       _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
+	break;
+      case porTEXT:
+	f += ((TextPortion*) _FuncInfo[i].ParamInfo[j].DefaultValue)->Value();
+	break;
+      case porINPUT:
+	f += "INPUT";
+	break;
+      case porOUTPUT:
+	f += "OUTPUT";
+	break;
+      default:
+	f += "N/A";
+      }
+    }
+    else
+      f += PortionTypeToText(_FuncInfo[i].ParamInfo[j].Type);
+    if(_FuncInfo[i].ParamInfo[j].DefaultValue) f += '}';
+    }
+    f += ']';
+    list.Append(f);
+  }
+  return list;
+}
+
 void FuncDescObj::Dump(gOutput& f, int i) const
 {
-  int j;
-  f << _FuncName << '[';
-  for(j = 0; j < _FuncInfo[i].NumParams; j++)
-  {
-    if(j != 0) f << ", ";
-    if(_FuncInfo[i].ParamInfo[j].DefaultValue) f << '{';
-    f << _FuncInfo[i].ParamInfo[j].Name;
-    if(_FuncInfo[i].ParamInfo[j].PassByReference) f << '<';
-    f << "->";
-    if(_FuncInfo[i].ParamInfo[j].DefaultValue)
-      f << _FuncInfo[i].ParamInfo[j].DefaultValue;
-    else
-      f << PortionTypeToText(_FuncInfo[i].ParamInfo[j].Type);
-    if(_FuncInfo[i].ParamInfo[j].DefaultValue) f << '}';
-  }
-  f << "]\n";  
+  f << FuncList()[i] << '\n';
 }
 
 void FuncDescObj::Dump(gOutput& f) const

@@ -95,6 +95,7 @@ public:
 
 
 
+  bool Push(Portion* data);
   bool Push ( const bool&      data );
   bool Push ( const long&      data );
   bool Push ( const double&    data );
@@ -161,29 +162,9 @@ public:
   void Flush  ( void );
   void Clear  ( void );
 
-  void Help(void);
-};
-
-
-
-#include "gslist.h"
-
-class gFuncListSorter : public gListSorter<FuncDescObj*>
-{
-protected:
-  CompareResult Compare(FuncDescObj* const& a, FuncDescObj* const& b) const
-  {
-    if((a->FuncName()) < (b->FuncName()))
-      return GreaterThan;
-    else if((a->FuncName()) > (b->FuncName()))
-      return LessThan;
-    else
-      return Equal;
-  }
-public:
-  gFuncListSorter(gSortList<FuncDescObj*>& list)
-    : gListSorter<FuncDescObj*>(list)
-    {}
+  Portion* Help(gString text);
+  Portion* HelpVars(gString text);
+  Portion* UnAssignExt( void );
 };
 
 

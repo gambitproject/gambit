@@ -98,7 +98,7 @@ class Quit : public Instruction
   void Output( gOutput& s ) const;
 };
 
-
+/*
 class Clear : public Instruction
 {
  public:
@@ -106,6 +106,7 @@ class Clear : public Instruction
   bool Execute( GSM& gsm ) const;
   void Output( gOutput& s ) const;
 };
+*/
 
 class IfGoto : public Instruction
 {
@@ -518,6 +519,7 @@ class Flush : public Instruction
   void Output( gOutput& s ) const;
 };
 
+/*
 class Help : public Instruction
 {
 public:
@@ -525,7 +527,7 @@ public:
   bool Execute(GSM& gsm) const;
   void Output(gOutput& s) const;
 };
-
+*/
 
 gOutput& operator << ( gOutput& s, Instruction* p );
 
