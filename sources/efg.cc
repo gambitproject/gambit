@@ -938,6 +938,58 @@ void BaseEfg::UnmarkSubgames(Node *n)
 }
 
 
+int BaseEfg::ProfileLength(bool trunc) const
+{
+  int sum = 0;
+
+  for (int i = 1; i <= players.Length(); i++)
+    for (int j = 1; j <= players[i]->infosets.Length(); j++)
+      sum += players[i]->infosets[j]->actions.Length() - ((trunc) ? 1 : 0);
+
+  return sum;
+}
+
+gArray<int> BaseEfg::PureDimensionality(void) const
+{
+  gArray<int> foo(players.Length());
+  
+  for (int i = 1; i <= foo.Length(); i++)
+    foo[i] = players[i]->infosets.Length();
+
+  return foo;
+}
+
+gPVector<int> BaseEfg::Dimensionality(bool trunc) const
+{
+  gArray<int> foo(players.Length());
+  int i;
+  for (i = 1; i <= players.Length(); i++)
+    foo[i] = players[i]->infosets.Length();
+
+  gPVector<int> bar(foo);
+  for (i = 1; i <= players.Length(); i++)
+    for (int j = 1; j <= players[i]->infosets.Length(); j++)
+      bar(i, j) = players[i]->infosets[j]->actions.Length() -((trunc) ? 1 : 0);
+
+  return bar;
+}  
+
+gPVector<int> BaseEfg::BeliefDimensionality(bool trunc) const
+{
+  gArray<int> foo(players.Length());
+  int i;
+  for (i = 1; i <= players.Length(); i++)
+    foo[i] = players[i]->infosets.Length();
+
+  gPVector<int> bar(foo);
+  for (i = 1; i <= players.Length(); i++)
+    for (int j = 1; j <= players[i]->infosets.Length(); j++)
+      bar(i, j) = players[i]->infosets[j]->members.Length() -((trunc) ? 1 : 0);
+
+  return bar;
+}  
+
+
 //========================================================================
 
 //--------------------------------------------------------------------------

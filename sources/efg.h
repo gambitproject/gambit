@@ -11,6 +11,9 @@
 #include "gblock.h"
 #include "glist.h"
 
+#include "gpvector.h"
+
+
 class Outcome;
 class EFPlayer;
 class Infoset;
@@ -144,13 +147,17 @@ protected:
     void MarkSubgames(const gList<Node *> &list);
     bool DefineSubgame(Node *n);
     void RemoveSubgame(Node *n);
+
+
+    int ProfileLength(bool trunc = false) const;
+    gArray<int> PureDimensionality(void) const;
+    gPVector<int> Dimensionality(bool trunc = false) const;
+    gPVector<int> BeliefDimensionality(bool trunc = false) const;
 };
 
 
 template <class T> class OutcomeVector;
 #include "behav.h"
-
-#include "gpvector.h"
 
 template <class T> class Efg;
 template <class T> class BehavProfile;
@@ -191,10 +198,6 @@ template <class T> class Efg : public BaseEfg   {
     Infoset *CreateInfoset(EFPlayer *pl, int br);
 
         //# COMPUTING VALUES OF PROFILES
-
-    int ProfileLength(bool trunc = false) const;
-    gPVector<int> Dimensionality(bool trunc = false) const;
-    gPVector<int> BeliefDimensionality(bool trunc = false) const;
 
     void Payoff(const gPVector<int> &profile, gVector<T> &payoff) const;
     void Payoff(const gArray<gArray<int> *> &profile, 

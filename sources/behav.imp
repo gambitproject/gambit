@@ -335,46 +335,6 @@ void Efg<T>::Payoff(const gArray<gArray<int> *> &profile,
 }
 
 
-template <class T> int Efg<T>::ProfileLength(bool trunc) const
-{
-  int sum = 0;
-
-  for (int i = 1; i <= players.Length(); i++)
-    for (int j = 1; j <= players[i]->infosets.Length(); j++)
-      sum += players[i]->infosets[j]->actions.Length() - ((trunc) ? 1 : 0);
-
-  return sum;
-}
-
-template <class T> gPVector<int> Efg<T>::Dimensionality(bool trunc) const
-{
-  gArray<int> foo(players.Length());
-  int i;
-  for (i = 1; i <= players.Length(); i++)
-    foo[i] = players[i]->infosets.Length();
-
-  gPVector<int> bar(foo);
-  for (i = 1; i <= players.Length(); i++)
-    for (int j = 1; j <= players[i]->infosets.Length(); j++)
-      bar(i, j) = players[i]->infosets[j]->actions.Length() -((trunc) ? 1 : 0);
-
-  return bar;
-}  
-
-template <class T> gPVector<int> Efg<T>::BeliefDimensionality(bool trunc) const
-{
-  gArray<int> foo(players.Length());
-  int i;
-  for (i = 1; i <= players.Length(); i++)
-    foo[i] = players[i]->infosets.Length();
-
-  gPVector<int> bar(foo);
-  for (i = 1; i <= players.Length(); i++)
-    for (int j = 1; j <= players[i]->infosets.Length(); j++)
-      bar(i, j) = players[i]->infosets[j]->members.Length() -((trunc) ? 1 : 0);
-
-  return bar;
-}  
 
 
 //-------------------------------------------------------------------------

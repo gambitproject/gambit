@@ -7,78 +7,51 @@
 #include "glist.h"
 
 #include "efg.h"
+#include "efgiter.h"
+#include "efgciter.h"
 #include "behavsol.h"
-
 
 template <class T> int FindPureNash(const Efg<T> &efg,
 				    gList<BehavSolution<T> > &eqs)
 {
-  gVector<int> isets(efg.NumPlayers());
-  for (int i = 1; i <= efg.NumPlayers(); i++)
-    isets[i] = efg.PlayerList()[i]->NumInfosets();
-
-  gPVector<int> profile(isets);
-  profile = 1;
+  int index;
+  EFSupport S(efg);
+  EfgContIter<T> citer(S);
   
-  gVector<T> payoff(efg.NumPlayers()), deviate(efg.NumPlayers());
+  do  {
+    int flag = 1;
+    EfgIter<T> eiter(citer);
 
-  while (true)   {
-    // check if the current profile is a PSNE
-    efg.Payoff(profile, payoff);
-
-    bool is_psne = true;
-
-    for (int i = 1; i <= efg.NumPlayers() && is_psne; i++)  {
-      for (int j = 1; j <= isets[i] && is_psne; j++)  {
-	int foo = profile(i, j);
-
-	for (int k = 1; is_psne &&
-	     k <= efg.PlayerList()[i]->InfosetList()[j]->NumActions(); k++)  {
-	  profile(i, j) = k;
-	  efg.Payoff(profile, deviate);
-	  if (deviate[i] > payoff[i])  is_psne = false;
+    for (int pl = 1; flag && pl <= efg.NumPlayers(); pl++)  {
+      T current = citer.Payoff(pl);
+      for (int iset = 1; flag && iset <= efg.PlayerList()[pl]->NumInfosets();
+	   iset++)  {
+	Infoset *s = efg.PlayerList()[pl]->InfosetList()[iset];
+	for (int act = 1; act <= s->NumActions(); act++)  {
+	  eiter.Next(pl, iset);
+	  if (eiter.Payoff(pl) > current)  {
+	    flag = 0;
+	    break;
+	  }
 	}
-
-	profile(i, j) = foo;
       }
     }
     
-    if (is_psne)    {
-      BehavProfile<T> tmp(efg);
-      ((gVector<T> &) tmp).operator=((T) 0);
-
-      for (int i = 1; i <= efg.NumPlayers(); i++)
-	for (int j = 1; j <= isets[i]; j++)
-	  tmp(i, j, profile(i, j)) = (T) 1;
-
-      BehavSolution<T> sol(tmp, id_PURENASH);
-      sol.SetIsNash(T_YES);
-      eqs.Append(sol);
-    }
-
-    // go to next profile
-
-    int pl = efg.NumPlayers();
-    int iset = isets[pl];
-    
-    while (true)   {
-      if (profile(pl, iset) < efg.PlayerList()[pl]->InfosetList()[iset]->NumActions())  {
-	profile(pl, iset) += 1;
-	break;
+    if (flag)  {
+      BehavProfile<T> temp(efg);
+      // zero out all the entries, since any equlibria are pure
+      ((gVector<T> &) temp).operator=((T) 0);
+      gPVector<int> profile(citer.GetEfgNumbering());
+      for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
+	for (int iset = 1; iset <= efg.PlayerList()[pl]->NumInfosets();
+	     iset++)
+	  temp(pl, iset, profile(pl, iset)) = (T) 1;
       }
 
-      profile(pl, iset) = 1;
-      iset--;
-      if (iset == 0)  {
-	pl--;
-	if (pl == 0)   break;
-	iset = isets[pl];
-      }
+      index = eqs.Append(BehavSolution<T>(temp, id_PURENASH));
+      eqs[index].SetIsNash(T_YES);
     }
-
-    
-    if (pl == 0)   break;
-  }
+  }  while (citer.NextContingency());
 
   return eqs.Length();
 }

@@ -8,8 +8,6 @@
 #include "glist.h"
 #include "glistit.h"
 
-//#include "extform.h"
-
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
@@ -49,6 +47,14 @@ TEMPLATE class BehavProfile<gRational>;
 TEMPLATE gOutput &operator<<(gOutput &, const BehavProfile<gRational> &);
 //TEMPLATE bool operator==(const gArray<gRational> &, const gArray<gRational> &);
 //TEMPLATE bool operator!=(const gArray<gRational> &, const gArray<gRational> &);
+
+#include "efgiter.imp"
+
+TEMPLATE class EfgIter<gRational>;
+
+#include "efgciter.imp"
+
+TEMPLATE class EfgContIter<gRational>;
 
 #include "readefg.imp"
 
