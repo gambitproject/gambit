@@ -443,7 +443,7 @@ Portion *GSM_SetNameOutcome(Portion **param)
 Portion *GSM_SetNamePlayer(Portion **param)
 {
   EFPlayer *p = ((EfPlayerPortion *) param[0])->Value();
-  gString name = ((TextPortion *) param[0])->Value();
+  gString name = ((TextPortion *) param[1])->Value();
   p->SetName(name);
   return param[0]->ValCopy();
 }
@@ -662,7 +662,7 @@ Portion *GSM_NthChild(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
   int child = ((IntPortion *) param[1])->Value();
-  if (child < 1 || child >= n->NumChildren())   return 0;
+  if (child < 1 || child > n->NumChildren())   return 0;
 
   Portion* por = new NodeValPortion(n->GetChild(child));
   por->SetOwner( param[ 0 ]->Owner() );
@@ -969,13 +969,13 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("NewInfoset");
   FuncObj->SetFuncInfo(GSM_NewInfoset1, 3);
-  FuncObj->SetParamInfo(GSM_NewInfoset1, 0, "player", porEF_PLAYER);
+  FuncObj->SetParamInfo(GSM_NewInfoset1, 0, "player", porPLAYER_EFG);
   FuncObj->SetParamInfo(GSM_NewInfoset1, 1, "actions", porINTEGER);
   FuncObj->SetParamInfo(GSM_NewInfoset1, 2, "name", porTEXT,
 			new TextValPortion(""));
 
   FuncObj->SetFuncInfo(GSM_NewInfoset2, 3);
-  FuncObj->SetParamInfo(GSM_NewInfoset2, 0, "player", porEF_PLAYER);
+  FuncObj->SetParamInfo(GSM_NewInfoset2, 0, "player", porPLAYER_EFG);
   FuncObj->SetParamInfo(GSM_NewInfoset2, 1, "actions", porLIST | porTEXT);
   FuncObj->SetParamInfo(GSM_NewInfoset2, 2, "name", porTEXT,
 			new TextValPortion(""));
@@ -1038,7 +1038,7 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_SetNameOutcome, 1, "name", porTEXT);
 
   FuncObj->SetFuncInfo(GSM_SetNamePlayer, 2);
-  FuncObj->SetParamInfo(GSM_SetNamePlayer, 0, "x", porEF_PLAYER);
+  FuncObj->SetParamInfo(GSM_SetNamePlayer, 0, "x", porPLAYER_EFG);
   FuncObj->SetParamInfo(GSM_SetNamePlayer, 1, "name", porTEXT);
   gsm->AddFunction(FuncObj);
 
@@ -1133,7 +1133,7 @@ void Init_efgfunc(GSM *gsm)
 			PASS_BY_REFERENCE ); 
 
   FuncObj->SetFuncInfo(GSM_NamePlayer, 1);
-  FuncObj->SetParamInfo(GSM_NamePlayer, 0, "x", porEF_PLAYER);
+  FuncObj->SetParamInfo(GSM_NamePlayer, 0, "x", porPLAYER_EFG);
 
   FuncObj->SetFuncInfo(GSM_NameNfg, 1);
   FuncObj->SetParamInfo(GSM_NameNfg, 0, "x", porNFG, NO_DEFAULT_VALUE,
@@ -1172,7 +1172,7 @@ void Init_efgfunc(GSM *gsm)
   
   FuncObj = new FuncDescObj("NumInfosets");
   FuncObj->SetFuncInfo(GSM_NumInfosets, 1);
-  FuncObj->SetParamInfo(GSM_NumInfosets, 0, "player", porEF_PLAYER);
+  FuncObj->SetParamInfo(GSM_NumInfosets, 0, "player", porPLAYER_EFG);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NumMembers");
