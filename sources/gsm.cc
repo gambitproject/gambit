@@ -1489,37 +1489,10 @@ bool GSM::Child (void)
   p2 = _ResolveRef(p2);
   p1 = _ResolveRef(p1);
 
+  _Push(p1);
+  _Push(p2);
   
-  if(p1->Spec().ListDepth > 0 && p2->Spec() == porINTEGER)
-  {
-    int n = ((IntPortion *) p2)->Value();
-    bool result = true;
-    if (n <= 0 || n > ((ListPortion*) p1)->Length())
-    {
-      _ErrorMessage(_StdErr, 11);
-      result = false;
-    }
-    else
-    {
-      _Push(((ListPortion*) p1)->SubscriptCopy(n));
-      result = true;
-    }
-    delete p1;
-    delete p2;
-    return result;
-  }
-  else
-  {
-    _Push(p1);
-    _Push(p2);
-    
-    if(p1->Spec().ListDepth > 0)
-      return _BinaryOperation("NthElement");
-    else
-      return _BinaryOperation("NthChild");
-  }
-
-  // return _BinaryOperation("NthChild");
+  return _BinaryOperation("NthChild");
 }
 
 

@@ -2957,8 +2957,7 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Null, 
 				       PortionSpec(porANYTYPE, 0, true),
 				       1, 0, LISTABLE));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", 
-					    PortionSpec(porANYTYPE, 0, true)));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE));
   gsm->AddFunction(FuncObj);
 
 }
