@@ -17,16 +17,17 @@
 #include "gstack.h"
 #include "gcompile.h"
 #include "gcmdline.h"
-
+#include "gpreproc.h"
 
 
 typedef void (*fptr)(int);
 
 void SigFPEHandler(int a)
 {
-if (a==SIGFPE)
-	gerr<<"A floating point error has occured!  The results returned may be invalid\n";
-signal(SIGFPE, (fptr)SigFPEHandler);  //  reinstall signal handler
+  if (a==SIGFPE)
+    gerr << "A floating point error has occured! "
+         << "The results returned may be invalid\n";
+  signal(SIGFPE, (fptr) SigFPEHandler);  //  reinstall signal handler
 }
 
 void SigSegFaultHandler(int)
@@ -36,9 +37,10 @@ void SigSegFaultHandler(int)
   exit(1);
 }
 
-#define MATH_CONTINUE	0
-#define	MATH_IGNORE		1
-#define	MATH_QUIT			2
+#define MATH_CONTINUE    0
+#define	MATH_IGNORE	 1
+#define	MATH_QUIT	 2
+
 #ifdef __BORLANDC__ // this handler is defined differently windows
 extern "C" int winio_ari(const char *msg);
 extern "C" void winio_closeall(void);
@@ -46,43 +48,43 @@ int _RTLENTRY _matherr (struct exception *e)
 #else
 #ifdef __linux__ // kludge to make it compile.  Seems linux does not support.
   struct exception {int type;char *name;double arg1,arg2,retval; }; 
-  #define LN_MINDOUBLE 1e-20
+#define LN_MINDOUBLE 1e-20
 #define SING 0
 #endif
 int matherr(struct exception *e)
 #endif
 {
-char *whyS [] =
-{
-		"argument domain error",
-		"argument singularity ",
-		"overflow range error ",
-		"underflow range error",
-		"total loss of significance",
-		"partial loss of significance"
-};
-static option=MATH_CONTINUE;
-char errMsg[ 80 ];
-if (option!=MATH_IGNORE)
-{
-sprintf (errMsg,
-			"%s (%8g,%8g): %s\n", e->name, e->arg1, e->arg2, whyS [e->type - 1]);
-gerr<<errMsg;
-// define this to pop up a dialog for math errors under windows.  allows to quit.
+  char *whyS [] = { "argument domain error",
+		    "argument singularity ",
+		    "overflow range error ",
+		    "underflow range error",
+		    "total loss of significance",
+		    "partial loss of significance" };
+  static option = MATH_CONTINUE;
+  char errMsg[80];
+  if (option != MATH_IGNORE)  {
+    sprintf (errMsg, "%s (%8g,%8g): %s\n",
+	     e->name, e->arg1, e->arg2, whyS [e->type - 1]);
+    gerr << errMsg;
+// define this to pop up a dialog for math errors under windows. 
+// allows to quit.
 #if defined(__WIN32__) && defined(MATH_ERROR_DIALOG)
-option=winio_ari(errMsg);
-if (option==MATH_QUIT) { winio_closeall(); exit(1);}
+    option = winio_ari(errMsg);
+    if (option == MATH_QUIT) {
+      winio_closeall(); 
+      exit(1);
+    }
 #endif
-}
+  }
 
-if (e->type == SING)
-	if (!strcmp(e->name,"log"))
-		if(e->arg1 == 0.0) {
-e->retval = LN_MINDOUBLE;
-return 1;
-		}
+  if (e->type == SING)
+    if (!strcmp(e->name,"log"))
+      if(e->arg1 == 0.0)  {
+	e->retval = LN_MINDOUBLE;
+	return 1;
+      }
 
-return 1;	// we did not really fix anything, but want no more warnings
+  return 1;	// we did not really fix anything, but want no more warnings
 }
 
 GSM* _gsm;
@@ -91,9 +93,8 @@ char* _ExePath = NULL;
 
 int main( int /*argc*/, char* argv[] )
 {
-
-  _ExePath = new char[ strlen( argv[0] ) + 2 ];
-  strcpy( _ExePath, argv[0] );
+  _ExePath = new char[strlen(argv[0]) + 2];
+  strcpy(_ExePath, argv[0]);
 
 #ifdef __GNUG__
   const char SLASH = '/';
@@ -102,25 +103,22 @@ int main( int /*argc*/, char* argv[] )
 #endif   // __GNUG__
 
 
-  char* c = NULL;
-  c = strrchr( argv[0], SLASH );
+  char *c = strrchr( argv[0], SLASH );
 
-  _SourceDir = new char[ 256 ];
-  if( c != NULL )
-  {
-    int len = strlen( argv[0] ) - strlen( c );
-    assert( len < 256 );
-    strncpy( _SourceDir, argv[0], len );
+  _SourceDir = new char[256];
+  if (c != NULL)  {
+    int len = strlen(argv[0]) - strlen(c);
+    assert(len < 256);
+    strncpy(_SourceDir, argv[0], len);
   }
-  else
-  {
-    strcpy( _SourceDir, "" );
+  else   {
+    strcpy(_SourceDir, "");
   }
     
   
   // Set up the error handling functions:
 #ifndef __BORLANDC__
-  signal(SIGFPE, (fptr)SigFPEHandler);
+  signal(SIGFPE, (fptr) SigFPEHandler);
 
   signal(SIGSEGV, (fptr) SigSegFaultHandler);
   signal(SIGABRT, (fptr) SigSegFaultHandler);
@@ -130,12 +128,14 @@ int main( int /*argc*/, char* argv[] )
 #endif  
 
   _gsm = new GSM(256);
-  GCLCompiler *C = new GCLCompiler;
-  
-  C->Parse();
+
+  GCLCompiler C;
+  gPreprocessor P(&gcmdline);
+
+  while (!P.eof()) 
+    C.Parse(P.GetLine(), P.GetFileName(), P.GetLineNumber());
 
   delete[] _SourceDir;
-  delete C;
   delete _gsm;
 
 

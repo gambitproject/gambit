@@ -130,8 +130,6 @@ gString gPreprocessor::GetLine( void )
 
 	  while( !m_InputStack.Peek()->eof() && !EOL( c ) )
 	    GetChar( c );
-	  break;
-
 	}
 	else if( line.right( 2 ) == "/*" )
 	{
@@ -150,7 +148,6 @@ gString gPreprocessor::GetLine( void )
 	      quote = !quote;
 	  }
 	  SetPrompt( true );
-	  break;
 
 	}
 	else if( line.right( 7 ) == "Include" )

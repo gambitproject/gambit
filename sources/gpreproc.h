@@ -34,7 +34,7 @@ private:
 
 
   
-  bool EOL( char c ) const { return ( c == '\n' || c == 'r' ); }
+  bool EOL( char c ) const { return ( c == '\n' || c == '\r' ); }
 
   void SetPrompt( bool prompt )
   {

@@ -14,7 +14,6 @@
 #include "gmisc.h"
 
 #include "gambitio.h"
-#include "gcmdline.h"
 
 #include "gstring.h"
 #include "rational.h"
@@ -54,15 +53,13 @@ gStack<gString> GCL_InputFileNames(4);
 
 %define MEMBERS   \
   GSM& gsm; \
-  bool record_funcbody, in_funcdecl, fakesemi; \
-  int fakeCRLFs; \
+  bool record_funcbody, in_funcdecl; \
+  int current_char, current_line; \
+  gString current_expr, current_file; \
   gString funcbody, funcname, funcdesc, paramtype, functype; \
   gList<gString> formals, types; \
   gList<Portion *> portions; \
   gList<bool> refs; \
-  gStack<int> lines; \
-  gStack<gInput *> inputs; \
-  gStack<char> matching; \
   gStack<gString> funcnames; \
   gString tval; \
   gclExpression *exprtree; \
@@ -77,16 +74,12 @@ gStack<gString> GCL_InputFileNames(4);
   bool DeleteFunction(void); \
   void RecoverFromError(void); \
   \
-  int Parse(void); \
-  int Execute(void); \
-  void LoadInputs( const char* name ); 
+  int Parse(const gString &line, const gString &file, int line); \
+  int Execute(void); 
 
-%define CONSTRUCTOR_INIT     : gsm(*_gsm), in_funcdecl(false), \
-                               fakesemi(false), fakeCRLFs(1)
+%define CONSTRUCTOR_INIT     : gsm(*_gsm), in_funcdecl(false)
 
-%define CONSTRUCTOR_CODE       GCL_InputFileNames.Push("stdin"); \
-                               lines.Push(1); \
-                               LoadInputs( "gclini.gcl" );
+%define CONSTRUCTOR_CODE     
 
 %union  {
   gclExpression *eval;
@@ -96,7 +89,7 @@ gStack<gString> GCL_InputFileNames(4);
   gclListConstant *lcval;
 }
 
-%type <eval> expression constant function include parameter
+%type <eval> expression constant function parameter
 %type <pval> parameterlist
 %type <rpval> reqparameterlist 
 %type <opval> optparameterlist
@@ -183,16 +176,13 @@ program: expression  EOC  { exprtree = $1; return 0; }
        | error CRLF   { RecoverFromError(); return 1; }
        ;
  
-include:         INCLUDE LBRACK TEXT RBRACK
-                   { ++fakeCRLFs; fakesemi = true; LoadInputs(tval); 
-                     $$ = new gclConstExpr(new BoolPortion(true)); }
-
 expression:      constant
           |      function
-          |      include
           |      LPAREN expression RPAREN   { $$ = $2; }
           |      expression SEMI expression
               { $$ = new gclSemiExpr($1, $3); }
+          |      expression SEMI
+	      { $$ = $1; }
           |      expression ASSIGN expression 
               { $$ = new gclAssignment($1, $3); }
 	  |      expression ASSIGN
@@ -261,12 +251,11 @@ function:        IF LBRACK expression COMMA expression COMMA
                             expression COMMA expression RBRACK
               { $$ = new gclForExpr($3, $5, $7, $9); }
         |        DEFFUNC { if (in_funcdecl) YYERROR;  in_funcdecl = true; }
-                  LBRACK  { gcmdline.SetPrompt(false); } signature COMMA 
+                  LBRACK signature COMMA 
                   { funcbody = ""; record_funcbody = true; }
                   expression RBRACK
                   { record_funcbody = false; in_funcdecl = false;
-                    $$ = DefineFunction($8);
-	            gcmdline.SetPrompt(true); }
+                    $$ = DefineFunction($7); }
         |        NAME LBRACK  { funcnames.Push(tval); } parameterlist RBRACK
               { $$ = new gclFunctionCall(funcnames.Pop(), $4); }
 
@@ -372,54 +361,13 @@ binding:         RARROW    { refs.Append(false); }
 const char CR = (char) 10;
 
 char GCLCompiler::nextchar(void)
-{
-  char c;
-
-  while (inputs.Depth() && inputs.Peek()->eof())  {
-    delete inputs.Pop();
-    GCL_InputFileNames.Pop();
-    lines.Pop();
-  }
-
-  if (fakeCRLFs > 0)  {
-    --fakeCRLFs;
-    c = '\n';
-  }
-  else if (fakesemi)  {
-    fakesemi = false;
-    c = ';';
-  }
-  else  {
-    if (inputs.Depth() == 0)
-      // gin >> c;
-      gcmdline >> c;
-    else
-      *inputs.Peek() >> c;
-
-    if (c == CR)
-      lines.Peek()++;
-
-    if( record_funcbody )
-      funcbody += c;
-
-  }
-  return c;
+{	
+  return current_expr[current_char++];
 }
 
-void GCLCompiler::ungetchar(char c)
+void GCLCompiler::ungetchar(char /*c*/)
 {
-  if (inputs.Depth() == 0)
-    // gin.unget(c);
-    gcmdline.unget(c);
-  else
-    inputs.Peek()->unget(c);
-
-  if (c == CR)
-    lines.Peek()--;
-
-  if( record_funcbody )
-    if( funcbody.length() > 0 )
-      funcbody.remove( funcbody.length() - 1 );
+  current_char--;
 }
 
 typedef struct tokens  { long tok; char *name; } TOKENS_T;
@@ -446,9 +394,8 @@ static struct tokens toktable[] =
     { CRLF, "carriage return" }, { EOC, "carriage return" }, { 0, 0 }
 };
 
-
-  gerr << s << ": " << GCL_InputFileNames.Peek() << ':'
-       << ((yychar == CRLF || yychar == EOC) ? lines.Peek() - 1 : lines.Peek()) << " at ";
+  gerr << s << " at line " << current_line << " in file " << current_file
+       << ": ";
 
   for (int i = 0; toktable[i].tok != 0; i++)
     if (toktable[i].tok == yychar)   {
@@ -482,7 +429,10 @@ static struct tokens toktable[] =
       gerr << "NullOut\n";
       break;
     default:
-      gerr << yychar << '\n';
+      if (isprint(yychar) && !isspace(yychar))
+        gerr << ((char) yychar) << '\n';
+      else 
+        gerr << "nonprinting character " << yychar << '\n';
       break;
   }    
 }
@@ -490,50 +440,10 @@ static struct tokens toktable[] =
 int GCLCompiler::yylex(void)
 {
   char c;
-
-I_dont_believe_Im_doing_this:
-
-  while (1)  {
-    char d;
-    do  {
-      c = nextchar();
-    }  while (isspace(c) && c != CR);
-    if (c == CR && (matching.Depth() || inputs.Depth() > 0))
-      continue;
- 
-    if (c == '/')  {
-      if ((d = nextchar()) == '/')  {
-	while ((d = nextchar()) != CR);
-	if (matching.Depth() || inputs.Depth() > 1)
-	  goto I_dont_believe_Im_doing_this;
-	else
-	  return EOC;
-      }
-      else if (d == '*')  {
-	int done = 0;
-	while (!done)  {
-	  while ((d = nextchar()) != '*');
-	  if ((d = nextchar()) == '/')  done = 1;
-	}
-      }
-      else  {
-	ungetchar(d);
-	return SLASH;
-      }
-    }
-    else
-      break;
-  }
-
-  if (c == '\\')   {
-    while (isspace(c = nextchar()) && c != CR);
-    if (c == CR)
-      goto I_dont_believe_Im_doing_this;
-    else  {
-      ungetchar(c);
-      return '\\';
-    }
-  }
+  
+  do  {
+    c = nextchar();
+  }  while (isspace(c) || c == '\r' || c == '\n');
 
   if (isalpha(c))  {
     gString s(c);
@@ -573,7 +483,6 @@ I_dont_believe_Im_doing_this:
   }
 
   if (c == '"')   {
-    gcmdline.SetPrompt( false );
     tval = "";
     c = nextchar();
     bool lastslash = false;
@@ -587,7 +496,6 @@ I_dont_believe_Im_doing_this:
       lastslash = (c == '\\');
       c = nextchar();
     }
-    gcmdline.SetPrompt( true );
     return TEXT;
   }
 
@@ -638,14 +546,10 @@ I_dont_believe_Im_doing_this:
 
     case ';':   return SEMI;
     case '_':   return UNDERSCORE;
-    case '(':   matching.Push('(');  return LPAREN;
-    case ')':   if (matching.Depth() > 0 && matching.Peek() == '(')
-                  matching.Pop();
-                return RPAREN;
-    case '{':   matching.Push('{');  return LBRACE;
-    case '}':   if (matching.Depth() > 0 && matching.Peek() == '{')
-                  matching.Pop();
-                return RBRACE;
+    case '(':   return LPAREN;
+    case ')':   return RPAREN;
+    case '{':   return LBRACE;
+    case '}':   return RBRACE;
     case '+':   return PLUS;
     case '-':   c = nextchar();
                 if (c == '>')  return RARROW;
@@ -658,19 +562,13 @@ I_dont_believe_Im_doing_this:
                 else   { ungetchar(c);  return EQU; }  
     case '#':   return HASH;
     case '^':   return CARET;
-    case '[':   matching.Push('[');
-                c = nextchar();
-                if (c == '[')   {
-		  matching.Push('[');
-		  return DBLLBRACK;
-		}
+    case '[':   c = nextchar();
+                if (c == '[')  return DBLLBRACK;
                 else   {
 		  ungetchar(c);
 		  return LBRACK;
 		}
-    case ']':   if (matching.Depth() > 0 && matching.Peek() == '[')
-                  matching.Pop();
-                return RBRACK;
+    case ']':   return RBRACK;
     case ':':   c = nextchar();
                 if (c == '=')  return ASSIGN;
                 else   { ungetchar(c);  return ':'; }  
@@ -697,52 +595,37 @@ I_dont_believe_Im_doing_this:
     case '|':   c = nextchar();
                 if (c == '|')  return LOR;
                 else   { ungetchar(c);  return '|'; }
-    case CR:    if (matching.Depth())
-                  //return CRLF;
-                  goto I_dont_believe_Im_doing_this;
-                else if (inputs.Depth() > 0)
-                  goto I_dont_believe_Im_doing_this;
-    case EOF:   return EOC;
-    default:    if ((inputs.Depth() == 0 && gcmdline.eof()) ||
-                    (inputs.Depth() > 0 && inputs.Peek()->eof())) return EOC;
-                return c;
+    case '\0':  return EOC;
+    case CR:    assert(0);
+    default:    return c;
   }
 }
 
-int GCLCompiler::Parse(void)
+int GCLCompiler::Parse(const gString &line, const gString &file, int lineno)
 {
-  int command = 1;
+  current_expr = line;
+  current_char = 0;
+  current_file = file;
+  current_line = lineno;
 
-  while ((inputs.Depth() > 0 || !gcmdline.eof()))  {
-
-    while (inputs.Depth() && inputs.Peek()->eof())  {
-      delete inputs.Pop();
-      GCL_InputFileNames.Pop();
-      lines.Pop();
-    }
-
-    matching.Flush();
-    if (!yyparse())  {
-      Execute();
-      if (exprtree)   delete exprtree;
-      if (inputs.Depth() == 0) command++;
+  for (int i = 0; i < line.length(); i++)   {
+    if (!isspace(line[i]))  {	
+      if (!yyparse())  {	
+        Execute();
+        if (exprtree)   delete exprtree;
+      }
+      
+      gsm.Clear();
+      return 1;
     }
   }
-  gsm.Clear();
-  return 1;
+
+  return 0;
 }
 
 
 void GCLCompiler::RecoverFromError(void)
 {
-  while (inputs.Depth())   {
-    delete inputs.Pop();
-    GCL_InputFileNames.Pop();
-    lines.Pop();
-  }
-
-  gcmdline.ResetPrompt();
-
   in_funcdecl = false;
   formals.Flush();
   types.Flush();
@@ -883,7 +766,7 @@ int GCLCompiler::Execute(void)
   return rcSUCCESS;
 }
 
-
+/*
 void GCLCompiler::LoadInputs( const char* name )
 {
   extern char* _SourceDir;
@@ -963,3 +846,4 @@ void GCLCompiler::LoadInputs( const char* name )
   else
     gerr << "GCL Warning: " << name << " not found.\n";
 }
+*/
