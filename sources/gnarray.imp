@@ -11,7 +11,7 @@ template <class T> gNArray<T>::gNArray(void)
   : storage_size(0), storage(0)
 { }
 
-template <class T> gNArray<T>::gNArray(const gTuple<int> &d)
+template <class T> gNArray<T>::gNArray(const gArray<int> &d)
   : dim(d)
 {
   if (dim.Length() <= 0)   {
@@ -141,7 +141,7 @@ template <class T> T &gNArray<T>::operator[](long l)
   return storage[l];
 }
 
-template <class T> const gTuple<int> &gNArray<T>::Dimensionality(void) const
+template <class T> const gArray<int> &gNArray<T>::Dimensionality(void) const
 {
   return dim;
 }
@@ -162,7 +162,7 @@ gIndexedNArray<T>::gIndexedNArray(const gVector<int> &d)
 {
   long offset = 1;
 
-  index = new gTuple<long>[dim.Length()];
+  index = new gArray<long>[dim.Length()];
   for (int i = 1; i <= dim.Length(); i++)  {
     for (int j = 0; j < dim[i]; j++)
       index[i - 1] += j * offset;
@@ -174,7 +174,7 @@ template <class T>
 gIndexedNArray<T>::gIndexedNArray(const gIndexedNArray<T> &a)
   : gNArray<T>(a)
 {
-  index = new gTuple<long>[dim.Length()];
+  index = new gArray<long>[dim.Length()];
   for (int i = 0; i < dim.Length(); i++)
     index[i] = a.index[i];
 }
@@ -191,7 +191,7 @@ gIndexedNArray<T> &gIndexedNArray<T>::operator=(const gIndexedNArray<T> &a)
     gNArray<T>::operator=(a);
 
     if (index)   delete [] index;
-    index = new gTuple<long>[dim.Length()];
+    index = new gArray<long>[dim.Length()];
     for (int i = 0; i < dim.Length(); i++)
       index[i] = a.index[i];
   }

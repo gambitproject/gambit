@@ -112,15 +112,15 @@ template <class T> long ContIter<T>::GetIndex(void) const
   return profile->GetIndex();
 }
 
-template <class T> gTuple<int> ContIter<T>::Get(void) const
+template <class T> gArray<int> ContIter<T>::Get(void) const
 {
-  gTuple<int> current(N->NumPlayers());
+  gArray<int> current(N->NumPlayers());
   for (int i = 1; i <= current.Length(); i++)
     current[i] = (*profile)[i]->number;
   return current;
 }
 
-template <class T> void ContIter<T>::Get(gTuple<int> &t) const
+template <class T> void ContIter<T>::Get(gArray<int> &t) const
 {
   for (int i = 1; i <= N->NumPlayers(); i++)
     t[i] = (*profile)[i]->number;

@@ -48,8 +48,8 @@ template <class T> class ContIter    {
     void Set(int pl, int num);
     int Next(int pl);
 
-    gTuple<int> Get(void) const;
-    void Get(gTuple<int> &t) const;
+    gArray<int> Get(void) const;
+    void Get(gArray<int> &t) const;
 
     int NextContingency(void);
 

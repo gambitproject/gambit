@@ -10,7 +10,6 @@
 #include <assert.h>
 #include "gambitio.h"
 #include "gvector.h"
-#include "gtuple.h"
 
 //
 // Basic n-dimensional array
@@ -19,14 +18,14 @@ template <class T> class gNArray   {
   protected:
     long storage_size;
     T *storage;
-    gTuple<int> dim;
+    gArray<int> dim;
 
     void DumpFrom(gOutput &, int, gVector<int> &) const;
     void ReadFrom(gInput &, const gVector<int> &, gVector<int> &, int);
 
   public:
     gNArray(void);
-    gNArray(const gTuple<int> &d);
+    gNArray(const gArray<int> &d);
     gNArray(const gNArray<T>& a);
     ~gNArray();
 
@@ -38,7 +37,7 @@ template <class T> class gNArray   {
     const T &operator[](long l) const;
     T &operator[](long l);
 
-    const gTuple<int> &Dimensionality(void) const;
+    const gArray<int> &Dimensionality(void) const;
 
     void Input(gInput &, const gVector<int> &, int);
     void Output(gOutput &) const;
@@ -47,7 +46,7 @@ template <class T> class gNArray   {
 #ifdef UNUSED
 template <class T> class gIndexedNArray : private gNArray<T>   {
   private:
-    gTuple<long> *index;
+    gArray<long> *index;
     
   public:
     gIndexedNArray(void);

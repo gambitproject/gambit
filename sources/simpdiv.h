@@ -29,7 +29,7 @@ template <class T> class SimpdivModule  {
     long leash;
     int t, nplayers, ibar, nevals, nits;
     T pay,d,maxz,bestz,mingrid;
-    gTuple<int> nstrats,ylabel;
+    gArray<int> nstrats,ylabel;
     gVector<T> M;
     gRectArray<int> labels,pi;
     gPVector<int> U,TT;

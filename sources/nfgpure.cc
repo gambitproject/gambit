@@ -10,7 +10,6 @@
 #include "contiter.h"
 #include "rational.h"
 #include "glist.h"
-#include "gtuple.h"
 
 template <class T> int FindPureNash(const NormalForm<T> &N,
 						gList<gPVector<T> > &eqs)
@@ -36,7 +35,7 @@ template <class T> int FindPureNash(const NormalForm<T> &N,
       gPVector<T> temp(N.Dimensionality());
       // zero out all the entries, since any equlibria are pure
       ((gVector<T> &) temp).operator=((T) 0);
-      gTuple<int> profile = citer.Get();
+      gArray<int> profile = citer.Get();
       for (int i = 1; i <= profile.Length(); i++)
 	temp(i, profile[i]) = (T) 1;
       eqs.Append(temp);
