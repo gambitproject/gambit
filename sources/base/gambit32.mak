@@ -13,8 +13,8 @@ BCCDIR = C:\BC5
 SOURCE_SUFFIX = .cc
 OBJECT_SUFFIX = .obj
 
-EXTRACPPFLAGS = -v -I..\..\include
-EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
+EXTRACPPFLAGS = -I..\..\include
+EXTRALINKFLAGS = -Tpe -aa -V4.0 -c
 
 SOURCES = garray.cc gblock.cc glist.cc gmisc.cc gpool.cc \
           grarray.cc gstream.cc gtext.cc gwatch.cc
@@ -27,7 +27,7 @@ WXINC = -I$(WXDIR)\include
 
 OPT = -Od
 
-.cc.obj:
+$(SOURCE_SUFFIX).obj:
 	bcc32 $(CPPFLAGS) -P -c {$< }
 
 GUILIBS=$(WXLIB) cw32mti import32 ole2w32

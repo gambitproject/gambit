@@ -2,7 +2,8 @@ gambit_icn ICON gambit.ico
 efg_icn    ICON efg.ico
 nfg_icn    ICON nfg.ico
 
-rcinclude wx.rc
+rcinclude wx\msw\wx.rc
+rcinclude wx\html\msw\wxhtml.rc
 
 SCISSORCUR	CURSOR	 bitmaps\scissor.cur
 OUTCOMECUR	CURSOR	 bitmaps\outcome.cur

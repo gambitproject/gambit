@@ -7,20 +7,21 @@
 .AUTODEPEND
 
 # The following directories must be set or overriden for the target setup
-WXDIR = C:\TED\WX2
-BCCDIR = C:\BORLAND\BCC55
+WXDIR = E:\WX2
+BCCDIR = C:\BC5
 
 SOURCE_SUFFIX = .cc
 OBJECT_SUFFIX = .obj
 
-EXTRACPPFLAGS = -D__BCC55__ -I$(BCCDIR)\include -I..\include -Ibase -Imath
+# Define __BCC55__ if using Borland 5.5
+EXTRACPPFLAGS = -I$(BCCDIR)\include -I..\include -Ibase -Imath
 EXTRALINKFLAGS = 
 
 !include make.filelist
 
 CFG = gambit32.cfg
 WXLIBDIR = $(WXDIR)\lib
-WXLIB = wx32 xpm
+WXLIB = wx32 xpm tiff jpeg winpng zlib
 WXINC = -I$(WXDIR)\include
 
 .path.cc = .;base;math
@@ -35,7 +36,7 @@ GUILIBS=$(WXLIB) cw32mt import32 ole2w32
 GCLLIBS=cw32mti import32 ole2w32 bfc40 bfcs40
 
 
-LINKFLAGS= /v /c /aa /L$(WXLIBDIR);$(BCCDIR)\lib $(EXTRALINKFLAGS)
+LINKFLAGS= /c /aa /L$(WXLIBDIR);$(BCCDIR)\lib $(EXTRALINKFLAGS)
 OPT = -Od
 DEBUG_FLAGS=
 
@@ -55,7 +56,7 @@ gambit.res
 !
 
 gambit.res :      ..\winsrc\res\gambit.rc 
-    brc32 -r -fo.\gambit.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include ..\winsrc\res\gambit
+    brc32 -r -fo.\gambit.res /i$(BCCDIR)\include /i$(WXDIR)\include ..\winsrc\res\gambit
 
 gcl:   $(TTYGCL_OBJECTS)
   ilink32 $(LINKFLAGS) @&&!
@@ -93,4 +94,7 @@ clean:
         -erase *.res
         -erase *.map
         -erase *.rws
+
+
+
 
