@@ -186,10 +186,14 @@ Node *BaseExtForm::RootNode(void) const
 { return root; }
 
 bool BaseExtForm::IsSuccessor(const Node *n, const Node *from) const
-{ return false; }
+{ return IsPredecessor(from, n); }
 
 bool BaseExtForm::IsPredecessor(const Node *n, const Node *of) const
-{ return false; }
+{ 
+  while (n && n != of)    n = n->parent;
+
+  return (n == of);
+}
 
 //------------------------------------------------------------------------
 //                    ExtForm<T>: Operations on players
@@ -325,13 +329,47 @@ Infoset *BaseExtForm::SwitchPlayer(Node *n, Player *p)
   return n->infoset;
 }
 
+void BaseExtForm::CopySubtree(Node *src, Node *dest, Node *stop)
+{
+  if (src == stop)   return;
+
+  if (src->children.Length())  {
+    AppendNode(dest, src->infoset);
+    for (int i = 1; i <= src->children.Length(); i++)
+      CopySubtree(src->children[i], dest->children[i], stop);
+  }
+
+  dest->name = src->name;
+  dest->outcome = src->outcome;
+}
+
 Node *BaseExtForm::CopyTree(Node *src, Node *dest)
 {
+  assert(src && dest);
+  if (src == dest || dest->children.Length())   return src;
+
+  CopySubtree(src, dest, dest);
+
   return dest;
 }
 
 Node *BaseExtForm::MoveTree(Node *src, Node *dest)
 {
+  assert(src && dest);
+  if (src == dest || dest->children.Length() || IsPredecessor(src, dest))
+    return src;
+
+  Node *parent = src->parent;    // cannot be null, saves us some problems
+
+  parent->children[parent->children.Find(src)] = dest;
+  dest->parent->children[dest->parent->children.Find(dest)] = src;
+
+  src->parent = dest->parent;
+  dest->parent = parent;
+
+  dest->name = "";
+  dest->outcome = 0;
+  
   return dest;
 }
 

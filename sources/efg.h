@@ -27,6 +27,8 @@ class BaseExtForm     {
        //# PROTECTED CONSTRUCTORS -- FOR DERIVED CLASS USE ONLY
     BaseExtForm(void);
 
+    void CopySubtree(Node *, Node *, Node *);
+
     void DisplayTree(gOutput &, Node *) const;
     void WriteEfgFile(gOutput &, Node *) const;
     virtual Infoset *CreateInfoset(int n, Player *pl, int br) = 0;
