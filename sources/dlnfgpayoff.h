@@ -13,7 +13,7 @@ private:
   const Nfg &m_nfg;
   wxText *m_outcomeName;
 
-  const char *HelpString(void) const { return "Outcome Menu"; }
+  const char *HelpString(void) const { return "Change Payoffs Dialog"; }
 
 public:
   dialogNfgPayoffs(const Nfg &, NFOutcome *, wxWindow *parent);

@@ -13,7 +13,8 @@ class dialogEnumPure : public dialogAlgorithm {
 private:
   void AlgorithmFields(void);
 
-  gText HelpTopic(void) const { return "EnumPure"; }
+  const char *HelpString(void) const { return "EnumPure"; }
+
 public:
   dialogEnumPure(wxWindow *p_parent = 0, bool p_subgames = false,
 		 bool p_vianfg = false);

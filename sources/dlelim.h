@@ -13,7 +13,7 @@ private:
   wxCheckBox *m_allBox;
   wxRadioBox *m_domTypeBox, *m_domMethodBox, *m_domPrecisionBox;
 
-  const char *HelpString(void) const { return ""; }
+  const char *HelpString(void) const { return "Normal form Supports"; }
 
   static void CallbackMethod(wxListBox &p_object, wxCommandEvent &)
     { ((dialogElimMixed *) p_object.wxEvtHandler::GetClientData())->OnMethod(); }
@@ -38,7 +38,7 @@ private:
   wxCheckBox *m_allBox;
   wxRadioBox *m_domTypeBox, *m_domConditionalBox;
 
-  const char *HelpString(void) const { return ""; }
+  const char *HelpString(void) const { return "Extensive form Supports"; }
   
 public:
   dialogElimBehav(wxWindow *, const gArray<gText> &p_players);

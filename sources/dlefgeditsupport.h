@@ -1,7 +1,7 @@
 //
 // FILE: dlefgeditsupport.h -- Dialog for editing
 //
-// $id$
+// $Id$
 //
 
 #ifndef DLEFGEDITSUPPORT_H
@@ -18,7 +18,8 @@ private:
   static void CallbackInfoset(wxListBox &, wxCommandEvent &);
   static void CallbackAction(wxListBox &, wxCommandEvent &);
 
-  const char *HelpString(void) const { return ""; }
+  const char *HelpString(void) const
+    { return "Creating and Editing Supports"; }
 
   void OnPlayer(int);
   void OnInfoset(int);
@@ -32,4 +33,4 @@ public:
   gText Name(void) const { return m_nameItem->GetValue(); }
 };
 
-#endif  // DLNFGEDITSUPPORT_H
+#endif  // DLEFGEDITSUPPORT_H

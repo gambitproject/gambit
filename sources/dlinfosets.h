@@ -30,7 +30,7 @@ private:
   void NewInfoset(void);
   void RemoveInfoset(void);
 
-  const char *HelpString(void) const { return "Tree Menu"; }
+  const char *HelpString(void) const { return "Edit Menu (efg)"; }
 
 public:
   dialogInfosets(FullEfg &, wxFrame * = 0);

@@ -19,7 +19,7 @@ private:
 
   void OnEdit(void);
 
-  const char *HelpString(void) const { return "Edit Menu"; }
+  const char *HelpString(void) const { return "Edit Menu (nfg)"; }
 
 public:
   dialogNfgPlayers(Nfg &p_nfg, wxWindow *p_parent = 0);

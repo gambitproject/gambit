@@ -115,7 +115,7 @@ private:
   int GetAccelKey(int);
   int GetKeyIndex(int);
 
-  const char *HelpString(void) const { return "Accelerator Keys"; }
+  const char *HelpString(void) const { return "Accelerators Dialog"; }
     
 public:
   EditAccelDialog(wxWindow *, const gList<Accel> &,

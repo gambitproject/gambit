@@ -14,6 +14,8 @@ private:
   gText m_name;
   wxText *m_outcomeName;
 
+  const char *HelpString(void) const { return "Change Payoffs Dialog"; }
+
 public:
   dialogEfgPayoffs(const FullEfg &, EFOutcome *, wxWindow *parent);
   virtual ~dialogEfgPayoffs() { }

@@ -160,12 +160,13 @@ dialogPlayerColor::dialogPlayerColor(wxWindow *p_parent,
   m_okButton->GetConstraints()->height.AsIs();
 
   m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
+  m_cancelButton->GetConstraints()->left.SameAs(this, wxCentreX, 5);
   m_cancelButton->GetConstraints()->width.AsIs();
   m_cancelButton->GetConstraints()->height.AsIs();
 
-  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->Show(FALSE);
+  m_helpButton->GetConstraints()->top.SameAs(this, wxTop);
+  m_helpButton->GetConstraints()->left.SameAs(this, wxLeft);
   m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
   m_helpButton->GetConstraints()->height.AsIs();
 

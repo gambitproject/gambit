@@ -12,7 +12,7 @@ private:
   FullEfg &m_efg;
   wxListBox *m_outcomeList;
 
-  const char *HelpString(void) const { return "Outcome Menu"; }
+  const char *HelpString(void) const { return "Outcome Select Dialog"; }
 
 public:
   dialogEfgOutcomeSelect(FullEfg &, wxWindow * = 0);

@@ -13,7 +13,7 @@ private:
 
   wxListBox *m_playerNameList;
 
-  const char *HelpString(void) const { return "Infoset Menu"; }
+  const char *HelpString(void) const { return "Edit Menu (efg)"; }
 
 public:
   dialogInfosetReveal(const Efg &, wxWindow *);

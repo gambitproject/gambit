@@ -15,7 +15,7 @@ private:
   wxIntegerItem *m_accuracy;
   wxRadioBox *m_startOption;
 
-  gText HelpTopic(void) const  { return "Qre"; }
+  const char *HelpString(void) const  { return "QRE"; }
   
   void AlgorithmFields(void);
 

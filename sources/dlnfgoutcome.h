@@ -12,7 +12,7 @@ private:
   Nfg &m_nfg;
   wxListBox *m_outcomeList;
 
-  const char *HelpString(void) const { return "Outcome Menu"; }
+  const char *HelpString(void) const { return "Select Outcome Dialog"; }
 
 public:
   dialogNfgOutcomeSelect(Nfg &, wxWindow * = 0);

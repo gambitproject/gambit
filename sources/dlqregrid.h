@@ -16,7 +16,7 @@ private:
   wxCheckBox *m_multiGrid;
   wxRadioBox *m_startOption;
 
-  gText HelpTopic(void) const  { return "QreGrid"; }
+  const char *HelpString(void) const  { return "QRE Grid"; }
 
   void AlgorithmFields(void);
 

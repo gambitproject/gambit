@@ -13,7 +13,7 @@ class dialogLp : public dialogAlgorithm {
 private:
   void AlgorithmFields(void);
 
-  gText HelpTopic(void) const { return "Lp"; }
+  const char *HelpString(void) const { return "Lp"; }
 
 public:
   dialogLp(wxWindow *p_parent = 0, bool p_subgames = false,

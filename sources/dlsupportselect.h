@@ -11,7 +11,7 @@ class dialogSupportSelect : public guiAutoDialog {
 private:
   wxListBox *m_supportList;
 
-  const char *HelpString(void) const { return ""; }
+  const char *HelpString(void) const { return "Supports"; }
 
 public:
   dialogSupportSelect(const gList<NFSupport *> &p_supports, 

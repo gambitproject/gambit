@@ -30,6 +30,8 @@ private:
   wxSlider *m_branchLength, *m_nodeLength, *m_forkLength, *m_ySpacing;
   wxRadioBox *m_infosetLines;
 
+  const char *HelpString(void) const { return "Prefs Menu (efg)"; }
+
 public:
   dialogTreeOptions(const TreeDrawSettings &p_settings, wxWindow *p_parent);
   virtual ~dialogTreeOptions() { }
@@ -209,6 +211,8 @@ class dialogLegends : public guiAutoDialog {
 private:
   wxChoice *m_nodeAbove, *m_nodeBelow, *m_nodeAfter;
   wxChoice *m_branchAbove, *m_branchBelow;
+
+  const char *HelpString(void) const { return "Legends Dialog"; }
 
 public:
   dialogLegends(const TreeDrawSettings &, wxWindow *);

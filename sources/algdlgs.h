@@ -52,7 +52,6 @@ protected:
   void PrecisionField(void);
 
   virtual void AlgorithmFields(void) { }
-  const char *HelpTopic(void) const  { return "Solutions of Games"; }
   void MakeCommonFields(bool p_dominance, bool p_subgames, bool p_vianfg);
 
 public:

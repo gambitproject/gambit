@@ -13,7 +13,7 @@ class dialogSimpdiv : public dialogAlgorithm {
 private:
   wxIntegerItem *m_nRestarts, *m_leashLength;
 
-  gText HelpTopic(void) const { return "Simpdiv"; }
+  const char *HelpString(void) const { return "SimpDiv"; }
 
   void AlgorithmFields(void);
 

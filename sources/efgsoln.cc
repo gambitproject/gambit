@@ -262,7 +262,7 @@ void NodeSolnShow::OnMenuCommand(int id)
 void NodeSolnShow::OnHelp(int help_type)
 {
   if (!help_type) // contents
-    wxHelpContents(EFG_INSPECT_HELP);
+    wxHelpContents("Extensive Form Solution Inspect");
   else
     wxHelpAbout();
 }
@@ -412,7 +412,7 @@ private:
     { ((BSolnSortFilterDialog *)ob.GetClientData())->OnCancel(); }
 
     static void help_func(wxButton &, wxEvent &)
-    { wxHelpContents(EFG_SOLN_SORT_HELP); }
+    { wxHelpContents("Sorting and Filtering Solutions"); }
 
     void OnOk(void);
     void OnCancel(void);
@@ -675,7 +675,7 @@ Bool EfgSolnShow::HilightInfoset(int pl, int iset)
 void EfgSolnShow::OnHelp(int help_type)
 {
     if (!help_type) // contents
-        wxHelpContents(EFG_INSPECT_HELP);
+        wxHelpContents("Extensive Form Solution Inspect");
     else
         wxHelpAbout();
 }

@@ -12,7 +12,7 @@ private:
   Infoset *m_infoset;
   wxListBox *m_actionList;
 
-  const char *HelpString(void) const { return "Action Menu"; }
+  const char *HelpString(void) const { return "Edit Menu (efg)"; }
 
 public:
   dialogActionSelect(Infoset *, const gText &, const gText &, wxWindow *);

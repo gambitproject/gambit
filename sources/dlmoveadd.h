@@ -29,7 +29,7 @@ private:
 
   void OnOk(void);
 
-  const char *HelpString(void) const { return "Node Menu"; }
+  const char *HelpString(void) const { return "Add Move Dialog"; }
   
 public:
   dialogMoveAdd(FullEfg &, const gText &,

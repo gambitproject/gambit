@@ -12,7 +12,7 @@ private:
   Node *m_node;
   wxListBox *m_branchList;
 
-  const char *HelpString(void) const  { return "Node Menu"; }
+  const char *HelpString(void) const  { return "Edit Menu (efg)"; }
 
 public:
   dialogNodeDelete(Node *, wxWindow *);

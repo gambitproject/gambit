@@ -17,7 +17,8 @@ private:
   static void CallbackPlayer(wxListBox &, wxCommandEvent &);
   static void CallbackStrategy(wxListBox &, wxCommandEvent &);
 
-  const char *HelpString(void) const { return ""; }
+  const char *HelpString(void) const
+    { return "Creating and Editing Supports"; }
 
   void OnPlayer(int);
   void OnStrategy(int);

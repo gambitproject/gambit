@@ -14,7 +14,7 @@ private:
   wxIntegerItem *m_accuracy, *m_nTries;
   wxRadioBox *m_startOption;
 
-  gText HelpTopic(void) const { return "Liap"; }
+  const char *HelpString(void) const { return "Liap"; }
 
   void AlgorithmFields(void);
 

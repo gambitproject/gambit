@@ -19,7 +19,7 @@ private:
   static void CallbackPlayer(wxListBox &, wxCommandEvent &);
   static void CallbackStrategy(wxListBox &, wxCommandEvent &);
 
-  const char *HelpString(void) const { return "Edit Menu"; }
+  const char *HelpString(void) const { return "Edit Menu (nfg)"; }
 
   void OnPlayer(int);
   void OnStrategy(int);

@@ -13,7 +13,7 @@ class dialogLcp : public dialogAlgorithm {
 private:
   void AlgorithmFields(void);
 
-  gText HelpTopic(void) const { return "Lcp"; }
+  const char *HelpString(void) const { return "Lp"; }
 
 public:
   dialogLcp(wxWindow *p_parent = 0,

@@ -22,7 +22,7 @@ private:
   void OnEdit(void);
   void OnNew(void);
 
-  const char *HelpString(void) const { return "Tree Menu"; }
+  const char *HelpString(void) const { return "Edit Menu (efg)"; }
 
 public:
   dialogEfgPlayers(FullEfg &p_efg, wxWindow *p_parent = 0);

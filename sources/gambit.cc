@@ -271,11 +271,8 @@ wxFrame *GambitApp::OnInit(void)
   // Set up the help system.
   gText workingDir = wxGetWorkingDirectory();
 
-  wxInitHelp(workingDir + "/gambit", "Gambit -- Graphics User Interface, Version 0.96\n\n"
-	     "Developed by Richard D. McKelvey (rdm@hss.caltech.edu)\n"
-	     "Main Programmer:  Theodore Turocy (arbiter@nwu.edu)\n"
-	     "Polynomial Solution code:  Andrew McLennan (mclennan@icarus.socsci.umn.edu)\n"
-	     "Front End: Eugene Grayver (egrayver@hss.caltech.edu)\n"
+  wxInitHelp(workingDir + "/gambit", "Gambit Graphics User Interface, Version 0.96\n\n"
+	     "Developed by the Gambit Project (gambit@hss.caltech.edu)\n"
 	     "California Institute of Technology, 1996-9.\n"
 	     "Funding provided by the National Science Foundation");
   
