@@ -35,6 +35,7 @@ TEMPLATE class gBlock<gString>;
 #include "garray.imp"
 TEMPLATE class gArray<gBlock<int> >;
 TEMPLATE class gArray<gBlock<double> >;
+TEMPLATE class gBlock<gArray<int> *>;
 TEMPLATE class gBlock<gBlock<int> >;
 TEMPLATE class gBlock<gBlock<double> >;
 
@@ -48,6 +49,7 @@ TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gRational> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gString> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gArray<gBlock<int> > &);
 TEMPLATE gOutput &operator<<(gOutput &, const gArray<gBlock<double> > &);
+TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gArray<int> *> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gBlock<int> > &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gBlock<double> > &);
 

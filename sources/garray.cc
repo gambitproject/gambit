@@ -26,6 +26,7 @@ TEMPLATE class gArray<gInteger>;
 TEMPLATE class gArray<gRational>;
 TEMPLATE class gArray<gString>;
 TEMPLATE class gArray<gArray<int> >;
+TEMPLATE class gArray<gArray<int> *>;
 TEMPLATE class gArray<gArray<double> >;
 
 TEMPLATE gOutput &operator<<(gOutput &, const gArray<bool> &);
@@ -37,4 +38,6 @@ TEMPLATE gOutput &operator<<(gOutput &, const gArray<gInteger> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gArray<gRational> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gArray<gString> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gArray<gArray<int> > &);
+TEMPLATE gOutput &operator<<(gOutput &, const gArray<gArray<int> *> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gArray<gArray<double> > &);
+
