@@ -396,6 +396,9 @@ Node *BaseEfg::DeleteNode(Node *n, Node *keep)
 
   if (keep->parent != n)   return n;
 
+  if (n->gameroot == n)
+    MarkSubgame(keep, keep);
+
   n->children.Remove(n->children.Find(keep));
   DeleteTree(n);
   keep->parent = n->parent;
