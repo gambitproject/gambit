@@ -161,28 +161,52 @@ void wxCancelButton::Get(void) const
 class wxGSM : public GSM {
 private:
   gStatus &m_status;
+  gStatus *m_algorithmStatus;
+  bool m_useAlgorithmStatus;
   wxWindow *m_parent;
 
 public:
   wxGSM(wxWindow *p_parent, gStatus &p_status,
-	gInput &p_input, gOutput &p_output, gOutput &p_error)
-    : GSM(p_input, p_output, p_error), m_status(p_status), m_parent(p_parent)
-    { }
+	gInput &p_input, gOutput &p_output, gOutput &p_error);
   virtual ~wxGSM() { }
 
-  gStatus &GetStatusMonitor(void) { return m_status; }
-  gStatus *StartAlgorithmMonitor(const gText &);
-  void EndAlgorithmMonitor(gStatus *);
+  gStatus &GetStatusMonitor(void);
+  void StartAlgorithmMonitor(const gText &);
+  void EndAlgorithmMonitor(void);
+  void ToggleMonitorStyle(void);
 };
 
-gStatus *wxGSM::StartAlgorithmMonitor(const gText &p_caption)
+wxGSM::wxGSM(wxWindow *p_parent, gStatus &p_status,
+	     gInput &p_input, gOutput &p_output, gOutput &p_error)
+  : GSM(p_input, p_output, p_error),
+    m_status(p_status), m_algorithmStatus(0),
+    m_useAlgorithmStatus(true), m_parent(p_parent)
+{ }
+
+gStatus &wxGSM::GetStatusMonitor(void)
 {
-  return new wxStatus(m_parent, p_caption);
+  return ((m_useAlgorithmStatus && m_algorithmStatus) ? 
+	  *m_algorithmStatus : m_status);
+} 
+
+void wxGSM::StartAlgorithmMonitor(const gText &p_caption)
+{
+  if (m_useAlgorithmStatus) {
+    m_algorithmStatus = new wxStatus(m_parent, p_caption);
+  }
 }
 
-void wxGSM::EndAlgorithmMonitor(gStatus *p_status)
+void wxGSM::EndAlgorithmMonitor(void)
 {
-  delete p_status;
+  if (m_useAlgorithmStatus && m_algorithmStatus) {
+    delete m_algorithmStatus;
+    m_algorithmStatus = 0;
+  }
+}
+
+void wxGSM::ToggleMonitorStyle(void)
+{
+  m_useAlgorithmStatus = !m_useAlgorithmStatus;
 }
 
 
@@ -197,12 +221,13 @@ private:
   wxOutputWindowStream *m_outputStream;
   gList<gText> m_history;
 
-  GSM *m_environment;
+  wxGSM *m_environment;
   GCLCompiler *m_compiler;
 
   // Menu event handlers
   void OnSaveLog(wxCommandEvent &);
   void OnSaveScript(wxCommandEvent &);
+  void OnPrefsProgress(wxCommandEvent &);
   void OnPrefsInputFont(wxCommandEvent &);
   void OnPrefsOutputFont(wxCommandEvent &);
   void OnHelpAbout(wxCommandEvent &);
@@ -238,6 +263,7 @@ const int idSAVE_LOG = 2001;
 const int idSAVE_SCRIPT = 2002;
 const int idPREFS_INPUTFONT = 2100;
 const int idPREFS_OUTPUTFONT = 2101;
+const int idPREFS_PROGRESS = 2102;
 
 GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
 		   const wxPoint &p_position, const wxSize &p_size)
@@ -256,6 +282,9 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
   editMenu->Append(wxID_PASTE, "&Paste", "Paste selected text");
 
   wxMenu *prefsMenu = new wxMenu;
+  prefsMenu->Append(idPREFS_PROGRESS, "Show &progress display",
+		    "Show progress display for algorithms", true);
+  prefsMenu->AppendSeparator();
   prefsMenu->Append(idPREFS_INPUTFONT, "&Input window font",
 		    "Change the font used in the input window");
   prefsMenu->Append(idPREFS_OUTPUTFONT, "&Output window font",
@@ -271,6 +300,7 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
   menuBar->Append(prefsMenu, "&Prefs");
   menuBar->Append(helpMenu, "&Help");
   SetMenuBar(menuBar);
+  GetMenuBar()->Check(idPREFS_PROGRESS, true);
 
   CreateStatusBar();
 
@@ -351,6 +381,7 @@ BEGIN_EVENT_TABLE(GclFrame, wxFrame)
   EVT_MENU(idSAVE_LOG, GclFrame::OnSaveLog)
   EVT_MENU(idSAVE_SCRIPT, GclFrame::OnSaveScript)
   EVT_MENU(wxID_EXIT, wxWindow::Close)
+  EVT_MENU(idPREFS_PROGRESS, GclFrame::OnPrefsProgress)
   EVT_MENU(idPREFS_INPUTFONT, GclFrame::OnPrefsInputFont)
   EVT_MENU(idPREFS_OUTPUTFONT, GclFrame::OnPrefsOutputFont)
   EVT_MENU(wxID_ABOUT, GclFrame::OnHelpAbout)
@@ -402,6 +433,11 @@ void GclFrame::OnSaveScript(wxCommandEvent &)
 		   "Error", wxOK);
     }
   }
+}
+
+void GclFrame::OnPrefsProgress(wxCommandEvent &)
+{
+  m_environment->ToggleMonitorStyle();
 }
 
 void GclFrame::OnPrefsInputFont(wxCommandEvent &) 

@@ -1080,13 +1080,13 @@ void GSM::GlobalVarRemove     ( const gText& var_name )
   delete _GlobalRefTable.Remove(var_name);
 }
 
-gStatus *GSM::StartAlgorithmMonitor(const gText &)
-{
-  return &GetStatusMonitor();
-}
-
-void GSM::EndAlgorithmMonitor(gStatus *)
+void GSM::StartAlgorithmMonitor(const gText &)
 { }
+
+void GSM::EndAlgorithmMonitor(void)
+{
+  GetStatusMonitor().Reset();
+}
 
 gclRuntimeError::gclRuntimeError(const gText &s)
   : message(s)
