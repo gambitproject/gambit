@@ -38,7 +38,7 @@ gSquareMatrix<T> &gSquareMatrix<T>::operator=(const gSquareMatrix<T> &M)
 //                gSquareMatrix<T>: Public member functions
 //-----------------------------------------------------------------------------
 
-template <class T> gSquareMatrix<T> gSquareMatrix<T>::Invert(void) const
+template <class T> gSquareMatrix<T> gSquareMatrix<T>::Inverse(void) const
 {
   assert(mincol == minrow && maxcol == maxrow);
   gSquareMatrix<T> copy(*this);
