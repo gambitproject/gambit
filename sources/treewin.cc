@@ -2749,7 +2749,7 @@ void TreeWindow::file_save(void)
 {
   static int s_nDecimals = 6;
   gText filename = frame->Filename();
-  gText s = wxFileSelector("Save data file", wxPathOnly(filename),
+  gText s = wxFileSelector("Save data file", (char *)gPathOnly(filename),
                (char *)gFileNameFromPath(filename), ".efg", "*.efg",
                wxSAVE | wxOVERWRITE_PROMPT);
 

@@ -1094,9 +1094,13 @@ gText gFileNameFromPath(char *path)
   gText filename(path);
   if(strstr("/",path) || strstr("\\",path))
     filename = FileNameFromPath(path);
-  filename = filename.Dncase();
   return filename;
 }
 
-
-
+gText gPathOnly(char *name)
+{
+  gText path;
+  if(strstr("/",name) || strstr("\\",name))
+    path = wxPathOnly(name);
+  return path;
+}

@@ -231,7 +231,7 @@ void NfgShow::Save(void)
 {
   static int s_nDecimals = 6;
   gText filename = Filename();
-  gText s = wxFileSelector("Save data file", wxPathOnly(filename), 
+  gText s = wxFileSelector("Save data file", (char *)gPathOnly(filename), 
                (char *)gFileNameFromPath(filename), ".nfg", "*.nfg", 
                wxSAVE | wxOVERWRITE_PROMPT);
 

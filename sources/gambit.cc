@@ -407,7 +407,7 @@ void GambitFrame::LoadFile(char *s)
                 return;
 
             // Save the current directory.
-            gambitApp.SetCurrentDir(gText(wxPathOnly(s)));
+            gambitApp.SetCurrentDir(gPathOnly(s));
 
             GUI_RECORD_ARG("GambitFrame::LoadFile", 1, s);
 
@@ -419,6 +419,7 @@ void GambitFrame::LoadFile(char *s)
     {
 
       gText filename(gFileNameFromPath(s));
+      filename = filename.Dncase();
 
 #ifndef EFG_ONLY
         if (strstr((const char *)filename, ".nfg"))       // This must be a normal form.
