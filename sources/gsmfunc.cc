@@ -5,10 +5,10 @@
 //# $Id$
 //#
 
+#include <assert.h>
 
 #include "gsmfunc.h"
 
-#include <assert.h>
 #include "glist.h"
 #include "gstack.h"
 
@@ -712,42 +712,9 @@ gList<gString> FuncDescObj::FuncList( bool udf, bool bif ) const
 	f += _FuncInfo[i].ParamInfo[j].Name;
 	if(_FuncInfo[i].ParamInfo[j].PassByReference) f += '<';
 	f += "->";
+	
 	if(_FuncInfo[i].ParamInfo[j].DefaultValue)
-	{
-	  switch(_FuncInfo[i].ParamInfo[j].DefaultValue->Spec().Type)
-	  {
-	  case porBOOL:
-	    if(((BoolPortion*)
-		_FuncInfo[i].ParamInfo[j].DefaultValue)->Value())
-	      f += "True";
-	    else
-	      f += "False";
-	    break;
-	  case porINTEGER:
-	    f += ToString(((IntPortion*) 
-			   _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
-	    break;
-	  case porFLOAT:
-	    f += ToString(((FloatPortion*) 
-			   _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
-	    break;
-	  case porRATIONAL:
-	    f += ToString(((RationalPortion*) 
-			   _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
-	    break;
-	  case porTEXT:
-	    f += ((TextPortion*)_FuncInfo[i].ParamInfo[j].DefaultValue)->Value();
-	    break;
-	  case porINPUT:
-	    f += "INPUT";
-	    break;
-	  case porOUTPUT:
-	    f += "OUTPUT";
-	    break;
-	  default:
-	    f += "N/A";
-	  }
-	}
+	  f += _FuncInfo[i].ParamInfo[j].DefaultValue->OutputString();
 	else
 	  f += PortionSpecToText(_FuncInfo[i].ParamInfo[j].Spec);
 	

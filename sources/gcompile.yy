@@ -210,10 +210,17 @@ optparam:     { assert( optparam == 0 );
                 optparam = new gList<NewInstr*>; }
               expression 
               { 
-                assert( gsm.Execute( *optparam ) == rcSUCCESS );
-                Portion* _p_ = gsm.PopValue();
-                assert( _p_ != 0 );
-                portions.Append( _p_ );
+                if( gsm.Execute( *optparam ) == rcSUCCESS )
+                {
+                  Portion* _p_ = gsm.PopValue();
+                  assert( _p_ != 0 );
+                  if( _p_->Spec().Type != porREFERENCE )
+                    portions.Append( _p_ );
+                  else
+                    portions.Append( NO_DEFAULT_VALUE );
+                }
+                else
+                  portions.Append( NO_DEFAULT_VALUE );
                 delete optparam;
                 optparam = 0;
               }

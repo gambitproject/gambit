@@ -78,7 +78,10 @@ public:
   Portion* Original(void) const;
 
   virtual PortionSpec Spec(void) const = 0;
+
   virtual void Output(gOutput& s) const;
+  virtual gString OutputString( void ) const = 0;
+
   virtual Portion* ValCopy(void) const = 0;
   virtual Portion* RefCopy(void) const = 0;
   virtual bool IsReference(void) const = 0;
@@ -107,7 +110,10 @@ public:
 
   gString Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
   bool IsReference(void) const;
@@ -130,7 +136,10 @@ public:
 
   PortionSpec Spec(void) const;
   unsigned long DataType(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
   bool IsReference(void) const;
@@ -153,7 +162,10 @@ public:
 
   gString Value(void);
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
   bool IsReference(void) const;
@@ -178,7 +190,10 @@ public:
 
   long& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -215,7 +230,10 @@ public:
 
   double& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -253,7 +271,10 @@ public:
 
   gRational& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -293,7 +314,10 @@ public:
 
   gString& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -331,7 +355,10 @@ public:
 
   bool& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -379,7 +406,10 @@ public:
 
   Outcome*& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -418,7 +448,10 @@ public:
 
   NFPlayer*& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -461,7 +494,10 @@ public:
 
   Strategy*& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -503,7 +539,10 @@ public:
 
   NFSupport*& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -543,7 +582,10 @@ public:
 
   EFSupport*& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -583,7 +625,10 @@ public:
 
   EFPlayer*& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -624,7 +669,10 @@ public:
 
   Infoset*& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -664,7 +712,10 @@ public:
 
   Node*& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -704,7 +755,10 @@ public:
 
   Action*& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -749,7 +803,10 @@ public:
 
   BaseMixedProfile*& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -792,7 +849,10 @@ public:
 
   BaseBehavProfile*& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -836,7 +896,10 @@ public:
 
   BaseNfg*& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -878,7 +941,10 @@ public:
 
   BaseEfg*& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -919,7 +985,10 @@ public:
 
   gOutput& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -958,7 +1027,10 @@ public:
 
   gInput& Value(void) const;
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 };
@@ -1010,8 +1082,11 @@ public:
   gList< Portion* >& Value(void) const;
   void SetDataType(unsigned long type);
   PortionSpec Spec(void) const;
+
   void Output(gOutput& s) const;
   void Output(gOutput& s, long ListLF) const;
+  gString OutputString( void ) const;
+
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 

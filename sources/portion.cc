@@ -239,11 +239,17 @@ PortionSpec ErrorPortion::Spec(void) const
 void ErrorPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
-  if(_Value == "")
-    s << "(Error)";
-  else
-    s << _Value;
+  s << OutputString();
 }
+
+gString ErrorPortion::OutputString( void ) const
+{
+  if(_Value == "")
+    return "(Error)";
+  else
+    return _Value;  
+}
+
 
 Portion* ErrorPortion::ValCopy(void) const
 { return new ErrorPortion(_Value); }
@@ -275,7 +281,12 @@ PortionSpec NullPortion::Spec(void) const
 void NullPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
-  s << "Null(" << PortionSpecToText(_DataType) << ')';
+  s << OutputString();
+}
+
+gString NullPortion::OutputString( void ) const
+{
+  return (gString) "Null(" + PortionSpecToText(_DataType) + ')';
 }
 
 Portion* NullPortion::ValCopy(void) const
@@ -308,7 +319,12 @@ PortionSpec ReferencePortion::Spec(void) const
 void ReferencePortion::Output(gOutput& s) const
 { 
   Portion::Output(s);
-  s << "(Reference) \"" << _Value << "\""; 
+  s << OutputString();
+}
+
+gString ReferencePortion::OutputString( void ) const
+{
+  return (gString) "(Reference) \"" + _Value + "\""; 
 }
 
 Portion* ReferencePortion::ValCopy(void) const
@@ -341,6 +357,11 @@ void IntPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
   s << *_Value; 
+}
+
+gString IntPortion::OutputString( void ) const
+{
+  return ToString( *_Value );
 }
 
 Portion* IntPortion::ValCopy(void) const
@@ -394,6 +415,11 @@ void FloatPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
   s << *_Value; 
+}
+
+gString FloatPortion::OutputString( void ) const
+{
+  return ToString( *_Value );
 }
 
 Portion* FloatPortion::ValCopy(void) const
@@ -451,6 +477,11 @@ void RationalPortion::Output(gOutput& s) const
   s << *_Value; 
 }
 
+gString RationalPortion::OutputString( void ) const
+{
+  return ToString( *_Value );
+}
+
 Portion* RationalPortion::ValCopy(void) const
 { return new RationalValPortion(*_Value); }
 
@@ -504,8 +535,13 @@ PortionSpec TextPortion::Spec(void) const
 void TextPortion::Output(gOutput& s) const
 { 
   Portion::Output(s);
+  s << OutputString();
+}
+
+gString TextPortion::OutputString( void ) const
+{
   gString text = *_Value;
-  int i;
+  int i = 0;
   for(i = 0; i < text.length(); i++)
     if(text[i] == '\\' && text[i + 1] == 'n')
     {
@@ -513,9 +549,9 @@ void TextPortion::Output(gOutput& s) const
       text[i] = '\n';
     }
 
-  if(_WriteQuoted) s << "\"";
-  s << text;
-  if(_WriteQuoted) s << "\""; 
+  if(_WriteQuoted) 
+    text = (gString) '\"' + text + '\"';
+  return text;
 }
 
 Portion* TextPortion::ValCopy(void) const
@@ -575,7 +611,12 @@ PortionSpec BoolPortion::Spec(void) const
 void BoolPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
-  s << (*_Value ? "True" : "False"); 
+  s << OutputString();
+}
+
+gString BoolPortion::OutputString( void ) const
+{
+  return (*_Value ? "True" : "False");  
 }
 
 Portion* BoolPortion::ValCopy(void) const
@@ -655,6 +696,11 @@ void OutcomePortion::Output(gOutput& s) const
   }
 }
 
+gString OutcomePortion::OutputString( void ) const
+{
+  return "(Outcome)";
+}
+
 Portion* OutcomePortion::ValCopy(void) const
 { 
   Portion* p = new OutcomeValPortion(*_Value);
@@ -720,6 +766,11 @@ void NfPlayerPortion::Output(gOutput& s) const
   s << "(NfPlayer) " << *_Value;
   if(*_Value)
     s << " \"" << (*_Value)->GetName() << "\""; 
+}
+
+gString NfPlayerPortion::OutputString( void ) const
+{
+  return "(NfPlayer)";
 }
 
 Portion* NfPlayerPortion::ValCopy(void) const
@@ -798,6 +849,11 @@ void StrategyPortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->name << "\""; 
 }
 
+gString StrategyPortion::OutputString( void ) const
+{
+  return "(Strategy)";
+}
+
 Portion* StrategyPortion::ValCopy(void) const
 {
   Portion* p = new StrategyValPortion(*_Value); 
@@ -866,6 +922,11 @@ void NfSupportPortion::Output(gOutput& s) const
     s << ' ' << **_Value;  
 }
 
+gString NfSupportPortion::OutputString( void ) const
+{
+  return "(NfSupport)";
+}
+
 Portion* NfSupportPortion::ValCopy(void) const
 {
   Portion* p = new NfSupportValPortion(*_Value); 
@@ -930,6 +991,11 @@ void EfSupportPortion::Output(gOutput& s) const
   s << "(EfSupport) " << *_Value;
   if(*_Value) 
     s << ' ' << **_Value;
+}
+
+gString EfSupportPortion::OutputString( void ) const
+{
+  return "(EfSupport)";
 }
 
 Portion* EfSupportPortion::ValCopy(void) const
@@ -999,6 +1065,11 @@ void EfPlayerPortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
+gString EfPlayerPortion::OutputString( void ) const
+{
+  return "(EfPlayer)";
+}
+
 Portion* EfPlayerPortion::ValCopy(void) const
 {
   Portion* p = new EfPlayerValPortion(*_Value); 
@@ -1064,6 +1135,11 @@ void InfosetPortion::Output(gOutput& s) const
   s << "(Infoset) " << *_Value;
   if(*_Value)
     s << " \"" << (*_Value)->GetName() << "\""; 
+}
+
+gString InfosetPortion::OutputString( void ) const
+{
+  return "(Infoset)";
 }
 
 Portion* InfosetPortion::ValCopy(void) const
@@ -1132,6 +1208,11 @@ void NodePortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
+gString NodePortion::OutputString( void ) const
+{
+  return "(Node)";
+}
+
 Portion* NodePortion::ValCopy(void) const
 {
   Portion* p = new NodeValPortion(*_Value); 
@@ -1198,6 +1279,11 @@ void ActionPortion::Output(gOutput& s) const
   s << "(Action) " << *_Value;
   if(*_Value)
     s << " \"" << (*_Value)->GetName() << "\""; 
+}
+
+gString ActionPortion::OutputString( void ) const
+{
+  return "(Action)";
 }
 
 Portion* ActionPortion::ValCopy(void) const
@@ -1304,6 +1390,11 @@ void MixedPortion::Output(gOutput& s) const
       assert(0);
     }
   }
+}
+
+gString MixedPortion::OutputString( void ) const
+{
+  return "(Mixed)";
 }
 
 Portion* MixedPortion::ValCopy(void) const
@@ -1435,6 +1526,11 @@ void BehavPortion::Output(gOutput& s) const
   }
 }
 
+gString BehavPortion::OutputString( void ) const
+{
+  return "(Behav)";
+}
+
 Portion* BehavPortion::ValCopy(void) const
 { 
   Portion* p;
@@ -1539,6 +1635,11 @@ void NfgPortion::Output(gOutput& s) const
   Portion::Output(s);
   assert(*_Value);
   s << "(Nfg) \"" << (*_Value)->GetTitle() << "\""; 
+}
+
+gString NfgPortion::OutputString( void ) const
+{
+  return "(Nfg)";
 }
 
 Portion* NfgPortion::ValCopy(void) const
@@ -1651,6 +1752,11 @@ void EfgPortion::Output(gOutput& s) const
   s << "(Efg) \"" << (*_Value)->GetTitle() << "\""; 
 }
 
+gString EfgPortion::OutputString( void ) const
+{
+  return "(Efg)";
+}
+
 Portion* EfgPortion::ValCopy(void) const
 { 
   Portion* p = new EfgValPortion(*_Value); 
@@ -1740,6 +1846,11 @@ void OutputPortion::Output(gOutput& s) const
   s << "(Output)"; 
 }
 
+gString OutputPortion::OutputString( void ) const
+{
+  return "(Output)";
+}
+
 Portion* OutputPortion::ValCopy(void) const
 { return RefCopy(); }
 
@@ -1794,6 +1905,11 @@ void InputPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
   s << "(Input)"; 
+}
+
+gString InputPortion::OutputString( void ) const
+{
+  return "(Input)";
 }
 
 Portion* InputPortion::ValCopy(void) const
@@ -2094,6 +2210,20 @@ void ListPortion::Output(gOutput& s, long ListLF) const
     s << ' ';
 }
 
+
+gString ListPortion::OutputString( void ) const
+{
+  gString text( "{ " );
+  int i = 0;
+  for( i = 1; i <= Length(); i++ )
+  {
+    if( i > 1 )
+      text += ", ";
+    text += operator[]( i )->OutputString();
+  }
+  text += " }";
+  return text;
+}
 
 
 int ListPortion::Append(Portion* item)
