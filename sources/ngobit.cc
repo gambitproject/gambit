@@ -9,6 +9,7 @@
 #include "ngobit.h"
 
 #include "gfunc.h"
+#include "gmatrix.h"
 
 NFGobitParams::NFGobitParams(gStatus &s)
   : trace(0), powLam(1), maxits1(100), maxitsN(20),
@@ -29,7 +30,7 @@ class NFGobitFunc : public gC2Function<double>  {
   private:
     long _nevals;
     const Nfg &_nfg;
-    double _Lambda;
+    gVector<double> _Lambda;
     gVector<double> **_scratch;
     MixedProfile<double> _p;
 
@@ -45,13 +46,15 @@ class NFGobitFunc : public gC2Function<double>  {
     virtual ~NFGobitFunc();
     
     void SetLambda(double l)   { _Lambda = l; }
+    void SetLambda(const gVector<double> &l)   { _Lambda = l; }
     long NumEvals(void) const  { return _nevals; }
 };
 
 
 NFGobitFunc::NFGobitFunc(const Nfg &N,
 			 const MixedProfile<gNumber> &start)
-  : _nevals(0L), _nfg(N), _p(start.Support(), start.ParameterValues())
+  : _nevals(0L), _nfg(N), _Lambda(N.NumPlayers()),
+    _p(start.Support(), start.ParameterValues())
 {
   for (int i = 1; i <= _p.Length(); i++)
     _p[i] = start[i];
@@ -84,13 +87,13 @@ double NFGobitFunc::GobitDerivValue(int i, int j,
     v.Payoff(pl, pl, payoff);
     for (int st = 2; st <= _p.Support().NumStrats(pl); st++) {
       dv = (double) log(v(pl, 1)) - (double) log(v(pl, st)) -
-	_Lambda * (payoff[1] - payoff[st]);
+	_Lambda[pl] * (payoff[1] - payoff[st]);
       if (pl == i)  {
 	if (j == 1)          x += dv / v(pl, 1);
 	else if (j == st)    x -= dv / v(pl, st);
       }
       else
-	x -= dv * _Lambda * (v.Payoff(pl, pl, 1, i, j) -
+	x -= dv * _Lambda[pl] * (v.Payoff(pl, pl, 1, i, j) -
 			     v.Payoff(pl, pl, st, i, j));
     }
   }
@@ -125,7 +128,7 @@ double NFGobitFunc::Value(const gVector<double> &v)
     _p.Payoff(pl, pl, payoff);
     for (int st = 2; st <= _p.Support().NumStrats(pl); st++) {
       z = log(_p(pl, 1)) - log(_p(pl, st)) -
-          _Lambda * (payoff[1] - payoff[st]);
+          _Lambda[pl] * (payoff[1] - payoff[st]);
       val += z * z;
     }
   }
@@ -238,6 +241,197 @@ void Gobit(const Nfg &N, NFGobitParams &params,
   nits = 0;
 }
 
+class NFKGobitFunc : public gFunction<double>   {
+private:
+  long _nevals;
+  bool _domain_err;
+  const Nfg &_nfg;
+  double _K;
+  gVector<double> **_scratch;
+  MixedProfile<double> _p;
+  NFGobitFunc F;
+  const NFGobitParams & params;
+  
+  double Value(const gVector<double> &);
+  
+public:
+  NFKGobitFunc(const Nfg &, const MixedProfile<gNumber> &, 
+		  const NFGobitParams & params);
+  virtual ~NFKGobitFunc();
+  
+  void SetK(double k)   { _K = k; }
+  void Get_p(MixedProfile<double> &p) const {p = _p;}
+  long NumEvals(void) const   { return _nevals; }
+  bool DomainErr(void) const { return _domain_err;}
+};
+
+
+NFKGobitFunc::NFKGobitFunc(const Nfg &N,
+				 const MixedProfile<gNumber> &start, 
+				 const NFGobitParams & p)
+  :_nevals(0L), _domain_err(false), _nfg(N), _K(1.0),
+   _p(start.Support(), start.ParameterValues()) , 
+    F(N,start), params(p)
+{
+  for (int i = 1; i <= _p.Length(); i++)
+    _p[i] = start[i];
+    
+  _scratch = new gVector<double> *[_nfg.NumPlayers()] - 1;
+  for (int i = 1; i <= _nfg.NumPlayers(); i++)  
+    _scratch[i] = new gVector<double>(_p.Support().NumStrats(i));
+}
+
+NFKGobitFunc::~NFKGobitFunc()
+{
+  for (int i = 1; i <= _nfg.NumPlayers(); i++) 
+    delete _scratch[i];
+
+  delete [] (_scratch + 1);
+}
+
+double NFKGobitFunc::Value(const gVector<double> &lambda)
+{
+  int iter = 0;
+  double value = 0.0;
+  
+  F.SetLambda(lambda);
+  // gout.SetExpMode().SetPrec(12);
+  // gout << "\nin NFKGobitFunc::Value, lambda = " << lambda;
+
+  DFP(_p, F, value, iter,
+      params.maxits1, params.tol1, params.maxitsN, params.tolN,
+      *params.tracefile,params.trace-1,true);
+
+  // gout << "\nin NFKGobitFunc::Value, after DFP, p = \n" << _p;
+  _nevals = F.NumEvals();
+
+  for (int pl = 1; pl <= _nfg.NumPlayers(); pl++)  {
+    gVector<double> &payoff = *_scratch[pl];
+    _p.Payoff(pl, pl, payoff);
+    // gout << "\npl: " << pl << " payoff: " << payoff;
+    for( int j = 1;j<=(_p.Support().NumStrats(pl));j++)
+      for(int k = 1;k<=(_p.Support().NumStrats(pl));k++)
+	value+=pow(_p(pl,j)*_p(pl,k)*payoff[j]*(payoff[j]-payoff[k])-lambda[pl]/_K,2);
+  }
+  // gout << "\nvalue: " << value;
+  return value;
+}
+
+extern bool OldPowell(gVector<double> &p, gMatrix<double> &xi,
+		   gFunction<double> &func, double &fret, int &iter,
+		   int maxits1, double tol1, int maxitsN, double tolN,
+		   gOutput &tracefile, int tracelevel,  gStatus &status = gstatus);
+
+void KGobit(const Nfg &N, NFGobitParams &params,
+	   const MixedProfile<gNumber> &start,
+	   gList<MixedSolution> &solutions, 
+	   long &nevals, long &nits)
+{
+  NFKGobitFunc F(N, start, params);
+  int i;
+  int iter = 0, nit;
+  double K, K_old = 0.0, value = 0.0;
+  gVector<double> lambda(N.NumPlayers());
+  lambda = (double)1.0;
+  gVector<double> lam_old(lambda);
+
+  if (params.pxifile) 
+    WritePXIHeader(*params.pxifile, N, params);
+
+  K = (params.delLam < 0.0) ? params.maxLam : params.minLam;
+  int num_steps, step = 0;
+  if (params.powLam == 0)
+    num_steps = (int) ((params.maxLam - params.minLam) / params.delLam);
+  else
+    num_steps = (int) (log(params.maxLam / params.minLam) /
+		       log(params.delLam + 1.0));
+
+  MixedProfile<double> p(start.Support(), start.ParameterValues());
+  MixedProfile<double> p_old(p);
+
+  gMatrix<double> xi(lambda.Length(), lambda.Length());
+  xi.MakeIdent();
+
+  if (params.trace>0)  {
+    gout << "\nin NFKGobit";
+    gout << " traceLevel: " << params.trace;
+    gout << "\np: " << p << "\nxi: " << xi;
+    gout << "\np: " << p << "\nxi: " << xi;
+    *params.tracefile << "\nin NFKGobit";
+    *params.tracefile << " traceLevel: " << params.trace;
+    *params.tracefile << "\np: " << p << "\nxi: " << xi;
+    *params.tracefile << "\np: " << p << "\nxi: " << xi;
+  }
+
+  bool powell = true;
+  for (nit = 1; !params.status.Get() && powell && !F.DomainErr() &&
+       K <= params.maxLam && K >= params.minLam &&
+       value < 10.0; nit++)   {
+    if (params.trace>0)  {
+      gout << "\nnit: " << nit << " K: " << K ;
+      *params.tracefile << "\nnit: " << nit << " K: " << K ;
+    }
+    F.SetK(K);
+
+    powell =  OldPowell(lambda, xi, F, value, iter,
+		     params.maxits1, params.tol1, params.maxitsN, params.tolN,
+		     *params.tracefile, params.trace-1);
+
+    F.Get_p(p);
+    if (params.trace>0)  {
+      gout << "\nafter powell " << powell << " iter = " << iter;
+      gout << " value = " << value;
+      gout << "\nlambda: " << lambda;
+      gout << "\np: " << p;
+      *params.tracefile << "\nafter powell " << powell << " iter = " << iter;
+      *params.tracefile << " value = " << value;
+      *params.tracefile << "\nlambda: " << lambda;
+      *params.tracefile << "\np: " << p;
+    }
+    if(powell && !F.DomainErr()) {
+      if (params.trace>0)  {
+	*params.tracefile << "\nK: " << K << " val: ";
+	*params.tracefile << "\nlambda: " << lambda << " val: ";
+	params.tracefile->SetExpMode();
+	*params.tracefile << value;
+	params.tracefile->SetFloatMode();
+	*params.tracefile << " p: " << p;
+      } 
+      
+      if (params.pxifile)   {
+	*params.pxifile << "\n" << K << " " << value;
+	*params.pxifile << " ";
+	for (int pl = 1; pl <= N.NumPlayers(); pl++)
+	  for (int strat = 1;
+	       strat <= p.Support().NumStrats(pl);
+	       strat++)
+	    *params.pxifile << p(pl, strat) << " ";
+      }
+      
+      if (params.fullGraph) {
+	i = solutions.Append(MixedSolution(p, NfgAlg_GOBIT));      
+	solutions[i].SetGobit(K, value);
+      }
+      K_old=K;                              // keep last good solution
+      lam_old=lambda;                            
+      p_old=p;                             
+    }
+    K += params.delLam * pow(K, params.powLam);
+    params.status.SetProgress((double) step / (double) num_steps);
+    step++;
+  }
+
+  if (!params.fullGraph)
+  {
+    i = solutions.Append(MixedSolution(p, NfgAlg_GOBIT));
+    solutions[i].SetGobit(K_old, value);
+  }
+
+  if (params.status.Get())   params.status.Reset();
+
+  nevals = F.NumEvals();
+  nits = 0;
+}
 
 
 

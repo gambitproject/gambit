@@ -33,6 +33,11 @@ void Gobit(const Nfg &, NFGobitParams &,
 	   long &nevals, long &nits);
 
 
+void KGobit(const Nfg &N, NFGobitParams &params,
+	    const MixedProfile<gNumber> &start,
+	    gList<MixedSolution> &solutions, 
+	    long &nevals, long &nits);
+
 #endif    // NGOBIT_H
 
 
