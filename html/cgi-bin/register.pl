@@ -30,7 +30,9 @@ EndOfText
 $name = $query->param('name');
 $email = $query->param('email');
 $learn = $query->param('learn');
-$site = $query->param('site');
+unless ($site = $query->param('site'))  {
+    $site = 'US';
+}
 
 if ($site eq 'CH')  {
     $basepath = 'http://www.inf.ethz.ch/personal/stengel/gambit/ver96';
