@@ -51,7 +51,7 @@ char *horiz_opt=new char[20];
 float tw,th;			// figure out the font size for data display
 
 parent->GetDataExtent(&tw,&th);
-horiz=(col_dim_char) ? col_width[1]/tw : col_width[1]/10;
+horiz=(col_dim_char) ? (int) (col_width[1]/tw) : (int) (col_width[1]/10);
 strcpy(horiz_opt,"pixels");
 MyDialogBox *options_dialog=new MyDialogBox((wxWindow *)parent,"Options");
 options_dialog->Form()->Add(wxMakeFormMessage("Fonts"));
@@ -94,9 +94,9 @@ if (options_dialog->Completed()==wxOK)
 	col_dim_char=col_dim;
 	// if the length of the column is measured in chars
 	int which_col=wxListFindString(column_list,col_str);
-	SetColWidth((col_dim) ? tw*horiz : horiz*10,which_col);
+	SetColWidth((col_dim) ? (int) (tw*horiz) : (int) (horiz*10),which_col);
 	// if we want to fit the row height to the font size
-	row_height=(vert_fit) ? tw+2*TEXT_OFF : row_height;
+	row_height=(vert_fit) ? (int) (tw+2*TEXT_OFF) : row_height;
 	labels=0;
 	if (labels_row) labels|=S_LABEL_ROW;
 	if (labels_col) labels|=S_LABEL_COL;
@@ -126,7 +126,7 @@ if (f->Completed()==wxOK)
 delete f;
 }
 
-void	SpreadSheetDrawSettings::SaveOptions(const char const*s)
+void	SpreadSheetDrawSettings::SaveOptions(const char *s)
 {
 char *file_name;
 const char *sn="SpreadSheet3D";	// section name
@@ -144,7 +144,7 @@ wxWriteResource(sn,"Label-Font",wxFontToString(label_font),file_name);
 delete [] file_name;
 }
 
-int	SpreadSheetDrawSettings::LoadOptions(const char const *s)
+int	SpreadSheetDrawSettings::LoadOptions(const char *s)
 {
 char *file_name;
 const char *sn="SpreadSheet3D";	// section name
@@ -282,7 +282,7 @@ if (ev.LeftDown() || ev.ButtonDClick())
 {
 	float x,y;
 	ev.Position(&x,&y);
-	cell.row=(y-draw_settings->YStart())/draw_settings->GetRowHeight()+1;
+	cell.row=(int) ((y-draw_settings->YStart())/draw_settings->GetRowHeight()+1);
 	cell.col=0;int i=1;
 	while (!cell.col && i<=sheet->GetCols())
 		{if (x<MaxX(i)) cell.col=i;i++;}
@@ -861,7 +861,7 @@ if (draw_settings->RowLabels())
 	for (i=1;i<=data[1].GetRows();i++)
 	{
 		data[1].GetLabelExtent(data[cur_level].GetLabelRow(i),&w,&h);
-		if (w>max_w) max_w=w;
+		if (w>max_w) max_w=(int)w;
 	}
   draw_settings->SetXStart(max_w+3);
 }
@@ -870,7 +870,7 @@ if (draw_settings->ColLabels())
 	for (i=1;i<=data[1].GetCols();i++)
 	{
 		data[1].GetLabelExtent(data[cur_level].GetLabelCol(i),&w,&h);
-		if (h>max_h) max_h=h;
+		if (h>max_h) max_h=(int)h;
 	}
 	draw_settings->SetYStart(max_h+3);
 }
@@ -882,7 +882,7 @@ int w,h,w1,h1;
 // Update the row height in draw_settings
 float tw,th;
 data[cur_level].GetDataExtent(&tw,&th);
-DrawSettings()->SetRowHeight(th);
+DrawSettings()->SetRowHeight((int) th);
 data[cur_level].GetSize(&w,&h);
 for (int i=1;i<=data.Length();i++) data[i].CheckSize();
 Panel()->Fit();Panel()->GetSize(&w1,&h1);
