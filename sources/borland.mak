@@ -7,9 +7,9 @@
 # Main makefile for Borland C++
 #
 
-GAMBIT_TOP = c:\gambit
+GAMBIT_TOP = d:\gambit
 
-all:  base math numerical pelican poly game nash gui
+all:  base math numerical pelican poly game nash gcl gui wxgcl
 
 base:
 	cd $(GAMBIT_TOP)\sources\base
@@ -39,8 +39,16 @@ nash:
 	cd $(GAMBIT_TOP)\sources\nash
 	make -f borland
 
+gcl:
+	cd $(GAMBIT_TOP)\sources\gcl
+	make -f borland
+
 gui:
 	cd $(GAMBIT_TOP)\sources\gui
+	make -f borland
+
+wxgcl:
+	cd $(GAMBIT_TOP)\sources\wxgcl
 	make -f borland
 
 clean:
@@ -58,7 +66,11 @@ clean:
 	make -f borland clean
 	cd $(GAMBIT_TOP)\sources\nash
 	make -f borland clean
+	cd $(GAMBIT_TOP)\sources\gcl
+	make -f borland clean
 	cd $(GAMBIT_TOP)\sources\gui
+	make -f borland clean
+	cd $(GAMBIT_TOP)\sources\wxgcl
 	make -f borland clean
 
 

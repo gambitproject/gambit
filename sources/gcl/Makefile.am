@@ -6,23 +6,7 @@ bin_PROGRAMS = gcl
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
-libgcl_a_SOURCES = \
-	algfunc.cc \
-	efgfunc.cc \
-	gclinst.cc \
-	gcompile.cc \
-	gpreproc.cc \
-	gsm.cc \
-	gsmfunc.cc \
-	gsmhash.cc \
-	gsmincl.cc \
-	gsminstr.cc \
-	gsmoper.cc \
-	gsmutils.cc \
-	listfunc.cc \
-	nfgfunc.cc \
-	portion.cc \
-	solfunc.cc
+!include filelist.in
 
 gcl_SOURCES = gcl.cc gclstatus.cc gcmdline.cc 
 
