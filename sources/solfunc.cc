@@ -59,14 +59,14 @@ Portion *GSM_ActionProb_Float(Portion **param)
   assert(infoset > 0);
   assert(action > 0);
 
-  if (!s->GetPlayer()->IsChance()) 
-  {
-    por = new FloatValPortion((*bp)(player, infoset, action));
-  }
+  if(bp->GetEFSupport().Contains(a))
+    if (!s->GetPlayer()->IsChance()) 
+      por = new FloatValPortion((*bp)(player, infoset, action));
+    else
+    por = new FloatValPortion(((ChanceInfoset<double> *) s)->
+			      GetActionProbs()[action]);
   else
-  {
-    por = new FloatValPortion(((ChanceInfoset<double> *) s)->GetActionProbs()[action]);
-  }
+    por = new NullPortion(porFLOAT);
 
   por->SetOwner( param[ 0 ]->Owner() );
   por->AddDependency();
@@ -100,14 +100,14 @@ Portion *GSM_ActionProb_Rational(Portion **param)
   assert(infoset > 0);
   assert(action > 0);
 
-  if (!s->GetPlayer()->IsChance()) 
-  {
-    por = new RationalValPortion((*bp)(player, infoset, action));
-  }
+  if(bp->GetEFSupport().Contains(a))
+    if (!s->GetPlayer()->IsChance()) 
+      por = new RationalValPortion((*bp)(player, infoset, action));
+    else
+      por = new RationalValPortion(((ChanceInfoset<gRational> *) s)->
+				   GetActionProbs()[action]);
   else
-  {
-    por = new RationalValPortion(((ChanceInfoset<gRational> *) s)->GetActionProbs()[action]);
-  }
+    return new NullPortion(porRATIONAL);
 
   por->SetOwner( param[ 0 ]->Owner() );
   por->AddDependency();
