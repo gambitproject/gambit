@@ -150,7 +150,7 @@ Action* LastAction( Node* node )
 }
 
 
-bool IsPerfectRecall(const BaseEfg &efg)
+bool IsPerfectRecall(const BaseEfg &efg, Infoset *&s1, Infoset *&s2)
 {
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)   {
     EFPlayer *player = efg.PlayerList()[pl];
@@ -172,17 +172,23 @@ bool IsPerfectRecall(const BaseEfg &efg)
 	      for (int act = 1; act <= iset1->NumActions(); act++)  {
 		if (efg.IsPredecessor(iset1->GetMemberList()[n]->GetChild(act),
 				      iset2->GetMemberList()[m]))  {
-		  if (action != 0 && action != act)
+		  if (action != 0 && action != act)  {
+		    s1 = iset1;
+		    s2 = iset2;
 		    return false;
+		  }
 		  action = act;
 		}
 	      }
 	      break;
 	    }
 	  }
-
-	  if (n > iset1->NumMembers() && precedes)
+	  
+	  if (n > iset1->NumMembers() && precedes)  {
+	    s1 = iset1;
+	    s2 = iset2;
 	    return false;
+	  }
 	}
 	
 

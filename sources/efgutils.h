@@ -44,8 +44,9 @@ bool AllSubgamesMarked(const BaseEfg &efg);
 // returns the list of nodes which are roots of child subgames
 void ChildSubgames(Node *, gList<Node *> &);
 
-
-bool IsPerfectRecall(const BaseEfg &);
+// determines if a game is perfect recall.  
+// if not, returns a pair of infosets violating the definition
+bool IsPerfectRecall(const BaseEfg &, Infoset *&, Infoset *&);
 
 #endif // EFGUTILS_H
 
