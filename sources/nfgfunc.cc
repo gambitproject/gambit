@@ -133,23 +133,21 @@ Portion *GSM_ElimNDom(Portion **param)
 
 template <class T> class Mixed_ListPortion : public ListValPortion   {
   public:
-    Mixed_ListPortion(NormalForm<T> *, const gList<gPVector<T> > &);
+    Mixed_ListPortion(const gList<MixedProfile<T> > &);
 };
 
-Mixed_ListPortion<double>::Mixed_ListPortion(NormalForm<double> *N,
-			       const gList<gPVector<double> > &list)
+Mixed_ListPortion<double>::Mixed_ListPortion(const gList<MixedProfile<double> > &list)
 {
   _DataType = porMIXED_FLOAT;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new MixedValPortion( new MixedProfile<double>(*N, list[i])));
+    Append(new MixedValPortion( new MixedProfile<double>(list[i])));
 }
 
-Mixed_ListPortion<gRational>::Mixed_ListPortion(NormalForm<gRational> *N,
-						const gList<gPVector<gRational> > &list)
+Mixed_ListPortion<gRational>::Mixed_ListPortion(const gList<MixedProfile<gRational> > &list)
 {
   _DataType = porMIXED_RATIONAL;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new MixedValPortion( new MixedProfile<gRational>(*N, list[i])));
+    Append(new MixedValPortion( new MixedProfile<gRational>(list[i])));
 }
 
 #include "enum.h"
@@ -168,7 +166,7 @@ Portion *GSM_EnumFloat(Portion **param)
   ((IntPortion *) param[2])->Value() = EM.NumPivots();
   ((FloatPortion *) param[3])->Value() = EM.Time();
 
-  return new Mixed_ListPortion<double>(&N, EM.GetSolutions());
+  return new Mixed_ListPortion<double>(EM.GetSolutions());
 }
 
 Portion *GSM_EnumRational(Portion **param)
@@ -185,7 +183,7 @@ Portion *GSM_EnumRational(Portion **param)
   ((IntPortion *) param[2])->Value() = EM.NumPivots();
   ((FloatPortion *) param[3])->Value() = EM.Time();
 
-  return new Mixed_ListPortion<gRational>(&N, EM.GetSolutions());
+  return new Mixed_ListPortion<gRational>(EM.GetSolutions());
 }
 
 #include "ngobit.h"
@@ -219,7 +217,7 @@ Portion *GSM_GridSolveFloat(Portion **param)
   GP.minLam = ((FloatPortion *) param[2])->Value();
   GP.maxLam = ((FloatPortion *) param[3])->Value();
   GP.delLam = ((FloatPortion *) param[4])->Value();
-  GP.type = ((IntPortion *) param[5])->Value();
+  GP.powLam = ((IntPortion *) param[5])->Value();
   GP.delp = ((FloatPortion *) param[6])->Value();
   GP.tol = ((FloatPortion *) param[7])->Value();
 
@@ -229,8 +227,8 @@ Portion *GSM_GridSolveFloat(Portion **param)
 //  ((IntPortion *) param[8])->Value() = GM.NumEvals();
 //  ((FloatPortion *) param[9])->Value() = GM.Time();
 
-  gList<gPVector<double> > solns;
-  return new Mixed_ListPortion<double>(&N, solns);
+  gList<MixedProfile<double> > solns;
+  return new Mixed_ListPortion<double>(solns);
 }
 
 Portion *GSM_GridSolveRational(Portion **param)
@@ -242,7 +240,7 @@ Portion *GSM_GridSolveRational(Portion **param)
   GP.minLam = ((RationalPortion *) param[2])->Value();
   GP.maxLam = ((RationalPortion *) param[3])->Value();
   GP.delLam = ((RationalPortion *) param[4])->Value();
-  GP.type = ((IntPortion *) param[5])->Value();
+  GP.powLam = ((IntPortion *) param[5])->Value();
   GP.delp = ((RationalPortion *) param[6])->Value();
   GP.tol = ((RationalPortion *) param[7])->Value();
 
@@ -252,8 +250,8 @@ Portion *GSM_GridSolveRational(Portion **param)
 //  ((IntPortion *) param[8])->Value() = GM.NumEvals();
 //  ((FloatPortion *) param[9])->Value() = GM.Time();
 
-  gList<gPVector<gRational> > solns;
-  return new Mixed_ListPortion<gRational>(&N, solns);
+  gList<MixedProfile<gRational> > solns;
+  return new Mixed_ListPortion<gRational>(solns);
 }
 
 #include "lemke.h"
@@ -263,15 +261,15 @@ Portion *GSM_LemkeNfgFloat(Portion **param)
   NormalForm<double> &N = * (NormalForm<double>*) ((NfgPortion*) param[0])->Value();
 
   LemkeParams LP;
-  LP.nequilib = ((IntPortion *) param[1])->Value();
+  LP.stopAfter = ((IntPortion *) param[1])->Value();
   
   LemkeModule<double> LS(N, LP);
   LS.Lemke();
 
   ((IntPortion *) param[2])->Value() = LS.NumPivots();
-  ((FloatPortion *) param[3])->Value() = (double) LS.Time();
+  ((FloatPortion *) param[3])->Value() = LS.Time();
 
-  return new Mixed_ListPortion<double>(&N, LS.GetSolutions());
+  return new Mixed_ListPortion<double>(LS.GetSolutions());
 }
 
 Portion *GSM_LemkeNfgRational(Portion **param)
@@ -279,15 +277,15 @@ Portion *GSM_LemkeNfgRational(Portion **param)
   NormalForm<gRational> &N = * (NormalForm<gRational>*) ((NfgPortion*) param[0])->Value();
 
   LemkeParams LP;
-  LP.nequilib = ((IntPortion *) param[1])->Value();
+  LP.stopAfter = ((IntPortion *) param[1])->Value();
   
   LemkeModule<gRational> LS(N, LP);
   LS.Lemke();
 
   ((IntPortion *) param[2])->Value() = LS.NumPivots();
-  ((FloatPortion *) param[3])->Value() = (double) LS.Time();
+  ((FloatPortion *) param[3])->Value() = LS.Time();
 
-  return new Mixed_ListPortion<gRational>(&N, LS.GetSolutions());
+  return new Mixed_ListPortion<gRational>(LS.GetSolutions());
 }
 
 #include "nliap.h"
@@ -297,8 +295,8 @@ Portion *GSM_LiapNfg(Portion **param)
   NormalForm<double> &N = * (NormalForm<double>*) ((NfgPortion*) param[0])->Value();
 
   NFLiapParams<double> LP;
-  LP.nequilib = ((IntPortion *) param[3])->Value();
-  LP.ntries = ((IntPortion *) param[4])->Value();
+  LP.stopAfter = ((IntPortion *) param[3])->Value();
+  LP.nTries = ((IntPortion *) param[4])->Value();
   
   NFLiapModule<double> LM(N, LP);
   LM.Liap(1);
@@ -306,7 +304,7 @@ Portion *GSM_LiapNfg(Portion **param)
   ((FloatPortion *) param[1])->Value() = LM.Time();
   ((IntPortion *) param[2])->Value() = LM.NumEvals();
 
-  return new Mixed_ListPortion<double>(&N, LM.GetSolutions());
+  return new Mixed_ListPortion<double>(LM.GetSolutions());
 }
 
 #include "simpdiv.h"
@@ -316,9 +314,9 @@ Portion *GSM_SimpdivFloat(Portion **param)
   NormalForm<double> &N = * (NormalForm<double>*) ((NfgPortion*) param[0])->Value();
   
   SimpdivParams SP;
-  SP.number = ((IntPortion *) param[1])->Value();
-  SP.ndivs = ((IntPortion *) param[2])->Value();
-  SP.leash = ((IntPortion *) param[3])->Value();
+  SP.stopAfter = ((IntPortion *) param[1])->Value();
+  SP.nRestarts = ((IntPortion *) param[2])->Value();
+  SP.leashLength = ((IntPortion *) param[3])->Value();
 
   SimpdivModule<double> SM(N, SP);
   SM.Simpdiv();
@@ -326,7 +324,7 @@ Portion *GSM_SimpdivFloat(Portion **param)
   ((IntPortion *) param[4])->Value() = SM.NumEvals();
   ((FloatPortion *) param[5])->Value() = SM.Time();
   
-  return new Mixed_ListPortion<double>(&N, SM.GetSolutions());
+  return new Mixed_ListPortion<double>(SM.GetSolutions());
 }
 
 Portion *GSM_SimpdivRational(Portion **param)
@@ -334,9 +332,9 @@ Portion *GSM_SimpdivRational(Portion **param)
   NormalForm<gRational> &N = * (NormalForm<gRational>*) ((NfgPortion*) param[0])->Value();
   
   SimpdivParams SP;
-  SP.number = ((IntPortion *) param[1])->Value();
-  SP.ndivs = ((IntPortion *) param[2])->Value();
-  SP.leash = ((IntPortion *) param[3])->Value();
+  SP.stopAfter = ((IntPortion *) param[1])->Value();
+  SP.nRestarts = ((IntPortion *) param[2])->Value();
+  SP.leashLength = ((IntPortion *) param[3])->Value();
 
   SimpdivModule<gRational> SM(N, SP);
   SM.Simpdiv();
@@ -344,7 +342,7 @@ Portion *GSM_SimpdivRational(Portion **param)
   ((IntPortion *) param[4])->Value() = SM.NumEvals();
   ((FloatPortion *) param[5])->Value() = SM.Time();
   
-  return new Mixed_ListPortion<gRational>(&N, SM.GetSolutions());
+  return new Mixed_ListPortion<gRational>(SM.GetSolutions());
 }
 
 #include "purenash.h"
@@ -353,7 +351,7 @@ Portion *GSM_PureNashFloat(Portion **param)
 {
   NormalForm<double> &N = * (NormalForm<double>*) ((NfgPortion*) param[0])->Value();
 
-  gList<gPVector<double> > solns;
+  gList<MixedProfile<double> > solns;
 
   gWatch watch;
 
@@ -361,14 +359,14 @@ Portion *GSM_PureNashFloat(Portion **param)
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
-  return new Mixed_ListPortion<double>(&N, solns);
+  return new Mixed_ListPortion<double>(solns);
 }
 
 Portion *GSM_PureNashRational(Portion **param)
 {
   NormalForm<gRational> &N = * (NormalForm<gRational>*) ((NfgPortion*) param[0])->Value();
 
-  gList<gPVector<gRational> > solns;
+  gList<MixedProfile<gRational> > solns;
 
   gWatch watch;
 
@@ -376,7 +374,7 @@ Portion *GSM_PureNashRational(Portion **param)
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
-  return new Mixed_ListPortion<gRational>(&N, solns);
+  return new Mixed_ListPortion<gRational>(solns);
 }
  
 Portion *GSM_ReadNfg(Portion **param)

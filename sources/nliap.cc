@@ -10,7 +10,6 @@
 #include <math.h>
 #include "nliap.h"
 #include "gfunct.h"
-#include "rational.h"
 
 //-------------------------------------------------------------------------
 //                     NFLiapParams<T>: Member functions
@@ -241,7 +240,7 @@ template <class T> NFLiapModule<T>::~NFLiapModule()
 { }
 
 template <class T>
-const gList<gPVector<T> > &NFLiapModule<T>::GetSolutions(void) const
+const gList<MixedProfile<T> > &NFLiapModule<T>::GetSolutions(void) const
 {
   return solutions;
 }
@@ -260,7 +259,7 @@ template <class T> LiapFunc<T> *NFLiapModule<T>::CreateFunc(void)
 template <class T>
 void NFLiapModule<T>::AddSolution(const LiapFunc<T> *const F)
 {
-  solutions.Append(((NFLiapFunc<T> *) F)->GetProfile());
+  solutions.Append(MixedProfile<T>(N, ((NFLiapFunc<T> *) F)->GetProfile()));
 }
 
 

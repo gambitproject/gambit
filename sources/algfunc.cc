@@ -100,8 +100,8 @@ Portion *GSM_LiapEfg(Portion **param)
 
   EFLiapParams<double> LP;
 
-  LP.nequilib = ((IntPortion *) param[3])->Value();
-  LP.ntries = ((IntPortion *) param[4])->Value();
+  LP.stopAfter = ((IntPortion *) param[3])->Value();
+  LP.nTries = ((IntPortion *) param[4])->Value();
  
   EFLiapModule<double> LM(E, LP);
   LM.Liap(1);

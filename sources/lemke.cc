@@ -20,7 +20,7 @@
 //---------------------------------------------------------------------------
 
 LemkeParams::LemkeParams(void) 
-  : plev(0), nequilib(0), output(&gnull)
+  : trace(0), stopAfter(0), output(&gnull)
 { }
 
 //---------------------------------------------------------------------------
@@ -44,13 +44,13 @@ template <class T> class LemkeTableau : public gTableau<T>
     void Pivot(int, int);
  
   public:
-    LemkeTableau(const NormalForm<T> &, gOutput &ofile, int plev);
+    LemkeTableau(const NormalForm<T> &, gOutput &ofile, int trace);
     virtual ~LemkeTableau();
 
     int Lemke(int);
     long NumPivots(void) const;
     long &NumPivots(void);
-    void GetSolutions(gList<gPVector<T> > &) const;
+    void GetSolutions(gList<MixedProfile<T> > &) const;
 };
 
 //-------------------------------------------------------------------------
@@ -59,13 +59,13 @@ template <class T> class LemkeTableau : public gTableau<T>
 
 template <class T>
 LemkeTableau<T>::LemkeTableau(const NormalForm<T> &NF,
-			      gOutput &ofile, int plev)
+			      gOutput &ofile, int trace)
      : gTableau<T>(1, NF.NumStrats(1) + NF.NumStrats(2),
 		   NF.NumStrats(1) + NF.NumStrats(2),
 		   0, NF.NumStrats(1) + NF.NumStrats(2) + 1,
 		   NF.NumStrats(1) + NF.NumStrats(2)),
 		   N(NF), num_strats(NF.NumStrats(1) + NF.NumStrats(2)),
-		   output(ofile), printlevel(plev),
+		   output(ofile), printlevel(trace),
 		   npivots(0)
 {
   NormalIter<T> iter(N);
@@ -354,16 +354,12 @@ template <class T> int LemkeTableau<T>::Exit_Row(int col)
 //-------------------------------------------------------------------------
 
 template <class T>
-void LemkeTableau<T>::GetSolutions(gList<gPVector<T> > &solutions) const
+void LemkeTableau<T>::GetSolutions(gList<MixedProfile<T> > &solutions) const
 {
   solutions.Flush();
 
   for (int i = 1; i <= List.Length(); i++)    {
-    gArray<int> dim(2);
-    dim[1] = N.NumStrats(1);
-    dim[2] = N.NumStrats(2);
-
-    gPVector<T> profile(dim);
+    MixedProfile<T> profile(N);
     T sum = (T) 0;
 
     for (int j = 1; j <= N.NumStrats(1); j++)
@@ -429,13 +425,10 @@ template <class T> int LemkeModule<T>::Lemke(void)
 {
   if (nf.NumPlayers() != 2 || !params.output)   return 0;
 
-//  if (params.dup_strat < 0 ||
-//      params.dup_strat > nf.NumStrats(1) + nf.NumStrats(2))   return 0;
-  
   gWatch watch;
 
-  LemkeTableau<T> LT(nf, *params.output, params.plev);
-  LT.Lemke((params.nequilib == 1) ? 1 : 0);
+  LemkeTableau<T> LT(nf, *params.output, params.trace);
+  LT.Lemke((params.stopAfter == 1) ? 1 : 0);
 
   time = watch.Elapsed();
   npivots += LT.NumPivots();
@@ -455,7 +448,7 @@ template <class T> double LemkeModule<T>::Time(void) const
 }
 
 template <class T>
-const gList<gPVector<T> > &LemkeModule<T>::GetSolutions(void) const
+const gList<MixedProfile<T> > &LemkeModule<T>::GetSolutions(void) const
 {
   return solutions;
 }
@@ -477,8 +470,8 @@ class LemkeModule<gRational>;
 
 template <class T>
 int Lemke(const NormalForm<T> &N, const LemkeParams &p,
-	  gList<gPVector<T> > &solutions,
-	  long &npivots, gRational &time)
+	  gList<MixedProfile<T> > &solutions,
+	  long &npivots, double &time)
 {
   LemkeModule<T> LM(N, p);
   int result = LM.Lemke();
@@ -493,15 +486,15 @@ int Lemke(const NormalForm<T> &N, const LemkeParams &p,
 
 #ifdef __GNUG__
 template int Lemke(const NormalForm<double> &, const LemkeParams &,
-		   gList<gPVector<double> > &, long &, gRational &);
+		   gList<MixedProfile<double> > &, long &, double &);
 template int Lemke(const NormalForm<gRational> &, const LemkeParams &,
-		   gList<gPVector<gRational> > &, long &, gRational &);
+		   gList<MixedProfile<gRational> > &, long &, double &);
 #elif defined __BORLANDC__
 #pragma option -Jgd
 int Lemke(const NormalForm<double> &, const LemkeParams &,
-	  gList<gPVector<double> > &, long &, gRational &);
+	  gList<MixedProfile<double> > &, long &, double &);
 int Lemke(const NormalForm<gRational> &, const LemkeParams &,
-	  gList<gPVector<gRational> > &, long &, gRational &);
+	  gList<MixedProfile<gRational> > &, long &, double &);
 #pragma option -Jgx
 #endif   // __GNUG__, __BORLANDC__
 

@@ -10,6 +10,7 @@
 #include "normal.h"
 #include "liap.h"
 #include "glist.h"
+#include "mixed.h"
 
 template <class T> class NFLiapParams : public LiapParams<T>  {
   public:
@@ -19,7 +20,7 @@ template <class T> class NFLiapParams : public LiapParams<T>  {
 template <class T> class NFLiapModule : public LiapModule<T>  {
   private:
     const NormalForm<T> &N;
-    gList<gPVector<T> > solutions;
+    gList<MixedProfile<T> > solutions;
 
     LiapFunc<T> *CreateFunc(void);
     void AddSolution(const LiapFunc<T> *const);
@@ -28,7 +29,7 @@ template <class T> class NFLiapModule : public LiapModule<T>  {
     NFLiapModule(const NormalForm<T> &N, NFLiapParams<T> &p); 
     NFLiapModule(const NormalForm<T> &N, NFLiapParams<T> &p,gPVector<T> &s); 
     virtual ~NFLiapModule();
-    const gList<gPVector<T> > &GetSolutions(void) const;
+    const gList<MixedProfile<T> > &GetSolutions(void) const;
 };
 
 

@@ -8,12 +8,12 @@
 #define PURENASH_H
 
 #include "normal.h"
-#include "rational.h"
+#include "mixed.h"
 #include "glist.h"
 
 
 template <class T> int FindPureNash(const NormalForm<T> &N,
-				    gList<gPVector<T> > &);
+				    gList<MixedProfile<T> > &);
 
 
 #endif    // PURENASH_H

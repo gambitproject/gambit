@@ -10,9 +10,10 @@
 #include "contiter.h"
 #include "rational.h"
 #include "glist.h"
+#include "mixed.h"
 
 template <class T> int FindPureNash(const NormalForm<T> &N,
-						gList<gPVector<T> > &eqs)
+				    gList<MixedProfile<T> > &eqs)
 {
   ContIter<T> citer((NormalForm<T> &) N);
   
@@ -32,7 +33,7 @@ template <class T> int FindPureNash(const NormalForm<T> &N,
     }
     
     if (flag)  {
-      gPVector<T> temp(N.Dimensionality());
+      MixedProfile<T> temp(N);
       // zero out all the entries, since any equlibria are pure
       ((gVector<T> &) temp).operator=((T) 0);
       gArray<int> profile = citer.Get();
@@ -52,6 +53,6 @@ template <class T> int FindPureNash(const NormalForm<T> &N,
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE int FindPureNash(const NormalForm<double> &, gList<gPVector<double> > &);
-TEMPLATE int FindPureNash(const NormalForm<gRational> &,gList<gPVector<gRational> > &);
+TEMPLATE int FindPureNash(const NormalForm<double> &, gList<MixedProfile<double> > &);
+TEMPLATE int FindPureNash(const NormalForm<gRational> &,gList<MixedProfile<gRational> > &);
 

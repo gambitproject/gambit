@@ -23,7 +23,8 @@
 #include "simpdiv.h"
 
 SimpdivParams::SimpdivParams(gStatus &status_)
-  : plev(0), number(1), ndivs(20), leash(0), output(&gnull), status(status_)
+  : trace(0), stopAfter(1), nRestarts(20), leashLength(0),
+    tracefile(&gnull), status(status_)
 { }
 
 //-------------------------------------------------------------------------
@@ -32,7 +33,7 @@ SimpdivParams::SimpdivParams(gStatus &status_)
 
 template <class T> SimpdivModule<T>::SimpdivModule(const NormalForm<T> &n,
 						   const SimpdivParams &p)
-  : rep(n), params(p), nevals(0), nits(0), nstrats(n.Dimensionality()),
+  : N(n), params(p), nevals(0), nits(0), nstrats(n.Dimensionality()),
     ylabel(2), labels(n.ProfileLength(), 2), pi(n.ProfileLength(), 2),
     U(n.Dimensionality()), TT(n.Dimensionality()),
     ab(n.Dimensionality()), y(n.Dimensionality()),
@@ -76,16 +77,16 @@ template <class T> T SimpdivModule<T>::simplex(void)
   labels(ibar,1)=j;
   labels(ibar,2)=h;
 //  if(nits>=MAXIT)goto end;
-  if(params.plev>=4) {
-    *params.output << "\n Step 1, j = " << j << " h= " << h; 
-    *params.output << " maxz = " << maxz; 
+  if(params.trace>=4) {
+    *params.tracefile << "\n Step 1, j = " << j << " h= " << h; 
+    *params.tracefile << " maxz = " << maxz; 
   }
   
 // Label case1a not currently used, hence commented
 // case1a:;
   if(TT(j,h)==0 && U(j,h)==0)
     {
-      if(params.plev>=4) *params.output << " Case 1a "; 
+      if(params.trace>=4) *params.tracefile << " Case 1a "; 
       for(hh=1,tot=0;hh<=nstrats[j];hh++)
 	if(TT(j,hh)==1 || U(j,hh)==1)tot++;
       if(tot==nstrats[j]-1)goto end;
@@ -97,7 +98,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
       /* case1b */
   else if(TT(j,h))
     {
-      if(params.plev>=4) *params.output << " Case 1b "; 
+      if(params.trace>=4) *params.tracefile << " Case 1b "; 
       i=1;
       while(labels(i,1)!=j || labels(i,2)!=h || i==ibar) i++;
       goto step3;
@@ -105,7 +106,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
       /* case1c */
   else if(U(j,h))
     {
-      if(params.plev>=4) *params.output << " Case 1c "; 
+      if(params.trace>=4) *params.tracefile << " Case 1c "; 
       k=h;
       while(U(j,k)){k++;if(k>nstrats[j])k=1;}
       if(TT(j,k)==0)i=t+1;
@@ -117,7 +118,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
     }
   
  step2:;
-  if(params.plev>=4) *params.output << "  Step 2 "; 
+  if(params.trace>=4) *params.tracefile << "  Step 2 "; 
   getY(y,i);
   pi.RotateDown(i,t+1);
   pi(i,1)=j;
@@ -131,7 +132,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
   goto step1;
   
  step3:;
-  if(params.plev>=4) *params.output << "  Step 3 "; 
+  if(params.trace>=4) *params.tracefile << "  Step 3 "; 
   if(i==t+1)ii=t;
   else ii=i;
   j=pi(ii,1);
@@ -146,7 +147,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
   
       /* case3a */
   if(i==1 && (y(j,k)<=(T)0 || (v(j,k)-y(j,k))>=((T)(leash))*d)) {
-    if(params.plev>=4) *params.output << " Case 3a "; 
+    if(params.trace>=4) *params.tracefile << " Case 3a "; 
     for(hh=1,tot=0;hh<=nstrats[j];hh++)
       if(TT(j,hh)==1 || U(j,hh)==1)tot++;
     if(tot==nstrats[j]-1) {
@@ -163,12 +164,12 @@ template <class T> T SimpdivModule<T>::simplex(void)
       /* case3b */
   else if(i>=2 && i<=t &&
 	  (y(j,k)<=(T)(0) || (v(j,k)-y(j,k))>=((T)(leash))*d)) {
-    if(params.plev>=4) *params.output << " Case 3b "; 
+    if(params.trace>=4) *params.tracefile << " Case 3b "; 
     goto step4;
   }
       /* case3c */
   else if(i==t+1 && ab(j,kk)==(T)(0)) {
-    if(params.plev>=4) *params.output << " Case 3c "; 
+    if(params.trace>=4) *params.tracefile << " Case 3c "; 
     if(y(j,h)<=(T)(0) || (v(j,h)-y(j,h))>=((T)(leash))*d)goto step4;
     else {
       k=0;
@@ -197,7 +198,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
     }
   goto step1;
  step4:;
-  if(params.plev>=4) *params.output << "  Step 4 "; 
+  if(params.trace>=4) *params.tracefile << "  Step 4 "; 
   getY(y,1);
   j=pi(i-1,1);
   h=pi(i-1,2);
@@ -211,7 +212,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
   i=ii;
   goto step3;
  step5:;
-  if(params.plev>=4) *params.output << "  Step 5 "; 
+  if(params.trace>=4) *params.tracefile << "  Step 5 "; 
   k=kk;
 
   labels.RotateDown(1,t+1);
@@ -237,11 +238,11 @@ template <class T> T SimpdivModule<T>::simplex(void)
  end:;
   maxz=bestz;
   nevals+=nits;
-  if(params.plev >= 2) { 
-    *params.output << "\ngrid = " << d << " maxz = " << maxz;
-    if(params.plev>= 3) {
-      *params.output << " j = " << j << " h = " << h;  
-      *params.output << " nits = " <<nits;
+  if(params.trace >= 2) { 
+    *params.tracefile << "\ngrid = " << d << " maxz = " << maxz;
+    if(params.trace>= 3) {
+      *params.tracefile << " j = " << j << " h = " << h;  
+      *params.tracefile << " nits = " <<nits;
     }
   } 
   for(i=1;i<=nplayers;i++)
@@ -363,11 +364,11 @@ template <class T> T SimpdivModule<T>::getlabel(gPVector<T> &yy)
   ylabel[1]=1;
   ylabel[2]=1;
   
-  for(i=1;i<=rep.NumPlayers();i++) {
+  for(i=1;i<=N.NumPlayers();i++) {
     payoff=(T)(0);
     maxval=((T)(-1000000));
-    for(j=1;j<=rep.NumStrats(i);j++) {
-      pay=rep.Payoff(i,i,j,yy);
+    for(j=1;j<=N.NumStrats(i);j++) {
+      pay=N.Payoff(i,i,j,yy);
       payoff+=(yy(i,j)*pay);
       if(pay>maxval) {
 	maxval=pay;
@@ -398,29 +399,31 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
 {
   int qf,soln,i,j,k,ii;
 
+  gWatch watch;
+
   if(leash==0)leash=32000;
   bestz=(T)1.0e30;
   mingrid=(T)(2);
-  for(i=1;i<=params.ndivs;i++)mingrid=mingrid*(T)(2);
+  for(i=1;i<=params.nRestarts;i++)mingrid=mingrid*(T)(2);
   mingrid = ((T)(1))/mingrid;
-//  *params.output << "\nleash = " << leash << " ndivs = " << ndivs;
-//  *params.output << " mingrid = " << mingrid;
+//  *params.tracefile << "\nleash = " << leash << " ndivs = " << ndivs;
+//  *params.tracefile << " mingrid = " << mingrid;
   
-  nplayers=rep.NumPlayers();
+  nplayers=N.NumPlayers();
   
   y = (T)(0);
-//  *params.output << "\nnplayers =" << nplayers;
-//  *params.output << "\nnstrats = " << nstrats;
-//  *params.output << "\ny = " << y;
+//  *params.tracefile << "\nnplayers =" << nplayers;
+//  *params.tracefile << "\nnstrats = " << nstrats;
+//  *params.tracefile << "\ny = " << y;
   
   solutions.Flush();
-  for(soln=0;soln<params.number && !params.status.Get();soln++)
+  for(soln=0;soln<params.stopAfter && !params.status.Get();soln++)
     {
       k=1;
       d=(T) 1.0 / (T) k;
       for(i=1;i<=nplayers;i++)
 	{
-//	  *params.output << "\n i = " << i;
+//	  *params.tracefile << "\n i = " << i;
 	  y(i,1)=(T)(1);
 	  for(j=1;j<=nstrats[i];j++)
 	    if(j>1)y(i,j)=(T)(0);
@@ -438,11 +441,14 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
 //	  if(maxz<(T)(TOL) || nevals>=MAXIT)qf=1;
 	  if(maxz<(T)(TOL))qf=1;
 	}
-      *params.output << "\nSimpDiv solution # " << soln+1 << " : " << y;
-      *params.output << " maxz = " << maxz; 
-      solutions.Append(y);
+      *params.tracefile << "\nSimpDiv solution # " << soln+1 << " : " << y;
+      *params.tracefile << " maxz = " << maxz; 
+      solutions.Append(MixedProfile<T>(N, y));
    }
   if(params.status.Get()) params.status.Reset();
+
+  time = watch.Elapsed();
+
   return 1;
 }
 

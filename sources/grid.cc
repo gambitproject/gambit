@@ -15,40 +15,40 @@
 
 
 template <class T>
-GridParams<T>::GridParams(void) :
-	minLam(.01), maxLam(30), delLam(.01),delp(.01),tol(.01),
-	plev(0),outfile(0),errfile(0),pxifile(0),status(gstatus)
+GridParams<T>::GridParams(void)
+  : minLam(.01), maxLam(30), delLam(.01), delp(.01), tol(.01), powLam(1),
+    trace(0), tracefile(&gnull), pxifile(&gnull), status(gstatus)
 { }
-template <class T>
-GridParams<T>::GridParams(const GridParams<T> &p) :
-	minLam(p.minLam),maxLam(p.maxLam),delLam(p.delLam),delp(p.delp),tol(p.tol),
-	type(p.type),plev(p.plev),outfile(p.outfile),errfile(p.errfile),
-	pxifile(p.pxifile),status(p.status)
 
-{ }
 template <class T>
-GridParams<T>::GridParams(gStatus &st):
-	minLam(.01), maxLam(30), delLam(.01), delp(.01), tol(.01),
-	plev(0),outfile(0),errfile(0),pxifile(0), status(st)
+GridParams<T>::GridParams(const GridParams<T> &p)
+  : minLam(p.minLam), maxLam(p.maxLam), delLam(p.delLam), delp(p.delp),
+    tol(p.tol), powLam(p.powLam), trace(p.trace), tracefile(p.tracefile),
+    pxifile(p.pxifile), status(p.status)
+{ }
+
+template <class T>
+GridParams<T>::GridParams(gStatus &st)
+  : minLam(.01), maxLam(30), delLam(.01), delp(.01), tol(.01), powLam(1),
+    trace(0), tracefile(&gnull), pxifile(&gnull), status(st)
 { }
 
 template <class T>
 int GridParams<T>::Ok(void) const
 {
-if (!pxifile) return 0;
-return 1;
+  return (pxifile && tracefile);
 }
 
 template <class T>
-GridSolveModule<T>::GridSolveModule(const NormalForm<T> &r,const GridParams<T> &param)
-	: nf(r),p(r.NumStrats(1)),x(r.NumStrats(1)), q_calc(r.NumStrats(2)),
-		y(r.NumStrats(2)),params(param),matrix(r.NumStrats(1),r.NumStrats(2))
-{}
+GridSolveModule<T>::GridSolveModule(const NormalForm<T> &r,
+				    const GridParams<T> &param)
+  : nf(r), p(r.NumStrats(1)), x(r.NumStrats(1)), q_calc(r.NumStrats(2)),
+    y(r.NumStrats(2)), params(param), matrix(r.NumStrats(1), r.NumStrats(2))
+{ }
 
 template <class T>
 GridSolveModule<T>::~GridSolveModule(void)
-{
-}
+{ }
 
 // Output header
 template <class T>
@@ -69,7 +69,7 @@ for (int i=1;i<=st1;i++)
 
 out<<"Settings:\n";
 out<<params.minLam<<'\n'<<params.maxLam<<'\n'<<params.delLam<<'\n';
-out<<0<<'\n'<<1<<'\n'<<params.type<<'\n';
+out<<0<<'\n'<<1<<'\n'<<params.powLam<<'\n';
 
 out<<"Extra:\n";
 out<<1<<'\n'<<params.tol<<'\n'<<params.delp<<'\n';
@@ -138,7 +138,7 @@ for (i = 1; i <= st1; i++)
 if (ok)
 {
 	OutputResult(*params.pxifile,l,dist,q,p);
-	if (params.plev>1)	OutputResult(*params.outfile,l,dist,q,p);
+	if (params.trace>1)	OutputResult(*params.tracefile,l,dist,q,p);
 }
 
 return (ok);
@@ -148,7 +148,7 @@ return (ok);
 template <class T> int GridSolveModule<T>::GridSolve(void)
 {
 int i,j;
-if (!params.Ok()) {if (params.errfile) *params.errfile<<"Param Error\n";return 0;}
+if (!params.Ok()) { *params.tracefile << "Param Error\n"; return 0; }
 
 params.status<<"Grid Solve algorithm\n";
 NormalIter<T> iter(nf);
@@ -166,18 +166,18 @@ for (i=1;i<=st1;i++)
 // Initialize the output file
 gWatch timer;timer.Start();
 OutputHeader(*params.pxifile);
-if (params.plev>0) OutputHeader(*params.outfile);
+if (params.trace>0) OutputHeader(*params.tracefile);
 // Create the ProbVector to give us all sets of probability values
 ProbVect<T> *pv=new ProbVect<T>(st1,(int)((T)1.0/params.delp+(T)0.5));
 int num_steps;
-if (params.type==0)
+if (params.powLam==0)
 	num_steps=(int)((params.maxLam-params.minLam)/params.delLam);
 else
 	num_steps=(int)(log(params.maxLam/params.minLam)/log(params.delLam+(T)1));
 T l=params.minLam;
 for (int step=1;step<num_steps && !params.status.Get();step++)
 {
-	if (params.type==0)  l=l+params.delLam; else l=l*(params.delLam+(T)1);
+	if (params.powLam==0)  l=l+params.delLam; else l=l*(params.delLam+(T)1);
 	while (!pv->Done()) if (pv->Inc())	CheckEqu(pv->GetP(),l);
 	pv->Reset();
 	params.status.SetProgress((double)step/(double)num_steps);

@@ -8,15 +8,15 @@
 #define ENUM_H
 
 #include "normal.h"
-#include "rational.h"
 #include "glist.h"
 #include "gstatus.h"
 #include "lhtab.h"
+#include "mixed.h"
 
 class EnumParams     {
 public:
-  int plev, stopAfter;
-  gOutput *outfile;
+  int trace, stopAfter;
+  gOutput *tracefile;
   gStatus &status;
 
   EnumParams(gStatus &status_=gstatus);
@@ -34,6 +34,7 @@ private:
   int rows,cols,level;
   long count,npivots;
   double time;
+  gList<MixedProfile<T> > solutions;
   
 //  void AddSolution(const gPVector<T> &s);
   
@@ -48,23 +49,15 @@ public:
   
   EnumParams &Parameters(void);
 
-      //  Ted -- I like 2nd form better, but does this ever get 
-      //         de-allocated?  
-
-//  void GetSolutions(gList<gPVector<T> > &solutions) const;
-  gList<gPVector<T> > &GetSolutions(void) const;
-
-      //  Ted -- Valuable information (the basis) is lost in this 
-      //         module by converting to gPVectors. Can 
-      //         we find a better way to do this.  
+  gList<MixedProfile<T> > &GetSolutions(void);
 };
 
 //
 // Convenience functions for "one-shot" evaluations
 //
 template <class T> int Enum(const NormalForm<T> &N, const EnumParams &p,
-			    gList<gPVector<T> > &solutions,
-			    long &npivots, gRational &time);
+			    gList<MixedProfile<T> > &solutions,
+			    long &npivots, double &time);
 
 #endif    // ENUM_H
 

@@ -4,10 +4,7 @@
 //# $Id$
 //#
 
-#include "rational.h"
 #include "gwatch.h"
-#include "gpvector.h"
-
 #include "normal.h"
 #include "normiter.h"
 
@@ -20,8 +17,8 @@ template <class T> gVector<T> Make_b(const NormalForm<T> &);
 //                        EnumParams: member functions
 //---------------------------------------------------------------------------
 
-EnumParams::EnumParams(gStatus &status_) : plev(0), stopAfter(0),
-outfile(&gnull),status(status_)
+EnumParams::EnumParams(gStatus &status_) : trace(0), stopAfter(0),
+tracefile(&gnull),status(status_)
 { }
 
 //-------------------------------------------------------------------------
@@ -37,10 +34,6 @@ EnumModule<T>::EnumModule(const NormalForm<T> &N, const EnumParams &p)
 
 template <class T> int EnumModule<T>::Enum(void)
 {
-  // Ted -- is there a better way to do this?  A lot of 
-  //        allocation before finding out there are too 
-  //        many players. (Same in Lemke module I think)
-  
   if (NF.NumPlayers() != 2)   return 0;  
   
   gWatch watch;
@@ -62,17 +55,17 @@ template <class T> int EnumModule<T>::Enum(void)
   }
   
   if(params.status.Get()) {
-    (*params.outfile) << "\n User Break \n";
+    (*params.tracefile) << "\n User Break \n";
     params.status.Reset();
   }
 
-  if(params.plev>=2) {
+  if(params.trace>=2) {
     for(i=1;i<=List.Length();i++) {
-      (*params.outfile) << "\n";
-      List[i].Dump(*params.outfile);
+      (*params.tracefile) << "\n";
+      List[i].Dump(*params.tracefile);
     }
   }
-  time = (gRational) watch.Elapsed();
+  time = watch.Elapsed();
   return 1;
 }
 
@@ -138,7 +131,7 @@ template <class T> void EnumModule<T>
     j=1;
   }
   
-  if(params.plev>=3) {
+  if(params.trace>=3) {
     printf("\nPass# %3ld, Depth =%3d, Target = ",
 	   count, rows-pr+1);
     for(i=1;i<=rows;i++)
@@ -149,7 +142,7 @@ template <class T> void EnumModule<T>
     }
     if(j) {
       printf("  Nash equilib");    
-      B2.Dump(*params.outfile); 
+      B2.Dump(*params.tracefile); 
     }
   }
   
@@ -162,44 +155,6 @@ template <class T> void EnumModule<T>
       }
   }
 }
-
-/*
-template <class T>
-gList<gPVector<T> > &EnumTableau<T>::AddSolution(void) const
-{
-  gArray<int> dim(2);
-  dim[1] = n1;
-  dim[2] = n2;
-  
-  gPVector<T> profile(dim);
-  T sum = (T) 0;
-  
-  for (int j = 1; j <= N.NumStrats(1); j++)
-    if (List.IsDefined(j))   sum += List(j);
-  
-  if (sum == (T) 0)  continue;
-  
-  for (j = 1; j <= N.NumStrats(1); j++) 
-    if (List.IsDefined(j))   profile(1, j) = List(j) / sum;
-    else  profile(1, j) = (T) 0;
-  
-  sum = (T) 0;
-  
-  for (j = 1; j <= N.NumStrats(2); j++)
-    if (List[i].IsDefined(N.NumStrats(1) + j))  
-      sum += List[i](N.NumStrats(1) + j);
-  
-  if (sum == (T) 0)  continue;
-  
-  for (j = 1; j <= N.NumStrats(2); j++)
-    if (List[i].IsDefined(N.NumStrats(1) + j))
-      profile(2, j) = List[i](N.NumStrats(1) + j) / sum;
-    else
-      profile(2, j) = (T) 0;
-  
-  solutions.Append(profile);
-}
-*/
 
 template <class T> long EnumModule<T>::NumPivots(void) const
 {
@@ -216,22 +171,13 @@ template <class T> EnumParams &EnumModule<T>::Parameters(void)
   return params;
 }
 
-//template <class T> void EnumModule<T>
-//::GetSolutions(gList<gPVector<T> > &solutions) const
-
-template <class T> gList<gPVector<T> > &EnumModule<T>
-::GetSolutions(void) const
+template <class T>
+gList<MixedProfile<T> > &EnumModule<T>::GetSolutions(void)
 {
-  gList<gPVector<T> > *solutions;
-  solutions = new gList<gPVector<T> >;
-//  solutions.Flush();
+  solutions.Flush();
 
   for (int i = 1; i <= List.Length(); i++)    {
-    gArray<int> dim(2);
-    dim[1] = rows;
-    dim[2] = cols;
-
-    gPVector<T> profile(dim);
+    MixedProfile<T> profile(NF);
     T sum = (T) 0;
 
     for (int j = 1; j <= rows; j++)
@@ -257,26 +203,13 @@ template <class T> gList<gPVector<T> > &EnumModule<T>
       else
 	profile(2, j) = (T) 0;
 
-    solutions->Append(profile);
+    solutions.Append(profile);
   }
-  return *solutions;
-}
-
-
-/*
-template <class T>
-const gList<gPVector<T> > &EnumModule<T>::GetSolutions(void) const
-{
   return solutions;
 }
 
+#include "rational.h"
 
-template <class T>
-void EnumModule<T>::AddSolution(const gPVector<T> &s)
-{
-  solutions.Append(s);
-}
-*/
 #ifdef __GNUG__
 template class EnumModule<double>;
 template class EnumModule<gRational>;

@@ -8,12 +8,12 @@
 #define LEMKE_H
 
 #include "normal.h"
-#include "rational.h"
+#include "mixed.h"
 #include "glist.h"
 
 class LemkeParams     {
   public:
-    int dup_strat, plev, nequilib, maxdepth;
+    int trace, stopAfter, maxDepth;
     gOutput *output;
     
     LemkeParams(void);
@@ -28,7 +28,7 @@ template <class T> class LemkeModule  {
     const LemkeParams &params;
     long npivots;
     double time;
-    gList<gPVector<T> > solutions;
+    gList<MixedProfile<T> > solutions;
 
   public:
     LemkeModule(const NormalForm<T> &N, const LemkeParams &p);
@@ -39,15 +39,15 @@ template <class T> class LemkeModule  {
     long NumPivots(void) const;
     double Time(void) const;
 
-    const gList<gPVector<T> > &GetSolutions(void) const;
+    const gList<MixedProfile<T> > &GetSolutions(void) const;
 };
 
 //
 // Convenience functions for "one-shot" evaluations
 //
 template <class T> int Lemke(const NormalForm<T> &N, const LemkeParams &p,
-			     gList<gPVector<T> > &solutions,
-			     long &npivots, gRational &time);
+			     gList<MixedProfile<T> > &solutions,
+			     long &npivots, double &time);
 				   
 #endif    // LEMKE_H
 
