@@ -23,6 +23,7 @@ typedef struct NODEENTRY {
 }  NodeEntry;
 
 template <class T> class ExtensiveShow;
+
 class BaseTreeWindow
 {
 public:
@@ -37,9 +38,9 @@ class TreeWindow : public BaseTreeWindow, public wxCanvas
 		// Private variables
 		ExtForm<T> *the_problem;
 		int			subgame;							// which subgame I am.  1 for root
-		ExtensiveShow<T> *frame;				// parent frame
+		ExtensiveShow<T> *frame;			// parent frame
 		Node mark_node,old_mark_node;	// Used in mark/goto node operations
-		TreeDrawParams draw_settings;	// Stores drawing parameters
+		TreeDrawSettings draw_settings;	// Stores drawing parameters
 		TreeWinIter *iterator;				// Used to process cursor keys
 		TreeNodeCursor *flasher;			// Used to flash the cursor
 		wxList *node_list;						// Data for display coordinates of nodes
@@ -84,7 +85,7 @@ class TreeWindow : public BaseTreeWindow, public wxCanvas
 	public:
 		// Constructor
 		TreeWindow(ExtForm<T> *p,ExtensiveShow<T> *frame,int subgame=1,
-							int x=-1,int y=-1,int w=-1,int h=-1,int style=0);
+							int x=-1,int y=-1,int w=-1,int h=-1,int style=wxRETAINED);
 		// Destructor
 		~TreeWindow();
 		// Windows event handlers
@@ -150,40 +151,6 @@ class TreeWindow : public BaseTreeWindow, public wxCanvas
 		void Render(wxDC &dc);
 
 };
-
-template <class T>
-class ExtensiveShow : public wxFrame
-{
-private:
-	ExtForm<T> *ef;
-	wxList *accelerators;					// Used to process accelerator keys
-	// Solution routines
-  gBlock<int> got_soln;
-	void SolveNormal(void);
-	void SolveEGambit(void);
-public:
-	wxFrame *parent;
-	TreeWindow<T> *tw;
-	// Constructor.  You need only suply the ExtForm
-	ExtensiveShow(ExtForm<T> *ef,int subgame=1,wxFrame *frame=NULL,
-								const char *title=0,int x=-1,int y=-1,int w=600,
-								int h=400,int type=wxDEFAULT_FRAME);
-	// Destructor
-	~ExtensiveShow();
-	// Event handlers
-	Bool 		OnClose(void);
-	void 		OnMenuCommand(int id);
-	// Accelerators allow for platform-indep handling of hotkeys
-	wxList 	*MakeAccelerators(void);
-	Bool		CheckAccelerators(int ch);
-	// Solution modules
-	void		Solve(void);
-};
-
-// Solution constants
-#define EFG_NORMAL_SOLUTION		0
-#define EFG_EGAMBIT_SOLUTION	1
-#define EFG_ALL_SOLUTION			2
 
 #endif   // TREEWINDOW_H
 
