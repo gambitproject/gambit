@@ -1,0 +1,141 @@
+#! /bin/sh
+
+echo
+echo ------------------------------------------------------------
+echo Gambit GUI installation script.
+echo ------------------------------------------------------------
+
+echo
+echo Please answer the following questions.  Hit \<return\> to
+echo accept the default answers, which are in parentheses before
+echo the question mark.
+
+unpackdir=`pwd`
+echo
+echo You have unpacked the gambit distribution in $unpackdir.
+
+#
+# 1) Install the binaries.
+#
+
+echo 
+echo 1\) Where do you want the gambit binaries to be installed \(~/bin\)?
+
+read ans
+case $ans in
+   [^\n]*) bin_install=$ans ;;
+   *)      bin_install=$HOME/bin ;;
+esac
+
+#
+# Convert the ~ to $HOME
+#
+
+bin_install=`echo $bin_install | sed -e 's/\~/$HOME/g'`
+eval "bin_install=$bin_install"
+
+echo
+echo Installing binaries in $bin_install...
+
+# Flag an error if the binary directory doesn't exist.
+
+if [ ! -d $bin_install ]
+then
+    # Try to make the directory.
+    mkdir $bin_install
+    if [ $? -ne 0 ]
+    then
+	echo
+	echo ERROR! Could not create directory $bin_install
+        echo Please create the directory and start over.
+	echo
+	exit 1
+    else
+        echo
+        echo Created directory $bin_install
+    fi
+fi
+
+cp gambit/bin/* $bin_install
+
+if [ $? -ne 0 ]
+then
+    echo
+    echo ERROR! Copy was unsuccessful.
+    echo Do you have write permission on $bin_install?
+    echo If not, please select another directory.
+    echo
+fi
+
+#
+# Figure out if the install directory is in the current path.
+# If not, add it and (later) offer to add a line to the user's .cshrc file.
+#
+
+# Q: how do we figure out whether the install directory
+#    is in the user's path?  Need an awk script with -F:
+#    to separate fields on :'s.  Even then it's quite
+#    hairy.  Might want to have a separate awk script in the
+#    bin directory or use a here document.
+
+# The closest I've come is this:
+#val=`echo $PATH | awk -F: '{ for (i = 1; i <= NF; i++) \
+#    if (index($i,"/usr/ucb") > 0) print "found"; }'`
+
+# echo $val
+
+
+#
+# Install the gambit.ini file as ~/.gambit.ini
+#
+
+
+#
+# Fix the .gambit.ini file if necessary.
+#
+
+
+#
+# Set up the appropriate environment variables.
+# E.g. WXHELPFILES
+#
+# Are there environment variables for where to put efg/nfg files?
+#
+
+
+
+#
+# Install the on-line help.
+#
+
+
+#
+# Tell the user how to change his .cshrc file; offer to do
+# it from this script.
+#
+
+
+
+# Old gui-init script: plagiarize as needed:
+#
+#echo This program will check and possibly update your Gambit GUI configuration.
+#echo file: $(HOME)/.gambit.ini
+#
+#if (-f $(HOME)/.gambit.ini) then
+#	echo Previous Gambit GUI init file found.
+#else 
+#	echo Creating a new Gambit GUI init file
+#	cp ./gambit.ini $(HOME)/.gambit.ini
+#endif
+#
+#grep -s "Root-Dir" $(HOME)/.gambit.ini
+#
+#if ($status) then
+#	echo Setting the local install dir to : `pwd`
+#	echo "Install.Root-Dir:       " `pwd` >> $(HOME)/.gambit.ini
+#	echo Setting the local help dir to : `pwd`/manual/
+#	echo "Install.Help-Dir:       " `pwd`/manual/ >> $(HOME)/.gambit.ini
+#else
+#	echo Local dir variables already set, no changes made
+#endif
+#
