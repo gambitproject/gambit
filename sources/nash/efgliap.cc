@@ -52,8 +52,9 @@ gbtBehavLiapFunction::~gbtBehavLiapFunction()
 
 double gbtBehavLiapFunction::Value(const gbtVector<double> &v) const
 {
-  ((gbtVector<double> &) m_profile).operator=(v);
-    //m_profile = v;
+  for (int i = 1; i <= v.Length(); i++) {
+    m_profile[i] = v[i];
+  }
   // Don't impose penalties in Lyapunov function; avoid this as
   // we go out of the feasible set in numerically computing the
   // derivative of the function.
@@ -102,7 +103,10 @@ bool gbtBehavLiapFunction::Gradient(const gbtVector<double> &x,
 {
   const double DELTA = .00001;
 
-  ((gbtVector<double> &) m_profile).operator=(x);
+  for (int i = 1; i <= x.Length(); i++) {
+    m_profile[i] = x[i];
+  }
+
   for (int i = 1; i <= x.Length(); i++) {
     m_profile[i] += DELTA;
     double value = m_profile->GetLiapValue(false);
