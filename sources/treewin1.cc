@@ -97,75 +97,78 @@ void TreeWindow::edit_paste(void)
 //***********************************************************************
 void TreeWindow::node_add(void)
 {
-    static int branches = 2; // make this static so it remembers the last entry
-    static EFPlayer *player = 0;
-    static Infoset *infoset = 0;
-    static Efg *last_ef = 0; // need this to make sure player,infoset are valid
+  static int branches = 2; // make this static so it remembers the last entry
+  static EFPlayer *player = 0;
+  static Infoset *infoset = 0;
+  static Efg *last_ef = 0; // need this to make sure player,infoset are valid
     
-    if (last_ef != &ef)
-    {
-        player = 0;
-        infoset = 0;
-        last_ef = &ef;
+  if (last_ef != &ef)  {
+    player = 0;
+    infoset = 0;
+    last_ef = &ef;
+  }
+    
+  NodeAddDialog node_add_dialog(ef, player, infoset, branches, pframe);
+
+  if (node_add_dialog.Completed() == wxOK)  {
+    nodes_changed = TRUE;
+    NodeAddMode mode = node_add_dialog.GetAddMode();
+    player = node_add_dialog.GetPlayer();
+    infoset = node_add_dialog.GetInfoset();
+    branches = node_add_dialog.GetBranches();
+    Bool set_names = FALSE;
+
+    if (cursor->NumChildren() == 0)  {
+      try {
+	if (mode == NodeAddNew) {
+	  //	  ef.AppendNode(cursor, player, branches);
+	  ef.AppendNode(cursor, player, -50);
+	  set_names = node_add_dialog.SetNames();
+	}
+	else
+	  ef.AppendNode(cursor, infoset);
+
+	// take care of probs for chance nodes.
+	if (set_names) {
+	  node_label();
+	  infoset_label();
+	}
+
+	if (player == ef.GetChance())
+	  action_probs();
+      }
+      catch (gException &E) {
+        wxMessageBox(E.Description(), "Gambit Error", wxOK | wxCENTRE, pframe);
+	// internal error in Efg -- for now, ignore silently
+      }
     }
-    
-    NodeAddDialog node_add_dialog(ef, player, infoset, branches, pframe);
+    else {
+      try {
+	if (mode == NodeAddNew) {
+	  ef.InsertNode(cursor, player, branches);
+	  set_names = node_add_dialog.SetNames();
+	  cursor = cursor->GetParent(); // old cursor is now the child
+	}
+	else
+	  ef.InsertNode(cursor, infoset);
 
-    if (node_add_dialog.Completed() == wxOK)
-    {
-        nodes_changed = TRUE;
-        NodeAddMode mode = node_add_dialog.GetAddMode();
-        player = node_add_dialog.GetPlayer();
-        infoset = node_add_dialog.GetInfoset();
-        branches = node_add_dialog.GetBranches();
-        Bool set_names = FALSE;
+	// take care of probs for chance nodes.
+	if (set_names) {
+	  node_label();
+	  infoset_label();
+	}
 
-        if (cursor->NumChildren() == 0)
-        {
-            try
-            {
-                if (mode == NodeAddNew)
-                {
-                    ef.AppendNode(cursor, player, branches);
-                    set_names = node_add_dialog.SetNames();
-                }
-                else
-                    ef.AppendNode(cursor, infoset);
-            }
-            catch (Efg::Exception &e)
-            {
-                // internal error in Efg -- for now, ignore silently
-            }
-        }
-        else
-        {
-            try
-            {
-                if (mode == NodeAddNew)
-                {
-                    ef.InsertNode(cursor, player, branches);
-                    set_names = node_add_dialog.SetNames();
-                    cursor = cursor->GetParent(); // old cursor is now the child
-                }
-                else
-                    ef.InsertNode(cursor, infoset);
-            }
-            catch (Efg::Exception &e)
-            {
-                // internal error in Efg -- for now, ignore silently
-            }
-        }
+	if (player == ef.GetChance())
+	  action_probs();
+	
+      }
+      catch (...) {
+	// internal error in Efg -- for now, ignore silently
+	
+      }
+    }
         
-        // take care of probs for chance nodes.
-        if (set_names)
-        { 
-            node_label();
-            infoset_label();
-        }
-
-        if (player == ef.GetChance())
-            action_probs();
-    }
+  }
 }
 
 //***********************************************************************

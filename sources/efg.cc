@@ -811,7 +811,8 @@ EFPlayer *Efg::GetChance(void) const
 
 Infoset *Efg::AppendNode(Node *n, EFPlayer *p, int count)
 {
-  assert(n && p && count > 0);
+  if (!n || !p || count == 0)
+    throw Exception();
 
   if (n->children.Length() == 0)   {
     n->infoset = CreateInfoset(p->infosets.Length() + 1, p, count);
