@@ -40,12 +40,12 @@ public:
 
 
 class Nfg;
-class NFStrategySet;
+class nfgSupportPlayer;
 
 class NFSupport {
 protected:
   const Nfg *bnfg;
-  gArray <NFStrategySet *> sups;
+  gArray <nfgSupportPlayer *> sups;
   
 public:
   NFSupport(const Nfg &);

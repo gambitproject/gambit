@@ -31,7 +31,7 @@ template class gRectBlock<gRational>;
 #include "garray.imp"
 #include "gblock.imp"
 
-template class gArray<NFStrategySet *>;
+template class gArray<nfgSupportPlayer *>;
 template class gArray<Strategy *>;
 template class gArray<NFOutcome *>;
 
