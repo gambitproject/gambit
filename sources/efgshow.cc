@@ -196,84 +196,109 @@ void EfgShow::SolveStandard(void)
   // Most of the GUI code assumes information sets exist.
   if (ef.TotalNumInfosets() == 0)  return;
 
-  // check that the game is perfect recall, if not give a warning
-  Infoset *bad1, *bad2;
-  if (!IsPerfectRecall(ef, bad1, bad2)) {
-    int completed = wxMessageBox("This game is not perfect recall\n"
-				 "Do you wish to continue?", 
-				 "Solve Warning", 
-				 wxOK | wxCANCEL | wxCENTRE, this);
-    if (completed != wxOK) return;
+  bool isPerfectRecall;
+
+  if ((isPerfectRecall = IsPerfectRecall(ef)) == false) {
+    if (wxMessageBox("This game is not perfect recall\n"
+		     "Do you wish to continue?", 
+		     "Solve Warning", 
+		     wxOK | wxCANCEL | wxCENTRE, this) != wxOK)
+      return;
   }
 
-  EfgSolveStandardDialog *ESSD = new EfgSolveStandardDialog(ef, this);
-  if (ESSD->Completed() != wxOK)  {
-    delete ESSD;
-    return;
-  }
-  delete ESSD;
-
-  EfgSolveSettings ESS(ef);
+  dialogEfgSolveStandard dialog(ef, this);
+  if (dialog.Completed() != wxOK)  return;
 
   guiEfgSolution *solver;
 
-  Enable(FALSE);
   wxBeginBusyCursor();
 
-  if (!ESS.ViaNfg()) {
-    switch (ESS.GetEfgAlgorithm()) {
-    case EFG_PURENASH_SOLUTION:
-      solver = new guiefgEnumPureEfg(*cur_sup, this);
+  bool markSubgames = false;
+  
+  switch (dialog.Type()) {
+  case efgSTANDARD_NASH:
+    switch (dialog.Number()) {
+    case efgSTANDARD_ONE:
+      if (ef.NumPlayers() == 2 && isPerfectRecall) {
+	if (ef.IsConstSum()) 
+	  solver = new guiefgLpEfg(*cur_sup, this, 1, dialog.Precision(),
+				   true);
+	else
+	  solver = new guiefgLcpEfg(*cur_sup, this, 1, dialog.Precision(),
+				    true);
+      }
+      else if (ef.NumPlayers() == 2 && !isPerfectRecall)
+	solver = new guiefgQreEfg(*cur_sup, this, 1, true);
+      else 
+	solver = new guiefgSimpdivNfg(*cur_sup, this, 1, dialog.Precision(),
+				      true);
       break;
-    case EFG_LCP_SOLUTION:
-      solver = new guiefgLcpEfg(*cur_sup, this);
+    case efgSTANDARD_TWO:
+      if (ef.NumPlayers() == 2)
+	solver = new guiefgEnumMixedNfg(*cur_sup, this, 2,
+					dialog.Precision(), false);
+      else
+	wxMessageBox("Not guaranteed to find two solutions", "Warning");
+	solver = new guiefgLiapEfg(*cur_sup, this, 2, false);
       break;
-    case EFG_CSUM_SOLUTION:
-      solver = new guiefgLpEfg(*cur_sup, this);
+    case efgSTANDARD_ALL:
+      wxMessageBox("Not guaranteed to find all solutions", "Warning");
+      solver = new guiefgLiapEfg(*cur_sup, this, 0, false);
       break;
-    case EFG_LIAP_SOLUTION:
-      solver = new guiefgLiapEfg(*cur_sup, this);
-      break;
-    case EFG_QRE_SOLUTION:
-      solver = new guiefgQreEfg(*cur_sup, this);
-      break;
-    default:
-      return;
     }
-  }
-  else {
-    switch (ESS.GetNfgAlgorithm()) {
-    case NFG_ENUMPURE_SOLUTION:
-      solver = new guiefgEnumPureNfg(*cur_sup, this);
+    break;
+
+  case efgSTANDARD_PERFECT:
+    markSubgames = true;
+    switch (dialog.Number()) {
+    case efgSTANDARD_ONE:
+      if (ef.NumPlayers() == 2 && isPerfectRecall) {
+	if (ef.IsConstSum()) 
+	  solver = new guiefgLpEfg(*cur_sup, this, 1, dialog.Precision(),
+				   true);
+	else
+	  solver = new guiefgLcpEfg(*cur_sup, this, 1, dialog.Precision(),
+				    true);
+      }
+      else if (ef.NumPlayers() == 2 && !isPerfectRecall)
+	solver = new guiefgQreEfg(*cur_sup, this, 1, true);
+      else 
+	solver = new guiefgSimpdivNfg(*cur_sup, this, 1, dialog.Precision(),
+				      true);
       break;
-    case NFG_ENUMMIXED_SOLUTION:
-      solver = new guiefgEnumMixedNfg(*cur_sup, this);
+    case efgSTANDARD_TWO:
+      if (ef.NumPlayers() == 2)
+	solver = new guiefgEnumMixedNfg(*cur_sup, this, 2,
+					dialog.Precision(), false);
+      else
+	wxMessageBox("Not guaranteed to find two solutions", "Warning");
+	solver = new guiefgLiapEfg(*cur_sup, this, 2, false);
       break;
-    case NFG_LCP_SOLUTION:
-      solver = new guiefgLcpNfg(*cur_sup, this);
+    case efgSTANDARD_ALL:
+      wxMessageBox("Not guaranteed to find all solutions", "Warning");
+      solver = new guiefgLiapEfg(*cur_sup, this, 0, false);
       break;
-    case NFG_LP_SOLUTION:
-      solver = new guiefgLpNfg(*cur_sup, this);
+    }
+    break;
+
+  case efgSTANDARD_SEQUENTIAL:
+    switch (dialog.Number()) {
+    case efgSTANDARD_ONE:
+      solver = new guiefgQreEfg(*cur_sup, this, 1, true);
       break;
-    case NFG_LIAP_SOLUTION:
-      solver = new guiefgLiapNfg(*cur_sup, this);
+    case efgSTANDARD_TWO:
+      wxMessageBox("Not guaranteed to find two solutions", "Warning");
+      solver = new guiefgLiapEfg(*cur_sup, this, 2, true);
       break;
-    case NFG_SIMPDIV_SOLUTION:
-      solver = new guiefgSimpdivNfg(*cur_sup, this);
-      break;
-    case NFG_QRE_SOLUTION:
-      solver = new guiefgQreNfg(*cur_sup, this);
-      break;
-    case NFG_QREALL_SOLUTION:
-      solver = new guiefgQreAllNfg(*cur_sup, this);
-      break;
-    default:
+    case efgSTANDARD_ALL:
+      wxMessageBox("Not guaranteed to find all solutions", "Warning");
+      solver = new guiefgLiapEfg(*cur_sup, this, 0, true);
       return;
     }
   }
 
   try {
-    if (ESS.MarkSubgames())  
+    if (markSubgames)  
       tw->SubgameMarkAll();
     else
       tw->SubgameUnmarkAll();
@@ -289,12 +314,8 @@ void EfgShow::SolveStandard(void)
   delete solver;
 
   ChangeSolution(solns.VisibleLength());
-  Enable(TRUE);
   InspectSolutions(CREATE_DIALOG);
 }
-
-// Solve
-bool IsPerfectRecall(const Efg &, Infoset *&, Infoset *&);
 
 void EfgShow::Solve(int p_algorithm)
 {

@@ -1,7 +1,7 @@
 //
 // FILE: efgsolvd.cc -- Standard solution methods for extensive form
 //
-//
+// $Id$
 //
 
 // Most of these probably aren't necessary... figure out which ones are!
@@ -57,307 +57,169 @@ EfgSolveSettings::~EfgSolveSettings()
 }
 
 //========================================================================
-//                EfgSolveStandardDialog: Member functions
+//                dialogEfgSolveStandard: Member functions
 //========================================================================
 
-EfgSolveStandardDialog::EfgSolveStandardDialog(const Efg &p_efg,
+dialogEfgSolveStandard::dialogEfgSolveStandard(const Efg &p_efg,
 					       wxWindow *p_parent)
-  : EfgSolveSettings(p_efg, false),
-    MyDialogBox(p_parent, "Standard Solution", EFG_STANDARD_HELP),
-    m_standardTypeStr(new char[20]), m_standardNumStr(new char[20]),
-    m_precisionStr(new char[20])
+  : wxDialogBox(p_parent, "Standard Solution", TRUE), m_efg(p_efg)
 {
   gText defaultsFile("gambit.ini");
-  wxGetResource(SOLN_SECT, "Efg-Standard-Type", &m_standardType, 
+  int standardType = 0, standardNum = 0, precision = 0;
+  wxGetResource(SOLN_SECT, "Efg-Standard-Type", &standardType, 
 		defaultsFile);
-  wxGetResource(SOLN_SECT, "Efg-Standard-Num", &m_standardNum,
+  wxGetResource(SOLN_SECT, "Efg-Standard-Num", &standardNum,
 		defaultsFile);
-  wxGetResource(PARAMS_SECTION, "Precision", &m_precisionStr, defaultsFile);
+  wxGetResource(SOLN_SECT, "Efg-Standard-Precision", &precision, defaultsFile);
 
-  m_standardTypeList = new wxStringList("Nash", "Subgame Perfect",
-					"Sequential", 0);
-  m_standardNumList = new wxStringList("One", "Two", "All", 0);
-  m_precisionList = new wxStringList("Float", "Rational", 0);
+  char *typeChoices[] = { "Nash", "Subgame Perfect", "Sequential" };
+  m_standardType = new wxRadioBox(this, (wxFunction) CallbackChanged,
+				  "Type", -1, -1, -1, -1,
+				  3, typeChoices, 0, wxVERTICAL);
+  m_standardType->SetClientData((char *) this);
+  m_standardType->SetSelection(standardType);
 
-  strcpy(m_standardTypeStr,
-	 (char *) m_standardTypeList->Nth(m_standardType)->Data());
-  strcpy(m_standardNumStr,
-	 (char *) m_standardNumList->Nth(m_standardNum)->Data());
+  char *numChoices[] = { "One", "Two", "All" };
+  m_standardNum = new wxRadioBox(this, (wxFunction) CallbackChanged,
+				 "Number", -1, -1, -1, -1,
+				 3, numChoices, 0, wxVERTICAL);
+  m_standardNum->SetClientData((char *) this);
+  m_standardNum->SetSelection(standardNum);
 
-  Add(wxMakeFormString("Type", &m_standardTypeStr, wxFORM_RADIOBOX,
-		       new wxList(wxMakeConstraintStrings(m_standardTypeList),
-				  0)));
-  Add(wxMakeFormString("Number", &m_standardNumStr, wxFORM_RADIOBOX,
-		       new wxList(wxMakeConstraintStrings(m_standardNumList),
-				  0)));
-  Add(wxMakeFormNewLine());
-  Add(wxMakeFormString("Precision", &m_precisionStr, wxFORM_RADIOBOX,
-		       new wxList(wxMakeConstraintStrings(m_precisionList),
-				  0), 0, wxHORIZONTAL));
-  Go();
-
-  if (Completed() == wxOK) {
-    m_standardType = wxListFindString(m_standardTypeList, m_standardTypeStr);
-    m_standardNum = wxListFindString(m_standardNumList, m_standardNumStr);
-    m_precision = ((wxListFindString(m_precisionList, m_precisionStr) == 0)
-		   ? precRATIONAL : precDOUBLE);
-    StandardSettings();
-    result = SD_SAVE;
-  }
-  else
-    result = SD_CANCEL;
-}
-
-EfgSolveStandardDialog::~EfgSolveStandardDialog()
-{
-  gText defaultsFile("gambit.ini");
-  wxWriteResource(SOLN_SECT, "Efg-Standard-Type", m_standardType,
-		  defaultsFile);
-  wxWriteResource(SOLN_SECT, "Efg-Standard-Num", m_standardNum,
-		  defaultsFile);
-  wxWriteResource(PARAMS_SECTION, "Precision", m_precisionStr,
-		  defaultsFile);
-
-  delete [] m_standardTypeStr;
-  delete [] m_standardNumStr;
-  delete [] m_precisionStr;
-
-  delete m_standardTypeList;
-  delete m_standardNumList;
-  delete m_precisionList;
-}
-
-void EfgSolveStandardDialog::StandardSettings(void)
-{
-  int stopAfter = 1, max_solns = 1, dom_type = DOM_WEAK;
-  bool use_elimdom = true, all = true;
-  Infoset *bad1, *bad2;   // for use with IsPerfectRecall
-
-  if (m_standardType == efgSTANDARD_NASH
-      && m_standardNum == efgSTANDARD_ONE &&
-      ef.NumPlayers() == 2) {
-    use_nfg = FALSE;
-    if (IsPerfectRecall(ef, bad1, bad2))
-      algorithm = (ef.IsConstSum()) ? EFG_CSUM_SOLUTION : EFG_LCP_SOLUTION;
-    else
-      algorithm = EFG_QRE_SOLUTION;
-    stopAfter = 1;
-    max_solns = 1;
-    use_elimdom = true;
-    all = true;
-    dom_type = DOM_WEAK;
-    subgames = TRUE;
-  }
-
-  else if (m_standardType == efgSTANDARD_NASH
-	   && m_standardNum == efgSTANDARD_ONE
-	   && ef.NumPlayers() != 2)  {
-    use_nfg = TRUE;
-    algorithm = NFG_SIMPDIV_SOLUTION;
-    stopAfter = 1;
-    max_solns = 1;
-    use_elimdom = true;
-    all = true;
-    dom_type = DOM_WEAK;
-    subgames = TRUE;
-  }
-	
-  else if (m_standardType == efgSTANDARD_NASH
-	   && m_standardNum == efgSTANDARD_TWO
-	   && ef.NumPlayers() == 2) {
-    use_nfg = TRUE;
-    algorithm = NFG_ENUMMIXED_SOLUTION;
-    stopAfter = 2;
-    max_solns = 2;
-    use_elimdom = true;
-    all = true;
-    dom_type = DOM_STRONG;
-    subgames = FALSE;
-  }
-	
-  else if (m_standardType == efgSTANDARD_NASH
-	   && m_standardNum == efgSTANDARD_TWO 
-	   && ef.NumPlayers() != 2) {
-    use_nfg = FALSE;
-    algorithm = EFG_LIAP_SOLUTION;
-    stopAfter = 2;
-    max_solns = 2;
-    use_elimdom = true;
-    all = true;
-    dom_type = DOM_STRONG;
-    subgames = FALSE;
-    wxWriteResource(PARAMS_SECTION, "Liap-Ntries", 2*stopAfter, defaults_file);
-  }
-	
-  else if (m_standardType == efgSTANDARD_NASH
-	   && m_standardNum == efgSTANDARD_ALL 
-	   && ef.NumPlayers()==2) {
-    use_nfg = TRUE;
-    algorithm = NFG_ENUMMIXED_SOLUTION;
-    stopAfter = 0;
-    max_solns = 0;
-    use_elimdom = true;
-    all = true;
-    dom_type = DOM_STRONG;
-    subgames = FALSE;
-  }
-	
-  else if (m_standardType == efgSTANDARD_NASH 
-	   && m_standardNum == efgSTANDARD_ALL
-	   && ef.NumPlayers() != 2) {
-    use_nfg = FALSE;
-    algorithm = EFG_LIAP_SOLUTION;
-    stopAfter = 0;
-    max_solns = 0;
-    use_elimdom = true;
-    all = true;
-    dom_type = DOM_STRONG;
-    subgames = FALSE;
-    Warn("Not guaranteed to find all solutions for 'All Nash n-person'\n");
-    wxWriteResource(PARAMS_SECTION, "Liap-Ntries", 2*stopAfter, defaults_file);
-  }
-
-  else if (m_standardType == efgSTANDARD_PERFECT
-	   && m_standardNum == efgSTANDARD_ONE 
-	   && ef.NumPlayers() == 2) {
-    use_nfg = FALSE;
-    if (IsPerfectRecall(ef, bad1, bad2))
-      algorithm = (ef.IsConstSum()) ? EFG_CSUM_SOLUTION : EFG_LCP_SOLUTION;
-    else
-      algorithm = EFG_QRE_SOLUTION;
-    stopAfter = 1;
-    max_solns = 1;
-    use_elimdom = true;
-    all = true;
-    dom_type = DOM_WEAK;
-    subgames = TRUE;
-  }
+  char *precisionChoices[] = { "Float", "Rational" };
+  m_precision = new wxRadioBox(this, 0, "Precision", -1, -1, -1, -1,
+			       2, precisionChoices, 0, wxVERTICAL);
+  m_precision->SetSelection(precision);
   
-  else if (m_standardType == efgSTANDARD_PERFECT
-	   && m_standardNum == efgSTANDARD_ONE
-	   && ef.NumPlayers() != 2) {
-    use_nfg = TRUE;
-    algorithm = NFG_SIMPDIV_SOLUTION;
-    stopAfter = 1;
-    max_solns = 1;
-    use_elimdom = true;
-    all = true;
-    dom_type = DOM_WEAK;
-    subgames = TRUE;
-  }
-	
-  else if (m_standardType == efgSTANDARD_PERFECT
-	   && m_standardNum == efgSTANDARD_TWO 
-	   && ef.NumPlayers() == 2) {
-    use_nfg = TRUE;
-    algorithm = NFG_ENUMMIXED_SOLUTION;
-    stopAfter = 2;
-    max_solns = 2;
-    use_elimdom = true;
-    all = true;
-    dom_type = DOM_STRONG;
-    subgames = TRUE;
-    Warn("Not guaranteed to find 2 solutions for 'Two Perfect'");
-  }
-	
-  else if (m_standardType == efgSTANDARD_PERFECT 
-	   && m_standardNum == efgSTANDARD_TWO
-	   && ef.NumPlayers() != 2) {
-    use_nfg = TRUE;
-    algorithm = NFG_LIAP_SOLUTION;
-    stopAfter = 2;
-    max_solns = 2;
-    use_elimdom = true;
-    all = true;
-    dom_type = DOM_STRONG;
-    subgames = TRUE;
-    wxWriteResource(PARAMS_SECTION, "Liap-Ntries", 2*stopAfter, defaults_file);
-    Warn("Not guaranteed to find 2 solutions for 'Two Perfect'");
-  }
-	
-  else if (m_standardType == efgSTANDARD_PERFECT
-	   && m_standardNum == efgSTANDARD_ALL 
-	   && ef.NumPlayers() == 2) {
-    use_nfg = TRUE;
-    algorithm = NFG_ENUMMIXED_SOLUTION;
-    stopAfter = 0;
-    max_solns = 0;
-    use_elimdom = true;
-    all = true;
-    dom_type = DOM_STRONG;
-    subgames = TRUE;
-  }
-	
-  else if (m_standardType == efgSTANDARD_PERFECT 
-	   && m_standardNum == efgSTANDARD_ALL 
-	   && ef.NumPlayers() != 2) {
-    use_nfg = FALSE;
-    algorithm = EFG_LIAP_SOLUTION;
-    stopAfter = 0;
-    max_solns = 0;
-    use_elimdom = true;
-    all = true;
-    dom_type = DOM_STRONG;
-    subgames = TRUE;
-    Warn("Not guaranteed to find all solutions for 'All Subgame Perfect n-person'\n");
-    wxWriteResource(PARAMS_SECTION, "Liap-Ntries", 2*stopAfter, defaults_file);
-  }
+  NewLine();
+  m_description = new wxText(this, 0, "Using algorithm");
+  m_description->Enable(FALSE);
 
-  else if (m_standardType == efgSTANDARD_SEQUENTIAL 
-	   && m_standardNum == efgSTANDARD_ONE) {
-    use_nfg = FALSE;
-    algorithm = EFG_QRE_SOLUTION;
-    stopAfter = 1;
-    max_solns = 1;
-    use_elimdom = false;
-    all = true;
-    dom_type = DOM_STRONG;
-    subgames = FALSE;
-  }
+  NewLine();
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "OK");
+  okButton->SetClientData((char *) this);
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel");
+  cancelButton->SetClientData((char *) this);
 
-  else if (m_standardType == efgSTANDARD_SEQUENTIAL
-	   && m_standardNum == efgSTANDARD_TWO) {
-    use_nfg = FALSE;
-    algorithm = EFG_LIAP_SOLUTION;
-    stopAfter = 2;
-    max_solns = 2;
-    use_elimdom = false;
-    all = true;
-    dom_type = DOM_STRONG;
-    subgames = FALSE;
-    Warn("Not guaranteed to find all solutions for 'Two Sequential'\n");
-    wxWriteResource(PARAMS_SECTION, "Liap-Ntries", 2*stopAfter, defaults_file);
-  }
+  OnChanged();
 
-  if (m_standardType == efgSTANDARD_SEQUENTIAL 
-      && m_standardNum == efgSTANDARD_ALL) {
-    use_nfg = FALSE;
-    algorithm = EFG_LIAP_SOLUTION;
-    stopAfter = 0;
-    max_solns = 0;
-    use_elimdom = false;
-    all = true;
-    dom_type = DOM_STRONG;
-    subgames = FALSE;
-    Warn("Not guaranteed to find all solutions for 'All Sequential'\n");
-    wxWriteResource(PARAMS_SECTION, "Liap-Ntries", 2*stopAfter, defaults_file);
-  }
-
-  pick_solns=false; // pick solution subgames off for all standard solns
-  // -------- now write the new settings to file
-  wxWriteResource(SOLN_SECT,"Use-Nfg",use_nfg,defaults_file);
-  char *alg_sect=(use_nfg) ? "Nfg-Algorithm" : "Efg-Algorithm";
-  wxWriteResource(SOLN_SECT,alg_sect,algorithm,defaults_file);
-  wxWriteResource(PARAMS_SECTION,"Stop-After",stopAfter,defaults_file);
-  wxWriteResource(PARAMS_SECTION,"Max-Solns",max_solns,defaults_file);
-  wxWriteResource(SOLN_SECT,"Nfg-ElimDom-All",(int)all,defaults_file);
-  wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Type",dom_type,defaults_file);
-  wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",(int)use_elimdom,defaults_file);
-  wxWriteResource(SOLN_SECT,"Efg-Mark-Subgames",subgames,defaults_file);
-  wxWriteResource(SOLN_SECT,"Efg-Interactive-Solns",pick_solns,defaults_file);
-
-  wxWriteResource(PARAMS_SECTION, "Precision", m_precisionStr,
-		  defaults_file);
+  Fit();
+  Show(TRUE);
 }
 
+dialogEfgSolveStandard::~dialogEfgSolveStandard()
+{
+  gText defaultsFile("gambit.ini");
+  wxWriteResource(SOLN_SECT, "Efg-Standard-Type",
+		  m_standardType->GetSelection(), defaultsFile);
+  wxWriteResource(SOLN_SECT, "Efg-Standard-Num",
+		  m_standardNum->GetSelection(), defaultsFile);
+  wxWriteResource(SOLN_SECT, "Efg-Standard-Precision",
+		  m_precision->GetSelection(), defaultsFile);
+}
+
+void dialogEfgSolveStandard::OnOK(void)
+{
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void dialogEfgSolveStandard::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool dialogEfgSolveStandard::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+void dialogEfgSolveStandard::OnChanged(void)
+{
+  switch (m_standardType->GetSelection()) {
+  case 0:
+  case 1:
+    switch (m_standardNum->GetSelection()) {
+    case 0:
+      if (IsPerfectRecall(m_efg)) {
+	if (m_efg.NumPlayers() == 2 && m_efg.IsConstSum()) {
+	  m_description->SetValue("LpSolve[EFG]");
+	  m_precision->Enable(TRUE);
+	}
+	else if (m_efg.NumPlayers() == 2) {
+	  m_description->SetValue("LcpSolve[EFG]");
+	  m_precision->Enable(TRUE);
+	}
+	else {
+	  m_description->SetValue("SimpdivSolve[NFG]");
+	  m_precision->Enable(TRUE);
+	}
+      }
+      else {
+	m_description->SetValue("QreSolve[EFG]");
+	m_precision->Enable(FALSE);
+      }
+      break;
+    case 1:
+      if (m_efg.NumPlayers() == 2) {
+	m_description->SetValue("EnumMixedSolve[NFG]");
+	m_precision->Enable(TRUE);
+      }
+      else {
+	m_description->SetValue("LiapSolve[EFG]");
+	m_precision->Enable(FALSE);
+      }
+      break;
+    case 2:
+      m_description->SetValue("LiapSolve[EFG]");
+      m_precision->Enable(FALSE);
+      break;
+    }
+    break;
+  case 2:
+    m_precision->Enable(FALSE);
+    switch (m_standardNum->GetSelection()) {
+    case 0:
+      m_description->SetValue("QreSolve[EFG]");
+      break;
+    case 1:
+    case 2:
+      m_description->SetValue("LiapSolve[EFG]");
+      break;
+    }
+  }
+}
+
+guiStandardType dialogEfgSolveStandard::Type(void) const
+{
+  switch (m_standardType->GetSelection()) {
+  case 0:
+    return efgSTANDARD_NASH;
+  case 1:
+    return efgSTANDARD_PERFECT;
+  case 2:
+    return efgSTANDARD_SEQUENTIAL;
+  default:
+    return efgSTANDARD_NASH;
+  }
+}
+
+guiStandardNum dialogEfgSolveStandard::Number(void) const
+{
+  switch (m_standardNum->GetSelection()) {
+  case 0:
+    return efgSTANDARD_ONE;
+  case 1:
+    return efgSTANDARD_TWO;
+  case 2:
+    return efgSTANDARD_ALL;
+  default:
+    return efgSTANDARD_ALL;
+  }
+}
 

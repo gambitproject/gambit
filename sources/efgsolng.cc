@@ -14,16 +14,14 @@
 #include "efgsolng.h"
 #include "nfgconst.h"
 
-// sections in the defaults file(s)
-#define SOLN_SECT "Soln-Defaults"
-
 //=========================================================================
 //                     guiEfgSolution: Member functions
 //=========================================================================
 
 guiEfgSolution::guiEfgSolution(const EFSupport &p_support,
 			       EfgShowInterface *p_parent)
-  : m_efg(p_support.Game()), m_support(p_support), m_parent(p_parent)
+  : m_efg(p_support.Game()), m_support(p_support), m_parent(p_parent),
+    m_traceFile(0), m_traceLevel(0)
 { }
 
 //=========================================================================
@@ -49,11 +47,10 @@ public:
 guiSubgameSolver::guiSubgameSolver(EfgShowInterface *p_parent, const Efg &p_efg,
 			       bool p_eliminate, bool p_iterative,
 			       bool p_strong)
-  : m_parent(p_parent),
+  : m_parent(p_parent), m_pickSoln(false),
     m_eliminate(p_eliminate), m_iterative(p_iterative), m_strong(p_strong)
 {
   MarkedSubgameRoots(p_efg, m_subgameRoots);
-  wxGetResource(SOLN_SECT, "Efg-Interactive-Solns", &m_pickSoln, "gambit.ini");
 }
 
 //
@@ -230,12 +227,31 @@ guiefgLiapEfg::guiefgLiapEfg(const EFSupport &p_support,
   : guiEfgSolution(p_support, p_parent)
 { }
 
+guiefgLiapEfg::guiefgLiapEfg(const EFSupport &p_support,
+			     EfgShowInterface *p_parent,
+			     int p_stopAfter, bool p_eliminateWeak)
+  : guiEfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter)
+{
+  m_eliminate = true;
+  m_eliminateAll = true;
+  m_eliminateWeak = p_eliminateWeak;
+  m_eliminateMixed = false;
+  m_markSubgames = false;
+
+  m_nTries = 10;
+  m_maxits1D = 100;
+  m_maxitsND = 20;
+  m_tol1D = 2.0e-10;
+  m_tolND = 1.0e-10;
+}
+
 gList<BehavSolution> guiefgLiapEfg::Solve(void) const
 {
   wxStatus status(m_parent->Frame(), "LiapSolve Progress");
   BehavProfile<gNumber> start = m_parent->CreateStartProfile(m_startOption);
 
   EFLiapParams params(status);
+  params.stopAfter = m_stopAfter;
   params.tol1 = m_tol1D;
   params.tolN = m_tolND;
   params.maxits1 = m_maxits1D;
@@ -264,6 +280,7 @@ bool guiefgLiapEfg::SolveSetup(void)
     m_eliminateWeak = dialog.EliminateWeak();
     m_markSubgames = dialog.MarkSubgames();
 
+    m_stopAfter = dialog.StopAfter();
     m_tol1D = dialog.Tol1D();
     m_tolND = dialog.TolND();
     m_maxits1D = dialog.Maxits1D();
@@ -395,6 +412,20 @@ guiefgLcpEfg::guiefgLcpEfg(const EFSupport &p_support,
 			   EfgShowInterface *p_parent)
   : guiEfgSolution(p_support, p_parent)
 { }
+
+guiefgLcpEfg::guiefgLcpEfg(const EFSupport &p_support,
+			   EfgShowInterface *p_parent,
+			   int p_stopAfter, gPrecision p_precision,
+			   bool p_eliminateWeak)
+  : guiEfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter),
+    m_precision(p_precision)
+{
+  m_eliminate = true;
+  m_eliminateAll = true;
+  m_eliminateWeak = p_eliminateWeak;
+  m_eliminateMixed = false;
+  m_markSubgames = false;
+}
 
 gList<BehavSolution> guiefgLcpEfg::Solve(void) const
 {
@@ -678,6 +709,20 @@ guiefgEnumMixedNfg::guiefgEnumMixedNfg(const EFSupport &p_support,
   : guiEfgSolution(p_support, p_parent)
 { }
 
+guiefgEnumMixedNfg::guiefgEnumMixedNfg(const EFSupport &p_support,
+				       EfgShowInterface *p_parent,
+				       int p_stopAfter, gPrecision p_precision,
+				       bool p_eliminateWeak)
+  : guiEfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter),
+    m_precision(p_precision)
+{
+  m_eliminate = true;
+  m_eliminateAll = true;
+  m_eliminateWeak = p_eliminateWeak;
+  m_eliminateMixed = false;
+  m_markSubgames = false;
+}
+
 gList<BehavSolution> guiefgEnumMixedNfg::Solve(void) const
 {
   wxEnumStatus status(m_parent->Frame());
@@ -827,6 +872,20 @@ guiefgLpEfg::guiefgLpEfg(const EFSupport &p_support,
   : guiEfgSolution(p_support, p_parent)
 { }
 
+guiefgLpEfg::guiefgLpEfg(const EFSupport &p_support,
+			 EfgShowInterface *p_parent,
+			 int p_stopAfter, gPrecision p_precision,
+			 bool p_eliminateWeak)
+  : guiEfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter),
+    m_precision(p_precision)
+{
+  m_eliminate = true;
+  m_eliminateAll = true;
+  m_eliminateWeak = p_eliminateWeak;
+  m_eliminateMixed = false;
+  m_markSubgames = false;
+}
+
 gList<BehavSolution> guiefgLpEfg::Solve(void) const
 {
   wxStatus status(m_parent->Frame(), "LpSolve Progress");
@@ -905,6 +964,20 @@ guiefgSimpdivNfg::guiefgSimpdivNfg(const EFSupport &p_support,
 				   EfgShowInterface *p_parent)
   : guiEfgSolution(p_support, p_parent)
 { }
+
+guiefgSimpdivNfg::guiefgSimpdivNfg(const EFSupport &p_support,
+				   EfgShowInterface *p_parent,
+				   int p_stopAfter, gPrecision p_precision,
+				   bool p_eliminateWeak)
+  : guiEfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter),
+    m_precision(p_precision)
+{
+  m_eliminate = true;
+  m_eliminateAll = true;
+  m_eliminateWeak = p_eliminateWeak;
+  m_eliminateMixed = false;
+  m_markSubgames = false;
+}
 
 gList<BehavSolution> guiefgSimpdivNfg::Solve(void) const
 {
@@ -1169,6 +1242,17 @@ guiefgQreEfg::guiefgQreEfg(const EFSupport &p_support,
 			   EfgShowInterface *p_parent)
   : guiEfgSolution(p_support, p_parent)
 { }
+
+guiefgQreEfg::guiefgQreEfg(const EFSupport &p_support,
+			   EfgShowInterface *p_parent,
+			   int p_stopAfter, bool p_eliminateWeak)
+  : guiEfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter)
+{
+  m_eliminate = true;
+  m_eliminateAll = true;
+  m_eliminateWeak = p_eliminateWeak;
+  m_eliminateMixed = false;
+}
 
 gList<BehavSolution> guiefgQreEfg::Solve(void) const
 {

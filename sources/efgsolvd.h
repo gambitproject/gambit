@@ -1,14 +1,8 @@
 //
-// FILE: efgsolvd.h -- the main dialog for running ExtensiveForm solution
-//                     efg_algorithms. 
+// FILE: efgsolvd.h -- Selecting algorithm dialogs
 //
 // $Id$
 //
-
-// You must add an entry here for each new efg_algorithm.
-// Update: this dialog box now also includes the NormalForm solution
-// efg_algorithms.  They are enabled by selecting the 'Use NF' box.  This is
-// why "nfgsolvd.h" is included here
 
 #ifndef EFGSOLVD_H
 #define EFGSOLVD_H
@@ -49,29 +43,43 @@ public:
 // NB: The numbering of the are important, as they are saved
 // in the defaults file as integers and not text strings.
 //
-#define efgSTANDARD_NASH       0
-#define efgSTANDARD_PERFECT    1
-#define efgSTANDARD_SEQUENTIAL 2
+typedef enum {
+  efgSTANDARD_NASH = 0, efgSTANDARD_PERFECT = 1, efgSTANDARD_SEQUENTIAL = 2
+} guiStandardType;
 
-#define efgSTANDARD_ONE        0
-#define efgSTANDARD_TWO        1
-#define efgSTANDARD_ALL        2
+typedef enum {
+  efgSTANDARD_ONE = 0, efgSTANDARD_TWO = 1, efgSTANDARD_ALL 
+} guiStandardNum;
 
-class EfgSolveStandardDialog : public EfgSolveSettings, public MyDialogBox {
+class dialogEfgSolveStandard : public wxDialogBox {
 private:
-  int m_standardType, m_standardNum;
-  gPrecision m_precision;
+  int m_completed;
+  wxRadioBox *m_standardType, *m_standardNum, *m_precision;
+  wxText *m_description;
+  const Efg &m_efg;
 
-  char *m_standardTypeStr, *m_standardNumStr, *m_precisionStr;
-  wxStringList *m_standardTypeList, *m_standardNumList, *m_precisionList;
+  static void CallbackOK(wxButton &p_object, wxEvent &)
+    { ((dialogEfgSolveStandard *) p_object.GetClientData())->OnOK(); }
+  static void CallbackCancel(wxButton &p_object, wxEvent &)
+    { ((dialogEfgSolveStandard *) p_object.GetClientData())->OnCancel(); }
+  static void CallbackChanged(wxRadioBox &p_object, wxEvent &)
+    { ((dialogEfgSolveStandard *) p_object.GetClientData())->OnChanged(); }
 
-  // PRIVATE MEMBER FUNCTIONS
-  void StandardSettings(void);
+  void OnOK(void);
+  void OnCancel(void);
+  Bool OnClose(void);
+  
+  void OnChanged(void);
 
 public:
-  EfgSolveStandardDialog(const Efg &p_efg, wxWindow *p_parent);
-  virtual ~EfgSolveStandardDialog();
-};
+  dialogEfgSolveStandard(const Efg &p_efg, wxWindow *p_parent);
+  virtual ~dialogEfgSolveStandard();
 
+  int Completed(void) const { return m_completed; }
+  guiStandardType Type(void) const;
+  guiStandardNum Number(void) const;
+  gPrecision Precision(void) const
+   { return ((m_precision->GetSelection() == 0) ? precDOUBLE : precRATIONAL); }
+};
 
 #endif   // EFGSOLVD_H

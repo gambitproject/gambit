@@ -84,6 +84,8 @@ private:
 
 public:
   guiefgEnumMixedNfg(const EFSupport &, EfgShowInterface *);
+  guiefgEnumMixedNfg(const EFSupport &, EfgShowInterface *, int p_stopAfter,
+		     gPrecision p_precision, bool p_eliminateWeak);
   virtual ~guiefgEnumMixedNfg()   { }
 
   virtual gList<BehavSolution> Solve(void) const;
@@ -101,6 +103,8 @@ private:
 
 public:
   guiefgLpEfg(const EFSupport &, EfgShowInterface *);
+  guiefgLpEfg(const EFSupport &, EfgShowInterface *, int p_stopAfter,
+	      gPrecision p_precision, bool p_eliminateWeak);
   virtual ~guiefgLpEfg()  { }
 
   virtual gList<BehavSolution> Solve(void) const;
@@ -114,6 +118,8 @@ private:
 
 public:
   guiefgLpNfg(const EFSupport &, EfgShowInterface *);
+  guiefgLpNfg(const EFSupport &, EfgShowInterface *, int p_stopAfter,
+	      gPrecision p_precision, bool p_eliminateWeak);
   virtual ~guiefgLpNfg()  { }
 
   virtual gList<BehavSolution> Solve(void) const;
@@ -131,6 +137,8 @@ private:
 
 public:
   guiefgLcpEfg(const EFSupport &, EfgShowInterface *);
+  guiefgLcpEfg(const EFSupport &, EfgShowInterface *, int p_stopAfter,
+	       gPrecision p_precision, bool p_eliminateWeak);
   virtual ~guiefgLcpEfg()   { }
 
   virtual gList<BehavSolution> Solve(void) const;
@@ -158,10 +166,12 @@ class guiefgLiapEfg : public guiEfgSolution {
 private:
   double m_tolND, m_tol1D;
   int m_maxitsND, m_maxits1D, m_nTries;
-  int m_startOption;
+  int m_stopAfter, m_startOption;
 
 public:
   guiefgLiapEfg(const EFSupport &, EfgShowInterface *);
+  guiefgLiapEfg(const EFSupport &, EfgShowInterface *,
+		int p_stopAfter, bool m_eliminateWeak);
   virtual ~guiefgLiapEfg()  { }
 
   virtual gList<BehavSolution> Solve(void) const;
@@ -193,6 +203,9 @@ private:
 
 public:
   guiefgSimpdivNfg(const EFSupport &, EfgShowInterface *);
+  guiefgSimpdivNfg(const EFSupport &, EfgShowInterface *,
+		   int p_stopAfter, gPrecision p_precision, 
+		   bool m_eliminateWeak);
   virtual ~guiefgSimpdivNfg()  { } 
 
   virtual gList<BehavSolution> Solve(void) const;
@@ -230,10 +243,12 @@ public:
 
 class guiefgQreEfg : public guiEfgSolution {
 private:
-  int m_startOption;
+  int m_stopAfter, m_startOption;
 
 public:
   guiefgQreEfg(const EFSupport &, EfgShowInterface *);
+  guiefgQreEfg(const EFSupport &, EfgShowInterface *, int p_stopAfter,
+	       bool p_eliminateWeak);
   virtual ~guiefgQreEfg()  { }
 
   virtual gList<BehavSolution> Solve(void) const;
