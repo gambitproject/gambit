@@ -15,6 +15,7 @@
 <!ENTITY apirefefgsupport SYSTEM "apirefefgsupport.sgml">
 <!ENTITY apirefefgbasis SYSTEM "apirefefgbasis.sgml">
 <!ENTITY apirefnfgsupport SYSTEM "apirefnfgsupport.sgml">
+<!ENTITY apirefnfgcontingency SYSTEM "apirefnfgcontingency.sgml">
 <!ENTITY apirefnash SYSTEM "apirefnash.sgml">
 <!ENTITY apirefqre SYSTEM "apirefqre.sgml">
 <!ENTITY apirefbehav SYSTEM "apirefbehav.sgml">
