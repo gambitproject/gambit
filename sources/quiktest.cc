@@ -26,8 +26,8 @@ int main()
   gPoly<gRational> pa(&Space,&ReverseDegLex);
   gPoly<gRational> pb(&Space,&ReverseDegLex);
 
-  gString gw; gString gx; gString gy; gString gz; 
-  gString ga; gString gb;
+  gText gw; gText gx; gText gy; gText gz; 
+  gText ga; gText gb;
 
 /* simple test of root solving 
   gw = "1 - 2n1"; pw = gw;
