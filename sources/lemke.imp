@@ -67,7 +67,7 @@ template <class T> int LemkeModule<T>::Lemke(int dup)
   BFS<T> cbfs((T) 0);
   int i;
 
-  if (NF.NumPlayers() != 2 || !params.tracefile)   return 0;
+  if (NF.NumPlayers() != 2)   return 0;
 
   gWatch watch;
 

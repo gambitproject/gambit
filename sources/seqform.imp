@@ -110,7 +110,7 @@ template <class T> int SeqFormModule<T>::Lemke(void)
   BFS<T> cbfs((T) 0);
   int i;
   
-  if (EF.NumPlayers() != 2 || !params.tracefile)   return 0;
+  if (EF.NumPlayers() != 2)   return 0;
   
   gWatch watch;
 

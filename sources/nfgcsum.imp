@@ -99,7 +99,7 @@ template <class T> int ZSumModule<T>::ZSum(int /*dup*/)
 {
   BFS<T> cbfs((T) 0);
   
-  if (NF.NumPlayers() != 2 || !params.tracefile)   return 0;
+  if (NF.NumPlayers() != 2)   return 0;
   if(!IsConstSum()) return 0;;
   gWatch watch;
   
