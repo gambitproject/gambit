@@ -60,7 +60,7 @@ GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
     _OUTPUT = new OutputRefPortion( _StdOut );
     _NULL   = new OutputRefPortion( gnull );
 
-    _DefaultNfg = new NfgValPortion( new NormalForm<gRational> );
+    _DefaultNfg = new NfgValPortion( new NormalForm<double> );
     _DefaultEfg = new EfgValPortion( new Efg<double> );
   }
 
@@ -1140,7 +1140,12 @@ bool GSM::CallFunction( void )
   }
 
   _Push( return_value );
-
+  
+  gout << "here!\n";
+  gout << (void*) return_value << "\n";
+  gout << PortionTypeToText( return_value->Type() ) << "\n";
+  gout << return_value << "\n";
+  gout << "here!\n";
 
   for( index = 0; index < num_params; index++ )
   {
@@ -1160,6 +1165,7 @@ bool GSM::CallFunction( void )
       assert( param[ index ] == 0 );
     }
   }
+
 
   delete func;
 
