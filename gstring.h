@@ -1,8 +1,8 @@
-//
-// FILE: gstring.h -- Definition of gString class
-//
-// @(#)gstring.h	1.11 1/1/95
-//
+//#
+//# FILE: gstring.h -- Definition of gString class
+//#
+//# $Id$
+//#
 
 #ifndef GSTRING_H
 #define GSTRING_H
@@ -91,12 +91,6 @@ class gString   {
 inline gString operator+(const char *c, const gString &s)
 {
     return gString(c) + s;
-}
-
-gInput &operator>>(gInput &from, gString &);
-
-inline gOutput& operator<<(gOutput& to, const gString& A){
-  to << A.storage; return to;
 }
 
 #endif   // STRING_H

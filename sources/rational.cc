@@ -429,3 +429,167 @@ gRational::fits_in_double() const
 {
     return gRational (DBL_MIN) <= *this && *this <= gRational (DBL_MAX);
 }
+
+
+//
+// These were moved from the header file to eliminate warnings
+//
+
+gRational::gRational() : num(&_ZeroRep), den(&_OneRep) {}
+gRational::~gRational() {}
+
+gRational::gRational(const gRational& y) :num(y.num), den(y.den) {}
+
+gRational::gRational(const gInteger& n) :num(n), den(&_OneRep) {}
+
+gRational::gRational(const gInteger& n, const gInteger& d) :num(n),den(d)
+{
+  normalize();
+}
+
+gRational::gRational(long n) :num(n), den(&_OneRep) { }
+
+gRational::gRational(int n) :num(n), den(&_OneRep) { }
+
+gRational::gRational(long n, long d) :num(n), den(d) { normalize(); }
+gRational::gRational(int n, int d) :num(n), den(d) { normalize(); }
+gRational::gRational(long n, unsigned long d) :num(n), den(d)
+{
+  normalize();
+}
+gRational::gRational(unsigned long n, long d) :num(n), den(d)
+{
+  normalize();
+}
+gRational::gRational(unsigned long n, unsigned long d) :num(n), den(d)
+{
+  normalize();
+}
+
+gRational &gRational::operator =  (const gRational& y)
+{
+  num = y.num;  den = y.den;   return *this;
+}
+
+int operator == (const gRational& x, const gRational& y)
+{
+  return compare(x.num, y.num) == 0 && compare(x.den, y.den) == 0;
+}
+
+int operator != (const gRational& x, const gRational& y)
+{
+  return compare(x.num, y.num) != 0 || compare(x.den, y.den) != 0;
+}
+
+int operator <  (const gRational& x, const gRational& y)
+{
+  return compare(x, y) <  0; 
+}
+
+int operator <= (const gRational& x, const gRational& y)
+{
+  return compare(x, y) <= 0; 
+}
+
+int operator >  (const gRational& x, const gRational& y)
+{
+  return compare(x, y) >  0; 
+}
+
+int operator >= (const gRational& x, const gRational& y)
+{
+  return compare(x, y) >= 0; 
+}
+
+int sign(const gRational& x)
+{
+  return sign(x.num);
+}
+
+void gRational::negate()
+{
+  num.negate();
+}
+
+
+void gRational::operator += (const gRational& y) 
+{
+  add(*this, y, *this);
+}
+
+void gRational::operator -= (const gRational& y) 
+{
+  sub(*this, y, *this);
+}
+
+void gRational::operator *= (const gRational& y) 
+{
+  mul(*this, y, *this);
+}
+
+void gRational::operator /= (const gRational& y) 
+{
+  div(*this, y, *this);
+}
+
+const gInteger& gRational::numerator() const { return num; }
+const gInteger& gRational::denominator() const { return den; }
+gRational::operator double() const { return ratio(num, den); }
+
+#ifdef __GNUG__
+gRational operator <? (const gRational& x, const gRational& y)
+{
+  if (compare(x, y) <= 0) return x; else return y;
+}
+
+gRational operator >? (const gRational& x, const gRational& y)
+{
+  if (compare(x, y) >= 0) return x; else return y;
+}
+#endif
+
+#if defined(__GNUG__) && !defined(NO_NRV)
+
+gRational operator + (const gRational& x, const gRational& y) return r
+{
+  add(x, y, r);
+}
+
+gRational operator - (const gRational& x, const gRational& y) return r
+{
+  sub(x, y, r);
+}
+
+gRational operator * (const gRational& x, const gRational& y) return r
+{
+  mul(x, y, r);
+}
+
+gRational operator / (const gRational& x, const gRational& y) return r
+{
+  div(x, y, r);
+}
+
+#else /* NO_NRV */
+
+gRational operator + (const gRational& x, const gRational& y) 
+{
+  gRational r; add(x, y, r); return r;
+}
+
+gRational operator - (const gRational& x, const gRational& y)
+{
+  gRational r; sub(x, y, r); return r;
+}
+
+gRational operator * (const gRational& x, const gRational& y)
+{
+  gRational r; mul(x, y, r); return r;
+}
+
+gRational operator / (const gRational& x, const gRational& y)
+{
+  gRational r; div(x, y, r); return r;
+}
+#endif
+

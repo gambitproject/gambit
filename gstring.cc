@@ -1,7 +1,7 @@
 //
 // FILE: gstring.cc -- Implementation of String class
 //
-// @(#)gstring.cc	1.9 1/1/95
+// $Id$
 //
 
 #ifdef __GNUG__
@@ -205,4 +205,9 @@ gInput& operator>>(gInput &from, gString &s)
   }
 
   return from;
+}
+
+gOutput& operator<<(gOutput &to, const gString &A)
+{
+  to << A.storage; return to;
 }
