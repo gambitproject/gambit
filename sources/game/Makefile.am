@@ -10,6 +10,7 @@ libgame_a_SOURCES = \
 	behav.h \
 	behav.imp \
 	behavinst.cc \
+	comlab.cc \
 	efbasis.cc \
 	efbasis.h \
 	efdom.cc \

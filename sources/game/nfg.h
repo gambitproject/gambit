@@ -147,6 +147,8 @@ public:
 };
 
 Nfg *ReadNfgFile(gInput &);
+Nfg *ReadComLabSfg(gInput &);
+void WriteComLabSfg(gOutput &, Nfg *);
 
 #include "mixed.h"
 

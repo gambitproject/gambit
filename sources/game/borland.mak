@@ -17,6 +17,7 @@ EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 libgame_a_SOURCES = \
         actiter.cc \
 	behavinst.cc \
+	comlab.cc \
 	efbasis.cc \
 	efdom.cc \
 	efg.cc \
