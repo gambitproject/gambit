@@ -35,10 +35,10 @@ ENALG_SOURCES = csumsub.cc psnesub.cc enumsub.cc simpsub.cc liapsub.cc \
 
 ENALG_OBJECTS = $(ENALG_SOURCES:.cc=.o)
 
-NALG_SOURCES = bfs.cc lemke.cc nliap.cc ngobit.cc enum.cc simpdiv.cc \
-               tableau.cc ludecomp.cc nfgpure.cc lhtab.cc lemketab.cc grid.cc \
-               nfgcsum.cc lpsolve.cc nfdom.cc nfdommix.cc vertenum.cc \
-               polenum.cc clique.cc basis.cc
+NALG_SOURCES = tableau.cc lptab.cc bfs.cc lemke.cc nliap.cc ngobit.cc \
+		enum.cc simpdiv.cc ludecomp.cc nfgpure.cc lhtab.cc \
+		lemketab.cc grid.cc nfgcsum.cc lpsolve.cc nfdom.cc \
+		nfdommix.cc vertenum.cc polenum.cc clique.cc basis.cc
 
 NALG_OBJECTS = $(NALG_SOURCES:.cc=.o)
 
@@ -49,8 +49,8 @@ GCL_SOURCES = gsm.cc gsmfunc.cc gsmoper.cc gsmhash.cc gsminstr.cc portion.cc \
 
 GCL_OBJECTS = $(GCL_SOURCES:.cc=.o)
 
-ALLGCL_SOURCES = $(GPOLY_SOURCES) $(GAME_SOURCES) $(GLIB_SOURCES)\
-                 $(EALG_SOURCES) $(NALG_SOURCES) $(ENALG_SOURCES) \
+ALLGCL_SOURCES = $(NALG_SOURCES) $(GPOLY_SOURCES) $(GAME_SOURCES) $(GLIB_SOURCES)\
+                 $(EALG_SOURCES) $(ENALG_SOURCES) \
                  $(GCL_SOURCES)
 
 ALLGCL_OBJECTS = $(ALLGCL_SOURCES:.cc=.o)
