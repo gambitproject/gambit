@@ -63,7 +63,8 @@ template <class T> class gIdeal {
                 // It fails if the variety is not zero dimensional.
           bool              IsRoot(const gVector<T>&) const;
 
-   bool ZeroDimensional() const;
+   bool ZeroDimensional()    const;
+   bool IsEntireRing()       const;
    bool Contains(gPoly<T> &) const;
 };  
 

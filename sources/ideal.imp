@@ -188,6 +188,12 @@ template<class T> bool gIdeal<T>::Contains(gPoly<T> & f) const
   gPoly<T> zero(Space,(T)0,order);
   return (basis.ReductionOf(f,*order) == zero);
 }
+  
+template<class T> bool gIdeal<T>::IsEntireRing() const
+{
+  gPoly<T> one(Space,(T)1,order);
+  return Contains(one);
+}
 
 
 
