@@ -44,6 +44,19 @@ Portion *GSM_Lemke(Portion **param)
   return new Mixed_List_Portion<double>(N, LS.GetSolutions());
 }
 
+#include "enum.h"
+
+Portion *GSM_Enum(Portion **param)
+{
+  NormalForm<double> *N = &((Nfg_Portion<double> *) param[0])->Value();
+
+  EnumParams EP;
+  EnumModule<double> EM(*N, EP);
+  EM.Enum();
+
+  return new Mixed_List_Portion<double>(N, EM.GetSolutions());
+}
+
 Portion *GSM_ReadNfg(Portion **param)
 {
   gFileInput f(((gString_Portion *) param[0])->Value());
@@ -61,6 +74,10 @@ void Init_nfgfunc(GSM *gsm)
   FuncDescObj *FuncObj;
 
   FuncObj = new FuncDescObj("DisplayNfg", GSM_DisplayNfg, 1);
+  FuncObj->SetParamInfo(0, "N", porNFG, NO_DEFAULT_VALUE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Enum", GSM_Enum, 1);
   FuncObj->SetParamInfo(0, "N", porNFG, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 
