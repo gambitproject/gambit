@@ -4,22 +4,23 @@
 //# $Id$
 //#
 
-#include "normiter.h"
-#include "normal.h"
+#include "nfg.h"
 #include "lemke.h"
 
 main()
 {
-  NormalForm<double> N(gin);
-  LemkeParams LP;
-  LP.trace=2;
-//  LP.tracefile=&gout;
-//  LP.nequilib=1;
-  LemkeModule<double> LM((NormalForm<double> &) N, LP);
-  LM.Lemke();
-  LM.GetSolutions().Dump(gout);
-  gout << "\nNum Pivots = " << LM.NumPivots();
-  gout << ", Time = " << LM.Time() << "\n";
+  Nfg<double> *N = 0;
+  ReadNfgFile(gin, N);
+  LemkeParams P;
+//  P.trace=2;
+//  P.tracefile=&gout;
+//  P.nequilib=1;
+  NFSupport S(*N);
+  LemkeModule<double> M(*N, P,S);
+  M.Lemke();
+  M.GetSolutions().Dump(gout);
+  gout << "\nNum Pivots = " << M.NumPivots();
+  gout << ", Time = " << M.Time() << "\n";
   return 1;
 }
 
