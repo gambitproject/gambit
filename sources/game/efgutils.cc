@@ -35,17 +35,17 @@ static void
 NDoChild(const gbtEfgGame & e, const gbtEfgNode & n, gbtList < gbtEfgNode > &list)
 {
   list.Append(n);
-  for (int i = 1; i <= n.NumChildren(); i++)
-    NDoChild(e, n.GetChild(i), list);
+  for (int i = 1; i <= n->NumChildren(); i++)
+    NDoChild(e, n->GetChild(i), list);
 }
 
 static void
 MSRDoChild(const gbtEfgGame & e, const gbtEfgNode & n,
            gbtList < gbtEfgNode > &list)
 {
-  for (int i = 1; i <= n.NumChildren(); i++)
-    MSRDoChild(e, n.GetChild(i), list);
-  if (n.GetSubgameRoot() == n)
+  for (int i = 1; i <= n->NumChildren(); i++)
+    MSRDoChild(e, n->GetChild(i), list);
+  if (n->GetSubgameRoot() == n)
     list.Append(n);
 }
 
@@ -53,20 +53,20 @@ static void
 LSRDoChild(const gbtEfgGame & e, const gbtEfgNode & n,
            gbtList < gbtEfgNode > &list)
 {
-  for (int i = 1; i <= n.NumChildren(); i++)
-    LSRDoChild(e, n.GetChild(i), list);
-  if (n.IsSubgameRoot())
+  for (int i = 1; i <= n->NumChildren(); i++)
+    LSRDoChild(e, n->GetChild(i), list);
+  if (n->IsSubgameRoot())
     list.Append(n);
 }
 
 static void
 CSDoChild(const gbtEfgGame & e, gbtEfgNode n, gbtList < gbtEfgNode > &list)
 {
-  if (n.GetSubgameRoot() == n)
+  if (n->GetSubgameRoot() == n)
     list.Append(n);
   else
-    for (int i = 1; i <= n.NumChildren(); i++)
-      CSDoChild(e, n.GetChild(i), list);
+    for (int i = 1; i <= n->NumChildren(); i++)
+      CSDoChild(e, n->GetChild(i), list);
 }
 
 // Public Functions
@@ -75,8 +75,8 @@ int
 CountNodes(const gbtEfgGame & e, const gbtEfgNode & n)
 {
   int num = 1;
-  for (int i = 1; i <= n.NumChildren(); i++)
-    num += CountNodes(e, n.GetChild(i));
+  for (int i = 1; i <= n->NumChildren(); i++)
+    num += CountNodes(e, n->GetChild(i));
   return num;
 }
 
@@ -97,12 +97,12 @@ Nodes(const gbtEfgGame & efg, const gbtEfgNode &n, gbtList < gbtEfgNode > &list)
 void
 TerminalNodes(const gbtEfgNode & p_node, gbtList < gbtEfgNode > &p_list)
 {
-  if (p_node.NumChildren() == 0) {
+  if (p_node->NumChildren() == 0) {
     p_list.Append(p_node);
   }
   else {
-    for (int i = 1; i <= p_node.NumChildren(); i++) {
-      TerminalNodes(p_node.GetChild(i), p_list);
+    for (int i = 1; i <= p_node->NumChildren(); i++) {
+      TerminalNodes(p_node->GetChild(i), p_list);
     }
   }
 }
@@ -142,7 +142,7 @@ HasSubgames(const gbtEfgGame & e, gbtEfgNode n)
 {
   gbtList < gbtEfgNode > list;
   LegalSubgameRoots(e, n, list);
-  if (n.IsSubgameRoot())
+  if (n->IsSubgameRoot())
     return list.Length() > 1;
   return list.Length() > 0;
 }
@@ -164,26 +164,14 @@ ChildSubgames(const gbtEfgGame & efg, const gbtEfgNode &n,
 	      gbtList < gbtEfgNode > &list)
 {
   list.Flush();
-  for (int i = 1; i <= n.NumChildren(); i++)
-    CSDoChild(efg, n.GetChild(i), list);
+  for (int i = 1; i <= n->NumChildren(); i++)
+    CSDoChild(efg, n->GetChild(i), list);
 }
 
 int
 NumNodes(const gbtEfgGame & befg)
 {
   return (CountNodes(befg, befg.GetRoot()));
-}
-
-gbtEfgAction
-LastAction(const gbtEfgGame & e, const gbtEfgNode &node)
-{
-  gbtEfgNode parent = node.GetParent();
-  if (parent == 0)
-    return 0;
-  for (int i = 1; i <= node.NumChildren(); i++)
-    if (parent.GetChild(i) == node)
-      return parent.GetInfoset()->GetAction(i);
-  return 0;
 }
 
 gbtEfgGame

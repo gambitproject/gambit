@@ -99,7 +99,7 @@ public:
 
 void gbtCmdDeleteTree::Do(gbtGameDocument *p_doc)  
 {
-  m_node.DeleteTree();
+  m_node->DeleteTree();
   p_doc->GetEfg().DeleteEmptyInfosets();
 }
 
@@ -127,7 +127,7 @@ public:
 
 void gbtCmdDeleteMove::Do(gbtGameDocument *p_doc)  
 {
-  m_node.DeleteMove();
+  m_node->DeleteMove();
   p_doc->GetEfg().DeleteEmptyInfosets();
 }
 
@@ -183,7 +183,7 @@ public:
 
 void gbtCmdLeaveInfoset::Do(gbtGameDocument *p_doc)  
 {
-  m_node.LeaveInfoset();
+  m_node->LeaveInfoset();
 }
 
 //---------------------------------------------------------------------
@@ -211,7 +211,7 @@ public:
 
 void gbtCmdJoinInfoset::Do(gbtGameDocument *p_doc)  
 {
-  m_node.JoinInfoset(m_infoset);
+  m_node->JoinInfoset(m_infoset);
   p_doc->GetEfg().DeleteEmptyInfosets();
 }
 
@@ -433,26 +433,26 @@ void gbtEfgFrame::OnUpdate(gbtGameView *)
 			       !m_doc->GetCopyNode().IsNull()));
 
   menuBar->Enable(GBT_MENU_EDIT_INSERT, !cursor.IsNull());
-  menuBar->Enable(GBT_MENU_EDIT_DELETE, cursor.NumChildren() > 0);
+  menuBar->Enable(GBT_MENU_EDIT_DELETE, cursor->NumChildren() > 0);
   menuBar->Enable(GBT_MENU_EDIT_REVEAL, 
-		  !cursor.GetInfoset().IsNull());
+		  !cursor->GetInfoset().IsNull());
 
   menuBar->Enable(GBT_MENU_EDIT_TOGGLE_SUBGAME,
-		  (!cursor.IsNull() && cursor.IsSubgameRoot() &&
-		   !cursor.GetParent().IsNull()));
+		  (!cursor.IsNull() && cursor->IsSubgameRoot() &&
+		   !cursor->GetParent().IsNull()));
   menuBar->Enable(GBT_MENU_EDIT_MARK_SUBGAME_TREE,
-		  (!cursor.IsNull() && cursor.IsSubgameRoot()));
+		  (!cursor.IsNull() && cursor->IsSubgameRoot()));
   menuBar->Enable(GBT_MENU_EDIT_UNMARK_SUBGAME_TREE,
-		  (!cursor.IsNull() && cursor.IsSubgameRoot()));
+		  (!cursor.IsNull() && cursor->IsSubgameRoot()));
   menuBar->SetLabel(GBT_MENU_EDIT_TOGGLE_SUBGAME,
-		    (!cursor.IsNull() && !cursor.GetParent().IsNull() &&
-		     cursor.IsSubgameRoot() &&
-		     cursor.GetSubgameRoot() == cursor) ?
+		    (!cursor.IsNull() && !cursor->GetParent().IsNull() &&
+		     cursor->IsSubgameRoot() &&
+		     cursor->GetSubgameRoot() == cursor) ?
 		    _("Unmark &subgame") : _("Mark &subgame"));
 
   menuBar->Enable(GBT_MENU_EDIT_NODE, !cursor.IsNull());
   menuBar->Enable(GBT_MENU_EDIT_MOVE,
-		  !cursor.IsNull() && !cursor.GetInfoset().IsNull());
+		  !cursor.IsNull() && !cursor->GetInfoset().IsNull());
 
   menuBar->Check(GBT_MENU_VIEW_NFG_REDUCED, m_doc->ShowNfg());
   menuBar->Check(GBT_MENU_VIEW_PROFILES, m_doc->ShowProfiles());
@@ -962,7 +962,7 @@ void gbtEfgFrame::OnEditReveal(wxCommandEvent &)
     try {
       for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
 	gbtEfgPlayer player = m_doc->GetEfg().GetPlayer(pl);
-	m_doc->Submit(new gbtCmdReveal(m_doc->GetCursor().GetInfoset(),
+	m_doc->Submit(new gbtCmdReveal(m_doc->GetCursor()->GetInfoset(),
 				       player));
       }
     }
@@ -974,7 +974,7 @@ void gbtEfgFrame::OnEditReveal(wxCommandEvent &)
 
 void gbtEfgFrame::OnEditToggleSubgame(wxCommandEvent &)
 {
-  if (m_doc->GetCursor().GetSubgameRoot() == m_doc->GetCursor()) {
+  if (m_doc->GetCursor()->GetSubgameRoot() == m_doc->GetCursor()) {
     m_doc->Submit(new gbtCmdMarkSubgame(m_doc->GetCursor(), false));
   }
   else {
@@ -1004,7 +1004,7 @@ void gbtEfgFrame::OnEditNode(wxCommandEvent &)
 {
   dialogEditNode dialog(this, m_doc->GetCursor());
   if (dialog.ShowModal() == wxID_OK) {
-    m_doc->GetCursor().SetLabel(gbtText(dialog.GetNodeName().mb_str()));
+    m_doc->GetCursor()->SetLabel(gbtText(dialog.GetNodeName().mb_str()));
     if (dialog.GetOutcome() > 0) {
       gbtEfgOutcome outcome = m_doc->GetEfg().GetOutcome(dialog.GetOutcome());
       m_doc->Submit(new gbtCmdSetOutcome(m_doc->GetCursor(), outcome));
@@ -1013,14 +1013,14 @@ void gbtEfgFrame::OnEditNode(wxCommandEvent &)
       m_doc->Submit(new gbtCmdSetOutcome(m_doc->GetCursor(), 0));
     }
 
-    if (m_doc->GetCursor().IsSubgameRoot() &&
-	!m_doc->GetCursor().GetParent().IsNull()) {
+    if (m_doc->GetCursor()->IsSubgameRoot() &&
+	!m_doc->GetCursor()->GetParent().IsNull()) {
       m_doc->Submit(new gbtCmdMarkSubgame(m_doc->GetCursor(),
 					  dialog.MarkedSubgame()));
     }
 
-    if (m_doc->GetCursor().NumChildren() > 0 &&
-	dialog.GetInfoset() != m_doc->GetCursor().GetInfoset()) {
+    if (m_doc->GetCursor()->NumChildren() > 0 &&
+	dialog.GetInfoset() != m_doc->GetCursor()->GetInfoset()) {
       if (dialog.GetInfoset() == 0) {
 	m_doc->Submit(new gbtCmdLeaveInfoset(m_doc->GetCursor()));
       }
@@ -1034,7 +1034,7 @@ void gbtEfgFrame::OnEditNode(wxCommandEvent &)
 
 void gbtEfgFrame::OnEditMove(wxCommandEvent &)
 {
-  gbtEfgInfoset infoset = m_doc->GetCursor().GetInfoset();
+  gbtEfgInfoset infoset = m_doc->GetCursor()->GetInfoset();
 
   dialogEditMove dialog(this, infoset);
   if (dialog.ShowModal() == wxID_OK) {

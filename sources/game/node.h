@@ -30,72 +30,92 @@
 #include "math/rational.h"
 #include "efg.h"
 
-#if defined(__GNUG__) && !defined(__APPLE_CC__)
-#pragma interface
-#endif   // __GNUG__
-
-class Lexicon;
-
 template <class T> class gbtBehavAssessment;
+
+class gbtEfgNodeRep : public gbtGameObject {
+friend class gbtEfgGame;
+friend class gbtEfgInfosetBase;
+friend class gbtEfgNode;
+friend struct gbt_efg_game_rep;
+public:
+  virtual gbtText GetLabel(void) const = 0;
+  virtual void SetLabel(const gbtText &) = 0;
+  virtual int GetId(void) const = 0;
+  virtual gbtEfgGame GetGame(void) const = 0;
+
+  virtual int NumChildren(void) const = 0;
+  bool IsTerminal(void) const { return (NumChildren() == 0); }
+  bool IsNonterminal(void) const { return !IsTerminal(); }
+  virtual gbtEfgNode GetChild(int i) const = 0;
+  virtual gbtEfgNode GetChild(const gbtEfgAction &) const = 0; 
+  virtual bool IsPredecessorOf(const gbtEfgNode &) const = 0;
+
+  virtual gbtEfgNode GetParent(void) const = 0;
+  virtual gbtEfgAction GetPriorAction(void) const = 0; // returns null if root node
+
+  virtual gbtEfgNode GetPriorSibling(void) const = 0;
+  virtual gbtEfgNode GetNextSibling(void) const = 0;
+
+  virtual gbtEfgInfoset GetInfoset(void) const = 0;
+  virtual int GetMemberId(void) const = 0;
+  virtual gbtEfgNode GetPriorMember(void) const = 0;
+  virtual gbtEfgNode GetNextMember(void) const = 0;
+
+  virtual gbtEfgPlayer GetPlayer(void) const = 0;
+
+  virtual gbtEfgNode GetSubgameRoot(void) const = 0;
+  virtual bool IsSubgameRoot(void) const = 0;
+
+  virtual gbtEfgOutcome GetOutcome(void) const = 0;
+  virtual void SetOutcome(const gbtEfgOutcome &) = 0;
+
+  virtual gbtEfgNode InsertMove(gbtEfgInfoset) = 0;
+  // Note: Starting in 0.97.1.1, this now deletes the *parent* move
+  virtual void DeleteMove(void) = 0;
+  virtual void DeleteTree(void) = 0;
+
+  virtual void JoinInfoset(gbtEfgInfoset) = 0;
+  virtual gbtEfgInfoset LeaveInfoset(void) = 0;
+};
+
+class gbtEfgNullNode { };
 
 class gbtEfgNode {
 friend class gbtEfgGame;
-friend class gbtEfgInfosetBase;
-friend struct gbt_efg_game_rep;
-friend class Lexicon;
-protected:
-  struct gbt_efg_node_rep *rep;
+private:
+  gbtEfgNodeRep *m_rep;
 
 public:
-  gbtEfgNode(void);
-  gbtEfgNode(gbt_efg_node_rep *);
-  gbtEfgNode(const gbtEfgNode &);
-  ~gbtEfgNode();
+  gbtEfgNode(void) : m_rep(0) { }
+  gbtEfgNode(gbtEfgNodeRep *p_rep)
+    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
+  gbtEfgNode(const gbtEfgNode &p_player)
+    : m_rep(p_player.m_rep) { if (m_rep) m_rep->Reference(); }
+  ~gbtEfgNode() { if (m_rep && m_rep->Dereference()) delete m_rep; }
 
-  gbtEfgNode &operator=(const gbtEfgNode &);
+  gbtEfgNode &operator=(const gbtEfgNode &p_player) {
+    if (this != &p_player) {
+      if (m_rep && m_rep->Dereference()) delete m_rep;
+      m_rep = p_player.m_rep;
+      if (m_rep) m_rep->Reference();
+    }
+    return *this;
+  }
 
-  bool operator==(const gbtEfgNode &) const;
-  bool operator!=(const gbtEfgNode &) const;
+  bool operator==(const gbtEfgNode &p_player) const
+  { return (m_rep == p_player.m_rep); }
+  bool operator!=(const gbtEfgNode &p_player) const
+  { return (m_rep != p_player.m_rep); }
 
-  bool IsNull(void) const;
-  int GetId(void) const;
-  gbtEfgGame GetGame(void) const;
-  gbtText GetLabel(void) const;
-  void SetLabel(const gbtText &);
+  gbtEfgNodeRep *operator->(void) 
+  { if (!m_rep) throw gbtEfgNullAction(); return m_rep; }
+  const gbtEfgNodeRep *operator->(void) const 
+  { if (!m_rep) throw gbtEfgNullAction(); return m_rep; }
+  
+  gbtEfgNodeRep *Get(void) const { return m_rep; }
 
-  int NumChildren(void) const;
-  bool IsTerminal(void) const { return (NumChildren() == 0); }
-  bool IsNonterminal(void) const { return !IsTerminal(); }
-  gbtEfgNode GetChild(int i) const;
-  gbtEfgNode GetChild(const gbtEfgAction &) const; 
-  bool IsPredecessorOf(const gbtEfgNode &) const;
-
-  gbtEfgNode GetParent(void) const;
-  gbtEfgAction GetPriorAction(void) const; // returns null if root node
-
-  gbtEfgNode GetPriorSibling(void) const;
-  gbtEfgNode GetNextSibling(void) const;
-
-  gbtEfgInfoset GetInfoset(void) const;
-  int GetMemberId(void) const;
-  gbtEfgNode GetPriorMember(void) const;
-  gbtEfgNode GetNextMember(void) const;
-
-  gbtEfgPlayer GetPlayer(void) const;
-
-  gbtEfgNode GetSubgameRoot(void) const;
-  bool IsSubgameRoot(void) const;
-
-  gbtEfgOutcome GetOutcome(void) const;
-  void SetOutcome(const gbtEfgOutcome &);
-
-  gbtEfgNode InsertMove(gbtEfgInfoset);
-  // Note: Starting in 0.97.1.1, this now deletes the *parent* move
-  void DeleteMove(void);
-  void DeleteTree(void);
-
-  void JoinInfoset(gbtEfgInfoset);
-  gbtEfgInfoset LeaveInfoset(void);
+  // Questionable whether this should be provided
+  bool IsNull(void) const { return (m_rep == 0); }
 };
 
 gbtOutput &operator<<(gbtOutput &, const gbtEfgNode &);

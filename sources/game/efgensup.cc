@@ -68,9 +68,9 @@ InfosetGuaranteedActiveByPriorCommitments(gbtAllActionIterator &cursor,
       return true;
     }
     else
-      while (S->Contains(current.GetPriorAction()) &&
-	     cursor.IsSubsequentTo(current.GetPriorAction())) {
-	current = current.GetParent();
+      while (S->Contains(current->GetPriorAction()) &&
+	     cursor.IsSubsequentTo(current->GetPriorAction())) {
+	current = current->GetParent();
 	if (current == S->GetRoot()) {
 	  return true;
 	}

@@ -43,6 +43,7 @@ template <class T> class gbtPureBehavProfile;
 #include "node.h"
 
 struct gbt_efg_game_rep;
+class gbtEfgNodeBase;
 
 //
 // Exception classes for the various bad stuff that can happen
@@ -83,21 +84,21 @@ protected:
   
   // this is for use with the copy constructor
   void CopySubtree(gbt_efg_game_rep *,
-		   gbt_efg_node_rep *, gbt_efg_node_rep *);
+		   gbtEfgNodeBase *, gbtEfgNodeBase *);
 
-  void CopySubtree(gbt_efg_node_rep *, gbt_efg_node_rep *,
-		   gbt_efg_node_rep *);
+  void CopySubtree(gbtEfgNodeBase *, gbtEfgNodeBase *,
+		   gbtEfgNodeBase *);
 
   gbtEfgOutcome NewOutcome(int index);
 
-  void WriteEfg(gbtOutput &, gbt_efg_node_rep *) const;
+  void WriteEfg(gbtOutput &, gbtEfgNodeBase *) const;
 
-  void Payoff(gbt_efg_node_rep *n, gbtNumber,
+  void Payoff(gbtEfgNodeBase *n, gbtNumber,
 	      const gbtPVector<int> &, gbtVector<gbtNumber> &) const;
-  void Payoff(gbt_efg_node_rep *n, gbtNumber,
+  void Payoff(gbtEfgNodeBase *n, gbtNumber,
 	      const gbtArray<gbtArray<int> > &, gbtArray<gbtNumber> &) const;
   
-  void InfosetProbs(gbt_efg_node_rep *n, gbtNumber,
+  void InfosetProbs(gbtEfgNodeBase *n, gbtNumber,
 		    const gbtPVector<int> &, gbtPVector<gbtNumber> &) const;
     
 

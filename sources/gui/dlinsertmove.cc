@@ -65,7 +65,7 @@ void gbtCmdInsertMove::Do(gbtGameDocument *p_doc)
     player->SetLabel("Player " + ToText(p_doc->GetEfg().NumPlayers()));
   }
 
-  p_doc->GetCursor().InsertMove(player->NewInfoset(m_actions));
+  p_doc->GetCursor()->InsertMove(player->NewInfoset(m_actions));
 }
 
 //=========================================================================
@@ -103,7 +103,7 @@ void gbtCmdInsertMoveInfoset::Do(gbtGameDocument *p_doc)
     player->SetLabel("Player " + ToText(p_doc->GetEfg().NumPlayers()));
   }
 
-  p_doc->GetCursor().InsertMove(player->GetInfoset(m_infosetNumber));
+  p_doc->GetCursor()->InsertMove(player->GetInfoset(m_infosetNumber));
 }
 
 //=========================================================================

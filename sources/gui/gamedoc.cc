@@ -237,7 +237,7 @@ gbtText gbtGameDocument::GetRealizProb(const gbtEfgNode &p_node) const
 gbtText gbtGameDocument::GetBeliefProb(const gbtEfgNode &p_node) const
 {
   if (m_curProfile == 0 || p_node.IsNull() ||
-      p_node.GetPlayer().IsNull()) {
+      p_node->GetPlayer().IsNull()) {
     return "";
   }
   return ToText(m_behavProfiles[m_curProfile].GetBelief(p_node),
@@ -266,21 +266,21 @@ gbtText gbtGameDocument::GetNodeValue(const gbtEfgNode &p_node) const
 gbtText gbtGameDocument::GetInfosetProb(const gbtEfgNode &p_node) const
 {
   if (m_curProfile == 0 || p_node.IsNull() ||
-      p_node.GetPlayer().IsNull()) {
+      p_node->GetPlayer().IsNull()) {
     return "";
   }
-  return ToText(m_behavProfiles[m_curProfile].GetInfosetProb(p_node.GetInfoset()),
+  return ToText(m_behavProfiles[m_curProfile].GetInfosetProb(p_node->GetInfoset()),
 		m_prefs.NumDecimals());
 }
 
 gbtText gbtGameDocument::GetInfosetValue(const gbtEfgNode &p_node) const
 {
   if (m_curProfile == 0 || p_node.IsNull() ||
-      p_node.GetPlayer().IsNull() || p_node.GetPlayer()->IsChance()) {
+      p_node->GetPlayer().IsNull() || p_node->GetPlayer()->IsChance()) {
     return "";
   }
-  if (GetBehavProfile().GetInfosetProb(p_node.GetInfoset()) > gbtNumber(0)) {
-    return ToText(GetBehavProfile().GetInfosetValue(p_node.GetInfoset()),
+  if (GetBehavProfile().GetInfosetProb(p_node->GetInfoset()) > gbtNumber(0)) {
+    return ToText(GetBehavProfile().GetInfosetValue(p_node->GetInfoset()),
 		  m_prefs.NumDecimals());
   }
   else {
@@ -291,28 +291,28 @@ gbtText gbtGameDocument::GetInfosetValue(const gbtEfgNode &p_node) const
 
 gbtText gbtGameDocument::GetActionProb(const gbtEfgNode &p_node, int p_act) const
 {
-  if (!p_node.GetPlayer().IsNull() && p_node.GetPlayer()->IsChance()) {
-    return ToText(p_node.GetInfoset()->GetChanceProb(p_act),
+  if (!p_node->GetPlayer().IsNull() && p_node->GetPlayer()->IsChance()) {
+    return ToText(p_node->GetInfoset()->GetChanceProb(p_act),
 		  m_prefs.NumDecimals());
   }
 
-  if (m_curProfile == 0 || p_node.GetPlayer().IsNull()) {
+  if (m_curProfile == 0 || p_node->GetPlayer().IsNull()) {
     return "";
   }
 
-  return ToText(GetBehavProfile().GetActionProb(p_node.GetInfoset()->GetAction(p_act)),
+  return ToText(GetBehavProfile().GetActionProb(p_node->GetInfoset()->GetAction(p_act)),
 		m_prefs.NumDecimals());
 }
 
 gbtText gbtGameDocument::GetActionValue(const gbtEfgNode &p_node, int p_act) const
 {
   if (m_curProfile == 0 || p_node.IsNull() ||
-      p_node.GetPlayer().IsNull() || p_node.GetPlayer()->IsChance()) {
+      p_node->GetPlayer().IsNull() || p_node->GetPlayer()->IsChance()) {
     return "";
   }
 
-  if (GetBehavProfile().GetInfosetProb(p_node.GetInfoset()) > gbtNumber(0)) {
-    return ToText(GetBehavProfile().GetActionValue(p_node.GetInfoset()->GetAction(p_act)),
+  if (GetBehavProfile().GetInfosetProb(p_node->GetInfoset()) > gbtNumber(0)) {
+    return ToText(GetBehavProfile().GetActionValue(p_node->GetInfoset()->GetAction(p_act)),
 		  m_prefs.NumDecimals());
   }
   else  {
@@ -323,12 +323,12 @@ gbtText gbtGameDocument::GetActionValue(const gbtEfgNode &p_node, int p_act) con
 
 gbtNumber gbtGameDocument::ActionProb(const gbtEfgNode &p_node, int p_action) const
 {
-  if (!p_node.GetPlayer().IsNull() && p_node.GetPlayer()->IsChance()) {
-    return p_node.GetInfoset()->GetChanceProb(p_action);
+  if (!p_node->GetPlayer().IsNull() && p_node->GetPlayer()->IsChance()) {
+    return p_node->GetInfoset()->GetChanceProb(p_action);
   }
 
-  if (m_curProfile && !p_node.GetInfoset().IsNull()) {
-    return m_behavProfiles[m_curProfile](p_node.GetInfoset()->GetAction(p_action));
+  if (m_curProfile && !p_node->GetInfoset().IsNull()) {
+    return m_behavProfiles[m_curProfile](p_node->GetInfoset()->GetAction(p_action));
   }
   return -1;
 }

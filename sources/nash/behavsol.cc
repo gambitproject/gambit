@@ -646,7 +646,7 @@ SubgamePerfectChecker::SubgamePerfectChecker(const gbtEfgGame &p_efg,
       gbtEfgNode member = infoset->GetMember(1);
       
       for (index = 1; (index <= subroots.Length() &&
-		       member.GetSubgameRoot() != subroots[index]); index++);
+		       member->GetSubgameRoot() != subroots[index]); index++);
       
       infoset_subgames(pl, iset) = index;
     }

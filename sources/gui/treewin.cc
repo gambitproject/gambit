@@ -90,7 +90,7 @@ void gbtCmdCopyTree::Do(gbtGameDocument *p_doc)
 
 void gbtCmdSetOutcome::Do(gbtGameDocument *p_doc)  
 {
-  m_node.SetOutcome(m_outcome);
+  m_node->SetOutcome(m_outcome);
 }
 
 
@@ -181,19 +181,19 @@ void gbtTreeView::OnKeyEvent(wxKeyEvent &p_event)
   if (!cursor.IsNull() && !p_event.ShiftDown()) {
     switch (p_event.KeyCode()) {
     case WXK_LEFT:
-      if (!cursor.GetParent().IsNull()) {
-	m_doc->Submit(new gbtCmdSetCursor(cursor.GetParent()));
+      if (!cursor->GetParent().IsNull()) {
+	m_doc->Submit(new gbtCmdSetCursor(cursor->GetParent()));
       }
       break;
     case WXK_RIGHT:
-      if (cursor.NumChildren() > 0) {
-	m_doc->Submit(new gbtCmdSetCursor(cursor.GetChild(1)));
+      if (cursor->NumChildren() > 0) {
+	m_doc->Submit(new gbtCmdSetCursor(cursor->GetChild(1)));
       }
       break;
     case WXK_UP: {
       gbtEfgNode prior = ((!p_event.ControlDown()) ? 
 			  m_layout.PriorSameLevel(m_doc->GetCursor()) :
-			  cursor.GetPriorMember());
+			  cursor->GetPriorMember());
       if (!prior.IsNull()) {
 	m_doc->Submit(new gbtCmdSetCursor(prior));
       }
@@ -202,7 +202,7 @@ void gbtTreeView::OnKeyEvent(wxKeyEvent &p_event)
     case WXK_DOWN: {
       gbtEfgNode next = ((!p_event.ControlDown()) ?
 			 m_layout.NextSameLevel(m_doc->GetCursor()) :
-			 cursor.GetNextMember());
+			 cursor->GetNextMember());
       if (!next.IsNull()) {
 	m_doc->Submit(new gbtCmdSetCursor(next));
       }
@@ -241,24 +241,24 @@ void gbtTreeView::OnUpdate(gbtGameView *)
 				  !m_doc->GetCutNode().IsNull()));
   m_nodeMenu->Enable(GBT_MENU_EDIT_INSERT, !cursor.IsNull());
   m_nodeMenu->Enable(GBT_MENU_EDIT_REVEAL,
-		     (!cursor.IsNull() && !cursor.GetInfoset().IsNull()));
+		     (!cursor.IsNull() && !cursor->GetInfoset().IsNull()));
   m_nodeMenu->Enable(GBT_MENU_EDIT_MOVE, 
-		     (!cursor.IsNull() && !cursor.GetInfoset().IsNull()));
+		     (!cursor.IsNull() && !cursor->GetInfoset().IsNull()));
 
   m_nodeMenu->Enable(GBT_MENU_EDIT_TOGGLE_SUBGAME,
 		     (!cursor.IsNull() && 
-		      cursor.IsSubgameRoot() &&
-		      !cursor.GetParent().IsNull()));
+		      cursor->IsSubgameRoot() &&
+		      !cursor->GetParent().IsNull()));
   m_nodeMenu->Enable(GBT_MENU_EDIT_MARK_SUBGAME_TREE,
 		     (!cursor.IsNull() && 
-		      cursor.IsSubgameRoot()));
+		      cursor->IsSubgameRoot()));
   m_nodeMenu->Enable(GBT_MENU_EDIT_UNMARK_SUBGAME_TREE,
 		     (!cursor.IsNull() && 
-		      cursor.IsSubgameRoot()));
+		      cursor->IsSubgameRoot()));
   m_nodeMenu->SetLabel(GBT_MENU_EDIT_TOGGLE_SUBGAME,
-		       (!cursor.IsNull() && !cursor.GetParent().IsNull() &&
-			cursor.IsSubgameRoot() &&
-			cursor.GetSubgameRoot() == cursor) ?
+		       (!cursor.IsNull() && !cursor->GetParent().IsNull() &&
+			cursor->IsSubgameRoot() &&
+			cursor->GetSubgameRoot() == cursor) ?
 		       _("Unmark subgame") : _("Mark subgame"));
   Refresh();
 }
@@ -392,7 +392,7 @@ void gbtTreeView::OnMouseMotion(wxMouseEvent &p_event)
 
       gbtEfgNode node = m_layout.NodeHitTest(x, y);
     
-      if (!node.IsNull() && node.NumChildren() > 0) {
+      if (!node.IsNull() && node->NumChildren() > 0) {
 	m_dragSource = node;
 	if (p_event.ControlDown()) {
 	  m_dragImage = new wxDragImage(_("Copy subtree"),
@@ -427,7 +427,7 @@ void gbtTreeView::OnMouseMotion(wxMouseEvent &p_event)
     y = (int) ((float) y / m_zoom);
 
     gbtEfgNode node = m_layout.NodeHitTest(x, y);
-    if (!node.IsNull() && node.NumChildren() == 0) {
+    if (!node.IsNull() && node->NumChildren() == 0) {
       try {
 	if (m_dragMode == dragCOPY) {
 	  m_doc->Submit(new gbtCmdCopyTree(m_dragSource, node));
@@ -437,7 +437,7 @@ void gbtTreeView::OnMouseMotion(wxMouseEvent &p_event)
 	}
 	else if (m_dragMode == dragOUTCOME) { 
 	  m_doc->Submit(new gbtCmdSetOutcome(node,
-					     m_dragSource.GetOutcome()));
+					     m_dragSource->GetOutcome()));
 	}
       }
       catch (gbtException &ex) {

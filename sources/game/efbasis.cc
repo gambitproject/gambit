@@ -254,7 +254,7 @@ gbtEfgPlayer gbtEfgNodeSet::GetPlayer(void) const
 
 int gbtEfgNodeSet::Find(const gbtEfgNode &n) const
 {
-  return (infosets[n.GetInfoset()->GetId()]->nodes.Find(n));
+  return (infosets[n->GetInfoset()->GetId()]->nodes.Find(n));
 }
 
 // checks for a valid gbtEfgNodeSet
@@ -341,9 +341,9 @@ gbtEfgNode gbtEfgBasis::GetNode(const gbtEfgInfoset &infoset, int index) const
 
 int gbtEfgBasis::Find(const gbtEfgNode &n) const
 {
-  if (n.GetInfoset()->GetGame() != m_efg)   return 0;
+  if (n->GetInfoset()->GetGame() != m_efg)   return 0;
 
-  int pl = n.GetInfoset()->GetPlayer()->GetId();
+  int pl = n->GetInfoset()->GetPlayer()->GetId();
 
   return nodes[pl]->Find(n);
 }
@@ -375,7 +375,7 @@ gbtPVector<int> gbtEfgBasis::NumNodes(void) const
 
 bool gbtEfgBasis::RemoveNode(const gbtEfgNode &n)
 {
-  gbtEfgInfoset infoset = n.GetInfoset();
+  gbtEfgInfoset infoset = n->GetInfoset();
   gbtEfgPlayer player = infoset->GetPlayer();
 
   return nodes[player->GetId()]->RemoveNode(infoset->GetId(), n);
@@ -388,19 +388,19 @@ bool gbtEfgBasis::IsReachable(gbtEfgNode n) const
   }
 
   while (n != m_efg.GetRoot()) {
-    if (!n.GetParent().GetInfoset()->IsChanceInfoset()) {
-      if (!gbtEfgSupport::Contains(LastAction(m_efg, n))) {
+    if (!n->GetParent()->GetInfoset()->IsChanceInfoset()) {
+      if (!gbtEfgSupport::Contains(n->GetPriorAction())) {
 	return false;
       }
     }
-    n = n.GetParent();
+    n = n->GetParent();
   }
   return true;
 }
 
 void gbtEfgBasis::AddNode(const gbtEfgNode &n)
 {
-  gbtEfgInfoset infoset = n.GetInfoset();
+  gbtEfgInfoset infoset = n->GetInfoset();
   gbtEfgPlayer player = infoset->GetPlayer();
 
   nodes[player->GetId()]->AddNode(infoset->GetId(), n);
@@ -561,7 +561,7 @@ int gbtEfgBasis::Col(const gbtEfgAction &p_action) const
 
 int gbtEfgBasis::Col(const gbtEfgNode &n) const
 {
-  gbtEfgInfoset iset = n.GetInfoset();
+  gbtEfgInfoset iset = n->GetInfoset();
   return (*nodeIndex)(iset->GetPlayer()->GetId(), iset->GetId(),
 		      (*bigbasis).Find(n));
 }
@@ -578,12 +578,12 @@ void gbtEfgBasis::AddEquation2(int row, gbtEfgNode n) const
   if(Col(n))
     (*A)(row,Col(n)) = 1.0;
   if(n!=m_efg.GetRoot()) {
-    gbtEfgAction act = LastAction(m_efg,n);
+    gbtEfgAction act = n->GetPriorAction();
     if(Col(act))
       (*A)(row,Col(act)) = -1.0;
-    while(n.GetParent() != m_efg.GetRoot()) {
-      n = n.GetParent();
-      act = LastAction(m_efg,n);
+    while(n->GetParent() != m_efg.GetRoot()) {
+      n = n->GetParent();
+      act = n->GetPriorAction();
       if(Col(act))
 	(*A)(row,Col(act)) = -1.0;
     }
@@ -649,7 +649,7 @@ void gbtEfgBasis::Dump(gbtOutput& s) const
       s << '"' << infoset->GetLabel() << "\" { ";
       for (k = 1; k <= NumNodes(i, j); k++)  {
 	gbtEfgNode node = nodes[i]->NodeList(j)[k];
-	s << '"' << node.GetLabel() << "\" ";
+	s << '"' << node->GetLabel() << "\" ";
       }
       s << "} ";
     }

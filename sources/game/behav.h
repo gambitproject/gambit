@@ -81,11 +81,11 @@ protected:
   T &BeliefProb(const gbtEfgNode &node);
   
   gbtVector<T> NodeValues(const gbtEfgNode &node) const
-    { return m_nodeValues.Row(node.GetId()); }
+    { return m_nodeValues.Row(node->GetId()); }
   const T &NodeValue(const gbtEfgNode &node, int pl) const
-    { return m_nodeValues(node.GetId(), pl); }
+    { return m_nodeValues(node->GetId(), pl); }
   T &NodeValue(const gbtEfgNode &node, int pl)
-    { return m_nodeValues(node.GetId(), pl); }
+    { return m_nodeValues(node->GetId(), pl); }
 
   T IsetProb(const gbtEfgInfoset &iset) const;
 

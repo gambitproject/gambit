@@ -41,7 +41,7 @@
 class gbtEfgGame;
 class gbtEfgActionBase;
 class gbtEfgInfosetBase;
-struct gbt_efg_node_rep;
+class gbtEfgNodeBase;
 class gbtEfgPlayerBase;
 struct gbt_efg_game_rep;
 
@@ -146,7 +146,7 @@ public:
   int m_refCount;
   gbtBlock<gbtEfgActionBase *> m_actions;
   gbtBlock<gbtNumber> m_chanceProbs;
-  gbtBlock<gbt_efg_node_rep *> m_members;
+  gbtBlock<gbtEfgNodeBase *> m_members;
   int m_flag, m_whichbranch;
 
   gbtEfgInfosetBase(gbtEfgPlayerBase *, int id, int br);
@@ -189,7 +189,8 @@ public:
   void PrintActions(gbtOutput &) const;
 };
 
-struct gbt_efg_node_rep {
+class gbtEfgNodeBase : public gbtEfgNodeRep {
+public:
   int m_id;
   gbt_efg_game_rep *m_efg;
   bool m_deleted;
@@ -198,21 +199,53 @@ struct gbt_efg_node_rep {
 
   bool m_mark;
   gbtEfgInfosetBase *m_infoset;
-  gbt_efg_node_rep *m_parent;
+  gbtEfgNodeBase *m_parent;
   gbtEfgOutcomeBase *m_outcome;
-  gbtBlock<gbt_efg_node_rep *> m_children;
-  gbt_efg_node_rep *m_whichbranch, *m_ptr, *m_gameroot;
+  gbtBlock<gbtEfgNodeBase *> m_children;
+  mutable gbtEfgNodeBase *m_whichbranch, *m_ptr, *m_gameroot;
 
-  gbt_efg_node_rep(gbt_efg_game_rep *, gbt_efg_node_rep *);
-  ~gbt_efg_node_rep();
+  gbtEfgNodeBase(gbt_efg_game_rep *, gbtEfgNodeBase *);
+  virtual ~gbtEfgNodeBase();
+
+  gbtText GetLabel(void) const { return m_label; }
+  void SetLabel(const gbtText &p_label) { m_label = p_label; }
+  int GetId(void) const { return m_id; }
+  gbtEfgGame GetGame(void) const;
+
+  int NumChildren(void) const;
+  gbtEfgNode GetChild(int i) const;
+  gbtEfgNode GetChild(const gbtEfgAction &) const; 
+  bool IsPredecessorOf(const gbtEfgNode &) const;
+
+  gbtEfgNode GetParent(void) const;
+  gbtEfgAction GetPriorAction(void) const; // returns null if root node
+
+  gbtEfgInfoset GetInfoset(void) const;
+  int GetMemberId(void) const;
+
+  gbtEfgPlayer GetPlayer(void) const;
+
+  gbtEfgNode GetSubgameRoot(void) const;
+  bool IsSubgameRoot(void) const;
+
+  gbtEfgOutcome GetOutcome(void) const;
+  void SetOutcome(const gbtEfgOutcome &);
+
+  gbtEfgNode InsertMove(gbtEfgInfoset);
+  // Note: Starting in 0.97.1.1, this now deletes the *parent* move
+  void DeleteMove(void);
+  void DeleteTree(void);
+
+  void JoinInfoset(gbtEfgInfoset);
+  gbtEfgInfoset LeaveInfoset(void);
 
   void DeleteOutcome(gbtEfgOutcomeBase *outc);
 
-  gbt_efg_node_rep *GetPriorSibling(void);
-  gbt_efg_node_rep *GetNextSibling(void);
+  gbtEfgNode GetPriorSibling(void) const;
+  gbtEfgNode GetNextSibling(void) const;
 
-  gbt_efg_node_rep *GetPriorMember(void);
-  gbt_efg_node_rep *GetNextMember(void);
+  gbtEfgNode GetPriorMember(void) const;
+  gbtEfgNode GetNextMember(void) const;
 
   void MarkSubtree(bool p_mark);
 };
@@ -226,7 +259,7 @@ struct gbt_efg_game_rep {
   gbtText m_label, comment;
   gbtBlock<gbtEfgPlayerBase *> players;
   gbtBlock<gbtEfgOutcomeBase *> outcomes;
-  gbt_efg_node_rep *root;
+  gbtEfgNodeBase *root;
   gbtEfgPlayerBase *chance;
   gbt_nfg_game_rep *m_reducedNfg;
 
@@ -234,18 +267,18 @@ struct gbt_efg_game_rep {
   ~gbt_efg_game_rep();
 
   void SortInfosets(void);
-  void NumberNodes(gbt_efg_node_rep *, int &);
+  void NumberNodes(gbtEfgNodeBase *, int &);
   void DeleteLexicon(void);
 
-  void InsertMove(gbt_efg_node_rep *, gbtEfgInfosetBase *);
-  void DeleteMove(gbt_efg_node_rep *);
-  void DeleteTree(gbt_efg_node_rep *);
+  void InsertMove(gbtEfgNodeBase *, gbtEfgInfosetBase *);
+  void DeleteMove(gbtEfgNodeBase *);
+  void DeleteTree(gbtEfgNodeBase *);
 
   gbtEfgInfosetBase *NewInfoset(gbtEfgPlayerBase *,
 				  int p_id, int p_actions);
   void DeleteInfoset(gbtEfgInfosetBase *);
-  void JoinInfoset(gbtEfgInfosetBase *, gbt_efg_node_rep *); 
-  gbtEfgInfosetBase *LeaveInfoset(gbt_efg_node_rep *);
+  void JoinInfoset(gbtEfgInfosetBase *, gbtEfgNodeBase *); 
+  gbtEfgInfosetBase *LeaveInfoset(gbtEfgNodeBase *);
   void MergeInfoset(gbtEfgInfosetBase *, gbtEfgInfosetBase *);
   void Reveal(gbtEfgInfosetBase *, gbtEfgPlayerBase *);
   void SetPlayer(gbtEfgInfosetBase *, gbtEfgPlayerBase *);
@@ -255,9 +288,9 @@ struct gbt_efg_game_rep {
   void DeleteOutcome(gbtEfgOutcomeBase *p_outcome);
 
   // Utility routines for subgames
-  void MarkTree(gbt_efg_node_rep *, gbt_efg_node_rep *);
-  bool CheckTree(gbt_efg_node_rep *, gbt_efg_node_rep *);
-  void MarkSubgame(gbt_efg_node_rep *, gbt_efg_node_rep *);
+  void MarkTree(const gbtEfgNodeBase *, const gbtEfgNodeBase *);
+  bool CheckTree(const gbtEfgNodeBase *, const gbtEfgNodeBase *);
+  void MarkSubgame(gbtEfgNodeBase *, gbtEfgNodeBase *);
 };
 
 #endif  // EFGINT_H

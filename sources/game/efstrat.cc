@@ -509,10 +509,10 @@ gbtList<gbtEfgNode>
 gbtEfgSupport::ReachableNonterminalNodes(const gbtEfgNode &n) const
 {
   gbtList<gbtEfgNode> answer;
-  if (n.IsNonterminal()) {
-    for (int i = 1; i <= NumActions(n.GetInfoset()); i++) {
-      gbtEfgNode nn = n.GetChild(GetAction(n.GetInfoset(), i));
-      if (nn.IsNonterminal()) {
+  if (n->IsNonterminal()) {
+    for (int i = 1; i <= NumActions(n->GetInfoset()); i++) {
+      gbtEfgNode nn = n->GetChild(GetAction(n->GetInfoset(), i));
+      if (nn->IsNonterminal()) {
 	answer += nn;
 	answer += ReachableNonterminalNodes(nn);
       }
@@ -526,8 +526,8 @@ gbtEfgSupport::ReachableNonterminalNodes(const gbtEfgNode &n,
 				     const gbtEfgAction &a) const
 {
   gbtList<gbtEfgNode> answer;
-  gbtEfgNode nn = n.GetChild(a);
-  if (nn.IsNonterminal()) {
+  gbtEfgNode nn = n->GetChild(a);
+  if (nn->IsNonterminal()) {
     answer += nn;
     answer += ReachableNonterminalNodes(nn);
   }
@@ -551,7 +551,7 @@ gbtList<gbtEfgInfoset> gbtEfgSupport::ReachableInfosets(const gbtEfgNode &n) con
   gbtList<gbtEfgInfoset> answer;
   gbtList<gbtEfgNode> nodelist = ReachableNonterminalNodes(n);
   for (int i = 1; i <= nodelist.Length(); i++)
-    answer += nodelist[i].GetInfoset();
+    answer += nodelist[i]->GetInfoset();
   answer.RemoveRedundancies();
   return answer;
 }
@@ -562,7 +562,7 @@ gbtList<gbtEfgInfoset> gbtEfgSupport::ReachableInfosets(const gbtEfgNode &n,
   gbtList<gbtEfgInfoset> answer;
   gbtList<gbtEfgNode> nodelist = ReachableNonterminalNodes(n,a);
   for (int i = 1; i <= nodelist.Length(); i++)
-    answer += nodelist[i].GetInfoset();
+    answer += nodelist[i]->GetInfoset();
   answer.RemoveRedundancies();
   return answer;
 }
@@ -575,12 +575,12 @@ bool gbtEfgSupport::AlwaysReaches(const gbtEfgInfoset &i) const
 bool gbtEfgSupport::AlwaysReachesFrom(const gbtEfgInfoset &i, 
 				  const gbtEfgNode &n) const
 {
-  if (n.IsTerminal()) return false;
+  if (n->IsTerminal()) return false;
   else {
-    if (n.GetInfoset() == i) return true;
+    if (n->GetInfoset() == i) return true;
     else {
-      for (int j = 1; j <= NumActions(n.GetInfoset()); j++) {
-	if (!AlwaysReachesFrom(i, n.GetChild(GetAction(n.GetInfoset(), j)))) {
+      for (int j = 1; j <= NumActions(n->GetInfoset()); j++) {
+	if (!AlwaysReachesFrom(i, n->GetChild(GetAction(n->GetInfoset(), j)))) {
 	  return false;
 	}
       }
@@ -604,11 +604,11 @@ bool gbtEfgSupport::MayReach(const gbtEfgNode &n) const
   if (n == m_efg.GetRoot())
     return true;
   else {
-    if (!Contains(n.GetPriorAction())) {
+    if (!Contains(n->GetPriorAction())) {
       return false;
     }
     else {
-      return MayReach(n.GetParent());
+      return MayReach(n->GetParent());
     }
   }
 }
@@ -683,16 +683,16 @@ gbtEfgSupportWithActiveInfo::infoset_has_active_nodes(const gbtEfgInfoset &i) co
 
 void gbtEfgSupportWithActiveInfo::activate(const gbtEfgNode &n)
 {
-  is_nonterminal_node_active[n.GetPlayer()->GetId()]
-                            [n.GetInfoset()->GetId()]
-                            [n.GetMemberId()] = true;
+  is_nonterminal_node_active[n->GetPlayer()->GetId()]
+                            [n->GetInfoset()->GetId()]
+                            [n->GetMemberId()] = true;
 }
 
 void gbtEfgSupportWithActiveInfo::deactivate(const gbtEfgNode &n)
 {
-  is_nonterminal_node_active[n.GetPlayer()->GetId()]
-                            [n.GetInfoset()->GetId()]
-                            [n.GetMemberId()] = false;
+  is_nonterminal_node_active[n->GetPlayer()->GetId()]
+                            [n->GetInfoset()->GetId()]
+                            [n->GetMemberId()] = false;
 }
 
 void gbtEfgSupportWithActiveInfo::activate(const gbtEfgInfoset &i)
@@ -708,23 +708,23 @@ void gbtEfgSupportWithActiveInfo::deactivate(const gbtEfgInfoset &i)
 void
 gbtEfgSupportWithActiveInfo::activate_this_and_lower_nodes(const gbtEfgNode &n)
 {
-  if (n.IsNonterminal()) {
+  if (n->IsNonterminal()) {
     activate(n); 
-    activate(n.GetInfoset());
-    for (int i = 1; i <= NumActions(n.GetInfoset()); i++) 
-      activate_this_and_lower_nodes(n.GetChild(GetAction(n.GetInfoset(), i)));
+    activate(n->GetInfoset());
+    for (int i = 1; i <= NumActions(n->GetInfoset()); i++) 
+      activate_this_and_lower_nodes(n->GetChild(GetAction(n->GetInfoset(), i)));
   }
 }
 
 void
 gbtEfgSupportWithActiveInfo::deactivate_this_and_lower_nodes(const gbtEfgNode &n)
 {
-  if (n.IsNonterminal()) {  // THIS ALL LOOKS FISHY
+  if (n->IsNonterminal()) {  // THIS ALL LOOKS FISHY
     deactivate(n); 
-    if ( !infoset_has_active_nodes(n.GetInfoset()) )
-      deactivate(n.GetInfoset());
-    for (int i = 1; i <= NumActions(n.GetInfoset()); i++) {
-      deactivate_this_and_lower_nodes(n.GetChild(GetAction(n.GetInfoset(), i)));
+    if ( !infoset_has_active_nodes(n->GetInfoset()) )
+      deactivate(n->GetInfoset());
+    for (int i = 1; i <= NumActions(n->GetInfoset()); i++) {
+      deactivate_this_and_lower_nodes(n->GetChild(GetAction(n->GetInfoset(), i)));
     }
   }
 }
@@ -733,9 +733,9 @@ void gbtEfgSupportWithActiveInfo::
 deactivate_this_and_lower_nodes_returning_deactivated_infosets(const gbtEfgNode &n, 
                                                 gbtList<gbtEfgInfoset> *list)
 {
-  if (n.IsNonterminal()) {
+  if (n->IsNonterminal()) {
     deactivate(n); 
-    if ( !infoset_has_active_nodes(n.GetInfoset()) ) {
+    if ( !infoset_has_active_nodes(n->GetInfoset()) ) {
 
       //DEBUG
       /*
@@ -743,11 +743,11 @@ deactivate_this_and_lower_nodes_returning_deactivated_infosets(const gbtEfgNode 
 	   << " with support \n" << *this << "\n";
       */
 
-      (*list) += n.GetInfoset(); 
-      deactivate(n.GetInfoset());
+      (*list) += n->GetInfoset(); 
+      deactivate(n->GetInfoset());
     }
-    for (int i = 1; i <= NumActions(n.GetInfoset()); i++) 
-      deactivate_this_and_lower_nodes_returning_deactivated_infosets(n.GetChild(GetAction(n.GetInfoset(), i)), list);    
+    for (int i = 1; i <= NumActions(n->GetInfoset()); i++) 
+      deactivate_this_and_lower_nodes_returning_deactivated_infosets(n->GetChild(GetAction(n->GetInfoset(), i)), list);    
   }
 }
 
@@ -912,7 +912,7 @@ bool gbtEfgSupportWithActiveInfo::RemoveAction(const gbtEfgAction &s)
 {
   gbtList<gbtEfgNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
-    deactivate_this_and_lower_nodes(startlist[i].GetChild(s));
+    deactivate_this_and_lower_nodes(startlist[i]->GetChild(s));
 
   // the following returns false if s was not active
   return gbtEfgSupport::RemoveAction(s);
@@ -926,7 +926,7 @@ RemoveActionReturningDeletedInfosets(const gbtEfgAction &s,
   gbtList<gbtEfgNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     deactivate_this_and_lower_nodes_returning_deactivated_infosets(
-                           startlist[i].GetChild(s),list);
+                           startlist[i]->GetChild(s),list);
 
   // the following returns false if s was not active
   return gbtEfgSupport::RemoveAction(s);
@@ -966,9 +966,9 @@ bool gbtEfgSupportWithActiveInfo::NodeIsActive(const int pl,
 
 bool gbtEfgSupportWithActiveInfo::NodeIsActive(const gbtEfgNode &n) const
 {
-  return NodeIsActive(n.GetInfoset()->GetPlayer()->GetId(),
-		      n.GetInfoset()->GetId(),
-		      n.GetMemberId());
+  return NodeIsActive(n->GetInfoset()->GetPlayer()->GetId(),
+		      n->GetInfoset()->GetId(),
+		      n->GetMemberId());
 }
 
 bool gbtEfgSupportWithActiveInfo::HasActiveActionsAtActiveInfosets()

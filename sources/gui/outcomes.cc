@@ -121,10 +121,10 @@ void gbtCmdAttachOutcome::Do(gbtGameDocument *p_doc)
 {
   if (p_doc->HasEfg()) {
     if (m_id > 0) {
-      p_doc->GetCursor().SetOutcome(p_doc->GetEfg().GetOutcome(m_id));
+      p_doc->GetCursor()->SetOutcome(p_doc->GetEfg().GetOutcome(m_id));
     }
     else {
-      p_doc->GetCursor().SetOutcome(0);
+      p_doc->GetCursor()->SetOutcome(0);
     }
   }
   else {

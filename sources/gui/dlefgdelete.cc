@@ -43,7 +43,7 @@ dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, gbtEfgNode p_node)
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  if (!p_node.GetParent().IsNull()) {
+  if (!p_node->GetParent().IsNull()) {
     wxString deleteChoices[] = { _("Entire subtree"), _("Parent move") };
     m_deleteTree = new wxRadioBox(this, -1, _("Delete"),
 				  wxDefaultPosition, wxDefaultSize,

@@ -57,12 +57,12 @@ gbtEfgActionBase::gbtEfgActionBase(gbtEfgInfosetBase *p_infoset,
 
 bool gbtEfgActionBase::Precedes(gbtEfgNode n) const
 {
-  while (n != n.GetGame().GetRoot()) {
-    if (n.GetPriorAction().Get() == this) {
+  while (n != n->GetGame().GetRoot()) {
+    if (n->GetPriorAction().Get() == this) {
       return true;
     }
     else {
-      n = n.GetParent();
+      n = n->GetParent();
     }
   }
   return false;
@@ -192,7 +192,7 @@ gbtEfgGame gbtEfgInfosetBase::GetGame(void) const
 
 bool gbtEfgInfosetBase::Precedes(gbtEfgNode p_node) const
 {
-  gbt_efg_node_rep *node = p_node.rep;
+  gbtEfgNodeBase *node = dynamic_cast<gbtEfgNodeBase *>(p_node.Get());
   while (node) {
     if (node->m_infoset == this) {
       return true;

@@ -84,7 +84,7 @@ void gbtEfgNavigateWindow::OnUpdate(void)
 
   // if we got here, the node is valid.
   try {
-    SetCellValue(wxString::Format(wxT("%s"), (char *) cursor.GetLabel()),
+    SetCellValue(wxString::Format(wxT("%s"), (char *) cursor->GetLabel()),
 		 0, 0);
     SetCellValue(wxString::Format(wxT("%s"),
 				  (char *) m_doc->GetRealizProb(cursor)),
@@ -94,15 +94,15 @@ void gbtEfgNavigateWindow::OnUpdate(void)
 
     gbtText tmpstr;
   
-    if (cursor.GetPlayer().IsNull()) {
+    if (cursor->GetPlayer().IsNull()) {
       tmpstr = "TERMINAL";
     }
     else {
-      if (cursor.GetPlayer()->IsChance())
+      if (cursor->GetPlayer()->IsChance())
 	tmpstr = "CHANCE";
       else
-	tmpstr = ("(" + ToText(cursor.GetPlayer()->GetId()) + "," +
-		  ToText(cursor.GetInfoset()->GetId()) + ")");
+	tmpstr = ("(" + ToText(cursor->GetPlayer()->GetId()) + "," +
+		  ToText(cursor->GetInfoset()->GetId()) + ")");
     }
 	  
     SetCellValue(wxString::Format(wxT("%s"), (char *) tmpstr), 3, 0);
@@ -116,14 +116,14 @@ void gbtEfgNavigateWindow::OnUpdate(void)
 				  (char *) m_doc->GetInfosetValue(cursor)),
 		 6, 0);
 	
-    gbtEfgNode p = cursor.GetParent();
+    gbtEfgNode p = cursor->GetParent();
 
     if (!p.IsNull()) {
       int branch = 0;
-      for (branch = 1; p.GetChild(branch) != cursor; branch++);
+      for (branch = 1; p->GetChild(branch) != cursor; branch++);
 
       SetCellValue(wxString::Format(wxT("%s"),
-				    (char *) cursor.GetPriorAction()->GetLabel()),
+				    (char *) cursor->GetPriorAction()->GetLabel()),
 		   7, 0);
       SetCellValue(wxString::Format(wxT("%s"),
 				    (char *) m_doc->GetActionProb(p, branch)),

@@ -83,13 +83,13 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
   
   for (int soln = 1; soln <= thissolns.Length(); soln++)   {
     for (i = 1; i <= subroots.Length(); i++) {
-      subroots[i].SetOutcome(subrootvalues[soln][i]);
+      subroots[i]->SetOutcome(subrootvalues[soln][i]);
     }
     
     gbtEfgGame foo = p_support.GetTree().Copy(n);
     // this prevents double-counting of outcomes at roots of subgames
     // by convention, we will just put the payoffs in the parent subgame
-    foo.GetRoot().SetOutcome(0);
+    foo.GetRoot()->SetOutcome(0);
 
     gbtList<gbtEfgNode> nodes;
     Nodes(p_support.GetTree(), n, nodes);
@@ -101,7 +101,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
       int index;
 
       for (index = 1; index <= nodes.Length() &&
-	   nodes[index].GetPlayer() != p_support.GetPlayer(pl); index++);
+	   nodes[index]->GetPlayer() != p_support.GetPlayer(pl); index++);
 	
       if (index > nodes.Length())  continue;
 
@@ -109,7 +109,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 	
       for (base = 1; base <= p_support.GetPlayer(pl)->NumInfosets(); base++)
 	if (p_support.GetPlayer(pl)->GetInfoset(base) ==
-	    nodes[index].GetInfoset())  break;
+	    nodes[index]->GetInfoset())  break;
 	
       assert(base <= p_support.GetPlayer(pl)->NumInfosets());
 	
@@ -176,7 +176,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 	int index;
 
 	for (index = 1; index <= nodes.Length() &&
-	     nodes[index].GetPlayer() != p_support.GetPlayer(pl); index++);
+	     nodes[index]->GetPlayer() != p_support.GetPlayer(pl); index++);
 	
 	if (index > nodes.Length())  continue;
 
@@ -184,7 +184,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 	
 	for (base = 1; base <= p_support.GetPlayer(pl)->NumInfosets(); base++)
 	  if (p_support.GetPlayer(pl)->GetInfoset(base) ==
-	      nodes[index].GetInfoset())  break;
+	      nodes[index]->GetInfoset())  break;
 	
 	assert(base <= p_support.GetPlayer(pl)->NumInfosets());
 	
@@ -214,8 +214,8 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
       gbtVector<gbtNumber> subval(foo.NumPlayers());
       for (i = 1; i <= foo.NumPlayers(); i++)  {
 	subval[i] = sol[solno].Payoff(i);
-	if (!n.GetOutcome().IsNull())  {
-	  subval[i] += n.GetOutcome()->GetPayoff(p_support.GetPlayer(i));
+	if (!n->GetOutcome().IsNull())  {
+	  subval[i] += n->GetOutcome()->GetPayoff(p_support.GetPlayer(i));
         }
       }
 
@@ -232,7 +232,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
     }
   }
 
-  n.DeleteTree();
+  n->DeleteTree();
 }
 
 //-----------------------------------------------------------------------

@@ -66,8 +66,8 @@ static void MakeStrategy(gbt_nfg_game_rep *p_nfg, gbtEfgPlayerBase *p_player)
 
 static void MakeReducedStrats(gbt_nfg_game_rep *p_nfg,
 			      gbtEfgPlayerBase *p,
-			      gbt_efg_node_rep *n,
-			      gbt_efg_node_rep *nn)
+			      gbtEfgNodeBase *n,
+			      gbtEfgNodeBase *nn)
 {
   if (!n->m_parent)  n->m_ptr = 0;
 
@@ -77,7 +77,7 @@ static void MakeReducedStrats(gbt_nfg_game_rep *p_nfg,
 	// we haven't visited this infoset before
 	n->m_infoset->m_flag = true;
 	for (int i = 1; i <= n->m_children.Length(); i++)   {
-	  gbt_efg_node_rep *m = n->m_children[i];
+	  gbtEfgNodeBase *m = n->m_children[i];
 	  n->m_whichbranch = m;
 	  n->m_infoset->m_whichbranch = i;
 	  MakeReducedStrats(p_nfg, p, m, nn);
@@ -104,13 +104,13 @@ static void MakeReducedStrats(gbt_nfg_game_rep *p_nfg,
     }
   }
   else if (nn)  {
-    gbt_efg_node_rep *m;
+    gbtEfgNodeBase *m;
     for (; ; nn = nn->m_parent->m_ptr->m_whichbranch)  {
-      m = nn->GetNextSibling();
+      m = dynamic_cast<gbtEfgNodeBase *>(nn->GetNextSibling().Get());
       if (m || nn->m_parent->m_ptr == NULL)   break;
     }
     if (m)  {
-      gbt_efg_node_rep *mm = m->m_parent->m_whichbranch;
+      gbtEfgNodeBase *mm = m->m_parent->m_whichbranch;
       m->m_parent->m_whichbranch = m;
       MakeReducedStrats(p_nfg, p, m, m);
       m->m_parent->m_whichbranch = mm;

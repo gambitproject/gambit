@@ -44,9 +44,6 @@ int CountNodes(const gbtEfgGame &, const gbtEfgNode &);
 // Returns the terminal nodes in a subtree rooted at 'p_node'
 void TerminalNodes(const gbtEfgNode &, gbtList<gbtEfgNode> &);
 
-// returns the action leading up to the node
-gbtEfgAction LastAction(const gbtEfgGame &, const gbtEfgNode &node);
-
 // returns the list of nodes which are marked as the roots of subgames
 void MarkedSubgameRoots(const gbtEfgGame &, gbtList<gbtEfgNode> &list);
 

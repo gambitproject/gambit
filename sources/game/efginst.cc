@@ -42,8 +42,8 @@ template class gbtBlock<gbtEfgInfosetBase *>;
 template class gbtArray<gbtEfgInfoset>;
 template class gbtBlock<gbtEfgInfoset>;
 
-template class gbtArray<gbt_efg_node_rep *>;
-template class gbtBlock<gbt_efg_node_rep *>;
+template class gbtArray<gbtEfgNodeBase *>;
+template class gbtBlock<gbtEfgNodeBase *>;
 
 template class gbtArray<gbtEfgNode>;
 template class gbtBlock<gbtEfgNode>;
