@@ -1,17 +1,14 @@
-
+//
+// FILE: gnlist.h -- Nested list class for GCL
+//
 // $Id$
+//
 
-#ifndef __gnlist_h__
-#define __gnlist_h__
+#ifndef GNLIST_H
+#define GNLIST_H
 
 #include "glist.h"
 
-
-
-
-template <class T> class gNestedList
-{
-private:
   //-------------------------------------------------------------------
   // Internally, this is how it works:
   //
@@ -30,24 +27,12 @@ private:
   //     before the first OPENING brace, while the 3 corresponds to the
   //     fact that there are two data items before the second OPENING brace.
   //------------------------------------------------------------------
-  gList< T > m_Data;
-  gList< int > m_Dim;
 
-  //------------------------------------------------------------------
-  // GetElementInfo
-  // 
-  // Return values:
-  //   If the element requested is itself a list, then:
-  //     islist = true
-  //     el_start and el_end point to the start and the ending index numbers
-  //       in Data()
-  //     k_start and k_end point to the opening and closing braces,
-  //       respectively, corresponding to the sublist in Dim()
-  //   otherwise
-  //     islist = false
-  //     el_start = el_end, both pointing to the element in Data()
-  //     k_start and k_end are undefined
-  //-----------------------------------------------------------------
+template <class T> class gNestedList  {
+private:
+  gList<T> m_Data;
+  gList<int> m_Dim;
+
   void GetElementInfo( int el, 
 		       bool& islist, 
 		       int& k_start, int& k_end, 
