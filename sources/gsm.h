@@ -35,7 +35,7 @@ template <class T> class gStack;
 template <class T> class RefCountHashTable;
 
 
-#define GCL_VERSION   0.95
+#define GCL_VERSION   0.96
 
 class GSM  {
 friend class gclFunctionCall;
