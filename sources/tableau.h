@@ -1,18 +1,15 @@
 //
-// FILE: tableau.h:  integer tableau classes  **CHANGE THIS FILENAME
+// FILE: tableau.h:  tableau classes
 //
 // $Id$
 //
 
-// CHANGE THESE NAMES
-#ifndef TABLEAU_H  
+#ifndef TABLEAU_H
 #define TABLEAU_H
 
 #include "rational.h"
 #include "ludecomp.h"
 #include "bfs.h"
-// This is the rational to Integer conversion routine
-#include "gcdr.h"
 
 template <class T> class Tableau;
 template <class T> class LPTableau;
@@ -57,31 +54,15 @@ public:
 
 template <class T> class Tableau : public BaseTableau<T>{
 private:
-  int remap(int col_index) const;  // aligns the column indexes
-  void reintden() const;  // Reintegrates the denominator for output
-  void unintden() const;  // Undoes this
   long npivots;
 protected:
-  // We no longer need these, since there should be no tolerance for integers
   T eps1,eps2;
-
   gVector<T> tmpcol; // temporary column vector, to avoid allocation
   const gMatrix<T> *A;
   const gVector<T> *b;
   Basis<T> basis;
-
-  // This version uses the full tableau, hence no LU decomposition
   LUdecomp<T> B;
-
-  // Similarly, this is for the LU decompostion
   gVector<T> solution;
-
-  gMatrix <T> Tabdat;  // This caries the full tableau
-  // This may require a change in implementation, because it may be unweildly
-  // to carry this around
-  double totdenom;  // This carries the denominator for Q data or 1 for Z
-  double denom;  // This is the denominator for the simplex
-
 public:
       // constructors and destructors
   Tableau(const gMatrix<T> &A, const gVector<T> &b); 
@@ -102,11 +83,11 @@ public:
   int Label(int i) const;   // return variable in i'th position of Tableau
   int Find(int i) const;  // return Tableau position of variable i
   
-  // pivoting
+      // pivoting
   int CanPivot(int outgoing,int incoming);
   void Pivot(int outrow,int col);
-  // perform pivot operation -- outgoing is row, incoming is column
-  //  void CompPivot(int outlabel,int col);
+      // perform pivot operation -- outgoing is row, incoming is column
+//  void CompPivot(int outlabel,int col);
   long NumPivots() const;
   long &NumPivots();
 
@@ -119,7 +100,6 @@ public:
   
   
       // raw Tableau functions
-  // No LU decomposition
   void Refactor();
   void BasisVector(gVector<T> &x) const; // solve M x = (*b)
   void GetColumn( int , gVector<T> &) const;  // raw column
@@ -134,7 +114,6 @@ public:
   bool GtZero(T x) const;
   bool LeZero(T x) const;
   bool GeZero(T x) const;
-  // No error with integers
   T Epsilon(int i = 2) const;
   bool IsFeasible();
   bool IsLexMin();
@@ -208,12 +187,3 @@ template <class T> gOutput &operator<<(gOutput &, const Basis<T> &);
 #endif   // __GNUG__, __BORLANDC__
 
 #endif     // TABLEAU_H
-
-
-
-
-
-
-
-
-

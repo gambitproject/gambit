@@ -66,8 +66,7 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
   gVector<T> col(MinRow(), MaxRow());
   
   SolveColumn(inlabel,incol);
-  
-  gout << "\nincol = " << incol << '\n';;
+  //* gout << "\nincol = " << incol;
       // Find all row indices for which column col has positive entries.
   for (i = MinRow(); i <= MaxRow(); i++)
     if (incol[i] > eps2)
@@ -260,8 +259,3 @@ template <class T> int LTableau<T>::LemkePath(int dup)
 
 template class LTableau<double>;
 template class LTableau<gRational>;
-
-
-
-
-

@@ -7,6 +7,7 @@
 #include "rational.h"
 #include "tableau.imp"
 
+
 template class BaseTableau<double>;
 template class BaseTableau<gRational>;
 
