@@ -737,7 +737,7 @@ An existing variable may be deleted by the use of the \tindex{UnAssign}
 function
 
 \begin{verbatim}
-UnAssign[name->TEXT] =: T
+UnAssign[name->TEXT] =: BOOLEAN
 \end{verbatim}
 
 \noindent After \verb+UnAssign+ is called on a variable, the variable
@@ -6794,14 +6794,14 @@ is not rectangular.
 
 \item\lex{Unassign}
 \protect \large \begin{verbatim}
-UnAssign[name->TEXT] =: T
+UnAssign[name->TEXT] =: BOOLEAN
 \end{verbatim}\normalsize
 
-{\it for all types} {\tt T}
 \bd
-Undefines the variable with name \verb+name+.  Returns the
-last value of the variable.
-\item [Short form:] \verb+x :=+ followed by semicolon or linefeed. 
+Undefines the variable with name \verb+name+.  Returns 
+\verb+True+ if the variable was defined, and \verb+False+ if the
+variable was not defined, at the time of the call.
+\item [Short form:] \verb+x :=
 \item [Note:] For the short form, quotes around \verb+name+ are not
 required, and the function is not listable.
 \item [See also:] \verb+Assign+, \verb+Clear+.
