@@ -834,13 +834,13 @@ void EfgSolnShow::UpdateValues(void)
             SetCell(cur_pos, FeaturePos(BSOLN_CREATOR), NameEfgAlgType(cur.Creator()));
 
         if (features[BSOLN_ISNASH])
-            SetCell(cur_pos, FeaturePos(BSOLN_ISNASH), NameTriState(cur.IsNash()));
+            SetCell(cur_pos, FeaturePos(BSOLN_ISNASH), Name(cur.IsNash()));
 
         if (features[BSOLN_ISPERF])
-            SetCell(cur_pos, FeaturePos(BSOLN_ISPERF), NameTriState(cur.IsSubgamePerfect()));
+            SetCell(cur_pos, FeaturePos(BSOLN_ISPERF), Name(cur.IsSubgamePerfect()));
 
         if (features[BSOLN_ISSEQ])
-            SetCell(cur_pos, FeaturePos(BSOLN_ISSEQ), NameTriState(cur.IsSequential()));
+            SetCell(cur_pos, FeaturePos(BSOLN_ISSEQ), Name(cur.IsSequential()));
 
         if (features[BSOLN_GLAMBDA])
         {
