@@ -1,0 +1,174 @@
+//#
+//# FILE: gsmatrix.imp -- Implementation of square matrices
+//#
+//# $Id$
+//#
+
+#include "gsmatrix.h"
+#include <assert.h>
+
+//-----------------------------------------------------------------------------
+//     gSquareMatrix<T>: Constructors, destructor, constructive operators
+//-----------------------------------------------------------------------------
+
+template <class T> gSquareMatrix<T>::gSquareMatrix(void)   { }
+
+template <class T> gSquareMatrix<T>::gSquareMatrix(int size)
+  : gMatrix<T>(size, size)
+{ }
+
+template <class T> gSquareMatrix<T>::gSquareMatrix(const gSquareMatrix<T> &M)
+  : gMatrix<T>(M)
+{ }
+
+template <class T> gSquareMatrix<T>::~gSquareMatrix()   { }
+
+template <class T>
+gSquareMatrix<T> &gSquareMatrix<T>::operator=(const gSquareMatrix<T> &M)
+{
+  gMatrix<T>::operator=(M);
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+//          gSquareMatrix<T>: Private auxiliary member functions
+//-----------------------------------------------------------------------------
+
+template<class T> gSquareMatrix<T>
+gSquareMatrix<T>::GetSubMatrix(const gArray<int> &rowV,
+			       const gArray<int> &colV) const
+{
+  int rows= rowV.Length();
+  int cols= colV.Length();
+  for(int i=1; i<=rows; i++)
+    assert( CheckRow(rowV[i]) );
+  for(int j=1; j<=cols; j++)
+    assert( CheckColumn(colV[j]) );
+
+  assert(rows == cols);
+  gSquareMatrix<T> m(rows);
+  for(i=1; i<=rows; i++)
+    {
+      T* srcrow= data[ rowV[i] ];
+      T* dstrow= m.data[i];
+		for(j=1; j<=cols; j++)
+	dstrow[j]= srcrow[ colV[j] ];
+    }
+  return m;
+}
+
+
+//-----------------------------------------------------------------------------
+//                gSquareMatrix<T>: Public member functions
+//-----------------------------------------------------------------------------
+
+template<class T> gSquareMatrix<T> gSquareMatrix<T>::Invert(void) const
+{
+  assert( mincol==minrow && maxcol==maxrow );
+  gSquareMatrix<T> copy(*this);
+  gSquareMatrix<T> inv(maxrow);
+
+  // initialize inverse matrix and prescale row vectors
+  for(int i=minrow; i<=maxrow; i++)
+    {
+      T max= (T)0;
+      for(int j=mincol; j<=maxcol; j++)
+	{
+	  T abs= copy.data[i][j];
+	  if( abs < (T)0 )
+	    abs= -abs;
+	  if( abs > max )
+	    max= abs;
+	}
+		assert( max!= (T) 0 );
+      T scale= (T)1/max;
+      for(j=mincol; j<=maxcol; j++)
+	{
+	  copy.data[i][j]*= scale;
+	  if(i==j)
+	    inv.data[i][j]= scale;
+	  else
+	    inv.data[i][j]= (T)0;
+	}
+    }
+
+//gout<<"debug: Invert:\ncopy:\n"<<copy<<"inv:\n"<<inv<<"\n";
+//char c; gin.get(c);
+  for(i=mincol; i<=maxcol; i++)
+    {
+      // find pivot row
+      T max= copy.data[i][i];
+      if(max<(T)0)
+	max= -max;
+      int row= i;
+      for(int j=i+1; j<=maxrow; j++)
+	{
+	  T abs= copy.data[j][i];
+	  if( abs < (T)0 )
+	    abs= -abs;
+	  if( abs > max )
+	    { max= abs; row= j; }
+	}
+      assert( max > (T)0 );
+      copy.SwitchRows(i,row);
+      inv.SwitchRows(i,row);
+//gout<<"debug: swapped rows "<<i<<" and "<<row
+//  <<":\ncopy:\n"<<copy<<"inv:\n"<<inv<<"\n";
+      // scale pivot row
+      T factor= (T)1/copy.data[i][i];
+      for(int k=mincol; k<=maxcol; k++)
+	{
+	  copy.data[i][k]*= factor;
+	  inv.data[i][k]*= factor;
+	}
+
+      // reduce other rows
+      for(j=minrow; j<=maxrow; j++)
+	{
+	  if(j!=i)
+	    {
+	      T mult= copy.data[j][i];
+	      for(k=mincol; k<=maxcol; k++)
+		{
+		  copy.data[j][k]-= copy.data[i][k]*mult;
+		  inv.data[j][k]-= inv.data[i][k]*mult;
+		}
+	    }
+	} // end for(j)
+//gout<<"debug: after pivot #"<<i<<":\ncopy:\n"<<copy<<"inv:\n"<<inv<<"\n";
+//gin.get(c);
+    } // end for(i)
+
+  return inv;
+}
+
+template <class T> T gSquareMatrix<T>::Determinant(void) const
+{
+  assert(minrow==mincol && maxrow==maxcol);
+  assert(NumRows()>0);
+  if(NumRows()==1)
+    return (*this)(minrow,mincol);
+  if(NumRows()==2)
+    return (*this)(minrow,mincol) * (*this)(maxrow,maxcol)
+         - (*this)(minrow,maxcol) * (*this)(maxrow,mincol);
+
+  T result= (T)0;
+  int i,j;
+  T l=(T)1;
+  gBlock<int> rows, cols;
+  for(i=minrow+1; i<=maxrow; i++)
+    rows.Append(i);
+  for(i=minrow; i<=maxrow; i++)
+    {
+      for(j=mincol; j<=maxcol; j++)
+	if(j!=i) cols.Append(j);
+      gSquareMatrix<T> tmp= GetSubMatrix(rows,cols);
+      result+= (tmp.Determinant()*l*(*this)(1,i));
+      l*=(T)(-1);
+      cols.Flush();
+    }
+  return result;
+}
+
+
+
