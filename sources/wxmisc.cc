@@ -20,89 +20,6 @@
 #include "system.h"
 #include "base/gmisc.h"
 
-//***************************************************************************
-//                       RANDOM USEFUL FUNCTIONS
-// These will hopefully be a part of wxwin some day.  These all belong in
-// different files/classes.
-//***************************************************************************
-
-// List Find String function--finds the index of a string in a wxList
-int wxListFindString(wxList *l, char *s)
-{
-    for (int i = 0; i < l->Number(); i++)
-        if (strcmp((char *)l->Nth(i)->Data(), s) == 0) return i;
-
-    return -1;
-}
-
-
-// Find In Array function--finds an integer in an array of integers, returns index
-int FindIntArray(int *array, int num, int what)
-{
-    for (int i = 0; i < num; i++) 
-    {
-        if (array[i] == what) 
-            return i;
-    }
-
-    return -1;
-}
-
-
-// Returns a wxStringList with string representations
-// for integers 1..n, or m..n if the start value is supplied.
-// It creates a new list if l == NULL; otherwise it appends to
-// the list supplied.
-wxStringList* wxStringListInts(int num, wxStringList *l, int start)
-{
-    wxStringList *tmp = (l) ? l : new wxStringList;
-    char tmp_str[10];
-
-    for (int i = start; i <= num; i++)
-    {
-        sprintf(tmp_str, "%d", i);
-        tmp->Add(tmp_str);
-    }
-
-    return tmp;
-}
-
-
-// Font To String--writes all the font data to a string.  Use with String To Font
-// Note, returns a static buffer, copy it if needed
-char *wxFontToString(wxFont *f)
-{
-    static char fts_buffer[200];
-    // write the size, family, style, weight, underlining
-    sprintf(fts_buffer, "%d %d %d %d %d", f->GetPointSize(), f->GetFamily(),
-            f->GetStyle(), f->GetWeight(), f->GetUnderlined());
-
-    return fts_buffer;
-}
-
-
-// String To Font--converts the data in a string created by Font To String
-// into a font.  Note that this allocated the required memory.  Delete if
-// necessary.
-wxFont *wxStringToFont(char *s)
-{
-    int si, f, st, w, u;
-    sscanf(s, "%d %d %d %d %d", &si, &f, &st, &w, &u);
-
-    return (new wxFont(si, f, st, w, u));
-}
-
-
-// FindFile
-char *wxFindFile(const char *name)
-{
-  wxPathList path_list;
-  path_list.AddEnvList("PATH");
-  const char *file_name = path_list.FindValidPath((char *)name);
-  
-  return  (file_name) ? copystring(file_name) : 0;
-}
-
 //------------------------
 // Help system functions
 //------------------------
@@ -205,34 +122,9 @@ guiAutoDialog::guiAutoDialog(wxWindow *p_parent, char *p_title)
 guiAutoDialog::~guiAutoDialog()
 { }
 
-void guiAutoDialog::Go(void)
-{
-  Layout();
-  Fit();
-
-  const wxWindowList &children = GetChildren();
-
-  int minX = 1000, minY = 1000, totalWidth = 0, totalHeight = 0;
-
-  for (wxNode *child = children.First(); child != 0; child = child->Next()) {
-    wxWindow *data = (wxWindow *) child->Data();
-    int x, y, width, height;
-    data->GetPosition(&x, &y);
-    data->GetSize(&width, &height);
-
-    minX = gmin(minX, x);
-    minY = gmin(minY, y);
-    totalWidth = gmax(totalWidth, x + width);
-    totalHeight = gmax(totalHeight, y + height);
-  }
-
-  SetClientSize(totalWidth + 10, totalHeight + 10);
-  Layout();
-}
-
 void guiAutoDialog::OnHelp(void)
 {
-wxHelpContents(HelpString());
+  wxHelpContents(HelpString());
 }
 
 //========================================================================
@@ -326,42 +218,6 @@ dialogTextWindow::dialogTextWindow(wxWindow *p_parent,
 
 dialogTextWindow::~dialogTextWindow()
 { }
-
-
-//***************************** BASIC KEYBOARD STUFF ****************
-
-bool    IsCursor(wxKeyEvent &ev)
-{
-    long ch = ev.KeyCode();
-    return   (ch == WXK_UP || ch == WXK_DOWN || ch == WXK_LEFT || 
-              ch == WXK_RIGHT || ch == WXK_TAB || ch == WXK_RETURN);
-}
-
-
-bool    IsEnter(wxKeyEvent &ev)
-{
-    return (ev.KeyCode() == 'm' && ev.ControlDown());
-}
-
-
-bool    IsNumeric(wxKeyEvent &ev)
-{
-    long ch = ev.KeyCode();
-    return ((ch >= '0' && ch <= '9') || ch == '-' ||    ch == '.');
-}
-
-
-bool    IsAlphaNum(wxKeyEvent &ev)
-{
-    return !(IsCursor(ev) || IsDelete(ev) || IsEnter(ev));
-}
-
-
-bool    IsDelete(wxKeyEvent &ev)
-{
-    return ((ev.KeyCode() == WXK_DELETE) ||
-            (ev.KeyCode() == WXK_BACK));
-}
 
 
 // gDrawTextGetNum will scan the string, starting at position i,
@@ -647,52 +503,6 @@ void gGetTextExtent(wxDC &dc, const gText &s0, float *x, float *y)
   if (old_font) {
     dc.SetFont(*old_font);
   }
-}
-
-
-// Takes a string formated for gDrawText and returns just the text value of it.
-gText gPlainText(const gText &s)
-{
-    int i = 0;
-    gText plain;
-
-    while (i < s.Length())
-    {
-        while (i < s.Length() && s[i] != '\\')
-        {
-            plain += s[i];
-            i++;
-        }
-        
-        if (s[i] == '\\')   // has to be a command
-        {
-            i++;
-            switch (s[i])
-            {
-            case '\\':
-                plain += "\\";
-                break;
-
-            case 'C' :
-                gDrawTextGetNum(s, &i); // just absorb that info
-                break;
-
-            case '^' :
-            case '_' :
-                plain += s[i];
-                break;
-
-            case '~' :
-                break;
-
-            default:
-                wxError("Unknown code in gDrawText");
-                break;
-            }
-        }
-    }
-
-    return plain;
 }
 
 gText gFileNameFromPath(const char *path)

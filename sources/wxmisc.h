@@ -25,8 +25,6 @@ protected:
 
   void OnHelp(void);
 
-  void Go(void);
-
 public:
   guiAutoDialog(wxWindow *p_parent, char *p_title);
   virtual ~guiAutoDialog();
@@ -72,42 +70,12 @@ public:
   virtual ~dialogTextWindow();
 };
 
-// Returns the position of s in the list l.  This is useful for finding
-// the selection # in a String form item w/ a list constraint
-int wxListFindString(wxList *l, char *s);
-
-// Returns a wxStringList containing num strings representing integers
-// from 1 to n (i.e. "1", "2", .."n").  If l is NULL, a new list is created
-// otherwise, the nums are appended to l.  If "start" is supplied, it
-// starts from that value.
-wxStringList* wxStringListInts(int num, wxStringList *l = 0, int start = 1);
-
-// Converts a font into a string format that can be used to save it in a data file
-char *wxFontToString(wxFont *f);
-
-// Converts an encoded string back into a font. see wxFontToString
-wxFont *wxStringToFont(char *s);
-
-// Some basic keyboard stuff...
-bool    IsCursor(wxKeyEvent &ev);
-bool    IsEnter(wxKeyEvent &ev);
-bool    IsNumeric(wxKeyEvent &ev);
-bool    IsAlphaNum(wxKeyEvent &ev);
-bool    IsDelete(wxKeyEvent &ev);
-
 // gDrawText is an extension of the wxWindow's wxDC::DrawText function
 // Besides providing the same features, it also supports imbedded codes
 // to change the color of the output text.  The codes have the format
 // of: "text[/C{#}]", where # is the number of the color to select
 // from the gambit_color_list.  Also allows sup/superscripts
-// Note: uses gString
 void gDrawText(wxDC &dc, const gText &s, float x, float y);
-
-// Calculates the size of the string when parsed as gDrawText
-void gGetTextExtent(wxDC &dc, const gText &s0, float *x, float *y);
-
-// Returns just the text portion of a gDrawText formated string
-gText gPlainText(const gText &s);
 
 // Returns the file name from a path.  The function FileNameFromPath()
 // crashes when there is no path
@@ -117,19 +85,11 @@ gText gFileNameFromPath(const char *path);
 // crashes when there is no path
 gText gPathOnly(const char *name);
 
-// FindFile: finds the specified file in the path.  User deletes the
-// result
-char *wxFindFile(const char *name);
-
 // Functions to implement online help system.
 void wxInitHelp(const char *file_name, const char *help_about_str = 0);
 void wxHelpContents(const char *name);
 void wxHelpAbout(const char *help_str = 0);
 void wxKillHelp(void);
-
-#define CREATE_DIALOG       0
-#define DESTROY_DIALOG      1
-#define UPDATE_DIALOG       2
 
 // in efgsolvd.cc, nfgsolvd.cc
 const int idTYPE_RADIOBOX = 501;
