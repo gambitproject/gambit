@@ -276,7 +276,7 @@ BehavProfile<T>::BehavProfile(const MixedProfile<T> &p_profile)
     m_bvals = (T) 0;
 
     for (int st = 1; st <= support.NumStrats(pl); st++)  {
-      int snum = support.Strategies(pl)[st]->Number();
+      int snum = support.GetStrategy(pl, st)->GetId();
       if (p_profile(pl, st) > (T) 0)  {
 	const gArray<int> *const actions = m_efg->GetLexicon()->strategies[pl][snum];
 

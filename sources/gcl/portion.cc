@@ -695,8 +695,9 @@ void StrategyPortion::Output(gOutput& s) const
 { 
   Portion::Output(s);
   s << "(Strategy) " << *_Value;
-  if(*_Value)
-    s << " \"" << (*_Value)->Name() << "\""; 
+  if (*_Value) {
+    s << " \"" << (*_Value)->GetLabel() << "\""; 
+  }
 }
 
 gText StrategyPortion::OutputString(void) const
@@ -1393,10 +1394,10 @@ void MixedPortion::Output(gOutput& s) const
     s << "{ ";
     gbtNfgPlayer player = rep->value->Game().GetPlayer(pl);
     for (int st = 1; st <= player.NumStrategies(); st++) {
-      Strategy *strategy = player.Strategies()[st];
+      Strategy *strategy = player.GetStrategy(st);
       if (_WriteSolutionLabels == triTRUE) {
 	if ((*rep->value)(strategy) > gNumber(0)) {
-	  s << strategy->Name() << '=';
+	  s << strategy->GetLabel() << '=';
 	  s << (*rep->value)(strategy) << ' ';
 	}
       }

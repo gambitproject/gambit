@@ -61,7 +61,6 @@ public:
   int GetId(void) const;
 
   int NumStrategies(void) const;
-  const gArray<Strategy *> &Strategies(void) const;
   Strategy *GetStrategy(int) const;
 };
 

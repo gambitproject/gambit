@@ -151,7 +151,7 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
 	  for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
 	    nfg->SetPayoff(outcome, pl, 0);
 	    nfg->SetLabel(outcome, outcome.GetLabel() +
-			  ToText(iter.Profile()[pl]->Number()));
+			  ToText(iter.Profile()[pl]->GetId()));
 	  }
 	  nfg->SetOutcome(iter.Profile(), outcome);
 	} while (iter.NextContingency());

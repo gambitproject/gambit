@@ -219,7 +219,7 @@ static Portion* GSM_Name(GSM &, Portion **param)
   case porNFPLAYER:
     return new TextPortion(((NfPlayerPortion*) param[0])->Value().GetLabel());
   case porSTRATEGY:
-    return new TextPortion(((StrategyPortion*) param[0])->Value()->Name());
+    return new TextPortion(((StrategyPortion*) param[0])->Value()->GetLabel());
   case porNFOUTCOME:
     return new TextPortion(((NfOutcomePortion*) param[0])->Value().GetLabel());
   case porNFSUPPORT:
@@ -454,7 +454,7 @@ static Portion *GSM_SetName_Strategy(GSM &, Portion **param)
 {
   Strategy *s = ((StrategyPortion *) param[0])->Value();
   gText name = ((TextPortion *) param[1])->Value();
-  s->SetName(name);
+  s->SetLabel(name);
   return param[0]->ValCopy();
 }
 
@@ -530,9 +530,13 @@ static Portion* GSM_SetPayoff(GSM &gsm, Portion** param)
 static Portion *GSM_Strategies(GSM &, Portion **param)
 {
   gbtNfgPlayer player = ((NfPlayerPortion *) param[0])->Value();
-  gbtNfgSupport* s = ((NfSupportPortion*) param[1])->Value();
+  const gbtNfgSupport &support = *((NfSupportPortion*) param[1])->Value();
 
-  return ArrayToList(s->Strategies(player.GetId()));
+  ListPortion *ret = new ListPortion;
+  for (int st = 1; st <= player.NumStrategies(); st++) {
+    ret->Append(new StrategyPortion(support.GetStrategy(player.GetId(), st)));
+  }
+  return ret;
 }
 
 //--------------

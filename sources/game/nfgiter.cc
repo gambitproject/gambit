@@ -78,7 +78,7 @@ NfgIter &NfgIter::operator=(const NfgIter &it)
 void NfgIter::First(void)
 {
   for (int i = 1; i <= N->NumPlayers(); i++)  {
-    Strategy *s = support.Strategies(i)[1];
+    Strategy *s = support.GetStrategy(i, 1);
     profile.Set(i, s);
     current_strat[i] = 1;
   }
@@ -88,11 +88,11 @@ int NfgIter::Next(int p)
 {
   Strategy *s;
   if (current_strat[p] < support.NumStrats(p))  {
-    s = support.Strategies(p)[++(current_strat[p])];
+    s = support.GetStrategy(p, ++(current_strat[p]));
     profile.Set(p, s);
     return 1;
   }
-  s = support.Strategies(p)[1];
+  s = support.GetStrategy(p, 1);
   profile.Set(p, s);
   current_strat[p] = 1;
   return 0;
@@ -104,20 +104,21 @@ int NfgIter::Set(int p, int s)
       s <= 0 || s > support.NumStrats(p))
     return 0;
   
-  profile.Set(p, support.Strategies(p)[s]);
+  profile.Set(p, support.GetStrategy(p, s));
   return 1;
 }
 
 void NfgIter::Get(gArray<int> &t) const
 {
-  for (int i = 1; i <= N->NumPlayers(); i++)
-    t[i] = profile[i]->Number();
+  for (int i = 1; i <= N->NumPlayers(); i++) {
+    t[i] = profile[i]->GetId();
+  }
 }
 
 void NfgIter::Set(const gArray<int> &t)
 {
   for (int i = 1; i <= N->NumPlayers(); i++){
-    profile.Set(i, support.Strategies(i)[t[i]]);
+    profile.Set(i, support.GetStrategy(i, t[i]));
     current_strat[i] = t[i];
   } 
 }
@@ -163,7 +164,7 @@ NfgContIter::~NfgContIter()
 void NfgContIter::First(void)
 {
   for (int i = 1; i <= thawed.Length(); i++){
-    profile.Set(thawed[i], support.Strategies(thawed[i])[1]);
+    profile.Set(thawed[i], support.GetStrategy(thawed[i], 1));
     current_strat[thawed[i]] = 1;
   }	
 }
@@ -172,7 +173,7 @@ void NfgContIter::Set(int pl, int num)
 {
   if (!frozen.Contains(pl))   return;
 
-  profile.Set(pl, support.Strategies(pl)[num]);
+  profile.Set(pl, support.GetStrategy(pl, num));
   current_strat[pl] = num;
 }
 
@@ -181,7 +182,7 @@ void NfgContIter::Set(const Strategy *s)
   if (!frozen.Contains(s->GetPlayer().GetId()))   return;
 
   profile.Set(s->GetPlayer().GetId(), s);
-  current_strat[s->GetPlayer().GetId()] = s->Number();
+  current_strat[s->GetPlayer().GetId()] = s->GetId();
 }
 
 void NfgContIter::Freeze(const gBlock<int> &freeze)
@@ -220,15 +221,16 @@ int NfgContIter::NextContingency(void)
   while (1)   {
     int pl = thawed[j];
     if (current_strat[pl] < support.NumStrats(pl)) {
-      s = support.Strategies(pl)[++(current_strat[pl])];
+      s = support.GetStrategy(pl, ++(current_strat[pl]));
       profile.Set(pl, s);
       return 1;
     }
-    profile.Set(pl, support.Strategies(pl)[1]);
+    profile.Set(pl, support.GetStrategy(pl, 1));
     current_strat[pl] = 1;
     j--;
-    if (j == 0)
+    if (j == 0) {
       return 0;
+    }
   }
 }
 
@@ -245,15 +247,17 @@ const StrategyProfile &NfgContIter::Profile(void) const
 gArray<int> NfgContIter::Get(void) const
 {
   gArray<int> current(N->NumPlayers());
-  for (int i = 1; i <= current.Length(); i++)
-    current[i] = profile[i]->Number();
+  for (int i = 1; i <= current.Length(); i++) {
+    current[i] = profile[i]->GetId();
+  }
   return current;
 }
 
 void NfgContIter::Get(gArray<int> &t) const
 {
-  for (int i = 1; i <= N->NumPlayers(); i++)
-    t[i] = profile[i]->Number();
+  for (int i = 1; i <= N->NumPlayers(); i++) {
+    t[i] = profile[i]->GetId();
+  }
 }
 
 gbtNfgOutcome NfgContIter::GetOutcome(void) const
@@ -269,8 +273,9 @@ void NfgContIter::SetOutcome(gbtNfgOutcome outcome)
 void NfgContIter::Dump(gOutput &f) const
 {
   f << "{ ";
-  for (int i = 1; i <= N->NumPlayers(); i++)
-    f << profile[i]->Number() << ' ';
+  for (int i = 1; i <= N->NumPlayers(); i++) {
+    f << profile[i]->GetId() << ' ';
+  }
   f << '}';
 }
 

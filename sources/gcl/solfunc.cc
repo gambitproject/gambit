@@ -370,7 +370,7 @@ static Portion *GSM_Regret_Mixed(GSM &, Portion **param)
   gPVector<gNumber> v(n.NumStrats());
   P.Regret(v);
 
-  return new NumberPortion(v(player.GetId(), s->Number()));
+  return new NumberPortion(v(player.GetId(), s->GetId()));
 }
 
 static Portion *GSM_Regret_Behav(GSM &, Portion **param)
@@ -543,7 +543,7 @@ static Portion *GSM_SetStrategyProbs(GSM &, Portion **param)
       throw gclRuntimeError("Mismatching dimensionality");
     }
 
-    P->Set(player.Strategies()[st], ((NumberPortion*) p2)->Value());
+    P->Set(player.GetStrategy(st), ((NumberPortion*) p2)->Value());
     delete p2;
   }
 
@@ -577,7 +577,7 @@ static Portion *GSM_StrategyProbs(GSM &, Portion **param)
     ListPortion *p1 = new ListPortion;
 
     for (int st = 1; st <= player.NumStrategies(); st++) {
-      Strategy *strategy = player.Strategies()[st];
+      Strategy *strategy = player.GetStrategy(st);
       p1->Append(new NumberPortion((*profile)(strategy)));
     }
 

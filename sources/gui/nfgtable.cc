@@ -140,7 +140,7 @@ wxString NfgGridTable::GetRowLabelValue(int p_row)
 {
   int numStrats = m_table->GetSupport().NumStrats(m_table->GetRowPlayer());
   if (p_row + 1 <= numStrats) {
-    return (char *) m_table->GetSupport().Strategies(m_table->GetRowPlayer())[p_row+1]->Name();
+    return (char *) m_table->GetSupport().GetStrategy(m_table->GetRowPlayer(), p_row+1)->GetLabel();
   }
   else if (p_row + 1 == numStrats + m_table->ShowDominance()) {
     return "Dom";
@@ -158,7 +158,7 @@ wxString NfgGridTable::GetColLabelValue(int p_col)
 {
   int numStrats = m_table->GetSupport().NumStrats(m_table->GetColPlayer());
   if (p_col + 1 <= numStrats) {
-    return (char *) m_table->GetSupport().Strategies(m_table->GetColPlayer())[p_col+1]->Name();
+    return (char *) m_table->GetSupport().GetStrategy(m_table->GetColPlayer(), p_col+1)->GetLabel();
   }
   else if (p_col + 1 == numStrats + m_table->ShowDominance()) {
     return "Dom";

@@ -161,10 +161,10 @@ void NfgSupportWindow::UpdateValues(void)
 					       (char *) player.GetLabel());
     
     for (int st = 1; st <= m_parent->Game().NumStrats(pl); st++) {
-      Strategy *strategy = m_parent->Game().Strategies(pl)[st];
+      Strategy *strategy = m_parent->Game().GetPlayer(pl).GetStrategy(st);
 
       wxTreeItemId stratID = m_strategyTree->AppendItem(id, 
-						       (char *) strategy->Name());
+						       (char *) strategy->GetLabel());
       if (m_parent->GetSupport()->Contains(strategy)) {
 	m_strategyTree->SetItemTextColour(stratID, *wxBLACK);
       }

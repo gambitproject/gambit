@@ -94,9 +94,7 @@ public:
   gArray<int> NumStrats(void) const;
   int ProfileLength(void) const;
 
-  gArray<Strategy *> Strategies(int pl) const;
-  Strategy *GetStrategy(int pl, int st) const
-    { return Strategies(pl)[st]; }
+  Strategy *GetStrategy(int pl, int st) const;
   int GetIndex(const Strategy *) const;
   bool Contains(const Strategy *) const;
 

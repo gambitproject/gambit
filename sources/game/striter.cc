@@ -79,7 +79,7 @@ bool gbtStrategyIterator::GoToNext(void)
 
 Strategy *gbtStrategyIterator::GetStrategy(void) const
 {
-  return m_support.Strategies(pl)[st];
+  return m_support.GetStrategy(pl, st);
 }
 
 gbtNfgPlayer gbtStrategyIterator::GetPlayer(void) const
@@ -102,6 +102,6 @@ bool gbtStrategyIterator::IsSubsequentTo(const Strategy *p_strategy) const
     return false;
   }
   else {
-    return (st > p_strategy->Number());
+    return (st > p_strategy->GetId());
   }
 }

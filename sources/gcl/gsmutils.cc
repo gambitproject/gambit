@@ -98,15 +98,6 @@ Portion *ArrayToList(const gArray<Node *> &A)
 }
 
 template<>
-Portion *ArrayToList(const gArray<Strategy *> &A)
-{
-  ListPortion *ret = new ListPortion;
-  for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new StrategyPortion(A[i]));
-  return ret;
-}
-
-template<>
 Portion *ArrayToList(const gList<Node *> &A)
 {
   ListPortion *ret = new ListPortion;

@@ -36,8 +36,8 @@ StrategyProfile::StrategyProfile(const Nfg &N)
   : index(0L), profile(N.NumPlayers())
 {
   for (int pl = 1; pl <= N.NumPlayers(); pl++)   {
-    profile[pl] = N.Strategies(pl)[1];
-    index += profile[pl]->Index();
+    profile[pl] = N.GetPlayer(pl).GetStrategy(1);
+    index += profile[pl]->GetIndex();
   }
 }
 
@@ -85,7 +85,7 @@ return profile[p];
 
 void StrategyProfile::Set(int p, const Strategy *const s)
 {
-  index += (((s) ? s->Index() : 0L) - ((profile[p]) ? profile[p]->Index() : 0L));
+  index += (((s) ? s->GetIndex() : 0L) - ((profile[p]) ? profile[p]->GetIndex() : 0L));
   profile[p] = (Strategy *)s;
 }
 
@@ -154,23 +154,25 @@ int gbtNfgSupport::ProfileLength(void) const
   return total;
 }
 
-gArray<Strategy *> gbtNfgSupport::Strategies(int pl) const
+Strategy *gbtNfgSupport::GetStrategy(int pl, int st) const
 {
-  gBlock<Strategy *> ret;
-  for (int st = 1; st <= m_nfg->NumStrats(pl); st++) {
-    if (m_strategies(pl, st)) {
-      ret += m_nfg->GetPlayer(pl).GetStrategy(st);
+  int index = 0;
+  for (int i = 1; i <= m_nfg->NumStrats(pl); i++) {
+    if (m_strategies(pl, i)) {
+      if (++index == st) {
+	return m_nfg->GetPlayer(pl).GetStrategy(i);
+      }
     }
+    
   }
-  return ret;
+  return 0;
 }
 
 int gbtNfgSupport::GetIndex(const Strategy *p_strategy) const
 {
   int pl = p_strategy->GetPlayer().GetId();
-  gArray<Strategy *> strats = Strategies(pl);
-  for (int st = 1; st <= strats.Length(); st++) {
-    if (strats[st] == p_strategy) {
+  for (int st = 1; st <= NumStrats(pl); st++) {
+    if (GetStrategy(pl, st) == p_strategy) {
       return st;
     }
   }
@@ -179,7 +181,7 @@ int gbtNfgSupport::GetIndex(const Strategy *p_strategy) const
 
 bool gbtNfgSupport::Contains(const Strategy *p_strategy) const
 {
-  return m_strategies(p_strategy->GetPlayer().GetId(), p_strategy->Number());
+  return m_strategies(p_strategy->GetPlayer().GetId(), p_strategy->GetId());
 }
 
 //--------------------------------------------------------------------------
@@ -188,12 +190,12 @@ bool gbtNfgSupport::Contains(const Strategy *p_strategy) const
 
 void gbtNfgSupport::AddStrategy(Strategy *s)
 {
-  m_strategies(s->GetPlayer().GetId(), s->Number()) = 1;
+  m_strategies(s->GetPlayer().GetId(), s->GetId()) = 1;
 }
 
 void gbtNfgSupport::RemoveStrategy(Strategy *s)
 {
-  m_strategies(s->GetPlayer().GetId(), s->Number()) = 0;
+  m_strategies(s->GetPlayer().GetId(), s->GetId()) = 0;
 }
 
 //--------------------------------------------------------------------------
@@ -232,9 +234,8 @@ void gbtNfgSupport::Output(gOutput &p_output) const
   p_output << '"' << m_name << "\" { ";
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
     p_output << "{ ";
-    const gArray<Strategy *> &strategies = Strategies(pl);
-    for (int st = 1; st <= strategies.Length(); st++) {
-      p_output << "\"" << strategies[st]->Name() << "\" ";
+    for (int st = 1; st <= NumStrats(pl); st++) {
+      p_output << "\"" << GetStrategy(pl, st)->GetLabel() << "\" ";
     }
     p_output << "} ";
   }

@@ -183,7 +183,7 @@ wxString NfgProfileList::GetReport(void) const
 
       for (int st = 1; st <= player.NumStrategies(); st++) {
 	report += wxString::Format("%2d: %-6s", st,
-				   (const char *) player.GetStrategy(st)->Name());
+				   (const char *) player.GetStrategy(st)->GetLabel());
 
 	for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
 	  report += wxString::Format("%-15s ", 

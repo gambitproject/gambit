@@ -47,12 +47,12 @@ private:
   ~Strategy();
 
 public:
-  const gText &Name(void) const { return m_name; }
-  void SetName(const gText &s)  { m_name = s; }
+  const gText &GetLabel(void) const { return m_name; }
+  void SetLabel(const gText &s)  { m_name = s; }
+  int GetId(void) const        { return m_number; }
 
   gbtNfgPlayer GetPlayer(void) const;
-  int Number(void) const        { return m_number; }
-  long Index(void) const        { return m_index; }
+  long GetIndex(void) const        { return m_index; }
 };
 
 class StrategyProfile;
@@ -109,8 +109,6 @@ public:
 
   int NumStrats(int pl) const;
   const gArray<int> &NumStrats(void) const  { return dimensions; }
-  const gArray<Strategy *> &Strategies(int p) const;
-
   int ProfileLength(void) const;
 
   // OUTCOMES

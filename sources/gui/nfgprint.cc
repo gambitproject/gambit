@@ -62,14 +62,14 @@ wxString gbtBuildHtml(const Nfg &p_nfg, int p_rowPlayer, int p_colPlayer)
     theHtml += "<td></td>";
     for (int st = 1; st <= p_nfg.NumStrats(p_colPlayer); st++) {
       theHtml += wxString::Format("<td align=center><b>%s</b></td>",
-				  (char *) p_nfg.Strategies(p_colPlayer)[st]->Name());
+				  (char *) p_nfg.GetPlayer(p_colPlayer).GetStrategy(st)->GetLabel());
     } 
     theHtml += "</tr>";
     for (int st1 = 1; st1 <= p_nfg.NumStrats(p_rowPlayer); st1++) {
       cont[p_rowPlayer] = st1;
       theHtml += "<tr>";
       theHtml += wxString::Format("<td align=center><b>%s</b></td>",
-				  (char *) p_nfg.Strategies(p_rowPlayer)[st1]->Name());
+				  (char *) p_nfg.GetPlayer(p_rowPlayer).GetStrategy(st1)->GetLabel());
       for (int st2 = 1; st2 <= p_nfg.NumStrats(p_colPlayer); st2++) {
 	cont[p_colPlayer] = st2;
 	theHtml += "<td align=center>";

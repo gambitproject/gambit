@@ -40,7 +40,7 @@ Nfg *CompressNfg(const Nfg &nfg, const gbtNfgSupport &S)
     gbtNfgPlayer player = N->GetPlayer(pl);
     player.SetLabel(nfg.GetPlayer(pl).GetLabel());
     for (int st = 1; st <= N->NumStrats(pl); st++) {
-      player.GetStrategy(st)->SetName(S.GetStrategy(pl, st)->Name());
+      player.GetStrategy(st)->SetLabel(S.GetStrategy(pl, st)->GetLabel());
     }
   }
 

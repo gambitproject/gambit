@@ -44,7 +44,7 @@ MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
   gEpsilon(m_epsilon);
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
     for (int st = 1; st <= Game().NumStrats(pl); st++) {
-      int index = p_profile.Support().GetIndex(Game().Strategies(pl)[st]);
+      int index = p_profile.Support().GetIndex(Game().GetPlayer(pl).GetStrategy(st));
       if (index > 0)
 	m_profile(pl, st) = p_profile(pl, index);
       else
@@ -64,7 +64,7 @@ MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
   gEpsilon(m_epsilon);
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
     for (int st = 1; st <= Game().NumStrats(pl); st++) {
-      int index = p_profile.Support().GetIndex(Game().Strategies(pl)[st]);
+      int index = p_profile.Support().GetIndex(Game().GetPlayer(pl).GetStrategy(st));
       if (index > 0)
 	m_profile(pl, st) = p_profile(pl, index);
       else
@@ -83,7 +83,7 @@ MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
 {
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
     for (int st = 1; st <= Game().NumStrats(pl); st++) {
-      int index = p_profile.Support().GetIndex(Game().Strategies(pl)[st]);
+      int index = p_profile.Support().GetIndex(Game().GetPlayer(pl).GetStrategy(st));
       if (index > 0)
 	m_profile(pl, st) = p_profile(pl, index);
       else
@@ -222,7 +222,7 @@ bool MixedSolution::operator==(const MixedSolution &p_solution) const
 void MixedSolution::Set(Strategy *p_strategy, const gNumber &p_value)
 { 
   Invalidate();
-  m_profile(p_strategy->GetPlayer().GetId(), p_strategy->Number()) = p_value;
+  m_profile(p_strategy->GetPlayer().GetId(), p_strategy->GetId()) = p_value;
   if (p_value.Precision() != m_precision)
     LevelPrecision();
 }
@@ -230,7 +230,7 @@ void MixedSolution::Set(Strategy *p_strategy, const gNumber &p_value)
 const gNumber &MixedSolution::operator()(Strategy *p_strategy) const
 {
   gbtNfgPlayer player = p_strategy->GetPlayer();
-  return m_profile(player.GetId(), p_strategy->Number()); 
+  return m_profile(player.GetId(), p_strategy->GetId()); 
 }
 
 MixedSolution &MixedSolution::operator+=(const MixedSolution &p_solution)

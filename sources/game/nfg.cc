@@ -257,11 +257,6 @@ int gbtNfgPlayer::NumStrategies(void) const
   return (rep) ? rep->m_strategies.Length() : 0;
 }
 
-const gArray<Strategy *> &gbtNfgPlayer::Strategies(void) const
-{
-  return rep->m_strategies;
-}
-
 Strategy *gbtNfgPlayer::GetStrategy(int st) const
 {
   return (rep) ? rep->m_strategies[st] : 0;
@@ -407,7 +402,7 @@ void Nfg::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
       gbtNfgPlayer player = GetPlayer(i);
       p_file << "{ ";
       for (int j = 1; j <= player.NumStrategies(); j++)
-	p_file << '"' << EscapeQuotes(player.Strategies()[j]->Name()) << "\" ";
+	p_file << '"' << EscapeQuotes(player.GetStrategy(j)->GetLabel()) << "\" ";
       p_file << "}\n";
     }
   
@@ -478,11 +473,6 @@ void Nfg::DeleteOutcome(gbtNfgOutcome p_outcome)
       outcomes[outc]->m_id = outc;
     }
   }
-}
-
-const gArray<Strategy *> &Nfg::Strategies(int p) const
-{
-  return players[p]->m_strategies;
 }
 
 void Nfg::SetTitle(const gText &s) 

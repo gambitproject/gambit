@@ -120,9 +120,11 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
     if (!ret) 
       return false;
     
-    for (k = 1; k <= strats; k++)
-      if (dom[k])
-	R.RemoveStrategy(S.Strategies(pl)[k]);
+    for (k = 1; k <= strats; k++) {
+      if (dom[k]) {
+	R.RemoveStrategy(S.GetStrategy(pl, k));
+      }
+    }
     
     return true;
   }
@@ -203,9 +205,11 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
     if (!ret) 
       return false;
     
-    for (k = 1; k <= strats; k++)
-      if (dom[k])
-	R.RemoveStrategy(S.Strategies(pl)[k]);
+    for (k = 1; k <= strats; k++) {
+      if (dom[k]) {
+	R.RemoveStrategy(S.GetStrategy(pl, k));
+      }
+    }
     
     return true;
   }
@@ -219,7 +223,7 @@ bool IsMixedDominated(const gbtNfgSupport &S,Strategy *str,
 {
   int pl = str->GetPlayer().GetId();
   Nfg &nfg = *str->GetPlayer().GetGame();
-  int whichstrat = str->Number();
+  int whichstrat = str->GetId();
   int strats = S.NumStrats(pl);
 
   NfgContIter s(S);
