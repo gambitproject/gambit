@@ -8,19 +8,25 @@
 
 Portion *GSM_DisplayNfg(Portion **param)
 {
-  BaseNormalForm *N = &((Nfg_Portion *) param[0])->Value();
+  NormalForm<double> *N = &((Nfg_Portion<double> *) param[0])->Value();
 
   N->DisplayNfg(gout);
-  return new Nfg_Portion(*N);
+  return new Nfg_Portion<double>(*N);
 }
 
-Portion *GSM_ReadNfgFile(Portion **param)
+Portion *GSM_Lemke(Portion **param)
+{
+
+  return new numerical_Portion<gInteger>(1);
+}
+
+Portion *GSM_ReadNfg(Portion **param)
 {
   gFileInput f(((gString_Portion *) param[0])->Value());
   
   if (f.IsValid())  {
-    BaseNormalForm *N = new NormalForm<double>(f);
-    return new Nfg_Portion(*N);
+    NormalForm<double> *N = new NormalForm<double>(f);
+    return new Nfg_Portion<double>(*N);
   }
   else
     return 0;
@@ -34,8 +40,17 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, "N", porNFG, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("ReadNfgFile", GSM_ReadNfgFile, 1);
+  FuncObj = new FuncDescObj("Lemke", GSM_Lemke, 3);
+  FuncObj->SetParamInfo(0, "N", porNFG, NO_DEFAULT_VALUE);
+  FuncObj->SetParamInfo(1, "nequilib", porINTEGER,
+			new numerical_Portion<gInteger>(0));
+  FuncObj->SetParamInfo(2, "time", porDOUBLE, new numerical_Portion<double>(0),
+			PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("ReadNfg", GSM_ReadNfg, 1);
   FuncObj->SetParamInfo(0, "file", porSTRING, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
+
 }
 
