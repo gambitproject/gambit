@@ -53,6 +53,7 @@ template <class T> class gPVector : public gVector<T> {
   gPVector<T> operator-(const gPVector<T> &v) const;
   gPVector<T>& operator-=(const gPVector<T> &v);
   T operator*(const gPVector<T> &v) const;
+  gPVector<T> operator*(const T &c) const;
   gPVector<T>& operator*=(const T c);
   gPVector<T> operator/(T c);
 

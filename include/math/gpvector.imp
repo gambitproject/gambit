@@ -165,6 +165,13 @@ template <class T> T gPVector<T>::operator*(const gPVector<T> &v) const
   return (*this).gVector<T>::operator*(v);
 }
 
+template <class T> gPVector<T> gPVector<T>::operator*(const T &c) const
+{
+  gPVector<T> ret(*this);
+  ret *= c;
+  return ret;
+}
+
 template <class T> gPVector<T>& gPVector<T>::operator*=(const T c)
 {
   gVector<T>::operator*=(c);
