@@ -13,6 +13,11 @@
 #include "glist.h"
 #include "garray.h"
 
+gelBadFunctionSig::gelBadFunctionSig(const gText &s) : sig(s)   { }
+
+gText gelBadFunctionSig::Description(void) const
+{ return "Bad function signature: " + sig; }
+
 
 static gelType NameToType(const gText &name)
 {
@@ -50,6 +55,10 @@ static gelType NameToType(const gText &name)
     return gelNFSUPPORT;
   else if (name == "MIXED")
     return gelMIXED;
+  else if (name == "INPUT")
+    return gelINPUT;
+  else if (name == "OUTPUT")
+    return gelOUTPUT;
   else if (name == "ANYTYPE")
     return gelANYTYPE;
   else
@@ -57,59 +66,55 @@ static gelType NameToType(const gText &name)
 }
 
 gelParamInfo::gelParamInfo(const gText &s)
-  : m_Optional( false ), m_ByReference( false )
+  : m_Optional(false), m_ByReference(false)
 {
-  int index = 0;
-  int length = s.Length();
-  gText word;
+  int index = 0, length = s.Length();
+  gText word = "";
   bool quote = false;
   
-  assert( index < length );
-  if( s[index] == '{' )
-  {
+  if (length == 0)
+    throw gelBadFunctionSig();
+  
+  if (s[index] == '{')   {
     m_Optional = true;
     ++index;
   }
   
-  word = "";
-  while( isalnum( s[index] ) )
-  {
-    assert( index < length );
-    word += s[index];
-    ++index;
+  while (isalnum(s[index]))   {
+    if (index >= length)
+      throw gelBadFunctionSig();
+    word += s[index++];
   }
   m_Name = word;
-  
 
-  assert( index < length );
-  if( s[index] == '<' )
-  {
+  if (index >= length)
+    throw gelBadFunctionSig();
+  
+  if (s[index] == '<')   {
     m_ByReference = true;
     ++index;
   }
   
-  assert( index < length && s[index] == '-' );
-  ++index;
-  assert( index < length && s[index] == '>' );
-  ++index;
-  
+  if (index >= length || s[index++] != '-')
+    throw gelBadFunctionSig();
+  if (index >= length || s[index++] != '>')
+    throw gelBadFunctionSig();
   
   word = "";
   quote = false;
-  while( isalnum( s[index] ) || 
-	 ( ispunct( s[index] ) && s[index] != '}' ) ||
-	 quote )
-  {
-    assert( index < length );
-    if( s[index] == '\"' )
+  while (isalnum(s[index]) || 
+	 (ispunct(s[index]) && s[index] != '}') ||
+	 quote)   {
+    if (index >= length)
+      throw gelBadFunctionSig();
+    if (s[index] == '\"') 
       quote = !quote;
-    word += s[index];
-    ++index;
+    word += s[index++];
   }
-
-  if( m_Optional )
-  {
-    assert( index < length && s[index] == '}' );
+  
+  if (m_Optional)  {
+    if (index >= length || s[index] != '}')
+      throw gelBadFunctionSig();
     m_Default = word;
   }
   else
@@ -119,117 +124,109 @@ gelParamInfo::gelParamInfo(const gText &s)
 
 gOutput &operator<<(gOutput &f, const gelSignature &)  { return f; }
 
-gelSignature::gelSignature( const gText& s, gelAdapter* bif )
-: m_IsUdf( false ), m_Bif( bif )
+gelSignature::gelSignature(const gText &s, gelAdapter *bif)
+  : m_IsUdf(false), m_Bif(bif)
 {
-  assert( m_Bif );
-  ParseSignature( s );
+  if (!m_Bif)
+    throw gelBadFunctionSig();
+  ParseSignature(s);
 }
 
-gelSignature::gelSignature( const gText& s )
-: m_IsUdf( true ), m_Udf( NULL )
+gelSignature::gelSignature(const gText &s)
+  : m_IsUdf(true), m_Udf(0)
 {
-  ParseSignature( s );
+  ParseSignature(s);
 }
 
-void gelSignature::SetUdf( gelExpr* udf )
+void gelSignature::SetUdf(gelExpr *udf)
 {
-  assert( m_IsUdf );
-  assert( m_Udf == NULL );
+  if (!m_IsUdf)
+    throw gelInternalError("Expression given for non-UDF");
+  if (m_Udf != 0)
+    throw gelInternalError("Tried to redefine UDF");
+  if (udf == 0)
+    throw gelInternalError("Tried to give null expression for UDF");
 
   m_Udf = udf;
-  assert( m_Udf );
-  if( m_Type == gelUNDEFINED )
+  if (m_Type == gelUNDEFINED)
     m_Type = m_Udf->Type();
-  assert( m_Type == m_Udf->Type() );
-  assert( m_Type != gelUNDEFINED );
+  if (m_Type != m_Udf->Type() || m_Type == gelUNDEFINED)
+    throw gelInternalError("UDF return type mismatch");
 }
 
 
-void gelSignature::ParseSignature( const gText &s )
+void gelSignature::ParseSignature(const gText &s)
 {
-
-  gText word;
-  int index = 0;
-  int param = 0;
-  bool quote = false;
-  bool done = false;
+  gText word = "";
+  int index = 0, param = 0;
+  bool quote = false, done = false;
   int length = s.Length();
 
-
-
-  word = "";
-  assert( index < length );
-  while( s[index] != '[' )
-  {
-    assert( index < length );
-    if( isalnum( s[index] ) )
+  if (index >= length)
+    throw gelBadFunctionSig();
+  while (s[index] != '[')  {
+    if (index >= length)   
+      throw gelBadFunctionSig();
+    if (isalnum(s[index]))
       word += s[index];
-    ++index;
+    index++;
   }
-  assert( s[index] == '[' );
-  assert( index < length );
+
+  if (index >= length || s[index] != '[')   
+    throw gelBadFunctionSig();
   m_Name = word;
+  index++;
 
-
-  ++index;
-  param = 0;
-  done = false;
-  while( !done )
-  {
-    assert( index < length );
+  while (!done)   { 
+    if (index >= length)
+      throw gelBadFunctionSig();
 
     word = "";
     quote = false;
-    while( (s[index] != ',' && s[index] != ']') || quote )
-    {
-      assert( index < length );
-
-      if( isalnum( s[index] ) || ispunct( s[index] ) || quote )
-      {
-	if( s[index] == '\"' )
+    while ((s[index] != ',' && s[index] != ']') || quote)  {
+      if (index >= length)
+	throw gelBadFunctionSig();
+      
+      if (isalnum(s[index]) || ispunct(s[index]) || quote)  {
+	if (s[index] == '\"')
 	  quote = !quote;
 	word += s[index];
       }
-      ++index;
-
+      index++;
     }
 
     if (word != "")   {
-      m_Parameters.Append( new gelParamInfo( word ) );
-      ++param;
+      m_Parameters.Append(new gelParamInfo(word));
+      param++;
     }
 
-    assert( index < length );
-    if( s[index] == ']' )
+    if (index >= length)
+      throw gelBadFunctionSig();
+    if (s[index++] == ']')
       done = true;
-    ++index;
   }
 
 
-  while( index < length && isspace( s[index] ) )
-    ++index;
-  if( index >= length )
-  {
+  while (index < length && isspace(s[index]))
+    index++;
+  
+  if (index >= length)  {
     // NOTICE
     // this is for those "incomplete functions" without return types
     // should be elimited in the future
-
     word = "ANYTYPE";
   }
-  else
-  {
-    assert( index < length && s[index] == '=' );
-    ++index;
-    assert( index < length && s[index] == ':' );
-    ++index;
+  else  {
+    if (index >= length || s[index++] != '=')
+      throw gelBadFunctionSig();
+    if (index >= length || s[index++] != ':')
+      throw gelBadFunctionSig();
 
     word = "";
-    while( index < length )
-    {
-      if( isalnum( s[index] ) || ispunct( s[index] ) )
+    while (index < length)  {
+      if (isalnum(s[index]) || ispunct(s[index]))
 	word += s[index];
-      ++index;
+      index++;
     }
   }
 
@@ -238,11 +235,8 @@ void gelSignature::ParseSignature( const gText &s )
 
 gelSignature::~gelSignature()
 {
-  if( m_IsUdf )
-    delete m_Udf;
-
-  for (int i = 1; i <= m_Parameters.Length(); i++)
-    delete m_Parameters[i];
+  if (m_IsUdf)  delete m_Udf;
+  for (int i = 1; i <= m_Parameters.Length(); delete m_Parameters[i++]);
 }
 
 bool gelSignature::Matches(const gText &n,
@@ -251,9 +245,8 @@ bool gelSignature::Matches(const gText &n,
   if (n != m_Name ||
       actuals.Length() != m_Parameters.Length())
     return false;
-
-  for (int i = 1; i <= actuals.Length(); i++)
-  {
+  
+  for (int i = 1; i <= actuals.Length(); i++)   {
     if (m_Parameters[i]->Type() != gelANYTYPE &&
         actuals[i]->Type() != m_Parameters[i]->Type())
       return false;
@@ -262,7 +255,7 @@ bool gelSignature::Matches(const gText &n,
   return true;
 }
 
-gelExpr* gelSignature::Evaluate(const gArray<gelExpr *> &actuals) const
+gelExpr *gelSignature::Evaluate(const gArray<gelExpr *> &actuals) const
 {
   if (m_IsUdf)  {
     switch (m_Type)  {
@@ -271,10 +264,10 @@ gelExpr* gelSignature::Evaluate(const gArray<gelExpr *> &actuals) const
                                  (gelExpression<gNumber> *) m_Udf);
     case gelBOOLEAN:
       return new gelUDF<gTriState>(*this, actuals,
-				                           (gelExpression<gTriState> *) m_Udf);
+				   (gelExpression<gTriState> *) m_Udf);
     case gelTEXT:
       return new gelUDF<gText>(*this, actuals,
-				                       (gelExpression<gText> *) m_Udf);
+			       (gelExpression<gText> *) m_Udf);
     case gelEFG:
       return new gelUDF<Efg *>(*this, actuals,
                                (gelExpression<Efg *> *) m_Udf);
@@ -293,6 +286,12 @@ gelExpr* gelSignature::Evaluate(const gArray<gelExpr *> &actuals) const
     case gelEFOUTCOME:
       return new gelUDF<EFOutcome *>(*this, actuals,
                                      (gelExpression<EFOutcome *> *) m_Udf);
+    case gelEFSUPPORT:
+      return new gelUDF<EFSupport *>(*this, actuals,
+				     (gelExpression<EFSupport *> *) m_Udf);
+    case gelBEHAV:
+      return new gelUDF<BehavSolution *>(*this, actuals,
+					 (gelExpression<BehavSolution *> *) m_Udf);
     case gelNFG:
       return new gelUDF<Nfg *>(*this, actuals,
                                (gelExpression<Nfg *> *) m_Udf);
@@ -305,8 +304,14 @@ gelExpr* gelSignature::Evaluate(const gArray<gelExpr *> &actuals) const
     case gelNFOUTCOME:
       return new gelUDF<NFOutcome *>(*this, actuals,
                                      (gelExpression<NFOutcome *> *) m_Udf);
+    case gelNFSUPPORT:
+      return new gelUDF<NFSupport *>(*this, actuals,
+				     (gelExpression<NFSupport *> *) m_Udf);
+    case gelMIXED:
+      return new gelUDF<MixedSolution *>(*this, actuals,
+					 (gelExpression<MixedSolution *> *) m_Udf);
     case gelUNDEFINED:
-      assert( 0 );
+      throw gelInternalError("Undefined function return type");
       break;
 
     default:
@@ -314,28 +319,27 @@ gelExpr* gelSignature::Evaluate(const gArray<gelExpr *> &actuals) const
     }
   }
   else
-  {
-    return m_Bif( actuals );
-  }
+    return m_Bif(actuals);
 }
 
 
 
-  //-----------------------------------------------------------
-  // DefineParams
-  //   Only defines the parameters; don't assign them
-  //   subvt - the inner, function scope
-  //-----------------------------------------------------------
-void gelSignature::DefineParams( gelVariableTable* subvt ) const
+//-----------------------------------------------------------
+// DefineParams
+//   Only defines the parameters; don't assign them
+//   subvt - the inner, function scope
+//-----------------------------------------------------------
+void gelSignature::DefineParams(gelVariableTable *subvt) const
 {
-  assert( subvt );
-  int i = 0;
-  for( i = 1; i <= m_Parameters.Length(); ++i )
-  {
-    assert( m_Parameters[i] );
+  if (!subvt)
+    throw gelInternalError("Null pointer passed to DefineParams");
+  
+  for (int i = 1; i <= m_Parameters.Length(); i++)  {
+    if (!m_Parameters[i])
+      throw gelInternalError("Null parameter pointer");
+
     gText name = m_Parameters[i]->Name();
-    switch( m_Parameters[i]->Type() )
-    {
+    switch (m_Parameters[i]->Type())  {
     case gelBOOLEAN:
     case gelNUMBER:
     case gelTEXT:
@@ -359,33 +363,33 @@ void gelSignature::DefineParams( gelVariableTable* subvt ) const
     case gelOUTPUT:
     case gelANYTYPE:
     case gelUNDEFINED:
-      assert( 0 );
+      throw gelInternalError("Undefined parameter type");
       break;
     }
   }
 }
 
-  //-----------------------------------------------------------
-  // AssignParams
-  //   Both defines and assigns the parameters
-  //   subvt - the inner, function scope
-  //   vt    - the outer, global scope
-  //-----------------------------------------------------------
-void gelSignature::AssignParams( gelVariableTable* subvt, gelVariableTable* vt,
-				const gArray<gelExpr *>& params ) const
+//-----------------------------------------------------------
+// AssignParams
+//   Both defines and assigns the parameters
+//   subvt - the inner, function scope
+//   vt    - the outer, global scope
+//-----------------------------------------------------------
+void gelSignature::AssignParams(gelVariableTable *subvt, gelVariableTable *vt,
+				const gArray<gelExpr *> &params) const
 {
-  assert( subvt );
-  assert( vt );
-  assert( m_Parameters.Length() == params.Length() );
+  if (!subvt || !vt)
+    throw gelInternalError("Null pointer passed to AssignParams");
+  if (m_Parameters.Length() != params.Length())
+    throw gelInternalError("Mismatched parameter lists");
 
-  DefineParams( subvt );
-
-  int i = 0;
-  for( i = 1; i <= m_Parameters.Length(); ++i )
-  {
-    assert( m_Parameters[i] );
-    assert( params[i] );
-    assert( m_Parameters[i]->Type() == params[i]->Type() );
+  DefineParams(subvt);
+  
+  for (int i = 1; i <= m_Parameters.Length(); i++)   {
+    if (!m_Parameters[i] || !params[i])
+      throw gelInternalError("Null parameter in AssignParams");
+    if (m_Parameters[i]->Type() != params[i]->Type())
+      throw gelInternalError("Type mismatch in AssignParams");
 
     gText name = m_Parameters[i]->Name();
     switch (m_Parameters[i]->Type())  {
@@ -461,7 +465,7 @@ void gelSignature::AssignParams( gelVariableTable* subvt, gelVariableTable* vt,
     case gelOUTPUT:
     case gelANYTYPE:
     case gelUNDEFINED:
-      assert( 0 );
+      throw gelInternalError("Undefined parameter type"); 
       break;
     }
   }
@@ -473,6 +477,8 @@ extern void gelListInit(gelEnvironment *);
 extern void gelEfgInit(gelEnvironment *);
 extern void gelNfgInit(gelEnvironment *);
 extern void gelMiscInit(gelEnvironment *);
+extern void gelAlgInit(gelEnvironment *);
+extern void gelSolInit(gelEnvironment *);
 
 gelEnvironment::gelEnvironment(void)
 {
@@ -480,6 +486,8 @@ gelEnvironment::gelEnvironment(void)
   gelListInit(this);
   gelEfgInit(this);
   gelNfgInit(this);
+  gelAlgInit(this);
+  gelSolInit(this);
   gelMiscInit(this);
 }
 
@@ -488,12 +496,12 @@ gelEnvironment::~gelEnvironment()
 
 void gelEnvironment::Register(gelAdapter *func, const gText &sig)
 {
-  signatures.Append( new gelSignature( sig, func ) );
+  signatures.Append(new gelSignature(sig, func));
 }
 
-void gelEnvironment::Register( gelSignature* sig )
+void gelEnvironment::Register(gelSignature *sig)
 {
-  signatures.Append( sig );
+  signatures.Append(sig);
 }
 
 gelExpr *gelEnvironment::Match(const gText &name,
@@ -504,7 +512,7 @@ gelExpr *gelEnvironment::Match(const gText &name,
       return 0;
 
   for (int i = 1; i <= signatures.Length(); i++)
-    if( signatures[i]->Matches( name, actuals ) )
+    if (signatures[i]->Matches(name, actuals))
       return signatures[i]->Evaluate( actuals );
 
   return 0;
@@ -515,14 +523,14 @@ gelExpr *gelEnvironment::Match(const gText &name, gelExpr *op1, gelExpr *op2)
   gArray<gelExpr *> actuals(2);
   actuals[1] = op1;
   actuals[2] = op2;
-  return Match( name, actuals );
+  return Match(name, actuals);
 }
 
 gelExpr *gelEnvironment::Match(const gText &name, gelExpr *op)
 {
   gArray<gelExpr *> actuals(1);
   actuals[1] = op;
-  return Match( name, actuals );
+  return Match(name, actuals);
 }
 
 
@@ -535,4 +543,5 @@ template class gArray<gelExpr*>;
 template class gList<gelSignature *>;
 template class gList<gelAdapter *>;
 template class gList<gelParamInfo *>;
+
 
