@@ -11,7 +11,7 @@ template <class T> gNArray<T>::gNArray(void)
   : storage_size(0), storage(0)
 { }
 
-template <class T> gNArray<T>::gNArray(const gVector<int> &d)
+template <class T> gNArray<T>::gNArray(const gTuple<int> &d)
   : dim(d)
 {
   if (dim.Length() <= 0)   {
@@ -141,7 +141,7 @@ template <class T> T &gNArray<T>::operator[](long l)
   return storage[l];
 }
 
-template <class T> const gVector<int> &gNArray<T>::Dimensionality(void) const
+template <class T> const gTuple<int> &gNArray<T>::Dimensionality(void) const
 {
   return dim;
 }

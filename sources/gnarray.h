@@ -19,14 +19,14 @@ template <class T> class gNArray   {
   protected:
     long storage_size;
     T *storage;
-	 gVector<int> dim;
+    gTuple<int> dim;
 
     void DumpFrom(gOutput &, int, gVector<int> &) const;
     void ReadFrom(gInput &, const gVector<int> &, gVector<int> &, int);
 
   public:
     gNArray(void);
-    gNArray(const gVector<int> &d);
+    gNArray(const gTuple<int> &d);
     gNArray(const gNArray<T>& a);
     ~gNArray();
 
@@ -36,12 +36,12 @@ template <class T> class gNArray   {
     T &operator[](const gVector<int> &);
 
     const T &operator[](long l) const;
-	 T &operator[](long l);
+    T &operator[](long l);
 
-    const gVector<int> &Dimensionality(void) const;
+    const gTuple<int> &Dimensionality(void) const;
 
     void Input(gInput &, const gVector<int> &, int);
-	 void Output(gOutput &) const;
+    void Output(gOutput &) const;
 };
 
 #ifdef UNUSED
