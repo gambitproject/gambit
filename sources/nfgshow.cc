@@ -118,9 +118,9 @@ void NfgToolbar::OnMouseEnter(wxCommandEvent &p_event)
   }
 }
 
-//======================================================================
-//                           class NfgShow
-//======================================================================
+//----------------------------------------------------------------------
+//                   class NfgShow: Member functions
+//----------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_FILE_SAVE, NfgShow::OnFileSave)
@@ -168,9 +168,9 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_LIST_ITEM_SELECTED(idNFG_SOLUTION_LIST, NfgShow::OnSolutionSelected)
 END_EVENT_TABLE()
 
-//======================================================================
-//                 NfgShow: Constructor and destructor
-//======================================================================
+//----------------------------------------------------------------------
+//                      class NfgShow: Lifecycle
+//----------------------------------------------------------------------
 
 NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
   : wxFrame(p_frame, -1, "", wxDefaultPosition, wxSize(500, 500)),
@@ -187,10 +187,10 @@ NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
   SetIcon(wxIcon(nfg_bits, nfg_width, nfg_height));
 #endif  // __WXMSW__
 
-  cur_soln = 0;
+  m_currentSolution = 0;
   m_currentSupport = new NFSupport(m_nfg);    // base support
   m_currentSupport->SetName("Full Support");
-  supports.Append(m_currentSupport);
+  m_supports.Append(m_currentSupport);
 
   MakeMenus();
   CreateStatusBar(3);
@@ -232,17 +232,21 @@ NfgShow::~NfgShow()
   delete &m_nfg;
 }
 
+//----------------------------------------------------------------------
+//               class NfgShow: Private member functions
+//----------------------------------------------------------------------
+
 void NfgShow::MakeMenus(void)
 {
-  wxMenu *file_menu = new wxMenu;
-  file_menu->Append(NFG_FILE_SAVE, "&Save", "Save the game");
-  file_menu->Append(NFG_FILE_OUTPUT, "Out&put", "Output to any device");
-  file_menu->Append(NFG_FILE_CLOSE, "&Close", "Close the window");
+  wxMenu *fileMenu = new wxMenu;
+  fileMenu->Append(NFG_FILE_SAVE, "&Save", "Save the game");
+  fileMenu->Append(NFG_FILE_OUTPUT, "Out&put", "Output to any device");
+  fileMenu->Append(NFG_FILE_CLOSE, "&Close", "Close the window");
   
-  wxMenu *edit_menu = new wxMenu;
-  edit_menu->Append(NFG_EDIT_LABEL, "&Label", "Set the label of the game");
-  edit_menu->Append(NFG_EDIT_PLAYERS, "&Players", "Edit player names");
-  edit_menu->Append(NFG_EDIT_STRATS, "&Strategies", "Edit strategy names");
+  wxMenu *editMenu = new wxMenu;
+  editMenu->Append(NFG_EDIT_LABEL, "&Label", "Set the label of the game");
+  editMenu->Append(NFG_EDIT_PLAYERS, "&Players", "Edit player names");
+  editMenu->Append(NFG_EDIT_STRATS, "&Strategies", "Edit strategy names");
 
   wxMenu *editOutcomesMenu = new wxMenu;
   editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_NEW, "&New",
@@ -255,18 +259,18 @@ void NfgShow::MakeMenus(void)
 			   "Set the outcome for the current contingency to null");
   editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_PAYOFFS, "&Payoffs",
 			   "Set the payoffs for outcome of the current contingency");
-  edit_menu->Append(NFG_EDIT_OUTCOMES,  "&Outcomes",  editOutcomesMenu,
+  editMenu->Append(NFG_EDIT_OUTCOMES,  "&Outcomes",  editOutcomesMenu,
 		    "Set/Edit outcomes");
 
-  wxMenu *supports_menu = new wxMenu;
-  supports_menu->Append(NFG_SUPPORT_UNDOMINATED, "&Undominated",
-			"Find undominated strategies");
-  supports_menu->Append(NFG_SUPPORT_NEW, "&New",
-			"Create a new support");
-  supports_menu->Append(NFG_SUPPORT_EDIT, "&Edit",
-			"Edit the currently displayed support");
-  supports_menu->Append(NFG_SUPPORT_DELETE, "&Delete",
-			"Delete a support");
+  wxMenu *supportsMenu = new wxMenu;
+  supportsMenu->Append(NFG_SUPPORT_UNDOMINATED, "&Undominated",
+		       "Find undominated strategies");
+  supportsMenu->Append(NFG_SUPPORT_NEW, "&New",
+		       "Create a new support");
+  supportsMenu->Append(NFG_SUPPORT_EDIT, "&Edit",
+		       "Edit the currently displayed support");
+  supportsMenu->Append(NFG_SUPPORT_DELETE, "&Delete",
+		       "Delete a support");
   wxMenu *supportsSelectMenu = new wxMenu;
   supportsSelectMenu->Append(NFG_SUPPORT_SELECT_FROMLIST, "From &List...",
 			     "Select a support from the list of defined supports");
@@ -274,12 +278,12 @@ void NfgShow::MakeMenus(void)
 			     "Select the previous support from the list");
   supportsSelectMenu->Append(NFG_SUPPORT_SELECT_NEXT, "&Next",
 			     "Select the next support from the list");
-  supports_menu->Append(NFG_SUPPORT_SELECT, "&Select", supportsSelectMenu,
-			"Change the current support");
+  supportsMenu->Append(NFG_SUPPORT_SELECT, "&Select", supportsSelectMenu,
+		       "Change the current support");
 
-  wxMenu *solve_menu = new wxMenu;
-  solve_menu->Append(NFG_SOLVE_STANDARD,  "S&tandard...",
-		     "Standard solutions");
+  wxMenu *solveMenu = new wxMenu;
+  solveMenu->Append(NFG_SOLVE_STANDARD,  "S&tandard...",
+		    "Standard solutions");
   
   wxMenu *solveCustomMenu = new wxMenu;
   solveCustomMenu->Append(NFG_SOLVE_CUSTOM_ENUMPURE, "EnumPure",
@@ -300,8 +304,8 @@ void NfgShow::MakeMenus(void)
 			  "Compute quantal response equilibrium");
   solveCustomMenu->Append(NFG_SOLVE_CUSTOM_QREGRID, "QREGrid",
 			  "Compute quantal response equilibrium");
-  solve_menu->Append(NFG_SOLVE_CUSTOM, "Custom", solveCustomMenu,
-		     "Solve with a particular algorithm");
+  solveMenu->Append(NFG_SOLVE_CUSTOM, "Custom", solveCustomMenu,
+		    "Solve with a particular algorithm");
 
   
   wxMenu *viewMenu = new wxMenu;
@@ -334,189 +338,156 @@ void NfgShow::MakeMenus(void)
   prefsMenu->Append(NFG_PREFS_SAVE, "&Save", "Save current configuration");
   prefsMenu->Append(NFG_PREFS_LOAD, "&Load", "Load configuration");
 
-  wxMenu *help_menu = new wxMenu;
-  help_menu->Append(NFG_HELP_ABOUT, "&About");
-  help_menu->Append(NFG_HELP_CONTENTS, "&Contents");
+  wxMenu *helpMenu = new wxMenu;
+  helpMenu->Append(NFG_HELP_ABOUT, "&About");
+  helpMenu->Append(NFG_HELP_CONTENTS, "&Contents");
 
-  wxMenuBar *tmp_menubar = new wxMenuBar;
-  tmp_menubar->Append(file_menu,     "&File");
-  tmp_menubar->Append(edit_menu,     "&Edit");
-  tmp_menubar->Append(supports_menu, "S&upports");
-  tmp_menubar->Append(solve_menu,    "&Solve");
-  tmp_menubar->Append(viewMenu,  "&View");
-  tmp_menubar->Append(prefsMenu,    "&Prefs");
-  tmp_menubar->Append(help_menu,     "&Help");
+  wxMenuBar *menuBar = new wxMenuBar;
+  menuBar->Append(fileMenu, "&File");
+  menuBar->Append(editMenu, "&Edit");
+  menuBar->Append(supportsMenu, "S&upports");
+  menuBar->Append(solveMenu, "&Solve");
+  menuBar->Append(viewMenu, "&View");
+  menuBar->Append(prefsMenu, "&Prefs");
+  menuBar->Append(helpMenu, "&Help");
 
-  viewMenu->Check(NFG_VIEW_OUTCOMES, !getNormalDrawSettings().OutcomeValues());
+  viewMenu->Check(NFG_VIEW_OUTCOMES, !m_drawSettings.OutcomeValues());
   
-  SetMenuBar(tmp_menubar);
+  SetMenuBar(menuBar);
 }
 
-gArray<int> NfgShow::GetProfile(void) const
+void NfgShow::UpdateMenus(void)
 {
-  return m_panel->GetProfile();
-}
+  wxMenuBar *menu = GetMenuBar();
+  gArray<int> profile(GetProfile());
 
-void NfgShow::SetStrategy(int p_player, int p_strategy)
-{
-  m_panel->SetStrategy(p_player, p_strategy);
-  m_table->SetStrategy(p_player, p_strategy);
-}
+  menu->Enable(NFG_EDIT_OUTCOMES_DELETE, m_nfg.NumOutcomes() > 0);
+  menu->Enable(NFG_EDIT_OUTCOMES_ATTACH, m_nfg.NumOutcomes() > 0);
+  menu->Enable(NFG_EDIT_OUTCOMES_DETACH, m_nfg.GetOutcome(profile) != 0);
+  menu->Enable(NFG_EDIT_OUTCOMES_PAYOFFS, m_nfg.GetOutcome(profile) != 0);
 
-void NfgShow::UpdateProfile(gArray<int> &profile)
-{
-  //  m_table->OnChangeValues();
+  menu->Enable(NFG_SUPPORT_SELECT_FROMLIST, NumSupports() > 1);
+  menu->Enable(NFG_SUPPORT_SELECT_PREVIOUS, NumSupports() > 1);
+  menu->Enable(NFG_SUPPORT_SELECT_NEXT, NumSupports() > 1);
+
+  menu->Enable(NFG_SOLVE_CUSTOM_ENUMMIXED, m_nfg.NumPlayers() == 2);
+  menu->Enable(NFG_SOLVE_CUSTOM_LP,
+	       m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg));
+  menu->Enable(NFG_SOLVE_CUSTOM_LCP, m_nfg.NumPlayers() == 2);
+
+  menu->Enable(NFG_VIEW_PROBABILITIES, m_solutionTable->Length() > 0);
+  menu->Enable(NFG_VIEW_VALUES, m_solutionTable->Length() > 0);
+
+  SetStatusText((char *)
+		("Support: " + CurrentSupport()->GetName()), 1);
+  if (CurrentSolution() > 0) {
+    SetStatusText((char *) ("Solution: " + 
+			    ToText(CurrentSolution())),
+		  2);
+  }
+  else {
+    SetStatusText("No solution displayed", 2);
+  }
 }
 
 gText NfgShow::UniqueSupportName(void) const
 {
-  int number = supports.Length() + 1;
+  int number = m_supports.Length() + 1;
   while (1) {
     int i;
-    for (i = 1; i <= supports.Length(); i++) {
-      if (supports[i]->GetName() == "Support" + ToText(number)) {
+    for (i = 1; i <= m_supports.Length(); i++) {
+      if (m_supports[i]->GetName() == "Support" + ToText(number)) {
 	break;
       }
     }
 
-    if (i > supports.Length())
+    if (i > m_supports.Length())
       return "Support" + ToText(number);
     
     number++;
   }
 }
 
-// Clear solutions-just updates the spreadsheet to remove any hilights
-void NfgShow::ClearSolutions(void)
+//----------------------------------------------------------------------
+//                    class NfgShow: Event handlers
+//----------------------------------------------------------------------
+
+void NfgShow::OnCloseWindow(wxCloseEvent &p_event)
 {
-#ifdef NOT_PORTED_YET
-  if (m_table->HaveProbs()) {
-    for (int i = 1; i <= cols; i++) {
-      m_table->SetCellValue("", rows+1, i);
-    }
-    for (int i = 1; i <= rows; i++) {
-      m_table->SetCellValue("", i, cols+1);
-    }
-    m_table->SetCellValue("", rows+1, cols+1);
-  }
-
-  /*
-  if (m_table->HaveDom()) {  // if there exist the dominance row/col
-    int dom_pos = 1+m_table->HaveProbs();
-    for (int i = 1; i <= cols; i++)
-      m_table->SetCell(rows+dom_pos, i, "");
-
-    for (int i = 1; i <= rows; i++)
-      m_table->SetCell(i, cols+dom_pos, "");
-  }
-  */
-
-  if (m_table->HaveVal()) {
-    int val_pos = 1+m_table->HaveProbs()+m_table->HaveDom();
-    for (int i = 1; i <= cols; i++)  {
-      m_table->SetCellValue("", rows+val_pos, i);
-    }
-    for (int i = 1; i <= rows; i++) {
-      m_table->SetCellValue("", i, cols+val_pos);
-    }
-  }
-#endif  // NOT_PORTED_YET
-}
-
-void NfgShow::ChangeSolution(int sol)
-{
-  cur_soln = sol;
-    
-  m_table->OnChangeValues();
-  if (m_solutionTable) {
-    m_solutionTable->UpdateValues();
-  }
-}
-
-void NfgShow::OnSolutionSelected(wxListEvent &p_event)
-{
-  cur_soln = p_event.m_itemIndex + 1;
-  m_table->OnChangeValues();
-}
- 
-void NfgShow::SetFileName(const gText &s)
-{
-  if (s != "")
-    filename = s;
-  else 
-    filename = "untitled.nfg";
-
-  // Title the window
-  SetTitle((char *) ("[" + filename + "] " + m_nfg.GetTitle()));
-}
-
-void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)
-{
-  if (!InterfaceOk()) {  // we better have someone to send solutions to
-    return;
-  }
-  
-  const Efg *efg = InterfaceObjectEfg();
-
-  if (efg->AssociatedNfg() != &m_nfg) 
-    return;
-
-  if (!IsPerfectRecall(*efg)) {
-    if (wxMessageBox("May not be able to find valid behavior strategy\n"
-		     "for game of imperfect recall\n"
-		     "Continue anyway?",
-		     "Convert to behavior strategy",
-		     wxOK | wxCANCEL | wxCENTRE) != wxOK)   
+  if (p_event.CanVeto() && GameIsDirty()) {
+    if (wxMessageBox("Game has been modified.  Close anyway?", "Warning",
+		     wxOK | wxCANCEL) == wxCANCEL) {
+      p_event.Veto();
       return;
-  }
-
-  EFSupport S(*InterfaceObjectEfg());
-  BehavProfile<gNumber> bp(mp);
-  SolutionToEfg(bp, set);
-}
-
-void NfgShow::SetPlayers(int p_rowPlayer, int p_colPlayer)
-{
-  m_rowPlayer = p_rowPlayer;
-  m_colPlayer = p_colPlayer;
-  
-  SetTitle((char *) (m_nfg.GetTitle() + " : " + 
-		     m_nfg.Players()[m_rowPlayer]->GetName() +
-		     " x " + m_nfg.Players()[m_colPlayer]->GetName()));
-
-  m_table->SetPlayers(m_rowPlayer, m_colPlayer);
-  SetStrategy(m_rowPlayer, 1);
-  SetStrategy(m_colPlayer, 1);
-  m_table->OnChangeLabels();
-  m_panel->SetSupport(*m_currentSupport);
-  m_table->OnChangeValues();
-}
-
-void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
-{
-  gArray<int> profile(m_panel->GetProfile());
-  profile[m_rowPlayer] = st1;
-  profile[m_colPlayer] = st2;
-
-  dialogNfgPayoffs dialog(m_nfg, m_nfg.GetOutcome(profile), this);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    NFOutcome *outc = m_nfg.GetOutcome(profile);
-    gArray<gNumber> payoffs(dialog.Payoffs());
-
-    if (!outc) {
-      outc = m_nfg.NewOutcome();
-      m_nfg.SetOutcome(profile, outc);
     }
+  }
 
-    for (int i = 1; i <= m_nfg.NumPlayers(); i++)
-      m_nfg.SetPayoff(outc, i, payoffs[i]);
-    outc->SetName(dialog.Name());
+  InterfaceDied();
+  Show(false);
+  Destroy();
+}
 
-    m_table->OnChangeValues();
-    InterfaceDied();
+void NfgShow::AdjustSizes(void)
+{
+  const int toolbarHeight = 40;
+  int width, height;
+  GetClientSize(&width, &height);
+  if (m_toolbar) {
+    m_toolbar->SetSize(0, 0, width, toolbarHeight);
+  }
+  if (m_solutionSashWindow && m_solutionSashWindow->IsShown()) {
+    int solnHeight = gmax(100, height / 3);
+    m_solutionSashWindow->SetSize(0, height - solnHeight, width, solnHeight);
+    height -= solnHeight;
+  }
+  if (m_panelSashWindow) {
+    m_panelSashWindow->SetSize(0, 40, 200, height - 40);
+  }
+  if (m_table) {
+    m_table->SetSize(200, 40, width - 200, height - 40);
   }
 }
+
+
+void NfgShow::OnSize(wxSizeEvent &)
+{
+  AdjustSizes();
+}
+
+void NfgShow::OnSashDrag(wxSashEvent &p_event)
+{
+  int clientWidth, clientHeight;
+  GetClientSize(&clientWidth, &clientHeight);
+
+  switch (p_event.GetId()) {
+  case idPANELWINDOW:
+    m_table->SetSize(p_event.GetDragRect().width,
+		     m_table->GetRect().y,
+		     clientWidth - p_event.GetDragRect().width,
+		     m_table->GetRect().height);
+    m_panelSashWindow->SetSize(m_panelSashWindow->GetRect().x,
+			       m_panelSashWindow->GetRect().y,
+			       p_event.GetDragRect().width,
+			       m_panelSashWindow->GetRect().height);
+    break;
+  case idSOLUTIONWINDOW:
+    m_table->SetSize(m_table->GetRect().x, m_table->GetRect().y,
+		     m_table->GetRect().width,
+		     clientHeight - p_event.GetDragRect().height - 40);
+    m_panelSashWindow->SetSize(m_panelSashWindow->GetRect().x,
+			       m_panelSashWindow->GetRect().y,
+			       m_panelSashWindow->GetRect().width,
+			       clientHeight - p_event.GetDragRect().height - 40);
+    m_solutionSashWindow->SetSize(0, clientHeight - p_event.GetDragRect().height,
+				  clientWidth, p_event.GetDragRect().width);
+    break;
+  }
+
+}
+
+//----------------------------------------------------------------------
+//                 class NfgShow: Menu event handlers
+//----------------------------------------------------------------------
 
 void NfgShow::OnFileOutput(wxCommandEvent &)
 {
@@ -670,14 +641,14 @@ void NfgShow::OnSupportUndominated(wxCommandEvent &)
 	  while ((sup = sup->Undominated(dialog.DomStrong(), 
 					 dialog.Players(), gnull, status)) != 0) {
 	    sup->SetName(UniqueSupportName());
-	    supports.Append(sup);
+	    m_supports.Append(sup);
 	  }
 	}
 	else {
 	  if ((sup = sup->Undominated(dialog.DomStrong(), 
 				      dialog.Players(), gnull, status)) != 0) {
 	    sup->SetName(UniqueSupportName());
-	    supports.Append(sup);
+	    m_supports.Append(sup);
 	  }
 	}
       }
@@ -687,7 +658,7 @@ void NfgShow::OnSupportUndominated(wxCommandEvent &)
 					      dialog.Players(),
 					      gnull, status)) != 0) {
 	    sup->SetName(UniqueSupportName());
-	    supports.Append(sup);
+	    m_supports.Append(sup);
 	  }
 	}
 	else {
@@ -695,7 +666,7 @@ void NfgShow::OnSupportUndominated(wxCommandEvent &)
 					   dialog.Players(),
 					   gnull, status)) != 0) {
 	    sup->SetName(UniqueSupportName());
-	    supports.Append(sup);
+	    m_supports.Append(sup);
 	  }
 	}
       }
@@ -703,7 +674,7 @@ void NfgShow::OnSupportUndominated(wxCommandEvent &)
     catch (gSignalBreak &) { }
 
     if (m_currentSupport != sup) {
-      m_currentSupport = supports[supports.Length()]; // displaying the last created support
+      m_currentSupport = m_supports[m_supports.Length()];
       SetPlayers(m_rowPlayer, m_colPlayer);
     }
     else {
@@ -724,7 +695,7 @@ void NfgShow::OnSupportNew(wxCommandEvent &)
     try {
       NFSupport *support = new NFSupport(dialog.Support());
       support->SetName(dialog.Name());
-      supports.Append(support);
+      m_supports.Append(support);
 
       ChangeSolution(0);
       m_currentSupport = support;
@@ -756,16 +727,16 @@ void NfgShow::OnSupportEdit(wxCommandEvent &)
 
 void NfgShow::OnSupportDelete(wxCommandEvent &)
 {
-  if (supports.Length() == 1)  return;
+  if (m_supports.Length() == 1)  return;
 
-  dialogSupportSelect dialog(this, supports,
+  dialogSupportSelect dialog(this, m_supports,
 			     m_currentSupport, "Delete Support");
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      delete supports.Remove(dialog.Selected());
-      if (!supports.Find(m_currentSupport)) {
-	m_currentSupport = supports[1];
+      delete m_supports.Remove(dialog.Selected());
+      if (!m_supports.Find(m_currentSupport)) {
+	m_currentSupport = m_supports[1];
 	SetPlayers(m_rowPlayer, m_colPlayer);
 	ChangeSolution(0);
       }
@@ -778,12 +749,12 @@ void NfgShow::OnSupportDelete(wxCommandEvent &)
 
 void NfgShow::OnSupportSelectFromList(wxCommandEvent &)
 {
-  dialogSupportSelect dialog(this, supports,
+  dialogSupportSelect dialog(this, m_supports,
 			     m_currentSupport, "Select Support");
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      m_currentSupport = supports[dialog.Selected()];
+      m_currentSupport = m_supports[dialog.Selected()];
       SetPlayers(m_rowPlayer, m_colPlayer);
     }
     catch (gException &E) {
@@ -794,24 +765,24 @@ void NfgShow::OnSupportSelectFromList(wxCommandEvent &)
 
 void NfgShow::OnSupportSelectPrevious(wxCommandEvent &)
 {
-  int index = supports.Find(m_currentSupport);
+  int index = m_supports.Find(m_currentSupport);
   if (index == 1) {
-    m_currentSupport = supports[supports.Length()];
+    m_currentSupport = m_supports[m_supports.Length()];
   }
   else {
-    m_currentSupport = supports[index - 1];
+    m_currentSupport = m_supports[index - 1];
   }
   SetPlayers(m_rowPlayer, m_colPlayer);
 }
 
 void NfgShow::OnSupportSelectNext(wxCommandEvent &)
 {
-  int index = supports.Find(m_currentSupport);
-  if (index == supports.Length()) {
-    m_currentSupport = supports[1];
+  int index = m_supports.Find(m_currentSupport);
+  if (index == m_supports.Length()) {
+    m_currentSupport = m_supports[1];
   }
   else {
-    m_currentSupport = supports[index + 1];
+    m_currentSupport = m_supports[index + 1];
   }
   SetPlayers(m_rowPlayer, m_colPlayer);
 }
@@ -1056,7 +1027,7 @@ void NfgShow::OnViewValues(wxCommandEvent &)
 
 void NfgShow::OnViewOutcomes(wxCommandEvent &)
 {
-  draw_settings.SetOutcomeValues(1 - draw_settings.OutcomeValues());
+  m_drawSettings.SetOutcomeValues(1 - m_drawSettings.OutcomeValues());
   m_table->OnChangeValues();
 }
 
@@ -1087,7 +1058,7 @@ void NfgShow::OnProfilesNew(wxCommandEvent &)
 
 void NfgShow::OnProfilesClone(wxCommandEvent &)
 {
-  MixedSolution profile((*m_solutionTable)[cur_soln]);
+  MixedSolution profile((*m_solutionTable)[m_currentSolution]);
   
   dialogMixedEditor dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
@@ -1099,13 +1070,13 @@ void NfgShow::OnProfilesClone(wxCommandEvent &)
 
 void NfgShow::OnProfilesRename(wxCommandEvent &)
 {
-  if (cur_soln > 0) {
+  if (m_currentSolution > 0) {
     wxTextEntryDialog dialog(this, "Enter new name for profile",
 			     "Rename profile",
-			     (char *) (*m_solutionTable)[cur_soln].GetName());
+			     (char *) (*m_solutionTable)[m_currentSolution].GetName());
 
     if (dialog.ShowModal() == wxID_OK) {
-      (*m_solutionTable)[cur_soln].SetName(dialog.GetValue().c_str());
+      (*m_solutionTable)[m_currentSolution].SetName(dialog.GetValue().c_str());
       m_solutionTable->UpdateValues();
     }
   }
@@ -1113,21 +1084,21 @@ void NfgShow::OnProfilesRename(wxCommandEvent &)
 
 void NfgShow::OnProfilesEdit(wxCommandEvent &)
 {
-  if (cur_soln > 0) {
-    dialogMixedEditor dialog(this, (*m_solutionTable)[cur_soln]);
+  if (m_currentSolution > 0) {
+    dialogMixedEditor dialog(this, (*m_solutionTable)[m_currentSolution]);
 
     if (dialog.ShowModal() == wxID_OK) {
-      (*m_solutionTable)[cur_soln] = dialog.GetProfile();
-      ChangeSolution(cur_soln);
+      (*m_solutionTable)[m_currentSolution] = dialog.GetProfile();
+      ChangeSolution(m_currentSolution);
     }
   }
 }
 
 void NfgShow::OnProfilesDelete(wxCommandEvent &)
 {
-  m_solutionTable->Remove(cur_soln);
-  cur_soln = (m_solutionTable->Length() > 0) ? 1 : 0;
-  ChangeSolution(cur_soln);
+  m_solutionTable->Remove(m_currentSolution);
+  m_currentSolution = (m_solutionTable->Length() > 0) ? 1 : 0;
+  ChangeSolution(m_currentSolution);
   UpdateMenus();
 }
 
@@ -1158,7 +1129,7 @@ void NfgShow::OnPrefsFont(wxCommandEvent &)
   wxFontDialog dialog(this, &data);
   
   if (dialog.ShowModal() == wxID_OK) {
-    draw_settings.SetDataFont(dialog.GetFontData().GetChosenFont());
+    m_drawSettings.SetDataFont(dialog.GetFontData().GetChosenFont());
     m_table->SetCellTextFont(dialog.GetFontData().GetChosenFont());
   }
 }
@@ -1169,128 +1140,138 @@ void NfgShow::OnPrefsColors(wxCommandEvent &)
 
 void NfgShow::OnPrefsAccels(wxCommandEvent &)
 {
-  EditAccelerators(accelerators, MakeEventNames());
-  //  WriteAccelerators(accelerators, "NfgAccelerators", wxGetApp().ResourceFile());
+  EditAccelerators(m_accelerators, MakeEventNames());
+  //  WriteAccelerators(m_accelerators, "NfgAccelerators", wxGetApp().ResourceFile());
 }
 
 
 void NfgShow::OnPrefsSave(wxCommandEvent &)
 {
-  draw_settings.SaveSettings();
+  m_drawSettings.SaveSettings();
 }
 
 void NfgShow::OnPrefsLoad(wxCommandEvent &)
 {
-  draw_settings.LoadSettings();
+  m_drawSettings.LoadSettings();
 }
 
+//----------------------------------------------------------------------
+//                class NfgShow: Public member functions
+//----------------------------------------------------------------------
 
-void NfgShow::OnCloseWindow(wxCloseEvent &p_event)
+gArray<int> NfgShow::GetProfile(void) const
 {
-  if (p_event.CanVeto() && GameIsDirty()) {
-    if (wxMessageBox("Game has been modified.  Close anyway?", "Warning",
-		     wxOK | wxCANCEL) == wxCANCEL) {
-      p_event.Veto();
+  return m_panel->GetProfile();
+}
+
+void NfgShow::SetStrategy(int p_player, int p_strategy)
+{
+  m_panel->SetStrategy(p_player, p_strategy);
+  m_table->SetStrategy(p_player, p_strategy);
+}
+
+void NfgShow::UpdateProfile(gArray<int> &profile)
+{
+  //  m_table->OnChangeValues();
+}
+
+void NfgShow::ChangeSolution(int sol)
+{
+  m_currentSolution = sol;
+    
+  m_table->OnChangeValues();
+  if (m_solutionTable) {
+    m_solutionTable->UpdateValues();
+  }
+}
+
+void NfgShow::OnSolutionSelected(wxListEvent &p_event)
+{
+  m_currentSolution = p_event.m_itemIndex + 1;
+  m_table->OnChangeValues();
+}
+ 
+void NfgShow::SetFileName(const gText &p_fileName)
+{
+  if (p_fileName != "") {
+    m_fileName = p_fileName;
+  }
+  else {  
+    m_fileName = "untitled.nfg";
+  }
+
+  SetTitle((char *) ("[" + m_fileName + "] " + m_nfg.GetTitle()));
+}
+
+void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)
+{
+  if (!InterfaceOk()) {  // we better have someone to send solutions to
+    return;
+  }
+  
+  const Efg *efg = InterfaceObjectEfg();
+
+  if (efg->AssociatedNfg() != &m_nfg) 
+    return;
+
+  if (!IsPerfectRecall(*efg)) {
+    if (wxMessageBox("May not be able to find valid behavior strategy\n"
+		     "for game of imperfect recall\n"
+		     "Continue anyway?",
+		     "Convert to behavior strategy",
+		     wxOK | wxCANCEL | wxCENTRE) != wxOK)   
       return;
+  }
+
+  EFSupport S(*InterfaceObjectEfg());
+  BehavProfile<gNumber> bp(mp);
+  SolutionToEfg(bp, set);
+}
+
+void NfgShow::SetPlayers(int p_rowPlayer, int p_colPlayer)
+{
+  m_rowPlayer = p_rowPlayer;
+  m_colPlayer = p_colPlayer;
+  
+  SetTitle((char *) (m_nfg.GetTitle() + " : " + 
+		     m_nfg.Players()[m_rowPlayer]->GetName() +
+		     " x " + m_nfg.Players()[m_colPlayer]->GetName()));
+
+  m_table->SetPlayers(m_rowPlayer, m_colPlayer);
+  SetStrategy(m_rowPlayer, 1);
+  SetStrategy(m_colPlayer, 1);
+  m_table->OnChangeLabels();
+  m_panel->SetSupport(*m_currentSupport);
+  m_table->OnChangeValues();
+}
+
+void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
+{
+  gArray<int> profile(m_panel->GetProfile());
+  profile[m_rowPlayer] = st1;
+  profile[m_colPlayer] = st2;
+
+  dialogNfgPayoffs dialog(m_nfg, m_nfg.GetOutcome(profile), this);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    NFOutcome *outc = m_nfg.GetOutcome(profile);
+    gArray<gNumber> payoffs(dialog.Payoffs());
+
+    if (!outc) {
+      outc = m_nfg.NewOutcome();
+      m_nfg.SetOutcome(profile, outc);
     }
-  }
 
-  InterfaceDied();
-  Show(false);
-  Destroy();
-}
+    for (int i = 1; i <= m_nfg.NumPlayers(); i++)
+      m_nfg.SetPayoff(outc, i, payoffs[i]);
+    outc->SetName(dialog.Name());
 
-void NfgShow::UpdateMenus(void)
-{
-  wxMenuBar *menu = GetMenuBar();
-  gArray<int> profile(GetProfile());
-
-  menu->Enable(NFG_EDIT_OUTCOMES_DELETE, m_nfg.NumOutcomes() > 0);
-  menu->Enable(NFG_EDIT_OUTCOMES_ATTACH, m_nfg.NumOutcomes() > 0);
-  menu->Enable(NFG_EDIT_OUTCOMES_DETACH, m_nfg.GetOutcome(profile) != 0);
-  menu->Enable(NFG_EDIT_OUTCOMES_PAYOFFS, m_nfg.GetOutcome(profile) != 0);
-
-  menu->Enable(NFG_SUPPORT_SELECT_FROMLIST, NumSupports() > 1);
-  menu->Enable(NFG_SUPPORT_SELECT_PREVIOUS, NumSupports() > 1);
-  menu->Enable(NFG_SUPPORT_SELECT_NEXT, NumSupports() > 1);
-
-  menu->Enable(NFG_SOLVE_CUSTOM_ENUMMIXED, m_nfg.NumPlayers() == 2);
-  menu->Enable(NFG_SOLVE_CUSTOM_LP,
-	       m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg));
-  menu->Enable(NFG_SOLVE_CUSTOM_LCP, m_nfg.NumPlayers() == 2);
-
-  menu->Enable(NFG_VIEW_PROBABILITIES, m_solutionTable->Length() > 0);
-  menu->Enable(NFG_VIEW_VALUES, m_solutionTable->Length() > 0);
-
-  SetStatusText((char *)
-		("Support: " + CurrentSupport()->GetName()), 1);
-  if (CurrentSolution() > 0) {
-    SetStatusText((char *) ("Solution: " + 
-			    ToText(CurrentSolution())),
-		  2);
-  }
-  else {
-    SetStatusText("No solution displayed", 2);
-  }
-}
-
-void NfgShow::AdjustSizes(void)
-{
-  const int toolbarHeight = 40;
-  int width, height;
-  GetClientSize(&width, &height);
-  if (m_toolbar) {
-    m_toolbar->SetSize(0, 0, width, toolbarHeight);
-  }
-  if (m_solutionSashWindow && m_solutionSashWindow->IsShown()) {
-    int solnHeight = gmax(100, height / 3);
-    m_solutionSashWindow->SetSize(0, height - solnHeight, width, solnHeight);
-    height -= solnHeight;
-  }
-  if (m_panelSashWindow) {
-    m_panelSashWindow->SetSize(0, 40, 200, height - 40);
-  }
-  if (m_table) {
-    m_table->SetSize(200, 40, width - 200, height - 40);
+    m_table->OnChangeValues();
+    InterfaceDied();
   }
 }
 
 
-void NfgShow::OnSize(wxSizeEvent &)
-{
-  AdjustSizes();
-}
-
-void NfgShow::OnSashDrag(wxSashEvent &p_event)
-{
-  int clientWidth, clientHeight;
-  GetClientSize(&clientWidth, &clientHeight);
-
-  switch (p_event.GetId()) {
-  case idPANELWINDOW:
-    m_table->SetSize(p_event.GetDragRect().width,
-		     m_table->GetRect().y,
-		     clientWidth - p_event.GetDragRect().width,
-		     m_table->GetRect().height);
-    m_panelSashWindow->SetSize(m_panelSashWindow->GetRect().x,
-			       m_panelSashWindow->GetRect().y,
-			       p_event.GetDragRect().width,
-			       m_panelSashWindow->GetRect().height);
-    break;
-  case idSOLUTIONWINDOW:
-    m_table->SetSize(m_table->GetRect().x, m_table->GetRect().y,
-		     m_table->GetRect().width,
-		     clientHeight - p_event.GetDragRect().height - 40);
-    m_panelSashWindow->SetSize(m_panelSashWindow->GetRect().x,
-			       m_panelSashWindow->GetRect().y,
-			       m_panelSashWindow->GetRect().width,
-			       clientHeight - p_event.GetDragRect().height - 40);
-    m_solutionSashWindow->SetSize(0, clientHeight - p_event.GetDragRect().height,
-				  clientWidth, p_event.GetDragRect().width);
-    break;
-  }
-
-}
 
 #include "nfgaccl.h"
 
@@ -1308,7 +1289,7 @@ gArray<AccelEvent> NfgShow::MakeEventNames(void)
 
 int NfgShow::CheckAccelerators(wxKeyEvent &ev)
 {
-  int id = ::CheckAccelerators(accelerators, ev);
+  int id = ::CheckAccelerators(m_accelerators, ev);
 
 #ifdef NOT_PORTED_YET
   if (id) 
@@ -1323,12 +1304,9 @@ const gList<MixedSolution> &NfgShow::Solutions(void) const
   return *m_solutionTable;
 }
 
-template class SolutionList<MixedSolution>;
-
-
-//**********************************************************************
-//                       NORMAL DRAW OPTIONS
-//**********************************************************************
+//-----------------------------------------------------------------------
+//               class NormalDrawSettings: Member functions
+//-----------------------------------------------------------------------
 
 NormalDrawSettings::NormalDrawSettings(void)
   : m_decimals(2), m_dataFont(*wxNORMAL_FONT)

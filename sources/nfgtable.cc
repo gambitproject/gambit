@@ -133,7 +133,7 @@ void NfgTable::OnChangeValues(void)
       gText pay_str;
       NFOutcome *outcome = iterator.GetOutcome();
 
-      if (m_parent->getNormalDrawSettings().OutcomeValues()) {
+      if (m_parent->OutcomeValues()) {
 	for (int k = 1; k <= nfg.NumPlayers(); k++) {
 	  pay_str += ToText(nfg.Payoff(outcome, k), GetDecimals());
 	  

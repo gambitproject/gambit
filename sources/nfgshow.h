@@ -38,7 +38,6 @@ class NfgToolbar;
 class NfgShow : public wxFrame, public EfgNfgInterface {
 private:
   Nfg &m_nfg;
-  gList<NFSupport *> supports;
 
   NfgPanel *m_panel;
   NfgToolbar *m_toolbar;
@@ -47,22 +46,20 @@ private:
 
   wxSashWindow *m_panelSashWindow, *m_solutionSashWindow;
 
-  int cur_soln;
-
+  gList<NFSupport *> m_supports;
   NFSupport *m_currentSupport;
+  int m_currentSolution;
 
   int m_rowPlayer, m_colPlayer;
-  NormalDrawSettings  draw_settings;
-  gList<Accel>    accelerators;
-  gText filename;
-  
-  // Private functions
+  NormalDrawSettings m_drawSettings;
+  gList<Accel> m_accelerators;
+  gText m_fileName;
+
+
   void MakeMenus(void);
-
-  gText UniqueSupportName(void) const;
-
-  void AdjustSizes(void);
   void UpdateMenus(void);
+  gText UniqueSupportName(void) const;
+  void AdjustSizes(void);
 
   // process accelerators
   gArray<AccelEvent> MakeEventNames(void);
@@ -125,7 +122,7 @@ public:
   gArray<int> GetProfile(void) const;
 
   NFSupport *CurrentSupport(void) const { return m_currentSupport; }
-  int NumSupports(void) const { return supports.Length(); }
+  int NumSupports(void) const { return m_supports.Length(); }
   
   void OutcomePayoffs(int st1, int st2, bool next = false);
   void UpdateProfile(gArray<int> &profile);
@@ -134,31 +131,26 @@ public:
   int GetRowPlayer(void) const { return m_rowPlayer; }
   int GetColPlayer(void) const { return m_colPlayer; }
   
-  void ClearSolutions(void);
   void ChangeSolution(int sol);
 
-  int CurrentSolution(void) const { return cur_soln; }
+  int CurrentSolution(void) const { return m_currentSolution; }
   const gList<MixedSolution> &Solutions(void) const;
 
-  // Project solutions to EF.
   void SolutionToExtensive(const MixedSolution &mp, bool set = false);
 
-  // Filename support
   void SetFileName(const gText &s);
-  const gText &Filename(void) const { return filename; }
+  const gText &Filename(void) const { return m_fileName; }
 
   const Nfg &Game(void) const { return m_nfg; }  
 
   bool GameIsDirty(void) const { return m_nfg.IsDirty(); }
 
-  int GetDecimals(void) const { return draw_settings.GetDecimals(); }
-  void SetDecimals(int p_decimals) { draw_settings.SetDecimals(p_decimals); }
+  int GetDecimals(void) const { return m_drawSettings.GetDecimals(); }
+  void SetDecimals(int p_decimals) { m_drawSettings.SetDecimals(p_decimals); }
+  bool OutcomeValues(void) const { return m_drawSettings.OutcomeValues(); }
 
-  // Process Accelerator Keys
-  int  CheckAccelerators(wxKeyEvent &ev);
+  int CheckAccelerators(wxKeyEvent &ev);
 
-  // Access to the draw settings.
-  const NormalDrawSettings& getNormalDrawSettings() { return draw_settings; }
 
   DECLARE_EVENT_TABLE()
 };
