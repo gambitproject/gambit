@@ -413,6 +413,67 @@ Portion* GSM_EqualTo_bool( Portion** param )
 }
 
 
+
+
+
+
+Portion* GSM_EqualTo_EfPlayer( Portion** param )
+{
+  Portion* result = 0;
+  result = new BoolValPortion
+    (
+     ( (EfPlayerPortion*) param[ 0 ] )->Value() ==
+     ( (EfPlayerPortion*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+Portion* GSM_EqualTo_Node( Portion** param )
+{
+  Portion* result = 0;
+  result = new BoolValPortion
+    (
+     ( (NodePortion*) param[ 0 ] )->Value() ==
+     ( (NodePortion*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+Portion* GSM_EqualTo_Infoset( Portion** param )
+{
+  Portion* result = 0;
+  result = new BoolValPortion
+    (
+     ( (InfosetPortion*) param[ 0 ] )->Value() ==
+     ( (InfosetPortion*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+Portion* GSM_EqualTo_Outcome( Portion** param )
+{
+  Portion* result = 0;
+  result = new BoolValPortion
+    (
+     ( (OutcomePortion*) param[ 0 ] )->Value() ==
+     ( (OutcomePortion*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+Portion* GSM_EqualTo_Action( Portion** param )
+{
+  Portion* result = 0;
+  result = new BoolValPortion
+    (
+     ( (ActionPortion*) param[ 0 ] )->Value() ==
+     ( (ActionPortion*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+
+
 //----------------------- GSM_NotEqualTo --------------------------
 
 Portion* GSM_NotEqualTo_double( Portion** param )
@@ -469,6 +530,68 @@ Portion* GSM_NotEqualTo_bool( Portion** param )
      );
   return result;
 }
+
+
+
+
+
+
+Portion* GSM_NotEqualTo_EfPlayer( Portion** param )
+{
+  Portion* result = 0;
+  result = new BoolValPortion
+    (
+     ( (EfPlayerPortion*) param[ 0 ] )->Value() !=
+     ( (EfPlayerPortion*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+Portion* GSM_NotEqualTo_Node( Portion** param )
+{
+  Portion* result = 0;
+  result = new BoolValPortion
+    (
+     ( (NodePortion*) param[ 0 ] )->Value() !=
+     ( (NodePortion*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+Portion* GSM_NotEqualTo_Infoset( Portion** param )
+{
+  Portion* result = 0;
+  result = new BoolValPortion
+    (
+     ( (InfosetPortion*) param[ 0 ] )->Value() !=
+     ( (InfosetPortion*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+Portion* GSM_NotEqualTo_Outcome( Portion** param )
+{
+  Portion* result = 0;
+  result = new BoolValPortion
+    (
+     ( (OutcomePortion*) param[ 0 ] )->Value() !=
+     ( (OutcomePortion*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+Portion* GSM_NotEqualTo_Action( Portion** param )
+{
+  Portion* result = 0;
+  result = new BoolValPortion
+    (
+     ( (ActionPortion*) param[ 0 ] )->Value() !=
+     ( (ActionPortion*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+
 
 
 //-------------------------- GSM_GreaterThan -------------------------
@@ -810,6 +933,38 @@ void Init_gsmoper( GSM* gsm )
   };
 
 
+  ParamInfoType xy_EfPlayer[] =
+  {
+    ParamInfoType( "x", porEF_PLAYER ),
+    ParamInfoType( "y", porEF_PLAYER )
+  };
+
+  ParamInfoType xy_Node[] =
+  {
+    ParamInfoType( "x", porNODE ),
+    ParamInfoType( "y", porNODE )
+  };
+
+  ParamInfoType xy_Infoset[] =
+  {
+    ParamInfoType( "x", porINFOSET ),
+    ParamInfoType( "y", porINFOSET )
+  };
+
+  ParamInfoType xy_Outcome[] =
+  {
+    ParamInfoType( "x", porOUTCOME ),
+    ParamInfoType( "y", porOUTCOME )
+  };
+
+  ParamInfoType xy_Action[] =
+  {
+    ParamInfoType( "x", porACTION ),
+    ParamInfoType( "y", porACTION )
+  };
+
+
+
   ParamInfoType x_Float[] =
   {
     ParamInfoType( "x", porFLOAT )
@@ -919,6 +1074,12 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetFuncInfo( GSM_EqualTo_gString, 2, xy_Text );
   FuncObj->SetFuncInfo( GSM_EqualTo_bool, 2, xy_Bool );
 
+  FuncObj->SetFuncInfo( GSM_EqualTo_EfPlayer, 2, xy_EfPlayer );
+  FuncObj->SetFuncInfo( GSM_EqualTo_Node, 2, xy_Node );
+  FuncObj->SetFuncInfo( GSM_EqualTo_Infoset, 2, xy_Infoset );
+  FuncObj->SetFuncInfo( GSM_EqualTo_Outcome, 2, xy_Outcome );
+  FuncObj->SetFuncInfo( GSM_EqualTo_Action, 2, xy_Action );
+
   gsm->AddFunction( FuncObj );
 
 
@@ -931,6 +1092,12 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetFuncInfo( GSM_NotEqualTo_gRational, 2, xy_Rational );
   FuncObj->SetFuncInfo( GSM_NotEqualTo_gString, 2, xy_Text );
   FuncObj->SetFuncInfo( GSM_NotEqualTo_bool, 2, xy_Bool );
+
+  FuncObj->SetFuncInfo( GSM_NotEqualTo_EfPlayer, 2, xy_EfPlayer );
+  FuncObj->SetFuncInfo( GSM_NotEqualTo_Node, 2, xy_Node );
+  FuncObj->SetFuncInfo( GSM_NotEqualTo_Infoset, 2, xy_Infoset );
+  FuncObj->SetFuncInfo( GSM_NotEqualTo_Outcome, 2, xy_Outcome );
+  FuncObj->SetFuncInfo( GSM_NotEqualTo_Action, 2, xy_Action );
 
   gsm->AddFunction( FuncObj );
 
