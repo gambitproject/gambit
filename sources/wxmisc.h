@@ -88,6 +88,7 @@ public:
     virtual void   OnOk(void);
     virtual void   OnCancel(void);
     virtual void   OnHelp(void);
+    virtual Bool   OnClose(void);
 };
 
 

@@ -414,7 +414,10 @@ void NfgSolnShow::OnOk(void)
     if (parent) 
         parent->InspectSolutions(DESTROY_DIALOG);
 
-    Close();
+    // RDM This line causes a crash in OnClose():
+    // Close();
+    // I'm substitutinging this one:   
+    delete this;
 }
 
 
@@ -560,6 +563,13 @@ void NfgSolnShow::OnOptionsChanged(unsigned int options)
         Resize();
         Repaint();
     }
+}
+
+// OnClose -- Close the window, as if OK was pressed
+Bool NfgSolnShow::OnClose(void)
+{
+  OnOk();
+  return FALSE;
 }
 
 void NfgSolnShow::UpdateValues(void)
@@ -1106,6 +1116,13 @@ void Nfg1SolnPicker::OnRemove(bool all)
 int Nfg1SolnPicker::Picked(void) const
 {
     return picked;
+}
+
+// OnClose -- Close the window, as if OK was pressed
+Bool Nfg1SolnPicker::OnClose(void)
+{
+  OnOk();
+  return FALSE;
 }
 
 

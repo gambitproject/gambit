@@ -277,6 +277,12 @@ void MyDialogBox::OnHelp(void)
     if (help_str) wxHelpContents(help_str);
 }
 
+Bool MyDialogBox::OnClose(void)
+{
+  OnCancel();
+  return FALSE;
+}
+
 
 // Implementation for a message box with help capability
 MyMessageBox::MyMessageBox(const char *message, const char *caption, 

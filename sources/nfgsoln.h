@@ -63,6 +63,8 @@ public:
 	void OnHelp(int help_type=0);
 	// Take care of some options changes
 	void OnOptionsChanged(unsigned int options=0);
+  // OnClose calls OnOk
+  virtual Bool OnClose(void);
 };
 
 //****************************************************************************
@@ -91,6 +93,8 @@ public:
 	virtual void OnHelp(int help_type=0);
 	// Return the pick
 	int Picked(void) const;
+  // OnClose calls OnOk
+  virtual Bool OnClose(void);
 };
 
 #endif
