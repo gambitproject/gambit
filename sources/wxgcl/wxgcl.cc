@@ -279,8 +279,6 @@ private:
   void OnPrefsPrompt(wxCommandEvent &);
   void OnPrefsInputFont(wxCommandEvent &);
   void OnPrefsOutputFont(wxCommandEvent &);
-  void OnHelpContents(wxCommandEvent &);
-  void OnHelpIndex(wxCommandEvent &);
   void OnHelpAbout(wxCommandEvent &);
 
   // Other event handlers
@@ -356,9 +354,6 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
 		    "Change the font used in the output window");
 
   wxMenu *helpMenu = new wxMenu;
-  helpMenu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
-  helpMenu->Append(wxID_HELP_INDEX, "&Index", "Index of help file");
-  helpMenu->AppendSeparator();
   helpMenu->Append(wxID_ABOUT, "&About", "About Gambit");
 
   wxMenuBar *menuBar = new wxMenuBar;
@@ -470,8 +465,6 @@ BEGIN_EVENT_TABLE(GclFrame, wxFrame)
   EVT_MENU(idPREFS_PROMPT, GclFrame::OnPrefsPrompt)
   EVT_MENU(idPREFS_INPUTFONT, GclFrame::OnPrefsInputFont)
   EVT_MENU(idPREFS_OUTPUTFONT, GclFrame::OnPrefsOutputFont)
-  EVT_MENU(wxID_HELP_CONTENTS, GclFrame::OnHelpContents)
-  EVT_MENU(wxID_HELP_INDEX, GclFrame::OnHelpIndex)
   EVT_MENU(wxID_ABOUT, GclFrame::OnHelpAbout)
   EVT_TEXT_ENTER(idINPUT_WINDOW, GclFrame::OnTextEnter)
   EVT_CLOSE(GclFrame::OnCloseWindow)
@@ -550,14 +543,6 @@ void GclFrame::OnPrefsOutputFont(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     m_outputWindow->SetFont(dialog.GetFontData().GetChosenFont());
   }
-}
-
-void GclFrame::OnHelpContents(wxCommandEvent &)
-{
-}
-
-void GclFrame::OnHelpIndex(wxCommandEvent &)
-{
 }
 
 void GclFrame::OnHelpAbout(wxCommandEvent &)
