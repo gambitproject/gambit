@@ -238,10 +238,11 @@ void FuncDescObj::_SetFuncInfo( const int f_index, const int num_params )
 #ifndef NDEBUG
   else // function already defined
   {
-    gerr << "FuncDescObj Error: attempted to initialize the same function\n";
-    gerr << "                   multiple times as different overloaded\n";
-    gerr << "                   version while initializing function\n";
-    gerr << "                   \"" << _FuncName << "\"\n";
+    gerr << "FuncDescObj Error:\n";
+    gerr << "  Attempted to initialize the same function\n";
+    gerr << "  multiple times as different overloaded\n";
+    gerr << "  versions while initializing function\n";
+    gerr << "  \"" << _FuncName << "\"\n";
     assert( 0 );
   }  
 #endif // NDEBUG
@@ -333,19 +334,21 @@ void FuncDescObj::_SetParamInfo
 #ifndef NDEBUG
   if( !( param_index >= 0 && param_index < _FuncInfo[ f_index ].NumParams ) )
   {
-    gerr << "FuncDescObj Error: an invalid parameter index specified\n";
-    gerr << "                   for SetParamInfo( ... ) while initializing\n";
-    gerr << "                   the function \"" << _FuncName << "\" for\n";
-    gerr << "                   the parameter \"" << param_name << "\"\n";
-    gerr << "                   Index specified: " << param_index << "\n";
+    gerr << "FuncDescObj Error:\n";
+    gerr << "  An invalid parameter index specified\n";
+    gerr << "  for SetParamInfo( ... ) while initializing\n";
+    gerr << "  the function \"" << _FuncName << "\" for\n";
+    gerr << "  the parameter \"" << param_name << "\"\n";
+    gerr << "  Index specified: " << param_index << "\n";
   }
   assert( param_index >= 0 && param_index < _FuncInfo[ f_index ].NumParams );
 
   if( f_index == -1 )
   {
-    gerr << "FuncDescObj Error: an undefined function pointer specified\n";
-    gerr << "                   for SetParamInfo( ... ) while initializing\n";
-    gerr << "                   the function \"" << _FuncName << "\" for\n";
+    gerr << "FuncDescObj Error:\n";
+    gerr << "  An undefined function pointer specified\n";
+    gerr << "  for SetParamInfo( ... ) while initializing\n";
+    gerr << "  the function \"" << _FuncName << "\"\n";
   }
   assert( f_index >= 0 && f_index < _NumFuncs );
 #endif // NDEBUG
@@ -362,18 +365,19 @@ void FuncDescObj::_SetParamInfo
 #ifndef NDEBUG
   if( repeated_variable_declaration )
   {
-    gerr << "FuncDescObj Error: multiple parameters of a functions were\n";
-    gerr << "                   declared with the same formal name ";
-    gerr << "\"" << param_name << "\"\n";
-    gerr << "                   during initialization\n";
+    gerr << "FuncDescObj Error:\n";
+    gerr << "  Multiple parameters of a functions were\n";
+    gerr << "  declared with the same formal name \"" << param_name << "\"\n";
+    gerr << "  during initialization\n";
   }
   assert( !repeated_variable_declaration );
-
+  
   if( _FuncInfo[ f_index ].ParamInfo[ param_index ].Name != "" )
   {
-    gerr << "FuncDescObj Error: parameter #" << param_index << " of a\n";
-    gerr << "                   function in \"" << _FuncName << "\" was\n";
-    gerr << "                   declared multiple times\n";
+    gerr << "FuncDescObj Error:\n";
+    gerr << "  Parameter #" << param_index << " of a\n";
+    gerr << "  function in \"" << _FuncName << "\" was\n";
+    gerr << "  declared multiple times\n";
   }
   assert( _FuncInfo[ f_index ].ParamInfo[ param_index ].Name == "" );
 #endif // NDEBUG
