@@ -1378,22 +1378,8 @@ Portion* GSM_Write_numerical( Portion** param )
 
 Portion* GSM_Write_gString( Portion** param )
 {
-  int i = 0;
-
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
-
-  gString text = ( (TextPortion*) param[ 1 ] )->Value();
-
-  for( i = 0; i < text.length(); i++ )
-  {
-    if( text[ i ] == '\\' && text[ i + 1 ] == 'n' )
-    {
-      text.remove( i );
-      text[ i ] = '\n';
-    }
-  }
-
-  s << text;
+  s << param[1];
   return param[0]->RefCopy();
 }
 
@@ -1401,19 +1387,7 @@ Portion* GSM_Write_gString( Portion** param )
 Portion* GSM_Write_Mixed( Portion** param )
 {
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
-
-  BaseMixedProfile* mixed = ( (MixedPortion*) param[ 1 ] )->Value();
-  switch( mixed->Type() )
-  {
-  case DOUBLE:
-    s << * (MixedSolution<double>*) mixed; 
-    break;
-  case RATIONAL:
-    s << * (MixedSolution<gRational>*) mixed; 
-    break;
-  default:
-    assert( 0 );
-  }
+  s << param[1];
   return param[0]->RefCopy();
 }
 
@@ -1421,19 +1395,7 @@ Portion* GSM_Write_Mixed( Portion** param )
 Portion* GSM_Write_Behav( Portion** param )
 {
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
-
-  BaseBehavProfile* behav = ( (BehavPortion*) param[ 1 ] )->Value();
-  switch( behav->Type() )
-  {
-  case DOUBLE:
-    s << * (BehavSolution<double>*) behav; 
-    break;
-  case RATIONAL:
-    s << * (BehavSolution<gRational>*) behav; 
-    break;
-  default:
-    assert( 0 );
-  }
+  s << param[1];
   return param[0]->RefCopy();
 }
 
@@ -2083,6 +2045,21 @@ Portion *GSM_Version(Portion **)
   return new FloatValPortion(GCL_VERSION);
 }
 
+/*
+extern GSM& _gsm;
+
+Portion* GSM_Help(Portion** param)
+{
+  return _gsm.Help(((TextPortion*) param[0])->Value());
+}
+
+Portion* GSM_Clear(Portion**)
+{
+  _gsm.Clear();
+  return new BoolValPortion(true);
+}
+*/
+
 
 void Init_gsmoper( GSM* gsm )
 {
@@ -2718,10 +2695,17 @@ void Init_gsmoper( GSM* gsm )
 
   //---------------- faked functions -----------------//
 
+/*
   FuncObj = new FuncDescObj( (gString) "Help" );
-  FuncObj->SetFuncInfo( GSM_Fake, 1 );
-  FuncObj->SetParamInfo( GSM_Fake, 0, "x", porTEXT );
+  FuncObj->SetFuncInfo( GSM_Help, 1 );
+  FuncObj->SetParamInfo( GSM_Help, 0, "x", porTEXT );
   gsm->AddFunction( FuncObj );
+
+  FuncObj = new FuncDescObj( (gString) "Clear" );
+  FuncObj->SetFuncInfo( GSM_Clear, 0 );
+  gsm->AddFunction( FuncObj );
+*/
+
 
   FuncObj = new FuncDescObj( (gString) "Assign" );
   FuncObj->SetFuncInfo( GSM_Fake, 2 );
