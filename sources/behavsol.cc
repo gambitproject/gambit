@@ -116,7 +116,6 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
     m_isSequential(triUNKNOWN), m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
-  gEpsilon(m_epsilon);
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
     EFPlayer *player = Game().Players()[pl];  
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
@@ -131,6 +130,12 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
     }
   }
   LevelPrecision();
+
+  if ((*m_profile)[1].Precision() == precDOUBLE)
+    m_epsilon = 0.0;
+  else
+    m_epsilon = 0;
+  gEpsilon(m_epsilon);
 }
 
 BehavSolution::BehavSolution(const BehavSolution &p_solution)
@@ -171,6 +176,7 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
     m_isNash = p_solution.m_isNash;
     m_isSubgamePerfect = p_solution.m_isSubgamePerfect;
     m_isSequential = p_solution.m_isSequential;
+    m_epsilon = p_solution.m_epsilon;
     m_qreLambda = p_solution.m_qreLambda;
     m_qreValue = p_solution.m_qreValue;
     m_liapValue = p_solution.m_liapValue;
@@ -198,8 +204,9 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 void BehavSolution::EvalEquilibria(void) const
 {
   if (IsComplete() && IsPerfectRecall(m_profile->Game())) {
-    if (m_isNash == triUNKNOWN) 
+    if (m_isNash == triUNKNOWN) {
       m_isNash = (m_profile->MaxGripe() <= m_epsilon) ? triTRUE : triFALSE;
+    }
   }  
   if (m_isNash == triFALSE) {
     m_isSubgamePerfect = triFALSE;

@@ -97,7 +97,6 @@ MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
     m_isProper(triUNKNOWN), m_checkedPerfect(false), m_qreLambda(-1), 
     m_qreValue(-1),m_liapValue(-1), m_id(0)
 {
-  gEpsilon(m_epsilon);
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
     for (int st = 1; st <= Game().NumStrats(pl); st++) {
       int index = p_profile.Support().Find(Game().Strategies(pl)[st]);
@@ -108,6 +107,11 @@ MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
     }
   }
   LevelPrecision();
+  if (m_profile[1].Precision() == precDOUBLE)
+    m_epsilon = 0.0;
+  else
+    m_epsilon = 0;
+  gEpsilon(m_epsilon);
 }
 
 MixedSolution::MixedSolution(const MixedSolution &p_solution)
