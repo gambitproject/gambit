@@ -1,0 +1,226 @@
+//
+// FILE: enum.cc -- Nash Enum module
+//
+// $Id$
+//
+
+#include "gwatch.h"
+#include "nfg.h"
+#include "nfgiter.h"
+
+#include "enum.h"
+#include "glistit.h"
+
+void Epsilon_T(double &v, int i);
+void Epsilon_T(gRational &v, int i);
+
+//-------------------------------------------------------------------------
+//                    EnumModule<T>: Member functions
+//-------------------------------------------------------------------------
+
+template <class T>
+EnumModule<T>::EnumModule(const Nfg<T> &N, const EnumParams &p,
+			  const NFSupport &S)
+  : NF(N), support(S), params(p), rows(S.NumStrats(1)), cols(S.NumStrats(2)), 
+    level(0), count(0), npivots(0)
+{ 
+  Epsilon_T(eps,2);
+}
+
+
+template <class T> int EnumModule<T>::Enum(void)
+{
+  int index;
+  bool add;
+  T min;
+
+  if (NF.NumPlayers() != 2)   return 0;  
+  int n1, n2, v1,v2,i,j,k;
+
+  gWatch watch;
+
+  n1=support.NumStrats(1);
+  n2=support.NumStrats(2);
+  NfgIter<T> iter(&support); 
+
+  gMatrix<T> A1(1,n1,1,n2);
+  gMatrix<T> A2(1,n2,1,n1);
+  gVector<T> b1(1,n1);
+  gVector<T> b2(1,n2);
+
+  min = NF.MinPayoff()-(T)1; 
+
+
+   // construct A1,A2,b1,b2  
+  
+  for (i=1; i<=n1; i++) {
+    for (j=1; j<=n2; j++)  {
+      A1(i, j) = iter.Payoff(1) - min;
+      A2(j, i) = iter.Payoff(2) - min;
+      iter.Next(2);
+    }
+    iter.Next(1);
+  }
+
+  b1 = -(T)1;
+  b2 = -(T)1;
+
+  // enumerate vertices of A1 x + b1 <= 0 and A2 x + b2 <= 0
+
+  params.status.SetProgress((double)0);
+
+  time = watch.Elapsed();
+  double dt = (double)0;
+  if(params.trace>=2) 
+    (*params.tracefile) << "\nat start,    dt = " << dt << " time = " << time; 
+  
+
+  VertEnum<T> poly1(A1,b1,params.status);
+  params.status.SetProgress(-(double)(1));
+
+  dt = watch.Elapsed()-time;
+  time = watch.Elapsed();
+  if(params.trace>=2) 
+    (*params.tracefile) << "\nafter poly1, dt = " << dt << " time = " << time; 
+  
+
+  VertEnum<T> poly2(A2,b2,params.status);
+  params.status.SetProgress(-(double)1);
+
+  
+  dt = watch.Elapsed()-time;
+  time = watch.Elapsed();
+  if(params.trace>=2) 
+    (*params.tracefile) << "\nafter poly2, dt = " << dt << " time = " << time; 
+  
+
+  const BFS_List &verts1(poly1.VertexList());
+  const BFS_List &verts2(poly2.VertexList());
+  v1=verts1.Length();
+  v2=verts2.Length();
+
+//  v1=poly1.VertexList().Length();
+//  v2=poly2.VertexList().Length();
+  if(params.trace>=2) 
+    (*params.tracefile) << "\n v1 = " << v1 << ", v2 = " << v2;
+
+  BFS<T> bfs1,bfs2;
+  MixedProfile<T> profile(NF,support);
+  T sum;
+  bool nash;
+
+  gListIter< BFS<T> > iter1((gList< BFS<T> > &) verts1);
+  gListIter< BFS<T> > iter2((gList< BFS<T> > &) verts2);
+
+  i=0;
+  for( iter2.GoFirst(),iter2++; 
+       !iter2.PastEnd() &&  !params.status.Get()
+       && (params.stopAfter==0 || solutions.Length()<params.stopAfter);
+       iter2++ ) {
+    bfs1 = iter2.GetValue();
+    params.status.SetProgress((double)(i-2)/(double)v2);
+//    gout << "\nProgress = " << (double)(i-2)/(double)v2;
+    i++;
+    for( iter1.GoFirst(),iter1++; !iter1.PastEnd()
+       && (params.stopAfter==0 || solutions.Length()<params.stopAfter);
+	 iter1++ ) {
+      bfs2 = iter1.GetValue();
+      
+      // check if solution is nash 
+      // need only check complementarity, since it is feasible
+      
+      nash=1;
+      for(k=1;k<=n1 && nash==1;k++)
+	if(bfs1.IsDefined(k) && bfs2.IsDefined(-k))
+	  if(!EqZero(bfs1(k)*bfs2(-k)))
+	    nash=0;
+      for(k=1;k<=n2 && nash==1;k++)
+	if(bfs2.IsDefined(k) && bfs1.IsDefined(-k))
+	  if(!EqZero(bfs2(k)*bfs1(-k)))
+	    nash=0;
+
+      if(nash) {
+	sum = (T)0;
+	for(k=1;k<=n1;k++) {
+	  profile(1,k) = (T)0;
+	  if(bfs1.IsDefined(k)) {
+	    profile(1,k) =-bfs1(k);
+	    sum+=profile(1,k);
+	  }
+	} 
+	for(k=1;k<=n1;k++) {
+	  if(bfs1.IsDefined(k)) 
+	    profile(1,k)/=sum;
+	}
+	sum = (T)0;
+	for(k=1;k<=n2;k++) {
+	  profile(2,k) = (T)0;
+	  if(bfs2.IsDefined(k)) {
+	    profile(2,k) =-bfs2(k);
+	    sum+=profile(2,k);
+	  }
+	} 
+	for(k=1;k<=n2;k++) {
+	  if(bfs2.IsDefined(k)) 
+	    profile(2,k)/=sum;
+	} 
+
+	add = false;
+	if((params.status.Get() != 1) || 
+	   (params.status.Get() == 1 && profile.IsNash()))
+	  add = true;
+	if(add)
+	{
+	  index = solutions.Append(MixedSolution<T>(profile, NfgAlg_ENUM));
+	  if(params.status.Get() != 1)
+	    solutions[index].SetIsNash(T_YES);
+	}
+      }
+    }
+
+  }
+  npivots = poly1.NumPivots()+poly2.NumPivots();
+
+  if(params.status.Get()) {
+    (*params.tracefile) << "\n User Break \n";
+    params.status.Reset();
+  }
+
+  
+  dt = watch.Elapsed()-time;
+  time = watch.Elapsed();
+  if(params.trace>=2) {
+    (*params.tracefile) << "\nafter loop,  dt = " << dt << " time = " << time;
+    (*params.tracefile) << "\n";
+  }
+  return 1;
+}
+
+
+template <class T> bool EnumModule<T>::EqZero(T x) const
+{
+  if(x <= eps && x >= -eps) return 1;
+  return 0;
+}     
+
+template <class T> long EnumModule<T>::NumPivots(void) const
+{
+  return npivots;
+}
+
+template <class T> double EnumModule<T>::Time(void) const
+{
+  return time;
+}
+
+template <class T> EnumParams &EnumModule<T>::Parameters(void)
+{
+  return params;
+}
+
+template <class T>
+const gList<MixedSolution<T> > &EnumModule<T>::GetSolutions(void) const
+{
+  return solutions;
+}
+
