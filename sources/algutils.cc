@@ -3,7 +3,7 @@
 //
 
 #include "algutils.h"
-#include "assert.h"
+#include <assert.h>
 
 AlgParams::AlgParams(gStatus &s)
   : m_accuracy(0), trace(0), stopAfter(0), precision(precDOUBLE), 
