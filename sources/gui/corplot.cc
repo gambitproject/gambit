@@ -286,7 +286,23 @@ void gbtCorPlotWindow::OnPaint(wxPaintEvent &)
   dc.Clear();
   DrawXAxis(dc);
   DrawYAxis(dc);
+
+  int width, height;
+  GetClientSize(&width, &height);
+
   for (int i = 1; i <= m_cor->NumDimensions(); i++) {
+    static wxPen *pens[] = { wxRED_PEN, wxGREEN_PEN, wxCYAN_PEN,
+			     wxLIGHT_GREY_PEN, wxBLACK_PEN };
+    dc.SetPen(*pens[(i - 1) % 5]);
+
+    dc.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+    dc.SetTextForeground(*wxBLUE);
+    wxCoord tw,th;
+    dc.GetTextExtent((char *) m_cor->GetLabel(i), &tw, &th);
+    dc.DrawLine(width - m_marginX - 50, 3*th*i/2+th/2,
+		width - m_marginX - 40, 3*th*i/2+th/2);
+    dc.DrawText((char *) m_cor->GetLabel(i), 
+		width - m_marginX - 35, 3*th*i/2);
     DrawDimension(dc, i);
   }
 }
