@@ -17,7 +17,7 @@
 
 
 #define CRASHTEST
-// #define INTERACTIVE
+#define INTERACTIVE
 
 
 int main( void )
@@ -64,7 +64,7 @@ int main( void )
   gin >> cont;
 
 
-
+/*
 
 
   gout << "\n";
@@ -1036,9 +1036,13 @@ int main( void )
   machine->PushRef( "lx" );
   machine->Push( (long) -2 );
   machine->Subscript();
+  gout << "here1!\n";
   machine->PushRef( "lx" );
+  gout << "here2!\n";
   machine->Push( (long) 7 );
+  gout << "here3!\n";
   machine->Subscript();
+  gout << "here4!\n";
   machine->Dump();
 
 #endif
@@ -3220,6 +3224,33 @@ int main( void )
   machine->Push( (long) 2 );
   machine->Subscript();
   machine->Dump();
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+*/
+
+  machine->PushRef( "nx" );
+  machine->InitCallFunction( "ReadNfg" );
+  machine->InitCallFunction( "Input" );
+  machine->Push( "e02.nfg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Dump();
+
+  machine->InitCallFunction( "PureNash" );
+  machine->PushRef( "nx" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
   
 
   gout << "*********************** Press Return to continue ************";

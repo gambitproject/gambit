@@ -40,7 +40,7 @@ Behav_ListPortion<double>::Behav_ListPortion(ExtForm<double> *E,
 {
   _DataType = porBEHAV_FLOAT;
   for (int i = 1; i <= list.Length(); i++)
-    Append( new BehavValPortion<double>(list[i]));
+    Append( new BehavValPortion<double>( * new BehavProfile<double>(list[i])));
 }
 
 Behav_ListPortion<gRational>::Behav_ListPortion(ExtForm<gRational> *E,
@@ -48,7 +48,7 @@ Behav_ListPortion<gRational>::Behav_ListPortion(ExtForm<gRational> *E,
 {
   _DataType = porBEHAV_RATIONAL;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new BehavValPortion<gRational>(list[i]));
+    Append( new BehavValPortion<gRational>( * new BehavProfile<gRational>(list[i])));
 }
 
 Portion *GSM_GobitEfg(Portion **param)

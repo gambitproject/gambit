@@ -73,7 +73,7 @@ Mixed_ListPortion<double>::Mixed_ListPortion(NormalForm<double> *N,
 {
   _DataType = porMIXED_FLOAT;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new MixedValPortion<double>(MixedProfile<double>(*N, list[i])));
+    Append(new MixedValPortion<double>(* new MixedProfile<double>(*N, list[i])));
 }
 
 #include "enum.h"
