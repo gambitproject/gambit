@@ -23,9 +23,9 @@ extern "C" long _sysconf(int);
 
 #endif   // __GNUG__
 
-#if defined __BORLANDC__
-#include <time.h>
-#endif    // __GNUG__, __BORLANDC__
+#ifdef __BORLANDC__
+#include <sys\timeb.h>
+#endif    // __BORLANDC__
 
 
 gWatch::gWatch(bool run /* = true */)
@@ -57,7 +57,9 @@ void gWatch::Start(void)
   times(&buffer);
   start = buffer.tms_utime;
 #elif defined __BORLANDC__
-  start = time(NULL);
+  struct timeb buffer;
+  ftime(&buffer);
+  start = buffer.time * 1000 + buffer.millitm;
 #endif   // __GNUG__, __BORLANDC__
 }
 
@@ -72,7 +74,9 @@ void gWatch::Stop(void)
   times(&buffer);
   stop = buffer.tms_utime;
 #elif defined __BORLANDC__
-  stop= time(NULL);
+  struct timeb buffer;
+  ftime(&buffer);
+  stop = buffer.time * 1000 + buffer.millitm;
 #endif   // __GNUG__, __BORLANDC__
 }
 
@@ -87,7 +91,9 @@ double gWatch::Elapsed(void) const
   
   return (((double) (stop - start)) / ((double) (CLK_TCK)));
 #elif defined __BORLANDC__
-  return ((double) (time(NULL) - start));
+  struct timeb buffer;
+  ftime(&buffer);
+  return (((double) (buffer.time * 1000 + buffer.millitm - start)) / 1000);
 #endif  // __GNUG__, __BORLANDC__
 }
 
