@@ -25,6 +25,7 @@ class Lexicon;
 class Nfg;
 template <class T> class BehavProfile;
 template <class T> class MixedProfile;
+template <class T> class PureBehavProfile;
 
 class Efg     {
 
@@ -41,6 +42,8 @@ friend class Nfg;
 protected:
     bool sortisets;
     mutable bool m_dirty;
+    mutable long m_revision;
+    mutable long m_outcome_revision;
     gText title, comment;
     gBlock<EFPlayer *> players;
     gBlock<EFOutcome *> outcomes;
@@ -48,7 +51,6 @@ protected:
     EFPlayer *chance;
     mutable Nfg *afg;
     mutable Lexicon *lexicon;
-
 
     // this is for use with the copy constructor
     void CopySubtree(Node *, Node *);
@@ -111,6 +113,7 @@ protected:
 
        //# DATA ACCESS -- GENERAL INFORMATION
     bool IsConstSum(void) const; 
+    long RevisionNumber(void) const { return m_revision; }
     bool IsDirty(void) const { return m_dirty; }
     void SetIsDirty(bool p_dirty) { m_dirty = p_dirty; }
     gNumber MinPayoff(int pl = 0) const;
@@ -187,9 +190,10 @@ protected:
     gArray<gNumber> GetChanceProbs(Infoset *) const;
 
     void SetPayoff(EFOutcome *, int pl, const gNumber &value);
-    gNumber Payoff(EFOutcome *, int pl) const;
-    gArray<gNumber> Payoff(EFOutcome *) const;
+    gNumber Payoff(const EFOutcome *, int pl) const;
+    gArray<gNumber> Payoff(const EFOutcome *) const;
 
+    void InitPayoffs(void) const;
 
     // Unmarks all subgames in the subtree rooted at n
     void UnmarkSubgames(Node *n);
@@ -199,7 +203,6 @@ protected:
     void MarkSubgames(const gList<Node *> &list);
     bool DefineSubgame(Node *n);
     void RemoveSubgame(Node *n);
-
 
     int ProfileLength(void) const;
     int TotalNumInfosets(void) const;
@@ -259,7 +262,6 @@ template <class T> class PureBehavProfile   {
     const Efg *E;
     gArray<gArray<const Action *> *> profile;
     gPVector<T> *chanceprobs;
-    gRectArray<T> *payoffs;
 
     //    void IndPayoff(const Node *n, const int &pl, const T, T &) const;
     // This aims at efficiency, but leads to a problem described in behav.imp

@@ -89,7 +89,8 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
     m_checkedSubgamePerfect(false), m_checkedSequential(false), 
     m_epsilon(0.0),
     m_qreLambda(-1), m_qreValue(-1),
-    m_liapValue(-1), m_beliefs(0), m_regret(0), m_rnf_regret(0), m_id(0)
+    m_liapValue(-1), m_beliefs(0), m_regret(0), m_rnf_regret(0), 
+    m_id(0), m_revision(p_profile.Game().RevisionNumber())
 {
   gEpsilon(m_epsilon);
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
@@ -118,7 +119,8 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
     m_checkedANFNash(false), m_checkedNash(false),
     m_checkedSubgamePerfect(false), m_checkedSequential(false), 
     m_qreLambda(-1), m_qreValue(-1),
-    m_liapValue(-1), m_beliefs(0), m_regret(0), m_rnf_regret(0), m_id(0)
+    m_liapValue(-1), m_beliefs(0), m_regret(0), m_rnf_regret(0), 
+    m_id(0), m_revision(p_profile.Game().RevisionNumber())
 {
   gEpsilon(m_epsilon);
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
@@ -146,7 +148,8 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
     m_checkedANFNash(false), m_checkedNash(false),
     m_checkedSubgamePerfect(false), m_checkedSequential(false), 
     m_qreLambda(-1), m_qreValue(-1),
-    m_liapValue(-1), m_beliefs(0), m_regret(0), m_rnf_regret(0), m_id(0)
+    m_liapValue(-1), m_beliefs(0), m_regret(0), m_rnf_regret(0), 
+    m_id(0), m_revision(p_profile.Game().RevisionNumber())
 {
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
     EFPlayer *player = Game().Players()[pl];  
@@ -187,7 +190,8 @@ BehavSolution::BehavSolution(const BehavSolution &p_solution)
     m_qreLambda(p_solution.m_qreLambda),
     m_qreValue(p_solution.m_qreValue),
     m_liapValue(p_solution.m_liapValue),
-    m_beliefs(0), m_regret(0), m_rnf_regret(0), m_id(0)
+    m_beliefs(0), m_regret(0), m_rnf_regret(0), 
+    m_id(0), m_revision(p_solution.m_revision)
 {
   if (p_solution.m_beliefs) {
     m_beliefs = new gDPVector<gNumber>(*p_solution.m_beliefs);
@@ -228,6 +232,8 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
     m_qreLambda = p_solution.m_qreLambda;
     m_qreValue = p_solution.m_qreValue;
     m_liapValue = p_solution.m_liapValue;
+    m_id = p_solution.m_id;
+    m_revision = p_solution.m_revision;
     if (m_beliefs)   delete m_beliefs;
     if (p_solution.m_beliefs)
       m_beliefs = new gDPVector<gNumber>(*p_solution.m_beliefs);
@@ -258,6 +264,7 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 
 void BehavSolution::CheckIsNash(void) const
 {
+  if(!IsValid()) Invalidate();
   if (m_checkedNash == false) {
     bool decomposes = HasSubgames(Game());
     // check subgame perfection if game decomposes (its faster)
@@ -296,6 +303,7 @@ void BehavSolution::CheckIsNash(void) const
 
 void BehavSolution::CheckIsSubgamePerfect(void) const
 {
+  if(!IsValid()) Invalidate();
   if(m_checkedSubgamePerfect == false) {
     // Note -- HasSubgames should be cached in Efg
     bool decomposes = HasSubgames(Game());
@@ -333,6 +341,7 @@ void BehavSolution::CheckIsSubgamePerfect(void) const
 
 void BehavSolution::CheckIsANFNash(void) const
 {
+  if(!IsValid()) Invalidate();
   if (m_checkedANFNash == false) {
     gStatus &m_status = gstatus;
     m_isANFNash = (m_profile->ExtendsToANFNash(Support(),Support(),m_status)) ?
@@ -555,6 +564,7 @@ void BehavSolution::Invalidate(void) const
     delete m_rnf_regret;
     m_rnf_regret = 0;
   }
+  m_revision = Game().RevisionNumber();
 }
 
 //-----------------------------------------

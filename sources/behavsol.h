@@ -44,6 +44,7 @@ protected:
   mutable gDPVector<gNumber> *m_beliefs, *m_regret;
   mutable gPVector<gNumber> *m_rnf_regret;
   unsigned int m_id;
+  mutable long m_revision;
 
   // PRIVATE AUXILIARY MEMBER FUNCTIONS
   void CheckIsNash(void) const;
@@ -179,6 +180,7 @@ public:
 	 
   // Force the invalidation of cached quantities
   void Invalidate(void) const;
+  bool IsValid(void) const {return (m_revision == Game().RevisionNumber());}
 
 
 

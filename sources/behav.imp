@@ -20,9 +20,9 @@
 //-------------------------------------------------------------------------
 
 template <class T> PureBehavProfile<T>::PureBehavProfile(const Efg &efg)
-  : E(&efg), profile(efg.NumPlayers()),
-    payoffs(new gRectArray<T>(efg.NumOutcomes(), efg.NumPlayers()))
+  : E(&efg), profile(efg.NumPlayers())
 {
+  E->InitPayoffs();  // only needed for T=double, remove if class is detemplated
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
     EFPlayer *player = efg.Players()[pl];
     profile[pl] = new gArray<const Action *>(player->NumInfosets());
@@ -36,48 +36,42 @@ template <class T> PureBehavProfile<T>::PureBehavProfile(const Efg &efg)
   chanceprobs = new gPVector<T>(dim);
   for (int iset = 1; iset <= dim.Length(); iset++)
     for (int act = 1; act <= efg.GetChance()->Infosets()[iset]->NumActions(); act++)
-       (*chanceprobs)(iset, act) = efg.GetChanceProb(efg.GetChance()->Infosets()[iset], act);
-
-  for (int outc = 1; outc <= E->NumOutcomes(); outc++)
-    for (int pl = 1; pl <= E->NumPlayers(); pl++)
-      (*payoffs)(outc, pl) = E->Payoff(E->Outcomes()[outc], pl);
-
+      (*chanceprobs)(iset, act) = efg.GetChanceProb(efg.GetChance()->Infosets()[iset], act);
 }
 
 template <class T>
 PureBehavProfile<T>::PureBehavProfile(const PureBehavProfile<T> &p)
-  : E(p.E), profile(p.profile.Length()),
-    payoffs(new gRectArray<T>(*p.payoffs))
+  : E(p.E), profile(p.profile.Length())
 {
+  E->InitPayoffs();  // only needed for T=double, remove if class is detemplated
   for (int pl = 1; pl <= profile.Length(); pl++)   {
     profile[pl] = new gArray<const Action *>(p.profile[pl]->Length());
     for (int iset = 1; iset <= profile[pl]->Length(); iset++)
       (*profile[pl])[iset] = (*p.profile[pl])[iset];
   }
-
+  
   gArray<int> dim(E->GetChance()->NumInfosets());
   for (int iset = 1; iset <= dim.Length(); iset++)
     dim[iset] = E->GetChance()->Infosets()[iset]->NumActions();
   chanceprobs = new gPVector<T>(dim);
   for (int iset = 1; iset <= dim.Length(); iset++)
     for (int act = 1; act <= E->GetChance()->Infosets()[iset]->NumActions(); act++)
-       (*chanceprobs)(iset, act) = E->GetChanceProb(E->GetChance()->Infosets()[iset], act);
+      (*chanceprobs)(iset, act) = E->GetChanceProb(E->GetChance()->Infosets()[iset], act);
 }
 
 template <class T> PureBehavProfile<T>::~PureBehavProfile()
 {
   for (int pl = 1; pl <= profile.Length(); delete profile[pl++]);
-  delete payoffs;
   delete chanceprobs;
 }
 
-template <class T>
-PureBehavProfile<T> &PureBehavProfile<T>::operator=(const PureBehavProfile<T> &p)
+template <class T> 
+PureBehavProfile<T> &PureBehavProfile<T>::operator=(const PureBehavProfile<T> &p) 
 {
   if (this != &p && E == p.E)   {
-    for (int pl = 1; pl <= profile.Length(); pl++)
-      for (int iset = 1; iset <= profile[pl]->Length(); iset++)
-        (*profile[pl])[iset] = (*p.profile[pl])[iset];
+    for(int pl = 1; pl <= profile.Length(); pl++)
+    for(int iset = 1; iset <= profile[pl]->Length(); iset++)
+    (*profile[pl])[iset] = (*p.profile[pl])[iset];
   }
   return *this;
 }
@@ -85,7 +79,7 @@ PureBehavProfile<T> &PureBehavProfile<T>::operator=(const PureBehavProfile<T> &p
 template <class T> T PureBehavProfile<T>::operator()(Action *action) const
 {
   if ((*profile[action->BelongsTo()->GetPlayer()->GetNumber()])
-              [action->BelongsTo()->GetNumber()] == action)
+      [action->BelongsTo()->GetNumber()] == action)
     return (T) 1;
   else
     return (T) 0;
@@ -94,7 +88,7 @@ template <class T> T PureBehavProfile<T>::operator()(Action *action) const
 template <class T> void PureBehavProfile<T>::Set(const Action *action)
 {
   (*profile[action->BelongsTo()->GetPlayer()->GetNumber()])
-               [action->BelongsTo()->GetNumber()] = action;
+    [action->BelongsTo()->GetNumber()] = action;
 }
 
 template <class T>
@@ -139,14 +133,16 @@ void PureBehavProfile<T>::IndPayoff(const Node *n,
 // The following could be shortened by using the player-specific one above.
 // Whether this would be more efficient in fact is unknown. - AMM 7.6.98
 
+/*
 template <class T>
 const T PureBehavProfile<T>::Payoff(const EFOutcome *o, const int &pl) const
 {
   if (o)
-    return (*payoffs)(o->GetNumber(), pl);
+    return E->Payoff(o, pl);
   else
     return (T) 0;
 }
+*/
 
 template <class T>
 const T PureBehavProfile<T>::Payoff(const Node *n, const int &pl) const
@@ -260,16 +256,16 @@ BehavProfile<T>::BehavProfile(const BehavProfile<T> &p_profile)
   : gDPVector<T>(p_profile), m_efg(p_profile.m_efg),
     m_root(new BehavNode<T>(p_profile.m_efg->RootNode(),
 			    p_profile.m_efg->NumPlayers())),
-    m_support(p_profile.m_support),
-    m_payoffs(new gRectArray<T>(*p_profile.m_payoffs))
+    m_support(p_profile.m_support)
 {
+  InitPayoffs();
   gArray<int> dim(m_efg->GetChance()->NumInfosets());
   for (int iset = 1; iset <= dim.Length(); iset++)
     dim[iset] = m_efg->GetChance()->Infosets()[iset]->NumActions();
   m_chanceprobs = new gPVector<T>(dim);
   for (int iset = 1; iset <= dim.Length(); iset++)
     for (int act = 1; act <= m_efg->GetChance()->Infosets()[iset]->NumActions(); act++)
-       (*m_chanceprobs)(iset, act) = m_efg->GetChanceProb(m_efg->GetChance()->Infosets()[iset], act);
+      (*m_chanceprobs)(iset, act) = m_efg->GetChanceProb(m_efg->GetChance()->Infosets()[iset], act);
 }
 
 template <class T> 
@@ -277,10 +273,9 @@ BehavProfile<T>::BehavProfile(const BehavSolution &p_solution)
   : gDPVector<T>(p_solution.Game().NumActions()), m_efg(&p_solution.Game()),
     m_root(new BehavNode<T>(p_solution.Game().RootNode(),
 			    p_solution.Game().NumPlayers())),
-    m_support(EFSupport(p_solution.Game())), 
-    m_payoffs(new gRectArray<T>(p_solution.Game().NumOutcomes(),
-				p_solution.Game().NumPlayers()))
+    m_support(EFSupport(p_solution.Game()))
 {
+  InitPayoffs();
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
     EFPlayer *player = m_efg->Players()[pl];
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
@@ -296,10 +291,7 @@ BehavProfile<T>::BehavProfile(const BehavSolution &p_solution)
   m_chanceprobs = new gPVector<T>(dim);
   for (int iset = 1; iset <= dim.Length(); iset++)
     for (int act = 1; act <= m_efg->GetChance()->Infosets()[iset]->NumActions(); act++)
-       (*m_chanceprobs)(iset, act) = m_efg->GetChanceProb(m_efg->GetChance()->Infosets()[iset], act);
-  for (int outc = 1; outc <= m_efg->NumOutcomes(); outc++)
-    for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)
-      (*m_payoffs)(outc, pl) = m_efg->Payoff(m_efg->Outcomes()[outc], pl);
+      (*m_chanceprobs)(iset, act) = m_efg->GetChanceProb(m_efg->GetChance()->Infosets()[iset], act);
 }
 
 template <class T> BehavProfile<T>::BehavProfile(const EFSupport &p_support) 
@@ -307,9 +299,9 @@ template <class T> BehavProfile<T>::BehavProfile(const EFSupport &p_support)
     m_efg(&p_support.Game()),
     m_root(new BehavNode<T>(m_efg->RootNode(), m_efg->NumPlayers())),
     m_support(p_support),
-    m_chanceprobs(new gPVector<T>(0)),
-    m_payoffs(new gRectArray<T>(m_efg->NumOutcomes(), m_efg->NumPlayers()))
+    m_chanceprobs(new gPVector<T>(0))
 {
+  InitPayoffs();
   gArray<int> dim(m_efg->GetChance()->NumInfosets());
   Centroid();
   for (int iset = 1; iset <= dim.Length(); iset++)
@@ -321,17 +313,12 @@ template <class T> BehavProfile<T>::BehavProfile(const EFSupport &p_support)
 	 act <= m_efg->GetChance()->Infosets()[iset]->NumActions(); act++)
        (*m_chanceprobs)(iset, act) = 
 	 m_efg->GetChanceProb(m_efg->GetChance()->Infosets()[iset], act);
-  for (int outc = 1; outc <= m_efg->NumOutcomes(); outc++)
-    for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)
-      (*m_payoffs)(outc, pl) = m_efg->Payoff(m_efg->Outcomes()[outc], pl);
-
 }
 
 template <class T> BehavProfile<T>::~BehavProfile()
 {
   delete m_root;
   delete m_chanceprobs;
-  delete m_payoffs;
 }
 
 template <class T>
@@ -988,11 +975,18 @@ BehavProfile<T>::ExtendsToNash(const EFSupport &little_supp,
 //--------------
 
 template <class T>
+void BehavProfile<T>::InitPayoffs(void) const
+{
+  m_efg->InitPayoffs();
+}
+
+template <class T>
 void BehavProfile<T>::Payoff(Node *p_node, T p_prob, int p_player,
 			     T &p_value) const
 {
-  if (p_node->outcome)
-    p_value += p_prob * (*m_payoffs)(p_node->outcome->GetNumber(), p_player);
+  if (p_node->outcome) 
+    p_value += p_prob * Payoff(p_node->outcome, p_player);
+
   if (p_node->children.Length())  {
     if (p_node->infoset->player->number == 0)  {
       for (int child = 1; child <= p_node->children.Length(); child++)
@@ -1032,12 +1026,10 @@ void BehavProfile<T>::CondPayoff(BehavNode<T> *p_node, T p_prob,
     (p_node->node->infoset) ? p_node->node->infoset->player->number : -1;
   int iset = (p_node->node->infoset) ? p_node->node->infoset->number : 0;
   
-  if (p_node->node->outcome)  {
-    for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)
-      p_node->scratch[pl] += (*m_payoffs)(p_node->node->outcome->GetNumber(),
-					  pl);
-  }
-
+  if (p_node->node->outcome)  
+    for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) 
+      p_node->scratch[pl] +=  Payoff(p_node->node->outcome, pl);
+  
   int nc = p_node->children.Length();
   for (int child = 1; child <= nc; child++)
     p_node->children[child]->scratch = p_node->scratch;
@@ -1218,8 +1210,9 @@ void BehavProfile<T>::NodeValues(BehavNode<T> *p_node, int p_player,
 {
   int tindex = p_index;
 
-  if (p_node->node->outcome)
-    p_node->nval += (*m_payoffs)(p_node->node->outcome->GetNumber(), p_player);
+ if (p_node->node->outcome) 
+   p_node->nval += Payoff(p_node->node->outcome, p_player);
+ 
 
   for (int child = 1; child <= p_node->children.Length(); child++)
     p_node->children[child]->nval = p_node->nval;
@@ -1351,11 +1344,9 @@ void BehavAssessment<T>::CondPayoff(BehavNode<T> *p_node, T p_prob,
   int iset = 
     (p_node->node->GetInfoset()) ? p_node->node->GetInfoset()->GetNumber() : 0;
   
-  if (p_node->node->GetOutcome())  {
-    for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)
-      p_node->scratch[pl] += 
-	(*m_payoffs)(p_node->node->GetOutcome()->GetNumber(), pl);
-  }
+  if (p_node->node->GetOutcome()) 
+    for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) 
+      p_node->scratch[pl] += Payoff(p_node->node->GetOutcome(), pl);
 
   int nc = p_node->children.Length();
   for (int child = 1; child <= nc; child++)
@@ -1445,11 +1436,3 @@ template <class T> gOutput &operator<<(gOutput &p_file,
   p_assess.Dump(p_file);
   return p_file;
 }
-
-
-
-
-
-
-
-

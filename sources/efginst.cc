@@ -7,17 +7,44 @@
 #include "behav.imp"
 #include "rational.h"
 
+const gNumber BehavProfile<gNumber>::Payoff(const EFOutcome *o, int pl) const
+{ 
+  return o->payoffs[pl];
+}
+
+
+const gRational BehavProfile<gRational>::Payoff(const EFOutcome *o, int pl) const
+{ 
+  //  gout << "\nin BehavProfile<gRational>::Payoff()";
+  return o->payoffs[pl];
+}
+
+const double BehavProfile<double>::Payoff(const EFOutcome *o, int pl) const
+{ 
+  return o->double_payoffs[pl];
+}
+
+const gNumber PureBehavProfile<gNumber>::Payoff(const EFOutcome *o, const int &pl) const
+{
+  if (o)
+    return o->payoffs[pl];
+  else
+    return (gNumber) 0;
+}
+
 template class BehavNode<double>;
 template class BehavProfile<double>;
 template class BehavAssessment<double>;
 template gOutput &operator<<(gOutput &, const BehavProfile<double> &);
 template gOutput &operator<<(gOutput &, const BehavAssessment<double> &);
 
+
 template class BehavNode<gRational>;
 template class BehavProfile<gRational>;
 template class BehavAssessment<gRational>;
 template gOutput &operator<<(gOutput &, const BehavProfile<gRational> &);
 template gOutput &operator<<(gOutput &, const BehavAssessment<gRational> &);
+
 
 template class BehavNode<gNumber>;
 template class BehavProfile<gNumber>;
@@ -26,6 +53,7 @@ template gOutput &operator<<(gOutput &, const BehavProfile<gNumber> &);
 template gOutput &operator<<(gOutput &, const BehavAssessment<gNumber> &);
 
 
+/*
 template class PureBehavProfile<double>;
 
 void PureBehavProfile<gRational>::Payoff(const Node *n, const gRational prob, 
@@ -33,7 +61,7 @@ void PureBehavProfile<gRational>::Payoff(const Node *n, const gRational prob,
 {
   if (n->GetOutcome())
     for (int pl = 1; pl <= E->NumPlayers(); pl++)
-      payoff[pl] += prob * (*payoffs)(n->GetOutcome()->GetNumber(), pl);
+      payoff[pl] += prob * Payoff(n->GetOutcome(), pl);
   
   if (n->GetInfoset() && n->GetPlayer()->IsChance())
     for (int i = 1; i <= n->NumChildren(); i++)
@@ -59,6 +87,8 @@ void PureBehavProfile<gRational>::InfosetProbs(Node *n, gRational prob,
 }
 
 template class PureBehavProfile<gRational>;
+*/
+
 template class PureBehavProfile<gNumber>;
 
 #include "garray.imp"
