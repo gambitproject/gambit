@@ -751,55 +751,91 @@ void TreeWindow::infoset_label(void)
 
 
 //***********************************************************************
-//                       INFOSET-SWITCH-PLAYER MENU HANDLER
+//                   INFOSET-SWITCH-PLAYER MENU HANDLER
 //***********************************************************************
+
+class efgSwitchPlayerDialog : public wxDialogBox {
+private:
+  const Efg &m_efg;
+  int m_completed;
+  wxListBox *m_playerList;
+
+  static void CallbackOK(wxButton &p_object, wxEvent &)
+    { ((efgSwitchPlayerDialog *) p_object.GetClientData())->OnOK(); }
+  static void CallbackCancel(wxButton &p_object, wxEvent &)
+    { ((efgSwitchPlayerDialog *) p_object.GetClientData())->OnCancel(); }
+
+  void OnOK(void);
+  void OnCancel(void);
+  Bool OnClose(void);
+
+public:
+  efgSwitchPlayerDialog(Infoset *, wxWindow *);
+  virtual ~efgSwitchPlayerDialog() { }
+
+  int Completed(void) const { return m_completed; }
+  EFPlayer *Player(void) const;
+};
+
+efgSwitchPlayerDialog::efgSwitchPlayerDialog(Infoset *p_infoset,
+					     wxWindow *p_parent)
+  : wxDialogBox(p_parent, "Select Player", TRUE), m_efg(*p_infoset->Game())
+{
+  m_playerList = new wxListBox(this, 0, "Player");
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+    m_playerList->Append(ToText(pl) + ": " + m_efg.Players()[pl]->GetName());
+  }
+  m_playerList->SetSelection(p_infoset->GetPlayer()->GetNumber() - 1);
+
+  NewLine();
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  okButton->SetClientData((char *) this);
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel");
+  cancelButton->SetClientData((char *) this);
+
+  Fit();
+  Show(TRUE);
+}
+
+void efgSwitchPlayerDialog::OnOK(void)
+{
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void efgSwitchPlayerDialog::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool efgSwitchPlayerDialog::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+EFPlayer *efgSwitchPlayerDialog::Player(void) const
+{
+  return m_efg.Players()[m_playerList->GetSelection() + 1];
+}
 
 void TreeWindow::infoset_switch_player(void)
 {
-  MyDialogBox *infoset_switch_dialog = 0;
-  char *player_name = 0;
-    
   try {
-    infoset_switch_dialog = new MyDialogBox(this, "Set New Player", EFG_INFOSET_HELP);
-    wxStringList *player_list = new wxStringList;
-    player_name = new char[20];
+    efgSwitchPlayerDialog dialog(Cursor()->GetInfoset(), this);
         
-    if (ef.GetChance() != Cursor()->GetPlayer())
-      player_list->Add(ef.GetChance()->GetName());
-
-    for (int pl = 1; pl <= ef.NumPlayers(); pl++) {
-      if (ef.Players()[pl] != Cursor()->GetPlayer())
-	player_list->Add(ef.Players()[pl]->GetName());
-    }
-
-    infoset_switch_dialog->Add(
-            wxMakeFormString("Player", &player_name,
-                             wxFORM_CHOICE,
-                             new wxList(wxMakeConstraintStrings(player_list), 0)));
-    infoset_switch_dialog->Go();
-        
-    if (infoset_switch_dialog->Completed() == wxOK) {
-      if (strcmp(player_name, ef.GetChance()->GetName())) {
-	ef.SwitchPlayer(Cursor()->GetInfoset(), EfgGetPlayer(ef, player_name));
-	infosets_changed = TRUE;
-      }
-      else {
-	Infoset *s = ef.CreateInfoset(ef.GetChance(), Cursor()->NumChildren());
-	ef.JoinInfoset(s, Cursor());
+    if (dialog.Completed() == wxOK) {
+      if (dialog.Player() != Cursor()->GetInfoset()->GetPlayer()) {
+	ef.SwitchPlayer(Cursor()->GetInfoset(), dialog.Player());
 	infosets_changed = TRUE;
       }
     }
-        
-    delete infoset_switch_dialog;
-    delete [] player_name;
   }
   catch (gException &E) {
-    if (infoset_switch_dialog)  
-      delete infoset_switch_dialog;
-
-    if (player_name)   
-      delete [] player_name;
-
     guiExceptionDialog(E.Description(), pframe);
   }
 }
@@ -1162,24 +1198,14 @@ void TreeWindow::tree_label(void)
 
 void TreeWindow::tree_delete(void)
 {
-  MyMessageBox *tree_delete_dialog = 0;
-    
   try {
-    tree_delete_dialog = new MyMessageBox("Are you sure?",
-					  "Delete Tree",
-					  EFG_TREE_HELP, pframe);
-        
-    if (tree_delete_dialog->Completed() == wxOK) {
+    if (MyMessageBox("Are you sure?", "Delete Tree",
+		     EFG_TREE_HELP, pframe).Completed() == wxOK) {
       nodes_changed = true;
       ef.DeleteTree(Cursor());
     }
-
-    delete tree_delete_dialog;
   }
   catch (gException &E) {
-    if (tree_delete_dialog)  
-      delete tree_delete_dialog;
-
     guiExceptionDialog(E.Description(), pframe);
   }
 }
@@ -1205,9 +1231,9 @@ void TreeWindow::tree_copy(void)
 
 void TreeWindow::tree_move(void)
 {
-  nodes_changed = true;
   try {
     ef.MoveTree(mark_node, Cursor());
+    nodes_changed = true;
   }
   catch (gException &E) {
     guiExceptionDialog(E.Description(), pframe);

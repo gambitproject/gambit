@@ -1063,6 +1063,7 @@ bool Efg::DeleteEmptyInfoset(Infoset *s)
 Infoset *Efg::SwitchPlayer(Infoset *s, EFPlayer *p)
 {
   if (!s || !p)  throw Exception();
+  if (s->GetPlayer()->IsChance() || p->IsChance())  throw Exception();
   
   if (s->player == p)   return s;
 

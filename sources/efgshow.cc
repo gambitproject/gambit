@@ -1439,7 +1439,8 @@ void EfgShow::UpdateMenus(Node *p_cursor, Node *p_markNode)
 				 p_markNode->GetSubgameRoot() == p_cursor->GetSubgameRoot()) ? TRUE : FALSE);
   menuBar->Enable(INFOSET_LABEL, (p_cursor->GetInfoset()) ? TRUE : FALSE);
   menuBar->Enable(INFOSET_SWITCH_PLAYER,
-		  (p_cursor->GetInfoset()) ? TRUE : FALSE);
+		  (p_cursor->GetInfoset() &&
+		   !p_cursor->GetPlayer()->IsChance()) ? TRUE : FALSE);
   menuBar->Enable(INFOSET_REVEAL, (p_cursor->GetInfoset()) ? TRUE : FALSE);
 
   menuBar->Enable(ACTION_LABEL,
