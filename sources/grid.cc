@@ -1,117 +1,124 @@
 //#
 //# FILE: grid.cc -- Grid-search solution module
 //#
-//# $Id$
+//# @(#)grid.cc	1.8 2/7/95
 //#
 
 #ifdef __GNUG__
 #pragma implementation "grid.h"
 #endif   // __GNUG__
 
+#include "basic.h"
 #include "rational.h"
+#include "gmatrix.h"
 #include "normal.h"
 #include "normiter.h"
 #include "probvect.h"
-#include "equdata.h"
-#include "stpwatch.h"
 #include "gwatch.h"
 #include "grid.h"
 
-GridParams::GridParams(void) : plev(0)   { }
-
-// Controls if solutions are displayed on gout as they are obtained
-#define SCREEN_OUTPUT
-
-template <class T> class GridSolveModule   {
-  private:
-    NormalForm<T> &rep;
-    FileHeader header;
-    gVector<T> p, x, q_calc, y;
-    gOutput &out;
-
-    void  (*update_func)(void);
-    int CheckEqu(gVector<T> &q,T l);
-    void OutputResult(gOutput &out,T l,T dist,gVector<T> &q,gVector<T> &p);
-
-  public:
-    GridSolveModule(NormalForm<T> &r,gInput &in,gOutput &out);
-    GridSolveModule(NormalForm<T> &r,gOutput &out,T _merror=-1.0,T _qstep=-1.0,
-		    T _estep=-1.0,T _estart=-1.0,T _estop=-1.0,int _data_type=-1);
-    ~GridSolveModule()   { }
-    void SetUpdateFunc(void (*upd)(void)) { update_func = upd; }
-//
-// Finds the equilibria points at a given error value using the grid search
-//
-    int GridSolve(void);
-
-};
 
 template <class T>
-GridSolveModule<T>::GridSolveModule(NormalForm<T> &r, gInput &params, gOutput &_out)
-  : rep(r), header(params), out(_out), x(r.NumStrats(1)), p(r.NumStrats(1)),
-    y(r.NumStrats(2)), q_calc(r.NumStrats(2)), update_func(0)
+GridParams<T>::GridParams(void) :
+	plev(0),outfile(0),errfile(0),pxifile(0),update_func(0)
+{ }
+template <class T>
+GridParams<T>::GridParams(const GridParams<T> &p) :
+	plev(p.plev),outfile(p.outfile),errfile(p.errfile),
+	pxifile(p.pxifile),update_func(p.update_func),
+	minLam(p.minLam),maxLam(p.maxLam),delLam(p.delLam),
+	delp(p.delp),tol(p.tol),type(p.type)
+
+{ }
+
+template <class T>
+GridParams<T>::~GridParams(void)
+{}
+
+template <class T>
+int GridParams<T>::Ok(void) const
+{
+if (!pxifile) return 0;
+if (type==0 && delLam<=(T)1.0) return 0;
+return 1;
+}
+/*
+template <class T>
+GridSolveModule<T>::GridSolveModule(const NormalForm<T> &r, gInput &param)
+	: nf(r), x(r.NumStrats(1)), p(r.NumStrats(1)),y(r.NumStrats(2)),
+		q_calc(r.NumStrats(2)),matrix(r.NumStrats(1),r.NumStrats(2))
+{assert(0);	// this does not work
+}
+*/
+template <class T>
+GridSolveModule<T>::GridSolveModule(const NormalForm<T> &r,const GridParams<T> &param)
+	: nf(r), params(param), x(r.NumStrats(1)), p(r.NumStrats(1)),
+		y(r.NumStrats(2)), q_calc(r.NumStrats(2)),
+		matrix(r.NumStrats(1),r.NumStrats(2))
+{}
+
+template <class T>
+GridSolveModule<T>::~GridSolveModule(void)
 {
 }
 
+// Output header
 template <class T>
-GridSolveModule<T>::GridSolveModule(NormalForm<T> &r, gOutput &_out,
-				    T _merror, T _qstep, T _estep, T _estart,
-				    T _estop, int _data_type)
-  : rep(r), out(_out), x(r.NumStrats(1)), p(r.NumStrats(1)),
-    y(r.NumStrats(2)), q_calc(r.NumStrats(2))
+void GridSolveModule<T>::OutputHeader(void)
 {
-  gBlock<int> strategies(r.NumPlayers());
-  for (int i = 1; i <= r.NumPlayers(); i++)
-    strategies[i] = r.NumStrats(i);
-
-  header = FileHeader(_merror, _qstep, _estep, _estart, _estop,
-		      _data_type, r.NumPlayers(), strategies);
+int st1=nf.NumStrats(1),st2=nf.NumStrats(2);
+*params.pxifile<<2<<' '<<nf.NumStrats(1)<<' '<<nf.NumStrats(2)<<'\n';
+*params.pxifile<<"3 2 1\n";
+for (int i=1;i<=st1;i++)
+{
+	for (int j=1;j<=st2;j++)
+		*params.pxifile<<matrix(i,j).row<<' '<<matrix(i,j).col<<' ';
+	*params.pxifile<<'\n';
+}
+*params.pxifile<<"Settings:\n";
+*params.pxifile<<params.tol<<'\n'<<params.delp<<'\n'<<params.delLam<<'\n';
+*params.pxifile<<params.minLam<<'\n'<<params.maxLam<<'\n'<<params.type<<'\n';
+int num_columns=st1+st2+2;
+*params.pxifile<<num_columns<<' '<<(num_columns-1)<<' '<<num_columns<<' ';
+for (i=1;i<=st1;i++) *params.pxifile<<i<<' ';
+for (i=1;i<=st2;i++) *params.pxifile<<st1+i<<' ';
+*params.pxifile<<'\n';
+*params.pxifile<<'Data:\n';
 }
 
 template <class T>
-void GridSolveModule<T>::OutputResult(gOutput &out, T l, T dist,
-				      gVector<T> &q, gVector<T> &p)
+void GridSolveModule<T>::OutputResult(T l, T dist,gVector<T> &q,gVector<T> &p)
 {
-  int i;
-  for (i = p.First(); i <= p.Last(); i++)  out << p[i] << ' ';
-  for (i = q.First(); i <= q.Last(); i++)  out << q[i] << ' ';
-  out << l << ' ' << dist << '\n';
+	int i;
+	for (i = p.First(); i <= p.Last(); i++)  *params.pxifile << p[i] << ' ';
+	for (i = q.First(); i <= q.Last(); i++)  *params.pxifile << q[i] << ' ';
+	*params.pxifile << l << ' ' << dist << '\n';
 }
 
 template <class T>
 int GridSolveModule<T>::CheckEqu(gVector<T> &q, T l)
 {
-  T denom = (T) 0;	// denominator of function
-  Bool ok;              // was a solution found?
-  T dist;   		// metric function--distance from the equ
-  int i, j;
-
+T denom;					// denominator of function
+bool ok;         	// was a solution found?
+T dist;   				// metric function--distance from the equ
+int i, j;
+int st1=nf.NumStrats(1),st2=nf.NumStrats(2);
 /*---------------------make X's---------------------*/
-  for (i = 1; i <= header.NumStrategies(1); i++)  {
-    x[i] = 0;
-    for (j = 1; j <= header.NumStrategies(2); j++)
-      x[i] += ((T)(*(header.Matrix()))(i-1,j-1).row)*q[j];
-  }
-
+x=(T)0;			// zero out the entire x-vector
+for (i=1;i<=st1;i++)
+	for (j=1;j<=st2;j++) x[i] += matrix(i,j).row*q[j];
 /*--------------------make P's----------------------*/
-  for (i = 1; i <= header.NumStrategies(1); i++)
-    denom += exp(l*x[i]);
-  for (i = 1; i <= header.NumStrategies(1); i++)
-    p[i] = ((T) exp(l*x[i])) / denom;
-
+denom=(T)0;
+for (i=1;i<=st1;i++) denom += exp(l*x[i]);
+for (i=1;i<=st1;i++) p[i] = ((T) exp(l*x[i])) / denom;
 /*--------------------make Y's----------------------*/
-  for (i = 1; i <= header.NumStrategies(2); i++)  {
-    y[i] = (T) 0;
-    for (j = 1; j <= header.NumStrategies(1); j++)
-      y[i] += ((T)(*(header.Matrix()))(j-1,i-1).col) * p[j];
-  }
-
+y=(T)0;			// zero out the entire y-vector
+for (i=1;i<=st2;i++)
+	for (j=1;j<=st1;j++) y[i] += matrix(i,j).col*p[j];
 /*--------------------make Q_CALC's-----------------*/
-  denom = (T) 0;
-  for (i = 1; i <= header.NumStrategies(2); i++)
-    denom += exp(l*y[i]);
-  for (i = 1; i <= header.NumStrategies(2); i++)
-    q_calc[i] = ((T)exp(l*y[i])) / denom;
+denom=(T)0;
+for (i=1;i<=st2;i++) denom+=exp(l*y[i]);
+for (i=1;i<=st2;i++) q_calc[i]=((T)exp(l*y[i])) / denom;
 
 /*--------------------check for equilibrium---------*/
 			 /* Note: this uses the very crude method for finding*
@@ -123,128 +130,73 @@ int GridSolveModule<T>::CheckEqu(gVector<T> &q, T l)
 			 * if Distance is not used, value of ok is either   *
 			 * 1.0 or 0.0                                       */
 
-  ok = TRUE; dist = (T) 0;
-  for (i = 1; i <= header.NumStrategies(1); i++)  {
-    dist += fabs((double)(q[i]-q_calc[i]));
-    if ((fabs((double)(q[i]-q_calc[i]))>=header.MError())) ok=FALSE;
-  }
-
-  if (ok)   OutputResult(out,l,dist,q,p);
-
-  return (ok);
+ok=true;dist=(T)0;
+for (i = 1; i <= st1; i++)
+{
+	dist += fabs((double)(q[i]-q_calc[i]));
+	if ((T)fabs(q[i]-q_calc[i])>=params.tol) ok=false;
 }
 
+if (ok) OutputResult(l,dist,q,p);
 
+return (ok);
+}
+
+// GridSolve--call to start
 template <class T> int GridSolveModule<T>::GridSolve(void)
 {
 int i,j;
-NormalIter<T> iter(rep);
-int num_infosets=rep.NumPlayers();
-int	dim_x=rep.NumStrats(1),dim_y=rep.NumStrats(2);
-assert(num_infosets==2);
-// Build a FileHeader from scratch.....
-header.SetNumInfosets(rep.NumPlayers());
-for (i=1;i<=rep.NumPlayers();i++) header.SetNumStrategies(i,rep.NumStrats(i));
-header.SetMatrix();		// Create a copy of the matrix in the FileHeader
-for (j=1;j<=dim_y;j++)
-	for (i=1;i<=dim_x;i++)
+if (!params.Ok()) {wxMessageBox("Invalid parameters!");return 0;}
+
+NormalIter<T> iter(nf);
+int	st1=nf.NumStrats(1),st2=nf.NumStrats(2);
+// Build a game matrix--this speeds things up enormously
+
+for (i=1;i<=st1;i++)
+	for (j=1;j<=st2;j++)
 	{
-		iter.Set(1,j);iter.Set(2,i);
-		header.SetMatrixValue(j-1,i-1,1,iter.Payoff(1));
-		header.SetMatrixValue(j-1,i-1,2,iter.Payoff(2));
+		iter.Set(1,i);iter.Set(2,j);
+		matrix(i,j).row=iter.Payoff(1);
+		matrix(i,j).col=iter.Payoff(2);
 	}
 
-
 // Initialize the output file
-StopWatch *timer=new StopWatch;timer->Start();
-out<<header;
+gWatch timer;timer.Start();
+OutputHeader();
 // Create the ProbVector to give us all sets of probability values
-ProbVect<T> *pv=new ProbVect<T>(header.NumStrategies(1),(int)(1.0/header.QStep()+0.5));
-
-for (double l=header.EStart();l<header.EStop();l=(header.DataType()==DATA_TYPE_ARITH) ? (l+header.QStep()) : (l*header.QStep()))
+ProbVect<T> *pv=new ProbVect<T>(st1,(int)((T)1.0/params.delp+(T)0.5));
+int num_steps;
+if (params.type)
+	num_steps=(params.maxLam-params.minLam)/params.delLam;
+else
+	num_steps=log(params.maxLam/params.minLam)/log(params.delLam);
+T l=params.minLam;
+for (int step=1;step<num_steps;step++)
 {
-	while (!pv->Done()) if (pv->Inc())	CheckEqu(pv->GetP(),T(l));
+	if (params.type) l=l+params.delLam; else l=l*params.delLam;
+	while (!pv->Done()) if (pv->Inc())	CheckEqu(pv->GetP(),l);
 	pv->Reset();
-	if (update_func) (*update_func)();
+	if (params.update_func) (*params.update_func)(step/num_steps);
 }
 // Record the time taken and close the output file
-out<<"Simulation took "<<timer->ElapsedStr()<<'\n';
-delete timer;
+*params.pxifile<<"Simulation took "<<timer.ElapsedStr()<<'\n';
 delete pv;
 return 1;
 }
 
 #ifdef __GNUG__
-template class ProbVect<double>;
-template class ProbVect<gRational>;
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#pragma option -Jgd
+#define TEMPLATE
+#endif   // __GNUG__, __BORLANDC__
+TEMPLATE class ProbVect<double>;
+TEMPLATE class ProbVect<gRational>;
 
-template class GridSolveModule<double>;
-template class GridSolveModule<gRational>;
-#endif   // __GNUG__
+TEMPLATE class GridSolveModule<double>;
+TEMPLATE class GridSolveModule<gRational>;
 
-//
-// Note: reading from the parameter file is currently not available...
-// This will be reactivated soon, hopefully.
-//
-
-/*
-int NormalForm::GridSolve(const gString &param_file,
-                          const gString &out_file)
-{
-  gFileInput in((char *) param_file);
-  gFileOutput out((char *) out_file);
-  switch (type)    {
-    case DOUBLE:  {
-      GridSolveModule<double> M((NFRep<double> &) *data,in,out);
-      M.GridSolve();
-      return 1;
-    }
-    case RATIONAL:  {
-      GridSolveModule<Rational> M((NFRep<Rational> &) *data,in,out);
-      M.GridSolve();
-      return 1;
-    }
-    default:
-      return 0;
-  }
-}
-*/
-
-// Grid Solve, allows to set most parameters from the function call
-int GridSolver::GridSolve(void)
-{
-  gOutput *outfile = &gout;
-
-  if (params.outfile != "")
-    outfile = new gFileOutput((char *) params.outfile);
-
-  gWatch watch;
-
-  switch (nf.Type())  {
-    case DOUBLE:  {
-      GridSolveModule<double> M((NormalForm<double> &) nf, *outfile,
-				(double) params.tol, (double) params.delp,
-				(double) params.delLam,(double) params.minLam, 
-				(double) params.maxLam, params.type);
-      M.GridSolve();
-      break;
-    }
-    case RATIONAL:  {
-      GridSolveModule<gRational> M((NormalForm<gRational> &) nf, *outfile,
-				  params.tol, params.delp,
-				  params.delLam, params.minLam,
-				  params.maxLam, params.type);
-      M.GridSolve();
-      break;
-    }
-  }
-
-  time = watch.Elapsed();
-
-  if (params.outfile != "")   delete outfile;
-
-  return 1;
-}
-
+TEMPLATE class GridParams<double>;
+TEMPLATE class GridParams<gRational>;
 
 

@@ -1,7 +1,7 @@
 //#
 //# FILE: grid.h -- Interface to grid-solve module
 //#
-//# $Id$
+//# @(#)grid.h	1.1 12/5/94
 //#
 
 #ifndef GRID_H
@@ -11,37 +11,42 @@
 #pragma interface
 #endif   // __GNUG__
 
-#include "normal.h"
+#include "g2dblock.h"
 
-class GridParams   {
-  public:
-    gRational minLam, maxLam, delLam, delp, tol;
-    int type, plev;
-    gString outfile, errfile;
-
-    GridParams(void);
+template <class T> class GridParams   {
+	public:
+		T minLam, maxLam, delLam, delp, tol;
+		int type, plev;
+		gOutput *outfile, *errfile, *pxifile;
+		void  (*update_func)(double);
+		GridParams(void);
+		GridParams(const GridParams<T> &p);
+		~GridParams(void);
+		int Ok(void) const;	// check the validity of the paramters
 };
 
-class GridSolver   {
-  private:
-    const BaseNormalForm &nf;
-    GridParams params;
-    int nevals;
-    gRational time;
- 
-  public:
-    GridSolver(const BaseNormalForm &N, const GridParams &p)
-      : nf(N), params(p)   { }
-    GridSolver(const BaseNormalForm &N, const gString &param_file,
-	       const gString &out_file);
-    ~GridSolver()   { }
+template <class T> class PayoffClass
+{
+public:
+	T row;T col;
+};
 
-    int GridSolve(void);
+template <class T> class GridSolveModule
+{
+private:
+	const NormalForm<T> &nf;
+	gVector<T> p, x, q_calc, y;
+	const GridParams<T> &params;
+	g2DBlock<PayoffClass<T> > matrix;
 
-    int NumEvals(void) const    { return nevals; }
-    gRational Time(void) const  { return time; }
-
-    GridParams &Parameters(void)   { return params; }
+	int CheckEqu(gVector<T> &q,T l);
+	void OutputResult(T l,T dist,gVector<T> &q,gVector<T> &p);
+	void OutputHeader(void);
+public:
+	GridSolveModule(const NormalForm<T> &r,const GridParams<T> &param);
+//	GridSolveModule(const NormalForm<T> &r,gInput &param);
+	~GridSolveModule();
+	int GridSolve(void);
 };
 
 #endif    // GRID_H
