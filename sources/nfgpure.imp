@@ -14,10 +14,10 @@
 #include "mixed.h"
 
 template <class T> int FindPureNash(const Nfg<T> &N,
+				    const NFSupport &S,
 				    gList<MixedSolution<T> > &eqs)
 {
   int index;
-  NFSupport S(N.GameForm());
   NfgContIter citer(S);
   
   do  {
@@ -26,7 +26,7 @@ template <class T> int FindPureNash(const Nfg<T> &N,
     
     for (int pl = 1; flag && pl <= N.NumPlayers(); pl++)  {
       T current = N.Payoff(citer.GetOutcome(), pl);
-      for (int i = 1; i <= N.NumStrats(pl); i++)  {
+      for (int i = 1; i <= S.NumStrats(pl); i++)  {
 	niter.Next(pl);
 	if (N.Payoff(niter.GetOutcome(), pl) > current)  {
 	  flag = 0;

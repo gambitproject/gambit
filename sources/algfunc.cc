@@ -253,7 +253,7 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
 
 static Portion *GSM_EnumPure_Nfg(Portion **param)
 {
-//  NFSupport* S = ((NfSupportPortion*) param[0])->Value();
+  NFSupport* S = ((NfSupportPortion*) param[0])->Value();
   NfgPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por;
 
@@ -264,14 +264,14 @@ static Portion *GSM_EnumPure_Nfg(Portion **param)
   case DOUBLE:
     {
       gList<MixedSolution<double> > solns;
-      FindPureNash(* (Nfg<double>*) N, solns);
+      FindPureNash(* (Nfg<double>*) N, *S, solns);
       por = new Mixed_ListPortion<double>(solns);
     }
     break;
   case RATIONAL:
     {
       gList<MixedSolution<gRational> > solns;
-      FindPureNash(* (Nfg<gRational>*) N, solns);
+      FindPureNash(* (Nfg<gRational>*) N, *S, solns);
       por = new Mixed_ListPortion<gRational>(solns);
     }
     break;

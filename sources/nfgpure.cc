@@ -14,6 +14,8 @@
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE int FindPureNash(const Nfg<double> &, gList<MixedSolution<double> > &);
-TEMPLATE int FindPureNash(const Nfg<gRational> &,gList<MixedSolution<gRational> > &);
+TEMPLATE int FindPureNash(const Nfg<double> &, const NFSupport &,
+			  gList<MixedSolution<double> > &);
+TEMPLATE int FindPureNash(const Nfg<gRational> &, const NFSupport &,
+			  gList<MixedSolution<gRational> > &);
 
