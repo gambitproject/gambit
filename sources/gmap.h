@@ -283,7 +283,7 @@ template <class K, class T> class gBaseMapMessage : public gMessage  {
   friend class gBaseMapIter<K, T>;
 
   private:
-    enum MessageType { DEFINE, REMOVE } mod_type;
+    enum MessageType { DEFINE, REMOVE, FLUSH } mod_type;
     int mod_position;
 
     gBaseMapMessage(int pos, MessageType t)
@@ -356,6 +356,15 @@ template <class K, class T> class gBaseMap : public gSender {
 //-grp
 
 //
+// These are the equality and assignment operators for this and all derived
+// classes.
+//+grp
+    int operator==(const gBaseMap &M) const;
+    int operator!=(const gBaseMap &M) const { return !(*this==M); }
+    int operator=(const gBaseMap &M)
+//-grp
+
+//
 // Returns the default value for the map
 //+grp    
     T &Default(void)     { return _default; }
@@ -394,6 +403,42 @@ length(m.length), _default(m._default)
 
   values = new T[length];
   memcpy(values, m.values, length * sizeof(T));
+}
+
+template <class K, class T> INLINE
+int gBaseMap<K, T>::operator==(const gBaseMap &M) const
+{
+  if(length!=M.length) return 0;
+
+  for(int i=0;i<length;i++)
+    {  if(keys[i]!=M.keys[i]) return 0;
+       if(values[i]!=M.values[i]) return 0;
+     }
+
+  if(_default!=_default) return 0;
+
+  return 1;
+}
+
+template <class K, class T> INLINE
+void gBaseMap<K, T>::operator=(const gBaseMap &M) const
+{
+  if(this != &M)
+    {  Send(gBaseMapMessage<K, T>(-1,gBaseMapMessage<K, T>::FLUSH));
+
+       length = M.length();
+
+       if(keys) delete [] keys;
+       if(values) delete [] values;
+
+       keys = new K[M.length];
+       values = new T[M.length];
+
+       memcpy(keys, M.keys, length * sizeof(K));
+       memcpy(values, M.values, length * sizeof(T));
+
+       _default = M._default;
+     }
 }
 
 template <class K, class T> INLINE
