@@ -50,9 +50,9 @@ class ExtForm    {
     void InsertAction(const Node &n, int where, int number);
     Node DeleteAction(const Node &n, int which);
     void LabelAction(const Node &n, int br, const gString &label)  { }
-    gVector<double> GetActionProbs(const Node &n) const;
-    double GetActionProb(const Node &n, int br) const;
-    void SetActionProbs(const Node &n, const gVector<double> &probs);
+    gVector<gNumber> GetActionProbs(const Node &n) const;
+    gNumber GetActionProb(const Node &n, int br) const;
+    void SetActionProbs(const Node &n, const gVector<gNumber> &probs);
 
     void SetOutcome(const Node &n, int outcome)
       { if (nodes.IsMember(n))  nodes.SetOutcome(n, outcome); }

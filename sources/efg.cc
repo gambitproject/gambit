@@ -175,19 +175,19 @@ Node ExtForm::DeleteAction(const Node &n, int which)
   return ret;
 }
 
-gVector<double> ExtForm::GetActionProbs(const Node &n) const
+gVector<gNumber> ExtForm::GetActionProbs(const Node &n) const
 {
-  if (!nodes.IsMember(n) || n[1] != 0)   return gVector<double>(1, 0);
+  if (!nodes.IsMember(n) || n[1] != 0)   return gVector<gNumber>(1, 0);
   return players.GetActionProbs(n[0], n[2]);
 }
 
-double ExtForm::GetActionProb(const Node &n, int br) const
+gNumber ExtForm::GetActionProb(const Node &n, int br) const
 {
   if (!nodes.IsMember(n) || n[1] != 0)   return -1.0;
   return players.GetActionProb(n[0], n[2], br);
 }
 
-void ExtForm::SetActionProbs(const Node &n, const gVector<double> &probs)
+void ExtForm::SetActionProbs(const Node &n, const gVector<gNumber> &probs)
 {
   if (!nodes.IsMember(n) || n[1] != 0)   return;
   players.SetActionProbs(n[0], n[2], probs);

@@ -70,14 +70,14 @@ class Infoset   {
       { return actions[act]->GetActionName(); }
 
 	// get an action's probability
-    double GetActionProb(int act) const
-      { return (double) actions[act]->GetActionProb(); }
+    gNumber GetActionProb(int act) const
+      { return actions[act]->GetActionProb(); }
 
 	// get the vector of probabilities for the actions
-    gVector<double> GetActionProbs(void) const;
+    gVector<gNumber> GetActionProbs(void) const;
 
 	// set the probabilities of the actions
-    void SetActionProbs(const gVector<double> &probs);
+    void SetActionProbs(const gVector<gNumber> &probs);
 
 	// remove an action from the infoset
     void RemoveAction(int act)
