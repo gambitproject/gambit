@@ -12,24 +12,26 @@
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgNode::DeleteMove(gbtEfgNode p_keep)
+void gbtEfgNode::DeleteMove(void)
 </synopsis>
 </para>
 </formalpara>
 
 <para>
 <function>DeleteMove</function>
-deletes <parameter>node</parameter> from its extensive form game.  The
-subtree rooted in node <parameter>keep</parameter>, which must be a child of
-<parameter>node</parameter>, is kept, and <parameter>keep</parameter> takes
-the place of <parameter>node</parameter> in
-the tree.  All other subtrees descending from <parameter>node</parameter> 
-are deleted.
-It is an error if <parameter>keep</parameter>
-is not a child of <parameter>node</parameter>, 
-or if <parameter>keep</parameter> and <parameter>node</parameter> are not
-from the same extensive form game.
+deletes the move prior to the node from its extensive form game. 
+All other subtrees emanating from the parent move are deleted, and the
+node assumes its parent's former place in the game tree.
 </para>
+
+<note>
+<para>
+The meaning of <function>DeleteMove</function> changed beginning with
+version 0.97.1.1.  In prior versions, <function>DeleteMove</function>
+was called on the node where the move was to be deleted, and the branch
+to keep was specified.
+</para>
+</note>
 
 </sect2>
 
