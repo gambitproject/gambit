@@ -79,40 +79,40 @@ class Player   {
 	// OPERATIONS ON BRANCHES
 	// returns the number of branches in an infoset
     int NumBranches(int game, int iset) const
-      { return infosets(game, iset)->NumBranches(); }
+      { return infosets(game, iset)->NumActions(); }
 
 	// set the name of a branch in an infoset
     void SetBranchName(int game, int iset, int br, const gString &name)
-      { infosets(game, iset)->SetBranchName(br, name); }
+      { infosets(game, iset)->SetActionName(br, name); }
 
 	// returns the name of a branch in an infoset
     gString GetBranchName(int game, int iset, int br) const
-      { return infosets(game, iset)->GetBranchName(br); }
+      { return infosets(game, iset)->GetActionName(br); }
 
 	// set the probabilities of branches in an infoset
     void SetBranchProbs(int game, int iset, const gVector<double> &probs)
-      { infosets(game, iset)->SetBranchProbs(probs); }
+      { infosets(game, iset)->SetActionProbs(probs); }
 
 	// get the probabilities of branches in an infoset
     gVector<double> GetBranchProbs(int game, int iset) const
-      { return infosets(game, iset)->GetBranchProbs(); }
+      { return infosets(game, iset)->GetActionProbs(); }
 
 	// get the probability associated with one branch of an infoset
     double GetBranchProb(int game, int iset, int br) const
-      { return infosets(game, iset)->GetBranchProb(br); }
+      { return infosets(game, iset)->GetActionProb(br); }
 
 	// remove a branch from an infoset
     void RemoveBranch(int game, int iset, int br)
-      { infosets(game, iset)->RemoveBranch(br); }
+      { infosets(game, iset)->RemoveAction(br); }
 
 	// insert a branch in an infoset
     void InsertBranch(int game, int iset, int br)
-      { infosets(game, iset)->InsertBranch(br); }
+      { infosets(game, iset)->InsertAction(br); }
 
 	// append a branch in an infoset
     void AppendBranch(int game, int iset, const gString &name = "")
-      { infosets(game, iset)->AppendBranch();
-        infosets(game,iset)->SetBranchName(infosets(game,iset)->NumBranches(),
+      { infosets(game, iset)->AppendAction();
+        infosets(game,iset)->SetActionName(infosets(game,iset)->NumActions(),
 					   name);
       }
 

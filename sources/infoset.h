@@ -11,37 +11,38 @@
 #include "gstring.h"
 #include "gset.h"
 #include "gvector.h"
+#include "gnumber.h"
 
-class Branch   {
+class Action   {
   private:
     gString name;
-    double prob;
+    gNumber prob;
 
   public:
-    Branch(void) : prob(-1.0)   { }
-    Branch(const Branch &b) : name(b.name), prob(b.prob)  { }
-    ~Branch()   { }
+    Action(void) : prob(-1.0)   { }
+    Action(const Action &b) : name(b.name), prob(b.prob)  { }
+    ~Action()   { }
 
-    Branch &operator=(const Branch &b)
+    Action &operator=(const Action &b)
       { name = b.name;  prob = b.prob;  return *this; }
 
-    gString GetBranchName(void) const   { return name; }
-    void SetBranchName(const gString &s)    { name = s; }
+    gString GetActionName(void) const   { return name; }
+    void SetActionName(const gString &s)    { name = s; }
     
-    double GetBranchProb(void) const   { return prob; }
-    void SetBranchProb(double d)    { prob = d; }
+    gNumber GetActionProb(void) const   { return prob; }
+    void SetActionProb(gNumber d)    { prob = d; }
 };
 
 
 class Infoset   {
   private:
     gString name;
-    gSet<Branch *> branches;
+    gSet<Action *> actions;
 
   public:
 	// CONSTRUCTORS AND DESTRUCTOR
-	// create a new infoset with brs branches
-    Infoset(int brs = 0);
+	// create a new infoset with acts actions
+    Infoset(int acts = 0);
 	// copy constructor
     Infoset(const Infoset &);
 	// clean up after an infoset
@@ -57,38 +58,38 @@ class Infoset   {
 	// set the infoset name
     void SetInfosetName(const gString &s)   { name = s; }
 
-	// return the number of branches in the infoset
-    int NumBranches(void) const   { return branches.Length(); }
+	// return the number of actions at the infoset
+    int NumActions(void) const   { return actions.Length(); }
 
-	// set a branch's name
-    void SetBranchName(int br, const gString &s)
-      { branches[br]->SetBranchName(s); }
+	// set an action's name
+    void SetActionName(int act, const gString &s)
+      { actions[act]->SetActionName(s); }
 
-	// return a branch's name
-    gString GetBranchName(int br) const
-      { return branches[br]->GetBranchName(); }
+	// return an action's name
+    gString GetActionName(int act) const
+      { return actions[act]->GetActionName(); }
 
-	// get a branch's probability
-    double GetBranchProb(int br) const
-      { return branches[br]->GetBranchProb(); }
+	// get an action's probability
+    double GetActionProb(int act) const
+      { return (double) actions[act]->GetActionProb(); }
 
-	// get the vector of probabilities for the branches
-    gVector<double> GetBranchProbs(void) const;
+	// get the vector of probabilities for the actions
+    gVector<double> GetActionProbs(void) const;
 
-	// set the probabilities of the branches
-    void SetBranchProbs(const gVector<double> &probs);
+	// set the probabilities of the actions
+    void SetActionProbs(const gVector<double> &probs);
 
-	// remove a branch from the infoset
-    void RemoveBranch(int br)
-      { delete branches.Remove(br); }
+	// remove an action from the infoset
+    void RemoveAction(int act)
+      { delete actions.Remove(act); }
 
-	// add a branch to the infoset
-    void InsertBranch(int br)
-      { branches.Insert(new Branch, br); }
+	// add an action to the infoset
+    void InsertAction(int act)
+      { actions.Insert(new Action, act); }
 
-	// append a branch to the infoset
-    void AppendBranch(void)
-      { branches.Append(new Branch); }
+	// append an action to the infoset
+    void AppendAction(void)
+      { actions.Append(new Action); }
 };
 
 
