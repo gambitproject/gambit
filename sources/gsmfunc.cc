@@ -148,7 +148,6 @@ CallListFunction(GSM* gsm, Portion** ParamIn)
       }
     }
 
-
     if(recurse)
     {
       result = CallListFunction(gsm, CurrParam);
@@ -158,7 +157,10 @@ CallListFunction(GSM* gsm, Portion** ParamIn)
       bool error_call = false;
       for(j = 0; j < NumParams; j++)
       {
-        CurrParam[j] = CurrParam[j]->RefCopy();
+	if(CurrParam[j]->IsReference())
+	  CurrParam[j] = CurrParam[j]->RefCopy();
+	else
+	  CurrParam[j] = CurrParam[j]->ValCopy();
 	if(CurrParam[j]->Spec().Type == porERROR)
 	  error_call = true;
       }
@@ -195,7 +197,7 @@ CallListFunction(GSM* gsm, Portion** ParamIn)
       }
       else
 	result = new ErrorPortion("Error in arguments");
-      
+
       for(j = 0; j < NumParams; j++)
 	delete CurrParam[j];
     }
@@ -724,7 +726,7 @@ gList<gString> FuncDescObj::FuncList(void) const
 }
 
 void FuncDescObj::Dump(gOutput& f, int i) const
-{ f << FuncList()[i] << '\n'; }
+{ f << FuncList()[i+1] << '\n'; }
 
 void FuncDescObj::Dump(gOutput& f) const
 {
@@ -1527,7 +1529,7 @@ void CallFuncObj::Dump(gOutput& f) const
   if(_FuncIndex < 0)
     f << FuncName() << "[]\n";
   else
-    f << FuncList()[_FuncIndex] << '\n';
+    FuncDescObj::Dump(f, _FuncIndex);
 }
 
 
