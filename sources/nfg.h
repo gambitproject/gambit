@@ -50,6 +50,7 @@ friend void SetEfg(Nfg *, const Efg *);
 protected:
   mutable bool m_dirty;
   mutable long m_revision;
+  mutable long m_outcome_revision;
   gText title, comment;
   gArray<int> dimensions;
 
@@ -117,6 +118,8 @@ public:
   gNumber Payoff(NFOutcome *o, NFPlayer *p) const 
     { return Payoff(o,p->GetNumber()); }
 
+  void InitPayoffs(void) const;
+
     // defined in nfgutils.cc
   friend void RandomNfg(Nfg &);
   friend bool IsConstSum(const Nfg &);
@@ -128,18 +131,26 @@ public:
 
 int ReadNfgFile(gInput &, Nfg *&);
 
+#include "mixed.h"
+
 class NFOutcome   {
   friend class Nfg;
+  friend class MixedProfile<double>;
+  friend class MixedProfile<gRational>;
+  friend class MixedProfile<gNumber>;
   private:
     int number;
     Nfg *nfg;
     gText name;
     gArray<gNumber> payoffs;
+    gArray<double> double_payoffs;
 
     NFOutcome(int n, Nfg *N)
-      : number(n), nfg(N), payoffs(N->NumPlayers())  { }
+      : number(n), nfg(N), payoffs(N->NumPlayers()), 
+	double_payoffs(N->NumPlayers()) { }
     NFOutcome(int n, const NFOutcome &c)
-      : number(n), nfg(c.nfg),name(c.name), payoffs(c.payoffs) { }
+      : number(n), nfg(c.nfg),name(c.name), payoffs(c.payoffs), 
+	double_payoffs(c.double_payoffs)  { }
     ~NFOutcome() { }
 
   public:

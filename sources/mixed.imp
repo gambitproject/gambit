@@ -20,16 +20,20 @@
 template <class T> MixedProfile<T>::MixedProfile(const NFSupport &s)
   : gPVector<T>(s.NumStrats()), N(&s.Game()), support(s)
 {
+  InitPayoffs();
   Centroid();
 }
 
 template <class T> MixedProfile<T>::MixedProfile(const MixedProfile<T> &p)
   : gPVector<T>(p), N(p.N), support(p.support)
-{ }
+{ 
+  InitPayoffs();
+}
 
 template <class T> MixedProfile<T>::MixedProfile(const MixedSolution &p)
   : gPVector<T>(p.Game().NumStrats()), N(&p.Game()), support(p.Game())
 {
+  InitPayoffs();
   for (int pl = 1; pl <= N->NumPlayers(); pl++) {
     NFPlayer *player = N->Players()[pl];
     for (int st = 1; st <= N->NumStrats(pl); st++)
@@ -242,9 +246,8 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl, int const_st,
     PPayoff(pl, const_pl, const_st, cur_pl + 1, index,
 	    prob, value);
   else if (cur_pl > N->NumPlayers())  {
-    T xx;
     if (N->GetOutcome(index))
-      value += prob * (xx =  N->Payoff(N->GetOutcome(index), pl));
+      value += prob * Payoff(N->GetOutcome(index), pl);
   }
   else   {
     for (int j = 1; j <= support.NumStrats(cur_pl); j++)  {
@@ -268,10 +271,9 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
     PPayoff(pl, const_pl1, const_st1, const_pl2, const_st2,
 	    cur_pl + 1, index,prob, value);
   else if (cur_pl > N->NumPlayers())  {
-    T xx;
     if (N->GetOutcome(index))
       value += prob *
-      (xx = N->Payoff(N->GetOutcome(index), pl));
+	Payoff(N->GetOutcome(index), pl);
   }
   else   {
     for (int j = 1; j <= support.NumStrats(cur_pl); j++ ) {
@@ -295,11 +297,9 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
 	   prob, value);
   else if (cur_pl > N->NumPlayers())  {
     for (int j = 1; j <= support.NumStrats(const_pl); j++ ){ 
-      T xx;
       s = support.Strategies(const_pl)[j];
       if (N->GetOutcome(index + s->Index()))
-	     value[j] += prob *
-            ( xx = N->Payoff(N->GetOutcome(index + s->Index()), pl));
+	     value[j] += prob * Payoff(N->GetOutcome(index + s->Index()), pl);
     }
   }
   else   {
@@ -312,10 +312,8 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
   }
 }
 
-
-
-
-
-
-
-
+template <class T>
+void MixedProfile<T>::InitPayoffs(void) const
+{
+  N->InitPayoffs();
+}

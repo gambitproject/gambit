@@ -44,8 +44,8 @@ int Nfg::Product(const gArray<int> &dim)
 }
   
 Nfg::Nfg(const gArray<int> &dim)
-  : m_dirty(false), m_revision(0), title("UNTITLED"), 
-    dimensions(dim), players(dim.Length()),
+  : m_dirty(false), m_revision(0),  m_outcome_revision(-1), 
+    title("UNTITLED"), dimensions(dim), players(dim.Length()),
     results(Product(dim)), efg(0)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
@@ -61,7 +61,8 @@ Nfg::Nfg(const gArray<int> &dim)
 }
 
 Nfg::Nfg(const Nfg &b)
-  : m_dirty(false), m_revision(0), title(b.title), comment(b.comment), 
+  : m_dirty(false), m_revision(0),  m_outcome_revision(-1), 
+    title(b.title), comment(b.comment), 
     dimensions(b.dimensions),
     players(b.players.Length()), outcomes(b.outcomes.Length()),
     results(b.results.Length()), efg(0)
@@ -372,6 +373,16 @@ const gArray<Strategy *> &NFPlayer::Strategies(void) const
   return strategies;
 }
 
+void Nfg::InitPayoffs(void) const 
+{
+  if(m_outcome_revision == RevisionNumber()) return;
+
+  for (int outc = 1; outc <= NumOutcomes(); outc++)
+    for (int pl = 1; pl <= NumPlayers(); pl++)
+      outcomes[outc]->double_payoffs[pl] = outcomes[outc]->payoffs[pl];
+
+  m_outcome_revision = RevisionNumber();
+}
 
 // Not really how these should be handled; but it works for now, and
 // we can deal with housekeeping later

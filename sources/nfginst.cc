@@ -7,6 +7,23 @@
 #include "mixed.imp"
 #include "rational.h"
 
+const gNumber MixedProfile<gNumber>::Payoff(const NFOutcome *o, int pl) const
+{ 
+  return o->payoffs[pl];
+}
+
+
+const gRational MixedProfile<gRational>::Payoff(const NFOutcome *o, int pl) const
+{ 
+  gout << "\nin MixedProfile<gRational>::Payoff()";
+  return o->payoffs[pl];
+}
+
+const double MixedProfile<double>::Payoff(const NFOutcome *o, int pl) const
+{ 
+  return o->double_payoffs[pl];
+}
+
 template class MixedProfile<double>;
 template gOutput &operator<<(gOutput &, const MixedProfile<double> &);
 
