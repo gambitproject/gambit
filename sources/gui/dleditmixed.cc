@@ -76,6 +76,8 @@ dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
   m_probGrid = new wxGrid(this, idPROB_GRID,
 			  wxDefaultPosition, wxDefaultSize);
   m_probGrid->CreateGrid(firstPlayer.NumStrategies(), 1);
+  m_probGrid->SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+  m_probGrid->SetDefaultEditor(new gbtNumberEditor);
   m_probGrid->SetLabelValue(wxHORIZONTAL, _("Probability"), 0);
   for (int st = 1; st <= firstPlayer.NumStrategies(); st++) {
     m_probGrid->SetLabelValue(wxVERTICAL,
@@ -85,7 +87,12 @@ dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
     m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
 					      (char *) ToText(p_profile(firstPlayer.GetStrategy(st)))),
 			     st - 1, 0);
-    m_probGrid->SetCellEditor(st - 1, 0, new gbtNumberEditor);
+    if (st % 2 == 0) {
+      m_probGrid->SetCellBackgroundColour(st - 1, 0, wxColour(200, 200, 200));
+    }
+    else {
+      m_probGrid->SetCellBackgroundColour(st - 1, 0, wxColour(225, 225, 225));
+    }
   }
   m_probGrid->SetMargins(0, 0);
   m_probGrid->SetSize(wxSize(m_probGrid->GetRowLabelSize() + 
@@ -115,7 +122,7 @@ void dialogEditMixed::OnSelChanged(wxCommandEvent &p_event)
 {
   if (m_probGrid->IsCellEditControlEnabled()) {
     m_probGrid->SaveEditControlValue();
-    m_probGrid->DisableCellEditControl();
+    m_probGrid->HideCellEditControl();
   }
 
   gbtNfgPlayer oldPlayer = m_profile.GetGame().GetPlayer(m_selection);
@@ -144,7 +151,12 @@ void dialogEditMixed::OnSelChanged(wxCommandEvent &p_event)
     m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
 					      (char *) ToText(m_profile(player.GetStrategy(st)))),
 			     st - 1, 0);
-    m_probGrid->SetCellEditor(st - 1, 0, new gbtNumberEditor);
+    if (st % 2 == 0) {
+      m_probGrid->SetCellBackgroundColour(st - 1, 0, wxColour(200, 200, 200));
+    }
+    else {
+      m_probGrid->SetCellBackgroundColour(st - 1, 0, wxColour(225, 225, 225));
+    }
   }
 
   m_selection = p_event.GetSelection() + 1;

@@ -24,9 +24,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
 #include "nash/behavsol.h"
 #include "dleditbehav.h"
@@ -36,13 +36,13 @@
 //                 class dialogEditBehav: Member functions
 //-------------------------------------------------------------------------
 
-const int idINFOSET_TREE = 2001;
-const int idPROB_GRID = 2002;
+const int GBT_INFOSET_TREE = 2001;
+const int GBT_PROB_GRID = 2002;
 
 BEGIN_EVENT_TABLE(dialogEditBehav, wxDialog)
-  EVT_TREE_ITEM_COLLAPSING(idINFOSET_TREE, dialogEditBehav::OnItemCollapsing)
-  EVT_TREE_SEL_CHANGING(idINFOSET_TREE, dialogEditBehav::OnSelChanging)
-  EVT_TREE_SEL_CHANGED(idINFOSET_TREE, dialogEditBehav::OnSelChanged)
+  EVT_TREE_ITEM_COLLAPSING(GBT_INFOSET_TREE, dialogEditBehav::OnItemCollapsing)
+  EVT_TREE_SEL_CHANGING(GBT_INFOSET_TREE, dialogEditBehav::OnSelChanging)
+  EVT_TREE_SEL_CHANGED(GBT_INFOSET_TREE, dialogEditBehav::OnSelChanged)
   EVT_BUTTON(wxID_OK, dialogEditBehav::OnOK)
 END_EVENT_TABLE()
 
@@ -65,7 +65,7 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
   topSizer->Add(nameSizer, 0, wxALL | wxEXPAND, 5);
 
   wxBoxSizer *editSizer = new wxBoxSizer(wxHORIZONTAL);
-  m_infosetTree = new wxTreeCtrl(this, idINFOSET_TREE,
+  m_infosetTree = new wxTreeCtrl(this, GBT_INFOSET_TREE,
 				 wxDefaultPosition, wxSize(200, 200));
   m_infosetTree->AddRoot(wxString::Format(wxT("%s"),
 					  (char *) p_profile.GetLabel()));
@@ -114,11 +114,12 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
   m_infosetTree->Expand(m_infosetTree->GetRootItem());
   editSizer->Add(m_infosetTree, 1, wxALL | wxEXPAND, 5);
 
-  m_probGrid = new wxGrid(this, idPROB_GRID,
+  m_probGrid = new wxGrid(this, GBT_PROB_GRID,
 			  wxDefaultPosition, wxDefaultSize);
   m_probGrid->CreateGrid(m_lastInfoset.NumActions(), 1);
+  m_probGrid->SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+  m_probGrid->SetDefaultEditor(new gbtNumberEditor);
   m_probGrid->SetLabelValue(wxHORIZONTAL, _("Probability"), 0);
-  m_probGrid->SetDefaultCellAlignment(wxRIGHT, wxCENTER);
   for (int act = 1; act <= m_lastInfoset.NumActions(); act++) {
     m_probGrid->SetLabelValue(wxVERTICAL,
 			      wxString::Format(wxT("%s"),
@@ -127,7 +128,12 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
     m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
 					      (char *) ToText(p_profile(m_lastInfoset.GetAction(act)))),
 			     act - 1, 0);
-    m_probGrid->SetCellEditor(act - 1, 0, new gbtNumberEditor);
+    if (act % 2 == 0) {
+      m_probGrid->SetCellBackgroundColour(act - 1, 0, wxColour(200, 200, 200));
+    }
+    else {
+      m_probGrid->SetCellBackgroundColour(act - 1, 0, wxColour(225, 225, 225));
+    }
   }
   m_probGrid->SetMargins(0, 0);
   m_probGrid->SetSize(wxSize(m_probGrid->GetRowLabelSize() + 
@@ -207,7 +213,12 @@ void dialogEditBehav::OnSelChanged(wxTreeEvent &p_event)
       m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
 						(char *) ToText(m_profile(m_lastInfoset.GetAction(act)))),
 			       act - 1, 0);
-      m_probGrid->SetCellEditor(act - 1, 0, new gbtNumberEditor);
+      if (act % 2 == 0) {
+	m_probGrid->SetCellBackgroundColour(act - 1, 0, wxColour(200, 200, 200));
+      }
+      else {
+	m_probGrid->SetCellBackgroundColour(act - 1, 0, wxColour(225, 225, 225));
+      }
     }
   }
   else {
