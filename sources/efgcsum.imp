@@ -41,7 +41,7 @@ public:
 
   void Make_Abc();
   
-  int Add_BFS(const LPSolve<T> &B);
+  int Add_BFS(/*const*/ LPSolve<T> &B);
   long NumPivots(void) const;
   double Time(void) const;
   
@@ -123,23 +123,47 @@ template <class T> int CSSeqFormModule<T>::CSSeqForm(int /*dup*/)
 }
 
 
-template <class T> int CSSeqFormModule<T>::Add_BFS(const LPSolve<T> &lp)
+template <class T> int CSSeqFormModule<T>::Add_BFS(/*const*/ LPSolve<T> &lp)
 {
   BFS<T> cbfs((T) 0);
 //  T value = (T)0;
 
-  lp.OptBFS(cbfs);
-//  value=cbfs(EF.NumStrats(1)+1)+maxpay;
-//  cbfs.Dump(gout);
-//  gout << "\nvalue =" << value << "\n\n";
-  if (List.Contains(cbfs))  return 0;
-//  if(params.trace >=2) (*params.tracefile) << "\nFound CBFS";
-//  (*params.tracefile)  << "\nB = ";
-//  B.Dump(*params.tracefile);
-//  (*params.tracefile)  << "\ncbfs = ";
-//  cbfs.Dump(*params.tracefile );
-  List.Append(cbfs);
-  
+  if (params.stopAfter == 1)
+  {
+    lp.OptBFS(cbfs);
+  //  value=cbfs(EF.NumStrats(1)+1)+maxpay;
+  //  cbfs.Dump(gout);
+  //  gout << "\nvalue =" << value << "\n\n";
+    if (List.Contains(cbfs))  return 0;
+  //  if(params.trace >=2) (*params.tracefile) << "\nFound CBFS";
+  //  (*params.tracefile)  << "\nB = ";
+  //  B.Dump(*params.tracefile);
+  //  (*params.tracefile)  << "\ncbfs = ";
+  //  cbfs.Dump(*params.tracefile );
+    List.Append(cbfs);
+  }
+  else if (params.stopAfter == 0)
+  {
+    gList<BFS <T> > bList = lp.GetAll();
+
+    for (int k = 1; k <= bList.Length(); k++)
+    {
+      cbfs = bList[k];
+      if (List.Contains(cbfs))  return 0;
+      List.Append(cbfs);
+    }
+  }
+  else
+  {
+    gList<BFS <T> > bList = lp.GetAll();
+
+    for (int k = 1; k <= bList.Length() && k <= params.stopAfter; k++)
+    {
+      cbfs = bList[k];
+      if (List.Contains(cbfs))  return 0;
+      List.Append(cbfs);
+    }
+  }
   return 1;
 }
 
