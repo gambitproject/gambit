@@ -26,6 +26,9 @@
 // In order to use type T, the following operators must be defined:
 //   +, -(binary), *(binary), /, ==, =
 //
+
+template <class T> class gMatrix;
+
 template <class T> class gVector {
 friend class gMatrix<T>;
 private:
