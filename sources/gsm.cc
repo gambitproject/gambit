@@ -66,14 +66,6 @@ GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
   
   // global function default variables initialization
   // these should be done before InitFunctions() is called
-  /*
-  if( _NumObj == 0 )
-  {
-    _INPUT  = new InputRefPortion( _StdIn );
-    _OUTPUT = new OutputRefPortion( _StdOut );
-    _NULL   = new OutputRefPortion( gnull );
-  }
-  */
 
   _StackStack    = new gStack< gStack< Portion* >* >( 1 );
   _StackStack->Push( new gStack< Portion* >( size ) );
@@ -106,14 +98,6 @@ GSM::~GSM()
   delete _StackStack->Pop();
   delete _StackStack;
 
-  /*
-  if( _NumObj == 0 )
-  {
-    delete _INPUT;
-    delete _OUTPUT;
-    delete _NULL;
-  }
-  */
 }
 
 
@@ -245,11 +229,6 @@ bool GSM::_VarIsDefined( const gString& var_name ) const
 
   assert( var_name != "" );
 
-  /*
-  if( var_name == "OUTPUT" || var_name == "INPUT" || var_name == "NULL" )
-    result = true;
-  else
-  */
   result = _RefTableStack->Peek()->IsDefined( var_name );
   return result;
 }
@@ -264,13 +243,6 @@ bool GSM::_VarDefine( const gString& var_name, Portion* p )
 
   assert( var_name != "" );
 
-  /*
-  if( var_name == "OUTPUT" || var_name == "INPUT" || var_name == "NULL" )
-  {
-    read_only = true;
-  }
-  else 
-  */
   if( _RefTableStack->Peek()->IsDefined( var_name ) )
   {
     old_value = (*_RefTableStack->Peek())( var_name );
@@ -323,18 +295,6 @@ Portion* GSM::_VarValue( const gString& var_name ) const
   Portion* result;
 
   assert( var_name != "" );
-  /*
-  if( var_name == "INPUT" )
-    result = _INPUT;
-  else if( var_name == "OUTPUT" )
-    result = _OUTPUT;
-  else if( var_name == "NULL" )
-    result = _NULL;
-  else
-  {
-    result = (*_RefTableStack->Peek())( var_name );
-  }
-  */
   result = (*_RefTableStack->Peek())( var_name );
   return result;
 }
@@ -346,17 +306,6 @@ Portion* GSM::_VarRemove( const gString& var_name )
 
   assert( var_name != "" );
 
-  /*
-  if( var_name == "INPUT" || var_name == "OUTPUT" || var_name == "NULL" )
-  {
-    _ErrorMessage( _StdErr, 55, 0, 0, var_name );
-    result = _VarValue( var_name )->ValCopy();
-  }
-  else
-  {
-    result = _RefTableStack->Peek()->Remove( var_name );
-  }
-  */
   result = _RefTableStack->Peek()->Remove( var_name );
   return result;
 }
@@ -394,7 +343,80 @@ bool GSM::PushRef( const gString& ref )
 
 bool GSM::Assign( void )
 {
-  return _BinaryOperation( "Assign" );
+  Portion* p2;
+  Portion* p1;
+  bool result = true;
+  p2 = _Pop();
+  p1 = _Pop();
+  p2 = _ResolveRef(p2);
+  p1 = _ResolveRef(p1);
+  
+  if(p1->Type() == porREFERENCE)
+  {
+    if(p2->Type() != porREFERENCE)
+    {
+      _VarDefine(((ReferencePortion*) p1)->Value(), p2);
+      delete p1;
+      _Push(p2->RefCopy());
+    }
+    else
+    {
+      _ErrorMessage(_StdErr, 63, 0, 0, ((ReferencePortion*) p2)->Value());
+      result = false;
+    } 
+  }
+  else if(p2->Type() == porREFERENCE)
+  {
+    _ErrorMessage(_StdErr, 63, 0, 0, ((ReferencePortion*) p2)->Value());
+    result = false;
+  }
+  else if(p1->Type() == p2->Type())
+  {
+    if(p1->Type() != porLIST)
+    {
+      if(!(p1->Type() & (porINPUT|porOUTPUT))) 
+      {
+	p1->AssignFrom(p2);
+	_Push(p1->RefCopy()); 
+	delete p2;
+      }
+      else 
+      {
+	_ErrorMessage(_StdErr, 64);
+	result = false;
+      }
+    }
+    else if((((ListPortion*) p1)->DataType() ==
+	     ((ListPortion*) p2)->DataType()) ||
+	    (((ListPortion*) p1)->DataType() == porUNDEFINED) )
+    {
+      if( !( ((ListPortion*) p1)->DataType() & (porINPUT|porOUTPUT) ) )
+      {
+	p1->AssignFrom(p2);
+	_Push(p1->RefCopy());
+	delete p2;
+      }
+      else
+      {
+	_ErrorMessage(_StdErr, 64);
+	result = false;
+      }
+    }
+    else
+    {      
+      _ErrorMessage(_StdErr, 65);
+      result = false;
+    }
+  }
+  else
+  {
+    _ErrorMessage(_StdErr, 66);
+    result = false;
+  }
+
+  if(!result)
+  { delete p2; delete p1; }
+  return result;
 }
 
 
@@ -555,24 +577,186 @@ bool GSM::_UnaryOperation( const gString& funcname )
 //-----------------------------------------------------------------
 
 bool GSM::Add ( void )
-{ return _BinaryOperation( "Plus" ); }
+{ 
+  Portion* p1;
+  Portion* p2;
+  bool result = false;
+
+  p2 = _Pop();
+  p2 = _ResolveRef(p2);
+  p1 = _Pop();
+  p1 = _ResolveRef(p1);  
+
+  if(p1->Type()==p2->Type())
+  {
+    result = true;
+    if(p1->Type()==porINTEGER)
+      ((IntPortion*) p1)->Value() += ((IntPortion*) p2)->Value();
+    else if(p1->Type()==porFLOAT)
+      ((FloatPortion*) p1)->Value() += ((FloatPortion*) p2)->Value();
+    else if(p1->Type()==porRATIONAL)
+      ((RationalPortion*) p1)->Value() += ((RationalPortion*) p2)->Value();
+    else if(p1->Type()==porMIXED_FLOAT)
+      (*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) += 
+	(*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
+    else if(p1->Type()==porMIXED_RATIONAL)
+      (*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) += 
+	(*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value()));
+    else if(p1->Type()==porBEHAV_FLOAT)
+      (*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) += 
+	(*((BehavSolution<double>*) ((BehavPortion*) p2)->Value()));
+    else if(p1->Type()==porBEHAV_RATIONAL)
+      (*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) += 
+	(*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
+    else
+      result = false;
+  }
+
+  if(result)
+  { delete p2; _Push(p1); }
+  else
+  { _Push(p1); _Push(p2); result = _BinaryOperation( "Plus" ); }
+  return result;
+}
 
 bool GSM::Subtract ( void )
-{ return _BinaryOperation( "Minus" ); }
+{ 
+  Portion* p1;
+  Portion* p2;
+  bool result = false;
+
+  p2 = _Pop();
+  p2 = _ResolveRef(p2);
+  p1 = _Pop();
+  p1 = _ResolveRef(p1);  
+
+  if(p1->Type()==p2->Type())
+  {
+    result = true;
+    if(p1->Type()==porINTEGER)
+      ((IntPortion*) p1)->Value() -= ((IntPortion*) p2)->Value();
+    else if(p1->Type()==porFLOAT)
+      ((FloatPortion*) p1)->Value() -= ((FloatPortion*) p2)->Value();
+    else if(p1->Type()==porRATIONAL)
+      ((RationalPortion*) p1)->Value() -= ((RationalPortion*) p2)->Value();
+    else if(p1->Type()==porMIXED_FLOAT)
+      (*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) -= 
+	(*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
+    else if(p1->Type()==porMIXED_RATIONAL)
+      (*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) -= 
+	(*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value()));
+    else if(p1->Type()==porBEHAV_FLOAT)
+      (*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) -= 
+	(*((BehavSolution<double>*) ((BehavPortion*) p2)->Value()));
+    else if(p1->Type()==porBEHAV_RATIONAL)
+      (*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) -= 
+	(*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
+    else
+      result = false;
+  }
+
+  if(result)
+  { delete p2; _Push(p1); }
+  else
+  { _Push(p1); _Push(p2); result = _BinaryOperation( "Minus" ); }
+  return result;
+}
 
 bool GSM::Multiply ( void )
-{ return _BinaryOperation( "Times" ); }
+{ 
+  Portion* p1;
+  Portion* p2;
+  bool result = false;
+
+  p2 = _Pop();
+  p2 = _ResolveRef(p2);
+  p1 = _Pop();
+  p1 = _ResolveRef(p1);  
+
+  if(p1->Type()==p2->Type())
+  {
+    result = true;
+    if(p1->Type()==porINTEGER)
+      ((IntPortion*) p1)->Value() *= ((IntPortion*) p2)->Value();
+    else if(p1->Type()==porFLOAT)
+      ((FloatPortion*) p1)->Value() *= ((FloatPortion*) p2)->Value();
+    else if(p1->Type()==porRATIONAL)
+      ((RationalPortion*) p1)->Value() *= ((RationalPortion*) p2)->Value();
+    else
+      result = false;
+  }
+
+  if(result)
+  { delete p2; _Push(p1); }
+  else
+  { _Push(p1); _Push(p2); result = _BinaryOperation( "Times" ); }
+  return result;
+}
+
 
 bool GSM::Dot ( void )
 { return _BinaryOperation( "Dot" ); }
 
 bool GSM::Divide ( void )
 { 
-  return _BinaryOperation( "Divide" ); 
+  Portion* p1;
+  Portion* p2;
+  Portion* p;
+  bool result = false;
+
+  p2 = _Pop();
+  p2 = _ResolveRef(p2);
+  p1 = _Pop();
+  p1 = _ResolveRef(p1);  
+
+  if(p1->Type()==p2->Type())
+  {
+    result = true;
+    if(p1->Type()==porINTEGER && ((IntPortion*) p2)->Value() != 0)
+    {
+      p = new RationalValPortion(((IntPortion*) p1)->Value());
+      delete p1; 
+      p1 = p;
+      ((RationalPortion*) p1)->Value() /= ((IntPortion*) p2)->Value();
+    }
+    else if(p1->Type()==porFLOAT && ((FloatPortion*) p2)->Value() != 0)
+      ((FloatPortion*) p1)->Value() /= ((FloatPortion*) p2)->Value();
+    else if(p1->Type()==porRATIONAL && ((RationalPortion*) p2)->Value() != 0)
+      ((RationalPortion*) p1)->Value() /= ((RationalPortion*) p2)->Value();
+    else
+      result = false;
+  }
+
+  if(result)
+  { delete p2; _Push(p1); }
+  else
+  { _Push(p1); _Push(p2); result = _BinaryOperation( "Divide" ); }
+  return result;
 }
 
 bool GSM::Negate( void )
-{ return _UnaryOperation( "Negate" ); }
+{
+  Portion* p1;
+  bool result = true;
+
+  p1 = _Pop();
+  p1 = _ResolveRef(p1);  
+
+  if(p1->Type()==porINTEGER)
+    ((IntPortion*) p1)->Value() = -(((IntPortion*) p1)->Value());
+  else if(p1->Type()==porFLOAT)
+    ((FloatPortion*) p1)->Value() = -(((FloatPortion*) p1)->Value());
+  else if(p1->Type()==porRATIONAL)
+    ((RationalPortion*) p1)->Value() = -(((RationalPortion*) p1)->Value());
+  else
+    result = false;
+
+  if(result)
+    _Push(p1);
+  else
+  { _Push(p1); result = _UnaryOperation( "Negate" ); }
+  return result;
+}
 
 bool GSM::Power( void )
 { return _BinaryOperation( "Power" ); }
@@ -582,39 +766,368 @@ bool GSM::Concat ( void )
 
 
 bool GSM::IntegerDivide ( void )
-{ return _BinaryOperation( "IntegerDivide" ); }
+{ 
+  Portion* p1;
+  Portion* p2;
+  bool result = false;
+
+  p2 = _Pop();
+  p2 = _ResolveRef(p2);
+  p1 = _Pop();
+  p1 = _ResolveRef(p1);  
+
+  if(p1->Type()==p2->Type())
+  {
+    result = true;
+    if(p1->Type()==porINTEGER && ((IntPortion*) p2)->Value() != 0)
+      ((IntPortion*) p1)->Value() /= ((IntPortion*) p2)->Value();
+    else
+      result = false;
+  }
+
+  if(result)
+  { delete p2; _Push(p1); }
+  else
+  { _Push(p1); _Push(p2); result = _BinaryOperation( "IntegerDivide" ); }
+  return result;
+}
 
 bool GSM::Modulus ( void )
-{ return _BinaryOperation( "Modulus" ); }
+{
+  Portion* p1;
+  Portion* p2;
+  bool result = false;
+
+  p2 = _Pop();
+  p2 = _ResolveRef(p2);
+  p1 = _Pop();
+  p1 = _ResolveRef(p1);  
+
+  if(p1->Type()==p2->Type())
+  {
+    result = true;
+    if(p1->Type()==porINTEGER && ((IntPortion*) p2)->Value() != 0)
+      ((IntPortion*) p1)->Value() %= ((IntPortion*) p2)->Value();
+    else
+      result = false;
+  }
+
+  if(result)
+  { delete p2; _Push(p1); }
+  else
+  { _Push(p1); _Push(p2); result = _BinaryOperation( "Modulus" ); }
+  return result;
+}
 
 
 bool GSM::EqualTo ( void )
-{ return _BinaryOperation( "Equal" ); }
+{ 
+  Portion* p1;
+  Portion* p2;
+  bool b = false;
+  bool result = false;
+
+  p2 = _Pop();
+  p2 = _ResolveRef(p2);
+  p1 = _Pop();
+  p1 = _ResolveRef(p1);  
+
+  if(p1->Type()==p2->Type())
+  {
+    result = true;
+    if(p1->Type()==porBOOL)   
+      b = (((BoolPortion*) p1)->Value() == ((BoolPortion*) p2)->Value());
+    else if(p1->Type()==porINTEGER)   
+      b = (((IntPortion*) p1)->Value() == ((IntPortion*) p2)->Value());
+    else if(p1->Type()==porFLOAT)
+      b = (((FloatPortion*) p1)->Value() == ((FloatPortion*) p2)->Value());
+    else if(p1->Type()==porRATIONAL)
+      b = (((RationalPortion*) p1)->Value()==((RationalPortion*) p2)->Value());
+    else if(p1->Type()==porTEXT)
+      b = (((TextPortion*) p1)->Value() == ((TextPortion*) p2)->Value());
+    else if(p1->Type()==porMIXED_FLOAT)
+      b = ((*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) == 
+	   (*((MixedSolution<double>*) ((MixedPortion*) p2)->Value())));
+    else if(p1->Type()==porMIXED_RATIONAL)
+      b = ((*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) == 
+	   (*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value())));
+    else if(p1->Type()==porBEHAV_FLOAT)
+      b = ((*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) == 
+	   (*((BehavSolution<double>*) ((BehavPortion*) p2)->Value())));
+    else if(p1->Type()==porBEHAV_RATIONAL)
+      b = ((*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) == 
+	   (*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value())));
+    else
+      result = false;
+  }
+
+  if(result)
+  { delete p2; delete p1; _Push(new BoolValPortion(b)); }
+  else
+  { _Push(p1); _Push(p2); result = _BinaryOperation( "Equal" ); }
+  return result;
+}
 
 bool GSM::NotEqualTo ( void )
-{ return _BinaryOperation( "NotEqual" ); }
+{ 
+  Portion* p1;
+  Portion* p2;
+  bool b = false;
+  bool result = false;
+
+  p2 = _Pop();
+  p2 = _ResolveRef(p2);
+  p1 = _Pop();
+  p1 = _ResolveRef(p1);  
+
+  if(p1->Type()==p2->Type())
+  {
+    result = true;
+    if(p1->Type()==porBOOL)   
+      b = (((BoolPortion*) p1)->Value() != ((BoolPortion*) p2)->Value());
+    else if(p1->Type()==porINTEGER)   
+      b = (((IntPortion*) p1)->Value() != ((IntPortion*) p2)->Value());
+    else if(p1->Type()==porFLOAT)
+      b = (((FloatPortion*) p1)->Value() != ((FloatPortion*) p2)->Value());
+    else if(p1->Type()==porRATIONAL)
+      b = (((RationalPortion*) p1)->Value()!=((RationalPortion*) p2)->Value());
+    else if(p1->Type()==porTEXT)
+      b = (((TextPortion*) p1)->Value() != ((TextPortion*) p2)->Value());
+    else if(p1->Type()==porMIXED_FLOAT)
+      b = ((*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) != 
+	   (*((MixedSolution<double>*) ((MixedPortion*) p2)->Value())));
+    else if(p1->Type()==porMIXED_RATIONAL)
+      b = ((*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) != 
+	   (*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value())));
+    else if(p1->Type()==porBEHAV_FLOAT)
+      b = ((*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) != 
+	   (*((BehavSolution<double>*) ((BehavPortion*) p2)->Value())));
+    else if(p1->Type()==porBEHAV_RATIONAL)
+      b = ((*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) != 
+	   (*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value())));
+    else
+      result = false;
+  }
+
+  if(result)
+  { delete p2; delete p1; _Push(new BoolValPortion(b)); }
+  else
+  { _Push(p1); _Push(p2); result = _BinaryOperation( "NotEqual" ); }
+  return result;
+}
 
 bool GSM::GreaterThan ( void )
-{ return _BinaryOperation( "Greater" ); }
+{ 
+  Portion* p1;
+  Portion* p2;
+  bool b = false;
+  bool result = false;
+
+  p2 = _Pop();
+  p2 = _ResolveRef(p2);
+  p1 = _Pop();
+  p1 = _ResolveRef(p1);  
+
+  if(p1->Type()==p2->Type())
+  {
+    result = true;
+    if(p1->Type()==porINTEGER)   
+      b = (((IntPortion*) p1)->Value() > ((IntPortion*) p2)->Value());
+    else if(p1->Type()==porFLOAT)
+      b = (((FloatPortion*) p1)->Value() > ((FloatPortion*) p2)->Value());
+    else if(p1->Type()==porRATIONAL)
+      b = (((RationalPortion*) p1)->Value()>((RationalPortion*) p2)->Value());
+    else if(p1->Type()==porTEXT)
+      b = (((TextPortion*) p1)->Value() > ((TextPortion*) p2)->Value());
+    else
+      result = false;
+  }
+
+  if(result)
+  { delete p2; delete p1; _Push(new BoolValPortion(b)); }
+  else
+  { _Push(p1); _Push(p2); result = _BinaryOperation( "Greater" ); }
+  return result;
+}
 
 bool GSM::LessThan ( void )
-{ return _BinaryOperation( "Less" ); }
+{ 
+  Portion* p1;
+  Portion* p2;
+  bool b = false;
+  bool result = false;
+
+  p2 = _Pop();
+  p2 = _ResolveRef(p2);
+  p1 = _Pop();
+  p1 = _ResolveRef(p1);  
+
+  if(p1->Type()==p2->Type())
+  {
+    result = true;
+    if(p1->Type()==porINTEGER)   
+      b = (((IntPortion*) p1)->Value() < ((IntPortion*) p2)->Value());
+    else if(p1->Type()==porFLOAT)
+      b = (((FloatPortion*) p1)->Value() < ((FloatPortion*) p2)->Value());
+    else if(p1->Type()==porRATIONAL)
+      b = (((RationalPortion*) p1)->Value()<((RationalPortion*) p2)->Value());
+    else if(p1->Type()==porTEXT)
+      b = (((TextPortion*) p1)->Value() < ((TextPortion*) p2)->Value());
+    else
+      result = false;
+  }
+
+  if(result)
+  { delete p2; delete p1; _Push(new BoolValPortion(b)); }
+  else
+  { _Push(p1); _Push(p2); result = _BinaryOperation( "LessEqual" ); }
+  return result;
+}
 
 bool GSM::GreaterThanOrEqualTo ( void )
-{ return _BinaryOperation( "GreaterEqual" ); }
+{ 
+  Portion* p1;
+  Portion* p2;
+  bool b = false;
+  bool result = false;
+
+  p2 = _Pop();
+  p2 = _ResolveRef(p2);
+  p1 = _Pop();
+  p1 = _ResolveRef(p1);  
+
+  if(p1->Type()==p2->Type())
+  {
+    result = true;
+    if(p1->Type()==porINTEGER)   
+      b = (((IntPortion*) p1)->Value() >= ((IntPortion*) p2)->Value());
+    else if(p1->Type()==porFLOAT)
+      b = (((FloatPortion*) p1)->Value() >= ((FloatPortion*) p2)->Value());
+    else if(p1->Type()==porRATIONAL)
+      b = (((RationalPortion*) p1)->Value()>=((RationalPortion*) p2)->Value());
+    else if(p1->Type()==porTEXT)
+      b = (((TextPortion*) p1)->Value() >= ((TextPortion*) p2)->Value());
+    else
+      result = false;
+  }
+
+  if(result)
+  { delete p2; delete p1; _Push(new BoolValPortion(b)); }
+  else
+  { _Push(p1); _Push(p2); result = _BinaryOperation( "GreaterEqual" ); }
+  return result;
+}
 
 bool GSM::LessThanOrEqualTo ( void )
-{ return _BinaryOperation( "LessEqual" ); }
+{ 
+  Portion* p1;
+  Portion* p2;
+  bool b = false;
+  bool result = false;
+
+  p2 = _Pop();
+  p2 = _ResolveRef(p2);
+  p1 = _Pop();
+  p1 = _ResolveRef(p1);  
+
+  if(p1->Type()==p2->Type())
+  {
+    result = true;
+    if(p1->Type()==porINTEGER)   
+      b = (((IntPortion*) p1)->Value() <= ((IntPortion*) p2)->Value());
+    else if(p1->Type()==porFLOAT)
+      b = (((FloatPortion*) p1)->Value() <= ((FloatPortion*) p2)->Value());
+    else if(p1->Type()==porRATIONAL)
+      b = (((RationalPortion*) p1)->Value()<=((RationalPortion*) p2)->Value());
+    else if(p1->Type()==porTEXT)
+      b = (((TextPortion*) p1)->Value() <= ((TextPortion*) p2)->Value());
+    else
+      result = false;
+  }
+
+  if(result)
+  { delete p2; delete p1; _Push(new BoolValPortion(b)); }
+  else
+  { _Push(p1); _Push(p2); result = _BinaryOperation( "LessEqual" ); }
+  return result;
+}
 
 
 bool GSM::AND ( void )
-{ return _BinaryOperation( "And" ); }
+{ 
+  Portion* p1;
+  Portion* p2;
+  bool b = false;
+  bool result = false;
+
+  p2 = _Pop();
+  p2 = _ResolveRef(p2);
+  p1 = _Pop();
+  p1 = _ResolveRef(p1);  
+
+  if(p1->Type()==p2->Type())
+  {
+    result = true;
+    if(p1->Type()==porBOOL)   
+      b = (((BoolPortion*) p1)->Value() && ((BoolPortion*) p2)->Value());
+    else
+      result = false;
+  }
+
+  if(result)
+  { delete p2; delete p1; _Push(new BoolValPortion(b)); }
+  else
+  { _Push(p1); _Push(p2); result = _BinaryOperation( "And" ); }
+  return result;
+}
 
 bool GSM::OR ( void )
-{ return _BinaryOperation( "Or" ); }
+{ 
+  Portion* p1;
+  Portion* p2;
+  bool b = false;
+  bool result = false;
+
+  p2 = _Pop();
+  p2 = _ResolveRef(p2);
+  p1 = _Pop();
+  p1 = _ResolveRef(p1);  
+
+  if(p1->Type()==p2->Type())
+  {
+    result = true;
+    if(p1->Type()==porBOOL)   
+      b = (((BoolPortion*) p1)->Value() || ((BoolPortion*) p2)->Value());
+    else
+      result = false;
+  }
+
+  if(result)
+  { delete p2; delete p1; _Push(new BoolValPortion(b)); }
+  else
+  { _Push(p1); _Push(p2); result = _BinaryOperation( "Or" ); }
+  return result;
+}
 
 bool GSM::NOT ( void )
-{ return _UnaryOperation( "Not" ); }
+{
+  Portion* p1;
+  bool result = true;
+
+  p1 = _Pop();
+  p1 = _ResolveRef(p1);  
+
+  if(p1->Type()==porBOOL)
+    ((BoolPortion*) p1)->Value() = !((BoolPortion*) p1)->Value();
+  else
+    result = false;
+
+  if(result)
+    _Push(p1);
+  else
+  { _Push(p1); result = _UnaryOperation( "Not" ); }
+  return result;
+}
 
 
 bool GSM::Read ( void )
@@ -1232,6 +1745,18 @@ void GSM::_ErrorMessage
     break;
   case 62:
     s << "Function " << str1 << "[] not found\n";
+    break;
+  case 63:
+    s << "Undefined variable " << str1 << " passed to Assign[]\n";
+    break;
+  case 64:
+    s << "Cannot assign from an INPUT or OUTPUT variable\n";
+    break;
+  case 65:
+    s << "Attempted to change the type of a list\n";
+    break;
+  case 66:
+    s << "Attempted to change the type of a variable\n";
     break;
   default:
     s << "General error " << error_num << "\n";
