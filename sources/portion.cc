@@ -40,7 +40,7 @@ Portion::~Portion()
 
 int Portion::Operation( Portion *p, OperationMode mode )
 {
-  gerr << "** Portion Error: attempted to execute an unsupported operation\n";
+  gerr << "Portion Error: attempted to execute an unsupported operation\n";
   assert(0);
   return 0;
 }
@@ -350,8 +350,8 @@ List_Portion::List_Portion( const gBlock<Portion*>& new_value )
     type_match = TypeCheck( new_value[ i ] );
     if( !type_match )
     {
-      gerr << "** Portion Error: attempted to initialize a List_Portion with a\n";
-      gerr << "                  gBlock<Portion *> that contains mixed types\n";
+      gerr << "Portion Error: attempted to initialize a List_Portion with a\n";
+      gerr << "               gBlock<Portion*> that contains mixed types\n";
       assert(0);
     }
   }
@@ -458,7 +458,7 @@ int List_Portion::Insert( Portion* item, int index )
 
   if( item->Type() == porREFERENCE )
   {
-    gerr << "** Portion Error: attempted to insert a Reference type into List_Portion\n";
+    gerr << "Portion Error: attempted to insert a Reference into a List_Portion\n";
     assert(0);
   }
 
@@ -474,8 +474,8 @@ int List_Portion::Insert( Portion* item, int index )
     type_match = TypeCheck( item );
     if( !type_match )
     {
-      gerr << "** Portion Error: attempted to insert a conflicting Portion type\n";
-      gerr << "                  into a List_Portion.\n";
+      gerr << "Portion Error: attempted to insert conflicting Portion types\n";
+      gerr << "               into a List_Portion.\n";
       assert(0);
     }
   }
@@ -509,7 +509,7 @@ void List_Portion::Flush( void )
 
 
 //----------------------------------------------------------------------
-  // class instantiations
+//                         class instantiations
 //----------------------------------------------------------------------
 
 
