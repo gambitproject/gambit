@@ -35,6 +35,8 @@ Action* LastAction( Node* node );
 // returns the list of nodes which are the roots of subgames
 void SubgameRoots(const BaseEfg &efg, gList<Node *> &list);
 
+// returns the list of nodes which are roots of child subgames
+void ChildSubgames(Node *, gList<Node *> &);
 
 #endif // EFGUTILS_H
 

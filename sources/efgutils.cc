@@ -36,6 +36,15 @@ void SRDoChild(Node *n, gList<Node *> &list)
   if (n->GetSubgameRoot() == n)  list.Append(n);
 }
 
+void CSDoChild(Node *n, gList<Node *> &list)
+{
+  if (n->GetSubgameRoot() == n)
+    list.Append(n);
+  else
+    for (int i = 1; i <= n->NumChildren(); i++)
+      CSDoChild(n->GetChild(i), list);
+}
+
 // Public Functions
  
 int CountNodes (Node *n)
@@ -74,6 +83,13 @@ void SubgameRoots(const BaseEfg &efg, gList<Node *> &list)
 {
   list.Flush();
   SRDoChild(efg.RootNode(), list);
+}
+
+void ChildSubgames(Node *n, gList<Node *> &list)
+{
+  list.Flush();
+  for (int i = 1; i <= n->NumChildren(); i++)
+    CSDoChild(n->GetChild(i), list);
 }
 
 int NumNodes (const BaseEfg &befg)
