@@ -94,13 +94,12 @@ typedef enum {
   efgmenuSOLVE_CUSTOM_NFG_POLENUM = 1539,
   efgmenuSOLVE_CUSTOM_NFG_QRE = 1517,
   efgmenuSOLVE_CUSTOM_NFG_QREGRID = 1518,
+  efgmenuSOLVE_CUSTOM_EFG_QREHOMOTOPY = 1520,
 
   efgmenuSOLVE_NFG = 1521,
   efgmenuSOLVE_NFG_REDUCED = 1504,
   efgmenuSOLVE_NFG_AGENT = 1519,
   
-  efgmenuSOLVE_WIZARD = 1525,
-
   efgmenuVIEW_PROFILES = 1850,
   efgmenuVIEW_NAVIGATION = 1860,
   efgmenuVIEW_OUTCOMES = 1861,

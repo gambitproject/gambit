@@ -37,4 +37,27 @@ public:
     { return m_startOption->GetSelection(); }
 };
 
+class dialogQreHomotopy : public wxDialog {
+private:
+  wxRadioBox *m_finiteLambda;
+  wxTextCtrl *m_maxLambda, *m_stepSize;
+  wxCheckBox *m_pxiFile;
+  wxString m_maxLambdaValue, m_stepSizeValue;
+
+  // Event handlers
+  void OnStoppingLambda(wxCommandEvent &);
+
+public:
+  dialogQreHomotopy(wxWindow *p_parent);
+
+  // Returning data from dialog; only valid if ShowModal() returns OK.
+  bool FiniteLambda(void) const;
+  bool GeneratePXIFile(void) const;
+  
+  double MaxLambda(void) const;
+  double StepSize(void) const;
+
+  DECLARE_EVENT_TABLE()
+};
+
 #endif  // DLQRE_H

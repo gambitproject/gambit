@@ -1,7 +1,10 @@
 //
-// FILE: efgshow.h -- Declarations of classes for extensive form display code
+// $Source$
+// $Date$
+// $Revision$
 //
-//  $Id$
+// DESCRIPTION:
+// Interface to class representing extensive form viewing window
 //
 
 #ifndef EFGSHOW_H
@@ -135,9 +138,9 @@ private:
 
   void OnSolveStandard(wxCommandEvent &);
   void OnSolveCustom(wxCommandEvent &);
+  void OnSolveQre(wxCommandEvent &);
   void OnSolveNormalReduced(wxCommandEvent &);
   void OnSolveNormalAgent(wxCommandEvent &);
-  void OnSolveWizard(wxCommandEvent &);
 
   void OnViewProfiles(wxCommandEvent &);
   void OnViewCursor(wxCommandEvent &);

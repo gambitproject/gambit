@@ -19,7 +19,7 @@ class EFQreParams : public FuncMinParams  {
 public:
   bool m_homotopy;
   int powLam;
-  double minLam, maxLam, delLam;
+  double minLam, maxLam, delLam, m_stepSize;
   bool fullGraph;
 
   EFQreParams(void);

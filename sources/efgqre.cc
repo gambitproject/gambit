@@ -18,7 +18,7 @@
 
 EFQreParams::EFQreParams(void)
   : m_homotopy(true), powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01),
-    fullGraph(false)
+    m_stepSize(0.0001), fullGraph(false)
 { }
 
 //=========================================================================
@@ -431,7 +431,7 @@ void QreHomotopy(const Efg::Game &p_efg, EFQreParams &params,
   gMatrix<double> H(p_efg.ProfileLength(), p_efg.ProfileLength() + 1);
   BehavProfile<double> profile(p_start);
   double lambda = 0.0;
-  double stepsize = 0.0001;
+  double stepsize = params.m_stepSize;
   int numSteps = 0;
 
   WritePXIHeader(p_pxifile, p_efg, params);

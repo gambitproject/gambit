@@ -1,7 +1,10 @@
 //
-// FILE: efgshow.cc -- Implementation of class EfgShow
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of extensive form viewing frame
 //
 
 #include "wx/wxprec.h"
@@ -11,7 +14,6 @@
 #include "wx/notebook.h"
 #include "wx/fontdlg.h"
 #include "wx/printdlg.h"
-#include "wx/wizard.h"
 #include "guishare/wxmisc.h"
 #include "guishare/wxstatus.h"
 
@@ -58,6 +60,9 @@
 #include "dlelim.h"
 #include "dlsupportselect.h"
 #include "dlefgeditsupport.h"
+
+#include "dlqre.h"
+#include "efgqre.h"
 
 #include "behavedit.h"
 
@@ -144,9 +149,9 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_POLENUM, EfgShow::OnSolveCustom)
   EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_QRE, EfgShow::OnSolveCustom)
   EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_QREGRID, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_EFG_QREHOMOTOPY, EfgShow::OnSolveQre)
   EVT_MENU(efgmenuSOLVE_NFG_REDUCED, EfgShow::OnSolveNormalReduced)
   EVT_MENU(efgmenuSOLVE_NFG_AGENT, EfgShow::OnSolveNormalAgent)
-  EVT_MENU(efgmenuSOLVE_WIZARD, EfgShow::OnSolveWizard)
   EVT_MENU(efgmenuVIEW_PROFILES, EfgShow::OnViewProfiles)
   EVT_MENU(efgmenuVIEW_NAVIGATION, EfgShow::OnViewCursor)
   EVT_MENU(efgmenuVIEW_OUTCOMES, EfgShow::OnViewOutcomes)
@@ -619,8 +624,8 @@ void EfgShow::MakeMenus(void)
 			"Display only nodes that are support-reachable",
 			true);
   
-  wxMenu *solve_menu = new wxMenu;
-  solve_menu->Append(efgmenuSOLVE_STANDARD, "S&tandard...", "Standard solutions");
+  wxMenu *solveMenu = new wxMenu;
+  solveMenu->Append(efgmenuSOLVE_STANDARD, "S&tandard...", "Standard solutions");
 
   wxMenu *solveCustomMenu = new wxMenu;
   wxMenu *solveCustomEfgMenu = new wxMenu;
@@ -636,6 +641,9 @@ void EfgShow::MakeMenus(void)
 			     "Enumeration by systems of polynomials");
   solveCustomEfgMenu->Append(efgmenuSOLVE_CUSTOM_EFG_QRE, "QRE",
 			     "Compute quantal response equilibria");
+  solveCustomEfgMenu->Append(efgmenuSOLVE_CUSTOM_EFG_QREHOMOTOPY,
+			     "QRE homotopy",
+			     "Compute QRE correspondence via homotopy");
   solveCustomMenu->Append(efgmenuSOLVE_CUSTOM_EFG, "Extensive form",
 			  solveCustomEfgMenu,
 			  "Solve using extensive form based algorithms");
@@ -663,20 +671,16 @@ void EfgShow::MakeMenus(void)
               solveCustomNfgMenu,
               "Solve using normal form based algorithms");
 
-  solve_menu->Append(efgmenuSOLVE_CUSTOM, "Custom", solveCustomMenu,
-             "Select a specific algorithm");
+  solveMenu->Append(efgmenuSOLVE_CUSTOM, "Custom", solveCustomMenu,
+		    "Select a specific algorithm");
 
   wxMenu *solveNfgMenu = new wxMenu;
   solveNfgMenu->Append(efgmenuSOLVE_NFG_REDUCED, "Reduced",
                "Generate reduced normal form");
   solveNfgMenu->Append(efgmenuSOLVE_NFG_AGENT, "Agent",
                "Generate agent normal form");
-  solve_menu->Append(efgmenuSOLVE_NFG, "Normal form", solveNfgMenu,
-             "Create a normal form representation of this game");
-
-  solve_menu->AppendSeparator();
-  solve_menu->Append(efgmenuSOLVE_WIZARD, "&Wizard",
-		     "Experimental wizard for algorithms");
+  solveMenu->Append(efgmenuSOLVE_NFG, "Normal form", solveNfgMenu,
+		    "Create a normal form representation of this game");
   
   wxMenu *viewMenu = new wxMenu;
   viewMenu->Append(efgmenuVIEW_PROFILES, "&Profiles",
@@ -746,7 +750,7 @@ void EfgShow::MakeMenus(void)
   menu_bar->Append(viewMenu, "&View");
   menu_bar->Append(subgame_menu,  "Sub&games");
   menu_bar->Append(supports_menu, "S&upports");
-  menu_bar->Append(solve_menu,    "&Solve");
+  menu_bar->Append(solveMenu, "&Solve");
   menu_bar->Append(prefsMenu,     "&Prefs");
   menu_bar->Append(helpMenu,      "&Help");
 
@@ -1917,6 +1921,82 @@ void EfgShow::OnSolveCustom(wxCommandEvent &p_event)
   UpdateMenus();
 }
 
+void EfgShow::OnSolveQre(wxCommandEvent &)
+{
+  dialogQreHomotopy dialog(this);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    gOutput *pxifile = &gnull;
+    if (dialog.GeneratePXIFile()) {
+      wxFileDialog fileDialog(this, "Choose file for PXI output",
+			      wxPathOnly(m_filename),
+			      "", "*.pxi",
+			      wxSAVE | wxOVERWRITE_PROMPT);
+      if (fileDialog.ShowModal() != wxID_OK) {
+	return;
+      }
+
+      try {
+	pxifile = new gFileOutput(fileDialog.GetPath().c_str());
+      }
+      catch (gFileOutput::OpenFailed &ex) {
+	wxMessageBox(wxString::Format("Could not open file '%s' for writing.",
+				      fileDialog.GetPath().c_str()),
+		     "Error", wxOK, this);
+	return;
+      }
+    }
+
+    gList<BehavSolution> solutions;
+
+    try {
+      EFQreParams params;
+      params.m_homotopy = true;
+      params.maxLam = dialog.MaxLambda();
+      params.m_stepSize = dialog.StepSize();
+
+      wxStatus status(this, "QreSolve Progress");
+      long nevals, nits;
+      BehavProfile<gNumber> start(m_efg);
+
+      wxBusyCursor cursor;
+      Qre(m_efg, params, *pxifile, start, solutions, status, nevals, nits);
+    }
+    catch (gSignalBreak &) {
+      guiExceptionDialog("Algorithm canceled by user", this);
+    }
+    catch (gException &ex) {
+      guiExceptionDialog(ex.Description(), this);
+      if (pxifile != &gnull) {
+	delete pxifile;
+      }
+      return;
+    }
+
+    if (pxifile != &gnull) {
+      delete pxifile;
+    }
+
+    if (solutions.Length() > 0) {
+      for (int soln = 1; soln <= solutions.Length(); soln++) {
+	AddSolution(solutions[soln], true);
+      }
+      ChangeSolution(m_solutionTable->Length());
+      UpdateMenus();
+      if (!m_solutionSashWindow->IsShown())  {
+	m_solutionTable->Show(true);
+	m_solutionSashWindow->Show(true);
+	GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+	AdjustSizes();
+      }
+    }
+    else {
+      wxMessageBox("The algorithm returned no solutions.",
+		   "Notification", wxOK, this);
+    }
+  }
+}
+
 void EfgShow::OnSolveNormalReduced(wxCommandEvent &)
 {
   // check that the game is perfect recall, if not give a warning
@@ -1966,101 +2046,6 @@ void EfgShow::OnSolveNormalAgent(wxCommandEvent &)
     (void) new NfgShow(*N, m_parent);
   }
 }
-
-class DominancePage : public wxWizardPageSimple {
-private:
-  wxRadioBox *m_depthChoice, *m_typeChoice, *m_methodChoice;
-
-public:
-  DominancePage(wxWizard *);
-};
-
-DominancePage::DominancePage(wxWizard *p_parent)
-  : wxWizardPageSimple(p_parent)
-{
-  SetAutoLayout(true);
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-
-  wxString depthChoices[] = { "None", "Once", "Iterative" };
-  m_depthChoice = new wxRadioBox(this, idDEPTH_CHOICE, "Depth",
-				 wxDefaultPosition, wxDefaultSize,
-				 3, depthChoices, 0, wxRA_SPECIFY_COLS);
-  topSizer->Add(m_depthChoice, 0, wxALL, 5);
-
-  wxString typeChoices[] = { "Weak", "Strong" };
-  m_typeChoice = new wxRadioBox(this, -1, "Type",
-				wxDefaultPosition, wxDefaultSize,
-				2, typeChoices, 0, wxRA_SPECIFY_COLS);
-  if (m_depthChoice->GetSelection() == 0)
-    m_typeChoice->Enable(false);
-  topSizer->Add(m_typeChoice, 0, wxALL, 5);
-
-  wxString methodChoices[] = { "Pure", "Mixed" };
-  m_methodChoice = new wxRadioBox(this, -1, "Method",
-				  wxDefaultPosition, wxDefaultSize,
-				  2, methodChoices, 0, wxRA_SPECIFY_COLS);
-  if (m_depthChoice->GetSelection() == 0)
-    m_methodChoice->Enable(false);
-  topSizer->Add(m_methodChoice, 0, wxALL, 5);
-
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-
-  Layout();
-}
-
-class SubgamesPage : public wxWizardPageSimple {
-public:
-  SubgamesPage(wxWizard *p_parent);
-};
-
-SubgamesPage::SubgamesPage(wxWizard *p_parent)
-  : wxWizardPageSimple(p_parent)
-{
-  new wxStaticText(this, -1, "Subgames options go here");
-}
-
-class AlgorithmPage : public wxWizardPageSimple {
-public:
-  AlgorithmPage(wxWizard *);
-};
-
-AlgorithmPage::AlgorithmPage(wxWizard *p_parent)
-  : wxWizardPageSimple(p_parent)
-{
-  new wxStaticText(this, -1, "Algorithm options go here");
-}
-
-class FinishPage : public wxWizardPageSimple {
-public:
-  FinishPage(wxWizard *);
-};
-
-FinishPage::FinishPage(wxWizard *p_parent)
-  : wxWizardPageSimple(p_parent)
-{
-  new wxStaticText(this, -1, "All finished... click Finish to run");
-}
-
-void EfgShow::OnSolveWizard(wxCommandEvent &)
-{
-  wxWizard *wizard = wxWizard::Create(this, -1, "Solution wizard");
-  wxWizardPageSimple *page1 = new DominancePage(wizard);
-  wxWizardPageSimple *page2 = new SubgamesPage(wizard);
-  wxWizardPageSimple *page3 = new AlgorithmPage(wizard);
-  wxWizardPageSimple *page4 = new FinishPage(wizard);
-  wxWizardPageSimple::Chain(page1, page2);
-  wxWizardPageSimple::Chain(page2, page3);
-  wxWizardPageSimple::Chain(page3, page4);
-
-  if (wizard->RunWizard(page1)) {
-
-  }
-
-  wizard->Destroy();
-}
-
 
 void EfgShow::OnViewProfiles(wxCommandEvent &)
 {
