@@ -85,8 +85,10 @@ bool Dominates(const EFSupport &S,
 	       const gStatus &status)
 {
   const Infoset *infoset = a->BelongsTo();
+  /*
   if (infoset != b->BelongsTo())
     throw gclRuntimeError("Dominates(..) needs actions in same infoset.\n");
+  */
   const EFPlayer *player = infoset->GetPlayer();
 
   return Dominates(S,player->GetNumber(),infoset->GetNumber(),
