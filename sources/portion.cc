@@ -1,9 +1,9 @@
-//#
-//# FILE: portion.cc -- implementation of Portion base and descendent classes
-//#                     companion to GSM
-//#
-//# @(#)portion.cc	1.154 12/17/96
-//#
+//
+// FILE: portion.cc -- implementation of Portion base and descendent classes
+//                     companion to GSM
+//
+// $Id$
+//
 
 
 #include <assert.h>
@@ -1399,40 +1399,29 @@ bool ActionRefPortion::IsReference(void) const
 
 
 
-MixedPortion::MixedPortion(void)
+MixedPortion<double>::MixedPortion(void)
 {}
 
-MixedPortion::~MixedPortion()
+MixedPortion<double>::~MixedPortion()
 { }
 
-BaseMixedProfile*& MixedPortion::Value(void) const
+MixedProfile<double> *& MixedPortion<double>::Value(void) const
 { return *_Value; }
 
-PortionSpec MixedPortion::Spec(void) const
+PortionSpec MixedPortion<double>::Spec(void) const
 { 
   unsigned long _DataType = porMIXED;
-  if(*_Value)
-    switch((*_Value)->Type())
-    {
-    case DOUBLE:
-      _DataType = porMIXED_FLOAT;
-      break;
-    case RATIONAL:
-      _DataType = porMIXED_RATIONAL;
-      break;
-    default:
-      assert(0);
-    }
+  _DataType = porMIXED_FLOAT;
   return PortionSpec(_DataType);
 }
 
-DataType MixedPortion::SubType( void ) const
+DataType MixedPortion<double>::SubType( void ) const
 {
   assert( Value() );
-  return Value()->Type();
+  return DOUBLE;
 }
 
-void MixedPortion::Output(gOutput& s) const
+void MixedPortion<double>::Output(gOutput& s) const
 {
   Portion::Output(s);
   if(!*_Value)
@@ -1442,90 +1431,162 @@ void MixedPortion::Output(gOutput& s) const
   else
   {
     s << "(Mixed) ";
-    switch((*_Value)->Type())
-    {
-    case DOUBLE: 
-      if(_WriteSolutionInfo>1)
-	s << (MixedSolution<double>) *(MixedSolution<double>*)(*_Value); 
-      else
-	s << (MixedProfile<double>) *(MixedSolution<double>*)(*_Value); 
-      break;
-    case RATIONAL:
-      if(_WriteSolutionInfo>1)
-	s << (MixedSolution<gRational>) *(MixedSolution<gRational>*)(*_Value); 
-      else
-	s << (MixedProfile<gRational>) *(MixedSolution<gRational>*)(*_Value); 
-      break;
-    default:
-      assert(0);
-    }
+    if (_WriteSolutionInfo>1)
+      s << (MixedSolution<double>) *(MixedSolution<double>*)(*_Value); 
+    else
+      s << (MixedProfile<double>) *(MixedSolution<double>*)(*_Value); 
   }
 }
 
-gString MixedPortion::OutputString( void ) const
+gString MixedPortion<double>::OutputString( void ) const
 {
   return "(Mixed)";
 }
 
-Portion* MixedPortion::ValCopy(void) const
+Portion* MixedPortion<double>::ValCopy(void) const
 { 
   Portion* p = 0;
   if(!*_Value)
   {
-    p = new MixedValPortion(0);
+    p = new MixedValPortion<double>(0);
   }
   else
   {
-    switch((*_Value)->Type())
-    {
-    case DOUBLE:
-      p = new MixedValPortion
-	(new MixedSolution<double>
-	 (* (MixedSolution<double>*) (*_Value))); 
-      break;
-    case RATIONAL:
-      p = new MixedValPortion
-	(new MixedSolution<gRational>
-	 (* (MixedSolution<gRational>*) (*_Value)));       
-      break;
-    default:
-      assert(0);
-    }
+    p = new MixedValPortion<double>
+      (new MixedSolution<double>
+       (* (MixedSolution<double>*) (*_Value))); 
   }
   p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
-Portion* MixedPortion::RefCopy(void) const
+Portion* MixedPortion<double>::RefCopy(void) const
 { 
-  Portion* p = new MixedRefPortion(*_Value); 
+  Portion* p = new MixedRefPortion<double>(*_Value); 
   p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
-MixedValPortion::MixedValPortion(BaseMixedProfile* value)
-{ _Value = new BaseMixedProfile*(value); }
+MixedValPortion<double>::MixedValPortion(MixedProfile<double> * value)
+{ _Value = new MixedProfile<double> *(value); }
 
-MixedValPortion::~MixedValPortion()
+MixedValPortion<double>::~MixedValPortion()
 { 
   delete *_Value;
   delete _Value; 
 }
 
-bool MixedValPortion::IsReference(void) const
+bool MixedValPortion<double>::IsReference(void) const
 { return false; }
 
 
-MixedRefPortion::MixedRefPortion(BaseMixedProfile*& value)
+MixedRefPortion<double>::MixedRefPortion(MixedProfile<double> *& value)
 { _Value = &value; }
 
-MixedRefPortion::~MixedRefPortion()
+MixedRefPortion<double>::~MixedRefPortion()
 { }
 
-bool MixedRefPortion::IsReference(void) const
+bool MixedRefPortion<double>::IsReference(void) const
 { return true; }
+
+
+
+MixedPortion<gRational>::MixedPortion(void)
+{}
+
+MixedPortion<gRational>::~MixedPortion()
+{ }
+
+MixedProfile<gRational> *& MixedPortion<gRational>::Value(void) const
+{ return *_Value; }
+
+PortionSpec MixedPortion<gRational>::Spec(void) const
+{ 
+  unsigned long _DataType = porMIXED;
+  _DataType = porMIXED_FLOAT;
+  return PortionSpec(_DataType);
+}
+
+DataType MixedPortion<gRational>::SubType( void ) const
+{
+  assert( Value() );
+  return RATIONAL;
+}
+
+void MixedPortion<gRational>::Output(gOutput& s) const
+{
+  Portion::Output(s);
+  if(!*_Value)
+  {
+    s << "(Mixed) NULL"; 
+  }
+  else
+  {
+    s << "(Mixed) ";
+    if (_WriteSolutionInfo>1)
+      s << (MixedSolution<gRational>) *(MixedSolution<gRational>*)(*_Value); 
+    else
+      s << (MixedProfile<gRational>) *(MixedSolution<gRational>*)(*_Value); 
+  }
+}
+
+gString MixedPortion<gRational>::OutputString( void ) const
+{
+  return "(Mixed)";
+}
+
+Portion* MixedPortion<gRational>::ValCopy(void) const
+{ 
+  Portion* p = 0;
+  if(!*_Value)
+  {
+    p = new MixedValPortion<gRational>(0);
+  }
+  else
+  {
+    p = new MixedValPortion<gRational>
+      (new MixedSolution<gRational>
+       (* (MixedSolution<gRational>*) (*_Value))); 
+  }
+  p->SetGame(Game(), GameIsEfg());
+  return p;
+}
+
+Portion* MixedPortion<gRational>::RefCopy(void) const
+{ 
+  Portion* p = new MixedRefPortion<gRational>(*_Value); 
+  p->SetGame(Game(), GameIsEfg());
+  p->SetOriginal(Original());
+  return p;
+}
+
+
+MixedValPortion<gRational>::MixedValPortion(MixedProfile<gRational> * value)
+{ _Value = new MixedProfile<gRational> *(value); }
+
+MixedValPortion<gRational>::~MixedValPortion()
+{ 
+  delete *_Value;
+  delete _Value; 
+}
+
+bool MixedValPortion<gRational>::IsReference(void) const
+{ return false; }
+
+
+MixedRefPortion<gRational>::MixedRefPortion(MixedProfile<gRational> *& value)
+{ _Value = &value; }
+
+MixedRefPortion<gRational>::~MixedRefPortion()
+{ }
+
+bool MixedRefPortion<gRational>::IsReference(void) const
+{ return true; }
+
+
+
 
 
 
@@ -2620,11 +2681,11 @@ bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
 	 *(((EfSupportPortion*) p2)->Value()));
   
   else if(p1->Spec().Type & porMIXED_FLOAT)
-    b = ((*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) == 
-	 (*((MixedSolution<double>*) ((MixedPortion*) p2)->Value())));
+    b = ((*((MixedSolution<double>*) ((MixedPortion<double>*) p1)->Value())) == 
+	 (*((MixedSolution<double>*) ((MixedPortion<double>*) p2)->Value())));
   else if(p1->Spec().Type & porMIXED_RATIONAL)
-    b = ((*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) == 
-	 (*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value())));
+    b = ((*((MixedSolution<gRational>*) ((MixedPortion<gRational>*) p1)->Value())) == 
+	 (*((MixedSolution<gRational>*) ((MixedPortion<gRational>*) p2)->Value())));
   else if(p1->Spec().Type & porBEHAV_FLOAT)
     b = ((*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) == 
 	 (*((BehavSolution<double>*) ((BehavPortion*) p2)->Value())));
@@ -2652,3 +2713,19 @@ bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
 }
 
 
+
+
+
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#pragma option -Jgd
+#define TEMPLATE
+#endif   // __GNUG__, __BORLANDC__
+
+TEMPLATE class MixedPortion<double>;
+TEMPLATE class MixedValPortion<double>;
+TEMPLATE class MixedRefPortion<double>;
+TEMPLATE class MixedPortion<gRational>;
+TEMPLATE class MixedValPortion<gRational>;
+TEMPLATE class MixedRefPortion<gRational>;

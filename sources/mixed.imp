@@ -158,25 +158,25 @@ void Nfg<T>::WriteNfgFile(gOutput &f) const
 //---------------------------------------------------------------------------
 
 template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF)
-  : BaseMixedProfile(NF), gPVector<T>(NF.dimensions)
+  : gPVector<T>(NF.dimensions), N(&NF), support(NF)
 {
   Centroid();
 }
 
 template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF,
 						 const NFSupport &s)
-  : BaseMixedProfile(NF, s), gPVector<T>(s.NumStrats())
+  : gPVector<T>(s.NumStrats()), N(&NF), support(s)
 {
   Centroid();
 }
 
 template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF,
 						 const gPVector<T> &profile)
-  : BaseMixedProfile(NF), gPVector<T>(profile)
+  : gPVector<T>(profile), N(&NF), support(NF)
 { }
 
 template <class T> MixedProfile<T>::MixedProfile(const MixedProfile<T> &p)
-  : BaseMixedProfile(p), gPVector<T>(p)
+  : gPVector<T>(p), N(p.N), support(p.support)
 { }
 
 template <class T> MixedProfile<T>::~MixedProfile()   { }
@@ -184,8 +184,12 @@ template <class T> MixedProfile<T>::~MixedProfile()   { }
 template <class T>
 MixedProfile<T> &MixedProfile<T>::operator=(const MixedProfile<T> &p)
 {
-  BaseMixedProfile::operator=(p);
-  gPVector<T>::operator=(p);
+  if (this != &p && N == p.N)   {
+    // note that a dimensionality change will trigger a failed assertion
+    // in the gPVector assignment operator
+    support = p.support;
+    gPVector<T>::operator=(p);
+  }
   return *this;
 }
 

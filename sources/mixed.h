@@ -12,34 +12,16 @@
 
 class BaseNfg;
 
-class BaseMixedProfile     {
-  protected:
-    const BaseNfg *N;
-    NFSupport support;
-
-    BaseMixedProfile(const BaseNfg &);
-    BaseMixedProfile(const BaseNfg &, const NFSupport &s);
-    BaseMixedProfile(const BaseMixedProfile &);
-    BaseMixedProfile &operator=(const BaseMixedProfile &);
-
-  public:
-    virtual ~BaseMixedProfile();
-
-    DataType Type(void) const;
-    virtual bool IsPure(void) const = 0;
-    virtual bool IsPure(int pl) const = 0;
-    const NFSupport &Support(void) const;
-};
-
-
 #include "gpvector.h"
 
 template <class T> class Nfg;
 
-template <class T> class MixedProfile 
-  : public BaseMixedProfile, public gPVector<T>  {
+template <class T> class MixedProfile : public gPVector<T>  {
 
   private:
+    const Nfg<T> *N;
+    NFSupport support;
+
     // Private Payoff functions
 
     T PPayoff(int pl, int index, int i) const;
@@ -75,7 +57,8 @@ template <class T> class MixedProfile
     void Payoff(int pl, int const_pl, gVector<T> &payoff) const;
 
     bool operator==(const MixedProfile<T> &) const;
-    
+
+    const NFSupport &Support(void) const   { return support; }
 };
 
 #ifndef __BORLANDC__

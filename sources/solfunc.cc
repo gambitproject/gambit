@@ -520,14 +520,13 @@ static Portion *GSM_CentroidEFSupport(Portion **param)
 static Portion *GSM_CentroidNFSupport(Portion **param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
-  BaseMixedProfile *P;
+  Portion *por;
 
   if (S->BelongsTo().Type() == DOUBLE)
-    P = new MixedSolution<double>((Nfg<double> &) S->BelongsTo(), *S);
+    por = new MixedValPortion<double>(new MixedSolution<double>((Nfg<double> &) S->BelongsTo(), *S));
   else
-    P = new MixedSolution<gRational>((Nfg<gRational> &) S->BelongsTo(), *S);
+    por = new MixedValPortion<gRational>(new MixedSolution<gRational>((Nfg<gRational> &) S->BelongsTo(), *S));
 
-  Portion *por = new MixedValPortion(P);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -575,7 +574,7 @@ static Portion *GSM_GobitLambda_BehavFloat(Portion** param)
 static Portion *GSM_GobitLambda_MixedFloat(Portion** param)
 {
   MixedSolution<double>* bs = 
-    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<double>*) ((MixedPortion<double>*) param[0])->Value();
   if(bs->Creator() != NfgAlg_GOBIT)
     return new NullPortion(porFLOAT);
   return new FloatValPortion(bs->GobitLambda());
@@ -597,7 +596,7 @@ static Portion *GSM_GobitValue_BehavFloat(Portion** param)
 static Portion *GSM_GobitValue_MixedFloat(Portion** param)
 {
   MixedSolution<double>* bs = 
-    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<double>*) ((MixedPortion<double>*) param[0])->Value();
   if(bs->Creator() != NfgAlg_GOBIT)
     return new NullPortion(porFLOAT);
   return new FloatValPortion(bs->GobitValue());
@@ -715,14 +714,14 @@ static Portion *GSM_IsKnownNash_BehavRational(Portion **param)
 static Portion *GSM_IsKnownNash_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
-    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<double>*) ((MixedPortion<double>*) param[0])->Value();
   return new BoolValPortion(P->IsNash() == T_YES);
 }
 
 static Portion *GSM_IsKnownNash_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
-    (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[0])->Value();
   return new BoolValPortion(P->IsNash() == T_YES);
 }
 
@@ -748,14 +747,14 @@ static Portion *GSM_IsKnownNotNash_BehavRational(Portion **param)
 static Portion *GSM_IsKnownNotNash_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
-    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<double>*) ((MixedPortion<double>*) param[0])->Value();
   return new BoolValPortion(P->IsNash() == T_NO);
 }
 
 static Portion *GSM_IsKnownNotNash_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
-    (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[0])->Value();
   return new BoolValPortion(P->IsNash() == T_NO);
 }
 
@@ -766,14 +765,14 @@ static Portion *GSM_IsKnownNotNash_MixedRational(Portion **param)
 static Portion *GSM_IsKnownNotPerfect_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
-    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<double>*) ((MixedPortion<double>*) param[0])->Value();
   return new BoolValPortion(P->IsPerfect() == T_NO);
 }
 
 static Portion *GSM_IsKnownNotPerfect_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
-    (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[0])->Value();
   return new BoolValPortion(P->IsPerfect() == T_NO);
 }
 
@@ -820,14 +819,14 @@ static Portion *GSM_IsKnownNotSubgamePerfect_BehavRational(Portion **param)
 static Portion *GSM_IsKnownPerfect_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
-    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<double>*) ((MixedPortion<double>*) param[0])->Value();
   return new BoolValPortion(P->IsPerfect() == T_YES);
 }
 
 static Portion *GSM_IsKnownPerfect_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
-    (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[0])->Value();
   return new BoolValPortion(P->IsPerfect() == T_YES);
 }
 
@@ -889,14 +888,14 @@ static Portion *GSM_LiapValue_BehavRational(Portion **param)
 static Portion *GSM_LiapValue_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
-    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<double>*) ((MixedPortion<double>*) param[0])->Value();
   return new FloatValPortion(P->LiapValue());
 }
 
 static Portion *GSM_LiapValue_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
-    (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[0])->Value();
   return new RationalValPortion(P->LiapValue());
 }
 
@@ -909,8 +908,9 @@ Portion* GSM_Mixed_NFSupport(Portion** param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   gArray<int> dim = S->NumStrats();
-  BaseMixedProfile *P;
   Portion* por;
+  MixedSolution<double> *Pd = 0;
+  MixedSolution<gRational> *Pr = 0;
   unsigned long datatype;
   int i;
   int j;
@@ -920,11 +920,11 @@ Portion* GSM_Mixed_NFSupport(Portion** param)
   switch(S->BelongsTo().Type())
   {
   case DOUBLE:
-    P = new MixedSolution<double>((Nfg<double> &) S->BelongsTo(), *S);
+    Pd = new MixedSolution<double>((Nfg<double> &) S->BelongsTo(), *S);
     datatype = porFLOAT;
     break;
   case RATIONAL:
-    P = new MixedSolution<gRational>((Nfg<gRational> &) S->BelongsTo(), *S);
+    Pr = new MixedSolution<gRational>((Nfg<gRational> &) S->BelongsTo(), *S);
     datatype = porRATIONAL;
     break;
   default:
@@ -934,7 +934,8 @@ Portion* GSM_Mixed_NFSupport(Portion** param)
 
   if(((ListPortion*) param[1])->Length() != dim.Length())
   {
-    delete P;
+    if (Pd) delete Pd;
+    if (Pr) delete Pr;
     return new ErrorPortion("Mismatching number of players");
   }
   
@@ -944,12 +945,14 @@ Portion* GSM_Mixed_NFSupport(Portion** param)
     if(p1->Spec().ListDepth == 0)
     {
       delete p1;
-      delete P;
+      if (Pd) delete Pd;
+      if (Pr) delete Pr;
       return new ErrorPortion("Mismatching dimensionality");
     }
     if (((ListPortion*) p1)->Length() != S->NumStrats(i))  {
       delete p1;
-      delete P;
+      if (Pd) delete Pd;
+      if (Pr) delete Pr;
       return new ErrorPortion("Mismatching number of strategies");
     }
     
@@ -959,18 +962,19 @@ Portion* GSM_Mixed_NFSupport(Portion** param)
       {
 	delete p2;
 	delete p1;
-	delete P;
+	if (Pd)  delete Pd;
+	if (Pr)  delete Pr;
 	return new ErrorPortion("Mismatching dimensionality");
       }
       
       switch(datatype)
       {
       case porFLOAT:
-	(* (MixedSolution<double>*) P)(i, j) = 
+	(* (MixedSolution<double>*) Pd)(i, j) = 
 	  ((FloatPortion*) p2)->Value();
 	break;
       case porRATIONAL:
-	(* (MixedSolution<gRational>*) P)(i, j) = 
+	(* (MixedSolution<gRational>*) Pr)(i, j) = 
 	  ((RationalPortion*) p2)->Value();
 	break;
       default:
@@ -981,8 +985,11 @@ Portion* GSM_Mixed_NFSupport(Portion** param)
     }
     delete p1;
   }
-  
-  por = new MixedValPortion(P);
+
+  if (datatype == porFLOAT)
+    por = new MixedValPortion<double>(Pd);
+  else
+    por = new MixedValPortion<gRational>(Pr);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -1117,7 +1124,7 @@ static Portion *GSM_RealizProbs_Rational(Portion **param)
 static Portion *GSM_Regret_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
-    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<double>*) ((MixedPortion<double>*) param[0])->Value();
   Strategy* s = ((StrategyPortion*) param[1])->Value();
   NFPlayer* p = s->nfp;
   BaseNfg &n = p->BelongsTo();
@@ -1131,7 +1138,7 @@ static Portion *GSM_Regret_MixedFloat(Portion **param)
 static Portion *GSM_Regret_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
-    (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[0])->Value();
   Strategy* s = ((StrategyPortion*) param[1])->Value();
   NFPlayer* p = s->nfp;
   BaseNfg &n = p->BelongsTo();
@@ -1182,7 +1189,7 @@ static Portion *GSM_Regret_BehavRational(Portion **param)
 static Portion *GSM_Regrets_MixedFloat(Portion **param)
 {
   MixedSolution<double> *profile = 
-    (MixedSolution<double> *) ((MixedPortion *) param[0])->Value();
+    (MixedSolution<double> *) ((MixedPortion<double> *) param[0])->Value();
 
   gPVector<double> v(profile->BelongsTo().NumStrats());
 
@@ -1206,7 +1213,7 @@ static Portion *GSM_Regrets_MixedFloat(Portion **param)
 static Portion *GSM_Regrets_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *profile = 
-    (MixedSolution<gRational> *) ((MixedPortion *) param[0])->Value();
+    (MixedSolution<gRational> *) ((MixedPortion<gRational> *) param[0])->Value();
 
   gPVector<gRational> v(profile->BelongsTo().NumStrats());
 
@@ -1359,7 +1366,7 @@ static Portion *GSM_SetStrategyProbs_Float(Portion **param)
   int PlayerNum = 0;
 
   MixedSolution<double>* P = 
-    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<double>*) ((MixedPortion<double> *) param[0])->Value();
   Nfg<double>& N = P->BelongsTo();
   const gArray<NFPlayer *> &player = N.Players();
   
@@ -1401,7 +1408,7 @@ static Portion *GSM_SetStrategyProbs_Rational(Portion **param)
   int PlayerNum = 0;
 
   MixedSolution<gRational>* P = 
-    (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[0])->Value();
   Nfg<gRational>& N = P->BelongsTo();
   const gArray<NFPlayer *> &player = N.Players();
   
@@ -1443,7 +1450,7 @@ static Portion *GSM_StrategyProb_Float(Portion **param)
 {
   Portion *por;
   MixedSolution<double>* profile = 
-    (MixedSolution<double> *) ((MixedPortion *) param[0])->Value();
+    (MixedSolution<double> *) ((MixedPortion<double> *) param[0])->Value();
   Strategy* strategy = ((StrategyPortion*) param[1])->Value();
   NFPlayer* player = strategy->nfp;
   
@@ -1462,7 +1469,7 @@ static Portion *GSM_StrategyProb_Rational(Portion **param)
 {
   Portion *por;
   MixedSolution<gRational>* profile = 
-    (MixedSolution<gRational> *) ((MixedPortion *) param[0])->Value();
+    (MixedSolution<gRational> *) ((MixedPortion<gRational> *) param[0])->Value();
   Strategy* strategy = ((StrategyPortion*) param[1])->Value();
   NFPlayer* player = strategy->nfp;
   
@@ -1544,9 +1551,15 @@ static Portion *GSM_Support_Behav(Portion** param)
   return new EfSupportValPortion(new EFSupport(P->GetEFSupport()));
 }
 
-static Portion *GSM_Support_Mixed(Portion** param)
+static Portion *GSM_Support_MixedFloat(Portion** param)
 {
-  BaseMixedProfile *P = ((MixedPortion *) param[0])->Value();
+  MixedProfile<double> *P = ((MixedPortion<double> *) param[0])->Value();
+  return new NfSupportValPortion(new NFSupport(P->Support()));
+}
+
+static Portion *GSM_Support_MixedRational(Portion** param)
+{
+  MixedProfile<gRational> *P = ((MixedPortion<gRational> *) param[0])->Value();
   return new NfSupportValPortion(new NFSupport(P->Support()));
 }
 
@@ -1991,13 +2004,15 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED_RATIONAL));
   gsm->AddFunction(FuncObj);
 
-
-  FuncObj = new FuncDescObj("Support", 2);
+  FuncObj = new FuncDescObj("Support", 3);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Support_Behav, porEFSUPPORT, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV)); 
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Support_Mixed, porNFSUPPORT, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED)); 
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Support_MixedFloat, porNFSUPPORT, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED_FLOAT)); 
+
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Support_MixedRational, porNFSUPPORT, 1));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("profile", porMIXED_RATIONAL)); 
   gsm->AddFunction(FuncObj);
 }
 

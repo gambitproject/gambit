@@ -176,34 +176,34 @@ Portion* GSM_Add_gRational(Portion** param)
 Portion* GSM_Add_MixedFloat(Portion** param)
 {
   Portion* result = 0;
-  if(((MixedPortion*) param[0])->Value() == 0 ||
-     ((MixedPortion*) param[1])->Value() == 0)
+  if(((MixedPortion<double>*) param[0])->Value() == 0 ||
+     ((MixedPortion<double>*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
 
-  if(((MixedPortion*) param[0])->Value()->Support() !=
-     ((MixedPortion*) param[1])->Value()->Support())
+  if(((MixedPortion<double>*) param[0])->Value()->Support() !=
+     ((MixedPortion<double>*) param[1])->Value()->Support())
     return new ErrorPortion("Support mismatch");
 
   result = param[0]->ValCopy();
-  (* (MixedSolution<double>*) ((MixedPortion*) result)->Value()) +=
-    (* (MixedSolution<double>*) ((MixedPortion*) param[1])->Value());
+  (* (MixedSolution<double>*) ((MixedPortion<double>*) result)->Value()) +=
+    (* (MixedSolution<double>*) ((MixedPortion<double>*) param[1])->Value());
   return result;
 }
 
 Portion* GSM_Add_MixedRational(Portion** param)
 {
   Portion* result = 0;
-  if(((MixedPortion*) param[0])->Value() == 0 ||
-     ((MixedPortion*) param[1])->Value() == 0)
+  if(((MixedPortion<gRational>*) param[0])->Value() == 0 ||
+     ((MixedPortion<gRational>*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
 
-  if(((MixedPortion*) param[0])->Value()->Support() !=
-     ((MixedPortion*) param[1])->Value()->Support())
+  if(((MixedPortion<gRational>*) param[0])->Value()->Support() !=
+     ((MixedPortion<gRational>*) param[1])->Value()->Support())
     return new ErrorPortion("Support mismatch");
 
   result = param[0]->ValCopy();
-  (* (MixedSolution<gRational>*) ((MixedPortion*) result)->Value()) +=
-    (* (MixedSolution<gRational>*) ((MixedPortion*) param[1])->Value());
+  (* (MixedSolution<gRational>*) ((MixedPortion<gRational>*) result)->Value()) +=
+    (* (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[1])->Value());
   return result;
 }
 
@@ -320,34 +320,34 @@ Portion* GSM_Subtract_gRational(Portion** param)
 Portion* GSM_Subtract_MixedFloat(Portion** param)
 {
   Portion* result = 0;
-  if(((MixedPortion*) param[0])->Value() == 0 ||
-     ((MixedPortion*) param[1])->Value() == 0)
+  if(((MixedPortion<double>*) param[0])->Value() == 0 ||
+     ((MixedPortion<double>*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
 
-  if(((MixedPortion*) param[0])->Value()->Support() !=
-     ((MixedPortion*) param[1])->Value()->Support())
+  if(((MixedPortion<double>*) param[0])->Value()->Support() !=
+     ((MixedPortion<double>*) param[1])->Value()->Support())
     return new ErrorPortion("Support mismatch");
 
   result = param[0]->ValCopy();
-  (* (MixedSolution<double>*) ((MixedPortion*) result)->Value()) -=
-    (* (MixedSolution<double>*) ((MixedPortion*) param[1])->Value());
+  (* (MixedSolution<double>*) ((MixedPortion<double>*) result)->Value()) -=
+    (* (MixedSolution<double>*) ((MixedPortion<double>*) param[1])->Value());
   return result;
 }
 
 Portion* GSM_Subtract_MixedRational(Portion** param)
 {
   Portion* result = 0;
-  if(((MixedPortion*) param[0])->Value() == 0 ||
-     ((MixedPortion*) param[1])->Value() == 0)
+  if(((MixedPortion<gRational>*) param[0])->Value() == 0 ||
+     ((MixedPortion<gRational>*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
 
-  if(((MixedPortion*) param[0])->Value()->Support() !=
-     ((MixedPortion*) param[1])->Value()->Support())
+  if(((MixedPortion<gRational>*) param[0])->Value()->Support() !=
+     ((MixedPortion<gRational>*) param[1])->Value()->Support())
     return new ErrorPortion("Support mismatch");
 
   result = param[0]->ValCopy();
-  (* (MixedSolution<gRational>*) ((MixedPortion*) result)->Value()) -=
-    (* (MixedSolution<gRational>*) ((MixedPortion*) param[1])->Value());
+  (* (MixedSolution<gRational>*) ((MixedPortion<gRational>*) result)->Value()) -=
+    (* (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[1])->Value());
   return result;
 }
 
@@ -427,11 +427,11 @@ Portion* GSM_Multiply_gRational(Portion** param)
 Portion* GSM_Multiply_MixedFloat(Portion** param)
 {
   Portion* result = 0;
-  if(((MixedPortion*) param[1])->Value() == 0)
+  if(((MixedPortion<double>*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
   
   result = param[1]->ValCopy();
-  (* (MixedSolution<double>*) ((MixedPortion*) result)->Value()) *=
+  (* (MixedSolution<double>*) ((MixedPortion<double>*) result)->Value()) *=
     ((FloatPortion*) param[0])->Value();
   return result;
 }
@@ -439,11 +439,11 @@ Portion* GSM_Multiply_MixedFloat(Portion** param)
 Portion* GSM_Multiply_MixedRational(Portion** param)
 {
   Portion* result = 0;
-  if(((MixedPortion*) param[1])->Value() == 0)
+  if(((MixedPortion<gRational>*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
   
   result = param[1]->ValCopy();
-  (* (MixedSolution<gRational>*) ((MixedPortion*) result)->Value()) *=
+  (* (MixedSolution<gRational>*) ((MixedPortion<gRational>*) result)->Value()) *=
     ((RationalPortion*) param[0])->Value();
   return result;
 }
@@ -924,8 +924,8 @@ Portion* GSM_Equal_MixedFloat(Portion** param)
  			       param[1]->Spec().Type );
   }
   return new BoolValPortion
-    ((*(MixedSolution<double> *) ((MixedPortion *) param[0])->Value()) ==
-     (*(MixedSolution<double> *) ((MixedPortion *) param[1])->Value()));
+    ((*(MixedSolution<double> *) ((MixedPortion<double> *) param[0])->Value()) ==
+     (*(MixedSolution<double> *) ((MixedPortion<double> *) param[1])->Value()));
 }
 
 Portion* GSM_Equal_MixedRational(Portion** param) 
@@ -937,8 +937,8 @@ Portion* GSM_Equal_MixedRational(Portion** param)
  			       param[1]->Spec().Type );
   }
   return new BoolValPortion
-    ((*(MixedSolution<gRational> *) ((MixedPortion *) param[0])->Value()) ==
-     (*(MixedSolution<gRational> *) ((MixedPortion *) param[1])->Value()));
+    ((*(MixedSolution<gRational> *) ((MixedPortion<gRational> *) param[0])->Value()) ==
+     (*(MixedSolution<gRational> *) ((MixedPortion<gRational> *) param[1])->Value()));
 }
 
 //------------
@@ -1058,15 +1058,15 @@ Portion* GSM_NotEqual_NfSupport(Portion** param)
 Portion* GSM_NotEqual_MixedFloat(Portion** param)
 {
   return new BoolValPortion
-    ((*(MixedSolution<double> *) ((MixedPortion *) param[0])->Value()) !=
-     (*(MixedSolution<double> *) ((MixedPortion *) param[1])->Value()));
+    ((*(MixedSolution<double> *) ((MixedPortion<double> *) param[0])->Value()) !=
+     (*(MixedSolution<double> *) ((MixedPortion<double> *) param[1])->Value()));
 }
 
 Portion* GSM_NotEqual_MixedRational(Portion** param) 
 {
   return new BoolValPortion
-    ((*(MixedSolution<gRational> *) ((MixedPortion *) param[0])->Value()) !=
-     (*(MixedSolution<gRational> *) ((MixedPortion *) param[1])->Value()));
+    ((*(MixedSolution<gRational> *) ((MixedPortion<gRational> *) param[0])->Value()) !=
+     (*(MixedSolution<gRational> *) ((MixedPortion<gRational> *) param[1])->Value()));
 }
 
 
@@ -2104,7 +2104,7 @@ Portion *GSM_ListForm_MixedFloat(Portion **param)
   Portion* por;
 
   MixedSolution<double> *P = 
-    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<double>*) ((MixedPortion<double>*) param[0])->Value();
 
   por = new ListValPortion();
 
@@ -2134,7 +2134,7 @@ Portion *GSM_ListForm_MixedRational(Portion **param)
   Portion* por;
 
   MixedSolution<gRational> *P = 
-    (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[0])->Value();
 
   por = new ListValPortion();
 
@@ -2205,7 +2205,7 @@ Portion *GSM_Mixed_NfgFloat(Portion **param)
   }
 
 
-  Portion* por = new MixedValPortion(P);
+  Portion* por = new MixedValPortion<double>(P);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -2263,7 +2263,7 @@ Portion *GSM_Mixed_NfgRational(Portion **param)
   }
 
 
-  Portion* por = new MixedValPortion(P);
+  Portion* por = new MixedValPortion<gRational>(P);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -2438,7 +2438,7 @@ Portion* GSM_Read_MixedFloat(Portion** param)
   Portion* sub_param[2];
   Portion* owner = 
     new NfgValPortion(& ((MixedSolution<double>*) 
-		       ((MixedPortion*) param[1])->Value())->BelongsTo());
+		       ((MixedPortion<double>*) param[1])->Value())->BelongsTo());
 
   sub_param[0] = param[1];
   sub_param[1] = 0;
@@ -2457,8 +2457,8 @@ Portion* GSM_Read_MixedFloat(Portion** param)
   sub_param[0] = owner;
   sub_param[1] = list;
   Portion* p = GSM_Mixed_NfgFloat(sub_param);
-  (*((MixedSolution<double>*) ((MixedPortion*) param[1])->Value())) = 
-    (*((MixedSolution<double>*) ((MixedPortion*) p)->Value()));
+  (*((MixedSolution<double>*) ((MixedPortion<double>*) param[1])->Value())) = 
+    (*((MixedSolution<double>*) ((MixedPortion<double>*) p)->Value()));
 
   delete owner;
   delete list;
@@ -2474,7 +2474,7 @@ Portion* GSM_Read_MixedRational(Portion** param)
   Portion* sub_param[2];
   Portion* owner = 
     new NfgValPortion(& ((MixedSolution<gRational>*) 
-		       ((MixedPortion*) param[1])->Value())->BelongsTo());
+		       ((MixedPortion<gRational>*) param[1])->Value())->BelongsTo());
 
   sub_param[0] = param[1];
   sub_param[1] = 0;
@@ -2493,8 +2493,8 @@ Portion* GSM_Read_MixedRational(Portion** param)
   sub_param[0] = owner;
   sub_param[1] = list;
   Portion* p = GSM_Mixed_NfgRational(sub_param);
-  (*((MixedSolution<gRational>*) ((MixedPortion*) param[1])->Value())) = 
-    (*((MixedSolution<gRational>*) ((MixedPortion*) p)->Value()));
+  (*((MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[1])->Value())) = 
+    (*((MixedSolution<gRational>*) ((MixedPortion<gRational>*) p)->Value()));
 
   delete owner;
   delete list;

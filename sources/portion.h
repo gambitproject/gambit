@@ -1,9 +1,9 @@
-//#
-//# FILE: portion.h -- header file for Portion class
-//#                    companion to GSM
-//#
-//# $Id$
-//#
+//
+// FILE: portion.h -- header file for Portion class
+//                    companion to GSM
+//
+// $Id$
+//
 
 
 
@@ -783,20 +783,17 @@ public:
 //                          new Mixed class
 //---------------------------------------------------------------------
 
-class BaseMixedProfile;
-
-class MixedPortion : public Portion
-{
+template <class T> class MixedPortion : public Portion  {
 protected:
-  BaseMixedProfile** _Value;
+  MixedProfile<T> ** _Value;
   MixedPortion(void);
 
 public:
   virtual ~MixedPortion();
 
-  BaseMixedProfile*& Value(void) const;
+  MixedProfile<T> *& Value(void) const;
   PortionSpec Spec(void) const;
-  DataType SubType( void ) const;
+  DataType SubType(void) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -806,18 +803,16 @@ public:
 };
 
 
-class MixedValPortion : public MixedPortion
-{
+template <class T> class MixedValPortion : public MixedPortion<T>  {
 public:
-  MixedValPortion(BaseMixedProfile* value);
+  MixedValPortion(MixedProfile<T> *value);
   virtual ~MixedValPortion();
   bool IsReference(void) const;
 };
 
-class MixedRefPortion : public MixedPortion
-{
+template <class T> class MixedRefPortion : public MixedPortion<T>  {
 public:
-  MixedRefPortion(BaseMixedProfile*& value);
+  MixedRefPortion(MixedProfile<T> *& value);
   virtual ~MixedRefPortion();
   bool IsReference(void) const;
 };

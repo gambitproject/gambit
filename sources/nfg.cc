@@ -221,43 +221,6 @@ const gArray<Strategy *> &NFPlayer::Strategies(void) const
 
 
 
-#include "mixed.h"
-
-//---------------------------------------------------------------------------
-//                    BaseMixedProfile member functions
-//---------------------------------------------------------------------------
-
-BaseMixedProfile::BaseMixedProfile(const BaseNfg &NF) 
-  : N(&NF), support(NF) 
-{ }
-
-BaseMixedProfile::BaseMixedProfile(const BaseNfg &NF, const NFSupport &s)
-  : N(&NF), support(s)  
-{ }
-
-BaseMixedProfile::BaseMixedProfile(const BaseMixedProfile &p)
-  : N(p.N), support(p.support)  
-{ }
-
-BaseMixedProfile::~BaseMixedProfile()   { }
-
-BaseMixedProfile &BaseMixedProfile::operator=(const BaseMixedProfile &p)
-{
-  N = p.N;
-  support = p.support;
-  return *this;
-}
-
-DataType BaseMixedProfile::Type(void) const
-{
-  return N->Type();
-}
-
-const NFSupport &BaseMixedProfile::Support(void) const
-{
-  return support;
-}
-
 // Not really how these should be handled; but it works for now, and
 // we can deal with housekeeping later
 

@@ -40,14 +40,14 @@ Mixed_ListPortion<double>::Mixed_ListPortion(const gList<MixedSolution<double> >
 {
   _DataType = porMIXED_FLOAT;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new MixedValPortion(new MixedSolution<double>(list[i])));
+    Append(new MixedValPortion<double>(new MixedSolution<double>(list[i])));
 }
 
 Mixed_ListPortion<gRational>::Mixed_ListPortion(const gList<MixedSolution<gRational> > &list)
 {
   _DataType = porMIXED_RATIONAL;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new MixedValPortion(new MixedSolution<gRational>(list[i])));
+    Append(new MixedValPortion<gRational>(new MixedSolution<gRational>(list[i])));
 }
 
 
@@ -114,7 +114,7 @@ static Portion *GSM_AgentForm_Rational(Portion **param)
 
 static Portion *GSM_Behav_Float(Portion **param)
 {
-  MixedSolution<double> &mp = * (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+  MixedSolution<double> &mp = * (MixedSolution<double>*) ((MixedPortion<double>*) param[0])->Value();
 
   Nfg<double> &N = mp.BelongsTo(); 
   const Efg<double> &E = *(const Efg<double> *) N.AssociatedEfg();
@@ -130,7 +130,7 @@ static Portion *GSM_Behav_Float(Portion **param)
 static Portion *GSM_Behav_Rational(Portion **param)
 {
   MixedSolution<gRational> &mp = 
-    * (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
+    * (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[0])->Value();
 
   Nfg<gRational> &N = mp.BelongsTo(); 
   const Efg<gRational> &E = *(const Efg<gRational> *) N.AssociatedEfg();
@@ -411,7 +411,7 @@ static Portion *GSM_Gobit_Start(Portion **param)
 {
   if (param[0]->Spec().Type == porMIXED_FLOAT)  {
     MixedSolution<double> &start = 
-      * (MixedSolution<double> *) ((MixedPortion *) param[0])->Value();
+      * (MixedSolution<double> *) ((MixedPortion<double> *) param[0])->Value();
     Nfg<double> &N = start.BelongsTo();
   
     NFGobitParams NP;
@@ -702,7 +702,7 @@ static Portion *GSM_Liap_BehavFloat(Portion **param)
 static Portion *GSM_Liap_MixedFloat(Portion **param)
 {
   MixedSolution<double> &start = 
-    * (MixedSolution<double> *) ((MixedPortion *) param[0])->Value();
+    * (MixedSolution<double> *) ((MixedPortion<double> *) param[0])->Value();
   Nfg<double> &N = start.BelongsTo();
 
   NFLiapParams params;
@@ -996,7 +996,7 @@ Portion* GSM_Payoff_BehavRational(Portion** param)
 Portion* GSM_Payoff_MixedFloat(Portion** param)
 {
   MixedSolution<double>* mp = 
-    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<double>*) ((MixedPortion<double>*) param[0])->Value();
   NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
 
   return new FloatValPortion(mp->Payoff(player->GetNumber()));
@@ -1005,7 +1005,7 @@ Portion* GSM_Payoff_MixedFloat(Portion** param)
 Portion* GSM_Payoff_MixedRational(Portion** param)
 {
   MixedSolution<gRational>* mp = 
-    (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
+    (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[0])->Value();
   NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
 
   return new RationalValPortion(mp->Payoff(player->GetNumber()));

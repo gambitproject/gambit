@@ -2496,11 +2496,11 @@ void GSM::InvalidateGameProfile( void* game, bool IsEfg )
 	  switch( ((BaseNfg*) game)->Type() )
 	  {
 	  case DOUBLE:
-	    ((MixedSolution<double>*) ((MixedPortion*) 
+	    ((MixedSolution<double>*) ((MixedPortion<double> *) 
 				       varslist[i])->Value())->Invalidate();
 	    break;
 	  case RATIONAL:
-	    ((MixedSolution<gRational>*) ((MixedPortion*) 
+	    ((MixedSolution<gRational>*) ((MixedPortion<gRational> *) 
 					  varslist[i])->Value())->Invalidate();
 	    break;
 	  default:
