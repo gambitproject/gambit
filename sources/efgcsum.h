@@ -35,7 +35,7 @@ private:
   const EFSupport &support;
   gMatrix<T> *A;
   gVector<T> *b, *c;
-  T maxpay;
+  T maxpay, minpay;
   long npivots;
   double time;
   int ns1,ns2,ni1,ni2;
@@ -52,12 +52,12 @@ public:
 
   void Make_Abc();
   
-//  int Add_BFS(const LPSolve<T> &B);
+  int Add_BFS(const LPSolve<T> &B);
   long NumPivots(void) const;
   double Time(void) const;
   
-//  void GetProfile(gDPVector<T> &v, const gVector<T> &sol,
-//		  const Node *n, int s1,int s2);
+  void GetProfile(gDPVector<T> &v, const BFS<T> &sol,
+		  const Node *n, int s1,int s2) const;
   void GetSolutions(gList<BehavSolution<T> > &) const;
 };
 
