@@ -2113,6 +2113,9 @@ void ListPortion::Output( gOutput& s, long ListLF ) const
   }
   else
   {
+    if( _WriteListLF > ListLF ) 
+      for( c = 0; c < (ListLF+1) * _WriteListIndent-1; c++ )
+	s << ' ';
     s << " (" << PortionSpecToText(_DataType) << ')';
   }
 
