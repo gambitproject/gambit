@@ -194,7 +194,7 @@ DataType BaseMixedProfile::Type(void) const
   return N->Type();
 }
 
-const NFSupport &BaseMixedProfile::GetNFSupport(void)
+const NFSupport &BaseMixedProfile::GetNFSupport(void) const
 {
   return (stratset);
 }

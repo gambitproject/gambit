@@ -29,7 +29,7 @@ class BaseMixedProfile     {
     virtual bool IsPure(void) const = 0;
     virtual bool IsPure(int pl) const = 0;
     bool IsTruncated(void) const    { return truncated; }
-    const NFSupport &GetNFSupport(void);
+    const NFSupport &GetNFSupport(void) const;
 };
 
 
