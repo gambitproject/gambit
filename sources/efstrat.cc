@@ -190,8 +190,10 @@ EFSupport &EFSupport::operator=(const EFSupport &s)
 {
   if (this != &s && befg == s.befg) {
     name = s.name;
-    for (int i = 1; i <= sets.Length(); i++)
-      *(sets[i]) = (*(sets[i])); 
+    for (int i = 1; i <= sets.Length(); i++)  {
+      delete sets[i];
+      sets[i] = new EFActionSet(*(s.sets[i]));
+    }
   }
   return *this;
 }
