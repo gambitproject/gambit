@@ -18,15 +18,19 @@ template <class T> int FindPureNash(const Efg<T> &efg, const EFSupport &sup,
 {
   int index;
   EfgContIter<T> citer(sup);
+  gPVector<T> probs(efg.PureDimensionality());
 
   do  {
     int flag = 1;
+    efg.InfosetProbs(citer.GetEfgNumbering(), probs);
+
     EfgIter<T> eiter(citer);
 
     for (int pl = 1; flag && pl <= efg.NumPlayers(); pl++)  {
       T current = citer.Payoff(pl);
       for (int iset = 1; flag && iset <= efg.PlayerList()[pl]->NumInfosets();
 	   iset++)  {
+	if (probs(pl, iset) == (T) 0)   continue;
 	Infoset *s = efg.PlayerList()[pl]->InfosetList()[iset];
 	for (int act = 1; act <= s->NumActions(); act++)  {
 	  eiter.Next(pl, iset);

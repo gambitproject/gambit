@@ -174,6 +174,7 @@ template <class T> class Efg : public BaseEfg   {
     void Payoff(Node *n, T, const gPVector<int> &, gVector<T> &) const;
     void Payoff(Node *n, T, const gArray<gArray<int> *> &, gVector<T> &) const;
 
+    void InfosetProbs(Node *n, T, const gPVector<int> &, gPVector<T> &) const;
 
     Infoset *CreateInfoset(int n, EFPlayer *pl, int br);
     Node *CreateNode(Node *parent);
@@ -210,6 +211,8 @@ template <class T> class Efg : public BaseEfg   {
     void Payoff(const gPVector<int> &profile, gVector<T> &payoff) const;
     void Payoff(const gArray<gArray<int> *> &profile, 
 		gVector<T> &payoff) const;
+
+    void InfosetProbs(const gPVector<int> &profile, gPVector<T> &prob) const;
 
     friend Nfg<T> *MakeReducedNfg(Efg<T> &, const EFSupport &);
     friend Nfg<T> *MakeAfg(Efg<T> &);

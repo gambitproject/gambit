@@ -355,10 +355,34 @@ void Efg<T>::Payoff(Node *n, T prob, const gPVector<int> &profile,
 }
 
 template <class T>
+void Efg<T>::InfosetProbs(Node *n, T prob, const gPVector<int> &profile,
+			  gPVector<T> &probs) const
+{
+  if (n->infoset && n->infoset->player->IsChance())
+    for (int i = 1; i <= n->children.Length(); i++)
+      InfosetProbs(n->children[i],
+		   prob * ((ChanceInfoset<T> &) *n->infoset).probs[i],
+		   profile, probs);
+  else if (n->infoset)  {
+    probs(n->infoset->player->number, n->infoset->number) += prob;
+    InfosetProbs(n->children[profile(n->infoset->player->number,n->infoset->number)],
+		 prob, profile, probs);
+  }
+}
+
+template <class T>
 void Efg<T>::Payoff(const gPVector<int> &profile, gVector<T> &payoff) const
 {
   ((gVector<T> &) payoff).operator=((T) 0);
   Payoff(root, (T) 1.0, profile, payoff);
+}
+
+template <class T>
+void Efg<T>::InfosetProbs(const gPVector<int> &profile,
+			  gPVector<T> &probs) const
+{
+  ((gVector<T> &) probs).operator=((T) 0);
+  InfosetProbs(root, (T) 1.0, profile, probs);
 }
 
 template <class T>
