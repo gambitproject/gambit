@@ -1,7 +1,7 @@
 //#
 //# FILE: lpsolve.h -- Linear program solution module
 //#
-//# @(#)lpsolve.h	1.1 8/17/95
+//# $Id$
 //#
 
 #ifndef LPSOLVE_H
@@ -12,7 +12,7 @@
 
 //
 // This class implements a LP solver.  Its constructor takes as input a
-// LP problem of the form minimize Cx subject to Ax<=B, x>=0, and computes
+// LP problem of the form minimize Cx subject to Ax>=B, x>=0, and computes
 // the optimum values of x and Cx.  These can be accessed using the
 // member functions provided.
 //
