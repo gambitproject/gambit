@@ -44,6 +44,41 @@ template <class T> void TypedNode<T>::Resize(int pl)
 
 
 //------------------------------------------------------------------------
+//           ChanceInfoset<T>: Member function definitions
+//------------------------------------------------------------------------
+
+template <class T>
+ChanceInfoset<T>::ChanceInfoset(BaseEfg *E, int n, EFPlayer *p, int br)
+  : Infoset(E, n, p, br), probs(br)
+{
+  for (int i = 1; i <= br; probs[i++] = (T) 1 / (T) br);
+}
+
+template <class T> void ChanceInfoset<T>::InsertAction(int where)
+{ 
+  actions.Insert(new Action(where, "", this), where);
+  for (; where <= actions.Length(); where++)
+    actions[where]->number = where;
+  probs.Insert((T) 0, where);
+}
+
+template <class T> void ChanceInfoset<T>::RemoveAction(int which)
+{
+  delete actions.Remove(which);
+  for (; which <= actions.Length(); which++)
+    actions[which]->number = which;
+  probs.Remove(which);
+}
+
+template <class T> void ChanceInfoset<T>::PrintActions(gOutput &f) const
+{ 
+  f << "{ ";
+  for (int i = 1; i <= actions.Length(); i++)
+    f << '"' << actions[i]->GetName() << "\" " << probs[i] << ' ';
+  f << "}";
+}
+
+//------------------------------------------------------------------------
 //      Efg<T>: Constructor, destructors, constructive operators
 //------------------------------------------------------------------------
 

@@ -62,6 +62,10 @@ TEMPLATE class gNode<Node *>;
 #include "efgutils.h"
 #include <assert.h>
 
+//----------------------------------------------------------------------
+//                 EFPlayer: Member function definitions
+//----------------------------------------------------------------------
+
 EFPlayer::~EFPlayer()
 {
   while (infosets.Length())   delete infosets.Remove(1);
@@ -81,8 +85,92 @@ Infoset *EFPlayer::GetInfoset(const gString &name) const
   return 0;
 }
 
+
+//----------------------------------------------------------------------
+//                 Infoset: Member function definitions
+//----------------------------------------------------------------------
+
+Infoset::Infoset(BaseEfg *e, int n, EFPlayer *p, int br)
+  : valid(true), E(e), number(n), player(p), actions(br), flag(0) 
+{
+  while (br)   {
+    actions[br] = new Action(br, ToString(br), this);
+    br--; 
+  }
+}
+
+Infoset::~Infoset()  
+{
+  for (int i = 1; i <= actions.Length(); i++)  delete actions[i];
+}
+
+void Infoset::PrintActions(gOutput &f) const
+{ 
+  f << "{ ";
+  for (int i = 1; i <= actions.Length(); i++)
+    f << '"' << actions[i]->name << "\" ";
+  f << "}";
+}
+
+void Infoset::InsertAction(int where)
+{ 
+  actions.Insert(new Action(where, "", this), where);
+  for (; where <= actions.Length(); where++)
+    actions[where]->number = where;
+}
+
+void Infoset::RemoveAction(int which)
+{
+  delete actions.Remove(which);
+  for (; which <= actions.Length(); which++)
+    actions[which]->number = which;
+}
+
+
+//----------------------------------------------------------------------
+//                   Node: Member function definitions
+//----------------------------------------------------------------------
+
+Node::Node(BaseEfg *e, Node *p)
+  : valid(true), mark(false), E(e), infoset(0), parent(p), outcome(0),
+    gameroot((p) ? p->gameroot : this)
+{ }
+
+Node::~Node()
+{
+  for (int i = children.Length(); i; delete children[i--]);
+}
+
+
+Node *Node::NextSibling(void) const  
+{
+  if (!parent)   return 0;
+  if (parent->children.Find((Node * const) this) == parent->children.Length())
+    return 0;
+  else
+    return parent->children[parent->children.Find((Node * const)this) + 1];
+}
+
+Node *Node::PriorSibling(void) const
+{ 
+  if (!parent)   return 0;
+  if (parent->children.Find((Node * const)this) == 1)
+    return 0;
+  else
+    return parent->children[parent->children.Find((Node * const)this) - 1];
+
+}
+
+void Node::DeleteOutcome(Outcome *outc)
+{ 
+  if (outc == outcome)   outcome = 0;
+  for (int i = 1; i <= children.Length(); i++)
+    children[i]->DeleteOutcome(outc);
+}
+
+
 //------------------------------------------------------------------------
-//      BaseExtForm: Constructors, destructor, constructive operators
+//       BaseEfg: Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 
 #ifdef MEMCHECK
@@ -374,7 +462,7 @@ bool BaseEfg::IsPredecessor(const Node *n, const Node *of) const
 }
 
 //------------------------------------------------------------------------
-//                    ExtForm<T>: Operations on players
+//                     BaseEfg: Operations on players
 //------------------------------------------------------------------------
 
 EFPlayer *BaseEfg::GetChance(void) const

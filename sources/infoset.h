@@ -26,14 +26,20 @@ class Action   {
   friend class ChanceInfoset<double>;
   friend class ChanceInfoset<gRational>;
   private:
+    int number;
     gString name;
+    Infoset *owner;
 
-    Action(const gString &s) : name(s)   { }
+    Action(int br, const gString &n, Infoset *s)
+      : number(br), name(n), owner(s)   { }
     ~Action()   { }
 
   public:
     const gString &GetName(void) const   { return name; }
     void SetName(const gString &s)       { name = s; }
+
+    int GetNumber(void) const        { return number; }
+    Infoset *BelongsTo(void) const   { return owner; }
 };
 
 class Infoset   {
@@ -55,18 +61,10 @@ class Infoset   {
     gBlock<Node *> members;
     int flag, whichbranch;
     
-    Infoset(BaseEfg *e, int n, EFPlayer *p, int br)
-      : valid(true), E(e), number(n), player(p), actions(br), flag(0) 
-      { while (br)  { actions[br] = new Action(ToString(br)); br--; } }
-    virtual ~Infoset()  
-      { for (int i = 1; i <= actions.Length(); i++)  delete actions[i]; }
+    Infoset(BaseEfg *e, int n, EFPlayer *p, int br);
+    virtual ~Infoset();  
 
-    virtual void PrintActions(gOutput &f) const
-      { f << "{ ";
-	for (int i = 1; i <= actions.Length(); i++)
-	  f << '"' << actions[i]->name << "\" ";
-	f << "}";
-      }
+    virtual void PrintActions(gOutput &f) const;
 
   public:
 
@@ -80,10 +78,8 @@ class Infoset   {
     void SetName(const gString &s)    { name = s; }
     const gString &GetName(void) const   { return name; }
 
-    virtual void InsertAction(int where)
-      { actions.Insert(new Action(""), where); }
-    virtual void RemoveAction(int which)
-      { delete actions.Remove(which); }
+    virtual void InsertAction(int where);
+    virtual void RemoveAction(int which);
 
     void SetActionName(int i, const gString &s)
       { actions[i]->name = s; }
@@ -117,28 +113,14 @@ template <class T> class ChanceInfoset : public Infoset  {
   private:
     gBlock<T> probs;
 
-    ChanceInfoset(BaseEfg *E, int n, EFPlayer *p, int br)
-      : Infoset(E, n, p, br), probs(br)
-      { for (int i = 1; i <= br; probs[i++] = (T) 1 / (T) br); }
-    ~ChanceInfoset()    { }
+    ChanceInfoset(BaseEfg *E, int n, EFPlayer *p, int br);
+    virtual ~ChanceInfoset()    { }
 
-    void PrintActions(gOutput &f) const
-      { f << "{ ";
-	for (int i = 1; i <= actions.Length(); i++)
-	  f << '"' << actions[i]->GetName() << "\" " << probs[i] << ' ';
-	f << "}";
-      }
+    void PrintActions(gOutput &f) const;
 
   public:
-    void InsertAction(int where)
-      { actions.Insert(new Action(""), where);
-	probs.Insert((T) 0, where);
-      }
-
-    void RemoveAction(int which)
-      { delete actions.Remove(which);
-	probs.Remove(which);
-      }
+    void InsertAction(int where);
+    void RemoveAction(int which);
 
     void SetActionProb(int i, const T &value)  { probs[i] = value; }
     const T &GetActionProb(int i) const   { return probs[i]; }
