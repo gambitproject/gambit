@@ -74,7 +74,6 @@ class BaseExtForm     {
        //# DATA ACCESS -- PLAYERS
     int NumPlayers(void) const;
 
-    Player *GetPlayer(const gString &name) const;
     Player *GetChance(void) const;
     Player *NewPlayer(void);
     const gArray<Player *> &PlayerList(void) const  { return players; }
@@ -82,6 +81,7 @@ class BaseExtForm     {
        //# DATA ACCESS -- OUTCOMES
     int NumOutcomes(void) const;
     const gArray<Outcome *> &OutcomeList(void) const  { return outcomes; }
+    void DeleteOutcome(Outcome *c);  
  
        //# EDITING OPERATIONS
     Infoset *AppendNode(Node *n, Player *p, int br);

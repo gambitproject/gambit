@@ -65,6 +65,11 @@ class Node    {
 
     Outcome *GetOutcome(void) const   { return outcome; }
     void SetOutcome(Outcome *outc)    { outcome = outc; }
+    void DeleteOutcome(Outcome *outc)
+      { if (outc == outcome)   outcome = 0;
+	for (int i = 1; i <= children.Length(); i++)
+	  children[i]->DeleteOutcome(outc);
+      }
 };
 
 #endif   // NODE_H

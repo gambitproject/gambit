@@ -247,6 +247,12 @@ int BaseExtForm::NumPlayers(void) const
 int BaseExtForm::NumOutcomes(void) const
 { return outcomes.Length(); }
 
+void BaseExtForm::DeleteOutcome(Outcome *outc)
+{
+  root->DeleteOutcome(outc);
+  ScrapOutcome(outc);
+}
+
 Node *BaseExtForm::RootNode(void) const
 { return root; }
 
@@ -267,13 +273,6 @@ bool BaseExtForm::IsPredecessor(const Node *n, const Node *of) const
 Player *BaseExtForm::GetChance(void) const
 {
   return chance;
-}
-
-Player *BaseExtForm::GetPlayer(const gString &name) const
-{
-  for (int i = 1; i <= players.Length(); i++)
-    if (players[i]->name == name)   return players[i];
-  return 0;
 }
 
 Player *BaseExtForm::NewPlayer(void)
