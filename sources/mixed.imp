@@ -265,6 +265,34 @@ template <class T> bool MixedProfile<T>::IsNash(void) const
   if(LiapValue()==(T)0) return 1;
   return 0;
 }
+    
+template <class T> void MixedProfile<T>::Gripe(gPVector<T> &value) const
+{
+  int i, j;
+  T pay,x;
+  
+  for (i = 1; i <= Nf->NumPlayers(); i++) {
+    pay = Payoff(i);
+    for (j = 1; j <= GetNFSupport().NumStrats(i); j++) {
+      x = Payoff(i , i ,j);
+      if(x>pay)
+	value(i, j) = x-pay;
+      else value(i,j) = (T)0;
+    }
+  }
+}
+
+template <class T> T MixedProfile<T>::MaxGripe() const
+{
+  int i;
+  T maxgripe = (T)0;;
+
+  gPVector<T> v(*this);
+  Gripe(v);
+  for(i=v.First(); i<=v.Last(); i++)
+    if(v[i] > maxgripe) maxgripe = v[i];
+  return maxgripe;
+}
 
 template <class T> bool MixedProfile<T>::IsPure(void) const
 {

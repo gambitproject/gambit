@@ -69,6 +69,8 @@ template <class T> class MixedProfile
 
     T LiapValue(void) const;
     bool IsNash(void) const;
+    void Gripe(gPVector<T> &value) const;
+    T MaxGripe() const;
     bool IsPure(void) const;
     bool IsPure(int pl) const;
     void Centroid(void);
