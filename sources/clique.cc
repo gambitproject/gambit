@@ -97,8 +97,11 @@ candtry1 (int stk[], // stack
   /* remove  cand  from  clique1,
      put  cand  into  NOT1  by increasing  *sc1  and moving
      the node at position  *sc1  to the end of CAND1 */
-  cliqsize1-- ;
-  stk[ec1++] = stk[*sc1] ;
+  // The following lines modified since ec1 and cliqsize1 are
+  // never used after the increments
+  //cliqsize1-- ;
+  //stk[ec1++] = stk[*sc1] ;
+  stk[ec1] = stk[*sc1];
   stk[*sc1] = cand ;
   (*sc1)++ ;
 }
@@ -152,8 +155,12 @@ candtry2 (int stk[], // stack
   // remove  cand  from  clique2,
   // put  cand  into  NOT2  by increasing  *sc2  and moving
   // the node at position  sc2  to the end of CAND1 
-  cliqsize2-- ;
-  stk[ec2++] = stk[*sc2] ;
+
+  // The following lines modified since ec2 and cliqsize2 are not used
+  // after the increments
+  // cliqsize2-- ;
+  // stk[ec2++] = stk[*sc2] ;
+  stk[ec2] = stk[*sc2];
   stk[*sc2] = cand ;
   (*sc2)++ ;
 }
@@ -205,7 +212,10 @@ extend (int stk[], // stack
     
     // reserve two arrays of size cmax on the stack 
     firstlist = tmplist = tos;  tos += cmax;
-    savelist = tos;  tos += cmax;
+    savelist = tos;  
+
+    // tos is not used again.. 
+    // tos += cmax;
     
     /* find fixpoint  fixp (a node of the graph) in  NOT  or  CAND
        which has the smallest possible number of disconnections  minnod 
