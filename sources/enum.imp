@@ -164,14 +164,17 @@ template <class T> int EnumModule<T>::Enum(void)
 	} 
 
 	add = false;
-	if((params.status.Get() != 1) || 
-	   (params.status.Get() == 1 && profile.IsNash()))
+	if((params.status.Get() != 1) 
+//	   || (params.status.Get() == 1 && profile.IsNash())
+	 )
 	  add = true;
 	if(add)
 	{
 	  index = solutions.Append(MixedSolution<T>(profile, NfgAlg_ENUM));
-	  if(params.status.Get() != 1)
+	  if(params.status.Get() != 1) {
+	    solutions[index].SetEpsilon(eps);
 	    solutions[index].SetIsNash(T_YES);
+	  }
 	}
       }
     }

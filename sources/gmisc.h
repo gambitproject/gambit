@@ -58,7 +58,6 @@ double Uniform(void);
 #define IM 2147483647
 long ran1(long* idum);
 
-
 //
 // Converting between strings and other datatypes
 //
@@ -78,6 +77,13 @@ double		FromString(const gString &s,double &d);
 gRational	FromString(const gString &s,gRational &r);
 
 double ToDouble(const gString &);
+
+//
+// Type dependent epsilon
+//
+
+void gEpsilon(double &v, int i = 8);
+void gEpsilon(gRational &v, int i = 8);
 
 #endif    // GMISC_H
 

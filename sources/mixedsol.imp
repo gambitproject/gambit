@@ -19,7 +19,9 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n)
   _GobitValue(-1),
   _LiapValue(-1),
   _Payoff(0)
-{}
+{
+  gEpsilon(_Epsilon);
+}
 
 template <class T> 
 MixedSolution<T>::MixedSolution(const Nfg<T>& n, const NFSupport& s)
@@ -31,7 +33,9 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n, const NFSupport& s)
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1)
-{}
+{
+  gEpsilon(_Epsilon);
+}
 
 template <class T> 
 MixedSolution<T>::MixedSolution(const Nfg<T>& n, const gPVector<T>& v)
@@ -43,7 +47,9 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n, const gPVector<T>& v)
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1)
-{}
+{
+  gEpsilon(_Epsilon);
+}
 
 template <class T> 
 MixedSolution<T>::MixedSolution(const MixedProfile<T>& m, NfgAlgType creator)
@@ -55,7 +61,9 @@ MixedSolution<T>::MixedSolution(const MixedProfile<T>& m, NfgAlgType creator)
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1)
-{}
+{
+  gEpsilon(_Epsilon);
+}
 
 
 template <class T> MixedSolution<T>::MixedSolution(const MixedSolution<T>& m)
@@ -64,6 +72,7 @@ template <class T> MixedSolution<T>::MixedSolution(const MixedSolution<T>& m)
   _IsNash(m._IsNash),
   _IsPerfect(m._IsPerfect),
   _IsProper(m._IsProper),
+  _Epsilon(m._Epsilon),
   _GobitLambda(m._GobitLambda),
   _GobitValue(m._GobitValue),
   _LiapValue(m._LiapValue)
@@ -75,7 +84,7 @@ template <class T> MixedSolution<T>::~MixedSolution() {}
 template <class T> void MixedSolution<T>::EvalEquilibria()
 {
   if(_IsNash == T_DONTKNOW)
-    if(MixedProfile<T>::IsNash())
+    if(MaxGripe() <= _Epsilon)
       _IsNash = T_YES;
     else
       _IsNash = T_NO;
@@ -111,6 +120,14 @@ template <class T> void MixedSolution<T>::SetIsProper(TriState i)
 template <class T> TriState MixedSolution<T>::IsProper(void) const
 { ((MixedSolution<T> &) *this).EvalEquilibria(); return _IsProper; }
 
+
+template <class T> void MixedSolution<T>::SetEpsilon(T value)
+{
+  _Epsilon = value;
+}
+
+template <class T> T MixedSolution<T>::Epsilon(void) const
+{ return _Epsilon; }
 
 template <class T> void MixedSolution<T>::SetGobit(T lambda, T value)
 {

@@ -33,6 +33,7 @@ private:
   const LemkeParams &params;
   long npivots;
   double time;
+  T epsilon;
   gList<BFS<T> > List;
   gList<MixedSolution<T> > solutions;
 

@@ -441,14 +441,16 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
 
     add = false;
     MixedProfile<T> profile(y);
-    if((params.status.Get() != 1) || 
-       (params.status.Get() == 1 && profile.IsNash()))
+    if((params.status.Get() != 1) 
+//       || (params.status.Get() == 1 && profile.IsNash())
+     )
       add = true;
     if(add)
     {
       index=solutions.Append(MixedSolution<T>(profile, NfgAlg_SIMPDIV));
-      if(params.status.Get() != 1)
-	solutions[index].SetIsNash(T_YES);
+      if(params.status.Get() != 1) {
+	solutions[index].IsNash();
+      }
     }    
   }
   if(params.status.Get()) params.status.Reset();

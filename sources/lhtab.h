@@ -43,6 +43,7 @@ public:
   int MaxRow() const;
   int MinCol() const;
   int MaxCol() const;
+  T Epsilon() const;
   
   bool Member(int i) const;
   int Label(int i) const;   // return variable in i'th position of Tableau

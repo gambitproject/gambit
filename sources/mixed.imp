@@ -257,11 +257,6 @@ template <class T> T MixedProfile<T>::LiapValue(void) const
   return result;
 }
 
-template <class T> bool MixedProfile<T>::IsNash(void) const
-{
-  return (LiapValue() == (T) 0);
-}
-    
 template <class T> void MixedProfile<T>::Gripe(gPVector<T> &value) const
 {
   int i, j;

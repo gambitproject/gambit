@@ -45,6 +45,7 @@ template <class T> int LemkeModule<T>::Lemke(int dup)
   gMatrix<T> A2(Make_A2(NF, support));
   gVector<T> b2(Make_b2(NF, support));
   LHTableau<T> B(A1,A2,b1,b2);
+  epsilon = B.Epsilon();
    if (dup == 0)
     All_Lemke(0,B,npivots);
   else  {
@@ -162,14 +163,16 @@ template <class T> void LemkeModule<T>::AddSolutions(void)
 
     int index;
     bool add = false;
-    if((params.status.Get() !=1) ||
-       (params.status.Get() ==1 && profile.IsNash()))
+    if((params.status.Get() !=1) 
+//       || (params.status.Get() ==1 && profile.IsNash())
+     )
       add = true;
     if(add) {
       index = solutions.Append(MixedSolution<T>(profile, NfgAlg_LEMKE));
       if(params.status.Get() != 1) {
 	solutions[index].SetIsNash(T_YES);
 	solutions[index].SetIsPerfect(T_YES);
+	solutions[index].SetEpsilon(epsilon);
       }
     }
   }
@@ -187,7 +190,7 @@ template <class T> long LemkeModule<T>::NumPivots(void) const
 template <class T>
 LemkeModule<T>::LemkeModule(const Nfg<T> &N, const LemkeParams &p,
 			    const NFSupport &S)
-  : NF(N), support(S), params(p), npivots(0)
+  : NF(N), support(S), params(p), npivots(0), epsilon(0)
 { }
 
 template <class T> LemkeModule<T>::~LemkeModule()
@@ -197,3 +200,7 @@ template <class T> double LemkeModule<T>::Time(void) const
 {
   return time;
 }
+
+
+
+

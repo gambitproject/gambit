@@ -17,13 +17,13 @@ BehavSolution<T>::BehavSolution(const Efg<T>& e)
   _IsNash(T_DONTKNOW),
   _IsSubgamePerfect(T_DONTKNOW),
   _IsSequential(T_DONTKNOW),
-  _Epsilon(0),
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
   _Beliefs(0),
   _Id(MaxId)
 {
+  gEpsilon(_Epsilon);
   MaxId++;
 }
 
@@ -35,14 +35,14 @@ BehavSolution<T>::BehavSolution(const Efg<T>& e, const gDPVector<T>& v)
   _IsNash(T_DONTKNOW),
   _IsSubgamePerfect(T_DONTKNOW),
   _IsSequential(T_DONTKNOW),
-  _Epsilon(0),
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
   _Beliefs(0),
   _Id(MaxId)
 {
-MaxId++;
+  gEpsilon(_Epsilon);
+  MaxId++;
 }
 
 template <class T> 
@@ -52,14 +52,14 @@ BehavSolution<T>::BehavSolution(const EFSupport& s)
   _IsNash(T_DONTKNOW),
   _IsSubgamePerfect(T_DONTKNOW),
   _IsSequential(T_DONTKNOW),
-  _Epsilon(0),
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
   _Beliefs(0),
   _Id(MaxId)
 {
-MaxId++;
+  gEpsilon(_Epsilon);
+  MaxId++;
 }
 
 template <class T> 
@@ -69,14 +69,14 @@ BehavSolution<T>::BehavSolution(const BehavProfile<T>& b, EfgAlgType creator)
   _IsNash(T_DONTKNOW),
   _IsSubgamePerfect(T_DONTKNOW),
   _IsSequential(T_DONTKNOW),
-  _Epsilon(0),
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
   _Beliefs(0),
   _Id(MaxId)
 {
-MaxId++;
+  gEpsilon(_Epsilon);
+  MaxId++;
 }
 
 

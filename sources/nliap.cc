@@ -13,8 +13,6 @@ NFLiapParams::NFLiapParams(gStatus &s)
     tol1(2.0e-10), tolN(1.0e-10), tracefile(&gnull), status(s)
 { }
 
-
-
 class NFLiapFunc : public gC2Function<double>   {
   private:
     long _nevals;
@@ -42,7 +40,6 @@ NFLiapFunc::NFLiapFunc(const Nfg<double> &N,
 
 NFLiapFunc::~NFLiapFunc()
 { }
-
 
 bool NFLiapFunc::Hessian(const gVector<double> &, gMatrix<double> &)
 {
@@ -86,7 +83,6 @@ bool NFLiapFunc::Deriv(const gVector<double> &v, gVector<double> &d)
       d[ii++] = LiapDerivValue(i1, j1, _p);
     }
   }
-
   return true;
 }
   
@@ -134,7 +130,6 @@ double NFLiapFunc::Value(const gVector<double> &v)
     x = sum - 1.0;
     result += BIG2 * x * x;   // penalty for not summing to 1
   }
-
   return result;
 }
 
@@ -153,7 +148,6 @@ static void PickRandomProfile(MixedProfile<double> &p)
       p(pl, st) = tmp;
       sum += tmp;
     }
-    
     p(pl, st) = 1.0 - sum;
   }
 }
@@ -186,14 +180,17 @@ bool Liap(const Nfg<double> &N, NFLiapParams &params,
     if (found = DFP(p, F, value, iter, params.maxits1, params.tol1,
 		    params.maxitsN, params.tolN))  {
       bool add = false;
-      if ((!params.status.Get()) || 
-	  (params.status.Get() && p.IsNash()))
+      if ((!params.status.Get()) 
+//	  || (params.status.Get() && p.IsNash())
+	)
 	add = true;
       if (add)  {
 	int index = solutions.Append(MixedSolution<double>(p, NfgAlg_LIAP));
 	solutions[index].SetLiap(value);
-	if (!params.status.Get())
-	  solutions[index].SetIsNash(T_YES);
+	if (!params.status.Get()) {
+	  solutions[index].SetEpsilon(params.tolN);
+	  solutions[index].IsNash();
+	}
       }   
     }
   }

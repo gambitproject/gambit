@@ -37,6 +37,7 @@ protected:
   TriState _IsNash;
   TriState _IsPerfect;
   TriState _IsProper;
+  T _Epsilon;
   T _GobitLambda;
   T _GobitValue;
   T _LiapValue;
@@ -61,6 +62,9 @@ public:
   TriState IsPerfect(void) const; //Is it Perfect? Y/N/DK
   void SetIsProper(TriState);
   TriState IsProper(void) const; //Is it Proper? Y/N/DK
+
+  void SetEpsilon(T value);
+  T Epsilon(void) const; // epsilon for zero tolerance
 
   void SetGobit(T lambda, T value);
   T GobitLambda(void) const; // lambda from gobit alg

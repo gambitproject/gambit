@@ -148,6 +148,9 @@ int LHTableau<T>::MinCol() const { return T2.MinCol(); }
 template <class T>
 int LHTableau<T>::MaxCol() const { return T1.MaxCol(); }
 
+template <class T>
+T LHTableau<T>::Epsilon() const { return T1.Epsilon(); }
+
 
 template <class T>
 bool LHTableau<T>::Member(int i) const
