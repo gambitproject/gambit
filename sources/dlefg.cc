@@ -98,10 +98,10 @@ EFPlayer *dialogEfgSelectPlayer::GetPlayer(void)
 //                     dialogMoveAdd: Member functions
 //=========================================================================
 
-dialogMoveAdd::dialogMoveAdd(Efg &p_efg, EFPlayer *p_player,
+dialogMoveAdd::dialogMoveAdd(Efg &p_efg, const gText &p_title, EFPlayer *p_player,
 			     Infoset *p_infoset, int p_branches,
 			     wxFrame *p_frame)
-  : wxDialogBox(p_frame, "Add Move", TRUE),
+  : wxDialogBox(p_frame, p_title, TRUE),
     m_efg(p_efg), m_branches(p_branches)
 {
   wxLayoutConstraints *constraints;

@@ -38,7 +38,8 @@ private:
   void OnHelp(void);
 
 public:
-  dialogMoveAdd(Efg &ef_,EFPlayer *player=0,Infoset *infoset=0,int branches=2,wxFrame *frame=0);
+  dialogMoveAdd(Efg &, const gText &, EFPlayer *player=0, Infoset *infoset=0,
+                int branches=2, wxFrame *frame=0);
   virtual ~dialogMoveAdd();
 
   int Completed(void) const { return m_completed; }

@@ -1592,7 +1592,7 @@ void TreeWindow::node_add(void)
     last_ef = &ef;
   }
     
-  dialogMoveAdd dialog(ef, player, infoset, branches, pframe);
+  dialogMoveAdd dialog(ef, "Add Move", player, infoset, branches, pframe);
 
   if (dialog.Completed() == wxOK)  {
     NodeAddMode mode = dialog.GetAddMode();
@@ -1631,7 +1631,7 @@ void TreeWindow::node_insert(void)
     last_ef = &ef;
   }
     
-  dialogMoveAdd dialog(ef, player, infoset, branches, pframe);
+  dialogMoveAdd dialog(ef, "Insert Move", player, infoset, branches, pframe);
 
   if (dialog.Completed() == wxOK)  {
     NodeAddMode mode = dialog.GetAddMode();
