@@ -27,7 +27,7 @@ extern wxApp *wxTheApp=1;
 GambitApp gambitApp;
 
 typedef void ( *fptr)(int);
-void SigFPEHandler(int type)
+void SigFPEHandler(int /*type*/)
 {
 signal(SIGFPE, (fptr)SigFPEHandler);  //  reinstall signal handler
 wxMessageBox("A floating point error has occured!\nThe results returned may be invalid");
@@ -95,7 +95,7 @@ return 1;		// we did not really fix anything, but want no more warnings
 
 
 char *wxStrLwr(char *s)
-{for (int i=0;i<strlen(s);i++) s[i]=tolower(s[i]); return s;}
+{for (unsigned int i=0;i<strlen(s);i++) s[i]=tolower(s[i]); return s;}
 
 class GambitToolBar:	// no reason to have yet another .h file for just this
 #ifdef wx_msw

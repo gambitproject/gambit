@@ -1,9 +1,14 @@
-// File: efgsolvd.h -- the main dialog for running ExtensiveForm solution
-// efg_algorithms.  You must add an entry here for each new efg_algorithm.
+//
+// FILE: efgsolvd.h -- the main dialog for running ExtensiveForm solution
+//                     efg_algorithms. 
+//
+// $Id$
+//
+
+// You must add an entry here for each new efg_algorithm.
 // Update: this dialog box now also includes the NormalForm solution
 // efg_algorithms.  They are enabled by selecting the 'Use NF' box.  This is
 // why "nfgsolvd.h" is included here
-// $Id$
 
 #define NFG_ALGORITHM_LIST	// we do not need all of nfgsolvd.h
 #include "nfgsolvd.h"
@@ -34,7 +39,7 @@ protected:
 	{
 	int stopAfter,max_solns,dom_type;
 	bool use_elimdom,all;
-	bool csum=ef.IsConstSum();
+	// bool csum=ef.IsConstSum();
 	Infoset *bad1,*bad2;
 	bool perf=IsPerfectRecall(ef,bad1,bad2);
 
@@ -229,9 +234,9 @@ public:
 	}
 	bool UseNF(void) const	{	return use_nfg;	}
 	EfgSolutionT GetEfgAlgorithm(void) const
-	{assert(!UseNF() && "Wrong type: use Nfg");return algorithm;}
+	{assert(!UseNF() && "Wrong type: use Nfg");return (EfgSolutionT) algorithm;}
 	NfgSolutionT GetNfgAlgorithm(void) const
-	{assert(UseNF() && "Wrong type: use Efg");return algorithm;}
+	{assert(UseNF() && "Wrong type: use Efg");return (NfgSolutionT) algorithm;}
 	bool MarkSubgames(void) const {return subgames;}
 	bool AutoInspect(void) const {return auto_inspect;}
 	bool UseStandard(void) const {return use_standard;}

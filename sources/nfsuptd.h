@@ -1,6 +1,10 @@
-// File: efsuptd.h -- Declarations of dialogs for dealing with NF
+//
+// FILE: efsuptd.h -- Declarations of dialogs for dealing with NF
 // supports.
-// @(#)nfsuptd.h	1.1 11/20/96
+//
+// $Id$
+//
+
 #ifndef NFSUPTD_H
 #define NFSUPTD_H
 class BaseNormShow;
@@ -47,13 +51,13 @@ private:
 	}
 	void OnCur(int cur_sup)
 	{
-	cur_dim->SetValue(array_to_string(sups[cur_sup]->SupportDimensions()));
-	disp_dim->SetValue(array_to_string(sups[cur_sup]->SupportDimensions()));
+	cur_dim->SetValue(array_to_string(sups[cur_sup]->NumStrats()));
+	disp_dim->SetValue(array_to_string(sups[cur_sup]->NumStrats()));
 	disp_item->SetSelection(cur_sup-1);
 	}
 
 	void OnDisp(int disp_sup)
-	{disp_dim->SetValue(array_to_string(sups[disp_sup]->SupportDimensions()));}
+	{disp_dim->SetValue(array_to_string(sups[disp_sup]->NumStrats()));}
 
 // Utility funcs
 	static gString array_to_string(const gArray<int> &a)
@@ -70,10 +74,10 @@ public:
 	wxForm *f=new wxForm(0);
 	SetLabelPosition(wxVERTICAL);
 	cur_dim=new wxText(this,0,"Current",
-											array_to_string(sups[cur_sup]->SupportDimensions()),
+											array_to_string(sups[cur_sup]->NumStrats()),
 											-1,-1,80,-1,wxREADONLY);
 	disp_dim=new wxText(this,0,"Display",
-											array_to_string(sups[disp_sup]->SupportDimensions()),
+											array_to_string(sups[disp_sup]->NumStrats()),
 											-1,-1,80,-1,wxREADONLY);
 	support_list=wxStringListInts(sups.Length());
 	cur_str=new char[10];strcpy(cur_str,ToString(cur_sup));
@@ -120,28 +124,25 @@ public:
 // Note can not delete the first support
 void NFSupportInspectDialog::OnRemoveSupport(void)
 {
-SupportRemoveDialog SRD(this,sups.Length());
-if (SRD.Completed()==wxOK)
-{
-gArray<bool> selected(SRD.Selected());
-bool revert=false;
-for (int i=sups.Length();i>=2;i--)
-	if (selected[i])
-	{
-		delete sups.Remove(i);
-		if (i==init_cur || i==init_disp && revert==false)
-		{
-			wxMessageBox("Display/Current support deleted.\nReverting to full support");
-			revert=true;
-		}
+  SupportRemoveDialog SRD(this,sups.Length());
+  if (SRD.Completed()==wxOK)  {
+    gArray<bool> selected(SRD.Selected());
+    bool revert=false;
+    for (int i=sups.Length();i>=2;i--)
+      if (selected[i])  {
+	delete sups.Remove(i);
+	if (i==init_cur || i==init_disp && revert==false)  {
+	  wxMessageBox("Display/Current support deleted.\nReverting to full support");
+	  revert=true;
 	}
-disp_item->Clear();cur_item->Clear();
-for (i=1;i<=sups.Length();i++)
-	{disp_item->Append(ToString(i));cur_item->Append(ToString(i));}
-disp_item->SetSize(-1,-1,-1,-1);cur_item->SetSize(-1,-1,-1,-1);
-disp_item->SetSelection(0);cur_item->SetSelection(0);
-if (revert) bns->SupportInspect(SUPPORT_CHANGE);
-}
+      }
+    disp_item->Clear();cur_item->Clear();
+    for (int i=1;i<=sups.Length();i++)
+      {disp_item->Append(ToString(i));cur_item->Append(ToString(i));}
+    disp_item->SetSize(-1,-1,-1,-1);cur_item->SetSize(-1,-1,-1,-1);
+    disp_item->SetSelection(0);cur_item->SetSelection(0);
+    if (revert) bns->SupportInspect(SUPPORT_CHANGE);
+  }
 }
 
 #endif

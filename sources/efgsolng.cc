@@ -93,29 +93,40 @@ if (subg_num==subgame_roots.Length()) parent->SetPickSubgame(0);
 }
 
 // Eliminated dominanted strats, if so requested
-NFSupport *ComputeDominated(NFSupport &S, bool strong,
+template <class T> NFSupport *ComputeDominated(const Nfg<T> &, NFSupport &S, bool strong,
 								const gArray<int> &players, gOutput &tracefile,gStatus &gstatus); // in nfdom.cc
 #include "elimdomd.h"
 template <class T>
 void BaseBySubgameG<T>::BaseViewNormal(const Nfg<T> &N, NFSupport *&sup)
 {
-DominanceSettings DS;
-if (!DS.UseElimDom()) return;
+  DominanceSettings DS;
+  if (!DS.UseElimDom()) return;
 
-gArray<int> players(N.NumPlayers());
-for (int i=1;i<=N.NumPlayers();i++) players[i]=i;
-NFSupport *temp_sup=sup,*temp_sup1=0;
-if (DS.FindAll())
-{
-	while ((temp_sup=ComputeDominated(*temp_sup,DS.DomStrong(),players,gnull,gstatus)))
-		{if (temp_sup1) delete temp_sup1; temp_sup1=temp_sup;}
-	if (temp_sup1) sup=temp_sup1;
-}
-else
-{
-	if ((temp_sup=ComputeDominated(*temp_sup,DS.DomStrong(),players,gnull,gstatus)))
-	 sup=temp_sup;
-}
+  gArray<int> players(N.NumPlayers());
+  for (int i=1;i<=N.NumPlayers();i++) players[i]=i;
+  NFSupport *temp_sup=sup,*temp_sup1=0;
+  if (DS.FindAll())  {
+    if (temp_sup->BelongsTo().Type() == DOUBLE)   {
+      while ((temp_sup=ComputeDominated((Nfg<double> &) temp_sup->BelongsTo(),*temp_sup,DS.DomStrong(),players,gnull,gstatus)))
+	{if (temp_sup1) delete temp_sup1; temp_sup1=temp_sup;}
+      if (temp_sup1) sup=temp_sup1;
+    }
+    else  {
+      while ((temp_sup=ComputeDominated((Nfg<gRational> &) temp_sup->BelongsTo(),*temp_sup,DS.DomStrong(),players,gnull,gstatus)))
+	{if (temp_sup1) delete temp_sup1; temp_sup1=temp_sup;}
+      if (temp_sup1) sup=temp_sup1;
+    }
+  }
+  else  {
+    if (temp_sup->BelongsTo().Type() == DOUBLE)   {
+      if ((temp_sup=ComputeDominated((Nfg<double> &) temp_sup->BelongsTo(),*temp_sup,DS.DomStrong(),players,gnull,gstatus)))
+	sup=temp_sup;
+    }
+    else  {
+      if ((temp_sup=ComputeDominated((Nfg<gRational> &) temp_sup->BelongsTo(),*temp_sup,DS.DomStrong(),players,gnull,gstatus)))
+	sup=temp_sup;
+    }
+  }
 }
 
 

@@ -202,7 +202,8 @@ for (int i=1;i<=acc.Length();i++)
 		}
 // If we got here, this is fine.
 Accel temp;
-temp.ctrl=key_ctrl->GetSelection();temp.shift=key_shift->GetSelection();
+temp.ctrl=(AccelState) key_ctrl->GetSelection();
+temp.shift=(AccelState) key_shift->GetSelection();
 temp.key=RealKey();temp.id=id;
 if (acc_id) acc[acc_id]=temp; else acc+=temp;
 }
@@ -251,7 +252,9 @@ for (int i=1;i<=num_accels;i++)
 	Accel tmp_acc;
 	sprintf(tmp_str,"Accel%d",i);
 	wxGetResource(section,tmp_str,&tmp_str1,file_name);
-	fields=sscanf(tmp_str1,"%d %d %ld %ld",&tmp_acc.ctrl,&tmp_acc.shift,&tmp_acc.key,&tmp_acc.id);
+	fields=sscanf(tmp_str1,"%d %d %ld %ld",
+		      (int *) &tmp_acc.ctrl, (int *)&tmp_acc.shift,
+		      &tmp_acc.key,&tmp_acc.id);
 	assert(fields==4 && "Accels::Invalid DataFormat");
 	list+=tmp_acc;
 }

@@ -1,8 +1,14 @@
-// File: nfgsolvd.h -- the main dialog for running NormalForm solution
-// algorithms.  You must add an entry here for each new algorithm.
+//
+// FILE: nfgsolvd.h -- the main dialog for running NormalForm solution
+//                     algorithms. 
+//
+// $Id$
+//
+
+// You must add an entry here for each new algorithm.
 // Update: this now takes the number of players so that it can turn
 // of the algorithms that will not work with this number of players.
-// $Id$
+
 #ifndef NFGSOLVD_H
 #define NFGSOLVD_H
 
@@ -165,7 +171,7 @@ public:
 		wxWriteResource(SOLN_SECT,"Nfg-Auto-Inspect-Solns",auto_inspect,defaults_file);
 	}
 	}
-	NfgSolutionT GetAlgorithm(void) {return algorithm;}
+	NfgSolutionT GetAlgorithm(void) {return (NfgSolutionT) algorithm;}
 	Bool GetExtensive(void) {return extensive;}
 	bool AutoInspect(void) const {return auto_inspect;}
 	bool UseStandard(void) const {return use_standard;}
