@@ -163,6 +163,13 @@ Portion *GSM_DeleteNode(Portion **param)
   return new NodeValPortion(n->BelongsTo()->DeleteNode(n, keep));
 }
 
+Portion *GSM_DeleteOutcome(Portion **param)
+{
+  Outcome *outc = ((OutcomePortion *) param[0])->Value();
+  outc->BelongsTo()->DeleteOutcome(outc);
+  return new BoolValPortion(true);
+}
+
 Portion *GSM_DeleteTree(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
@@ -754,6 +761,11 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_DeleteNode, 2);
   FuncObj->SetParamInfo(GSM_DeleteNode, 0, "node", porNODE);
   FuncObj->SetParamInfo(GSM_DeleteNode, 1, "keep", porNODE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("DeleteOutcome");
+  FuncObj->SetFuncInfo(GSM_DeleteOutcome, 1);
+  FuncObj->SetParamInfo(GSM_DeleteOutcome, 0, "infoset", porINFOSET);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("DeleteTree");
