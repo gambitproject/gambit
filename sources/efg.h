@@ -46,9 +46,7 @@ protected:
     gBlock<EFOutcome *> outcomes;
     Node *root;
     EFPlayer *chance;
-#ifndef EFG_ONLY
     mutable Nfg *afg;
-#endif  EFG_ONLY
     mutable Lexicon *lexicon;
 
 
@@ -215,13 +213,10 @@ protected:
 
     // defined in efgutils.cc
     friend void RandomEfg(Efg &);
-#ifndef EFG_ONLY
     // This function put in to facilitate error-detection in MixedToBehav[]
     friend Nfg *AssociatedNfg(const Efg *E);
     friend Nfg *AssociatedAfg(const Efg *E);
-#endif   // EFG_ONLY
 
-#ifndef EFG_ONLY
     friend Nfg *MakeReducedNfg(const EFSupport &);
     friend Nfg *MakeAfg(const Efg &);
     friend void MixedToBehav(const Nfg &, const MixedProfile<double> &mp,
@@ -236,7 +231,6 @@ protected:
 		             const Efg &, BehavProfile<gNumber> &bp);
     friend void BehavToMixed(const Efg &, const BehavProfile<gNumber> &,
 			     const Nfg &, MixedProfile<gNumber> &);
-#endif   // EFG_ONLY
 };
 
 #include "behav.h"

@@ -458,19 +458,15 @@ void GambitFrame::OnMenuCommand(int id)
         LoadFile(); 
         break;
         
-#ifndef EFG_ONLY
     case FILE_NEW_NFG: 
         GUI_RECORD("FILE:NEW_NFG");
         NfgGUI(0, gText(), 0, this);   
         break;
-#endif
-        
-#ifndef NFG_ONLY
+
     case FILE_NEW_EFG: 
         GUI_RECORD("FILE:NEW_EFG");
         EfgGUI(0, gText(), 0, this); 
         break;
-#endif
         
     case GAMBIT_HELP_ABOUT:
         // No logging for help system.

@@ -280,9 +280,7 @@ Efg::Efg(const Efg &E, Node *n /* = 0 */)
 #endif // MEMCHECK
 }
 
-#ifndef EFG_ONLY
 #include "lexicon.h"
-#endif   // EFG_ONLY
 
 Efg::~Efg()
 {
@@ -293,10 +291,8 @@ Efg::~Efg()
   for (i = 1; i <= players.Length(); delete players[i++]);
   for (i = 1; i <= outcomes.Length(); delete outcomes[i++]);
 
-#ifndef EFG_ONLY
   if (lexicon)   delete lexicon;
   lexicon = 0;
-#endif   // EFG_ONLY
 
 #ifdef MEMCHECK
   _NumObj--;
@@ -310,10 +306,8 @@ Efg::~Efg()
 
 void Efg::DeleteLexicon(void) const
 {
-#ifndef EFG_ONLY
   if (lexicon)   delete lexicon;
   lexicon = 0;
-#endif   // EFG_ONLY
 }
 
 Infoset *Efg::GetInfosetByIndex(EFPlayer *p, int index) const
