@@ -1,7 +1,7 @@
 //
 // FILE: gsmincl.h   header file for GSM components
 //
-// @(#)gsmincl.h	2.5 19 Jul 1997
+// $Id$
 //
 
 
@@ -57,19 +57,13 @@ typedef enum
 
 #define  porNFG                ( 0x00000040 )
 #define  porEFG                ( 0x00000100 )
-#define  porMIXED_FLOAT        ( 0x00000400 )
-#define  porMIXED_RATIONAL     ( 0x00000800 )
-#define  porMIXED              ( porMIXED_FLOAT | porMIXED_RATIONAL )
-#define  porBEHAV_FLOAT        ( 0x00001000 )
-#define  porBEHAV_RATIONAL     ( 0x00002000 )
-#define  porBEHAV              ( porBEHAV_FLOAT | porBEHAV_RATIONAL )
+#define  porMIXED              ( 0x00000400 )
+#define  porBEHAV              ( 0x00001000 )
 
 #define  porEFOUTCOME          ( 0x00004000 )
-
 #define  porINFOSET            ( 0x00010000 )
 
 #define  porNFSUPPORT          ( 0x00040000 )
-
 #define  porEFSUPPORT          ( 0x00100000 )
 
 #define  porNFPLAYER           ( 0x00400000 )

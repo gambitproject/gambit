@@ -36,8 +36,8 @@ struct PortionSpecTextType
 };  
 
 
-#define NUM_PortionSpecs 30
-#define NUM_CompositePortionSpecs 2
+#define NUM_PortionSpecs 26
+#define NUM_CompositePortionSpecs 0
 
 PortionSpecTextType _PortionSpecText[] =
 {
@@ -47,11 +47,6 @@ PortionSpecTextType _PortionSpecText[] =
   { porINTEGER,            "INTEGER" },
   { porNUMBER,             "NUMBER" },
   { porTEXT,               "TEXT" },
-
-  { porMIXED_FLOAT,        "MIXED(FLOAT)" },
-  { porMIXED_RATIONAL,     "MIXED(RATIONAL)" },
-  { porBEHAV_FLOAT,        "BEHAV(FLOAT)" },
-  { porBEHAV_RATIONAL,     "BEHAV(RATIONAL)" },
 
   { porNFOUTCOME,          "NFOUTCOME" },
 
