@@ -496,7 +496,7 @@ void dialogEnumPure::AlgorithmFields(void)
   else {
     m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
   }
-  m_algorithmGroup->GetConstraints()->left.SameAs(m_subgamesGroup, wxLeft);
+  m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
   m_algorithmGroup->GetConstraints()->right.SameAs(m_stopAfter, wxRight, -10);
   m_algorithmGroup->GetConstraints()->bottom.SameAs(m_stopAfter, wxBottom, -10);
 
@@ -553,7 +553,7 @@ void dialogEnumMixed::AlgorithmFields(void)
   else {
     m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
   }
-  m_algorithmGroup->GetConstraints()->left.SameAs(m_subgamesGroup, wxLeft);
+  m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
   m_algorithmGroup->GetConstraints()->right.SameAs(m_stopAfter, wxRight, -10);
   m_algorithmGroup->GetConstraints()->bottom.SameAs(m_precision, wxBottom, -10);
 
@@ -632,7 +632,7 @@ void dialogLp::AlgorithmFields(void)
   else {
     m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
   }
-  m_algorithmGroup->GetConstraints()->left.SameAs(m_subgamesGroup, wxLeft);
+  m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
   m_algorithmGroup->GetConstraints()->right.SameAs(m_precision, wxRight, -10);
   m_algorithmGroup->GetConstraints()->bottom.SameAs(m_precision, wxBottom, -10);
 
@@ -676,7 +676,7 @@ void dialogLcp::AlgorithmFields(void)
   else {
     m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
   }
-  m_algorithmGroup->GetConstraints()->left.SameAs(m_subgamesGroup, wxLeft);
+  m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
   m_algorithmGroup->GetConstraints()->right.SameAs(m_stopAfter, wxRight, -10);
   m_algorithmGroup->GetConstraints()->bottom.SameAs(m_precision, wxBottom, -10);
 
@@ -824,7 +824,7 @@ void dialogLiap::AlgorithmFields(void)
   else {
     m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
   }
-  m_algorithmGroup->GetConstraints()->left.SameAs(m_subgamesGroup, wxLeft);
+  m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
   m_algorithmGroup->GetConstraints()->right.SameAs(m_maxits1D, wxRight, -10);
   m_algorithmGroup->GetConstraints()->bottom.SameAs(m_startOption, wxBottom, -10);
 }
@@ -917,7 +917,7 @@ void dialogSimpdiv::AlgorithmFields(void)
   else {
     m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
   }
-  m_algorithmGroup->GetConstraints()->left.SameAs(m_subgamesGroup, wxLeft);
+  m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
   m_algorithmGroup->GetConstraints()->right.SameAs(m_leashLength, wxRight, -10);
   m_algorithmGroup->GetConstraints()->bottom.SameAs(m_leashLength, wxBottom, -10);
 }
@@ -960,7 +960,7 @@ void dialogPolEnum::AlgorithmFields(void)
   else {
     m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
   }
-  m_algorithmGroup->GetConstraints()->left.SameAs(m_subgamesGroup, wxLeft);
+  m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
   m_algorithmGroup->GetConstraints()->right.SameAs(m_stopAfter, wxRight, -10);
   m_algorithmGroup->GetConstraints()->bottom.SameAs(m_stopAfter, wxBottom, -10);
 
