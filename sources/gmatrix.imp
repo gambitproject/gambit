@@ -997,7 +997,7 @@ gMatrix<T>::Pivot(int row, int col)
 	}
     }
 }
-/* commented out to avoid 'null character' bug
+
 template<class T> T
 gMatrix<T>::Determinant(void) const
 {
@@ -1026,7 +1026,6 @@ gMatrix<T>::Determinant(void) const
     }
   return result;
 }
-*/
 
 
 template <class T> gOutput &operator<<(gOutput &to, const gMatrix<T> &M)
