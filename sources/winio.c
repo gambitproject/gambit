@@ -1,18 +1,18 @@
 /*
 The files argcargv.c, winio.c and wmhandlr.c are all needed to simulate a
 console under Windows for the GCL.
- $Id$
+ @(#)winio.c	1.1 6/12/96
 
 	WINIO.C -- Stdio (with extensions) for Windows
-	
+
 	Copyright (c) Dave Maxey & Andrew Schulman, 1990-1992.
 	All Rights Reserved.
-	
+
 	Contact:  Andrew Schulman (CompuServe 76320,302)
-	
+
 	From Chapter 4 of "Undocumented Windows" (Addison-Wesley 1992)
 	by Andrew Schulman, Dave Maxey and Matt Pietrek
-		
+
 	HACKED FOR WIN32S -- see #ifdef WIN32
 	(There may still be some LOWORD, HIWORD that are wrong.)
 	Microsoft Systems Journal, April 1993
@@ -57,7 +57,10 @@ console under Windows for the GCL.
 #define			ID_ABOUT				35
 #define			MAX_MENU_ID				ID_ABOUT
 
-#define			WINIO_ABOUT_TEXT		"Gambit -- Command Line Interface, Version 0.92\n\nDeveloped by Richard D. McKelvey (rdm@hss.caltech.edu)\nMain Programmer:  Theodore Turocy (magyar@hss.caltech.edu)\nFront End: Eugene Grayver (egrayver@hss.caltech.edu)\nCalifornia Institute of Technology, 1995.\nFunding provided by the National Science Foundation"
+//#define			WINIO_ABOUT_TEXT		": Gambit Command Language, Version 0.94\n\nDeveloped by Richard D. McKelvey and Andrew McLennan \nMain Programmer: Theodore Turocy \nStack Machine: Gary Wu\nFront End: Eugene Grayver\n\nPart of the Gambit Project:\n\n  gambit@hss.caltech.edu\n  www.hss.caltech.edu/~gambit/Gambit.html\n\nFunding provided by the National Science Foundation"
+// string too long?
+
+#define			WINIO_ABOUT_TEXT		": Gambit Command Language, Version 0.94\n\nPart of the Gambit Project:\n\n  gambit@hss.caltech.edu\n  www.hss.caltech.edu/~gambit/Gambit.html\n\nFunding provided by the National Science Foundation"
 
 /* The following structure contains winio state about a window, and a
 	pointer to it is stored as instance data within Windows. It can be
@@ -65,14 +68,14 @@ console under Windows for the GCL.
 typedef struct {
 	UINT			bufsize;
 	UINT			bufused;
-	UINT			curr_font;                         
+	UINT			curr_font;
 	BOOL			tCaret, tCR;
 	long			cLinesDiscarded;
 	int				cxChar, cyChar, cxWidth, cyHeight;
 	int				xWinWidth, yWinHeight, xCurrPos;
 	int				xLeftOfWin, yTopOfWin, yCurrLine;
 	UINT			pchKbIn, pchKbOut;
-	LPSTR			fpBuffer, fpTopOfWin, fpCurrLine, fpCurr, fpSOI; 
+	LPSTR			fpBuffer, fpTopOfWin, fpCurrLine, fpCurr, fpSOI;
 	LPSTR			fpKeyboard;
 	HANDLE			hBuffer, hKeyboard;
 	HMENU			hMainMenu, hFileMenu, hHelpMenu;
