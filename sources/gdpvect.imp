@@ -49,7 +49,7 @@ template <class T> gDPVector<T>::gDPVector(void) : dvptr(0)
 { }
 
 template <class T> gDPVector<T>::gDPVector(const gPVector<int> &sig)
-  : gPVector<T>(sig), dvlen(sig.Lengths().Length()),
+  : gPVector<T>((gArray<int>)sig), dvlen(sig.Lengths().Length()),
     dvidx(sig.Lengths().Length())
 {
   dvptr = new T **[dvlen.Length()];
