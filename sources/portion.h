@@ -1091,8 +1091,12 @@ protected:
 
   bool _ContainsListsOnly;
   unsigned long _DataType;
-  bool _IsNull(void) const;
-  int _ListDepth(void) const;
+
+  bool _IsNull;
+  int _ListDepth;
+
+  // bool _IsNull(void) const;
+  // int _ListDepth(void) const;
 
 public:
   virtual ~ListPortion();

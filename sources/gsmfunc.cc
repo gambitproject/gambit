@@ -169,7 +169,10 @@ Portion* CallFuncObj::CallListFunction(GSM* gsm, Portion** ParamIn)
 	if(ParamIn[i]->Spec().ListDepth > 0 && 
 	   ParamIn[j]->Spec().ListDepth > 0)
 	  if(!_ListDimMatch((ListPortion*)ParamIn[i],(ListPortion*)ParamIn[j]))
+	  {
+	    delete[] Listed;
 	    return new ErrorPortion("Mismatched dimensionalities");
+	  }
     }
   }
 
@@ -270,6 +273,7 @@ Portion* CallFuncObj::CallListFunction(GSM* gsm, Portion** ParamIn)
   }
 
   delete[] CurrParam;
+  delete[] Listed;
   return p;
 }
 

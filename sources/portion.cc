@@ -2283,6 +2283,9 @@ ListPortion::ListPortion(void)
 { 
   _ContainsListsOnly = true;
   _DataType = porUNDEFINED;
+
+  _IsNull = false;
+  _ListDepth = 1;
 }
 
 ListPortion::~ListPortion()
@@ -2367,7 +2370,10 @@ gList< Portion* >& ListPortion::Value(void) const
 
 
 PortionSpec ListPortion::Spec(void) const
-{ return PortionSpec(_DataType, _ListDepth(), _IsNull()); }
+{ 
+  return PortionSpec(_DataType, _ListDepth, _IsNull); 
+  // return PortionSpec(_DataType, _ListDepth(), _IsNull()); 
+}
 
 DataType ListPortion::SubType( void ) const
 {
@@ -2515,7 +2521,7 @@ bool ListRefPortion::IsReference(void) const
 
 
 
-
+/*
 bool ListPortion::_IsNull(void) const
 {
   int i;
@@ -2551,6 +2557,7 @@ int ListPortion::_ListDepth(void) const
 
   return Depth;
 }
+*/
 
 bool ListPortion::ContainsListsOnly(void) const
 {
@@ -2701,6 +2708,13 @@ int ListPortion::Insert(Portion* item, int index)
     else
       delete item;
   }
+
+  if( result > 0 )
+  {
+    if( item->Spec().ListDepth + 1 > _ListDepth )
+      _ListDepth = item->Spec().ListDepth + 1;
+  }
+
   return result;
 }
 
@@ -2739,13 +2753,24 @@ bool ListPortion::Contains(Portion* p2) const
 
 Portion* ListPortion::Remove(int index)
 { 
-  Portion* result;
+  Portion* result = 0;
   if(index >= 1 && index <= _Value->Length())
     result = _Value->Remove(index);
-  else
-    result = 0;
-  if(_Value->Length() == 0)
-    _ContainsListsOnly = true;
+
+  _ContainsListsOnly = true;
+  _ListDepth = 1;
+  if(_Value->Length() > 0)
+  {
+    int i = 0;
+    for( i = 1; i <= _Value->Length(); ++i )
+    {
+      if( (*_Value)[i]->Spec().ListDepth == 0 )
+	_ContainsListsOnly = false;
+      if( (*_Value)[i]->Spec().ListDepth >= _ListDepth )
+	_ListDepth = (*_Value)[i]->Spec().ListDepth + 1;
+    }
+  }
+
   return result;
 }
 
