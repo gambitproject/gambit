@@ -1364,6 +1364,10 @@ void GSM_SetWriteOptions(void)
 }
 
 
+//------------------------------------------------
+// Set*Format
+//------------------------------------------------
+
 Portion* GSM_SetListFormat(Portion** param)
 {
   _WriteListBraces = ((BoolPortion*) param[0])->Value();
@@ -1406,6 +1410,55 @@ Portion* GSM_SetSolutionFormat(Portion** param)
 
   return new BoolValPortion(true);
 }
+
+
+//------------------------------------------------
+// Get*Format
+//------------------------------------------------
+
+
+Portion* GSM_GetListFormat(Portion** param)
+{
+  ((BoolPortion*) param[0])->Value() = _WriteListBraces;
+  ((BoolPortion*) param[1])->Value() = _WriteListCommas;
+  ((IntPortion*) param[2])->Value() = _WriteListLF;
+  ((IntPortion*) param[3])->Value() = _WriteListIndent;
+
+  return new BoolValPortion(true);
+}
+
+Portion* GSM_GetNumericFormat(Portion** param)
+{
+  ((IntPortion*) param[0])->Value() = _WriteWidth;
+  ((IntPortion*) param[1])->Value() = _WritePrecis;
+  ((BoolPortion*) param[2])->Value() = _WriteExpmode;
+
+  return new BoolValPortion(true);
+}
+
+
+Portion* GSM_GetTextFormat(Portion** param)
+{
+  ((BoolPortion*) param[0])->Value() = _WriteQuoted;
+
+  return new BoolValPortion(true);
+}
+
+
+Portion* GSM_GetSolutionFormat(Portion** param)
+{
+  ((IntPortion*) param[0])->Value() = _WriteSolutionInfo;
+
+  return new BoolValPortion(true);
+}
+
+
+
+
+
+
+
+
 
 
 
@@ -3580,6 +3633,9 @@ void Init_gsmoper(GSM* gsm)
   gsm->AddFunction(FuncObj);
 
 
+  //---------------
+  // Set*Format
+  //---------------
 
   FuncObj = new FuncDescObj("SetListFormat", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetListFormat, porBOOL, 4));
@@ -3627,6 +3683,68 @@ void Init_gsmoper(GSM* gsm)
 			 new IntRefPortion(_WriteSolutionInfo)));
   gsm->AddFunction(FuncObj);
 
+
+
+
+
+  //---------------
+  // Get*Format
+  //---------------
+
+  FuncObj = new FuncDescObj("GetListFormat", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GetListFormat, porBOOL, 4));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType
+			("braces", porBOOL,
+			 new BoolRefPortion(_WriteListBraces),
+			 BYREF ));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType
+			("commas", porBOOL,
+			 new BoolRefPortion(_WriteListCommas),
+			 BYREF ));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType
+			("lf", porINTEGER,
+			 new IntRefPortion(_WriteListLF),
+			 BYREF ));
+  FuncObj->SetParamInfo(0, 3, ParamInfoType
+			("indent", porINTEGER,
+			 new IntRefPortion(_WriteListIndent),
+			 BYREF ));
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("GetNumericFormat", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GetNumericFormat, porBOOL, 3));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType
+			("width", porINTEGER, 
+			 new IntRefPortion(_WriteWidth),
+			 BYREF ));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType
+			("precis", porINTEGER,
+			 new IntRefPortion(_WritePrecis),
+			 BYREF ));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType
+			("expmode", porBOOL,
+			 new BoolRefPortion(_WriteExpmode),
+			 BYREF ));
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("GetTextFormat", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GetTextFormat, porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType
+			("quote", porBOOL,
+			 new BoolRefPortion(_WriteQuoted),
+			 BYREF ));
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("GetSolutionFormat", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GetSolutionFormat, porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType
+			("info", porINTEGER,
+			 new IntRefPortion(_WriteSolutionInfo),
+			 BYREF ));
+  gsm->AddFunction(FuncObj);
 
 
 
@@ -3883,6 +4001,9 @@ void Init_gsmoper(GSM* gsm)
 					    new BoolValPortion( true ) ) );
   gsm->AddFunction(FuncObj);
 }
+
+
+
 
 
 
