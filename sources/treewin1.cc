@@ -901,7 +901,7 @@ void TreeWindow::action_probs(void)
   int num_d = num_actions/ENTRIES_PER_DIALOG-((num_actions%ENTRIES_PER_DIALOG) ? 0 : 1);
 
   MyDialogBox *node_probs_dialog = 0;
-  char **prob_vector;
+  char **prob_vector = 0;
 
   try {
     for (int d = 0; d <= num_d; d++) {
