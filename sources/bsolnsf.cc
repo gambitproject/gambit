@@ -103,8 +103,8 @@ switch (options.SortBy())
 case BSORT_BY_NONE:
 			return Equal;
 case BSORT_BY_CREATOR:
-			if (a.Creator()>b.Creator()) return GreaterThan;
-			if (a.Creator()<b.Creator()) return LessThan;
+			if (NameID(a.Creator())>NameID(b.Creator())) return GreaterThan;
+			if (NameID(a.Creator()<NameID(b.Creator())) return LessThan;
 			return Equal;
 case BSORT_BY_NASH:
 			if (a.IsNash()==b.IsNash())
