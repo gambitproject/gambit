@@ -133,7 +133,7 @@ public:
   bool GtZero(T x) const;
   bool LeZero(T x) const;
   bool GeZero(T x) const;
-  bool IsNash(void) const; // this does not belong here
+  T Epsilon(int i = 2) const;
   bool IsLexMin();
   BFS<T> GetBFS1(void) const; 
   BFS<T> GetBFS(void) const;  // used in lpsolve for some reason
