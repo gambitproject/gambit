@@ -16,13 +16,16 @@ class Player   {
   private:
     int number;
     gString name;
+    BaseExtForm *E;
     
     gBlock<Infoset *> infosets;
 
-    Player(int n) : number(n)  { }
+    Player(BaseExtForm *e, int n) : E(e), number(n)  { }
     ~Player();
 
   public:
+    BaseExtForm *BelongsTo(void) const   { return E; }
+  
     const gString &GetName(void) const   { return name; }
     void SetName(const gString &s)       { name = s; }
 

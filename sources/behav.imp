@@ -71,7 +71,8 @@ template <class T> ExtForm<T>::ExtForm(const ExtForm<T> &E)
   int i;
 
   for (i = 1; i <= E.outcomes.Length(); i++)
-    outcomes.Append(new OutcomeVector<T>((OutcomeVector<T> &) *E.outcomes[i]));
+    outcomes.Append(new OutcomeVector<T>(this, 
+					 (OutcomeVector<T> &) *E.outcomes[i]));
   
   for (i = 1; i <= E.chance->infosets.Length(); i++)   {
     ChanceInfoset<T> *t = (ChanceInfoset<T> *) E.chance->infosets[i];
@@ -117,7 +118,7 @@ template <class T> Node *ExtForm<T>::CreateNode(Node *parent)
 
 template <class T> OutcomeVector<T> *ExtForm<T>::NewOutcome(void)
 {
-  OutcomeVector<T> *ret = new OutcomeVector<T>(outcomes.Length() + 1,
+  OutcomeVector<T> *ret = new OutcomeVector<T>(this, outcomes.Length() + 1,
 					       players.Length());
   outcomes.Append(ret);
   ret->name = "Outcome " + ToString(outcomes.Length());

@@ -15,11 +15,14 @@ class Outcome   {
   protected:
     int number;
     gString name;
+    BaseExtForm *E;
 
-    Outcome(int n) : number(n)   { }
+    Outcome(BaseExtForm *e, int n) : E(e), number(n)   { }
     virtual ~Outcome()   { }
   
   public:
+    BaseExtForm *BelongsTo(void) const   { return E; }
+
     const gString &GetName(void) const   { return name; }
     void SetName(const gString &s)       { name = s; }
 
@@ -32,7 +35,10 @@ template <class T> class OutcomeVector : public Outcome, public gVector<T>   {
   friend class ExtForm<T>;
 
   private:
-    OutcomeVector(int n, int pl) : Outcome(n), gVector<T>(pl)  { }
+    OutcomeVector(BaseExtForm *E, int n, int pl)
+      : Outcome(E, n), gVector<T>(pl)  { }
+    OutcomeVector(BaseExtForm *E, const OutcomeVector<T> &v)
+      : Outcome(E, v.number), gVector<T>(v)   { }
     ~OutcomeVector()    { }
 
     void Resize(int pl)    { }

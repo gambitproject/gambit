@@ -73,14 +73,14 @@ Infoset *Player::GetInfoset(const gString &name) const
 //      BaseExtForm: Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 
-BaseExtForm::BaseExtForm(void) : title("UNTITLED"), chance(new Player(0))
+BaseExtForm::BaseExtForm(void) : title("UNTITLED"), chance(new Player(this, 0))
 { }
 
 BaseExtForm::BaseExtForm(const BaseExtForm &E)
-  : title(E.title), chance(new Player(0)), players(E.players.Length())
+  : title(E.title), chance(new Player(this, 0)), players(E.players.Length())
 {
   for (int i = 1; i <= players.Length(); i++)  {
-    (players[i] = new Player(i))->name = E.players[i]->name;
+    (players[i] = new Player(this, i))->name = E.players[i]->name;
     for (int j = 1; j <= E.players[i]->infosets.Length(); j++)   {
       Infoset *s = new Infoset(this, j, players[i],
 			       E.players[i]->infosets[j]->actions.Length());
@@ -253,7 +253,7 @@ Player *BaseExtForm::GetPlayer(const gString &name) const
 
 Player *BaseExtForm::NewPlayer(void)
 {
-  Player *ret = new Player(players.Length() + 1);
+  Player *ret = new Player(this, players.Length() + 1);
   players.Append(ret);
   root->Resize(players.Length());
   return ret;
