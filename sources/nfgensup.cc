@@ -84,7 +84,7 @@ void AllUndominatedSubsupportsRECURSIVE(const NFSupport *s,
 					const bool strong,
 					const bool conditional,
 					      gList<const NFSupport> *list,
-					const gStatus &status)
+					gStatus &status)
 { 
   bool abort = false;
   bool no_deletions = true;
@@ -161,7 +161,7 @@ void AllUndominatedSubsupportsRECURSIVE(const NFSupport *s,
 gList<const NFSupport> AllUndominatedSubsupports(const NFSupport &S,
 						 const bool strong,
 						 const bool conditional,
-						 const gStatus &status)
+						 gStatus &status)
 {
   gList<const NFSupport> answer;
   NFSupport sact(S);
@@ -183,7 +183,7 @@ void PossibleNashSubsupportsRECURSIVE(const NFSupport *s,
 					    NFSupport *sact,
 				            StrategyCursorForSupport *c,
 				            gList<const NFSupport> *list,
-				      const gStatus &status)
+				      gStatus &status)
 { 
   bool abort = false;
   bool no_deletions = true;
@@ -237,7 +237,7 @@ void PossibleNashSubsupportsRECURSIVE(const NFSupport *s,
 }
   
 gList<const NFSupport> PossibleNashSubsupports(const NFSupport &S,
-					       const gStatus &status)
+					       gStatus &status)
 {
   gList<const NFSupport> answer;
   NFSupport sact(S);

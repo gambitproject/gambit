@@ -47,12 +47,12 @@ void AllUndominatedSubsupportsRECURSIVE(const NFSupport *s,
 					      StrategyCursorForSupport *c,
 					const bool strong,
 					      gList<const NFSupport> *list,
-					const gStatus &status);
+					gStatus &status);
   
 gList<const NFSupport> AllUndominatedSubsupports(const NFSupport &S,
 						 const bool strong,
 						 const bool conditional,
-						 const gStatus &status);
+						 gStatus &status);
 
 // The following two routines combine to produce all subsupports that could
 // host the path of a behavioral Nash equilibrium.  These are subsupports
@@ -69,10 +69,10 @@ void PossibleNashSubsupportsRECURSIVE(const NFSupport *s,
 					    NFSupport *sact,
 				            StrategyCursorForSupport *c,
 					    gList<const NFSupport> *list,
-				      const gStatus &status);
+				      gStatus &status);
   
 gList<const NFSupport> PossibleNashSubsupports(const NFSupport &S,
-					       const gStatus &status);
+					       gStatus &status);
 
 ///////////////// Utility Cursor Class /////////////////////
 
