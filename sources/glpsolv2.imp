@@ -18,9 +18,7 @@
 
 template <class T> INLINE gLPTableau2<T>::gLPTableau2(const gMatrix<T> &A, 
 						      const gVector<T> &B,
-						      const gVector<T> &C,
-						      const gMatrix<T> &D, 
-						      const gVector<T> &E) 
+						      const gVector<T> &C) 
 	  : gTableau<T>(1, B.Length() + 1, 0, 0, B.Length() + 1, B.Length()),
              // We probably want to just dispose of this last construction
 	    feasible(1), bounded(1), well_formed(1), optimum(1, C.Length())

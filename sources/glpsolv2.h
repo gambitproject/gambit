@@ -37,8 +37,7 @@ template <class T> class gLPTableau2 : public gTableau<T> {
     gVector<T> optimum;
 
   public:
-    gLPTableau2(const gMatrix<T> &A, const gVector<T> &B, const gVector<T> &C, 
-		const gMatrix<T> &D, const gVector<T> &E);
+    gLPTableau2(const gMatrix<T> &A, const gVector<T> &B, const gVector<T> &C);
     ~gLPTableau2()   { }
     
     inline T OptimumCost(void) const                     { return cost;       }
