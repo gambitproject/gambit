@@ -1,14 +1,17 @@
-//
-// FILE: gambitio.cc -- Implementation of more complicated I/O functions
-//
-// $Id$
-//
+//#
+//# FILE: gambitio.cc -- Implementation of more complicated I/O functions
+//#
+//# $Id$
+//#
 
+#ifdef __GNUG__
+#pragma implementation "gambitio.h"
+#endif   // __GNUG__
 
 #include "gambitio.h"
 
 
-input gin(stdin);
+gInput gin(stdin);
 
-output gout(stdout);
-output gerr(stderr);
+gOutput gout(stdout);
+gOutput gerr(stderr);
