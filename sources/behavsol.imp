@@ -5,6 +5,7 @@
 //#
 
 
+#include "efgutils.h"
 #include "behavsol.h"
 
 
@@ -93,6 +94,7 @@ template <class T> void BehavSolution<T>::EvalEquilibria()
       _IsNash = T_YES;
     else
       _IsNash = T_NO;
+
   if(_IsNash == T_NO)
   {
     _IsSubgamePerfect = T_NO;
@@ -116,7 +118,15 @@ template <class T> void BehavSolution<T>::SetIsSubgamePerfect(int i)
 { _IsSubgamePerfect = i; }
 
 template <class T> int BehavSolution<T>::IsSubgamePerfect()
-{ EvalEquilibria(); return _IsSubgamePerfect; }
+{
+  EvalEquilibria(); 
+  if((_Creator != id_USER) && (_IsNash == T_YES) && (AllSubgamesMarked(*E)))
+    _IsSubgamePerfect = T_YES;
+  else
+    _IsSubgamePerfect = T_DONTKNOW;
+
+  return _IsSubgamePerfect; 
+}
 
 template <class T> void BehavSolution<T>::SetIsSequential(int i)
 { _IsSequential = i; }
