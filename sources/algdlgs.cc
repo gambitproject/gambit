@@ -386,3 +386,60 @@ int dialogLp::StopAfter(void) const
     return m_stopAfter->GetInteger(); 
 }
 
+//=======================================================================
+//                       dialogLcp: Member functions
+//=======================================================================
+
+#include "dllcp.h"
+
+dialogLcp::dialogLcp(bool p_lemkeHowson, wxWindow *p_parent,
+		     bool p_subgames, bool p_vianfg)
+  : dialogAlgorithm("LcpSolve Parameters", p_vianfg, p_parent),
+    m_lemkeHowson(p_lemkeHowson)
+{
+  MakeCommonFields(true, p_subgames, p_vianfg);
+  Go();
+}
+
+dialogLcp::~dialogLcp()
+{
+  if (m_completed == wxOK) {
+    wxWriteResource("Algorithm Params", "Lcp-MaxDepth", MaxDepth(),
+		    "gambit.ini");
+    if (m_lemkeHowson)
+      wxWriteResource("Algorithm Params", "Lcp-DupStrat",
+		      m_dupStrat->GetValue(), "gambit.ini");
+  }
+}
+
+void dialogLcp::AlgorithmFields(void)
+{
+  (void) new wxMessage(this, "Algorithm parameters");
+  NewLine();
+  StopAfterField();
+  NewLine();
+  PrecisionField();
+  NewLine();
+
+  int maxDepth = 0;
+  wxGetResource("Algorithm Params", "Lcp-MaxDepth", &maxDepth, "gambit.ini");
+  m_maxDepth = new wxIntegerItem(this, "Max depth", maxDepth, -1, -1, 100, -1);
+
+  if (m_lemkeHowson) {
+    Bool dupStrat = FALSE;
+    wxGetResource("Algorithm Params", "Lcp-DupStrat", &dupStrat, "gambit.ini");
+    m_dupStrat = new wxCheckBox(this, 0, "Dup strat");
+    if (dupStrat == TRUE)
+      m_dupStrat->SetValue(TRUE);
+  }
+  NewLine();
+}
+
+int dialogLcp::StopAfter(void) const
+{
+  if (m_findAll->GetValue())
+    return 0;
+  else
+    return m_stopAfter->GetInteger(); 
+}
+

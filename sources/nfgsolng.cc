@@ -180,8 +180,8 @@ bool guinfgEnumMixed::SolveSetup(void)
 // LcpSolve
 //------------
 
+#include "dllcp.h"
 #include "lemke.h"
-#include "seqfprm.h"
 
 guinfgLcp::guinfgLcp(const NFSupport &p_support,
 		     NfgShowInterface *p_parent)
@@ -214,7 +214,7 @@ gList<MixedSolution> guinfgLcp::Solve(void)
 
 bool guinfgLcp::SolveSetup(void)
 {
-  LcpSolveDialog dialog(m_parent->Frame());
+  dialogLcp dialog(true, m_parent->Frame(), false, true);
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
@@ -249,7 +249,7 @@ gList<MixedSolution> guinfgLp::Solve(void)
     return gList<MixedSolution>();
   }
 
-  wxStatus status(m_parent->Frame(), "LP Algorithm");
+  wxStatus status(m_parent->Frame(), "LpSolve Progress");
   status << "Progress not implemented\n" << "Cancel button disabled\n";
 
   ZSumParams params;
@@ -268,7 +268,7 @@ gList<MixedSolution> guinfgLp::Solve(void)
 
 bool guinfgLp::SolveSetup(void)
 {
-  dialogLp dialog(m_parent->Frame());
+  dialogLp dialog(m_parent->Frame(), false, true);
   
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();

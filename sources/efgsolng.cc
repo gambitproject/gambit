@@ -388,32 +388,13 @@ bool guiefgLiapNfg::SolveSetup(void)
 //                               LcpSolve
 //========================================================================
 
+#include "dllcp.h"
+
 //---------------------
 // LCP on efg
 //---------------------
 
 #include "seqform.h"
-#include "seqfprm.h"
-
-LcpSolveDialog::LcpSolveDialog(wxWindow *p_parent, bool p_subgames,
-			       bool p_vianfg)
-  : dialogAlgorithm("LcpSolve Parameters", p_vianfg, p_parent)
-{
-  MakeCommonFields(true, p_subgames, p_vianfg);
-  Go();
-}
-
-void LcpSolveDialog::AlgorithmFields(void)
-{
-  char *precisionChoices[2] = { "Float", "Rational" };
-  m_precision = new wxRadioBox(this, 0, "Precision", -1, -1, -1, -1,
-			       2, precisionChoices);
-  NewLine();
-  m_maxDepth = new wxText(this, 0, "Max depth");
-  NewLine();
-  m_stopAfter = new wxText(this, 0, "Stop after");
-  NewLine();
-}
 
 class SeqFormBySubgameG : public efgLcpSolve, public guiSubgameViaEfg {
 protected:
@@ -463,7 +444,7 @@ gList<BehavSolution> guiefgLcpEfg::Solve(void) const
 
 bool guiefgLcpEfg::SolveSetup(void)
 { 
-  LcpSolveDialog dialog(m_parent->Frame(), true);
+  dialogLcp dialog(false, m_parent->Frame(), true);
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
@@ -537,7 +518,7 @@ gList<BehavSolution> guiefgLcpNfg::Solve(void) const
 
 bool guiefgLcpNfg::SolveSetup(void)
 {
-  LcpSolveDialog dialog(m_parent->Frame(), true, true); 
+  dialogLcp dialog(true, m_parent->Frame(), true, true); 
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
