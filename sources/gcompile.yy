@@ -76,6 +76,7 @@ gStack<gString> GCL_InputFileNames(4);
   gStack<int> lines; \
   GSM& gsm; \
   bool quit; \
+  bool in_funcdecl; \
   \
   char nextchar(void); \
   void ungetchar(char c); \
@@ -97,7 +98,7 @@ gStack<gString> GCL_InputFileNames(4);
                                labels(4), \
                                listlen(4), matching(4), \
                                lines(4), \
-                               gsm(*_gsm), quit(false)
+                               gsm(*_gsm), quit(false), in_funcdecl(false)
 
 %define CONSTRUCTOR_CODE       GCL_InputFileNames.Push("stdin"); \
                                lines.Push(1); \
@@ -169,11 +170,9 @@ program:
               { return 0; }
        |      error EOC   { RecoverFromError();  return 1; }
        |      error CRLF  { RecoverFromError();  return 1; }
-       |      include    { return 0; }     
+//       |      include    { return 0; }     
 
 toplevel:     statements
-        |     funcdecl toplevel
-        |     delfunc toplevel
 
 statements:   statement               
           |   statements sep statement
@@ -182,10 +181,8 @@ sep:          SEMI    { semi = true; }
    |          CRLF    { semi = false; }
 
 
-writeopt:    
-        |     WRITE
-
-funcdecl:     writeopt DEFFUNC LBRACK { gcmdline.SetPrompt( false ); }
+funcdecl:     DEFFUNC { if (in_funcdecl)  YYERROR;  in_funcdecl = true; }
+               LBRACK { gcmdline.SetPrompt( false ); }
               NAME
               { funcname = tval; function = new gList<NewInstr*>; 
                 statementcount = 0; }
@@ -197,7 +194,7 @@ funcdecl:     writeopt DEFFUNC LBRACK { gcmdline.SetPrompt( false ); }
                   funcbody.remove( funcbody.length() - 1 );
               }
               optfuncdesc
-              RBRACK   {/* if (!triv && !semi) emit(new NewInstr(iOUTPUT));*/
+              RBRACK   { in_funcdecl = false;
 			 if (!DefineFunction())  YYERROR; 
                          gcmdline.SetPrompt( true ); } 
 
@@ -205,11 +202,13 @@ optfuncdesc:  | { funcdesc = ""; }
               COMMA CRLFopt TEXT CRLFopt 
               { funcdesc = tval; }
 
-delfunc:      writeopt DELFUNC LBRACK NAME
+delfunc:      DELFUNC { if (in_funcdecl)  YYERROR;  in_funcdecl = true; }
+   	      LBRACK NAME
               { funcname = tval; function = new gList<NewInstr*>; 
                 statementcount = 0; }
               LBRACK formallist RBRACK TYPEopt
-              RBRACK   { if (!DeleteFunction())  YYERROR; } 
+              RBRACK   { in_funcdecl = false;
+	                 if (!DeleteFunction())  YYERROR; } 
 
 TYPEopt:      { functype = "ANYTYPE" }
           |   TYPEDEF { paramtype = ""; } typename 
@@ -261,16 +260,11 @@ optparen:
 binding:      RARROW    { refs.Append(false); }
        |      DBLARROW  { refs.Append(true); }
 
-statement:    writeopt { triv = true; statementcount++; }
-         |    expression { triv = false; }
+statement:    |  expression { triv = false; }
 
 
-include:      writeopt INCLUDE LBRACK TEXT RBRACK semiopt EOC
-              { 
-                LoadInputs( tval );
-	      }
-
-semiopt:   | SEMI
+include:      INCLUDE LBRACK TEXT RBRACK
+              { LoadInputs(tval); }
 
 
 conditional:  IF { gcmdline.SetPrompt( false ); }
@@ -371,6 +365,9 @@ expression:   Ea
           |   conditional
           |   whileloop
           |   forloop
+          |   funcdecl { emit(new NewInstr(iPUSH_BOOL, true)); }  
+          |   delfunc   { emit(new NewInstr(iPUSH_BOOL, true)); }
+          |   include   { emit(new NewInstr(iPUSH_BOOL, true)); }
           ;
 
 Ea:           E0
