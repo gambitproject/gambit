@@ -194,9 +194,7 @@ void QreJacobian(const Nfg &p_nfg,
 
 	  if (pl1 == pl2) {
 	    if (st1 == st2) {
-	      for (int k = 1; k <= p_profile.Support().NumStrats(pl1); k++) {
-		p_matrix(rowno, colno) += expl(p_lambda * p_profile.Payoff(pl1, pl1, k));
-	      }
+	      p_matrix(rowno, colno) = 1.0;
 	    }
 	    else {
 	      p_matrix(rowno, colno) = 0.0;
@@ -204,20 +202,18 @@ void QreJacobian(const Nfg &p_nfg,
 	  } 
 	  else {  // pl1 != pl2
 	    for (int k = 1; k <= p_profile.Support().NumStrats(pl1); k++) {
-	      p_matrix(rowno, colno) += p_lambda * p_profile.Payoff(pl1, pl1, k, pl2, st2) * expl(p_lambda * p_profile.Payoff(pl1, pl1, k));
+	      p_matrix(rowno, colno) += (p_profile.Payoff(pl1, pl1, k, pl2, st2) - p_profile.Payoff(pl1, pl1, st1, pl2, st2)) * p_profile(pl1, k);
 	    }
-	    p_matrix(rowno, colno) *= p_profile(pl1, st1);
-	    p_matrix(rowno, colno) -= p_lambda * p_profile.Payoff(pl1, pl1, st1, pl2, st2) * expl(p_lambda * p_profile.Payoff(pl1, pl1, st1));
+	    p_matrix(rowno, colno) *= p_lambda * p_profile(pl1, st1);
 	  }
 	}
       }
 
       // Now for the column wrt lambda
       for (int k = 1; k <= p_profile.Support().NumStrats(pl1); k++) {
-	p_matrix(rowno, p_matrix.NumColumns()) += p_profile.Payoff(pl1, pl1, k) * expl(p_lambda * p_profile.Payoff(pl1, pl1, k));
+	p_matrix(rowno, p_matrix.NumColumns()) += (p_profile.Payoff(pl1, pl1, k) - p_profile.Payoff(pl1, pl1, st1)) * p_profile(pl1, k);
       } 
       p_matrix(rowno, p_matrix.NumColumns()) *= p_profile(pl1, st1);
-      p_matrix(rowno, p_matrix.NumColumns()) -= p_profile.Payoff(pl1, pl1, st1) * expl(p_lambda * p_profile.Payoff(pl1, pl1, st1));
     }
   }
 }
