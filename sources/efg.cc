@@ -255,12 +255,40 @@ Node *BaseExtForm::DeleteNode(Node *n, Node *keep)
 
 Infoset *BaseExtForm::InsertNode(Node *n, Player *p, int count)
 {
-  return 0;
+  assert(n && p && count > 0);
+
+  Node *m = CreateNode(n->parent);
+  m->infoset = CreateInfoset(p->infosets.Length() + 1, p, count);
+  p->infosets.Append(m->infoset);
+  m->infoset->members.Append(m);
+  if (n->parent)
+    n->parent->children[n->parent->children.Find(n)] = m;
+  else
+    root = m;
+  m->children.Append(n);
+  while (--count)
+    m->children.Append(CreateNode(m));
+
+  return m->infoset;
 }
 
 Infoset *BaseExtForm::InsertNode(Node *n, Infoset *s)
 {
-  return 0;
+  assert(n && s);
+  
+  Node *m = CreateNode(n->parent);
+  m->infoset = s;
+  s->members.Append(m);
+  if (n->parent)
+    n->parent->children[n->parent->children.Find(n)] = m;
+  else
+    root = m;
+  m->children.Append(n);
+  int count = s->actions.Length();
+  while (--count)
+    m->children.Append(CreateNode(m));
+  
+  return m->infoset;
 }
 
 Infoset *BaseExtForm::JoinInfoset(Infoset *s, Node *n)
@@ -378,8 +406,25 @@ Node *BaseExtForm::DeleteTree(Node *n)
   return n;
 }
 
-Infoset *BaseExtForm::InsertAction(Infoset *s, Action *a, int count)
+Infoset *BaseExtForm::AppendAction(Infoset *s)
 {
+  assert(s);
+  s->actions.Append(new Action(""));
+  for (int i = 1; i <= s->members.Length(); i++)
+    s->members[i]->children.Append(CreateNode(s->members[i]));
+  return s;
+}
+
+Infoset *BaseExtForm::InsertAction(Infoset *s, Action *a)
+{
+  assert(a && s);
+  for (int where = 1; where <= s->actions.Length() && s->actions[where] != a;
+       where++);
+  if (where > s->actions.Length())   return s;
+  s->actions.Insert(new Action(""), where);
+  for (int i = 1; i <= s->members.Length(); i++)
+    s->members[i]->children.Insert(CreateNode(s->members[i]), where);
+
   return s;
 }
 

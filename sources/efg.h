@@ -83,7 +83,8 @@ class BaseExtForm     {
     Node *MoveTree(Node *src, Node *dest);
     Node *DeleteTree(Node *n);
 
-    Infoset *InsertAction(Infoset *s, Action *a, int count = 1);
+    Infoset *AppendAction(Infoset *s);
+    Infoset *InsertAction(Infoset *s, Action *a);
     Infoset *DeleteAction(Infoset *s, Action *a);
 };
 
