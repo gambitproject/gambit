@@ -178,9 +178,9 @@ int NFStrategySet::NumStrats(void) const
 }
 
 // Return the entire strategy set
-const gArray<Strategy *> &NFStrategySet::GetNFStrategySet(void) const
+const gBlock<Strategy *> &NFStrategySet::GetNFStrategySet(void) const
 {
-  return strategies;
+	return strategies;
 }
 
 // Return the NFPlayer of this NFStrategySet
@@ -210,7 +210,7 @@ NFSupport::NFSupport(const NFSupport &s)
 NFSupport::~NFSupport()
 { 
   for (int i = 1; i <= sups.Length(); i++)
-    delete sups[i];
+		delete sups[i];
 }
 
 NFSupport &NFSupport::operator=(const NFSupport &s)
@@ -222,7 +222,7 @@ NFSupport &NFSupport::operator=(const NFSupport &s)
   return (*this);
 }
 
-bool NFSupport::operator==(const NFSupport &s)
+bool NFSupport::operator==(const NFSupport &s) const
 {
   assert(sups.Length() == s.sups.Length());
   for (int i = 1; i <= sups.Length() && *sups[i] == *s.sups[i]; i++);
@@ -247,7 +247,7 @@ Strategy *NFSupport::GetStrategy(int pl, int num) const
   return (sups[pl]->GetStrategy(num));
 }
 
-const gArray<Strategy *> &NFSupport::GetStrategy(int pl) const
+const gBlock<Strategy *> &NFSupport::GetStrategy(int pl) const
 {
   return (sups[pl]->GetNFStrategySet());
 }
@@ -263,7 +263,21 @@ const gArray<int> NFSupport::SupportDimensions(void) const
 
   for ( int i = 1 ; i <= a.Length(); i++)
     a[i] = sups[i]->NumStrats();
-  return a;
+	return a;
+}
+
+// Returns true if all strategies in _THIS_ belong to _S_
+bool NFSupport::IsSubset(const NFSupport &s) const
+{
+	assert(sups.Length() == s.sups.Length());
+	for (int i = 1; i <= sups.Length(); i++)
+		if (NumStrats(i) > s.NumStrats(i))
+			return false;
+		else
+			for (int j = 1; j <= NumStrats(i); j++)
+				if (!s.GetStrategy(i).Contains(GetStrategy(i,j)))
+					return false;
+	return true;
 }
 
 

@@ -71,7 +71,7 @@ public:
   NFStrategySet();
 
   NFStrategySet(const NFStrategySet &s); 
-  
+
   NFStrategySet( NFPlayer &p);
   
   NFStrategySet &operator=(const NFStrategySet &s); 
@@ -103,7 +103,7 @@ public:
   int NumStrats(void) const;
 
   //  return the entire strategy set in a const gArray
-  const gArray<Strategy *> &GetNFStrategySet(void) const;
+	const gBlock<Strategy *> &GetNFStrategySet(void) const;
 
   // return the NFPlayer of this NFStrategySet
   NFPlayer &GetPlayer(void) const;
@@ -134,21 +134,23 @@ public:
   NFSupport(const NFSupport &s); 
   virtual ~NFSupport();
   NFSupport &operator=(const NFSupport &s);
-  bool operator==(const NFSupport &s);
+  bool operator==(const NFSupport &s) const;
 
   //---------
   // Members
   //---------
 
   void SetNFStrategySet(int pl, NFStrategySet *s);   
-  NFStrategySet *GetNFStrategySet(int pl) const    { return sups[pl]; }
+	NFStrategySet *GetNFStrategySet(int pl) const    { return sups[pl]; }
 
-  Strategy *GetStrategy(int pl, int num) const;
-  const gArray<Strategy *> &GetStrategy(int pl) const;
-  int NumStrats(int pl) const  { return sups[pl]->NumStrats(); }
+	Strategy *GetStrategy(int pl, int num) const;
+	const gBlock<Strategy *> &GetStrategy(int pl) const;
+	int NumStrats(int pl) const  { return sups[pl]->NumStrats(); }
 
-  const BaseNfg &BelongsTo(void) const;
-  const gArray<int> SupportDimensions(void) const;
+	const BaseNfg &BelongsTo(void) const;
+	const gArray<int> SupportDimensions(void) const;
+
+	bool IsSubset(const NFSupport &s) const;
 };
 
 

@@ -1,7 +1,7 @@
 //#
 //# FILE: efstrat.cc -- Implementation of supports for the extensive form
 //#
-//# $Id$
+//# @(#)efstrat.cc	1.1 10/2/95
 //#
 
 //#include "efstrat.h"
@@ -35,10 +35,20 @@ EFActionArrays &EFActionArrays::operator=( const EFActionArrays &a)
   return (*this);
 }
 
+#ifdef __BORLANDC__
+bool operator==(const gArray<Action *> &a, const gArray<Action *> &b)
+{
+	if (a.mindex != b.mindex || a.maxdex != b.maxdex)   return false;
+	for (int i = a.mindex; i <= a.maxdex; i++)
+		if (a[i] != b[i])   return false;
+	return true;
+}
+#endif
+
 bool EFActionArrays::operator==(const EFActionArrays &a)
 {
-  if ( (acts == a.acts) && (ori == a.ori)) return (true);
-  else return (false);
+	if ( (acts == a.acts) && (ori == a.ori)) return (true);
+	else return (false);
 }
 
 //--------------------------------------------------

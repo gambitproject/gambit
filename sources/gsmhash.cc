@@ -57,6 +57,9 @@ TEMPLATE class HashTable< gString, FuncDescObj* >;
 
 #include "gsmhash.h"
 
+#ifdef __BORLANDC__
+TEMPLATE class RefCountHashTable< gList< Instruction* >* >;
+#endif
 
 #pragma option -Jgx
 #include "portion.h"
