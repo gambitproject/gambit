@@ -15,7 +15,7 @@ class PolEnumBySubgame : public SubgameSolver  {
 
     int SolveSubgame(const Efg &, const EFSupport &,
 		     gList<BehavSolution> &);
-    EfgAlgType AlgorithmID() const { return EfgAlg_ENUMSUB; }    
+    EfgAlgType AlgorithmID() const { return EfgAlg_POLENSUB; }    
 
   public:
     PolEnumBySubgame(const EFSupport &, const gArray<gNumber> &values,

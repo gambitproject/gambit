@@ -25,6 +25,7 @@ typedef enum
   NfgAlg_SIMPDIV,
   NfgAlg_PURENASH,
   NfgAlg_SEQFORM,
+  NfgAlg_POLENUM
 } NfgAlgType;
 
 gString NameNfgAlgType(NfgAlgType i);
