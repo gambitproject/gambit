@@ -519,7 +519,7 @@ static Portion *GSM_CentroidEFSupport(Portion **param)
 static Portion *GSM_CentroidNFSupport(Portion **param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
-  NfgPayoffs *N = ((NfSupportPortion *) param[0])->PayoffTable();
+  NFPayoffs *N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion *por;
 
   if (N->Type() == DOUBLE)
@@ -548,7 +548,7 @@ static Portion* GSM_Game_MixedRational(Portion** param)
 
 static Portion *GSM_Game_NfSupport(Portion **param)
 {
-  NfgPayoffs *N = ((NfSupportPortion *) param[0])->Value()->BelongsTo().PayoffTable();
+  NFPayoffs *N = ((NfSupportPortion *) param[0])->Value()->BelongsTo().PayoffTable();
 
   if (N->Type() == DOUBLE)
     return new NfgValPortion<double>((Nfg<double> *) N);
@@ -917,7 +917,7 @@ static Portion *GSM_LiapValue_MixedRational(Portion **param)
 Portion* GSM_Mixed_NFSupport(Portion** param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
-  NfgPayoffs *N = ((NfSupportPortion *) param[0])->PayoffTable();
+  NFPayoffs *N = ((NfSupportPortion *) param[0])->PayoffTable();
   gArray<int> dim = S->NumStrats();
   Portion* por;
   MixedSolution<double> *Pd = 0;
@@ -1138,7 +1138,7 @@ static Portion *GSM_Regret_MixedFloat(Portion **param)
     (MixedSolution<double>*) ((MixedPortion<double>*) param[0])->Value();
   Strategy* s = ((StrategyPortion*) param[1])->Value();
   NFPlayer* p = s->nfp;
-  BaseNfg &n = p->BelongsTo();
+  NFGameForm &n = p->BelongsTo();
   
   gPVector<double> v(n.NumStrats());
   P->Regret(v);
@@ -1152,7 +1152,7 @@ static Portion *GSM_Regret_MixedRational(Portion **param)
     (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[0])->Value();
   Strategy* s = ((StrategyPortion*) param[1])->Value();
   NFPlayer* p = s->nfp;
-  BaseNfg &n = p->BelongsTo();
+  NFGameForm &n = p->BelongsTo();
   
   gPVector<gRational> v(n.NumStrats());
   P->Regret(v);
@@ -1504,7 +1504,7 @@ static Portion *GSM_StrategyProbs_Float(Portion **param)
   MixedSolution<double> *profile =
     (MixedSolution<double> *) ((MixedPortion<double> *) param[0])->Value();
   const NFSupport *support = &profile->Support();
-  const BaseNfg &nfg = support->BelongsTo();
+  const NFGameForm &nfg = support->BelongsTo();
 
   ListPortion *por = new ListValPortion;
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)  {
@@ -1530,7 +1530,7 @@ static Portion *GSM_StrategyProbs_Rational(Portion **param)
   MixedSolution<gRational> *profile =
     (MixedSolution<gRational> *) ((MixedPortion<gRational> *) param[0])->Value();
   const NFSupport *support = &profile->Support();
-  const BaseNfg &nfg = support->BelongsTo();
+  const NFGameForm &nfg = support->BelongsTo();
 
   ListPortion *por = new ListValPortion;
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)  {

@@ -33,7 +33,7 @@ Strategy::~Strategy()
 // StrategyProfile: Constructors, Destructors, Operators
 //--------------------------------------------------------
 
-StrategyProfile::StrategyProfile(BaseNfg &N)
+StrategyProfile::StrategyProfile(NFGameForm &N)
   : index(0L), profile(N.NumPlayers())
 {
   for (int pl = 1; pl <= N.NumPlayers(); pl++)   {
@@ -194,7 +194,7 @@ const gBlock<Strategy *> &NFStrategySet::GetNFStrategySet(void) const
 // NFSupport: Ctors, Dtor, Operators
 //-----------------------------------------------
 
-NFSupport::NFSupport(const BaseNfg &N) : bnfg(&N), sups(N.NumPlayers())
+NFSupport::NFSupport(const NFGameForm &N) : bnfg(&N), sups(N.NumPlayers())
 { 
   for (int i = 1; i <= sups.Length(); i++)
     sups[i] = new NFStrategySet(*(N.Players()[i]));

@@ -96,7 +96,7 @@ payoff:       NUMBER
                   if (pl > Ndbl->NumPlayers())   {
 		    cont++;
 		    if (cont <= ncont)  
-	              Ndbl->NewOutcome();
+	              Ndbl->GameForm().NewOutcome();
 		    pl = 1;
                   }
                 }
@@ -104,7 +104,7 @@ payoff:       NUMBER
                   if (pl > Nrat->NumPlayers())   {
 		    cont++;
 		    if (cont <= ncont)  
-	              Nrat->NewOutcome();
+	              Nrat->GameForm().NewOutcome();
 		    pl = 1;
 		  }
                 } 

@@ -25,17 +25,17 @@ struct Strategy   {
   ~Strategy();
 };
 
-class BaseNfg;
+class NFGameForm;
 template <class T> class Nfg;
 
 class StrategyProfile   {
-  friend class BaseNfg;
+  friend class NFGameForm;
 private:
   long index;
   gArray<Strategy *> profile;
   
 public:
-  StrategyProfile(BaseNfg &);
+  StrategyProfile(NFGameForm &);
   StrategyProfile(const StrategyProfile &p);
 
   ~StrategyProfile();
@@ -52,16 +52,16 @@ public:
 };
 
 
-class BaseNfg;
+class NFGameForm;
 class NFStrategySet;
 
 class NFSupport {
 protected:
-  const BaseNfg *bnfg;
+  const NFGameForm *bnfg;
   gArray <NFStrategySet *> sups;
   
 public:
-  NFSupport(const BaseNfg &);
+  NFSupport(const NFGameForm &);
   NFSupport(const NFSupport &s); 
   virtual ~NFSupport();
   NFSupport &operator=(const NFSupport &s);
@@ -69,7 +69,7 @@ public:
   bool operator==(const NFSupport &s) const;
   bool operator!=(const NFSupport &s) const;
 
-  const BaseNfg &BelongsTo(void) const   { return *bnfg; }
+  const NFGameForm &BelongsTo(void) const   { return *bnfg; }
   
   const gBlock<Strategy *> &Strategies(int pl) const;
 

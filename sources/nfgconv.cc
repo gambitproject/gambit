@@ -29,7 +29,7 @@ Nfg<gRational> *ConvertNfg(const Nfg<double> &orig)
   
   for (int outc = 1; outc <= orig.NumOutcomes(); outc++)  {
     NFOutcome *outcome = 
-      (outc > 1) ? N->NewOutcome() : N->Outcomes()[1];
+      (outc > 1) ? N->GameForm().NewOutcome() : N->Outcomes()[1];
 
     for (int pl = 1; pl <= N->NumPlayers(); pl++)
       N->SetPayoff(outcome, pl, gRational(orig.Payoff(orig.Outcomes()[outc], pl)));
@@ -70,7 +70,7 @@ Nfg<double> *ConvertNfg(const Nfg<gRational> &orig)
 
   for (int outc = 1; outc <= orig.NumOutcomes(); outc++)  {
     NFOutcome *outcome = 
-      (outc > 1) ? N->NewOutcome() : N->Outcomes()[1];
+      (outc > 1) ? N->GameForm().NewOutcome() : N->Outcomes()[1];
 
     for (int pl = 1; pl <= N->NumPlayers(); pl++)
       N->SetPayoff(outcome, pl, (double) orig.Payoff(orig.Outcomes()[outc], pl));

@@ -14,7 +14,7 @@
 //---------------------------------------------------------------
 
 template <class T> Nfg<T>::Nfg(const gArray<int> &dim)
-  : gameform(new BaseNfg(*this, dim)),
+  : gameform(new NFGameForm(*this, dim)),
 #ifndef NFG_ONLY
     efg(0),
 #endif   // NFG_ONLY
@@ -26,7 +26,7 @@ template <class T> Nfg<T>::Nfg(const gArray<int> &dim)
 }
 
 template <class T> Nfg<T>::Nfg(const Nfg<T> &N)
-  : gameform(new BaseNfg(*N.gameform)),
+  : gameform(new NFGameForm(*N.gameform)),
 #ifndef NFG_ONLY
     efg(0),
 #endif   // NFG_ONLY
@@ -124,15 +124,16 @@ template <class T> T Nfg<T>::MaxPayoff(int player) const
   return maxpay;
 }
 
-template <class T> NFOutcome *Nfg<T>::NewOutcome(void)
+template <class T> void Nfg<T>::NewOutcome(void)
 {
-  NFOutcome *outcome = gameform->NewOutcome();
-
   gVector<T> zeroes(NumPlayers());
   zeroes = (T) 0;
   payoffs.AddRow(zeroes);
+}
 
-  return outcome;
+template <class T> void Nfg<T>::DeleteOutcome(int outc)
+{
+  payoffs.RemoveRow(outc);
 }
   
 template <class T> void Nfg<T>::SetPayoff(NFOutcome *outcome,

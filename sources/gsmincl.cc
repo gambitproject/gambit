@@ -1,8 +1,8 @@
-//#
-//# FILE: gsmincl.cc   miscellaneous GSM functions
-//#
-//# @(#)gsmincl.cc	1.18 10/1/96
-//#
+//
+// FILE: gsmincl.cc   miscellaneous GSM functions
+//
+// $Id$
+//
 
 #include "gsmincl.h"
 #include "string.h"
@@ -36,7 +36,7 @@ struct PortionSpecTextType
 };  
 
 
-#define NUM_PortionSpecs 41
+#define NUM_PortionSpecs 42
 #define NUM_CompositePortionSpecs 9
 
 PortionSpecTextType _PortionSpecText[] =
@@ -66,7 +66,7 @@ PortionSpecTextType _PortionSpecText[] =
   { porNFSUPPORT_RATIONAL, "NFSUPPORT(RATIONAL)" },
   { porEFSUPPORT_FLOAT,    "EFSUPPORT(FLOAT)" },
   { porEFSUPPORT_RATIONAL, "EFSUPPORT(RATIONAL)" },
-
+  { porNFOUTCOME,          "NFOUTCOME" },
 
   { porNFPLAYER,           "NFPLAYER" },
   { porEFPLAYER,           "EFPLAYER" },

@@ -26,7 +26,7 @@ template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
 
   for (int outc = 1; outc <= nfg.NumOutcomes(); outc++)  {
     NFOutcome *outcome = 
-      (outc > 1) ? N->NewOutcome() : N->Outcomes()[1];
+      (outc > 1) ? N->GameForm().NewOutcome() : N->Outcomes()[1];
 
     outcome->SetName(nfg.Outcomes()[outc]->GetName());
 

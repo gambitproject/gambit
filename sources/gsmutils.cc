@@ -82,6 +82,14 @@ Portion *ArrayToList(const gArray<NFPlayer *> &A)
   return ret;
 }
 
+Portion *ArrayToList(const gArray<NFOutcome *> &A)
+{
+  ListPortion *ret = new ListValPortion;
+  for (int i = 1; i <= A.Length(); i++)
+    ret->Append(new NfOutcomeValPortion(A[i]));
+  return ret;
+}
+
 Portion *ArrayToList(const gArray<Strategy *> &A)
 {
   ListPortion *ret = new ListValPortion;

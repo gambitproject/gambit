@@ -9,7 +9,6 @@
 
 #include "gblock.h"
 
-template <class T> class Nfg;
 class StrategyProfile;
 
 //
@@ -27,7 +26,7 @@ friend class NfgIter;
 private:
   NFSupport support;
   gArray<int> current_strat;
-  BaseNfg *N;
+  NFGameForm *N;
   StrategyProfile profile;
   gBlock<int> frozen, thawed;
   

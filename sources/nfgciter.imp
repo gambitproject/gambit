@@ -16,7 +16,7 @@
 NfgContIter::NfgContIter(const NFSupport &s)
   : support(s), 
     current_strat(s.BelongsTo().NumPlayers()),
-    N((BaseNfg *) &s.BelongsTo()), profile(*N),
+    N((NFGameForm *) &s.BelongsTo()), profile(*N),
     thawed(N->NumPlayers())
 {
   for (int i = 1; i <= thawed.Length(); i++)

@@ -152,7 +152,7 @@ static Portion *GSM_Behav_Rational(Portion **param)
 static Portion *GSM_EnumMixed_Nfg(Portion **param)
 {
   NFSupport* S = ((NfSupportPortion*) param[0])->Value();
-  NfgPayoffs *N = ((NfSupportPortion *) param[0])->PayoffTable();
+  NFPayoffs *N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por = 0;
 
   EnumParams EP;
@@ -254,7 +254,7 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
 static Portion *GSM_EnumPure_Nfg(Portion **param)
 {
   NFSupport* S = ((NfSupportPortion*) param[0])->Value();
-  NfgPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
+  NFPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por;
 
   gWatch watch;
@@ -352,7 +352,7 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
 static Portion *GSM_GobitGrid_Support(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  NfgPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
+  NFPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por = 0;
 
   GridParams GP;
@@ -495,7 +495,7 @@ static Portion *GSM_Gobit_Start(Portion **param)
 static Portion *GSM_Lcp_Nfg(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  NfgPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
+  NFPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por = 0;
 
   LemkeParams LP;
@@ -737,7 +737,7 @@ static Portion *GSM_Liap_MixedFloat(Portion **param)
 static Portion *GSM_Lp_Nfg(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  NfgPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
+  NFPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por = 0;
 
   ZSumParams ZP;
@@ -1021,7 +1021,7 @@ Portion* GSM_Payoff_MixedRational(Portion** param)
 static Portion *GSM_Simpdiv_Nfg(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  NfgPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
+  NFPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por = 0;
 
   SimpdivParams SP;

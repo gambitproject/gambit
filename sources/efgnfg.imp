@@ -158,9 +158,9 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
     E.Payoff(corr, value);
     
     if (iter.GetIndex() > 0)  
-      iter.SetOutcome(((Nfg<T> *) L->N)->NewOutcome());
+      iter.SetOutcome(L->N->GameForm().NewOutcome());
     for (int j = 1; j <= E.NumPlayers(); j++)
-      ((Nfg<T> *) L->N)->SetPayoff(iter.GetOutcome(), j, value[j]);
+      L->N->SetPayoff(iter.GetOutcome(), j, value[j]);
     
     iter.NextContingency();
     while (pl > 0)   {
@@ -338,7 +338,7 @@ template <class T> Nfg<T> *MakeAfg(Efg<T> &E)
     E.Payoff(profile, payoff);
 
     if (iter.GetIndex() > 0)
-      iter.SetOutcome(afg->NewOutcome());
+      iter.SetOutcome(afg->GameForm().NewOutcome());
 
     for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)
       for (int iset = 1; iset <= E.Players()[epl]->NumInfosets(); iset++, npl++)

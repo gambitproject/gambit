@@ -22,12 +22,12 @@ class NfgContIter;
 class NfgIter    {
 private:
   NFSupport support;
-  BaseNfg *N;
+  NFGameForm *N;
   gArray<int> current_strat;
   StrategyProfile profile;
   
 public:
-  NfgIter(BaseNfg &);
+  NfgIter(NFGameForm &);
   NfgIter(const NFSupport &s);
   NfgIter(const NfgIter &);
   NfgIter(const NfgContIter &);
