@@ -22,4 +22,4 @@ wxgcl_LDADD = \
 	$(top_builddir)/sources/math/libmath.a \
 	$(top_builddir)/sources/base/libbase.a
 
-EXTRA_DIST = borland.mak
+EXTRA_DIST = borland.mak wxgcl.rc
