@@ -78,6 +78,9 @@ template <class T> class BehavProfile
 
     T LiapValue(void) const;
     bool IsNash(void) const;
+    T MaxGripe() const;
+    T MaxGripe(int &pl, int &iset, int &act) const;
+
     void Centroid(void) const;
 
     bool operator==(const BehavProfile<T> &) const;

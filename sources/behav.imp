@@ -483,9 +483,71 @@ template <class T> T BehavProfile<T>::LiapValue(void) const
   return result;
 }
 
+template <class T> T BehavProfile<T>::MaxGripe() const
+{
+  int i = 0;
+  return MaxGripe(i,i,i);
+}
+
+//
+// Returns MaxGripe, and arguments where Max is attained in argument list
+// if any arguments are non zero when called, returns MaxGripe for 
+// pl, iset and act constrained to those values. 
+//
+template <class T> T BehavProfile<T>::MaxGripe(int &pl, int &iset, int &act) const
+{
+  // Currently this is very inefficient.  But we need some functions 
+  // to evaluate the effect on payoff from a change in a profile 
+  // to make this better (rdm) 
+  int i,j,k;
+  int i1,i2,j1,j2,k1,k2;
+  int newpl,newiset,newact;
+  T pay, delta, maxgripe;
+  BehavProfile<T> scratch(*this);
+
+  newpl=newiset=newact=1;
+
+  maxgripe = (T)0;
+  if(pl >=1 && pl <= E->NumPlayers()) { i1=i2=pl; }
+  else {
+    i1=1;i2=E->NumPlayers();
+    iset=0;act=0;
+  }
+  for (i = i1; i <= i2; i++) {
+    pay = Payoff(i);
+    EFPlayer *player = E->PlayerList()[i];
+    if(iset>=1 && iset <=player->NumInfosets()) { j1=j2=iset; }
+    else {
+      j1=1;j2=player->NumInfosets();
+      act=0;
+    }
+    for (j = j1; j <= j2; j++) {
+      Infoset *s = player->InfosetList()[j];
+      if(act>=1 && act <= s->NumActions()) { k1=k2=act; }
+      else { k1=1;k2=s->NumActions(); }
+      for (k = 1; k <= s->NumActions(); k++) 
+	scratch(i, j, k) = (T)0;
+      for (k = k1; k <= k2; k++) {
+	scratch(i, j, k) = (T)1;
+	delta = scratch.Payoff(i) - pay;
+	if(delta > maxgripe) {
+	  maxgripe=delta;
+	  newpl = i;
+	  newiset = j;
+	  newact = k;
+	}
+	scratch(i, j, k) = (T)0;
+      }
+      for (k = 1; k <= s->NumActions(); k++) 
+	scratch(i, j, k) = (*this)(i, j, k);
+    }
+  }
+  return maxgripe;
+}
+
 template <class T> bool BehavProfile<T>::IsNash(void) const
 {
-  if(LiapValue()==(T)0) return 1;
+  if(MaxGripe()==(T)0) return 1;
   return 0;
 }
 
