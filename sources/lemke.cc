@@ -391,8 +391,10 @@ LemkeTableau<T>::LemkeTableau(const NormalForm<T> &r,
   for (i = 1; i <= n1 + n2; Tableau(i++, n1 + n2 + 1) = 0.0);
 }
 
+#ifdef __GNUG__
 template class LemkeTableau<double>;
 template class LemkeTableau<gRational>;
+#endif   // __GNUG__
 
 int LemkeSolver::Lemke(void)
 {

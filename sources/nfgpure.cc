@@ -150,8 +150,10 @@ template <class T> void PureNashModule<T>::SingleNash(long i)
     }
 }
 
+#ifdef __GNUG__
 template class PureNashModule<double>;
 template class PureNashModule<gRational>;
+#endif   // __GNUG__
 
 int PureNashSolver::PureNash(void)
 {

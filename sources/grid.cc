@@ -173,11 +173,13 @@ delete pv;
 return 1;
 }
 
+#ifdef __GNUG__
 template class ProbVect<double>;
 template class ProbVect<gRational>;
 
 template class GridSolveModule<double>;
 template class GridSolveModule<gRational>;
+#endif   // __GNUG__
 
 //
 // Note: reading from the parameter file is currently not available...

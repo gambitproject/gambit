@@ -464,8 +464,10 @@ template <class T> T SimpdivModule<T>::getlabel(gPVector<T> &yy)
   return maxz;
 }
 
+#ifdef __GNUG__
 template class SimpdivModule<double>;
 template class SimpdivModule<gRational>;
+#endif   // __GNUG__
 
 int SimpdivSolver::Simpdiv(void)
 {
