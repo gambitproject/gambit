@@ -8,8 +8,6 @@
 #define LEMKE_H
 
 #include "nfg.h"
-#include "rational.h"
-#include "mixed.h"
 #include "mixedsol.h"
 #include "glist.h"
 #include "lhtab.h"
@@ -65,3 +63,7 @@ template <class T> int Lemke(const Nfg<T> &N, const LemkeParams &p,
 */				   
 
 #endif    // LEMKE_H
+
+
+
+
