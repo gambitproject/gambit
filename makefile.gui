@@ -119,6 +119,7 @@ clean_solaris:
 
 
 
+
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
 gambit.o: extform.h gstring.h /usr/include/string.h
