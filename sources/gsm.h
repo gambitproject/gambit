@@ -1,8 +1,8 @@
-//#
-//# FILE: gsm.h -- definition of GSM (stack machine) type
-//#
-//# $Id$
-//#
+//
+// FILE: gsm.h -- definition of GSM (stack machine) type
+//
+// $Id$
+//
 
 
 #ifndef GSM_H
@@ -28,7 +28,7 @@ class gRational;
 template <class T> class gList;
 template <class T> class gStack;
 
-#define GCL_VERSION   0.93
+#define GCL_VERSION   0.94
 
 class GSM
 {
