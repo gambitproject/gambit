@@ -896,6 +896,23 @@ anonymously just like a value parameter, subject to the usual rules.
 It is a run-time error to attempt to pass a value to a reference
 parameter, or vice versa.
 
+Finally, a note about deciding which function signature matches a particular
+call in cases where subtype values are involved.  It is permitted to 
+specify as a function parameter a datatype which is a subtype of another
+type (the most common example is \verb+INTEGER+ being a subtype of
+\verb+NUMBER+; see the section on typing for the complete list).  In this case,
+you might have these two signatures for a function:
+
+\begin{verbatim}
+Foo[x->INTEGER] =: INTEGER
+Foo[x->NUMBER] =: NUMBER
+\end{verbatim}
+
+Then, a call of \verb+Foo[3]+ resolves to the first signture (since the
+value passed is an integer), and \verb+Foo[3.5]+ resolves to the second
+(since it's a number, but not specifically an integer).
+\marginpar{Give complete specification of the rules for this}
+
 \subsection{\rindex{User defined functions}}\index{Functions!User Defined}
 
 As GCL programs become more and more complex, frequently there are
@@ -1394,9 +1411,7 @@ If[boolean-expression, statement-list {, statement-list}]
 \verb+boolean-expression+ evaluates to \verb+True+, then the first
 list of statements is executed.  If it evaluates to \verb+False+, and
 the second (optional) list of statements is present, that list is
-executed; if it is not present, execution falls through to the next
-statement.
-\marginpar{What data type does If[] return?}
+executed; if it is not present, the If[] expression evaluates to \verb+False+.
 For example, the statement
 
 \begin{verbatim}
@@ -1412,8 +1427,8 @@ If[i = 2, j := 1]
 \end{verbatim}
 
 \noindent in which case \verb+j+ would be set to \verb+1+ if \verb+i+
-is equal to \verb+2+, but if \verb+i+ were not \verb+2+, nothing would
-occur.
+is equal to \verb+2+, but if \verb+i+ were not \verb+2+, the expression
+evaluates to \verb+False+.
 
 This last example brings up an important note about conditional
 execution.  Statements which appear in a branch of an \verb+If+
