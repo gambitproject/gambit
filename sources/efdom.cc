@@ -30,8 +30,8 @@ bool Dominates(const EFSupport &S,
 {
   const EFSupportWithActiveInfo SAct(S);
   const Infoset *infoset = S.Game().GetInfosetByIndex(pl,iset);
-  Action *aAct = S.Actions(pl,iset)[a];
-  Action *bAct = S.Actions(pl,iset)[b];
+  Action *aAct = infoset->GetAction(a);
+  Action *bAct = infoset->GetAction(b);
 
   bool equal = true;
 
@@ -40,9 +40,9 @@ bool Dominates(const EFSupport &S,
     EfgContIter A(S), B(S);
     A.Freeze(pl, iset); 
     B.Freeze(pl, iset); 
-    A.Set(pl, iset, a); 
-    B.Set(pl, iset, b); 
-    
+    A.Set(aAct);
+    B.Set(bAct);
+
     do  {
       status.Get();
       gRational ap = A.Payoff(pl);  
@@ -58,7 +58,7 @@ bool Dominates(const EFSupport &S,
 
   else {
     gList<const Node *> nodelist = SAct.ReachableNodesInInfoset(infoset);  
-    if (nodelist.Length() == 0)
+    if (nodelist.Length() == 0) 
       nodelist = infoset->ListOfMembers();  // This may not be a good idea;
                                             // I suggest checking for this 
                                             // prior to entry
@@ -71,8 +71,8 @@ bool Dominates(const EFSupport &S,
       L.RemoveRedundancies();
       
       EfgConditionalContIter A(S,L), B(S,L);
-      A.Set(pl, iset, a); 
-      B.Set(pl, iset, b); 
+      A.Set(aAct);
+      B.Set(bAct);
       
       do  {
 	status.Get();
@@ -105,7 +105,6 @@ bool Dominates(const EFSupport &S,
     throw efgDominanceException
       ("Dominates(..) needs actions in same infoset.\n");
   const EFPlayer *player = infoset->GetPlayer();
-
   return Dominates(S,player->GetNumber(),infoset->GetNumber(),
 		   a->GetNumber(),b->GetNumber(),
 		   strong, conditional, status);
@@ -248,9 +247,9 @@ EFSupport *SupportWithoutDominatedOfPlayerList(const EFSupport &S,
   return T;
 }
 
-/*
-void AndyTest(const EFSupport &, gStatus &status);
-*/
+
+// void AndyTest(const EFSupport &, gStatus &status);
+
 EFSupport *DominanceTruncatedSupport(const EFSupport &S, 
 				     const bool strong,
 				     const bool conditional,
@@ -258,7 +257,7 @@ EFSupport *DominanceTruncatedSupport(const EFSupport &S,
 				           gStatus &status)
 {
   //  AndyTest(S,status);
-  exit(0);
+  //  exit(0);
 
   gBlock<int> players(S.Game().NumPlayers());
   int i;
