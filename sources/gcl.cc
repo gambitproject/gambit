@@ -102,65 +102,70 @@ int gcl_main( int /*argc*/, char* argv[] )
 int main( int /*argc*/, char* argv[] )
 #endif // __BORLANDC__
 {
-  _ExePath = new char[strlen(argv[0]) + 2];
-  strcpy(_ExePath, argv[0]);
-
+  try {
+    _ExePath = new char[strlen(argv[0]) + 2];
+    strcpy(_ExePath, argv[0]);
+    
 #ifdef __GNUG__
-  const char SLASH = '/';
+    const char SLASH = '/';
 #elif defined __BORLANDC__
-  const char SLASH = '\\';
+    const char SLASH = '\\';
 #endif   // __GNUG__
-
-
-  char *c = strrchr( argv[0], SLASH );
-
-  _SourceDir = new char[256];
-  if (c != NULL)  {
-    int len = strlen(argv[0]) - strlen(c);
-    assert(len < 256);
-    strncpy(_SourceDir, argv[0], len);
-  }
-  else   {
-    strcpy(_SourceDir, "");
-  }
-
+    
+    
+    char *c = strrchr( argv[0], SLASH );
+    
+    _SourceDir = new char[256];
+    if (c != NULL)  {
+      int len = strlen(argv[0]) - strlen(c);
+      assert(len < 256);
+      strncpy(_SourceDir, argv[0], len);
+    }
+    else   {
+      strcpy(_SourceDir, "");
+    }
+    
   
-  // Set up the error handling functions:
+    // Set up the error handling functions:
 #ifndef __BORLANDC__
-  signal(SIGFPE, (fptr) SigFPEHandler);
-
-  signal(SIGTSTP, SIG_IGN);
-
-  signal(SIGSEGV, (fptr) SigSegFaultHandler);
-  signal(SIGABRT, (fptr) SigSegFaultHandler);
-  signal(SIGBUS,  (fptr) SigSegFaultHandler);
-  signal(SIGKILL, (fptr) SigSegFaultHandler);
-  signal(SIGILL,  (fptr) SigSegFaultHandler);
+    signal(SIGFPE, (fptr) SigFPEHandler);
+    
+    signal(SIGTSTP, SIG_IGN);
+    
+    signal(SIGSEGV, (fptr) SigSegFaultHandler);
+    signal(SIGABRT, (fptr) SigSegFaultHandler);
+    signal(SIGBUS,  (fptr) SigSegFaultHandler);
+    signal(SIGKILL, (fptr) SigSegFaultHandler);
+    signal(SIGILL,  (fptr) SigSegFaultHandler);
 #endif  
-
-  _gsm = new GSM(256);
-
-  GCLCompiler C;
-  gPreprocessor P(&gcmdline, "Include[\"gclini.gcl\"]");
-
-  while (!P.eof())
-  {
-    gText line = P.GetLine();
-    gText fileName = P.GetFileName();
-    int lineNumber = P.GetLineNumber();
-    gText rawLine = P.GetRawLine();
-    C.Parse(line, fileName, lineNumber, rawLine );
+    
+    _gsm = new GSM(256);
+    
+    GCLCompiler C;
+    gPreprocessor P(&gcmdline, "Include[\"gclini.gcl\"]");
+    
+    while (!P.eof())
+      {
+	gText line = P.GetLine();
+	gText fileName = P.GetFileName();
+	int lineNumber = P.GetLineNumber();
+	gText rawLine = P.GetRawLine();
+	C.Parse(line, fileName, lineNumber, rawLine );
+      }
+    
+    delete[] _SourceDir;
+    delete _gsm;
+    
+    
+    // this is normally done in destructor for gCmdLineInput,
+    //   in gcmdline.cc, but apparently the destructors for
+    //   global static objects are not called, hence this
+    gCmdLineInput::RestoreTermAttr();
   }
-
-  delete[] _SourceDir;
-  delete _gsm;
-
-
-  // this is normally done in destructor for gCmdLineInput,
-  //   in gcmdline.cc, but apparently the destructors for
-  //   global static objects are not called, hence this
-  gCmdLineInput::RestoreTermAttr();
+  // The last line of defense for exceptions:
+  catch(gException &w) {gout << w.ErrorMessage() << "; Caught in gcl.cc, main()\n";}
   
   return 0;
 }
+
 

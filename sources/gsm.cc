@@ -599,8 +599,10 @@ Portion *GSM::Execute(gclExpression *expr, bool /*user_func*/)
 {
   Portion*        p               = 0;
 
+  try {
   p = expr->Evaluate();
-
+  }
+  catch(gException &w) {gout << w.ErrorMessage() <<  "; Caught in gsm.cc, GSM::Execute()\n";}
   return p;
 }
 
