@@ -44,6 +44,11 @@ extern "C" int winio_ari(const char *msg);
 extern "C" void winio_closeall(void);
 int _RTLENTRY _matherr (struct exception *e)
 #else
+#ifdef __linux__ // kludge to make it compile.  Seems linux does not support.
+  struct exception {int type;char *name;double arg1,arg2,retval; }; 
+  #define LN_MINDOUBLE 1e-20
+#define SING 0
+#endif
 int matherr(struct exception *e)
 #endif
 {
