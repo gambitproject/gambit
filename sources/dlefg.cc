@@ -40,8 +40,6 @@ dialogEfgSelectPlayer::dialogEfgSelectPlayer(Efg &p_efg, wxWindow *p_parent)
       m_playerNameList->Append("Player" + ToText(pl));
   }
 
-  // Force a selection -- some implementations (e.g. Motif) do not
-  // automatically set any selection
   m_playerNameList->SetSelection(0); 
 
   NewLine();
@@ -101,11 +99,11 @@ dialogMoveAdd::dialogMoveAdd(Efg &p_efg, EFPlayer *p_player,
 {
   m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player");
   m_playerItem->Append("Chance");
-  m_playerItem->SetClientData(0, (char *) this);
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     m_playerItem->Append(ToText(pl) + ": " + m_efg.Players()[pl]->GetName());
   }
   m_playerItem->Append("New Player");
+  m_playerItem->wxEvtHandler::SetClientData((char *) this);
   if (p_player)
     m_playerItem->SetSelection(p_player->GetNumber());
   else
@@ -114,14 +112,13 @@ dialogMoveAdd::dialogMoveAdd(Efg &p_efg, EFPlayer *p_player,
   m_infosetItem = new wxListBox(this, (wxFunction) CallbackInfoset,
 				"Infoset");
   m_infosetItem->Append("New");
-  m_infosetItem->SetClientData(0, (char *) this);
   if (p_player) {
     for (int iset = 1; iset <= p_player->NumInfosets(); iset++) {
       m_infosetItem->Append(ToText(iset) + ": " +
 			    p_player->Infosets()[iset]->GetName());
     }
   }
-
+  m_infosetItem->wxEvtHandler::SetClientData((char *) this);
   if (p_infoset)
     m_infosetItem->SetSelection(p_infoset->GetNumber());
   else
@@ -159,18 +156,17 @@ void dialogMoveAdd::OnCancel(void)
   Show(FALSE);
 }
 
-void dialogMoveAdd::OnPlayer(void)
+void dialogMoveAdd::OnPlayer(int p_player)
 {
-  int playerNumber = m_playerItem->GetSelection();
   EFPlayer *player = 0;
-  if (playerNumber == 0)
+  m_playerItem->SetSelection(p_player);
+  if (p_player == 0)
     player = m_efg.GetChance();
-  else if (playerNumber <= m_efg.NumPlayers())
-    player = m_efg.Players()[playerNumber];
+  else if (p_player <= m_efg.NumPlayers())
+    player = m_efg.Players()[p_player];
 
   m_infosetItem->Clear();
   m_infosetItem->Append("New");
-  m_infosetItem->SetClientData(0, (char *) this);
   if (player) {
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       m_infosetItem->Append(ToText(iset) + ": " +
@@ -182,16 +178,16 @@ void dialogMoveAdd::OnPlayer(void)
   m_actionItem->Enable(TRUE);
 }
 
-void dialogMoveAdd::OnInfoset(void)
+void dialogMoveAdd::OnInfoset(int p_infoset)
 {
-  int infosetNumber = m_infosetItem->GetSelection();
-  if (infosetNumber > 0) {
+  m_infosetItem->SetSelection(p_infoset);
+  if (p_infoset > 0) {
     int playerNumber = m_playerItem->GetSelection();
     Infoset *infoset;
     if (playerNumber == 0)
-      infoset = m_efg.GetChance()->Infosets()[infosetNumber];
+      infoset = m_efg.GetChance()->Infosets()[p_infoset];
     else
-      infoset = m_efg.Players()[playerNumber]->Infosets()[infosetNumber];
+      infoset = m_efg.Players()[playerNumber]->Infosets()[p_infoset];
     m_actionItem->Enable(FALSE);
     m_actionItem->SetValue(ToText(infoset->NumActions()));
   }
@@ -307,7 +303,7 @@ dialogActionLabel::dialogActionLabel(Infoset *p_infoset, wxWindow *p_parent)
 			 p_infoset->Actions()[act]->GetName());
     m_actionNames[act] = p_infoset->Actions()[act]->GetName();
   }
-  m_actionList->SetClientData(0, (char *) this);
+  m_actionList->wxEvtHandler::SetClientData((char *) this);
   m_actionList->SetSelection(0);
 
   m_actionName = new wxText(this, (wxFunction) 0, "Name");
@@ -345,17 +341,16 @@ Bool dialogActionLabel::OnClose(void)
   return FALSE;
 }
 
-void dialogActionLabel::OnAction(void)
+void dialogActionLabel::OnAction(int p_action)
 {
-  int selected = m_actionList->GetSelection();
-
-  if (selected == m_lastSelection)  return;
+  if (p_action == m_lastSelection)  return;
+  m_actionList->SetSelection(p_action);
   m_actionNames[m_lastSelection + 1] = m_actionName->GetValue();
-  m_actionName->SetValue(m_actionNames[selected + 1]);
+  m_actionName->SetValue(m_actionNames[p_action + 1]);
   m_actionList->SetString(m_lastSelection,
 			  ToText(m_lastSelection + 1) + ": " +
 			  m_actionNames[m_lastSelection + 1]);
-  m_lastSelection = selected;
+  m_lastSelection = p_action;
 }
 
 //=========================================================================
@@ -419,10 +414,10 @@ dialogActionProbs::dialogActionProbs(Infoset *p_infoset, wxWindow *p_parent)
 			 p_infoset->Actions()[act]->GetName());
     m_actionProbs[act] = p_infoset->Game()->GetChanceProb(p_infoset, act);
   }
-  m_actionList->SetClientData(0, (char *) this);
+  m_actionList->wxEvtHandler::SetClientData((char *) this);
   m_actionList->SetSelection(0);
 
-  m_actionProb = new wxText(this, (wxFunction) 0, "Probability");
+  m_actionProb = new wxText(this, 0, "Probability");
   m_actionProb->SetValue(ToText(m_actionProbs[1]));
   
   NewLine();
@@ -457,14 +452,13 @@ Bool dialogActionProbs::OnClose(void)
   return FALSE;
 }
 
-void dialogActionProbs::OnAction(void)
+void dialogActionProbs::OnAction(int p_action)
 {
-  int selected = m_actionList->GetSelection();
-
-  if (selected == m_lastSelection)  return;
+  if (p_action == m_lastSelection)  return;
+  m_actionList->SetSelection(p_action);
   m_actionProbs[m_lastSelection + 1] = ToDouble(m_actionProb->GetValue());
-  m_actionProb->SetValue(ToText(m_actionProbs[selected + 1]));
-  m_lastSelection = selected;
+  m_actionProb->SetValue(ToText(m_actionProbs[p_action + 1]));
+  m_lastSelection = p_action;
 }
 
 //=========================================================================

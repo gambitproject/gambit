@@ -21,15 +21,17 @@ private:
     { ((dialogMoveAdd *) p_object.GetClientData())->OnOK(); }
   static void CallbackCancel(wxButton &p_object, wxEvent &)
     { ((dialogMoveAdd *) p_object.GetClientData())->OnCancel(); }
-  static void CallbackPlayer(wxListBox &p_object, wxEvent &)
-    { ((dialogMoveAdd *) p_object.GetClientData(0))->OnPlayer(); }
-  static void CallbackInfoset(wxListBox &p_object, wxEvent &)
-    { ((dialogMoveAdd *) p_object.GetClientData(0))->OnInfoset(); }
+  static void CallbackPlayer(wxListBox &p_object, wxCommandEvent &p_event)
+    { ((dialogMoveAdd *) p_object.wxEvtHandler::GetClientData())->
+	OnPlayer(p_event.commandInt); }
+  static void CallbackInfoset(wxListBox &p_object, wxCommandEvent &p_event)
+    { ((dialogMoveAdd *) p_object.wxEvtHandler::GetClientData())->
+	OnInfoset(p_event.commandInt); }
 
   void OnOK(void);
   void OnCancel(void);
-  void OnPlayer(void);
-  void OnInfoset(void);
+  void OnPlayer(int);
+  void OnInfoset(int);
   Bool OnClose(void);
 
 public:

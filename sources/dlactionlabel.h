@@ -19,12 +19,13 @@ private:
     { ((dialogActionLabel *) p_object.GetClientData())->OnOK(); }
   static void CallbackCancel(wxButton &p_object, wxEvent &)
     { ((dialogActionLabel *) p_object.GetClientData())->OnCancel(); }
-  static void CallbackAction(wxListBox &p_object, wxEvent &)
-    { ((dialogActionLabel *) p_object.GetClientData(0))->OnAction(); }
+  static void CallbackAction(wxListBox &p_object, wxCommandEvent &p_event)
+    { ((dialogActionLabel *) p_object.wxEvtHandler::GetClientData())->
+	OnAction(p_event.commandInt); }
 
   void OnOK(void);
   void OnCancel(void);
-  void OnAction(void);
+  void OnAction(int);
   Bool OnClose(void);
 
 public:
