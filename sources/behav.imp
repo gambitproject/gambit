@@ -27,15 +27,7 @@ template <class T> void OutcomeVector<T>::Resize(int pl)
 //                   TypedNode<T>: Class definition
 //------------------------------------------------------------------------
 
-template <class T> class TypedNode : public Node    {
-  public:
-    gVector<T> *scratch;
-
-    TypedNode(BaseEfg *E, Node *parent, int pl);
-    virtual ~TypedNode();
-
-    void Resize(int pl);
-};
+#include "tnode.h"
 
 template <class T> TypedNode<T>::TypedNode(BaseEfg *E, Node *p, int pl) 
   : Node(E, p), scratch(new gVector<T>(pl))   { }

@@ -55,45 +55,46 @@ void Lexicon::MakeReducedStrats(EFPlayer *p, Node *n, Node *nn)
   int i;
   Node *m, *mm;
 
+  if (!n->parent)  n->ptr = 0;
+
   if (n->NumChildren() > 0)  {
-    if (n->GetPlayer() == p)  {
-      if (n->GetInfoset()->flag == 0)  {
+    if (n->infoset->player == p)  {
+      if (n->infoset->flag == 0)  {
 	// we haven't visited this infoset before
-	n->GetInfoset()->flag = 1;
+	n->infoset->flag = 1;
 	for (i = 1; i <= n->NumChildren(); i++)   {
 	  Node *m = n->GetChild(i);
 	  n->whichbranch = m;
-	  n->GetInfoset()->whichbranch = i;
+	  n->infoset->whichbranch = i;
 	  MakeReducedStrats(p, m, nn);
 	}
-	n->GetInfoset()->flag = 0;
+	n->infoset->flag = 0;
       }
       else  {
 	// we have visited this infoset, take same action
-	MakeReducedStrats(p, n->GetChild(n->GetInfoset()->whichbranch),
-			  nn);
+	MakeReducedStrats(p, n->children[n->infoset->whichbranch], nn);
       }
     }
     else  {
       n->ptr = NULL;
       if (nn != NULL)
-	n->ptr = nn->GetParent();
-      n->whichbranch = n->GetChild(1);
-      if (n->GetInfoset())
-	n->GetInfoset()->whichbranch = 0;
-      MakeReducedStrats(p, n->GetChild(1), n->GetChild(1));
+	n->ptr = nn->parent;
+      n->whichbranch = n->children[1];
+      if (n->infoset)
+	n->infoset->whichbranch = 0;
+      MakeReducedStrats(p, n->children[1], n->children[1]);
     }
   }
   else if (nn)  {
-    for (m = NULL; ; nn = nn->GetParent()->ptr->whichbranch)  {
+    for (m = NULL; ; nn = nn->parent->ptr->whichbranch)  {
       m = nn->NextSibling();
-      if (m || nn->GetParent()->ptr == NULL)   break;
+      if (m || nn->parent->ptr == NULL)   break;
     }
     if (m)  {
-      mm = m->GetParent()->whichbranch;
-      m->GetParent()->whichbranch = m;
+      mm = m->parent->whichbranch;
+      m->parent->whichbranch = m;
       MakeReducedStrats(p, m, m);
-      m->GetParent()->whichbranch = mm;
+      m->parent->whichbranch = mm;
     }
     else 
       MakeStrategy(p);
@@ -103,13 +104,14 @@ void Lexicon::MakeReducedStrats(EFPlayer *p, Node *n, Node *nn)
 }
 
 
+#include "tnode.h"
+
 template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E)
 {
   int i;
 
   Lexicon *L = new Lexicon(E);
   for (i = 1; i <= E.NumPlayers(); i++)  {
-    E.RootNode()->ptr = NULL;
     L->MakeReducedStrats(E.PlayerList()[i], E.RootNode(), NULL);
   }
   gArray<int> dim(E.NumPlayers());
@@ -195,8 +197,8 @@ void RealizationProbs(const Nfg<T> &N, const MixedProfile<T> &mp,
     }
 
     Node *child = n->GetChild(i);
-    child->bval = prob * n->bval;
-    child->nval += child->bval;    
+    ((TypedNode<T> *) child)->bval = prob * ((TypedNode<T> *) n)->bval;
+    ((TypedNode<T> *) child)->nval += ((TypedNode<T> *) child)->bval;    
 
     RealizationProbs(N, mp, E, bp, pl, actions, child);
   }    
@@ -209,19 +211,19 @@ void BehaviorStrat(const Efg<T> &E, BehavProfile<T> &bp, int pl, Node *n)
   for (int i = 1; i <= n->NumChildren(); i++)   {
     Node *child = n->GetChild(i);
     if (n->GetPlayer() && n->GetPlayer()->GetNumber() == pl)
-      if (n->nval > (T) 0.0)  {
+      if (((TypedNode<T> *) n)->nval > (T) 0.0)  {
 	bp(n->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber(), i) =
-	  child->nval / n->nval;
+	  ((TypedNode<T> *) child)->nval / ((TypedNode<T> *) n)->nval;
       }
     BehaviorStrat(E, bp, pl, child);
   }
 }
 
-void ClearNodeProbs(Node *n)
+template <class T> void ClearNodeProbs(TypedNode<T> *n)
 {
   n->nval = 0.0;
   for (int i = 1; i <= n->NumChildren(); i++)
-    ClearNodeProbs(n->GetChild(i));
+    ClearNodeProbs(((TypedNode<T> *) n->GetChild(i)));
 }
 
 void BaseEfg::DeleteLexicon(void)
@@ -239,19 +241,22 @@ void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
   Node *n = E.RootNode();
 
   for (int pl = 1; pl <= N.NumPlayers(); pl++)   {
-    ClearNodeProbs(n);
+    ClearNodeProbs((TypedNode<T> *) n);
 
-    for (int st = 1; st <= N.NumStrats(pl); st++)  {
+    NFStrategySet *S = mp.GetNFSupport().GetNFStrategySet(pl);
+
+    for (int st = 1; st <= S->NumStrats(); st++)  {
+      int snum = S->GetStrategy(st)->number;
       if (mp(pl, st) > (T) 0.0)  {
-	const gArray<int> *const actions = E.lexicon->strategies[pl][st];
+	const gArray<int> *const actions = E.lexicon->strategies[pl][snum];
 
-	n->bval = mp(pl, st);
+	((TypedNode<T> *) n)->bval = mp(pl, st);
 
 	RealizationProbs(N, mp, E, bp, pl, actions, E.RootNode());
       }
     }
     
-    E.RootNode()->nval = (T) 1.0;
+    ((TypedNode<T> *) E.RootNode())->nval = (T) 1.0;
     BehaviorStrat(E, bp, pl, n);
   }
 }
@@ -265,6 +270,9 @@ void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
 #endif   // __GNUG__, __BORLANDC__
 
 #include "rational.h"
+
+TEMPLATE void ClearNodeProbs(TypedNode<double> *);
+TEMPLATE void ClearNodeProbs(TypedNode<gRational> *);
 
 TEMPLATE void MixedToBehav(const Nfg<double> &,const MixedProfile<double> &,
 			   const Efg<double> &, BehavProfile<double> &);

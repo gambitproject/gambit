@@ -39,6 +39,7 @@ class Infoset   {
   friend class EFPlayer;
   friend class Efg<double>;
   friend class Efg<gRational>;
+  friend class Lexicon;
 
   protected:
     bool valid;
@@ -48,6 +49,7 @@ class Infoset   {
     EFPlayer *player;
     gBlock<Action *> actions;
     gBlock<Node *> members;
+    int flag, whichbranch;
     
     Infoset(BaseEfg *e, int n, EFPlayer *p, int br)
       : valid(true), E(e), number(n), player(p), actions(br), flag(0) 
@@ -63,7 +65,6 @@ class Infoset   {
       }
 
   public:
-    int flag, whichbranch;
 
     bool IsValid(void) const             { return valid; }
     BaseEfg *BelongsTo(void) const   { return E; }

@@ -14,6 +14,7 @@ class Node    {
   friend class BaseEfg;
   friend class Efg<double>;
   friend class Efg<gRational>;
+  friend class Lexicon;
   
   protected:
     bool valid;
@@ -23,6 +24,7 @@ class Node    {
     Node *parent;
     Outcome *outcome;
     gBlock<Node *> children;
+    Node *whichbranch, *ptr;
 
     Node(BaseEfg *e, Node *p)
       : valid(true), E(e), infoset(0), parent(p), outcome(0)   { }
@@ -32,9 +34,6 @@ class Node    {
     virtual void Resize(int) = 0;
 
   public:
-    // these are temporarily here for nfgefg
-    double nval, bval;
-    Node *whichbranch, *ptr;
 
     bool IsValid(void) const     { return valid; }
     BaseEfg *BelongsTo(void) const   { return E; }
