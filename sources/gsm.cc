@@ -647,41 +647,16 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
 
   result = Execute(&program, true);
 
-  rc_result = rcSUCCESS;
-
-  switch(rc_result)
-  {
-  case rcSUCCESS:
-    result = _ResolveRef(result);
-    result_copy = result->ValCopy();
-    delete result;
-    result = result_copy;
-    result_copy = 0;
-    if(result->Spec().Type == porERROR)  {
-      gout << result << '\n'; 
+  result = _ResolveRef(result);
+  result_copy = result->ValCopy();
+  delete result;
+  result = result_copy;
+  result_copy = 0;
+  if (result->Spec().Type == porERROR)  {
+//    gout << result << '\n'; 
 //      delete result;
 //      result = 0;
     }
-    break;
-  case rcQUIT:
-    result = 
-      new ErrorPortion((gString)
-		       "Error: Interruption by user");
-    break;
-
-  default:
-    if(rc_result >= 0)
-      result = new ErrorPortion((gString)
-				"Error at line " +
-				ToString(rc_result / 65536) + 
-				" in function, line " +
-				ToString(rc_result % 65536) +
-				" in source code");
-    else
-      result = 0;
-    break;
-    }
-
 
   for(i = 0; i < func_info.NumParams; i++)
   {
