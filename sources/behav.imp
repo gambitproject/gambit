@@ -641,22 +641,20 @@ void BehavProfile<T>::Beliefs(Node *n, T prob,
 }
 
 template <class T>
-void BehavProfile<T>::NodeValues(Node *n, T prob, int pl, 
-			gArray<T> &valarray, int &index) const
+void BehavProfile<T>::NodeValues(Node *n, int pl, 
+				 gArray<T> &valarray, int &index) const
 {
-  int anum;
-	int tindex = index;
-	if (n->parent)
-		((TypedNode<T> *) n)->nval = ((TypedNode<T> *) n->parent)->nval;
-	else
-	 ((TypedNode<T> *) n)->nval =  (T)0.0;
+  int anum, child, tindex = index;
 
   if (n->outcome)
     ((TypedNode<T> *) n)->nval += ((OutcomeVector<T> &) *n->outcome)[pl];
 
+  for (child = 1; child <= n->children.Length(); child++)
+    ((TypedNode<T> *) n->children[child])->nval = ((TypedNode<T> *) n)->nval;
+ 
   T value = (T) 0.0;
-
-  if (n->children.Length())
+  
+  if (n->children.Length())  {
     if (IsTruncated())   {
       T p = (T) 0.0;
 
@@ -664,15 +662,12 @@ void BehavProfile<T>::NodeValues(Node *n, T prob, int pl,
       for (i = 1, npl = n->infoset->player->number,
 	   iset = n->infoset->number; i < n->children.Length(); i++)  {
 	if ( npl == 0 ||
-			behavsupport.IsActionInSupport(npl, iset, n->infoset->actions[i])){
+	     behavsupport.IsActionInSupport(npl, iset, n->infoset->actions[i])){
 	  if ( npl != 0 )
-			anum = behavsupport.OriNumber(npl, iset, n->infoset->actions[i]);
+	    anum = behavsupport.OriNumber(npl, iset, n->infoset->actions[i]);
 	  p += ((npl) ? (*this)(npl, iset, anum) :
 		((ChanceInfoset<T> *) n->infoset)->probs[i]);
-	  NodeValues(n->children[i],
-		     prob * ((npl) ? (*this)(npl, iset, anum) :
-			     ((ChanceInfoset<T> *) n->infoset)->probs[i]),
-		     pl, valarray, ++index);
+	  NodeValues(n->children[i], pl, valarray, ++index);
 	  value += ((npl) ? (*this)(npl, iset, anum) :
 		    ((ChanceInfoset<T> *) n->infoset)->probs[i]) *
 		      ((TypedNode<T> *) n->children[i])->nval;
@@ -680,8 +675,7 @@ void BehavProfile<T>::NodeValues(Node *n, T prob, int pl,
 	else index += CountNodes(n->children[i]); 
       }
       
-      NodeValues(n->children[i], prob * ((T)1 - p), pl, valarray,
-		 ++index);
+      NodeValues(n->children[i], pl, valarray, ++index);
       value += ((T) 1 - p) * ((TypedNode<T> *) n->children[i])->nval;
       
     }
@@ -690,14 +684,11 @@ void BehavProfile<T>::NodeValues(Node *n, T prob, int pl,
 	   iset = n->infoset->number; i <= n->children.Length(); i++)  {
 	if ( npl == 0 || 
 	    behavsupport.IsActionInSupport(npl, n->infoset->number,
-						 n->infoset->actions[i])) {
+					   n->infoset->actions[i])) {
 	  if (npl != 0)
 	    anum = behavsupport.OriNumber(npl, n->infoset->number,
 						n->infoset->actions[i]);
-	  NodeValues(n->children[i],
-		     prob * ((npl) ? (*this)(npl, iset, anum) :
-			     ((ChanceInfoset<T> *) n->infoset)->probs[i]),
-		     pl, valarray, ++index);
+	  NodeValues(n->children[i], pl, valarray, ++index);
 	  value += ((npl) ? (*this)(npl, iset, anum) :
 		    ((ChanceInfoset<T> *) n->infoset)->probs[i]) *
 		      ((TypedNode<T> *) n->children[i])->nval;
@@ -705,7 +696,10 @@ void BehavProfile<T>::NodeValues(Node *n, T prob, int pl,
 	else index += CountNodes(n->children[i]);
       }
     }
-  ((TypedNode<T> *) n)->nval += value;
+
+    ((TypedNode<T> *) n)->nval = value;
+  }
+
   valarray[tindex] = ((TypedNode<T> *) n)->nval;
 }
 
@@ -714,10 +708,12 @@ gArray<T> BehavProfile<T>::NodeValues(int pl) const
 {
   int index = 1, maxindex = NumNodes(*BelongsTo());
 
-	behavsupport.ValidSupport();
+  behavsupport.ValidSupport();
   gArray<T> valarray(maxindex); 
-  for (int ii=1; ii<=maxindex; ii++) valarray[ii] = (T) 0;
-  NodeValues(E->RootNode(), (T) 1.0, pl, valarray, index);
+  for (int i = 1; i <= maxindex; i++)  valarray[i] = (T) 0;
+  ((TypedNode<T> *) E->RootNode())->nval = (T) 0.0;
+
+  NodeValues(E->RootNode(), pl, valarray, index);
   return valarray;
 }
 

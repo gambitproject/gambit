@@ -47,7 +47,7 @@ template <class T> class BehavProfile
   private:
 
     void Payoff(Node *n, T prob, int pl, T &value) const;
-    void NodeValues(Node *n, T prob, int pl, gArray<T> &valarray,
+    void NodeValues(Node *n, int pl, gArray<T> &valarray,
 		    int &index) const;
     void CondPayoff(Node *n, T prob, gPVector<T> &, gDPVector<T> &) const;
     void NodeRealizProbs(Node *n, T prob, int &index, gArray<T> &NRProbs);
