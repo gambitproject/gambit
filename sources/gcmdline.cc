@@ -4,19 +4,25 @@
 #include <ctype.h>
 
 #ifdef __GNUG__
+
 #include <unistd.h>
 #define TEMPLATE template
+
 #elif defined __BORLANDC__
+
+#include "winio.h"
 #pragma option -Jgd
 #define TEMPLATE
+
 #endif   // __GNUG__, __BORLANDC__
+
 #include "gcmdline.h"
 
 
 int gCmdLineInput::s_NumInstances = 0;
-#ifdef __GNUC__
+#ifdef __GNUG__
 struct termios gCmdLineInput::s_TermAttr;
-#endif // __GNUC__
+#endif // __GNUG__
 
 void gCmdLineInput::SaveTermAttr( void )
 {
@@ -72,10 +78,11 @@ void gCmdLineInput::SetRawTermAttr( void )
   rawTerm.c_lflag &= ~ICANON;
   rawTerm.c_lflag &= ~XCASE;
   rawTerm.c_lflag &= ~ECHO;
-  
+
   rawTerm.c_cc[VTIME] = 0;
   rawTerm.c_cc[VMIN] = 1;
   tcsetattr( STDIN_FILENO, TCSANOW, &rawTerm );
+
 
 
 #endif // __GNUG__
@@ -137,14 +144,14 @@ void gCmdLineInput::GetCmdExec( void )
 	sprintf( buf, "GCL%d:= ", numInvoke );
       else
 	sprintf( buf, "GCL%d:=; GCL%d:= ",
-		numInvoke - m_HistoryDepth, 
+		numInvoke - m_HistoryDepth,
 		numInvoke );
-    }
-    ++numInvoke;
+	 }
+	 ++numInvoke;
   }
   else
-    sprintf( buf, "" );
-  
+	 sprintf( buf, "" );
+
 
   gString cmdBuf = buf;
   gString cmdBufOld;
@@ -158,18 +165,55 @@ void gCmdLineInput::GetCmdExec( void )
   for( ; ; ) // infinite loop
   {
 	 assert( 0 <= curPos );
-    assert( curPos <= cmdBuf.length() );
-    
-    gin.get( c );
-    if( c == EOF || c == '\r' || c == '\n' )
-      break;
+	 assert( curPos <= cmdBuf.length() );
 
-    if( c == 27 ) // escape sequences
-    {
-      EscapeCode code = GetEscapeSequence();
-      switch( code )
-      {
-      case ESC_LEFT:
+#ifdef __BORLANDC__
+	 winio_setecho( winio_current(), false );
+	 c = winio_getchar();
+#else
+	 gin.get( c );
+#endif // __BORLANDC__
+	 if( c == EOF || c == '\r' || c == '\n' )
+		break;
+
+
+	 if( c == 27 ||
+		  c == VK_LEFT || c == VK_RIGHT ||
+		  c == VK_DOWN || c == VK_UP ||
+		  c == VK_DELETE ) // escape sequences
+	 {
+		EscapeCode code = ESC_ERROR;
+		if( c == 27 )
+		  code = GetEscapeSequence();
+		else
+		{
+		  switch( c )
+		  {
+		  case VK_LEFT:
+			 code = ESC_LEFT;
+			 break;
+		  case VK_RIGHT:
+			 code = ESC_RIGHT;
+			 break;
+		  case VK_UP:
+			 code = ESC_UP;
+			 break;
+		  case VK_DOWN:
+			 code = ESC_DOWN;
+			 break;
+		  case VK_DELETE:
+			 code = ESC_DELETE;
+          break;
+
+		  default:
+			 // do nothing
+          ;
+		  }
+		}
+
+		switch( code )
+		{
+		case ESC_LEFT:
 	if( curPos > 0 )
 	{
 	  --curPos;
@@ -179,7 +223,7 @@ void gCmdLineInput::GetCmdExec( void )
 	  gout << '\a';
 	break;
 
-      case ESC_RIGHT:
+		case ESC_RIGHT:
 	if( curPos < cmdBuf.length() )
 	{
 	  gout << cmdBuf[curPos];
@@ -189,7 +233,7 @@ void gCmdLineInput::GetCmdExec( void )
 	  gout << '\a';
 	break;
 
-      case ESC_UP:
+		case ESC_UP:
 	if( historyPos > 1 )
 	{
 	  // clear the current line
@@ -200,20 +244,20 @@ void gCmdLineInput::GetCmdExec( void )
 		 gout << '\b';
 #endif
 	  for( i = 0; i < cmdBuf.length(); ++i )
-	    gout << ' ';
+		 gout << ' ';
 #ifndef USE_CR
 	  for( i = 0; i < cmdBuf.length(); ++i )
-	    gout << '\b';
+		 gout << '\b';
 #endif
 
 	  // save the latest line
 	  if( historyPos > m_History.Length() )
-	    cmdBufOld = cmdBuf;
+		 cmdBufOld = cmdBuf;
 
 	  --historyPos;
 	  cmdBuf = m_History[historyPos];
 	  curPos = cmdBuf.length();
-	  
+
 	  // display the new line
 #ifdef USE_CR
 	  gout << '\r';
@@ -224,7 +268,7 @@ void gCmdLineInput::GetCmdExec( void )
 	  gout << '\a';
 	break;
 
-      case ESC_DOWN:
+		case ESC_DOWN:
 	if( historyPos <= m_History.Length() )
 	{
 	  // clear the current line
@@ -235,7 +279,7 @@ void gCmdLineInput::GetCmdExec( void )
 	    gout << '\b';
 #endif
 	  for( i = 0; i < cmdBuf.length(); ++i )
-	    gout << ' ';
+		 gout << ' ';
 #ifndef USE_CR
 	  for( i = 0; i < cmdBuf.length(); ++i )
 	    gout << '\b';
@@ -283,9 +327,9 @@ void gCmdLineInput::GetCmdExec( void )
     {
       gout << "^R\n";
       gout << cmdBuf;
-      curPos = cmdBuf.length();
+		curPos = cmdBuf.length();
     }
-    else if( c == '\b' || c == 127 ) // backspace
+	 else if( c == '\b' || c == 127 ) // backspace
     {
       if( curPos > 0 )
       {
@@ -309,7 +353,7 @@ void gCmdLineInput::GetCmdExec( void )
       cmdBuf.insert( c, curPos );
       ++curPos;
       
-      // print the entire string after the current cursor position
+		// print the entire string after the current cursor position
       gout << cmdBuf.right( cmdBuf.length() - curPos + 1 );
       
       // reposition the cursor
@@ -344,37 +388,52 @@ gCmdLineInput::EscapeCode gCmdLineInput::GetEscapeSequence( void ) const
   char c1 = 0;
   char c2 = 0;
   char c3 = 0;
-  
+
   // remember that the first Escape has already been caught
 
   // the second char must be '[' in an escape sequence
   if( !gin.eof() )
+#ifdef __BORLANDC__
+	 winio_setecho( winio_current(), false );
+	 c1 = winio_getchar();
+#else
 	 gin.get( c1 );
+#endif // __BORLANDC__
   if( c1 != '[' )
-    return ESC_ERROR;
+	 return ESC_ERROR;
 
-  
+
   if( !gin.eof() )
-    gin.get( c2 );
+#ifdef __BORLANDC__
+	 winio_setecho( winio_current(), false );
+	 c2 = winio_getchar();
+#else
+	 gin.get( c2 );
+#endif // __BORLANDC__
   switch( c2 )
   {
   case 65: // up arrow
-    return ESC_UP;
+	 return ESC_UP;
   case 66: // down arrow
-    return ESC_DOWN;
+	 return ESC_DOWN;
   case 68: // left arrow
-    return ESC_LEFT;
+	 return ESC_LEFT;
   case 67: // right arrow
 	 return ESC_RIGHT;
 
   case 51: // delete key, if followed by 126
-    if( !gin.eof() )
-      gin.get( c3 );
-    if( c3 == 126 )
-      return ESC_DELETE;
-    else
+	 if( !gin.eof() )
+#ifdef __BORLANDC__
+	 winio_setecho( winio_current(), false );
+	 c3 = winio_getchar();
+#else
+	 gin.get( c3 );
+#endif // __BORLANDC__
+	 if( c3 == 126 )
+		return ESC_DELETE;
+	 else
 		return ESC_ERROR;
-    break;
+	 break;
 
   default:
     return ESC_ERROR;
@@ -405,7 +464,7 @@ gInput& gCmdLineInput::operator >> (int &x)
     GetCmdExec();
     assert( m_CmdExec.length() > 0 );
     
-    int num = 0;
+	 int num = 0;
     tokens = sscanf( m_CmdExec.stradr(), "%d%n", &x, &num );
     EatSpace( num );
   }
@@ -417,7 +476,7 @@ gInput& gCmdLineInput::operator >> (unsigned int &x)
   int tokens = 0;
   while( tokens == 0 )
   {
-    GetCmdExec();
+	 GetCmdExec();
     assert( m_CmdExec.length() > 0 );
     
     int num = 0;
@@ -465,7 +524,7 @@ gInput& gCmdLineInput::operator >> (double &x)
     GetCmdExec();
     assert( m_CmdExec.length() > 0 );
     
-    int num = 0;
+	 int num = 0;
     tokens = sscanf( m_CmdExec.stradr(), "%lf%n", &x, &num );
     EatSpace( num );
   }

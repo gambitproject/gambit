@@ -76,6 +76,7 @@ typedef struct {
 	int				xLeftOfWin, yTopOfWin, yCurrLine;
 	UINT			pchKbIn, pchKbOut;
 	LPSTR			fpBuffer, fpTopOfWin, fpCurrLine, fpCurr, fpSOI;
+	LPSTR			fpNextSOI;
 	LPSTR			fpKeyboard;
 	HANDLE			hBuffer, hKeyboard;
 	HMENU			hMainMenu, hFileMenu, hHelpMenu;
@@ -186,10 +187,22 @@ recVKtoSB		VKtoSB[VK_DOWN - VK_PRIOR + 1] =
 //					VK_END						VK_HOME
 					{ SB_TOP, SB_BOTTOM },		{ SB_TOP, SB_TOP },
 //					VK_LEFT						VK_UP
+					{ DO_NOTHING, DO_NOTHING },	{ DO_NOTHING, DO_NOTHING },
+//					VK_RIGHT					VK_DOWN
+					{ DO_NOTHING, DO_NOTHING },   { DO_NOTHING, DO_NOTHING } };
+
+// changed by gwu to not associate arrow keys; this is the original:
+/*
+//					VK_PRIOR					VK_NEXT
+				{	{ DO_NOTHING, SB_PAGEUP },	{ DO_NOTHING, SB_PAGEDOWN },
+//					VK_END						VK_HOME
+					{ SB_TOP, SB_BOTTOM },		{ SB_TOP, SB_TOP },
+//					VK_LEFT						VK_UP
 					{ SB_LINEUP, DO_NOTHING },	{ DO_NOTHING, SB_LINEUP },
 //					VK_RIGHT					VK_DOWN
 					{ SB_LINEDOWN, DO_NOTHING },{ DO_NOTHING, SB_LINEDOWN } };
-				
+*/
+
 
 				
 				
@@ -202,7 +215,7 @@ void abort_exit(void)
 	exit(0);
 	}
 				
-				
+
 /* ===================================================================	*/
 /* the interface functions themselves.....								*/
 /* ===================================================================	*/
@@ -1293,7 +1306,7 @@ long winio_wmchar(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	WINIO_HWND whWnd = (WINIO_HWND) GetWindowLong(hwnd, 4);
 	char far *lpchKeybd = whWnd->fpKeyboard;
 	unsigned pchSave = whWnd->pchKbIn;
-	
+
 	whWnd->pchKbIn++;
 	if (whWnd->pchKbIn == TYPE_AHEAD)
 		whWnd->pchKbIn = 0;
@@ -1346,17 +1359,41 @@ long winio_wmldblclk(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 long winio_wmkeydown(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	int hSB, vSB;
-	
-	if ((wParam < VK_PRIOR) || (wParam > VK_DOWN))
-		return 0;
-	
-	hSB = VKtoSB[wParam - VK_PRIOR].hSB;
-	vSB = VKtoSB[wParam - VK_PRIOR].vSB;
-	if (hSB != DO_NOTHING)
-		SendMessage(hwnd, WM_HSCROLL, hSB, 0L);
-	if (vSB != DO_NOTHING)
-		SendMessage(hwnd, WM_VSCROLL, vSB, 0L);
+
+  	WINIO_HWND whWnd = (WINIO_HWND) GetWindowLong(hwnd, 4);
+	char far *lpchKeybd = whWnd->fpKeyboard;
+	unsigned pchSave = whWnd->pchKbIn;
+
+
+	if( wParam != VK_DELETE )
+	{
+	  if ((wParam < VK_PRIOR) || (wParam > VK_DOWN))
+		 return 0;
+
+	  hSB = VKtoSB[wParam - VK_PRIOR].hSB;
+	  vSB = VKtoSB[wParam - VK_PRIOR].vSB;
+	  if (hSB != DO_NOTHING)
+		 SendMessage(hwnd, WM_HSCROLL, hSB, 0L);
+	  if (vSB != DO_NOTHING)
+		 SendMessage(hwnd, WM_VSCROLL, vSB, 0L);
+	  if( hSB != DO_NOTHING || vSB != DO_NOTHING )
+	    return 0;  
+	//	return 0;
+	}
+
+	whWnd->pchKbIn++;
+	if (whWnd->pchKbIn == TYPE_AHEAD)
+		whWnd->pchKbIn = 0;
+	if (whWnd->pchKbIn == whWnd->pchKbOut)
+		{
+		MessageBeep(0);
+		whWnd->pchKbIn = pchSave;
+		}
+	else
+		*(lpchKeybd + pchSave) = LOBYTE(wParam);
+
 	return 0;
+
 	}
 
 /* --------------------------------------------------------------- */
@@ -1469,7 +1506,7 @@ long winio_wmsetfocus(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 long winio_wmkillfocus(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	WINIO_HWND whWnd = (WINIO_HWND) GetWindowLong(hwnd, 4);
-	
+
 	if (whWnd->tCaret)
 		{
 		HideCaret(hwnd);
@@ -1818,7 +1855,9 @@ void append2buffer(char *pch, unsigned cch)
 				break;
 			case '\n' :
 				*pch = '\0';
-				*whwndCurr->fpCurr++ = '\0';
+				// *whwndCurr->fpCurr++ = '\0';
+				whwndCurr->fpCurr = whwndCurr->fpNextSOI + 1;
+            *whwndCurr->fpCurr = '\0';
 				whwndCurr->fpCurrLine = whwndCurr->fpCurr;
 				whwndCurr->fpSOI = whwndCurr->fpCurr;
 				whwndCurr->yCurrLine++;
@@ -1837,7 +1876,9 @@ void append2buffer(char *pch, unsigned cch)
 			case '\b' :
 				if (whwndCurr->fpCurr > whwndCurr->fpSOI)
 					{
-					*(--whwndCurr->fpCurr) = 0;
+					// *(--whwndCurr->fpCurr) = 0;
+					// gwu - do this so backspace doesn't erase, just move backwards
+					--whwndCurr->fpCurr;
 					whwndCurr->bufused--;
 					whwndCurr->xCurrPos--;
 					}
@@ -1845,7 +1886,9 @@ void append2buffer(char *pch, unsigned cch)
 			case 0x1b :
 				while (whwndCurr->fpCurr > whwndCurr->fpSOI)
 					{
-					*(--whwndCurr->fpCurr) = 0;
+					// *(--whwndCurr->fpCurr) = 0;
+					// gwu - do this so backspace doesn't erase, just move backwards
+					--whwndCurr->fpCurr;
 					whwndCurr->bufused--;
 					whwndCurr->xCurrPos--;
 					}
@@ -1865,6 +1908,8 @@ void append2buffer(char *pch, unsigned cch)
 						}
 					whwndCurr->xCurrPos++;
 					*whwndCurr->fpCurr++ = *pch;
+					if( whwndCurr->fpCurr > whwndCurr->fpNextSOI )
+					  whwndCurr->fpNextSOI = whwndCurr->fpCurr;
 					}
 			}
 		}
@@ -1872,7 +1917,8 @@ void append2buffer(char *pch, unsigned cch)
 	if ((whwndCurr->fpBuffer + whwndCurr->bufused) < whwndCurr->fpCurr)
 		{
 		whwndCurr->bufused = (whwndCurr->fpCurr - whwndCurr->fpBuffer);
-		*whwndCurr->fpCurr = '\0';
+		// gwu - do this so backspace doesn't erase, just move backwards
+		// *whwndCurr->fpCurr = '\0';
 		}
 	}
 
