@@ -27,10 +27,12 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
 
   NFStrategySet *newS = new NFStrategySet(*S.GetNFStrategySet(pl));
   gArray<bool> dom(S.NumStrats(pl));
+  gVector<T> dominator(S.NumStrats(pl));
+
+  int st,i,k,n;
 
   if (strong)   {
     T COpt;
-    int k,n;
     bool ret = false;
     int strats = S.NumStrats(pl);
     int contingencies = 1;
@@ -65,28 +67,37 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
     for (k = 1; k <= strats && !status.Get(); k++)	{
       double s1 = (double)k/(double)(strats);
       status.SetProgress((1.0-s1)*d1 + s1*d2);
-      tracefile << '\n' << (gRectArray<T> &)A << '\n';
-      tracefile << B << '\n';
-      tracefile << C << '\n';
+      // tracefile << '\n' << (gRectArray<T> &)A << '\n';
+      // tracefile << B << '\n';
+      // tracefile << C << '\n';
       LPSolve<T> Tab(A, B, C, 1);
 
       COpt = Tab.OptimumCost();
       tracefile << "\nPlayer = " << pl << " Strat = "<< k;
-      tracefile << " F = " << Tab.IsFeasible();
-      tracefile << " x = " << Tab.OptimumVector();
-      tracefile << " Obj = " << COpt;
+      // tracefile << " F = " << Tab.IsFeasible();
+      // tracefile << " x = " << Tab.OptimumVector();
+      // tracefile << " Obj = " << COpt;
 
       dom[k] = false;
 
       if (Tab.IsFeasible() && COpt > eps) {
-	tracefile << " Strongly Dominated";
+	tracefile << " Strongly Dominated by ";
+	gVector<T> xx(Tab.OptimumVector());
+	for(i=1,st=1;st<=strats;st++) {
+	  if(st==k) dominator[st] = (T)0;
+	  else {
+	    dominator[st] = xx[i];
+	    i++;
+	  }
+	}
+	tracefile << dominator;
 	ret = true;
 	dom[k] = true;
       }
       if (k<strats)
 	A.SwitchColumn(k,B);
     }
-    tracefile << "\n";
+    // tracefile << "\n";
 
     if (!ret)  {
       delete newS;
@@ -102,7 +113,6 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
 
   else  {    // look for weak domination
     T C0 = (T) 0, COpt, TmpC;
-    int k,n;
     bool ret = false;
     int strats = S.NumStrats(pl);
     int contingencies = 1;
@@ -136,34 +146,43 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
     for (k = 1; k <= strats && !status.Get(); k++)	{
       double s1 = (double)k/(double)(strats);
       status.SetProgress((1.0-s1)*d1 + s1*d2);
-      tracefile << '\n' << (gRectArray<T> &)A << '\n';
-      tracefile << B << '\n';
-      tracefile << C << '\n';
+      // tracefile << '\n' << (gRectArray<T> &)A << '\n';
+      // tracefile << B << '\n';
+      // tracefile << C << '\n';
       LPSolve<T> Tab(A, B, C, 1);
 
       COpt = Tab.OptimumCost();
       tracefile << "\nPlayer = " << pl << " Strat = "<< k;
-      tracefile << " F = " << Tab.IsFeasible();
-      tracefile << " x = " << Tab.OptimumVector();
-      tracefile << " Obj = " << COpt;
+      // tracefile << " F = " << Tab.IsFeasible();
+      // tracefile << " x = " << Tab.OptimumVector();
+      // tracefile << " Obj = " << COpt;
 
       dom[k] = false;
 
       if (Tab.IsFeasible() && (COpt >= C0-eps && COpt <=C0+eps))
 	tracefile << " Duplicated strategy?\n\n";
       else if (Tab.IsFeasible() && COpt > C0+eps) {
-	tracefile << " Weakly Dominated\n\n";
+	tracefile << " Weakly Dominated by ";
+	gVector<T> xx(Tab.OptimumVector());
+	for(i=1,st=1;st<=strats;st++) {
+	  if(st==k) dominator[st] = (T)0;
+	  else {
+	    dominator[st] = xx[i];
+	    i++;
+	  }
+	}
+	tracefile << dominator;
 	ret = true;
 	dom[k] = true;
       }
-      else  tracefile << "\n\n";
+      // else  tracefile << "\n\n";
       if(k<strats) {
 	A.SwitchColumn(k,B);
 	TmpC=C0; C0=C[k]; C[k]=TmpC;
       }
 
     }
-    tracefile << "\n";
+    // tracefile << "\n";
 
     if (!ret)  {
       delete newS;
@@ -199,9 +218,9 @@ NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
 				 const gArray<int> &players,
 				 gOutput &tracefile, gStatus &status=gstatus)
 {
-	NFSupport *T = new NFSupport(S);
-	bool any = false;
-
+  NFSupport *T = new NFSupport(S);
+  bool any = false;
+  
   for (int i = 1; i <= players.Length() && !status.Get(); i++)   {
     int pl = players[i];
     NFStrategySet *SS;
@@ -212,19 +231,19 @@ NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
       SS = ComputeMixedDominated((Nfg<gRational> &) S.BelongsTo(),
 				 S, pl, strong, tracefile, status);
 //	status.SetProgress((double)i/players.Length());
-		if (SS)  {
-			delete T->GetNFStrategySet(pl);
-			T->SetNFStrategySet(pl, SS);
-			any = true;
-		}
-	}
-
-	if (!any || status.Get())  {
-		delete T;
-		return 0;
-	}
-
-	return T;
+    if (SS)  {
+      delete T->GetNFStrategySet(pl);
+      T->SetNFStrategySet(pl, SS);
+      any = true;
+    }
+  }
+  tracefile << "\n";
+  if (!any || status.Get())  {
+    delete T;
+    return 0;
+  }
+  
+  return T;
 }
 
 

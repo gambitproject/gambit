@@ -95,8 +95,8 @@ template <class T> int ZSumModule<T>::Add_BFS(const LPSolve<T> &lp)
   value=cbfs(NF.NumStrats(1)+1)+minpay;
   cbfs.Remove(NF.NumStrats(1)+1);
   cbfs.Remove(-NF.NumStrats(2)-1);
-  cbfs.Dump(gout);
-  gout << "\nvalue =" << value << "\n\n";
+//  cbfs.Dump(gout);
+//  gout << "\nvalue =" << value << "\n\n";
   if (List.Contains(cbfs))  return 0;
 //  if(params.trace >=2) (*params.tracefile) << "\nFound CBFS";
 //  (*params.tracefile)  << "\nB = ";
