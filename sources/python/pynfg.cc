@@ -80,6 +80,24 @@ nfg_getlabel(nfgobject *self, PyObject *args)
 }
 
 static PyObject *
+nfg_getoutcome(nfgobject *self, PyObject *args)
+{
+  int index;
+
+  if (!PyArg_ParseTuple(args, "i", &index)) {
+    return NULL;
+  }
+
+  if (index < 1 || index > self->m_nfg->NumOutcomes()) {
+    return NULL;
+  }
+
+  nfoutcomeobject *outcome = newnfoutcomeobject();
+  *outcome->m_nfoutcome = self->m_nfg->GetOutcome(index);
+  return (PyObject *) outcome;
+}
+
+static PyObject *
 nfg_getplayer(nfgobject *self, PyObject *args)
 {
   int index;
@@ -161,6 +179,7 @@ nfg_writenfg(nfgobject *self, PyObject *args)
 
 static struct PyMethodDef nfg_methods[] = {
   { "GetLabel", (PyCFunction) nfg_getlabel, 1 },
+  { "GetOutcome", (PyCFunction) nfg_getoutcome, 1 },
   { "GetPlayer", (PyCFunction) nfg_getplayer, 1 },
   { "NumOutcomes", (PyCFunction) nfg_numoutcomes, 1 },
   { "NumPlayers", (PyCFunction) nfg_numplayers, 1 },

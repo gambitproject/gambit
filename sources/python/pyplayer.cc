@@ -85,6 +85,24 @@ efplayer_getgame(efplayerobject *self, PyObject *args)
 }
 
 static PyObject *
+efplayer_getinfoset(efplayerobject *self, PyObject *args)
+{
+  int index;
+
+  if (!PyArg_ParseTuple(args, "i", &index)) {
+    return NULL;
+  }
+
+  if (index < 1 || index > self->m_efplayer->NumInfosets()) {
+    return NULL;
+  }
+  
+  infosetobject *infoset = newinfosetobject();
+  *infoset->m_infoset = self->m_efplayer->GetInfoset(index);
+  return (PyObject *) infoset;
+}
+
+static PyObject *
 efplayer_getlabel(efplayerobject *self, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
@@ -130,6 +148,7 @@ efplayer_setlabel(efplayerobject *self, PyObject *args)
 
 static struct PyMethodDef efplayer_methods[] = {
   { "GetGame", (PyCFunction) efplayer_getgame, 1 }, 
+  { "GetInfoset", (PyCFunction) efplayer_getinfoset, 1 },
   { "GetLabel", (PyCFunction) efplayer_getlabel, 1 },
   { "IsChance", (PyCFunction) efplayer_ischance, 1 },
   { "NumInfosets", (PyCFunction) efplayer_numinfosets, 1 },
@@ -252,6 +271,24 @@ nfplayer_getlabel(nfplayerobject *self, PyObject *args)
 }
 
 static PyObject *
+nfplayer_getstrategy(nfplayerobject *self, PyObject *args)
+{
+  int index;
+
+  if (!PyArg_ParseTuple(args, "i", &index)) {
+    return NULL;
+  }
+
+  if (index < 1 || index > self->m_nfplayer->NumStrategies()) {
+    return NULL;
+  }
+  
+  strategyobject *strategy = newstrategyobject();
+  *strategy->m_strategy = self->m_nfplayer->GetStrategy(index);
+  return (PyObject *) strategy;
+}
+
+static PyObject *
 nfplayer_numstrategies(nfplayerobject *self, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
@@ -278,6 +315,7 @@ nfplayer_setlabel(nfplayerobject *self, PyObject *args)
 static struct PyMethodDef nfplayer_methods[] = {
   { "GetGame", (PyCFunction) nfplayer_getgame, 1 }, 
   { "GetLabel", (PyCFunction) nfplayer_getlabel, 1 },
+  { "GetStrategy", (PyCFunction) nfplayer_getstrategy, 1 }, 
   { "NumStrategies", (PyCFunction) nfplayer_numstrategies, 1 },
   { "SetLabel", (PyCFunction) nfplayer_setlabel, 1 },
   { NULL, NULL }

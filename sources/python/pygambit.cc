@@ -38,9 +38,14 @@ static struct PyMethodDef gambit_methods[] = {
 };
 
 extern void initefg(void);
+extern void initinfoset(void);
 extern void initmixed(void);
 extern void initnash(void);
 extern void initnfg(void);
+extern void initnode(void);
+extern void initoutcome(void);
+extern void initplayer(void);
+extern void initstrategy(void);
 
 extern "C" void
 initgambit(void)
@@ -48,9 +53,14 @@ initgambit(void)
   PyObject *m;
 
   initefg();
+  initinfoset();
   initmixed();
   initnash();
   initnfg();
+  initnode();
+  initoutcome();
+  initplayer();
+  initstrategy();
 
   m = Py_InitModule("gambit", gambit_methods);
 

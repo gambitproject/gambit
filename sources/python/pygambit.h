@@ -62,6 +62,62 @@ extern PyTypeObject Efplayertype;
 efplayerobject *newefplayerobject(void);
 
 /*************************************************************************
+ * INFOSET OBJECT
+ *************************************************************************/
+
+typedef struct {
+  PyObject_HEAD
+  gbtEfgInfoset *m_infoset;
+} infosetobject;
+
+extern PyTypeObject Infosettype;
+#define is_infosetobject(v)  ((v)->ob_type == &Infosettype)
+
+infosetobject *newinfosetobject(void);
+
+/*************************************************************************
+ * ACTION OBJECT
+ *************************************************************************/
+
+typedef struct {
+  PyObject_HEAD
+  gbtEfgAction *m_action;
+} actionobject;
+
+extern PyTypeObject Actiontype;
+#define is_actionobject(v)  ((v)->ob_type == &Actiontype)
+
+actionobject *newactionobject(void);
+
+/************************************************************************
+ * NODE OBJECT
+ *************************************************************************/
+
+typedef struct {
+  PyObject_HEAD
+  gbtEfgNode *m_node;
+} nodeobject;
+
+extern PyTypeObject Nodetype;
+#define is_nodeobject(v)  ((v)->ob_type == &Nodetype)
+
+nodeobject *newnodeobject(void);
+
+/*************************************************************************
+ * EFOUTCOME OBJECT
+ *************************************************************************/
+
+typedef struct {
+  PyObject_HEAD
+  gbtEfgOutcome *m_efoutcome;
+} efoutcomeobject;
+
+extern PyTypeObject Efoutcometype;
+#define is_efoutcomeobject(v)  ((v)->ob_type == &Efoutcometype)
+
+efoutcomeobject *newefoutcomeobject(void);
+
+/*************************************************************************
  * NFG OBJECT
  *************************************************************************/
 
@@ -88,6 +144,34 @@ extern PyTypeObject Nfplayertype;
 #define is_nfplayerobject(v)  ((v)->ob_type == &Nfplayertype)
 
 nfplayerobject *newnfplayerobject(void);
+
+/*************************************************************************
+ * STRATEGY OBJECT
+ *************************************************************************/
+
+typedef struct {
+  PyObject_HEAD
+  gbtNfgStrategy *m_strategy;
+} strategyobject;
+
+extern PyTypeObject Strategytype;
+#define is_strategobject(v)  ((v)->ob_type == &Strategytype)
+
+strategyobject *newstrategyobject(void);
+
+/*************************************************************************
+ * NFOUTCOME OBJECT
+ *************************************************************************/
+
+typedef struct {
+  PyObject_HEAD
+  gbtNfgOutcome *m_nfoutcome;
+} nfoutcomeobject;
+
+extern PyTypeObject Nfoutcometype;
+#define is_nfoutcomeobject(v)  ((v)->ob_type == &Nfoutcometype)
+
+nfoutcomeobject *newnfoutcomeobject(void);
 
 /*************************************************************************
  * MIXED PROFILE OBJECT

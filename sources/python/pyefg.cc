@@ -92,6 +92,24 @@ efg_getlabel(efgobject *self, PyObject *args)
 }
 
 static PyObject *
+efg_getoutcome(efgobject *self, PyObject *args)
+{
+  int index;
+
+  if (!PyArg_ParseTuple(args, "i", &index)) {
+    return NULL;
+  }
+
+  if (index < 1 || index > self->m_efg->NumOutcomes()) {
+    return NULL;
+  }
+
+  efoutcomeobject *outcome = newefoutcomeobject();
+  *outcome->m_efoutcome = self->m_efg->GetOutcome(index);
+  return (PyObject *) outcome;
+}
+
+static PyObject *
 efg_getplayer(efgobject *self, PyObject *args)
 {
   int index;
@@ -107,6 +125,18 @@ efg_getplayer(efgobject *self, PyObject *args)
   efplayerobject *player = newefplayerobject();
   *player->m_efplayer = self->m_efg->GetPlayer(index);
   return (PyObject *) player;
+}
+
+static PyObject *
+efg_getroot(efgobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  nodeobject *node = newnodeobject();
+  *node->m_node = self->m_efg->RootNode();
+  return (PyObject *) node;
 }
 
 static PyObject *
@@ -174,7 +204,9 @@ efg_writeefg(efgobject *self, PyObject *args)
 static struct PyMethodDef efg_methods[] = {
   { "GetChance", (PyCFunction) efg_getchance, 1 },
   { "GetLabel", (PyCFunction) efg_getlabel, 1 },
+  { "GetOutcome", (PyCFunction) efg_getoutcome, 1 },
   { "GetPlayer", (PyCFunction) efg_getplayer, 1 },
+  { "GetRoot", (PyCFunction) efg_getroot, 1 },
   { "NumOutcomes", (PyCFunction) efg_numoutcomes, 1 },
   { "NumPlayers", (PyCFunction) efg_numplayers, 1 },
   { "SetLabel", (PyCFunction) efg_setlabel, 1 },
