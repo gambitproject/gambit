@@ -33,7 +33,7 @@ void yyerror(char *s)
 
 void dt1_set_input(FILE *f)
 {
-  input_stream = new gInput(f);
+  input_stream = new gFileInput(f);
 }
 
 void dt1_close_input(void)

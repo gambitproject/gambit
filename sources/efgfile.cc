@@ -1,8 +1,8 @@
-//
-// FILE: efgfile.cc -- Write out a .efg file from the old-style structures
-//
-// $Id$
-//
+//#
+//# FILE: efgfile.cc -- Write out a .efg file from the old-style structures
+//#
+//# $Id$
+//#
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -145,7 +145,7 @@ void write_player_names(FILE *f)
 }
 
 
-
+/*
 void write_outcomes(FILE *f)
 {
   fprintf(f, "{ ");
@@ -327,28 +327,96 @@ void write_nodes(FILE *f, int game)
   
   fprintf(f, "  }\n");
 }
+*/
 
+int cisets;
 
-void write_efg_file(FILE *f)
+void write_node(FILE *f, struct node *n)
 {
-  fprintf(f, "{ \"%s\"\n\n", whichpblm->title);
+  if (n->infoset != NULLiset)   {
+    fprintf(f, "p \"%s\" \"Player %d\" \"(%d,%d)\" {", n->nodename,
+	    n->infoset->playr->plyrnumber, n->infoset->playr->plyrnumber,
+	    n->infoset->isetplyrnumber);
+    int br = 1;
+    for (struct node *m = n->firstbranch; m != NULLnode; 
+	 m = m->nextbranch, br++)
+      if (!strcmp(m->branchname, ""))
+	fprintf(f, " \"%d\"", br);
+      else
+	fprintf(f, " \"%s\"", m->branchname);
+    
+    fprintf(f, " } ");
+    
+    if (n->outcome != whichpblm->firstoutcome)  {
+      fprintf(f, "\"Outcome %p\" { ", n->outcome->outnumber);
+      for (int pl = 1; pl <= whichpblm->nplayers; pl++)
+	fprintf(f, "%lf ", n->outcome->component[pl]);
+      fprintf(f, "}");
+    }
+    else
+      fprintf(f, "\"\"");
 
-  write_player_names(f);
-  fprintf(f, "\n");
-  write_outcomes(f);
-  fprintf(f, "\n");
-
-  mark_nodes();
-
-  for (struct game *g = whichpblm->firstgame; g != NULLgame; g = g->nextgame) {
-    fprintf(f, "{ %d \"%s\"\n", g->gamenumber, whichpblm->title);
-    write_infosets(f, g->gamenumber);
     fprintf(f, "\n");
-    write_nodes(f, g->gamenumber);
-    fprintf(f, "}\n\n");
+  }
+  else if (n->firstbranch != NULLnode)   {
+    fprintf(f, "c \"%s\" \"(0,%d)\" {", n->nodename, cisets++);
+    int br = 1;
+    
+    for (struct node *m = n->firstbranch; m != NULLnode; 
+	 m = m->nextbranch, br++)
+      if (!strcmp(m->branchname, ""))
+	fprintf(f, " \"%d\"", br);
+      else
+	fprintf(f, " \"%s\"", m->branchname);
+    
+    fprintf(f, " } ");
+
+    if (n->outcome != whichpblm->firstoutcome)  {
+      fprintf(f, "\"Outcome %p\" { ", n->outcome->outnumber);
+      for (int pl = 1; pl <= whichpblm->nplayers; pl++)
+	fprintf(f, "%lf ", n->outcome->component[pl]);
+      fprintf(f, "}");
+    }
+    else
+      fprintf(f, "\"\"");
+
+    fprintf(f, "\n");
+  }
+  else   {    // terminal node
+    fprintf(f, "t \"%s\" ", n->nodename);
+    if (n->outcome != whichpblm->firstoutcome)  {
+      fprintf(f, "\"Outcome %d\" { ", n->outcome->outnumber);
+      for (int pl = 1; pl <= whichpblm->nplayers; pl++)
+	fprintf(f, "%lf ", n->outcome->component[pl]);
+      fprintf(f, "}");
+    }
+    else
+      fprintf(f, "\"\"");
+    fprintf(f, "\n");
   }
 
-  fprintf(f, "}\n");
+
+  for (struct node *m = n->firstbranch; m != NULLnode; m = m->nextbranch)
+    write_node(f, m);
+}
+  
+void write_efg_file(FILE *f)
+{
+  fprintf(f, "EFG 1 D \"%s\" {", whichpblm->title);
+
+  for (struct plyr *p = whichpblm->firstplayer; p != NULLplyr;
+       p = p->nextplayer)   {
+    fprintf(f, " \"Player %d\"", p->plyrnumber);
+    int iset = 1;
+    for (struct iset *s = p->firstiset; s != NULLiset; s = s->nextplyriset)
+      s->isetplyrnumber = iset++;
+  }
+
+  fprintf(f, " }\n");
+
+  cisets = 1;
+
+  write_node(f, whichpblm->firstgame->rootnode);
 }
 
 
@@ -361,7 +429,12 @@ void dt1toefg(FILE *in, FILE *out)
     return;
   }
 
-  split_subgame_roots();
+  
+  if (whichpblm->ngames != 1)   {
+    printf("Sorry, .efg files do not support multiple game elements currently.\n");
+    return;
+  }
+
   write_efg_file(out);
   cleanup();
 }

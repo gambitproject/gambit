@@ -17,26 +17,24 @@
 
 extern void dt1toefg(FILE *, FILE *);
 
-gOutput cout(stdout);
-
 void doConversion(gString fIn, gString fOut)
 {
   char *inName, *outName;
   FILE *fileIn, *fileOut;
 
   fileIn = fopen(fIn, "r");
-  cout << "Input:  " << fIn;
+  gout << "Input:  " << fIn;
   if (fileIn == NULL)
     {
-      cout << "\nError#1.  Could not open input file " << fIn << "\n";
+      gout << "\nError#1.  Could not open input file " << fIn << "\n";
       exit(1);
     }
 
   fileOut = fopen(fOut, "w");
-  cout << "\n  Output:  " << fOut << "\n";
+  gout << "\n  Output:  " << fOut << "\n";
   if (fileOut == NULL)
     {
-      cout << "Error#2.  Could not open output file " << fOut << "\n";
+      gout << "Error#2.  Could not open output file " << fOut << "\n";
       exit(2);
     }
 
@@ -74,18 +72,18 @@ gString replaceSuffix(gString fName, gString newSuffix)
 
 void helpInst(const gString &program_name)
 {
-    cout << program_name << " help \n";
-    cout << "Syntax:  " << program_name << " [infile] [infile] [infile] ... \n";
-    cout << "  -or-   " << program_name << " [infile] [-o outfile] \n";
-    cout << "\n       " << program_name << " will expect the suffixes .dt1 for input files and\n";
-    cout << "       .efg for output files.  It will supply them if they are not\n";
-    cout << "       present.\n";
-    cout << "Switch: \n";
-    cout << "   -o  This will specify an output file.  If this option is not\n";
-    cout << "       used, input files will be translated to files of the same\n";
-    cout << "       name, with the appropriate suffix.  If this option is used,\n";
-    cout << "       only one input file may be specified.  Any other number\n";
-    cout << "       will cause an error.\n\n";
+    gout << program_name << " help \n";
+    gout << "Syntax:  " << program_name << " [infile] [infile] [infile] ... \n";
+    gout << "  -or-   " << program_name << " [infile] [-o outfile] \n";
+    gout << "\n       " << program_name << " will expect the suffixes .dt1 for input files and\n";
+    gout << "       .efg for output files.  It will supply them if they are not\n";
+    gout << "       present.\n";
+    gout << "Switch: \n";
+    gout << "   -o  This will specify an output file.  If this option is not\n";
+    gout << "       used, input files will be translated to files of the same\n";
+    gout << "       name, with the appropriate suffix.  If this option is used,\n";
+    gout << "       only one input file may be specified.  Any other number\n";
+    gout << "       will cause an error.\n\n";
 }
 
 void main(int argc, char *argv[])
@@ -114,12 +112,12 @@ void main(int argc, char *argv[])
 	  if ( temp == "-o" )
 	    {
 	      if (i == argc-1)
-		{cout << "Error#3, no output file specified\n";
+		{gout << "Error#3, no output file specified\n";
 		 exit(3);}
 	      else
 		{ outFlag = i;}
 	      if (argc != 4)
-		{cout << "Error#4, incorrect number of input files\n";
+		{gout << "Error#4, incorrect number of input files\n";
 		 exit(4);}
 	    }
 	}
@@ -140,7 +138,7 @@ void main(int argc, char *argv[])
 		fOut = suffixCheck(temp, outSuffix.upcase()) + outSuffix;
 	      }
 	  doConversion(fIn, fOut);
-	  cout << "Done.  1 file converted.\n";
+	  gout << "Done.  1 file converted.\n";
 	}
       else   //-o flag not found
 	{
@@ -159,7 +157,7 @@ void main(int argc, char *argv[])
 
 		done = findfirst(temp, &fileBlock, 0);
 		while (!done) {
-		  cout << fileBlock.ff_name << "\n";
+		  gout << fileBlock.ff_name << "\n";
 		  temp = suffixCheck(fileBlock.ff_name, inSuffix.dncase());
 	      #endif //__BORLANDC__
 	      #ifdef __GNUG__
@@ -175,7 +173,7 @@ void main(int argc, char *argv[])
 		  }
 	      #endif //__BORLANDC__
 	    }
-	  cout << "Done.  " << converCount << " files converted.\n";
+	  gout << "Done.  " << converCount << " files converted.\n";
 	}
     }
 }
