@@ -781,7 +781,7 @@ if (iterator)
 	NodeEntry *entry=GetNodeEntry(iterator->Cursor());
 	// check if in the visible x-dimention
 	xs=entry->x;
-	xe=(int)(entry->x+draw_settings.NodeLength()/2)*draw_settings.Zoom();
+	xe=(int)((entry->x+draw_settings.NodeLength()/2)*draw_settings.Zoom());
 	if (xs<x_start*PIXELS_PER_SCROLL || xe > x_start*PIXELS_PER_SCROLL+width)
 		x_start=(int)(entry->x*draw_settings.Zoom()/(PIXELS_PER_SCROLL*draw_settings.Zoom())-1);
 	if (x_start<0) x_start=0;
