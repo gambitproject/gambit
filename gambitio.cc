@@ -19,7 +19,7 @@
 // we use gfgetc and overload that function (fgetc by default).  Define
 // GUI_FGETC when compiling this file to use a different function for gfgetc.
 
-int gfgetc(FILE *stream); // must use identical declaration to overload
+extern "C" int gfgetc(FILE *stream); // must use identical declaration to overload
 #ifndef GUI_FGETC
 #define gfgetc fgetc	// normally, just use the standard fgetc
 #endif
