@@ -90,7 +90,16 @@ the main Gambit library via a 'make install' before this will work
 
 Note that you may need to take a few additional steps up front for this
 to work; see http://www.python.org/doc/current/inst/non-ms-compilers.html
-for details. 
+for details.  In particular, you will probably need to create a version
+of the Python library that is compatible with the Borland compiler.
+You will need to create the library using the command
+
+coff2omf python23.lib python23_bcpp.lib
+
+The coff2omf program comes with your Borland C++ installation, and the
+command should be issued from the directory in which your copy of
+python23.lib resides.
+
 
 Hopefully, assuming Python is correctly installed on your system, this 
 should build without a problem.  There is no installation target provided

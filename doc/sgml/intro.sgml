@@ -407,6 +407,20 @@ separately.  (If you aren't going to be using this, you can
 skip this section.)  Take a look at sources/python/borland.mak;
 in particular, make sure that the PYTHONDIR points to the correct
 location of your Python installation.
+</para>
+
+<para>
+Prior to creating the Python extension, you will need to convert the
+Python library to a format compatible with the Borland compiler.
+Locate the directory in which the file <filename>Python23.lib</filename>
+resides on your system.  In that directory, issue the command
+<programlisting>
+coff2omf python23.lib python23_bcpp.lib
+</programlisting>
+You'll only need to do this once (per Python installation).
+</para>
+
+<para>
 From the python subdirectory of the Gambit source tree, issue
 <programlisting>
 make -f borland
@@ -414,6 +428,7 @@ make -f borland
 Be sure to do this after building the main library above; the makefile
 assumes the main Gambit library has been built already.
 </para>
+
 
 <para>
 If all goes well, you'll wind up with three files in the directory:
