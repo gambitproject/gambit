@@ -26,7 +26,7 @@ class LemkeSolution : public MixedSolution   {
 
     SolutionType Type(void) const   { return sLEMKE; }
     void Output(gOutput &f) const
-      { gout << "Lemke solution: " << p << '\n'; }
+      { f << "Lemke solution: " << p << '\n'; }
 };
 
 
@@ -36,7 +36,8 @@ class BaseLemke    {
     virtual ~BaseLemke()   { }
 };
 
-template <class T> class LemkeTableau : public gTableau<T>, public BaseLemke  {
+template <class T> class LemkeTableau
+  : public gTableau<T>, public BaseLemke, public SolutionModule  {
   private:
     int Lemke_Step(int);
     int At_CBFS(void) const;
@@ -45,8 +46,10 @@ template <class T> class LemkeTableau : public gTableau<T>, public BaseLemke  {
     void Pivot(int, int);
  
   public:
-    LemkeTableau(int i) : gTableau<T>(i)  { }
-    LemkeTableau(const LemkeTableau<T> &t) : gTableau<T>(t)  { }
+    LemkeTableau(int num_strats, gOutput &ofile, gOutput &efile, int plev)
+      : gTableau<T>(num_strats), SolutionModule(ofile, efile, plev)  { }
+    LemkeTableau(const LemkeTableau<T> &t)
+      : gTableau<T>(t), SolutionModule(t)  { }
     virtual ~LemkeTableau()   { }
 
     int Lemke(int);
@@ -77,9 +80,8 @@ template <class T> void LemkeTableau<T>::Pivot(int row, int col)
   Row_Labels[row] = Col_Labels[col];
   Col_Labels[col] = temp;
  
-#ifdef UNUSED
-   Dump(gout);
-#endif   // UNUSED
+  if (printlevel >= 2)
+    Dump(output);
 
      // Now switch the col column and the Num_Strat + 1 (scratch) column,
      // then set the row'th entry to 0, making the whole column zero.
@@ -109,12 +111,12 @@ template <class T> int LemkeTableau<T>::Lemke(int Duplicate_Label)
     List.Append(cbfs);
   }
 
-#ifdef UNUSED
-  for (i = 1; i <= List.Length(); i++)   {
-    List[i].Dump(gout);
-    gout << "\n";
+  if (printlevel >= 2)  {
+    for (i = 1; i <= List.Length(); i++)   {
+      List[i].Dump(output);
+      output << "\n";
+    }
   }
-#endif   // UNUSED
 
   return List.Length();
 }
@@ -144,14 +146,16 @@ template <class T> int LemkeTableau<T>::Lemke_Step(int Duplicate_Label)
     exit_label = Row_Labels[row];           // The corresponding label.
     newcol = Col_Labels.Find(-exit_label);  // The column corresponding to 
                                             // The dual label of exit_label.
-#ifdef UNUSED
-    Dump(gout);
-    gout << "\npivot row = " << row << " col = " << col << "\n";
-#endif   // UNUSED
+    if (printlevel >= 2)  {
+      Dump(output);
+      output << "\npivot row = " << row << " col = " << col << "\n";
+    }
+
     Pivot(row, col);
-#ifdef UNUSED
-    Dump(gout);
-#endif   // UNUSED
+
+    if (printlevel >= 2) 
+      Dump(output);
+
     col = newcol;                   // The new column to enter the basis.
   } while (exit_label != -Duplicate_Label && exit_label != Duplicate_Label);
 	                                              // Quit when at a CBFS.
@@ -184,39 +188,41 @@ template <class T> int LemkeTableau<T>::All_Lemke(BFS_List &List, int j)
     if (Row_Labels[i] > 0)
       cbfs.Define(Row_Labels[i], Tableau(i,0));
 
-#ifdef UNUSED
-  gout << "\npath " << j ;
-  gout << " Basis:  " ;
-  for (i = 1; i <= Num_Strats; i++)
-    gout << Row_Labels[i] << " " ;
-  gout << "\n";	
-#endif   // UNUSED
+  if (printlevel >= 2)  {
+    output << "\npath " << j ;
+    output << " Basis:  " ;
+    for (i = 1; i <= Num_Strats; i++)
+      output << Row_Labels[i] << " " ;
+    output << "\n";	
+  }
 
   if (List.Contains(cbfs))  return 1;
   List.Append(cbfs);
-  cbfs.Dump(gout);
 
-#ifdef UNUSED
-  gout << "\npath " << j << " Basis:  " ;
-  for (i = 1; i <= Num_Strats; i++)
-    gout << Row_Labels[i] << " " ;
-#endif   // UNUSED
-  gout << "\n";
-#ifdef UNUSED
-  Dump(gout);
-#endif   // UNUSED
+  if (printlevel >= 1)
+    cbfs.Dump(output);
+
+  if (printlevel >= 2)  {
+    output << "\npath " << j << " Basis:  " ;
+    for (i = 1; i <= Num_Strats; i++)
+      output << Row_Labels[i] << " " ;
+  }
+
+  if (printlevel >= 1)
+    output << "\n";
+
+  if (printlevel >= 2)
+    Dump(output);
 
   for (i = 1; i <= Num_Strats; i++)
     if (i != j)  {
       LemkeTableau<T> Tcopy(*this);
       Tcopy.Lemke_Step(i);
-#ifdef UNUSED
-      Tcopy.Dump(gout);
-#endif   // UNUSED
+
+      if (printlevel >= 2)      Tcopy.Dump(output);
       Tcopy.All_Lemke(List, i);
-#ifdef UNUSED
-      Tcopy.Dump(gout);
-#endif   // UNUSED
+
+      if (printlevel >= 2)      Tcopy.Dump(output);
     }
   return 1;
 }
@@ -290,23 +296,19 @@ int NormalForm::Lemke(int dup_strat)
   for (i = 1; i <= strategies.Length(); i++)
     s.SetStrategy(strategies[i]->GetStrategy(1));
 
-  switch (array->Type())   {
+  switch (type)   {
     case nfDOUBLE:   {
       double min = 0.0, x;
-      LemkeTableau<double> T(n);
+      LemkeTableau<double> T(n, gout, gerr, 1);
       NFRep<double> *N = (NFRep<double> *) array;
-
-//      N->WriteNfgFile(gout);
 
       for (i = 1; i <= n1; i++)
  	for (j = 1; j <= n2; j++)  {
 	  s.SetStrategy(strategies[1]->GetStrategy(i));
 	  s.SetStrategy(strategies[2]->GetStrategy(j));
 	  x = (*N)(s,1);
-//	  gout << i << ' ' << j << ' ' << s << " -> " << x << '\n';
 	  if (x < min)  min = x;
 	  x = (*N)(s,2);
-//	  gout << i << ' ' << j << ' ' << s << " -> " << x << '\n';
 	  if (x < min)  min = x;
 	}
 
@@ -334,7 +336,7 @@ int NormalForm::Lemke(int dup_strat)
 
     case nfRATIONAL:   {
       Rational min = 0, x;
-      LemkeTableau<Rational> T(n);
+      LemkeTableau<Rational> T(n, gout, gerr, 1);
       NFRep<Rational> *N = (NFRep<Rational> *) array;
 
       for (i = 1; i <= n1; i++)
