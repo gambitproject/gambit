@@ -1,0 +1,907 @@
+Gambit Open Bugs List
+
+---------------
+
+Template for bug listing:
+
+ITEM nnnn:  Brief description
+
+DATE:     mm/dd/yyyy by INITIALS
+AFFECTS:  GCL and/or GUI; list platforms
+STATUS:   OPEN/CLOSED (description of resolution)
+SEVERITY: CRUCIAL/MAJOR/INTERMEDIATE/MINOR
+DETAILS:
+
+---------------
+
+Severity categories:
+  CRUCIAL      *MUST* be fixed before next public release
+  MAJOR        should be fixed before next public release if possible
+  INTERMEDIATE annoyance for which a workaround is possible
+  MINOR        suggestions and tweaks
+
+---------------
+
+ITEM 0001:  Incorrect solutions, and crashing with large integers
+
+DATE:     9/8/1999 by TLT (was Bug C5 in bugs_gcl)
+AFFECTS:  GCL, GUI (all platforms?)
+STATUS:   OPEN
+SEVERITY: MAJOR
+DETAILS:
+
+  46 mill:/home/mill/rdm/gambit/test newgcl
+  Include["gclini.gcl"]
+  Include["stdudfs.gcl"]
+  GCL1:= p:={ { { 343519405, 57518365 }, { 905196150, 857537702 } },{ { 500889218, 1982990232 }, { 83903549, 1493083335 } } }
+  GCL2:= << n:=Nfg[p]
+  (Nfg) ""
+  GCL3:= << AllNash[n]
+  {  (MIXED) }
+  GCL4:= << LcpSolve[n]
+  gcl_mill: lemketab.cc:166: int LTableau<double>::ExitIndex(int): Assertion `c <= MaxRow()' failed.
+  A segmentation fault has occurred
+
+COMMENTS:
+
+RDM 2/21/1998. The above occurs only with precision->Float, and
+stopAfter->0 (which were the defaults for LcpSolve[] when this example
+was run). 
+
+RDM 9/3/1998. This was moved here from the GUI bug list.  The file is
+in ~rdm/gambit/nfg/osborne.nfg
+
+  222 mill:/home/mill/rdm/gambit/test newgcl
+  Include["gclini.gcl"]
+  Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
+  GCL1:= << n:=LoadNfg["../nfg/osborne.nfg"]
+  (Nfg) "4 actions; minimal action 0.00; maximal action 0.50"
+  GCL2:= << LcpSolve[n]
+  gcl_mill: lemketab.cc:166: int LTableau<double>::ExitIndex(int): Assertion `c <= MaxRow()' failed.
+  A segmentation fault has occurred
+
+RDM 2/21/1998. The above occurs only with precision->Float, and
+stopAfter->0 (which were the defaults for LcpSolve[] when this example
+was run). I created a rational version of the above, in osborne_r.nfg,
+and it works fine (takes about ten minutes in Float on mill), finding
+a unique equilibrium.
+
+RDM 9/6/1998. In this same section should be noted problems
+solving "stengel.nfg" in Float.  This used to crash.  Since changing
+to automatic Refactoring of Tableau, it doesn't crash, but finds 261
+solutions many of which are *not* Nash equilibria.  On the other hand,
+if you first divide all payoffs by a large number (like 1000000), to
+get them in lower range, then it computes correctly.  So this problem
+is related to the zero tolerance in the Tableau code, and should be
+able to be "fixed" by proper scaling of the tableau before
+computation.  However, this also points to an inherent limitation in
+the Float code: There is no way to prevent this kind of problem from
+occurring if there are legitimate entries in the normal form which
+differ sufficiently greatly in magnitude.  Therefore we need to do two
+things: 
+
+1.  Make sure and check that all solutions returned are indeed Nash
+equilibria.
+
+2. Detect and warn the user when there may be a problem with floating
+point calculations.
+
+---------------
+
+ITEM 0002: RS6000 exception handling problems
+
+DATE:     9/8/1999 by TLT (was Bug C9a in bugs_gcl)
+AFFECTS:  GCL on RS6000 (possibly GUI as well?)
+STATUS:   OPEN
+SEVERITY: MINOR (probably system and/or compiler dependent)
+DETAILS:
+
+When the file "x" does not exist:
+
+  43 billandal:/home/mill/rdm/gambit/sources gcl_AIX
+  Include["gclini.gcl"]
+  Include["stdudfs.gcl"]
+  GCL1:= << LoadNfg["x"]
+  A segmentation fault has occurred
+
+Also, when you quit the gcl on billandal, it seg faults.  As before,
+none of these are a problem on mill or koo.  
+
+COMMENTS:
+TLT 8/29/1998.  Appears to be a compiler bug with g++ 2.8.1 on
+RS6k and catching exceptions.
+
+---------------
+
+ITEM 0003: LPSolve[] fails when stopAfter != 1
+
+DATE:     9/8/1999 by TLT (was Bugs C18 and C27 in bugs_gcl)
+AFFECTS:  GCL (GUI as well?), all platforms(?)
+STATUS:   OPEN
+SEVERITY: MAJOR
+DETAILS:
+
+  GCL1:= << n:=LoadNfg["../nfg/csg1.nfg"]
+  (Nfg) ""
+  GCL2:= << m:=LpSolve[n,stopAfter->0]
+
+  c: { 0.000000 0.000000 0.000000 1.000000 }
+  uc: { 0.000000 0.000000 0.000000 0.000000 }
+  col: 1 cost: 0.000000 label: 4 x: 1.000000
+  col: 2 cost: -1.000000 label: -2 x: In function LpSolve[], in file "stdudfs.gcl" at line 463:
+  In function LpSolve[], in file "console" at line 2:
+  GCL EXCEPTION:Bad index in gArray; Caught in gcl.cc, main()
+
+Include["gclini.gcl"]
+Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
+GCL1:= << n:=LoadNfg["../nfg/zero.nfg"]
+(Nfg) "Two person 2 x 2 game with all zero payoffs"
+GCL2:= << LpSolve[n]
+{ (Mixed) { 1.000000 0.000000 }{ 1.000000 0.000000 } }
+GCL3:= << LpSolve[n,stopAfter->2]
+
+c: { 0.000000 0.000000 1.000000 }
+uc: { 0.000000 0.000000 0.000000 }
+col: 1 cost: 0.000000 label: 3 x: 1.000000
+col: 2 cost: 0.000000 label: -2 x: In function LpSolve[], in file "/home/mill/rdm/gambit/bin/stdudfs.gcl" at line 461:
+In function LpSolve[], in file "console" at line 3:
+EXCEPTION: Bad index in gArray
+GCL4:= << Quit
+
+Note: Bug does not occur if stopAfter->1
+
+---------------
+
+ITEM 0004: Algorithms producing nonsense on games of imperfect recall
+
+DATE:     9/8/1999 by TLT (was Bug C21 in bugs_gcl)
+AFFECTS:  GCL, GUI; all platforms
+STATUS:   OPEN
+SEVERITY: MAJOR
+DETAILS:
+
+  GCL1:= << e:=LoadEfg["myerson.efg"]
+  (Efg) "Myerson - Game with no solution in behavioral strategies"
+  GCL2:= << IsPerfectRecall[e]       
+  False
+  GCL3:= << b:=LcpSolve[e]              
+  { (Behav) { { 0.000000 1.000000 }{ 0.250000 0.750000 } }{ { 0.500000 0.500000 } } }
+  GCL4:= << IsNash[b]
+  { False }
+  GCL5:= << OneNash[e]   
+  { (Behav) { { 0.500000 0.500000 }{ 1.000000 1.000000 } }{ { 0.500000 0.500000 } } }
+  GCL6:= << IsNash[GCL5] 
+  { Maybe }
+
+---------------
+
+ITEM 0005:  LiapValue inaccurate on incomplete behavior profiles
+
+DATE:     9/8/1999 by TLT (was Bug C26 in bugs_gcl)
+AFFECTS:  GCL, GUI; all platforms
+STATUS:   OPEN
+SEVERITY: MAJOR
+DETAILS:
+
+GCL1:= << LoadEfg["D:/gambit/efg/e02.efg"]
+(Efg) "Selten (IJGT, 75), Figure 2"
+GCL2:= << LcpSolve[GCL1]
+{ (Behav) { { 1.000000 0.000000 }{ 0.000000 0.000000 } }{ { 0.500000 0.500000 } } }
+GCL3:= << LiapValue[GCL2]
+{ 100.000000 }
+
+This is actually a symptom of the "incomplete" profiles generated by
+LcpSolve[EFG], Behav[NFG], and so forth.  The fix is to improve
+BehavProfile<T> and BehavSolution to be smart enough to realize when
+action probabilities at certain information sets are not specified.
+
+---------------
+
+ITEM 0006:  Infinite loop in LcpSolve[nfg]
+
+DATE:     9/8/1999 by TLT (was Bug C28 in bugs_gcl)
+AFFECTS:  GCL (all platforms?)
+STATUS:   OPEN
+SEVERITY: INTERMEDIATE
+DETAILS:
+
+The following hangs the GCL:
+
+  GCL1:= << k:=10;
+  GCL2:= << n:=Randomize[NewNfg[{k,k},True],seed->142];
+  GCL3:= << LcpSolve[n]
+
+---------------
+
+ITEM 0007:  Include file names not printable
+
+DATE:     9/8/1999 by TLT (was Bug C31 in bugs_gcl)
+AFFECTS:  GCL (MSWindows)
+STATUS:   OPEN
+SEVERITY: MINOR
+DETAILS:
+
+Here, the GCL is being run from the directory c:\gambit96, and the
+gclini.gcl and stdudfs.gcl files are in c:\gambit96\bin.
+
+  Include["C:\gambit9in\gclini.gcl"]
+  Include["C:\gambit9in\stdudfs.gcl"]
+  GCL1: << Include["gcl\nqre.gcl"]
+  True
+  Include["gcl
+  qre.gcl"]
+
+Note that it does not print the names of the included files correctly,
+even though it locates and loads them all correctly.  Evidently it is
+treating the "\n" in the pathname "gcl\nqre.gcl" as a new line
+character when it prints it even though it actually loads the file OK.
+This is probably what is happening with the "\b" in "c:\gambit96\bin"
+also.
+
+---------------
+
+ITEM 0008:  Slow redrawing in MFC version of GCL
+
+DATE:     9/8/1999 by TLT (was Bug C32, point 2, in bugs_gcl)
+AFFECTS:  GCL (MSWindows)
+STATUS:   OPEN
+SEVERITY: MINOR
+DETAILS:
+
+Re-display of the command line after using the editing functions,
+like the up arrow and down arrow is much too slow.  This needs to be
+speeded up.
+
+---------------
+
+ITEM 0009:  Cut-and-paste issues in MFC version of GCL
+
+DATE:     9/8/1999 by TLT (was Bug C32, point 3, in bugs_gcl)
+AFFECTS:  GCL (MSWindows)
+STATUS:   OPEN
+SEVERITY: MINOR
+DETAILS:
+
+Right now, the OnContextMenu() function is overridden to paste text
+into the command line.  It would be better if after highlighting text
+in the GCL window, the right mouse button would bring up the context
+menu (as in Notepad) to allow to cut or paste text into the GCL window
+in the standard MS-windows way.
+
+---------------
+
+ITEM 0010:  GCL segfaults; orphan variables suspected
+
+DATE:     9/8/1999 by TLT (was Bug C33 in bugs_gcl)
+AFFECTS:  GCL (all platforms?)
+STATUS:   OPEN
+SEVERITY: CRUCIAL
+DETAILS:
+
+Put the following commands in the file test.gcl
+
+  e:= NewEfg[];
+  P1 := NewPlayer[e, "P1"];
+  e:= NewEfg[];
+  P1 := NewPlayer[e, "P1"];
+  e:= NewEfg[];
+  P1 := NewPlayer[e, "P1"];
+
+Then 
+
+  Include["test.gcl"] leads to   
+
+GCL1:= << Include["test.gcl"]     
+True
+A segmentation fault has occurred
+
+On the other hand, if P1 is deallocated before each call, as in 
+
+  e:= NewEfg[];
+  P1 := NewPlayer[e, "P1"];
+  e:= NewEfg[];
+  P1:=;P1 := NewPlayer[e, "P1"];
+  e:= NewEfg[];
+  P1:=;P1 := NewPlayer[e, "P1"];
+
+then it is OK.  Also, if the contents of test.gcl are run from the
+command line, it is OK.
+
+---------------
+
+ITEM 0011:  No way to pass Include[] files on command line in GCL
+
+DATE:     9/8/1999 by TLT (was Suggestion S1 in bugs_gcl)
+AFFECTS:  GCL (all platforms, Unix especially)
+STATUS:   OPEN
+SEVERITY: MINOR
+DETAILS:
+
+Perhaps we should have a -Ifilename flag to include a file?
+
+On Mon, 11 May 1998, Olson Collin K wrote:
+
+> One simple creature comfort that would make programming in Gambit zounds
+> easier would be to take all of the command line arguemnts to gcl32 and
+> automatically Include[] them.  So far as I can tell from the manual, there
+> is no way to do this.
+> 
+> I prefer to code using my own text editor, and this feature would make it
+> much easier to do my own coding from outside the gcl command console and
+> allow me to write software that calls gcl iteratively, for example.
+
+---------------
+
+ITEM 0012:  LiapSolve does not keep partial solutions
+
+DATE:     9/8/1999 by TLT (was Bug D8 in bugs_gui)
+AFFECTS:  GUI (all platforms)
+STATUS:   OPEN
+SEVERITY: MINOR
+DETAILS:
+
+When solving an extensive form game (try using the standard solution
+setting of All Nash on e01.efg -- which puts you in an infinite loop
+in liap solve), the code returns empty solutions when it is terminated
+with the Cancel button.  This appears to be a problem in the subgame
+soving code which appeared when we changed to exceptions for handling
+the cancel event.  Here is some relevant correspondence 
+
+key:
+
+> > RDM
+> Ted
+RDM
+
+> >2.  Even when there are subgames, the algorithm should keep the
+> >complete solutions it finds, and only chuck those which have not been
+> >solved for all subgames yet.  If you solve for all solutions, this puts it
+> >in an infinite loop, and if you hit cancel after it has found some
+> >complete solutions, it will keep them, no?  
+> 
+> But the infinite loop you're putting it in occurs at the *bottom* level
+> subgame!
+
+We have an additional parameter in the gui (seems like it should be in the
+GCL also, but I don't see it there) which sets the maximum number of
+solutions per subgame.  I thought this was supposed to solve this problem
+by effectively putting the infinite loop at the top.  I thought this
+should deal with the first problem too (games with no proper subgames.) 
+But I will have to look at the code to see what this actually does. 
+Perhaps it is not implemented correctly. 
+
+---------------
+
+ITEM 0013:  Scrolling problems in extensive and normal form displays
+
+DATE:     9/8/1999 by TLT (was Bug D11 in bugs_gui)
+AFFECTS:  GUI (all platforms?)
+STATUS:   OPEN
+SEVERITY: MAJOR
+DETAILS:
+
+For both EFGs and NFGs, using the arrow keys to scroll doesn't affect the
+scrollbar position and doesn't redraw the entire screen.
+
+COMMENTS:
+TLT 1/8/1999.  I don't experience this problem in the Windows version
+at all, *except* when using the increase-magnification feature.  The
+cursor is not always visible on the screen immediately following a
+zoom operation (but will become so after a move with the arrow keys)
+
+---------------
+
+ITEM 0014:  No tilde expansion
+
+DATE:     9/8/1999 by TLT (was Bug D15 in bugs_gui)
+AFFECTS:  GUI, GCL; Unix
+STATUS:   OPEN
+SEVERITY: MINOR
+DETAILS:
+
+In fields requiring file names, the GUI will not accept the "~"
+character or aliases.  For example, running QRE on poker.efg, the
+following errors result, even though both
+'~rdm/gambit/pxi/pxi_motif_Linux' and and 'newpxi' refer to valid
+executable files, and run fine when entered from the command line.
+ 
+  wxWindows: could not execute '~rdm/gambit/pxi/pxi_motif_Linux'
+  wxWindows: could not execute 'newpxi'
+
+COMMENTS:
+TLT 10/2/1998.  Tilde-expansion is a shell convenience, which is why
+it works on the command line.  We would need to add code to do this.
+Not hard, we've just never gotten around to doing it.
+
+---------------
+
+ITEM 0015:  Need "in place" editing of outcomes for large games
+
+DATE:     9/8/1999 by TLT (was Bug D17 in bugs_gui)
+AFFECTS:  GUI (all platforms)
+STATUS:   OPEN
+SEVERITY: MINOR
+DETAILS:
+
+This is really more of an enhancement than a bug.  
+
+In the normal and extensive form, if the game is large, it takes a
+long time to bring up the outcome window, and find the outcome
+associated with a given location in the EF/NF game.  We should
+have "in place" editing, where you can edit the outcome right on the
+normal or extensive form dislpay.
+
+For NFG, at least, here is a proposed interface:
+
+The cursor can be placed anywhere on the text except on a comma separating
+entries in the outcome.  Text can be entered or deleted; it will come up in
+the same color as the text it is replacing.  Text cannot be added past a
+comma, and the comma can't be deleted.  To get to the next entry in the
+box, use tab; to get to the previous entry, use shift-tab.  Once at the end
+of the box, tab will move the entry to the next box.  If at the last box in
+the row, tab will move to the first box in the next row.  If in the last
+box in the array, tab will move to the first box in the array.  Similar
+rules hold for shift-tab in the other direction.  The arrow keys move the
+focus to a different box.  It would be nice to have a visible insert
+cursor, but this may be harder to achieve.
+
+---------------
+
+ITEM 0016:  No progress display or status checking for PolEnum algorithms
+
+DATE:     9/8/1999 by TLT (was Bug D21, point 1, in bugs_gui)
+AFFECTS:  GCL, GUI; all platforms
+STATUS:   OPEN
+SEVERITY: CRUCIAL
+DETAILS:
+
+The PolEnum algorithms do not provide status updates, nor do they poll
+for user cancel requests.
+
+---------------
+
+ITEM 0017:  Crash caused by cancelling algorithm
+
+DATE:     9/8/1999 by TLT (was Bug D21, point 2, in bugs_gui)
+AFFECTS:  GUI (all platforms?)
+STATUS:   OPEN
+SEVERITY: CRUCIAL
+DETAILS:
+
+  Convert Caro2.efg to nfg, and run All Nash.  Hit Cancel on 
+  progress display -- causes crash.
+
+COMMENTS:
+TLT 1/8/1999. I was unable to reproduce this second problem in Win95 on
+my machine.
+
+---------------
+
+ITEM 0018:  Icons not correct
+
+DATE:     9/8/1999 by TLT (was Bug D26 in bugs_gui)
+AFFECTS:  GCL, GUI; MS-Windows only
+STATUS:   OPEN
+SEVERITY: MINOR
+DETAILS:
+
+The icon that is displayed on the window manager and the file list for
+the gcl and gui are frequently wrong (Gui should display gambit.ico
+and the gcl should display gcl.ico.  Also, the icons displayed in the
+upper left hand corner of the frames for the gui are not always
+correct.  For example, the EF Gui should display efg.ico, and the NF
+Gui should display nfg.ico.
+
+COMMENTS:
+TLT 3/5/1998.  Apparently a Win95 problem, according to the wxWin
+documentation.
+
+---------------
+
+ITEM 0019:  Warning message on Linux/wxxt port
+
+DATE:     9/8/1999 by TLT (was Bug D32 in bugs_gui)
+AFFECTS:  GUI (Linux-wxxt only)
+STATUS:   OPEN
+SEVERITY: MINOR
+DETAILS:
+
+When loading up 8x8.nfg in the wxxt version of gambit, we get this:
+
+panel: cannot resize frame to ZERO width or height
+
+No harm seems to come of this.
+
+---------------
+
+ITEM 0020:  Field width on dialog boxes
+
+DATE:     9/8/1999 by TLT (was Bug D35 in bugs_gui)
+AFFECTS:  GUI, all platforms
+STATUS:   OPEN
+SEVERITY: CRUCIAL
+DETAILS:
+
+Examples:
+
+1. On Solve->Custom->NFG->SimpDiv, the #restarts field is too narrow
+on MSWin.  
+
+2. On File Save, the field for the decimal places is too narrow to see
+the number.  There were other dialogs with similar problems.  Can't
+recall them now.
+
+COMMENTS:
+TLT 9/8/1999.  These are fine on my display under Win95.  I have experienced
+similar problems when running the X version remotely on my display, however.
+We need to experiment across several displays to determine what causes
+this and how to deal with it in as system-independent a way as possible.
+
+---------------
+
+ITEM 0021:  Bug in interactive selection of subgame solutions
+
+DATE:     9/8/1999 by TLT (was Bug D37 in bugs_gui)
+AFFECTS:  GUI (all platforms?)
+STATUS:   OPEN
+SEVERITY: CRUCIAL
+DETAILS:
+
+The following causes a crash:
+
+Load coord2ts.efg, and solve via Solve->Custom->Efg->LCP (noDomElim,
+Interactive selection, findAll)
+
+COMMENTS:
+TLT 9/8/1999.  I cannot reproduce this on my machine.
+
+---------------
+
+ITEM 0022:  Dominance info not displayed on normal form game.  
+
+DATE:     9/8/1999 by TLT (was Bug D38 in bugs_gui)
+AFFECTS:  GUI (all platforms)
+STATUS:   OPEN
+SEVERITY: CRUCIAL
+DETAILS:
+
+Load poker.efg, generate a normal form game, and do
+Supports->ElimDom (Weak,Pure) The dominance information should be
+displayed in the normal form, but it is not displayed, even if you
+select Inspect->Info->DisplayDominance
+
+COMMENTS:
+TLT 9/8/1999.  This is because the dominance elimination code does not
+return any dominance info for the GUI to display.  This will be added
+shortly, and the GUI modified to take advantage.
+
+---------------
+
+ITEM 0023:  Windows don't dismiss via window manager close control
+
+DATE:     9/8/1999 by TLT (was Bug 5.2 in bugs_gui)
+AFFECTS:  GUI (all platforms)
+STATUS:   OPEN
+SEVERITY: CRUCIAL
+DETAILS:
+
+> 2. Why the solution list window does not vanish from the upper right
+> close button?
+
+COMMENTS:
+RDM 8/20/1999.  Solution list window is fixed, but there are still a few
+with the problem -- i.e, in the inspect solution window, the edit
+mixed window cannot be deleted.  Also, the Edit->Strats->Label dialog
+box (and perhaps others as well) can not be gotten rid of.  Also,
+after this window has been created, the main Gambit window can be
+dismissed and the child windows do not get dismissed.  (this is on
+Linux) N.B. the "close" button here refers to the window manager close
+button.
+
+TLT 9/8/1999.  Mixed strategy edit window should now be fixed (works on
+Windows, untested on unix.)  There is no such dialog as Edit->Strats->Label;
+all the dialogs on the Edit menu on the normal form seem just fine to me.
+This sounds like it might be an outdated problem; I replaced a spreadsheet
+version of that dialog months ago which did have a similar problem.
+
+---------------
+
+ITEM 0024:  Scrolling problems
+
+DATE:     9/8/1999 by TLT (was Bug 5.4 in bugs_gui)
+AFFECTS:  GUI (all platforms)
+STATUS:   OPEN
+SEVERITY: MAJOR
+DETAILS:
+
+> 4. When the main window for the tree design is not maximized the
+> vertical and the horizontal bars are getting out of the screen.
+
+COMMENTS:
+RDM 9/3/1998.  Here are further details:
+
+On Linux: Load caro2.efg.  Hit +magnify button twice.  Move cursor
+R,R,D,R,R.  Notice how screen does not always display cursor.  Now hit
+L,L,L,L, and try to get back to the root node.  Again cursor moves off
+the screen, and the bottom scroll bar does not help to move the window
+to display the cursor.  Also, the scroll bars require a complete
+redraw before the next scroll bar hit is recorded. Load a big game
+like bayes2a.efg, andthen hit the right scroll bar three times
+insuccession to try and scroll the screen down.  It redraws the screen
+three times instead of halting the redraw when the second and third
+hits to the scroll bar are made.  Also, dragging the scroll bar does
+not work.  This makes it very time consuming to move around a large
+game.
+
+On MSWindows: Load condjury.efg, and hit the -magnify button twice (to
+get to mag .6).  Then try and get to the lower right part of the tree.
+It is impossible either by the cursor or by the use of the scrollbars.
+
+---------------
+
+ITEM 0025:  Information set lines are lost or broken on large trees
+
+DATE:     9/8/1999 by TLT (was Bug 5.7 in bugs_gui)
+AFFECTS:  GUI (all platforms?)
+STATUS:   OPEN
+SEVERITY: INTERMEDIATE
+DETAILS:
+
+> 7. In the magnify mode the lines representing information sets are
+> broken or lost on trees with big verical dimension ( due to many
+> branches emanating from a single node). Also in this case horizontal
+> gray lines appear and payoffs seems like double-stroked.
+
+COMMENTS:
+RDM 9/3/1998.  This is still a problem.  Look at Bayes2a, try and
+remember what the game is supposed to look like (or bring up two
+copies, one for comparison). Then hit +Magnify three times.  Now move
+around the tree with the cursor, and eventually you will see this.
+
+---------------
+
+ITEM 0026:  Scrolling problems in GUI
+
+DATE:     9/8/1999 by TLT (was Bug 7.1 in bugs_gui)
+AFFECTS:  GUI (all platforms?)
+STATUS:   OPEN
+SEVERITY: MAJOR
+DETAILS:
+
+> I'm using version 0.94 on a Windows 95 Pentium 133.
+> 
+> Bugs(?):
+> 1. With large games one can't scroll to the bottom right of the matrix.
+> The scrollbar will only move in jumps, and moves over parts of the game,
+> which seem to be inaccesible (maybe one can work around this by
+> changing the font size).  If one clicks on a cell, then presses a cursor
+> key, the associated cell may go off the screen, and there is no way of
+> telling where it is (assuming the matrix is large enough that the
+> names of the actions are off the screen).
+
+COMMENTS: 
+RDM ??/??/19??.  Still a problem.  This may be related to
+similar problems in extensive form window (cf. Items 0024 and 0025).
+
+---------------
+
+ITEM 0027:  Screen does not refresh while solving
+
+DATE:     9/8/1999 by TLT (was Bug 7.3 in bugs_gui)
+AFFECTS:  GUI (all platforms?)
+STATUS:   OPEN
+SEVERITY: INTERMEDIATE
+DETAILS:
+
+> 3. The screen is not rewritten when a program that wrote over the previous
+> screen is closed and Gambit is busy solving a game.  That is, one opens
+> Gambit, starts it off looking for equilibria, then opens another program
+> that displays on top of the Gambit screen; when one closes that program,
+> the Gambit screen is just blank (so that, in particular, one cannot cancel
+> the solution process in progress).
+
+---------------
+
+ITEM 0028:  Cannot find help files
+
+DATE:     9/8/1999 by TLT (was Bug 7.6 in bugs_gui)
+AFFECTS:  GUI (all platforms?)
+STATUS:   OPEN
+SEVERITY: MAJOR
+DETAILS:
+
+> 6. If one loads a game from a directory other than Gambit, the program can
+> no longer find the Help files.
+
+---------------
+
+ITEM 0029:  Bad postscript files
+
+DATE:     9/8/1999 by TLT (was Bug 9 in bugs_gui)
+AFFECTS:  GUI (all platforms?)
+STATUS:   OPEN
+SEVERITY: MINOR
+DETAILS:
+
+On Tue, 23 Jun 1998, Bernhard von Stengel wrote:
+
+Hi,
+
+more apparent bugs. This time:  buggy generation of PS-Files.
+This may be a bug in the wxwin package.
+
+1.
+When I generate large games, display fails altogether since
+the scaling doesn't work.  I only see the initial part of a very
+large tree.
+
+2.
+In some cases, parts of the tree are also DELETED when the PS
+file is generated.  I presume this is due to faulty memory management,
+but it can also be a GAMBIT bug.  It occasionally happened for smaller
+games, but then it disappeared when the file was reloaded, so I could
+reproduce it only for the large extensive form game.
+To document this, I enclose by separate mail
+
+a. The (level 8) generated tree which looks complete as a file.
+
+b. The PS file generated from the GUI interface.
+
+   In order to look at the PS file, I found a method to print it easily
+   on an ordinary printer.  Namely, I enclose in this mail a latex
+   file that assumes that the GUI-generated file is stored as
+
+   efg.eps
+
+   in the same directory.  Running it through latex, it then generates a
+   single page where the game tree fits on a letter-size page, filling it
+   maximally. The .dvi file has to be converted to .ps with  dvips,
+   of course.  I found LATEX the easiest way to do this.
+
+Regards, Bernhard
+
+
+%
+%  displays "efg.eps" in maximum size
+%
+\documentstyle[epsf]{article}
+\topmargin-3.2cm
+\textheight27.1cm
+\textwidth20cm
+\oddsidemargin-2cm
+\begin{document}
+\thispagestyle{empty}
+\noindent
+\epsfxsize19.9cm
+\epsfysize27.0cm
+\epsfbox{efg.eps}
+\end{document}
+
+---------------
+
+ITEM 0030:  Problem under XView
+
+DATE:     9/8/1999 by TLT (was Bug 10.2 in bugs_gui)
+AFFECTS:  GUI (all platforms?)
+STATUS:   OPEN
+SEVERITY: INTERMEDIATE
+DETAILS:
+
+(This point replied to On Mon, 22 Jun 1998, Richard McKelvey wrote:)
+
+> 2) Below is a game that I can't see unless I take the POSTSCRIPT detour
+>    (it's the game generated with level 2)
+>    I have a hunch the  xview  stuff on our machine is uncompatible.
+>    Can't see any help files either.  Perhaps due to  
+>    XView warning: Cannot load font '-*-times-bold-r-normal-*-*-160-*-*-*-*-*-*' (Font package)
+>    etc.?
+> 
+> EFG 2 R "UNTITLED" { "P1" "P2" }
+> 
+> p "" 1 1 "" { "L" "R" } 0
+> p "" 2 1 "" { "L" "R" } 0
+> t "" 1 "" { 43 65 }
+> t "" 2 "" { 47 69 }
+> p "" 2 1 "" { "L" "R" } 0
+> t "" 3 "" { 6 94 }
+> t "" 4 "" { 69 69 }
+
+This is a Gambit BUG.  Or at least, I get the same problem running under
+xview. It appears to be that the scroll is not working correctly under
+XView. You can view the game in the zoom window (in prefs menu), but that
+only shows the part near the cursor.  
+
+Perhaps this is a problem in wxwin support of xview, as there is no
+problem viewing the game under the motif version or the Windows version of
+the GUI.
+
+COMMENTS:
+RDM ??/??/19??. I reproduced this under version .94 on Xview.  We need
+to compile the new code under Xview to see if this still exists.
+
+---------------
+
+ITEM 0031:  Correct implementation of AllPerfect
+
+DATE:     9/8/1999 by TLT/RDM
+AFFECTS:  GCL, GUI; all platforms
+STATUS:   OPEN
+SEVERITY: CRUCIAL
+DETAILS:
+
+Earlier this year, we changed the UDFs (and standard algorithms in the
+GUI) for computing two or more Perfect equilibria to first eliminate
+all weakly dominated strategies, and then apply EnumMixed.  I have
+finally realized that this is not correct. Even if we eliminate all
+strategies weakly dominated by mixed strategies, it does not guarantee
+that all Nash equilibria of the remaining game is Nash.  The following
+game (supplied by Tom Palfrey) is a counterexample.
+
+
+  GCL1:= << n:=LoadNfg["../nfg/mixdom3.nfg"]
+  (Nfg) "Game with no dominated pure strategies, and dominated equilibrium"
+  GCL2:= << Payoffs[n]
+  { { { 3, 1 }, { 0, 0 }, { 0, 1 } },
+    { { 3/2, 1 }, { 2, 2 }, { 3/2, 1 } },
+    { { 0, 1 }, { 0, 0 }, { 3, 1 } } }
+  GCL3:= << ElimDom[n,mixed->True]
+  (NfSupport) 0x83eb028 "" { { "1" "2" "3" } { "1" "2" "3" } } 
+  GCL4:= << m:=Mixed[n,{{1/2,0,1/2},{1/2,0,1/2}}]
+  (Mixed) { 1/2 0 1/2 }{ 1/2 0 1/2 }
+  GCL5:= << IsNash[m]
+  True
+
+
+In this game, m is a Nash equilibrium, which is dominated for player 1
+by his second strategy. Hence it is not perfect.  While any pure
+strategy Nash equilibrium of the reduced game will be Perfect, it does
+not follow that any mixed Nash equilibrium of the reduced game is
+Perfect.  
+
+---------------
+
+ITEM 0032:  Perfect equilibrium test for 2-player games
+
+DATE:     9/8/1999 by TLT/RDM
+AFFECTS:  GUI, GCL; all platforms
+STATUS:   OPEN
+SEVERITY: CRUCIAL
+DETAILS:
+
+Use LP from VanDamme, p. 49. I added code to
+check whether a pure equilibrium is mixed dominated, but still need to
+add code for mixed equilibria, and hook up to IsPerfect.
+
+---------------
+
+ITEM 0033:  Need capability to output sequence form
+
+DATE:     9/8/1999 by TLT/RDM
+AFFECTS:  GUI, GCL; all platforms
+STATUS:   OPEN
+SEVERITY: CRUCIAL
+DETAILS:
+
+Should be able to generate the sequence form for a game.  The code
+exists for n-player games, but at a minimum needs to be made available
+to the user for 2-player games.
+
+---------------
+
+ITEM 0034:  Writing to gout
+
+DATE:     9/8/1999 by TLT/RDM
+AFFECTS:  GUI, GCL; all platforms
+STATUS:   OPEN
+SEVERITY: CRUCIAL
+DETAILS:
+
+Some algorithms write debugging or tracing information to gout.  These
+calls should either be removed, or directed to a tracefile.
+
+---------------
+
+
+
+
+
