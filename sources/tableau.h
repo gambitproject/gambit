@@ -22,7 +22,7 @@ protected:
   const gMatrix<T> *A;
   gBlock<int> label;    
 public:
-  Basis(void);
+//  Basis(void);
   Basis(const gMatrix<T> &A);
   Basis(const Basis<T> &);
   ~Basis();
@@ -54,9 +54,7 @@ public:
 
 template <class T> class Tableau {
 private:
-//gVector<T> tmpcol; // temporary column vector, to avoid allocation
-//  void SolveDual();
-
+  gVector<T> tmpcol; // temporary column vector, to avoid allocation
   bool ColIndex(int) const;
   bool RowIndex(int) const;
   long npivots;
@@ -66,16 +64,9 @@ protected:
   Basis<T> basis;
   LUdecomp<T> B;
   gVector<T> solution;
-  
-//  gVector<T> unitcost;
-//  gVector<T> cost;
-//  gVector<T> dual;
-//  bool costdefined;
-//  bool creator;
-  
 public:
 // constructors and destructors
-  Tableau(void);
+//  Tableau(void);
   Tableau(const gMatrix<T> &A, const gVector<T> &b); 
   Tableau(const Tableau<T>&);
   virtual ~Tableau();
@@ -103,12 +94,12 @@ public:
 
 // raw Tableau functions
   void Refactor();
-  void Solve(const gVector<T> &, gVector<T> &) const;
-  void SolveT(const gVector<T> &, gVector<T> &) const;
-  void Multiply(const gVector<T> &, gVector<T>& ) const;
-  void MultiplyT(const gVector<T> &, gVector<T> &) const;
-  void BasisVector(gVector<T> &) const; // column vector
-  void SolveColumn(int, gVector<T> &) const;
+  void Solve(const gVector<T> &b, gVector<T> &x) const;  // solve M x = b
+  void SolveT(const gVector<T> &c, gVector<T> &y) const;  // solve y M = c
+  void Multiply(const gVector<T> &, gVector<T>& );
+  void MultiplyT(const gVector<T> &, gVector<T> &);
+  void BasisVector(gVector<T> &x) const; // solve M x = (*b)
+  void SolveColumn(int, gVector<T> &);
 //  void SetBasis( const Basis<T> &); // set new Tableau
   void GetBasis( Basis<T> & ) const; // return Basis for current Tableau
   
@@ -116,22 +107,32 @@ public:
   bool IsNash(void) const;
   BFS<T> GetBFS(void) const;
   void Dump(gOutput &) const;
+};
 
-/*
-// cost-based functions
+template <class T> class LPTableau : public Tableau<T> {
+private:
+  gVector<T> dual;
+  gVector<T> unitcost;
+  gVector<T> cost;
+
+  void SolveDual();
+public:
+//  LPTableau(void);
+  LPTableau(const gMatrix<T> &A, const gVector<T> &b); 
+  LPTableau(const LPTableau<T>&);
+  virtual ~LPTableau();
+  
+  LPTableau<T>& operator=(const LPTableau<T>&);
+
   void SetCost(const gVector<T>& ); // unit column cost := 0
-  void SetCost(const gVector<T>&, const gVector<T>& ); // DumbTableau row
-  void GetCost(gVector<T>&, gVector<T>& ) const; // DumbTableau row
-  void ClearCost(); // make cost undefined
+  void SetCost(const gVector<T>&, const gVector<T>& );
+  void GetCost(gVector<T>&, gVector<T>& ) const;
   T TotalCost() const; // cost of current solution
   T RelativeCost(int) const; // negative index convention
   void RelativeCostVector(gVector<T> &, gVector<T> &) const; 
       // DumbTableau row
   void DualVector(gVector<T> &) const; // column vector
-*/
-
 };
-
 
 #ifdef __GNUG__
 #include "rational.h"

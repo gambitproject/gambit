@@ -21,7 +21,7 @@ template <class T> gVector<T> Make_b(const NormalForm<T> &);
 //---------------------------------------------------------------------------
 
 EnumParams::EnumParams(gStatus &status_) : plev(0), stopAfter(0),
-outfile(0),status(status_)
+outfile(&gnull),status(status_)
 { }
 
 //-------------------------------------------------------------------------
@@ -62,12 +62,15 @@ template <class T> int EnumModule<T>::Enum(void)
   }
   
   if(params.status.Get()) {
-    gout << "\n User Break \n";
+    (*params.outfile) << "\n User Break \n";
     params.status.Reset();
   }
-  for(i=1;i<=List.Length();i++) {
-    gout << "\n";
-    List[i].Dump(gout);
+
+  if(params.plev>=2) {
+    for(i=1;i<=List.Length();i++) {
+      (*params.outfile) << "\n";
+      List[i].Dump(*params.outfile);
+    }
   }
   time = (gRational) watch.Elapsed();
   return 1;
@@ -146,7 +149,7 @@ template <class T> void EnumModule<T>
     }
     if(j) {
       printf("  Nash equilib");    
-      B2.Dump(gout); 
+      B2.Dump(*params.outfile); 
     }
   }
   

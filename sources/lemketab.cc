@@ -10,9 +10,9 @@
 //                        Lemke Tableau: member functions
 //---------------------------------------------------------------------------
  
-template <class T> LTableau<T>::LTableau(void)
-  : Tableau<T>()
-{ } 
+// template <class T> LTableau<T>::LTableau(void)
+//   : Tableau<T>()
+// { } 
 
 template <class T> LTableau<T>::LTableau(const gMatrix<T> &A, 
 					 const gVector<T> &b)
@@ -46,7 +46,7 @@ template <class T> int LTableau<T>::PivotIn(int inlabel)
 //
 
 
-template <class T> int LTableau<T>::ExitIndex(int inlabel) const
+template <class T> int LTableau<T>::ExitIndex(int inlabel)
 {
   gBlock<int> BestSet;
   int i, c;
