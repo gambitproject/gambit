@@ -27,203 +27,205 @@ Portion* GSM_Assign( Portion** param )
 //                      mathematical operators
 //------------------------------------------------------------------
 
-Portion* GSM_Add( Portion** param )
+
+/*---------------------- GSM_Add ---------------------------*/
+
+Portion* GSM_Add_double( Portion** param )
 {
   Portion* result = 0;
+  result = new numerical_Portion<double>
+    (
+     ( (numerical_Portion<double>*) param[ 0 ] )->Value() +
+     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
-  if( param[ 0 ]->Type() != param[ 1 ]->Type() )
-    return 0;
-  
-  switch( param[ 0 ]->Type() )
+Portion* GSM_Add_gInteger( Portion** param )
+{
+  Portion* result = 0;
+  result = new numerical_Portion<gInteger>
+    (
+     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() +
+     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+Portion* GSM_Add_gRational( Portion** param )
+{
+  Portion* result = 0;
+  result = new numerical_Portion<gRational>
+    (
+     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() +
+     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+
+
+/*---------------------- GSM_Subtract ------------------------*/
+
+Portion* GSM_Subtract_double( Portion** param )
+{
+  Portion* result = 0;
+  result = new numerical_Portion<double>
+    (
+     ( (numerical_Portion<double>*) param[ 0 ] )->Value() -
+     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+Portion* GSM_Subtract_gInteger( Portion** param )
+{
+  Portion* result = 0;
+  result = new numerical_Portion<gInteger>
+    (
+     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() -
+     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+Portion* GSM_Subtract_gRational( Portion** param )
+{
+  Portion* result = 0;
+  result = new numerical_Portion<gRational>
+    (
+     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() -
+     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+
+
+/*------------------------- GSM_Multiply ---------------------------*/
+
+Portion* GSM_Multiply_double( Portion** param )
+{
+  Portion* result = 0;
+  result = new numerical_Portion<double>
+    (
+     ( (numerical_Portion<double>*) param[ 0 ] )->Value() *
+     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+Portion* GSM_Multiply_gInteger( Portion** param )
+{
+  Portion* result = 0;
+  result = new numerical_Portion<gInteger>
+    (
+     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() *
+     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+Portion* GSM_Multiply_gRational( Portion** param )
+{
+  Portion* result = 0;
+  result = new numerical_Portion<gRational>
+    (
+     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() *
+     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+
+
+/*---------------------------- GSM_Divide -------------------------------*/
+
+Portion* GSM_Divide_double( Portion** param )
+{
+  Portion* result = 0;
+  if( ( (numerical_Portion<double>*) param[ 1 ] )->Value() != 0 )
   {
-  case porDOUBLE:
     result = new numerical_Portion<double>
       (
-       ( (numerical_Portion<double>*) param[ 0 ] )->Value() +
+       ( (numerical_Portion<double>*) param[ 0 ] )->Value() /
        ( (numerical_Portion<double>*) param[ 1 ] )->Value()
        );
-    break;
-    
-  case porINTEGER:
+  }
+  else
+  {
+    gerr << "GSM_Divide Error: division by zero\n";
+  }
+  return result;
+}
+
+Portion* GSM_Divide_gInteger( Portion** param )
+{
+  Portion* result = 0;
+  if( ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value() != 0 )
+  {
     result = new numerical_Portion<gInteger>
       (
-       ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() +
+       ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() /
        ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
        );
-    break;
+  }
+  else
+  {
+    gerr << "GSM_Divide Error: division by zero\n";
+  }
+  return result;
+}
 
-  case porRATIONAL:
+Portion* GSM_Divide_gRational( Portion** param )
+{
+  Portion* result = 0;
+  if( ( (numerical_Portion<gRational>*) param[ 1 ] )->Value() != 0 )
+  {
     result = new numerical_Portion<gRational>
       (
-       ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() +
+       ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() /
        ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
        );
-    break;
   }
-  return result;
-}
-
-
-Portion* GSM_Subtract( Portion** param )
-{
-  Portion* result = 0;
-
-  if( param[ 0 ]->Type() != param[ 1 ]->Type() )
-    return 0;
-  
-  switch( param[ 0 ]->Type() )
+  else
   {
-  case porDOUBLE:
-    result = new numerical_Portion<double>
-      (
-       ( (numerical_Portion<double>*) param[ 0 ] )->Value() -
-       ( (numerical_Portion<double>*) param[ 1 ] )->Value()
-       );
-    break;
-    
-  case porINTEGER:
-    result = new numerical_Portion<gInteger>
-      (
-       ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() -
-       ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
-       );
-    break;
-
-  case porRATIONAL:
-    result = new numerical_Portion<gRational>
-      (
-       ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() -
-       ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
-       );
-    break;
-  }
-  return result;
-}
-
-
-Portion* GSM_Multiply( Portion** param )
-{
-  Portion* result = 0;
-
-  if( param[ 0 ]->Type() != param[ 1 ]->Type() )
-    return 0;
-  
-  switch( param[ 0 ]->Type() )
-  {
-  case porDOUBLE:
-    result = new numerical_Portion<double>
-      (
-       ( (numerical_Portion<double>*) param[ 0 ] )->Value() *
-       ( (numerical_Portion<double>*) param[ 1 ] )->Value()
-       );
-    break;
-    
-  case porINTEGER:
-    result = new numerical_Portion<gInteger>
-      (
-       ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() *
-       ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
-       );
-    break;
-
-  case porRATIONAL:
-    result = new numerical_Portion<gRational>
-      (
-       ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() *
-       ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
-       );
-    break;
-  }
-  return result;
-}
-
-
-Portion* GSM_Divide( Portion** param )
-{
-  Portion* result = 0;
-
-  if( param[ 0 ]->Type() != param[ 1 ]->Type() )
-    return 0;
-  
-  switch( param[ 0 ]->Type() )
-  {
-  case porDOUBLE:
-    if( ( (numerical_Portion<double>*) param[ 1 ] )->Value() != 0 )
-    {
-      result = new numerical_Portion<double>
-	(
-	 ( (numerical_Portion<double>*) param[ 0 ] )->Value() /
-	 ( (numerical_Portion<double>*) param[ 1 ] )->Value()
-	 );
-    }
-    else
-    {
-      gerr << "GSM_Divide Error: division by zero\n";
-    }
-    break;
-    
-  case porINTEGER:
-    if( ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value() != 0 )
-    {
-      result = new numerical_Portion<gInteger>
-	(
-	 ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() /
-	 ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
-	 );
-    }
-    else
-    {
-      gerr << "GSM_Divide Error: division by zero\n";
-    }
-    break;
-
-  case porRATIONAL:
-    if( ( (numerical_Portion<gRational>*) param[ 1 ] )->Value() != 0 )
-    {
-      result = new numerical_Portion<gRational>
-	(
-	 ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() /
-	 ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
-	 );
-    }
-    else
-    {
-      gerr << "GSM_Divide Error: division by zero\n";
-    }
-    break;
+    gerr << "GSM_Divide Error: division by zero\n";
   }
   return result;
 }
 
 
 
-Portion* GSM_Negate( Portion** param )
+/*------------------------ GSM_Negate ------------------------*/
+
+Portion* GSM_Negate_double( Portion** param )
 {
   Portion* result = 0;
+  result = new numerical_Portion<double>
+    (
+     -( (numerical_Portion<double>*) param[ 0 ] )->Value()
+     );
+  return result;
+}
 
-  switch( param[ 0 ]->Type() )
-  {
-  case porDOUBLE:
-    result = new numerical_Portion<double>
-      (
-       -( (numerical_Portion<double>*) param[ 0 ] )->Value()
-       );
-    break;
-    
-  case porINTEGER:
-    result = new numerical_Portion<gInteger>
-      (
-       -( (numerical_Portion<gInteger>*) param[ 0 ] )->Value()
-       );
-    break;
+Portion* GSM_Negate_gInteger( Portion** param )
+{
+  Portion* result = 0;
+  result = new numerical_Portion<gInteger>
+    (
+     -( (numerical_Portion<gInteger>*) param[ 0 ] )->Value()
+     );
+  return result;
+}
 
-  case porRATIONAL:
-    result = new numerical_Portion<gRational>
-      (
-       -( (numerical_Portion<gRational>*) param[ 0 ] )->Value()
-       );
-    break;
-  }
+Portion* GSM_Negate_gRational( Portion** param )
+{
+  Portion* result = 0;
+  result = new numerical_Portion<gRational>
+    (
+     -( (numerical_Portion<gRational>*) param[ 0 ] )->Value()
+     );
   return result;
 }
 
@@ -233,30 +235,22 @@ Portion* GSM_Negate( Portion** param )
 //                    integer math operators
 //--------------------------------------------------------------------
 
+/*---------------------- GSM_Modulus ---------------------------*/
 
-Portion* GSM_Modulus( Portion** param )
+Portion* GSM_Modulus_gInteger( Portion** param )
 {
   Portion* result = 0;
-
-  if( param[ 0 ]->Type() != param[ 1 ]->Type() )
-    return 0;
-  
-  switch( param[ 0 ]->Type() )
+  if( ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value() != 0 )
   {
-  case porINTEGER:
-    if( ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value() != 0 )
-    {
-      result = new numerical_Portion<gInteger>
-	(
-	 ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() %
-	 ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
-	 );
-    }
-    else
-    {
-      gerr << "GSM_Divide Error: division by zero\n";
-    }
-    break;
+    result = new numerical_Portion<gInteger>
+      (
+       ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() %
+       ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+       );
+  }
+  else
+  {
+    gerr << "GSM_Divide Error: division by zero\n";
   }
   return result;
 }
@@ -267,281 +261,308 @@ Portion* GSM_Modulus( Portion** param )
 //                      relational operators
 //------------------------------------------------------------------
 
-Portion* GSM_EqualTo( Portion** param )
+/*---------------------- GSM_EqualTo --------------------------*/
+
+Portion* GSM_EqualTo_double( Portion** param )
 {
   Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<double>*) param[ 0 ] )->Value() ==
+     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
-  if( param[ 0 ]->Type() != param[ 1 ]->Type() )
-    return 0;
-  
-  switch( param[ 0 ]->Type() )
-  {
-  case porDOUBLE:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<double>*) param[ 0 ] )->Value() ==
-       ( (numerical_Portion<double>*) param[ 1 ] )->Value()
-       );
-    break;
-    
-  case porINTEGER:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() ==
-       ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
-       );
-    break;
+Portion* GSM_EqualTo_gInteger( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() ==
+     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
-  case porRATIONAL:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() ==
-       ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
-       );
-    break;
+Portion* GSM_EqualTo_gRational( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() ==
+     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
-  case porSTRING:
-    result = new bool_Portion
-      (
-       ( (gString_Portion*) param[ 0 ] )->Value() ==
-       ( (gString_Portion*) param[ 1 ] )->Value()
-       );
-    break;
-  }
+Portion* GSM_EqualTo_gString( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (gString_Portion*) param[ 0 ] )->Value() ==
+     ( (gString_Portion*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
+Portion* GSM_EqualTo_bool( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (bool_Portion*) param[ 0 ] )->Value() ==
+     ( (bool_Portion*) param[ 1 ] )->Value()
+     );
   return result;
 }
 
 
-Portion* GSM_NotEqualTo( Portion** param )
+/*----------------------- GSM_NotEqualTo --------------------------*/
+
+Portion* GSM_NotEqualTo_double( Portion** param )
 {
   Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<double>*) param[ 0 ] )->Value() !=
+     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
-  if( param[ 0 ]->Type() != param[ 1 ]->Type() )
-    return 0;
-  
-  switch( param[ 0 ]->Type() )
-  {
-  case porDOUBLE:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<double>*) param[ 0 ] )->Value() !=
-       ( (numerical_Portion<double>*) param[ 1 ] )->Value()
-       );
-    break;
-    
-  case porINTEGER:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() !=
-       ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
-       );
-    break;
+Portion* GSM_NotEqualTo_gInteger( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() !=
+     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
-  case porRATIONAL:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() !=
-       ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
-       );
-    break;
+Portion* GSM_NotEqualTo_gRational( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() !=
+     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
-  case porSTRING:
-    result = new bool_Portion
-      (
-       ( (gString_Portion*) param[ 0 ] )->Value() !=
-       ( (gString_Portion*) param[ 1 ] )->Value()
-       );
-    break;
-  }
+Portion* GSM_NotEqualTo_gString( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (gString_Portion*) param[ 0 ] )->Value() !=
+     ( (gString_Portion*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
+Portion* GSM_NotEqualTo_bool( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (bool_Portion*) param[ 0 ] )->Value() !=
+     ( (bool_Portion*) param[ 1 ] )->Value()
+     );
   return result;
 }
 
 
-Portion* GSM_GreaterThan( Portion** param )
+/*-------------------------- GSM_GreaterThan -------------------------*/
+
+Portion* GSM_GreaterThan_double( Portion** param )
 {
   Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<double>*) param[ 0 ] )->Value() >
+     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
-  if( param[ 0 ]->Type() != param[ 1 ]->Type() )
-    return 0;
-  
-  switch( param[ 0 ]->Type() )
-  {
-  case porDOUBLE:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<double>*) param[ 0 ] )->Value() >
-       ( (numerical_Portion<double>*) param[ 1 ] )->Value()
-       );
-    break;
-    
-  case porINTEGER:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() >
-       ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
-       );
-    break;
+Portion* GSM_GreaterThan_gInteger( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() >
+     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
-  case porRATIONAL:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() >
-       ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
-       );
-    break;
+Portion* GSM_GreaterThan_gRational( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() >
+     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
-  case porSTRING:
-    result = new bool_Portion
-      (
-       ( (gString_Portion*) param[ 0 ] )->Value() >
-       ( (gString_Portion*) param[ 1 ] )->Value()
-       );
-    break;
-  }
-
+Portion* GSM_GreaterThan_gString( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (gString_Portion*) param[ 0 ] )->Value() >
+     ( (gString_Portion*) param[ 1 ] )->Value()
+     );
   return result;
 }
 
 
-Portion* GSM_LessThan( Portion** param )
+/*----------------------- GSM_LessThan -----------------------*/
+
+Portion* GSM_LessThan_double( Portion** param )
 {
   Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<double>*) param[ 0 ] )->Value() <
+     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
-  if( param[ 0 ]->Type() != param[ 1 ]->Type() )
-    return 0;
-  
-  switch( param[ 0 ]->Type() )
-  {
-  case porDOUBLE:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<double>*) param[ 0 ] )->Value() <
-       ( (numerical_Portion<double>*) param[ 1 ] )->Value()
-       );
-    break;
-    
-  case porINTEGER:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() <
-       ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
-       );
-    break;
+Portion* GSM_LessThan_gInteger( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() <
+     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
-  case porRATIONAL:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() <
-       ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
-       );
-    break;
+Portion* GSM_LessThan_gRational( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() <
+     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
-  case porSTRING:
-    result = new bool_Portion
-      (
-       ( (gString_Portion*) param[ 0 ] )->Value() <
-       ( (gString_Portion*) param[ 1 ] )->Value()
-       );
-    break;
-  }
-
+Portion* GSM_LessThan_gString( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (gString_Portion*) param[ 0 ] )->Value() <
+     ( (gString_Portion*) param[ 1 ] )->Value()
+     );
   return result;
 }
 
 
-Portion* GSM_GreaterThanOrEqualTo( Portion** param )
+/*--------------------- GSM_GreaterThanOrEqualTo --------------------*/
+
+Portion* GSM_GreaterThanOrEqualTo_double( Portion** param )
 {
   Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<double>*) param[ 0 ] )->Value() >=
+     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
-  if( param[ 0 ]->Type() != param[ 1 ]->Type() )
-    return 0;
-  
-  switch( param[ 0 ]->Type() )
-  {
-  case porDOUBLE:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<double>*) param[ 0 ] )->Value() >=
-       ( (numerical_Portion<double>*) param[ 1 ] )->Value()
-       );
-    break;
-    
-  case porINTEGER:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() >=
-       ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
-       );
-    break;
+Portion* GSM_GreaterThanOrEqualTo_gInteger( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() >=
+     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
-  case porRATIONAL:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() >=
-       ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
-       );
-    break;
+Portion* GSM_GreaterThanOrEqualTo_gRational( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() >=
+     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
-  case porSTRING:
-    result = new bool_Portion
-      (
-       ( (gString_Portion*) param[ 0 ] )->Value() >=
-       ( (gString_Portion*) param[ 1 ] )->Value()
-       );
-    break;
-  }
-
+Portion* GSM_GreaterThanOrEqualTo_gString( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (gString_Portion*) param[ 0 ] )->Value() >=
+     ( (gString_Portion*) param[ 1 ] )->Value()
+     );
   return result;
 }
 
 
-Portion* GSM_LessThanOrEqualTo( Portion** param )
+/*--------------------- GSM_LessThanOrEqualTo ---------------------*/
+
+Portion* GSM_LessThanOrEqualTo_double( Portion** param )
 {
   Portion* result = 0;
-
-  if( param[ 0 ]->Type() != param[ 1 ]->Type() )
-    return 0;
-  
-  switch( param[ 0 ]->Type() )
-  {
-  case porDOUBLE:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<double>*) param[ 0 ] )->Value() <=
-       ( (numerical_Portion<double>*) param[ 1 ] )->Value()
-       );
-    break;
-    
-  case porINTEGER:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() <=
-       ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
-       );
-    break;
-
-  case porRATIONAL:
-    result = new bool_Portion
-      (
-       ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() <=
-       ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
-       );
-    break;
-
-  case porSTRING:
-    result = new bool_Portion
-      (
-       ( (gString_Portion*) param[ 0 ] )->Value() <=
-       ( (gString_Portion*) param[ 1 ] )->Value()
-       );
-    break;
-  }
-
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<double>*) param[ 0 ] )->Value() <=
+     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     );
   return result;
 }
 
+Portion* GSM_LessThanOrEqualTo_gInteger( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() <=
+     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+Portion* GSM_LessThanOrEqualTo_gRational( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() <=
+     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+Portion* GSM_LessThanOrEqualTo_gString( Portion** param )
+{
+  Portion* result = 0;
+  result = new bool_Portion
+    (
+     ( (gString_Portion*) param[ 0 ] )->Value() <=
+     ( (gString_Portion*) param[ 1 ] )->Value()
+     );
+  return result;
+}
 
 
 
@@ -613,103 +634,341 @@ void Init_gsmoper( GSM* gsm )
 
 
 
+  /*-------------------- Plus ----------------------------*/
+
   FuncObj = new FuncDescObj( (gString) "Plus" );
-  FuncObj->SetFuncInfo( GSM_Add, 2 );
-  FuncObj->SetParamInfo( GSM_Add, 0, "x", porNUMERICAL, NO_DEFAULT_VALUE );
-  FuncObj->SetParamInfo( GSM_Add, 1, "y", porNUMERICAL, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_Add_double, 2 );
+  FuncObj->SetParamInfo( GSM_Add_double, 0, "x", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_Add_double, 1, "y", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_Add_gInteger, 2 );
+  FuncObj->SetParamInfo( GSM_Add_gInteger, 0, "x", 
+			porINTEGER, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_Add_gInteger, 1, "y", 
+			porINTEGER, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_Add_gRational, 2 );
+  FuncObj->SetParamInfo( GSM_Add_gRational, 0, "x", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_Add_gRational, 1, "y", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+
   gsm->AddFunction( FuncObj );
+
+
+  /*----------------------- Minus ------------------------*/
 
   FuncObj = new FuncDescObj( (gString) "Minus" );
-  FuncObj->SetFuncInfo( GSM_Subtract, 2 );
-  FuncObj->SetParamInfo( GSM_Subtract, 0, "x", 
-			porNUMERICAL, NO_DEFAULT_VALUE );
-  FuncObj->SetParamInfo( GSM_Subtract, 1, "y", 
-			porNUMERICAL, NO_DEFAULT_VALUE );
+  FuncObj->SetFuncInfo( GSM_Subtract_double, 2 );
+  FuncObj->SetParamInfo( GSM_Subtract_double, 0, "x", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_Subtract_double, 1, "y", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_Subtract_gInteger, 2 );
+  FuncObj->SetParamInfo( GSM_Subtract_gInteger, 0, "x", 
+			porINTEGER, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_Subtract_gInteger, 1, "y", 
+			porINTEGER, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_Subtract_gRational, 2 );
+  FuncObj->SetParamInfo( GSM_Subtract_gRational, 0, "x", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_Subtract_gRational, 1, "y", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+
   gsm->AddFunction( FuncObj );
+
+
+  /*----------------------- Times ----------------------------*/
 
   FuncObj = new FuncDescObj( (gString) "Times" );
-  FuncObj->SetFuncInfo( GSM_Multiply, 2 );
-  FuncObj->SetParamInfo( GSM_Multiply, 0, "x", 
-			porNUMERICAL, NO_DEFAULT_VALUE );
-  FuncObj->SetParamInfo( GSM_Multiply, 1, "y", 
-			porNUMERICAL, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_Multiply_double, 2 );
+  FuncObj->SetParamInfo( GSM_Multiply_double, 0, "x", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_Multiply_double, 1, "y", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_Multiply_gInteger, 2 );
+  FuncObj->SetParamInfo( GSM_Multiply_gInteger, 0, "x", 
+			porINTEGER, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_Multiply_gInteger, 1, "y", 
+			porINTEGER, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_Multiply_gRational, 2 );
+  FuncObj->SetParamInfo( GSM_Multiply_gRational, 0, "x", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_Multiply_gRational, 1, "y", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+
   gsm->AddFunction( FuncObj );
+
+
+  /*----------------------- Divide -------------------------*/
 
   FuncObj = new FuncDescObj( (gString) "Divide" );
-  FuncObj->SetFuncInfo( GSM_Divide, 2 );
-  FuncObj->SetParamInfo( GSM_Divide, 0, "x", 
-			porNUMERICAL, NO_DEFAULT_VALUE );
-  FuncObj->SetParamInfo( GSM_Divide, 1, "y", 
-			porNUMERICAL, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_Divide_double, 2 );
+  FuncObj->SetParamInfo( GSM_Divide_double, 0, "x", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_Divide_double, 1, "y", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_Divide_gInteger, 2 );
+  FuncObj->SetParamInfo( GSM_Divide_gInteger, 0, "x", 
+			porINTEGER, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_Divide_gInteger, 1, "y", 
+			porINTEGER, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_Divide_gRational, 2 );
+  FuncObj->SetParamInfo( GSM_Divide_gRational, 0, "x", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_Divide_gRational, 1, "y", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+
   gsm->AddFunction( FuncObj );
+
+
+  /*----------------------- Negate -----------------------*/
 
   FuncObj = new FuncDescObj( (gString) "Negate" );
-  FuncObj->SetFuncInfo( GSM_Negate, 1 );
-  FuncObj->SetParamInfo( GSM_Negate, 0, "x", 
-			porNUMERICAL, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_Negate_double, 1 );
+  FuncObj->SetParamInfo( GSM_Negate_double, 0, "x", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_Negate_gInteger, 1 );
+  FuncObj->SetParamInfo( GSM_Negate_gInteger, 0, "x", 
+			porINTEGER, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_Negate_gRational, 1 );
+  FuncObj->SetParamInfo( GSM_Negate_gRational, 0, "x", 
+			porINTEGER, NO_DEFAULT_VALUE );
+
   gsm->AddFunction( FuncObj );
 
+
+  /*----------------------- Modulus ------------------------*/
 
   FuncObj = new FuncDescObj( (gString) "Modulus" );
-  FuncObj->SetFuncInfo( GSM_Modulus, 2 );
-  FuncObj->SetParamInfo( GSM_Modulus, 0, "x", 
+
+  FuncObj->SetFuncInfo( GSM_Modulus_gInteger, 2 );
+  FuncObj->SetParamInfo( GSM_Modulus_gInteger, 0, "x", 
 			porINTEGER, NO_DEFAULT_VALUE );
-  FuncObj->SetParamInfo( GSM_Modulus, 1, "y", 
+  FuncObj->SetParamInfo( GSM_Modulus_gInteger, 1, "y", 
 			porINTEGER, NO_DEFAULT_VALUE );
+
   gsm->AddFunction( FuncObj );
 
 
 
+
+
+  /*-------------------------- Equal ---------------------------*/
 
   FuncObj = new FuncDescObj( (gString) "Equal" );
-  FuncObj->SetFuncInfo( GSM_EqualTo, 2 );
-  FuncObj->SetParamInfo( GSM_EqualTo, 0, "x", 
-			porNUMERICAL | porSTRING, NO_DEFAULT_VALUE );
-  FuncObj->SetParamInfo( GSM_EqualTo, 1, "y", 
-			porNUMERICAL | porSTRING, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_EqualTo_double, 2 );
+  FuncObj->SetParamInfo( GSM_EqualTo_double, 0, "x", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_EqualTo_double, 1, "y", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_EqualTo_gInteger, 2 );
+  FuncObj->SetParamInfo( GSM_EqualTo_gInteger, 0, "x", 
+			porINTEGER, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_EqualTo_gInteger, 1, "y", 
+			porINTEGER, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_EqualTo_gRational, 2 );
+  FuncObj->SetParamInfo( GSM_EqualTo_gRational, 0, "x", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_EqualTo_gRational, 1, "y", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_EqualTo_gString, 2 );
+  FuncObj->SetParamInfo( GSM_EqualTo_gString, 0, "x", 
+			porSTRING, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_EqualTo_gString, 1, "y", 
+			porSTRING, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_EqualTo_bool, 2 );
+  FuncObj->SetParamInfo( GSM_EqualTo_bool, 0, "x", 
+			porBOOL, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_EqualTo_bool, 1, "y", 
+			porBOOL, NO_DEFAULT_VALUE );
+
   gsm->AddFunction( FuncObj );
+
+
+  /*-------------------------- NotEqual ---------------------------*/
 
   FuncObj = new FuncDescObj( (gString) "NotEqual" ); 
-  FuncObj->SetFuncInfo( GSM_NotEqualTo, 2 );
-  FuncObj->SetParamInfo( GSM_NotEqualTo, 0, "x", 
-			porNUMERICAL | porSTRING, NO_DEFAULT_VALUE );
-  FuncObj->SetParamInfo( GSM_NotEqualTo, 1, "y", 
-			porNUMERICAL | porSTRING, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_NotEqualTo_double, 2 );
+  FuncObj->SetParamInfo( GSM_NotEqualTo_double, 0, "x", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_NotEqualTo_double, 1, "y", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_NotEqualTo_gInteger, 2 );
+  FuncObj->SetParamInfo( GSM_NotEqualTo_gInteger, 0, "x", 
+			porINTEGER, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_NotEqualTo_gInteger, 1, "y", 
+			porINTEGER, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_NotEqualTo_gRational, 2 );
+  FuncObj->SetParamInfo( GSM_NotEqualTo_gRational, 0, "x", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_NotEqualTo_gRational, 1, "y", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_NotEqualTo_gString, 2 );
+  FuncObj->SetParamInfo( GSM_NotEqualTo_gString, 0, "x", 
+			porSTRING, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_NotEqualTo_gString, 1, "y", 
+			porSTRING, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_NotEqualTo_bool, 2 );
+  FuncObj->SetParamInfo( GSM_NotEqualTo_bool, 0, "x", 
+			porBOOL, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_NotEqualTo_bool, 1, "y", 
+			porBOOL, NO_DEFAULT_VALUE );
+
   gsm->AddFunction( FuncObj );
+
+
+  /*-------------------------- Greater ---------------------------*/
 
   FuncObj = new FuncDescObj( (gString) "Greater" );
-  FuncObj->SetFuncInfo( GSM_GreaterThan, 2 );
-  FuncObj->SetParamInfo( GSM_GreaterThan, 0, "x", 
-			porNUMERICAL | porSTRING, NO_DEFAULT_VALUE );
-  FuncObj->SetParamInfo( GSM_GreaterThan, 1, "y", 
-			porNUMERICAL | porSTRING, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_GreaterThan_double, 2 );
+  FuncObj->SetParamInfo( GSM_GreaterThan_double, 0, "x", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_GreaterThan_double, 1, "y", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_GreaterThan_gInteger, 2 );
+  FuncObj->SetParamInfo( GSM_GreaterThan_gInteger, 0, "x", 
+			porINTEGER, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_GreaterThan_gInteger, 1, "y", 
+			porINTEGER, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_GreaterThan_gRational, 2 );
+  FuncObj->SetParamInfo( GSM_GreaterThan_gRational, 0, "x", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_GreaterThan_gRational, 1, "y", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_GreaterThan_gString, 2 );
+  FuncObj->SetParamInfo( GSM_GreaterThan_gString, 0, "x", 
+			porSTRING, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_GreaterThan_gString, 1, "y", 
+			porSTRING, NO_DEFAULT_VALUE );
+
   gsm->AddFunction( FuncObj );
+
+
+  /*-------------------------- Less ---------------------------*/
 
   FuncObj = new FuncDescObj( (gString) "Less" );
-  FuncObj->SetFuncInfo( GSM_LessThan, 2 );
-  FuncObj->SetParamInfo( GSM_LessThan, 0, "x", 
-			porNUMERICAL | porSTRING, NO_DEFAULT_VALUE );
-  FuncObj->SetParamInfo( GSM_LessThan, 1, "y", 
-			porNUMERICAL | porSTRING, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_LessThan_double, 2 );
+  FuncObj->SetParamInfo( GSM_LessThan_double, 0, "x", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_LessThan_double, 1, "y", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_LessThan_gInteger, 2 );
+  FuncObj->SetParamInfo( GSM_LessThan_gInteger, 0, "x", 
+			porINTEGER, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_LessThan_gInteger, 1, "y", 
+			porINTEGER, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_LessThan_gRational, 2 );
+  FuncObj->SetParamInfo( GSM_LessThan_gRational, 0, "x", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_LessThan_gRational, 1, "y", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_LessThan_gString, 2 );
+  FuncObj->SetParamInfo( GSM_LessThan_gString, 0, "x", 
+			porSTRING, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_LessThan_gString, 1, "y", 
+			porSTRING, NO_DEFAULT_VALUE );
+
   gsm->AddFunction( FuncObj );
+
+
+  /*---------------------- GreaterThanOrEqualTo ---------------------------*/
 
   FuncObj = new FuncDescObj( (gString) "GreaterEqual" );
-  FuncObj->SetFuncInfo( GSM_GreaterThanOrEqualTo, 2 );
-  FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo, 0, "x", 
-			porNUMERICAL | porSTRING, NO_DEFAULT_VALUE );
-  FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo, 1, "y", 
-			porNUMERICAL | porSTRING, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_GreaterThanOrEqualTo_double, 2 );
+  FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo_double, 0, "x", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo_double, 1, "y", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_GreaterThanOrEqualTo_gInteger, 2 );
+  FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo_gInteger, 0, "x", 
+			porINTEGER, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo_gInteger, 1, "y", 
+			porINTEGER, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_GreaterThanOrEqualTo_gRational, 2 );
+  FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo_gRational, 0, "x", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo_gRational, 1, "y", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_GreaterThanOrEqualTo_gString, 2 );
+  FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo_gString, 0, "x", 
+			porSTRING, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo_gString, 1, "y", 
+			porSTRING, NO_DEFAULT_VALUE );
+
   gsm->AddFunction( FuncObj );
+
+
+  /*----------------------- LessThanOrEqualTo ---------------------------*/
 
   FuncObj = new FuncDescObj( (gString) "LessEqual" );
-  FuncObj->SetFuncInfo( GSM_LessThanOrEqualTo, 2 );
-  FuncObj->SetParamInfo( GSM_LessThanOrEqualTo, 0, "x", 
-			porNUMERICAL | porSTRING, NO_DEFAULT_VALUE );
-  FuncObj->SetParamInfo( GSM_LessThanOrEqualTo, 1, "y", 
-			porNUMERICAL | porSTRING, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_LessThanOrEqualTo_double, 2 );
+  FuncObj->SetParamInfo( GSM_LessThanOrEqualTo_double, 0, "x", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_LessThanOrEqualTo_double, 1, "y", 
+			porDOUBLE, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_LessThanOrEqualTo_gInteger, 2 );
+  FuncObj->SetParamInfo( GSM_LessThanOrEqualTo_gInteger, 0, "x", 
+			porINTEGER, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_LessThanOrEqualTo_gInteger, 1, "y", 
+			porINTEGER, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_LessThanOrEqualTo_gRational, 2 );
+  FuncObj->SetParamInfo( GSM_LessThanOrEqualTo_gRational, 0, "x", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_LessThanOrEqualTo_gRational, 1, "y", 
+			porRATIONAL, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_LessThanOrEqualTo_gString, 2 );
+  FuncObj->SetParamInfo( GSM_LessThanOrEqualTo_gString, 0, "x", 
+			porSTRING, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_LessThanOrEqualTo_gString, 1, "y", 
+			porSTRING, NO_DEFAULT_VALUE );
+
   gsm->AddFunction( FuncObj );
 
 
+
+
+  /*--------------------- And -------------------------------*/
 
   FuncObj = new FuncDescObj( (gString) "And" );
   FuncObj->SetFuncInfo( GSM_AND, 2 );
@@ -719,6 +978,9 @@ void Init_gsmoper( GSM* gsm )
 			porBOOL, NO_DEFAULT_VALUE );
   gsm->AddFunction( FuncObj );
 
+
+  /*--------------------- Or -------------------------------*/
+
   FuncObj = new FuncDescObj( (gString) "Or" );
   FuncObj->SetFuncInfo( GSM_OR, 2 );
   FuncObj->SetParamInfo( GSM_OR, 0, "x", 
@@ -726,6 +988,9 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetParamInfo( GSM_OR, 1, "y", 
 			porBOOL, NO_DEFAULT_VALUE );
   gsm->AddFunction( FuncObj );
+
+
+  /*--------------------- Not -------------------------------*/
 
   FuncObj = new FuncDescObj( (gString) "Not" );
   FuncObj->SetFuncInfo( GSM_NOT, 1 );
