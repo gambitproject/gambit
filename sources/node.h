@@ -16,19 +16,25 @@ class Node    {
   friend class ExtForm<gRational>;
   
   protected:
+    bool valid;
+    BaseExtForm *E;
     gString name;
     Infoset *infoset;
     Node *parent;
     Outcome *outcome;
     gBlock<Node *> children;
 
-    Node(Node *p) : parent(p), infoset(0), outcome(0)   { }
+    Node(BaseExtForm *e, Node *p)
+      : valid(true), E(e), parent(p), infoset(0), outcome(0)   { }
     virtual ~Node()
       { for (int i = children.Length(); i; delete children[i--]); }
 
     virtual void Resize(int) = 0;
 
   public:
+    bool IsValid(void) const     { return valid; }
+    BaseExtForm *BelongsTo(void) const   { return E; }
+
     int NumChildren(void) const    { return children.Length(); }
     Infoset *GetInfoset(void) const   { return infoset; }
     Player *GetPlayer(void) const

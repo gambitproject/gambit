@@ -37,13 +37,16 @@ class Infoset   {
   friend class ExtForm<gRational>;
 
   protected:
+    bool valid;
+    BaseExtForm *E;
     int number;
     gString name;
     Player *player;
     gBlock<Action *> actions;
     gBlock<Node *> members;
     
-    Infoset(int n, Player *p, int br) : number(n), player(p), actions(br) 
+    Infoset(BaseExtForm *e, int n, Player *p, int br)
+      : valid(true), E(e), number(n), player(p), actions(br) 
       { while (br)  { actions[br] = new Action(ToString(br)); br--; } }
     virtual ~Infoset()  
       { for (int i = 1; i <= actions.Length(); i++)  delete actions[i]; }
@@ -56,6 +59,9 @@ class Infoset   {
       }
 
   public:
+    bool IsValid(void) const             { return valid; }
+    BaseExtForm *BelongsTo(void) const   { return E; }
+
     bool IsChanceInfoset(void) const   { return (player->IsChance()); }
 
     Player *GetPlayer(void) const    { return player; }
@@ -92,7 +98,8 @@ template <class T> class ChanceInfoset : public Infoset  {
   private:
     gVector<T> probs;
 
-    ChanceInfoset(int n, Player *p, int br) : Infoset(n, p, br), probs(br)
+    ChanceInfoset(BaseExtForm *E, int n, Player *p, int br)
+      : Infoset(E, n, p, br), probs(br)
       { probs[1] = (T) 1.0;
 	for (int i = 2; i <= br; probs[i++] = (T) 0.0);
       }

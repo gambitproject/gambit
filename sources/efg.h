@@ -24,6 +24,10 @@ class BaseExtForm     {
     Node *root;
     Player *chance;
 
+    gBlock<Node *> dead_nodes;
+    gBlock<Infoset *> dead_infosets;
+    gBlock<Outcome *> dead_outcomes;
+
        //# PROTECTED CONSTRUCTORS -- FOR DERIVED CLASS USE ONLY
     BaseExtForm(void);
 
@@ -31,8 +35,13 @@ class BaseExtForm     {
 
     void DisplayTree(gOutput &, Node *) const;
     void WriteEfgFile(gOutput &, Node *) const;
+
     virtual Infoset *CreateInfoset(int n, Player *pl, int br) = 0;
-    virtual Node *CreateNode(Node *parent) const = 0;
+    virtual Node *CreateNode(Node *parent) = 0;
+
+    void ScrapNode(Node *);
+    void ScrapInfoset(Infoset *);
+    void ScrapOutcome(Outcome *);
 
   public:
        //# DESTRUCTOR
@@ -112,7 +121,7 @@ template <class T> class ExtForm : public BaseExtForm   {
 //			  gDPVector<T> &) const;
 
     Infoset *CreateInfoset(int n, Player *pl, int br);
-    Node *CreateNode(Node *parent) const;
+    Node *CreateNode(Node *parent);
 
   public:
 	//# CONSTRUCTORS AND DESTRUCTOR

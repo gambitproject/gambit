@@ -18,14 +18,14 @@ template <class T> class TypedNode : public Node    {
   public:
     gVector<T> *scratch;
 
-    TypedNode(Node *parent, int pl);
+    TypedNode(BaseExtForm *E, Node *parent, int pl);
     virtual ~TypedNode();
 
     void Resize(int pl);
 };
 
-template <class T> TypedNode<T>::TypedNode(Node *p, int pl) 
-  : Node(p), scratch(new gVector<T>(pl))   { }
+template <class T> TypedNode<T>::TypedNode(BaseExtForm *E, Node *p, int pl) 
+  : Node(E, p), scratch(new gVector<T>(pl))   { }
 
 template <class T> TypedNode<T>::~TypedNode()   { delete scratch; }
 
@@ -43,7 +43,7 @@ template <class T> void TypedNode<T>::Resize(int pl)
 //------------------------------------------------------------------------
 
 template <class T> ExtForm<T>::ExtForm(void)
-{ root = new TypedNode<T>(0, 0); }
+{ root = new TypedNode<T>(this, 0, 0); }
 
 template <class T> ExtForm<T>::~ExtForm()
 { }
@@ -54,8 +54,8 @@ template <class T> ExtForm<T>::~ExtForm()
 
 template <class T> Infoset *ExtForm<T>::CreateInfoset(int n, Player *p, int br)
 {
-  Infoset *s = (p->IsChance()) ? new ChanceInfoset<T>(n, p, br) :
-               new Infoset(n, p, br);
+  Infoset *s = (p->IsChance()) ? new ChanceInfoset<T>(this, n, p, br) :
+               new Infoset(this, n, p, br);
   
   n = 1;
   do  {
@@ -64,8 +64,8 @@ template <class T> Infoset *ExtForm<T>::CreateInfoset(int n, Player *p, int br)
   return s;
 }
 
-template <class T> Node *ExtForm<T>::CreateNode(Node *parent) const
-{ return new TypedNode<T>(parent, players.Length()); }
+template <class T> Node *ExtForm<T>::CreateNode(Node *parent)
+{ return new TypedNode<T>(this, parent, players.Length()); }
 
 //------------------------------------------------------------------------
 //                 ExtForm<T>: Operations on outcomes

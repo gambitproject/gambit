@@ -80,8 +80,37 @@ BaseExtForm::~BaseExtForm()
 {
   delete root;
   delete chance;
-  while (players.Length())    delete players.Remove(1);
-  while (outcomes.Length())   delete outcomes.Remove(1);
+  int i;
+
+  for (i = 1; i <= players.Length(); delete players[i++]);
+  for (i = 1; i <= outcomes.Length(); delete outcomes[i++]);
+
+  for (i = 1; i <= dead_nodes.Length(); delete dead_nodes[i++]);
+  for (i = 1; i <= dead_infosets.Length(); delete dead_infosets[i++]);
+  for (i = 1; i <= dead_outcomes.Length(); delete dead_outcomes[i++]);
+}
+
+//------------------------------------------------------------------------
+//                  BaseExtForm: Private member functions
+//------------------------------------------------------------------------
+
+void BaseExtForm::ScrapNode(Node *n)
+{
+  n->children.Flush();
+  n->valid = false;
+  dead_nodes.Append(n);
+}
+
+void BaseExtForm::ScrapInfoset(Infoset *s)
+{
+  s->members.Flush();
+  s->valid = false;
+  dead_infosets.Append(s);
+}
+
+void BaseExtForm::ScrapOutcome(Outcome *c)
+{
+  dead_outcomes.Append(c);
 }
 
 //------------------------------------------------------------------------
@@ -256,7 +285,8 @@ Node *BaseExtForm::DeleteNode(Node *n, Node *keep)
     n->parent->children[n->parent->children.Find(n)] = keep;
   else
     root = keep;
-  delete n;
+
+  ScrapNode(n);
 
   return keep;
 }
@@ -312,7 +342,7 @@ Infoset *BaseExtForm::JoinInfoset(Infoset *s, Node *n)
 
   t->members.Remove(t->members.Find(n));
   if (t->members.Length() == 0)
-    delete p->infosets.Remove(p->infosets.Find(t));
+    dead_infosets.Append(p->infosets.Remove(p->infosets.Find(t)));
   s->members.Append(n);
 
   n->infoset = s;
@@ -351,7 +381,7 @@ Infoset *BaseExtForm::MergeInfoset(Infoset *to, Infoset *from)
   to->members += from->members;
   for (int i = 1; i <= from->members.Length(); i++)
     from->members[i]->infoset = to;
-  delete from->player->infosets.Remove(from->player->infosets.Find(from));
+  dead_infosets.Append(from->player->infosets.Remove(from->player->infosets.Find(from)));
   return to;
 }
 
@@ -415,13 +445,13 @@ Node *BaseExtForm::DeleteTree(Node *n)
 
   while (n->NumChildren() > 0)   {
     DeleteTree(n->children[1]);
-    delete n->children.Remove(1);
+    ScrapNode(n->children.Remove(1));
   }
   
   if (n->infoset)  {
     n->infoset->members.Remove(n->infoset->members.Find(n));
     if (n->infoset->members.Length() == 0)
-      delete n->infoset->player->infosets.Remove(n->infoset->player->infosets.Find(n->infoset));
+      dead_infosets.Append(n->infoset->player->infosets.Remove(n->infoset->player->infosets.Find(n->infoset)));
     for (int j = 1; j <= n->infoset->player->infosets.Length(); j++)
       n->infoset->player->infosets[j]->number = j;
   }
