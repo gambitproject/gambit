@@ -6,7 +6,7 @@ bin_PROGRAMS = gcl
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
-!include filelist.in
+include filelist.in
 
 gcl_SOURCES = gcl.cc gclstatus.cc gcmdline.cc 
 
@@ -22,3 +22,5 @@ gcl_LDADD = \
 
 gcompile.cc:  gcompile.yy
 	bison -p gcl_yy -o gcompile.cc gcompile.yy
+
+
