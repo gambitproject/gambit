@@ -102,7 +102,10 @@ void gNestedList<T>::Output( gOutput& out ) const
   if( m_Dim[1] == 0 ) // not a list
   {
     assert( m_Dim.Length() == 1 );
-    out << Data()[1];    
+    if (Data()[1] != NULL)
+      out << Data()[1];    
+    else
+      out << "(NULL)";
   }
   else // is a list
   {
@@ -111,7 +114,10 @@ void gNestedList<T>::Output( gOutput& out ) const
       assert( m_Dim[i] != 0 );
       for (j = 0; j < abs( m_Dim[i] ) - 1; ++j )
       {
-	out << Data()[el];
+	if (Data()[el] != NULL)
+	  out << Data()[el];
+	else
+	  out << "(NULL)";
 
 	if( j != abs( m_Dim[i] ) - 2 || m_Dim[i] > 0 )
 	  out << ", ";
@@ -262,35 +268,43 @@ void gNestedList<gTriState *>::Output( gOutput& out ) const
   if( m_Dim[1] == 0 ) // not a list
   {
     assert( m_Dim.Length() == 1 );
-    switch (*Data()[1])  {
-    case triTRUE:
-      out << "True";
-      break;
-    case triFALSE:
-      out << "False";
-      break;
-    case triMAYBE:
-      out << "Maybe";
-      break;
+    if (!Data()[1])
+      out << "(NULL)";
+    else  { 
+      switch (*Data()[1])  {
+      case triTRUE:
+	out << "True";
+	break;
+      case triFALSE:
+	out << "False";
+	break;
+      case triMAYBE:
+	out << "Maybe";
+	break;
+      }
     }
   }
-  else // is a list
+  else  // is a list
   {
     for (i = 1; i <= m_Dim.Length(); ++i )
     {
       assert( m_Dim[i] != 0 );
       for (j = 0; j < abs( m_Dim[i] ) - 1; ++j )
       {
-	switch (*Data()[el])  {
-	case triTRUE:
-	  out << "True";
-	  break;
-	case triFALSE:
-	  out << "False";
-	  break;
-	case triMAYBE:
-	  out << "Maybe";
-	  break;
+	if (!Data()[el])
+	  out << "(NULL)";
+	else  {
+	  switch (*Data()[el])  {
+	  case triTRUE:
+	    out << "True";
+	    break;
+	  case triFALSE:
+	    out << "False";
+	    break;
+	  case triMAYBE:
+	    out << "Maybe";
+	    break;
+	  }
 	}
 
 	if( j != abs( m_Dim[i] ) - 2 || m_Dim[i] > 0 )
@@ -320,7 +334,10 @@ void gNestedList<gNumber *>::Output( gOutput& out ) const
   {
     assert( m_Dim.Length() == 1 );
 
-    out << *Data()[1];    
+    if (!Data()[1])
+      out << "(NULL)";
+    else
+      out << *Data()[1];    
   }
   else // is a list
   {
@@ -329,7 +346,10 @@ void gNestedList<gNumber *>::Output( gOutput& out ) const
       assert( m_Dim[i] != 0 );
       for (j = 0; j < abs( m_Dim[i] ) - 1; ++j )
       {
-	out << *Data()[el];
+	if (!Data()[el])
+	  out << "(NULL)";
+	else
+	  out << *Data()[el];
 
 	if( j != abs( m_Dim[i] ) - 2 || m_Dim[i] > 0 )
 	  out << ", ";
@@ -358,7 +378,10 @@ void gNestedList<gText *>::Output( gOutput& out ) const
   {
     assert( m_Dim.Length() == 1 );
 
-    out << *Data()[1];    
+    if (!Data()[1])
+      out << "(NULL)";
+    else
+      out << *Data()[1];    
   }
   else // is a list
   {
@@ -367,7 +390,10 @@ void gNestedList<gText *>::Output( gOutput& out ) const
       assert( m_Dim[i] != 0 );
       for (j = 0; j < abs( m_Dim[i] ) - 1; ++j )
       {
-	out << *Data()[el];
+	if (!Data()[el])
+	  out << "(NULL)";
+	else
+	  out << *Data()[el];
 
 	if( j != abs( m_Dim[i] ) - 2 || m_Dim[i] > 0 )
 	  out << ", ";
