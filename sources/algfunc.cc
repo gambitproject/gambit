@@ -272,6 +272,40 @@ Portion *GSM_NfgRational(Portion **param)
     return new ErrorPortion("Conversion to reduced nfg failed");
 }
 
+
+Portion *GSM_AfgFloat(Portion **param)
+{
+  Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
+  gWatch watch;
+
+  Nfg<double> *N = MakeAfg(E);
+  
+  ((FloatPortion *) param[1])->Value() = watch.Elapsed();
+  
+  if (N)
+    return new NfgValPortion(N);
+  else
+    return new ErrorPortion("Conversion to agent form failed");
+}
+
+Portion *GSM_AfgRational(Portion **param)
+{
+  Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
+  gWatch watch;
+
+  Nfg<gRational> *N = MakeAfg(E);
+  
+  ((FloatPortion *) param[1])->Value() = watch.Elapsed();
+
+  if (N)
+    return new NfgValPortion(N);
+  else
+    return new ErrorPortion("Conversion to agent form failed");
+}
+
+
+
+
 template <class T> class Behav_ListPortion : public ListValPortion   {
   public:
     Behav_ListPortion(const gList<BehavSolution<T> > &);
@@ -1442,6 +1476,20 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_BehavRational, 0, "mixed", porMIXED_RATIONAL);
   FuncObj->SetParamInfo(GSM_BehavRational, 1, "efg", porEFG_RATIONAL,
 		        NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Afg");
+  FuncObj->SetFuncInfo(GSM_AfgFloat, 2);
+  FuncObj->SetParamInfo(GSM_AfgFloat, 0, "efg", porEFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_AfgFloat, 1, "time", porFLOAT,
+			new FloatValPortion(0), PASS_BY_REFERENCE);
+  
+  FuncObj->SetFuncInfo(GSM_AfgRational, 2);
+  FuncObj->SetParamInfo(GSM_AfgRational, 0, "efg", porEFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_AfgRational, 1, "time", porFLOAT,
+			new FloatValPortion(0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Nfg");
