@@ -759,40 +759,48 @@ bool NfOutcomePortion::IsReference(void) const
 
 gPool NfSupportPortion::pool(sizeof(NfSupportPortion));
 
+NfSupportPortion::rep::~rep()
+{ delete value; }
+
 NfSupportPortion::NfSupportPortion(NFSupport *value)
-  : _Value(new NFSupport *(value)), _ref(false)
+  : m_rep(new struct rep(value)), m_ref(false)
 {
-  SetGame(&value->Game());
+  SetGame(&m_rep->value->Game());
 }
 
 NfSupportPortion::NfSupportPortion(NFSupport &value)
-  : _Value(new NFSupport *(new NFSupport(value))), _ref(false)
+  : m_rep(new struct rep(new NFSupport(value))), m_ref(false)
 {
-  SetGame(&value.Game());
+  SetGame(&m_rep->value->Game());
 }
 
-NfSupportPortion::NfSupportPortion(NFSupport *&value, bool ref)
-  : _Value(&value), _ref(ref)
+NfSupportPortion::NfSupportPortion(const NfSupportPortion *p, bool ref)
+  : m_rep(p->m_rep), m_ref(ref)
 {
-  SetGame(&value->Game());
+  m_rep->nref++;
+  SetGame(&m_rep->value->Game());
 }
 
 NfSupportPortion::~NfSupportPortion()
 {
-  if (!_ref)   {
-    delete *_Value;
-    delete _Value;
-  }
+  if (--m_rep->nref == 0)  delete m_rep;
 }
 
 NFSupport *NfSupportPortion::Value(void) const
-{ return *_Value; }
+{ return m_rep->value; }
 
 void NfSupportPortion::SetValue(NFSupport *value)
 {
   SetGame(&value->Game());
-  delete *_Value;
-  *_Value = value;
+  if (m_ref) {
+    ((NfSupportPortion *) Original())->SetValue(value);
+    m_rep = ((NfSupportPortion *) Original())->m_rep;
+    m_rep->nref++;
+  }
+  else {
+    if (--m_rep->nref == 0)  delete m_rep;
+    m_rep = new rep(value);
+  }
 }
 
 PortionSpec NfSupportPortion::Spec(void) const
@@ -803,9 +811,9 @@ PortionSpec NfSupportPortion::Spec(void) const
 void NfSupportPortion::Output(gOutput& s) const
 { 
   Portion::Output(s);
-  s << "(NfSupport) " << *_Value;
-  if(*_Value) 
-    s << ' ' << **_Value;  
+  s << "(NfSupport) " << m_rep->value;
+  if (m_rep->value) 
+    s << ' ' << *m_rep->value;  
 }
 
 gText NfSupportPortion::OutputString(void) const
@@ -815,18 +823,18 @@ gText NfSupportPortion::OutputString(void) const
 
 Portion* NfSupportPortion::ValCopy(void) const
 {
-  return new NfSupportPortion(new NFSupport(**_Value));
+  return new NfSupportPortion(this, false);
 }
 
 Portion* NfSupportPortion::RefCopy(void) const
 {
-  Portion* p = new NfSupportPortion(*_Value, true);
+  Portion* p = new NfSupportPortion(this, true);
   p->SetOriginal(Original());
   return p;
 }
 
 bool NfSupportPortion::IsReference(void) const
-{ return _ref; }
+{ return m_ref; }
 
 
 //-------------
@@ -835,41 +843,48 @@ bool NfSupportPortion::IsReference(void) const
 
 gPool EfSupportPortion::pool(sizeof(EfSupportPortion));
 
+EfSupportPortion::rep::~rep()
+{ delete value; }
+
 EfSupportPortion::EfSupportPortion(EFSupport *value)
-  : _Value(new EFSupport *(value)), _ref(false)
+  : m_rep(new struct rep(value)), m_ref(false)
 {
-  SetGame(&value->Game());
+  SetGame(&m_rep->value->Game());
 }
 
 EfSupportPortion::EfSupportPortion(EFSupport &value)
-  : _Value(new EFSupport *(NULL)), _ref(false)
+  : m_rep(new struct rep(new EFSupport(value))), m_ref(false)
 {
-  _Value = new EFSupport *(new EFSupport(value));
-  SetGame(&value.Game());
+  SetGame(&m_rep->value->Game());
 }
 
-EfSupportPortion::EfSupportPortion(EFSupport *&value, bool ref)
-  : _Value(&value), _ref(ref)
+EfSupportPortion::EfSupportPortion(const EfSupportPortion *p, bool ref)
+  : m_rep(p->m_rep), m_ref(ref)
 {
-  SetGame(&value->Game());
+  m_rep->nref++;
+  SetGame(&m_rep->value->Game());
 }
 
 EfSupportPortion::~EfSupportPortion()
 {
-  if (!_ref)   {
-    delete *_Value;
-    delete _Value;
-  }
+  if (--m_rep->nref == 0)  delete m_rep;
 }
 
 EFSupport *EfSupportPortion::Value(void) const
-{ return *_Value; }
+{ return m_rep->value; }
 
 void EfSupportPortion::SetValue(EFSupport *value)
 {
   SetGame(&value->Game());
-  delete *_Value;
-  *_Value = value;
+  if (m_ref) {
+    ((EfSupportPortion *) Original())->SetValue(value);
+    m_rep = ((EfSupportPortion *) Original())->m_rep;
+    m_rep->nref++;
+  }
+  else {
+    if (--m_rep->nref == 0)  delete m_rep;
+    m_rep = new rep(value);
+  }
 }
 
 PortionSpec EfSupportPortion::Spec(void) const
@@ -880,9 +895,9 @@ PortionSpec EfSupportPortion::Spec(void) const
 void EfSupportPortion::Output(gOutput& s) const
 { 
   Portion::Output(s);
-  s << "(EfSupport) " << *_Value;
-  if(*_Value) 
-    s << ' ' << **_Value;
+  s << "(EfSupport) " << m_rep->value;
+  if (m_rep->value) 
+    s << ' ' << *m_rep->value;
 }
 
 gText EfSupportPortion::OutputString(void) const
@@ -892,18 +907,18 @@ gText EfSupportPortion::OutputString(void) const
 
 Portion* EfSupportPortion::ValCopy(void) const
 {
-  return new EfSupportPortion(new EFSupport(**_Value)); 
+  return new EfSupportPortion(this, false);
 }
 
 Portion* EfSupportPortion::RefCopy(void) const
 {
-  Portion* p = new EfSupportPortion(*_Value, true); 
+  Portion* p = new EfSupportPortion(this, true); 
   p->SetOriginal(Original());
   return p;
 }
 
 bool EfSupportPortion::IsReference(void) const
-{ return _ref; }
+{ return m_ref; }
 
 
 //----------

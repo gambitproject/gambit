@@ -427,16 +427,23 @@ public:
 //-------------
 
 class NFSupport;
-class NFPayoffs;
 
 class NfSupportPortion : public Portion   {
 protected:
-  NFSupport** _Value;
-  bool _ref;
+  struct rep  {
+    NFSupport *value;
+    int nref;
+
+    rep(NFSupport *v) : value(v), nref(1)  { }
+    ~rep();
+  };
+  
+  struct rep *m_rep; 
+  bool m_ref;
 
   static gPool pool;
 
-  NfSupportPortion(NFSupport *&, bool);
+  NfSupportPortion(const NfSupportPortion *, bool);
 
 public:
   NfSupportPortion(NFSupport *);
@@ -468,12 +475,20 @@ class EFSupport;
 
 class EfSupportPortion : public Portion  {
 protected:
-  EFSupport** _Value;
-  bool _ref;
+  struct rep {
+    EFSupport *value;
+    int nref;
+
+    rep(EFSupport *v) : value(v), nref(1)  { }
+    ~rep();
+  };
+
+  struct rep *m_rep;
+  bool m_ref;
 
   static gPool pool;
 
-  EfSupportPortion(EFSupport *&, bool);
+  EfSupportPortion(const EfSupportPortion *, bool);
 
 public:
   EfSupportPortion(EFSupport *);
