@@ -202,6 +202,20 @@ void EfgShow::OnSelectedMoved(const Node *n)
 
 void EfgShow::SolveStandard(void)
 {
+  // This is a guard against trying to solve the "trivial" game.
+  // Most of the GUI code assumes information sets exist.
+  if (ef.TotalNumInfosets() == 0)  return;
+
+  // check that the game is perfect recall, if not give a warning
+  Infoset *bad1, *bad2;
+  if (!IsPerfectRecall(ef, bad1, bad2)) {
+    int completed = wxMessageBox("This game is not perfect recall\n"
+				 "Do you wish to continue?", 
+				 "Solve Warning", 
+				 wxOK | wxCANCEL | wxCENTRE, this);
+    if (completed != wxOK) return;
+  }
+
   EfgSolveStandardDialog *ESSD = new EfgSolveStandardDialog(ef, this);
   if (ESSD->Completed() != wxOK)  {
     delete ESSD;
