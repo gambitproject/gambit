@@ -774,6 +774,10 @@ void NfgShow::AttachOutcome(void)
     outcome_list->Add(tmp);
   }
 
+  if (solns.Length() > 0) {
+    dialog->Add(wxMakeFormMessage("Pressing OK will delete computed solutions"));
+    dialog->Add(wxMakeFormNewLine());
+  }
   dialog->Add(wxMakeFormString("Outcome", &outcome_name,
 			       wxFORM_CHOICE,
 			       new wxList(wxMakeConstraintStrings(outcome_list), 0)));
@@ -790,6 +794,7 @@ void NfgShow::AttachOutcome(void)
     
     int outc = (int) ToDouble(outcome_name);
     nf.SetOutcome(spread->GetProfile(), nf.Outcomes()[outc]);
+    InterfaceDied();
     UpdateVals();
   }
 
@@ -800,6 +805,7 @@ void NfgShow::AttachOutcome(void)
 void NfgShow::DetachOutcome(void)
 {
   nf.SetOutcome(spread->GetProfile(), 0);
+  InterfaceDied();
   UpdateVals();
 }
 
@@ -812,8 +818,8 @@ void NfgShow::RenameOutcome(void)
   char *name = new char[40];
   strncpy(name, nf.GetOutcome(profile)->GetName(), 40);
 
-  MyDialogBox *dialog = new MyDialogBox(spread, "Rename outcome");
-  dialog->Form()->Add(wxMakeFormString("New outcome name", &name, wxFORM_TEXT,
+  MyDialogBox *dialog = new MyDialogBox(spread, "Label outcome");
+  dialog->Form()->Add(wxMakeFormString("New outcome label", &name, wxFORM_TEXT,
 				       0, 0, 0, 220));
   dialog->Go();
 
@@ -878,9 +884,13 @@ void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)
   if (!InterfaceOk()) {  // we better have someone to send solutions to
     return;
   }
+  
+  const Efg *efg = InterfaceObjectEfg();
 
-  Infoset *s1, *s2;
-  if (!IsPerfectRecall(*InterfaceObjectEfg(), s1, s2)) {
+  if (AssociatedNfg(efg) != &nf) 
+    return;
+
+  if (!IsPerfectRecall(*efg)) {
     if (wxMessageBox("May not be able to find valid behavior strategy\n"
 		     "for game of imperfect recall\n"
 		     "Continue anyway?",
@@ -1548,13 +1558,13 @@ private:
   wxText **payoff_items;
 
 public:
-  NFChangePayoffs(Nfg &nf, const gArray<int> &profile, wxWindow *parent);
+  NFChangePayoffs(Nfg &, const gArray<int> &, bool, wxWindow *parent);
   gArray<gNumber> Payoffs(void);
 };
 
-NFChangePayoffs::NFChangePayoffs(Nfg &nf_, const gArray<int> &profile_,
-				 wxWindow *parent)
-  : MyDialogBox(parent, "Change Payoffs"), profile(profile_), nf(nf_)
+NFChangePayoffs::NFChangePayoffs(Nfg &p_nfg, const gArray<int> &p_profile,
+				 bool p_solutions, wxWindow *p_parent)
+  : MyDialogBox(p_parent, "Change Payoffs"), profile(p_profile), nf(p_nfg)
 {
   Add(wxMakeFormMessage("Change payoffs for outcome of profile:"));
   gText profile_str = "(";
@@ -1573,6 +1583,11 @@ NFChangePayoffs::NFChangePayoffs(Nfg &nf_, const gArray<int> &profile_,
 
   Add(wxMakeFormMessage(profile_str));
   Add(wxMakeFormNewLine());
+
+  if (p_solutions) {
+    Add(wxMakeFormMessage("Pressing OK will delete computed solutions"));
+    Add(wxMakeFormNewLine());
+  }
 
   NFOutcome *outc = nf.GetOutcome(profile);
 
@@ -1662,7 +1677,9 @@ void NfgShow::ChangePayoffs(int st1, int st2, bool next)
   nf_iter.Set(pl1, st1);
   nf_iter.Set(pl2, st2);
 
-  NFChangePayoffs *payoffs_dialog = new NFChangePayoffs(nf, profile, spread);
+  NFChangePayoffs *payoffs_dialog = new NFChangePayoffs(nf, profile,
+							solns.Length() > 0,
+							spread);
 
   if (payoffs_dialog->Completed() == wxOK) {
     NFOutcome *outc = nf.GetOutcome(profile);

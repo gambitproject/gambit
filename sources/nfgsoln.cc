@@ -248,18 +248,20 @@ NfgSolnShow::NfgSolnShow(gSortList<MixedSolution> &solns_, int num_players_,
     if (opts&MSOLN_O_OPTIONS)
         AddButton("Opt", (wxFunction)settings_button);
 
-    if (opts&MSOLN_O_EFGNFG)
-    {
-        wxButton *extensive_button = AddButton("NF->EF", 
-                                               (wxFunction)NfgSolnShow::extensive_button);
+    if (opts&MSOLN_O_EFGNFG) {
+      wxButton *extensive_button = AddButton("Mixed->Behav", 
+					     (wxFunction) NfgSolnShow::extensive_button);
 
-        if (parent)
-        {
-            if (!parent->InterfaceOk()) 
-                extensive_button->Enable(FALSE);
-        }
-
-        if (!parent) extensive_button->Enable(FALSE);
+      if (parent) {
+	if (!parent->InterfaceOk()) 
+	  extensive_button->Enable(FALSE);
+	else if (AssociatedNfg(parent->InterfaceObjectEfg()) != 
+		 &solns_[1].Game())
+	  extensive_button->Enable(FALSE);
+      }
+      else {
+	extensive_button->Enable(FALSE);
+      }
     }
 
     if (opts&MSOLN_O_SORTFILT)
@@ -669,7 +671,9 @@ void NfgSolnShow::UpdateValues(void)
 void NfgSolnShow::SolutionToExtensive(void)
 {
     assert(parent);     // we must have a parent if we got here
-    //assert(parent->InterfaceOk());    // and it must have someone to send solutions to
+
+    // must have somewhere to send solutions
+    if (!parent->InterfaceOk())  return;
 
     int row = CurRow();
 
