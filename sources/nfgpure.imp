@@ -49,7 +49,7 @@ void FindPureNash(const NFSupport &p_support, int p_max,
 	p_solutions[index].SetIsNash(triTRUE);
       else
 	p_solutions[index].SetIsNash(triFALSE);
-      if (index == p_max)  break;
+      if (p_max > 0 && index == p_max)  break;
     }
   }  while (citer.NextContingency());
 }

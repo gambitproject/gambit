@@ -345,8 +345,10 @@ protected:
 
 public:
   guiNfgEnumPureBySubgame(const Efg &p_efg, const EFSupport &p_support,
-			  int p_max = 0, EfgShowInterface *p_parent = 0)
-    : PureNashBySubgame(p_support, p_max), guiBaseBySubgameG(p_parent, p_efg)
+			  gStatus &p_status, int p_max = 0,
+			  EfgShowInterface *p_parent = 0)
+    : PureNashBySubgame(p_support, p_status, p_max),
+      guiBaseBySubgameG(p_parent, p_efg)
     { Solve(); }
   virtual ~guiNfgEnumPureBySubgame() { }
 };
@@ -361,9 +363,9 @@ gList<BehavSolution> guiEfgNfgPureNash::Solve(void) const
 {
   PureNashParamsSettings PNPS;
   wxStatus status(m_parent->Frame(), "EnumPure Algorithm");
-  status << "Progress not implemented\n" << "Cancel button disabled\n";
   try {
-    guiNfgEnumPureBySubgame M(m_efg, m_support, PNPS.MaxSolns(), m_parent);
+    guiNfgEnumPureBySubgame M(m_efg, m_support, status, PNPS.MaxSolns(),
+			      m_parent);
     return M.GetSolutions();
   }
   catch (gSignalBreak &) {

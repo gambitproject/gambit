@@ -69,10 +69,12 @@ NfgEnumPureG::NfgEnumPureG(const Nfg &N, const NFSupport &sup, NfgShowInterface 
 
 gList<MixedSolution> NfgEnumPureG::Solve(void) const
 {
-    wxStatus status(parent->Frame(), "EnumPure Algorithm");
-    status << "Progress not implemented\n" << "Cancel button disabled\n";
-    FindPureNash(nf, sup, (gList<MixedSolution> &)solns);
-    return solns;
+  wxStatus status(parent->Frame(), "EnumPure Algorithm");
+  try {
+    FindPureNash(sup, 0, status, (gList<MixedSolution> &)solns);
+  }
+  catch (gSignalBreak &) { }
+  return solns;
 }
 
 
