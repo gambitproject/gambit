@@ -1366,7 +1366,6 @@ Portion* GSM_Read_Undefined(Portion** param)
   char c = ' ';  
   gInput& input = ((InputPortion*) param[0])->Value();
   long old_pos = input.getpos();
-  gout << old_pos << '\n';
 
   Portion* result = 0;
 
