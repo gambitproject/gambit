@@ -443,6 +443,7 @@ static Portion *GSM_Qre_Start(Portion **param)
   }
 }
 
+#ifdef INTERNAL_VERSION
 
 //---------------
 // KQreSolve
@@ -545,6 +546,7 @@ static Portion *GSM_KQre_Start(Portion **param)
   }
 }
 
+#endif // INTERNAL_VERSION
 
 //------------
 // LcpSolve
@@ -1080,6 +1082,8 @@ static Portion *GSM_PolEnumSolve_Efg(Portion **param)
   return new Behav_ListPortion(solutions);
 }
 
+#ifdef INTERNAL_VERSION
+
 #include "seqeq.h"
 
 static Portion *GSM_SequentialEquilib(Portion **param)
@@ -1113,7 +1117,7 @@ static Portion *GSM_SequentialEquilib(Portion **param)
 
   return new Behav_ListPortion(solutions);
 }
-
+#endif // INTERNAL_VERSION
 #endif // ! MINI_POLY
 
 //---------
@@ -1459,7 +1463,7 @@ void Init_algfunc(GSM *gsm)
 
   gsm->AddFunction(FuncObj);
 
-
+#ifdef INTERNAL_VERSION
   FuncObj = new gclFunction("KQreSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_KQre_Start, 
 				       PortionSpec(porMIXED | porBEHAV , 1), 16));
@@ -1498,7 +1502,7 @@ void Init_algfunc(GSM *gsm)
 					     new NumberPortion(0)));
 
   gsm->AddFunction(FuncObj);
-
+#endif // INTERNAL_VERSION
 
   FuncObj = new gclFunction("LcpSolve", 3);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Lcp_Nfg, 
@@ -1710,6 +1714,7 @@ void Init_algfunc(GSM *gsm)
 					   new BoolPortion(true)));
   gsm->AddFunction(FuncObj);
 
+#ifdef INTERNAL_VERSION
   FuncObj = new gclFunction("SeqEquilibSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_SequentialEquilib, 
 				       PortionSpec(porBEHAV, 1), 8));
@@ -1730,6 +1735,7 @@ void Init_algfunc(GSM *gsm)
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
+#endif // INTERNAL_VERSION
 #endif // ! MINI_POLY
 
 
