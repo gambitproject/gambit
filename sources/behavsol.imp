@@ -21,10 +21,10 @@ BehavSolution<T>::BehavSolution(const Efg<T>& e)
   _GobitValue(-1),
   _LiapValue(-1),
   _Beliefs(0),
-  _Id(MaxId)
+  _Id(0)
 {
   gEpsilon(_Epsilon);
-  MaxId++;
+
 }
 
 
@@ -39,10 +39,10 @@ BehavSolution<T>::BehavSolution(const Efg<T>& e, const gDPVector<T>& v)
   _GobitValue(-1),
   _LiapValue(-1),
   _Beliefs(0),
-  _Id(MaxId)
+  _Id(0)
 {
   gEpsilon(_Epsilon);
-  MaxId++;
+
 }
 
 template <class T> 
@@ -56,10 +56,10 @@ BehavSolution<T>::BehavSolution(const EFSupport& s)
   _GobitValue(-1),
   _LiapValue(-1),
   _Beliefs(0),
-  _Id(MaxId)
+  _Id(0)
 {
   gEpsilon(_Epsilon);
-  MaxId++;
+
 }
 
 template <class T> 
@@ -72,11 +72,11 @@ BehavSolution<T>::BehavSolution(const BehavProfile<T>& b, EfgAlgType creator)
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
-  _Beliefs(0),
-  _Id(MaxId)
+	_Beliefs(0),
+	_Id(0)
 {
   gEpsilon(_Epsilon);
-  MaxId++;
+
 }
 
 
@@ -103,7 +103,7 @@ template <class T> BehavSolution<T>::~BehavSolution()
 
 template <class T> void BehavSolution<T>::EvalEquilibria()
 {
-  if(_Creator == EfgAlg_LIAP || _Creator == EfgAlg_GOBIT)
+	if(_Creator == EfgAlg_LIAP || _Creator == EfgAlg_GOBIT)
     _IsSequential = T_YES;
   else
     _IsSequential = T_DONTKNOW;
@@ -122,8 +122,10 @@ template <class T> void BehavSolution<T>::EvalEquilibria()
     }
 }
 
-template <class T> int BehavSolution<T>::Id(void) const
+template <class T> unsigned int BehavSolution<T>::Id(void) const
 {return _Id;}
+template <class T> void BehavSolution<T>::SetId(unsigned int i)
+{_Id=i;}
 
 template <class T> void BehavSolution<T>::SetCreator(EfgAlgType c)
 { _Creator = c; }

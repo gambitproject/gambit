@@ -46,7 +46,6 @@ TEMPLATE gOutput &operator<<(gOutput &, const BehavProfile<double> &);
 
 #include "behavsol.imp"
 
-unsigned long BehavSolution<double>::MaxId=1;
 TEMPLATE class BehavSolution<double>;
 TEMPLATE gOutput &operator<<(gOutput &, const BehavSolution<double> &);
 

@@ -18,64 +18,69 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n)
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
-  _Payoff(0)
+	_Payoff(0),
+	_Id(0)
 {
-  gEpsilon(_Epsilon);
+	gEpsilon(_Epsilon);
 }
 
-template <class T> 
+template <class T>
 MixedSolution<T>::MixedSolution(const Nfg<T>& n, const NFSupport& s)
 : MixedProfile<T>(n, s),
-  _Creator(NfgAlg_USER),
-  _IsNash(T_DONTKNOW),
-  _IsPerfect(T_DONTKNOW),
-  _IsProper(T_DONTKNOW),
-  _GobitLambda(-1),
-  _GobitValue(-1),
-  _LiapValue(-1)
+	_Creator(NfgAlg_USER),
+	_IsNash(T_DONTKNOW),
+	_IsPerfect(T_DONTKNOW),
+	_IsProper(T_DONTKNOW),
+	_GobitLambda(-1),
+	_GobitValue(-1),
+	_LiapValue(-1),
+	_Id(0)
 {
-  gEpsilon(_Epsilon);
+	gEpsilon(_Epsilon);
 }
 
-template <class T> 
+template <class T>
 MixedSolution<T>::MixedSolution(const Nfg<T>& n, const gPVector<T>& v)
 : MixedProfile<T>(n, v),
-  _Creator(NfgAlg_USER),
-  _IsNash(T_DONTKNOW),
-  _IsPerfect(T_DONTKNOW),
-  _IsProper(T_DONTKNOW),
-  _GobitLambda(-1),
-  _GobitValue(-1),
-  _LiapValue(-1)
+	_Creator(NfgAlg_USER),
+	_IsNash(T_DONTKNOW),
+	_IsPerfect(T_DONTKNOW),
+	_IsProper(T_DONTKNOW),
+	_GobitLambda(-1),
+	_GobitValue(-1),
+	_LiapValue(-1),
+	_Id(0)
 {
-  gEpsilon(_Epsilon);
+	gEpsilon(_Epsilon);
 }
 
-template <class T> 
+template <class T>
 MixedSolution<T>::MixedSolution(const MixedProfile<T>& m, NfgAlgType creator)
 : MixedProfile<T>(m),
-  _Creator(creator),
-  _IsNash(T_DONTKNOW),
-  _IsPerfect(T_DONTKNOW),
-  _IsProper(T_DONTKNOW),
-  _GobitLambda(-1),
-  _GobitValue(-1),
-  _LiapValue(-1)
+	_Creator(creator),
+	_IsNash(T_DONTKNOW),
+	_IsPerfect(T_DONTKNOW),
+	_IsProper(T_DONTKNOW),
+	_GobitLambda(-1),
+	_GobitValue(-1),
+	_LiapValue(-1),
+	_Id(0)
 {
-  gEpsilon(_Epsilon);
+	gEpsilon(_Epsilon);
 }
 
 
 template <class T> MixedSolution<T>::MixedSolution(const MixedSolution<T>& m)
-: MixedProfile<T>(m), 
-  _Creator(m._Creator),
-  _IsNash(m._IsNash),
-  _IsPerfect(m._IsPerfect),
-  _IsProper(m._IsProper),
-  _Epsilon(m._Epsilon),
-  _GobitLambda(m._GobitLambda),
-  _GobitValue(m._GobitValue),
-  _LiapValue(m._LiapValue)
+: MixedProfile<T>(m),
+	_Creator(m._Creator),
+	_IsNash(m._IsNash),
+	_IsPerfect(m._IsPerfect),
+	_IsProper(m._IsProper),
+	_Epsilon(m._Epsilon),
+	_GobitLambda(m._GobitLambda),
+	_GobitValue(m._GobitValue),
+	_LiapValue(m._LiapValue),
+	_Id(m._Id)
 {}
 
 template <class T> MixedSolution<T>::~MixedSolution() {}
@@ -83,19 +88,23 @@ template <class T> MixedSolution<T>::~MixedSolution() {}
 
 template <class T> void MixedSolution<T>::EvalEquilibria()
 {
-  if(IsComplete())
-    if(_IsNash == T_DONTKNOW)
-      if(MaxGripe() <= _Epsilon)
+	if(IsComplete())
+		if(_IsNash == T_DONTKNOW)
+			if(MaxGripe() <= _Epsilon)
 	_IsNash = T_YES;
-      else
+			else
 	_IsNash = T_NO;
-  if( _IsNash == T_NO )
-    {
-      _IsPerfect = T_NO;
-      _IsProper = T_NO;
-    }
+	if( _IsNash == T_NO )
+		{
+			_IsPerfect = T_NO;
+			_IsProper = T_NO;
+		}
 }
 
+template <class T> unsigned int MixedSolution<T>::Id(void) const
+{return _Id;}
+template <class T> void MixedSolution<T>::SetId(unsigned int i)
+{_Id=i;}
 
 template <class T> void MixedSolution<T>::SetCreator(NfgAlgType c)
 { _Creator = c; }

@@ -1,7 +1,7 @@
 // File: efgsolng.h -- declarations for the GUI part of the extensive form
 // algorithm solutions.  Each solution algorithm is contained in a separate class
 // and the ExtensiveShow does not need to know any details
-// $Id$
+// @(#)efgsolng.h	1.5 8/6/96
 #ifndef EFGSOLNG_H
 #define EFGSOLNG_H
 #include "behavsol.h"
@@ -9,7 +9,7 @@
 template <class T> class ExtensiveShowInterf
 {
 public:
-	virtual void PickSolutions(const Efg<T> &,gSortList<BehavSolution<T> > &) = 0;
+	virtual void PickSolutions(const Efg<T> &,gList<BehavSolution<T> > &) = 0;
 	virtual BehavProfile<T> CreateStartProfile(int how) = 0;
 	virtual void SetPickSubgame(const Node *n) = 0;
 	virtual const gString &Filename(void) const = 0;

@@ -44,7 +44,6 @@ TEMPLATE gOutput &operator<<(gOutput &, const BehavProfile<gRational> &);
 
 #include "behavsol.imp"
 
-unsigned long BehavSolution<gRational>::MaxId=1;
 TEMPLATE class BehavSolution<gRational>;
 
 TEMPLATE gOutput &operator<<(gOutput &, const BehavSolution<gRational> &);

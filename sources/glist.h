@@ -55,9 +55,9 @@ template <class T> class gList  {
 
     gList<T> &Combine(gList<T> &b);
 
-    int Append(const T &);
-    int Insert(const T &, int);
-    T Remove(int);
+    virtual int Append(const T &);
+		int Insert(const T &, int);
+		virtual T Remove(int);
 
     int Find(const T &) const;
     bool Contains(const T &t) const;

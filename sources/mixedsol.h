@@ -42,27 +42,30 @@ protected:
   T _GobitValue;
   T _LiapValue;
   gArray<T> _Payoff;
+	unsigned int _Id;
 
-  void EvalEquilibria();
+	void EvalEquilibria();
 
 public:
-  MixedSolution(const Nfg<T> &);
-  MixedSolution(const Nfg<T> &, const NFSupport &);
-  MixedSolution(const Nfg<T> &, const gPVector<T> &);
-  MixedSolution(const MixedProfile<T> &, NfgAlgType creator = NfgAlg_USER);
-  MixedSolution(const MixedSolution<T> &);
+	MixedSolution(const Nfg<T> &);
+	MixedSolution(const Nfg<T> &, const NFSupport &);
+	MixedSolution(const Nfg<T> &, const gPVector<T> &);
+	MixedSolution(const MixedProfile<T> &, NfgAlgType creator = NfgAlg_USER);
+	MixedSolution(const MixedSolution<T> &);
 
-  virtual ~MixedSolution();
+	virtual ~MixedSolution();
 
-  void SetCreator(NfgAlgType);
-  NfgAlgType Creator(void) const; //Who created this object? (algorithm ID or user)
-  bool IsComplete(void) const; 
+	unsigned int Id(void) const;
+  void SetId(unsigned int );
+	void SetCreator(NfgAlgType);
+	NfgAlgType Creator(void) const; //Who created this object? (algorithm ID or user)
+	bool IsComplete(void) const;
 
-  void SetIsNash(TriState);
-  TriState IsNash(void) const; // Is it Nash? Y/N/DK
-  void SetIsPerfect(TriState);
-  TriState IsPerfect(void) const; //Is it Perfect? Y/N/DK
-  void SetIsProper(TriState);
+	void SetIsNash(TriState);
+	TriState IsNash(void) const; // Is it Nash? Y/N/DK
+	void SetIsPerfect(TriState);
+	TriState IsPerfect(void) const; //Is it Perfect? Y/N/DK
+	void SetIsProper(TriState);
   TriState IsProper(void) const; //Is it Proper? Y/N/DK
 
   void SetEpsilon(T value);

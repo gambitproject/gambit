@@ -1,6 +1,6 @@
 // File: efgsolng.cc -- definition of the class dealing with the GUI part of the
 // extensive form solutions.
-// $Id$
+// @(#)efgsolng.cc	1.8 8/6/96
 
 #include "wx.h"
 #include "wx_form.h"
@@ -11,7 +11,6 @@
 #pragma hdrstop
 #include "efgsolng.h"
 #include "nfgconst.h"
-#include "gslist.h"
 
 // sections in the defaults file(s)
 #define		SOLN_SECT				"Soln-Defaults"
@@ -47,7 +46,7 @@ TEMPLATE class  ExtensiveSolutionG<gRational>;
 
 /*************************** BY SUBGAME G **********************************/
 #define	SELECT_SUBGAME_NUM	10000
-void LegalSubgameRoots(const BaseEfg &efg, gList<Node *> &list); // in efgutils.cc
+void MarkedSubgameRoots(const BaseEfg &efg, gList<Node *> &list); // in efgutils.cc
 
 template <class T> class BaseBySubgameG
 {
@@ -65,16 +64,12 @@ template <class T>
 BaseBySubgameG<T>::BaseBySubgameG(ExtensiveShowInterf<T> *parent_,const BaseEfg &ef)
 									:parent(parent_)
 {
-LegalSubgameRoots(ef,subgame_roots);
+MarkedSubgameRoots(ef,subgame_roots);
 wxGetResource(SOLN_SECT,"Efg-Interactive-Solns",&pick_soln,"gambit.ini");
 }
 
 
 // Pick solutions to go on with, if so requested
-// Note the non-standard use of the OnMenuCommand function of the wxFrame.  We
-// want to pass the current subgame # to the parent class, but do not want to
-// include the entire extshow.h header.  Thus, ExtensiveShow 's OnMenuCommand
-// must process menu id's > SELECT_SUBGAME_NUM appropriately.
 template <class T>
 void BaseBySubgameG<T>::BaseSelectSolutions(int subg_num,const Efg<T> &ef,gList<BehavSolution<T> > &solns)
 {
@@ -90,12 +85,8 @@ if (solns.Length()==0)
 int num_isets=0;
 for (int i=1;i<=ef.NumPlayers();i++)
 	num_isets+=ef.PlayerList()[i]->NumInfosets();
-if (num_isets)
-{
-	gSortList<BehavSolution<T> > temp_solns=solns;
-	parent->PickSolutions(ef,temp_solns);
-	solns=temp_solns;
-}
+
+if (num_isets)	parent->PickSolutions(ef,solns);
 
 // turn off the subgame picking icon at the last subgame
 if (subg_num==subgame_roots.Length()) parent->SetPickSubgame(0);
