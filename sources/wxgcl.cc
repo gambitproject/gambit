@@ -6,15 +6,16 @@
 
 #include "wx/wx.h"
 #include "wx/splitter.h"
+#include "wx/fontdlg.h"
 
 #include "gsm.h"
 #include "gcmdline.h"
 #include "gpreproc.h"
 #include "gcompile.h"
 
-GSM* _gsm;
-char* _SourceDir = NULL;
-char* _ExePath = NULL;
+GSM *_gsm;
+char *_SourceDir = 0;
+char *_ExePath = 0;
 
 class wxCommandLine : public gclCommandLine {
 protected:
@@ -145,10 +146,15 @@ private:
   wxTextCtrl *m_outputWindow;
   wxTextCtrl *m_inputWindow;
   wxOutputWindowStream *m_outputStream;
+  gList<gText> m_history;
 
   GCLCompiler m_compiler;
 
   // Menu event handlers
+  void OnSaveLog(wxCommandEvent &);
+  void OnSaveScript(wxCommandEvent &);
+  void OnPrefsInputFont(wxCommandEvent &);
+  void OnPrefsOutputFont(wxCommandEvent &);
   void OnHelpAbout(wxCommandEvent &);
   void OnHelpContents(wxCommandEvent &);
 
@@ -174,19 +180,42 @@ bool GclApp::OnInit(void)
 
 const int idINPUT_WINDOW = 1001;
 
+const int idSAVE = 2000;
+const int idSAVE_LOG = 2001;
+const int idSAVE_SCRIPT = 2002;
+const int idPREFS_INPUTFONT = 2100;
+const int idPREFS_OUTPUTFONT = 2101;
+
 GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
 		   const wxPoint &p_position, const wxSize &p_size)
   : wxFrame(p_parent, -1, p_title, p_position, p_size)
 {
   wxMenu *fileMenu = new wxMenu;
+  wxMenu *fileSaveMenu = new wxMenu;
+  fileSaveMenu->Append(idSAVE_LOG, "&Log", "Save all input and output");
+  fileSaveMenu->Append(idSAVE_SCRIPT, "&Script", "Save all input only");
+  fileMenu->Append(idSAVE, "&Save", fileSaveMenu, "Save input and output");
   fileMenu->Append(wxID_EXIT, "&Quit", "Quit program");
   
+  wxMenu *editMenu = new wxMenu;
+  editMenu->Append(wxID_CUT, "Cu&t", "Cut selected text");
+  editMenu->Append(wxID_COPY, "&Copy", "Copy selected text");
+  editMenu->Append(wxID_PASTE, "&Paste", "Paste selected text");
+
+  wxMenu *prefsMenu = new wxMenu;
+  prefsMenu->Append(idPREFS_INPUTFONT, "&Input window font",
+		    "Change the font used in the input window");
+  prefsMenu->Append(idPREFS_OUTPUTFONT, "&Output window font",
+		    "Change the font used in the output window");
+
   wxMenu *helpMenu = new wxMenu;
   helpMenu->Append(wxID_ABOUT, "&About", "About this program");
   helpMenu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
 
   wxMenuBar *menuBar = new wxMenuBar;
   menuBar->Append(fileMenu, "&File");
+  menuBar->Append(editMenu, "&Edit");
+  menuBar->Append(prefsMenu, "&Prefs");
   menuBar->Append(helpMenu, "&Help");
   SetMenuBar(menuBar);
 
@@ -201,8 +230,15 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
 				 wxDefaultPosition, wxDefaultSize,
 				 wxTE_MULTILINE | wxTE_PROCESS_ENTER);
   splitter->SplitHorizontally(m_outputWindow, m_inputWindow, 300);
+  m_inputWindow->SetFocus();
+  m_inputWindow->SetValue("<< ");
 
   Show(true);
+
+  _SourceDir = new char[1024];
+  strncpy(_SourceDir, wxGetWorkingDirectory(), 1023);
+  _ExePath = new char[1024];
+  strncpy(_ExePath, wxGetWorkingDirectory(), 1023);
 
   _gsm = new GSM(gin, *m_outputStream, *m_outputStream);
   wxCommandLine cmdline(20);
@@ -228,12 +264,79 @@ GclFrame::~GclFrame()
 { }
 
 BEGIN_EVENT_TABLE(GclFrame, wxFrame)
+  EVT_MENU(idSAVE_LOG, GclFrame::OnSaveLog)
+  EVT_MENU(idSAVE_SCRIPT, GclFrame::OnSaveScript)
   EVT_MENU(wxID_EXIT, wxWindow::Close)
+  EVT_MENU(idPREFS_INPUTFONT, GclFrame::OnPrefsInputFont)
+  EVT_MENU(idPREFS_OUTPUTFONT, GclFrame::OnPrefsOutputFont)
   EVT_MENU(wxID_ABOUT, GclFrame::OnHelpAbout)
   EVT_MENU(wxID_HELP_CONTENTS, GclFrame::OnHelpContents)
   EVT_TEXT_ENTER(idINPUT_WINDOW, GclFrame::OnTextEnter)
   EVT_CLOSE(GclFrame::OnCloseWindow)
 END_EVENT_TABLE()
+
+void GclFrame::OnSaveLog(wxCommandEvent &)
+{
+  wxFileDialog dialog(this, "Save Log As...", "", "", "*.log");
+
+  if (dialog.ShowModal() == wxID_OK) {
+    try {
+      gFileOutput file(dialog.GetPath().c_str());
+      file << m_outputWindow->GetValue();
+    }
+    catch (gFileOutput::OpenFailed &) {
+      wxMessageBox((char *) (gText("Could not open ") + dialog.GetPath().c_str() +
+			     " for writing."), "Error", wxOK);
+    }
+    catch (gFileOutput::WriteFailed &) {
+      wxMessageBox((char *) (gText("Error occurred in writing ") + dialog.GetPath().c_str()),
+		   "Error", wxOK);
+    }
+  }
+}
+
+void GclFrame::OnSaveScript(wxCommandEvent &)
+{
+  wxFileDialog dialog(this, "Save Script As...", "", "", "*.gcl");
+
+  if (dialog.ShowModal() == wxID_OK) {
+    try {
+      gFileOutput file(dialog.GetPath().c_str());
+      for (int i = 1; i <= m_history.Length(); i++) {
+	file << m_history[i] << '\n';
+      }
+    }
+    catch (gFileOutput::OpenFailed &) {
+      wxMessageBox((char *) (gText("Could not open ") + dialog.GetPath().c_str() +
+			     " for writing."), "Error", wxOK);
+    }
+    catch (gFileOutput::WriteFailed &) {
+      wxMessageBox((char *) (gText("Error occurred in writing ") + dialog.GetPath().c_str()),
+		   "Error", wxOK);
+    }
+  }
+}
+
+void GclFrame::OnPrefsInputFont(wxCommandEvent &) 
+{
+  wxFontData data;
+  wxFontDialog dialog(this, &data);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    m_inputWindow->SetFont(dialog.GetFontData().GetChosenFont());
+  }
+}
+
+void GclFrame::OnPrefsOutputFont(wxCommandEvent &) 
+{
+  wxFontData data;
+  wxFontDialog dialog(this, &data);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    m_outputWindow->SetFont(dialog.GetFontData().GetChosenFont());
+  }
+}
+
 
 void GclFrame::OnHelpAbout(wxCommandEvent &)
 {
@@ -259,6 +362,7 @@ void GclFrame::OnCloseWindow(wxCloseEvent &)
 void GclFrame::OnTextEnter(wxCommandEvent &)
 {
   m_outputWindow->AppendText(m_inputWindow->GetValue());
+  m_history.Append(m_inputWindow->GetValue().c_str());
   m_outputWindow->AppendText("\n");
 
   wxCommandLine cmdline(20);
@@ -279,7 +383,7 @@ void GclFrame::OnTextEnter(wxCommandEvent &)
   catch (gException &w)  {
     _gsm->OutputStream() << "GCL EXCEPTION:" << w.Description() << "; Caught in GclFrame::OnTextEnter()\n";
   }
-  m_inputWindow->Clear();
+  m_inputWindow->SetValue("<< ");
   m_outputWindow->AppendText("\n");
 }
 
