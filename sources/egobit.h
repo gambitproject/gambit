@@ -1,5 +1,5 @@
 //#
-//# FILE: gobit.h -- Interface to Gobit solution module
+//# FILE: egobit.h -- Interface to Gobit solution module
 //#
 //# $Id$
 //#
@@ -24,18 +24,20 @@ class ExtGobitParams     {
 
 class ExtGobitSolver  {
   private:
-    const ExtForm<double> &nf;
+    const BaseExtForm &ef;
     ExtGobitParams params;
     int nevals;
+    gRational time;
 
   public:
-    ExtGobitSolver(const ExtForm<double> &N, const ExtGobitParams &p) 
-      : nf(N), params(p)   { }
+    ExtGobitSolver(const BaseExtForm &E, const ExtGobitParams &p) 
+      : ef(E), params(p)   { }
     ~ExtGobitSolver()   { }
 
     int Gobit(void);
     
     int NumEvals(void) const    { return nevals; }
+    gRational Time(void) const   { return time; }
 
     ExtGobitParams &Parameters(void)   { return params; }
 };

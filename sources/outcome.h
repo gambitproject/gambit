@@ -20,6 +20,7 @@ class Outcome   {
     virtual ~Outcome();
 
     virtual DataType Type(void) const = 0;
+    virtual void SetNumPlayers(int p) = 0;
 
     void SetName(const gString &);
     const gString &GetName(void) const;

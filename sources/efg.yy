@@ -20,11 +20,13 @@
                   struct nodeinfo info; \
                   gVector<double> *outc; \
                   gTuple<double> *v; \
-                  gBlock<struct nodeinfo *> *nodelist;
+                  gBlock<struct nodeinfo *> *nodelist; \
+                            \
+                  BaseExtForm *ReadEfgFile(void);
 
-%define CONSTRUCTOR_PARAM  gInput &f, ExtForm<double> *EFG
+%define CONSTRUCTOR_PARAM  gInput &f
 
-%define CONSTRUCTOR_INIT   : infile(f), E(EFG)
+%define CONSTRUCTOR_INIT   : infile(f)
 
 %token LPAREN    257
 %token RPAREN    258
@@ -41,7 +43,8 @@
 
 %%
 
-efgfile:    LBRACE NAME  { E->SetTitle(last_name); } 
+efgfile:    LBRACE NAME  { E = new ExtForm<double>(1);
+			   E->SetTitle(last_name); } 
             players outcomes games RBRACE  { return 0; }
 
 /* Parsing the player list */
@@ -89,8 +92,8 @@ games:      game
      |      games game
 
 game:       LBRACE INTEGER  { gameNo = last_int;
-                              E->CreateSubgame(gameNo, 1); }
-            NAME  { E->LabelSubgame(gameNo, last_name); }
+                              E->CreateGame(gameNo, 1); }
+            NAME  { E->LabelGame(gameNo, last_name); }
             infosets nodes
             RBRACE
 
@@ -262,3 +265,11 @@ void EfgFileReader::yyerror(char *s)
   fprintf(stderr, "Error: %s.\n", s);
 }
 
+BaseExtForm *EfgFileReader::ReadEfgFile(void)
+{
+  if (yyparse())  {
+    delete E;
+    return 0;
+  }
+  return E;
+}

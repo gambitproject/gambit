@@ -1,5 +1,5 @@
 //#
-//# FILE: gobit.cc -- Gobit module
+//# FILE: egobit.cc -- Gobit module
 //#
 //# $Id$
 //#
@@ -166,7 +166,17 @@ T ExtGobitModule<T>::Value(const gVector<T> &v)
   return val;
 };
 
+#ifdef __GNUG__
 template class ExtGobitModule<double>;
+template class ExtGobitModule<gRational>;
+#elif defined __BORLANDC__
+#pragma option -Jgd
+class ExtGobitModule<double>;
+class ExtGobitModule<gRational>;
+#pragma option -Jgx
+#endif   // __GNUG__, __BORLANDC__
+
+#include "gwatch.h"
 
 int ExtGobitSolver::Gobit(void)
 {
@@ -180,20 +190,23 @@ int ExtGobitSolver::Gobit(void)
   if (params.errfile != "" && params.errfile == params.outfile)
     errfile = outfile;
   
+  gWatch watch;
   
-//  switch (nf.Type())  {
-//  case DOUBLE:
-    T = new ExtGobitModule<double>((ExtForm<double> &) nf, *outfile,
-				*errfile, params);
-//    break;
-/*
- case RATIONAL:
-    T = new GobitModule<Rational>((NFRep<Rational> &) *data, gout, gerr,0);
-		break;
-    */
-//  }
+  switch (ef.Type())  {
+    case DOUBLE:
+      T = new ExtGobitModule<double>((ExtForm<double> &) ef, *outfile,
+				     *errfile, params);
+      break;
+    case RATIONAL:
+      T = new ExtGobitModule<gRational>((ExtForm<gRational> &) ef,
+					*outfile, *errfile, params);
+      break;
+  }
+
   T->Gobit(params.nequilib);
   
+  time = watch.Elapsed();
+
   if (params.outfile != "")
     delete outfile;
   if (params.errfile != "" && params.errfile != params.outfile)
