@@ -2450,6 +2450,12 @@ int ListPortion::Insert( Portion* item, int index )
   {
     if( PortionTypeMatch( item_type, _DataType ) )
       result = _Value->Insert( item, index );
+    else if( item_type == porUNKNOWN )
+    {
+      result = _Value->Insert( item, index );
+      assert( item->Type() == porLIST );
+      ((ListPortion*) item)->SetDataType( _DataType );
+    }
     else
       delete item;
   }
