@@ -1,7 +1,10 @@
 //
-// FILE: gambit.cc -- Main program for Gambit GUI
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of main wxApp class
 //
 
 #include <string.h>
@@ -11,97 +14,20 @@
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
-#include "wx/wizard.h"
 #include "wx/image.h"
 
+#include "game/nfg.h"
+#include "game/nfstrat.h"
+#include "game/nfgciter.h"
 #include "gambit.h"
 #include "guishare/wxmisc.h"
 #include "guishare/dlabout.h"
 #include "splash.h"
+#include "dlnewgame.h"
 #include "efgshow.h"
 #include "nfgshow.h"
 #include <signal.h>
 #include <math.h>
-
-typedef void (*fptr)(int);
-
-
-void SigFPEHandler(int type)
-{
-  signal(SIGFPE, (fptr)SigFPEHandler);  // Reinstall signal handler.
-  wxMessageBox("A floating point error has occured!\n"
-	       "The results returned may be invalid");
-}
-
-//
-// FIXME: Figure out how to handle math errors!
-//
-#ifdef UNUSED
-class MathErrHandl : public wxDialog {
-private:
-  wxRadioBox *opt_box;
-  int opt;
-  static void ok_func(wxButton &ob, wxEvent &) 
-    { ((MathErrHandl *)ob.GetClientData())->OnOk(); }
-  void OnOk(void) { opt = opt_box->GetSelection(); Show(FALSE); }
-    
-public:
-  MathErrHandl(const char *err);
-  int Option(void) { return opt; }
-};
-
-MathErrHandl::MathErrHandl(const char *err)
-  : wxDialog(0, 0, "Numerical Error")
-{
-  char *options[3] = {"Continue", "Ignore", "Quit"};
-  /*
-  wxMessage(this, (char *)err);
-  this->NewLine();
-  opt_box = new wxRadioBox(this, 0, "What now?", 
-			   -1, -1, -1, -1, 3, 
-			   options, 1, wxVERTICAL);
-  this->NewLine();
-  wxButton *ok = new wxButton(this, (wxFunction)ok_func, "OK");
-  ok->SetClientData((char *)this);
-  Fit();
-  ok->Centre(wxHORIZONTAL);
-  */
-  ShowModal();
-}
-    
-#ifdef __WXMSW__ // this handler is defined differently under win/unix
-const int MATH_CONTINUE = 0;
-const int MATH_IGNORE = 1;
-const int MATH_QUIT = 2;
-int _RTLENTRY _matherr (struct exception *e)
-#else
-#ifdef _LINUX
-struct exception { char *name; double arg1, arg2; int type; };
-#endif
-int matherr(struct exception *e)
-#endif
-{
-  static char *whyS[] = { "argument domain error",
-                          "argument singularity ",
-			  "overflow range error ",
-			  "underflow range error",
-			  "total loss of significance",
-			  "partial loss of significance" };
-
-  static int option = MATH_CONTINUE;
-  char errMsg[80];
-  if (option != MATH_IGNORE)   {
-  sprintf (errMsg, "%s (%8g,%8g): %s\n",
-	   e->name, e->arg1, e->arg2, whyS [e->type - 1]);
-  MathErrHandl E(errMsg);
-  option = E.Option();
-  if (option==MATH_QUIT)   {
-    wxExit();
-  }
-  // we did not really fix anything, but want no more warnings
-  return 1;	
-}
-#endif  // UNUSED
 
 class Game {
 public:
@@ -152,12 +78,6 @@ bool GambitApp::OnInit(void)
   // m_help.AddBook("help/guiman.hhp");
   // m_help.AddBook("help/gclman.hhp");
 
-  // Set up the error handling functions.
-  // For some reason this does not work w/ BC++ (crash on exit)
-#ifndef __BORLANDC__ 
-  signal(SIGFPE, (fptr) SigFPEHandler);
-#endif
-    
   // Process command line arguments, if any.
 #ifdef UNUSED
   if (argc > 1) { 
@@ -187,254 +107,46 @@ GambitApp::~GambitApp()
   }
 }
 
-class NewGameTypePage : public wxWizardPage {
-private:
-  wxRadioBox *m_gameType;
-  wxWizardPage *m_efgPage, *m_nfgPage;
-
-public:
-  NewGameTypePage(wxWizard *, wxWizardPage *, wxWizardPage *);
-
-  bool CreateEfg(void) const { return (m_gameType->GetSelection() == 0); }
-
-  wxWizardPage *GetPrev(void) const { return 0; }
-  wxWizardPage *GetNext(void) const
-    { return (CreateEfg()) ? m_efgPage : m_nfgPage; }
-};
-
-NewGameTypePage::NewGameTypePage(wxWizard *p_parent,
-				 wxWizardPage *p_efgPage,
-				 wxWizardPage *p_nfgPage)
-  : wxWizardPage(p_parent), m_efgPage(p_efgPage), m_nfgPage(p_nfgPage)
-{
-  SetAutoLayout(true);
-
-  wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
-  sizer->Add(new wxStaticText(this, -1,
-			      "Step 1: Select the representation to work with"),
-	     0, wxALL | wxCENTER, 10);
-
-  wxString typeChoices[] = { "Extensive form", "Normal form" };
-  m_gameType = new wxRadioBox(this, -1, "Representation",
-			      wxDefaultPosition, wxDefaultSize,
-			      2, typeChoices);
-  sizer->Add(m_gameType, 0, wxALL | wxCENTER, 10);
-
-  SetSizer(sizer);
-  sizer->Fit(this);
-  sizer->SetSizeHints(this);
-
-  Layout();
-}
-
-const int idADDPLAYER_BUTTON = 2001;
-const int idDELETEPLAYER_BUTTON = 2002;
-
-class NfgPlayersPage : public wxWizardPageSimple {
-private:
-  wxButton *m_addButton, *m_deleteButton;
-  wxGrid *m_nameGrid;
-
-  // Event handlers
-  void OnAddPlayer(wxCommandEvent &);
-  void OnDeletePlayer(wxCommandEvent &);
-
-public:
-  NfgPlayersPage(wxWizard *);
-
-  int NumPlayers(void) const { return m_nameGrid->GetRows(); }
-  gText GetName(int) const;
-  gArray<int> NumStrats(void) const;
-
-  DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(NfgPlayersPage, wxWizardPageSimple)
-  EVT_BUTTON(idADDPLAYER_BUTTON, NfgPlayersPage::OnAddPlayer)
-  EVT_BUTTON(idDELETEPLAYER_BUTTON, NfgPlayersPage::OnDeletePlayer)
-END_EVENT_TABLE()
-
-NfgPlayersPage::NfgPlayersPage(wxWizard *p_parent)
-  : wxWizardPageSimple(p_parent)
-{
-  SetAutoLayout(true);
-  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  m_addButton = new wxButton(this, idADDPLAYER_BUTTON, "Add player");
-  buttonSizer->Add(m_addButton, 0, wxALL, 5);
-  m_deleteButton = new wxButton(this, idDELETEPLAYER_BUTTON, "Delete player");
-  m_deleteButton->Enable(false);
-  buttonSizer->Add(m_deleteButton, 0, wxALL, 5);
-
-  m_nameGrid = new wxGrid(this, -1, wxDefaultPosition, wxSize(250, 200));
-  m_nameGrid->CreateGrid(2, 2);
-  m_nameGrid->SetLabelValue(wxHORIZONTAL, "Label", 0);
-  m_nameGrid->SetLabelValue(wxHORIZONTAL, "Strategies", 1);
-  m_nameGrid->SetLabelAlignment(wxVERTICAL, wxCENTRE);
-  m_nameGrid->SetCellValue("Player1", 0, 0);
-  m_nameGrid->SetCellValue("Player2", 1, 0);
-  m_nameGrid->SetCellValue("2", 0, 1);
-  m_nameGrid->SetCellValue("2", 1, 1);
-  m_nameGrid->DisableDragRowSize();
-  m_nameGrid->DisableDragColSize();
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(new wxStaticText(this, -1,
-				 "Step 2: Define the players for the game"),
-		0, wxALL | wxCENTER, 5);
-  topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
-  topSizer->Add(m_nameGrid, 0, wxALL | wxCENTER, 5);
-
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-
-  Layout();
-}
-
-void NfgPlayersPage::OnAddPlayer(wxCommandEvent &)
-{
-  m_nameGrid->AppendRows();
-  m_nameGrid->AdjustScrollbars();
-  m_nameGrid->SetCellValue((char *) ("Player" + ToText(m_nameGrid->GetRows())),
-			   m_nameGrid->GetRows() - 1, 0);
-  m_nameGrid->SetCellValue("2", m_nameGrid->GetRows() - 1, 1);
-  m_deleteButton->Enable(true);
-}
-
-void NfgPlayersPage::OnDeletePlayer(wxCommandEvent &)
-{
-  m_nameGrid->DeleteRows(m_nameGrid->GetCursorRow());
-  m_nameGrid->AdjustScrollbars();
-  m_deleteButton->Enable(m_nameGrid->GetRows() > 2);
-}
-
-gText NfgPlayersPage::GetName(int p_player) const
-{
-  return m_nameGrid->GetCellValue(p_player - 1, 0).c_str();
-}
-
-gArray<int> NfgPlayersPage::NumStrats(void) const
-{
-  gArray<int> numStrats(m_nameGrid->GetRows());
-  for (int pl = 1; pl <= numStrats.Length(); pl++) {
-    numStrats[pl] = atoi(m_nameGrid->GetCellValue(pl - 1, 1));
-  }
-
-  return numStrats;
-}
-
-class EfgPlayersPage : public wxWizardPageSimple {
-private:
-  wxButton *m_addButton, *m_deleteButton;
-  wxGrid *m_nameGrid;
-
-  // Event handlers
-  void OnAddPlayer(wxCommandEvent &);
-  void OnDeletePlayer(wxCommandEvent &);
-
-public:
-  EfgPlayersPage(wxWizard *);
-
-  int NumPlayers(void) const { return m_nameGrid->GetRows(); }
-  gText GetName(int) const;
-  gArray<int> NumStrats(void) const;
-
-  DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(EfgPlayersPage, wxWizardPageSimple)
-  EVT_BUTTON(idADDPLAYER_BUTTON, EfgPlayersPage::OnAddPlayer)
-  EVT_BUTTON(idDELETEPLAYER_BUTTON, EfgPlayersPage::OnDeletePlayer)
-END_EVENT_TABLE()
-
-EfgPlayersPage::EfgPlayersPage(wxWizard *p_parent)
-  : wxWizardPageSimple(p_parent)
-{
-  SetAutoLayout(true);
-  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  m_addButton = new wxButton(this, idADDPLAYER_BUTTON, "Add player");
-  buttonSizer->Add(m_addButton, 0, wxALL, 5);
-  m_deleteButton = new wxButton(this, idDELETEPLAYER_BUTTON, "Delete player");
-  m_deleteButton->Enable(false);
-  buttonSizer->Add(m_deleteButton, 0, wxALL, 5);
-
-  m_nameGrid = new wxGrid(this, -1, wxDefaultPosition, wxSize(250, 200));
-  m_nameGrid->CreateGrid(2, 1);
-  m_nameGrid->SetLabelValue(wxHORIZONTAL, "Label", 0);
-  m_nameGrid->SetLabelAlignment(wxVERTICAL, wxCENTRE);
-  m_nameGrid->SetCellValue("Player1", 0, 0);
-  m_nameGrid->SetCellValue("Player2", 1, 0);
-  m_nameGrid->DisableDragRowSize();
-  m_nameGrid->DisableDragColSize();
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(new wxStaticText(this, -1,
-				 "Step 2: Define the players for the game"),
-		0, wxALL | wxCENTER, 5);
-  topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
-  topSizer->Add(m_nameGrid, 0, wxALL | wxCENTER, 5);
-
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-
-  Layout();
-}
-
-void EfgPlayersPage::OnAddPlayer(wxCommandEvent &)
-{
-  m_nameGrid->AppendRows();
-  m_nameGrid->AdjustScrollbars();
-  m_nameGrid->SetCellValue((char *) ("Player" + ToText(m_nameGrid->GetRows())),
-			   m_nameGrid->GetRows() - 1, 0);
-  m_deleteButton->Enable(true);
-}
-
-void EfgPlayersPage::OnDeletePlayer(wxCommandEvent &)
-{
-  m_nameGrid->DeleteRows(m_nameGrid->GetCursorRow());
-  m_nameGrid->AdjustScrollbars();
-  m_deleteButton->Enable(m_nameGrid->GetRows() > 2);
-}
-
-gText EfgPlayersPage::GetName(int p_player) const
-{
-  return m_nameGrid->GetCellValue(p_player - 1, 0).c_str();
-}
-
 void GambitApp::OnFileNew(wxWindow *p_parent)
 {
-  wxWizard *wizard = wxWizard::Create(p_parent, -1, "Creating a new game");
-  EfgPlayersPage *efgPage = new EfgPlayersPage(wizard);
-  NfgPlayersPage *nfgPage = new NfgPlayersPage(wizard);
-  NewGameTypePage *page1 = new NewGameTypePage(wizard, efgPage, nfgPage);
-  efgPage->SetPrev(page1);
-  nfgPage->SetPrev(page1);
+  dialogNewGame dialog(p_parent);
 
-  if (wizard->RunWizard(page1)) {
-    if (page1->CreateEfg()) {
+  if (dialog.ShowModal() == wxID_OK) {
+    if (dialog.CreateEfg()) {
       FullEfg *efg = new FullEfg;
-      for (int pl = 1; pl <= efgPage->NumPlayers(); pl++) {
-	efg->NewPlayer()->SetName(efgPage->GetName(pl));
-      }
       efg->SetTitle("Untitled Extensive Form Game");
+      for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
+	efg->NewPlayer()->SetName(gText("Player") + ToText(pl));
+      }
       EfgShow *efgShow = new EfgShow(*efg, 0);
       efgShow->SetFilename("");
       AddGame(efg, efgShow);
     }
     else {
-      Nfg *nfg = new Nfg(nfgPage->NumStrats());
-      for (int pl = 1; pl <= nfgPage->NumPlayers(); pl++) {
-	nfg->Players()[pl]->SetName(nfgPage->GetName(pl));
-      }
+      Nfg *nfg = new Nfg(dialog.NumStrategies());
       nfg->SetTitle("Untitled Normal Form Game");
+      for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
+	nfg->Players()[pl]->SetName(gText("Player") + ToText(pl));
+      }
+      if (dialog.CreateOutcomes()) {
+	NFSupport support(*nfg);
+	NfgContIter iter(support);
+	iter.First();
+	do {
+	  NFOutcome *outcome = nfg->NewOutcome();
+	  for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
+	    nfg->SetPayoff(outcome, pl, 0);
+	    outcome->SetName(outcome->GetName() +
+			     ToText(iter.Profile()[pl]->Number()));
+	  }
+	  nfg->SetOutcome(iter.Profile(), outcome);
+	} while (iter.NextContingency());
+      }
       NfgShow *nfgShow = new NfgShow(*nfg, 0);
       nfgShow->SetFilename("");
       AddGame(nfg, nfgShow);
     }
   }
-
-  wizard->Destroy();
 }
 
 void GambitApp::OnFileOpen(wxWindow *p_parent)

@@ -26,6 +26,7 @@ gambit_SOURCES = \
 	dlelimbehav.cc \
 	dlelimmixed.cc \
 	dlinsertmove.cc \
+	dlnewgame.cc \
 	dlnfg.cc \
 	dlnfgproperties.cc \
 	dlnfgstandard.cc \
