@@ -17,6 +17,52 @@
 #include "solution.h"
 #include "lemke.h"
 
+//---------
+// HACK!
+// This is a hack to get the solutions out of the module.  Future proper
+// redesign will solve the problem in a better fashion.
+// Don't let anyone ever know I did this.
+//---------
+
+gBlock<gPVector<double> *> sol_double;
+gBlock<gPVector<gRational> *> sol_rational;
+
+void GetLemkeSolution(gBlock<gPVector<double> *> &sols)
+{
+  sols = gBlock<gPVector<double> *>(sol_double.Length());
+  for (int i = 1; i <= sols.Length(); i++)
+    sols[i] = new gPVector<double>(*sol_double[i]);
+}
+
+void GetLemkeSolution(gBlock<gPVector<gRational> *> &sols)
+{
+  sols = gBlock<gPVector<gRational> *>(sol_rational.Length());
+  for (int i = 1; i <= sols.Length(); i++)
+    sols[i] = new gPVector<gRational>(*sol_rational[i]);
+}
+
+void ClearLemkeSolution(void)
+{
+  for (int i = 1; i <= sol_double.Length(); i++)
+    delete sol_double[i];
+  for (i = 1; i <= sol_rational.Length(); i++)
+    delete sol_rational[i];
+
+  sol_double = gBlock<gPVector<double> *>();
+  sol_rational = gBlock<gPVector<gRational> *>();
+}
+
+void AddLemkeSolution(gPVector<double> *sol)
+{
+  sol_double.Append(sol);
+}
+
+void AddLemkeSolution(gPVector<gRational> *sol)
+{
+  sol_rational.Append(sol);
+}
+
+
 LemkeParams::LemkeParams(void) : dup_strat(0), plev(0)
 { }
 
@@ -287,12 +333,14 @@ template <class T> int LemkeTableau<T>::Exit_Row(int col)
 
 template <class T> void LemkeTableau<T>::GetSolutions(void) const
 {
+  ClearLemkeSolution();
+
   for (int i = 1; i <= List.Length(); i++)    {
     gTuple<int> dim(2);
     dim[1] = rep.NumStrats(1);
     dim[2] = rep.NumStrats(2);
 
-    gPVector<T> profile(dim);
+    gPVector<T> *profile = new gPVector<T>(dim);
     T sum = (T) 0;
 
     for (int j = 1; j <= rep.NumStrats(1); j++)
@@ -301,8 +349,8 @@ template <class T> void LemkeTableau<T>::GetSolutions(void) const
     if (sum == (T) 0)  continue;
 
     for (j = 1; j <= rep.NumStrats(1); j++) 
-      if (List[i].IsDefined(j))   profile(1, j) = List[i](j) / sum;
-      else  profile(1, j) = (T) 0;
+      if (List[i].IsDefined(j))   (*profile)(1, j) = List[i](j) / sum;
+      else  (*profile)(1, j) = (T) 0;
 
     sum = (T) 0;
 
@@ -314,13 +362,11 @@ template <class T> void LemkeTableau<T>::GetSolutions(void) const
 
     for (j = 1; j <= rep.NumStrats(2); j++)
       if (List[i].IsDefined(rep.NumStrats(1) + j))
-	profile(2, j) = List[i](rep.NumStrats(1) + j) / sum;
+	(*profile)(2, j) = List[i](rep.NumStrats(1) + j) / sum;
       else
-	profile(2, j) = (T) 0;
+	(*profile)(2, j) = (T) 0;
 
-	gout << "Lemke solution:\n";
-	profile.Dump(gout);
-	gout << '\n';
+    AddLemkeSolution(profile);
   }
 }
 

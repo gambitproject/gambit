@@ -42,6 +42,14 @@ class LemkeSolver  {
     LemkeParams &Parameters(void)   { return params; }
 };
 
+//
+// This is a dirty hack.  It returns the solutions from the last invocation
+// of LemkeSolver::Lemke() as a block of pointers to profile vectors.
+// The user is responsible for deleting the pointers after he is done with
+// them.
+//
+template <class T> GetLemkeSolution(gBlock<gPVector<T> *> &);
+
 
 #endif    // LEMKE_H
 
