@@ -149,7 +149,7 @@ NFSupport *ComputeDominated(NFSupport &S, bool strong,
   for (int i = 1; i <= players.Length(); i++)   {
     int pl = players[i];
     tracefile << "Dominated strategies for player " << pl << ":\n";
-    NFStrategySet *SS = ComputeDominated(S, pl, strong);
+    NFStrategySet *SS = ComputeDominated(S, pl, strong, tracefile);
     if (SS)   {
       delete T->GetNFStrategySet(pl);
       T->SetNFStrategySet(pl, SS);
