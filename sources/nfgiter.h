@@ -1,7 +1,7 @@
 //
 // FILE: nfgiter.h -- Normal form iterator class
 //
-// $Id$
+// @(#)nfgiter.h	2.7 4/3/97
 //
 
 #ifndef NFGITER_H
@@ -14,6 +14,7 @@ class StrategyProfile;
 #include "nfstrat.h"
 class NFSupport;
 class NfgContIter;
+class NFOutcome;
 
 //
 // This class is useful for iterating around the normal form.
@@ -25,25 +26,25 @@ private:
   NFGameForm *N;
   gArray<int> current_strat;
   StrategyProfile profile;
-  
+
 public:
   NfgIter(NFGameForm &);
   NfgIter(const NFSupport &s);
   NfgIter(const NfgIter &);
   NfgIter(const NfgContIter &);
   ~NfgIter();
-  
+
   NfgIter &operator=(const NfgIter &);
-  
+
   void First(void);
   int Next(int p);
   int Set(int p, int s);
-  
+
   void Get(gArray<int> &t) const;
   void Set(const gArray<int> &t);
-  
+
   long GetIndex(void) const;
-  
+
   NFOutcome *GetOutcome(void) const;
   void SetOutcome(NFOutcome *);
 
