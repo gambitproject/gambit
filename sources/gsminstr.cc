@@ -211,8 +211,8 @@ Portion *gclFunctionCall::Evaluate(void)
 				      _gsm._StdOut, _gsm._StdErr);
   
   int undefined = 0;
-
-  for (int i = 1; i <= params->req->NumParams(); i++)   {
+  int i;
+  for (i = 1; i <= params->req->NumParams(); i++)   {
     Portion *val = (*params->req)[i]->Evaluate();
     if (val->Spec().Type == porREFERENCE)   {
       if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value()))
@@ -226,7 +226,7 @@ Portion *gclFunctionCall::Evaluate(void)
       call->SetCurrParam(val, AUTO_VAL_OR_REF);
   }
   
-  for (int i = 1; i <= params->opt->NumParams(); i++)  {
+  for (i = 1; i <= params->opt->NumParams(); i++)  {
     call->SetCurrParamIndex(params->opt->FormalName(i));
     Portion *val = (*params->opt)[i]->Evaluate();
     if (val->Spec().Type == porREFERENCE)   {
