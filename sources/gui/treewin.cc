@@ -64,7 +64,14 @@ void TreeWindow::MakeMenus(void)
 
   m_nodeMenu->Append(efgmenuEDIT_INSERT, "Insert move", "Insert a move");
   m_nodeMenu->Append(efgmenuEDIT_REVEAL, "Reveal move",
-		     "Reveal the move");
+		     "Reveal this move");
+  m_nodeMenu->AppendSeparator();
+  m_nodeMenu->Append(efgmenuEDIT_TOGGLE_SUBGAME, "Mark subgame",
+		     "Mark or unmark this subgame");
+  m_nodeMenu->Append(efgmenuEDIT_MARK_SUBGAME_TREE, "Mark subgame tree",
+		     "Mark all subgames in this tree");
+  m_nodeMenu->Append(efgmenuEDIT_UNMARK_SUBGAME_TREE, "Unmark subgame tree",
+		     "Unmark all subgames in this tree");
   m_nodeMenu->AppendSeparator();
   m_nodeMenu->Append(efgmenuEDIT_NODE, "Edit node",
 		     "View and change node properties");
@@ -509,59 +516,26 @@ void TreeWindow::SetCursorPosition(Node *p_cursor)
 
 void TreeWindow::UpdateMenus(void)
 {
-  m_nodeMenu->Enable(efgmenuEDIT_INSERT, (m_parent->Cursor()) ? true : false);
+  Node *cursor = m_parent->Cursor();
+
+  m_nodeMenu->Enable(efgmenuEDIT_INSERT, (cursor) ? true : false);
   m_nodeMenu->Enable(efgmenuEDIT_REVEAL,
-		     (m_parent->Cursor() && m_parent->Cursor()->GetInfoset()));
+		     (cursor && cursor->GetInfoset()));
   m_nodeMenu->Enable(efgmenuEDIT_MOVE, 
-		     (m_parent->Cursor() && m_parent->Cursor()->GetInfoset()));
-}
+		     (cursor && cursor->GetInfoset()));
 
-//-----------------------------------------------------------------------
-//                     SUBGAME MENU HANDLER FUNCTIONS
-//-----------------------------------------------------------------------
-
-//----------------------
-// Subgames->Mark All
-//----------------------
-
-void TreeWindow::SubgameMarkAll(void)
-{
-  gList<Node *> subgame_roots;
-  LegalSubgameRoots(m_efg, subgame_roots);
-  m_efg.MarkSubgames(subgame_roots);
-  RefreshLayout();
-}
-
-void TreeWindow::SubgameMark(void)
-{
-  if (m_parent->Cursor()->GetSubgameRoot() == m_parent->Cursor()) {
-    // ignore silently
-    return;
-  }
-
-  if (!m_efg.IsLegalSubgame(m_parent->Cursor())) {
-    wxMessageBox("This node is not a root of a valid subgame"); 
-    return;
-  }
-
-  m_efg.MarkSubgame(m_parent->Cursor());
-  RefreshLayout();
-}
-
-void TreeWindow::SubgameUnmark(void)
-{
-  if (m_parent->Cursor()->GetSubgameRoot() != m_parent->Cursor() ||
-      m_parent->Cursor()->GetSubgameRoot() == m_efg.RootNode())
-    return;
-    
-  m_efg.UnmarkSubgame(m_parent->Cursor());
-  RefreshLayout();
-}
-
-void TreeWindow::SubgameUnmarkAll(void)
-{
-  m_efg.UnmarkSubgames(m_efg.RootNode());
-  RefreshLayout();
+  m_nodeMenu->Enable(efgmenuEDIT_TOGGLE_SUBGAME,
+		     (cursor && m_efg.IsLegalSubgame(cursor) &&
+		      cursor->GetParent()));
+  m_nodeMenu->Enable(efgmenuEDIT_MARK_SUBGAME_TREE,
+		     (cursor && m_efg.IsLegalSubgame(cursor)));
+  m_nodeMenu->Enable(efgmenuEDIT_UNMARK_SUBGAME_TREE,
+		     (cursor && m_efg.IsLegalSubgame(cursor)));
+  m_nodeMenu->SetLabel(efgmenuEDIT_TOGGLE_SUBGAME,
+		       (cursor && cursor->GetParent() &&
+			m_efg.IsLegalSubgame(cursor) &&
+			cursor->GetSubgameRoot() == cursor) ?
+		       "Unmark subgame" : "Mark subgame");
 }
 
 //-----------------------------------------------------------------------

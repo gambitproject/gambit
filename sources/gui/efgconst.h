@@ -14,7 +14,9 @@ typedef enum {
   efgmenuEDIT_INSERT = 1100,
   efgmenuEDIT_DELETE = 1101,
   efgmenuEDIT_REVEAL = 1407,
-
+  efgmenuEDIT_TOGGLE_SUBGAME = 1410,
+  efgmenuEDIT_MARK_SUBGAME_TREE = 1411,
+  efgmenuEDIT_UNMARK_SUBGAME_TREE = 1412,
   efgmenuEDIT_GAME = 1419,
   efgmenuEDIT_NODE = 1420,
   efgmenuEDIT_MOVE = 1421,
@@ -39,12 +41,6 @@ typedef enum {
   efgmenuFORMAT_DISPLAY = 1603,
   efgmenuFORMAT_DISPLAY_DECIMALS = 1618,
   efgmenuFORMAT_DISPLAY_LAYOUT = 1620,
-
-  efgmenuTOOLS_SUBGAME = 1349,
-  efgmenuTOOLS_SUBGAME_MARKALL = 1350,
-  efgmenuTOOLS_SUBGAME_MARK = 1351,
-  efgmenuTOOLS_SUBGAME_UNMARKALL = 1352,
-  efgmenuTOOLS_SUBGAME_UNMARK = 1354,
 
   efgmenuTOOLS_DOMINANCE = 1800,
 

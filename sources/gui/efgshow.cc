@@ -86,6 +86,9 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuEDIT_INSERT, EfgShow::OnEditInsert)
   EVT_MENU(efgmenuEDIT_DELETE, EfgShow::OnEditDelete)
   EVT_MENU(efgmenuEDIT_REVEAL, EfgShow::OnEditReveal)
+  EVT_MENU(efgmenuEDIT_TOGGLE_SUBGAME, EfgShow::OnEditToggleSubgame)
+  EVT_MENU(efgmenuEDIT_MARK_SUBGAME_TREE, EfgShow::OnEditMarkSubgameTree)
+  EVT_MENU(efgmenuEDIT_UNMARK_SUBGAME_TREE, EfgShow::OnEditUnmarkSubgameTree)
   EVT_MENU(efgmenuEDIT_NODE, EfgShow::OnEditNode)
   EVT_MENU(efgmenuEDIT_MOVE, EfgShow::OnEditMove)
   EVT_MENU(efgmenuEDIT_GAME, EfgShow::OnEditGame)
@@ -106,10 +109,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuFORMAT_DISPLAY_DECIMALS, EfgShow::OnFormatDisplayDecimals)
   EVT_MENU(efgmenuFORMAT_SAVE, EfgShow::OnFormatSave)
   EVT_MENU(efgmenuFORMAT_LOAD, EfgShow::OnFormatLoad)
-  EVT_MENU(efgmenuTOOLS_SUBGAME_MARKALL, EfgShow::OnToolsSubgamesMarkAll)
-  EVT_MENU(efgmenuTOOLS_SUBGAME_MARK, EfgShow::OnToolsSubgamesMark)
-  EVT_MENU(efgmenuTOOLS_SUBGAME_UNMARKALL, EfgShow::OnToolsSubgamesUnMarkAll)
-  EVT_MENU(efgmenuTOOLS_SUBGAME_UNMARK, EfgShow::OnToolsSubgamesUnMark)
   EVT_MENU(efgmenuTOOLS_DOMINANCE, EfgShow::OnToolsDominance)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_STANDARD, 
 	   EfgShow::OnToolsEquilibriumStandard)
@@ -546,6 +545,13 @@ void EfgShow::MakeMenus(void)
   editMenu->Append(efgmenuEDIT_REVEAL, "&Reveal", 
 		   "Reveal choice at node");
   editMenu->AppendSeparator();
+  editMenu->Append(efgmenuEDIT_TOGGLE_SUBGAME, "Mark &subgame",
+		   "Mark or unmark the subgame at this node");
+  editMenu->Append(efgmenuEDIT_MARK_SUBGAME_TREE, "Mar&k subgame tree",
+		   "Mark all subgames in this subtree");
+  editMenu->Append(efgmenuEDIT_UNMARK_SUBGAME_TREE, "&Unmark subgame tree",
+		   "Unmark all subgames in this subtree");
+  editMenu->AppendSeparator();
   editMenu->Append(efgmenuEDIT_NODE, "&Node",
 		   "Edit properties of the node");
   editMenu->Append(efgmenuEDIT_MOVE, "&Move",
@@ -554,18 +560,6 @@ void EfgShow::MakeMenus(void)
 		   "Edit properties of the game");
 
   wxMenu *toolsMenu = new wxMenu;
-
-  wxMenu *toolsSubgameMenu = new wxMenu;
-  toolsSubgameMenu->Append(efgmenuTOOLS_SUBGAME_MARKALL, "Mark &All",
-			   "Scan tree for subgames");
-  toolsSubgameMenu->Append(efgmenuTOOLS_SUBGAME_MARK, "&Mark",
-			   "Set node subgame root");
-  toolsSubgameMenu->Append(efgmenuTOOLS_SUBGAME_UNMARKALL, "UnMark &All",
-			   "Clear all subgame info");
-  toolsSubgameMenu->Append(efgmenuTOOLS_SUBGAME_UNMARK, "&UnMark",
-			   "Unmark node subgame");
-  toolsMenu->Append(efgmenuTOOLS_SUBGAME, "&Subgame", toolsSubgameMenu,
-		    "Manipulate subgames");
 
   toolsMenu->Append(efgmenuTOOLS_DOMINANCE, "&Dominance",
 		    "Find undominated actions");
@@ -719,6 +713,19 @@ void EfgShow::UpdateMenus(void)
 		  (cursor && m_efg.NumChildren(cursor) > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_REVEAL, 
 		  (cursor && cursor->GetInfoset()) ? true : false);
+
+  menuBar->Enable(efgmenuEDIT_TOGGLE_SUBGAME,
+		  (cursor && m_efg.IsLegalSubgame(cursor) &&
+		   cursor->GetParent()));
+  menuBar->Enable(efgmenuEDIT_MARK_SUBGAME_TREE,
+		  (cursor && m_efg.IsLegalSubgame(cursor)));
+  menuBar->Enable(efgmenuEDIT_UNMARK_SUBGAME_TREE,
+		  (cursor && m_efg.IsLegalSubgame(cursor)));
+  menuBar->SetLabel(efgmenuEDIT_TOGGLE_SUBGAME,
+		    (cursor && cursor->GetParent() &&
+		     m_efg.IsLegalSubgame(cursor) &&
+		     cursor->GetSubgameRoot() == cursor) ?
+		    "Unmark &subgame" : "Mark &subgame");
 
   menuBar->Enable(efgmenuEDIT_NODE, (cursor) ? true : false);
   menuBar->Enable(efgmenuEDIT_MOVE,
@@ -968,9 +975,39 @@ void EfgShow::OnEditReveal(wxCommandEvent &)
   }
 }
 
-//----------------------------------------------------------------------
-//           EfgShow: Menu handlers - Edit->Tree menu
-//----------------------------------------------------------------------
+void EfgShow::OnEditToggleSubgame(wxCommandEvent &)
+{
+  if (Cursor()->GetSubgameRoot() == Cursor()) {
+    m_efg.UnmarkSubgame(Cursor());
+  }
+  else {
+    m_efg.MarkSubgame(Cursor());
+  }
+  m_treeWindow->RefreshLayout();
+  m_treeWindow->Refresh();
+}
+
+void EfgShow::OnEditMarkSubgameTree(wxCommandEvent &)
+{
+  gList<Node *> subgames;
+  LegalSubgameRoots(m_efg, Cursor(), subgames);
+  for (int i = 1; i <= subgames.Length(); i++) {
+    m_efg.MarkSubgame(subgames[i]);
+  }
+  m_treeWindow->RefreshLayout();
+  m_treeWindow->Refresh();
+}
+
+void EfgShow::OnEditUnmarkSubgameTree(wxCommandEvent &)
+{
+  gList<Node *> subgames;
+  LegalSubgameRoots(m_efg, Cursor(), subgames);
+  for (int i = 1; i <= subgames.Length(); i++) {
+    m_efg.UnmarkSubgame(subgames[i]);
+  }
+  m_treeWindow->RefreshLayout();
+  m_treeWindow->Refresh();
+}
 
 void EfgShow::OnEditNode(wxCommandEvent &)
 {
@@ -978,6 +1015,15 @@ void EfgShow::OnEditNode(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     Cursor()->SetName(dialog.GetNodeName().c_str());
     m_efg.SetOutcome(Cursor(), m_efg.GetOutcome(dialog.GetOutcome()));
+
+    if (m_efg.IsLegalSubgame(Cursor())) {
+      if (dialog.MarkedSubgame()) {
+	m_efg.MarkSubgame(Cursor());
+      }
+      else {
+	m_efg.UnmarkSubgame(Cursor());
+      }
+    }
 
     if (Cursor()->NumChildren() > 0 &&
 	dialog.GetInfoset() != Cursor()->GetInfoset()) {
@@ -1285,35 +1331,6 @@ void EfgShow::OnFormatLoad(wxCommandEvent &)
 {
   m_treeWindow->DrawSettings().LoadOptions();
 }
-
-//----------------------------------------------------------------------
-//           EfgShow: Menu handlers - Tools->Subgames menu
-//----------------------------------------------------------------------
-
-void EfgShow::OnToolsSubgamesMarkAll(wxCommandEvent &)
-{
-  m_treeWindow->SubgameMarkAll();
-  m_treeWindow->Refresh();
-}
-
-void EfgShow::OnToolsSubgamesMark(wxCommandEvent &)
-{
-  m_treeWindow->SubgameMark();
-  m_treeWindow->Refresh();
-}
-
-void EfgShow::OnToolsSubgamesUnMarkAll(wxCommandEvent &)
-{
-  m_treeWindow->SubgameUnmarkAll();
-  m_treeWindow->Refresh();
-}
-
-void EfgShow::OnToolsSubgamesUnMark(wxCommandEvent &)
-{
-  m_treeWindow->SubgameUnmark();
-  m_treeWindow->Refresh();
-}
-
 
 //----------------------------------------------------------------------
 //             EfgShow: Menu handler - Tools->Dominance

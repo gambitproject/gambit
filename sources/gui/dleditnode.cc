@@ -62,6 +62,22 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Node *p_node)
   infosetSizer->Add(m_infoset, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(infosetSizer, 0, wxALL | wxEXPAND, 5);
 
+  wxBoxSizer *subgameSizer = new wxBoxSizer(wxVERTICAL);
+  if (!p_node->GetParent()) {
+    subgameSizer->Add(new wxStaticText(this, wxID_STATIC,
+				       "This is the root node of the tree"),
+		      0, wxALL | wxCENTER, 5);
+  }
+  else if (p_node->Game()->IsLegalSubgame(p_node)) {
+    subgameSizer->Add(new wxStaticText(this, wxID_STATIC,
+				       "This is the root of a proper subgame"),
+		      0, wxALL | wxCENTER, 5);
+    m_markedSubgame = new wxCheckBox(this, -1, "Subgame is marked");
+    m_markedSubgame->SetValue(p_node->GetSubgameRoot() == p_node);
+    subgameSizer->Add(m_markedSubgame, 0, wxALL | wxCENTER, 0);
+  }
+  topSizer->Add(subgameSizer, 0, wxALL | wxCENTER, 5);
+
   wxBoxSizer *outcomeSizer = new wxBoxSizer(wxHORIZONTAL);
   outcomeSizer->Add(new wxStaticText(this, wxID_STATIC, "Outcome"),
 		    0, wxALL | wxCENTER, 5);

@@ -73,6 +73,10 @@ private:
   void OnEditDelete(wxCommandEvent &);
   void OnEditReveal(wxCommandEvent &);
 
+  void OnEditToggleSubgame(wxCommandEvent &);
+  void OnEditMarkSubgameTree(wxCommandEvent &);
+  void OnEditUnmarkSubgameTree(wxCommandEvent &);
+
   void OnEditMove(wxCommandEvent &);
   void OnEditGame(wxCommandEvent &);
 
@@ -94,11 +98,6 @@ private:
   void OnFormatDisplayDecimals(wxCommandEvent &);
   void OnFormatSave(wxCommandEvent &);
   void OnFormatLoad(wxCommandEvent &);
-
-  void OnToolsSubgamesMarkAll(wxCommandEvent &);
-  void OnToolsSubgamesMark(wxCommandEvent &);
-  void OnToolsSubgamesUnMarkAll(wxCommandEvent &);
-  void OnToolsSubgamesUnMark(wxCommandEvent &);
 
   void OnToolsDominance(wxCommandEvent &);
 

@@ -52,12 +52,6 @@ public:
   TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent);
   virtual ~TreeWindow();
     
-  // MENU EVENT HANDLERS
-  void SubgameMarkAll(void);
-  void SubgameMark(void);
-  void SubgameUnmarkAll(void);
-  void SubgameUnmark(void);
-
   EfgShow *Parent(void) const { return m_parent; }
   
   virtual void OnDraw(wxDC &dc);
