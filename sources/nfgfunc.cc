@@ -986,39 +986,55 @@ void Init_nfgfunc(GSM *gsm)
   //--------------------- ElimDom ---------------------------//
 
   FuncObj = new FuncDescObj("ElimDom");
-  FuncObj->SetFuncInfo(GSM_ElimDom, 3);
+  FuncObj->SetFuncInfo(GSM_ElimDom, 5);
   FuncObj->SetParamInfo(GSM_ElimDom, 0, "support", porNF_SUPPORT);
   FuncObj->SetParamInfo(GSM_ElimDom, 1, "strong", porBOOL,
 			new BoolValPortion(false));
   FuncObj->SetParamInfo(GSM_ElimDom, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimDom, 3, "traceFile", porOUTPUT,
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimDom, 4, "traceLevel", porINTEGER,
+			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_ElimDom_Nfg, 3);
+  FuncObj->SetFuncInfo(GSM_ElimDom_Nfg, 5);
   FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 0, "nfg", porNFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 1, "strong", porBOOL,
 			new BoolValPortion(false));
   FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 3, "traceFile", porOUTPUT,
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 4, "traceLevel", porINTEGER,
+			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
 
 
 
   FuncObj = new FuncDescObj("ElimAllDom");
-  FuncObj->SetFuncInfo(GSM_ElimAllDom, 3);
+  FuncObj->SetFuncInfo(GSM_ElimAllDom, 5);
   FuncObj->SetParamInfo(GSM_ElimAllDom, 0, "support", porNF_SUPPORT);
   FuncObj->SetParamInfo(GSM_ElimAllDom, 1, "strong", porBOOL,
 			new BoolValPortion(false));
   FuncObj->SetParamInfo(GSM_ElimAllDom, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimAllDom, 3, "traceFile", porOUTPUT,
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimAllDom, 4, "traceLevel", porINTEGER,
+			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_ElimAllDom_Nfg, 3);
+  FuncObj->SetFuncInfo(GSM_ElimAllDom_Nfg, 5);
   FuncObj->SetParamInfo(GSM_ElimAllDom_Nfg, 0, "nfg", porNFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetParamInfo(GSM_ElimAllDom_Nfg, 1, "strong", porBOOL,
 			new BoolValPortion(false));
   FuncObj->SetParamInfo(GSM_ElimAllDom_Nfg, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimAllDom_Nfg, 3, "traceFile", porOUTPUT,
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimAllDom_Nfg, 4, "traceLevel", porINTEGER,
+			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
 
 

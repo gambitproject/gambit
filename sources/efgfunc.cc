@@ -277,7 +277,8 @@ Portion *GSM_ElimAllDom_EfSupport(Portion **param)
   while( new_T )
   {
     old_T = new_T;
-    new_T = ComputeDominated(*old_T, strong, players, gout);
+    new_T = ComputeDominated(*old_T, strong, players,
+			     ((OutputPortion *) param[3])->Value());
   }
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
@@ -304,7 +305,8 @@ Portion *GSM_ElimAllDom_Efg(Portion **param)
   while( new_T )
   {
     old_T = new_T;
-    new_T = ComputeDominated(*old_T, strong, players, gout);
+    new_T = ComputeDominated(*old_T, strong, players,
+			     ((OutputPortion *) param[3])->Value());
   }
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
@@ -329,7 +331,8 @@ Portion *GSM_ElimDom_EfSupport(Portion **param)
   int i;
   for (i = 1; i <= players.Length(); i++)   players[i] = i;
 
-  EFSupport *T = ComputeDominated(*S, strong, players, gout);
+  EFSupport *T = ComputeDominated(*S, strong, players,
+				  ((OutputPortion *) param[3])->Value());
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
@@ -351,7 +354,8 @@ Portion *GSM_ElimDom_Efg(Portion **param)
   int i;
   for (i = 1; i <= players.Length(); i++)   players[i] = i;
 
-  EFSupport *T = ComputeDominated(*S, strong, players, gout);
+  EFSupport *T = ComputeDominated(*S, strong, players,
+				  ((OutputPortion *) param[3])->Value());
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
@@ -1523,37 +1527,53 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("ElimAllDom");
-  FuncObj->SetFuncInfo(GSM_ElimAllDom_EfSupport, 3);
+  FuncObj->SetFuncInfo(GSM_ElimAllDom_EfSupport, 5);
   FuncObj->SetParamInfo(GSM_ElimAllDom_EfSupport, 0, "support", porEF_SUPPORT);
   FuncObj->SetParamInfo(GSM_ElimAllDom_EfSupport, 1, "strong", porBOOL,
 			new BoolValPortion(false));
   FuncObj->SetParamInfo(GSM_ElimAllDom_EfSupport, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimAllDom_EfSupport, 3, "traceFile", porOUTPUT,
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimAllDom_EfSupport, 4, "traceLevel", porINTEGER,
+			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_ElimAllDom_Efg, 3);
+  FuncObj->SetFuncInfo(GSM_ElimAllDom_Efg, 5);
   FuncObj->SetParamInfo(GSM_ElimAllDom_Efg, 0, "efg", porEFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetParamInfo(GSM_ElimAllDom_Efg, 1, "strong", porBOOL,
 			new BoolValPortion(false));
   FuncObj->SetParamInfo(GSM_ElimAllDom_Efg, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimAllDom_Efg, 3, "traceFile", porOUTPUT,
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimAllDom_Efg, 4, "traceLevel", porINTEGER,
+			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("ElimDom");
-  FuncObj->SetFuncInfo(GSM_ElimDom_EfSupport, 3);
+  FuncObj->SetFuncInfo(GSM_ElimDom_EfSupport, 5);
   FuncObj->SetParamInfo(GSM_ElimDom_EfSupport, 0, "support", porEF_SUPPORT);
   FuncObj->SetParamInfo(GSM_ElimDom_EfSupport, 1, "strong", porBOOL,
 			new BoolValPortion(false));
   FuncObj->SetParamInfo(GSM_ElimDom_EfSupport, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimDom_EfSupport, 3, "traceFile", porOUTPUT,
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimDom_EfSupport, 4, "traceLevel", porINTEGER,
+			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_ElimDom_Efg, 3);
+  FuncObj->SetFuncInfo(GSM_ElimDom_Efg, 5);
   FuncObj->SetParamInfo(GSM_ElimDom_Efg, 0, "efg", porEFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_ElimDom_Efg, 1, "strong", porBOOL,
 			new BoolValPortion(false));
   FuncObj->SetParamInfo(GSM_ElimDom_Efg, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimDom_Efg, 3, "traceFile", porOUTPUT,
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimDom_Efg, 4, "traceLevel", porINTEGER,
+			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Float");
