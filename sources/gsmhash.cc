@@ -1,10 +1,10 @@
-//#
-//# FILE: gsmhash.h -- definitions of descendent HashTables used by
-//#                    GSM and its accompanying modules
-//#                    companion to GSM
-//#
-//# $Id$
-//#
+//
+// FILE: gsmhash.h -- definitions of descendent HashTables used by
+//                    GSM and its accompanying modules
+//                    companion to GSM
+//
+// $Id$
+//
 
 
 
@@ -17,12 +17,10 @@ class Instruction;
 #elif defined __BORLANDC__
 #define TEMPLATE
 template <class T> class gList;
-template <class T> class gListIter;
 template <class T> class gNode;
 
 TEMPLATE class gList< gString >;
 TEMPLATE class gNode< gString >;
-TEMPLATE class gListIter< gString >;
 
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__

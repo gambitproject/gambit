@@ -1,8 +1,8 @@
-//#
-//# FILE: nfgdbl.cc -- Instantiation of double-precision normal forms
-//#
-//# $Id$
-//#
+//
+// FILE: nfgdbl.cc -- Instantiation of double-precision normal forms
+//
+// $Id$
+//
 
 #include "rational.h"
 #include "nfg.h"
@@ -19,10 +19,6 @@ class gList<gRational>;
 template <class T> class gNode;
 class gNode<gString>;
 class gNode<gRational>;
-template <class T> class gListIter;
-class gListIter<gString>;
-class gListIter<gRational>;
-
 
 class Nfg<gRational>;
 template <class T> class NfgIter;

@@ -20,27 +20,19 @@ class gNode<BehavProfile<double> >;
 class gNode<BehavProfile<gRational> >;
 class gList<BehavProfile<double> >;
 class gList<BehavProfile<gRational> >;
-class gListIter<BehavProfile<double> >;
-class gListIter<BehavProfile<gRational> >;
 class gNode<BehavSolution<double> >;
 class gNode<BehavSolution<gRational> >;
 class gList<BehavSolution<double> >;
 class gList<BehavSolution<gRational> >;
-class gListIter<BehavSolution<double> >;
-class gListIter<BehavSolution<gRational> >;
 #include "mixedsol.h"
 class gNode<MixedProfile<double> >;
 class gNode<MixedProfile<gRational> >;
 class gList<MixedProfile<double> >;
 class gList<MixedProfile<gRational> >;
-class gListIter<MixedProfile<double> >;
-class gListIter<MixedProfile<gRational> >;
 class gNode<MixedSolution<double> >;
 class gNode<MixedSolution<gRational> >;
 class gList<MixedSolution<double> >;
 class gList<MixedSolution<gRational> >;
-class gListIter<MixedSolution<double> >;
-class gListIter<MixedSolution<gRational> >;
 
 gOutput &operator<<(gOutput &, const gArray<int> &);
 gOutput &operator<<(gOutput &, const gArray<double> &);
@@ -60,7 +52,6 @@ class gArray<unsigned char>;
 
 class gNode<gArray<int> >;
 class gList<gArray<int> >;
-class gListIter<gArray<int> >;
 
 bool operator==(const gArray<Outcome *> &a, const gArray<Outcome *> &b)
 {

@@ -1,11 +1,11 @@
-//#
-//# FILE: efgdbl.cc -- Instantiation of double-precision extensive forms
-//#
-//# $Id$
-//#
+//
+// FILE: efgdbl.cc -- Instantiation of double-precision extensive forms
+//
+// $Id$
+//
+
 #include "rational.h"
 #include "glist.h"
-#include "glistit.h"
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -24,11 +24,8 @@ class ChanceInfoset<gRational>;
 class Node;
 class gString;
 class gList<gString>;
-class gListIter<gString>;
 class gList<gRational>;
-class gListIter<gRational>;
 class gList<Node *>;
-class gListIter<Node *>;
 
 template <class T> class BehavSolution;
 gOutput &operator<<(gOutput &, const BehavSolution<double> &);
