@@ -7,9 +7,11 @@
 #ifndef DLELIM_H
 #define DLELIM_H
 
+#include "wx/grid.h"
+
 class dialogElimMixed : public guiAutoDialog {
 private:
-  wxListBox *m_playerBox;
+  wxGrid *m_playerGrid;
   wxCheckBox *m_allBox;
   wxRadioBox *m_domTypeBox, *m_domMethodBox, *m_domPrecisionBox;
 

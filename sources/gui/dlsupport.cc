@@ -61,19 +61,18 @@ dialogElimMixed::dialogElimMixed(wxWindow *p_parent,
   if (domPrecision == 0 || domPrecision == 1)
     m_domPrecisionBox->SetSelection(domPrecision);
 
-#ifdef __WXGTK__
-  m_playerBox = new wxListBox(this, -1,
-			      wxDefaultPosition, wxDefaultSize,
-			      0, 0, wxLB_EXTENDED);
-#else
-  m_playerBox = new wxListBox(this, -1,
-			      wxDefaultPosition, wxDefaultSize,
-			      0, 0, wxLB_MULTIPLE);
-#endif  // __WXGTK__
+  m_playerGrid = new wxGrid(this, -1, wxDefaultPosition, wxSize(100, 100));
+  m_playerGrid->CreateGrid(p_players.Length(), 2);
+  m_playerGrid->SetLabelSize(wxHORIZONTAL, 0);
+  m_playerGrid->SetLabelSize(wxVERTICAL, 0);
+  m_playerGrid->SetColumnWidth(0, 20);
+  for (int pl = 0; pl < p_players.Length(); pl++) {
+    m_playerGrid->SetCellValue(pl, 0, "1");
+    m_playerGrid->SetCellRenderer(pl, 0, new wxGridCellBoolRenderer);
+    m_playerGrid->SetCellEditor(pl, 0, new wxGridCellBoolEditor);
 
-  for (int pl = 1; pl <= p_players.Length(); pl++) {
-    m_playerBox->Append((char *) (ToText(pl) + ": " + p_players[pl]));
-    m_playerBox->SetSelection(pl - 1, true);
+    m_playerGrid->SetCellValue(pl, 1, (char *) p_players[pl+1]);
+    m_playerGrid->SetReadOnly(pl, 1);
   }
 
   wxBoxSizer *optionSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -83,7 +82,7 @@ dialogElimMixed::dialogElimMixed(wxWindow *p_parent,
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(optionSizer, 0, wxCENTER | wxALL, 5);
-  topSizer->Add(m_playerBox, 0, wxCENTER | wxALL, 5);
+  topSizer->Add(m_playerGrid, 1, wxCENTER | wxALL, 5);
   topSizer->Add(m_allBox, 1, wxCENTER | wxALL, 5);
   topSizer->Add(m_buttonSizer, 0, wxCENTER | wxALL, 5);
 
@@ -115,10 +114,8 @@ void dialogElimMixed::OnOK(wxCommandEvent &p_event)
 gArray<int> dialogElimMixed::Players(void) const
 {
   gBlock<int> players;
-  for (int i = 1; i <= m_playerBox->Number(); i++) {
-    if (m_playerBox->Selected(i-1)) {
-      players.Append(i);
-    }
+  for (int i = 0; i < m_playerGrid->GetRows(); i++) {
+    players.Append(i+1);
   }
   return players;
 }
