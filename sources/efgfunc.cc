@@ -645,6 +645,16 @@ Portion *GSM_IsLegalSubgame_Node(Portion **param)
   return new BoolValPortion(n->BelongsTo()->IsLegalSubgame(n));
 }
 
+//-------------------
+// IsPerfectRecall
+//-------------------
+
+Portion *GSM_IsPerfectRecall(Portion **param)
+{
+  Infoset *s1, *s2;
+  BaseEfg &efg = * ((EfgPortion *) param[0])->Value();
+  return new BoolValPortion(IsPerfectRecall(efg, s1, s2));
+}
 
 //--------------------
 // MarkThisSubgame
@@ -1669,6 +1679,16 @@ void Init_efgfunc(GSM *gsm)
 					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
   
+  FuncObj = new FuncDescObj("IsLegalSubgame", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsLegalSubgame_Node, porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("IsPerfectRecall", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsPerfectRecall, porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG,
+					    REQUIRED, BYREF));
+  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("IsPredecessor", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsPredecessor, porBOOL, 2));
@@ -2096,11 +2116,6 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 0, ParamInfoType("node", porNODE));
   gsm->AddFunction(FuncObj);
 
-
-  FuncObj = new FuncDescObj("IsLegalSubgame", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsLegalSubgame_Node, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
-  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("UnmarkThisSubgame", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_UnmarkThisSubgame, porNODE, 1));
