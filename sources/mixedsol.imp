@@ -10,7 +10,7 @@
 
 template <class T> 
 MixedSolution<T>::MixedSolution(const Nfg<T>& n)
-: MixedProfile<T>(n, false),
+  : MixedProfile<T>(n),
   _Creator(NfgAlg_USER),
   _IsNash(T_DONTKNOW),
   _IsPerfect(T_DONTKNOW),

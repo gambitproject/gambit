@@ -15,10 +15,10 @@ class BaseNfg;
 class BaseMixedProfile     {
   protected:
     const BaseNfg *N;
-    bool truncated;
-    NFSupport stratset;
-    BaseMixedProfile(const BaseNfg &, bool trunc);
-    BaseMixedProfile(const BaseNfg &, bool trunc, const NFSupport &s);
+    NFSupport support;
+
+    BaseMixedProfile(const BaseNfg &);
+    BaseMixedProfile(const BaseNfg &, const NFSupport &s);
     BaseMixedProfile(const BaseMixedProfile &);
     BaseMixedProfile &operator=(const BaseMixedProfile &);
 
@@ -28,7 +28,6 @@ class BaseMixedProfile     {
     DataType Type(void) const;
     virtual bool IsPure(void) const = 0;
     virtual bool IsPure(int pl) const = 0;
-    bool IsTruncated(void) const    { return truncated; }
     const NFSupport &GetNFSupport(void) const;
 };
 
@@ -41,9 +40,6 @@ template <class T> class MixedProfile
   : public BaseMixedProfile, public gPVector<T>  {
 
   private:
-
-    const Nfg<T> *Nf;
-    
     // Private Payoff functions
 
     T PPayoff(int pl, int index, int i) const;
@@ -55,7 +51,7 @@ template <class T> class MixedProfile
 		gVector<T> &value) const;
     
   public:
-    MixedProfile(const Nfg<T> &, bool truncated = false);
+    MixedProfile(const Nfg<T> &);
     MixedProfile(const Nfg<T> &, const NFSupport &);
     MixedProfile(const Nfg<T> &, const gPVector<T> &);
     MixedProfile(const MixedProfile<T> &);
@@ -81,9 +77,11 @@ template <class T> class MixedProfile
     bool operator==(const MixedProfile<T> &) const;
     
 };
+
 #ifndef __BORLANDC__
 template <class T> gOutput &operator<<(gOutput &f, const MixedProfile<T> &);
 #endif
+
 #endif    // MIXED_H
 
 

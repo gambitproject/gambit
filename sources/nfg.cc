@@ -173,22 +173,24 @@ const gArray<Strategy *> &NFPlayer::StrategyList(void) const
 //                    BaseMixedProfile member functions
 //---------------------------------------------------------------------------
 
-BaseMixedProfile::BaseMixedProfile(const BaseNfg &NF, bool trunc) 
-: N(&NF), truncated(trunc), stratset(NF)   { }
+BaseMixedProfile::BaseMixedProfile(const BaseNfg &NF) 
+  : N(&NF), support(NF) 
+{ }
 
-BaseMixedProfile::BaseMixedProfile(const BaseNfg &NF, bool trunc,
-				   const NFSupport &s)
-: N(&NF), truncated(trunc), stratset(s)   { }
+BaseMixedProfile::BaseMixedProfile(const BaseNfg &NF, const NFSupport &s)
+  : N(&NF), support(s)  
+{ }
 
 BaseMixedProfile::BaseMixedProfile(const BaseMixedProfile &p)
-: N(p.N), truncated(p.truncated), stratset(p.stratset)   { }
+  : N(p.N), support(p.support)  
+{ }
 
 BaseMixedProfile::~BaseMixedProfile()   { }
 
 BaseMixedProfile &BaseMixedProfile::operator=(const BaseMixedProfile &p)
 {
   N = p.N;
-  stratset = p.stratset;
+  support = p.support;
   return *this;
 }
 
@@ -199,8 +201,9 @@ DataType BaseMixedProfile::Type(void) const
 
 const NFSupport &BaseMixedProfile::GetNFSupport(void) const
 {
-  return (stratset);
+  return support;
 }
+
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__

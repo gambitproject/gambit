@@ -1,8 +1,8 @@
-//#
-//# FILE: nfg.imp -- Implementation of type normal form
-//#
-//# $Id$
-//#
+//
+// FILE: nfg.imp -- Implementation of typed normal form
+//
+// $Id$
+//
 
 #include "nfg.h"
 #include "nfplayer.h"
@@ -174,28 +174,26 @@ void Nfg<T>::WriteNfgFile(gOutput &f) const
 //                    MixedProfile<T> member functions
 //---------------------------------------------------------------------------
 
-template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF,
-						 bool truncated)
-: BaseMixedProfile(NF, truncated), Nf(&NF), gPVector<T>(NF.dimensions)
+template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF)
+  : BaseMixedProfile(NF), gPVector<T>(NF.dimensions)
 {
   Centroid();
 }
 
 template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF,
 						 const NFSupport &s)
-: BaseMixedProfile(s.BelongsTo(), false, s), Nf(&NF), 
-	gPVector<T>(s.SupportDimensions())
+  : BaseMixedProfile(NF, s), gPVector<T>(s.SupportDimensions())
 {
   Centroid();
 }
 
 template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF,
 						 const gPVector<T> &profile)
-  : BaseMixedProfile(NF, false), gPVector<T>(profile), Nf(&NF)
+  : BaseMixedProfile(NF), gPVector<T>(profile)
 { }
 
 template <class T> MixedProfile<T>::MixedProfile(const MixedProfile<T> &p)
-  : BaseMixedProfile(p), gPVector<T>(p), Nf(p.Nf)
+  : BaseMixedProfile(p), gPVector<T>(p)
 { }
 
 template <class T> MixedProfile<T>::~MixedProfile()   { }
@@ -205,7 +203,6 @@ MixedProfile<T> &MixedProfile<T>::operator=(const MixedProfile<T> &p)
 {
   BaseMixedProfile::operator=(p);
   gPVector<T>::operator=(p);
-  Nf = (p.Nf);
   return *this;
 }
 
@@ -214,8 +211,8 @@ template <class T> void MixedProfile<T>::Centroid(void)
   T center;
   
   for (int i = 1; i <= N->NumPlayers(); i++)  {
-    center = ((T) 1) / ((T) stratset.GetStrategy(i).Length());
-    for (int j = 1; j <= stratset.GetStrategy(i).Length(); j++)
+    center = ((T) 1) / ((T) support.GetStrategy(i).Length());
+    for (int j = 1; j <= support.GetStrategy(i).Length(); j++)
       svptr[i][j] = center;
   }
 }
@@ -262,8 +259,7 @@ template <class T> T MixedProfile<T>::LiapValue(void) const
 
 template <class T> bool MixedProfile<T>::IsNash(void) const
 {
-  if(LiapValue()==(T)0) return 1;
-  return 0;
+  return (LiapValue() == (T) 0);
 }
     
 template <class T> void MixedProfile<T>::Gripe(gPVector<T> &value) const
@@ -271,7 +267,7 @@ template <class T> void MixedProfile<T>::Gripe(gPVector<T> &value) const
   int i, j;
   T pay,x;
   
-  for (i = 1; i <= Nf->NumPlayers(); i++) {
+  for (i = 1; i <= N->NumPlayers(); i++) {
     pay = Payoff(i);
     for (j = 1; j <= GetNFSupport().NumStrats(i); j++) {
       x = Payoff(i , i ,j);
@@ -282,7 +278,7 @@ template <class T> void MixedProfile<T>::Gripe(gPVector<T> &value) const
   }
 }
 
-template <class T> T MixedProfile<T>::MaxGripe() const
+template <class T> T MixedProfile<T>::MaxGripe(void) const
 {
   int i;
   T maxgripe = (T)0;;
@@ -322,7 +318,7 @@ MixedProfile<T>::Payoff( int pl, int player1, int strat1 ) const
 {
   T value = (T) 0;
   PPayoff(pl, player1, strat1, 1,
-	 stratset.GetStrategy(player1,strat1)->index, (T) 1.0, value);
+	 support.GetStrategy(player1,strat1)->index, (T) 1.0, value);
   return value;
 }
 
@@ -333,8 +329,8 @@ MixedProfile<T>::Payoff( int pl, int player1, int strat1, int player2,
   if (player1 == player2) return (T) 0;
   T value = (T) 0;
   PPayoff(pl, player1, strat1, player2, strat2, 1,
-	 stratset.GetStrategy(player1,strat1)->index +
-	 stratset.GetStrategy(player2,strat2)->index,
+	 support.GetStrategy(player1,strat1)->index +
+	 support.GetStrategy(player2,strat2)->index,
 	 (T) 1.0, value);
   return value;
 }
@@ -367,10 +363,11 @@ T MixedProfile<T>::PPayoff(int pl, int index,
   Strategy *s;
   int pindex = 0;
 
-  if (i > N->NumPlayers()) return Nf->payoffs[pl][index];
+  if (i > N->NumPlayers())
+    return ((Nfg<T> *) N)->payoffs[pl][index];
   T sum = (T) 0;
-  for ( int j = 1; j <= stratset.GetStrategy(i).Length(); j++ ) {
-    s = stratset.GetStrategy(i, j);
+  for ( int j = 1; j <= support.GetStrategy(i).Length(); j++ ) {
+    s = support.GetStrategy(i, j);
     if ((*this)(i, j) != (T) 0) {
       index += s->index - pindex; 
       pindex = s->index;
@@ -391,10 +388,10 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl, int const_st,
     PPayoff(pl, const_pl, const_st, cur_pl + 1, index,
 	   prob, value);
   else if (cur_pl > N->NumPlayers())
-    value += prob * (Nf->payoffs[pl][index]);
+    value += prob * (((Nfg<T> *) N)->payoffs[pl][index]);
   else   {
-    for ( int j = 1; j <= stratset.GetStrategy(cur_pl).Length(); j++ ){
-      s = stratset.GetStrategy(cur_pl, j);
+    for ( int j = 1; j <= support.GetStrategy(cur_pl).Length(); j++ ){
+      s = support.GetStrategy(cur_pl, j);
       if ((*this)(cur_pl, j) > (T) 0)
 	PPayoff(pl, const_pl, const_st, cur_pl + 1,
 	       index + s->index, prob * (*this)(cur_pl, j), value);
@@ -414,10 +411,10 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
     PPayoff(pl, const_pl1, const_st1, const_pl2, const_st2,
 	   cur_pl + 1, index,prob, value);
   else if (cur_pl > N->NumPlayers())
-    value += prob * (Nf->payoffs[pl][index]);
+    value += prob * (((Nfg<T> *) N)->payoffs[pl][index]);
   else   {
-    for (int j = 1; j <= stratset.GetStrategy(cur_pl).Length(); j++ ) {
-      s = stratset.GetStrategy(cur_pl, j);
+    for (int j = 1; j <= support.GetStrategy(cur_pl).Length(); j++ ) {
+      s = support.GetStrategy(cur_pl, j);
       if ((*this)(cur_pl, j) > (T) 0)
 	PPayoff(pl, const_pl1, const_st1, const_pl2, const_st2,
 	       cur_pl + 1, index + s->index, prob * (*this)(cur_pl, j), 
@@ -436,14 +433,14 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
     PPayoff(pl, const_pl, cur_pl + 1, index,
 	   prob, value);
   else if (cur_pl > N->NumPlayers())  {
-    for (int j = 1; j <= stratset.GetStrategy(const_pl).Length(); j++ ){ 
-      s = stratset.GetStrategy(const_pl,j);
-      value[j] += prob * (Nf->payoffs[pl][index + s->index]);
+    for (int j = 1; j <= support.GetStrategy(const_pl).Length(); j++ ){ 
+      s = support.GetStrategy(const_pl,j);
+      value[j] += prob * (((Nfg<T> *) N)->payoffs[pl][index + s->index]);
     }
   }
   else   {
-    for (int j = 1; j <= stratset.GetStrategy(cur_pl).Length(); j++) {
-      s = stratset.GetStrategy(cur_pl,j);
+    for (int j = 1; j <= support.GetStrategy(cur_pl).Length(); j++) {
+      s = support.GetStrategy(cur_pl,j);
       if ((*this)(cur_pl, j) > (T) 0)
 	PPayoff(pl, const_pl, cur_pl + 1,
 	       index + s->index, prob * (*this)(cur_pl, j), value);
