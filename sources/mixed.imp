@@ -50,6 +50,8 @@ template <class T> Nfg<T>::~Nfg()
   }
   efg = 0;
 #endif   // NFG_ONLY
+
+  delete gameform;
 }
 
 
