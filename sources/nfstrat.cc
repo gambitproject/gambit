@@ -33,7 +33,7 @@ Strategy::~Strategy()
 // StrategyProfile: Constructors, Destructors, Operators
 //--------------------------------------------------------
 
-StrategyProfile::StrategyProfile(Nfg &N)
+StrategyProfile::StrategyProfile(const Nfg &N)
   : index(0L), profile(N.NumPlayers())
 {
   for (int pl = 1; pl <= N.NumPlayers(); pl++)   {

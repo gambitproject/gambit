@@ -34,7 +34,7 @@ private:
   gArray<Strategy *> profile;
   
 public:
-  StrategyProfile(Nfg &);
+  StrategyProfile(const Nfg &);
   StrategyProfile(const StrategyProfile &p);
 
   ~StrategyProfile();
