@@ -32,6 +32,16 @@ template <class T> class gNArray   {
     void DumpFrom(output &, int, gVector<int> &) const;
     void ReadFrom(input &, const gVector<int> &, gVector<int> &, int);
 
+    T operator[](long l) const
+      { assert(l >= 0 && l < storage_size);
+	return storage[l];
+      }
+
+    T &operator[](long l)
+      { assert(l >= 0 && l < storage_size);
+	return storage[l];
+      }
+
   public:
     gNArray(void) : storage_size(0), storage(0)    { }
     gNArray(const gVector<int> &d);
@@ -158,7 +168,7 @@ void gNArray<T>::ReadFrom(input &f, const gVector<int> &norder,
     strat[norder[i]] = j;
     if (i > 1)
       ReadFrom(f, norder, strat, i - 1);
-    else
+    else 
       f >> (*this)[strat];
   }
 }
