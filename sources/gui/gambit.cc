@@ -166,8 +166,10 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
 void GambitApp::OnFileOpen(wxWindow *p_parent)
 {
   wxFileDialog dialog(p_parent, "Choose file", CurrentDir(), "", 
+		      "Games (*.efg, *.nfg)|*.[en]fg|"
 		      "Extensive form games (*.efg)|*.efg|"
-		      "Normal form games (*.nfg)|*.nfg");
+		      "Normal form games (*.nfg)|*.nfg|"
+		      "All files|*.*");
 
   if (dialog.ShowModal() == wxID_OK) {
     SetCurrentDir(wxPathOnly(dialog.GetPath()));
@@ -185,7 +187,8 @@ void GambitApp::OnFileMRUFile(wxCommandEvent &p_event)
 void GambitApp::OnFileImportComLab(wxWindow *p_parent)
 {
   wxFileDialog dialog(p_parent, "Choose file", CurrentDir(), "",
-		      "ComLabGames strategic form games (*.sfg)|*.sfg");
+		      "ComLabGames strategic form games (*.sfg)|*.sfg|"
+		      "All files|*.*");
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
