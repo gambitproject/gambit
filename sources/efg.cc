@@ -517,27 +517,28 @@ void BaseEfg::Reveal(Infoset *where, gBlock<EFPlayer *> who)
   Node *n;
   Infoset *newiset;
 
-  UnmarkSubtree(root);
+  UnmarkSubtree(root);  // start with a clean tree
   
   for(i=1;i<=where->actions.Length();i++) {
     for(j=1;j<=where->members.Length();j++) 
       MarkSubtree(where->members[j]->children[i]);
     for(j=who.First();j<=who.Last();j++)
       for(k=1;k<=who[j]->infosets.Length();k++) {
+	    // make copy to iterate correctly 
 	OldMembers = who[j]->infosets[k]->members;
 	flag=false;
 	for(m=1;m<=OldMembers.Length();m++) {
 	  n = OldMembers[m];
-	  if(n->mark)
+	  if(n->mark) {
+	   n->mark=false;
 	   if(!flag) {
 	     newiset = LeaveInfoset(n);
 	     flag=true;
 	   }
-	   else {
+	   else 
 	     JoinInfoset(newiset,n);
-	     n->mark=false;
-	   }
-	}	    
+	 }	    
+	}
       }
   }
 }
