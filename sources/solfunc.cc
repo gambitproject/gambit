@@ -609,6 +609,22 @@ static Portion *GSM_Regrets_Behav(Portion **param)
   return gDPVectorToList(bp->Regret());
 }
 
+//-------------------
+// SetActionProb
+//-------------------
+
+static Portion *GSM_SetActionProb(Portion **param)
+{
+  BehavSolution *P = new BehavSolution(*((BehavPortion *) param[0])->Value());
+  Action *a = ((ActionPortion *) param[1])->Value();
+  gNumber value = ((NumberPortion *) param[2])->Value();
+  
+  (*P)(a->BelongsTo()->GetPlayer()->GetNumber(),
+       a->BelongsTo()->GetNumber(), a->GetNumber()) = value;
+  ((BehavPortion *) param[0])->SetValue(P);
+  return param[0]->RefCopy();
+}
+
 //-----------------
 // SetActionProbs
 //-----------------
@@ -668,7 +684,20 @@ static Portion *GSM_SetActionProbs(Portion **param)
   return param[0]->RefCopy();
 }
 
+//-------------------
+// SetStrategyProb
+//-------------------
 
+static Portion *GSM_SetStrategyProb(Portion **param)
+{
+  MixedSolution *P = new MixedSolution(*((MixedPortion *) param[0])->Value());
+  Strategy *s = ((StrategyPortion *) param[1])->Value();
+  gNumber value = ((NumberPortion *) param[2])->Value();
+  
+  (*P)(s->nfp->GetNumber(), s->number) = value;
+  ((MixedPortion *) param[0])->SetValue(P);
+  return param[0]->RefCopy();
+}
 
 //-------------------
 // SetStrategyProbs
@@ -843,7 +872,9 @@ void Init_solfunc(GSM *gsm)
       { "Regrets[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))", 
 	GSM_Regrets_Behav },
       { "Regrets[profile->MIXED] =: LIST(LIST(NUMBER))", GSM_Regrets_Mixed },
+      { "SetActionProb[profile<->BEHAV, action->ACTION, value->NUMBER =: BEHAV", GSM_SetActionProb },
       { "SetActionProbs[profile<->BEHAV, infoset->INFOSET, value->LIST(NUMBER) =: BEHAV", GSM_SetActionProbs },
+      { "SetStrategyProb[profile<->MIXED, strategy->STRATEGY, value->NUMBER =: MIXED", GSM_SetStrategyProb },
       { "SetStrategyProbs[profile<->MIXED, player->NFPLAYER, value->LIST(NUMBER) =: MIXED", GSM_SetStrategyProbs },
       { "StrategyProb[profile->MIXED, strategy->STRATEGY] =: NUMBER",
 	GSM_StrategyProb },
