@@ -224,6 +224,22 @@ static Portion* GSM_Game_EfgTypes(Portion** param)
 }
 
 //---------------
+// Creator
+//---------------
+
+static Portion *GSM_Creator_Behav(Portion** param)
+{
+  BehavSolution *bs = ((BehavPortion*) param[0])->Value();
+  return new TextPortion(NameEfgAlgType(bs->Creator()));
+}
+
+static Portion *GSM_Creator_Mixed(Portion** param)
+{
+  MixedSolution *ms = ((MixedPortion*) param[0])->Value();
+  return new TextPortion(NameNfgAlgType(ms->Creator()));
+}
+
+//---------------
 // QreLambda
 //---------------
 
@@ -734,6 +750,8 @@ void Init_solfunc(GSM *gsm)
       { "Game[support->NFSUPPORT] =: NFG", GSM_Game_NfSupport },
       { "Game[support->EFSUPPORT] =: EFG", GSM_Game_EfgTypes },
       { "Game[basis->EFBASIS] =: EFG", GSM_Game_EfgTypes },
+      { "Creator[profile->MIXED] =: TEXT", GSM_Creator_Mixed },
+      { "Creator[profile->BEHAV] =: TEXT", GSM_Creator_Behav },
       { "QreLambda[profile->MIXED] =: NUMBER", GSM_QreLambda_Mixed },
       { "QreLambda[profile->BEHAV] =: NUMBER", GSM_QreLambda_Behav },
       { "QreValue[profile->MIXED] =: NUMBER", GSM_QreValue_Mixed },
