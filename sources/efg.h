@@ -129,8 +129,13 @@ template <class T> class Efg : public BaseEfg   {
     void Payoff(Node *n, T, const gArray<gArray<int> *> &, gVector<T> &) const;
     void Payoff(Node *n, T prob, int pl, T &value,
 		const BehavProfile<T> &profile) const;
+
     void CondPayoff(Node *n, T prob, const BehavProfile<T> &,
 		    gPVector<T> &, gDPVector<T> &) const;
+    void NodeRealizProbs(Node *n, T prob, const BehavProfile<T> &profile,
+			 int index, gArray<T> &NRProbs);
+    void Beliefs(Node *n, T prob, const BehavProfile<T> &profile,
+		 int index, gArray<T> BProbs, gPVector<T> &gpv);
 
     Infoset *CreateInfoset(int n, EFPlayer *pl, int br);
     Node *CreateNode(Node *parent);
@@ -157,12 +162,6 @@ template <class T> class Efg : public BaseEfg   {
         //# COMPUTING VALUES OF PROFILES
 //    gDPVector<T> *NewBehavProfile(void) const;
 
-    gArray<T> NodeRealizProbs(const BehavProfile<T> &);
-    void NodeRealizProbs(Node *n, T prob, const BehavProfile<T> &profile,
-			 int index, gArray<T> &NRProbs);
-    gArray<T> Beliefs(const BehavProfile<T> &);
-    void Beliefs(Node *n, T prob, const BehavProfile<T> &profile,
-		 int index, gArray<T> BProbs, gPVector<T> &gpv);
 
     int ProfileLength(bool trunc = false) const;
     gPVector<int> Dimensionality(bool trunc = false) const;
@@ -171,8 +170,12 @@ template <class T> class Efg : public BaseEfg   {
     void Payoff(const gPVector<int> &profile, gVector<T> &payoff) const;
     void Payoff(const gArray<gArray<int> *> &profile, gVector<T> &payoff) const;
     T Payoff(int pl, const BehavProfile<T> &) const;
+
     void CondPayoff(const BehavProfile<T> &profile, gDPVector<T> &value,
 		    gPVector<T> &probs) const;
+
+    gArray<T> NodeRealizProbs(const BehavProfile<T> &);
+    gArray<T> Beliefs(const BehavProfile<T> &);
 
     friend Nfg<T> *MakeReducedNfg(Efg<T> &);
     friend void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
