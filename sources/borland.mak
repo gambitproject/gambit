@@ -14,7 +14,7 @@
 WXLIBDIR = $(WXDIR)\lib
 WXLIB = wx24s_bcc tiff jpeg winpng zlib
 
-EXTRACPPFLAGS = -v -I$(WXDIR)\include -I$(WXDIR)\lib\msw -I$(BCCDIR)\include -I$(GAMBITDIR)\include -I$(GAMBITDIR)\include\gambit -D__BCC55__ -DVERSION=\"0.97.1.5\"
+EXTRACPPFLAGS = -v -I$(WXDIR)\include -I$(WXDIR)\lib\msw -I$(BCCDIR)\include -I$(GAMBITDIR)\include -I$(GAMBITDIR)\include\gambit -D__BCC55__ -DVERSION=\"0.97.1.6\"
 EXTRALINKFLAGS = 
 
 gambit_SOURCES = \
