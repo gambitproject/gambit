@@ -177,10 +177,12 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
 	int j = solns.Length();
 	solns[j].SetCreator((EfgAlgType) AlgorithmID());
 	
-	solns[j].SetIsNash(triTRUE);
-	if (marked)
+	if (m_isPerfectRecall)
+	  solns[j].SetIsNash(triTRUE);
+	if (marked && m_isPerfectRecall)
 	  solns[j].SetIsSubgamePerfect(triTRUE); 
-	if (solns[j].Creator() == EfgAlg_ELIAPSUB) {
+	if (solns[j].Creator() == EfgAlg_ELIAPSUB
+	    && m_isPerfectRecall) {
 	  solns[j].SetLiap(solns[j].LiapValue());
 	  solns[j].SetIsSequential(triTRUE);      // even if marked = false
 	  solns[j].SetIsSubgamePerfect(triTRUE);  // even if marked = false
@@ -274,6 +276,8 @@ gList<BehavSolution> SubgameSolver::Solve(const EFSupport &p_support)
 	  support.RemoveAction(efg.Players()[pl]->Infosets()[iset]->Actions()[act]);
     }
   }
+
+  m_isPerfectRecall = IsPerfectRecall(efg);
 
   try {
     FindSubgames(support, efg.RootNode(), solutions, values);

@@ -137,6 +137,11 @@ Action *LastAction(Node *node)
   return 0;
 }
 
+bool IsPerfectRecall(const Efg &p_efg)
+{
+  Infoset *s1, *s2;
+  return IsPerfectRecall(p_efg, s1, s2);
+}
 
 bool IsPerfectRecall(const Efg &efg, Infoset *&s1, Infoset *&s2)
 {

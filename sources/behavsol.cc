@@ -191,7 +191,7 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 
 void BehavSolution::EvalEquilibria(void) const
 {
-  if (IsComplete()) {
+  if (IsComplete() && IsPerfectRecall(m_profile->Game())) {
     if (m_isNash == triUNKNOWN) 
       m_isNash = (m_profile->MaxGripe() <= m_epsilon) ? triTRUE : triFALSE;
   }  

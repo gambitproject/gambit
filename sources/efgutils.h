@@ -46,6 +46,7 @@ void ChildSubgames(Node *, gList<Node *> &);
 
 // determines if a game is perfect recall.  
 // if not, returns a pair of infosets violating the definition
+bool IsPerfectRecall(const Efg &);
 bool IsPerfectRecall(const Efg &, Infoset *&, Infoset *&);
 
 

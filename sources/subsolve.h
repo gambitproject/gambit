@@ -21,6 +21,7 @@ public:
 class NFSupport;
 class SubgameSolver   {
 private:
+  bool m_isPerfectRecall;
   int max_solns, subgame_number;
   double time;
   BehavProfile<gNumber> *solution;

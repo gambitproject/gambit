@@ -19,6 +19,8 @@ static int FindPureNash(const EFSupport &p_support,
   EfgContIter citer(p_support);
   gPVector<gNumber> probs(p_support.Game().NumInfosets());
 
+  bool isPerfectRecall = IsPerfectRecall(p_support.Game());
+
   do  {
     int flag = 1;
     citer.GetProfile().InfosetProbs(probs);
@@ -53,7 +55,7 @@ static int FindPureNash(const EFSupport &p_support,
       }
 
       index = p_solutions.Append(BehavSolution(temp, EfgAlg_PURENASH));
-      p_solutions[index].SetIsNash(triTRUE);
+      p_solutions[index].SetIsNash((isPerfectRecall) ? triTRUE : triUNKNOWN);
     }
   }  while (citer.NextContingency());
 
@@ -71,4 +73,8 @@ efgEnumPure::efgEnumPure(int max)
 { }
 
 efgEnumPure::~efgEnumPure()   { }
+
+
+
+
 

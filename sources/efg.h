@@ -288,6 +288,9 @@ template <class T> class PureBehavProfile   {
 };
 
 
+#include "efgutils.h"
+
+
 #endif   // EFG_H
 
 
