@@ -5,7 +5,6 @@ bin_PROGRAMS = gambit
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
 gambit_SOURCES = \
-	behavfilter.cc \
 	dleditbehav.cc \
 	dleditcont.cc \
 	dleditefg.cc \
@@ -30,7 +29,6 @@ gambit_SOURCES = \
 	efgshow.cc \
 	efgsupport.cc \
 	gambit.cc \
-	mixedfilter.cc \
 	nfgnavigate.cc \
 	nfgoutcome.cc \
 	nfgprofile.cc \
