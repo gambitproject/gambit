@@ -83,10 +83,11 @@ template <class T> void gTree<T>::RecursiveCopy(      gTreeNode<T>* copyn,
 						const gTreeNode<T>* orign)
 {
   gList<gTreeNode<T>*> oldchildren = Children(orign);
-  for (int i = 1; i <= oldchildren.Length(); i++) 
+  int i;
+  for (i = 1; i <= oldchildren.Length(); i++)
     InsertAt(oldchildren[i]->data,copyn);
   gList<gTreeNode<T>*> newchildren = Children(copyn);
-  for (int i = 1; i <= newchildren.Length(); i++) 
+  for (i = 1; i <= newchildren.Length(); i++)
     RecursiveCopy(newchildren[i],oldchildren[i]);
 }
 
@@ -189,11 +190,12 @@ template <class T> void gTree<T>::RecursiveDump(gOutput& f,
 						const gTreeNode<T>* n, 
 						const int level) const
 {
-  for (int i = 1; i <= level; i++) gout << "   ";
+  int i;
+  for (i = 1; i <= level; i++) gout << "   ";
   gout << n->data << "\n";
 
   gList<gTreeNode<T>*> children = Children(n);
-  for (int i = 1; i <= children.Length(); i++) {
+  for (i = 1; i <= children.Length(); i++) {
     RecursiveDump(f,children[i],level+1);
   }
 }

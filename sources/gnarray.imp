@@ -21,14 +21,14 @@ template <class T> gNArray<T>::gNArray(const gArray<int> &d)
   else   {
     assert(dim.First() == 1);
     storage_size = 1;
-    
-    for (int i = 1; i <= dim.Length(); i++)   {
+    int i;
+    for (i = 1; i <= dim.Length(); i++)   {
       assert(dim[i] >= 1);
       storage_size *= dim[i];
     }
-    
+
     storage = new  T[storage_size];
-    for (int i = 0; i < storage_size; storage[i++] = 0);
+    for (i = 0; i < storage_size; storage[i++] = 0);
   }
 }
 

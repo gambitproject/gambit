@@ -166,7 +166,8 @@ template<class T> bool gIdeal<T>::ZeroDimensional() const
   if (Dmnsn() == 0) return true;
 
   gArray<bool> HasLeadingTermThatIsPowerOfVariable(Dmnsn());
-  for (int i = 1; i <= Dmnsn(); i++)
+  int i;
+  for (i = 1; i <= Dmnsn(); i++)
     HasLeadingTermThatIsPowerOfVariable[i] = false;
 
   for (int j = 1; j <= basis.Length(); j++) {
@@ -176,14 +177,14 @@ template<class T> bool gIdeal<T>::ZeroDimensional() const
     if (basis[j].LeadingPowerProduct(*order).IsUnivariate())
       HasLeadingTermThatIsPowerOfVariable[
 	 basis[j].LeadingPowerProduct(*order).SoleActiveVariable()
-	    ] = true;	
+	    ] = true;
   }
 
-  for (int i = 1; i <= Dmnsn(); i++)
+  for (i = 1; i <= Dmnsn(); i++)
     if (!HasLeadingTermThatIsPowerOfVariable[i]) return false;
   return true;
 }
-  
+
 template<class T> bool gIdeal<T>::Contains(gPoly<T> & f) const
 {
   gPoly<T> zero(Space,(T)0,order);

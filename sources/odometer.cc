@@ -20,9 +20,10 @@ gIndexOdometer::gIndexOdometer(const gArray<int> IndexUpperBounds)
   MaxIndices(IndexUpperBounds), 
   CurIndices(IndexUpperBounds.Length())
 {
-  for (int i = 1; i <= NoIndices(); i++) MinIndices[i] = 1;
+  int i;
+  for (i = 1; i <= NoIndices(); i++) MinIndices[i] = 1;
   CurIndices[1] = 0;
-  for (int i = 2; i <= NoIndices(); i++) CurIndices[i] = 1;
+  for (i = 2; i <= NoIndices(); i++) CurIndices[i] = 1;
 }
 
 gIndexOdometer::gIndexOdometer(const gBlock<int> IndexUpperBounds) 
@@ -30,9 +31,10 @@ gIndexOdometer::gIndexOdometer(const gBlock<int> IndexUpperBounds)
    MaxIndices(IndexUpperBounds), 
    CurIndices(IndexUpperBounds.Length())
 {
-  for (int i = 1; i <= NoIndices(); i++) MinIndices[i] = 1;
+  int i;
+  for (i = 1; i <= NoIndices(); i++) MinIndices[i] = 1;
   CurIndices[1] = 0;
-  for (int i = 2; i <= NoIndices(); i++) CurIndices[i] = 1;
+  for (i = 2; i <= NoIndices(); i++) CurIndices[i] = 1;
 }
 
 gIndexOdometer::gIndexOdometer(const gArray<int> IndexLowerBounds,
@@ -50,8 +52,9 @@ gIndexOdometer::gIndexOdometer(const int* IndexUpperBounds, const int NoInd)
   MaxIndices(NoInd), 
   CurIndices(NoInd)
 {
-  for (int i = 1; i <= NoIndices(); i++) MinIndices[i] = 1;
-  for (int i = 1; i <= NoIndices(); i++) {
+  int i;
+  for (i = 1; i <= NoIndices(); i++) MinIndices[i] = 1;
+  for (i = 1; i <= NoIndices(); i++) {
     MaxIndices[i] = IndexUpperBounds[i-1];
     CurIndices[i] = 1;
   }
@@ -159,16 +162,17 @@ gArray<int> gIndexOdometer::CurrentIndices() const
 gIndexOdometer gIndexOdometer::AfterExcisionOf(int& to_be_zapped) const
 {
   gBlock<int> NewMins, NewMaxs;
-  for (int i = 1;              i < to_be_zapped; i++) 
+  int i;
+  for (i = 1;              i < to_be_zapped; i++)
     { NewMins += MinIndices[i]; NewMaxs += MaxIndices[i]; }
-  for (int i = to_be_zapped+1; i <= NoIndices(); i++) 
+  for (i = to_be_zapped+1; i <= NoIndices(); i++)
     { NewMins += MinIndices[i]; NewMaxs += MaxIndices[i]; }
 
   gIndexOdometer NewOdo(NewMins,NewMaxs);
 
-  for (int i = 1;              i < to_be_zapped; i++) 
+  for (i = 1;              i < to_be_zapped; i++)
     NewOdo.SetIndex(i  ,CurIndices[i]);
-  for (int i = to_be_zapped+1; i <= NoIndices(); i++) 
+  for (i = to_be_zapped+1; i <= NoIndices(); i++)
     NewOdo.SetIndex(i-1,CurIndices[i]);
 
   return NewOdo;

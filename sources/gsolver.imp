@@ -125,7 +125,8 @@ template<class T> gList<gVector<gDouble> > gSolver<T>::Roots()
   gList<exp_vect> mon_bss = TheIdeal.MonomialBasis();
 
   gList<polynomial<T> > UnivariateRootEquations;
-  for (int i = 1; i <= TheIdeal.Dmnsn(); i++) {
+  int i;
+  for (i = 1; i <= TheIdeal.Dmnsn(); i++) {
     gMatrix<T> CoefficientMatrix(mon_bss.Length()+1, mon_bss.Length());
     int j = 0; 
     bool done = false;
@@ -161,7 +162,7 @@ template<class T> gList<gVector<gDouble> > gSolver<T>::Roots()
   }
 
   gList<polynomial<gDouble> > ConvertedUnivariateRootEquations;
-  for (int i = 1; i <= UnivariateRootEquations.Length(); i++)
+  for (i = 1; i <= UnivariateRootEquations.Length(); i++)
     ConvertedUnivariateRootEquations += UnivariateRootEquations[i].TogDouble();
 
   gList<gVector<gDouble> > original;
@@ -172,10 +173,10 @@ template<class T> gList<gVector<gDouble> > gSolver<T>::Roots()
     gInterval<gDouble> root_interval((gDouble)-10,(gDouble)10); //  Ouch!!
     gDouble error = (gDouble) 0.0001;                           // Ditto!!
 
-  for (int i = 1; i <= TheIdeal.Dmnsn(); i++) {
-    gList<gDouble> roots_of_eqn_i = 
+  for (i = 1; i <= TheIdeal.Dmnsn(); i++) {
+    gList<gDouble> roots_of_eqn_i =
       ConvertedUnivariateRootEquations[i].PreciseRoots(root_interval,error);
-    for (int j = 1; j <= original.Length(); j++) 
+    for (int j = 1; j <= original.Length(); j++)
       for (int k = 1; k <= roots_of_eqn_i.Length(); k++) {
       gVector<gDouble> new_vec = original[j];
       new_vec[i] = roots_of_eqn_i[k];
@@ -190,7 +191,7 @@ template<class T> gList<gVector<gDouble> > gSolver<T>::Roots()
   gPolyList<gDouble> InputListTogDouble(TheIdeal.TheSpace(),
 					TheIdeal.Order(),
 					gDoublePolys);
-  for (int i = 1; i <= original.Length(); i++)
+  for (i = 1; i <= original.Length(); i++)
     if (InputListTogDouble.IsRoot(original[i])) finished += original[i];
   return finished;
 }

@@ -136,7 +136,7 @@ const gRectangle<T> gRectangle<T>::CubeContainingCrcmscrbngSphere() const
   while (diameter * diameter < sumsquares) diameter += maxlength;
   
   gList<gInterval<T> > new_sides;
-  for (int i = 1; i <= Dmnsn(); i++)
+  for (i = 1; i <= Dmnsn(); i++)
     new_sides += CartesianFactor(i).SameCenterWithNewLength(diameter);
   return gRectangle<T>(new_sides);
 }

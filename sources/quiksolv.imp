@@ -625,22 +625,23 @@ QuikSolv<T>::FindRootsRecursion(      gList<gVector<gDouble> >* rootlistptr,
 
   gVector<gDouble> point = r.Center();
   if ( NewtonRootIsOnlyInRct(r, point) ) {
-    for (int i = NoEquations + 1; i <= System.Length(); i++)
+    int i;
+    for (i = NoEquations + 1; i <= System.Length(); i++)
       if (TreesOfPartials[i].ValueOfRootPoly(point) < (gDouble)0)
 	return;
     bool already_found = false;
-    for (int i = 1; i <= rootlistptr->Length(); i++)
+    for (i = 1; i <= rootlistptr->Length(); i++)
       if (point == (*rootlistptr)[i])
 	already_found = true;
     if (!already_found) {
       *rootlistptr += point;
-      (*roots_found)++; 
+      (*roots_found)++;
     }
-    return; 
+    return;
   }
 
   int N = r.NumberOfCellsInSubdivision();
-  for (int i = 1; i <= N; i++) 
+  for (int i = 1; i <= N; i++)
     if (max_no_roots == 0 || *roots_found < max_no_roots) {
       if (iterations >= max_iterations) return;
       else {

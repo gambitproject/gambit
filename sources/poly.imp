@@ -318,16 +318,17 @@ bool polynomial<T>::CannotHaveRootsIn(const gInterval<T>& I) const
   // generate list of derivatives
   gList< polynomial<T> > derivs;
   derivs += Derivative();
-  for (int i = 2; i <= Degree(); i++) derivs += derivs[i-1].Derivative();
+  int i;
+  for (i = 2; i <= Degree(); i++) derivs += derivs[i-1].Derivative();
 
   T val = EvaluationAt(I.LowerBound());
-  if (val < (T)0) val = -val;            
+  if (val < (T)0) val = -val;
 
   // find max |c_0/Degree()*c_i|^(1/i)
   int max_index = 0;
   T base_of_max_index = (T)0;
   T relevant_factorial = (T)1;
-  for (int i = 1; i <= Degree(); i++) {
+  for (i = 1; i <= Degree(); i++) {
     relevant_factorial *= (T)i;
     T ith_coeff = derivs[i].EvaluationAt(I.LowerBound()) / relevant_factorial;
     if (ith_coeff < (T)0) ith_coeff = -ith_coeff;
