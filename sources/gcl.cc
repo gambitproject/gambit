@@ -73,9 +73,13 @@ return 1;	// we did not really fix anything, but want no more warnings
 
 GSM* _gsm;
 char* _SourceDir = NULL;
+char* _ExePath = NULL;
 
 int main( int /*argc*/, char* argv[] )
 {
+
+  _ExePath = new char[ strlen( argv[0] ) + 2 ];
+  strcpy( _ExePath, argv[0] );
 
 #ifdef __GNUG__
   const char SLASH = '/';

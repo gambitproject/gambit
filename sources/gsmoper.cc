@@ -23,7 +23,8 @@
 #include "efg.h"
 
 #include "system.h"
-
+#include "gstack.h"
+#include "gstring.h"
 
 extern GSM* _gsm;
 
@@ -2579,6 +2580,47 @@ Portion* GSM_Shell( Portion** param )
 }
 
 
+extern char* _ExePath;
+Portion* GSM_ExePath( Portion** )
+{
+  assert( _ExePath );
+  return new TextValPortion( _ExePath );
+}
+
+
+
+Portion* GSM_Platform( Portion** )
+{
+#ifdef __svr4__
+  return new TextValPortion( "SVR4" );
+#elif defined sparc
+  return new TextValPortion( "SPARC" );
+#elif defined sun
+  return new TextValPortion( "SUN" );
+#elif defined _AIX32
+  return new TextValPortion( "AIX32" );
+#elif defined _AIX
+  return new TextValPortion( "AIX" );
+#elif defined hpux
+  return new TextValPortion( "HP UX" );
+#elif defined hppa
+  return new TextValPortion( "HPPA" );
+#elif defined __BORLANDC__
+  return new TextValPortion( "DOS/Windows" );
+#else
+  return new TextValPortion( "Unknown" );
+#endif
+}
+
+
+extern gStack<gString> GCL_InputFileNames;
+Portion* GSM_GetPath( Portion** )
+{
+  if( GCL_InputFileNames.Depth() > 0 )
+    return new TextValPortion( GCL_InputFileNames.Peek() );
+  else
+    return new TextValPortion( "" );
+}
 
 
 
@@ -3462,6 +3504,18 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT ) );
   gsm->AddFunction(FuncObj);
 
+
+  FuncObj = new FuncDescObj("ExePath", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ExePath, porTEXT, 0));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Platform", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Platform, porTEXT, 0));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("GetPath", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GetPath, porTEXT, 0));
+  gsm->AddFunction(FuncObj);
 
 }
 

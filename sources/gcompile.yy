@@ -45,6 +45,7 @@ TEMPLATE class gList<bool>;
 TEMPLATE class gNode<bool>;
 
 extern GSM* _gsm;  // defined at the end of gsm.cc
+gStack<gString> GCL_InputFileNames(4);
 
 %}
 
@@ -68,7 +69,6 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
   gStack<int> labels, listlen; \
   gStack<char> matching; \
   gStack<gInput *> inputs; \
-  gStack<gString> filenames; \
   gStack<int> lines; \
   GSM& gsm; \
   bool quit; \
@@ -92,10 +92,12 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
                                formalstack(4), \
                                labels(4), \
                                listlen(4), matching(4), \
-                               filenames(4), lines(4), \
+                               lines(4), \
                                gsm(*_gsm), quit(false)
 
-%define CONSTRUCTOR_CODE       LoadInputs( "gclini.gcl" );
+%define CONSTRUCTOR_CODE       GCL_InputFileNames.Push("stdin"); \
+                               lines.Push(1); \
+                               LoadInputs( "gclini.gcl" );
 
 %token LOR
 %token LAND
@@ -264,18 +266,6 @@ statement:    { triv = true; statementcount++; }
 include:      INCLUDE LBRACK TEXT RBRACK
               { 
                 LoadInputs( tval );
-                /*
-                inputs.Push(new gFileInput(tval));
-		if (!inputs.Peek()->IsValid())   {
-		  gerr << "include file " << tval << " not found\n";
-		  delete inputs.Pop();
-		  YYERROR;
-		}
-		else { // not sure if making this part an else clause is right
-		  filenames.Push(tval);
-		  lines.Push(1);
-		}
-                */
 	      }
 
 conditional:  IF LBRACK CRLFopt expression CRLFopt COMMA 
@@ -485,7 +475,7 @@ char GCLCompiler::nextchar(void)
 
   while (inputs.Depth() && inputs.Peek()->eof())  {
     delete inputs.Pop();
-    filenames.Pop();
+    GCL_InputFileNames.Pop();
     lines.Pop();
   }
 
@@ -543,7 +533,7 @@ static struct tokens toktable[] =
 };
 
 
-  gerr << s << ": " << filenames.Peek() << ':'
+  gerr << s << ": " << GCL_InputFileNames.Peek() << ':'
        << ((yychar == CRLF || yychar == EOC) ? lines.Peek() - 1 : lines.Peek()) << " at ";
 
   for (int i = 0; toktable[i].tok != 0; i++)
@@ -794,7 +784,7 @@ int GCLCompiler::Parse(void)
 
     while (inputs.Depth() && inputs.Peek()->eof())  {
       delete inputs.Pop();
-      filenames.Pop();
+      GCL_InputFileNames.Pop();
       lines.Pop();
     }
 
@@ -846,7 +836,7 @@ void GCLCompiler::RecoverFromError(void)
 
   while (inputs.Depth())   {
     delete inputs.Pop();
-    filenames.Pop();
+    GCL_InputFileNames.Pop();
     lines.Pop();
   }
 }
@@ -984,8 +974,6 @@ void GCLCompiler::Execute(void)
 
 void GCLCompiler::LoadInputs( const char* name )
 {
-  filenames.Push("stdin");
-  lines.Push(1);
 
   extern char* _SourceDir;
   const char* SOURCE = _SourceDir; 
@@ -1009,7 +997,7 @@ void GCLCompiler::LoadInputs( const char* name )
     delete inputs.Pop();
   else
   {  
-    filenames.Push( IniFileName );
+    GCL_InputFileNames.Push( IniFileName );
     ini_found = true;
   }
 
@@ -1024,7 +1012,7 @@ void GCLCompiler::LoadInputs( const char* name )
         delete inputs.Pop();
       else
       {  
-        filenames.Push( IniFileName );
+        GCL_InputFileNames.Push( IniFileName );
         ini_found = true;
       }
     }
@@ -1037,7 +1025,7 @@ void GCLCompiler::LoadInputs( const char* name )
         delete inputs.Pop();
       else
       {
-        filenames.Push( IniFileName );
+        GCL_InputFileNames.Push( IniFileName );
         ini_found = true;
       }
     }
@@ -1050,7 +1038,7 @@ void GCLCompiler::LoadInputs( const char* name )
         delete inputs.Pop();
       else
       {  
-        filenames.Push( IniFileName );
+        GCL_InputFileNames.Push( IniFileName );
         ini_found = true;
       }
     }
