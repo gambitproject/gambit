@@ -8,15 +8,9 @@
 #define NFPLAYER_H
 
 class Strategy;
-class gRational;
-template <class T> class Nfg;
 
 class NFPlayer {
-
   friend class BaseNfg;
-  friend class NFStrategySet;
-  friend class Nfg<double>;
-  friend class Nfg<gRational>;
 
 private:
   int number;
@@ -24,12 +18,10 @@ private:
   BaseNfg *N;
   
   gArray<Strategy *> strategies;
- 
 
 public:
-
-  NFPlayer( int n, BaseNfg *no, int num );
-  virtual ~NFPlayer();
+  NFPlayer(int n, BaseNfg *no, int num);
+  ~NFPlayer();
 
   BaseNfg &BelongsTo(void) const;
   
