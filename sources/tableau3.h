@@ -12,6 +12,8 @@ private:
   gRational Det;
   gMatrix<gRational> InvDat;
 
+  gVector<gRational> tmpcol; // temporary column vector, to avoid allocation
+
 protected:
 public:
       // constructors and destructors
@@ -22,6 +24,7 @@ public:
   Tableau<gRational>& operator=(const Tableau<gRational>&);
   
   // pivoting
+  int CanPivot(int outgoing,int incoming);
   void Pivot(int outrow,int col); // pivot -- outgoing is row, incoming is column
   void SolveColumn(int, gVector<gRational> &);  // column in new basis 
   
