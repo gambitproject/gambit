@@ -454,7 +454,9 @@ Portion *gclConditional::Evaluate(void)
     else
       ret = falsebr->Evaluate();
     delete guardval;
-    return ret;
+    Portion *retcopy = ret->ValCopy();
+    delete ret;
+    return retcopy;
   }
   catch (...)   {
     delete guardval;
