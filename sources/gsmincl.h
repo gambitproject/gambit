@@ -53,6 +53,8 @@ typedef enum
 #define  porRATIONAL           ( 0x00000008 )
 #define  porTEXT               ( 0x00000010 )
 
+#define  porNFOUTCOME          ( 0x00000020 )
+
 #define  porNFG_FLOAT          ( 0x00000040 )
 #define  porNFG_RATIONAL       ( 0x00000080 )
 #define  porNFG                ( porNFG_FLOAT | porNFG_RATIONAL )

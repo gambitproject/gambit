@@ -904,6 +904,86 @@ bool StrategyRefPortion::IsReference(void) const
 
 
 
+//---------------------------------------------------------------------
+//                          NfOutcome class
+//---------------------------------------------------------------------
+
+
+NfOutcomePortion::NfOutcomePortion(void)
+{ }
+
+NfOutcomePortion::~NfOutcomePortion()
+{ }
+
+NFOutcome*& NfOutcomePortion::Value(void) const
+{ return *_Value; }
+
+PortionSpec NfOutcomePortion::Spec(void) const
+{ 
+  return porNFOUTCOME;
+}
+
+
+DataType NfOutcomePortion::SubType( void ) const
+{
+  assert( Value() );
+  assert( Value()->BelongsTo() );
+  return Value()->BelongsTo()->Type();
+}
+
+
+void NfOutcomePortion::Output(gOutput& s) const
+{
+  Portion::Output(s);
+  
+  s << "(NFOutcome) " << *_Value;
+  if (*_Value)
+    s << " \"" << (*_Value)->GetName() << "\"\n";
+}
+
+gString NfOutcomePortion::OutputString( void ) const
+{
+  return "(Outcome)";
+}
+
+Portion* NfOutcomePortion::ValCopy(void) const
+{ 
+  Portion* p = new NfOutcomeValPortion(*_Value);
+  p->SetGame(Game(), GameIsEfg());
+  return p;
+}
+
+Portion* NfOutcomePortion::RefCopy(void) const
+{ 
+  Portion* p = new NfOutcomeRefPortion(*_Value); 
+  p->SetGame(Game(), GameIsEfg());
+  p->SetOriginal(Original());
+  return p;
+}
+
+
+NfOutcomeValPortion::NfOutcomeValPortion(NFOutcome* value)
+{ _Value = new NFOutcome*(value); }
+
+NfOutcomeValPortion::~NfOutcomeValPortion()
+{
+  delete _Value; 
+}
+
+bool NfOutcomeValPortion::IsReference(void) const
+{ return false; }
+
+
+NfOutcomeRefPortion::NfOutcomeRefPortion(NFOutcome*& value)
+{ _Value = &value; }
+
+NfOutcomeRefPortion::~NfOutcomeRefPortion()
+{ }
+
+bool NfOutcomeRefPortion::IsReference(void) const
+{ return true; }
+
+
 
 
 

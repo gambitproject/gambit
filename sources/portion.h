@@ -510,6 +510,48 @@ public:
 
 
 
+//---------------------------------------------------------------------
+//                          NfOutcome class
+//---------------------------------------------------------------------
+
+class NFOutcome;
+
+class NfOutcomePortion : public Portion
+{
+protected:
+  NFOutcome** _Value;
+  NfOutcomePortion(void);
+
+public:
+  virtual ~NfOutcomePortion();
+
+  NFOutcome*& Value(void) const;
+  PortionSpec Spec(void) const;
+  DataType SubType( void ) const;
+
+  void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
+  Portion* ValCopy(void) const;
+  Portion* RefCopy(void) const;
+};
+
+class NfOutcomeValPortion : public NfOutcomePortion
+{
+public:
+  NfOutcomeValPortion(NFOutcome* value);
+  virtual ~NfOutcomeValPortion();
+  bool IsReference(void) const;
+};
+
+class NfOutcomeRefPortion : public NfOutcomePortion
+{
+public:
+  NfOutcomeRefPortion(NFOutcome*& value);
+  virtual ~NfOutcomeRefPortion();
+  bool IsReference(void) const;
+};
+
 
 
 //---------------------------------------------------------------------
