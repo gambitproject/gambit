@@ -445,8 +445,6 @@ Portion* GSM_GobitValue_BehavRational(Portion** param)
 }
 
 
-
-
 //-------------------------- LiapSolve ---------------------------//
 
 Portion *GSM_LiapEfg_EfgFloat(Portion **param)
@@ -814,23 +812,28 @@ Portion *GSM_LpSolveEfgRational(Portion **param)
 
 //----------------------- EnumPureSolve --------------------------//
 
+template <class T>
+int FindPureNash(const Efg<T> &, gList<BehavSolution<T> > &);
+
 Portion *GSM_EnumPureEfgFloat(Portion **param)
 {
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
+  gList<BehavSolution<double> > solns;
 
-  if (!((BoolPortion *) param[1])->Value())
-    return new ErrorPortion("algorithm not implemented for extensive forms");
+  if (((BoolPortion *) param[1])->Value())   {
+    PureNashBySubgame<double> M(E);
+    M.Solve();
+    solns = M.GetSolutions();
+    ((FloatPortion *) param[3])->Value() = M.Time();
+  }
+  else  {
+    gWatch watch;
+    FindPureNash(E, solns);
+    ((FloatPortion *) param[3])->Value() = watch.Elapsed();
+  }
 
-  PureNashBySubgame<double> M(E);
-
-  M.Solve();
-
-  gList<BehavSolution<double> > solns(M.GetSolutions());
-
-  ((FloatPortion *) param[3])->Value() = M.Time();
-  
   Portion* por = new Behav_ListPortion<double>(solns);
-  por->SetOwner( param[ 0 ]->Original() );
+  por->SetOwner(param[0]->Original());
   por->AddDependency();
   return por;
 }
@@ -838,18 +841,20 @@ Portion *GSM_EnumPureEfgFloat(Portion **param)
 Portion *GSM_EnumPureEfgRational(Portion **param)
 {
   Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
-
-  if (!((BoolPortion *) param[1])->Value())
-    return new ErrorPortion("algorithm not implemented for extensive forms");
-
-  PureNashBySubgame<gRational> M(E);
-
-  M.Solve();
-
-  gList<BehavSolution<gRational> > solns(M.GetSolutions());
-
-  ((FloatPortion *) param[3])->Value() = M.Time();
+  gList<BehavSolution<gRational> > solns;
   
+  if (((BoolPortion *) param[1])->Value())  {
+    PureNashBySubgame<gRational> M(E);
+    M.Solve();
+    solns = M.GetSolutions();
+    ((FloatPortion *) param[3])->Value() = M.Time();
+  }
+  else  {
+    gWatch watch;
+    FindPureNash(E, solns);
+    ((FloatPortion *) param[3])->Value() = watch.Elapsed();
+  } 
+ 
   Portion* por = new Behav_ListPortion<gRational>(solns);
   por->SetOwner( param[ 0 ]->Original() );
   por->AddDependency();
