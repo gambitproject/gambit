@@ -20,11 +20,9 @@ AC_DEFUN(WX_PATH_WXCONFIG,
 dnl 
 dnl Get the cflags and libraries from the wx-config script
 dnl
-AC_ARG_WITH(wx-prefix, [  --with-wx-prefix=PREFIX   Prefix where wxWindows is in
-stalled (optional)],
+AC_ARG_WITH(wx-prefix, [  --with-wx-prefix=PREFIX   Prefix where wxWindows is installed (optional)],
             wx_config_prefix="$withval", wx_config_prefix="")
-AC_ARG_WITH(wx-exec-prefix,[  --with-wx-exec-prefix=PREFIX Exec prefix where wxW
-indows is installed (optional)],
+AC_ARG_WITH(wx-exec-prefix,[  --with-wx-exec-prefix=PREFIX Exec prefix where wxWindows is installed (optional)],
             wx_config_exec_prefix="$withval", wx_config_exec_prefix="")
 
   dnl deal with optional prefixes
