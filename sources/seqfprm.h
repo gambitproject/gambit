@@ -1,6 +1,6 @@
 // File: seqfprm.h -- definition of params dialog for the sequence form
 // algorithm
-// $Id$
+// @(#)seqfprm.h	1.10 6/18/96
 #ifndef SEQFPRM_H
 #define SEQFPRM_H
 
@@ -48,7 +48,7 @@ void SeqFormParamsSettings::GetParams(SeqFormParams &P)
 {
 P.stopAfter=StopAfter();P.maxdepth=maxdepth;
 // Output stuff
-P.plev=TraceLevel();P.output=OutFile();
+P.trace=TraceLevel();P.tracefile=OutFile();
 }
 
 

@@ -35,9 +35,9 @@ wxWriteResource(PARAMS_SECTION,"Lemke-maxDepth",maxDepth,defaults_file);
 
 void LemkeParamsSettings::GetParams(LemkeParams &P)
 {
-P.stopAfter=StopAfter();P.maxDepth=maxDepth;
+P.stopAfter=StopAfter();P.maxdepth=maxDepth;
 // Output stuff
-P.trace=TraceLevel();P.output=OutFile();
+P.trace=TraceLevel();P.tracefile=OutFile();
 }
 
 LemkeSolveParamsDialog::LemkeSolveParamsDialog(wxWindow *parent,bool subgames)

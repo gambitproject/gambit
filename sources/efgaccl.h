@@ -1,5 +1,5 @@
 // File: efgaccl.h -- gives names to various Extensive form GUI options
-// $Id$
+// @(#)efgaccl.h	1.9 4/16/96
 
 #ifndef EFGACCL_H
 #define EFGACCL_H
@@ -36,10 +36,10 @@ AccelEvent("Save",FILE_SAVE),
 AccelEvent("Close",FILE_CLOSE),
 AccelEvent("Print",FILE_OUTPUT),
 AccelEvent("Solve",SOLVE_SOLVE),
-AccelEvent("Supports",SOLVE_SUPPORTS),
+AccelEvent("Supports",SUPPORTS_SUPPORTS),
 AccelEvent("MakeNF",SOLVE_SOLVE_NORMAL),
-AccelEvent("Inspect Soln",SOLVE_INSPECT),
-AccelEvent("Remove Soln",SOLVE_REMOVE),
+AccelEvent("Inspect Soln",INSPECT_INSPECT),
+AccelEvent("Remove Soln",INSPECT_REMOVE),
 AccelEvent("Mark Subgames",SUBGAME_SOLVE),
 AccelEvent("Unmark All Subgames",SUBGAME_CLEARALL),
 AccelEvent("Unmark Node Subgame",SUBGAME_CLEARONE),

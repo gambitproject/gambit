@@ -1,7 +1,8 @@
 // File: elimdomd.h -- declarations for classes dealing with inspection and
 // creation of dominated strategy supports
 // $Id$
-
+#ifndef ELIMDOMD_H
+#define ELIMDOMD_H
 #define SUPPORT_OPEN		0
 #define SUPPORT_CLOSE		1
 #define SUPPORT_CHANGE	2
@@ -10,6 +11,7 @@
 #define	DOM_STRONG			1
 
 #define		SOLN_SECT			"Soln-Defaults"
+#define NFG_ELIMDOM_HELP		"Elimination of Dominated Strategies"
 
 class DominanceSettings
 {
@@ -64,7 +66,6 @@ public:
 	}
 };
 
-#ifdef ELIMDOM_NFG // the rest of the dominance dialogs are only used in the NFG
 class ElimDomParamsDialog // Can not use MyDialogBox due to wxMULTIPLE
 {
 private:
@@ -121,7 +122,7 @@ public:
 	ok_button->SetClientData((char *)this);
 	wxButton *cancel_button=new wxButton(d,(wxFunction)cancel_button_func,"Cancel");
 	cancel_button->SetClientData((char *)this);
-	new wxButton(d,(wxFunction)help_button_func,"?");
+	new wxButton(d,(wxFunction)help_button_func,"Help");
 	d->Fit();
 	d->Show(TRUE);
 	}
@@ -133,7 +134,7 @@ public:
 	int  Completed(void) {return completed;}
 };
 
-
+#ifdef ELIMDOM_NFG // the rest of the dominance dialogs are only used in the NFG
 class BaseNormShow;
 class SupportInspectDialog:public wxDialogBox
 {
@@ -236,3 +237,5 @@ public:
 };
 
 #endif // ELIMDOM_NFG
+#endif
+
