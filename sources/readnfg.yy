@@ -39,6 +39,12 @@
 
 %define CONSTRUCTOR_INIT      : infile(f), N(nfg)
 
+%union  {
+  gString *text;
+}
+
+%type <text> number
+
 %token LBRACE
 %token RBRACE
 %token SLASH
@@ -137,12 +143,13 @@ outcome:       LBRACE NAME
 outcpaylist:   outcpay
            |   outcpaylist commaopt outcpay
 
-outcpay:       NUMBER   
+outcpay:       number   
                  { if (pl > N->NumPlayers())  YYERROR;
                    N->SetPayoff(outcome, pl++, 
 	                        gPoly<gNumber>(N->Parameters(),
-                                               last_number,
-					       N->ParamOrder())); } 
+                                               *$1,
+					       N->ParamOrder())); 
+                   delete $1; } 
        |       polynomial
                  { if (pl > N->NumPlayers())  YYERROR;
                    N->SetPayoff(outcome, pl++, 
@@ -150,7 +157,8 @@ outcpay:       NUMBER
                                                last_poly,
 					       N->ParamOrder()));
                    last_poly = ""; } 
-       |       NUMBER '+' { last_poly = ToString(last_number) + " + "; }
+       |       number '+' 
+                { last_poly = *$1 + " + "; delete $1; }
                polynomial
                  { if (pl > N->NumPlayers())  YYERROR;
                    N->SetPayoff(outcome, pl++, 
@@ -158,7 +166,8 @@ outcpay:       NUMBER
                                                last_poly,
 					       N->ParamOrder()));
                    last_poly = ""; } 
-       |       NUMBER '-' { last_poly = ToString(last_number) + " - "; }
+       |       number '-' 
+               { last_poly = *$1 + " - "; delete $1; }
                polynomial
                  { if (pl > N->NumPlayers())  YYERROR;
                    N->SetPayoff(outcome, pl++, 
@@ -167,10 +176,9 @@ outcpay:       NUMBER
 					       N->ParamOrder())); 
 	           last_poly = ""; } 
  
-
-
 commaopt:    | ','   
-      
+
+number:           NUMBER    { $$ = new gString(ToString(last_number)); }
 
 contingencylist:  contingency
                |  contingencylist contingency
@@ -185,7 +193,7 @@ polynomial:        polyterm
           |        polynomial '-' { last_poly += "- "; } polyterm
           ;
 
-polyterm:          NUMBER { last_poly += ToString(last_number) + " "; }
+polyterm:          number { last_poly += *$1 + " "; delete $1; }
                    variables
         ;
 

@@ -49,6 +49,12 @@ template class gStack<Node *>;
 
 %define CONSTRUCTOR_INIT     : infile(f), polymode(false), E(e), path(32)
 
+%union  {
+  gString *text;
+}
+
+%type <text> number
+
 %token LBRACE
 %token RBRACE
 %token SLASH
@@ -240,18 +246,20 @@ commaopt:
         |          ','
         ;
 
-payoff:            NUMBER 
-    { values.Append(gPoly<gNumber>(E->Parameters(), last_number, E->ParamOrder())); }
+number:            NUMBER    { $$ = new gString(ToString(last_number)); }
+
+payoff:            number
+    { values.Append(gPoly<gNumber>(E->Parameters(), *$1, E->ParamOrder())); delete $1; }
       |            polynomial 
-    { values.Append(gPoly<gNumber>(E->Parameters(), last_poly, E->ParamOrder())); gout << last_poly << '\n'; last_poly = ""; }
-      |            NUMBER '+'
-    { last_poly = ToString(last_number) + " + "; }
+    { values.Append(gPoly<gNumber>(E->Parameters(), last_poly, E->ParamOrder())); last_poly = ""; }
+      |            number '+'
+    { last_poly = *$1 + " + ";  delete $1; }
                   polynomial
-    { values.Append(gPoly<gNumber>(E->Parameters(), last_poly, E->ParamOrder())); gout << last_poly << '\n'; last_poly = ""; }
-      |            NUMBER '-'
-    { last_poly = ToString(last_number) + " - "; }
+    { values.Append(gPoly<gNumber>(E->Parameters(), last_poly, E->ParamOrder())); last_poly = ""; }
+      |            number '-'
+    { last_poly = *$1 + " - ";  delete $1; }
                   polynomial
-    { values.Append(gPoly<gNumber>(E->Parameters(), last_poly, E->ParamOrder())); gout << last_poly << '\n'; last_poly = ""; }
+    { values.Append(gPoly<gNumber>(E->Parameters(), last_poly, E->ParamOrder())); last_poly = ""; }
       ;
 
 polynomial:        polyterm
@@ -259,7 +267,7 @@ polynomial:        polyterm
           |        polynomial '-' { last_poly += "- "; } polyterm
           ;
 
-polyterm:          NUMBER { last_poly += ToString(last_number) + " "; }
+polyterm:          number { last_poly += *$1 + " "; delete $1; }
                    variables
         ;
 
@@ -269,8 +277,8 @@ variables:         variable
 
 variable:          varname
                    { last_poly += " "; }
-        |          varname '^' NUMBER
-                   { last_poly += "^" + ToString(last_number) + " "; }
+        |          varname '^' number
+                   { last_poly += "^" + *$3 + " ";  delete $3; }
         ;
 
 varname:           VARNAME
