@@ -28,7 +28,6 @@
   bool bval, triv, semi; \
   gInteger ival; \
   double dval; \
-  gRational rval; \
   gString tval, formal, funcname;  \
   gList<Instruction *> program, *function; \
   gList<gString> formals, types; \
@@ -37,6 +36,8 @@
   gGrowableStack<int> labels, listlen; \
   gGrowableStack<char> matching; \
   gGrowableStack<gInput *> inputs; \
+  gGrowableStack<gString> filenames; \
+  gGrowableStack<int> lines; \
   GSM gsm; \
   bool quit; \
   \
@@ -53,7 +54,10 @@
 
 %define CONSTRUCTOR_INIT     : function(0), formalstack(4), labels(4), \
                                listlen(4), matching(4), \
+                               filenames(4), lines(4), \
                                gsm(256), quit(false)
+
+%define CONSTRUCTOR_CODE       filenames.Push("stdin"); lines.Push(1);
 
 %token LOR
 %token LAND
@@ -81,11 +85,6 @@
 %token COMMA
 %token HASH
 
-%token NAME
-%token BOOLEAN
-%token FLOAT
-%token INTEGER
-%token RATIONAL
 %token PERCENT
 %token DIV
 %token LPAREN
@@ -98,12 +97,12 @@
 %token DEFFUNC
 %token INCLUDE
 
+%token NAME
 %token BOOLEAN
 %token INTEGER
 %token FLOAT
-%token RATCONST
 %token TEXT
-%token NAME
+
 
 %token CRLF
 %token EOC
@@ -155,6 +154,8 @@ include:      INCLUDE LBRACK TEXT RBRACK
 		  delete inputs.Pop();
 		  YYERROR;
 		}
+		filenames.Push(tval);
+		lines.Push(1);
 	      }
 
 conditional:  IF LBRACK CRLFopt expression CRLFopt COMMA 
@@ -282,7 +283,6 @@ E7:           E8
 E8:           BOOLEAN       { emit(new Push<bool>(bval)); }
   |           INTEGER       { emit(new Push<long>(ival.as_long())); }
   |           FLOAT         { emit(new Push<double>(dval)); }
-  |           RATCONST      { emit(new Push<gRational>(rval)); }
   |           TEXT          { emit(new Push<gString>(tval)); }
   |           LPAREN expression RPAREN
   |           NAME          { emit(new PushRef(tval)); }
@@ -322,17 +322,25 @@ listel:       expression   { listlen.Push(listlen.Pop() + 1); }
 %%
 
 
+const char CR = (char) 10;
+
 char GCLCompiler::nextchar(void)
 {
   char c;
 
-  while (inputs.Depth() && inputs.Peek()->eof())
+  while (inputs.Depth() && inputs.Peek()->eof())  {
     delete inputs.Pop();
+    filenames.Pop();
+    lines.Pop();
+  }
 
   if (inputs.Depth() == 0)
     gin >> c;
   else
     *inputs.Peek() >> c;
+
+  if (c == CR)
+    lines.Peek()++;
 
   return c;
 }
@@ -343,14 +351,60 @@ void GCLCompiler::ungetchar(char c)
     gin.unget(c);
   else
     inputs.Peek()->unget(c);
+
+  if (c == CR)
+    lines.Peek()--;
 }
+
+typedef struct tokens  { long tok; char *name; };
 
 void GCLCompiler::yyerror(char *s)
 {
-  gerr << "Error: " << s << '\n';
-}
+static struct tokens toktable[] =
+{ { LOR, "OR or ||" },  { LAND, "AND or &&" }, { LNOT, "NOT or !" },
+    { EQU, "=" }, { NEQ, "!=" }, { LTN, "<" }, { LEQ, "<=" },
+    { GTN, ">" }, { GEQ, ">=" }, { PLUS, "+" }, { MINUS, "-" },
+    { STAR, "*" }, { SLASH, "/" }, { ASSIGN, ":=" }, { SEMI, ";" },
+    { LBRACK, "[" }, { DBLLBRACK, "[[" }, { RBRACK, "]" },
+    { LBRACE, "{" }, { RBRACE, "}" }, { RARROW, "->" },
+    { LARROW, "<-" }, { COMMA, "," }, { HASH, "#" },
+    { IF, "If" }, { WHILE, "While" }, { FOR, "For" },
+    { QUIT, "Quit" }, { DEFFUNC, "NewFunction" }, { INCLUDE, "Include" },
+    { PERCENT, "%" }, { DIV, "DIV" }, { LPAREN, "(" }, { RPAREN, ")" },
+    { CRLF, "carriage return" }, { EOC, "carriage return" }, { 0, 0 }
+};
 
-const char CR = (char) 10;
+
+  gerr << s << ": " << filenames.Peek() << ':'
+       << ((yychar == CRLF || yychar == EOC) ? lines.Peek() - 1 : lines.Peek()) << " at ";
+
+  for (int i = 0; toktable[i].tok != 0; i++)
+    if (toktable[i].tok == yychar)   {
+      gerr << toktable[i].name << '\n';
+      return;
+    }
+
+  switch (yychar)   {
+    case NAME:
+      gerr << "identifier " << tval << '\n';
+      break;
+    case BOOLEAN:
+      gerr << ((bval) ? "True" : "False") << '\n';
+      break;
+    case FLOAT:
+      gerr << "floating-point constant " << dval << '\n';
+      break;
+    case INTEGER:
+      gerr << "integer constant " << ival << '\n';
+      break;
+    case TEXT:
+      gerr << "text string " << tval << '\n';
+      break;
+    default:
+      gerr << yychar << '\n';
+      break;
+  }    
+}
 
 int GCLCompiler::yylex(void)
 {
@@ -572,6 +626,11 @@ void GCLCompiler::RecoverFromError(void)
   }
   labels.Flush();
   listlen.Flush();
+
+  while (inputs.Depth())   {
+    delete inputs.Pop();
+    lines.Pop();
+  }
 }
     
 
