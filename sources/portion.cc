@@ -105,7 +105,7 @@ Portion::Portion( void )
 
 #ifdef MEMCHECK
   _NumObj++;
-  gout << "--- Portion Ctor, count: " << _NumObj << "\n";
+  printf("--- Portion Ctor, count: %ld\n", _NumObj);
 #endif
 }
 
@@ -113,7 +113,7 @@ Portion::~Portion()
 { 
 #ifdef MEMCHECK
   _NumObj--;
-  gout << "--- Portion Dtor, count: " << _NumObj << "\n";
+  printf("--- Portion Dtor, count: %ld\n", _NumObj);
 #endif
 }
 

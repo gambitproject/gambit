@@ -117,8 +117,6 @@ extern GSM& _gsm;  // defined at the end of gsm.cc
 %token QUIT
 %token DEFFUNC
 %token INCLUDE
-%token ASSIGNFUNC
-%token UNASSIGN
 
 %token NAME
 %token BOOLEAN
@@ -188,18 +186,8 @@ statement:    { triv = true; statementcount++; }
          |    conditional { triv = false; }
          |    whileloop { triv = false; }
          |    forloop   { triv = false; }
-         |    assignment
-         |    unassignment
          |    QUIT     { triv = false; quit = true; emit(new Quit); }
 
-
-assignment:   ASSIGNFUNC LBRACK NAME { emit(new PushRef(tval)); }
-              COMMA expression RBRACK { emit(new Assign); }
-
-unassignment: UNASSIGN LBRACK NAME RBRACK
-              { emit(new PushRef(tval));
-		emit(new UnAssign);
-	      }
 
 include:      INCLUDE LBRACK TEXT RBRACK
               { inputs.Push(new gFileInput(tval));
@@ -292,6 +280,7 @@ exprlist:     expression  { emit(new Pop); }
 
 expression:   Ea
           |   Ea ASSIGN expression { emit(new Assign()); }
+          |   Ea ASSIGN { emit(new UnAssign()); }
           ;
 
 Ea:           E0
@@ -574,8 +563,6 @@ I_dont_believe_Im_doing_this:
     else if (s == "Quit")   return QUIT;
     else if (s == "NewFunction")   return DEFFUNC;
     else if (s == "Include")   return INCLUDE;
-    else if (s == "Assign")   return ASSIGNFUNC;
-    else if (s == "UnAssign")   return UNASSIGN;
     else  { tval = s; return NAME; }
   }
 

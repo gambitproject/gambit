@@ -43,6 +43,7 @@ Portion* GSM_Assign_Undefined( Portion** param )
 }
 */
 
+
 /*
 Portion* GSM_Assign( Portion** param )
 {
@@ -91,21 +92,22 @@ Portion* GSM_Assign( Portion** param )
 }
 */
 
-/*
+
+
 Portion* GSM_Assign(Portion** param)
 {
-  _gsm.PushRef(param[0]->Original()->VarName());
-  _gsm.Push(param[1]->ValCopy());
+  _gsm.PushRef(((TextPortion*) param[0])->Value());
+  Portion* p = param[1]->ValCopy();
+  _gsm.Push(p);
   _gsm.Assign();
-  return param[1]->RefCopy();
+  return p->RefCopy();
 }
 
 Portion* GSM_UnAssign(Portion** param)
 {
-  _gsm.PushRef(param[0]->Original()->VarName());
+  _gsm.PushRef(((TextPortion*) param[0])->Value());
   return _gsm.UnAssignExt();
 }
-*/
 
 Portion* GSM_Fake(Portion**)
 {
@@ -2103,6 +2105,7 @@ Portion* GSM_Manual(Portion** param)
   gOutput& s = ((OutputPortion*) param[1])->Value();
   ListPortion* Prototypes = (ListPortion*) _gsm.Help(txt);
   int i;
+  int body;
 
   for(i=1; i<=Prototypes->Length(); i++)
   {
@@ -2112,24 +2115,95 @@ Portion* GSM_Manual(Portion** param)
 
   gFileInput f("gcl.man");
   gString line;
+  gString line_out;
   bool found = false;
   while(f.IsValid() && !f.eof() && !found)
   {
     line = GetLine(f);
-    if(line.length() == txt.length()+2)
-      if(line==(gString)'['+txt+']')
+    if(line.length() >= txt.length())
+      if(line.left(txt.length())==txt)
 	found = true;
   }
   if(found)
+  {
+    body = 0;
     while(f.IsValid() && !f.eof())
     {
-      line = GetLine(f);
-      if(line.length()>=1)
-	if(line.left(1) == '[' && line.right(1) == ']')
+      line = GetLine(f);      
+      if(line.length()>=3 && line.left(3) == "\\bd")
+	body++;
+      if(body > 0)
+      {
+	line_out = line;
+	while(true)
+	{
+	  char* s;
+	  int idx;
+	  int numchars = 0;
+	  if((s=strstr(line_out.stradr(), "\\bd")) != 0)
+	    numchars = 3;
+	  else if((s=strstr(line_out.stradr(), "\\ed")) != 0)
+	    numchars = 3;
+	  else if((s=strstr(line_out.stradr(), "\\item")) != 0)
+	    numchars = 5;
+	  else if((s=strstr(line_out.stradr(), "\\tt")) != 0)
+	    numchars = 4;
+	  else if((s=strstr(line_out.stradr(), "\\em")) != 0)
+	    numchars = 4;
+	  else if((s=strstr(line_out.stradr(), "$")) != 0)
+	  {
+	    idx = s - line_out.stradr();
+	    line_out[idx] = '\'';
+	    numchars = 0;
+	  }
+	  else if((s=strstr(line_out.stradr(), "\\verb")) != 0)
+	  {
+	    numchars = 5;
+	    idx = s - line_out.stradr();
+	    for(i=0; i<numchars; i++) 
+	      line_out.remove(idx);
+	    if(line_out.length()>idx)
+	    {
+	      char c;
+	      c = line_out[idx];
+	      line_out[idx] = '\"';
+	      while(line_out.length()>idx)
+	      {
+		idx++;
+		if(line_out[idx]==c)
+		  break;
+	      }
+	      line_out[idx] = '\"';
+	    }
+	    numchars = 0;
+	  }
+	  else
+	    break;
+	  idx = s - line_out.stradr();
+	  for(i=0; i<numchars; i++) 
+	    line_out.remove(idx);
+	  if(line_out.length()>idx && line_out[idx] == ' ')
+	    line_out.remove(idx);
+	}
+	for(i=0; i<body; i++)
+	  s << ' ';
+	s << line_out << '\n';
+      }
+      if(line.length()>=3 && line.left(3) == "\\ed")
+      {
+	body--;
+	if(body <= 0)
 	  break;
-      s << line << '\n';
+      }
     }
-    
+  }
+
+  if(!found)
+  {
+    s << '\n';
+    s << "  " << "Manual not found\n";
+    s << '\n';
+  }
   return new BoolValPortion(found);
 }
 
@@ -2802,13 +2876,18 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetFuncInfo( GSM_Clear, 0 );
   gsm->AddFunction( FuncObj );
 
-/*
+
+  FuncObj = new FuncDescObj( (gString) "Assign" );
+  FuncObj->SetFuncInfo( GSM_Assign, 2 );
+  FuncObj->SetParamInfo( GSM_Assign, 0, "x", porTEXT );
+  FuncObj->SetParamInfo( GSM_Assign, 1, "v", porANYTYPE, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  gsm->AddFunction( FuncObj );  
+
   FuncObj = new FuncDescObj( (gString) "UnAssign" );
   FuncObj->SetFuncInfo( GSM_UnAssign, 1 );
-  FuncObj->SetParamInfo( GSM_UnAssign, 0, "x", porANYTYPE,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo( GSM_UnAssign, 0, "x", porTEXT );
   gsm->AddFunction( FuncObj );
-*/
 }
 
 

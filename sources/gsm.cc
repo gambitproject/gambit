@@ -687,7 +687,7 @@ Portion* GSM::UnAssignExt( void )
       _Push( p );
       txt = "UnAssign[] called on undefined reference \"";
       txt += ((ReferencePortion*) p)->Value();
-      txt += "\"\n";
+      txt += '\"';
       p = new ErrorPortion(txt);
       return p;
     }
@@ -695,7 +695,7 @@ Portion* GSM::UnAssignExt( void )
   else
   {
     _Push( p );
-    txt = "UnAssign[] called on a non-reference value\n";
+    txt = "UnAssign[] called on a non-reference value";
     p = new ErrorPortion(txt);
     return p;
   }
