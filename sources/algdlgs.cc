@@ -372,9 +372,9 @@ void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
   if (p_subgames)    SubgameFields();
   AlgorithmFields();
 
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "OK");
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
+  m_okButton = new wxButton(this, (wxFunction) CallbackOK, "OK");
+  m_okButton->SetClientData((char *) this);
+  m_okButton->SetDefault();
 
   wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
 					"Cancel");
@@ -388,29 +388,29 @@ void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
 					"Help");
   helpButton->SetClientData((char *) this);
 
-  okButton->SetConstraints(new wxLayoutConstraints);
-  okButton->GetConstraints()->right.SameAs(cancelButton, wxLeft, 10);
-  okButton->GetConstraints()->top.SameAs(m_algorithmGroup, wxBottom, 10);
-  okButton->GetConstraints()->height.AsIs();
-  okButton->GetConstraints()->width.SameAs(cancelButton, wxWidth);
+  m_okButton->SetConstraints(new wxLayoutConstraints);
+  m_okButton->GetConstraints()->right.SameAs(cancelButton, wxLeft, 10);
+  m_okButton->GetConstraints()->top.SameAs(m_algorithmGroup, wxBottom, 10);
+  m_okButton->GetConstraints()->height.AsIs();
+  m_okButton->GetConstraints()->width.SameAs(traceButton, wxWidth);
 
   cancelButton->SetConstraints(new wxLayoutConstraints);
   cancelButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
-  cancelButton->GetConstraints()->centreY.SameAs(okButton, wxCentreY);
+  cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
   cancelButton->GetConstraints()->height.AsIs();
-  cancelButton->GetConstraints()->width.AsIs();
+  cancelButton->GetConstraints()->width.SameAs(traceButton, wxWidth);
 
   traceButton->SetConstraints(new wxLayoutConstraints);
   traceButton->GetConstraints()->left.SameAs(cancelButton, wxRight, 10);
-  traceButton->GetConstraints()->centreY.SameAs(okButton, wxCentreY);
+  traceButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
   traceButton->GetConstraints()->height.AsIs();
-  traceButton->GetConstraints()->width.SameAs(cancelButton, wxWidth);
+  traceButton->GetConstraints()->width.AsIs();
 
   helpButton->SetConstraints(new wxLayoutConstraints);
   helpButton->GetConstraints()->left.SameAs(traceButton, wxRight, 10);
-  helpButton->GetConstraints()->centreY.SameAs(okButton, wxCentreY);
+  helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
   helpButton->GetConstraints()->height.AsIs();
-  helpButton->GetConstraints()->width.SameAs(cancelButton, wxWidth);
+  helpButton->GetConstraints()->width.SameAs(traceButton, wxWidth);
 
   Layout();
   Fit();
@@ -465,95 +465,6 @@ gOutput *dialogAlgorithm::TraceFile(void) const
   }
 }
 
-//=======================================================================
-//                   class dialogPxi: Member functions
-//=======================================================================
-
-static char *wxOutputFile(const char *name)
-{
-  static char t_outfile[250];
-  static char slash[2];
-  slash[0] = System::Slash();
-  slash[1] = '\0';
-
-  if (strstr(slash, name)) {
-    strcpy(t_outfile, FileNameFromPath((char *)name)); // strip the path
-  }
-  else
-    strcpy(t_outfile, name);
-
-  char *period = strchr(t_outfile, '.'); // strip the extension
-  
-  if (period) t_outfile[period-t_outfile] = '\0';
-  strcat(t_outfile, ".pxi"); // add a ".pxi" extension
-  
-  return t_outfile;
-}
-
-dialogPxi::dialogPxi(const char *p_label, const char *p_filename,
-		     wxWindow *p_parent, const char *p_helpStr)
-  : dialogAlgorithm(p_label, false, p_parent, p_helpStr)
-{ 
-  m_defaultPxiFile = wxOutputFile(p_filename);
-}
-
-dialogPxi::~dialogPxi()
-{
-  if (m_completed == wxOK) {
-    wxWriteResource("Algorithm Params", "Pxi-Plot-Type",
-		    m_plotType->GetSelection(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "Run-Pxi",
-		    m_runPxi->GetValue(), gambitApp.ResourceFile());
-    if (m_runPxi->GetValue()) 
-      wxWriteResource("Algorithm Params", "Pxi-Command",
-		      m_pxiCommand->GetValue(), gambitApp.ResourceFile());
-  }
-}
-
-void dialogPxi::PxiFields(void)
-{
-  int plotType = 0;
-  wxGetResource("Algorithm Params", "Pxi-Plot-Type", &plotType, gambitApp.ResourceFile());
-  char *plotTypeChoices[] = { "Log", "Linear" };
-  m_plotType = new wxRadioBox(this, 0, "Plot type", -1, -1, -1, -1,
-			      2, plotTypeChoices);
-  if (plotType == 0 || plotType == 1)
-    m_plotType->SetSelection(plotType);
-  NewLine();
-
-  m_pxiFile = new wxText(this, 0, "PXI file");
-  m_pxiFile->SetValue(m_defaultPxiFile);
-  NewLine();
-
-  Bool runPxi = false;
-  wxGetResource("Algorithm Params", "Run-Pxi", &runPxi, gambitApp.ResourceFile());
-  m_runPxi = new wxCheckBox(this, (wxFunction) CallbackRun, "Run PXI");
-  m_runPxi->SetClientData((char *) this);
-  m_runPxi->SetValue(runPxi);
-
-  gText pxiCommand;
-  wxGetResourceStr("Algorithm Params", "Pxi-Command", pxiCommand, 
-		   gambitApp.ResourceFile());
-  m_pxiCommand = new wxText(this, 0, "PXI command");
-  m_pxiCommand->SetValue(pxiCommand);
-  m_pxiCommand->Enable(m_runPxi->GetValue());
-  NewLine();
-}
-
-void dialogPxi::OnRun(void)
-{
-  m_pxiCommand->Enable(m_runPxi->GetValue());
-}
-
-gOutput *dialogPxi::PxiFile(void) const
-{
-  try {
-    return new gFileOutput(m_pxiFile->GetValue());
-  }
-  catch (gFileOutput::OpenFailed &E) {
-    return 0;
-  }
-}
 
 //=======================================================================
 //                   dialogEnumPure: Member functions
@@ -1075,6 +986,114 @@ int dialogPolEnum::StopAfter(void) const
 }
 
 //=======================================================================
+//                   class dialogPxi: Member functions
+//=======================================================================
+
+static char *wxOutputFile(const char *name)
+{
+  static char t_outfile[250];
+  static char slash[2];
+  slash[0] = System::Slash();
+  slash[1] = '\0';
+
+  if (strstr(slash, name)) {
+    strcpy(t_outfile, FileNameFromPath((char *)name)); // strip the path
+  }
+  else
+    strcpy(t_outfile, name);
+
+  char *period = strchr(t_outfile, '.'); // strip the extension
+  
+  if (period) t_outfile[period-t_outfile] = '\0';
+  strcat(t_outfile, ".pxi"); // add a ".pxi" extension
+  
+  return t_outfile;
+}
+
+dialogPxi::dialogPxi(const char *p_label, const char *p_filename,
+		     wxWindow *p_parent, const char *p_helpStr)
+  : dialogAlgorithm(p_label, false, p_parent, p_helpStr)
+{ 
+  m_defaultPxiFile = wxOutputFile(p_filename);
+}
+
+dialogPxi::~dialogPxi()
+{
+  if (m_completed == wxOK) {
+    wxWriteResource("Algorithm Params", "Pxi-Plot-Type",
+		    m_plotType->GetSelection(), gambitApp.ResourceFile());
+    wxWriteResource("Algorithm Params", "Run-Pxi",
+		    m_runPxi->GetValue(), gambitApp.ResourceFile());
+    if (m_runPxi->GetValue()) 
+      wxWriteResource("Algorithm Params", "Pxi-Command",
+		      m_pxiCommand->GetValue(), gambitApp.ResourceFile());
+  }
+}
+
+void dialogPxi::PxiFields(void)
+{
+  m_pxiGroup = new wxGroupBox(this, "PXI options");
+
+  m_pxiFile = new wxText(this, 0, "PXI file");
+  m_pxiFile->SetValue(m_defaultPxiFile);
+  NewLine();
+
+  Bool runPxi = false;
+  wxGetResource("Algorithm Params", "Run-Pxi", &runPxi, gambitApp.ResourceFile());
+  m_runPxi = new wxCheckBox(this, (wxFunction) CallbackRun, "Run PXI");
+  m_runPxi->SetClientData((char *) this);
+  m_runPxi->SetValue(runPxi);
+  NewLine();
+
+  gText pxiCommand;
+  wxGetResourceStr("Algorithm Params", "Pxi-Command", pxiCommand, 
+		   gambitApp.ResourceFile());
+  m_pxiCommand = new wxText(this, 0, "PXI command");
+  m_pxiCommand->SetValue(pxiCommand);
+  m_pxiCommand->Enable(m_runPxi->GetValue());
+  NewLine();
+
+  m_pxiGroup->SetConstraints(new wxLayoutConstraints);
+  m_pxiGroup->GetConstraints()->top.SameAs(m_algorithmGroup, wxBottom, 10);
+  m_pxiGroup->GetConstraints()->bottom.SameAs(m_pxiCommand, wxBottom, -10);
+  m_pxiGroup->GetConstraints()->left.SameAs(m_algorithmGroup, wxLeft);
+  m_pxiGroup->GetConstraints()->right.SameAs(m_algorithmGroup, wxRight);
+
+  m_pxiFile->SetConstraints(new wxLayoutConstraints);
+  m_pxiFile->GetConstraints()->top.SameAs(m_pxiGroup, wxTop, 20);
+  m_pxiFile->GetConstraints()->left.SameAs(m_pxiGroup, wxLeft, 10);
+  m_pxiFile->GetConstraints()->right.SameAs(m_pxiGroup, wxRight, 10);
+  m_pxiFile->GetConstraints()->height.AsIs();
+
+  m_runPxi->SetConstraints(new wxLayoutConstraints);
+  m_runPxi->GetConstraints()->top.SameAs(m_pxiFile, wxBottom, 10);
+  m_runPxi->GetConstraints()->left.SameAs(m_pxiFile, wxLeft);
+  m_runPxi->GetConstraints()->width.AsIs();
+  m_runPxi->GetConstraints()->height.AsIs();
+
+  m_pxiCommand->SetConstraints(new wxLayoutConstraints);
+  m_pxiCommand->GetConstraints()->centreY.SameAs(m_runPxi, wxCentreY);
+  m_pxiCommand->GetConstraints()->left.SameAs(m_runPxi, wxRight, 10);
+  m_pxiCommand->GetConstraints()->right.SameAs(m_pxiGroup, wxRight, 10);
+  m_pxiCommand->GetConstraints()->height.AsIs();
+}
+
+void dialogPxi::OnRun(void)
+{
+  m_pxiCommand->Enable(m_runPxi->GetValue());
+}
+
+gOutput *dialogPxi::PxiFile(void) const
+{
+  try {
+    return new gFileOutput(m_pxiFile->GetValue());
+  }
+  catch (gFileOutput::OpenFailed &E) {
+    return 0;
+  }
+}
+
+//=======================================================================
 //                      dialogQre: Member functions
 //=======================================================================
 
@@ -1082,9 +1101,12 @@ int dialogPolEnum::StopAfter(void) const
 
 dialogQre::dialogQre(wxWindow *p_parent, const gText &p_filename,
 		     bool p_vianfg)
-  : dialogPxi("QreSolve Params", p_filename, p_parent, QRE_HELP)
+  : dialogPxi("QreSolve Parameters", p_filename, p_parent, QRE_HELP)
 {
   MakeCommonFields(true, false, p_vianfg);
+  m_okButton->GetConstraints()->top.SameAs(m_pxiGroup, wxBottom, 10);
+  Layout();
+  Fit();
   Go();
 }
 
@@ -1131,51 +1153,51 @@ void dialogQre::AlgorithmFields(void)
   m_minLam->GetConstraints()->left.SameAs(m_algorithmGroup, wxLeft, 10);
   m_minLam->GetConstraints()->width.AsIs();
   m_minLam->GetConstraints()->height.AsIs();
+  NewLine();
 
   m_maxLam = new wxNumberItem(this, "maxLam", maxLam);
   m_maxLam->SetConstraints(new wxLayoutConstraints);
-  m_maxLam->GetConstraints()->top.SameAs(m_minLam, wxTop);
-  m_maxLam->GetConstraints()->left.SameAs(m_minLam, wxRight, 10);
+  m_maxLam->GetConstraints()->top.SameAs(m_minLam, wxBottom, 10);
+  m_maxLam->GetConstraints()->left.SameAs(m_minLam, wxLeft);
   m_maxLam->GetConstraints()->width.AsIs();
   m_maxLam->GetConstraints()->height.AsIs();
-
+  
   m_delLam = new wxNumberItem(this, "delLam", delLam);
   m_delLam->SetConstraints(new wxLayoutConstraints);
-  m_delLam->GetConstraints()->top.SameAs(m_minLam, wxTop);
-  m_delLam->GetConstraints()->left.SameAs(m_maxLam, wxRight, 10);
+  m_delLam->GetConstraints()->top.SameAs(m_maxLam, wxBottom, 10);
+  m_delLam->GetConstraints()->left.SameAs(m_minLam, wxLeft);
   m_delLam->GetConstraints()->width.AsIs();
   m_delLam->GetConstraints()->height.AsIs();
-
   NewLine();
 
-  m_tolND = new wxIntegerItem(this, "Tol n-D: 1.0 e -", tolND, -1, -1, 150, -1);
+  m_tolND = new wxIntegerItem(this, "Tol n-D: 1.0 e -", tolND, -1, -1, -1, -1);
   m_tolND->SetConstraints(new wxLayoutConstraints);
-  m_tolND->GetConstraints()->top.SameAs(m_minLam, wxBottom, 10);
-  m_tolND->GetConstraints()->left.SameAs(m_minLam, wxLeft);
+  m_tolND->GetConstraints()->top.SameAs(m_minLam, wxTop);
+  m_tolND->GetConstraints()->left.SameAs(m_minLam, wxRight, 10);
   m_tolND->GetConstraints()->width.AsIs();
   m_tolND->GetConstraints()->height.AsIs();
 
-  m_tol1D = new wxIntegerItem(this, "Tol 1-D: 1.0 e -", tol1D, -1, -1, 150, -1);
+  m_tol1D = new wxIntegerItem(this, "Tol 1-D: 1.0 e -", tol1D, -1, -1, -1, -1);
   m_tol1D->SetConstraints(new wxLayoutConstraints);
-  m_tol1D->GetConstraints()->top.SameAs(m_tolND, wxTop);
-  m_tol1D->GetConstraints()->left.SameAs(m_tolND, wxRight, 10);
+  m_tol1D->GetConstraints()->top.SameAs(m_tolND, wxBottom, 10);
+  m_tol1D->GetConstraints()->left.SameAs(m_tolND, wxLeft);
   m_tol1D->GetConstraints()->width.AsIs();
   m_tol1D->GetConstraints()->height.AsIs();
   NewLine();
 
   m_maxitsND = new wxIntegerItem(this, "Iterations n-D", maxitsND,
-				 -1, -1, 150, -1);
+				 -1, -1, -1, -1);
   m_maxitsND->SetConstraints(new wxLayoutConstraints);
-  m_maxitsND->GetConstraints()->top.SameAs(m_tolND, wxBottom, 10);
+  m_maxitsND->GetConstraints()->top.SameAs(m_tol1D, wxBottom, 10);
   m_maxitsND->GetConstraints()->left.SameAs(m_tolND, wxLeft);
   m_maxitsND->GetConstraints()->width.AsIs();
   m_maxitsND->GetConstraints()->height.AsIs();
 
   m_maxits1D = new wxIntegerItem(this, "Iterations 1-D", maxits1D,
-				 -1, -1, 150, -1);
+				 -1, -1, -1, -1);
   m_maxits1D->SetConstraints(new wxLayoutConstraints);
-  m_maxits1D->GetConstraints()->top.SameAs(m_maxitsND, wxTop);
-  m_maxits1D->GetConstraints()->left.SameAs(m_maxitsND, wxRight, 10);
+  m_maxits1D->GetConstraints()->top.SameAs(m_maxitsND, wxBottom, 10);
+  m_maxits1D->GetConstraints()->left.SameAs(m_tol1D, wxLeft);
   m_maxits1D->GetConstraints()->width.AsIs();
   m_maxits1D->GetConstraints()->height.AsIs();
   NewLine();
@@ -1184,51 +1206,39 @@ void dialogQre::AlgorithmFields(void)
   wxGetResource("Algorithm Params", "Qre-startOption",
 		&startOption, gambitApp.ResourceFile());
   char *startOptions[] = { "Default", "Saved", "Prompt" };
-  m_startOption = new wxRadioBox(this, 0, "Start", -1, -1, -1, -1,
+  m_startOption = new wxRadioBox(this, 0, "Starting Point", -1, -1, -1, -1,
 				 3, startOptions);
   if (startOption >= 0 && startOption <= 2)
     m_startOption->SetSelection(startOption);
-  NewLine();
+
   m_startOption->SetConstraints(new wxLayoutConstraints);
-  m_startOption->GetConstraints()->top.SameAs(m_maxitsND, wxBottom, 10);
+  m_startOption->GetConstraints()->top.SameAs(m_maxits1D, wxBottom, 10);
   m_startOption->GetConstraints()->left.SameAs(m_minLam, wxLeft);
   m_startOption->GetConstraints()->width.AsIs();
   m_startOption->GetConstraints()->height.AsIs();
   NewLine();
 
-  PxiFields();
-  NewLine();
+  int plotType = 0;
+  wxGetResource("Algorithm Params", "Pxi-Plot-Type", &plotType, gambitApp.ResourceFile());
+  char *plotTypeChoices[] = { "Log", "Linear" };
+  m_plotType = new wxRadioBox(this, 0, "Plot type", -1, -1, -1, -1,
+			      2, plotTypeChoices);
+  if (plotType == 0 || plotType == 1)
+    m_plotType->SetSelection(plotType);
 
   m_plotType->SetConstraints(new wxLayoutConstraints);
-  m_plotType->GetConstraints()->top.SameAs(m_startOption, wxBottom, 10);
-  m_plotType->GetConstraints()->left.SameAs(m_minLam, wxLeft);
+  m_plotType->GetConstraints()->top.SameAs(m_startOption, wxTop);
+  m_plotType->GetConstraints()->left.SameAs(m_startOption, wxRight, 10);
   m_plotType->GetConstraints()->width.AsIs();
   m_plotType->GetConstraints()->height.AsIs();
-
-  m_pxiFile->SetConstraints(new wxLayoutConstraints);
-  m_pxiFile->GetConstraints()->centreY.SameAs(m_plotType, wxCentreY);
-  m_pxiFile->GetConstraints()->left.SameAs(m_plotType, wxRight, 10);
-  m_pxiFile->GetConstraints()->width.AsIs();
-  m_pxiFile->GetConstraints()->height.AsIs();
-
-  m_runPxi->SetConstraints(new wxLayoutConstraints);
-  m_runPxi->GetConstraints()->top.SameAs(m_plotType, wxBottom, 10);
-  m_runPxi->GetConstraints()->left.SameAs(m_minLam, wxLeft);
-  m_runPxi->GetConstraints()->width.AsIs();
-  m_runPxi->GetConstraints()->height.AsIs();
-
-  m_pxiCommand->SetConstraints(new wxLayoutConstraints);
-  m_pxiCommand->GetConstraints()->centreY.SameAs(m_runPxi, wxCentreY);
-  m_pxiCommand->GetConstraints()->left.SameAs(m_runPxi, wxRight, 10);
-  m_pxiCommand->GetConstraints()->width.AsIs();
-  m_pxiCommand->GetConstraints()->height.AsIs();
 
   m_algorithmGroup->SetConstraints(new wxLayoutConstraints);
   m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
   m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
-  m_algorithmGroup->GetConstraints()->right.SameAs(m_delLam, wxRight, -10);
-  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_pxiCommand, wxBottom, -10);
+  m_algorithmGroup->GetConstraints()->right.SameAs(m_tolND, wxRight, -10);
+  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_startOption, wxBottom, -10);
 
+  PxiFields();
 }
 
 //=======================================================================
@@ -1239,9 +1249,12 @@ void dialogQre::AlgorithmFields(void)
 
 dialogQreGrid::dialogQreGrid(wxWindow *p_parent,
 			     const gText &p_filename)
-  : dialogPxi("QreGridSolve Params", p_filename, p_parent, QRE_HELP)
+  : dialogPxi("QreGridSolve Parameters", p_filename, p_parent, QRE_HELP)
 {
   MakeCommonFields(true, false, true);
+  m_okButton->GetConstraints()->top.SameAs(m_pxiGroup, wxBottom, 10);
+  Layout();
+  Fit();
   Go();
 }
 
@@ -1281,26 +1294,71 @@ void dialogQreGrid::AlgorithmFields(void)
   wxGetResourceStr("Algorithm Params", "QreGrid-tol2", tol2, gambitApp.ResourceFile());
 
   m_algorithmGroup = new wxGroupBox(this, "Algorithm parameters");
-  NewLine();
 
   m_minLam = new wxNumberItem(this, "minLam", minLam);
+  m_minLam->SetConstraints(new wxLayoutConstraints);
+  m_minLam->GetConstraints()->top.SameAs(m_algorithmGroup, wxTop, 20);
+  m_minLam->GetConstraints()->left.SameAs(m_algorithmGroup, wxLeft, 10);
+  m_minLam->GetConstraints()->width.AsIs();
+  m_minLam->GetConstraints()->height.AsIs();
+  NewLine();
+
   m_maxLam = new wxNumberItem(this, "maxLam", maxLam);
+  m_maxLam->SetConstraints(new wxLayoutConstraints);
+  m_maxLam->GetConstraints()->top.SameAs(m_minLam, wxBottom, 10);
+  m_maxLam->GetConstraints()->left.SameAs(m_minLam, wxLeft);
+  m_maxLam->GetConstraints()->width.AsIs();
+  m_maxLam->GetConstraints()->height.AsIs();
+  NewLine();
+
   m_delLam = new wxNumberItem(this, "delLam", delLam);
+  m_delLam->SetConstraints(new wxLayoutConstraints);
+  m_delLam->GetConstraints()->top.SameAs(m_maxLam, wxBottom, 10);
+  m_delLam->GetConstraints()->left.SameAs(m_minLam, wxLeft);
+  m_delLam->GetConstraints()->width.AsIs();
+  m_delLam->GetConstraints()->height.AsIs();
   NewLine();
 
   m_delp1 = new wxNumberItem(this, "Grid 1 Del", delp1);
+  m_delp1->SetConstraints(new wxLayoutConstraints);
+  m_delp1->GetConstraints()->top.SameAs(m_minLam, wxTop);
+  m_delp1->GetConstraints()->left.SameAs(m_minLam, wxRight, 10);
+  m_delp1->GetConstraints()->width.AsIs();
+  m_delp1->GetConstraints()->height.AsIs();
+
   m_tol1 = new wxNumberItem(this, "Grid 1 Tol", tol1);
+  m_tol1->SetConstraints(new wxLayoutConstraints);
+  m_tol1->GetConstraints()->top.SameAs(m_delp1, wxBottom, 10);
+  m_tol1->GetConstraints()->left.SameAs(m_delp1, wxLeft);
+  m_tol1->GetConstraints()->width.AsIs();
+  m_tol1->GetConstraints()->height.AsIs();
+
   NewLine();
   m_delp2 = new wxNumberItem(this, "Grid 2 Del", delp2);
-  m_tol2 = new wxNumberItem(this, "Grid 2 Tol", tol2);
+  m_delp2->SetConstraints(new wxLayoutConstraints);
+  m_delp2->GetConstraints()->top.SameAs(m_tol1, wxBottom, 10);
+  m_delp2->GetConstraints()->left.SameAs(m_delp1, wxLeft);
+  m_delp2->GetConstraints()->width.AsIs();
+  m_delp2->GetConstraints()->height.AsIs();
+
   NewLine();
+  m_tol2 = new wxNumberItem(this, "Grid 2 Tol", tol2);
+  m_tol2->SetConstraints(new wxLayoutConstraints);
+  m_tol2->GetConstraints()->top.SameAs(m_delp2, wxBottom, 10);
+  m_tol2->GetConstraints()->left.SameAs(m_delp1, wxLeft);
+  m_tol2->GetConstraints()->width.AsIs();
+  m_tol2->GetConstraints()->height.AsIs();
 
   Bool multiGrid;
   wxGetResource("Algorithm Params", "QreGrid-multiGrid",
 		&multiGrid, gambitApp.ResourceFile());
   m_multiGrid = new wxCheckBox(this, 0, "Use MultiGrid");
   m_multiGrid->SetValue(multiGrid);
-  NewLine();
+  m_multiGrid->SetConstraints(new wxLayoutConstraints);
+  m_multiGrid->GetConstraints()->centreY.SameAs(m_tol2, wxCentreY);
+  m_multiGrid->GetConstraints()->left.SameAs(m_minLam, wxLeft);
+  m_multiGrid->GetConstraints()->width.AsIs();
+  m_multiGrid->GetConstraints()->height.AsIs();
 
   int startOption;
   wxGetResource("Algorithm Params", "Qre-GridstartOption",
@@ -1310,15 +1368,22 @@ void dialogQreGrid::AlgorithmFields(void)
 				 3, startOptions);
   if (startOption >= 0 && startOption <= 2)
     m_startOption->SetSelection(startOption);
+  m_multiGrid->SetValue(multiGrid);
+  m_startOption->SetConstraints(new wxLayoutConstraints);
+  m_startOption->GetConstraints()->top.SameAs(m_tol2, wxBottom, 10);
+  m_startOption->GetConstraints()->left.SameAs(m_minLam, wxLeft);
+  m_startOption->GetConstraints()->width.AsIs();
+  m_startOption->GetConstraints()->height.AsIs();
   NewLine();
 
   PxiFields();
+  NewLine();
 
   m_algorithmGroup->SetConstraints(new wxLayoutConstraints);
   m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
   m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
-  m_algorithmGroup->GetConstraints()->right.SameAs(m_delLam, wxRight, -10);
-  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_pxiCommand, wxBottom, -10);
+  m_algorithmGroup->GetConstraints()->right.SameAs(m_delp1, wxRight, -10);
+  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_startOption, wxBottom, -10);
 
 }
 

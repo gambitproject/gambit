@@ -57,6 +57,8 @@ protected:
   wxCheckBox *m_findAll;
   wxRadioBox *m_precision;
 
+  wxButton *m_okButton;
+
   void DominanceFields(bool p_mixed);
   void SubgameFields(void);
 
@@ -105,6 +107,7 @@ protected:
   wxRadioBox *m_plotType;
   wxText *m_pxiFile, *m_pxiCommand;
   wxCheckBox *m_runPxi;
+  wxGroupBox *m_pxiGroup;
 
   static void CallbackRun(wxCheckBox &p_object, wxEvent &)
     { ((dialogPxi *) p_object.GetClientData())->OnRun(); }
