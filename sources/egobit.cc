@@ -250,7 +250,9 @@ const gList<BehavProfile<T> > &EFGobitModule<T>::GetSolutions(void) const
 
 template <class T> GobitFunc<T> *EFGobitModule<T>::CreateFunc(void)
 {
-  return new EFGobitFunc<T>(E, params, start);
+  if(E.ProfileLength(true)) 
+    return new EFGobitFunc<T>(E, params, start);
+  return 0;
 }
 
 template <class T>
