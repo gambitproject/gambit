@@ -121,6 +121,7 @@ public:
 
   // returns the index of the action if it is in the ActionSet
   int Find(Action *) const;
+  int Find(int, Action *) const;
 
   // Number of Actions in a particular infoset
   int NumActions(int iset) const;
@@ -246,6 +247,11 @@ EFPlayer &EFActionSet::GetPlayer(void) const
 int EFActionSet::Find(Action *a) const
 {
   return (infosets[a->BelongsTo()->GetNumber()]->acts.Find(a));
+}
+
+int EFActionSet::Find(int p_infoset, Action *a) const
+{
+  return (infosets[p_infoset]->acts.Find(a));
 }
 
 // checks for a valid EFActionSet
@@ -395,11 +401,16 @@ const Node *EFSupport::RootNode(void) const
 
 int EFSupport::Find(Action *a) const
 {
-  if (a->BelongsTo()->Game() != befg)   return 0;
+  if (a->BelongsTo()->Game() != befg)  assert(0);
 
   int pl = a->BelongsTo()->GetPlayer()->GetNumber();
 
   return sets[pl]->Find(a);
+}
+
+int EFSupport::Find(int p_player, int p_infoset, Action *p_action) const
+{
+  return sets[p_player]->Find(p_infoset, p_action);
 }
 
 bool EFSupport::ActionIsActive(Action *a) const
@@ -622,7 +633,8 @@ void EFSupport::Dump(gOutput& s) const
       s << '"' << infoset->GetName() << "\" { ";
       for (k = 1; k <= NumActions(i, j); k++)  {
 	const Action *action = sets[i]->ActionList(j)[k];
-	s << '"' << action->GetName() << "\" ";
+	//	s << '"' << action->GetName() << "\" ";
+	s << action << ' ';
       }
       s << "} ";
     }

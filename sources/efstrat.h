@@ -43,6 +43,7 @@ public:
   // Returns the position of the action in the support.  Returns zero
   // if it is not there.
   int Find(Action *) const;
+  int Find(int, int, Action *) const;
   bool ActionIsActive(const int pl, const int iset, const int act) const;
   bool ActionIsActive(Action *) const;
   bool AllActionsInSupportAtInfosetAreActive(const EFSupport &,

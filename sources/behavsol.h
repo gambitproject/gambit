@@ -62,6 +62,7 @@ public:
     { return !(*this == p_solution); }
 
   void Set(Action *, const gNumber &);
+  void Set(int, int, int, const gNumber &);
   const gNumber &operator()(Action *) const;
 
   BehavSolution &operator+=(const BehavSolution &);

@@ -264,6 +264,16 @@ void BehavSolution::Set(Action *p_action, const gNumber &p_prob)
     LevelPrecision();
 }
 
+void BehavSolution::Set(int p_player, int p_infoset, int p_action,
+			const gNumber &p_prob)
+{
+  Invalidate();
+
+  (*m_profile)(p_player, p_infoset, p_action) = p_prob;
+  if (m_precision != p_prob.Precision())
+    LevelPrecision();
+}
+
 const gNumber &BehavSolution::operator()(Action *p_action) const
 {
   Infoset *infoset = p_action->BelongsTo();
