@@ -220,13 +220,4 @@ TEMPLATE class EFLiapModule<gRational>;
 TEMPLATE class EFLiapFunc<double>;
 TEMPLATE class EFLiapFunc<gRational>;
 
-#include "glist.imp"
-TEMPLATE class gList<gDPVector<double> >;
-TEMPLATE class gList<gDPVector<gRational> >;
-TEMPLATE class gList<gPVector<double> >;
-TEMPLATE class gList<gPVector<gRational> >;
-TEMPLATE class gNode<gDPVector<double> >;
-TEMPLATE class gNode<gDPVector<gRational> >;
-TEMPLATE class gNode<gPVector<double> >;
-TEMPLATE class gNode<gPVector<gRational> >;
 
