@@ -65,8 +65,10 @@ template <class T> bool EfgFile<T>::CheckActionProbs(Infoset *s,
 template <class T> bool EfgFile<T>::CheckOutcome(Outcome *c,
 						 const gList<gRational> &p)
 {
+  c->PrintValues(gout);  gout << '\n';
+  p.Dump(gout);  gout << '\n';
   for (int i = 1; i <= p.Length(); i++)
-    if (((OutcomeVector<T> &) *c)[i] != p[i])   return false;
+    if (((OutcomeVector<T> &) *c)[i] != (T) p[i])   return false;
   return true;
 }
 
