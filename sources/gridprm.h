@@ -59,9 +59,9 @@ void GridSolveParamsDialog<T>::GetParams(GridParams<T> &P)
 {
 P.minLam=minLam;P.maxLam=maxLam;P.delLam=delLam;P.tol=tol;P.delp=delp;
 // Pxi stuff
-P.type=PxiType();P.pxifile=PxiFile();
+P.powLam=PxiType();P.pxifile=PxiFile();
 // Output stuff
-P.plev=TraceLevel();P.outfile=OutFile();P.errfile=ErrFile();
+P.trace=TraceLevel();P.tracefile=OutFile();
 }
 
 #ifdef __GNUG__
