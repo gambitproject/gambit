@@ -288,13 +288,6 @@ void LHTableau<T>::GetBasis(Basis<T> &out) const
 // miscellaneous functions
 
 template <class T>
-bool LHTableau<T>::IsNash() const
-{ 
-  if(T1.IsNash() && T2.IsNash()) return 1;
-  return 0;
-}
-
-template <class T>
 BFS<T> LHTableau<T>::GetBFS()
 {
   int i;

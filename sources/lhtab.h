@@ -64,7 +64,6 @@ public:
 //  void GetBasis( Basis<T> & ) const; // return Basis for current Tableau
   
       // miscellaneous functions
-  bool IsNash(void) const; // this does not belong here
   BFS<T> GetBFS(void);
   void Dump(gOutput &) const;
 
