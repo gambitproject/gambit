@@ -93,8 +93,8 @@ void dialogQreFile::OnPxiFile(wxCommandEvent &)
 
 
       file << "Settings:\n";
-      file << m_profiles[1].QreLambda() << '\n';
-      file << m_profiles[m_profiles.Length()].QreLambda() << '\n';
+      file << ((double) m_profiles[1].QreLambda()) << '\n';
+      file << ((double) m_profiles[m_profiles.Length()].QreLambda()) << '\n';
       file << 0.1 << '\n';
       file << 0 << '\n' << 1 << '\n' << 1 << '\n';
 
@@ -110,10 +110,10 @@ void dialogQreFile::OnPxiFile(wxCommandEvent &)
 
       for (int i = 1; i <= m_profiles.Length(); i++) {
 	const MixedProfile<gNumber> &profile = *m_profiles[i].Profile();
-	file << m_profiles[i].QreLambda() << " 0.000000 ";
+	file << ((double) m_profiles[i].QreLambda()) << " 0.000000 ";
 
 	for (int j = 1; j <= profile.Length(); j++) {
-	  file << profile[j] << ' ';
+	  file << ((double) profile[j]) << ' ';
 	}
 
 	file << '\n';
