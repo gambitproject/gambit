@@ -35,6 +35,7 @@
 
 // Declarations of internal structures
 #include "efgint.h"
+#include "nfgint.h"
 
 //----------------------------------------------------------------------
 //           struct gbt_efg_infoset_rep: Member functions
@@ -61,6 +62,9 @@ gbt_efg_game_rep::~gbt_efg_game_rep()
 void gbt_efg_game_rep::DeleteLexicon(void) 
 {
   if (m_reducedNfg) {
+    if (--m_reducedNfg->m_refCount == 0) {
+      // FIXME: delete the normal form
+    }
     m_reducedNfg = 0;
   }
 }
