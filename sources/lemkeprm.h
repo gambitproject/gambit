@@ -41,7 +41,6 @@ LemkeSolveParamsDialog::LemkeSolveParamsDialog(wxWindow *parent,bool subgames)
 														:OutputParamsDialog("Lemke Params",parent,LCP_HELP)
 
 {
-Add(wxMakeFormShort("Max depth",&maxDepth));
 // Now add the basic stuff
 MakeOutputFields(OUTPUT_FIELD|MAXSOLN_FIELD| ((subgames) ? SPS_FIELD : 0));
 Go();
