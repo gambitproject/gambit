@@ -1,5 +1,7 @@
 GCL Bugs
 
+//------------------------------
+
 Bug C5: Incorrect solutions, and crashing with large integers:
 
   46 mill:/home/mill/rdm/gambit/test newgcl
@@ -18,6 +20,8 @@ Bug C5: Incorrect solutions, and crashing with large integers:
 
 This looks like an algorithm bug.  I'll see if I can track it down (rdm).  
 
+//------------------------------
+
 Bug C8:  Bug in mixed dominance elimination.  
 
   311 mill:/home/mill/rdm/gambit/test2 newgcl
@@ -31,6 +35,8 @@ Bug C8:  Bug in mixed dominance elimination.
   gcl_mill: tableau.imp:385: void LPTableau<gRational>::SetCost(const class gVector<gRational> &): Assertion `c.Last()==(cost.Last()+unitcost.Length())' failed.
   A segmentation fault has occurred
 
+//------------------------------
+
 Bug C9a: The Include["x"] bug on billandal is fixed, but the other IO functions
 are still having the same problem there:
 
@@ -42,6 +48,11 @@ are still having the same problem there:
 
 Also, when you quit the gcl on billandal, it seg faults.  As before,
 none of these are a problem on mill or koo.  
+
+COMMENT (magyar 8/29/98)  Appears to be a compiler bug with g++ 2.8.1 on
+RS6k and catching exceptions.
+
+//------------------------------
 
 Bug C16a: Concat is not running listably any more. 
 
@@ -92,6 +103,8 @@ Bug C18: Bug in LPSolve[] (or use the script gambit/test/csumsolve.gcl):
   In function LpSolve[], in file "console" at line 2:
   GCL EXCEPTION:Bad index in gArray; Caught in gcl.cc, main()
 
+//--------------------------------------
+
 Bug C19: LiapSolve is giving incorrect solutions, and in the wrong
 precision.  It just retruns the centroid, in Rational precision. 
 
@@ -102,6 +115,9 @@ precision.  It just retruns the centroid, in Rational precision.
     (Behav) { { 1/2 1/2 } }{ { 1/2 1/2 } }{ { 1/2 1/2 } },
     (Behav) { { 1/2 1/2 } }{ { 1/2 1/2 } }{ { 1/2 1/2 } } }
 
+FIXED:  8/29/98, magyar
+
+//--------------------------------------
 
 Bug C20: Read[StdIn,x] hangs the machine (it had to be killed remotely)
 
