@@ -1,13 +1,13 @@
 //
 // FILE: dlmoveadd.h -- Dialog for adding a move to an efg
 //
-//
+// $Id$
 //
 
 #ifndef DLMOVEADD_H
 #define DLMOVEADD_H
 
-typedef enum { NodeAddNew, NodeAddIset} NodeAddMode;
+typedef enum { NodeAddNew, NodeAddIset } NodeAddMode;
 
 class dialogMoveAdd : public wxDialogBox {
 private:
@@ -21,6 +21,8 @@ private:
     { ((dialogMoveAdd *) p_object.GetClientData())->OnOK(); }
   static void CallbackCancel(wxButton &p_object, wxEvent &)
     { ((dialogMoveAdd *) p_object.GetClientData())->OnCancel(); }
+  static void CallbackHelp(wxButton &p_object, wxEvent &)
+    { ((dialogMoveAdd *) p_object.GetClientData())->OnHelp(); }
   static void CallbackPlayer(wxListBox &p_object, wxCommandEvent &p_event)
     { ((dialogMoveAdd *) p_object.wxEvtHandler::GetClientData())->
 	OnPlayer(p_event.commandInt); }
@@ -33,6 +35,7 @@ private:
   void OnPlayer(int);
   void OnInfoset(int);
   Bool OnClose(void);
+  void OnHelp(void);
 
 public:
   dialogMoveAdd(Efg &ef_,EFPlayer *player=0,Infoset *infoset=0,int branches=2,wxFrame *frame=0);

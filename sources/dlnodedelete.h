@@ -1,7 +1,7 @@
 //
 // FILE: dlnodedelete.h -- Dialog for Edit->Node->Delete
 //
-//
+// $Id$
 //
 
 #ifndef DLNODEDELETE_H
@@ -17,10 +17,13 @@ private:
     { ((dialogNodeDelete *) p_object.GetClientData())->OnOK(); }
   static void CallbackCancel(wxButton &p_object, wxEvent &)
     { ((dialogNodeDelete *) p_object.GetClientData())->OnCancel(); }
+  static void CallbackHelp(wxButton &p_object, wxEvent &)
+    { ((dialogNodeDelete *) p_object.GetClientData())->OnHelp(); }
 
   void OnOK(void);
   void OnCancel(void);
   Bool OnClose(void);
+  void OnHelp(void);
 
 public:
   dialogNodeDelete(Node *, wxWindow *);

@@ -26,7 +26,7 @@
 //                  dialogEfgSelectPlayer: Member functions
 //=========================================================================
 
-dialogEfgSelectPlayer::dialogEfgSelectPlayer(const Efg &p_efg, bool p_chance, 
+dialogEfgSelectPlayer::dialogEfgSelectPlayer(const Efg &p_efg, bool p_chance,
 					     wxWindow *p_parent)
   : wxDialogBox(p_parent, "Select Player", TRUE),
     m_efg(p_efg), m_chance(p_chance)
@@ -43,7 +43,7 @@ dialogEfgSelectPlayer::dialogEfgSelectPlayer(const Efg &p_efg, bool p_chance,
       m_playerNameList->Append("Player" + ToText(pl));
   }
 
-  m_playerNameList->SetSelection(0); 
+  m_playerNameList->SetSelection(0);
 
   NewLine();
   wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
@@ -104,6 +104,9 @@ dialogMoveAdd::dialogMoveAdd(Efg &p_efg, EFPlayer *p_player,
   : wxDialogBox(p_frame, "Add Move", TRUE),
     m_efg(p_efg), m_branches(p_branches)
 {
+  wxLayoutConstraints *constraints;
+  SetAutoLayout(TRUE);
+
   m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player");
   m_playerItem->Append("Chance");
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
@@ -132,17 +135,42 @@ dialogMoveAdd::dialogMoveAdd(Efg &p_efg, EFPlayer *p_player,
     m_infosetItem->SetSelection(0);
 
   NewLine();
- 
+
   m_actionItem = new wxText(this, 0, "Actions");
   m_actionItem->SetValue(ToText(p_branches));
   m_actionItem->Enable(m_infosetItem->GetSelection() == 0);
 
+  NewLine();
+
   wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
   okButton->SetClientData((char *) this);
   okButton->SetDefault();
+  constraints = new wxLayoutConstraints;
+  constraints->centreX.PercentOf(this, wxWidth, 25);
+  constraints->bottom.SameAs(this, wxBottom, 5);
+  constraints->width.PercentOf(this, wxWidth, 20);
+  constraints->height.PercentOf(this, wxHeight, 20);
+  okButton->SetConstraints(constraints);
+
   wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
 					"Cancel");
   cancelButton->SetClientData((char *) this);
+  constraints = new wxLayoutConstraints;
+  constraints->centreX.PercentOf(this, wxWidth, 50);
+  constraints->bottom.SameAs(okButton, wxBottom);
+  constraints->width.PercentOf(this, wxWidth, 20);
+  constraints->height.PercentOf(this, wxHeight, 20);
+  cancelButton->SetConstraints(constraints);
+
+  wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp,
+					"Help");
+  helpButton->SetClientData((char *) this);
+  constraints = new wxLayoutConstraints;
+  constraints->centreX.PercentOf(this, wxWidth, 75);
+  constraints->bottom.SameAs(okButton, wxBottom);
+  constraints->width.PercentOf(this, wxWidth, 20);
+  constraints->height.PercentOf(this, wxHeight, 20);
+  helpButton->SetConstraints(constraints);
 
   Fit();
   Show(TRUE);
@@ -161,6 +189,11 @@ void dialogMoveAdd::OnCancel(void)
 {
   m_completed = wxCANCEL;
   Show(FALSE);
+}
+
+void dialogMoveAdd::OnHelp(void)
+{
+  wxHelpContents("Node Menu");
 }
 
 void dialogMoveAdd::OnPlayer(int p_player)
@@ -211,6 +244,7 @@ Bool dialogMoveAdd::OnClose(void)
   return FALSE;
 }
 
+
 NodeAddMode dialogMoveAdd::GetAddMode(void) const
 {
   return (m_infosetItem->GetSelection() == 0) ? NodeAddNew : NodeAddIset;
@@ -256,6 +290,9 @@ int dialogMoveAdd::GetActions(void) const
 dialogNodeDelete::dialogNodeDelete(Node *p_node, wxWindow *p_parent)
   : wxDialogBox(p_parent, "Delete Node", TRUE), m_node(p_node)
 {
+  wxLayoutConstraints *constraints;
+  SetAutoLayout(TRUE);
+
   SetLabelPosition(wxVERTICAL);
   m_branchList = new wxListBox(this, 0, "Keep subtree at branch");
   for (int act = 1; act <= p_node->NumChildren(); act++) {
@@ -268,9 +305,32 @@ dialogNodeDelete::dialogNodeDelete(Node *p_node, wxWindow *p_parent)
   wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
   okButton->SetClientData((char *) this);
   okButton->SetDefault();
+  constraints = new wxLayoutConstraints;
+  constraints->centreX.PercentOf(this, wxWidth, 15);
+  constraints->bottom.SameAs(this, wxBottom, 5);
+  constraints->width.PercentOf(this, wxWidth, 25);
+  constraints->height.PercentOf(this, wxHeight, 25);
+  okButton->SetConstraints(constraints);
+
   wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
 					"Cancel");
   cancelButton->SetClientData((char *) this);
+  constraints = new wxLayoutConstraints;
+  constraints->centreX.PercentOf(this, wxWidth, 50);
+  constraints->bottom.SameAs(okButton, wxBottom);
+  constraints->width.PercentOf(this, wxWidth, 25);
+  constraints->height.PercentOf(this, wxHeight, 25);
+  cancelButton->SetConstraints(constraints);
+
+  wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp,
+					"Help");
+  helpButton->SetClientData((char *) this);
+  constraints = new wxLayoutConstraints;
+  constraints->centreX.PercentOf(this, wxWidth, 85);
+  constraints->bottom.SameAs(okButton, wxBottom);
+  constraints->width.PercentOf(this, wxWidth, 25);
+  constraints->height.PercentOf(this, wxHeight, 25);
+  helpButton->SetConstraints(constraints);
 
   Fit();
   Show(TRUE);
@@ -293,6 +353,11 @@ Bool dialogNodeDelete::OnClose(void)
   m_completed = wxCANCEL;
   Show(FALSE);
   return FALSE;
+}
+
+void dialogNodeDelete::OnHelp(void)
+{
+  wxHelpContents("Node Menu");
 }
 
 //=========================================================================
