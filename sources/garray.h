@@ -13,7 +13,8 @@
 
 template <class T> class gArray  {
   friend bool operator==(const gArray<T> &, const gArray<T> &);
-  friend bool operator!=(const gArray<T> &, const gArray<T> &);
+// the following is causing problems -- commenting it out for now
+//  friend bool operator!=(const gArray<T> &, const gArray<T> &);
                            
   protected:
     int mindex, maxdex;
