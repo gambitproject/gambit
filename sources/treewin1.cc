@@ -226,6 +226,87 @@ void TreeWindow::node_label(void)
 //                       NODE-OUTCOME MENU HANDLER
 //***********************************************************************
 
+void TreeWindow::EditOutcomeAttach(void)
+{
+  if (ef.NumOutcomes() == 0)
+    return;
+
+  MyDialogBox *dialog = new MyDialogBox(pframe, "Attach Outcome");
+    
+  wxStringList *outcome_list = new wxStringList;
+  char *outcome_name = new char[256];
+        
+  for (int outc = 1; outc <= ef.NumOutcomes(); outc++) {
+    EFOutcome *outcome = ef.Outcomes()[outc];
+    gText tmp = ToText(outc) + ": " + outcome->GetName() + " (";
+    tmp += ToText(ef.Payoff(outcome, 1)) + ", " + ToText(ef.Payoff(outcome, 2));
+    if (ef.NumPlayers() > 2) {
+      tmp += ", " + ToText(ef.Payoff(outcome, 3));
+      if (ef.NumPlayers() > 3) 
+	tmp += ",...)";
+      else
+	tmp += ")";
+    }
+    else
+      tmp += ")";
+  
+    outcome_list->Add(tmp);
+  }
+
+  dialog->Add(wxMakeFormString("Outcome", &outcome_name,
+			       wxFORM_CHOICE,
+			       new wxList(wxMakeConstraintStrings(outcome_list), 0)));
+
+  dialog->Go();
+  
+  if (dialog->Completed() == wxOK) {
+    for (int i = 0; ; i++) {
+      if (outcome_name[i] == ':') {
+	outcome_name[i] = '\0';
+	break;
+      }
+    }
+    
+    int outc = (int) ToDouble(outcome_name);
+    cursor->SetOutcome(ef.Outcomes()[outc]);
+    outcomes_changed = 1;
+    OnPaint();
+  }
+
+  delete dialog;
+  delete [] outcome_name;
+}
+
+void TreeWindow::EditOutcomeDetach(void)
+{
+  cursor->SetOutcome(0);
+  outcomes_changed = 1;
+  OnPaint();
+}
+
+void TreeWindow::EditOutcomeLabel(void)
+{
+  if (!cursor->GetOutcome())
+    return;
+
+  char *name = new char[40];
+  strncpy(name, cursor->GetOutcome()->GetName(), 40);
+
+  MyDialogBox *dialog = new MyDialogBox(pframe, "Label outcome");
+  dialog->Form()->Add(wxMakeFormString("New outcome label", &name, wxFORM_TEXT,
+				       0, 0, 0, 220));
+  dialog->Go();
+
+  if (dialog->Completed() == wxOK) {
+    cursor->GetOutcome()->SetName(name);
+    outcomes_changed = 1;
+  }
+  
+  delete dialog;
+  delete [] name;
+}
+
+
 #define DRAG_OUTCOME_END      7
 
 void TreeWindow::node_outcome(int out, int x, int y)

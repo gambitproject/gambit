@@ -45,9 +45,13 @@
 #define TREE_LABEL                          1305
 #define TREE_PLAYERS                        1306
 #define TREE_MOVE                           1307
-#define TREE_OUTCOMES                       1308
 #define TREE_SUBGAMES                       1309
 #define TREE_INFOSETS                       1310
+
+#define TREE_OUTCOMES                       1320
+#define TREE_OUTCOMES_ATTACH                1321
+#define TREE_OUTCOMES_DETACH                1322
+#define TREE_OUTCOMES_LABEL                 1323
 
 #define SUBGAME_SOLVE                       1350
 #define SUBGAME_CLEARALL                    1352

@@ -2274,7 +2274,7 @@ void TreeWindow::ProcessDClick(wxMouseEvent &ev)
             case NODE_ABOVE_PLAYER: tree_players(); break;
             case NODE_ABOVE_ISETLABEL: infoset_switch_player(); break;
             case NODE_ABOVE_ISETID:  infoset_switch_player(); break;
-            case NODE_ABOVE_OUTCOME: tree_outcomes(entry->n->GetOutcome()->GetName()); break;
+            case NODE_ABOVE_OUTCOME: ChangePayoffs(); break;
             case NODE_ABOVE_REALIZPROB: break;
             case NODE_ABOVE_BELIEFPROB: break;
             case NODE_ABOVE_VALUE: break;
@@ -2330,9 +2330,7 @@ void TreeWindow::ProcessDClick(wxMouseEvent &ev)
             case NODE_TERMINAL_OUTCOME:
             case NODE_TERMINAL_NAME:
                 if (entry->n->GetOutcome())
-                    tree_outcomes(entry->n->GetOutcome()->GetName());
-                else
-                    tree_outcomes();
+                    ChangePayoffs();
                 break;
             }
             OnPaint();
@@ -2844,9 +2842,105 @@ void TreeWindow::file_save(void)
 //
 // Tree-Outcome menu handler
 //
-void TreeWindow::tree_outcomes(const gText out_name)
+#define ENTRIES_PER_ROW 5
+
+class EFChangePayoffs : public MyDialogBox {
+private:
+  Node *node;
+  Efg &ef;
+
+  wxText *m_outcomeNameItem;
+  wxText **payoff_items;
+
+public:
+  EFChangePayoffs(Efg &, Node *, wxWindow *parent);
+  gArray<gNumber> Payoffs(void);
+};
+
+EFChangePayoffs::EFChangePayoffs(Efg &p_efg, Node *p_node, wxWindow *p_parent)
+  : MyDialogBox(p_parent, "Change Payoffs"), node(p_node), ef(p_efg)
 {
-    frame->ChangeOutcomes(CREATE_DIALOG, out_name);
+  Add(wxMakeFormMessage("Change payoffs for outcome at cursor:"));
+  Add(wxMakeFormNewLine());
+
+  EFOutcome *outc = node->GetOutcome();
+
+  if (outc) {
+    Add(wxMakeFormMessage("Outcome:")); 
+    if (outc->GetName() != "")
+      Add(wxMakeFormMessage(outc->GetName()));
+    else
+      Add(wxMakeFormMessage("Outcome " + ToText(outc->GetNumber())));
+  }
+  else
+    Add(wxMakeFormMessage("Defining new outcome: Outcome " +
+			  ToText(ef.NumOutcomes() + 1)));
+
+  Add(wxMakeFormNewLine());
+
+  // Payoff items
+  char **new_payoffs = new char *[ef.NumPlayers()+1];
+  wxFormItem **payoff_fitems = new wxFormItem *[ef.NumPlayers()+1];
+  payoff_items = new wxText *[ef.NumPlayers()+1];
+
+  for (int i = 1; i <= ef.NumPlayers(); i++) {
+    new_payoffs[i] = new char[40];
+    payoff_fitems[i] = Add(wxMakeFormString("", &(new_payoffs[i]), wxFORM_TEXT, 0, 0, 0, 160));
+
+    if (i % ENTRIES_PER_ROW == 0)
+      Add(wxMakeFormNewLine());
+  }
+
+  AssociatePanel();
+
+  for (int i = 1; i <= ef.NumPlayers(); i++) {
+    payoff_items[i] = (wxText *)payoff_fitems[i]->GetPanelItem();
+    gNumber payoff = 0;
+    if (outc)
+      payoff = ef.Payoff(outc, i);
+    payoff_items[i]->SetValue(ToText(payoff));
+  }
+
+  Go1();
+
+  for (int i = 1; i <= ef.NumPlayers(); i++) 
+    delete [] new_payoffs[i];
+
+  delete [] new_payoffs;
+}
+
+
+gArray<gNumber> EFChangePayoffs::Payoffs(void)
+{
+  gArray<gNumber> payoffs(ef.NumPlayers());
+
+  for (int i = 1; i <= ef.NumPlayers(); i++)
+    FromText(payoff_items[i]->GetValue(), payoffs[i]);
+
+  return payoffs;
+}
+
+void TreeWindow::ChangePayoffs(void)
+{
+  EFChangePayoffs *dialog = new EFChangePayoffs(ef, cursor, pframe);
+
+  if (dialog->Completed() == wxOK) {
+    EFOutcome *outc = cursor->GetOutcome();
+    gArray<gNumber> payoffs(dialog->Payoffs());
+
+    if (!outc) {
+      outc = ef.NewOutcome();
+      cursor->SetOutcome(outc);
+      outc->SetName("Outcome " + ToText(ef.NumOutcomes()));
+    }
+
+    for (int i = 1; i <= ef.NumPlayers(); i++)
+      ef.SetPayoff(outc, i, payoffs[i]);
+
+    outcomes_changed = 1;
+  }
+  
+  delete dialog;
 }
 
 template class gList<NODEENTRY *>;

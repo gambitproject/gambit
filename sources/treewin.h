@@ -227,7 +227,11 @@ public:
     void node_set_mark(void);
     void node_goto_mark(void);
     void node_outcome(int out,int x=-1,int y=-1);
-    
+    void EditOutcomeAttach(void);
+    void EditOutcomeDetach(void);
+    void EditOutcomeLabel(void);
+    void ChangePayoffs(void);
+      
     void action_label(void);
     void action_insert(void);
     void action_delete(void);
@@ -239,7 +243,6 @@ public:
     void tree_label(void);
     void tree_players(void);
     void tree_infosets(void);
-    void tree_outcomes(const gText out_name=gText());
     
     void infoset_merge(void);
     void infoset_break(void);
@@ -260,7 +263,6 @@ public:
     void subgame_toggle(void);
     void subgame_set(void);
     
-    void edit_outcome(void);
     void display_legends(void);
     void display_options(void);
     void display_colors(void);

@@ -64,7 +64,7 @@ guiEfgShowToolBar::guiEfgShowToolBar(wxFrame *p_frame)
 #include "bitmaps/options.xpm"
 #include "bitmaps/makenf.xpm"
 #include "bitmaps/inspect.xpm"
-#include "bitmaps/payoff.xpm"
+  //#include "bitmaps/payoff.xpm"
   wxBitmap *ToolbarSaveBitmap = new wxBitmap(save_xpm);
   wxBitmap *ToolbarPrintBitmap = new wxBitmap(print_xpm);
   wxBitmap *ToolbarDeleteBitmap = new wxBitmap(delete_xpm);
@@ -76,7 +76,7 @@ guiEfgShowToolBar::guiEfgShowToolBar(wxFrame *p_frame)
   wxBitmap *ToolbarOptionsBitmap = new wxBitmap(options_xpm);
   wxBitmap *ToolbarMakenfBitmap = new wxBitmap(makenf_xpm);
   wxBitmap *ToolbarInspectBitmap = new wxBitmap(inspect_xpm);
-  wxBitmap *ToolbarPayoffBitmap = new wxBitmap(payoff_xpm);
+  //wxBitmap *ToolbarPayoffBitmap = new wxBitmap(payoff_xpm);
     
   // Save, Print | Add, Delete, Outcomes | Solve, Inspect, MakeNF |
   // ZoomIn, ZoomOut, Options | Help
@@ -92,7 +92,7 @@ guiEfgShowToolBar::guiEfgShowToolBar(wxFrame *p_frame)
   AddSeparator();
   AddTool(NODE_ADD, ToolbarAddBitmap);
   AddTool(NODE_DELETE, ToolbarDeleteBitmap);
-  AddTool(TREE_OUTCOMES, ToolbarPayoffBitmap);
+  // AddTool(TREE_OUTCOMES, ToolbarPayoffBitmap);
   AddSeparator();
   AddTool(SOLVE_STANDARD, ToolbarSolveBitmap);
   AddTool(INSPECT_SOLUTIONS, ToolbarInspectBitmap);
@@ -737,6 +737,14 @@ void EfgShow::MakeMenus(void)
   infoset_menu->Append(INFOSET_SWITCH_PLAYER, "&Player", "Change player of cursor iset");
   infoset_menu->Append(INFOSET_REVEAL, "&Reveal", "Reveal infoset to players");
 
+  wxMenu *outcome_menu = new wxMenu;
+  outcome_menu->Append(TREE_OUTCOMES_ATTACH, "&Attach",
+		       "Attach an outcome to the node at cursor");
+  outcome_menu->Append(TREE_OUTCOMES_DETACH, "&Detach",
+		       "Detach the outcome from the node at cursor");
+  outcome_menu->Append(TREE_OUTCOMES_LABEL, "&Label",
+		       "Label the outcome at the node at cursor");
+
   wxMenu *tree_menu = new wxMenu;
   tree_menu->Append(TREE_COPY,      "&Copy",     "Copy tree from marked node");
   tree_menu->Append(TREE_MOVE,      "&Move",     "Move tree from marked node");
@@ -747,7 +755,8 @@ void EfgShow::MakeMenus(void)
   edit_menu->Append(EDIT_NODE,    "&Node",     node_menu,    "Edit the node");
   edit_menu->Append(EDIT_ACTIONS, "&Actions",  action_menu,  "Edit actions");
   edit_menu->Append(EDIT_INFOSET, "&Infoset",  infoset_menu, "Edit infosets");
-  edit_menu->Append(TREE_OUTCOMES, "&Outcomes", "Edit/View the payoffs");
+  edit_menu->Append(TREE_OUTCOMES, "&Outcomes", outcome_menu,
+		    "Edit outcomes and payoffs");
   edit_menu->Append(EDIT_TREE,    "&Tree",     tree_menu,    "Edit the tree");
 
   wxMenu *subgame_menu = new wxMenu;
@@ -936,8 +945,14 @@ void EfgShow::OnMenuCommand(int id)
       tw->tree_label();
       SetFileName();
       break;
-    case TREE_OUTCOMES: 
-      ChangeOutcomes(CREATE_DIALOG);
+    case TREE_OUTCOMES_ATTACH:
+      tw->EditOutcomeAttach();
+      break;
+    case TREE_OUTCOMES_DETACH:
+      tw->EditOutcomeDetach();
+      break;
+    case TREE_OUTCOMES_LABEL:
+      tw->EditOutcomeLabel();
       break;
     case TREE_PLAYERS:
       tw->tree_players();
