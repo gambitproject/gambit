@@ -54,8 +54,10 @@ dialogElimMixed::dialogElimMixed(wxWindow *p_parent,
   m_domTypeBox->GetConstraints()->height.AsIs();
   
   char *domMethodList[2] = {"Pure", "Mixed"};
-  m_domMethodBox = new wxRadioBox(this, NULL, "Method", 1, 1, -1, -1, 2,
+  m_domMethodBox = new wxRadioBox(this, (wxFunction) CallbackMethod, "Method",
+				  1, 1, -1, -1, 2,
 				  domMethodList, 1);
+  m_domMethodBox->wxEvtHandler::SetClientData((char *) this);
   if (domMethod == 0 || domMethod == 1)
     m_domMethodBox->SetSelection(domMethod);
   m_domMethodBox->SetConstraints(new wxLayoutConstraints);
@@ -74,6 +76,7 @@ dialogElimMixed::dialogElimMixed(wxWindow *p_parent,
   m_domPrecisionBox->GetConstraints()->left.SameAs(m_domMethodBox, wxRight, 10);
   m_domPrecisionBox->GetConstraints()->width.AsIs();
   m_domPrecisionBox->GetConstraints()->height.AsIs();
+  OnMethod();
 
   m_playerBox = new wxListBox(this, NULL, "Players", wxMULTIPLE);
   for (int pl = 1; pl <= p_players.Length(); pl++) {
@@ -127,6 +130,11 @@ gArray<int> dialogElimMixed::Players(void) const
     }
   }
   return players;
+}
+
+void dialogElimMixed::OnMethod(void)
+{
+  m_domPrecisionBox->Enable(m_domMethodBox->GetSelection() == 1);
 }
 
 //=========================================================================

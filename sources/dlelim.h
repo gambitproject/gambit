@@ -14,6 +14,10 @@ private:
   wxRadioBox *m_domTypeBox, *m_domMethodBox, *m_domPrecisionBox;
 
   const char *HelpString(void) const { return ""; }
+
+  static void CallbackMethod(wxListBox &p_object, wxCommandEvent &)
+    { ((dialogElimMixed *) p_object.wxEvtHandler::GetClientData())->OnMethod(); }
+  void OnMethod(void);
   
 public:
   dialogElimMixed(wxWindow *, const gArray<gText> &p_players);
