@@ -32,7 +32,7 @@ int main( void )
   gList< Instruction* > program;
 
 
-/*
+
   gout << "\n";
   machine->Push( d_1 );
   machine->Push( d_2 );
@@ -1039,16 +1039,84 @@ int main( void )
   program.Append( new CallFunction );
   program.Append( new Dump );
   machine->Execute( program );
-*/
 
 
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "z" );
+  machine->Bind();
+  machine->GenerateNfg( 100 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "z", "a" );
+  machine->Bind();
+  machine->Push( (double) 111 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "z" );
+  machine->Output();
+  machine->PushRef( "z", "a" );
+  machine->Output();
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "q" );
+  machine->Bind();
+  machine->PushRef( "z" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "q" );
+  machine->Output();
+  machine->PushRef( "q", "a" );
+  machine->Output();
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "q", "b" );
+  machine->Bind();
+  machine->PushRef( "z", "a" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "q" );
+  machine->Output();
+  machine->PushRef( "q", "b" );
+  machine->Output();
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "z", "a" );
+  machine->Bind();
+  machine->PushRef( "q" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+
+  program.Append( new InitCallFunction( "Assign" ) );
+  program.Append( new PushRef( "z", "a" ) );
+  program.Append( new Bind );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new Bind );
+  program.Append( new CallFunction );
+  program.Append( new Dump );
+  machine->Execute( program );
+
+
+/*
   machine->PushRef( "x" );
   machine->Push( (double) 10 );
   for( i = 0; i < 9; i++ )
   {
     machine->Push( (gInteger) i );
   }
-  machine->PushList( 10 );
+  machine->PushList( 9 );
   machine->Assign();
   machine->Dump();
 
@@ -1056,6 +1124,47 @@ int main( void )
   machine->Push( (gInteger) 3 );
   machine->Subscript();
   machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 0 );
+  machine->Subscript();
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 9 );
+  machine->Subscript();
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 10 );
+  machine->Subscript();
+  machine->PushRef( "x" );
+  machine->Push( (double) 6 );
+  machine->Subscript();  
+  machine->Dump();
+*/
+
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "x", "a" );
+  machine->Bind();
+  machine->Push( (double) 10 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "x" );
+  machine->Bind();
+  machine->Push( (double) 10 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "x", "a" );
+  machine->Bind();
+  machine->Push( (double) 11 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
 
 
   gout << "Deleting machine\n";

@@ -400,6 +400,7 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
 }
 
 
+
 Portion* GSM::_ResolvePrimaryRefOnly( Reference_Portion* p )
 {
   Portion*  result = 0;
@@ -631,14 +632,75 @@ void GSM::AddFunction( FuncDescObj* func )
 }
 
 
-int FuncParamCheck( const PortionType stack_param_type, 
-  		    const PortionType func_param_type )
+bool GSM::_FuncParamCheck( CallFuncObj* func, 
+			  const PortionType stack_param_type )
 {
-  return stack_param_type & func_param_type;
+  bool type_match;
+  PortionType func_param_type = func->GetCurrParamType();
+  gString funcname = func->FuncName();
+  int index = func->GetCurrParamIndex();
+  bool result = true;
+
+  type_match = (stack_param_type & func_param_type) != 0;
+
+  if( !type_match && func_param_type != porERROR )
+  {
+    gerr << "GSM Error: mismatched parameter type found while executing\n";
+    gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
+    gerr << "           at Parameter #: " << index << "\n";
+    gerr << "           Expected type: ";
+    PrintPortionTypeSpec( gerr, func_param_type );
+    gerr << "           Type found:    ";
+    PrintPortionTypeSpec( gerr, stack_param_type );
+    result = false;
+  }
+  return result;
 }
 
 
+#ifndef NDEBUG
+void GSM::_BindCheck( void ) const
+{
+  if( _CallFuncStack->Depth() <= 0 )
+  {
+    gerr << "GSM Error: the CallFunction() subsystem was not initialized by\n";
+    gerr << "           calling InitCallFunction() first\n";
+  }
+  assert( _CallFuncStack->Depth() > 0 );
 
+  if( _Stack->Depth() <= 0 )
+  {
+    gerr << "GSM Error: no value found to assign to a function parameter\n";
+  }
+  assert( _Stack->Depth() > 0 );
+}
+#endif // NDEBUG
+
+
+bool GSM::_BindCheck( const gString& param_name ) const
+{
+  CallFuncObj*  func;
+  int           new_index;
+  bool          result = true;
+
+  _BindCheck();
+  
+  func = _CallFuncStack->Peek();
+  new_index = func->FindParamName( param_name );
+  
+  if( new_index >= 0 )
+  {
+    func->SetCurrParamIndex( new_index );
+  }
+  else // ( new_index == PARAM_NOT_FOUND )
+  {
+    gerr << "FuncDescObj Error: parameter \"" << param_name;
+    gerr << "\" is not defined for\n";
+    gerr << "                   the function \"" << func->FuncName() << "\"\n";
+    result = false;
+  }
+  return result;
+}
 
 
 bool GSM::InitCallFunction( const gString& funcname )
@@ -667,72 +729,137 @@ bool GSM::Bind( void )
   PortionType          curr_param_type;
   Portion*             param;
   gString              funcname;
+  bool                 result = true;
+  gString ref;
+  Reference_Portion* refp;
+
+  func = _CallFuncStack->Peek();
+  param = _Stack->Peek();
+
+  if( func->GetCurrParamPassByRef() && ( param->Type() == porREFERENCE ) )
+  {
+    result = BindRef();
+  }
+  else
+  {
+    result = BindVal();
+  }
+  return result;
+}
+
+
+bool GSM::BindVal( void )
+{
+  CallFuncObj*  func;
+  PortionType          curr_param_type;
+  Portion*             param;
+  gString              funcname;
   int                  i;
   int                  type_match;
   bool                 result = true;
   gString ref;
+  Reference_Portion* refp;
 
 #ifndef NDEBUG
-  if( _CallFuncStack->Depth() <= 0 )
-  {
-    gerr << "GSM Error: the CallFunction() subsystem was not initialized by\n";
-    gerr << "           calling InitCallFunction() first\n";
-  }
-  assert( _CallFuncStack->Depth() > 0 );
-
-  if( _Stack->Depth() <= 0 )
-  {
-    gerr << "GSM Error: no value found to assign to a function parameter\n";
-  }
-  assert( _Stack->Depth() > 0 );
+  _BindCheck();
 #endif // NDEBUG
 
   func = _CallFuncStack->Pop();
   param = _Stack->Pop();
   
-  if( !func->GetCurrParamPassByReference() )
+  if( param->Type() == porREFERENCE )
+    param = _ResolveRef( (Reference_Portion *)param );
+
+  result = _FuncParamCheck( func, param->Type() );
+  if( result == true )
+  {
+    result = func->SetCurrParam( param ); 
+  }
+  _CallFuncStack->Push( func );
+  return result;
+}
+
+
+bool GSM::BindRef( void )
+{
+  CallFuncObj*  func;
+  PortionType          curr_param_type;
+  Portion*             param;
+  gString              funcname;
+  int                  i;
+  int                  type_match;
+  bool                 result = true;
+  gString ref;
+  gString subref;
+
+#ifndef NDEBUG
+  _BindCheck();
+#endif // NDEBUG
+
+  func = _CallFuncStack->Pop();
+  param = _Stack->Pop();
+  
+  if( func->GetCurrParamPassByRef() )
   {
     if( param->Type() == porREFERENCE )
-      param = _ResolveRef( (Reference_Portion *)param );
-  }
-  else
-  {
-    assert( param->Type() == porREFERENCE );
-    ref = ( (Reference_Portion*) param )->Value();
-    delete param;
-    if( _RefTable->IsDefined( ref ) )
     {
-      param = (*_RefTable)( ref )->Copy();
+      ref = ( (Reference_Portion*) param )->Value();
+      subref = ( (Reference_Portion*) param )->SubValue();
+      func->SetCurrParamRef( (Reference_Portion*) param );
+      if( _RefTable->IsDefined( ref ) )
+      {
+	if( subref == "" )
+	{
+	  param = (*_RefTable)( ref )->Copy();
+	}
+	else
+	{
+	  param = _ResolvePrimaryRefOnly( (Reference_Portion*) param );
+	  switch( param->Type() )
+	  {
+	  case porNFG:
+	    ( (Nfg_Portion*) param )->UnAssign( subref );
+	    param = 0;
+	    break;
+	  default:
+	    gerr << "GSM Error: attempted to bind the subvariable of a\n";
+	    gerr << "           type that does not support subvariables\n";
+	    delete param;
+	    param = 0;
+	    result = false;
+	  }
+	}
+      }
+      else
+      {
+	param = 0;
+      }
     }
-    else
+    else // ( param->Type() != porREFERENCE )
     {
-      param = 0;
-    }
-    func->SetCurrParamRefName( ref );
-  }
-  
-  if( param != 0 )
-  {
-    curr_param_type = func->GetCurrParamType();
-    type_match = FuncParamCheck( param->Type(), curr_param_type );
-    if( !type_match && curr_param_type != porERROR )
-    {
-      funcname = func->FuncName();
-      i        = func->GetCurrParamIndex();
-      gerr << "GSM Error: mismatched parameter type found while executing\n";
-      gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
-      gerr << "           at Parameter #: " << i << "\n";
-      gerr << "           Expected type: ";
-      PrintPortionTypeSpec( gerr, func->GetCurrParamType() );
-      gerr << "           Type found:    ";
-      PrintPortionTypeSpec( gerr, param->Type() );
+      gerr << "GSM Error: called BindRef() on a non-Reference type\n";
       result = false;
     }
+  }
+  else // ( !func->GetCurrParamPassByRef() )
+  {
+    gerr << "GSM Error: called BindRef() on a parameter that is specified\n";
+    gerr << "           to be passed by value only\n";
+    result = false;
+  }
+
+  if( param != 0 )
+  {
+    result = _FuncParamCheck( func, param->Type() );
   }
 
   if( result == true )
   {
     result = func->SetCurrParam( param ); 
+  }
+  else
+  {
+    func->SetCurrParam( new Error_Portion ); 
   }
   
   _CallFuncStack->Push( func );
@@ -740,36 +867,39 @@ bool GSM::Bind( void )
 }
 
 
+
+
 bool GSM::Bind( const gString& param_name )
 {
-  CallFuncObj*  func;
-  int                  new_index;
-  int                  result = true;
-  
-#ifndef NDEBUG
-  if( _CallFuncStack->Depth() <= 0 )
-  {
-    gerr << "GSM Error: the CallFunction() subsystem was not initialized by\n";
-    gerr << "           calling InitCallFunction() first\n";
-  }
-  assert( _CallFuncStack->Depth() > 0 );
-#endif // NDEBUG
+  int result = false;
 
-  func = _CallFuncStack->Pop();
-  new_index = func->FindParamName( param_name );
-  
-  if( new_index >= 0 )
+  if( _BindCheck( param_name ) )
   {
-    func->SetCurrParamIndex( new_index );
-    _CallFuncStack->Push( func );
     result = Bind();
   }
-  else // ( new_index == PARAM_NOT_FOUND )
+  return result;
+}
+
+
+bool GSM::BindVal( const gString& param_name )
+{
+  int result = false;
+
+  if( _BindCheck( param_name ) )
   {
-    gerr << "FuncDescObj Error: parameter \"" << param_name;
-    gerr << "\" is not defined for\n";
-    gerr << "                   the function \"" << func->FuncName() << "\"\n";
-    result = false;
+    result = BindVal();
+  }
+  return result;
+}
+
+
+bool GSM::BindRef( const gString& param_name )
+{
+  int result = false;
+
+  if( _BindCheck( param_name ) )
+  {
+    result = BindRef();
   }
   return result;
 }
@@ -782,8 +912,10 @@ bool GSM::CallFunction( void )
   int num_params;
   int index;
   gString ref;
+  Reference_Portion* refp;
   Portion*             return_value;
   bool                 result = true;
+  Portion* p;
 
 #ifndef NDEBUG
   if( _CallFuncStack->Depth() <= 0 )
@@ -817,9 +949,40 @@ bool GSM::CallFunction( void )
     if( func->ParamPassByReference( index ) )
     {
       func->SetCurrParamIndex( index );
-      ref = func->GetCurrParamRefName();
-      assert( param[ index ] != 0 );
-      _RefTable->Define( ref, param[ index ] );
+      refp = func->GetCurrParamRef();
+
+      if( refp != 0 )
+      {
+	assert( param[ index ] != 0 );
+	if( refp->SubValue() == "" )
+	{
+	  _RefTable->Define( refp->Value(), param[ index ] );
+	}
+	else
+	{
+	  if( _RefTable->IsDefined( refp->Value() ) )
+	  {
+	    p = ( *_RefTable )( refp->Value() );
+	    switch( p->Type() )
+	    {
+	    case porNFG:
+	      ( (Nfg_Portion*) p )->Assign( refp->SubValue(), param[ index ] );
+	      break;
+	    default:
+	      gerr << "GSM Error: attempted to assign the subvariable of a\n";
+	      gerr << "           type that does not support subvariables\n";
+	      result = false;
+	    }
+	  }
+	  else
+	  {
+	    gerr << "GSM Error: attempted to assign the sub-variable of\n";
+	    gerr << "           an undefined variable\n";
+	    result = false;
+	  }
+	}
+	delete refp;
+      }
     }
   }
 
@@ -839,17 +1002,22 @@ bool GSM::CallFunction( void )
 bool GSM::Execute( gList< Instruction* >& program )
 {
   bool result;
+  bool done = false;
   Portion *p;
   Instruction *instruction;
   int program_counter = 1;
   int program_length = program.Length();
 
-  while( program_counter <= program_length )
+  while( ( program_counter <= program_length ) && ( !done ) )
   {
     instruction = program[ program_counter ];
 
     switch( instruction->Type() )
     {
+    case iQUIT:
+      result = true;
+      done = true;
+      break;
     case iIF_GOTO:
       p = _Stack->Pop();
       if( p->Type() == porBOOL )
@@ -908,6 +1076,26 @@ bool GSM::Execute( gList< Instruction* >& program )
 //----------------------------------------------------------------------------
 //                   miscellaneous functions
 //----------------------------------------------------------------------------
+
+
+bool GSM::Pop( void )
+{
+  Portion* p;
+  bool result = false;
+
+  if( _Stack->Depth() > 0 )
+  {
+    p = _Stack->Pop();
+    delete p;
+    result = true;
+  }
+  else
+  {
+    gerr << "GSM Error: Pop() called on an empty stack\n";
+  }
+  return result;
+}
+
 
 void GSM::Output( void )
 {

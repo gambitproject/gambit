@@ -26,7 +26,7 @@ typedef enum
 
   iNOP,
 
-  iIF_GOTO, iGOTO,
+  iQUIT, iIF_GOTO, iGOTO,
 
   iPUSH, iPUSHLIST, iPUSHREF,
   iASSIGN, iUNASSIGN, iSUBSCRIPT,
@@ -40,7 +40,7 @@ typedef enum
 
   iINIT_CALL_FUNCTION, iBIND, iCALL_FUNCTION,
 
-  iOUTPUT, iDUMP, iFLUSH
+  iPOP, iOUTPUT, iDUMP, iFLUSH
 } Opcode;
 
 //--------------------------------------------------------------------
@@ -79,6 +79,15 @@ class NOP : public Instruction
 
 
 //----------------------- branch operators ---------------------------
+
+class Quit : public Instruction
+{
+ public:
+  Opcode Type( void ) const;
+  bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
+};
+
 
 class IfGoto : public Instruction
 {
@@ -361,6 +370,15 @@ class CallFunction : public Instruction
 
 
 //------------------------- miscellaneous instructions --------------------
+
+
+class Pop : public Instruction
+{
+ public:
+  Opcode Type( void ) const;
+  bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
+};
 
 
 class Display : public Instruction

@@ -72,8 +72,8 @@ class CallFuncObj : public FuncDescObj
  private:
   struct RunTimeParamInfoType
   {
-    bool    Defined;
-    gString RefName;
+    bool               Defined;
+    Reference_Portion* Ref;
   };
   Portion**             _Param;
   RunTimeParamInfoType* _RunTimeParamInfo;
@@ -85,14 +85,14 @@ class CallFuncObj : public FuncDescObj
 
   void        SetCurrParamIndex   ( const int index );
   bool        SetCurrParam        ( Portion *new_param );
-  void        SetCurrParamRefName ( const gString& ref_name );
+  void        SetCurrParamRef ( Reference_Portion* ref );
 
-  gString&    GetParamRefName ( const int index ) const;
+  Reference_Portion* GetParamRef ( const int index ) const;
 
   int         GetCurrParamIndex           ( void ) const;
   PortionType GetCurrParamType            ( void ) const;
-  bool        GetCurrParamPassByReference ( void ) const;
-  gString&    GetCurrParamRefName         ( void ) const;
+  bool        GetCurrParamPassByRef ( void ) const;
+  Reference_Portion* GetCurrParamRef ( void ) const;
 
   Portion*    CallFunction      ( Portion** param );
 };
@@ -100,3 +100,4 @@ class CallFuncObj : public FuncDescObj
 
 
 #endif  // GSMFUNC_H
+

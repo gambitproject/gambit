@@ -341,6 +341,7 @@ CallFuncObj::CallFuncObj( FuncDescObj* func )
       _Param[ index ] = _ParamInfo[ index ].DefaultValue->Copy();
     }
     _RunTimeParamInfo[ index ].Defined = false;
+    _RunTimeParamInfo[ index ].Ref = 0;
   }
 }
 
@@ -357,10 +358,10 @@ void CallFuncObj::SetCurrParamIndex( const int index )
   _CurrParamIndex = index;
 }
 
-void CallFuncObj::SetCurrParamRefName( const gString& ref_name )
+void CallFuncObj::SetCurrParamRef( Reference_Portion* ref )
 {
   assert( _CurrParamIndex < _NumParams );
-  _RunTimeParamInfo[ _CurrParamIndex ].RefName = ref_name;
+  _RunTimeParamInfo[ _CurrParamIndex ].Ref = ref;
 }
 
 
@@ -400,9 +401,9 @@ bool CallFuncObj::SetCurrParam( Portion *param )
 }
 
 
-gString& CallFuncObj::GetParamRefName( const int index ) const
+Reference_Portion* CallFuncObj::GetParamRef( const int index ) const
 {
-  return _RunTimeParamInfo[ index ].RefName;
+  return _RunTimeParamInfo[ index ].Ref;
 }
 
 
@@ -425,15 +426,15 @@ PortionType CallFuncObj::GetCurrParamType( void ) const
 }
 
 
-bool CallFuncObj::GetCurrParamPassByReference( void ) const
+bool CallFuncObj::GetCurrParamPassByRef( void ) const
 {
   return _ParamInfo[ _CurrParamIndex ].PassByReference;
 }
 
 
-gString& CallFuncObj::GetCurrParamRefName( void ) const
+Reference_Portion* CallFuncObj::GetCurrParamRef( void ) const
 {
-  return _RunTimeParamInfo[ _CurrParamIndex ].RefName;
+  return _RunTimeParamInfo[ _CurrParamIndex ].Ref;
 }
 
 

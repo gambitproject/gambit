@@ -53,6 +53,15 @@ void NOP::Output( gOutput& s ) const
 
 //------------------------- branch operations ------------------------
 
+
+Opcode Quit::Type( void ) const
+{ return iQUIT; }
+bool Quit::Execute( GSM& gsm ) const
+{ return true; }
+void Quit::Output( gOutput& s ) const
+{ s << "Quit"; }
+
+
 IfGoto::IfGoto( int index )
      : _InstructionIndex( index )
 { }
@@ -331,6 +340,14 @@ void CallFunction::Output( gOutput& s ) const
 
 //------------------------- miscellaneous instructions --------------------
   
+
+Opcode Pop::Type( void ) const
+{ return iPOP; }
+bool Pop::Execute( GSM& gsm ) const
+{ return gsm.Pop(); }
+void Pop::Output( gOutput& s ) const
+{ s << "Pop"; }
+
 
 Opcode Display::Type( void ) const
 { return iOUTPUT; }

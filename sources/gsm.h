@@ -17,9 +17,6 @@
 #include "gsmhash.h"
 
 
-int FuncParamCheck( const PortionType stack_param_type, 
-		    const PortionType func_param_type );
-
 
 class FunctionHashTable;
 class Instruction;
@@ -39,6 +36,13 @@ class GSM
 
   bool _UnaryOperation  ( OperationMode mode );
   bool _BinaryOperation ( OperationMode mode );
+
+  bool _FuncParamCheck( CallFuncObj* func,
+		       const PortionType func_param_type );
+
+  void _BindCheck ( void ) const;
+  bool _BindCheck ( const gString& param_name ) const;
+
 
   // This function is located in gsmfunc.cc
   void InitFunctions( void );
@@ -96,11 +100,17 @@ class GSM
 
   bool InitCallFunction ( const gString& funcname );
   bool Bind             ( void );
+  bool BindVal          ( void );
+  bool BindRef          ( void );
   bool Bind             ( const gString& param_name );
+  bool BindVal           ( const gString& param_name );
+  bool BindRef          ( const gString& param_name );
   bool CallFunction     ( void );
 
   bool Execute( gList< Instruction* >& program );
      
+  bool Pop ( void );
+
   void Output ( void );
   void Dump   ( void );
   void Flush  ( void );

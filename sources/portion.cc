@@ -65,6 +65,7 @@ void Portion::MakeCopyOfData( Portion* p )
   }
   assert( this->Type() == p->Type() );
 #endif // NDEBUG
+  _Temporary = false;
 }
 
 
@@ -274,11 +275,10 @@ bool bool_Portion::Operation( Portion* p, OperationMode mode )
 
 void bool_Portion::Output( gOutput& s ) const
 {
-  s << "(bool) ";
   if( _Value == true )
-    s << "true";
+    s << " true";
   else
-    s << "false";
+    s << " false";
 }
 
 
@@ -574,11 +574,23 @@ Portion* List_Portion::Subscript( Portion* p ) const
   if( p->Type() == porINTEGER )
   {
     i = (int) ( (numerical_Portion<gInteger>*) p )->Value().as_long();
-    result = _Value[ i ]->Copy();
+    if( i >= 1 && i <= _Value.Length() )
+    {
+      result = _Value[ i ]->Copy();
+    }
+    else
+    {
+      gerr << "List_Portion Error: an out-of-range subscript specified\n";
+      gerr << "       Valid range: " << 1 << " to " << _Value.Length() << "\n";
+      gerr << "       Subscript specified: " << i << "\n";
+      result = new Error_Portion;
+    }
   }
   else
   {
     gerr << "List_Portion Error: a non-Integer subscript specified\n";
+    gerr << "       Type specified: ";
+    PrintPortionTypeSpec( gerr, p->Type() );
     result = new Error_Portion;
   }
   delete p;
@@ -682,13 +694,6 @@ bool Nfg_Portion::UnAssign( const gString& ref )
   {
     _RefTable->Remove( ref );
   }
-#ifndef NDEBUG
-  else
-  {
-    gerr << "GSM Warning: calling UnAssign() on a undefined reference\n";
-  }
-#endif // NDEBUG
-
   return true;
 }
 
@@ -721,23 +726,29 @@ Portion* Nfg_Portion::operator()( const gString& ref ) const
 
 void PrintPortionTypeSpec( gOutput& s, PortionType type )
 {
-  if( type & porBOOL )
-    s << "porBOOL ";
-  if( type & porDOUBLE )
-    s << "porDOUBLE ";
-  if( type & porINTEGER )
-    s << "porINTEGER ";
-  if( type & porRATIONAL )
-    s << "porRATIONAL ";
-  if( type & porSTRING )
-    s << "porSTRING ";
-  if( type & porLIST )
-    s << "porLIST ";
-  if( type & porNFG )
-    s << "porNFG ";
-  if( type & porREFERENCE )
-    s << "porREFERENCE ";
-
+  if( type == porERROR )
+  {
+    s << "porERROR ";
+  }
+  else
+  {
+    if( type & porBOOL )
+      s << "porBOOL ";
+    if( type & porDOUBLE )
+      s << "porDOUBLE ";
+    if( type & porINTEGER )
+      s << "porINTEGER ";
+    if( type & porRATIONAL )
+      s << "porRATIONAL ";
+    if( type & porSTRING )
+      s << "porSTRING ";
+    if( type & porLIST )
+      s << "porLIST ";
+    if( type & porNFG )
+      s << "porNFG ";
+    if( type & porREFERENCE )
+      s << "porREFERENCE ";
+  }
   s << "\n";
 }
 
