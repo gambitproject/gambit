@@ -621,12 +621,13 @@ static Portion *GSM_SetActionProb(Portion **param)
   int player = a->BelongsTo()->GetPlayer()->GetNumber();
   int action = P->Support().Find(a);
 
-  if (action == 0)
-    return new ErrorPortion("Action not present in support of profile");
+//  if (action == 0)
+//    return new ErrorPortion("Action not present in support of profile");
 
   gNumber value = ((NumberPortion *) param[2])->Value();
   
-  (*P)(player, infoset, action) = value;
+  if (action != 0)
+    (*P)(player, infoset, action) = value;
   ((BehavPortion *) param[0])->SetValue(P);
   return param[0]->RefCopy();
 }
@@ -702,10 +703,10 @@ static Portion *GSM_SetStrategyProb(Portion **param)
   int player = s->nfp->GetNumber();
   int strat = (*P).Support().Strategies(player).Find(s);
 
-  if (strat == 0)
-    return new ErrorPortion("Strategy not found in support of profile");
-
-  (*P)(player, strat) = value;
+//  if (strat == 0)
+//    return new ErrorPortion("Strategy not found in support of profile");
+  if(strat !=0)
+    (*P)(player, strat) = value;
   ((MixedPortion *) param[0])->SetValue(P);
   return param[0]->RefCopy();
 }
