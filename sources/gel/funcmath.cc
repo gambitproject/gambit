@@ -223,7 +223,11 @@ gNumber gelfuncNumChars::Evaluate(gelVariableTable *vt) const
 DECLARE_BINARY(gelfuncNthElement, gText, gNumber, gText)
 
      
-class gelExceptionNonInteger   { };
+class gelExceptionNonInteger : public gException  { 
+  public:
+    virtual ~gelExceptionNonInteger()   { }
+    gText Description(void) const  { return "Expected integer index"; }
+};
 
 gText gelfuncNthElement::Evaluate(gelVariableTable *vt) const
 {

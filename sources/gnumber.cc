@@ -16,6 +16,11 @@
 #include <assert.h>
 #include <ctype.h>
 
+#include "gtext.h"
+
+gText gNumber::DivideByZero::Description(void) const
+{ return "Divide by zero in gNumber"; }
+
 
 gNumber::gNumber(void) 
   : rep(precRATIONAL), rval(new gRational)

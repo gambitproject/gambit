@@ -1,7 +1,7 @@
 //
 // FILE: gnumber.h -- Number class for Gambit project. 
 //
-// @(#)gnumber.h	2.5 02/05/98
+// $Id$
 //
 
 #ifndef GNUMBER_H
@@ -21,7 +21,11 @@ protected:
 
 public:
 #ifdef USE_EXCEPTIONS
-  class DivideByZero   { };
+  class DivideByZero : public gException  {
+    public:
+      virtual ~DivideByZero()  { }
+      gText Description(void) const;
+  };
 #endif   // USE_EXCEPTIONS
 
   gNumber(void);

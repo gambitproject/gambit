@@ -88,6 +88,15 @@ gText EscapeQuotes(const gText &);
 void gEpsilon(double &v, int i = 8);
 void gEpsilon(gRational &v, int i = 8);
 void gEpsilon(gNumber &v, int i=8);
+
+
+#ifdef USE_EXCEPTIONS
+class gException   {
+  public:
+    virtual gText Description(void) const = 0;
+};
+#endif   // USE_EXCEPTIONS
+
 #endif    // GMISC_H
 
 

@@ -149,6 +149,9 @@ int main( int /*argc*/, char* argv[] )
       else  
         gout << "A compile error occurred\n";
     }
+    catch (gException &e)  {
+      gout << "EXCEPTION: " << e.Description() << '\n';
+    }
     catch (...)   {
       gout << "Whoa... exception!!!!\n";
     }
