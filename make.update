@@ -13,6 +13,7 @@
 # machine.  If a nongui target is being built, _$(GUI) is set to 'none'. 
 
 MACHINE_sun4=dosh.hum.caltech.edu
+MACHINE_solaris=minimax.caltech.edu
 MACHINE_rs6000=ironbark.hum.caltech.edu
 MACHINE_hp=jilt.hum.caltech.edu
 MACHINE_latex=hss.caltech.edu
@@ -31,6 +32,7 @@ ifeq ($(TARGET),all)
 	@$(MAKE)  -f make.update TARGET=gui HOST=$(HOST) GUI=$(GUI)
 	@$(MAKE)  -f make.update TARGET=gcl HOST=$(HOST) GUI=$(GUI)
 	@$(MAKE)  -f make.update TARGET=src HOST=$(HOST) GUI=$(GUI)
+	@$(MAKE)  -f make.update TARGET=gcldoc HOST=$(HOST) GUI=$(GUI)
 endif	
 #Check GUI target options
 ifeq ($(TARGET),gui)
@@ -48,14 +50,16 @@ endif
 #Check which hosts to build on
 ifeq ($(HOST),none)
 	@$(MAKE) -f make.update error \
-		ERRORNAME='Must specify a HOST type [sun4,rs6000]'
+		ERRORNAME='Must specify a HOST type [sun4,solaris,rs6000]'
 endif
 ifeq ($(HOST),all)
 	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=sun4 GUI=$(GUI)
+	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=solaris GUI=$(GUI)
 	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=rs6000 GUI=$(GUI)
 endif
 
 #Do the actual building
+ifneq ($(HOST),all)
 ifeq ($(TARGET),gui)
 	rsh $(MACHINE_$(HOST)) "cd ~/distrib; \
 		make -f make.distr gui HOST=$(HOST) GUI=$(GUI)"
@@ -64,10 +68,12 @@ ifeq ($(TARGET),gcl)
 	rsh $(MACHINE_$(HOST)) "cd ~/distrib; \
 		make -f make.distr gcl HOST=$(HOST) GUI=$(GUI)"
 endif
+endif
+
 ifeq ($(TARGET),src) # Build sources only on DOSH
 	rsh $(MACHINE_sun4) "cd ~/distrib; make -f make.distr src"
 endif
-ifeq ($(TARGET),gclman) # Build manuals only on hss (latex machine)
+ifeq ($(TARGET),gcldoc) # Build manuals only on hss (latex machine)
 	rsh $(MACHINE_latex) "cd /home/ironbark/gambit/distrib/manuals/gclman;\
 				make"
 endif
