@@ -58,7 +58,7 @@ public:
   
   EnumParams &Parameters(void);
 
-  gList<MixedProfile<T> > &GetSolutions(void);
+  const gList<MixedProfile<T> > &GetSolutions(void) const;
 };
 
 //
