@@ -193,7 +193,7 @@ Tableau<gRational>::Tableau(const gMatrix<gRational> &A,
     nonbasic[j] = j;
   
   totdenom = lcm(find_lcd(A),find_lcd(b));
-  if(totdenom>=0) throw BadDenom();
+  if(totdenom<=0) throw BadDenom();
   //  assert(totdenom>0);
   
   for (int i = b.First();i<=b.Last();i++) {
