@@ -1,51 +1,44 @@
 //
-// FILE: subsolve.h -- Interface to generic subgame solver
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Compute Nash equilibria of an extensive form game by recursively
+// solving subgames
 //
 
 #ifndef SUBSOLVE_H
 #define SUBSOLVE_H
 
-#include "game/efg.h"
-#include "game/nfg.h"
-#include "behavsol.h"
+#include "efgalgorithm.h"
+#include "nfgalgorithm.h"
 
-class efgAlgorithm {
-public:
-  virtual ~efgAlgorithm();
-
-  virtual gList<BehavSolution> Solve(const EFSupport &) = 0;
-};
-
-class NFSupport;
-class SubgameSolver   {
+class SubgameSolver : public efgNashAlgorithm  {
 private:
   bool m_isPerfectRecall;
-  int max_solns, subgame_number;
   double time;
   BehavProfile<gNumber> *solution;
   gList<BehavSolution> solutions;
+  efgNashAlgorithm *m_efgAlgorithm;
+  nfgNashAlgorithm *m_nfgAlgorithm;
 
   gArray<gArray<Infoset *> *> infosets;
 
   void FindSubgames(const EFSupport &, gStatus &, 
 		    Node *, gList<BehavSolution> &, gList<Efg::Outcome> &);
   
-protected:
-  virtual void SolveSubgame(const FullEfg &, const EFSupport &,
-			    gList<BehavSolution> &, gStatus &) = 0;
-  virtual void ViewSubgame(int, const FullEfg &, EFSupport &);
-
-  virtual void ViewNormal(const Nfg &, NFSupport &);
-  virtual void SelectSolutions(int, const FullEfg &, gList<BehavSolution> &);
-  virtual EfgAlgType AlgorithmID() const = 0;
-
 public:
-  SubgameSolver(int maxsol = 0);
+  SubgameSolver(void) : m_efgAlgorithm(0), m_nfgAlgorithm(0) { }
   virtual ~SubgameSolver();
     
+  gText GetAlgorithm(void) const;
   gList<BehavSolution> Solve(const EFSupport &, gStatus &);
+
+  void SetAlgorithm(efgNashAlgorithm *p_algorithm)
+    { m_efgAlgorithm = p_algorithm; m_nfgAlgorithm = 0; }
+  void SetAlgorithm(nfgNashAlgorithm *p_algorithm)
+    { m_nfgAlgorithm = p_algorithm; m_efgAlgorithm = 0; }
   
   double Time(void) const   { return time; }
 };

@@ -1,48 +1,55 @@
 //
-// FILE: simpdiv.imp -- Mixed strategy algorithm for Gambit
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Compute Nash equilibria via simplicial subdivision on the normal form
 //
 
 //
 // simpdiv is a simplicial subdivision algorithm with restart, for finding
 // mixed strategy solutions to general finite n-person games.  It is based on
-// van Der Laan, Talman and van Der Heyden, Math in Oper Res, 1987,
-// code was written by R. McKelvey
+// van Der Laan, Talman and van Der Heyden, Math in Oper Res, 1987.
+// 
+// Original code was written by R. McKelvey.  The implementation was
+// kludged to conform to the new standard algorithm interface (namely,
+// by removing passing a reference to the game in the ctor); truly,
+// the algorithm needs recoded from the ground up to remove gotos and
+// simplify things. (TLT, 6/2002)
 //
 
-#define TOL 1.0e-10
-#define MAXIT 10000
-
-#include "base/base.h"
-#include "game/nfg.h"
 #include "simpdiv.h"
 
 //-------------------------------------------------------------------------
-//               SimpdivModule<T>: Constructor and destructor
+//               nfgSimpdiv<T>: Constructor and destructor
 //-------------------------------------------------------------------------
 
-template <class T> SimpdivModule<T>::SimpdivModule(const NFSupport &s,
-						   const SimpdivParams &p)
-  : N(s.Game()), params(p), support(s), 
-    y(s), leash(p.leashLength), t(0), nplayers(N.NumPlayers()),
-    ibar(1), nevals(0), nits(0), nstrats(s.NumStrats()),
-    ylabel(2), labels(y.Length(), 2), pi(y.Length(), 2),
-    U(s.NumStrats()), TT(s.NumStrats()),
-    ab(s.NumStrats()), besty(s.NumStrats()),
-    v(s.NumStrats())
-{ }
-
-template <class T> SimpdivModule<T>::~SimpdivModule()
-{ }
-
-
-//-------------------------------------------------------------------------
-//               SimpdivModule<T>: Private member functions
-//-------------------------------------------------------------------------
-
-template <class T> T SimpdivModule<T>::simplex(void)
+template <class T> nfgSimpdiv<T>::nfgSimpdiv(void)
+  : m_nRestarts(20), m_leashLength(0)
 {
+  t = 0;
+  ibar = 1;
+}
+
+
+template <class T> nfgSimpdiv<T>::~nfgSimpdiv()
+{ }
+
+
+//-------------------------------------------------------------------------
+//               nfgSimpdiv<T>: Private member functions
+//-------------------------------------------------------------------------
+
+template <class T> T nfgSimpdiv<T>::Simplex(MixedProfile<T> &y)
+{
+  gArray<int> ylabel(2);
+  gRectArray<int> labels(y.Length(), 2), pi(y.Length(), 2);
+  gPVector<int> U(y.Support().NumStrats()), TT(y.Support().NumStrats());
+  gPVector<T> ab(y.Support().NumStrats());
+  gPVector<T> besty(y.Support().NumStrats());
+  gPVector<T> v(y);
+
   int i = 0;
   int j, k, h, jj, hh,ii, kk,tot;
   T maxz;
@@ -51,9 +58,9 @@ template <class T> T SimpdivModule<T>::simplex(void)
 // step0:;
   ibar=1;
   t=0;
-  for(j=1;j<=nplayers;j++)
+  for(j=1;j<=y.Game().NumPlayers();j++)
     {
-      for(h=1;h<=nstrats[j];h++)
+      for(h=1;h<=y.Support().NumStrats(j);h++)
 	{
 	  TT(j,h)=0;
 	  U(j,h)=0;
@@ -65,25 +72,19 @@ template <class T> T SimpdivModule<T>::simplex(void)
   
  step1:;
   
-  maxz=getlabel(y);
+  maxz=getlabel(y, ylabel, besty);
   j=ylabel[1];
   h=ylabel[2];
   labels(ibar,1)=j;
   labels(ibar,2)=h;
-//  if(nits>=MAXIT)goto end;
-  if(params.trace>=4) {
-    *params.tracefile << "\n Step 1, j = " << j << " h= " << h; 
-    *params.tracefile << " maxz = " << maxz; 
-  }
   
 // Label case1a not currently used, hence commented
 // case1a:;
   if(TT(j,h)==0 && U(j,h)==0)
     {
-      if(params.trace>=4) *params.tracefile << " Case 1a "; 
-      for(hh=1,tot=0;hh<=nstrats[j];hh++)
+      for(hh=1,tot=0;hh<=y.Support().NumStrats(j);hh++)
 	if(TT(j,hh)==1 || U(j,hh)==1)tot++;
-      if(tot==nstrats[j]-1)goto end;
+      if(tot==y.Support().NumStrats(j)-1)goto end;
       else {
 	i=t+1;
 	goto step2;
@@ -92,7 +93,6 @@ template <class T> T SimpdivModule<T>::simplex(void)
       /* case1b */
   else if(TT(j,h))
     {
-      if(params.trace>=4) *params.tracefile << " Case 1b "; 
       i=1;
       while(labels(i,1)!=j || labels(i,2)!=h || i==ibar) i++;
       goto step3;
@@ -100,9 +100,8 @@ template <class T> T SimpdivModule<T>::simplex(void)
       /* case1c */
   else if(U(j,h))
     {
-      if(params.trace>=4) *params.tracefile << " Case 1c "; 
       k=h;
-      while(U(j,k)){k++;if(k>nstrats[j])k=1;}
+      while(U(j,k)){k++;if(k>y.Support().NumStrats(j))k=1;}
       if(TT(j,k)==0)i=t+1;
       else {
 	i=1;
@@ -112,92 +111,86 @@ template <class T> T SimpdivModule<T>::simplex(void)
     }
   
  step2:;
-  if(params.trace>=4) *params.tracefile << "  Step 2 "; 
-  getY(y,i);
+  getY(y,v,U,TT,ab,pi,i);
   pi.RotateDown(i,t+1);
   pi(i,1)=j;
   pi(i,2)=h;
   labels.RotateDown(i+1,t+2);
   ibar=i+1;
   t++;
-  getnexty(y,i);
+  getnexty(y,pi,U,i);
   TT(j,h)=1;
   U(j,h)=0;
   goto step1;
   
  step3:;
-  if(params.trace>=4) *params.tracefile << "  Step 3 "; 
   if(i==t+1)ii=t;
   else ii=i;
   j=pi(ii,1);
   h=pi(ii,2);
   k=h;
-  if(i<t+1)k=get_b(j,h);
-  kk=get_c(j,h);
+  if(i<t+1)k=get_b(j,h,y.Support().NumStrats(j),U);
+  kk=get_c(j,h,y.Support().NumStrats(j),U);
   if(i==1)ii=t+1;
   else if(i==t+1)ii=1;
   else ii=i-1;
-  getY(y,ii);
+  getY(y,v,U,TT,ab,pi,ii);
   
       /* case3a */
-  if(i==1 && (y(j,k)<=(T)0 || (v(j,k)-y(j,k))>=((T)(leash))*d)) {
-    if(params.trace>=4) *params.tracefile << " Case 3a "; 
-    for(hh=1,tot=0;hh<=nstrats[j];hh++)
+  if(i==1 && (y(j,k)<=(T)0 || (v(j,k)-y(j,k))>=((T)(m_leashLength))*d)) {
+    for(hh=1,tot=0;hh<=y.Support().NumStrats(j);hh++)
       if(TT(j,hh)==1 || U(j,hh)==1)tot++;
-    if(tot==nstrats[j]-1) {
+    if(tot==y.Support().NumStrats(j)-1) {
       U(j,k)=1;
       goto end;
     }
     else {
-      update(j,i);
+      update(pi,labels,ab,U,j,i);
       U(j,k)=1;
-      getnexty(y,t);
+      getnexty(y,pi,U,t);
       goto step1;
     }
   }
       /* case3b */
   else if(i>=2 && i<=t &&
-	  (y(j,k)<=(T)(0) || (v(j,k)-y(j,k))>=((T)(leash))*d)) {
-    if(params.trace>=4) *params.tracefile << " Case 3b "; 
+	  (y(j,k)<=(T)(0) || (v(j,k)-y(j,k))>=((T)(m_leashLength))*d)) {
     goto step4;
   }
       /* case3c */
   else if(i==t+1 && ab(j,kk)==(T)(0)) {
-    if(params.trace>=4) *params.tracefile << " Case 3c "; 
-    if(y(j,h)<=(T)(0) || (v(j,h)-y(j,h))>=((T)(leash))*d)goto step4;
+    if(y(j,h)<=(T)(0) || (v(j,h)-y(j,h))>=((T)(m_leashLength))*d)goto step4;
     else {
       k=0;
       while(ab(j,kk)==(T)(0) && k==0) {
 	if(kk==h)k=1;
 	kk++;
-	if(kk>nstrats[j])kk=1;
+	if(kk>y.Support().NumStrats(j))kk=1;
       }
       kk--;
-      if(kk==0)kk=nstrats[j];
+      if(kk==0)kk=y.Support().NumStrats(j);
       if(kk==h)goto step4;
       else goto step5;
     }
   }
   else {
-      if(i==1) getnexty(y,1);
-      else if(i<=t) getnexty(y,i);
+      if(i==1) getnexty(y,pi,U,1);
+      else if(i<=t) getnexty(y,pi,U,i);
       else if(i==t+1) {
 	j=pi(t,1);
 	h=pi(t,2);
-	hh=get_b(j,h);
+	hh=get_b(j,h,y.Support().NumStrats(j),U);
 	y(j,h)-=d;
 	y(j,hh)+=d;
       }
-      update(j,i);
+      update(pi,labels,ab,U,j,i);
     }
   goto step1;
  step4:;
-  if(params.trace>=4) *params.tracefile << "  Step 4 "; 
-  getY(y,1);
+  getY(y,v,U,TT,ab,pi,1);
   j=pi(i-1,1);
   h=pi(i-1,2);
   TT(j,h)=0;
-  if(y(j,h)<=(T)(0) || (v(j,h)-y(j,h))>=((T)(leash))*d)U(j,h)=1;
+  if(y(j,h)<=(T)(0) || (v(j,h)-y(j,h))>=((T)(m_leashLength))*d)U(j,h)=1;
   labels.RotateUp(i,t+1);
   pi.RotateUp(i-1,t);
   t--;
@@ -206,7 +199,6 @@ template <class T> T SimpdivModule<T>::simplex(void)
   i=ii;
   goto step3;
  step5:;
-  if(params.trace>=4) *params.tracefile << "  Step 5 "; 
   k=kk;
 
   labels.RotateDown(1,t+1);
@@ -215,38 +207,33 @@ template <class T> T SimpdivModule<T>::simplex(void)
   U(j,k)=0;
   jj=pi(1,1);
   hh=pi(1,2);
-  kk=get_b(jj,hh);
+  kk=get_b(jj,hh,y.Support().NumStrats(jj),U);
   y(jj,hh)-=d;
   y(jj,kk)+=d;
   
-  k=get_c(j,h);
+  k=get_c(j,h,y.Support().NumStrats(j),U);
   kk=1;
   while(kk){
     if(k==h)kk=0;
     ab(j,k)=(ab(j,k)-((T)(1)));
     k++;
-    if(k>nstrats[j])k=1;
+    if(k>y.Support().NumStrats(j))k=1;
   }
   goto step1;
 
  end:;
   maxz=bestz;
-  nevals+=nits;
-  if(params.trace >= 2) { 
-    *params.tracefile << "\ngrid = " << d << " maxz = " << maxz;
-    if(params.trace>= 3) {
-      *params.tracefile << " j = " << j << " h = " << h;  
-      *params.tracefile << " nits = " <<nits;
-    }
-  } 
-  for(i=1;i<=nplayers;i++)
-    for(j=1;j<=nstrats[i];j++)
+  for(i=1;i<=y.Game().NumPlayers();i++)
+    for(j=1;j<=y.Support().NumStrats(i);j++)
       y(i,j)=besty(i,j);
-  nits=0;
   return maxz;
 }
 
-template <class T> void SimpdivModule<T>::update(int j, int i)
+template <class T> void nfgSimpdiv<T>::update(gRectArray<int> &pi,
+					      gRectArray<int> &labels,
+					      gPVector<T> &ab,
+					      const gPVector<int> &U,
+					      int j, int i)
 {
   int jj, hh, k,f;
   
@@ -261,12 +248,12 @@ template <class T> void SimpdivModule<T>::update(int j, int i)
     jj=pi(1,1);
     hh=pi(1,2);
     if(jj==j) {
-      k=get_c(jj,hh);
+      k=get_c(jj,hh,ab.Lengths()[jj],U);
       while(f) {
 	if(k==hh)f=0;
 	ab(j,k)=ab(j,k) + ((T)(1));
 	k++;
-	if(k>nstrats[jj])k=1;
+	if(k>ab.Lengths()[jj])k=1;
       }
       pi.RotateUp(1,t);
     }
@@ -277,41 +264,50 @@ template <class T> void SimpdivModule<T>::update(int j, int i)
     jj=pi(t,1);
     hh=pi(t,2);
     if(jj==j) {
-      k=get_c(jj,hh);
+      k=get_c(jj,hh,ab.Lengths()[jj],U);
       while(f) {
 	if(k==hh)f=0;
 	ab(j,k)= ab(j,k)-((T)(1));
 	k++;
-	if(k>nstrats[jj])k=1;
+	if(k>ab.Lengths()[jj])k=1;
       }
       pi.RotateDown(1,t);
     }
   }
 }
 
-template <class T> void SimpdivModule<T>::getY(MixedProfile<T> &x,int k)
+template <class T> void nfgSimpdiv<T>::getY(MixedProfile<T> &x,
+					    gPVector<T> &v, 
+					    const gPVector<int> &U,
+					    const gPVector<int> &TT,
+					    const gPVector<T> &ab,
+					    const gRectArray<int> &pi,
+					    int k)
 {
   int j, h, i,hh;
   
-  for(j=1;j<=nplayers;j++)
-    for(h=1;h<=nstrats[j];h++)
+  for(j=1;j<=x.Game().NumPlayers();j++)
+    for(h=1;h<=x.Support().NumStrats(j);h++)
       x(j,h)=v(j,h);
-  for(j=1;j<=nplayers;j++)
-    for(h=1;h<=nstrats[j];h++)
+  for(j=1;j<=x.Game().NumPlayers();j++)
+    for(h=1;h<=x.Support().NumStrats(j);h++)
       if(TT(j,h)==1 || U(j,h)==1) {
 	x(j,h)+=(d*ab(j,h));
 	hh=h-1;
-	if(hh==0)hh=nstrats[j];
+	if(hh==0)hh=x.Support().NumStrats(j);
 	x(j,hh)-=(d*ab(j,h));
       }
   i=2;
   while(i<=k) {
-    getnexty(x,i-1);
+    getnexty(x,pi,U,i-1);
     i++;
   }
 }
 
-template <class T> void SimpdivModule<T>::getnexty(MixedProfile<T> &x,int i)
+template <class T> void nfgSimpdiv<T>::getnexty(MixedProfile<T> &x,
+						const gRectArray<int> &pi, 
+						const gPVector<int> &U,
+						int i)
 {
   int j,h,hh;
   
@@ -319,50 +315,52 @@ template <class T> void SimpdivModule<T>::getnexty(MixedProfile<T> &x,int i)
   j=pi(i,1);
   h=pi(i,2);
   x(j,h)+=d;
-  hh=get_b(j,h);
+  hh=get_b(j,h,x.Support().NumStrats(j),U);
   x(j,hh)-=d;
 }
 
-template <class T> int SimpdivModule<T>::get_b(int j, int h)
+template <class T> int nfgSimpdiv<T>::get_b(int j, int h, int nstrats,
+					    const gPVector<int> &U)
 {
   int hh;
   
   hh=h-1;
-  if(hh==0)hh=nstrats[j];
+  if(hh==0)hh=nstrats;
   while(U(j,hh)) {
     hh--;
-    if(hh==0)hh=nstrats[j];
+    if(hh==0)hh=nstrats;
   }
   return hh;
 }
 
-template <class T> int SimpdivModule<T>::get_c(int j, int h)
+template <class T> int nfgSimpdiv<T>::get_c(int j, int h, int nstrats,
+					    const gPVector<int> &U)
 {
   int hh;
   
-  hh=get_b(j,h);
-	hh++;
-  if(hh>nstrats[j])hh=1;
+  hh=get_b(j,h,nstrats,U);
+  hh++;
+  if(hh > nstrats)hh=1;
   return hh;
 }
 
-template <class T> T SimpdivModule<T>::getlabel(MixedProfile<T> &yy)
+template <class T> T nfgSimpdiv<T>::getlabel(MixedProfile<T> &yy,
+					     gArray<int> &ylabel,
+					     gPVector<T> &besty)
 {
   int i,j,jj;
   T maxz,payoff,maxval;
   
-  nits++;
-
   maxz=((T)(-1000000));
   
   ylabel[1]=1;
   ylabel[2]=1;
   
-  for(i=1;i<=N.NumPlayers();i++) {
+  for(i=1;i<=yy.Game().NumPlayers();i++) {
     payoff=(T)(0);
     maxval=((T)(-1000000));
     jj=0;
-    for(j=1;j<=support.NumStrats(i);j++) {
+    for(j=1;j<=yy.Support().NumStrats(i);j++) {
       pay=yy.Payoff(i,i,j);
       payoff+=(yy(i,j)*pay);
       if(pay>maxval) {
@@ -379,8 +377,8 @@ template <class T> T SimpdivModule<T>::getlabel(MixedProfile<T> &yy)
   }
   if(maxz<bestz) {
     bestz=maxz;
-    for(i=1;i<=nplayers;i++)
-      for(j=1;j<=nstrats[i];j++)
+    for(i=1;i<=yy.Game().NumPlayers();i++)
+      for(j=1;j<=yy.Support().NumStrats(i);j++)
 	besty(i,j)=yy(i,j);
   }
   return maxz;
@@ -388,55 +386,63 @@ template <class T> T SimpdivModule<T>::getlabel(MixedProfile<T> &yy)
 
 
 //-------------------------------------------------------------------------
-//               SimpdivModule<T>: Main solution algorithm
+//               nfgSimpdiv<T>: Main solution algorithm
 //-------------------------------------------------------------------------
 
-template <class T> int SimpdivModule<T>::Simpdiv(gStatus &p_status)
+template <class T> 
+gList<MixedSolution> nfgSimpdiv<T>::Solve(const NFSupport &p_support,
+					  gStatus &p_status)
 {
-  int qf,soln,i,j,k,ii;
+  int qf,i,j,k,ii;
 
-  gWatch watch;
+  // A raft of initializations moved here from the former constructor.
+  // This algorithm is in need of some serious reorganization!
+  t = 0;
+  ibar = 1;
 
-  if(leash==0)leash=32000;  // not the best way to do this.  Change this!
+  if (m_leashLength == 0) {
+    m_leashLength = 32000;  // not the best way to do this.  Change this!
+  }
   bestz=(T)1.0e30;          // ditto
   mingrid=(T)(2);
-  for(i=1;i<=params.nRestarts;i++)mingrid=mingrid*(T)(2);
+  for (i = 1; i <= m_nRestarts; i++)  {
+    mingrid = mingrid *(T)(2);
+  }
   mingrid = ((T)(1))/mingrid;
   
+  MixedProfile<T> y(p_support);
   ((gVector<T> &) y).operator=((T) 0);
-  
-  solutions.Flush();
 
-  for (soln=0;soln<params.stopAfter;soln++) {
-    p_status.Get();
-    k=1;
-    d=(T) 1.0 / (T) k;
-    for(i=1;i<=nplayers;i++) {
-      y(i,1)=(T)(1);
-      for(j=1;j<=nstrats[i];j++)
-	if(j>1)y(i,j)=(T)(0);
-    }
-    
-    for(qf=0,ii=0;qf!=1 && d > mingrid;ii++) {
-      p_status.Get();
-      p_status.SetProgress((double)ii/(double)params.nRestarts);
-      d=(T)(d/(T)2.0);
-      for(i=1;i<=nplayers;i++)
-	for(j=1;j<=nstrats[i];j++)
-	  v(i,j)=y(i,j);
-      maxz=simplex();
-      
-      if(maxz<(T)(TOL))qf=1;
-    }
-    *params.tracefile << "\nSimpDiv solution # " << (soln+1) << " : " << y;
-    *params.tracefile << " maxz = " << maxz; 
-    
-    MixedProfile<T> profile(y);
-    solutions.Append(MixedSolution(profile, algorithmNfg_SIMPDIV));
-    //    solutions[index].SetEpsilon(TOL);
+  // In principle, this algorithm can be started from any point
+  // in the simplex.  Currently, it starts at a predefined point;
+  // therefore, it is set up to compute one and only one equilibrium.
+  gList<MixedSolution> solutions;
+  k=1;
+  d=(T) 1.0 / (T) k;
+  for(i=1;i<=p_support.Game().NumPlayers();i++) {
+    y(i,1)=(T)(1);
+    for(j=1;j<=p_support.NumStrats(i);j++)
+      if(j>1)y(i,j)=(T)(0);
   }
+    
+  for(qf=0,ii=0;qf!=1 && d > mingrid;ii++) {
+    const double TOL = 1.0e-10;
+    p_status.Get();
+    p_status.SetProgress((double) ii / (double) m_nRestarts);
+    d=(T)(d/(T)2.0);
+    maxz=Simplex(y);
+      
+    if(maxz<(T)(TOL))qf=1;
+  }
+    
+  MixedProfile<T> profile(y);
+  solutions.Append(MixedSolution(profile, algorithmNfg_SIMPDIV));
 
-  time = watch.Elapsed();
-
-  return 1;
+  return solutions;
 }
+
+
+
+
+
+

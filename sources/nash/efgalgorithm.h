@@ -16,6 +16,8 @@
 class efgNashAlgorithm {
 public:
   virtual ~efgNashAlgorithm() { }
+
+  virtual gText GetAlgorithm(void) const = 0;
   virtual gList<BehavSolution> Solve(const EFSupport &, gStatus &) = 0;
 };
 

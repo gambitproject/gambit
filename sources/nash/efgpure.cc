@@ -1,7 +1,10 @@
 //
-// FILE: efgpure.cc -- Find all pure strategy Nash equilibria
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Compute pure-strategy Nash equilibria on extensive form games
 //
 
 #include "base/base.h"
@@ -12,10 +15,11 @@
 #include "game/efgciter.h"
 #include "behavsol.h"
 
-static void efgEnumPureSolve(const EFSupport &p_support,
-			     gList<BehavSolution> &p_solutions,
-			     int p_stopAfter, gStatus &p_status)
+gList<BehavSolution> efgEnumPure::Solve(const EFSupport &p_support,
+					gStatus &p_status)
 {
+  gList<BehavSolution> solutions;
+
   EfgContIter citer(p_support);
   gPVector<gNumber> probs(p_support.GetGame().NumInfosets());
 
@@ -66,25 +70,14 @@ static void efgEnumPureSolve(const EFSupport &p_support,
 				 Infosets()[iset])->GetNumber()) = 1;
       }
 
-      p_solutions.Append(BehavSolution(temp, algorithmEfg_ENUMPURE_EFG));
+      solutions.Append(BehavSolution(temp, algorithmEfg_ENUMPURE_EFG));
     }
     contNumber++;
-  }  while ((p_stopAfter == 0 || p_solutions.Length() < p_stopAfter) &&
+  }  while ((m_stopAfter == 0 || solutions.Length() < m_stopAfter) &&
 	    citer.NextContingency());
+  return solutions;
 }
 
-void efgEnumPure::SolveSubgame(const FullEfg &, const EFSupport &p_support,
-			       gList<BehavSolution> &p_solutions,
-			       gStatus &p_status)
-{
-  efgEnumPureSolve(p_support, p_solutions, m_stopAfter, p_status);
-}
-
-efgEnumPure::efgEnumPure(int p_stopAfter)
-  : SubgameSolver(0), m_stopAfter(p_stopAfter)
-{ }
-
-efgEnumPure::~efgEnumPure()   { }
 
 
 

@@ -19,6 +19,7 @@ public:
   SeqFormParams(void);
 };
 
+#ifdef UNUSED
 class efgLcpSolve : public SubgameSolver  {
 private:
   int npivots;
@@ -35,6 +36,7 @@ public:
   
   int NumPivots(void) const  { return npivots; }
 };
+#endif  // UNUSED
 
 #endif    // SEQFORM_H
 

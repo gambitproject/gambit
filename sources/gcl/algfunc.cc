@@ -199,8 +199,9 @@ static Portion *GSM_EnumMixed_Nfg(GSM &gsm, Portion **param)
   try {
     double time;
     long npivots;
-    Enum(*S, params, solutions, gsm.OutputStream(),
-	 gsm.GetStatusMonitor(), npivots, time);
+    nfgEnumMixed algorithm;
+    // Set parameters
+    solutions = algorithm.Solve(*S, gsm.GetStatusMonitor());
     ((NumberPortion *) param[3])->SetValue(npivots);
     ((NumberPortion *) param[4])->SetValue(time);
   }

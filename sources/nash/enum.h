@@ -1,7 +1,10 @@
 //
-// FILE: enum.h -- Interface to Nash Enum solution module
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Algorithm to enumerate mixed strategy equilibria on normal forms
 //
 
 //
@@ -14,25 +17,31 @@
 #ifndef ENUM_H
 #define ENUM_H
 
-#include "base/base.h"
-#include "game/nfg.h"
-#include "algutils.h"
-#include "game/mixed.h"
-#include "mixedsol.h"
-#include "numerical/vertenum.h"
+#include "nfgalgorithm.h"
 
-class EnumParams : public AlgParams {
+template <class T> class nfgEnumMixed : public nfgNashAlgorithm {
+private:
+  int m_stopAfter;
+  bool m_cliques;
+
+  // Private auxiliary functions
+  bool EqZero(const T &) const;
+
 public:
-  bool cliques;
+  nfgEnumMixed(void);
+  virtual ~nfgEnumMixed() { }
+  
+  int StopAfter(void) const { return m_stopAfter; }
+  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
 
-  EnumParams(void);
+  bool Cliques(void) const { return m_cliques; }
+  void SetCliques(bool p_cliques) { m_cliques = p_cliques; }
+
+  gText GetAlgorithm(void) const { return "EnumMixed"; }
+  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
 };
 
-int Enum(const NFSupport &, const EnumParams &,
-	 gList<MixedSolution> &, gOutput &,
-	 gStatus &, long &npivots, double &time);
-
-#endif    // ENUM_H
+#endif  // ENUM_H
 
 
 

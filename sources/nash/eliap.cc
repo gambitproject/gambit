@@ -171,7 +171,7 @@ bool Liap(const Efg::Game &E, EFLiapParams &params,
 //------------------------------------------
 // Interfacing to solve-by-subgame code
 //------------------------------------------
-
+#ifdef UNUSED
 void efgLiapSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
 				gList<BehavSolution> &solns,
 				gStatus &p_status)
@@ -226,7 +226,5 @@ efgLiapSolve::efgLiapSolve(const Efg::Game &E, const EFLiapParams &p,
   }   
 
 }
-
-efgLiapSolve::~efgLiapSolve()   { }
-
+#endif  // UNUSED
 

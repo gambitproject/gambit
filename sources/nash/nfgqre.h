@@ -10,10 +10,7 @@
 #ifndef NFGQRE_H
 #define NFGQRE_H
 
-#include "base/base.h"
-
-#include "game/nfg.h"
-#include "mixedsol.h"
+#include "nfgalgorithm.h"
 
 //
 // A useful function for QRE stability analysis
@@ -22,7 +19,7 @@ void QreJacobian(const Nfg &p_nfg,
 		 const MixedProfile<double> &p_profile,
 		 const double &p_nu, gMatrix<double> &p_matrix);
 
-class QreNfg {
+class nfgQre : public nfgNashAlgorithm {
 private:
   double m_maxLam, m_stepSize;
   bool m_fullGraph;
@@ -31,12 +28,10 @@ private:
   void SolveStep(MixedProfile<double> &p_profile, double &p_nu,
 		 double, double) const;
 		 
-
 public:
-  // LIFECYCLE
-  QreNfg(void);
+  nfgQre(void);
+  virtual ~nfgQre() { }
 
-  // ACCESSING AND SETTING ALGORITHM PARAMETERS
   double GetMaxLambda(void) const { return m_maxLam; }
   void SetMaxLambda(double p_maxLam) { m_maxLam = p_maxLam; }
 
@@ -46,9 +41,8 @@ public:
   bool GetFullGraph(void) const { return m_fullGraph; }
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
 
-  // RUN THE ALGORITHM
-  void Solve(const NFSupport &p_support, gOutput &p_pxifile,
-	     gStatus &p_status, gList<MixedSolution> &);
+  gText GetAlgorithm(void) const { return "Qre"; }
+  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
 };  
 
 #endif  // NFGQRE_H

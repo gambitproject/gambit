@@ -9,19 +9,15 @@ libnash_a_SOURCES = \
 	behavextend.cc \
 	behavsol.cc \
 	clique.cc \
-	csumsub.cc \
 	efgalleq.cc \
 	efgcsum.cc \
 	efgpure.cc \
 	efgqre.cc \
 	eliap.cc \
 	enum.cc \
-	enumsub.cc \
 	epolenum.cc \
 	lemke.cc \
-	lemkesub.cc \
 	lhtab.cc \
-	liapsub.cc \
 	mixedsol.cc \
 	nfgalleq.cc \
 	nfgcsum.cc \
@@ -29,13 +25,17 @@ libnash_a_SOURCES = \
 	nfgqre.cc \
 	nfgqregrid.cc \
 	nliap.cc \
-	polensub.cc \
 	polenum.cc \
-	psnesub.cc \
 	seqeq.cc \
 	seqform.cc \
 	simpdiv.cc \
-	simpsub.cc \
 	subsolve.cc
+
+
+#	csumsub.cc \
+#	lemkesub.cc \
+#	liapsub.cc \
+#	polensub.cc \
+#	simpsub.cc \
 
 

@@ -1,34 +1,37 @@
 //
-// FILE: nliap.cc -- Implementation of Liapunov algorithm for normal forms
+// $Source$
+// $Date$
+// $Revision$
 //
-//  $Id$
+// DESCRIPTION:
+// Compute Nash equilibria by minimizing Liapunov function
 //
 
-#include "nliap.h"
 #include "numerical/gfunc.h"
+#include "nliap.h"
 
-NFLiapParams::NFLiapParams(void)
-  : nTries(10)
-{ }
+//---------------------------------------------------------------------
+//                        class NFLiapFunc
+//---------------------------------------------------------------------
 
 class NFLiapFunc : public gC2Function<double>   {
-  private:
-    long _nevals;
-    const Nfg &_nfg;
-    MixedProfile<double> _p;
+private:
+  long _nevals;
+  const Nfg &_nfg;
+  MixedProfile<double> _p;
 
-    double Value(const gVector<double> &);
+  double Value(const gVector<double> &);
 
-    double LiapDerivValue(int, int, const MixedProfile<double> &);
+  double LiapDerivValue(int, int, const MixedProfile<double> &);
     
-    bool Deriv(const gVector<double> &, gVector<double> &);
-    bool Hessian(const gVector<double> &, gMatrix<double> &);
+  bool Deriv(const gVector<double> &, gVector<double> &);
+  bool Hessian(const gVector<double> &, gMatrix<double> &);
 
-  public:
-    NFLiapFunc(const Nfg &, const MixedProfile<double> &);
-    virtual ~NFLiapFunc();
+public:
+  NFLiapFunc(const Nfg &, const MixedProfile<double> &);
+  virtual ~NFLiapFunc();
     
-    long NumEvals(void) const  { return _nevals; }
+  long NumEvals(void) const  { return _nevals; }
 };
 
 NFLiapFunc::NFLiapFunc(const Nfg &N,
@@ -150,6 +153,10 @@ static void PickRandomProfile(MixedProfile<double> &p)
   }
 }
 
+//---------------------------------------------------------------------
+//                  class nfgLiap: Member functions
+//---------------------------------------------------------------------
+
 extern bool DFP(gPVector<double> &p,
 		gC2Function<double> &func,
 		double &fret, int &iter,
@@ -157,67 +164,59 @@ extern bool DFP(gPVector<double> &p,
 		gOutput &tracefile, int tracelevel, bool interior,
 		gStatus &status);
 
+nfgLiap::nfgLiap(void)
+  : m_stopAfter(1), m_numTries(10), m_maxits1(100), m_maxitsN(20),
+    m_tol1(2.0e-10), m_tolN(1.0e-10)
+{ }
 
-bool Liap(const Nfg &N, NFLiapParams &params,
-	  const MixedProfile<gNumber> &start,
-	  gList<MixedSolution> &solutions, gStatus &p_status,
-	  long &nevals, long &niters)
+gList<MixedSolution> nfgLiap::Solve(const NFSupport &p_support,
+				    gStatus &p_status)
 {
   static const double ALPHA = .00000001;
-  MixedProfile<double> p(start.Support());
-  for (int i = 1; i <= p.Length(); i++)
-    p[i] = start[i];
-
-  NFLiapFunc F(N, p);
+  MixedProfile<double> p(p_support);
+  NFLiapFunc F(p.Game(), p);
 
   // if starting vector not interior, perturb it towards centroid
   int kk;
-  for(kk=1;kk <= p.Length() && p[kk]>ALPHA;kk++);
-  if(kk<=p.Length()) {
-    MixedProfile<double> c(start.Support());
-    for(int k=1;k<=p.Length();k++)
-      p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
-  }
-
-  double value;
-  int iter;
-  bool found = false;
-
-  solutions.Flush();
-
-  for (int i = 1;  
-       (params.nTries == 0 || i <= params.nTries) &&
-	 (params.stopAfter==0 || solutions.Length() < params.stopAfter);
-       i++) { 
-    p_status.Get();
-    if (i > 1) PickRandomProfile(p);
-    
-    if (params.trace>0)
-      *params.tracefile << "\nTry #: " << i << " p: ";
-    
-    if ((found = DFP(p, F, value, iter, params.maxits1, params.tol1,
-		     params.maxitsN, params.tolN, *params.tracefile,
-		     params.trace-1, false, p_status)) == true)  {
-      bool add = true;
-      int ii = 1;
-      while (ii <= solutions.Length() && add == true) {
-	if (solutions[ii].Equals(p)) 
-	  add = false;
-	  ii++;
-	}
-
-      if (add)  {
-	if(params.trace>0)
-	  *params.tracefile << p;
-      
-	int index = solutions.Append(MixedSolution(p, algorithmNfg_LIAP));
-	solutions[index].SetEpsilon( params.Accuracy() );
-      }
+  for (kk = 1; kk <= p.Length() && p[kk] > ALPHA; kk++);
+  if (kk <= p.Length()) {
+    MixedProfile<double> centroid(p.Support());
+    for (int k = 1; k <= p.Length(); k++) {
+      p[k] = centroid[k] * ALPHA + p[k] * (1.0-ALPHA);
     }
   }
 
-  nevals = F.NumEvals();
-  niters = 0L;
+  gList<MixedSolution> solutions;
 
-  return found;
+  for (int i = 1; ((m_numTries == 0 || i <= m_numTries) &&
+		   (m_stopAfter == 0 || solutions.Length() < m_stopAfter));
+       i++) { 
+    p_status.Get();
+
+    double value;
+    int iter;
+
+    if (DFP(p, F, value, iter, m_maxits1, m_tol1,
+	    m_maxitsN, m_tolN, gnull, 0, false, p_status)) {
+      bool add = true;
+      int ii = 1;
+      while (ii <= solutions.Length() && add) {
+	if (solutions[ii].Equals(p)) {
+	  add = false;
+	  break;
+	}
+	ii++;
+      }
+
+      if (add)  {
+	int index = solutions.Append(MixedSolution(p, algorithmNfg_LIAP));
+      }
+    }
+    PickRandomProfile(p);
+  }
+
+  return solutions;
 }
+
+
+

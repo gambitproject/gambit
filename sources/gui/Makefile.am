@@ -5,15 +5,6 @@ bin_PROGRAMS = gambit
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
 gambit_SOURCES = \
-	algenumpure.cc \
-	algenummixed.cc \
-	alglcp.cc \
-	algliap.cc \
-	alglp.cc \
-	algpolenum.cc \
-	algqre.cc \
-	algqregrid.cc \
-	algsimpdiv.cc \
 	behavfilter.cc \
 	dleditbehav.cc \
 	dleditcont.cc \
@@ -22,7 +13,7 @@ gambit_SOURCES = \
 	dleditmove.cc \
 	dleditnode.cc \
 	dlefg.cc \
-	dlefgstandard.cc \
+	dlefgnash.cc \
 	dlelimbehav.cc \
 	dlelimmixed.cc \
 	dlinsertmove.cc \
@@ -52,13 +43,23 @@ gambit_SOURCES = \
 	userprefs.cc \
 	wxio.cc
 
+#	algenumpure.cc \
+#	algenummixed.cc \
+#	alglcp.cc \
+#	algliap.cc \
+#	alglp.cc \
+#	algpolenum.cc \
+#	algqre.cc \
+#	algqregrid.cc \
+#	algsimpdiv.cc \
+
 gambit_LDADD = \
 	$(top_builddir)/sources/guishare/libguishare.a \
 	$(top_builddir)/sources/nash/libnash.a \
-	$(top_builddir)/sources/numerical/libnumerical.a \
 	$(top_builddir)/sources/game/libgame.a \
 	$(top_builddir)/sources/poly/libpoly.a \
 	$(top_builddir)/sources/pelican/libpelican.a \
+	$(top_builddir)/sources/numerical/libnumerical.a \
 	$(top_builddir)/sources/math/libmath.a \
 	$(top_builddir)/sources/base/libbase.a
 

@@ -1,7 +1,10 @@
 //
-// FILE: efgpure.h -- Interface to pure-strategy Nash equilibrium finder
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Compute pure-strategy Nash equilibria on extensive form games
 //
 
 #ifndef EFGPURE_H
@@ -9,21 +12,18 @@
 
 #include "base/base.h"
 #include "base/gstatus.h"
-#include "game/efg.h"
-#include "behavsol.h"
-#include "subsolve.h"
+#include "efgalgorithm.h"
 
-class efgEnumPure : public SubgameSolver  {
+class efgEnumPure : public efgNashAlgorithm {
 private:
   int m_stopAfter;
 
-  void SolveSubgame(const FullEfg &, const EFSupport &,
-		    gList<BehavSolution> &, gStatus &);
-  EfgAlgType AlgorithmID(void) const { return algorithmEfg_ENUMPURE_EFG; }
-
 public:
-  efgEnumPure(int p_stopAfter);
-  virtual ~efgEnumPure();
+  efgEnumPure(void) : m_stopAfter(0) { }
+  virtual ~efgEnumPure() { }
+
+  gText GetAlgorithm(void) const { return "EnumPure[EFG]"; }
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
 };
 
 #endif    // EFGPURE_H

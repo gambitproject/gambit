@@ -1,24 +1,32 @@
 //
-// FILE: nfgalleq.h -- enumerates all Nash equilibria, assuming genericity
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Enumerates all Nash equilibria in a normal form game, via solving
+// systems of polynomial equations
 //
 
 #ifndef NFGALLEQ_H
 #define NFGALLEQ_H
 
-#include "base/base.h"
-#include "base/gstatus.h"
-#include "game/nfg.h"
-#include "game/mixed.h"
-#include "mixedsol.h"
-#include "game/nfgensup.h"
-#include "polenum.h" 
+#include "nfgalgorithm.h"
 
-int AllNashSolve(const NFSupport &, const PolEnumParams &, 
-		 gList<MixedSolution> &, gStatus &, 
-		 long &nevals, double &time,
-		 gList<const NFSupport> &singular_supports);
+class nfgPolEnum : public nfgNashAlgorithm {
+private:
+  int m_stopAfter;
+
+public:
+  nfgPolEnum(void);
+  virtual ~nfgPolEnum() { }
+
+  int StopAfter(void) const { return m_stopAfter; }
+  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
+
+  gText GetAlgorithm(void) const { return "PolEnum"; }
+  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+};
 
 #endif    // NFGALLEQ_H
 

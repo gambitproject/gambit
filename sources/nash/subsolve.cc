@@ -1,18 +1,19 @@
 //
-// FILE: subsolve.cc -- Implementation of solve-by-subgame algorithms
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Compute Nash equilibria of an extensive form game by recursively
+// solving subgames
 //
 
 #include "base/base.h"
-#include "base/gsignal.h"
-#include "game/efg.h"
-#include "game/efgutils.h"
-#include "game/nfg.h"
-#include "game/nfstrat.h"
-#include "math/rational.h"
-
 #include "subsolve.h"
+
+//-----------------------------------------------------------------------
+//               SubgameSolver: Private member functions
+//-----------------------------------------------------------------------
 
 void SubgameSolver::FindSubgames(const EFSupport &p_support,
 				 gStatus &p_status,
@@ -49,32 +50,23 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support,
     gList<BehavProfile<gNumber> > newsolns;
     gList<gArray<Efg::Outcome> > newsubrootvalues;
     
-    for (int soln = 1; soln <= thissolns.Length() &&
-	 (max_solns == 0 || newsolns.Length() <= max_solns);
-	 soln++)
-      for (int subsoln = 1; subsoln <= subsolns.Length() &&
-	   (max_solns == 0 || newsolns.Length() <= max_solns); subsoln++)  {
+    for (int soln = 1; soln <= thissolns.Length(); soln++) {
+      for (int subsoln = 1; subsoln <= subsolns.Length(); subsoln++) {
 	BehavProfile<gNumber> bp(thissolns[soln]);
 	BehavProfile<gNumber> tmp(*subsolns[subsoln].Profile());
-	for (int j = 1; j <= bp.Length(); j++)
+	for (int j = 1; j <= bp.Length(); j++) {
 	  bp[j] += tmp[j];
+	}
 	newsolns.Append(bp);
 	
 	newsubrootvalues.Append(subrootvalues[soln]);
 	newsubrootvalues[newsubrootvalues.Length()][i] = subvalues[subsoln];
       }
+    }
     
     thissolns = newsolns;
     subrootvalues = newsubrootvalues;
   }
-  
-  assert(n->GetSubgameRoot() == n);
-  
-  // This is here to allow called hook code to figure out which subgame
-  // is currently being solved.  The number should correspond to the index
-  // of the subgame in the list returned by SubgameRoots().
-  
-  subgame_number++;
   
   for (int soln = 1; soln <= thissolns.Length(); soln++)   {
     for (i = 1; i <= subroots.Length(); i++) {
@@ -122,22 +114,43 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support,
       }
     }
 
-    ViewSubgame(subgame_number, foo, subsupport);
-    
     gList<BehavSolution> sol;
 
     bool interrupted = false;
 
     try {
-      SolveSubgame(foo, subsupport, sol, p_status);
-      SelectSolutions(subgame_number, foo, sol);
+      if (m_efgAlgorithm) {
+	sol = m_efgAlgorithm->Solve(subsupport, p_status);
+      }
+      else if (m_nfgAlgorithm) {
+	Nfg *nfg = MakeReducedNfg(subsupport);
+	NFSupport support(*nfg);
+
+	gList<MixedSolution> nfgSolutions;
+
+	try {
+	  nfgSolutions = m_nfgAlgorithm->Solve(support, p_status);
+	}
+	catch (gSignalBreak &) {
+	  delete nfg;
+	  throw;
+	}
+
+	for (int soln = 1; soln <= nfgSolutions.Length(); soln++) {
+	  MixedProfile<gNumber> profile(*nfgSolutions[soln].Profile());
+	  sol.Append(BehavProfile<gNumber>(profile));
+	}
+
+	delete nfg;
+      }
+      //      SolveSubgame(foo, subsupport, sol, p_status);
+      //      SelectSolutions(subgame_number, foo, sol);
     }
     catch (gSignalBreak &) {
       interrupted = true;
     }
     
     // put behav profile in "total" solution here...
-    
     if (sol.Length() == 0)  {
       solns.Flush();
       return;
@@ -180,7 +193,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support,
       }
       
       int j = solns.Length();
-      solns[j].SetCreator((EfgAlgType) AlgorithmID());
+      //      solns[j].SetCreator((EfgAlgType) AlgorithmID());
 
       gVector<gNumber> subval(foo.NumPlayers());
       for (i = 1; i <= foo.NumPlayers(); i++)  {
@@ -205,39 +218,23 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support,
   efg.DeleteTree(n);
 }
 
-// These are dummies... for specific applications, these can be overriden
-// in derived classes to allow interactive access to the solution process
+//-----------------------------------------------------------------------
+//                      SubgameSolver: Lifecycle
+//-----------------------------------------------------------------------
 
-// This is called immediately after the subgame is constructed in the
-// solution process. 
+SubgameSolver::~SubgameSolver()
+{
+  if (m_efgAlgorithm) {
+    delete m_efgAlgorithm;
+  }
+  else if (m_nfgAlgorithm) {
+    delete m_nfgAlgorithm;
+  }
+}
 
-void SubgameSolver::ViewSubgame(int, const FullEfg &, EFSupport &)
-{ }
-
-// This is called in the normal-form solution modules after the normal
-// form is constructed.  Note especially that the Nfg is passed
-// non-const, so that strategies may be eliminated as seen fit.
-// It is assumed that the NFSupport returned is "sensible"
-
-void SubgameSolver::ViewNormal(const Nfg &, NFSupport &)
-{ }
-// This is called for each subgame after the solutions have been computed
-// The idea is for the called code to possibly allow for viewing or
-// selection of "interesting" equilibria for further computation during
-// the process.  Again, there is no restriction that one can't
-// muck about with the solution list in "bad" ways using this.
-// Caveat utor!
-
-void SubgameSolver::SelectSolutions(int, const FullEfg &,
-				       gList<BehavSolution> &)
-{ }
-
-SubgameSolver::SubgameSolver(int max)
-  : max_solns(max)
-{ }
-
-SubgameSolver::~SubgameSolver()  
-{ }
+//-----------------------------------------------------------------------
+//               SubgameSolver: Public member functions
+//-----------------------------------------------------------------------
 
 gList<BehavSolution> SubgameSolver::Solve(const EFSupport &p_support,
 					  gStatus &p_status)
@@ -245,8 +242,6 @@ gList<BehavSolution> SubgameSolver::Solve(const EFSupport &p_support,
   gWatch watch;
 
   solutions.Flush();
-  subgame_number = 0;
-
   gList<Efg::Outcome> values;
 
   solution = new BehavProfile<gNumber>(p_support);
@@ -277,13 +272,27 @@ gList<BehavSolution> SubgameSolver::Solve(const EFSupport &p_support,
   }
   catch (gSignalBreak &) { }
 
-  for (int i = 1; i <= efg.NumPlayers(); i++)
+  for (int i = 1; i <= efg.NumPlayers(); i++) {
     delete infosets[i];
+  }
 
   delete solution;
 
   time = watch.Elapsed();
   return solutions;
+}
+
+gText SubgameSolver::GetAlgorithm(void) const
+{
+  if (m_efgAlgorithm) {
+    return m_efgAlgorithm->GetAlgorithm();
+  }
+  else if (m_nfgAlgorithm) {
+    return m_nfgAlgorithm->GetAlgorithm();
+  }
+  else {
+    return "";
+  }
 }
 
 

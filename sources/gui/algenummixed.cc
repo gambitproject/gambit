@@ -14,7 +14,7 @@
 #include "wx/notebook.h"
 #include "guishare/valinteger.h"
 #include "guishare/wxstatus.h"
-#include "algenumpure.h"
+#include "algenummixed.h"
 #include "nash/enumsub.h"  // for efg via nfg
 #include "nash/enum.h"  // for normal-form algorithm
 
@@ -201,7 +201,8 @@ bool EnumMixedNfg(wxWindow *p_parent,
     try {
       long npivots;
       double time;
-      Enum(p_support, params, p_solutions, gnull, status, npivots, time);
+      nfgEnumMixed algorithm;
+      p_solutions = algorithm.Solve(p_support, status);
     }
     catch (gSignalBreak &) { }
     return true;

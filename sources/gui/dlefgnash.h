@@ -7,38 +7,35 @@
 // Dialog for selecting algorithms to compute Nash equilibria
 //
 
-#ifndef DLNFGNASH_H
-#define DLNFGNASH_H
+#ifndef DLEFGNASH_H
+#define DLEFGNASH_H
 
 #include "wx/treectrl.h"
 #include "base/gmap.h"
-#include "nash/nfgalgorithm.h"
+#include "nash/efgalgorithm.h"
 
-class panelNfgNashAlgorithm;
+class panelEfgNashAlgorithm;
 
-class dialogNfgNash : public wxDialog {
+class dialogEfgNash : public wxDialog {
 private:
   wxTreeCtrl *m_algorithmTree;
   wxPanel *m_fooPanel, *m_currentPanel;
-  gOrdMap<wxTreeItemId, panelNfgNashAlgorithm *> m_algorithms;
+  gOrdMap<wxTreeItemId, panelEfgNashAlgorithm *> m_algorithms;
 
   // Private auxiliary functions
-  void LoadAlgorithms(const Nfg &);
+  void LoadAlgorithms(void);
 
   // Event handlers
   void OnSelectionChanged(wxTreeEvent &);
 
 public:
   // Lifecycle
-  dialogNfgNash(wxWindow *, const NFSupport &);
+  dialogEfgNash(wxWindow *, const EFSupport &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  efgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
 
-
-
-#endif   // DLNFGNASH_H
-
+#endif   // DLEFGNASH_H

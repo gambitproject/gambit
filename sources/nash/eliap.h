@@ -22,6 +22,7 @@ public:
   EFLiapParams(void);
 };
 
+#ifdef UNUSED
 class efgLiapSolve : public SubgameSolver  {
 private:
   int nevals, subgame_number;
@@ -40,6 +41,7 @@ public:
   
   int NumEvals(void) const   { return nevals; }
 };
+#endif  // UNUSED
 
 #endif    // ELIAP_H
 

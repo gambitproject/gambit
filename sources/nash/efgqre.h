@@ -10,10 +10,7 @@
 #ifndef EFGQRE_H
 #define EFGQRE_H
 
-#include "base/base.h"
-
-#include "game/efg.h"
-#include "behavsol.h"
+#include "efgalgorithm.h"
 
 //
 // Computes a branch of the agent logistic quantal response equilibrium 
@@ -24,16 +21,15 @@
 // be added.
 //
 
-class QreEfg {
+class efgQre : public efgNashAlgorithm {
 private:
   double m_maxLam, m_stepSize;
   bool m_fullGraph;
 
 public:
-  // LIFECYCLE
-  QreEfg(void);
+  efgQre(void);
+  virtual ~efgQre() { }
 
-  // ACCESSING AND SETTING ALGORITHM PARAMETERS
   double GetMaxLambda(void) const { return m_maxLam; }
   void SetMaxLambda(double p_maxLam) { m_maxLam = p_maxLam; }
 
@@ -43,16 +39,9 @@ public:
   bool GetFullGraph(void) const { return m_fullGraph; }
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
 
-  // RUN THE ALGORITHM
-  void Solve(const Efg::Game &p_efg, gOutput &p_pxifile,
-	     gStatus &p_status, gList<BehavSolution> &p_solutions);
+  gText GetAlgorithm(void) const { return "Qre[EFG]"; }
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
 };
-
-#ifdef WITH_KQRE
-void KQre(const Efg::Game &E, EFQreParams &params, gOutput &,
-	  const BehavProfile<gNumber> &start, gList<BehavSolution> &solutions, 
-	  gStatus &, long &nevals, long &nits);
-#endif  // WITH_KQRE
 
 #endif   // EFGQRE_H
 

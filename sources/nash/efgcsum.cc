@@ -42,20 +42,6 @@ static int _CSSeqForm(const EFSupport &support, const CSSeqFormParams &params,
   return 1;
 }    
 
-void efgLpSolve::SolveSubgame(const FullEfg &/*E*/, const EFSupport &sup,
-			      gList<BehavSolution> &solns, gStatus &p_status)
-{
-  int npiv;
-  double time;
-  _CSSeqForm(sup, params, solns, p_status, npiv, time);
-  npivots += npiv;
-}
-
-efgLpSolve::efgLpSolve(const CSSeqFormParams &p, int max)
-  : SubgameSolver(max), npivots(0), params(p)
-{ }
-
-efgLpSolve::~efgLpSolve()   { }
 
 template class CSSeqFormModule<double>;
 template class CSSeqFormModule<gRational>;

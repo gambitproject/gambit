@@ -141,28 +141,6 @@ int AllEFNashSolve(const EFSupport &S, const EfgPolEnumParams &params,
 }
 
 
-void efgPolEnumSolve::SolveSubgame(const FullEfg &, const EFSupport &p_support,
-				   gList<BehavSolution> &p_solutions,
-				   gStatus &p_status)
-{
-  long nevals;
-  double time;
-  gList<const EFSupport> singularSupports;
-
-  AllEFNashSolve(p_support, params, p_solutions, p_status,
-		 nevals, time, singularSupports);
-}
-
-efgPolEnumSolve::efgPolEnumSolve(const EfgPolEnumParams &p_params, int p_max)
-  : SubgameSolver(p_max), params(p_params)
-{ }
-
-efgPolEnumSolve::~efgPolEnumSolve() { }
-
-
-
-
-
 
 
 

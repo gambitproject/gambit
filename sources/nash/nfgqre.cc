@@ -359,20 +359,21 @@ void TracePath(const MixedProfile<double> &p_start,
   }
 }
 
-QreNfg::QreNfg(void)
+nfgQre::nfgQre(void)
   : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
 { }
 
-void QreNfg::SolveStep(MixedProfile<double> &p_profile, double &p_nu,
+void nfgQre::SolveStep(MixedProfile<double> &p_profile, double &p_nu,
 		       double p_initialSign, double p_stepsize) const
 {
 }
 
-void QreNfg::Solve(const NFSupport &p_support, gOutput &p_pxiFile,
-		   gStatus &p_status, gList<MixedSolution> &p_solutions)
+gList<MixedSolution> nfgQre::Solve(const NFSupport &p_support,
+				   gStatus &p_status)
 {
+  gList<MixedSolution> solutions;
   MixedProfile<double> profile(p_support);
-  WritePXIHeader(p_pxiFile, p_support.Game());
+  WritePXIHeader(gnull, p_support.Game());
 
   try {
     TracePath(profile, 0.0, m_maxLam);
@@ -405,5 +406,7 @@ void QreNfg::Solve(const NFSupport &p_support, gOutput &p_pxiFile,
   if (!m_fullGraph) { 
     //    p_corresp.Append(1, nu / (1.0-nu), MixedSolution(profile, algorithmNfg_QRE));
   }
+
+  return solutions;
 }
 

@@ -20,6 +20,7 @@ public:
 
 #include "subsolve.h"
 
+#ifdef UNUSED
 class efgLpSolve : public SubgameSolver  {
 private:
   long npivots;
@@ -35,7 +36,7 @@ public:
   
   long NumPivots(void) const  { return npivots; }
 };
-
+#endif  // UNUSED
 
 #endif    // EFGCSUM_H
 

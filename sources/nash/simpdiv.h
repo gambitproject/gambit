@@ -1,69 +1,51 @@
 //
-// FILE: simpdiv.h -- Interface to Simpdiv solution module
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Compute Nash equilibria via simplicial subdivision on the normal form
 //
 
 #ifndef SIMPDIV_H
 #define SIMPDIV_H
 
-#include "base/base.h"
-#include "game/nfg.h"
-#include "algutils.h"
-#include "mixedsol.h"
+#include "nfgalgorithm.h"
 
-class SimpdivParams : public AlgParams {
+template <class T> class nfgSimpdiv : public nfgNashAlgorithm {
+private:
+  int m_nRestarts, m_leashLength;
+
+  int t, ibar;
+  T pay,d,maxz,bestz,mingrid;
+
+  T Simplex(MixedProfile<T> &);
+  T getlabel(MixedProfile<T> &yy, gArray<int> &, gPVector<T> &);
+  void update(gRectArray<int> &, gRectArray<int> &, gPVector<T> &,
+	      const gPVector<int> &, int j, int i);
+  void getY(MixedProfile<T> &x, gPVector<T> &, 
+	    const gPVector<int> &, const gPVector<int> &, 
+	    const gPVector<T> &, const gRectArray<int> &, int k);
+  void getnexty(MixedProfile<T> &x, const gRectArray<int> &,
+		const gPVector<int> &, int i);
+  int get_c(int j, int h, int nstrats, const gPVector<int> &);
+  int get_b(int j, int h, int nstrats, const gPVector<int> &);
+  
 public:
-  int nRestarts, leashLength;
-  
-  SimpdivParams(void);
+  nfgSimpdiv(void);
+  virtual ~nfgSimpdiv();
+
+  int NumRestarts(void) const { return m_nRestarts; }
+  void SetNumRestarts(int p_nRestarts) { m_nRestarts = p_nRestarts; }
+
+  int LeashLength(void) const { return m_leashLength; }
+  void SetLeashLength(int p_leashLength) { m_leashLength = p_leashLength; }
+
+  gText GetAlgorithm(void) const { return "Simpdiv"; }
+  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
 };
 
-template <class T> class SimpdivModule  {
-  private:
-    const Nfg &N;
-    const SimpdivParams &params;
-    const NFSupport &support;
-
-    MixedProfile<T> y;
-    long leash;
-    int t, nplayers, ibar, nevals, nits;
-    T pay,d,maxz,bestz,mingrid;
-    double time;
-    gArray<int> nstrats,ylabel;
-//    gVector<T> M;
-    gRectArray<int> labels,pi;
-    gPVector<int> U,TT;
-    gPVector<T> ab,besty,v;
-
-    gList<MixedSolution> solutions;
-
-    T simplex(void);
-    T getlabel(MixedProfile<T> &yy);
-    void update(int j, int i);
-    void getY(MixedProfile<T> &x,int k);
-    void getnexty(MixedProfile<T> &x,int i);
-    int get_c(int j, int h);
-    int get_b(int j, int h);
-  
-  public:
-    SimpdivModule(const NFSupport &N, const SimpdivParams &);
-    virtual ~SimpdivModule();
-
-    int NumEvals(void) const  { return nevals; }
-    int NumIters(void) const  { return nits; }
-    double Time(void) const   { return time; }
-
-    int Simpdiv(gStatus &);
-    const gList<MixedSolution> &GetSolutions(void) const  { return solutions; }
-};
-
-int Simpdiv(const NFSupport &, const SimpdivParams &,
-	    gList<MixedSolution> &, gStatus &,
-	    int &nevals, int &niters, double &time);
-
-
-#endif    // SIMPDIV_H
+#endif  // SIMPDIV_H
 
 
 

@@ -36,24 +36,6 @@ int _SeqForm(const EFSupport &support, const SeqFormParams &params,
   return 1;
 }
 
-void efgLcpSolve::SolveSubgame(const FullEfg &/*E*/, const EFSupport &sup,
-			       gList<BehavSolution> &solns,
-			       gStatus &p_status)
-{
-  int npiv;
-  double time;
-  _SeqForm(sup, params, solns, p_status, npiv, time);
-
-  npivots += npiv;
-}
-
-efgLcpSolve::efgLcpSolve(const SeqFormParams &p, int max)
-  : SubgameSolver(max), npivots(0), params(p)
-{ }
-
-efgLcpSolve::~efgLcpSolve()   { }
-
-
 template class SeqFormModule<double>;
 template class SeqFormModule<gRational>;
 

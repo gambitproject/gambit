@@ -650,7 +650,7 @@ gOutput &operator<<(gOutput &p_file, const BehavSolution &p_solution)
 
 SubgamePerfectChecker::SubgamePerfectChecker(const Efg::Game &E, const BehavProfile<gNumber> &s,
 					     const gNumber & epsilon)
-  : SubgameSolver(1), subgame_number(0), eps(epsilon),  
+  : subgame_number(0), eps(epsilon),  
     isSubgamePerfect(triTRUE), infoset_subgames(E.NumInfosets()), start(s)
 {
   MarkedSubgameRoots(E, oldroots);

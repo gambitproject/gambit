@@ -22,6 +22,7 @@ int AllEFNashSolve(const EFSupport &, const EfgPolEnumParams &,
 		   gList<const EFSupport> &singular_supports);
 
 
+#ifdef UNUSED
 class efgPolEnumSolve : public SubgameSolver  {
 private:
   int npivots;
@@ -36,6 +37,7 @@ public:
   efgPolEnumSolve(const EfgPolEnumParams &, int max = 0);
   virtual ~efgPolEnumSolve();
 };
+#endif  // UNUSED
 
 #endif    // EFGALLEQ_H
 
