@@ -2164,15 +2164,10 @@ Portion* GSM_Date(Portion**)
 {
   time_t now = time(0);
   gString AscTime = asctime(localtime(&now));
-  return new TextValPortion(AscTime.mid(11, 1) + AscTime.mid(4, 21));
+  return new TextValPortion(AscTime.mid(11, 1) +
+			    AscTime.mid(4, 21) + ", " + AscTime.mid(8, 12));
 }
 
-Portion* GSM_Time(Portion**)
-{
-  time_t now = time(0);
-  gString AscTime = asctime(localtime(&now));
-  return new TextValPortion(AscTime.mid(8, 12));
-}
 
 
 
@@ -2835,8 +2830,5 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetFuncInfo( GSM_Date, 0 );
   gsm->AddFunction( FuncObj );
 
-  FuncObj = new FuncDescObj( (gString) "Time" );
-  FuncObj->SetFuncInfo( GSM_Time, 0 );
-  gsm->AddFunction( FuncObj );
 }
 
