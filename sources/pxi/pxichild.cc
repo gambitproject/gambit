@@ -27,6 +27,7 @@
 #include "dlformattitle.h"
 #include "dlformatlegend.h"
 #include "overlay.h"
+#include "series.h"
 
 //
 // wxWindows is "supposed to" pass unhandled menu commands on to
@@ -55,6 +56,7 @@ BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   EVT_MENU(PXI_FORMAT_PROFILE_AXIS, PxiChild::OnFormatProfileAxis)
   EVT_MENU(PXI_FORMAT_TITLE, PxiChild::OnFormatTitle)
   EVT_MENU(PXI_FORMAT_LEGEND, PxiChild::OnFormatLegend)
+  EVT_MENU(PXI_FORMAT_SERIES, PxiChild::OnFormatSeries)
   EVT_MENU(PXI_FORMAT_OVERLAY, PxiChild::OnFormatOverlay)
   EVT_MENU(wxID_HELP_CONTENTS, PxiChild::OnHelpContents)
   EVT_MENU(wxID_HELP_INDEX, PxiChild::OnHelpIndex)
@@ -155,6 +157,7 @@ void PxiChild::MakeMenus(void)
 		     "Format profile (vertical) axis");
   formatMenu->Append(PXI_FORMAT_TITLE, "&Title", "Format graph title");
   formatMenu->Append(PXI_FORMAT_LEGEND, "&Legend", "Format graph legend");
+  formatMenu->Append(PXI_FORMAT_SERIES, "&Series", "Format series");
   formatMenu->Append(PXI_FORMAT_OVERLAY,"&Overlay", "Format overlay");
   formatMenu->AppendSeparator();
   formatMenu->Append(PXI_FORMAT_COLORS, "&Colors", "Change Colors");
@@ -569,6 +572,17 @@ void PxiChild::OnFormatLegend(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     plot->GetLegendProperties() = dialog.GetProperties();
+    plot->Render();
+  }
+}
+
+void PxiChild::OnFormatSeries(wxCommandEvent &)
+{
+  PxiPlot *plot = GetShownPlot();
+  Series::Dialog dialog(this, plot->GetSeriesProperties());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    plot->GetSeriesProperties() = dialog.GetProperties();
     plot->Render();
   }
 }

@@ -172,10 +172,12 @@ void QreNfg::Solve(const Nfg &p_nfg, gOutput &p_pxiFile,
       QreJacobian(p_nfg, profile2, nu + nuinc1 * 0.5, H);
       QreComputeStep(p_nfg, profile, H,
 		     delta2, nuinc2, initialsign, stepsize);
-    
+
       profile += delta1 * 0.5;
       profile += delta2 * 0.5; 
       nu += 0.5 * (nuinc1 + nuinc2);
+
+      printf("%f %f %f %f\n", nu / (1.0-nu), profile.Payoff(1), profile.Payoff(2), profile.Payoff(1) + profile.Payoff(2));
 
       if (nu < 0.0 || nu > 1.0) {
 	// negative nu is probably numerical instability;

@@ -332,46 +332,43 @@ static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
 // QreGridSolve
 //------------------
 
-#include "grid.h"
+#include "nfgqregrid.h"
 
 static Portion *GSM_QreGrid_Support(GSM &gsm, Portion **param)
 {
-  NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
+  NFSupport &support = *((NfSupportPortion*) param[0])->Value();
 
-  GridParams GP;
-  
-  if(((TextPortion*) param[1])->Value() != "")
-    GP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
-  else
-    GP.pxifile = &gnull;
-  GP.minLam = ((NumberPortion *) param[2])->Value();
-  GP.maxLam = ((NumberPortion *) param[3])->Value();
-  GP.delLam = ((NumberPortion *) param[4])->Value();
-  GP.powLam = ((NumberPortion *) param[5])->Value();
-  GP.fullGraph = ((BoolPortion *) param[6])->Value();
-  GP.delp1 = ((NumberPortion *) param[7])->Value();
-  GP.tol1 = ((NumberPortion *) param[8])->Value();
-  GP.delp2 = ((NumberPortion *) param[9])->Value();
-  GP.tol2 = ((NumberPortion *) param[10])->Value();
+  gOutput *pxiFile = 0;
+  if (((TextPortion *) param[1])->Value() != "") {
+    pxiFile = new gFileOutput(((TextPortion *) param[1])->Value());
+  }
 
-  GP.multi_grid = 0;
-  if (GP.delp2 > 0.0 && GP.tol2 > 0.0)
-    GP.multi_grid = 1;
-  
+  QreNfgGrid qre;
+  qre.SetMinLambda(((NumberPortion *) param[2])->Value());
+  qre.SetMaxLambda(((NumberPortion *) param[3])->Value());
+  qre.SetDelLambda(((NumberPortion *) param[4])->Value());
+  qre.SetPowLambda(((NumberPortion *) param[5])->Value());
+  qre.SetFullGraph(((BoolPortion *) param[6])->Value());
+  qre.SetDelP1(((NumberPortion *) param[7])->Value());
+  qre.SetTol1(((NumberPortion *) param[8])->Value());
+  qre.SetDelP2(((NumberPortion *) param[9])->Value());
+  qre.SetTol2(((NumberPortion *) param[10])->Value());
+
   gList<MixedSolution> solutions;
   gsm.StartAlgorithmMonitor("QreGridSolve Progress");
 
   try {
-    GridSolve(S, GP, solutions, gsm.GetStatusMonitor());
+    qre.Solve(support, (pxiFile) ? *pxiFile : gnull,
+	      gsm.GetStatusMonitor(), solutions);
   }
   catch (gSignalBreak &) { }
   catch (...) {
-    if (GP.pxifile != &gnull)  delete GP.pxifile;
+    if (pxiFile) delete pxiFile;
     gsm.EndAlgorithmMonitor();
     throw;
   }
 
-  if (GP.pxifile != &gnull)  delete GP.pxifile;
+  if (pxiFile) delete pxiFile;
   gsm.EndAlgorithmMonitor();
 
   return new Mixed_ListPortion(solutions);

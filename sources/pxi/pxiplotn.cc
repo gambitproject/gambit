@@ -224,7 +224,7 @@ void PxiPlotN::PlotData(wxDC& dc, int x0, int y0,
 	  // Must set pen each time for now, since DrawExpPoint might
 	  // reset it
 	  dc.SetPen(wxPen(equ_colors[(st-1)%NUM_COLORS+1], 1, wxSOLID));
-	  if (GetSeriesProperties().m_connectDots &&
+	  if (GetSeriesProperties().m_connect &&
 	      prevX >= 0 && prevY >= 0) {
 	    dc.DrawLine(prevX, prevY, x, y); 
 	  }

@@ -1353,7 +1353,7 @@ bool guiefgQreEfg::SolveSetup(void)
 //========================================================================
 
 #include "dlqregrid.h"
-#include "grid.h"
+#include "nfgqregrid.h"
 
 guiefgQreAllNfg::guiefgQreAllNfg(EfgShow *p_parent)
   : guiEfgSolution(p_parent)
@@ -1363,26 +1363,22 @@ gList<BehavSolution> guiefgQreAllNfg::Solve(const EFSupport &p_support) const
 {
   wxStatus status(m_parent, "QreGridSolve Progress");
 
-  GridParams params;
-  params.minLam = m_minLam;
-  params.maxLam = m_maxLam;
-  params.delLam = m_delLam;
-  params.tol1 = m_tol1;
-  params.tol2 = m_tol2;
-  params.delp1 = m_delp1;
-  params.delp2 = m_delp2;
-  params.powLam = m_powLam;
-  params.multi_grid = m_multiGrid;
-  params.pxifile = m_pxiFile;
-  params.trace = m_traceLevel;
-  params.tracefile = m_traceFile;
+  QreNfgGrid qre;
+  qre.SetMinLambda(m_minLam);
+  qre.SetMaxLambda(m_maxLam);
+  qre.SetDelLambda(m_delLam);
+  qre.SetTol1(m_tol1);
+  qre.SetTol2(m_tol2);
+  qre.SetDelP1(m_delp1);
+  qre.SetDelP2(m_delp2);
+  qre.SetPowLambda(m_powLam);
 
   Nfg *N = MakeReducedNfg(p_support);
   NFSupport S(*N);
 
   gList<MixedSolution> nfg_solns;
   try {
-    GridSolve(S, params, nfg_solns, status);
+    qre.Solve(S, *m_pxiFile, status, nfg_solns);
   }
   catch (gSignalBreak &) { }
 

@@ -61,8 +61,6 @@ PxiPlot::PxiPlot(wxWindow *p_parent, const wxPoint &p_position,
   m_legendProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
   m_legendProp.m_color = *wxBLUE;
 
-  m_seriesProp.m_connectDots = true;
-  
   // fit to 8 1/2 x 11 inch  
   SetScale(1.0);
 

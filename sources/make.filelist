@@ -52,7 +52,7 @@ ENALG_OBJECTS = $(ENALG_SOURCES:.cc=$(OBJECT_SUFFIX))
 
 NALG_SOURCES = btableau.cc tableau.cc lptab.cc bfs.cc lemke.cc nliap.cc \
 		nfgqre.cc enum.cc simpdiv.cc ludecomp.cc nfgpure.cc lhtab.cc \
-		lemketab.cc grid.cc nfgcsum.cc lpsolve.cc nfdom.cc \
+		lemketab.cc nfgqregrid.cc nfgcsum.cc lpsolve.cc nfdom.cc \
 		nfdommix.cc vertenum.cc polenum.cc clique.cc basis.cc \
 		nfgensup.cc nfgalleq.cc lapack.cc \
                 yamamoto.cc
@@ -118,7 +118,7 @@ ALLGUI_OBJECTS = $(ALLGUI_SOURCES:.cc=$(OBJECT_SUFFIX))
 PXI_SOURCES = pxi.cc pxichild.cc \
               pxiplot.cc pxiplotn.cc pxiplot2.cc pxiplot3.cc \
               dlformataxis.cc dlformattitle.cc dlformatlegend.cc \
-              overlay.cc dleditdata.cc \
+              overlay.cc series.cc dleditdata.cc \
               equtrac.cc probvect.cc expdata.cc pxifile.cc
 
 PXI_OBJECTS = $(PXI_SOURCES:.cc=$(OBJECT_SUFFIX))

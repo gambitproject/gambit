@@ -48,6 +48,7 @@ private:
   void OnFormatProfileAxis(wxCommandEvent &);
   void OnFormatTitle(wxCommandEvent &);
   void OnFormatLegend(wxCommandEvent &);
+  void OnFormatSeries(wxCommandEvent &);
   void OnFormatOverlay(wxCommandEvent &);
   void OnFormatColors(wxCommandEvent &);
 

@@ -12,6 +12,7 @@
 
 #include "pxi.h"
 #include "overlay.h"
+#include "series.h"
 
 class PxiAxisDisplayProperties {
 public:
@@ -64,11 +65,6 @@ public:
   wxColour m_color;
 };
 
-class PxiSeriesProperties {
-public:
-  bool m_connectDots;
-};
-
 class PxiPlot : public wxScrolledWindow {
 friend class PxiChild;
 public:
@@ -98,7 +94,7 @@ protected:
   PxiTitleProperties m_titleProp;
   PxiLegendProperties m_legendProp;
   Overlay::Properties m_overlayProp;
-  PxiSeriesProperties m_seriesProp;
+  Series::Properties m_seriesProp;
 
   int Width(void) const { return (m_landscape) ? m_height : m_width; }
   int Height(void) const { return (m_landscape) ? m_width : m_height; }
@@ -132,7 +128,7 @@ public:
   PxiTitleProperties &GetTitleProperties(void) { return m_titleProp; }
   PxiLegendProperties &GetLegendProperties(void) { return m_legendProp; }
   Overlay::Properties &GetOverlayProperties(void) { return m_overlayProp; }
-  PxiSeriesProperties &GetSeriesProperties(void) { return m_seriesProp; }
+  Series::Properties &GetSeriesProperties(void) { return m_seriesProp; }
 
   bool IsStrategyShown(int iset, int st) const { return (iset == m_page); }
 

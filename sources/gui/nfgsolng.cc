@@ -605,7 +605,7 @@ bool guinfgQre::SolveSetup(void)
 //-------------
 
 #include "dlqregrid.h"
-#include "grid.h"
+#include "nfgqregrid.h"
 
 guinfgQreAll::guinfgQreAll(NfgShow *p_parent)
   : guiNfgSolution(p_parent)
@@ -615,23 +615,19 @@ gList<MixedSolution> guinfgQreAll::Solve(const NFSupport &p_support)
 {
   wxStatus status(m_parent, "QreGridSolve Progress");
 
-  GridParams params;
-  params.minLam = m_minLam;
-  params.maxLam = m_maxLam;
-  params.delLam = m_delLam;
-  params.tol1 = m_tol1;
-  params.tol2 = m_tol2;
-  params.delp1 = m_delp1;
-  params.delp2 = m_delp2;
-  params.powLam = m_powLam;
-  params.multi_grid = m_multiGrid;
-  params.pxifile = m_pxiFile;
-  params.trace = m_traceLevel;
-  params.tracefile = m_traceFile;
+  QreNfgGrid qre;
+  qre.SetMinLambda(m_minLam);
+  qre.SetMaxLambda(m_maxLam);
+  qre.SetDelLambda(m_delLam);
+  qre.SetTol1(m_tol1);
+  qre.SetTol2(m_tol2);
+  qre.SetDelP1(m_delp1);
+  qre.SetDelP2(m_delp2);
+  qre.SetPowLambda(m_powLam);
 
   gList<MixedSolution> solutions;
   try {
-    GridSolve(p_support, params, solutions, status);
+    qre.Solve(p_support, *m_pxiFile, status, solutions);
   }
   catch (gSignalBreak &) { }
   
