@@ -763,8 +763,10 @@ bool BaseEfg::DefineSubgame(Node *n)
 
 void BaseEfg::RemoveSubgame(Node *n)
 {
-  if (n->gameroot == n && n->parent)
+  if (n->gameroot == n && n->parent)  {
+    n->gameroot = 0;
     MarkSubgame(n, n->parent->gameroot);
+  }
 }
   
 
