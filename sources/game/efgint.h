@@ -92,6 +92,7 @@ struct gbt_efg_infoset_rep {
   int m_flag, m_whichbranch;
 
   gbt_efg_infoset_rep(gbt_efg_player_rep *, int id, int br);
+  ~gbt_efg_infoset_rep();
 
   void PrintActions(gbtOutput &) const;
 };

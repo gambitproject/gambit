@@ -75,7 +75,9 @@ gbtEfgAction::gbtEfgAction(const gbtEfgAction &p_action)
 {
   if (rep) {
     rep->m_refCount++;
-    rep->m_infoset->m_player->m_efg->m_refCount++;
+    if (!rep->m_deleted) {
+      rep->m_infoset->m_player->m_efg->m_refCount++;
+    }
   }
 }
 
@@ -83,10 +85,10 @@ gbtEfgAction::~gbtEfgAction()
 {
   if (rep) {
     if (--rep->m_refCount == 0 && rep->m_deleted) {
-      // delete rep;
+      delete rep;
     }
     else if (--rep->m_infoset->m_player->m_efg->m_refCount == 0) {
-      // delete rep->m_infoset->m_player->m_efg;
+      delete rep->m_infoset->m_player->m_efg;
     }
   }
 }
@@ -99,16 +101,18 @@ gbtEfgAction &gbtEfgAction::operator=(const gbtEfgAction &p_action)
 
   if (rep) {
     if (--rep->m_refCount == 0 && rep->m_deleted) {
-      // delete rep;
+      delete rep;
     }
     else if (--rep->m_infoset->m_player->m_efg->m_refCount == 0) {
-      // delete rep->m_infoset->m_player->m_efg;
+      delete rep->m_infoset->m_player->m_efg;
     }
   }
 
   if ((rep = p_action.rep) != 0) {
     rep->m_refCount++;
-    rep->m_infoset->m_player->m_efg->m_refCount++;
+    if (!rep->m_deleted) {
+      rep->m_infoset->m_player->m_efg->m_refCount++;
+    }
   }
   return *this;
 }
@@ -220,6 +224,18 @@ gbt_efg_infoset_rep::gbt_efg_infoset_rep(gbt_efg_player_rep *p_player,
     m_actions[act] = new gbt_efg_action_rep(this, act);
     if (p_player->m_id == 0) {
       m_chanceProbs[act] = gbtRational(1, p_br);
+    }
+  }
+}
+
+gbt_efg_infoset_rep::~gbt_efg_infoset_rep()
+{
+  for (int act = 1; act <= m_actions.Length(); act++) {
+    if (m_actions[act]->m_refCount == 0) {
+      delete m_actions[act];
+    }
+    else {
+      m_actions[act]->m_deleted = true;
     }
   }
 }
