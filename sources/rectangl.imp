@@ -249,6 +249,15 @@ const gRectangle<T> gRectangle<T>::SubdivisionCell(const int& index) const
   return Orthant(updowns);
 }
 
+template<class T>
+const T gRectangle<T>::DiameterSquared() const
+{
+  T answer((T)0);
+  for (int i = 1; i <= Dmnsn(); i++)
+    answer += HeightInCoord(i) * HeightInCoord(i);
+  return answer;
+}
+
 //----------------------------------
 //           Conversion
 //----------------------------------

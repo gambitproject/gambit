@@ -56,6 +56,7 @@ public:
     const gList<gVector<T> > VertexList()                       const;
     const int                NumberOfCellsInSubdivision()       const;
     const gRectangle<T>      SubdivisionCell(const int&)        const;
+    const T                  DiameterSquared()                  const;
 
     // output
 friend gOutput& operator << (gOutput& output, const gRectangle<T>& x);
