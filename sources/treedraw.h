@@ -2,7 +2,6 @@
 #define TREEDRAW_H
 #include "treecons.h"
 class TreeDrawParams   {
-friend class DisplayOptionsForm;
 	private:
 	// These are user-definable
   // Size info for different elements of the tree
@@ -22,7 +21,7 @@ friend class DisplayOptionsForm;
 	// Zoom mode;
 		float zoom_factor;
   // These are used internally
-		int x_scroll,y_scroll;
+		int x_scroll,y_scroll,xsteps,ysteps;
 		typedef struct {int pl;int cl;} player_colors_struct;
 		wxList *player_colors;
   public:
@@ -92,7 +91,10 @@ friend class DisplayOptionsForm;
 		void set_x_scroll(int xs) {x_scroll=xs;}
 		int get_x_scroll(void) {return x_scroll;}
 		void set_y_scroll(int ys) {y_scroll=ys;}
-    int get_y_scroll(void) {return y_scroll;}
+		int get_y_scroll(void) {return y_scroll;}
+		int	x_steps(void)	{return xsteps;}
+		void set_x_steps(int xs)	{xsteps=xs;}
+		int	y_steps(void)	{return ysteps;}
+		void	set_y_steps(int ys)	{ysteps=ys;}
 };
 #endif
-
