@@ -41,6 +41,80 @@ protected:
   void NodeRealizProbs(BehavNode<T> *, T, int &, gArray<T> &) const;
   void Beliefs(Node *, T, gDPVector<T> &, gPVector<T> &) const;
 
+  // USED IN TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO ANF NASH
+
+  gPolyList<gDouble> ActionProbsSumToOneIneqs(const gSpace &, 
+					      const term_order &,
+					      const EFSupport &,
+					      const gList<gList<int> > &) 
+    const;
+
+  bool ANFNodeProbabilityPoly(      gPoly<gDouble> &,
+		   	      const gSpace &, 
+			      const term_order &,
+			      const EFSupport &,
+			      const gList<gList<int> > &,
+			      const Node *,
+			      const int &pl,
+			      const int &i,
+			      const int &j) const;
+
+  gPolyList<gDouble> ANFExpectedPayoffDiffPolys(const gSpace &, 
+						const term_order&,
+						const EFSupport &,
+						const EFSupport &,
+						const gList<gList<int> > &) 
+    const;
+
+  gPolyList<gDouble> ExtendsToANFNashIneqs(const gSpace &, 
+					   const term_order&,
+					   const EFSupport&,
+					   const EFSupport&,
+					   const gList<gList<int> > &) const;
+
+  // USED IN TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO BEHAV NASH
+
+  // void BehavProfile<T>::DeviationInfosetsRECURSION(gList<const Infoset *> &,
+  void DeviationInfosetsRECURSION(gList<const Infoset *> &,
+						   const EFSupport & big_supp,
+						   const EFPlayer *pl,
+						   const Node* node,
+						   const Action *act) const;
+
+  const gList<const Infoset *> DeviationInfosets(const EFSupport &,
+						 const EFPlayer *,
+						 const Infoset *,
+						 const Action *) const;
+
+  const gList<const EFSupport> DeviationSupports(const EFSupport &,
+						 const gList<const Infoset*> &,
+						 const EFPlayer *,
+						 const Infoset *,
+						 const Action *) const;
+
+  bool NashNodeProbabilityPoly(      gPoly<gDouble> &,
+			       const gSpace &, 
+			       const term_order &,
+			       const EFSupport &,
+			       const gList<gList<int> > &,
+			       const Node *,
+			       const EFPlayer *,
+			       const Infoset *,
+			       const Action *) const;
+
+  gPolyList<gDouble> NashExpectedPayoffDiffPolys(const gSpace &, 
+						 const term_order&,
+						 const EFSupport &,
+						 const EFSupport &,
+						 const gList<gList<int> > &) 
+    const;
+
+  gPolyList<gDouble> ExtendsToNashIneqs(const gSpace &, 
+					const term_order&,
+					const EFSupport&,
+					const EFSupport&,
+					const gList<gList<int> > &) const;
+
 public:
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
   BehavProfile(const EFSupport &);
@@ -69,74 +143,8 @@ public:
 
   void Dump(gOutput &) const;
 
-  // USED IN TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO BEHAV NASH
-  gPolyList<gDouble> ActionProbsSumToOneIneqs(const gSpace &, 
-					      const term_order &,
-					      const EFSupport &,
-					      const gList<gList<int> > &) 
-    const;
-
-
-
-  void BehavProfile<T>::DeviationInfosetsRECURSION(gList<const Infoset *> &,
-						   const EFSupport & big_supp,
-						   const EFPlayer *pl,
-						   const Node* node,
-						   const Action *act) const;
-  const gList<const Infoset *> DeviationInfosets(const EFSupport &,
-						 const EFPlayer *,
-						 const Infoset *,
-						 const Action *) const;
-  const gList<const EFSupport> DeviationSupports(const EFSupport &,
-						 const gList<const Infoset*> &,
-						 const EFPlayer *,
-						 const Infoset *,
-						 const Action *) const;
-  bool NodeProbabilityPoly(      gPoly<gDouble> &,
-			   const gSpace &, 
-			   const term_order &,
-			   const EFSupport &,
-			   const gList<gList<int> > &,
-			   const Node *,
-			   const int &pl,
-			   const int &i,
-			   const int &j) const;
-  bool NashNodeProbabilityPoly(      gPoly<gDouble> &,
-			       const gSpace &, 
-			       const term_order &,
-			       const EFSupport &,
-			       const gList<gList<int> > &,
-			       const Node *,
-			       const EFPlayer *,
-			       const Infoset *,
-			       const Action *) const;
-  gPolyList<gDouble> ANFExpectedPayoffDiffPolys(const gSpace &, 
-						const term_order&,
-						const EFSupport &,
-						const EFSupport &,
-						const gList<gList<int> > &) 
-    const;
-  gPolyList<gDouble> NashExpectedPayoffDiffPolys(const gSpace &, 
-						 const term_order&,
-						 const EFSupport &,
-						 const EFSupport &,
-						 const gList<gList<int> > &) 
-    const;
-  gPolyList<gDouble> ExtendsToANFNashIneqs(const gSpace &, 
-					   const term_order&,
-					   const EFSupport&,
-					   const EFSupport&,
-					   const gList<gList<int> > &) const;
-  gPolyList<gDouble> ExtendsToNashIneqs(const gSpace &, 
-					const term_order&,
-					const EFSupport&,
-					const EFSupport&,
-					const gList<gList<int> > &) const;
-
-  // TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO ANF NASH
-  bool ExtendsToANFNash(const EFSupport &, 
-			const EFSupport &, 
-			      gStatus &) const;
+  // TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO ANF NASH, NASH
+  bool ExtendsToANFNash(const EFSupport &, const EFSupport &, gStatus &) const;
   bool ExtendsToNash(const EFSupport &, const EFSupport &, gStatus &) const;
 
   // COMPUTATION OF INTERESTING QUANTITIES

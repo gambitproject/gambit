@@ -36,34 +36,86 @@ protected:
   gPrecision m_precision;
   mutable EFSupport m_support;
   mutable EfgAlgType m_creator;
-  mutable gTriState m_isNash, m_isSubgamePerfect, m_isSequential;
-  mutable bool m_checkedNash,  m_checkedSubgamePerfect, m_checkedSequential;
+  mutable gTriState m_isANFNash, m_isNash;
+  mutable gTriState m_isSubgamePerfect, m_isSequential;
+  mutable bool m_checkedANFNash,  m_checkedNash;
+  mutable bool m_checkedSubgamePerfect, m_checkedSequential;
   mutable gNumber m_epsilon, m_qreLambda, m_qreValue, m_liapValue;
   mutable gDPVector<gNumber> *m_beliefs, *m_regret;
   unsigned int m_id;
 
   // PRIVATE AUXILIARY MEMBER FUNCTIONS
   void CheckIsNash(void) const;
+  void CheckIsANFNash(void) const;
   void LevelPrecision(void);
 
   // USED IN TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO BEHAV NASH
+
+  void DeviationInfosetsRECURSION(      gList<const Infoset *> &,
+				  const EFSupport & big_supp,
+				  const EFPlayer *pl,
+				  const Node* node,
+				  const Action *act) const;
+
+  const gList<const Infoset *> DeviationInfosets(const EFSupport &,
+						 const EFPlayer *,
+						 const Infoset *,
+						 const Action *) const;
+
+  const gList<const EFSupport> DeviationSupports(const EFSupport &,
+						 const gList<const Infoset*> &,
+						 const EFPlayer *,
+						 const Infoset *,
+						 const Action *) const;
+
+  bool NashNodeProbabilityPoly(      gPoly<gDouble> &,
+			       const gSpace &, 
+			       const term_order &,
+			       const EFSupport &,
+			       const gList<gList<int> > &,
+			       const Node *,
+			       const EFPlayer *,
+			       const Infoset *,
+			       const Action *) const;
+
+  gPolyList<gDouble> NashExpectedPayoffDiffPolys(const gSpace &, 
+						 const term_order&,
+						 const EFSupport &,
+						 const EFSupport &,
+						 const gList<gList<int> > &) 
+    const;
+
+  gPolyList<gDouble> ExtendsToNashIneqs(const gSpace &, 
+					const term_order&,
+					const EFSupport&,
+					const EFSupport&,
+					const gList<gList<int> > &) const;
+
+  // USED IN TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO ANF NASH
   gPolyList<gDouble> ActionProbsSumToOneIneqs(const gSpace &, 
 					      const term_order&,
+					      const EFSupport &,
 					      const gList<gList<int> > &) 
     const;
-  bool NodeProbabilityPoly(      gPoly<gDouble> &,
-			   const gSpace &, 
-			   const term_order&,
-			   const gList<gList<int> > &,
-			   const Node *,
-			   const int &pl,
-			   const int &i,
-			   const int &j) const;
-  gPolyList<gDouble> ExpectedPayoffDiffPolys(const gSpace &, 
-					     const term_order&,
-					     const gList<gList<int> > &) const;
+  bool ANFNodeProbabilityPoly(      gPoly<gDouble> &,
+			      const gSpace &, 
+			      const term_order&,
+			      const EFSupport &,
+			      const gList<gList<int> > &,
+			      const Node *,
+			      const int &pl,
+			      const int &i,
+			      const int &j) const;
+  gPolyList<gDouble> ANFExpectedPayoffDiffPolys(const gSpace &, 
+						const term_order&,
+						const EFSupport &,
+						const EFSupport &,
+						const gList<gList<int> > &) 
+    const;
   gPolyList<gDouble> ExtendsToANFNashIneqs(const gSpace &, 
 					   const term_order&,
+					   const EFSupport&,
+					   const EFSupport&,
 					   const gList<gList<int> > &) const;
 
 public:
@@ -103,6 +155,7 @@ public:
   EfgAlgType Creator(void) const { return m_creator; }
   EFSupport Support(void) const { return m_support; }
   gTriState IsNash(void) const;
+  gTriState IsANFNash(void) const;
   gTriState IsSubgamePerfect(void) const;
   gTriState IsSequential(void) const;
   const gNumber &Epsilon(void) const { return m_epsilon; }
@@ -135,8 +188,9 @@ public:
   const gNumber &GetValue(Infoset *s, int act) const
     { return m_profile->GetValue(s, act); }
 
-  // TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO ANF NASH
-  bool ExtendsToANFNash(gStatus &) const;
+  // TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO NASH, ANF NASH
+  bool ExtendsToNash(const EFSupport &, const EFSupport &, gStatus &) const;
+  bool ExtendsToANFNash(const EFSupport &, const EFSupport &, gStatus &) const;
 
   // OUTPUT
   void Dump(gOutput &) const;

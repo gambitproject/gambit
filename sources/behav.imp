@@ -308,33 +308,16 @@ template <class T> BehavProfile<T>::BehavProfile(const EFSupport &p_support)
     m_payoffs(new gRectArray<T>(m_efg->NumOutcomes(), m_efg->NumPlayers()))
 {
   gArray<int> dim(m_efg->GetChance()->NumInfosets());
-
-  //DEBUG
-  //gout << "We got through the construction of the gArray dim.\n\n";
-
   Centroid();
-
-  //DEBUG
-  //gout << "We got through centroid.\n\n";
-
   for (int iset = 1; iset <= dim.Length(); iset++)
     dim[iset] = m_efg->GetChance()->Infosets()[iset]->NumActions();
   delete m_chanceprobs;
   m_chanceprobs = new gPVector<T>(dim);
-
-  //DEBUG
-  //gout << "We reinitialized m_chanceprobs.\n\n";
-
   for (int iset = 1; iset <= dim.Length(); iset++)
     for (int act = 1; 
 	 act <= m_efg->GetChance()->Infosets()[iset]->NumActions(); act++)
        (*m_chanceprobs)(iset, act) = 
 	 m_efg->GetChanceProb(m_efg->GetChance()->Infosets()[iset], act);
-
-  //DEBUG
-  //gout << "We got this far at least.\n\n";
-  //exit(0);
-
   for (int outc = 1; outc <= m_efg->NumOutcomes(); outc++)
     for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)
       (*m_payoffs)(outc, pl) = m_efg->Payoff(m_efg->Outcomes()[outc], pl);
@@ -503,7 +486,7 @@ BehavProfile<T>::ActionProbsSumToOneIneqs(const gSpace &BehavStratSpace,
 }
 
 template <class T>
-bool BehavProfile<T>::NodeProbabilityPoly(      gPoly<gDouble> & node_prob,
+bool BehavProfile<T>::ANFNodeProbabilityPoly(      gPoly<gDouble> & node_prob,
 		          	          const gSpace &BehavStratSpace, 
 				          const term_order &Lex,
 					  const EFSupport &big_supp,
@@ -513,11 +496,6 @@ bool BehavProfile<T>::NodeProbabilityPoly(      gPoly<gDouble> & node_prob,
 				          const int &i,
 				          const int &j) const
 {
-  /*
-  //DEBUG
-  gout << "pl = " << pl << " while infoset = " << i << " and action = " << j << ".\n";
-  */
-
   while (tempnode != Game().RootNode()) {
 
     const Action *last_action = tempnode->GetAction();
@@ -528,36 +506,14 @@ bool BehavProfile<T>::NodeProbabilityPoly(      gPoly<gDouble> & node_prob,
     else 
       if (big_supp.HasActiveActionAt(last_infoset)) {
 	if (last_infoset == Game().GetInfosetByIndex(pl,i)) {
-	  if (j != last_action->GetNumber()) {
-
-	    /*
-	    //DEBUG
-	    gout << "Eliminated (pl,i,j) = (" <<
-	      last_infoset->GetPlayer()->GetNumber() << "," <<
-	      last_infoset->GetNumber() << "," <<
-	      last_action->GetNumber() 
-		 << ") because wrong deviation.\n";
-	    */
-	    
+	  if (j != last_action->GetNumber()) 
 	    return false;
-	  }
 	}
 	else
 	  if (big_supp.ActionIsActive((Action *)last_action))
 	    node_prob *= (gDouble)GetValue(last_action);
-	  else {
-
-	    /*
-	    //DEBUG
-	    gout << "Eliminated (pl,i,j) = (" <<
-	      last_infoset->GetPlayer()->GetNumber() << "," <<
-	      last_infoset->GetNumber() << "," <<
-	      last_action->GetNumber() 
-		 << ") because action is inactive.\n";
-	    */
-	    
+	  else 
 	    return false;
-	  }
       }
       else {
 	int initial_var_no = 
@@ -605,48 +561,22 @@ BehavProfile<T>::ANFExpectedPayoffDiffPolys(const gSpace &BehavStratSpace,
 	    gPoly<gDouble> next_poly(&BehavStratSpace, &Lex);
 
 	    for (int n = 1; n <= terminal_nodes.Length(); n++) {
-
-	      /*
-	      //DEBUG
-	      gout << "\nTerminal node " << n << " with outcome " <<
-	    	terminal_nodes[n]->GetOutcome()->GetName();
-	      gout << " has payoff " << 
-		Game().Payoff(terminal_nodes[n]->GetOutcome(),pl) << ".\n";
-	      */
-
 	      gPoly<gDouble> node_prob(&BehavStratSpace, (gDouble)1.0, &Lex);
-	      if (NodeProbabilityPoly(node_prob,
-				      BehavStratSpace,
-				      Lex,
-				      big_supp,
-				      var_index,
-				      terminal_nodes[n],
-				      pl,i,j)) {
+	      if (ANFNodeProbabilityPoly(node_prob,
+					 BehavStratSpace,
+					 Lex,
+					 big_supp,
+					 var_index,
+					 terminal_nodes[n],
+					 pl,i,j)) {
 		node_prob *= 
 		  (gDouble)Game().Payoff(terminal_nodes[n]->GetOutcome(),pl);
 		next_poly += node_prob;
-		/*
-		//DEBUG
-		gout << "It's contribution is " << node_prob << ".\n";
-		*/
 	      }
 	    }
-
-	    /*
-	    //DEBUG
-	    gout << "The player's payoff is " 
-		 << (gDouble)Payoff(pl) << ".\n\n";
-	    */
-
 	    answer += -next_poly + (gDouble)Payoff(pl);
 	  }
     }
-
-  /*
-  //DEBUG
-  gout << "The new no-deviation inequalities are\n" << answer << "\n\n";
-  */
-
   return answer;
 }
 
@@ -663,12 +593,6 @@ BehavProfile<T>::ExtendsToANFNashIneqs(const gSpace &BehavStratSpace,
 				     Lex, 
 				     big_supp, 
 				     var_index);
-
-  /*
-  //DEBUG
-  gout << "The new sum-to-one inequalities are\n" << answer;
-  */
-
   answer += ANFExpectedPayoffDiffPolys(BehavStratSpace, 
 				       Lex, 
 				       little_supp,
@@ -715,25 +639,11 @@ BehavProfile<T>::ExtendsToANFNash(const EFSupport &little_supp,
   term_order Lex(&BehavStratSpace, ptr);
 
   num_vars = BehavStratSpace.Dmnsn();
-
-  /*
-  //DEBUG
-  gout << "The new dimension is " << num_vars << ".\n";
-  */
-
   gPolyList<gDouble> inequalities = ExtendsToANFNashIneqs(BehavStratSpace,
 							  Lex,
 							  little_supp,
 							  big_supp,
 							  var_index);
-  /*
-  //DEBUG
-  gout << "The behav_profile is\n" << *this << "\n"
-       << "with support\n" << little_supp << "\n";
-
-  gout << "The dimension is " << inequalities.Dmnsn()
-       << " and the system is\n" << inequalities << "\n";
-  */
 
   // set up the rectangle of search
   gVector<gDouble> bottoms(num_vars), tops(num_vars);
@@ -844,10 +754,6 @@ BehavProfile<T>::DeviationSupports(const EFSupport & big_supp,
 	int h = 1;
 	bool active = true;
 	while (active && h < k) {
-
-	  //DEBUG
-	  gout << "Entering while(active && h < k) ...\n";
-
 	  if (isetlist[h]->Precedes(isetlist[k]->GetMember(1)))
 	    if (active_act_no[h] == 0 || 
 		!isetlist[h]->GetAction(active_act_no[h])->
@@ -1005,11 +911,6 @@ BehavProfile<T>::ExtendsToNashIneqs(const gSpace &BehavStratSpace,
 				     big_supp, 
 				     var_index);
 
-  /*
-  //DEBUG
-  gout << "The new sum-to-one inequalities are\n" << answer;
-  */
-
   answer += NashExpectedPayoffDiffPolys(BehavStratSpace, 
 				    Lex, 
 				    little_supp,
@@ -1057,25 +958,11 @@ BehavProfile<T>::ExtendsToNash(const EFSupport &little_supp,
 
   num_vars = BehavStratSpace.Dmnsn();
 
-  /*
-  //DEBUG
-  gout << "The new dimension is " << num_vars << ".\n";
-  */
-
   gPolyList<gDouble> inequalities = ExtendsToNashIneqs(BehavStratSpace,
 						       Lex,
 						       little_supp,
 						       big_supp,
 						       var_index);
-  /*
-  //DEBUG
-  gout << "The behav_profile is\n" << *this << "\n"
-       << "with support\n" << little_supp << "\n";
-
-  gout << "The dimension is " << inequalities.Dmnsn()
-       << " and the system is\n" << inequalities << "\n";
-  */
-
   // set up the rectangle of search
   gVector<gDouble> bottoms(num_vars), tops(num_vars);
   bottoms = (gDouble)0;
