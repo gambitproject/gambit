@@ -213,7 +213,7 @@ gComplex pow(const gComplex& x, const long y)
 }
 
 #include <stdio.h>
-#include "gstring.h"
+#include "gtext.h"
 
 
 //#define MYGCONVERT_BUFFER_LENGTH     64
