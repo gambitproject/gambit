@@ -557,13 +557,14 @@ void efgTreeLayout::UpdateTableInfosets(void)
     
   for (int i = 0; i <= m_maxlev; i++)  nums[i+1] += nums[i];
     
-  // now add the needed length to each level
+  // now add the needed length to each level, and set maxX
+  m_maxX = 0;
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
     e = m_nodeList[pos];
     if (e->level != 0) {
       e->x += nums[e->level-1]*INFOSET_SPACING;
-      m_maxX = gmax(m_maxX, e->x);
     }
+    m_maxX = gmax(m_maxX, e->x);
   }
 }
 

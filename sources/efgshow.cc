@@ -2281,6 +2281,7 @@ void EfgShow::OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged)
   UpdateMenus();
   if (p_nodesChanged || p_infosetsChanged) {
     m_treeWindow->RefreshLayout();
+    m_treeWindow->Refresh();
   }
 }
 

@@ -57,28 +57,19 @@ END_EVENT_TABLE()
 TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   : wxScrolledWindow(p_parent),
     ef(*p_efgShow->Game()), m_parent(p_efgShow),
-    m_layout(ef, this), m_dragImage(0), m_zoom(1.0)
+    mark_node(0), subgame_node(0), m_layout(ef, this),
+    hilight_infoset(0), hilight_infoset1(0), m_dragImage(0), m_dragSource(0),
+    iset_drag(new IsetDragger(this, ef)),
+    branch_drag(new BranchDragger(this, ef)),
+    flasher(new TreeNodeCursor(this)),
+    m_zoom(1.0), m_cursor(ef.RootNode()), outcomes_changed(false)
 {
-  // Set the cursor to the root node
-  m_cursor = ef.RootNode();
   // Make sure that Chance player has a name
   ef.GetChance()->SetName("Chance");
-
-  // Create the flasher to flash the cursor or just a steady cursor
-  flasher = new TreeNodeCursor(this);
-  // Create provision for merging isets by drag'n dropping
-  iset_drag = new IsetDragger(this, ef);
-  // Create provision for adding/creating braches by drag'n dropping
-  branch_drag = new BranchDragger(this, ef);
-  // No node has been marked yet--mark_node is invalid
-  mark_node = 0; 
-  // No isets are being hilighted
-  hilight_infoset = 0; hilight_infoset1 = 0;
 
   SetBackgroundColour(*wxWHITE);
   MakeMenus();
   RefreshLayout();
-  EnsureCursorVisible();
 }
 
 TreeWindow::~TreeWindow()
