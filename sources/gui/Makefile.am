@@ -69,6 +69,7 @@ gambit_SOURCES = \
 	gambit.h \
 	gamedoc.cc \
 	gamedoc.h \
+	id.h \
 	nfgnavigate.cc \
 	nfgnavigate.h \
 	nfgprint.cc \
@@ -81,12 +82,12 @@ gambit_SOURCES = \
 	nfgtable.h \
 	numberedit.cc \
 	numberedit.h \
+	outcomes.cc \
+	outcomes.h \
 	prefs.cc \
 	prefs.h \
 	profile.cc \
 	profile.h \
-	outcomes.cc \
-	outcomes.h \
 	treewin.cc \
 	treewin.h \
 	valnumber.cc \

@@ -26,6 +26,7 @@ libnash_a_SOURCES = \
 	efglp.imp \
 	efgpoly.cc \
 	efgpoly.h \
+	efgpoly.imp \
 	efgpure.cc \
 	efgpure.h \
 	efgsubsolve.cc \

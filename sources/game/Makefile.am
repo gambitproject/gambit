@@ -20,6 +20,7 @@ libgame_a_SOURCES = \
 	efgensup.cc \
 	efgensup.h \
 	efginst.cc \
+	efgint.h \
 	efgiter.cc \
 	efgiter.h \
 	efgnfg.cc \
@@ -44,6 +45,7 @@ libgame_a_SOURCES = \
 	nfgensup.cc \
 	nfgensup.h \
 	nfginst.cc \
+	nfgint.h \
 	nfgiter.cc \
 	nfgiter.h \
 	nfgutils.cc \
