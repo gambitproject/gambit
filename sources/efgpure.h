@@ -16,8 +16,6 @@
 
 int EnumPure(const EFSupport &, gList<BehavSolution> &, double &time);
 
-#include "subsolve.h"
-
 class EfgPSNEBySubgame : public SubgameSolver  {
   private:
     int SolveSubgame(const Efg &, const EFSupport &,
