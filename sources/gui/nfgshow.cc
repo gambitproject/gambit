@@ -16,7 +16,6 @@
 #include "guishare/wxstatus.h"
 #include "nfgshow.h"
 #include "nfgtable.h"
-#include "nfgsoln.h"
 #include "nfgprint.h"
 #include "nfgprofile.h"
 #include "nfgnavigate.h"
