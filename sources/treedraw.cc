@@ -11,53 +11,16 @@
 TreeDrawSettings::TreeDrawSettings(void)
 {
 zoom_factor=1.0;
-int gamb_ver=0;
-wxGetResource("Gambit","Gambit-Version",&gamb_ver,INIFILE);
 
-if (gamb_ver!=CURVER)
-{
-	// if there is no ini file yet, use the hard coded defaults and create
-	// the ini file from them.
-	flashing_cursor=FLASHING_CURSOR_DEFAULT;
-	branch_length=BRANCH_LENGTH_DEFAULT;
-	node_length=NODE_LENGTH_DEFAULT;
-	fork_length=FORK_LENGTH_DEFAULT;
-	outcome_length=OUTCOME_LENGTH_DEFAULT;
-	y_spacing=Y_SPACING_DEFAULT;
-	x_origin=0;y_origin=0;
-	color_coded_outcomes=TRUE;
-	chance_color=CHANCE_COLOR_DEFAULT;
-	cursor_color=CURSOR_COLOR_DEFAULT;
-	show_infosets=SHOW_INFOSETS_DEFAULT;
-	node_above_label=NODE_ABOVE_LABEL;
-	node_below_label=NODE_BELOW_ISETID;
-	node_right_label=NODE_RIGHT_OUTCOME;
-	branch_above_label=BRANCH_ABOVE_LABEL;
-	branch_below_label=BRANCH_BELOW_PROBS;
-	node_terminal_label=NODE_TERMINAL_OUTCOME;
-	node_above_font=new wxFont(12,wxSWISS,wxNORMAL,wxNORMAL);
-	node_below_font=new wxFont(12,wxSWISS,wxNORMAL,wxNORMAL);
-	node_right_font=new wxFont(12,wxSWISS,wxNORMAL,wxNORMAL);
-	branch_above_font=new wxFont(12,wxSWISS,wxNORMAL,wxNORMAL);
-	branch_below_font=new wxFont(12,wxSWISS,wxNORMAL,wxNORMAL);
-	node_terminal_font=new wxFont(12,wxSWISS,wxNORMAL,wxNORMAL);
-	root_reachable=TRUE;
-	num_prec=3;
-	SaveOptions();
-}
-else
-{
-	// if the ini file exists, read the defaults from it
-	x_origin=0;y_origin=0;
-	node_above_font=NULL;
-	node_below_font=NULL;
-	node_right_font=NULL;
-	branch_above_font=NULL;
-	branch_below_font=NULL;
-	node_terminal_font=NULL;
+x_origin=0;y_origin=0;
+node_above_font=NULL;
+node_below_font=NULL;
+node_right_font=NULL;
+branch_above_font=NULL;
+branch_below_font=NULL;
+node_terminal_font=NULL;
 
-	LoadOptions(INIFILE);
-}
+LoadOptions(INIFILE);
 }
 
 
@@ -271,7 +234,6 @@ delete display_legend_dialog;
 void TreeDrawSettings::SaveOptions(char *s)
 {
 char *file_name=(s) ? s : INIFILE;
-wxWriteResource("Gambit","Gambit-Version",CURVER,file_name);
 wxWriteResource("Gambit","Branch-Length",branch_length,file_name);
 wxWriteResource("Gambit","Node-Length",node_length,file_name);
 wxWriteResource("Gambit","Fork-Length",fork_length,file_name);

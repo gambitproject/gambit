@@ -46,7 +46,8 @@ if (option!=MATH_IGNORE)
 sprintf (errMsg,
 			"%s (%8g,%8g): %s\n", e->name, e->arg1, e->arg2, whyS [e->type - 1]);
 gerr<<errMsg;
-#ifdef __WIN32__
+// define this to pop up a dialog for math errors under windows.  allows to quit.
+#if defined(__WIN32__) && defined(MATH_ERROR_DIALOG)
 option=winio_ari(errMsg);
 if (option==MATH_QUIT) { winio_closeall(); exit(1);}
 #endif

@@ -4,6 +4,8 @@
 // efg_algorithms.  They are enabled by selecting the 'Use NF' box.  This is
 // why "nfgsolvd.h" is included here
 // $Id$
+
+#define NFG_ALGORITHM_LIST	// we do not need all of nfgsolvd.h
 #include "nfgsolvd.h"
 
 #define STANDARD_NASH				0
@@ -64,6 +66,7 @@ protected:
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
 	subg=FALSE;
 	Warn("Not guaranteed to find all solutions for 'Two Nash n-person'\n");
+	wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
 	}
 	// All Nash 2 person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ALL && ef.NumPlayers()==2)
@@ -81,6 +84,7 @@ protected:
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
 	subg=FALSE;
 	Warn("Not guaranteed to find all solutions for 'All Nash n-person'\n");
+	wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
 	}
 	// One Subgame Perfect (same as One Nash)
 	// One Subgame Perfect for 2 person
@@ -113,6 +117,7 @@ protected:
 	stopAfter=2;max_solns=2;
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
 	subg=TRUE;
+	wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
 	}
 	// All Subgame Perfect 2 person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ALL && ef.NumPlayers()==2)
@@ -130,6 +135,7 @@ protected:
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
 	subg=TRUE;
 	Warn("Not guaranteed to find all solutions for 'All Subgame Perfect n-person'\n");
+	wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
 	}
 	// One Sequential
 	if (standard_type==STANDARD_SEQUENTIAL && standard_num==STANDARD_ONE)
@@ -147,6 +153,7 @@ protected:
 	use_elimdom=false;all=true;dom_type=DOM_STRONG;
 	subg=FALSE;
 	Warn("Not guaranteed to find all solutions for 'Two Sequential'\n");
+	wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
 	}
 	// All Sequential
 	if (standard_type==STANDARD_SEQUENTIAL && standard_num==STANDARD_ALL)
@@ -156,6 +163,7 @@ protected:
 	use_elimdom=false;all=true;dom_type=DOM_STRONG;
 	subg=FALSE;
 	Warn("Not guaranteed to find all solutions for 'All Sequential'\n");
+	wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
 	}
 	pick_solns=false; // pick solution subgames off for all standard solns
 	// -------- now write the new settings to file

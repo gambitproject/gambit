@@ -1,7 +1,7 @@
 //****************************************************************************
 // Classes that are often used for the algorithm params dialogs.
 //****************************************************************************
-// $Id$
+// @$Id$
 //
 
 #include "gambitio.h"
@@ -90,7 +90,7 @@ OutputParamsDialog::~OutputParamsDialog(void)
 void OutputParamsDialog::MakeOutputFields(unsigned int fields)
 {
 Add(wxMakeFormNewLine());
-if (fields&MAXSOLN_FIELD && !fields&SPS_FIELD)
+if (fields&MAXSOLN_FIELD && !(fields&SPS_FIELD))
 {
 	Add(wxMakeFormShort("Max Ttl Solns",&stopAfter,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
 	Add(wxMakeFormNewLine());

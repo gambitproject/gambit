@@ -58,7 +58,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns,
   thissolns.Append(solution);
   ((gVector<T> &) thissolns[1]).operator=((T) 0);
 
-  gList<Node *> subroots;
+	gList<Node *> subroots;
   ChildSubgames(n, subroots);
 
   gList<gArray<Outcome *> > subrootvalues;
@@ -199,9 +199,8 @@ void SubgameSolver<T>::ViewSubgame(int, const Efg<T> &)
 // It is assumed that the NFSupport returned is "sensible"
 
 template <class T>
-void SubgameSolver<T>::ViewNormal(const Nfg<T> &, NFSupport &)
+void SubgameSolver<T>::ViewNormal(const Nfg<T> &, NFSupport *&)
 { }
-
 // This is called for each subgame after the solutions have been computed
 // The idea is for the called code to possibly allow for viewing or
 // selection of "interesting" equilibria for further computation during
@@ -316,11 +315,11 @@ void NFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E,
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
-  NFSupport S(*N);
+  NFSupport *S=new NFSupport(*N);
 
   ViewNormal(*N, S);
 
-  MixedProfile<T> mp(*N, S);
+  	MixedProfile<T> mp(*N, *S);
 
   NFLiapModule<T> M(*N, params, mp);
   
@@ -356,11 +355,11 @@ void LemkeBySubgame<T>::SolveSubgame(const Efg<T> &E,
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
-  NFSupport S(*N);
+  NFSupport *S=new NFSupport(*N);
 
   ViewNormal(*N, S);
 
-  MixedProfile<T> mp(*N, S);
+  	MixedProfile<T> mp(*N, *S);
 
   LemkeModule<T> M(*N, params, mp.GetNFSupport());
   
@@ -396,11 +395,11 @@ void SimpdivBySubgame<T>::SolveSubgame(const Efg<T> &E,
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
-  NFSupport S(*N);
+  NFSupport *S=new NFSupport(*N);
 
   ViewNormal(*N, S);
 
-  MixedProfile<T> mp(*N, S);
+  	MixedProfile<T> mp(*N, *S);
 
   SimpdivModule<T> M(*N, params, mp.GetNFSupport());
   
@@ -436,25 +435,25 @@ void EnumBySubgame<T>::SolveSubgame(const Efg<T> &E,
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
-  NFSupport S(*N);
+	NFSupport *S=new NFSupport(*N);
 
-  ViewNormal(*N, S);
+	ViewNormal(*N, S);
 
-  MixedProfile<T> mp(*N, S);
+	MixedProfile<T> mp(*N, *S);
 
-  EnumModule<T> M(*N, params, mp.GetNFSupport());
-  
-  M.Enum();
+	EnumModule<T> M(*N, params, mp.GetNFSupport());
 
-  npivots += M.NumPivots();
+	M.Enum();
 
-  for (int i = 1; i <= M.GetSolutions().Length(); i++)  {
-    BehavProfile<T> bp(E);
-    MixedToBehav(*N, M.GetSolutions()[i], E, bp);
-    solns.Append(bp);
-  }
+	npivots += M.NumPivots();
 
-  delete N;
+	for (int i = 1; i <= M.GetSolutions().Length(); i++)  {
+		BehavProfile<T> bp(E);
+		MixedToBehav(*N, M.GetSolutions()[i], E, bp);
+		solns.Append(bp);
+	}
+
+	delete N;
 }
 
 template <class T>
@@ -475,7 +474,7 @@ void PureNashBySubgame<T>::SolveSubgame(const Efg<T> &E,
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
-  NFSupport S(*N);
+  NFSupport *S=new NFSupport(*N);
 
   ViewNormal(*N, S);
 
@@ -483,7 +482,7 @@ void PureNashBySubgame<T>::SolveSubgame(const Efg<T> &E,
   FindPureNash(*N, sol);
 
   for (int i = 1; i <= sol.Length(); i++)  {
-    BehavProfile<T> bp(E);
+		BehavProfile<T> bp(E);
     MixedToBehav(*N, sol[i], E, bp);
     solns.Append(bp);
   }
@@ -509,15 +508,15 @@ void ZSumBySubgame<T>::SolveSubgame(const Efg<T> &E,
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
-  NFSupport S(*N);
+	NFSupport *S=new NFSupport(*N);
 
-  ViewNormal(*N, S);
+	ViewNormal(*N, S);
 
-  MixedProfile<T> mp(*N, S);
+		MixedProfile<T> mp(*N, *S);
 
-  ZSumModule<T> M(*N, params, mp.GetNFSupport());
-  
-  M.ZSum();
+	ZSumModule<T> M(*N, params, mp.GetNFSupport());
+
+	M.ZSum();
 
   npivots += M.NumPivots();
 
@@ -560,6 +559,19 @@ class gListIter<MixedProfile<double> >;
 class gListIter<MixedProfile<gRational> >;
 class gNode<MixedProfile<double> >;
 class gNode<MixedProfile<gRational> >;
+
+class gNode<gArray<int> >;
+class gList<gArray<int> >;
+class gListIter<gArray<int> >;
+
+class gNode<BFS<double> >;
+class gNode<BFS<gRational> >;
+class gList<BFS<double> >;
+class gList<BFS<gRational> >;
+class gListIter<BFS<double> >;
+class gListIter<BFS<gRational> >;
+
+
 bool operator==(const gArray<Outcome *> &a, const gArray<Outcome *> &b)
 {
 	if (a.mindex != b.mindex || a.maxdex != b.maxdex)   return false;

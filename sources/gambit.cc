@@ -88,7 +88,7 @@ MathErrHandl E(errMsg);
 option=E.Option();
 if (option==MATH_QUIT) wxExit();
 }
-return 1;		// we did not really fix anything, but want no more warnings  
+return 1;		// we did not really fix anything, but want no more warnings
 }
 
 
@@ -179,6 +179,15 @@ void GambitToolBar::OnMouseEnter(int tool)
 // main frame
 wxFrame *GambitApp::OnInit(void)
 {
+// First check if we have a current settings file (gambit.ini).  If not, exit!
+int ver;
+wxGetResource("Gambit","Gambit-Version",&ver,"gambit.ini");
+if (ver!=GAMBIT_VERSION)
+{
+	wxMessageBox("Gambit is unable to locate a current configuration file.\nPlease make "
+								"sure that the program was installed correctly","Config Error");
+	return 0;
+}
 // Create the main frame window
 GambitFrame *gambit_frame = new GambitFrame(NULL, "Gambit", 0, 0, 220, 150,wxDEFAULT_FRAME);
 // Give it an icon

@@ -1,7 +1,7 @@
 //#
 //# FILE: gmisc.h -- Miscellaneous generally-useful functions
 //#
-//# 
+//# $Id$ 
 //#
 
 #ifndef GMISC_H

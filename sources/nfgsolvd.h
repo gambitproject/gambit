@@ -3,6 +3,8 @@
 // Update: this now takes the number of players so that it can turn
 // of the algorithms that will not work with this number of players.
 // $Id$
+#ifndef NFGSOLVD_H
+#define NFGSOLVD_H
 
 #define SD_CANCEL			-1
 #define SD_PARAMS			1
@@ -63,6 +65,7 @@ public:
 	}
 };
 
+#ifndef NFG_ALGORITHM_LIST
 class NfgSolveSettings
 {
 protected:
@@ -92,14 +95,16 @@ protected:
 	{algorithm=NFG_ENUMMIXED_SOLUTION;stopAfter=2;dom_type=DOM_STRONG;all=TRUE;use_elimdom=TRUE;}
 	// Two Nash n person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_TWO && nf.NumPlayers()!=2)
-	{algorithm=NFG_LIAP_SOLUTION;stopAfter=2;dom_type=DOM_STRONG;all=TRUE;use_elimdom=TRUE;}
+	{algorithm=NFG_LIAP_SOLUTION;stopAfter=2;dom_type=DOM_STRONG;all=TRUE;use_elimdom=TRUE;
+	 wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);}
 	// All Nash 2 person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ALL && nf.NumPlayers()==2)
 	{algorithm=NFG_ENUMMIXED_SOLUTION;stopAfter=0;dom_type=DOM_STRONG;all=TRUE;use_elimdom=TRUE;}
 	// All Nash n person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ALL && nf.NumPlayers()!=2)
 	{algorithm=NFG_LIAP_SOLUTION;stopAfter=0;dom_type=DOM_STRONG;all=TRUE;use_elimdom=TRUE;
-	 Warn("Not guaranteed to find all solutions for 'All Nash' n-person games\n");}
+	 Warn("Not guaranteed to find all solutions for 'All Nash' n-person games\n");
+	 wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);}
 	// One Perfect 2 person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ONE && nf.NumPlayers()==2)
 	{algorithm=NFG_LCP_SOLUTION;stopAfter=1;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;}
@@ -264,3 +269,6 @@ public:
 	}
 };
 
+#endif
+
+#endif

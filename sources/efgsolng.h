@@ -1,7 +1,7 @@
 // File: efgsolng.h -- declarations for the GUI part of the extensive form
 // algorithm solutions.  Each solution algorithm is contained in a separate class
 // and the ExtensiveShow does not need to know any details
-// $Id$
+// @(#)efgsolng.h	1.1 6/18/96
 #ifndef EFGSOLNG_H
 #define EFGSOLNG_H
 

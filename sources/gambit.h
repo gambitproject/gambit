@@ -30,4 +30,6 @@ public:
 
 #define GAMBIT_GUI_HELP	"Using Gambit GUI"
 
+
+#define GAMBIT_VERSION					93
 #endif
