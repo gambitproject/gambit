@@ -112,18 +112,6 @@ scrollbar position and doesn't redraw the entire screen.
 
 //------------------------------
 
-Bug D14: Halting early on some solution methods causes internal errors
-  
-Load an extensive form game and go to
-
-  Solve->Custom->ExtensiveForm->QRE.
-
-If you halt early, the program reports an internal error:
-bad entry in glist.  For example, try poker2.efg.  This doesn't
-cause a crash, but is ugly.
-
-//------------------------------
-
 Bug D15:  Won't accept file name abbreviations
 
 In fields requiring file names, the GUI will not accept the "~"

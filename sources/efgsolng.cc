@@ -1314,66 +1314,6 @@ QreSolveParamsDialog::QreSolveParamsDialog(wxWindow *p_parent,
 // Qre on nfg
 //---------------------
 
-//
-// This algorithm does not support solving by subgames.  However I will still
-// derive a solution class from the BaseBySubgameG to maintain uniformity.
-//
-
-class NQreBySubgameG : public BaseBySubgameG {
-private:
-  gList<BehavSolution> m_solutions;
-
-protected:
-  void ViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
-    { BaseViewNormal(p_nfg, p_support); }
-
-public:
-  NQreBySubgameG(const Efg &, bool p_eliminate, bool p_iterative,
-		   bool p_strong, EfgShowInterface * = 0);
-
-  gList<BehavSolution> GetSolutions(void) const { return m_solutions; }
-};
-
-NQreBySubgameG::NQreBySubgameG(const Efg &p_efg,
-				   bool p_eliminate, bool p_iterative,
-				   bool p_strong,
-				   EfgShowInterface *p_parent /*= 0*/)
-  : BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
-{
-  QreParamsSettings GSPD(m_parent->Filename());
-  wxStatus status(m_parent->Frame(), "QRE Algorithm");
-  NFQreParams P(status);
-  GSPD.GetParams(P);
-
-  EFSupport ES = EFSupport(p_efg);
-  Nfg *N = MakeReducedNfg(ES);
-  NFSupport *S = new NFSupport(*N);
-  ViewNormal(*N, S);
-
-  BehavProfile<gNumber> startb = m_parent->CreateStartProfile(GSPD.StartOption());
-  MixedProfile<gNumber> startm(*N);
-
-  BehavToMixed(p_efg, startb, *N, startm);
-  
-  long nevals, nits;
-  gList<MixedSolution> nfg_solns;
-
-  try {
-    Qre(*N, P, startm, nfg_solns, nevals, nits);
-  }
-  catch (gSignalBreak &) { }
-
-  GSPD.RunPxi();
-
-  for (int i = 1; i <= nfg_solns.Length(); i++) {
-    MixedToBehav(*N, nfg_solns[i], p_efg, startb);
-    m_solutions.Append(BehavSolution(startb, EfgAlg_QRE));
-  }
-
-  delete N;
-  delete S;
-}
-
 EfgNQreG::EfgNQreG(const Efg &p_efg, const EFSupport &p_support, 
 		       EfgShowInterface *p_parent)
   : guiEfgSolution(p_efg, p_support, p_parent)
@@ -1381,9 +1321,38 @@ EfgNQreG::EfgNQreG(const Efg &p_efg, const EFSupport &p_support,
 
 gList<BehavSolution> EfgNQreG::Solve(void) const
 {
-  // exception handler is located in the ctor
-  NQreBySubgameG M(ef, Eliminate(), EliminateAll(), DominanceType(), parent);
-  return M.GetSolutions();
+  QreParamsSettings GSPD(parent->Filename());
+  wxStatus status(parent->Frame(), "QRE Algorithm");
+
+  NFQreParams P(status);
+  GSPD.GetParams(P);
+
+  Nfg *N = MakeReducedNfg(EFSupport(ef));
+
+  BehavProfile<gNumber> startb = parent->CreateStartProfile(GSPD.StartOption());
+  MixedProfile<gNumber> startm(*N);
+
+  BehavToMixed(ef, startb, *N, startm);
+  
+  long nevals, nits;
+  gList<MixedSolution> nfg_solns;
+
+  try {
+    Qre(*N, P, startm, nfg_solns, nevals, nits);
+    GSPD.RunPxi();
+  }
+  catch (gSignalBreak &) { }
+
+  gList<BehavSolution> solutions;
+
+  for (int i = 1; i <= nfg_solns.Length(); i++) {
+    MixedToBehav(*N, nfg_solns[i], ef, startb);
+    solutions.Append(BehavSolution(startb, EfgAlg_QRE));
+  }
+
+  delete N;
+
+  return solutions;
 }
 
 bool EfgNQreG::SolveSetup(void) const
@@ -1407,7 +1376,7 @@ bool EfgNQreG::SolveSetup(void) const
 //---------------------
 
 EfgEQreG::EfgEQreG(const Efg &p_efg, const EFSupport &p_support, 
-		       EfgShowInterface *p_parent)
+		   EfgShowInterface *p_parent)
   : guiEfgSolution(p_efg, p_support, p_parent)
 { }
 
@@ -1423,15 +1392,14 @@ gList<BehavSolution> EfgEQreG::Solve(void) const
 
   try {
     Qre(ef, P, start, solns, nevals, nits);
+    if (!solns[1].IsSequential()) {
+      wxMessageBox("Warning:  Algorithm did not converge to sequential equilibrium.\n"
+		   "Returning last value.\n");
+    }
+    GSPD.RunPxi();
   }
   catch (gSignalBreak &) { }
 
-  if (!solns[1].IsSequential()) {
-    wxMessageBox("Warning:  Algorithm did not converge to sequential equilibrium.\n"
-		 "Returning last value.\n");
-  }
-
-  GSPD.RunPxi();
   return solns;
 }
 
