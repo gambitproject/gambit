@@ -82,10 +82,7 @@ libnumerical_a_OBJECTS = \
 	+vertenum.obj
 
 libgame_a_OBJECTS = \
-	+"efgiter.obj" \
-	+"efgutils.obj" \
 	+"game-file.obj" \
-	+"nfgiter.obj" \
 	+"sfg.obj" \
 	+"sfstrat.obj" \
 	+"table-mixed-double.obj" \
