@@ -52,7 +52,7 @@ void Infoset::PrintActions(gOutput &f) const
 { 
   f << "{ ";
   for (int i = 1; i <= actions.Length(); i++)
-    f << '"' << actions[i]->name << "\" ";
+    f << '"' << EscapeQuotes(actions[i]->name) << "\" ";
   f << "}";
 }
 
@@ -135,8 +135,10 @@ void ChanceInfoset::RemoveAction(int which)
 void ChanceInfoset::PrintActions(gOutput &f) const
 { 
   f << "{ ";
-  for (int i = 1; i <= actions.Length(); i++)
-    f << '"' << actions[i]->GetName() << "\" " << probs[i] << ' ';
+  for (int i = 1; i <= actions.Length(); i++) {
+    f << '"' << EscapeQuotes(actions[i]->GetName()) << "\" ";
+    f << probs[i] << ' ';
+  }
   f << "}";
 }
 

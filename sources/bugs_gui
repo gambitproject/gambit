@@ -171,22 +171,6 @@ remember what the game is supposed to look like (or bring up two
 copies, one for comparison). Then hit +Magnify three times.  Now move
 around the tree with the cursor, and eventually you will see this.
 
-
-//------------------------------
-
-GUI Bug 6.2
-
-2.
-> I also ran into some difficulties in saving some games.  I think I have
-> narrowed the problem down to games with quotation marks (" ") in either the
-> Node Label or the Action Label.  The game (in extensive form) would save
-> without any indication of an error, but when I tried to open the file
-> later I would get the following messages:
-
-RDM: The seems to be partially fixed (9/3/98). Now you can save the
-games, but not reload them. The problem seems to be quotes in the
-labels.
-
 //------------------------------
 
 GUI Bug 7.1
