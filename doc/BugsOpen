@@ -783,6 +783,15 @@ STATUS:   OPEN
 SEVERITY: CRUCIAL
 DETAILS:
 
+9/9/99 RDM: We agreed to implement this (in two person games) to find
+the extreme Nash equilibria that are also Perfect.  Thus, we will
+eliminate all pure strategies weakly dominated by mixed strategies,
+compute all Nash equilibria of the resulting game, and then check any
+mixed equilibria that result to make sure they are not weakly
+dominated.  This is now done in the GCL (9/9/99).  We still need to
+make changes in the GCU to implement it like this.  
+
+
 Earlier this year, we changed the UDFs (and standard algorithms in the
 GUI) for computing two or more Perfect equilibria to first eliminate
 all weakly dominated strategies, and then apply EnumMixed.  I have
@@ -811,20 +820,6 @@ by his second strategy. Hence it is not perfect.  While any pure
 strategy Nash equilibrium of the reduced game will be Perfect, it does
 not follow that any mixed Nash equilibrium of the reduced game is
 Perfect.  
-
----------------
-
-ITEM 0032:  Perfect equilibrium test for 2-player games
-
-DATE:     9/8/1999 by TLT/RDM
-AFFECTS:  GUI, GCL; all platforms
-STATUS:   OPEN
-SEVERITY: CRUCIAL
-DETAILS:
-
-Use LP from VanDamme, p. 49. I added code to
-check whether a pure equilibrium is mixed dominated, but still need to
-add code for mixed equilibria, and hook up to IsPerfect.
 
 ---------------
 

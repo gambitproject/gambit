@@ -2933,10 +2933,10 @@ AllNash & Strong & 2 person       & EnumMixed & \\ \cline{3-5}
         &        & n person       & Liap      & Not guaranteed\\
 \hline
 \hline
-OnePerfect & Strong & 2 person     & Lcp    & \\ \cline{3-5}
+OnePerfect & Weak & 2 person     & Lcp    & \\ \cline{3-5}
            &        & n person     &     &Not implemented  \\
 \hline
-AllPerfect & Strong & 2 person      & EnumMixed & \\ \cline{3-5}
+AllPerfect & Weak & 2 person      & EnumMixed & \\ \cline{3-5}
            &        & n person      &     & Not implemented\\
 \hline
 \multicolumn{5}{c}{\ }\\
@@ -4986,15 +4986,18 @@ the existence of static variables.
 IsDominated[strategy->STRATEGY, support->NFSUPPORT, {strong->False}, 
             {mixed->False}, {precision->Rational}, {time<->0.000000}, 
             {traceFile<->(Output)}, {traceLevel->0}] =: BOOLEAN
+IsDominated[profile->MIXED, {strong->False}, {mixed->False}, 
+            {time<->0.000000}, {traceFile<->(Output)}, 
+            {traceLevel->0}] =: BOOLEAN,
 IsDominated[action->ACTION, support->EFSUPPORT, {strong->False}, 
             {conditional->False}, {time<->0.000000}, {traceFile<->(Output)}, 
-            {traceLevel->0}] =: BOOLEAN 
+            {traceLevel->0}] =: BOOLEAN }
 \end{verbatim}\normalsize
 
-\bd 
-Determines if the \verb+strategy+ or \verb+action+ is dominated in
-\verb+support+.  The following optional parameters may be specified to
-modify the behavior of the elimination:
+\bd Determines if the \verb+strategy+ or \verb+action+ is dominated in
+\verb+support+, or if the \verb+profile+ is dominated in its
+support. The following optional parameters may be specified to modify
+the behavior of the elimination:
 
 \bd
 \item [strong:] By default, determines if the strategy or action is
@@ -5008,7 +5011,8 @@ prototype above).
 \item [conditional:] If this is true, checks for conditional domination (only applicable to extensive form games (i. e., for the second function prototype above).
 \item [precision:] Default precision is Rational.  Note that the precision
 parameter is only applicable for mixed domination.  Pure strategy
-domination always uses Rational precision.
+domination always uses Rational precision.  For the \verb+profile+ version of the 
+function, the precision used is the precision of \verb+profile+.  
 \item [time:] Returns the time consumed by the computation.
 \item [traceFile:] A file containing a log of more detailed information
 on the elimination process.  By default, no logging is done.
@@ -7390,9 +7394,10 @@ Searches for all Perfect Nash equilibria of the normal form game
 \verb+n+.  Returns a list containing the equilibria found.
 
 \begin{verbatim}
-  If[NumPlayers[n] = 2, 
-    s:=ElimAllDom[n];
-    EnumMixedSolve[s,0,precision],
+   If[NumPlayers[n] = 2, 
+    s:=ElimAllDom[n,mixed->True];
+    m:=EnumMixedSolve[s,0,precision];
+    Filter[m,IsPerfect[m]],
     << " Not implemented for n-person games";
     List[Centroid[Support[n]],0]
   ]
