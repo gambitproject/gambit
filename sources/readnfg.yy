@@ -289,6 +289,7 @@ int ReadNfgFile(gInput &p_file, Nfg *&p_nfg)
     return 0;
   }
 
+  p_nfg = N;
   return 1;
 }
 
