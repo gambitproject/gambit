@@ -7,6 +7,7 @@
 #include "gambitio.h"
 #include "normal.h"
 #include "nfrep.h"
+#include "normiter.h"
 #include "gtableau.h"
 #include "rational.h"
 #include "mixed.h"
@@ -46,10 +47,7 @@ template <class T> class LemkeTableau
     void Pivot(int, int);
  
   public:
-    LemkeTableau(int num_strats, gOutput &ofile, gOutput &efile, int plev)
-      : gTableau<T>(num_strats), SolutionModule(ofile, efile, plev)  { }
-    LemkeTableau(const LemkeTableau<T> &t)
-      : gTableau<T>(t), SolutionModule(t)  { }
+    LemkeTableau(const NFRep<T> &, gOutput &ofile, gOutput &efile, int plev);
     virtual ~LemkeTableau()   { }
 
     int Lemke(int);
@@ -281,93 +279,68 @@ template <class T> int LemkeTableau<T>::Exit_Row(int col)
   return BestSet[1];
 }
 
+template <class T>
+LemkeTableau<T>::LemkeTableau(const NFRep<T> &r,
+			      gOutput &ofile, gOutput &efile, int plev)
+     : gTableau<T>(r.NumStrats(1) + r.NumStrats(2)), 
+       SolutionModule(ofile, efile, plev)
+{
+  NormalIter<T> iter(r);
+  T min = (T) 0, x;
+  int n1 = r.NumStrats(1), n2 = r.NumStrats(2);
+
+  for (int i = 1; i <= n1; i++)   {
+    for (int j = 1; j <= n2; j++)  {
+      x = iter.Evaluate(1);
+      if (x < min)   min = x;
+      x = iter.Evaluate(2);
+      if (x < min)   min = x;
+      iter.Next(2);
+    }
+    iter.Next(1);
+  }
+
+  for (i = 1; i <= n1; i++) 
+    for (int j = 1; j <= n1; j++) 
+      Tableau(i, j) = 0.0;
+
+  for (i = n1 + 1; i <= n1 + n2; i++)
+    for (int j = n1 + 1; j <= n1 + n2; j++)
+      Tableau(i, j) = 0.0;
+
+
+  for (i = 1; i <= n1; i++)  {
+    for (int j = 1; j <= n2; j++)  {
+      Tableau(i, n1 + j) = iter.Evaluate(1) - min;
+      Tableau(n1 + j, i) = iter.Evaluate(2) - min;
+      iter.Next(2);
+    }
+    iter.Next(1);
+  }
+
+  for (i = 1; i <= n1 + n2; Tableau(i++, 0) = -1.0);
+  for (i = 1; i <= n1 + n2; Tableau(i++, n1 + n2 + 1) = 0.0);
+}
+
 
 
 int NormalForm::Lemke(int dup_strat)
 {
-  int i, j;
-  StrategyProfile s(2);
-
   if (NumPlayers() != 2)   return 0;
-  int n1 = strategies[1]->NumStrats();
-  int n2 = strategies[2]->NumStrats();
-  int n = n1+n2;
 
-  for (i = 1; i <= strategies.Length(); i++)
-    s.SetStrategy(strategies[i]->GetStrategy(1));
+  if (dup_strat < 0 || dup_strat > data->NumStrats(1)+data->NumStrats(2))
+    dup_strat = 0;
 
   switch (type)   {
-    case nfDOUBLE:   {
-      double min = 0.0, x;
-      LemkeTableau<double> T(n, gout, gerr, 1);
-      NFRep<double> *N = (NFRep<double> *) array;
-
-      for (i = 1; i <= n1; i++)
- 	for (j = 1; j <= n2; j++)  {
-	  s.SetStrategy(strategies[1]->GetStrategy(i));
-	  s.SetStrategy(strategies[2]->GetStrategy(j));
-	  x = (*N)(s,1);
-	  if (x < min)  min = x;
-	  x = (*N)(s,2);
-	  if (x < min)  min = x;
-	}
-
-      for (i = 1; i <= n1; i++) 
-	for (j = 1; j <= n1; j++)
-	  T.Entry(i,j) = 0.0;
-      
-      for (i = n1 + 1; i <= n; i++)  
-	for (j = n1 + 1; j <= n; j++) 
-	  T.Entry(i,j) = 0.0;
-
-      for (i = 1; i <= n1; i++)  
-	for (j = 1; j <= n2; j++)  {
-	  s.SetStrategy(strategies[1]->GetStrategy(i));
-	  s.SetStrategy(strategies[2]->GetStrategy(j));
-	  T.Entry(i, n1 + j) = (*N)(s,1) - min;
-	  T.Entry(n1 + j, i) = (*N)(s,2) - min;
-	}
-
-      for (i = 1; i <= n; T.Entry(i++, 0) = -1.0);
-      for (i = 1; i <= n; T.Entry(i++, n + 1) = 0.0);
-      T.Lemke((dup_strat <= 0 || dup_strat > n) ? 0 : dup_strat); 
+    case nfDOUBLE:  {
+      LemkeTableau<double> T((NFRep<double> &) *data, gout, gerr, 1);
+      T.Lemke(dup_strat);
       return 1;
     }
 
     case nfRATIONAL:   {
-      Rational min = 0, x;
-      LemkeTableau<Rational> T(n, gout, gerr, 1);
-      NFRep<Rational> *N = (NFRep<Rational> *) array;
-
-      for (i = 1; i <= n1; i++)
-	for (j = 1; j <= n2; j++)  {
-	  s.SetStrategy(strategies[1]->GetStrategy(i));
-	  s.SetStrategy(strategies[2]->GetStrategy(j));
-	  x = (*N)(s,1);
-	  if (x < min)  min = x;
-	  x = (*N)(s,2);
-	  if (x < min)  min = x;
-	}
-
-      for (i = 1; i <= n1; i++) 
-	for (j = 1; j <= n1; j++)
-	  T.Entry(i,j) = 0.0;
-      
-      for (i = n1 + 1; i <= n; i++)  
-	for (j = n1 + 1; j <= n; j++) 
-	  T.Entry(i,j) = 0.0;
-
-      for (i = 1; i <= n1; i++)  
-	for (j = 1; j <= n2; j++)  {
-	  s.SetStrategy(strategies[1]->GetStrategy(i));
-	  s.SetStrategy(strategies[2]->GetStrategy(j));
-	  T.Entry(i, n1 + j) = (*N)(s,1) - min;
-	  T.Entry(n1 + j, i) = (*N)(s,2) - min;
-	}
-
-      for (i = 1; i <= n; T.Entry(i++, 0) = -1.0);
-      for (i = 1; i <= n; T.Entry(i++, n + 1) = 0.0);
-      T.Lemke((dup_strat <= 0 || dup_strat > n) ? 0 : dup_strat); 
+      LemkeTableau<Rational> T((NFRep<Rational> &) *data, gout, gerr, 1);
+      T.Lemke(dup_strat);
       return 1;
     }
   }
