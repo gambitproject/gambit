@@ -113,123 +113,123 @@ Portion* GSM_Fake(Portion**)
 
 //---------------------- GSM_Add ---------------------------
 
-Portion* GSM_Add_double( Portion** param )
+Portion* GSM_Add_double(Portion** param)
 {
   Portion* result = 0;
   result = new FloatValPortion
     (
-     ( (FloatPortion*) param[ 0 ] )->Value() +
-     ( (FloatPortion*) param[ 1 ] )->Value()
-     );
+     ((FloatPortion*) param[0])->Value() +
+     ((FloatPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_Add_int( Portion** param )
+Portion* GSM_Add_int(Portion** param)
 {
   Portion* result = 0;
   result = new IntValPortion
     (
-     ( (IntPortion*) param[ 0 ] )->Value() +
-     ( (IntPortion*) param[ 1 ] )->Value()
-     );
+     ((IntPortion*) param[0])->Value() +
+     ((IntPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_Add_gRational( Portion** param )
+Portion* GSM_Add_gRational(Portion** param)
 {
   Portion* result = 0;
   result = new RationalValPortion
     (
-     ( (RationalPortion*) param[ 0 ] )->Value() +
-     ( (RationalPortion*) param[ 1 ] )->Value()
-     );
+     ((RationalPortion*) param[0])->Value() +
+     ((RationalPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_Add_MixedFloat( Portion** param )
+Portion* GSM_Add_MixedFloat(Portion** param)
 {
   Portion* result = 0;
-  if( ( (MixedPortion*) param[ 0 ] )->Value() == 0 ||
-     ( (MixedPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Mixed value" );
+  if(((MixedPortion*) param[0])->Value() == 0 ||
+     ((MixedPortion*) param[1])->Value() == 0)
+    return new ErrorPortion("Cannot operate on a null Mixed value");
 
-  result = param[ 0 ]->ValCopy();
-  ( * (MixedSolution<double>*) ( (MixedPortion*) result )->Value() ) +=
-    ( * (MixedSolution<double>*) ( (MixedPortion*) param[ 1 ] )->Value() );
+  result = param[0]->ValCopy();
+  (* (MixedSolution<double>*) ((MixedPortion*) result)->Value()) +=
+    (* (MixedSolution<double>*) ((MixedPortion*) param[1])->Value());
   return result;
 }
 
-Portion* GSM_Add_MixedRational( Portion** param )
+Portion* GSM_Add_MixedRational(Portion** param)
 {
   Portion* result = 0;
-  if( ( (MixedPortion*) param[ 0 ] )->Value() == 0 ||
-     ( (MixedPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Mixed value" );
+  if(((MixedPortion*) param[0])->Value() == 0 ||
+     ((MixedPortion*) param[1])->Value() == 0)
+    return new ErrorPortion("Cannot operate on a null Mixed value");
 
-  result = param[ 0 ]->ValCopy();
-  ( * (MixedSolution<gRational>*) ( (MixedPortion*) result )->Value() ) +=
-    ( * (MixedSolution<gRational>*) ( (MixedPortion*) param[ 1 ] )->Value() );
+  result = param[0]->ValCopy();
+  (* (MixedSolution<gRational>*) ((MixedPortion*) result)->Value()) +=
+    (* (MixedSolution<gRational>*) ((MixedPortion*) param[1])->Value());
   return result;
 }
 
 
-Portion* GSM_Add_BehavFloat( Portion** param )
+Portion* GSM_Add_BehavFloat(Portion** param)
 {
   Portion* result = 0;
-  if( ( (BehavPortion*) param[ 0 ] )->Value() == 0 ||
-     ( (BehavPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Behav value" );
+  if(((BehavPortion*) param[0])->Value() == 0 ||
+     ((BehavPortion*) param[1])->Value() == 0)
+    return new ErrorPortion("Cannot operate on a null Behav value");
 
-  result = param[ 0 ]->ValCopy();
-  ( * (BehavSolution<double>*) ( (BehavPortion*) result )->Value() ) +=
-    ( * (BehavSolution<double>*) ( (BehavPortion*) param[ 1 ] )->Value() );
+  result = param[0]->ValCopy();
+  (* (BehavSolution<double>*) ((BehavPortion*) result)->Value()) +=
+    (* (BehavSolution<double>*) ((BehavPortion*) param[1])->Value());
   return result;
 }
 
-Portion* GSM_Add_BehavRational( Portion** param )
+Portion* GSM_Add_BehavRational(Portion** param)
 {
   Portion* result = 0;
-  if( ( (BehavPortion*) param[ 0 ] )->Value() == 0 ||
-     ( (BehavPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Mixed value" );
+  if(((BehavPortion*) param[0])->Value() == 0 ||
+     ((BehavPortion*) param[1])->Value() == 0)
+    return new ErrorPortion("Cannot operate on a null Mixed value");
 
-  result = param[ 0 ]->ValCopy();
-  ( * (BehavSolution<gRational>*) ( (BehavPortion*) result )->Value() ) +=
-    ( * (BehavSolution<gRational>*) ( (BehavPortion*) param[ 1 ] )->Value() );
+  result = param[0]->ValCopy();
+  (* (BehavSolution<gRational>*) ((BehavPortion*) result)->Value()) +=
+    (* (BehavSolution<gRational>*) ((BehavPortion*) param[1])->Value());
   return result;
 }
 
 
 //--------------------- Concat ---------------------------
 
-Portion* GSM_Concat_gString( Portion** param )
+Portion* GSM_Concat_gString(Portion** param)
 {
   Portion* result = 0;
   result = new TextValPortion
     (
-     ( (TextPortion*) param[ 0 ] )->Value() +
-     ( (TextPortion*) param[ 1 ] )->Value()
-     );
+     ((TextPortion*) param[0])->Value() +
+     ((TextPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_Concat_List( Portion** param )
+Portion* GSM_Concat_List(Portion** param)
 {
   Portion* result = 0;
   int i;
   int append_result;
 
-  // gBlock<Portion*>& p_value = ( (ListPortion*) param[ 1 ] )->Value();
-  gList<Portion*>& p_value = ( (ListPortion*) param[ 1 ] )->Value();
-  result = new ListValPortion( ( (ListPortion*) param[ 0 ] )->Value() );
-  for( i = 1; i <= p_value.Length(); i++ )
+  // gBlock<Portion*>& p_value = ((ListPortion*) param[1])->Value();
+  gList<Portion*>& p_value = ((ListPortion*) param[1])->Value();
+  result = new ListValPortion(((ListPortion*) param[0])->Value());
+  for(i = 1; i <= p_value.Length(); i++)
   {
-    append_result = ( (ListPortion*) result )->Append( p_value[ i ]->ValCopy() );
-    if( append_result == 0 )
+    append_result = ((ListPortion*) result)->Append(p_value[i]->ValCopy());
+    if(append_result == 0)
     {
       delete result;
       result = new ErrorPortion
-	( "Attempted concatenating lists of different types" );
+	("Attempted concatenating lists of different types");
       break;
     }
   }
@@ -240,90 +240,90 @@ Portion* GSM_Concat_List( Portion** param )
 
 //---------------------- GSM_Subtract ------------------------
 
-Portion* GSM_Subtract_double( Portion** param )
+Portion* GSM_Subtract_double(Portion** param)
 {
   Portion* result = 0;
   result = new FloatValPortion
     (
-     ( (FloatPortion*) param[ 0 ] )->Value() -
-     ( (FloatPortion*) param[ 1 ] )->Value()
-     );
+     ((FloatPortion*) param[0])->Value() -
+     ((FloatPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_Subtract_int( Portion** param )
+Portion* GSM_Subtract_int(Portion** param)
 {
   Portion* result = 0;
   result = new IntValPortion
     (
-     ( (IntPortion*) param[ 0 ] )->Value() -
-     ( (IntPortion*) param[ 1 ] )->Value()
-     );
+     ((IntPortion*) param[0])->Value() -
+     ((IntPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_Subtract_gRational( Portion** param )
+Portion* GSM_Subtract_gRational(Portion** param)
 {
   Portion* result = 0;
   result = new RationalValPortion
     (
-     ( (RationalPortion*) param[ 0 ] )->Value() -
-     ( (RationalPortion*) param[ 1 ] )->Value()
-     );
+     ((RationalPortion*) param[0])->Value() -
+     ((RationalPortion*) param[1])->Value()
+    );
   return result;
 }
 
 
-Portion* GSM_Subtract_MixedFloat( Portion** param )
+Portion* GSM_Subtract_MixedFloat(Portion** param)
 {
   Portion* result = 0;
-  if( ( (MixedPortion*) param[ 0 ] )->Value() == 0 ||
-     ( (MixedPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Mixed value" );
+  if(((MixedPortion*) param[0])->Value() == 0 ||
+     ((MixedPortion*) param[1])->Value() == 0)
+    return new ErrorPortion("Cannot operate on a null Mixed value");
 
-  result = param[ 0 ]->ValCopy();
-  ( * (MixedSolution<double>*) ( (MixedPortion*) result )->Value() ) -=
-    ( * (MixedSolution<double>*) ( (MixedPortion*) param[ 1 ] )->Value() );
+  result = param[0]->ValCopy();
+  (* (MixedSolution<double>*) ((MixedPortion*) result)->Value()) -=
+    (* (MixedSolution<double>*) ((MixedPortion*) param[1])->Value());
   return result;
 }
 
-Portion* GSM_Subtract_MixedRational( Portion** param )
+Portion* GSM_Subtract_MixedRational(Portion** param)
 {
   Portion* result = 0;
-  if( ( (MixedPortion*) param[ 0 ] )->Value() == 0 ||
-     ( (MixedPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Mixed value" );
+  if(((MixedPortion*) param[0])->Value() == 0 ||
+     ((MixedPortion*) param[1])->Value() == 0)
+    return new ErrorPortion("Cannot operate on a null Mixed value");
 
-  result = param[ 0 ]->ValCopy();
-  ( * (MixedSolution<gRational>*) ( (MixedPortion*) result )->Value() ) -=
-    ( * (MixedSolution<gRational>*) ( (MixedPortion*) param[ 1 ] )->Value() );
+  result = param[0]->ValCopy();
+  (* (MixedSolution<gRational>*) ((MixedPortion*) result)->Value()) -=
+    (* (MixedSolution<gRational>*) ((MixedPortion*) param[1])->Value());
   return result;
 }
 
 
-Portion* GSM_Subtract_BehavFloat( Portion** param )
+Portion* GSM_Subtract_BehavFloat(Portion** param)
 {
   Portion* result = 0;
-  if( ( (BehavPortion*) param[ 0 ] )->Value() == 0 ||
-     ( (BehavPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Behav value" );
+  if(((BehavPortion*) param[0])->Value() == 0 ||
+     ((BehavPortion*) param[1])->Value() == 0)
+    return new ErrorPortion("Cannot operate on a null Behav value");
 
-  result = param[ 0 ]->ValCopy();
-  ( * (BehavSolution<double>*) ( (BehavPortion*) result )->Value() ) -=
-    ( * (BehavSolution<double>*) ( (BehavPortion*) param[ 1 ] )->Value() );
+  result = param[0]->ValCopy();
+  (* (BehavSolution<double>*) ((BehavPortion*) result)->Value()) -=
+    (* (BehavSolution<double>*) ((BehavPortion*) param[1])->Value());
   return result;
 }
 
-Portion* GSM_Subtract_BehavRational( Portion** param )
+Portion* GSM_Subtract_BehavRational(Portion** param)
 {
   Portion* result = 0;
-  if( ( (BehavPortion*) param[ 0 ] )->Value() == 0 ||
-     ( (BehavPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Mixed value" );
+  if(((BehavPortion*) param[0])->Value() == 0 ||
+     ((BehavPortion*) param[1])->Value() == 0)
+    return new ErrorPortion("Cannot operate on a null Mixed value");
 
-  result = param[ 0 ]->ValCopy();
-  ( * (BehavSolution<gRational>*) ( (BehavPortion*) result )->Value() ) -=
-    ( * (BehavSolution<gRational>*) ( (BehavPortion*) param[ 1 ] )->Value() );
+  result = param[0]->ValCopy();
+  (* (BehavSolution<gRational>*) ((BehavPortion*) result)->Value()) -=
+    (* (BehavSolution<gRational>*) ((BehavPortion*) param[1])->Value());
   return result;
 }
 
@@ -331,136 +331,136 @@ Portion* GSM_Subtract_BehavRational( Portion** param )
 
 //------------------------- GSM_Multiply ---------------------------
 
-Portion* GSM_Multiply_double( Portion** param )
+Portion* GSM_Multiply_double(Portion** param)
 {
   Portion* result = 0;
   result = new FloatValPortion
     (
-     ( (FloatPortion*) param[ 0 ] )->Value() *
-     ( (FloatPortion*) param[ 1 ] )->Value()
-     );
+     ((FloatPortion*) param[0])->Value() *
+     ((FloatPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_Multiply_int( Portion** param )
+Portion* GSM_Multiply_int(Portion** param)
 {
   Portion* result = 0;
   result = new IntValPortion
     (
-     ( (IntPortion*) param[ 0 ] )->Value() *
-     ( (IntPortion*) param[ 1 ] )->Value()
-     );
+     ((IntPortion*) param[0])->Value() *
+     ((IntPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_Multiply_gRational( Portion** param )
+Portion* GSM_Multiply_gRational(Portion** param)
 {
   Portion* result = 0;
   result = new RationalValPortion
     (
-     ( (RationalPortion*) param[ 0 ] )->Value() *
-     ( (RationalPortion*) param[ 1 ] )->Value()
-     );
+     ((RationalPortion*) param[0])->Value() *
+     ((RationalPortion*) param[1])->Value()
+    );
   return result;
 }
 
 
-Portion* GSM_Multiply_MixedFloat1( Portion** param )
+Portion* GSM_Multiply_MixedFloat1(Portion** param)
 {
   Portion* result = 0;
-  if( ( (MixedPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Mixed value" );
+  if(((MixedPortion*) param[1])->Value() == 0)
+    return new ErrorPortion("Cannot operate on a null Mixed value");
   
-  result = param[ 1 ]->ValCopy();
-  ( * (MixedSolution<double>*) ( (MixedPortion*) result )->Value() ) *=
-    ( (FloatPortion*) param[ 0 ] )->Value();
+  result = param[1]->ValCopy();
+  (* (MixedSolution<double>*) ((MixedPortion*) result)->Value()) *=
+    ((FloatPortion*) param[0])->Value();
   return result;
 }
 
-Portion* GSM_Multiply_MixedFloat2( Portion** param )
+Portion* GSM_Multiply_MixedFloat2(Portion** param)
 {
   Portion* result = 0;
-  if( ( (MixedPortion*) param[ 0 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Mixed value" );
+  if(((MixedPortion*) param[0])->Value() == 0)
+    return new ErrorPortion("Cannot operate on a null Mixed value");
   
-  result = param[ 0 ]->ValCopy();
-  ( * (MixedSolution<double>*) ( (MixedPortion*) result )->Value() ) *=
-    ( (FloatPortion*) param[ 1 ] )->Value();
-  return result;
-}
-
-
-Portion* GSM_Multiply_MixedRational1( Portion** param )
-{
-  Portion* result = 0;
-  if( ( (MixedPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Mixed value" );
-  
-  result = param[ 1 ]->ValCopy();
-  ( * (MixedSolution<gRational>*) ( (MixedPortion*) result )->Value() ) *=
-    ( (RationalPortion*) param[ 0 ] )->Value();
-  return result;
-}
-
-Portion* GSM_Multiply_MixedRational2( Portion** param )
-{
-  Portion* result = 0;
-  if( ( (MixedPortion*) param[ 0 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Mixed value" );
-  
-  result = param[ 0 ]->ValCopy();
-  ( * (MixedSolution<gRational>*) ( (MixedPortion*) result )->Value() ) *=
-    ( (RationalPortion*) param[ 1 ] )->Value();
+  result = param[0]->ValCopy();
+  (* (MixedSolution<double>*) ((MixedPortion*) result)->Value()) *=
+    ((FloatPortion*) param[1])->Value();
   return result;
 }
 
 
-Portion* GSM_Multiply_BehavFloat1( Portion** param )
+Portion* GSM_Multiply_MixedRational1(Portion** param)
 {
   Portion* result = 0;
-  if( ( (BehavPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Behav value" );
+  if(((MixedPortion*) param[1])->Value() == 0)
+    return new ErrorPortion("Cannot operate on a null Mixed value");
   
-  result = param[ 1 ]->ValCopy();
-  ( * (BehavSolution<double>*) ( (BehavPortion*) result )->Value() ) *=
-    ( (FloatPortion*) param[ 0 ] )->Value();
+  result = param[1]->ValCopy();
+  (* (MixedSolution<gRational>*) ((MixedPortion*) result)->Value()) *=
+    ((RationalPortion*) param[0])->Value();
   return result;
 }
 
-Portion* GSM_Multiply_BehavFloat2( Portion** param )
+Portion* GSM_Multiply_MixedRational2(Portion** param)
 {
   Portion* result = 0;
-  if( ( (BehavPortion*) param[ 0 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Behav value" );
+  if(((MixedPortion*) param[0])->Value() == 0)
+    return new ErrorPortion("Cannot operate on a null Mixed value");
   
-  result = param[ 0 ]->ValCopy();
-  ( * (BehavSolution<double>*) ( (BehavPortion*) result )->Value() ) *=
-    ( (FloatPortion*) param[ 1 ] )->Value();
+  result = param[0]->ValCopy();
+  (* (MixedSolution<gRational>*) ((MixedPortion*) result)->Value()) *=
+    ((RationalPortion*) param[1])->Value();
   return result;
 }
 
 
-Portion* GSM_Multiply_BehavRational1( Portion** param )
+Portion* GSM_Multiply_BehavFloat1(Portion** param)
 {
   Portion* result = 0;
-  if( ( (BehavPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Behav value" );
+  if(((BehavPortion*) param[1])->Value() == 0)
+    return new ErrorPortion("Cannot operate on a null Behav value");
   
-  result = param[ 1 ]->ValCopy();
-  ( * (BehavSolution<gRational>*) ( (BehavPortion*) result )->Value() ) *=
-    ( (RationalPortion*) param[ 0 ] )->Value();
+  result = param[1]->ValCopy();
+  (* (BehavSolution<double>*) ((BehavPortion*) result)->Value()) *=
+    ((FloatPortion*) param[0])->Value();
   return result;
 }
 
-Portion* GSM_Multiply_BehavRational2( Portion** param )
+Portion* GSM_Multiply_BehavFloat2(Portion** param)
 {
   Portion* result = 0;
-  if( ( (BehavPortion*) param[ 0 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Behav value" );
+  if(((BehavPortion*) param[0])->Value() == 0)
+    return new ErrorPortion("Cannot operate on a null Behav value");
   
-  result = param[ 0 ]->ValCopy();
-  ( * (BehavSolution<gRational>*) ( (BehavPortion*) result )->Value() ) *=
-    ( (RationalPortion*) param[ 1 ] )->Value();
+  result = param[0]->ValCopy();
+  (* (BehavSolution<double>*) ((BehavPortion*) result)->Value()) *=
+    ((FloatPortion*) param[1])->Value();
+  return result;
+}
+
+
+Portion* GSM_Multiply_BehavRational1(Portion** param)
+{
+  Portion* result = 0;
+  if(((BehavPortion*) param[1])->Value() == 0)
+    return new ErrorPortion("Cannot operate on a null Behav value");
+  
+  result = param[1]->ValCopy();
+  (* (BehavSolution<gRational>*) ((BehavPortion*) result)->Value()) *=
+    ((RationalPortion*) param[0])->Value();
+  return result;
+}
+
+Portion* GSM_Multiply_BehavRational2(Portion** param)
+{
+  Portion* result = 0;
+  if(((BehavPortion*) param[0])->Value() == 0)
+    return new ErrorPortion("Cannot operate on a null Behav value");
+  
+  result = param[0]->ValCopy();
+  (* (BehavSolution<gRational>*) ((BehavPortion*) result)->Value()) *=
+    ((RationalPortion*) param[1])->Value();
   return result;
 }
 
@@ -468,60 +468,60 @@ Portion* GSM_Multiply_BehavRational2( Portion** param )
 
 //---------------------------- GSM_Divide -------------------------------
 
-Portion* GSM_Divide_double( Portion** param )
+Portion* GSM_Divide_double(Portion** param)
 {
   Portion* result = 0;
-  if( ( (FloatPortion*) param[ 1 ] )->Value() != 0 )
+  if(((FloatPortion*) param[1])->Value() != 0)
   {
     result = new FloatValPortion
       (
-       ( (FloatPortion*) param[ 0 ] )->Value() /
-       ( (FloatPortion*) param[ 1 ] )->Value()
-       );
+       ((FloatPortion*) param[0])->Value() /
+       ((FloatPortion*) param[1])->Value()
+      );
   }
   else
   {
     result = new NullPortion(porFLOAT);
-    //result = new ErrorPortion( "Division by zero" );
+    //result = new ErrorPortion("Division by zero");
   }
   return result;
 }
 
 
-Portion* GSM_Divide_int( Portion** param )
+Portion* GSM_Divide_int(Portion** param)
 {
   Portion* result = 0;
-  if( ( (IntPortion*) param[ 1 ] )->Value() != 0 )
+  if(((IntPortion*) param[1])->Value() != 0)
   {
-    result = new RationalValPortion( ( (IntPortion*) param[ 0 ] )->Value() );
-    ( (RationalPortion*) result )->Value() /= 
-      ( (IntPortion*) param[ 1 ] )->Value();
+    result = new RationalValPortion(((IntPortion*) param[0])->Value());
+    ((RationalPortion*) result)->Value() /= 
+      ((IntPortion*) param[1])->Value();
   }
   else
   {
     result = new NullPortion(porRATIONAL);
-    //result = new ErrorPortion( "Division by zero" );
+    //result = new ErrorPortion("Division by zero");
   }
   return result;
 }
 
 
 
-Portion* GSM_Divide_gRational( Portion** param )
+Portion* GSM_Divide_gRational(Portion** param)
 {
   Portion* result = 0;
-  if( ( (RationalPortion*) param[ 1 ] )->Value() != (gRational)0 )
+  if(((RationalPortion*) param[1])->Value() != (gRational)0)
   {
     result = new RationalValPortion
       (
-       ( (RationalPortion*) param[ 0 ] )->Value() /
-       ( (RationalPortion*) param[ 1 ] )->Value()
-       );
+       ((RationalPortion*) param[0])->Value() /
+       ((RationalPortion*) param[1])->Value()
+      );
   }
   else
   {
     result = new NullPortion(porRATIONAL);
-    //result = new ErrorPortion( "Division by zero" );
+    //result = new ErrorPortion("Division by zero");
   }
   return result;
 }
@@ -530,21 +530,21 @@ Portion* GSM_Divide_gRational( Portion** param )
 
 //-------------------------- GSM_IntegerDivide -------------------------------
 
-Portion* GSM_IntegerDivide_int( Portion** param )
+Portion* GSM_IntegerDivide_int(Portion** param)
 {
   Portion* result = 0;
-  if( ( (IntPortion*) param[ 1 ] )->Value() != 0 )
+  if(((IntPortion*) param[1])->Value() != 0)
   {
     result = new IntValPortion
       (
-       ( (IntPortion*) param[ 0 ] )->Value() /
-       ( (IntPortion*) param[ 1 ] )->Value()
-       );
+       ((IntPortion*) param[0])->Value() /
+       ((IntPortion*) param[1])->Value()
+      );
   }
   else
   {
     result = new NullPortion(porINTEGER);
-    //result = new ErrorPortion( "Division by zero" );
+    //result = new ErrorPortion("Division by zero");
   }
   return result;
 }
@@ -577,21 +577,21 @@ Portion* GSM_Power_Int_Int(Portion** param)
 {
   long base = ((IntPortion*) param[0])->Value();
   long exponent = ((IntPortion*) param[1])->Value();
-  return new IntValPortion( (long) pow( (double) base, (double) exponent ) );
+  return new IntValPortion((long) pow((double) base, (double) exponent));
 }
 
 Portion* GSM_Power_Float_Int(Portion** param)
 {
   double base = ((FloatPortion*) param[0])->Value();
   long exponent = ((IntPortion*) param[1])->Value();
-  return new FloatValPortion( pow( base, (double) exponent ) );
+  return new FloatValPortion(pow(base, (double) exponent));
 }
 
 Portion* GSM_Power_Rational_Int(Portion** param)
 {
   gRational base = ((RationalPortion*) param[0])->Value();
   long exponent = ((IntPortion*) param[1])->Value();
-  return new RationalValPortion( pow( base, exponent ) );
+  return new RationalValPortion(pow(base, exponent));
 }
 
 
@@ -599,21 +599,21 @@ Portion* GSM_Power_Int_Float(Portion** param)
 {
   long base = ((IntPortion*) param[0])->Value();
   double exponent = ((FloatPortion*) param[1])->Value();
-  return new FloatValPortion( (double) pow( (double) base, exponent ) );
+  return new FloatValPortion((double) pow((double) base, exponent));
 }
 
 Portion* GSM_Power_Float_Float(Portion** param)
 {
   double base = ((FloatPortion*) param[0])->Value();
   double exponent = ((FloatPortion*) param[1])->Value();
-  return new FloatValPortion( (double) pow( base, exponent ) );
+  return new FloatValPortion((double) pow(base, exponent));
 }
 
 Portion* GSM_Power_Rational_Float(Portion** param)
 {
   gRational base = ((RationalPortion*) param[0])->Value();
   double exponent = ((FloatPortion*) param[1])->Value();
-  return new FloatValPortion( (double) pow( base, ((long) exponent) ) );
+  return new FloatValPortion((double) pow(base, ((long) exponent)));
 }
 
 
@@ -621,33 +621,33 @@ Portion* GSM_Power_Rational_Float(Portion** param)
 
 //------------------------ GSM_Negate ------------------------
 
-Portion* GSM_Negate_double( Portion** param )
+Portion* GSM_Negate_double(Portion** param)
 {
   Portion* result = 0;
   result = new FloatValPortion
     (
-     -( (FloatPortion*) param[ 0 ] )->Value()
-     );
+     -((FloatPortion*) param[0])->Value()
+    );
   return result;
 }
 
-Portion* GSM_Negate_int( Portion** param )
+Portion* GSM_Negate_int(Portion** param)
 {
   Portion* result = 0;
   result = new IntValPortion
     (
-     -( (IntPortion*) param[ 0 ] )->Value()
-     );
+     -((IntPortion*) param[0])->Value()
+    );
   return result;
 }
 
-Portion* GSM_Negate_gRational( Portion** param )
+Portion* GSM_Negate_gRational(Portion** param)
 {
   Portion* result = 0;
   result = new RationalValPortion
     (
-     -( (RationalPortion*) param[ 0 ] )->Value()
-     );
+     -((RationalPortion*) param[0])->Value()
+    );
   return result;
 }
 
@@ -659,21 +659,21 @@ Portion* GSM_Negate_gRational( Portion** param )
 
 //---------------------- GSM_Modulus ---------------------------
 
-Portion* GSM_Modulus_int( Portion** param )
+Portion* GSM_Modulus_int(Portion** param)
 {
   Portion* result = 0;
-  if( ( (IntPortion*) param[ 1 ] )->Value() != 0 )
+  if(((IntPortion*) param[1])->Value() != 0)
   {
     result = new IntValPortion
       (
-       ( (IntPortion*) param[ 0 ] )->Value() %
-       ( (IntPortion*) param[ 1 ] )->Value()
-       );
+       ((IntPortion*) param[0])->Value() %
+       ((IntPortion*) param[1])->Value()
+      );
   }
   else
   {
     result = new NullPortion(porINTEGER);
-    //result = new ErrorPortion( "Division by zero" );
+    //result = new ErrorPortion("Division by zero");
   }
   return result;
 }
@@ -922,188 +922,188 @@ Portion* GSM_NotEqual_MixedRational(Portion** param)
 
 //-------------------------- GSM_GreaterThan -------------------------
 
-Portion* GSM_GreaterThan_double( Portion** param )
+Portion* GSM_GreaterThan_double(Portion** param)
 {
   Portion* result = 0;
   result = new BoolValPortion
     (
-     ( (FloatPortion*) param[ 0 ] )->Value() >
-     ( (FloatPortion*) param[ 1 ] )->Value()
-     );
+     ((FloatPortion*) param[0])->Value() >
+     ((FloatPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_GreaterThan_int( Portion** param )
+Portion* GSM_GreaterThan_int(Portion** param)
 {
   Portion* result = 0;
   result = new BoolValPortion
     (
-     ( (IntPortion*) param[ 0 ] )->Value() >
-     ( (IntPortion*) param[ 1 ] )->Value()
-     );
+     ((IntPortion*) param[0])->Value() >
+     ((IntPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_GreaterThan_gRational( Portion** param )
+Portion* GSM_GreaterThan_gRational(Portion** param)
 {
   Portion* result = 0;
   result = new BoolValPortion
     (
-     ( (RationalPortion*) param[ 0 ] )->Value() >
-     ( (RationalPortion*) param[ 1 ] )->Value()
-     );
+     ((RationalPortion*) param[0])->Value() >
+     ((RationalPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_GreaterThan_gString( Portion** param )
+Portion* GSM_GreaterThan_gString(Portion** param)
 {
   Portion* result = 0;
   result = new BoolValPortion
     (
-     ( (TextPortion*) param[ 0 ] )->Value() >
-     ( (TextPortion*) param[ 1 ] )->Value()
-     );
+     ((TextPortion*) param[0])->Value() >
+     ((TextPortion*) param[1])->Value()
+    );
   return result;
 }
 
 
 //----------------------- GSM_LessThan -----------------------
 
-Portion* GSM_LessThan_double( Portion** param )
+Portion* GSM_LessThan_double(Portion** param)
 {
   Portion* result = 0;
   result = new BoolValPortion
     (
-     ( (FloatPortion*) param[ 0 ] )->Value() <
-     ( (FloatPortion*) param[ 1 ] )->Value()
-     );
+     ((FloatPortion*) param[0])->Value() <
+     ((FloatPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_LessThan_int( Portion** param )
+Portion* GSM_LessThan_int(Portion** param)
 {
   Portion* result = 0;
   result = new BoolValPortion
     (
-     ( (IntPortion*) param[ 0 ] )->Value() <
-     ( (IntPortion*) param[ 1 ] )->Value()
-     );
+     ((IntPortion*) param[0])->Value() <
+     ((IntPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_LessThan_gRational( Portion** param )
+Portion* GSM_LessThan_gRational(Portion** param)
 {
   Portion* result = 0;
   result = new BoolValPortion
     (
-     ( (RationalPortion*) param[ 0 ] )->Value() <
-     ( (RationalPortion*) param[ 1 ] )->Value()
-     );
+     ((RationalPortion*) param[0])->Value() <
+     ((RationalPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_LessThan_gString( Portion** param )
+Portion* GSM_LessThan_gString(Portion** param)
 {
   Portion* result = 0;
   result = new BoolValPortion
     (
-     ( (TextPortion*) param[ 0 ] )->Value() <
-     ( (TextPortion*) param[ 1 ] )->Value()
-     );
+     ((TextPortion*) param[0])->Value() <
+     ((TextPortion*) param[1])->Value()
+    );
   return result;
 }
 
 
 //--------------------- GSM_GreaterThanOrEqualTo --------------------
 
-Portion* GSM_GreaterThanOrEqualTo_double( Portion** param )
+Portion* GSM_GreaterThanOrEqualTo_double(Portion** param)
 {
   Portion* result = 0;
   result = new BoolValPortion
     (
-     ( (FloatPortion*) param[ 0 ] )->Value() >=
-     ( (FloatPortion*) param[ 1 ] )->Value()
-     );
+     ((FloatPortion*) param[0])->Value() >=
+     ((FloatPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_GreaterThanOrEqualTo_int( Portion** param )
+Portion* GSM_GreaterThanOrEqualTo_int(Portion** param)
 {
   Portion* result = 0;
   result = new BoolValPortion
     (
-     ( (IntPortion*) param[ 0 ] )->Value() >=
-     ( (IntPortion*) param[ 1 ] )->Value()
-     );
+     ((IntPortion*) param[0])->Value() >=
+     ((IntPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_GreaterThanOrEqualTo_gRational( Portion** param )
+Portion* GSM_GreaterThanOrEqualTo_gRational(Portion** param)
 {
   Portion* result = 0;
   result = new BoolValPortion
     (
-     ( (RationalPortion*) param[ 0 ] )->Value() >=
-     ( (RationalPortion*) param[ 1 ] )->Value()
-     );
+     ((RationalPortion*) param[0])->Value() >=
+     ((RationalPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_GreaterThanOrEqualTo_gString( Portion** param )
+Portion* GSM_GreaterThanOrEqualTo_gString(Portion** param)
 {
   Portion* result = 0;
   result = new BoolValPortion
     (
-     ( (TextPortion*) param[ 0 ] )->Value() >=
-     ( (TextPortion*) param[ 1 ] )->Value()
-     );
+     ((TextPortion*) param[0])->Value() >=
+     ((TextPortion*) param[1])->Value()
+    );
   return result;
 }
 
 
 //--------------------- GSM_LessThanOrEqualTo ---------------------
 
-Portion* GSM_LessThanOrEqualTo_double( Portion** param )
+Portion* GSM_LessThanOrEqualTo_double(Portion** param)
 {
   Portion* result = 0;
   result = new BoolValPortion
     (
-     ( (FloatPortion*) param[ 0 ] )->Value() <=
-     ( (FloatPortion*) param[ 1 ] )->Value()
-     );
+     ((FloatPortion*) param[0])->Value() <=
+     ((FloatPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_LessThanOrEqualTo_int( Portion** param )
+Portion* GSM_LessThanOrEqualTo_int(Portion** param)
 {
   Portion* result = 0;
   result = new BoolValPortion
     (
-     ( (IntPortion*) param[ 0 ] )->Value() <=
-     ( (IntPortion*) param[ 1 ] )->Value()
-     );
+     ((IntPortion*) param[0])->Value() <=
+     ((IntPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_LessThanOrEqualTo_gRational( Portion** param )
+Portion* GSM_LessThanOrEqualTo_gRational(Portion** param)
 {
   Portion* result = 0;
   result = new BoolValPortion
     (
-     ( (RationalPortion*) param[ 0 ] )->Value() <=
-     ( (RationalPortion*) param[ 1 ] )->Value()
-     );
+     ((RationalPortion*) param[0])->Value() <=
+     ((RationalPortion*) param[1])->Value()
+    );
   return result;
 }
 
-Portion* GSM_LessThanOrEqualTo_gString( Portion** param )
+Portion* GSM_LessThanOrEqualTo_gString(Portion** param)
 {
   Portion* result = 0;
   result = new BoolValPortion
     (
-     ( (TextPortion*) param[ 0 ] )->Value() <=
-     ( (TextPortion*) param[ 1 ] )->Value()
-     );
+     ((TextPortion*) param[0])->Value() <=
+     ((TextPortion*) param[1])->Value()
+    );
   return result;
 }
 
@@ -1116,46 +1116,46 @@ Portion* GSM_LessThanOrEqualTo_gString( Portion** param )
 
 
 
-Portion* GSM_AND( Portion** param )
+Portion* GSM_AND(Portion** param)
 {
   Portion* result = 0;
 
-  assert( param[ 0 ]->Spec().Type == porBOOL );
+  assert(param[0]->Spec().Type == porBOOL);
   
   result = new BoolValPortion
     (
-     ( (BoolPortion*) param[ 0 ] )->Value() &&
-     ( (BoolPortion*) param[ 1 ] )->Value()
-     );
+     ((BoolPortion*) param[0])->Value() &&
+     ((BoolPortion*) param[1])->Value()
+    );
   return result;
 }
 
 
 
-Portion* GSM_OR( Portion** param )
+Portion* GSM_OR(Portion** param)
 {
   Portion* result = 0;
 
-  assert( param[ 0 ]->Spec().Type == porBOOL );
+  assert(param[0]->Spec().Type == porBOOL);
   
   result = new BoolValPortion
     (
-     ( (BoolPortion*) param[ 0 ] )->Value() ||
-     ( (BoolPortion*) param[ 1 ] )->Value()
-     );
+     ((BoolPortion*) param[0])->Value() ||
+     ((BoolPortion*) param[1])->Value()
+    );
 
   return result;
 }
 
 
 
-Portion* GSM_NOT( Portion** param )
+Portion* GSM_NOT(Portion** param)
 {
   Portion* result = 0;
 
-  assert( param[ 0 ]->Spec().Type == porBOOL );
+  assert(param[0]->Spec().Type == porBOOL);
   
-  result = new BoolValPortion( !( (BoolPortion*) param[ 0 ] )->Value() );
+  result = new BoolValPortion(!((BoolPortion*) param[0])->Value());
 
   return result;
 }
@@ -1171,34 +1171,34 @@ Portion *GSM_Paren(Portion **param)
 //-----------------------------------------------------------------
 
 
-Portion* GSM_NewOutputStream( Portion** param )
+Portion* GSM_NewOutputStream(Portion** param)
 {
   Portion* result = 0;
   gOutput* g;
   
-  assert( param[ 0 ]->Spec().Type == porTEXT );
+  assert(param[0]->Spec().Type == porTEXT);
 
-  g = new gFileOutput( ( (TextPortion*) param[ 0 ] )->Value() );
-  result = new OutputValPortion( *g );
+  g = new gFileOutput(((TextPortion*) param[0])->Value());
+  result = new OutputValPortion(*g);
   
   return result;
 }
 
 
-Portion* GSM_NewInputStream( Portion** param )
+Portion* GSM_NewInputStream(Portion** param)
 {
   Portion* result = 0;
   gInput* g;
   
-  assert( param[ 0 ]->Spec().Type == porTEXT );
+  assert(param[0]->Spec().Type == porTEXT);
 
-  g = new gFileInput( ( (TextPortion*) param[ 0 ] )->Value() );
+  g = new gFileInput(((TextPortion*) param[0])->Value());
 
-  if( g->IsValid() )
-    result = new InputValPortion( *g );
+  if(g->IsValid())
+    result = new InputValPortion(*g);
   else
-    result = new ErrorPortion( (gString) "Error opening file \"" + 
-			      ( (TextPortion*) param[ 0 ] )->Value() + "\"" );
+    result = new ErrorPortion((gString) "Error opening file \"" + 
+			      ((TextPortion*) param[0])->Value() + "\"");
   
   return result;
 }
@@ -1221,127 +1221,127 @@ long _WriteListIndent = 2;
 long _WriteSolutionInfo = 1;
 
 
-void GSM_SetWriteOptions( void )
+void GSM_SetWriteOptions(void)
 {
-  Portion::_SetWriteWidth( _WriteWidth );
-  Portion::_SetWritePrecis( _WritePrecis );
-  Portion::_SetWriteExpmode( _WriteExpmode );
-  Portion::_SetWriteQuoted( _WriteQuoted );
-  Portion::_SetWriteListBraces( _WriteListBraces );
-  Portion::_SetWriteListCommas( _WriteListCommas );
-  Portion::_SetWriteListLF( _WriteListLF );
-  Portion::_SetWriteListIndent( _WriteListIndent );
-  Portion::_SetWriteSolutionInfo( _WriteSolutionInfo );
+  Portion::_SetWriteWidth(_WriteWidth);
+  Portion::_SetWritePrecis(_WritePrecis);
+  Portion::_SetWriteExpmode(_WriteExpmode);
+  Portion::_SetWriteQuoted(_WriteQuoted);
+  Portion::_SetWriteListBraces(_WriteListBraces);
+  Portion::_SetWriteListCommas(_WriteListCommas);
+  Portion::_SetWriteListLF(_WriteListLF);
+  Portion::_SetWriteListIndent(_WriteListIndent);
+  Portion::_SetWriteSolutionInfo(_WriteSolutionInfo);
 }
 
 
-Portion* GSM_SetFormat( Portion** param )
+Portion* GSM_SetFormat(Portion** param)
 {
-  _WriteWidth = ( (IntPortion*) param[ 0 ] )->Value();
-  _WritePrecis = ( (IntPortion*) param[ 1 ] )->Value();
-  _WriteExpmode = ( (BoolPortion*) param[ 2 ] )->Value();
-  _WriteQuoted = ( (BoolPortion*) param[ 3 ] )->Value();
-  _WriteListBraces = ( (BoolPortion*) param[ 4 ] )->Value();
-  _WriteListCommas = ( (BoolPortion*) param[ 5 ] )->Value();
-  _WriteListLF = ( (IntPortion*) param[ 6 ] )->Value();
-  _WriteListIndent = ( (IntPortion*) param[ 7 ] )->Value();
-  _WriteSolutionInfo = ( (IntPortion*) param[ 8 ] )->Value();
+  _WriteWidth = ((IntPortion*) param[0])->Value();
+  _WritePrecis = ((IntPortion*) param[1])->Value();
+  _WriteExpmode = ((BoolPortion*) param[2])->Value();
+  _WriteQuoted = ((BoolPortion*) param[3])->Value();
+  _WriteListBraces = ((BoolPortion*) param[4])->Value();
+  _WriteListCommas = ((BoolPortion*) param[5])->Value();
+  _WriteListLF = ((IntPortion*) param[6])->Value();
+  _WriteListIndent = ((IntPortion*) param[7])->Value();
+  _WriteSolutionInfo = ((IntPortion*) param[8])->Value();
 
   GSM_SetWriteOptions();
 
-  return new BoolValPortion( true );
+  return new BoolValPortion(true);
 }
 
 
 
 
 
-Portion* GSM_Write_numerical( Portion** param )
+Portion* GSM_Write_numerical(Portion** param)
 {
   assert(param[1]->Spec().Type & (porINTEGER|porFLOAT|porRATIONAL));
-  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
-  s << param[ 1 ];
+  gOutput& s = ((OutputPortion*) param[0])->Value();
+  s << param[1];
   return param[0]->RefCopy();
 }
 
 
-Portion* GSM_Write_gString( Portion** param )
+Portion* GSM_Write_gString(Portion** param)
 {
   assert(param[1]->Spec().Type == porTEXT);
-  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
   return param[0]->RefCopy();
 }
 
 
-Portion* GSM_Write_Mixed( Portion** param )
+Portion* GSM_Write_Mixed(Portion** param)
 {
   assert(param[1]->Spec().Type & porMIXED);
-  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
   return param[0]->RefCopy();
 }
 
 
-Portion* GSM_Write_Behav( Portion** param )
+Portion* GSM_Write_Behav(Portion** param)
 {
   assert(param[1]->Spec().Type & porBEHAV);
-  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
   return param[0]->RefCopy();
 }
 
 
-Portion* GSM_Write_NfSupport( Portion** param )
+Portion* GSM_Write_NfSupport(Portion** param)
 {
   assert(param[1]->Spec().Type & porNF_SUPPORT);
-  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
   return param[0]->RefCopy();
 }
 
-Portion* GSM_Write_EfSupport( Portion** param )
+Portion* GSM_Write_EfSupport(Portion** param)
 {
   assert(param[1]->Spec().Type & porEF_SUPPORT);
-  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
   return param[0]->RefCopy();
 }
 
-Portion* GSM_Write_Strategy( Portion** param )
+Portion* GSM_Write_Strategy(Portion** param)
 {
   assert(param[1]->Spec().Type & porSTRATEGY);
-  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
   return param[0]->RefCopy();
 }
 
 
-Portion* GSM_Write_Nfg( Portion** param )
+Portion* GSM_Write_Nfg(Portion** param)
 {
   assert(param[1]->Spec().Type & porNFG);
-  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  gOutput& s = ((OutputPortion*) param[0])->Value();
 
-  BaseNfg* nfg = ( (NfgPortion*) param[ 1 ] )->Value();
-  // nfg->DisplayNfg( s );
+  BaseNfg* nfg = ((NfgPortion*) param[1])->Value();
+  // nfg->DisplayNfg(s);
 
   s << "Temporary hack; still waiting for DisplayNfg() to finish\n";
-  nfg->WriteNfgFile( s );
+  nfg->WriteNfgFile(s);
 
   return param[0]->RefCopy();
 }
 
 
-Portion* GSM_Write_Efg( Portion** param )
+Portion* GSM_Write_Efg(Portion** param)
 {
   assert(param[1]->Spec().Type & porEFG);
-  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  gOutput& s = ((OutputPortion*) param[0])->Value();
 
-  BaseEfg* efg = ( (EfgPortion*) param[ 1 ] )->Value();
-  // efg->DisplayEfg( s );
+  BaseEfg* efg = ((EfgPortion*) param[1])->Value();
+  // efg->DisplayEfg(s);
 
   s << "Temporary hack; still waiting for DisplayEfg() to finish\n";
-  efg->WriteEfgFile( s );
+  efg->WriteEfgFile(s);
 
   return param[0]->RefCopy();
 }
@@ -1349,11 +1349,11 @@ Portion* GSM_Write_Efg( Portion** param )
 
 
 
-Portion* GSM_Write_list( Portion** param )
+Portion* GSM_Write_list(Portion** param)
 {
   assert(param[1]->Spec().ListDepth > 0);
-  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
-  s << param[ 1 ];
+  gOutput& s = ((OutputPortion*) param[0])->Value();
+  s << param[1];
   return param[0]->RefCopy();
 }
 
@@ -1365,7 +1365,7 @@ Portion* GSM_Write_list( Portion** param )
 
 
 
-Portion* GSM_Read_Bool( Portion** param )
+Portion* GSM_Read_Bool(Portion** param)
 {
   gInput& input = ((InputPortion*) param[0])->Value();
   long old_pos = input.getpos();
@@ -1373,35 +1373,35 @@ Portion* GSM_Read_Bool( Portion** param )
   bool error = false;
   char c = ' ';
 
-  if( input.eof() )
+  if(input.eof())
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "End of file reached" );
+    input.setpos(old_pos);
+    return new ErrorPortion("End of file reached");
   }
-  while( !input.eof() && isspace(c) )
+  while(!input.eof() && isspace(c))
     input.get(c);
-  if( c == 'T' )
+  if(c == 'T')
   {
-    if( !input.eof() ) input.get(c); if( c != 'r' ) error = true;
-    if( !input.eof() ) input.get(c); if( c != 'u' ) error = true;
-    if( !input.eof() ) input.get(c); if( c != 'e' ) error = true;
+    if(!input.eof()) input.get(c); if(c != 'r') error = true;
+    if(!input.eof()) input.get(c); if(c != 'u') error = true;
+    if(!input.eof()) input.get(c); if(c != 'e') error = true;
     value = true;
   }
-  else if( c == 'F' )
+  else if(c == 'F')
   {
-    if( !input.eof() ) input.get(c); if( c != 'a' ) error = true;
-    if( !input.eof() ) input.get(c); if( c != 'l' ) error = true;
-    if( !input.eof() ) input.get(c); if( c != 's' ) error = true;
-    if( !input.eof() ) input.get(c); if( c != 'e' ) error = true;
+    if(!input.eof()) input.get(c); if(c != 'a') error = true;
+    if(!input.eof()) input.get(c); if(c != 'l') error = true;
+    if(!input.eof()) input.get(c); if(c != 's') error = true;
+    if(!input.eof()) input.get(c); if(c != 'e') error = true;
     value = false;
   }
   else
     error = true;
 
-  if( error )
+  if(error)
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "No boolean data found" );
+    input.setpos(old_pos);
+    return new ErrorPortion("No boolean data found");
   }
 
   ((BoolPortion*) param[1])->Value() = value;
@@ -1409,37 +1409,37 @@ Portion* GSM_Read_Bool( Portion** param )
 }
 
 
-Portion* GSM_Read_Integer( Portion** param )
+Portion* GSM_Read_Integer(Portion** param)
 {
   gInput& input = ((InputPortion*) param[0])->Value();
   long old_pos = input.getpos();
   int value;
   char c;
 
-  if( input.eof() )
+  if(input.eof())
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "End of file reached" );
+    input.setpos(old_pos);
+    return new ErrorPortion("End of file reached");
   }
   input >> value;
-  if( !input.IsValid() )
+  if(!input.IsValid())
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "File read error" );
+    input.setpos(old_pos);
+    return new ErrorPortion("File read error");
   }
 
   input.get(c);
-  while( !input.eof() && isspace(c) ) 
+  while(!input.eof() && isspace(c)) 
     input.get(c); 
-  if( c == '/' )
+  if(c == '/')
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "Type mismatch: expected INTEGER, got RATIONAL" );
+    input.setpos(old_pos);
+    return new ErrorPortion("Type mismatch: expected INTEGER, got RATIONAL");
   }
-  else if( c == '.' )
+  else if(c == '.')
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "Type mismatch: expected INTEGER, got FLOAT" );
+    input.setpos(old_pos);
+    return new ErrorPortion("Type mismatch: expected INTEGER, got FLOAT");
   }
   else
     input.unget(c);
@@ -1449,32 +1449,32 @@ Portion* GSM_Read_Integer( Portion** param )
   return param[0]->RefCopy();
 }
 
-Portion* GSM_Read_Float( Portion** param )
+Portion* GSM_Read_Float(Portion** param)
 {
   gInput& input = ((InputPortion*) param[0])->Value();
   long old_pos = input.getpos();
   double value;
   char c;
 
-  if( input.eof() )
+  if(input.eof())
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "End of file reached" );
+    input.setpos(old_pos);
+    return new ErrorPortion("End of file reached");
   }
   input >> value;
-  if( !input.IsValid() ) 
+  if(!input.IsValid()) 
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "File read error" );
+    input.setpos(old_pos);
+    return new ErrorPortion("File read error");
   }
 
   input.get(c);
-  while( !input.eof() && isspace(c) ) 
+  while(!input.eof() && isspace(c)) 
     input.get(c); 
-  if( c == '/' )
+  if(c == '/')
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "Type mismatch: expected FLOAT, got RATIONAL" );
+    input.setpos(old_pos);
+    return new ErrorPortion("Type mismatch: expected FLOAT, got RATIONAL");
   }
   else
     input.unget(c);
@@ -1484,7 +1484,7 @@ Portion* GSM_Read_Float( Portion** param )
   return param[0]->RefCopy();
 }
 
-Portion* GSM_Read_Rational( Portion** param )
+Portion* GSM_Read_Rational(Portion** param)
 {
   int numerator = 0;
   int denominator = 0;
@@ -1492,48 +1492,48 @@ Portion* GSM_Read_Rational( Portion** param )
   gInput& input = ((InputPortion*) param[0])->Value();
   long old_pos = input.getpos();
 
-  if( input.eof() )
+  if(input.eof())
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "End of file reached" );
+    input.setpos(old_pos);
+    return new ErrorPortion("End of file reached");
   }
   input >> numerator;
-  if( !input.IsValid() )
+  if(!input.IsValid())
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "File read error" );
+    input.setpos(old_pos);
+    return new ErrorPortion("File read error");
   }
 
   input.get(c);
-  while( !input.eof() && isspace(c) ) 
+  while(!input.eof() && isspace(c)) 
     input.get(c); 
-  if( !input.eof() && c == '.' )
+  if(!input.eof() && c == '.')
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "Expected RATIONAL, got FLOAT" );
+    input.setpos(old_pos);
+    return new ErrorPortion("Expected RATIONAL, got FLOAT");
   }
-  if( input.eof() || c != '/' )
+  if(input.eof() || c != '/')
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "Expected RATIONAL, got INTEGER" );
+    input.setpos(old_pos);
+    return new ErrorPortion("Expected RATIONAL, got INTEGER");
   }
 
-  if( input.eof() )
+  if(input.eof())
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "End of file reached" );
+    input.setpos(old_pos);
+    return new ErrorPortion("End of file reached");
   }
   input >> denominator;
-  if( !input.IsValid() )
+  if(!input.IsValid())
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "File read error" );
+    input.setpos(old_pos);
+    return new ErrorPortion("File read error");
   }
 
-  if( denominator == 0 )
+  if(denominator == 0)
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "Division by zero" );
+    input.setpos(old_pos);
+    return new ErrorPortion("Division by zero");
   }
 
   ((RationalPortion*) param[1])->Value() = numerator;
@@ -1542,7 +1542,7 @@ Portion* GSM_Read_Rational( Portion** param )
   return param[0]->RefCopy();
 }
 
-Portion* GSM_Read_Text( Portion** param )
+Portion* GSM_Read_Text(Portion** param)
 {
   char c = ' ';
   gString s;
@@ -1550,28 +1550,28 @@ Portion* GSM_Read_Text( Portion** param )
   gInput& input = ((InputPortion*) param[0])->Value();
   long old_pos = input.getpos();
 
-  while( !input.eof() && isspace(c) )
-    input.get( c );
-  if( input.eof() )
+  while(!input.eof() && isspace(c))
+    input.get(c);
+  if(input.eof())
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "End of file reached" );
+    input.setpos(old_pos);
+    return new ErrorPortion("End of file reached");
   }
-  if( !input.eof() && c == '\"' )
+  if(!input.eof() && c == '\"')
     input.get(c); 
   else
   {
     input.unget(c);
-    input.setpos( old_pos );
-    return new ErrorPortion( "File read error: missing starting \"" );
+    input.setpos(old_pos);
+    return new ErrorPortion("File read error: missing starting \"");
   }
 
-  while( !input.eof() && c != '\"' )
+  while(!input.eof() && c != '\"')
   { t+=c; input.get(c); }
-  if( input.eof() )
+  if(input.eof())
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "End of file reached" );  
+    input.setpos(old_pos);
+    return new ErrorPortion("End of file reached");  
   }
   
   ((TextPortion*) param[1])->Value() = t;
@@ -1581,8 +1581,8 @@ Portion* GSM_Read_Text( Portion** param )
 
 
 
-Portion* GSM_Read_List( Portion** param, PortionSpec spec,
-		       Portion* (*func) ( Portion** ), bool ListFormat )
+Portion* GSM_Read_List(Portion** param, PortionSpec spec,
+		       Portion* (*func) (Portion**), bool ListFormat)
 {
   Portion* p;
   Portion** sub_param;
@@ -1593,26 +1593,26 @@ Portion* GSM_Read_List( Portion** param, PortionSpec spec,
   long old_pos = input.getpos();
 
 
-  while( !input.eof() && isspace(c) )
-    input.get( c );
-  if( input.eof() )
+  while(!input.eof() && isspace(c))
+    input.get(c);
+  if(input.eof())
   {
-    input.setpos( old_pos );
-    return new ErrorPortion( "End of file reached" );
+    input.setpos(old_pos);
+    return new ErrorPortion("End of file reached");
   }
-  if( !ListFormat )
+  if(!ListFormat)
   {
-    if( c == '{' )
+    if(c == '{')
       ListFormat = true;
     else
       input.unget(c);
   }
   else
   {
-    if( c != '{' )
+    if(c != '{')
     {
-      input.setpos( old_pos );
-      return new ErrorPortion( "\'{\' expected" );
+      input.setpos(old_pos);
+      return new ErrorPortion("\'{\' expected");
     }
   }
 
@@ -1621,32 +1621,32 @@ Portion* GSM_Read_List( Portion** param, PortionSpec spec,
   list = ((ListPortion*) param[1]);
 
 
-  for( i=1; i <= list->Length(); i++ )
+  for(i=1; i <= list->Length(); i++)
   {
     assert((*list)[i]->Spec().Type==spec.Type);
     sub_param[0] = param[0];
     sub_param[1] = (*list)[i];
 
-    if( i > 1 ) 
+    if(i > 1) 
     {
       c = ' ';
-      while( !input.eof() && isspace(c) )
-	input.get( c );
-      if( c == ',' )
+      while(!input.eof() && isspace(c))
+	input.get(c);
+      if(c == ',')
       {
-	if( !ListFormat )
+	if(!ListFormat)
 	  input.unget(c);
       }
       else
 	input.unget(c);      
     }
 
-    if( (*list)[i]->Spec() == spec )
-      p = (*func)( sub_param );
+    if((*list)[i]->Spec() == spec)
+      p = (*func)(sub_param);
     else
-      p = GSM_Read_List( sub_param, spec, func, ListFormat );
+      p = GSM_Read_List(sub_param, spec, func, ListFormat);
 
-    if( p->Spec().Type == porERROR )
+    if(p->Spec().Type == porERROR)
     {
       delete[] sub_param;
       input.setpos(old_pos);
@@ -1657,20 +1657,20 @@ Portion* GSM_Read_List( Portion** param, PortionSpec spec,
   }
   delete[] sub_param;
 
-  if( ListFormat )
+  if(ListFormat)
   {
     c = ' ';
-    while( !input.eof() && isspace(c) )
+    while(!input.eof() && isspace(c))
       input.get(c);
-    if( c != '}' )
+    if(c != '}')
     {
       input.setpos(old_pos);
-      return new ErrorPortion( "Mismatched braces" );
+      return new ErrorPortion("Mismatched braces");
     }
-    if( input.eof() )
+    if(input.eof())
     {
-      input.setpos( old_pos );
-      return new ErrorPortion( "End of file reached" );
+      input.setpos(old_pos);
+      return new ErrorPortion("End of file reached");
     }
   }
 
@@ -1679,52 +1679,52 @@ Portion* GSM_Read_List( Portion** param, PortionSpec spec,
 
 
 
-Portion* GSM_Read_List_Bool( Portion** param )
+Portion* GSM_Read_List_Bool(Portion** param)
 {
   Portion* temp = param[1]->ValCopy();
-  Portion* p = GSM_Read_List( param, porBOOL, GSM_Read_Bool, false );
-  if( p->Spec().Type == porERROR )
-    ((ListPortion*) param[1])->AssignFrom( temp );
+  Portion* p = GSM_Read_List(param, porBOOL, GSM_Read_Bool, false);
+  if(p->Spec().Type == porERROR)
+    ((ListPortion*) param[1])->AssignFrom(temp);
   delete temp;
   return p;
 }
 
-Portion* GSM_Read_List_Integer( Portion** param )
+Portion* GSM_Read_List_Integer(Portion** param)
 {
   Portion* temp = param[1]->ValCopy();
-  Portion* p = GSM_Read_List( param, porINTEGER, GSM_Read_Integer, false );
-  if( p->Spec().Type == porERROR )
-    ((ListPortion*) param[1])->AssignFrom( temp );
+  Portion* p = GSM_Read_List(param, porINTEGER, GSM_Read_Integer, false);
+  if(p->Spec().Type == porERROR)
+    ((ListPortion*) param[1])->AssignFrom(temp);
   delete temp;
   return p;
 }
 
-Portion* GSM_Read_List_Float( Portion** param )
+Portion* GSM_Read_List_Float(Portion** param)
 {
   Portion* temp = param[1]->ValCopy();
-  Portion* p = GSM_Read_List( param, porFLOAT, GSM_Read_Float, false );
-  if( p->Spec().Type == porERROR )
-    ((ListPortion*) param[1])->AssignFrom( temp );
+  Portion* p = GSM_Read_List(param, porFLOAT, GSM_Read_Float, false);
+  if(p->Spec().Type == porERROR)
+    ((ListPortion*) param[1])->AssignFrom(temp);
   delete temp;
   return p;
 }
 
-Portion* GSM_Read_List_Rational( Portion** param )
+Portion* GSM_Read_List_Rational(Portion** param)
 {
   Portion* temp = param[1]->ValCopy();
-  Portion* p = GSM_Read_List( param, porRATIONAL, GSM_Read_Rational, false );
-  if( p->Spec().Type == porERROR )
-    ((ListPortion*) param[1])->AssignFrom( temp );
+  Portion* p = GSM_Read_List(param, porRATIONAL, GSM_Read_Rational, false);
+  if(p->Spec().Type == porERROR)
+    ((ListPortion*) param[1])->AssignFrom(temp);
   delete temp;
   return p;
 }
 
-Portion* GSM_Read_List_Text( Portion** param )
+Portion* GSM_Read_List_Text(Portion** param)
 {
   Portion* temp = param[1]->ValCopy();
-  Portion* p = GSM_Read_List( param, porTEXT, GSM_Read_Text, false );
-  if( p->Spec().Type == porERROR )
-    ((ListPortion*) param[1])->AssignFrom( temp );
+  Portion* p = GSM_Read_List(param, porTEXT, GSM_Read_Text, false);
+  if(p->Spec().Type == porERROR)
+    ((ListPortion*) param[1])->AssignFrom(temp);
   delete temp;
   return p;
 }
@@ -1732,22 +1732,22 @@ Portion* GSM_Read_List_Text( Portion** param )
 
 
 
-extern Portion* GSM_ListForm_MixedFloat( Portion** param );
-extern Portion* GSM_Mixed_NfgFloat( Portion **param );
+extern Portion* GSM_ListForm_MixedFloat(Portion** param);
+extern Portion* GSM_Mixed_NfgFloat(Portion **param);
 
-Portion* GSM_Read_MixedFloat( Portion** param )
+Portion* GSM_Read_MixedFloat(Portion** param)
 {
   Portion** sub_param = new Portion*[2];
   Portion* owner = param[1]->Owner();
   sub_param[0] = param[1];
   sub_param[1] = 0;
-  Portion* list = GSM_ListForm_MixedFloat( sub_param );
+  Portion* list = GSM_ListForm_MixedFloat(sub_param);
   sub_param[0] = param[0];
   sub_param[1] = list;
-  Portion* result = GSM_Read_List_Float( sub_param );
+  Portion* result = GSM_Read_List_Float(sub_param);
   sub_param[0] = owner;
   sub_param[1] = list;
-  Portion* p = GSM_Mixed_NfgFloat( sub_param );
+  Portion* p = GSM_Mixed_NfgFloat(sub_param);
   (*((MixedSolution<double>*) ((MixedPortion*) param[1])->Value())) = 
     (*((MixedSolution<double>*) ((MixedPortion*) p)->Value()));
   delete list;
@@ -1757,22 +1757,22 @@ Portion* GSM_Read_MixedFloat( Portion** param )
 }
 
 
-extern Portion* GSM_ListForm_MixedRational( Portion** param );
-extern Portion* GSM_Mixed_NfgRational( Portion **param );
+extern Portion* GSM_ListForm_MixedRational(Portion** param);
+extern Portion* GSM_Mixed_NfgRational(Portion **param);
 
-Portion* GSM_Read_MixedRational( Portion** param )
+Portion* GSM_Read_MixedRational(Portion** param)
 {
   Portion** sub_param = new Portion*[2];
   Portion* owner = param[1]->Owner();
   sub_param[0] = param[1];
   sub_param[1] = 0;
-  Portion* list = GSM_ListForm_MixedRational( sub_param );
+  Portion* list = GSM_ListForm_MixedRational(sub_param);
   sub_param[0] = param[0];
   sub_param[1] = list;
-  Portion* result = GSM_Read_List_Rational( sub_param );
+  Portion* result = GSM_Read_List_Rational(sub_param);
   sub_param[0] = owner;
   sub_param[1] = list;
-  Portion* p = GSM_Mixed_NfgRational( sub_param );
+  Portion* p = GSM_Mixed_NfgRational(sub_param);
   (*((MixedSolution<gRational>*) ((MixedPortion*) param[1])->Value())) = 
     (*((MixedSolution<gRational>*) ((MixedPortion*) p)->Value()));
   delete list;
@@ -1783,22 +1783,22 @@ Portion* GSM_Read_MixedRational( Portion** param )
 
 
 
-extern Portion* GSM_ListForm_BehavFloat( Portion** param );
-extern Portion* GSM_Behav_EfgFloat( Portion **param );
+extern Portion* GSM_ListForm_BehavFloat(Portion** param);
+extern Portion* GSM_Behav_EfgFloat(Portion **param);
 
-Portion* GSM_Read_BehavFloat( Portion** param )
+Portion* GSM_Read_BehavFloat(Portion** param)
 {
   Portion** sub_param = new Portion*[2];
   Portion* owner = param[1]->Owner();
   sub_param[0] = param[1];
   sub_param[1] = 0;
-  Portion* list = GSM_ListForm_BehavFloat( sub_param );
+  Portion* list = GSM_ListForm_BehavFloat(sub_param);
   sub_param[0] = param[0];
   sub_param[1] = list;
-  Portion* result = GSM_Read_List_Float( sub_param );
+  Portion* result = GSM_Read_List_Float(sub_param);
   sub_param[0] = owner;
   sub_param[1] = list;
-  Portion* p = GSM_Behav_EfgFloat( sub_param );
+  Portion* p = GSM_Behav_EfgFloat(sub_param);
   (*((BehavSolution<double>*) ((BehavPortion*) param[1])->Value())) = 
     (*((BehavSolution<double>*) ((BehavPortion*) p)->Value()));
   delete list;
@@ -1808,22 +1808,22 @@ Portion* GSM_Read_BehavFloat( Portion** param )
 }
 
 
-extern Portion* GSM_ListForm_BehavRational( Portion** param );
-extern Portion* GSM_Behav_EfgRational( Portion **param );
+extern Portion* GSM_ListForm_BehavRational(Portion** param);
+extern Portion* GSM_Behav_EfgRational(Portion **param);
 
-Portion* GSM_Read_BehavRational( Portion** param )
+Portion* GSM_Read_BehavRational(Portion** param)
 {
   Portion** sub_param = new Portion*[2];
   Portion* owner = param[1]->Owner();
   sub_param[0] = param[1];
   sub_param[1] = 0;
-  Portion* list = GSM_ListForm_BehavRational( sub_param );
+  Portion* list = GSM_ListForm_BehavRational(sub_param);
   sub_param[0] = param[0];
   sub_param[1] = list;
-  Portion* result = GSM_Read_List_Rational( sub_param );
+  Portion* result = GSM_Read_List_Rational(sub_param);
   sub_param[0] = owner;
   sub_param[1] = list;
-  Portion* p = GSM_Behav_EfgRational( sub_param );
+  Portion* p = GSM_Behav_EfgRational(sub_param);
   (*((BehavSolution<gRational>*) ((BehavPortion*) param[1])->Value())) = 
     (*((BehavSolution<gRational>*) ((BehavPortion*) p)->Value()));
   delete list;
@@ -1835,7 +1835,7 @@ Portion* GSM_Read_BehavRational( Portion** param )
 
 
 
-Portion* GSM_Read_Undefined( Portion** param )
+Portion* GSM_Read_Undefined(Portion** param)
 {
   /* will go through and try to read the input as different format until
      it succeeds */
@@ -1847,14 +1847,14 @@ Portion* GSM_Read_Undefined( Portion** param )
 
   Portion* result = 0;
 
-  assert( param[1] == 0 );
+  assert(param[1] == 0);
 
 
-  while( !input.eof() && isspace(c) )
+  while(!input.eof() && isspace(c))
     input.get(c);
-  if( input.eof() )
-    return new ErrorPortion( "End of file reached" );
-  if( c == '{' )
+  if(input.eof())
+    return new ErrorPortion("End of file reached");
+  if(c == '{')
   {
     param[1] = new ListValPortion();
 
@@ -1864,9 +1864,9 @@ Portion* GSM_Read_Undefined( Portion** param )
     {
       sub_param[0] = param[0];
       sub_param[1] = 0;
-      result = GSM_Read_Undefined( sub_param );
-      if( result->Spec().Type != porERROR )
-	((ListPortion*) param[1])->Append( sub_param[1] );
+      result = GSM_Read_Undefined(sub_param);
+      if(result->Spec().Type != porERROR)
+	((ListPortion*) param[1])->Append(sub_param[1]);
       else
       {
 	delete result;
@@ -1874,35 +1874,35 @@ Portion* GSM_Read_Undefined( Portion** param )
       }
 
       c = ' ';
-      while( !input.eof() && isspace(c) )
+      while(!input.eof() && isspace(c))
 	input.get(c);
-      if( !input.eof() && c != ',' )
+      if(!input.eof() && c != ',')
 	input.unget(c);
 
-    } while( result != 0 && !input.eof() );
+    } while(result != 0 && !input.eof());
 
     delete[] sub_param;
 
     c = ' ';
-    while( !input.eof() && isspace(c) )
+    while(!input.eof() && isspace(c))
       input.get(c);
-    if( input.eof() )
+    if(input.eof())
     {
       delete result;
       delete param[1];
       param[1] = 0;
-      result = new ErrorPortion( "End of file reached" );
+      result = new ErrorPortion("End of file reached");
     }
-    else if( c != '}' )
+    else if(c != '}')
     {
       delete result;
       delete param[1];
       param[1] = 0;
-      result = new ErrorPortion( "Mismatching braces" );
+      result = new ErrorPortion("Mismatching braces");
     }
     else
     {
-      assert( result == 0 );
+      assert(result == 0);
       result = param[0]->RefCopy();
     }
 
@@ -1910,44 +1910,44 @@ Portion* GSM_Read_Undefined( Portion** param )
   else // not a list
   {
     input.unget(c);
-    param[1] = new BoolValPortion( false );
-    result = GSM_Read_Bool( param );
+    param[1] = new BoolValPortion(false);
+    result = GSM_Read_Bool(param);
 
-    if( result->Spec().Type == porERROR )
+    if(result->Spec().Type == porERROR)
     {
       delete param[1];
       delete result;
-      param[1] = new IntValPortion( 0 );
-      result = GSM_Read_Integer( param );    
+      param[1] = new IntValPortion(0);
+      result = GSM_Read_Integer(param);    
     }
-    if( result->Spec().Type == porERROR )
+    if(result->Spec().Type == porERROR)
     {
       delete param[1];
       delete result;
-      param[1] = new FloatValPortion( 0 );
-      result = GSM_Read_Float( param );    
+      param[1] = new FloatValPortion(0);
+      result = GSM_Read_Float(param);    
     }
-    if( result->Spec().Type == porERROR )
+    if(result->Spec().Type == porERROR)
     {
       delete param[1];
       delete result;
-      param[1] = new RationalValPortion( 0 );
-      result = GSM_Read_Rational( param );    
+      param[1] = new RationalValPortion(0);
+      result = GSM_Read_Rational(param);    
     }
-    if( result->Spec().Type == porERROR )
+    if(result->Spec().Type == porERROR)
     {
       delete param[1];
       delete result;
-      param[1] = new TextValPortion( (gString) "" );
-      result = GSM_Read_Text( param );    
+      param[1] = new TextValPortion((gString) "");
+      result = GSM_Read_Text(param);    
     }
-    if( result->Spec().Type == porERROR )
+    if(result->Spec().Type == porERROR)
     {
       delete param[1];
       delete result;
       param[1] = 0;
-      result = new ErrorPortion( "Cannot determine data type" );
-      input.setpos( old_pos );
+      result = new ErrorPortion("Cannot determine data type");
+      input.setpos(old_pos);
     }
 
   }
@@ -2127,7 +2127,7 @@ Portion* GSM_Date(Portion**)
 
 
 
-void Init_gsmoper( GSM* gsm )
+void Init_gsmoper(GSM* gsm)
 {
   FuncDescObj* FuncObj;
 
@@ -2140,130 +2140,124 @@ void Init_gsmoper( GSM* gsm )
 
   ParamInfoType xy_Int[] =
   {
-    ParamInfoType( "x", porINTEGER ),
-    ParamInfoType( "y", porINTEGER )
+    ParamInfoType("x", porINTEGER),
+    ParamInfoType("y", porINTEGER)
   };
 
   ParamInfoType xy_Float[] =
   {
-    ParamInfoType( "x", porFLOAT ),
-    ParamInfoType( "y", porFLOAT )
+    ParamInfoType("x", porFLOAT),
+    ParamInfoType("y", porFLOAT)
   };
 
   ParamInfoType xy_Rational[] =
   {
-    ParamInfoType( "x", porRATIONAL ),
-    ParamInfoType( "y", porRATIONAL )
+    ParamInfoType("x", porRATIONAL),
+    ParamInfoType("y", porRATIONAL)
   };
 
   ParamInfoType xy_Text[] =
   {
-    ParamInfoType( "x", porTEXT ),
-    ParamInfoType( "y", porTEXT )
+    ParamInfoType("x", porTEXT),
+    ParamInfoType("y", porTEXT)
   };
 
   ParamInfoType xy_Bool[] =
   {
-    ParamInfoType( "x", porBOOL ),
-    ParamInfoType( "y", porBOOL )
-  };
-
-  ParamInfoType xy_List[] =
-  {
-    ParamInfoType( "x", PortionSpec(porANYTYPE, 1) ),
-    ParamInfoType( "y", PortionSpec(porANYTYPE, 1) )
+    ParamInfoType("x", porBOOL),
+    ParamInfoType("y", porBOOL)
   };
 
 
   ParamInfoType xy_NfSupport[] =
   {
-    ParamInfoType( "x", porNF_SUPPORT ),
-    ParamInfoType( "y", porNF_SUPPORT )
+    ParamInfoType("x", porNF_SUPPORT),
+    ParamInfoType("y", porNF_SUPPORT)
   };
 
   ParamInfoType xy_MixedFloat[] =
   {
-    ParamInfoType( "x", porMIXED_FLOAT ),
-    ParamInfoType( "y", porMIXED_FLOAT )
+    ParamInfoType("x", porMIXED_FLOAT),
+    ParamInfoType("y", porMIXED_FLOAT)
   };
 
   ParamInfoType xy_MixedRational[] =
   {
-    ParamInfoType( "x", porMIXED_RATIONAL ),
-    ParamInfoType( "y", porMIXED_RATIONAL )
+    ParamInfoType("x", porMIXED_RATIONAL),
+    ParamInfoType("y", porMIXED_RATIONAL)
   };
 
   ParamInfoType xy_EfSupport[] =
   {
-    ParamInfoType( "x", porEF_SUPPORT ),
-    ParamInfoType( "y", porEF_SUPPORT )
+    ParamInfoType("x", porEF_SUPPORT),
+    ParamInfoType("y", porEF_SUPPORT)
   };
 
   ParamInfoType xy_BehavFloat[] =
   {
-    ParamInfoType( "x", porBEHAV_FLOAT ),
-    ParamInfoType( "y", porBEHAV_FLOAT )
+    ParamInfoType("x", porBEHAV_FLOAT),
+    ParamInfoType("y", porBEHAV_FLOAT)
   };
 
   ParamInfoType xy_BehavRational[] =
   {
-    ParamInfoType( "x", porBEHAV_RATIONAL ),
-    ParamInfoType( "y", porBEHAV_RATIONAL )
+    ParamInfoType("x", porBEHAV_RATIONAL),
+    ParamInfoType("y", porBEHAV_RATIONAL)
   };
 
 
   ParamInfoType xy_EfPlayer[] =
   {
-    ParamInfoType( "x", porPLAYER_EFG ),
-    ParamInfoType( "y", porPLAYER_EFG )
+    ParamInfoType("x", porPLAYER_EFG),
+    ParamInfoType("y", porPLAYER_EFG)
   };
 
   ParamInfoType xy_NfPlayer[] =
   {
-    ParamInfoType( "x", porPLAYER_NFG ),
-    ParamInfoType( "y", porPLAYER_NFG ),
+    ParamInfoType("x", porPLAYER_NFG),
+    ParamInfoType("y", porPLAYER_NFG),
   };
 
   ParamInfoType xy_Node[] =
   {
-    ParamInfoType( "x", porNODE ),
-    ParamInfoType( "y", porNODE )
+    ParamInfoType("x", porNODE),
+    ParamInfoType("y", porNODE)
   };
 
   ParamInfoType xy_Infoset[] =
   {
-    ParamInfoType( "x", porINFOSET ),
-    ParamInfoType( "y", porINFOSET )
+    ParamInfoType("x", porINFOSET),
+    ParamInfoType("y", porINFOSET)
   };
 
   ParamInfoType xy_Outcome[] =
   {
-    ParamInfoType( "x", porOUTCOME ),
-    ParamInfoType( "y", porOUTCOME )
+    ParamInfoType("x", porOUTCOME),
+    ParamInfoType("y", porOUTCOME)
   };
 
   ParamInfoType xy_Action[] =
   {
-    ParamInfoType( "x", porACTION ),
-    ParamInfoType( "y", porACTION )
+    ParamInfoType("x", porACTION),
+    ParamInfoType("y", porACTION)
   };
 
   ParamInfoType xy_Strategy[] =
   {
-    ParamInfoType( "x", porSTRATEGY ),
-    ParamInfoType( "y", porSTRATEGY )
+    ParamInfoType("x", porSTRATEGY),
+    ParamInfoType("y", porSTRATEGY)
   };
 
 
   ParamInfoType x_Float[] =
   {
-    ParamInfoType( "x", porFLOAT )
+    ParamInfoType("x", porFLOAT)
   };
 
 
   ParamInfoType file_Text[] =
   {
-    ParamInfoType( "file", porTEXT )
+    ParamInfoType("file", porTEXT)
   };
 
 
@@ -2284,7 +2278,7 @@ void Init_gsmoper( GSM* gsm )
 				       porBEHAV_FLOAT, 2, xy_BehavFloat));
   FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Add_BehavRational, 
 				       porBEHAV_RATIONAL, 2,xy_BehavRational));
-  gsm->AddFunction( FuncObj );
+  gsm->AddFunction(FuncObj);
 
   //-------------------- Concat -------------------------
   
@@ -2292,8 +2286,11 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Concat_gString, 
 				       porTEXT, 2, xy_Text));
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Concat_List, 
-				       PortionSpec(porANYTYPE, 1), 
-				       2, xy_List, NON_LISTABLE));
+				       PortionSpec(porANYTYPE, 1), 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", 
+					    PortionSpec(porANYTYPE, NLIST)));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("y", 
+					    PortionSpec(porANYTYPE, NLIST)));
   gsm->AddFunction(FuncObj);
 
   //----------------------- Minus ------------------------
@@ -2363,7 +2360,7 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetParamInfo(10, 0, ParamInfoType("x", porBEHAV_RATIONAL));
   FuncObj->SetParamInfo(10, 1, ParamInfoType("y", porRATIONAL));
 
-  gsm->AddFunction( FuncObj );
+  gsm->AddFunction(FuncObj);
 
 
   //----------------------- Divide -------------------------
@@ -2405,7 +2402,7 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetParamInfo(5, 0, ParamInfoType("x", porRATIONAL));
   FuncObj->SetParamInfo(5, 1, ParamInfoType("y", porFLOAT));
 
-  gsm->AddFunction( FuncObj );
+  gsm->AddFunction(FuncObj);
 
 
   //----------------------- Exp, Log ---------------------
@@ -2740,7 +2737,7 @@ void Init_gsmoper( GSM* gsm )
 			 new IntRefPortion(_WriteListIndent)));
   FuncObj->SetParamInfo(0, 8, ParamInfoType
 			("solutionInfo", porINTEGER,
-			 new IntRefPortion( _WriteSolutionInfo)));
+			 new IntRefPortion(_WriteSolutionInfo)));
   gsm->AddFunction(FuncObj);
 
 

@@ -279,7 +279,7 @@ Portion* GSM_Sort_By_Text(Portion** param)
 Portion *GSM_NthElement(Portion **param)
 {
   int n = ((IntPortion *) param[1])->Value();
-  if(n < 0 || n > ((ListPortion *) param[0])->Length())
+  if(n <= 0 || n > ((ListPortion *) param[0])->Length())
     return new ErrorPortion("Subscript out of range");
   else
     return ((ListPortion *) param[0])->Subscript(n);
@@ -288,8 +288,7 @@ Portion *GSM_NthElement(Portion **param)
 Portion *GSM_Remove(Portion **param)
 {
   ListPortion *ret = (ListPortion *) param[0]->ValCopy();
-  delete ret->Remove
-    (((IntPortion *) param[1])->Value());
+  delete ret->Remove(((IntPortion *) param[1])->Value());
   return ret;
 }
 
@@ -743,25 +742,24 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Contains, porBOOL, 2,
 				       0, NON_LISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("list", 
-					    PortionSpec(porANYTYPE,1)));
+					    PortionSpec(porANYTYPE, NLIST)));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("x", porANYTYPE));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("NthElement", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NthElement, porANYTYPE, 
-				       2, 0, NON_LISTABLE));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("list", PortionSpec(porANYTYPE, 1),
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NthElement, porANYTYPE, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("list", 
+					    PortionSpec(porANYTYPE, NLIST),
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("n", porINTEGER));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Remove", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Remove, 
-				       PortionSpec(porANYTYPE, 1), 
-				       2, 0, NON_LISTABLE));
+				       PortionSpec(porANYTYPE, 1), 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("list",
-					    PortionSpec(porANYTYPE,1)));
+					    PortionSpec(porANYTYPE, NLIST)));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("n", porINTEGER));
   gsm->AddFunction(FuncObj);
 
@@ -951,17 +949,18 @@ void Init_listfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Filter", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Filter, 
-				       PortionSpec(porANYTYPE, 1), 2,
-				       0, NON_LISTABLE));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", PortionSpec(porANYTYPE,1)));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("y", PortionSpec(porBOOL,1)));
+				       PortionSpec(porANYTYPE, 1), 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", 
+					    PortionSpec(porANYTYPE, NLIST)));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("y", 
+					    PortionSpec(porBOOL, NLIST)));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Flatten", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Flatten, 
-				       PortionSpec(porANYTYPE, 1), 2,
-				       0, NON_LISTABLE));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", PortionSpec(porANYTYPE,1)));
+				       PortionSpec(porANYTYPE, 1), 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", 
+					    PortionSpec(porANYTYPE, NLIST)));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("levels", porINTEGER,
 					    new IntValPortion(0)));
   gsm->AddFunction(FuncObj);

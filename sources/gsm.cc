@@ -1427,7 +1427,7 @@ bool GSM::Subscript (void)
   p1 = _ResolveRef(p1);
 
   
-  if(p1->Spec().ListDepth > 0 && p2->Spec().Type == porINTEGER)
+  if(p1->Spec().ListDepth > 0 && p2->Spec() == porINTEGER)
   {
     int n = ((IntPortion *) p2)->Value();
     bool result = true;
@@ -1445,7 +1445,7 @@ bool GSM::Subscript (void)
     delete p2;
     return result;
   }
-  if(p1->Spec().Type == porTEXT && p2->Spec().Type == porINTEGER)
+  if(p1->Spec().Type == porTEXT && p2->Spec() == porINTEGER)
   {
     gString text(((TextPortion *) p1)->Value());
     int n = ((IntPortion *) p2)->Value();
@@ -1488,7 +1488,7 @@ bool GSM::Child (void)
   p1 = _ResolveRef(p1);
 
   
-  if(p1->Spec().ListDepth > 0 && p2->Spec().Type == porINTEGER)
+  if(p1->Spec().ListDepth > 0 && p2->Spec() == porINTEGER)
   {
     int n = ((IntPortion *) p2)->Value();
     bool result = true;
