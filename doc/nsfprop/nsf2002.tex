@@ -249,7 +249,7 @@ based algorithm.
 \begin{itemize} 
 \item
 We currently have no means in Gambit of finding {\it proper
-equilibria}, as defined by Myerson [1975].  Yamomoto [1993] proposes a
+equilibria}, as defined by Myerson [1978].  Yamomoto [1993] proposes a
 homotopy based algorithm for finding proper equilibria, and we plan to
 introduce code to implement this algorithm.
 \item
@@ -269,11 +269,11 @@ based approach.  This method involves starting with a system where we
 can find the maximum number of solutions for a system of polynomial
 equations that is guaranteed by Bernstein's theorem.  We then
 transform it to the game of interest, following all of the solutions,
-but just keeping those that real and satisfy the required constraints.
-We have attempted implementation of such an algorithm, but have had
-problems in finding suitable homotopy code that will work within
-gambit.  Once we perfect our own homotopy code, we anticipate that we
-will be able to successfully implement this algorithm as well.
+but just keeping those that are real and satisfy the required
+constraints.  We have attempted implementation of such an algorithm,
+but have had problems in finding suitable homotopy code that will work
+within gambit.  Once we perfect our own homotopy code, we anticipate
+that we will be able to successfully implement this algorithm as well.
 \end{itemize}
 
 We do not currently have any means of finding either proper equilibria
@@ -384,7 +384,10 @@ problem in the papers (McKelvey, McLennan, 1995, and McLennan, 1999).
 There we find an exact formula for the maximal number of totally mixed
 equilibria, and for the average number of Nash equilibria for a game,
 and show that the number of such equilibria is exponential both in the
-number of players and the size of strategy sets.  Similarly, in
+number of players and the size of strategy sets.  Berg and McLennan
+[2001] applies the fomula from McLennan [1999] to two player games,
+finding that the mean number of equilibria grows exponentially as the
+size of both players' pure strategy sets goes to infinity.  Similarly, in
 investigating the problems with the numerical instability of the QRE
 algorithm, one of us (Turocy [2001]) has been led to discover numerically
 stable ways of computation of the correspondence, and to find other
@@ -398,6 +401,11 @@ as these as they arise.
 \end{center}
 
 \begin{description}
+\item
+Berg, J., and A. McLennan, ``The Asymptotic Expected Number of Nash
+Equilibria of Two Player Normal  Form Games,''  {\it mimeo},
+University of Minnesota, 2001.
+
 \item
 Govindan, S., and R. Wilson, ``A Global Newton Method to Compute Nash
 Equilibria,'' {\it mimeo}, Stanford University, 2000.  
@@ -618,7 +626,7 @@ Andrew McLennan, Thomas Palfrey, John Patty.
 \ \\
 \begin{tabular}{ll}
 Date of birth:&March 7, 1954\\
-Marital Status:&Married, one child.\\
+Marital Status:&Divorced, one child.\\
 Office address:&Department of Economics \\
 &University of Minnesota \\
 &1035 Management and Economics \\
@@ -641,7 +649,9 @@ Ph.D.,(Economics) Princeton University, 1982.
 {\bf ACADEMIC APPOINTMENTS}
 \begin{description}
 \item
-Associate Professor, University of Minnesota; 1987 - present. 
+Professor, University of Minnesota; 2000 - present. 
+\item
+Associate Professor, University of Minnesota; 1987 - 2000. 
 \item
 Postdoctoral Fellow, Mathematical Science Research Institute, January -
 June 1986.
@@ -683,13 +693,14 @@ Single Quarter Leave, Fall Quarter 1991.
 \begin{description}
 
 \item
-``Justifiable Beliefs in Sequential Equilibrium,'' {\it
-Econometrica}, {\bf 53} (1985), 889-904.
+``The Maximal Number of Regular Totally Mixed Equilibria,'' with
+R. McKelvey, {\it Journal of Economic Theory}, 72:411-425, 1997.
 
 \item
-``The Space of Conditional Systems is a Ball'',
-{\it International Journal of Game Theory}, {\bf 18} (1989),
-125-139.
+McKelvey, R. D., and A. McLennan, ``Computation of Equilibria in
+Finite Games,'' in {\it Handbook of Computational
+Economics}, Edited by H. Amman, D. A. Kendrick and J. Rust,
+(Amsterdam: Elsevier, 1996).
 
 \item
 ``Consistent Conditional Systems in
@@ -697,14 +708,16 @@ Non-cooperative Game Theory'', {\it International Journal of Game
 Theory}, {\bf 18} (1989), 141-174.
 
 \item
-``Sequential Bargaining as a Non-cooperative
-Foundation for Walrasian Equilibrium,'' \break {\it Econometrica},
-{\bf 59}, (1991), 1395--1424.  (Joint with Hugo Sonnenschein)
+``Generic Finiteness of Equilibrium Outcome Distributions in Game
+Forms,'' in {\it Econometrica}, {\bf 69} (2001), 455-471. (Joint with
+Srihari Govindan)
 
 \item
-``On the Generic Finiteness of Equilibrium Outcome
-distributions in Game Forms,'' in {\it Game Theory and Economic
-Applications}, ed. by B. Dutta {\it et al}, Springer-Verlag, 1992.
+``The Mean Number of Real Roots of a Multihomogeneous System of
+Polynomial Equations'' forthcoming in the {\it American Journal of
+Mathematics} (2002).
+
+
 
 
 \end{description}
@@ -718,18 +731,19 @@ Correspondences'', {\it International Journal of game Theory},
 {\bf 18} (1989), 175-184.
 
 \item
+``Sequential Bargaining as a Non-cooperative
+Foundation for Walrasian Equilibrium,'' \break {\it Econometrica},
+{\bf 59}, (1991), 1395--1424.  (Joint with Hugo Sonnenschein)
+
+
+\item
+``Justifiable Beliefs in Sequential Equilibrium,'' {\it
+Econometrica}, {\bf 53} (1985), 889-904.
+
+\item
 ``Stationary Markov Equilibria,'' {\it Econometrica}, {\bf 62},
 (1994), 745-781.  (Joint with D.~Duffie, J.~Geanakoplos, and
 A.~Mas-Colell)
-
-\item
-``Approximation of Contractible Valued
-Correspondences by Functions,'' {\it Journal of
-Mathematical Economics}, {\bf 20}, (1991), 591--598.
-
-\item
-``Randomized Preference Aggregation:  Additivity of Power and Strategy
-Proofness,'' {\it Journal of Economics Theory}, {\bf 22} (1980), 1-11.
 
 \item
 ``Price Diversity and Incomplete Learning in the Long Run,'' {\it Journal
@@ -743,7 +757,7 @@ of Economic Dynamics and Control}, {\bf 7} (1984), 331-347.
 \noindent
 {\bf Collaborators within the last 48 months} 
 
-Srihari Govindan, Richard McKelvey, and In-Uck Park
+Srihari Govindan, Richard McKelvey, In-Uck Park, and Hulya Eraslan
 
 \ \\
 \noindent
