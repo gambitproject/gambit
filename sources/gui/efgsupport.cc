@@ -189,17 +189,17 @@ void EfgSupportWindow::OnUpdate(gbtGameView *)
 
 void EfgSupportWindow::OnSupportList(wxCommandEvent &p_event)
 {
-  m_doc->m_efgShow->SetSupportNumber(p_event.GetSelection() + 1);
+  m_doc->SetEfgSupport(p_event.GetSelection() + 1);
 }
 
 void EfgSupportWindow::OnSupportPrev(wxCommandEvent &)
 {
-  m_doc->m_efgShow->SetSupportNumber(m_supportList->GetSelection());
+  m_doc->SetEfgSupport(m_supportList->GetSelection());
 }
 
 void EfgSupportWindow::OnSupportNext(wxCommandEvent &)
 {
-  m_doc->m_efgShow->SetSupportNumber(m_supportList->GetSelection() + 2);
+  m_doc->SetEfgSupport(m_supportList->GetSelection() + 2);
 
 }
 
@@ -227,7 +227,7 @@ void EfgSupportWindow::ToggleItem(wxTreeItemId p_id)
     m_actionTree->SetItemTextColour(p_id, *wxBLACK);
   }
 
-  m_doc->m_efgShow->SetSupportNumber(m_supportList->GetSelection() + 1);
+  m_doc->SetEfgSupport(m_supportList->GetSelection() + 1);
 }
 
 

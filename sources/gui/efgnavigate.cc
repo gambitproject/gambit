@@ -56,11 +56,11 @@ EfgNavigateWindow::EfgNavigateWindow(gbtGameDocument *p_doc,
   Show(true);
 }
 
-void EfgNavigateWindow::Set(gbtEfgNode p_cursor) 
+void EfgNavigateWindow::OnUpdate(gbtGameView *)
 {
-  m_cursor = p_cursor;
+  gbtEfgNode cursor = m_doc->GetCursor();
   
-  if (m_cursor.IsNull()) { // no data available
+  if (cursor.IsNull()) { // no data available
     for (int i = 0; i < GetRows(); i++) { 
       SetCellValue("", i, 0);
     }
@@ -69,35 +69,35 @@ void EfgNavigateWindow::Set(gbtEfgNode p_cursor)
 
   // if we got here, the node is valid.
   try {
-    SetCellValue((char *) m_cursor.GetLabel(), 0, 0);
-    SetCellValue((char *) m_doc->GetRealizProb(m_cursor), 1, 0);
-    SetCellValue((char *) m_doc->GetNodeValue(m_cursor), 2, 0);
+    SetCellValue((char *) cursor.GetLabel(), 0, 0);
+    SetCellValue((char *) m_doc->GetRealizProb(cursor), 1, 0);
+    SetCellValue((char *) m_doc->GetNodeValue(cursor), 2, 0);
 
     gText tmpstr;
   
-    if (m_cursor.GetPlayer().IsNull()) {
+    if (cursor.GetPlayer().IsNull()) {
       tmpstr = "TERMINAL";
     }
     else {
-      if (m_cursor.GetPlayer().IsChance())
+      if (cursor.GetPlayer().IsChance())
 	tmpstr = "CHANCE";
       else
-	tmpstr = ("(" + ToText(m_cursor.GetPlayer().GetId()) + "," +
-		  ToText(m_cursor.GetInfoset().GetId()) + ")");
+	tmpstr = ("(" + ToText(cursor.GetPlayer().GetId()) + "," +
+		  ToText(cursor.GetInfoset().GetId()) + ")");
     }
 	  
     SetCellValue((char *) tmpstr, 3, 0);
-    SetCellValue((char *) m_doc->GetInfosetProb(m_cursor), 4, 0);
-    SetCellValue((char *) m_doc->GetBeliefProb(m_cursor), 5, 0);
-    SetCellValue((char *) m_doc->GetInfosetValue(m_cursor), 6, 0);
+    SetCellValue((char *) m_doc->GetInfosetProb(cursor), 4, 0);
+    SetCellValue((char *) m_doc->GetBeliefProb(cursor), 5, 0);
+    SetCellValue((char *) m_doc->GetInfosetValue(cursor), 6, 0);
 	
-    gbtEfgNode p = m_cursor.GetParent();
+    gbtEfgNode p = cursor.GetParent();
 
     if (!p.IsNull()) {
       int branch = 0;
-      for (branch = 1; p.GetChild(branch) != m_cursor; branch++);
+      for (branch = 1; p.GetChild(branch) != cursor; branch++);
 
-      SetCellValue((char *) m_cursor.GetAction().GetLabel(), 7, 0);
+      SetCellValue((char *) cursor.GetAction().GetLabel(), 7, 0);
       SetCellValue((char *) m_doc->GetActionProb(p, branch), 8, 0);
       SetCellValue((char *) m_doc->GetActionValue(p, branch), 9, 0);
     }

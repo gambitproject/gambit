@@ -63,6 +63,7 @@ void gbtCmdInsertMove::Do(gbtGameDocument *p_doc)
   }
 
   p_doc->GetCursor().InsertMove(player.NewInfoset(m_actions));
+  p_doc->OnTreeChanged(true, true);
 }
 
 //=========================================================================
@@ -98,6 +99,7 @@ void gbtCmdInsertMoveInfoset::Do(gbtGameDocument *p_doc)
   }
 
   p_doc->GetCursor().InsertMove(player.GetInfoset(m_infosetNumber));
+  p_doc->OnTreeChanged(true, true);
 }
 
 //=========================================================================

@@ -98,6 +98,7 @@ private:
   void OnEditUnmarkSubgameTree(wxCommandEvent &);
 
   void OnEditMove(wxCommandEvent &);
+  void OnEditNode(wxCommandEvent &);
   void OnEditGame(wxCommandEvent &);
 
   void OnViewProfiles(wxCommandEvent &);
@@ -138,23 +139,15 @@ private:
 
   void OnInfoNotebookPage(wxNotebookEvent &);
 
+  // OVERRIDING DOCUMENT MEMBERS
   bool IsEfgView(void) const { return true; }
   bool IsNfgView(void) const { return false; }
+  void OnUpdate(gbtGameView *);
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR
   EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~EfgShow();
-
-  // OVERRIDING DOCUMENT MEMBERS
-  void OnUpdate(gbtGameView *);
-
-  // SUPPORT ACCESS AND MANIPULATION
-  void SetSupportNumber(int p_number);
-
-  void SetCursor(gbtEfgNode m_node);
-
-  void OnEditNode(wxCommandEvent &);
 
   DECLARE_EVENT_TABLE()
 };

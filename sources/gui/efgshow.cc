@@ -196,7 +196,6 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   m_infoNotebook = new wxNotebook(m_nodeSashWindow, idINFONOTEBOOK);
 
   m_navigateWindow = new EfgNavigateWindow(m_doc, m_infoNotebook);
-  m_navigateWindow->Set(m_doc->GetCursor());
   m_navigateWindow->SetSize(200, 200);
   m_infoNotebook->AddPage(m_navigateWindow, "Navigation");
 
@@ -228,6 +227,7 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   // Force this at end to make sure item is unchecked; under MSW,
   // the ordering of events in creating the window leaves this checked
   GetMenuBar()->Check(GBT_EFG_MENU_VIEW_NAVIGATION, false);
+  m_doc->UpdateViews(0, true, true);
 }
 
 EfgShow::~EfgShow()
@@ -268,11 +268,8 @@ void EfgShow::OnUpdate(gbtGameView *)
   menuBar->Enable(GBT_EFG_MENU_EDIT_NODE, !cursor.IsNull());
   menuBar->Enable(GBT_EFG_MENU_EDIT_MOVE,
 		  !cursor.IsNull() && !cursor.GetInfoset().IsNull());
-
-  if (m_treeWindow) {
-    menuBar->Check(GBT_EFG_MENU_VIEW_SUPPORT_REACHABLE,
-		   m_treeWindow->DrawSettings().RootReachable());
-  }
+  menuBar->Check(GBT_EFG_MENU_VIEW_SUPPORT_REACHABLE,
+		 m_doc->GetPreferences().RootReachable());
 
   if (m_doc->GetFilename() != "") {
     SetTitle(wxString::Format("Gambit - [%s] %s", 
@@ -284,27 +281,6 @@ void EfgShow::OnUpdate(gbtGameView *)
 			      (char *) m_doc->GetEfg().GetTitle()));
   }
 }
-
-void EfgShow::SetSupportNumber(int p_number)
-{
-  if (p_number >= 1 && p_number <= m_doc->m_efgSupports.Length()) {
-    m_doc->m_curEfgSupport = m_doc->m_efgSupports[p_number];
-    m_doc->UpdateViews(this, true, false);
-  }
-}
-
-void EfgShow::SetCursor(gbtEfgNode p_node)
-{
-  if (m_treeWindow) {
-    m_treeWindow->SetCursorPosition(p_node);
-  }
-  if (m_navigateWindow) {
-    m_navigateWindow->Set(p_node);
-  }
-  m_doc->m_cursor = p_node;
-  m_doc->UpdateViews(this, true, false);
-}
-
 
 //--------------------------------------------------------------------
 //          EfgShow: Creating and updating menus and toolbar
@@ -747,7 +723,7 @@ void EfgShow::OnEditCut(wxCommandEvent &)
   m_doc->m_cutNode = m_doc->GetCursor();
   m_treeWindow->SetCutNode(m_doc->m_cutNode, true);
   m_doc->m_copyNode = 0;
-  m_treeWindow->Refresh();
+  m_doc->UpdateViews(0, true, true);
 }
 
 void EfgShow::OnEditCopy(wxCommandEvent &)
@@ -757,7 +733,7 @@ void EfgShow::OnEditCopy(wxCommandEvent &)
     m_treeWindow->SetCutNode(m_doc->GetCutNode(), false);
     m_doc->m_cutNode = 0;
   }
-  m_treeWindow->Refresh();
+  m_doc->UpdateViews(0, true, true);
 }
 
 void EfgShow::OnEditPaste(wxCommandEvent &)
@@ -777,7 +753,6 @@ void EfgShow::OnEditInsert(wxCommandEvent &)
   dialogInsertMove dialog(this, m_doc);
 
   if (dialog.ShowModal() == wxID_OK)  {
-    printf("About to submit...\n");
     m_doc->Submit(dialog.GetCommand());
   }
 }
@@ -793,8 +768,8 @@ void EfgShow::OnEditDelete(wxCommandEvent &)
       }
       else {
 	gbtEfgNode keep = dialog.KeepNode();
-	m_treeWindow->SetCursorPosition(m_doc->m_efg->DeleteNode(m_doc->GetCursor(),
-								 keep));
+	m_doc->SetCursor(m_doc->m_efg->DeleteNode(m_doc->GetCursor(),
+						  keep));
       }
       m_doc->m_efg->DeleteEmptyInfosets();
       m_doc->OnTreeChanged(true, true);
@@ -833,8 +808,7 @@ void EfgShow::OnEditToggleSubgame(wxCommandEvent &)
   else {
     m_doc->m_efg->MarkSubgame(m_doc->GetCursor());
   }
-  m_treeWindow->RefreshLayout();
-  m_treeWindow->Refresh();
+  m_doc->UpdateViews(0, true, true);
 }
 
 void EfgShow::OnEditMarkSubgameTree(wxCommandEvent &)
@@ -844,8 +818,7 @@ void EfgShow::OnEditMarkSubgameTree(wxCommandEvent &)
   for (int i = 1; i <= subgames.Length(); i++) {
     m_doc->m_efg->MarkSubgame(subgames[i]);
   }
-  m_treeWindow->RefreshLayout();
-  m_treeWindow->Refresh();
+  m_doc->UpdateViews(0, true, true);
 }
 
 void EfgShow::OnEditUnmarkSubgameTree(wxCommandEvent &)
@@ -855,8 +828,7 @@ void EfgShow::OnEditUnmarkSubgameTree(wxCommandEvent &)
   for (int i = 1; i <= subgames.Length(); i++) {
     m_doc->m_efg->UnmarkSubgame(subgames[i]);
   }
-  m_treeWindow->RefreshLayout();
-  m_treeWindow->Refresh();
+  m_doc->UpdateViews(0, true, true);
 }
 
 void EfgShow::OnEditNode(wxCommandEvent &)
@@ -1073,9 +1045,8 @@ void EfgShow::OnViewZoomOut(wxCommandEvent &)
 
 void EfgShow::OnViewSupportReachable(wxCommandEvent &)
 {
-  m_treeWindow->DrawSettings().SetRootReachable(!m_treeWindow->DrawSettings().RootReachable());
-  m_treeWindow->RefreshLayout();
-  m_treeWindow->Refresh();
+  m_doc->GetPreferences().SetRootReachable(!m_doc->GetPreferences().RootReachable());
+  m_doc->UpdateViews(0, true, true);
 }
 
 //----------------------------------------------------------------------
@@ -1085,13 +1056,13 @@ void EfgShow::OnViewSupportReachable(wxCommandEvent &)
 void EfgShow::OnFormatFontsAboveNode(wxCommandEvent &)
 {
   wxFontData data;
-  data.SetInitialFont(m_treeWindow->DrawSettings().NodeAboveFont());
+  data.SetInitialFont(m_doc->GetPreferences().NodeAboveFont());
   wxFontDialog dialog(this, &data);
   
   if (dialog.ShowModal() == wxID_OK) {
-    m_treeWindow->DrawSettings().SetNodeAboveFont(dialog.GetFontData().GetChosenFont());
-    m_treeWindow->DrawSettings().SaveOptions();
-    m_treeWindow->RefreshLabels();
+    m_doc->GetPreferences().SetNodeAboveFont(dialog.GetFontData().GetChosenFont());
+    m_doc->GetPreferences().SaveOptions();
+    m_doc->UpdateViews(0, true, true);
   }
 }
 
@@ -1101,9 +1072,9 @@ void EfgShow::OnFormatFontsBelowNode(wxCommandEvent &)
   wxFontDialog dialog(this, &data);
   
   if (dialog.ShowModal() == wxID_OK) {
-    m_treeWindow->DrawSettings().SetNodeBelowFont(dialog.GetFontData().GetChosenFont());
-    m_treeWindow->DrawSettings().SaveOptions();
-    m_treeWindow->RefreshLabels();
+    m_doc->GetPreferences().SetNodeBelowFont(dialog.GetFontData().GetChosenFont());
+    m_doc->GetPreferences().SaveOptions();
+    m_doc->UpdateViews(0, true, true);
   }
 }
 
@@ -1113,9 +1084,9 @@ void EfgShow::OnFormatFontsAfterNode(wxCommandEvent &)
   wxFontDialog dialog(this, &data);
   
   if (dialog.ShowModal() == wxID_OK) {
-    m_treeWindow->DrawSettings().SetNodeRightFont(dialog.GetFontData().GetChosenFont());
-    m_treeWindow->DrawSettings().SaveOptions();
-    m_treeWindow->RefreshLabels();
+    m_doc->GetPreferences().SetNodeRightFont(dialog.GetFontData().GetChosenFont());
+    m_doc->GetPreferences().SaveOptions();
+    m_doc->UpdateViews(0, true, true);
   }
 }
 
@@ -1125,9 +1096,9 @@ void EfgShow::OnFormatFontsAboveBranch(wxCommandEvent &)
   wxFontDialog dialog(this, &data);
   
   if (dialog.ShowModal() == wxID_OK) {
-    m_treeWindow->DrawSettings().SetBranchAboveFont(dialog.GetFontData().GetChosenFont());
-    m_treeWindow->DrawSettings().SaveOptions();
-    m_treeWindow->RefreshLabels();
+    m_doc->GetPreferences().SetBranchAboveFont(dialog.GetFontData().GetChosenFont());
+    m_doc->GetPreferences().SaveOptions();
+    m_doc->UpdateViews(0, true, true);
   }
 }
 
@@ -1137,53 +1108,52 @@ void EfgShow::OnFormatFontsBelowBranch(wxCommandEvent &)
   wxFontDialog dialog(this, &data);
   
   if (dialog.ShowModal() == wxID_OK) {
-    m_treeWindow->DrawSettings().SetBranchBelowFont(dialog.GetFontData().GetChosenFont());
-    m_treeWindow->DrawSettings().SaveOptions();
-    m_treeWindow->RefreshLabels();
+    m_doc->GetPreferences().SetBranchBelowFont(dialog.GetFontData().GetChosenFont());
+    m_doc->GetPreferences().SaveOptions();
+    m_doc->UpdateViews(0, true, true);
   }
 }
 
 void EfgShow::OnFormatDisplayLayout(wxCommandEvent &)
 {
-  TreeDrawSettings &settings = m_treeWindow->DrawSettings();
+  TreeDrawSettings &settings = m_doc->GetPreferences();
 
   dialogLayout dialog(this, settings);
 
   if (dialog.ShowModal() == wxID_OK) {
     dialog.GetSettings(settings);
-    m_treeWindow->DrawSettings().SaveOptions();
-    m_treeWindow->RefreshLayout();
-    m_treeWindow->Refresh();
+    m_doc->GetPreferences().SaveOptions();
+    m_doc->UpdateViews(0, true, true);
   }
 }
 
 void EfgShow::OnFormatDisplayLegend(wxCommandEvent &)
 {
-  dialogLegend dialog(this, m_treeWindow->DrawSettings());
+  dialogLegend dialog(this, m_doc->GetPreferences());
 
   if (dialog.ShowModal() == wxID_OK) {
-    m_treeWindow->DrawSettings().SetNodeAboveLabel(dialog.GetNodeAbove());
-    m_treeWindow->DrawSettings().SetNodeBelowLabel(dialog.GetNodeBelow());
-    m_treeWindow->DrawSettings().SetNodeRightLabel(dialog.GetNodeAfter());
-    m_treeWindow->DrawSettings().SetBranchAboveLabel(dialog.GetBranchAbove());
-    m_treeWindow->DrawSettings().SetBranchBelowLabel(dialog.GetBranchBelow());
-    m_treeWindow->DrawSettings().SaveOptions();
-    m_treeWindow->RefreshLabels();
+    m_doc->GetPreferences().SetNodeAboveLabel(dialog.GetNodeAbove());
+    m_doc->GetPreferences().SetNodeBelowLabel(dialog.GetNodeBelow());
+    m_doc->GetPreferences().SetNodeRightLabel(dialog.GetNodeAfter());
+    m_doc->GetPreferences().SetBranchAboveLabel(dialog.GetBranchAbove());
+    m_doc->GetPreferences().SetBranchBelowLabel(dialog.GetBranchBelow());
+    m_doc->GetPreferences().SaveOptions();
+    m_doc->UpdateViews(0, true, true);
   }
 }
 
 void EfgShow::OnFormatDisplayColors(wxCommandEvent &)
 {
-  dialogEfgColor dialog(this, m_treeWindow->DrawSettings());
+  dialogEfgColor dialog(this, m_doc->GetPreferences());
 
   if (dialog.ShowModal() == wxID_OK) {
-    m_treeWindow->DrawSettings().SetChanceColor(dialog.GetChanceColor());
-    m_treeWindow->DrawSettings().SetTerminalColor(dialog.GetTerminalColor());
+    m_doc->GetPreferences().SetChanceColor(dialog.GetChanceColor());
+    m_doc->GetPreferences().SetTerminalColor(dialog.GetTerminalColor());
     for (int pl = 1; pl <= 8; pl++) {
-      m_treeWindow->DrawSettings().SetPlayerColor(pl,
+      m_doc->GetPreferences().SetPlayerColor(pl,
 						  dialog.GetPlayerColor(pl));
     }
-    m_treeWindow->DrawSettings().SaveOptions();
+    m_doc->GetPreferences().SaveOptions();
     m_doc->UpdateViews(this, true, false);
   }
 }
@@ -1191,12 +1161,12 @@ void EfgShow::OnFormatDisplayColors(wxCommandEvent &)
 void EfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
 {
   dialogSpinCtrl dialog(this, "Decimal places", 0, 25,
-			m_treeWindow->DrawSettings().NumDecimals());
+			m_doc->GetPreferences().NumDecimals());
 
   if (dialog.ShowModal() == wxID_OK) {
-    m_treeWindow->DrawSettings().SetNumDecimals(dialog.GetValue());
-    m_treeWindow->DrawSettings().SaveOptions();
-    m_treeWindow->Refresh();
+    m_doc->GetPreferences().SetNumDecimals(dialog.GetValue());
+    m_doc->GetPreferences().SaveOptions();
+    m_doc->UpdateViews(0, true, true);
   }
 }
 

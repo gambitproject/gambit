@@ -44,7 +44,7 @@
 gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg)
   : m_modified(false),
     m_curProfile(0),
-    m_efg(new gbtEfgGame(p_efg)), m_efgShow(0),
+    m_efg(new gbtEfgGame(p_efg)), 
     m_curEfgSupport(0),
     m_cursor(0), m_copyNode(0), m_cutNode(0),
     m_nfg(0), m_nfgShow(0),
@@ -63,7 +63,7 @@ gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg)
 gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg)
   : m_modified(false),
     m_curProfile(0),
-    m_efg(0), m_efgShow(0),
+    m_efg(0),
     m_curEfgSupport(0), 
     m_cursor(0), m_copyNode(0), m_cutNode(0),
     m_nfg(new gbtNfgGame(p_nfg)), m_nfgShow(0),
@@ -98,9 +98,15 @@ void gbtGameDocument::OnTreeChanged(bool p_nodesChanged,
     // It would be nice to relax this, but be conservative for now
     m_copyNode = 0;
     m_cutNode = 0;
+    m_modified = true;
   }
 }
 
+void gbtGameDocument::SetCursor(gbtEfgNode p_node)
+{
+  m_cursor = p_node;
+  UpdateViews(0, true, false);
+}
 
 //==========================================================================
 //                 gbtGameDocument: Operations on outcomes
@@ -150,6 +156,14 @@ gText gbtGameDocument::UniqueEfgSupportName(void) const
 void gbtGameDocument::AddSupport(EFSupport *p_support)
 {
   m_efgSupports.Append(p_support);
+}
+
+void gbtGameDocument::SetEfgSupport(int p_index)
+{
+  if (p_index >= 1 && p_index <= m_efgSupports.Length()) {
+    m_curEfgSupport = m_efgSupports[p_index];
+    UpdateViews(0, true, false);
+  }
 }
 
 
@@ -240,7 +254,7 @@ gText gbtGameDocument::GetRealizProb(const gbtEfgNode &p_node) const
     return "";
   }
   return ToText(m_behavProfiles[m_curProfile].RealizProb(p_node),
-		NumDecimals());
+		m_prefs.NumDecimals());
 }
 
 gText gbtGameDocument::GetBeliefProb(const gbtEfgNode &p_node) const
@@ -250,7 +264,7 @@ gText gbtGameDocument::GetBeliefProb(const gbtEfgNode &p_node) const
     return "";
   }
   return ToText(m_behavProfiles[m_curProfile].BeliefProb(p_node),
-		NumDecimals());
+		m_prefs.NumDecimals());
 }
 
 gText gbtGameDocument::GetNodeValue(const gbtEfgNode &p_node) const
@@ -261,7 +275,7 @@ gText gbtGameDocument::GetNodeValue(const gbtEfgNode &p_node) const
   gText tmp = "(";
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
     tmp += ToText(m_behavProfiles[m_curProfile].NodeValue(p_node)[pl], 
-		  NumDecimals());
+		  m_prefs.NumDecimals());
     if (pl < m_efg->NumPlayers()) {
       tmp += ",";
     }
@@ -279,7 +293,7 @@ gText gbtGameDocument::GetInfosetProb(const gbtEfgNode &p_node) const
     return "";
   }
   return ToText(m_behavProfiles[m_curProfile].IsetProb(p_node.GetInfoset()),
-		NumDecimals());
+		m_prefs.NumDecimals());
 }
 
 gText gbtGameDocument::GetInfosetValue(const gbtEfgNode &p_node) const
@@ -290,7 +304,7 @@ gText gbtGameDocument::GetInfosetValue(const gbtEfgNode &p_node) const
   }
   if (GetBehavProfile().IsetProb(p_node.GetInfoset()) > gNumber(0)) {
     return ToText(GetBehavProfile().IsetValue(p_node.GetInfoset()),
-		  NumDecimals());
+		  m_prefs.NumDecimals());
   }
   else {
     // this is due to a bug in the value computation
@@ -302,7 +316,7 @@ gText gbtGameDocument::GetActionProb(const gbtEfgNode &p_node, int p_act) const
 {
   if (!p_node.GetPlayer().IsNull() && p_node.GetPlayer().IsChance()) {
     return ToText(p_node.GetInfoset().GetChanceProb(p_act),
-		  NumDecimals());
+		  m_prefs.NumDecimals());
   }
 
   if (m_curProfile == 0 || p_node.GetPlayer().IsNull()) {
@@ -310,7 +324,7 @@ gText gbtGameDocument::GetActionProb(const gbtEfgNode &p_node, int p_act) const
   }
 
   return ToText(GetBehavProfile().ActionProb(p_node.GetInfoset().GetAction(p_act)),
-		NumDecimals());
+		m_prefs.NumDecimals());
 }
 
 gText gbtGameDocument::GetActionValue(const gbtEfgNode &p_node, int p_act) const
@@ -322,7 +336,7 @@ gText gbtGameDocument::GetActionValue(const gbtEfgNode &p_node, int p_act) const
 
   if (GetBehavProfile().IsetProb(p_node.GetInfoset()) > gNumber(0)) {
     return ToText(GetBehavProfile().ActionValue(p_node.GetInfoset().GetAction(p_act)),
-		  NumDecimals());
+		  m_prefs.NumDecimals());
   }
   else  {
     // this is due to a bug in the value computation

@@ -293,17 +293,17 @@ gbtEfgNode efgTreeLayout::BranchHitTest(int p_x, int p_y) const
     NodeEntry *parent_entry = GetNodeEntry(entry->GetNode().GetParent());
 
     if (parent_entry) {
-      if (p_x > (parent_entry->X() + m_parent->DrawSettings().NodeSize() + 
+      if (p_x > (parent_entry->X() + m_doc->GetPreferences().NodeSize() + 
 		 parent_entry->GetSublevel() * m_infosetSpacing + 10) &&
-	  p_x < (parent_entry->X() + m_parent->DrawSettings().NodeSize() +
-		 m_parent->DrawSettings().BranchLength() +
+	  p_x < (parent_entry->X() + m_doc->GetPreferences().NodeSize() +
+		 m_doc->GetPreferences().BranchLength() +
 		 parent_entry->GetSublevel() * m_infosetSpacing)) {
 	// Good old slope/intercept method for finding a point on a line
 	int y0 = (parent_entry->Y() + 
 		  (int) (p_x - parent_entry->X() - 
-			 m_parent->DrawSettings().NodeSize()) *
+			 m_doc->GetPreferences().NodeSize()) *
 		  (entry->Y() - parent_entry->Y()) / 
-		  m_parent->DrawSettings().BranchLength());
+		  m_doc->GetPreferences().BranchLength());
 
 	if (p_y > y0-2 && p_y < y0+2) {
 	  return entry->GetNode();
@@ -340,7 +340,7 @@ wxString efgTreeLayout::CreateNodeAboveLabel(const NodeEntry *p_entry) const
 {
   gbtEfgNode n = p_entry->GetNode();
     
-  switch (m_parent->DrawSettings().NodeAboveLabel()) {
+  switch (m_doc->GetPreferences().NodeAboveLabel()) {
   case NODE_ABOVE_NOTHING:
     return "";
   case NODE_ABOVE_LABEL:
@@ -374,7 +374,7 @@ wxString efgTreeLayout::CreateNodeBelowLabel(const NodeEntry *p_entry) const
 {
   gbtEfgNode n = p_entry->GetNode();
 
-  switch (m_parent->DrawSettings().NodeBelowLabel()) { 
+  switch (m_doc->GetPreferences().NodeBelowLabel()) { 
   case NODE_BELOW_NOTHING:
     return "";
   case NODE_BELOW_LABEL:
@@ -408,7 +408,7 @@ wxString efgTreeLayout::CreateNodeRightLabel(const NodeEntry *p_entry) const
 {    
   gbtEfgNode node = p_entry->GetNode();
 
-  switch (m_parent->DrawSettings().NodeRightLabel()) { 
+  switch (m_doc->GetPreferences().NodeRightLabel()) { 
   case NODE_RIGHT_NOTHING:
     return "";
   case NODE_RIGHT_OUTCOME:
@@ -424,7 +424,7 @@ wxString efgTreeLayout::CreateBranchAboveLabel(const NodeEntry *p_entry) const
 {
   gbtEfgNode parent = p_entry->GetParent()->GetNode();
 
-  switch (m_parent->DrawSettings().BranchAboveLabel()) {
+  switch (m_doc->GetPreferences().BranchAboveLabel()) {
   case BRANCH_ABOVE_NOTHING:
     return "";
   case BRANCH_ABOVE_LABEL:
@@ -444,7 +444,7 @@ wxString efgTreeLayout::CreateBranchBelowLabel(const NodeEntry *p_entry) const
 {
   gbtEfgNode parent = p_entry->GetParent()->GetNode();
 
-  switch (m_parent->DrawSettings().BranchBelowLabel()) {
+  switch (m_doc->GetPreferences().BranchBelowLabel()) {
   case BRANCH_BELOW_NOTHING:
     return "";
   case BRANCH_BELOW_LABEL:
@@ -526,7 +526,7 @@ int efgTreeLayout::LayoutSubtree(const gbtEfgNode &p_node,
 				 int &p_maxy, int &p_miny, int &p_ycoord)
 {
   int y1 = -1, yn = 0;
-  const TreeDrawSettings &settings = m_parent->DrawSettings();
+  const TreeDrawSettings &settings = m_doc->GetPreferences();
     
   NodeEntry *entry = m_nodeList[p_node.GetId()];
   entry->SetNextMember(0);
@@ -597,7 +597,7 @@ int efgTreeLayout::LayoutSubtree(const gbtEfgNode &p_node,
 //
 NodeEntry *efgTreeLayout::NextInfoset(NodeEntry *e)
 {
-  const TreeDrawSettings &draw_settings = m_parent->DrawSettings();
+  const TreeDrawSettings &draw_settings = m_doc->GetPreferences();
   
   for (int pos = m_nodeList.Find(e) + 1; pos <= m_nodeList.Length(); pos++) {
     NodeEntry *e1 = m_nodeList[pos];
@@ -664,7 +664,7 @@ void efgTreeLayout::CheckInfosetEntry(NodeEntry *e)
 void efgTreeLayout::FillInfosetTable(const gbtEfgNode &n,
 				     const EFSupport &cur_sup)
 {
-  const TreeDrawSettings &draw_settings = m_parent->DrawSettings();
+  const TreeDrawSettings &draw_settings = m_doc->GetPreferences();
   NodeEntry *entry = GetNodeEntry(n);
   if (n.NumChildren() > 0) {
     for (int i = 1; i <= n.NumChildren(); i++) {
@@ -728,7 +728,7 @@ void efgTreeLayout::Layout(const EFSupport &p_support)
 {
   // Kinda kludgey; probably should query draw settings whenever needed.
   m_infosetSpacing = 
-    (m_parent->DrawSettings().InfosetJoin() == INFOSET_JOIN_LINES) ? 10 : 40;
+    (m_doc->GetPreferences().InfosetJoin() == INFOSET_JOIN_LINES) ? 10 : 40;
 
   if (m_nodeList.Length() != NumNodes(*m_doc->m_efg)) {
     // A rebuild is in order; force it
@@ -738,7 +738,7 @@ void efgTreeLayout::Layout(const EFSupport &p_support)
   int miny = 0, maxy = 0, ycoord = c_topMargin;
   LayoutSubtree(m_doc->m_efg->RootNode(), p_support, maxy, miny, ycoord);
 
-  const TreeDrawSettings &draw_settings = m_parent->DrawSettings();
+  const TreeDrawSettings &draw_settings = m_doc->GetPreferences();
   if (draw_settings.InfosetConnect() != INFOSET_CONNECT_NONE) {
     // FIXME! This causes lines to disappear... sometimes.
     FillInfosetTable(m_doc->m_efg->RootNode(), p_support);
@@ -782,7 +782,7 @@ void efgTreeLayout::BuildNodeList(const EFSupport &p_support)
 
 void efgTreeLayout::GenerateLabels(void)
 {
-  const TreeDrawSettings &settings = m_parent->DrawSettings();
+  const TreeDrawSettings &settings = m_doc->GetPreferences();
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     NodeEntry *entry = m_nodeList[i];
     entry->SetNodeAboveLabel(CreateNodeAboveLabel(entry));
@@ -817,7 +817,7 @@ void efgTreeLayout::GenerateLabels(void)
 //
 void efgTreeLayout::RenderSubtree(wxDC &p_dc) const
 {
-  const TreeDrawSettings &settings = m_parent->DrawSettings();
+  const TreeDrawSettings &settings = m_doc->GetPreferences();
 
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
     NodeEntry *entry = m_nodeList[pos];  
@@ -826,12 +826,12 @@ void efgTreeLayout::RenderSubtree(wxDC &p_dc) const
     if (entry->GetChildNumber() == 1) {
       parentEntry->Draw(p_dc);
 
-      if (m_parent->DrawSettings().InfosetConnect() != INFOSET_CONNECT_NONE &&
+      if (m_doc->GetPreferences().InfosetConnect() != INFOSET_CONNECT_NONE &&
 	  parentEntry->GetNextMember()) {
 	int nextX = parentEntry->GetNextMember()->X();
 	int nextY = parentEntry->GetNextMember()->Y();
 
-	if ((m_parent->DrawSettings().InfosetConnect() !=
+	if ((m_doc->GetPreferences().InfosetConnect() !=
 	     INFOSET_CONNECT_SAMELEVEL) ||
 	    parentEntry->X() == nextX) {
 #ifdef __WXGTK__

@@ -31,6 +31,7 @@
 #include "nash/behavsol.h"
 #include "game/nfg.h"
 #include "nash/mixedsol.h"
+#include "treedraw.h"
 
 class EfgShow;
 class NfgShow;
@@ -54,9 +55,10 @@ private:
   gList<BehavSolution> m_behavProfiles;
   gList<MixedSolution> m_mixedProfiles;
 
+  TreeDrawSettings m_prefs;
+
 public:
   gbtEfgGame *m_efg;
-  EfgShow *m_efgShow;
 
   EFSupport *m_curEfgSupport;
   gList<EFSupport *> m_efgSupports;
@@ -84,7 +86,11 @@ public:
   void UpdateViews(gbtGameView *, bool, bool);
   void OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged);
 
+  TreeDrawSettings &GetPreferences(void) { return m_prefs; }
+  const TreeDrawSettings &GetPreferences(void) const { return m_prefs; }
+
   // MARKED NODES
+  void SetCursor(gbtEfgNode m_node);
   gbtEfgNode GetCursor(void) const { return m_cursor; }
   gbtEfgNode GetCopyNode(void) const { return m_copyNode; }
   gbtEfgNode GetCutNode(void) const { return m_cutNode; }
@@ -98,6 +104,7 @@ public:
   EFSupport *GetEfgSupport(void) const { return m_curEfgSupport; }
   const gList<EFSupport *> &AllEfgSupports(void) const
     { return m_efgSupports; }
+  void SetEfgSupport(int p_index);
 
   // PROFILES
   gText UniqueBehavProfileName(void) const;
@@ -141,10 +148,6 @@ public:
   gbtNfgSupport *GetNfgSupport(void) const { return m_curNfgSupport; }
   const gList<gbtNfgSupport *> &AllNfgSupports(void) const
     { return m_nfgSupports; }
-
-
-  // DISPLAY CONFIGURATION
-  int NumDecimals(void) const { return 2; }
 };
 
 //

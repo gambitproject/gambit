@@ -38,8 +38,6 @@ friend class EfgPrintout;
 friend class EfgShow;
 private:
   efgTreeLayout m_layout;
-  TreeDrawSettings m_drawSettings;
-
   double m_zoom;
   wxMenu *m_nodeMenu, *m_gameMenu;
 
@@ -75,13 +73,6 @@ public:
   virtual void OnDraw(wxDC &dc);
   void OnDraw(wxDC &, double);
 
-  void RefreshLayout(void);
-  void RefreshLabels(void);
-  
-  TreeDrawSettings &DrawSettings(void) { return m_drawSettings; }
-  const TreeDrawSettings &DrawSettings(void) const { return m_drawSettings; }
-  
-  void SetCursorPosition(gbtEfgNode p_cursor);
   void SetCutNode(gbtEfgNode, bool);
     
   double GetZoom(void) const { return m_zoom; }

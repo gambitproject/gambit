@@ -151,13 +151,13 @@ void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
     switch (p_event.KeyCode()) {
     case WXK_LEFT:
       if (!m_doc->GetCursor().GetParent().IsNull()) {
-	m_doc->m_efgShow->SetCursor(m_layout.GetValidParent(m_doc->GetCursor())->GetNode());
+	m_doc->SetCursor(m_layout.GetValidParent(m_doc->GetCursor())->GetNode());
 	c = true;
       }
       break;
     case WXK_RIGHT:
       if (m_layout.GetValidChild(m_doc->GetCursor())) {
-	m_doc->m_efgShow->SetCursor(m_layout.GetValidChild(m_doc->GetCursor())->GetNode());
+	m_doc->SetCursor(m_layout.GetValidChild(m_doc->GetCursor())->GetNode());
 	c = true;
       }
       break;
@@ -166,7 +166,7 @@ void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
 			  m_layout.PriorSameLevel(m_doc->GetCursor()) :
 			  PriorSameIset(m_doc->GetCursor()));
       if (!prior.IsNull()) {
-	m_doc->m_efgShow->SetCursor(prior);
+	m_doc->SetCursor(prior);
 	c = true;
       }
       break;
@@ -176,7 +176,7 @@ void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
 			 m_layout.NextSameLevel(m_doc->GetCursor()) :
 			 NextSameIset(m_doc->GetCursor()));
       if (!next.IsNull()) {
-	m_doc->m_efgShow->SetCursor(next);
+	m_doc->SetCursor(next);
 	c = true;
       }
       break;
@@ -233,17 +233,6 @@ void TreeWindow::OnUpdate(gbtGameView *)
 			m_doc->GetEfg().IsLegalSubgame(cursor) &&
 			cursor.GetSubgameRoot() == cursor) ?
 		       "Unmark subgame" : "Mark subgame");
-}
-
-void TreeWindow::RefreshLayout(void)
-{
-  m_layout.Layout(*m_doc->GetEfgSupport());
-  AdjustScrollbarSteps();
-}
-
-void TreeWindow::RefreshLabels(void)
-{
-  m_layout.GenerateLabels();
   Refresh();
 }
 
@@ -263,7 +252,7 @@ void TreeWindow::AdjustScrollbarSteps(void)
   const int OUTCOME_LENGTH = 60;
 
   SetScrollbars(50, 50,
-		(int) ((m_layout.MaxX() + m_drawSettings.NodeSize() + 
+		(int) ((m_layout.MaxX() + m_doc->GetPreferences().NodeSize() + 
 			OUTCOME_LENGTH) * m_zoom / 50 + 1),
 		(int) (m_layout.MaxY() * m_zoom / 50 + 1),
 		scrollX, scrollY);
@@ -294,7 +283,7 @@ void TreeWindow::OnDraw(wxDC &dc)
 {
   if (!m_doc->GetCursor().IsNull()) {
     if (!m_layout.GetNodeEntry(m_doc->GetCursor())) {
-      m_doc->m_efgShow->SetCursor(m_doc->GetEfg().RootNode());
+      m_doc->SetCursor(m_doc->GetEfg().RootNode());
     }
     
     UpdateCursor();
@@ -335,7 +324,8 @@ void TreeWindow::EnsureCursorVisible(void)
     xScroll -= -xx / 50 + 1;
   }
   const int OUTCOME_LENGTH = 60;
-  CalcScrolledPosition((int) (entry->X() * m_zoom + m_drawSettings.NodeSize() +
+  CalcScrolledPosition((int) (entry->X() * m_zoom + 
+			      m_doc->GetPreferences().NodeSize() +
 			      OUTCOME_LENGTH),
 		       (int) (entry->Y() * m_zoom), &xx, &yy);
   if (xx > width) {
@@ -373,7 +363,7 @@ void TreeWindow::ProcessCursor(void)
   if (!m_doc->GetCursor().IsNull()) {
     NodeEntry *entry = m_layout.GetNodeEntry(m_doc->GetCursor()); 
     if (!entry) {
-      m_doc->m_efgShow->SetCursor(m_doc->GetEfg().RootNode());
+      m_doc->SetCursor(m_doc->GetEfg().RootNode());
       entry = m_layout.GetNodeEntry(m_doc->GetCursor());
     }
     
@@ -406,7 +396,7 @@ gText TreeWindow::OutcomeAsString(const gbtEfgNode &n) const
       if (DrawSettings().ColorCodedOutcomes())
 	tmp += ("\\C{"+ToText(DrawSettings().GetPlayerColor(i))+"}");
       */
-      tmp += ToText(v[i], DrawSettings().NumDecimals());
+      tmp += ToText(v[i], m_doc->GetPreferences().NumDecimals());
     }
     /*
     if (DrawSettings().ColorCodedOutcomes()) 
@@ -503,7 +493,7 @@ void TreeWindow::OnLeftClick(wxMouseEvent &p_event)
   y = (int) ((float) y / m_zoom);
 
   gbtEfgNode node = m_layout.NodeHitTest(x, y);
-  m_doc->m_efgShow->SetCursor(node);
+  m_doc->SetCursor(node);
   Refresh();
   ProcessCursor();
 }
@@ -521,10 +511,11 @@ void TreeWindow::OnLeftDoubleClick(wxMouseEvent &p_event)
 
   gbtEfgNode node = m_layout.NodeHitTest(x, y);
   if (!node.IsNull()) {
-    m_doc->m_efgShow->SetCursor(node);
+    m_doc->SetCursor(node);
     Refresh();
-    wxCommandEvent event;
-    m_doc->m_efgShow->OnEditNode(event);
+    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
+			 GBT_EFG_MENU_EDIT_NODE);
+    GetParent()->AddPendingEvent(event);
   }
 }
 
@@ -545,23 +536,15 @@ void TreeWindow::OnRightClick(wxMouseEvent &p_event)
 
   gbtEfgNode node = m_layout.NodeHitTest(x, y);
   if (!node.IsNull()) {
-    m_doc->m_efgShow->SetCursor(node);
+    m_doc->SetCursor(node);
     Refresh();
     PopupMenu(m_nodeMenu, p_event.GetX(), p_event.GetY());
   }
   else {
     // If right-click doesn't hit anything, display generic game menu
-    m_doc->m_efgShow->SetCursor(0);
+    m_doc->SetCursor(0);
     Refresh();
     PopupMenu(m_gameMenu, p_event.GetX(), p_event.GetY());
-  }
-}
-
-void TreeWindow::SetCursorPosition(gbtEfgNode p_cursor)
-{
-  if (!m_doc->GetCursor().IsNull()) {
-    m_layout.GetNodeEntry(m_doc->GetCursor())->SetCursor(false);
-    m_layout.GetNodeEntry(m_doc->GetCursor())->SetSelected(false);
   }
 }
 

@@ -33,18 +33,15 @@
 
 class EfgNavigateWindow : public wxGrid, public gbtGameView {
 private:
-  gbtEfgNode m_cursor;
-
   void OnEditorShown(wxGridEvent &);
 
   bool IsEfgView(void) const { return true; }
   bool IsNfgView(void) const { return false; }
+  void OnUpdate(gbtGameView *);
 
 public:
   EfgNavigateWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~EfgNavigateWindow() { }
-
-  void Set(gbtEfgNode p_cursor);
 };
 
 #endif  // EFGNAVIGATE_H
