@@ -228,14 +228,14 @@ template <class T> int gDPVector<T>::operator!=(const gDPVector<T> &v) const
 template <class T> void gDPVector<T>::Dump(gOutput &f) const
 {
   for (int i = 1; i <= dvlen.Length(); i++)  {
-    gout << "{ ";
+    f << "{ ";
     for (int j = 1; j <= dvlen[i]; j++)  {
-      gout << "{ ";
+      f << "{ ";
       for (int k = 1; k <= svlen[dvidx[i] + j - 1]; k++)
-	gout << (*this)(i, j, k) << ' ';
-      gout << "}";
+	f << (*this)(i, j, k) << ' ';
+      f << "}";
     }
-    gout << " }";
+    f << " }";
   }
 }
 
