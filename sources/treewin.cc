@@ -469,79 +469,31 @@ void TreeRender::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
     label = "";
     hilight = false;
     
-    if (!child_entry->has_children)   // if the node is terminal
-    {
-        switch (draw_settings.LabelNodeTerminal())
-        {
-        case NODE_TERMINAL_NOTHING:
-            label = "";
-            break;
+    switch (draw_settings.LabelNodeRight()) { 
+    case NODE_RIGHT_NOTHING:
+      label = "";
+      break;
             
-        case NODE_TERMINAL_OUTCOME:
-            label = parent->OutcomeAsString(n, hilight);
-            break;
+    case NODE_RIGHT_OUTCOME:
+      label = parent->OutcomeAsString(n, hilight);
+      break;
             
-        case NODE_TERMINAL_NAME:
-            if (n->GetOutcome()) 
-                label = n->GetOutcome()->GetName();
-            break;
+    case NODE_RIGHT_NAME:
+      if (n->GetOutcome()) 
+	label = n->GetOutcome()->GetName();
+      break;
             
-        default:
-            label = "";
-            break;
-        }
-        
-        if (label != "")   
-        {
-            dc.SetFont(draw_settings.NodeTerminalFont());
-            if (hilight)  
-            {
-                dc.SetBackgroundMode(wxSOLID);
-                dc.SetTextBackground(wxLIGHT_GREY);
-            }
-            
-            gDrawText(dc, label,
-                      child_entry->x + draw_settings.NodeLength() +
-                      child_entry->nums * INFOSET_SPACING + 10,
-                      child_entry->y - 12);
-            
-            if (hilight)  
-            {
-                dc.SetBackgroundMode(wxTRANSPARENT);
-                dc.SetTextBackground(wxWHITE);
-            }
-        }
+    default:
+      label = "";
+      break;
     }
-    else // Now take care of displaying the right node labels, for non-terminal nodes. 
-    {
-        switch (draw_settings.LabelNodeRight())   
-        {
-        case NODE_RIGHT_NOTHING:
-            label = "";
-            break;
-            
-        case NODE_RIGHT_OUTCOME:
-            label = parent->OutcomeAsString(n, hilight);
-            break;
-            
-        case NODE_RIGHT_NAME:
-            if (n->GetOutcome()) 
-                label = n->GetOutcome()->GetName();
-            break;
-            
-        default:
-            label = "";
-            break;
-        }
         
-        if (label != "")   
-        {
-            dc.SetFont(draw_settings.NodeRightFont());
-            gDrawText(dc, label,
-                      child_entry->x + draw_settings.NodeLength() +
-                      child_entry->nums * INFOSET_SPACING + 10,
-                      child_entry->y - 12);
-        }
+    if (label != "") { 
+      dc.SetFont(draw_settings.NodeRightFont());
+      gDrawText(dc, label,
+		child_entry->x + draw_settings.NodeLength() +
+		child_entry->nums * INFOSET_SPACING + 10,
+		child_entry->y - 12);
     }
 }
 
@@ -2316,19 +2268,16 @@ void TreeWindow::ProcessDClick(wxMouseEvent &ev)
            draw_settings.OutcomeLength()*ef.NumPlayers() &&
            y > entry->y-DELTA && y < entry->y+DELTA)
         {
-            if (!entry->has_children)
-                id = draw_settings.LabelNodeTerminal();
-            else 
-                id = draw_settings.LabelNodeRight();
+	  id = draw_settings.LabelNodeRight();
         }
         if (id != -1)
         {
             cursor = (Node *)entry->n;
             switch (id) {
-            case NODE_TERMINAL_NOTHING:
+            case NODE_RIGHT_NOTHING:
 	      break;
-            case NODE_TERMINAL_OUTCOME:
-            case NODE_TERMINAL_NAME:
+            case NODE_RIGHT_OUTCOME:
+            case NODE_RIGHT_NAME:
 	      ChangePayoffs();
 	      break;
             }
@@ -2380,10 +2329,7 @@ void TreeWindow::ProcessRClick(wxMouseEvent &ev)
            draw_settings.OutcomeLength()*ef.NumPlayers() &&
            y > entry->y-DELTA && y < entry->y+DELTA)
         {
-            if (!entry->has_children)
-                s = node_terminal_src[draw_settings.LabelNodeTerminal()].l_name;
-            else
-                s = node_right_src[draw_settings.LabelNodeRight()].l_name;
+	  s = node_right_src[draw_settings.LabelNodeRight()].l_name;
         }
         if (s)
         {
@@ -2437,10 +2383,7 @@ void TreeWindow::ProcessRDClick(wxMouseEvent &ev)
            draw_settings.OutcomeLength()*ef.NumPlayers() &&
            y > entry->y-DELTA && y < entry->y+DELTA)
         {
-            if (!entry->has_children) 
-                id = NODE_TERMINAL_LEGEND;
-            else
-                id = NODE_RIGHT_LEGEND;
+	  id = NODE_RIGHT_LEGEND;
         }
         if (id != -1)
         {
