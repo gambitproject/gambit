@@ -45,6 +45,10 @@ Portion::~Portion()
 }
 
 
+PortionType Portion::SubType( void ) const
+{ return porERROR; }
+
+
 bool& Portion::Temporary( void )
 { return _Temporary; }
 
@@ -385,6 +389,76 @@ void gString_Portion::Output( gOutput& s ) const
 
 
 //---------------------------------------------------------------------
+//                          MixedProfile type
+//---------------------------------------------------------------------
+template <class T> 
+  Mixed_Portion<T>::Mixed_Portion( const MixedProfile<T>& value )
+    : _Value( value )
+{
+  _Owner = 0;
+}
+
+
+template <class T> bool Mixed_Portion<T>::SetOwner( NormalForm<T>* owner )
+{
+  if( owner != 0 )
+    if( owner->Type() == _Value.Type() )
+    {
+      _Owner = owner;
+      return true;
+    }
+  return false;
+}
+
+template <class T> MixedProfile<T> Mixed_Portion<T>::Value( void ) const
+{ return _Value; }
+
+template <class T> MixedProfile<T>& Mixed_Portion<T>::Value( void )
+{ return _Value; }
+
+template <class T> PortionType Mixed_Portion<T>::Type( void ) const
+{ return porMIXED; }
+
+template <class T> Portion* Mixed_Portion<T>::Copy( void ) const
+{ return new Mixed_Portion<T>( _Value ); }
+
+
+template <class T>
+  bool Mixed_Portion<T>::Operation( Portion* p, OperationMode mode )
+{
+  bool      result = true;
+  MixedProfile<T>&  p_value = ( (Mixed_Portion<T>*) p )->_Value;
+
+  if( p == 0 )      // unary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );      
+    }
+  }
+  else               // binary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );
+    }
+    delete p;
+  }
+  return result;
+}
+
+
+template <class T> void Mixed_Portion<T>::Output( gOutput& s ) const
+{
+  _Value.Dump( s );
+}
+
+
+
+
+//---------------------------------------------------------------------
 //                        Reference type
 //---------------------------------------------------------------------
 Reference_Portion::Reference_Portion( const gString& value )
@@ -628,14 +702,14 @@ Portion* List_Portion::Subscript( Portion* p ) const
 //---------------------------------------------------------------------
 
 
-Nfg_Portion::Nfg_Portion( BaseNormalForm& value )
+template <class T> Nfg_Portion<T>::Nfg_Portion( NormalForm<T>& value )
 {
   _RefTable = new RefHashTable;
   _Value = &value;
 }
 
 
-Nfg_Portion::~Nfg_Portion()
+template <class T> Nfg_Portion<T>::~Nfg_Portion()
 {
   delete _RefTable;
 
@@ -644,34 +718,31 @@ Nfg_Portion::~Nfg_Portion()
 }
 
 
-BaseNormalForm& Nfg_Portion::Value( void )
+template <class T> NormalForm<T>& Nfg_Portion<T>::Value( void )
 { return *_Value; }
 
-PortionType Nfg_Portion::Type( void ) const
+template <class T> PortionType Nfg_Portion<T>::Type( void ) const
 { return porNFG; }
 
-Portion* Nfg_Portion::Copy( void ) const
-{ return new Nfg_Portion( *_Value ); }
+template <class T> Portion* Nfg_Portion<T>::Copy( void ) const
+{ return new Nfg_Portion<T>( *_Value ); }
 
 
-void Nfg_Portion::MakeCopyOfData( Portion* p )
+template <class T> void Nfg_Portion<T>::MakeCopyOfData( Portion* p )
 {
   Portion::MakeCopyOfData( p );
-  switch (_Value->Type())   {
-    case DOUBLE:
-      _Value = new NormalForm<double>((NormalForm<double> &) *((Nfg_Portion *) p)->_Value);
-      break;
-    case RATIONAL:
-      _Value = new NormalForm<gRational>((NormalForm<gRational> &) *((Nfg_Portion *) p)->_Value);
-      break;
-  }
+    _Value = new NormalForm<T>
+      (
+       (NormalForm<T> &) *((Nfg_Portion<T> *) p)->_Value
+       );
 }
 
 
-bool Nfg_Portion::Operation( Portion* p, OperationMode mode )
+template <class T> 
+  bool Nfg_Portion<T>::Operation( Portion* p, OperationMode mode )
 {
   bool result = true;
-  BaseNormalForm&  p_value = *( ( (Nfg_Portion*) p )->_Value );
+  NormalForm<T>& p_value = *( ( (Nfg_Portion<T>*) p )->_Value );
 
   if( p == 0 )      // unary operations
   {
@@ -694,7 +765,7 @@ bool Nfg_Portion::Operation( Portion* p, OperationMode mode )
 }
 
 
-void Nfg_Portion::Output( gOutput& s ) const
+template <class T> void Nfg_Portion<T>::Output( gOutput& s ) const
 { s << "NormalForm[ "; _Value->GetTitle(); s << ']'; }
 
 
@@ -703,7 +774,8 @@ void Nfg_Portion::Output( gOutput& s ) const
 //     Assign() and UnAssign() for Nfg_Portion
 //---------------------------------------------------------------------
 
-bool Nfg_Portion::Assign( const gString& ref, Portion *p )
+template <class T> 
+  bool Nfg_Portion<T>::Assign( const gString& ref, Portion *p )
 {
 #ifndef NDEBUG
   if( p->Type() == porREFERENCE )
@@ -720,7 +792,7 @@ bool Nfg_Portion::Assign( const gString& ref, Portion *p )
 }
 
 
-bool Nfg_Portion::UnAssign( const gString& ref )
+template <class T> bool Nfg_Portion<T>::UnAssign( const gString& ref )
 {
   if( _RefTable->IsDefined( ref ) )
   {
@@ -730,13 +802,14 @@ bool Nfg_Portion::UnAssign( const gString& ref )
 }
 
 
-bool Nfg_Portion::IsDefined( const gString& ref ) const
+template <class T> bool Nfg_Portion<T>::IsDefined( const gString& ref ) const
 {
   return _RefTable->IsDefined( ref );
 }
 
 
-Portion* Nfg_Portion::operator()( const gString& ref ) const
+template <class T> 
+  Portion* Nfg_Portion<T>::operator()( const gString& ref ) const
 {
   Portion* result = 0;
 
@@ -834,7 +907,35 @@ PortionType numerical_Portion<gRational>::Type( void ) const
 
 
 
+TEMPLATE class Mixed_Portion<double>;
+PortionType Mixed_Portion<double>::Type( void ) const
+{ return porMIXED; }
+PortionType Mixed_Portion<double>::SubType( void ) const
+{ return porDOUBLE; }
+
+TEMPLATE class Mixed_Portion<gRational>;
+PortionType Mixed_Portion<gRational>::Type( void ) const
+{ return porMIXED; }
+PortionType Mixed_Portion<gRational>::SubType( void ) const
+{ return porRATIONAL; }
+
+
+
+TEMPLATE class Nfg_Portion<double>;
+PortionType Nfg_Portion<double>::Type( void ) const
+{ return porNFG; }
+PortionType Nfg_Portion<double>::SubType( void ) const
+{ return porDOUBLE; }
+
+TEMPLATE class Nfg_Portion<gRational>;
+PortionType Nfg_Portion<gRational>::Type( void ) const
+{ return porNFG; }
+PortionType Nfg_Portion<gRational>::SubType( void ) const
+{ return porRATIONAL; }
+
+
 
 #include "gblock.imp"
 
 TEMPLATE class gBlock<Portion*>;
+

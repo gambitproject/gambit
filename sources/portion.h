@@ -43,10 +43,13 @@ typedef unsigned int PortionType;
 #define  porLIST       ( 0x0020 )
 #define  porNFG        ( 0x0040 )
 #define  porEFG        ( 0x0080 )
-#define  porREFERENCE  ( 0x0100 )
+#define  porMIXED      ( 0x0100 )
+#define  porREFERENCE  ( 0x1000 )
 
+#define  porALLOWS_SUBVARIABLES ( porNFG | porEFG )
+				  
 #define  porNUMERICAL  ( porDOUBLE | porINTEGER | porRATIONAL )
-#define  porVALUE      ( 0x00FF )
+#define  porVALUE      ( 0x0FFF )
 #define  porALL        ( 0xFFFF )
 
 
@@ -71,6 +74,7 @@ class Portion
 
   bool&               Temporary      ( void );
   virtual PortionType Type           ( void ) const = 0;
+  virtual PortionType SubType        ( void ) const;
   virtual Portion*    Copy           ( void ) const = 0;
   virtual void        MakeCopyOfData ( Portion* p );
   virtual bool        Operation      ( Portion* p, OperationMode mode );
@@ -140,6 +144,7 @@ class gString_Portion : public Portion
 };
 
 
+
 class Reference_Portion : public Portion
 {
  private:
@@ -192,26 +197,56 @@ class List_Portion : public Portion
 };
 
 
-#include "normal.h"
 
-class Nfg_Portion : public Portion
+
+#include "mixed.h"
+
+template <class T> class Mixed_Portion : public Portion
 {
  private:
-  BaseNormalForm *_Value;
+  MixedProfile<T> _Value;
+  NormalForm<T>*  _Owner;
+
+ public:
+  Mixed_Portion( const MixedProfile<T>& value );
+
+  bool SetOwner( NormalForm<T>* owner );
+
+  MixedProfile<T>& Value     ( void );
+  MixedProfile<T>  Value     ( void ) const;
+  Portion*         Copy      ( void ) const;
+  PortionType      Type      ( void ) const;
+  PortionType      SubType   ( void ) const;
+  bool             Operation ( Portion* p, OperationMode mode );
+  void             Output    ( gOutput& s ) const;
+};
+
+
+
+
+
+
+#include "normal.h"
+
+template <class T> class Nfg_Portion : public Portion
+{
+ private:
+  NormalForm<T>* _Value;
   RefHashTable*  _RefTable;
 
  public:
-  Nfg_Portion( BaseNormalForm& value );
+  Nfg_Portion( NormalForm<T>& value );
   ~Nfg_Portion();
 
   // Only the passing by reference version of Value() is provided in 
   // order to eliminate unecessary copying
-  BaseNormalForm& Value          ( void );
-  Portion*    Copy           ( void ) const;
-  void        MakeCopyOfData ( Portion* p );
-  PortionType Type           ( void ) const;
-  bool        Operation      ( Portion* p, OperationMode mode );
-  void        Output         ( gOutput& s ) const;
+  NormalForm<T>& Value          ( void );
+  Portion*       Copy           ( void ) const;
+  void           MakeCopyOfData ( Portion* p );
+  PortionType    Type           ( void ) const;
+  PortionType    SubType        ( void ) const;
+  bool           Operation      ( Portion* p, OperationMode mode );
+  void           Output         ( gOutput& s ) const;
 
   bool        Assign     ( const gString& ref, Portion* data );
   bool        UnAssign   ( const gString& ref );

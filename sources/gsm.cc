@@ -127,7 +127,7 @@ bool GSM::Push( const gString& data )
 /*
 bool GSM::GenerateNfg( const double& data )
 {
-  Nfg_Portion* p;
+  Nfg_Portion<double>* p;
   p = new Nfg_Portion( *(new Nfg) );
   p->Value().value = data;
   p->Temporary() = false;
@@ -257,7 +257,7 @@ bool GSM::Assign( void )
     {
       primary_ref = _ResolvePrimaryRefOnly( (Reference_Portion*) p1 );
 
-      if( primary_ref->Type() == porNFG )
+      if( primary_ref->Type() & porALLOWS_SUBVARIABLES )
       {
 	if( p2->Type() == porREFERENCE )
 	{
@@ -271,9 +271,32 @@ bool GSM::Assign( void )
 	}
 	p2_copy->Temporary() = false;
 	p2->Temporary() = true;
-	( (Nfg_Portion*) primary_ref )->Assign( p1_subvalue, p2_copy );
+
+	switch( primary_ref->Type() )
+	{
+	case porNFG:
+	  switch( primary_ref->SubType() )
+	  {
+	  case porDOUBLE:
+	    ( (Nfg_Portion<double>*) primary_ref )->
+	      Assign( p1_subvalue, p2_copy );
+	    break;
+	  case porRATIONAL:
+	    ( (Nfg_Portion<gRational>*) primary_ref )->
+	      Assign( p1_subvalue, p2_copy );
+	    break;
+	  default:
+	    gerr << "GSM Error: unknown subtype of Nfg_Portion\n";
+	    assert(0);
+	  }
+	  break;
+	  
+	default:
+	  gerr << "GSM Error: unknown type supports subvariables\n";
+	  assert(0);
+	}
+
 	delete p2;
-	
 	p1 = _ResolveRef( (Reference_Portion*) p1 );
       }
       else
@@ -331,28 +354,47 @@ bool GSM::UnAssign( void )
       {
 	_RefTable->Remove( ref );
       }
-#ifndef NDEBUG
-      else
-      {
-	gerr << "GSM Warning: calling UnAssign() on a undefined reference\n";
-      }
-#endif // NDEBUG
     }
 
     else // ( p1_subvalue != "" )
     {
       primary_ref = _ResolvePrimaryRefOnly( (Reference_Portion*) p1 );
 
-#ifndef NDEBUG
-      if( primary_ref->Type() != porNFG )
+      if( primary_ref->Type() & porALLOWS_SUBVARIABLES )
+      {
+	switch( primary_ref->Type() )
+	{
+	case porNFG:
+	  switch( primary_ref->SubType() )
+	  {
+	  case porDOUBLE:
+	    ( (Nfg_Portion<double>*) primary_ref )->UnAssign( p1_subvalue );
+	    break;
+	  case porRATIONAL:
+	    ( (Nfg_Portion<gRational>*) primary_ref )->UnAssign( p1_subvalue );
+	    break;
+	  default:
+	    gerr << "GSM Error: unknown subtype of Nfg_Portion\n";
+	    assert(0);
+	  }
+	  break;
+	  
+	default:
+	  gerr << "GSM Error: unknown type supports subvariables\n";
+	  assert(0);
+	}
+      }
+      else
       {
 	gerr << "GSM Error: attempted to unassign a sub-reference of a type\n";
 	gerr << "           that doesn't support such structures\n";
+	if( primary_ref->Type() == porERROR )
+	{
+	  delete primary_ref;
+	}
+	delete p1;
+	p1 = new Error_Portion;
       }
-      assert( primary_ref->Type() == porNFG );
-#endif // NDEBUG
-
-      ( (Nfg_Portion*) primary_ref )->UnAssign( p1_subvalue );
     }
     delete p1;
   }
@@ -391,7 +433,19 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
       switch( result->Type() )
       {
       case porNFG:
-	result = ((Nfg_Portion*) result )->operator()( subvalue );
+	switch( result->SubType() )
+	{
+	case porDOUBLE:
+	  result = ((Nfg_Portion<double>*) result )->operator()( subvalue );
+	  break;
+	case porRATIONAL:
+	  result = ((Nfg_Portion<gRational>*) result )->operator()( subvalue );
+	  break;
+	default:
+	  gerr << "GSM Error: unknown Nfg_Portion subtype\n";
+	  assert(0);
+	  break;
+	}
 	if( result != 0 )
 	{
 	  result = result->Copy();
@@ -401,6 +455,7 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
 	  result = new Error_Portion;
 	}
 	break;
+	
       default:
 	gerr << "GSM Error: attempted to resolve a subvariable of a type\n";
 	gerr << "           that does not support subvariables\n";
@@ -439,13 +494,31 @@ Portion* GSM::_ResolveRefWithoutCopy( Reference_Portion* p )
       switch( result->Type() )
       {
       case porNFG:
-	if( ((Nfg_Portion*) result )->IsDefined( subvalue ) )
+	switch( result->SubType() )
 	{
-	  result = ((Nfg_Portion*) result )->operator()( subvalue )->Copy();
-	}
-	else
-	{
-	  result = 0;
+	case porDOUBLE:
+	  if( ((Nfg_Portion<double>*) result )->IsDefined( subvalue ) )
+	  {
+	    result = ((Nfg_Portion<double>*) result )->
+	      operator()( subvalue )->Copy();
+	  }
+	  else
+	  {
+	    result = 0;
+	  }
+	case porRATIONAL:
+	  if( ((Nfg_Portion<gRational>*) result )->IsDefined( subvalue ) )
+	  {
+	    result = ((Nfg_Portion<gRational>*) result )
+	      ->operator()( subvalue )->Copy();
+	  }
+	  else
+	  {
+	    result = 0;
+	  }
+	default:
+	  gerr << "GSM Error: unknown subtype of Nfg_Portion\n";
+	  assert(0);
 	}
 	break;
 
@@ -900,24 +973,27 @@ bool GSM::BindRef( void )
     return false;
   }
 
-  if( result == false )
-  {
-    func->SetErrorOccurred();
-  }
   
-  if( result == true && param != 0 )
+  if( result == true )
   {
-    result = _FuncParamCheck( func, param->Type() );
-    if( result == true )
+    if( param != 0 )
     {
-      result = func->SetCurrParam( param ); 
+      result = _FuncParamCheck( func, param->Type() );
+      if( result == true )
+      {
+	result = func->SetCurrParam( param ); 
+      }
+    }
+    else
+    {
+      func->SetCurrParamIndex( func->GetCurrParamIndex() + 1 ); 
     }
   }
   else
   {
     func->SetCurrParam( 0 ); 
+    func->SetErrorOccurred();
   }
-
 
   _CallFuncStack->Push( func );
   return result;
@@ -1007,9 +1083,9 @@ bool GSM::CallFunction( void )
     {
       func->SetCurrParamIndex( index );
       refp = func->GetCurrParamRef();
-
       if( refp != 0 && param[ index ] != 0 )
       {
+	gout << "index: " << index << refp << "\n";
 	if( refp->SubValue() == "" )
 	{
 	  _RefTable->Define( refp->Value(), param[ index ] );
@@ -1022,9 +1098,23 @@ bool GSM::CallFunction( void )
 	    switch( p->Type() )
 	    {
 	    case porNFG:
-	      ( (Nfg_Portion*) p )->Assign( refp->SubValue(), param[ index ]->Copy() );
-	      delete param[ index ];
+	      switch( p->SubType() )
+	      {
+	      case porDOUBLE:
+		( (Nfg_Portion<double>*) p )->
+		  Assign( refp->SubValue(), param[ index ]->Copy() );
+		break;
+	      case porRATIONAL:
+		( (Nfg_Portion<gRational>*) p )->
+		  Assign( refp->SubValue(), param[ index ]->Copy() );
+		break;
+	      default:
+		gerr << "GSM Error: unknown Nfg_Portion subtype\n";
+		assert(0);
+	      }
 	      break;
+	      delete param[ index ];
+	      
 	    default:
 	      gerr << "GSM Error: attempted to assign the subvariable of a\n";
 	      gerr << "           type that does not support subvariables\n";

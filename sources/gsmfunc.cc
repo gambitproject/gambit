@@ -97,7 +97,7 @@ void GSM::InitFunctions( void )
 
   Init_gclmath( this );
 
-  Init_nfgfunc( this );
+  // Init_nfgfunc( this );
 }
 
 

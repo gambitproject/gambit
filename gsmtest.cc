@@ -38,7 +38,7 @@ int main( void )
   gList< Instruction* > program;
 
 
-
+/*
   gout << "\n";
   machine->Push( d_1 );
   machine->Push( d_2 );
@@ -1131,10 +1131,14 @@ int main( void )
 
 
   machine->PushRef( "x" );
+#if 0
   machine->InitCallFunction( "ReadNfgFile" );
   machine->Push( "2x2.nfg" );
   machine->Bind();
   machine->CallFunction();
+#endif
+  machine->Push( (double) 0 );
+
   machine->Assign();
 
   machine->PushRef( "x", "a" );
@@ -1167,10 +1171,13 @@ int main( void )
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x" );
   machine->Bind();
+#if 0
   machine->InitCallFunction( "ReadNfgFile" );
   machine->Push( "2x2.nfg" );
   machine->Bind();
   machine->CallFunction();
+#endif
+  machine->Push( (double) 0 );
 
   machine->Bind();
   machine->CallFunction();
@@ -1226,6 +1233,37 @@ int main( void )
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
+*/
+
+
+  machine->InitCallFunction( "Test" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "Test" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "Test" );
+  machine->PushRef( "x" );
+  machine->Bind();
+  machine->PushRef( "y" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->PushRef( "y" );
+  machine->Dump();
+/*
+  machine->InitCallFunction( "Test" );
+  machine->PushRef( "x" );
+  machine->BindVal();
+  machine->PushRef( "y" );
+  machine->BindVal();
+  machine->CallFunction();
+  machine->Dump();
+*/
 
   gout << "Deleting machine\n";
   delete machine;
