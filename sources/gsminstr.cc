@@ -9,7 +9,7 @@
 
 
 #include "gsminstr.h"
-
+#include "gmisc.h"
 #include "gsm.h"
 #include "gambitio.h"
 #include "integer.h"

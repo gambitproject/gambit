@@ -8,10 +8,57 @@
 
 
 
+#include "gstring.h"
+class Portion;
+class FuncDescObj;
+class Instruction;
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+template <class T> class gList;
+template <class T> class gListIter;
+template <class T> class gNode;
+
+TEMPLATE class gList< gString >;
+TEMPLATE class gNode< gString >;
+TEMPLATE class gListIter< gString >;
+
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
+
+#include "glist.imp"
+
+TEMPLATE class gNode< int >;
+TEMPLATE class gList< int >;
+
+TEMPLATE class gList< Portion* >;
+TEMPLATE class gNode< Portion* >;
+
+TEMPLATE class gList< FuncDescObj* >;
+TEMPLATE class gNode< FuncDescObj* >;
+
+TEMPLATE class gList< gList< Instruction* >* >;
+TEMPLATE class gNode< gList< Instruction* >* >;
+
+/* 
+	 already instantiated in readefg.y
+	 TEMPLATE class gList< gString >;
+	 TEMPLATE class gNode< gString >;
+	 */
+
+#include "hash.imp"
+
+
+TEMPLATE class HashTable< gList< Instruction* >*, int >;
+
+TEMPLATE class HashTable< gString, Portion* >;
+TEMPLATE class HashTable< gString, FuncDescObj* >;
 
 #include "gsmhash.h"
+TEMPLATE class RefCountHashTable< gList< Instruction* >* >;
 
-#include "gstring.h"
+#pragma option -Jgx
 #include "portion.h"
 #include "gsmfunc.h"
 
@@ -21,16 +68,16 @@
 
 
 
-int RefHashTable::NumBuckets( void ) const 
+int RefHashTable::NumBuckets( void ) const
 { return 26; }
 
-int RefHashTable::Hash( const gString& ref ) const 
+int RefHashTable::Hash( const gString& ref ) const
 { return (int)( ref[0] % 26 ); }
-  
-void RefHashTable::DeleteAction( Portion* value ) 
+
+void RefHashTable::DeleteAction( Portion* value )
 { delete value; }
 
-RefHashTable::RefHashTable() 
+RefHashTable::RefHashTable()
 { Init(); }
 
 RefHashTable::~RefHashTable()
@@ -40,7 +87,7 @@ RefHashTable::~RefHashTable()
 
 
 
-int FunctionHashTable::NumBuckets() const 
+int FunctionHashTable::NumBuckets() const
 { return 26; }
 
 int FunctionHashTable::Hash( const gString& funcname ) const 
@@ -73,62 +120,5 @@ template <class T> RefCountHashTable<T>::RefCountHashTable()
 
 template <class T> RefCountHashTable<T>::~RefCountHashTable()
 { Flush(); }
-
-
-
-
-
-
-
-
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
-
-
-
-
-
-#include "glist.imp"
-
-TEMPLATE class gNode< int >;
-TEMPLATE class gList< int >;
-
-TEMPLATE class gList< Portion* >;
-TEMPLATE class gNode< Portion* >;
-
-TEMPLATE class gList< FuncDescObj* >;
-TEMPLATE class gNode< FuncDescObj* >;
-
-TEMPLATE class gList< gList< Instruction* >* >;
-TEMPLATE class gNode< gList< Instruction* >* >;
-
-/* 
-   already instantiated in readefg.y
-   TEMPLATE class gList< gString >;
-   TEMPLATE class gNode< gString >;
-   */
-
-
-
-
-
-#include "hash.imp"
-
-
-TEMPLATE class HashTable< gList< Instruction* >*, int >;
-TEMPLATE class RefCountHashTable< gList< Instruction* >* >;
-
-
-
-TEMPLATE class HashTable< gString, Portion* >;
-TEMPLATE class HashTable< gString, FuncDescObj* >;
-
-
 
 

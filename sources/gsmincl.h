@@ -33,8 +33,11 @@ typedef enum { rcFAIL, rcSUCCESS, rcQUIT } GSM_ReturnCode;
 
 
 
-
+#ifndef __BORLANDC__
 typedef unsigned int PortionType;
+#else
+typedef unsigned long PortionType;
+#endif
 
 #define  porERROR      ( 0x0000 )
 #define  porBOOL       ( 0x0001 )

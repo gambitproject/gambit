@@ -8,17 +8,9 @@
 
 #include <assert.h>
 #include <string.h>
-
-
-#include "portion.h"
-#include "gsmhash.h"
-
-#include "gambitio.h"
-
-#include "nfg.h"
-#include "efg.h"
-
-
+//----------------------------------------------------------------------
+//                         class instantiations
+//----------------------------------------------------------------------
 
 
 
@@ -30,6 +22,25 @@
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
+#include "garray.imp"
+
+TEMPLATE class gArray<Portion *>;
+
+#include "gblock.imp"
+
+TEMPLATE class gBlock<Portion*>;
+
+#ifdef __BORLANDC__
+#pragma option -Jgx
+#endif
+
+#include "portion.h"
+#include "gsmhash.h"
+
+#include "gambitio.h"
+
+#include "nfg.h"
+#include "efg.h"
 
 
 
@@ -2513,14 +2524,14 @@ PortionType TextToPortionType( const gString& text )
 
   for( i = 0; i < NumPortionTypes; i++ )
   {
-    if( strstr( text, _PortionTypeText[ i ].Text ) )
+    if( strstr( (const char *)text, _PortionTypeText[ i ].Text ) )
     {
-      if( !strstr( text, (gString) "(" + _PortionTypeText[ i ].Text + ")" ) )
+      if( !strstr( (const char *)text, (gString) "(" + _PortionTypeText[ i ].Text + ")" ) )
       {
 	if( !( result & _PortionTypeText[ i ].Type ) )
 	  result = result | _PortionTypeText[ i ].Type;
       }
-      else if( strstr( text, (gString) "LIST(" + 
+      else if( strstr((const char *) text, (gString) "LIST(" + 
 		      _PortionTypeText[ i ].Text + ")" ) )
 	result = result | _PortionTypeText[ i ].Type;	
     }
@@ -2549,19 +2560,7 @@ gOutput& operator << ( gOutput& s, Portion* p )
 
 
 
-//----------------------------------------------------------------------
-//                         class instantiations
-//----------------------------------------------------------------------
 
-
-
-#include "garray.imp"
-
-TEMPLATE class gArray<Portion *>;
-
-#include "gblock.imp"
-
-TEMPLATE class gBlock<Portion*>;
 
 
 
