@@ -254,6 +254,21 @@ Note, this is also leading to problems in the GUI (not surprisingly):
 Load poker.efg, and do Supports->ElimDom, and check Weak and
 PureStrat, then OK.  Gives internal error in Gambit
 
+//------------------------------
+
+Bug C32:  Seg fault when file does not exist
+
+This is on mill, using version compiled with O2.  Here, poker.efg is
+not in the working directory.
+
+  57 mill:/home/mill/rdm/gambit newgcl
+  Include["/home/mill/rdm/gambit/bin/gclini.gcl"]
+  Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
+  GCL1:= << e:=LoadEfg["poker.efg"]
+  In function LoadEfg[], in file "console" at line 1:
+  A segmentation fault has occurred
+
+
 //---------------  These are not bugs but suggested improvements ------------
 
 S1: A suggestion to add command line arguments.  Perhaps we should
