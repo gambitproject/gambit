@@ -108,8 +108,7 @@ template <class T> int SeqFormModule<T>::Lemke(void)
   
   gWatch watch;
 
-  EFSupport sup(EF);
-  BehavProfile<T> profile(sup);
+  BehavProfile<T> profile(support);
   gVector<T> sol(tab->MinRow(),tab->MaxRow());
     
   solutions.Flush();
@@ -187,8 +186,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
 
   np+=B.NumPivots();
   gVector<T> sol(tab->MinRow(),tab->MaxRow());
-  EFSupport sup(EF);
-  BehavProfile<T> profile(sup);
+  BehavProfile<T> profile(support);
 
   newsol =0;
   for (i = B.MinRow(); 
