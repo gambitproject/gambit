@@ -135,7 +135,7 @@ void gCmdLineInput::GetCmdExec( void )
 
 
   // set up the editable prompt
-  char buf[16];
+  char buf[32];
   if( m_Prompt )
   {
     ++m_NumInvoke;
