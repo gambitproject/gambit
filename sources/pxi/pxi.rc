@@ -8,7 +8,7 @@
  */
 
 
-pxi_icn   ICON ..\winsrc\res\pxi.ico 
+pxi_icn   ICON ..\bitmaps\pxi.ico 
 
 rcinclude wx\msw\wx.rc
 rcinclude wx\html\msw\wxhtml.rc

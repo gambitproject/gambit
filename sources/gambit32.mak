@@ -56,8 +56,8 @@ $(GUILIBS)
 gambit.res
 !
 
-gambit.res :      ..\winsrc\res\gambit.rc 
-    brc32 -r -fo.\gambit.res /i$(BCCDIR)\include /i$(WXDIR)\include ..\winsrc\res\gambit
+gambit.res :      gambit.rc 
+    brc32 -r -fo.\gambit.res /i$(BCCDIR)\include /i$(WXDIR)\include gambit
 
 wxgcl:	$(WXGCL_OBJECTS)  wxgcl.res
   ilink32 $(LINKFLAGS) @&&!
@@ -69,8 +69,8 @@ $(GUILIBS)
 wxgcl.res
 !
 
-wxgcl.res :      ..\winsrc\res\wxgcl.rc 
-    brc32 -r -fo.\wxgcl.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include ..\winsrc\res\wxgcl
+wxgcl.res :      wxgcl.rc 
+    brc32 -r -fo.\wxgcl.res /i$(BCCDIR)\include /i$(WXDIR)\include wxgcl
 
 pxi:  $(ALLPXI_OBJECTS) pxi.res
   ilink32 $(LINKFLAGS) @&&!
@@ -83,7 +83,7 @@ pxi.res
 !
 
 pxi.res :      pxi\pxi.rc
-   brc32 -r -fo.\pxi.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include pxi\pxi
+   brc32 -r -fo.\pxi.res /i$(BCCDIR)\include /i$(WXDIR)\include pxi\pxi
 
 
 #
