@@ -389,6 +389,31 @@ returned.
 </sect2>
 
 
+<sect2 id="apiref.node.getsequence">
+<title>GetSequence</title>
+<indexterm><primary>GetSequence</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtGameSequence gbtGameNode::GetSequence(const gbtGamePlayer &amp;player) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetSequence</function> 
+returns the sequence belonging to <parameter>player</parameter>
+that leads up to the node.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) is thrown if
+<parameter>player</parameter> does not belong to the same game as
+the node.
+</para>
+
+</sect2>
+
 <sect2 id="apiref.node.insertmove">
 <title>InsertMove</title>
 <indexterm><primary>InsertMove</primary></indexterm>

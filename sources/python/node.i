@@ -110,6 +110,8 @@ class gbtGameNode {
   gbtGameNode GetParent(void) const   { return (*self)->GetParent(); }
   gbtGameAction GetPriorAction(void) const
     { return (*self)->GetPriorAction(); }
+  gbtGameSequence GetSequence(const gbtGamePlayer &p) const
+    { return (*self)->GetSequence(p); }
 
   gbtGameNode GetPriorSibling(void) const
     { return (*self)->GetPriorSibling(); }

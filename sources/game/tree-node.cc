@@ -131,6 +131,38 @@ gbtGameAction gbtTreeNodeRep::GetPriorAction(void) const
   return m_parent->m_infoset->m_actions[m_parent->m_children.Find(const_cast<gbtTreeNodeRep *>(this))];
 }
 
+gbtGameSequence 
+gbtTreeNodeRep::GetSequence(const gbtGamePlayer &p_player) const
+{
+  if (p_player.IsNull())  throw gbtGameNullException();
+  gbtTreePlayerRep *player = 
+    dynamic_cast<gbtTreePlayerRep *>(p_player.Get());
+  if (!player || player->m_efg != m_efg) {
+    throw gbtGameMismatchException();
+  }
+
+  if (!m_efg->m_hasComputed)  m_efg->BuildComputedElements();
+  const gbtTreeNodeRep *node = this;
+  while (node) {
+    const gbtTreeNodeRep *parent = node->m_parent;
+    if (m_parent->m_infoset->m_player == player) {
+      gbtTreeActionRep *action =
+	parent->m_infoset->m_actions[parent->m_children.Find(const_cast<gbtTreeNodeRep *>(node))];
+      for (int seq = 1; seq <= player->m_sequences.Length(); seq++) {
+	if (player->m_sequences[seq]->m_action == action) {
+	  return player->m_sequences[seq];
+	}
+      }
+    }
+    else {
+      node = parent;
+    }
+  }
+
+  // The null sequence is always the first sequence in the list
+  return player->m_sequences[1];
+}
+
 gbtGameNode gbtTreeNodeRep::GetPriorSibling(void) const
 {
   if (!m_parent)  return 0;

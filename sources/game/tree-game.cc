@@ -594,6 +594,13 @@ void gbtTreeGameRep::ClearComputedElements(void) const
     }
     m_players[pl]->m_sequences.Flush();
   }
+
+  // Clear sequences of chance player as well
+  for (int seq = 1; seq <= m_chance->m_sequences.Length(); seq++) {
+    m_chance->m_sequences[seq]->Delete();
+  }
+  m_chance->m_sequences.Flush();
+
   m_hasComputed = false;
 }
 
@@ -705,7 +712,7 @@ MakeSequences(gbtTreePlayerRep *p, gbtTreeNodeRep *n,
 void gbtTreeGameRep::BuildComputedElements(void) const
 {
   if (m_hasComputed)  return;
-  
+    
   for (int pl = 1; pl <= NumPlayers(); pl++) {
     MakeReducedStrats(m_players[pl], m_root, NULL);
     
@@ -716,6 +723,14 @@ void gbtTreeGameRep::BuildComputedElements(void) const
     m_players[pl]->m_sequences.Append(nullSeq);
     MakeSequences(m_players[pl], m_root, visited, nullSeq);
   }
+
+  // Build sequences for chance player as well
+  gbtArray<int> visited(m_chance->m_infosets.Length());
+  for (int i = 1; i <= visited.Length(); visited[i++] = 0);
+  gbtTreeSequenceRep *nullSeq = new gbtTreeSequenceRep(m_chance,
+						       0, 0, 1);
+  m_chance->m_sequences.Append(nullSeq);
+  MakeSequences(m_chance, m_root, visited, nullSeq);
 
   m_hasComputed = true;
 }

@@ -71,11 +71,14 @@ public:
   virtual gbtGameNode GetParent(void) const = 0;
   /// Returns the action directly before the node
   virtual gbtGameAction GetPriorAction(void) const = 0; 
+  /// Returns the sequence for the player that leads to the node
+  virtual gbtGameSequence GetSequence(const gbtGamePlayer &) const = 0;
 
   /// Returns the prior sibling of the node
   virtual gbtGameNode GetPriorSibling(void) const = 0;
   /// Returns the subsequent sibling of the node
   virtual gbtGameNode GetNextSibling(void) const = 0;
+
   //@}
 
   //!

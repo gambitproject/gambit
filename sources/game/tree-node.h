@@ -73,6 +73,7 @@ public:
   bool IsPredecessorOf(const gbtGameNode &) const;
   gbtGameNode GetParent(void) const;
   gbtGameAction GetPriorAction(void) const;
+  gbtGameSequence GetSequence(const gbtGamePlayer &) const;
   gbtGameNode GetPriorSibling(void) const;
   gbtGameNode GetNextSibling(void) const;
   //@}
