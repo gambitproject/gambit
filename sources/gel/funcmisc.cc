@@ -162,22 +162,72 @@ template class gelfuncSemi<NFOutcome *>;
 
 #include "gwatch.h"
 
-gWatch _gelStopwatch;
+gWatch _gelStopwatch(false);
+
+//---------------
+// ElapsedTime
+//---------------
+
+DECLARE_NOPARAM(gelfuncElapsedTime, gNumber)
+
+gNestedList<gNumber> gelfuncElapsedTime::Evaluate(gelVariableTable *) const
+{
+  gNestedList<gNumber> ret;
+  ret.Data().Append(_gelStopwatch.Elapsed());
+  return ret;
+}
+
+//------------------
+// IsWatchRunning
+//------------------
+
+DECLARE_NOPARAM(gelfuncIsWatchRunning, gTriState)
+
+gNestedList<gTriState> gelfuncIsWatchRunning::Evaluate(gelVariableTable *) const
+{
+  gNestedList<gTriState> ret;
+  ret.Data().Append((_gelStopwatch.IsRunning()) ? triTRUE : triFALSE);
+  return ret;
+}
 
 //---------------
 // StartWatch
-//----------------
+//---------------
 
-DECLARE_NOPARAM(gelfuncStartWatch, gNumber);
+DECLARE_NOPARAM(gelfuncStartWatch, gNumber)
 
 gNestedList<gNumber> gelfuncStartWatch::Evaluate(gelVariableTable *) const
 {
   _gelStopwatch.Start();
   gNestedList<gNumber> ret;
-  ret.Data().Append( 0 );
+  ret.Data().Append(0);
   return ret;
 }
 
+//--------------
+// StopWatch
+//--------------
+
+DECLARE_NOPARAM(gelfuncStopWatch, gNumber)
+
+gNestedList<gNumber> gelfuncStopWatch::Evaluate(gelVariableTable *) const
+{
+  _gelStopwatch.Stop();
+  gNestedList<gNumber> ret;
+  ret.Data().Append(_gelStopwatch.Elapsed());
+  return ret;
+}
+
+
+gelExpr *GEL_ElapsedTime(const gArray<gelExpr *> &)
+{
+  return new gelfuncElapsedTime();
+}
+
+gelExpr *GEL_IsWatchRunning(const gArray<gelExpr *> &)
+{
+  return new gelfuncIsWatchRunning();
+}
 
 gelExpr *GEL_PrintBoolean(const gArray<gelExpr *> &params)
 {
@@ -322,10 +372,14 @@ gelExpr *GEL_SemiNFOutcome(const gArray<gelExpr *> &params)
 				((gelExpression<NFOutcome *> *) params[2]));
 }
 
-
 gelExpr *GEL_StartWatch(const gArray<gelExpr *> &)
 {
   return new gelfuncStartWatch();
+}
+
+gelExpr *GEL_StopWatch(const gArray<gelExpr *> &)
+{
+  return new gelfuncStopWatch();
 }
 
 
@@ -334,13 +388,24 @@ gelExpr *GEL_StartWatch(const gArray<gelExpr *> &)
 void gelMiscInit(gelEnvironment *env)
 {
   struct  { gelAdapter *func; char *sig; }  sigarray[] = {
+    { GEL_ElapsedTime, "ElapsedTime[] =: NUMBER" },
+    { GEL_IsWatchRunning, "IsWatchRunning[] =: BOOLEAN" },
     { GEL_PrintBoolean, "Print[x->BOOLEAN] =: BOOLEAN" },
     { GEL_PrintEfg, "Print[x->EFG] =: EFG" },
     { GEL_PrintNumber, "Print[x->NUMBER] =: NUMBER" },
     { GEL_PrintText, "Print[x->TEXT] =: TEXT" },
+    { GEL_PrintNode, "Print[x->NODE] =: NODE" },
+    { GEL_PrintInfoset, "Print[x->INFOSET] =: INFOSET" },
+    { GEL_PrintAction, "Print[x->ACTION] =: ACTION" },
+    { GEL_PrintEFPlayer, "Print[x->EFPLAYER] =: EFPLAYER" },
+    { GEL_PrintEFOutcome, "Print[x->EFOUTCOME] =: EFOUTCOME" },
+    { GEL_PrintNfg, "Print[x->NFG] =: NFG" },
+    { GEL_PrintStrategy, "Print[x->STRATEGY] =: STRATEGY" },
+    { GEL_PrintNFPlayer, "Print[x->NFPLAYER] =: NFPLAYER" },
+    { GEL_PrintNFOutcome, "Print[x->NFOUTCOME] =: NFOUTCOME" },
     { GEL_SemiBoolean, "Semi[x->ANYTYPE, y->BOOLEAN] =: BOOLEAN" },
     { GEL_SemiNumber, "Semi[x->ANYTYPE, y->NUMBER] =: NUMBER" },
-    { GEL_SemiText, "Semi[x->ANYTYPE, y-TEXT] =: TEXT" },
+    { GEL_SemiText, "Semi[x->ANYTYPE, y->TEXT] =: TEXT" },
     { GEL_SemiEfg, "Semi[x->ANYTYPE, y->EFG] =: EFG" },
     { GEL_SemiNode, "Semi[x->ANYTYPE, y->NODE] =: NODE" },
     { GEL_SemiAction, "Semi[x->ANYTYPE, y->ACTION] =: ACTION" },
@@ -352,6 +417,7 @@ void gelMiscInit(gelEnvironment *env)
     { GEL_SemiNFPlayer, "Semi[x->ANYTYPE, y->NFPLAYER] =: NFPLAYER" },
     { GEL_SemiNFOutcome, "Semi[x->ANYTYPE, y->NFOUTCOME] =: NFOUTCOME" },
     { GEL_StartWatch, "StartWatch[] =: NUMBER" },
+    { GEL_StopWatch, "StopWatch[] =: NUMBER" },
     { 0, 0 } };
 
   for (int i = 0; sigarray[i].func; i++)  
