@@ -85,11 +85,21 @@ bool IneqSolv<T>::IsASolution(const gVector<T>& v) const
 
 template<class T> 
 bool IneqSolv<T>::SystemHasNoSolutionIn(const gRectangle<T>& r,
-					       gArray<int>& precedence) const
+					      gArray<int>& precedence) const
 {
   for (int i = 1; i <= System.Length(); i++) {
 
     if ( TreesOfPartials[precedence[i]].PolyEverywhereNegativeIn(r) ) {
+
+      /*
+      //DEBUG
+      gout << "The polynomial " << System[precedence[i]] 
+	   << " has no roots in ";
+      gRectangle<T> newrect(r);
+      gout << newrect;
+      gout << ".\n";
+      */
+
       if (i != 1) { // We have found a new "most likely to never be positive"
 	int tmp = precedence[i];
 	for (int j = 1; j <= i-1; j++) 
