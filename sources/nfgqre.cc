@@ -45,9 +45,9 @@ static void WritePXIHeader(gOutput &pxifile, const Nfg &N)
 //             QRE Correspondence Computation via Homotopy
 //=========================================================================
 
-static void QreJacobian(const Nfg &p_nfg,
-			const MixedProfile<double> &p_profile,
-			const double &p_nu, gMatrix<double> &p_matrix)
+void QreJacobian(const Nfg &p_nfg,
+		 const MixedProfile<double> &p_profile,
+		 const double &p_nu, gMatrix<double> &p_matrix)
 {
   p_matrix = (double) 0;
 
@@ -142,14 +142,36 @@ QreNfg::QreNfg(void)
   : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
 { }
 
+void QreNfg::SolveStep(MixedProfile<double> &p_profile, double &p_nu,
+		       double p_initialSign, double p_stepsize) const
+{
+  // This is a (primitive) first-order Runge-Kutta style method
+  gMatrix<double> H(p_profile.Length(), p_profile.Length() + 1);
+  gPVector<double> delta1(p_profile), delta2(p_profile);
+  double nuinc1, nuinc2;
+      
+  QreJacobian(p_profile.Game(), p_profile, p_nu, H);
+  QreComputeStep(p_profile.Game(), p_profile, H,
+		 delta1, nuinc1, p_initialSign, p_stepsize);
+    
+  MixedProfile<double> profile2(p_profile);
+  profile2 += delta1 * 0.5; 
+  QreJacobian(p_profile.Game(), profile2, p_nu + nuinc1 * 0.5, H);
+  QreComputeStep(p_profile.Game(), p_profile, H,
+		 delta2, nuinc2, p_initialSign, p_stepsize);
+
+  p_profile += delta1 * 0.5;
+  p_profile += delta2 * 0.5; 
+  p_nu += 0.5 * (nuinc1 + nuinc2);
+}
+
 void QreNfg::Solve(const Nfg &p_nfg, gOutput &p_pxiFile,
 		   gStatus &p_status,
 		   Correspondence<double, MixedSolution> &p_corresp)
 {
-  gMatrix<double> H(p_nfg.ProfileLength(), p_nfg.ProfileLength() + 1);
   MixedProfile<double> profile(p_nfg);
   double nu = 0.0;
-  double stepsize = 0.00001;
+  double stepsize = 0.0001;
 
   WritePXIHeader(p_pxiFile, p_nfg);
 
@@ -159,25 +181,7 @@ void QreNfg::Solve(const Nfg &p_nfg, gOutput &p_pxiFile,
 
   try {
     while (nu / (1.0-nu) <= m_maxLam) {
-      // Use a first-order Runge-Kutta style method
-      gPVector<double> delta1(profile), delta2(profile);
-      double nuinc1, nuinc2;
-      
-      QreJacobian(p_nfg, profile, nu, H);
-      QreComputeStep(p_nfg, profile, H,
-		     delta1, nuinc1, initialsign, stepsize);
-    
-      MixedProfile<double> profile2(profile);
-      profile2 += delta1 * 0.5; 
-      QreJacobian(p_nfg, profile2, nu + nuinc1 * 0.5, H);
-      QreComputeStep(p_nfg, profile, H,
-		     delta2, nuinc2, initialsign, stepsize);
-
-      profile += delta1 * 0.5;
-      profile += delta2 * 0.5; 
-      nu += 0.5 * (nuinc1 + nuinc2);
-
-      printf("%f %f %f %f\n", nu / (1.0-nu), profile.Payoff(1), profile.Payoff(2), profile.Payoff(1) + profile.Payoff(2));
+      SolveStep(profile, nu, initialsign, stepsize);
 
       if (nu < 0.0 || nu > 1.0) {
 	// negative nu is probably numerical instability;
@@ -189,6 +193,93 @@ void QreNfg::Solve(const Nfg &p_nfg, gOutput &p_pxiFile,
       // going to be the case, but QreValue is suspect for large lambda 
       p_pxiFile << "\n" << (nu / (1.0-nu)) << " " << 0.0 << " ";
       for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
+	for (int st = 1; st <= profile.Support().NumStrats(pl); st++) {
+	  p_pxiFile << profile(pl, st) << " ";
+	}
+      }
+
+      if (m_fullGraph) { 
+	p_corresp.Append(1, nu / (1.0-nu),
+			 MixedSolution(profile, algorithmNfg_QRE));
+      }
+
+      p_status.Get();
+      p_status.SetProgress(nu * (1.0 + m_maxLam) / m_maxLam,
+			   gText("Current lambda: ") + ToText(nu / (1.0-nu)));
+    }
+  }
+  catch (...) {
+    p_corresp.Append(1, nu / (1.0-nu), MixedSolution(profile, algorithmNfg_QRE));
+    throw;
+  }
+  
+  if (!m_fullGraph) { 
+    p_corresp.Append(1, nu / (1.0-nu), MixedSolution(profile, algorithmNfg_QRE));
+  }
+}
+
+void QreNfg::Solve(const MixedProfile<double> &p_startProfile,
+		   double p_startLambda,
+		   gOutput &p_pxiFile, gStatus &p_status,
+		   Correspondence<double, MixedSolution> &p_corresp)
+{
+  MixedProfile<double> profile(p_startProfile);
+  double nu = p_startLambda / (p_startLambda + 1.0);
+  double stepsize = 0.00001;
+
+  WritePXIHeader(p_pxiFile, p_startProfile.Game());
+
+  // Pick the direction to follow the path so that nu starts out
+  // increasing
+  double initialsign = (profile.Length() % 2 == 0) ? 1.0 : -1.0;
+
+  try {
+    while (nu / (1.0-nu) <= m_maxLam) {
+      SolveStep(profile, nu, initialsign, stepsize);
+
+      if (nu < 0.0 || nu > 1.0) {
+	// negative nu is probably numerical instability;
+	// nu > 1.0 runs past valid region...
+	return;
+      }
+
+      // Write out the QreValue as 0 in the PXI file; not generally
+      // going to be the case, but QreValue is suspect for large lambda 
+      p_pxiFile << "\n" << (nu / (1.0-nu)) << " " << 0.0 << " ";
+      for (int pl = 1; pl <= profile.Game().NumPlayers(); pl++) {
+	for (int st = 1; st <= profile.Support().NumStrats(pl); st++) {
+	  p_pxiFile << profile(pl, st) << " ";
+	}
+      }
+ 
+      if (m_fullGraph) { 
+	p_corresp.Append(1, nu / (1.0-nu),
+			 MixedSolution(profile, algorithmNfg_QRE));
+      }
+
+      p_status.Get();
+      p_status.SetProgress(nu * (1.0 + m_maxLam) / m_maxLam,
+			   gText("Current lambda: ") + ToText(nu / (1.0-nu)));
+    }
+
+    // Now, reverse direction and trace out the other way
+    initialsign *= -1.0;
+    nu = p_startLambda / (p_startLambda + 1.0);
+    profile = p_startProfile;
+
+    while (nu / (1.0-nu) <= m_maxLam) {
+      SolveStep(profile, nu, initialsign, stepsize);
+
+      if (nu < 0.0 || nu > 1.0) {
+	// negative nu is probably numerical instability;
+	// nu > 1.0 runs past valid region...
+	return;
+      }
+
+      // Write out the QreValue as 0 in the PXI file; not generally
+      // going to be the case, but QreValue is suspect for large lambda 
+      p_pxiFile << "\n" << (nu / (1.0-nu)) << " " << 0.0 << " ";
+      for (int pl = 1; pl <= profile.Game().NumPlayers(); pl++) {
 	for (int st = 1; st <= profile.Support().NumStrats(pl); st++) {
 	  p_pxiFile << profile(pl, st) << " ";
 	}

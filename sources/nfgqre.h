@@ -16,10 +16,22 @@
 #include "nfg.h"
 #include "mixedsol.h"
 
+//
+// A useful function for QRE stability analysis
+//
+void QreJacobian(const Nfg &p_nfg,
+		 const MixedProfile<double> &p_profile,
+		 const double &p_nu, gMatrix<double> &p_matrix);
+
 class QreNfg {
 private:
   double m_maxLam, m_stepSize;
   bool m_fullGraph;
+
+  // Execute one step of the homotopy
+  void SolveStep(MixedProfile<double> &p_profile, double &p_nu,
+		 double, double) const;
+		 
 
 public:
   // LIFECYCLE
@@ -38,6 +50,11 @@ public:
   // RUN THE ALGORITHM
   void Solve(const Nfg &p_nfg, gOutput &p_pxifile,
 	     gStatus &p_status, 
+	     Correspondence<double, MixedSolution> &p_solutions);
+
+  void Solve(const MixedProfile<double> &p_startProfile,
+	     double p_startLambda,
+	     gOutput &p_pxifile, gStatus &p_status,
 	     Correspondence<double, MixedSolution> &p_solutions);
 };  
 

@@ -390,7 +390,6 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
 
   if (param[0]->Spec().Type == porMIXED)  {
     MixedSolution &start = *((MixedPortion *) param[0])->Value();
-    Nfg &N = start.Game();
 
     QreNfg qre;
     qre.SetMaxLambda(((NumberPortion *) param[3])->Value());
@@ -400,7 +399,9 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
     gsm.StartAlgorithmMonitor("QreSolve Progress");
     try {
       gWatch watch;
-      qre.Solve(N, (pxiFile) ? *pxiFile : gnull,
+      qre.Solve(MixedProfile<double>(start), 
+		((NumberPortion *) param[2])->Value(),
+		(pxiFile) ? *pxiFile : gnull,
 		gsm.GetStatusMonitor(), qreCorresp);
 
       ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
