@@ -1115,8 +1115,10 @@ static bool IsInteger(wxText &p_item)
   return true;
 }
 
-wxIntegerItem::wxIntegerItem(wxPanel *p_parent, char *p_label)
-  : wxText(p_parent, (wxFunction) EventCallback, p_label), m_value(0)
+wxIntegerItem::wxIntegerItem(wxPanel *p_parent, char *p_label, int p_default,
+			     int p_x, int p_y, int p_width, int p_height)
+  : wxText(p_parent, (wxFunction) EventCallback, p_label, ToText(p_default),
+	   p_x, p_y, p_width, p_height), m_value(0)
 { }
 
 void wxIntegerItem::EventCallback(wxIntegerItem &p_item,

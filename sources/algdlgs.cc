@@ -170,10 +170,13 @@ dialogEnumPure::~dialogEnumPure()
 
 void dialogEnumPure::AlgorithmFields(void)
 {
-  (void) new wxMessage(this, "Algorithm parameters:");
-  m_stopAfter = new wxIntegerItem(this, "Stop after");
+  int x, y;
+  GetCursor(&x, &y);
+
+  new wxGroupBox(this, "Algorithm parameters", -1, -1, 150, 70);
+  m_stopAfter = new wxIntegerItem(this, "Stop after", 0, x + 10, y + 50, 100);
   NewLine();
 }
 
 int dialogEnumPure::StopAfter(void) const
-{ return (int) ToDouble(m_stopAfter->GetValue()); }
+{ return m_stopAfter->GetInteger(); }

@@ -1,7 +1,5 @@
 //
-// FILE: wxmisc.h -- Defines some generic stuff that should be in wxWin
-// Right now its a dialog box with a built in form, a font selector, and
-// a wxListFindString function... More to come
+// FILE: wxmisc.h -- Some wxWindows extensions
 //
 // $Id$
 //
@@ -244,7 +242,8 @@ private:
   static void EventCallback(wxIntegerItem &p_object, wxCommandEvent &p_event);
 
 public:
-  wxIntegerItem(wxPanel *p_parent, char *p_label);
+  wxIntegerItem(wxPanel *p_parent, char *p_label, int p_default = 0,
+		int p_x = -1, int p_y = -1, int p_w = -1, int p_h = -1);
   virtual ~wxIntegerItem() { }
 
   void SetInteger(int p_value);
