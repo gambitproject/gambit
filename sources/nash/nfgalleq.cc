@@ -31,7 +31,7 @@ gList<MixedSolution> nfgPolEnum::Solve(const NFSupport &p_support,
   gList<MixedSolution> solutions;
 
   for (int i = 1; (i <= supports.Length() &&
-		   (m_stopAfter == 0 || m_stopAfter <= solutions.Length())); 
+		   (m_stopAfter == 0 || m_stopAfter > solutions.Length())); 
        i++) {
     p_status.Get();
     p_status.SetProgress((double) (i-1) / (double) supports.Length());
