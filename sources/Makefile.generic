@@ -154,9 +154,9 @@ ifndef SYSNAME
 	@echo Must specify a SYSNAME e.g. linux, solaris, hp
 	@exit 1
 endif
-	make -f $(MYNAME) gcl_$(SYSNAME)
+	make -f $(MYNAME) gcl_$(SYSNAME) SYSNAME=$(SYSNAME)
 
-gui_$(SYSNAME):	$(OBJDIR) $(ALLGUI_OBJECTS)
+gui_$(GUI)_$(SYSNAME):	$(OBJDIR) $(ALLGUI_OBJECTS)
 	cd $(OBJDIR); \
 	$(CC) $(ALLGUI_OBJECTS) $(LIBDIR) $(GUILIBS) \
 	    -o ../gui_$(GUI)_$(SYSNAME); cd ..
@@ -173,7 +173,7 @@ ifndef GUI
 	@echo \(xt only supported on linux\)
 	@exit 1
 endif
-	make -f $(MYNAME) gui_$(SYSNAME)
+	make -f $(MYNAME) gui_$(GUI)_$(SYSNAME) GUI=$(GUI) SYSNAME=$(SYSNAME)
 
 readefg.cc:  readefg.yy
 	bison++ -d -h readefg.h -o readefg.cc readefg.yy
