@@ -46,7 +46,7 @@ NfgEnumPureG::NfgEnumPureG(const Nfg &p_nfg, const NFSupport &p_support,
 gList<MixedSolution> NfgEnumPureG::Solve(void) const
 {
   wxStatus status(parent->Frame(), "EnumPure Algorithm");
-  
+
   PureNashParamsSettings PNS;
   int stopAfter;
   PNS.GetParams(stopAfter);
@@ -83,7 +83,10 @@ gList<MixedSolution> NfgEnumG::Solve(void) const
   EPS.GetParams(P);
   long npivots;
   double time;
-  Enum(sup, P, solns, npivots, time);
+  try {
+	  Enum(sup, P, solns, npivots, time);
+  }
+  catch (gSignalBreak &) { }
   return solns;
 }
 
@@ -119,7 +122,10 @@ gList<MixedSolution> NfgLemkeG::Solve(void) const
   LPS.GetParams(P);
   int npivots;
   double time;
-  Lemke(sup, P, solns, npivots, time);
+  try {
+	  Lemke(sup, P, solns, npivots, time);
+  }
+  catch (gSignalBreak &) { }
   return solns;
 }
 
@@ -155,7 +161,10 @@ gList<MixedSolution> NfgZSumG::Solve(void) const
   LPPS.GetParams(P);
   int npivots;
   double time;
-  ZSum(sup, P, solns, npivots, time);
+  try {
+	  ZSum(sup, P, solns, npivots, time);
+  }
+  catch (gSignalBreak &) { }
   return solns;
 }
 
@@ -185,7 +194,10 @@ gList<MixedSolution> NfgLiapG::Solve(void) const
   LPS.GetParams(P);
   MixedProfile<gNumber> start(parent->CreateStartProfile(LPS.StartOption()));
   long nevals, nits;
-  Liap(nf, P, start, solns, nevals, nits);
+  try {
+  	Liap(nf, P, start, solns, nevals, nits);
+  }
+  catch (gSignalBreak &) { }
   return solns;
 }
 
@@ -215,7 +227,10 @@ gList<MixedSolution> NfgSimpdivG::Solve(void) const
   SPS.GetParams(P);
   int nevals, niters;
   double time;
-  Simpdiv(sup, P, solns, nevals, niters, time);
+  try {
+	  Simpdiv(sup, P, solns, nevals, niters, time);
+  }
+  catch (gSignalBreak &) { }
   return solns;
 }
 
@@ -245,7 +260,10 @@ gList<MixedSolution> guiPolEnumNfg::Solve(void) const
   PES.GetParams(P);
   long nevals;
   double time;
-  PolEnum(sup, P, solns, nevals, time);
+  try {
+	  PolEnum(sup, P, solns, nevals, time);
+  }
+  catch (gSignalBreak &) { }
   return solns;
 }
 
@@ -277,7 +295,11 @@ gList<MixedSolution> NfgQreG::Solve(void) const
   MixedProfile<gNumber> start(parent->CreateStartProfile(GSPD.StartOption()));
 
   long nevals, nits;
-  Qre(nf, P, start, solns, nevals, nits);
+  try {
+  		gout << "\nmin, max, del " << P.minLam << " " << P.maxLam << " " << P.delLam;
+	  Qre(nf, P, start, solns, nevals, nits);
+  }
+  catch (gSignalBreak &) { }
 
   GSPD.RunPxi();
   return solns;
@@ -307,7 +329,10 @@ gList<MixedSolution> NfgQreAllG::Solve(void) const
   wxStatus *status = new wxStatus(parent->Frame(), "QRE Grid Solve");
   GridParams P(*status);
   GSPD.GetParams(P);
-  GridSolve(sup, P, solns);
+  try {
+	  GridSolve(sup, P, solns);
+  }
+  catch (gSignalBreak &) { }
   delete status;
   GSPD.RunPxi();
   return solns;
