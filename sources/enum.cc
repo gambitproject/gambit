@@ -17,7 +17,7 @@
 //                        EnumParams: member functions
 //---------------------------------------------------------------------------
 
-EnumParams::EnumParams(gStatus status_) : plev(0), nequilib(0),outfile(0),
+EnumParams::EnumParams(gStatus &status_) : plev(0), nequilib(0),outfile(0),
 errfile(0),status(status_)
 { }
 
