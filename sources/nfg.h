@@ -86,6 +86,7 @@ public:
   // PLAYERS AND STRATEGIES
   int NumPlayers(void) const;
   const gArray<NFPlayer *> &Players(void) const;
+  inline NFPlayer *GetPlayer(const int i) const { return Players()[i]; }
 
   int NumStrats(int pl) const;
   const gArray<int> &NumStrats(void) const  { return dimensions; }
