@@ -288,189 +288,15 @@ dialogNodeDelete::dialogNodeDelete(Node *p_node, wxWindow *p_parent)
 //                   dialogActionLabel: Member functions
 //=========================================================================
 
-int dialogActionLabel::s_actionsPerDialog = 8;
-
 dialogActionLabel::dialogActionLabel(Infoset *p_infoset, wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Label Actions", TRUE), m_infoset(p_infoset),
-    m_pageNumber(0), m_backButton(0), m_nextButton(0),
-    m_actionNames(p_infoset->NumActions())
+  : guiPagedDialog(p_parent, "Label Actions", p_infoset->NumActions()),
+    m_infoset(p_infoset)
 {
-  SetAutoLayout(TRUE);
-  
-  for (int act = 1; act <= m_infoset->NumActions(); act++)
-    m_actionNames[act] = m_infoset->Actions()[act]->GetName();
-
-  int numFields = gmin(m_infoset->NumActions(), s_actionsPerDialog);
-  m_actionLabels = new wxText *[numFields];
-  for (int act = 1; act <= numFields; act++) {
-    m_actionLabels[act-1] = new wxText(this, 0, ToText(act) + "  ", "",
-				       -1, -1, -1, -1, wxFIXED_LENGTH);
-    m_actionLabels[act-1]->SetValue(m_infoset->Actions()[act]->GetName());
-    NewLine();
+  for (int act = 1; act <= m_infoset->NumActions(); act++) {
+    SetValue(act, m_infoset->Actions()[act]->GetName());
   }
 
-  if (m_infoset->NumActions() > s_actionsPerDialog) {
-    m_backButton = new wxButton(this, (wxFunction) CallbackBack,
-					"<< Back");
-    m_backButton->SetClientData((char *) this);
-    m_backButton->Enable(FALSE);
-
- 	 m_backButton->SetConstraints(new wxLayoutConstraints);
-  	 m_backButton->GetConstraints()->top.SameAs(m_actionLabels[numFields-1],
-                                               wxBottom, 10);
-    m_backButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
-    m_backButton->GetConstraints()->height.AsIs();
-    m_backButton->GetConstraints()->width.AsIs();
-
-    m_nextButton = new wxButton(this, (wxFunction) CallbackNext,
-					"Next >>");
-    m_nextButton->SetClientData((char *) this);
- 	 m_nextButton->SetConstraints(new wxLayoutConstraints);
-  	 m_nextButton->GetConstraints()->top.SameAs(m_actionLabels[numFields-1],
-                                                 wxBottom, 10);
-    m_nextButton->GetConstraints()->left.SameAs(this, wxCentreX, 5);
-    m_nextButton->GetConstraints()->height.AsIs();
-    m_nextButton->GetConstraints()->width.AsIs();
-  }
-  NewLine();
-  
-  m_okButton = new wxButton(this, (wxFunction) CallbackOK, "OK");
-  m_okButton->SetClientData((char *) this);
-
-  m_cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  m_cancelButton->SetClientData((char *) this);
-
-  m_helpButton = new wxButton(this, (wxFunction) CallbackHelp,
-					"Help");
-  m_helpButton->SetClientData((char *) this);
-
-  m_cancelButton->SetConstraints(new wxLayoutConstraints);
-  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
-  m_cancelButton->GetConstraints()->height.AsIs();
-  m_cancelButton->GetConstraints()->width.AsIs();
-
-  m_okButton->SetConstraints(new wxLayoutConstraints);
-  if (m_backButton)  {
-    m_okButton->GetConstraints()->top.SameAs(m_backButton, wxBottom, 10);
-  }
-  else  {
-    m_okButton->GetConstraints()->top.SameAs(m_actionLabels[numFields-1],
-                                                 wxBottom, 10);
-  }
-  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
-  m_okButton->GetConstraints()->height.AsIs();
-  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
-
-  m_helpButton->SetConstraints(new wxLayoutConstraints);
-  m_helpButton->GetConstraints()->centreY.SameAs(m_cancelButton, wxCentreY);
-  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
-  m_helpButton->GetConstraints()->height.AsIs();
-  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
-
-  for (int act = 1; act <= numFields; act++) {
-    m_actionLabels[act-1]->SetConstraints(new wxLayoutConstraints);
-    m_actionLabels[act-1]->GetConstraints()->top.AsIs();
-    m_actionLabels[act-1]->GetConstraints()->height.AsIs();
-    m_actionLabels[act-1]->GetConstraints()->left.SameAs(m_okButton, wxLeft);
-    m_actionLabels[act-1]->GetConstraints()->right.SameAs(m_helpButton, wxRight);
-  }
-
-  Layout();
-  int width, height;
-  m_actionLabels[0]->GetSize(&width, &height);
-  SetSize(-1, -1, width + 20, -1);
-  Fit();
-  Show(TRUE);
-}
-
-void dialogActionLabel::OnOK(void)
-{
-  m_completed = wxOK;
-  int entry = 0;
-  for (int act = m_pageNumber * s_actionsPerDialog;
-       act < gmin((m_pageNumber + 1) * s_actionsPerDialog,
-		  m_infoset->NumActions()); act++, entry++)
-    m_actionNames[act + 1] = m_actionLabels[entry]->GetValue();
-  Show(FALSE);
-}
-
-void dialogActionLabel::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool dialogActionLabel::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
-
-void dialogActionLabel::OnHelp(void)
-{
-  wxHelpContents("Action Menu");
-}
-
-void dialogActionLabel::OnBack(void)
-{
-  int entry = 0;
-  for (int act = m_pageNumber * s_actionsPerDialog;
-       act < gmin((m_pageNumber + 1) * s_actionsPerDialog,
-		  m_infoset->NumActions()); act++, entry++)
-    m_actionNames[act + 1] = m_actionLabels[entry]->GetValue();
-
-  m_pageNumber--;
-  entry = 0;
-  for (int act = m_pageNumber * s_actionsPerDialog;
-       act < (m_pageNumber + 1) * s_actionsPerDialog; act++, entry++) {
-    m_actionLabels[entry]->Show(FALSE);
-    m_actionLabels[entry]->SetValue(m_actionNames[act + 1]);
-    m_actionLabels[entry]->SetLabel(ToText(act + 1));
-  }
-  m_backButton->Show(FALSE);
-  m_nextButton->Show(FALSE);
-  m_okButton->Show(FALSE);
-  m_cancelButton->Show(FALSE);
-  
-  // This gyration ensures the tabbing order remains the same
-  m_cancelButton->Show(TRUE);
-  m_okButton->Show(TRUE);
-  m_nextButton->Show(TRUE);
-  m_backButton->Show(TRUE);
-  for (entry = s_actionsPerDialog - 1; entry >= 0; entry--)
-    m_actionLabels[entry]->Show(TRUE);
-  
-  m_actionLabels[0]->SetFocus();
-  m_backButton->Enable(m_pageNumber > 0);
-  m_nextButton->Enable(TRUE);
-}
-
-void dialogActionLabel::OnNext(void)
-{
-  int entry = 0;
-  for (int act = m_pageNumber * s_actionsPerDialog;
-       act < (m_pageNumber + 1) * s_actionsPerDialog; act++, entry++)
-    m_actionNames[act + 1] = m_actionLabels[entry]->GetValue();
-
-  m_pageNumber++;
-  entry = 0;
-  for (int act = m_pageNumber * s_actionsPerDialog;
-       act < (m_pageNumber + 1) * s_actionsPerDialog; act++, entry++) {
-    if (act < m_infoset->NumActions()) {
-      m_actionLabels[entry]->SetValue(m_actionNames[act + 1]);
-      m_actionLabels[entry]->SetLabel(ToText(act + 1));
-    }
-    else
-      m_actionLabels[entry]->Show(FALSE);
-  }
-
-  m_actionLabels[0]->SetFocus();
-  m_backButton->Enable(TRUE);
-  m_nextButton->Enable((m_pageNumber + 1) * s_actionsPerDialog <=
-		       m_infoset->NumActions());
+  Go();
 }
 
 //=========================================================================
@@ -568,281 +394,59 @@ void dialogActionSelect::OnHelp(void)
 //                   dialogActionProbs: Member functions
 //=========================================================================
 
-int dialogActionProbs::s_actionsPerDialog = 8;
-
 dialogActionProbs::dialogActionProbs(Infoset *p_infoset, wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Action Probabilities", TRUE), m_infoset(p_infoset),
-    m_pageNumber(0), m_actionProbs(p_infoset->NumActions())
+  : guiPagedDialog(p_parent, "Action Probabilities", p_infoset->NumActions()),
+    m_infoset(p_infoset)
 {
-  for (int act = 1; act <= m_infoset->NumActions(); act++)
-    m_actionProbs[act] = 
-      m_infoset->Game()->GetChanceProb(m_infoset->Actions()[act]);
-
-  m_probItems = new wxNumberItem *[gmin(m_infoset->NumActions(),
-					s_actionsPerDialog)];
-  for (int act = 1; act <= gmin(m_infoset->NumActions(), s_actionsPerDialog);
-       act++) {
-    m_probItems[act-1] = new wxNumberItem(this, ToText(act) + "  ", 
-					  ToText(m_actionProbs[act]));
-    NewLine();
+  for (int act = 1; act <= m_infoset->NumActions(); act++) {
+    SetValue(act,
+	     ToText(m_infoset->Game()->GetChanceProb(m_infoset->Actions()[act])));
   }
 
-  if (m_infoset->NumActions() > s_actionsPerDialog) {
-    m_backButton = new wxButton(this, (wxFunction) CallbackBack,
-					"<< Back");
-    m_backButton->SetClientData((char *) this);
-    m_backButton->Enable(FALSE);
-    m_nextButton = new wxButton(this, (wxFunction) CallbackNext,
-					"Next >>");
-    m_nextButton->SetClientData((char *) this);
-  }
-
-  m_okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  m_okButton->SetClientData((char *) this);
-  m_cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  m_cancelButton->SetClientData((char *) this);
-
-  Fit();
-  Show(TRUE);
-}
-
-void dialogActionProbs::OnOK(void)
-{
-  m_completed = wxOK;
-  int entry = 0;
-  for (int act = m_pageNumber * s_actionsPerDialog;
-       act < gmin((m_pageNumber + 1) * s_actionsPerDialog,
-		  m_infoset->NumActions()); act++, entry++)
-    m_actionProbs[act + 1] = m_probItems[entry]->GetNumber();
-  Show(FALSE);
-}
-
-void dialogActionProbs::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool dialogActionProbs::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
-
-void dialogActionProbs::OnBack(void)
-{
-  int entry = 0;
-  for (int act = m_pageNumber * s_actionsPerDialog;
-       act < gmin((m_pageNumber + 1) * s_actionsPerDialog,
-		  m_infoset->NumActions()); act++, entry++)
-    m_actionProbs[act + 1] = m_probItems[entry]->GetNumber();
-
-  m_pageNumber--;
-  entry = 0;
-  for (int act = m_pageNumber * s_actionsPerDialog;
-       act < (m_pageNumber + 1) * s_actionsPerDialog; act++, entry++) {
-    m_probItems[entry]->Show(FALSE);
-    m_probItems[entry]->SetNumber(m_actionProbs[act + 1]);
-    m_probItems[entry]->SetValue(ToText(m_actionProbs[act + 1]));
-    m_probItems[entry]->SetLabel(ToText(act + 1));
-  }
-  m_backButton->Show(FALSE);
-  m_nextButton->Show(FALSE);
-  m_okButton->Show(FALSE);
-  m_cancelButton->Show(FALSE);
-  
-  // This gyration ensures the tabbing order remains the same
-  m_cancelButton->Show(TRUE);
-  m_okButton->Show(TRUE);
-  m_nextButton->Show(TRUE);
-  m_backButton->Show(TRUE);
-  for (entry = s_actionsPerDialog - 1; entry >= 0; entry--)
-    m_probItems[entry]->Show(TRUE);
-  
-  m_probItems[0]->SetFocus();
-  m_backButton->Enable(m_pageNumber > 0);
-  m_nextButton->Enable(TRUE);
-}
-
-void dialogActionProbs::OnNext(void)
-{
-  int entry = 0;
-  for (int act = m_pageNumber * s_actionsPerDialog;
-       act < (m_pageNumber + 1) * s_actionsPerDialog; act++, entry++)
-    m_actionProbs[act + 1] = m_probItems[entry]->GetNumber();
-
-  m_pageNumber++;
-  entry = 0;
-  for (int act = m_pageNumber * s_actionsPerDialog;
-       act < (m_pageNumber + 1) * s_actionsPerDialog; act++, entry++) {
-    if (act < m_infoset->NumActions()) {
-      m_probItems[entry]->SetNumber(m_actionProbs[act + 1]);
-      m_probItems[entry]->SetValue(ToText(m_actionProbs[act + 1]));
-      m_probItems[entry]->SetLabel(ToText(act + 1));
-    }
-    else
-      m_probItems[entry]->Show(FALSE);
-  }
-
-  m_probItems[0]->SetFocus();
-  m_backButton->Enable(TRUE);
-  m_nextButton->Enable((m_pageNumber + 1) * s_actionsPerDialog <=
-		       m_infoset->NumActions());
+  Go();
 }
 
 //=========================================================================
 //                    dialogEfgPayoffs: Member functions
 //=========================================================================
 
-int dialogEfgPayoffs::s_payoffsPerDialog = 8;
-
 dialogEfgPayoffs::dialogEfgPayoffs(const Efg &p_efg, EFOutcome *p_outcome,
 				   bool p_solutions, wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Change Payoffs", TRUE),
-    m_outcome(p_outcome), m_efg(p_efg), m_pageNumber(0),
-    m_payoffs(p_efg.NumPlayers())
+  : guiPagedDialog(p_parent, "Change Payoffs", p_efg.NumPlayers()),
+    m_outcome(p_outcome), m_efg(p_efg)
 {
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)
-    m_payoffs[pl] = m_efg.Payoff(p_outcome, pl);
+    SetValue(pl, ToText(m_efg.Payoff(p_outcome, pl)));
 
-  (void) new wxMessage(this, "Change payoffs for outcome:");
-  NewLine();
-
-  m_outcomeName = new wxText(this, 0, "Outcome");
+  m_outcomeName = new wxText(this, 0, "Outcome", "", 1, 1);
   if (p_outcome)
     m_outcomeName->SetValue(p_outcome->GetName());
   else
     m_outcomeName->SetValue("Outcome" + ToText(p_efg.NumOutcomes() + 1));
-  NewLine();
 
-  if (p_solutions) {
-    (void) new wxMessage(this, "Pressing OK will delete computed solutions");
-    NewLine();
-  }
+  m_outcomeName->SetConstraints(new wxLayoutConstraints);
+  m_outcomeName->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_outcomeName->GetConstraints()->left.SameAs(m_dataFields[0], wxLeft);
+  m_outcomeName->GetConstraints()->right.SameAs(m_dataFields[0], wxRight);
+  m_outcomeName->GetConstraints()->height.AsIs();
 
-  m_outcomePayoffs = new wxNumberItem *[gmin(m_efg.NumPlayers(),
-					     s_payoffsPerDialog)];
+  m_dataFields[0]->GetConstraints()->top.SameAs(m_outcomeName, wxBottom, 10);
 
-  for (int pl = 1; pl <= gmin(m_efg.NumPlayers(),
-			      s_payoffsPerDialog); pl++) {
-    m_outcomePayoffs[pl-1] = new wxNumberItem(this,
-					      ToText(pl) + "  ",
-					      ToText(m_payoffs[pl]));
-    NewLine();
-  }
-
-  m_outcomePayoffs[0]->SetFocus();
-#ifndef LINUX_WXXT
-  m_outcomePayoffs[0]->SetSelection(0, strlen(m_outcomePayoffs[0]->GetValue()));
-#endif
-
-  NewLine();
-  if (m_efg.NumPlayers() > s_payoffsPerDialog) {
-    m_backButton = new wxButton(this, (wxFunction) CallbackBack,
-					"<< Back");
-    m_backButton->SetClientData((char *) this);
-    m_backButton->Enable(FALSE);
-    m_nextButton = new wxButton(this, (wxFunction) CallbackNext,
-					"Next >>");
-    m_nextButton->SetClientData((char *) this);
-  }
-
-  m_okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  m_okButton->SetClientData((char *) this);
-  m_okButton->SetDefault();
-  m_cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  m_cancelButton->SetClientData((char *) this);
-
-  Fit();
-  Show(TRUE);
+  Go();
 }
 
-void dialogEfgPayoffs::OnOK(void)
+gArray<gNumber> dialogEfgPayoffs::Payoffs(void) const
 {
-  m_completed = wxOK;
-  int entry = 0;
-  for (int pl = m_pageNumber * s_payoffsPerDialog;
-       pl < gmin((m_pageNumber + 1) * s_payoffsPerDialog,
-		 m_efg.NumPlayers()); pl++, entry++)
-    m_payoffs[pl + 1] = m_outcomePayoffs[entry]->GetNumber();
-  Show(FALSE);
-}
-
-void dialogEfgPayoffs::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool dialogEfgPayoffs::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
-
-void dialogEfgPayoffs::OnBack(void)
-{
-  int entry = 0;
-  for (int pl = m_pageNumber * s_payoffsPerDialog;
-       pl < gmin((m_pageNumber + 1) * s_payoffsPerDialog,
-		 m_efg.NumPlayers()); pl++, entry++)
-    m_payoffs[pl + 1] = m_outcomePayoffs[entry]->GetNumber();
-
-  m_pageNumber--;
-  entry = 0;
-  for (int pl = m_pageNumber * s_payoffsPerDialog;
-       pl < (m_pageNumber + 1) * s_payoffsPerDialog; pl++, entry++) {
-    m_outcomePayoffs[entry]->Show(FALSE);
-    m_outcomePayoffs[entry]->SetNumber(m_payoffs[pl + 1]);
-    m_outcomePayoffs[entry]->SetValue(ToText(m_payoffs[pl + 1]));
-    m_outcomePayoffs[entry]->SetLabel(ToText(pl + 1) + "  ");
+  gArray<gNumber> ret(m_efg.NumPlayers());
+  for (int pl = 1; pl <= ret.Length(); pl++) {
+    ret[pl] = ToNumber(GetValue(pl));
   }
-  m_backButton->Show(FALSE);
-  m_nextButton->Show(FALSE);
-  m_okButton->Show(FALSE);
-  m_cancelButton->Show(FALSE);
-  
-  // This gyration ensures the tabbing order remains the same
-  m_cancelButton->Show(TRUE);
-  m_okButton->Show(TRUE);
-  m_nextButton->Show(TRUE);
-  m_backButton->Show(TRUE);
-  for (entry = s_payoffsPerDialog - 1; entry >= 0; entry--)
-    m_outcomePayoffs[entry]->Show(TRUE);
-  
-  m_outcomePayoffs[0]->SetFocus();
-  m_backButton->Enable(m_pageNumber > 0);
-  m_nextButton->Enable(TRUE);
+  return ret;
 }
 
-void dialogEfgPayoffs::OnNext(void)
+gText dialogEfgPayoffs::Name(void) const
 {
-  int entry = 0;
-  for (int pl = m_pageNumber * s_payoffsPerDialog;
-       pl < (m_pageNumber + 1) * s_payoffsPerDialog; pl++, entry++)
-    m_payoffs[pl + 1] = m_outcomePayoffs[entry]->GetNumber();
-
-  m_pageNumber++;
-  entry = 0;
-  for (int pl = m_pageNumber * s_payoffsPerDialog;
-       pl < (m_pageNumber + 1) * s_payoffsPerDialog; pl++, entry++) {
-    if (pl < m_efg.NumPlayers()) {
-      m_outcomePayoffs[entry]->SetNumber(m_payoffs[pl + 1]);
-      m_outcomePayoffs[entry]->SetValue(ToText(m_payoffs[pl + 1]));
-      m_outcomePayoffs[entry]->SetLabel(ToText(pl + 1) + "  ");
-    }
-    else
-      m_outcomePayoffs[entry]->Show(FALSE);
-  }
-
-  m_outcomePayoffs[0]->SetFocus();
-  m_backButton->Enable(TRUE);
-  m_nextButton->Enable((m_pageNumber + 1) * s_payoffsPerDialog <=
-		       m_efg.NumPlayers());
+  return m_outcomeName->GetValue();
 }
 
 //=========================================================================
