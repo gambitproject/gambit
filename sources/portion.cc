@@ -585,7 +585,7 @@ void List_Portion::Output( gOutput& s ) const
   int i;
   int length = _Value.Length();
 
-  s << " { ";
+  s << " {";
   if( length >= 1 )
   {
     s << _Value[ 1 ];
