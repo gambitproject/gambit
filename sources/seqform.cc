@@ -323,6 +323,7 @@ template <class T> int SeqFormModule<T>::LCPPath()
   do  {
     // Talk about optimism! This is dumb, but better than nothing (I guess):
     params.status.SetProgress((double)nits/(double)(nits+1)); 
+    nits++;
     exit = tab->PivotIn(enter);
 //    if(params.plev >=2)
 //      Dump(*params.output);
