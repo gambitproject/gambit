@@ -44,7 +44,6 @@ template <class T> class gMatrix : public gRectArray<T>  {
     void RMultiply(const gVector<T> &, gVector<T> &) const;
     gMatrix<T> operator*(const gMatrix<T> &) const;
     gVector<T> operator*(const gVector<T> &) const;
-    friend gVector<T> operator*(const gVector<T> &, const gMatrix<T> &);
     gMatrix<T> operator*(const T &) const;
     gMatrix<T> &operator*=(const gMatrix<T> &);
     gMatrix<T> &operator*=(const T &);
@@ -72,6 +71,7 @@ template <class T> class gMatrix : public gRectArray<T>  {
   void Pivot(int, int);
 };
 
+template <class T> gVector<T> operator*(const gVector<T> &, const gMatrix<T> &);
 template <class T> gOutput &operator<<(gOutput &, const gMatrix<T> &);
 
 #endif     // GMATRIX_H
