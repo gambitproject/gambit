@@ -198,10 +198,13 @@ void Portion::SetGame(void* game, bool efg)
 #ifdef MEMCHECK
       gout<<"Game "<<_Game<<" ref count-: "<<_gsm->GameRefCount(_Game)<<'\n';
 #endif
-      if(_gsm->GameRefCount(_Game) == 0)
-      {
-	if(!_GameIsEfg)
-	  delete (BaseNfg*) _Game;
+      if(_gsm->GameRefCount(_Game) == 0)   {
+	  if (!_GameIsEfg)   {
+	    if (((NfgPayoffs *) _Game)->Type() == DOUBLE)
+	      delete (Nfg<double> *) _Game;
+	    else
+	      delete (Nfg<gRational> *) _Game;
+	  }
 	else
 	  delete (BaseEfg*) _Game;
 	_Game = 0;
