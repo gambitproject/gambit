@@ -678,8 +678,15 @@ I_dont_believe_Im_doing_this:
     gcmdline.SetPrompt( false );
     tval = "";
     c = nextchar();
-    while (c != '"')   {
-      tval += c;
+    bool lastslash = false;
+	
+    while (c != '"' || lastslash)   {
+      if (lastslash && c == '"')  
+        tval[tval.length() - 1] = '"';
+      else
+        tval += c;
+
+      lastslash = (c == '\\');
       c = nextchar();
     }
     gcmdline.SetPrompt( true );
