@@ -30,7 +30,7 @@ Bool wxGetResourceStr(char *section, char *entry, char *value, char *file)
 //            OutputParamsSettings: Member function definitions
 //========================================================================
 
-#define	SOLN_SECT			"Soln-Defaults"
+#define SOLN_SECT           "Soln-Defaults"
 
 OutputParamsSettings::OutputParamsSettings(void)
 {
@@ -47,8 +47,8 @@ OutputParamsSettings::OutputParamsSettings(void)
   wxGetResource(PARAMS_SECTION, "Max-Solns", &m_maxSolns, defaults_file);
   m_precisionStr = new char[10];
   wxGetResourceStr(PARAMS_SECTION, "Precision", m_precisionStr,
-  		   defaults_file);
-  trace_list = wxStringListInts(4);
+           defaults_file);
+  trace_list = wxStringListInts(4, NULL, 0);
   m_precisionList = new wxStringList;
   m_precisionList->Add("Float");
   m_precisionList->Add("Rational");
@@ -57,7 +57,7 @@ OutputParamsSettings::OutputParamsSettings(void)
 
   m_domDepthStr = new char[20];
   wxGetResourceStr(SOLN_SECT,"Nfg-ElimDom-Depth", m_domDepthStr,
-		   defaults_file);
+           defaults_file);
   wxGetResource(SOLN_SECT,"Nfg-ElimDom-Type",&dom_type,defaults_file);
   wxGetResource(SOLN_SECT,"Nfg-ElimDom-Method",&dom_method,defaults_file);
 
@@ -97,7 +97,7 @@ void OutputParamsSettings::SaveDefaults(void)
   wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Method",dom_method,defaults_file);
 
   wxWriteResource(SOLN_SECT, "Efg-Mark-Subgames", markSubgames,
-		  defaults_file);
+          defaults_file);
 }
 
 //
@@ -105,7 +105,7 @@ void OutputParamsSettings::SaveDefaults(void)
 // if the default output window is used outp is not modified.
 //
 gOutput *OutputParamsSettings::MakeOutputFile(const char *s,
-					      gOutput *&outp) const
+                          gOutput *&outp) const
 {
   if (!s) 
     return &gnull;
@@ -149,7 +149,7 @@ int OutputParamsSettings::TraceLevel(void) const
 gPrecision OutputParamsSettings::Precision(void) const
 {
   return ((wxListFindString(m_precisionList, m_precisionStr) == 1) ?
-	  precRATIONAL : precDOUBLE);
+      precRATIONAL : precDOUBLE);
 }
 
 
@@ -174,23 +174,23 @@ void OutputParamsDialog::MakeCommonFields(bool p_dominance, bool p_subgames)
 
     m_domDepthList = new wxStringList("None", "Once", "Iterative", 0);
     Add(wxMakeFormString("Depth", &m_domDepthStr, wxFORM_RADIOBOX,
-			 new wxList(wxMakeConstraintStrings(m_domDepthList),
-				    0), 0, wxVERTICAL));
+             new wxList(wxMakeConstraintStrings(m_domDepthList),
+                    0), 0, wxVERTICAL));
     Add(wxMakeFormNewLine());
 
     dom_type_list = new wxStringList("Weak", "Strong", 0);
     dom_type_str = new char[20];
     strcpy(dom_type_str, (char *) dom_type_list->Nth(dom_type)->Data());
     Add(wxMakeFormString("Type", &dom_type_str, wxFORM_RADIOBOX,
-			 new wxList(wxMakeConstraintStrings(dom_type_list), 0),
-			 0, wxVERTICAL));
+             new wxList(wxMakeConstraintStrings(dom_type_list), 0),
+             0, wxVERTICAL));
   
     dom_method_list = new wxStringList("Pure", "Mixed", 0);
     dom_method_str = new char[20];
     strcpy(dom_method_str, (char *) dom_method_list->Nth(dom_method)->Data());
     Add(wxMakeFormString("Method", &dom_method_str, wxFORM_RADIOBOX,
-			 new wxList(wxMakeConstraintStrings(dom_method_list),
-				    0), 0, wxVERTICAL));
+             new wxList(wxMakeConstraintStrings(dom_method_list),
+                    0), 0, wxVERTICAL));
   
     Add(wxMakeFormNewLine());
   }
@@ -211,34 +211,34 @@ void OutputParamsDialog::MakeOutputFields(unsigned int fields)
   Add(wxMakeFormNewLine());
   if (fields & PRECISION_FIELD) {
     Add(wxMakeFormString("Precision", &m_precisionStr, wxFORM_RADIOBOX,
-			 new wxList(wxMakeConstraintStrings(m_precisionList),
-				    0), 
-			 0, wxVERTICAL));
+             new wxList(wxMakeConstraintStrings(m_precisionList),
+                    0), 
+             0, wxVERTICAL));
     Add(wxMakeFormNewLine());
   }
 
   if ((fields & MAXSOLN_FIELD) && !(fields & SPS_FIELD)) {
     Add(wxMakeFormShort("Max Ttl Solns", &m_stopAfter, wxFORM_DEFAULT, 
-			NULL, NULL, wxVERTICAL, 100));
+            NULL, NULL, wxVERTICAL, 100));
     Add(wxMakeFormNewLine());
   }
 
   if ((fields & MAXSOLN_FIELD) && (fields & SPS_FIELD)) {
     Add(wxMakeFormShort("Solns/Subgame", &m_stopAfter, wxFORM_DEFAULT, 
-			NULL, NULL, wxVERTICAL, 100));
+            NULL, NULL, wxVERTICAL, 100));
     Add(wxMakeFormShort("Max Ttl Solns", &m_maxSolns, wxFORM_DEFAULT, 
-			NULL, NULL, wxVERTICAL, 100));
+            NULL, NULL, wxVERTICAL, 100));
     Add(wxMakeFormNewLine());
   }
 
   if (fields & OUTPUT_FIELD) {
     Add(wxMakeFormString("TraceFile", &outname, wxFORM_DEFAULT, 
-			 NULL, NULL, wxVERTICAL));
+             NULL, NULL, wxVERTICAL));
   }
 
   if (fields & ERROR_FIELD) {
     Add(wxMakeFormString("ErrFile", &errname, wxFORM_DEFAULT, 
-			  NULL, NULL, wxVERTICAL));
+              NULL, NULL, wxVERTICAL));
   }
 
   if ((fields & ERROR_FIELD) && (fields & OUTPUT_FIELD)) { 
@@ -246,8 +246,8 @@ void OutputParamsDialog::MakeOutputFields(unsigned int fields)
   }
 
   Add(wxMakeFormString("Trace Level", &trace_str, wxFORM_CHOICE,
-		       new wxList(wxMakeConstraintStrings(trace_list), 0), 
-		       0, wxVERTICAL));
+               new wxList(wxMakeConstraintStrings(trace_list), 0), 
+               0, wxVERTICAL));
   Add(wxMakeFormNewLine());
 }
 
@@ -417,7 +417,9 @@ void PxiParamsDialog::MakePxiFields(void)
     Form()->Add(wxMakeFormString("Plot Type", &type_str, wxFORM_RADIOBOX,
                                  new wxList(wxMakeConstraintStrings(type_list), 0)));
 
-    Form()->Add(wxMakeFormString("PxiFile", &pxiname));
+    Form()->Add(wxMakeFormString("PxiFile", &pxiname, 
+                                 wxFORM_DEFAULT, NULL, NULL, NULL,
+                                 300));
 
     Add(wxMakeFormString("Next", &name_option_str, wxFORM_RADIOBOX,
                          new wxList(wxMakeConstraintStrings(name_option_list), 0)));
@@ -425,7 +427,9 @@ void PxiParamsDialog::MakePxiFields(void)
 
     Form()->Add(wxMakeFormBool("Run PXI", &run_pxi));
 
-    Form()->Add(wxMakeFormString("PXI Command", &pxi_command));
+    Form()->Add(wxMakeFormString("PXI Command", &pxi_command,
+                                 wxFORM_DEFAULT, NULL, NULL, NULL,
+                                 300));
 }
 
 // Destructor
