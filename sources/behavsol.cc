@@ -498,6 +498,218 @@ const gDPVector<gNumber> &BehavSolution::Regret(void) const
   return *m_regret;
 }
 
+//----------------------------------------
+// Restriction to Support Extends to Nash
+//----------------------------------------
+
+gPolyList<gDouble> 
+BehavSolution::ActionProbsSumToOneIneqs(const gSpace &BehavStratSpace, 
+					const term_order &Lex,
+					const gList<gList<int> > &var_index) 
+  const
+{
+  gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
+
+  int pl;
+  for (pl = 1; pl <= Game().NumPlayers(); pl++) 
+    for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
+      Infoset *current_infoset = Game().GetInfosetByIndex(pl,i);
+      if (!Support().MayReach(current_infoset)) {
+	int index_base = var_index[pl][i];
+	gPoly<gDouble> factor(&BehavStratSpace, (gDouble)1.0, &Lex);
+	for (int k = 1; k < current_infoset->NumActions(); k++)
+	  factor -= gPoly<gDouble>(&BehavStratSpace, index_base + k, 1, &Lex);
+	answer += factor;
+      }
+    }
+  return answer;
+}
+
+bool BehavSolution::NodeProbabilityPoly(      gPoly<gDouble> & node_prob,
+					const gSpace &BehavStratSpace, 
+					const term_order &Lex,
+					const gList<gList<int> > &var_index,
+					const Node *tempnode,
+					const int &pl,
+					const int &i,
+					const int &j) const
+{
+  //DEBUG
+  gout << "pl = " << pl << " while infoset = " << i << " and action = " << j << ".\n";
+
+  while (tempnode != Game().RootNode()) {
+
+    const Action *last_action = tempnode->GetAction();
+    Infoset *last_infoset = last_action->BelongsTo();
+    
+    if (last_infoset->IsChanceInfoset()) 
+      node_prob *= (gDouble)Game().GetChanceProb(last_action);
+    else 
+      if (Support().MayReach(last_infoset)) {
+	if (last_infoset == Game().GetInfosetByIndex(pl,i)) {
+	  if (j != last_action->GetNumber()) {
+
+	    //DEBUG
+	    gout << "Eliminated (pl,i,j) = (" <<
+	      last_infoset->GetPlayer()->GetNumber() << "," <<
+	      last_infoset->GetNumber() << "," <<
+	      last_action->GetNumber() 
+		 << ") because wrong deviation.\n";
+	    
+	    return false;
+	  }
+	}
+	else
+	  if (Support().ActionIsActive((Action *)last_action))
+	    node_prob *= (gDouble)Profile()->GetValue(last_action);
+	  else {
+
+	    //DEBUG
+	    gout << "Eliminated (pl,i,j) = (" <<
+	      last_infoset->GetPlayer()->GetNumber() << "," <<
+	      last_infoset->GetNumber() << "," <<
+	      last_action->GetNumber() 
+		 << ") because action is inactive.\n";
+	    
+	    return false;
+	  }
+      }
+      else {
+	int initial_var_no = 
+ var_index[last_infoset->GetPlayer()->GetNumber()][last_infoset->GetNumber()];
+	if (last_action->GetNumber() < last_infoset->NumActions()){
+	  int varno = initial_var_no + last_action->GetNumber();
+	  node_prob *= gPoly<gDouble>(&BehavStratSpace, varno, 1, &Lex);
+	}
+	else {
+	  gPoly<gDouble> factor(&BehavStratSpace, (gDouble)1.0, &Lex);
+	  int k;
+	  for (k = 1; k < last_infoset->NumActions(); k++)
+	    factor -= gPoly<gDouble>(&BehavStratSpace,
+				     initial_var_no + k, 1, &Lex);
+	  node_prob *= factor;
+	}
+      } 
+    tempnode = tempnode->GetParent();
+  }
+  return true;
+}
+
+gPolyList<gDouble> 
+BehavSolution::ExpectedPayoffDiffPolys(const gSpace &BehavStratSpace, 
+				       const term_order &Lex,
+				       const gList<gList<int> > &var_index) 
+  const
+{
+  gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
+
+  gList<const Node *> terminal_nodes = Game().TerminalNodes();
+
+  for (int pl = 1; pl <= Game().NumPlayers(); pl++)
+    for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
+      Infoset *infoset = Game().GetInfosetByIndex(pl,i);
+      if (Support().MayReach(infoset)) 
+	for (int j = 1; j <= infoset->NumActions(); j++)
+	  if (!Support().ActionIsActive(pl,i,j)) {
+	
+	    // This will be the utility difference between the
+	    // payoff resulting from the profile and deviation to 
+	    // action j
+	    gPoly<gDouble> next_poly(&BehavStratSpace, &Lex);
+
+	    for (int n = 1; n <= terminal_nodes.Length(); n++) {
+
+	      //DEBUG
+	      gout << "\nTerminal node " << n << " with outcome " <<
+	    	terminal_nodes[n]->GetOutcome()->GetName();
+	      gout << " has payoff " << 
+		Game().Payoff(terminal_nodes[n]->GetOutcome(),pl) << ".\n";
+
+	      gPoly<gDouble> node_prob(&BehavStratSpace, (gDouble)1.0, &Lex);
+	      if (NodeProbabilityPoly(node_prob,
+				      BehavStratSpace,
+				      Lex,
+				      var_index,
+				      terminal_nodes[n],
+				      pl,i,j)) {
+		node_prob *= 
+		  (gDouble)Game().Payoff(terminal_nodes[n]->GetOutcome(),pl);
+		next_poly += node_prob;
+
+		//DEBUG
+		gout << "It's contribution is " << node_prob << ".\n";
+	      }
+	    }
+
+	    //DEBUG
+	    gout << "The player's payoff is " 
+		 << (gDouble)Payoff(pl) << ".\n\n";
+
+	    answer += -next_poly + (gDouble)Payoff(pl);
+	  }
+    }
+  return answer;
+}
+
+gPolyList<gDouble> 
+BehavSolution::ExtendsToNashIneqs(const gSpace &BehavStratSpace, 
+				  const term_order &Lex,
+				  const gList<gList<int> > &var_index) const
+{
+  gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
+  answer += ActionProbsSumToOneIneqs(BehavStratSpace, Lex, var_index);
+  answer += ExpectedPayoffDiffPolys(BehavStratSpace, Lex, var_index);
+  return answer;
+}
+
+bool BehavSolution::ExtendsToNash(gStatus &m_status) const
+{
+  // First we compute the number of variables, and indexing information
+  int num_vars(0);
+  gList<gList<int> > var_index;
+  int pl;
+  for (pl = 1; pl <= Game().NumPlayers(); pl++) {
+
+    gList<int> list_for_pl;
+
+    for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
+      list_for_pl += num_vars;
+      if (!Support().MayReach(Game().GetInfosetByIndex(pl,i))) {
+	num_vars += Game().NumActionsAtInfoset(pl,i) - 1;
+      }
+    }
+    var_index += list_for_pl;
+  }
+
+  // We establish the space
+  gSpace BehavStratSpace(num_vars);
+  ORD_PTR ptr = &lex;
+  term_order Lex(&BehavStratSpace, ptr);
+
+  gPolyList<gDouble> inequalities = ExtendsToNashIneqs(BehavStratSpace,
+						       Lex,
+						       var_index);
+  num_vars = inequalities.Dmnsn();
+
+  //DEBUG
+  gout << "The behav_profile is\n" << *(this->Profile()) << "\n"
+       << "with support\n" << Support() << "\n";
+
+  gout << "The dimension is " << inequalities.Dmnsn()
+       << " and the system is\n" << inequalities << "\n";
+
+  // set up the rectangle of search
+  gVector<gDouble> bottoms(num_vars), tops(num_vars);
+  bottoms = (gDouble)0;
+  tops = (gDouble)1;
+  gRectangle<gDouble> Cube(bottoms, tops); 
+
+  // Set up the test and do it
+  IneqSolv<gDouble> extension_tester(inequalities,m_status);
+  gVector<gDouble> sample(num_vars);
+  return extension_tester.ASolutionExists(Cube,sample); 
+}
+
 //----------
 // Output
 //----------
