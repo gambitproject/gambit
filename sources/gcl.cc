@@ -144,15 +144,13 @@ int main( int /*argc*/, char* argv[] )
     
     GCLCompiler C;
     gPreprocessor P(&gcmdline, "Include[\"gclini.gcl\"]");
-    
-    while (!P.eof())
-      {
-	gText line = P.GetLine();
-	gText fileName = P.GetFileName();
-	int lineNumber = P.GetLineNumber();
-	gText rawLine = P.GetRawLine();
-	C.Parse(line, fileName, lineNumber, rawLine );
-      }
+    while (!P.eof()) {
+      gText line = P.GetLine();
+      gText fileName = P.GetFileName();
+      int lineNumber = P.GetLineNumber();
+      gText rawLine = P.GetRawLine();
+      C.Parse(line, fileName, lineNumber, rawLine );
+    }
     
     delete[] _SourceDir;
     delete _gsm;
@@ -164,6 +162,8 @@ int main( int /*argc*/, char* argv[] )
     gCmdLineInput::RestoreTermAttr();
   }
 
+  // AIX has some problem with exception handling
+#ifndef _AIX
   catch (gclQuitOccurred &e) {
     gCmdLineInput::RestoreTermAttr(); 
     return 0;
@@ -173,6 +173,12 @@ int main( int /*argc*/, char* argv[] )
     gout << "GCL EXCEPTION:" << w.Description() << "; Caught in gcl.cc, main()\n";
     return 1;
   }
+#else
+  catch (...) {
+    gCmdLineInput::RestoreTermAttr();
+    return 0;
+  }
+#endif // _AIX
   
   return 0;
 }

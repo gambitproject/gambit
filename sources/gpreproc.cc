@@ -61,7 +61,14 @@ gInput *gPreprocessor::LoadInput(gText &p_name)
       infile = new gFileInput(paths[i]);
       return infile;
     }
+
+    // This #ifdef is here because under AIX with g++ 2.8.1, this
+    // catch handler is causing a coredump.
+#ifdef _AIX
+    catch (...) {
+#else
     catch (gFileInput::OpenFailed &) {
+#endif   // _AIX
     }
   }
 
