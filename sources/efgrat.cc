@@ -27,6 +27,10 @@ class gList<Node *>;
 class gNode<gString>;
 class gNode<gRational>;
 class gNode<Node *>;
+template <class T> class gArray;
+class gNode<gArray<int> >;
+class gList<gArray<int> *>;
+class gNode<gArray<int> *>;
 template <class T> class EfgFile;
 class EfgFile<double>;
 #define TEMPLATE
