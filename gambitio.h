@@ -127,13 +127,13 @@ class gOutput  {
 
     virtual bool IsValid(void) const = 0;
 
-    virtual int GetWidth(void)  = 0;
+    virtual int GetWidth(void) const = 0;
     virtual gOutput &SetWidth(int w)  = 0;
-    virtual int GetPrec(void)  = 0;
+    virtual int GetPrec(void) const = 0;
     virtual gOutput &SetPrec(int p)  = 0;
     virtual gOutput &SetExpMode(void)  = 0;
     virtual gOutput &SetFloatMode(void)  = 0;
-    virtual char GetRepMode(void) = 0;
+    virtual char GetRepMode(void) const = 0;
 };
 
 class gFileOutput : public gOutput  {
