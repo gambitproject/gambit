@@ -362,9 +362,9 @@ LemkeTableau<T>::LemkeTableau(const NormalForm<T> &r,
 
   for (i = 1; i <= n1; i++)   {
     for (int j = 1; j <= n2; j++)  {
-      x = iter.Evaluate(1);
+      x = iter.Payoff(1);
       if (x < min)   min = x;
-      x = iter.Evaluate(2);
+      x = iter.Payoff(2);
       if (x < min)   min = x;
       iter.Next(2);
     }
@@ -382,8 +382,8 @@ LemkeTableau<T>::LemkeTableau(const NormalForm<T> &r,
 
   for (i = 1; i <= n1; i++)  {
     for (int j = 1; j <= n2; j++)  {
-      Tableau(i, n1 + j) = iter.Evaluate(1) - min;
-      Tableau(n1 + j, i) = iter.Evaluate(2) - min;
+      Tableau(i, n1 + j) = iter.Payoff(1) - min;
+      Tableau(n1 + j, i) = iter.Payoff(2) - min;
       iter.Next(2);
     }
     iter.Next(1);

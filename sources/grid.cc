@@ -149,8 +149,8 @@ for (j=1;j<=dim_y;j++)
 	for (i=1;i<=dim_x;i++)
 	{
 		iter.Set(1,j);iter.Set(2,i);
-		header.SetMatrixValue(j-1,i-1,1,iter.Evaluate(1));
-		header.SetMatrixValue(j-1,i-1,2,iter.Evaluate(2));
+		header.SetMatrixValue(j-1,i-1,1,iter.Payoff(1));
+		header.SetMatrixValue(j-1,i-1,2,iter.Payoff(2));
 	}
 
 
