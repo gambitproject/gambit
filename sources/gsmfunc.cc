@@ -1181,7 +1181,8 @@ Portion *CallFuncObj::CallListFunction(GSM* gsm, Portion **ParamIn)
 }
 
 
-typedef enum { matchNONE = 0, matchSUPERTYPE = 1, matchEXACT = 2 } gclMatchLevel;
+typedef enum { matchNONE = 0, matchSUPERTYPE = 1, matchEXACT = 2,
+               matchSUPERLIST = 3, matchEXACTLIST = 4 } gclMatchLevel;
 
 gclMatchLevel TypeMatch(Portion* p, PortionSpec ExpectedSpec, 
 			bool Listable, bool return_type_check = false)
@@ -1226,8 +1227,14 @@ gclMatchLevel TypeMatch(Portion* p, PortionSpec ExpectedSpec,
   if (CalledSpec.Type & ExpectedSpec.Type)  {
     if (CalledSpec.ListDepth == ExpectedSpec.ListDepth)
       return matchtype;
-    else if (CalledSpec.ListDepth > ExpectedSpec.ListDepth && Listable)
-      return matchtype;
+    else if (CalledSpec.ListDepth > ExpectedSpec.ListDepth && Listable) {
+      if (matchtype == matchSUPERTYPE)
+	return matchSUPERLIST;
+      else if (matchtype == matchEXACT)
+	return matchEXACTLIST;
+      else
+	return matchNONE;
+    }
     else if (CalledSpec.ListDepth > 0 && ExpectedSpec.ListDepth == 1 && 
 	    !Listable)
       return matchtype;
@@ -1426,6 +1433,7 @@ ReferencePortion* CallFuncObj::GetParamRef(int index) const
 void CallFuncObj::ComputeFuncIndex(void)
 {
   int exact_index = 0, supertype_index = 0;
+  bool exact_listmatch = false, supertype_listmatch = false;
 
   if (m_funcIndex == -1 && _NumFuncs == 1)
     m_funcIndex = 0;
@@ -1453,10 +1461,8 @@ void CallFuncObj::ComputeFuncIndex(void)
 	    TypeMatch(m_params[index],
 		      _FuncInfo[f_index].ParamInfo[index].Spec,
 		      (_FuncInfo[f_index].Flag & funcLISTABLE));
-	  if (parammatch == matchNONE)
-	    matchlevel = matchNONE;
-	  else if (parammatch == matchSUPERTYPE)
-	    matchlevel = matchSUPERTYPE;
+	  if (parammatch != matchEXACT)
+	    matchlevel = parammatch;
 	}
 	else {
 	  // parameter is undefined
@@ -1473,12 +1479,46 @@ void CallFuncObj::ComputeFuncIndex(void)
       }
       
       if (matchlevel == matchEXACT) {
-	exact_index = f_index;
-	exact_matches++;
+	if ((exact_matches == 0) ||
+	    (exact_matches > 0 && exact_listmatch)) {
+	  exact_matches = 1;
+	  exact_index = f_index;
+	  exact_listmatch = false;
+	}
+	else {
+	  exact_index = f_index;
+	  exact_matches++;
+	  exact_listmatch = false;
+	}
+      }
+      else if (matchlevel == matchEXACTLIST) {
+	// listable matches are superseded by nonlistable ones
+	if (exact_listmatch || exact_matches == 0) {
+	  exact_index = f_index;
+	  exact_matches++;
+	  exact_listmatch = true;
+	}
       }
       else if (matchlevel == matchSUPERTYPE) {
-	supertype_index = f_index;
-	supertype_matches++;
+	if ((supertype_matches == 0) ||
+	    (supertype_matches > 0 && supertype_listmatch)) {
+	  supertype_matches = 1;
+	  supertype_index = f_index;
+	  supertype_listmatch = false;
+	}
+	else {
+	  supertype_index = f_index;
+	  supertype_matches++;
+	  supertype_listmatch = false;
+	}
+      }
+      else if (matchlevel == matchSUPERLIST) {
+	// listable matches are superseded by nonlistable ones
+	if (supertype_listmatch || supertype_matches == 0) {
+	  supertype_index = f_index;
+	  supertype_matches++;
+	  supertype_listmatch = true;
+	}
       }
     }
 
