@@ -2,7 +2,7 @@
 // This file implements a 3-D spreadsheet type dialog box.  It can have
 // unlimited dimensions for both rows/columns and the number of layers.
 // At the moment each cell contains only a gString, but functions for
-// converting gStrings to gNumber, etc are available.  The spreadsheet
+// converting gStrings to numbers, etc are available.  The spreadsheet
 // implements movement by cursor keys and mouse input.  Each cell can have
 // a type attribute which will determine if the cell is to accept numeric(default)
 // input only or any alphanumeric input.  The spreadsheet can be made
@@ -12,12 +12,42 @@
 // to allow edition of rows, columns, levels through the SetChage funnction.  A row
 // can be added at the end of the matrix by pressing F2 with the
 // hilighed cell on the bottom row.  A column is added using F3. A level by F4
+
+// The control of the various features of the spreadsheet can be
+// accomplished using either the menu bar, buttons or a combination of
+// both.  The constructor takes an argument that determines which menus
+// and buttons are to be created.  See SpreadSheetDrawSettings.
+
+// Buttons:
+// The following buttons are supported directly: OK, CANCEL, CHANGE,
+// PRINT, HELP
 // Optionally, a button can be added to execute the add row/col/level by
 // using the '| CHANGE_BUTTON' in the buttons field of the constructor
-// Printing is supported through the Print command/Print button enabled by
-// setting the '| PRINT_BUTTON' in the buttons field of the constructor
+// Output is supported through the Print command/Print button enabled by
+// setting the '| PRINT_BUTTON' in the buttons field of the constructor.
 // The user can create additional buttons on the spreadsheet by calling the
 // AddButton function.
+
+// Menus:
+// The following menus are supported directly: File: CLOSE, OUTPUT,
+// Display: OPTIONS, CHANGE, Help: HELP
+// Note: Menus are tricky since it is currently impossible to dynamically
+// add a menu to a menubar (it is possible to add a menuiterm to a menu).
+// So, if you wish to add items to a menubar, you have to:
+// call wxMenuBar *tmp_bar=MakeMenuBar();
+// add your menus, call SetMenuBar(tmp_bar);
+
+// The physical dimentions of each data cell can be controlled by the
+// user.  Each column can have a different width and all rows have the
+// same height.  The size can be measured in either screen pixels or be
+// tied to the size of the font(*).  In that case, each unit corresponds
+// to the width of a letter, and is scaled automatically when font is
+// changed.  The row height can also be made to scale w/ the font by
+// checking the vert_fit(*) option.
+
+// The spreadsheet now supports the gDrawText extended text format, which
+// allows for multiple colors to be used in the same cell.  See wxmisc
+
 #ifndef	SPREAD_H
 #define	SPREAD_H
 
@@ -40,10 +70,11 @@
 #define	MIN_SHEET_HEIGHT		20
 #define MIN_SHEET_WIDTH			160
 #define	DEFAULT_ROW_HEIGHT	30
-#define	DEFAULT_COL_WIDTH		60
+#define	DEFAULT_COL_WIDTH		6
 #define DEFAULT_BUTTON_SPACE	40
 #define	ROW_LABEL_WIDTH			30
 #define	COL_LABEL_HEIGHT		30
+#define	COL_WIDTH_UNIT			10
 
 //********************** SPREAD SHEET DATA SETTINGS ***********************
 // Both the DataSettings and DrawSettings employ a pseudo-reference
@@ -97,6 +128,7 @@ class SpreadSheetDrawSettings
 private:
 	SpreadSheet3D *parent;
 	int 		row_height,default_col_width;
+	int			tw,th;
 	gBlock<int> col_width;
 	int			total_height,total_width,real_height,real_width;
 	int			x_scroll,y_scroll;
@@ -127,8 +159,8 @@ public:
 	void AddCol(void) {col_width.Append(DEFAULT_COL_WIDTH);}
 	// Data Access, Get* functions
 		// These functions control the dimentions of each cell i.e. Width X Height
-	int	GetRowHeight(void)	{return row_height;}
-	int	GetColWidth(int col=0)		{if (col) return col_width[col]; else return col_width[1];}
+	int	GetRowHeight(void)	{return ((vert_fit) ? (th+2*TEXT_OFF) : row_height);}
+	int	GetColWidth(int col=0);
 		// GetWidth/Height return the size of the virtual canvas if scrollbars are on (GetVirtualSize)
 	int GetWidth(void)			{return total_width;}
 	int GetHeight(void)			{return total_height;}
@@ -151,6 +183,8 @@ public:
 		// Panel Sizing--allows the user to add items to the panel
 	int			PanelSize(void)	{return panel_size;}
 	void		SetPanelSize(int _s)	{panel_size=_s;}
+		// Updates font information after change/on init
+	void		UpdateFontSize(float w=-1,float h=-1);
 		// Set* functions
 	void	SetRowHeight(int _r)	{row_height=_r;}
 	void	SetColWidth(int	_c,int col=0);
@@ -158,8 +192,8 @@ public:
 	void	SetHeight(int _h)			{total_height=_h;}
 	void	SetRealWidth(int _w)	{real_width=_w;}
 	void	SetRealHeight(int _h)	{real_height=_h;}
-	void	SetDataFont(wxFont *_f)	{if (data_font) delete data_font;	data_font=_f;	}
-	void	SetLabelFont(wxFont *_f){if (label_font) delete label_font;label_font=_f;}
+	void	SetDataFont(wxFont *_f)	{data_font=_f;UpdateFontSize();}
+	void	SetLabelFont(wxFont *_f){label_font=_f;UpdateFontSize();}
 	void	SetXScroll(int _s)		{x_scroll=_s;}
 	void	SetYScroll(int _s)		{y_scroll=_s;}
 	void	SetScrolling(Bool _s)	{scrolling=_s;}
@@ -216,11 +250,8 @@ public:
 	void GetLabelExtent(char *str,float *x,float *y)
 		{SetFont(draw_settings->GetLabelFont());GetTextExtent(str,x,y);}
 	// DataExtent
-	void GetDataExtent(float *x,float *y,const char *str=0)
-		{SetFont(draw_settings->GetDataFont());
-		 GetTextExtent((str) ? str : "W",x,y);
-		 (*x)+=2*TEXT_OFF;(*y)+=2*TEXT_OFF;
-		}
+	void GetDataExtent(float *x,float *y,const char *str="W")
+		{SetFont(draw_settings->GetDataFont());GetTextExtent(str,x,y);}
 	// Data Access
 	int		Row(void)	{return cell.row;}
 	int		Col(void)	{return cell.col;}
@@ -305,7 +336,7 @@ public:
 	void GetSize(int *w,int *h) {sheet->DesiredSize(w,h);}
 	void CheckSize(void) {sheet->CheckScrollbars();}
 	void GetLabelExtent(char *str,float *x,float *y)	{sheet->GetLabelExtent(str,x,y);}
-	void GetDataExtent(float *x,float *y,const char *str=0)	{sheet->GetDataExtent(x,y,str);}
+	void GetDataExtent(float *x,float *y,const char *str="W")	{sheet->GetDataExtent(x,y,str);}
 	// Row/Col manipulation
 	void AddRow(void);
 	void AddCol(void);
@@ -357,11 +388,29 @@ public:
 	void		Dump(gOutput &out) {data.Dump(out);}
 };
 //**************************** SPREAD SHEET 3D ******************************
-#define	PRINT_BUTTON		1
-#define	CHANGE_BUTTON		2
-#define	OK_BUTTON				4
-#define	CANCEL_BUTTON		8
-#define OPTIONS_BUTTON	16
+// Feature control constants: the low byte is used by the panel/buttons,
+// and the high byte is used by the menubar/menus
+#define ANY_BUTTON			1			// Specify this to create an empty panel
+#define ALL_BUTTONS			255
+#define	PRINT_BUTTON		2
+#define	CHANGE_BUTTON		4
+#define	OK_BUTTON				8
+#define	CANCEL_BUTTON		16
+#define OPTIONS_BUTTON	32
+#define HELP_BUTTON			64
+
+
+#define	ANY_MENU				256		// Specify this to create an empty menubar
+#define	ALL_MENUS       65280
+#define OUTPUT_MENU			512
+#define CLOSE_MENU			1024
+#define OPTIONS_MENU		2048
+#define CHANGE_MENU			4096
+#define HELP_MENU				8192
+
+#define HELP_MENU_ABOUT			8193
+#define HELP_MENU_CONTENTS	8194
+
 class SpreadSheet3D: public wxFrame
 {
 friend gOutput &operator<<(gOutput &op,const SpreadSheet3D &s);
@@ -371,20 +420,25 @@ private:
 	SpreadSheetDataSettings		*data_settings;
 	int										cur_level;
 	wxPanel								*panel;
+	wxMenuBar							*menubar;
 	wxSlider							*level_item;
 	int										panel_x,panel_y,panel_new_line;
 	int										completed;
 	int										levels;
 	Bool									editable;
-	int										buttons;
+	unsigned int					features;
 	gString								label;
 	void	SavePanelPos(void)	{panel->GetCursor(&panel_x,&panel_y);}
+	void	MakeFeatures();
 protected:
 	wxPanel *Panel(void) {return panel;}
+	wxMenuBar *MenuBar(void) {return menubar;}
+	wxMenuBar *MakeMenuBar(void);
+	void SetMenuBar(wxMenuBar *bar);
 public:
 	// Constructor
 	SpreadSheet3D(int rows,int cols,int levels,char *title,
-					wxFrame *parent=NULL,int _buttons=OK_BUTTON | CANCEL_BUTTON,
+					wxFrame *parent=NULL,unsigned int _features=OK_BUTTON | CANCEL_BUTTON,
 					SpreadSheetDrawSettings *drs=NULL,SpreadSheetDataSettings *_dts=NULL);
 	// Destructor
 	~SpreadSheet3D(void)
@@ -395,6 +449,7 @@ public:
 	// Windows Events Handlers
 	void Update(wxDC *dc=NULL);
 	void OnSize(int w,int h);
+  void OnMenuCommand(int id);
 	static void spread_slider_func(wxSlider &ob,wxCommandEvent &ev);
 	static void spread_ok_func(wxButton	&ob,wxEvent &ev);
 	static void spread_cancel_func(wxButton	 &ob,wxEvent &ev);
@@ -406,6 +461,7 @@ public:
 	virtual void OnDoubleClick(int row,int col,int level,const gString &value) { }
 	virtual void OnSelectedMoved(int row,int col) { }
 	virtual void OnPrint(void);
+	virtual void OnHelp(int help_type=0) { }
 	// General data access
 	void		SetType(int row,int col,gSpreadValType t) {data[cur_level].SetType(row,col,t);}
 	gSpreadValType GetType(int row,int col) {return data[cur_level].GetType(row,col);}
@@ -475,7 +531,7 @@ public:
 	SpreadSheetDrawSettings *DrawSettings(void)	{return draw_settings;}
 	SpreadSheetDataSettings *DataSettings(void)	{return data_settings;}
 	// Some low level info about the canvases
-	void GetDataExtent(float *x,float *y,const char *str=0)	{data[cur_level].GetDataExtent(x,y,str);}
+	void GetDataExtent(float *x,float *y,const char *str="W")	{data[cur_level].GetDataExtent(x,y,str);}
 	// Labeling
 	void	FitLabels(void);
 	void	Resize(void);
@@ -484,9 +540,11 @@ public:
 	// Printing
 	void Print(int device) {data[cur_level].Print(device);}
 	// Adding buttons
-	wxButton *AddButton(char *label,wxFunction fun);
+	wxButton *AddButton(const char *label,wxFunction fun);
 	wxPanel *AddPanel(void);
-	void			AddButtonNewLine(void) {panel_new_line=TRUE;}
+	void		AddButtonNewLine(void) {panel_new_line=TRUE;}
+// Could not find a way to do this
+//	void 		AddMenu(wxMenu *submenu,const char *label);
 	// Debugging
 	void		Dump(void);
 };

@@ -29,7 +29,7 @@ if (!LoadOptions())
 {
 	row_height=DEFAULT_ROW_HEIGHT;
 	default_col_width=DEFAULT_COL_WIDTH;
-	col_dim_char=FALSE;
+	col_dim_char=TRUE;
 	labels=0;
 	vert_fit=TRUE;
 	data_font=wxTheFontList->FindOrCreateFont(11,wxMODERN,wxNORMAL,wxNORMAL);
@@ -44,15 +44,9 @@ x_start=-1;y_start=-1;
 
 void	SpreadSheetDrawSettings::SetOptions(void)
 {
-ref_cnt=1;
-Bool vertfit=vert_fit,col_dim=col_dim_char,labels_col=ColLabels(),labels_row=RowLabels();
-int horiz,vert=row_height;
-char *horiz_opt=new char[20];
-float tw,th;			// figure out the font size for data display
+Bool labels_col=ColLabels(),labels_row=RowLabels();
+int horiz=col_width[1],vert=row_height;
 
-parent->GetDataExtent(&tw,&th);
-horiz=(col_dim_char) ? (int) (col_width[1]/tw) : (int) (col_width[1]/10);
-strcpy(horiz_opt,"pixels");
 MyDialogBox *options_dialog=new MyDialogBox((wxWindow *)parent,"Options");
 options_dialog->Form()->Add(wxMakeFormMessage("Fonts"));
 wxFormItem *lfont_but=wxMakeFormButton("Label",(wxFunction)spread_options_lfont_func);
@@ -63,20 +57,16 @@ options_dialog->Form()->Add(wxMakeFormNewLine());
 options_dialog->Form()->Add(wxMakeFormMessage("Cell size"));
 options_dialog->Form()->Add(wxMakeFormNewLine());
 options_dialog->Form()->Add(wxMakeFormShort("Horiz",&horiz,wxFORM_SLIDER,new wxList(wxMakeConstraintRange(0, 50), 0)));
-options_dialog->Form()->Add(wxMakeFormBool("char",&col_dim));
+options_dialog->Form()->Add(wxMakeFormBool("char",&horiz_fit));
 wxStringList *column_list=new wxStringList;
-char *col_str=new char[10];char tmp_str[10];
+char *col_str=new char[10];
 column_list->Add("All");
-for (int i=1;i<=col_width.Length();i++)
-{
-	sprintf(tmp_str,"%d",i);
-	column_list->Add(tmp_str);
-}
+column_list=wxStringListInts(col_width.Length(),column_list);
 options_dialog->Form()->Add(wxMakeFormString("Col",&col_str,wxFORM_CHOICE,
 	new wxList(wxMakeConstraintStrings(column_list),0)));
 options_dialog->Form()->Add(wxMakeFormNewLine());
 options_dialog->Form()->Add(wxMakeFormShort("Vert",&vert,wxFORM_SLIDER,new wxList(wxMakeConstraintRange(0, 50), 0)));
-options_dialog->Form()->Add(wxMakeFormBool("Fit to font",&vertfit));
+options_dialog->Form()->Add(wxMakeFormBool("Fit to font",&vert_fit));
 options_dialog->Form()->Add(wxMakeFormNewLine());
 options_dialog->Form()->Add(wxMakeFormMessage("Show Labels"));
 options_dialog->Form()->Add(wxMakeFormBool("row",&labels_row));
@@ -90,13 +80,9 @@ options_dialog->Form()->AssociatePanel(options_dialog);
 options_dialog->Go1();
 if (options_dialog->Completed()==wxOK)
 {
-	vert_fit=vertfit;
-	col_dim_char=col_dim;
-	// if the length of the column is measured in chars
 	int which_col=wxListFindString(column_list,col_str);
-	SetColWidth((col_dim) ? (int) (tw*horiz) : (int) (horiz*10),which_col);
-	// if we want to fit the row height to the font size
-	row_height=(vert_fit) ? (int) (tw+2*TEXT_OFF) : row_height;
+	SetColWidth(horiz,which_col);
+	SetRowHeight(row_height);
 	labels=0;
 	if (labels_row) labels|=S_LABEL_ROW;
 	if (labels_col) labels|=S_LABEL_COL;
@@ -173,6 +159,14 @@ return 1;
 
 
 // Column width
+int	SpreadSheetDrawSettings::GetColWidth(int col)
+{
+if (!col) col=1;
+if (horiz_fit)
+	return col_width[col]*tw+2*TEXT_OFF;
+else
+	return col_width[col]*COL_WIDTH_UNIT;
+}
 void SpreadSheetDrawSettings::SetColWidth(int	_c,int col)
 {
 if
@@ -180,7 +174,14 @@ if
 else
 	for (int i=1;i<=col_width.Length();i++) col_width[i]=_c;
 }
-
+// Font Size.  If the cell size is tied to the font size, i.e. if
+// vert_fit is used, or if the cell width is measured in chars, we
+// need to update these values every time the font changes
+void SpreadSheetDrawSettings::UpdateFontSize(float x,float y)
+{
+if (x<0 && y<0) parent->GetDataExtent(&x,&y);
+tw=(int)x;th=(int)y;
+}
 //**************************** SPREAD SHEET DATA SETTINGS ****************
 void SpreadSheetDataSettings::SetAutoLabelStr(const gString s,int what)
 {
@@ -212,6 +213,10 @@ top_frame=(SpreadSheet3D *)parent;
 sheet=_sheet;
 draw_settings=top_frame->DrawSettings();
 data_settings=top_frame->DataSettings();
+// Make sure that draw_settings knows about the current font size
+float tw,th;
+GetDataExtent(&tw,&th);
+draw_settings->UpdateFontSize(tw,th);
 // Allow double clicking on canvas
 AllowDoubleClick(TRUE);
 // Give myself some scrollbars if necessary
@@ -269,6 +274,12 @@ if (x_step>0 || y_step>0)
 		draw_settings->SetScrolling(TRUE);
 	}
 }
+if (x_step<0 && y_step<0 && draw_settings->Scrolling())
+{
+	((wxCanvas *)this)->SetScrollbars(x_step,y_step,XSTEPS,YSTEPS,4,4);
+	draw_settings->SetXScroll(x_step);draw_settings->SetYScroll(y_step);
+	draw_settings->SetScrolling(FALSE);
+}
 
 }
 
@@ -282,7 +293,7 @@ if (ev.LeftDown() || ev.ButtonDClick())
 {
 	float x,y;
 	ev.Position(&x,&y);
-	cell.row=(int) ((y-draw_settings->YStart())/draw_settings->GetRowHeight()+1);
+	cell.row=(int)((y-draw_settings->YStart())/draw_settings->GetRowHeight()+1);
 	cell.col=0;int i=1;
 	while (!cell.col && i<=sheet->GetCols())
 		{if (x<MaxX(i)) cell.col=i;i++;}
@@ -291,7 +302,7 @@ if (ev.LeftDown() || ev.ButtonDClick())
 	if (cell.col<1) cell.col=1;
 	if (cell.col>sheet->GetCols()) cell.col=sheet->GetCols();
 	top_frame->OnSelectedMoved(cell.row,cell.col);
-	if (ev.LeftDown() && !ev.ControlDown()) ProcessCursor(1);
+	if (ev.LeftDown() && !ev.ControlDown()) ProcessCursor(0);
 	if (ev.ButtonDClick() || (ev.LeftDown() && ev.ControlDown()))
 		top_frame->OnDoubleClick(cell.row,cell.col,sheet->GetLevel(),sheet->GetValue(cell.row,cell.col));
 }
@@ -354,8 +365,9 @@ cell.Reset(sheet->GetValue(cell.row,cell.col));
 UpdateCell(*(GetDC()),cell);
 top_frame->OnSelectedMoved(cell.row,cell.col);
 top_frame->SetStatusText(cell.str);
-// Make sure the cursor is visible
-if (draw_settings->Scrolling())
+// Make sure the cursor is visible.  Note, do not if this was a mouse
+// movement (ch=0)
+if (draw_settings->Scrolling() && ch!=0)
 {
 	int x_scroll=0,y_scroll=0;
 	if (draw_settings->YStart()+cell.row*draw_settings->GetRowHeight()>draw_settings->GetRealHeight())
@@ -412,7 +424,7 @@ dc.SetClippingRegion(MaxX(col-1)+TEXT_OFF,
 									draw_settings->YStart()+(row-1)*draw_settings->GetRowHeight()+TEXT_OFF,
 									draw_settings->GetColWidth(col)-2*TEXT_OFF,
 									draw_settings->GetRowHeight()-2*TEXT_OFF);
-dc.DrawText(sheet->GetValue(row,col),
+gDrawText(dc,sheet->GetValue(row,col),
 							MaxX(col-1)+TEXT_OFF,
 							draw_settings->YStart()+(row-1)*draw_settings->GetRowHeight()+TEXT_OFF);
 dc.DestroyClippingRegion();
@@ -633,7 +645,7 @@ sheet->SetSize(xs,ys,xe,ye);
 
 //**************************** SPREAD SHEET 3D *****************************
 SpreadSheet3D::SpreadSheet3D(int rows,int cols,int _levels,char *title,
-					wxFrame *parent,int _buttons,SpreadSheetDrawSettings *drs,
+					wxFrame *parent,unsigned int _features,SpreadSheetDrawSettings *drs,
 					SpreadSheetDataSettings *dts):	wxFrame(parent,title)
 {
 assert(rows>0);assert(cols>0);assert(_levels>0);
@@ -654,57 +666,82 @@ completed=wxRUNNING;
 editable=TRUE;
 levels=_levels;
 label=title;
-buttons=_buttons;
+features=_features;
 data=gList<SpreadSheet>(levels);
 // have to do this in two steps since arrays can not take constructors
 for (int i=1;i<=levels;i++) data[i].Init(rows,cols,i,NULL,this);
 // Turn on level #1
 cur_level=0;
 SetLevel(1);
-// Create the panel
-int h,w;
-panel_x=panel_y=0;
-panel_new_line=FALSE;
-GetClientSize(&w,&h);
-panel=new wxPanel(this,0,h-DEFAULT_BUTTON_SPACE,w,DEFAULT_BUTTON_SPACE,wxBORDER);
-if (levels>1)	// create a slider to choose the active level
-{
-	level_item=new wxSlider(panel,(wxFunction)SpreadSheet3D::spread_slider_func,NULL,1,1,levels,140);
-	level_item->SetClientData((char *)this);
-	panel->NewLine();
-	SavePanelPos();
-}
-if (buttons&OK_BUTTON)
-{
-	wxButton	*ok=AddButton("OK",(wxFunction)SpreadSheet3D::spread_ok_func);
-	ok->SetClientData((char*)this);
-}
-if (buttons&CANCEL_BUTTON)
-{
-	wxButton	*cancel=AddButton("Cancel",(wxFunction)SpreadSheet3D::spread_cancel_func);
-	cancel->SetClientData((char*)this);
-}
-if (buttons&PRINT_BUTTON)
-{
-	wxButton *print=AddButton("P",(wxFunction)SpreadSheet3D::spread_print_func);
-	print->SetClientData((char*)this);
-}
-if (buttons&OPTIONS_BUTTON)
-{
-	wxButton *options=AddButton("Config",(wxFunction)SpreadSheet3D::spread_options_func);
-	options->SetClientData((char*)this);
-}
-if (buttons&CHANGE_BUTTON)
-{
-	AddButtonNewLine();
-	wxButton *change=AddButton("Grow/Shrink",(wxFunction)SpreadSheet3D::spread_change_func);
-	change->SetClientData((char *)this);
-}
+if (levels>1) features|=ANY_BUTTON;	// we need a panel for the slider
+MakeFeatures();
 CreateStatusLine(2);
 // Size this frame according to the sheet dimentions
 Resize();
 }
 
+void SpreadSheet3D::MakeFeatures(void)
+{
+//------------------make the panel---------------------------
+if (features&ALL_BUTTONS) // Create the panel
+{
+	int h,w;
+	panel_x=panel_y=0;
+	panel_new_line=FALSE;
+	GetClientSize(&w,&h);
+	panel=new wxPanel(this,0,h-DEFAULT_BUTTON_SPACE,w,DEFAULT_BUTTON_SPACE,wxBORDER);
+
+	if (levels>1) // create a slider to choose the active level
+	{
+		level_item=new wxSlider(panel,(wxFunction)SpreadSheet3D::spread_slider_func,NULL,1,1,levels,140);
+		level_item->SetClientData((char *)this);
+		panel->NewLine();
+		SavePanelPos();
+	}
+	if (features&OK_BUTTON)
+	{
+		wxButton	*ok=AddButton("OK",(wxFunction)SpreadSheet3D::spread_ok_func);
+		ok->SetClientData((char*)this);
+	}
+	if (features&CANCEL_BUTTON)
+	{
+		wxButton	*cancel=AddButton("Cancel",(wxFunction)SpreadSheet3D::spread_cancel_func);
+		cancel->SetClientData((char*)this);
+	}
+	if (features&PRINT_BUTTON)
+	{
+		wxButton *print=AddButton("P",(wxFunction)SpreadSheet3D::spread_print_func);
+		print->SetClientData((char*)this);
+	}
+	if (features&OPTIONS_BUTTON)
+	{
+		wxButton *options=AddButton("Config",(wxFunction)SpreadSheet3D::spread_options_func);
+		options->SetClientData((char*)this);
+	}
+	if (features&CHANGE_BUTTON)
+	{
+		AddButtonNewLine();
+		wxButton *change=AddButton("Grow/Shrink",(wxFunction)SpreadSheet3D::spread_change_func);
+		change->SetClientData((char *)this);
+	}
+}
+else
+	panel=0;
+	SetMenuBar(MakeMenuBar());
+}
+void SpreadSheet3D::OnMenuCommand(int id)
+{
+switch (id)
+{
+	case OUTPUT_MENU: OnPrint(); break;
+	case CLOSE_MENU: OnOk(); break;
+	case OPTIONS_MENU: DrawSettings()->SetOptions(); break;
+	case CHANGE_MENU: break;
+	case HELP_MENU_ABOUT: OnHelp(HELP_MENU_ABOUT); break;
+	case HELP_MENU_CONTENTS: OnHelp(); break;
+	default: wxMessageBox("Unknown"); break;
+}
+}
 #pragma argsused		// turn off the _w,_h not used message
 void SpreadSheet3D::OnSize(int _w,int _h)
 {
@@ -712,7 +749,7 @@ int w,h;
 GetClientSize(&w, &h);
 panel->SetSize(0,h-DrawSettings()->PanelSize(),w,DrawSettings()->PanelSize());
 for (int i=1;i<=levels;i++) data[i].SetSize(0,0,w,h-DrawSettings()->PanelSize());
-}                                      
+}
 
 // Callback functions
 #pragma argsused		// turn off the ev not used message
@@ -863,7 +900,7 @@ if (draw_settings->RowLabels())
 		data[1].GetLabelExtent(data[cur_level].GetLabelRow(i),&w,&h);
 		if (w>max_w) max_w=(int)w;
 	}
-  draw_settings->SetXStart(max_w+3);
+	draw_settings->SetXStart(max_w+3);
 }
 if (draw_settings->ColLabels())
 {
@@ -879,10 +916,6 @@ if (draw_settings->ColLabels())
 void SpreadSheet3D::Resize(void)
 {
 int w,h,w1,h1;
-// Update the row height in draw_settings
-float tw,th;
-data[cur_level].GetDataExtent(&tw,&th);
-DrawSettings()->SetRowHeight((int) th);
 data[cur_level].GetSize(&w,&h);
 for (int i=1;i<=data.Length();i++) data[i].CheckSize();
 Panel()->Fit();Panel()->GetSize(&w1,&h1);
@@ -917,17 +950,18 @@ FitLabels();
 Resize();
 }
 
-wxButton *SpreadSheet3D::AddButton(char *label,wxFunction fun)
+wxButton *SpreadSheet3D::AddButton(const char *label,wxFunction fun)
 {
 #ifdef wx_msw
+assert(panel);
 panel->RealAdvanceCursor();
 SavePanelPos();
 if (panel_new_line)
 	{panel_y+=40;panel_x=PANEL_LEFT_MARGIN;panel_new_line=FALSE;}
-wxButton *button=new wxButton(panel,fun,label,panel_x,panel_y);
+wxButton *button=new wxButton(panel,fun,(char *)label,panel_x,panel_y);
 #else
 if (panel_new_line) panel->NewLine();
-wxButton *button=new wxButton(panel,fun,label);
+wxButton *button=new wxButton(panel,fun,(char *)label);
 #endif
 
 return button;
@@ -948,5 +982,49 @@ panel->NewLine();
 return panel;
 #endif
 }
+/*
+void SpreadSheet3D::AddMenu(wxMenu *submenu,const char *label)
+{
+assert(menubar);		// make sure a menubar exists
+menubar->Append(submenu,(char *)label);
+SetMenuBar(menubar);
+}
+*/
+wxMenuBar *SpreadSheet3D::MakeMenuBar(void)
+{
+wxMenuBar *tmp_menubar=0;
+//-------------------------------make menus----------------------------
+if (features&ALL_MENUS)
+{
+	tmp_menubar=new wxMenuBar;
+	wxMenu *file_menu=0;
+	if (features&(OUTPUT_MENU|CLOSE_MENU)) file_menu=new wxMenu;
+	if (features&OUTPUT_MENU)
+		file_menu->Append(OUTPUT_MENU,"Out&put","Output to any device");
+	if (features&CLOSE_MENU)
+		file_menu->Append(CLOSE_MENU,"&Close","Exit");
+	if (file_menu) tmp_menubar->Append(file_menu,"&File");
+	wxMenu *display_menu=0;
+	if (features&(OPTIONS_MENU|CHANGE_MENU)) display_menu=new wxMenu;
+	if (features&OPTIONS_MENU)
+		display_menu->Append(OPTIONS_MENU,"&Options","Configure display options");
+	if (features&CHANGE_MENU)
+		display_menu->Append(CHANGE_MENU,"&Change","Change sheet dimentions");
+	if (display_menu) tmp_menubar->Append(display_menu,"&Display");
+	if (features&HELP_MENU)
+	{
+		wxMenu *help_menu=new wxMenu;
+		help_menu->Append(HELP_MENU_ABOUT,"&About");
+		help_menu->Append(HELP_MENU_CONTENTS,"&Contents");
+		tmp_menubar->Append(help_menu,"&Help");
+	}
+}
+return tmp_menubar;
+}
 
+void SpreadSheet3D::SetMenuBar(wxMenuBar *bar)
+{
+menubar=bar;
+if (menubar) wxFrame::SetMenuBar(menubar);
+}
 
