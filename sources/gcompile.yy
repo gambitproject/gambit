@@ -111,14 +111,17 @@
 %%
 
 
-program:      statements EOC 
+program:      toplevel EOC 
               { if (!triv || !semi) emit(new Display); emit(new Pop); return 0; }
        |      error EOC   { RecoverFromError();  return 1; }
        |      error CRLF  { RecoverFromError();  return 1; }
 
-statements:   statement 
+toplevel:     statements
+        |     include toplevel
+        |     funcdecl toplevel
+
+statements:   statement
           |   statements sep statement
-          |   funcdecl
 
 sep:          SEMI    { semi = true; }
    |          CRLF    { semi = false; 
@@ -127,7 +130,7 @@ sep:          SEMI    { semi = true; }
 funcdecl:     DEFFUNC LBRACK NAME
               { funcname = tval; function = new gList<Instruction *>; }
               LBRACK formallist RBRACK COMMA statements
-              RBRACK   { if (!semi) emit(new Display);
+              RBRACK   { if (!triv && !semi) emit(new Display);
 			 if (!DefineFunction())  YYERROR; } 
 		
 formallist:
@@ -153,7 +156,6 @@ statement:    { triv = true; }
          |    conditional { triv = false; }
          |    whileloop { triv = false; }
          |    forloop   { triv = false; }
-         |    include 
          |    unassignment
          |    QUIT     { triv = false; quit = true; emit(new Quit); }
 
@@ -305,7 +307,7 @@ E8:           BOOLEAN       { emit(new Push<bool>(bval)); }
   |           list          { emit(new PushList(listlen.Pop())); }
   ;
 
-function:     NAME LBRACK  { emit(new InitCallFunction(tval)); } arglist RBRACK
+function:     NAME LBRACK { emit(new InitCallFunction(tval)); } arglist RBRACK
 
 arglist:
        |      unnamed_args
@@ -326,8 +328,8 @@ named_arg:    NAME RARROW { formalstack.Push(tval); } expression
                            { emit(new PushRef(tval));
                              emit(new BindRef(formalstack.Pop())); }
 
-list:         LBRACE  { listlen.Push(0); } listels RBRACE
-    |         LBRACE  { listlen.Push(0); } RBRACE
+list:         LBRACE CRLFopt  { listlen.Push(0); } listels CRLFopt RBRACE
+    |         LBRACE CRLFopt  { listlen.Push(0); } RBRACE
 
 listels:      listel
        |      listels CRLFopt COMMA CRLFopt listel

@@ -466,6 +466,7 @@ Portion *GSM_CentroidEfgRational(Portion **param)
 
 extern Portion *GSM_CentroidNfgFloat(Portion **);
 extern Portion *GSM_CentroidNfgRational(Portion **);
+extern Portion *GSM_CentroidNFSupport(Portion **);
 
 Portion *GSM_Chance(Portion **param)
 {
@@ -740,7 +741,7 @@ Portion *GSM_PlayerNode(Portion **param)
   return por;
 }
 
-Portion *GSM_Players(Portion **param)
+Portion *GSM_PlayersEfg(Portion **param)
 {
   BaseEfg &E = *((EfgPortion*) param[0])->Value();
 
@@ -749,6 +750,8 @@ Portion *GSM_Players(Portion **param)
   p->AddDependency();
   return p;
 }
+
+extern Portion *GSM_PlayersNfg(Portion **);
 
 Portion *GSM_PriorSibling(Portion **param)
 {
@@ -1012,6 +1015,10 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_CentroidNfgFloat, 0, "nfg", porNFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
 
+  FuncObj->SetFuncInfo(GSM_CentroidNFSupport, 1);
+  FuncObj->SetParamInfo(GSM_CentroidNFSupport, 0, "support",
+			porNF_SUPPORT);
+
   FuncObj->SetFuncInfo(GSM_CentroidNfgRational, 1);
   FuncObj->SetParamInfo(GSM_CentroidNfgRational, 0, "nfg", porNFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
@@ -1166,9 +1173,13 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Players");
-  FuncObj->SetFuncInfo(GSM_Players, 1);
-  FuncObj->SetParamInfo(GSM_Players, 0, "efg", porEFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetFuncInfo(GSM_PlayersEfg, 1);
+  FuncObj->SetParamInfo(GSM_PlayersEfg, 0, "efg", porEFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_PlayersNfg, 1);
+  FuncObj->SetParamInfo(GSM_PlayersNfg, 0, "nfg", porNFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("PriorSibling");

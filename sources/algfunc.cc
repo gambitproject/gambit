@@ -134,7 +134,7 @@ Portion *GSM_LiapEfg(Portion **param)
   BehavProfile<double> start(E);
 
   EFLiapModule<double> LM(E, LP, (foo) ? *foo : start);
-  LM.Liap(1);
+  LM.Liap();
 
   ((IntPortion *) param[1])->Value() = LM.NumEvals();
   ((FloatPortion *) param[2])->Value() = LM.Time();

@@ -14,8 +14,21 @@
 #include "glist.h"
 #include "mixed.h"
 
+Portion *ArrayToList(const gArray<NFPlayer *> &A)
+{
+  ListPortion *ret = new ListValPortion;
+  for (int i = 1; i <= A.Length(); i++)
+    ret->Append(new NfPlayerValPortion(A[i]));
+  return ret;
+}
 
-
+Portion *ArrayToList(const gArray<Strategy *> &A)
+{
+  ListPortion *ret = new ListValPortion;
+  for (int i = 1; i <= A.Length(); i++)
+    ret->Append(new StrategyValPortion(A[i]));
+  return ret;
+}
 
 //
 // These functions are added to the function list in efgfunc.cc along with
@@ -44,6 +57,22 @@ Portion *GSM_CentroidNfgRational(Portion **param)
   return por;
 }
 
+Portion *GSM_CentroidNFSupport(Portion **param)
+{
+  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  BaseMixedProfile *P;
+
+  if (S->BelongsTo().Type() == DOUBLE)
+    P = new MixedProfile<double>((Nfg<double> &) S->BelongsTo(), *S);
+  else
+    P = new MixedProfile<gRational>((Nfg<gRational> &) S->BelongsTo(), *S);
+
+  Portion *por = new MixedValPortion(P);
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+
 Portion *GSM_NumPlayersNfg(Portion **param)
 {
   BaseNfg &N = * ((NfgPortion*) param[0])->Value();
@@ -56,12 +85,50 @@ Portion *GSM_NameNfg(Portion **param)
   return new TextValPortion(N.GetTitle());
 }
 
+Portion *GSM_PlayersNfg(Portion **param)
+{
+  BaseNfg &N = *((NfgPortion*) param[0])->Value();
+
+  Portion* p = ArrayToList(N.PlayerList());
+  p->SetOwner( param[ 0 ]->Original() );
+  p->AddDependency();
+  return p;
+}
+
+Portion *GSM_AddStrategy(Portion **param)
+{
+  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  Strategy *s = ((StrategyPortion *) param[1])->Value();
+
+  S->GetNFStrategySet(s->nfp->GetNumber())->AddStrategy(s);
+  return new StrategyValPortion(s);
+}
+
+Portion *GSM_RemoveStrategy(Portion **param)
+{
+  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  Strategy *s = ((StrategyPortion *) param[1])->Value();
+  
+  S->GetNFStrategySet(s->nfp->GetNumber())->RemoveStrategy(s);
+  return new StrategyValPortion(s);
+}
+
 Portion *GSM_SetNameNfg(Portion **param)
 {
   BaseNfg &N = * ((NfgPortion*) param[0])->Value();
   gString name = ((TextPortion *) param[1])->Value();
   N.SetTitle(name);
   return param[0]->ValCopy();
+}
+
+Portion *GSM_Strategies(Portion **param)
+{
+  NFPlayer *P = (NFPlayer *) ((NfPlayerPortion *) param[0])->Value();
+
+  Portion *por = ArrayToList(P->StrategyList());
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
 }
 
 
@@ -233,7 +300,8 @@ Portion *GSM_GobitNfg(Portion **param)
   NP.delLam = ((FloatPortion *) param[8])->Value();
   NP.powLam = ((IntPortion *) param[9])->Value();
 
-  MixedProfile<double> *foo = (MixedProfile<double> *) ((MixedPortion *) param[10])->Value();
+  MixedProfile<double> *foo = (MixedProfile<double> *)
+    ((MixedPortion *) param[10])->Value();
   MixedProfile<double> start(N);
 
   NFGobitModule<double> M(N, NP, (foo) ? *foo : start);
@@ -363,7 +431,7 @@ Portion *GSM_LiapNfg(Portion **param)
   MixedProfile<double> start(N);
 
   NFLiapModule<double> LM(N, LP, (foo) ? *foo : start);
-  LM.Liap(1);
+  LM.Liap();
 
   ((FloatPortion *) param[1])->Value() = LM.Time();
   ((IntPortion *) param[2])->Value() = LM.NumEvals();
@@ -516,6 +584,16 @@ Portion *GSM_NewNfg(Portion **param)
   Nfg<double> *N = new Nfg<double>(d);
 
   return new NfgValPortion(N);
+}
+
+Portion *GSM_NewSupport(Portion **param)
+{
+  BaseNfg &N = * ((NfgPortion *) param[0])->Value();
+  Portion *p = new NfSupportValPortion(new NFSupport(N));
+
+  p->SetOwner( param[ 0 ]->Original() );
+  p->AddDependency();
+  return p;
 }
 
 Portion *GSM_WriteNfg(Portion **param)
@@ -764,6 +842,29 @@ void Init_nfgfunc(GSM *gsm)
 			new BoolValPortion(false));
   FuncObj->SetParamInfo(GSM_NewNfg, 2, "seed", porINTEGER,
 			new IntValPortion(0));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("NewSupport");
+  FuncObj->SetFuncInfo(GSM_NewSupport, 1);
+  FuncObj->SetParamInfo(GSM_NewSupport, 0, "nfg", porNFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("AddStrategy");
+  FuncObj->SetFuncInfo(GSM_AddStrategy, 2);
+  FuncObj->SetParamInfo(GSM_AddStrategy, 0, "support", porNF_SUPPORT);
+  FuncObj->SetParamInfo(GSM_AddStrategy, 1, "strategy", porSTRATEGY);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("RemoveStrategy");
+  FuncObj->SetFuncInfo(GSM_RemoveStrategy, 2);
+  FuncObj->SetParamInfo(GSM_RemoveStrategy, 0, "support", porNF_SUPPORT);
+  FuncObj->SetParamInfo(GSM_RemoveStrategy, 1, "strategy", porSTRATEGY);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Strategies");
+  FuncObj->SetFuncInfo(GSM_Strategies, 1);
+  FuncObj->SetParamInfo(GSM_Strategies, 0, "player", porPLAYER_NFG);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("ReadNfg");
