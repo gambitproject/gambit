@@ -16,7 +16,12 @@
 // Portion
 //-------------
 
-class FullEfg;
+namespace FullEfgNamespace {
+  class FullEfg;
+}
+
+using FullEfgNamespace::FullEfg;
+
 class Nfg;
 
 class Portion

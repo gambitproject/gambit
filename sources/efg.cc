@@ -231,7 +231,7 @@ const Action *Node::GetAction() const
   throw Efg::Exception();
 }
 
-void Node::DeleteOutcome(FullEfg::Outcome *outc)
+void Node::DeleteOutcome(FullEfgNamespace::Outcome *outc)
 {
   if (outc == outcome)   outcome = 0;
   for (int i = 1; i <= children.Length(); i++)

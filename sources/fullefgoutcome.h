@@ -5,7 +5,9 @@
 #ifndef FULLEFGOUTCOME_H
 #define FULLEFGOUTCOME_H
 
-class FullEfg::Outcome   {
+namespace FullEfgNamespace {
+
+class Outcome   {
 friend class FullEfg;
 friend class BehavProfile<double>;
 friend class BehavProfile<gRational>;
@@ -23,5 +25,7 @@ protected:
     { }
   ~Outcome()  { }
 };
+
+}   // namespace FullEfgOutcome
 
 #endif  // FULLEFGOUTCOME_H

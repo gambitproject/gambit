@@ -35,7 +35,7 @@ class Node    {
     gText name;
     Infoset *infoset;
     Node *parent;
-    FullEfg::Outcome *outcome;
+    FullEfgNamespace::Outcome *outcome;
     gBlock<Node *> children;
     Node *whichbranch, *ptr, *gameroot;
     void *solution;
@@ -43,7 +43,7 @@ class Node    {
     Node(FullEfg *e, Node *p);
     ~Node();
 
-    void DeleteOutcome(FullEfg::Outcome *outc);
+    void DeleteOutcome(FullEfgNamespace::Outcome *outc);
 
   public:
     FullEfg *Game(void) const   { return E; }

@@ -108,6 +108,14 @@ void Lexicon::MakeReducedStrats(const EFSupport &S,
     MakeStrategy(p);
 }
 
+//
+// The following two functions have been placed in the
+// FullEfgNamespace namespace for now, to make the friend
+// declarations in class FullEfg work correctly.
+//
+
+namespace FullEfgNamespace {
+
 Nfg *MakeReducedNfg(const EFSupport &support)
 {
   int i;
@@ -235,7 +243,7 @@ Nfg *MakeAfg(const Efg &E)
   return afg;
 }
 
-
+} // namespace FullEfgNamespace
 
 
 #include "base/glist.imp"
