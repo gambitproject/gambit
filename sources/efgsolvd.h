@@ -2,7 +2,7 @@
 // FILE: efgsolvd.h -- the main dialog for running ExtensiveForm solution
 //                     efg_algorithms. 
 //
-// @(#)efgsolvd.h	2.2 3/29/97
+// $Id$
 //
 
 // You must add an entry here for each new efg_algorithm.
