@@ -13,7 +13,6 @@
 
 #include "efgnfgi.h"
 #include "gambit.h"
-#include "accels.h"
 #include "efgconst.h"
 #include "behavsol.h"
 #include "solnlist.h"
@@ -41,14 +40,11 @@ private:
   EFSupport *m_currentSupport;
 
   EfgProfileList *m_solutionTable;
-  gList<Accel>    accelerators;
   gText   filename;
   EfgToolbar *m_toolbar;
   wxSashWindow *m_treeSashWindow, *m_nodeSashWindow, *m_toolSashWindow;
   wxSashWindow *m_solutionSashWindow;
 
-  // Private functions
-  gArray<AccelEvent> MakeEventNames(void);
   EfgCursorWindow *m_cursorWindow;
 
   wxPageSetupData m_pageSetupData;
@@ -157,7 +153,6 @@ private:
   void OnPrefsColors(wxCommandEvent &);
   void OnPrefsSave(wxCommandEvent &);
   void OnPrefsLoad(wxCommandEvent &);
-  void OnPrefsAccels(wxCommandEvent &);
 
   void OnProfilesNew(wxCommandEvent &);
   void OnProfilesClone(wxCommandEvent &);
@@ -194,9 +189,6 @@ public:
 
   // Interface for infoset hilighting between the tree and solution display
   void HilightInfoset(int pl, int iset, int who);
-
-  // Accelerators allow for platform-indep handling of hotkeys
-  int CheckAccelerators(wxKeyEvent &ev);
 
   gText UniqueSupportName(void) const;
 

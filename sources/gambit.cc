@@ -233,18 +233,25 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
   newMenu->Append(FILE_NEW_EFG, "&Extensive",
 		  "Create a new extensive form game");
   fileMenu->Append(FILE_NEW, "&New", newMenu, "Create a new game");
-  fileMenu->Append(FILE_OPEN, "&Open", "Open a saved game");
+  fileMenu->Append(FILE_OPEN, "&Open\tCtrl-O", "Open a saved game");
   fileMenu->AppendSeparator();
-  fileMenu->Append(FILE_QUIT, "&Quit", "Quit Gambit");
+  fileMenu->Append(FILE_QUIT, "&Quit\tCtrl-X", "Quit Gambit");
 
   wxMenu *helpMenu = new wxMenu;
-  helpMenu->Append(GAMBIT_HELP_CONTENTS, "&Contents", "Table of contents");
+  helpMenu->Append(GAMBIT_HELP_CONTENTS, "&Contents\tF1", "Table of contents");
   helpMenu->Append(GAMBIT_HELP_ABOUT, "&About", "About Gambit");
   
   wxMenuBar *menuBar = new wxMenuBar;
   menuBar->Append(fileMenu, "&File");
   menuBar->Append(helpMenu, "&Help");
   SetMenuBar(menuBar);
+
+ wxAcceleratorEntry entries[3];
+  entries[0].Set(wxACCEL_CTRL, (int) 'O', FILE_OPEN);
+  entries[1].Set(wxACCEL_CTRL, (int) 'X', FILE_QUIT);
+  entries[2].Set(wxACCEL_NORMAL, WXK_F1, GAMBIT_HELP_CONTENTS);
+  wxAcceleratorTable accel(3, entries);
+  SetAcceleratorTable(accel);
 
   wxConfig config("Gambit");
   m_fileHistory.Load(config);

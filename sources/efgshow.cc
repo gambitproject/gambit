@@ -262,7 +262,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuPREFS_COLORS, EfgShow::OnPrefsColors)
   EVT_MENU(efgmenuPREFS_SAVE, EfgShow::OnPrefsSave)
   EVT_MENU(efgmenuPREFS_LOAD, EfgShow::OnPrefsLoad)
-  EVT_MENU(efgmenuPREFS_ACCELS, EfgShow::OnPrefsAccels)
   EVT_MENU(efgmenuPROFILES_NEW, EfgShow::OnProfilesNew)
   EVT_MENU(efgmenuPROFILES_CLONE, EfgShow::OnProfilesClone)
   EVT_MENU(efgmenuPROFILES_RENAME, EfgShow::OnProfilesRename)
@@ -299,8 +298,17 @@ EfgShow::EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent)
 #endif
 
   CreateStatusBar();
+
+  wxAcceleratorEntry entries[5];
+  entries[0].Set(wxACCEL_CTRL, (int) 'O', FILE_OPEN);
+  entries[1].Set(wxACCEL_CTRL, (int) 'S', efgmenuFILE_SAVE);
+  entries[2].Set(wxACCEL_CTRL, (int) 'P', efgmenuFILE_PRINT);
+  entries[3].Set(wxACCEL_CTRL, (int) 'X', FILE_QUIT);
+  entries[4].Set(wxACCEL_NORMAL, WXK_F1, GAMBIT_HELP_CONTENTS);
+  wxAcceleratorTable accel(5, entries);
+  SetAcceleratorTable(accel);
+
   MakeMenus();
-  //  ReadAccelerators(accelerators, "EfgAccelerators", wxGetApp().ResourceFile());
     
   m_currentSupport = new EFSupport(m_efg);
   m_currentSupport->SetName("Full Support");
@@ -596,18 +604,18 @@ void EfgShow::MakeMenus(void)
   fileNewMenu->Append(FILE_NEW_EFG, "&Extensive",
 		      "Create a new extensive form game");
   fileMenu->Append(FILE_NEW, "&New", fileNewMenu, "Create a new game");
-  fileMenu->Append(FILE_OPEN, "&Open", "Open a saved game");
+  fileMenu->Append(FILE_OPEN, "&Open\tCtrl-O", "Open a saved game");
   fileMenu->Append(efgmenuFILE_CLOSE, "&Close", "Close this window");
   fileMenu->AppendSeparator();
-  fileMenu->Append(efgmenuFILE_SAVE, "&Save", "Save this game");
+  fileMenu->Append(efgmenuFILE_SAVE, "&Save\tCtrl-S", "Save this game");
   fileMenu->AppendSeparator();
   fileMenu->Append(efgmenuFILE_PAGE_SETUP, "Page Se&tup",
 		   "Set up preferences for printing");
   fileMenu->Append(efgmenuFILE_PRINT_PREVIEW, "Print Pre&view",
 		   "View a preview of the game printout");
-  fileMenu->Append(efgmenuFILE_PRINT, "&Print", "Print this game");
+  fileMenu->Append(efgmenuFILE_PRINT, "&Print\tCtrl-P", "Print this game");
   fileMenu->AppendSeparator();
-  fileMenu->Append(FILE_QUIT, "&Quit", "Quit Gambit");
+  fileMenu->Append(FILE_QUIT, "&Quit\tCtrl-X", "Quit Gambit");
 
   wxMenu *edit_menu = new wxMenu;
   wxMenu *nodeMenu  = new wxMenu;
@@ -816,14 +824,13 @@ void EfgShow::MakeMenus(void)
 
   prefs_menu->Append(efgmenuPREFS_COLORS, "&Colors",
 		     "Set player colors");
-  prefs_menu->Append(efgmenuPREFS_ACCELS, "&Accels",
-		     "Edit accelerator keys");
   prefs_menu->AppendSeparator();
   prefs_menu->Append(efgmenuPREFS_SAVE, "&Save");
   prefs_menu->Append(efgmenuPREFS_LOAD, "&Load");
   
   wxMenu *help_menu = new wxMenu;
-  help_menu->Append(GAMBIT_HELP_CONTENTS, "&Contents", "Table of contents");
+  help_menu->Append(GAMBIT_HELP_CONTENTS, "&Contents\tF1",
+		    "Table of contents");
   help_menu->Append(GAMBIT_HELP_ABOUT, "&About", "About Gambit");
 
   wxMenuBar *menu_bar = new wxMenuBar;
@@ -838,34 +845,6 @@ void EfgShow::MakeMenus(void)
 
   // Set the menu bar
   SetMenuBar(menu_bar);
-}
-
-//---------------------------------------------------------------------
-//             EXTENSIVE SHOW: EVENT-HANDLING HOOK MEMBERS
-//---------------------------------------------------------------------
-#include "efgaccl.h"
-gArray<AccelEvent> EfgShow::MakeEventNames(void)
-{
-    gArray<AccelEvent> events(NUM_EFG_EVENTS);
-
-    for (int i = 0; i < NUM_EFG_EVENTS; i++) 
-        events[i+1] = efg_events[i];
-
-    return events;
-}
-
-
-// Check Accelerators
-int EfgShow::CheckAccelerators(wxKeyEvent &ev)
-{
-  int id = ::CheckAccelerators(accelerators, ev);
-  //  gout << id << '\n';
-  
-  if (id) { 
-    //    OnMenuCommand(id);
-  }
-   
-  return id;
 }
 
 // if who == 2, hilight in the tree display
@@ -2184,12 +2163,6 @@ void EfgShow::OnPrefsSave(wxCommandEvent &)
 void EfgShow::OnPrefsLoad(wxCommandEvent &)
 {
   m_treeWindow->DrawSettings().LoadOptions();
-}
-
-void EfgShow::OnPrefsAccels(wxCommandEvent &)
-{
-  EditAccelerators(accelerators, MakeEventNames());
-  //  WriteAccelerators(accelerators, "EfgAccelerators", wxGetApp().ResourceFile());
 }
 
 void EfgShow::OnCloseWindow(wxCloseEvent &p_event)

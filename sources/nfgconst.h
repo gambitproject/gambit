@@ -59,13 +59,9 @@
 #define NFG_PREFS_FONT_DATA             208
 #define NFG_PREFS_FONT_LABELS           203
 #define NFG_PREFS_COLORS                200
-#define NFG_PREFS_ACCELS                202
 #define NFG_PREFS_SAVE                  209
 #define NFG_PREFS_LOAD                  210
 #define NFG_OPTIONS_MENU                211
-
-#define NFG_ACCL_PAYOFF                 400
-#define NFG_ACCL_NEXT_PAYOFF            410
 
 #define NFG_PROFILES_FILTER             700
 #define NFG_PROFILES_NEW                701

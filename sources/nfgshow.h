@@ -14,8 +14,6 @@
 #include "wxmisc.h"
 
 #include "nfgdraw.h"
-#include "accels.h"
-
 #include "gmisc.h"
 
 #include "nfg.h"
@@ -53,7 +51,6 @@ private:
 
   int m_rowPlayer, m_colPlayer;
   NormalDrawSettings m_drawSettings;
-  gList<Accel> m_accelerators;
   gText m_fileName;
 
   wxPageSetupData m_pageSetupData;
@@ -63,9 +60,6 @@ private:
   void UpdateMenus(void);
   gText UniqueSupportName(void) const;
   void AdjustSizes(void);
-
-  // process accelerators
-  gArray<AccelEvent> MakeEventNames(void);
 
   // Menu event handlers
   void OnFileSave(wxCommandEvent &);
@@ -105,7 +99,6 @@ private:
   void OnPrefsFontData(wxCommandEvent &);
   void OnPrefsFontLabels(wxCommandEvent &);
   void OnPrefsColors(wxCommandEvent &);
-  void OnPrefsAccels(wxCommandEvent &);
   void OnPrefsSave(wxCommandEvent &);
   void OnPrefsLoad(wxCommandEvent &);
 
@@ -155,9 +148,6 @@ public:
   int GetDecimals(void) const { return m_drawSettings.GetDecimals(); }
   void SetDecimals(int p_decimals) { m_drawSettings.SetDecimals(p_decimals); }
   bool OutcomeValues(void) const { return m_drawSettings.OutcomeValues(); }
-
-  int CheckAccelerators(wxKeyEvent &ev);
-
 
   DECLARE_EVENT_TABLE()
 };

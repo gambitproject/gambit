@@ -161,7 +161,6 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_PREFS_FONT_DATA, NfgShow::OnPrefsFontData)
   EVT_MENU(NFG_PREFS_FONT_LABELS, NfgShow::OnPrefsFontLabels)
   EVT_MENU(NFG_PREFS_COLORS, NfgShow::OnPrefsColors)
-  EVT_MENU(NFG_PREFS_ACCELS, NfgShow::OnPrefsAccels)
   EVT_MENU(NFG_PREFS_SAVE, NfgShow::OnPrefsSave)
   EVT_MENU(NFG_PREFS_LOAD, NfgShow::OnPrefsLoad)
   EVT_MENU(NFG_PROFILES_NEW, NfgShow::OnProfilesNew)
@@ -201,6 +200,16 @@ NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
   m_supports.Append(m_currentSupport);
 
   MakeMenus();
+
+  wxAcceleratorEntry entries[5];
+  entries[0].Set(wxACCEL_CTRL, (int) 'O', FILE_OPEN);
+  entries[1].Set(wxACCEL_CTRL, (int) 'S', NFG_FILE_SAVE);
+  entries[2].Set(wxACCEL_CTRL, (int) 'P', NFG_FILE_PRINT);
+  entries[3].Set(wxACCEL_CTRL, (int) 'X', FILE_QUIT);
+  entries[4].Set(wxACCEL_NORMAL, WXK_F1, GAMBIT_HELP_CONTENTS);
+  wxAcceleratorTable accel(5, entries);
+  SetAcceleratorTable(accel);
+
   CreateStatusBar(3);
   m_toolbar = new NfgToolbar(this);
 
@@ -225,9 +234,6 @@ NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
 
   m_panelSashWindow->Show(true);
 
-  // Create the accelerators
-  //  ReadAccelerators(accelerators, "NfgAccelerators", wxGetApp().ResourceFile());
-  
   SetPlayers(1, 2);
 
   m_nfg.SetIsDirty(false);
@@ -253,18 +259,18 @@ void NfgShow::MakeMenus(void)
   fileNewMenu->Append(FILE_NEW_EFG, "&Extensive",
 		      "Create a new extensive form game");
   fileMenu->Append(FILE_NEW, "&New", fileNewMenu, "Create a new game");
-  fileMenu->Append(FILE_OPEN, "&Open", "Open a saved game");
+  fileMenu->Append(FILE_OPEN, "&Open\tCtrl-O", "Open a saved game");
   fileMenu->Append(NFG_FILE_CLOSE, "&Close", "Close this window");
   fileMenu->AppendSeparator();
-  fileMenu->Append(NFG_FILE_SAVE, "&Save", "Save this game");
+  fileMenu->Append(NFG_FILE_SAVE, "&Save\tCtrl-S", "Save this game");
   fileMenu->AppendSeparator();
   fileMenu->Append(NFG_FILE_PAGE_SETUP, "Page Se&tup",
 		   "Set up preferences for printing");
   fileMenu->Append(NFG_FILE_PRINT_PREVIEW, "Print Pre&view",
 		   "View a preview of the game printout");
-  fileMenu->Append(NFG_FILE_PRINT, "&Print", "Print this game");
+  fileMenu->Append(NFG_FILE_PRINT, "&Print\tCtrl-P", "Print this game");
   fileMenu->AppendSeparator();
-  fileMenu->Append(FILE_QUIT, "&Quit", "Quit Gambit");
+  fileMenu->Append(FILE_QUIT, "&Quit\tCtrl-X", "Quit Gambit");
   
   wxMenu *editMenu = new wxMenu;
   editMenu->Append(NFG_EDIT_LABEL, "&Label", "Set the label of the game");
@@ -359,13 +365,12 @@ void NfgShow::MakeMenus(void)
   prefsFontMenu->Append(NFG_PREFS_FONT_LABELS, "&Labels", "Set label font");
   prefsMenu->Append(NFG_PREFS_FONT, "&Font", prefsFontMenu, "Set fonts");
   prefsMenu->Append(NFG_PREFS_COLORS, "&Colors", "Set player colors");
-  prefsMenu->Append(NFG_PREFS_ACCELS, "&Accels", "Edit accelerators");
   prefsMenu->AppendSeparator();
   prefsMenu->Append(NFG_PREFS_SAVE, "&Save", "Save current configuration");
   prefsMenu->Append(NFG_PREFS_LOAD, "&Load", "Load configuration");
 
   wxMenu *helpMenu = new wxMenu;
-  helpMenu->Append(GAMBIT_HELP_CONTENTS, "&Contents", "Table of contents");
+  helpMenu->Append(GAMBIT_HELP_CONTENTS, "&Contents\tF1", "Table of contents");
   helpMenu->Append(GAMBIT_HELP_ABOUT, "&About", "About Gambit");
 
   wxMenuBar *menuBar = new wxMenuBar;
@@ -1195,13 +1200,6 @@ void NfgShow::OnPrefsColors(wxCommandEvent &)
 {
 }
 
-void NfgShow::OnPrefsAccels(wxCommandEvent &)
-{
-  EditAccelerators(m_accelerators, MakeEventNames());
-  //  WriteAccelerators(m_accelerators, "NfgAccelerators", wxGetApp().ResourceFile());
-}
-
-
 void NfgShow::OnPrefsSave(wxCommandEvent &)
 {
   m_drawSettings.SaveSettings();
@@ -1331,34 +1329,6 @@ void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
     m_table->OnChangeValues();
     InterfaceDied();
   }
-}
-
-
-
-#include "nfgaccl.h"
-
-// These events include those for NormShow and those for SpreadSheet3D
-gArray<AccelEvent> NfgShow::MakeEventNames(void)
-{
-  gArray<AccelEvent> events(NUM_NFG_EVENTS);
-
-  for (int i = 0; i < NUM_NFG_EVENTS; i++)
-    events[i+1] = nfg_events[i];
-
-  return events;
-}
-
-
-int NfgShow::CheckAccelerators(wxKeyEvent &ev)
-{
-  int id = ::CheckAccelerators(m_accelerators, ev);
-
-#ifdef NOT_PORTED_YET
-  if (id) 
-    m_table->OnMenuCommand(id);
-#endif  // NOT_PORTED_YET
-
-  return id;
 }
 
 const gList<MixedSolution> &NfgShow::Solutions(void) const
