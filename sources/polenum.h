@@ -25,7 +25,8 @@ public:
 
 
 int PolEnum(const NFSupport &, const PolEnumParams &, 
-	    gList<MixedSolution> &, long &nevals, double &time);
+	    gList<MixedSolution> &, long &nevals, double &time,
+	    bool &is_singular);
 
 #endif    // POLENUM_H
 

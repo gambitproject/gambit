@@ -16,7 +16,8 @@ PolEnumParams::PolEnumParams(gStatus &status_)
 { }
 
 int PolEnum(const NFSupport &support, const PolEnumParams &params,
-	    gList<MixedSolution> &solutions, long &nevals, double &time)
+	    gList<MixedSolution> &solutions, long &nevals, double &time,
+	    bool &is_singular)
 {
   if (params.precision == precDOUBLE)  {
     PolEnumModule<gDouble> module(support, params);
@@ -24,6 +25,10 @@ int PolEnum(const NFSupport &support, const PolEnumParams &params,
     nevals = module.NumEvals();
     time = module.Time();
     solutions = module.GetSolutions();
+    if (module.IsSingular()) 
+      is_singular = true;
+    else 
+      is_singular = false;
   }
   else if (params.precision == precRATIONAL)  {
     PolEnumModule<gRational> module(support, params);
@@ -31,6 +36,10 @@ int PolEnum(const NFSupport &support, const PolEnumParams &params,
     nevals = module.NumEvals();
     time = module.Time();
     solutions = module.GetSolutions();
+    if (module.IsSingular()) 
+      is_singular = true;
+    else 
+      is_singular = false;
   }
 
   return 1;
