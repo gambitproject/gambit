@@ -326,13 +326,9 @@ FLOAT 	& Evaluates to a floating point number \\
 
 TEXT	& String of arbitrary length enclosed in quotation marks\\ 
 
-EFG	& Game in extensive form.  An extensive form is defined as any
-element of the set of possible return values of built-in functions
-that return data type EFG.\\
+EFG	& Game in extensive form\\
 
-NFG	& Game in normal form.  A normal form is defined as any
-element of the set of possible return values of built-in functions
-that return data type NFG\\
+NFG	& Game in normal form\\
 
 NODE	& A node (may only be a subvariable of an extensive
 form problem) \\ 
@@ -340,18 +336,11 @@ form problem) \\
 DATATYPE & Defines precision (constants: Float or
 Rational) \\ 
 
-STRATEGY & In a normal form game, one of the options a player may adopt.
-This may only be a subvariable of a NFG \\
+STRATEGY & In a normal form game, one of the options a player may adopt
 
-MIXED	& {Profile of mixed strategies.  Can only be a
-subvariable of a normal form problem.  That is, if n is a problem in
-normal form, a variable of type MIXED can only be assigned to a
-subvariable of the form n.x.}\\ 
+MIXED	& Profile of mixed strategies\\
 
-BEHAV	& Profile of behavioral
-strategies.  Can only be a subvariable of an extensive form problem.
-That is, if e is a problem in extensive form, a variable of type BEHAV
-can only be assigned to a subvariable of the form e.x. \\
+BEHAV	& Profile of behavioral strategies
 \end{tabular}
 
 
@@ -387,13 +376,13 @@ of the list and any sublists must always be the same.  Hence
 	{ 3, { 4, 6 }, 23 }
 \end{verbatim}
 
-is a legal list, since all the elements are of type \verb+INTEGER+, but
+is a legal list, since all the elements are of type INTEGER, but
 
 \begin{verbatim}
 	{ 3, { 4.2, 5.7 }, 23 }
 \end{verbatim}
 
-is not, since the second element is a \verb+LIST(FLOAT)+.
+is not, since the second element is a LIST(FLOAT).
 
 \subsubsection{Boolean}
 
@@ -457,12 +446,12 @@ Let \verb+a+ and \verb+b+ be statements evaluating to INTEGER. Then
 any integer $n>1$ can be viewed as short form for \verb+Plus[n-1,1]+  
  
 \item
-\verb+Neg[a]+ returns the integer which when added to \verb+a+ yields
+\verb+Negate[a]+ returns the integer which when added to \verb+a+ yields
 0.  It has the short form \verb&-a&.  
  
 \item
 \verb+Minus[a,b]+ returns the sum of the values returned by
-\verb+a+ and \verb+Neg[b]+.  It has the short form \verb&a - b&.  
+\verb+a+ and \verb+Negate[b]+.  It has the short form \verb&a - b&.  
 
 \item
 \verb+Times[a,b]+ returns the product of the values returned by
@@ -476,7 +465,7 @@ short form \verb+a DIV b+.
 \item
 \verb+Modulus[a,b]+ returns the remainder of \verb+a+ divided by
 \verb+b+.  This is the integer which, when added to
-\verb+Times[b,Div[a,b]]+, yields \verb+a+.  It has the short form 
+\verb+Times[b,Divide[a,b]]+, yields \verb+a+.  It has the short form 
 \verb+a MOD b+.
 \item
 
@@ -486,11 +475,11 @@ Relational operators take INTEGER arguments and
 return a BOOLEAN
 \bd
 \item
-\verb+GreaterThan[a,b]+ returns \verb+True+ if \verb+a+$>$\verb+b+, and
+\verb+Greater[a,b]+ returns \verb+True+ if \verb+a+$>$\verb+b+, and
 returns \verb+False+ otherwise.  It has the short form \verb+a > b+.
 
 \item
-\verb+LessThan[a,b]+ returns \verb+True+ if \verb+a+$<$\verb+b+, and
+\verb+Less[a,b]+ returns \verb+True+ if \verb+a+$<$\verb+b+, and
 returns \verb+False+ otherwise.  It has the short form \verb+a < b+.
 
 \item
@@ -532,7 +521,7 @@ to \verb+y/z+
 short form \verb&a + b&.  
  
 \item
-\verb+Neg[a]+ returns \verb+-w / x+.  It has the short form \verb&-a&.  
+\verb+Negate[a]+ returns \verb+-w / x+.  It has the short form \verb&-a&.  
  
 \item
 \verb+Minus[a,b]+ returns \verb+w * z - y * x / x * z+.  
@@ -556,11 +545,11 @@ Relational operators for RATIONAL can also be defined in terms of
 relational operators for INTEGER.  
 \bd
 \item
-\verb+GreaterThan[a,b]+ returns \verb+w * z +$>$\verb+ x * y+.
+\verb+Greater[a,b]+ returns \verb+w * z +$>$\verb+ x * y+.
 It has the short form \verb+a > b+.
 
 \item
-\verb+LessThan[a,b]+ returns \verb+w * z +$<$\verb+ x * y+.
+\verb+Less[a,b]+ returns \verb+w * z +$<$\verb+ x * y+.
 It has the short form \verb+a < b+.
 
 \item
@@ -616,7 +605,7 @@ is associative (it is not always the case that
 \verb+(a*b)*c = a*(b*c)+).  Nor does multiplication
 distribute over addition (it is not always true that 
 \verb&a*(b+c) = a*b+a*c&.  Further, not all floating point numbers have
-multiplicative inverses.  This means that we can have such wonderful
+multiplicative inverses.  This means that we can have such
 properties as \verb+b*(a/b) != a+ (if \verb+a = 1+ and
 \verb+b = 3+, for example), or \verb&a+b = a& and yet not \verb+ b = 0+.  In
 addition to these problems, the result of a floating poing operation
@@ -642,7 +631,7 @@ and \verb+m = Insig[x]+.
 It has the short form \verb&a + b&.
  
 \item
-\verb+Neg[a]+ returns \verb+-w E x+.  It has the short form \verb&-a&.  
+\verb+Negate[a]+ returns \verb+-w E x+.  It has the short form \verb&-a&.  
  
 \item
 \verb+Minus[a,b]+ returns \verb+Plus[a, -b]+
@@ -666,11 +655,11 @@ Relational operators for FLOAT can also be defined in terms of
 relational operators for INTEGER.  
 \bd
 \item
-\verb+GreaterThan[a,b]+ returns \verb&w*10^(x+n) > y*10^(z+n)&.
+\verb+Greater[a,b]+ returns \verb&w*10^(x+n) > y*10^(z+n)&.
 It has the short form \verb+a > b+.
 
 \item 
-\verb+LessThan[a,b]+ returns \verb&w*10^(x+n) < y*10^(z+n)&.
+\verb+Less[a,b]+ returns \verb&w*10^(x+n) < y*10^(z+n)&.
 It has the short form \verb+a < b+.
 
 \item
@@ -848,7 +837,8 @@ And[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN
 
 \item
 \protect \large \begin{verbatim}
-AppendNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
+AppendNode[n->NODE, pl->INTEGER, br->INTEGER, {acts->LIST(TEXT)},
+	   {probs->LIST(T)}] =: NODE
 \end{verbatim} \normalsize
 
 \bd
@@ -874,7 +864,14 @@ is created automatically.
 \ed
 
 \item
-[Optional parameters:] None.
+[Optional parameters:]\hfil\null
+\bd
+\item
+[acts:] A list of names for the actions at the newly-created information set
+\item
+[probs:] A list of probabilities for the actions.  This may only be specified
+if the player is the chance player (player number 0)
+\ed
 \ed
 
 \item 
@@ -1861,7 +1858,7 @@ For T = INTEGER, FLOAT, RATIONAL, or TEXT.
 
 \item
 \protect \large \begin{verbatim}
-GreaterThan[x->T, y->T] =: BOOLEAN
+Greater[x->T, y->T] =: BOOLEAN
 \end{verbatim}\normalsize
 
 For T = INTEGER, FLOAT, RATIONAL, or TEXT.
@@ -2220,10 +2217,10 @@ Lemke[N->NFG, {nequilib->INTEGER},
 
 \bd
 \item
-[Description:] Searches for one solution of the specified normal form
+[Description:] Searches for equilibria of the specified normal form
 game specified using the Lemke-Howson algorithm.
 \item
-[Return value:] The list of solutions found.
+[Return value:] The list of equilibria found.
 \item
 [Required parameters:]\hfil\null
 
@@ -2238,9 +2235,9 @@ searched.
 
 \bd
 \item
-[nequilib:] Specifies the number of equilibria to find.  If not given
-the default value is zero, which means that all equilibria are to be
-found.
+[nequilib:] Specifies the number of equilibria to find.  If not specified,
+the default value is zero, which means that all equilibria reachable by
+the algorithm are to be found.
 \item
 [time:] Returns the elapsed time for the operation.
 \ed
@@ -2301,7 +2298,7 @@ For T = INTEGER, FLOAT, RATIONAL, or TEXT.
 
 \item
 \protect \large \begin{verbatim}
-LessThan[x->T, y->T] =: BOOLEAN
+Less[x->T, y->T] =: BOOLEAN
 \end{verbatim}\normalsize
 
 For T = INTEGER, FLOAT, RATIONAL, or TEXT.
@@ -2409,6 +2406,10 @@ Default is 2.0e-10.
 \item
 \protect \large \begin{verbatim}
 MergeInfosets[n->NODE, to->NODE] =: NODE
+\end{verbatim}\normalsize
+
+\protect \large \begin{verbatim}
+MergeInfosets[n->LIST(NODE)] =: INFOSET
 \end{verbatim}\normalsize
 
 \bd
@@ -2593,20 +2594,23 @@ NameOf[n->NODE] =: TEXT
 
 \item
 \protect \large \begin{verbatim}
-NewEfg[{type->DATATYPE}] =: EFG
+NewEfg[{players->LIST(TEXT)}, {type->DATATYPE}] =: EFG
 \end{verbatim}\normalsize
 
 \bd
 \item
 [Description:] Allocates and returns a new extensive form game.
 \item
-[Return value:] The newly allocated problem in extensive form.
+[Return value:] The newly allocated game in extensive form.
 \item
 [Required parameters:] None.
 \item
 [Optional parameters:]\hfil\null
 
 \bd
+\item
+[players:] A list of text names for the players to create by default.  If
+unspecified, the new game has only the chance player.
 \item
 [type:] Specifies the type (Float or Rational) of the new extensive
 form problem.
@@ -3116,6 +3120,22 @@ specified node.
 
 \item
 [Optional parameters:] None.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+PlayerList[E->EFG] =: LIST(PLAYER)
+\end{verbatim} \normalsize
+
+\bd
+\item
+[Description:]
+\item
+[Return value:]
+\item
+[Required parameters:]
+\item
+[Optional parameters:]
 \ed
 
 \item 
