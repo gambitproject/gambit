@@ -202,7 +202,7 @@ ITEM 0006:  Infinite loop in LcpSolve[nfg]
 DATE:     9/8/1999 by TLT (was Bug C28 in bugs_gcl)
 AFFECTS:  GCL (all platforms?)
 STATUS:   OPEN
-SEVERITY: INTERMEDIATE
+SEVERITY: MAJOR
 DETAILS:
 
 The following hangs the GCL:
@@ -604,6 +604,8 @@ all the dialogs on the Edit menu on the normal form seem just fine to me.
 This sounds like it might be an outdated problem; I replaced a spreadsheet
 version of that dialog months ago which did have a similar problem.
 
+Need fix Behav also. 
+
 ---------------
 
 ITEM 0024:  Scrolling problems
@@ -834,11 +836,11 @@ GUI) for computing two or more Perfect equilibria to first eliminate
 all weakly dominated strategies, and then apply EnumMixed.  I have
 finally realized that this is not correct. Even if we eliminate all
 strategies weakly dominated by mixed strategies, it does not guarantee
-that all Nash equilibria of the remaining game is Nash.  The following
+that all Nash equilibria of the remaining game are perfect.  The following
 game (supplied by Tom Palfrey) is a counterexample.
 
 
-  GCL1:= << n:=LoadNfg["../nfg/mixdom3.nfg"]
+  GCL1:= << n:=LoadNfg["../nfg/perfect1.nfg"]
   (Nfg) "Game with no dominated pure strategies, and dominated equilibrium"
   GCL2:= << Payoffs[n]
   { { { 3, 1 }, { 0, 0 }, { 0, 1 } },
@@ -893,13 +895,49 @@ ITEM 0034:  Writing to gout
 DATE:     9/8/1999 by TLT/RDM
 AFFECTS:  GUI, GCL; all platforms
 STATUS:   OPEN
-SEVERITY: CRUCIAL
+SEVERITY: MINOR
 DETAILS:
 
 Some algorithms write debugging or tracing information to gout.  These
 calls should either be removed, or directed to a tracefile.
 
 ---------------
+
+
+ITEM 0035:  LiapSolve not setting solutions to Nash
+
+DATE:     9/8/1999 by TLT/RDM
+AFFECTS:  GCL; a
+STATUS:   OPEN
+SEVERITY: CRUCIAL
+DETAILS:
+
+
+GCL1:= << e:=LoadEfg["../efg/e01.efg"
+GCL2:= << AllNash[e]                  
+ Warning: Entering infinite loop.  Use Ctl-C to exit.
+{ (Behav) { { 1.000000 0.000000 } }{ { 0.999998 0.000002 } }{ { 0.248126 0.751874 } },
+  (Behav) { { 1.000001 0.000000 } }{ { 0.999992 0.000008 } }{ { 0.231082 0.768918 } },
+  (Behav) { { 1.000000 0.000000 } }{ { 1.000000 0.000000 } }{ { 0.247619 0.752381 } },
+  (Behav) { { 1.000001 0.000000 } }{ { 0.999991 0.000009 } }{ { 0.246676 0.753324 } },
+  (Behav) { { 1.000001 0.000000 } }{ { 0.999991 0.000009 } }{ { 0.249250 0.750750 } },
+  (Behav) { { 1.000000 0.000000 } }{ { 0.999994 0.000006 } }{ { 0.234463 0.765537 } },
+  (Behav) { { 1.000001 0.000000 } }{ { 0.999994 0.000006 } }{ { 0.238701 0.761299 } },
+  (Behav) { { 1.000000 0.000000 } }{ { 0.999999 0.000001 } }{ { 0.246528 0.753472 } },
+  (Behav) { { 0.999992 0.000008 } }{ { 0.999985 0.000015 } }{ { 0.249969 0.750031 } } }
+GCL3:= << IsNash[GCL2]
+{ Unknown,
+  Unknown,
+  Unknown,
+  Unknown,
+  Unknown,
+  Unknown,
+  Unknown,
+  Unknown,
+  Unknown }
+
+
+
 
 
 
