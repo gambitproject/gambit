@@ -189,7 +189,7 @@ CallListFunction( GSM* gsm, Portion** ParamIn )
   p = new ListValPortion();
 
   assert( Source != 0 );
-  assert( Source->Length() > 0 );
+  // assert( Source->Length() > 0 );
 
   // i is now the index in the lists
   for( i = 1; i <= Source->Length(); i++ )
