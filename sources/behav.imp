@@ -202,10 +202,9 @@ void PureBehavProfile<T>::InfosetProbs(gPVector<T> &probs) const
 }
 
 
-
-//-------------------------------------------------------------------------
-//                    BehavProfile<T> member functions
-//-------------------------------------------------------------------------
+//------------------------------------------------------------------------
+//      Declaration and implementation of BehavProfile<T>::BehavNode
+//------------------------------------------------------------------------
 
 template <class T> class BehavNode  {
 public:
@@ -231,98 +230,103 @@ template <class T> BehavNode<T>::~BehavNode()
        delete children[child++]);
 }
 
-template <class T> BehavProfile<T>::BehavProfile(const BehavProfile<T> &p)
-  : gDPVector<T>(p), E(p.E),
-    root(new BehavNode<T>(p.E->RootNode(), p.E->NumPlayers())),
-    support(p.support), payoffs(new gRectArray<T>(*p.payoffs))
+//-------------------------------------------------------------------------
+//   BehavProfile<T>: Constructors, Destructor, Constructive Operators
+//-------------------------------------------------------------------------
+
+template <class T>
+BehavProfile<T>::BehavProfile(const BehavProfile<T> &p_profile)
+  : gDPVector<T>(p_profile), m_efg(p_profile.m_efg),
+    m_root(new BehavNode<T>(p_profile.m_efg->RootNode(),
+			    p_profile.m_efg->NumPlayers())),
+    m_support(p_profile.m_support),
+    m_payoffs(new gRectArray<T>(*p_profile.m_payoffs))
 {
-  gArray<int> dim(E->GetChance()->NumInfosets());
-  int iset = 0;
-  for ( iset = 1; iset <= dim.Length(); iset++)
-    dim[iset] = E->GetChance()->Infosets()[iset]->NumActions();
-  chanceprobs = new gPVector<T>(dim);
-  for ( iset = 1; iset <= dim.Length(); iset++)
-    for (int act = 1; act <= E->GetChance()->Infosets()[iset]->NumActions(); act++)
-       (*chanceprobs)(iset, act) = E->GetChanceProb(E->GetChance()->Infosets()[iset], act);
+  gArray<int> dim(m_efg->GetChance()->NumInfosets());
+  for (int iset = 1; iset <= dim.Length(); iset++)
+    dim[iset] = m_efg->GetChance()->Infosets()[iset]->NumActions();
+  m_chanceprobs = new gPVector<T>(dim);
+  for (int iset = 1; iset <= dim.Length(); iset++)
+    for (int act = 1; act <= m_efg->GetChance()->Infosets()[iset]->NumActions(); act++)
+       (*m_chanceprobs)(iset, act) = m_efg->GetChanceProb(m_efg->GetChance()->Infosets()[iset], act);
 }
 
-template <class T> BehavProfile<T>::BehavProfile(const BehavSolution &p)
-  : gDPVector<T>(p.Game().NumActions()), E(&p.Game()),
-    root(new BehavNode<T>(p.Game().RootNode(), p.Game().NumPlayers())),
-    support(EFSupport(p.Game())), 
-    payoffs(new gRectArray<T>(p.Game().NumOutcomes(), p.Game().NumPlayers()))
+template <class T> 
+BehavProfile<T>::BehavProfile(const BehavSolution &p_solution)
+  : gDPVector<T>(p_solution.Game().NumActions()), m_efg(&p_solution.Game()),
+    m_root(new BehavNode<T>(p_solution.Game().RootNode(),
+			    p_solution.Game().NumPlayers())),
+    m_support(EFSupport(p_solution.Game())), 
+    m_payoffs(new gRectArray<T>(p_solution.Game().NumOutcomes(),
+				p_solution.Game().NumPlayers()))
 {
-  for (int pl = 1; pl <= E->NumPlayers(); pl++) {
-    EFPlayer *player = E->Players()[pl];
+  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
+    EFPlayer *player = m_efg->Players()[pl];
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       Infoset *infoset = player->Infosets()[iset];
       for (int act = 1; act <= infoset->NumActions(); act++)
-	(*this)(pl, iset, act) = p(pl, iset, act);
+	(*this)(pl, iset, act) = p_solution(pl, iset, act);
     }
   }
 
-  gArray<int> dim(E->GetChance()->NumInfosets());
+  gArray<int> dim(m_efg->GetChance()->NumInfosets());
   for (int iset = 1; iset <= dim.Length(); iset++)
-    dim[iset] = E->GetChance()->Infosets()[iset]->NumActions();
-  chanceprobs = new gPVector<T>(dim);
+    dim[iset] = m_efg->GetChance()->Infosets()[iset]->NumActions();
+  m_chanceprobs = new gPVector<T>(dim);
   for (int iset = 1; iset <= dim.Length(); iset++)
-    for (int act = 1; act <= E->GetChance()->Infosets()[iset]->NumActions(); act++)
-       (*chanceprobs)(iset, act) = E->GetChanceProb(E->GetChance()->Infosets()[iset], act);
+    for (int act = 1; act <= m_efg->GetChance()->Infosets()[iset]->NumActions(); act++)
+       (*m_chanceprobs)(iset, act) = m_efg->GetChanceProb(m_efg->GetChance()->Infosets()[iset], act);
 }
 
-template <class T> BehavProfile<T>::BehavProfile(const EFSupport &s) 
-  : gDPVector<T>(s.NumActions()), E(&s.Game()),
-    root(new BehavNode<T>(E->RootNode(), E->NumPlayers())), support(s),
-    payoffs(new gRectArray<T>(E->NumOutcomes(), E->NumPlayers()))
+template <class T> BehavProfile<T>::BehavProfile(const EFSupport &p_support) 
+  : gDPVector<T>(p_support.NumActions()), m_efg(&p_support.Game()),
+    m_root(new BehavNode<T>(m_efg->RootNode(), m_efg->NumPlayers())),
+    m_support(p_support),
+    m_payoffs(new gRectArray<T>(m_efg->NumOutcomes(), m_efg->NumPlayers()))
 {
-  gArray<int> dim(E->GetChance()->NumInfosets());
+  gArray<int> dim(m_efg->GetChance()->NumInfosets());
   Centroid();
-  int iset = 0;
-  for ( iset = 1; iset <= dim.Length(); iset++)
-    dim[iset] = E->GetChance()->Infosets()[iset]->NumActions();
-  chanceprobs = new gPVector<T>(dim);
-  for ( iset = 1; iset <= dim.Length(); iset++)
-    for (int act = 1; act <= E->GetChance()->Infosets()[iset]->NumActions(); act++)
-       (*chanceprobs)(iset, act) = E->GetChanceProb(E->GetChance()->Infosets()[iset], act);
+  for (int iset = 1; iset <= dim.Length(); iset++)
+    dim[iset] = m_efg->GetChance()->Infosets()[iset]->NumActions();
+  m_chanceprobs = new gPVector<T>(dim);
+  for (int iset = 1; iset <= dim.Length(); iset++)
+    for (int act = 1; act <= m_efg->GetChance()->Infosets()[iset]->NumActions(); act++)
+       (*m_chanceprobs)(iset, act) = m_efg->GetChanceProb(m_efg->GetChance()->Infosets()[iset], act);
 
-  for (int outc = 1; outc <= E->NumOutcomes(); outc++)
-    for (int pl = 1; pl <= E->NumPlayers(); pl++)
-      (*payoffs)(outc, pl) = E->Payoff(E->Outcomes()[outc], pl);
+  for (int outc = 1; outc <= m_efg->NumOutcomes(); outc++)
+    for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)
+      (*m_payoffs)(outc, pl) = m_efg->Payoff(m_efg->Outcomes()[outc], pl);
 
 }
 
 template <class T> BehavProfile<T>::~BehavProfile()
 {
-  delete root;
-  delete chanceprobs;
-  delete payoffs;
+  delete m_root;
+  delete m_chanceprobs;
+  delete m_payoffs;
 }
 
 template <class T>
-BehavProfile<T> &BehavProfile<T>::operator=(const BehavProfile<T> &p)
+BehavProfile<T> &BehavProfile<T>::operator=(const BehavProfile<T> &p_profile)
 {
-  if (this != &p && E == p.E)   {
-    // note that a dimensionality change will trigger a failed assertion
+  if (this != &p_profile && m_efg == p_profile.m_efg)   {
+    // note that a dimensionality change will trigger an exception
     // in the gDPVector assignment operator
-    support = p.support;
-    gDPVector<T>::operator=(p);
+    gDPVector<T>::operator=(p_profile);
+    m_support = p_profile.m_support;
   }
   return *this;
 }
 
-#include <assert.h>
+//-------------------------------------------------------------------------
+//                 BehavProfile<T>: General data access
+//-------------------------------------------------------------------------
 
-template <class T> void BehavProfile<T>::Centroid(void) const
+template <class T>
+const T &BehavProfile<T>::GetValue(Infoset *p_infoset, int p_action) const
 {
-  T center;
-
-  for (int pl = 1; pl <= dvlen.Length(); pl++)
-    for (int iset = 1; iset <= dvlen[pl]; iset++)  {
-      center = ((T) 1 / (T) support.NumActions(pl, iset));
-      int act;
-      for (act = 1; act <= svlen[dvidx[pl] + iset - 1]; act++)
-	dvptr[pl][iset][act] = center;
-    }
+  return (*this)(p_infoset->GetPlayer()->GetNumber(), p_infoset->GetNumber(),
+		 p_action);
 }
 
 template <class T> T BehavProfile<T>::LiapValue(void) const
@@ -335,12 +339,12 @@ template <class T> T BehavProfile<T>::LiapValue(void) const
   BehavProfile<T> tmp(p);
   T x, result = ((T) 0), avg, sum;
 
-  gDPVector<T> cpay(E->NumActions());  
-  gPVector<T> probs(E->NumInfosets());
+  gDPVector<T> cpay(m_efg->NumActions());  
+  gPVector<T> probs(m_efg->NumInfosets());
   tmp.CondPayoff(cpay, probs);
 
-  for (int i = 1; i <= E->NumPlayers(); i++) {
-    EFPlayer *player = E->Players()[i];
+  for (int i = 1; i <= m_efg->NumPlayers(); i++) {
+    EFPlayer *player = m_efg->Players()[i];
     for (int j = 1; j <= player->NumInfosets(); j++) {
       avg = sum = (T)0;
       Infoset *s = player->Infosets()[j];
@@ -370,96 +374,88 @@ template <class T> void BehavProfile<T>::Gripe(gDPVector<T> &value) const
   // Currently this is very inefficient.  But we need some functions 
   // to evaluate the effect on payoff from a change in a profile 
   // to make this better (rdm) 
-  int i, j, k;
-  T pay;
   BehavProfile<T> scratch(*this);
   
-  for (i = 1; i <= E->NumPlayers(); i++) {
-    pay = Payoff(i);
-    EFPlayer *player = E->Players()[i];
-    for (j = 1; j <= player->NumInfosets(); j++) {
-      Infoset *s = player->Infosets()[j];
-      for (k = 1; k <= s->NumActions(); k++) 
-	scratch(i, j, k) = (T)0;
-      for (k = 1; k <= s->NumActions(); k++) {
-	scratch(i, j, k) = (T)1;
-	value(i, j, k) = scratch.Payoff(i) - pay;
-	if(value(i,j,k) < (T)0) 
-	  value(i,j,k) = (T)0;
-	scratch(i, j, k) = (T)0;
+  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
+    T pay = Payoff(pl);
+    EFPlayer *player = m_efg->Players()[pl];
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      Infoset *infoset = player->Infosets()[iset];
+      for (int act = 1; act <= infoset->NumActions(); act++) 
+	scratch(pl, iset, act) = (T) 0;
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	scratch(pl, iset, act) = (T) 1;
+	value(pl, iset, act) = scratch.Payoff(pl) - pay;
+	if (value(pl, iset, act) < (T) 0) 
+	  value(pl, iset, act) = (T) 0;
+	scratch(pl, iset, act) = (T) 0;
       }
-      for (k = 1; k <= s->NumActions(); k++) 
-	scratch(i, j, k) = (*this)(i, j, k);
+      for (int act = 1; act <= infoset->NumActions(); act++) 
+	scratch(pl, iset, act) = (*this)(pl, iset, act);
     }
   }
 }
 
 template <class T> T BehavProfile<T>::MaxGripe(void) const
 {
-  int i;
-  T maxgripe = (T)0;;
-
+  T maxgripe = (T) 0;
   gDPVector<T> v(*this);
   Gripe(v);
-  for(i=v.First(); i<=v.Last(); i++)
-    if(v[i] > maxgripe) maxgripe = v[i];
+
+  for (int i = v.First(); i <= v.Last(); i++)
+    if (v[i] > maxgripe) maxgripe = v[i];
   return maxgripe;
 }
 
-template <class T>
-const T &BehavProfile<T>::GetValue(Infoset *s, int act) const
-{
-  return (*this)(s->GetPlayer()->GetNumber(), s->GetNumber(), act);
-}
+//-------------------------------------------------------------------------
+//                 BehavProfile<T>: Operator overloading
+//-------------------------------------------------------------------------
 
 template <class T>
-bool BehavProfile<T>::operator==(const BehavProfile<T> &bp) const
+bool BehavProfile<T>::operator==(const BehavProfile<T> &p_profile) const
 {
-  return (E == bp.E && (gDPVector<T> &) *this == (gDPVector<T> &) bp);
+  return (m_efg == p_profile.m_efg &&
+	  (gDPVector<T> &) *this == (gDPVector<T> &) p_profile);
 }
-
-template <class T> gOutput &operator<<(gOutput &f, const BehavProfile<T> &p)
-{ p.Dump(f);   return f;  }
 
 
 //------------------------------------------------------------------------
 //         BehavProfile<T>: Computation of interesting quantities
 //------------------------------------------------------------------------
 
-#include "gdpvect.h"
-
 //--------------
 // Payoff
 //--------------
 
 template <class T>
-void BehavProfile<T>::Payoff(Node *n, T prob, int pl, T &value) const
+void BehavProfile<T>::Payoff(Node *p_node, T p_prob, int p_player,
+			     T &p_value) const
 {
-  if (n->outcome)
-    value += prob * (*payoffs)(n->outcome->GetNumber(), pl);
-  if (n->children.Length())  {
-    if (n->infoset->player->number == 0)  {
-      for (int i = 1; i <= n->children.Length(); i++)
-	Payoff(n->children[i],
-	       prob * (*chanceprobs)(n->infoset->number, i),
-	       pl, value);
+  if (p_node->outcome)
+    p_value += p_prob * (*m_payoffs)(p_node->outcome->GetNumber(), p_player);
+  if (p_node->children.Length())  {
+    if (p_node->infoset->player->number == 0)  {
+      for (int child = 1; child <= p_node->children.Length(); child++)
+	Payoff(p_node->children[child],
+	       p_prob * (*m_chanceprobs)(p_node->infoset->number, child),
+	       p_player, p_value);
     }
     else  {
-      int npl = n->infoset->player->number;
-      int iset = n->infoset->number;
-      const gArray<Action *> &actions = support.Actions(npl, iset);
+      int npl = p_node->infoset->player->number;
+      int iset = p_node->infoset->number;
+      const gArray<Action *> &actions = m_support.Actions(npl, iset);
 
       for (int act = 1; act <= actions.Length(); act++)
-	Payoff(n->children[actions[act]->GetNumber()],
-	       prob * (*this)(npl, iset, act), pl, value);
+	Payoff(p_node->children[actions[act]->GetNumber()],
+	       p_prob * (*this)(npl, iset, act), p_player, p_value);
     }
   }
 }
 
-template <class T> T BehavProfile<T>::Payoff(int pl) const
+template <class T> T BehavProfile<T>::Payoff(int p_player) const
 {
   T value = (T) 0;
-  Payoff(E->RootNode(), (T) 1, pl, value);
+  Payoff(m_efg->RootNode(), (T) 1, p_player, value);
   return value;
 }
 
@@ -468,88 +464,89 @@ template <class T> T BehavProfile<T>::Payoff(int pl) const
 //----------------
 
 template <class T>
-void BehavProfile<T>::CondPayoff(BehavNode<T> *n, T prob, gPVector<T> &probs,
-				 gDPVector<T> &payoff) const
+void BehavProfile<T>::CondPayoff(BehavNode<T> *p_node, T p_prob,
+				 gPVector<T> &p_probs,
+				 gDPVector<T> &p_payoff) const
 {
-  int pl = (n->node->infoset) ? n->node->infoset->player->number : -1;
-  int iset = (n->node->infoset) ? n->node->infoset->number : 0;
+  int npl =
+    (p_node->node->infoset) ? p_node->node->infoset->player->number : -1;
+  int iset = (p_node->node->infoset) ? p_node->node->infoset->number : 0;
   
-  if (n->node->outcome)  {
-    for (int i = 1; i <= E->NumPlayers(); i++)
-      n->scratch[i] += (*payoffs)(n->node->outcome->GetNumber(), i);
+  if (p_node->node->outcome)  {
+    for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)
+      p_node->scratch[pl] += (*m_payoffs)(p_node->node->outcome->GetNumber(),
+					  pl);
   }
 
-  int i, nc;
-  for (i = 1, nc = n->children.Length(); i <= nc; i++)
-    n->children[i]->scratch = n->scratch;
+  int nc = p_node->children.Length();
+  for (int child = 1; child <= nc; child++)
+    p_node->children[child]->scratch = p_node->scratch;
   
   T newprob((T) 0);
-  gVector<T> tmp(E->NumPlayers());
+  gVector<T> tmp(m_efg->NumPlayers());
   tmp = (T) 0;
   
   if (nc == 0)   return;
 
-  if (n->node->infoset->player->number == 0)   {
-    for (i = 1; i <= nc; i++)  {
-      CondPayoff(n->children[i],
-		 prob * (*chanceprobs)(n->node->infoset->number, i),
-		 probs, payoff);
+  if (p_node->node->infoset->player->number == 0)   {
+    for (int child = 1; child <= nc; child++)  {
+      CondPayoff(p_node->children[child],
+		 p_prob*(*m_chanceprobs)(p_node->node->infoset->number, child),
+		 p_probs, p_payoff);
       
-      for (int j = 1; j <= n->scratch.Length(); j++)
-	tmp[j] += 
-	(*chanceprobs)(n->node->infoset->number, i) *
-	n->children[i]->scratch[j];
+      for (int pl = 1; pl <= p_node->scratch.Length(); pl++)
+	tmp[pl] += 
+	  (*m_chanceprobs)(p_node->node->infoset->number, child) *
+	  p_node->children[child]->scratch[pl];
     }
-    n->scratch = tmp;
+    p_node->scratch = tmp;
   }
   else  {    // player decision node
-    int act;
-    
     const gArray<Action *> &actions =
-      support.Actions(n->node->infoset->player->number, 
-		      n->node->infoset->number);
+      m_support.Actions(p_node->node->infoset->player->number, 
+			p_node->node->infoset->number);
     
-    for (act = 1; act <= actions.Length(); act++)  {
+    for (int act = 1; act <= actions.Length(); act++)  {
       int childno = actions[act]->GetNumber();
-      newprob = (*this)(pl, n->node->infoset->number, act);
-      CondPayoff(n->children[childno], prob * newprob, probs, payoff);
+      newprob = (*this)(npl, p_node->node->infoset->number, act);
+      CondPayoff(p_node->children[childno], p_prob * newprob,
+		 p_probs, p_payoff);
       
-      for (int j = 1; j <= n->scratch.Length(); j++)
-	tmp[j] +=
-	newprob * n->children[childno]->scratch[j];
+      for (int pl = 1; pl <= p_node->scratch.Length(); pl++)
+	tmp[pl] += newprob * p_node->children[childno]->scratch[pl];
 
-      payoff(pl, iset, childno) += 
-	prob * n->children[childno]->scratch[pl];
-      n->scratch = tmp;
+      p_payoff(npl, iset, childno) += 
+	p_prob * p_node->children[childno]->scratch[npl];
+      p_node->scratch = tmp;
     }
   }
   
-  if (pl > 0)
-    probs(pl, n->node->infoset->number) += prob;
+  if (npl > 0)
+    p_probs(npl, p_node->node->infoset->number) += p_prob;
 }
 
 
-template <class T> 
-void BehavProfile<T>::CondPayoff(gDPVector<T> &payoff, 
-				 gPVector<T> &probs) const
+template <class T> void BehavProfile<T>::CondPayoff(gDPVector<T> &p_payoff,
+						    gPVector<T> &p_probs) const
 {
-  ((gVector<T> &) payoff).operator=((T) 0);
-  ((gVector<T> &) probs).operator=((T) 0);
+  ((gVector<T> &) p_payoff).operator=((T) 0);
+  ((gVector<T> &) p_probs).operator=((T) 0);
 
-  root->scratch = (T) 0;
-  CondPayoff(root, (T) 1, probs, payoff);
+  m_root->scratch = (T) 0;
+  CondPayoff(m_root, (T) 1, p_probs, p_payoff);
 
-  for (int i = 1; i <= E->NumPlayers(); i++)
-    for (int j = 1; j <= (E->Players())[i]->infosets.Length(); j++)
-      for (int k = 1; k <= (E->Players())[i]->infosets[j]->actions.Length();
-	   k++)
-	// This will protect against	 divides by zero.
-	// It will leave unreached infoset values at zero, which
-	// is probably not in general what we want.
-	// CondPayoff() was designed for use with Gobit in which case
-	// this doesn't happen. (?)   -- Ted
-	if (probs(i,j) != probs(i,j) * (T) 0)
-	  payoff(i, j, k) /= probs(i, j);
+  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
+    EFPlayer *player = m_efg->Players()[pl];
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      Infoset *infoset = player->Infosets()[iset];
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	// This will protect against divides by zero.
+	// It will leave unreached infoset values at zero.
+	if (p_probs(pl, iset) != p_probs(pl, iset) * (T) 0)
+	  p_payoff(pl, iset, act) /= p_probs(pl, iset);
+      }
+    }
+  }
 }
 
 //--------------------
@@ -557,56 +554,46 @@ void BehavProfile<T>::CondPayoff(gDPVector<T> &payoff,
 //--------------------
 
 template <class T>
-void BehavProfile<T>::NodeRealizProbs(BehavNode<T> *n, T prob, int &index, 
-				      gArray<T> &NRProbs) const
+void BehavProfile<T>::NodeRealizProbs(BehavNode<T> *p_node, T p_prob,
+				      int &p_index, gArray<T> &p_probs) const
 {
-  NRProbs[index] = prob;
-  int anum = 0;
-  int pl = (n->node->infoset) ? n->node->infoset->player->number : -1;
+  p_probs[p_index] = p_prob;
+  if (!p_node->node->infoset)  return;
 
-  T newprob((T) 0);
-  int i, nc = n->children.Length();
+  int npl = p_node->node->infoset->player->number;
 
-  if (nc == 0)   return;
-  
-  for (i = 1; i < nc; i++) {
-    if ( pl == 0 || pl == -1 ||
-	support.Find(n->node->infoset->actions[i])) {  
-      if (pl != 0 && pl != -1)
-	anum = support.Find(n->node->infoset->actions[i]);
-      
-      newprob = ((pl) ? (*this)(pl, n->node->infoset->number, anum) :
-		 (*chanceprobs)(n->node->infoset->number, i));
-      NodeRealizProbs(n->children[i], prob * newprob, ++index,
-		      NRProbs);
+  if (npl == 0) {  // chance node
+    for (int child = 1; child <= p_node->node->NumChildren(); child++) {
+      NodeRealizProbs(p_node->children[child],
+		      p_prob * (*m_chanceprobs)(p_node->node->infoset->number,
+						child),
+		      ++p_index, p_probs);
     }
-    else index += CountNodes(n->node->children[i]); 
   }
+  else if (npl > 0) {
+    for (int child = 1; child <= p_node->node->NumChildren(); child++) {
+      int index = m_support.Find(p_node->node->infoset->actions[child]);
+      if (index) {
+	NodeRealizProbs(p_node->children[child],
+			p_prob * (*this)(npl, p_node->node->infoset->number,
+					 index),
+			++p_index, p_probs);
+      }
+      else
+	p_index += CountNodes(p_node->node->children[child]); 
 
-  if (nc > 0) 
-    if  ( pl == 0 || pl == -1 ||  
-	 support.Find(n->node->infoset->actions[i])) {
-      if (pl !=0 && pl != -1)
-	anum = support.Find(n->node->infoset->actions[i]);
-      
-      newprob = ((pl) ? (*this)(pl, n->node->infoset->number, anum) :
-		 (*chanceprobs)(n->node->infoset->number, i));
-      
-      NodeRealizProbs(n->children[nc], prob * newprob, ++index,
-		      NRProbs);
     }
-    else index += CountNodes(n->node->children[i]);     
+  }
 }
 
-template <class T> 
-gArray<T> BehavProfile<T>::NodeRealizProbs(void) const
+template <class T> gArray<T> BehavProfile<T>::NodeRealizProbs(void) const
 {
-  int index = 1, maxindex = NumNodes(*E);
+  int index = 1, maxindex = NumNodes(*m_efg);
 
-  gArray<T> NRProbs(maxindex);
-  for (int ii = 1; ii <= maxindex; ii++) NRProbs[ii] = (T)0;
-  NodeRealizProbs(root, (T) 1, index, NRProbs);
-  return NRProbs;
+  gArray<T> probs(maxindex);
+  for (int i = 1; i <= maxindex; probs[i++] = (T) 0);
+  NodeRealizProbs(m_root, (T) 1, index, probs);
+  return probs;
 }
 
 //------------
@@ -614,53 +601,52 @@ gArray<T> BehavProfile<T>::NodeRealizProbs(void) const
 //------------
 
 template <class T>
-void BehavProfile<T>::Beliefs(Node *n, T prob,
-			      gDPVector<T> &BProbs, gPVector<T> &gpv) const
+void BehavProfile<T>::Beliefs(Node *p_node, T p_prob,
+			      gDPVector<T> &p_probs, gPVector<T> &p_gpv) const
 {
-  int pl = (n->infoset) ? n->infoset->player->number : -1;
-  int iset = (n->infoset) ? n->infoset->number : 0;
-  T newprob((T) 0);
-  int i, nc = n->children.Length();
-  int mnum=1;
+  int npl = (p_node->infoset) ? p_node->infoset->player->number : -1;
+  int iset = (p_node->infoset) ? p_node->infoset->number : 0;
+  int nc = p_node->children.Length();
+  int mnum = 1;
 
-  if (n->infoset == 0)   return;
+  if (p_node->infoset == 0)   return;
 
-  while(mnum <= n->infoset->NumMembers() &&
-	n->infoset->Members()[mnum]!=n) 
+  while (mnum <= p_node->infoset->NumMembers() &&
+	 p_node->infoset->Members()[mnum] != p_node) 
     mnum++;
-  assert(mnum<=n->infoset->NumMembers());
   
-  if (pl > 0 && gpv(pl, iset) != (T)0)
-    BProbs(pl,iset,mnum) = prob / gpv(pl, iset);
+  if (npl > 0 && p_gpv(npl, iset) != (T) 0)
+    p_probs(npl, iset, mnum) = p_prob / p_gpv(npl, iset);
 
-  if (pl == 0)  {
-    for (i = 1; i <= nc; i++)  {
-      newprob = (*chanceprobs)(n->infoset->number, i);
-      Beliefs(n->children[i], prob * newprob, BProbs, gpv);
+  if (npl == 0)  {
+    for (int child = 1; child <= nc; child++)  {
+      Beliefs(p_node->children[child],
+	      p_prob * (*m_chanceprobs)(p_node->infoset->number, child),
+	      p_probs, p_gpv);
     }
-
-    return;
   }
+  else {
+    const gArray<Action *> &actions = m_support.Actions(npl, iset);
 
-  const gArray<Action *> &actions = support.Actions(pl, iset);
-
-  for (i = 1; i <= support.NumActions(pl, iset); i++) {
-    newprob = (*this)(pl, n->infoset->number, actions[i]->GetNumber());
-    Beliefs(n->children[actions[i]->GetNumber()],
-	    prob * newprob, BProbs, gpv);
+    for (int act = 1; act <= m_support.NumActions(npl, iset); act++) {
+      Beliefs(p_node->children[actions[act]->GetNumber()],
+	      p_prob * (*this)(npl,
+			       p_node->infoset->number,
+			       actions[act]->GetNumber()),
+	      p_probs, p_gpv);
+    }
   }
 }
 
 template <class T> gDPVector<T> BehavProfile<T>::Beliefs(void) const
 {
-  gDPVector<T> BProbs(E->NumMembers());
-  BProbs = (T)0;
-  gDPVector<T> payoff(E->NumActions());
-  gPVector<T> probs(E->NumActions().Lengths());
-  CondPayoff( payoff, probs);
-  Beliefs ( E->RootNode(), (T)1, BProbs, probs);
-//  gout << "\nBProbs: " << BProbs; 
-  return BProbs;
+  gDPVector<T> bprobs(m_efg->NumMembers());
+  bprobs = (T) 0;
+  gDPVector<T> payoff(m_efg->NumActions());
+  gPVector<T> probs(m_efg->NumActions().Lengths());
+  CondPayoff(payoff, probs);
+  Beliefs(m_efg->RootNode(), (T) 1, bprobs, probs);
+  return bprobs;
 }
 
 //-----------------
@@ -668,64 +654,238 @@ template <class T> gDPVector<T> BehavProfile<T>::Beliefs(void) const
 //-----------------
 
 template <class T>
-void BehavProfile<T>::NodeValues(BehavNode<T> *n, int pl, 
-				 gArray<T> &valarray, int &index) const
+void BehavProfile<T>::NodeValues(BehavNode<T> *p_node, int p_player, 
+				 gArray<T> &p_values, int &p_index) const
 {
-  int child, tindex = index;
+  int tindex = p_index;
 
-  if (n->node->outcome)
-    n->nval += (*payoffs)(n->node->outcome->GetNumber(), pl);
+  if (p_node->node->outcome)
+    p_node->nval += (*m_payoffs)(p_node->node->outcome->GetNumber(), p_player);
 
-  for (child = 1; child <= n->children.Length(); child++)
-    n->children[child]->nval = n->nval;
+  for (int child = 1; child <= p_node->children.Length(); child++)
+    p_node->children[child]->nval = p_node->nval;
  
   T value = (T) 0;
   
-  if (n->node->infoset == 0)   {
-    valarray[tindex] = n->nval;
+  if (p_node->node->infoset == 0)   {
+    p_values[tindex] = p_node->nval;
     return;
   }
   
-  if (n->node->infoset->player->number == 0)  {
-    for (int i = 1; i <= n->children.Length(); i++)   {
-      NodeValues(n->children[i], pl, valarray, ++index);
-      value += (*chanceprobs)(n->node->infoset->number, i) *
-	         n->children[i]->nval;
+  if (p_node->node->infoset->player->number == 0)  {
+    for (int child = 1; child <= p_node->children.Length(); child++)   {
+      NodeValues(p_node->children[child], p_player, p_values, ++p_index);
+      value += (*m_chanceprobs)(p_node->node->infoset->number, child) *
+	         p_node->children[child]->nval;
     }
 
-    n->nval = value;
-    return;
+    p_node->nval = value;
   }
-
-  for (int i = 1, npl = n->node->infoset->player->number,
-       iset = n->node->infoset->number; i <= n->children.Length(); i++)  {
-    if (support.Find(n->node->infoset->actions[i])) {
-      int anum = support.Find(n->node->infoset->actions[i]);
-      NodeValues(n->children[i], pl, valarray, ++index);
-      value += ((npl) ? (*this)(npl, iset, anum) :
-		(*chanceprobs)(n->node->infoset->number, i)) *
-		  n->children[i]->nval;
+  else {
+    int npl = p_node->node->infoset->player->number;
+    int iset = p_node->node->infoset->number;
+    for (int act = 1; act <= p_node->children.Length(); act++)  {
+      NodeValues(p_node->children[act], p_player, p_values, ++p_index);
+      int index = m_support.Find(p_node->node->infoset->actions[act]);
+      if (index)
+	value += (*this)(npl, iset, index) * p_node->children[act]->nval;
     }
-    else
-      NodeValues(n->children[i], pl, valarray, ++index);
-  }
   
-  n->nval = value;
+    p_node->nval = value;
+    p_values[tindex] = p_node->nval;
+  }
+}
 
-  valarray[tindex] = n->nval;
+template <class T> gArray<T> BehavProfile<T>::NodeValues(int p_player) const
+{
+  int index = 1, maxindex = NumNodes(*m_efg);
+  gArray<T> values(maxindex); 
+  for (int i = 1; i <= maxindex; values[i++] = (T) 0);
+  m_root->nval = (T) 0;
+  NodeValues(m_root, p_player, values, index);
+  return values;
+}
+
+
+template <class T> void BehavProfile<T>::Centroid(void) const
+{
+  T center;
+
+  for (int pl = 1; pl <= dvlen.Length(); pl++)
+    for (int iset = 1; iset <= dvlen[pl]; iset++)  {
+      center = ((T) 1 / (T) m_support.NumActions(pl, iset));
+      int act;
+      for (act = 1; act <= svlen[dvidx[pl] + iset - 1]; act++)
+	dvptr[pl][iset][act] = center;
+    }
+}
+
+template <class T> gOutput &operator<<(gOutput &p_file,
+				       const BehavProfile<T> &p_profile)
+{
+  p_profile.Dump(p_file);
+  return p_file;
+}
+
+
+
+//------------------------------------------------------------------------
+//  BehavAssessment<T>: Constructors, Destructor, Constructive Operators
+//------------------------------------------------------------------------
+
+template <class T>
+BehavAssessment<T>::BehavAssessment(const EFSupport &p_support)
+  : BehavProfile<T>(p_support), m_beliefs(p_support.Game().NumMembers())
+{
+  m_beliefs = BehavProfile<T>::Beliefs();
 }
 
 template <class T>
-gArray<T> BehavProfile<T>::NodeValues(int pl) const
+BehavAssessment<T>::BehavAssessment(const BehavProfile<T> &p_profile)
+  : BehavProfile<T>(p_profile), m_beliefs(p_profile.Beliefs())
+{ }
+
+template <class T>
+BehavAssessment<T>::BehavAssessment(const BehavAssessment<T> &p_assess)
+  : BehavProfile<T>(p_assess), m_beliefs(p_assess.m_beliefs)
+{ }
+
+template <class T> BehavAssessment<T>::~BehavAssessment()
+{ }
+
+template <class T> BehavAssessment<T> &
+BehavAssessment<T>::operator=(const BehavAssessment<T> &p_assess)
 {
-  int index = 1, maxindex = NumNodes(*E);
-
-  gArray<T> valarray(maxindex); 
-  for (int i = 1; i <= maxindex; i++)  valarray[i] = (T) 0;
-  root->nval = (T) 0;
-
-  NodeValues(root, pl, valarray, index);
-  return valarray;
+  if (this != &p_assess && &Game() == &p_assess.Game()) {
+    BehavProfile<T>::operator=(p_assess);
+    m_beliefs = p_assess.m_beliefs;
+  }
+  return *this;
 }
+
+//------------------------------------------------------------------------
+//        BehavAssessment<T>: Access and manipulation of beliefs
+//------------------------------------------------------------------------
+
+template <class T> gDPVector<T> BehavAssessment<T>::Beliefs(void) const
+{ return m_beliefs; }
+
+template <class T> gDPVector<T> &BehavAssessment<T>::Beliefs(void)
+{ return m_beliefs; }
+
+//----------------
+// CondPayoff
+//----------------
+
+template <class T>
+void BehavAssessment<T>::CondPayoff(BehavNode<T> *p_node, T p_prob,
+				    gPVector<T> &p_probs,
+				    gDPVector<T> &p_payoff) const
+{
+  int npl =
+    (p_node->node->GetInfoset()) ? p_node->node->GetPlayer()->GetNumber() : -1;
+  int iset = 
+    (p_node->node->GetInfoset()) ? p_node->node->GetInfoset()->GetNumber() : 0;
+  
+  if (p_node->node->GetOutcome())  {
+    for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)
+      p_node->scratch[pl] += 
+	(*m_payoffs)(p_node->node->GetOutcome()->GetNumber(), pl);
+  }
+
+  int nc = p_node->children.Length();
+  for (int child = 1; child <= nc; child++)
+    p_node->children[child]->scratch = p_node->scratch;
+  
+  T newprob((T) 0);
+  gVector<T> tmp(m_efg->NumPlayers());
+  tmp = (T) 0;
+  
+  if (nc == 0)   return;
+
+  if (npl == 0)   {
+    for (int child = 1; child <= nc; child++)  {
+      CondPayoff(p_node->children[child],
+		 p_prob *
+		 (*m_chanceprobs)(p_node->node->GetInfoset()->GetNumber(),
+				  child),
+		 p_probs, p_payoff);
+      
+      for (int pl = 1; pl <= p_node->scratch.Length(); pl++)
+	tmp[pl] += 
+	  (*m_chanceprobs)(p_node->node->GetInfoset()->GetNumber(), child) *
+	  p_node->children[child]->scratch[pl];
+    }
+    p_node->scratch = tmp;
+  }
+  else  {    // player decision node
+    // This implementation differs from the one in BehavProfile<T>
+    // since we have well-defined belief probabilities off the equilibrium
+    // path.  So, we must traverse the whole tree, and cannot ignore
+    // the (zero-probability) actions which do not appear in the support
+    for (int child = 1; child <= p_node->node->NumChildren(); child++) {
+      int act = m_support.Find(p_node->node->GetInfoset()->Actions()[child]);
+      if (act)
+	newprob = (*this)(npl, iset, act);
+      else
+	newprob = (T) 0;
+      CondPayoff(p_node->children[child], p_prob * newprob,
+		 p_probs, p_payoff);
+      for (int pl = 1; pl <= p_node->scratch.Length(); pl++)
+	tmp[pl] += newprob * p_node->children[child]->scratch[pl];
+      
+      int mnum;
+      for (mnum = 1;
+	   p_node->node->GetInfoset()->Members()[mnum] != p_node->node;
+	   mnum++);
+      p_payoff(npl, iset, child) += 
+	m_beliefs(npl, iset, mnum)  * p_node->children[child]->scratch[npl];
+      p_node->scratch = tmp;
+    }
+  }    
+  
+  if (npl > 0)
+    p_probs(npl, p_node->node->GetInfoset()->GetNumber()) += p_prob;
+}
+
+
+template <class T>
+void BehavAssessment<T>::CondPayoff(gDPVector<T> &p_payoff,
+				    gPVector<T> &p_probs) const
+{
+  ((gVector<T> &) p_payoff).operator=((T) 0);
+  ((gVector<T> &) p_probs).operator=((T) 0);
+
+  m_root->scratch = (T) 0;
+  CondPayoff(m_root, (T) 1, p_probs, p_payoff);
+
+  // We can dispense with the normalization step found in the analogous
+  // place in BehavProfile<T> since the beliefs are assumed to be 
+  // normalized to sum to 1.  (If they don't, things are weird anyway.)
+}
+
+//------------------------------------------------------------------------
+//                     BehavAssessment<T>: Output
+//------------------------------------------------------------------------
+
+template <class T> void BehavAssessment<T>::Dump(gOutput &p_file) const
+{
+  BehavProfile<T>::Dump(p_file);
+  p_file << ' ';
+  p_file << m_beliefs;
+}
+
+template <class T> gOutput &operator<<(gOutput &p_file,
+				       const BehavAssessment<T> &p_assess)
+{
+  p_assess.Dump(p_file);
+  return p_file;
+}
+
+
+
+
+
+
 
 

@@ -96,7 +96,7 @@ void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
 
   ((gVector<T> &) bp).operator=((T)0); 
 
-  BehavNode<T> *n = bp.root;
+  BehavNode<T> *n = bp.m_root;
   const NFSupport &support = mp.Support();
 
   for (int pl = 1; pl <= N.NumPlayers(); pl++)   {
@@ -109,11 +109,11 @@ void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
 
 	n->bval = mp(pl, st);
 
-	RealizationProbs(N, mp, E, bp, pl, actions, bp.root);
+	RealizationProbs(N, mp, E, bp, pl, actions, bp.m_root);
       }
     }
     
-    bp.root->nval = (T) 1;
+    bp.m_root->nval = (T) 1;
     BehaviorStrat(E, bp, pl, n);
   }
 }

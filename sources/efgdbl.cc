@@ -8,7 +8,9 @@
 
 template class BehavNode<double>;
 template class BehavProfile<double>;
+template class BehavAssessment<double>;
 template gOutput &operator<<(gOutput &, const BehavProfile<double> &);
+template gOutput &operator<<(gOutput &, const BehavAssessment<double> &);
 
 template class PureBehavProfile<double>;
 

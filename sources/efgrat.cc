@@ -9,7 +9,9 @@
 
 template class BehavNode<gRational>;
 template class BehavProfile<gRational>;
+template class BehavAssessment<gRational>;
 template gOutput &operator<<(gOutput &, const BehavProfile<gRational> &);
+template gOutput &operator<<(gOutput &, const BehavAssessment<gRational> &);
 
 void PureBehavProfile<gRational>::Payoff(const Node *n, const gRational prob, 
 					 gArray<gRational> &payoff) const
