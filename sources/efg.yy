@@ -10,7 +10,6 @@
 #define PROBLEM_C
 #include "problem.h"
 
-Problem *the_problem;
 gString *last_name;
 int last_int;
 double last_double;
@@ -44,11 +43,6 @@ void efg_close_input(void)
   delete input_stream;
   input_stream = 0;
   delete last_name;
-}
-
-void efg_set_problem(Problem *p)
-{
-  the_problem = p;
 }
 
 void yyerror(char *s)
@@ -149,13 +143,13 @@ actions:        action
        |        actions action
 
 action:         NAME
-             { the_problem->games(gameNo)->AppendAction(playerNo, isetNo);
-               the_problem->games(gameNo)->LabelAction(playerNo, isetNo, actNo++, *last_name); }
+             { games(gameNo)->AppendAction(playerNo, isetNo);
+               games(gameNo)->LabelAction(playerNo, isetNo, actNo++, *last_name); }
 
 prob_list:      LBRACE
             { v = new gTuple<gNumber>(1, actNo - 1); actNo = 1; }
                 probs RBRACE
-            { the_problem->games(gameNo)->SetActionProbs(playerNo, isetNo, *v);
+            { games(gameNo)->SetActionProbs(playerNo, isetNo, *v);
               delete v;  }
 
 probs:          prob
