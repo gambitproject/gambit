@@ -1143,6 +1143,7 @@ Portion *GSM_Lp_Support(Portion **param)
 }
 
 #include "csumsub.h"
+#include "efgcsum.h"
 
 Portion *GSM_Lp_EfgFloat(Portion **param)
 {
@@ -1151,21 +1152,39 @@ Portion *GSM_Lp_EfgFloat(Portion **param)
   if (E.NumPlayers() > 2 || !E.IsConstSum())
     return new ErrorPortion("Only valid for two-person zero-sum games");
 
-  ZSumParams ZP;
-
-  ZP.tracefile = &((OutputPortion *) param[3])->Value();
-  ZP.trace = ((IntPortion *) param[4])->Value();
-
-  ZSumBySubgame<double> ZM(E, ZP);
-
-  ZM.Solve();
-
-  gList<BehavSolution<double> > solns(ZM.GetSolutions());
-
-
-  ((IntPortion *) param[1])->Value() = ZM.NumPivots();
-  ((FloatPortion *) param[2])->Value() = ZM.Time();
+  gList<BehavSolution<double> > solns;
   
+  if (((BoolPortion *) param[1])->Value())   {
+    ZSumParams ZP;
+
+    ZP.tracefile = &((OutputPortion *) param[4])->Value();
+    ZP.trace = ((IntPortion *) param[5])->Value();
+
+    ZSumBySubgame<double> ZM(E, ZP);
+
+    ZM.Solve();
+
+    solns = ZM.GetSolutions();
+
+    ((IntPortion *) param[2])->Value() = ZM.NumPivots();
+    ((FloatPortion *) param[3])->Value() = ZM.Time();
+  }
+  else  {
+    CSSeqFormParams ZP;
+
+    ZP.tracefile = &((OutputPortion *) param[4])->Value();
+    ZP.trace = ((IntPortion *) param[5])->Value();
+
+    CSSeqFormBySubgame<double> ZM(E, ZP);
+
+    ZM.Solve();
+
+    solns = ZM.GetSolutions();
+
+    ((IntPortion *) param[2])->Value() = ZM.NumPivots();
+    ((FloatPortion *) param[3])->Value() = ZM.Time();
+  }
+
   Portion* por = new Behav_ListPortion<double>(solns);
   por->SetOwner( param[ 0 ]->Original() );
   por->AddDependency();
@@ -1179,20 +1198,39 @@ Portion *GSM_Lp_EfgRational(Portion **param)
   if (E.NumPlayers() > 2 || !E.IsConstSum())
     return new ErrorPortion("Only valid for two-person zero-sum games");
 
-  ZSumParams ZP;
+  gList<BehavSolution<gRational> > solns;
 
-  ZP.tracefile = &((OutputPortion *) param[3])->Value();
-  ZP.trace = ((IntPortion *) param[4])->Value();
+  if (((BoolPortion *) param[1])->Value())   {
+    ZSumParams ZP;
 
-  ZSumBySubgame<gRational> ZM(E, ZP);
+    ZP.tracefile = &((OutputPortion *) param[4])->Value();
+    ZP.trace = ((IntPortion *) param[5])->Value();
 
-  ZM.Solve();
+    ZSumBySubgame<gRational> ZM(E, ZP);
 
-  gList<BehavSolution<gRational> > solns(ZM.GetSolutions());
+    ZM.Solve();
 
-  ((IntPortion *) param[1])->Value() = ZM.NumPivots();
-  ((FloatPortion *) param[2])->Value() = ZM.Time();
-  
+    solns = ZM.GetSolutions();
+
+    ((IntPortion *) param[2])->Value() = ZM.NumPivots();
+    ((FloatPortion *) param[3])->Value() = ZM.Time();
+  }
+  else  {
+    CSSeqFormParams ZP;
+
+    ZP.tracefile = &((OutputPortion *) param[4])->Value();
+    ZP.trace = ((IntPortion *) param[5])->Value();
+
+    CSSeqFormBySubgame<gRational> ZM(E, ZP);
+
+    ZM.Solve();
+
+    solns = ZM.GetSolutions();
+
+    ((IntPortion *) param[2])->Value() = ZM.NumPivots();
+    ((FloatPortion *) param[3])->Value() = ZM.Time();
+  }
+
   Portion* por = new Behav_ListPortion<gRational>(solns);
   por->SetOwner( param[ 0 ]->Original() );
   por->AddDependency();
@@ -2087,28 +2125,32 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_Lp_Support, 4, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_Lp_EfgFloat, 5);
+  FuncObj->SetFuncInfo(GSM_Lp_EfgFloat, 6);
   FuncObj->SetParamInfo(GSM_Lp_EfgFloat, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_Lp_EfgFloat, 1, "nPivots", porINTEGER,
+  FuncObj->SetParamInfo(GSM_Lp_EfgFloat, 1, "asNfg", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_Lp_EfgFloat, 2, "nPivots", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_Lp_EfgFloat, 2, "time", porFLOAT,
+  FuncObj->SetParamInfo(GSM_Lp_EfgFloat, 3, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_Lp_EfgFloat, 3, "traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(GSM_Lp_EfgFloat, 4, "traceFile", porOUTPUT,
 			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_Lp_EfgFloat, 4, "traceLevel", porINTEGER,
+  FuncObj->SetParamInfo(GSM_Lp_EfgFloat, 5, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_Lp_EfgRational, 5);
+  FuncObj->SetFuncInfo(GSM_Lp_EfgRational, 6);
   FuncObj->SetParamInfo(GSM_Lp_EfgRational, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_Lp_EfgRational, 1, "nPivots", porINTEGER,
+  FuncObj->SetParamInfo(GSM_Lp_EfgRational, 1, "asNfg", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_Lp_EfgRational, 2, "nPivots", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_Lp_EfgRational, 2, "time", porFLOAT,
+  FuncObj->SetParamInfo(GSM_Lp_EfgRational, 3, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_Lp_EfgRational, 3, "traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(GSM_Lp_EfgRational, 4, "traceFile", porOUTPUT,
 			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_Lp_EfgRational, 4, "traceLevel", porINTEGER,
+  FuncObj->SetParamInfo(GSM_Lp_EfgRational, 5, "traceLevel", porINTEGER,
 			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
 
