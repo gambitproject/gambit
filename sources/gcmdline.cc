@@ -19,6 +19,9 @@ int gCmdLineInput::s_NumInstances = 0;
 struct termios gCmdLineInput::s_TermAttr;
 #endif // __GNUG__
 
+
+
+
 void gCmdLineInput::SaveTermAttr( void )
 {
 #ifdef __GNUG__
@@ -54,7 +57,7 @@ void gCmdLineInput::SetRawTermAttr( void )
 
   rawTerm.c_iflag &= ~IGNBRK;
   rawTerm.c_iflag &= ~BRKINT;
-  rawTerm.c_iflag &= ~IGNBRK;
+  rawTerm.c_iflag &= ~IGNPAR;
   rawTerm.c_iflag &= ~PARMRK;
   rawTerm.c_iflag &= ~INPCK;
   rawTerm.c_iflag &= ~ISTRIP;
@@ -69,7 +72,8 @@ void gCmdLineInput::SetRawTermAttr( void )
 
   rawTerm.c_oflag |= OPOST;
 
-  rawTerm.c_lflag &= ~ISIG;
+  // rawTerm.c_lflag &= ~ISIG;
+  rawTerm.c_lflag |= ISIG;
   rawTerm.c_lflag &= ~ICANON;
   rawTerm.c_lflag &= ~XCASE;
   rawTerm.c_lflag &= ~ECHO;

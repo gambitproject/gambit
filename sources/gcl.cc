@@ -22,6 +22,7 @@
 
 typedef void (*fptr)(int);
 
+
 void SigFPEHandler(int a)
 {
   if (a==SIGFPE)
@@ -119,6 +120,8 @@ int main( int /*argc*/, char* argv[] )
   // Set up the error handling functions:
 #ifndef __BORLANDC__
   signal(SIGFPE, (fptr) SigFPEHandler);
+
+  signal(SIGTSTP, SIG_IGN);
 
   signal(SIGSEGV, (fptr) SigSegFaultHandler);
   signal(SIGABRT, (fptr) SigSegFaultHandler);

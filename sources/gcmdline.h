@@ -30,7 +30,6 @@ public:
   static void SaveTermAttr( void );
   static void RestoreTermAttr( void );
   static void SetRawTermAttr( void );
-  
 
 private:
   // the history of commands already executed
