@@ -60,7 +60,7 @@ if (n->GetOutcome())
 {
 	OutcomeVector<T> *tv=(OutcomeVector<T> *)n->GetOutcome();;
 	gVector<T> &v=*tv;
-	ToStringPrecision(2);
+//	ToStringPrecision(2);
 	gString tmp="(";
 	for (int i=v.First();i<=v.Last();i++)
 	{
@@ -221,7 +221,7 @@ if (!n->GetPlayer()->IsChance())	// if this is not a chance player
 	wxMessageBox("Probabilities only valid for CHANCE player","Error",wxOK | wxCENTRE,frame);
 	return;
 }
-ToStringPrecision(4);
+//ToStringPrecision(4);
 
 int num_actions=cursor->NumChildren();
 int num_d=num_actions/ENTRIES_PER_DIALOG-((num_actions%ENTRIES_PER_DIALOG) ? 0 : 1);

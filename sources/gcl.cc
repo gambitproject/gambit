@@ -1,3 +1,5 @@
+// File: gcl.cc -- top level of the Gambit Command Line
+// $Id$
 #include "rational.h"
 #include "gstring.h"
 #include "glist.h"
@@ -17,7 +19,12 @@ if (a==SIGFPE)
 signal(SIGFPE, (fptr)SigFPEHandler);  //  reinstall signal handler
 }
 
+#define MATH_CONTINUE	0
+#define	MATH_IGNORE		1
+#define	MATH_QUIT			2
 #ifdef __BORLANDC__ // this handler is defined differently windows
+extern "C" int winio_ari(const char *msg);
+extern "C" void winio_closeall(void);
 int _RTLENTRY _matherr (struct exception *e)
 #else
 int matherr(struct exception *e)
@@ -32,11 +39,18 @@ char *whyS [] =
 		"total loss of significance",
 		"partial loss of significance"
 };
-
+static option=MATH_CONTINUE;
 char errMsg[ 80 ];
+if (option!=MATH_IGNORE)
+{
 sprintf (errMsg,
 			"%s (%8g,%8g): %s\n", e->name, e->arg1, e->arg2, whyS [e->type - 1]);
 gerr<<errMsg;
+#ifdef __WIN32__
+option=winio_ari(errMsg);
+if (option==MATH_QUIT) { winio_closeall(); exit(1);}
+#endif
+}
 
 if (e->type == SING)
 	if (!strcmp(e->name,"log"))
@@ -45,7 +59,7 @@ e->retval = LN_MINDOUBLE;
 return 1;
 		}
 
-return 0;
+return 1;	// we did not really fix anything, but want no more warnings
 }
 
 int main(int ,char **)

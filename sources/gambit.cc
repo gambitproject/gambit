@@ -28,11 +28,40 @@ GambitApp gambitApp;
 
 typedef void (*fptr)(int);
 
-void SigFPEHandler(int a)
+void SigFPEHandler(int )
 {
 signal(SIGFPE, (fptr)SigFPEHandler);  //  reinstall signal handler
 wxMessageBox("A floating point error has occured!\nThe results returned may be invalid");
 }
+
+#define MATH_CONTINUE	0
+#define	MATH_IGNORE		1
+#define	MATH_QUIT			2
+class MathErrHandl : public wxDialogBox
+{
+private:
+	wxRadioBox *opt_box;
+	int opt;
+	static void ok_func(wxButton &ob,wxEvent &ev)
+	{((MathErrHandl *)ob.GetClientData())->OnOk();}
+	void OnOk(void)
+	{opt=opt_box->GetSelection();Show(FALSE);}
+public:
+	MathErrHandl(const char *err):wxDialogBox(0,"Numerical Error",TRUE)
+	{
+	char *options[3]={"Continue","Ignore","Quit"};
+	new wxMessage(this,err);
+	this->NewLine();
+	opt_box=new wxRadioBox(this,0,"What now?",-1,-1,-1,-1,3,options,1,wxVERTICAL);
+	this->NewLine();
+	wxButton *ok=new wxButton(this,(wxFunction)ok_func,"OK");
+	ok->SetClientData((char *)this);
+	Fit();
+	ok->Centre(wxHORIZONTAL);
+	Show(TRUE);
+	}
+	int Option(void) {return opt;}
+};
 
 #ifdef wx_msw // this handler is defined differently under win/unix
 int _RTLENTRY _matherr (struct exception *e)
@@ -40,7 +69,7 @@ int _RTLENTRY _matherr (struct exception *e)
 int matherr(struct exception *e)
 #endif
 {
-char *whyS [] =
+static char *whyS [] =
 {
 		"argument domain error",
 		"argument singularity ",
@@ -49,12 +78,17 @@ char *whyS [] =
 		"total loss of significance",
 		"partial loss of significance"
 };
-
+static option=MATH_CONTINUE;
 char errMsg[ 80 ];
+if (option!=MATH_IGNORE)
+{
 sprintf (errMsg,
 			"%s (%8g,%8g): %s\n", e->name, e->arg1, e->arg2, whyS [e->type - 1]);
-wxError(errMsg,"Numerical Error");
-return 0;
+MathErrHandl E(errMsg);
+option=E.Option();
+if (option==MATH_QUIT) wxExit();
+}
+return 1;		// we did not really fix anything, but want no more warnings  
 }
 
 
@@ -130,7 +164,7 @@ int gap = 8;
 	AddTool(GAMBIT_HELP_CONTENTS, ToolbarHelpBitmap, NULL,FALSE, (float)currentX, -1, NULL);
 }
 
-Bool GambitToolBar::OnLeftClick(int tool, Bool toggled)
+Bool GambitToolBar::OnLeftClick(int tool, Bool )
 {parent->OnMenuCommand(tool);return TRUE;}
 
 void GambitToolBar::OnMouseEnter(int tool)
@@ -180,14 +214,11 @@ gambit_frame->CreateStatusLine();
 new GambitToolBar(gambit_frame);
 
 // Set up the help system
-wxInitHelp("gambit","Gambit -- Graphics User Interface, Version 0.9\n\nDeveloped by Richard D. McKelvey (rdm@hss.caltech.edu)\nMain Programmer:  Theodore Turocy (magyar@hss.caltech.edu)\nFront End: Eugene Grayver (egrayver@hss.caltech.edu)\nCalifornia Institute of Technology, 1995.\nFunding provided by the National Science Foundation");
+wxInitHelp("gambit","Gambit -- Graphics User Interface, Version 0.93\n\nDeveloped by Richard D. McKelvey (rdm@hss.caltech.edu)\nMain Programmer:  Theodore Turocy (magyar@hss.caltech.edu)\nFront End: Eugene Grayver (egrayver@hss.caltech.edu)\nCalifornia Institute of Technology, 1996.\nFunding provided by the National Science Foundation");
 
 gambit_frame->Show(TRUE);
 // Set up the error handling functions:
 signal(SIGFPE, (fptr)SigFPEHandler);
-// Set up the input/output default windows
-wout=new gWxOutput(gWXOUT);wout->Show(FALSE);
-werr=new gWxOutput(gWXERR);werr->Show(FALSE);
 
 // Process command line arguments, if any
 if (argc>1) gambit_frame->LoadFile(argv[1]);
@@ -196,8 +227,10 @@ if (argc>1) gambit_frame->LoadFile(argv[1]);
 return gambit_frame;
 }
 
+int GambitApp::OnExit(void)
+{if (wx_frame) wx_frame->OnClose();return TRUE;}
 // Define my frame constructor
-GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int type):
+GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int ):
 	wxFrame(frame, title, x, y, w, h)
 {}
 
@@ -242,7 +275,7 @@ void GambitFrame::OnMenuCommand(int id)
 	switch (id)
 	{
 		case FILE_QUIT: OnClose(); delete this;	break;
-		case FILE_LOAD:	LoadFile();	break;
+		case FILE_LOAD:	LoadFile(); break;
 #ifndef EFG_ONLY
 		case FILE_NEW_NFG: NfgGUI(0,gString(),0,this);	break;
 #endif
@@ -264,6 +297,6 @@ Bool GambitFrame::OnClose()
 	wxFlushResources();
 #endif
 	wxKillHelp();
-//	delete wout;delete werr;
+	wout->OnClose();werr->OnClose();
 	return TRUE;
 }

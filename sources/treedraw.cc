@@ -42,6 +42,7 @@ if (gamb_ver!=CURVER)
 	branch_below_font=new wxFont(12,wxSWISS,wxNORMAL,wxNORMAL);
 	node_terminal_font=new wxFont(12,wxSWISS,wxNORMAL,wxNORMAL);
 	root_reachable=TRUE;
+	num_prec=3;
 	SaveOptions();
 }
 else
@@ -87,6 +88,9 @@ tree_options_dialog->Form()->Add(wxMakeFormBool("Show Infosets",&show_infosets,w
 tree_options_dialog->Form()->Add(wxMakeFormBool("Flashing Cursor",&flashing_cursor,wxFORM_CHECKBOX));
 tree_options_dialog->Form()->Add(wxMakeFormNewLine());
 tree_options_dialog->Form()->Add(wxMakeFormBool("Color Coded Outcomes",&color_coded_outcomes,wxFORM_CHECKBOX));
+tree_options_dialog->Form()->Add(wxMakeFormNewLine());
+tree_options_dialog->Add(wxMakeFormShort("Output precision",&num_prec,wxFORM_SLIDER,new wxList(wxMakeConstraintRange(0, 16), 0)));
+
 tree_options_dialog->Go();
 }
 
@@ -285,6 +289,7 @@ wxWriteResource("Gambit","Node-Terminal-Label",node_terminal_label,file_name);
 wxWriteResource("Gambit","Flashing-Cursor",flashing_cursor,file_name);
 wxWriteResource("Gambit","Color-Outcomes",color_coded_outcomes,file_name);
 wxWriteResource("Gambit","Root-Reachable",root_reachable,file_name);
+wxWriteResource("Gambit","Output-Precision",num_prec,file_name);
 // Save the font settings
 wxWriteResource("Gambit","Node-Above-Font",wxFontToString(node_above_font),file_name);
 wxWriteResource("Gambit","Node-Below-Font",wxFontToString(node_below_font),file_name);
@@ -317,6 +322,7 @@ wxGetResource("Gambit","Node-Right-Label",&node_right_label,file_name);
 wxGetResource("Gambit","Flashing-Cursor",&flashing_cursor,file_name);
 wxGetResource("Gambit","Color-Outcomes",&color_coded_outcomes,file_name);
 wxGetResource("Gambit","Root-Reachable",&root_reachable,file_name);
+wxGetResource("Gambit","Output-Precision",&num_prec,file_name);
 // Load the font settings
 char *l_tempstr=new char[100];
 wxGetResource("Gambit","Node-Above-Font",&l_tempstr,file_name);

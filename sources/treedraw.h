@@ -1,6 +1,6 @@
 // File: treedraw.h -- contains the definition of the configuration class 
 // for the extensive form
-// @(#)treedraw.h	1.7 7/18/95
+// $Id$
 #ifndef TREEDRAW_H
 #define TREEDRAW_H
 #include "gblock.h"
@@ -23,6 +23,7 @@ class TreeDrawSettings:public GambitDrawSettings
 		int	 	node_above_label,node_below_label,branch_above_label,
 					branch_below_label,node_terminal_label,node_right_label;
 		Bool color_coded_outcomes;
+    int		num_prec;
 	// Fonts for labels. Note, the system does not make a copy. DO NOT delete the font!
 		wxFont *node_above_font,*node_below_font,*node_right_font,
 					 *branch_above_font,*branch_below_font,*node_terminal_font;

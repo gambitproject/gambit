@@ -1,4 +1,5 @@
 // File: Spread.h, header file for spread.cc
+// $Id$
 // This file implements a 3-D spreadsheet type dialog box.  It can have
 // unlimited dimensions for both rows/columns and the number of layers.
 // At the moment each cell contains only a gString, but functions for
@@ -64,7 +65,7 @@
 // is advisable to call CanvasFocus member after processing any panel item
 // events.
 
-// $Id$
+
 
 #ifndef	SPREAD_H
 #define	SPREAD_H
@@ -147,6 +148,7 @@ private:
 	SpreadSheet3D *parent;
 	int 		row_height,default_col_width;
 	int			tw,th;
+  int			num_prec;
 	gBlock<int> col_width;
 	int			total_height,total_width,real_height,real_width;
 	int			x_scroll,y_scroll;
@@ -207,6 +209,8 @@ public:
 	void		UpdateFontSize(float w=-1,float h=-1);
 		// Are we to use the color-capable gtext or the plain text
 	Bool		UseGText(void) const {return gtext;}
+		// Number of decimal places to output for floating point numbers
+	int			NumPrec(void) const {return num_prec;}
 		// Set* functions
 	void	SetRowHeight(int _r)	{row_height=_r;}
 	void	SetColWidth(int	_c,int col=0);

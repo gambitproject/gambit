@@ -2,9 +2,7 @@
 // algorithms.  You must add an entry here for each new algorithm.
 // Update: this now takes the number of players so that it can turn
 // of the algorithms that will not work with this number of players.
-// Please list these explicitly
-// Only work for 2 players: Lemke, Enum
-// @(#)nfgsolvd.h	1.15 4/16/96
+// $Id$
 
 #define SD_CANCEL			-1
 #define SD_PARAMS			1
@@ -73,6 +71,7 @@ protected:
 	Bool extensive,auto_inspect;
 	int standard_type,standard_num;
 	Bool	use_standard;
+	bool	solving;
 protected:
 	char *defaults_file;
 	const BaseNfg &nf;
@@ -99,25 +98,28 @@ protected:
 	{algorithm=NFG_ENUMMIXED_SOLUTION;stopAfter=0;dom_type=DOM_STRONG;all=TRUE;use_elimdom=TRUE;}
 	// All Nash n person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ALL && nf.NumPlayers()!=2)
-	{algorithm=NFG_LIAP_SOLUTION;stopAfter=0;dom_type=DOM_STRONG;all=TRUE;use_elimdom=TRUE;}
+	{algorithm=NFG_LIAP_SOLUTION;stopAfter=0;dom_type=DOM_STRONG;all=TRUE;use_elimdom=TRUE;
+	 Warn("Not guaranteed to find all solutions for 'All Nash' n-person games\n");}
 	// One Perfect 2 person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ONE && nf.NumPlayers()==2)
 	{algorithm=NFG_LCP_SOLUTION;stopAfter=1;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;}
 	// One Perfect n person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ONE && nf.NumPlayers()!=2)
-	{gerr<<"One Perfect not implemented for n person games\nUsing current settings\n";}
+	{Warn("One Perfect not implemented for n person games\nUsing current settings\n");}
 	// Two Perfect 2 person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_TWO && nf.NumPlayers()==2)
 	{algorithm=NFG_LCP_SOLUTION;stopAfter=2;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;}
 	// Two Perfect n person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_TWO && nf.NumPlayers()!=2)
-	{gerr<<"Two Perfect not implemented for n person games\nUsing current settings\n";}
+	{Warn("Two Perfect not implemented for n person games\nUsing current settings\n");}
 	// All Perfect 2 person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ALL && nf.NumPlayers()==2)
-	{algorithm=NFG_LCP_SOLUTION;stopAfter=0;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;}
+	{algorithm=NFG_LCP_SOLUTION;stopAfter=0;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;
+	 Warn("Not guaranteed to find all solutions for 'All Perfect' 2-person games\n");}
+
 	// All Perfect n person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ALL && nf.NumPlayers()!=2)
-	{gerr<<"All Perfect not implemented for n person games\nUsing current settings\n";}
+	{Warn("All Perfect not implemented for n person games\nUsing current settings\n");}
 
 	// -------- now write the new settings to file
 	wxWriteResource(SOLN_SECT,"Nfg-Algorithm",algorithm,defaults_file);
@@ -126,8 +128,10 @@ protected:
 	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Type",dom_type,defaults_file);
 	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",use_elimdom,defaults_file);
 }
+virtual void Warn(const char *warning) // only warn when solving
+{if (solving) wxMessageBox(warning,"Standard Solution");}
 public:
-	NfgSolveSettings(const BaseNfg &nf_) : nf(nf_)
+	NfgSolveSettings(const BaseNfg &nf_,bool solving_=true):nf(nf_),solving(solving_)
 	{
 	result=SD_SAVE;
 	defaults_file="gambit.ini";
@@ -137,6 +141,7 @@ public:
 	wxGetResource(SOLN_SECT,"Nfg-Standard-Type",&standard_type,defaults_file);
 	wxGetResource(SOLN_SECT,"Nfg-Standard-Num",&standard_num,defaults_file);
 	wxGetResource(SOLN_SECT,"Nfg-Auto-Inspect-Solns",&auto_inspect,defaults_file);
+	if (use_standard) StandardSettings();
 	}
 	~NfgSolveSettings()
 	{
@@ -185,13 +190,14 @@ private:
 	algorithm=nfg_algorithm_box->GetSelection();
 	extensive=extensive_box->GetValue();
 	auto_inspect=auto_inspect_box->GetValue();
+  use_standard=FALSE;
 	d->Show(FALSE);
 	}
 
 public:
 // Constructor
 	NfgSolveParamsDialog(const BaseNfg &nf,int have_efg,wxWindow *parent=0)
-						:NfgSolveSettings(nf)
+						:NfgSolveSettings(nf,false)
 	{
 		d=new wxDialogBox(parent,"Solutions",TRUE);
 		nfg_algorithm_box=MakeNfgAlgorithmList(nf.NumPlayers(),nf.IsConstSum(),d,(wxFunction)nfg_algorithm_box_func);
@@ -227,7 +233,7 @@ private:
 	wxStringList *standard_type_list,*standard_num_list;
 public:
 	NfgSolveStandardDialog(const BaseNfg &nf,wxWindow *parent):
-				NfgSolveSettings(nf),MyDialogBox(parent,"Standard Solution",NFG_STANDARD_HELP)
+				NfgSolveSettings(nf,false),MyDialogBox(parent,"Standard Solution",NFG_STANDARD_HELP)
 	{
 	standard_type_list=new wxStringList("Nash","Perfect",0);
 	standard_num_list=new wxStringList("One","Two","All",0);

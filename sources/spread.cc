@@ -46,12 +46,14 @@ if (!LoadOptions())
 	data_font=wxTheFontList->FindOrCreateFont(11,wxMODERN,wxNORMAL,wxNORMAL);
 	label_font=wxTheFontList->FindOrCreateFont(12,wxMODERN,wxNORMAL,wxNORMAL);
 	gtext=TRUE;
+  num_prec=3;
 	SaveOptions();
 }
 
 for (int i=1;i<=col_width.Length();i++) col_width[i]=DEFAULT_COL_WIDTH;
 x_scroll=y_scroll=0;scrolling=FALSE;
 x_start=-1;y_start=-1;
+ToStringPrecision(num_prec);
 }
 
 void	SpreadSheetDrawSettings::SetOptions(void)
@@ -72,6 +74,7 @@ options_dialog->Add(wxMakeFormShort("Horiz",&horiz,wxFORM_SLIDER,new wxList(wxMa
 options_dialog->Add(wxMakeFormBool("char",&horiz_fit));
 wxStringList *column_list=new wxStringList;
 char *col_str=new char[10];
+column_list->Add("None");
 column_list->Add("All");
 column_list=wxStringListInts(col_width.Length(),column_list);
 options_dialog->Add(wxMakeFormString("Col",&col_str,wxFORM_CHOICE,
@@ -84,7 +87,9 @@ options_dialog->Add(wxMakeFormMessage("Show Labels"));
 options_dialog->Add(wxMakeFormBool("row",&labels_row));
 options_dialog->Add(wxMakeFormBool("col",&labels_col));
 options_dialog->Add(wxMakeFormBool("Color Text",&gtext));
-options_dialog->Form()->Add(wxMakeFormNewLine());
+options_dialog->Add(wxMakeFormNewLine());
+options_dialog->Add(wxMakeFormShort("Output precision",&num_prec,wxFORM_SLIDER,new wxList(wxMakeConstraintRange(0, 16), 0)));
+options_dialog->Add(wxMakeFormNewLine());
 Bool save=FALSE;
 options_dialog->Form()->Add(wxMakeFormBool("Save now",&save));
 options_dialog->Form()->AssociatePanel(options_dialog);
@@ -94,11 +99,12 @@ options_dialog->Go1();
 if (options_dialog->Completed()==wxOK)
 {
 	int which_col=wxListFindString(column_list,col_str);
-	SetColWidth(horiz,which_col);
+	if (which_col) SetColWidth(horiz,which_col-1);
 	SetRowHeight(row_height);
 	labels=0;
 	if (labels_row) labels|=S_LABEL_ROW;
 	if (labels_col) labels|=S_LABEL_COL;
+	ToStringPrecision(num_prec);
 	if (save) SaveOptions();
 }
 delete options_dialog;delete col_str;
@@ -140,7 +146,7 @@ wxWriteResource(sn,"Show-Labels",show_labels,file_name);
 wxWriteResource(sn,"Data-Font",wxFontToString(data_font),file_name);
 wxWriteResource(sn,"Label-Font",wxFontToString(label_font),file_name);
 wxWriteResource(sn,"Use-GText",gtext,file_name);
-
+wxWriteResource("Gambit","Output-Precision",num_prec,file_name);
 delete [] file_name;
 }
 
@@ -164,6 +170,7 @@ data_font=wxStringToFont(font_str);
 wxGetResource(sn,"Label-Font",&font_str,file_name);
 label_font=wxStringToFont(font_str);
 wxGetResource(sn,"Use-GText",&gtext,file_name);
+wxGetResource("Gambit","Output-Precision",&num_prec,file_name);
 
 return 1;
 }

@@ -1,11 +1,13 @@
 // File: wxstatus.h -- definition of the class to implement progress
 // indication/cancel feature for the gambit algorithms in the gui.
-// @(#)wxstatus.h	1.8 9/11/95
+// $Id$
+#ifndef WXSTATUS_H
+#define WXSTATUS_H
 #include "wx.h"
 #include "gstatus.h"
 class wxStatus: public wxDialogBox,public gStatus
 {
-private:
+protected:
 	int Width,Prec;
 	char Represent;
 	wxGauge *gauge;
@@ -34,10 +36,10 @@ public:
 
 	bool IsValid(void) const {return true;}
 	// functions for gProgress
-	void	SetProgress(double p);
+	virtual void SetProgress(double p);
 	// functions for gSignal
-	void	SetSignal(void) {sig=true;}
-	bool Get(void) const {return sig;}
-	void Reset(void) {sig=false;}
+	virtual void SetSignal(void) {sig=true;}
+	virtual bool Get(void) const {return sig;}
+	virtual void Reset(void) {sig=false;}
 };
-
+#endif

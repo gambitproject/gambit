@@ -24,6 +24,7 @@ protected:
 	char *defaults_file;
 	Bool	use_standard;
 	int result;
+	bool	solving;
 protected:
 	const BaseEfg &ef;
 	// call this to convert standard settings to actual solution parameters
@@ -62,7 +63,7 @@ protected:
 	stopAfter=2;max_solns=2;
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
 	subg=FALSE;
-	gerr<<"Not guaranteed to find all solutions for 'Two Nash n-person'\n";
+	Warn("Not guaranteed to find all solutions for 'Two Nash n-person'\n");
 	}
 	// All Nash 2 person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ALL && ef.NumPlayers()==2)
@@ -79,7 +80,7 @@ protected:
 	stopAfter=0;max_solns=0;
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
 	subg=FALSE;
-	gerr<<"Not guaranteed to find all solutions for 'All Nash n-person'\n";
+	Warn("Not guaranteed to find all solutions for 'All Nash n-person'\n");
 	}
 	// One Subgame Perfect (same as One Nash)
 	// One Subgame Perfect for 2 person
@@ -128,7 +129,7 @@ protected:
 	stopAfter=0;max_solns=0;
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
 	subg=TRUE;
-	gerr<<"Not guaranteed to find all solutions for 'All Subgame Perfect n-person'\n";
+	Warn("Not guaranteed to find all solutions for 'All Subgame Perfect n-person'\n");
 	}
 	// One Sequential
 	if (standard_type==STANDARD_SEQUENTIAL && standard_num==STANDARD_ONE)
@@ -145,7 +146,7 @@ protected:
 	stopAfter=2;max_solns=2;
 	use_elimdom=false;all=true;dom_type=DOM_STRONG;
 	subg=FALSE;
-	gerr<<"Not guaranteed to find all solutions for 'Two Sequential'\n";
+	Warn("Not guaranteed to find all solutions for 'Two Sequential'\n");
 	}
 	// All Sequential
 	if (standard_type==STANDARD_SEQUENTIAL && standard_num==STANDARD_ALL)
@@ -154,7 +155,7 @@ protected:
 	stopAfter=0;max_solns=0;
 	use_elimdom=false;all=true;dom_type=DOM_STRONG;
 	subg=FALSE;
-	gerr<<"Not guaranteed to find all solutions for 'All Sequential'\n";
+	Warn("Not guaranteed to find all solutions for 'All Sequential'\n");
 	}
 	pick_solns=false; // pick solution subgames off for all standard solns
 	// -------- now write the new settings to file
@@ -169,8 +170,10 @@ protected:
 	wxWriteResource(SOLN_SECT,"Efg-Mark-Subgames",subg,defaults_file);
 	wxWriteResource(SOLN_SECT,"Efg-Interactive-Solns",pick_solns,defaults_file);
 }
+virtual void Warn(const char *warning) // only warn when solving
+{if (solving) wxMessageBox(warning,"Standard Solution");}
 public:
-	EfgSolveSettings(const BaseEfg &ef_):ef(ef_)
+	EfgSolveSettings(const BaseEfg &ef_,bool solving_=true):ef(ef_),solving(solving_)
 	{
 	result=SD_SAVE;
 	defaults_file="gambit.ini";
@@ -252,10 +255,9 @@ private:
 	efg_algorithm_box->wxWindow::Enable(!usenf);
 	use_nfg=usenf;
 	}
-
 public:
 	EfgSolveParamsDialog(const BaseEfg &ef,int have_nfg,wxWindow *parent=0)
-									:EfgSolveSettings(ef)
+									:EfgSolveSettings(ef,false)
 	{
 		d=new wxDialogBox(parent,"Solutions",TRUE);
 
@@ -318,9 +320,15 @@ private:
 	wxStringList *standard_type_list,*standard_num_list;
 public:
 	EfgSolveStandardDialog(const BaseEfg &ef,wxWindow *parent):
-				EfgSolveSettings(ef),MyDialogBox(parent,"Standard Solution",EFG_STANDARD_HELP)
+				EfgSolveSettings(ef,false),MyDialogBox(parent,"Standard Solution",EFG_STANDARD_HELP)
 	{
+	Bool expert=FALSE;char *defaults_file="gambit.ini";
+	wxGetResource(SOLN_SECT,"Gambit-Expert",&expert,defaults_file);
+	if (expert)
 	standard_type_list=new wxStringList("Nash","Subgame Perfect","Sequential",0);
+	else // No sequential
+	standard_type_list=new wxStringList("Nash","Subgame Perfect",0);
+
 	standard_num_list=new wxStringList("One","Two","All",0);
 	standard_type_str=new char[20];standard_num_str=new char[20];
 	strcpy(standard_type_str,(char *)standard_type_list->Nth(standard_type)->Data());
