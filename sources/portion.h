@@ -1077,7 +1077,7 @@ bool PortionTypeMatch( const PortionType& t1, const PortionType& t2 );
 
 gString PortionTypeToText( const PortionType& type );
 PortionType TextToPortionType( const gString& text );
-
+int TextToPortionListDepth( const gString& text );
 
 void PrintPortionTypeSpec( gOutput& s, PortionType type );
 

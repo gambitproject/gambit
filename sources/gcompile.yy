@@ -684,13 +684,15 @@ bool GCLCompiler::DefineFunction(void)
   bool error = false;
   for (int i = 1; i <= formals.Length(); i++)   {
     PortionType type = TextToPortionType(types[i]);
+    int listdepth = TextToPortionListDepth(types[i]);
 
     if (type != porERROR)   {
       if (refs[i])
 	func->SetParamInfo(function, i - 1, formals[i], type,
-			   NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+			   NO_DEFAULT_VALUE, PASS_BY_REFERENCE, listdepth);
       else
-	func->SetParamInfo(function, i - 1, formals[i], type);
+	func->SetParamInfo(function, i - 1, formals[i], type,
+			   NO_DEFAULT_VALUE, PASS_BY_VALUE, listdepth);
     }
     else   {
       error = true;

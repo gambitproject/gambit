@@ -1227,7 +1227,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	param_sets_matched++;
       }
     }
-    
+
     if( param_sets_matched == 1 )
     {
       _FuncIndex = curr_f_index;
@@ -1417,15 +1417,6 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	list_op = true;
 	break;
       }
-
-    // this check is temporary //
-    if( _FuncInfo[_FuncIndex].UserDefined )
-      for( i = 0; i < _FuncInfo[_FuncIndex].NumParams; i++ )
-	if( _FuncInfo[_FuncIndex].ParamInfo[i].Type & porLIST) 
-	{
-	  list_op = false;
-	  break;
-	}
 
     if( !list_op || !_FuncInfo[_FuncIndex].Listable )
     {
