@@ -127,7 +127,7 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
   m_qreList->InsertColumn(0, "Lambda");
 
   int maxColumn = 0;
-  const EFSupport &support = p_profiles[1].Support();
+  const gbtEfgSupport &support = p_profiles[1].Support();
   for (int pl = 1; pl <= support.GetGame().NumPlayers(); pl++) {
     for (int iset = 1; iset <= support.GetGame().GetPlayer(pl).NumInfosets(); iset++) {
       for (int act = 1; act <= support.NumActions(pl, iset); act++) {

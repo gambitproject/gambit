@@ -48,7 +48,7 @@ template <class T> gbtEfgNashLcp<T>::~gbtEfgNashLcp()
 //
 
 template <class T> 
-gList<BehavSolution> gbtEfgNashLcp<T>::Solve(const EFSupport &p_support,
+gList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
 					     gStatus &p_status)
 {
   BFS<T> cbfs((T) 0);
@@ -144,7 +144,7 @@ template <class T> int gbtEfgNashLcp<T>::Add_BFS(const LTableau<T> &tableau)
 // all possible paths, adding any new equilibria to the List.  
 //
 template <class T> int 
-gbtEfgNashLcp<T>::All_Lemke(const EFSupport &p_support,
+gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
 			    int j, LTableau<T> &B, int depth,
 			    gMatrix<T> &A, gList<BehavSolution> &p_solutions,
 			    gStatus &p_status)
@@ -214,7 +214,7 @@ gbtEfgNashLcp<T>::All_Lemke(const EFSupport &p_support,
 }
 
 template <class T>
-void gbtEfgNashLcp<T>::FillTableau(const EFSupport &p_support, gMatrix<T> &A,
+void gbtEfgNashLcp<T>::FillTableau(const gbtEfgSupport &p_support, gMatrix<T> &A,
 				   const gbtEfgNode &n, T prob,
 				   int s1, int s2, int i1, int i2)
 {
@@ -268,7 +268,7 @@ void gbtEfgNashLcp<T>::FillTableau(const EFSupport &p_support, gMatrix<T> &A,
 
 
 template <class T>
-void gbtEfgNashLcp<T>::GetProfile(const EFSupport &p_support,
+void gbtEfgNashLcp<T>::GetProfile(const gbtEfgSupport &p_support,
 				  const LTableau<T> &tab, 
 				  gDPVector<T> &v, const gVector<T> &sol,
 				  const gbtEfgNode &n, int s1,int s2)

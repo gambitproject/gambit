@@ -784,12 +784,12 @@ gPool EfSupportPortion::pool(sizeof(EfSupportPortion));
 EfSupportPortion::rep::~rep()
 { delete value; }
 
-EfSupportPortion::EfSupportPortion(EFSupport *value)
+EfSupportPortion::EfSupportPortion(gbtEfgSupport *value)
   : m_rep(new struct rep(value)), m_ref(false)
 { }
 
-EfSupportPortion::EfSupportPortion(EFSupport &value)
-  : m_rep(new struct rep(new EFSupport(value))), m_ref(false)
+EfSupportPortion::EfSupportPortion(gbtEfgSupport &value)
+  : m_rep(new struct rep(new gbtEfgSupport(value))), m_ref(false)
 { }
 
 EfSupportPortion::EfSupportPortion(const EfSupportPortion *p, bool ref)
@@ -803,10 +803,10 @@ EfSupportPortion::~EfSupportPortion()
   if (--m_rep->nref == 0)  delete m_rep;
 }
 
-EFSupport *EfSupportPortion::Value(void) const
+gbtEfgSupport *EfSupportPortion::Value(void) const
 { return m_rep->value; }
 
-void EfSupportPortion::SetValue(EFSupport *value)
+void EfSupportPortion::SetValue(gbtEfgSupport *value)
 {
   if (m_ref) {
     ((EfSupportPortion *) Original())->SetValue(value);

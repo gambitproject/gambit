@@ -57,7 +57,7 @@ template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
 static Portion *GSM_ActionNumber(GSM &, Portion **param)
 {
   gbtEfgAction a = AsEfgAction(param[0]);
-  EFSupport &support = AsEfgSupport(param[1]);
+  gbtEfgSupport &support = AsEfgSupport(param[1]);
   return new NumberPortion(support.GetIndex(a));
 }
 
@@ -65,7 +65,7 @@ static Portion *GSM_BasisActionNumber(GSM &, Portion **param)
 {
   gbtEfgAction a = AsEfgAction(param[0]);
   EFBasis &basis = AsEfgBasis(param[1]);
-  return new NumberPortion(basis.EFSupport::GetIndex(a));
+  return new NumberPortion(basis.gbtEfgSupport::GetIndex(a));
 }
 
 //-------------
@@ -78,7 +78,7 @@ static Portion *GSM_Actions(GSM &, Portion **param)
     return new ListPortion;
 
   gbtEfgInfoset infoset = AsEfgInfoset(param[0]);
-  EFSupport &support = AsEfgSupport(param[1]);
+  gbtEfgSupport &support = AsEfgSupport(param[1]);
 
   ListPortion *ret = new ListPortion;
   for (gbtActionIterator action(support, infoset); !action.End(); action++) {
@@ -115,10 +115,10 @@ static Portion *GSM_BasisActions(GSM &, Portion **param)
 
 static Portion *GSM_AddAction(GSM &, Portion **param)
 {  
-  EFSupport &support = AsEfgSupport(param[0]);
+  gbtEfgSupport &support = AsEfgSupport(param[0]);
   gbtEfgAction action = AsEfgAction(param[1]);
 
-  EFSupport *S = new EFSupport(support);
+  gbtEfgSupport *S = new gbtEfgSupport(support);
   S->AddAction(action);
 
   return new EfSupportPortion(S);
@@ -243,7 +243,7 @@ static Portion *GSM_Comment(GSM &, Portion **param)
 
 static Portion *GSM_CompressEfg(GSM &, Portion **param)
 {
-  EFSupport &S = AsEfgSupport(param[0]);
+  gbtEfgSupport &S = AsEfgSupport(param[0]);
   return new EfgPortion(CompressEfg(S.GetGame(), S));
 }
 
@@ -357,7 +357,7 @@ static Portion *GSM_DeleteTree(GSM &gsm, Portion **param)
 static Portion *GSM_IsDominated_Efg(GSM &, Portion **param)
 {
   gbtEfgAction act = AsEfgAction(param[0]);
-  EFSupport &S = AsEfgSupport(param[1]);
+  gbtEfgSupport &S = AsEfgSupport(param[1]);
   bool strong = AsBool(param[2]);
   bool conditional = AsBool(param[3]);
   gWatch watch;
@@ -623,7 +623,7 @@ static Portion *GSM_Name(GSM &, Portion **param)
   case porEFPLAYER:
     return new TextPortion(AsEfgPlayer(param[0]).GetLabel());
   case porEFSUPPORT:
-    return new TextPortion(AsEfgSupport(param[0]).GetName());
+    return new TextPortion(AsEfgSupport(param[0]).GetLabel());
   case porEFG:
     return new TextPortion(AsEfg(param[0]).GetLabel());
   default:
@@ -834,7 +834,7 @@ static Portion *GSM_Players(GSM &, Portion **param)
 
 static Portion *GSM_PossibleNashSupports(GSM &gsm, Portion **param)
 {
-  return ArrayToList(PossibleNashSubsupports(EFSupport(AsEfg(param[0])),
+  return ArrayToList(PossibleNashSubsupports(gbtEfgSupport(AsEfg(param[0])),
 					     gsm.GetStatusMonitor()));
 }
 
@@ -872,10 +872,10 @@ static Portion *GSM_PriorSibling(GSM &, Portion **param)
 
 static Portion *GSM_RemoveAction(GSM &, Portion **param)
 {  
-  EFSupport &support = AsEfgSupport(param[0]);
+  gbtEfgSupport &support = AsEfgSupport(param[0]);
   gbtEfgAction action = AsEfgAction(param[1]);
 
-  EFSupport *S = new EFSupport(support);
+  gbtEfgSupport *S = new gbtEfgSupport(support);
   S->RemoveAction(action);
   return new EfSupportPortion(S);
 }
@@ -965,7 +965,7 @@ static Portion *GSM_WriteSfg(GSM &, Portion **param)
   if (!efg.IsPerfectRecall()) 
     throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
 
-  EFSupport efs(efg);
+  gbtEfgSupport efs(efg);
   Sfg sfg(efs);
   sfg.Dump(out);
   return param[0]->ValCopy();
@@ -996,7 +996,7 @@ static Portion *GSM_Sfg(GSM &, Portion **param)
   if (!efg.IsPerfectRecall()) 
     throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
 
-  EFSupport efs(efg);
+  gbtEfgSupport efs(efg);
   Sfg sfg(efs);
 
   ListPortion *por = new ListPortion;
@@ -1014,7 +1014,7 @@ static Portion *GSM_SfgStrats(GSM &, Portion **param)
     throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
   gbtEfgPlayer player = AsEfgPlayer(param[1]);
   int p = player.GetId();
-  EFSupport efs(efg);
+  gbtEfgSupport efs(efg);
   Sfg sfg(efs);
 
   ListPortion *por = new ListPortion;
@@ -1036,7 +1036,7 @@ static Portion *GSM_SfgConstraints(GSM &, Portion **param)
     throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
   gbtEfgPlayer player = AsEfgPlayer(param[1]);
   int p = player.GetId();
-  EFSupport efs(efg);
+  gbtEfgSupport efs(efg);
   Sfg sfg(efs);
 
   gRectArray<gNumber> A(sfg.Constraints(p));
@@ -1107,7 +1107,7 @@ static Portion *GSM_SetName(GSM &, Portion **param)
     AsEfgPlayer(param[0]).SetLabel(name);
     break;
   case porEFSUPPORT:
-    AsEfgSupport(param[0]).SetName(name);
+    AsEfgSupport(param[0]).SetLabel(name);
     break;
   case porEFG:
     AsEfg(param[0]).SetLabel(name);
@@ -1177,7 +1177,7 @@ static Portion *GSM_Subgames(GSM &, Portion **param)
 
 static Portion *GSM_Support(GSM &, Portion **param)
 {
-  return new EfSupportPortion(new EFSupport(AsEfg(param[0])));
+  return new EfSupportPortion(new gbtEfgSupport(AsEfg(param[0])));
 }
 
 //--------------
@@ -1195,7 +1195,7 @@ static Portion *GSM_Basis(GSM &, Portion **param)
 
 static Portion *GSM_UnDominated(GSM &gsm, Portion **param)
 {
-  EFSupport &S = AsEfgSupport(param[0]);
+  gbtEfgSupport &S = AsEfgSupport(param[0]);
   bool strong = AsBool(param[1]);
   bool conditional = AsBool(param[2]);
   gWatch watch;
@@ -1203,13 +1203,13 @@ static Portion *GSM_UnDominated(GSM &gsm, Portion **param)
   gBlock<int> players(S.GetGame().NumPlayers());
   for (int i = 1; i <= players.Length(); i++)   players[i] = i;
 
-  EFSupport T(S.Undominated(strong, conditional, players,
+  gbtEfgSupport T(S.Undominated(strong, conditional, players,
 			    ((OutputPortion *) param[4])->Value(),
 			    gsm.GetStatusMonitor()));
 
   ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
   
-  return new EfSupportPortion(new EFSupport(T));
+  return new EfSupportPortion(new gbtEfgSupport(T));
 }
 
 //-----------------

@@ -35,7 +35,7 @@ EfgIter::EfgIter(gbtEfgGame p_efg)
   First();
 }
 
-EfgIter::EfgIter(const EFSupport &s)
+EfgIter::EfgIter(const gbtEfgSupport &s)
   : m_efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(m_efg.NumInfosets()),
     _payoff(m_efg.NumPlayers())
@@ -124,7 +124,7 @@ void EfgIter::Dump(gOutput &f) const
   _current.Dump(f);
 }
 
-EfgContIter::EfgContIter(const EFSupport &s)
+EfgContIter::EfgContIter(const gbtEfgSupport &s)
   : _frozen_pl(0), _frozen_iset(0),
     m_efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
@@ -144,7 +144,7 @@ EfgContIter::EfgContIter(const EFSupport &s)
   First();
 }
 
-EfgContIter::EfgContIter(const EFSupport &s, 
+EfgContIter::EfgContIter(const gbtEfgSupport &s, 
 			 const gList<gbtEfgInfoset >&active)
   : _frozen_pl(0), _frozen_iset(0),
     m_efg(s.GetGame()), _support(s),
@@ -270,7 +270,7 @@ void EfgContIter::Dump(gOutput &f) const
 
 
 
-EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s)
+EfgConditionalContIter::EfgConditionalContIter(const gbtEfgSupport &s)
   : m_efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
     _is_active(),
@@ -289,7 +289,7 @@ EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s)
   First();
 }
 
-EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s, 
+EfgConditionalContIter::EfgConditionalContIter(const gbtEfgSupport &s, 
 					       const gList<gbtEfgInfoset> &active)
   : m_efg(s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),

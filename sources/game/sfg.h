@@ -36,7 +36,7 @@
 class Sfg  {
 private:
   gbtEfgGame m_efg;
-  const EFSupport &efsupp;
+  const gbtEfgSupport &efsupp;
   gArray<SFSequenceSet *> *sequences;
   gNArray<gArray<gNumber> *> *SF;  // sequence form
   gArray<gRectArray<gNumber> *> *E;   // constraint matrices for sequence form.  
@@ -49,7 +49,7 @@ private:
   void GetSequenceDims(const gbtEfgNode &);
 
 public:
-  Sfg(const EFSupport &);
+  Sfg(const gbtEfgSupport &);
   virtual ~Sfg();  
 
   inline int NumSequences(int pl) const {return seq[pl];}

@@ -29,7 +29,7 @@
 //              gbtEfgNashSubgames: Private member functions
 //-----------------------------------------------------------------------
 
-void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
+void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 				      gStatus &p_status,
 				      gbtEfgNode n,
 				      gList<BehavSolution> &solns,
@@ -95,7 +95,7 @@ void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
     gList<gbtEfgNode> nodes;
     Nodes(efg, n, nodes);
     
-    EFSupport subsupport(foo);
+    gbtEfgSupport subsupport(foo);
     // here, we build the support for the subgame
     for (int pl = 1; pl <= foo.NumPlayers(); pl++)  {
       gbtEfgPlayer p = foo.GetPlayer(pl);
@@ -139,7 +139,7 @@ void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
       }
       else if (m_nfgAlgorithm) {
 	CompressEfgInPlace(foo, subsupport);
-	subsupport = EFSupport(foo);
+	subsupport = gbtEfgSupport(foo);
 	gbtNfgGame nfg = foo.GetReducedNfg();
 	gbtNfgSupport support(nfg);
 
@@ -254,7 +254,7 @@ gbtEfgNashSubgames::~gbtEfgNashSubgames()
 //               gbtEfgNashSubgames: Public member functions
 //-----------------------------------------------------------------------
 
-gList<BehavSolution> gbtEfgNashSubgames::Solve(const EFSupport &p_support,
+gList<BehavSolution> gbtEfgNashSubgames::Solve(const gbtEfgSupport &p_support,
 					  gStatus &p_status)
 {
   gWatch watch;
@@ -275,7 +275,7 @@ gList<BehavSolution> gbtEfgNashSubgames::Solve(const EFSupport &p_support,
     }
   }
 
-  EFSupport support(efg);
+  gbtEfgSupport support(efg);
 
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
     gbtEfgPlayer player = p_support.GetGame().GetPlayer(pl);

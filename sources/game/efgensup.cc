@@ -35,7 +35,7 @@
 //
 static bool
 DeletionsViolateActiveCommitments(gbtAllActionIterator &cursor,
-				  const EFSupportWithActiveInfo *S,
+				  const gbtEfgSupportWithActiveInfo *S,
 				  const gList<gbtEfgInfoset> *infosetlist)
 {
   for (int i = 1; i <= infosetlist->Length(); i++) {
@@ -59,7 +59,7 @@ DeletionsViolateActiveCommitments(gbtAllActionIterator &cursor,
 
 static bool
 InfosetGuaranteedActiveByPriorCommitments(gbtAllActionIterator &cursor,
-					  const EFSupportWithActiveInfo *S,
+					  const gbtEfgSupportWithActiveInfo *S,
 					  gbtEfgInfoset infoset)
 {
   for (int i = 1; i <= infoset.NumMembers(); i++) {
@@ -83,10 +83,10 @@ InfosetGuaranteedActiveByPriorCommitments(gbtAllActionIterator &cursor,
 // final one, which is our goal, is the undominated support function.
 // We begin by simply enumerating all subsupports.
 
-void AllSubsupportsRECURSIVE(const EFSupport *s,
-			     EFSupportWithActiveInfo *sact,
+void AllSubsupportsRECURSIVE(const gbtEfgSupport *s,
+			     gbtEfgSupportWithActiveInfo *sact,
 			     gbtAllActionIterator *c,
-			     gList<const EFSupport> *list)
+			     gList<const gbtEfgSupport> *list)
 { 
   (*list) += *sact;
 
@@ -101,10 +101,10 @@ void AllSubsupportsRECURSIVE(const EFSupport *s,
   } while (c_copy.GoToNext()) ;
 }
 
-gList<const EFSupport> AllSubsupports(const EFSupport &S)
+gList<const gbtEfgSupport> AllSubsupports(const gbtEfgSupport &S)
 {
-  gList<const EFSupport> answer;
-  EFSupportWithActiveInfo SAct(S);
+  gList<const gbtEfgSupport> answer;
+  gbtEfgSupportWithActiveInfo SAct(S);
   gbtAllActionIterator cursor(S);
 
   AllSubsupportsRECURSIVE(&S,&SAct,&cursor,&answer);
@@ -120,10 +120,10 @@ gList<const EFSupport> AllSubsupports(const EFSupport &S)
 // prototype of the eventual path enumerator, which will also perform
 // dominance elimination.
 
-void AllInequivalentSubsupportsRECURSIVE(const EFSupport *s,
-					 EFSupportWithActiveInfo *sact,
+void AllInequivalentSubsupportsRECURSIVE(const gbtEfgSupport *s,
+					 gbtEfgSupportWithActiveInfo *sact,
 					 gbtAllActionIterator *c,
-					 gList<const EFSupport> *list)
+					 gList<const gbtEfgSupport> *list)
 { 
   if (sact->HasActiveActionsAtActiveInfosetsAndNoOthers()) {
     (*list) += *sact;
@@ -145,10 +145,10 @@ void AllInequivalentSubsupportsRECURSIVE(const EFSupport *s,
   } while (c_copy.GoToNext()) ;
 }
 
-gList<const EFSupport> AllInequivalentSubsupports(const EFSupport &S)
+gList<const gbtEfgSupport> AllInequivalentSubsupports(const gbtEfgSupport &S)
 {
-  gList<const EFSupport> answer;
-  EFSupportWithActiveInfo SAct(S);
+  gList<const gbtEfgSupport> answer;
+  gbtEfgSupportWithActiveInfo SAct(S);
   gbtAllActionIterator cursor(S);
 
   AllInequivalentSubsupportsRECURSIVE(&S,&SAct,&cursor,&answer);
@@ -156,12 +156,12 @@ gList<const EFSupport> AllInequivalentSubsupports(const EFSupport &S)
   return answer;
 }
 
-void AllUndominatedSubsupportsRECURSIVE(const EFSupport *s,
-					 EFSupportWithActiveInfo *sact,
+void AllUndominatedSubsupportsRECURSIVE(const gbtEfgSupport *s,
+					 gbtEfgSupportWithActiveInfo *sact,
 					 gbtAllActionIterator *c,
 					const bool strong,
 					const bool conditional,
-					 gList<const EFSupport> *list,
+					 gList<const gbtEfgSupport> *list,
 					 const gStatus &status)
 { 
   bool abort = false;
@@ -252,13 +252,13 @@ void AllUndominatedSubsupportsRECURSIVE(const EFSupport *s,
   }
 }
   
-gList<const EFSupport> AllUndominatedSubsupports(const EFSupport &S,
+gList<const gbtEfgSupport> AllUndominatedSubsupports(const gbtEfgSupport &S,
 						 const bool strong,
 						 const bool conditional,
 						 const gStatus &status)
 {
-  gList<const EFSupport> answer;
-  EFSupportWithActiveInfo sact(S);
+  gList<const gbtEfgSupport> answer;
+  gbtEfgSupportWithActiveInfo sact(S);
   gbtAllActionIterator cursor(S);
 
   AllUndominatedSubsupportsRECURSIVE(&S,
@@ -272,10 +272,10 @@ gList<const EFSupport> AllUndominatedSubsupports(const EFSupport &S,
   return answer;
 }
 
-void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
-					    EFSupportWithActiveInfo *sact,
+void PossibleNashSubsupportsRECURSIVE(const gbtEfgSupport *s,
+					    gbtEfgSupportWithActiveInfo *sact,
 				            gbtAllActionIterator *c,
-				            gList<const EFSupport> *list,
+				            gList<const gbtEfgSupport> *list,
 				      const gStatus &status)
 { 
   status.Get();
@@ -353,7 +353,7 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
   }
 }
 
-gList<const EFSupport> SortSupportsBySize(gList<const EFSupport> &list) 
+gList<const gbtEfgSupport> SortSupportsBySize(gList<const gbtEfgSupport> &list) 
 {
   gArray<int> sizes(list.Length());
   for (int i = 1; i <= list.Length(); i++)
@@ -390,18 +390,18 @@ gList<const EFSupport> SortSupportsBySize(gList<const EFSupport> &list)
       }
   }
 
-  gList<const EFSupport> answer;
+  gList<const gbtEfgSupport> answer;
   for (int i = 1; i <= list.Length(); i++)
     answer += list[listproxy[i]];
 
   return answer;
 }
   
-gList<const EFSupport> PossibleNashSubsupports(const EFSupport &S,
+gList<const gbtEfgSupport> PossibleNashSubsupports(const gbtEfgSupport &S,
 					       gStatus &status)
 {
-  gList<const EFSupport> answer;
-  EFSupportWithActiveInfo sact(S);
+  gList<const gbtEfgSupport> answer;
+  gbtEfgSupportWithActiveInfo sact(S);
   gbtAllActionIterator cursor(S);
 
   status.SetProgress(0);
@@ -416,7 +416,7 @@ gList<const EFSupport> PossibleNashSubsupports(const EFSupport &S,
   for (int i = answer.Length(); i >= 1; i--) {
     status.SetProgress((2.0-((double)i/(double)answer.Length()))/2.0);
     status.Get();
-    EFSupportWithActiveInfo current(answer[i]);
+    gbtEfgSupportWithActiveInfo current(answer[i]);
     gbtAllActionIterator crsr(S);
     bool remove = false;
     do {

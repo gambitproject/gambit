@@ -34,7 +34,7 @@
 
 class EFNodeSet;
 
-class EFBasis : public EFSupport {
+class EFBasis : public gbtEfgSupport {
 protected:
   gArray <EFNodeSet *> nodes;
 

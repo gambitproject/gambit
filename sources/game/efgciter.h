@@ -48,7 +48,7 @@ class EfgContIter    {
   private:
     int _frozen_pl, _frozen_iset;
     gbtEfgGame m_efg;
-    EFSupport _support;
+    gbtEfgSupport _support;
     PureBehavProfile<gNumber> _profile;
     gPVector<int> _current;
     gBlock<gBlock<bool> > _is_active;
@@ -56,8 +56,8 @@ class EfgContIter    {
     mutable gVector<gNumber> _payoff;
 
   public:
-    EfgContIter(const EFSupport &);
-    EfgContIter(const EFSupport &, const gList<gbtEfgInfoset> &);
+    EfgContIter(const gbtEfgSupport &);
+    EfgContIter(const gbtEfgSupport &, const gList<gbtEfgInfoset> &);
     ~EfgContIter();
   
     void First(void);
@@ -86,7 +86,7 @@ class EfgConditionalContIter    {
   friend class EfgIter;
   private:
     gbtEfgGame m_efg;
-    EFSupport _support;
+    gbtEfgSupport _support;
     PureBehavProfile<gNumber> _profile;
     gPVector<int> _current;
     gBlock<gBlock<bool> > _is_active;
@@ -94,8 +94,8 @@ class EfgConditionalContIter    {
     mutable gVector<gNumber> _payoff;
 
   public:
-    EfgConditionalContIter(const EFSupport &);
-    EfgConditionalContIter(const EFSupport &, const gList<gbtEfgInfoset> &);
+    EfgConditionalContIter(const gbtEfgSupport &);
+    EfgConditionalContIter(const gbtEfgSupport &, const gList<gbtEfgInfoset> &);
     ~EfgConditionalContIter();
   
     void First(void); // Sets each infoset's action to the first in the support

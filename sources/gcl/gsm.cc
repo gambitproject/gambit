@@ -340,7 +340,7 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
 	((NfSupportPortion *) p1)->SetValue(new gbtNfgSupport(*((NfSupportPortion *) p2)->Value()));
 	break;
       case porEFSUPPORT:
-	((EfSupportPortion *) p1)->SetValue(new EFSupport(*((EfSupportPortion *) p2)->Value()));
+	((EfSupportPortion *) p1)->SetValue(new gbtEfgSupport(*((EfSupportPortion *) p2)->Value()));
 	break;
       case porEFBASIS:
 	((EfBasisPortion *) p1)->SetValue(new EFBasis(*((EfBasisPortion *) p2)->Value()));

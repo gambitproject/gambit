@@ -57,7 +57,7 @@ public:
   void SetTolN(double p_tolN) { m_tolN = p_tolN; }
 
   gText GetAlgorithm(void) const { return "Liap[EFG]"; }
-  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
+  gList<BehavSolution> Solve(const gbtEfgSupport &, gStatus &);
 };
 
 

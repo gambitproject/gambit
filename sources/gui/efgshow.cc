@@ -1053,11 +1053,11 @@ void EfgShow::OnToolsDominance(wxCommandEvent &)
   dialogElimBehav dialog(this, playerNames);
 
   if (dialog.ShowModal() == wxID_OK) {
-    EFSupport support(m_doc->GetEfgSupport());
+    gbtEfgSupport support(m_doc->GetEfgSupport());
     wxStatus status(this, "Dominance Elimination");
 
     try {
-      EFSupport newSupport(support);
+      gbtEfgSupport newSupport(support);
 
       while (true) {
 	gNullOutput gnull;
@@ -1069,8 +1069,8 @@ void EfgShow::OnToolsDominance(wxCommandEvent &)
 	  break;
 	}
 	else {
-	  newSupport.SetName(m_doc->UniqueEfgSupportName());
-	  m_doc->AddEfgSupport(new EFSupport(newSupport));
+	  newSupport.SetLabel(m_doc->UniqueEfgSupportName());
+	  m_doc->AddEfgSupport(new gbtEfgSupport(newSupport));
 	  support = newSupport;
 	}
 
@@ -1195,8 +1195,8 @@ void EfgShow::OnHelpAbout(wxCommandEvent &)
 
 void EfgShow::OnSupportDuplicate(wxCommandEvent &)
 {
-  EFSupport *newSupport = new EFSupport(m_doc->GetEfgSupport());
-  newSupport->SetName(m_doc->UniqueEfgSupportName());
+  gbtEfgSupport *newSupport = new gbtEfgSupport(m_doc->GetEfgSupport());
+  newSupport->SetLabel(m_doc->UniqueEfgSupportName());
   m_doc->AddEfgSupport(newSupport);
   m_doc->SetEfgSupport(m_doc->AllEfgSupports().Length());
 }
@@ -1212,7 +1212,7 @@ void EfgShow::OnSupportDelete(wxCommandEvent &)
 
 void EfgShow::OnProfilesNew(wxCommandEvent &)
 {
-  BehavSolution profile = BehavProfile<gNumber>(EFSupport(m_doc->GetEfg()));
+  BehavSolution profile = BehavProfile<gNumber>(gbtEfgSupport(m_doc->GetEfg()));
 
   dialogEditBehav dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {

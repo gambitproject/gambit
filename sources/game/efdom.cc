@@ -40,7 +40,7 @@ gText efgDominanceException::Description(void) const
 }
 
 
-bool EFSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
+bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
 			  bool strong, const bool conditional) const
 {
   gbtEfgInfoset infoset = a.GetInfoset();
@@ -48,7 +48,7 @@ bool EFSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
     throw efgDominanceException
       ("Dominates(..) needs actions in same infoset.\n");
 
-  const EFSupportWithActiveInfo SAct(*this);
+  const gbtEfgSupportWithActiveInfo SAct(*this);
   gbtEfgPlayer player = infoset.GetPlayer();
   int pl = player.GetId();
   bool equal = true;
@@ -114,7 +114,7 @@ bool EFSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
   */
 }
 
-bool SomeElementDominates(const EFSupport &S, 
+bool SomeElementDominates(const gbtEfgSupport &S, 
 			  const gArray<gbtEfgAction> &array,
 			  const gbtEfgAction &a,
 			  bool strong, bool conditional)
@@ -127,7 +127,7 @@ bool SomeElementDominates(const EFSupport &S,
   return false;
 }
 
-bool EFSupport::IsDominated(const gbtEfgAction &a, 
+bool gbtEfgSupport::IsDominated(const gbtEfgAction &a, 
 			    bool strong, bool conditional) const
 {
   gArray<gbtEfgAction> array(NumActions(a.GetInfoset()));
@@ -137,7 +137,7 @@ bool EFSupport::IsDominated(const gbtEfgAction &a,
   return SomeElementDominates(*this,array,a,strong,conditional);
 }
 
-bool InfosetHasDominatedElement(const EFSupport &S, 
+bool InfosetHasDominatedElement(const gbtEfgSupport &S, 
 				gbtEfgInfoset infoset,
 				bool strong, bool conditional,
 				gStatus &/*status*/)
@@ -154,7 +154,7 @@ bool InfosetHasDominatedElement(const EFSupport &S,
   return false;
 }
 
-bool ElimDominatedInInfoset(const EFSupport &S, EFSupport &T,
+bool ElimDominatedInInfoset(const gbtEfgSupport &S, gbtEfgSupport &T,
 			     const int pl, 
 			     const int iset, 
 			     const bool strong,
@@ -195,7 +195,7 @@ bool ElimDominatedInInfoset(const EFSupport &S, EFSupport &T,
   return action_was_eliminated;
 }
 
-bool ElimDominatedForPlayer(const EFSupport &S, EFSupport &T,
+bool ElimDominatedForPlayer(const gbtEfgSupport &S, gbtEfgSupport &T,
 			    const int pl, int &cumiset,
 			    const bool strong,
 			    const bool conditional,
@@ -215,12 +215,12 @@ bool ElimDominatedForPlayer(const EFSupport &S, EFSupport &T,
   return action_was_eliminated;
 }
 
-EFSupport EFSupport::Undominated(bool strong, bool conditional,
+gbtEfgSupport gbtEfgSupport::Undominated(bool strong, bool conditional,
 				  const gArray<int> &players,
 				  gOutput &, // tracefile 
 				  gStatus &status) const
 {
-  EFSupport T(*this);
+  gbtEfgSupport T(*this);
   int cumiset = 0;
 
   for (int i = 1; i <= players.Length(); i++)   {

@@ -152,7 +152,7 @@ gbtEfgNashLiap::gbtEfgNashLiap(void)
     m_tol1(2.0e-10), m_tolN(1.0e-10)
 { }
 
-gList<BehavSolution> gbtEfgNashLiap::Solve(const EFSupport &p_support,
+gList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
 					   gStatus &p_status)
 {
   static const double ALPHA = .00000001;

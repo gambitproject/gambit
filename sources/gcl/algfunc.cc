@@ -125,19 +125,19 @@ void NfSupport_ListPortion::SetValue(const gList<const gbtNfgSupport> &list)
 
 class EfSupport_ListPortion : public ListPortion   {
   public:
-    EfSupport_ListPortion(const gList<const EFSupport> &);
+    EfSupport_ListPortion(const gList<const gbtEfgSupport> &);
     EfSupport_ListPortion();
     virtual ~EfSupport_ListPortion()   { }
 
-  void SetValue(const gList<const EFSupport> &);
+  void SetValue(const gList<const gbtEfgSupport> &);
 };
 
 EfSupport_ListPortion::EfSupport_ListPortion(const gList<const 
-					                 EFSupport> &list)
+					                 gbtEfgSupport> &list)
 {
   rep->_DataType = porEFSUPPORT;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new EfSupportPortion(new EFSupport(list[i])));
+    Append(new EfSupportPortion(new gbtEfgSupport(list[i])));
 }
 
 EfSupport_ListPortion::EfSupport_ListPortion()
@@ -145,10 +145,10 @@ EfSupport_ListPortion::EfSupport_ListPortion()
   rep->_DataType = porEFSUPPORT;
 }
 
-void EfSupport_ListPortion::SetValue(const gList<const EFSupport> &list)
+void EfSupport_ListPortion::SetValue(const gList<const gbtEfgSupport> &list)
 {
   for (int i = 1; i <= list.Length(); i++)
-    Append(new EfSupportPortion(new EFSupport(list[i])));
+    Append(new EfSupportPortion(new gbtEfgSupport(list[i])));
 }
 
 
@@ -267,7 +267,7 @@ static Portion *GSM_EnumMixed_Nfg(GSM &gsm, Portion **param)
 
 static Portion *GSM_EnumMixed_Efg(GSM &gsm, Portion **param)
 {
-  const EFSupport &support = AsEfgSupport(param[0]);
+  const gbtEfgSupport &support = AsEfgSupport(param[0]);
 
   if (!AsBool(param[1])) {
     throw gclRuntimeError("algorithm not implemented for extensive forms");
@@ -338,7 +338,7 @@ static Portion *GSM_EnumPure_Nfg(GSM &gsm, Portion **param)
 
 static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
 {
-  const EFSupport &support = AsEfgSupport(param[0]);
+  const gbtEfgSupport &support = AsEfgSupport(param[0]);
 
   if (!support.GetGame().IsPerfectRecall()) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with EnumPure; results not guaranteed\n";
@@ -447,7 +447,7 @@ static gbtEfgNashAlgorithm *GSM_Lcp_Efg_Rational(int p_stopAfter)
 
 static Portion *GSM_Lcp_Efg(GSM &gsm, Portion **param)
 {
-  const EFSupport &support = AsEfgSupport(param[0]);
+  const gbtEfgSupport &support = AsEfgSupport(param[0]);
   gbtEfgGame efg = support.GetGame();
 
   if (efg.NumPlayers() != 2) {
@@ -540,7 +540,7 @@ Portion* GSM_Lcp_ListNumber(GSM &, Portion** param)
 static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
 {
   const BehavProfile<gNumber> &start = *AsBehav(param[0]).Profile();
-  const EFSupport &support = start.Support();
+  const gbtEfgSupport &support = start.Support();
   
   gsm.StartAlgorithmMonitor("LiapSolve Progress");
 
@@ -716,7 +716,7 @@ static gbtEfgNashAlgorithm *GSM_Lp_Efg_Rational(void)
 
 static Portion *GSM_Lp_Efg(GSM &gsm, Portion **param)
 {
-  const EFSupport &support = AsEfgSupport(param[0]);
+  const gbtEfgSupport &support = AsEfgSupport(param[0]);
   gbtEfgGame efg = support.GetGame();
   
   if (efg.NumPlayers() != 2 || !efg.IsConstSum()) {
@@ -788,7 +788,7 @@ static Portion *GSM_PolEnumSolve_Nfg(GSM &gsm, Portion **param)
 
 static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
 {
-  const EFSupport &support = AsEfgSupport(param[0]);
+  const gbtEfgSupport &support = AsEfgSupport(param[0]);
 
   if (!support.GetGame().IsPerfectRecall()) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with PolEnum; results not guaranteed\n";
@@ -1028,7 +1028,7 @@ static Portion *GSM_Simpdiv_Nfg(GSM &gsm, Portion **param)
 
 static Portion *GSM_Simpdiv_Efg(GSM &gsm, Portion **param)
 {
-  const EFSupport &support = AsEfgSupport(param[0]);
+  const gbtEfgSupport &support = AsEfgSupport(param[0]);
 
   if (!AsBool(param[1])) {
     throw gclRuntimeError("algorithm not implemented for extensive forms");

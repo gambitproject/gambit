@@ -62,11 +62,11 @@ Portion *ArrayToList(const gArray<gNumber> &A)
 }
 
 template<>
-Portion *ArrayToList(const gList<const EFSupport> &A)
+Portion *ArrayToList(const gList<const gbtEfgSupport> &A)
 {
   ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++) {
-    EFSupport sup = A[i];
+    gbtEfgSupport sup = A[i];
     ret->Append(new EfSupportPortion(sup));
   }
   return ret;

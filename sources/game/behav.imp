@@ -232,7 +232,7 @@ BehavProfile<T>::BehavProfile(const BehavProfile<T> &p_profile)
   InitProfile();
 }
 
-template <class T> BehavProfile<T>::BehavProfile(const EFSupport &p_support) 
+template <class T> BehavProfile<T>::BehavProfile(const gbtEfgSupport &p_support) 
   : gDPVector<T>(p_support.NumActions()), 
     m_efg(p_support.GetGame()),
     m_support(p_support),
@@ -952,7 +952,7 @@ template <class T> gOutput &operator<<(gOutput &p_file,
 //------------------------------------------------------------------------
 
 template <class T>
-BehavAssessment<T>::BehavAssessment(const EFSupport &p_support)
+BehavAssessment<T>::BehavAssessment(const gbtEfgSupport &p_support)
   : BehavProfile<T>(p_support), m_beliefs(p_support.GetGame().NumMembers())
 {
   m_beliefs = BehavProfile<T>::Beliefs();

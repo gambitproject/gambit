@@ -101,7 +101,7 @@ static Portion *GSM_ActionValue(GSM &, Portion **param)
 
 static Portion *GSM_Behav(GSM &, Portion **param)
 {
-  EFSupport *S = ((EfSupportPortion *) param[0])->Value();
+  gbtEfgSupport *S = ((EfSupportPortion *) param[0])->Value();
   return new BehavPortion(new BehavSolution(BehavProfile<gNumber>(*S)));
 }
 
@@ -619,7 +619,7 @@ static Portion *GSM_StrategyValue(GSM &, Portion **param)
 static Portion *GSM_Support_Behav(GSM &, Portion** param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
-  return new EfSupportPortion(new EFSupport(P->Support()));
+  return new EfSupportPortion(new gbtEfgSupport(P->Support()));
 }
 
 static Portion *GSM_Support_Mixed(GSM &, Portion** param)

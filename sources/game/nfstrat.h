@@ -68,7 +68,7 @@ protected:
   // This really could be a gPVector<bool> probably, but we'll keep
   // it this way for now to placate possibly older compilers.
   gPVector<int> m_strategies;
-  gText m_name;
+  gText m_label;
   
   bool Undominated(gbtNfgSupport &newS, int pl, bool strong,
 		   gOutput &tracefile, gStatus &status) const;
@@ -87,8 +87,8 @@ public:
   // DATA ACCESS: GENERAL
   gbtNfgGame GetGame(void) const { return m_nfg; }
 
-  const gText &GetName(void) const { return m_name; }
-  void SetName(const gText &p_name) { m_name = p_name; }
+  const gText &GetLabel(void) const { return m_label; }
+  void SetLabel(const gText &p_label) { m_label = p_label; }
   
   // DATA ACCESS: STRATEGIES
   int NumStrats(int pl) const;

@@ -55,14 +55,14 @@ gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
     m_efg->GetChance().SetLabel("Chance");
   }
 
-  m_curEfgSupport = new EFSupport(*m_efg);
-  m_curEfgSupport->SetName("Full Support");
+  m_curEfgSupport = new gbtEfgSupport(*m_efg);
+  m_curEfgSupport->SetLabel("Full Support");
   m_efgSupports.Append(m_curEfgSupport);
 
   for (int pl = 1; pl <= m_efg->NumPlayers(); m_contingency[pl++] = 1);
 
   m_curNfgSupport = new gbtNfgSupport(m_efg->GetReducedNfg());
-  m_curNfgSupport->SetName("Full Support");
+  m_curNfgSupport->SetLabel("Full Support");
   m_nfgSupports.Append(m_curNfgSupport);
 }
 
@@ -83,7 +83,7 @@ gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg, wxString p_filename)
   for (int pl = 1; pl <= m_nfg->NumPlayers(); m_contingency[pl++] = 1);
 
   m_curNfgSupport = new gbtNfgSupport(*m_nfg);
-  m_curNfgSupport->SetName("Full Support");
+  m_curNfgSupport->SetLabel("Full Support");
   m_nfgSupports.Append(m_curNfgSupport);
 }
 
@@ -107,9 +107,9 @@ void gbtGameDocument::OnTreeChanged(bool p_nodesChanged,
       delete m_efgSupports.Remove(1);
     }
 
-    m_curEfgSupport = new EFSupport(*m_efg);
+    m_curEfgSupport = new gbtEfgSupport(*m_efg);
     m_efgSupports.Append(m_curEfgSupport);
-    m_curEfgSupport->SetName("Full Support");
+    m_curEfgSupport->SetLabel("Full Support");
   }
 
   if (p_infosetsChanged || p_nodesChanged) {
@@ -123,7 +123,7 @@ void gbtGameDocument::OnTreeChanged(bool p_nodesChanged,
     }
     
     m_curNfgSupport = new gbtNfgSupport(m_efg->GetReducedNfg());
-    m_curNfgSupport->SetName("Full Support");
+    m_curNfgSupport->SetLabel("Full Support");
     m_nfgSupports.Append(m_curNfgSupport);
 
     m_contingency = gArray<int>(m_efg->NumPlayers());
@@ -204,7 +204,7 @@ gText gbtGameDocument::UniqueEfgSupportName(void) const
   while (1) {
     int i;
     for (i = 1; i <= m_efgSupports.Length(); i++) {
-      if (m_efgSupports[i]->GetName() == "Support" + ToText(number)) {
+      if (m_efgSupports[i]->GetLabel() == "Support" + ToText(number)) {
 	break;
       }
     }
@@ -222,7 +222,7 @@ gText gbtGameDocument::UniqueNfgSupportName(void) const
   while (1) {
     int i;
     for (i = 1; i <= m_nfgSupports.Length(); i++) {
-      if (m_nfgSupports[i]->GetName() == "Support" + ToText(number)) {
+      if (m_nfgSupports[i]->GetLabel() == "Support" + ToText(number)) {
 	break;
       }
     }
@@ -242,7 +242,7 @@ void gbtGameDocument::SetEfgSupport(int p_index)
   }
 }
 
-void gbtGameDocument::AddEfgSupport(EFSupport *p_support)
+void gbtGameDocument::AddEfgSupport(gbtEfgSupport *p_support)
 {
   m_efgSupports.Append(p_support);
   UpdateViews();
@@ -668,5 +668,5 @@ template class gArray<gbtGameView *>;
 template class gBlock<gbtGameView *>;
 
 #include "base/glist.imp"
-template class gList<EFSupport *>;
+template class gList<gbtEfgSupport *>;
 template class gList<gbtNfgSupport *>;

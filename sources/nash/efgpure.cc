@@ -32,7 +32,7 @@
 #include "game/efgciter.h"
 #include "behavsol.h"
 
-gList<BehavSolution> gbtEfgNashEnumPure::Solve(const EFSupport &p_support,
+gList<BehavSolution> gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
 					       gStatus &p_status)
 {
   gList<BehavSolution> solutions;
@@ -75,7 +75,7 @@ gList<BehavSolution> gbtEfgNashEnumPure::Solve(const EFSupport &p_support,
     }
 
     if (flag)  {
-      BehavProfile<gNumber> temp(EFSupport(p_support.GetGame()));
+      BehavProfile<gNumber> temp(gbtEfgSupport(p_support.GetGame()));
       // zero out all the entries, since any equilibria are pure
       ((gVector<gNumber> &) temp).operator=(gNumber(0));
       const PureBehavProfile<gNumber> &profile = citer.GetProfile();

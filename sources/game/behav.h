@@ -51,7 +51,7 @@ template <class T> class gRectArray;
 template <class T> class BehavProfile : private gDPVector<T>  {
 protected:
   gbtEfgGame m_efg;
-  EFSupport m_support;
+  gbtEfgSupport m_support;
   mutable bool m_cached_data;
 
   // structures for storing cached data: nodes
@@ -128,7 +128,7 @@ public:
 
   // CONSTRUCTORS, DESTRUCTOR
 
-  BehavProfile(const EFSupport &);
+  BehavProfile(const gbtEfgSupport &);
   BehavProfile(const BehavProfile<T> &);
   BehavProfile(const MixedProfile<T> &);
   virtual ~BehavProfile();
@@ -151,7 +151,7 @@ public:
   // GENERAL DATA ACCESS
 
   gbtEfgGame GetGame(void) const   { return m_efg; }
-  const EFSupport &Support(void) const   { return m_support; }
+  const gbtEfgSupport &Support(void) const   { return m_support; }
   
   const T &GetRealizProb(const gbtEfgNode &node);
   const T &GetBeliefProb(const gbtEfgNode &node);
@@ -237,7 +237,7 @@ protected:
   
 public:
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
-  BehavAssessment(const EFSupport &);
+  BehavAssessment(const gbtEfgSupport &);
   BehavAssessment(const BehavProfile<T> &);
   BehavAssessment(const BehavAssessment<T> &);
   virtual ~BehavAssessment();

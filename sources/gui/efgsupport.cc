@@ -173,11 +173,11 @@ void EfgSupportWindow::OnUpdate(void)
 {
   m_supportList->Clear();
 
-  const gList<EFSupport *> &supports = m_doc->AllEfgSupports();
+  const gList<gbtEfgSupport *> &supports = m_doc->AllEfgSupports();
 
   for (int i = 1; i <= supports.Length(); i++) {
     m_supportList->Append((char *)
-			  (ToText(i) + ": " + supports[i]->GetName()));
+			  (ToText(i) + ": " + supports[i]->GetLabel()));
   }
 
   int supportIndex = m_doc->GetEfgSupportIndex();
@@ -187,7 +187,7 @@ void EfgSupportWindow::OnUpdate(void)
 
   m_actionTree->DeleteAllItems();
 
-  m_actionTree->AddRoot((char *) m_doc->GetEfgSupport().GetName());
+  m_actionTree->AddRoot((char *) m_doc->GetEfgSupport().GetLabel());
   for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
     gbtEfgPlayer player = m_doc->GetEfg().GetPlayer(pl);
 

@@ -35,7 +35,7 @@
 //                  gbtAllActionIterator: Lifecycle
 //------------------------------------------------------------------------
 
-gbtAllActionIterator::gbtAllActionIterator(const EFSupport &p_support)
+gbtAllActionIterator::gbtAllActionIterator(const gbtEfgSupport &p_support)
   : m_support(p_support), pl(1), iset(1), act(0)
 {
   // The idea behind this initialization is to guard against the
@@ -145,13 +145,13 @@ bool gbtAllActionIterator::IsSubsequentTo(const gbtEfgAction &p_action) const
 //                     class gbtAllActionIterator
 //========================================================================
 
-gbtActionIterator::gbtActionIterator(const EFSupport &p_support,
+gbtActionIterator::gbtActionIterator(const gbtEfgSupport &p_support,
 				     gbtEfgInfoset p_infoset)
   : m_support(p_support), pl(p_infoset.GetPlayer().GetId()),
     iset(p_infoset.GetId()), act(1)
 { }
 
-gbtActionIterator::gbtActionIterator(const EFSupport &p_support,
+gbtActionIterator::gbtActionIterator(const gbtEfgSupport &p_support,
 				     int p_player, int p_infoset)
   : m_support(p_support), pl(p_player), iset(p_infoset), act(1)
 { }

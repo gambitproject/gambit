@@ -3,12 +3,14 @@
 EXTRA_DIST = \
 	pybehav.cc \
 	pyefg.cc \
+	pyefgsupport.cc \
 	pygambit.cc \
 	pygambit.h \
 	pyinfoset.cc \
 	pymixed.cc \
 	pynash.cc \
 	pynfg.cc \
+	pynfgsupport.cc \
 	pynode.cc \
 	pyoutcome.cc \
 	pyplayer.cc \

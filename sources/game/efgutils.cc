@@ -187,7 +187,7 @@ LastAction(const gbtEfgGame & e, const gbtEfgNode &node)
 }
 
 gbtEfgGame
-CompressEfg(const gbtEfgGame & efg, const EFSupport & S)
+CompressEfg(const gbtEfgGame & efg, const gbtEfgSupport & S)
 {
   gbtEfgGame newefg = efg.Copy();
 
@@ -208,7 +208,7 @@ CompressEfg(const gbtEfgGame & efg, const EFSupport & S)
   return newefg;
 }
 
-void CompressEfgInPlace(gbtEfgGame p_efg, const EFSupport &p_support)
+void CompressEfgInPlace(gbtEfgGame p_efg, const gbtEfgSupport &p_support)
 {
   // Do this to avoid problems with p_efg and p_support being incompatible
   // after deletions

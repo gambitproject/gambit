@@ -37,7 +37,7 @@ class BehavSolution {
 protected:
   BehavProfile<gNumber> *m_profile;
   gPrecision m_precision;
-  mutable EFSupport m_support;
+  mutable gbtEfgSupport m_support;
   mutable gText m_creator;
   mutable gFact<gTriState> m_ANFNash, m_Nash, m_SubgamePerfect, m_Sequential;
   mutable gNumber m_epsilon, m_qreLambda, m_qreValue;
@@ -96,7 +96,7 @@ public:
   void SetLabel(const gText &p_label) { m_label = p_label; }
 
   const gText &GetCreator(void) const { CheckIsValid(); return m_creator; }
-  EFSupport Support(void) const { CheckIsValid(); return m_support; }
+  gbtEfgSupport Support(void) const { CheckIsValid(); return m_support; }
   const gTriState &IsNash(void) const;
   BehavSolution PolishEq(void) const;
   const gTriState &IsANFNash(void) const;

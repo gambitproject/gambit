@@ -202,7 +202,7 @@ static Portion* GSM_Name(GSM &, Portion **param)
   case porNFOUTCOME:
     return new TextPortion(AsNfgOutcome(param[0]).GetLabel());
   case porNFSUPPORT:
-    return new TextPortion(AsNfgSupport(param[0]).GetName());
+    return new TextPortion(AsNfgSupport(param[0]).GetLabel());
   default:
     throw gclRuntimeError("Unknown type passed to Name[]");
   }
@@ -424,7 +424,7 @@ static Portion *GSM_SetName_NfOutcome(GSM &, Portion **param)
 
 static Portion *GSM_SetName_NfSupport(GSM &, Portion **param)
 {
-  AsNfgSupport(param[0]).SetName(AsText(param[1]));
+  AsNfgSupport(param[0]).SetLabel(AsText(param[1]));
   return param[0]->RefCopy();
 }
 

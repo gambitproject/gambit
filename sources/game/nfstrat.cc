@@ -139,7 +139,7 @@ gbtNfgSupport::gbtNfgSupport(const gbtNfgGame &p_nfg)
 gbtNfgSupport &gbtNfgSupport::operator=(const gbtNfgSupport &p_support)
 {
   if (this != &p_support && m_nfg == p_support.m_nfg) {
-    m_name = p_support.m_name;
+    m_label = p_support.m_label;
     m_strategies = p_support.m_strategies;
   }
   return *this;
@@ -263,7 +263,7 @@ bool gbtNfgSupport::IsValid(void) const
 
 void gbtNfgSupport::Output(gOutput &p_output) const
 {
-  p_output << '"' << m_name << "\" { ";
+  p_output << '"' << m_label << "\" { ";
   for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
     p_output << "{ ";
     for (int st = 1; st <= NumStrats(pl); st++) {

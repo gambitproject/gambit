@@ -65,9 +65,9 @@ void ChildSubgames(const gbtEfgGame &, const gbtEfgNode &,
 
 void RandomEfg(const gbtEfgGame &);
 
-gbtEfgGame CompressEfg(const gbtEfgGame &, const EFSupport &);
+gbtEfgGame CompressEfg(const gbtEfgGame &, const gbtEfgSupport &);
 // An "in-place" version of the above
-void CompressEfgInPlace(gbtEfgGame, const EFSupport &);
+void CompressEfgInPlace(gbtEfgGame, const gbtEfgSupport &);
 
 #endif // EFGUTILS_H
 

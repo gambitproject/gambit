@@ -34,25 +34,25 @@
 
 class EFActionSet;
 
-class EFSupport {
+class gbtEfgSupport {
 protected:
-  gText m_name;
+  gText m_label;
   gbtEfgGame m_efg;
   gArray<EFActionSet *> m_players;
 
 public:
-  EFSupport(const gbtEfgGame &);
-  EFSupport(const EFSupport &);
-  virtual ~EFSupport();
-  EFSupport &operator=(const EFSupport &);
+  gbtEfgSupport(const gbtEfgGame &);
+  gbtEfgSupport(const gbtEfgSupport &);
+  virtual ~gbtEfgSupport();
+  gbtEfgSupport &operator=(const gbtEfgSupport &);
 
-  bool operator==(const EFSupport &) const;
-  bool operator!=(const EFSupport &) const;
+  bool operator==(const gbtEfgSupport &) const;
+  bool operator!=(const gbtEfgSupport &) const;
 
   gbtEfgGame GetGame(void) const { return m_efg; }
 
-  const gText &GetName(void) const { return m_name; }
-  void SetName(const gText &p_name) { m_name = p_name; }
+  const gText &GetLabel(void) const { return m_label; }
+  void SetLabel(const gText &p_label) { m_label = p_label; }
 
   int NumActions(int pl, int iset) const;
   int NumActions(const gbtEfgInfoset &) const;
@@ -96,7 +96,7 @@ public:
 		 bool strong, bool conditional) const;
   bool IsDominated(const gbtEfgAction &,
 		   bool strong, bool conditional) const;
-  EFSupport Undominated(bool strong, bool conditional,
+  gbtEfgSupport Undominated(bool strong, bool conditional,
 			 const gArray<int> &players,
 			 gOutput &, // tracefile 
 			 gStatus &status) const;
@@ -105,7 +105,7 @@ public:
   void Dump(gOutput &) const;
 };
 
-gOutput &operator<<(gOutput &f, const EFSupport &);
+gOutput &operator<<(gOutput &f, const gbtEfgSupport &);
 
 
 // The following class keeps a record of which nodes and infosets are 
@@ -114,7 +114,7 @@ gOutput &operator<<(gOutput &f, const EFSupport &);
 // BUG - The interface above does not entirely agree with the one
 // below vis-a-vis common elements.
 
-class EFSupportWithActiveInfo : public EFSupport {
+class gbtEfgSupportWithActiveInfo : public gbtEfgSupport {
 protected:
   gArray<gList<bool> >         is_infoset_active;
   gArray<gList<gList<bool> > > is_nonterminal_node_active;
@@ -136,15 +136,15 @@ protected:
 						 gList<gbtEfgInfoset> *);
 
 public:
-  EFSupportWithActiveInfo(const gbtEfgGame &);
-  EFSupportWithActiveInfo(const EFSupport &);
-  EFSupportWithActiveInfo(const EFSupportWithActiveInfo &);
-  virtual ~EFSupportWithActiveInfo();
+  gbtEfgSupportWithActiveInfo(const gbtEfgGame &);
+  gbtEfgSupportWithActiveInfo(const gbtEfgSupport &);
+  gbtEfgSupportWithActiveInfo(const gbtEfgSupportWithActiveInfo &);
+  virtual ~gbtEfgSupportWithActiveInfo();
 
   // Operators
-  EFSupportWithActiveInfo &operator=(const EFSupportWithActiveInfo &);
-  bool operator==(const EFSupportWithActiveInfo &) const;
-  bool operator!=(const EFSupportWithActiveInfo &) const;
+  gbtEfgSupportWithActiveInfo &operator=(const gbtEfgSupportWithActiveInfo &);
+  bool operator==(const gbtEfgSupportWithActiveInfo &) const;
+  bool operator!=(const gbtEfgSupportWithActiveInfo &) const;
 
   // Find the reachable nodes at an infoset
   gList<gbtEfgNode> ReachableNodesInInfoset(const gbtEfgInfoset &) const;
@@ -155,7 +155,7 @@ public:
   bool RemoveAction(const gbtEfgAction &);
   bool RemoveActionReturningDeletedInfosets(const gbtEfgAction &,
 					    gList<gbtEfgInfoset> *);
-  //  void GoToNextSubsupportOf(const EFSupport &);
+  //  void GoToNextSubsupportOf(const gbtEfgSupport &);
 
   // Information
   bool InfosetIsActive(const int pl, const int iset) const;
@@ -171,7 +171,7 @@ public:
   void Dump(gOutput& s) const;
 };
 
-gOutput &operator<<(gOutput &f, const EFSupportWithActiveInfo &);
+gOutput &operator<<(gOutput &f, const gbtEfgSupportWithActiveInfo &);
 
 
 #endif  // EFSTRAT_H

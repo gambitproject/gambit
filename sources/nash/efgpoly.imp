@@ -46,7 +46,7 @@ template <class T> class EfgPolEnumModule  {
 private:
   T eps;
   gbtEfgGame m_efg;
-  const EFSupport &support;
+  const gbtEfgSupport &support;
   EfgPolEnumParams params;
   gSpace *Space;
   term_order *Lex;
@@ -86,7 +86,7 @@ private:
   int SaveNashSolutions(const gList<gVector<gDouble> > &list, gStatus &);
 
 public:
-  EfgPolEnumModule(const EFSupport &, const EfgPolEnumParams &p);
+  EfgPolEnumModule(const gbtEfgSupport &, const EfgPolEnumParams &p);
   ~EfgPolEnumModule();
 
   int EfgPolEnum(gStatus &);
@@ -114,7 +114,7 @@ public:
 //-------------------------------------------------------------------------
 
 template <class T>
-EfgPolEnumModule<T>::EfgPolEnumModule(const EFSupport &S,
+EfgPolEnumModule<T>::EfgPolEnumModule(const gbtEfgSupport &S,
 				      const EfgPolEnumParams &p)
   : m_efg(S.GetGame()), support(S), params(p), count(0), nevals(0), SF(S),
     is_singular(false), var(S.GetGame().NumPlayers())

@@ -301,10 +301,10 @@ bool EFActionSet::HasActiveActionAt(const int &iset) const
 
 
 //--------------------------------------------------
-// EFSupport: Constructors, Destructors, Operators
+// gbtEfgSupport: Constructors, Destructors, Operators
 //--------------------------------------------------
 
-EFSupport::EFSupport(const gbtEfgGame &p_efg) 
+gbtEfgSupport::gbtEfgSupport(const gbtEfgGame &p_efg) 
   : m_efg(p_efg), m_players(p_efg.NumPlayers())
 {
   for (int pl = 1; pl <= m_players.Length(); pl++) {
@@ -312,24 +312,24 @@ EFSupport::EFSupport(const gbtEfgGame &p_efg)
   }
 }
 
-EFSupport::EFSupport(const EFSupport &p_support)
-  : m_name(p_support.m_name), m_efg(p_support.m_efg),
+gbtEfgSupport::gbtEfgSupport(const gbtEfgSupport &p_support)
+  : m_label(p_support.m_label), m_efg(p_support.m_efg),
     m_players(p_support.m_players.Length())
 {
   for (int pl = 1; pl <= m_players.Length(); pl++)
     m_players[pl] = new EFActionSet(*(p_support.m_players[pl]));
 }
 
-EFSupport::~EFSupport()
+gbtEfgSupport::~gbtEfgSupport()
 {
   for (int pl = 1; pl <= m_players.Length(); pl++)
     delete m_players[pl];
 }
 
-EFSupport &EFSupport::operator=(const EFSupport &p_support)
+gbtEfgSupport &gbtEfgSupport::operator=(const gbtEfgSupport &p_support)
 {
   if (this != &p_support && m_efg == p_support.m_efg) {
-    m_name = p_support.m_name;
+    m_label = p_support.m_label;
     for (int pl = 1; pl <= m_players.Length(); pl++)  {
       delete m_players[pl];
       m_players[pl] = new EFActionSet(*(p_support.m_players[pl]));
@@ -338,7 +338,7 @@ EFSupport &EFSupport::operator=(const EFSupport &p_support)
   return *this;
 }
 
-bool EFSupport::operator==(const EFSupport &p_support) const
+bool gbtEfgSupport::operator==(const gbtEfgSupport &p_support) const
 {
   if (m_players.Length() != p_support.m_players.Length())
     return false;
@@ -349,16 +349,16 @@ bool EFSupport::operator==(const EFSupport &p_support) const
   return (pl > m_players.Length());
 }
 
-bool EFSupport::operator!=(const EFSupport &p_support) const
+bool gbtEfgSupport::operator!=(const gbtEfgSupport &p_support) const
 {
   return !(*this == p_support);
 }
 
 //-----------------------------
-// EFSupport: Member Functions 
+// gbtEfgSupport: Member Functions 
 //-----------------------------
 
-int EFSupport::NumActions(int pl, int iset) const
+int gbtEfgSupport::NumActions(int pl, int iset) const
 {
   if (pl == 0) {
     return m_efg.GetChance().GetInfoset(iset).NumActions();
@@ -368,7 +368,7 @@ int EFSupport::NumActions(int pl, int iset) const
   }
 }
 
-int EFSupport::NumActions(const gbtEfgInfoset &i) const
+int gbtEfgSupport::NumActions(const gbtEfgInfoset &i) const
 {
   if (i.GetPlayer().IsChance()) {
     return i.NumActions();
@@ -378,14 +378,14 @@ int EFSupport::NumActions(const gbtEfgInfoset &i) const
   }
 }
 
-int EFSupport::GetIndex(const gbtEfgAction &a) const
+int gbtEfgSupport::GetIndex(const gbtEfgAction &a) const
 {
   if (a.GetInfoset().GetGame() != m_efg)  return 0;
   int pl = a.GetInfoset().GetPlayer().GetId();
   return m_players[pl]->Find(a);
 }
 
-bool EFSupport::Contains(const gbtEfgAction &a) const
+bool gbtEfgSupport::Contains(const gbtEfgAction &a) const
 {
   if (a.GetInfoset().GetGame() != m_efg)   
     return false;
@@ -401,12 +401,12 @@ bool EFSupport::Contains(const gbtEfgAction &a) const
     return true;
 }
 
-bool EFSupport::Contains(int pl, int iset, int act) const
+bool gbtEfgSupport::Contains(int pl, int iset, int act) const
 {
   return Contains(GetGame().GetPlayer(pl).GetInfoset(iset).GetAction(act));
 }
 
-gbtEfgAction EFSupport::GetAction(int pl, int iset, int act) const
+gbtEfgAction gbtEfgSupport::GetAction(int pl, int iset, int act) const
 {
   if (pl == 0) {
     return m_efg.GetChance().GetInfoset(iset).GetAction(act);
@@ -416,7 +416,7 @@ gbtEfgAction EFSupport::GetAction(int pl, int iset, int act) const
   }
 }
 
-gbtEfgAction EFSupport::GetAction(const gbtEfgInfoset &infoset, int act) const
+gbtEfgAction gbtEfgSupport::GetAction(const gbtEfgInfoset &infoset, int act) const
 {
   if (infoset.GetPlayer().IsChance()) {
     return infoset.GetAction(act);
@@ -426,7 +426,7 @@ gbtEfgAction EFSupport::GetAction(const gbtEfgInfoset &infoset, int act) const
   }
 }
 
-bool EFSupport::HasActiveActionAt(const gbtEfgInfoset &infoset) const
+bool gbtEfgSupport::HasActiveActionAt(const gbtEfgInfoset &infoset) const
 {
   if (!m_players[infoset.GetPlayer().GetId()]->
       HasActiveActionAt(infoset.GetId()))
@@ -435,7 +435,7 @@ bool EFSupport::HasActiveActionAt(const gbtEfgInfoset &infoset) const
   return true;
 }
 
-int EFSupport::NumDegreesOfFreedom(void) const
+int gbtEfgSupport::NumDegreesOfFreedom(void) const
 {
   int answer(0);
 
@@ -446,7 +446,7 @@ int EFSupport::NumDegreesOfFreedom(void) const
   return answer;  
 }
 
-bool EFSupport::HasActiveActionsAtAllInfosets(void) const
+bool gbtEfgSupport::HasActiveActionsAtAllInfosets(void) const
 {
   if (m_players.Length() != m_efg.NumPlayers())   return false;
   for (int i = 1; i <= m_players.Length(); i++)
@@ -455,7 +455,7 @@ bool EFSupport::HasActiveActionsAtAllInfosets(void) const
   return true;
 }
 
-gPVector<int> EFSupport::NumActions(void) const
+gPVector<int> gbtEfgSupport::NumActions(void) const
 {
   gArray<int> foo(m_efg.NumPlayers());
   int i;
@@ -470,7 +470,7 @@ gPVector<int> EFSupport::NumActions(void) const
   return bar;
 }  
 
-bool EFSupport::RemoveAction(const gbtEfgAction &s)
+bool gbtEfgSupport::RemoveAction(const gbtEfgAction &s)
 {
   gbtEfgInfoset infoset = s.GetInfoset();
   gbtEfgPlayer player = infoset.GetPlayer();
@@ -478,7 +478,7 @@ bool EFSupport::RemoveAction(const gbtEfgAction &s)
   return m_players[player.GetId()]->RemoveAction(infoset.GetId(), s); 
 }
 
-void EFSupport::AddAction(const gbtEfgAction &s)
+void gbtEfgSupport::AddAction(const gbtEfgAction &s)
 {
   gbtEfgInfoset infoset = s.GetInfoset();
   gbtEfgPlayer player = infoset.GetPlayer();
@@ -486,7 +486,7 @@ void EFSupport::AddAction(const gbtEfgAction &s)
   m_players[player.GetId()]->AddAction(infoset.GetId(), s);
 }
 
-int EFSupport::NumSequences(int j) const
+int gbtEfgSupport::NumSequences(int j) const
 {
   if (j < 1 || j > m_efg.NumPlayers()) return 1;
   gList<gbtEfgInfoset> isets = ReachableInfosets(m_efg.GetPlayer(j));
@@ -496,7 +496,7 @@ int EFSupport::NumSequences(int j) const
   return num;
 }
 
-int EFSupport::TotalNumSequences(void) const
+int gbtEfgSupport::TotalNumSequences(void) const
 {
   int total = 0;
   for (int i = 1 ; i <= m_efg.NumPlayers(); i++)
@@ -505,7 +505,7 @@ int EFSupport::TotalNumSequences(void) const
 }
 
 gList<gbtEfgNode> 
-EFSupport::ReachableNonterminalNodes(const gbtEfgNode &n) const
+gbtEfgSupport::ReachableNonterminalNodes(const gbtEfgNode &n) const
 {
   gList<gbtEfgNode> answer;
   if (n.IsNonterminal()) {
@@ -521,7 +521,7 @@ EFSupport::ReachableNonterminalNodes(const gbtEfgNode &n) const
 }
 
 gList<gbtEfgNode> 
-EFSupport::ReachableNonterminalNodes(const gbtEfgNode &n,
+gbtEfgSupport::ReachableNonterminalNodes(const gbtEfgNode &n,
 				     const gbtEfgAction &a) const
 {
   gList<gbtEfgNode> answer;
@@ -533,7 +533,7 @@ EFSupport::ReachableNonterminalNodes(const gbtEfgNode &n,
   return answer;
 }
 
-gList<gbtEfgInfoset> EFSupport::ReachableInfosets(const gbtEfgPlayer &p) const
+gList<gbtEfgInfoset> gbtEfgSupport::ReachableInfosets(const gbtEfgPlayer &p) const
 { 
   gList<gbtEfgInfoset> answer;
 
@@ -545,7 +545,7 @@ gList<gbtEfgInfoset> EFSupport::ReachableInfosets(const gbtEfgPlayer &p) const
   return answer;
 }
 
-gList<gbtEfgInfoset> EFSupport::ReachableInfosets(const gbtEfgNode &n) const
+gList<gbtEfgInfoset> gbtEfgSupport::ReachableInfosets(const gbtEfgNode &n) const
 {
   gList<gbtEfgInfoset> answer;
   gList<gbtEfgNode> nodelist = ReachableNonterminalNodes(n);
@@ -555,7 +555,7 @@ gList<gbtEfgInfoset> EFSupport::ReachableInfosets(const gbtEfgNode &n) const
   return answer;
 }
 
-gList<gbtEfgInfoset> EFSupport::ReachableInfosets(const gbtEfgNode &n, 
+gList<gbtEfgInfoset> gbtEfgSupport::ReachableInfosets(const gbtEfgNode &n, 
 						  const gbtEfgAction &a) const
 {
   gList<gbtEfgInfoset> answer;
@@ -566,12 +566,12 @@ gList<gbtEfgInfoset> EFSupport::ReachableInfosets(const gbtEfgNode &n,
   return answer;
 }
 
-bool EFSupport::AlwaysReaches(const gbtEfgInfoset &i) const
+bool gbtEfgSupport::AlwaysReaches(const gbtEfgInfoset &i) const
 {
   return AlwaysReachesFrom(i, m_efg.GetRoot());
 }
 
-bool EFSupport::AlwaysReachesFrom(const gbtEfgInfoset &i, 
+bool gbtEfgSupport::AlwaysReachesFrom(const gbtEfgInfoset &i, 
 				  const gbtEfgNode &n) const
 {
   if (n.IsTerminal()) return false;
@@ -588,7 +588,7 @@ bool EFSupport::AlwaysReachesFrom(const gbtEfgInfoset &i,
   return true;
 }
 
-bool EFSupport::MayReach(const gbtEfgInfoset &infoset) const
+bool gbtEfgSupport::MayReach(const gbtEfgInfoset &infoset) const
 {
   for (int j = 1; j <= infoset.NumMembers(); j++) {
     if (MayReach(infoset.GetMember(j))) {
@@ -598,7 +598,7 @@ bool EFSupport::MayReach(const gbtEfgInfoset &infoset) const
   return false;
 }
 
-bool EFSupport::MayReach(const gbtEfgNode &n) const
+bool gbtEfgSupport::MayReach(const gbtEfgNode &n) const
 {
   if (n == m_efg.GetRoot())
     return true;
@@ -613,9 +613,9 @@ bool EFSupport::MayReach(const gbtEfgNode &n) const
 }
 
 
-void EFSupport::Dump(gOutput &p_output) const
+void gbtEfgSupport::Dump(gOutput &p_output) const
 {
-  p_output << '"' << m_name << "\" { ";
+  p_output << '"' << m_label << "\" { ";
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)  {
     gbtEfgPlayer player = m_players[pl]->GetPlayer();
     p_output << '"' << player.GetLabel() << "\" { ";
@@ -633,7 +633,7 @@ void EFSupport::Dump(gOutput &p_output) const
   p_output << "} ";
 }
 
-gOutput& operator<<(gOutput&s, const EFSupport& e)
+gOutput& operator<<(gOutput&s, const gbtEfgSupport& e)
 {
   e.Dump(s);
   return s;
@@ -641,11 +641,11 @@ gOutput& operator<<(gOutput&s, const EFSupport& e)
 
 
 //----------------------------------------------------
-//                EFSupportWithActiveInfo
+//                gbtEfgSupportWithActiveInfo
 // ---------------------------------------------------
 
 // Utilities 
-bool EFSupportWithActiveInfo::infoset_has_active_nodes(const int pl,
+bool gbtEfgSupportWithActiveInfo::infoset_has_active_nodes(const int pl,
 						       const int iset) const
 {
   //DEBUG
@@ -675,37 +675,37 @@ bool EFSupportWithActiveInfo::infoset_has_active_nodes(const int pl,
 }
 
 bool
-EFSupportWithActiveInfo::infoset_has_active_nodes(const gbtEfgInfoset &i) const
+gbtEfgSupportWithActiveInfo::infoset_has_active_nodes(const gbtEfgInfoset &i) const
 {
   return infoset_has_active_nodes(i.GetPlayer().GetId(), i.GetId());
 }
 
-void EFSupportWithActiveInfo::activate(const gbtEfgNode &n)
+void gbtEfgSupportWithActiveInfo::activate(const gbtEfgNode &n)
 {
   is_nonterminal_node_active[n.GetPlayer().GetId()]
                             [n.GetInfoset().GetId()]
                             [n.GetMemberId()] = true;
 }
 
-void EFSupportWithActiveInfo::deactivate(const gbtEfgNode &n)
+void gbtEfgSupportWithActiveInfo::deactivate(const gbtEfgNode &n)
 {
   is_nonterminal_node_active[n.GetPlayer().GetId()]
                             [n.GetInfoset().GetId()]
                             [n.GetMemberId()] = false;
 }
 
-void EFSupportWithActiveInfo::activate(const gbtEfgInfoset &i)
+void gbtEfgSupportWithActiveInfo::activate(const gbtEfgInfoset &i)
 {
   is_infoset_active[i.GetPlayer().GetId()][i.GetId()] = true;
 }
 
-void EFSupportWithActiveInfo::deactivate(const gbtEfgInfoset &i)
+void gbtEfgSupportWithActiveInfo::deactivate(const gbtEfgInfoset &i)
 {
   is_infoset_active[i.GetPlayer().GetId()][i.GetId()] = false;
 }
 
 void
-EFSupportWithActiveInfo::activate_this_and_lower_nodes(const gbtEfgNode &n)
+gbtEfgSupportWithActiveInfo::activate_this_and_lower_nodes(const gbtEfgNode &n)
 {
   if (n.IsNonterminal()) {
     activate(n); 
@@ -716,7 +716,7 @@ EFSupportWithActiveInfo::activate_this_and_lower_nodes(const gbtEfgNode &n)
 }
 
 void
-EFSupportWithActiveInfo::deactivate_this_and_lower_nodes(const gbtEfgNode &n)
+gbtEfgSupportWithActiveInfo::deactivate_this_and_lower_nodes(const gbtEfgNode &n)
 {
   if (n.IsNonterminal()) {  // THIS ALL LOOKS FISHY
     deactivate(n); 
@@ -728,7 +728,7 @@ EFSupportWithActiveInfo::deactivate_this_and_lower_nodes(const gbtEfgNode &n)
   }
 }
 
-void EFSupportWithActiveInfo::
+void gbtEfgSupportWithActiveInfo::
 deactivate_this_and_lower_nodes_returning_deactivated_infosets(const gbtEfgNode &n, 
                                                 gList<gbtEfgInfoset> *list)
 {
@@ -750,7 +750,7 @@ deactivate_this_and_lower_nodes_returning_deactivated_infosets(const gbtEfgNode 
   }
 }
 
-void EFSupportWithActiveInfo::InitializeActiveListsToAllActive()
+void gbtEfgSupportWithActiveInfo::InitializeActiveListsToAllActive()
 {
   for (int pl = 0; pl <= GetGame().NumPlayers(); pl++) {
     gbtEfgPlayer player = (pl == 0) ? GetGame().GetChance() : GetGame().GetPlayer(pl); 
@@ -769,7 +769,7 @@ void EFSupportWithActiveInfo::InitializeActiveListsToAllActive()
   }
 }
 
-void EFSupportWithActiveInfo::InitializeActiveListsToAllInactive()
+void gbtEfgSupportWithActiveInfo::InitializeActiveListsToAllInactive()
 {
   for (int pl = 0; pl <= GetGame().NumPlayers(); pl++) {
     gbtEfgPlayer player = (pl == 0) ? GetGame().GetChance() : GetGame().GetPlayer(pl);
@@ -790,7 +790,7 @@ void EFSupportWithActiveInfo::InitializeActiveListsToAllInactive()
   }
 }
 
-void EFSupportWithActiveInfo::InitializeActiveLists()
+void gbtEfgSupportWithActiveInfo::InitializeActiveLists()
 {
   InitializeActiveListsToAllInactive();
 
@@ -798,25 +798,25 @@ void EFSupportWithActiveInfo::InitializeActiveLists()
 }
 
 // Constructors and Destructor
-EFSupportWithActiveInfo::EFSupportWithActiveInfo(const gbtEfgGame &p_efg)
-  : EFSupport(p_efg), 
+gbtEfgSupportWithActiveInfo::gbtEfgSupportWithActiveInfo(const gbtEfgGame &p_efg)
+  : gbtEfgSupport(p_efg), 
     is_infoset_active(0, p_efg.NumPlayers()), 
     is_nonterminal_node_active(0, p_efg.NumPlayers())
 {
   InitializeActiveLists();
 }
 
-EFSupportWithActiveInfo::EFSupportWithActiveInfo(const EFSupport& given)
-  : EFSupport(given), 
+gbtEfgSupportWithActiveInfo::gbtEfgSupportWithActiveInfo(const gbtEfgSupport& given)
+  : gbtEfgSupport(given), 
     is_infoset_active(0,given.GetGame().NumPlayers()), 
     is_nonterminal_node_active(0,given.GetGame().NumPlayers())
 {
   InitializeActiveLists();
 }
 
-EFSupportWithActiveInfo::EFSupportWithActiveInfo(
-				  const EFSupportWithActiveInfo& given)
-  : EFSupport(given), 
+gbtEfgSupportWithActiveInfo::gbtEfgSupportWithActiveInfo(
+				  const gbtEfgSupportWithActiveInfo& given)
+  : gbtEfgSupport(given), 
     //is_infoset_active(0,given.GetGame().NumPlayers()), 
         is_infoset_active(is_infoset_active), 
     is_nonterminal_node_active(given.is_nonterminal_node_active)
@@ -824,15 +824,15 @@ EFSupportWithActiveInfo::EFSupportWithActiveInfo(
   //  InitializeActiveLists();
 }
 
-EFSupportWithActiveInfo::~EFSupportWithActiveInfo()
+gbtEfgSupportWithActiveInfo::~gbtEfgSupportWithActiveInfo()
 {}
 
 // Operators
-EFSupportWithActiveInfo &
-EFSupportWithActiveInfo::operator=(const EFSupportWithActiveInfo &s)
+gbtEfgSupportWithActiveInfo &
+gbtEfgSupportWithActiveInfo::operator=(const gbtEfgSupportWithActiveInfo &s)
 {
   if (this != &s) {
-    ((EFSupport&) *this) = s;
+    ((gbtEfgSupport&) *this) = s;
     is_infoset_active = s.is_infoset_active;
     is_nonterminal_node_active = s.is_nonterminal_node_active;
   }
@@ -840,9 +840,9 @@ EFSupportWithActiveInfo::operator=(const EFSupportWithActiveInfo &s)
 }
 
 bool 
-EFSupportWithActiveInfo::operator==(const EFSupportWithActiveInfo &s) const
+gbtEfgSupportWithActiveInfo::operator==(const gbtEfgSupportWithActiveInfo &s) const
 {
-  if ((EFSupport&) *this != (EFSupport&) s) {
+  if ((gbtEfgSupport&) *this != (gbtEfgSupport&) s) {
     //  gout << "Underlying supports differ.\n"; 
     return false; 
   }
@@ -866,14 +866,14 @@ EFSupportWithActiveInfo::operator==(const EFSupportWithActiveInfo &s) const
 }
 
 bool 
-EFSupportWithActiveInfo::operator!=(const EFSupportWithActiveInfo &s) const
+gbtEfgSupportWithActiveInfo::operator!=(const gbtEfgSupportWithActiveInfo &s) const
 {
   return !(*this == s);
 }
 
 // Member Function
 gList<gbtEfgNode> 
-EFSupportWithActiveInfo::ReachableNodesInInfoset(const gbtEfgInfoset &i) const
+gbtEfgSupportWithActiveInfo::ReachableNodesInInfoset(const gbtEfgInfoset &i) const
 {
   gList<gbtEfgNode> answer;
   int pl = i.GetPlayer().GetId();
@@ -885,7 +885,7 @@ EFSupportWithActiveInfo::ReachableNodesInInfoset(const gbtEfgInfoset &i) const
 }
 
 gList<gbtEfgNode>
-EFSupportWithActiveInfo::ReachableNonterminalNodes() const
+gbtEfgSupportWithActiveInfo::ReachableNonterminalNodes() const
 {
   gList<gbtEfgNode> answer;
   for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
@@ -898,27 +898,27 @@ EFSupportWithActiveInfo::ReachableNonterminalNodes() const
 }
 
 // Editing functions
-void EFSupportWithActiveInfo::AddAction(const gbtEfgAction &s)
+void gbtEfgSupportWithActiveInfo::AddAction(const gbtEfgAction &s)
 {
-  EFSupport::AddAction(s);
+  gbtEfgSupport::AddAction(s);
 
   gList<gbtEfgNode> startlist(ReachableNodesInInfoset(s.GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     activate_this_and_lower_nodes(startlist[i]);
 }
 
-bool EFSupportWithActiveInfo::RemoveAction(const gbtEfgAction &s)
+bool gbtEfgSupportWithActiveInfo::RemoveAction(const gbtEfgAction &s)
 {
   gList<gbtEfgNode> startlist(ReachableNodesInInfoset(s.GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     deactivate_this_and_lower_nodes(startlist[i].GetChild(s));
 
   // the following returns false if s was not active
-  return EFSupport::RemoveAction(s);
+  return gbtEfgSupport::RemoveAction(s);
 }
 
 bool 
-EFSupportWithActiveInfo::
+gbtEfgSupportWithActiveInfo::
 RemoveActionReturningDeletedInfosets(const gbtEfgAction &s,
 				     gList<gbtEfgInfoset> *list)
 {
@@ -928,10 +928,10 @@ RemoveActionReturningDeletedInfosets(const gbtEfgAction &s,
                            startlist[i].GetChild(s),list);
 
   // the following returns false if s was not active
-  return EFSupport::RemoveAction(s);
+  return gbtEfgSupport::RemoveAction(s);
 }
 
-int EFSupportWithActiveInfo::NumActiveNodes(int pl, int iset) const
+int gbtEfgSupportWithActiveInfo::NumActiveNodes(int pl, int iset) const
 {
   int answer = 0;
   for (int i = 1; i <= is_nonterminal_node_active[pl][iset].Length(); i++)
@@ -940,37 +940,37 @@ int EFSupportWithActiveInfo::NumActiveNodes(int pl, int iset) const
   return answer;
 }
 
-int EFSupportWithActiveInfo::NumActiveNodes(const gbtEfgInfoset &i) const
+int gbtEfgSupportWithActiveInfo::NumActiveNodes(const gbtEfgInfoset &i) const
 {
   return NumActiveNodes(i.GetPlayer().GetId(), i.GetId());
 }
 
-bool EFSupportWithActiveInfo::InfosetIsActive(const int pl,
+bool gbtEfgSupportWithActiveInfo::InfosetIsActive(const int pl,
 					      const int iset) const
 {
   return is_infoset_active[pl][iset];
 }
 
-bool EFSupportWithActiveInfo::InfosetIsActive(const gbtEfgInfoset &i) const
+bool gbtEfgSupportWithActiveInfo::InfosetIsActive(const gbtEfgInfoset &i) const
 {
   return InfosetIsActive(i.GetPlayer().GetId(), i.GetId());
 }
 
-bool EFSupportWithActiveInfo::NodeIsActive(const int pl,
+bool gbtEfgSupportWithActiveInfo::NodeIsActive(const int pl,
 					   const int iset,
 					   const int node) const
 {
   return is_nonterminal_node_active[pl][iset][node];
 }
 
-bool EFSupportWithActiveInfo::NodeIsActive(const gbtEfgNode &n) const
+bool gbtEfgSupportWithActiveInfo::NodeIsActive(const gbtEfgNode &n) const
 {
   return NodeIsActive(n.GetInfoset().GetPlayer().GetId(),
 		      n.GetInfoset().GetId(),
 		      n.GetMemberId());
 }
 
-bool EFSupportWithActiveInfo::HasActiveActionsAtActiveInfosets()
+bool gbtEfgSupportWithActiveInfo::HasActiveActionsAtActiveInfosets()
 {
   for (int pl = 1; pl <= GetGame().NumPlayers(); pl++)
     for (int iset = 1; iset <= GetGame().GetPlayer(pl).NumInfosets(); iset++) 
@@ -980,7 +980,7 @@ bool EFSupportWithActiveInfo::HasActiveActionsAtActiveInfosets()
   return true;
 }
 
-bool EFSupportWithActiveInfo::HasActiveActionsAtActiveInfosetsAndNoOthers()
+bool gbtEfgSupportWithActiveInfo::HasActiveActionsAtActiveInfosetsAndNoOthers()
 {
   for (int pl = 1; pl <= GetGame().NumPlayers(); pl++)
     for (int iset = 1; iset <= GetGame().GetPlayer(pl).NumInfosets(); iset++) {
@@ -995,9 +995,9 @@ bool EFSupportWithActiveInfo::HasActiveActionsAtActiveInfosetsAndNoOthers()
 }
 
 
-void EFSupportWithActiveInfo::Dump(gOutput& s) const
+void gbtEfgSupportWithActiveInfo::Dump(gOutput& s) const
 {
-  EFSupport::Dump(s);
+  gbtEfgSupport::Dump(s);
 
   /*
   s << "\n";
@@ -1038,7 +1038,7 @@ void EFSupportWithActiveInfo::Dump(gOutput& s) const
   */
 }
 
-gOutput& operator<<(gOutput&s, const EFSupportWithActiveInfo& e)
+gOutput& operator<<(gOutput&s, const gbtEfgSupportWithActiveInfo& e)
 {
   e.Dump(s);
   return s;
@@ -1048,9 +1048,9 @@ gOutput& operator<<(gOutput&s, const EFSupportWithActiveInfo& e)
 // Instantiations
 #include "base/glist.imp"
 
-template class gList<EFSupport>;
-template class gList<const EFSupport>;
-template class gList<const EFSupportWithActiveInfo>;
+template class gList<gbtEfgSupport>;
+template class gList<const gbtEfgSupport>;
+template class gList<const gbtEfgSupportWithActiveInfo>;
 
 #include "math/gvector.imp"
 #include "math/gpvector.imp"

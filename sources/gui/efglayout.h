@@ -182,11 +182,11 @@ private:
   NodeEntry *NextInfoset(NodeEntry *);
   void CheckInfosetEntry(NodeEntry *);
 
-  void BuildNodeList(const gbtEfgNode &, const EFSupport &, int);
+  void BuildNodeList(const gbtEfgNode &, const gbtEfgSupport &, int);
 
-  int LayoutSubtree(const gbtEfgNode &, const EFSupport &,
+  int LayoutSubtree(const gbtEfgNode &, const gbtEfgSupport &,
 		    int &, int &, int &);
-  void FillInfosetTable(const gbtEfgNode &, const EFSupport &);
+  void FillInfosetTable(const gbtEfgNode &, const gbtEfgSupport &);
   void UpdateTableInfosets(void);
   void UpdateTableParents(void);
 
@@ -203,8 +203,8 @@ public:
   gbtEfgNode PriorSameLevel(const gbtEfgNode &) const;
   gbtEfgNode NextSameLevel(const gbtEfgNode &) const;
 
-  void BuildNodeList(const EFSupport &);
-  void Layout(const EFSupport &);
+  void BuildNodeList(const gbtEfgSupport &);
+  void Layout(const gbtEfgSupport &);
   void GenerateLabels(void);
 
   void SetCutNode(const gbtEfgNode &);

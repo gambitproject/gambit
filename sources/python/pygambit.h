@@ -31,6 +31,7 @@
 #include "base/base.h"
 #include "game/efg.h"
 #include "game/nfg.h"
+#include "game/nfstrat.h"
 #include "nash/mixedsol.h"
 #include "nash/behavsol.h"
 
@@ -119,6 +120,20 @@ extern PyTypeObject Efoutcometype;
 efoutcomeobject *newefoutcomeobject(void);
 
 /*************************************************************************
+ * EFSUPPORT OBJECT
+ *************************************************************************/
+
+typedef struct {
+  PyObject_HEAD
+  gbtEfgSupport *m_support;
+} efsupportobject;
+
+extern PyTypeObject Efsupporttype;
+#define is_efsupportobject(v)  ((v)->ob_type == &Efsupporttype)
+
+efsupportobject *newefsupportobject(void);
+
+/*************************************************************************
  * NFG OBJECT
  *************************************************************************/
 
@@ -173,6 +188,20 @@ extern PyTypeObject Nfoutcometype;
 #define is_nfoutcomeobject(v)  ((v)->ob_type == &Nfoutcometype)
 
 nfoutcomeobject *newnfoutcomeobject(void);
+
+/*************************************************************************
+ * NFSUPPORT OBJECT
+ *************************************************************************/
+
+typedef struct {
+  PyObject_HEAD
+  gbtNfgSupport *m_support;
+} nfsupportobject;
+
+extern PyTypeObject Nfsupporttype;
+#define is_nfsupportobject(v)  ((v)->ob_type == &Nfsupporttype)
+
+nfsupportobject *newnfsupportobject(void);
 
 /*************************************************************************
  * MIXED PROFILE OBJECT

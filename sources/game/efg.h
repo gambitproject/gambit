@@ -31,7 +31,7 @@
 #include "math/gnumber.h"
 #include "math/gpvector.h"
 
-class EFSupport;
+class gbtEfgSupport;
 class gbtNfgGame;
 template <class T> class BehavProfile;
 template <class T> class MixedProfile;

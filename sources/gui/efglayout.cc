@@ -498,7 +498,7 @@ gbtEfgNode efgTreeLayout::NextSameLevel(const gbtEfgNode &p_node) const
 }
 
 int efgTreeLayout::LayoutSubtree(const gbtEfgNode &p_node, 
-				 const EFSupport &p_support,
+				 const gbtEfgSupport &p_support,
 				 int &p_maxy, int &p_miny, int &p_ycoord)
 {
   int y1 = -1, yn = 0;
@@ -638,7 +638,7 @@ void efgTreeLayout::CheckInfosetEntry(NodeEntry *e)
 }
 
 void efgTreeLayout::FillInfosetTable(const gbtEfgNode &n,
-				     const EFSupport &cur_sup)
+				     const gbtEfgSupport &cur_sup)
 {
   const gbtPreferences &prefs = m_doc->GetPreferences();
   NodeEntry *entry = GetNodeEntry(n);
@@ -700,7 +700,7 @@ void efgTreeLayout::UpdateTableParents(void)
   }
 }
 
-void efgTreeLayout::Layout(const EFSupport &p_support)
+void efgTreeLayout::Layout(const gbtEfgSupport &p_support)
 {
   // Kinda kludgey; probably should query draw prefs whenever needed.
   m_infosetSpacing = 
@@ -731,7 +731,7 @@ void efgTreeLayout::Layout(const EFSupport &p_support)
 }
 
 void efgTreeLayout::BuildNodeList(const gbtEfgNode &p_node, 
-				  const EFSupport &p_support,
+				  const gbtEfgSupport &p_support,
 				  int p_level)
 {
   NodeEntry *entry = new NodeEntry(p_node);
@@ -745,7 +745,7 @@ void efgTreeLayout::BuildNodeList(const gbtEfgNode &p_node,
   m_maxLevel = gmax(p_level, m_maxLevel);
 }
 
-void efgTreeLayout::BuildNodeList(const EFSupport &p_support)
+void efgTreeLayout::BuildNodeList(const gbtEfgSupport &p_support)
 {
   while (m_nodeList.Length() > 0) {
     delete m_nodeList.Remove(1);

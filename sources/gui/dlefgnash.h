@@ -49,7 +49,7 @@ private:
 
 public:
   // Lifecycle
-  dialogEfgNash(wxWindow *, const EFSupport &);
+  dialogEfgNash(wxWindow *, const gbtEfgSupport &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   gbtEfgNashAlgorithm *GetAlgorithm(void) const;

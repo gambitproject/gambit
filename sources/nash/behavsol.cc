@@ -42,7 +42,7 @@ private:
   BehavProfile<gNumber> start;
   gList<gbtEfgNode> oldroots;
   
-  void SolveSubgame(const gbtEfgGame &, const EFSupport &,
+  void SolveSubgame(const gbtEfgGame &, const gbtEfgSupport &,
 		    gList<BehavSolution> &, gStatus &);
   
 public:
@@ -59,7 +59,7 @@ public:
 
 BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
 			     const gText &p_creator)
-  : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.GetGame()))),
+  : m_profile(new BehavProfile<gNumber>(gbtEfgSupport(p_profile.GetGame()))),
     m_precision(precDOUBLE),
     m_support(p_profile.Support()), m_creator(p_creator),
     m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
@@ -87,7 +87,7 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
 
 BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
 			     const gText &p_creator)
-  : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.GetGame()))),
+  : m_profile(new BehavProfile<gNumber>(gbtEfgSupport(p_profile.GetGame()))),
     m_precision(precRATIONAL), 
     m_support(p_profile.Support()), m_creator(p_creator),
     m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
@@ -112,7 +112,7 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
 
 BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile, 
 			     const gText &p_creator)
-  : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.GetGame()))),
+  : m_profile(new BehavProfile<gNumber>(gbtEfgSupport(p_profile.GetGame()))),
     m_precision(precRATIONAL),
     m_support(p_profile.Support()), m_creator(p_creator),
     m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
@@ -521,7 +521,7 @@ void BehavSolution::Invalidate(void) const
   // changes in m_efg.  This only deals with changes in action probs of 
   // m_profile, and changes to outcome payoffs or chance probs of m_efg
   m_profile->Invalidate();
-  m_support = EFSupport(m_profile->GetGame());
+  m_support = gbtEfgSupport(m_profile->GetGame());
   m_creator = "User";
   m_ANFNash.Invalidate();
   m_Nash.Invalidate();
@@ -652,7 +652,7 @@ SubgamePerfectChecker::SubgamePerfectChecker(const gbtEfgGame &p_efg,
 }
 
 void SubgamePerfectChecker::SolveSubgame(const gbtEfgGame &p_efg,
-					 const EFSupport &sup,
+					 const gbtEfgSupport &sup,
 					 gList<BehavSolution> &solns,
 					 gStatus &p_status)
 {

@@ -37,7 +37,7 @@
 //----------------------------------------------------
 
 
-Sfg::Sfg(const EFSupport &S)
+Sfg::Sfg(const gbtEfgSupport &S)
   : m_efg(S.GetGame()), efsupp(S), seq(m_efg.NumPlayers()),
     isetFlag(S.GetGame().NumInfosets()),
     isetRow(S.GetGame().NumInfosets()), infosets(m_efg.NumPlayers())
@@ -46,7 +46,7 @@ Sfg::Sfg(const EFSupport &S)
   gArray<gbtEfgInfoset> zero(m_efg.NumPlayers());
   gArray<int> one(m_efg.NumPlayers());
 
-  EFSupport support(m_efg);
+  gbtEfgSupport support(m_efg);
 
   for(i=1;i<=m_efg.NumPlayers();i++) {
     seq[i]=1;

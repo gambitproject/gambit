@@ -487,15 +487,15 @@ inline gbtNfgSupport &AsNfgSupport(Portion *portion)
 // EfSupport
 //-------------
 
-class EFSupport;
+class gbtEfgSupport;
 
 class EfSupportPortion : public Portion  {
 protected:
   struct rep {
-    EFSupport *value;
+    gbtEfgSupport *value;
     int nref;
 
-    rep(EFSupport *v) : value(v), nref(1)  { }
+    rep(gbtEfgSupport *v) : value(v), nref(1)  { }
     ~rep();
   };
 
@@ -507,12 +507,12 @@ protected:
   EfSupportPortion(const EfSupportPortion *, bool);
 
 public:
-  EfSupportPortion(EFSupport *);
-  EfSupportPortion(EFSupport &);
+  EfSupportPortion(gbtEfgSupport *);
+  EfSupportPortion(gbtEfgSupport &);
   virtual ~EfSupportPortion();
 
-  EFSupport *Value(void) const;
-  void SetValue(EFSupport *);
+  gbtEfgSupport *Value(void) const;
+  void SetValue(gbtEfgSupport *);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -527,7 +527,7 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
-inline EFSupport &AsEfgSupport(Portion *portion)
+inline gbtEfgSupport &AsEfgSupport(Portion *portion)
 { return *(dynamic_cast<EfSupportPortion *>(portion))->Value(); }
 
 

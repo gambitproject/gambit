@@ -42,7 +42,7 @@ private:
 
   gArray<gArray<gbtEfgInfoset> *> infosets;
 
-  void FindSubgames(const EFSupport &, gStatus &, 
+  void FindSubgames(const gbtEfgSupport &, gStatus &, 
 		    gbtEfgNode, gList<BehavSolution> &, gList<gbtEfgOutcome> &);
   
 public:
@@ -50,7 +50,7 @@ public:
   virtual ~gbtEfgNashSubgames();
     
   gText GetAlgorithm(void) const;
-  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
+  gList<BehavSolution> Solve(const gbtEfgSupport &, gStatus &);
 
   void SetAlgorithm(gbtEfgNashAlgorithm *p_algorithm)
     { m_efgAlgorithm = p_algorithm; m_nfgAlgorithm = 0; }

@@ -115,7 +115,7 @@ static void NewtonStep(gMatrix<double> &q, gMatrix<double> &b,
   d = sqrt(d);
 }
 
-static void QreLHS(const EFSupport &p_support, const gVector<double> &p_point,
+static void QreLHS(const gbtEfgSupport &p_support, const gVector<double> &p_point,
 		   gVector<double> &p_lhs)
 {
   BehavProfile<double> profile(p_support);
@@ -147,7 +147,7 @@ static void QreLHS(const EFSupport &p_support, const gVector<double> &p_point,
   }
 }
 
-static void QreJacobian(const EFSupport &p_support,
+static void QreJacobian(const gbtEfgSupport &p_support,
 			const gVector<double> &p_point,
 			gMatrix<double> &p_matrix)
 {
@@ -256,7 +256,7 @@ static void TracePath(const BehavProfile<double> &p_start,
     if (x[i] < 1.0e-10) {
       // Drop this strategy from the support, then recursively call
       // to continue tracing
-      EFSupport newSupport(p_start.Support());
+      gbtEfgSupport newSupport(p_start.Support());
       int index = 1;
       for (int pl = 1; pl <= newSupport.GetGame().NumPlayers(); pl++) {
 	gbtEfgPlayer player = newSupport.GetGame().GetPlayer(pl);
@@ -376,7 +376,7 @@ static void TracePath(const BehavProfile<double> &p_start,
       if (u[i] < 1.0e-10) {
 	// Drop this strategy from the support, then recursively call
 	// to continue tracing
-	EFSupport newSupport(p_start.Support());
+	gbtEfgSupport newSupport(p_start.Support());
 	int index = 1;
 	for (int pl = 1; pl <= newSupport.GetGame().NumPlayers(); pl++) {
 	  gbtEfgPlayer player = newSupport.GetGame().GetPlayer(pl);
@@ -433,7 +433,7 @@ gbtEfgNashLogit::gbtEfgNashLogit(void)
   : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
 { }
 
-gList<BehavSolution> gbtEfgNashLogit::Solve(const EFSupport &p_support,
+gList<BehavSolution> gbtEfgNashLogit::Solve(const gbtEfgSupport &p_support,
 					    gStatus &p_status)
 {
   gList<BehavSolution> solutions;

@@ -55,8 +55,8 @@ private:
   // Extensive-form related state information
   gbtEfgGame *m_efg;
   gbtEfgNode m_cursor, m_copyNode, m_cutNode;
-  EFSupport *m_curEfgSupport;
-  gList<EFSupport *> m_efgSupports;
+  gbtEfgSupport *m_curEfgSupport;
+  gList<gbtEfgSupport *> m_efgSupports;
 
   // Normal-form related state information
   gbtNfgGame *m_nfg;
@@ -132,13 +132,13 @@ public:
   gText UniqueEfgSupportName(void) const;
   gText UniqueNfgSupportName(void) const;
 
-  const EFSupport &GetEfgSupport(void) const { return *m_curEfgSupport; }
+  const gbtEfgSupport &GetEfgSupport(void) const { return *m_curEfgSupport; }
   int GetEfgSupportIndex(void) const
     { return m_efgSupports.Find(m_curEfgSupport); }
-  const gList<EFSupport *> &AllEfgSupports(void) const
+  const gList<gbtEfgSupport *> &AllEfgSupports(void) const
     { return m_efgSupports; }
   void SetEfgSupport(int p_index);
-  void AddEfgSupport(EFSupport *);
+  void AddEfgSupport(gbtEfgSupport *);
   void DeleteEfgSupport(void);
   void AddAction(gbtEfgAction);
   void RemoveAction(gbtEfgAction);

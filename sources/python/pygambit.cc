@@ -45,6 +45,7 @@ extern void initinfoset(void);
 extern void initmixed(void);
 extern void initnash(void);
 extern void initnfg(void);
+extern void initnfgsupport(void);
 extern void initnode(void);
 extern void initoutcome(void);
 extern void initplayer(void);
@@ -61,6 +62,7 @@ initgambit(void)
   initmixed();
   initnash();
   initnfg();
+  initnfgsupport();
   initnode();
   initoutcome();
   initplayer();

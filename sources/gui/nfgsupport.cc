@@ -143,7 +143,7 @@ void NfgSupportWindow::OnUpdate(gbtGameView *)
 
   for (int i = 1; i <= supports.Length(); i++) {
     m_supportList->Append((char *)
-			  (ToText(i) + ": " + supports[i]->GetName()));
+			  (ToText(i) + ": " + supports[i]->GetLabel()));
   }
 
   int supportIndex = m_doc->GetNfgSupportIndex();
@@ -153,7 +153,7 @@ void NfgSupportWindow::OnUpdate(gbtGameView *)
 
   m_strategyTree->DeleteAllItems();
 
-  m_strategyTree->AddRoot((char *) m_doc->GetNfgSupport().GetName());
+  m_strategyTree->AddRoot((char *) m_doc->GetNfgSupport().GetLabel());
   for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
     gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(pl);
 

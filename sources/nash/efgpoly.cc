@@ -41,7 +41,7 @@ EfgPolEnumParams::EfgPolEnumParams(void)
 
 template class EfgPolEnumModule<gDouble>;
 
-int EfgPolEnum(const EFSupport &support, const EfgPolEnumParams &params,
+int EfgPolEnum(const gbtEfgSupport &support, const EfgPolEnumParams &params,
 	       gList<BehavSolution> &solutions, gStatus &p_status,
 	       long &nevals, double &time, bool &is_singular)
 {
@@ -55,7 +55,7 @@ int EfgPolEnum(const EFSupport &support, const EfgPolEnumParams &params,
   return 1;
 }
 
-BehavSolution PolishEquilibrium(const EFSupport &support, 
+BehavSolution PolishEquilibrium(const gbtEfgSupport &support, 
 				const BehavSolution &sol, 
 				bool &is_singular)
 {
@@ -74,18 +74,18 @@ gbtEfgNashEnumPoly::gbtEfgNashEnumPoly(void)
   : m_stopAfter(0)
 { }
 
-gList<BehavSolution> gbtEfgNashEnumPoly::Solve(const EFSupport &p_support,
+gList<BehavSolution> gbtEfgNashEnumPoly::Solve(const gbtEfgSupport &p_support,
 					       gStatus &p_status)
 {
   p_status.SetProgress(0.0);
   p_status << "Step 1 of 2: Enumerating supports";
-  gList<const EFSupport> supports = PossibleNashSubsupports(p_support,
+  gList<const gbtEfgSupport> supports = PossibleNashSubsupports(p_support,
 							    p_status);
 
   p_status.SetProgress(0.0);
   p_status << "Step 2 of 2: Computing equilibria";
 
-  gList<const EFSupport> singularSupports;
+  gList<const gbtEfgSupport> singularSupports;
   gList<BehavSolution> solutions;
 
   for (int i = 1; (i <= supports.Length() &&

@@ -32,16 +32,16 @@
 class algExtendsToNash {
 public:
   bool ExtendsToNash(const BehavSolution &p_solution,
-		     const EFSupport &p_littleSupport,
-		     const EFSupport &p_bigSupport,
+		     const gbtEfgSupport &p_littleSupport,
+		     const gbtEfgSupport &p_bigSupport,
 		     gStatus &p_status);
 };
 
 class algExtendsToAgentNash {
 public:
   bool ExtendsToAgentNash(const BehavSolution &p_solution,
-			  const EFSupport &p_littleSupport,
-			  const EFSupport &p_bigSupport,
+			  const gbtEfgSupport &p_littleSupport,
+			  const gbtEfgSupport &p_bigSupport,
 			  gStatus &p_status);
 };
 

@@ -712,7 +712,7 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
 	  break;
 	}
 	else {
-	  newSupport.SetName(m_doc->UniqueNfgSupportName());
+	  newSupport.SetLabel(m_doc->UniqueNfgSupportName());
 	  m_doc->AddNfgSupport(new gbtNfgSupport(newSupport));
 	  support = newSupport;
 	}
@@ -875,7 +875,7 @@ void NfgShow::OnHelpAbout(wxCommandEvent &)
 void NfgShow::OnSupportDuplicate(wxCommandEvent &)
 {
   gbtNfgSupport *newSupport = new gbtNfgSupport(m_doc->GetNfgSupport());
-  newSupport->SetName(m_doc->UniqueNfgSupportName());
+  newSupport->SetLabel(m_doc->UniqueNfgSupportName());
   m_doc->AddNfgSupport(newSupport);
   m_doc->SetNfgSupport(m_doc->AllNfgSupports().Length());
 }

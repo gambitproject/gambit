@@ -40,13 +40,13 @@ private:
   gList<BFS<T> > List;
   gList<gbtEfgInfoset> isets1, isets2;
 
-  void FillTableau(const EFSupport &, gMatrix<T> &, const gbtEfgNode &, T,
+  void FillTableau(const gbtEfgSupport &, gMatrix<T> &, const gbtEfgNode &, T,
 		   int, int, int, int);
   int Add_BFS(const LTableau<T> &tab);
-  int All_Lemke(const EFSupport &, int dup, LTableau<T> &B,
+  int All_Lemke(const gbtEfgSupport &, int dup, LTableau<T> &B,
 		int depth, gMatrix<T> &, gList<BehavSolution> &, gStatus &);
   
-  void GetProfile(const EFSupport &, const LTableau<T> &tab, 
+  void GetProfile(const gbtEfgSupport &, const LTableau<T> &tab, 
 		  gDPVector<T> &, const gVector<T> &, 
 		  const gbtEfgNode &n, int,int);
 
@@ -61,7 +61,7 @@ public:
   void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
 
   gText GetAlgorithm(void) const { return "Lcp[EFG]"; }
-  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
+  gList<BehavSolution> Solve(const gbtEfgSupport &, gStatus &);
 };
 
 #endif  // EFGLCP_H

@@ -31,12 +31,12 @@
 
 class gbtAllActionIterator {
 protected:
-  EFSupport m_support;
+  gbtEfgSupport m_support;
   int pl, iset, act;
 
 public:
   // LIFECYCLE
-  gbtAllActionIterator(const EFSupport &);
+  gbtAllActionIterator(const gbtEfgSupport &);
   ~gbtAllActionIterator() { }
 
   // OPERATORS
@@ -61,12 +61,12 @@ public:
 
 class gbtActionIterator {
 protected:
-  const EFSupport &m_support;
+  const gbtEfgSupport &m_support;
   int pl, iset, act;
 
 public:
-  gbtActionIterator(const EFSupport &, gbtEfgInfoset);
-  gbtActionIterator(const EFSupport &, int pl, int iset);
+  gbtActionIterator(const gbtEfgSupport &, gbtEfgInfoset);
+  gbtActionIterator(const gbtEfgSupport &, int pl, int iset);
 
   gbtEfgAction operator*(void) const;
   gbtActionIterator &operator++(int);

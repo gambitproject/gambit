@@ -36,7 +36,7 @@
 class StrategyProfile;
 class Lexicon;
 class gbtEfgGame;
-class EFSupport;
+class gbtEfgSupport;
 template <class T> class MixedProfile;
 
 struct gbt_nfg_game_rep;

@@ -273,7 +273,7 @@ bool EFNodeSet::IsValid(void) const
 //--------------------------------------------------
 
 EFBasis::EFBasis(const gbtEfgGame &p_efg) 
-  : EFSupport(p_efg), nodes(p_efg.NumPlayers())
+  : gbtEfgSupport(p_efg), nodes(p_efg.NumPlayers())
 {
   for (int i = 1; i <= nodes.Length(); i++) {
     nodes[i] = new EFNodeSet(p_efg.GetPlayer(i));
@@ -281,7 +281,7 @@ EFBasis::EFBasis(const gbtEfgGame &p_efg)
 }
 
 EFBasis::EFBasis(const EFBasis &b)
-  : EFSupport(b), nodes(b.nodes.Length())
+  : gbtEfgSupport(b), nodes(b.nodes.Length())
 {
   for (int i = 1; i <= nodes.Length(); i++)
     nodes[i] = new EFNodeSet(*(b.nodes[i]));
@@ -295,13 +295,13 @@ EFBasis::~EFBasis()
 
 EFBasis &EFBasis::operator=(const EFBasis &b)
 {
-  EFSupport::operator=(b);
+  gbtEfgSupport::operator=(b);
   return *this;
 }
 
 bool EFBasis::operator==(const EFBasis &b) const
 {
-  if( (*this).EFSupport::operator!=(b)) return false;
+  if( (*this).gbtEfgSupport::operator!=(b)) return false;
 
   if (nodes.Length() != b.nodes.Length()) return false;
 
@@ -350,7 +350,7 @@ int EFBasis::Find(const gbtEfgNode &n) const
 
 bool EFBasis::IsValid(void) const
 {
-  if(!(*this).EFSupport::HasActiveActionsAtAllInfosets()) return false;
+  if(!(*this).gbtEfgSupport::HasActiveActionsAtAllInfosets()) return false;
   if (nodes.Length() != m_efg.NumPlayers())   return false;
   for (int i = 1; i <= nodes.Length(); i++)
     if (!nodes[i]->IsValid())  return false;
@@ -389,7 +389,7 @@ bool EFBasis::IsReachable(gbtEfgNode n) const
 
   while (n != m_efg.GetRoot()) {
     if (!n.GetParent().GetInfoset().IsChanceInfoset()) {
-      if (!EFSupport::Contains(LastAction(m_efg, n))) {
+      if (!gbtEfgSupport::Contains(LastAction(m_efg, n))) {
 	return false;
       }
     }
@@ -556,7 +556,7 @@ int EFBasis::Col(const gbtEfgAction &p_action) const
 {
   gbtEfgInfoset iset = p_action.GetInfoset();
   return (*actIndex)(iset.GetPlayer().GetId(), iset.GetId(),
-		     (*bigbasis).EFSupport::GetIndex(p_action));
+		     (*bigbasis).gbtEfgSupport::GetIndex(p_action));
 }
 
 int EFBasis::Col(const gbtEfgNode &n) const
@@ -637,7 +637,7 @@ void EFBasis::Dump(gOutput& s) const
   int k;
 
   s << "\nActions: ";
-  (*this).EFSupport::Dump(s);
+  (*this).gbtEfgSupport::Dump(s);
   s << "\nNodes:   ";
   s << "{ ";
   numplayers = m_efg.NumPlayers();
