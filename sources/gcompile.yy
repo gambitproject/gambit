@@ -26,21 +26,6 @@
 
 #include "system.h"
 
-
-#include "gstack.imp"
-
-
-template class gStack<gText>;
-template class gStack<int>;
-template class gStack<char>;
-template class gStack<gInput *>;
-template class gStack<unsigned int>;
-
-#include "glist.imp"
-
-template class gList<bool>;
-template class gList<gclExpression *>;
-
 extern GSM* _gsm;  // defined at the end of gsm.cc
 gStack<gText> GCL_InputFileNames(4);
 

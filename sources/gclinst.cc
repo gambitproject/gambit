@@ -7,6 +7,7 @@
 #include "gstack.imp"
 #include "garray.imp"
 #include "gblock.imp"
+#include "glist.imp"
 #include "gslist.imp"
 
 class Portion;
@@ -15,10 +16,17 @@ class NfgPortion;
 class FuncDescObj;
 class CallFuncObj;
 class RefHashTable;
+class gclExpression;
 
 //----------
 // Stacks
 //----------
+
+template class gStack<gText>;
+template class gStack<int>;
+template class gStack<char>;
+template class gStack<gInput *>;
+template class gStack<unsigned int>;
 
 template class gStack<Portion *>;
 template class gStack<gStack<Portion *> *>;
@@ -28,6 +36,9 @@ template class gStack<RefHashTable *>;
 //--------
 // Lists
 //--------
+
+template class gList<bool>;
+template class gList<gclExpression *>;
 
 template class gSortList<FuncDescObj *>;
 template class gListSorter<FuncDescObj *>;
