@@ -223,7 +223,6 @@ bool GSM::PushList( const int num_of_elements )
 bool GSM::_VarIsDefined( const gString& var_name ) const
 {
   bool result;
-  RefHashTable* ref_table;
 
   assert( var_name != "" );
 
@@ -237,7 +236,6 @@ bool GSM::_VarIsDefined( const gString& var_name ) const
 
 bool GSM::_VarDefine( const gString& var_name, Portion* p )
 {
-  RefHashTable* ref_table;
   Portion* old_value;
   bool type_match = true;
   bool read_only = false;
@@ -306,7 +304,6 @@ bool GSM::_VarDefine( const gString& var_name, Portion* p )
 Portion* GSM::_VarValue( const gString& var_name ) const
 {
   Portion* result;
-  RefHashTable* ref_table;
 
   assert( var_name != "" );
 
@@ -376,8 +373,6 @@ bool GSM::Assign( void )
   Portion*  p2_copy;
   Portion*  p2;
   Portion*  p1;
-  Portion*  primary_ref;
-  Portion*  por_result;
   bool      result = true;
   PortionType p1_type;
   PortionType p2_type;
@@ -677,7 +672,6 @@ bool GSM::_BinaryOperation( const gString& funcname )
 
 bool GSM::_UnaryOperation( const gString& funcname )
 {
-  Portion*  p1;
   Portion*  result = 0;
 
   if( _Depth() >= 1 )
@@ -772,17 +766,13 @@ bool GSM::Subscript ( void )
 {
   Portion* p2;
   Portion* p1;
-  Portion* p;
-  Portion* refp;
   Portion* real_list;
   Portion* element;
-  Portion* shadow;
 
   gString  old_string;
   gString  new_string;
   int      subscript;
   bool     result = true;
-  bool     was_ref = false;
 
   assert( _Depth() >= 2 );
   p2 = _Pop();
@@ -1036,7 +1026,6 @@ bool GSM::BindRef( void )
 {
   CallFuncObj*       func;
   Portion*           param;
-  ReferencePortion* ref_param = 0;
   bool               result    = true;
 
 #ifndef NDEBUG
@@ -1100,12 +1089,9 @@ bool GSM::CallFunction( void )
   Portion**           param;
   int                 num_params;
   int                 index;
-  int                 listindex;
   gString             ref;
   ReferencePortion*  refp;
   Portion*            return_value;
-  Portion*            p;
-  Portion*            por_result;
   bool                define_result;
   bool                result = true;
 
@@ -1411,7 +1397,6 @@ bool GSM::Pop( void )
 void GSM::Flush( void )
 {
   int       i;
-  Portion*  p;
   bool result;
 
   assert( _Depth() >= 0 );

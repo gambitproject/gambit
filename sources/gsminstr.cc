@@ -414,5 +414,6 @@ TEMPLATE class gNode< Instruction* >;
 gOutput& operator << ( gOutput& s, Instruction* p )
 {
   p->Output( s );
+  return s;
 }
 

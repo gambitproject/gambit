@@ -161,7 +161,6 @@ template <class K, class T> T& HashTable<K, T>::operator()( K key )
 {
   int i;
   int position;
-  T   return_value;
 
   position = IsDefined( key );
   if( position != 0 )

@@ -139,7 +139,6 @@ FuncDescObj::FuncDescObj( FuncDescObj& func )
 {
   int index;
   int f_index;
-  int i;
 
   _FuncName  = func._FuncName;
   _NumFuncs  = func._NumFuncs;
@@ -407,7 +406,6 @@ void FuncDescObj::_SetParamInfo
 {
   int index;
   int repeated_variable_declaration = false;
-  int i;
   
 #ifndef NDEBUG
   if( !( param_index >= 0 && param_index < _FuncInfo[ f_index ].NumParams ) )
@@ -614,7 +612,7 @@ int CallFuncObj::FindParamName( const gString& param_name )
 	}
 	else // ( result != index )
 	{
-	  result == PARAM_AMBIGUOUS;
+	  result = PARAM_AMBIGUOUS;
 	  break;
 	}
       }
@@ -717,8 +715,6 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
   int params_matched;
   int param_sets_matched;
   Portion* result = 0;
-  GSM_ReturnCode return_code;
-
 
   if( _FuncIndex == -1 && _NumFuncs == 1 )
     _FuncIndex = 0;

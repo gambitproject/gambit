@@ -1321,7 +1321,6 @@ void ListPortion::AssignFrom( Portion* p )
 {
   int i;
   int length;
-  int type_match;
   int result;
   gBlock< Portion* >& value = *( ( (ListPortion*) p )->_Value );
 
@@ -1375,7 +1374,6 @@ ListValPortion::ListValPortion( gBlock< Portion* >& value )
 { 
   int i;
   int length;
-  int type_match;
   int result;
 
   _Value = new gBlock< Portion* >; 
