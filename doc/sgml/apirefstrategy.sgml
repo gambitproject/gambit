@@ -7,7 +7,6 @@
 <sect2 id="apiref.strategy.getgame">
 <title>GetGame</title>
 <indexterm><primary>GetGame</primary></indexterm>
-<indexterm><primary>Game (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -18,17 +17,8 @@ gbtNfgGame gbtNfgStrategy::GetGame(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-Game[strategy->STRATEGY] =: NFG
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetGame</function> (or <function>Game</function> in the GCL)
+<function>GetGame</function> 
 returns the normal form game to which the strategy belongs.
 </para>
 
@@ -38,7 +28,6 @@ returns the normal form game to which the strategy belongs.
 <sect2 id="apiref.strategy.getlabel">
 <title>GetLabel</title>
 <indexterm><primary>GetLabel</primary></indexterm>
-<indexterm><primary>Name (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -49,17 +38,8 @@ gText gbtNfgStrategy::GetLabel(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-Name[x->STRATEGY*] =: TEXT
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetLabel</function> (<function>Name</function> in the GCL)
+<function>GetLabel</function> 
 returns the text label of the strategy.
 The empty string is returned if the strategy object is null.
 </para>
@@ -69,7 +49,6 @@ The empty string is returned if the strategy object is null.
 <sect2 id="apiref.strategy.setlabel">
 <title>SetLabel</title>
 <indexterm><primary>SetLabel</primary></indexterm>
-<indexterm><primary>SetName (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -80,19 +59,8 @@ void gbtNfgStrategy::SetLabel(const gText &amp;p_label)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-SetName[x->STRATEGY, name->TEXT] =: STRATEGY
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>SetLabel</function> (<function>SetName</function> in the GCL) 
-sets the text label of the strategy.  The GCL version returns the 
-strategy.
+<function>SetLabel</function> sets the text label of the strategy.
 </para>
 
 </sect2>

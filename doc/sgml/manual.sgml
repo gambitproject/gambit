@@ -52,18 +52,6 @@
 </chapter>
 
 
-<chapter id="apiuser">
-<title>Gambit API User's Guide</title>
-
-<para>
-
-</para>
-
-&apigame;
-&apigcl;
-
-</chapter>
-
 &apiref;
 
 <appendix id="app.alg">

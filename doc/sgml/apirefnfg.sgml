@@ -4,41 +4,10 @@
 <para>
 </para>
 
-<sect2 id="apiref.nfg.compressnfg">
-<title>CompressNfg (GCL only)</title>
-<indexterm><primary>CompressNfg (GCL function)</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-This part of the interface is currently in flux in C++ and Python.
-Consult the source code or the Gambit development team for information
-if you require this function.
-</para>
-</formalpara>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-CompressNfg[support->NFSUPPORT] =: NFG 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>CompressNfg</function> creates a copy of the 
-normal form game on which <parameter>support</parameter> is
-defined, where all strategies not present in <parameter>support</parameter>
-have been removed.
-</para>
-
-</sect2>
 
 <sect2 id="apiref.nfg.getcomment">
 <title>GetComment</title>
 <indexterm><primary>GetComment</primary></indexterm>
-<indexterm><primary>Comment (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -49,19 +18,9 @@ gText gbtNfgGame::GetComment(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-Comment[nfg->NFG] =: TEXT
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetComment</function> (<function>Comment</function> in the GCL)
-returns the comment associated with the game
-<parameter>nfg</parameter>.
+<function>GetComment</function> returns the comment associated with
+the game.
 </para>
 
 </sect2>
@@ -69,7 +28,6 @@ returns the comment associated with the game
 <sect2 id="apiref.nfg.getlabel">
 <title>GetLabel</title>
 <indexterm><primary>GetLabel</primary></indexterm>
-<indexterm><primary>Name (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -80,17 +38,8 @@ gText gbtNfgGame::GetLabel(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-Name[x->NFG*] =: TEXT
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetLabel</function> (<function>Name</function> in the GCL)
+<function>GetLabel</function>
 returns the text label of the game.  
 The empty string is returned if the game object is null.
 </para>
@@ -101,7 +50,6 @@ The empty string is returned if the game object is null.
 <sect2 id="apiref.nfg.getplayer">
 <title>GetPlayer</title>
 <indexterm><primary>GetPlayer</primary></indexterm>
-<indexterm><primary>Players (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -117,20 +65,6 @@ gbtNfgPlayer gbtNfgGame::GetPlayer(int p_index) const
 <parameter>p_index</parameter> from the list of players in the
 game.  Each game's players are numbered sequentially beginning
 at one.  An exception is thown if the index is out of range.
-</para>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-Players[nfg->NFG] =: LIST(NFPLAYER) 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>Players</function>
-returns the list of players defined on the game <parameter>nfg</parameter>.
 </para>
 
 </sect2>
@@ -149,54 +83,12 @@ bool gbtNfgGame::IsConstSum(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-IsConstSum[nfg->NFG] =: BOOLEAN 
-</synopsis>
-</para>
-</formalpara>
-
 <para>
 <function>IsConstSum</function>
 returns <literal>True</literal> (nonzero) when the normal form game 
 is constant sum and <literal>False</literal> (zero) otherwise.
 </para>
 </sect2>
-
-
-<sect2 id="apiref.nfg.newnfg">
-<title>NewNfg</title>
-<indexterm><primary>NewNfg</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-This part of the interface is currently in flux in C++ and Python.
-Consult the source code or the Gambit development team for information
-if you require this function.
-</para>
-</formalpara>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-NewNfg[dim->LIST(INTEGER)] =: NFG 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>NewNfg</function>
-creates a new normal form game with dimension <parameter>dim</parameter>.  No
-initialization of the payoffs of the game is done.  Returns the newly
-created game.  
-</para>
-
-</sect2>
-
 
 
 <sect2 id="apiref.nfg.newoutcome">
@@ -212,21 +104,10 @@ gbtNfgOutcome gbtNfgGame::NewOutcome(void)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-NewOutcome[nfg->NFG] =: NFOUTCOME 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>NewOutcome</function>
-defines a new outcome in the normal form game <parameter>nfg</parameter>.
-The new
-outcome specifies payoffs of zero for all players.  Returns the newly
-created outcome.
+<function>NewOutcome</function> defines a new outcome in the normal
+form game.  The new outcome specifies payoffs of zero for all players.
+Returns the newly created outcome.
 </para>
 </sect2>
 
@@ -234,7 +115,6 @@ created outcome.
 <sect2 id="apiref.nfg.newsupport">
 <title>NewSupport</title>
 <indexterm><primary>NewSupport</primary></indexterm>
-<indexterm><primary>Support (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -245,18 +125,9 @@ gbtNfgSupport gbtNfgGame::NewSupport(void)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-Support[nfg->NFG] =: NFSUPPORT
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>NewSupport</function> (<function>Support</function> in the
-GCL) creates a new support object on the normal form game.  The
+<function>NewSupport</function> creates a new support object 
+on the normal form game.  The
 support contains all strategies for all players.
 </para>
 
@@ -280,58 +151,12 @@ int gbtNfgGame::NumPlayers(void) const
 on the game.
 </para>
 
-<formalpara>
-<title>GCL usage</title>
-<para>
-<function>NumPlayers</function> can be written as a user-defined function
-in the GCL as
-<programlisting>
-NewFunction[NumPlayers[nfg->NFG] =: INTEGER,
-  Length[Players[nfg]]
-];
-</programlisting>
-</para>
-</formalpara>
-
-</sect2>
-
-
-<sect2 id="apiref.nfg.outcome">
-<title>Outcome</title>
-<indexterm><primary>Outcome</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-This part of the interface is currently in flux in C++ and Python.
-Consult the source code or the Gambit development team for information
-if you require this function.
-</para>
-</formalpara>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-Outcome[profile->LIST(STRATEGY)] =: NFOUTCOME 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>Outcome</function>
-returns the outcome associated with the <parameter>node</parameter>,
-or the contingency <parameter>profile</parameter>.  The outcome associated
-with the null node is the null outcome.
-</para>
-
 </sect2>
 
 
 <sect2 id="apiref.nfg.readnfg">
 <title>ReadNfg</title>
 <indexterm><primary>ReadNfg</primary></indexterm>
-<indexterm><primary>LoadNfg (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++ usage</title>
@@ -351,20 +176,11 @@ nfg = gambit.ReadNfg(filename)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-LoadNfg[file->TEXT] =: NFG 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>ReadNfg</function> (<function>LoadNfg</function> in the GCL)
+<function>ReadNfg</function> 
 reads a normal form game from the file <parameter>file</parameter>.
 C++ users should pass a stream represented by a <type>gInput</type> object;
-Python and GCL users should pass the filename of the file to be read.
+Python users should pass the filename of the file to be read.
 An error occurs if the file cannot be opened, or if the file does
 not contain a valid normal form savefile.
 </para>
@@ -385,18 +201,9 @@ void gbtNfgGame::SetComment(const gText &amp;p_comment)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-SetComment[nfg->NFG, comment->TEXT] =: NFG
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>SetComment</function> 
-sets the comment associated with the game <parameter>nfg</parameter>.
+<function>SetComment</function> sets the comment associated with the
+game.
 </para>
 
 </sect2>
@@ -405,7 +212,6 @@ sets the comment associated with the game <parameter>nfg</parameter>.
 <sect2 id="apiref.nfg.setlabel">
 <title>SetLabel</title>
 <indexterm><primary>SetLabel</primary></indexterm>
-<indexterm><primary>SetName (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -416,62 +222,15 @@ void gbtNfgGame::SetLabel(const gText &amp;p_label)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-SetName[x->NFG, name->TEXT] =: NFG
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>SetLabel</function> (<function>SetName</function> in the GCL) 
-sets the text label of the game.  The GCL version returns the game.
+<function>SetLabel</function> sets the text label of the game.
 </para>
 
 </sect2>
-
-
-<sect2 id="apiref.nfg.setoutcome">
-<title>SetOutcome</title>
-<indexterm><primary>SetOutcome</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-This part of the interface is currently in flux in C++ and Python.
-Consult the source code or the Gambit development team for information
-if you require this function.
-</para>
-</formalpara>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-SetOutcome[profile->LIST(STRATEGY), outcome->NFOUTCOME] =: NFOUTCOME 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>SetOutcome</function>
-attaches <parameter>outcome</parameter> to the cell in the normal form game
-determined by the pure strategy profile defined by <parameter>profile</parameter>.
-Returns the outcome attached.  It is an error if <parameter>profile</parameter> and
-<parameter>outcome</parameter> are not from the same normal form game. Also,
-<parameter>profile</parameter> must be a list of strategies consisting of one strategy
-for each player in the game.  
-</para>
-
-</sect2>
-
 
 <sect2 id="apiref.nfg.writenfg">
 <title>WriteNfg</title>
 <indexterm><primary>WriteNfg</primary></indexterm>
-<indexterm><primary>SaveNfg (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++ usage</title>
@@ -491,22 +250,10 @@ nfg.WriteNfg(filename)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-SaveNfg[nfg->EFG, file->TEXT] =: NFG 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>WriteNfg</function>
-(<function>SaveNfg</function> in the GCL) writes a normal form
-game to an external savefile.  In C, this file is given as a 
-<type>gOutput</type> stream object; in Python and the GCL, the filename
-to be written is passed.
-The GCL version returns <parameter>nfg</parameter>.
+<function>WriteNfg</function> writes a normal form game to an external
+savefile.  In C++, this file is given as a <type>gOutput</type> stream
+object; in Python, the filename to be written is passed.  
 </para>
 
 </sect2>

@@ -19,25 +19,11 @@ void gbtNfgOutcome::DeleteOutcome(void)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-DeleteOutcome[outcome->EFOUTCOME] =: LIST(NODE) 
-DeleteOutcome[outcome->NFOUTCOME] =: BOOLEAN 
-</synopsis>
-</para>
-</formalpara>
-
 <para>
 <function>DeleteOutcome</function> removes
 <parameter>outcome</parameter> from its game.  All nodes (for
 extensive forms) or contingencies (for normal forms) with the
 specified outcome attached are reset to having no outcome attached.
-In the GCL,
-the extensive form version returns the list of nodes to which the
-outcome was attached; the normal form version returns
-<literal>True</literal>.
 </para>
 
 </sect2>
@@ -45,7 +31,6 @@ outcome was attached; the normal form version returns
 <sect2 id="apiref.outcome.getgame">
 <title>GetGame</title>
 <indexterm><primary>GetGame</primary></indexterm>
-<indexterm><primary>Game (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -57,18 +42,8 @@ gbtNfgGame gbtNfgOutcome::GetGame(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-Game[player->EFOUTCOME] =: EFG
-Game[player->NFOUTCOME] =: NFG
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetGame</function> (or <function>Game</function> in the GCL)
+<function>GetGame</function>
 returns the extensive or normal form game to which the outcome belongs.
 </para>
 
@@ -77,7 +52,6 @@ returns the extensive or normal form game to which the outcome belongs.
 <sect2 id="apiref.outcome.getlabel">
 <title>GetLabel</title>
 <indexterm><primary>GetLabel</primary></indexterm>
-<indexterm><primary>Name (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -89,18 +63,8 @@ gText gbtNfgOutcome::GetLabel(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-Name[x->EFPLAYER*] =: TEXT
-Name[x->NFPLAYER*] =: TEXT
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetLabel</function> (<function>Name</function> in the GCL)
+<function>GetLabel</function> 
 returns the text label of the outcome.
 The empty string is returned if the outcome object is null.
 </para>
@@ -110,7 +74,6 @@ The empty string is returned if the outcome object is null.
 <sect2 id="apiref.outcome.getpayoff">
 <title>GetPayoff</title>
 <indexterm><primary>GetPayoff</primary></indexterm>
-<indexterm><primary>Payoff (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -122,15 +85,6 @@ gNumber gbtNfgOutcome::GetPayoff(gbtNfgPlayer) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-Payoff[outcome->EFOUTCOME*, player->EFPLAYER] =: NUMBER 
-Payoff[outcome->NFOUTCOME*, player->NFPLAYER] =: NUMBER 
-</synopsis>
-</para>
-</formalpara>
 
 <para>
 <function>Payoff</function>
@@ -154,7 +108,6 @@ a rational number class for Python!)
 <sect2 id="apiref.outcome.setlabel">
 <title>SetLabel</title>
 <indexterm><primary>SetLabel</primary></indexterm>
-<indexterm><primary>SetName (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -166,19 +119,8 @@ void gbtNfgOutcome::SetLabel(const gText &amp;p_label)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-SetName[x->EFOUTCOME, name->TEXT] =: EFOUTCOME
-SetName[x->NFOUTCOME, name->TEXT] =: NFOUTCOME
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>SetLabel</function> (<function>SetName</function> in the GCL) 
-sets the text label of the outcome.  The GCL version returns the outcome.
+<function>SetLabel</function> sets the text label of the outcome.
 </para>
 
 </sect2>
@@ -198,24 +140,12 @@ void gbtNfgOutcome::SetPayoff(gbtNfgPlayer, gNumber)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-SetPayoff[outcome->EFOUTCOME, player->EFPLAYER,
-          payoff->NUMBER] =: EFOUTCOME 
-SetPayoff[outcome->NFOUTCOME, player->NFPLAYER, 
-          payoff->NUMBER] =: NFOUTCOME 
-</synopsis>
-</para>
-</formalpara>
-
 <para>
 <function>SetPayoff</function> sets the payoff of
-<parameter>outcome</parameter> for <parameter>player</parameter> to
+the outcome for <parameter>player</parameter> to
 <parameter>payoff</parameter>.  It is an error if
-<parameter>outcome</parameter> and <parameter>player</parameter> are
-not from the same game.  Returns <parameter>outcome</parameter>.
+the outcome and <parameter>player</parameter> are
+not from the same game. 
 </para>
 
 <note>

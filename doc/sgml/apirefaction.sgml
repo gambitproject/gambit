@@ -18,23 +18,13 @@ void gbtEfgAction::DeleteAction(void)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-DeleteAction[action->ACTION] =: INFOSET 
-</synopsis>
-</para>
-</formalpara>
-
 <para>
 <function>DeleteAction</function> deletes
 <parameter>action</parameter> from its information set.  As a
 consequence, the corresponding subtrees associated with the action
-from each member of the information set are deleted.  The GCL version
-returns the information set to which <parameter>action</parameter>
-belonged.  It is an error if <parameter>action</parameter> is the only
-action at its information set.
+from each member of the information set are deleted.  It is an error
+if <parameter>action</parameter> is the only action at its information
+set.
 </para>
 
 </sect2>
@@ -43,7 +33,6 @@ action at its information set.
 <sect2 id="apiref.action.getchanceprob">
 <title>GetChanceProb</title>
 <indexterm><primary>GetChanceProb</primary></indexterm>
-<indexterm><primary>ChanceProb (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -54,22 +43,11 @@ gNumber gbtEfgAction::GetChanceProb(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-ChanceProb[action->ACTION] =: NUMBER 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetChanceProb</function> (<function>ChanceProb</function> in
-the GCL) returns the probability of 
-<parameter>action</parameter> being chosen at its information
-set by the chance player.  It is an error if <parameter>action</parameter>
-is not an action
-which is chosen by the chance player.
+<function>GetChanceProb</function> returns the probability of
+<parameter>action</parameter> being chosen at its information set by
+the chance player.  It is an error if <parameter>action</parameter> is
+not an action which is chosen by the chance player.
 </para>
 
 </sect2>
@@ -77,7 +55,6 @@ which is chosen by the chance player.
 <sect2 id="apiref.action.getinfoset">
 <title>GetInfoset</title>
 <indexterm><primary>GetInfoset</primary></indexterm>
-<indexterm><primary>Infoset (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -88,17 +65,8 @@ gbtEfgInfoset gbtEfgAction::GetInfoset(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-Infoset[action->ACTION*] =: INFOSET 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetInfoset</function> (<function>Infoset</function> in the GCL)
+<function>GetInfoset</function> 
 returns the information set to which <parameter>action</parameter> belongs.
 The null
 action is assumed to belong to the null information set.
@@ -109,7 +77,6 @@ action is assumed to belong to the null information set.
 <sect2 id="apiref.action.getlabel">
 <title>GetLabel</title>
 <indexterm><primary>GetLabel</primary></indexterm>
-<indexterm><primary>Name (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -120,17 +87,8 @@ gText gbtEfgAction::GetLabel(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-Name[x->ACTION*] =: TEXT
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetLabel</function> (<function>Name</function> in the GCL)
+<function>GetLabel</function>
 returns the text label of the action.
 The empty string is returned if the action object is null.
 </para>
@@ -165,7 +123,6 @@ by the chance player.
 <sect2 id="apiref.action.setlabel"> 
 <title>SetLabel</title>
 <indexterm><primary>SetLabel</primary></indexterm>
-<indexterm><primary>SetName (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -176,18 +133,8 @@ void gbtEfgAction::SetLabel(const gText &amp;p_label)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-SetName[x->ACTION, name->TEXT] =: ACTION
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>SetLabel</function> (<function>SetName</function> in the GCL) 
-sets the text label of the action.  The GCL version returns the action.
+<function>SetLabel</function> sets the text label of the action.
 </para>
 
 </sect2>

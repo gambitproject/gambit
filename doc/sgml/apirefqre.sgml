@@ -7,7 +7,6 @@
 <sect2 id="apiref.qre.logitsolve">
 <title>LogitSolve</title>
 <indexterm><primary>LogitSolve</primary></indexterm>
-<indexterm><primary>QreSolve (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>Python usage</title>
@@ -25,21 +24,8 @@ gList&lt;BehavSolution&gt; LogitSolve(gbtEfgSupport p_support,
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-QreSolve[support->NFSUPPORT, {pxifile->""}, {maxLam->1000},
-         {stepSize->0.0001}, {fullGraph->False}] =: LIST(MIXED) 
-QreSolve[support->EFSUPPORT, {pxifile->""}, {maxLam->1000},
-         {stepSize->0.0001}, {fullGraph->False}] =: LIST(BEHAV)
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>LogitSolve</function> (<function>QreSolve</function> in the
-GCL) traces
+<function>LogitSolve</function> traces
 the principal branch of the logistic quantal response equilibrium
 correspondence for a game, using the algorithm described in
 <citation><xref linkend="Tur02"></citation>.
@@ -47,7 +33,7 @@ correspondence for a game, using the algorithm described in
 
 <para>
 The behavior of the algorithm is controlled by the following
-parameters, which are optional in the GCL:
+parameters:
 <itemizedlist>
 <listitem>
 <para>

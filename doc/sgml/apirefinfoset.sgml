@@ -7,7 +7,6 @@
 <sect2 id="apiref.infoset.deleteemptyinfoset">
 <title>DeleteInfoset</title>
 <indexterm><primary>DeleteInfoset</primary></indexterm>
-<indexterm><primary>DeleteEmptyInfoset (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -18,23 +17,11 @@ void gbtEfgInfoset::DeleteInfoset(void)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-DeleteEmptyInfoset[infoset->INFOSET] =: BOOLEAN 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>DeleteInfoset</function>
-(<function>DeleteEmptyInfoset</function> in the GCL) deletes
+<function>DeleteInfoset</function> deletes
 <parameter>infoset</parameter> from its extensive form game.  An
 information set may be deleted only when it has no members; otherwise,
-this function has no effect.  The GCL version returns
-<literal>True</literal> when the
-information set was successfully deleted.
+this function has no effect.
 </para>
 
 </sect2>
@@ -42,7 +29,6 @@ information set was successfully deleted.
 <sect2 id="apiref.infoset.GetAction">
 <title>GetAction</title>
 <indexterm><primary>GetAction</primary></indexterm>
-<indexterm><primary>Actions (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -61,33 +47,12 @@ sequentially beginning at one.  An exception is thrown if the index
 is out of range.
 </para>
 
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-Actions[infoset->INFOSET*, support->EFSUPPORT] =: LIST(ACTION)
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>Actions</function> returns the list of actions available 
-at <parameter>infoset</parameter> in
-<parameter>support</parameter> or <parameter>basis</parameter>.
-If <parameter>infoset</parameter> is the null
-information set, the empty list of actions is returned.  It is an
-error if <parameter>infoset</parameter> and <parameter>support</parameter>
-(or <parameter>basis</parameter>) are not from the same
-extensive form game.
-</para>
-
 </sect2>
 
 
 <sect2 id="apiref.infoset.getgame">
 <title>GetGame</title>
 <indexterm><primary>GetGame</primary></indexterm>
-<indexterm><primary>Game (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -98,17 +63,8 @@ gbtEfgGame gbtEfgInfoset::GetGame(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-Game[infoset->INFOSET] =: EFG
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetGame</function> (or <function>Game</function> in the GCL)
+<function>GetGame</function> 
 returns the extensive form game to which the information set belongs.
 </para>
 
@@ -118,7 +74,6 @@ returns the extensive form game to which the information set belongs.
 <sect2 id="apiref.infoset.getlabel">
 <title>GetLabel</title>
 <indexterm><primary>GetLabel</primary></indexterm>
-<indexterm><primary>Name (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -129,17 +84,8 @@ gText gbtEfgInfoset::GetLabel(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-Name[x->INFOSET*] =: TEXT
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetLabel</function> (<function>Name</function> in the GCL)
+<function>GetLabel</function>
 returns the text label of the information set.
 The empty string is returned if the information set object is null.
 </para>
@@ -169,142 +115,9 @@ is out of range.
 
 </sect2>
 
-<sect2 id="apiref.infoset.insertaction">
-<title>InsertAction</title>
-<indexterm><primary>InsertAction</primary></indexterm>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-InsertAction[infoset->INFOSET, at->ACTION] =: ACTION 
-InsertAction[infoset->INFOSET] =: ACTION 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>InsertAction</function>
-inserts a new action into <parameter>infoset</parameter>
-before the action <parameter>at</parameter>. 
-If <parameter>at</parameter> is not specified, the new action
-is appended to <parameter>infoset</parameter>'s
-actions.
-The corresponding new branch is created for
-each node belonging to <parameter>infoset</parameter>.
-Returns the newly created action.
-</para>
-
-</sect2>
-
-
-<sect2 id="apiref.infoset.members">
-<title>Members</title>
-<indexterm><primary>Members</primary></indexterm>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-Members[infoset->INFOSET*] =: LIST(NODE) 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>Members</function>
-returns the list of nodes which are members of <parameter>infoset</parameter>.
-If <parameter>infoset</parameter> is null, the empty list is returned.
-</para>
-
-</sect2>
-
-
-<sect2 id="apiref.infoset.mergeinfosets">
-<title>MergeInfosets</title>
-<indexterm><primary>MergeInfosets</primary></indexterm>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-MergeInfosets[to->INFOSET, from->INFOSET] =: INFOSET
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>MergeInfosets</function>
-moves all the nodes from the information set <parameter>from</parameter> into
-<parameter>to</parameter>.
-It is an error if the number of actions is not the same at the
-two information sets, or if the information sets are not from the
-same extensive form game.  The information set <parameter>to</parameter>
-is returned.
-</para>
-
-</sect2>
-
-
-<sect2 id="apiref.infoset.reveal">
-<title>Reveal</title>
-<indexterm><primary>Reveal</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-<synopsis>
-void gbtEfgInfoset::Reveal(gbtEfgPlayer who)
-</synopsis>
-</para>
-</formalpara>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-Reveal[infoset->INFOSET, who->LIST(EFPLAYER)] =: INFOSET 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>Reveal</function> 
-reveals the list of actions at <parameter>infoset</parameter> to the players
-in <parameter>who</parameter>,
-refining their information partitions at
-all information sets in the extensive form game accordingly.  
-</para>
-
-</sect2>
-
-
-<sect2 id="apiref.infoset.setchanceprobs">
-<title>SetChanceProbs</title>
-<indexterm><primary>SetChanceProbs</primary></indexterm>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-SetChanceProbs[infoset->INFOSET, probs->LIST(NUMBER)] =: INFOSET 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>SetChanceProbs</function> 
-sets the action probabilities for 
-<parameter>infoset</parameter> to the values given in <parameter>probs</parameter>.  Returns <parameter>infoset</parameter>.
-An error occurs if <parameter>infoset</parameter> does not belong to the chance player.
-</para>
-
-</sect2>
-
 <sect2 id="apiref.infoset.setlabel">
 <title>SetLabel</title>
 <indexterm><primary>SetLabel</primary></indexterm>
-<indexterm><primary>SetName (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -315,19 +128,9 @@ void gbtEfgInfoset::SetLabel(const gText &amp;p_label)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-SetName[x->INFOSET, name->TEXT] =: INFOSET
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>SetLabel</function> (<function>SetName</function> in the GCL) 
-sets the text label of the information set.
-The GCL version returns the information set.
+<function>SetLabel</function> sets the text label of the information
+set.
 </para>
 
 </sect2>

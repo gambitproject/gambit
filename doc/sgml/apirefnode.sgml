@@ -4,44 +4,6 @@
 <para>
 </para>
 
-<sect2 id="apiref.node.copytree">
-<title>CopyTree (GCL only)</title>
-<indexterm><primary>CopyTree</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-This part of the interface is currently in flux in C++ and Python.
-Consult the source code or the Gambit development team for information
-if you require this function.
-</para>
-</formalpara>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-CopyTree[from->NODE, to->NODE] =: NODE 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>CopyTree</function> copies the subtree rooted at
-<parameter>from</parameter> to the terminal node
-<parameter>to</parameter> in the same extensive form game.  The nodes
-in the copied subtree belong to the same information sets as their
-counterparts in the original subtree.  Returns the node
-<parameter>to</parameter>.  It is an error if
-<parameter>from</parameter> and <parameter>to</parameter> are not from
-the same extensive form game, or if <parameter>to</parameter> is not a
-terminal node.  The function has no effect if the copying operation
-would violate the currently marked subgame structure.
-</para>
-
-</sect2>
-
-
 <sect2 id="apiref.node.deletemove">
 <title>DeleteMove</title>
 <indexterm><primary>DeleteMove</primary></indexterm>
@@ -55,15 +17,6 @@ void gbtEfgNode::DeleteMove(gbtEfgNode p_keep)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-DeleteMove[node->NODE, keep->NODE] =: NODE 
-</synopsis>
-</para>
-</formalpara>
-
 <para>
 <function>DeleteMove</function>
 deletes <parameter>node</parameter> from its extensive form game.  The
@@ -72,7 +25,6 @@ subtree rooted in node <parameter>keep</parameter>, which must be a child of
 the place of <parameter>node</parameter> in
 the tree.  All other subtrees descending from <parameter>node</parameter> 
 are deleted.
-In the GCL version, the kept node <parameter>keep</parameter> is returned.
 It is an error if <parameter>keep</parameter>
 is not a child of <parameter>node</parameter>, 
 or if <parameter>keep</parameter> and <parameter>node</parameter> are not
@@ -94,20 +46,10 @@ void gbtEfgNode::DeleteTree(void)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-DeleteTree[node->NODE] =: NODE 
-</synopsis>
-</para>
-</formalpara>
-
 <para>
 <function>DeleteTree</function>
 deletes the subtree rooted at <parameter>node</parameter>.  The
-node then becomes a terminal node.  The node is returned in the GCL
-version.
+node then becomes a terminal node. 
 </para>
 
 </sect2>
@@ -116,7 +58,6 @@ version.
 <sect2 id="apiref.node.getchild">
 <title>GetChild</title>
 <indexterm><primary>GetChild</primary></indexterm>
-<indexterm><primary>NthChild (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -127,17 +68,8 @@ gbtEfgNode gbtEfgNode::GetChild(int p_index) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-NthChild[node->NODE, n->INTEGER] =: NODE
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetChild</function> (<function>NthChild</function> in the GCL)
+<function>GetChild</function> 
 returns the child numbered
 <parameter>p_index</parameter> from the list of children for the node.
 Each node's children, if any, are numbered sequentially beginning at one.
@@ -150,7 +82,6 @@ An exception is thrown if the index is out of range.
 <sect2 id="apiref.node.getgame">
 <title>GetGame</title>
 <indexterm><primary>GetGame</primary></indexterm>
-<indexterm><primary>Game (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -161,18 +92,9 @@ gbtEfgGame gbtEfgNode::GetGame(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-Game[node->NODE] =: EFG
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetGame</function> (or <function>Game</function> in the GCL)
-returns the extensive form game to which the node belongs.
+<function>GetGame</function> returns the extensive form game to which
+the node belongs.
 </para>
 
 </sect2>
@@ -180,7 +102,6 @@ returns the extensive form game to which the node belongs.
 <sect2 id="apiref.node.getinfoset">
 <title>GetInfoset</title>
 <indexterm><primary>GetInfoset</primary></indexterm>
-<indexterm><primary>Infoset (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title
@@ -191,21 +112,10 @@ gbtEfgInfoset gbtEfgNode::GetInfoset(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-Infoset[node->NODE*] =: INFOSET 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetInfoset</function> (<function>Infoset</function> in the GCL)
-returns the information set to which the
-<parameter>node</parameter> belongs.
-The null
-node belongs to the null information set.
+<function>GetInfoset</function> returns the information set to which
+the <parameter>node</parameter> belongs.  The null node belongs to the
+null information set.
 </para>
 
 </sect2>
@@ -214,7 +124,6 @@ node belongs to the null information set.
 <sect2 id="apiref.node.getlabel">
 <title>GetLabel</title>
 <indexterm><primary>GetLabel</primary></indexterm>
-<indexterm><primary>Name (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -225,19 +134,9 @@ gText gbtEfgNode::GetLabel(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-Name[x->NODE*] =: TEXT
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetLabel</function> (<function>Name</function> in the GCL)
-returns the text label of the node.  
-The empty string is returned if the node object is null.
+<function>GetLabel</function> returns the text label of the node.  The
+empty string is returned if the node object is null.
 </para>
 
 </sect2>
@@ -246,7 +145,6 @@ The empty string is returned if the node object is null.
 <sect2 id="apiref.node.getnextsibling">
 <title>GetNextSibling</title>
 <indexterm><primary>GetNextSibling</primary></indexterm>
-<indexterm><primary>NextSibling (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -257,21 +155,10 @@ gbtEfgNode gbtEfgNode::GetNextSibling(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-NextSibling[node->NODE] =: NODE 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetNextSibling</function> (<function>NextSibling</function>
-in the GCL)
-returns the next sibling of <parameter>node</parameter>. 
-If <parameter>node</parameter> has no next
-sibling, the null node is returned.
+<function>GetNextSibling</function> returns the next sibling of
+<parameter>node</parameter>.  If <parameter>node</parameter> has no
+next sibling, the null node is returned.
 </para>
 
 </sect2>
@@ -279,7 +166,6 @@ sibling, the null node is returned.
 <sect2 id="apiref.node.getoutcome">
 <title>GetOutcome</title>
 <indexterm><primary>GetOutcome</primary></indexterm>
-<indexterm><primary>Outcome (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -290,17 +176,8 @@ gbtEfgOutcome gbtEfgNode::GetOutcome(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-Outcome[node->NODE*] =: EFOUTCOME 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetOutcome</function> (<function>Outcome</function> in the GCL)
+<function>GetOutcome</function>
 returns the outcome associated with the <parameter>node</parameter>.
 The outcome associated
 with the null node is the null outcome.
@@ -312,7 +189,6 @@ with the null node is the null outcome.
 <sect2 id="apiref.node.getparent">
 <title>GetParent</title>
 <indexterm><primary>GetParent</primary></indexterm>
-<indexterm><primary>Parent (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -323,17 +199,8 @@ gbtEfgNode gbtEfgNode::GetParent(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-Parent[node->NODE*] =: NODE 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetParent</function> (<function>Parent</function> in the GCL)
+<function>GetParent</function> 
 returns the parent of <parameter>node</parameter>.
 If <parameter>node</parameter> is the root node,
 or if <parameter>node</parameter> is null, the null node is returned.
@@ -344,7 +211,6 @@ or if <parameter>node</parameter> is null, the null node is returned.
 <sect2 id="apiref.node.getprioraction">
 <title>GetPriorAction</title>
 <indexterm><primary>GetPriorAction</primary></indexterm>
-<indexterm><primary>PriorAction (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -355,20 +221,11 @@ gbtEfgAction gbtEfgNode::GetPriorAction(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-PriorAction[node->NODE] =: ACTION 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetPriorAction</function> (<function>PriorAction</function>
-in the GCL) 
-returns the action corresponding to the branch leading to <parameter>node</parameter>.
-If <parameter>node</parameter> is the root node, its prior action is the null action.
+<function>GetPriorAction</function> returns the action corresponding
+to the branch leading to <parameter>node</parameter>.  If
+<parameter>node</parameter> is the root node, its prior action is the
+null action.
 </para>
 
 </sect2>
@@ -376,7 +233,7 @@ If <parameter>node</parameter> is the root node, its prior action is the null ac
 <sect2 id="apiref.node.getpriorsibling">
 <title>GetPriorSibling</title>
 <indexterm><primary>GetPriorSibling</primary></indexterm>
-<indexterm><primary>PriorSibling (GCL function)</primary></indexterm>
+
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -387,18 +244,8 @@ gbtEfgNode gbtEfgNode::GetPriorSibling(void) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-PriorSibling[node->NODE] =: NODE 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetPriorSibling</function> (<function>PriorSibling</function>
-in the GCL)
+<function>GetPriorSibling</function>
 returns the previous sibling of <parameter>node</parameter>. 
 If <parameter>node</parameter> has no previous
 sibling, the null node is returned.
@@ -420,15 +267,6 @@ gbtEfgNode gbtEfgNode::InsertMove(gbtEfgInfoset)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-InsertMove[infoset->INFOSET, node->NODE] =: NODE 
-</synopsis>
-</para>
-</formalpara>
-
 <para>
 <function>InsertMove</function>
 inserts a new node in the tree at the location of <parameter>node</parameter>.
@@ -444,7 +282,6 @@ becomes the first child of the new node.  Returns the new node.
 <sect2 id="apiref.node.ispredecessorof">
 <title>IsPredecessorOf</title>
 <indexterm><primary>IsPredecessorOf</primary></indexterm>
-<indexterm><primary>IsPredecessor (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -455,157 +292,13 @@ bool gbtEfgNode::IsPredecessorOf(gbtEfgNode) const
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-IsPredecessor[node->NODE, of->NODE] =: BOOLEAN 
-</synopsis>
-</para>
-</formalpara>
-
 <para>
 <function>IsPredecessorOf</function>
-(<function>IsPredecessor</function> in the GCL)
 returns <literal>True</literal> (nonzero) when <parameter>node</parameter>
 is a predecessor
 in the tree of the node <parameter>of</parameter>, and
 <literal>False</literal> (zero) otherwise.
 A node is considered its own predecessor.
-</para>
-
-</sect2>
-
-
-<sect2 id="apiref.node.marksubgame">
-<title>MarkSubgame (GCL only)</title>
-<indexterm><primary>MarkSubgame</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-This part of the interface is currently in flux in C++ and Python.
-Consult the source code or the Gambit development team for information
-if you require this function.
-</para>
-</formalpara>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-MarkSubgame[node->NODE] =: BOOLEAN 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>MarkSubgame</function>
-marks <parameter>node</parameter> as being the root of a subgame for use in later computation.
-Only nodes which are roots of subgames may be marked.  Returns <literal>True</literal>
-if <parameter>node</parameter> was marked as a subgame (i.e., if it is the root of a subgame).
-</para>
-
-</sect2>
-
-
-<sect2 id="apiref.node.markedsubgame">
-<title>MarkedSubgame (GCL only)</title>
-<indexterm><primary>MarkedSubgame</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-This part of the interface is currently in flux in C++ and Python.
-Consult the source code or the Gambit development team for information
-if you require this function.
-</para>
-</formalpara>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-MarkedSubgame[node->NODE] =: BOOLEAN 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>MarkedSubgame</function>
-returns <literal>True</literal> (nonzero)
-if <parameter>node</parameter> is currently
-marked as a subgame, and <literal>False</literal> (zero) otherwise.
-</para>
-
-</sect2>
-
-
-<sect2 id="apiref.node.movetoinfoset">
-<title>MoveToInfoset (GCL only)</title>
-<indexterm><primary>MoveToInfoset</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-This part of the interface is currently in flux in C++ and Python.
-Consult the source code or the Gambit development team for information
-if you require this function.
-</para>
-</formalpara>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-MoveToInfoset[node->NODE, infoset->INFOSET] =: NODE 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>MoveToInfoset</function>
-removes <parameter>node</parameter> from its current information set, and makes it a
-member of <parameter>infoset</parameter>. It is an error if the number of actions at
-<parameter>node</parameter> is not the same as the number of actions in
-<parameter>infoset</parameter>, or if <parameter>node</parameter> and 
-<parameter>infoset</parameter> are from
-different extensive form games.   
-</para>
-
-</sect2>
-
-
-<sect2 id="apiref.node.movetree">
-<title>MoveTree (GCL only)</title>
-<indexterm><primary>MoveTree</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-This part of the interface is currently in flux in C++ and Python.
-Consult the source code or the Gambit development team for information
-if you require this function.
-</para>
-</formalpara>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-MoveTree[from->NODE, to->NODE] =: NODE 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>MoveTree</function>
-moves the subtree rooted at <parameter>from</parameter> to
-the terminal node <parameter>to</parameter>.  The node <parameter>from</parameter> becomes a terminal node.
-Returns <parameter>to</parameter>.
-It is an error if <parameter>to</parameter> is not a terminal
-node, or if <parameter>from</parameter> and <parameter>to</parameter> are not from the same extensive
-form game.
 </para>
 
 </sect2>
@@ -629,26 +322,12 @@ int gbtEfgNode::NumChildren(void) const
 (direct descendants) of the node.
 </para>
 
-<formalpara>
-<title>GCL usage</title>
-<para>
-<function>NumChildren</function> can be written as a user-defined function
-in the GCL as
-<programlisting>
-NewFunction[NumChildren[node->NODE] =: INTEGER,
-  Length[Children[node]]
-];
-</programlisting>
-</para>
-</formalpara>
-
 </sect2>
 
 
 <sect2 id="apiref.node.setlabel"> 
 <title>SetLabel</title>
 <indexterm><primary>SetLabel</primary></indexterm>
-<indexterm><primary>SetName (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
@@ -659,18 +338,8 @@ void gbtEfgNode::SetLabel(const gText &amp;p_label)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
 <para>
-<synopsis>
-SetName[x->NODE, name->TEXT] =: NODE
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>SetLabel</function> (<function>SetName</function> in the GCL) 
-sets the text label of the node.  The GCL version returns the node.
+<function>SetLabel</function> sets the text label of the node.
 </para>
 
 </sect2>
@@ -689,15 +358,6 @@ void gbtEfgNode::SetOutcome(gbtEfgOutcome)
 </para>
 </formalpara>
 
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-SetOutcome[node->NODE, outcome->EFOUTCOME*] =: EFOUTCOME 
-</synopsis>
-</para>
-</formalpara>
-
 <para>
 <function>SetOutcome</function> 
 attaches <parameter>outcome</parameter> to <parameter>node</parameter>.
@@ -710,41 +370,6 @@ extensive form game.
 </para>
 
 </sect2>
-
-<sect2 id="apiref.node.unmarksubgame">
-<title>UnMarkSubgame (GCL only)</title>
-<indexterm><primary>UnMarkSubgame</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-This part of the interface is currently in flux in C++ and Python.
-Consult the source code or the Gambit development team for information
-if you require this function.
-</para>
-</formalpara>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-UnMarkSubgame[node->NODE] =: NODE 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>UnMarkSubgame</function> unmarks <parameter>node</parameter>
-as being the root of a subgame for use in later computation.  If
-<parameter>node</parameter> is not marked as a subgame root, or if
-<parameter>node</parameter> is the root node, this function has no
-effect.  Returns the <parameter>node</parameter>.
-</para>
-
-</sect2>
-
-
-
 
 </sect1>
 
