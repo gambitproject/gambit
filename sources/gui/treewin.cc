@@ -560,6 +560,7 @@ void TreeWindow::OnSize(wxSizeEvent &p_event)
 void gbtCmdMoveTree::Do(gbtGameDocument *p_doc)  
 {
   p_doc->GetEfg().MoveTree(m_src, m_dest);
+  p_doc->OnTreeChanged(true, true);
 }
 
 //=======================================================================
@@ -569,6 +570,7 @@ void gbtCmdMoveTree::Do(gbtGameDocument *p_doc)
 void gbtCmdCopyTree::Do(gbtGameDocument *p_doc)  
 {
   p_doc->GetEfg().CopyTree(m_src, m_dest);
+  p_doc->OnTreeChanged(true, true);
 }
 
 //=======================================================================
@@ -578,6 +580,7 @@ void gbtCmdCopyTree::Do(gbtGameDocument *p_doc)
 void gbtCmdSetOutcome::Do(gbtGameDocument *p_doc)  
 {
   m_node.SetOutcome(m_outcome);
+  p_doc->OnTreeChanged(false, false);
 }
 
 template class gList<NodeEntry *>;
