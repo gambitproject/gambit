@@ -173,11 +173,9 @@ template <class T>
 void EFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E,
 				      gList<BehavProfile<T> > &solns)
 {
-  EFLiapParams EP;
-
   BehavProfile<T> bp(E);
 
-  EFLiapModule<double> EM(E, EP, bp);
+  EFLiapModule<double> EM(E, params, bp);
   
   EM.Liap();
 
