@@ -11,6 +11,7 @@ template <class T> class gArray;
 template <class T> class Nfg;
 template <class T> class ContIter;
 class StrategyProfile;
+class Support;
 
 //
 // This class is useful for iterating around the normal form.
