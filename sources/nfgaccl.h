@@ -7,7 +7,9 @@
 #define 	NUM_NFG_EVENTS	33
 AccelEvent nfg_events[NUM_NFG_EVENTS]=
 {
-AccelEvent("Save",NFG_FILE_SAVE),
+AccelEvent("FileSave",NFG_FILE_SAVE),
+AccelEvent("FileOutput",OUTPUT_MENU),
+AccelEvent("FileClose",CLOSE_MENU),
 AccelEvent("EditGame",NFG_EDIT_GAME),
 AccelEvent("EditStrats",NFG_EDIT_STRATS),
 AccelEvent("EditPlayers",NFG_EDIT_PLAYERS),
