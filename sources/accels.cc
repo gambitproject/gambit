@@ -17,6 +17,7 @@
 #include "glist.imp"
 #include "accels.h"
 TEMPLATE class gList<Accel>;
+TEMPLATE class gNode<Accel>;
 #include "garray.imp"
 TEMPLATE class gArray<AccelEvent>;
 #ifdef __BORLANDC__
