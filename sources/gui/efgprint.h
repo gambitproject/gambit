@@ -1,23 +1,24 @@
 //
-// FILE: efgprint.h -- Declaration of printout class for extensive forms
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Interface to printouts for extensive forms 
 //
 
 #ifndef EFGPRINT_H
 #define EFGPRINT_H
 
 #include "wx/print.h"
-
 #include "treewin.h"
 
 class EfgPrintout : public wxPrintout {
 private:
-  TreeWindow *tree;
-  int num_pages;
+  TreeWindow *m_treeWindow;
     
 public:
-  EfgPrintout(TreeWindow *s, const char *title = "ExtensivePrintout");
+  EfgPrintout(TreeWindow *, const wxString &);
   virtual ~EfgPrintout() { }
 
   bool OnPrintPage(int page);

@@ -238,10 +238,13 @@ void TreeWindow::SetZoom(double p_zoom)
   Refresh();
 }
 
+//
+// Draws the tree to device context 'dc'.  Assumes zoom has already been
+// set in 'dc', and ignores 'm_zoom'.  Currently only used by
+// the printing code.
+//
 void TreeWindow::OnDraw(wxDC &dc)
 {
-  dc.SetUserScale(m_zoom, m_zoom);
-    
   if (m_parent->Cursor()) {
     if (!m_layout.GetNodeEntry(m_parent->Cursor())) {
       m_parent->SetCursor(m_efg.RootNode());

@@ -1,7 +1,10 @@
 //
-// FILE: efgprint.cc -- Printout class for extensive forms
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of class to print out extensive forms
 //
 
 #include "wx/wxprec.h"
@@ -11,88 +14,53 @@
 #include "efgprint.h"
 #include "math/gmath.h"
 
-EfgPrintout::EfgPrintout(TreeWindow *t, const char *title)
-  : wxPrintout((char *) title), tree(t)
+EfgPrintout::EfgPrintout(TreeWindow *p_treeWindow, const wxString &p_title)
+  : wxPrintout(p_title), m_treeWindow(p_treeWindow)
 { }
 
+//
+// Does the actual work of printing, by computing an appropriate scaling
+// for a full-page printout.
+// This code is based on the code in the printing sample from wxWindows
+//
 bool EfgPrintout::OnPrintPage(int)
 {
-  // this is funky--I am playing around w/ the
-  // different zoom settings.  So the zoom setting in draw_settings does not
-  // equal to the zoom setting in the printer!
   wxDC *dc = GetDC();
   if (!dc) return false;
     
   dc->SetBackgroundMode(wxTRANSPARENT);
-    
-  int win_w, win_h;
-  tree->GetClientSize(&win_w, &win_h);    // that is the size of the window
-  // Now we have to check in case our real page size is reduced
-  // (e.g. because we're drawing to a print preview memory DC)
-  int pageWidth, pageHeight;
+   
+  // The actual size of the tree, in pixels
+  int maxX = m_treeWindow->m_layout.MaxX();
+  int maxY = m_treeWindow->m_layout.MaxY();
+
+  // Margins
+  int marginX = 50;
+  int marginY = 50;
+
+  maxX += 2 * marginX;
+  maxY += 2 * marginY;
+
+  // Get the size of the DC in pixels
   wxCoord w, h;
   dc->GetSize(&w, &h);
-  GetPageSizePixels(&pageWidth, &pageHeight);
-  float pageScaleX = (float)w/pageWidth;
-  float pageScaleY = (float)h/pageHeight;
-  
-#ifdef UNUSED
-  if (true) { // fit to page
-#endif  // UNUSED
-    int maxX = tree->m_layout.MaxX();
-    int maxY = tree->m_layout.MaxY();
-    // Figure out the 'fake' window zoom
-    float zoom_x = (float)win_w/(float)maxX, zoom_y = (float)win_h/(float)maxY;
-    float real_zoom = gmin(zoom_x, zoom_y);
 
-    // Figure out the 'real' printer zoom
-    int ppiPrinterX, ppiPrinterY;
-    GetPPIPrinter(&ppiPrinterX, &ppiPrinterY);
-    // Make the margins.  They are just 1" on all sides now.
-    float marginX = 1*ppiPrinterX;
-    float marginY = 1*ppiPrinterY;
-        
-    zoom_x = (float)((pageWidth-2*marginX)/(float)maxX)*pageScaleX;
-    zoom_y = (float)((pageHeight-2*marginY)/(float)maxY)*pageScaleY;
-    real_zoom = gmin(zoom_x, zoom_y);
-        
-    dc->SetUserScale(real_zoom, real_zoom);
-    dc->SetDeviceOrigin((int) (marginX*pageScaleX), (int) (marginY*pageScaleY));
-#ifdef UNUSED
-  }
-  else {  // WYSIWYG
-    int ppiScreenX, ppiScreenY;
-    GetPPIScreen(&ppiScreenX, &ppiScreenY);
-    int ppiPrinterX, ppiPrinterY;
-    GetPPIPrinter(&ppiPrinterX, &ppiPrinterY);
-        
-    // This scales the DC so that the printout roughly represents the
-    // the screen scaling. The text point size _should_ be the right size
-    // but in fact is too small for some reason. This is a detail that will
-    // need to be addressed at some point but can be fudged for the
-    // moment.
-    float scaleX = (float)((float)ppiPrinterX/(float)ppiScreenX);
-    float scaleY = (float)((float)ppiPrinterY/(float)ppiScreenY);
-    
-    // If printer pageWidth == current DC width, then this doesn't
-    // change. But w might be the preview bitmap width, so scale down.
-    float overallScaleX = scaleX * pageScaleX;
-    float overallScaleY = scaleY * pageScaleY;
-    dc->SetUserScale(overallScaleX, overallScaleY);
-    
-    // Make the margins.  They are just 1" on all sides now.
-    float marginX = 1*ppiPrinterX, marginY = 1*ppiPrinterY;
-    dc->SetDeviceOrigin(marginX*pageScaleX, marginY*pageScaleY);
-    // Figure out the 'fake' window zoom
-    float real_width = (pageWidth-2*marginX)/scaleX;
-    float real_height = (pageHeight-2*marginY)/scaleY;
-    float zoom_x = win_w/real_width, zoom_y = win_h/real_height;
-    float real_zoom = gmax(zoom_x, zoom_y);
-    dc->SetUserScale(real_zoom, real_zoom);
-  }
-#endif  // UNUSED
-    
-  tree->OnDraw(*dc);
+  // Calculate a scaling factor
+  float scaleX = (float) w / (float) maxX;
+  float scaleY = (float) h / (float) maxY;
+
+  float actualScale = (scaleX < scaleY) ? scaleX : scaleY;
+
+  // Calculate the position on the DC to center the tree
+  float posX = (float) ((w - (m_treeWindow->m_layout.MaxX() * actualScale)) / 2.0);
+  float posY = (float) ((h - (m_treeWindow->m_layout.MaxY() * actualScale)) / 2.0);
+
+  // Set the scale and origin
+  dc->SetUserScale(actualScale, actualScale);
+  dc->SetDeviceOrigin((long) posX, (long) posY);
+
+  // Draw!
+  m_treeWindow->OnDraw(*dc);
     
   return true;
 }
@@ -114,13 +82,12 @@ bool EfgPrintout::OnBeginDocument(int startPage, int endPage)
 // have no way to tell how many pages will be used in the wysiwyg mode. So,
 // we have no choice but to disable the From:To page selection mechanism.
 void EfgPrintout::GetPageInfo(int *minPage, int *maxPage,
-                                    int *selPageFrom, int *selPageTo)
+			      int *selPageFrom, int *selPageTo)
 {
-  num_pages = 1;
-  *minPage = 0;
-  *maxPage = num_pages;
-  *selPageFrom = 0;
-  *selPageTo = 0;
+  *minPage = 1;
+  *maxPage = 1;
+  *selPageFrom = 1;
+  *selPageTo = 1;
 }
 
 

@@ -787,9 +787,10 @@ void EfgShow::OnFilePageSetup(wxCommandEvent &)
 void EfgShow::OnFilePrintPreview(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
-  wxPrintPreview *preview = new wxPrintPreview(new EfgPrintout(m_treeWindow),
-					       new EfgPrintout(m_treeWindow),
-					       &data);
+  wxPrintPreview *preview = 
+    new wxPrintPreview(new EfgPrintout(m_treeWindow,(char *) m_efg.GetTitle()),
+		       new EfgPrintout(m_treeWindow,(char *) m_efg.GetTitle()),
+		       &data);
 
   if (!preview->Ok()) {
     delete preview;
@@ -808,10 +809,13 @@ void EfgShow::OnFilePrint(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
   wxPrinter printer(&data);
-  EfgPrintout printout(m_treeWindow);
+  EfgPrintout printout(m_treeWindow, (char *) m_efg.GetTitle());
 
   if (!printer.Print(this, &printout, true)) {
-    wxMessageBox("There was an error in printing", "Error", wxOK);
+    if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {
+      wxMessageBox("There was an error in printing", "Error", wxOK);
+    }
+    // Otherwise, user hit "cancel"; just be quiet and return.
     return;
   }
   else {
