@@ -914,7 +914,7 @@ void Init_gsmoper( GSM* gsm )
   FuncObj = new FuncDescObj( (gString) "Equal" );
 
   FuncObj->SetFuncInfo( GSM_EqualTo_double, 2, xy_Float );
-  FuncObj->SetFuncInfo( GSM_EqualTo_int, 2, xy_Float );
+  FuncObj->SetFuncInfo( GSM_EqualTo_int, 2, xy_Int );
   FuncObj->SetFuncInfo( GSM_EqualTo_gRational, 2, xy_Rational );
   FuncObj->SetFuncInfo( GSM_EqualTo_gString, 2, xy_Text );
   FuncObj->SetFuncInfo( GSM_EqualTo_bool, 2, xy_Bool );
