@@ -1,7 +1,7 @@
 //
 // FILE: gnumber.h -- Number class for Gambit project. 
 //
-// $Id$
+// @(#)gnumber.h	2.2 01/18/98
 //
 
 #ifndef GNUMBER_H
@@ -58,6 +58,8 @@ public:
   void             error(const char* msg) const;
   operator double() const;
   operator gRational() const;
+  gRational TogRational() const;
+  double ToDouble() const;
   Precision GetPrecision(void) const;
 };
 

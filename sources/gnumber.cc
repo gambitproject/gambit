@@ -1,7 +1,7 @@
 //
 // FILE: gnumber.cc -- Number class for Gambit project. 
 //
-// $Id$
+// @(#)gnumber.cc	2.7 01/18/98
 //
 
 #ifdef __GNUG__
@@ -85,9 +85,9 @@ gNumber operator - (const gNumber& x)
 gOutput& operator << (gOutput& s, const gNumber& x)
 {
   if (x.GetPrecision() == precDOUBLE)
-    s << (double) x;
+    s << x.ToDouble();
   else
-    s << (gRational) x;
+    s <<  x.TogRational();
   return s;
 }
 
@@ -154,6 +154,22 @@ gInput& operator >> (gInput& f, gNumber& y)
 
 
 gNumber::operator double(void) const
+{
+  if (rep == precDOUBLE)
+    return dval;
+  else
+    return (double) *rval;
+}
+
+gRational gNumber::TogRational(void) const
+{
+  if (rep == precDOUBLE)
+    return gRational(dval);
+  else
+    return *rval;
+}
+
+double gNumber::ToDouble(void) const
 {
   if (rep == precDOUBLE)
     return dval;
