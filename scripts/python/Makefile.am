@@ -1,3 +1,4 @@
 ## Process this file with automake to create Makefile.in
 
-SUBDIRS = efg nfg scripts sources
+EXTRA_DIST = 
+
