@@ -18,9 +18,9 @@ template <class T> class gNArray   {
   protected:
 		long storage_size;
 #ifdef __BORLANDC__
-	#define HUGE	huge
+	#define GHUGE	huge
 #else
-	#define HUGE
+	#define GHUGE
 #endif
     T HUGE *storage;
     gArray<int> dim;
