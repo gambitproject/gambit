@@ -88,13 +88,11 @@ protected:
     void MarkSubgame(Node *, Node *);
 
   public:
-#ifdef USE_EXCEPTIONS
     class Exception : public gException   {
     public:
       virtual ~Exception()   { }
       gText Description(void) const    { return "Efg error"; }
     };
-#endif   // USE_EXCEPTIONS
 
     Efg(void);
     Efg(const Efg &, Node * = 0);
