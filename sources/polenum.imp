@@ -1,0 +1,88 @@
+//
+// FILE: polenum.imp -- Polynomial Nash Enum module
+//
+// $Id$ 
+//
+
+#include "gwatch.h"
+#include "nfg.h"
+#include "nfgiter.h"
+
+#include "polenum.h"
+#include "quiksolv.h"
+
+template <class T> class PolEnumModule  {
+private:
+  T eps;
+  const Nfg &NF;
+  const NFSupport &support;
+  PolEnumParams params;
+  int rows,cols,level;
+  long count,nevals;
+  double time;
+  gArray<gNumber> values;
+  gList<MixedSolution> solutions;
+
+  bool EqZero(T x) const;
+  
+public:
+  PolEnumModule(const NFSupport &, const PolEnumParams &p,
+	     const gArray<gNumber> &values);
+  
+  int PolEnum(void);
+  
+  long NumEvals(void) const;
+  double Time(void) const;
+  
+  PolEnumParams &Parameters(void);
+
+  const gList<MixedSolution> &GetSolutions(void) const;
+};
+
+//-------------------------------------------------------------------------
+//                    PolEnumModule<T>: Member functions
+//-------------------------------------------------------------------------
+
+template <class T>
+PolEnumModule<T>::PolEnumModule(const NFSupport &S, const PolEnumParams &p,
+			  const gArray<gNumber> &v)
+  : NF(S.Game()), support(S), params(p), rows(S.NumStrats(1)), cols(S.NumStrats(2)), 
+    level(0), count(0), nevals(0), values(v)
+{ 
+  gEpsilon(eps,12);
+}
+
+
+template <class T> int PolEnumModule<T>::PolEnum(void)
+{
+  return 1;
+}
+
+
+template <class T> bool PolEnumModule<T>::EqZero(T x) const
+{
+  if(x <= eps && x >= -eps) return 1;
+  return 0;
+}     
+
+template <class T> long PolEnumModule<T>::NumEvals(void) const
+{
+  return nevals;
+}
+
+template <class T> double PolEnumModule<T>::Time(void) const
+{
+  return time;
+}
+
+template <class T> PolEnumParams &PolEnumModule<T>::Parameters(void)
+{
+  return params;
+}
+
+template <class T>
+const gList<MixedSolution> &PolEnumModule<T>::GetSolutions(void) const
+{
+  return solutions;
+}
+

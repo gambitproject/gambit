@@ -1,0 +1,507 @@
+//
+// File: quiksolv.imp  
+//        -- Implementation of class gPolyList
+// 
+// $Id$
+//
+
+#include "quiksolv.h"
+
+//---------------------------------------------------------------
+//                      QuikSolv
+//---------------------------------------------------------------
+
+//---------------------------
+// Constructors / Destructors
+//---------------------------
+
+template <class T> QuikSolv<T>::QuikSolv(const gPolyList<T>& given) 
+: System(given), HasBeenSolved(false), Roots()
+{
+}
+
+template<class T> QuikSolv<T>::QuikSolv(const QuikSolv& qs)
+: System(qs.System), HasBeenSolved(qs.HasBeenSolved), Roots(qs.Roots)
+{
+}
+
+template<class T> QuikSolv<T>::~QuikSolv()
+{
+}
+
+//----------------------------------
+//      Supporting Calculations
+//----------------------------------
+
+//---------------------------------------------------------------
+// Generate partial derivatives of all polynomials in the system
+//---------------------------------------------------------------
+
+template <class T>
+void QuikSolv<T>::TreeOfPartialsRECURSIVE(gTree<gPoly<T> >& t, 
+					  gTreeNode<gPoly<T> >* n) const
+{
+  if (n->GetData().Degree() >= 1) {
+    for (int i = 1; i <= Dmnsn(); i++) {
+      t.InsertAt(n->GetData().PartialDerivative(i),n);
+      TreeOfPartialsRECURSIVE(t,n->GetYoungest());
+    }
+  }
+}
+
+template <class T>
+gTree<gPoly<T> > QuikSolv<T>::TreeOfPartials(const gPoly<T>& p) const
+{
+  gTree<gPoly<T> > answer(p);
+
+  TreeOfPartialsRECURSIVE(answer, answer.RootNode());
+
+  return answer;
+}
+
+template <class T>
+gList<gTree<gPoly<T> > > QuikSolv<T>::ListOfPartialTrees() const
+{
+  gList<gTree<gPoly<T> > > answer;
+
+  gPolyList<T> equations = UnderlyingEquations();
+
+  for (int i = 1; i <= Dmnsn(); i++) 
+    answer += TreeOfPartials(equations[i]);
+
+  return answer;
+}
+
+//---------------------------
+// Is a root impossible?
+//---------------------------
+
+template <class T> T
+QuikSolv<T>::MaximalNonconstantContributionRECURSIVE(const gTree<gPoly<T> >& t,
+					     const gTreeNode<gPoly<T> >* n,
+					     const gVector<T>& p,
+					     const gVector<T>& halvesoflengths,
+					     gVector<int>& wrtos) const
+{
+  T answer = (T)0;
+
+  if (n->GetEldest() != NULL) {
+    gList<gTreeNode<gPoly<T> >*> children = t.Children(n);
+    for (int i = 1; i <= children.Length(); i++) {
+      wrtos[i]++;
+
+      T increment = children[i]->GetData().Evaluate(p);
+      if (increment < (T)0) increment = -increment;
+     	  
+      for (int j = 1; j <= p.Length(); j++) 
+	for (int k = 1; k <= wrtos[j]; k++) {
+	  increment *= halvesoflengths[j];
+	  increment /= (T)k;
+	}
+
+      answer += increment;
+
+      answer += MaximalNonconstantContributionRECURSIVE(t,
+							children[i],
+							p,
+							halvesoflengths,
+							wrtos);
+      
+      wrtos[i]--;
+    }
+  }
+
+  return answer;
+}
+
+template<class T> bool
+QuikSolv<T>::PolyHasNoRootsIn(const gRectangle<T>& r, 
+			      const gTree<gPoly<T> >& t) const
+{
+  gVector<T> center = r.Center();
+  T constant = t.RootNode()->GetData().Evaluate(center);
+  if (constant < (T)0) constant = - constant;
+
+  gVector<T> HalvesOfSideLengths = r.SideLengths();
+  for (int k = 1; k <= Dmnsn(); k++) HalvesOfSideLengths[k] /= (T)2;
+
+  gVector<int> WithRespectTos(r.Dmnsn());
+  for (int i = 1; i <= r.Dmnsn(); i++) WithRespectTos[i] = 0;
+
+  T max = MaximalNonconstantContributionRECURSIVE(t,
+						  t.RootNode(),
+						  center,
+						  HalvesOfSideLengths,
+						  WithRespectTos);
+
+  if (max > constant) return false;
+  else                return true;
+}
+
+template<class T> 
+bool QuikSolv<T>::SystemHasNoRootsIn(const gRectangle<T>& r,
+				      const gList<gTree<gPoly<T> > >& list) 
+  const
+{
+  for (int i = 1; i <= Dmnsn(); i++)
+    if (PolyHasNoRootsIn(r,list[i])) return true; 
+  return false;
+}
+
+//--------------------------------------
+// Does Newton's method lead to a root?
+//--------------------------------------
+
+template<class T> 
+gVector<gDouble> QuikSolv<T>::VectorTogDouble(gVector<T>& given) const
+{
+  gVector<gDouble> newvec(given.Length());
+  for (int i = 1; i <= given.Length(); i++)
+    newvec[i] = (gDouble)given[i];
+  return newvec;
+}
+
+template <class T>
+bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<T>& r,
+					gVector<T>& point) const
+{
+  assert(UnderlyingEquations().Length() == Dmnsn());
+
+  gVector<gDouble> zero(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++) zero[i] = (gDouble)0;
+
+  gVector<T> oldevals = UnderlyingEquations().Evaluate(point);
+  if ( VectorTogDouble(oldevals) == zero ) 
+    if (r.Contains(point)) return true;
+    else               return false;
+
+  while (true) {
+    gPolyList<T> polylist = UnderlyingEquations();
+    gSquareMatrix<T> Df = polylist.SquareDerivativeMatrix(point);
+    if (Df.Determinant() == (T)0) return false;
+    gVector<T> Del = - (Df.Inverse() * oldevals);
+
+    if ( !r.SameCenterDoubleSideLengths().Contains(point + Del) ) return false;
+    point += Del;
+
+    gVector<T> newevals = polylist.Evaluate(point);
+
+    if (newevals * newevals > oldevals * oldevals) return false;
+    if ( VectorTogDouble(newevals) == zero )
+      if (r.Contains(point)) return true;
+      else                   return false;
+
+    oldevals = newevals;
+  }
+}
+
+//------------------------------------
+// Is the Newton root the only root?
+//------------------------------------
+
+template<class T> 
+gPoly<T> QuikSolv<T>::TranslateOfMono(const gMono<T>& m, 
+				      const gVector<T>& new_origin) const
+{
+  gPoly<T> answer(AmbientSpace(), (T)1, TermOrder());
+
+  for (int i = 1; i <= Dmnsn(); i++) {
+    if (m.ExpV()[i] > 0) {
+      gPoly<T> lt(AmbientSpace(), i, 1, TermOrder());
+      lt += gPoly<T>(AmbientSpace(), new_origin[i], TermOrder());
+      for (int j = 1; j <= m.ExpV()[i]; j++)
+	answer *= lt;
+    }
+  }
+
+  answer *= m.Coef();
+
+  return answer;
+}
+
+template<class T> 
+gPoly<T>  QuikSolv<T>::TranslateOfPoly(const gPoly<T>& p, 
+				       const gVector<T>& new_origin) const
+{
+  gPoly<T> answer(AmbientSpace(), TermOrder());
+  for (int i = 1; i <= p.MonomialList().Length(); i++) 
+    answer += TranslateOfMono(p.MonomialList()[i],new_origin);
+  return answer;
+}
+
+template<class T> 
+gPolyList<T>  QuikSolv<T>::TranslateOfSystem(const gPolyList<T>& old,
+					     const gVector<T>& new_origin) 
+const
+{
+  gList<gPoly<T> > new_polys;
+  for (int i = 1; i <= UnderlyingEquations().Length(); i++)
+    new_polys += gPoly<T>( TranslateOfPoly(old[i],new_origin) );
+  return gPolyList<T>(AmbientSpace(),TermOrder(),new_polys);
+}
+
+template<class T> 
+gPoly<T>  QuikSolv<T>::MonoInNewCoordinates(const gMono<T>& m, 
+					    const gSquareMatrix<T>& M) const
+{
+  assert(M.NumRows() == Dmnsn());
+
+  gPoly<T> answer(AmbientSpace(), (T)1, TermOrder());
+
+  for (int i = 1; i <= Dmnsn(); i++) {
+    if (m.ExpV()[i] > 0) {
+      gPoly<T> linearform(AmbientSpace(), (T)0, TermOrder());
+      for (int j = 1; j <= Dmnsn(); j++) {
+	exp_vect exps(AmbientSpace(), j, 1);
+	linearform += gPoly<T>(AmbientSpace(), exps, M(i,j), TermOrder());
+      }
+      for (int k = 1; k <= m.ExpV()[i]; k++) answer *= linearform;
+    }
+  }
+
+  answer *= m.Coef();
+
+  return answer;
+}
+
+template<class T> 
+gPoly<T> QuikSolv<T>::PolyInNewCoordinates(const gPoly<T>& p, 
+					   const gSquareMatrix<T>& M) const
+{
+  gPoly<T> answer(AmbientSpace(), TermOrder());
+  for (int i = 1; i <= p.MonomialList().Length(); i++) 
+    answer += MonoInNewCoordinates(p.MonomialList()[i],M);
+  return answer;
+}
+
+template<class T> 
+gPolyList<T> QuikSolv<T>::SystemInNewCoordinates(const gPolyList<T>& old,
+						 const gSquareMatrix<T>& M) 
+const
+{
+  gList<gPoly<T> > new_polys;
+  for (int i = 1; i <= UnderlyingEquations().Length(); i++)
+    new_polys += gPoly<T>( PolyInNewCoordinates(old[i],M) );
+  return gPolyList<T>(AmbientSpace(),TermOrder(),new_polys);
+}
+
+template<class T>
+   gDouble QuikSolv<T>::MaxDistanceFromPointToVertexAfterTransformation(
+				      const gRectangle<T>& r,
+				      const gVector<T>& p,
+				      const gSquareMatrix<T>& M)    const
+{
+  assert( r.Contains(p) );
+
+  T max = (T)0;
+
+  gArray<int> ListOfTwos(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++) ListOfTwos[i] = 2;
+  gIndexOdometer ListOfTopBottoms(ListOfTwos);
+
+  while (ListOfTopBottoms.Turn()) {
+    gVector<T> diffs(Dmnsn());
+    for (int i = 1; i <= Dmnsn(); i++)
+      if (ListOfTopBottoms[i] == 2)
+	diffs[i] = r.CartesianFactor(i).UpperBound() - p[i];
+      else 
+	diffs[i] = p[i] - r.CartesianFactor(i).LowerBound();
+    gVector<T> new_diffs = M * diffs;
+    T squared_length = new_diffs * new_diffs;
+    if (max < squared_length)
+       max = squared_length;
+  }
+
+  return sqrt((gDouble)max);
+}
+
+template<class T>
+gDouble QuikSolv<T>::MaximalContributionOfHigherOrderTerms(
+						 const gPoly<gDouble>& p,
+						 const gDouble& radius)  const
+{
+  gDouble maxcon = (gDouble)0;
+  for (int i = 1; i <= p.MonomialList().Length(); i++) 
+    if (p.MonomialList()[i].TotalDegree() > 1) 
+      maxcon += p.MonomialList()[i].Coef() * 
+	            pow(radius,p.MonomialList()[i].TotalDegree());
+
+  return maxcon;
+}
+
+template<class T>
+bool QuikSolv<T>::HasNoOtherRootsIn(const gRectangle<T>& r,
+			  const gVector<T>& p,
+			  const gSquareMatrix<T>& M)  const
+{
+  gPolyList<T> system1 = TranslateOfSystem(UnderlyingEquations(),p);
+  gPolyList<T> system2 = SystemInNewCoordinates(system1,M);
+  gList<gPoly<gDouble> > list = system2.ListTogDouble();
+
+  gDouble radius = MaxDistanceFromPointToVertexAfterTransformation(r,p,M);
+
+  gDouble max = (gDouble)0;
+  for (int i = 1; i <= Dmnsn(); i++)
+    max += MaximalContributionOfHigherOrderTerms(list[i],radius);
+
+  if (max >= radius) return false;
+  else               return true;
+}
+
+//--------------------------------------------
+// Does Newton's method yield a unique root?
+//--------------------------------------------
+
+template <class T>
+bool QuikSolv<T>::NewtonRootIsOnlyInRct(const gRectangle<T>& r,
+					gVector<T>& point) const
+{
+  if ( NewtonRootInRectangle(r,point) ) {
+    gSquareMatrix<T> Df = 
+      UnderlyingEquations().SquareDerivativeMatrix(point);      
+
+    if ( HasNoOtherRootsIn(r,point,Df.Inverse()) ) return true;
+  }
+  else return false;
+}
+
+//--------------------------
+// Subdivide the rectangle 
+//--------------------------
+
+template<class T> 
+gList<gRectangle<T> > QuikSolv<T>::BinarySubdivision(const gRectangle<T>& r) 
+const 
+{ 
+  gList<gRectangle<T> > answer;
+
+  gArray<int> ListOfTwos(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++) ListOfTwos[i] = 2;
+  gIndexOdometer ListOfTopBottoms(ListOfTwos);
+
+  while (ListOfTopBottoms.Turn()) {
+    gList<gInterval<T> > SubintervalList;
+    for (int i = 1; i <= Dmnsn(); i++) 
+      if (ListOfTopBottoms[i] == 1)
+	SubintervalList += r.CartesianFactor(i).LeftHalf();
+    else
+	SubintervalList += r.CartesianFactor(i).RightHalf();
+    answer += gRectangle<T>(SubintervalList);
+  }
+
+  return answer;
+}
+
+//----------------------------------
+//        Operators
+//----------------------------------
+
+template<class T> 
+QuikSolv<T>& QuikSolv<T>::operator=(const QuikSolv<T> & rhs)
+{
+  assert (System == rhs.System);
+
+  if (*this != rhs) {
+    HasBeenSolved = rhs.HasBeenSolved;
+    Roots         = rhs.Roots;
+  }
+}
+
+template<class T>  
+bool QuikSolv<T>::operator==(const QuikSolv<T> & rhs) const
+{
+    if (System        != rhs.System        ||
+	HasBeenSolved != rhs.HasBeenSolved ||
+	Roots         != rhs.Roots)
+         return false;
+    else return true;
+}
+
+template<class T>  
+bool QuikSolv<T>::operator!=(const QuikSolv<T> & rhs) const
+{
+  return !(*this == rhs);
+}
+
+//-------------------------------------------
+//           The Central Calculation
+//-------------------------------------------
+
+template<class T> bool
+QuikSolv<T>::FindRoots(const gRectangle<T>& r, 
+		       const int& depth, 
+		       const int& maxbreadth) 
+{
+  gList<gVector<gDouble> > rootlist;
+
+  gList<gRectangle<T> > CurrentList;
+  CurrentList += r;
+
+  gList<gTree<gPoly<T> > > list = ListOfPartialTrees();
+
+  for (int d = 1; d <= depth; d++) {
+    for (int j = 1; j <= CurrentList.Length(); j++ ) {
+
+      bool remove = false;
+      gVector<T> point = CurrentList[j].Center();
+
+      if ( SystemHasNoRootsIn(CurrentList[j],list) ) 
+	remove = true; 
+
+      else if ( NewtonRootIsOnlyInRct(CurrentList[j],point) ) {
+	rootlist += VectorTogDouble(point); 
+	remove = true;
+      }
+
+      if (remove) { CurrentList.Remove(j); j--; }
+    }
+
+    /*
+    //DEBUG
+    if (CurrentList.Length() > 0) {
+      gout << "After elimination with d = " << d 
+	   << ", the list has " << CurrentList.Length() 
+	   << " members.\n";
+	}
+     */
+	
+    if (CurrentList.Length() == 0) 
+      { Roots = rootlist; HasBeenSolved = true; return true; }
+
+    else if (d < depth) {
+      if (CurrentList.Length() > maxbreadth) return false; 
+
+      gList<gRectangle<T> > NewList;
+      for (int j1 = 1; j1 <= CurrentList.Length(); j1++)
+	NewList += BinarySubdivision(CurrentList[j1]);
+      CurrentList = NewList;
+    }
+  }
+
+  gSolver<T> bigsolver(System.TermOrder(), System);
+
+  if ( !bigsolver.IsZeroDimensional() ) return false;
+  else {
+    rootlist = bigsolver.Roots();
+    gList<gVector<gDouble> > roots;
+    for (int j = 1; j <= rootlist.Length(); j++)
+      if (TogDouble(r).Contains(rootlist[j])) roots += rootlist[j];
+    Roots = roots;
+  }
+
+  return true;
+}
+
+//----------------------------------
+//           Printing
+//----------------------------------
+
+template <class T> gOutput& operator << (gOutput& output, 
+					 const QuikSolv<T>& x)
+{
+  output << "The system is\n" << x.System;
+  if (x.HasBeenSolved) 
+    output << "It has been solved with roots:\n" << x.Roots;
+  else output << "It has not been solved.";
+  return  output;
+}

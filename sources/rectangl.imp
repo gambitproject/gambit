@@ -1,0 +1,175 @@
+//
+// FILE: rectangl.imp -- Implementation of gRectangle
+//
+// $Id$
+//
+
+#include "rectangl.h"
+#include "glist.h"
+
+
+//--------------------------------------------------------------------------
+//                   rectangle -- constructors and destructor
+//--------------------------------------------------------------------------
+
+template<class T> gRectangle<T>::gRectangle(const gRectangle<T>& given) 
+: sides(given.sides)
+{
+}
+
+template<class T> gRectangle<T>::gRectangle(const gList< gInterval<T> >& given)
+: sides(given)
+{
+}
+
+template<class T> gRectangle<T>::gRectangle(const gVector<T> lower_bd, 
+                                            const gVector<T> upper_bd) 
+: sides()
+{ 
+  assert (lower_bd.Check(upper_bd));
+  for (int i = 1; i <= upper_bd.Length(); i++) {
+    gInterval<T> side(lower_bd[i],upper_bd[i]);
+    sides += side;
+  }
+}
+
+
+template<class T> gRectangle<T>::~gRectangle() 
+{
+}
+
+//--------------------------------------------------------------------------
+//                          rectangle -- operators
+//--------------------------------------------------------------------------
+
+template<class T> gRectangle<T>& 
+                          gRectangle<T>::operator = (const gRectangle<T>& rhs)
+{
+  gout << "For const'ness, operator = not allowed for gRectangles\n";
+  exit (0);
+}
+
+
+template<class T> bool gRectangle<T>::operator == (const gRectangle<T>& rhs)
+     const
+{
+  for (int i = 1; i <= Dmnsn(); i++)
+    if (sides[i] != rhs.sides[i]) return false;
+  return true;
+}
+
+template<class T> bool gRectangle<T>::operator != (const gRectangle<T>& rhs)
+     const
+{
+  return !(*this == rhs);
+}
+
+//--------------------------------------------------------------------------
+//                             interval -- information
+//--------------------------------------------------------------------------
+
+template<class T> const int gRectangle<T>::Dmnsn() const 
+{ 
+  return sides.Length();
+}
+
+template<class T> const gVector<T> gRectangle<T>::LowerBound() const 
+{ 
+  gVector<T> answer(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].LowerBound();
+  return answer;
+}
+
+template<class T> const gVector<T> gRectangle<T>::UpperBound() const 
+{ 
+  gVector<T> answer(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].UpperBound();
+  return answer;
+}
+
+template<class T> 
+const gInterval<T> gRectangle<T>::CartesianFactor(const int& i) const 
+{ 
+  return sides[i];
+}
+
+template<class T> 
+const gRectangle<T> gRectangle<T>::SameCenterDoubleSideLengths() const 
+{ 
+  gList<gInterval<T> > new_sides;
+  for (int i = 1; i <= Dmnsn(); i++)
+    new_sides += CartesianFactor(i).SameCenterTwiceLength();
+  return gRectangle<T>(new_sides);
+}
+
+template<class T> const gVector<T> gRectangle<T>::SideLengths() const 
+{ 
+  gVector<T> answer(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++) 
+    answer[i] = sides[i].UpperBound() - sides[i].LowerBound();
+  return answer;
+}
+
+template<class T> bool gRectangle<T>::Contains(const gVector<T>& point) const 
+{ 
+  assert (point.Length() == Dmnsn());
+
+  for (int i = 1; i <= Dmnsn(); i++)
+    if (point[i] < sides[i].LowerBound() || sides[i].UpperBound() < point[i])
+      return false;
+  return true;
+}
+
+template<class T> bool gRectangle<T>::Contains(const gRectangle<T>& R) const 
+{ 
+  assert (R.Dmnsn() == Dmnsn());
+
+  for (int i = 1; i <= Dmnsn(); i++)
+    if ( !sides[i].Contains(R.sides[i]) )
+      return false;
+  return true;
+}
+
+template<class T> const T gRectangle<T>::Volume() const 
+{ 
+  T answer = (T)1;
+  for (int i = 1; i <= Dmnsn(); i++)
+    answer *= ( sides[i].UpperBound() - sides[i].LowerBound() );
+  return answer;
+}
+
+template<class T> const gVector<T> gRectangle<T>::Center() const 
+{ 
+  gVector<T> answer(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++) 
+    answer[i] = (sides[i].UpperBound() + sides[i].LowerBound())
+		                     / ((T)2);
+  return answer;
+}
+//----------------------------------
+//           Conversion
+//----------------------------------
+
+template<class T>  
+gRectangle<gDouble>  TogDouble(const gRectangle<T>& given) 
+{
+  gList<gInterval<gDouble> > cartesian_factors;
+  for (int i = 1; i <= given.Dmnsn(); i++) 
+    cartesian_factors += gInterval<gDouble>((gDouble)given.LowerBound()[i],
+					    (gDouble)given.UpperBound()[i]);
+  return gRectangle<gDouble>(cartesian_factors);
+}
+
+//--------------------------------------------------------------------------
+//                        interval -- printing
+//--------------------------------------------------------------------------
+
+template<class T> gOutput& operator << (gOutput& output, 
+					const gRectangle<T>& x)
+{
+  for (int i = 1; i <= x.Dmnsn() - 1; i++)
+    output << x.sides[i] << "x";
+  if (x.Dmnsn() > 0) 
+    output << x.sides[x.Dmnsn()];
+  return output;
+}

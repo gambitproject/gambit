@@ -1,0 +1,196 @@
+//
+// File: gsolver.imp  
+//        -- Implementation of class gGsolver
+// 
+// $Id$ 
+//
+
+#include "gsolver.h"
+
+//---------------------------------------------------------------
+//                      gSolver
+//---------------------------------------------------------------
+
+//---------------------------
+// Constructor / Destructor
+//---------------------------
+
+
+template<class T>  gSolver<T>::gSolver(const term_order* Order,
+				       const gPolyList<T>& Inputs)
+: InputList(Inputs), TheIdeal(Order, Inputs)
+{
+}
+
+
+template<class T>  gSolver<T>::gSolver(const gSolver<T>& given)
+: InputList(given.InputList), TheIdeal(given.TheIdeal)
+{
+}
+
+template<class T>  gSolver<T>::~gSolver()
+{
+}
+
+//---------------------------
+//        Utilities
+//---------------------------
+
+template <class T> gList<gPoly<gDouble> > gSolver<T>::BasisTogDouble() const
+{
+  gList<gPoly<gDouble> > newlist;
+  gPolyList<T> oldlist = TheIdeal.CanonicalBasis();
+  for (int i = 1; i <= oldlist.Length(); i++) {
+    
+    newlist += TogDouble(oldlist[i]); 
+  }
+  return newlist;
+}
+
+template <class T> gList<gVector<gDouble> >  
+    gSolver<T>::ContinuationSolutions(const gList<gPoly<gDouble> >& list,
+				      const int dmnsn,
+				      const int curvar,
+				      const gVector<gDouble>& knownvals)
+{
+  gList<gVector<gDouble> > answer;
+
+  if (!list[1].IsZero()) {
+    polynomial<gDouble> rootpoly = list[1].UnivariateEquivalent(curvar);
+
+    gInterval<gDouble> root_interval((gDouble)-10,(gDouble)10); //  Ouch!!
+    gDouble error = (gDouble) 0.0001;                           // Ditto!!
+
+//DEBUG
+//gout << "About to enter PreciseRoots ... \n";
+
+    gList<gDouble> rootlist = rootpoly.PreciseRoots(root_interval,error);
+
+//DEBUG
+//gout << "Just left PreciseRoots ... \n";
+
+
+    for (int i = 1; i <= rootlist.Length(); i++) {
+      gVector<gDouble> newvec(knownvals);
+      newvec[curvar] = rootlist[i];
+      if (curvar == dmnsn) answer +=  newvec;
+      else {
+	gList<gPoly<gDouble> > newlist;
+	for (int j = 2; j <= list.Length(); j++) 
+	  newlist += list[j].EvaluateOneVar(curvar,rootlist[i]);
+	answer += ContinuationSolutions(newlist,dmnsn,curvar+1,newvec);
+      }
+    }
+  }
+  
+  else {   // (list[1].IsZero())
+    gList<gPoly<gDouble> > newlist;
+    for (int j = 2; j <= list.Length(); j++) 
+      newlist += list[j];
+    answer += ContinuationSolutions(newlist,dmnsn,curvar,knownvals);
+  }
+
+  return answer;
+}
+
+//---------------------------
+//        Information
+//---------------------------
+
+template<class T> bool gSolver<T>::IsZeroDimensional()
+{
+  return TheIdeal.ZeroDimensional();
+}
+
+/* - Old Implementation of Roots
+template<class T> gList<gVector<gDouble> > gSolver<T>::Roots()
+{
+  gList<gPoly<gDouble> >   dlist = BasisTogDouble();
+
+  int dmnsn = InputList.AmbientSpace()->Dmnsn();
+
+  gVector<gDouble> origin(dmnsn);
+  for (int i = 1; i <= dmnsn; i++) origin[i] = (gDouble)0; // Needless!
+
+  gList<gVector<gDouble> > rootlist = ContinuationSolutions(dlist,
+							    dmnsn,
+							    1,
+							    origin);
+  return rootlist;
+}
+*/
+
+template<class T> gList<gVector<gDouble> > gSolver<T>::Roots()
+{
+  gList<exp_vect> mon_bss = TheIdeal.MonomialBasis();
+
+  gList<polynomial<T> > UnivariateRootEquations;
+  for (int i = 1; i <= TheIdeal.Dmnsn(); i++) {
+    gMatrix<T> CoefficientMatrix(mon_bss.Length()+1, mon_bss.Length());
+    int j = 0; 
+    bool done = false;
+    while (!done) {
+      exp_vect x_i_to_j(InputList.AmbientSpace(),i,j);
+      gPoly<T> power(InputList.AmbientSpace(),x_i_to_j,(T)1,TheIdeal.Order());
+      gPoly<T> reduced_power = TheIdeal.CanonicalBasis().
+	                                ReductionOf(power,*(TheIdeal.Order()));
+      for (int k = 1; k <= mon_bss.Length(); k++)
+	CoefficientMatrix(j+1,k) = reduced_power.GetCoef(mon_bss[k]);
+
+//DEBUG
+//gout << "After updating, j = " << j
+//  << "and CoefficientMatrix is\n" << CoefficientMatrix << "\n";
+
+      gMatrix<T> SubMatrix(j+1,mon_bss.Length());
+      for (int m = 1; m <= j+1; m++)
+	for (int n = 1; n <= mon_bss.Length(); n++)
+	  SubMatrix(m,n) = CoefficientMatrix(m,n);
+
+//DEBUG
+//gout << "Before entering Linear Combination, SubMatrix is\n" 
+//  << SubMatrix << "\n";
+
+      LinearCombination<T> Attempt(SubMatrix);
+      if (Attempt.LastRowIsSpanned()) {
+	polynomial<T> root_eqn_i(Attempt.LinearDependence());
+	UnivariateRootEquations += root_eqn_i;
+	done = true;
+      }
+      j++;
+    }
+  }
+
+  gList<polynomial<gDouble> > ConvertedUnivariateRootEquations;
+  for (int i = 1; i <= UnivariateRootEquations.Length(); i++)
+    ConvertedUnivariateRootEquations += UnivariateRootEquations[i].TogDouble();
+
+  gList<gVector<gDouble> > original;
+  gList<gVector<gDouble> > revised;
+  gVector<gDouble> zero(TheIdeal.Dmnsn());
+  original += zero;
+
+    gInterval<gDouble> root_interval((gDouble)-10,(gDouble)10); //  Ouch!!
+    gDouble error = (gDouble) 0.0001;                           // Ditto!!
+
+  for (int i = 1; i <= TheIdeal.Dmnsn(); i++) {
+    gList<gDouble> roots_of_eqn_i = 
+      ConvertedUnivariateRootEquations[i].PreciseRoots(root_interval,error);
+    for (int j = 1; j <= original.Length(); j++) 
+      for (int k = 1; k <= roots_of_eqn_i.Length(); k++) {
+      gVector<gDouble> new_vec = original[j];
+      new_vec[i] = roots_of_eqn_i[k];
+      revised += new_vec;
+    }
+    original = revised;
+    revised.Flush();
+  }
+
+  gList<gVector<gDouble> > finished;
+  gList<gPoly<gDouble> > gDoublePolys = InputList.ListTogDouble();
+  gPolyList<gDouble> InputListTogDouble(TheIdeal.TheSpace(),
+					TheIdeal.Order(),
+					gDoublePolys);
+  for (int i = 1; i <= original.Length(); i++)
+    if (InputListTogDouble.IsRoot(original[i])) finished += original[i];
+  return finished;
+}
