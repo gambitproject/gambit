@@ -13,6 +13,79 @@
 #include "gmisc.h"
 #include "rational.h"
 
+
+
+Portion* GSM_Sort(Portion** param, bool (*compfunc)(Portion*, Portion*))
+{
+  unsigned long n = ((ListPortion*) param[0])->Length();
+  Portion* a[n+1];
+  unsigned long i, j, inc;
+  Portion* v; 
+  bool no_sub_lists = true;
+
+  for(i=1; i<=n; i++)
+  {
+    a[i] = ((ListPortion*) param[0])->Remove(1);
+    if(a[i]->Spec().ListDepth > 0)
+      no_sub_lists = false;
+  }
+
+  if(no_sub_lists)
+  {
+    // insertion sort, adopted from _Numerical_Recipes_in_C_
+    inc = 1;
+    do {
+      inc *= 3;
+      inc++;
+    } while(inc <= n);
+    do {
+      inc /= 3;
+      for(i=inc+1; i<=n; i++) {
+	v = a[i];
+	j=i;
+	while(compfunc(a[j-inc], v)) {
+	  a[j] = a[j-inc];
+	  j -= inc;
+	  if(j <= inc) break;
+	}
+	a[j] = v;
+      }
+    } while(inc > 1);
+  }
+
+  for(i=1; i<=n; i++)
+    ((ListPortion*) param[0])->Append(a[i]);  
+
+  if(no_sub_lists)
+    return param[0]->ValCopy();
+  else
+    return new ErrorPortion("Cannot sort a nested list");
+}
+
+
+bool GSM_Compare_Integer(Portion* p1, Portion* p2)
+{ return ((IntPortion*) p1)->Value() > ((IntPortion*) p2)->Value(); }
+Portion* GSM_Sort_Integer(Portion** param)
+{ return GSM_Sort(param, GSM_Compare_Integer); }
+
+bool GSM_Compare_Float(Portion* p1, Portion* p2)
+{ return ((FloatPortion*) p1)->Value() > ((FloatPortion*) p2)->Value(); }
+Portion* GSM_Sort_Float(Portion** param)
+{ return GSM_Sort(param, GSM_Compare_Float); }
+
+bool GSM_Compare_Rational(Portion* p1, Portion* p2)
+{ return ((RationalPortion*) p1)->Value() > ((RationalPortion*) p2)->Value(); }
+Portion* GSM_Sort_Rational(Portion** param)
+{ return GSM_Sort(param, GSM_Compare_Rational); }
+
+bool GSM_Compare_Text(Portion* p1, Portion* p2)
+{ return ((TextPortion*) p1)->Value() > ((TextPortion*) p2)->Value(); }
+Portion* GSM_Sort_Text(Portion** param)
+{ return GSM_Sort(param, GSM_Compare_Text); }
+
+
+
+
 Portion *GSM_NthElement(Portion **param)
 {
   int n = ((IntPortion *) param[1])->Value();
@@ -625,6 +698,19 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_Transpose,
 			0, "x", PortionSpec(porANYTYPE,2), 
 			NO_DEFAULT_VALUE, PASS_BY_VALUE);
+  gsm->AddFunction(FuncObj);
+
+
+  //------------------ Sort -----------------------
+  FuncObj = new FuncDescObj( "Sort" );
+  FuncObj->SetFuncInfo(GSM_Sort_Integer, 1);
+  FuncObj->SetParamInfo(GSM_Sort_Integer, 0, "x", PortionSpec(porINTEGER,1));
+  FuncObj->SetFuncInfo(GSM_Sort_Float, 1);
+  FuncObj->SetParamInfo(GSM_Sort_Float, 0, "x", PortionSpec(porFLOAT,1));
+  FuncObj->SetFuncInfo(GSM_Sort_Rational, 1);
+  FuncObj->SetParamInfo(GSM_Sort_Rational, 0, "x", PortionSpec(porRATIONAL,1));
+  FuncObj->SetFuncInfo(GSM_Sort_Text, 1);
+  FuncObj->SetParamInfo(GSM_Sort_Text, 0, "x", PortionSpec(porTEXT,1));
   gsm->AddFunction(FuncObj);
 
 }
