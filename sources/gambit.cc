@@ -180,6 +180,11 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_EXIT, "E&xit\tCtrl-X", "Exit Gambit");
 
+  wxConfig config("Gambit");
+  m_fileHistory.Load(config);
+  m_fileHistory.UseMenu(fileMenu);
+  m_fileHistory.AddFilesToMenu();
+
   wxMenu *helpMenu = new wxMenu;
   helpMenu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
   helpMenu->Append(wxID_ABOUT, "&About", "About Gambit");
@@ -187,6 +192,7 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
   wxMenuBar *menuBar = new wxMenuBar(wxMB_DOCKABLE);
   menuBar->Append(fileMenu, "&File");
   menuBar->Append(helpMenu, "&Help");
+
   SetMenuBar(menuBar);
 
   wxAcceleratorEntry entries[4];
@@ -196,11 +202,6 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
   entries[3].Set(wxACCEL_NORMAL, WXK_F1, wxID_HELP_CONTENTS);
   wxAcceleratorTable accel(4, entries);
   SetAcceleratorTable(accel);
-
-  wxConfig config("Gambit");
-  m_fileHistory.Load(config);
-  m_fileHistory.UseMenu(fileMenu);
-  m_fileHistory.AddFilesToMenu();
 
   CreateStatusBar();
   MakeToolbar();
@@ -500,6 +501,8 @@ void GambitFrame::OnNew(wxCommandEvent &)
       EfgShow *efgShow = new EfgShow(*efg, this);
       efgShow->SetFileName("");
       AddGame(efg, efgShow);
+      m_fileHistory.UseMenu(efgShow->GetMenuBar()->GetMenu(0));
+      m_fileHistory.AddFilesToMenu(efgShow->GetMenuBar()->GetMenu(0));
     }
     else {
       Nfg *nfg = new Nfg(nfgPage->NumStrats());
@@ -509,6 +512,8 @@ void GambitFrame::OnNew(wxCommandEvent &)
       NfgShow *nfgShow = new NfgShow(*nfg, this);
       nfgShow->SetFileName("");
       AddGame(nfg, nfgShow);
+      m_fileHistory.UseMenu(nfgShow->GetMenuBar()->GetMenu(0));
+      m_fileHistory.AddFilesToMenu(nfgShow->GetMenuBar()->GetMenu(0));
     }
   }
 
@@ -534,7 +539,7 @@ void GambitFrame::OnLoad(wxCommandEvent &)
 
 void GambitFrame::OnMRUFile(wxCommandEvent &p_event)
 {
-  LoadFile(m_fileHistory.GetHistoryFile(p_event.GetSelection() - wxID_FILE1).c_str());
+  LoadFile(m_fileHistory.GetHistoryFile(p_event.GetId() - wxID_FILE1).c_str());
 }
 
 void GambitFrame::OnHelpAbout(wxCommandEvent &)
@@ -569,6 +574,8 @@ void GambitFrame::LoadFile(const gText &p_filename)
       NfgShow *nfgShow = new NfgShow(*nfg, this);
       nfgShow->SetFileName(p_filename);
       AddGame(nfg, nfgShow);
+      m_fileHistory.UseMenu(nfgShow->GetMenuBar()->GetMenu(0));
+      m_fileHistory.AddFilesToMenu(nfgShow->GetMenuBar()->GetMenu(0));
       return;
     }
     catch (gFileInput::OpenFailed &) {
@@ -592,6 +599,8 @@ void GambitFrame::LoadFile(const gText &p_filename)
       EfgShow *efgShow = new EfgShow(*efg, this);
       efgShow->SetFileName(filename);
       AddGame(efg, efgShow);
+      m_fileHistory.UseMenu(efgShow->GetMenuBar()->GetMenu(0));
+      m_fileHistory.AddFilesToMenu(efgShow->GetMenuBar()->GetMenu(0));
       return;
     }
     catch (gFileInput::OpenFailed &) { 
