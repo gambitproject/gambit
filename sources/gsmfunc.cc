@@ -46,9 +46,59 @@ void GSM::InitFunctions( void )
 
 
 
-/*******************************************************************/
+
+//---------------------------------------------------------------
+//                      ParamInfoType
+//---------------------------------------------------------------
+
+
+ParamInfoType::ParamInfoType( void )
+{
+  Name = "";
+  Type = porERROR;
+  DefaultValue = NO_DEFAULT_VALUE;
+  PassByReference = 0;
+}
+
+ParamInfoType::ParamInfoType( const ParamInfoType& param_info )
+:
+ Name( param_info.Name ),
+ Type( param_info.Type ),
+ DefaultValue( param_info.DefaultValue ),
+ PassByReference( param_info.PassByReference )
+{ }
+
+ParamInfoType::ParamInfoType
+( 
+ const gString& name, 
+ const PortionType& type,
+ Portion* default_value, 
+ const bool pass_by_ref
+ )
+:
+ Name( name ), 
+ Type( type ), 
+ DefaultValue( default_value ), 
+ PassByReference( pass_by_ref )
+{ }
+
+ParamInfoType::~ParamInfoType()
+{ }
+
+ParamInfoType& ParamInfoType::operator = ( const ParamInfoType& param_info )
+{
+  Name = param_info.Name;
+  Type = param_info.Type;
+  DefaultValue = param_info.DefaultValue;
+  PassByReference = param_info.PassByReference;
+  return *this;
+}
+
+
+
+//---------------------------------------------------------------------
 //                   Function descriptor objects
-/*******************************************************************/
+//---------------------------------------------------------------------
 
 RefCountHashTable< gList< Instruction* >* > FuncDescObj::_RefCountTable;
 
@@ -78,43 +128,30 @@ FuncDescObj::FuncDescObj( FuncDescObj& func )
       _RefCountTable( _FuncInfo[ f_index ].FuncInstr )++;
     }
 
-    _FuncInfo[ f_index ].NumParams   = func._FuncInfo[ f_index ].NumParams;
+    _FuncInfo[ f_index ].NumParams = func._FuncInfo[ f_index ].NumParams;
     _FuncInfo[ f_index ].ParamInfo =
       new ParamInfoType[ _FuncInfo[ f_index ].NumParams ];
 
     for( index = 0; index < _FuncInfo[ f_index ].NumParams; index ++ )
     {
-      /*
-      _FuncInfo[ f_index ].ParamInfo[ index ] =
-	ParamInfoType( func._FuncInfo[ f_index ].ParamInfo[ index ] );
-	*/
-      _FuncInfo[ f_index ].ParamInfo[ index ].Name =
-	func._FuncInfo[ f_index ].ParamInfo[ index ].Name;
-      _FuncInfo[ f_index ].ParamInfo[ index ].Type =
-	func._FuncInfo[ f_index ].ParamInfo[ index ].Type;
-      if( func._FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue == 
-	 NO_DEFAULT_VALUE )
+      _FuncInfo[ f_index ].ParamInfo[ index ] = 
+	func._FuncInfo[ f_index ].ParamInfo[ index ];
+
+      if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue != 0 )
       {
-	_FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue = 
-	  NO_DEFAULT_VALUE;
-      }
-      else
-      {
-	if( func._FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->
+	if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->
 	   ShadowOf() == 0 )
 	{
 	  _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue = 
-	    func._FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->Copy();
+	    _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->Copy();
 	}
 	else
 	{
 	  _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue = 
-	    func._FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->
+	    _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->
 	      ShadowOf()->Copy();
 	}
-      }
-      _FuncInfo[ f_index ].ParamInfo[ index ].PassByReference =
-	func._FuncInfo[ f_index ].ParamInfo[ index ].PassByReference;
+      }	
     }
   }
 }
@@ -402,11 +439,6 @@ void FuncDescObj::_SetParamInfo
     param_type;
   _FuncInfo[ f_index ].ParamInfo[ param_index ].DefaultValue = 
     param_default_value;
-/*
-  if( _FuncInfo[ f_index ].ParamInfo[ param_index ].DefaultValue != 0 )
-    _FuncInfo[ f_index ].ParamInfo[ param_index ].DefaultValue = 
-      _FuncInfo[ f_index ].ParamInfo[ param_index ].DefaultValue->Copy();
-*/
   _FuncInfo[ f_index ].ParamInfo[ param_index ].PassByReference = 
     param_pass_by_reference;
 }
@@ -444,9 +476,9 @@ gString FuncDescObj::FuncName( void ) const
 
 
 
-/*******************************************************************/
+//---------------------------------------------------------------------
 //                      CallFuncObj
-/*******************************************************************/
+//---------------------------------------------------------------------
 
   
 CallFuncObj::CallFuncObj( FuncDescObj* func, gOutput& s_out, gOutput& s_err )

@@ -52,38 +52,18 @@ private:
   bool         PassByReference;
 
 public:
-  ParamInfoType( void )
-  {
-    Name = "";
-    Type = porERROR;
-    DefaultValue = NO_DEFAULT_VALUE;
-    PassByReference = 0;
-  }
-
-  ParamInfoType( const ParamInfoType& param_info )
-    :
-  Name( param_info.Name ),
-  Type( param_info.Type ),
-  DefaultValue( param_info.DefaultValue ),
-  PassByReference( param_info.PassByReference )
-  { }
-
+  ParamInfoType( void );
+  ParamInfoType( const ParamInfoType& param_info );
   ParamInfoType
     ( 
      const gString& name, 
      const PortionType& type,
      Portion* default_value, 
      const bool pass_by_ref = false 
-     )
-      :
-  Name( name ), 
-  Type( type ), 
-  DefaultValue( default_value ), 
-  PassByReference( pass_by_ref )
-  { }
+     );
+  ~ParamInfoType();
 
-  ~ParamInfoType()
-  { }
+  ParamInfoType& operator = ( const ParamInfoType& param_info );
 };
 
 

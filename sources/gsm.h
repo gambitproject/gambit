@@ -33,6 +33,8 @@ template <class T> class gGrowableStack;
 class GSM
 {
 private:
+  static int _NumObj;
+
   gInput&  _StdIn;
   gOutput& _StdOut;
   gOutput& _StdErr;

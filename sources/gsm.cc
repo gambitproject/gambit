@@ -41,6 +41,8 @@ Portion* _NULL = 0;
 //              implementation of GSM (Stack machine)
 //--------------------------------------------------------------------
 
+int GSM::_NumObj = 0;
+
 GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
 :_StdIn( s_in ), _StdOut( s_out ), _StdErr( s_err )
 {
@@ -57,29 +59,36 @@ GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
 
   // global function default variables initialization
   // these should be done before InitFunctions() is called
-  gArray<int> dim( 2 );
-  dim[ 1 ] = 2;
-  dim[ 2 ] = 2;
-  _DefaultNfgShadow = new Error_Portion;
-  _DefaultNfgShadow->ShadowOf() = 
-    new Nfg_Portion<double>( * new NormalForm<double>( dim ) );
+  if( _NumObj == 0 )
+  {
+    gArray<int> dim( 2 );
+    dim[ 1 ] = 2;
+    dim[ 2 ] = 2;
+    _DefaultNfgShadow = new Error_Portion;
+    _DefaultNfgShadow->ShadowOf() = 
+      new Nfg_Portion<double>( * new NormalForm<double>( dim ) );
+    
+    _DefaultEfgShadow = new Error_Portion;
+    _DefaultEfgShadow->ShadowOf() = 
+      new Efg_Portion<double>( * new ExtForm<double> );
+    
+    _INPUT  = new Input_Portion ( _StdIn,   true );
+    _OUTPUT = new Output_Portion( _StdOut,  true );
+    _NULL   = new Output_Portion( gnull,    true );
+  }
 
-  _DefaultEfgShadow = new Error_Portion;
-  _DefaultEfgShadow->ShadowOf() = 
-    new Efg_Portion<double>( * new ExtForm<double> );
-
-  _INPUT  = new Input_Portion ( _StdIn,   true );
-  _OUTPUT = new Output_Portion( _StdOut,  true );
-  _NULL   = new Output_Portion( gnull,    true );
-  
   _FuncTable     = new FunctionHashTable;
   InitFunctions();  // This function is located in gsmfunc.cc
+
+  _NumObj++;
 }
 
 
 GSM::~GSM()
 {
   int i;
+
+  _NumObj--;
 
   for( i = _CallFuncStack->Depth(); i > 0; i-- )
   {
@@ -92,15 +101,18 @@ GSM::~GSM()
   Flush();
   delete _FuncTable;
 
-  delete _DefaultNfgShadow->ShadowOf();
-  delete _DefaultNfgShadow;
-
-  delete _DefaultEfgShadow->ShadowOf();
-  delete _DefaultEfgShadow;
-
-  delete _INPUT;
-  delete _OUTPUT;
-  delete _NULL;
+  if( _NumObj == 0 )
+  {
+    delete _DefaultNfgShadow->ShadowOf();
+    delete _DefaultNfgShadow;
+    
+    delete _DefaultEfgShadow->ShadowOf();
+    delete _DefaultEfgShadow;
+    
+    delete _INPUT;
+    delete _OUTPUT;
+    delete _NULL;
+  }
 
   assert( _RefTableStack->Depth() == 1 );
   delete _RefTableStack->Pop();

@@ -37,7 +37,8 @@ int main( void )
   gString x = "x";
   gString y = "y";
   gString z = "z";
-  GSM *machine;
+  GSM* machine;
+  GSM* gsm;
   gList< Instruction* >* prog;
   FuncDescObj* func;
 
@@ -46,6 +47,7 @@ int main( void )
   gOutput* serr = new gFileOutput( "serr" );
 
   machine = new GSM( 32, gin, gout, gerr );
+  gsm = new GSM;
 
   gList< Instruction* > program;
 
@@ -2707,6 +2709,7 @@ int main( void )
 
 
   gout << "\nDeleting machine\n";
+  delete gsm;
   delete machine;
 
   delete sout;
