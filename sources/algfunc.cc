@@ -212,9 +212,11 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
     gList<BehavSolution> solutions;
 
     try {
-      double time;
-      EnumPure(support, solutions, time);
-      ((NumberPortion *) param[4])->SetValue(time);
+      gWatch watch;
+      efgEnumPure algorithm;
+      algorithm.Solve(support);
+      solutions = algorithm.GetSolutions(); 
+      ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
     }
     catch (gSignalBreak &) {
     }
@@ -624,7 +626,7 @@ static Portion *GSM_Liap_Behav(Portion **param)
 
     try {
       NFLiapBySubgame M(E, LP, start);
-      M.Solve();
+      M.Solve(EFSupport(E));
       solutions = M.GetSolutions();
 
       ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
@@ -656,7 +658,7 @@ static Portion *GSM_Liap_Behav(Portion **param)
 
     try {
       EFLiapBySubgame M(E, LP, start);
-      M.Solve();
+      M.Solve(EFSupport(E));
       solutions = M.GetSolutions();
 
       ((NumberPortion *) param[8])->SetValue(watch.Elapsed());

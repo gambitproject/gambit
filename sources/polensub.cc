@@ -38,7 +38,7 @@ int PolEnumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
 PolEnumBySubgame::PolEnumBySubgame(const EFSupport &S,
 				   const PolEnumParams &p, int max)
-  : SubgameSolver(S, max), nevals(0), params(p)
+  : SubgameSolver(max), nevals(0), params(p)
 { }
 
 PolEnumBySubgame::~PolEnumBySubgame()   { }
@@ -47,7 +47,7 @@ int PolEnum(const EFSupport &support, const PolEnumParams &params,
 	    gList<BehavSolution> &solutions, long &nevals, double &time)
 {
   PolEnumBySubgame module(support, params);
-  module.Solve();
+  module.Solve(support);
   nevals = module.NumEvals();
   time = module.Time();
   solutions = module.GetSolutions();

@@ -36,7 +36,7 @@ int SimpdivBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
 SimpdivBySubgame::SimpdivBySubgame(const EFSupport &S, 
 				   const SimpdivParams &p, int max)
-  : SubgameSolver(S, max), params(p)
+  : SubgameSolver(max), params(p)
 { }
 
 SimpdivBySubgame::~SimpdivBySubgame()   { }
@@ -46,7 +46,7 @@ int Simpdiv(const EFSupport &support, const SimpdivParams &params,
 	    int &nevals, int &/*niters*/, double &time)
 {
   SimpdivBySubgame module(support, params);
-  module.Solve();
+  module.Solve(support);
   
   solutions = module.GetSolutions();
   nevals = module.NumEvals();

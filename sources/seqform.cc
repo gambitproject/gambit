@@ -42,7 +42,7 @@ int SeqForm(const EFSupport &support,
 	    int &npivots, double &time)
 {
   SeqFormBySubgame module(support, params);
-  module.Solve();
+  module.Solve(support);
   solutions = module.GetSolutions();
   npivots = module.NumPivots();
   time = module.Time();
@@ -63,7 +63,7 @@ int SeqFormBySubgame::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
 
 SeqFormBySubgame::SeqFormBySubgame(const EFSupport &S,
 				   const SeqFormParams &p, int max)
-  : SubgameSolver(S, max), npivots(0), params(p)
+  : SubgameSolver(max), npivots(0), params(p)
 { }
 
 SeqFormBySubgame::~SeqFormBySubgame()   { }

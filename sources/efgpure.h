@@ -13,18 +13,15 @@
 
 #include "subsolve.h"
 
+class efgEnumPure : public SubgameSolver  {
+private:
+  int SolveSubgame(const Efg &, const EFSupport &,
+		   gList<BehavSolution> &);
+  EfgAlgType AlgorithmID() const { return EfgAlg_PURENASHSUB; }    
 
-int EnumPure(const EFSupport &, gList<BehavSolution> &, double &time);
-
-class EfgPSNEBySubgame : public SubgameSolver  {
-  private:
-    int SolveSubgame(const Efg &, const EFSupport &,
-		     gList<BehavSolution> &);
-    EfgAlgType AlgorithmID() const { return EfgAlg_PURENASHSUB; }    
-
-  public:
-    EfgPSNEBySubgame(const EFSupport &, int max = 0);
-    virtual ~EfgPSNEBySubgame();
+public:
+  efgEnumPure(int max = 0);
+  virtual ~efgEnumPure();
 };
 
 #endif    // EFGPURE_H

@@ -60,7 +60,7 @@ int NFLiapBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
 NFLiapBySubgame::NFLiapBySubgame(const Efg &E, const NFLiapParams &p,
 				 const BehavProfile<gNumber> &s, int max)
-  : SubgameSolver(s.Support(), max),
+  : SubgameSolver(max),
     nevals(0), subgame_number(0),
     infoset_subgames(E.NumInfosets()), params(p), start(s)
 { }

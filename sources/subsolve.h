@@ -11,19 +11,24 @@
 #include "nfg.h"
 #include "behavsol.h"
 
+class efgAlgorithm {
+public:
+  virtual ~efgAlgorithm();
+
+  virtual void Solve(const EFSupport &) = 0;
+};
+
 class NFSupport;
 class SubgameSolver   {
   private:
     int max_solns, subgame_number;
     double time;
-    Efg efg;
-    EFSupport support;
-    BehavProfile<gNumber> solution;
+    BehavProfile<gNumber> *solution;
     gList<BehavSolution> solutions;
 
     gArray<gArray<Infoset *> *> infosets;
 
-    void FindSubgames(Node *, gList<BehavSolution> &,
+    void FindSubgames(const EFSupport &, Node *, gList<BehavSolution> &,
 		      gList<EFOutcome *> &);
 
   protected:
@@ -38,10 +43,10 @@ class SubgameSolver   {
     virtual EfgAlgType AlgorithmID() const = 0;
 
   public:
-    SubgameSolver(const EFSupport &, int maxsol = 0);
+    SubgameSolver(int maxsol = 0);
     virtual ~SubgameSolver();
     
-    void Solve(void);
+    void Solve(const EFSupport &);
 
     double Time(void) const   { return time; }
     const gList<BehavSolution> &GetSolutions(void) const

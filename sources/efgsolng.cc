@@ -238,7 +238,7 @@ public:
     : EFLiapBySubgame(p_efg, p_params, 
 		      BehavProfile<gNumber>(p_start), p_max),
       BaseBySubgameG(p_parent, p_efg)
-    { Solve(); }
+    { Solve(EFSupport(p_efg)); }
 };
 
 guiEfgSolveLiap::guiEfgSolveLiap(const Efg &p_efg, const EFSupport &p_support,
@@ -300,7 +300,7 @@ public:
     : NFLiapBySubgame(p_efg, p_params,
 		      BehavProfile<gNumber>(p_start), p_max),
       BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
-    { Solve(); }
+    { Solve(EFSupport(p_efg)); }
 };
 
 EfgNLiapG::EfgNLiapG(const Efg &p_efg, const EFSupport &p_support, 
@@ -406,7 +406,7 @@ public:
 		    EfgShowInterface *p_parent = 0)
     : SeqFormBySubgame(p_support, p_params, p_max),
       BaseBySubgameG(p_parent, p_efg)
-    { Solve(); }
+    { Solve(p_support); }
 };
 
 EfgSeqFormG::EfgSeqFormG(const Efg &p_efg, const EFSupport &p_support, 
@@ -493,7 +493,7 @@ public:
 		  EfgShowInterface *p_parent = 0)
     : LemkeBySubgame(p_support, p_params, p_max), 
       BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
-    { Solve(); }
+    { Solve(p_support); }
 };
 
 EfgLemkeG::EfgLemkeG(const Efg &p_efg, const EFSupport &p_support, 
@@ -577,7 +577,7 @@ public:
 		     int p_max = 0, EfgShowInterface *p_parent = 0)
     : PureNashBySubgame(p_support, gstatus, p_max),
       BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
-    { Solve(); }
+    { Solve(p_support); }
 };
 
 EfgPureNashG::EfgPureNashG(const Efg &p_efg, const EFSupport &p_support, 
@@ -624,7 +624,7 @@ bool EfgPureNashG::SolveSetup(void) const
 
 #include "efgpure.h"
 
-class EPureNashBySubgameG : public EfgPSNEBySubgame, public BaseBySubgameG {
+class EPureNashBySubgameG : public efgEnumPure, public BaseBySubgameG {
 protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
@@ -633,8 +633,8 @@ protected:
 public:
   EPureNashBySubgameG(const Efg &p_efg, const EFSupport &p_support,
 		      int p_max = 0, EfgShowInterface *p_parent = 0)
-    : EfgPSNEBySubgame(p_support, p_max), BaseBySubgameG(p_parent, p_efg)
-    { Solve(); }
+    : efgEnumPure(p_max), BaseBySubgameG(p_parent, p_efg)
+    { Solve(p_support); }
 };
 
 EfgEPureNashG::EfgEPureNashG(const Efg &p_efg, const EFSupport &p_support, 
@@ -744,7 +744,7 @@ public:
 		 int p_max = 0, EfgShowInterface *p_parent = 0)
     : EnumBySubgame(p_support, p_params, p_max), 
       BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
-    { Solve(); }
+    { Solve(p_support); }
 };
 
 EfgEnumG::EfgEnumG(const Efg &p_efg, const EFSupport &p_support,
@@ -847,7 +847,7 @@ public:
 		 EfgShowInterface *p_parent = 0)
     : ZSumBySubgame(p_support, p_params, p_max), 
       BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
-    { Solve(); }
+    { Solve(p_support); }
 };
 
 EfgZSumG::EfgZSumG(const Efg &p_efg, const EFSupport &p_support,
@@ -910,7 +910,7 @@ public:
 		    EfgShowInterface *p_parent = 0)
     : CSSeqFormBySubgame(p_support, p_params, p_max),
       BaseBySubgameG(p_parent, p_efg)
-    { Solve(); }
+    { Solve(p_support); }
 };
 
 EfgCSumG::EfgCSumG(const Efg &p_efg, const EFSupport &p_support,
@@ -1023,7 +1023,7 @@ public:
 		    EfgShowInterface *p_parent = 0)
     : SimpdivBySubgame(p_support, p_params, p_max),
       BaseBySubgameG(p_parent, p_efg)
-    { Solve(); }
+    { Solve(p_support); }
 };
 
 EfgSimpdivG::EfgSimpdivG(const Efg &p_efg, const EFSupport &p_support, 
@@ -1114,7 +1114,7 @@ public:
 			    EfgShowInterface *p_parent = 0)
     : PolEnumBySubgame(p_support, p_params, p_max),
       BaseBySubgameG(p_parent, p_efg)
-    { Solve(); }
+    { Solve(p_support); }
 };
 
 guiPolEnumEfgNfg::guiPolEnumEfgNfg(const EFSupport &p_support, 

@@ -13,15 +13,17 @@
 
 #include "subsolve.h"
 
-void SubgameSolver::FindSubgames(Node *n, gList<BehavSolution> &solns,
+void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
+				 gList<BehavSolution> &solns,
 				 gList<EFOutcome *> &values)
 {
   int i;
   int failed;
+  const Efg &efg = p_support.Game();
   bool marked = AllSubgamesMarked(efg);
   
   gList<BehavProfile<gNumber> > thissolns;
-  thissolns.Append(solution);
+  thissolns.Append(*solution);
   ((gVector<gNumber> &) thissolns[1]).operator=(gNumber(0));
   
   gList<Node *> subroots;
@@ -34,7 +36,7 @@ void SubgameSolver::FindSubgames(Node *n, gList<BehavSolution> &solns,
     gList<BehavSolution> subsolns;
     gList<EFOutcome *> subvalues;
     
-    FindSubgames(subroots[i], subsolns, subvalues);
+    FindSubgames(p_support, subroots[i], subsolns, subvalues);
     
     if (subsolns.Length() == 0)  {
       solns.Flush();
@@ -117,7 +119,7 @@ void SubgameSolver::FindSubgames(Node *n, gList<BehavSolution> &solns,
 	  
 	for (int act = 1; act <= p->Infosets()[iset]->NumActions();
 	     act++)  {
-	  if (!support.Find((*infosets[pl])[index]->Actions()[act])) 
+	  if (!p_support.Find((*infosets[pl])[index]->Actions()[act])) 
 	    subsupport.RemoveAction(p->Infosets()[iset]->Actions()[act]);
 	}
       }
@@ -227,31 +229,14 @@ void SubgameSolver::SelectSolutions(int, const Efg &,
 				       gList<BehavSolution> &)
 { }
 
-SubgameSolver::SubgameSolver(const EFSupport &S, int max)
-  : max_solns(max), efg(S.Game()), support(efg), solution(S),
-    infosets(efg.NumPlayers())
-{
-  for (int i = 1; i <= efg.NumPlayers(); i++)
-    infosets[i] = new gArray<Infoset *>(efg.Players()[i]->Infosets());
-  
-  for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
-    EFPlayer *player = S.Game().Players()[pl];
-    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
-      Infoset *infoset = player->Infosets()[iset];
-      for (int act = 1; act <= infoset->NumActions(); act++) 
-	if (!S.Find(infoset->Actions()[act]))
-	  support.RemoveAction(efg.Players()[pl]->Infosets()[iset]->Actions()[act]);
-    }
-  }
-}
+SubgameSolver::SubgameSolver(int max)
+  : max_solns(max)
+{ }
 
 SubgameSolver::~SubgameSolver()  
-{
-  for (int i = 1; i <= efg.NumPlayers(); i++)
-    delete infosets[i];
-}
+{ }
 
-void SubgameSolver::Solve(void)
+void SubgameSolver::Solve(const EFSupport &p_support)
 {
   gWatch watch;
 
@@ -262,7 +247,32 @@ void SubgameSolver::Solve(void)
 
   ((gVector<gNumber> &) solution).operator=(gNumber(0));
 
-  FindSubgames(efg.RootNode(), solutions, values);
+  Efg efg(p_support.Game());
+  infosets = gArray<gArray<Infoset *> *>(efg.NumPlayers());
+
+  for (int i = 1; i <= efg.NumPlayers(); i++)
+    infosets[i] = new gArray<Infoset *>(efg.Players()[i]->Infosets());
+  
+  solution = new BehavProfile<gNumber>(p_support);
+
+  EFSupport support(efg);
+
+  for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
+    EFPlayer *player = p_support.Game().Players()[pl];
+    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
+      Infoset *infoset = player->Infosets()[iset];
+      for (int act = 1; act <= infoset->NumActions(); act++) 
+	if (!p_support.Find(infoset->Actions()[act]))
+	  support.RemoveAction(efg.Players()[pl]->Infosets()[iset]->Actions()[act]);
+    }
+  }
+
+  FindSubgames(support, efg.RootNode(), solutions, values);
+
+  for (int i = 1; i <= efg.NumPlayers(); i++)
+    delete infosets[i];
+
+  delete solution;
 
   time = watch.Elapsed();
 }

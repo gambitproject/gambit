@@ -238,7 +238,7 @@ extern void MarkedSubgameRoots(const Efg &, gList<Node *> &);
 
 EFLiapBySubgame::EFLiapBySubgame(const Efg &E, const EFLiapParams &p,
 				 const BehavProfile<gNumber> &s, int max)
-  : SubgameSolver(s.Support(), max), nevals(0), subgame_number(0),
+  : SubgameSolver(max), nevals(0), subgame_number(0),
     infoset_subgames(E.NumInfosets()), params(p), start(s)
 {
   gList<Node *> subroots;

@@ -37,7 +37,7 @@ int LemkeBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
 LemkeBySubgame::LemkeBySubgame(const EFSupport &S, const LemkeParams &p,
 			       int max)
-  : SubgameSolver(S, max), npivots(0), params(p)
+  : SubgameSolver(max), npivots(0), params(p)
 { }
 
 LemkeBySubgame::~LemkeBySubgame()   { }
@@ -47,7 +47,7 @@ int Lemke(const EFSupport &support, const LemkeParams &params,
 	  gList<BehavSolution> &solutions, int &npivots, double &time)
 {
   LemkeBySubgame module(support, params);
-  module.Solve();
+  module.Solve(support);
   npivots = module.NumPivots();
   time = module.Time();
   solutions = module.GetSolutions();

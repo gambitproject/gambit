@@ -12,8 +12,8 @@
 #include "efgciter.h"
 #include "behavsol.h"
 
-int FindPureNash(const EFSupport &p_support,
-		 gList<BehavSolution> &p_solutions)
+static int FindPureNash(const EFSupport &p_support,
+			gList<BehavSolution> &p_solutions)
 {
   int index;
   EfgContIter citer(p_support);
@@ -42,9 +42,9 @@ int FindPureNash(const EFSupport &p_support,
     }
 
     if (flag)  {
-      BehavProfile<double> temp(p_support);
+      BehavProfile<gNumber> temp(p_support);
       // zero out all the entries, since any equilibria are pure
-      ((gVector<double> &) temp).operator=(0);
+      ((gVector<gNumber> &) temp).operator=(0);
       const PureBehavProfile<gNumber> &profile = citer.GetProfile();
       for (int pl = 1; pl <= p_support.Game().NumPlayers(); pl++)  {
 	for (int iset = 1; iset <= p_support.Game().Players()[pl]->NumInfosets();
@@ -60,28 +60,17 @@ int FindPureNash(const EFSupport &p_support,
   return p_solutions.Length();
 }
 
-
-int EnumPure(const EFSupport &p_support,
-	     gList<BehavSolution> &p_solutions, double &p_time)
-{
-  EfgPSNEBySubgame module(p_support);
-  module.Solve();
-  p_time = module.Time();
-  p_solutions = module.GetSolutions();
-  return 1;
-}
-
-int EfgPSNEBySubgame::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
-				   gList<BehavSolution> &solns)
+int efgEnumPure::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
+			      gList<BehavSolution> &solns)
 {
   FindPureNash(sup, solns);
 
   return 0;
 }
 
-EfgPSNEBySubgame::EfgPSNEBySubgame(const EFSupport &S, int max)
-  : SubgameSolver(S, max)
+efgEnumPure::efgEnumPure(int max)
+  : SubgameSolver(max)
 { }
 
-EfgPSNEBySubgame::~EfgPSNEBySubgame()   { }
+efgEnumPure::~efgEnumPure()   { }
 

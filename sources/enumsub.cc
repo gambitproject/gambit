@@ -37,7 +37,7 @@ int EnumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 }
 
 EnumBySubgame::EnumBySubgame(const EFSupport &S, const EnumParams &p, int max)
-  : SubgameSolver(S, max), npivots(0), params(p)
+  : SubgameSolver(max), npivots(0), params(p)
 { }
 
 EnumBySubgame::~EnumBySubgame()   { }
@@ -46,7 +46,7 @@ int Enum(const EFSupport &support, const EnumParams &params,
 	 gList<BehavSolution> &solutions, long &npivots, double &time)
 {
   EnumBySubgame module(support, params);
-  module.Solve();
+  module.Solve(support);
   npivots = module.NumPivots();
   time = module.Time();
   solutions = module.GetSolutions();
