@@ -259,6 +259,10 @@ void TreeWindow::OnDraw(wxDC &dc)
 
 void TreeWindow::EnsureCursorVisible(void)
 {
+  if (!m_parent->Cursor()) {
+    return;
+  }
+
   NodeEntry *entry = m_layout.GetNodeEntry(m_parent->Cursor()); 
   int xScroll, yScroll;
   GetViewStart(&xScroll, &yScroll);
