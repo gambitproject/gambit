@@ -269,55 +269,66 @@ void QreComputeStep(const Nfg &p_nfg, const MixedProfile<double> &p_profile,
 }
 
 void QreHomotopy(const Nfg &p_nfg, NFQreParams &params,
-		 const MixedProfile<gNumber> &start,
-		 gList<MixedSolution> &solutions, gStatus &p_status,
+		 const MixedProfile<gNumber> &p_start,
+		 gList<MixedSolution> &p_solutions, gStatus &p_status,
 		 long &nevals, long &nits)
 {
   gMatrix<long double> H(p_nfg.ProfileLength(), p_nfg.ProfileLength() + 1);
-  MixedProfile<double> profile(start);
+  MixedProfile<double> profile(p_start);
   double lambda = params.minLam;
   double stepsize = 0.0001;
   // Pick the direction to follow the path so that lambda starts out
   // increasing
   double initialsign = (p_nfg.ProfileLength() % 2 == 0) ? 1.0 : -1.0;
 
-  solutions.Flush();
+  p_solutions.Flush();
 
-  while (lambda <= params.maxLam) {
-    // Use a first-order Runge-Kutta style method
-    gPVector<double> delta1(profile), delta2(profile);
-    double lambdainc1, lambdainc2;
-  
-    QreJacobian(p_nfg, profile, lambda, H);
-    QreComputeStep(p_nfg, profile, H, delta1, lambdainc1, initialsign, stepsize);
-
-    MixedProfile<double> profile2(profile);
-    profile2 += delta1 * 0.5; 
-    QreJacobian(p_nfg, profile2, lambda + lambdainc1 * 0.5, H);
-    QreComputeStep(p_nfg, profile, H, delta2, lambdainc2, initialsign, stepsize);
+  try {
+    while (lambda <= params.maxLam) {
+      // Use a first-order Runge-Kutta style method
+      gPVector<double> delta1(profile), delta2(profile);
+      double lambdainc1, lambdainc2;
+      
+      QreJacobian(p_nfg, profile, lambda, H);
+      QreComputeStep(p_nfg, profile, H,
+		     delta1, lambdainc1, initialsign, stepsize);
     
-    profile += delta1 * 0.5;
-    profile += delta2 * 0.5; 
-    lambda += 0.5 * (lambdainc1 + lambdainc2);
+      MixedProfile<double> profile2(profile);
+      profile2 += delta1 * 0.5; 
+      QreJacobian(p_nfg, profile2, lambda + lambdainc1 * 0.5, H);
+      QreComputeStep(p_nfg, profile, H,
+		     delta2, lambdainc2, initialsign, stepsize);
+    
+      profile += delta1 * 0.5;
+      profile += delta2 * 0.5; 
+      lambda += 0.5 * (lambdainc1 + lambdainc2);
 
-    if (params.fullGraph) { 
-      solutions.Append(MixedSolution(profile, algorithmNfg_QRE));
-      NFQreFunc qreValue(p_nfg, MixedProfile<gNumber>(profile));
-      qreValue.SetLambda(lambda);
-      solutions[solutions.Length()].SetQre(lambda, qreValue.Value(profile));
+      if (params.fullGraph) { 
+	p_solutions.Append(MixedSolution(profile, algorithmNfg_QRE));
+	NFQreFunc qreValue(p_nfg, MixedProfile<gNumber>(profile));
+	qreValue.SetLambda(lambda);
+	p_solutions[p_solutions.Length()].SetQre(lambda, qreValue.Value(profile));
+      }
+
+      p_status.Get();
+      p_status.SetProgress((lambda - params.minLam) /
+			   (params.maxLam - params.minLam),
+			   gText("Current lambda: ") + ToText(lambda));
     }
-
-    p_status.Get();
-    p_status.SetProgress((lambda - params.minLam) /
-			 (params.maxLam - params.minLam),
-			 gText("Current lambda: ") + ToText(lambda));
+  }
+  catch (...) {
+    p_solutions.Append(MixedSolution(profile, algorithmNfg_QRE));
+    NFQreFunc qreValue(p_nfg, MixedProfile<gNumber>(profile));
+    qreValue.SetLambda(lambda);
+    p_solutions[p_solutions.Length()].SetQre(lambda, qreValue.Value(profile));
+    throw;
   }
   
   if (!params.fullGraph) { 
-    solutions.Append(MixedSolution(profile, algorithmNfg_QRE));
+    p_solutions.Append(MixedSolution(profile, algorithmNfg_QRE));
     NFQreFunc qreValue(p_nfg, MixedProfile<gNumber>(profile));
     qreValue.SetLambda(lambda);
-    solutions[solutions.Length()].SetQre(lambda, qreValue.Value(profile));
+    p_solutions[p_solutions.Length()].SetQre(lambda, qreValue.Value(profile));
   }
 }
 
