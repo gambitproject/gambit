@@ -1,7 +1,7 @@
 //#
 //# FILE: egobit.cc -- Implementation of extensive form Gobit algorithm
 //#
-//# @(#)egobit.cc	1.18 6/1/95
+//# $Id$
 //#
 
 #include <math.h>
