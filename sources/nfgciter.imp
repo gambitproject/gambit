@@ -14,13 +14,13 @@
 //-------------------------------------
 
 template <class T> NfgContIter<T>::NfgContIter(const NFSupport *s)
-  : current_strat((s->sups).Length()), N((Nfg<T> *) s->sups[1]->nfp->N), 
+  : stratset(*s), 
+    current_strat((s->sups).Length()), N((Nfg<T> *) s->sups[1]->nfp->N), 
     profile(new StrategyProfile(s->sups.Length())),
     thawed(s->sups.Length())
 {
   for (int i = 1; i <= thawed.Length(); i++)
     thawed[i] = i;
-  stratset = s;
   First();
 }
 
@@ -36,7 +36,7 @@ template <class T> NfgContIter<T>::~NfgContIter()
 template <class T> void NfgContIter<T>::First(void)
 {
   for (int i = 1; i <= thawed.Length(); i++){
-    profile->Set(thawed[i], stratset->GetStrategy(thawed[i], 1));
+    profile->Set(thawed[i], stratset.GetStrategy(thawed[i], 1));
     current_strat[thawed[i]] = 1;
   }	
 }
@@ -45,7 +45,7 @@ template <class T> void NfgContIter<T>::Set(int pl, int num)
 {
   if (!frozen.Contains(pl))   return;
 
-  profile->Set(pl, stratset->GetStrategy(pl, num));
+  profile->Set(pl, stratset.GetStrategy(pl, num));
   current_strat[pl] = num;
 }
 
@@ -84,12 +84,12 @@ template <class T> int NfgContIter<T>::NextContingency(void)
   Strategy *s;
   while (1)   {
     int pl = thawed[j];
-    if (current_strat[pl] < stratset->sups[pl]->NumStrats()) {
-      s = stratset->GetStrategy(pl, ++(current_strat[pl]));
+    if (current_strat[pl] < stratset.sups[pl]->NumStrats()) {
+      s = stratset.GetStrategy(pl, ++(current_strat[pl]));
       profile->Set(pl, s);
       return 1;
     }
-    profile->Set(pl, stratset->GetStrategy(pl, 1));
+    profile->Set(pl, stratset.GetStrategy(pl, 1));
     current_strat[pl] = 1;
     j--;
     if (j == 0)

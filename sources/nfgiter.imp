@@ -1,8 +1,8 @@
-//#
-//# FILE: normiter.imp -- Implementation of generic normal form iterator
-//#
-//# $Id$
-//#
+//
+// FILE: normiter.imp -- Implementation of generic normal form iterator
+//
+// $Id$
+//
 
 #include "nfgiter.h"
 #include "nfg.h"
@@ -15,34 +15,30 @@
 // NfgIter<T>:  Constructors, Destructors, Operators
 //--------------------------------------------------------------------------
 template <class T> NfgIter<T>::NfgIter (Nfg<T> &N)
-: stratset ( new NFSupport(N)),
-  N(&N), current_strat((stratset->sups).Length()),
-  profile(new StrategyProfile(stratset->sups.Length()))
+: stratset(N),
+  N(&N), current_strat((stratset.sups).Length()),
+  profile(new StrategyProfile(stratset.sups.Length()))
 {
   First();
 }
+
 template <class T> NfgIter<T>::NfgIter(const NFSupport *s) 
-: N((Nfg<T> *) s->bnfg), current_strat((s->sups).Length()),
-  profile(new StrategyProfile(s->sups.Length()))
+: stratset(*s), N((Nfg<T> *) s->bnfg), current_strat((stratset.sups).Length()),
+  profile(new StrategyProfile(stratset.sups.Length()))
 {
-  stratset = s;
   First();
 }
 
 
 template <class T> NfgIter<T>::NfgIter(const NfgIter<T> &it)
-: N(it.N), current_strat(it.current_strat), 
+: stratset(it.stratset), N(it.N), current_strat(it.current_strat), 
   profile(new StrategyProfile(*it.profile))
-{ 
-  stratset = it.stratset;
-}
+{ }
 
 template <class T> NfgIter<T>::NfgIter(const NfgContIter<T> &it)
-: N(it.N), current_strat(it.current_strat),
+: stratset(it.stratset), N(it.N), current_strat(it.current_strat),
   profile(new StrategyProfile(*it.profile))
-{
-  stratset = it.stratset;
-}
+{ }
 
 template <class T> NfgIter<T>::~NfgIter()
 {
@@ -62,6 +58,7 @@ NfgIter<T> &NfgIter<T>::operator=(const NfgIter<T> &it)
   }
   return *this;
 }
+
 //-----------------------------
 // NfgIter: Member Functions
 //-----------------------------
@@ -69,7 +66,7 @@ NfgIter<T> &NfgIter<T>::operator=(const NfgIter<T> &it)
 template <class T> void NfgIter<T>::First(void)
 {
   for (int i = 1; i <= N->NumPlayers(); i++)  {
-    Strategy *s = stratset->GetStrategy(i,1);
+    Strategy *s = stratset.GetStrategy(i,1);
     profile->Set(i, s);
     current_strat[i] = 1;
   }
@@ -78,12 +75,12 @@ template <class T> void NfgIter<T>::First(void)
 template <class T> int NfgIter<T>::Next(int p)
 {
   Strategy *s;
-  if (current_strat[p] < stratset->sups[p]->NumStrats())  {
-    s = stratset->GetStrategy(p,++(current_strat[p]));
+  if (current_strat[p] < stratset.sups[p]->NumStrats())  {
+    s = stratset.GetStrategy(p,++(current_strat[p]));
     profile->Set(p, s);
     return 1;
   }
-  s = stratset->GetStrategy(p,1);
+  s = stratset.GetStrategy(p,1);
   profile->Set(p, s);
   current_strat[p] = 1;
   return 0;
@@ -92,10 +89,10 @@ template <class T> int NfgIter<T>::Next(int p)
 template <class T> int NfgIter<T>::Set(int p, int s)
 {
   if (p <= 0 || p > N->NumPlayers() ||
-      s <= 0 || s > stratset->sups[p]->NumStrats())
+      s <= 0 || s > stratset.sups[p]->NumStrats())
     return 0;
   
-  profile->Set(p, stratset->GetStrategy(p,s));
+  profile->Set(p, stratset.GetStrategy(p,s));
   return 1;
 }
 
@@ -108,7 +105,7 @@ template <class T> void NfgIter<T>::Get(gArray<int> &t) const
 template <class T> void NfgIter<T>::Set(const gArray<int> &t)
 {
   for (int i = 1; i <= N->NumPlayers(); i++){
-    profile->Set(i, stratset->GetStrategy(i,t[i]));
+    profile->Set(i, stratset.GetStrategy(i,t[i]));
     current_strat[i] = t[i];
   } 
 }

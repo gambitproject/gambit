@@ -25,7 +25,7 @@ class StrategyProfile;
 template <class T> class NfgContIter    {
 friend class NfgIter<T>;
 private:
-  const NFSupport *stratset;
+  NFSupport stratset;
   gArray<int> current_strat;
   Nfg<T> *N;
   StrategyProfile *profile;
