@@ -28,8 +28,14 @@ private:
 
   bool EqZero(T x) const;
   
-  // p_i_j as a gPoly, with last prob in terms of previous probs
-  gPoly<T> Prob(int i,int j,int k) const;
+  // p_i_j as a gPoly, eliminating the last variable for 
+  // each information set, and satisfying the adding up 
+  // constraints of the sequence form strategies
+  gPoly<T> Prob(int pl,int seq) const;
+
+  // Payoff to player pl, after eliminating last variable for 
+  // each infoset.  
+  gPoly<T> Payoff(int pl) const;
 
   // equation for when player i sets strat1 = strat2
   // with last probs for each player substituted out.  
@@ -70,23 +76,28 @@ EfgPolEnumModule<T>::EfgPolEnumModule(const EFSupport &S, const EfgPolEnumParams
 
 template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
 {
-  int i,j,k;
+  int i,j;
 
 
   gWatch watch;
   gPolyList<T> equations(&Space,&Lex);
 
   // equations for equality of strat j to strat j+1
- /*
-  for( i=1;i<=EF.NumPlayers();i++) 
-    for(j=1;j<support.NumSequences(i);j++) 
-      equations+=Equation(i,j,j+1);
-  */
 
+  int kk=0;
+  for( i=1;i<=EF.NumPlayers();i++) {
+    int num_vars=support.NumSequences(i)-EF.NumInfosets()[i]-1; 
+    for(j=1;j<=num_vars;j++)
+      equations+=(Payoff(i)).PartialDerivative(kk+j);
+    kk+=num_vars;
+  }
+
+  /*
   for( i=1;i<=EF.NumPlayers();i++) 
-    for(j=1;j<EF.NumInfosets()[i];j++) 
-      for(k=1;k<support.NumActions(i,j);k++) 
-      equations+=Prob(i,j,k);
+    for(j=1;j<=support.NumSequences(i);j++)
+      if(SF.ActionNumber(i,j)==support.NumActions(i,SF.InfosetNumber(i,j)))
+	equations+=Prob(i,j);
+  */
 
   // set up the rectangle of search
   gVector<T> bottoms(num_vars), tops(num_vars);
@@ -105,8 +116,8 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
       << quickie.UnderlyingEquations() ;
   }  
 
-/*
-  if(quickie.FindRoots(Cube,2000)) {
+
+  if(quickie.FindCertainNumberOfRoots(Cube,20000,params.stopAfter)) {
     if(params.trace>0) {
       (*params.tracefile) << "\nThe system has the following roots in [0,1]^"
 	<< num_vars << " :\n" << quickie.RootList();
@@ -124,8 +135,6 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
   }
 //  int index = SaveSolutions(quickie.RootList());
   time = watch.Elapsed();
-
-  */
 
   return 1;	 
 
@@ -187,42 +196,67 @@ const gList<BehavSolution> &EfgPolEnumModule<T>::GetSolutions(void) const
 {
   return solutions;
 }
+*/
 
-
-template <class T> gPoly<T> EfgPolEnumModule<T>::Prob(int p, int strat) const
+template <class T> gPoly<T> EfgPolEnumModule<T>::Prob(int p, int seq) const
 {
   gPoly<T> equation(&Space,&Lex);
   gVector<int> exps(num_vars);
   int i,j,kk = 0;
   
-  for(i=1;i<p;i++) 
-    kk+=(support.NumStrats(i)-1);
 
-  if(strat<support.NumStrats(p)) {
+  for(i=1;i<p;i++) 
+    kk+=(support.NumSequences(i)-EF.NumInfosets()[i]-1);
+
+  int iset = SF.InfosetNumber(p,seq);
+  int act  = SF.ActionNumber(p,seq);
+
+  if(seq==1) {
     exps=0;
-    exps[strat+kk]=1;
+    exp_vect const_exp(&Space,exps);
+    gMono<T> const_term((T)1,const_exp);
+    gPoly<T> new_term(&Space,const_term,&Lex);
+    equation+=new_term;
+  }
+  else if(act<support.NumActions(p,iset)) {
+    exps=0;
+    exps[kk+seq-iset]=1;
     exp_vect const_exp(&Space,exps);
     gMono<T> const_term((T)1,const_exp);
     gPoly<T> new_term(&Space,const_term,&Lex);
     equation+=new_term;
   }
   else {
-    for(j=1;j<support.NumStrats(p);j++) {
-      exps=0;
-      exps[j+kk]=1;
-      exp_vect exponent(&Space,exps);
-      gMono<T> term((T)(-1),exponent);
-      gPoly<T> new_term(&Space,term,&Lex);
-      equation+=new_term;
+    for(j=1;j<seq;j++) {
+      if((SF.Constraints(p))(iset+1,j)==-1)
+	equation-=Prob(p,j);
+      if((SF.Constraints(p))(iset+1,j)==1)
+	equation+=Prob(p,j);
     }
-    exps=0;
-    exp_vect const_exp(&Space,exps);
-    gMono<T> const_term((T)1,const_exp);
-    gPoly<T> new_term(&Space,const_term,&Lex);
-    equation+=new_term;
   }
   return equation;
 }
+
+template <class T> gPoly<T> 
+EfgPolEnumModule<T>::Payoff(int pl) const
+{
+  gIndexOdometer index(SF.NumSequences());
+  gNumber pay;
+
+  gPoly<T> equation(&Space,&Lex);
+  while (index.Turn()) {
+    pay=SF.Payoff(index.CurrentIndices(),pl);
+    if( pay !=0) {
+      gPoly<T> term(&Space,(T)pay,&Lex);
+      int k;
+      for(k=1;k<=EF.NumPlayers();k++) 
+	term*=Prob(k,(index.CurrentIndices())[k]);
+      equation+=term;
+    }
+  }
+  return equation;
+}
+/*
 
 template <class T> gPoly<T> 
 EfgPolEnumModule<T>::Equation(int i, int strat1, int strat2) const
@@ -253,6 +287,9 @@ EfgPolEnumModule<T>::Equation(int i, int strat1, int strat2) const
   return equation;
 }
 */
+
+
+
 
 
 
