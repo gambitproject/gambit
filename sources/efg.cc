@@ -1275,7 +1275,7 @@ gPVector<int> Efg::NumMembers(void) const
 //------------------------------------------------------------------------
 
 void Efg::Payoff(Node *n, gNumber prob, const gPVector<int> &profile,
-			gVector<gNumber> &payoff) const
+		 gVector<gNumber> &payoff) const
 {
   if (n->outcome)  {
     gArray<gNumber> values(Parameters()->Dmnsn());
@@ -1324,14 +1324,11 @@ void Efg::InfosetProbs(const gPVector<int> &profile,
 }
 
 void Efg::Payoff(Node *n, gNumber prob, const gArray<gArray<int> *> &profile,
-		    gVector<gNumber> &payoff) const
+		    gPolyArray<gNumber> &payoff) const
 {
   if (n->outcome)   {
-    gArray<gNumber> values(Parameters()->Dmnsn());
-    for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
-
     for (int i = 1; i <= players.Length(); i++)
-      payoff[i] += prob * n->outcome->payoffs[i].Evaluate(values);
+      payoff[i] += prob * n->outcome->payoffs[i];
   }
   
   if (n->infoset && n->infoset->player->IsChance())
@@ -1345,9 +1342,10 @@ void Efg::Payoff(Node *n, gNumber prob, const gArray<gArray<int> *> &profile,
 }
 
 void Efg::Payoff(const gArray<gArray<int> *> &profile,
-		    gVector<gNumber> &payoff) const
+		 gPolyArray<gNumber> &payoff) const
 {
-  ((gVector<gNumber> &) payoff).operator=((gNumber) 0);
+  for (int i = 1; i <= payoff.Length(); i++)
+    payoff[i] = gPoly<gNumber>(parameters, paramorder);
   Payoff(root, 1.0, profile, payoff);
 }
 

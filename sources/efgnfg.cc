@@ -144,7 +144,7 @@ Nfg *MakeReducedNfg(const Efg &E, const EFSupport &support)
     corr[i] = L->strategies[i][1];
   }
 
-  gVector<gNumber> value(E.NumPlayers());
+  gPolyArray<gNumber> value(E.Parameters(), E.ParamOrder(), E.NumPlayers());
 
   int pl = E.NumPlayers();
   while (1)  {
@@ -152,8 +152,7 @@ Nfg *MakeReducedNfg(const Efg &E, const EFSupport &support)
 
     iter.SetOutcome(L->N->NewOutcome());
     for (int j = 1; j <= E.NumPlayers(); j++)
-      L->N->SetPayoff(iter.GetOutcome(), j,
-                      gPoly<gNumber>(L->N->Parameters(), value[j], L->N->ParamOrder()));
+      L->N->SetPayoff(iter.GetOutcome(), j, value[j]);
 
     iter.NextContingency();
     while (pl > 0)   {

@@ -82,7 +82,7 @@ protected:
     void WriteEfgFile(gOutput &, Node *) const;
 
     void Payoff(Node *n, gNumber, const gPVector<int> &, gVector<gNumber> &) const;
-    void Payoff(Node *n, gNumber, const gArray<gArray<int> *> &, gVector<gNumber> &) const;
+    void Payoff(Node *n, gNumber, const gArray<gArray<int> *> &, gPolyArray<gNumber> &) const;
 
     void InfosetProbs(Node *n, gNumber, const gPVector<int> &, gPVector<gNumber> &) const;
 
@@ -182,7 +182,7 @@ protected:
         //# COMPUTING VALUES OF PROFILES
     void Payoff(const gPVector<int> &profile, gVector<gNumber> &payoff) const;
     void Payoff(const gArray<gArray<int> *> &profile,
-		gVector<gNumber> &payoff) const;
+		gPolyArray<gNumber> &payoff) const;
 
     void InfosetProbs(const gPVector<int> &profile, gPVector<gNumber> &prob) const;
 
