@@ -41,9 +41,6 @@ PureNashSolveParamsDialog::PureNashSolveParamsDialog(wxWindow *parent,
   Go();
 }
 
-void
-
-
 #endif
 
 #endif

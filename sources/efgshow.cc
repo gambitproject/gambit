@@ -150,85 +150,90 @@ void EfgShow::SubgamesSetup(void)
 
 void EfgShow::SolveSetup(int what)
 {
-  if (what == SOLVE_SETUP_CUSTOM) {
-    EfgSolveParamsDialog ESD(ef, 0/*InterfaceOk()*/, this);
+    if (what == SOLVE_SETUP_CUSTOM)
+    {
+        EfgSolveParamsDialog ESD(ef, 0/*InterfaceOk()*/, this);
 
-    if (ESD.GetResult() == SD_CANCEL) 
-      return;   // CANCEL
+        if (ESD.GetResult() == SD_CANCEL) 
+            return;   // CANCEL
 
-    if (ESD.GetResult() == SD_PARAMS) {
-      if (!ESD.UseNF())   // solving using the EF
-	switch (ESD.GetEfgAlgorithm()) {
-	case EFG_GOBIT_SOLUTION:
-	  guiEfgEGobit(ef, *cur_sup, this).SolveSetup(); 
-	  break;
+        if (ESD.GetResult() == SD_PARAMS)
+        {
+            if (!ESD.UseNF())   // solving using the EF
+                switch (ESD.GetEfgAlgorithm())
+                {
+                case EFG_GOBIT_SOLUTION:
+                    EfgEGobitG(ef, *cur_sup, this).SolveSetup(); 
+                    break;
 
-	case EFG_LIAP_SOLUTION:
-	  guiEfgLiap(ef, *cur_sup, this).SolveSetup();
-	  break;
+                case EFG_LIAP_SOLUTION:
+                    EfgELiapG(ef, *cur_sup, this).SolveSetup();
+                    break;
 
-	case EFG_LCP_SOLUTION:
-	  guiEfgSeqForm(ef, *cur_sup, this).SolveSetup(); 
-	  break;
+                case EFG_LCP_SOLUTION:
+                    EfgSeqFormG(ef, *cur_sup, this).SolveSetup(); 
+                    break;
 
-	case EFG_CSUM_SOLUTION:
-	  guiEfgCSum(ef, *cur_sup, this).SolveSetup(); 
-	  break;
+                case EFG_CSUM_SOLUTION:
+                    EfgCSumG(ef, *cur_sup, this).SolveSetup(); 
+                    break;
 
-	case EFG_PURENASH_SOLUTION:
-	  guiEfgPureNash(ef, *cur_sup, this).SolveSetup(); 
-	  break;
+                case EFG_PURENASH_SOLUTION:
+                    EfgEPureNashG(ef, *cur_sup, this).SolveSetup(); 
+                    break;
 
-	default:
-	  assert(0 && "Unknown EFG algorithm"); 
-	  break;
-	}
-      else     // solving by creating a NF, solving, and then projecting solutions back
-	switch (ESD.GetNfgAlgorithm()) {
-	case NFG_ENUMPURE_SOLUTION:
-	  guiEfgNfgPureNash(ef, *cur_sup, this).SolveSetup(); 
-	  break;
+                default:
+                    assert(0 && "Unknown EFG algorithm"); 
+                    break;
+                }
+            else    // solving by creating a NF, solving, and then projecting solutions back
+                switch (ESD.GetNfgAlgorithm())
+                {
+                case NFG_ENUMPURE_SOLUTION:
+                    EfgPureNashG(ef, *cur_sup, this).SolveSetup(); 
+                    break;
 
-	case NFG_LCP_SOLUTION:
-	  guiEfgLemke(ef, *cur_sup, this).SolveSetup(); 
-	  break;
+                case NFG_LCP_SOLUTION:
+                    EfgLemkeG(ef, *cur_sup, this).SolveSetup(); 
+                    break;
 
-	case NFG_LIAP_SOLUTION:
-	  guiEfgNfgLiap(ef, *cur_sup, this).SolveSetup(); 
-	  break;
+                case NFG_LIAP_SOLUTION:
+                    EfgNLiapG(ef, *cur_sup, this).SolveSetup(); 
+                    break;
 
-	case NFG_GOBITALL_SOLUTION:
-	  guiEfgGobitAll(ef, *cur_sup, this).SolveSetup(); 
-	  break;
-	  
-	case NFG_GOBIT_SOLUTION:
-	  guiEfgNGobit(ef, *cur_sup, this).SolveSetup(); 
-	  break;
+                case NFG_GOBITALL_SOLUTION:
+                    EfgGobitAllG(ef, *cur_sup, this).SolveSetup(); 
+                    break;
 
-	case NFG_SIMPDIV_SOLUTION:
-	  guiEfgSimpdiv(ef, *cur_sup, this).SolveSetup(); 
-	  break;
+                case NFG_GOBIT_SOLUTION:
+                    EfgNGobitG(ef, *cur_sup, this).SolveSetup(); 
+                    break;
 
-	case NFG_ENUMMIXED_SOLUTION:
-	  guiEfgEnum(ef, *cur_sup, this).SolveSetup(); 
-	  break;
+                case NFG_SIMPDIV_SOLUTION:
+                    EfgSimpdivG(ef, *cur_sup, this).SolveSetup(); 
+                    break;
 
-	case NFG_LP_SOLUTION:
-	  guiEfgZSum(ef, *cur_sup, this).SolveSetup(); 
-	  break;
+                case NFG_ENUMMIXED_SOLUTION:
+                    EfgEnumG(ef, *cur_sup, this).SolveSetup(); 
+                    break;
 
-	default:                    
-	  assert(0 && "Unknown NFG algorithm"); 
-	  break;
-	}
+                case NFG_LP_SOLUTION:
+                    EfgZSumG(ef, *cur_sup, this).SolveSetup(); 
+                    break;
+
+                default:                    
+                    assert(0 && "Unknown NFG algorithm"); 
+                    break;
+                }
+        }
+
+        GetMenuBar()->Check(SOLVE_STANDARD, FALSE); // using standard now
     }
-
-    GetMenuBar()->Check(SOLVE_STANDARD, FALSE); // using standard now
-  }
-  else { // SOLVE_SETUP_STANDARD
-    EfgSolveStandardDialog(ef, this);
-    GetMenuBar()->Check(SOLVE_STANDARD, TRUE); // using standard now
-  }
+    else // SOLVE_SETUP_STANDARD
+    {
+        EfgSolveStandardDialog(ef, this);
+        GetMenuBar()->Check(SOLVE_STANDARD, TRUE); // using standard now
+    }
 }
 
 // Solve
@@ -236,80 +241,54 @@ bool IsPerfectRecall(const Efg &, Infoset *&, Infoset *&);
 
 void EfgShow::Solve(void)
 {
-  // check that the game is perfect recall, if not give a warning
-  Infoset *bad1, *bad2;
-  if (!IsPerfectRecall(ef, bad1, bad2)) {
-    int completed = wxMessageBox("This game is not perfect recall\n"
-				 "Do you wish to continue?", 
-				 "Solve Warning", 
-				 wxOK | wxCANCEL | wxCENTRE, this);
-    if (completed != wxOK) return;
-  }
+    // check that the game is perfect recall, if not give a warning
+    Infoset *bad1, *bad2;
+    if (!IsPerfectRecall(ef, bad1, bad2))
+    {
+        int completed = wxMessageBox("This game is not perfect recall\n"
+                                     "Do you wish to continue?", 
+                                     "Solve Warning", 
+                                     wxOK|wxCANCEL|wxCENTRE, this);
+        if (completed != wxOK) return;
+    }
     
-  EfgSolveSettings ESS(ef);
-  Enable(FALSE);  // do not want users doing anything while solving
+    EfgSolveSettings ESS(ef);
+    Enable(FALSE);  // do not want users doing anything while solving
 
-  if (ESS.MarkSubgames()) 
-    tw->subgame_solve();
+    if (ESS.MarkSubgames()) 
+        tw->subgame_solve();
 
-  if (!ESS.MarkSubgames() && ESS.UseStandard()) 
-    tw->subgame_clear_all(); // for standard if not mark, must clear
+    if (!ESS.MarkSubgames() && ESS.UseStandard()) 
+        tw->subgame_clear_all(); // for standard if not mark, must clear
 
-  if (!ESS.UseNF())   // solving using the extensive form
-    switch (ESS.GetEfgAlgorithm()) {
-    case EFG_GOBIT_SOLUTION:
-      solns += guiEfgEGobit(ef, *cur_sup, this).Solve(); 
-      break;
-    case EFG_LIAP_SOLUTION:
-      solns += guiEfgLiap(ef, *cur_sup, this).Solve();
-      break;
-    case EFG_LCP_SOLUTION:
-      solns += guiEfgSeqForm(ef, *cur_sup, this).Solve();
-      break;
-    case EFG_PURENASH_SOLUTION:
-      solns += guiEfgPureNash(ef, *cur_sup, this).Solve();
-      break;
-    case EFG_CSUM_SOLUTION:
-      solns += guiEfgCSum(ef, *cur_sup, this).Solve();
-      break;
-    default: 
-      assert(0 && "Unknown EFG algorithm"); 
-      break;
-    }
-  else  {    // solving via the normal form
-    switch (ESS.GetNfgAlgorithm()) {
-    case NFG_ENUMPURE_SOLUTION:
-      solns += guiEfgNfgPureNash(ef, *cur_sup, this).Solve();
-      break;
-    case NFG_LCP_SOLUTION: 
-      solns += guiEfgLemke(ef, *cur_sup, this).Solve();
-      break;
-    case NFG_LIAP_SOLUTION:
-      solns += guiEfgNfgLiap(ef, *cur_sup, this).Solve();
-      break;
-    case NFG_GOBITALL_SOLUTION:
-      solns += guiEfgGobitAll(ef, *cur_sup, this).Solve();
-      break;
-    case NFG_GOBIT_SOLUTION: 
-      solns += guiEfgNGobit(ef, *cur_sup, this).Solve();
-      break;
-    case NFG_SIMPDIV_SOLUTION:
-      solns += guiEfgSimpdiv(ef, *cur_sup, this).Solve();
-      break;
-    case NFG_ENUMMIXED_SOLUTION:
-      solns += guiEfgEnum(ef, *cur_sup, this).Solve();
-      break;
-    case NFG_LP_SOLUTION:
-      solns += guiEfgZSum(ef, *cur_sup, this).Solve();
-      break;
-    default:
-      assert(0 && "Unknown NFG algorithm"); break;
-    }
+    if (!ESS.UseNF())   // solving using the EF
+        switch (ESS.GetEfgAlgorithm())
+        {
+        case EFG_GOBIT_SOLUTION:    solns += EfgEGobitG(ef, *cur_sup, this).Solve(); break;
+        case EFG_LIAP_SOLUTION:     solns += EfgELiapG(ef, *cur_sup, this).Solve(); break;
+        case EFG_LCP_SOLUTION:      solns += EfgSeqFormG(ef, *cur_sup, this).Solve(); break;
+        case EFG_PURENASH_SOLUTION: solns += EfgEPureNashG(ef, *cur_sup, this).Solve(); break;
+        case EFG_CSUM_SOLUTION:     solns += EfgCSumG(ef, *cur_sup, this).Solve(); break;
+        default:                    assert(0 && "Unknown EFG algorithm"); break;
+        }
+    else    // solving by creating a NF, solving, and then projecting solutions back
+        switch (ESS.GetNfgAlgorithm())
+        {
+        case NFG_ENUMPURE_SOLUTION: solns += EfgPureNashG(ef, *cur_sup, this).Solve(); break;
+        case NFG_LCP_SOLUTION:      solns += EfgLemkeG(ef, *cur_sup, this).Solve(); break;
+        case NFG_LIAP_SOLUTION:     solns += EfgNLiapG(ef, *cur_sup, this).Solve(); break;
+        case NFG_GOBITALL_SOLUTION: solns += EfgGobitAllG(ef, *cur_sup, this).Solve(); break;
+        case NFG_GOBIT_SOLUTION:    solns += EfgNGobitG(ef, *cur_sup, this).Solve(); break;
+        case NFG_SIMPDIV_SOLUTION:  solns += EfgSimpdivG(ef, *cur_sup, this).Solve(); break;
+        case NFG_ENUMMIXED_SOLUTION:solns += EfgEnumG(ef, *cur_sup, this).Solve(); break;
+        case NFG_LP_SOLUTION:       solns += EfgZSumG(ef, *cur_sup, this).Solve(); break;
+        default:                    assert(0 && "Unknown NFG algorithm"); break;
+        }
     ChangeSolution(solns.VisibleLength());
     Enable(TRUE);
     if (ESS.AutoInspect()) InspectSolutions(CREATE_DIALOG);
-  }
 }
+
 
 void EfgShow::InspectSolutions(int what)
 {
@@ -501,7 +480,7 @@ gNumber EfgShow::BranchProb(const Node *n, int br)
 
 // Solve Normal: create a NF from the EF
 #include "nfg.h"
-Nfg *MakeReducedNfg(const Efg &, const EFSupport &support);
+Nfg *MakeReducedNfg(const EFSupport &support);
 Nfg *MakeAfg(const Efg &);
 
 
