@@ -31,7 +31,7 @@ int main( void )
 
   gList< Instruction* > program;
 
-
+/*
   gout << "\n";
   machine->Push( d_1 );
   machine->Push( d_2 );
@@ -516,22 +516,22 @@ int main( void )
   program.Append( new Dump );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new EQU );
+  program.Append( new Equ );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new NEQ );
+  program.Append( new Neq );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new GTN );
+  program.Append( new Gtn );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new LTN );
+  program.Append( new Ltn );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new GEQ );
+  program.Append( new Geq );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new LEQ );
+  program.Append( new Leq );
   program.Append( new Dump );
 
   program.Append( new PushRef( "x" ) );
@@ -548,22 +548,22 @@ int main( void )
   program.Append( new Add );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new EQU );
+  program.Append( new Equ );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new NEQ );
+  program.Append( new Neq );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new GTN );
+  program.Append( new Gtn );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new LTN );
+  program.Append( new Ltn );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new GEQ );
+  program.Append( new Geq );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new LEQ );
+  program.Append( new Leq );
   program.Append( new Dump );
 
   program.Append( new Push<bool>( false ) );
@@ -855,16 +855,16 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
-  gout << "Testing Modulous\n";
+  gout << "Testing Modulus\n";
   machine->Push( (gInteger) 6 );
   machine->Push( (gInteger) 5 );
-  machine->Modulous();
+  machine->Modulus();
   machine->Dump();
 
-  gout << "Testing Modulous\n";
+  gout << "Testing Modulus\n";
   machine->Push( (gInteger) 5 );
   machine->Push( (gInteger) 5 );
-  machine->Modulous();
+  machine->Modulus();
   machine->Dump();
 
 
@@ -891,10 +891,11 @@ int main( void )
   gin >> cont;
 
 
+
   gout << "Testing Loops:\n";
   program.Append( new Push<double>( 101 ) );
   program.Append( new Push<double>( 100 ) );
-  program.Append( new GTN );
+  program.Append( new Gtn );
   program.Append( new IfGoto( 8 ) );
   program.Append( new Push<double>( 3 ) );
   program.Append( new Dump );
@@ -905,25 +906,25 @@ int main( void )
 
   program.Append( new Push<bool>( true ) );
   program.Append( new Push<bool>( true ) );
-  program.Append( new EQU );
+  program.Append( new Equ );
   program.Append( new Dump );
 
   program.Append( new Push<bool>( true ) );
   program.Append( new Push<bool>( true ) );
-  program.Append( new NEQ );
-  program.Append( new Dump );
-
-  program.Append( new Push<bool>( true ) );
-  program.Append( new Push<bool>( false ) );
-  program.Append( new EQU );
+  program.Append( new Neq );
   program.Append( new Dump );
 
   program.Append( new Push<bool>( true ) );
   program.Append( new Push<bool>( false ) );
-  program.Append( new NEQ );
+  program.Append( new Equ );
   program.Append( new Dump );
 
-  program.Append( new InitCallFunction( "Modulous" ) );
+  program.Append( new Push<bool>( true ) );
+  program.Append( new Push<bool>( false ) );
+  program.Append( new Neq );
+  program.Append( new Dump );
+
+  program.Append( new InitCallFunction( "Modulus" ) );
   program.Append( new Push<gInteger>( 6 ) );
   program.Append( new Bind );
   program.Append( new Push<gInteger>( 5 ) );
@@ -931,7 +932,7 @@ int main( void )
   program.Append( new CallFunction );
   program.Append( new Dump );
 
-  program.Append( new InitCallFunction( "Modulous" ) );
+  program.Append( new InitCallFunction( "Modulus" ) );
   program.Append( new Push<gInteger>( 6 ) );
   program.Append( new Bind );
   program.Append( new Push<gInteger>( 6 ) );
@@ -939,7 +940,62 @@ int main( void )
   program.Append( new CallFunction );
   program.Append( new Dump );
 
+  program.Dump( gout );
+
   machine->Execute( program );
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+  
+  machine->InitCallFunction( "Add" );
+  machine->Push( (double) 12 );
+  machine->Bind( "y" );
+  machine->Push( (double) 13 );
+  machine->Bind( "x" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "Add" );
+  machine->Push( (double) 12 );
+  machine->Bind( "x" );
+  machine->Push( (double) 13 );
+  machine->Bind( "y" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "Add" );
+  machine->Push( (double) 12 );
+  machine->Bind( "x" );
+  machine->Push( (double) 13 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "Add" );
+  machine->Push( (double) 12 );
+  machine->Bind();
+  machine->Push( (double) 13 );
+  machine->Bind( "y" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "Add" );
+  machine->Push( (double) 12 );
+  machine->Bind();
+  machine->Push( (double) 13 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+*/
+
+  machine->PushRef( "x" );
+  machine->GenerateNfg( 100 );
+  machine->Assign();
+  machine->PushRef( "x", "y" );
+  machine->Dump();
+
 
 
 

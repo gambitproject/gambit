@@ -321,6 +321,7 @@ CallFuncObj::CallFuncObj( FuncDescObj* func )
   int index;
 
   _Param = new Portion* [ _NumParams ];
+  _ParamDefined = new bool [ _NumParams ];
   _CurrParamIndex = 0;
   
   for( index = 0; index < _NumParams; index++ )
@@ -333,12 +334,14 @@ CallFuncObj::CallFuncObj( FuncDescObj* func )
     {
       _Param[ index ] = _ParamInfo[ index ].DefaultValue->Copy();
     }
+    _ParamDefined[ index ] = false;
   }
 }
 
 
 CallFuncObj::~CallFuncObj()
 {
+  delete[] _ParamDefined;
   delete[] _Param;
 }
 
@@ -349,22 +352,39 @@ void CallFuncObj::SetCurrParamIndex( const int index )
 }
 
 
-void CallFuncObj::SetCurrParam( Portion *param )
+bool CallFuncObj::SetCurrParam( Portion *param )
 {
+  bool result = true;
+
   if( _CurrParamIndex < _NumParams )
   {
-    if( _Param[ _CurrParamIndex ] != NO_DEFAULT_VALUE )
+    if( !_ParamDefined[ _CurrParamIndex ] )
     {
-      delete _Param[ _CurrParamIndex ];
+      if( _Param[ _CurrParamIndex ] != NO_DEFAULT_VALUE )
+      {
+	delete _Param[ _CurrParamIndex ];
+      }
+      _Param[ _CurrParamIndex ] = param;
+      _ParamDefined[ _CurrParamIndex ] = true;
+      _CurrParamIndex++;
     }
-    _Param[ _CurrParamIndex ] = param;
-    _CurrParamIndex++;
+    else
+    {
+      gerr << "CalFuncObj Error: multiple definitions found for parameter ";
+      gerr << "\"" << _ParamInfo[ _CurrParamIndex ].Name;
+      gerr << "\"\n while executing CallFunction() on\n";
+      gerr << "                  function \"" << _FuncName << "\" )\n";
+      result = false;
+    }
   }
   else // ( _CurrParamIndex >= _NumParams )
   {
     gerr << "CallFuncObj Error: too many parameters specified for\n";
-    gerr << "                          function \"" << _FuncName << "\"\n";
+    gerr << "                   function \"" << _FuncName << "\"\n";
+    result = false;
   }
+  
+  return result;
 }
 
 
@@ -382,8 +402,6 @@ PortionType CallFuncObj::GetCurrParamType( void ) const
   }
   else // ( _CurrParamIndex >= _NumParams )
   {
-    gerr << "CallFuncObj Error: too many parameters specified for\n";
-    gerr << "                   function \"" << _FuncName << "\"\n";
     return porERROR;
   }
 }

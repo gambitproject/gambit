@@ -13,6 +13,7 @@
 
 
 #include "gsm.h"
+#include "gambitio.h"
 
 
 //-------------------------------------------------------------------
@@ -57,6 +58,7 @@ class Instruction
 
   virtual Opcode Type( void ) const = 0;
   virtual bool Execute( GSM& gsm ) const = 0;
+  virtual void Output( gOutput& s ) const = 0;
 };
 
 
@@ -72,6 +74,7 @@ class NOP : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -86,6 +89,7 @@ class IfGoto : public Instruction
   int WhereTo( void ) const;
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -98,6 +102,7 @@ class Goto : public Instruction
   int WhereTo( void ) const;
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -112,6 +117,7 @@ template <class T> class Push : public Instruction
   Push( const T& value );
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -123,6 +129,7 @@ class PushList : public Instruction
   PushList( const int num_elements );
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -134,6 +141,7 @@ class PushRef : public Instruction
   PushRef( const gString& ref );
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -142,6 +150,7 @@ class Assign : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -150,6 +159,7 @@ class UnAssign : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -160,6 +170,7 @@ class Add : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM &gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -168,6 +179,7 @@ class Sub : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM &gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -176,6 +188,7 @@ class Mul : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM &gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -184,6 +197,7 @@ class Div : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM &gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -192,6 +206,7 @@ class Neg : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM &gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -203,6 +218,7 @@ class IntDiv : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM &gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 class Mod : public Instruction
@@ -210,6 +226,7 @@ class Mod : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM &gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -221,6 +238,7 @@ class Equ : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -229,6 +247,7 @@ class Neq : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -237,6 +256,7 @@ class Gtn : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -245,6 +265,7 @@ class Ltn : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -253,6 +274,7 @@ class Geq : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -261,6 +283,7 @@ class Leq : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -271,6 +294,7 @@ class AND : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -279,6 +303,7 @@ class OR : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -287,6 +312,7 @@ class NOT : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -300,6 +326,7 @@ class InitCallFunction : public Instruction
   InitCallFunction( const gString& func_name );
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -312,6 +339,7 @@ class Bind : public Instruction
   Bind( const gString& func_name );
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -320,16 +348,19 @@ class CallFunction : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
 //------------------------- miscellaneous instructions --------------------
 
-class Output : public Instruction
+
+class Display : public Instruction
 {
  public:
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -338,6 +369,7 @@ class Dump : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
 
@@ -346,7 +378,12 @@ class Flush : public Instruction
  public:
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
 };
 
+
+
+
+gOutput& operator << ( gOutput& s, Instruction* p );
 
 #endif // GSMINSTR_H

@@ -49,7 +49,7 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetParamInfo( 1, "y", porINTEGER, NO_DEFAULT_VALUE );
   gsm->AddFunction( FuncObj );
 
-  FuncObj = new FuncDescObj( (gString) "Modulous", GSM_Modulous, 2 );
+  FuncObj = new FuncDescObj( (gString) "Modulus", GSM_Modulus, 2 );
   FuncObj->SetParamInfo( 0, "x", porINTEGER, NO_DEFAULT_VALUE );
   FuncObj->SetParamInfo( 1, "y", porINTEGER, NO_DEFAULT_VALUE );
   gsm->AddFunction( FuncObj );
@@ -326,7 +326,7 @@ Portion* GSM_IntegerDivide( Portion** param )
 }
 
 
-Portion* GSM_Modulous( Portion** param )
+Portion* GSM_Modulus( Portion** param )
 {
   Portion* result = 0;
 

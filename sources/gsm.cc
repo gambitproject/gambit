@@ -363,26 +363,32 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
   gString&  ref = p->Value();
   gString   subvalue;
 
-#ifndef NDEBUG
-  if( !_RefTable->IsDefined( ref ) )
+  if( _RefTable->IsDefined( ref ) )
   {
-    gerr << "GSM Error: attempted to resolve an undefined reference\n";
-    gerr << "           \"" << ref << "\"\n";
-  }
-  assert( _RefTable->IsDefined( ref ) );
-#endif // NDEBUG
-
-  subvalue = ( (Reference_Portion*) p )->SubValue();
-  if( subvalue == "" )
-  {
-    result = (*_RefTable)( ref )->Copy();
+    subvalue = ( (Reference_Portion*) p )->SubValue();
+    if( subvalue == "" )
+    {
+      result = (*_RefTable)( ref )->Copy();
+    }
+    else
+    {
+      result = (*_RefTable)( ref );
+      result = ((Nfg_Portion*) result )->operator()( subvalue );
+      if( result != 0 )
+      {
+	result = result->Copy();
+      }
+      else
+      {
+	result = new Error_Portion;
+      }
+    }
   }
   else
   {
-    result = (*_RefTable)( ref );
-    result = ((Nfg_Portion*) result )->operator()( subvalue );
-    assert( result != 0 );
-    result = result->Copy();
+    gerr << "GSM Error: attempted to resolve an undefined reference\n";
+    gerr << "           \"" << ref << "\"\n";
+    result = new Error_Portion;
   }
   delete p;
 
@@ -397,16 +403,17 @@ Portion* GSM::_ResolvePrimaryRefOnly( Reference_Portion* p )
   gString&  ref = p->Value();
   gString   subvalue;
 
-#ifndef NDEBUG
-  if( !_RefTable->IsDefined( ref ) )
+  if( _RefTable->IsDefined( ref ) )
+  {
+    result = (*_RefTable)( ref );
+  }
+  else
   {
     gerr << "GSM Error: attempted to resolve an undefined reference\n";
     gerr << "           \"" << ref << "\"\n";
+    result = new Error_Portion;
   }
-  assert( _RefTable->IsDefined( ref ) );
-#endif // NDEBUG
 
-  result = (*_RefTable)( ref );
   return result;
 }
 
@@ -660,8 +667,11 @@ bool GSM::Bind( void )
     PrintPortionTypeSpec( gerr, param->Type() );
     result = false;
   }
-  func->SetCurrParam( param ); 
-
+  if( result == true )
+  {
+    result = func->SetCurrParam( param ); 
+  }
+  
   _CallFuncStack->Push( func );
   return result;
 }
@@ -687,19 +697,9 @@ bool GSM::Bind( const gString& param_name )
   
   if( new_index >= 0 )
   {
-    if( new_index >= func->GetCurrParamIndex() )
-    {
-      func->SetCurrParamIndex( new_index );
-      _CallFuncStack->Push( func );
-      result = Bind();
-    }
-    else // ( new_index < func->GetCurrParamIndex() )
-    {
-      gerr << "GSM Error: multiple definitions found for parameter ";
-      gerr << "\"" << param_name << "\" while executing\n";
-      gerr << "           CallFunction( \"" << func->FuncName() << "\", ... )\n";
-      result = false;
-    }
+    func->SetCurrParamIndex( new_index );
+    _CallFuncStack->Push( func );
+    result = Bind();
   }
   else // ( new_index == PARAM_NOT_FOUND )
   {
@@ -731,15 +731,13 @@ bool GSM::CallFunction( void )
   return_value = func->CallFunction();
   delete func;
 
-#ifndef NDEBUG
   if( return_value == 0 )
   {
     gerr << "GSM Error: an error occurred while attempting to execute\n";
     gerr << "           CallFunction( \"" << func->FuncName() << "\", ... )\n";
+    return_value = new Error_Portion;
+    result = false;
   }
-  assert( return_value != 0 );
-#endif // NDEBUG
-
   _Stack->Push( return_value );
 
   return result;
@@ -801,9 +799,10 @@ bool GSM::Execute( gList< Instruction* >& program )
 
     if( result == false )
     {
-      gerr << "GSM Error: instruction #" << program_counter << ", opcode: ";
-      gerr << instruction->Type() << ",\n";
+      gerr << "GSM Error: instruction #" << program_counter;
+      gerr << ": " << instruction << "\n";
       gerr << "           was not executed successfully\n";
+      gerr << "           Program abnormally terminated.\n";
       break;
     }
   }
@@ -826,13 +825,22 @@ void GSM::Output( void )
 {
   Portion*  p;
 
-  p = _Stack->Pop();
-  if( p->Type() == porREFERENCE )
+  assert( _Stack->Depth() >= 0 );
+
+  if( _Stack->Depth() == 0 )
   {
-    p = _ResolveRef( (Reference_Portion*) p );
+    gout << "Stack : NULL\n";
   }
-  p->Output( gout );
-  delete p;
+  else
+  {
+    p = _Stack->Pop();
+    if( p->Type() == porREFERENCE )
+    {
+      p = _ResolveRef( (Reference_Portion*) p );
+    }
+    p->Output( gout );
+    delete p;
+  }
 }
 
 
@@ -840,13 +848,22 @@ void GSM::Dump( void )
 {
   int  i;
 
-  for( i = _Stack->Depth() - 1; i >= 0; i-- )
+  assert( _Stack->Depth() >= 0 );
+
+  if( _Stack->Depth() == 0 )
   {
-    gout << "Stack element " << i << " : ";
-    Output();
+    gout << "Stack : NULL\n";
+  }
+  else
+  {
+    for( i = _Stack->Depth() - 1; i >= 0; i-- )
+    {
+      gout << "Stack element " << i << " : ";
+      Output();
+    }
   }
   gout << "\n";
-
+ 
   assert( _Stack->Depth() == 0 );
 }
 

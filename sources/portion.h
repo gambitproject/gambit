@@ -78,6 +78,15 @@ class Portion
 
 
 
+class Error_Portion : public Portion
+{
+ public:
+  PortionType Type         ( void ) const;
+  Portion*    Copy         ( void ) const;
+  void        Output       ( gOutput& s ) const;
+};
+
+
 template <class T> class numerical_Portion : public Portion
 {
  private:

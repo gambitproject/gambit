@@ -67,6 +67,7 @@ class CallFuncObj : public FuncDescObj
 {
  private:
   Portion**  _Param;
+  bool*      _ParamDefined;
   int        _CurrParamIndex;
 
  public:
@@ -74,7 +75,7 @@ class CallFuncObj : public FuncDescObj
   ~CallFuncObj();
 
   void        SetCurrParamIndex ( const int index );
-  void        SetCurrParam      ( Portion *new_param );
+  bool        SetCurrParam      ( Portion *new_param );
 
   int         GetCurrParamIndex ( void ) const;
   PortionType GetCurrParamType  ( void ) const;

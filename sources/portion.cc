@@ -77,6 +77,22 @@ bool Portion::Operation( Portion* p, OperationMode mode )
 
 
 
+
+
+//-----------------------------------------------------------------------
+//                          error type 
+//-----------------------------------------------------------------------
+
+PortionType Error_Portion::Type( void ) const
+{ return porERROR; }
+
+Portion* Error_Portion::Copy( void ) const
+{ return new Error_Portion; }
+
+void Error_Portion::Output( gOutput& s ) const
+{ s << " Error\n"; }
+
+
 //-----------------------------------------------------------------------
 //                        numerical type 
 //-----------------------------------------------------------------------
@@ -671,16 +687,16 @@ Portion* Nfg_Portion::operator()( const gString& ref ) const
 {
   Portion* result = 0;
 
-#ifndef NDEBUG
-  if( !_RefTable->IsDefined( ref ) )
+  if( _RefTable->IsDefined( ref ) )
+  {
+    result = (*_RefTable)( ref );
+  }
+  else
   {
     gerr << "Portion Error: attempted to access an undefined reference\n";
     gerr << "               \"" << ref << "\"\n";
   }
-  assert( _RefTable->IsDefined( ref ) );
-#endif // NDEBUG
 
-  result = (*_RefTable)( ref );
   return result;
 }
 
