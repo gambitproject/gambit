@@ -52,23 +52,5 @@ public:
     { return (m_domPrecision == 0) ? precDOUBLE : precRATIONAL; }
 };
 
-
-class SupportRemoveDialog: public wxDialogBox {
-private:
-  int num_sups;
-  wxListBox *sups_item;
-  int completed;
-	
-  static void all_func(wxCheckBox &ob,wxEvent &);
-  static void ok_func(wxButton &ob,wxEvent &);
-  static void cancel_func(wxButton &ob,wxEvent &);
-
-public:
-  SupportRemoveDialog(wxWindow *parent,int num_sups_);
-
-  gArray<bool> Selected(void);
-  int Completed(void) { return completed; }
-};
-
 #endif   // DLELIM_H
 

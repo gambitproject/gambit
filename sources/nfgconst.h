@@ -18,6 +18,12 @@
 #define NFG_SOLVE_STANDARD_MENU         145
 #define NFG_SOLVE_GAMEINFO_MENU         155
 
+#define NFG_SUPPORT_UNDOMINATED         160
+#define NFG_SUPPORT_NEW                 161
+#define NFG_SUPPORT_EDIT                162
+#define NFG_SUPPORT_DELETE              163
+#define NFG_SUPPORT_VIEW                164
+
 #define NFG_PREFS_OUTCOMES_MENU         350
 
 #define NFG_SOLVE_CUSTOM                499

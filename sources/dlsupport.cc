@@ -9,8 +9,9 @@
 
 #include "garray.h"
 #include "gambit.h"
+#include "nfgshow.h"
 #include "dlelim.h"
-#include "dlnfgsupport.h"
+#include "dlnfgsupportview.h"
 
 const char *SOLN_SECT = "Soln-Defaults";
 
@@ -122,173 +123,43 @@ Bool dialogElim::OnClose(void)
 }
 
 //=========================================================================
-//               class SupportRemoveDialog: Member functions
+//               class dialogNfgSupportView: Member functions
 //=========================================================================
 
-void SupportRemoveDialog::all_func(wxCheckBox &ob,wxEvent &)
+dialogNfgSupportView::dialogNfgSupportView(const gList<NFSupport *> &p_supports,
+					   NFSupport *p_current,
+					   wxWindow *p_parent /*=0*/)
+  : guiAutoDialog(p_parent, "Select Support")
 {
-  SupportRemoveDialog *parent=(SupportRemoveDialog *)ob.GetClientData();
-  for (int i=1;i<=parent->num_sups;i++)
-    parent->sups_item->SetSelection(i-1,ob.GetValue());
-}
-
-void SupportRemoveDialog::ok_func(wxButton &ob,wxEvent &)
-{
-  SupportRemoveDialog *parent=(SupportRemoveDialog *)ob.GetClientData();
-  parent->Show(FALSE);
-  parent->completed=wxOK;
-}
-
-void SupportRemoveDialog::cancel_func(wxButton &ob,wxEvent &)
-{
-  SupportRemoveDialog *parent=(SupportRemoveDialog *)ob.GetClientData();
-  parent->Show(FALSE);
-  parent->completed=wxCANCEL;
-}
-
-SupportRemoveDialog::SupportRemoveDialog(wxWindow *parent, int num_sups_)
-  : wxDialogBox(parent,"Remove Support(s)",TRUE), num_sups(num_sups_)
-{
-  wxStringList *support_list=wxStringListInts(num_sups);
-  sups_item=new wxListBox(this,0,"Supports",wxMULTIPLE,-1,-1,-1,-1,num_sups,support_list->ListToArray(),wxLB_MULTIPLE	);
-  wxCheckBox *all_item=new wxCheckBox(this,(wxFunction)all_func,"All");
-  all_item->SetClientData((char *)this);
-  NewLine();
-  wxButton *ok_button=new wxButton(this,(wxFunction)ok_func,"Ok");
-  wxButton *cancel_button=new wxButton(this,(wxFunction)cancel_func,"Cancel");
-  ok_button->SetClientData((char *)this);
-  cancel_button->SetClientData((char *)this);
-  Fit();
-  Show(TRUE);
-}
-
-gArray<bool> SupportRemoveDialog::Selected(void)
-{
-  gArray<bool> selected(num_sups);
-  for (int i=1;i<=num_sups;i++)
-    selected[i]=(sups_item->Selected(i-1)) ? true : false;
-  return selected;
-}
-
-
-//=========================================================================
-//               class dialogNfgSupportInspect: Member functions
-//=========================================================================
-
-void dialogNfgSupportInspect::OnNewSupport(void)
-{
-  if (bns->MakeSupport()) {
-    cur_item->Append(ToText(sups.Length()));
-    cur_item->SetSize(-1,-1,-1,-1);
-  }
-}
-
-// Note can not delete the first support
-void dialogNfgSupportInspect::OnRemoveSupport(void)
-{
-  int i;
-  SupportRemoveDialog SRD(this,sups.Length());
-  if (SRD.Completed()==wxOK)  {
-    gArray<bool> selected(SRD.Selected());
-    bool revert=false;
-    for (i=sups.Length();i>=2;i--)
-      if (selected[i])  {
-	delete sups.Remove(i);
-	if (i==init_cur && revert==false)  {
-	  wxMessageBox("Current support deleted.\nReverting to full support");
-	  revert=true;
-	}
-      }
-    cur_item->Clear();
-    for (i=1;i<=sups.Length();i++)
-      {cur_item->Append(ToText(i));}
-    cur_item->SetSize(-1,-1,-1,-1);
-    cur_item->SetSelection(0);
-    if (revert) bns->ChangeSupport(UPDATE_DIALOG);
-  }
-}
-
-void dialogNfgSupportInspect::OnChangeSupport(void)
-{
-  bns->ChangeSupport(UPDATE_DIALOG);
-  init_cur = Current();
-}
-
-void dialogNfgSupportInspect::OnCur(int cur_sup)
-{
-  cur_dim->SetValue(array_to_string(sups[cur_sup]->NumStrats()));
-}
-
-gText dialogNfgSupportInspect::array_to_string(const gArray<int> &a)
-{
-  gText tmp='(';
-  for (int i=1;i<=a.Length();i++)
-    tmp+=ToText(a[i])+((i==a.Length()) ? ")" : ",");
-  return tmp;
-}
-
-dialogNfgSupportInspect::dialogNfgSupportInspect(gList<NFSupport *> &p_supports,
-					       int cur_sup, NfgShow *bns_,
-					       wxWindow *parent /*=0*/)
-  : wxDialogBox(parent,"Select Support"), bns(bns_), sups(p_supports)
-{
-  init_cur=cur_sup;
-  wxForm *f=new wxForm(0);
-  SetLabelPosition(wxVERTICAL);
-  cur_dim=new wxText(this,0,"Current",
-		     array_to_string(sups[cur_sup]->NumStrats()),
-		     -1,-1,80,-1,wxREADONLY);
-
-  support_list = new wxStringList;
-  for (int i = 1; i <= p_supports.Length(); i++) {
-    const gText &name = p_supports[i]->GetName();
-    if (name == "")
-      support_list->Add("Support " + ToText(i));
-    else
-      support_list->Add(name);
+  m_supportList = new wxListBox(this, 0, "Support", wxSINGLE, 1, 1);
+  for (int support = 1; support <= p_supports.Length(); support++) {
+    m_supportList->Append(ToText(support) + ": " + 
+			  p_supports[support]->GetName());
+    if (p_supports[support] == p_current) {
+      m_supportList->SetSelection(support - 1);
+    }
   }
 
-  cur_str = new char[100];
-  if (p_supports[cur_sup]->GetName() != "")
-    strncpy(cur_str, "Support " + ToText(cur_sup), 99);
-  else
-    strncpy(cur_str, p_supports[cur_sup]->GetName(), 99);
+  m_okButton->GetConstraints()->top.SameAs(m_supportList, wxBottom, 10);
+  m_okButton->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
 
-  wxFormItem *cur_fitem=wxMakeFormString("",&cur_str,wxFORM_CHOICE,
-					 new wxList(wxMakeConstraintStrings(support_list),0));
-  f->Add(cur_fitem);
-  f->Add(wxMakeFormNewLine());
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->left.SameAs(m_okButton, wxRight, 10);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
 
-  wxFormItem *newsup_fitem=wxMakeFormButton("New",
-					    (wxFunction) CallbackNew);
-  f->Add(newsup_fitem);
-  wxFormItem *rmvsup_fitem=wxMakeFormButton("Remove",
-					    (wxFunction) CallbackRemove);
-  f->Add(rmvsup_fitem);
-  f->Add(wxMakeFormNewLine());
-  wxFormItem *close_fitem=wxMakeFormButton("Close",
-					   (wxFunction) CallbackClose);
-  f->Add(close_fitem);
-  wxFormItem *cngsup_fitem=wxMakeFormButton("Apply",
-					    (wxFunction) CallbackChange);
-  f->Add(cngsup_fitem);
-  wxFormItem *help_fitem=wxMakeFormButton("?",(wxFunction) CallbackHelp);
-  f->Add(help_fitem);
-  f->AssociatePanel(this);
-  cur_item=(wxChoice *)cur_fitem->GetPanelItem();
-  cur_item->Callback((wxFunction) CallbackCurrent);
-  cur_item->SetClientData((char *)this);
-  ((wxButton *)newsup_fitem->GetPanelItem())->SetClientData((char *)this);
-  ((wxButton *)rmvsup_fitem->GetPanelItem())->SetClientData((char *)this);
-  ((wxButton *)cngsup_fitem->GetPanelItem())->SetClientData((char *)this);
-  ((wxButton *)help_fitem->GetPanelItem())->SetClientData((char *)this);
-  ((wxButton *)close_fitem->GetPanelItem())->SetClientData((char *)bns);
-  Fit();
-  Show(TRUE);
-}
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_helpButton->GetConstraints()->height.AsIs();
 
-Bool dialogNfgSupportInspect::OnClose(void)
-{
-  bns->ChangeSupport(DESTROY_DIALOG);
-  return FALSE;
+  m_supportList->SetConstraints(new wxLayoutConstraints);
+  m_supportList->GetConstraints()->left.SameAs(m_okButton, wxLeft);
+  m_supportList->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_supportList->GetConstraints()->right.SameAs(m_helpButton, wxRight);
+  m_supportList->GetConstraints()->height.AsIs();
+  
+  Go();
 }

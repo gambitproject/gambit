@@ -62,13 +62,9 @@ private:
 
   int cur_soln;
 
-  // we can display NF for one support, while working on a different support
-  // disp_sup always corresponds to the support currently displayed.  cur_sup
-  // corresponds to the support that will be operated upon by solution algs.
   NFSupport *cur_sup;
   wxFrame     *pframe;
   NormalSpread    *spread;
-  dialogNfgSupportInspect *support_dialog;
   int pl1, pl2;
   int rows, cols;
   NfgSolnShow *soln_show; // need to keep track of this to kill at the end
@@ -106,7 +102,12 @@ public:
 
   // Supports and domination
   int SolveElimDom(void);
-  void ChangeSupport(int what);
+
+  void SupportNew(void);
+  void SupportEdit(void);
+  void SupportDelete(void);
+  void SupportView(void);
+
   NFSupport *MakeSupport(void);
   
   void OutcomeNew(void);

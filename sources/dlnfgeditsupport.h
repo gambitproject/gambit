@@ -1,13 +1,13 @@
 //
-// FILE: dlnfgnewsupport.h -- Dialog for creating NFSupports
+// FILE: dlnfgeditsupport.h -- Dialog for editing
 //
 // $Id$
 //
 
-#ifndef DLNFGNEWSUPPORT_H
-#define DLNFGNEWSUPPORT_H
+#ifndef DLNFGEDITSUPPORT_H
+#define DLNFGEDITSUPPORT_H
 
-class dialogNfgNewSupport : public guiAutoDialog {
+class dialogNfgEditSupport : public guiAutoDialog {
 private:
   const Nfg &m_nfg;
   NFSupport m_support;
@@ -22,10 +22,10 @@ private:
   void OnStrategy(int);
 
 public:
-  dialogNfgNewSupport(const Nfg &, wxWindow *);
-  virtual ~dialogNfgNewSupport() { }
+  dialogNfgEditSupport(const NFSupport &, wxWindow *);
+  virtual ~dialogNfgEditSupport() { }
 
-  NFSupport *CreateSupport(void) const;
+  const NFSupport &Support(void) const { return m_support; }
 };
 
-#endif  // DLNFGNEWSUPPORT_H
+#endif  // DLNFGEDITSUPPORT_H

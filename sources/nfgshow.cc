@@ -14,13 +14,13 @@
 #include "gambit.h"
 #include "dlnfgpayoff.h"
 #include "dlnfgoutcome.h"
-#include "dlnfgnewsupport.h"
+#include "dlnfgeditsupport.h"
 #include "dlnfgplayers.h"
 #include "dlstrategies.h"
 #include "dlnfgsave.h"
 
 #include "dlelim.h"
-#include "dlnfgsupport.h"
+#include "dlnfgsupportview.h"
 
 //======================================================================
 //                 NfgShow: Constructor and destructor
@@ -38,7 +38,6 @@ NfgShow::NfgShow(Nfg &N, EfgNfgInterface *efg, wxFrame *pframe_)
   
   spread = new NormalSpread(cur_sup, pl1, pl2, this, pframe);
 
-  support_dialog = 0;  // no support dialog yet
   soln_show      = 0;  // no solution inspect window yet.
   SetPlayers(pl1, pl2, true);
 
@@ -430,8 +429,6 @@ void NfgShow::OnOk(void)
   if (soln_show) {
     soln_show->OnOk();
   }
-
-  ChangeSupport(DESTROY_DIALOG);
 
   spread->Close();
   delete &nf;
@@ -826,13 +823,15 @@ void NfgShow::SetPlayers(int _pl1, int _pl2, bool first_time)
 
 NFSupport *NfgShow::MakeSupport(void)
 {
-  dialogNfgNewSupport dialog(nf, spread);
+  /*
+  dialogNfgEditSupport dialog(nf, spread);
 
   if (dialog.Completed() == wxOK) {
     NFSupport *support = dialog.CreateSupport();
     supports.Append(support);
     return support;
   }
+  */
   return 0;
 }
 
@@ -1023,6 +1022,7 @@ int NfgShow::SolveElimDom(void)
   return 0;
 }
 
+#ifdef UNUSED
 // Support Inspect
 void NfgShow::ChangeSupport(int what)
 {
@@ -1046,6 +1046,81 @@ void NfgShow::ChangeSupport(int what)
       SetPlayers(pl1, pl2);
     }
   }
+}
+#endif  // UNUSED
+
+void NfgShow::SupportNew(void)
+{
+  dialogNfgEditSupport dialog(NFSupport(nf), spread);
+
+  if (dialog.Completed() == wxOK) {
+    try {
+      NFSupport *support = new NFSupport(dialog.Support());
+      supports.Append(support);
+
+      ChangeSolution(0);  // chances are, the current solution will not work.
+      cur_sup = support;
+      SetPlayers(pl1, pl2);
+    }
+    catch (gException &E) {
+      guiExceptionDialog(E.Description(), spread);
+    }
+  }
+}
+
+void NfgShow::SupportEdit(void)
+{
+  dialogNfgEditSupport dialog(*cur_sup, spread);
+
+  if (dialog.Completed() == wxOK) {
+    try {
+      *cur_sup = dialog.Support();
+
+      ChangeSolution(0);  // chances are, the current solution will not work.
+      SetPlayers(pl1, pl2);
+    }
+    catch (gException &E) {
+      guiExceptionDialog(E.Description(), spread);
+    }
+  }
+}
+
+void NfgShow::SupportDelete(void)
+{
+  if (supports.Length() == 1)  return;
+
+  dialogNfgSupportView dialog(supports, cur_sup, spread);
+
+  if (dialog.Completed() == wxOK) {
+    try {
+      delete supports.Remove(dialog.Selected());
+      if (!supports.Find(cur_sup)) {
+	cur_sup = supports[1];
+	ChangeSolution(0);
+	SetPlayers(pl1, pl2);
+      }
+    }
+    catch (gException &E) {
+      guiExceptionDialog(E.Description(), spread);
+    }
+  }
+}
+
+void NfgShow::SupportView(void)
+{
+  dialogNfgSupportView dialog(supports, cur_sup, spread);
+
+  if (dialog.Completed() == wxOK) {
+    try {
+      cur_sup = supports[dialog.Selected()];
+      ChangeSolution(0);  // chances are, the current solution will not work.
+      SetPlayers(pl1, pl2);
+    }
+    catch (gException &E) {
+      guiExceptionDialog(E.Description(), spread);
+    }
+  }
+
 }
 
 void NfgShow::Print(void)
@@ -1581,8 +1656,8 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
   
   wxMenu *edit_menu = new wxMenu;
   edit_menu->Append(NFG_EDIT_GAME, "&Label", "Set the label of the game");
-  edit_menu->Append(NFG_EDIT_STRATS,    "&Strats",    "Edit player strategies");
-  edit_menu->Append(NFG_EDIT_PLAYERS,   "&Players",   "Edit players");
+  edit_menu->Append(NFG_EDIT_PLAYERS, "&Players", "Edit player names");
+  edit_menu->Append(NFG_EDIT_STRATS, "&Strategies", "Edit strategy names");
 
   wxMenu *editOutcomesMenu = new wxMenu;
   editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_NEW, "&New",
@@ -1601,10 +1676,16 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
 		    "Set/Edit outcomes");
 
   wxMenu *supports_menu = new wxMenu;
-  supports_menu->Append(NFG_SOLVE_COMPRESS_MENU, "&Undominated",
+  supports_menu->Append(NFG_SUPPORT_UNDOMINATED, "&Undominated",
 			"Find undominated strategies");
-  supports_menu->Append(NFG_SOLVE_SUPPORTS_MENU, "&Select",
-			"Select and create supports");
+  supports_menu->Append(NFG_SUPPORT_NEW, "&New",
+			"Create a new support");
+  supports_menu->Append(NFG_SUPPORT_EDIT, "&Edit",
+			"Edit the currently displayed support");
+  supports_menu->Append(NFG_SUPPORT_DELETE, "&Delete",
+			"Delete a support");
+  supports_menu->Append(NFG_SUPPORT_VIEW, "&View",
+			"Change the viewed support");
 
   wxMenu *solve_menu = new wxMenu;
   solve_menu->Append(NFG_SOLVE_STANDARD_MENU,  "S&tandard...",
@@ -1912,12 +1993,20 @@ void NormalSpread::OnMenuCommand(int id)
       parent->InspectSolutions(CREATE_DIALOG);
       break;
 
-    case NFG_SOLVE_COMPRESS_MENU: 
+    case NFG_SUPPORT_UNDOMINATED:
       parent->SolveElimDom();
       break;
-
-    case NFG_SOLVE_SUPPORTS_MENU: 
-      parent->ChangeSupport(CREATE_DIALOG);
+    case NFG_SUPPORT_NEW:
+      parent->SupportNew();
+      break;
+    case NFG_SUPPORT_EDIT:
+      parent->SupportEdit();
+      break;
+    case NFG_SUPPORT_DELETE:
+      parent->SupportDelete();
+      break;
+    case NFG_SUPPORT_VIEW:
+      parent->SupportView();
       break;
       
     case NFG_SOLVE_STANDARD_MENU: 

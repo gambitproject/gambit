@@ -16,7 +16,7 @@
 #include "dlnfgsave.h"
 #include "dlnfgplayers.h"
 #include "dlstrategies.h"
-#include "dlnfgnewsupport.h"
+#include "dlnfgeditsupport.h"
 
 //=========================================================================
 //                 class dialogNfgPayoffs: Member functions 
@@ -289,12 +289,13 @@ void dialogStrategies::CallbackStrategy(wxListBox &p_object,
 }
 
 //=========================================================================
-//                   dialogNfgNewSupport: Member functions
+//                   dialogNfgEditSupport: Member functions
 //=========================================================================
 
-dialogNfgNewSupport::dialogNfgNewSupport(const Nfg &p_nfg, wxWindow *p_parent)
-  : guiAutoDialog(p_parent, "Define support"),
-    m_nfg(p_nfg), m_support(m_nfg)
+dialogNfgEditSupport::dialogNfgEditSupport(const NFSupport &p_support,
+					   wxWindow *p_parent)
+  : guiAutoDialog(p_parent, "Edit support"),
+    m_nfg(p_support.Game()), m_support(p_support)
 {
   SetLabelPosition(wxVERTICAL);
   m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player");
@@ -341,20 +342,21 @@ dialogNfgNewSupport::dialogNfgNewSupport(const Nfg &p_nfg, wxWindow *p_parent)
   Go();
 }
 
-void dialogNfgNewSupport::OnPlayer(int p_number)
+void dialogNfgEditSupport::OnPlayer(int p_number)
 {
   m_playerItem->SetSelection(p_number);
   NFPlayer *player = m_nfg.Players()[p_number+1];
   m_strategyItem->Clear();
   for (int st = 1; st <= player->NumStrats(); st++) {
-    m_strategyItem->Append(ToText(st));
+    m_strategyItem->Append(ToText(st) + ": " +
+			   player->Strategies()[st]->Name());
     if (m_support.Find(player->Strategies()[st])) {
       m_strategyItem->SetSelection(st - 1, TRUE);
     }
   }
 }
 
-void dialogNfgNewSupport::OnStrategy(int /*p_strategy*/)
+void dialogNfgEditSupport::OnStrategy(int /*p_strategy*/)
 {
   int player = m_playerItem->GetSelection() + 1;
   for (int st = 0; st < m_strategyItem->Number(); st++) {
@@ -368,22 +370,17 @@ void dialogNfgNewSupport::OnStrategy(int /*p_strategy*/)
   }
 }
 
-NFSupport *dialogNfgNewSupport::CreateSupport(void) const
+void dialogNfgEditSupport::CallbackPlayer(wxListBox &p_object,
+					  wxCommandEvent &p_event)
 {
-  return new NFSupport(m_support);
-}
-
-void dialogNfgNewSupport::CallbackPlayer(wxListBox &p_object,
-					 wxCommandEvent &p_event)
-{
-  ((dialogNfgNewSupport *) p_object.wxEvtHandler::GetClientData())->
+  ((dialogNfgEditSupport *) p_object.wxEvtHandler::GetClientData())->
     OnPlayer(p_event.commandInt);
 }
 
-void dialogNfgNewSupport::CallbackStrategy(wxListBox &p_object, 
-					   wxCommandEvent &p_event)
+void dialogNfgEditSupport::CallbackStrategy(wxListBox &p_object, 
+					    wxCommandEvent &p_event)
 {
-  ((dialogNfgNewSupport *) p_object.wxEvtHandler::GetClientData())->
+  ((dialogNfgEditSupport *) p_object.wxEvtHandler::GetClientData())->
     OnStrategy(p_event.commandInt);
 }
 
