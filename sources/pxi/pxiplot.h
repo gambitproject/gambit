@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Implementation of PXI plot base class
+// Interface to PXI plot base class
 //
 
 #ifndef PXIPLOT_H
@@ -103,21 +103,16 @@ protected:
   PxiLegendProperties m_legendProp;
   PxiOverlayProperties m_overlayProp;
 
-  int Width(void) const 
-    {if(m_landscape) return m_height; return m_width;}
-  int Height(void) const 
-    {if(m_landscape) return m_width; return m_height;}
-  void SetLandscape(bool flag) 
-    {m_landscape = flag;}
-  bool GetLandscape(void) 
-    {return m_landscape;}
-  double GetScale(void) const {return m_scale;} 
+  int Width(void) const { return (m_landscape) ? m_height : m_width; }
+  int Height(void) const { return (m_landscape) ? m_width : m_height; }
+  void SetLandscape(bool p_flag) { m_landscape = p_flag; }
+  bool GetLandscape(void) const { return m_landscape; }
+  double GetScale(void) const { return m_scale; } 
   void SetScale(double x);
 
-  virtual void DoPlot(wxDC& dc,
+  virtual void DoPlot(wxDC &dc,
 		      int x0, int y0, int cw,int ch, int level=1) = 0;
-  void PlotLabels(wxDC &dc,int ch,int cw);
-
+  void PlotLabels(wxDC &dc, int ch, int cw);
   void DrawToken(wxDC &dc, int x, int y, int st);
 
   // Event handlers
@@ -129,11 +124,9 @@ public:
 	  const ExpData &p_expData);
   virtual ~PxiPlot();
 
-  void Update(wxDC& dc,int device);
-
   void Render(void);
+  void Update(wxDC &dc, int device);
 
-  //  wxString PxiName(void) const { return m_header.FileName(); }
   const FileHeader &Header(void) { return m_header; }
 
   // Interface to property classes

@@ -7,12 +7,6 @@
 // Implementation of PXI plot base class
 //
 
-#include <math.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
 #include "wx/wxprec.h"
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
@@ -23,6 +17,89 @@
 #include "expdata.h"
 #include "equtrac.h"
 #include "pxi.h"
+
+//======================================================================
+//                     class PxiPlot: Lifecycle
+//======================================================================
+
+PxiPlot::PxiPlot(wxWindow *p_parent, const wxPoint &p_position,
+		 const wxSize &p_size,
+		 const FileHeader &p_header, int p_page,
+		 const ExpData &p_expData)
+  : wxScrolledWindow(p_parent, -1, p_position, p_size),
+    m_header(p_header),
+    m_drawSettings(m_header, p_page), m_expData(p_expData),
+    m_landscape(false), m_width(850/2), m_height(1100/2), m_scale(1.0), 
+    m_dc(new wxMemoryDC), m_page(p_page)
+{
+  m_lambdaAxisProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
+  m_lambdaAxisProp.m_color = *wxBLUE;
+  m_lambdaAxisProp.m_scale.m_minimum =
+    wxString::Format("%f", p_header.EStart());
+  m_lambdaAxisProp.m_scale.m_maximum = 
+    wxString::Format("%f", p_header.EStop());
+  m_lambdaAxisProp.m_scale.m_divisions = 10;
+  m_lambdaAxisProp.m_scale.m_useLog = true;
+  m_lambdaAxisProp.m_scale.m_canUseLog = true;
+  m_lambdaAxisProp.m_display.m_shown = true;
+  m_lambdaAxisProp.m_display.m_ticks = true;
+  m_lambdaAxisProp.m_display.m_numbers = true;
+
+  m_probAxisProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
+  m_probAxisProp.m_color = *wxBLUE;
+  m_probAxisProp.m_scale.m_minimum = "0.0";
+  m_probAxisProp.m_scale.m_maximum = "1.0";
+  m_probAxisProp.m_scale.m_divisions = 10;
+  m_probAxisProp.m_scale.m_useLog = false;
+  m_probAxisProp.m_scale.m_canUseLog = false;
+  m_probAxisProp.m_display.m_shown = true;
+  m_probAxisProp.m_display.m_ticks = true;
+  m_probAxisProp.m_display.m_numbers = true;
+
+  m_titleProp.m_title = wxString::Format("Plot %d", p_page);
+  m_titleProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
+  m_titleProp.m_color = *wxBLUE;
+
+  m_legendProp.m_showLegend = true;
+  m_legendProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
+  m_legendProp.m_color = *wxBLUE;
+  
+  m_overlayProp.m_token = false;
+  m_overlayProp.m_lines = false;
+  m_overlayProp.m_tokenSize = 4;
+  m_overlayProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
+
+  // fit to 8 1/2 x 11 inch  
+  SetScale(1.0);
+
+  m_dc->SelectObject(wxBitmap(2000, 2000));
+  Show(true);
+}
+
+PxiPlot::~PxiPlot()
+{
+  delete m_dc;
+}
+
+
+//======================================================================
+//                   class PxiPlot: Event handlers
+//======================================================================
+
+BEGIN_EVENT_TABLE(PxiPlot, wxScrolledWindow)
+  EVT_PAINT(PxiPlot::OnPaint)
+END_EVENT_TABLE()
+
+void PxiPlot::OnPaint(wxPaintEvent &)
+{
+  wxPaintDC dc(this);
+  dc.Blit(0, 0, GetSize().GetWidth(), GetSize().GetHeight(),
+	  m_dc, 0, 0);
+}
+
+//======================================================================
+//               class PxiPlot: Plot-drawing routines
+//======================================================================
 
 void PxiPlot::PlotLabels(wxDC &dc, int ch,int cw)
 {
@@ -37,14 +114,15 @@ void PxiPlot::PlotLabels(wxDC &dc, int ch,int cw)
   }
 }
 
-
-//********************************** DRAW TOKEN ******************************
-// Draw a token.  If we are using COLOR_PROB mode, a different token is drawn for
-// each strategy #.  Otherwise, we just draw an ellipse.  Note that each token is
-// a 8x8 image.
-#define		NUM_TOKENS		7
+//
+// Draws a token.
+// If we are using COLOR_PROB mode, a different token is drawn for
+// each strategy #.  Otherwise, we just draw an ellipse.  
+//
 void PxiPlot::DrawToken(wxDC &dc, int x, int y, int st)
 {
+  const int NUM_TOKENS = 7;
+
   int ts = m_overlayProp.m_tokenSize;
   if (m_drawSettings.GetColorMode()==COLOR_PROB) {
     dc.SetPen(*wxBLACK_PEN);
@@ -73,8 +151,9 @@ void PxiPlot::DrawToken(wxDC &dc, int x, int y, int st)
       assert(0);	// if we got here, something is very wrong. make sure # of cases=NUM_TOKENS
     }
   }
-  else
+  else {
     dc.DrawEllipse(x-ts,y-ts,2*ts,2*ts);
+  }
 }
 
 void PxiPlot::Update(wxDC& dc,int device)
@@ -154,88 +233,6 @@ void PxiPlot::Update(wxDC& dc,int device)
 
   DoPlot(dc, XOFF, ch-XOFF, cw-2*XOFF, ch-2*XOFF, 1);
   wxEndBusyCursor();
-}
-
-#ifdef UNUSED
-void PxiPlot::SetExpDatafile(const wxString &p_expDatafile)
-{ 
-  m_expDatafile = p_expDatafile;
-  /*
-  if(exp_data) delete exp_data;
-  exp_data = NULL;
-  exp_data = new ExpData(P); 
-  */
-}
-#endif  // UNUSED
-
-BEGIN_EVENT_TABLE(PxiPlot, wxScrolledWindow)
-  EVT_PAINT(PxiPlot::OnPaint)
-END_EVENT_TABLE()
-
-PxiPlot::PxiPlot(wxWindow *p_parent, const wxPoint &p_position,
-		 const wxSize &p_size,
-		 const FileHeader &p_header, int p_page,
-		 const ExpData &p_expData)
-  : wxScrolledWindow(p_parent, -1, p_position, p_size),
-    m_header(p_header),
-    m_drawSettings(m_header, p_page), m_expData(p_expData),
-    m_landscape(false), m_width(850/2), m_height(1100/2), m_scale(1.0), 
-    m_dc(new wxMemoryDC), m_page(p_page)
-{
-  m_lambdaAxisProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
-  m_lambdaAxisProp.m_color = *wxBLUE;
-  m_lambdaAxisProp.m_scale.m_minimum =
-    wxString::Format("%f", p_header.EStart());
-  m_lambdaAxisProp.m_scale.m_maximum = 
-    wxString::Format("%f", p_header.EStop());
-  m_lambdaAxisProp.m_scale.m_divisions = 10;
-  m_lambdaAxisProp.m_scale.m_useLog = true;
-  m_lambdaAxisProp.m_scale.m_canUseLog = true;
-  m_lambdaAxisProp.m_display.m_shown = true;
-  m_lambdaAxisProp.m_display.m_ticks = true;
-  m_lambdaAxisProp.m_display.m_numbers = true;
-
-  m_probAxisProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
-  m_probAxisProp.m_color = *wxBLUE;
-  m_probAxisProp.m_scale.m_minimum = "0.0";
-  m_probAxisProp.m_scale.m_maximum = "1.0";
-  m_probAxisProp.m_scale.m_divisions = 10;
-  m_probAxisProp.m_scale.m_useLog = false;
-  m_probAxisProp.m_scale.m_canUseLog = false;
-  m_probAxisProp.m_display.m_shown = true;
-  m_probAxisProp.m_display.m_ticks = true;
-  m_probAxisProp.m_display.m_numbers = true;
-
-  m_titleProp.m_title = wxString::Format("Plot %d", p_page);
-  m_titleProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
-  m_titleProp.m_color = *wxBLUE;
-
-  m_legendProp.m_showLegend = true;
-  m_legendProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
-  m_legendProp.m_color = *wxBLUE;
-  
-  m_overlayProp.m_token = false;
-  m_overlayProp.m_lines = false;
-  m_overlayProp.m_tokenSize = 4;
-  m_overlayProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
-
-  // fit to 8 1/2 x 11 inch  
-  SetScale(1.0);
-
-  m_dc->SelectObject(wxBitmap(2000, 2000));
-  Show(true);
-}
-
-PxiPlot::~PxiPlot()
-{
-  delete m_dc;
-}
-
-void PxiPlot::OnPaint(wxPaintEvent &)
-{
-  wxPaintDC dc(this);
-  dc.Blit(0, 0, GetSize().GetWidth(), GetSize().GetHeight(),
-	  m_dc, 0, 0);
 }
 
 void PxiPlot::Render(void)
