@@ -32,8 +32,8 @@ delete [] outname;
 delete [] errname;
 delete [] trace_str;
 delete trace_list;
-if (outfile) delete outfile;
-if (errfile) delete errfile;
+if (outfile && outfile!=wout && outfile!=&gnull) delete outfile;
+if (errfile && errfile!=wout && errfile!=&gnull) delete errfile;
 }
 
 void OutputParamsSettings::SaveDefaults(void)
