@@ -44,7 +44,7 @@ class gText   {
     gText &operator=(const gText &s);
 
 	  // MEMBER FUNCTIONS
-    int Length(void) const    { return strlen(storage); }
+    unsigned int Length(void) const    { return strlen(storage); }
     gText Right(int len) const;
     gText Left(int len) const;
     gText Mid(int len, int where) const;
@@ -89,7 +89,7 @@ class gText   {
         return *(storage + n);
       }
 
-    char &operator[](unsigned int n) const
+    const char &operator[](unsigned int n) const
       { if (n > strlen(storage))   throw BadIndex();
         return *(storage + n);
       }
