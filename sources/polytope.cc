@@ -4,6 +4,7 @@
 //  $Id$
 //
 
+#include "gmisc.h"
 #include "polytope.imp"
 #include "rational.h"
 
@@ -16,11 +17,11 @@
 
 #include "glist.imp"
 TEMPLATE class gList<index_pair*>;
-TEMPLATE class gNode<index_pair*>;
+//TEMPLATE class gNode<index_pair*>;
 TEMPLATE class gList<gVector<int> >;
-TEMPLATE class gNode<gVector<int> >;
-TEMPLATE class gList<gVector<gRational> >;
-TEMPLATE class gNode<gVector<gRational> >;
+//TEMPLATE class gNode<gVector<int> >;
+//TEMPLATE class gList<gVector<gRational> >;
+//TEMPLATE class gNode<gVector<gRational> >;
 
 TEMPLATE class gPolytope<int>;
 TEMPLATE gOutput &operator<<(gOutput &f, const gPolytope<int> &y);

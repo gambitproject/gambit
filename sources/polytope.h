@@ -23,11 +23,6 @@ polytope not satisfying this.
 
 */
 
-struct index_pair {  // For recording the endpoints of an edge
-    int head;
-    int tail;
-  };
-
 template <class T> class gPolytope {
 
 private:
