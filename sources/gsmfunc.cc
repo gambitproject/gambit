@@ -97,6 +97,36 @@ bool CallFuncObj::_ListNestedCheck(Portion* p, const ParamInfoType& info)
 Portion* CallFuncObj::CallNormalFunction( GSM* gsm, Portion** param )
 {
   Portion* result = 0;
+
+  // now check to see that all parameters belong to the same game,
+  //   if so specified
+
+  int index = 0;
+  if( !_ErrorOccurred && (_FuncInfo[_FuncIndex].Flag & funcGAMEMATCH) )
+  {
+    void* game = NULL; 
+    for(index = 0; index < _FuncInfo[_FuncIndex].NumParams; index++)
+    {
+      if(param[index] != 0 &&
+	 _RunTimeParamInfo[index].Defined)
+      {
+	if( param[index]->Game() != NULL )
+	{
+	  if( game == NULL )
+	    game = param[index]->Game();
+	  else
+	    if( game != param[index]->Game() )
+	    {
+	      _ErrorMessage( _StdErr, 29, index + 1, _FuncName );
+	      _ErrorOccurred = true;
+	    }
+	}
+      }
+    }   
+  }
+
+
+
   if( !_ErrorOccurred )
   {
     if(!_FuncInfo[_FuncIndex].UserDefined)
@@ -1363,32 +1393,6 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 	}
       }
     }
-  }
-
-  // now check to see that all parameters belong to the same game,
-  //   if so specified
-
-  if( !_ErrorOccurred && (_FuncInfo[_FuncIndex].Flag & funcGAMEMATCH) )
-  {
-    void* game = NULL; 
-    for(index = 0; index < _FuncInfo[_FuncIndex].NumParams; index++)
-    {
-      if(_Param[index] != 0 &&
-	 _RunTimeParamInfo[index].Defined)
-      {
-	if( _Param[index]->Game() != NULL )
-	{
-	  if( game == NULL )
-	    game = _Param[index]->Game();
-	  else
-	    if( game != _Param[index]->Game() )
-	    {
-	      _ErrorMessage( _StdErr, 29, index + 1, _FuncName );
-	      _ErrorOccurred = true;
-	    }
-	}
-      }
-    }   
   }
 
 
