@@ -65,6 +65,7 @@
 #include "efgqre.h"
 #include "algenumpure.h"
 #include "algenummixed.h"
+#include "alglcp.h"
 #include "alglp.h"
 
 #include "behavedit.h"
@@ -166,7 +167,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_ENUMPURE, 
 	   EfgShow::OnToolsEquilibriumCustomEfgEnumPure)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_LCP,
-	   EfgShow::OnToolsEquilibriumCustom)
+	   EfgShow::OnToolsEquilibriumCustomEfgLcp)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_LP,
 	   EfgShow::OnToolsEquilibriumCustomEfgLp)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_LIAP,
@@ -180,7 +181,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_ENUMMIXED, 
 	   EfgShow::OnToolsEquilibriumCustomNfgEnumMixed)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LCP,
-	   EfgShow::OnToolsEquilibriumCustom)
+	   EfgShow::OnToolsEquilibriumCustomNfgLcp)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LP, 
 	   EfgShow::OnToolsEquilibriumCustomNfgLp)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LIAP,
@@ -2223,9 +2224,6 @@ void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
   guiEfgSolution *solver = 0;
 
   switch (algorithm) {
-  case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_LCP:
-    solver = new guiefgLcpEfg(this);
-    break;
   case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_LIAP:
     solver = new guiefgLiapEfg(this);
     break;
@@ -2236,9 +2234,6 @@ void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
     solver = new guiefgQreEfg(this);
     break;
 
-  case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LCP: 
-    solver = new guiefgLcpNfg(this);
-    break;
   case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LIAP: 
     solver = new guiefgLiapNfg(this);
     break;
@@ -2309,6 +2304,26 @@ void EfgShow::OnToolsEquilibriumCustomEfgEnumPure(wxCommandEvent &)
   }
 }
 
+void EfgShow::OnToolsEquilibriumCustomEfgLcp(wxCommandEvent &)
+{
+  gList<BehavSolution> solutions;
+  if (LcpEfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddProfile(solutions[soln], true);
+    }
+    
+    ChangeProfile(m_profileTable->Length());
+    UpdateMenus();
+    if (!m_solutionSashWindow->IsShown())  {
+      m_profileTable->Show(true);
+      m_solutionSashWindow->Show(true);
+      GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+      AdjustSizes();
+    }
+  }
+}
+
+
 void EfgShow::OnToolsEquilibriumCustomEfgLp(wxCommandEvent &)
 {
   gList<BehavSolution> solutions;
@@ -2351,6 +2366,25 @@ void EfgShow::OnToolsEquilibriumCustomNfgEnumMixed(wxCommandEvent &)
 {
   gList<BehavSolution> solutions;
   if (EnumMixedNfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddProfile(solutions[soln], true);
+    }
+    
+    ChangeProfile(m_profileTable->Length());
+    UpdateMenus();
+    if (!m_solutionSashWindow->IsShown())  {
+      m_profileTable->Show(true);
+      m_solutionSashWindow->Show(true);
+      GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+      AdjustSizes();
+    }
+  }
+}
+
+void EfgShow::OnToolsEquilibriumCustomNfgLcp(wxCommandEvent &)
+{
+  gList<BehavSolution> solutions;
+  if (LcpNfg(this, *m_currentSupport, solutions)) {
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddProfile(solutions[soln], true);
     }

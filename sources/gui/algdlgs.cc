@@ -21,7 +21,6 @@
 
 #include "nfgconst.h"
 
-#include "dllcp.h"
 #include "dlliap.h"
 #include "dlsimpdiv.h"
 #include "dlpolenum.h"
@@ -354,36 +353,6 @@ gOutput *dialogAlgorithm::TraceFile(void) const
   }
 }
 
-
-//=======================================================================
-//                       dialogLcp: Member functions
-//=======================================================================
-
-dialogLcp::dialogLcp(wxWindow *p_parent, bool p_subgames, bool p_vianfg)
-  : dialogAlgorithm("LcpSolve Parameters", p_vianfg, p_parent)
-{
-  MakeCommonFields(true, p_subgames, p_vianfg);
-}
-
-dialogLcp::~dialogLcp()
-{ }
-
-void dialogLcp::AlgorithmFields(void)
-{
-  m_algorithmBox = new wxStaticBoxSizer
-    (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
-  m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
-  StopAfterField();
-  PrecisionField();
-}
-
-int dialogLcp::StopAfter(void) const
-{
-  if (m_findAll->GetValue())
-    return 0;
-  else
-    return ToNumber(m_stopAfter->GetValue().c_str());
-}
 
 //=======================================================================
 //                       dialogLiap: Member functions

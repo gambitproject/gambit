@@ -31,8 +31,7 @@ void efgLcpNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   delete N;
 }
 
-efgLcpNfgSolve::efgLcpNfgSolve(const EFSupport &, const LemkeParams &p,
-			       int max)
+efgLcpNfgSolve::efgLcpNfgSolve(const LemkeParams &p, int max)
   : SubgameSolver(max), npivots(0), params(p)
 { }
 

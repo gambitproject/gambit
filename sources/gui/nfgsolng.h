@@ -27,36 +27,6 @@ public:
   virtual bool SolveSetup(void) = 0;
 };
 
-class guinfgLp : public guiNfgSolution   {
-private:
-  int m_stopAfter;
-  gPrecision m_precision;
-
-public:
-  guinfgLp(NfgShow *);
-  guinfgLp(NfgShow *,
-	   int p_stopAfter, gPrecision p_precision, bool p_eliminateWeak);
-  virtual ~guinfgLp()   { }
-
-  virtual gList<MixedSolution> Solve(const NFSupport &);
-  virtual bool SolveSetup(void);
-};
-
-class guinfgLcp : public guiNfgSolution   {
-private:
-  int m_stopAfter;
-  gPrecision m_precision;
-
-public:
-  guinfgLcp(NfgShow *);
-  guinfgLcp(NfgShow *,
-	    int p_stopAfter, gPrecision p_precision, bool p_eliminateWeak);
-  virtual ~guinfgLcp()   { }
-
-  virtual gList<MixedSolution> Solve(const NFSupport &);
-  virtual bool SolveSetup(void);
-};
-
 class guinfgLiap : public guiNfgSolution   {
 private:
   double m_accuracy;

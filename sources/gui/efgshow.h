@@ -155,9 +155,11 @@ private:
   void OnToolsEquilibriumStandard(wxCommandEvent &);
   void OnToolsEquilibriumCustom(wxCommandEvent &);
   void OnToolsEquilibriumCustomEfgEnumPure(wxCommandEvent &);
+  void OnToolsEquilibriumCustomEfgLcp(wxCommandEvent &);
   void OnToolsEquilibriumCustomEfgLp(wxCommandEvent &);
   void OnToolsEquilibriumCustomNfgEnumPure(wxCommandEvent &);
   void OnToolsEquilibriumCustomNfgEnumMixed(wxCommandEvent &);
+  void OnToolsEquilibriumCustomNfgLcp(wxCommandEvent &);
   void OnToolsEquilibriumCustomNfgLp(wxCommandEvent &);
   void OnToolsEquilibriumQre(wxCommandEvent &);
 

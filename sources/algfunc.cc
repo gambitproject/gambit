@@ -646,7 +646,7 @@ static Portion *GSM_Lcp_Efg(GSM &gsm, Portion **param)
 
     gList<BehavSolution> solutions;
     try {
-      efgLcpNfgSolve algorithm(support, params);
+      efgLcpNfgSolve algorithm(params);
       solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
       ((NumberPortion *) param[4])->SetValue(algorithm.NumPivots());
       ((NumberPortion *) param[5])->SetValue(algorithm.Time());
@@ -670,7 +670,7 @@ static Portion *GSM_Lcp_Efg(GSM &gsm, Portion **param)
 
     gList<BehavSolution> solutions;
     try {
-      efgLcpSolve algorithm(support, params);
+      efgLcpSolve algorithm(params);
       solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
       ((NumberPortion *) param[4])->SetValue(algorithm.NumPivots());
       ((NumberPortion *) param[5])->SetValue(algorithm.Time());

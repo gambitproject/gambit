@@ -31,7 +31,7 @@ private:
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_LCP_EFG; }    
 
 public:
-  efgLcpSolve(const EFSupport &, const SeqFormParams &, int max = 0);
+  efgLcpSolve(const SeqFormParams &, int max = 0);
   virtual ~efgLcpSolve();
   
   int NumPivots(void) const  { return npivots; }

@@ -20,7 +20,7 @@ private:
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_LCP_NFG; }    
 
 public:
-  efgLcpNfgSolve(const EFSupport &, const LemkeParams &, int max = 0);
+  efgLcpNfgSolve(const LemkeParams &, int max = 0);
   virtual ~efgLcpNfgSolve();
 
   int NumPivots(void) const   { return npivots; }
