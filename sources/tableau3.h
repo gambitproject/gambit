@@ -9,11 +9,12 @@
 
 class Tableau<gRational> : public TableauInterface<gRational>{
 private:
-  gRational Det;
-  gRational totdenom;
-  gMatrix<gRational> InvDat;
+  gInteger Det;
+  gInteger totdenom;
+  gMatrix<gInteger> InvDat;
 
   gVector<gRational> tmpcol; // temporary column vector, to avoid allocation
+  void Reduce();
 
 protected:
 public:
@@ -44,4 +45,9 @@ public:
 };
 
 #endif     // TABLEAU3_H
+
+
+
+
+
 
