@@ -12,6 +12,7 @@ open           BITMAP bitmaps\open.bmp
 save           BITMAP bitmaps\save.bmp
 print          BITMAP bitmaps\print.bmp
 preview        BITMAP bitmaps\preview.bmp
+table          BITMAP bitmaps\table.bmp
 help           BITMAP bitmaps\help.bmp
 
 ADD_BITMAP     BITMAP bitmaps\add.bmp
