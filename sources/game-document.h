@@ -73,6 +73,9 @@ public:
   void SetPayoff(gbtGameOutcome p_outcome,
 		 const gbtGamePlayer &p_player, const gbtRational &p_value);
 
+  void InsertStrategy(int player, int where);
+
+
   // Various properties of the document
   wxColour GetPlayerColor(int p_index) const;
   void SetPlayerColor(int p_index, const wxColour &);

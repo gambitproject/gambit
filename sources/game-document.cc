@@ -158,6 +158,13 @@ void gbtGameDocument::SetPayoff(gbtGameOutcome p_outcome,
   UpdateViews(); 
 }
 
+void gbtGameDocument::InsertStrategy(int p_player, int p_where)
+{
+  SaveUndo("adding strategy");
+  m_game->GetPlayer(p_player)->GetInfoset(1)->InsertAction(p_where);
+  m_modified = true;
+  UpdateViews();
+}
 
 wxColour gbtGameDocument::GetPlayerColor(int p_player) const
 {
