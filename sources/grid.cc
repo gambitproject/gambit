@@ -208,12 +208,17 @@ TEMPLATE class GridParams<double>;
 TEMPLATE class GridParams<gRational>;
 
 #include "grarray.imp"
+#include "garray.imp"
 
 TEMPLATE class PayoffClass<double>;
 TEMPLATE class PayoffClass<gRational>;
 
 TEMPLATE class gRectArray<PayoffClass<double> >;
 TEMPLATE class gRectArray<PayoffClass<gRational> >;
+
+TEMPLATE class gArray<PayoffClass<double> >;
+TEMPLATE class gArray<PayoffClass<gRational> >;
+
 
 gOutput &operator<<(gOutput &o, const PayoffClass<double> &p) {return o;}
 gOutput &operator<<(gOutput &o, const PayoffClass<gRational> &p) {return o;}
