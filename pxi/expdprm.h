@@ -1,35 +1,97 @@
 #include "wxmisc.h"
 
-#ifdef NOT_IMPLEMENTED
-class ExpDataDialog:public MyDialogBox
+class dialogExpData: public guiAutoDialog
 {
 private:
-  char *likename,*pxiname,*expname;
+  wxString likename, pxiname, expname;
   gOutput *likefile;
   gInput *pxifile,*expfile;
   int save_like,load_now;
   PxiFrame *frame;
-  static void browse_pxi_func(wxButton &ob,wxEvent &ev);
-  static void browse_exp_func(wxButton &ob,wxEvent &ev);
-  static void save_item_func(wxCheckBox &ob,wxEvent &ev);
+  wxTextCtrl *m_pxiName, *m_expName, *m_likeName;
+  wxCheckBox *m_saveLike, *m_loadNow;
+
+  void OnBrowsePxi(wxCommandEvent &);
+  void OnBrowseExp(wxCommandEvent &);
+  
+  //  static void browse_pxi_func(wxButton &ob,wxEvent &ev);
+  //  static void browse_exp_func(wxButton &ob,wxEvent &ev);
+  //  static void save_item_func(wxCheckBox &ob,wxEvent &ev);
 public:
   // Constructor
-  ExpDataDialog(const char *pxi_name=0,PxiFrame *parent=0);
+  dialogExpData(const char *pxi_name=0,PxiFrame *parent=0);
   // Destructor
-  ~ExpDataDialog(void);
+  ~dialogExpData(void);
   // Data access
   void	GetParams(ExpDataParams &P);
   void	LoadNow(void);
+
+  DECLARE_EVENT_TABLE()
 };
 
-ExpDataDialog::ExpDataDialog(const char *pxi_name,PxiFrame *parent)
-  :MyDialogBox(parent,"Likelihood"),frame(parent),likefile(0),expfile(0),pxifile(0)
+const int idEXPDATA_BROWSE1_BUTTON = 3051;
+const int idEXPDATA_BROWSE2_BUTTON = 3052;
+
+BEGIN_EVENT_TABLE(dialogExpData, wxDialog)
+  EVT_BUTTON(idEXPDATA_BROWSE1_BUTTON, dialogExpData::OnBrowsePxi)
+  EVT_BUTTON(idEXPDATA_BROWSE2_BUTTON, dialogExpData::OnBrowseExp)
+END_EVENT_TABLE()
+
+dialogExpData::dialogExpData(const char *pxi_name,PxiFrame *parent)
+  :guiAutoDialog(parent,"Likelihood"), likename("like.out"), pxiname(pxi_name), 
+   expname(""), frame(parent), likefile(0), 
+   expfile(0),pxifile(0)
 {
-  likename=new char[250];strcpy(likename,"like.out");
-  pxiname=new char[250];strcpy(pxiname,pxi_name);
-  expname=new char[250];strcpy(expname,"");
+  //  likename=new char[250];strcpy(likename,"like.out");
+  //  pxiname=new char[250];strcpy(pxiname,pxi_name);
+  //  expname=new char[250];strcpy(expname,"");
+
   save_like=TRUE;load_now=FALSE;
   
+  wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);
+
+  wxBoxSizer *pxinameSizer = new wxBoxSizer(wxHORIZONTAL);
+  pxinameSizer->Add(new wxStaticText(this, -1, "PxiName"), 0,
+		     wxCENTER | wxALL, 5);
+  m_pxiName = new wxTextCtrl(this, -1, pxiname);
+  pxinameSizer->Add(m_pxiName, 1, wxEXPAND | wxALL, 5);
+  wxButton *browse1Button = new wxButton(this, idEXPDATA_BROWSE1_BUTTON, "Browse...");
+  pxinameSizer->Add(browse1Button, 0, wxALL, 5);
+
+  wxBoxSizer *expnameSizer = new wxBoxSizer(wxHORIZONTAL);
+  expnameSizer->Add(new wxStaticText(this, -1, "ExpName"), 0,
+		     wxCENTER | wxALL, 5);
+  m_expName = new wxTextCtrl(this, -1, expname);
+  expnameSizer->Add(m_expName, 1, wxEXPAND | wxALL, 5);
+  wxButton *browse2Button = new wxButton(this, idEXPDATA_BROWSE2_BUTTON, "Browse...");
+  expnameSizer->Add(browse2Button, 0, wxALL, 5);
+
+  wxBoxSizer *likenameSizer = new wxBoxSizer(wxHORIZONTAL);
+  likenameSizer->Add(new wxStaticText(this, -1, "Likename"), 0,
+		     wxCENTER | wxALL, 5);
+  m_likeName = new wxTextCtrl(this, -1, likename);
+  likenameSizer->Add(m_likeName, 1, wxEXPAND | wxALL, 5);
+  m_saveLike = new wxCheckBox(this, -1, "Save Like");
+  m_saveLike->SetValue(true);
+  likenameSizer->Add(m_saveLike, 1, wxEXPAND | wxALL, 5);
+
+  m_loadNow = new wxCheckBox(this, -1, "Load Now");
+  m_loadNow->SetValue(false);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  allSizer->Add(pxinameSizer, 1, wxEXPAND | wxALL, 5);
+  allSizer->Add(expnameSizer, 1, wxEXPAND | wxALL, 5);
+  allSizer->Add(likenameSizer, 1, wxEXPAND | wxALL, 5);
+  allSizer->Add(m_loadNow, 1, wxEXPAND | wxALL, 5);
+  allSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
+
+  SetAutoLayout(TRUE);
+  SetSizer(allSizer); 
+  allSizer->Fit(this);
+  allSizer->SetSizeHints(this); 
+  Layout();
+
+#ifdef UNUSED
   wxFormItem *name_pxi=wxMakeFormString("PxiName ",&pxiname);
 Form()->Add(name_pxi);
  wxFormItem *browse_pxi=wxMakeFormButton("Browse",(wxFunction)browse_pxi_func);
@@ -55,25 +117,57 @@ Form()->Add(name_pxi);
  ((wxCheckBox *)save_item->GetPanelItem())->SetClientData((char *)name_like->GetPanelItem());
  ((wxCheckBox *)save_item->GetPanelItem())->Callback((wxFunction)save_item_func);
  Go1();
+#endif //UNUSED
 }
 
-void ExpDataDialog::browse_pxi_func(wxButton &ob,wxEvent &)
+void dialogExpData::OnBrowsePxi(wxCommandEvent &) 
+{
+  Enable(false); // Don't allow anything while the dialog is up.
+  wxString file = wxFileSelector("Load Data File", 
+				    wxPathOnly(m_pxiName->GetValue()),
+				    wxFileNameFromPath(m_pxiName->GetValue()),
+				    ".pxi", "*.pxi");
+  Enable(true);
+
+  if (file) {
+    m_pxiName->SetValue(file);
+  }
+}
+
+void dialogExpData::OnBrowseExp(wxCommandEvent &) 
+{
+  wxString file = wxFileSelector("Load Observation File", 
+				    wxPathOnly(m_pxiName->GetValue()),
+				    wxFileNameFromPath(m_pxiName->GetValue()),
+				    ".agg", "*.agg");
+
+  if (file) {
+    m_expName->SetValue(file);
+  }
+}
+
+#ifdef UNUSED
+void dialogExpData::browse_pxi_func(wxButton &ob,wxEvent &)
 {
   char *s=wxFileSelector("Load data file", NULL, NULL, NULL, "*.out");
   if (s) ((wxText *)ob.GetClientData())->SetValue(s);
 }
 
-void ExpDataDialog::browse_exp_func(wxButton &ob,wxEvent &)
+void dialogExpData::browse_exp_func(wxButton &ob,wxEvent &)
 {
   char *s=wxFileSelector("Load observation file", NULL, NULL, NULL, "*.exp");
   if (s) ((wxText *)ob.GetClientData())->SetValue(s);
 }
 
-void ExpDataDialog::save_item_func(wxCheckBox &ob,wxEvent &)
-{((wxText *)ob.GetClientData())->Enable(ob.GetValue());}
+void dialogExpData::save_item_func(wxCheckBox &ob,wxEvent &)
+{((wxString *)ob.GetClientData())->Enable(ob.GetValue());}
+#endif // UNUSED
 
-void ExpDataDialog::GetParams(ExpDataParams &P)
+void dialogExpData::GetParams(ExpDataParams &P)
 {
+  expname = m_expName->GetValue();
+  pxiname = m_pxiName->GetValue();
+  likename = m_likeName->GetValue();
   assert(pxiname && expname);
   pxifile=new gFileInput(pxiname);expfile=new gFileInput(expname);
   P.pxifile=pxifile;P.expfile=expfile;
@@ -83,22 +177,19 @@ void ExpDataDialog::GetParams(ExpDataParams &P)
   }
 }
 
-void ExpDataDialog::LoadNow(void)
+void dialogExpData::LoadNow(void)
 {
   if (likefile && load_now) {
     delete likefile;likefile=0;
-    frame->MakeChild(likename);
+    frame->LoadFile(likename);
+    //    frame->MakeChild(likename);
   }
 }
 
-ExpDataDialog::~ExpDataDialog(void)
+dialogExpData::~dialogExpData(void)
 {
-  delete [] likename;
-  delete [] pxiname;
-  delete [] expname;
   if (pxifile) delete pxifile;
   if (expfile) delete expfile;
   if (likefile) delete likefile;
 }
-#endif // NOT_IMPLEMENTED
 

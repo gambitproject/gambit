@@ -24,12 +24,8 @@
 
 #define PXI_QUIT              100
 #define PXI_OUTPUT             101
-//#define PXI_PRINT             101
 #define PXI_ABOUT             108
 #define PXI_LOAD_FILE         111
-//#define PXI_PRINT_EPS         112  // Windows-only option
-//#define PXI_COPY_MF           113  // Windows-only option
-//#define PXI_SAVE_MF           114  // Windows-only option
 #define	PXI_NEW_WINDOW	      117
 #define	PXI_CHILD_QUIT	      118
 #define	PXI_JUST_REPAINT      115
@@ -42,7 +38,6 @@
 #define	PXI_PLOT_X              0
 #define	PXI_PLOT_3              1
 #define PXI_PLOT_2              2
-#define	PXI_SHOW_GAME         126
 #define	PXI_NO_SET_STOP      -1.0
 #define	PXI_SET_STOP          127
 #define	PXI_KEY_STOP          WXK_SPACE
@@ -53,12 +48,11 @@
 #define PXI_DATA_OVERLAY_DATA 215
 #define PXI_DATA_OVERLAY_FILE 220
 
-
 #define PXI_PLOT_2_STEP        .1
-/*********************** PXI.H ******************************************/
 #define MAXN    10
 
 
+/*********************** PXI.H ******************************************/
 
 extern void pxiExceptionDialog(const wxString &p_message, wxWindow *p_parent,
                                long p_style = wxOK | wxCENTRE);
@@ -99,7 +93,6 @@ private:
   int 		plot_mode;
   int		data_mode;
   int		one_or_two;
-  Bool		show_game;
   Bool		connect_dots;
   int		color_mode;
   Bool		restart_overlay_colors;
@@ -125,7 +118,6 @@ public:
   static void overlay_func(wxButton &ob,wxEvent &);
   static void overlay_font_func(wxButton &ob,wxEvent &);
   static void label_font_func(wxButton &ob,wxEvent &);
-  static void disp_func(wxButton &ob,wxEvent &);
   PxiDrawSettings(FileHeader &header);
   // Get* functions
   // PlotMode, returns the type of plot currently selected:
@@ -138,8 +130,6 @@ public:
   int	GetDataMode(void) {return data_mode;}
   // ColorMode, how to color the data: by equilibrium #, prob #, or just a constant
   int	GetColorMode(void) {return color_mode;}
-  // ShowGame, tells whether to display the game matrix
-  Bool	GetShowGame(void) {return show_game;}
   // StrategyShow, tells whether player p's strategy #s is to be plotted
   Bool	GetStrategyShow(int p,int s) {return strategy_show[p][s];}
   // StopMin, returns the value to start plotting at
@@ -237,7 +227,6 @@ private:
   void PlotData_X(wxDC& dc,int ch,int cw,const FileHeader &f_header,int level);
   void PlotData_3(wxDC& dc,int ch,int cw,const FileHeader &f_header,int level);
   void PlotData_2(wxDC& dc,int ch,int cw,const FileHeader &f_header);
-  void ShowGame(wxDC& dc,int cw,int ch,const FileHeader &header);
   void PlotLabels(wxDC &dc,int ch,int cw);
   
   void DrawExpPoint_X(wxDC &dc,double cur_e,int iset,int st,int ch,int cw,int plot);
@@ -259,7 +248,6 @@ public:
   void OnChar(wxKeyEvent &ev);
   void OnEvent(wxMouseEvent &ev);
   void ShowDetail(void);
-  void GetGame(void);
   void StopIt(void);
   void MakeOverlayData(void);
   void MakeOverlayFile(void);
@@ -291,10 +279,8 @@ public:
 
   void LoadFile(const wxString &);
 
-  Bool OnClose(void);
   void MakeOneDot(char *in_filename=NULL,char *out_filename=NULL);
-  char *MakeDataFile(void);
-  //  void OnMenuCommand(int id);
+  //  char *MakeDataFile(void);
 
   DECLARE_EVENT_TABLE()
 };
@@ -305,6 +291,10 @@ private:
   wxFrame *parent;
   PxiCanvas *canvas;
 
+  void OnGrid(wxCommandEvent &);
+  void OnOverlayData(wxCommandEvent &);
+  void OnOverlayFile(wxCommandEvent &);
+  void OnOneDot(wxCommandEvent &);
   void OnFileDetail(wxCommandEvent &);
   void OnFileOutput(wxCommandEvent &);
   void OnDisplayOptions(wxCommandEvent &);
@@ -314,9 +304,6 @@ private:
 public:
   PxiChild(wxFrame *p_parent, const wxString &p_title);
   ~PxiChild(void);
-
-  Bool OnClose(void);
-  void OnMenuCommand(int id);
 
   void  print_eps(wxOutputOption fit);                 // output to postscript file
   void  print(wxOutputOption fit,bool preview=false);  // output to printer (WIN only)
@@ -334,7 +321,7 @@ private:
   wxNumberItem *m_minLam, *m_maxLam, *m_minY, *m_maxY;
   wxButton *m_overlayButton, *m_fontButton, *m_plotButton;
   wxRadioBox *m_plotMode, *m_colorMode;
-  wxCheckBox *m_displayMatrix, *m_twoPlots, *m_connectDots, *m_restartColors;
+  wxCheckBox *m_twoPlots, *m_connectDots, *m_restartColors;
 
   void OnWhichPlot(wxCommandEvent &);
   void OnWhichInfoset(wxCommandEvent &);
@@ -359,8 +346,6 @@ public:
     { return m_plotMode->GetSelection(); }
   int GetColorMode() const 
     { return m_colorMode->GetSelection(); }
-  bool GetDisplayMatrix() const 
-    { return m_displayMatrix->GetValue(); }
   bool GetTwoPlots() const 
     { return m_twoPlots->GetValue(); }
   bool GetConnectDots() const 

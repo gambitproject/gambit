@@ -75,10 +75,8 @@ char tempstr[200];
 // Must initialise these in OnInit, not statically
 wxCursor	*arrow_cursor;
 wxCursor	*wait_cursor;
-wxColour	*game_color;
 wxColour	*axis_text_color;
 wxFont		*axis_font;
-wxFont		*game_font;
 wxBrush		*clear_brush;
 wxBrush		*exp_data_brush;
 
@@ -110,13 +108,11 @@ bool PxiApp::OnInit(void)
   wait_cursor = new wxCursor(wxCURSOR_WAIT);
   // Create the rest of the resources
   axis_font = new wxFont(8, wxSWISS, wxNORMAL, wxNORMAL);
-  game_font = new wxFont(14,wxSWISS,wxNORMAL,wxNORMAL);
-  game_color = new wxColour("BLACK");
   axis_text_color=new wxColour("BLUE");
   clear_brush = new wxBrush("BLACK",wxTRANSPARENT);
   exp_data_brush=new wxBrush("BLACK",wxSOLID);
 
-  //  pxiFrame->SetCursor(arrow_cursor);
+  // pxiFrame->SetCursor(arrow_cursor);
 
   pxiFrame->Show(true);
   if (argc>1) pxiFrame->LoadFile( (wxString) (argv[1]));
@@ -189,9 +185,9 @@ void PxiToolbar::OnMouseEnter(wxCommandEvent &p_event)
 //                       class PxiFrame
 //=====================================================================
 
-PxiFrame::PxiFrame(wxFrame *frame, const wxString &p_title,
+PxiFrame::PxiFrame(wxFrame *p_parent, const wxString &p_title,
 		   const wxPoint &p_position, const wxSize &p_size, long p_style) :
-  wxFrame(frame, -1, p_title, p_position, p_size,p_style)
+  wxFrame(p_parent, -1, p_title, p_position, p_size,p_style)
 {
 #ifdef __WXMSW__
   SetIcon(wxIcon("pxi_icn"));
@@ -247,12 +243,10 @@ void PxiFrame::OnFileLoad(wxCommandEvent &)
 				  NULL, NULL, "*.pxi").c_str();
   Enable(true);
 
-  if (filename == "") {
+  if(filename == "") 
     return;
-  }
 
   wxGetApp().SetCurrentDir(wxPathOnly(filename));
-  
   LoadFile(filename);
 }
 
@@ -284,14 +278,6 @@ void PxiFrame::LoadFile(const wxString &p_filename)
       m_fileHistory.AddFileToHistory(p_filename);
     }
     PxiChild *subframe = new PxiChild(this,p_filename);
-#ifdef UNUSED
-    // Now build the canvas on top of the subframe
-    int width, height;
-    subframe->GetClientSize(&width, &height);
-    // save the canvas in subframe
-    subframe->canvas = new PxiCanvas(subframe, wxPoint(0, 0), wxSize(width, height),wxRETAINED,p_filename);
-    subframe->Show(TRUE);
-#endif // UNUSED
   }
   else
     wxMessageBox("Unknown file type");
@@ -301,26 +287,39 @@ BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   //  EVT_MENU(PXI_LOAD_FILE, PxiChild::On)
   EVT_MENU(PXI_OUTPUT, PxiChild::OnFileOutput)
   EVT_MENU(PXI_CHILD_QUIT, PxiChild::Close)
-  //  EVT_MENU(PXI_PRINT_EPS, PxiChild::OnPrintEps)
-  //  EVT_MENU(PXI_PRINT_MF, PxiChild::OnPrintMF)
-#ifdef wx_msw
-  //  EVT_MENU(PXI_PRINT, PxiChild::OnPrint)
-  //  EVT_MENU(PXI_COPY_MF, PxiChild::OnCopyMF)
-  //  EVT_MENU(PXI_SAVE_MF, PxiChild::OnSaveMF)
-#endif
   EVT_MENU(PXI_QUIT, PxiChild::Close)
-  /*
-  EVT_MENU(PXI_DATA_GRIDL, PxiChild::OnGrid)
+  EVT_MENU(PXI_DATA_GRID, PxiChild::OnGrid)
   EVT_MENU(PXI_DATA_OVERLAY_DATA, PxiChild::OnOverlayData)
   EVT_MENU(PXI_DATA_OVERLAY_FILE, PxiChild::OnOverlayFile)
-  */
-  //  EVT_MENU(PXI_DATA_ONEDOT, PxiChild::MakeOnedot)
+  EVT_MENU(PXI_DATA_ONEDOT, PxiChild::OnOneDot)
   EVT_MENU(PXI_FILE_DETAIL, PxiChild::OnFileDetail)
   EVT_MENU(PXI_DISPLAY_OPTIONS, PxiChild::OnDisplayOptions)
   EVT_MENU(PXI_ABOUT, PxiChild::OnHelpAbout)
   EVT_SIZE(PxiChild::OnSize)
   EVT_CLOSE(PxiChild::OnCloseWindow)
 END_EVENT_TABLE()
+
+void PxiChild::OnGrid(wxCommandEvent &)
+{
+}
+
+void PxiChild::OnOverlayData(wxCommandEvent &)
+{
+  canvas->MakeOverlayData();
+  wxClientDC dc(this);
+  canvas->Update(dc,PXI_UPDATE_SCREEN);
+}
+
+void PxiChild::OnOverlayFile(wxCommandEvent &)
+{
+  canvas->MakeOverlayFile();
+  wxClientDC dc(this);
+  canvas->Update(dc,PXI_UPDATE_SCREEN);
+}
+
+void PxiChild::OnOneDot(wxCommandEvent &)
+{
+}
 
 void PxiChild::OnFileDetail(wxCommandEvent &)
 {
@@ -330,7 +329,7 @@ void PxiChild::OnFileDetail(wxCommandEvent &)
 void PxiChild::OnFileOutput(wxCommandEvent &)
 {
   wxOutputDialogBox dialog(0,this);
-  if (dialog.ShowModal() == wxID_OK) {
+  if (dialog.ShowModal() == wxID_OK) 
     switch (dialog.GetMedia()) {
     case wxMEDIA_PRINTER: print(dialog.GetOption()); break;
     case wxMEDIA_PS:print_eps(dialog.GetOption()); break;
@@ -341,9 +340,6 @@ void PxiChild::OnFileOutput(wxCommandEvent &)
       // We'll ignore this silently
       break;
     }
-  }
-#ifdef NOT_IMPLEMENTED
-#endif // NOT_IMPLEMENTED
 }
 
 void PxiChild::OnHelpAbout(wxCommandEvent &)
@@ -360,7 +356,6 @@ void PxiChild::OnDisplayOptions(wxCommandEvent &)
 
 PxiChild::PxiChild(wxFrame *p_parent, const wxString &p_filename) :
   wxFrame(p_parent, -1, p_filename, wxPoint(0,0),wxSize(480,480)), parent(p_parent)
-  //  canvas(this, wxPoint(0, 0), wxSize(width, height),wxRETAINED,p_filename)
 {
   SetSizeHints(300, 300);
 
@@ -369,36 +364,23 @@ PxiChild::PxiChild(wxFrame *p_parent, const wxString &p_filename) :
   SetIcon(wxIcon("pxi_icn"));
 #else
 #include "pxi.xpm"
-    SetIcon(wxIcon(pxi_xpm));
-  //  SetIcon(wxIcon(pxi_bits, pxi_width, pxi_height));
+  SetIcon(wxIcon(pxi_xpm));
 #endif
 
   CreateStatusBar();
   MakeMenus();
 
   //  m_toolbar = new PxiChildToolbar(this, this);
+
   int width, height;
   GetClientSize(&width, &height);
     // save the canvas in subframe
   canvas = new PxiCanvas(this, wxPoint(0, 0), wxSize(width, height),wxRETAINED,p_filename);
   Show(true);
-
-#ifdef UNUSED
-  my_children.Append(this);
-  Show(FALSE);
-  // Give it an icon (this is ignored in MDI mode: uses resources)
-  wxIcon *icon = new wxIcon("chrt_icn");
-  SetIcon(icon);
-  
-#endif // UNUSED
 }
 
 PxiChild::~PxiChild(void)
-{
-  /*
-    my_children.DeleteObject(this);
-  */
-}
+{ }
 
 void PxiChild::MakeMenus(void)
 {
@@ -424,6 +406,7 @@ void PxiChild::MakeMenus(void)
   menu_bar->Append(data_menu, "&Data");
   menu_bar->Append(display_menu, "&Display");
   menu_bar->Append(help_menu, "&Help");
+
   // Associate the menu bar with the frame
   SetMenuBar(menu_bar);
 }
@@ -493,33 +476,6 @@ void PxiCanvas::ShowDetail(void)
   wxMessageBox(message,"File Details",wxOK);
 }
 
-/*************************** Show Game *****************************/
-// Show Game
-void PxiCanvas::ShowGame(wxDC& dc,int cw,int ch,const FileHeader &header)
-{
-  //  float		th,tw;
-  wxCoord		th,tw;
-  int			i1,i;
-  wxString matrix_line;
-  if (header.Matrix()) {
-    dc.SetFont(*game_font);
-    dc.SetTextForeground(*game_color);
-    for (i1=0;i1<header.Matrix()->DimX();i1++) {
-      matrix_line="";
-      for (i=0;i<header.Matrix()->DimY();i++) {
-	sprintf(tempstr,"%2.1lf,%2.1lf ",(*header.Matrix())(i1,i).row,(*header.Matrix())(i1,i).col);
-	matrix_line+=tempstr;
-      }
-      dc.GetTextExtent(matrix_line,&tw,&th);
-      dc.DrawText(matrix_line,(cw-2*XOFF-tw)/2+XOFF,XOFF+th*i1*1.5);
-    }
-  }
-  dc.SetPen(*wxBLACK_PEN);
-  dc.SetBrush(*clear_brush);
-  dc.DrawRoundedRectangle(XOFF/2+(cw-2*XOFF-tw)/2, XOFF/2, XOFF+tw, th, th*(header.Matrix()->DimY()-1)*1.5+XOFF*3/2);
-}
-
-
 void PxiCanvas::StopIt(void)
 {
   if (draw_settings->GetStopMax()==draw_settings->GetMaxL()) {
@@ -538,16 +494,14 @@ void PxiCanvas::StopIt(void)
 #include "expdprm.h"
 void PxiCanvas::MakeOverlayData(void)
 {
-#ifdef NOT_IMPLEMENTED
   if (exp_data) {delete exp_data;exp_data=NULL;}
-  ExpDataDialog D(headers[1].FileName(),frame);
-  if (D.Completed()==wxOK) {
+  dialogExpData dialog(headers[1].FileName(),(PxiFrame *)this->GetParent());
+  if (dialog.ShowModal() == wxID_OK) {
     ExpDataParams P;
-    D.GetParams(P);
+    dialog.GetParams(P);
     exp_data=new ExpData(P);
-    D.LoadNow();
+    dialog.LoadNow();
   }
-#endif // NOT_IMPLEMENTED
 }
 
 void PxiCanvas::MakeOverlayFile(void)
@@ -562,7 +516,6 @@ void PxiCanvas::MakeOverlayFile(void)
       headers.Append(temp_header);
   }
 }
-
 
 void PxiFrame::MakeOneDot(char *in_filename,char *out_filename)
 {
@@ -585,19 +538,18 @@ void PxiFrame::MakeOneDot(char *in_filename,char *out_filename)
 
 void PxiCanvas::OnChar(wxKeyEvent &ev)
 {
-#ifdef NOT_IMPLEMENTED
   switch(ev.KeyCode()) {
   case PXI_KEY_STOP:
     StopIt();
     break;
   default:
-    wxCanvas::OnChar(ev);
+    wxScrolledWindow::OnChar(ev);
     break;
   }
-#endif // NOT_IMPLEMENTED
 }
 
 #define TEXT_MARGIN	.05
+
 void PxiCanvas::OnEvent(wxMouseEvent &ev)
 {
   if (ev.ShiftDown() && ev.ButtonDown()) {  // use shift mouse click to add a label
@@ -671,7 +623,7 @@ void PxiChild::print(wxOutputOption /*fit*/, bool preview)
 
 void PxiChild::print_eps(wxOutputOption fit)
 {
-  wxPostScriptDC dc;
+  wxPostScriptDC dc("junk.pxi",true, this);
   if (dc.Ok()) {
     dc.StartDoc("Pxi printout");
     dc.StartPage();
@@ -727,10 +679,10 @@ void PxiChild::save_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
 }
 #endif
 
+#ifdef UNUSED
 // Intercept menu commands
 void PxiChild::OnMenuCommand(int id)
 {
-#ifdef NOT_IMPLEMENTED
   switch (id) {
   case PXI_PRINT_EPS:         // To use the special wxWindows EPS driver
     // under Windows 3.1, specify "PostScript"
@@ -808,11 +760,10 @@ void PxiChild::OnMenuCommand(int id)
     frame->OnMenuCommand(id);
     break;
   }
-#endif // NOT_IMPLEMENTED
 }
-//**************************************************************************
-//********************* Create a new data file *****************************
-//**************************************************************************
+#endif // UNUSED
+
+
 #ifdef NOT_IMPLEMENTED
 void solver_update_func1(int total=-1,wxProgressIndicator1 *_p=NULL)
 {
@@ -830,8 +781,6 @@ void solver_update_func(void)
 {wxYield();solver_update_func1();}
 #endif // NOT_IMPLEMENTED
 
-
-
 // bench mark function--tests how long it takes this cpu to calculate one equ
 double bench_mark(void)
 {
@@ -841,6 +790,7 @@ double bench_mark(void)
   for (int i=0;i<10000;i++) {a=exp(a)*exp(a/a)*exp(a*a)*exp(a+1);a=3.34343;}
   return (((double)wxGetElapsedTime())/10000.0);
 }
+
 // calc num steps.  this calculates the number of combinations possible with
 // 'num' integers, 0..'max', such that their sum is <='max'  See any math book
 // for explanation of this formula:
@@ -861,9 +811,9 @@ unsigned long calc_num_steps(int dim,int steps)
   return (temp1/factorial(dim-1));
 }
 
+#ifdef UNUSED
 char *PxiFrame::MakeDataFile(void)
 {
-#ifdef NOT_IMPLEMENTED
   char *out_file_name=NULL;
   // Create the settings dialog, get the settings
   NormalCalcSettings *settings=new NormalCalcSettings;
@@ -906,13 +856,12 @@ char *PxiFrame::MakeDataFile(void)
   }
   delete settings;
   return (out_file_name);
-#endif // NOT_IMPLEMENTED
 }
+#endif // UNUSED
 
 void PxiFrame::OnCloseWindow(wxCloseEvent &)
 {
   wxKillHelp();
-  //  wout->OnClose(); werr->OnClose();
   Destroy();
 }
 
@@ -930,24 +879,6 @@ void PxiCanvas::OnPaint(wxPaintEvent &)
 // Define the behaviour for the frame closing
 // - must delete all frames except for the main one.
 
-Bool PxiFrame::OnClose(void)
-{
-#ifdef UNUSED
-  // Must delete children
-  wxNode *node = my_children.First();
-  while (node) {
-    PxiChild *child = (PxiChild *)node->Data();
-    wxNode *next = node->Next();
-    child->Close();
-    node = next;
-  }
-#endif // UNUSED
-  return TRUE;
-}
-
-Bool PxiChild::OnClose(void)
-{return TRUE;}
-
 //*************************************************************************
 //************************* DRAW SETTINGS *********************************
 //*************************************************************************
@@ -963,7 +894,7 @@ PxiDrawSettings::PxiDrawSettings(FileHeader &header)
   label_font=new wxFont(10,wxSWISS,wxNORMAL,wxNORMAL);
   connect_dots=FALSE;
   data_mode=header.DataType();
-  plot_mode=PXI_PLOT_X;show_game=FALSE;
+  plot_mode=PXI_PLOT_X;
   l_start=header.EStart();l_stop=header.EStop();l_step=header.EStep();
   stop_min=l_start;stop_max=l_stop;
   data_min=header.DataMin();data_max=header.DataMax();
@@ -996,6 +927,7 @@ PxiDrawSettings::PxiDrawSettings(FileHeader &header)
 // In this case, the two desired strategies are selected in the dialog, and
 // the third is calculated from 1-(first+second).  You can also plot more than
 // one infoset per triangle now.
+
 Bool PxiDrawSettings::CheckPlot3Mode(void)
 {
   int i;
@@ -1026,6 +958,7 @@ Bool PxiDrawSettings::CheckPlot3Mode(void)
   }
   return TRUE;
 }
+
 // Check Plot_2 Mode:  Plot 2 mode plots a player's strategy against another
 // strategy (the same or different player's).  Only one pair of strategies
 // can be plotted at any one time.  Thus, only two of the checkboxes in the
@@ -1043,7 +976,9 @@ Bool PxiDrawSettings::CheckPlot2Mode(void)
   }
   return TRUE;
 }
+
 #define DELTA			1e-9
+
 void PxiDrawSettings::SetOptions(wxWindow *parent)
 {
   dialogDrawSettings dialog(parent, *this);
@@ -1052,156 +987,19 @@ void PxiDrawSettings::SetOptions(wxWindow *parent)
     stop_max = strtod(dialog.GetMaxLam(),NULL);
     data_min = strtod(dialog.GetMinY(),NULL);
     data_max = strtod(dialog.GetMaxY(),NULL);
-    int mode = dialog.GetPlotMode();
-    if(mode==0)plot_mode=PXI_PLOT_X;
-    if(mode==1)plot_mode=PXI_PLOT_2;
-    if(mode==2)plot_mode=PXI_PLOT_3;
+    SetPlotFeatures(dialog.GetPlotMode());
 
+    int mode = dialog.GetPlotMode();
     mode = dialog.GetColorMode();
     if(mode==0)color_mode=COLOR_EQU;
     if(mode==1)color_mode=COLOR_PROB;
     if(mode==2)color_mode=COLOR_NONE;
 
-    show_game = dialog.GetDisplayMatrix();
     one_or_two=1;
     if(dialog.GetTwoPlots()) one_or_two = 2;
     connect_dots = dialog.GetConnectDots();
     restart_overlay_colors = dialog.GetRestartColors();
   };
-#ifdef NOT_IMPLEMENTED
-  Bool	enable_set_stop=TRUE;
-  Bool 	display_two,connectdots;
-  int 	i,iset;                       
-  MyDialogBox *display_dialog=new MyDialogBox(parent,"Draw Settings");
-// Display Range
-  display_dialog->Form()->Add(wxMakeFormMessage("Display Range:"));
-  display_dialog->Form()->Add(wxMakeFormNewLine());
-  sprintf(tempstr,"From[%3.3f..%3.3f]:",l_start,l_stop);
-  display_dialog->Form()->Add(wxMakeFormFloat(tempstr, &stop_min, wxFORM_DEFAULT,
-					      new wxList(wxMakeConstraintRange(l_start-DELTA,l_stop+DELTA), 0)));
-  sprintf(tempstr,"To[%3.3f..%3.3f]:",l_start,l_stop);
-  display_dialog->Form()->Add(wxMakeFormFloat(tempstr, &stop_max, wxFORM_DEFAULT,
-					      new wxList(wxMakeConstraintRange(l_start-DELTA,l_stop+DELTA), 0)));
-  display_dialog->Form()->Add(wxMakeFormBool("Enable",&enable_set_stop));
-  display_dialog->Form()->Add(wxMakeFormNewLine());
-  
-  display_dialog->Form()->Add(wxMakeFormFloat("DataMin", &data_min));
-  display_dialog->Form()->Add(wxMakeFormFloat("DataMax", &data_max));
-  
-  // Display strategies.  If the game is small enough, put all the items right
-  // here.  Otherwise create a button to call up a new dialog
-  gBlock<Bool> plot_top_bool(num_infosets);
-  gBlock<Bool> plot_bottom_bool(num_infosets);
-  wxFormItem *display_button=0;
-  if (num_infosets<=5) {
-    display_dialog->Form()->Add(wxMakeFormNewLine());
-    display_dialog->Form()->Add(wxMakeFormMessage("Display Data:"));
-    display_dialog->Form()->Add(wxMakeFormNewLine());
-    display_dialog->Form()->Add(wxMakeFormMessage("On Top"));
-    for (i=1;i<=num_infosets;i++) {
-      if (plot_top.Contains(i)) plot_top_bool[i]=TRUE; else plot_top_bool[i]=FALSE;
-      sprintf(tempstr,"%d",i);
-      display_dialog->Form()->Add(wxMakeFormBool(tempstr,&(plot_top_bool[i])));
-    }
-    display_dialog->Form()->Add(wxMakeFormMessage("On Bottom"));
-    for (i=1;i<=num_infosets;i++) {
-      if (plot_bottom.Contains(i)) plot_bottom_bool[i]=TRUE; else plot_bottom_bool[i]=FALSE;
-      sprintf(tempstr,"%d",i);
-      display_dialog->Form()->Add(wxMakeFormBool(tempstr,&(plot_bottom_bool[i])));
-    }
-    display_dialog->Form()->Add(wxMakeFormNewLine());
-    for (iset=1;iset<=num_infosets;iset++) {
-      char tmp[80];
-      sprintf(tmp,"Infoset %d:     ",iset);
-      display_dialog->Form()->Add(wxMakeFormMessage(tmp));
-      for (i=1;i<=strategy_show[iset].Length();i++) {
-	sprintf(tempstr,"%d",i);
-	display_dialog->Form()->Add(wxMakeFormBool(tempstr,&(strategy_show[iset][i])));
-      }
-      display_dialog->Form()->Add(wxMakeFormNewLine());
-    }
-  }
-  else {
-    display_dialog->Form()->Add(wxMakeFormNewLine());
-    display_button=wxMakeFormButton("What to display",(wxFunction)PxiDrawSettings::disp_func);
-    display_dialog->Form()->Add(display_button);
-    display_dialog->Form()->Add(wxMakeFormNewLine());
-  }
-  
-  // Display Mode--Xplot or 3plot
-  display_dialog->Form()->Add(wxMakeFormNewLine());
-  wxStringList *plot_mode_list=new wxStringList;
-  char				 *plot_mode_str=new char[20];
-  if (plot_mode==PXI_PLOT_X) strcpy(plot_mode_str,"Plot X");
-  if (plot_mode==PXI_PLOT_2) strcpy(plot_mode_str,"Plot 2");
-  if (plot_mode==PXI_PLOT_3) strcpy(plot_mode_str,"Plot 3");
-  plot_mode_list->Add("Plot X");plot_mode_list->Add("Plot 3");plot_mode_list->Add("Plot 2");
-  wxFormItem *plot_mode_item=wxMakeFormString("Plot Mode",&plot_mode_str,wxFORM_RADIOBOX,
-					      new wxList(wxMakeConstraintStrings(plot_mode_list), 0),NULL,wxVERTICAL);
-  display_dialog->Form()->Add(plot_mode_item);
-  // Color Mode--Equ,Prob,None
-  wxStringList *color_mode_list=new wxStringList;
-  char				 *color_mode_str=new char[20];
-  if (color_mode==COLOR_EQU ) strcpy(color_mode_str,"Equ");
-  if (color_mode==COLOR_PROB) strcpy(color_mode_str,"Prob");
-  if (color_mode==COLOR_NONE) strcpy(color_mode_str,"None");
-  color_mode_list->Add("Equ");color_mode_list->Add("Prob");color_mode_list->Add("None");
-  wxFormItem *color_mode_item=wxMakeFormString("Color Mode",&color_mode_str,wxFORM_RADIOBOX,
-					       new wxList(wxMakeConstraintStrings(color_mode_list), 0),NULL,wxVERTICAL);
-  display_dialog->Form()->Add(color_mode_item);
-  // Display matrix
-  display_dialog->Form()->Add(wxMakeFormNewLine());
-  display_dialog->Form()->Add(wxMakeFormBool("Display Matrix",&show_game));
-  if (one_or_two==2) display_two=TRUE; else display_two=FALSE;
-  connectdots=ConnectDots();
-  display_dialog->Form()->Add(wxMakeFormBool("Two Plots",&display_two));
-  display_dialog->Form()->Add(wxMakeFormBool("Connect Dots",&connectdots));
-  display_dialog->Form()->Add(wxMakeFormBool("Restart Colors",&restart_overlay_colors));
-  display_dialog->Form()->Add(wxMakeFormNewLine());
-  wxFormItem *overlay_button=wxMakeFormButton("Overlay Options",(wxFunction)PxiDrawSettings::overlay_func);
-  display_dialog->Form()->Add(overlay_button);
-  wxFormItem *label_font_button=wxMakeFormButton("Label Font",(wxFunction)PxiDrawSettings::label_font_func);
-  display_dialog->Form()->Add(label_font_button);
-  wxFormItem *plot_feat_button=wxMakeFormButton("Plot Options",(wxFunction)PxiDrawSettings::plot_features_func);
-  display_dialog->Form()->Add(plot_feat_button);
-  display_dialog->Form()->AssociatePanel(display_dialog);
-  ((wxButton *)overlay_button->GetPanelItem())->SetClientData((char *)this);
-  ((wxButton *)label_font_button->GetPanelItem())->SetClientData((char *)this);
-  ((wxButton *)plot_feat_button->GetPanelItem())->SetClientData((char *)this);
-  if (display_button) ((wxButton *)display_button->GetPanelItem())->SetClientData((char *)this);
-  display_dialog->Go1();
-  if (display_dialog->Completed()==wxOK) {
-    one_or_two=(display_two) ? 2 : 1;
-    connect_dots=connectdots;
-    if (!enable_set_stop) ResetSetStop();
-    if (num_infosets<=5)
-      for (i=1;i<=num_infosets;i++) {
-	if (plot_top_bool[i]) {
-	  if (!plot_top.Contains(i)) plot_top.Append(i);
-	}
-	else {
-	  if (plot_top.Contains(i)) plot_top.Remove(plot_top.Find(i));
-	}
-	if (plot_bottom_bool[i]) {
-	  if (!plot_bottom.Contains(i)) plot_bottom.Append(i);
-	}
-	else {
-	  if (plot_bottom.Contains(i)) plot_bottom.Remove(plot_bottom.Find(i));
-	}
-      }
-    if (strcmp(plot_mode_str,"Plot X")==0)
-      plot_mode=PXI_PLOT_X;
-    if (strcmp(plot_mode_str,"Plot 3")==0)
-      plot_mode=(CheckPlot3Mode()) ? PXI_PLOT_3 : PXI_PLOT_X;
-    if (strcmp(plot_mode_str,"Plot 2")==0)
-      plot_mode=(CheckPlot2Mode()) ? PXI_PLOT_2 : PXI_PLOT_X;
-    if (strcmp(color_mode_str,"Equ")==0) color_mode=COLOR_EQU;
-    if (strcmp(color_mode_str,"Prob")==0) color_mode=COLOR_PROB;
-    if (strcmp(color_mode_str,"None")==0) color_mode=COLOR_NONE;
-  }
-  delete display_dialog;
-  delete [] plot_mode_str;
-#endif // NOT_IMPLEMENTED
 }
 
 void PxiDrawSettings::overlay_func(wxButton &ob,wxEvent &)
@@ -1338,99 +1136,6 @@ void PxiDrawSettings::label_font_func(wxButton &ob,wxEvent &)
   if (f->Completed()==wxOK)
     draw_settings->SetLabelFont(f->MakeFont());
   delete f;
-#endif // NOT_IMPLEMENTED
-}
-
-// Dialog to select what isets and strategies will be displayed.  Take
-// care of large games (so that the dialogs do not get too large)
-void PxiDrawSettings::disp_func(wxButton &ob,wxEvent &)
-{
-#ifdef NOT_IMPLEMENTED
-  PxiDrawSettings	*ds=(PxiDrawSettings *)ob.GetClientData();
-  MyDialogBox *display_dialog=new MyDialogBox(0,"What to Display");
-  display_dialog->Form()->Add(wxMakeFormNewLine());
-  display_dialog->Form()->Add(wxMakeFormMessage("Display Data:"));
-  display_dialog->Form()->Add(wxMakeFormNewLine());
-  display_dialog->Form()->Add(wxMakeFormMessage("On Top"));
-  int i,iset;
-  int num_infosets=ds->num_infosets;
-  gBlock<Bool> plot_top_bool(num_infosets);
-  gBlock<Bool> plot_bottom_bool(num_infosets);
-  gBlock<show_player_strategies>	&strategy_show=ds->strategy_show;
-  gBlock<int>		&plot_top=ds->plot_top,&plot_bottom=ds->plot_bottom;
-  
-  for (i=1;i<=num_infosets;i++) {
-    if (plot_top.Contains(i)) plot_top_bool[i]=TRUE; else plot_top_bool[i]=FALSE;
-    sprintf(tempstr,"%d",i);
-    display_dialog->Form()->Add(wxMakeFormBool(tempstr,&(plot_top_bool[i])));
-    if (i%8==0) display_dialog->Form()->Add(wxMakeFormNewLine());
-  }
-  if (i>8) display_dialog->Form()->Add(wxMakeFormNewLine());
-  display_dialog->Form()->Add(wxMakeFormMessage("On Bottom"));
-  for (i=1;i<=num_infosets;i++) {
-    if (plot_bottom.Contains(i)) plot_bottom_bool[i]=TRUE; else plot_bottom_bool[i]=FALSE;
-    sprintf(tempstr,"%d",i);
-    display_dialog->Form()->Add(wxMakeFormBool(tempstr,&(plot_bottom_bool[i])));
-    if (i%8==0) display_dialog->Form()->Add(wxMakeFormNewLine());
-  }
-  display_dialog->Form()->Add(wxMakeFormNewLine());
-  // Now display all of the infoset startegies, at most 8 per dialog
-  for (iset=1;iset<=gmin(num_infosets,8);iset++) {
-    char tmp[80];
-    sprintf(tmp,"Infoset %d:     ",iset);
-    display_dialog->Form()->Add(wxMakeFormMessage(tmp));
-    for (i=1;i<=strategy_show[iset].Length();i++) {
-      sprintf(tempstr,"%d",i);
-      display_dialog->Form()->Add(wxMakeFormBool(tempstr,&(strategy_show[iset][i])));
-    }
-    display_dialog->Form()->Add(wxMakeFormNewLine());
-  }
-  display_dialog->Go();
-  if (display_dialog->Completed()==wxOK) {
-    for (i=1;i<=num_infosets;i++) {
-      if (plot_top_bool[i])
-	{
-	  if (!plot_top.Contains(i)) plot_top.Append(i);
-	}
-      else {
-	if (plot_top.Contains(i)) plot_top.Remove(plot_top.Find(i));
-      }
-      if (plot_bottom_bool[i]) {
-	if (!plot_bottom.Contains(i)) plot_bottom.Append(i);
-      }
-      else {
-	if (plot_bottom.Contains(i)) plot_bottom.Remove(plot_bottom.Find(i));
-      }
-    }
-    delete display_dialog;
-  }
-  else {
-    delete display_dialog;
-    return;
-  }
-  
-  // Now display all of the infoset startegies, at most 8 per dialog
-  for (int iset_group=1;iset_group<=(num_infosets-1)/8;iset_group++) {
-    int start=iset_group*8+1;
-    int end=start+gmin(num_infosets-start,8);
-    display_dialog=new MyDialogBox(0,"What to Display");
-    char tmp[80];
-    sprintf(tmp,"Isets %d-%d",start,end);
-    for (iset=start;iset<=end;iset++) {
-      sprintf(tmp,"Infoset %d:     ",iset);
-      display_dialog->Form()->Add(wxMakeFormMessage(tmp));
-      for (i=1;i<=strategy_show[iset].Length();i++) {
-	sprintf(tempstr,"%d",i);
-	display_dialog->Form()->Add(wxMakeFormBool(tempstr,&(strategy_show[iset][i])));
-      }
-      display_dialog->Form()->Add(wxMakeFormNewLine());
-    }
-    display_dialog->Go();
-    if (display_dialog->Completed()!=wxOK)
-      {delete display_dialog;return;}
-    else
-      {delete display_dialog;}
-  }
 #endif // NOT_IMPLEMENTED
 }
 
@@ -1583,9 +1288,6 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
   m_fontButton = new wxButton(this, idSETTINGS_FONT_BUTTON, "Font");
   m_plotButton = new wxButton(this, idSETTINGS_PLOT_BUTTON, "Plot");
   
-  m_displayMatrix = new wxCheckBox(this, -1, "Display Matrix");
-  m_displayMatrix->SetValue(draw_settings.show_game);
-    
   m_twoPlots = new wxCheckBox(this, -1, "Two Plots");
   if(draw_settings.one_or_two==2)
     m_twoPlots->SetValue(true);
@@ -1599,7 +1301,6 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
   m_restartColors->SetValue(draw_settings.restart_overlay_colors);
 
   wxBoxSizer *miscSizer = new wxBoxSizer(wxHORIZONTAL);
-  miscSizer->Add(m_displayMatrix, 0, wxALL, 5);
   miscSizer->Add(m_twoPlots, 0, wxALL, 5);
   miscSizer->Add(m_connectDots, 0, wxALL, 5);
   miscSizer->Add(m_restartColors, 0, wxALL, 5);
@@ -1702,11 +1403,17 @@ void dialogDrawSettings::OnAction(wxCommandEvent &)
 }
 
 void dialogDrawSettings::OnOverlay(wxCommandEvent &)
-{ }
+{
+  //  draw_settings.overlay_func();
+}
 
 void dialogDrawSettings::OnFont(wxCommandEvent &)
-{ }
+{ 
+  //  draw_settings.label_font_func();
+}
 
 void dialogDrawSettings::OnPlot(wxCommandEvent &)
-{ }
+{ 
+  //  draw_settings.plot_features_func();
+}
 

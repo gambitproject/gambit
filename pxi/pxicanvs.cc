@@ -458,7 +458,7 @@ void PxiCanvas::Update(wxDC& dc,int device)
     PlotAxis_3(dc,ch,cw,draw_settings->GetNumPlots(),draw_settings->PlotFeatures());
     for (int i=1;i<=headers.Length();i++) PlotData_3(dc,ch,cw,headers[i],i);
   }
-  if (draw_settings->GetShowGame()) ShowGame(dc,cw,ch,headers[1]);
+  //  if (draw_settings->GetShowGame()) ShowGame(dc,cw,ch,headers[1]);
   wxEndBusyCursor();
 }
 

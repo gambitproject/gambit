@@ -406,16 +406,22 @@ wxOutputDialogBox::wxOutputDialogBox(wxStringList *p_extraMedia,
 {
   wxStringList mediaList("Printer", "PostScript", "Clipboard",
 			 "Metafile", "Print Preview", 0);
+  
   if (p_extraMedia) {
     for (int i = 0; i < p_extraMedia->Number(); i++)
       mediaList.Add((const char *)(p_extraMedia->Nth(i)->Data()));
   }
-
   m_mediaBox = new wxRadioBox(this, 0, "Media", wxDefaultPosition, wxDefaultSize,
 			      mediaList.Number(), (const wxString *)mediaList.ListToArray(), 
 			      (int)(mediaList.Number()/2));
+  
+  /*  wxString mediaList[] = {"Printer", "PostScript", "Clipboard", "Metafile", "Print Preview"};
+      m_mediaBox = new wxRadioBox(this, 0, "Media", 
+      wxDefaultPosition, wxDefaultSize,
+      5, mediaList, 3);
+  */
   m_fitBox = new wxCheckBox(this, 0, "Fit to page");
-
+  
 #ifdef wx_x // Printer, Clipboard, and MetaFiles are not yet supp'ed
   m_mediaBox->Enable(0, false);
   m_mediaBox->Enable(2, false);
