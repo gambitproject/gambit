@@ -4,8 +4,45 @@
 // $Id$
 //
 
-#include "rational.h"
-#include "lemkesub.imp"
+#include "lemkesub.h"
+
+int LemkeBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
+				 gList<BehavSolution> &solns)
+{
+  Nfg *N = MakeReducedNfg(E, sup);
+
+  NFSupport *S = new NFSupport(*N);
+
+  ViewNormal(*N, S);
+
+  gList<MixedSolution> solutions;
+
+  int npiv;
+  double time;
+
+  Lemke(*S, params, values, solutions, npiv, time);
+
+  npivots += npiv;
+
+  for (int i = 1; i <= solutions.Length(); i++)  {
+    BehavProfile<gNumber> bp(sup, values);
+    MixedToBehav(*N, solutions[i], E, bp);
+    solns.Append(bp);
+  }
+
+  delete S;
+  delete N;
+  return params.status.Get();
+}
+
+LemkeBySubgame::LemkeBySubgame(const EFSupport &S, const LemkeParams &p,
+				  const gArray<gNumber> &v, int max)
+  : SubgameSolver(S, v, max), npivots(0), params(p),
+    values(v)
+{ }
+
+LemkeBySubgame::~LemkeBySubgame()   { }
+
 
 int Lemke(const EFSupport &support, const LemkeParams &params,
 	  const gArray<gNumber> &values,
