@@ -194,7 +194,12 @@ template <class T> void NFGobitFunc<T>::Output(gOutput &f,int format) const
   // Header information
   if(format==3) {
     f<<"Dimensionality:\n";
-    N.WriteNfgFile(f);
+    int n=N.NumPlayers();
+    f << n << " ";
+    for(int i=1;i<=n;i++)
+      f << N.NumStrats(i);
+    f << "\n";
+//    N.WriteNfgFile(f);
   }
   else if(format==2) {
     int numcols = 2+N.ProfileLength();
