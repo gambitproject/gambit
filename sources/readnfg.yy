@@ -1,39 +1,33 @@
 %{
-/*  $Id$ */
+/* $Id$ */
 #include <ctype.h>
-#include "base/base.h"
+#include "base/gmisc.h"
+#include "base/gstream.h"
+#include "base/glist.h"
 #include "math/rational.h"
 #include "nfg.h"
 #include "nfplayer.h"
 #include "nfstrat.h"
 
+static gInput *infile;
+static gText last_name;  
+static gNumber last_number;
+static gText title, comment;  
+static Nfg *N; 
+static int ncont, pl, cont;
+static gList<gText> names;
+static gList<gNumber> numbers; 
+static gList<gText> stratnames;
+static NFOutcome *outcome; 
+
+static bool CreateNfg(const gList<gText> &, const gList<gNumber> &,
+	              const gList<gText> &);
+static void SetPayoff(int cont, int pl, const gNumber &);
+
+void nfg_yyerror(char *);
+int nfg_yylex(void);
 
 %}
-
-%name NfgFileReader
-
-%define MEMBERS      gInput &infile;  \
-                     gText last_name;  gNumber last_number; \
-                     gText title, comment; \
-                     Nfg *& N; \
-                     int ncont, pl, cont; \
-		     gText last_poly; \
-                     gList<gText> names, params; \
-                     gList<gNumber> numbers; \
-                     gList<gText> stratnames; \
-                     NFOutcome *outcome; \
-                     \
-                     bool CreateNfg(const gList<gText> &, \
-					    const gList<gNumber> &, \
-					    const gList<gText> &); \
-                     void SetPayoff(int cont, int pl, \
-				    const gNumber &); \
-		     int Parse(void); \
-                     virtual ~NfgFileReader();
-
-%define CONSTRUCTOR_PARAM     gInput &f, Nfg *& nfg
-
-%define CONSTRUCTOR_INIT      : infile(f), N(nfg)
 
 %token LBRACE
 %token RBRACE
@@ -135,41 +129,46 @@ contingencylist:  contingency
 
 contingency:   NUMBER
                 { if (cont > ncont)  YYERROR;
-                  if (last_number != gNumber(0))
-                    N->SetOutcome(cont++, N->Outcomes()[last_number]); }
+                  if (last_number != gNumber(0)) {
+                    N->SetOutcome(cont++, N->Outcomes()[last_number]); 
+                  }
+                  else  {
+                    N->SetOutcome(cont++, 0);
+                  }
+                }
               
 %%
 
-void NfgFileReader::yyerror(char *)    { }
+void nfg_yyerror(char *)    { }
 
-int NfgFileReader::yylex(void)
+int nfg_yylex(void)
 {
   char c, d;
 
   while (1)  {
     do  {
-      infile >> c;
+      *infile >> c;
     }  while (isspace(c));
  
     if (c == '/')   {
-      infile >> d;
+      *infile >> d;
       if (d == '/')  {
 	do  {
-	  infile >> d;
+	  *infile >> d;
 	}  while (d != '\n');
       }
       else if (d == '*')  {
 	int done = 0;
 	while (!done)  {
 	  do {
-	    infile >> d;
+	    *infile >> d;
 	  }  while (d != '*');
-	  infile >> d;
+	  *infile >> d;
 	  if (d == '/')   done = 1;
 	}
       }
       else  {
-	infile.unget(d);
+	infile->unget(d);
 	return SLASH;
       }
     }
@@ -179,37 +178,37 @@ int NfgFileReader::yylex(void)
 
   if (isalpha(c))   {
     last_name = c;
-    infile >> c;
+    *infile >> c;
     while (isalpha(c))   {
       last_name += c;
-      infile >> c;
+      *infile >> c;
     }  
-    infile.unget(c);
+    infile->unget(c);
     return VARNAME;
   }   
 
   if (c == '"')  {
-    infile.unget(c);
-    infile >> last_name;
+    infile->unget(c);
+    *infile >> last_name;
 
     return NAME;
   }
   else if (isdigit(c) || c == '-')   {
-    infile.unget(c);
-    infile >> last_number;
+    infile->unget(c);
+    *infile >> last_number;
     return NUMBER;
   }
   
   switch (c)   {
-    case '-':  infile >> c;
+    case '-':  *infile >> c;
                if (isdigit(c))  {
-                 infile.unget(c);
-                 infile >> last_number;
+                 infile->unget(c);
+                 *infile >> last_number;
 		 last_number = -last_number;
                  return NUMBER;
                }
                else  {
-                 infile.unget(c);
+                 infile->unget(c);
                  return '-';
                }
     case '{':  return LBRACE;
@@ -218,13 +217,9 @@ int NfgFileReader::yylex(void)
   }
 }
 
-
-NfgFileReader::~NfgFileReader()   { }
-
-
-bool NfgFileReader::CreateNfg(const gList<gText> &players,
-			      const gList<gNumber> &dims,
-			      const gList<gText> &strats)
+bool CreateNfg(const gList<gText> &players,
+	       const gList<gNumber> &dims,
+	       const gList<gText> &strats)
 {
   if (players.Length() != dims.Length())   return false;
 
@@ -249,25 +244,24 @@ bool NfgFileReader::CreateNfg(const gList<gText> &players,
   return true;
 }
 
-void NfgFileReader::SetPayoff(int cont, int pl, 
-                              const gNumber &value)
+void SetPayoff(int cont, int pl, const gNumber &value)
 {
   if (pl == 1)
     N->SetOutcome(cont, N->NewOutcome());
   N->SetPayoff(N->GetOutcome(cont), pl, value);
 }
 
-int NfgFileReader::Parse(void)
+static int ParseNfgFile(void)
 {
-  infile.seekp(0);
+  infile->seekp(0);
   static char *prologue = { "NFG 1 " };
   char c;
   for (unsigned int i = 0; i < strlen(prologue); i++)  {
-    infile.get(c);
+    infile->get(c);
     if (c != prologue[i])  return 1;
   }
 
-  infile.get(c);
+  infile->get(c);
   switch (c)   {
     case 'D':
       break;
@@ -277,8 +271,8 @@ int NfgFileReader::Parse(void)
       return 1;
   }
 
-  int ret = yyparse();
-  N->m_dirty = false;
+  int ret = nfg_yyparse();
+  N->SetIsDirty(false);
   return ret;	
 }
 
@@ -287,9 +281,10 @@ int ReadNfgFile(gInput &p_file, Nfg *&p_nfg)
 {
   assert(!p_nfg);
 
-  NfgFileReader R(p_file, p_nfg);
+  infile = &p_file;
+  N = p_nfg;
 
-  if (R.Parse())   {
+  if (ParseNfgFile())   {
     if (p_nfg)   { delete p_nfg;  p_nfg = 0; }
     return 0;
   }

@@ -175,13 +175,13 @@ endif
 	$(MAKE) wxgcl_$(GUI)_$(SYSNAME) GUI=$(GUI) SYSNAME=$(SYSNAME)
 
 readefg.cc:  readefg.yy
-	bison++ -d -h readefg.h -o readefg.cc readefg.yy
+	bison -p efg_yy -o readefg.cc readefg.yy
 
 readnfg.cc:  readnfg.yy
-	bison++ -d -h readnfg.h -o readnfg.cc readnfg.yy
+	bison -p nfg_yy -o readnfg.cc readnfg.yy
 
 gcompile.cc: gcompile.yy
-	bison++ -d -h gcompile.h -o gcompile.cc gcompile.yy
+	bison -p gcl_yy -o gcompile.cc gcompile.yy
 
 clean:	
 	rm -f $(OBJDIR)/*.o

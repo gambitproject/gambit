@@ -120,18 +120,9 @@ protected:
   void MarkSubtree(Node *);
   void UnmarkSubtree(Node *);
 
-  Infoset *CreateInfoset(int n, EFPlayer *pl, int br);
-  
   void SortInfosets(void);
   void NumberNodes(Node *, int &);
   
-// These are auxiliary functions used by the .efg file reader code
-  Infoset *GetInfosetByIndex(EFPlayer *p, int index) const;
-  Infoset *CreateInfosetByIndex(EFPlayer *p, int index, int br);
-  EFOutcome *GetOutcomeByIndex(int index) const;
-  EFOutcome *CreateOutcomeByIndex(int index);
-  void Reindex(void);
-
   void DeleteLexicon(void) const;
 
   EFOutcome *NewOutcome(int index);
@@ -279,6 +270,14 @@ public:
 
   friend Nfg *MakeReducedNfg(const EFSupport &);
   friend Nfg *MakeAfg(const Efg &);
+
+// These are auxiliary functions used by the .efg file reader code
+  Infoset *GetInfosetByIndex(EFPlayer *p, int index) const;
+  Infoset *CreateInfosetByIndex(EFPlayer *p, int index, int br);
+  EFOutcome *GetOutcomeByIndex(int index) const;
+  EFOutcome *CreateOutcomeByIndex(int index);
+  void Reindex(void);
+  Infoset *CreateInfoset(int n, EFPlayer *pl, int br);
 
   void RegisterClient(EfgClient *);
   void UnregisterClient(EfgClient *);

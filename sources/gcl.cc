@@ -13,10 +13,12 @@
 #include "base/base.h"
 #include "math/rational.h"
 #include "gsmconsole.h"
-#include "gcompile.h"
 #include "gcmdline.h"
 #include "gpreproc.h"
 
+extern int GCLParse(GSM *p_gsm,
+		    const gText& line, const gText &file, int lineno,
+		    const gText& rawline);
 
 void gclNewHandler(void)
 {
@@ -151,7 +153,6 @@ int main( int /*argc*/, char* argv[] )
 #endif
 
 
-    GCLCompiler C(*gsm);
     gCmdLineInput gcmdline(20);
     gPreprocessor P(*gsm, &gcmdline, "Include[\"gclini.gcl\"]");
     while (!P.eof()) {
@@ -159,7 +160,7 @@ int main( int /*argc*/, char* argv[] )
       gText fileName = P.GetFileName();
       int lineNumber = P.GetLineNumber();
       gText rawLine = P.GetRawLine();
-      C.Parse(line, fileName, lineNumber, rawLine );
+      GCLParse(gsm, line, fileName, lineNumber, rawLine );
     }
 
     delete[] _SourceDir;

@@ -16,10 +16,13 @@
 #include "gnullstatus.h"
 #include "gcmdline.h"
 #include "gpreproc.h"
-#include "gcompile.h"
 
 char *_SourceDir = 0;
 char *_ExePath = 0;
+
+extern int GCLParse(GSM *p_gsm,
+		    const gText& line, const gText &file, int lineno,
+		    const gText& rawline);
 
 class wxCommandLine : public gclCommandLine {
 protected:
@@ -224,7 +227,6 @@ private:
   gList<gText> m_history;
 
   wxGSM *m_environment;
-  GCLCompiler *m_compiler;
 
   // Menu event handlers
   void OnSaveLog(wxCommandEvent &);
@@ -357,7 +359,6 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
 
   m_environment = new wxGSM(this, *m_cancelButton,
 			    gin, *m_outputStream, *m_outputStream);
-  m_compiler = new GCLCompiler(*m_environment);
   wxCommandLine cmdline(20);
   gPreprocessor preproc(*m_environment, &cmdline, "Include[\"gclini.gcl\"]");
   wxBusyCursor cursor;
@@ -367,7 +368,7 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
       gText fileName = preproc.GetFileName();
       int lineNumber = preproc.GetLineNumber();
       gText rawLine = preproc.GetRawLine();
-      m_compiler->Parse(line, fileName, lineNumber, rawLine);
+      GCLParse(m_environment, line, fileName, lineNumber, rawLine);
     }
   }
   catch (gSignalBreak &) {
@@ -559,7 +560,7 @@ void GclFrame::OnTextEnter(wxCommandEvent &)
       gText fileName = preproc.GetFileName();
       int lineNumber = preproc.GetLineNumber();
       gText rawLine = preproc.GetRawLine();
-      m_compiler->Parse(line, fileName, lineNumber, rawLine);
+      GCLParse(m_environment, line, fileName, lineNumber, rawLine);
     }
   }
   catch (gSignalBreak &) {

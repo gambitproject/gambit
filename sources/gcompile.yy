@@ -6,14 +6,17 @@
 // Jan L. A. van de Snepscheut, who wrote a program after which
 // this code is modeled.
 //
-//  $Id$
+// $Id$
 //
 
 #include <stdlib.h>
 #include <ctype.h>
-
-#include "base/base.h"
+#include "base/gmisc.h"
+#include "base/gstream.h"
+#include "base/gtext.h"
 #include "math/rational.h"
+#include "base/glist.h"
+#include "base/gstack.h"
 #include "gsm.h"
 #include "gsminstr.h"
 #include "gsmfunc.h"
@@ -23,45 +26,36 @@
 
 gStack<gText> GCL_InputFileNames(4);
 
+static GSM *gsm; \
+static bool record_funcbody, in_funcdecl;
+static int current_char, current_line;
+static gText current_expr, current_file, current_rawline;
+static gText funcbody, funcname, funcdesc, paramtype, functype; 
+static gList<gText> formals, types; 
+static gList<Portion *> portions;
+static gList<bool> refs;
+static gStack<gText> funcnames;
+static gText tval;
+static gclExpression *exprtree;
+static gTriState bval;
+static double dval;
+static gInteger ival;
+
+static char nextchar(void);
+static void ungetchar(char c);
+
+static gclExpression *NewFunction(gclExpression *expr);
+static gclExpression *DeleteFunction(void);
+static void RecoverFromError(void);
+
+int GCLParse(const gText& line, const gText &file,
+             int lineno, const gText& rawline); 
+int Execute(void); 
+
+void gcl_yyerror(char *s);
+int gcl_yylex(void);
+
 %}
-
-%name GCLCompiler
-
-%define MEMBERS   \
-  GSM& gsm; \
-  bool record_funcbody, in_funcdecl; \
-  int current_char, current_line; \
-  gText current_expr, current_file, current_rawline; \
-  gText funcbody, funcname, funcdesc, paramtype, functype; \
-  gList<gText> formals, types; \
-  gList<Portion *> portions; \
-  gList<bool> refs; \
-  gStack<gText> funcnames; \
-  gText tval; \
-  gclExpression *exprtree; \
-  gTriState bval; \
-  double dval; \
-  gInteger ival; \
-  \
-  virtual ~GCLCompiler()  { } \
-  char nextchar(void); \
-  void ungetchar(char c); \
-  \
-  gclExpression *NewFunction(gclExpression *expr); \
-  gclExpression *DeleteFunction(void); \
-  void RecoverFromError(void); \
-  \
-  int Parse(const gText& line, const gText &file, int lineno, \
-            const gText& rawline); \
-  int Execute(void); 
-
-%define CONSTRUCTOR_PARAM    GSM &p_environment
-
-%define CONSTRUCTOR_INIT     : gsm(p_environment), \
-                               record_funcbody( false ), \
-                               in_funcdecl(false)
-
-%define CONSTRUCTOR_CODE     
 
 %union  {
   gclExpression *eval;
@@ -301,7 +295,7 @@ constant:        BOOLEAN
         |        TEXT
           { $$ = new gclConstExpr(new TextPortion(tval)); }
         |        STDOUT
-          { $$ = new gclConstExpr(new OutputPortion(gsm.OutputStream())); }
+          { $$ = new gclConstExpr(new OutputPortion(gout)); }
         |        gNULL
           { $$ = new gclConstExpr(new OutputPortion(gnull)); }
         |        FLOATPREC
@@ -355,7 +349,7 @@ formalparam:     NAME  { formals.Append(tval); }  binding
                  { paramtype = ""; types.Append(paramtype); }
                  expression RBRACE
                  { {
-                   Portion *_p_ = $6->Evaluate(gsm);
+                   Portion *_p_ = $6->Evaluate(*gsm);
                    if (_p_->Spec().Type != porREFERENCE)
                      portions.Append(_p_);
                    else  {
@@ -374,7 +368,7 @@ binding:         RARROW    { refs.Append(false); }
 
 const char CR = (char) 10;
 
-char GCLCompiler::nextchar(void)
+char nextchar(void)
 {
   char c = current_expr[current_char];
   if( c == '\r' || c == '\n' )
@@ -383,7 +377,7 @@ char GCLCompiler::nextchar(void)
   return c;
 }
 
-void GCLCompiler::ungetchar(char /*c*/)
+void ungetchar(char /*c*/)
 {
   char c = current_expr[current_char-1];
   if( (current_char > 0) && (c == '\r' || c == '\n') )
@@ -393,7 +387,7 @@ void GCLCompiler::ungetchar(char /*c*/)
 
 typedef struct tokens  { long tok; char *name; } TOKENS_T;
 
-void GCLCompiler::yyerror(char *s)
+void gcl_yyerror(char *s)
 {
 static struct tokens toktable[] =
 { { LOR, "OR or ||" },  { LAND, "AND or &&" }, { LNOT, "NOT or !" },
@@ -413,52 +407,52 @@ static struct tokens toktable[] =
     { FLOATPREC, "Float" }, { RATIONALPREC, "Rational" }, { 0, 0 }
 };
 
-  gsm.ErrorStream() << s << " at line " << current_line << " in file " << current_file
+  gerr << s << " at line " << current_line << " in file " << current_file
        << ": ";
 
   for (int i = 0; toktable[i].tok != 0; i++)
-    if (toktable[i].tok == yychar)   {
-      gsm.ErrorStream() << toktable[i].name << '\n';
+    if (toktable[i].tok == gcl_yychar)   {
+      gerr << toktable[i].name << '\n';
       return;
     }
 
-  switch (yychar)   {
+  switch (gcl_yychar)   {
     case NAME:
-      gsm.ErrorStream() << "identifier " << tval << '\n';
+      gerr << "identifier " << tval << '\n';
       break;
     case BOOLEAN:
       if (bval == triTRUE)
-     	gsm.ErrorStream() << "True\n";
+     	gerr << "True\n";
       else if (bval == triFALSE)
-        gsm.ErrorStream() << "False\n";
+        gerr << "False\n";
       else  /* (bval == triUNKNOWN) */
-        gsm.ErrorStream() << "Unknown\n";
+        gerr << "Unknown\n";
       break;
     case FLOAT:
-      gsm.ErrorStream() << "floating-point constant " << dval << '\n';
+      gerr << "floating-point constant " << dval << '\n';
       break;
     case INTEGER:
-      gsm.ErrorStream() << "integer constant " << ival << '\n';
+      gerr << "integer constant " << ival << '\n';
       break;
     case TEXT:
-      gsm.ErrorStream() << "text string " << tval << '\n';
+      gerr << "text string " << tval << '\n';
       break;
     case STDOUT:
-      gsm.ErrorStream() << "StdOut\n";
+      gerr << "StdOut\n";
       break;
     case gNULL:
-      gsm.ErrorStream() << "NullOut\n";
+      gerr << "NullOut\n";
       break;
     default:
-      if (isprint(yychar) && !isspace(yychar))
-        gsm.ErrorStream() << ((char) yychar) << '\n';
+      if (isprint(gcl_yychar) && !isspace(gcl_yychar))
+        gerr << ((char) gcl_yychar) << '\n';
       else 
-        gsm.ErrorStream() << "nonprinting character " << yychar << '\n';
+        gerr << "nonprinting character " << gcl_yychar << '\n';
       break;
   }    
 }
 
-int GCLCompiler::yylex(void)
+int gcl_yylex(void)
 {
   char c;
   
@@ -673,9 +667,11 @@ int GCLCompiler::yylex(void)
   }
 }
 
-int GCLCompiler::Parse(const gText& line, const gText &file, int lineno,
-                       const gText& rawline )
+int GCLParse(GSM *p_gsm,
+	     const gText& line, const gText &file, int lineno,
+             const gText& rawline)
 {
+  gsm = p_gsm;
   current_expr = line;
   current_char = 0;
   current_file = file;
@@ -684,7 +680,7 @@ int GCLCompiler::Parse(const gText& line, const gText &file, int lineno,
 
   for (int i = 0; i < line.Length(); i++)   {
     if (!isspace(line[i]))  {	
-      if (!yyparse())  {	
+      if (!gcl_yyparse())  {	
         Execute();
         if (exprtree)   delete exprtree;
       }
@@ -697,7 +693,7 @@ int GCLCompiler::Parse(const gText& line, const gText &file, int lineno,
 }
 
 
-void GCLCompiler::RecoverFromError(void)
+void RecoverFromError(void)
 {
   in_funcdecl = false;
   formals.Flush();
@@ -707,16 +703,16 @@ void GCLCompiler::RecoverFromError(void)
 }
     
 
-gclExpression *GCLCompiler::NewFunction(gclExpression *expr)
+gclExpression *NewFunction(gclExpression *expr)
 {
-  gclFunction *func = new gclFunction(gsm, funcname, 1);
+  gclFunction *func = new gclFunction(*gsm, funcname, 1);
   PortionSpec funcspec;
 
   try {
     funcspec = TextToPortionSpec(functype);
   }
   catch (gclRuntimeError &)  {
-    gsm.ErrorStream() << "Error: Unknown type " << functype << ", " << 
+    gerr << "Error: Unknown type " << functype << ", " << 
       " as return type in declaration of " << funcname << "[]\n";
     return new gclConstExpr(new BoolPortion(false));;
   }
@@ -745,7 +741,7 @@ gclExpression *GCLCompiler::NewFunction(gclExpression *expr)
 	spec = TextToPortionSpec(types[i]);
       }
       catch (gclRuntimeError &) {
-	gsm.ErrorStream() << "Error: Unknown type " << types[i] << ", " << 
+	gerr << "Error: Unknown type " << types[i] << ", " << 
 	  PortionSpecToText(spec) << " for parameter " << formals[i] <<
 	  " in declaration of " << funcname << "[]\n";
 	return new gclConstExpr(new BoolPortion(false));;
@@ -772,9 +768,9 @@ gclExpression *GCLCompiler::NewFunction(gclExpression *expr)
 }
 
 
-gclExpression *GCLCompiler::DeleteFunction(void)
+gclExpression *DeleteFunction(void)
 {
-  gclFunction *func = new gclFunction(gsm, funcname, 1);
+  gclFunction *func = new gclFunction(*gsm, funcname, 1);
 
   PortionSpec funcspec;
 
@@ -782,7 +778,7 @@ gclExpression *GCLCompiler::DeleteFunction(void)
     funcspec = TextToPortionSpec(functype);
   }
   catch (gclRuntimeError &)  {
-    gsm.ErrorStream() << "Error: Unknown type " << functype << ", " << 
+    gerr << "Error: Unknown type " << functype << ", " << 
       PortionSpecToText(funcspec) << " as return type in declaration of " << 
       funcname << "[]\n";
     return new gclConstExpr(new BoolPortion(false));
@@ -809,7 +805,7 @@ gclExpression *GCLCompiler::DeleteFunction(void)
 					portions[i], BYVAL));
     }
     catch (gclRuntimeError &) {
-      gsm.ErrorStream() << "Error: Unknown type " << types[i] << ", " << 
+      gerr << "Error: Unknown type " << types[i] << ", " << 
 	PortionSpecToText(spec) << " for parameter " << formals[i] <<
 	" in declaration of " << funcname << "[]\n";
       return new gclConstExpr(new BoolPortion(false));
@@ -827,23 +823,21 @@ gclExpression *GCLCompiler::DeleteFunction(void)
 #include "gstatus.h"
 #include "gsm.h"
 
-int GCLCompiler::Execute(void)
+int Execute(void)
 {
   try  {
-    Portion *result = gsm.Execute(exprtree);
+    Portion *result = gsm->Execute(exprtree);
     if (result)  delete result;
   }
   catch (gclQuitOccurred &) {
     throw;
   }
   catch (gclRuntimeError &E) {
-    gsm.OutputStream() << "ERROR: " << E.Description() << '\n';
+    gout << "ERROR: " << E.Description() << '\n';
   }
   catch (gException &E) {
-    gsm.OutputStream() << "EXCEPTION: " << E.Description() << '\n';
+    gout << "EXCEPTION: " << E.Description() << '\n';
   }
-
-  gsm.GetStatusMonitor().Reset();
 
   return rcSUCCESS;
 }

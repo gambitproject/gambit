@@ -1,48 +1,46 @@
 %{
-/*  $Id$ */
+/* $Id$ */
 #include <stdlib.h>
 #include <ctype.h>
-#include "base/base.h"
+#include "base/gstream.h"
+#include "base/gtext.h"
 #include "math/rational.h"
 #include "math/gnumber.h"
+#include "base/gstack.h"
+#include "base/glist.h"
 #include "efg.h"
 
 
 #include "base/gstack.imp"
 
 template class gStack<Node *>;
+
+static gInput *infile;
+static gText last_name;
+static gNumber last_number;
+static int last_int, iset_idx;
+static FullEfg *E;
+static gText title, comment;
+static gStack<Node *> path;
+static gList<gText> actions, players;
+static gList<gNumber> values;
+static EFPlayer *player;
+static Infoset *infoset;
+static EFOutcome *outcome;
+static int i;
+static gText iset_name, outc_name;
+
+static void SetOutcome(EFOutcome *, const gList<gNumber> &);
+static void SetActionProbs(Infoset *, const gList<gNumber> &); 
+static bool CheckActionProbs(Infoset *, const gList<gNumber > &);
+static bool CheckOutcome(EFOutcome *, const gList<gNumber> &);
+static int Parse(void);
+static void CreateEfg(void);
+
+void efg_yyerror(char *);
+int efg_yylex(void);
+
 %}
-
-%name EfgFileReader
-
-%define MEMBERS    gInput &infile; \
-                   gText last_name, last_poly;  gNumber last_number;  \
-                   int last_int, iset_idx; \
-		   bool polymode; \
-                   FullEfg *& E; \
-		   gText title, comment; \
-                   gStack<Node *> path; \
-                   gList<gText> actions, players, params; \
-                   gList<gNumber> values; \
-                   EFPlayer *player; Infoset *infoset; EFOutcome *outcome; \
-                   int i;  gText iset_name, outc_name; \
-                   virtual ~EfgFileReader(); \
-                   EFOutcome *NewOutcome(void); \
-                   void SetOutcome(EFOutcome *, \
-			           const gList<gNumber> &); \
-                   void SetActionProbs(Infoset *, \
-			               const gList<gNumber> &); \
-                   bool CheckActionProbs(Infoset *, \
-					 const gList<gNumber > &);\
-                   bool CheckOutcome(EFOutcome *, \
-				     const gList<gNumber> &); \
-		   int Parse(void); \
-                   void CreateEfg(void);
-
-
-%define CONSTRUCTOR_PARAM    gInput &f, FullEfg *& e
-
-%define CONSTRUCTOR_INIT     : infile(f), polymode(false), E(e), path(32)
 
 %token LBRACE
 %token RBRACE
@@ -58,7 +56,9 @@ efgfile:           header  { CreateEfg(); path.Push(E->RootNode()); }
                    body    { E->Reindex();  return 0; }
        ;
 
-header:            NAME  { title = last_name; }  playerlist commentopt
+header:            NAME 
+                   { title = last_name; players.Flush(); path.Flush(); } 
+                   playerlist commentopt
       ;
 
 playerlist:        LBRACE RBRACE
@@ -198,10 +198,9 @@ outcome_number:    NUMBER
 
 outcome_info:      { if (!outcome && last_int != 0)  YYERROR; }
             |      outcome_name LBRACE 
-                   { values.Flush(); polymode = true; } payofflist
+                   { values.Flush(); } payofflist
                    RBRACE
-                   { polymode = false;
-                     if (values.Length() != E->NumPlayers())   YYERROR;
+                   { if (values.Length() != E->NumPlayers())   YYERROR;
 		     if (!outcome)   {
 		       outcome = E->CreateOutcomeByIndex(last_int);
 		       outcome->SetName(outc_name);
@@ -229,36 +228,36 @@ payoff:            NUMBER    { values.Append(last_number); }
 
 %%
 
-void EfgFileReader::yyerror(char *s)   { gout << s << '\n'; }
+void efg_yyerror(char *s)   { gout << s << '\n'; }
 
-int EfgFileReader::yylex(void)
+int efg_yylex(void)
 {
   char c, d;
 
   while (1)  {
     do  {
-      infile >> c;
+      *infile >> c;
     }  while (isspace(c));
  
     if (c == '/')   {
-      infile >> d;
+      *infile >> d;
       if (d == '/')  {
 	do  {
-	  infile >> d;
+	  *infile >> d;
 	}  while (d != '\n');
       }
       else if (d == '*')  {
 	int done = 0;
 	while (!done)  {
 	  do {
-	    infile >> d;
+	    *infile >> d;
 	  }  while (d != '*');
-	  infile >> d;
+	  *infile >> d;
 	  if (d == '/')   done = 1;
 	}
       }
       else  {
-	infile.unget(d);
+	infile->unget(d);
 	return SLASH;
       }
     }
@@ -267,40 +266,31 @@ int EfgFileReader::yylex(void)
   }
 
   if (isalpha(c))   {
-    if (!polymode) 
-      return c;	
-    last_name = c;
-    infile >> c;
-    while (isalpha(c))   {
-      last_name += c;
-      infile >> c;
-    }  
-    infile.unget(c);
-    return VARNAME;
+    return c;	
   }   
 
   if (c == '"')  {
-    infile.unget(c);
-    infile >> last_name;
+    infile->unget(c);
+    *infile >> last_name;
 
     return NAME;
   }
   else if (isdigit(c) || c == '-')   {
-    infile.unget(c);
-    infile >> last_number;
+    infile->unget(c);
+    *infile >> last_number;
     return NUMBER;
   }
   
   switch (c)   {
-    case '-':  infile >> c;
+    case '-':  *infile >> c;
                if (isdigit(c))  {
-                 infile.unget(c);
-                 infile >> last_number;
+                 infile->unget(c);
+                 *infile >> last_number;
 		 last_number = -last_number;
                  return NUMBER;
                }
                else  {
-                 infile.unget(c);
+                 infile->unget(c);
                  return '-';
                }
     case '{':  return LBRACE;
@@ -309,61 +299,51 @@ int EfgFileReader::yylex(void)
   }
 }
 
-EfgFileReader::~EfgFileReader()   { }
-
-
-EFOutcome *EfgFileReader::NewOutcome(void)
-{
-  return E->NewOutcome();
-}
-
-void EfgFileReader::SetOutcome(EFOutcome *c, const gList<gNumber> &p)
+void SetOutcome(EFOutcome *c, const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
     E->SetPayoff(c, i, p[i]);
 }
 
-void EfgFileReader::SetActionProbs(Infoset *s,
-	 			   const gList<gNumber> &p)
+void SetActionProbs(Infoset *s, const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
     E->SetChanceProb(s, i, p[i]);
 }
 
-bool EfgFileReader::CheckActionProbs(Infoset *s, 
-                                     const gList<gNumber> &p)
+bool CheckActionProbs(Infoset *s, const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
     if (E->GetChanceProb(s, i) != p[i])  return false;
   return true;
 }
 
-bool EfgFileReader::CheckOutcome(EFOutcome *c, const gList<gNumber> &p)
+bool CheckOutcome(EFOutcome *c, const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
     if (E->Payoff(c, E->Players()[i]) != p[i])   return false;
   return true;
 }
 
-int EfgFileReader::Parse(void)
+int Parse(void)
 {
-  infile.seekp(0);
+  infile->seekp(0);
   static char *prologue = { "EFG 2 " };
   char c;
   for (unsigned int i = 0; i < strlen(prologue); i++)   {
-    infile.get(c);
+    infile->get(c);
     if (c != prologue[i])   return 1;
   }
 
-  infile.get(c);
+  infile->get(c);
   if (c != 'D' && c != 'R')   return 1;
 
-  int ret = yyparse();
-  E->m_dirty = false;
+  int ret = efg_yyparse();
+  E->SetIsDirty(false);
   return ret;
 }
 
-void EfgFileReader::CreateEfg(void)
+void CreateEfg(void)
 {
   E = new FullEfg;
 
@@ -375,17 +355,17 @@ void EfgFileReader::CreateEfg(void)
 
 FullEfg *ReadEfgFile(gInput &p_file)
 {
-  FullEfg *efg = 0; 
-  EfgFileReader reader(p_file, efg);
-  
-  if (reader.Parse())  {
-    if (efg)  {
-      delete efg;
+  infile = &p_file;
+  E = 0;  
+
+  if (Parse())  {
+    if (E)  {
+      delete E;
     }
     return 0;
   }
 
-  return efg;
+  return E;
 }
 
 
