@@ -83,7 +83,7 @@ template <class T> void ChanceInfoset<T>::PrintActions(gOutput &f) const
 //------------------------------------------------------------------------
 
 template <class T> Efg<T>::Efg(void)
-{ (root = new TypedNode<T>(this, 0, 0))->name = "ROOT"; }
+{ root = new TypedNode<T>(this, 0, 0); }
 
 template <class T> void Efg<T>::CopySubtree(Node *n, Node *m)
 {
