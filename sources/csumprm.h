@@ -3,7 +3,8 @@
 #define ZSUMPRM_H
 
 #include "algdlgs.h"
-
+class CSSeqFormParams;
+class ZSumParams;
 class LPParamsSettings: public virtual OutputParamsSettings
 {
 protected:
@@ -11,7 +12,8 @@ protected:
 public:
 	LPParamsSettings(void);
 	~LPParamsSettings() {SaveDefaults();}
-	void GetParams(ZSumParams &P);
+	void GetParams(ZSumParams *P);
+	void GetParams(CSSeqFormParams *P);
 };
 class LPSolveParamsDialog : public OutputParamsDialog, public LPParamsSettings
 {
@@ -26,11 +28,18 @@ LPParamsSettings::LPParamsSettings(void)
 void LPParamsSettings::SaveDefaults(void)
 {}
 
-void LPParamsSettings::GetParams(ZSumParams &P)
+void LPParamsSettings::GetParams(ZSumParams *P)
 {
-P.stopAfter=StopAfter();
+P->stopAfter=StopAfter();
 // Output stuff
-P.trace=TraceLevel();P.tracefile=OutFile();
+P->trace=TraceLevel();P->tracefile=OutFile();
+}
+
+void LPParamsSettings::GetParams(CSSeqFormParams *P)
+{
+P->stopAfter=StopAfter();
+// Output stuff
+P->trace=TraceLevel();P->tracefile=OutFile();
 }
 
 LPSolveParamsDialog::LPSolveParamsDialog(wxWindow *parent,bool subgames)

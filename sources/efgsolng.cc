@@ -11,6 +11,7 @@
 #pragma hdrstop
 #include "efgsolng.h"
 #include "nfgconst.h"
+#include "gslist.h"
 
 // sections in the defaults file(s)
 #define		SOLN_SECT				"Soln-Defaults"
@@ -46,7 +47,7 @@ TEMPLATE class  ExtensiveSolutionG<gRational>;
 
 /*************************** BY SUBGAME G **********************************/
 #define	SELECT_SUBGAME_NUM	10000
-void SubgameRoots(const BaseEfg &efg, gList<Node *> &list); // in efgutils.cc
+void LegalSubgameRoots(const BaseEfg &efg, gList<Node *> &list); // in efgutils.cc
 
 template <class T> class BaseBySubgameG
 {
@@ -64,7 +65,7 @@ template <class T>
 BaseBySubgameG<T>::BaseBySubgameG(ExtensiveShowInterf<T> *parent_,const BaseEfg &ef)
 									:parent(parent_)
 {
-SubgameRoots(ef,subgame_roots);
+LegalSubgameRoots(ef,subgame_roots);
 wxGetResource(SOLN_SECT,"Efg-Interactive-Solns",&pick_soln,"gambit.ini");
 }
 
@@ -89,7 +90,13 @@ if (solns.Length()==0)
 int num_isets=0;
 for (int i=1;i<=ef.NumPlayers();i++)
 	num_isets+=ef.PlayerList()[i]->NumInfosets();
-if (num_isets) parent->PickSolutions(ef,solns,num_isets);
+if (num_isets)
+{
+	gSortList<BehavSolution<T> > temp_solns=solns;
+	parent->PickSolutions(ef,temp_solns);
+	solns=temp_solns;
+}
+
 // turn off the subgame picking icon at the last subgame
 if (subg_num==subgame_roots.Length()) parent->SetPickSubgame(0);
 }
@@ -125,6 +132,9 @@ TEMPLATE class BaseBySubgameG<double>;
 TEMPLATE class BaseBySubgameG<gRational>;
 
 /******************************* ALL THE SPECIFIC ALGORITHMS ****************/
+#include "nliap.h"
+#include "eliap.h"
+#include "liapsub.h"
 #define LIAP_PRM_INST
 #include "liapprm.h"
 // Extensive Form Liap... note that it is not implemented for gRationals
@@ -152,8 +162,7 @@ gList<BehavSolution<T> > EFLiapG<T>::Solve(void) const
 {
 LiapParamsSettings LPS;
 wxStatus status(parent->Frame(),"Liap Algorithm");
-BehavProfile<T> start(ef);
-start.Centroid();
+BehavProfile<T> start=parent->CreateStartProfile(LPS.StartOption());
 EFLiapParams P(status);
 LPS.GetParams(&P);
 EFLiapBySubgameG<T> M(ef,P,start,LPS.MaxSolns(),parent);
@@ -202,8 +211,7 @@ gList<BehavSolution<T> > NFLiapG<T>::Solve(void) const
 {
 LiapParamsSettings LPS;
 wxStatus status(parent->Frame(),"Liap Algorithm");
-BehavProfile<T> start(ef);
-start.Centroid();
+BehavProfile<T> start=parent->CreateStartProfile(LPS.StartOption());;
 NFLiapParams P(status);
 LPS.GetParams(&P);
 NFLiapBySubgameG<T> M(ef,P,start,LPS.MaxSolns(),parent);
@@ -226,6 +234,7 @@ gList<BehavSolution<gRational> > NFLiapG<gRational>::Solve(void) const
 TEMPLATE class NFLiapG<gRational>;
 
 // SeqForm
+#include "seqform.h"
 #define SEQF_PRM_INST
 #include "seqfprm.h"
 template <class T> class SeqFormBySubgameG:
@@ -267,6 +276,7 @@ TEMPLATE class SeqFormG<double>;
 TEMPLATE class SeqFormG<gRational>;
 
 // Lemke
+#include "lemkesub.h"
 #define LEMKE_PRM_INST
 #include "lemkeprm.h"
 template <class T> class LemkeBySubgameG:
@@ -317,6 +327,7 @@ TEMPLATE class LemkeG<gRational>;
 
 
 // Pure Nash
+#include "psnesub.h"
 #define PUREN_PRM_INST
 #include "purenprm.h"
 template <class T> class PureNashBySubgameG:
@@ -358,7 +369,47 @@ void PureNashG<T>::SolveSetup(void) const
 TEMPLATE class PureNashG<double>;
 TEMPLATE class PureNashG<gRational>;
 
+// Efg Pure Nash
+#include "efgpure.h"
+template <class T> class EPureNashBySubgameG:
+													public EfgPSNEBySubgame<T>,public BaseBySubgameG<T>
+{
+protected:
+void SelectSolutions(int n,const Efg<T> &ef,gList<BehavSolution<T> > &solns)
+{ BaseSelectSolutions(n,ef,solns);}
+public:
+EPureNashBySubgameG(const Efg<T> &E,
+													int max = 0,ExtensiveShowInterf<T> *parent_=0):
+													EfgPSNEBySubgame<T>(E,max),BaseBySubgameG<T>(parent_,E)
+{Solve();}
+};
+
+TEMPLATE class EPureNashBySubgameG<double>;
+TEMPLATE class EPureNashBySubgameG<gRational>;
+
+template <class T>
+EPureNashG<T>::EPureNashG(const Efg<T> &E,ExtensiveShowInterf<T> *parent):ExtensiveSolutionG<T>(E,parent)
+{ }
+
+template <class T>
+gList<BehavSolution<T> > EPureNashG<T>::Solve(void) const
+{
+PureNashParamsSettings PNPS;
+wxStatus status(parent->Frame(),"Efg PureNash");
+status<<"Progress not implemented\n"<<"Cancel button disabled\n";
+EPureNashBySubgameG<T> M(ef,PNPS.MaxSolns(),parent);
+return M.GetSolutions();
+}
+
+template <class T>
+void EPureNashG<T>::SolveSetup(void) const
+{PureNashSolveParamsDialog PNPD(parent->Frame(),true);}
+
+TEMPLATE class EPureNashG<double>;
+TEMPLATE class EPureNashG<gRational>;
+
 // Enum Mixed
+#include "enumsub.h"
 #define ENUM_PRM_INST
 #include "enumprm.h"
 template <class T> class EnumBySubgameG:
@@ -403,6 +454,8 @@ TEMPLATE class EnumG<double>;
 TEMPLATE class EnumG<gRational>;
 
 // LP (ZSum)
+#include "csumsub.h"
+#include "efgcsum.h"
 #define CSUM_PRM_INST
 #include "csumprm.h"
 template <class T> class ZSumBySubgameG:
@@ -441,7 +494,7 @@ LPParamsSettings LPPS;
 wxStatus status(parent->Frame(),"LP Algorithm");
 status<<"Progress not implemented\n"<<"Cancel button disabled\n";
 ZSumParams P;
-LPPS.GetParams(P);
+LPPS.GetParams(&P);
 ZSumBySubgameG<T> M(ef,P,LPPS.MaxSolns(),parent);
 return M.GetSolutions();
 }
@@ -453,7 +506,56 @@ void ZSumG<T>::SolveSetup(void) const
 TEMPLATE class ZSumG<double>;
 TEMPLATE class ZSumG<gRational>;
 
+// Efg Csum
+#include "efgcsum.h"
+template <class T> class EfgCSumBySubgameG:
+													public EfgCSumBySubgame<T>,public BaseBySubgameG<T>
+{
+protected:
+void SelectSolutions(int n,const Efg<T> &ef,gList<BehavSolution<T> > &solns)
+{ BaseSelectSolutions(n,ef,solns);}
+public:
+EfgCSumBySubgameG(const Efg<T> &E,const CSSeqFormParams &P,
+													int max = 0,ExtensiveShowInterf<T> *parent_=0):
+													EfgCSumBySubgame<T>(E,P,max),BaseBySubgameG<T>(parent_,E)
+{Solve();}
+};
+
+TEMPLATE class EfgCSumBySubgameG<double>;
+TEMPLATE class EfgCSumBySubgameG<gRational>;
+
+
+template <class T>
+EfgCSumG<T>::EfgCSumG(const Efg<T> &E,ExtensiveShowInterf<T> *parent):ExtensiveSolutionG<T>(E,parent)
+{ }
+
+template <class T>
+gList<BehavSolution<T> > EfgCSumG<T>::Solve(void) const
+{
+if (ef.NumPlayers() > 2 || !ef.IsConstSum())
+{
+	wxMessageBox("Only valid for two-person zero-sum games");
+	return EmptyBehavList((T)1);
+}
+
+LPParamsSettings LPPS;
+wxStatus status(parent->Frame(),"LP Algorithm");
+status<<"Progress not implemented\n"<<"Cancel button disabled\n";
+CSSeqFormParams P(status);
+LPPS.GetParams(&P);
+EfgCSumBySubgameG<T> M(ef,P,LPPS.MaxSolns(),parent);
+return M.GetSolutions();
+}
+
+template <class T>
+void EfgCSumG<T>::SolveSetup(void) const
+{LPSolveParamsDialog ZSPD(parent->Frame(),true);}
+
+TEMPLATE class EfgCSumG<double>;
+TEMPLATE class EfgCSumG<gRational>;
+
 // Simpdiv
+#include "simpsub.h"
 #define SIMP_PRM_INST
 #include "simpprm.h"
 template <class T> class SimpdivBySubgameG:
@@ -527,7 +629,7 @@ NFSupport *S=new NFSupport(*N);
 ViewNormal(*N,S);
 
 MixedProfile<T> start(*N,*S);
-start.Centroid();
+
 long nevals,nits;
 gList<MixedSolution<double> > nfg_solns;
 Gobit(*N,P,start,nfg_solns,nevals,nits);
@@ -582,8 +684,7 @@ gList<BehavSolution<double> > EGobitG<double>::Solve(void) const
 {
 GobitParamsSettings GSPD(parent->Filename());
 wxStatus status(parent->Frame(),"Gobit Algorithm");
-BehavProfile<double> start(ef);
-start.Centroid();
+BehavProfile<double> start=parent->CreateStartProfile(GSPD.StartOption());;
 EFGobitParams P(status);
 GSPD.GetParams(&P);
 long nevals,nits;

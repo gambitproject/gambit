@@ -90,7 +90,7 @@ public:
 	virtual void UpdateCursor(const NodeEntry *entry);
 };
 
-class OutcomeDialog;
+class BaseOutcomeDialog;
 class BaseTreeWindow: public TreeRender
 {
 friend class ExtensivePrintout;
@@ -114,7 +114,7 @@ private:
 	EFSupport * &disp_sup;	// we only need to know the displayed sup
 	BaseExtensiveShow	*frame;
 	Node	*mark_node,*old_mark_node;		// Used in mark/goto node operations
-  const Node	*subgame_node;		 		// Used to mark the 'picking' subgame root
+	const Node	*subgame_node;		 		// Used to mark the 'picking' subgame root
 	gList<NodeEntry *> node_list;		// Data for display coordinates of nodes
 	gList<SubgameEntry> subgame_list; // Keeps track of collapsed/expanded subgames
 	Bool		nodes_changed;    		// Used to determine if a node_list recalc
@@ -123,6 +123,11 @@ private:
 	gOutput	*log;									// Are we saving each action to a file?
 	Infoset *hilight_infoset;			// Hilight infoset from the solution disp
 	TreeRender *zoom_window;
+	wxMenu	*build_menu;					// a popup menu, equivalent to top level build
+	class NodeDragger;						// Class to take care of tree copy/move by
+	NodeDragger *node_drag;				// drag and dropping nodes.
+	class IsetDragger;						// Class to take care of iset join by
+  IsetDragger *iset_drag;				// drag and dropping.
 	// Private Functions
 	int 	FillTable(const Node *n,const Node *subgame, int level);
 	void 	ProcessCursor(void);
@@ -139,21 +144,22 @@ private:
 	void	Log(const gString &s);
 	int PlayerNum(const EFPlayer *p) const ;
 	int IsetNum(const Infoset *i) const ;
+	static void OnPopup(wxMenu &ob,wxCommandEvent &ev);
 protected:
 	Node	 *cursor;										// Used to process cursor keys, stores current pos
 	Bool		outcomes_changed;
 	TreeDrawSettings draw_settings;		// Stores drawing parameters
-	OutcomeDialog *outcome_dialog;		// do we have outcomes open for this window?
+	BaseOutcomeDialog *outcome_dialog;		// do we have outcomes open for this window?
 public:
 	virtual double 	ProbAsDouble(const Node *n,int action) const =0;
 	gString	AsString(TypedSolnValues what,const Node *n,int br=0) const;
 	virtual gString	OutcomeAsString(const Node *n) const =0;
 	virtual Bool JustRender(void) const;
 	// Constructor
-//	BaseTreeWindow(const BaseTreeWindow &bt);
 	BaseTreeWindow(BaseEfg &ef_,EFSupport * &disp, BaseExtensiveShow *frame);
 	// Destructor
 	~BaseTreeWindow(void);
+	// Event Handlers
 	void OnEvent(wxMouseEvent& event);
 	void OnChar(wxKeyEvent& ch);
 	// Menu event handlers (these are mostly in btreewn1.cc)
@@ -175,7 +181,7 @@ public:
 	void tree_move(void);
 	void tree_label(void);
 	void tree_players(void);
-	virtual void tree_outcomes(const gString out_name=gString(),int save_num=0) =0;
+	virtual void tree_outcomes(const gString out_name=gString()) =0;
 
 	void infoset_merge(void);
 	void infoset_break(void);
@@ -225,10 +231,13 @@ public:
 	const Node *Cursor(void) const {return cursor;}
 	// Hilight the subgame root for the currently active subgame
 	void	SetSubgamePickNode(const Node *n);
+	// Check if a node is about to be dragged
+	Node *GotObject(float &mx,float &my,int what); // 0-nonterminal,1-terminal
+	// Used by a child outcomes inspect when it is close
+	void OutcomeDialogDied(void);
 };
 
 template <class T> class ExtensiveShow;
-class OutcomeDialog;
 template <class T>
 class TreeWindow : public BaseTreeWindow
 {
@@ -239,8 +248,6 @@ class TreeWindow : public BaseTreeWindow
 	// used or implemented.  Perhaps later...
 	TreeWindow(const TreeWindow<T> &);
 	void operator=(const TreeWindow<T> &);
-	OutcomeDialog *CreateOutcomeWindow(const gString &);
-  void					 CheckOutcomeWindow(OutcomeDialog *,int );
 public:
 	double 	ProbAsDouble(const Node *n,int action) const ;
 	gString	OutcomeAsString(const Node *n) const;
@@ -249,7 +256,7 @@ public:
 	// Destructor
 	~TreeWindow();
 		// Menu events
-	void tree_outcomes(const gString out_name=gString(),int save_num=0);
+	void tree_outcomes(const gString out_name=gString());
 	void action_probs(void);
 	void node_outcome(const gString out_name);
 };

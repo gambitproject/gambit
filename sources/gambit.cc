@@ -1,7 +1,7 @@
 //
 // FILE: gambit.cc -- Main program for Gambit GUI
 //
-// @(#)gambit.cc	1.35 6/18/96
+// $Id$
 //
 #include <assert.h>
 #include <string.h>
@@ -124,22 +124,14 @@ GambitToolBar::GambitToolBar(wxFrame *frame):
 {
 parent=frame;
 // Load palette bitmaps
-#ifdef wx_msw
-wxBitmap *ToolbarOpenBitmap=new wxBitmap("OPENTOOL");
-wxBitmap *ToolbarHelpBitmap=new wxBitmap("HELPTOOL");
-wxBitmap *ToolbarNfgBitmap=new wxBitmap("NFGTOOL");
-wxBitmap *ToolbarEfgBitmap=new wxBitmap("EFGTOOL");
-#endif
-#ifdef wx_x
-#include "bitmaps/open.xbm"
-#include "bitmaps/help.xbm"
-#include "bitmaps/efg.xbm"
-#include "bitmaps/nfg.xbm"
-wxBitmap *ToolbarHelpBitmap=new wxBitmap(HELP_bits,HELP_width,HELP_height);
-wxBitmap *ToolbarNfgBitmap=new wxBitmap(NFG_bits,NFG_width,NFG_height);
-wxBitmap *ToolbarEfgBitmap=new wxBitmap(EFG_bits,EFG_width,EFG_height);
-wxBitmap *ToolbarOpenBitmap=new wxBitmap(OPEN_bits,OPEN_width,OPEN_height);
-#endif
+#include "bitmaps/open.xpm"
+#include "bitmaps/help.xpm"
+#include "bitmaps/efg.xpm"
+#include "bitmaps/nfg.xpm"
+wxBitmap *ToolbarHelpBitmap=new wxBitmap(help_xpm);
+wxBitmap *ToolbarNfgBitmap=new wxBitmap(nfg_xpm);
+wxBitmap *ToolbarEfgBitmap=new wxBitmap(efg_xpm);
+wxBitmap *ToolbarOpenBitmap=new wxBitmap(open_xpm);
 // Open | Efg,Nfg | Help
 // Create the toolbar
 SetMargins(2, 2);
@@ -147,21 +139,13 @@ SetMargins(2, 2);
 SetDefaultSize(33,30);
 #endif
 GetDC()->SetBackground(wxLIGHT_GREY_BRUSH);
-int dx = 3;
-int gap = 8;
-#ifdef wx_msw
-	int width = 38;
-#else
-	int width = ToolbarOpenBitmap->GetWidth();
-#endif
-	int currentX = gap;
-	AddTool(FILE_LOAD, ToolbarOpenBitmap,NULL,FALSE,(float)currentX,-1,NULL);
-	currentX += width + dx+gap;
-	AddTool(FILE_NEW_EFG, ToolbarEfgBitmap, NULL,FALSE, (float)currentX, -1, NULL);
-	currentX += width + dx;
-	AddTool(FILE_NEW_NFG, ToolbarNfgBitmap, NULL,FALSE, (float)currentX, -1, NULL);
-	currentX += width + dx+gap;
-	AddTool(GAMBIT_HELP_CONTENTS, ToolbarHelpBitmap, NULL,FALSE, (float)currentX, -1, NULL);
+AddTool(FILE_LOAD, ToolbarOpenBitmap);
+AddSeparator();
+AddTool(FILE_NEW_EFG, ToolbarEfgBitmap);
+AddTool(FILE_NEW_NFG, ToolbarNfgBitmap);
+AddSeparator();
+AddTool(GAMBIT_HELP_CONTENTS, ToolbarHelpBitmap);
+Layout();
 }
 
 Bool GambitToolBar::OnLeftClick(int tool, Bool )
@@ -174,13 +158,11 @@ void GambitToolBar::OnMouseEnter(int tool)
 //---------------------------------------------------------------------
 //                     GAMBITFRAME: CONSTRUCTOR
 //---------------------------------------------------------------------
-extern int   memory_trace(int warnonly = 0);	// activate tracing of mem blocks
 
 // The `main program' equivalent, creating the windows and returning the
 // main frame
 wxFrame *GambitApp::OnInit(void)
 {
-memory_trace(1);
 // First check if we have a current settings file (gambit.ini).  If not, exit!
 int ver;
 wxGetResource("Gambit","Gambit-Version",&ver,"gambit.ini");
@@ -197,10 +179,9 @@ wxIcon *frame_icon;
 #ifdef wx_msw
 	frame_icon = new wxIcon("gambit_icn");
 #else
-	#include "gambit.xbm"
-	frame_icon = new wxIcon(gambit_bits, gambit_width, gambit_height);
+	#include "gambi.xpm"
+	frame_icon = new wxIcon(gambi_xpm);
 #endif
-
 gambit_frame->SetIcon(frame_icon);
 
 // Make a menubar

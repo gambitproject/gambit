@@ -9,7 +9,8 @@
 template <class T> class ExtensiveShowInterf
 {
 public:
-	virtual void PickSolutions(const Efg<T> &,gList<BehavSolution<T> > &,int ) = 0;
+	virtual void PickSolutions(const Efg<T> &,gSortList<BehavSolution<T> > &) = 0;
+	virtual BehavProfile<T> CreateStartProfile(int how) = 0;
 	virtual void SetPickSubgame(const Node *n) = 0;
 	virtual const gString &Filename(void) const = 0;
 	virtual wxFrame *Frame(void) = 0;
@@ -70,6 +71,14 @@ public:
 	virtual gList<BehavSolution<T> > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
+// Efg Pure Nash
+template <class T> class EPureNashG : public ExtensiveSolutionG<T>
+{
+public:
+	EPureNashG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
+	virtual gList<BehavSolution<T> > Solve(void) const;
+	virtual void SolveSetup(void) const;
+};
 
 // Enum Mixed
 template <class T> class EnumG : public ExtensiveSolutionG<T>
@@ -85,6 +94,15 @@ template <class T> class ZSumG : public ExtensiveSolutionG<T>
 {
 public:
 	ZSumG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
+	virtual gList<BehavSolution<T> > Solve(void) const;
+	virtual void SolveSetup(void) const;
+};
+
+// EfgCSum
+template <class T> class EfgCSumG : public ExtensiveSolutionG<T>
+{
+public:
+	EfgCSumG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
 	virtual gList<BehavSolution<T> > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };

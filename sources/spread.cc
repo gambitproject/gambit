@@ -346,7 +346,7 @@ if (ev.LeftDown() || ev.ButtonDClick())
 	if (cell.row>sheet->GetRows()) cell.row=sheet->GetRows();
 	if (cell.col<1) cell.col=1;
 	if (cell.col>sheet->GetCols()) cell.col=sheet->GetCols();
-	top_frame->OnSelectedMoved(cell.row,cell.col);
+	top_frame->OnSelectedMoved(cell.row,cell.col,SpreadMoveJump);
 	if (ev.LeftDown() && !ev.ControlDown()) ProcessCursor(0);
 	if (ev.ButtonDClick() || (ev.LeftDown() && ev.ControlDown()))
 		top_frame->OnDoubleClick(cell.row,cell.col,sheet->GetLevel(),sheet->GetValue(cell.row,cell.col));
@@ -396,22 +396,23 @@ if (ch==WXK_F3)
 void SpreadSheetC::ProcessCursor(int ch)
 {
 if (cell.editing && ch!=0) sheet->SetValue(cell.row,cell.col,cell.str);
+SpreadMoveDir how=SpreadMoveJump;
 switch (ch)
 {
 case	WXK_UP:
-			if (cell.row>1) cell.row--;break;
+			if (cell.row>1) {cell.row--;how=SpreadMoveUp;}break;
 case 	WXK_DOWN:
-			if (cell.row<sheet->GetRows()) cell.row++;break;
+			if (cell.row<sheet->GetRows()) {cell.row++;how=SpreadMoveDown;}break;
 case	WXK_RIGHT:
-			if (cell.col<sheet->GetCols()) cell.col++;break;
+			if (cell.col<sheet->GetCols()) {cell.col++;how=SpreadMoveRight;}break;
 case WXK_LEFT:
-			if (cell.col>1) cell.col--;	break;
+			if (cell.col>1) {cell.col--;how=SpreadMoveLeft;}	break;
 default:
 			break;
 }
 cell.Reset(sheet->GetValue(cell.row,cell.col));
 UpdateCell(*(GetDC()),cell);
-top_frame->OnSelectedMoved(cell.row,cell.col);
+top_frame->OnSelectedMoved(cell.row,cell.col,how);
 top_frame->SetStatusText(gPlainText(cell.str));
 // Make sure the cursor is visible.  Note, do not if this was a mouse
 // movement (ch=0)
@@ -507,8 +508,9 @@ max_col=0;i=1;
 while (!max_col && i<=sheet->GetCols())	{if (x_start+width<MaxX(i)) max_col=i;i++;}
 if (max_col<1) max_col=sheet->GetCols();
 // Draw the grid
-if (dc.__type!=wxTYPE_DC_METAFILE) {dc.Clear();dc.BeginDrawing();}
-if (dc.__type!=wxTYPE_DC_POSTSCRIPT) dc.SetBackgroundMode(wxTRANSPARENT);
+char *dc_type=dc.GetClassInfo()->GetClassName();
+if (strcmp(dc_type,"wxMetaFileDC")!=0) {dc.Clear();dc.BeginDrawing();}
+if (strcmp(dc_type,"wxPostScriptDC")!=0) dc.SetBackgroundMode(wxTRANSPARENT);
 dc.SetBrush(wxTRANSPARENT_BRUSH);
 dc.SetPen(grid_line_pen);
 for (row=min_row;row<=max_row;row++)
@@ -548,7 +550,7 @@ for (row=min_row;row<=max_row;row++)
 
 // Hilight the currently selected cell
 UpdateCell(dc,cell);
-if (dc.__type!=wxTYPE_DC_METAFILE) dc.EndDrawing();
+if (strcmp(dc_type,"wxMetaFileDC")!=0)  dc.EndDrawing();
 }
 
 
@@ -881,6 +883,15 @@ MakeFeatures();
 CreateStatusLine(2);
 // Size this frame according to the sheet dimensions
 Resize();
+}
+
+SpreadSheet3D::~SpreadSheet3D(void)
+{
+Show(FALSE);
+if (toolbar) {delete toolbar; toolbar=0;}
+if (panel) {delete panel; panel=0;}
+if (--draw_settings->ref_cnt==0) delete draw_settings;
+if (--data_settings->ref_cnt==0) delete data_settings;
 }
 
 void SpreadSheet3D::MakeFeatures(void)

@@ -95,6 +95,8 @@
 #define	COL_LABEL_HEIGHT		30
 #define	COL_WIDTH_UNIT			10
 
+typedef enum {SpreadMoveJump,SpreadMoveLeft,SpreadMoveRight,SpreadMoveUp,SpreadMoveDown} SpreadMoveDir;
+
 //********************** SPREAD SHEET DATA SETTINGS ***********************
 // Both the DataSettings and DrawSettings employ a pseudo-reference
 // counting mechanism.  Since it is desirable to be able to use the
@@ -471,13 +473,7 @@ public:
 					wxFrame *parent=NULL,unsigned int _features=OK_BUTTON | CANCEL_BUTTON,
 					SpreadSheetDrawSettings *drs=NULL,SpreadSheetDataSettings *_dts=NULL);
 	// Destructor
-	~SpreadSheet3D(void)
-	{
-  	Show(FALSE);
-  	if (toolbar) {delete toolbar; toolbar=0;}
-		if (--draw_settings->ref_cnt==0) delete draw_settings;
-		if (--data_settings->ref_cnt==0) delete data_settings;
-	}
+	~SpreadSheet3D(void);
 	// Windows Events Handlers
 	void Update(wxDC *dc=NULL);
 	virtual void OnSize(int w,int h);
@@ -485,7 +481,7 @@ public:
 	virtual void OnOk(void);
 	virtual void OnCancel(void);
 	virtual void OnDoubleClick(int ,int ,int ,const gString &) { }
-	virtual void OnSelectedMoved(int ,int ) { }
+	virtual void OnSelectedMoved(int row,int col,SpreadMoveDir how=SpreadMoveJump) { }
 	virtual void OnPrint(void);
 	virtual void OnHelp(int =0) { }
 	virtual Bool OnCharNew(wxKeyEvent &) {return FALSE;}

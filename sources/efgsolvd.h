@@ -274,6 +274,8 @@ public:
 		efg_algorithm_list[EFG_GOBIT_SOLUTION]="Gobit";
 		efg_algorithm_list[EFG_LIAP_SOLUTION]="Liap";
 		efg_algorithm_list[EFG_LCP_SOLUTION]="LCP";
+		efg_algorithm_list[EFG_PURENASH_SOLUTION]="PureNash";
+		efg_algorithm_list[EFG_CSUM_SOLUTION]="Csum";
 		efg_algorithm_box=new	wxRadioBox(d,(wxFunction)algorithm_box_func,"Efg Algorithms",-1,-1,-1,-1,EFG_NUM_SOLUTIONS,efg_algorithm_list,2);
 		efg_algorithm_box->SetClientData((char *)this);
 		d->NewLine();
