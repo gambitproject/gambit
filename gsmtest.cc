@@ -1,5 +1,8 @@
-
-
+//#
+//# FILE: gsmtest.cc  test driver for GSM
+//#
+//# $Id$
+//#
 
 
 #include "gsm.h"
@@ -32,7 +35,7 @@ int main( void )
   gOutput* sout = new gFileOutput( "sout" );
   gOutput* serr = new gFileOutput( "serr" );
 
-  machine = new GSM( 32, *sout, *serr );
+  machine = new GSM( 32, gout, gerr );
 
   gList< Instruction* > program;
 
@@ -1786,8 +1789,32 @@ int main( void )
   machine->Dump();
 
 
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
 
-  gout << "*********************** press return to continue ************";
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "E" );
+  machine->Bind();
+  machine->InitCallFunction( "ReadEfg" );
+  machine->Push( "e02.efg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+
+  machine->PushRef( "E" );
+  machine->InitCallFunction( "ReadEfg" );
+  machine->Push( "e02.efg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Dump();
+
+
+  gout << "*********************** Press Return to continue ************";
   gin >> cont;
 
 
