@@ -95,7 +95,7 @@ int Portion::_NumObj = 0;
 #endif
 
 Portion::Portion(void)
-  : _Original(0), _Game(0), _GameIsEfg(false)
+  : _Game(0), _GameIsEfg(false)
 {
 #ifdef MEMCHECK
   _NumObj++;
@@ -115,26 +115,6 @@ Portion::~Portion()
   printf("--- Portion Dtor, count: %d\n", _NumObj);
 #endif
 }
-
-
-void Portion::SetOriginal(const Portion* p)
-{ 
-  _Original = (Portion*) p;
-}
-
-Portion* Portion::Original(void) const
-{ 
-  if(!IsReference())
-  {
-    assert(!_Original);
-    return (Portion*) this;
-  }
-  else
-  {
-    return _Original; 
-  }
-}
-
 
 
 void* Portion::Game(void) const
@@ -360,9 +340,7 @@ Portion* PrecisionPortion::ValCopy(void) const
 
 Portion* PrecisionPortion::RefCopy(void) const
 { 
-  Portion* p = new PrecisionPortion(*_Value, true);
-  p->SetOriginal(Original());
-  return p;
+  return new PrecisionPortion(*_Value, true);
 }
 
 bool PrecisionPortion::IsReference(void) const
@@ -406,9 +384,7 @@ Portion* IntPortion::ValCopy(void) const
 
 Portion* IntPortion::RefCopy(void) const
 { 
-  Portion* p = new IntPortion(*_Value, true);
-  p->SetOriginal(Original());
-  return p;
+  return new IntPortion(*_Value, true);
 }
 
 bool IntPortion::IsReference(void) const
@@ -452,9 +428,7 @@ Portion* NumberPortion::ValCopy(void) const
 
 Portion* NumberPortion::RefCopy(void) const
 { 
-  Portion* p = new NumberPortion(*_Value, true); 
-  p->SetOriginal(Original());
-  return p;
+  return new NumberPortion(*_Value, true); 
 }
 
 bool NumberPortion::IsReference(void) const
@@ -511,9 +485,7 @@ Portion* TextPortion::ValCopy(void) const
 
 Portion* TextPortion::RefCopy(void) const
 { 
-  Portion* p = new TextPortion(*_Value, true); 
-  p->SetOriginal(Original());
-  return p;
+  return new TextPortion(*_Value, true); 
 }
 
 bool TextPortion::IsReference(void) const
@@ -557,9 +529,7 @@ Portion* BoolPortion::ValCopy(void) const
 
 Portion* BoolPortion::RefCopy(void) const
 { 
-  Portion* p = new BoolPortion(*_Value, true);
-  p->SetOriginal(Original());
-  return p;
+  return new BoolPortion(*_Value, true);
 }
 
 bool BoolPortion::IsReference(void) const
@@ -622,9 +592,7 @@ Portion* EfOutcomePortion::ValCopy(void) const
 
 Portion* EfOutcomePortion::RefCopy(void) const
 { 
-  Portion* p = new EfOutcomePortion(*_Value, true); 
-  p->SetOriginal(Original());
-  return p;
+  return new EfOutcomePortion(*_Value, true); 
 }
 
 bool EfOutcomePortion::IsReference(void) const
@@ -685,9 +653,7 @@ Portion* NfPlayerPortion::ValCopy(void) const
 
 Portion* NfPlayerPortion::RefCopy(void) const
 {
-  Portion* p = new NfPlayerPortion(*_Value, true); 
-  p->SetOriginal(Original());
-  return p;
+  return new NfPlayerPortion(*_Value, true); 
 }
 
 bool NfPlayerPortion::IsReference(void) const
@@ -747,9 +713,7 @@ Portion* StrategyPortion::ValCopy(void) const
 
 Portion* StrategyPortion::RefCopy(void) const
 {
-  Portion* p = new StrategyPortion(*_Value, true); 
-  p->SetOriginal(Original());
-  return p;
+  return new StrategyPortion(*_Value, true); 
 }
 
 bool StrategyPortion::IsReference(void) const
@@ -814,9 +778,7 @@ Portion* NfOutcomePortion::ValCopy(void) const
 
 Portion* NfOutcomePortion::RefCopy(void) const
 { 
-  Portion* p = new NfOutcomePortion(*_Value, true); 
-  p->SetOriginal(Original());
-  return p;
+  return new NfOutcomePortion(*_Value, true); 
 }
 
 bool NfOutcomePortion::IsReference(void) const
@@ -882,9 +844,7 @@ Portion* NfSupportPortion::ValCopy(void) const
 
 Portion* NfSupportPortion::RefCopy(void) const
 {
-  Portion* p = new NfSupportPortion(*_Value, true);
-  p->SetOriginal(Original());
-  return p;
+  return new NfSupportPortion(*_Value, true);
 }
 
 
@@ -955,9 +915,7 @@ Portion* EfSupportPortion::ValCopy(void) const
 
 Portion* EfSupportPortion::RefCopy(void) const
 {
-  Portion* p = new EfSupportPortion(*_Value, true); 
-  p->SetOriginal(Original());
-  return p;
+  return new EfSupportPortion(*_Value, true); 
 }
 
 bool EfSupportPortion::IsReference(void) const
@@ -1017,9 +975,7 @@ Portion* EfPlayerPortion::ValCopy(void) const
 
 Portion* EfPlayerPortion::RefCopy(void) const
 {
-  Portion* p = new EfPlayerPortion(*_Value, true); 
-  p->SetOriginal(Original());
-  return p;
+  return new EfPlayerPortion(*_Value, true); 
 }
 
 bool EfPlayerPortion::IsReference(void) const
@@ -1083,9 +1039,7 @@ Portion* InfosetPortion::ValCopy(void) const
 
 Portion* InfosetPortion::RefCopy(void) const
 {
-  Portion* p = new InfosetPortion(*_Value, true); 
-  p->SetOriginal(Original());
-  return p;
+  return new InfosetPortion(*_Value, true); 
 }
 
 bool InfosetPortion::IsReference(void) const
@@ -1146,9 +1100,7 @@ Portion* NodePortion::ValCopy(void) const
 
 Portion* NodePortion::RefCopy(void) const
 {
-  Portion* p = new NodePortion(*_Value, true); 
-  p->SetOriginal(Original());
-  return p;
+  return new NodePortion(*_Value, true); 
 }
 
 bool NodePortion::IsReference(void) const
@@ -1209,9 +1161,7 @@ Portion* ActionPortion::ValCopy(void) const
 
 Portion* ActionPortion::RefCopy(void) const
 {
-  Portion* p = new ActionPortion(*_Value, true); 
-  p->SetOriginal(Original());
-  return p;
+  return new ActionPortion(*_Value, true); 
 }
 
 bool ActionPortion::IsReference(void) const
@@ -1281,9 +1231,7 @@ Portion* MixedPortion::ValCopy(void) const
 
 Portion* MixedPortion::RefCopy(void) const
 { 
-  Portion* p = new MixedPortion(*_Value, true);
-  p->SetOriginal(Original());
-  return p;
+  return new MixedPortion(*_Value, true);
 }
 
 bool MixedPortion::IsReference(void) const
@@ -1354,9 +1302,7 @@ Portion* BehavPortion::ValCopy(void) const
 
 Portion* BehavPortion::RefCopy(void) const
 { 
-  Portion* p = new BehavPortion(*_Value, true); 
-  p->SetOriginal(Original());
-  return p;
+  return new BehavPortion(*_Value, true); 
 }
 
 bool BehavPortion::IsReference(void) const
@@ -1417,9 +1363,7 @@ Portion* NfgPortion::ValCopy(void) const
 
 Portion* NfgPortion::RefCopy(void) const
 { 
-  Portion* p = new NfgPortion(*_Value, true);
-  p->SetOriginal(Original());
-  return p;
+  return new NfgPortion(*_Value, true);
 }
 
 bool NfgPortion::IsReference(void) const
@@ -1481,9 +1425,7 @@ Portion* EfgPortion::ValCopy(void) const
 
 Portion* EfgPortion::RefCopy(void) const
 { 
-  Portion* p = new EfgPortion(*_Value, true); 
-  p->SetOriginal(Original());
-  return p;
+  return new EfgPortion(*_Value, true); 
 }
 
 bool EfgPortion::IsReference(void) const
@@ -1535,9 +1477,7 @@ Portion* OutputPortion::ValCopy(void) const
 
 Portion* OutputPortion::RefCopy(void) const
 { 
-  Portion* p = new OutputPortion(this, true); 
-  p->SetOriginal(Original());
-  return p;
+  return new OutputPortion(this, true); 
 }
 
 bool OutputPortion::IsReference(void) const
@@ -1590,9 +1530,7 @@ Portion* InputPortion::ValCopy(void) const
 
 Portion* InputPortion::RefCopy(void) const
 { 
-  Portion* p = new InputPortion(this, true); 
-  p->SetOriginal(Original());
-  return p;
+  return new InputPortion(this, true); 
 }
 
 bool InputPortion::IsReference(void) const
@@ -1704,10 +1642,7 @@ gList< Portion* >& ListPortion::Value(void) const
 
 PortionSpec ListPortion::Spec(void) const
 { 
-  if (IsReference())
-    return Original()->Spec();
-  else
-    return PortionSpec(_DataType, _ListDepth, _IsNull); 
+  return PortionSpec(_DataType, _ListDepth, _IsNull); 
 }
 
 Precision ListPortion::SubType( void ) const
@@ -1741,7 +1676,6 @@ Portion* ListPortion::RefCopy(void) const
 { 
   ListPortion* p = new ListPortion(*_Value, true); 
   ((ListPortion*) p)->_DataType = _DataType;
-  p->SetOriginal(Original());
   return p;
 }
 
@@ -1926,7 +1860,7 @@ int ListPortion::Insert(Portion* item, int index)
   if(_DataType == porUNDEFINED) // inserting into an empty list
   {
     _DataType = item_type.Type;
-    ((ListPortion*) Original())->_DataType = _DataType;
+//    ((ListPortion*) Original())->_DataType = _DataType;
     result = _Value->Insert(item, index);
   }
   else  // inserting into an existing list
