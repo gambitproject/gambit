@@ -195,13 +195,11 @@ FuncDescObj::FuncDescObj( const gText& func_proto,
   _NumFuncs = 1;
   _FuncInfo = new gclSignature[1];
   
-  char ch = ' ';
   int index = 0;
   gText func_name;
+  char ch = func_proto[index++];
 
-  ch = func_proto[index++];
-  while (isalpha(ch))
-  {
+  while (isalpha(ch)) {
     func_name += ch;
     ch=func_proto[index++];
   }
@@ -268,7 +266,6 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gText& s,
   int index=0, length=s.Length();
   int numArgs=0;
   bool done = false;
-  bool required = false;
   gList<gText> specList;
   gList<gText> nameList;
   gList<int>     listList;
@@ -286,15 +283,10 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gText& s,
     // Loop through the string, parsing a word-argument pair at a time.
   while (!done)  // ch should always be at beginning of next name here
   {
-  
-    if (ch == '{')  // If the argument is optional
-    {
+    bool required = true;
+    if (ch == '{')  {  // If the argument is optional
       ch=s[index++];
       required = false;
-    }
-    else            // The argument is required
-    {
-      required = true;
     }
   
       // name gets the name of the variable
@@ -377,16 +369,14 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gText& s,
           word = "TEXT";
         }
           // If it is a number (int or double)
-        else if ((word[0] >= '0' && word[0] <= '9') || word[0] == '-')
-        {
-          char cha = ' ';
+        else if ((word[0] >= '0' && word[0] <= '9') || word[0] == '-') {
           int sign = 1;
           int index2 = 0;
           bool isDouble = false;
           /*gInteger num = 0, denom = 1;*/
           gNumber* num = new gNumber(0);
         
-          cha = word[index2++];
+          char cha = word[index2++];
         
           if (cha == '-')  {  // If the number is negative
             sign = -1;
@@ -491,7 +481,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gText& s,
       if (ch == ',')  // If there will be another variable
       {
           // Move ch to the first letter of the next variable name 
-        ch=s[index++];
+        index++;
         ch=s[index++];
       }
       else
@@ -503,7 +493,8 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gText& s,
     // Move ch to point to first char of return type
   while (ch != ':' && index<=length)
     ch=s[index++];
-  ch=s[index++];
+
+  index++;
   ch=s[index++];
   
     // Word gets the word, which is the type of variable.
@@ -692,7 +683,6 @@ void FuncDescObj::SetParamInfo(int funcindex, const gclParameter params[])
 
 bool FuncDescObj::Combine(FuncDescObj* newfunc)
 {
-  bool result = true;
   bool finalresult = true;
   bool same_params;
   int i;
@@ -701,9 +691,8 @@ bool FuncDescObj::Combine(FuncDescObj* newfunc)
   int index;
   gStack<int> delete_stack;
 
-  for(i = 0; i < newfunc->_NumFuncs; i++)
-  {
-    result = true;
+  for (i = 0; i < newfunc->_NumFuncs; i++) {
+    bool result = true;
     for(f_index = 0; f_index < _NumFuncs; f_index++)
     {
       same_params = true;
@@ -772,12 +761,9 @@ bool FuncDescObj::Combine(FuncDescObj* newfunc)
       }
     }
 
-    if(result)
-    {
-      int delete_index = 0;
-      while(delete_stack.Depth() > 0)
-      {
-	delete_index = delete_stack.Pop();
+    if (result) {
+      while(delete_stack.Depth() > 0) {
+	int delete_index = delete_stack.Pop();
 	gerr << "Replacing " << FuncList()[delete_index+1] << '\n';
 	Delete(delete_index);
       }
@@ -809,7 +795,6 @@ bool FuncDescObj::Combine(FuncDescObj* newfunc)
 
 bool FuncDescObj::Delete(FuncDescObj* newfunc)
 {
-  bool result = true;
   bool finalresult = true;
   bool same_params;
   int i;
@@ -817,9 +802,8 @@ bool FuncDescObj::Delete(FuncDescObj* newfunc)
   int delete_index = 0;
   int index;
 
-  for(i = 0; i < newfunc->_NumFuncs; i++)
-  {
-    result = false;
+  for (i = 0; i < newfunc->_NumFuncs; i++) {
+    bool result = false;
     for(f_index = 0; f_index < _NumFuncs; f_index++)
     {
       if(_FuncInfo[f_index].NumParams == newfunc->_FuncInfo[i].NumParams) 
@@ -1422,7 +1406,7 @@ ReferencePortion* CallFuncObj::GetParamRef(int index) const
 
 // Attempt to identify the function being called out of all the
 // overloaded versions.
-void CallFuncObj::ComputeFuncIndex(GSM *gsm, Portion **param)
+void CallFuncObj::ComputeFuncIndex(void)
 {
   int exact_index = 0, supertype_index = 0;
 
@@ -1511,9 +1495,9 @@ void CallFuncObj::ComputeFuncIndex(GSM *gsm, Portion **param)
 Portion *CallFuncObj::CallFunction(GSM *gsm, Portion **param)
 {
   int index;
-  Portion* result = 0;
+  Portion* result;
 
-  ComputeFuncIndex(gsm, param);
+  ComputeFuncIndex();
 
   // at this point m_funcIndex should be defined; i.e. the function
   // matching stage is done.  Now to weed out some particular errors:

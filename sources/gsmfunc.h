@@ -163,7 +163,7 @@ private:
   // PRIVATE AUXILIARY MEMBER FUNCTIONS
   gText ParamName(int index) const;
 
-  void ComputeFuncIndex(GSM *, Portion **);
+  void ComputeFuncIndex(void);
   Portion *CallNormalFunction(GSM *, Portion **);
   Portion *CallListFunction(GSM *, Portion **);
 

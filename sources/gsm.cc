@@ -747,7 +747,6 @@ Portion* GSM::HelpVars(gText varname)
   int ck;
   int cfk;
   bool match;
-  int found = 0;
   gText curname;
   const gList<gText>* vars = _RefTableStack->Peek()->Key();
   gText var;
@@ -806,11 +805,9 @@ Portion* GSM::HelpVars(gText varname)
 	match = false;
       if(fk+1==varname.Length() && varname[fk]=='*')
 	match = true;
-      if(match)
-      {	
+      if (match) {
 	var = varlist[i];
 	varslist.Append(var);
-	found++;
       }      
     }
 

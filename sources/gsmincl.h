@@ -62,14 +62,14 @@ class PortionSpec
 {
 public:
   unsigned long Type;
-  unsigned short ListDepth;
+  unsigned int ListDepth;
   bool Null;
 
   PortionSpec(const PortionSpec& spec)
     : Type(spec.Type), ListDepth(spec.ListDepth), Null(spec.Null)
     {}
   PortionSpec(unsigned long type = 0,
-	      signed short listdepth = 0,
+	      unsigned int listdepth = 0,
 	      bool null = false )
     : Type(type), ListDepth(listdepth), Null(null)
     {}
