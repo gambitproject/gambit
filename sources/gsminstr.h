@@ -29,7 +29,7 @@ typedef enum
 
   iNOP,
 
-  iQUIT, iIF_GOTO, iGOTO,
+  iQUIT, iIF_GOTO, iGOTO, iCLEAR,
 
   iPUSH, iPUSHLIST, iPUSHREF,
   iASSIGN, iUNASSIGN, iSUBSCRIPT, iCHILD,
@@ -96,6 +96,14 @@ class Quit : public Instruction
   void Output( gOutput& s ) const;
 };
 
+
+class Clear : public Instruction
+{
+ public:
+  Opcode Type( void ) const;
+  bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
+};
 
 class IfGoto : public Instruction
 {

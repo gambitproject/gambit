@@ -69,6 +69,13 @@ bool Quit::Execute( GSM& gsm ) const
 void Quit::Output( gOutput& s ) const
 { s << "Quit"; }
 
+Opcode Clear::Type( void ) const
+{ return iCLEAR; }
+bool Clear::Execute( GSM& gsm ) const
+{ gsm.Clear(); return true; }
+void Clear::Output( gOutput& s ) const
+{ s << "Clear"; }
+
 
 IfGoto::IfGoto( int index )
      : _InstructionIndex( index )
