@@ -377,11 +377,26 @@ ActionCursorForSupport::GoToNext()
 {
   if (act != support->NumActions(pl,iset))
     { act++; return true; }
-  else if (iset != support->Game().Players()[pl]->NumInfosets())
-    { iset++; act = 1; return true; }
-  else if (pl != support->Game().NumPlayers())
-    { pl++; iset = 1; act = 1; return true; }
-  else return false;
+  
+  int temppl(pl);
+  int tempiset(iset);
+  tempiset ++; 
+
+  while (temppl <= support->Game().NumPlayers()) {
+    while (tempiset <= support->Game().Players()[temppl]->NumInfosets()) {
+      if (support->NumActions(temppl,tempiset) > 0) {
+	pl = temppl;
+	iset = tempiset;
+	act = 1;
+	return true;
+      }
+      else
+	tempiset++;
+    }
+    tempiset = 1;
+    temppl++;
+  }
+  return false;
 }
 
 const Action *ActionCursorForSupport::GetAction() const
