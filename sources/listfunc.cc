@@ -499,7 +499,7 @@ Portion* GSM_List_Nfg( Portion** param )
   Nfg& nfg =
       * (((NfgPortion *) param[0])->Value());
     for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
-      p->Append(new NfgValPortion(new Nfg(nfg)));
+      p->Append(new NfgPortion(new Nfg(nfg)));
   return p;
 }
 
@@ -520,7 +520,7 @@ Portion* GSM_List_Efg( Portion** param )
   Efg& efg =
       *(((EfgPortion*) param[0])->Value());
     for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
-      p->Append( new EfgValPortion( new Efg( efg ) ) );  
+      p->Append( new EfgPortion( new Efg( efg ) ) );  
 
   return p;
 }

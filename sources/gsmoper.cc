@@ -1803,7 +1803,7 @@ Portion* GSM_Read_Mixed(Portion** param)
 {
   Portion* sub_param[2];
   Portion* owner =
-    new NfgValPortion(&(((MixedPortion*) param[1])->Value())->Game());
+    new NfgPortion(&(((MixedPortion*) param[1])->Value())->Game());
 
   sub_param[0] = param[1];
   sub_param[1] = 0;
@@ -1832,14 +1832,11 @@ Portion* GSM_Read_Mixed(Portion** param)
 }
 
 
-//extern Portion* GSM_ListForm_Behav(Portion** param);
-//extern Portion* GSM_Behav_Efg(Portion **param);
-
 Portion* GSM_Read_Behav(Portion** param)
 {
   Portion* sub_param[2];
   Portion* owner = 
-    new EfgValPortion(&(((BehavPortion*) param[1])->Value())->Game());
+    new EfgPortion(&(((BehavPortion*) param[1])->Value())->Game());
 
   sub_param[0] = param[1];
   sub_param[1] = 0;

@@ -74,7 +74,7 @@ static Portion *GSM_AgentForm(Portion **param)
   ((NumberPortion *) param[1])->Value() = watch.Elapsed();
 
   if (N)
-    return new NfgValPortion(N);
+    return new NfgPortion(N);
   else
     return new ErrorPortion("Conversion to agent form failed");
 }
@@ -716,7 +716,7 @@ static Portion *GSM_Nfg(Portion **param)
   ((NumberPortion *) param[1])->Value() = watch.Elapsed();
 
   if (N)
-    return new NfgValPortion(N);
+    return new NfgPortion(N);
   else
     return new ErrorPortion("Conversion to reduced nfg failed");
 }

@@ -217,21 +217,21 @@ static Portion *GSM_Beliefs(Portion **param)
 
 static Portion* GSM_Game_Mixed(Portion** param)
 {
-  return new NfgValPortion(&((MixedPortion *) param[0])->Value()->Game());
+  return new NfgPortion(&((MixedPortion *) param[0])->Value()->Game());
 }
 
 static Portion *GSM_Game_NfSupport(Portion **param)
 {
   Nfg *N = (Nfg *) &((NfSupportPortion *) param[0])->Value()->Game();
 
-  return new NfgValPortion(N);
+  return new NfgPortion(N);
 }
 
 static Portion* GSM_Game_EfgTypes(Portion** param)
 {
   if(param[0]->Game())  {
     assert(param[0]->GameIsEfg());
-    return new EfgValPortion((Efg*) param[0]->Game());
+    return new EfgPortion((Efg*) param[0]->Game());
   }
   else
     return 0;

@@ -1,7 +1,7 @@
 //
 // FILE: nfgfunc.cc -- Normal form command language builtins
 //
-// @(#)nfgfunc.cc	2.23 19 Jul 1997
+// $Id$
 //
 
 
@@ -54,7 +54,7 @@ static Portion *GSM_CompressNfg(Portion **param)
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   Nfg *N = (Nfg *) &S->Game();
 
-  return new NfgValPortion(CompressNfg(*N, *S));
+  return new NfgPortion(CompressNfg(*N, *S));
 }
 
 
@@ -125,7 +125,7 @@ static Portion *GSM_Game_NfPlayer(Portion **param)
 {
   Nfg &N = ((NfPlayerPortion *) param[0])->Value()->Game();
 
-  return new NfgValPortion(&N);
+  return new NfgPortion(&N);
 }
 
 
@@ -133,7 +133,7 @@ static Portion *GSM_Game_Strategy(Portion **param)
 {
   Nfg &N = ((StrategyPortion *) param[0])->Value()->nfp->Game();
 
-  return new NfgValPortion(&N);
+  return new NfgPortion(&N);
 }
 
 
@@ -165,7 +165,7 @@ static Portion *GSM_LoadNfg(Portion **param)
     if (!ReadNfgFile(f, nfg))
       return new ErrorPortion("Not a valid .nfg file");
 
-    return new NfgValPortion(nfg);
+    return new NfgPortion(nfg);
   }
   else
     return new ErrorPortion("Unable to open file for reading");
@@ -216,7 +216,7 @@ static Portion *GSM_NewNfg(Portion **param)
 
   gSpace *space = new gSpace;
   ORD_PTR ord = &lex;
-  return new NfgValPortion(new Nfg(d, space, new term_order(space, ord)));
+  return new NfgPortion(new Nfg(d, space, new term_order(space, ord)));
 }
 
 /*
@@ -314,7 +314,7 @@ Portion* GSM_NewNfg_Payoff(Portion** param, bool rational)
     // end valid index region
   }
   
-  return new NfgValPortion(nfg);
+  return new NfgPortion(nfg);
 }
 
 

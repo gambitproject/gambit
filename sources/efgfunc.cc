@@ -128,7 +128,7 @@ static Portion *GSM_CompressEfg(Portion **param)
 {
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
 
-  return new EfgValPortion(CompressEfg(S->Game(), *S));
+  return new EfgPortion(CompressEfg(S->Game(), *S));
 }
 
 //---------------
@@ -287,7 +287,7 @@ Portion* GSM_Game_EfgElements(Portion** param)
 {
   if (param[0]->Game())  {
     assert(param[0]->GameIsEfg());
-    return new EfgValPortion((Efg*) param[0]->Game());
+    return new EfgPortion((Efg*) param[0]->Game());
   }
   else
     return 0;
@@ -425,7 +425,7 @@ static Portion *GSM_LoadEfg(Portion **param)
     ReadEfgFile((gInput &) f, E);
 	
     if (E)
-      return new EfgValPortion(E);
+      return new EfgPortion(E);
     else
       return new ErrorPortion("Not a valid .efg file");
   }
@@ -577,7 +577,7 @@ static Portion *GSM_NewEfg(Portion **param)
   ListPortion *players = (ListPortion *) param[0];
   for (int i = 1; i <= players->Length(); i++)
     E->NewPlayer()->SetName(((TextPortion *) (*players)[i])->Value());
-  return new EfgValPortion(E);
+  return new EfgPortion(E);
 }
 
 

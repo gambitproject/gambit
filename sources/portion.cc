@@ -162,7 +162,7 @@ void Portion::SetGame(const Nfg *game)
 #ifdef MEMCHECK
       gout<<"Game "<<_Game<<" ref count-: "<<(_gsm->GameRefCount(_Game)-1)<<'\n';
 #endif
-      if (--_gsm->GameRefCount(_Game) == 0)
+      if (--_gsm->GameRefCount(_Game) == 0) 
 	delete (Nfg *) _Game;
     }    
      
@@ -190,8 +190,7 @@ void Portion::SetGame(const Efg *game)
 // Removed to temporarily solve a problem somewhere with reference counting
 // of efgs.  Of course, note that this causes a memory leak!  This needs
 // to be tracked down in the near future.
-//	delete (Efg*) _Game;
-	;
+	delete (Efg*) _Game;
     }
     
     _Game = (void *) game;
@@ -1392,11 +1391,22 @@ bool BehavPortion::IsReference(void) const
 //                            new Nfg class
 //---------------------------------------------------------------------
 
-NfgPortion::NfgPortion(void)
-{ }
+NfgPortion::NfgPortion(Nfg *value)
+  : _Value(new Nfg *(value)), _ref(false)
+{
+  SetGame(*_Value);
+}
+
+NfgPortion::NfgPortion(Nfg *&value, bool ref)
+  : _Value(&value), _ref(ref)
+{ 
+  SetGame(*_Value);
+}
 
 NfgPortion::~NfgPortion()
-{ }
+{ 
+  if (!_ref)  delete _Value; 
+}
 
 Nfg *NfgPortion::Value(void) const
 { return *_Value; }
@@ -1426,45 +1436,18 @@ gString NfgPortion::OutputString( void ) const
 
 Portion* NfgPortion::ValCopy(void) const
 { 
-  return new NfgValPortion(*_Value);
+  return new NfgPortion(*_Value);
 }
 
 Portion* NfgPortion::RefCopy(void) const
 { 
-  Portion* p = new NfgRefPortion(*_Value);
+  Portion* p = new NfgPortion(*_Value, true);
   p->SetOriginal(Original());
   return p;
 }
 
-
-
-NfgValPortion::NfgValPortion(Nfg *value)
-{
-  _Value = new Nfg *(value);
-  SetGame(*_Value);
-}
-
-NfgValPortion::~NfgValPortion()
-{ 
-  delete _Value; 
-}
-
-bool NfgValPortion::IsReference(void) const
-{ return false; }
-
-
-NfgRefPortion::NfgRefPortion(Nfg *&value)
-{
-  _Value = &value; 
-  SetGame(*_Value);
-}
-
-NfgRefPortion::~NfgRefPortion()
-{ }
-
-bool NfgRefPortion::IsReference(void) const
-{ return true; }
-
+bool NfgPortion::IsReference(void) const
+{ return _ref; }
 
 
 
@@ -1472,14 +1455,22 @@ bool NfgRefPortion::IsReference(void) const
 //                            new Efg class
 //---------------------------------------------------------------------
 
-
-
-EfgPortion::EfgPortion(void)
+EfgPortion::EfgPortion(Efg *value)
+  : _Value(new Efg *(value)), _ref(false)
 {
+  SetGame(*_Value);
+}
+
+EfgPortion::EfgPortion(Efg *&value, bool ref)
+  : _Value(&value), _ref(ref)
+{ 
+  SetGame(*_Value);
 }
 
 EfgPortion::~EfgPortion()
-{ }
+{ 
+  if (!_ref)  delete _Value; 
+}
 
 Efg *EfgPortion::Value(void) const
 { return *_Value; }
@@ -1509,46 +1500,20 @@ gString EfgPortion::OutputString( void ) const
 
 Portion* EfgPortion::ValCopy(void) const
 { 
-  return new EfgValPortion(*_Value);
+  return new EfgPortion(*_Value);
 }
 
 Portion* EfgPortion::RefCopy(void) const
 { 
-  Portion* p = new EfgRefPortion(*_Value); 
+  Portion* p = new EfgPortion(*_Value, true); 
   p->SetOriginal(Original());
   return p;
 }
 
-
-
-EfgValPortion::EfgValPortion(Efg* value)
-{ 
-  _Value = new Efg*(value); 
-  SetGame(*_Value);
-}
-
-EfgValPortion::~EfgValPortion()
-{ 
-  delete _Value; 
-}
-
-bool EfgValPortion::IsReference(void) const
-{ return false; }
-
-
-EfgRefPortion::EfgRefPortion(Efg*& value)
+bool EfgPortion::IsReference(void) const
 {
-  _Value = &value;
-  SetGame(*_Value);
+  return _ref;
 }
-
-EfgRefPortion::~EfgRefPortion()
-{ }
-
-bool EfgRefPortion::IsReference(void) const
-{ return true; }
-
-
 
 
 //---------------------------------------------------------------------

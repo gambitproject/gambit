@@ -705,9 +705,12 @@ public:
 class NfgPortion : public Portion   {
 protected:
   Nfg ** _Value;
-  NfgPortion(void);
+  bool _ref;
+
+  NfgPortion(Nfg *&, bool);
 
 public:
+  NfgPortion(Nfg *value);
   virtual ~NfgPortion();
 
   Nfg *Value(void) const;
@@ -719,24 +722,9 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-
-class NfgValPortion : public NfgPortion  {
-public:
-  NfgValPortion(Nfg *value);
-  virtual ~NfgValPortion();
   bool IsReference(void) const;
 };
-
-class NfgRefPortion : public NfgPortion  {
-public:
-  NfgRefPortion(Nfg *&value);
-  virtual ~NfgRefPortion();
-  bool IsReference(void) const;
-};
-
-
 
 
 //---------------------------------------------------------------------
@@ -744,13 +732,15 @@ public:
 //---------------------------------------------------------------------
 
 
-class EfgPortion : public Portion
-{
+class EfgPortion : public Portion   {
 protected:
   Efg** _Value;
-  EfgPortion(void);
+  bool _ref;
+  
+  EfgPortion(Efg *&, bool);
 
 public:
+  EfgPortion(Efg *value);
   virtual ~EfgPortion();
 
   Efg *Value(void) const;
@@ -762,27 +752,9 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-
-class EfgValPortion : public EfgPortion
-{
-public:
-  EfgValPortion(Efg* value);
-  virtual ~EfgValPortion();
   bool IsReference(void) const;
 };
-
-class EfgRefPortion : public EfgPortion
-{
-public:
-  EfgRefPortion(Efg*& value);
-  virtual ~EfgRefPortion();
-  bool IsReference(void) const;
-};
-
-
-
 
 
 //---------------------------------------------------------------------
