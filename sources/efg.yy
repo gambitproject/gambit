@@ -7,6 +7,7 @@
 #include "gametree.h"
 #include "extform.h"
 #include "outcome.h"
+#include "rational.h"
 
 %}
 

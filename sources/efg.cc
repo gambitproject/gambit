@@ -9,6 +9,7 @@
 #include "outcome.h"
 #include "gmapiter.h"
 #include "glistit.h"
+#include "rational.h"
 
 static int generator = 0;
 
