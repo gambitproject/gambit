@@ -67,14 +67,6 @@ int NumNodes (const BaseEfg &befg)
 #include "gmisc.h"
 #include "efg.h"
 
-// prototype in efg.h
-
-template <class T> void RandomEfg(Efg<T> &efg)
-{
-  for (int i = 1; i <= efg.NumPlayers(); i++)
-    for (int j = 1; j <= efg.NumOutcomes(); j++)
-      ((OutcomeVector<T>&) *efg.outcomes[j])[i] = (T) Uniform();
-}
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -84,6 +76,14 @@ template <class T> void RandomEfg(Efg<T> &efg)
 #endif   // __GNUG__, __BORLANDC__
 
 #include "rational.h"
+// prototype in efg.h
+
+template <class T> void RandomEfg(Efg<T> &efg)
+{
+  for (int i = 1; i <= efg.NumPlayers(); i++)
+    for (int j = 1; j <= efg.NumOutcomes(); j++)
+      ((OutcomeVector<T>&) *efg.outcomes[j])[i] = (T) Uniform();
+}
 
 TEMPLATE void RandomEfg(Efg<double> &efg);
 TEMPLATE void RandomEfg(Efg<gRational> &efg);

@@ -4,6 +4,39 @@
 //# $Id$
 //#
 
+//-----------------------------------------------------------------------
+//                       Template instantiations
+//-----------------------------------------------------------------------
+
+
+class Portion;
+class CallFuncObj;
+class RefHashTable;
+template <class T> class gGrowableStack;
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
+
+#include "gstack.imp"
+
+TEMPLATE class gStack< Portion* >;
+TEMPLATE class gStack< gGrowableStack< Portion* >* >;
+TEMPLATE class gStack< CallFuncObj* >;
+TEMPLATE class gStack< RefHashTable* >;
+
+#include "ggrstack.imp"
+
+TEMPLATE class gGrowableStack< Portion* >;
+TEMPLATE class gGrowableStack< gGrowableStack< Portion* >* >;
+TEMPLATE class gGrowableStack< CallFuncObj* >;
+TEMPLATE class gGrowableStack< RefHashTable* >;
+
+#ifdef __BORLANDC__
+#pragma option -Jgx
+#endif
 
 #include "gsm.h"
 
@@ -598,10 +631,10 @@ bool GSM::_BinaryOperation( const gString& funcname )
   _Push( p2 );
   _Push( p1 );
   
-  prog.Append( new class InitCallFunction( funcname ) );
-  prog.Append( new class Bind );
-  prog.Append( new class Bind );
-  prog.Append( new class CallFunction );
+  prog.Append( new class :: InitCallFunction( funcname ) );
+  prog.Append( new class :: Bind );
+  prog.Append( new class :: Bind );
+  prog.Append( new class :: CallFunction );
   result = Execute( prog );
 
   if( result == rcSUCCESS )
@@ -630,9 +663,9 @@ bool GSM::_UnaryOperation( const gString& funcname )
   assert( _Depth() >= 1 );
 #endif // NDEBUG
 
-  prog.Append( new class InitCallFunction( funcname ) );
-  prog.Append( new class Bind );
-  prog.Append( new class CallFunction );
+  prog.Append( new class :: InitCallFunction( funcname ) );
+  prog.Append( new class :: Bind );
+  prog.Append( new class :: CallFunction );
   result = Execute( prog );
 
   if( result == rcSUCCESS )
@@ -1496,34 +1529,5 @@ void GSM::_ErrorMessage
 
 
 
-//-----------------------------------------------------------------------
-//                       Template instantiations
-//-----------------------------------------------------------------------
-
-
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
-
-
-
-#include "gstack.imp"
-
-TEMPLATE class gStack< Portion* >;
-TEMPLATE class gStack< gGrowableStack< Portion* >* >;
-TEMPLATE class gStack< CallFuncObj* >;
-TEMPLATE class gStack< RefHashTable* >;
-
-#include "ggrstack.imp"
-
-TEMPLATE class gGrowableStack< Portion* >;
-TEMPLATE class gGrowableStack< gGrowableStack< Portion* >* >;
-TEMPLATE class gGrowableStack< CallFuncObj* >;
-TEMPLATE class gGrowableStack< RefHashTable* >;
 
 
