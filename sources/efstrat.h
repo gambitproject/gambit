@@ -57,6 +57,7 @@ public:
 
   // Number of Sequences for the player
   int NumSequences(int pl) const;
+  int TotalNumSequences() const;
 
   void Dump(gOutput& s) const;
 };

@@ -363,6 +363,14 @@ int EFSupport::NumSequences(int j) const
   return num;
 }
 
+int EFSupport::TotalNumSequences() const
+{
+  int total = 0;
+  for (int i = 1 ; i <= befg->NumPlayers(); i++)
+    total += NumSequences(i);
+  return total;
+}
+
 void EFSupport::Dump(gOutput& s) const
 {
   int numplayers;

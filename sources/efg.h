@@ -178,6 +178,8 @@ protected:
 
 
     int ProfileLength(void) const;
+    int TotalNumInfosets(void) const;
+
     gArray<int> NumInfosets(void) const;
     gPVector<int> NumActions(void) const;
     gPVector<int> NumMembers(void) const;

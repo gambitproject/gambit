@@ -1257,6 +1257,16 @@ gArray<int> Efg::NumInfosets(void) const
   return foo;
 }
 
+int Efg::TotalNumInfosets(void) const
+{
+  int foo=0;
+  
+  for (int i = 1; i <= players.Length(); i++)
+    foo += (NumInfosets())[i];
+
+  return foo;
+}
+
 gPVector<int> Efg::NumActions(void) const
 {
   gArray<int> foo(players.Length());
