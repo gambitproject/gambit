@@ -114,6 +114,8 @@ public:
   bool Negate   ( void );
   bool Power    ( void );
 
+  bool Concat   ( void );
+
   bool IntegerDivide ( void );
   bool Modulus       ( void );
 
