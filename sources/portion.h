@@ -14,9 +14,12 @@
 
 #include "gambitio.h"
 
-#include "gblock.h"
 #include "rational.h"
 #include "gstring.h"
+
+#include "gsmhash.h"
+
+
 
 
 typedef enum 
@@ -74,39 +77,7 @@ typedef unsigned int PortionType;
 
 
 
-class RefHashTable;
 class List_Portion;
-class GSM;
-
-
-
-
-
-
-
-
-
-
-
-
-
-class ReferenceCounter
-{
-private:
-  int _RefCount;
-
-public:
-  ReferenceCounter( void );
-  int& RefCount( void );
-};
-
-
-
-class gStreamOutput : public gFileOutput, public ReferenceCounter
-{
-public:
-  gStreamOutput( const gString& filename );
-};
 
 
 
@@ -123,8 +94,6 @@ class Portion
   static int _NumPortions;
 
  protected:
-  GSM*       _GSM;
-  bool       _Temporary;
   // the following two are only used by List operations (so far)
   Portion*       _ShadowOf;
   List_Portion*  _ParentList;
@@ -135,12 +104,10 @@ class Portion
   Portion();
   virtual ~Portion();
 
-  bool&               Temporary      ( void );
   Portion*&           ShadowOf       ( void );
   List_Portion*&      ParentList     ( void );
   virtual PortionType Type           ( void ) const = 0;
-  virtual Portion*    Copy           ( void ) const = 0;
-  virtual void        MakeCopyOfData ( Portion* p );
+  virtual Portion*    Copy           ( bool new_data = false ) const = 0;
   virtual Portion*    Operation      ( Portion* p, OperationMode mode );
   virtual void        Output         ( gOutput& s ) const = 0;
 };
@@ -160,7 +127,7 @@ class Error_Portion : public Portion
 
   gString&    Value     ( void );
   gString     Value     ( void ) const;
-  Portion*    Copy      ( void ) const;
+  Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   void        Output    ( gOutput& s ) const;
 };
@@ -177,7 +144,7 @@ template <class T> class numerical_Portion : public Portion
 
   T&          Value     ( void );
   T           Value     ( void ) const;
-  Portion*    Copy      ( void ) const;
+  Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   Portion*    Operation ( Portion* p, OperationMode mode );
   void        Output    ( gOutput& s ) const;
@@ -194,7 +161,7 @@ class bool_Portion : public Portion
 
   bool&       Value     ( void );
   bool        Value     ( void ) const;
-  Portion*    Copy      ( void ) const;
+  Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   Portion*    Operation ( Portion* p, OperationMode mode );
   void        Output    ( gOutput& s ) const;
@@ -211,7 +178,7 @@ class gString_Portion : public Portion
 
   gString&    Value     ( void );
   gString     Value     ( void ) const;
-  Portion*    Copy      ( void ) const;
+  Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   Portion*    Operation ( Portion* p, OperationMode mode );
   void        Output    ( gOutput& s ) const;
@@ -233,11 +200,15 @@ class Reference_Portion : public Portion
   gString     Value    ( void ) const;
   gString&    SubValue ( void );
   gString     SubValue ( void ) const;
-  Portion*    Copy     ( void ) const;
+  Portion*    Copy     ( bool new_data ) const;
   PortionType Type     ( void ) const;
   void        Output   ( gOutput& s ) const;
 };
 
+
+
+
+#include "gblock.h"
 
 class List_Portion : public Portion
 {
@@ -254,7 +225,7 @@ class List_Portion : public Portion
 
   gBlock<Portion*>& Value     ( void );
   gBlock<Portion*>  Value     ( void ) const;
-  Portion*          Copy      ( void ) const;
+  Portion*          Copy      ( bool new_data ) const;
   PortionType       Type      ( void ) const;
   PortionType       DataType  ( void ) const;
   void              Output    ( gOutput& s ) const;
@@ -287,7 +258,7 @@ template <class T> class Mixed_Portion : public Portion
 
   MixedProfile<T>& Value     ( void );
   MixedProfile<T>  Value     ( void ) const;
-  Portion*         Copy      ( void ) const;
+  Portion*         Copy      ( bool new_data ) const;
   PortionType      Type      ( void ) const;
   void             Output    ( gOutput& s ) const;
 };
@@ -309,7 +280,7 @@ template <class T> class Behav_Portion : public Portion
 
   BehavProfile<T>& Value     ( void );
   BehavProfile<T>  Value     ( void ) const;
-  Portion*         Copy      ( void ) const;
+  Portion*         Copy      ( bool new_data ) const;
   PortionType      Type      ( void ) const;
   void             Output    ( gOutput& s ) const;
 };
@@ -324,6 +295,8 @@ template <class T> class Behav_Portion : public Portion
 template <class T> class Nfg_Portion : public Portion
 {
  private:
+  static int _NumObj;
+  static RefCountHashTable< NormalForm<T>* > _RefCountTable;
   NormalForm<T>* _Value;
   RefHashTable*  _RefTable;
 
@@ -334,8 +307,7 @@ template <class T> class Nfg_Portion : public Portion
   // Only the passing by reference version of Value() is provided in 
   // order to eliminate unecessary copying
   NormalForm<T>& Value          ( void );
-  Portion*       Copy           ( void ) const;
-  void           MakeCopyOfData ( Portion* p );
+  Portion*       Copy           ( bool new_data ) const;
   PortionType    Type           ( void ) const;
   void           Output         ( gOutput& s ) const;
 
@@ -355,6 +327,8 @@ template <class T> class Nfg_Portion : public Portion
 template <class T> class Efg_Portion : public Portion
 {
  private:
+  static int _NumObj;
+  static RefCountHashTable< ExtForm<T>* > _RefCountTable;
   ExtForm<T>*    _Value;
   RefHashTable*  _RefTable;
 
@@ -365,8 +339,7 @@ template <class T> class Efg_Portion : public Portion
   // Only the passing by reference version of Value() is provided in 
   // order to eliminate unecessary copying
   ExtForm<T>&    Value          ( void );
-  Portion*       Copy           ( void ) const;
-  void           MakeCopyOfData ( Portion* p );
+  Portion*       Copy           ( bool new_data ) const;
   PortionType    Type           ( void ) const;
   void           Output         ( gOutput& s ) const;
 
@@ -391,7 +364,7 @@ class Outcome_Portion : public Portion
 
   Outcome*&   Value     ( void );
   Outcome*    Value     ( void ) const;
-  Portion*    Copy      ( void ) const;
+  Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   void        Output    ( gOutput& s ) const;
 };
@@ -410,7 +383,7 @@ class Player_Portion : public Portion
 
   Player*&    Value     ( void );
   Player*     Value     ( void ) const;
-  Portion*    Copy      ( void ) const;
+  Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   void        Output    ( gOutput& s ) const;
 };
@@ -429,7 +402,7 @@ class Infoset_Portion : public Portion
 
   Infoset*&   Value     ( void );
   Infoset*    Value     ( void ) const;
-  Portion*    Copy      ( void ) const;
+  Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   void        Output    ( gOutput& s ) const;
 };
@@ -445,7 +418,7 @@ class Action_Portion : public Portion
 
   Action*&    Value     ( void );
   Action*     Value     ( void ) const;
-  Portion*    Copy      ( void ) const;
+  Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   void        Output    ( gOutput& s ) const;
 };
@@ -464,7 +437,7 @@ class Node_Portion : public Portion
 
   Node*&      Value     ( void );
   Node*       Value     ( void ) const;
-  Portion*    Copy      ( void ) const;
+  Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   void        Output    ( gOutput& s ) const;
 };
@@ -475,15 +448,16 @@ class Node_Portion : public Portion
 class Stream_Portion : public Portion
 {
  private:
-  gStreamOutput* _Value;
+  static int _NumObj;
+  static RefCountHashTable< gOutput* > _RefCountTable;
+  gOutput* _Value;
 
  public:
-  Stream_Portion( gStreamOutput& value );
-  Stream_Portion( const gString& filename );
+  Stream_Portion( gOutput& value );
   ~Stream_Portion();
 
-  gFileOutput&  Value          ( void );
-  Portion*      Copy           ( void ) const;
+  gOutput&      Value          ( void );
+  Portion*      Copy           ( bool new_data ) const;
   PortionType   Type           ( void ) const;
   void          Output         ( gOutput& s ) const;
 };

@@ -14,29 +14,24 @@
 
 
 #include "hash.h"
-#include "portion.h"
-#include "gsmfunc.h"
 
+
+
+class Portion;
+class FuncDescObj;
+class gString;
 
 
 class RefHashTable : public HashTable<gString, Portion*>
 {
  private:
-  int NumBuckets( void ) const 
-  { return 26; }
-  
-  int Hash( const gString& ref ) const 
-  { return (int)( ref[0] % 26 ); }
-  
-  void DeleteAction( Portion* value ) 
-  { delete value; }
+  int NumBuckets( void ) const;
+  int Hash( const gString& ref ) const;
+  void DeleteAction( Portion* value );
   
  public:
-  RefHashTable() 
-  { Init(); }
-  
-  ~RefHashTable()
-  { Flush(); }
+  RefHashTable();
+  ~RefHashTable();
 };
 
 
@@ -44,22 +39,33 @@ class RefHashTable : public HashTable<gString, Portion*>
 class FunctionHashTable : public HashTable<gString, FuncDescObj*>
 {
  private:
-  int NumBuckets() const 
-  { return 26; }
-  
-  int Hash( const gString& funcname ) const 
-  { return (int)( funcname[0] % 26 ); }
-
-  void DeleteAction( FuncDescObj* func ) 
-  { delete func; }
+  int NumBuckets() const;
+  int Hash( const gString& funcname ) const;
+  void DeleteAction( FuncDescObj* func );
 
  public:
-  FunctionHashTable() 
-  { Init(); }
-
-  ~FunctionHashTable() 
-  { Flush(); }  
+  FunctionHashTable();
+  ~FunctionHashTable();
 };
+
+
+
+
+template <class T> class RefCountHashTable : public HashTable<T, int>
+{
+ private:
+  int NumBuckets( void ) const;
+  int Hash( const T& ptr ) const;
+  void DeleteAction( int value );
+  
+ public:
+  RefCountHashTable();
+  ~RefCountHashTable();
+};
+
+
+
+
 
 
 #endif // GSMHASH_H

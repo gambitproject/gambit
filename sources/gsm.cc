@@ -136,7 +136,9 @@ bool GSM::Push( Node* data )
 
 bool GSM::PushStream( const gString& data )
 {
-  _Stack->Push( new Stream_Portion( data ) );
+  gOutput* g;
+  g = new gFileOutput( data );
+  _Stack->Push( new Stream_Portion( *g ) );
   return true;
 }
 
@@ -220,20 +222,14 @@ bool GSM::Assign( void )
       if( p2->Type() == porREFERENCE )
       {
 	p2 = _ResolveRef( (Reference_Portion*) p2 );
-	p2_copy = p2->Copy();
-	p2_copy->MakeCopyOfData( p2 );
+	p2_copy = p2->Copy( true );
       }
       else
       {
 	p2_copy = p2->Copy();
       }
-      p2_copy->Temporary() = false;
-      p2->Temporary() = true;
       _RefTable->Define( ( (Reference_Portion*) p1 )->Value(), p2_copy );
-      delete p2;
-      
-      p1 = _ResolveRef( (Reference_Portion*) p1 );
-      _Stack->Push( p1 );
+      delete p1;
     }
 
     else // ( p1_subvalue != "" )
@@ -245,15 +241,12 @@ bool GSM::Assign( void )
 	if( p2->Type() == porREFERENCE )
 	{
 	  p2 = _ResolveRef( (Reference_Portion*) p2 );
-	  p2_copy = p2->Copy();
-	  p2_copy->MakeCopyOfData( p2 );
+	  p2_copy = p2->Copy( true );
 	}
 	else
 	{
 	  p2_copy = p2->Copy();
 	}
-	p2_copy->Temporary() = false;
-	p2->Temporary() = true;
 
 	switch( primary_ref->Type() )
 	{
@@ -270,8 +263,7 @@ bool GSM::Assign( void )
 	  _ErrorMessage( _StdErr, 5 );
 	}
 
-	delete p2;
-	p1 = _ResolveRef( (Reference_Portion*) p1 );
+	delete p1;
       }
       else // ( !( primary_ref->Type() & porALLOWS_SUBVARIABLES ) )
       {
@@ -282,11 +274,13 @@ bool GSM::Assign( void )
 	}
 	delete p2;
 	delete p1;
-	p1 = new Error_Portion;
+	p2 = new Error_Portion;
       }
-      _Stack->Push( p1 );
     }
+
+    _Stack->Push( p2 );
   }
+
   else // ( p1->Type() != porREFERENCE )
   {
     int index = 0;
@@ -1042,7 +1036,6 @@ bool GSM::CallFunction( void )
     result = false;
   }
 
-
   _Stack->Push( return_value );
 
 
@@ -1494,19 +1487,6 @@ void GSM::_ErrorMessage
 #endif   // __GNUG__, __BORLANDC__
 
 
-
-#include "glist.imp"
-
-TEMPLATE class gList< Portion* >;
-TEMPLATE class gNode< Portion* >;
-
-/* already declared in readefg.y
-   TEMPLATE class gList< gString >;
-   TEMPLATE class gNode< gString >;
-   */
-
-TEMPLATE class gList< FuncDescObj* >;
-TEMPLATE class gNode< FuncDescObj* >;
 
 
 #include "gstack.imp"

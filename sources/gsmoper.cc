@@ -14,8 +14,7 @@ Portion* GSM_Assign( Portion** param )
   {
     delete param[ 0 ];
   }
-  param[ 0 ] = param[ 1 ]->Copy();
-  param[ 0 ]->MakeCopyOfData( param[ 1 ] );
+  param[ 0 ] = param[ 1 ]->Copy( true );
 
   result = param[ 1 ]->Copy();
 
@@ -627,10 +626,12 @@ Portion* GSM_NOT( Portion** param )
 Portion* GSM_NewStream( Portion** param )
 {
   Portion* result = 0;
+  gOutput* g;
   
   assert( param[ 0 ]->Type() == porSTRING );
 
-  result = new Stream_Portion( ( (gString_Portion*) param[ 0 ] )->Value() );
+  g = new gFileOutput( ( (gString_Portion*) param[ 0 ] )->Value() );
+  result = new Stream_Portion( *g );
   
   return result;
 }

@@ -19,26 +19,6 @@
 
 
 
-
-ReferenceCounter::ReferenceCounter( void )
-{
-  _RefCount = 1;
-}
-
-int& ReferenceCounter::RefCount( void )
-{
-  return _RefCount;
-}
-
-
-
-gStreamOutput::gStreamOutput( const gString& filename ) 
-:gFileOutput( filename ), ReferenceCounter()
-{
-}
-
-
-
 //---------------------------------------------------------------------
 //                          base class
 //---------------------------------------------------------------------
@@ -52,14 +32,12 @@ int Portion::_NumPortions = 0;
 
 Portion::Portion()
 {
-  _GSM = 0;
-  _Temporary = false;
   _ShadowOf = 0;
 
   // The following two lines are for detecting memory leakage.
 #ifdef MEMCHECK
   _NumPortions++;
-  gout << ">>> Portion ctor -- count: " << _NumPortions << "\n";
+  gout << ">>> Portion ctor - count: " << _NumPortions << "\n";
 #endif // MEMCHECK
 }
 
@@ -71,13 +49,10 @@ Portion::~Portion()
   // The following two lines are for detecting memory leakage.
 #ifdef MEMCHECK
   _NumPortions--;
-  gout << ">>> Portion dtor -- count: " << _NumPortions << "\n";
+  gout << ">>> Portion dtor - count: " << _NumPortions << "\n";
 #endif // MEMCHECK
 }
 
-
-bool& Portion::Temporary( void )
-{ return _Temporary; }
 
 
 Portion*& Portion::ShadowOf( void )
@@ -86,20 +61,6 @@ Portion*& Portion::ShadowOf( void )
 
 List_Portion*& Portion::ParentList( void )
 { return _ParentList; }
-
-
-void Portion::MakeCopyOfData( Portion* p )
-{ 
-#ifndef NDEBUG
-  if( this->Type() != p->Type() )
-  {
-    gerr << "Portion Error:\n";
-    gerr << "  Attempting to MakeCopyOfData() from a different Portion type\n";
-  }
-  assert( this->Type() == p->Type() );
-#endif // NDEBUG
-  _Temporary = false;
-}
 
 
 Portion* Portion::Operation( Portion* p, OperationMode mode )
@@ -135,7 +96,7 @@ gString& Error_Portion::Value( void )
 PortionType Error_Portion::Type( void ) const
 { return porERROR; }
 
-Portion* Error_Portion::Copy( void ) const
+Portion* Error_Portion::Copy( bool new_data ) const
 { return new Error_Portion( _Value ); }
 
 void Error_Portion::Output( gOutput& s ) const
@@ -167,8 +128,12 @@ template <class T> T& numerical_Portion<T>::Value( void )
 template <class T> PortionType numerical_Portion<T>::Type( void ) const
 { return porERROR; }
 
-template <class T> Portion* numerical_Portion<T>::Copy( void ) const
-{ return new numerical_Portion<T>( _Value ); }
+template <class T> Portion* numerical_Portion<T>::Copy( bool new_data ) const
+{ 
+  Portion* p;
+  p = new numerical_Portion<T>( _Value ); 
+  return p;
+}
 
 
 template <class T> 
@@ -307,7 +272,7 @@ bool& bool_Portion::Value( void )
 PortionType bool_Portion::Type( void ) const
 { return porBOOL; }
 
-Portion* bool_Portion::Copy( void ) const
+Portion* bool_Portion::Copy( bool new_data ) const
 { return new bool_Portion( _Value ); }
 
 
@@ -380,7 +345,7 @@ gString& gString_Portion::Value( void )
 PortionType gString_Portion::Type( void ) const
 { return porSTRING; }
 
-Portion* gString_Portion::Copy( void ) const
+Portion* gString_Portion::Copy( bool new_data ) const
 { return new gString_Portion( _Value ); }
 
 
@@ -470,7 +435,7 @@ template <class T> MixedProfile<T>& Mixed_Portion<T>::Value( void )
 template <class T> PortionType Mixed_Portion<T>::Type( void ) const
 { return porMIXED; }
 
-template <class T> Portion* Mixed_Portion<T>::Copy( void ) const
+template <class T> Portion* Mixed_Portion<T>::Copy( bool new_data ) const
 { return new Mixed_Portion<T>( _Value ); }
 
 template <class T> void Mixed_Portion<T>::Output( gOutput& s ) const
@@ -512,7 +477,7 @@ template <class T> BehavProfile<T>& Behav_Portion<T>::Value( void )
 template <class T> PortionType Behav_Portion<T>::Type( void ) const
 { return porBEHAV; }
 
-template <class T> Portion* Behav_Portion<T>::Copy( void ) const
+template <class T> Portion* Behav_Portion<T>::Copy( bool new_data ) const
 { return new Behav_Portion<T>( _Value ); }
 
 template <class T> void Behav_Portion<T>::Output( gOutput& s ) const
@@ -551,7 +516,7 @@ gString Reference_Portion::SubValue( void ) const
 PortionType Reference_Portion::Type( void ) const
 { return porREFERENCE; }
 
-Portion* Reference_Portion::Copy( void ) const
+Portion* Reference_Portion::Copy( bool new_data ) const
 { return new Reference_Portion( _Value, _SubValue ); }
 
 void Reference_Portion::Output( gOutput& s ) const
@@ -602,7 +567,7 @@ PortionType List_Portion::Type( void ) const
 PortionType List_Portion::DataType( void ) const
 { return _DataType; }
 
-Portion* List_Portion::Copy( void ) const
+Portion* List_Portion::Copy( bool new_data ) const
 { return new List_Portion( _Value ); }
 
 
@@ -771,20 +736,46 @@ Portion* List_Portion::GetSubscript( int index ) const
 //                            Nfg type
 //---------------------------------------------------------------------
 
+#ifdef MEMCHECK
+int Nfg_Portion<double>::_NumObj = 0;
+int Nfg_Portion<gRational>::_NumObj = 0;
+#endif // MEMCHECK
+
+RefCountHashTable< NormalForm<double>* > Nfg_Portion<double>::_RefCountTable;
+RefCountHashTable< NormalForm<gRational>* > Nfg_Portion<gRational>::_RefCountTable;
 
 template <class T> Nfg_Portion<T>::Nfg_Portion( NormalForm<T>& value )
 {
   _RefTable = new RefHashTable;
   _Value = &value;
+  if( !_RefCountTable.IsDefined( _Value ) )
+  {
+    _RefCountTable.Define( _Value, 1 );
+#ifdef MEMCHECK
+    _NumObj++;
+    gout << ">>> NormalForm Ctor - count: " << _NumObj << "\n";
+#endif // MEMCHECK
+  }
+  else
+  {
+    _RefCountTable( _Value )++;
+  }
 }
-
 
 template <class T> Nfg_Portion<T>::~Nfg_Portion()
 {
-  delete _RefTable;
-
-  if( !_Temporary )
+  assert( _RefCountTable.IsDefined( _Value ) );
+  assert( _RefCountTable( _Value ) > 0 );
+  _RefCountTable( _Value )--;
+  if( _RefCountTable( _Value ) == 0 )
+  {
     delete _Value;
+#ifdef MEMCHECK
+    _NumObj--;
+    gout << ">>> NormalForm Dtor - count: " << _NumObj << "\n";
+#endif // MEMCHECK
+  }
+  delete _RefTable;
 }
 
 
@@ -794,27 +785,29 @@ template <class T> NormalForm<T>& Nfg_Portion<T>::Value( void )
 template <class T> PortionType Nfg_Portion<T>::Type( void ) const
 { return porNFG; }
 
-template <class T> Portion* Nfg_Portion<T>::Copy( void ) const
+template <class T> Portion* Nfg_Portion<T>::Copy( bool new_data ) const
 { 
   Portion* p;
-  p = new Nfg_Portion<T>( *_Value ); 
-  p->Temporary() = true;
+  NormalForm<T>* new_value;
+
+  if( new_data )
+  {
+    new_value = new 
+      NormalForm<T>( *_Value );
+    p = new Nfg_Portion<T>( *new_value );
+  }
+  else
+  {
+    p = new Nfg_Portion<T>( *_Value ); 
+  }
   return p;
-}
-
-
-template <class T> void Nfg_Portion<T>::MakeCopyOfData( Portion* p )
-{
-  Portion::MakeCopyOfData( p );
-  _Value = new NormalForm<T>
-    (
-     (NormalForm<T> &) *((Nfg_Portion<T> *) p)->_Value
-     );
 }
 
 
 template <class T> void Nfg_Portion<T>::Output( gOutput& s ) const
 { s << "NormalForm[ "; _Value->GetTitle(); s << ']'; }
+
+
 
 
 
@@ -878,20 +871,46 @@ template <class T>
 //                            Efg type
 //---------------------------------------------------------------------
 
+#ifdef MEMCHECK
+int Efg_Portion<double>::_NumObj = 0;
+int Efg_Portion<gRational>::_NumObj = 0;
+#endif // MEMCHECK
+
+RefCountHashTable< ExtForm<double>* > Efg_Portion<double>::_RefCountTable;
+RefCountHashTable< ExtForm<gRational>* > Efg_Portion<gRational>::_RefCountTable;
 
 template <class T> Efg_Portion<T>::Efg_Portion( ExtForm<T>& value )
 {
   _RefTable = new RefHashTable;
   _Value = &value;
+  if( !_RefCountTable.IsDefined( _Value ) )
+  {
+    _RefCountTable.Define( _Value, 1 );
+#ifdef MEMCHECK
+    _NumObj++;
+    gout << ">>> ExtForm Ctor - count: " << _NumObj << "\n";
+#endif // MEMCHECK
+  }
+  else
+  {
+    _RefCountTable( _Value )++;
+  }
 }
-
 
 template <class T> Efg_Portion<T>::~Efg_Portion()
 {
-  delete _RefTable;
-
-  if( !_Temporary )
+  assert( _RefCountTable.IsDefined( _Value ) );
+  assert( _RefCountTable( _Value ) > 0 );
+  _RefCountTable( _Value )--;
+  if( _RefCountTable( _Value ) == 0 )
+  {
     delete _Value;
+#ifdef MEMCHECK
+    _NumObj--;
+    gout << ">>> ExtForm Dtor - count: " << _NumObj << "\n";
+#endif // MEMCHECK
+  }
+  delete _RefTable;
 }
 
 
@@ -901,26 +920,22 @@ template <class T> ExtForm<T>& Efg_Portion<T>::Value( void )
 template <class T> PortionType Efg_Portion<T>::Type( void ) const
 { return porEFG; }
 
-template <class T> Portion* Efg_Portion<T>::Copy( void ) const
+template <class T> Portion* Efg_Portion<T>::Copy( bool new_data ) const
 { 
   Portion* p;
-  p = new Efg_Portion<T>( *_Value );
-  p->Temporary() = true;
+  ExtForm<T>* new_value;
+
+  if( new_data )
+  {
+    new_value = new ExtForm<T>(); // ( *_Value );
+    p = new Efg_Portion<T>( *new_value );
+  }
+  else
+  {
+    p = new Efg_Portion<T>( *_Value );
+  }
   return p;
 }
-
-
-template <class T> void Efg_Portion<T>::MakeCopyOfData( Portion* p )
-{
-  Portion::MakeCopyOfData( p );
-  _Value = new ExtForm<T>();
-    /*
-    (
-     (ExtForm<T> &) *((Efg_Portion<T> *) p)->_Value
-     );
-     */
-}
-
 
 
 template <class T> void Efg_Portion<T>::Output( gOutput& s ) const
@@ -1001,7 +1016,7 @@ Outcome*& Outcome_Portion::Value( void )
 PortionType Outcome_Portion::Type( void ) const
 { return porOUTCOME; }
 
-Portion* Outcome_Portion::Copy( void ) const
+Portion* Outcome_Portion::Copy( bool new_data ) const
 { return new Outcome_Portion( _Value ); }
 
 void Outcome_Portion::Output( gOutput& s ) const
@@ -1028,7 +1043,7 @@ Player*& Player_Portion::Value( void )
 PortionType Player_Portion::Type( void ) const
 { return porPLAYER; }
 
-Portion* Player_Portion::Copy( void ) const
+Portion* Player_Portion::Copy( bool new_data ) const
 { return new Player_Portion( _Value ); }
 
 void Player_Portion::Output( gOutput& s ) const
@@ -1055,7 +1070,7 @@ Infoset*& Infoset_Portion::Value( void )
 PortionType Infoset_Portion::Type( void ) const
 { return porINFOSET; }
 
-Portion* Infoset_Portion::Copy( void ) const
+Portion* Infoset_Portion::Copy( bool new_data ) const
 { return new Infoset_Portion( _Value ); }
 
 void Infoset_Portion::Output( gOutput& s ) const
@@ -1082,7 +1097,7 @@ Action*& Action_Portion::Value( void )
 PortionType Action_Portion::Type( void ) const
 { return porACTION; }
 
-Portion* Action_Portion::Copy( void ) const
+Portion* Action_Portion::Copy( bool new_data ) const
 { return new Action_Portion( _Value ); }
 
 void Action_Portion::Output( gOutput& s ) const
@@ -1109,7 +1124,7 @@ Node*& Node_Portion::Value( void )
 PortionType Node_Portion::Type( void ) const
 { return porNODE; }
 
-Portion* Node_Portion::Copy( void ) const
+Portion* Node_Portion::Copy( bool new_data ) const
 { return new Node_Portion( _Value ); }
 
 void Node_Portion::Output( gOutput& s ) const
@@ -1125,34 +1140,52 @@ void Node_Portion::Output( gOutput& s ) const
 //                            Stream type
 //---------------------------------------------------------------------
 
+#ifdef MEMCHECK
+int Stream_Portion::_NumObj = 0;
+#endif // MEMCHECK
 
+RefCountHashTable< gOutput* > Stream_Portion::_RefCountTable;
 
-Stream_Portion::Stream_Portion( const gString& filename )
-{
-  _Value = new gStreamOutput( filename );
-}
-
-Stream_Portion::Stream_Portion( gStreamOutput& value )
+Stream_Portion::Stream_Portion( gOutput& value )
 {
   _Value = &value;
-  _Value->RefCount()++;
+  if( !_RefCountTable.IsDefined( _Value ) )
+  {
+    _RefCountTable.Define( _Value, 1 );
+#ifdef MEMCHECK
+    _NumObj++;
+    gout << ">>> gOutput Ctor - count: " << _NumObj << "\n";
+#endif // MEMCHECK
+  }
+  else
+  {
+    _RefCountTable( _Value )++;
+  }
 }
 
 Stream_Portion::~Stream_Portion()
 {
-  _Value->RefCount()--;
-  if( _Value->RefCount() <= 0 )
+  assert( _RefCountTable.IsDefined( _Value ) );
+  assert( _RefCountTable( _Value ) > 0 );
+  _RefCountTable( _Value )--;
+  if( _RefCountTable( _Value ) == 0 )
+  {
     delete _Value;
+#ifdef MEMCHECK
+    _NumObj--;
+    gout << ">>> gOutput Dtor - count: " << _NumObj << "\n";
+#endif // MEMCHECK
+  }
 }
 
 
-gFileOutput& Stream_Portion::Value( void )
+gOutput& Stream_Portion::Value( void )
 { return *( (gFileOutput*) _Value ); }
 
 PortionType Stream_Portion::Type( void ) const
 { return porSTREAM; }
 
-Portion* Stream_Portion::Copy( void ) const
+Portion* Stream_Portion::Copy( bool new_data ) const
 { return new Stream_Portion( *_Value ); }
 
 
@@ -1299,6 +1332,7 @@ gOutput& operator << ( gOutput& s, Portion* p )
 #define TEMPLATE
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
+
 
 
 

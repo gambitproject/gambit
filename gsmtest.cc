@@ -10,7 +10,7 @@
 
 
 #define CRASHTEST
-// #define INTERACTIVE
+#define INTERACTIVE
 
 
 int main( void )
@@ -1216,7 +1216,6 @@ int main( void )
 
 
 
-
   machine->PushRef( "x" );
   machine->InitCallFunction( "ReadNfg" );
   machine->Push( "2x2.nfg" );
@@ -1225,7 +1224,7 @@ int main( void )
   machine->Assign();
   machine->Dump();
 
-  gout << "asssigned sub\n";
+  gout << "assigned sub\n";
   machine->PushRef( "x", "a" );
   machine->Push( (double) 1 );
   machine->Assign();
@@ -1260,6 +1259,7 @@ int main( void )
 
 
 
+  
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x" );
   machine->Bind();
@@ -1919,6 +1919,52 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 #endif // CRASHTEST
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+
+  machine->PushRef( "x1" );
+  machine->InitCallFunction( "ReadNfg" );
+  machine->Push( "2x2.nfg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Dump();
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "x2" );
+  machine->Bind();
+  machine->InitCallFunction( "ReadNfg" );
+  machine->Push( "2x2.nfg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+#ifdef INTERACTIVE
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+#endif
+
+  machine->PushRef( "y1" );
+  machine->Push( (double) 1 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "y2" );
+  machine->Bind();
+  machine->Push( (double) 2 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
 
 #ifdef INTERACTIVE
   gout << "*********************** Press Return to continue ************";
