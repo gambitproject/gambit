@@ -12,7 +12,7 @@ GLIB_OBJECTS = $(GLIB_SOURCES:.cc=.o)
 GPOLY_SOURCES = prepoly.cc gpoly.cc monomial.cc interval.cc double.cc \
                 poly.cc complex.cc quiksolv.cc gpartltr.cc gsolver.cc \
                 odometer.cc rectangl.cc gtree.cc ideal.cc gpolylst.cc \
-                linrcomb.cc 
+                linrcomb.cc ineqsolv.cc
 
 GPOLY_OBJECTS = $(GPOLY_SOURCES:.cc=.o)
 
