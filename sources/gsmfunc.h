@@ -140,6 +140,7 @@ public:
   virtual ~FuncDescObj();
 
   void SetFuncInfo(int funcindex, FuncInfoType funcinfo);
+  void SetFuncInfo(int funcindex, const gString& s);
   void SetFuncInfo(int funcindex, const gString& s, 
                    Portion* (*funcptr)(Portion**)  );
   void SetParamInfo(int funcindex, int index, const ParamInfoType paraminfo);  
@@ -224,6 +225,7 @@ class CallFuncObj : public FuncDescObj
   void Dump(gOutput& f) const;
 };
 
+PortionSpec ToSpec(gString &str);
 
 
 #endif  // GSMFUNC_H
