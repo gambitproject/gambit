@@ -11,14 +11,16 @@
 template <class T> gHalfSpc<T>::gHalfSpc(const gSpace* space, 
 					 const T& constant, 
 					 const gVector<T>& normalvector)
-: Space(space), Constant(constant), NormalVector(normalvector)
+: Space(space), 
+  Constant(constant), 
+  NormalVector(normalvector)
 {
   assert(NormalVector.Length() == Dmnsn());
 }
 
 template <class T> gHalfSpc<T>::gHalfSpc(const gHalfSpc<T>& given)
 : Space(given.Space), 
-  Constant(given.Constant), 
+  Constant(given.Constant),
   NormalVector(given.NormalVector)
 {
 }
@@ -36,9 +38,25 @@ template <class T> const gSpace* gHalfSpc<T>::TheSpace() const
   return Space;
 }
 
-template <class T> int gHalfSpc<T>::Dmnsn() const
+template <class T> const int gHalfSpc<T>::Dmnsn() const
 {
   return Space->Dmnsn();
+}
+
+template <class T> const gVector<T> gHalfSpc<T>::NormalVect() const
+{
+  return NormalVector;
+}
+
+template <class T> const T gHalfSpc<T>::Coefficient(const int& i) const
+{
+  assert (1 <= i && i <= Dmnsn());
+  return NormalVector[i];
+}
+
+template <class T> const T gHalfSpc<T>::BoundaryValue() const
+{
+  return Constant;
 }
 
 //------------------------------------------------------------------------
@@ -64,6 +82,8 @@ bool gHalfSpc<T>::operator != (const gHalfSpc<T>& rhs) const
 
 template <class T> gOutput &operator<<(gOutput& f, const gHalfSpc<T>& h)
 {
+  assert (h.NormalVector.Length() >= 1);
+
   f << h.NormalVector[1] << "n1";
   for (int i = 2; i <= h.Dmnsn(); i++) 
     f << " + " << h.NormalVector[i] << "n" << i;
@@ -71,435 +91,215 @@ template <class T> gOutput &operator<<(gOutput& f, const gHalfSpc<T>& h)
   return f;
 }
 
+/* *********************** gDualTope ********************** */
+
 //------------------------------------------------------------------------
-//     gDualTpe: Constructors, destructor, constructive operators
+//     gDualTope: Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 
 template <class T> 
-gDualTpe<T>::gDualTpe(const gSpace* space, const gList<gHalfSpc<T> >& list)
-: Space(space), Inequalities(list)
+gDualTope<T>::gDualTope(const gSpace* space, 
+			const gList<gHalfSpc<T> >& list)
+: Space(space), Inequalities(minimallist(list)), Nonempty(isnonempty())
 {
   for (int i = 1; i <= Inequalities.Length(); i++)
     assert (Inequalities[i].TheSpace() == Space);
-
-// We should eventually clean up, eliminating redundant inequalities
-
 }
 
-template <class T> gDualTpe<T>::gDualTpe(const gDualTpe<T>& given)
+template <class T> 
+gDualTope<T>::gDualTope(const gSpace* space, 
+			const gRectangle<T>& r)
+: Space(space), Inequalities(listfromrectangle(r)), Nonempty(isnonempty())
+{
+  assert (r.Dmnsn() == Dmnsn());
+}
+
+template <class T> gDualTope<T>::gDualTope(const gDualTope<T>& given)
 : Space(given.Space), 
-  Inequalities(given.Inequalities)
+  Inequalities(given.Inequalities),
+  Nonempty(given.Nonempty)
 {
 }
 
-template <class T> gDualTpe<T>::~gDualTpe()
+template <class T> gDualTope<T>::~gDualTope()
 {
 }
 
 //------------------------------------------------------------------------
-//     gDualTpe: Operators
+//     gDualTope: Initial Computations
+//------------------------------------------------------------------------
+
+template <class T> const bool gDualTope<T>::isnonempty() const
+{
+  gMatrix<T> A(NumberOfFacets(),Dmnsn()+1);
+  for (int i = 1; i <= NumberOfFacets(); i++) {
+    for (int j = 1; j <= Dmnsn(); j++) 
+      A(i,j) = -Inequalities[i].Coefficient(j);
+    A(i,Dmnsn() + 1) = (T)-1;
+  }
+
+  gVector<T> B(NumberOfFacets());
+  for (int k = 1; k <= NumberOfFacets(); k++)
+    B[k] = -Inequalities[k].BoundaryValue();
+
+  gVector<T> C(Dmnsn() + 1);
+  for (int m = 1; m <= Dmnsn(); m++)
+    C[m] = (T)0;
+  C[Dmnsn() + 1] = (T)1;
+
+  gLPTableau2<T> testlp(A,B,C);
+  assert (testlp.IsFeasible());
+
+  if (!testlp.IsBounded() || testlp.OptimumCost() <= (T)0)
+    return true; 
+  else 
+    return false;
+}
+
+template <class T> const gList<gHalfSpc<T> > 
+gDualTope<T>::minimallist(const gList<gHalfSpc<T> >& list) const
+{
+  gList<gHalfSpc<T> > newlist(list);
+  int index = 1;
+
+  while (index <= newlist.Length()) {
+
+    gMatrix<T> A(newlist.Length() - 1,Dmnsn());
+    for (int j = 1; j <= Dmnsn(); j++) {
+      for (int i = 1; i < index; i++) 
+	A(i,j) =   -newlist[i].Coefficient(j);
+      for (int i = index+1; i <= newlist.Length(); i++) 
+        A(i-1,j) = -newlist[i].Coefficient(j);
+    } 
+
+    gVector<T> B(newlist.Length()-1);
+    for (int k = 1; k < index; k++)
+      B[k] =   -newlist[k].BoundaryValue();
+    for (int k = index+1; k <= newlist.Length(); k++)
+      B[k-1] = -newlist[k].BoundaryValue();
+
+    gVector<T> C(newlist[index].NormalVect());
+
+    gLPTableau2<T> testlp(A,B,C);
+
+    if (!testlp.IsFeasible()) return newlist;
+
+    if (!testlp.IsBounded() || 
+	testlp.OptimumCost() < newlist[index].BoundaryValue())
+      index++;
+    else
+      newlist.Remove(index);
+  }
+
+  return newlist;
+}
+
+template <class T> const gList<gHalfSpc<T> > 
+gDualTope<T>::listfromrectangle(const gRectangle<T>& r) const
+{
+  gList<gHalfSpc<T> > newlist;
+
+  for (int i = 1; i <= Dmnsn(); i++) {
+
+    gVector<T> up(Dmnsn());
+    for (int j = 1; j <= Dmnsn(); j++) up[j] = (T)0;
+    up[i] = (T)1;
+    T lowerbound = r.LowerBound()[i];
+    newlist += gHalfSpc<T>(Space,lowerbound,up);
+
+    gVector<T> down(Dmnsn());
+    for (int j = 1; j <= Dmnsn(); j++) down[j] = (T)0;
+    down[i] = (T)-1;
+    T upperbound = r.UpperBound()[i];
+    newlist += gHalfSpc<T>(Space,-upperbound,down);
+  }
+
+  return newlist;
+}
+
+//------------------------------------------------------------------------
+//     gDualTope: Operators
 //------------------------------------------------------------------------
 
 template <class T> 
-bool gDualTpe<T>::operator == (const gDualTpe<T>& rhs) const
+bool gDualTope<T>::operator == (const gDualTope<T>& rhs) const
 {
   return (Inequalities == rhs.Inequalities);
 }
 
 template <class T> 
-bool gDualTpe<T>::operator != (const gDualTpe<T>& rhs) const
+bool gDualTope<T>::operator != (const gDualTope<T>& rhs) const
 {
   return !(*this == rhs);
 }
 
 //------------------------------------------------------------------------
-//     gDualTpe: Information
+//     gDualTope: Information
 //------------------------------------------------------------------------
 
-template <class T> int gDualTpe<T>::Dmnsn() const
+template <class T> const int gDualTope<T>::Dmnsn() const
 {
   return Space->Dmnsn();
 }
 
+template <class T> const int gDualTope<T>::NumberOfFacets() const
+{
+  return Inequalities.Length();
+}
+
+template <class T> const bool gDualTope<T>::IsNonempty() const
+{
+  return Nonempty;
+}
+
+template <class T> const gDualTope<T> 
+gDualTope<T>::IntersectedWith(const gDualTope<T>& that) const
+{
+  return gDualTope<T>(Space,this->Inequalities + that.Inequalities);
+}
+
+template <class T> 
+const gRectangle<T> gDualTope<T>::BoundingRectangle() const
+{
+  gVector<T> lowerbds(Dmnsn());
+  gVector<T> upperbds(Dmnsn());
+
+  gMatrix<T> A(NumberOfFacets(),Dmnsn());
+  for (int j = 1; j <= NumberOfFacets(); j++)
+    for (int k = 1; k <= Dmnsn(); k++)
+      A(j,k) = -Inequalities[j].Coefficient(k);
+
+  gVector<T> B(NumberOfFacets());
+  for (int j = 1; j <= NumberOfFacets(); j++)
+    B[j] = -Inequalities[j].BoundaryValue();
+
+  for (int i = 1; i <= Dmnsn(); i++) {
+    gVector<T> C(Dmnsn());
+    for (int m = 1; m <= Dmnsn(); m++)
+      C[m] = (T)0;
+
+    C[i] = (T)-1;
+    gLPTableau2<T> upbound(A,B,C);
+    assert(upbound.IsBounded());
+    upperbds[i] = -upbound.OptimumCost();
+
+    C[i] = (T)1;
+    gLPTableau2<T> dnbound(A,B,C);
+    assert(dnbound.IsBounded());
+    lowerbds[i] = dnbound.OptimumCost();
+  }
+
+  return gRectangle<T>(lowerbds,upperbds);
+}
+
 //------------------------------------------------------------------------
-//     gDualTpe: Printing
+//     gDualTope: Printing
 //------------------------------------------------------------------------
 
 
-template <class T> gOutput &operator<<(gOutput& f, const gDualTpe<T>& p)
+template <class T> gOutput &operator<<(gOutput& f, const gDualTope<T>& p)
 {
   for (int i = 1; i <= p.Inequalities.Length(); i++) 
     f << p.Inequalities[i] << "\n";
   return f;
 }
-
-//------------------------------------------------------------------------
-//     gPolytope: Constructors, destructor, constructive operators
-//------------------------------------------------------------------------
-
-
-template <class T> 
-gPolytope<T>::gPolytope(const gSpace* space)
-: Space(space), vertices()
-{
-}
-
-template <class T>
-gPolytope<T>::gPolytope(const gPolytope<T>& p, const gArray<bool>& selection)
-: Space(p.Space), vertices()
-{ 
-  for (int i = 1; i <= p.number_of_vertices(); i++) if (selection[i]) 
-    {
-      gVector<T> temp(p.vertices[i]);
-      vertices += temp;
-    }
-}
-
-template <class T>
-gPolytope<T>::gPolytope(const gPolytope<T>& p)
-: Space(p.Space), vertices(p.vertices)
-{
-  int num_vrtcs = vertices.Length();
-
-  for (int i = 1; i <= num_vrtcs; i++) {
-    gVector<T> temp(p.vertices[i]);
-    vertices[i] = temp;
-  }
-}
-
-template <class T>
-gPolytope<T>::gPolytope(const gSpace* space, 
-			const gList<gVector<T> >& exp_vect_list)
-: Space(space), vertices()
-{
-  for (int i = 1; i <= exp_vect_list.Length(); i++) {
-    gVector<T> temp(Space->Dmnsn());
-    for (int j = 1; j <= Space->Dmnsn(); j++)
-      temp[j] = exp_vect_list[i][j];    
-    vertices += temp;
-  }
-}
-
-template <class T>
-gPolytope<T>::gPolytope(const gSpace* space, 
-		     const int D, 
-		     const int N, 
-		     gFileInput& data)
-: Space(space), vertices()
-{
-  for (int i = 1; i <= N; i++)
-    {
-      gVector<T> read_in(Space->Dmnsn());
-      for (int k = 1; k <= D; k++) {
-	data >> read_in[k];
-      }
-      vertices += read_in;
-    }
-
-  eliminate_nonextreme_vertices();
-}
-
-template <class T>
-gPolytope<T>::~gPolytope()
-{
-}
-
-//------------------------------------------------------------------------
-//     gPolytope: Operators
-//------------------------------------------------------------------------
-
-template <class T>
-gPolytope<T>& gPolytope<T>::operator=(const gPolytope<T>& p)
-{
-  if (this != &p)
-    {
-      for (int i = number_of_vertices(); i >= 1; i--) {
-	vertices.Remove(i);
-      }
-
-      for (int i = 1; i <= p.number_of_vertices(); i++) {
-	gVector<T> new_vert(p[i]);
-	vertices += new_vert;
-      }
-    }
-
-  return *this;
-}
-
-template <class T>
-bool gPolytope<T>::operator == (const gPolytope<T>& p) const
-{
-  if             (Space != p.Space)              return false;
-  if (vertices.Length() != p.vertices.Length())  return false;
-  for (int i = 1; i <= vertices.Length(); i++)
-    if    (vertices[i] != (p.vertices[i]))       return false;
-                                               return true;
-}
-
-template <class T>
-bool gPolytope<T>::operator != (const gPolytope<T>& p) const
-{
-  return !(*this == p);
-}
-
-template <class T>
-gVector<T> gPolytope<T>::operator[] (const int i) const
-{
-  gVector<T> vertex(Space->Dmnsn());
-  for (int j = 1; j <= Space->Dmnsn(); j++)
-    vertex[j] = vertices[i][j];
-  return vertex;
-}
-
-//------------------------------------------------------------------------
-//     gPolytope: Information
-//------------------------------------------------------------------------
-
-template <class T>
-const gSpace* gPolytope<T>::AmbientSpace() const
-{
-  return Space;
-}
-
-template <class T>
-bool gPolytope<T>::IsEmptySet() const
-{
-  if (vertices.Length() == 0) return true; else return false;
-}
-
-template <class T>
-int gPolytope<T>::number_of_vertices() const
-{
-  return vertices.Length();
-}
-
-template <class T>
-bool gPolytope<T>::is_face(const gArray<bool>& selection) const
-{
-  int num_vrtcs = vertices.Length();
-
-// Vector of dmnsn 1's //
-  gVector<gRational> e(Space->Dmnsn());
-  for (int j = 1; j <= Space->Dmnsn(); j++) e[j] = (gRational)1;
-
-// Dimensions of matrices in the linear program //
-  int m1, m2;
-  int n = Space->Dmnsn() + 1;     // number of variables in the linear program
-
-// Keys specify the vertices corresponding to each row of the matrices //
-  int *keys1, *keys2;
-  keys1 = new int[n + num_vrtcs];
-  keys2 = new int[n + num_vrtcs];
-
-// The 'first' vertex
-  gVector<T> a1(Space->Dmnsn());
-
-// We now set m1, m2, a1, and the keys //
-  m1 = n; m2 = -1;
-  for (int j = 0; j < num_vrtcs; j++)
-    if (!selection[j+1]) 
-      { m1++; keys1[m1 - n] = j; }
-    else
-      {
-	m2++;
-
-	if (m2 == 0)
-	  a1 = (*this)[j+1];
-	else
-	  keys2[m2] = j;
-      }
-		 
-// * The following objects express the LP min Cx s.t. Ax <= B, Dx = E, x >= 0
-  gMatrix<gRational> A(m1, n);
-  gVector<gRational> B(m1);
-  gVector<gRational> C(n);
-  gMatrix<gRational> D(m2, n);
-  gVector<gRational> E(m2);
-
-// * Rows 1..n-1 express f_h <= 2 
-  for (int i = 1; i <= n - 1; i++)
-    {
-      for (int j = 1; j <= n - 1; j++)
-	A(i,j) = 0;
-      A(i,i) = 1;
-      A(i,n) = 0;
-
-      B[i] = 2;
-    }
-
-// * Row n expresses g <= 2 
-  for (int j = 1; j <= n - 1; j++) 
-    A(n,j) = 0;
-  A(n,n) = 1;
-
-  B[n] = 2;
-
-// * Rows n+1,..,m1 express bj*f + g <= bj*e + 1 
-  for (int i = n + 1; i <= m1; i++)
-    {
-      for (int j = 1; j <= n - 1; j++)
-	A(i,j) = (gRational)((*this)[keys1[i-n]+1])[j];
-      A(i,n) = 1;
-
-      gVector<gRational> temp(Space->Dmnsn());
-      for (int q = 1; q <= Space->Dmnsn(); q++)
-	temp[q] = (gRational)((*this)[keys1[i-n]+1][q]);
-      B[i] = 1 + temp * e;
-    }
-
-// * The vector C expresses the objective function 
-  for (int j = 1; j <= n - 1; j++) 
-    C[j] = - (gRational) a1[j];
-  C[n] = - 1;
-
-// We need a vector expressing the difference between the two 
-// endpoints of the edge
-  gVector<T> diff_vector(Space->Dmnsn());
-
-// * The matrix D and the vector E express (ai - a1)*f = (ai - a1)*e 
-  for (int i = 1; i <= m2; i++)
-    {
-      diff_vector = (*this)[keys2[i]+1] - a1;
-
-      for (int j = 1; j <= n - 1; j++) D(i, j) = diff_vector[j]; D(i, n) = 0;
-
-      gVector<gRational> temp(Space->Dmnsn());
-      for (int q = 1; q <= Space->Dmnsn(); q++)
-	temp[q] = (gRational)(diff_vector[q]);
-      E[i] = temp * e;
-    }
-
-// Whew!! - We can now apply linear programming
-  gLPTableau1<gRational> T(A, B, C, D, E);
- 
-// Clean Up 
-  delete [] keys1;
-  delete [] keys2;
-
-// Report whether the value of the problem is positive
-  gVector<gRational> temp(Space->Dmnsn());
-  for (int q = 1; q <= Space->Dmnsn(); q++)
-    temp[q] = (gRational)(a1[q]);
-  if ( -T.OptimumCost() > (temp * e + 1))
-    return true;
-  else
-    return false;
-}
-
-template <class T>
-bool gPolytope<T>::is_edge(const ind_pair& endpoints) const
-{
-  gArray<bool> selection(vertices.Length());
-  for (int k = 1; k <= vertices.Length(); k++) selection[k] = false;
-  selection[endpoints.tail] = selection[endpoints.head] = true;
-
-  return is_face(selection);
-}
-
-template <class T>
-gList<ind_pair*> gPolytope<T>::ind_pairs_of_edges() const
-{
-  gList<ind_pair*> result;
-
-  for (int i = 1; i <= vertices.Length(); i++) 
-    for (int j = i+1; j <= vertices.Length(); j++)
-      {
-	ind_pair pair; pair.tail = i; pair.head = j;
-	if (is_edge(pair)) {
-	  ind_pair* ptr = new ind_pair(pair); result+=ptr;
-	}
-      } 
-  return result;
-}
-
-//------------------------------------------------------------------------
-//     gPolytope: Input and Output
-//------------------------------------------------------------------------
-
-template <class T>
-void gPolytope<T>::print_edge(const ind_pair edge) const
-{
-  ((*this)[edge.tail]).Dump(gout);
-  gout << "->";
-  ((*this)[edge.head]).Dump(gout);
-}
-
-template <class T> void 
-gPolytope<T>::list_edges(const int no_edges, const ind_pair* edges) const
-{
-  for (int i = 0; i < no_edges; i++)
-    { print_edge(edges[i]); gout << "\n"; }
-}
-
-template <class T>
-gOutput& operator << (gOutput& output, const gPolytope<T>& p)
-{
-  for (int k = 1; k <= p.number_of_vertices(); k++) {
-
-    output << "  Vertex " << k << " = (";
-    for (int j = 1; j <= p.Space->Dmnsn(); j++) {
-      output << p[k][j]; if (j < p.Space->Dmnsn()) output << ",";
-    }
-    output << ")\n";
-
-  }  
-  return output;
-}
-
-/*
-gFileInput& operator >> (gFileInput& input, gPolytope& p)
-{
-  for (int j = 0; j < p.number_of_vertices(); j++) 
-    for (int k = 0; k < p.Dmnsn(); k++)  
-      input >> p.vrtcs[j][k];   // MUST FIGURE OUT HOW TO REPLACE THIS
-
-  p.eliminate_nonextreme_vertices();
-
-  return input;
-}
-*/
-
-template <class T>
-void print_polytope_list(const gPolytope<T>* const poly_list, int length)
-{
-  for (int i = 0 ; i < length; i++) 
-    gout << "The vertices of polytope " << i+1 << " are:\n" << poly_list[i];
-}
-
-
-
-//------------------------------------------------------------------------
-//     gPolytope: Private housekeeping
-//------------------------------------------------------------------------
-
-template <class T>
-bool gPolytope<T>::is_extreme_point(const int vertex_no) const
-{
-  gArray<bool> selection(vertices.Length());
-  for (int k = 1; k <= vertices.Length(); k++)
-    selection[k] = false;
-  selection[vertex_no] = true;
-
-  return is_face(selection);
-}
-
-template <class T>
-void gPolytope<T>::eliminate_nonextreme_vertices()
-{
-  int num_vrtcs = vertices.Length(); int index_of_candidate = 1;
-
-  gArray<bool> selection(num_vrtcs);
-  for (int j = 1; j <= num_vrtcs; j++) selection[j] = true;
-
-  for (int j = 1; j <= num_vrtcs; j++) {      // Is j'th vertex extreme?
-    gPolytope pTestPoly(*this,selection);
-    if (pTestPoly.is_extreme_point(index_of_candidate)) 
-      index_of_candidate++; 
-    else selection[j] = false; 
-  }
-
-  for (int i = num_vrtcs; i >= 1; i--) if (!selection[i])
-    vertices.Remove(i);
-}
-
-
