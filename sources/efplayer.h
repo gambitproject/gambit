@@ -1,13 +1,17 @@
-//#
-//# FILE: player.h -- Declaration of Player data type
-//#
-//# $Id$
-//#
+//
+// FILE: efplayer.h -- Declaration of EFPlayer data type
+//
+// $Id$
+//
 
-#ifndef PLAYER_H
-#define PLAYER_H
+#ifndef EFPLAYER_H
+#define EFPLAYER_H
 
 class gRational;
+
+#ifdef __GNUG__
+#pragma interface
+#endif   // __GNUG__
 
 class EFPlayer   {
   friend class BaseEfg;

@@ -58,9 +58,17 @@ TEMPLATE class gNode<Node *>;
 
 #pragma -Jgx
 
+#ifdef __GNUG__
+#pragma implementation "outcome.h"
+#pragma implementation "infoset.h"
+#pragma implementation "efplayer.h"
+#pragma implementation "node.h"
+#endif   // __GNUG__
+
 #include "efg.h"
 #include "efgutils.h"
 #include <assert.h>
+
 
 //----------------------------------------------------------------------
 //                 EFPlayer: Member function definitions

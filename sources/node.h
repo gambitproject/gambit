@@ -1,8 +1,8 @@
-//#
-//# FILE: node.h -- Declaration of Node class
-//#
-//# $Id$
-//#
+//
+// FILE: node.h -- Declaration of Node class
+//
+// $Id$
+//
 
 #ifndef NODE_H
 #define NODE_H
@@ -10,6 +10,10 @@
 #include "rational.h"
 #include "gblock.h"
 #include "efg.h"
+
+#ifdef __GNUG__
+#pragma interface
+#endif   // __GNUG__
 
 class Node    {
   friend class BaseEfg;

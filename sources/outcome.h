@@ -1,11 +1,15 @@
-//#
-//# FILE: outcome.h -- defines Outcome class
-//#
-//# $Id$
-//#
+//
+// FILE: outcome.h -- defines Outcome class
+//
+// $Id$
+//
 
 #ifndef OUTCOME_H
 #define OUTCOME_H
+
+#ifdef __GNUG__
+#pragma interface
+#endif   // __GNUG__
 
 class Outcome   {
   friend class BaseEfg;

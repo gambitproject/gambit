@@ -1,11 +1,15 @@
-//#
-//# FILE: infoset.h -- Declaration of Infoset class
-//#
-//# $Id$
-//#
+//
+// FILE: infoset.h -- Declaration of Infoset class
+//
+// $Id$
+//
 
 #ifndef INFOSET_H
 #define INFOSET_H
+
+#ifdef __GNUG__
+#pragma interface
+#endif   // __GNUG__
 
 #include "rational.h"
 #include "gvector.h"
