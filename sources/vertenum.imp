@@ -15,6 +15,15 @@ VertEnum<T>::VertEnum(const gMatrix<T> &A, const gVector<T> &b,
   Enum();
 }
 
+template <class T>
+VertEnum<T>::VertEnum(const gMatrix<T> &A, const gVector<T> &b, 
+		      const gVector<T> &, gStatus &status_)
+  : mult_opt(0), depth(0), A(A), b(b), btemp(b), c(A.MinCol(),A.MaxCol()), 
+    npivots(0), nodes(0), status(status_) 
+{
+  Enum();
+}
+
 
 template <class T> VertEnum<T>::~VertEnum()
 { }
