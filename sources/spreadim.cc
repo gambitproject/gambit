@@ -1,4 +1,5 @@
 #include "wx.h"
+#include "wxmisc.h"
 #pragma		hdr_stop
 
 #include "grblock.h"
