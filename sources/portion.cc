@@ -2387,7 +2387,6 @@ void ListPortion::Output( gOutput& s ) const
   int i;
   int length = _Value->Length();
 
-  s << PortionTypeToText( DataType() );
   s << "{";
   if( length >= 1 )
   {
