@@ -88,6 +88,10 @@ int gbtProfileTable::GetInfoColumns(void) const
 
 int gbtProfileTable::GetBehavColumns(void) const
 {
+  if (!m_doc->HasEfg()) {
+    return 0;
+  }
+
   switch (m_doc->GetPreferences().ProfileStyle()) {
   case GBT_PROFILES_GRID:
     return m_doc->GetEfg().ProfileLength();
@@ -209,38 +213,62 @@ wxString gbtProfileTable::GetColLabelValue(int p_col)
 
 wxString gbtProfileTable::GetValue(int p_row, int p_col) 
 {
-  const BehavSolution &behav = m_doc->AllBehavProfiles()[p_row + 1];
-  const MixedSolution &mixed = m_doc->AllMixedProfiles()[p_row + 1];
+  const MixedSolution *mixed = &m_doc->AllMixedProfiles()[p_row + 1];
+  const BehavSolution *behav = 0;
+  if (m_doc->HasEfg()) {
+    behav = &m_doc->AllBehavProfiles()[p_row + 1];
+  }
+
   switch (p_col) {
   case 0:
-    return (char *) mixed.GetName();
+    return (char *) mixed->GetName();
   case 1:
-    return (char *) mixed.Creator();
+    return (char *) mixed->Creator();
   case 2:
-    return (char *) ToText(behav.IsNash());
+    if (behav) {
+      return (char *) ToText(behav->IsNash());
+    }
+    else {
+      return "";
+    }
   case 3:
-    return (char *) ToText(behav.IsSubgamePerfect());
+    if (behav) {
+      return (char *) ToText(behav->IsSubgamePerfect());
+    }
+    else {
+      return "";
+    }
   case 4:
-    return (char *) ToText(behav.IsSequential());
+    if (behav) {
+      return (char *) ToText(behav->IsSequential());
+    }
+    else {
+      return "";
+    }
   case 5:
-    return (char *) ToText(behav.LiapValue(),
-			   m_doc->GetPreferences().NumDecimals());
+    if (behav) {
+      return (char *) ToText(behav->LiapValue(),
+			     m_doc->GetPreferences().NumDecimals());
+    }
+    else {
+      return "";
+    }
   case 6:
-    return (char *) ToText(mixed.IsNash());
+    return (char *) ToText(mixed->IsNash());
   case 7:
-    return (char *) ToText(mixed.IsPerfect());
+    return (char *) ToText(mixed->IsPerfect());
   case 8:
-    return (char *) ToText(mixed.LiapValue(),
+    return (char *) ToText(mixed->LiapValue(),
 			   m_doc->GetPreferences().NumDecimals());
   default:
     if (p_col < GetInfoColumns() + GetBehavColumns()) {
       int offset = GetInfoColumns() - 1;
       if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
-	return (char *) ToText((*behav.Profile())[p_col - offset],
+	return (char *) ToText((*behav->Profile())[p_col - offset],
 			       m_doc->GetPreferences().NumDecimals());
       }
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_VECTOR) {
-	const gPVector<gNumber> &profile = behav.Profile()->GetPVector();
+	const gPVector<gNumber> &profile = behav->Profile()->GetPVector();
 	wxString ret = _T("("); 
 	for (int i = 1; i <= profile.Lengths()[p_col - offset]; i++) {
 	  if (i > 1) {
@@ -260,11 +288,11 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 	      gbtEfgInfoset infoset = player.GetInfoset(iset);
 	      wxString ret;
 	      for (int act = 1; act <= infoset.NumActions(); act++) {
-		if (behav(infoset.GetAction(act)) > gNumber(0)) {
+		if ((*behav)(infoset.GetAction(act)) > gNumber(0)) {
 		  if (ret != "") {
 		    ret += _T("+");
 		  }
-		  ret += (char *) ToText(behav(infoset.GetAction(act)),
+		  ret += (char *) ToText((*behav)(infoset.GetAction(act)),
 					 m_doc->GetPreferences().NumDecimals());
 		  if (infoset.GetAction(act).GetLabel() != "") {
 		    ret += _T("*[") + infoset.GetAction(act).GetLabel() + _T("]");
@@ -286,7 +314,7 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
     else {
       int offset = GetInfoColumns() + GetBehavColumns() - 1;
       if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
-	return (char *) ToText((*mixed.Profile())[p_col - offset],
+	return (char *) ToText((*mixed->Profile())[p_col - offset],
 			       m_doc->GetPreferences().NumDecimals());
       }
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_VECTOR) {
@@ -297,7 +325,7 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 	  if (st > 1) {
 	    ret += _T(",");
 	  }
-	  ret += (char *) ToText(mixed(strategy),
+	  ret += (char *) ToText((*mixed)(strategy),
 				 m_doc->GetPreferences().NumDecimals());
 	}
 	return ret + _T(")");
@@ -307,11 +335,11 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 	gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(p_col - offset);
 	for (int st = 1; st <= player.NumStrategies(); st++) {
 	  gbtNfgStrategy strategy = player.GetStrategy(st);
-	  if (mixed(strategy) > gNumber(0)) {
+	  if ((*mixed)(strategy) > gNumber(0)) {
 	    if (ret != "") {
 	      ret += _T("+");
 	    }
-	    ret += (char *) ToText(mixed(strategy),
+	    ret += (char *) ToText((*mixed)(strategy),
 				   m_doc->GetPreferences().NumDecimals());
 	    if (strategy.GetLabel() != "") {
 	      ret += _T("*[") + player.GetStrategy(st).GetLabel() + _T("]");
