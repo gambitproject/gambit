@@ -112,16 +112,15 @@ gStack<gText> GCL_InputFileNames(4);
 %token AMPER
 %token WRITE
 %token READ
-
 %token PERCENT
 %token DIV
 %token LPAREN
 %token RPAREN
+%token DOLLAR
 
 %token IF
 %token WHILE
 %token FOR
-%token QUIT
 %token DEFFUNC
 %token DELFUNC
 %token TYPEDEF
@@ -309,10 +308,9 @@ constant:        BOOLEAN
           { $$ = new gclConstExpr(new PrecisionPortion(precRATIONAL)); }
         |        NAME
           { $$ = new gclVarName(tval); }
+        |        DOLLAR NAME
+          { $$ = new gclVarName(gText("$") + tval); }
         |        list   { $$ = $1; }
-/*        |        QUIT
-          { $$ = new gclQuitExpression; }
-*/
         ;
 
 list:            LBRACE RBRACE  { $$ = new gclListConstant; }
@@ -402,9 +400,8 @@ static struct tokens toktable[] =
     { LBRACE, "{" }, { RBRACE, "}" }, { RARROW, "->" },
     { LARROW, "<-" }, { DBLARROW, "<->" }, { COMMA, "," }, { HASH, "#" },
     { DOT, "." }, { CARET, "^" }, { UNDERSCORE, "_" },
-    { AMPER, "&" }, { WRITE, "<<" }, { READ, ">>" },
+    { AMPER, "&" }, { WRITE, "<<" }, { READ, ">>" }, { DOLLAR, "$" },
     { IF, "If" }, { WHILE, "While" }, { FOR, "For" },
-    { QUIT, "Quit" }, 
     { DEFFUNC, "NewFunction" }, 
     { DELFUNC, "DeleteFunction" },
     { TYPEDEF, "=:" },
@@ -501,7 +498,6 @@ int GCLCompiler::yylex(void)
     else if (s == "If")     return IF;
     else if (s == "While")  return WHILE;
     else if (s == "For")    return FOR;
-//    else if (s == "Quit")   return QUIT;
     else if (s == "NewFunction")   return DEFFUNC;
     else if (s == "DeleteFunction")   return DELFUNC;
     else if (s == "Machine")   return MACHINEPREC;
@@ -671,6 +667,7 @@ int GCLCompiler::yylex(void)
     case '|':   c = nextchar();
                 if (c == '|')  return LOR;
                 else   { ungetchar(c);  return '|'; }
+    case '$':   return DOLLAR;
     case '\0':  return EOC;
     case CR:    assert(0);
     default:    return c;

@@ -129,56 +129,97 @@ bool GSM::VarIsDefined(const gText& var_name) const
   if (var_name == "")
     throw gclRuntimeError("Tried to see if empty variable name defined");
 
+  else if (var_name[0] == '$')
+    return _GlobalRefTable.IsDefined(var_name.Right(var_name.Length() - 1));
+
   return _RefTableStack->Peek()->IsDefined(var_name);
 }
 
 
-bool GSM::VarDefine(const gText& var_name, Portion* p)
+void GSM::VarDefine(const gText& var_name, Portion* p)
 {
   bool type_match = true;
-  bool result = true;
-  Portion *old_value;
+  Portion *old_value = 0;
 
   if (var_name == "")
     throw gclRuntimeError("Tried to define empty variable name");
 
   _ResolveRef(p);
 
-  if (_RefTableStack->Peek()->IsDefined(var_name)) {
-    old_value = (*_RefTableStack->Peek())(var_name);
-    if (p->Spec().ListDepth > 0) {
-      if (((ListPortion*) old_value)->Spec().Type != 
-	  ((ListPortion*) p)->Spec().Type)  {
-	if (((ListPortion*) p)->Spec().Type == porUNDEFINED)
+  if (var_name[0] == '$') {
+    gText global_name = var_name.Right(var_name.Length() - 1);
+
+    if (_GlobalRefTable.IsDefined(global_name)) {
+      old_value = _GlobalRefTable(global_name);
+      if (p->Spec().ListDepth > 0) {
+	if (((ListPortion*) old_value)->Spec().Type != 
+	    ((ListPortion*) p)->Spec().Type)  {
+	  if (((ListPortion*) p)->Spec().Type == porUNDEFINED)
 	    ((ListPortion*) p)->SetDataType(old_value->Spec().Type);
-	else if (old_value->Spec().Type != porUNDEFINED)
-	  type_match = false;
+	  else if (old_value->Spec().Type != porUNDEFINED)
+	    type_match = false;
+	}
+      }
+      else {
+	PortionSpec ospec = old_value->Spec();
+	PortionSpec pspec = p->Spec();
+	if (ospec.Type == porNULL)
+	  ospec = ((NullPortion*) old_value)->DataType();
+	if (pspec.Type == porNULL)
+	  pspec = ((NullPortion*) p)->DataType();
+	if (ospec.Type != pspec.Type)
+	  if (!PortionSpecMatch(ospec, pspec))
+	    type_match = false;
       }
     }
+
+    if (!type_match) {
+      delete p;
+      throw gclRuntimeError("Cannot change the type of variable \"" +
+			    var_name + "\"");
+    }
     else {
-      PortionSpec ospec = old_value->Spec();
-      PortionSpec pspec = p->Spec();
-      if (ospec.Type == porNULL)
-	ospec = ((NullPortion*) old_value)->DataType();
-      if (pspec.Type == porNULL)
-	pspec = ((NullPortion*) p)->DataType();
-      if (ospec.Type != pspec.Type)
-	if (!PortionSpecMatch(ospec, pspec))
-	  type_match = false;
+      if (old_value)
+	delete _VarRemove(var_name);
+      _GlobalRefTable.Define(global_name, p);
+    }
+  }    
+  else  {
+    if (_RefTableStack->Peek()->IsDefined(var_name)) {
+      old_value = (*_RefTableStack->Peek())(var_name);
+      if (p->Spec().ListDepth > 0) {
+	if (((ListPortion*) old_value)->Spec().Type != 
+	    ((ListPortion*) p)->Spec().Type)  {
+	  if (((ListPortion*) p)->Spec().Type == porUNDEFINED)
+	    ((ListPortion*) p)->SetDataType(old_value->Spec().Type);
+	  else if (old_value->Spec().Type != porUNDEFINED)
+	    type_match = false;
+	}
+      }
+      else {
+	PortionSpec ospec = old_value->Spec();
+	PortionSpec pspec = p->Spec();
+	if (ospec.Type == porNULL)
+	  ospec = ((NullPortion*) old_value)->DataType();
+	if (pspec.Type == porNULL)
+	  pspec = ((NullPortion*) p)->DataType();
+	if (ospec.Type != pspec.Type)
+	  if (!PortionSpecMatch(ospec, pspec))
+	    type_match = false;
+      }
+    }
+
+    if (!type_match) {
+      delete p;
+      throw gclRuntimeError("Cannot change the type of variable \"" +
+			    var_name + "\"");
+    }
+    else {
+      if (old_value)
+	delete _VarRemove(var_name);
+      _RefTableStack->Peek()->Define(var_name, p);
     }
   }
-
-  if (!type_match) {
-    delete p;
-    throw gclRuntimeError("Cannot change the type of variable \"" +
-			  var_name + "\"");
-  }
-  else {
-    if (old_value)
-      delete _VarRemove(var_name);
-    _RefTableStack->Peek()->Define(var_name, p);
-  }
-  return result;
 }
 
 
@@ -186,7 +227,13 @@ Portion* GSM::VarValue(const gText& var_name) const
 {
   if (var_name == "")
     throw gclRuntimeError("Tried to get value of empty variable name");
-  return (*_RefTableStack->Peek())(var_name);
+
+  else if (var_name[0] == '$')
+    return _GlobalRefTable(var_name.Right(var_name.Length() - 1)); 
+
+ return (*_RefTableStack->Peek())(var_name);
+
+
 }
 
 
@@ -194,6 +241,9 @@ Portion* GSM::_VarRemove(const gText& var_name)
 {
   if (var_name == "")
     throw gclRuntimeError("Tried to remove empty variable name");
+
+  else if (var_name[0] == '$')
+    return _GlobalRefTable.Remove(var_name.Right(var_name.Length() - 1));
 
   return _RefTableStack->Peek()->Remove(var_name);
 }
@@ -377,10 +427,8 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
 
 bool GSM::UnAssign(Portion *p)
 {
-  if(p->Spec().Type == porREFERENCE)
-  {
-    if(VarIsDefined(((ReferencePortion*) p)->Value()))
-    {
+  if (p->Spec().Type == porREFERENCE) {
+    if(VarIsDefined(((ReferencePortion*) p)->Value())) {
       delete _VarRemove(((ReferencePortion *) p)->Value());
       delete p;
       return true;
@@ -506,10 +554,8 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
 
   for (int i = 0; i < func_info.NumParams; i++) {
     if (param[i] != 0 && param[i]->Spec().Type != porREFERENCE) {
-      if (VarDefine(func_info.ParamInfo[i].Name, param[i]))
-	param[i] = param[i]->RefCopy();
-      else
-	throw gclRuntimeError("Param matching error");
+      VarDefine(func_info.ParamInfo[i].Name, param[i]);
+      param[i] = param[i]->RefCopy();
     }
   }
 

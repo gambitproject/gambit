@@ -86,7 +86,7 @@ public:
 
   // Assign() will delete lhs and rhs
   Portion* Assign       ( Portion* lhs, Portion* rhs );
-  bool     VarDefine    ( const gText& var_name, Portion* p );
+  void     VarDefine    ( const gText& var_name, Portion* p );
   bool     VarIsDefined ( const gText& var_name ) const;
   Portion* VarValue     ( const gText& var_name ) const;
   bool     UnAssign     ( Portion * );
