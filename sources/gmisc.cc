@@ -292,7 +292,7 @@ gRational FromText(const gText &f,gRational &y)
   }
   else if (ch == '.')  {
     denom = 1;
-		ch=f[index++];
+    ch=f[index++];
     while (ch >= '0' && ch <= '9' && index<=length)  {
       denom *= 10;
       num *= 10;
@@ -301,7 +301,10 @@ gRational FromText(const gText &f,gRational &y)
     }
   }
 
-  y = gRational(sign * num, denom);
+  if (denom != 0)
+    y = gRational(sign * num, denom);
+  else
+    y = gRational(sign * num);
   return y;
 }
 

@@ -31,8 +31,12 @@ gNumber::gNumber(void)
   : rep(precRATIONAL), rval(new gRational)
 { }
 
+gNumber::gNumber(float x)
+  : rep(precDOUBLE), dval(x)
+{ }
+
 gNumber::gNumber(double x)
-  : rep(precDOUBLE), rval(0), dval(x)
+  : rep(precDOUBLE), dval(x)
 { }
 
 gNumber::gNumber(int n) 

@@ -34,6 +34,7 @@ public:
 
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
   gNumber(void);
+  gNumber(float);
   gNumber(double);
   gNumber(int n);
   gNumber(long n);
