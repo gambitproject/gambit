@@ -35,6 +35,7 @@ protected:
   mutable NFSupport m_support;
   mutable NfgAlgType m_creator;
   mutable gTriState m_isNash, m_isPerfect, m_isProper;
+  mutable bool m_checkedPerfect;
   mutable gNumber m_epsilon, m_qreLambda, m_qreValue, m_liapValue;
   gArray<gNumber> m_payoff;
   unsigned int m_id;
