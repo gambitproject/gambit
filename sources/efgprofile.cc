@@ -15,7 +15,9 @@
 //-------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(EfgProfileList, wxListCtrl)
+  EVT_MENU(efgmenuPROFILES_FILTER, EfgProfileList::OnSortFilter)
   EVT_RIGHT_DOWN(EfgProfileList::OnRightClick)
+  EVT_LIST_COL_CLICK(idEFG_SOLUTION_LIST, EfgProfileList::OnColumnClick)
 END_EVENT_TABLE()
 
 EfgProfileList::EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent)
@@ -24,7 +26,8 @@ EfgProfileList::EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent)
     m_parent(p_efgShow)
 {
   m_menu = new wxMenu("Solutions");
-  m_menu->Append(efgmenuPROFILES_FILTER, "Filter...", "Filter profiles");
+  m_menu->Append(efgmenuPROFILES_FILTER, "Sort/Filter...",
+		 "Sort and filter profiles");
   m_menu->Append(efgmenuPROFILES_NEW, "New", "Create a new profile");
   m_menu->Append(efgmenuPROFILES_EDIT, "Edit...", "Edit this profile");
   m_menu->Append(efgmenuPROFILES_DELETE, "Delete", "Delete this profile");
@@ -47,7 +50,7 @@ EfgProfileList::~EfgProfileList()
 void EfgProfileList::UpdateValues(void)
 {
   DeleteAllItems();
-  for (int i = 1; i <= Length(); i++) {
+  for (int i = 1; i <= VisibleLength(); i++) {
     const BehavSolution &solution = (*this)[i];
     InsertItem(i - 1, 
 	       (char *) ("Profile" + ToText((int) solution.Id())));
@@ -67,7 +70,7 @@ void EfgProfileList::UpdateValues(void)
     }
   }
 
-  if (Length() > 0) {
+  if (VisibleLength() > 0) {
     wxListItem item;
     item.m_mask = wxLIST_MASK_STATE;
     item.m_itemId = m_parent->CurrentSolution() - 1;
@@ -106,82 +109,71 @@ void EfgProfileList::OnRightClick(wxMouseEvent &p_event)
   PopupMenu(m_menu, p_event.m_x, p_event.m_y);
 }
 
-#ifdef NOT_PORTED_YET
-void EfgProfileList::OnLabelLeftClick(int row, int col, int x, int y,
-				   bool control, bool shift)
+void EfgProfileList::OnSortFilter(wxCommandEvent &)
 {
-  if (row == -1) {
-    int old_sort_by = m_options.SortBy();
-    
-    if (col == FeaturePos(BSOLN_CREATOR) && features[BSOLN_CREATOR])
-      m_options.SortBy() = BSORT_BY_CREATOR;
+  dialogBehavFilter dialog(this, m_options);
 
-    if (col == FeaturePos(BSOLN_ISNASH) && features[BSOLN_ISNASH])
-      m_options.SortBy() = BSORT_BY_NASH;
+  if (dialog.ShowModal() == wxID_OK) {
+    dialog.Update(m_options);
 
-    if (col == FeaturePos(BSOLN_ISPERF) && features[BSOLN_ISPERF])
-      m_options.SortBy() = BSORT_BY_PERFECT;
-
-    if (col == FeaturePos(BSOLN_ISSEQ) && features[BSOLN_ISSEQ])
-      m_options.SortBy() = BSORT_BY_SEQ;
-
-    if (col == FeaturePos(BSOLN_GLAMBDA) && features[BSOLN_GLAMBDA])
-      m_options.SortBy() = BSORT_BY_GLAMBDA;
-
-    if (col == FeaturePos(BSOLN_GVALUE) && features[BSOLN_GVALUE])
-      m_options.SortBy() = BSORT_BY_GVALUE;
-
-    if (col == FeaturePos(BSOLN_LVALUE) && features[BSOLN_LVALUE])
-      m_options.SortBy() = BSORT_BY_LVALUE;
-
-    if (old_sort_by != m_options.SortBy()) 
-      SortFilter(false);
+    if (VisibleLength() > 0) {
+      BehavSolution &currentSolution = (*this)[m_parent->CurrentSolution()];
+      m_options.Filter(*this);
+      m_options.Sort(*this);
+      UpdateValues();
+      if (this->Find(currentSolution) <= VisibleLength()) {
+	m_parent->ChangeSolution(this->Find(currentSolution));
+      }
+      else {
+	m_parent->ChangeSolution(1);
+      }
+    }
+    else {
+      m_options.Filter(*this);
+      m_options.Sort(*this);
+      UpdateValues();
+      m_parent->ChangeSolution((VisibleLength() > 0) ? 1 : 0);
+    }
   }
 }
 
-void EfgProfileList::SortFilter(bool)
+void EfgProfileList::OnColumnClick(wxListEvent &p_event)
 {
-#ifdef NOT_PORTED_YET
-  int old_num_sol = num_solutions;  // current state
-  const BehavSolution *cur_solnp = 0;
-
-  if (cur_soln) 
-    cur_solnp = &solns[cur_soln];
-    
-  BSolnSorterFilter SF(solns, m_options); 
-  int new_num_sol = solns.VisibleLength();    // new state
-  int i, j;
-  int new_soln = 0;                           // try to find the new pos of cur_soln
-
-  for (i = 1; i <= solns.VisibleLength(); i++) {
-    if (cur_solnp == &solns[i]) 
-      new_soln = i;
+  switch (p_event.m_col) {
+  case 0:
+    m_options.SortBy() = BSORT_BY_ID;
+    break;
+  case 1:
+    m_options.SortBy() = BSORT_BY_CREATOR;
+    break;
+  case 2:
+    m_options.SortBy() = BSORT_BY_NASH;
+    break;
+  case 3:
+    m_options.SortBy() = BSORT_BY_PERFECT;
+    break;
+  case 4:
+    m_options.SortBy() = BSORT_BY_SEQ;
+    break;
+  case 5:
+    m_options.SortBy() = BSORT_BY_LVALUE;
+    break;
+  case 6:
+    m_options.SortBy() = BSORT_BY_GLAMBDA;
+    break;
+  case 7:
+    m_options.SortBy() = BSORT_BY_GVALUE;
+    break;
+  default:
+    break;
   }
 
-  int num_isets = m_parent->Game()->NumPlayerInfosets();
-
-  if (old_num_sol > new_num_sol) {
-    for (i = old_num_sol; i > new_num_sol; i--)
-      for (j = 1; j <= num_isets; j++)
-	DeleteRows();
+  if (VisibleLength() > 0) {
+    BehavSolution &currentSolution = (*this)[m_parent->CurrentSolution()];
+    m_options.Sort(*this);
+    UpdateValues();
+    m_parent->ChangeSolution(this->Find(currentSolution));
   }
-  
-  if (old_num_sol < new_num_sol) {
-    for (i = old_num_sol+1; i <= new_num_sol; i++)
-      for (j = 1; j <= num_isets; j++)
-	AppendRows();
-  }
-
-  num_solutions = solns.VisibleLength();
-  UpdateValues();
-
-  // make sure we do not try to access non-displayed solutions
-  if (cur_soln > num_solutions) 
-    cur_soln = 0;
-
-  //  UpdateSoln(new_soln, -1);
-  SetGridCursor(SolnPos(new_soln), 0);
-#endif // NOT_PORTED_YET
 }
-#endif  // NOT_PORTED_YET
+
 

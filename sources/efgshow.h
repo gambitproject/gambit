@@ -13,7 +13,6 @@
 #include "efgnfgi.h"
 #include "gambit.h"
 #include "accels.h"
-#include "bsolnsf.h"
 #include "efgsolng.h"
 #include "efgconst.h"
 #include "solnlist.h"

@@ -83,7 +83,7 @@ GUI_SOURCES = gambit.cc treewin.cc twflash.cc treedraw.cc treedrag.cc \
               treerender.cc wxmisc.cc efgshow.cc \
 	      efgsolvd.cc nfgsolvd.cc dlefg.cc dlnfg.cc \
               efgsolng.cc wxstatus.cc algdlgs.cc \
-              bsolnsf.cc efgsoln.cc accels.cc nfgshow.cc \
+              behavfilter.cc efgsoln.cc accels.cc nfgshow.cc \
               nfgsoln.cc nfgsolng.cc msolnsf.cc \
               gambdraw.cc wxio.cc gnullsts.cc dlsupport.cc \
               efgprofile.cc efgcursor.cc

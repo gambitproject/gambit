@@ -9,6 +9,7 @@
 
 #include "wx/listctrl.h"
 #include "efgshow.h"
+#include "behavfilter.h"
 
 class EfgProfileList : public wxListCtrl, public gSortList<BehavSolution> {
 private:
@@ -16,11 +17,13 @@ private:
   wxMenu *m_menu;
 
 protected:
-  BSolnSortFilterOptions m_options;
+  BehavListFilter m_options;
   //  virtual void  SortFilter(bool inter = true);
 
   // Event handlers
+  void OnSortFilter(wxCommandEvent &);
   void OnRightClick(wxMouseEvent &);
+  void OnColumnClick(wxListEvent &);
 
 public:
   EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent);

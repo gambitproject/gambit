@@ -12,7 +12,6 @@
 #include "efg.h"
 #include "efgconst.h"
 #include "efgshow.h"
-#include "bsolnsf.h"
 
 #ifdef NOT_PORTED_YET
 
