@@ -50,7 +50,7 @@ BEGIN
     "LANGUAGE 9, 1\r\n"
     "#pragma code_page(1252)\r\n"
     "#endif\r\n"
-    "#include ""res\\WinEdit.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""WinEdit.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "#include ""afxres.rc""         // Standard components\r\n"
     "#include ""afxprint.rc""       // printing/print preview resources\r\n"
     "#endif\0"
@@ -66,7 +66,8 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_WINEDITYPE          ICON    DISCARDABLE     "res\\Tree.ico"
+IDR_MAINFRAME           ICON    DISCARDABLE     "gcl.ico"
+IDR_WINEDITYPE          ICON    DISCARDABLE     "Tree.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -367,15 +368,4 @@ LANGUAGE 9, 1
 #endif
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
-
-LANGUAGE LANG_NEUTRAL,SUBLANG_NEUTRAL
-
-
-IDI_ICON1 ICON "gcl.ico"
-
-LANGUAGE LANG_NEUTRAL,SUBLANG_NEUTRAL
-
-LANGUAGE LANG_NEUTRAL,SUBLANG_NEUTRAL
-
-LANGUAGE LANG_NEUTRAL,SUBLANG_NEUTRAL
 
