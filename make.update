@@ -1,4 +1,4 @@
-# $Id$
+# @(#)make.update	1.7 6/19/96
 # An update script/makefile combination to create/update GAMBIT components
 # and automatically place them onto the primary GAMBIT ftp site.
 

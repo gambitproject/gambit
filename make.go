@@ -1,4 +1,4 @@
-# $Id$
+# @(#)make.go	1.20 9/1/96
 # Final level of makefiles--this actually builds the code.  Note that you
 # must set DEPEND=True for the depend_* targets.
 # This should not be edited by the user
