@@ -9,10 +9,10 @@
 extern void BehavToMixed(const Efg<double> &, const BehavProfile<double> &,
 			 const Nfg<double> &, MixedProfile<double> &);
 
-int NFLiapBySubgame::SolveSubgame(const Efg<double> &E,
+int NFLiapBySubgame::SolveSubgame(const Efg<double> &E, const EFSupport &sup,
 				   gList<BehavSolution<double> > &solns)
 {
-  BehavProfile<double> bp(E);
+  BehavProfile<double> bp(sup);
   
   subgame_number++;
 

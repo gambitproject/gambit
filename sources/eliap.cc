@@ -186,10 +186,10 @@ bool Liap(const Efg<double> &E, EFLiapParams &params,
 
 
 
-int EFLiapBySubgame::SolveSubgame(const Efg<double> &E,
+int EFLiapBySubgame::SolveSubgame(const Efg<double> &E, const EFSupport &sup,
 				  gList<BehavSolution<double> > &solns)
 {
-  BehavProfile<double> bp(E);
+  BehavProfile<double> bp(sup);
   
   subgame_number++;
 
