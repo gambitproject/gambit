@@ -428,3 +428,8 @@ gNumber operator/(const gNumber& x, const gNumber& y)
   }
 }
 
+bool gNumber::IsInteger(void) const
+{
+  return ((rep == precDOUBLE && fmod(dval, 1.0) == 0.0) ||
+	  (rep == precRATIONAL && rval->denominator() == 1));
+}

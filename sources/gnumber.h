@@ -61,6 +61,8 @@ public:
   operator double() const;
   operator gRational() const;
   Precision GetPrecision(void) const;
+
+  bool IsInteger(void) const;
 };
 
 gOutput &operator<<(gOutput &, const gNumber &);
