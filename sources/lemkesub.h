@@ -15,7 +15,8 @@ template <class T> class LemkeBySubgame : public SubgameSolver<T>  {
     int npivots;
     LemkeParams params;
 
-    int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
+    int SolveSubgame(const Efg<T> &, const EFSupport &,
+		     gList<BehavSolution<T> > &);
     EfgAlgType AlgorithmID() const { return EfgAlg_LEMKESUB; }    
 
   public:
