@@ -10,33 +10,34 @@
 #include "gstring.h"
 #include "gmap.h"
 #include "gvector.h"
+#include "gnumber.h"
 
 class Outcome    {
   private:
     gString name;
-    gSparseSet<double> values;
+    gSparseSet<gNumber> values;
 
   public:
-    Outcome(void) : values(0.0)  { }
+    Outcome(void) : values(gNumber(0.0))  { }
     Outcome(const Outcome &);
 
     Outcome &operator=(const Outcome &);
-    void SetOutcomeName(const gString &s)  {name = s;}
-    gString GetOutcomeName(void) const   {return name;}
+    void SetOutcomeName(const gString &s)  { name = s; }
+    gString GetOutcomeName(void) const   { return name; }
 
     // Return a vector containing the values of outcomes for each player
     // from (1..num_players).  If a player's value has not been set, it
     // is assumed to be 0.
-    gVector<double> GetOutcomeVector(int num_players) const;
+    gVector<gNumber> GetOutcomeVector(int num_players) const;
 
     // Return the value of the outcome for player p
-    double operator[](int p) const;
+    gNumber operator[](int p) const;
 
     // Set a player's value
-    void SetOutcome(int p, double value);
+    void SetOutcome(int p, gNumber value);
 
     // Set players' values according to a vector
-    void SetOutcome(const gVector<double> &v);
+    void SetOutcome(const gVector<gNumber> &v);
 };
 
   
