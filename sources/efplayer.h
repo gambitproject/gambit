@@ -41,8 +41,7 @@ class Player   {
     int CreateGame(int game)
       { return infosets.CreatePartition(game); }
 	// remove a group of information sets for a subgame
-    void RemoveGame(int game)
-      { infosets.RemovePartition(game); }
+    void RemoveGame(int game);
 	// returns the number of games
     int NumGames(void) const
       { return infosets.NumPartitions(); }

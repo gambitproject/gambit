@@ -180,7 +180,11 @@ Node ExtForm::MoveTree(Node src, Node dest)
   return ret;
 }
 
-
+Node ExtForm::CopyTree(Node src, Node dest)
+{
+      // this function is currently unimplemented
+  return src;
+}
 
 // Delete a terminal node, and return the new ID of its parent
 Node ExtForm::DeleteTerminalNode(const Node &n)

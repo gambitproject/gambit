@@ -66,6 +66,9 @@ template <class T> class gMap  {
     int GetFirstVacancy(void) const;
 	// returns index number of the ith element
     int GetIndex(int i) const;
+
+	// DEBUGGING
+    void Dump(void) const;
 };
 
 
@@ -150,7 +153,7 @@ INLINE int gMap<T>::Insert(const T &new_member, uint as_number)
     return as_number;
   }
 
-  for (uint i = 0; numbers[i] < as_number; i++)  {
+  for (uint i = 0; i < length - 1 && numbers[i] < as_number; i++)  {
     new_contents[i] = contents[i];
     new_numbers[i] = numbers[i];
   }
@@ -174,12 +177,7 @@ INLINE int gMap<T>::Insert(const T &new_member, uint as_number)
 
 template <class T> INLINE int gMap<T>::Append(const T &new_member)
 {
-  if (length == 0)   {
-    Insert(new_member, 1);
-    return 1;
-  }
-
-  for (uint i = 1; numbers[i] == i; i++);
+  for (uint i = 1; i <= length && numbers[i - 1] == i; i++);
   Insert(new_member, i);
   return i;
 }
@@ -207,7 +205,7 @@ template <class T> INLINE T gMap<T>::Remove(uint number)
     new_numbers[i] = numbers[i];
   }
 
-  for (i++; i < length; i++)  {
+  for (; i < length; i++)  {
     new_contents[i] = contents[i + 1];
     new_numbers[i] = numbers[i + 1];
   }
@@ -252,6 +250,14 @@ template <class T> inline int gMap<T>::GetIndex(int i) const
   return numbers[i - 1];
 }
 
+
+
+template <class T> INLINE void gMap<T>::Dump(void) const
+{
+  for (uint i = 0; i < length; i++)
+    printf("(%d) %d: %p\n", i + 1, numbers[i], contents[i]);
+  printf("\n");
+}
 
 #endif   // GMAP_H
 

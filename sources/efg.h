@@ -14,6 +14,7 @@
 class ExtForm    {
   private:
     int efg_no;
+    gString name;
     NodeSet nodes;
     PlayerSet &players;
 
@@ -51,8 +52,19 @@ class ExtForm    {
 
     void SetOutcome(const Node &n, int outcome)
       { if (nodes.IsMember(n))  nodes.SetOutcome(n, outcome); }
+    void ExpungeOutcome(int outcome)
+      { nodes.ExpungeOutcome(outcome); }
+
+    void SetNextGame(const Node &n, int game)
+      { if (nodes.IsMember(n))  nodes.SetNextGame(n, game); }
+    int GetNextGame(const Node &n) const
+      { if (!nodes.IsMember(n))   return 0;
+	return nodes.GetNextGame(n); }
+    void ExpungeGame(int game)
+      { nodes.ExpungeGame(game); }
 
     Node MoveTree(Node from, Node dest);
+    Node CopyTree(Node from, Node dest);
     Node DeleteTree(const Node &n);
 
 	// OPERATIONS ON NODES
@@ -70,6 +82,8 @@ class ExtForm    {
       { return nodes.GetPriorSibling(n); }
     Node GetNextSibling(const Node &n) const
       { return nodes.GetNextSibling(n); }
+    int HasSuccessorGame(const Node &n) const
+      { return nodes.HasSuccessorGame(n); }
 
 	// GENERAL INFORMATION
     int NumNodes(void) const
