@@ -168,6 +168,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
 	  if(marked)
 	    solns[j].SetIsSubgamePerfect(T_YES); 
 	  if(solns[j].Creator() == EfgAlg_ELIAPSUB) {
+	    solns[j].SetLiap(solns[j].LiapValue());
 	    solns[j].SetIsSequential(T_YES);      // even if marked = false
 	    solns[j].SetIsSubgamePerfect(T_YES);  // even if marked = false
 	  }
