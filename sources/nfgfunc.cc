@@ -40,7 +40,7 @@ Portion *ArrayToList(const gArray<Strategy *> &A)
 Portion *GSM_CentroidNfgFloat(Portion **param)
 {
   Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
-  MixedProfile<double> *P = new MixedProfile<double>(N);
+  MixedSolution<double> *P = new MixedSolution<double>(N);
 
   Portion* por = new MixedValPortion(P);
   por->SetOwner( param[ 0 ]->Original() );
@@ -51,7 +51,7 @@ Portion *GSM_CentroidNfgFloat(Portion **param)
 Portion *GSM_CentroidNfgRational(Portion **param)
 {
   Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
-  MixedProfile<gRational> *P = new MixedProfile<gRational>(N);
+  MixedSolution<gRational> *P = new MixedSolution<gRational>(N);
 
   Portion* por = new MixedValPortion(P);
   por->SetOwner( param[ 0 ]->Original() );
@@ -65,9 +65,9 @@ Portion *GSM_CentroidNFSupport(Portion **param)
   BaseMixedProfile *P;
 
   if (S->BelongsTo().Type() == DOUBLE)
-    P = new MixedProfile<double>((Nfg<double> &) S->BelongsTo(), *S);
+    P = new MixedSolution<double>((Nfg<double> &) S->BelongsTo(), *S);
   else
-    P = new MixedProfile<gRational>((Nfg<gRational> &) S->BelongsTo(), *S);
+    P = new MixedSolution<gRational>((Nfg<gRational> &) S->BelongsTo(), *S);
 
   Portion *por = new MixedValPortion(P);
   por->SetOwner(param[0]->Owner());
@@ -317,21 +317,21 @@ Portion *GSM_ElimAllDom_Nfg(Portion **param)
 
 template <class T> class Mixed_ListPortion : public ListValPortion   {
   public:
-    Mixed_ListPortion(const gList<MixedProfile<T> > &);
+    Mixed_ListPortion(const gList<MixedSolution<T> > &);
 };
 
-Mixed_ListPortion<double>::Mixed_ListPortion(const gList<MixedProfile<double> > &list)
+Mixed_ListPortion<double>::Mixed_ListPortion(const gList<MixedSolution<double> > &list)
 {
   _DataType = porMIXED_FLOAT;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new MixedValPortion( new MixedProfile<double>(list[i])));
+    Append(new MixedValPortion( new MixedSolution<double>(list[i])));
 }
 
-Mixed_ListPortion<gRational>::Mixed_ListPortion(const gList<MixedProfile<gRational> > &list)
+Mixed_ListPortion<gRational>::Mixed_ListPortion(const gList<MixedSolution<gRational> > &list)
 {
   _DataType = porMIXED_RATIONAL;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new MixedValPortion( new MixedProfile<gRational>(list[i])));
+    Append(new MixedValPortion( new MixedSolution<gRational>(list[i])));
 }
 
 
@@ -356,7 +356,7 @@ Portion *GSM_ConstSumFloat(Portion **param)
   ((IntPortion *) param[1])->Value() = ZM.NumPivots();
   ((FloatPortion *) param[2])->Value() = ZM.Time();
 
-  gList<MixedProfile<double> > solns;
+  gList<MixedSolution<double> > solns;
   ZM.GetSolutions(solns);
 
   Portion* por = new Mixed_ListPortion<double>(solns);
@@ -381,7 +381,7 @@ Portion *GSM_ConstSumRational(Portion **param)
   ((IntPortion *) param[1])->Value() = ZM.NumPivots();
   ((FloatPortion *) param[2])->Value() = ZM.Time();
 
-  gList<MixedProfile<gRational> > solns;
+  gList<MixedSolution<gRational> > solns;
   ZM.GetSolutions(solns);
 
   Portion* por = new Mixed_ListPortion<gRational>(solns);
@@ -409,7 +409,7 @@ Portion *GSM_ConstSumSupport(Portion **param)
       ZM.ZSum();
       ((IntPortion *) param[1])->Value() = ZM.NumPivots();
       ((FloatPortion *) param[2])->Value() = ZM.Time();
-      gList<MixedProfile<double> > solns;
+      gList<MixedSolution<double> > solns;
       ZM.GetSolutions(solns);  por = new Mixed_ListPortion<double>(solns);
     }
     break;
@@ -419,7 +419,7 @@ Portion *GSM_ConstSumSupport(Portion **param)
       ZM.ZSum();
       ((IntPortion *) param[1])->Value() = ZM.NumPivots();
       ((FloatPortion *) param[2])->Value() = ZM.Time();
-      gList<MixedProfile<gRational> > solns;
+      gList<MixedSolution<gRational> > solns;
       ZM.GetSolutions(solns);  por = new Mixed_ListPortion<gRational>(solns);
     }
     break;
@@ -535,7 +535,7 @@ Portion *GSM_EnumSupport(Portion **param)
 Portion *GSM_GobitNfg_NfgFloat(Portion **param)
 {
   Nfg<double> &N = *(Nfg<double> *) ((NfgPortion *) param[0])->Value();
-  MixedProfile<double> start(N);
+  MixedSolution<double> start(N);
   
   NFGobitParams NP;
   if( ((TextPortion*) param[1])->Value() != "" )
@@ -554,7 +554,7 @@ Portion *GSM_GobitNfg_NfgFloat(Portion **param)
   NP.tol1 = ((FloatPortion *) param[10] )->Value();
 
   gWatch watch;
-  gList<MixedProfile<double> > solutions;
+  gList<MixedSolution<double> > solutions;
   Gobit(N, NP, start, solutions,
         ((IntPortion *) param[12])->Value(),
         ((IntPortion *) param[13])->Value());
@@ -575,8 +575,8 @@ Portion *GSM_GobitNfg_NfgFloat(Portion **param)
 
 Portion *GSM_GobitNfg_MixedFloat(Portion **param)
 {
-  MixedProfile<double> &start = 
-    * (MixedProfile<double> *) ((MixedPortion *) param[0])->Value();
+  MixedSolution<double> &start = 
+    * (MixedSolution<double> *) ((MixedPortion *) param[0])->Value();
   Nfg<double> &N = *start.BelongsTo();
   
   NFGobitParams NP;
@@ -596,7 +596,7 @@ Portion *GSM_GobitNfg_MixedFloat(Portion **param)
   NP.tol1 = ((FloatPortion *) param[10])->Value();
 
   gWatch watch;
-  gList<MixedProfile<double> > solutions;
+  gList<MixedSolution<double> > solutions;
   Gobit(N, NP, start, solutions, 
         ((IntPortion *) param[12])->Value(),
         ((IntPortion *) param[13])->Value());
@@ -643,7 +643,7 @@ Portion *GSM_GridSolveFloat(Portion **param)
 //  ((IntPortion *) param[8])->Value() = GM.NumEvals();
 //  ((FloatPortion *) param[9])->Value() = GM.Time();
 
-  gList<MixedProfile<double> > solns;
+  gList<MixedSolution<double> > solns;
 
   Portion* por = new Mixed_ListPortion<double>(solns);
   por->SetOwner( param[ 0 ]->Original() );
@@ -678,7 +678,7 @@ Portion *GSM_GridSolveSupport(Portion **param)
       GM.GridSolve();
       // ((IntPortion *) param[8])->Value() = GM.NumEvals();
       // ((FloatPortion *) param[9])->Value() = GM.Time();
-      gList<MixedProfile<double> > solns;
+      gList<MixedSolution<double> > solns;
       por = new Mixed_ListPortion<double>(solns);
     }
     break;
@@ -690,7 +690,7 @@ Portion *GSM_GridSolveSupport(Portion **param)
       GM.GridSolve();
       // ((IntPortion *) param[8])->Value() = GM.NumEvals();
       // ((FloatPortion *) param[9])->Value() = GM.Time();
-      gList<MixedProfile<gRational> > solns;
+      gList<MixedSolution<gRational> > solns;
       por = new Mixed_ListPortion<gRational>(solns);
       */
     }
@@ -730,7 +730,7 @@ Portion *GSM_GridSolveRational(Portion **param)
 //  ((IntPortion *) param[8])->Value() = GM.NumEvals();
 //  ((FloatPortion *) param[9])->Value() = GM.Time();
 
-  gList<MixedProfile<gRational> > solns;
+  gList<MixedSolution<gRational> > solns;
 
   Portion* por = new Mixed_ListPortion<gRational>(solns);
   por->SetOwner( param[ 0 ]->Original() );
@@ -834,7 +834,7 @@ Portion *GSM_LemkeNfgSupport(Portion **param)
 Portion *GSM_LiapNfg_NfgFloat(Portion **param)
 {
   Nfg<double> &N = *(Nfg<double> *) ((NfgPortion*) param[0])->Value();
-  MixedProfile<double> start(N);
+  MixedSolution<double> start(N);
 
   NFLiapParams params;
 
@@ -850,7 +850,7 @@ Portion *GSM_LiapNfg_NfgFloat(Portion **param)
  
   long niters;
   gWatch watch;
-  gList<MixedProfile<double> > solutions;
+  gList<MixedSolution<double> > solutions;
   Liap(N, params, start, solutions,
        ((IntPortion *) param[8])->Value(),
        niters);
@@ -865,8 +865,8 @@ Portion *GSM_LiapNfg_NfgFloat(Portion **param)
 
 Portion *GSM_LiapNfg_MixedFloat(Portion **param)
 {
-  MixedProfile<double> &start = 
-    * (MixedProfile<double> *) ((MixedPortion *) param[0])->Value();
+  MixedSolution<double> &start = 
+    * (MixedSolution<double> *) ((MixedPortion *) param[0])->Value();
   Nfg<double> &N = *start.BelongsTo();
 
   NFLiapParams params;
@@ -883,7 +883,7 @@ Portion *GSM_LiapNfg_MixedFloat(Portion **param)
  
   long niters;
   gWatch watch;
-  gList<MixedProfile<double> > solutions;
+  gList<MixedSolution<double> > solutions;
   Liap(N, params, start, solutions,
        ((IntPortion *) param[8])->Value(),
        niters);
@@ -1001,7 +1001,7 @@ Portion *GSM_PureNashFloat(Portion **param)
 {
   Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
 
-  gList<MixedProfile<double> > solns;
+  gList<MixedSolution<double> > solns;
 
   gWatch watch;
 
@@ -1019,7 +1019,7 @@ Portion *GSM_PureNashRational(Portion **param)
 {
   Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
 
-  gList<MixedProfile<gRational> > solns;
+  gList<MixedSolution<gRational> > solns;
 
   gWatch watch;
 
@@ -1045,14 +1045,14 @@ Portion *GSM_PureNashSupport(Portion **param)
   {
   case DOUBLE:
     {
-      gList<MixedProfile<double> > solns;
+      gList<MixedSolution<double> > solns;
       FindPureNash( * (Nfg<double>*) N, solns );
       por = new Mixed_ListPortion<double>(solns);
     }
     break;
   case RATIONAL:
     {
-      gList<MixedProfile<gRational> > solns;
+      gList<MixedSolution<gRational> > solns;
       FindPureNash( * (Nfg<gRational>*) N, solns );
       por = new Mixed_ListPortion<gRational>(solns);
     }
@@ -1236,8 +1236,8 @@ Portion *GSM_List_MixedFloat(Portion **param)
   Portion* p2;
   Portion* por;
 
-  MixedProfile<double> *P = 
-    (MixedProfile<double>*) ((MixedPortion*) param[0])->Value();
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
 
   por = new ListValPortion();
 
@@ -1266,8 +1266,8 @@ Portion *GSM_List_MixedRational(Portion **param)
   Portion* p2;
   Portion* por;
 
-  MixedProfile<gRational> *P = 
-    (MixedProfile<gRational>*) ((MixedPortion*) param[0])->Value();
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
 
   por = new ListValPortion();
 
@@ -1302,7 +1302,7 @@ Portion *GSM_Mixed_NfgFloat(Portion **param)
   Portion* p2;
 
   Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
-  MixedProfile<double> *P = new MixedProfile<double>(N);
+  MixedSolution<double> *P = new MixedSolution<double>(N);
 
   if( ( (ListPortion*) param[1] )->Length() != N.NumPlayers() )
   {
@@ -1361,7 +1361,7 @@ Portion *GSM_Mixed_NfgRational(Portion **param)
   Portion* p2;
 
   Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
-  MixedProfile<gRational> *P = new MixedProfile<gRational>(N);
+  MixedSolution<gRational> *P = new MixedSolution<gRational>(N);
 
   if( ( (ListPortion*) param[1] )->Length() != N.NumPlayers() )
   {
@@ -1427,11 +1427,11 @@ Portion* GSM_Mixed_NFSupport( Portion** param )
   switch( param[ 0 ]->Owner()->Type() )
   {
   case porNFG_FLOAT:
-    P = new MixedProfile<double>((Nfg<double> &) S->BelongsTo(), *S);
+    P = new MixedSolution<double>((Nfg<double> &) S->BelongsTo(), *S);
     datatype = porFLOAT;
     break;
   case porNFG_RATIONAL:
-    P = new MixedProfile<gRational>((Nfg<gRational> &) S->BelongsTo(), *S);
+    P = new MixedSolution<gRational>((Nfg<gRational> &) S->BelongsTo(), *S);
     datatype = porRATIONAL;
     break;
   default:
@@ -1475,11 +1475,11 @@ Portion* GSM_Mixed_NFSupport( Portion** param )
       switch( datatype )
       {
       case porFLOAT:
-	( * (MixedProfile<double>*) P )( i, j ) = 
+	( * (MixedSolution<double>*) P )( i, j ) = 
 	  ( (FloatPortion*) p2 )->Value();
 	break;
       case porRATIONAL:
-	( * (MixedProfile<gRational>*) P )( i, j ) = 
+	( * (MixedSolution<gRational>*) P )( i, j ) = 
 	  ( (RationalPortion*) p2 )->Value();
 	break;
       default:
@@ -1507,8 +1507,8 @@ Portion *GSM_SetComponent_MixedFloat(Portion **param)
   Portion* p2;
   int PlayerNum = 0;
 
-  MixedProfile<double>* P = 
-    (MixedProfile<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  MixedSolution<double>* P = 
+    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
   Nfg<double>& N = * P->BelongsTo();
   gArray< NFPlayer* > player = N.PlayerList();
   
@@ -1553,8 +1553,8 @@ Portion *GSM_SetComponent_MixedRational(Portion **param)
   Portion* p2;
   int PlayerNum = 0;
 
-  MixedProfile<gRational>* P = 
-    (MixedProfile<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  MixedSolution<gRational>* P = 
+    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
   Nfg<gRational>& N = * P->BelongsTo();
   gArray< NFPlayer* > player = N.PlayerList();
   
@@ -1594,29 +1594,29 @@ Portion *GSM_SetComponent_MixedRational(Portion **param)
 
 Portion *GSM_IsNash_MixedFloat(Portion **param)
 {
-  MixedProfile<double> *P = 
-    (MixedProfile<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
   return new BoolValPortion(P->IsNash());
 }
 
 Portion *GSM_IsNash_MixedRational(Portion **param)
 {
-  MixedProfile<gRational> *P = 
-    (MixedProfile<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
   return new BoolValPortion(P->IsNash());
 }
 
 Portion *GSM_LiapValue_MixedFloat(Portion **param)
 {
-  MixedProfile<double> *P = 
-    (MixedProfile<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
   return new FloatValPortion(P->LiapValue());
 }
 
 Portion *GSM_LiapValue_MixedRational(Portion **param)
 {
-  MixedProfile<gRational> *P = 
-    (MixedProfile<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
   return new RationalValPortion(P->LiapValue());
 }
 

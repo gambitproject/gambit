@@ -130,7 +130,7 @@ template <class T> int ZSumModule<T>::Add_BFS(const LPSolve<T> &lp)
 }
 
 template <class T>
-void ZSumModule<T>::GetSolutions(gList<MixedProfile<T> > &solutions) const
+void ZSumModule<T>::GetSolutions(gList<MixedSolution<T> > &solutions) const
 {
   int n1=support.NumStrats(1);
   int n2=support.NumStrats(2);
@@ -181,7 +181,7 @@ class ZSumModule<gRational>;
 
 template <class T>
 int ZSum(const Nfg<T> &N, const ZSumParams &p,
-	  gList<MixedProfile<T> > &solutions,
+	  gList<MixedSolution<T> > &solutions,
 	  long &npivots, gRational &time)
 {
   NFSupport S(N);
@@ -198,9 +198,9 @@ int ZSum(const Nfg<T> &N, const ZSumParams &p,
 
 #ifdef __GNUG__
 template int ZSum(const Nfg<double> &, const ZSumParams &,
-		   gList<MixedProfile<double> > &, long &, gRational &);
+		   gList<MixedSolution<double> > &, long &, gRational &);
 template int ZSum(const Nfg<gRational> &, const ZSumParams &,
-		   gList<MixedProfile<gRational> > &, long &, gRational &);
+		   gList<MixedSolution<gRational> > &, long &, gRational &);
 #elif defined __BORLANDC__
 #pragma option -Jgd
 int ZSum(const Nfg<double> &, const ZSumParams &,

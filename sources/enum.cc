@@ -221,7 +221,7 @@ template <class T> EnumParams &EnumModule<T>::Parameters(void)
 }
 
 template <class T>
-const gList<MixedProfile<T> > &EnumModule<T>::GetSolutions(void) const
+const gList<MixedSolution<T> > &EnumModule<T>::GetSolutions(void) const
 {
   return solutions;
 }

@@ -61,5 +61,9 @@ TEMPLATE class gArray<double *>;
 TEMPLATE class gList<MixedProfile<double> >;
 TEMPLATE class gNode<MixedProfile<double> >;
 
+#include "mixedsol.h"
+
+TEMPLATE class gList<MixedSolution<double> >;
+TEMPLATE class gNode<MixedSolution<double> >;
 
 

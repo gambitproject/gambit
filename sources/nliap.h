@@ -13,6 +13,7 @@
 
 #include "nfg.h"
 #include "mixed.h"
+#include "mixedsol.h"
 
 class NFLiapParams   {
   public:
@@ -26,7 +27,7 @@ class NFLiapParams   {
 
 
 bool Liap(const Nfg<double> &, NFLiapParams &,
-	  const MixedProfile<double> &, gList<MixedProfile<double> > &,
+	  const MixedProfile<double> &, gList<MixedSolution<double> > &,
 	  long &nevals, long &niters);
 
 #endif   // NLIAP_H

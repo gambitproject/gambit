@@ -14,6 +14,7 @@
 #include "gmatrix.h"
 #include "lemketab.h"
 #include "gstatus.h"
+#include "behavsol.h"
 
 class SeqFormParams     {
   public:
@@ -41,7 +42,7 @@ private:
   long npivots;
   double time;
   BFS_List List;
-  gList< BehavProfile<T> > solutions;
+  gList< BehavSolution<T> > solutions;
 
 public:
   SeqFormModule(const Efg<T> &E, const SeqFormParams &p, 
@@ -58,7 +59,7 @@ public:
   int LCPPath(); // follow a path of ACBFS's from one CBFS to another
   void GetProfile(gDPVector<T> &, const gVector<T> &, 
 		  const Node *n, int,int);
-  const gList<BehavProfile<T> > &GetSolutions() const;
+  const gList<BehavSolution<T> > &GetSolutions() const;
   int NumSequences(int j);
   int NumInfosets(int j);
 };

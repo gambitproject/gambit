@@ -152,7 +152,7 @@ static void WritePXIHeader(gOutput &pxifile, const Efg<double> &E,
   pxifile << "\nData:\n";
 }
 
-static void AddSolution(gList<BehavProfile<double> > &solutions,
+static void AddSolution(gList<BehavSolution<double> > &solutions,
 			const BehavProfile<double> &profile)
 {
   const Efg<double> &E = *profile.BelongsTo();
@@ -182,7 +182,7 @@ extern bool Powell(gVector<double> &p, gMatrix<double> &xi,
 
 void Gobit(const Efg<double> &E, EFGobitParams &params,
 	   const BehavProfile<double> &start,
-	   gList<BehavProfile<double> > &solutions,
+	   gList<BehavSolution<double> > &solutions,
 	   long &nevals, long &nits)
 {
   EFGobitFunc F(E, start);

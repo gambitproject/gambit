@@ -53,7 +53,7 @@ template <class T> class LemkeTableau : public gTableau<T>
     int Lemke(int);
     long NumPivots(void) const;
     long &NumPivots(void);
-    void GetSolutions(gList<MixedProfile<T> > &) const;
+    void GetSolutions(gList<MixedSolution<T> > &) const;
 };
 
 //-------------------------------------------------------------------------
@@ -373,7 +373,7 @@ template <class T> int LemkeTableau<T>::Exit_Row(int col)
 //-------------------------------------------------------------------------
 
 template <class T>
-void LemkeTableau<T>::GetSolutions(gList<MixedProfile<T> > &solutions) const
+void LemkeTableau<T>::GetSolutions(gList<MixedSolution<T> > &solutions) const
 {
   solutions.Flush();
 
@@ -470,7 +470,7 @@ template <class T> double LemkeModule<T>::Time(void) const
 }
 
 template <class T>
-const gList<MixedProfile<T> > &LemkeModule<T>::GetSolutions(void) const
+const gList<MixedSolution<T> > &LemkeModule<T>::GetSolutions(void) const
 {
   return solutions;
 }
@@ -492,7 +492,7 @@ class LemkeModule<gRational>;
 
 template <class T>
 int Lemke(const Nfg<T> &N, const LemkeParams &p,
-	  gList<MixedProfile<T> > &solutions,
+	  gList<MixedSolution<T> > &solutions,
 	  long &npivots, double &time)
 {
   NFSupport S(N);

@@ -12,6 +12,7 @@
 #include "grarray.h"
 #include "gstatus.h"
 #include "mixed.h"
+#include "mixedsol.h"
 
 class SimpdivParams     {
   public:
@@ -39,7 +40,7 @@ template <class T> class SimpdivModule  {
     gPVector<int> U,TT;
     gPVector<T> ab,besty,v;
 
-    gList<MixedProfile<T> > solutions;
+    gList<MixedSolution<T> > solutions;
 
     T simplex(void);
     T getlabel(MixedProfile<T> &yy);
@@ -58,7 +59,7 @@ template <class T> class SimpdivModule  {
     double Time(void) const   { return time; }
 
     int Simpdiv(void);
-    const gList<MixedProfile<T> > &GetSolutions(void) const  { return solutions; }
+    const gList<MixedSolution<T> > &GetSolutions(void) const  { return solutions; }
 };
 
 

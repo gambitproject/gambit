@@ -1518,10 +1518,10 @@ void MixedPortion::Output( gOutput& s ) const
     switch( (*_Value)->Type() )
     {
     case DOUBLE:
-      s << "(Mixed) " << * (MixedProfile<double>*) (*_Value); 
+      s << "(Mixed) " << * (MixedSolution<double>*) (*_Value); 
       break;
     case RATIONAL:
-      s << "(Mixed) " << * (MixedProfile<gRational>*) (*_Value); 
+      s << "(Mixed) " << * (MixedSolution<gRational>*) (*_Value); 
       break;
     default:
       assert( 0 );
@@ -1542,11 +1542,13 @@ Portion* MixedPortion::ValCopy( void ) const
     {
     case DOUBLE:
       p = new MixedValPortion
-	( new MixedProfile<double>( * (MixedProfile<double>*) (*_Value) ) ); 
+	( new MixedSolution<double>
+	 ( * (MixedSolution<double>*) (*_Value) ) ); 
       break;
     case RATIONAL:
       p = new MixedValPortion
-	( new MixedProfile<gRational>( * (MixedProfile<gRational>*) (*_Value) ) ); 
+	( new MixedSolution<gRational>
+	 ( * (MixedSolution<gRational>*) (*_Value) ) );       
       break;
     default:
       assert( 0 );
@@ -1583,12 +1585,12 @@ void MixedPortion::AssignFrom( Portion* p )
     switch( ( (MixedPortion*) p )->Value()->Type() )
     {
     case DOUBLE:
-      *_Value = new MixedProfile<double>
-	( * (MixedProfile<double>*) ( (MixedPortion*) p )->Value() ); 
+      *_Value = new MixedSolution<double>
+	( * (MixedSolution<double>*) ( (MixedPortion*) p )->Value() ); 
       break;
     case RATIONAL:
-      *_Value =  new MixedProfile<gRational>
-	( * (MixedProfile<gRational>*) ( (MixedPortion*) p )->Value() ); 
+      *_Value =  new MixedSolution<gRational>
+	( * (MixedSolution<gRational>*) ( (MixedPortion*) p )->Value() ); 
       break;
     default:
       assert( 0 );
@@ -1657,7 +1659,7 @@ PortionType BehavPortion::Type( void ) const
 { 
   if( !*_Value )
   {
-    return porMIXED;
+    return porBEHAV;
   }
   else
   {
@@ -1686,10 +1688,10 @@ void BehavPortion::Output( gOutput& s ) const
     switch( (*_Value)->Type() )
     {
     case DOUBLE:
-      s << "(Behav) " << * (BehavProfile<double>*) (*_Value); 
+      s << "(Behav) " << * (BehavSolution<double>*) (*_Value); 
       break;
     case RATIONAL:
-      s << "(Behav) " << * (BehavProfile<gRational>*) (*_Value); 
+      s << "(Behav) " << * (BehavSolution<gRational>*) (*_Value); 
       break;
     default:
       assert( 0 );
@@ -1703,7 +1705,7 @@ Portion* BehavPortion::ValCopy( void ) const
 
   if( !*_Value )
   {
-    p = new MixedValPortion( 0 );
+    p = new BehavValPortion( 0 );
   }
   else
   {
@@ -1711,11 +1713,13 @@ Portion* BehavPortion::ValCopy( void ) const
     {
     case DOUBLE:
       p = new BehavValPortion
-	( new BehavProfile<double>( * (BehavProfile<double>*) (*_Value) ) ); 
+	( new BehavSolution<double>
+	 ( * (BehavSolution<double>*) (*_Value) ) ); 
       break;
     case RATIONAL:
       p = new BehavValPortion
-	( new BehavProfile<gRational>( * (BehavProfile<gRational>*) (*_Value) ) ); 
+	( new BehavSolution<gRational>
+	 ( * (BehavSolution<gRational>*) (*_Value) ) ); 
       break;
     default:
       assert( 0 );
@@ -1752,12 +1756,12 @@ void BehavPortion::AssignFrom( Portion* p )
     switch( ( (BehavPortion*) p )->Value()->Type() )
     {
     case DOUBLE:
-      *_Value = new BehavProfile<double>
-	( * (BehavProfile<double>*) ( (BehavPortion*) p )->Value() ); 
+      *_Value = new BehavSolution<double>
+	( * (BehavSolution<double>*) ( (BehavPortion*) p )->Value() ); 
       break;
     case RATIONAL:
-      *_Value =  new BehavProfile<gRational>
-	( * (BehavProfile<gRational>*) ( (BehavPortion*) p )->Value() ); 
+      *_Value =  new BehavSolution<gRational>
+	( * (BehavSolution<gRational>*) ( (BehavPortion*) p )->Value() ); 
       break;
     default:
       assert( 0 );

@@ -13,6 +13,7 @@
 
 #include "nfg.h"
 #include "mixed.h"
+#include "mixedsol.h"
 
 class NFGobitParams  {
   public:
@@ -28,7 +29,7 @@ class NFGobitParams  {
 
 
 void Gobit(const Nfg<double> &, NFGobitParams &,
-	   const MixedProfile<double> &, gList<MixedProfile<double> > &,
+	   const MixedProfile<double> &, gList<MixedSolution<double> > &,
 	   long &nevals, long &nits);
 
 

@@ -54,4 +54,9 @@ TEMPLATE int ReadEfgFile(gInput &, Efg<double> *&);
 
 TEMPLATE class gList<BehavProfile<double> >;
 TEMPLATE class gNode<BehavProfile<double> >;
-                                                                     
+
+#include "behavsol.h"
+
+TEMPLATE class gList<BehavSolution<double> >;
+TEMPLATE class gNode<BehavSolution<double> >;
+

@@ -161,7 +161,7 @@ extern bool DFP(gVector<double> &p,
 
 bool Liap(const Nfg<double> &N, NFLiapParams &params,
 	  const MixedProfile<double> &start,
-	  gList<MixedProfile<double> > &solutions,
+	  gList<MixedSolution<double> > &solutions,
 	  long &nevals, long &niters)
 {
   NFLiapFunc F(N, start);

@@ -9,6 +9,7 @@
 
 #include "nfg.h"
 #include "mixed.h"
+#include "mixedsol.h"
 #include "glist.h"
 #include "gstatus.h"
 
@@ -31,7 +32,7 @@ template <class T> class LemkeModule  {
     const LemkeParams &params;
     long npivots;
     double time;
-    gList<MixedProfile<T> > solutions;
+    gList<MixedSolution<T> > solutions;
 
   public:
     LemkeModule(const Nfg<T> &N, const LemkeParams &p, const NFSupport &);
@@ -42,7 +43,7 @@ template <class T> class LemkeModule  {
     long NumPivots(void) const;
     double Time(void) const;
 
-    const gList<MixedProfile<T> > &GetSolutions(void) const;
+    const gList<MixedSolution<T> > &GetSolutions(void) const;
 };
 
 //

@@ -14,6 +14,7 @@
 #include "tableau.h"
 #include "lpsolve.h"
 #include "mixed.h"
+#include "mixedsol.h"
 
 class ZSumParams     {
   public:
@@ -53,7 +54,7 @@ public:
   long NumPivots(void) const;
   double Time(void) const;
   
-  void GetSolutions(gList<MixedProfile<T> > &) const;
+  void GetSolutions(gList<MixedSolution<T> > &) const;
 };
 
 //

@@ -56,4 +56,7 @@ TEMPLATE int ReadEfgFile(gInput &, Efg<gRational> *&);
 TEMPLATE class gList<BehavProfile<gRational> >;
 TEMPLATE class gNode<BehavProfile<gRational> >;
 
+#include "behavsol.h"
 
+TEMPLATE class gList<BehavSolution<gRational> >;
+TEMPLATE class gNode<BehavSolution<gRational> >;

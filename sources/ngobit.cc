@@ -168,7 +168,7 @@ extern bool DFP(gVector<double> &p, gC2Function<double> &func,
 
 void Gobit(const Nfg<double> &N, NFGobitParams &params,
 	   const MixedProfile<double> &start,
-	   gList<MixedProfile<double> > &solutions,
+	   gList<MixedSolution<double> > &solutions,
 	   long &nevals, long &nits)
 {
   NFGobitFunc F(N, start);

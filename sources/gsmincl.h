@@ -20,6 +20,7 @@ typedef enum
   opNEG,
   opADD, opSUB, opMUL, opDIV, 
   opINTDIV, opMOD, 
+
   opEXP, opLOG,
   opPOW_INT, opPOW_FLOAT,
 
@@ -32,6 +33,11 @@ typedef enum
   opINTEGER, opFLOAT, opRATIONAL
 } OperationMode;
 
+#define id_USER 0
+
+#define T_DONTKNOW 0
+#define T_YES 1
+#define T_NO 2
 
 
 #define rcFAIL     0

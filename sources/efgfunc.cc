@@ -797,7 +797,7 @@ Portion* GSM_RemoveAction( Portion** param )
 Portion *GSM_CentroidEfgFloat(Portion **param)
 {
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
-  BehavProfile<double> *P = new BehavProfile<double>(E);
+  BehavSolution<double> *P = new BehavSolution<double>(E);
 
   Portion* por = new BehavValPortion(P);
   por->SetOwner( param[ 0 ]->Original() );
@@ -808,7 +808,7 @@ Portion *GSM_CentroidEfgFloat(Portion **param)
 Portion *GSM_CentroidEfgRational(Portion **param)
 {
   Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
-  BehavProfile<gRational> *P = new BehavProfile<gRational>(E);
+  BehavSolution<gRational> *P = new BehavSolution<gRational>(E);
 
   Portion* por = new BehavValPortion(P);
   por->SetOwner( param[ 0 ]->Original() );
@@ -822,9 +822,9 @@ Portion *GSM_CentroidEFSupport(Portion **param)
   BaseBehavProfile *P;
 
   if (S->BelongsTo().Type() == DOUBLE)
-    P = new BehavProfile<double>( *S );
+    P = new BehavSolution<double>( *S );
   else
-    P = new BehavProfile<gRational>( *S );
+    P = new BehavSolution<gRational>( *S );
 
   Portion *por = new BehavValPortion(P);
   por->SetOwner(param[0]->Owner());
@@ -1359,8 +1359,8 @@ Portion *GSM_List_BehavFloat(Portion **param)
   Portion* p3;
   Portion* por;
 
-  BehavProfile<double> *P = 
-    (BehavProfile<double>*) ((BehavPortion*) param[0])->Value();
+  BehavSolution<double> *P = 
+    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
 
   por = new ListValPortion();
 
@@ -1397,8 +1397,8 @@ Portion *GSM_List_BehavRational(Portion **param)
   Portion* p3;
   Portion* por;
 
-  BehavProfile<gRational> *P = 
-    (BehavProfile<gRational>*) ((BehavPortion*) param[0])->Value();
+  BehavSolution<gRational> *P = 
+    (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
 
   por = new ListValPortion();
 
@@ -1442,7 +1442,7 @@ Portion *GSM_Behav_EfgFloat(Portion **param)
   Portion* p3;
 
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
-  BehavProfile<double> *P = new BehavProfile<double>(E);
+  BehavSolution<double> *P = new BehavSolution<double>(E);
 
   if( ( (ListPortion*) param[1] )->Length() != E.NumPlayers() )
   {
@@ -1523,7 +1523,7 @@ Portion *GSM_Behav_EfgRational(Portion **param)
   Portion* p3;
 
   Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
-  BehavProfile<gRational> *P = new BehavProfile<gRational>(E);
+  BehavSolution<gRational> *P = new BehavSolution<gRational>(E);
 
   if( ( (ListPortion*) param[1] )->Length() != E.NumPlayers() )
   {
@@ -1614,7 +1614,7 @@ Portion *GSM_Behav_EFSupport(Portion **param)
     // The code here is completely copied from GSM_Behav_EfgFloat
 
     Efg<double> &E = * (Efg<double>*) &S->BelongsTo();
-    BehavProfile<double> *P = new BehavProfile<double>(E);
+    BehavSolution<double> *P = new BehavSolution<double>(E);
 
     if( ( (ListPortion*) param[1] )->Length() != E.NumPlayers() )
     {
@@ -1686,7 +1686,7 @@ Portion *GSM_Behav_EFSupport(Portion **param)
     // The code here is entirely copied from GSM_Behav_EfgRational()
 
     Efg<gRational> &E = * (Efg<gRational>*) &S->BelongsTo();
-    BehavProfile<gRational> *P = new BehavProfile<gRational>(E);
+    BehavSolution<gRational> *P = new BehavSolution<gRational>(E);
     
     if( ( (ListPortion*) param[1] )->Length() != E.NumPlayers() )
     {
@@ -1776,8 +1776,8 @@ Portion *GSM_SetComponent_BehavFloat(Portion **param)
   int PlayerNum = 0;
   int InfosetNum = 0;
   
-  BehavProfile<double>* P = 
-    (BehavProfile<double>*) ( (BehavPortion*) param[ 0 ] )->Value();
+  BehavSolution<double>* P = 
+    (BehavSolution<double>*) ( (BehavPortion*) param[ 0 ] )->Value();
   Efg<double>& E = * P->BelongsTo();
   gArray< EFPlayer* > player = E.PlayerList();
   
@@ -1832,8 +1832,8 @@ Portion *GSM_SetComponent_BehavRational(Portion **param)
   int PlayerNum = 0;
   int InfosetNum = 0;
   
-  BehavProfile<gRational>* P = 
-    (BehavProfile<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value();
+  BehavSolution<gRational>* P = 
+    (BehavSolution<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value();
   Efg<gRational>& E = * P->BelongsTo();
   gArray< EFPlayer* > player = E.PlayerList();
   

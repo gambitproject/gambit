@@ -21,17 +21,17 @@
 
 Portion *GSM_BehavFloat(Portion **param)
 {
-  MixedProfile<double> &mp = * (MixedProfile<double>*) ((MixedPortion*) param[0])->Value();
+  MixedSolution<double> &mp = * (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[1])->Value();
   Nfg<double> &N = *mp.BelongsTo(); 
 
-  BehavProfile<double>* bp;
+  BehavSolution<double>* bp;
 
   if( AssociatedNfg( &E ) != &N )  
     return new ErrorPortion("Normal and extensive form games not associated");
   else
   {
-    bp = new BehavProfile<double>(E);
+    bp = new BehavSolution<double>(E);
     MixedToBehav(N, mp, E, *bp);
   }
 
@@ -43,18 +43,18 @@ Portion *GSM_BehavFloat(Portion **param)
 
 Portion *GSM_BehavRational(Portion **param)
 {
-  MixedProfile<gRational> &mp = 
-    * (MixedProfile<gRational>*) ((MixedPortion*) param[0])->Value();
+  MixedSolution<gRational> &mp = 
+    * (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
   Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[1])->Value();
   Nfg<gRational> &N = *mp.BelongsTo(); 
 
-  BehavProfile<gRational>* bp;
+  BehavSolution<gRational>* bp;
 
   if( AssociatedNfg( &E ) != &N )  
     return new ErrorPortion("Normal and extensive form games not associated");
   else
   {
-    bp = new BehavProfile<gRational>(E);
+    bp = new BehavSolution<gRational>(E);
     MixedToBehav(N, mp, E, *bp);
   }
 
@@ -74,8 +74,8 @@ Portion* GSM_Payoff_BehavFloat( Portion** param )
 {
   int i;
   Portion* por = new ListValPortion;
-  BehavProfile<double>* bp = 
-    (BehavProfile<double>*) ((BehavPortion*) param[0])->Value();
+  BehavSolution<double>* bp = 
+    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
   for( i = 1; i <= bp->BelongsTo()->PlayerList().Length(); i++ )
   {
     ( (ListValPortion*) por )->Append( new FloatValPortion( bp->Payoff( i ) ));
@@ -87,8 +87,8 @@ Portion* GSM_Payoff_BehavFloat( Portion** param )
 {
   int i;
   Portion* por = new ListValPortion;
-  BehavProfile<gRational>* bp = 
-    (BehavProfile<gRational>*) ((BehavPortion*) param[0])->Value();
+  BehavSolution<gRational>* bp = 
+    (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
   for( i = 1; i <= bp->BelongsTo()->PlayerList().Length(); i++ )
   {
     ((ListValPortion*) por)->Append( new RationalValPortion( bp->Payoff( i )));
@@ -101,8 +101,8 @@ Portion* GSM_Payoff_MixedFloat( Portion** param )
 {
   int i;
   Portion* por = new ListValPortion;
-  MixedProfile<double>* bp = 
-    (MixedProfile<double>*) ((MixedPortion*) param[0])->Value();
+  MixedSolution<double>* bp = 
+    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
   for( i = 1; i <= bp->BelongsTo()->NumPlayers(); i++ )
   {
     ( (ListValPortion*) por )->Append( new FloatValPortion( bp->Payoff( i ) ));
@@ -114,8 +114,8 @@ Portion* GSM_Payoff_MixedRational( Portion** param )
 {
   int i;
   Portion* por = new ListValPortion;
-  MixedProfile<gRational>* bp = 
-    (MixedProfile<gRational>*) ((MixedPortion*) param[0])->Value();
+  MixedSolution<gRational>* bp = 
+    (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
   for( i = 1; i <= bp->BelongsTo()->NumPlayers(); i++ )
   {
     ((ListValPortion*) por)->Append( new RationalValPortion( bp->Payoff( i )));
@@ -130,7 +130,7 @@ Portion* GSM_Payoff_NfgFloat( Portion** param )
   Portion* p;
   Portion* por = new ListValPortion;
   Nfg<double>* nfg = (Nfg<double>*) ( (NfgPortion*) param[0] )->Value();
-  gArray<int> profile( ( (ListPortion*) param[ 1 ] )->Length() );
+  gArray<int> Solution( ( (ListPortion*) param[ 1 ] )->Length() );
   
   if( ( (ListPortion*) param[ 1 ] )->Length() != nfg->NumPlayers() )
     return new ErrorPortion("Invalid number of players specified in \"list\"");
@@ -139,13 +139,13 @@ Portion* GSM_Payoff_NfgFloat( Portion** param )
   {
     p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
     assert( p->Type() == porINTEGER );
-    profile[ i ] = ( (IntPortion*) p )->Value();
+    Solution[ i ] = ( (IntPortion*) p )->Value();
     delete p;
   }
   for( i = 1; i <= nfg->NumPlayers(); i++ )
   {
     ( (ListValPortion*) por )->
-      Append( new FloatValPortion( nfg->Payoff( i, profile ) ) );
+      Append( new FloatValPortion( nfg->Payoff( i, Solution ) ) );
   }
   return por;
 }
@@ -156,7 +156,7 @@ Portion* GSM_Payoff_NfgRational( Portion** param )
   Portion* p;
   Portion* por = new ListValPortion;
   Nfg<gRational>* nfg = (Nfg<gRational>*) ( (NfgPortion*) param[0] )->Value();
-  gArray<int> profile( ( (ListPortion*) param[ 1 ] )->Length() );
+  gArray<int> Solution( ( (ListPortion*) param[ 1 ] )->Length() );
   
   if( ( (ListPortion*) param[ 1 ] )->Length() != nfg->NumPlayers() )
     return new ErrorPortion("Invalid number of players specified in \"list\"");
@@ -165,13 +165,13 @@ Portion* GSM_Payoff_NfgRational( Portion** param )
   {
     p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
     assert( p->Type() == porINTEGER );
-    profile[ i ] = ( (IntPortion*) p )->Value();
+    Solution[ i ] = ( (IntPortion*) p )->Value();
     delete p;
   }
   for( i = 1; i <= nfg->NumPlayers(); i++ )
   {
     ( (ListValPortion*) por )->
-      Append( new RationalValPortion( nfg->Payoff( i, profile ) ) );
+      Append( new RationalValPortion( nfg->Payoff( i, Solution ) ) );
   }
   return por;
 }
@@ -185,7 +185,7 @@ Portion* GSM_SetPayoff_NfgFloat( Portion** param )
   int i;
   Portion* p;
   Nfg<double>* nfg = (Nfg<double>*) ( (NfgPortion*) param[0] )->Value();
-  gArray<int> profile( ( (ListPortion*) param[ 1 ] )->Length() );
+  gArray<int> Solution( ( (ListPortion*) param[ 1 ] )->Length() );
   
   if( ( (ListPortion*) param[ 1 ] )->Length() != nfg->NumPlayers() )
     return new ErrorPortion("Invalid number of players specified in \"list\"");
@@ -196,14 +196,14 @@ Portion* GSM_SetPayoff_NfgFloat( Portion** param )
   {
     p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
     assert( p->Type() == porINTEGER );
-    profile[ i ] = ( (IntPortion*) p )->Value();
+    Solution[ i ] = ( (IntPortion*) p )->Value();
     delete p;
   }
   for( i = 1; i <= nfg->NumPlayers(); i++ )
   {
     p = ( (ListPortion*) param[ 2 ] )->Subscript( i );
     assert( p->Type() == porFLOAT );
-    nfg->SetPayoff( i, profile, ( (FloatPortion*) p )->Value() );
+    nfg->SetPayoff( i, Solution, ( (FloatPortion*) p )->Value() );
     delete p;
   }
   return param[ 1 ]->ValCopy();
@@ -214,7 +214,7 @@ Portion* GSM_SetPayoff_NfgRational( Portion** param )
   int i;
   Portion* p;
   Nfg<gRational>* nfg = (Nfg<gRational>*) ( (NfgPortion*) param[0] )->Value();
-  gArray<int> profile( ( (ListPortion*) param[ 1 ] )->Length() );
+  gArray<int> Solution( ( (ListPortion*) param[ 1 ] )->Length() );
   
   if( ( (ListPortion*) param[ 1 ] )->Length() != nfg->NumPlayers() )
     return new ErrorPortion("Invalid number of players specified in \"list\"");
@@ -225,14 +225,14 @@ Portion* GSM_SetPayoff_NfgRational( Portion** param )
   {
     p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
     assert( p->Type() == porINTEGER );
-    profile[ i ] = ( (IntPortion*) p )->Value();
+    Solution[ i ] = ( (IntPortion*) p )->Value();
     delete p;
   }
   for( i = 1; i <= nfg->NumPlayers(); i++ )
   {
     p = ( (ListPortion*) param[ 2 ] )->Subscript( i );
     assert( p->Type() == porRATIONAL );
-    nfg->SetPayoff( i, profile, ( (RationalPortion*) p )->Value() );
+    nfg->SetPayoff( i, Solution, ( (RationalPortion*) p )->Value() );
     delete p;
   }
   return param[ 1 ]->ValCopy();
@@ -274,24 +274,24 @@ Portion *GSM_NfgRational(Portion **param)
 
 template <class T> class Behav_ListPortion : public ListValPortion   {
   public:
-    Behav_ListPortion(const gList<BehavProfile<T> > &);
+    Behav_ListPortion(const gList<BehavSolution<T> > &);
     virtual ~Behav_ListPortion()   { }
 };
 
 Behav_ListPortion<double>::Behav_ListPortion(
-			   const gList<BehavProfile<double> > &list)
+			   const gList<BehavSolution<double> > &list)
 {
   _DataType = porBEHAV_FLOAT;
   for (int i = 1; i <= list.Length(); i++)
-    Append( new BehavValPortion( new BehavProfile<double>(list[i])));
+    Append( new BehavValPortion( new BehavSolution<double>(list[i])));
 }
 
 Behav_ListPortion<gRational>::Behav_ListPortion(
-			      const gList<BehavProfile<gRational> > &list)
+			      const gList<BehavSolution<gRational> > &list)
 {
   _DataType = porBEHAV_RATIONAL;
   for (int i = 1; i <= list.Length(); i++)
-    Append( new BehavValPortion( new BehavProfile<gRational>(list[i])));
+    Append( new BehavValPortion( new BehavSolution<gRational>(list[i])));
 }
 
 
@@ -301,7 +301,7 @@ Behav_ListPortion<gRational>::Behav_ListPortion(
 Portion *GSM_GobitEfg_EfgFloat(Portion **param)
 {
   Efg<double> &E = *(Efg<double> *) ((EfgPortion *) param[0])->Value();
-  BehavProfile<double> start(E);
+  BehavSolution<double> start(E);
   
   EFGobitParams EP;
   if( ((TextPortion*) param[1])->Value() != "" )
@@ -321,7 +321,7 @@ Portion *GSM_GobitEfg_EfgFloat(Portion **param)
 
   gWatch watch;
   
-  gList<BehavProfile<double> > solutions;
+  gList<BehavSolution<double> > solutions;
   Gobit(E, EP, start, solutions,
         ((IntPortion *) param[12])->Value(),
         ((IntPortion *) param[13])->Value());
@@ -339,8 +339,8 @@ Portion *GSM_GobitEfg_EfgFloat(Portion **param)
 
 Portion *GSM_GobitEfg_BehavFloat(Portion **param)
 {
-  BehavProfile<double>& start = 
-    * (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
+  BehavSolution<double>& start = 
+    * (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
   Efg<double> &E = *( start.BelongsTo() );
   
   EFGobitParams EP;
@@ -361,7 +361,7 @@ Portion *GSM_GobitEfg_BehavFloat(Portion **param)
   
   gWatch watch;
 
-  gList<BehavProfile<double> > solutions;
+  gList<BehavSolution<double> > solutions;
   Gobit(E, EP, start, solutions,
         ((IntPortion *) param[12])->Value(),
         ((IntPortion *) param[13])->Value());
@@ -382,9 +382,9 @@ Portion *GSM_LiapEfg_EfgFloat(Portion **param)
 {
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
 
-  gList<BehavProfile<double> > solns;
+  gList<BehavSolution<double> > solns;
 
-  BehavProfile<double> start(E);
+  BehavSolution<double> start(E);
 
   if (((BoolPortion *) param[1])->Value())   {
     NFLiapParams params;
@@ -446,8 +446,8 @@ Portion *GSM_LiapEfg_EfgFloat(Portion **param)
 
 Portion *GSM_LiapEfg_BehavFloat(Portion **param)
 {
-  BehavProfile<double> &start = 
-    * (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
+  BehavSolution<double> &start = 
+    * (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
   Efg<double> &E = *( start.BelongsTo() );
 
   EFLiapParams LP;
@@ -464,7 +464,7 @@ Portion *GSM_LiapEfg_BehavFloat(Portion **param)
 
   long niters;
   gWatch watch;
-  gList<BehavProfile<double> > solutions;
+  gList<BehavSolution<double> > solutions;
   Liap(E, LP, start, solutions,
        ((IntPortion *) param[8])->Value(),
        niters);
@@ -488,7 +488,7 @@ Portion *GSM_LcpSolveEfgFloat(Portion **param)
 {
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
 
-  gList<BehavProfile<double> > solns;
+  gList<BehavSolution<double> > solns;
   
   if (((BoolPortion *) param[1])->Value())  {
     LemkeParams LP;
@@ -528,7 +528,7 @@ Portion *GSM_LcpSolveEfgRational(Portion **param)
 {
   Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
 
-  gList<BehavProfile<gRational> > solns;
+  gList<BehavSolution<gRational> > solns;
   
   if (((BoolPortion *) param[1])->Value())  {
     LemkeParams LP;
@@ -626,7 +626,7 @@ Portion *GSM_SimpdivEfgFloat(Portion **param)
   SimpdivBySubgame<double> SM(E, SP);
   SM.Solve();
 
-  gList<BehavProfile<double> > solns(SM.GetSolutions());
+  gList<BehavSolution<double> > solns(SM.GetSolutions());
 
   ((IntPortion *) param[5])->Value() = SM.NumEvals();
   ((FloatPortion *) param[6])->Value() = SM.Time();
@@ -653,7 +653,7 @@ Portion *GSM_SimpdivEfgRational(Portion **param)
 
   SM.Solve();
 
-  gList<BehavProfile<gRational> > solns(SM.GetSolutions());
+  gList<BehavSolution<gRational> > solns(SM.GetSolutions());
 
   ((IntPortion *) param[5])->Value() = SM.NumEvals();
   ((FloatPortion *) param[6])->Value() = SM.Time();
@@ -680,7 +680,7 @@ Portion *GSM_LpSolveEfgFloat(Portion **param)
 
   ZM.Solve();
 
-  gList<BehavProfile<double> > solns(ZM.GetSolutions());
+  gList<BehavSolution<double> > solns(ZM.GetSolutions());
 
 
   ((IntPortion *) param[1])->Value() = ZM.NumPivots();
@@ -705,7 +705,7 @@ Portion *GSM_LpSolveEfgRational(Portion **param)
 
   ZM.Solve();
 
-  gList<BehavProfile<gRational> > solns(ZM.GetSolutions());
+  gList<BehavSolution<gRational> > solns(ZM.GetSolutions());
 
   ((IntPortion *) param[1])->Value() = ZM.NumPivots();
   ((FloatPortion *) param[2])->Value() = ZM.Time();
@@ -730,7 +730,7 @@ Portion *GSM_EnumPureEfgFloat(Portion **param)
 
   M.Solve();
 
-  gList<BehavProfile<double> > solns(M.GetSolutions());
+  gList<BehavSolution<double> > solns(M.GetSolutions());
 
   ((FloatPortion *) param[3])->Value() = M.Time();
   
@@ -751,7 +751,7 @@ Portion *GSM_EnumPureEfgRational(Portion **param)
 
   M.Solve();
 
-  gList<BehavProfile<gRational> > solns(M.GetSolutions());
+  gList<BehavSolution<gRational> > solns(M.GetSolutions());
 
   ((FloatPortion *) param[3])->Value() = M.Time();
   
@@ -776,7 +776,7 @@ Portion *GSM_EnumMixedEfgFloat(Portion **param)
   EnumBySubgame<double> EM(E, EP);
   
   EM.Solve();
-  gList<BehavProfile<double> > solns(EM.GetSolutions());
+  gList<BehavSolution<double> > solns(EM.GetSolutions());
 
   ((IntPortion *) param[3])->Value() = EM.NumPivots();
   ((FloatPortion *) param[4])->Value() = EM.Time();
@@ -801,7 +801,7 @@ Portion *GSM_EnumMixedEfgRational(Portion **param)
   
   EM.Solve();
 
-  gList<BehavProfile<gRational> > solns(EM.GetSolutions());
+  gList<BehavSolution<gRational> > solns(EM.GetSolutions());
 
   ((IntPortion *) param[3])->Value() = EM.NumPivots();
   ((FloatPortion *) param[4])->Value() = EM.Time();
@@ -819,11 +819,11 @@ extern Portion *ArrayToList(const gArray<gRational> &A);
 
 Portion *GSM_ActionValuesFloat(Portion **param)
 {
-  BehavProfile<double> *bp = (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
+  BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
   Infoset *s = ((InfosetPortion *) param[1])->Value();
 
   if (s->BelongsTo() != bp->BelongsTo())
-    return new ErrorPortion("Profile and infoset must belong to same game");
+    return new ErrorPortion("Solution and infoset must belong to same game");
   
   if (s->GetPlayer()->IsChance())
     return new ErrorPortion("Infoset must belong to personal player");
@@ -845,11 +845,11 @@ Portion *GSM_ActionValuesFloat(Portion **param)
 
 Portion *GSM_ActionValuesRational(Portion **param)
 {
-  BehavProfile<gRational> *bp = (BehavProfile<gRational> *) ((BehavPortion *) param[0])->Value();
+  BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
   Infoset *s = ((InfosetPortion *) param[1])->Value();
 
   if (s->BelongsTo() != bp->BelongsTo())
-    return new ErrorPortion("Profile and infoset must belong to same game");
+    return new ErrorPortion("Solution and infoset must belong to same game");
   
   if (s->GetPlayer()->IsChance())
     return new ErrorPortion("Infoset must belong to personal player");
@@ -870,21 +870,21 @@ Portion *GSM_ActionValuesRational(Portion **param)
 
 Portion *GSM_BeliefsFloat(Portion **param)
 {
-  BehavProfile<double> *bp = (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
+  BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
 
   return ArrayToList(bp->Beliefs());
 }
 
 Portion *GSM_BeliefsRational(Portion **param)
 {
-  BehavProfile<gRational> *bp = (BehavProfile<gRational> *) ((BehavPortion *) param[0])->Value();
+  BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
 
   return ArrayToList(bp->Beliefs());
 }
 
 Portion *GSM_InfosetProbsFloat(Portion **param)
 {
-  BehavProfile<double> *bp = (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
+  BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
 
   Efg<double> *E = bp->BelongsTo();
 
@@ -903,7 +903,7 @@ Portion *GSM_InfosetProbsFloat(Portion **param)
 
 Portion *GSM_InfosetProbsRational(Portion **param)
 {
-  BehavProfile<gRational> *bp = (BehavProfile<gRational> *) ((BehavPortion *) param[0])->Value();
+  BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
 
   Efg<gRational> *E = bp->BelongsTo();
 
@@ -922,36 +922,36 @@ Portion *GSM_InfosetProbsRational(Portion **param)
 
 Portion *GSM_NodeValuesFloat(Portion **param)
 {
-  BehavProfile<double> *bp = (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
+  BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
   EFPlayer *p = ((EfPlayerPortion *) param[1])->Value();
 
   if (bp->BelongsTo() != p->BelongsTo())
-    return new ErrorPortion("Profile and player are from different games");
+    return new ErrorPortion("Solution and player are from different games");
 
   return ArrayToList(bp->NodeValues(p->GetNumber()));
 }
 
 Portion *GSM_NodeValuesRational(Portion **param)
 {
-  BehavProfile<gRational> *bp = (BehavProfile<gRational> *) ((BehavPortion *) param[0])->Value();
+  BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
   EFPlayer *p = ((EfPlayerPortion *) param[1])->Value();
 
   if (bp->BelongsTo() != p->BelongsTo())
-    return new ErrorPortion("Profile and player are from different games");
+    return new ErrorPortion("Solution and player are from different games");
 
   return ArrayToList(bp->NodeValues(p->GetNumber()));
 }
  
 Portion *GSM_RealizProbsFloat(Portion **param)
 {
-  BehavProfile<double> *bp = (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
+  BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
   
   return ArrayToList(bp->NodeRealizProbs());
 }  
   
 Portion *GSM_RealizProbsRational(Portion **param)
 {
-  BehavProfile<gRational> *bp = (BehavProfile<gRational> *) ((BehavPortion *) param[0])->Value();
+  BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
   
   return ArrayToList(bp->NodeRealizProbs());
 }

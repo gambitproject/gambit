@@ -9,11 +9,12 @@
 
 #include "nfg.h"
 #include "mixed.h"
+#include "mixedsol.h"
 #include "glist.h"
 
 
 template <class T> int FindPureNash(const Nfg<T> &N,
-				    gList<MixedProfile<T> > &);
+				    gList<MixedSolution<T> > &);
 
 
 #endif    // PURENASH_H

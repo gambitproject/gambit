@@ -16,7 +16,9 @@
 
 #include "gambitio.h"
 
-#include "mixed.h"
+#include "mixedsol.h"
+#include "behavsol.h"
+
 #include "nfg.h"
 #include "efg.h"
 

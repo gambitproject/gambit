@@ -4,6 +4,8 @@
 //# $Id$
 //#
 
+#include "purenash.h"
+
 #include "gambitio.h"
 #include "nfg.h"
 #include "nfgiter.h"
@@ -13,7 +15,7 @@
 #include "mixed.h"
 
 template <class T> int FindPureNash(const Nfg<T> &N,
-				    gList<MixedProfile<T> > &eqs)
+				    gList<MixedSolution<T> > &eqs)
 {
   NFSupport S(N);
   ContIter<T> citer(&S);
@@ -54,6 +56,6 @@ template <class T> int FindPureNash(const Nfg<T> &N,
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE int FindPureNash(const Nfg<double> &, gList<MixedProfile<double> > &);
-TEMPLATE int FindPureNash(const Nfg<gRational> &,gList<MixedProfile<gRational> > &);
+TEMPLATE int FindPureNash(const Nfg<double> &, gList<MixedSolution<double> > &);
+TEMPLATE int FindPureNash(const Nfg<gRational> &,gList<MixedSolution<gRational> > &);
 

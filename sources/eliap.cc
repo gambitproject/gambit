@@ -96,7 +96,7 @@ extern bool Powell(gVector<double> &p,
 
 bool Liap(const Efg<double> &E, EFLiapParams &params,
 	  const BehavProfile<double> &start,
-	  gList<BehavProfile<double> > &solutions,
+	  gList<BehavSolution<double> > &solutions,
 	  long &nevals, long &niters)
 {
   EFLiapFunc F(E, start);

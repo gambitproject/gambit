@@ -13,6 +13,7 @@
 
 #include "efg.h"
 #include "behav.h"
+#include "behavsol.h"
 
 class EFGobitParams   {
   public:
@@ -28,7 +29,7 @@ class EFGobitParams   {
 
 
 void Gobit(const Efg<double> &, EFGobitParams &,
-	   const BehavProfile<double> &, gList<BehavProfile<double> > &,
+	   const BehavProfile<double> &, gList<BehavSolution<double> > &,
 	   long &nevals, long &nits);
 
 

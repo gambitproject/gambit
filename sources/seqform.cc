@@ -159,7 +159,7 @@ template <class T> int SeqFormModule<T>::Add_BFS(const LTableau<T> &tab)
 //-------------------------------------------------------------------------
 
 template <class T> 
-const gList<BehavProfile<T> > &SeqFormModule<T>::GetSolutions(void) const
+const gList<BehavSolution<T> > &SeqFormModule<T>::GetSolutions(void) const
 {
   return solutions;
 }

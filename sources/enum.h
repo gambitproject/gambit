@@ -19,6 +19,7 @@
 #include "gstatus.h"
 #include "lhtab.h"
 #include "mixed.h"
+#include "mixedsol.h"
 #include "vertenum.h"
 
 class EnumParams     {
@@ -43,7 +44,7 @@ private:
   int rows,cols,level;
   long count,npivots;
   double time;
-  gList<MixedProfile<T> > solutions;
+  gList<MixedSolution<T> > solutions;
 
   bool EqZero(T x) const;
 //  void AddSolution(const gPVector<T> &s);
@@ -58,7 +59,7 @@ public:
   
   EnumParams &Parameters(void);
 
-  const gList<MixedProfile<T> > &GetSolutions(void) const;
+  const gList<MixedSolution<T> > &GetSolutions(void) const;
 };
 
 //

@@ -60,4 +60,8 @@ TEMPLATE class gArray<gRational *>;
 TEMPLATE class gList<MixedProfile<gRational> >;
 TEMPLATE class gNode<MixedProfile<gRational> >;
 
+#include "mixedsol.h"
+
+TEMPLATE class gList<MixedSolution<gRational> >;
+TEMPLATE class gNode<MixedSolution<gRational> >;
 

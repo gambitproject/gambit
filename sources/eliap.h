@@ -13,6 +13,7 @@
 
 #include "efg.h"
 #include "behav.h"
+#include "behavsol.h"
 
 class EFLiapParams  {
   public:
@@ -26,7 +27,7 @@ class EFLiapParams  {
 
 
 bool Liap(const Efg<double> &, EFLiapParams &,
-	  const BehavProfile<double> &, gList<BehavProfile<double> > &,
+	  const BehavProfile<double> &, gList<BehavSolution<double> > &,
 	  long &nevals, long &niters);
 
 #endif    // ELIAP_H
