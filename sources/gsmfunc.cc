@@ -687,7 +687,6 @@ bool CallFuncObj::_TypeMatch( Portion* p, PortionType ExpectedType ) const
 	else // normal type checking
 	{
 		if (CalledType & ExpectedType) result=true; else result=false;
-		long id=CalledType&ExpectedType;
 	}
 	return result;
 }
