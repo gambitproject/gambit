@@ -26,7 +26,7 @@ private:
   void OnHelp(void);
 
 public:
-  dialogActionSelect(Infoset *, wxWindow *);
+  dialogActionSelect(Infoset *, const gText &, const gText &, wxWindow *);
   virtual ~dialogActionSelect() { }
 
   int Completed(void) const { return m_completed; }

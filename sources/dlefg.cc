@@ -596,13 +596,16 @@ void dialogActionLabel::OnNext(void)
 //                   dialogActionSelect: Member functions
 //=========================================================================
 
-dialogActionSelect::dialogActionSelect(Infoset *p_infoset, wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Select action", TRUE), m_infoset(p_infoset)
+dialogActionSelect::dialogActionSelect(Infoset *p_infoset,
+				       const gText &p_caption,
+				       const gText &p_label,
+				       wxWindow *p_parent)
+  : wxDialogBox(p_parent, p_caption, TRUE), m_infoset(p_infoset)
 {
   SetAutoLayout(TRUE);
 
   SetLabelPosition(wxVERTICAL);
-  m_actionList = new wxListBox(this, 0, "Actions");
+  m_actionList = new wxListBox(this, 0, p_label);
   for (int act = 1; act <= p_infoset->NumActions(); act++) {
     m_actionList->Append(ToText(act) + ": " +
 			 p_infoset->Actions()[act]->GetName());

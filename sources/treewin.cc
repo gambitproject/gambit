@@ -1969,7 +1969,8 @@ void TreeWindow::action_label(void)
 void TreeWindow::action_insert(void)
 {
   Infoset *infoset = Cursor()->GetInfoset();
-  dialogActionSelect dialog(infoset, pframe);
+  dialogActionSelect dialog(infoset, "Insert action",
+			    "Insert new action before", pframe);
 
   if (dialog.Completed() == wxOK) {
     try {
@@ -2004,7 +2005,8 @@ void TreeWindow::action_append(void)
 void TreeWindow::action_delete(void)
 {
   Infoset *infoset = Cursor()->GetInfoset();
-  dialogActionSelect dialog(infoset, pframe);
+  dialogActionSelect dialog(infoset, "Delete Action", "Action to delete",
+			    pframe);
 
   if (dialog.Completed() == wxOK) {
     try {

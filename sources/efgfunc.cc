@@ -338,18 +338,17 @@ static Portion *GSM_ElimDom_Efg(Portion **param)
 {
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
   bool strong = ((BoolPortion *) param[1])->Value();
+  bool conditional = ((BoolPortion *) param[2])->Value();
   gWatch watch;
-
-  // The following sets conditional = false.  Could be more general.
 
   gBlock<int> players(S->Game().NumPlayers());
   for (int i = 1; i <= players.Length(); i++)   players[i] = i;
 
-  EFSupport *T = S->Undominated(strong, false, players,
-				((OutputPortion *) param[3])->Value(),
+  EFSupport *T = S->Undominated(strong, conditional, players,
+				((OutputPortion *) param[4])->Value(),
 				gstatus);
 
-  ((NumberPortion *) param[2])->SetValue(watch.Elapsed());
+  ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
   
   Portion *por = (T) ? new EfSupportPortion(T) : new EfSupportPortion(new EFSupport(*S));
 
@@ -1412,16 +1411,18 @@ void Init_efgfunc(GSM *gsm)
 
   // Adding ElimDom
   FuncObj = new gclFunction("ElimDom", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_ElimDom_Efg, porEFSUPPORT, 5));
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_ElimDom_Efg, porEFSUPPORT, 6));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porEFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("strong", porBOOLEAN,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(0, 2, gclParameter("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 2, gclParameter("conditional", porBOOLEAN,
+					    new BoolPortion(false)));
+  FuncObj->SetParamInfo(0, 3, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 3, gclParameter("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 4, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(0, 4, gclParameter("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 5, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
