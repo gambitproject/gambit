@@ -176,7 +176,6 @@ void Qre(const Nfg &N, NFQreParams &params,
 {
   NFQreFunc F(N, start);
 
-  int i;
   int iter = 0;
   double Lambda, value = 0.0;
   

@@ -243,7 +243,7 @@ NFOutcome *dialogNfgOutcomeSelect::GetOutcome(void)
 
 dialogStrategies::dialogStrategies(Nfg &p_nfg, wxFrame *p_parent)
   : wxDialogBox(p_parent, "Strategy Information", TRUE), m_nfg(p_nfg),
-    m_prevStrategy(0), m_gameChanged(false)
+    m_gameChanged(false), m_prevStrategy(0)
 {
   SetLabelPosition(wxVERTICAL);
   m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player",

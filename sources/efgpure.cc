@@ -45,7 +45,6 @@ static void efgEnumPureSolve(const EFSupport &p_support,
 	   flag && iset <= p_support.Game().Players()[pl]->NumInfosets();
 	   iset++)  {
       	if (probs(pl, iset) == gNumber(0))   continue;
-	Infoset *s = p_support.Game().Players()[pl]->Infosets()[iset];
        	for (int act = 1; act <= p_support.NumActions(pl, iset); act++)  {
 	  eiter.Next(pl, iset);
 	  if (eiter.Payoff(pl) > current)  {

@@ -819,7 +819,7 @@ gArray<EFPlayer *> dialogInfosetReveal::GetPlayers(void) const
 
 dialogInfosets::dialogInfosets(Efg &p_efg, wxFrame *p_parent)
   : wxDialogBox(p_parent, "Infoset Information", TRUE), m_efg(p_efg),
-    m_prevInfoset(0), m_gameChanged(false)
+    m_gameChanged(false), m_prevInfoset(0)
 {
   SetLabelPosition(wxVERTICAL);
   m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player",
