@@ -1,7 +1,7 @@
 //
 // FILE: seqform.imp -- Sequence Form module
 //
-// @(#)seqform.imp	2.9.1.1 7/15/97
+// $Id$ 
 //
 
 
@@ -294,10 +294,12 @@ template <class T> void SeqFormModule<T>
 //  gout << " prob = " << prob;
   int i,snew;
   if(n->GetOutcome()) {
+    gArray<gNumber> values(EF.Parameters()->Dmnsn());
+    for (int j = 1; j <= values.Length(); values[j++] = gNumber(0));
     (*A)(s1,ns1+s2) = (*A)(s1,ns1+s2) +
-       prob*(T) ((Efg &) EF).Payoff(n->GetOutcome(), 1) - maxpay;
+       prob*(T) EF.Payoff(n->GetOutcome(), 1).Evaluate(values) - maxpay;
     (*A)(ns1+s2,s1) = (*A)(ns1+s2,s1) +
-       prob*(T) ((Efg &) EF).Payoff(n->GetOutcome(), 2) - maxpay;
+       prob*(T) EF.Payoff(n->GetOutcome(), 2).Evaluate(values) - maxpay;
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {

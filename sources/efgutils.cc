@@ -222,6 +222,7 @@ void RandomEfg(Efg &efg)
 {
   for (int i = 1; i <= efg.NumPlayers(); i++)
     for (int j = 1; j <= efg.NumOutcomes(); j++)
-      efg.SetPayoff(efg.outcomes[j], i, Uniform());
+      efg.SetPayoff(efg.outcomes[j], i,
+                    gPoly<gNumber>(efg.Parameters(), gNumber(Uniform()), efg.ParamOrder()));
 }
 

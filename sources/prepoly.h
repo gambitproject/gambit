@@ -2,7 +2,7 @@
 // FILE: prepoly.h  --  Declaration of classes supporting 
 //                      multivariate polynomials.
 //
-// @(#)prepoly.h	2.1 3/27/97
+// $Id$
 //
 
 #ifndef PREPOLY_H
@@ -160,7 +160,7 @@ pointers to functions.
 // THE FOLLOWING FUNCTIONS SHOULD BE VIEWED AS PRIVATE MEMBERS OF 
 // class term_order  I WAS BAFFLED AS TO HOW TO HAVE A MEMBER THAT
 // IS A POINTER-TO-OTHER-MEMBER-FUNCTION
-typedef  const bool (*ORD_PTR)(const exp_vect &, const exp_vect &);
+typedef  bool (*ORD_PTR)(const exp_vect &, const exp_vect &);
   bool lex(const exp_vect &, const exp_vect &);
   bool reverselex(const exp_vect &, const exp_vect &);
   bool deglex(const exp_vect &, const exp_vect &);

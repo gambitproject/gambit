@@ -1,7 +1,7 @@
 //
 // FILE: nliap.cc -- Implementation of Liapunov algorithm for normal forms
 //
-// $Id$
+// @(#)nliap.cc	2.3 19 Jul 1997
 //
 
 #include "nliap.h"

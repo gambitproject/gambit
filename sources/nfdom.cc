@@ -19,11 +19,13 @@ bool Dominates(const Nfg &N,
   A.Set(pl, a);
   B.Freeze(pl);
   B.Set(pl, b);
-  
+
+  gArray<gNumber> values(N.Parameters()->Dmnsn());
+  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
   if (strong)  {
     do  {
-      gRational ap = N.Payoff(A.GetOutcome(), pl);
-      gRational bp = N.Payoff(B.GetOutcome(), pl);
+      gNumber ap = N.Payoff(A.GetOutcome(), pl).Evaluate(values);
+      gNumber bp = N.Payoff(B.GetOutcome(), pl).Evaluate(values);
       if (ap <= bp)  return false;
       A.NextContingency();
     } while (B.NextContingency());
@@ -34,8 +36,8 @@ bool Dominates(const Nfg &N,
   bool equal = true;
   
   do   {
-    gRational ap = N.Payoff(A.GetOutcome(), pl);
-    gRational bp = N.Payoff(B.GetOutcome(), pl);
+    gNumber ap = N.Payoff(A.GetOutcome(), pl).Evaluate(values);
+    gNumber bp = N.Payoff(B.GetOutcome(), pl).Evaluate(values);
     if (ap < bp)   return false;
     else if (ap > bp)  equal = false;
     A.NextContingency();

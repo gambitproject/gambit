@@ -309,7 +309,7 @@ void EfgFile::SetOutcome(EFOutcome *c,
 			 const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
-    E->SetPayoff(c, i, p[i]);
+    E->SetPayoff(c, i, gPoly<gNumber>(E->Parameters(), p[i], E->ParamOrder()));
 }
 
 void EfgFile::SetActionProbs(Infoset *s,
@@ -331,7 +331,7 @@ bool EfgFile::CheckOutcome(EFOutcome *c,
 			   const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
-    if (E->Payoff(c, i) != p[i])   return false;
+    if (E->Payoff(c, i) != gPoly<gNumber>(E->Parameters(), p[i], E->ParamOrder()))   return false;
   return true;
 }
 

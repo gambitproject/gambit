@@ -30,6 +30,7 @@ friend void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
     EFSupport support;
     gPVector<T> *chanceprobs;
     gRectArray<T> *payoffs;
+    gArray<gNumber> paramvalues;
 
 
     void Payoff(Node *n, T prob, int pl, T &value) const;
@@ -46,12 +47,14 @@ friend void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
     BehavProfile(const Efg &);
     BehavProfile(const Efg &, const gDPVector<T> &);
     BehavProfile(const Efg &, const EFSupport &);
+    BehavProfile(const Efg &, const EFSupport &, const gArray<gNumber> &paramvals);
     BehavProfile(const BehavProfile<T> &);
     virtual ~BehavProfile();
 
     BehavProfile<T> &operator=(const BehavProfile<T> &);
 
     Efg &Game(void) const   { return const_cast< Efg& >( *E ); }
+    const gArray<gNumber> &ParameterValues(void) const  { return paramvalues; }
 
     const T &GetValue(Infoset *s, int act) const;
 

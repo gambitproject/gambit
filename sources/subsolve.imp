@@ -1,7 +1,7 @@
 //
 // FILE: subsolve.imp -- Implementation of solve-by-subgame algorithms
 //
-// $Id$
+// $Id$ 
 //
 
 #include "subsolve.h"
@@ -177,14 +177,18 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
       
       gVector<T> subval(foo.NumPlayers());
       for (i = 1; i <= foo.NumPlayers(); i++)  {
-	subval[i] = sol[solno].Payoff(i);
-	if (n->GetOutcome())
-	  subval[i] += (T) ((Efg &) efg).Payoff(n->GetOutcome(), i);
+	      subval[i] = sol[solno].Payoff(i);
+	      if (n->GetOutcome())  {
+          gArray<gNumber> values(efg.Parameters()->Dmnsn());
+          for (int j = 1; j <= values.Length(); values[j++] = gNumber(0));
+	        subval[i] += (T) efg.Payoff(n->GetOutcome(), i).Evaluate(values);
+        }
       }
 
       EFOutcome *ov = efg.NewOutcome();
       for (i = 1; i <= efg.NumPlayers(); i++)
-	efg.SetPayoff(ov, i, subval[i]);
+	      efg.SetPayoff(ov, i, gPoly<gNumber>(efg.Parameters(), gNumber(subval[i]),
+                                            efg.ParamOrder()));
  
       values.Append(ov);
     }

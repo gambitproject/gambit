@@ -1,7 +1,7 @@
 //
 // FILE: efgfunc.cc -- Extensive form editing builtins
 //
-// $Id$
+// @(#)efgfunc.cc	2.17 20 Jul 1997
 //
 
 
@@ -724,7 +724,9 @@ static Portion *GSM_Payoff(Portion **param)
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
   Efg *efg = player->Game();
 
-  return new NumberPortion(efg->Payoff(c, player->GetNumber()));
+  gArray<gNumber> values(efg->Parameters()->Dmnsn());
+  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+  return new NumberPortion(efg->Payoff(c, player->GetNumber()).Evaluate(values));
 }
 
 //----------
@@ -955,12 +957,13 @@ static Portion *GSM_SetPayoff(Portion **param)
   EFOutcome *c = ((EfOutcomePortion *) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
   Efg *efg = player->Game();
-  double value = ((NumberPortion *) param[2])->Value();
+  gNumber value = ((NumberPortion *) param[2])->Value();
 
-  efg->SetPayoff(c, player->GetNumber(), value);
+  efg->SetPayoff(c, player->GetNumber(),
+                 gPoly<gNumber>(efg->Parameters(), value, efg->ParamOrder()));
 
   _gsm->InvalidateGameProfile(c->BelongsTo(), true);
-  
+
   return param[0]->ValCopy();
 }
 

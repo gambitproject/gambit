@@ -18,38 +18,58 @@
 
 template <class T> MixedProfile<T>::MixedProfile(const Nfg &NF)
   : gPVector<T>(NF.NumStrats()), N(&NF), support(NF),
-    payoffs(new gRectArray<T>(NF.NumOutcomes(), NF.NumPlayers()))
+    payoffs(new gRectArray<T>(NF.NumOutcomes(), NF.NumPlayers())),
+    paramvalues(NF.Parameters()->Dmnsn())
 {
   Centroid();
+  for (int i = 1; i <= paramvalues.Length(); paramvalues[i++] = gNumber(0));
   for (int outc = 1; outc <= N->NumOutcomes(); outc++)
     for (int pl = 1; pl <= N->NumPlayers(); pl++)
-      (*payoffs)(outc, pl) = N->Payoff(N->Outcomes()[outc], pl);
+      (*payoffs)(outc, pl) = N->Payoff(N->Outcomes()[outc], pl).Evaluate(paramvalues);
 }
 
 template <class T> MixedProfile<T>::MixedProfile(const Nfg &NF,
 						 const NFSupport &s)
   : gPVector<T>(s.NumStrats()), N(&NF), support(s),
-    payoffs(new gRectArray<T>(NF.NumOutcomes(), NF.NumPlayers()))
+    payoffs(new gRectArray<T>(NF.NumOutcomes(), NF.NumPlayers())),
+    paramvalues(NF.Parameters()->Dmnsn())
 {
   Centroid();
+  for (int i = 1; i <= paramvalues.Length(); paramvalues[i++] = gNumber(0));
   for (int outc = 1; outc <= N->NumOutcomes(); outc++)
     for (int pl = 1; pl <= N->NumPlayers(); pl++)
-      (*payoffs)(outc, pl) = N->Payoff(N->Outcomes()[outc], pl);
+      (*payoffs)(outc, pl) = N->Payoff(N->Outcomes()[outc], pl).Evaluate(paramvalues);
+}
+
+template <class T> MixedProfile<T>::MixedProfile(const Nfg &NF,
+						 const NFSupport &s, const gArray<gNumber> &params)
+  : gPVector<T>(s.NumStrats()), N(&NF), support(s),
+    payoffs(new gRectArray<T>(NF.NumOutcomes(), NF.NumPlayers())),
+    paramvalues(params)
+{
+  assert(paramvalues.Length() == NF.Parameters()->Dmnsn());
+  Centroid();
+  for (int i = 1; i <= paramvalues.Length(); paramvalues[i++] = gNumber(0));
+  for (int outc = 1; outc <= N->NumOutcomes(); outc++)
+    for (int pl = 1; pl <= N->NumPlayers(); pl++)
+      (*payoffs)(outc, pl) = N->Payoff(N->Outcomes()[outc], pl).Evaluate(paramvalues);
 }
 
 template <class T> MixedProfile<T>::MixedProfile(const Nfg &NF,
 						 const gPVector<T> &profile)
   : gPVector<T>(profile), N(&NF), support(NF),
-    payoffs(new gRectArray<T>(NF.NumOutcomes(), NF.NumPlayers()))
+    payoffs(new gRectArray<T>(NF.NumOutcomes(), NF.NumPlayers())),
+    paramvalues(NF.Parameters()->Dmnsn())
 {
+  for (int i = 1; i <= paramvalues.Length(); paramvalues[i++] = gNumber(0));
   for (int outc = 1; outc <= N->NumOutcomes(); outc++)
     for (int pl = 1; pl <= N->NumPlayers(); pl++)
-      (*payoffs)(outc, pl) = N->Payoff(N->Outcomes()[outc], pl);
+      (*payoffs)(outc, pl) = N->Payoff(N->Outcomes()[outc], pl).Evaluate(paramvalues);
 }
 
 template <class T> MixedProfile<T>::MixedProfile(const MixedProfile<T> &p)
   : gPVector<T>(p), N(p.N), support(p.support),
-    payoffs(new gRectArray<T>(*p.payoffs))
+    payoffs(new gRectArray<T>(*p.payoffs)), paramvalues(p.paramvalues)
 { }
 
 template <class T> MixedProfile<T>::~MixedProfile()

@@ -25,11 +25,14 @@ int Nfg::Product(const gArray<int> &dim)
 }
   
 Nfg::Nfg(const gArray<int> &dim)
-  : dimensions(dim), players(dim.Length()), results(Product(dim))
+  : dimensions(dim), players(dim.Length()), results(Product(dim)),
+    parameters(new gSpace)
 {
+  ORD_PTR ord = &lex;
+  paramorder = new term_order(parameters, ord);
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new NFPlayer(pl, this, dim[pl]);
-	 players[pl]->name = ToString(pl);
+	  players[pl]->name = ToString(pl);
     for (int st = 1; st <= players[pl]->NumStrats(); st++)
       players[pl]->strategies[st]->name = ToString(st);
   }
@@ -42,7 +45,8 @@ Nfg::Nfg(const gArray<int> &dim)
 Nfg::Nfg(const Nfg &b)
   : title(b.title), dimensions(b.dimensions),
     players(b.players.Length()), outcomes(b.outcomes.Length()),
-    results(b.results.Length())
+    results(b.results.Length()),
+    parameters(b.parameters), paramorder(b.paramorder)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new NFPlayer(pl, this, dimensions[pl]);
@@ -232,17 +236,17 @@ NFOutcome *Nfg::GetOutcome(const StrategyProfile &p) const
 }
 
 void Nfg::SetPayoff(NFOutcome *outcome,
-					            int pl, const gNumber &value)
+                    int pl, const gPoly<gNumber> &value)
 {
   if (outcome)   outcome->payoffs[pl] = value;
 }
 
-gNumber Nfg::Payoff(NFOutcome *outcome, int pl) const
+gPoly<gNumber> Nfg::Payoff(NFOutcome *outcome, int pl) const
 {
   if (outcome)
 	  return outcome->payoffs[pl];
   else
-	  return (gNumber) 0;
+	  return gPoly<gNumber>(Parameters(), gNumber(0), ParamOrder());
 }
 
 // ---------------------------------------

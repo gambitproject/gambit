@@ -9,6 +9,7 @@
 #include "double.h"
 #include "garray.imp"
 #include "gblock.imp"
+#include "gnumber.h"
 
 //TEMPLATE class gArray<gDouble>;
 //TEMPLATE class gBlock<gDouble>;
@@ -21,6 +22,9 @@ template gOutput& operator << (gOutput& output, const gMono<double>& x);
 
 template class gMono<gRational>;
 template gOutput& operator << (gOutput& output, const gMono<gRational>& x);
+
+template class gMono<gNumber>;
+template gOutput& operator << (gOutput& output, const gMono<gNumber>& x);
 
 #ifdef GDOUBLE
 template class gMono<gDouble>;
@@ -35,6 +39,9 @@ template class gNode< gMono<double> >;
 
 template class gList< gMono<gRational> >;
 template class gNode< gMono<gRational> >;
+
+template class gList< gMono<gNumber> >;
+template class gNode< gMono<gNumber> >;
 
 #ifdef GDOUBLE
 template class gList< gMono<gDouble> >;

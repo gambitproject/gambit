@@ -216,7 +216,8 @@ void NfgFile::SetPayoff(int cont, int pl,
 {
   if (pl == 1)
     Nrat->SetOutcome(cont, Nrat->NewOutcome());
-  Nrat->SetPayoff(Nrat->GetOutcome(cont), pl, value);
+  Nrat->SetPayoff(Nrat->GetOutcome(cont), pl, 
+		  gPoly<gNumber>(Nrat->Parameters(), value, Nrat->ParamOrder()));
 }
 
 

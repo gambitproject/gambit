@@ -195,6 +195,7 @@ template <class T> gPoly<T> operator*(const T val, const gPoly<T> &poly);
 template <class T> gPoly<T> operator*(const gPoly<T> &poly, const T val);
 #endif   // MINI_POLY
 
+template <class T> gOutput &operator<<(gOutput &, const gPoly<T> &);
 
 #endif //# GPOLY_H
 

@@ -180,8 +180,10 @@ template <class T> void CSSeqFormModule<T>
   if(n->GetOutcome()) {
 //    (*A)(s1,s2) = (*A)(s1,s2) -
 //       prob*(((OutcomeVector<T> &) *n->GetOutcome())[1]-minpay);
+    gArray<gNumber> values(EF.Parameters()->Dmnsn());
+    for (int j = 1; j <= values.Length(); values[j++] = gNumber(0));
     (*A)(s1,s2) = (*A)(s1,s2) +
-       prob * (T) ((Efg &) EF).Payoff(n->GetOutcome(), 1) - minpay;
+       prob * (T) EF.Payoff(n->GetOutcome(), 1).Evaluate(values) - minpay;
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {

@@ -1,7 +1,7 @@
 //
 // FILE: efg.cc -- Implementation of extensive form data type
 //
-// @(#)efg.cc	2.13 23 Jul 1997
+// $Id$
 //
 
 class Node;
@@ -213,8 +213,11 @@ int Efg::_NumObj = 0;
 
 Efg::Efg(void)
   : sortisets(true), title("UNTITLED"), chance(new EFPlayer(this, 0)),
+    parameters(new gSpace),
     lexicon(0)
 {
+  ORD_PTR ord = &lex;
+  paramorder = new term_order(parameters, ord);
   root = new Node(this, 0);
 #ifdef MEMCHECK
   _NumObj++;
@@ -225,7 +228,9 @@ Efg::Efg(void)
 Efg::Efg(const Efg &E, Node *n /* = 0 */)
   : sortisets(false), title(E.title),
     players(E.players.Length()), outcomes(E.outcomes.Length()),
-    chance(new EFPlayer(this, 0)), lexicon(0)
+    chance(new EFPlayer(this, 0)),
+    parameters(E.parameters), paramorder(E.paramorder),
+    lexicon(0)
 {
   for (int i = 1; i <= players.Length(); i++)  {
     (players[i] = new EFPlayer(this, i))->name = E.players[i]->name;
@@ -553,7 +558,8 @@ EFPlayer *Efg::NewPlayer(void)
   players.Append(ret);
 
   for (int outc = 1; outc <= outcomes.Length();
-       outcomes[outc++]->payoffs.Append(0));
+       outcomes[outc++]->payoffs.Append(gPoly<gNumber>(Parameters(), gNumber(0),
+                                                       ParamOrder())));
   DeleteLexicon();
   return ret;
 }
@@ -575,22 +581,19 @@ void Efg::DeleteOutcome(EFOutcome *outc)
   DeleteLexicon();
 }
 
-void Efg::SetPayoff(EFOutcome *outc, int pl, const gNumber &value)
+void Efg::SetPayoff(EFOutcome *outc, int pl, const gPoly<gNumber> &value)
 {
   outc->payoffs[pl] = value;
 }
 
-gNumber Efg::Payoff(EFOutcome *outc, int pl) const
+gPoly<gNumber> Efg::Payoff(EFOutcome *outc, int pl) const
 {
   return outc->payoffs[pl];
 }
 
-gVector<gNumber> Efg::Payoff(EFOutcome *outc) const
+gPolyArray<gNumber> Efg::Payoff(EFOutcome *outc) const
 {
-  gVector<gNumber> ret(NumPlayers());
-  for (int pl = 1; pl <= NumPlayers(); pl++)
-    ret[pl] = outc->payoffs[pl];
-  return ret;
+  return outc->payoffs;
 }
 
 bool Efg::IsConstSum(void) const
@@ -600,14 +603,17 @@ bool Efg::IsConstSum(void) const
 
   if (outcomes.Length() == 0)  return true;
 
+  gArray<gNumber> values(Parameters()->Dmnsn());
+  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+
   for (pl = 1; pl <= players.Length(); pl++)
-    cvalue += outcomes[1]->payoffs[pl];
+    cvalue += outcomes[1]->payoffs[pl].Evaluate(values);
 
   for (index = 2; index <= outcomes.Length(); index++)  {
     gNumber thisvalue(0);
 
     for (pl = 1; pl <= players.Length(); pl++)
-      thisvalue += outcomes[index]->payoffs[pl];
+      thisvalue += outcomes[index]->payoffs[pl].Evaluate(values);
 
     if (thisvalue > cvalue || thisvalue < cvalue)
       return false;
@@ -623,15 +629,18 @@ gNumber Efg::MinPayoff(int pl) const
 
   if (NumOutcomes() == 0)  return (gNumber) 0;
 
+  gArray<gNumber> values(Parameters()->Dmnsn());
+  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+
   if(pl) { p1=p2=pl;}
   else {p1=1;p2=players.Length();}
 
-  minpay = outcomes[1]->payoffs[p1];
+  minpay = outcomes[1]->payoffs[p1].Evaluate(values);
 
   for (index = 1; index <= outcomes.Length(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (outcomes[index]->payoffs[p] < minpay)
-	minpay = outcomes[index]->payoffs[p];
+      if (outcomes[index]->payoffs[p].Evaluate(values) < minpay)
+	minpay = outcomes[index]->payoffs[p].Evaluate(values);
   }
   return minpay;
 }
@@ -643,15 +652,18 @@ gNumber Efg::MaxPayoff(int pl) const
 
   if (NumOutcomes() == 0)  return (gNumber) 0;
 
+  gArray<gNumber> values(Parameters()->Dmnsn());
+  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+
   if(pl) { p1=p2=pl;}
   else {p1=1;p2=players.Length();}
 
-  maxpay = outcomes[1]->payoffs[p1];
+  maxpay = outcomes[1]->payoffs[p1].Evaluate(values);
 
   for (index = 1; index <= outcomes.Length(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (outcomes[index]->payoffs[p] > maxpay)
-	maxpay = outcomes[index]->payoffs[p];
+      if (outcomes[index]->payoffs[p].Evaluate(values) > maxpay)
+	maxpay = outcomes[index]->payoffs[p].Evaluate(values);
   }
   return maxpay;
 }
@@ -1265,10 +1277,14 @@ gPVector<int> Efg::NumMembers(void) const
 void Efg::Payoff(Node *n, gNumber prob, const gPVector<int> &profile,
 			gVector<gNumber> &payoff) const
 {
-  if (n->outcome)
+  if (n->outcome)  {
+    gArray<gNumber> values(Parameters()->Dmnsn());
+    for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+
     for (int i = 1; i <= players.Length(); i++)
-      payoff[i] += prob * n->outcome->payoffs[i];
-  
+      payoff[i] += prob * n->outcome->payoffs[i].Evaluate(values);
+  }
+
   if (n->infoset && n->infoset->player->IsChance())
     for (int i = 1; i <= n->children.Length(); i++)
       Payoff(n->children[i],
@@ -1310,9 +1326,13 @@ void Efg::InfosetProbs(const gPVector<int> &profile,
 void Efg::Payoff(Node *n, gNumber prob, const gArray<gArray<int> *> &profile,
 		    gVector<gNumber> &payoff) const
 {
-  if (n->outcome)
+  if (n->outcome)   {
+    gArray<gNumber> values(Parameters()->Dmnsn());
+    for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+
     for (int i = 1; i <= players.Length(); i++)
-      payoff[i] += prob * n->outcome->payoffs[i];
+      payoff[i] += prob * n->outcome->payoffs[i].Evaluate(values);
+  }
   
   if (n->infoset && n->infoset->player->IsChance())
     for (int i = 1; i <= n->children.Length(); i++)

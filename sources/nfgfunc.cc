@@ -1,7 +1,7 @@
 //
 // FILE: nfgfunc.cc -- Normal form command language builtins
 //
-// $Id$
+// @(#)nfgfunc.cc	2.23 19 Jul 1997
 //
 
 
@@ -471,8 +471,10 @@ static Portion* GSM_Payoff_NFOutcome(Portion** param)
   Nfg *nfg = ((NfgPortion *) param[0])->Value();
   NFOutcome *outcome = ((NfOutcomePortion *) param[1])->Value();
   NFPlayer *player = ((NfPlayerPortion *) param[2])->Value();
-  
-  return new NumberPortion(nfg->Payoff(outcome, player->GetNumber()));
+
+  gArray<gNumber> values(nfg->Parameters()->Dmnsn());
+  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+  return new NumberPortion(nfg->Payoff(outcome, player->GetNumber()).Evaluate(values));
 }
 
 
@@ -626,8 +628,9 @@ static Portion* GSM_SetPayoff_NFOutcome(Portion** param)
   NFOutcome *outcome = ((NfOutcomePortion *) param[1])->Value();
   NFPlayer *player = ((NfPlayerPortion *) param[2])->Value();
   double value = ((NumberPortion *) param[3])->Value();
-  
-  nfg->SetPayoff(outcome, player->GetNumber(), value);
+
+  nfg->SetPayoff(outcome, player->GetNumber(),
+                 gPoly<gNumber>(nfg->Parameters(), gNumber(value), nfg->ParamOrder()));
 
   _gsm->InvalidateGameProfile((Nfg *) nfg, false);
  

@@ -7,6 +7,7 @@
 #include "gpoly.imp"
 #include "double.h"
 #include "rational.h"
+#include "gnumber.h"
 
 template class gPoly<gRational>;
 #ifndef MINI_POLY
@@ -15,6 +16,14 @@ template gPoly<gRational> operator*(const gPoly<gRational> poly, const gRational
 #endif   // MINI_POLY
 template gOutput &operator<<(gOutput &f, const gPoly<gRational> &y);
 template gString &operator<<(gString &, const gPoly<gRational> &);
+
+template class gPoly<gNumber>;
+#ifndef MINI_POLY
+template gPoly<gNumber> operator*(const gNumber val, const gPoly<gNumber> poly);
+template gPoly<gNumber> operator*(const gPoly<gNumber> poly, const gNumber val);
+#endif   // MINI_POLY
+template gOutput &operator<<(gOutput &f, const gPoly<gNumber> &y);
+template gString &operator<<(gString &, const gPoly<gNumber> &);
 
 template class gPoly<double>;
 #ifndef MINI_POLY
@@ -105,6 +114,22 @@ gRational gPoly<gRational>::String_Coeff(gRational nega)
   }
   if (Coeff == "") return (nega);
   else return (nega * FromString(Coeff,rat));  
+}
+
+
+gNumber gPoly<gNumber>::String_Coeff(gNumber nega)
+{
+  gNumber num;
+  gString Coeff = "";
+  while (charc >= '0' && charc <= '9' || charc == '/' || charc == '.'){
+    Coeff += charc;
+    charnum++;
+    GetChar();
+  }
+
+  double dbl = (double) num;
+  if (Coeff == "") return (nega);
+  else return (nega * gNumber(FromString(Coeff, dbl)));  
 }
 
 

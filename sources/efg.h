@@ -15,6 +15,7 @@
 #include "grblock.h"
 #include "gnumber.h"
 
+#include "gpoly.h"
 #include "gpolyctr.h"
 
 class EFOutcome;
@@ -47,6 +48,8 @@ protected:
     gBlock<EFOutcome *> outcomes;
     Node *root;
     EFPlayer *chance;
+    gSpace *parameters;
+    term_order *paramorder;
 #ifndef EFG_ONLY
     mutable Nfg *afg;
 #endif  EFG_ONLY
@@ -107,6 +110,8 @@ protected:
     bool IsConstSum(void) const;
     gNumber MinPayoff(int pl = 0) const;
     gNumber MaxPayoff(int pl = 0) const;
+    gSpace *Parameters(void) const   { return parameters; }
+    term_order *ParamOrder(void) const   { return paramorder; }
 
     Node *RootNode(void) const;
     bool IsSuccessor(const Node *n, const Node *from) const;
@@ -154,9 +159,9 @@ protected:
     gNumber GetChanceProb(Infoset *, int) const;
     gArray<gNumber> GetChanceProbs(Infoset *) const;
 
-    void SetPayoff(EFOutcome *, int pl, const gNumber &value);
-    gNumber Payoff(EFOutcome *, int pl) const;
-    gVector<gNumber> Payoff(EFOutcome *) const;
+    void SetPayoff(EFOutcome *, int pl, const gPoly<gNumber> &value);
+    gPoly<gNumber> Payoff(EFOutcome *, int pl) const;
+    gPolyArray<gNumber> Payoff(EFOutcome *) const;
 
 
     // Unmarks all subgames in the subtree rooted at n

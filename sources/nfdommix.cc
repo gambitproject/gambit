@@ -1,7 +1,7 @@
 //
 // FILE: nfdommix.cc -- Elimination of dominated strategies in nfg
 //
-// $Id$
+// @(#)nfdommix.cc	2.9 19 Jul 1997
 //
 
 #include "gambitio.h"
@@ -24,6 +24,9 @@ bool ComputeMixedDominated(const Nfg &nfg,
   double d1,d2;
   d1 = (double)(pl-1)/(double)S.Game().NumPlayers();
   d2 = (double)pl/(double)S.Game().NumPlayers();
+
+  gArray<gNumber> values(S.Game().Parameters()->Dmnsn());
+  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
 
   gArray<bool> dom(S.NumStrats(pl));
   gVector<gRational> dominator(S.NumStrats(pl));
@@ -54,10 +57,10 @@ bool ComputeMixedDominated(const Nfg &nfg,
     s.First();
     for (n = 1; n <= contingencies; n++) {
       s.Set(pl, 1);
-      B[n] = -nfg.Payoff(s.GetOutcome(), pl);
+      B[n] = -nfg.Payoff(s.GetOutcome(), pl).Evaluate(values);
       for (k = 2; k <= strats; k++) {
 	s.Set(pl, k);
-	A(n, k - 1) = -nfg.Payoff(s.GetOutcome(), pl);
+	A(n, k - 1) = -nfg.Payoff(s.GetOutcome(), pl).Evaluate(values);
       }
       A(n, strats) = (gRational) 1;
       s.NextContingency();
@@ -130,11 +133,11 @@ bool ComputeMixedDominated(const Nfg &nfg,
     s.First();
     for(n=1;n<=contingencies;n++) {
       s.Set(pl, 1);
-      B[n]=-nfg.Payoff(s.GetOutcome(), pl);
+      B[n]=-nfg.Payoff(s.GetOutcome(), pl).Evaluate(values);
       C0 -= B[n];
       for(k=2;k<=strats;k++) {
 	s.Set(pl,k);
-	A(n,k-1)=-nfg.Payoff(s.GetOutcome(), pl);
+	A(n,k-1)=-nfg.Payoff(s.GetOutcome(), pl).Evaluate(values);
 	C[k-1]-=A(n,k-1);
       }
       s.NextContingency();

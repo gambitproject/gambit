@@ -1,7 +1,7 @@
 //
 // FILE: mixed.h -- Mixed strategy profile classes
 //
-// @(#)mixed.h	2.4 19 Jul 1997
+// $Id$
 //
 
 #ifndef MIXED_H
@@ -21,6 +21,7 @@ template <class T> class MixedProfile : public gPVector<T>  {
     const Nfg *N;
     NFSupport support;
     gRectArray<T> *payoffs;
+    gArray<gNumber> paramvalues;
 
     // Private Payoff functions
 
@@ -35,6 +36,7 @@ template <class T> class MixedProfile : public gPVector<T>  {
   public:
     MixedProfile(const Nfg &);
     MixedProfile(const Nfg &, const NFSupport &);
+    MixedProfile(const Nfg &, const NFSupport &, const gArray<gNumber> &params);
     MixedProfile(const Nfg &, const gPVector<T> &);
     MixedProfile(const MixedProfile<T> &);
     virtual ~MixedProfile();
@@ -42,6 +44,7 @@ template <class T> class MixedProfile : public gPVector<T>  {
     MixedProfile<T> &operator=(const MixedProfile<T> &);
 
     Nfg &Game(void) const  { return const_cast<Nfg &>(*N); }
+    const gArray<gNumber> &ParameterValues(void) const  { return paramvalues; }
 
     T LiapValue(void) const;
     void Regret(gPVector<T> &value) const;

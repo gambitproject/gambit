@@ -11,6 +11,8 @@
 #include "gstring.h"
 #include "grblock.h"
 #include "gnumber.h"
+#include "gpoly.h"
+#include "gpolyctr.h"
 
 class NFOutcome;
 
@@ -39,6 +41,9 @@ protected:
   gBlock<NFOutcome *> outcomes;
 
   gArray<NFOutcome *> results;
+
+  gSpace *parameters;
+  term_order *paramorder;
 #ifndef NFG_ONLY
   const Efg *efg;
 #endif  // NFG_ONLY
@@ -59,6 +64,9 @@ public:
   // GENERAL DATA ACCESS AND MANIPULATION  
   void SetTitle(const gString &s);
   const gString &GetTitle(void) const;
+
+  gSpace *Parameters(void) const    { return parameters; }
+  term_order *ParamOrder(void) const   { return paramorder; }
 
   void WriteNfgFile(gOutput &) const;
 
@@ -87,8 +95,8 @@ public:
   void SetOutcome(int index, NFOutcome *outcome)  { results[index] = outcome; }
   NFOutcome *GetOutcome(int index) const   { return results[index]; }
 
-  void SetPayoff(NFOutcome *, int pl, const gNumber &value);
-  gNumber Payoff(NFOutcome *, int pl) const;
+  void SetPayoff(NFOutcome *, int pl, const gPoly<gNumber> &value);
+  gPoly<gNumber> Payoff(NFOutcome *, int pl) const;
 
     // defined in nfgutils.cc
   friend void RandomNfg(Nfg &);
@@ -109,9 +117,10 @@ class NFOutcome   {
     int number;
     Nfg *nfg;
     gString name;
-    gArray<gNumber> payoffs;
+    gPolyArray<gNumber> payoffs;
 
-    NFOutcome(int n, Nfg *N) : number(n), nfg(N), payoffs(N->NumPlayers())  { }
+    NFOutcome(int n, Nfg *N)
+      : number(n), nfg(N), payoffs(N->Parameters(), N->ParamOrder(), N->NumPlayers())  { }
     NFOutcome(int n, const NFOutcome &c)
       : number(n), nfg(c.nfg),name(c.name), payoffs(c.payoffs) { }
     ~NFOutcome() { }

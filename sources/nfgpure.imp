@@ -19,16 +19,18 @@ template <class T> int FindPureNash(const Nfg &N,
 {
   int index;
   NfgContIter citer(S);
-  
+
+  gArray<gNumber> values(N.Parameters()->Dmnsn());
+  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
   do  {
     int flag = 1;
     NfgIter niter(citer);
     
     for (int pl = 1; flag && pl <= N.NumPlayers(); pl++)  {
-      T current = N.Payoff(citer.GetOutcome(), pl);
+      T current = N.Payoff(citer.GetOutcome(), pl).Evaluate(values);
       for (int i = 1; i <= S.NumStrats(pl); i++)  {
 	niter.Next(pl);
-	if ((T) N.Payoff(niter.GetOutcome(), pl) > current)  {
+	if ((T) N.Payoff(niter.GetOutcome(), pl).Evaluate(values) > current)  {
 	  flag = 0;
 	  break;
 	}
