@@ -1641,25 +1641,27 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Randomize", 4);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RandomEfg_Float, porEFG_FLOAT, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porEFG_FLOAT, 
-					    REQUIRED, BYREF));
+					    REQUIRED ));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_RandomEfg_Rational, 
 				       porEFG_RATIONAL, 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porEFG_RATIONAL,
-					    REQUIRED, BYREF));
+					    REQUIRED ));
 
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_RandomEfg_SeedFloat, 
 				       porEFG_FLOAT, 2));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porEFG_FLOAT,
-					    REQUIRED, BYREF));
+					    REQUIRED ));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("seed", porINTEGER));
 
   FuncObj->SetFuncInfo(3, FuncInfoType(GSM_RandomEfg_SeedRational, 
 				       porEFG_RATIONAL, 2));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porEFG_RATIONAL,
-					    REQUIRED, BYREF));
+					    REQUIRED ));
   FuncObj->SetParamInfo(3, 1, ParamInfoType("seed", porINTEGER));
   gsm->AddFunction(FuncObj);
+
+
 
   FuncObj = new FuncDescObj("Rational", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Rational_Efg, porEFG_RATIONAL, 1));
