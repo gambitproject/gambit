@@ -100,10 +100,10 @@ unixsrc:
 
 	@# FIXME: Have to figure out what to do about bison++ ...
 
-	if [ -f $(SRCDIR)/Makefile ]; \
-	then cp $(SRCDIR)/Makefile.generic $(SRCDIR)/Makefile; fi 
 
 	cd ..; \
+	if [ ! -f $(SRCDIR)/Makefile ]; \
+	then cp $(SRCDIR)/Makefile.generic $(SRCDIR)/Makefile; fi; \
 	zip gunixsrc.zip $(SRCDIR)/*.cc $(SRCDIR)/*.h $(SRCDIR)/*.imp \
 	$(SRCDIR)/*.yy $(SRCDIR)/Makefile  $(SRCDIR)/gambit.ini \
 	$(SRCDIR)/*.cpp $(SRCDIR)/*.gcl* $(SRCDIR)/*.def $(SRCDIR)/*.rc \
@@ -119,9 +119,10 @@ winsrc:
 	@echo ------------------------------------------------------
 	@echo
 
-	if [ -f gwinsrc.zip ]; then rm gwinsrc.zip; fi 
-	if [ ! -d $(SRCDIR)/obj ]; then mkdir $(SRCDIR)/obj; fi
 
+	cd ..; \
+	if [ ! -d $(SRCDIR)/obj ]; then mkdir $(SRCDIR)/obj; fi; \
+	if [ -f gwinsrc.zip ]; then rm gwinsrc.zip; fi; \
 	zip -l gwinsrc.zip $(SRCDIR)/*.yy \
 	$(SRCDIR)/*.h $(SRCDIR)/*.cc $(SRCDIR)/*.imp \
 	$(SRCDIR)/*.cpp $(SRCDIR)/*.def $(SRCDIR)/res/*.rc* \
