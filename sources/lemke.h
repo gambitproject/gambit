@@ -10,13 +10,15 @@
 #include "nfg.h"
 #include "mixed.h"
 #include "glist.h"
+#include "gstatus.h"
 
 class LemkeParams     {
   public:
     int trace, stopAfter, maxDepth;
     gOutput *output;
+    gStatus &status;
     
-    LemkeParams(void);
+    LemkeParams(gStatus &status_=gstatus);
 };
 
 //

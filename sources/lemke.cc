@@ -19,8 +19,8 @@
 //                        LemkeParams: member functions
 //---------------------------------------------------------------------------
 
-LemkeParams::LemkeParams(void) 
-  : trace(0), stopAfter(0), output(&gnull)
+LemkeParams::LemkeParams(gStatus &status_) 
+  : trace(0), stopAfter(0), output(&gnull),status(status_)
 { }
 
 //---------------------------------------------------------------------------
@@ -37,6 +37,7 @@ template <class T> class LemkeTableau : public gTableau<T>
     int printlevel;
     long npivots;
     BFS_List List;
+    gStatus &status;
    
     int Lemke_Step(int);
     int At_CBFS(void) const;
@@ -45,7 +46,8 @@ template <class T> class LemkeTableau : public gTableau<T>
     void Pivot(int, int);
  
   public:
-    LemkeTableau(const Nfg<T> &, const NFSupport &, gOutput &ofile, int trace);
+    LemkeTableau(const Nfg<T> &, const NFSupport &, 
+		 gOutput &ofile, int trace, gStatus &status_=gstatus);
     virtual ~LemkeTableau();
 
     int Lemke(int);
@@ -60,7 +62,8 @@ template <class T> class LemkeTableau : public gTableau<T>
 
 template <class T>
 LemkeTableau<T>::LemkeTableau(const Nfg<T> &NF, const NFSupport &S,
-			      gOutput &ofile, int trace)
+			      gOutput &ofile, int trace, 
+			      gStatus &status_)
      : gTableau<T>(1, S.NumStrats(1) + S.NumStrats(2),
 		   S.NumStrats(1) + S.NumStrats(2),
 		   0, S.NumStrats(1) + S.NumStrats(2) + 1,
@@ -68,7 +71,7 @@ LemkeTableau<T>::LemkeTableau(const Nfg<T> &NF, const NFSupport &S,
 		   N(NF), support(S),
 		   num_strats(S.NumStrats(1) + S.NumStrats(2)),
 		   output(ofile), printlevel(trace),
-		   npivots(0)
+		   npivots(0), status(status_)
 {
   NfgIter<T> iter(&S);
   T min = (T) 0, x;
@@ -174,11 +177,15 @@ template <class T> int LemkeTableau<T>::Lemke(int Duplicate_Label)
     All_Lemke(List, 0, npivots);
   else  {
     Lemke_Step(Duplicate_Label);
-    for (i = 1; i <= num_strats; i++)
+    for (i = 1; i <= num_strats && !status.Get(); i++) {
+      status.SetProgress((double)(i-1)/(double)num_strats);
       if (Row_Labels[i] > 0)
 	cbfs.Define(Row_Labels[i], Tableau(i,0));
+    }
     List.Append(cbfs);
   }
+
+  if(status.Get()) status.Reset();
 
   if (printlevel >= 2)  {
     for (i = 1; i <= List.Length(); i++)   {
@@ -253,7 +260,8 @@ template <class T> int LemkeTableau<T>::At_CBFS(void) const
 template <class T> int LemkeTableau<T>::All_Lemke(BFS_List &List, int j, long &np)
 {
   BFS<T> cbfs((T) 0);
-  int i;
+  int i,len;
+  T p1,p2,aa;
 
   np+=NumPivots();
 
@@ -272,6 +280,10 @@ template <class T> int LemkeTableau<T>::All_Lemke(BFS_List &List, int j, long &n
   if (List.Contains(cbfs))  return 1;
   List.Append(cbfs);
 
+  len=List.Length();
+  p1=(double)len/(double)(len+1);
+  p2=(double)(len+1)/(double)(len+2);
+
   if (printlevel >= 2)
     cbfs.Dump(output);
 
@@ -287,8 +299,10 @@ template <class T> int LemkeTableau<T>::All_Lemke(BFS_List &List, int j, long &n
   if (printlevel >= 3)
     Dump(output);
 
-  for (i = 1; i <= num_strats; i++)
+  for (i = 1; i <= num_strats  && !status.Get(); i++)
     if (i != j)  {
+      aa=(double)(i-1)/(double)num_strats;
+      status.SetProgress(p1+aa*(p2-p1));
       LemkeTableau<T> Tcopy(*this);
       Tcopy.NumPivots()= 0;
       Tcopy.Lemke_Step(i);
@@ -433,7 +447,7 @@ template <class T> int LemkeModule<T>::Lemke(void)
 
   gWatch watch;
 
-  LemkeTableau<T> LT(nf, support, *params.output, params.trace);
+  LemkeTableau<T> LT(nf, support, *params.output, params.trace, params.status);
 //  LT.Lemke((params.stopAfter == 1) ? 1 : 0);
   LT.Lemke(params.stopAfter);
 
