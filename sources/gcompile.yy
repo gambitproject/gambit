@@ -165,9 +165,9 @@ program:
               { return 0; }
        |      error EOC   { RecoverFromError();  return 1; }
        |      error CRLF  { RecoverFromError();  return 1; }
+       |      include    { return 0; }     
 
 toplevel:     statements
-        |     include toplevel
         |     funcdecl toplevel
         |     delfunc toplevel
 
@@ -255,7 +255,7 @@ optparen:
 binding:      RARROW    { refs.Append(false); }
        |      DBLARROW  { refs.Append(true); }
 
-statement:    { triv = true; statementcount++; }
+statement:    writeopt { triv = true; statementcount++; }
          |    expression { triv = false; }
          |    conditional { triv = false; }
          |    whileloop { triv = false; }
@@ -264,10 +264,11 @@ statement:    { triv = true; statementcount++; }
                          emit(new NewInstr(iQUIT)); }
 
 
-include:      writeopt INCLUDE LBRACK TEXT RBRACK
+include:      writeopt INCLUDE LBRACK TEXT RBRACK EOC
               { 
                 LoadInputs( tval );
 	      }
+
 
 conditional:  IF LBRACK CRLFopt expression CRLFopt COMMA 
               { emit(new NewInstr(iNOT)); emit(0);
@@ -797,12 +798,12 @@ int GCLCompiler::Parse(void)
 
     if (inputs.Depth() == 0)  {
       gout << "GCL" << command << ": ";
-      if (gsm.Verbose())
+      if (gsm.Verbose())  {
         gout << "<< ";
+	force_output = true;
+      }	
     }
     matching.Flush();
-    if (gsm.Verbose() && inputs.Depth() == 0)
-      force_output = true;
     if (!yyparse())  {
       Execute();
       if (inputs.Depth() == 0) command++;
