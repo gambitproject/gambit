@@ -1021,59 +1021,6 @@ template <class T> gArray<T> BehavProfile<T>::NodeRealizProbs(void) const
   return probs;
 }
 
-//------------
-// Beliefs
-//------------
-
-template <class T>
-void BehavProfile<T>::Beliefs(Node *p_node, T p_prob,
-			      gDPVector<T> &p_probs, gPVector<T> &p_gpv) const
-{
-  int npl = (p_node->infoset) ? p_node->infoset->player->number : -1;
-  int iset = (p_node->infoset) ? p_node->infoset->number : 0;
-  int nc = p_node->children.Length();
-  int mnum = 1;
-
-  if (p_node->infoset == 0)   return;
-
-  while (mnum <= p_node->infoset->NumMembers() &&
-	 p_node->infoset->Members()[mnum] != p_node) 
-    mnum++;
-  
-  if (npl > 0 && p_gpv(npl, iset) != (T) 0)
-    p_probs(npl, iset, mnum) = p_prob / p_gpv(npl, iset);
-
-  if (npl == 0)  {
-    for (int child = 1; child <= nc; child++)  {
-      Beliefs(p_node->children[child],
-	      p_prob * ChanceProb(p_node->infoset, child),
-	      p_probs, p_gpv);
-    }
-  }
-  else {
-    const gArray<Action *> &actions = m_support.Actions(npl, iset);
-
-    for (int act = 1; act <= m_support.NumActions(npl, iset); act++) {
-      Beliefs(p_node->children[actions[act]->GetNumber()],
-	      p_prob * (*this)(npl,
-			       p_node->infoset->number,
-			       actions[act]->GetNumber()),
-	      p_probs, p_gpv);
-    }
-  }
-}
-
-template <class T> gDPVector<T> BehavProfile<T>::Beliefs(void) const
-{
-  gDPVector<T> bprobs(m_efg->NumMembers());
-  bprobs = (T) 0;
-  gDPVector<T> payoff(m_efg->NumActions());
-  gPVector<T> probs(m_efg->NumActions().Lengths());
-  CondPayoff(payoff, probs);
-  Beliefs(m_efg->RootNode(), (T) 1, bprobs, probs);
-  return bprobs;
-}
-
 //-----------------
 // NodeValues
 //-----------------
@@ -1607,5 +1554,53 @@ template <class T> void BehavProfile<T>::NodeRealizProb(void) const
   if(!IsInstalled()) 
     InstallMe();
     NodeRealizProbs(m_root->node, (T) 1);
+}
+
+//------------
+// Beliefs
+//------------
+
+template <class T>
+void BehavProfile<T>::Beliefs(Node *node, T prob,
+			      gDPVector<T> &probs, gPVector<T> &gpv) const
+{
+  Infoset * iset = node->infoset;
+
+  if (iset) {
+    int mnum = 1;
+    while (mnum <= iset->NumMembers() &&
+	   iset->Members()[mnum] != node) 
+      mnum++;
+    
+    int pl = iset->player->number;
+    int isetnum = iset->number;
+    if (pl > 0 && gpv(pl, isetnum) != ((T) 0) * gpv(pl, isetnum)) 
+      probs(pl, isetnum, mnum) = prob / gpv(pl, isetnum);
+    
+    if (pl == 0)  {
+      for (int child = 1; child <= node->children.Length(); child++)  
+	Beliefs(node->children[child],
+		prob * ChanceProb(iset, child), probs, gpv);
+    }
+    else {
+      const gArray<Action *> &actions = m_support.Actions(iset);
+      
+      for (int act = 1; act <= m_support.NumActions(iset); act++) 
+	Beliefs(node->children[actions[act]->GetNumber()],
+		prob * ActionProb(actions[act]), probs, gpv);
+
+    }
+  }
+}
+
+template <class T> gDPVector<T> BehavProfile<T>::Beliefs(void) const
+{
+  gDPVector<T> bprobs(m_efg->NumMembers());
+  bprobs = (T) 0;
+  gDPVector<T> payoff(m_efg->NumActions());
+  gPVector<T> probs(m_efg->NumActions().Lengths());
+  CondPayoff(payoff, probs);
+  Beliefs(m_efg->RootNode(), (T) 1, bprobs, probs);
+  return bprobs;
 }
 
