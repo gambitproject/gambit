@@ -29,7 +29,6 @@ extern void Init_efgfunc( GSM* );
 extern void Init_algfunc(GSM *);
 extern void Init_listfunc(GSM *);
 extern void Init_listmath(GSM *);
-void Init_userfunc( GSM* );
 
 void GSM::InitFunctions( void )
 {
@@ -41,19 +40,6 @@ void GSM::InitFunctions( void )
   Init_nfgfunc(this);
   Init_efgfunc(this);
   Init_algfunc(this);
-
-  Init_userfunc( this );
-}
-
-
-
-
-void Init_userfunc( GSM* gsm )
-{
-/*
-  gList< Instruction* >* prog;
-  FuncDescObj* func;
-*/
 }
 
 
@@ -1386,6 +1372,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	    _ErrorOccurred = true;
 	  }
 	}
+	/*
 	else if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference &&
 		!_Param[ index ]->IsReference() && 
 		_RunTimeParamInfo[ index ].Ref == 0 )
@@ -1394,6 +1381,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
 	  _ErrorOccurred = true;
 	}
+	*/
       }
     }
   }
