@@ -723,6 +723,8 @@ static Portion *GSM_Parent(Portion **param)
 
 static Portion *GSM_Payoff(Portion **param)
 {
+  if (param[0]->Spec().Type == porNULL)
+    return new NumberPortion(0);
   EFOutcome *c = ((EfOutcomePortion *) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
   Efg *efg = player->Game();
@@ -1053,7 +1055,7 @@ void Init_efgfunc(GSM *gsm)
       { "Outcome[node->NODE*] =: EFOUTCOME", GSM_Outcome },
       { "Outcomes[efg->EFG] =: LIST(EFOUTCOME)", GSM_Outcomes },
       { "Parent[node->NODE*] =: NODE", GSM_Parent },
-      { "Payoff[outcome->EFOUTCOME, player->EFPLAYER] =: NUMBER",
+      { "Payoff[outcome->EFOUTCOME*, player->EFPLAYER] =: NUMBER",
 	GSM_Payoff },
       { "Player[infoset->INFOSET*] =: EFPLAYER", GSM_Player },
       { "Players[efg->EFG] =: LIST(EFPLAYER)", GSM_Players },
