@@ -143,6 +143,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
     for (int solno = 1; solno <= sol.Length(); solno++)  {
       int ii = solns.Append(thissolns[soln]);
       solns[ii].SetEpsilon(sol[solno].Epsilon());
+      solns[ii].SetCreator((EfgAlgType) AlgorithmID());
       
       for (int pl = 1; pl <= foo.NumPlayers(); pl++)  {
 	EFPlayer *p = foo.Players()[pl];
@@ -176,19 +177,6 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
 	}
       }
       
-      int j = solns.Length();
-      solns[j].SetCreator((EfgAlgType) AlgorithmID());
-	
-      //      if (m_isPerfectRecall)
-      //	solns[j].SetIsNash(triTRUE);
-      //      if (marked && m_isPerfectRecall)
-      //	solns[j].SetIsSubgamePerfect(triTRUE); 
-      if (solns[j].Creator() == algorithmEfg_LIAP_EFG && m_isPerfectRecall) {
-	solns[j].SetLiap(solns[j].LiapValue());
-	//	solns[j].SetIsSequential(triTRUE);      // even if marked = false
-	//	solns[j].SetIsSubgamePerfect(triTRUE);  // even if marked = false
-      }
-
       gVector<gNumber> subval(foo.NumPlayers());
       for (i = 1; i <= foo.NumPlayers(); i++)  {
 	subval[i] = sol[solno].Payoff(i);
