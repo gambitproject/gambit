@@ -26,9 +26,11 @@
 //                          base class
 //---------------------------------------------------------------------
 
+class BaseEfg;
+class NFPayoffs;
+
 class Portion
 {
-friend class ListPortion; 
 private:
   static int _NumObj;
 
@@ -50,7 +52,8 @@ protected:
   static long _WriteListIndent;
   static long _WriteSolutionInfo;
 
-  void SetGame(void* game, bool efg);
+  void SetGame(const BaseEfg *game);
+  void SetGame(const NFPayoffs *game);
 
 public:
   static void _SetWriteWidth(long);
@@ -704,8 +707,6 @@ public:
 //                          new Nfg class
 //---------------------------------------------------------------------
 
-class BaseNfg;
-
 template <class T> class NfgPortion : public Portion   {
 protected:
   Nfg<T> ** _Value;
@@ -748,7 +749,6 @@ public:
 //                          new Efg class
 //---------------------------------------------------------------------
 
-class BaseEfg;
 
 class EfgPortion : public Portion
 {
