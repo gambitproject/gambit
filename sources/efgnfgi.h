@@ -38,7 +38,7 @@ public:
 	EfgNfgInterface(InterfaceTypeT t,EfgNfgInterface<T> *i=0):
 		type(t), inter(i) {if (inter) inter->InterfaceSet(this);}
 // Destructor
-	~EfgNfgInterface(void) {InterfaceDied();}
+	virtual ~EfgNfgInterface(void) {InterfaceDied();}
 // Data access
 	void InterfaceDied(void) {if (inter) inter->InterfaceSet(0);inter=0;}
 	InterfaceTypeT InterfaceType(void) const {return type;}
