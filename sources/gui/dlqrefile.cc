@@ -39,6 +39,7 @@
 #include "corplot.h"
 
 BEGIN_EVENT_TABLE(dialogQreFile, wxFrame)
+  EVT_MENU(wxID_CLOSE, dialogQreFile::Close)
   EVT_MENU(GBT_MENU_QRE_EXPORT_PXI, dialogQreFile::OnFileExportPxi)
   EVT_MENU(GBT_MENU_QRE_PLOT, dialogQreFile::OnToolsPlot)
 END_EVENT_TABLE()
@@ -76,7 +77,7 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
 					  (char *) ToText(profile[j])));
     }
   }
-  topSizer->Add(m_qreList, 0, wxALL, 0);
+  topSizer->Add(m_qreList, 1, wxALL, 0);
 
   wxMenu *fileMenu = new wxMenu;
   fileMenu->Append(GBT_MENU_QRE_EXPORT_PXI, _("&Export to PXI"),
