@@ -94,6 +94,9 @@ gambit:
 
 	mv ../gambit_$(GUI)_$(SYSNAME).zip $(FTPDIR) 
 
+	@# Remove gambit_setup from top of distrib directory.
+	rm ../gambit_setup
+
 unixsrc:
 	@echo
 	@echo ------------------------------------------------------
