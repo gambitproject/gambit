@@ -15,37 +15,39 @@
 // allocation, and deallocation; the array currently cannot be expanded
 // or contracted at all.
 
-template <class T> class gStack   {
-  private:
-    int depth, max_depth;
-    T *contents;
+template <class T> class gStack   
+{
+ protected:
+  int depth;
+  int max_depth;
+  T*  contents;
 
-  public:
+ public:
           // CONSTRUCTORS AND DESTRUCTOR
-    gStack(int md);       // initialize stack of maximum depth 'md'
-    ~gStack();            // destruct gStack
+  gStack(int md);       // initialize stack of maximum depth 'md'
+  virtual ~gStack();    // destruct gStack
 
           // GENERAL DATA ACCESS
-    int Depth(void) const;
-    int MaxDepth(void) const;
+  int Depth(void) const;
+  int MaxDepth(void) const;
     
           // STACK OPERATIONS
           // Note: Push() assumes that depth < max_depth
           //       Peek() and Pop() assume that depth > 0
           // Failure to maintain these assertions on entry will
-          // caused a failed assert() call...
+          // cause a failed assert() call...
 
-    void Push(T new_el);    // push an element onto top of stack
-    T Pop(void);            // pop the top element off the stack
-    T Peek(void) const;     // get the top element without popping
-    T& Peek(void);          // also get the top element w/o popping
+  virtual void Push (T new_el);    // push an element onto top of stack
+  T            Pop  (void);            // pop the top element off the stack
+  T            Peek (void) const;     // get the top element without popping
+  T&           Peek (void);          // also get the top element w/o popping
                             // (the const version is used to just examine
                             //  the data without modifying it; the non-const
                             //  version allows the TOS to be modified
                             //  without the overhead of a push+pop --
                             //  use this with care!)
 
-    void Flush(void);       // empty the stack in one fell swoop
+  void Flush (void);       // empty the stack in one fell swoop
 };
 
 #endif    // GSTACK_H
