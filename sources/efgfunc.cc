@@ -125,7 +125,11 @@ Portion *GSM_AppendAction(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   s->BelongsTo()->AppendAction(s);
-  return new InfosetValPortion(s);
+
+  Portion* por = new InfosetValPortion(s);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_AppendNode(Portion **param)
@@ -136,7 +140,10 @@ Portion *GSM_AppendNode(Portion **param)
   if (n->BelongsTo() != s->BelongsTo())   return 0;
   n->BelongsTo()->AppendNode(n, s);
 
-  return new NodeValPortion(n->GetChild(1));
+  Portion* por = new NodeValPortion(n->GetChild(1));
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_AttachOutcome(Portion **param)
@@ -147,7 +154,10 @@ Portion *GSM_AttachOutcome(Portion **param)
   if (n->BelongsTo() != c->BelongsTo())   return 0;
   n->SetOutcome(c);
   
-  return new OutcomeValPortion(c);
+  Portion* por = new OutcomeValPortion(c);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_DeleteAction(Portion **param)
@@ -155,14 +165,22 @@ Portion *GSM_DeleteAction(Portion **param)
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   Action *a = ((ActionPortion *) param[1])->Value();
   s->BelongsTo()->DeleteAction(s, a);
-  return new InfosetValPortion(s);
+
+  Portion* por = new InfosetValPortion(s);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_DeleteNode(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
   Node *keep = ((NodePortion *) param[1])->Value();
-  return new NodeValPortion(n->BelongsTo()->DeleteNode(n, keep));
+
+  Portion* por = new NodeValPortion(n->BelongsTo()->DeleteNode(n, keep));
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_DeleteOutcome(Portion **param)
@@ -176,14 +194,22 @@ Portion *GSM_DeleteTree(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
   n->BelongsTo()->DeleteTree(n);
-  return new NodeValPortion(n);
+
+  Portion* por = new NodeValPortion(n);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_DetachOutcome(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
   n->SetOutcome(0);
-  return new NodeValPortion(n);
+
+  Portion* por = new NodeValPortion(n);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_InsertAction(Portion **param)
@@ -191,7 +217,11 @@ Portion *GSM_InsertAction(Portion **param)
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   Action *a = ((ActionPortion *) param[1])->Value();
   s->BelongsTo()->InsertAction(s, a);
-  return new InfosetValPortion(s);
+
+  Portion* por = new InfosetValPortion(s);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_InsertNode(Portion **param)
@@ -202,13 +232,20 @@ Portion *GSM_InsertNode(Portion **param)
   if (n->BelongsTo() != s->BelongsTo())   return 0;
   n->BelongsTo()->InsertNode(n, s);
 
-  return new NodeValPortion(n->GetParent());
+  Portion* por = new NodeValPortion(n->GetParent());
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_LeaveInfoset(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  return new InfosetValPortion(n->BelongsTo()->LeaveInfoset(n));
+
+  Portion* por = new InfosetValPortion(n->BelongsTo()->LeaveInfoset(n));
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_MergeInfosets(Portion **param)
@@ -219,7 +256,10 @@ Portion *GSM_MergeInfosets(Portion **param)
   if (s1->BelongsTo() != s2->BelongsTo())   return 0;
   s1->BelongsTo()->MergeInfoset(s1, s2);
   
-  return new InfosetValPortion(s1);
+  Portion* por = new InfosetValPortion(s1);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_NewEfg(Portion **param)
@@ -254,7 +294,11 @@ Portion *GSM_NewInfoset1(Portion **param)
 
   Infoset *s = p->BelongsTo()->CreateInfoset(p, n);
   s->SetName(name);
-  return new InfosetValPortion(s);
+
+  Portion* por = new InfosetValPortion(s);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
  
 //
@@ -271,7 +315,11 @@ Portion *GSM_NewInfoset2(Portion **param)
   s->SetName(name);
   for (int i = 1; i <= actions->Length(); i++)
     s->SetActionName(i, ((TextPortion *) actions->Subscript(i))->Value());
-  return new InfosetValPortion(s);
+
+  Portion* por = new InfosetValPortion(s);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_NewOutcomeFloat(Portion **param)
@@ -281,7 +329,11 @@ Portion *GSM_NewOutcomeFloat(Portion **param)
 
   Outcome *c = E.NewOutcome();
   c->SetName(name);
-  return new OutcomeValPortion(c);
+
+  Portion* por = new OutcomeValPortion(c);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_NewOutcomeRational(Portion **param)
@@ -291,7 +343,11 @@ Portion *GSM_NewOutcomeRational(Portion **param)
 
   Outcome *c = E.NewOutcome();
   c->SetName(name);
-  return new OutcomeValPortion(c);
+
+  Portion* por = new OutcomeValPortion(c);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_NewPlayer(Portion **param)
@@ -301,7 +357,11 @@ Portion *GSM_NewPlayer(Portion **param)
 
   EFPlayer *p = E.NewPlayer();
   p->SetName(name);
-  return new EfPlayerValPortion(p);
+
+  Portion* por = new EfPlayerValPortion(p);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_SetChanceProbs(Portion **param)
@@ -332,7 +392,10 @@ Portion *GSM_SetChanceProbs(Portion **param)
       break;
   }
  
-  return new InfosetValPortion(s);
+  Portion* por = new InfosetValPortion(s);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_SetNameAction(Portion **param)
@@ -395,7 +458,11 @@ Portion *GSM_SetPayoffFloat(Portion **param)
 
   for (int i = 1; i <= c->Length(); i++)
     (*c)[i] = ((FloatPortion *) p->Subscript(i))->Value();
-  return new OutcomeValPortion(c);
+
+  Portion* por = new OutcomeValPortion(c);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_SetPayoffRational(Portion **param)
@@ -408,7 +475,11 @@ Portion *GSM_SetPayoffRational(Portion **param)
 
   for (int i = 1; i <= c->Length(); i++)
     (*c)[i] = ((RationalPortion *) p->Subscript(i))->Value();
-  return new OutcomeValPortion(c);
+
+  Portion* por = new OutcomeValPortion(c);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 //
@@ -418,21 +489,33 @@ Portion *GSM_SetPayoffRational(Portion **param)
 Portion *GSM_Actions(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
-  return ArrayToList(s->GetActionList());
+
+  Portion* por = ArrayToList(s->GetActionList());
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_CentroidEfgFloat(Portion **param)
 {
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
   BehavProfile<double> *P = new BehavProfile<double>(E);
-  return new BehavValPortion(P);
+
+  Portion* por = new BehavValPortion(P);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_CentroidEfgRational(Portion **param)
 {
   Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
   BehavProfile<gRational> *P = new BehavProfile<gRational>(E);
-  return new BehavValPortion(P);
+
+  Portion* por = new BehavValPortion(P);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 extern Portion *GSM_CentroidNfgFloat(Portion **);
@@ -441,21 +524,32 @@ extern Portion *GSM_CentroidNfgRational(Portion **);
 Portion *GSM_Chance(Portion **param)
 {
   BaseEfg &E = *((EfgPortion*) param[0])->Value();
-  return new EfPlayerValPortion(E.GetChance());
+
+  Portion* por = new EfPlayerValPortion(E.GetChance());
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_ChanceProbs(Portion **param)
 {
+  Portion* por;
   Node *n = ((NodePortion *) param[0])->Value();
   if (!n->GetPlayer() || !n->GetPlayer()->IsChance())   return 0;
   switch (n->BelongsTo()->Type())   {
-    case DOUBLE:
-      return ArrayToList((gArray<double> &) ((ChanceInfoset<double> *) n->GetInfoset())->GetActionProbs());
-    case RATIONAL:
-      return ArrayToList((gArray<gRational> &) ((ChanceInfoset<gRational> *) n->GetInfoset())->GetActionProbs());
-    default:
-      return 0;
+  case DOUBLE:
+    por = ArrayToList((gArray<double> &) ((ChanceInfoset<double> *) n->GetInfoset())->GetActionProbs());
+    break;
+  case RATIONAL:
+    por = ArrayToList((gArray<gRational> &) ((ChanceInfoset<gRational> *) n->GetInfoset())->GetActionProbs());
+    break;
+  default:
+    return 0;
   }
+
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_CopyTree(Portion **param)
@@ -463,13 +557,20 @@ Portion *GSM_CopyTree(Portion **param)
   Node *n1 = ((NodePortion *) param[0])->Value();
   Node *n2 = ((NodePortion *) param[1])->Value();
 
-  return new NodeValPortion(n1->BelongsTo()->CopyTree(n1, n2));
+  Portion* por = new NodeValPortion(n1->BelongsTo()->CopyTree(n1, n2));
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_Infoset(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  return new InfosetValPortion(n->GetInfoset());
+
+  Portion* por = new InfosetValPortion(n->GetInfoset());
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_IsPredecessor(Portion **param)
@@ -497,13 +598,20 @@ Portion *GSM_MoveTree(Portion **param)
   Node *n1 = ((NodePortion *) param[0])->Value();
   Node *n2 = ((NodePortion *) param[1])->Value();
 
-  return new NodeValPortion(n1->BelongsTo()->MoveTree(n1, n2));
+  Portion* por = new NodeValPortion(n1->BelongsTo()->MoveTree(n1, n2));
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_NameAction(Portion **param)
 {
   Action *a = ((ActionPortion *) param[0])->Value();
-  return new TextValPortion(a->GetName());
+  
+  Portion* por = new TextValPortion(a->GetName());
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_NameEfg(Portion **param)
@@ -541,8 +649,13 @@ Portion *GSM_NameOutcome(Portion **param)
 Portion *GSM_NextSibling(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value()->NextSibling();
-  if (n)   return new NodeValPortion(n);
-  else   return 0;
+  if (!n)
+    return 0;
+  
+  Portion* por = new NodeValPortion(n);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_NthChild(Portion **param)
@@ -550,7 +663,11 @@ Portion *GSM_NthChild(Portion **param)
   Node *n = ((NodePortion *) param[0])->Value();
   int child = ((IntPortion *) param[1])->Value();
   if (child < 1 || child >= n->NumChildren())   return 0;
-  return new NodeValPortion(n->GetChild(child));
+
+  Portion* por = new NodeValPortion(n->GetChild(child));
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_NumActions(Portion **param)
@@ -596,61 +713,86 @@ extern Portion*GSM_NumPlayersNfg(Portion **);
 Portion *GSM_Outcome(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  if (n->GetOutcome())
-    return new OutcomeValPortion(n->GetOutcome());
-  else
+  if (!n->GetOutcome())
     return 0;
+
+  Portion* por = new OutcomeValPortion(n->GetOutcome());
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_Outcomes(Portion **param)
 {
   BaseEfg *E = ((EfgPortion*) param[0])->Value();
-  return ArrayToList(E->OutcomeList());
+  
+  Portion* por = ArrayToList(E->OutcomeList());
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_Parent(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  if (n->GetParent())
-    return new NodeValPortion(n->GetParent());
-  else
+  if (!n->GetParent())
     return 0;
+
+  Portion* por = new NodeValPortion(n->GetParent());
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_PayoffFloat(Portion **param)
 {
   OutcomeVector<double> *c = 
     (OutcomeVector<double> *) ((OutcomePortion *) param[0])->Value();
-  return ArrayToList((gArray<double> &) *c);
+ 
+  Portion* por = ArrayToList((gArray<double> &) *c);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_PayoffRational(Portion **param)
 {
   OutcomeVector<gRational> *c = 
     (OutcomeVector<gRational> *) ((OutcomePortion *) param[0])->Value();
-  return ArrayToList((gArray<gRational> &) *c);
+  
+  Portion* por = ArrayToList((gArray<gRational> &) *c);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_PlayerInfoset(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
-  return new EfPlayerValPortion(s->GetPlayer());
+
+  Portion* por = new EfPlayerValPortion(s->GetPlayer());
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_PlayerNode(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  if (n->GetPlayer())
-    return new EfPlayerValPortion(n->GetPlayer());
-  else
+  if (!n->GetPlayer())
     return 0;
+
+  Portion* por = new EfPlayerValPortion(n->GetPlayer());
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_Players(Portion **param)
 {
-  Portion* p;
   BaseEfg &E = *((EfgPortion*) param[0])->Value();
-  p = ArrayToList(E.PlayerList());
+
+  Portion* p = ArrayToList(E.PlayerList());
   p->SetOwner( param[ 0 ]->Original() );
   p->AddDependency();
   return p;
@@ -659,8 +801,13 @@ Portion *GSM_Players(Portion **param)
 Portion *GSM_PriorSibling(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value()->PriorSibling();
-  if (n)   return new NodeValPortion(n);
-  else   return 0;
+  if (!n)
+    return 0;
+  
+  Portion* por = new NodeValPortion(n);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_ReadEfg(Portion **param)
@@ -704,7 +851,11 @@ Portion *GSM_ReadEfg(Portion **param)
 Portion *GSM_RootNode(Portion **param)
 {
   BaseEfg &E = *((EfgPortion*) param[0])->Value();
-  return new NodeValPortion(E.RootNode());
+
+  Portion* por = new NodeValPortion(E.RootNode());
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_WriteEfg(Portion **param)
