@@ -14,11 +14,12 @@
 \newcommand{\bd}{\begin{description}}
 \newcommand{\ed}{\end{description}}
 \input{psfig}
+\makeindex
 
 % stuff for lex 
 % to put dictionary style headers in function ref sections
 
-\newcommand{\lex}[1]{\mark{#1}}
+\newcommand{\lex}[1]{\mark{#1}\index{#1}}
 
 \makeatletter
 \def\ps@lexicon{\def\@oddhead{\slshape\mysectionname\hfil 
@@ -6907,7 +6908,7 @@ EnumPureSolve[Support[nfg], stopAfter, time, traceFile, traceLevel];
 \end{verbatim} 
 \ed
 
-\item\lex{WnumPureSolve}
+\item\lex{EnumPureSolve}
 \protect \large \begin{verbatim}
 EnumPureSolve[efg->EFG, {stopAfter->00}, {time<->0.00}, 
                {traceFile<->NullOut}, {traceLevel->00}] =: LIST(BEHAV)
@@ -8337,6 +8338,7 @@ Following is the contents of ``loglike.gcl'':
 \bibliographystyle{chicagob}
 \bibliography{gambit}
 \addcontentsline{toc}{chapter}{Bibliography}
+\input{gclman.ind}
 \end{document}
 
 \newpage
