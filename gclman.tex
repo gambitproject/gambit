@@ -270,6 +270,19 @@ DetachOutcome[n->NODE] =: NODE
 
 ----------
 
+EfgToNfg[E->EXTFORM, {time<->RATIONAL}] =: NORFORM
+
+   -	Description:  Converts a problem in extensive form to the same problem
+	as a normal form game.
+   -	Return value:  The new normal form game.  
+   -	Required parameters:
+	  *  E:  The problem in extensive form to be converted to extensive 
+		form.
+   -	Optional parameters:
+	  *  time:  Returns the elapsed time for the operation.
+
+----------
+
 ElimAllDom[N->NORFORM, {strong->BOOLEAN}, {time<->RATIONAL}, {output->TEXT}] 
 	=: INTEGER
 
@@ -317,19 +330,6 @@ ElimDom[N->NORFORM, {pl->INTLIST}, {strong->BOOLEAN}, {time<->RATIONAL},
 	  *  output:  Redirects the output of the procedure to a specified 
 		file.  Directing output to ``/dev/null'' under Unix turns 
 		output off.  By default, it directs output to the screen.
-
-----------
-
-EfgToNfg[E->EXTFORM, {time<->RATIONAL}] =: NORFORM
-
-   -	Description:  Converts a problem in extensive form to the same problem
-	as a normal form game.
-   -	Return value:  The new normal form game.  
-   -	Required parameters:
-	  *  E:  The problem in extensive form to be converted to extensive 
-		form.
-   -	Optional parameters:
-	  *  time:  Returns the elapsed time for the operation.
 
 ----------
 
@@ -498,6 +498,69 @@ HasOutcome[E->EXTFORM, outc->INTEGER] =: BOOLEAN
 
 ----------
 
+InsertAction[n->NODE, as->1, br->3] =: NODE
+
+   -	Description:  Inserts the indicated number of actions into the 
+	information set containing the specified node.
+   -	Return value:  Returns the specified node.
+   -	Required parameters:
+	  *  n:  The node which belongs to the information set which is to have
+		actions inserted into it.
+	  *  as:  The number which will correspond to the first inserted
+		action.
+	  *  br:  The number of actions to be inserted at the specified node.
+   -	Optional parameters:  None.
+
+----------
+
+InsertNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
+
+   -	Description:  Inserts a new node belonging to the indicated player at 
+	the location of the specified node and moves that node to the end of 
+	the first branch of the new node.
+   -	Return value:  Returns the specified node.
+   -	Required parameters:
+	  *  n:  The location where the new node is to be inserted.  The node
+		currently at this location is then moved to the end of the 
+		first branch of the new node.
+	  *  pl:  The number corresponding to the player to which the new node
+		will belong.  If the player specified is not already defined in
+		the game, the player is created automatically.
+	  *  br:  The number of branches which the new node will have.
+   -	Optional parameters:  None.
+
+----------
+
+IsPredecessor[n->NODE, of->NODE] =: BOOLEAN
+
+   -	Description:  Finds whether or not the first node indicated is a 
+	predecessor of the second node given.
+   -	Return value:  Returns True only if the first node indicated is a
+	predecessor of the second node given.
+   -	Required parameters:
+	  *  n:  The node which, when it is the predecessor of the other node,
+		will result in the return value being True.
+	  *  of:  The node which, when it is preceeded by the other node, will
+		result in the return value being True.
+   -	Optional parameters:  None.
+
+----------
+
+IsSuccessor[n->NODE, from->NODE] =: NODE
+
+   -	Description:  Finds whether or not the first node indicated is a 
+	successor of the second node given.
+   -	Return value:  Returns True only if the first node indicated is a
+	successor of the second node given.
+   -	Required parameters:
+	  *  n:  The node which, when it is the successor of the other node,
+		will result in the return value being True.
+	  *  of:  The node which, when it is succeeded by the other node, will
+		result in the return value being True.
+   -	Optional parameters:  None.
+
+----------
+
 IsWatchRunning[] =: BOOLEAN
 
    -	Description:  Finds whether or not the system stopwatch is currently
@@ -505,6 +568,35 @@ IsWatchRunning[] =: BOOLEAN
    -	Return value:  True only if the system stopwatch is currently running.
 	Returns False otherwise.
    -	Required parameters:  None.
+   -	Optional parameters:  None.
+
+----------
+
+JoinInfoset[n->NODE, to->NODE] =: NODE
+
+   -	Description:  Removes the first node specified from the information set
+	to which it currently belongs and places it in the information set to
+	which the second node given belongs.
+   -	Return value:  XXXX .
+   -	Required parameters:
+	  *  n:  The node which is to be removed from its current information
+		set and placed in the information set belonging to the second
+		node given.
+	  *  to:  The node belonging to the information set to which the first
+		node specified will be transfered.
+   -	Optional parameters:  None.
+
+----------
+
+LeaveInfoset[n->NODE] =: NODE
+
+   -	Description:  Removes the specified node from the information set to
+	which it currently belongs and creates and places it in a new singleton
+	information set belonging to the same player.
+   -	Return value:  The specified node.
+   -	Required parameters:
+	  *  n:  The node which is to be removed from the information which it
+		currently belongs to.
    -	Optional parameters:  None.
 
 ----------
@@ -545,6 +637,28 @@ MergeInfosets[n->NODE, to->NODE] =: NODE
 		to be moved to the second information set.
 	  *  to:  The node which belongs to the information set to which all
 		the nodes from the first information set are to be moved.
+   -	Optional parameters:  None.
+
+----------
+
+MoveTree[n->NODE, to->NODE] =: NODE
+
+   -	Description:  Moves the subtree rooted at the first node specified to
+	the second given node.
+   -	Return value:  XXXX .
+   -	Required parameters:
+	  *  n:  The node at which the subtree to be moved is currently rooted.
+	  *  to:  The node to which the subtree is to be moved.
+   -	Optional parameters:  None.
+
+----------
+
+NameOf[n->NODE] =: TEXT
+
+   -	Description:  Returns the name of the specified node.
+   -	Return value:  The name of the specified node.
+   -	Required parameters:
+	   *  n:  The node for which the name will be returned.
    -	Optional parameters:  None.
 
 ----------
@@ -719,6 +833,17 @@ SetInfosetName[n->NODE, name->TEXT] =: NODE
 		assigned a name.
 	  *  name:  The name which is to be assigned to the given information
 		set.
+   -	Optional parameters:  None.
+
+----------
+
+SetNodeName[n->NODE, name->TEXT] =: NODE
+
+   -	Description:  Assigns the given name to the specified node.
+   -	Return value:  Returns the specified node.
+   -	Required parameters:
+	  *  n:  The node which is to have a name assigned.
+	  *  name:  The name which is to be assigned to the specified node.
    -	Optional parameters:  None.
 
 ----------
