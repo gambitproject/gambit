@@ -241,7 +241,7 @@ static Portion *GSM_DeleteAction(Portion **param)
 
   _gsm->UnAssignGameElement(infoset->Game(), true,
 			    porBEHAV | porEFSUPPORT);
-  _gsm->UnAssignEfgElement(infoset->Game(), porACTION, action);
+  _gsm->UnAssignEfgElement(infoset->Game(), porACTION, (Action *)action);
 
   return new InfosetPortion(infoset);
 }
@@ -426,7 +426,7 @@ static Portion *GSM_InsertAction(Portion **param)
 
   _gsm->UnAssignGameElement(s->Game(), true, porBEHAV | porEFSUPPORT);
 
-  return new ActionPortion(s->Game()->InsertAction(s));
+  return new ActionPortion((Action *)s->Game()->InsertAction(s));
 }
 
 static Portion *GSM_InsertActionAt(Portion **param)
@@ -436,7 +436,7 @@ static Portion *GSM_InsertActionAt(Portion **param)
 
   _gsm->UnAssignGameElement(s->Game(), true, porBEHAV | porEFSUPPORT);
 
-  return new ActionPortion(s->Game()->InsertAction(s, a));
+  return new ActionPortion((Action *)s->Game()->InsertAction(s, a));
 }
 
 //--------------
@@ -852,7 +852,7 @@ static Portion *GSM_PriorAction(Portion** param)
   if(a == 0)
     return new NullPortion(porACTION);
 
-  return new ActionPortion(a);
+  return new ActionPortion((Action *)a);
 }
 
 //----------------
@@ -991,7 +991,7 @@ static Portion *GSM_SetName(Portion **param)
   
   switch (param[0]->Spec().Type)   {
     case porACTION:
-      ((ActionPortion *) param[0])->Value()->SetName(name);
+      ((Action *)((ActionPortion *) param[0])->Value())->SetName(name);
       break;
     case porINFOSET:
       ((InfosetPortion *) param[0])->Value()->SetName(name);

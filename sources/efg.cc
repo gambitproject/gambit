@@ -1217,7 +1217,7 @@ gNumber Efg::GetChanceProb(Infoset *infoset, int act) const
     return (gNumber) 0;
 }
 
-gNumber Efg::GetChanceProb(Action *a) const
+gNumber Efg::GetChanceProb(const Action *a) const
 {
   return GetChanceProbs(a->BelongsTo())[a->GetNumber()];
 }

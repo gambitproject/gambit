@@ -127,7 +127,7 @@ int NumNodes (const Efg &befg)
   return (CountNodes(befg.RootNode()));
 }
 
-Action *LastAction(Node *node)
+const Action *LastAction(Node *node)
 {
   Node *parent = node->GetParent();
   if (parent == 0)  return 0;
@@ -203,7 +203,8 @@ Efg *CompressEfg(const Efg &efg, const EFSupport &S)
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
       Infoset *infoset = player->Infosets()[iset];
       for (int act = infoset->NumActions(); act >= 1; act--)  {
-	Action *oldact = efg.Players()[pl]->Infosets()[iset]->Actions()[act];
+	const Action *oldact = 
+	  efg.Players()[pl]->Infosets()[iset]->Actions()[act];
 	if (!S.Find(oldact))
 	  newefg->DeleteAction(infoset, infoset->Actions()[act]);
       }

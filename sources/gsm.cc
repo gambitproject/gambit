@@ -337,7 +337,7 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
 	((NodePortion *) p1)->SetValue(((NodePortion *) p2)->Value());
 	break;
       case porACTION:
-	((ActionPortion *) p1)->SetValue(((ActionPortion *) p2)->Value());
+	((ActionPortion *) p1)->SetValue((Action *)((ActionPortion *) p2)->Value());
 	break;
       case porNFG:
 	((NfgPortion *) p1)->SetValue(((NfgPortion *) p2)->Value());
@@ -1011,7 +1011,7 @@ void GSM::UnAssignEfgElement( Efg* game, PortionSpec spec, void* data )
 void GSM::UnAssignEfgInfoset( Efg* game, Infoset* infoset )
 {
   for (int i = 1; i <= infoset->NumActions(); i++ )
-    UnAssignEfgElement( game, porACTION, infoset->Actions()[ i ] );
+    UnAssignEfgElement( game, porACTION, (Action *)infoset->Actions()[i] );
   UnAssignEfgElement( game, porINFOSET, infoset );  
 }
 
@@ -1023,7 +1023,7 @@ void GSM::UnAssignEfgSubTree( Efg* game, Node* node )
     if (infoset) {
       const gArray<const Action *>& actions = infoset->Actions();
       for (int j = actions.First(); j <= actions.Last(); j++ )
-	UnAssignEfgElement( game, porACTION, actions[j] );
+	UnAssignEfgElement( game, porACTION, (Action *)actions[j] );
       UnAssignEfgElement( game, porINFOSET, infoset );
     }
     UnAssignEfgSubTree( game, node->GetChild( i ) );

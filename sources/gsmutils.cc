@@ -46,7 +46,7 @@ Portion *ArrayToList(const gArray<const Action *> &A)
 {
   ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new ActionPortion(A[i]));
+    ret->Append(new ActionPortion((Action *)A[i]));
   return ret;
 }
 

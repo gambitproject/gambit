@@ -37,7 +37,7 @@ template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
 static Portion *GSM_ActionProb(Portion **param)
 {
   const BehavSolution *profile = ((BehavPortion *) param[0])->Value();
-  Action* action = ((ActionPortion*) param[1])->Value();
+  const Action* action = ((ActionPortion*) param[1])->Value();
   Infoset* infoset = action->BelongsTo();
   EFPlayer* player = infoset->GetPlayer();
   
@@ -90,7 +90,7 @@ static Portion *GSM_ActionProbs(Portion **param)
 static Portion *GSM_ActionValue(Portion **param)
 {
   BehavSolution *profile = ((BehavPortion *) param[0])->Value();
-  Action* action = ((ActionPortion*) param[1])->Value();
+  const Action* action = ((ActionPortion*) param[1])->Value();
   Infoset *infoset = action->BelongsTo();
 
   if (infoset->GetPlayer()->IsChance())
@@ -485,7 +485,7 @@ static Portion *GSM_Regret_Behav(Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
 
-  Action* a = ((ActionPortion*) param[1])->Value();
+  const Action* a = ((ActionPortion*) param[1])->Value();
   Infoset* s = a->BelongsTo();
   EFPlayer* p = s->GetPlayer();
 
@@ -536,7 +536,7 @@ static Portion *GSM_Regrets_Behav(Portion **param)
 static Portion *GSM_SetActionProb(Portion **param)
 {
   BehavSolution *P = new BehavSolution(*((BehavPortion *) param[0])->Value());
-  Action *a = ((ActionPortion *) param[1])->Value();
+  const Action *a = ((ActionPortion *) param[1])->Value();
   int infoset = a->BelongsTo()->GetNumber();
   int player = a->BelongsTo()->GetPlayer()->GetNumber();
   int action = P->Support().Find(a);
