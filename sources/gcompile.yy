@@ -148,7 +148,8 @@ gStack<gText> GCL_InputFileNames(4);
 %left  LAND
 %nonassoc  EQU  NEQ  LTN  LEQ  GTN  GEQ
 %left  PLUS  MINUS  AMPER
-%left  STAR  SLASH  PERCENT  DIV  DOT  CARET
+%left  STAR  SLASH  PERCENT  DIV  DOT  
+%left  CARET
 %left  UMINUS
 %left  HASH  UNDERSCORE
 

@@ -859,24 +859,8 @@ ITEM 0040:  Order of Precedence for Exponentiation not correct
 
 DATE:     10/2/1999 by RDM
 AFFECTS:  GCL
-STATUS:   OPEN
+STATUS:   CLOSED
 SEVERITY: MINOR
-DETAILS:
-
-Shouldn't exponentiation have a higher order of precedence than
-multiplication and division?  Right now they are at the same level,
-which gives the following:
-
-  GCL1:= << 4 * 10^2
-  1600
-
-when one would expect:
-
-  GCL2:= << 4 * (10^2)
-  400
-
-(but shouldn't have to put the parentheses.) 
-
 
 ---------------
 
