@@ -259,7 +259,9 @@ void EfgShow::Solve(void)
   }
     
   EfgSolveSettings ESS(ef);
-  Enable(FALSE);  // do not want users doing anything while solving
+  // do not want users doing anything while solving
+  Enable(FALSE);
+  wxBeginBusyCursor();
 
   if (ESS.MarkSubgames()) 
     tw->subgame_solve();
@@ -320,11 +322,14 @@ void EfgShow::Solve(void)
 	break;   // internal error, we'll just ignore silently
       }
     }
+    wxEndBusyCursor();
   }
   catch (gException &E) {
+    wxEndBusyCursor();
     guiExceptionDialog(E.Description(), this);
   }
 
+ 
   ChangeSolution(solns.VisibleLength());
   Enable(TRUE);
   if (ESS.AutoInspect()) InspectSolutions(CREATE_DIALOG);
