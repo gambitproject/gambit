@@ -1,7 +1,7 @@
 //
 // FILE: efginst.cc -- Instantiation of extensive form template classes
 //
-// 
+// $Id$
 //
 
 #include "behav.imp"
@@ -65,6 +65,11 @@ template class BehavAssessment<double>;
 template gOutput &operator<<(gOutput &, const BehavProfile<double> &);
 template gOutput &operator<<(gOutput &, const BehavAssessment<double> &);
 
+template void RealizationProbs(const MixedProfile<double> &mp,
+			       const Efg &E, BehavProfile<double> &bp,
+			       int pl, const gArray<int> *const actions, BehavNode<double> *);
+
+template void BehaviorStrat(const Efg &E, BehavProfile<double> &bp, int pl, BehavNode<double> *);
 
 template class BehavNode<gRational>;
 template class BehavProfile<gRational>;
@@ -72,12 +77,21 @@ template class BehavAssessment<gRational>;
 template gOutput &operator<<(gOutput &, const BehavProfile<gRational> &);
 template gOutput &operator<<(gOutput &, const BehavAssessment<gRational> &);
 
+template void RealizationProbs(const MixedProfile<gRational> &mp,
+			       const Efg &E, BehavProfile<gRational> &bp,
+			       int pl, const gArray<int> *const actions, BehavNode<gRational> *);
+template void BehaviorStrat(const Efg &E, BehavProfile<gRational> &bp, int pl, BehavNode<gRational> *n);
 
 template class BehavNode<gNumber>;
 template class BehavProfile<gNumber>;
 template class BehavAssessment<gNumber>;
 template gOutput &operator<<(gOutput &, const BehavProfile<gNumber> &);
 template gOutput &operator<<(gOutput &, const BehavAssessment<gNumber> &);
+
+template void BehaviorStrat(const Efg &E, BehavProfile<gNumber> &bp, int pl, BehavNode<gNumber> *n);
+template void RealizationProbs(const MixedProfile<gNumber> &mp,
+			       const Efg &E, BehavProfile<gNumber> &bp,
+			       int pl, const gArray<int> *const actions, BehavNode<gNumber> *);
 
 
 /*

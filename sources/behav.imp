@@ -1,7 +1,7 @@
 //
-// FILE: efg.imp -- Implementation of templated extensive form members
+// FILE: behav.imp -- Implementation of behavior profiles
 //
-//  $Id$
+// $Id$
 //
 
 #include "efg.h"
@@ -14,6 +14,9 @@
 #include "gvector.h"
 #include "behavsol.h"
 
+#include "nfg.h"
+#include "mixed.h"
+#include "lexicon.h"
 
 //-------------------------------------------------------------------------
 //                    PureBehavProfile<T> member functions
@@ -218,7 +221,7 @@ public:
 };
 
 template <class T> BehavNode<T>::BehavNode(Node *n, int pl)
-  : node(n), scratch(pl), children(n->NumChildren())
+  : node(n), nval((T) 0), bval((T) 0), scratch(pl), children(n->NumChildren())
 {
   for (int child = 1; child <= children.Length(); child++) 
     children[child] = new BehavNode<T>(n->GetChild(child), pl);
@@ -1227,6 +1230,98 @@ template <class T> void BehavProfile<T>::Centroid(void) const
 	for (act = 1; act <= svlen[dvidx[pl] + iset - 1]; act++)
 	  dvptr[pl][iset][act] = center;
       }
+}
+
+template <class T>
+void RealizationProbs(const MixedProfile<T> &mp,
+		      const Efg &E, BehavProfile<T> &bp,
+		      int pl, const gArray<int> *const actions,
+		      BehavNode<T> *n)
+{
+  static const T tremble = (T) 0;
+  T prob;
+
+  Node *node = n->node;
+
+  for (int i = 1; i <= n->children.Length(); i++)   {
+    if (node->GetPlayer() && !node->GetPlayer()->IsChance())   {
+      if (node->GetPlayer()->GetNumber() == pl)  {
+	if ((*actions)[node->GetInfoset()->GetNumber()] == i)
+	  prob = (T) 1 - tremble + tremble / (T) node->NumChildren();
+	else
+	  prob = tremble / (T) node->NumChildren();
+      }
+      else if (bp.Support().Find(node->GetInfoset()->Actions()[i]))
+	prob = (T) 1 / (T) bp.Support().NumActions(node->GetPlayer()->GetNumber(),
+							  node->GetInfoset()->GetNumber());
+      else
+	prob = (T) 0;
+    }
+    else  {   // n.GetPlayer() == 0
+      prob = E.GetChanceProb(node->GetInfoset(), i).operator gRational();
+    }
+
+    BehavNode<T> *child = n->children[i];
+    child->bval = prob * n->bval;
+    child->nval += child->bval;    
+
+    RealizationProbs(mp, E, bp, pl, actions, child);
+  }    
+	
+}
+
+template <class T>
+void BehaviorStrat(const Efg &E, BehavProfile<T> &bp, int pl,
+		   BehavNode<T> *n)
+{
+  for (int i = 1; i <= n->children.Length(); i++)   {
+    BehavNode<T> *child = n->children[i];
+    if (n->node->GetPlayer() && n->node->GetPlayer()->GetNumber() == pl)
+      if (n->nval > (T) 0 && child->nval > (T) 0)  {
+	bp(n->node->GetPlayer()->GetNumber(),
+	   n->node->GetInfoset()->GetNumber(), 
+	   bp.Support().Find(n->node->GetInfoset()->Actions()[i])) =
+	  child->nval / n->nval;
+      }
+    BehaviorStrat(E, bp, pl, child);
+  }
+}
+
+template <class T>
+BehavProfile<T>::BehavProfile(const MixedProfile<T> &p_profile)
+  : gDPVector<T>(p_profile.Game().AssociatedEfg()->NumActions()), 
+    m_efg(p_profile.Game().AssociatedEfg()),
+    m_root(new BehavNode<T>(m_efg->RootNode(), m_efg->NumPlayers())),
+    m_support(*m_efg)
+{
+  InitPayoffs();
+
+  if (m_efg->AssociatedAfg() == &p_profile.Game())   {
+    ((gVector<T> &) *this).operator=((gVector<T> &) p_profile);
+    return;
+  }
+
+  ((gVector<T> &) *this).operator=((T)0); 
+
+  BehavNode<T> *n = m_root;
+  const NFSupport &support = p_profile.Support();
+  const Nfg &nfg = p_profile.Game();
+
+  for (int pl = 1; pl <= nfg.NumPlayers(); pl++)   {
+    for (int st = 1; st <= support.NumStrats(pl); st++)  {
+      int snum = support.Strategies(pl)[st]->Number();
+      if (p_profile(pl, st) > (T) 0)  {
+	const gArray<int> *const actions = m_efg->GetLexicon()->strategies[pl][snum];
+
+	n->bval = p_profile(pl, st);
+
+	RealizationProbs(p_profile, *m_efg, *this, pl, actions, m_root);
+      }
+    }
+    
+    m_root->nval = (T) 1;
+    BehaviorStrat(*m_efg, *this, pl, n);
+  }
 }
 
 //-----------------

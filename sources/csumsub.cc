@@ -22,9 +22,8 @@ void efgLpNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   npivots += npiv;
 
   for (int i = 1; i <= solutions.Length(); i++)  {
-    BehavProfile<gNumber> bp(sup);
-    MixedToBehav(*N, MixedProfile<gNumber>(solutions[i]), E, bp);
-    solns.Append(bp);
+    MixedProfile<gNumber> profile(solutions[i]);
+    solns.Append(BehavProfile<gNumber>(profile));
   }
 
   delete N;

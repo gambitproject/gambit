@@ -1656,5 +1656,21 @@ void FullEfg::InitPayoffs(void) const
   m_outcome_revision = RevisionNumber();
 }
 
+Nfg *FullEfg::AssociatedNfg(void) const
+{
+  if (lexicon) {
+    return lexicon->N;
+  }
+  else {
+    return 0;
+  }
+}
+
+Nfg *FullEfg::AssociatedAfg(void) const
+{
+  return afg;
+}
+
+
 #include "efgiter.imp"
 #include "efgciter.imp"

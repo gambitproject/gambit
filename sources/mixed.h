@@ -17,6 +17,7 @@ class MixedSolution;
 class NFOutcome;
 
 template <class T> class gRectArray;
+template <class T> class BehavProfile;
 
 template <class T> class MixedProfile : public gPVector<T>  {
 
@@ -39,6 +40,7 @@ template <class T> class MixedProfile : public gPVector<T>  {
   public:
     MixedProfile(const NFSupport &);
     MixedProfile(const MixedProfile<T> &);
+    MixedProfile(const BehavProfile<T> &);
     MixedProfile(const MixedSolution &);
     virtual ~MixedProfile();
 

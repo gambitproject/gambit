@@ -83,6 +83,10 @@ public:
 		      gVector<gNumber> &payoff) const = 0;
   virtual void Payoff(const gArray<gArray<int> *> &profile,
 		      gArray<gNumber> &payoff) const = 0;
+
+  virtual Nfg *AssociatedNfg(void) const = 0;
+  virtual Nfg *AssociatedAfg(void) const = 0;
+  virtual Lexicon *GetLexicon(void) const = 0;
 };
 
 class FullEfg : public Efg  {
@@ -276,24 +280,13 @@ public:
 
   // defined in efgutils.cc
   friend void RandomEfg(FullEfg &);
-  // This function put in to facilitate error-detection in MixedToBehav[]
-  friend Nfg *AssociatedNfg(const Efg *E);
-  friend Nfg *AssociatedAfg(const Efg *E);
+
+  Nfg *AssociatedNfg(void) const;
+  Nfg *AssociatedAfg(void) const;
+  Lexicon *GetLexicon(void) const { return lexicon; }
 
   friend Nfg *MakeReducedNfg(const EFSupport &);
   friend Nfg *MakeAfg(const Efg &);
-  friend void MixedToBehav(const Nfg &, const MixedProfile<double> &mp,
-			   const Efg &, BehavProfile<double> &bp);
-  friend void BehavToMixed(const Efg &, const BehavProfile<double> &,
-			   const Nfg &, MixedProfile<double> &);
-  friend void MixedToBehav(const Nfg &, const MixedProfile<gRational> &mp,
-			   const Efg &, BehavProfile<gRational> &bp);
-  friend void BehavToMixed(const Efg &, const BehavProfile<gRational> &,
-			   const Nfg &, MixedProfile<gRational> &);
-  friend void MixedToBehav(const Nfg &, const MixedProfile<gNumber> &mp,
-			   const Efg &, BehavProfile<gNumber> &bp);
-  friend void BehavToMixed(const Efg &, const BehavProfile<gNumber> &,
-			   const Nfg &, MixedProfile<gNumber> &);
 };
 
 #include "behav.h"

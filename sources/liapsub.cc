@@ -31,25 +31,25 @@ void efgLiapNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
 
   ViewNormal(*N, support);
 
-  MixedProfile<double> mp(support);
+  MixedProfile<double> mp(bp);
+  MixedProfile<gNumber> start(support);
 
-  BehavToMixed(E, bp, *N, mp);
-
-  MixedProfile<gNumber> st(support);
-  for (int i = 1; i <= st.Length(); i++)
-    st[i] = mp[i];
+  for (int pl = 1; pl <= N->NumPlayers(); pl++) {
+    for (int st = 1; st <= support.NumStrats(pl); st++) {
+      start(pl, st) = mp(pl, support.Strategies(pl)[st]->Number());
+    }
+  }
 
   long this_nevals, this_niters;
 
   gList<MixedSolution> subsolns;
-  Liap(*N, params, st, subsolns, this_nevals, this_niters);
+  Liap(*N, params, start, subsolns, this_nevals, this_niters);
 
   nevals += this_nevals;
 
   for (int i = 1; i <= subsolns.Length(); i++)  {
-    BehavProfile<gNumber> bp(start);
-    MixedToBehav(*N, MixedProfile<gNumber>(subsolns[i]), E, bp);
-    solns.Append(bp);
+    MixedProfile<gNumber> profile(subsolns[i]);
+    solns.Append(BehavProfile<gNumber>(profile));
   }
 
   delete N;

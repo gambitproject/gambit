@@ -1,9 +1,11 @@
 //
 // FILE: nfginst.cc -- Instantiation of normal form template classes
 //
-// 
+// $Id$ 
 //
 
+#include "behav.h"
+#include "lexicon.h"
 #include "mixed.imp"
 #include "rational.h"
 

@@ -170,12 +170,7 @@ EfgAlgType NfgAlgType2EfgAlgType(NfgAlgType algtype)
 static Portion *GSM_Behav(Portion **param)
 {
   MixedSolution &mp = *((MixedPortion*) param[0])->Value();
-  Nfg &N = mp.Game();
-  const Efg &E = *(const Efg *) N.AssociatedEfg();
-
-  BehavProfile<gNumber> *bp = new BehavProfile<gNumber>(EFSupport(E));
-
-  MixedToBehav(N, MixedProfile<gNumber>(mp), E, *bp);
+  BehavProfile<gNumber> *bp = new BehavProfile<gNumber>(MixedProfile<gNumber>(mp));
   BehavSolution *bs = new BehavSolution(*bp);
   bs->SetCreator(NfgAlgType2EfgAlgType(mp.Creator()));
   bs->SetEpsilon(mp.Epsilon());

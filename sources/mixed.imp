@@ -1,5 +1,5 @@
 //
-// FILE: nfg.imp -- Implementation of normal form
+// FILE: mixed.imp -- Implementation of mixed profiles
 //
 // $Id$
 //
@@ -316,4 +316,25 @@ template <class T>
 void MixedProfile<T>::InitPayoffs(void) const
 {
   N->InitPayoffs();
+}
+
+template <class T>
+MixedProfile<T>::MixedProfile(const BehavProfile<T> &p_profile)
+  : gPVector<T>(p_profile.Game().AssociatedNfg()->NumStrats()),
+    N(p_profile.Game().AssociatedNfg()), support(*N)
+{
+  InitPayoffs();
+  
+  const Efg &efg = p_profile.Game();
+  for (int pl = 1; pl <= N->NumPlayers(); pl++)  {
+    for (int st = 1; st <= N->NumStrats(pl); st++)  {
+      T prob = (T) 1;
+
+      for (int iset = 1; iset <= efg.Players()[pl]->NumInfosets(); iset++) {
+	if ((*efg.GetLexicon()->strategies[pl][st])[iset] > 0)
+	  prob *= p_profile(pl, iset, (*efg.GetLexicon()->strategies[pl][st])[iset]);
+      }
+      (*this)(pl, st) = prob;
+    }
+  }
 }

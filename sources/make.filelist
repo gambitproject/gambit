@@ -18,8 +18,8 @@ GPOLY_OBJECTS = $(GPOLY_SOURCES:.cc=.o)
 
 
 GAME_SOURCES = readnfg.cc nfstrat.cc nfg.cc nfginst.cc nfgutils.cc \
-               efg.cc efginst.cc readefg.cc efgnfg.cc efgnfgd.cc \
-               efgnfgr.cc efgutils.cc efstrat.cc mixedsol.cc behavsol.cc \
+               efg.cc efginst.cc readefg.cc efgnfg.cc \
+               efgutils.cc efstrat.cc mixedsol.cc behavsol.cc \
                sfstrat.cc sfg.cc algutils.cc
 
 GAME_OBJECTS = $(GAME_SOURCES:.cc=.o)

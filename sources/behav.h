@@ -24,8 +24,6 @@ template <class T> class gRectArray;
 class BehavSolution;
 
 template <class T> class BehavProfile : public gDPVector<T>  {
-  friend void MixedToBehav(const Nfg &, const MixedProfile<T> &, 
-			   const Efg &, BehavProfile<T> &);
 protected:
   const Efg *m_efg;
   BehavNode<T> *m_root;
@@ -117,6 +115,7 @@ public:
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
   BehavProfile(const EFSupport &);
   BehavProfile(const BehavProfile<T> &);
+  BehavProfile(const MixedProfile<T> &);
   BehavProfile(const BehavSolution &);
   virtual ~BehavProfile();
   
