@@ -56,8 +56,11 @@ template <class T> Infoset *ExtForm<T>::CreateInfoset(int n, Player *p, int br)
 {
   Infoset *s = (p->IsChance()) ? new ChanceInfoset<T>(n, p, br) :
                new Infoset(n, p, br);
-
-  s->name = "(" + ToString(p->number) + "," + ToString(n) + ")";
+  
+  n = 1;
+  do  {
+    s->name = "(" + ToString(p->number) + "," + ToString(n++) + ")";
+  }  while (p->IsInfosetDefined(s->name));
   return s;
 }
 
@@ -98,7 +101,7 @@ void ExtForm<T>::Payoff(Node *n, T prob, const gPVector<int> &profile,
 {
   if (n->outcome)
     for (int i = 1; i <= players.Length(); i++)
-      payoff[i] += ((OutcomeVector<T> &) *n->outcome)[i];
+      payoff[i] += prob * ((OutcomeVector<T> &) *n->outcome)[i];
   
   if (n->infoset && n->infoset->player->IsChance())
     for (int i = 1; i <= n->children.Length(); i++)

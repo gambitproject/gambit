@@ -33,6 +33,8 @@ class Player   {
     Infoset *GetInfoset(const gString &name) const;
     const gArray<Infoset *> &InfosetList(void) const  { return infosets; }
 
+    bool IsInfosetDefined(const gString &) const;
+
 // This function exists only to facilitate the current version of efg2nfg
 // and will not exist in the future.  DO NOT USE IN NEW CODE!
     int GetNumber(void) const    { return number; }

@@ -60,6 +60,13 @@ Player::~Player()
   while (infosets.Length())   delete infosets.Remove(1);
 }
 
+bool Player::IsInfosetDefined(const gString &s) const
+{
+  for (int i = 1; i <= infosets.Length(); i++)
+    if (infosets[i]->name == s)   return true;
+  return false;
+}
+
 Infoset *Player::GetInfoset(const gString &name) const
 {
   for (int i = 1; i <= infosets.Length(); i++)
@@ -254,16 +261,57 @@ Infoset *BaseExtForm::InsertNode(Node *n, Infoset *s)
 
 Infoset *BaseExtForm::JoinInfoset(Infoset *s, Node *n)
 {
+  assert(n && s);
+
+  if (!n->infoset)   return 0; 
+  if (n->infoset == s)   return s;
+  if (s->actions.Length() != n->children.Length())  return n->infoset;
+
+  Infoset *t = n->infoset;
+  Player *p = n->infoset->player;
+
+  t->members.Remove(t->members.Find(n));
+  if (t->members.Length() == 0)
+    delete p->infosets.Remove(p->infosets.Find(t));
+  s->members.Append(n);
+
+  n->infoset = s;
+
   return s;
 }
 
 Infoset *BaseExtForm::LeaveInfoset(Node *n)
 {
+  assert(n);
+
+  if (!n->infoset)   return 0;
+
+  Infoset *s = n->infoset;
+  if (s->members.Length() == 1)   return s;
+
+  Player *p = s->player;
+  s->members.Remove(s->members.Find(n));
+  n->infoset = CreateInfoset(p->infosets.Length() + 1, p,
+			     n->children.Length());
+  n->infoset->members.Append(n);
+  p->infosets.Append(n->infoset);
+  for (int i = 1; i <= s->actions.Length(); i++)
+    n->infoset->actions[i]->name = s->actions[i]->name;
+
   return n->infoset;
 }
 
 Infoset *BaseExtForm::MergeInfoset(Infoset *to, Infoset *from)
 {
+  assert(to && from);
+
+  if (to == from ||
+      to->actions.Length() != from->actions.Length())   return from;
+
+  to->members += from->members;
+  for (int i = 1; i <= from->members.Length(); i++)
+    from->members[i]->infoset = to;
+  delete from->player->infosets.Remove(from->player->infosets.Find(from));
   return to;
 }
 
