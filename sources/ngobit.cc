@@ -1,7 +1,7 @@
 //#
 //# FILE: ngobit.cc -- Implementation of normal form Gobit algorithm
 //#
-//# $Id$
+//# @(#)ngobit.cc	1.20 5/1/95
 //#
 
 #include <math.h>
@@ -189,18 +189,21 @@ template <class T> void NFGobitFunc<T>::Optimize(T Lam, int &iter, T &value)
 template <class T> void NFGobitFunc<T>::Output(gOutput &f,int format) const
 {
       // Header information
-  if(format==3) {
-    N.WriteNfgFile(f);
-  }
-  else if(format==2) {
-    int numcols = 2+N.ProfileLength();
-    f << "\n" << numcols;
-    for(int i=1;i<=numcols;i++) f << " " << i;
-    }
-      // PXI output
-  else if(format==1) {
-    f<< " ";
-    for (int pl = 1; pl <= N.NumPlayers(); pl++)  
+	if(format==3) {
+		f<<"Dimensionality:\n";
+		N.WriteNfgFile(f);
+	}
+	else if(format==2) {
+		int numcols = 2+N.ProfileLength();
+		f<<"DataFormat:\n";
+		f << numcols;
+		for(int i=1;i<=numcols;i++) f << " " << i;
+    f<<"\nData:\n";
+		}
+			// PXI output
+	else if(format==1) {
+		f<< " ";
+		for (int pl = 1; pl <= N.NumPlayers(); pl++)
       for (int strat = 1; strat <= N.NumStrats(pl); strat++)  
 	f << pp(pl,strat) << " ";
   }
