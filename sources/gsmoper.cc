@@ -875,6 +875,43 @@ Portion* GSM_NewInputStream( Portion** param )
 
 
 
+//-----------------------------------------------------------------
+//    Write and SetFormat function - possibly belong somewhere else
+//-----------------------------------------------------------------
+
+
+Portion* GSM_Write_numerical( Portion** param )
+{
+  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  s << param[ 1 ] << "\n";
+  return new OutputRefPortion( s );
+}
+
+
+Portion* GSM_Write_gString( Portion** param )
+{
+  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  if( ( (BoolPortion*) param[ 2 ] )->Value() )
+    s << param[ 1 ] << "\n";
+  else
+    s << ( (TextPortion*) param[ 1 ] )->Value() << "\n";
+  return new OutputRefPortion( s );
+}
+
+
+Portion* GSM_SetFormat( Portion** param )
+{
+  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  s.SetWidth( ( (IntPortion*) param[ 1 ] )->Value() );
+  s.SetPrec( ( (IntPortion*) param[ 2 ] )->Value() );
+  return new OutputRefPortion( s );
+}
+
+
+
+
+
+
 
 
 
@@ -1193,7 +1230,27 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetFuncInfo( GSM_NewInputStream, 1, file_Text );
   gsm->AddFunction( FuncObj );
 
+  //------------------- Formatted Output -------------------
 
+  FuncObj = new FuncDescObj( "Write" );
+  FuncObj->SetFuncInfo( GSM_Write_numerical, 2 );
+  FuncObj->SetParamInfo( GSM_Write_numerical, 0, "output", porOUTPUT );
+  FuncObj->SetParamInfo( GSM_Write_numerical, 1, "x", 
+			porBOOL | porINTEGER | porFLOAT | porRATIONAL );
+  FuncObj->SetFuncInfo( GSM_Write_gString, 3 );
+  FuncObj->SetParamInfo( GSM_Write_gString, 0, "output", porOUTPUT );
+  FuncObj->SetParamInfo( GSM_Write_gString, 1, "x", porTEXT );
+  FuncObj->SetParamInfo( GSM_Write_gString, 2, "quoted", porBOOL, 
+			new BoolValPortion( false ) );
+  gsm->AddFunction( FuncObj );
+
+
+  FuncObj = new FuncDescObj( "SetFormat" );
+  FuncObj->SetFuncInfo( GSM_SetFormat, 3 );
+  FuncObj->SetParamInfo( GSM_SetFormat, 0, "output", porOUTPUT );
+  FuncObj->SetParamInfo( GSM_SetFormat, 1, "width", porINTEGER );
+  FuncObj->SetParamInfo( GSM_SetFormat, 2, "precis", porINTEGER );
+  gsm->AddFunction( FuncObj );
 }
 
 
