@@ -217,24 +217,22 @@ void NfgOutcomeDialogC::OnDetach(void)
 // OnDelete
 void NfgOutcomeDialogC::OnDelete(void)
 {
-    char tmp_str[256];
-    int outc_num = OutcomeNum();
-    gText outc_name = nf.Outcomes()[outc_num]->GetName();
-    sprintf(tmp_str, "Delete Outcome '%s'?", (const char *)outc_name);
+  char tmp_str[256];
+  int outc_num = OutcomeNum();
+  gText outc_name = nf.Outcomes()[outc_num]->GetName();
+  sprintf(tmp_str, "Delete Outcome '%s'?", (const char *)outc_name);
 
-    if (wxMessageBox(tmp_str, "Confirm", wxOK|wxCANCEL) == wxOK)
-    {
-        if (outc_num <= nf.NumOutcomes()) // not the last, blank row
-        {
-            NFOutcome *tmp = nf.Outcomes()[outc_num];
-            assert(tmp);
-            nf.DeleteOutcome(tmp);
-            ns->SetOutcome(-1);
-        }
-
+  if (wxMessageBox(tmp_str, "Confirm", wxOK | wxCANCEL) == wxOK) {
+    if (outc_num <= nf.NumOutcomes()) { // not the last, blank row
+      NFOutcome *tmp = nf.Outcomes()[outc_num];
+      assert(tmp);
+      nf.DeleteOutcome(tmp);
+      ns->RemoveSolutions();
+      ns->SetOutcome(-1);
     }
+  }
 
-    CanvasFocus();
+  CanvasFocus();
 }
 
 
@@ -363,64 +361,59 @@ void NfgOutcomeDialogC::UpdateValues(void)
 
 void NfgOutcomeDialogC::CheckOutcome(int outc_num)
 {
-    assert(outc_num > 0 && outc_num <= nf.NumOutcomes() + 1);
-    bool outcomes_changed = false;
-    NFOutcome *tmp;
+  assert(outc_num > 0 && outc_num <= nf.NumOutcomes() + 1);
+  bool outcomes_changed = false;
+  NFOutcome *tmp;
 
-    // if a new outcome has created, append it to the list of outcomes
+  // if a new outcome has created, append it to the list of outcomes
 
-    if (outc_num > nf.NumOutcomes())
-    {
-        tmp = nf.NewOutcome();
-        tmp->SetName("Outcome " + ToText(nf.NumOutcomes()));
+  if (outc_num > nf.NumOutcomes()) {
+    tmp = nf.NewOutcome();
+    tmp->SetName("Outcome " + ToText(nf.NumOutcomes()));
+  }
+  else {
+    tmp = nf.Outcomes()[outc_num];
+  }
+
+  assert(tmp);
+
+  // check if the values have changed
+  int prow, pcol;
+
+  for (int j = 1; j <= nf.NumPlayers(); j++) {
+    PayoffPos(outc_num, j, &prow, &pcol);
+    gNumber payoff;
+    // Get text value and remove color prefix if any.
+    gText numstr = GetCell(prow, pcol);
+    int lastbrace = numstr.LastOccur('}');
+    numstr = numstr.Right(numstr.Length() - lastbrace);
+    FromText(numstr, payoff);
+    
+    if (nf.Payoff(tmp, j) != payoff) {
+      nf.SetPayoff(tmp, j, payoff);
+      outcomes_changed = true;
     }
-    else
-    {
-        tmp = nf.Outcomes()[outc_num];
+  }
+
+  // check if the name has changed
+  NamePos(outc_num, &prow, &pcol);
+  gText new_name = GetCell(prow, pcol);
+
+  if (new_name != tmp->GetName()) {
+    if (new_name != "") {
+      tmp->SetName(new_name);
+      outcomes_changed = true;
     }
-
-    assert(tmp);
-
-    // check if the values have changed
-    int prow, pcol;
-
-    for (int j = 1; j <= nf.NumPlayers(); j++)
-    {
-        PayoffPos(outc_num, j, &prow, &pcol);
-        gNumber payoff;
-        // Get text value and remove color prefix if any.
-        gText numstr = GetCell(prow, pcol);
-        int lastbrace = numstr.LastOccur('}');
-        numstr = numstr.Right(numstr.Length() - lastbrace);
-        FromText(numstr, payoff);
-
-        if (nf.Payoff(tmp, j) != payoff)
-        {
-            nf.SetPayoff(tmp, j, payoff);
-            outcomes_changed = true;
-        }
+    else {
+      SetCell(prow, pcol, tmp->GetName());
+      OnPaint();
     }
+  }
 
-    // check if the name has changed
-    NamePos(outc_num, &prow, &pcol);
-    gText new_name = GetCell(prow, pcol);
-
-    if (new_name != tmp->GetName())
-    {
-        if (new_name != "")
-        {
-            tmp->SetName(new_name);
-            outcomes_changed = true;
-        }
-        else
-        {
-            SetCell(prow, pcol, tmp->GetName());
-            OnPaint();
-        }
-    }
-
-    if (outcomes_changed) 
-        ns->SetOutcome(-1);
+  if (outcomes_changed) {
+    ns->RemoveSolutions();
+    ns->SetOutcome(-1);
+  }
 }
 
 /****************************************************************************
