@@ -210,12 +210,39 @@ menu.  These include:
 <itemizedlist>
 <listitem>
 <para>
+<guimenuitem>BMP</guimenuitem>: Exports a rendering of the extensive form,
+using the current layout settings, to a Windows bitmap file.
+A dialog prompts for the file in which to save the image.
+</para>
+</listitem>
+<listitem>
+<para>
+<guimenuitem>JPEG</guimenuitem>: Exports a rendering of the extensive form,
+using the current layout settings, to a JPEG file.
+A dialog prompts for the file in which to save the image.
+</para>
+</listitem>
+<listitem>
+<para>
+<guimenuitem>PNG</guimenuitem>: Exports a rendering of the extensive form,
+using the current layout settings, to a PNG bitmap file.
+A dialog prompts for the file in which to save the image.
+</para>
+</listitem>
+<listitem>
+<para>
 <guimenuitem>PostScript</guimenuitem>: Exports a rendering of the extensive
 form, using the current layout settings, to a file in PostScript format.
 A dialog prompts for the file in which to save the printout.
 </para>
 </listitem>
 </itemizedlist>
+<note>
+<para>
+Due to patent restrictions, Gambit cannot write files in GIF format, and
+will not in the future unless and until the restrictions are dropped.
+</para>
+</note>
 </para>
 
 </sect2>
