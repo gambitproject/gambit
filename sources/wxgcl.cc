@@ -228,6 +228,7 @@ private:
   void OnSaveLog(wxCommandEvent &);
   void OnSaveScript(wxCommandEvent &);
   void OnPrefsProgress(wxCommandEvent &);
+  void OnPrefsPrompt(wxCommandEvent &);
   void OnPrefsInputFont(wxCommandEvent &);
   void OnPrefsOutputFont(wxCommandEvent &);
   void OnHelpAbout(wxCommandEvent &);
@@ -239,6 +240,8 @@ private:
   void OnSashDrag(wxSashEvent &);
   void OnCancel(wxCommandEvent &);
   void OnTextEnter(wxCommandEvent &);
+
+  gText FormPrompt(void);
 
 public:
   GclFrame(wxFrame *p_parent, const wxString &p_title,
@@ -264,6 +267,7 @@ const int idSAVE_SCRIPT = 2002;
 const int idPREFS_INPUTFONT = 2100;
 const int idPREFS_OUTPUTFONT = 2101;
 const int idPREFS_PROGRESS = 2102;
+const int idPREFS_PROMPT = 2103;
 
 GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
 		   const wxPoint &p_position, const wxSize &p_size)
@@ -282,8 +286,10 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
   editMenu->Append(wxID_PASTE, "&Paste", "Paste selected text");
 
   wxMenu *prefsMenu = new wxMenu;
-  prefsMenu->Append(idPREFS_PROGRESS, "Show &progress display",
+  prefsMenu->Append(idPREFS_PROGRESS, "Show progress &display",
 		    "Show progress display for algorithms", true);
+  prefsMenu->Append(idPREFS_PROMPT, "Show assignment &prompt",
+		    "Include assignment at beginning of prompt", true);
   prefsMenu->AppendSeparator();
   prefsMenu->Append(idPREFS_INPUTFONT, "&Input window font",
 		    "Change the font used in the input window");
@@ -301,6 +307,7 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
   menuBar->Append(helpMenu, "&Help");
   SetMenuBar(menuBar);
   GetMenuBar()->Check(idPREFS_PROGRESS, true);
+  GetMenuBar()->Check(idPREFS_PROMPT, true);
 
   CreateStatusBar();
 
@@ -334,7 +341,7 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
   m_inputSashWindow->Layout();
 
   m_inputWindow->SetFocus();
-  m_inputWindow->SetValue("<< ");
+  m_inputWindow->SetValue((char *) FormPrompt());
   m_inputWindow->SetInsertionPointEnd();
 
   SetSizeHints(300, 300);
@@ -350,6 +357,7 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
   m_compiler = new GCLCompiler(*m_environment);
   wxCommandLine cmdline(20);
   gPreprocessor preproc(*m_environment, &cmdline, "Include[\"gclini.gcl\"]");
+  wxBusyCursor cursor;
   try {
     while (!preproc.eof()) {
       gText line = preproc.GetLine();
@@ -382,6 +390,7 @@ BEGIN_EVENT_TABLE(GclFrame, wxFrame)
   EVT_MENU(idSAVE_SCRIPT, GclFrame::OnSaveScript)
   EVT_MENU(wxID_EXIT, wxWindow::Close)
   EVT_MENU(idPREFS_PROGRESS, GclFrame::OnPrefsProgress)
+  EVT_MENU(idPREFS_PROMPT, GclFrame::OnPrefsPrompt)
   EVT_MENU(idPREFS_INPUTFONT, GclFrame::OnPrefsInputFont)
   EVT_MENU(idPREFS_OUTPUTFONT, GclFrame::OnPrefsOutputFont)
   EVT_MENU(wxID_ABOUT, GclFrame::OnHelpAbout)
@@ -438,6 +447,11 @@ void GclFrame::OnSaveScript(wxCommandEvent &)
 void GclFrame::OnPrefsProgress(wxCommandEvent &)
 {
   m_environment->ToggleMonitorStyle();
+}
+
+void GclFrame::OnPrefsPrompt(wxCommandEvent &)
+{
+
 }
 
 void GclFrame::OnPrefsInputFont(wxCommandEvent &) 
@@ -523,6 +537,9 @@ void GclFrame::OnTextEnter(wxCommandEvent &)
   gPreprocessor preproc(*m_environment, &cmdline,
 			gText(m_inputWindow->GetValue().c_str()) + "\n");
   m_inputWindow->SetValue("");
+
+  wxBusyCursor cursor;
+
   try {
     while (!preproc.eof()) {
       gText line = preproc.GetLine();
@@ -544,7 +561,7 @@ void GclFrame::OnTextEnter(wxCommandEvent &)
   }
 
   m_cancelButton->Enable(false);
-  m_inputWindow->SetValue("<< ");
+  m_inputWindow->SetValue((char *) FormPrompt());
   m_inputWindow->SetInsertionPointEnd();
   m_inputWindow->Enable(true);
   m_outputWindow->AppendText("\n");
@@ -556,3 +573,12 @@ void GclFrame::OnCancel(wxCommandEvent &)
   m_cancelButton->Set();
 }
 
+gText GclFrame::FormPrompt(void) 
+{
+  gText prompt;
+  if (GetMenuBar()->IsChecked(idPREFS_PROMPT)) {
+    prompt += "GCL" + ToText(m_history.Length() + 1) + ":= ";
+  }
+  prompt += "<< ";
+  return prompt;
+}
