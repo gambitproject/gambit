@@ -47,6 +47,8 @@ template <class T> class gDPVector : public gPVector<T>  {
     int operator==(const gDPVector<T> &v) const;
     int operator!=(const gDPVector<T> &v) const;
 
+    const gTuple<int> &DPLengths(void) const;
+
     void Dump(gOutput &) const;
 };
 

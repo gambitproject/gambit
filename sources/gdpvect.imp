@@ -221,6 +221,11 @@ template <class T> int gDPVector<T>::operator!=(const gDPVector<T> &v) const
   return !(*this == v);
 }
 
+template <class T> const gTuple<int> &gDPVector<T>::DPLengths(void) const
+{
+  return dvlen;
+}
+
 //--------------------------------------------------------------------------
 //                      gDPVector<T>: Output functions
 //--------------------------------------------------------------------------
