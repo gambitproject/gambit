@@ -1,7 +1,7 @@
 //#
 //# FILE: gblock.h -- Implementation of a generic array container class
 //#
-//# $Id$
+//# @(#)gblock.h	1.7 9/26/94
 //#
 
 #ifndef GBLOCK_H
@@ -182,13 +182,13 @@ template <class T> INLINE int gBlock<T>::operator==(const gBlock<T> &b) const
   return 1;
 }
 
-template <class T> inline const T &gBlock<T>::operator[](int n) const
+template <class T> INLINE const T &gBlock<T>::operator[](int n) const
 {
   assert(n >= 1 && n <= length);
   return data[--n];
 }
 
-template <class T> inline T &gBlock<T>::operator[](int n)
+template <class T> INLINE T &gBlock<T>::operator[](int n)
 {
   assert(n >= 1 && n <= length);
   return data[--n];
@@ -217,12 +217,12 @@ template <class T> INLINE int gBlock<T>::InsertAt(const T &t, int n)
   return n;
 }
 
-template <class T> inline int gBlock<T>::Append(const T &t)
+template <class T> INLINE int gBlock<T>::Append(const T &t)
 {
   return InsertAt(t, length + 1);
 }
 
-template <class T> inline int gBlock<T>::Insert(const T &t, int n)
+template <class T> INLINE int gBlock<T>::Insert(const T &t, int n)
 {
   return InsertAt(t, (n < 1) ? 1 : ((n > length + 1) ? length + 1 : n));
 }
