@@ -22,9 +22,9 @@ template <class T> EFGobitParams<T>::EFGobitParams(gStatus &status_)
   : GobitParams<T>(status_)
 { }
 
-template <class T> EFGobitParams<T>::EFGobitParams(gOutput &out, gOutput &err,
-						   gOutput &pxi, gStatus &status_)
-  : GobitParams<T>(out, err, pxi, status_)
+template <class T>
+EFGobitParams<T>::EFGobitParams(gOutput &out, gOutput &pxi, gStatus &status_)
+  : GobitParams<T>(out, pxi, status_)
 { }
 
 //-------------------------------------------------------------------------

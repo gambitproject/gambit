@@ -17,9 +17,9 @@ template <class T> NFGobitParams<T>::NFGobitParams(gStatus &status_)
   : GobitParams<T>(status_)
 { }
 
-template <class T> NFGobitParams<T>::NFGobitParams(gOutput &out, gOutput &err,
-						   gOutput &pxi, gStatus &status_)
-  : GobitParams<T>(out, err, pxi, status_)
+template <class T>
+NFGobitParams<T>::NFGobitParams(gOutput &out, gOutput &pxi, gStatus &status_)
+  : GobitParams<T>(out, pxi, status_)
 { }
 
 //-------------------------------------------------------------------------

@@ -48,19 +48,16 @@ Portion *GSM_GobitEfg(Portion **param)
 {
   EFGobitParams<double> EP;
  
-  EP.pxifile = &((Output_Portion *) param[13])->Value();
-  EP.minLam = ((numerical_Portion<double> *) param[2])->Value();
-  EP.maxLam = ((numerical_Portion<double> *) param[3])->Value();
-  EP.delLam = ((numerical_Portion<double> *) param[4])->Value();
-  EP.maxitsOpt = ((numerical_Portion<gInteger> *) param[7])->Value().as_long();
-  EP.maxitsBrent = ((numerical_Portion<gInteger> *) param[8])->Value().as_long();
-  EP.tolOpt = ((numerical_Portion<double> *) param[9])->Value();
-  EP.tolBrent = ((numerical_Portion<double> *) param[10])->Value();
+  EP.pxifile = &((Output_Portion *) param[1])->Value();
+  EP.minLam = ((numerical_Portion<double> *) param[3])->Value();
+  EP.maxLam = ((numerical_Portion<double> *) param[4])->Value();
+  EP.delLam = ((numerical_Portion<double> *) param[5])->Value();
+  EP.powLam = ((numerical_Portion<gInteger> *) param[6])->Value().as_long();
   
-  EFGobitModule<double> M(((Efg_Portion<double> *) param[14])->Value(), EP);
+  EFGobitModule<double> M(((Efg_Portion<double> *) param[0])->Value(), EP);
   M.Gobit(1);
 
-  ((numerical_Portion<double> *) param[11])->Value() = M.Time();
+  ((numerical_Portion<double> *) param[2])->Value() = M.Time();
 
   return new numerical_Portion<gInteger>(1);
 }
@@ -105,37 +102,22 @@ void Init_algfunc(GSM *gsm)
   FuncDescObj *FuncObj;
 
   FuncObj = new FuncDescObj("GobitEfg");
-  FuncObj->SetFuncInfo(GSM_GobitEfg, 15);
-  FuncObj->SetParamInfo(GSM_GobitEfg, 0, "trace", porINTEGER,
-			new numerical_Portion<gInteger>(0));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 1, "nequilib", porINTEGER,
-			new numerical_Portion<gInteger>(1));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 2, "minLam", porDOUBLE,
-			new numerical_Portion<double>(0.01));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 3, "maxLam", porDOUBLE,
-			new numerical_Portion<double>(30));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 4, "delLam", porDOUBLE,
-			new numerical_Portion<double>(.01));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 5, "type", porINTEGER,
-			new numerical_Portion<gInteger>(1));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 6, "start", porLIST | porDOUBLE,
-		        new List_Portion);
-  FuncObj->SetParamInfo(GSM_GobitEfg, 7, "maxitsOpt", porINTEGER,
-			new numerical_Portion<gInteger>(20));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 8, "maxitsBrent", porINTEGER,
-			new numerical_Portion<gInteger>(100));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 9, "tolOpt", porDOUBLE,
-			new numerical_Portion<double>(1.0e-10));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 10, "tolBrent", porDOUBLE,
-			new numerical_Portion<double>(2.0e-10));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 11, "time", porDOUBLE,
+  FuncObj->SetFuncInfo(GSM_GobitEfg, 8);
+  FuncObj->SetParamInfo(GSM_GobitEfg, 0, "efg", porEFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_GobitEfg, 1, "pxifile", porOUTPUT,
+			new Output_Portion(gnull));
+  FuncObj->SetParamInfo(GSM_GobitEfg, 2, "time", porDOUBLE,
 			new numerical_Portion<double>(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GobitEfg, 12, "output", porOUTPUT,
-			new Output_Portion(gnull));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 13, "pxifile", porOUTPUT,
-			new Output_Portion(gnull));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 14, "efg", porEFG_DOUBLE,
-		        new Efg_Portion<double>(*(new ExtForm<double>)));
+  FuncObj->SetParamInfo(GSM_GobitEfg, 3, "minLam", porDOUBLE,
+			new numerical_Portion<double>(Gobit_default_minLam, true));
+  FuncObj->SetParamInfo(GSM_GobitEfg, 4, "maxLam", porDOUBLE,
+			new numerical_Portion<double>(Gobit_default_maxLam, true));
+  FuncObj->SetParamInfo(GSM_GobitEfg, 5, "delLam", porDOUBLE,
+			new numerical_Portion<double>(Gobit_default_delLam, true));
+  FuncObj->SetParamInfo(GSM_GobitEfg, 6, "powLam", porINTEGER,
+		        new numerical_Portion<gInteger>(1));
+  FuncObj->SetParamInfo(GSM_GobitEfg, 7, "start", porLIST | porDOUBLE,
+		        new List_Portion);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("LiapEfg");

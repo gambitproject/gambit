@@ -60,37 +60,20 @@ Portion *GSM_Enum(Portion **param)
 
 #include "ngobit.h"
 
-//
-// GobitNfg: Parameter assignments:
-//
-// 0   E            EFG 
-// 1   pxifile      STREAM
-// 2   minLam       *DOUBLE
-// 3   maxLam       *DOUBLE
-// 4   delLam       *DOUBLE
-// 5   maxitsOpt    *INTEGER
-// 6   maxitsBrent  *INTEGER
-// 7   tolOpt       *DOUBLE
-// 8   tolBrent     *DOUBLE
-// 9   time         *REF(DOUBLE)
-//
 Portion *GSM_GobitNfg(Portion **param)
 {
-  NFGobitParams<double> EP;
+  NFGobitParams<double> NP;
 
-  EP.pxifile = &((Output_Portion *) param[1])->Value();
-  EP.minLam = ((numerical_Portion<double> *) param[2])->Value();
-  EP.maxLam = ((numerical_Portion<double> *) param[3])->Value();
-  EP.delLam = ((numerical_Portion<double> *) param[4])->Value();
-  EP.maxitsOpt = ((numerical_Portion<gInteger> *) param[5])->Value().as_long();
-  EP.maxitsBrent = ((numerical_Portion<gInteger> *) param[6])->Value().as_long();
-  EP.tolOpt = ((numerical_Portion<double> *) param[7])->Value();
-  EP.tolBrent = ((numerical_Portion<double> *) param[8])->Value();
+  NP.pxifile = &((Output_Portion *) param[1])->Value();
+  NP.minLam = ((numerical_Portion<double> *) param[3])->Value();
+  NP.maxLam = ((numerical_Portion<double> *) param[4])->Value();
+  NP.delLam = ((numerical_Portion<double> *) param[5])->Value();
+  NP.powLam = ((numerical_Portion<gInteger> *) param[6])->Value().as_long();
 
-  NFGobitModule<double> M(((Nfg_Portion<double> *) param[0])->Value(), EP);
+  NFGobitModule<double> M(((Nfg_Portion<double> *) param[0])->Value(), NP);
   M.Gobit(1);
 
-  ((numerical_Portion<double> *) param[9])->Value() = M.Time();
+  ((numerical_Portion<double> *) param[2])->Value() = M.Time();
 
   return new numerical_Portion<gInteger>(1);
 }
@@ -162,11 +145,12 @@ Portion *GSM_ReadNfg(Portion **param)
 
 Portion *GSM_WriteNfg(Portion **param)
 {
-  NormalForm<double> *N = &((Nfg_Portion<double> *) param[0])->Value();
-  gOutput *f = &((Output_Portion *) param[1])->Value();
+  gOutput &f = ((Output_Portion *) param[0])->Value();
+  BaseNormalForm &N = ((BaseNfg_Portion *) param[1])->Value();
+  int sset = ((numerical_Portion<gInteger> *) param[2])->Value().as_long();
 
-  N->WriteNfgFile(*f);
-  return new numerical_Portion<gInteger>(1);
+  N.WriteNfgFile(f, sset);
+  return new Output_Portion(f);
 }
 
 /*
@@ -197,26 +181,22 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GobitNfg");
-  FuncObj->SetFuncInfo(GSM_GobitNfg, 10);
-  FuncObj->SetParamInfo(GSM_GobitNfg, 0, "N", porNFG_DOUBLE);
+  FuncObj->SetFuncInfo(GSM_GobitNfg, 8);
+  FuncObj->SetParamInfo(GSM_GobitNfg, 0, "nfg", porNFG_DOUBLE);
   FuncObj->SetParamInfo(GSM_GobitNfg, 1, "pxifile", porOUTPUT,
-			NO_DEFAULT_VALUE);
-  FuncObj->SetParamInfo(GSM_GobitNfg, 2, "minLam", porDOUBLE,
-		        new numerical_Portion<double>(.01));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 3, "maxLam", porDOUBLE,
-		        new numerical_Portion<double>(30));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 4, "delLam", porDOUBLE,
-		        new numerical_Portion<double>(.01));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 5, "maxitsOpt", porINTEGER,
-		        new numerical_Portion<gInteger>(20));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 6, "maxitsBrent", porINTEGER,
-		        new numerical_Portion<gInteger>(100));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 7, "tolOpt", porDOUBLE,
-		        new numerical_Portion<double>(1.0e-10));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 8, "tolBrent", porDOUBLE,
-		        new numerical_Portion<double>(2.0e-10));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 9, "time", porDOUBLE,
+			new Output_Portion(gnull));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 2, "time", porDOUBLE,
 			new numerical_Portion<double>(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitNfg, 3, "minLam", porDOUBLE,
+			new numerical_Portion<double>(Gobit_default_minLam, true));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 4, "maxLam", porDOUBLE,
+			new numerical_Portion<double>(Gobit_default_maxLam, true));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 5, "delLam", porDOUBLE,
+			new numerical_Portion<double>(Gobit_default_delLam, true));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 6, "powLam", porINTEGER,
+			new numerical_Portion<gInteger>(1));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 7, "start", porLIST | porDOUBLE,
+			new List_Portion);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Lemke");
@@ -258,9 +238,10 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("WriteNfg");
-  FuncObj->SetFuncInfo(GSM_WriteNfg, 2);
-  FuncObj->SetParamInfo(GSM_WriteNfg, 0, "N", porNFG_DOUBLE);
-  FuncObj->SetParamInfo(GSM_WriteNfg, 1, "f", porOUTPUT);
+  FuncObj->SetFuncInfo(GSM_WriteNfg, 3);
+  FuncObj->SetParamInfo(GSM_WriteNfg, 0, "output", porOUTPUT);
+  FuncObj->SetParamInfo(GSM_WriteNfg, 1, "nfg", porNFG);
+  FuncObj->SetParamInfo(GSM_WriteNfg, 2, "sset", porINTEGER);
   gsm->AddFunction(FuncObj);
 }
 
