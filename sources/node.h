@@ -44,7 +44,14 @@ class Node    {
 	else
 		return parent->children[parent->children.Find((Node * const)this) + 1];
 			}
-    const gString &GetName(void) const   { return name; }
+		Node *PriorSibling(void) const
+			{ if (!parent)   return 0;
+	if (parent->children.Find((Node * const)this) == 1)
+		return 0;
+	else
+		return parent->children[parent->children.Find((Node * const)this) -1 1];
+			}
+		const gString &GetName(void) const   { return name; }
     void SetName(const gString &s)       { name = s; }
 
     Outcome *GetOutcome(void) const   { return outcome; }
