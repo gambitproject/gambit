@@ -11,7 +11,7 @@ template <class T>
 LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
 		    const gVector<T> &c, int nequals, gStatus &s) 
   : well_formed(1), feasible(1), bounded(1), aborted(0), 
-    nvars(c.Length()),neqns(b.Length()), total_cost(0),tmin(0),
+    nvars(c.Length()),neqns(b.Length()), nequals(nequals),total_cost(0),tmin(0),
      opt_bfs((T)0),  dual_bfs((T)0) ,A(A), b(b), c(c), AA(0),tab(0), 
      UB(0),LB(0),ub(0),lb(0),xx(0), cost(0),
      y(b.Length()),x(b.Length()),d(b.Length()), status(s)
@@ -77,7 +77,6 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
     }
   *UB = 0; *LB = 0;
   *ub = (T)0; *lb = (T)0;
-  
   
   // Define Phase I upper and lower bounds
   for(i=1;i<=nvars;i++) {
@@ -224,14 +223,6 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
 
      // Call GetAll for testing purposes
    // GetAll();
-  /*gout << "Calling SetFuncInfo to test..\n\n";*/
-  /*FuncDescObj* bob;*/
-  /*bob = new FuncDescObj( "Hey", 7);*/
-  /*const gString butt = "Hey[X->LIST(LIST(NUMBER)), {Y->\"silly\"}, CHEesEhEAD->NUMBER*] =: LIST(LIST(LIST(LIST(NUMBER))))";*/
-  /*const gString butt = "Hey[] =: NUMBER";*/
-  /*bob->SetFuncInfo(0,butt); */
-  
-
 }
 
 //template <class T> LPSolve<T>::
@@ -422,130 +413,39 @@ template <class T> const gVector<T> &LPSolve<T>::OptimumVector(void) const
   return (*xx);
 }
 
+template <class T> const LPTableau<T> &LPSolve<T>::GetTableau(void)
+{
+  return *tab;
+}
+
 template <class T> const gList<BFS <T> > &LPSolve<T>::GetAll(void)
 {
+  gVector<T> c(tab->GetCost());
+  gVector<T> uc(tab->GetUnitCost());
 
-    // These will be the data sent to NewVertEnum
-  gMatrix<T> *O  = new gMatrix<T>(1 + A.NumRows() + 
-                                      A.NumColumns(),A.NumColumns());
-  gVector<T> *p  = new gVector<T>(1 + A.NumRows() + A.NumColumns());
+  gout << "\nc: " << c;
+  gout << "\nuc: " << uc;
 
-    // Get full_bfs, which will tell me which rows to put first.
-  BFS<T> full_bfs;
-  full_bfs = tab->GetBFS1();
-
-  
-    // blank is a row of 0's used to fillin -I rows.
-  gArray<T> blank(A.NumColumns());
-  for (int j=blank.First(); j<=blank.Last(); j++)
-    blank[j] = (T)0;
-
-    // Temporary variable
-  gArray<T> temp(A.NumColumns());
-
-    // Counting variables for filling O and p
-  int filled = 1;
-  int filled2 = A.NumColumns() + 1;
-
-    // Fill first n of O with desirable elements.
-    // Cycle through every row of A and -I, putting them where they go.
-  for (int Row1 = -A.NumRows(); Row1<=A.NumColumns(); Row1++)
-  {
-    // Find desirable row of A or -I 
-    if (Row1 == 0)  // Do nothing for row 0, which is never defined in BFS
-    {}
-    else  // Not 0
-    {
-      if (! full_bfs.IsDefined(Row1))  // If it is a desirable row
-      {
-          // Set row filled to be proper thing, increment  filled.
-        //gout << "Row " << Row1 << " is not defined.\n";
-        if (Row1 < 0)
-        {
-          // Set row filled to be -Row1 of A
-	  //gout << "Set row " << filled << " to row " << -Row1 << " of A\n";
-          A.GetRow(-Row1,temp);
-          O->SetRow(filled,temp);
-          (*p)[filled] = -b[-Row1];
-        }
-        else
-        {
-          // Set row filled to be Row1 of -I
-	  //gout << "Set row " << filled << " to row " << Row1 << " of -I\n";
-          O->SetRow(filled,blank);
-	  (*O)(filled,Row1) = (T)-1;
-          (*p)[filled] = (T)0;
-
-        }
-         
-        //gout << "  filled: " << filled << "\n";
-        filled++;
-      }
-      else  // It is defined (Row1 is undesirable)
-      {
-          // Set row filled2 to be proper thing, increment  filled2.
-        //gout << "Row " << Row1 << " is not defined.\n";
-        if (Row1 < 0)
-        {
-          // Set row filled2 to be -Row1 of A
-	  //gout << "Set row " << filled2 << " to row " << -Row1 << " of A\n";
-          A.GetRow(-Row1,temp);
-          O->SetRow(filled2,temp);
-          (*p)[filled2] = -b[-Row1];
-        }
-        else
-        {
-          // Set row filled2 to be Row1 of -I
-	  //gout << "Set row " << filled2 << " to row " << Row1 << " of -I\n";
-          O->SetRow(filled2,blank);
-	  (*O)(filled2,Row1) = (T)-1;
-          (*p)[filled2] = (T)0;
-        }
-         
-        //gout << "  filled2: " << filled2 << "\n";
-        filled2++;
-      }
-
-    }
+  int i;
+  for(i=c.First();i<=c.Last();i++) {
+    gout << "\ncol: " << i << " cost: " << tab->RelativeCost(i);
+    if(tab->RelativeCost(i) < -eps2) tab->Mark(i);
+  }
+  for(i=uc.First();i<=uc.Last();i++) {
+    gout << "\nrow: " << i << " cost: " << tab->RelativeCost(-i);
+    if(tab->RelativeCost(-i) < -eps2) tab->Mark(-i);
   }
 
-
-    // Set next row of O to be (-c)
-  temp = c;
-  for (int j = temp.First(); j<=temp.Last(); j++)
-    temp[j] = -temp[j];
-  O->SetRow(filled2,temp); 
-
-    // Set next element of p
-  (*p)[filled2] = OptimumCost();
-
-    // Spit out info
-  //gout << "O: \n" << (*O) << "\n\n";
-  //gout << "p: \n" << (*p) << "\n\n";
-
-
-    // Output useful information
-  //gout << "A: \n"    << A       << "\n\n";
-  //gout << "b: \n"    << b       << "\n\n";
-  //gout << "c: \n"    << c       << "\n\n";
-  //gout << "xx: \n"   << (*xx)   << "\n\n";
-  //gout << "E: \n"    << (*E)    << "\n\n";
-  //gout << "f: \n"    << (*f)    << "\n\n";
-
-
-    // Set temp2 to be the starting vector
-  gVector<T> temp2(c.Length());
-  int k=xx->First();
-  for (int j=temp2.First(); j<=temp2.Last(); j++, k++)
-    temp2[j] = (*xx)[k];
-
-  NewVertEnum<T> AllSolutions((*O),(*p),temp2,status);
+  VertEnum<T> AllSolutions(*tab,status);
 
   gList<BFS<T> > *verts = new gList<BFS<T> >(AllSolutions.VertexList());
 
-  // gout << "Here are the vertices: \n";
-  // verts->Dump(gout);
-  // gout << "\n\n";
+  gout << "\nHere are the vertices: \n";
+  for(int i=1;i<=(*verts).Length();i++) {
+    gout << "\n" << i << ": ";
+    (*verts)[i].Dump(gout);
+  }
+  gout << "\n";
   
   return (*verts);
 }

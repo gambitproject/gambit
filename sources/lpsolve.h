@@ -30,7 +30,7 @@
 
 template <class T> class LPSolve {
 private:
-  int  well_formed, feasible, bounded, aborted, flag, nvars, neqns;
+  int  well_formed, feasible, bounded, aborted, flag, nvars, neqns,nequals;
   T total_cost,eps1,eps2,eps3,tmin;
   BFS<T> opt_bfs,dual_bfs;
   const gMatrix<T> &A;   // needed?
@@ -57,6 +57,7 @@ public:
   T OptimumCost(void) const;
   const gVector<T> &OptimumVector(void) const;
   const gList< BFS<T> > &GetAll(void);
+  const LPTableau<T> &GetTableau();
   
   int IsAborted(void) const;
   int IsWellFormed(void) const;
