@@ -10,6 +10,7 @@
 #endif  // WX_PRECOMP
 #include "wx/sashwin.h"
 #include "wx/fontdlg.h"
+#include "wx/image.h"   // for wxInitAllImageHandlers
 
 #include "wxgcl.h"
 #include "wxstatus.h"
@@ -238,8 +239,9 @@ private:
   void OnPrefsPrompt(wxCommandEvent &);
   void OnPrefsInputFont(wxCommandEvent &);
   void OnPrefsOutputFont(wxCommandEvent &);
-  void OnHelpAbout(wxCommandEvent &);
   void OnHelpContents(wxCommandEvent &);
+  void OnHelpIndex(wxCommandEvent &);
+  void OnHelpAbout(wxCommandEvent &);
 
   // Other event handlers
   void OnCloseWindow(wxCloseEvent &);
@@ -260,10 +262,20 @@ public:
 
 bool GclApp::OnInit(void)
 {
-  (void) new GclFrame(0, "Gambit Command Language",
-		      wxPoint(0, 0), wxSize(400, 400));
+  GclFrame *frame = new GclFrame(0, "Gambit Command Language",
+				 wxPoint(0, 0), wxSize(400, 400));
+
+  // Set up the help system.
+  wxInitAllImageHandlers();
+  m_help.SetTempDir(".");
+  m_help.AddBook("help/gclman.hhp");
+
+  frame->Show(true);
+  
   return true;
 }
+
+const int wxID_HELP_INDEX = 1000;
 
 const int idINPUT_WINDOW = 1001;
 const int idINPUT_SASH_WINDOW = 1002;
@@ -305,8 +317,10 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
 		    "Change the font used in the output window");
 
   wxMenu *helpMenu = new wxMenu;
-  helpMenu->Append(wxID_ABOUT, "&About", "About this program");
   helpMenu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
+  helpMenu->Append(wxID_HELP_INDEX, "&Index", "Index of help file");
+  helpMenu->AppendSeparator();
+  helpMenu->Append(wxID_ABOUT, "&About", "About Gambit");
 
   wxMenuBar *menuBar = new wxMenuBar;
   menuBar->Append(fileMenu, "&File");
@@ -353,7 +367,6 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
   m_inputWindow->SetInsertionPointEnd();
 
   SetSizeHints(300, 300);
-  Show(true);
 
   _SourceDir = new char[1024];
   strncpy(_SourceDir, wxGetWorkingDirectory(), 1023);
@@ -400,8 +413,9 @@ BEGIN_EVENT_TABLE(GclFrame, wxFrame)
   EVT_MENU(idPREFS_PROMPT, GclFrame::OnPrefsPrompt)
   EVT_MENU(idPREFS_INPUTFONT, GclFrame::OnPrefsInputFont)
   EVT_MENU(idPREFS_OUTPUTFONT, GclFrame::OnPrefsOutputFont)
-  EVT_MENU(wxID_ABOUT, GclFrame::OnHelpAbout)
   EVT_MENU(wxID_HELP_CONTENTS, GclFrame::OnHelpContents)
+  EVT_MENU(wxID_HELP_INDEX, GclFrame::OnHelpIndex)
+  EVT_MENU(wxID_ABOUT, GclFrame::OnHelpAbout)
   EVT_TEXT_ENTER(idINPUT_WINDOW, GclFrame::OnTextEnter)
   EVT_CLOSE(GclFrame::OnCloseWindow)
   EVT_SIZE(GclFrame::OnSize)
@@ -481,6 +495,15 @@ void GclFrame::OnPrefsOutputFont(wxCommandEvent &)
   }
 }
 
+void GclFrame::OnHelpContents(wxCommandEvent &)
+{
+  wxGetApp().HelpController().DisplayContents();
+}
+
+void GclFrame::OnHelpIndex(wxCommandEvent &)
+{
+  wxGetApp().HelpController().DisplayIndex();
+}
 
 void GclFrame::OnHelpAbout(wxCommandEvent &)
 {
@@ -494,9 +517,6 @@ void GclFrame::OnHelpAbout(wxCommandEvent &)
 	       "Funding provided by the National Science Foundation",
 	       "About...");
 }
-
-void GclFrame::OnHelpContents(wxCommandEvent &)
-{ }
 
 void GclFrame::OnCloseWindow(wxCloseEvent &)
 {
