@@ -134,6 +134,8 @@ class ExtForm    {
     int CreateInfoset(int, int, int);
 
         //# MANAGEMENT OF VARIABLES
+    int IsVariableDefined(const gString &name) const
+      { return nodes.IsVariableDefined(name); }
     Node GetNodeVariable(const gString &name) const
       { return nodes.GetNodeVariable(name); }
     int SetNodeVariable(const gString &name, const Node &node)
