@@ -710,7 +710,9 @@ defined.  If a node is a subgame root, a small rectangle is drawn at
 its base. 
 If a subgame is collapsed, all of the nodes it contains, up to the
 next 
-subgame root are not displayed but replaced by a subgame icon. 
+subgame root are not displayed but replaced by a subgame icon.  Shift-clicking
+(holding down the {\em SHIFT} key while clicking the left mouse button) on a
+subgame root node will toggle the state of that subgame (expanded vs. collapsed).
 Refer to the following picture for an example of subgame structures. 
 
 
@@ -740,8 +742,8 @@ requested will be found.]
 The following list describes the commands for working with subgames. 
 \begin{description}
 \item[Mark All:] Uses a built in algorithm to scan the entire tree and mark
-those nodes that are root nodes of subgames.  Once the
-subgames have been defined, they are all collapsed except for the ROOT subgame.
+those nodes that are root nodes of subgames.  Note that the subgame roots
+now become marked by small rectangles.
 \item[Mark:] Check whether the cursor node is a subgame root, and mark 
 it if it is.  If the cursor node is 
 not a root of a valid subgame, a warning is issued. 
