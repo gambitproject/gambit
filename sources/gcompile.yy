@@ -96,6 +96,7 @@
 %%
 
 program:      statements   { emit(new Display); }
+       |      error   { while (yylex() != EOF);  return 0; }
 
 statements:   statement
           |   statements SEMI statement
@@ -282,6 +283,16 @@ I_dont_believe_Im_doing_this:
     }
     else
       break;
+  }
+
+  if (c == '\\')   {
+    while (isspace(c = nextchar()) && c != CR);
+    if (c == CR)
+      goto I_dont_believe_Im_doing_this;
+    else  {
+      ungetchar(c);
+      return '\\';
+    }
   }
 
   if (isalpha(c))  {
