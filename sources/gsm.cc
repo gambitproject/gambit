@@ -2489,6 +2489,8 @@ void GSM::InvalidateGameProfile( void* game, bool IsEfg )
 
 void GSM::UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec )
 {
+  assert( spec.ListDepth == 0 );
+
   const gList<Portion*>* vars = _RefTableStack->Peek()->Value();
   gList<Portion*> varslist;
   int i = 0;
@@ -2503,9 +2505,8 @@ void GSM::UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec )
     if( varslist[i]->Game() == game )
     {
       assert( varslist[i]->GameIsEfg() == IsEfg );
-      if( varslist[i]->Spec() == spec )
+      if( varslist[i]->Spec().Type & spec.Type )
       {
-	assert( spec.ListDepth == 0 );
 	_RefTableStack->Peek()->Remove( varslist[i] );
       }
     }
@@ -2519,6 +2520,8 @@ void GSM::UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec )
 
 void GSM::UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data )
 {
+  assert( spec.ListDepth == 0 );
+
   const gList<Portion*>* vars = _RefTableStack->Peek()->Value();
   gList<Portion*> varslist;
   int i = 0;
@@ -2539,9 +2542,8 @@ void GSM::UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data )
     if( varslist[i]->Game() == game )
     {
       assert( varslist[i]->GameIsEfg() );
-      if( ( varslist[i]->Spec().Type & spec.Type ) && spec.ListDepth == 0 )
+      if( varslist[i]->Spec().Type & spec.Type )
       {
-	assert( spec.ListDepth == 0 );
 	if( spec.Type & porEFSUPPORT )
 	{
 	  if( ((EfSupportPortion*) varslist[i])->Value() == data )
