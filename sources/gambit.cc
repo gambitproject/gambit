@@ -29,6 +29,7 @@
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
 #include <wx/config.h>
+#include <wx/image.h>     // for wxInitAllImageHandlers
 
 #include "gambit.h"
 #include "game-frame.h"

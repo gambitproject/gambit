@@ -1,22 +1,22 @@
-gambit_icn ICON ..\bitmaps\gambit.ico
-efg_icn    ICON ..\bitmaps\efg.ico
-nfg_icn    ICON ..\bitmaps\nfg.ico
+gambit_icn ICON bitmaps\gambit.ico
+efg_icn    ICON bitmaps\efg.ico
+nfg_icn    ICON bitmaps\nfg.ico
 
 rcinclude wx\msw\wx.rc
 
 
-SCISSORCUR	CURSOR	 ..\bitmaps\scissor.cur
-OUTCOMECUR	CURSOR	 ..\bitmaps\outcome.cur
+SCISSORCUR	CURSOR	 bitmaps\scissor.cur
+OUTCOMECUR	CURSOR	 bitmaps\outcome.cur
 
-gambit         BITMAP ..\bitmaps\gambit.bmp
-new            BITMAP ..\bitmaps\new.bmp
-open           BITMAP ..\bitmaps\open.bmp
-save           BITMAP ..\bitmaps\save.bmp
-print          BITMAP ..\bitmaps\print.bmp
-preview        BITMAP ..\bitmaps\preview.bmp
-zoomin         BITMAP ..\bitmaps\zoomin.bmp
-zoomout        BITMAP ..\bitmaps\zoomout.bmp
-help           BITMAP ..\bitmaps\help.bmp
+gambit         BITMAP bitmaps\gambit.bmp
+new            BITMAP bitmaps\new.bmp
+open           BITMAP bitmaps\open.bmp
+save           BITMAP bitmaps\save.bmp
+print          BITMAP bitmaps\print.bmp
+preview        BITMAP bitmaps\preview.bmp
+zoomin         BITMAP bitmaps\zoomin.bmp
+zoomout        BITMAP bitmaps\zoomout.bmp
+help           BITMAP bitmaps\help.bmp
 
 COPY_BITMAP BITMAP 
 {

@@ -14,7 +14,7 @@
 WXLIBDIR = $(WXDIR)\lib
 WXLIB = wx24s_bcc tiff jpeg winpng zlib
 
-EXTRACPPFLAGS = -v -I$(WXDIR)\include -I$(WXDIR)\lib\msw -I$(BCCDIR)\include -I.. -D__BCC55__ -DVERSION=\"0.97.1.5\"
+EXTRACPPFLAGS = -v -I$(WXDIR)\include -I$(WXDIR)\lib\msw -I$(BCCDIR)\include -I$(GAMBITDIR)\include -I$(GAMBITDIR)\include\gambit -D__BCC55__ -DVERSION=\"0.97.1.5\"
 EXTRALINKFLAGS = 
 
 gambit_SOURCES = \
@@ -36,7 +36,7 @@ gambit_SOURCES = \
 
 OBJECTS = $(gambit_SOURCES:.cc=.obj)
 
-CFG = ..\gambit32.cfg
+CFG = gambit32.cfg
 
 OPT = -Od
 
@@ -44,9 +44,9 @@ OPT = -Od
 	bcc32 $(CPPFLAGS) -P -c {$< }
 
 
-GUILIBS=$(WXLIB) base math game pelican poly numerical nash cw32mt import32 ole2w32
+GUILIBS=$(WXLIB) gambit cw32mt import32 ole2w32
 
-LINKFLAGS= /c /aa /L$(WXLIBDIR);$(BCCDIR)\lib;..\base;..\math;..\game;..\pelican;..\poly;..\numerical;..\nash $(EXTRALINKFLAGS)
+LINKFLAGS= /c /aa /L$(WXLIBDIR);$(BCCDIR)\lib;"$(GAMBITDIR)\lib" $(EXTRALINKFLAGS)
 OPT = -Od
 DEBUG_FLAGS=
 
