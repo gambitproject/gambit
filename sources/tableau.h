@@ -55,7 +55,7 @@ private:
   bool RowIndex(int) const;
   long npivots;
 protected:
-  T eps2;
+  T eps1,eps2;
   gVector<T> tmpcol; // temporary column vector, to avoid allocation
   const gMatrix<T> *A;
   const gVector<T> *b;

@@ -173,16 +173,18 @@ Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
     basis(A),  B(A.MinRow(), A.MaxRow()),
     solution(A.MinRow(),A.MaxRow()) 
 {
+  Epsilon_T(eps1,1);
   Epsilon_T(eps2,2);
   B.refactor(A, basis.label);
   B.solve(b, solution);
 };
 
 
-template <class T>
-Tableau<T>::Tableau(const Tableau<T> &orig)
-  : npivots(0), eps2(orig.eps2), tmpcol(orig.tmpcol), A(orig.A),b(orig.b), 
-    basis(orig.basis), B(orig.B), solution(orig.solution)
+template <class T> 
+Tableau<T>::Tableau(const Tableau<T> &orig) 
+  : npivots(0), eps1(orig.eps1), eps2(orig.eps2), tmpcol(orig.tmpcol),
+    A(orig.A),b(orig.b), basis(orig.basis), B(orig.B),
+    solution(orig.solution) 
 { }
 
 template <class T> Tableau<T>::~Tableau()
