@@ -50,7 +50,8 @@ void DisplayEfgAlgType(gOutput& o, EfgAlgType i)
   o << NameEfgAlgType(i);
 }
 
-
+unsigned long BehavSolution<double>::MaxId=1;
+unsigned long BehavSolution<gRational>::MaxId=1;
 
 #ifdef __GNUG__
 #define TEMPLATE template

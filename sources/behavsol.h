@@ -61,6 +61,7 @@ public:
   BehavSolution(const BehavSolution<T> &);
   ~BehavSolution();
 
+  int Id(void) const;
   void SetCreator(EfgAlgType);
   EfgAlgType Creator() const; //Who created this object? (algorithm ID or user)
   void SetIsNash(TriState);

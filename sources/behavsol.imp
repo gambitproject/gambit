@@ -20,8 +20,11 @@ BehavSolution<T>::BehavSolution(const Efg<T>& e, bool truncated)
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
-  _Beliefs(0)
-{}
+  _Beliefs(0),
+  _Id(MaxId)
+{
+MaxId++;
+}
 
 
 template <class T> 
@@ -34,8 +37,11 @@ BehavSolution<T>::BehavSolution(const Efg<T>& e, const gDPVector<T>& v)
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
-  _Beliefs(0)
-{}
+  _Beliefs(0),
+  _Id(MaxId)
+{
+MaxId++;
+}
 
 template <class T> 
 BehavSolution<T>::BehavSolution(const EFSupport& s)
@@ -47,8 +53,11 @@ BehavSolution<T>::BehavSolution(const EFSupport& s)
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
-  _Beliefs(0)
-{}
+  _Beliefs(0),
+  _Id(MaxId)
+{
+MaxId++;
+}
 
 template <class T> 
 BehavSolution<T>::BehavSolution(const BehavProfile<T>& b, EfgAlgType creator)
@@ -60,8 +69,11 @@ BehavSolution<T>::BehavSolution(const BehavProfile<T>& b, EfgAlgType creator)
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
-  _Beliefs(0)
-{}
+  _Beliefs(0),
+  _Id(MaxId)
+{
+MaxId++;
+}
 
 
 template <class T> BehavSolution<T>::BehavSolution(const BehavSolution<T>& b)
@@ -73,7 +85,8 @@ template <class T> BehavSolution<T>::BehavSolution(const BehavSolution<T>& b)
   _GobitLambda(b._GobitLambda),
   _GobitValue(b._GobitValue),
   _LiapValue(b._LiapValue),
-  _Beliefs(0)
+  _Beliefs(0),
+  _Id(MaxId)
 {
   if(b._Beliefs) _Beliefs = new gDPVector<T>(*b._Beliefs);
 }
@@ -102,6 +115,9 @@ template <class T> void BehavSolution<T>::EvalEquilibria()
     _IsSequential = T_NO;
   }
 }
+
+template <class T> void BehavSolution<T>::Id(void) const
+{return _Id;}
 
 template <class T> void BehavSolution<T>::SetCreator(EfgAlgType c)
 { _Creator = c; }
