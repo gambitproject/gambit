@@ -110,37 +110,7 @@ information and plans.
 
 </sect1>
 
-<sect1 id="apiref.behav">
-<title>Behavior strategy profiles</title>
-
-<para>
-</para>
-
-&bifactionprob;
-&bifactionvalue;
-&bifbehav;
-&bifbelief;
-&bifcreator;
-&bifgame;
-&bifinfosetprob;
-&bifinfosetvalue;
-&bifisnash;
-&bifissequential;
-&bifissubgameperfect;
-&bifliapvalue;
-&bifmixed;
-&bifname;
-&bifnodevalue;
-&bifpayoff;
-&bifrealizprob;
-&bifregret;
-&bifregrets;
-&bifsetactionprob;
-&bifsetactionprobs;
-&bifsetname;
-
-</sect1>
-
+&apirefbehav;
 
 <sect1 id="apiref.mixed">
 <title>Mixed strategy profiles</title>
