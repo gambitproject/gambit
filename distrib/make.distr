@@ -77,15 +77,14 @@ gambit:
 	zip gambit_$(SYSNAME)_$(GUI).zip \
 	  ./gambit/bin/gcl_$(SYSNAME) \
 	  ./gambit/bin/gambit_$(SYSNAME)_$(GUI) \
-	  ./gambit/bin/wxhelp \
+	  ./gambit/bin/wxhelp_$(SYSNAME)_$(GUI) \
 	  ./gambit/efg/*.efg \
 	  ./gambit/nfg/*.nfg \
 	  ./gambit/gcl/*.gcl \
 	  ./gambit/misc/* \
 	  ./gambit_setup
 
-	cp ../../gambit_$(SYSNAME)_$(GUI).zip $(FTPDIR); \
-	rm -f ../../gambit_$(SYSNAME)_$(GUI).zip
+	mv ../../gambit_$(SYSNAME)_$(GUI).zip $(FTPDIR) 
 
 src:
 	@echo
@@ -103,8 +102,7 @@ src:
 	$(SRCDIR)/fake/* $(SRCDIR)/fake/sys/* $(SRCDIR)/bitmaps/* \
 	$(SRCDIR)/make.filelist 
 
-	cp ../../gambsrc.zip $(FTPDIR)
-	rm ../../gambsrc.zip
+	mv ../../gambsrc.zip $(FTPDIR)
 
 wxwin:
 	@echo
@@ -114,9 +112,9 @@ wxwin:
 	@echo
 
 	cd $(WXWINDIR) ; \
-	zip ./include/base/* ./include/x/* ./lib/libwx_$(SYSNAME)_$(GUI).a
-	cp wx_$(SYSNAME)_$(GUI).zip $(FTPDIR)
-	rm -f wx_$(SYSNAME)_$(GUI).zip
+	zip wx_$(SYSNAME)_$(GUI).zip \
+	  ./include/base/* ./include/x/* ./lib/libwx_$(SYSNAME)_$(GUI).a; \
+	mv wx_$(SYSNAME)_$(GUI).zip $(FTPDIR)
 
 doc:
 	@echo
@@ -126,7 +124,7 @@ doc:
 	@echo
 
 	cd ../doc; tex2ps gclman; \
-	cp gclman.ps $(FTPDIR)
+	mv gclman.ps $(FTPDIR)
 
 
 
