@@ -75,14 +75,17 @@ private:
     BSolnSortFilterOptions sf_options;
     gList<Accel>    accelerators;
     gText   filename;
-    int log_item, zoom_win_item;    // menu items of checkable menus
+    int zoom_win_item;    // menu items of checkable menus
     EfgShowToolBar *toolbar;
 
     // Private functions
     gArray<AccelEvent> MakeEventNames(void);
     void SetOptions(void);
     NodeSolnShow *node_inspect;
-    bool SolveNormal(void);
+
+    bool SolveNormalReduced(void);
+    bool SolveNormalAgent(void);
+
     void SubgamesSetup(void);
     void NodeInspect(bool insp);
 
@@ -116,7 +119,8 @@ public:
     void        OnSetFocus(void);
 
     // Solution routines
-    void        Solve(void);
+    void        Solve(int id);
+
     void        SolveSetup(int what);
     void        InspectSolutions(int what);
     void        RemoveSolutions(void);

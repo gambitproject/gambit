@@ -226,13 +226,10 @@ void EfgShow::SolveSetup(int what)
                     break;
                 }
         }
-
-        GetMenuBar()->Check(SOLVE_STANDARD, FALSE); // using standard now
     }
     else // SOLVE_SETUP_STANDARD
     {
         EfgSolveStandardDialog(ef, this);
-        GetMenuBar()->Check(SOLVE_STANDARD, TRUE); // using standard now
     }
 }
 
@@ -242,7 +239,7 @@ bool IsPerfectRecall(const Efg &, Infoset *&, Infoset *&);
 //void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
 //			long p_style = wxOK | wxCENTRE);
 
-void EfgShow::Solve(void)
+void EfgShow::Solve(int p_algorithm)
 {
   // This is a guard against trying to solve the "trivial" game.
   // Most of the GUI code assumes information sets exist.
@@ -258,70 +255,70 @@ void EfgShow::Solve(void)
     if (completed != wxOK) return;
   }
     
-  EfgSolveSettings ESS(ef);
+  //  EfgSolveSettings ESS(ef);
   // do not want users doing anything while solving
   Enable(FALSE);
   wxBeginBusyCursor();
 
+  /*
   if (ESS.MarkSubgames()) 
     tw->subgame_solve();
 
   if (!ESS.MarkSubgames() && ESS.UseStandard()) 
     tw->subgame_clear_all(); // for standard if not mark, must clear
+  */
+
+  guiEfgSolution *solver = 0;
+
+  switch (p_algorithm) {
+  case SOLVE_CUSTOM_EFG_ENUMPURE:
+    solver = new EfgEPureNashG(ef, *cur_sup, this);
+    break;
+  case SOLVE_CUSTOM_EFG_LCP:
+    solver = new EfgSeqFormG(ef, *cur_sup, this);
+    break;
+  case SOLVE_CUSTOM_EFG_LP:
+    solver = new EfgCSumG(ef, *cur_sup, this);
+    break;
+  case SOLVE_CUSTOM_EFG_LIAP:
+    solver = new EfgELiapG(ef, *cur_sup, this);
+    break;
+  case SOLVE_CUSTOM_EFG_GOBIT:
+    solver = new EfgEGobitG(ef, *cur_sup, this);
+    break;
+
+  case SOLVE_CUSTOM_NFG_ENUMPURE: 
+    solver = new EfgPureNashG(ef, *cur_sup, this);
+    break;
+  case SOLVE_CUSTOM_NFG_ENUMMIXED:
+    solver = new EfgEnumG(ef, *cur_sup, this);
+    break;
+  case SOLVE_CUSTOM_NFG_LCP: 
+    solver = new EfgLemkeG(ef, *cur_sup, this);
+    break;
+  case SOLVE_CUSTOM_NFG_LP:
+    solver = new EfgZSumG(ef, *cur_sup, this);
+    break;
+  case SOLVE_CUSTOM_NFG_LIAP: 
+    solver = new EfgNLiapG(ef, *cur_sup, this);
+    break;
+  case SOLVE_CUSTOM_NFG_SIMPDIV:
+    solver = new EfgSimpdivG(ef, *cur_sup, this);
+    break;
+  case SOLVE_CUSTOM_NFG_GOBIT:
+    solver = new EfgNGobitG(ef, *cur_sup, this);
+    break;
+  case SOLVE_CUSTOM_NFG_GOBITGRID: 
+    solver = new EfgGobitAllG(ef, *cur_sup, this);
+    break;
+  default:
+    // internal error, we'll just ignore silently
+    return;
+  }
 
   try {
-    if (!ESS.UseNF()) {   // solving via efg
-      switch (ESS.GetEfgAlgorithm()) {
-      case EFG_GOBIT_SOLUTION:    
-	solns += EfgEGobitG(ef, *cur_sup, this).Solve(); 
-	break;
-      case EFG_LIAP_SOLUTION:
-	solns += EfgELiapG(ef, *cur_sup, this).Solve();
-	break;
-      case EFG_LCP_SOLUTION:
-	solns += EfgSeqFormG(ef, *cur_sup, this).Solve();
-	break;
-      case EFG_PURENASH_SOLUTION:
-	solns += EfgEPureNashG(ef, *cur_sup, this).Solve();
-	break;
-      case EFG_CSUM_SOLUTION:
-	solns += EfgCSumG(ef, *cur_sup, this).Solve();
-	break;
-      default:
-	break;   // internal error, but we'll just ignore silently
-      }
-    }
-    else  {
-      // solving via nfg, solving, and then projecting solutions back
-      switch (ESS.GetNfgAlgorithm()) {
-      case NFG_ENUMPURE_SOLUTION:
-	solns += EfgPureNashG(ef, *cur_sup, this).Solve();
-	break;
-      case NFG_LCP_SOLUTION:
-	solns += EfgLemkeG(ef, *cur_sup, this).Solve();
-	break;
-      case NFG_LIAP_SOLUTION:
-	solns += EfgNLiapG(ef, *cur_sup, this).Solve();
-	break;
-      case NFG_GOBITALL_SOLUTION:
-	solns += EfgGobitAllG(ef, *cur_sup, this).Solve();
-	break;
-      case NFG_GOBIT_SOLUTION:
-	solns += EfgNGobitG(ef, *cur_sup, this).Solve();
-	break;
-      case NFG_SIMPDIV_SOLUTION:
-	solns += EfgSimpdivG(ef, *cur_sup, this).Solve();
-	break;
-      case NFG_ENUMMIXED_SOLUTION:
-	solns += EfgEnumG(ef, *cur_sup, this).Solve();
-	break;
-      case NFG_LP_SOLUTION:
-	solns += EfgZSumG(ef, *cur_sup, this).Solve();
-	break;
-      default:
-	break;   // internal error, we'll just ignore silently
-      }
-    }
+    solver->SolveSetup();
+    solns += solver->Solve();
     wxEndBusyCursor();
   }
   catch (gException &E) {
@@ -329,10 +326,11 @@ void EfgShow::Solve(void)
     guiExceptionDialog(E.Description(), this);
   }
 
+  delete solver;
  
   ChangeSolution(solns.VisibleLength());
   Enable(TRUE);
-  if (ESS.AutoInspect()) InspectSolutions(CREATE_DIALOG);
+  //  if (ESS.AutoInspect()) InspectSolutions(CREATE_DIALOG);
 }
 
 
@@ -524,51 +522,52 @@ gNumber EfgShow::BranchProb(const Node *n, int br)
     return -1;
 }
 
-// Solve Normal: create a NF from the EF
+
 #include "nfg.h"
 Nfg *MakeReducedNfg(const EFSupport &support);
 Nfg *MakeAfg(const Efg &);
 
 
-bool EfgShow::SolveNormal(void)
+bool EfgShow::SolveNormalReduced(void)
 {
-    // check that the game is perfect recall, if not give a warning
-    Infoset *bad1, *bad2;
+  // check that the game is perfect recall, if not give a warning
+  Infoset *bad1, *bad2;
 
-    if (!IsPerfectRecall(ef, bad1, bad2))
-    {
-        int completed = wxMessageBox("This game is not perfect recall\n"
-                                     "Do you wish to continue?", 
-                                     "Efg -> Nfg", 
-                                     wxOK|wxCANCEL|wxCENTRE, this);
-
-        if (completed != wxOK) 
-            return false;
-    }
+  if (!IsPerfectRecall(ef, bad1, bad2)) {
+    int completed = wxMessageBox("This game is not perfect recall\n"
+				 "Do you wish to continue?", 
+				 "Efg -> Nfg", 
+				 wxOK|wxCANCEL|wxCENTRE, this);
     
-    MyDialogBox *solve_normal_dialog = new MyDialogBox(this, "NF Type");
-    char *normal_str = new char[20];
-    wxStringList *normal_list = new wxStringList("Reduced", "Agent", 0);
-    solve_normal_dialog->Add(
-        wxMakeFormString("Type", 
-                         &normal_str, 
-                         wxFORM_RADIOBOX,
-                         new wxList(wxMakeConstraintStrings(normal_list), 0)));
-    solve_normal_dialog->Go();
+    if (completed != wxOK) 
+      return false;
+  }
+    
+  Nfg *N = MakeReducedNfg(*cur_sup);
+  if (N) NfgGUI(N, "", (EfgNfgInterface *) this, this);
 
-    if (solve_normal_dialog->Completed() == wxOK)
-    {
-        Nfg *N;
-        if (strcmp(normal_str, "Reduced") == 0)
-            N = MakeReducedNfg(*cur_sup);
-        else
-            N = MakeAfg(ef);
-        if (N) NfgGUI(N, "", (EfgNfgInterface *)this, this);
-    }
+  return false;
+}
 
-    delete solve_normal_dialog;
-    delete [] normal_str;
-    return false;
+bool EfgShow::SolveNormalAgent(void)
+{
+  // check that the game is perfect recall, if not give a warning
+  Infoset *bad1, *bad2;
+
+  if (!IsPerfectRecall(ef, bad1, bad2)) {
+    int completed = wxMessageBox("This game is not perfect recall\n"
+				 "Do you wish to continue?", 
+				 "Efg -> Nfg", 
+				 wxOK|wxCANCEL|wxCENTRE, this);
+    
+    if (completed != wxOK) 
+      return false;
+  }
+    
+  Nfg *N = MakeAfg(ef);
+  if (N) NfgGUI(N, "", (EfgNfgInterface *) this, this);
+
+  return false;
 }
 
 //************************************************************************
@@ -687,9 +686,9 @@ EfgShowToolBar::EfgShowToolBar(wxFrame *frame):
     AddTool(NODE_DELETE, ToolbarDeleteBitmap);
     AddTool(TREE_OUTCOMES, ToolbarPayoffBitmap);
     AddSeparator();
-    AddTool(SOLVE_SOLVE, ToolbarSolveBitmap);
+    AddTool(SOLVE_STANDARD, ToolbarSolveBitmap);
     AddTool(INSPECT_SOLUTIONS, ToolbarInspectBitmap);
-    AddTool(SOLVE_SOLVE_NORMAL, ToolbarMakenfBitmap);
+    AddTool(SOLVE_NFG_REDUCED, ToolbarMakenfBitmap);
     AddSeparator();
     AddTool(DISPLAY_INC_ZOOM, ToolbarZoominBitmap);
     AddTool(DISPLAY_DEC_ZOOM, ToolbarZoomoutBitmap);
@@ -724,10 +723,9 @@ void EfgShow::ExecuteLoggedCommand(const gText& command,
 #endif
     
     // FIXME! add commands.
-    
-    if (command == "SOLVE:SOLVE")
-    {
-        Solve();
+    // FIXME! this has been changed since solve menu was rearranged!
+    if (command == "SOLVE:SOLVE") {
+      Solve(SOLVE_CUSTOM_EFG_LIAP);
     }
     else if (command == "FILE:CLOSE")
     {

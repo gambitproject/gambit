@@ -1,5 +1,8 @@
-// File: efgaccl.h -- gives names to various Extensive form GUI options
+//
+// FILE: efgaccl.h -- gives names to various Extensive form GUI options
+//
 // $Id$
+//
 
 #ifndef EFGACCL_H
 #define EFGACCL_H
@@ -36,9 +39,9 @@ AccelEvent("Help",GAMBIT_HELP_CONTENTS),
 AccelEvent("Save",FILE_SAVE),
 AccelEvent("Close",FILE_CLOSE),
 AccelEvent("Print",FILE_OUTPUT),
-AccelEvent("Solve",SOLVE_SOLVE),
+AccelEvent("Solve",SOLVE_STANDARD),
 AccelEvent("Supports",SUPPORTS_SUPPORTS),
-AccelEvent("MakeNF",SOLVE_SOLVE_NORMAL),
+AccelEvent("MakeNF",SOLVE_NFG_REDUCED),
 AccelEvent("Inspect Soln",INSPECT_SOLUTIONS),
 AccelEvent("Mark Subgames",SUBGAME_SOLVE),
 AccelEvent("Unmark All Subgames",SUBGAME_CLEARALL),

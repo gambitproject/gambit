@@ -50,121 +50,158 @@ public:
 
 void EfgShow::MakeMenus(void)
 {
-    //Note: to insure greatest possible portability we will avoid using
-    //      resource files which are inherently non-portable.
-    wxMenu *file_menu = new wxMenu;
-    file_menu->Append(FILE_SAVE,   "&Save",    "Save the game");
-    file_menu->Append(FILE_OUTPUT, "&Output",  "Print or copy the game");
-    file_menu->Append(FILE_LOG,    "&Logging", "Start/stop logging gcl", TRUE);
-    file_menu->Append(FILE_CLOSE,  "&Close",   "Close this window");
+  // To insure greatest possible portability we will avoid using
+  // resource files which are inherently non-portable.
 
-    log_item = file_menu->FindItem("Logging");
-    wxMenu *build_menu = new wxMenu;
-    wxMenu *node_menu  = new wxMenu;
-    node_menu->Append(NODE_ADD,       "&Add",       "Add a node");
-    node_menu->Append(NODE_DELETE,    "&Delete",    "Remove cursor node");
-    node_menu->Append(NODE_INSERT,    "&Insert",    "Insert node at cursor");
-    node_menu->Append(NODE_LABEL,     "&Label",     "Label cursor node");
-    node_menu->AppendSeparator();
-    node_menu->Append(NODE_SET_MARK,  "Set &Mark",  "Mark cursor node");
-    node_menu->Append(NODE_GOTO_MARK, "Go&to Mark", "Goto marked node");
+  wxMenu *file_menu = new wxMenu;
+  file_menu->Append(FILE_SAVE,   "&Save",    "Save the game");
+  file_menu->Append(FILE_OUTPUT, "&Output",  "Print or copy the game");
+  file_menu->Append(FILE_CLOSE,  "&Close",   "Close this window");
 
-    wxMenu *action_menu = new wxMenu;
-    action_menu->Append(ACTION_DELETE, "&Delete", "Delete an action from cursor iset");
-    action_menu->Append(ACTION_INSERT, "&Insert", "Delete an action to cursor iset");
-    action_menu->Append(ACTION_LABEL,  "&Label");
-    action_menu->Append(ACTION_PROBS,  "&Probs",  "Set the chance player probs");
+  wxMenu *build_menu = new wxMenu;
+  wxMenu *node_menu  = new wxMenu;
+  node_menu->Append(NODE_ADD,       "&Add",       "Add a node");
+  node_menu->Append(NODE_DELETE,    "&Delete",    "Remove cursor node");
+  node_menu->Append(NODE_INSERT,    "&Insert",    "Insert node at cursor");
+  node_menu->Append(NODE_LABEL,     "&Label",     "Label cursor node");
+  node_menu->AppendSeparator();
+  node_menu->Append(NODE_SET_MARK,  "Set &Mark",  "Mark cursor node");
+  node_menu->Append(NODE_GOTO_MARK, "Go&to Mark", "Goto marked node");
 
-    wxMenu *infoset_menu = new wxMenu;
-    infoset_menu->Append(INFOSET_MERGE,  "&Merge",  "Merge cursor iset w/ marked");
-    infoset_menu->Append(INFOSET_BREAK,  "&Break",  "Make cursor a new iset");
-    infoset_menu->Append(INFOSET_SPLIT,  "&Split",  "Split iset at cursor");
-    infoset_menu->Append(INFOSET_JOIN,   "&Join",   "Join cursor to marked iset");
-    infoset_menu->Append(INFOSET_LABEL,  "&Label",  "Label cursor iset & actions");
-    infoset_menu->Append(INFOSET_SWITCH_PLAYER, "&Player", "Change player of cursor iset");
-    infoset_menu->Append(INFOSET_REVEAL, "&Reveal", "Reveal infoset to players");
+  wxMenu *action_menu = new wxMenu;
+  action_menu->Append(ACTION_DELETE, "&Delete", "Delete an action from cursor iset");
+  action_menu->Append(ACTION_INSERT, "&Insert", "Delete an action to cursor iset");
+  action_menu->Append(ACTION_LABEL,  "&Label");
+  action_menu->Append(ACTION_PROBS,  "&Probs",  "Set the chance player probs");
 
-    wxMenu *tree_menu = new wxMenu;
-    tree_menu->Append(TREE_COPY,      "&Copy",     "Copy tree from marked node");
-    tree_menu->Append(TREE_MOVE,      "&Move",     "Move tree from marked node");
-    tree_menu->Append(TREE_DELETE,    "&Delete",   "Delete recursively from cursor");
-    tree_menu->Append(TREE_LABEL,     "&Label",    "Set the game label");
-    tree_menu->Append(TREE_PLAYERS,   "&Players",  "Edit/View players");
-    tree_menu->Append(TREE_INFOSETS,  "&Infosets", "Edit/View infosets");
-    build_menu->Append(BUILD_NODE,    "&Node",     node_menu,    "Edit the node");
-    build_menu->Append(BUILD_ACTIONS, "&Actions",  action_menu,  "Edit actions");
-    build_menu->Append(BUILD_INFOSET, "&Infoset",  infoset_menu, "Edit infosets");
-    build_menu->Append(TREE_OUTCOMES, "&Outcomes", "Edit/View the payoffs");
-    build_menu->Append(BUILD_TREE,    "&Tree",     tree_menu,    "Edit the tree");
+  wxMenu *infoset_menu = new wxMenu;
+  infoset_menu->Append(INFOSET_MERGE,  "&Merge",  "Merge cursor iset w/ marked");
+  infoset_menu->Append(INFOSET_BREAK,  "&Break",  "Make cursor a new iset");
+  infoset_menu->Append(INFOSET_SPLIT,  "&Split",  "Split iset at cursor");
+  infoset_menu->Append(INFOSET_JOIN,   "&Join",   "Join cursor to marked iset");
+  infoset_menu->Append(INFOSET_LABEL,  "&Label",  "Label cursor iset & actions");
+  infoset_menu->Append(INFOSET_SWITCH_PLAYER, "&Player", "Change player of cursor iset");
+  infoset_menu->Append(INFOSET_REVEAL, "&Reveal", "Reveal infoset to players");
 
-    wxMenu *subgame_menu = new wxMenu;
-    subgame_menu->Append(SUBGAME_SOLVE,        "Mark &All",       "Scan tree for subgames");
-    subgame_menu->Append(SUBGAME_SET,          "&Mark",           "Set node subgame root");
-    subgame_menu->Append(SUBGAME_CLEARALL,     "Unmark &All",     "Clear all subgame info");
-    subgame_menu->Append(SUBGAME_CLEARONE,     "&Unmark",         "Unmark node subgame");
-    subgame_menu->Append(SUBGAME_COLLAPSEONE,  "&Collapse Level", "Collapse node subgame");
-    subgame_menu->Append(SUBGAME_COLLAPSEALL,  "&Collapse All",   "Collapse all subgames");
-    subgame_menu->Append(SUBGAME_EXPANDONE,    "&Expand Level",   "Expand node subgame");
-    subgame_menu->Append(SUBGAME_EXPANDBRANCH, "&Expand Branch",  "Expand entire branch");
-    subgame_menu->Append(SUBGAME_EXPANDALL,    "&Expand All",     "Expand all subgames");
+  wxMenu *tree_menu = new wxMenu;
+  tree_menu->Append(TREE_COPY,      "&Copy",     "Copy tree from marked node");
+  tree_menu->Append(TREE_MOVE,      "&Move",     "Move tree from marked node");
+  tree_menu->Append(TREE_DELETE,    "&Delete",   "Delete recursively from cursor");
+  tree_menu->Append(TREE_LABEL,     "&Label",    "Set the game label");
+  tree_menu->Append(TREE_PLAYERS,   "&Players",  "Edit/View players");
+  tree_menu->Append(TREE_INFOSETS,  "&Infosets", "Edit/View infosets");
+  build_menu->Append(BUILD_NODE,    "&Node",     node_menu,    "Edit the node");
+  build_menu->Append(BUILD_ACTIONS, "&Actions",  action_menu,  "Edit actions");
+  build_menu->Append(BUILD_INFOSET, "&Infoset",  infoset_menu, "Edit infosets");
+  build_menu->Append(TREE_OUTCOMES, "&Outcomes", "Edit/View the payoffs");
+  build_menu->Append(BUILD_TREE,    "&Tree",     tree_menu,    "Edit the tree");
 
-    wxMenu *supports_menu = new wxMenu;
-    supports_menu->Append(SUPPORTS_ELIMDOM,  "&ElimDom",  "Dominated strategies");
-    supports_menu->Append(SUPPORTS_SUPPORTS, "S&upports", "Create/view EF supports");
+  wxMenu *subgame_menu = new wxMenu;
+  subgame_menu->Append(SUBGAME_SOLVE,        "Mark &All",       "Scan tree for subgames");
+  subgame_menu->Append(SUBGAME_SET,          "&Mark",           "Set node subgame root");
+  subgame_menu->Append(SUBGAME_CLEARALL,     "Unmark &All",     "Clear all subgame info");
+  subgame_menu->Append(SUBGAME_CLEARONE,     "&Unmark",         "Unmark node subgame");
+  subgame_menu->Append(SUBGAME_COLLAPSEONE,  "&Collapse Level", "Collapse node subgame");
+  subgame_menu->Append(SUBGAME_COLLAPSEALL,  "&Collapse All",   "Collapse all subgames");
+  subgame_menu->Append(SUBGAME_EXPANDONE,    "&Expand Level",   "Expand node subgame");
+  subgame_menu->Append(SUBGAME_EXPANDBRANCH, "&Expand Branch",  "Expand entire branch");
+  subgame_menu->Append(SUBGAME_EXPANDALL,    "&Expand All",     "Expand all subgames");
+  
+  wxMenu *supports_menu = new wxMenu;
+  supports_menu->Append(SUPPORTS_ELIMDOM,  "&ElimDom",  "Dominated strategies");
+  supports_menu->Append(SUPPORTS_SUPPORTS, "S&upports", "Create/view EF supports");
+  
+  wxMenu *solve_menu = new wxMenu;
+  solve_menu->Append(SOLVE_STANDARD, "S&tandard...", "Standard solutions");
 
-    wxMenu *solve_menu = new wxMenu;
-    solve_menu->Append(SOLVE_SOLVE,        "&Solve",       "Start a solution algorithm");
-    solve_menu->Append(SOLVE_SOLVE_NORMAL, "Make &NF",     "Create a NF");
-    solve_menu->Append(SOLVE_STANDARD,     "S&tandard...", "Standard solutions", TRUE);
+  wxMenu *solveCustomMenu = new wxMenu;
+  wxMenu *solveCustomEfgMenu = new wxMenu;
+  solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_ENUMPURE, "EnumPure",
+			     "Enumerate pure strategy equilibria");
+  solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_LCP, "LCP",
+			     "Solve by linear complementarity program");
+  solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_LP, "LP",
+			     "Solve by linear program");
+  solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_LIAP, "Liapunov",
+			     "Liapunov function minimization");
+  solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_GOBIT, "Gobit",
+			     "Compute quantal response equilibria");
+  solveCustomMenu->Append(SOLVE_CUSTOM_EFG, "Extensive form",
+			  solveCustomEfgMenu,
+			  "Solve using extensive form based algorithms");
 
-    wxMenu *solve_settings_menu = new wxMenu;
-    solve_settings_menu->Append(SOLVE_ALGORITHM, "&Algorithm", "Set/Adjust current algorithm");
-    solve_settings_menu->Append(SOLVE_DOMINANCE, "&Dominance", "Set ElimDom options");
-    solve_settings_menu->Append(SOLVE_SUBGAMES,  "&Subgames",  "Set subgames options");
-    solve_menu->Append(SOLVE_SETTINGS,           "&Custom",    solve_settings_menu, 
-                       "Control default options");
-    solve_menu->Append(SOLVE_GAMEINFO,           "Game&Info",  "Display some game info");
+  wxMenu *solveCustomNfgMenu = new wxMenu;
+  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_ENUMPURE, "EnumPure",
+			     "Enumerate pure strategy equilibria");
+  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_ENUMMIXED, "EnumMixed",
+			     "Enumerate all equilibria");
+  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_LCP, "LCP",
+			     "Solve by linear complementarity program");
+  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_LP, "LP",
+			     "Solve by linear program");
+  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_LIAP, "Liapunov",
+			     "Liapunov function minimization");
+  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_SIMPDIV, "Simpdiv",
+			     "Simplicial subdivision");
+  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_GOBIT, "Gobit",
+			     "Compute quantal response equilibria");
+  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_GOBITGRID, "GobitGrid",
+			     "Compute quantal response equilibria");
+  solveCustomMenu->Append(SOLVE_CUSTOM_NFG, "Normal form",
+			  solveCustomNfgMenu,
+			  "Solve using normal form based algorithms");
 
-    wxMenu *inspect_menu = new wxMenu;
-    inspect_menu->Append(INSPECT_SOLUTIONS,  "&Solutions", "Inspect existing solutions");
-    inspect_menu->Append(INSPECT_FEATURES,   "In&fo",      "Advanced solution features");
+  solve_menu->Append(SOLVE_CUSTOM, "Custom", solveCustomMenu,
+		     "Select a specific algorithm");
 
-    wxMenu *prefs_menu = new wxMenu;
-    prefs_menu->Append(DISPLAY_SET_ZOOM,    "&Zoom",        "Specify zoom level");
-    prefs_menu->Append(DISPLAY_ZOOM_WIN,    "Zoom &Window", "Open zoom-in window", TRUE);
-    prefs_menu->Append(DISPLAY_SET_OPTIONS, "&Display",     "Set display options");
-    prefs_menu->Append(DISPLAY_LEGENDS,     "&Legend",      "Set legends");
-    prefs_menu->Append(DISPLAY_COLORS,      "&Colors",      "Set player colors");
-    prefs_menu->Append(DISPLAY_ACCELS,      "&Accels",      "Edit accelerator keys");
-    prefs_menu->AppendSeparator();
-    prefs_menu->Append(DISPLAY_SAVE_DEFAULT, "Save Default");
-    prefs_menu->Append(DISPLAY_LOAD_DEFAULT, "Load Default");
-    prefs_menu->Append(DISPLAY_SAVE_CUSTOM,  "Save Custom");
-    prefs_menu->Append(DISPLAY_LOAD_CUSTOM,  "Load Custom");
-    zoom_win_item = prefs_menu->FindItem("Zoom &Window");
+  wxMenu *solveNfgMenu = new wxMenu;
+  solveNfgMenu->Append(SOLVE_NFG_REDUCED, "Reduced",
+		       "Generate reduced normal form");
+  solveNfgMenu->Append(SOLVE_NFG_AGENT, "Agent",
+		       "Generate agent normal form");
+  solve_menu->Append(SOLVE_NFG, "Normal form", solveNfgMenu,
+		     "Create a normal form representation of this game");
+  solve_menu->AppendSeparator();
+  solve_menu->Append(SOLVE_DOMINANCE, "&Dominance", "Set ElimDom options");
+  solve_menu->Append(SOLVE_SUBGAMES,  "&Subgames",  "Set subgames options");
+  
+  wxMenu *inspect_menu = new wxMenu;
+  inspect_menu->Append(INSPECT_SOLUTIONS,  "&Solutions", "Inspect existing solutions");
+  inspect_menu->Append(INSPECT_FEATURES,   "In&fo",      "Advanced solution features");
+  inspect_menu->AppendSeparator();
+  inspect_menu->Append(INSPECT_GAMEINFO, "Game&Info",
+		       "Information about this game");
+  
+  wxMenu *prefs_menu = new wxMenu;
+  prefs_menu->Append(DISPLAY_SET_ZOOM,    "&Zoom",        "Specify zoom level");
+  prefs_menu->Append(DISPLAY_ZOOM_WIN,    "Zoom &Window", "Open zoom-in window", TRUE);
+  prefs_menu->Append(DISPLAY_SET_OPTIONS, "&Display",     "Set display options");
+  prefs_menu->Append(DISPLAY_LEGENDS,     "&Legend",      "Set legends");
+  prefs_menu->Append(DISPLAY_COLORS,      "&Colors",      "Set player colors");
+  prefs_menu->Append(DISPLAY_ACCELS,      "&Accels",      "Edit accelerator keys");
+  prefs_menu->AppendSeparator();
+  prefs_menu->Append(DISPLAY_SAVE_DEFAULT, "Save Default");
+  prefs_menu->Append(DISPLAY_LOAD_DEFAULT, "Load Default");
+  prefs_menu->Append(DISPLAY_SAVE_CUSTOM,  "Save Custom");
+  prefs_menu->Append(DISPLAY_LOAD_CUSTOM,  "Load Custom");
+  zoom_win_item = prefs_menu->FindItem("Zoom &Window");
+  
+  wxMenu *help_menu = new wxMenu;
+  help_menu->Append(GAMBIT_HELP_CONTENTS, "&Contents", "Table of contents");
+  help_menu->Append(GAMBIT_HELP_ABOUT,    "&About",    "About this program");
 
-    wxMenu *help_menu = new wxMenu;
-    help_menu->Append(GAMBIT_HELP_CONTENTS, "&Contents", "Table of contents");
-    help_menu->Append(GAMBIT_HELP_ABOUT,    "&About",    "About this program");
+  wxMenuBar *menu_bar = new wxMenuBar;
+  menu_bar->Append(file_menu,     "&File");
+  menu_bar->Append(build_menu,    "&Build");
+  menu_bar->Append(subgame_menu,  "Sub&games");
+  menu_bar->Append(supports_menu, "S&upports");
+  menu_bar->Append(solve_menu,    "&Solve");
+  menu_bar->Append(inspect_menu,  "&Inspect");
+  menu_bar->Append(prefs_menu,    "&Prefs");
+  menu_bar->Append(help_menu,     "&Help");
 
-    wxMenuBar *menu_bar = new wxMenuBar;
-    menu_bar->Append(file_menu,     "&File");
-    menu_bar->Append(build_menu,    "&Build");
-    menu_bar->Append(subgame_menu,  "Sub&games");
-    menu_bar->Append(supports_menu, "S&upports");
-    menu_bar->Append(solve_menu,    "&Solve");
-    menu_bar->Append(inspect_menu,  "&Inspect");
-    menu_bar->Append(prefs_menu,    "&Prefs");
-    menu_bar->Append(help_menu,     "&Help");
-
-    // Set the menu bar
-    SetMenuBar(menu_bar);
-
-    // Now check/uncheck all of the checkable menu items
-    Bool use_standard;
-    char *defaults_file =    "gambit.ini";
-    wxGetResource(SOLN_SECT, "Efg-Use-Standard", &use_standard, defaults_file);
-    menu_bar->Check(SOLVE_STANDARD, use_standard);
+  // Set the menu bar
+  SetMenuBar(menu_bar);
 }
 
 Bool EfgShow::OnClose(void)
@@ -376,19 +413,33 @@ void EfgShow::OnMenuCommand(int id)
     case INSPECT_SOLUTIONS: 
         InspectSolutions(CREATE_DIALOG);
         break;
+    case INSPECT_GAMEINFO: 
+      ShowGameInfo();
+      break;
 
-    case SOLVE_SOLVE: 
-        GUI_RECORD("SOLVE:SOLVE");
-        Solve();
-        break;
+    case SOLVE_CUSTOM_EFG_ENUMPURE:
+    case SOLVE_CUSTOM_EFG_LCP:
+    case SOLVE_CUSTOM_EFG_LP:
+    case SOLVE_CUSTOM_EFG_LIAP:
+    case SOLVE_CUSTOM_EFG_GOBIT:
+    case SOLVE_CUSTOM_NFG_ENUMPURE:
+    case SOLVE_CUSTOM_NFG_ENUMMIXED:
+    case SOLVE_CUSTOM_NFG_LCP:
+    case SOLVE_CUSTOM_NFG_LP:
+    case SOLVE_CUSTOM_NFG_LIAP:
+    case SOLVE_CUSTOM_NFG_SIMPDIV:
+    case SOLVE_CUSTOM_NFG_GOBIT:
+    case SOLVE_CUSTOM_NFG_GOBITGRID:
+      GUI_RECORD("SOLVE:SOLVE");
+      Solve(id);
+      break;
 
-    case SOLVE_SOLVE_NORMAL: 
-        SolveNormal();
-        break;
-
-    case SOLVE_ALGORITHM: 
-        SolveSetup(SOLVE_SETUP_CUSTOM);
-        break;
+    case SOLVE_NFG_REDUCED: 
+      SolveNormalReduced();
+      break;
+    case SOLVE_NFG_AGENT:
+      SolveNormalAgent();
+      break;
 
     case SOLVE_STANDARD:
         SolveSetup(SOLVE_SETUP_STANDARD);
@@ -404,9 +455,6 @@ void EfgShow::OnMenuCommand(int id)
         SubgamesSetup();
         break;
 
-    case SOLVE_GAMEINFO: 
-        ShowGameInfo();
-        break;
 
         // Display menu
 #define ZOOM_DELTA  .2

@@ -68,16 +68,30 @@
 #define INFOSET_REVEAL                      1407
 #define INFOSET_SPLIT                       1410
 
-#define SOLVE_SOLVE                         1501
-#define SOLVE_SOLVE_NORMAL                  1504
-#define SOLVE_SETTINGS                      1520        // settings submenu
-#define SOLVE_ALGORITHM                     1522
+#define SOLVE_CUSTOM                        1502
+#define SOLVE_CUSTOM_EFG                    1503
+#define SOLVE_CUSTOM_NFG                    1505
+#define SOLVE_CUSTOM_EFG_ENUMPURE           1506
+#define SOLVE_CUSTOM_EFG_LCP                1507
+#define SOLVE_CUSTOM_EFG_LP                 1508
+#define SOLVE_CUSTOM_EFG_LIAP               1509
+#define SOLVE_CUSTOM_EFG_GOBIT              1510
+#define SOLVE_CUSTOM_NFG_ENUMPURE           1511
+#define SOLVE_CUSTOM_NFG_ENUMMIXED          1512
+#define SOLVE_CUSTOM_NFG_LCP                1513
+#define SOLVE_CUSTOM_NFG_LP                 1514
+#define SOLVE_CUSTOM_NFG_LIAP               1515
+#define SOLVE_CUSTOM_NFG_SIMPDIV            1516
+#define SOLVE_CUSTOM_NFG_GOBIT              1517
+#define SOLVE_CUSTOM_NFG_GOBITGRID          1518
+
+#define SOLVE_NFG_REDUCED                   1504
+#define SOLVE_NFG_AGENT                     1519
+#define SOLVE_NFG                           1521
+
 #define SOLVE_DOMINANCE                     1524
 #define SOLVE_SUBGAMES                      1526
-#define SOLVE_STANDARD                      1540        // standard submenu
-#define SOLVE_STANDARD_TYPE                 1550
-#define SOLVE_STANDARD_NUM                  1560
-#define SOLVE_GAMEINFO                      1580
+#define SOLVE_STANDARD                      1540
 
 #define DISPLAY_SET_ZOOM                    1600
 #define DISPLAY_INC_ZOOM                    1601
@@ -98,6 +112,7 @@
 
 #define INSPECT_SOLUTIONS                   1850
 #define INSPECT_FEATURES                    1860
+#define INSPECT_GAMEINFO                    1870
 
 #define GAMBIT_HELP_CONTENTS                1700
 #define GAMBIT_HELP_ABOUT                   1701
