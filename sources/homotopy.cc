@@ -78,7 +78,8 @@ void HomQre(const Nfg &nfg, HomQreParams &params,
   if (params.pxifile) 
     WritePXIHeader(*params.pxifile, nfg, params);
   
-  fixpnf(supp, params, solutions, N, Y, flag, 1., 1., .1, .1, true,
+  gHompack<double> hom(supp, params);
+  hom.fixpnf(solutions, N, Y, flag, 1., 1., .1, .1, true,
   	 A, ssp, jeval_num,arclength,max_lambda,false);
 
   printf("Exiting flag: %d\n",flag);
@@ -120,82 +121,11 @@ if (x < eps)
 // return log(x);
 }
 
-template <class T> void rhojac( const NFSupport &supp, const gVector<T> &A, const T lambda,
-             const gVector<T> &X, gVector<T> &V, int K )
-{
-  int n_strats =supp.TotalNumStrats() ;  
-  int n_players = supp.Game().NumPlayers();
-  
-  gVector<T> Vxh(n_strats-n_players);
-  gVector<T> Vx(n_strats-n_players);
-  gVector<T> xh(n_strats-n_players);
-  T dh = 1E-12;
-  
-  if (K == 1) {
-    rho(supp, A, lambda+dh, X, Vxh);
-    rho(supp, A, lambda, X, Vx);
-    V = (Vxh-Vx)/dh;
-  } // end of K == 1 i.e. w.r.t. lambda
-  
-  
-  if ((K >= 2) && (K <= n_strats-n_players+1 )) {
-    xh = X;
-    xh[K-1] += dh;
-    rho(supp, A, lambda, xh,Vxh);
-    rho(supp, A, lambda, X, Vx);
-    V = (Vxh-Vx)/dh;
-  } // end of ((K >= 2) && (K <= n_strats-n_players+1 ))
-
-} // end of rhojac
-
-
-template <class T> void rho( const NFSupport &supp, const gVector<T> &A, const T lambda,
-          const gVector<T> &X, gVector<T> &V   )
-{
-  T eps = 0.00;
-  T tlambda = 1/(1-lambda) - 1; // switch in hompack3 as wells as here
-
-  MixedProfile<T> sol(supp);
-  int j = 1;
-  for(int pl = 1;pl<=supp.Game().NumPlayers();pl++) {
-    T resid = 1;
-    int i;
-    for(i=1;i<supp.NumStrats(pl);i++) {
-      sol(pl,i) = X[j];
-      resid -= X[j];
-      j++;
-    }
-    sol(pl,i) =  resid;
-  }
-
-  j=1;
-  for(int pl=1;pl<=supp.Game().NumPlayers();pl++)
-    for(int i = 2; i <= supp.NumStrats(pl); i++) {
-      T x =  (T) my_log((T)sol(pl,1),eps)- (T) my_log((T)sol(pl,i),eps) 
-	- tlambda*((T)(sol.Payoff(pl,pl,1)-sol.Payoff(pl,pl,i)));
-      V[j] = x;
-      j++;
-    }  
-}
-
-template <class T> void display_vector(const gVector<T> p,char * msg, int n,T ptag)
-{
-  int i;
-  printf("%s:(",msg);
-  for(i = 1; i < n; i++)
-    printf("%4.2f,",p[i]);
-  printf("%4.2f,%4.2f)\n",p[n],ptag);
-}
-
-
-
 #ifdef UNUSED
-template <class T> void rhojact( const gVector<T> &A, const NFSupport &supp, 
-             const gMatrix<T> &row_payoffs,
-             const gMatrix<T> &col_payoffs, const T lambda,
-             const gVector<T> &X, gVector<T> &V, int K )
+template <class T> void gHompack<T>::rhojact(const NFSupport &supp, const gVector<T> &A, 
+             const T lambda, const gVector<T> &X, gVector<T> &V, int K )
 {
-  
+  /*  
   int n_rows = row_payoffs.NumRows();
   int n_cols = row_payoffs.NumColumns();
   
@@ -244,6 +174,23 @@ template <class T> void rhojact( const gVector<T> &A, const NFSupport &supp,
   // display_vector(p,"p",n_rows-1,p_resid);
   // display_vector(q,"q",n_cols-1,q_resid);
   // printf ("K=%d\n",K);
+  */
+
+  T eps = 0.00;
+  T tlambda = 1/(1-lambda) - 1; // switch in hompack3 as wells as here
+
+  MixedProfile<T> sol(supp);
+  int j = 1;
+  for(int pl = 1;pl<=supp.Game().NumPlayers();pl++) {
+    T resid = 1;
+    int i;
+    for(i=1;i<supp.NumStrats(pl);i++) {
+      sol(pl,i) = X[j];
+      resid -= X[j];
+      j++;
+    }
+    sol(pl,i) =  resid;
+  }
   
   if (K == 1) {
     //derivatives w.r.t lambda
@@ -430,7 +377,7 @@ template <class T> T eu(const gVector<T> p,const gMatrix<T> M,
   
   return result;
 }
-#endif
+#endif  // UNUSED
 
 // assumes that the row and column are consistently dimensioned
 void echo_payoffs(const NFSupport &supp)
@@ -448,26 +395,14 @@ void echo_payoffs(const NFSupport &supp)
   while(iter.NextContingency());
 }
 
-template <class T> void F( const gVector<T> &X, gVector<T> &V )  { }
-template <class T> void Fjac( const gVector<T> &X, gVector<T> &V, int K )  { }
-
 // Instantiations
 
-template void display_vector(const gVector<double>,char *, int,double);
 template double my_log(double,double);
+
 #ifdef UNUSED
-template void rhojact( const gVector<double> &, const NFSupport &, const gMatrix<double> &,
-		       const gMatrix<double> &, const double,
-		       const gVector<double> &, gVector<double> &, int);
+template void gHompack<T>::rhojact(const NFSupport &, const gVector<double> &, 
+                   const double,
+		   const gVector<double> &, gVector<double> &, int);
 template double eu(const gVector<double>,const gMatrix<double>,
 		   const int,const int);
-#endif
-
-// template double tl(double);
-
-template void rho( const NFSupport &, const gVector<double> &, const double,
-          const gVector<double> &, gVector<double> &);
-template void rhojac( const NFSupport &, const gVector<double> &, const double,
-             const gVector<double> &, gVector<double> &, int);
-template void F( const gVector<double> &, gVector<double> &);
-template void Fjac( const gVector<double> &, gVector<double> &, int);
+#endif // UNUSED

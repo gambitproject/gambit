@@ -30,7 +30,18 @@
 
  // qofs //////////////////////////////////////////////////////////////////
  // The code below is related to the  Hermite cubic predictor
-template <class T> T qofs(T f0, T fp0, T f1, T fp1, T dels, T s)
+
+template <class T> 
+gHompack<T>::gHompack(const NFSupport &S, const HomQreParams &p)
+  : nfg(S.Game()), supp(S), params(p)
+{ } 
+
+template <class T> gHompack<T>::~gHompack(void)
+{ } 
+
+
+template <class T> 
+T gHompack<T>::qofs(T f0, T fp0, T f1, T fp1, T dels, T s)
 {
   T dd01, dd001, dd011, dd0011;
   dd01 = (f1 - f0) / dels;
@@ -40,7 +51,8 @@ template <class T> T qofs(T f0, T fp0, T f1, T fp1, T dels, T s)
   return ((dd0011 * (s - dels) + dd001) * s + fp0) * s + f0;
 }
 
-template <class T> bool out_of_bounds(gVector<T> &W,int range)
+template <class T> 
+bool gHompack<T>::out_of_bounds(gVector<T> &W,int range)
 {
   int i;
   
@@ -50,7 +62,8 @@ template <class T> bool out_of_bounds(gVector<T> &W,int range)
   return false;
 }
 
-template <class T> void build_prediction(gVector<T> &W,int N, gVector<T> &Y_old,
+template <class T> 
+void gHompack<T>::build_prediction(gVector<T> &W,int N, gVector<T> &Y_old,
 						gVector<T> &Ytan_old,gVector<T> &Y,
                   gVector<T> &Ytan,T old_step,T old_step_plus_step_size)
 {
@@ -253,13 +266,14 @@ template <class T> void build_prediction(gVector<T> &W,int N, gVector<T> &Y_old,
 
  // pointers to the vectors so they can be reallocated
 
+
 static gVector<double> *Ytan_p;     // YP = tangent vector to zero curve at Y
 static gVector<double> *Y_old_p;    // Yold = previous point on the zero curve
 static gVector<double> *Ytan_old_p; // YPold = previous tangent vector
 
-template <class T> void fixpnf(
-	     const NFSupport &supp,
-             HomQreParams &params,       // Name of the output file
+
+template <class T> 
+void gHompack<T>::fixpnf(
              gList<MixedSolution> &solutions,
 	     int N,                     // N is the dimension
 	     gVector<T> &Y,        // Y = [lambda, X]
@@ -280,7 +294,7 @@ template <class T> void fixpnf(
   MixedProfile<gNumber> sol(supp);
 
   //cout << "Entered fixpnf()." << endl;
-  void cleanup();
+  //  void cleanup();
   
   // Static variables //////////////////////////////////////////////////
   // these were marked with SAVE in the Fortran
@@ -482,7 +496,7 @@ template <class T> void fixpnf(
     //    show_probs("Before stepnf",Y,supp);
     
     
-    stepnf(N,supp, jeval_num, flag, start, crash, old_step, max_step, rel_err,
+    stepnf(N,jeval_num, flag, start, crash, old_step, max_step, rel_err,
 	   abs_err, total_arclength, Y, Ytan, Y_old, Ytan_old, A,
 	   stepsize_params);
     
@@ -587,7 +601,7 @@ template <class T> void fixpnf(
       // "Save Y_old for arc length calculation later."
       gVector<T> Z0 = Y_old;
       
-      rootnf(N,supp, jeval_num, flag, rel_ans_err, abs_ans_err,
+      rootnf(N,jeval_num, flag, rel_ans_err, abs_ans_err,
 	     Y, Ytan, Y_old, Ytan_old, A);
       
       // "Calculate final arc length."
@@ -628,13 +642,15 @@ template <class T> void fixpnf(
   return;
 }
 
-void cleanup() {
+template <class T> 
+void gHompack<T>::cleanup(void) {
   if (Ytan_p     != NULL)  delete Ytan_p;
   if (Y_old_p    != NULL)  delete Y_old_p;
   if (Ytan_old_p != NULL)  delete Ytan_old_p;
 }
 
-template <class T> void show_probs(char *msg,const gVector<T> &Y,NFSupport &supp)
+template <class T> 
+void gHompack<T>::show_probs(char *msg,const gVector<T> &Y)
 {
   MixedProfile<gNumber> sol(supp);
 
@@ -787,8 +803,8 @@ template <class T> void show_probs(char *msg,const gVector<T> &Y,NFSupport &supp
    C CALLS  DNRM2 , TANGNF .
 */
 
-template <class T> void stepnf( int N,
-	     const NFSupport &supp,
+template <class T> 
+void gHompack<T>::stepnf( int N,
 	     int &jeval_num,
 	     int &flag,
 	     bool &start,       bool &crash,
@@ -858,7 +874,7 @@ template <class T> void stepnf( int N,
     // Vale Murthy 3/1/00 The printing will scroll off the screen
     //    show_probs("Before tangnf",Y,supp);
     
-    tangnf(arclength,supp, Y, Ytan, Ytan_old, A, Newton_step, jeval_num, N, flag);
+    tangnf(arclength,Y, Ytan, Ytan_old, A, Newton_step, jeval_num, N, flag);
     
     //    show_probs("After tangnf",Y,supp);
     
@@ -876,7 +892,7 @@ template <class T> void stepnf( int N,
 	// display lambda,player 1's p's, player 2's q's
 	//show_probs("Before tangnf(2):",W,supp);
 	
-	tangnf(rholen,supp ,W, Wtan, Ytan_old, A, Newton_step, jeval_num, N, flag);
+	tangnf(rholen,W, Wtan, Ytan_old, A, Newton_step, jeval_num, N, flag);
 	//show_probs("After tangnf(2):",W,supp);
 	if (flag > 0)
 	  return;     // Return tangnf error.
@@ -955,7 +971,7 @@ template <class T> void stepnf( int N,
 	//show_probs("Before tangnf(3):",W,supp);
 	
 	// "Calculate the Newton step at the curent point W."
-	tangnf(rholen, supp, W, Wtan, Ytan, A,
+	tangnf(rholen, W, Wtan, Ytan, A,
 	       Newton_step, jeval_num, N, flag);
 	// show_probs("After tangnf(3):",W,supp);
 	if (flag > 0)  return;     // Return tangnf error.
@@ -1171,8 +1187,8 @@ template <class T> void stepnf( int N,
    C CALLS  D1MACH , DNRM2 , ROOT , TANGNF .
 */
 
-template <class T> void rootnf( int N,
-	     const NFSupport &supp,
+template <class T> 
+void gHompack<T>::rootnf( int N,
 	     int &jevalcount, int &flag,
 	     T relerr,     T abserr,
 	     gVector<T> &Y, //debugging 2/16/00 Vale Murthy
@@ -1225,7 +1241,7 @@ template <class T> void rootnf( int N,
     
     
     // "CALCULATE NEWTON STEP AT Q(SA)."
-    tangnf(sa,supp, W, WP, Ytan_old, A, Newton_step, jevalcount, N, flag);
+    tangnf(sa, W, WP, Ytan_old, A, Newton_step, jevalcount, N, flag);
     //cout << "rootnf: Left tangnf(), #1." << endl;
     // show_probs("After tangnf(4):",W,supp);
     
@@ -1239,7 +1255,7 @@ template <class T> void rootnf( int N,
     // show_probs("Before tangnf(5):",W,supp);
     
     // "GET THE TANGENT  WP  AT  W  AND THE NEXT NEWTON STEP IN Newton_step.
-    tangnf(sa,supp, W, WP, Ytan_old, A, Newton_step, jevalcount, N, flag);
+    tangnf(sa, W, WP, Ytan_old, A, Newton_step, jevalcount, N, flag);
     // show_probs("After tangnf(5):",W,supp);
     //cout << "rootnf: Left tangnf(), #2." << endl;
     
@@ -1332,7 +1348,8 @@ template <class T> void rootnf( int N,
     C  CALLS  D1MACH .
 */
 
-template <class T> void root( T &t, T &F_of_t,
+template <class T> 
+void gHompack<T>::root( T &t, T &F_of_t,
 	   T &b, T &c,
 	   T relerr, T abserr,
 	   int &flag
@@ -1535,8 +1552,8 @@ template <class T> void root( T &t, T &F_of_t,
    C CALLS  DGEQPF , DNRM2 , DORMQR , F (OR  RHO ), FJAC (OR  RHOJAC ).
 */
 
-template <class T> void tangnf( T &rholen,
-	     const NFSupport &supp,
+template <class T> 
+void gHompack<T>::tangnf( T &rholen,
 	     const gVector<T> &Y,
 	     gVector<T> &Ytan,
 	     const gVector<T> &Ytan_old,
@@ -1577,11 +1594,11 @@ template <class T> void tangnf( T &rholen,
     gVector<T> V(N);
     
     for (int i = 1; i <= N+1; ++i) {
-      rhojac(supp, A, lambda, X, V, i);
+      rhojac(A, lambda, X, V, i);
       QR.SetColumn(i, V);
     }
     
-    rho(supp, A, lambda, X, QR_Np2);
+    rho(A, lambda, X, QR_Np2);
     
   }
   else { // if (flag != -2) 
@@ -1631,7 +1648,8 @@ template <class T> void tangnf( T &rholen,
   gVector<T> tau(N);
   
   // CALL DGEQPF(N,NP1,QR,N,PIVOT,YP,ALPHA,K)
-  dgeqpf(QR, pivot, tau, info);
+  gLapack<T> la;
+  la.dgeqpf(QR, pivot, tau, info);
   
   if ( fabs(QR(N,N)) <= fabs(QR(1,1)) * DBL_MIN ) {
     flag = 4;       // Return error 4: Jacobian has rank < N
@@ -1665,7 +1683,8 @@ template <class T> void tangnf( T &rholen,
     }
     gMatrix<T> C(N, 1);
     C.SetColumn(1, QR_Np2);
-    dormqr('L', 'T', N, A, tau, C, info);
+    gLapack<T> la;
+    la.dormqr('L', 'T', N, A, tau, C, info);
     C.GetColumn(1, QR_Np2);
   }
   
@@ -1720,37 +1739,74 @@ template <class T> void tangnf( T &rholen,
   */
 }
 
-// Instantiations  ////////////////////////////////////////////////////////////
+template <class T> 
+void gHompack<T>::F( const gVector<T> &X, gVector<T> &V )  
+{ }
 
-template void fixpnf(const NFSupport &, HomQreParams &,
-		     gList<MixedSolution> &, 
-		     int, gVector<double> &, int &, double, double, double, double, bool, 
-		     gVector<double> &, gArray<double> &, int &, double &, double, bool);
+template <class T> 
+void gHompack<T>::Fjac(const gVector<T> &X, gVector<T> &V, int K ) 
+{ }
 
-template void stepnf(int , const NFSupport &, 
-		     int &, int &, bool &, bool &, double &, double &, double &, 
-		     double &, double &, gVector<double> &, gVector<double> &, 
-		     gVector<double> &, gVector<double> &,
-		     const gVector<double> &, const gArray<double> &);
+template <class T> 
+void gHompack<T>::rho(const gVector<T> &A, 
+		      const T lambda, const gVector<T> &X, gVector<T> &V )
+{
+  T eps = 0.00;
+  T tlambda = 1/(1-lambda) - 1; // switch in hompack3 as wells as here
 
-template void rootnf( int, const NFSupport &, int &, int &,
-		      double, double, gVector<double> &, gVector<double> &,
-		      gVector<double> &, gVector<double> &, const gVector<double> &);
+  MixedProfile<T> sol(supp);
+  int j = 1;
+  for(int pl = 1;pl<=supp.Game().NumPlayers();pl++) {
+    T resid = 1;
+    int i;
+    for(i=1;i<supp.NumStrats(pl);i++) {
+      sol(pl,i) = X[j];
+      resid -= X[j];
+      j++;
+    }
+    sol(pl,i) =  resid;
+  }
 
-template void root( double &, double &, double &, double &, double, double, int &);
+  j=1;
+  for(int pl=1;pl<=supp.Game().NumPlayers();pl++)
+    for(int i = 2; i <= supp.NumStrats(pl); i++) {
+      T x =  (T) my_log((T)sol(pl,1),eps)- (T) my_log((T)sol(pl,i),eps) 
+	- tlambda*((T)(sol.Payoff(pl,pl,1)-sol.Payoff(pl,pl,i)));
+      V[j] = x;
+      j++;
+    }  
+}
 
-template void show_probs(char *,const gVector<double> &,NFSupport &);
+template <class T> 
+void gHompack<T>::rhojac(const gVector<T> &A, 
+			 const T lambda, const gVector<T> &X, 
+			 gVector<T> &V, int K )
+{
+  int n_strats =supp.TotalNumStrats() ;  
+  int n_players = supp.Game().NumPlayers();
+  
+  gVector<T> Vxh(n_strats-n_players);
+  gVector<T> Vx(n_strats-n_players);
+  gVector<T> xh(n_strats-n_players);
+  T dh = 1E-12;
+  
+  if (K == 1) {
+    rho(A, lambda+dh, X, Vxh);
+    rho(A, lambda, X, Vx);
+    V = (Vxh-Vx)/dh;
+  } // end of K == 1 i.e. w.r.t. lambda
+  
+  
+  if ((K >= 2) && (K <= n_strats-n_players+1 )) {
+    xh = X;
+    xh[K-1] += dh;
+    rho(A, lambda, xh,Vxh);
+    rho(A, lambda, X, Vx);
+    V = (Vxh-Vx)/dh;
+  } // end of ((K >= 2) && (K <= n_strats-n_players+1 ))
+} 
 
-template bool out_of_bounds(gVector<double> &,int);
+// Instantiations  
 
-template void build_prediction(gVector<double> &,int, gVector<double> &, gVector<double> &,
-			       gVector<double> &, gVector<double> &,double,double);
-
-template void tangnf( double &, const NFSupport &,  
-		      const gVector<double> &, gVector<double> &, const gVector<double> &,
-		      const gVector<double> &, gVector<double> &, int &, int, int &);
-
-
-template double qofs(double, double, double, double, double, double);
-
+template class gHompack<double>;
 

@@ -461,6 +461,106 @@ static Portion *GSM_Qre_Start(Portion **param)
   }
 }
 
+//---------------
+// QreSolve
+//---------------
+
+#include "homotopy.h"
+
+static Portion *GSM_Hom_Start(Portion **param)
+{
+  if (param[0]->Spec().Type == porMIXED)  {
+    MixedSolution &start = *((MixedPortion *) param[0])->Value();
+    Nfg &N = start.Game();
+    HomQreParams NP;
+    if (((TextPortion *) param[1])->Value() != "")
+      NP.pxifile = new gFileOutput(((TextPortion *) param[1])->Value());
+    else
+      NP.pxifile = &gnull;
+    NP.minLam = ((NumberPortion *) param[2])->Value();
+    NP.maxLam = ((NumberPortion *) param[3])->Value();
+    NP.delLam = ((NumberPortion *) param[4])->Value();
+    NP.powLam = ((NumberPortion *) param[5])->Value();
+    NP.fullGraph = ((BoolPortion *) param[6])->Value();
+
+    NP.SetAccuracy( ((NumberPortion *) param[7])->Value());
+
+    NP.tracefile = &((OutputPortion *) param[11])->Value();
+    NP.trace = ((NumberPortion *) param[12])->Value();
+
+    gList<MixedSolution> solutions;
+    try {
+      long nevals, niters;
+      gWatch watch;
+      HomQre(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
+
+      ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
+      ((NumberPortion *) param[9])->SetValue(nevals);
+      ((NumberPortion *) param[10])->SetValue(niters);
+    }
+    catch (gSignalBreak &) {
+      NP.status.Reset();
+    }
+    catch (...) {
+      if (NP.pxifile != &gnull)  delete NP.pxifile;
+      throw;
+    }
+
+    if (NP.pxifile != &gnull)  delete NP.pxifile;
+    return new Mixed_ListPortion(solutions);
+  }
+  else  {     // BEHAV 
+    throw gclRuntimeError("Not implemented for extensive form games");
+    /*
+    BehavSolution &start = *((BehavPortion *) param[0])->Value();
+    Efg &E = start.Game();
+  
+    if (!IsPerfectRecall(E)) {
+      gout << "WARNING: Solving game of imperfect recall with Qre; results not guaranteed\n";
+    }
+
+    EFQreParams EP;
+    if(((TextPortion*) param[1])->Value() != "")
+      EP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
+    else
+      EP.pxifile = &gnull;
+    EP.minLam = ((NumberPortion *) param[2])->Value();
+    EP.maxLam = ((NumberPortion *) param[3])->Value();
+    EP.delLam = ((NumberPortion *) param[4])->Value();
+    EP.powLam = ((NumberPortion *) param[5])->Value();
+    EP.fullGraph = ((BoolPortion *) param[6])->Value();
+    
+    EP.SetAccuracy( ((NumberPortion *) param[7])->Value());
+
+    EP.tracefile = &((OutputPortion *) param[11])->Value();
+    EP.trace = ((NumberPortion *) param[12])->Value();
+    
+    gList<BehavSolution> solutions;
+    try {
+      long nevals, niters;
+      gWatch watch;
+    
+      Qre(E, EP, BehavProfile<gNumber>(start), solutions, nevals, niters);
+
+      ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
+      ((NumberPortion *) param[9])->SetValue(nevals);
+      ((NumberPortion *) param[10])->SetValue(niters);
+    }
+    catch (gSignalBreak &) {
+      EP.status.Reset();
+    }
+    catch (...) {
+      if (EP.pxifile != &gnull)  delete EP.pxifile;
+      throw;
+    }
+
+    if (EP.pxifile != &gnull)   delete EP.pxifile;
+
+    return new Behav_ListPortion(solutions);
+    */
+  }
+}
+
 #ifdef INTERNAL_VERSION
 
 //---------------
@@ -960,6 +1060,7 @@ static Portion *GSM_Lp_Efg(Portion **param)
   }
 }
 
+
 //------------------
 //  PolEnumSolve (was AllNashSolve)
 //------------------
@@ -1426,6 +1527,39 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new gclFunction("QreSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Qre_Start, 
+				       PortionSpec(porMIXED | porBEHAV, 1), 13));
+  FuncObj->SetParamInfo(0, 0, gclParameter("start",
+					    porMIXED | porBEHAV));
+  FuncObj->SetParamInfo(0, 1, gclParameter("pxifile", porTEXT,
+					    new TextPortion("")));
+  FuncObj->SetParamInfo(0, 2, gclParameter("minLam", porNUMBER,
+					    new NumberPortion(0.001)));
+  FuncObj->SetParamInfo(0, 3, gclParameter("maxLam", porNUMBER,
+					    new NumberPortion(500.0)));
+  FuncObj->SetParamInfo(0, 4, gclParameter("delLam", porNUMBER,
+					    new NumberPortion(0.02)));
+  FuncObj->SetParamInfo(0, 5, gclParameter("powLam", porINTEGER,
+					    new NumberPortion(1)));
+  FuncObj->SetParamInfo(0, 6, gclParameter("fullGraph", porBOOLEAN,
+					    new BoolPortion(false)));
+  FuncObj->SetParamInfo(0, 7, gclParameter("accuracy", porNUMBER,
+					    new NumberPortion(1.0e-8)));
+  FuncObj->SetParamInfo(0, 8, gclParameter("time", porNUMBER,
+					     new NumberPortion(0), BYREF));
+  FuncObj->SetParamInfo(0, 9, gclParameter("nEvals", porINTEGER,
+					     new NumberPortion(0), BYREF));
+  FuncObj->SetParamInfo(0, 10, gclParameter("nIters", porINTEGER,
+					     new NumberPortion(0), BYREF));
+  FuncObj->SetParamInfo(0, 11, gclParameter("traceFile", porOUTPUT,
+					     new OutputPortion(gnull), 
+					     BYREF));
+  FuncObj->SetParamInfo(0, 12, gclParameter("traceLevel", porNUMBER,
+					     new NumberPortion(0)));
+
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new gclFunction("HomSolve", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Hom_Start, 
 				       PortionSpec(porMIXED | porBEHAV, 1), 13));
   FuncObj->SetParamInfo(0, 0, gclParameter("start",
 					    porMIXED | porBEHAV));

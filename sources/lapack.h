@@ -12,23 +12,23 @@
 #include "gmatrix.h"
 
 // Prototypes ////////////////////////////////////////////////////////////
-template <class T> void dgeqpf(gMatrix<T> &A, gArray<int> &jpvt, gVector<T> &tau, int &info);
 
-template <class T> void dgeqr2(gMatrix<T> &A, gArray<T> &tau, int &info);
+template <class T> class gLapack {
+public: 
+  gLapack(void);
+  virtual ~gLapack();
 
-template <class T> void dlarfg(T &alpha, gVector<T> &X, T &tau);
-
-template <class T> void dormqr(char side, char trans, int k, gMatrix<T> &A,
+  void dgeqpf(gMatrix<T> &A, gArray<int> &jpvt, gVector<T> &tau, int &info);
+  void dgeqr2(gMatrix<T> &A, gArray<T> &tau, int &info);
+  void dlarfg(T &alpha, gVector<T> &X, T &tau);
+  void dormqr(char side, char trans, int k, gMatrix<T> &A,
             gVector<T> &tau, gMatrix<T> &C, int &info);
-
-template <class T> void dorm2r(char side, char trans, int k, gMatrix<T> &A,
+  void dorm2r(char side, char trans, int k, gMatrix<T> &A,
             gVector<T> &tau, gMatrix<T> &C, int &info);
-
-template <class T> void dlarf(char side, gVector<T> &V, T tau, gMatrix<T> &C);
-
-void xerbla(char *srname, int info);
-
-#endif
+  void dlarf(char side, gVector<T> &V, T tau, gMatrix<T> &C);
+  void xerbla(char *srname, int info);
+};
+#endif // LAPACK
 
 
 

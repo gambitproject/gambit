@@ -13,6 +13,13 @@
 #include "gmisc.h"
 #include "lapack.h"
 
+template <class T> gLapack<T>::gLapack(void)
+{ } 
+
+template <class T> gLapack<T>::~gLapack(void)
+{ } 
+
+
 
 // dgeqpf ////////////////////////////////////////////////////////////////
 /*  DGEQPF computes a QR factorization with column pivoting of a
@@ -74,7 +81,7 @@
     then the jth column of P is the ith canonical unit vector.
 */
 
-template <class T> void dgeqpf(gMatrix<T> &A, gArray<int> &jpvt, gVector<T> &tau, int &info)
+template <class T> void gLapack<T>::dgeqpf(gMatrix<T> &A, gArray<int> &jpvt, gVector<T> &tau, int &info)
 {
   //cout << "Entered dgeqpf()." << endl;
   
@@ -327,7 +334,7 @@ template <class T> void dgeqpf(gMatrix<T> &A, gArray<int> &jpvt, gVector<T> &tau
     and tau in TAU(i).
 */
 
-template <class T> void dgeqr2(gMatrix<T> &A, gArray<T> &tau, int &info)
+template <class T> void gLapack<T>::dgeqr2(gMatrix<T> &A, gArray<T> &tau, int &info)
 {
   //cout << "Entered dgeqr2." << endl;
   
@@ -432,7 +439,7 @@ template <class T> void dgeqr2(gMatrix<T> &A, gArray<T> &tau, int &info)
             The value tau.
 */
 
-template <class T> void dlarfg(T &alpha, gVector<T> &X, T &tau)
+template <class T> void gLapack<T>::dlarfg(T &alpha, gVector<T> &X, T &tau)
 {
   //cout << "Entered dlarfg()." << endl;
   
@@ -565,7 +572,7 @@ template <class T> void dlarfg(T &alpha, gVector<T> &X, T &tau)
 
 */
 
-template <class T> void dormqr(char side, char trans, int k, gMatrix<T> &A,
+template <class T> void gLapack<T>::dormqr(char side, char trans, int k, gMatrix<T> &A,
             gVector<T> &tau, gMatrix<T> &C, int &info)
 {
   //cout << "Entered dormqr()." << endl;
@@ -680,7 +687,7 @@ template <class T> void dormqr(char side, char trans, int k, gMatrix<T> &A,
             < 0: if INFO = -i, the i-th argument had an illegal value
 */
 
-template <class T> void dorm2r(char side, char trans, int k, gMatrix<T> &A,
+template <class T> void gLapack<T>::dorm2r(char side, char trans, int k, gMatrix<T> &A,
             gVector<T> &tau, gMatrix<T> &C, int &info)
 {
   //cout << "Entered dorm2r()." << endl;
@@ -819,7 +826,7 @@ template <class T> void dorm2r(char side, char trans, int k, gMatrix<T> &A,
 
     */
 
-template <class T> void dlarf(char side, gVector<T> &V, T tau, gMatrix<T> &C)
+template <class T> void gLapack<T>::dlarf(char side, gVector<T> &V, T tau, gMatrix<T> &C)
 {
   //cout << "Entered dlarf()." << endl;
   
@@ -886,17 +893,10 @@ template <class T> void dlarf(char side, gVector<T> &V, T tau, gMatrix<T> &C)
    =====================================================================
 */
 
-void xerbla(char *srname, int info)
+template <class T> void gLapack<T>::xerbla(char *srname, int info)
 {
   printf("** On entry to %6s, parameter number %2i had an illegal value\n",
 	 srname, info);
 }
 
-template void dgeqpf(gMatrix<double> &, gArray<int> &, gVector<double> &, int &);
-template void dgeqr2(gMatrix<double> &, gArray<double> &, int &);
-template void dlarfg(double &, gVector<double> &, double &);
-template void dormqr(char, char, int, gMatrix<double> &,
-            gVector<double> &, gMatrix<double> &, int &);
-template void dorm2r(char, char, int, gMatrix<double> &,
-            gVector<double> &, gMatrix<double> &, int &);
-template void dlarf(char, gVector<double> &, double, gMatrix<double> &);
+template class gLapack<double>;
