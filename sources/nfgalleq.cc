@@ -1,5 +1,5 @@
 //
-// FILE: nfgalleq.cc -- All Nash Enum module
+// FILE: nfgalleq.cc -- All Nash Enum module 
 //
 // $Id$
 //
