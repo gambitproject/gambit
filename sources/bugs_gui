@@ -46,6 +46,11 @@ for a new label.
 There are other instances of the File Selector dialog that should 
 also be looked at to make sure they behave as expected.
 
+RDM 12/29/98: most of the above is fixed now.  The only remaining
+problems are that on unix, it does not prompt with the existing
+filename, and when you exit the GUI after having made changes to the
+game, it does not prompt you to save.
+
 //------------------------------
 
 Bug D7:  Conflict with Netscape
@@ -163,19 +168,6 @@ cursor, but this may be harder to achieve.
 
 //------------------------------
 
-Bug D18: Problems with PXI
-
-On Win95 version, load poker.efg, run Solve->Custom->Extensive->QRE
-with params minLam = .001, maxlam = 20 delLam = .1.  Check Run PXI
-box, and set PXI command to pxi32.exe (with appropriate path, if
-necessary).  Now check OK to run algorithm. When algorithm completes,
-the gui crashes with notice that program has performed an illegal
-operation.
-
-This now appears to be fixed, RDM 12/27/98
-
-//------------------------------
-
 Bug D19: Problems with Standard Solution output.  
 
 There are numerous problems with the GUI Standard Solutions output:
@@ -247,13 +239,6 @@ strategies are specified there.
 
 //------------------------------
 
-Bug D24: Calculator toolbar button not hooked up. 
-
-
-Calculator toolbar button on NFG Gui gives "unknown" dialog.
-
-//------------------------------
-
 Bug D25: Problems with editing. 
 
 Edit mixed solution from the NF solution display.  The editor does not
@@ -288,6 +273,8 @@ Load poker.efg, convert it to reduced normal form, and then try to
 save this as a normal form game (junk.nfg).  The gui crashes.
 Similarly, if you try to solve the game with the QRE algorithm, the
 gui crashes.
+
+RDM: The above is now fixed (12/29/98)
 
 -------------  older bugs that still remain ---------------
 
