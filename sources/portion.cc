@@ -934,8 +934,12 @@ PortionType Nfg_Portion<gRational>::SubType( void ) const
 { return porRATIONAL; }
 
 
+#include "garray.imp"
+
+TEMPLATE class gArray<Portion *>;
 
 #include "gblock.imp"
 
 TEMPLATE class gBlock<Portion*>;
+
 
