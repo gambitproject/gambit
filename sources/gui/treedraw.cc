@@ -166,7 +166,7 @@ panelNodes::panelNodes(wxWindow *p_parent, const TreeDrawSettings &p_settings)
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
   wxBoxSizer *tokenSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxString tokenChoices[] = { "Line", "Box", "Circle", "Rounded" };
+  wxString tokenChoices[] = { "Line", "Box", "Circle", "Diamond" };
   m_chanceToken = new wxRadioBox(this, -1, "Chance nodes",
 				 wxDefaultPosition, wxDefaultSize,
 				 4, tokenChoices);

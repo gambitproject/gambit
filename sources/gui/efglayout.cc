@@ -1,7 +1,10 @@
 //
-// FILE: efglayout.cc -- Implementation of extensive form layout
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of tree layout representation
 //
 
 #include <math.h>
@@ -101,7 +104,7 @@ void DrawSmallSubgameIcon(wxDC &dc, const NodeEntry &entry)
 
 NodeEntry::NodeEntry(Node *p_node)
   : m_node(p_node), m_selected(false), m_cursor(false), m_size(20),
-    m_token(tokenELLIPSE),
+    m_token(NODE_TOKEN_CIRCLE),
     m_sublevel(0), nums(0), in_sup(true)
 { }
 
@@ -123,20 +126,29 @@ void NodeEntry::Draw(wxDC &p_dc) const
 
   p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, (IsSelected()) ? 4 : 2,
 					     wxSOLID));
-  if (m_token == tokenLINE) {
-    p_dc.DrawLine(x, y, x + m_size + nums * INFOSET_SPACING, y);
+  if (m_token == NODE_TOKEN_LINE) {
+    p_dc.DrawLine(x + m_sublevel * INFOSET_SPACING, y,
+		  x + m_sublevel * INFOSET_SPACING + m_size, y);
   }
-  else if (m_token == tokenELLIPSE) {
+  else if (m_token == NODE_TOKEN_BOX) {
     p_dc.SetBrush(*wxTRANSPARENT_BRUSH);
-    p_dc.DrawEllipse(x + m_sublevel * INFOSET_SPACING, y - 10, m_size, 20); 
+    p_dc.DrawRectangle(x + m_sublevel * INFOSET_SPACING, y - m_size / 2,
+		       m_size, m_size);
   }
-
-  if (IsSelected()) {
-    p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 2, wxSOLID)); 
-    p_dc.SetBrush(*wxBLACK_BRUSH);
-    p_dc.DrawRectangle(GetX() - 3, y - 3, 7, 7);
-    p_dc.DrawRectangle(GetX() + m_size - 3, y - 3, 7, 7);
-  }      
+  else if (m_token == NODE_TOKEN_DIAMOND) {
+    wxPoint points[4] = { wxPoint(x + m_size / 2, y - m_size / 2),
+			  wxPoint(x, y),
+			  wxPoint(x + m_size / 2, y + m_size / 2),
+			  wxPoint(x + m_size, y) };
+    p_dc.SetBrush(*wxTRANSPARENT_BRUSH);
+    p_dc.DrawPolygon(4, points, m_sublevel * INFOSET_SPACING);
+  }
+  else {
+    // Default: draw circles
+    p_dc.SetBrush(*wxTRANSPARENT_BRUSH);
+    p_dc.DrawEllipse(x + m_sublevel * INFOSET_SPACING, y - m_size / 2,
+		     m_size, m_size); 
+  }
 
   int textWidth, textHeight;
   p_dc.GetTextExtent(m_nodeAboveLabel, &textWidth, &textHeight);
@@ -207,6 +219,21 @@ int NodeEntry::GetX(void) const
   return (x + m_sublevel * INFOSET_SPACING);
 }
 
+bool NodeEntry::NodeHitTest(int p_x, int p_y) const
+{
+  if (p_x < GetX() || p_x >= GetX() + m_size) {
+    return false;
+  }
+
+  if (m_token == NODE_TOKEN_LINE) {
+    const int DELTA = 8;  // a fudge factor for "almost" hitting the node
+    return (p_y >= y - DELTA && p_y <= y + DELTA);
+  }
+  else {
+    return (p_y >= y - m_size / 2 && p_y <= y + m_size / 2);
+  }
+}
+
 //-----------------------------------------------------------------------
 //                class efgTreeLayout: Member functions
 //-----------------------------------------------------------------------
@@ -220,20 +247,11 @@ efgTreeLayout::efgTreeLayout(FullEfg &p_efg, TreeWindow *p_parent)
 
 Node *efgTreeLayout::NodeHitTest(int p_x, int p_y) const
 {
-  const int DELTA = 8;
-
   for (int i = 1; i <= m_nodeList.Length(); i++) {
-    NodeEntry *entry = m_nodeList[i];
-
-    if (p_x > entry->x &&
-	p_x < (entry->x + m_parent->DrawSettings().NodeSize()
-	       + entry->nums*INFOSET_SPACING) &&
-	p_y > entry->y - DELTA &&
-	p_y < entry->y + DELTA) {
-      return entry->GetNode();
+    if (m_nodeList[i]->NodeHitTest(p_x, p_y)) {
+      return m_nodeList[i]->GetNode();
     }
   }
-
   return 0;
 }
 
@@ -661,12 +679,15 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
 				     draw_settings.BranchLength());
   if (n->GetPlayer() && n->GetPlayer()->IsChance()) {
     entry->color = wxGetApp().GetPreferences().GetChanceColor();
+    entry->SetToken(draw_settings.ChanceToken());
   }
   else if (n->GetPlayer()) {
     entry->color = wxGetApp().GetPreferences().GetPlayerColor(n->GetPlayer()->GetNumber());
+    entry->SetToken(draw_settings.PlayerToken());
   }
   else {
     entry->color = wxGetApp().GetPreferences().GetTerminalColor();
+    entry->SetToken(draw_settings.TerminalToken());
   }  
   
   entry->expanded = subgame_entry.expanded;

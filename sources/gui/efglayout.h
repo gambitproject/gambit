@@ -15,15 +15,12 @@
 #include "efg.h"
 
 class NodeEntry {
-public:
-  typedef enum { tokenLINE = 0, tokenELLIPSE, tokenRECTANGLE } NodeType;
-
 private:
   Node *m_node;       // the corresponding node in the game
   bool m_selected;    // true if node is selected
   bool m_cursor;      // true if node is 'cursor'
   int m_size;         // horizontal size of the node
-  NodeType m_token;   // token to draw for node
+  int m_token;        // token to draw for node
 
   int m_level;        // depth of the node in tree
   int m_sublevel;     // # of the infoset line on this level
@@ -55,8 +52,8 @@ public:
   void SetSize(int p_size) { m_size = p_size; }
   int GetSize(void) const { return m_size; }
 
-  void SetToken(NodeType p_token) { m_token = p_token; }
-  NodeType GetToken(void) const { return m_token; }
+  void SetToken(int p_token) { m_token = p_token; }
+  int GetToken(void) const { return m_token; }
 
   void SetLevel(int p_level) { m_level = p_level; }
   int GetLevel(void) const { return m_level; }
@@ -86,6 +83,8 @@ public:
     { m_branchBelowLabel = p_label; }
 
   int GetX(void) const;
+
+  bool NodeHitTest(int p_x, int p_y) const;
 
   void Draw(wxDC &) const;
   void DrawIncomingBranch(wxDC &) const;

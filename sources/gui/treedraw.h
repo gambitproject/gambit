@@ -16,6 +16,16 @@
 
 #include "base/base.h"
 
+const int NODE_TOKEN_LINE = 0;
+const int NODE_TOKEN_BOX = 1;
+const int NODE_TOKEN_CIRCLE = 2;
+const int NODE_TOKEN_DIAMOND = 3;
+
+const int SHOWISET_NONE = 0;
+const int SHOWISET_SAME = 1;
+const int SHOWISET_ALL = 2;
+
+
 class TreeDrawSettings {
 private:
   // Node styling
@@ -137,9 +147,5 @@ public:
   void SaveOptions(void) const;
   void LoadOptions(void);
 };
-
-#define SHOWISET_NONE   0
-#define SHOWISET_SAME   1
-#define SHOWISET_ALL    2
 
 #endif  // TREEDRAW_H
