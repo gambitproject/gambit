@@ -9,6 +9,7 @@
 
 #include "gpoly.h"
 #include "gsmatrix.h"
+#include "odometer.h"
 // #include "objcount.h"
 
 // ***********************
@@ -26,7 +27,6 @@ template <class T> class gPolyList
    
    // SubProcedures of ToSortedReducedGrobner   
    void        Sort(const term_order &);
-//   void        OldGrobnerize(const term_order &);
    void        CriterionTwo(      gList<index_pair>&, 
 			    const gList<index_pair>&, 
 			    const int&,
@@ -63,7 +63,6 @@ template <class T> class gPolyList
    int         SelfReduction(const int &, const term_order &);
 
    // Transform to canonical basis for associated ideal
-//   gPolyList<T>&  OldToSortedReducedGrobner(const term_order &);
    gPolyList<T>&  ToSortedReducedGrobner(const term_order &);
 
    // Information
@@ -74,6 +73,8 @@ template <class T> class gPolyList
    const gList<gPoly<T> >   UnderlyingList()                          const;
    const gVector<T>         Evaluate(const gVector<T>&)               const;
    const bool               IsRoot(const gVector<T>&)                 const;
+   const gRectArray<gPoly<T>*> DerivativeMatrix()                     const;
+   const gPoly<T>           DetOfDerivativeMatrix()                   const;
    const gMatrix<T>         DerivativeMatrix(const gVector<T>&)       const;
    const gSquareMatrix<T>   SquareDerivativeMatrix(const gVector<T>&) const;
 

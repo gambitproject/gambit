@@ -423,6 +423,40 @@ template<class T> const bool gPolyList<T>::IsRoot(const gVector<T>& v) const
 }
   
 template<class T> 
+const gRectArray<gPoly<T>*> gPolyList<T>::DerivativeMatrix() const
+{
+  gPoly<T> zero(Space, Order);
+  gRectArray<gPoly<T>*> answer(Length(),Dmnsn());
+  int ii;
+  for (ii = 1; ii <= Length(); ii++)
+    for (int j = 1; j <= Dmnsn(); j++)
+      answer(ii,j) = new gPoly<T>(UnderlyingList()[ii].PartialDerivative(j));
+  
+  return answer;
+}
+  
+template<class T> 
+const gPoly<T> gPolyList<T>::DetOfDerivativeMatrix() const
+{
+  assert(List.Length() == Space->Dmnsn());
+
+  int n = List.Length();
+  gRectArray<gPoly<T>*> deriv_matrix = DerivativeMatrix();
+  gPoly<T> answer(Space, Order);
+
+  gPermutationOdometer odo(n);
+
+  while (odo.Turn()) {
+    gPoly<T> increment(Space, (T)1, Order);
+    for (int i = 1; i <= n; i++) increment *= *(deriv_matrix(i, odo[i]));
+    increment *= (T)odo.CurrentSign();
+    answer += increment;
+  }
+
+  return answer;
+}
+  
+template<class T> 
 const gMatrix<T> gPolyList<T>::DerivativeMatrix(const gVector<T>& p) const
 {
   gMatrix<T> answer(Length(),Dmnsn());

@@ -7,6 +7,9 @@
 #include "gpolylst.imp"
 #include "double.h"
 #include "glist.imp"
+#include "garray.imp"
+#include "grarray.imp"
+#include "gmatrix.imp"
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -42,4 +45,17 @@ int Counted<gPolyList<double> >::numObjects = 0;
 template class Counted<gPolyList<gRational> >;
 int Counted<gPolyList<gRational> >::numObjects = 0;
 */
+
+TEMPLATE class gRectArray<gPoly<gDouble>*>;
+TEMPLATE class gArray<gPoly<gDouble>*>;
+
+TEMPLATE class gRectArray<gPoly<gRational>*>;
+//TEMPLATE class gArray<gPoly<gRational>*>;
+
+TEMPLATE class gRectArray<gPoly<double>*>;
+//TEMPLATE class gArray<gPoly<double>*>;
+
+
+
+
 
