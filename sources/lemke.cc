@@ -15,6 +15,7 @@
 #include "rational.h"
 #include "gpvector.h"
 #include "solution.h"
+#include "gwatch.h"
 #include "lemke.h"
 
 //---------
@@ -450,19 +451,24 @@ int LemkeSolver::Lemke(void)
   if (params.errfile != "" && params.errfile == params.outfile)
     errfile = outfile;
  
+  gWatch watch;
+
   switch (nf.Type())   {
     case DOUBLE:
       T = new LemkeTableau<double>((NormalForm<double> &) nf,
 				   *outfile, *errfile, params.plev);
       break;
-  case RATIONAL:
+    case RATIONAL:
       T = new LemkeTableau<gRational>((NormalForm<gRational> &) nf,
 				      *outfile, *errfile, params.plev);
       break;
   }
 
   T->Lemke(params.dup_strat);
+
   npivots = T->NumPivots();
+  time = (gRational) watch.Elapsed();
+
   T->GetSolutions();
 
   if (params.outfile != "")

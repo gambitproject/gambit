@@ -161,6 +161,7 @@ template <class T> class ExtForm    {
         //# PAYOFF INFORMATION
     int ProfileLength(void) const;
     gPVector<int> Dimensionality(void) const;
+    void Payoff(const gPVector<int> &, gVector<T> &payoff) const;
     T Payoff(int pl, const gDPVector<T> &) const;
     void CondPayoff(const gDPVector<T> &profile, gDPVector<T> &value) const;
 };

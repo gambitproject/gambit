@@ -27,6 +27,7 @@ class GobitSolver  {
     const BaseNormalForm &nf;
     GobitParams params;
     int nevals;
+    gRational time;
 
   public:
     GobitSolver(const BaseNormalForm &N, const GobitParams &p) 
@@ -36,6 +37,7 @@ class GobitSolver  {
     int Gobit(void);
     
     int NumEvals(void) const    { return nevals; }
+    gRational Time(void) const   { return time; }
 
     GobitParams &Parameters(void)   { return params; }
 };

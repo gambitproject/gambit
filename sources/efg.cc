@@ -1201,6 +1201,12 @@ template <class T> void ExtForm<T>::CondPayoff(const gDPVector<T> &profile,
   nodes(1)->CondPayoff(profile, payoff);
 }
 
+template <class T> void ExtForm<T>::Payoff(const gPVector<int> &profile,
+					   gVector<T> &payoff) const
+{
+  nodes(1)->Payoff(profile, payoff);
+}
+
 DataType ExtForm<double>::Type(void) const   { return DOUBLE; }
 //DataType ExtForm<gRational>::Type(void) const  { return RATIONAL; }
 

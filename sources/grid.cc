@@ -14,6 +14,7 @@
 #include "probvect.h"
 #include "equdata.h"
 #include "stpwatch.h"
+#include "gwatch.h"
 #include "grid.h"
 
 GridParams::GridParams(void) : plev(0)   { }
@@ -217,6 +218,8 @@ int GridSolver::GridSolve(void)
   if (params.outfile != "")
     outfile = new gFileOutput((char *) params.outfile);
 
+  gWatch watch;
+
   switch (nf.Type())  {
     case DOUBLE:  {
       GridSolveModule<double> M((NormalForm<double> &) nf, *outfile,
@@ -235,6 +238,8 @@ int GridSolver::GridSolve(void)
       break;
     }
   }
+
+  time = watch.Elapsed();
 
   if (params.outfile != "")   delete outfile;
 

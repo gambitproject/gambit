@@ -20,6 +20,7 @@
 #include "gpvector.h"
 #include "solution.h"
 #include "gfunct.h"
+#include "gwatch.h"
 #include "liap.h"
 
 LiapParams::LiapParams(void) : nequilib(1), plev(0),tolDFP(1.0e-10)
@@ -222,6 +223,8 @@ int LiapSolver::Liap(void)
     errfile = outfile;
 
 //  gout << "\nLiapSolver::Liap() Loc 2";
+
+  gWatch watch;
   switch (nf.Type())   {
     case DOUBLE:   
       T = new LiapModule<double>((NormalForm<double> &) nf, 
@@ -237,6 +240,7 @@ int LiapSolver::Liap(void)
 
   T->Liap(params.nequilib);
 //  gout << "\nLiapSolver::Liap() Loc 4";
+  time = watch.Elapsed();
   nits=T->Nits();
   nevals= T->Nevals();
 

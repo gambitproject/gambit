@@ -28,6 +28,7 @@ class LiapSolver  {
     const BaseNormalForm &nf;
     LiapParams params;
     int nevals,nits;
+    gRational time;
 
   public:
     LiapSolver(const BaseNormalForm &N, const LiapParams &p) 
@@ -38,6 +39,7 @@ class LiapSolver  {
     
     int NumEvals(void) const    { return nevals; }
     int NumIters(void) const    { return nits; }
+    gRational Time(void) const   { return time; }
 
     LiapParams &Parameters(void)   { return params; }
 };

@@ -25,6 +25,7 @@
 #include "gmatrix.h"
 #include "gpvector.h"
 #include "solution.h"
+#include "gwatch.h"
 #include "simpdiv.h"
 
 SimpdivParams::SimpdivParams(void) : number(1), plev(0), ndivs(20), leash(0)
@@ -481,6 +482,8 @@ int SimpdivSolver::Simpdiv(void)
   if (params.errfile != "" && params.errfile == params.outfile)
     errfile = outfile;
  
+  gWatch watch;
+
   switch (nf.Type())   {
     case DOUBLE:
       T = new SimpdivModule<double>((NormalForm<double> &) nf, 
@@ -497,6 +500,7 @@ int SimpdivSolver::Simpdiv(void)
 
   T->Simpdiv(1);
 
+  time = watch.Elapsed();
   nevals = T->Nevals();
 
   if (params.outfile != "")

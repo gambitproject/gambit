@@ -16,6 +16,7 @@
 #include "gpvector.h"
 #include "solution.h"
 #include "gfunct.h"
+#include "gwatch.h"
 #include "gobit.h"
 
 GobitParams::GobitParams(void) 
@@ -185,6 +186,7 @@ int GobitSolver::Gobit(void)
   if (params.errfile != "" && params.errfile == params.outfile)
     errfile = outfile;
   
+  gWatch watch;
   
   switch (nf.Type())  {
   case DOUBLE:
@@ -198,6 +200,8 @@ int GobitSolver::Gobit(void)
     */
   }
   T->Gobit(params.nequilib);
+  
+  time = watch.Elapsed();
   
   if (params.outfile != "")
     delete outfile;
