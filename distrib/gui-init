@@ -1,8 +1,9 @@
 #! /bin/csh
 
-echo This program will update your Gambit GUI configuration
-echo file: ~/.gambitrc
+echo ""
+echo Updating your Gambit GUI configuration file: ~/.gambitrc
 if (-f ~/.gambitrc) then
+  echo ""
   echo Copying old Gambit GUI init file to ~/.gambitrc.old 
   cp ~/.gambitrc ~/.gambitrc.old 
 endif 
@@ -11,9 +12,13 @@ echo Creating a new Gambit GUI init file
 cp ./.gambitrc ~/.gambitrc
 
 set gambit_install_dir = `pwd | sed -e 's/\/[^/]*$//'`
+echo ""
 echo Setting the local install dir to : $gambit_install_dir
 echo "Install.Root-Dir:       " $gambit_install_dir >> ~/.gambitrc
 echo Setting the local help dir to : $gambit_install_dir/doc/html
-echo "Install.Help-Directory:       " $gambit_install_dir/doc/html >> ~/.gambitrc
+echo "Install.Help-Directory:       " $gambit_install_dir/doc >> ~/.gambitrc
+echo "Install.HTML-Dir:       " $gambit_install_dir/doc/html >> ~/.gambitrc
 echo Setting the pxi command : $gambit_install_dir/bin/pxi
 echo "Algorithm Params.Pxi-Command:     " $gambit_install_dir/bin/pxi >> ~/.gambitrc
+
+

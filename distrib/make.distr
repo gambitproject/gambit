@@ -66,10 +66,23 @@ gambit:
 	strip ../bin/gambit_$(GUI)_$(SYSNAME); \
 	cd ../distrib
 
+	@echo
+	@echo ------------------------
+	@echo Making pxi ...
+	@echo ------------------------
+	@echo
+
+	cd ../pxi; \
+	make -f Makefile.generic pxi GUI=$(GUI); \
+	mv pxi_$(GUI)_$(SYSNAME) ../bin; \
+	strip ../bin/pxi_$(GUI)_$(SYSNAME); \
+	cd ../distrib
+
 	@# Copy the setup and initialization files to ../misc
 	cp ./gambit_setup ./gui-init ../misc
 	cp ../distrib/.gambitrc ../misc
 	cp ./gambit_setup ..
+	cp ./README.1ST ..
 
 	@echo
 	@echo ------------------------
@@ -91,7 +104,9 @@ gambit:
 	  ./misc/.gambitrc \
 	  ./misc/* \
 	  ./doc/html/* \
-	  ./gambit_setup
+	  ./gambit_setup \
+	  ./README.1ST \
+	  ./bin/pxi_$(GUI)_$(SYSNAME) 
 
 	mv ../gambit_$(GUI)_$(SYSNAME).zip $(FTPDIR) 
 

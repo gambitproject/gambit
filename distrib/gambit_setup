@@ -6,40 +6,34 @@ echo Gambit GUI installation script.
 echo ------------------------------------------------------------
 
 echo
-echo The gambit binaries are now in `pwd`/bin.
-echo Please add this to your PATH environment variable
-echo in your .cshrc file or move/copy them to a directory in
-echo your path.
-echo WARNING: please do not change this directory without re-running
-echo this installation script!
-
-echo
 echo The current binaries are:
-echo `ls bin/gambit_*`
-echo `ls bin/gcl_*`
-echo `ls bin/pxi_*`
-echo `ls bin/wxhelp2_*`
+echo gambit: `ls bin/gambit_*`
+echo gcl:    `ls bin/gcl_*`
+echo pxi:    `ls bin/pxi_*`
 echo
-echo Making symbolic links to gambit, gcl, and pxi.
+echo Making symbolic links for gambit, gcl, and pxi.
 cd bin
 ln -s `echo gambit_*` gambit
 ln -s `echo gcl_*` gcl
 ln -s `echo pxi_*` pxi
-ln -s `echo wxhelp2_*` wxhelp
 cd ..
 
-cd doc/html
-ln -s `echo ../../bin/wxhelp2*` wxhelp
-cd ../..
-
-echo 
-echo Now executing gambit GUI startup script \(gui-init\).
 cd misc
 gui-init
 cd ..
+
+echo
+echo Installation script completed. 
+echo
+echo The gambit binaries are now in `pwd`/bin.
+echo Please add this to your PATH environment variable 
+echo in your .cshrc file 
+echo
+echo WARNING: do not change this directory without re-running
+echo this installation script!
+
 
 #
 # Set up the appropriate environment variables.
 # E.g. WXHELPFILES specifies where the help files reside.
 #
-
