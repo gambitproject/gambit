@@ -64,19 +64,20 @@ GAME_OBJECTS = readnfg.o readefg.o nfg.o nfgdbl.o nfgrat.o nfgutils.o \
 
 EALG_SOURCES =  egobit.cc eliap.cc seqform.cc efgcsum.cc \
 		psnesub.cc efgpure.cc lemkesub.cc liapsub.cc simpsub.cc \
-		enumsub.cc csumsub.cc behavsol.cc
+		enumsub.cc csumsub.cc behavsol.cc efgconv.cc
 
 EALG_OBJECTS =  egobit.o eliap.o seqform.o efgcsum.o \
 		psnesub.o efgpure.o lemkesub.o liapsub.o simpsub.o \
-		enumsub.o csumsub.o behavsol.o
+		enumsub.o csumsub.o behavsol.o efgconv.o
 
 NALG_SOURCES = lemke.cc nliap.cc ngobit.cc enum.cc simpdiv.cc tableau.cc \
 		ludecomp.cc nfgpure.cc lhtab.cc lemketab.cc grid.cc nfgcsum.cc\
-		lpsolve.cc nfdom.cc vertenum.cc mixedsol.cc
+		lpsolve.cc nfdom.cc vertenum.cc mixedsol.cc nfdommix.cc \
+		nfgconv.cc
 
 NALG_OBJECTS = lemke.o nliap.o ngobit.o enum.o simpdiv.o tableau.o ludecomp.o \
 		nfgpure.o lhtab.o lemketab.o grid.o nfgcsum.o lpsolve.o nfdom.o\
-		vertenum.o mixedsol.o
+		vertenum.o mixedsol.o nfdommix.o nfgconv.o
 
 AGCL_SOURCES = gcompile.cc gsm.cc gsmfunc.cc gsmoper.cc gsmhash.cc gclmath.cc \
                gsminstr.cc portion.cc nfgfunc.cc efgfunc.cc listfunc.cc \
