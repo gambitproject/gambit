@@ -191,11 +191,11 @@ static Portion *GSM_IsConstSum_Nfg(Portion **param)
 {
   if (param[0]->Spec().Type == porNFG_FLOAT)   {
     Nfg<double> &N = * ((NfgPortion<double> *) param[0])->Value();
-    return new BoolValPortion(N.IsConstSum());
+    return new BoolValPortion(IsConstSum(N));
   }
   else  {
     Nfg<gRational> &N = * ((NfgPortion<gRational> *) param[0])->Value();
-    return new BoolValPortion(N.IsConstSum());
+    return new BoolValPortion(IsConstSum(N));
   }
 }
 

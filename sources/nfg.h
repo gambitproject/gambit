@@ -144,10 +144,6 @@ public:
 
   // returns the type of the nfg, DOUBLE or RATIONAL
   DataType Type(void) const;
-  bool IsConstSum(void) const;
-  T MinPayoff(int pl = 0) const;
-  T MaxPayoff(int pl = 0) const;
-
   NFGameForm &GameForm(void) const   { return *gameform; }
 
   int NumPlayers(void) const   { return gameform->NumPlayers(); }
@@ -172,6 +168,9 @@ public:
 
   // defined in nfgutils.cc
   friend void RandomNfg(Nfg<T> &);
+  friend bool IsConstSum(const Nfg<T> &);
+  friend T MinPayoff(const Nfg<T> &, int pl = 0);
+  friend T MaxPayoff(const Nfg<T> &, int pl = 0);
 };
 
 int ReadNfgFile(gInput &, Nfg<double> *&, Nfg<gRational> *&);

@@ -44,7 +44,7 @@ template <class T> int EnumModule<T>::Enum(void)
   gVector<T> b1(1,n1);
   gVector<T> b2(1,n2);
 
-  min = NF.MinPayoff()-(T)1; 
+  min = MinPayoff(NF) - (T)1; 
 
 
    // construct A1,A2,b1,b2  

@@ -749,7 +749,7 @@ static Portion *GSM_Lp_Nfg(Portion **param)
   case DOUBLE:
     {
       if (((Nfg<double> *) N)->NumPlayers() > 2 ||
-	  !((Nfg<double> *) N)->IsConstSum())
+	  !IsConstSum((Nfg<double> &) *N))
 	return new ErrorPortion("Only valid for two-person zero-sum games");
 
       ZSumModule<double> ZM(* (Nfg<double>*) N, ZP, S);
@@ -763,7 +763,7 @@ static Portion *GSM_Lp_Nfg(Portion **param)
   case RATIONAL:
     {
       if (((Nfg<gRational> *) N)->NumPlayers() > 2 ||
-	  !((Nfg<gRational> *) N)->IsConstSum())
+	  !IsConstSum((Nfg<gRational> &) *N))
 	return new ErrorPortion("Only valid for two-person zero-sum games");
 
       ZSumModule<gRational> ZM(*(Nfg<gRational>*) N, ZP, S);
