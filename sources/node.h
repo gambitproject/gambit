@@ -48,6 +48,7 @@ class Node    {
     FullEfg *Game(void) const   { return E; }
 
     int NumChildren(void) const    { return children.Length(); }
+    int GetNumber(void) const { return number; }
     int NumberInInfoset(void) const;
     const gArray<Node *> &Children(void) const { return children; }
     Infoset *GetInfoset(void) const   { return infoset; }
