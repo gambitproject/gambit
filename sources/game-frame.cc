@@ -229,11 +229,21 @@ void gbtGameFrame::OnFileNew(wxCommandEvent &)
 void gbtGameFrame::OnFileOpen(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose file"), wxT(""), wxT(""), 
-		      _("Extensive form games (*.efg)|*.efg|"
+		      _("Gambit files (*.gbt)|*.gbt|"
+			"Extensive form games (*.efg)|*.efg|"
 			"Normal form games (*.nfg)|*.nfg|"
 			"All files|*.*"));
 
   if (dialog.ShowModal() == wxID_OK) {
+    if (dialog.GetPath().substr(dialog.GetPath().length() - 3, 3) == "gbt") {
+      gbtGameDocument *doc = new gbtGameDocument(0);
+      doc->Load(dialog.GetPath());
+      doc->SetFilename(dialog.GetPath());
+      wxGetApp().GetFileHistory()->AddFileToHistory(dialog.GetPath());
+      (void) new gbtGameFrame(0, doc);
+      return; 
+    }
+
     std::ifstream file(dialog.GetPath().mb_str());
 
     if (!file.is_open()) {
@@ -356,7 +366,7 @@ void gbtGameFrame::OnFileSave(wxCommandEvent &)
   wxFileDialog dialog(this, _("Choose file"),
 		      wxPathOnly(m_doc->GetFilename()),
 		      wxFileNameFromPath(m_doc->GetFilename()), 
-		      wxT("Normal form files (*.nfg)|*.nfg"),
+		      _T("Gambit files (*.gbt)|*.gbt"),
 		      wxSAVE | wxOVERWRITE_PROMPT);
 
   switch (dialog.ShowModal()) {
@@ -368,29 +378,8 @@ void gbtGameFrame::OnFileSave(wxCommandEvent &)
     return;
   }
 
-  try {
-    std::ofstream file(dialog.GetPath().mb_str());
-    if (file.is_open()) {
-      m_doc->GetGame()->WriteNfg(file);
-      if (file.bad()) {
-	wxMessageBox(wxString::Format(_("Write error occurred in saving %s."),
-				      (const char *) dialog.GetPath().mb_str()),
-		     _("Error"), wxOK, this);
-      }      
-      else {
-	m_doc->SetModified(false);
-      }
-    }
-    else {
-      wxMessageBox(wxString::Format(_("Could not open %s for writing."),
-				    (const char *) dialog.GetPath().mb_str()),
-		   _("Error"), wxOK, this);
-    }
-  }
-  catch (gbtException &) {
-    wxMessageBox(_("An internal error occurred in Gambit"), 
-		 _("Error"), wxOK, this);
-  }
+  m_doc->Save(dialog.GetPath());
+  m_doc->SetModified(false);
 }
 
 void gbtGameFrame::OnFileExportBMP(wxCommandEvent &)

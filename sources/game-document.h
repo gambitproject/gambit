@@ -37,7 +37,7 @@ private:
   gbtGame m_game;
 
   // Properties
-  wxColour m_playerColor[8];
+  gbtBlock<wxColour> m_playerColors;
   bool m_modified;
   wxString m_filename;
   double m_treeZoom;
@@ -72,6 +72,9 @@ public:
   const wxString &GetFilename(void) const { return m_filename; }
   void SetFilename(const wxString &p_filename) 
     { m_filename = p_filename; UpdateViews(); }
+
+  void Load(const wxString &);
+  void Save(const wxString &) const;
 };
 
 

@@ -24,6 +24,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <fstream>
+#include <sstream>
+
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
@@ -31,17 +34,26 @@
 
 #include "game-document.h"
 
+static wxColour s_defaultColors[8] = {
+  wxColour(255, 0, 0),
+  wxColour(0, 0, 255),
+  wxColour(0, 128, 0),
+  wxColour(255, 128, 0),
+  wxColour(0, 0, 64),
+  wxColour(128, 0, 255),
+  wxColour(64, 0, 0),
+  wxColour(255, 128, 255)
+};
+
+
 gbtGameDocument::gbtGameDocument(const gbtGame &p_game)
-  : m_game(p_game), m_modified(false), m_treeZoom(0.8)
+  : m_game(p_game), m_modified(false), m_treeZoom(1.0)
 {
-  m_playerColor[0] = wxColour(255, 0, 0);
-  m_playerColor[1] = wxColour(0, 0, 255);
-  m_playerColor[2] = wxColour(0, 128, 0);
-  m_playerColor[3] = wxColour(255, 128, 0);
-  m_playerColor[4] = wxColour(0, 0, 64);
-  m_playerColor[5] = wxColour(128, 0, 255);
-  m_playerColor[6] = wxColour(64, 0, 0);
-  m_playerColor[7] = wxColour(255, 128, 255);
+  if (!m_game.IsNull()) {
+    for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
+      m_playerColors.Append(s_defaultColors[(pl - 1) % 8]);
+    }
+  }
 }
 
 
@@ -89,15 +101,83 @@ wxColour gbtGameDocument::GetPlayerColor(int p_player) const
     return *wxLIGHT_GREY;
   }
   else {
-    return m_playerColor[(p_player - 1) % 8];
+    return m_playerColors[p_player];
   }
 }
 
 void gbtGameDocument::SetPlayerColor(int p_player, const wxColour &p_color)
 {
-  m_playerColor[(p_player - 1) % 8] = p_color;
+  m_playerColors[p_player] = p_color;
   UpdateViews();
 }
+
+
+void gbtGameDocument::Load(const wxString &p_filename)
+{
+  std::ifstream file(p_filename.c_str());
+
+  while (!file.eof()) {
+    std::string key, value;
+    char c;
+    
+    while (!file.eof() && (c = file.get()) != '=') {
+      key += c;
+    }
+
+    while (!file.eof() && (c = file.get()) != '\n') {
+      value += c;
+    }
+
+    if (key == "efg") {
+      std::istringstream iss(value);
+      m_game = ReadEfg(iss);
+    }
+    else if (key == "nfg") {
+      std::istringstream iss(value);
+      m_game = ReadNfg(iss);
+    }
+    else if (key == "playercolor") {
+      int pl, r, g, b;
+      sscanf(value.c_str(), "%d %d %d %d", &pl, &r, &g, &b);
+      if (m_playerColors.Last() >= pl) {
+	m_playerColors[pl] = wxColour(r, g, b);
+      }
+      else {
+	m_playerColors.Append(wxColour(r, g, b));
+      }
+    }
+  }
+}
+
+void gbtGameDocument::Save(const wxString &p_filename) const
+{
+  std::ostringstream oss;
+  if (m_game->HasTree()) {
+    m_game->WriteEfg(oss);
+  }
+  else {
+    m_game->WriteNfg(oss);
+  }
+  std::string gamefile = oss.str();
+  for (int i = 0; i < gamefile.length(); i++) {
+    if (gamefile[i] == '\n')  gamefile[i] = ' ';
+  }
+
+  std::ofstream file(p_filename.c_str());
+  if (m_game->HasTree()) {
+    file << "efg= " << gamefile << std::endl;
+  }
+  else {
+    file << "nfg= " << gamefile << std::endl;
+  }
+  for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
+    file << "playercolor= " << pl << " ";
+    file << (int) m_playerColors[pl].Red() << " ";
+    file << (int) m_playerColors[pl].Green() << " ";
+    file << (int) m_playerColors[pl].Blue() << std::endl;
+  }
+}
+
 
 
 gbtGameView::gbtGameView(gbtGameDocument *p_doc)
