@@ -441,7 +441,8 @@ int TreeWindow::node_add(void)
 int TreeWindow::node_label(void)
 {
 	char *label=new char[MAX_LABEL_LENGTH];
-	strcpy(label,iterator->Cursor()->Name());
+// TLT
+	strcpy(label,iterator->Cursor().Name());
 	MyDialogBox *form_dialog = new MyDialogBox(frame, "Label Node");
 	form_dialog->form->Add(wxMakeFormString("Label", &label,wxFORM_DEFAULT,
 		new wxList(wxMakeConstraintFunction(StringConstraint))));
@@ -496,6 +497,10 @@ int TreeWindow::node_set_mark(void)
 
 int TreeWindow::node_goto_mark(void)
 {
+// TLT
+// Eugene:  I commented this out because I'm not sure what the best way
+//          to deal with this part is, now that we're not using gHandle.
+/*
 		if (mark_node.IsNonNull())
     {
 			draw_settings.Iterator()->SetCursor(mark_node);
@@ -503,6 +508,7 @@ int TreeWindow::node_goto_mark(void)
 		}
 		else
 			wxMessageBox("Mark not set!","Error",wxOK | wxCENTRE);
+  */
 	return 1;
 }
 
@@ -859,14 +865,16 @@ return -1;
 
 int maxlev, maxy, miny, ycoord;
 
-int TreeWindow::FillTable(NodeEntry *table, gHandle<Node> &n, int level)
+int TreeWindow::FillTable(NodeEntry *table, Node &n, int level)
 {
+// TLT
+// Eugene: '_nodes->' becomes '_nodes.'
   int myy, y1, yn;
-	NodeEntry *entry = table + (the_problem->_nodes->ElNumber(n) - 1);
+	NodeEntry *entry = table + (the_problem->_nodes.ElNumber(n) - 1);
 
-  if (n->NumChildren() > 0)  {
-    for (uint i = 1; i <= n->NumChildren(); i++)  {
-			yn = FillTable(table, (*n)(i), level + 1);
+  if (n.NumChildren() > 0)  {
+    for (uint i = 1; i <= n.NumChildren(); i++)  {
+			yn = FillTable(table, n(i), level + 1);
       if (i == 1)  y1 = yn;
     }
     entry->y = (y1 + yn) / 2;
@@ -878,10 +886,16 @@ int TreeWindow::FillTable(NodeEntry *table, gHandle<Node> &n, int level)
   entry->level = level;
 	entry->x = level * (draw_settings.NodeLength() + draw_settings.BranchLength());
 
-  if (n->Player().IsNonNull()) 
-		entry->color = the_problem->_players->ElNumber(n->Player()) % 16;
+// TLT
+// Eugene:  "chance" is now defined as a special player...  I've hacked this
+// in, for the moment...
+/*
+  if (n.GetPlayer().IsNonNull()) 
+		entry->color = the_problem->_players.ElNumber(n.Player()) % 16;
   else 
 		entry->color = ::ColorNum(draw_settings.ChanceColor());
+  */
+  entry->color = ::ColorNum(draw_settings.ChanceColor());
 
   if (level > maxlev)    maxlev = level;
   if (entry->y > maxy)   maxy = entry->y;
@@ -925,25 +939,25 @@ device.DrawText(s,x,y);
 
 
 void TreeWindow::RenderSubtree(DisplayDevice &device,
-					gHandle<Node> &root, NodeEntry *table)
+					Node &root, NodeEntry *table)
 {
-  NodeEntry *entry = table + (the_problem->_nodes->ElNumber(root) - 1);
+  NodeEntry *entry = table + (the_problem->_nodes.ElNumber(root) - 1);
 
 	::DrawLine(device,entry->x, entry->y,
 			entry->x + draw_settings.NodeLength(), entry->y, entry->color);
 	device.SetFont(label_font);
   if (draw_settings.ShowLabels())
-		::DrawText(device,root->Name().stradr(),entry->x, entry->y+3, entry->color);
+		::DrawText(device,root.Name().stradr(),entry->x, entry->y+3, entry->color);
 
-  for (uint i = 1; i <= root->NumChildren(); i++)  {
+  for (uint i = 1; i <= root.NumChildren(); i++)  {
 		::DrawLine(device,entry->x + draw_settings.NodeLength(), entry->y,
 				entry->x + draw_settings.NodeLength() + draw_settings.BranchLength() / 2,
-				table[the_problem->_nodes->ElNumber((*root)(i)) - 1].y,entry->color);
+				table[the_problem->_nodes.ElNumber(root(i)) - 1].y,entry->color);
 		::DrawLine(device,entry->x + draw_settings.NodeLength() + draw_settings.BranchLength() / 2,
-				table[the_problem->_nodes->ElNumber((*root)(i)) - 1].y,
-				table[the_problem->_nodes->ElNumber((*root)(i)) - 1].x,
-				table[the_problem->_nodes->ElNumber((*root)(i)) - 1].y, entry->color);
-    RenderSubtree(device, (*root)(i), table);
+				table[the_problem->_nodes.ElNumber(root(i)) - 1].y,
+				table[the_problem->_nodes.ElNumber(root(i)) - 1].x,
+				table[the_problem->_nodes.ElNumber(root(i)) - 1].y, entry->color);
+    RenderSubtree(device, root(i), table);
   }
 }
 
@@ -951,7 +965,7 @@ void TreeWindow::Render(DisplayDevice &device,int render_device)
 {
 	if (node_table) delete node_table;
   // Note that node_table is preserved until the next redraw
-	node_table = new NodeEntry[(int)(the_problem->_nodes->Length())];
+	node_table = new NodeEntry[(int)(the_problem->_nodes.Length())];
 
   maxlev = miny = maxy = 0;
   ycoord = draw_settings.Window().height() / 2;
@@ -963,7 +977,7 @@ void TreeWindow::Render(DisplayDevice &device,int render_device)
   {
 		if (draw_settings.Iterator() != 0)
 		{
-			int cursor_index = the_problem->_nodes->ElNumber(draw_settings.Iterator()->Cursor()) - 1;
+			int cursor_index = the_problem->_nodes.ElNumber(draw_settings.Iterator()->Cursor()) - 1;
 			_flasher->SetFlashNode(node_table[cursor_index].x-4,node_table[cursor_index].y-4,
 			node_table[cursor_index].x+draw_settings.NodeLength(), node_table[cursor_index].y-4);
 		}
@@ -1000,7 +1014,7 @@ y_scroll=maxy/PIXELS_PER_SCROLL+1;
 // If cursor is active, make sure it is visible
 if (draw_settings.Iterator() != 0)
 {
-	int cursor_index = the_problem->_nodes->ElNumber(draw_settings.Iterator()->Cursor()) - 1;
+	int cursor_index = the_problem->_nodes.ElNumber(draw_settings.Iterator()->Cursor()) - 1;
 	// check if in the visible x-dimention
 	if ((node_table[cursor_index].x - draw_settings.XOrigin())*zoom_factor < x_start*PIXELS_PER_SCROLL ||
 	 (node_table[cursor_index].x - draw_settings.XOrigin()+ draw_settings.NodeLength()/2)*zoom_factor > x_start*PIXELS_PER_SCROLL+width)
@@ -1029,11 +1043,11 @@ if (x_start!=draw_settings.get_x_scroll() ||
 #define DELTA	8
 void TreeWindow::ProcessClick(int x,int y)
 {
-for (int i=1;i<=the_problem->_nodes->Length();i++)
+for (int i=1;i<=the_problem->_nodes.Length();i++)
 {
 	 if(x>node_table[i].x && x<node_table[i].x+draw_settings.NodeLength() &&
 			y>node_table[i].y-DELTA && y<node_table[i].y+DELTA)
-				iterator->SetCursor((*(the_problem->_nodes))[i+1]);
+				iterator->SetCursor(the_problem->_nodes[i+1]);
 }
 }
 

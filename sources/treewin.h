@@ -82,7 +82,8 @@ friend class DisplayOptionsForm;
 		// Private variables
 		ExtForm *the_problem;
     ExtFormIter *iterator;
-		gHandle<Node> mark_node;
+// TLT
+		Node mark_node;
     TreeDrawParams draw_settings;
 		wxFrame *frame;				// parent frame
 		TreeNodeFlasher *_flasher;
@@ -91,8 +92,9 @@ friend class DisplayOptionsForm;
 		float zoom_factor;
 
     // Private Functions
-		void RenderSubtree(DisplayDevice &, gHandle<Node> &, NodeEntry *);
-		int TreeWindow::FillTable(NodeEntry *table, gHandle<Node> &n, int level);
+// TLT
+		void RenderSubtree(DisplayDevice &, Node &, NodeEntry *);
+		int TreeWindow::FillTable(NodeEntry *table, Node &n, int level);
 		void ProcessCursor(void);
 		void ProcessClick(int x,int y);
 	public:

@@ -14,60 +14,66 @@
 #include "player.h"
 #include "node.h"
 #include "infoset.h"
-#include "game.h"
 #include "display.h"
 
 class ExtFormIter;
 
-class ExtForm : public Handled  {
+class ExtForm   {
 
   private:
-    gString *_title;
-    gSet<Outcome> *_outcomes;
-    gSet<Infoset> *_infosets;
+    gString _title;
+    gSet<Outcome> _outcomes;
+    gSet<Infoset> _infosets;
     bool _modified, _trivial;
     ExtFormIter *_iterator;
-    gHandle<Node> _root;
+    Node _root;
+    // dummy player for terminal information sets
+    Player _dummy, _chance;
 
     void AddOutcome(uint outcome_number);
     void AddPlayer(uint player_number);
-    void MoveTree(gHandle<Node> &to, gHandle<Node> &from);
+    void MoveTree(Node &to, Node &from);
 
   public:
-    gSet<Player> *_players;
-    gSet<Node> *_nodes;
+    gSet<Player> _players;
+    gSet<Node> _nodes;
 
+	// CONSTRUCTORS AND DESTRUCTOR
+	// initialize the trivial extensive form
     ExtForm(void);
+	// destruct an extensive form, including substructures
     ~ExtForm();
 
-    int AddNode(gHandle<Node> &n, uint player, uint branch_count);
-    int LabelNode(gHandle<Node> &n, gString &label);
-    int InsertNode(gHandle<Node> &n, uint player, uint branch_count);
-    int SetOutcome(gHandle<Node> &n, uint outcome_number);
-    int GetOutcome(gHandle<Node> &n);
-    int DeleteNode(gHandle<Node> &n, gHandle<Node> &keep);
+	// OPERATIONS ON NODES
+    int AddNode(Node &n, uint player, uint branch_count);
+    int LabelNode(Node &n, gString &label);
+    int InsertNode(Node &n, uint player, uint branch_count);
+    int SetOutcome(Node &n, uint outcome_number);
+    int GetOutcome(Node &n) const;
+    int DeleteNode(Node &n, Node &keep);
 
-    int InfosetMember(gHandle<Node> &new_member, gHandle<Node> &to_iset);
-    int BreakInfoset(gHandle<Node> &breakpoint);
-    int JoinInfoset(gHandle<Node> &new_members, gHandle<Node> &to_iset);
+	// OPERATIONS ON INFORMATION SETS
+    int JoinInfoset(Node &new_member, Node &to_iset);
+    int LeaveInfoset(Node &departer);
 
-    int LabelBranch(gHandle<Node> &n, gString &label);
-    int InsertBranch(gHandle<Node> &n, uint branch_number);
-    int DeleteBranch(gHandle<Node> &n, gHandle<Node> &remove);
-//  gVector<double> BranchProbs(gHandle<Node> &n) const;
-//  int SetBranchProbs(gHandle<Node> &n, gVector<double> &v);
+    int LabelBranch(Node &n, gString &label);
+    int InsertBranch(Node &n, uint branch_number);
+    int DeleteBranch(Node &n, Node &remove);
+//  gVector<double> BranchProbs(Node &n) const;
+//  int SetBranchProbs(Node &n, gVector<double> &v);
 
-    int DeleteTree(gHandle<Node> &n);
-    int CopyTree(gHandle<Node> &n, gHandle<Node> &to);
+	// OPERATIONS ON TREES
+    int DeleteTree(Node &n);
+    int CopyTree(Node &n, Node &to);
     int LabelTree(const gString &label);
     gString TreeLabel(void) const;
 
-    gHandle<Node> RootNode(void) const;
+    Node RootNode(void);
 
     bool IsTrivial(void) const;
     bool IsModified(void) const;
-
-    int NumNodes(void) const;
+    
+    int NumNodes(void) const   { return _nodes.Length(); }
 
     void RegisterIterator(ExtFormIter *iter);
     void UnregisterIterator(ExtFormIter *iter);
@@ -76,20 +82,18 @@ class ExtForm : public Handled  {
 
 
 class ExtFormIter   {
-#ifdef EXTFORM_C
   private:
     ExtForm *_extform;
-    gHandle<Node> _cursor;
-#endif    // EXTFORM_C
+    Node _cursor;
 
   public:
     ExtFormIter(ExtForm *extform);
     ~ExtFormIter();
 
-    gHandle<Node> Cursor(void) const;
-    void SetCursor(const gHandle<Node> &n);
+    Node Cursor(void);
+    void SetCursor(const Node &n);
     void GoParent(void);
-		void GoFirstChild(void);
+    void GoFirstChild(void);
 
     void GoPriorSibling(void);
     void GoNextSibling(void);

@@ -8,41 +8,69 @@
 #define INFOSET_H
 
 #include "basic.h"
-#include "ghandle.h"
 #include "gstring.h"
 #include "gset.h"
 
 #include "branch.h"
+#include "player.h"
 
-#ifdef __GNUG__
-extern class Node;
-extern class Player;
-#elif defined __BORLANDC__
-class Node;
-class Player;
-#else
-#error Unsupported compiler type.
-#endif   // __GNUG__, __BORLANDC__
-
-
-class Infoset : public Handled   {
+class Infoset   {
   private:
-    gString *_name;
-    gSet<Node> *_members;
-    gSet<Branch> *_branches;
-    gHandle<Player> _player;
+    struct irep   {
+      gString _name;
+      gSet<Branch> _branches;
+      Player _player;
+
+      int count;
+
+      irep(void) : count(1)   { } 
+    };
+
+    irep *ip;
 
   public:
-    Infoset(gHandle<Node> &n, gHandle<Player> &p);
-    ~Infoset();
+	// CONSTRUCTORS AND DESTRUCTOR
+	// construct an information set with no branches and
+	// setting the player to the dummy player
+    Infoset(void)   { ip = new irep; }
+	// construct an information set belonging to player Player
+	// and having branches branches
+    Infoset(Player &p, int branches);
+	// destruct an information set
+    ~Infoset()  {
+      if (--ip->count == 0)
+	delete ip;
+      }
 
-    gSet<Node> *InsertBranch(uint branch_number);
-    gSet<Node> *DeleteBranch(uint branch_number);
+	// OPERATOR OVERLOADING
+	// determine if two information sets are identical
+    int operator==(const Infoset &infoset) const { return (ip == infoset.ip); }
+    int operator!=(const Infoset &infoset) const { return (ip != infoset.ip); }
 
-    void AddMember(gHandle<Node> &n);
-    void RemoveMember(gHandle<Node> &n);
+	// assign another information set to this one
+    Infoset &operator=(const Infoset &infoset)  {
+      infoset.ip->count++;
+      if (--ip->count == 0)
+	delete ip;
+      ip = infoset.ip;
+      return *this;
+    }
 
-    gHandle<Player> Player(void) const  { return _player; }
+	// NAMING THE INFORMATION SET
+    void SetName(const gString &name)   { ip->_name = name; }
+    gString Name(void) const    { return ip->_name; }
+
+	// BRANCH MANIPULATION
+	// insert a new branch as branch number branch_number
+    void InsertBranch(uint branch_number);
+	// delete branch number branch_number
+    void DeleteBranch(uint branch_number);
+
+	// PLAYER MANIPULATION
+	// get the player who has the choice at this information set
+    Player GetPlayer(void) const  { return ip->_player; }
+	// set the player who has the choice at this information set
+    void SetPlayer(const Player& p) const   { ip->_player = p; }
 };
 
 

@@ -10,23 +10,45 @@
 #include "gstring.h"
 #include "gset.h"
 
-#ifdef __GNUG__
-extern class Infoset;
-#elif defined __BORLANDC__
-class Infoset;
-#else
-#error Unsupported compiler type.
-#endif   // __GNUG__, __BORLANDC__
-
-
-class Player : public Handled   {
+class Player   {
   private:
-    gString *_name;
-    gSet<Infoset> *_infosets;
+    struct prep  {
+      gString _name;
+
+      int count;
+
+      prep(void) : count(1)   { }
+    };
+
+    prep *p;
 
   public:
-    Player(void)   { _name = new gString;  _infosets = new gSet<Infoset>; }
-    ~Player()   { delete _name;   delete _infosets; }
+	// CONSTRUCTORS AND DESTRUCTOR
+	// construct a new player
+    Player(void)   { p = new prep; }
+	// destruct a player
+    ~Player()   {
+      if (--p->count == 0)
+	delete p;
+      }
+
+	// OPERATOR OVERLOADING
+	// determine if two players are identical
+    int operator==(const Player &player) const { return (p == player.p); }
+    int operator!=(const Player &player) const { return (p != player.p); }
+
+	// assign another player to this one
+    Player &operator=(const Player &player)  {
+      player.p->count++;
+      if (--p->count == 0)
+	delete p;
+      p = player.p;
+      return *this;
+    }
+
+	// NAMING THE PLAYER
+    void SetName(const gString &name)   { p->_name = name; }
+    gString Name(void) const    { return p->_name; }
 };
 
 #endif    // PLAYER_H
