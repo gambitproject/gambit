@@ -86,7 +86,6 @@ public:
   void SetId(unsigned int p_id) { m_id = p_id; }
   void SetCreator(NfgAlgType p_creator) { m_creator = p_creator; }
   void SetIsNash(void) const;
-  //  void SetIsNash(gTriState p_isNash) { m_isNash = p_isNash; }
   void SetIsPerfect(gTriState p_isPerfect) { m_isPerfect = p_isPerfect; }
   void SetIsProper(gTriState p_isProper) { m_isProper = p_isProper; }
   void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
