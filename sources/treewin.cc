@@ -1233,8 +1233,10 @@ int TreeWindow::BranchDragger::OnEvent(wxMouseEvent &ev,
             else
             {
                 BranchDraggerDialog dialog(ef, parent->GetParent());
-                EFPlayer *player = dialog.GetPlayer();
-                if (player) ef.AppendNode(start_node, player, 1);
+		if (dialog.Completed() == wxOK) {
+		  EFPlayer *player = dialog.GetPlayer();
+		  if (player) ef.AppendNode(start_node, player, 1);
+		}
             }
             infosets_changed = TRUE;
             parent->OnPaint();
