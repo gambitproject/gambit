@@ -76,6 +76,40 @@ follwoing message, (or something like it, depending on the machine):
 
 We should either fix this, or deliver a more informative error messsage
 
+//------------------------------
+
+Bug D8:  LiapSolve does not keep partial solutions.  
+
+When solving an extensive form game (try using the standard solution
+setting of All Nash on e01.efg -- which puts you in an infinite loop
+in liap solve), the code returns empty solutions when it is terminated
+with the Cancel button.  This appears to be a problem in the subgame
+soving code which appeared when we changed to exceptions for handling
+the cancel event.  Here is some relevant correspondence 
+
+key:
+
+> > RDM
+> Ted
+RDM
+
+> >2.  Even when there are subgames, the algorithm should keep the
+> >complete solutions it finds, and only chuck those which have not been
+> >solved for all subgames yet.  If you solve for all solutions, this puts it
+> >in an infinite loop, and if you hit cancel after it has found some
+> >complete solutions, it will keep them, no?  
+> 
+> But the infinite loop you're putting it in occurs at the *bottom* level
+> subgame!
+
+We have an additional parameter in the gui (seems like it should be in the
+GCL also, but I don't see it there) which sets the maximum number of
+solutions per subgame.  I thought this was supposed to solve this problem
+by effectively putting the infinite loop at the top.  I thought this
+should deal with the first problem too (games with no proper subgames.) 
+But I will have to look at the code to see what this actually does. 
+Perhaps it is not implemented correctly. 
+
 
 -------------  older bugs that still remain ---------------
 
