@@ -984,6 +984,7 @@ void NfgShow::SetOutcome(int out, int x, int y)
   if (out > nf.NumOutcomes()) {
     MyMessageBox("This outcome is not defined yet", 
 		 "Outcome", NFG_OUTCOME_HELP, spread);
+    UpdateVals();
   }
   else {
     gArray<int> cur_profile(spread->GetProfile());
@@ -1453,60 +1454,55 @@ template class SolutionList<MixedSolution>;
 
 //******************** NORMAL FORM GUI ******************************
 #include "nfggui.h"
-NfgGUI::NfgGUI(Nfg *nf, const gText infile_name, EfgNfgInterface *inter, wxFrame *parent)
+NfgGUI::NfgGUI(Nfg *nf, const gText infile_name, EfgNfgInterface *inter,
+	       wxFrame *parent)
 {
-    // an already created normal form has been passed
+  // an already created normal form has been passed
 
-    if (nf == 0) // must create a new normal form, from scratch or from file
-    {
-        gArray<int> dimensionality;
-        gArray<gText> names;
+  if (nf == 0)  {  // must create a new normal form, from scratch or from file
+    gArray<int> dimensionality;
+    gArray<gText> names;
 
-        if (infile_name == gText()) // from scratch
-        {
-            if (GetNFParams(dimensionality, names, parent))
-            {
-                nf = new Nfg(dimensionality);
+    if (infile_name == "") {  // from scratch
+      if (GetNFParams(dimensionality, names, parent)) {
+	nf = new Nfg(dimensionality);
 
-                for (int i = 1; i <= names.Length(); i++) 
-                    nf->Players()[i]->SetName(names[i]);
-            }
-        }
-        else  // from data file
-        {
-        try{
+	for (int i = 1; i <= names.Length(); i++) 
+	  nf->Players()[i]->SetName(names[i]);
+      }
+    }
+    else {   // from data file
+      try {
         gFileInput infile(infile_name);
         ReadNfgFile((gInput &) infile, nf);
 
-        if (!nf)
-            wxMessageBox("ReadFailed:FormatInvalid::Check the file");
-        }
-        catch(gFileInput::OpenFailed &) {
-                wxMessageBox("ReadFailed:FileInvalid::Check the file");
-                return;
-            }
-
-        }
+	if (!nf) {
+	  wxMessageBox(infile_name + " is not a valid .nfg file");
+	}
+      }
+      catch (gFileInput::OpenFailed &) {
+	wxMessageBox("Could not open " + infile_name + " for reading");
+	return;
+      }
+      
     }
+  }
 
-    NfgShow *nf_show = 0;
+  NfgShow *nf_show = 0;
 
-    if (nf)
-    {
-        if (nf->NumPlayers() > 1)
-        {
-            nf_show= new NfgShow(*nf, inter, parent);
-        }
-        else
-        {
-            delete nf;
-            MyMessageBox("Single player Normal Form games are not supported in the GUI", 
-                         "Error", NFG_GUI_HELP, parent);
-        }
+  if (nf) {
+    if (nf->NumPlayers() > 1) {
+      nf_show = new NfgShow(*nf, inter, parent);
     }
+    else {
+      delete nf;
+      MyMessageBox("Single player normal form games are not supported in the GUI", 
+		   "Error", NFG_GUI_HELP, parent);
+    }
+  }
 
-    if (nf_show)
-        nf_show->SetFileName(infile_name);
+  if (nf_show)
+    nf_show->SetFileName(infile_name);
 }
 
 // Create a normal form
