@@ -103,6 +103,7 @@ private:
   void OnCloseWindow(wxCloseEvent &);
   void OnSize(wxSizeEvent &);
   void OnSashDrag(wxSashEvent &);
+  void OnSetFocus(wxFocusEvent &);
   void OnSolutionSelected(wxListEvent &);
 
 public:

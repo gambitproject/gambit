@@ -90,6 +90,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_SIZE(NfgShow::OnSize)
   EVT_CLOSE(NfgShow::OnCloseWindow)
   EVT_SASH_DRAGGED(idSOLUTIONWINDOW, NfgShow::OnSashDrag)
+  EVT_SET_FOCUS(NfgShow::OnSetFocus)
   EVT_LIST_ITEM_SELECTED(idNFG_SOLUTION_LIST, NfgShow::OnSolutionSelected)
 END_EVENT_TABLE()
 
@@ -144,6 +145,7 @@ NfgShow::NfgShow(Nfg &p_nfg, GambitFrame *p_parent)
   m_nfg.SetIsDirty(false);
   GetMenuBar()->Check(NFG_VIEW_OUTCOMES, !m_table->OutcomeValues());
   UpdateMenus();
+  m_table->SetFocus();
   Show(true);
 }
 
@@ -427,7 +429,11 @@ void NfgShow::OnSashDrag(wxSashEvent &p_event)
 				  clientWidth, p_event.GetDragRect().height);
     break;
   }
+}
 
+void NfgShow::OnSetFocus(wxFocusEvent &)
+{
+  m_table->SetFocus();
 }
 
 //----------------------------------------------------------------------
@@ -1072,7 +1078,7 @@ void NfgShow::OnPrefsFontData(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     //    m_drawSettings.SetDataFont(dialog.GetFontData().GetChosenFont());
-    //    m_table->SetCellTextFont(dialog.GetFontData().GetChosenFont());
+    m_table->SetCellFont(dialog.GetFontData().GetChosenFont());
     m_table->OnChangeValues();
   }
 }
@@ -1084,7 +1090,7 @@ void NfgShow::OnPrefsFontLabels(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     // m_drawSettings.SetLabelFont(dialog.GetFontData().GetChosenFont());
-    //    m_table->SetLabelFont(dialog.GetFontData().GetChosenFont());
+    m_table->SetLabelFont(dialog.GetFontData().GetChosenFont());
     m_table->OnChangeLabels();
   }
 }

@@ -46,6 +46,7 @@ private:
   // Event handlers
   void OnLeftClick(wxGridEvent &);
   void OnLeftDoubleClick(wxGridEvent &);
+  void OnLabelLeftClick(wxGridEvent &);
 
   void OnStrategyChange(wxCommandEvent &);
   void OnRowPlayerChange(wxCommandEvent &);
@@ -79,7 +80,9 @@ public:
   void SaveSettings(void) const { m_settings.SaveSettings(); }
   void LoadSettings(void) { m_settings.LoadSettings(); }
 
-
+  void SetCellFont(const wxFont &p_font) 
+    { m_grid->SetDefaultCellFont(p_font); }
+  void SetLabelFont(const wxFont &p_font) { m_grid->SetLabelFont(p_font); }
   void OnChangeValues(void);
   void OnChangeLabels(void);
 

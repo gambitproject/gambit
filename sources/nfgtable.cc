@@ -17,6 +17,7 @@
 BEGIN_EVENT_TABLE(NfgTable, wxPanel)
   EVT_GRID_CELL_LEFT_CLICK(NfgTable::OnLeftClick)
   EVT_GRID_CELL_LEFT_DCLICK(NfgTable::OnLeftDoubleClick)
+  EVT_GRID_LABEL_LEFT_CLICK(NfgTable::OnLabelLeftClick)
   EVT_CHOICE(idSTRATEGY_CHOICE, NfgTable::OnStrategyChange)
   EVT_CHOICE(idROWPLAYER_CHOICE, NfgTable::OnRowPlayerChange)
   EVT_CHOICE(idCOLPLAYER_CHOICE, NfgTable::OnColPlayerChange)
@@ -85,7 +86,7 @@ NfgTable::NfgTable(Nfg &p_nfg, wxWindow *p_parent)
   navPanelSizer->Add(playerViewSizer, 0, wxALL | wxEXPAND, 10);
   navPanelSizer->Add(contViewSizer, 0, wxALL | wxEXPAND, 10);
 
-  m_grid = new wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize);
+  m_grid = new wxGrid(this, -1, wxDefaultPosition, wxDefaultSize);
   m_grid->CreateGrid(m_support.NumStrats(1),
 		     m_support.NumStrats(2));
   m_grid->SetGridCursor(0, 0);
@@ -384,8 +385,8 @@ void NfgTable::OnChangeValues(void)
 void NfgTable::ToggleProbs(void)
 {
   if (m_showProb) {
-    m_grid->DeleteRows();
-    m_grid->DeleteCols();
+    m_grid->DeleteRows(m_grid->GetRows() - 1);
+    m_grid->DeleteCols(m_grid->GetCols() - 1);
     m_showProb = 0;
   }
   else {
@@ -402,8 +403,8 @@ void NfgTable::ToggleProbs(void)
 void NfgTable::ToggleDominance(void)
 {
   if (m_showDom) {
-    m_grid->DeleteRows();
-    m_grid->DeleteCols();
+    m_grid->DeleteRows(m_grid->GetRows() - 1);
+    m_grid->DeleteCols(m_grid->GetCols() - 1);
     m_showDom = 0;
   }
   else {
@@ -421,8 +422,8 @@ void NfgTable::ToggleDominance(void)
 void NfgTable::ToggleValues(void)
 {
   if (m_showValue) {
-    m_grid->DeleteRows();
-    m_grid->DeleteCols();
+    m_grid->DeleteRows(m_grid->GetRows() - 1);
+    m_grid->DeleteCols(m_grid->GetCols() - 1);
     m_showValue = 0;
   }
   else {
@@ -457,6 +458,12 @@ void NfgTable::OnLeftDoubleClick(wxGridEvent &p_event)
 			 NFG_EDIT_OUTCOMES_PAYOFFS);
     m_parent->AddPendingEvent(event);
   }
+}
+
+void NfgTable::OnLabelLeftClick(wxGridEvent &p_event)
+{
+  // for the moment, just veto it
+  p_event.Veto();
 }
 
 void NfgTable::OnStrategyChange(wxCommandEvent &)
