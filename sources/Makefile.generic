@@ -82,9 +82,9 @@ WXLIB = -lwx_motif_$(SYSNAME)
 #   XLIB    = any X libraries used
 
 ifeq ($(SYSNAME), SunOS_5.6)
-XINCDIR = -I/usr/local/X11R6.4/include/X11
-XLIBDIR = -L/usr/local/X11R6.4/lib 
-XLIB = -lsocket -lnsl -lX11 -lXm -lXt -lgen -lm
+XINCDIR = -I/usr/openwin/include -I/usr/dt/include
+XLIBDIR = -L/usr/openwin/lib -L/usr/dt/lib
+XLIB = -lXm -lXmu -lXt -lX11 -lsocket -lnsl -lgen -lm
 else 
 ifeq ($(SYSNAME), HP-UX)
 DEFINES = -D_HPUX_SOURCE -DSVR4
