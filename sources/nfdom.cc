@@ -6,51 +6,37 @@
 
 #include "nfdom.h"
 
-gRectArray<gNumber> *paytable;
-
-bool Dominates(const Nfg &n,
-	       const NFSupport &S, int pl, int a, int b, bool strong)
+bool Dominates(const Nfg &,const NFSupport &S, int pl, int a, int b, 
+	       const gRectArray<gNumber> *paytable, bool strong)
 {
-  //DEBUG - temporary work around of apparent bug below
-  return Dominates(S,n.GetPlayer(pl)->GetStrategy(a),
-		   n.GetPlayer(pl)->GetStrategy(b),strong);
-
-  int asuppnum = S.Find(n.GetPlayer(pl)->GetStrategy(a));
-  int bsuppnum = S.Find(n.GetPlayer(pl)->GetStrategy(b));
-
-  /*
-  //DEBUG
-    gout << "\nThe player is " << pl << ", the action a is " << a 
-	 << ", the action b is " << b
-	 <<  ", and the support is " << S << "\n";
-  gout << "asuppnum = " << asuppnum << " and bsuppnum = " << bsuppnum << ".\n";
-  */
+  //DEBUG - In order to cross check with pointer version of Dominates(..)
+  //  Strategy *s = S.GetStrategy(pl,a);
+  //  Strategy *t = S.GetStrategy(pl,b);
+  //  bool answer = Dominates(S,s,t,strong);
 
   NfgContIter A(S), B(S);
 
   A.Freeze(pl);
-
-  A.Set(pl, asuppnum);
+  A.Set(pl, a);
   B.Freeze(pl);
-  B.Set(pl, bsuppnum);
+  B.Set(pl, b);
 
-  if (strong)  {
-    do  {
-
-      gNumber ap = (A.GetOutcome()) ? n.Payoff(A.GetOutcome(), pl) : gNumber(0);
-      gNumber bp = (B.GetOutcome()) ? n.Payoff(B.GetOutcome(), pl) : gNumber(0);
+  if (strong) {
+    do {
+      gNumber ap = (*paytable)(A.GetOutcome()->GetNumber(), pl);
+      gNumber bp = (*paytable)(B.GetOutcome()->GetNumber(), pl);
       if (ap <= bp)  return false;
       A.NextContingency();
     } while (B.NextContingency());
-	
+
     return true;
   }
 
   bool equal = true;
-  
-  do   {
-    gNumber ap = (A.GetOutcome()) ? n.Payoff(A.GetOutcome(), pl) : gNumber(0);
-    gNumber bp = (B.GetOutcome()) ? n.Payoff(B.GetOutcome(), pl) : gNumber(0);
+
+  do {
+    gNumber ap = (*paytable)(A.GetOutcome()->GetNumber(), pl);
+    gNumber bp = (*paytable)(B.GetOutcome()->GetNumber(), pl);
     if (ap < bp)   return false;
     else if (ap > bp)  equal = false;
     A.NextContingency();
@@ -59,58 +45,30 @@ bool Dominates(const Nfg &n,
   return (!equal);
 }
 
+bool Dominates(const Nfg &,const NFSupport &S, int pl, int a, int b, 
+	       const bool strong)
+{
+  gRectArray<gNumber> *paytable;
+  paytable = new gRectArray<gNumber>(S.Game().NumOutcomes(), 
+				     S.Game().NumPlayers());
+  InitializePaytable(S.Game(),paytable);
+  bool answer = Dominates(S.Game(),S,pl,a,b,paytable,strong);
+  delete paytable;
+  return answer;
+}
 
 bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong,
 	       const gStatus &status)
 {
-  const Nfg* n = S.GamePtr();
-
-  NfgContIter A(S), B(S);
-
-  A.Freeze(s->Player());
-  A.Set(s);
-  B.Freeze(s->Player());
-  B.Set(t);  
-
-  if (strong)  {
-    do  {
-
-      //DEBUG
-      if (!A.GetOutcome() || !B.GetOutcome())
-	{ gout << "Weirdness!!\n"; exit(0); }
-
-      gNumber ap = (A.GetOutcome()) ? 
-      n->Payoff(A.GetOutcome(), s->Player()) : gNumber(0);
-      gNumber bp = (B.GetOutcome()) ? 
-      n->Payoff(B.GetOutcome(), s->Player()) : gNumber(0);
-
-      if (ap <= bp)  return false;
-      A.NextContingency();
-    } while (B.NextContingency());
-	
-    return true;
-  }
-
-  bool equal = true;
-  
-  do   {
-    gNumber ap = (A.GetOutcome()) ? 
-    n->Payoff(A.GetOutcome(), s->Player()) : gNumber(0);
-    gNumber bp = (B.GetOutcome()) ? 
-    n->Payoff(B.GetOutcome(), s->Player()) : gNumber(0);
-
-    if (ap < bp)   return false;
-    else if (ap > bp)  equal = false;
-    A.NextContingency();
-  } while (B.NextContingency());
-
-  return (!equal);
+  return Dominates(S,s,t,strong);
 }
-
-
 
 bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong)
 {
+  //DEBUG
+  bool answer = Dominates(S.Game(),S,s->Player()->GetNumber(), 
+			  S.GetNumber(s), S.GetNumber(t),strong);
+
   const Nfg* n = S.GamePtr();
 
   NfgContIter A(S), B(S);
@@ -132,10 +90,13 @@ bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong)
       gNumber bp = (B.GetOutcome()) ? 
       n->Payoff(B.GetOutcome(), s->Player()) : gNumber(0);
 
-      if (ap <= bp)  return false;
+      if (ap <= bp)  { if (answer) { gout << "E1.\n"; exit(0);}
+      return false;
+      }
       A.NextContingency();
     } while (B.NextContingency());
 	
+    if (!answer) {gout << "E2.\n"; exit(0);}
     return true;
   }
 
@@ -147,11 +108,14 @@ bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong)
     gNumber bp = (B.GetOutcome()) ? 
     n->Payoff(B.GetOutcome(), s->Player()) : gNumber(0);
 
-    if (ap < bp)   return false;
+    if (ap < bp)   {if (answer) {gout << "E3.\n"; exit(0);}
+    return false;
+    }
     else if (ap > bp)  equal = false;
     A.NextContingency();
   } while (B.NextContingency());
 
+  if (answer == equal) {gout << "E4.\n"; exit(0);}
   return (!equal);
 }
 
@@ -163,32 +127,14 @@ bool IsDominated(const NFSupport &S, Strategy *s, bool strong,
     if (i != s->Number()) 
       if (Dominates(S,S.Strategies(s->Player()->GetNumber())[i],s,
 		    strong,status)) {
-
-	/*
-	//DEBUG
-  if (!Dominates(S.Game(),S,s->Player()->GetNumber(), 
-		S.Strategies(s->Player()->GetNumber())[i]->Number(),
-		 s->Number(),strong))
-    { gout << "Bloody murder!\n"; exit(0); }
-	*/
-
 	return true;
       }
-
-    /*
-	//DEBUG
-  else if (Dominates(S.Game(),S,s->Player()->GetNumber(), 
-		S.Strategies(s->Player()->GetNumber())[i]->Number(),
-		     s->Number(),strong))
-    { gout << "Bloody murder!\n"; exit(0); }
-    */
   }
-
   return false;
 }
 
 bool ComputeDominated(const Nfg &N, const NFSupport &S, NFSupport &newS,
-		      int pl, bool strong,
+		      int pl, const gRectArray<gNumber> *paytable, bool strong,
 		      gOutput &tracefile, gStatus &status)
 {
   gArray<int> set(S.NumStrats(pl));
@@ -206,7 +152,8 @@ bool ComputeDominated(const Nfg &N, const NFSupport &S, NFSupport &newS,
     double s1 = (double)min/(double)(dis+1);
     status.SetProgress((1.0-s1)*d1 + s1*d2);
     for (pp = 0;
-	 pp < min && !Dominates(N, S, pl, set[pp+1], set[dis+1], strong);
+	 pp < min && !Dominates(N, S, pl, set[pp+1], set[dis+1], 
+				paytable, strong);
 	 pp++);
     if (pp < min)
       dis--;
@@ -216,11 +163,13 @@ bool ComputeDominated(const Nfg &N, const NFSupport &S, NFSupport &newS,
       set[min+1] = foo;
 
       for (int inc = min + 1; inc <= dis; )  {
-	if (Dominates(N, S, pl, set[min+1], set[dis+1], strong))  {
+	if (Dominates(N, S, pl, set[min+1], set[dis+1], 
+		      paytable, strong))  {
 	  tracefile << S.Strategies(pl)[set[dis+1]]->Number() << " dominated by " << S.Strategies(pl)[set[min+1]]->Number() << '\n';
 	  dis--;
 	}
-	else if (Dominates(N, S, pl, set[dis+1], set[min+1], strong))  {
+	else if (Dominates(N, S, pl, set[dis+1], set[min+1], 
+			   paytable, strong))  {
 	  tracefile << S.Strategies(pl)[set[min+1]]->Number() << " dominated by " << S.Strategies(pl)[set[dis+1]]->Number() << '\n';
 	  foo = set[dis+1];
 	  set[dis+1] = set[min+1];
@@ -249,6 +198,13 @@ bool ComputeDominated(const Nfg &N, const NFSupport &S, NFSupport &newS,
     return false;
 }
 
+void InitializePaytable(const Nfg &N, gRectArray<gNumber> *paytable) 
+{
+  for (int outc = 1; outc <= N.NumOutcomes(); outc++)
+    for (int pl = 1; pl <= N.NumPlayers(); pl++)
+      (*paytable)(outc, pl) = N.Payoff(N.Outcomes()[outc], pl);
+}
+
 
 NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, bool strong,
 			    const gArray<int> &players,
@@ -256,18 +212,17 @@ NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, bool strong,
 {
   NFSupport *newS = new NFSupport(S);
   bool any = false;
-
+  
+  gRectArray<gNumber> *paytable;
   paytable = new gRectArray<gNumber>(N.NumOutcomes(), N.NumPlayers());
-  for (int outc = 1; outc <= N.NumOutcomes(); outc++)  {
-    for (int pl = 1; pl <= N.NumPlayers(); pl++)
-      (*paytable)(outc, pl) = N.Payoff(N.Outcomes()[outc], pl);
-  }
+  InitializePaytable(N,paytable);
 
   for (int i = 1; i <= players.Length(); i++)   {
     status.Get();
     int pl = players[i];
     tracefile << "Dominated strategies for player " << pl << ":\n";
-    any |= ComputeDominated(N, S, *newS, pl, strong, tracefile, status);
+    any |= ComputeDominated(N, S, *newS, pl, paytable,
+			    strong, tracefile, status);
 // status.SetProgress((double)i/players.Length());
   }
 

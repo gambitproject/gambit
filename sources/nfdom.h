@@ -11,8 +11,11 @@
 #include "gstatus.h"
 #include "nfplayer.h"
 
-bool Dominates(const Nfg &,
-	       const NFSupport &S, int pl, int a, int b, bool strong);
+bool Dominates(const Nfg &,const NFSupport &S, int pl, int a, int b, 
+	       const gRectArray<gNumber> *, bool strong);
+
+bool Dominates(const Nfg &,const NFSupport &S, int pl, int a, int b, 
+	       const bool strong);
 
 bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong,
 	       const gStatus &status);
@@ -21,6 +24,8 @@ bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong);
 
 bool IsDominated(const NFSupport &S, Strategy *s, bool strong, 
 		 const gStatus &status);
+
+void InitializePaytable(const Nfg &N, gRectArray<gNumber> *paytable); 
 
 bool ComputeDominated(const Nfg &N, const NFSupport &S, NFSupport &newS,
 		      int pl, bool strong,
