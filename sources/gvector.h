@@ -72,7 +72,9 @@ template <class T> class gVector : public gArray<T>   {
     bool Check(const gVector<T> &v) const;
 };
 
+#ifndef __BORLANDC__
 template <class T> gOutput &operator<<(gOutput &, const gVector<T> &);
+#endif
 
 #endif   //# GVECTOR_H
 
