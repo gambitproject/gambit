@@ -166,16 +166,16 @@ public:
 
 
 
-// #include "gslist.h"
-/*
+#include "gslist.h"
+
 class gFuncListSorter : public gListSorter<FuncDescObj*>
 {
 protected:
   CompareResult Compare(FuncDescObj* const& a, FuncDescObj* const& b) const
   {
-    if((a->FuncName())>(b->FuncName()))
+    if((a->FuncName()) < (b->FuncName()))
       return GreaterThan;
-    else if((a->FuncName())<(b->FuncName()))
+    else if((a->FuncName()) > (b->FuncName()))
       return LessThan;
     else
       return Equal;
@@ -185,7 +185,7 @@ public:
     : gListSorter<FuncDescObj*>(list)
     {}
 };
-*/
+
 
 
 #endif  // GSM_H

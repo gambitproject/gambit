@@ -1807,8 +1807,11 @@ void GSM::Help(void)
   int found = 0;
   gString curname;
   const gList<FuncDescObj*>* funcs = _FuncTable->Value();
-  gList<FuncDescObj*> funclist;
   FuncDescObj *func;
+  gList<FuncDescObj*> funclist;
+  gSortList<FuncDescObj*> funcslist;
+
+
 
   if( _FuncTable->IsDefined( funcname ) )
   {
@@ -1820,6 +1823,7 @@ void GSM::Help(void)
     for(i=0; i<_FuncTable->NumBuckets(); i++)
       for(j=1; j<=funcs[i].Length(); j++)
 	funclist.Append(funcs[i][j]);
+
     for(i=1; i<=funclist.Length(); i++)
     {
       match = true;
@@ -1860,27 +1864,28 @@ void GSM::Help(void)
 	match = true;
       if(match)
       {	
-	_StdOut << ' ' << funclist[i]->FuncName() << "[]\n";
+	// _StdOut << ' ' << funclist[i]->FuncName() << "[]\n";
 	func = funclist[i];
+	funcslist.Append(func);
 	found++;
       }      
     }
+
+    gFuncListSorter sorter(funcslist);
     _StdOut << ' ' << found << " match(es) found\n";
     if(found==1)
       func->Dump(_StdOut);
+    else
+    {
+      _StdOut << "Sorting function list...\n";
+      sorter.Sort();
+      for(i=1; i<=funcslist.Length(); i++)
+	funcslist[i]->Dump(_StdOut);
+	//_StdOut << ' ' << funcslist[i]->FuncName() << "[]\n";
+    }
 
     delete p;
 
-    /*
-    gSortList<FuncDescObj*> funclist;
-    for(i=0; i<_FuncTable->NumBuckets(); i++)
-      for(j=1; j<=funcs[i].Length(); j++)
-	funclist.Append(funcs[i][j]);
-    gFuncListSorter funclist_s(funclist);
-    funclist_s.Sort();
-    for(i=1; i<=funclist.Length(); i++)
-      _StdOut << funclist[i]->FuncName() << "[]\n";
-      */
   }
 }
 
@@ -1963,7 +1968,7 @@ void GSM::_ErrorMessage
 
 
 #include "garray.imp"
-// #include "gslist.imp"
+#include "gslist.imp"
 
 
 
@@ -1975,6 +1980,6 @@ void GSM::_ErrorMessage
 #endif   // __GNUG__, __BORLANDC__
 
 TEMPLATE class gArray<Instruction*>;
-//TEMPLATE class gSortList<FuncDescObj*>;
-//TEMPLATE class gListSorter<FuncDescObj*>;
+TEMPLATE class gSortList<FuncDescObj*>;
+TEMPLATE class gListSorter<FuncDescObj*>;
 
