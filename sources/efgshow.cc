@@ -237,13 +237,19 @@ void EfgShow::SolveStandard(void)
       if (ef.NumPlayers() == 2)
 	solver = new guiefgEnumMixedNfg(*cur_sup, this, 2,
 					dialog.Precision(), false);
-      else
+      else {
 	wxMessageBox("Not guaranteed to find two solutions", "Warning");
 	solver = new guiefgLiapEfg(*cur_sup, this, 2, false);
+      }
       break;
     case efgSTANDARD_ALL:
-      wxMessageBox("Not guaranteed to find all solutions", "Warning");
-      solver = new guiefgLiapEfg(*cur_sup, this, 0, false);
+      if (ef.NumPlayers() == 2)
+	solver = new guiefgEnumMixedNfg(*cur_sup, this, 0,
+					dialog.Precision(), false);
+      else {
+	wxMessageBox("Not guaranteed to find all solutions", "Warning");
+	solver = new guiefgLiapEfg(*cur_sup, this, 0, false);
+      }
       break;
     }
     break;
@@ -270,13 +276,19 @@ void EfgShow::SolveStandard(void)
       if (ef.NumPlayers() == 2)
 	solver = new guiefgEnumMixedNfg(*cur_sup, this, 2,
 					dialog.Precision(), false);
-      else
+      else {
 	wxMessageBox("Not guaranteed to find two solutions", "Warning");
 	solver = new guiefgLiapEfg(*cur_sup, this, 2, false);
+      }
       break;
     case efgSTANDARD_ALL:
-      wxMessageBox("Not guaranteed to find all solutions", "Warning");
-      solver = new guiefgLiapEfg(*cur_sup, this, 0, false);
+      if (ef.NumPlayers() == 2)
+	solver = new guiefgEnumMixedNfg(*cur_sup, this, 0,
+					dialog.Precision(), false);
+      else {
+	wxMessageBox("Not guaranteed to find all solutions", "Warning");
+	solver = new guiefgLiapEfg(*cur_sup, this, 0, false);
+      }
       break;
     }
     break;
