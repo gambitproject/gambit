@@ -13,6 +13,9 @@
 #include "dlefgplayer.h"
 #include "dlmoveadd.h"
 #include "dlnodedelete.h"
+#include "dlefgreveal.h"
+#include "dlefgpayoff.h"
+#include "dlefgoutcome.h"
 #include "dlefgsave.h"
 
 
@@ -284,6 +287,213 @@ Bool dialogNodeDelete::OnClose(void)
   m_completed = wxCANCEL;
   Show(FALSE);
   return FALSE;
+}
+
+//=========================================================================
+//                    dialogEfgPayoffs: Member functions
+//=========================================================================
+
+dialogEfgPayoffs::dialogEfgPayoffs(const Efg &p_efg, EFOutcome *p_outcome,
+				   bool p_solutions, wxWindow *p_parent)
+  : wxDialogBox(p_parent, "Change Payoffs", TRUE),
+    m_outcome(p_outcome), m_efg(p_efg), m_payoffs(p_efg.NumPlayers())
+{
+  (void) new wxMessage(this, "Change payoffs for outcome:");
+  NewLine();
+
+  m_outcomeName = new wxText(this, 0, "Outcome");
+  if (p_outcome)
+    m_outcomeName->SetValue(p_outcome->GetName());
+  else
+    m_outcomeName->SetValue("Outcome" + ToText(p_efg.NumOutcomes() + 1));
+  NewLine();
+
+  if (p_solutions) {
+    (void) new wxMessage(this, "Pressing OK will delete computed solutions");
+    NewLine();
+  }
+
+  m_outcomePayoffs = new wxText *[m_efg.NumPlayers()];
+
+  const int ENTRIES_PER_ROW = 3;
+
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+    m_outcomePayoffs[pl - 1] = new wxText(this, 0, "");
+    m_outcomePayoffs[pl - 1]->SetValue(ToText(m_efg.Payoff(p_outcome, pl)));
+    if (pl % ENTRIES_PER_ROW == 0)
+      NewLine();
+  }
+
+  m_outcomePayoffs[0]->SetFocus();
+#ifndef LINUX_WXXT
+  m_outcomePayoffs[0]->SetSelection(0, strlen(m_outcomePayoffs[0]->GetValue()));
+#endif
+
+  NewLine();
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  okButton->SetClientData((char *) this);
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel");
+  cancelButton->SetClientData((char *) this);
+
+  Fit();
+  Show(TRUE);
+}
+
+void dialogEfgPayoffs::OnOK(void)
+{
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)
+    FromText(m_outcomePayoffs[pl - 1]->GetValue(), m_payoffs[pl]);
+  m_name = m_outcomeName->GetValue();
+
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void dialogEfgPayoffs::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool dialogEfgPayoffs::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+//=========================================================================
+//                  dialogInfosetReveal: Member functions
+//=========================================================================
+
+dialogInfosetReveal::dialogInfosetReveal(const Efg &p_efg, wxWindow *p_parent)
+  : wxDialogBox(p_parent, "Reveal to Players", TRUE), m_efg(p_efg)
+{
+  m_playerNameList = new wxListBox(this, 0, "Players", wxMULTIPLE);
+
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+    const gText &name = m_efg.Players()[pl]->GetName();
+    if (name != "")
+      m_playerNameList->Append(name);
+    else
+      m_playerNameList->Append("Player" + ToText(pl));
+    m_playerNameList->SetSelection(pl - 1, TRUE);
+  }
+
+  NewLine();
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  okButton->SetClientData((char *) this);
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel");
+  cancelButton->SetClientData((char *) this);
+
+  Fit();
+  Show(TRUE);
+}
+
+dialogInfosetReveal::~dialogInfosetReveal()
+{ }
+
+void dialogInfosetReveal::OnOK(void)
+{
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void dialogInfosetReveal::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool dialogInfosetReveal::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+gArray<EFPlayer *> dialogInfosetReveal::GetPlayers(void) const
+{
+  gBlock<EFPlayer *> players;
+
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+    if (m_playerNameList->Selected(pl - 1))
+      players.Append(m_efg.Players()[pl]);
+  }
+
+  return players;
+}
+
+//=========================================================================
+//                dialogEfgOutcomeSelect: Member functions
+//=========================================================================
+
+dialogEfgOutcomeSelect::dialogEfgOutcomeSelect(Efg &p_efg, wxWindow *p_parent)
+  : wxDialogBox(p_parent, "Select Outcome", TRUE), m_efg(p_efg)
+{
+  m_outcomeList = new wxListBox(this, 0, "Outcome");
+  
+  for (int outc = 1; outc <= m_efg.NumOutcomes(); outc++) {
+    EFOutcome *outcome = m_efg.Outcomes()[outc];
+    gText item = outcome->GetName();
+    if (item == "")
+      item = "Outcome" + ToText(outc);
+
+    item += (" (" + ToText(m_efg.Payoff(outcome, 1)) + ", " +
+	     ToText(m_efg.Payoff(outcome, 2)));
+    if (m_efg.NumPlayers() > 2) {
+      item += ", " + ToText(m_efg.Payoff(outcome, 3));
+      if (m_efg.NumPlayers() > 3) 
+	item += ",...)";
+      else
+	item += ")";
+    }
+    else
+      item += ")";
+
+    m_outcomeList->Append(item);
+  }
+
+  m_outcomeList->SetSelection(0);
+
+  NewLine();
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  okButton->SetClientData((char *) this);
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel");
+  cancelButton->SetClientData((char *) this);
+  
+  Fit();
+  Show(TRUE);
+}
+
+void dialogEfgOutcomeSelect::OnOK(void)
+{
+  m_outcomeSelected = m_outcomeList->GetSelection();
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void dialogEfgOutcomeSelect::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool dialogEfgOutcomeSelect::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+EFOutcome *dialogEfgOutcomeSelect::GetOutcome(void)
+{
+  return m_efg.Outcomes()[m_outcomeSelected + 1];
 }
 
 //=========================================================================

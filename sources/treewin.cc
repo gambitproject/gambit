@@ -22,7 +22,10 @@
 #include "infosetd.h"
 #include "dlefgsave.h"
 #include "dlnodedelete.h"
+#include "dlefgreveal.h"
 #include "dlefgplayer.h"
+#include "dlefgpayoff.h"
+#include "dlefgoutcome.h"
 
 #include "efgutils.h"
 #include "glist.imp"
@@ -936,7 +939,7 @@ void TreeWindow::ProcessDClick(wxMouseEvent &ev)
             case NODE_ABOVE_PLAYER: tree_players(); break;
             case NODE_ABOVE_ISETLABEL: infoset_switch_player(); break;
             case NODE_ABOVE_ISETID:  infoset_switch_player(); break;
-            case NODE_ABOVE_OUTCOME: ChangePayoffs(); break;
+            case NODE_ABOVE_OUTCOME: EditOutcomePayoffs(); break;
             case NODE_ABOVE_REALIZPROB: break;
             case NODE_ABOVE_BELIEFPROB: break;
             case NODE_ABOVE_VALUE: break;
@@ -988,7 +991,7 @@ void TreeWindow::ProcessDClick(wxMouseEvent &ev)
 	      break;
             case NODE_RIGHT_OUTCOME:
             case NODE_RIGHT_NAME:
-	      ChangePayoffs();
+	      EditOutcomePayoffs();
 	      break;
             }
             OnPaint();
@@ -1551,9 +1554,10 @@ EFPlayer *EfgGetPlayer(const Efg &ef, const gText &name)
 //                    NODE MENU HANDLER FUNCTIONS
 //-----------------------------------------------------------------------
 
-//***********************************************************************
-//                        NODE-ADD MENU HANDLER
-//***********************************************************************
+//-----------------------
+// Edit->Node->Add Move
+//-----------------------
+
 void TreeWindow::node_add(void)
 {
   static int branches = 2; // make this static so it remembers the last entry
@@ -1592,9 +1596,10 @@ void TreeWindow::node_add(void)
   }
 }
 
-//***********************************************************************
-//                        NODE-INSERT MENU HANDLER
-//***********************************************************************
+//---------------------------
+// Edit->Node->Insert Move
+//---------------------------
+
 void TreeWindow::node_insert(void)
 {
   static int branches = 2; // make this static so it remembers the last entry
@@ -1636,9 +1641,10 @@ void TreeWindow::node_insert(void)
   }
 
 }
-//***********************************************************************
-//                      NODE-DELETE MENU HANDLER
-//***********************************************************************
+
+//----------------------
+// Edit->Node->Delete
+//----------------------
 
 void TreeWindow::node_delete(void)
 {
@@ -1656,9 +1662,9 @@ void TreeWindow::node_delete(void)
   }
 }
 
-//***********************************************************************
-//                       NODE-LABEL MENU HANDLER
-//***********************************************************************
+//---------------------
+// Edit->Node->Label
+//---------------------
 
 void TreeWindow::node_label(void)
 {
@@ -1670,266 +1676,9 @@ void TreeWindow::node_label(void)
     node->SetName(label);
 }
 
-//***********************************************************************
-//                       NODE-OUTCOME MENU HANDLER
-//***********************************************************************
-
-class EFChangePayoffs : public MyDialogBox {
-private:
-  EFOutcome *outcome;
-  Efg &ef;
-
-  wxText *name_item;
-  wxText **payoff_items;
-
-public:
-  EFChangePayoffs(Efg &, EFOutcome *, wxWindow *parent);
-
-  gArray<gNumber> Payoffs(void);
-  gText Name(void);
-};
-
-EFChangePayoffs::EFChangePayoffs(Efg &p_efg, EFOutcome *p_outcome,
-				 wxWindow *p_parent)
-  : MyDialogBox(p_parent, "Change Payoffs"), outcome(p_outcome), ef(p_efg)
-{
-  Add(wxMakeFormMessage("Change payoffs for outcome:"));
-  Add(wxMakeFormNewLine());
-
-  char *new_name = new char[40];
-  wxFormItem *name_fitem = Add(wxMakeFormString("Outcome:", &new_name, wxFORM_TEXT, 0, 0, 0, 160));
-  Add(wxMakeFormNewLine());
-
-  const int ENTRIES_PER_ROW = 3;
-
-  // Payoff items
-  char **new_payoffs = new char *[ef.NumPlayers()+1];
-  wxFormItem **payoff_fitems = new wxFormItem *[ef.NumPlayers()+1];
-  payoff_items = new wxText *[ef.NumPlayers()+1];
-
-  for (int i = 1; i <= ef.NumPlayers(); i++) {
-    new_payoffs[i] = new char[40];
-    if (ef.Players()[i]->GetName() != "")
-      payoff_fitems[i] = Add(wxMakeFormString(ef.Players()[i]->GetName() + ":", &(new_payoffs[i]), wxFORM_TEXT, 0, 0, 0, 160));
-    else
-      payoff_fitems[i] = Add(wxMakeFormString(ToText(i) + ":", &(new_payoffs[i]), wxFORM_TEXT, 0, 0, 0, 160));
-
-    if (i % ENTRIES_PER_ROW == 0)
-      Add(wxMakeFormNewLine());
-  }
-
-  AssociatePanel();
-
-  for (int i = 1; i <= ef.NumPlayers(); i++) {
-    payoff_items[i] = (wxText *)payoff_fitems[i]->GetPanelItem();
-    gNumber payoff = 0;
-    if (outcome)
-      payoff = ef.Payoff(outcome, i);
-    payoff_items[i]->SetValue(ToText(payoff));
-  }
-  
-  if (p_outcome && ef.NumPlayers() > 0) {
-    payoff_items[1]->SetFocus();
-  }
-
-  name_item = (wxText *) name_fitem->GetPanelItem();
-  if (outcome)
-    name_item->SetValue(outcome->GetName());
-  else
-    name_item->SetValue("Outcome " + ToText(ef.NumOutcomes() + 1));
-
-  Go1();
-
-  for (int i = 1; i <= ef.NumPlayers(); i++) 
-    delete [] new_payoffs[i];
-
-  delete [] new_payoffs;
-
-  delete [] new_name;
-}
-
-gArray<gNumber> EFChangePayoffs::Payoffs(void)
-{
-  gArray<gNumber> payoffs(ef.NumPlayers());
-
-  for (int i = 1; i <= ef.NumPlayers(); i++)
-    FromText(payoff_items[i]->GetValue(), payoffs[i]);
-
-  return payoffs;
-}
-
-gText EFChangePayoffs::Name(void)
-{
-  return name_item->GetValue();
-} 
-
-void TreeWindow::ChangePayoffs(void)
-{
-  EFChangePayoffs *dialog = new EFChangePayoffs(ef, Cursor()->GetOutcome(),
-						pframe);
-
-  if (dialog->Completed() == wxOK) {
-    EFOutcome *outc = Cursor()->GetOutcome();
-    gArray<gNumber> payoffs(dialog->Payoffs());
-
-    if (!outc) {
-      outc = ef.NewOutcome();
-      Cursor()->SetOutcome(outc);
-    }
-
-    for (int i = 1; i <= ef.NumPlayers(); i++)
-      ef.SetPayoff(outc, i, payoffs[i]);
-    outc->SetName(dialog->Name());
-
-    outcomes_changed = 1;
-  }
-  
-  delete dialog;
-}
-
-void TreeWindow::EditOutcomeAttach(void)
-{
-  MyDialogBox *dialog = new MyDialogBox(pframe, "Attach Outcome");
-    
-  wxStringList *outcome_list = new wxStringList;
-  char *outcome_name = new char[256];
-        
-  for (int outc = 1; outc <= ef.NumOutcomes(); outc++) {
-    EFOutcome *outcome = ef.Outcomes()[outc];
-    gText tmp = ToText(outc) + ": " + outcome->GetName() + " (";
-    tmp += ToText(ef.Payoff(outcome, 1)) + ", " + ToText(ef.Payoff(outcome, 2));
-    if (ef.NumPlayers() > 2) {
-      tmp += ", " + ToText(ef.Payoff(outcome, 3));
-      if (ef.NumPlayers() > 3) 
-	tmp += ",...)";
-      else
-	tmp += ")";
-    }
-    else
-      tmp += ")";
-  
-    outcome_list->Add(tmp);
-  }
-
-  dialog->Add(wxMakeFormString("Outcome", &outcome_name,
-			       wxFORM_CHOICE,
-			       new wxList(wxMakeConstraintStrings(outcome_list), 0)));
-
-  dialog->Go();
-  
-  if (dialog->Completed() == wxOK) {
-    for (int i = 0; ; i++) {
-      if (outcome_name[i] == ':') {
-	outcome_name[i] = '\0';
-	break;
-      }
-    }
-    
-    int outc = (int) ToDouble(outcome_name);
-    Cursor()->SetOutcome(ef.Outcomes()[outc]);
-    outcomes_changed = 1;
-    OnPaint();
-  }
-
-  delete dialog;
-  delete [] outcome_name;
-}
-
-void TreeWindow::EditOutcomeDetach(void)
-{
-  Cursor()->SetOutcome(0);
-  outcomes_changed = 1;
-  OnPaint();
-}
-
-void TreeWindow::EditOutcomeLabel(void)
-{
-  char *name = new char[40];
-  strncpy(name, Cursor()->GetOutcome()->GetName(), 40);
-
-  MyDialogBox *dialog = new MyDialogBox(pframe, "Label outcome");
-  dialog->Form()->Add(wxMakeFormString("New outcome label", &name, wxFORM_TEXT,
-				       0, 0, 0, 220));
-  dialog->Go();
-
-  if (dialog->Completed() == wxOK) {
-    Cursor()->GetOutcome()->SetName(name);
-    outcomes_changed = 1;
-  }
-  
-  delete dialog;
-  delete [] name;
-}
-
-void TreeWindow::EditOutcomeNew(void)
-{
-  EFChangePayoffs *dialog = new EFChangePayoffs(ef, 0, pframe);
-
-  if (dialog->Completed() == wxOK) {
-    EFOutcome *outc = ef.NewOutcome();
-    gArray<gNumber> payoffs(dialog->Payoffs());
-
-    for (int i = 1; i <= ef.NumPlayers(); i++)
-      ef.SetPayoff(outc, i, payoffs[i]);
-    outc->SetName(dialog->Name());
-
-    outcomes_changed = 1;
-  }
-  
-  delete dialog;
-}
-
-void TreeWindow::EditOutcomeDelete(void)
-{
-  MyDialogBox *dialog = new MyDialogBox(pframe, "Delete Outcome");
-    
-  wxStringList *outcome_list = new wxStringList;
-  char *outcome_name = new char[256];
-        
-  for (int outc = 1; outc <= ef.NumOutcomes(); outc++) {
-    EFOutcome *outcome = ef.Outcomes()[outc];
-    gText tmp = ToText(outc) + ": " + outcome->GetName() + " (";
-    tmp += ToText(ef.Payoff(outcome, 1)) + ", " + ToText(ef.Payoff(outcome, 2));
-    if (ef.NumPlayers() > 2) {
-      tmp += ", " + ToText(ef.Payoff(outcome, 3));
-      if (ef.NumPlayers() > 3) 
-	tmp += ",...)";
-      else
-	tmp += ")";
-    }
-    else
-      tmp += ")";
-  
-    outcome_list->Add(tmp);
-  }
-
-  dialog->Add(wxMakeFormString("Outcome", &outcome_name,
-			       wxFORM_CHOICE,
-			       new wxList(wxMakeConstraintStrings(outcome_list), 0)));
-
-  dialog->Go();
-  
-  if (dialog->Completed() == wxOK) {
-    for (int i = 0; ; i++) {
-      if (outcome_name[i] == ':') {
-	outcome_name[i] = '\0';
-	break;
-      }
-    }
-    
-    int outc = (int) ToDouble(outcome_name);
-    ef.DeleteOutcome(ef.Outcomes()[outc]);
-    outcomes_changed = 1;
-    OnPaint();
-  }
-
-  delete dialog;
-  delete [] outcome_name;
-}  
-
-//***********************************************************************
-//                       NODE-SET-MARK MENU HANDLER
-//***********************************************************************
+//------------------------
+// Edit->Node->Set Mark
+//------------------------
 
 void TreeWindow::node_set_mark(void)
 {
@@ -1940,9 +1689,9 @@ void TreeWindow::node_set_mark(void)
     mark_node = 0;                                   
 }
 
-//***********************************************************************
-//                      NODE-GOTO-MARK MENU HANDLER
-//***********************************************************************
+//-------------------------
+// Edit->Node->Goto Mark
+//-------------------------
 
 void TreeWindow::node_goto_mark(void)
 {
@@ -1952,83 +1701,175 @@ void TreeWindow::node_goto_mark(void)
   }
 }
 
+//---------------------------
+// Edit->Outcomes->Payoffs
+//---------------------------
+
+void TreeWindow::EditOutcomePayoffs(void)
+{
+  dialogEfgPayoffs dialog(ef, Cursor()->GetOutcome(), false, pframe);
+
+  if (dialog.Completed() == wxOK) {
+    EFOutcome *outc = Cursor()->GetOutcome();
+    gArray<gNumber> payoffs(dialog.Payoffs());
+
+    if (!outc) {
+      outc = ef.NewOutcome();
+      Cursor()->SetOutcome(outc);
+    }
+
+    for (int pl = 1; pl <= ef.NumPlayers(); pl++)
+      ef.SetPayoff(outc, pl, payoffs[pl]);
+    outc->SetName(dialog.Name());
+
+    outcomes_changed = true;
+  }
+}
+
+//--------------------------
+// Edit->Outcomes->Attach
+//--------------------------
+
+void TreeWindow::EditOutcomeAttach(void)
+{
+  dialogEfgOutcomeSelect dialog(ef, pframe);
+  
+  if (dialog.Completed() == wxOK) {
+    Cursor()->SetOutcome(dialog.GetOutcome());
+    outcomes_changed = true;
+    OnPaint();
+  }
+}
+
+//--------------------------
+// Edit->Outcomes->Detach
+//--------------------------
+
+void TreeWindow::EditOutcomeDetach(void)
+{
+  Cursor()->SetOutcome(0);
+  outcomes_changed = true;
+  OnPaint();
+}
+
+//--------------------------
+// Edit->Outcomes->Label
+//--------------------------
+
+void TreeWindow::EditOutcomeLabel(void)
+{
+  char *label = wxGetTextFromUser("New outcome label", "Label outcome",
+				  Cursor()->GetOutcome()->GetName());
+
+  if (label) {
+    Cursor()->GetOutcome()->SetName(label);
+    outcomes_changed = true;
+  }
+}
+
+//-----------------------
+// Edit->Outcomes->New
+//-----------------------
+
+void TreeWindow::EditOutcomeNew(void)
+{
+  dialogEfgPayoffs dialog(ef, 0, false, pframe);
+
+  if (dialog.Completed() == wxOK) {
+    EFOutcome *outc = ef.NewOutcome();
+    gArray<gNumber> payoffs(dialog.Payoffs());
+
+    for (int pl = 1; pl <= ef.NumPlayers(); pl++)
+      ef.SetPayoff(outc, pl, payoffs[pl]);
+    outc->SetName(dialog.Name());
+
+    outcomes_changed = true;
+  }
+}
+
+//--------------------------
+// Edit->Outcomes->Delete
+//--------------------------
+
+void TreeWindow::EditOutcomeDelete(void)
+{
+  dialogEfgOutcomeSelect dialog(ef, pframe);
+  
+  if (dialog.Completed() == wxOK) {
+    ef.DeleteOutcome(dialog.GetOutcome());
+    outcomes_changed = true;
+    OnPaint();
+  }
+}  
+
+
 //-----------------------------------------------------------------------
 //                   INFOSET MENU HANDLER FUNCTIONS
 //-----------------------------------------------------------------------
 
-//***********************************************************************
-//                    INFOSET-MEMBER MENU HANDLER
-//***********************************************************************
+//------------------------
+// Edit->Infoset->Merge
+//------------------------
 
 void TreeWindow::infoset_merge(void)
 {
   try {
     ef.MergeInfoset(mark_node->GetInfoset(), Cursor()->GetInfoset());
-    infosets_changed = TRUE;
+    infosets_changed = true;
   }
   catch (gException &E) {
     guiExceptionDialog(E.Description(), pframe);
   }
 }
 
-//***********************************************************************
-//                      INFOSET-BREAK MENU HANDLER
-//***********************************************************************
+//------------------------
+// Edit->Infoset->Break
+//------------------------
 
 void TreeWindow::infoset_break(void)
 {
   try {
-    char *iset_name = wxGetTextFromUser("New infoset name",
-					"Infoset Name",
-					"Infoset" +
-					ToText(Cursor()->GetPlayer()->NumInfosets()+1));
-    ef.LeaveInfoset(Cursor())->SetName(iset_name);
-    infosets_changed = TRUE;
+    ef.LeaveInfoset(Cursor());
+    infosets_changed = true;
   }
   catch (gException &E) {
     guiExceptionDialog(E.Description(), pframe);
   }
 }
 
-//***********************************************************************
-//                      INFOSET-SPLIT MENU HANDLER
-//***********************************************************************
+//------------------------
+// Edit->Infoset->Split
+//------------------------
 
 void TreeWindow::infoset_split(void)
 {
   try {
-    char *iset_name = wxGetTextFromUser("New infoset name");
-    Infoset *new_iset = ef.SplitInfoset(Cursor());
-    if (iset_name)
-      new_iset->SetName(iset_name);
-    else
-      new_iset->SetName("Infoset" + 
-			ToText(new_iset->GetPlayer()->NumInfosets()));
-    infosets_changed = TRUE;
+    ef.SplitInfoset(Cursor());
+    infosets_changed = true;
   }
   catch (gException &E) {
     guiExceptionDialog(E.Description(), pframe);
   }
 }
 
-//***********************************************************************
-//                       INFOSET-JOIN MENU HANDLER
-//***********************************************************************
+//------------------------
+// Edit->Infoset->Join
+//------------------------
 
 void TreeWindow::infoset_join(void)
 {
   try {
     ef.JoinInfoset(mark_node->GetInfoset(), Cursor());
-    infosets_changed = TRUE;
+    infosets_changed = true;
   }
   catch (gException &E) {
     guiExceptionDialog(E.Description(), pframe);
   }
 }
 
-//***********************************************************************
-//                       INFOSET-LABEL MENU HANDLER
-//***********************************************************************
+//------------------------
+// Edit->Infoset->Label
+//------------------------
 
 void TreeWindow::infoset_label(void)
 {
@@ -2039,10 +1880,9 @@ void TreeWindow::infoset_label(void)
     infoset->SetName(label);
 }
 
-
-//***********************************************************************
-//                   INFOSET-SWITCH-PLAYER MENU HANDLER
-//***********************************************************************
+//-------------------------
+// Edit->Infoset->Player
+//-------------------------
 
 void TreeWindow::infoset_switch_player(void)
 {
@@ -2061,65 +1901,22 @@ void TreeWindow::infoset_switch_player(void)
   }
 }
 
-//***********************************************************************
-//                       INFOSET-REVEAL MENU HANDLER
-//***********************************************************************
+//-------------------------
+// Edit->Infoset->Reveal
+//-------------------------
 
 void TreeWindow::infoset_reveal(void)
 {
-  MyDialogBox *infoset_reveal_dialog = 0;
-  char **player_names = 0;
-    
-  try {
-    infoset_reveal_dialog = new MyDialogBox(this, "Reveal to Players",
-					    EFG_INFOSET_HELP);
-    player_names = new char *[ef.NumPlayers()];
+  dialogInfosetReveal dialog(ef, this);
 
-    for (int i = 1; i <= ef.NumPlayers(); i++)
-      player_names[i - 1] = 0;
-
-    for (int i = 1; i <= ef.NumPlayers(); i++)
-      player_names[i - 1] = copystring(ef.Players()[i]->GetName());
-        
-    wxListBox *player_item = new wxListBox(infoset_reveal_dialog, 0, "Players",
-					   wxMULTIPLE, -1, -1, -1, -1,
-					   ef.NumPlayers(), player_names);
-    infoset_reveal_dialog->Go();
-
-    if (infoset_reveal_dialog->Completed() == wxOK) {
-      gBlock<EFPlayer *> players;
-
-      for (int i = 1; i <= ef.NumPlayers(); i++) {
-	if (player_item->Selected(i-1)) 
-	  players.Append(ef.Players()[i]);
-      }
-
-      ef.Reveal(Cursor()->GetInfoset(), players);
-      infosets_changed = TRUE;
+  if (dialog.Completed() == wxOK) {
+    try {
+      ef.Reveal(Cursor()->GetInfoset(), dialog.GetPlayers());
+      infosets_changed = true;
     }
-        
-    delete infoset_reveal_dialog;
-
-    for (int i = 1; i <= ef.NumPlayers(); i++)
-      delete [] player_names[i - 1];
-
-    delete [] player_names;
-  }
-  catch (gException &E) {
-    if (infoset_reveal_dialog)
-      delete infoset_reveal_dialog;
-
-    if (player_names) {
-      for (int i = 1; i <= ef.NumPlayers(); i++) {
-	if (player_names[i - 1])
-	  delete [] player_names[i - 1];
-      }
-
-      if (player_names)   
-	delete [] player_names;
+    catch (gException &E) {
+      guiExceptionDialog(E.Description(), pframe);
     }
-
-    guiExceptionDialog(E.Description(), pframe);
   }
 }
 

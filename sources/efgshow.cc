@@ -955,7 +955,7 @@ void EfgShow::OnMenuCommand(int id)
       tw->EditOutcomeLabel();
       break;
     case TREE_OUTCOMES_PAYOFFS:
-      tw->ChangePayoffs();
+      tw->EditOutcomePayoffs();
       break;
     case TREE_OUTCOMES_NEW:
       tw->EditOutcomeNew();

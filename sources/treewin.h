@@ -222,7 +222,7 @@ public:
   void EditOutcomeNew(void);
   void EditOutcomeDelete(void);
   void EditOutcomeLabel(void);
-  void ChangePayoffs(void);
+  void EditOutcomePayoffs(void);
       
   void action_label(void);
   void action_insert(void);
