@@ -32,7 +32,7 @@ int MAX_TH = 20;
 inline void DrawLine(wxDC &dc, double x_s, double y_s, double x_e, double y_e,
                      const wxColour &color, int thick = 0)
 {
-  dc.SetPen(*wxThePenList->FindOrCreatePen(color, (thick) ? 8 : 2, wxSOLID));
+  dc.SetPen(*wxThePenList->FindOrCreatePen(color, (thick) ? 4 : 2, wxSOLID));
   dc.DrawLine((int) x_s, (int) y_s, (int) x_e, (int) y_e);
 }
 
@@ -93,6 +93,22 @@ void DrawSmallSubgameIcon(wxDC &dc, const NodeEntry &entry)
   points[2].x = entry.x+SUBGAME_SMALL_ICON_SIZE;
   points[2].y = entry.y+SUBGAME_SMALL_ICON_SIZE/2;
   dc.DrawPolygon(3, points);
+}
+
+//-----------------------------------------------------------------------
+//                   class NodeEntry: Member functions
+//-----------------------------------------------------------------------
+
+NodeEntry::NodeEntry(void)
+  : m_selected(false), m_cursor(false), num(0), nums(0)
+{ }
+
+void NodeEntry::SetCursor(bool p_cursor)
+{
+  m_cursor = p_cursor;
+  if (m_cursor) {
+    m_selected = true;
+  }
 }
 
 //-----------------------------------------------------------------------
@@ -409,8 +425,6 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
     
   entry->infoset.y = -1;
   entry->infoset.x = -1;
-  entry->num = 0;
-  entry->nums = 0;
   entry->x = level * 
     (draw_settings.NodeLength() + draw_settings.BranchLength() +
      draw_settings.ForkLength());
@@ -885,14 +899,25 @@ void efgTreeLayout::RenderSubtree(wxDC &dc) const
     // Only draw the node line once for all children.
     if (child_entry.child_number == 1) {
       // draw the 'node' line
+#ifdef UNUSED
       bool hilight = 
 	(m_parent->HighlightInfoset()  && (entry.n->GetInfoset() == m_parent->HighlightInfoset())) ||
 	(m_parent->HighlightInfoset1() && (entry.n->GetInfoset() == m_parent->HighlightInfoset1()));
+#endif  // UNUSED
+      //      bool hilight = entry.IsSelected();
       ::DrawLine(dc, entry.x, entry.y,
 		 entry.x + m_parent->DrawSettings().NodeLength() + 
 		 entry.nums * INFOSET_SPACING, entry.y, 
-		 entry.color, hilight ? 1 : 0);
-      
+		 entry.color, (entry.IsSelected()) ? 1 : 0);
+      if (entry.IsSelected()) {
+	dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 2, wxSOLID)); 
+	dc.SetBrush(*wxTRANSPARENT_BRUSH);
+	dc.DrawRectangle(entry.x - 4, entry.y - 4, 9, 9);
+	dc.DrawRectangle(entry.x + m_parent->DrawSettings().NodeLength() +
+			 entry.nums * INFOSET_SPACING - 4,
+			 entry.y - 4, 9, 9);
+      }      
+
       // show the infoset lines, if required by draw settings
       ::DrawCircle(dc, entry.x + entry.num * INFOSET_SPACING, entry.y, 
 		   3, entry.color);
@@ -931,7 +956,16 @@ void efgTreeLayout::RenderSubtree(wxDC &dc) const
       ::DrawLine(dc, xe, ye, 
 		 xe + m_parent->DrawSettings().NodeLength() + 
 		 child_entry.nums * INFOSET_SPACING, 
-		 ye, wxGetApp().GetPreferences().GetTerminalColor());
+		 ye, wxGetApp().GetPreferences().GetTerminalColor(),
+		 child_entry.IsSelected() ? 1 : 0);
+      if (child_entry.IsSelected()) {
+	dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 2, wxSOLID)); 
+	dc.SetBrush(*wxTRANSPARENT_BRUSH);
+	dc.DrawRectangle(child_entry.x - 4, child_entry.y - 4, 9, 9);
+	dc.DrawRectangle(child_entry.x + m_parent->DrawSettings().NodeLength()+
+			 child_entry.nums * INFOSET_SPACING - 4,
+			 child_entry.y - 4, 9, 9);
+      }      
       
       // Collapsed subgame: subgame icon is drawn at this terminal node.
       if ((child_entry.n->GetSubgameRoot() == child_entry.n) && 

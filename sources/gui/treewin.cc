@@ -16,7 +16,6 @@
 #include "math/math.h"
 #include "efg.h"
 #include "treewin.h"
-#include "twflash.h"
 #include "efgshow.h"
 #include "treedrag.h"
 
@@ -62,7 +61,6 @@ TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
     hilight_infoset(0), hilight_infoset1(0), m_dragImage(0), m_dragSource(0),
     iset_drag(new IsetDragger(this, m_efg)),
     branch_drag(new BranchDragger(this, m_efg)),
-    flasher(new TreeNodeCursor(this)),
     m_zoom(1.0), m_cursor(m_efg.RootNode()), outcomes_changed(false)
 {
   // Make sure that Chance player has a name
@@ -82,70 +80,13 @@ TreeWindow::~TreeWindow()
 
 void TreeWindow::MakeMenus(void)
 {
-  m_editMenu = new wxMenu;
+  m_nodeMenu = new wxMenu;
 
-  wxMenu *nodeMenu  = new wxMenu;
-  nodeMenu->Append(efgmenuEDIT_NODE_ADD, "&Add Move", "Add a move");
-  nodeMenu->Append(efgmenuEDIT_NODE_DELETE, "&Delete Move", "Remove move at cursor");
-  nodeMenu->Append(efgmenuEDIT_NODE_INSERT, "&Insert Move", "Insert move at cursor");
-  nodeMenu->Append(efgmenuEDIT_NODE_LABEL,     "&Label",     "Label cursor node");
-  nodeMenu->AppendSeparator();
-  nodeMenu->Append(efgmenuEDIT_NODE_SET_MARK,  "Set &Mark",  "Mark cursor node");
-  nodeMenu->Append(efgmenuEDIT_NODE_GOTO_MARK, "Go&to Mark", "Goto marked node");
-
-  wxMenu *action_menu = new wxMenu;
-  action_menu->Append(efgmenuEDIT_ACTION_DELETE, "&Delete", "Delete an action from cursor information set");
-  action_menu->Append(efgmenuEDIT_ACTION_INSERT, "&Insert", "Insert an action in the cursor's information set");
-  action_menu->Append(efgmenuEDIT_ACTION_APPEND, "&Append", "Append an action to the cursor's information set");
-  action_menu->Append(efgmenuEDIT_ACTION_LABEL, "&Label", "Label the actions of the cursor's information set");
-  action_menu->Append(efgmenuEDIT_ACTION_PROBS, "&Probabilities", "Set chance probabilities for the cursor's information set");
-
-  wxMenu *infoset_menu = new wxMenu;
-  infoset_menu->Append(efgmenuEDIT_INFOSET_MERGE,  "&Merge",  "Merge cursor iset w/ marked");
-  infoset_menu->Append(efgmenuEDIT_INFOSET_BREAK,  "&Break",  "Make cursor a new iset");
-  infoset_menu->Append(efgmenuEDIT_INFOSET_SPLIT,  "&Split",  "Split iset at cursor");
-  infoset_menu->Append(efgmenuEDIT_INFOSET_JOIN,   "&Join",   "Join cursor to marked iset");
-  infoset_menu->Append(efgmenuEDIT_INFOSET_LABEL,  "&Label",  "Label cursor iset & actions");
-  infoset_menu->Append(efgmenuEDIT_INFOSET_PLAYER, "&Player", "Change player of cursor iset");
-  infoset_menu->Append(efgmenuEDIT_INFOSET_REVEAL, "&Reveal", "Reveal infoset to players");
-
-  wxMenu *outcome_menu = new wxMenu;
-  outcome_menu->Append(efgmenuEDIT_OUTCOMES_NEW, "&New",
-		       "Create a new outcome");
-  outcome_menu->Append(efgmenuEDIT_OUTCOMES_DELETE, "Dele&te",
-		       "Delete an outcome");
-  outcome_menu->Append(efgmenuEDIT_OUTCOMES_ATTACH, "&Attach",
-		       "Attach an outcome to the node at cursor");
-  outcome_menu->Append(efgmenuEDIT_OUTCOMES_DETACH, "&Detach",
-		       "Detach the outcome from the node at cursor");
-  outcome_menu->Append(efgmenuEDIT_OUTCOMES_LABEL, "&Label",
-		       "Label the outcome at the node at cursor");
-  outcome_menu->Append(efgmenuEDIT_OUTCOMES_PAYOFFS, "&Payoffs",
-		       "Set the payoffs for the outcome at the cursor");
-
-  wxMenu *tree_menu = new wxMenu;
-  tree_menu->Append(efgmenuEDIT_TREE_COPY, "&Copy",
-		    "Copy tree from marked node");
-  tree_menu->Append(efgmenuEDIT_TREE_MOVE, "&Move",
-		    "Move tree from marked node");
-  tree_menu->Append(efgmenuEDIT_TREE_DELETE, "&Delete",
-		    "Delete recursively from cursor");
-  tree_menu->Append(efgmenuEDIT_TREE_LABEL, "&Label",
-		    "Set the game label");
-  tree_menu->Append(efgmenuEDIT_TREE_PLAYERS, "&Players",
-		    "Edit/View players");
-  tree_menu->Append(efgmenuEDIT_TREE_INFOSETS, "&Infosets",
-		    "Edit/View infosets");
-
-  m_editMenu->Append(efgmenuEDIT_NODE, "&Node", nodeMenu, "Edit the node");
-  m_editMenu->Append(efgmenuEDIT_ACTIONS, "&Actions", action_menu, 
-		    "Edit actions");
-  m_editMenu->Append(efgmenuEDIT_INFOSET, "&Infoset", infoset_menu,
-		    "Edit infosets");
-  m_editMenu->Append(efgmenuEDIT_OUTCOMES, "&Outcomes", outcome_menu,
-		    "Edit outcomes and payoffs");
-  m_editMenu->Append(efgmenuEDIT_TREE, "&Tree", tree_menu,
-		    "Edit the tree");
+  m_nodeMenu->Append(efgmenuEDIT_NODE_ADD, "Add Move", "Add a move");
+  m_nodeMenu->Append(efgmenuEDIT_NODE_INSERT, "Insert Move", 
+		     "Insert a move before this node");
+  m_nodeMenu->AppendSeparator();
+  m_nodeMenu->Append(efgmenuEDIT_NODE_LABEL, "Label Node", "Label this node");
 }
 
 //---------------------------------------------------------------------
@@ -314,7 +255,7 @@ void TreeWindow::OnDraw(wxDC &dc)
   dc.BeginDrawing();
   dc.Clear();
   m_layout.Render(dc);
-  flasher->Flash(dc);
+  //  flasher->Flash(dc);
   dc.EndDrawing();
 }
 
@@ -375,6 +316,7 @@ void TreeWindow::ProcessCursor(void)
     
   UpdateCursor();
   EnsureCursorVisible();
+  Refresh();
   m_parent->OnSelectedMoved(Cursor());
 }
 
@@ -386,6 +328,10 @@ void TreeWindow::UpdateCursor(void)
     return;
   }
 
+  entry->SetCursor(true);
+  //  Refresh();
+
+#ifdef UNUSED
   if (entry->n->GetSubgameRoot() == entry->n && !entry->expanded) {
     flasher->SetFlashNode(entry->x + DrawSettings().NodeLength() +
 			  entry->nums*INFOSET_SPACING - SUBGAME_LARGE_ICON_SIZE,
@@ -405,6 +351,7 @@ void TreeWindow::UpdateCursor(void)
   PrepareDC(dc);
   dc.SetUserScale(m_zoom, m_zoom);
   flasher->Flash(dc);
+#endif  // UNUSED
 }
 
 gText TreeWindow::OutcomeAsString(const Node *n, bool &/*hilight*/) const
@@ -641,21 +588,19 @@ void TreeWindow::OnLeftDoubleClick(wxMouseEvent &p_event)
 
 void TreeWindow::OnRightClick(wxMouseEvent &p_event)
 {
-// QUERY: Is this constant needed anymore?  It isn't used elsewhere.
-  const int PIXELS_PER_SCROLL = 20;
-
   int x, y;
   CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
   x = (int) ((float) x / m_zoom);
   y = (int) ((float) y / m_zoom);
 
-  int x_start, y_start;
-  ViewStart(&x_start, &y_start);
   wxClientDC dc(this);
   PrepareDC(dc);
   dc.SetUserScale(m_zoom, m_zoom);
-  PopupMenu(m_editMenu, dc.LogicalToDeviceX(x-x_start*PIXELS_PER_SCROLL),
-	    dc.LogicalToDeviceY(y-y_start*PIXELS_PER_SCROLL));
+
+  Node *node = m_layout.NodeHitTest(x, y);
+  if (node) {
+    PopupMenu(m_nodeMenu, p_event.GetX(), p_event.GetY());
+  }
 }
 
 bool TreeWindow::ProcessShift(wxMouseEvent &ev)
@@ -831,66 +776,18 @@ Node *TreeWindow::GotObject(long &x, long &y, int what)
 
 void TreeWindow::SetCursorPosition(Node *p_cursor)
 {
+  if (m_cursor) {
+    m_layout.GetNodeEntry(m_cursor)->SetCursor(false);
+    m_layout.GetNodeEntry(m_cursor)->SetSelected(false);
+  }
   m_cursor = p_cursor;
   m_parent->UpdateMenus();
 }
 
 void TreeWindow::UpdateMenus(void)
 {
-  m_editMenu->Enable(efgmenuEDIT_NODE_ADD,
+  m_nodeMenu->Enable(efgmenuEDIT_NODE_ADD,
 		     (m_efg.NumChildren(m_cursor) > 0) ? false : true);
-  m_editMenu->Enable(efgmenuEDIT_NODE_DELETE,
-		     (m_efg.NumChildren(m_cursor) > 0) ? true : false);
-  m_editMenu->Enable(efgmenuEDIT_INFOSET_MERGE,
-		     (mark_node && mark_node->GetInfoset() &&
-		      m_cursor->GetInfoset() &&
-		      mark_node->GetSubgameRoot() == m_cursor->GetSubgameRoot() &&
-		     mark_node->GetPlayer() == m_cursor->GetPlayer()) ? true : false);
-  m_editMenu->Enable(efgmenuEDIT_INFOSET_BREAK,
-		     (m_cursor->GetInfoset()) ? true : false);
-  m_editMenu->Enable(efgmenuEDIT_INFOSET_SPLIT,
-		     (m_cursor->GetInfoset()) ? true : false);
-  m_editMenu->Enable(efgmenuEDIT_INFOSET_JOIN,
-		     (mark_node && mark_node->GetInfoset() &&
-		      m_cursor->GetInfoset() &&
-		      mark_node->GetSubgameRoot() == m_cursor->GetSubgameRoot()) ? true : false);
-  m_editMenu->Enable(efgmenuEDIT_INFOSET_LABEL,
-		    (m_cursor->GetInfoset()) ? true : false);
-  m_editMenu->Enable(efgmenuEDIT_INFOSET_PLAYER,
-		    (m_cursor->GetInfoset()) ? true : false);
-  m_editMenu->Enable(efgmenuEDIT_INFOSET_REVEAL,
-		    (m_cursor->GetInfoset()) ? true : false);
-
-  m_editMenu->Enable(efgmenuEDIT_ACTION_LABEL,
-		    (m_cursor->GetInfoset() &&
-		     m_cursor->GetInfoset()->NumActions() > 0) ? true : false);
-  m_editMenu->Enable(efgmenuEDIT_ACTION_INSERT,
-		    (m_efg.NumChildren(m_cursor) > 0) ? true : false);
-  m_editMenu->Enable(efgmenuEDIT_ACTION_APPEND,
-		    (m_efg.NumChildren(m_cursor) > 0) ? true : false);
-  m_editMenu->Enable(efgmenuEDIT_ACTION_DELETE,
-		    (m_efg.NumChildren(m_cursor) > 0) ? true : false);
-  m_editMenu->Enable(efgmenuEDIT_ACTION_PROBS,
-		    (m_cursor->GetInfoset() &&
-		     m_cursor->GetPlayer()->IsChance()) ? true : false);
-
-  m_editMenu->Enable(efgmenuEDIT_TREE_DELETE,
-		    (m_efg.NumChildren(m_cursor) > 0) ? true : false);
-  m_editMenu->Enable(efgmenuEDIT_TREE_COPY,
-		    (mark_node &&
-		     m_cursor->GetSubgameRoot() == mark_node->GetSubgameRoot()) ? true : false);
-  m_editMenu->Enable(efgmenuEDIT_TREE_MOVE,
-		    (mark_node &&
-		     m_cursor->GetSubgameRoot() == mark_node->GetSubgameRoot()) ? true : false);
-
-  m_editMenu->Enable(efgmenuEDIT_OUTCOMES_ATTACH,
-		    (m_efg.NumOutcomes() > 0) ? true : false);
-  m_editMenu->Enable(efgmenuEDIT_OUTCOMES_DETACH,
-		    (!m_efg.GetOutcome(Cursor()).IsNull()) ? true : false);
-  m_editMenu->Enable(efgmenuEDIT_OUTCOMES_LABEL,
-		    (!m_efg.GetOutcome(Cursor()).IsNull()) ? true : false);
-  m_editMenu->Enable(efgmenuEDIT_OUTCOMES_DELETE,
-		    (m_efg.NumOutcomes() > 0) ? true : false);
 }
 
 //-----------------------------------------------------------------------

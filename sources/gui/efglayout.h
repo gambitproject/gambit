@@ -1,7 +1,7 @@
 //
 // FILE: efglayout.h -- Declaration of extensive form layout
 //
-// $id$
+// $Id$
 //
 
 #ifndef EFGLAYOUT_H
@@ -15,6 +15,10 @@
 #include "efg.h"
 
 class NodeEntry {
+private:
+  bool m_selected;    // true if node is selected
+  bool m_cursor;      // true if node is 'cursor'
+
 public:
   int x, y, level;
   wxColour color;
@@ -28,14 +32,14 @@ public:
   Node *n;
   NodeEntry *parent;
   bool expanded;      // Is this subgame root expanded or collapsed?
-    
-  NodeEntry(void) { }
-  NodeEntry(const NodeEntry &e)
-    : x(e.x), y(e.y), level(e.level), color(e.color),
-      infoset(e.infoset),num(e.num),
-      nums(e.nums),has_children(e.has_children),
-      child_number(e.child_number),in_sup(e.in_sup),
-      n(e.n),expanded(e.expanded) { }
+
+  NodeEntry(void);
+
+  bool IsCursor(void) const { return m_cursor; }
+  bool IsSelected(void) const { return m_selected; }
+
+  void SetCursor(bool p_cursor);
+  void SetSelected(bool p_selected) { m_selected = p_selected; }
 };
 
 class SubgameEntry {

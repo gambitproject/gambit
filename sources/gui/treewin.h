@@ -10,7 +10,6 @@
 #include "wx/dragimag.h"
 
 #include "efglayout.h"
-#include "twflash.h"
 #include "guishare/wxmisc.h"
 
 class EfgShow;
@@ -27,7 +26,9 @@ private:
 
   Infoset *hilight_infoset;       // Hilight infoset from the solution disp
   Infoset *hilight_infoset1;      // Hilight infoset by pressing control
-  wxMenu *m_editMenu;           // a popup menu, equivalent to top level edit
+
+  // Context-sensitive popup menus, displayed on right-click
+  wxMenu *m_nodeMenu;
 
   wxDragImage *m_dragImage;
   Node *m_dragSource;
@@ -38,8 +39,6 @@ private:
 
   class BranchDragger;            // Class to take care of branch addition by
   BranchDragger *branch_drag;     // drag and dropping
-
-  TreeNodeCursor *flasher;                // Used to flash/display the cursor
 
   float m_zoom;
 
