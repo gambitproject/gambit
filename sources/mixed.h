@@ -41,10 +41,22 @@ template <class T> class MixedProfile
   : public BaseMixedProfile, public gPVector<T>  {
 
   private:
-    const Nfg<T> *Nf;
-    const T &Payoff(int pl, const StrategyProfile &p) const;
 
+    const Nfg<T> *Nf;
+    
+    // Private Payoff functions
+
+    T PPayoff(int pl, int index, int i) const;
+    void PPayoff(int pl, int const_pl, int const_st, int cur_pl, long index,
+		 T prob, T&value) const;
+    void PPayoff(int pl, int const_pl1, int const_st1, int const_pl2, 
+		int const_st2, int cur_pl, long index, T prob, T &value) const;
+    void PPayoff(int pl, int const_pl, int cur_pl, long index, T prob,
+		gVector<T> &value) const;
+    
   public:
+    
+
     MixedProfile(const Nfg<T> &, bool truncated = false);
     MixedProfile(const Nfg<T> &, const NFSupport &);
     MixedProfile(const Nfg<T> &, const gPVector<T> &);
@@ -63,14 +75,7 @@ template <class T> class MixedProfile
     T Payoff(int pl, int player1, int strat1) const;
     T Payoff(int pl, int player1, int strat1, int player2, int strat2) const;
     void Payoff(int pl, int const_pl, gVector<T> &payoff) const;
-    T Payoff(int pl, StrategyProfile &p, const gArray<int> &Player, 
-	     int i) const;
-    void Payoff(int pl, int const_pl, int const_st, int cur_pl, long index,
-		T prob, T&value) const;
-    void Payoff(int pl, int const_pl1, int const_st1, int const_pl2, 
-		int const_st2, int cur_pl, long index, T prob, T &value) const;
-    void Payoff(int pl, int const_pl, int cur_pl, long index, T prob,
-		gVector<T> &value) const;
+
     
 };
 
