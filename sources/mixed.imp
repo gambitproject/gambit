@@ -128,7 +128,8 @@ template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF,
 
 template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF,
 						 NFSupport &s)
-: BaseMixedProfile(NF, false, s), Nf(&NF), gPVector<T>(NF.dimensions)
+: BaseMixedProfile(s.BelongsTo(), false, s), Nf(&NF), 
+	gPVector<T>(s.SupportDimensions())
 {
   Centroid();
 }
@@ -158,7 +159,7 @@ template <class T> void MixedProfile<T>::Centroid()
   gVector<T>::operator=(gPVector<T>(N->Dimensionality()));
   T center;
   
-  for (int i = 1; i <= Nf->NumPlayers(); i++)  {
+  for (int i = 1; i <= N->NumPlayers(); i++)  {
     center = ((T) 1) / ((T) stratset.GetStrategy(i).Length());
     for (int j = 1; j <= stratset.GetStrategy(i).Length(); j++)
       svptr[i][j] = center;
@@ -281,7 +282,7 @@ void MixedProfile<T>::Payoff(int pl, int const_pl1, int const_st1,
   if (cur_pl == const_pl1 || cur_pl == const_pl2)
     Payoff(pl, const_pl1, const_st1, const_pl2, const_st2,
 	   cur_pl + 1, index,prob, value);
-  else if (cur_pl > Nf->NumPlayers())
+  else if (cur_pl > N->NumPlayers())
     value += prob * (Nf->payoffs[pl][index]);
   else   {
     for (int j = 1; j <= stratset.GetStrategy(cur_pl).Length(); j++ ) {

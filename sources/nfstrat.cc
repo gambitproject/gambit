@@ -193,7 +193,7 @@ NFPlayer &NFStrategySet::GetPlayer(void) const
 // NFSupport: Ctors, Dtor, Operators
 //-----------------------------------------------
 
-NFSupport::NFSupport( const BaseNfg &N) : sups(N.NumPlayers())
+NFSupport::NFSupport (const BaseNfg &N) : sups(N.NumPlayers())
 { 
   bnfg = &N;
   for (int i = 1; i <= sups.Length(); i++)
@@ -252,11 +252,19 @@ const gArray<Strategy *> &NFSupport::GetStrategy(int pl) const
   return (sups[pl]->GetNFStrategySet());
 }
 
-const BaseNfg *NFSupport::BelongsTo(void) const
+const BaseNfg &NFSupport::BelongsTo(void) const
 {
-  return bnfg;
+  return (*bnfg);
 }
 
+const gArray<int> NFSupport::SupportDimensions (void)
+{
+  gArray<int> a(sups.Length());
+
+  for ( int i = 1 ; i <= a.Length(); i++)
+    a[i] = sups[i]->NumStrats();
+  return a;
+}
 
 
 

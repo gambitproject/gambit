@@ -145,7 +145,8 @@ public:
 
   Strategy *GetStrategy(int pl, int num) const;
   const gArray<Strategy *> &GetStrategy(int pl) const;
-  const BaseNfg *BelongsTo(void) const;
+  const BaseNfg &BelongsTo(void) const;
+  const gArray<int> SupportDimensions ( void );
 };
 
 
