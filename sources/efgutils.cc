@@ -184,6 +184,12 @@ bool IsPerfectRecall(const BaseEfg &efg, Infoset *&s1, Infoset *&s2)
 	    }
 	  }
 	  
+	  if (i == j && precedes)  {
+	    s1 = iset1;
+	    s2 = iset2;
+	    return false;
+	  }
+
 	  if (n > iset1->NumMembers() && precedes)  {
 	    s1 = iset1;
 	    s2 = iset2;
