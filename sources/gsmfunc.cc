@@ -452,6 +452,29 @@ FuncDescObj::FuncDescObj(const gString& func_name, int numfuncs)
 }
 
 
+  // Assumes one argument, which has a prototype func_proto
+FuncDescObj::FuncDescObj(const gString& func_proto)
+{
+  _NumFuncs = 1;
+  _FuncInfo = new FuncInfoType[1];
+  
+  char ch = ' ';
+  int index = 0;
+  gString func_name;
+
+  ch = func_proto[index++];
+  while (isalpha(ch))
+  {
+    func_name += ch;
+    ch=func_proto[index++];
+  }
+
+  _FuncName = func_name;
+
+  SetFuncInfo(0,func_proto);
+}
+
+
 FuncDescObj::~FuncDescObj()
 {
   int index;
@@ -518,11 +541,23 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   gList<gString> specList;
   gList<gString> nameList;
   gList<int>     listList;
+  gList<Portion*>     reqList;
   
     // Move ch to the first variable name (most likely x)
   while (ch != '[' && index<=length)  
     ch=s[index++];
   ch=s[index++];
+
+  if (ch == '{')
+  {
+    int* silly = new int;
+    reqList.Append( (Portion *)silly);
+    ch=s[index++];
+  }
+  else
+  {
+    reqList.Append( REQUIRED );
+  }
 
   gString name = ch;
   ch=s[index++];
