@@ -1,0 +1,115 @@
+
+
+#include "behavsol.h"
+
+
+template <class T> 
+BehavSolution<T>::BehavSolution(const Efg<T>& e, bool truncated)
+: BehavProfile<T>(e, truncated),
+  _Creator(id_USER),
+  _IsNash(T_DONTKNOW),
+  _IsSubgamePerfect(T_DONTKNOW),
+  _IsSequential(T_DONTKNOW),
+  _GobitLambda(0),
+  _GobitValue(0),
+  _LiapValue(0),
+  _Beliefs(0)
+{}
+
+template <class T> 
+BehavSolution<T>::BehavSolution(const Efg<T>& e, const gDPVector<T>& v)
+: BehavProfile<T>(e, v),
+  _Creator(id_USER),
+  _IsNash(T_DONTKNOW),
+  _IsSubgamePerfect(T_DONTKNOW),
+  _IsSequential(T_DONTKNOW),
+  _GobitLambda(0),
+  _GobitValue(0),
+  _LiapValue(0),
+  _Beliefs(0)
+{}
+
+template <class T> 
+BehavSolution<T>::BehavSolution(const EFSupport& s)
+: BehavProfile<T>(s),
+  _Creator(id_USER),
+  _IsNash(T_DONTKNOW),
+  _IsSubgamePerfect(T_DONTKNOW),
+  _IsSequential(T_DONTKNOW),
+  _GobitLambda(0),
+  _GobitValue(0),
+  _LiapValue(0),
+  _Beliefs(0)
+{}
+
+template <class T> 
+BehavSolution<T>::BehavSolution(const BehavProfile<T>& b)
+: BehavProfile<T>(b),
+  _Creator(id_USER),
+  _IsNash(T_DONTKNOW),
+  _IsSubgamePerfect(T_DONTKNOW),
+  _IsSequential(T_DONTKNOW),
+  _GobitLambda(0),
+  _GobitValue(0),
+  _LiapValue(0),
+  _Beliefs(0)
+{}
+
+
+template <class T> BehavSolution<T>::BehavSolution(const BehavSolution<T>& b)
+: BehavProfile<T>(b),
+  _Creator(b._Creator),
+  _IsNash(b._IsNash),
+  _IsSubgamePerfect(b._IsSubgamePerfect),
+  _IsSequential(b._IsSequential),
+  _GobitLambda(b._GobitLambda),
+  _GobitValue(b._GobitValue),
+  _LiapValue(b._LiapValue),
+  _Beliefs(b._Beliefs)
+{}
+
+template <class T> BehavSolution<T>::~BehavSolution() {}
+
+template <class T> int BehavSolution<T>::Creator() const
+{ return _Creator; }
+
+template <class T> int BehavSolution<T>::IsNash() const
+{ return _IsNash; }
+
+template <class T> int BehavSolution<T>::IsSubgamePerfect() const
+{ return _IsSubgamePerfect; }
+
+template <class T> int BehavSolution<T>::IsSequential() const
+{ return _IsSequential; }
+
+template <class T> EFSupport BehavSolution<T>::Support() const
+{ return behavsupport; }
+
+template <class T> T BehavSolution<T>::GobitLambda() const
+{ return _GobitLambda; }
+
+template <class T> T BehavSolution<T>::GobitValue() const
+{ return _GobitValue; }
+
+template <class T> T BehavSolution<T>::LiapValue() const
+{ return _LiapValue; }
+
+template <class T> gVector<T> BehavSolution<T>::Beliefs()
+{ return _Beliefs; }
+
+
+template <class T> 
+bool BehavSolution<T>::operator==(const BehavSolution<T> & s) const
+{
+  return BehavProfile<T>::operator==(s);
+}
+
+template <class T> gOutput &operator<<(gOutput &f, const BehavSolution<T> &s)
+{ 
+  s.Dump(f);  
+  // f << " Creator: " << s.Creator();
+  // f << " IsNash: " << s.IsNash();
+  // f << " IsSubgamePerfect: " << s.IsSubgamePerfect();
+  // f << " IsSequential: " << s.IsSequantial();
+  return f;
+}
