@@ -69,6 +69,7 @@ typedef enum {
   efgmenuSUBGAME_EXPAND = 1360,
   efgmenuSUBGAME_EXPANDBRANCH = 1361,
   efgmenuSUBGAME_EXPANDALL = 1362,
+  efgmenuSUBGAME_VIEW = 1363,
 
   efgmenuSUPPORT_UNDOMINATED = 1800,
   efgmenuSUPPORT_NEW = 1801,

@@ -50,6 +50,7 @@
 #include "dlactionprobs.h"
 #include "dlefgplayers.h"
 #include "dlinfosets.h"
+#include "dlsubgames.h"
 
 #include "dllayout.h"
 #include "dllegends.h"
@@ -116,6 +117,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuSUBGAME_EXPANDALL, EfgShow::OnSubgamesExpandAll)
   EVT_MENU(efgmenuSUBGAME_EXPANDBRANCH, EfgShow::OnSubgamesExpandBranch)
   EVT_MENU(efgmenuSUBGAME_EXPAND, EfgShow::OnSubgamesExpand)
+  EVT_MENU(efgmenuSUBGAME_VIEW, EfgShow::OnSubgamesView)
   EVT_MENU(efgmenuSUPPORT_UNDOMINATED, EfgShow::OnSupportUndominated)
   EVT_MENU(efgmenuSUPPORT_NEW, EfgShow::OnSupportNew)
   EVT_MENU(efgmenuSUPPORT_EDIT, EfgShow::OnSupportEdit)
@@ -591,6 +593,9 @@ void EfgShow::MakeMenus(void)
 		       "Expand entire branch");
   subgame_menu->Append(efgmenuSUBGAME_EXPANDALL, "&Expand All",
 		       "Expand all subgames");
+  subgame_menu->AppendSeparator();
+  subgame_menu->Append(efgmenuSUBGAME_VIEW, "&View",
+		       "View all subgames");
   
   wxMenu *supports_menu = new wxMenu;
   supports_menu->Append(efgmenuSUPPORT_UNDOMINATED, "&Undominated",
@@ -1485,6 +1490,12 @@ void EfgShow::OnSubgamesExpandBranch(wxCommandEvent &)
 {
   m_treeWindow->SubgameExpandBranch();
   m_treeWindow->Refresh();
+}
+
+void EfgShow::OnSubgamesView(wxCommandEvent &)
+{
+  dialogSubgames dialog(this, m_efg);
+  dialog.ShowModal();
 }
 
 void EfgShow::OnSupportNew(wxCommandEvent &)

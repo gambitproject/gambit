@@ -28,6 +28,7 @@
 #include "dlefgsave.h"
 #include "dlefgplayers.h"
 #include "dlinfosets.h"
+#include "dlsubgames.h"
 
 //=========================================================================
 //                  dialogEfgSelectPlayer: Member functions
@@ -1102,4 +1103,42 @@ gText dialogEfgSave::Filename(void) const
 
 gText dialogEfgSave::Label(void) const
 { return m_treeLabel->GetValue().c_str(); }
+
+
+//=====================================================================
+//                  dialogSubgames: Member functions
+//=====================================================================
+
+dialogSubgames::dialogSubgames(wxWindow *p_parent, FullEfg &p_efg)
+  : guiAutoDialog(p_parent, "Subgames"),
+    m_efg(p_efg)
+{
+  m_subgameList = new wxListCtrl(this, -1, wxDefaultPosition,
+				 wxSize(200, 300),
+				 wxLC_REPORT | wxLC_SINGLE_SEL);
+  m_subgameList->InsertColumn(0, "Subgame Root");
+  m_subgameList->InsertColumn(1, "Marked");
+
+  gList<Node *> subgameRoots;
+  LegalSubgameRoots(p_efg, subgameRoots);
+
+  for (int i = 1; i <= subgameRoots.Length(); i++) {
+    m_subgameList->InsertItem(i - 1, (char *) subgameRoots[i]->GetName());
+    if (subgameRoots[i]->GetSubgameRoot() == subgameRoots[i]) {
+      m_subgameList->SetItem(i - 1, 1, "True");
+    }
+    else {
+      m_subgameList->SetItem(i - 1, 1, "False");
+    }
+  }
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(m_subgameList, 1, wxCENTRE | wxALL, 5);
+  topSizer->Add(m_buttonSizer, 0, wxALL, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+}
 

@@ -119,6 +119,7 @@ private:
   void OnSubgamesExpandAll(wxCommandEvent &);
   void OnSubgamesExpandBranch(wxCommandEvent &);
   void OnSubgamesExpand(wxCommandEvent &);
+  void OnSubgamesView(wxCommandEvent &);
 
   void OnSupportUndominated(wxCommandEvent &);
   void OnSupportNew(wxCommandEvent &);
