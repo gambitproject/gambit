@@ -69,7 +69,8 @@ gInput &gFileInput::operator>>(long &x)
 gInput &gFileInput::operator>>(char &x)
 {
   assert(f);
-  int c=fscanf(f, "%c", &x);valid=(c==1) ? 1 : 0;
+//  int c=fscanf(f, "%c", &x);valid=(c==1) ? 1 : 0;
+  x = fgetc(f);
   return *this;
 }
 
