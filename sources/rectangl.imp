@@ -127,7 +127,8 @@ const gRectangle<T> gRectangle<T>::CubeContainingCrcmscrbngSphere() const
 { 
   T maxlength((T)0);
   T sumsquares((T)0);
-  for (int i = 1; i <= Dmnsn(); i++) {
+  int i;
+  for (i = 1; i <= Dmnsn(); i++) {
     sumsquares += sides[i].Length() * sides[i].Length();
     if (sides[i].Length() > maxlength)
       maxlength = sides[i].Length();
