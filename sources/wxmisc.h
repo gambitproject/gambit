@@ -13,7 +13,7 @@
 #endif
 #include <stdio.h>
 #include "wx_timer.h"
-#include "wx_form.h"
+
 class MyForm: public wxForm
 {
 private:
