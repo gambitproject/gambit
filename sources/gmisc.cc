@@ -461,6 +461,15 @@ const char *gException::File(void) const
   return file;
 }
 
+gText gException::ErrorMessage(void) const
+{
+  char buf[512];
+
+  sprintf(buf, "\nGCL Exception;  Line:%4d  File: %s : ",Line(), File()); 
+  gText text(buf);
+  return buf+Description();
+}
+
 #endif   // USE_EXCEPTIONS
 
 

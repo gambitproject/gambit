@@ -97,43 +97,45 @@ double pow(double,long);
 //
 
 class index_pair {
- private:
+private:
   const int first;
   const int second;
-
- public:
+  
+public:
   index_pair(const int&, const int&);
   ~index_pair();
-
+  
   bool operator == (const index_pair&) const;
   bool operator != (const index_pair&) const;
   int operator [] (const int&) const; 
 
-friend gOutput& operator << (gOutput& output, const index_pair& x);  
+  friend gOutput& operator << (gOutput& output, const index_pair& x);  
 };
 
 #ifdef USE_EXCEPTIONS
 class gException   {
-  private:
-    int line;
-    char file[20];
-
-  public:
-    gException(void);
-    gException(int l, char *f);
-    virtual ~gException();
-
-    virtual gText Description(void) const = 0;
-    int Line(void) const;
-    const char *File(void) const;
+private:
+  int line;
+  char file[20];
+  
+public:
+  gException(void);
+  gException(int l, char *f);
+  virtual ~gException();
+  
+  virtual gText Description(void) const = 0;
+  int Line(void) const;
+  const char *File(void) const;
+  gText ErrorMessage(void) const;
 };
 
 class gNewFailed : public gException   {
-  public:
-    virtual ~gNewFailed()   { }
-    gText Description(void) const;
+public:
+  virtual ~gNewFailed()   { }
+  gText Description(void) const;
 }; 
 
 #endif   // USE_EXCEPTIONS
 
 #endif    // GMISC_H
+
