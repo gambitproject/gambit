@@ -32,6 +32,8 @@ gString NameNfgAlgType(NfgAlgType i)
     return "PureNash"; 
   case NfgAlg_SEQFORM: // LcpSolve
     return "LCP(Seq)"; 
+  case NfgAlg_POLENUM: // PolEnumSolve
+    return "PolEnum"; 
   default:
     return "ERROR" ;
   }

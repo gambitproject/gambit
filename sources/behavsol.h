@@ -30,7 +30,8 @@ typedef enum
   EfgAlg_ELIAPSUB,
   EfgAlg_ENUMSUB,
   EfgAlg_CSSEQFORM,
-  EfgAlg_POLENSUB
+  EfgAlg_POLENSUB,
+  EfgAlg_POLENUM,
 } EfgAlgType;
 
 gString NameEfgAlgType(EfgAlgType i);

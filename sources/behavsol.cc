@@ -34,10 +34,14 @@ gString NameEfgAlgType(EfgAlgType i)
     return "EFLiap*"; 
   case EfgAlg_NLIAPSUB:
     return "NFLiap*"; 
-  case EfgAlg_ENUMSUB:
+  case EfgAlg_ENUMSUB: // EnumSolve
     return "Enum*"; 
   case EfgAlg_CSSEQFORM:
     return "CSSeqForm";
+  case EfgAlg_POLENSUB:  // PolEnumSolve
+    return "PolEnum*"; 
+  case EfgAlg_POLENUM:  // PolEnumSolve
+    return "PolEnum"; 
   default:
     return "ERROR" ;
   }
