@@ -22,7 +22,7 @@
 #include "gfunct.h"
 #include "liap.h"
 
-LiapParams::LiapParams(void) : nequilib(1), plev(2)
+LiapParams::LiapParams(void) : nequilib(1), plev(0),tolDFP(1.0e-10)
 { }
 
 class BaseLiap {
@@ -42,18 +42,19 @@ private:
 public:
   LiapModule(const NormalForm<T> &N,gOutput &ofile,gOutput &efile,
 	     const LiapParams &params) 
-    :  SolutionModule(ofile,efile,plev),rep(N),
+    :  SolutionModule(ofile,efile,params.plev),rep(N),
   p(rep.Dimensionality()), params(params),
   gBC2FunctMin<T>(N.ProfileLength()){ SetPlev(params.plev);}
-  int Liap(int) ;
   virtual ~LiapModule() {}
 
   T Value(const gVector<T> &x);
-  int Deriv(const gVector<T> &p, gVector<T> &d) {return 1;};
+  int Deriv(const gVector<T> &p, gVector<T> &d);
   int Hess(const gVector<T> &p, gMatrix<T> &d) {return 1;}
-  T LiapDerivValue(int i1,int j1,const gPVector<T> &p) const;
-  T LiapValue(const gPVector<T> &p) const;
+  int Liap(int) ;
+
   int Liap(gPVector<T> &p);
+  T LiapDerivValue(int i1,int j1,const gPVector<T> &p) const;
+//  T LiapValue(const gPVector<T> &p) const;
   int Nevals(void) {return nevals;}
   int Nits(void) {return nits;}
 };
@@ -65,7 +66,7 @@ template <class T> int LiapModule<T>::Liap(int number)
   int n=0;
   T tmp,sum;
 //  gPVector<T> p(rep.Centroid());
-  gPVector<T> p(rep.Dimensionality());
+//  gPVector<T> p(rep.Dimensionality());
   for(int i=1;i<=rep.NumPlayers();i++)
     for(int j= 1;j<= rep.NumStrats(i);j++)
       p(i,j)=((T)(1)/(T)(rep.NumStrats(i)));
@@ -76,7 +77,7 @@ template <class T> int LiapModule<T>::Liap(int number)
   int it = 0;
   while(n<number && it < MAXIT) {
     it++;
-    for(int i=1;i<rep.NumPlayers();i++) {
+    for(int i=1;i<=rep.NumPlayers();i++) {
       sum = (T)(0);
       for(int j=1;j<rep.NumStrats(i);j++) {
 	tmp=(T)(2);
@@ -94,30 +95,24 @@ template <class T> int LiapModule<T>::Liap(int number)
 template <class T> int LiapModule<T>::Liap(gPVector<T> &p)
 {
   if(plev>=3) gout << "\np= " << p;
-  T val; 
-  val = MinPowell(p);
+  T val = (T)0;
+  int iter=0;
+  DFP(p,(T)(params.tolDFP),iter,val);
+//  val = MinPowell(p);
   gout << "\np= " << p << " f = " << val;
   if(val < (T) ( (T)(1) / (T)(100000) ) ) return 1;
   return 0;
 };
 
-template <class T>  
-T LiapModule<T>::Value(const gVector<T> &x)
-{
-  assert(x.Length()==rep.ProfileLength());
-
-  gPVector<T> m(rep.Dimensionality());
-  m = x;
-  return LiapValue(m);
-  
-};
-
 #define BIG1 ((T) 100)
 #define BIG2 ((T) 100)
 
-template <class T>  
-T LiapModule<T>::LiapValue(const gPVector<T> &p) const
+template <class T> inline 
+T LiapModule<T>::Value(const gVector<T> &x)
 {
+  assert(x.Length()==p.Length());
+
+  p=x;
   int i,j,num;
   gPVector<T> tmp(p);
   gPVector<T> payoff(p);
@@ -151,7 +146,63 @@ T LiapModule<T>::LiapValue(const gPVector<T> &p) const
     result += BIG2*x*x ;          // add penalty for sum not equal to 1
   }
   return result;
-}
+
+//  return LiapValue(m);
+  
+};
+
+template <class T> inline int LiapModule<T>::
+Deriv(const gVector<T> &v, gVector<T> &d)
+{
+  p=v;
+  int i1,j1,ii;
+  T avg;
+  
+  for(i1=1,ii=1;i1<=rep.NumPlayers();i1++) {
+    avg=(T)0;
+    for(j1=1;j1<=rep.NumStrats(i1);j1++) {
+      d[ii]=LiapDerivValue(i1,j1,p);
+      avg+=d[ii];
+      ii++;
+    }
+    avg/=(T)rep.NumStrats(i1);
+    ii-=rep.NumStrats(i1);
+    for(j1=1;j1<=rep.NumStrats(i1);j1++) {
+      d[ii]-=avg;
+      ii++;
+    }
+  }
+};
+
+template <class T> T LiapModule<T>::
+LiapDerivValue(int i1, int j1, const gPVector<T> &p) const
+{
+  int i, j;
+  T x, x1,psum;
+  
+  x=(T)0;
+  for(i=1;i<=rep.NumPlayers();i++) {
+    psum=(T)0.0;
+    for(j=1;j<=rep.NumStrats(i);j++) {
+      psum+=p(i,j);
+      x1=rep.Payoff(i,i,j,p)-rep.Payoff(i,p);
+      if(i1==i) {
+	if(x1>0)x-=x1*(rep.Payoff(i,i1,j1,p));
+      }
+      else {
+	if(x1>0)x+=x1*(rep.Payoff(i,i,j,i1,j1,p)-rep.Payoff(i,i1,j1,p));
+      }
+    }
+    if(i==i1)x+=psum-(T)1.0;
+  }
+  if(p(i1,j1)<(T)0.0)x+=p(i1,j1);
+  return (T)2.0*x;
+};
+
+//template <class T>  
+//T LiapModule<T>::LiapValue(const gPVector<T> &p) const
+//{
+//}
 
 int LiapSolver::Liap(void)
 //int LiapModule::Liap(int number, int plev, gOutput &out, gOutput &err,
@@ -160,7 +211,7 @@ int LiapSolver::Liap(void)
   BaseLiap *T;
   gOutput *outfile = &gout, *errfile = &gerr;
 
-  gout << "\nLiapSolver::Liap() Loc 1";
+//  gout << "\nLiapSolver::Liap() Loc 1";
   if (params.outfile != "")
     outfile = new gFileOutput((char *) params.outfile);
   if (params.errfile != "" && params.errfile != params.outfile)
@@ -168,7 +219,7 @@ int LiapSolver::Liap(void)
   if (params.errfile != "" && params.errfile == params.outfile)
     errfile = outfile;
 
-  gout << "\nLiapSolver::Liap() Loc 2";
+//  gout << "\nLiapSolver::Liap() Loc 2";
   switch (nf.Type())   {
     case DOUBLE:   
       T = new LiapModule<double>((NormalForm<double> &) nf, 
@@ -180,10 +231,10 @@ int LiapSolver::Liap(void)
       break; 
 */
   }
-  gout << "\nLiapSolver::Liap() Loc 3";
+//  gout << "\nLiapSolver::Liap() Loc 3";
 
   T->Liap(params.nequilib);
-  gout << "\nLiapSolver::Liap() Loc 4";
+//  gout << "\nLiapSolver::Liap() Loc 4";
   nits=T->Nits();
   nevals= T->Nevals();
 
