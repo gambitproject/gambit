@@ -27,6 +27,12 @@
 #ifndef OUTCOME_H
 #define OUTCOME_H
 
+//
+// The extensive form and normal form outcome classes are both included
+// in this header file in the hopes of an eventual unification of the
+// two.
+//
+
 struct gbt_efg_outcome_rep;
 class efgGame;
 
@@ -56,5 +62,36 @@ public:
 };
 
 gOutput &operator<<(gOutput &, const gbtEfgOutcome &);
+
+
+struct gbt_nfg_outcome_rep;
+class Nfg;
+
+class gbtNfgOutcome {
+friend class Nfg;
+protected:
+  struct gbt_nfg_outcome_rep *rep;
+
+public:
+  gbtNfgOutcome(void);
+  gbtNfgOutcome(gbt_nfg_outcome_rep *);
+  gbtNfgOutcome(const gbtNfgOutcome &);
+  ~gbtNfgOutcome();
+
+  gbtNfgOutcome &operator=(const gbtNfgOutcome &);
+
+  bool operator==(const gbtNfgOutcome &) const;
+  bool operator!=(const gbtNfgOutcome &) const;
+
+  bool IsNull(void) const;
+  int GetId(void) const;
+  Nfg *GetGame(void) const;
+  gText GetLabel(void) const;
+
+  gNumber GetPayoff(int p_playerId) const;
+  double GetPayoffDouble(int p_playerId) const;
+};
+
+gOutput &operator<<(gOutput &, const gbtNfgOutcome &);
 
 #endif  // OUTCOME_H

@@ -107,15 +107,6 @@ Portion *ArrayToList(const gArray<NFPlayer *> &A)
 }
 
 TEMPLATE_SPECIALIZATION()
-Portion *ArrayToList(const gArray<NFOutcome *> &A)
-{
-  ListPortion *ret = new ListPortion;
-  for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new NfOutcomePortion(A[i]));
-  return ret;
-}
-
-TEMPLATE_SPECIALIZATION()
 Portion *ArrayToList(const gArray<Strategy *> &A)
 {
   ListPortion *ret = new ListPortion;

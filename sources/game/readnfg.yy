@@ -43,7 +43,7 @@ static int ncont, pl, cont;
 static gList<gText> names;
 static gList<gNumber> numbers; 
 static gList<gText> stratnames;
-static NFOutcome *outcome; 
+static gbtNfgOutcome outcome; 
 
 static bool CreateNfg(const gList<gText> &, const gList<gNumber> &,
 	              const gList<gText> &);
@@ -51,6 +51,10 @@ static void SetPayoff(int cont, int pl, const gNumber &);
 
 void nfg_yyerror(char *);
 int nfg_yylex(void);
+
+#define yyparse nfg_yyparse
+#define yyerror nfg_yyerror
+#define yylex nfg_yylex
 
 %}
 
@@ -136,7 +140,7 @@ outcomes:      outcome
 
 outcome:       LBRACE NAME
                  { outcome = N->NewOutcome();
-                   outcome->SetName(last_name);  pl = 1; }
+                   N->SetLabel(outcome, last_name);  pl = 1; }
                outcpaylist RBRACE
 
 outcpaylist:   outcpay
@@ -155,7 +159,7 @@ contingencylist:  contingency
 contingency:   NUMBER
                 { if (cont > ncont)  YYERROR;
                   if (last_number != gNumber(0)) {
-                    N->SetOutcome(cont++, N->Outcomes()[last_number]); 
+                    N->SetOutcome(cont++, N->GetOutcomeId(last_number)); 
                   }
                   else  {
                     N->SetOutcome(cont++, 0);

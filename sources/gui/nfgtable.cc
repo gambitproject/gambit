@@ -190,7 +190,7 @@ wxString NfgGridTable::GetValue(int row, int col)
       profile.Set(pl, support.GetStrategy(pl, strategy[pl]));
     }
 
-    NFOutcome *outcome = m_nfg->GetOutcome(profile);
+    gbtNfgOutcome outcome = m_nfg->GetOutcome(profile);
     if (m_table->GetSettings().OutcomeValues()) {
       wxString ret = "(";
       for (int pl = 1; pl <= strategy.Length(); pl++) {
@@ -205,10 +205,10 @@ wxString NfgGridTable::GetValue(int row, int col)
       return ret;
     }
     else {
-      if (outcome) {
-	wxString ret = (char *) outcome->GetName();
+      if (!outcome.IsNull()) {
+	wxString ret = (char *) outcome.GetLabel();
 	if (ret == "") {
-	  ret = (char *) (gText("Outcome") + ToText(outcome->GetNumber()));
+	  ret = (char *) (gText("Outcome") + ToText(outcome.GetId()));
 	}
 	return ret;
       }

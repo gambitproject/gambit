@@ -226,10 +226,12 @@ T MixedProfile<T>::PPayoff(int pl, int index, int i) const
   int pindex = 0;
 
   if (i > N->NumPlayers())  {
-    if (N->GetOutcome(index))
+    if (!N->GetOutcome(index).IsNull()) {
       return N->Payoff(N->GetOutcome(index), pl);
-    else
+    }
+    else {
       return (T) 0;
+    }
   }
   T sum = (T) 0;
   for (int j = 1; j <= support.NumStrats(i); j++) {
@@ -253,8 +255,9 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl, int const_st,
     PPayoff(pl, const_pl, const_st, cur_pl + 1, index,
 	    prob, value);
   else if (cur_pl > N->NumPlayers())  {
-    if (N->GetOutcome(index))
+    if (!N->GetOutcome(index).IsNull()) {
       value += prob * Payoff(N->GetOutcome(index), pl);
+    }
   }
   else   {
     for (int j = 1; j <= support.NumStrats(cur_pl); j++)  {
@@ -278,9 +281,9 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
     PPayoff(pl, const_pl1, const_st1, const_pl2, const_st2,
 	    cur_pl + 1, index,prob, value);
   else if (cur_pl > N->NumPlayers())  {
-    if (N->GetOutcome(index))
-      value += prob *
-	Payoff(N->GetOutcome(index), pl);
+    if (!N->GetOutcome(index).IsNull()) {
+      value += prob * Payoff(N->GetOutcome(index), pl);
+    }
   }
   else   {
     for (int j = 1; j <= support.NumStrats(cur_pl); j++ ) {
@@ -305,8 +308,9 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
   else if (cur_pl > N->NumPlayers())  {
     for (int j = 1; j <= support.NumStrats(const_pl); j++ ){ 
       s = support.Strategies(const_pl)[j];
-      if (N->GetOutcome(index + s->Index()))
-	     value[j] += prob * Payoff(N->GetOutcome(index + s->Index()), pl);
+      if (!N->GetOutcome(index + s->Index()).IsNull()) {
+	value[j] += prob * Payoff(N->GetOutcome(index + s->Index()), pl);
+      }
     }
   }
   else   {

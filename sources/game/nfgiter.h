@@ -31,9 +31,9 @@ template <class T> class gArray;
 
 class StrategyProfile;
 #include "nfstrat.h"
+#include "outcome.h"
 class NFSupport;
 class NfgContIter;
-class NFOutcome;
 
 //
 // This class is useful for iterating around the normal form.
@@ -64,8 +64,8 @@ public:
 
   long GetIndex(void) const;
 
-  NFOutcome *GetOutcome(void) const;
-  void SetOutcome(NFOutcome *);
+  gbtNfgOutcome GetOutcome(void) const;
+  void SetOutcome(gbtNfgOutcome);
 
   const NFSupport &Support(void) const { return support; }
 };

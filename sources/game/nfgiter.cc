@@ -128,12 +128,12 @@ long NfgIter::GetIndex(void) const
   return profile.GetIndex();
 }
 
-NFOutcome *NfgIter::GetOutcome(void) const
+gbtNfgOutcome NfgIter::GetOutcome(void) const
 {
   return N->GetOutcome(profile);
 }
 
-void NfgIter::SetOutcome(NFOutcome *outcome)
+void NfgIter::SetOutcome(gbtNfgOutcome outcome)
 {
   N->SetOutcome(profile, outcome);
 }
@@ -257,12 +257,12 @@ void NfgContIter::Get(gArray<int> &t) const
     t[i] = profile[i]->Number();
 }
 
-NFOutcome *NfgContIter::GetOutcome(void) const
+gbtNfgOutcome NfgContIter::GetOutcome(void) const
 {
   return N->GetOutcome(profile);
 }
 
-void NfgContIter::SetOutcome(NFOutcome *outcome)
+void NfgContIter::SetOutcome(gbtNfgOutcome outcome)
 {
   N->SetOutcome(profile, outcome);
 }

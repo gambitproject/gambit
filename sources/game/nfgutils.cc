@@ -45,12 +45,13 @@ Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S)
   }
 
   for (int outc = 1; outc <= nfg.NumOutcomes(); outc++)  {
-    NFOutcome *outcome = N->NewOutcome();
+    gbtNfgOutcome outcome = N->NewOutcome();
 
-    outcome->SetName(nfg.Outcomes()[outc]->GetName());
+    N->SetLabel(outcome, nfg.GetOutcomeId(outc).GetLabel());
 
-    for (int pl = 1; pl <= N->NumPlayers(); pl++)
-      N->SetPayoff(outcome, pl, nfg.Payoff(nfg.Outcomes()[outc], pl));
+    for (int pl = 1; pl <= N->NumPlayers(); pl++) {
+      N->SetPayoff(outcome, pl, nfg.Payoff(nfg.GetOutcomeId(outc), pl));
+    }
   }
 
   NfgContIter oiter(S);
@@ -58,10 +59,12 @@ Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S)
   NfgContIter niter(newS);
   
   do   {
-    if (oiter.GetOutcome())
-      niter.SetOutcome(N->Outcomes()[oiter.GetOutcome()->GetNumber()]);
-    else
+    if (!oiter.GetOutcome().IsNull()) {
+      niter.SetOutcome(N->GetOutcomeId(oiter.GetOutcome().GetId()));
+    }
+    else {
       niter.SetOutcome(0);
+    }
 
     oiter.NextContingency();
   }  while (niter.NextContingency());

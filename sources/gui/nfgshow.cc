@@ -600,7 +600,7 @@ void NfgShow::OnEditContingency(wxCommandEvent &)
     }
     else {
       m_nfg.SetOutcome(GetContingency(),
-		       m_nfg.Outcomes()[dialog.GetOutcome()]);
+		       m_nfg.GetOutcomeId(dialog.GetOutcome()));
     }
     m_table->RefreshTable();
   }

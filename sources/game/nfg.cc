@@ -29,6 +29,113 @@
 #include "nfstrat.h"
 #include "nfplayer.h"
 
+//----------------------------------------------------------------------
+//                gbt_nfg_outcome_rep: Declaration
+//----------------------------------------------------------------------
+
+struct gbt_nfg_outcome_rep {
+  int m_id;
+  Nfg *m_nfg;
+  bool m_deleted;
+  gText m_label;
+  gBlock<gNumber> m_payoffs;
+  gBlock<double> m_doublePayoffs;
+  int m_refCount;
+
+  gbt_nfg_outcome_rep(Nfg *, int);
+};
+
+gbt_nfg_outcome_rep::gbt_nfg_outcome_rep(Nfg *p_nfg, int p_id)
+  : m_id(p_id), m_nfg(p_nfg), m_deleted(false), 
+    m_payoffs(p_nfg->NumPlayers()), m_doublePayoffs(p_nfg->NumPlayers()),
+    m_refCount(1)
+{
+  for (int i = 1; i <= m_payoffs.Length(); i++) {
+    m_payoffs[i] = 0;
+    m_doublePayoffs[i] = 0.0;
+  }
+}
+
+gbtNfgOutcome::gbtNfgOutcome(void)
+  : rep(0)
+{ }
+
+gbtNfgOutcome::gbtNfgOutcome(gbt_nfg_outcome_rep *p_rep)
+  : rep(p_rep)
+{
+  if (rep) {
+    rep->m_refCount++;
+  }
+}
+
+gbtNfgOutcome::gbtNfgOutcome(const gbtNfgOutcome &p_outcome)
+  : rep(p_outcome.rep)
+{
+  if (rep) {
+    rep->m_refCount++;
+  }
+}
+
+gbtNfgOutcome::~gbtNfgOutcome()
+{
+  if (rep) {
+    if (--rep->m_refCount == 0) {
+      delete rep;
+    }
+  }
+}
+
+gbtNfgOutcome &gbtNfgOutcome::operator=(const gbtNfgOutcome &p_outcome)
+{
+  if (this == &p_outcome) {
+    return *this;
+  }
+
+  if (rep && --rep->m_refCount == 0) {
+    delete rep;
+  }
+
+  if ((rep = p_outcome.rep) != 0) {
+    rep->m_refCount++;
+  }
+  return *this;
+}
+
+bool gbtNfgOutcome::operator==(const gbtNfgOutcome &p_outcome) const
+{
+  return (rep == p_outcome.rep);
+} 
+
+bool gbtNfgOutcome::operator!=(const gbtNfgOutcome &p_outcome) const
+{
+  return (rep != p_outcome.rep);
+} 
+
+int gbtNfgOutcome::GetId(void) const
+{
+  return (rep) ? rep->m_id : 0;
+}
+
+bool gbtNfgOutcome::IsNull(void) const
+{
+  return (rep == 0);
+}
+
+Nfg *gbtNfgOutcome::GetGame(void) const
+{
+  return (rep) ? rep->m_nfg : 0;
+}
+
+gText gbtNfgOutcome::GetLabel(void) const
+{
+  return (rep) ? rep->m_label : "";
+}
+
+gOutput &operator<<(gOutput &p_stream, const gbtNfgOutcome &)
+{ 
+  return p_stream;
+}
+
 //--------------------------------------
 // Strategy:  Constructors, Destructors
 //--------------------------------------
@@ -76,7 +183,7 @@ Nfg::Nfg(const gArray<int> &dim)
   IndexStrategies();
 
   for (int cont = 1; cont <= results.Length();
-       results[cont++] = (NFOutcome *) 0);
+       results[cont++] = (gbt_nfg_outcome_rep *) 0);
 }
 
 Nfg::Nfg(const Nfg &b)
@@ -97,14 +204,15 @@ Nfg::Nfg(const Nfg &b)
   IndexStrategies();
   
   for (int outc = 1; outc <= outcomes.Length(); outc++)  {
-    outcomes[outc] = new NFOutcome(outc, this);
-    outcomes[outc]->SetName(b.outcomes[outc]->GetName());
-    outcomes[outc]->payoffs = b.outcomes[outc]->payoffs;
+    outcomes[outc] = new gbt_nfg_outcome_rep(this, outc);
+    outcomes[outc]->m_label = b.outcomes[outc]->m_label;
+    outcomes[outc]->m_payoffs = b.outcomes[outc]->m_payoffs;
+    outcomes[outc]->m_doublePayoffs = b.outcomes[outc]->m_doublePayoffs;
   }
 
   for (int cont = 1; cont <= results.Length(); cont++)    
     results[cont] = (b.results[cont]) ?
-                     outcomes[b.results[cont]->GetNumber()] : (NFOutcome *) 0;
+                     outcomes[b.results[cont]->m_id] : (gbt_nfg_outcome_rep *) 0;
 }
 
 #include "efg.h"
@@ -177,20 +285,22 @@ void Nfg::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
 
     p_file << "{\n";
     for (int outc = 1; outc <= outcomes.Length(); outc++)   {
-      p_file << "{ \"" << EscapeQuotes(outcomes[outc]->name) << "\" ";
+      p_file << "{ \"" << EscapeQuotes(outcomes[outc]->m_label) << "\" ";
       for (int pl = 1; pl <= players.Length(); pl++)  {
-	p_file << outcomes[outc]->payoffs[pl];
-	if (pl < players.Length())
+	p_file << outcomes[outc]->m_payoffs[pl];
+	if (pl < players.Length()) {
 	  p_file << ", ";
-	else
+	}
+	else {
 	  p_file << " }\n";
+	}
       }
     }
     p_file << "}\n";
   
     for (int cont = 1; cont <= ncont; cont++)  {
       if (results[cont] != 0)
-	p_file << results[cont]->number << ' ';
+	p_file << results[cont]->m_id << ' ';
       else
 	p_file << "0 ";
     }
@@ -205,29 +315,33 @@ void Nfg::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
   }
 }
 
-NFOutcome *Nfg::NewOutcome(void)
+gbtNfgOutcome Nfg::NewOutcome(void)
 {
   m_dirty = true;
   m_revision++;
-  NFOutcome *outcome = new NFOutcome(outcomes.Length() + 1, this);
+  gbt_nfg_outcome_rep *outcome = new gbt_nfg_outcome_rep(this, 
+							 outcomes.Length()+1);
   outcomes.Append(outcome);
   return outcome;
 }
 
-void Nfg::DeleteOutcome(NFOutcome *outcome)
+void Nfg::DeleteOutcome(gbtNfgOutcome p_outcome)
 {
   m_dirty = true;
   m_revision++;
 
-  for (int i = 1; i <= results.Length(); i++) {
-    if (results[i] == outcome)
-      results[i] = 0;
+  if (p_outcome.rep) {
+    for (int i = 1; i <= results.Length(); i++) {
+      if (results[i] == p_outcome.rep)
+	results[i] = 0;
+    }
+
+    delete outcomes.Remove(p_outcome.rep->m_id);
+
+    for (int outc = 1; outc <= outcomes.Length(); outc++) {
+      outcomes[outc]->m_id = outc;
+    }
   }
-
-  delete outcomes.Remove(outcome->GetNumber());
-
-  for (int outc = 1; outc <= outcomes.Length(); outc++)
-    outcomes[outc]->number = outc;
 }
 
 const gArray<Strategy *> &Nfg::Strategies(int p) const
@@ -280,54 +394,76 @@ int Nfg::ProfileLength(void) const
   return nprof;
 }
 
-void Nfg::SetOutcome(const gArray<int> &profile, NFOutcome *outcome)
+gbtNfgOutcome Nfg::GetOutcomeId(int p_id) const
+{
+  return outcomes[p_id];
+}
+
+void Nfg::SetLabel(gbtNfgOutcome p_outcome, const gText &p_label)
+{
+  if (p_outcome.rep) { 
+    p_outcome.rep->m_label = p_label;
+  }
+}
+void Nfg::SetOutcome(const gArray<int> &p_profile,
+		     const gbtNfgOutcome &p_outcome)
 {
   int index = 1;
-  for (int i = 1; i <= profile.Length(); i++)
+  for (int i = 1; i <= p_profile.Length(); i++) {
+    index += players[i]->strategies[p_profile[i]]->m_index;
+  }
+  results[index] = p_outcome.rep;
+  m_dirty = true;
+  m_revision++;
+  BreakLink();
+}
+
+
+void Nfg::SetOutcome(const StrategyProfile &p, const gbtNfgOutcome &outcome)
+{
+  results[p.index + 1] = outcome.rep;
+  m_dirty = true;
+  m_revision++;
+  BreakLink();
+}
+
+void Nfg::SetOutcomeIndex(int p_index, const gbtNfgOutcome &p_outcome)
+{
+  results[p_index] = p_outcome.rep;
+}
+
+gbtNfgOutcome Nfg::GetOutcome(const gArray<int> &profile) const 
+{
+  int index = 1;
+  for (int i = 1; i <= profile.Length(); i++) {
     index += players[i]->strategies[profile[i]]->m_index;
-  results[index] = outcome;
-  m_dirty = true;
-  m_revision++;
-  BreakLink();
-}
-
-
-void Nfg::SetOutcome(const StrategyProfile &p, NFOutcome *outcome)
-{
-  results[p.index + 1] = outcome;
-  m_dirty = true;
-  m_revision++;
-  BreakLink();
-}
-
-NFOutcome *Nfg::GetOutcome(const gArray<int> &profile) const 
-{
-  int index = 1;
-  for (int i = 1; i <= profile.Length(); i++)
-	 index += players[i]->strategies[profile[i]]->m_index;
+  }
   return results[index];
 }
 
-NFOutcome *Nfg::GetOutcome(const StrategyProfile &p) const
+gbtNfgOutcome Nfg::GetOutcome(const StrategyProfile &p) const
 {
   return results[p.index + 1];
 }
 
-void Nfg::SetPayoff(NFOutcome *outcome, int pl, const gNumber &value)
+void Nfg::SetPayoff(gbtNfgOutcome outcome, int pl, const gNumber &value)
 {
-  if (outcome) {
-    outcome->payoffs[pl] = value;
+  if (outcome.rep) {
+    outcome.rep->m_payoffs[pl] = value;
+    outcome.rep->m_doublePayoffs[pl] = (double) value;
     m_dirty = true;
     m_revision++;
   }
 }
 
-gNumber Nfg::Payoff(NFOutcome *outcome, int pl) const
+gNumber Nfg::Payoff(gbtNfgOutcome outcome, int pl) const
 {
-  if (outcome)
-    return outcome->payoffs[pl];
-  else
+  if (outcome.rep) {
+    return outcome.rep->m_payoffs[pl];
+  }
+  else {
     return 0;
+  }
 }
 
 // ---------------------------------------
@@ -394,11 +530,15 @@ const gArray<Strategy *> &NFPlayer::Strategies(void) const
 
 void Nfg::InitPayoffs(void) const 
 {
-  if(m_outcome_revision == RevisionNumber()) return;
+  if (m_outcome_revision == RevisionNumber()) {
+    return;
+  }
 
-  for (int outc = 1; outc <= NumOutcomes(); outc++)
-    for (int pl = 1; pl <= NumPlayers(); pl++)
-      outcomes[outc]->double_payoffs[pl] = outcomes[outc]->payoffs[pl];
+  for (int outc = 1; outc <= NumOutcomes(); outc++) {
+    for (int pl = 1; pl <= NumPlayers(); pl++) {
+      outcomes[outc]->m_doublePayoffs[pl] = outcomes[outc]->m_payoffs[pl];
+    }
+  }
 
   m_outcome_revision = RevisionNumber();
 }

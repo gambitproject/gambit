@@ -50,10 +50,10 @@ libgame_a_SOURCES = \
 	nfstrat.h \
 	node.h \
 	readefg.cc \
-	readnfg.cc \
+	readnfg.yy \
 	sfg.cc \
 	sfg.h \
 	sfstrat.cc \
 	sfstrat.h
 
-EXTRA_DIST = borland.mak readnfg.yy
+EXTRA_DIST = borland.mak readnfg.cc

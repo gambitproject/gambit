@@ -30,10 +30,9 @@
 #include "base/gmisc.h"
 #include "math/gpvector.h"
 #include "nfstrat.h"
-
+#include "game/outcome.h"
 
 class Nfg;
-class NFOutcome;
 
 template <class T> class gRectArray;
 template <class T> class BehavProfile;
@@ -53,7 +52,7 @@ template <class T> class MixedProfile : public gPVector<T>  {
     void PPayoff(int pl, int const_pl, int cur_pl, long index, T prob,
 		gVector<T> &value) const;
     void InitPayoffs(void) const;
-    const T Payoff(const NFOutcome *o, int pl) const;
+    const T Payoff(const gbtNfgOutcome &o, int pl) const;
 
   public:
     MixedProfile(const NFSupport &);

@@ -39,9 +39,9 @@ bool NFSupport::Dominates(Strategy *s, Strategy *t, bool strong) const
 
   if (strong)  {
     do  {
-      gNumber ap = ((A.GetOutcome()) ? 
+      gNumber ap = ((!A.GetOutcome().IsNull()) ? 
 		    n.Payoff(A.GetOutcome(), s->Player()) : gNumber(0));
-      gNumber bp = ((B.GetOutcome()) ? 
+      gNumber bp = ((!B.GetOutcome().IsNull()) ? 
 		    n.Payoff(B.GetOutcome(), s->Player()) : gNumber(0));
 
       if (ap <= bp)  {
@@ -56,9 +56,9 @@ bool NFSupport::Dominates(Strategy *s, Strategy *t, bool strong) const
   bool equal = true;
   
   do   {
-    gNumber ap = ((A.GetOutcome()) ? 
+    gNumber ap = ((!A.GetOutcome().IsNull()) ? 
 		  n.Payoff(A.GetOutcome(), s->Player()) : gNumber(0));
-    gNumber bp = ((B.GetOutcome()) ? 
+    gNumber bp = ((!B.GetOutcome().IsNull()) ? 
 		  n.Payoff(B.GetOutcome(), s->Player()) : gNumber(0));
 
     if (ap < bp)   { 

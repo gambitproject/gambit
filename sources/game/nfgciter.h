@@ -76,8 +76,8 @@ public:
   
   long GetIndex(void) const;
   
-  NFOutcome *GetOutcome(void) const;
-  void SetOutcome(NFOutcome *);
+  gbtNfgOutcome GetOutcome(void) const;
+  void SetOutcome(gbtNfgOutcome);
   
   void Dump(gOutput &) const;
 };

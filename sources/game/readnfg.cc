@@ -1,17 +1,9 @@
 
-/*  A Bison parser, made from game/readnfg.yy
- by  GNU Bison version 1.27
-  */
+/*  A Bison parser, made from readnfg.yy
+    by GNU Bison version 1.28  */
 
 #define YYBISON 1  /* Identify Bison output.  */
 
-#define yyparse nfg_yyparse
-#define yylex nfg_yylex
-#define yyerror nfg_yyerror
-#define yylval nfg_yylval
-#define yychar nfg_yychar
-#define yydebug nfg_yydebug
-#define yynerrs nfg_yynerrs
 #define	LBRACE	257
 #define	RBRACE	258
 #define	SLASH	259
@@ -19,9 +11,34 @@
 #define	VARNAME	261
 #define	NUMBER	262
 
-#line 1 "game/readnfg.yy"
+#line 1 "readnfg.yy"
 
-/* $Id$ */
+//
+// $Source$
+// $Date$
+// $Revision$
+//
+// DESCRIPTION:
+// Parser for reading normal form savefiles
+//
+// This file is part of Gambit
+// Copyright (c) 2002, The Gambit Project
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
+
 #include <ctype.h>
 #include "base/gmisc.h"
 #include "base/gstream.h"
@@ -40,7 +57,7 @@ static int ncont, pl, cont;
 static gList<gText> names;
 static gList<gNumber> numbers; 
 static gList<gText> stratnames;
-static NFOutcome *outcome; 
+static gbtNfgOutcome outcome; 
 
 static bool CreateNfg(const gList<gText> &, const gList<gNumber> &,
 	              const gList<gText> &);
@@ -48,6 +65,10 @@ static void SetPayoff(int cont, int pl, const gNumber &);
 
 void nfg_yyerror(char *);
 int nfg_yylex(void);
+
+#define yyparse nfg_yyparse
+#define yyerror nfg_yyerror
+#define yylex nfg_yylex
 
 #ifndef YYSTYPE
 #define YYSTYPE int
@@ -126,11 +147,11 @@ static const short yyrhs[] = {    -1,
 
 #if YYDEBUG != 0
 static const short yyrline[] = { 0,
-    41,    46,    48,    49,    51,    53,    54,    56,    58,    59,
-    61,    63,    64,    66,    66,    68,    69,    71,    73,    74,
-    77,    79,    80,    82,    84,    84,    87,    91,    91,    92,
-    94,   104,   106,   106,   107,   109,   110,   112,   115,   117,
-   118,   120,   124,   124,   127,   128,   130
+    70,    75,    77,    78,    80,    82,    83,    85,    87,    88,
+    90,    92,    93,    95,    95,    97,    98,   100,   102,   103,
+   106,   108,   109,   111,   113,   113,   116,   120,   120,   121,
+   123,   133,   135,   135,   136,   138,   139,   141,   144,   146,
+   147,   149,   153,   153,   156,   157,   159
 };
 #endif
 
@@ -216,7 +237,7 @@ static const short yycheck[] = {     3,
 };
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
 #line 3 "/usr/lib/bison.simple"
-/* This file comes from bison-1.27.  */
+/* This file comes from bison-1.28.  */
 
 /* Skeleton output parser for bison,
    Copyright (C) 1984, 1989, 1990 Free Software Foundation, Inc.
@@ -429,7 +450,7 @@ __yy_memcpy (char *to, char *from, unsigned int count)
 #endif
 #endif
 
-#line 216 "/usr/lib/bison.simple"
+#line 217 "/usr/lib/bison.simple"
 
 /* The user can define YYPARSE_PARAM as the name of an argument to be passed
    into yyparse.  The argument should have type void *.
@@ -758,47 +779,47 @@ yyreduce:
   switch (yyn) {
 
 case 1:
-#line 42 "game/readnfg.yy"
+#line 71 "readnfg.yy"
 { if (!CreateNfg(names, numbers, stratnames))  return 1;
 		names.Flush();  numbers.Flush();  stratnames.Flush();
 	        N->SetTitle(title); N->SetComment(comment);
               ;
     break;}
 case 2:
-#line 46 "game/readnfg.yy"
+#line 75 "readnfg.yy"
 { return 0; ;
     break;}
 case 3:
-#line 48 "game/readnfg.yy"
+#line 77 "readnfg.yy"
 { title = last_name; pl = 0; ;
     break;}
 case 8:
-#line 56 "game/readnfg.yy"
+#line 85 "readnfg.yy"
 { names.Append(last_name); ;
     break;}
 case 14:
-#line 66 "game/readnfg.yy"
+#line 95 "readnfg.yy"
 { pl++; numbers.Append(0); ;
     break;}
 case 18:
-#line 71 "game/readnfg.yy"
+#line 100 "readnfg.yy"
 { stratnames.Append(last_name); numbers[pl] += 1; ;
     break;}
 case 20:
-#line 74 "game/readnfg.yy"
+#line 103 "readnfg.yy"
 { comment = last_name; ;
     break;}
 case 24:
-#line 82 "game/readnfg.yy"
+#line 111 "readnfg.yy"
 { numbers.Append(last_number); ;
     break;}
 case 27:
-#line 87 "game/readnfg.yy"
+#line 116 "readnfg.yy"
 { cont = 1;
                 pl = 1; ;
     break;}
 case 31:
-#line 95 "game/readnfg.yy"
+#line 124 "readnfg.yy"
 {  if (pl > N->NumPlayers())   {
 		    cont++;
 		    pl = 1;
@@ -809,24 +830,24 @@ case 31:
 	      ;
     break;}
 case 32:
-#line 104 "game/readnfg.yy"
+#line 133 "readnfg.yy"
 { cont = 1; ;
     break;}
 case 38:
-#line 113 "game/readnfg.yy"
+#line 142 "readnfg.yy"
 { outcome = N->NewOutcome();
-                   outcome->SetName(last_name);  pl = 1; ;
+                   N->SetLabel(outcome, last_name);  pl = 1; ;
     break;}
 case 42:
-#line 121 "game/readnfg.yy"
+#line 150 "readnfg.yy"
 { if (pl > N->NumPlayers())  YYERROR;
                    N->SetPayoff(outcome, pl++, last_number);  ;
     break;}
 case 47:
-#line 131 "game/readnfg.yy"
+#line 160 "readnfg.yy"
 { if (cont > ncont)  YYERROR;
                   if (last_number != gNumber(0)) {
-                    N->SetOutcome(cont++, N->Outcomes()[last_number]); 
+                    N->SetOutcome(cont++, N->GetOutcomeId(last_number)); 
                   }
                   else  {
                     N->SetOutcome(cont++, 0);
@@ -835,7 +856,7 @@ case 47:
     break;}
 }
    /* the action file gets copied in in place of this dollarsign */
-#line 542 "/usr/lib/bison.simple"
+#line 543 "/usr/lib/bison.simple"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1055,7 +1076,7 @@ yyerrhandle:
     }
   return 1;
 }
-#line 140 "game/readnfg.yy"
+#line 169 "readnfg.yy"
 
 
 void nfg_yyerror(char *)    { }

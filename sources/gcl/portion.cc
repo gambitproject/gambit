@@ -728,36 +728,38 @@ bool StrategyPortion::IsReference(void) const
 
 gPool NfOutcomePortion::pool(sizeof(NfOutcomePortion));
 
-NfOutcomePortion::NfOutcomePortion(NFOutcome *value)
-  : _Value(new NFOutcome *(value)), _ref(false)
+NfOutcomePortion::NfOutcomePortion(gbtNfgOutcome p_value)
+  : m_value(new gbtNfgOutcome(p_value)), m_ref(false)
 {
-  SetGame(value->Game());
+  SetGame(p_value.GetGame());
 }
 
-NfOutcomePortion::NfOutcomePortion(NFOutcome *&value, bool ref)
-  : _Value(&value), _ref(ref)
+NfOutcomePortion::NfOutcomePortion(gbtNfgOutcome *&p_value, bool p_ref)
+  : m_value(p_value), m_ref(p_ref)
 {
-  if (!_ref) {
-    SetGame(value->Game());
+  if (!p_ref) {
+    SetGame(p_value->GetGame());
   }
 }
 
 NfOutcomePortion::~NfOutcomePortion()
 {
-  if (!_ref)   delete _Value;
+  if (!m_ref) {
+    delete m_value;
+  }
 }
 
-NFOutcome *NfOutcomePortion::Value(void) const
-{ return *_Value; }
+gbtNfgOutcome NfOutcomePortion::Value(void) const
+{ return *m_value; }
 
-void NfOutcomePortion::SetValue(NFOutcome *value)
+void NfOutcomePortion::SetValue(gbtNfgOutcome p_value)
 {
-  if (_ref) {
-    ((NfOutcomePortion *) Original())->SetValue(value);
+  if (m_ref) {
+    ((NfOutcomePortion *) Original())->SetValue(p_value);
   }
   else {
-    SetGame(value->Game());
-    *_Value = value;
+    SetGame(p_value.GetGame());
+    *m_value = p_value;
   }
 }
 
@@ -770,30 +772,29 @@ void NfOutcomePortion::Output(gOutput& s) const
 {
   Portion::Output(s);
   
-  s << "(NFOutcome) " << *_Value;
-  if (*_Value)
-    s << " \"" << (*_Value)->GetName() << "\"";
+  s << "(NFOutcome) " << *m_value;
+  s << " \"" << (*m_value).GetLabel() << "\"\n";
 }
 
 gText NfOutcomePortion::OutputString(void) const
 {
-  return "(Outcome)";
+  return "(NFOutcome)";
 }
 
 Portion* NfOutcomePortion::ValCopy(void) const
 { 
-  return new NfOutcomePortion(*_Value);
+  return new NfOutcomePortion(*m_value);
 }
 
 Portion* NfOutcomePortion::RefCopy(void) const
 { 
-  Portion* p = new NfOutcomePortion(*_Value, true); 
+  Portion *p = new NfOutcomePortion((gbtNfgOutcome *) m_value, true); 
   p->SetOriginal(Original());
   return p;
 }
 
 bool NfOutcomePortion::IsReference(void) const
-{ return _ref; }
+{ return m_ref; }
 
 
 //-------------

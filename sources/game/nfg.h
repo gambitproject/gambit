@@ -30,9 +30,7 @@
 #include "base/base.h"
 #include "math/gnumber.h"
 #include "nfplayer.h"
-
-class NFOutcome;
-class NFPlayer;
+#include "outcome.h"
 
 class Strategy   {
 friend class Nfg;
@@ -73,9 +71,9 @@ protected:
   gArray<int> dimensions;
 
   gArray<NFPlayer *> players;
-  gBlock<NFOutcome *> outcomes;
+  gBlock<gbt_nfg_outcome_rep *> outcomes;
 
-  gArray<NFOutcome *> results;
+  gArray<gbt_nfg_outcome_rep *> results;
 
   const efgGame *efg;
 
@@ -117,24 +115,26 @@ public:
   int ProfileLength(void) const;
 
   // OUTCOMES
-  NFOutcome *NewOutcome(void);
-  void DeleteOutcome(NFOutcome *);
+  gbtNfgOutcome NewOutcome(void);
+  void DeleteOutcome(gbtNfgOutcome);
 
-  const gArray<NFOutcome *> &Outcomes(void) const  { return outcomes; }
+  gbtNfgOutcome GetOutcomeId(int p_id) const;
   int NumOutcomes(void) const   { return outcomes.Length(); }
 
-  void SetOutcome(const gArray<int> &profile, NFOutcome *outcome);
-  NFOutcome *GetOutcome(const gArray<int> &profile) const;
-  void SetOutcome(const StrategyProfile &p, NFOutcome *outcome);
-  NFOutcome *GetOutcome(const StrategyProfile &p) const;
+  void SetLabel(gbtNfgOutcome, const gText &);
 
-  void SetOutcome(int index, NFOutcome *outcome)  { results[index] = outcome; }
-  NFOutcome *GetOutcome(int index) const   { return results[index]; }
+  void SetOutcome(const gArray<int> &profile, const gbtNfgOutcome &outcome);
+  gbtNfgOutcome GetOutcome(const gArray<int> &profile) const;
+  void SetOutcome(const StrategyProfile &p, const gbtNfgOutcome &outcome);
+  gbtNfgOutcome GetOutcome(const StrategyProfile &p) const;
 
-  void SetPayoff(NFOutcome *, int pl, const gNumber &value);
-  gNumber Payoff(NFOutcome *, int pl) const;
-  gNumber Payoff(NFOutcome *o, NFPlayer *p) const 
-    { return Payoff(o,p->GetNumber()); }
+  void SetOutcomeIndex(int index, const gbtNfgOutcome &outcome);
+  gbtNfgOutcome GetOutcomeIndex(int index) const   { return results[index]; }
+
+  void SetPayoff(gbtNfgOutcome, int pl, const gNumber &value);
+  gNumber Payoff(gbtNfgOutcome, int pl) const;
+  gNumber Payoff(gbtNfgOutcome p_outcome, NFPlayer *p) const 
+    { return Payoff(p_outcome ,p->GetNumber()); }
 
   void InitPayoffs(void) const;
 
@@ -150,35 +150,6 @@ public:
 int ReadNfgFile(gInput &, Nfg *&);
 
 #include "mixed.h"
-
-class NFOutcome   {
-  friend class Nfg;
-  friend class MixedProfile<double>;
-  friend class MixedProfile<gRational>;
-  friend class MixedProfile<gNumber>;
-  private:
-    int number;
-    Nfg *nfg;
-    gText name;
-    gArray<gNumber> payoffs;
-    gArray<double> double_payoffs;
-
-    NFOutcome(int n, Nfg *N)
-      : number(n), nfg(N), payoffs(N->NumPlayers()), 
-	double_payoffs(N->NumPlayers()) { }
-    NFOutcome(int n, const NFOutcome &c)
-      : number(n), nfg(c.nfg),name(c.name), payoffs(c.payoffs), 
-	double_payoffs(c.double_payoffs)  { }
-    ~NFOutcome() { }
-
-  public:
-    int GetNumber(void) const    { return number; }
-
-    const gText &GetName(void) const   { return name; }
-    void SetName(const gText &s)   { name = s; }
-
-    Nfg *Game(void) const   { return nfg; }
-};
 
 extern Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S);
 

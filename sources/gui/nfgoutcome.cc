@@ -95,9 +95,9 @@ void NfgOutcomeWindow::UpdateValues(void)
   }
 
   for (int outc = 1; outc <= nfg.NumOutcomes(); outc++) {
-    NFOutcome *outcome = nfg.Outcomes()[outc];
+    gbtNfgOutcome outcome = nfg.GetOutcomeId(outc);
 
-    SetCellValue((char *) outcome->GetName(), outc - 1, 0);
+    SetCellValue((char *) outcome.GetLabel(), outc - 1, 0);
 
     for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
       SetCellValue((char *) ToText(nfg.Payoff(outcome, nfg.Players()[pl])),
@@ -148,11 +148,12 @@ void NfgOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
 
   if (col == 0) { 
     // Edited cell label
-    m_parent->Game().Outcomes()[row+1]->SetName(GetCellValue(row, col).c_str());
+    m_parent->Game().SetLabel(m_parent->Game().GetOutcomeId(row+1),
+			      GetCellValue(row, col).c_str());
   }
   else {
     // Edited payoff
-    m_parent->Game().SetPayoff(m_parent->Game().Outcomes()[row+1], col,
+    m_parent->Game().SetPayoff(m_parent->Game().GetOutcomeId(row+1), col,
 			       ToNumber(GetCellValue(row, col).c_str()));
   }
 
@@ -180,7 +181,7 @@ void NfgOutcomeWindow::OnPopupOutcomeNew(wxCommandEvent &)
 void NfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
 {
   if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
-    m_parent->Game().DeleteOutcome(m_parent->Game().Outcomes()[GetGridCursorRow() + 1]);
+    m_parent->Game().DeleteOutcome(m_parent->Game().GetOutcomeId(GetGridCursorRow() + 1));
     m_parent->OnOutcomesEdited();
   }
 }
@@ -189,7 +190,7 @@ void NfgOutcomeWindow::OnPopupOutcomeAttach(wxCommandEvent &)
 {
   if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
     m_parent->Game().SetOutcome(m_parent->GetContingency(),
-				m_parent->Game().Outcomes()[GetGridCursorRow() + 1]);
+				m_parent->Game().GetOutcomeId(GetGridCursorRow() + 1));
     m_parent->OnOutcomesEdited();
   }
 }

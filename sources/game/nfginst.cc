@@ -30,21 +30,21 @@
 #include "math/rational.h"
 
 TEMPLATE_SPECIALIZATION()
-const gNumber MixedProfile<gNumber>::Payoff(const NFOutcome *o, int pl) const
+const gNumber MixedProfile<gNumber>::Payoff(const gbtNfgOutcome &o, int pl) const
 { 
-  return o->payoffs[pl];
+  return N->Payoff(o, pl);
 }
 
 TEMPLATE_SPECIALIZATION()
-const gRational MixedProfile<gRational>::Payoff(const NFOutcome *o, int pl) const
+const gRational MixedProfile<gRational>::Payoff(const gbtNfgOutcome &o, int pl) const
 { 
-  return o->payoffs[pl];
+  return N->Payoff(o, pl);
 }
 
 TEMPLATE_SPECIALIZATION()
-const double MixedProfile<double>::Payoff(const NFOutcome *o, int pl) const
+const double MixedProfile<double>::Payoff(const gbtNfgOutcome &o, int pl) const
 { 
-  return o->double_payoffs[pl];
+  return N->Payoff(o, pl);
 }
 
 template class MixedProfile<double>;
@@ -73,15 +73,16 @@ template class gRectBlock<gRational>;
 
 template class gArray<nfgSupportPlayer *>;
 template class gArray<Strategy *>;
-template class gArray<NFOutcome *>;
+template class gArray<gbt_nfg_outcome_rep *>;
 
 template class gArray<NFPlayer *>;
 template class gBlock<Strategy *>;
 
-template class gBlock<NFOutcome *>;
+template class gBlock<gbt_nfg_outcome_rep *>;
 
 template class gList<Strategy *>;
 
 template class gList<const NFSupport>;
+
 
 

@@ -150,11 +150,11 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
 	NfgContIter iter(support);
 	iter.First();
 	do {
-	  NFOutcome *outcome = nfg->NewOutcome();
+	  gbtNfgOutcome outcome = nfg->NewOutcome();
 	  for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
 	    nfg->SetPayoff(outcome, pl, 0);
-	    outcome->SetName(outcome->GetName() +
-			     ToText(iter.Profile()[pl]->Number()));
+	    nfg->SetLabel(outcome, outcome.GetLabel() +
+			  ToText(iter.Profile()[pl]->Number()));
 	  }
 	  nfg->SetOutcome(iter.Profile(), outcome);
 	} while (iter.NextContingency());

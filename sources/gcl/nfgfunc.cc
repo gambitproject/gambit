@@ -89,12 +89,12 @@ static Portion *GSM_CompressNfg(GSM &, Portion **param)
 
 static Portion *GSM_DeleteOutcome(GSM &gsm, Portion **param)
 {
-  NFOutcome *outc = ((NfOutcomePortion *) param[0])->Value();
+  gbtNfgOutcome outc = ((NfOutcomePortion *) param[0])->Value();
 
-  gsm.InvalidateGameProfile(outc->Game(), false);
+  gsm.InvalidateGameProfile(outc.GetGame(), false);
 //  _gsm->UnAssignGameElement(outc->BelongsTo(), false, porNFOUTCOME, outc);
 
-  outc->Game()->DeleteOutcome(outc);
+  outc.GetGame()->DeleteOutcome(outc);
 
   return new BoolPortion(true);
 }
@@ -166,7 +166,7 @@ static Portion *GSM_Game_Strategy(GSM &, Portion **param)
 
 static Portion *GSM_Game_NfOutcome(GSM &, Portion **param)
 {
-  Nfg *N = ((NfOutcomePortion *) param[0])->Value()->Game();
+  Nfg *N = ((NfOutcomePortion *) param[0])->Value().GetGame();
 
   return new NfgPortion(N);
 }
@@ -223,8 +223,7 @@ static Portion* GSM_Name(GSM &, Portion **param)
   case porSTRATEGY:
     return new TextPortion(((StrategyPortion*) param[0])->Value()->Name());
   case porNFOUTCOME:
-    return new TextPortion(((NfOutcomePortion*) param[0])->Value()->
-			   GetName());
+    return new TextPortion(((NfOutcomePortion*) param[0])->Value().GetLabel());
   case porNFSUPPORT:
     return new TextPortion(((NfSupportPortion*) param[0])->Value()->GetName());
   default:
@@ -285,10 +284,12 @@ static Portion* GSM_Outcome(GSM &, Portion** param)
     profile.Set(i, strat);
   }
   
-  if (nfg.GetOutcome(profile))
+  if (!nfg.GetOutcome(profile).IsNull()) {
     return new NfOutcomePortion(nfg.GetOutcome(profile));
-  else
+  }
+  else {
     return new NullPortion(porNFOUTCOME);
+  }
 }
 
 //------------
@@ -299,7 +300,12 @@ static Portion *GSM_Outcomes(GSM &, Portion **param)
 {
   Nfg *N = ((NfgPortion *) param[0])->Value();
   
-  return ArrayToList(N->Outcomes());
+  ListPortion *ret = new ListPortion;
+  for (int outc = 1; outc <= N->NumOutcomes(); outc++) {
+    ret->Append(new NfOutcomePortion(N->GetOutcomeId(outc)));
+  }
+
+  return ret;
 }
 
 //-----------
@@ -311,8 +317,8 @@ static Portion* GSM_Payoff(GSM &, Portion** param)
   if (param[0]->Spec().Type == porNULL)
     return new NumberPortion(0);
 
-  NFOutcome *outcome = ((NfOutcomePortion *) param[0])->Value();
-  Nfg *nfg = outcome->Game();
+  gbtNfgOutcome outcome = ((NfOutcomePortion *) param[0])->Value();
+  Nfg *nfg = outcome.GetGame();
   NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
 
   return new NumberPortion(nfg->Payoff(outcome, player->GetNumber()));
@@ -451,9 +457,9 @@ static Portion *GSM_SetName_Strategy(GSM &, Portion **param)
 
 static Portion *GSM_SetName_NfOutcome(GSM &, Portion **param)
 {
-  NFOutcome *c = ((NfOutcomePortion *) param[0])->Value();
+  gbtNfgOutcome c = ((NfOutcomePortion *) param[0])->Value();
   gText name = ((TextPortion *) param[1])->Value();
-  c->SetName(name);
+  c.GetGame()->SetLabel(c, name);
   return param[0]->ValCopy();
 }
 
@@ -486,7 +492,7 @@ static Portion* GSM_SetOutcome(GSM &gsm, Portion** param)
     profile.Set(i, strat);
   }
   
-  NFOutcome *outcome = ((NfOutcomePortion *) param[1])->Value();
+  gbtNfgOutcome outcome = ((NfOutcomePortion *) param[1])->Value();
 
   nfg.SetOutcome(profile, outcome);
 
@@ -501,8 +507,8 @@ static Portion* GSM_SetOutcome(GSM &gsm, Portion** param)
 
 static Portion* GSM_SetPayoff(GSM &gsm, Portion** param)
 {
-  NFOutcome *outcome = ((NfOutcomePortion *) param[0])->Value();
-  Nfg *nfg = outcome->Game();
+  gbtNfgOutcome outcome = ((NfOutcomePortion *) param[0])->Value();
+  Nfg *nfg = outcome.GetGame();
   NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
   gNumber value = ((NumberPortion *) param[2])->Value();
 

@@ -410,23 +410,21 @@ public:
 // NfOutcome
 //------------
 
-class NFOutcome;
-
 class NfOutcomePortion : public Portion  {
 protected:
-  NFOutcome** _Value;
-  bool _ref;
+  gbtNfgOutcome *m_value;
+  bool m_ref;
 
   static gPool pool;
 
-  NfOutcomePortion(NFOutcome *&, bool);
+  NfOutcomePortion(gbtNfgOutcome *&, bool);
 
 public:
-  NfOutcomePortion(NFOutcome *); 
+  NfOutcomePortion(gbtNfgOutcome);
   virtual ~NfOutcomePortion();
 
-  NFOutcome *Value(void) const;
-  void SetValue(NFOutcome *); 
+  gbtNfgOutcome Value(void) const;
+  void SetValue(gbtNfgOutcome);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
