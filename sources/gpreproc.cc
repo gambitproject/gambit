@@ -456,7 +456,7 @@ gInput* gPreprocessor::LoadInput( gText& name )
 	try   {
 	  _Input = new gFileInput(IniFileName);
 	}
-	catch (gFileInput::OpenFailed &)
+	catch (gFileInput::OpenFailed &) {_Input = 0;}
 	if(_Input) {name = IniFileName;return _Input;}
       }
       if (System::GetEnv("GCLLIB") != NULL)  {
@@ -465,7 +465,7 @@ gInput* gPreprocessor::LoadInput( gText& name )
 	try  {
 	  _Input = new gFileInput(IniFileName);
 	}
-	catch (gFileInput::OpenFailed &)
+	catch (gFileInput::OpenFailed &){_Input = 0;}
 	if(_Input)  {name = IniFileName;return _Input;}
       }
       if (SOURCE != NULL)  {
@@ -473,7 +473,7 @@ gInput* gPreprocessor::LoadInput( gText& name )
 	try  {
 	  _Input = new gFileInput(IniFileName);
 	}
-	catch (gFileInput::OpenFailed &)
+	catch (gFileInput::OpenFailed &){_Input = 0;}
 	if(_Input)  {name = IniFileName;return _Input;}
       }
     }
