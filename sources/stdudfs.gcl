@@ -394,7 +394,7 @@ NewFunction[Payoffs[outcome->NFOUTCOME*]=:LIST(NUMBER),
   Payoff[outcome,Players[Game[outcome]]]
 ]
 
-NewFunction[EnumMixedSolve[nfg->NFG, {stopAfter->00}, {precision->Machine},
+NewFunction[EnumMixedSolve[nfg->NFG, {stopAfter->00}, {precision->Float},
   {nPivots<->00}, {time<->0.00}, {traceFile<->NullOut}, 
   {traceLevel->00},{cliques->False}] =: LIST(MIXED),
   EnumMixedSolve[Support[nfg], stopAfter, precision, nPivots, time, 
@@ -402,7 +402,7 @@ NewFunction[EnumMixedSolve[nfg->NFG, {stopAfter->00}, {precision->Machine},
 ]
 
 NewFunction[EnumMixedSolve[efg->EFG, {asNfg->False},{stopAfter->00}, 
-  {precision->Machine}, {nPivots<->00}, {time<->0.00}, {traceFile<->NullOut}, 
+  {precision->Float}, {nPivots<->00}, {time<->0.00}, {traceFile<->NullOut}, 
   {traceLevel->00},{cliques->False}] =: LIST(BEHAV),
   EnumMixedSolve[Support[efg], asNfg,stopAfter, precision, nPivots, time,
   traceFile, traceLevel, cliques]
@@ -413,7 +413,7 @@ NewFunction[EnumPureSolve[nfg->NFG, {stopAfter->00}, {time<->0.00},
   EnumPureSolve[Support[nfg], stopAfter, time, traceFile, traceLevel]
 ]
 
-NewFunction[EnumPureSolve[efg->EFG, {stopAfter->00},  {precision->Machine},
+NewFunction[EnumPureSolve[efg->EFG, {stopAfter->00},  {precision->Float},
   {time<->0.00}, {traceFile<->NullOut}, 
   {traceLevel->00}] =: LIST(BEHAV),
   EnumPureSolve[Support[efg], False, stopAfter, precision, time, 
@@ -440,7 +440,7 @@ NewFunction[GobitSolve[nfg->NFG, {pxifile->""}, {minLam->.001},
   traceLevel]
 ]
 
-NewFunction[LcpSolve[nfg->NFG,{stopAfter->00}, {precision->Machine},
+NewFunction[LcpSolve[nfg->NFG,{stopAfter->00}, {precision->Float},
   {nPivots<->00}, {time<->0.00}, {traceFile<->NullOut},
   {traceLevel->00}] =: LIST(MIXED),
   LcpSolve[Support[nfg], stopAfter, precision, nPivots,
@@ -448,13 +448,13 @@ NewFunction[LcpSolve[nfg->NFG,{stopAfter->00}, {precision->Machine},
 ]
 
 NewFunction[LcpSolve[efg->EFG, {asNfg->False}, {stopAfter->00}, 
-   {precision->Machine}, {nPivots<->00}, {time<->0.00}, {traceFile<->NullOut}, 
+   {precision->Float}, {nPivots<->00}, {time<->0.00}, {traceFile<->NullOut}, 
   {traceLevel->00}] =: LIST(BEHAV),
   LcpSolve[Support[efg], asNfg, stopAfter, precision, nPivots,
     time, traceFile, traceLevel]
 ]
 
-NewFunction[LpSolve[nfg->NFG, {stopAfter->1}, {precision->Machine},
+NewFunction[LpSolve[nfg->NFG, {stopAfter->1}, {precision->Float},
   {nPivots<->00}, {time<->0.00}, {traceFile<->NullOut}, 
   {traceLevel->00}] =: LIST(MIXED),
   LpSolve[Support[nfg], stopAfter, precision, nPivots, time, traceFile, 
@@ -462,7 +462,7 @@ NewFunction[LpSolve[nfg->NFG, {stopAfter->1}, {precision->Machine},
 ]
 
 NewFunction[LpSolve[efg->EFG, {asNfg->False}, {stopAfter->1}, 
-  {precision->Machine}, {nPivots<->00}, {time<->0.00},
+  {precision->Float}, {nPivots<->00}, {time<->0.00},
   {traceFile<->NullOut}, {traceLevel->00}] =: LIST(BEHAV),
   LpSolve[Support[efg], asNfg, stopAfter, precision, nPivots, time, 
   traceFile, traceLevel]
@@ -487,7 +487,7 @@ NewFunction[LiapSolve[efg->EFG, {asNfg->False}, {stopAfter->01},
 ]
 
 NewFunction[SimpDivSolve[nfg->NFG, {stopAfter->01}, {nRestarts->16}, 
-  {leashLength->00}, {precision->Machine}, {nEvals<->00},
+  {leashLength->00}, {precision->Float}, {nEvals<->00},
   {time<->0.00}, {traceFile<->NullOut},
   {traceLevel->00}] =: LIST(MIXED),
   SimpDivSolve[Support[nfg], stopAfter, nRestarts, leashLength,
@@ -495,7 +495,7 @@ NewFunction[SimpDivSolve[nfg->NFG, {stopAfter->01}, {nRestarts->16},
 ]
 
 NewFunction[SimpDivSolve[efg->EFG, {asNfg->False}, {stopAfter->01}, 
-  {nRestarts->16}, {leashLength->00}, {precision->Machine},
+  {nRestarts->16}, {leashLength->00}, {precision->Float},
   {nEvals<->00}, {time<->0.00},
   {traceFile<->NullOut}, {traceLevel->00}] =: LIST(BEHAV),
   SimpDivSolve[Support[efg], asNfg, stopAfter, nRestarts, leashLength,
@@ -573,7 +573,7 @@ NewFunction[InfiniteLoopWarning[stopAfter->NUMBER,nTries->NUMBER]=:TEXT,
   " Warning: May not find all"]
 ]
 
-NewFunction[OneNash[n->NFG,{precision->Machine}]=:LIST(MIXED),
+NewFunction[OneNash[n->NFG,{precision->Float}]=:LIST(MIXED),
   s:=ElimAllDom[n];
   If[NumPlayers[n] = 2,
     If[IsConstSum[n],LpSolve[s,1,precision],LcpSolve[s,1,precision]],
@@ -581,7 +581,7 @@ NewFunction[OneNash[n->NFG,{precision->Machine}]=:LIST(MIXED),
   ]
 ]  
 
-NewFunction[AllNash[n->NFG,{stopAfter->0},{nTries->0},{precision->Machine}]=:LIST(MIXED),
+NewFunction[AllNash[n->NFG,{stopAfter->0},{nTries->0},{precision->Float}]=:LIST(MIXED),
   s:=ElimAllDom[n,strong->True];
   If[NumPlayers[n] = 2, 
     EnumMixedSolve[s,0,precision],
@@ -590,7 +590,7 @@ NewFunction[AllNash[n->NFG,{stopAfter->0},{nTries->0},{precision->Machine}]=:LIS
   ]
 ]  
 
-NewFunction[OnePerfect[n->NFG,{precision->Machine}]=:LIST(MIXED),
+NewFunction[OnePerfect[n->NFG,{precision->Float}]=:LIST(MIXED),
   s:=ElimAllDom[n,strong->True];
   If[NumPlayers[n] = 2, 
     LcpSolve[s,1,precision],
@@ -599,7 +599,7 @@ NewFunction[OnePerfect[n->NFG,{precision->Machine}]=:LIST(MIXED),
   ]
 ]  
 
-NewFunction[AllPerfect[n->NFG,{stopAfter->0},{nTries->0},{precision->Machine}]=:LIST(MIXED),
+NewFunction[AllPerfect[n->NFG,{stopAfter->0},{nTries->0},{precision->Float}]=:LIST(MIXED),
   s:=ElimAllDom[n,strong->True];
   If[NumPlayers[n] = 2, 
     << " Warning: may not find all";
@@ -609,7 +609,7 @@ NewFunction[AllPerfect[n->NFG,{stopAfter->0},{nTries->0},{precision->Machine}]=:
   ]
 ]  
 
-NewFunction[OneNash[e->EFG,{precision->Machine}]=:LIST(BEHAV),
+NewFunction[OneNash[e->EFG,{precision->Float}]=:LIST(BEHAV),
   ms:=MarkedSubgames[e];MarkSubgames[e];
   If[NumPlayers[e] = 2 && IsPerfectRecall[e],
     If[IsConstSum[e],
@@ -622,7 +622,7 @@ NewFunction[OneNash[e->EFG,{precision->Machine}]=:LIST(BEHAV),
   MarkSubgames[ms];b
 ]  
 
-NewFunction[AllNash[e->EFG,{stopAfter->0},{nTries->0},{precision->Machine}]=:LIST(BEHAV),
+NewFunction[AllNash[e->EFG,{stopAfter->0},{nTries->0},{precision->Float}]=:LIST(BEHAV),
   ms:=MarkedSubgames[e];UnmarkSubgames[e];
   s:=ElimAllDom[Nfg[e],strong->True];
   If[NumPlayers[e] = 2, 
@@ -633,7 +633,7 @@ NewFunction[AllNash[e->EFG,{stopAfter->0},{nTries->0},{precision->Machine}]=:LIS
   MarkSubgames[ms];Behav[m]
 ]  
 
-NewFunction[OneSubgamePerfect[e->EFG,{precision->Machine}]=:LIST(BEHAV),
+NewFunction[OneSubgamePerfect[e->EFG,{precision->Float}]=:LIST(BEHAV),
   ms:=MarkedSubgames[e];MarkSubgames[e];
   If[NumPlayers[e] = 2 && IsPerfectRecall[e],
     If[IsConstSum[e],
@@ -646,7 +646,7 @@ NewFunction[OneSubgamePerfect[e->EFG,{precision->Machine}]=:LIST(BEHAV),
   MarkSubgames[ms];b
 ]  
 
-NewFunction[AllSubgamePerfect[e->EFG,{stopAfter->0},{nTries->0},{precision->Machine}]=:LIST(BEHAV),
+NewFunction[AllSubgamePerfect[e->EFG,{stopAfter->0},{nTries->0},{precision->Float}]=:LIST(BEHAV),
   ms:=MarkedSubgames[e];MarkSubgames[e];
   If[NumPlayers[e] = 2, 
     b:=EnumMixedSolve[e,True,0,precision],
