@@ -736,7 +736,7 @@ template<class T> gPoly<T> operator*(const gPoly<T> &poly, const T val)
 template <class T> gString &operator<<(gString &t, const gPoly<T> &p)
 {
   gString s;
-  if (p.Terms.Length() == 0) s += "0";
+  if (p.Terms.Length() == 0) s += ToString((T) 0.0);
   else {
     for (int j = 1; j <= p.Terms.Length(); j++)
       {
