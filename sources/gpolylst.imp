@@ -99,6 +99,14 @@ template<class T>  void gPolyList<T>::operator+=(const gPoly<T> & new_poly)
   List+=temp;
 }
 
+template<class T>  void gPolyList<T>::operator+=(const gPolyList<T> & new_list)
+{
+  gList<gPoly<T>*> temp;
+  for (int i = 1; i <= new_list.Length(); i++)
+    temp += new gPoly<T>(new_list[i]);
+  List+=temp;
+}
+
 // NB - does not copy pointee - see gpolylst.h
 template<class T>  void gPolyList<T>::operator+=(gPoly<T> * new_poly_ptr)
 {

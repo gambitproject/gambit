@@ -49,6 +49,7 @@ template <class T> class gPolyList
    bool       operator==(const gPolyList<T> &) const;
    bool       operator!=(const gPolyList<T> &) const;
    void       operator+=(const gPoly<T> &); 
+   void       operator+=(const gPolyList<T> &); 
 
    void       operator+=(      gPoly<T> *); // NB - Doesn't copy pointee
                               // This can save a copy when one must create a
