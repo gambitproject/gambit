@@ -16,7 +16,7 @@ WXWINDIR  = /home/mill/gambit/wxwin-new
 GUI       = none
 GMAKEFILE = Makefile2.generic
 #FTPDIR    = /home/mill/ftp/pub/gambit/ver96
-FTPDIR    = /home/ftp/pub/gambit/ver96
+FTPDIR    = /users/ftp/pub/gambit/ver96
 SRCDIR    = ./gambit0.96/sources
 
 all:
@@ -130,6 +130,30 @@ doc:
 
 	cd ../doc; tex2ps gclman; \
 	mv gclman.ps $(FTPDIR)
+
+pxi:
+	@echo
+	@echo ------------------------------------------------------
+	@echo Updating pxi on ftp server 
+	@echo ------------------------------------------------------
+	@echo
+
+	cd ../pxi; \
+	make -f Makefile.generic pxi GUI = $(GUI); \
+	mv pxi_$(GUI)_$(SYSNAME) ../bin; \
+	strip ../bin/pxi_$(GUI)_$(SYSNAME); \
+	cd ../distrib
+
+	cd ../..; \
+	if [ -f pxi_$(GUI)_$(SYSNAME).zip ]; \
+	then rm pxi_$(GUI)_$(SYSNAME).zip; fi; \
+	zip pxi_$(GUI)_$(SYSNAME).zip \
+	  ./gambit0.96/bin/pxi_$(GUI)_$(SYSNAME) 
+
+	mv ../../pxi_$(GUI)_$(SYSNAME).zip $(FTPDIR) 
+
+
+
 
 
 
