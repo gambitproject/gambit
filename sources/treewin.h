@@ -130,7 +130,9 @@ private:
 	class IsetDragger;						// Class to take care of iset join by
 	IsetDragger *iset_drag;				// drag and dropping.
 	class BranchDragger;					// Class to take care of branch addition by
-	BranchDragger *branch_drag;		/// drag and dropping
+	BranchDragger *branch_drag;		// drag and dropping
+	class OutcomeDragger;					// Class to take care of outcome copy/move by
+	OutcomeDragger *outcome_drag;	// drag and dropping
 	// Private Functions
 	int 	FillTable(const Node *n,int level);
 	void 	ProcessCursor(void);
