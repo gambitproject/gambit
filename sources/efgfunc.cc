@@ -1858,6 +1858,26 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_PriorSibling, 0, "node", porNODE);
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("RandomEfg");
+  FuncObj->SetFuncInfo(GSM_RandomEfg_Float, 1);
+  FuncObj->SetParamInfo(GSM_RandomEfg_Float, 0, "x", porEFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_RandomEfg_Rational, 1);
+  FuncObj->SetParamInfo(GSM_RandomEfg_Rational, 0, "x", porEFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_RandomEfg_SeedFloat, 2);
+  FuncObj->SetParamInfo(GSM_RandomEfg_SeedFloat, 0, "x", porEFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_RandomEfg_SeedFloat, 1, "seed", porINTEGER);
+
+  FuncObj->SetFuncInfo(GSM_RandomEfg_SeedRational, 2);
+  FuncObj->SetParamInfo(GSM_RandomEfg_SeedRational, 0, "x", porEFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_RandomEfg_SeedRational, 1, "seed", porINTEGER);
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("Randomize");
   FuncObj->SetFuncInfo(GSM_RandomEfg_Float, 1);
   FuncObj->SetParamInfo(GSM_RandomEfg_Float, 0, "x", porEFG_FLOAT,

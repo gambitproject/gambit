@@ -741,6 +741,27 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
+  FuncObj = new FuncDescObj("RandomNfg");
+  FuncObj->SetFuncInfo(GSM_RandomNfg_Float, 1);
+  FuncObj->SetParamInfo(GSM_RandomNfg_Float, 0, "x", porNFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_RandomNfg_Rational, 1);
+  FuncObj->SetParamInfo(GSM_RandomNfg_Rational, 0, "x", porNFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_RandomNfg_SeedFloat, 2);
+  FuncObj->SetParamInfo(GSM_RandomNfg_SeedFloat, 0, "x", porNFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_RandomNfg_SeedFloat, 1, "seed", porINTEGER);
+
+  FuncObj->SetFuncInfo(GSM_RandomNfg_SeedRational, 2);
+  FuncObj->SetParamInfo(GSM_RandomNfg_SeedRational, 0, "x", porNFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_RandomNfg_SeedRational, 1, "seed", porINTEGER);
+  gsm->AddFunction(FuncObj);
+
+
   FuncObj = new FuncDescObj("Rational");
   FuncObj->SetFuncInfo(GSM_Rational_Nfg, 1);
   FuncObj->SetParamInfo(GSM_Rational_Nfg, 0, "nfg", porNFG_FLOAT,
