@@ -405,7 +405,7 @@ dc.SetTextForeground(wxTheColourDatabase->FindColour(old_foreground));
 if (old_font) dc.SetFont(old_font);
 }
 
-int gGetTextExtent(wxDC &dc,const gString &s0, float *x, float *y)
+void gGetTextExtent(wxDC &dc,const gString &s0, float *x, float *y)
 {
 int i=0,c;
 float dx,dy;
