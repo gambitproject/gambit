@@ -313,12 +313,12 @@ template <class T> int SeqFormModule<T>::LCPPath()
 //-----------------------------------
 
 template <class T>
-int SeqFormBySubgame<T>::SolveSubgame(const Efg<T> &E,
+int SeqFormBySubgame<T>::SolveSubgame(const Efg<T> &E, const EFSupport &sup,
 				      gList<BehavSolution<T> > &solns)
 {
-  BehavProfile<T> bp(E);
+  BehavProfile<T> bp(sup);
 
-  SeqFormModule<T> M(E, params, bp.GetEFSupport());
+  SeqFormModule<T> M(E, params, sup);
   
   M.Lemke();
 

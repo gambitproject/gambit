@@ -68,7 +68,8 @@ template <class T> class SeqFormBySubgame : public SubgameSolver<T>  {
     int npivots;
     SeqFormParams params;
 
-    int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
+    int SolveSubgame(const Efg<T> &, const EFSupport &,
+		     gList<BehavSolution<T> > &);
     EfgAlgType AlgorithmID() const { return EfgAlg_SEQFORMSUB; }    
 
   public:
