@@ -335,11 +335,19 @@ gOutput &gNullOutput::operator<<(const void *)  { return *this; }
 bool gNullOutput::IsValid(void) const   { return true; }
 
 
-gInput &gin = gFileInput(stdin);
-gInput &gzero = gNullInput();
+gFileInput _gin(stdin);
+gInput &gin = _gin;
 
-gOutput &gout = gFileOutput(stdout);
-gOutput &gerr = gFileOutput(stderr);
-gOutput &gnull = gNullOutput();
+gNullInput _gzero;
+gInput &gzero = _gzero;
+
+gFileOutput _gout(stdout);
+gOutput &gout = _gout;
+
+gFileOutput _gerr(stderr);
+gOutput &gerr = _gerr;
+
+gNullOutput _gnull;
+gOutput &gnull = _gnull;
 
 
