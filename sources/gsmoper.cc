@@ -2068,6 +2068,7 @@ Portion* GSM_Clear(Portion**)
 
 #include <sys/types.h>
 #include <sys/time.h>
+#include <time.h>
 
 Portion* GSM_Date(Portion**)
 {
