@@ -15,16 +15,23 @@
 #include "efg.h"
 
 class NodeEntry {
+public:
+  typedef enum { tokenLINE = 0, tokenELLIPSE, tokenRECTANGLE } NodeType;
+
 private:
   bool m_selected;    // true if node is selected
   bool m_cursor;      // true if node is 'cursor'
+  int m_size;         // horizontal size of the node
+  NodeType m_token;   // token to draw for node
+
+  int m_level;        // depth of the node in tree
+  int m_sublevel;     // # of the infoset line on this level
 
 public:
-  int x, y, level;
+  int x, y;
   wxColour color;
   // pos of the next node in the infoset to connect to
   struct { int x, y; } infoset;
-  int num;            // # of the infoset line on this level
   int nums;           // sum of infosets previous to this level
   int has_children;   // how many children this node has
   int child_number;   // what branch # is this node from the parent
@@ -37,9 +44,23 @@ public:
 
   bool IsCursor(void) const { return m_cursor; }
   bool IsSelected(void) const { return m_selected; }
-
   void SetCursor(bool p_cursor);
   void SetSelected(bool p_selected) { m_selected = p_selected; }
+
+  void SetSize(int p_size) { m_size = p_size; }
+  int GetSize(void) const { return m_size; }
+
+  void SetToken(NodeType p_token) { m_token = p_token; }
+  NodeType GetToken(void) const { return m_token; }
+
+  void SetLevel(int p_level) { m_level = p_level; }
+  int GetLevel(void) const { return m_level; }
+  void SetSublevel(int p_sublevel) { m_sublevel = p_sublevel; }
+  int GetSublevel(void) const { return m_sublevel; }
+
+  int GetX(void) const;
+
+  void Draw(wxDC &) const;
 };
 
 class SubgameEntry {

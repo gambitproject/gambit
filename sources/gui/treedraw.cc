@@ -246,11 +246,11 @@ void TreeDrawSettings::LoadOptions(void)
 {
   wxConfig config("Gambit");
 
-  config.Read("/TreeDisplay/BranchLength", &branch_length, 60);
-  config.Read("/TreeDisplay/NodeLength", &node_length, 60);
+  config.Read("/TreeDisplay/BranchLength", &branch_length, 0);
+  config.Read("/TreeDisplay/NodeLength", &node_length, 20);
   config.Read("/TreeDisplay/ForkLength", &fork_length, 60);
   config.Read("/TreeDisplay/OutcomeLength", &outcome_length, 60);
-  config.Read("/TreeDisplay/YSpacing", &y_spacing, 30);
+  config.Read("/TreeDisplay/YSpacing", &y_spacing, 45);
 
   config.Read("/TreeDisplay/DisplayPrecision", &num_prec, 2);
 

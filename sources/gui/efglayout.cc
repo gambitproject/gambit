@@ -17,7 +17,7 @@
 #include "efgshow.h"
 #include "legend.h"
 
-int INFOSET_SPACING = 10;
+int INFOSET_SPACING = 40;
 int SUBGAME_LARGE_ICON_SIZE = 20;
 int SUBGAME_SMALL_ICON_SIZE = 10;
 int DELTA = 8;
@@ -99,7 +99,8 @@ void DrawSmallSubgameIcon(wxDC &dc, const NodeEntry &entry)
 //-----------------------------------------------------------------------
 
 NodeEntry::NodeEntry(void)
-  : m_selected(false), m_cursor(false), num(0), nums(0)
+  : m_selected(false), m_cursor(false), m_size(20), m_token(tokenELLIPSE),
+    m_sublevel(0), nums(0)
 { }
 
 void NodeEntry::SetCursor(bool p_cursor)
@@ -108,6 +109,31 @@ void NodeEntry::SetCursor(bool p_cursor)
   if (m_cursor) {
     m_selected = true;
   }
+}
+
+void NodeEntry::Draw(wxDC &p_dc) const
+{
+  p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, (IsSelected()) ? 4 : 2,
+					     wxSOLID));
+  if (m_token == tokenLINE) {
+    p_dc.DrawLine(x, y, x + m_size + nums * INFOSET_SPACING, y);
+  }
+  else if (m_token == tokenELLIPSE) {
+    p_dc.SetBrush(*wxTRANSPARENT_BRUSH);
+    p_dc.DrawEllipse(x + m_sublevel * INFOSET_SPACING, y - 10, m_size, 20); 
+  }
+
+  if (IsSelected()) {
+    p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 2, wxSOLID)); 
+    p_dc.SetBrush(*wxBLACK_BRUSH);
+    p_dc.DrawRectangle(GetX() - 3, y - 3, 7, 7);
+    p_dc.DrawRectangle(GetX() + m_size - 3, y - 3, 7, 7);
+  }      
+}
+
+int NodeEntry::GetX(void) const
+{
+  return (x + m_sublevel * INFOSET_SPACING);
 }
 
 //-----------------------------------------------------------------------
@@ -220,10 +246,10 @@ Node *efgTreeLayout::BranchHitTest(int p_x, int p_y) const
 
     if (parent_entry) {
       if (p_x > (parent_entry->x + m_parent->DrawSettings().NodeLength() + 
-		 parent_entry->num * INFOSET_SPACING + 10) &&
+		 parent_entry->GetSublevel() * INFOSET_SPACING + 10) &&
 	  p_x < (parent_entry->x + m_parent->DrawSettings().NodeLength() +
 		 m_parent->DrawSettings().ForkLength() +
-		 parent_entry->num * INFOSET_SPACING)) {
+		 parent_entry->GetSublevel() * INFOSET_SPACING)) {
 	// Good old slope/intercept method for finding a point on a line
 	int y0 = (parent_entry->y + 
 		  (int) (p_x - parent_entry->x - 
@@ -280,8 +306,8 @@ Node *efgTreeLayout::InfosetHitTest(int p_x, int p_y) const
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     NodeEntry *entry = m_nodeList[i];
     if (entry->infoset.y != -1 && entry->n->GetInfoset()) {
-      if (p_x > entry->x + entry->num * INFOSET_SPACING - 2 &&
-	  p_x < entry->x + entry->num * INFOSET_SPACING + 2) {
+      if (p_x > entry->x + entry->GetSublevel() * INFOSET_SPACING - 2 &&
+	  p_x < entry->x + entry->GetSublevel() * INFOSET_SPACING + 2) {
 	if (p_y > entry->y && p_y < entry->infoset.y) {
 	  // next iset is below this one
 	  return entry->n;
@@ -338,7 +364,7 @@ Node *efgTreeLayout::PriorSameLevel(Node *p_node) const
   NodeEntry *entry = GetEntry(p_node);
   if (entry) {
     for (int i = m_nodeList.Find(entry) - 1; i >= 1; i--) {
-      if (m_nodeList[i]->level == entry->level)
+      if (m_nodeList[i]->GetLevel() == entry->GetLevel())
 	return m_nodeList[i]->n;
     }
   }
@@ -350,7 +376,7 @@ Node *efgTreeLayout::NextSameLevel(Node *p_node) const
   NodeEntry *entry = GetEntry(p_node);
   if (entry) {
     for (int i = m_nodeList.Find(entry) + 1; i <= m_nodeList.Length(); i++) {
-      if (m_nodeList[i]->level == entry->level) { 
+      if (m_nodeList[i]->GetLevel() == entry->GetLevel()) { 
 	return m_nodeList[i]->n;
       }
     }
@@ -379,6 +405,7 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
     
   NodeEntry *entry = new NodeEntry;
   entry->n = n;   // store the node the entry is for
+  entry->SetSize(draw_settings.NodeLength());
   m_nodeList += entry;
   entry->in_sup = true;
   if (n->Game()->NumChildren(n)>0 && subgame_entry.expanded) {
@@ -409,7 +436,7 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
     ycoord += draw_settings.YSpacing();
   }
     
-  entry->level = level;
+  entry->SetLevel(level);
   entry->has_children = n->Game()->NumChildren(n);
   // Find out what branch of the parent this node is on
   if (n == m_efg.RootNode()) {
@@ -461,7 +488,7 @@ NodeEntry *efgTreeLayout::NextInfoset(NodeEntry *e)
       if (draw_settings.ShowInfosets() == SHOWISET_ALL) {
 	return e1;
       }
-      else if (e->level == e1->level) {
+      else if (e->GetLevel() == e1->GetLevel()) {
 	return e1;
       }
     }
@@ -488,8 +515,8 @@ void efgTreeLayout::CheckInfosetEntry(NodeEntry *e)
     e1 = m_nodeList[pos];
     // if the infosets are the same and they are on the same level and e1 has been processed
     if (e->n->GetInfoset() == e1->n->GetInfoset() && 
-	e->level == e1->level && e1->num) {
-      e->num = e1->num;
+	e->GetLevel() == e1->GetLevel() && e1->GetSublevel() > 0) {
+      e->SetSublevel(e1->GetSublevel());
       if (infoset_entry) {
 	e->infoset.y = infoset_entry->y;
 	if (draw_settings.ShowInfosets() == SHOWISET_ALL)
@@ -510,10 +537,12 @@ void efgTreeLayout::CheckInfosetEntry(NodeEntry *e)
   for (pos = 1; pos <= m_nodeList.Length(); pos++) {
     e1 = m_nodeList[pos];
     // Find the max num for this level
-    if (e->level == e1->level) num = gmax(e1->num, num);
+    if (e->GetLevel() == e1->GetLevel())  {
+      num = gmax(e1->GetSublevel(), num);
+    }
   }
   num++;
-  e->num = num;
+  e->SetSublevel(num);
   e->infoset.y = infoset_entry->y;
   if (draw_settings.ShowInfosets() == SHOWISET_ALL) {
     e->infoset.x = infoset_entry->x;
@@ -553,13 +582,13 @@ void efgTreeLayout::UpdateTableInfosets(void)
   // find the max e->num for each level
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
     e = m_nodeList[pos];
-    nums[e->level] = gmax(e->num+1, nums[e->level]);
+    nums[e->GetLevel()] = gmax(e->GetSublevel()+1, nums[e->GetLevel()]);
   }
     
   // record the max e->num for each level for each node
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
     e = m_nodeList[pos];
-    e->nums = nums[e->level];
+    e->nums = nums[e->GetLevel()];
   }
     
   for (int i = 0; i <= m_maxlev; i++)  nums[i+1] += nums[i];
@@ -568,8 +597,8 @@ void efgTreeLayout::UpdateTableInfosets(void)
   m_maxX = 0;
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
     e = m_nodeList[pos];
-    if (e->level != 0) {
-      e->x += nums[e->level-1]*INFOSET_SPACING;
+    if (e->GetLevel() != 0) {
+      e->x += nums[e->GetLevel()-1]*INFOSET_SPACING;
     }
     m_maxX = gmax(m_maxX, e->x);
   }
@@ -898,51 +927,38 @@ void efgTreeLayout::RenderSubtree(wxDC &dc) const
     // Only draw the node line once for all children.
     if (child_entry.child_number == 1) {
       // draw the 'node' line
-#ifdef UNUSED
-      bool hilight = 
-	(m_parent->HighlightInfoset()  && (entry.n->GetInfoset() == m_parent->HighlightInfoset())) ||
-	(m_parent->HighlightInfoset1() && (entry.n->GetInfoset() == m_parent->HighlightInfoset1()));
-#endif  // UNUSED
-      //      bool hilight = entry.IsSelected();
-      ::DrawLine(dc, entry.x, entry.y,
-		 entry.x + m_parent->DrawSettings().NodeLength() + 
-		 entry.nums * INFOSET_SPACING, entry.y, 
-		 entry.color, (entry.IsSelected()) ? 1 : 0);
-      if (entry.IsSelected()) {
-	dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 2, wxSOLID)); 
-	dc.SetBrush(*wxTRANSPARENT_BRUSH);
-	dc.DrawRectangle(entry.x - 4, entry.y - 4, 9, 9);
-	dc.DrawRectangle(entry.x + m_parent->DrawSettings().NodeLength() +
-			 entry.nums * INFOSET_SPACING - 4,
-			 entry.y - 4, 9, 9);
-      }      
+      entry.Draw(dc);
 
+#ifdef UNUSED
       // show the infoset lines, if required by draw settings
-      ::DrawCircle(dc, entry.x + entry.num * INFOSET_SPACING, entry.y, 
-		   3, entry.color);
+      ::DrawCircle(dc, entry.x + entry.GetSublevel() * INFOSET_SPACING,
+		   entry.y, 3, entry.color);
+#endif  // UNUSED
     }
       
     // draw the 'branches'
     if (child_entry.n->GetParent() && child_entry.in_sup) {
       // no branches for root node
-      xs = entry.x+m_parent->DrawSettings().NodeLength()+entry.nums*INFOSET_SPACING;
-      ys = entry.y;
-      xe = xs+m_parent->DrawSettings().ForkLength();
-      ye = child_entry.y;
-      ::DrawLine(dc, xs, ys, xe, ye, entry.color);
+      ::DrawLine(dc, entry.GetX() + entry.GetSize(), entry.y, 
+		 child_entry.GetX(), child_entry.y, entry.color);
 
+#ifdef UNUSED
       // Draw the highlight... y = a + bx = ys + (ye-ys) / (xe-xs) * x
       double prob = m_parent->Parent()->ActionProb(entry.n,  child_entry.child_number);
       if (prob > 0) {
 	::DrawLine(dc, xs, ys, (xs + m_parent->DrawSettings().ForkLength() * prob), 
 		   (ys + (ye - ys) * prob), *wxBLACK);
       }
+#endif  // UNUSED
       
+#ifdef UNUSED
+      // code for "branch" drawing; not really used in new style
       xs = xe;
       ys = ye;
       xe = child_entry.x;
       ye = ys;
       ::DrawLine(dc, xs, ye, xe, ye, entry.color);
+#endif  // UNUSED
     }
     else {
       xe = entry.x;
@@ -952,19 +968,7 @@ void efgTreeLayout::RenderSubtree(wxDC &dc) const
     // Take care of terminal nodes
     // (either real terminal or collapsed subgames)
     if (!child_entry.has_children) { 
-      ::DrawLine(dc, xe, ye, 
-		 xe + m_parent->DrawSettings().NodeLength() + 
-		 child_entry.nums * INFOSET_SPACING, 
-		 ye, wxGetApp().GetPreferences().GetTerminalColor(),
-		 child_entry.IsSelected() ? 1 : 0);
-      if (child_entry.IsSelected()) {
-	dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 2, wxSOLID)); 
-	dc.SetBrush(*wxTRANSPARENT_BRUSH);
-	dc.DrawRectangle(child_entry.x - 4, child_entry.y - 4, 9, 9);
-	dc.DrawRectangle(child_entry.x + m_parent->DrawSettings().NodeLength()+
-			 child_entry.nums * INFOSET_SPACING - 4,
-			 child_entry.y - 4, 9, 9);
-      }      
+      child_entry.Draw(dc);
       
       // Collapsed subgame: subgame icon is drawn at this terminal node.
       if ((child_entry.n->GetSubgameRoot() == child_entry.n) && 
@@ -991,32 +995,38 @@ void efgTreeLayout::RenderSubtree(wxDC &dc) const
     if (child_entry.child_number == 1) {
       if (m_parent->DrawSettings().ShowInfosets()) {
 	if (entry.infoset.y != -1) {
-	  ::DrawThinLine(dc, 
-			 entry.x + entry.num * INFOSET_SPACING, 
-			 entry.y, 
-			 entry.x + entry.num * INFOSET_SPACING, 
-			 entry.infoset.y, 
-			 entry.color);
+#ifdef __WXGTK__
+	  // A problem with using styled pens and user scaling on wxGTK
+	  dc.SetPen(wxPen(entry.color, 1, wxSOLID));
+#else
+	  dc.SetPen(wxPen(entry.color, 1, wxDOT));
+#endif   // __WXGTK__
+	  dc.DrawLine(entry.GetX(), entry.y, 
+		      entry.GetX(), entry.infoset.y); 
+	  dc.DrawLine(entry.GetX() + entry.GetSize(), entry.y,
+		      entry.GetX() + entry.GetSize(), entry.infoset.y);
 	}
-	  
+
+#ifdef UNUSED	  
 	if (entry.infoset.x != -1) {
 	  // Draw a little arrow in the direction of the iset.
 	  if (entry.infoset.x > entry.x) { // iset is to the right
 	    ::DrawLine(dc, 
-		       entry.x+entry.num*INFOSET_SPACING, 
+		       entry.x + entry.GetSublevel() * INFOSET_SPACING, 
 		       entry.infoset.y, 
-		       entry.x+(entry.num+1)*INFOSET_SPACING, 
+		       entry.x+(entry.GetSublevel()+1)*INFOSET_SPACING, 
 		       entry.infoset.y, entry.color);
 	  }
 	  else {  // iset is to the left
 	    ::DrawLine(dc, 
-		       entry.x + entry.num * INFOSET_SPACING, 
+		       entry.x + entry.GetSublevel() * INFOSET_SPACING, 
 		       entry.infoset.y, 
-		       entry.x + (entry.num - 1) * INFOSET_SPACING, 
+		       entry.x + (entry.GetSublevel() - 1) * INFOSET_SPACING, 
 		       entry.infoset.y, 
 		       entry.color);
 	  }
 	}
+#endif  // UNUSED
       }
     }
   }
