@@ -336,19 +336,23 @@ void gbtCorPlotWindow::DrawLegend(wxDC &p_dc)
 void gbtCorPlotWindow::OnPaint(wxPaintEvent &)
 {
   wxPaintDC dc(this);
+  OnDraw(dc);
+}
 
-  dc.SetBackground(*wxWHITE_BRUSH);
-  dc.Clear();
-  DrawXAxis(dc);
-  DrawYAxis(dc);
-  DrawLegend(dc);
+void gbtCorPlotWindow::OnDraw(wxDC &p_dc)
+{
+  p_dc.SetBackground(*wxWHITE_BRUSH);
+  p_dc.Clear();
+  DrawXAxis(p_dc);
+  DrawYAxis(p_dc);
+  DrawLegend(p_dc);
 
   for (int dim = 1; dim <= m_cor->NumDimensions(); dim++) {
     if (m_cor->IsDimensionShown(dim)) {
       static wxPen *pens[] = { wxRED_PEN, wxGREEN_PEN, wxCYAN_PEN,
 			       wxLIGHT_GREY_PEN, wxBLACK_PEN };
-      dc.SetPen(*pens[(dim - 1) % 5]);
-      DrawDimension(dc, dim);
+      p_dc.SetPen(*pens[(dim - 1) % 5]);
+      DrawDimension(p_dc, dim);
     }
   }
 }
@@ -373,6 +377,10 @@ gbtCorBranch *gbtCorPlotWindow::GetCorrespondence(void) const
 
 BEGIN_EVENT_TABLE(gbtCorPlotFrame, wxFrame)
   EVT_MENU(wxID_CLOSE, gbtCorPlotFrame::Close)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_BMP, gbtCorPlotFrame::OnFileExportBMP)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_JPEG, gbtCorPlotFrame::OnFileExportJPEG)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_PNG, gbtCorPlotFrame::OnFileExportPNG)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_POSTSCRIPT, gbtCorPlotFrame::OnFileExportPS)
   EVT_MENU(GBT_MENU_QRE_EDIT_SUPPORT, gbtCorPlotFrame::OnEditSupport)
 END_EVENT_TABLE()
 
@@ -389,6 +397,18 @@ gbtCorPlotFrame::gbtCorPlotFrame(wxWindow *p_parent,
   topSizer->Add(m_plot, 1, wxEXPAND, 0);
 
   wxMenu *fileMenu = new wxMenu;
+  wxMenu *fileExportMenu = new wxMenu;
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_BMP, wxT("&BMP"),
+			 _("Save a rendering of the plot as a Windows bitmap"));
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_JPEG, wxT("&JPEG"),
+			 _("Save a rendering of the plot as a JPEG image"));
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_PNG, wxT("&PNG"),
+			 _("Save a rendering of the plot as a PNG image"));
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_POSTSCRIPT, wxT("Post&Script"),
+			 _("Save a printout of the plot in PostScript format"));
+  fileExportMenu->Enable(GBT_MENU_FILE_EXPORT_POSTSCRIPT, wxUSE_POSTSCRIPT);
+  fileMenu->Append(GBT_MENU_FILE_EXPORT, _("&Export"), fileExportMenu,
+		   _("Export the game in various formats"));
   fileMenu->Append(wxID_CLOSE, _("&Close"), _("Close this window"));
 
   wxMenu *editMenu = new wxMenu;
@@ -407,6 +427,124 @@ gbtCorPlotFrame::gbtCorPlotFrame(wxWindow *p_parent,
   Show(true);
 }
 
+void gbtCorPlotFrame::OnFileExportBMP(wxCommandEvent &)
+{
+  wxFileDialog dialog(this, _("Choose output file"),
+		      wxGetApp().CurrentDir(), wxT(""),
+		      _("Windows bitmap files (*.bmp)|*.bmp"), wxSAVE);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    wxMemoryDC dc;
+    wxBitmap bitmap(m_plot->GetSize().GetWidth(),
+		    m_plot->GetSize().GetHeight());
+    dc.SelectObject(bitmap);
+    m_plot->OnDraw(dc);
+    if (!bitmap.SaveFile(dialog.GetPath(), wxBITMAP_TYPE_BMP)) {
+      wxMessageBox(wxString::Format(_("An error occurred in writing '%s'."),
+				    (const char *) dialog.GetPath().mb_str()),
+		   _("Error"), wxOK, this);
+    }
+  }
+}
+
+void gbtCorPlotFrame::OnFileExportJPEG(wxCommandEvent &)
+{
+  wxFileDialog dialog(this, _("Choose output file"),
+		      wxGetApp().CurrentDir(), wxT(""),
+		      _("JPEG files (*.jpeg)|*.jpeg|JPEG files (*.jpg)|*.jpg"),
+		      wxSAVE);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    wxMemoryDC dc;
+    wxBitmap bitmap(m_plot->GetSize().GetWidth(),
+		    m_plot->GetSize().GetHeight());
+    dc.SelectObject(bitmap);
+    m_plot->OnDraw(dc);
+    if (!bitmap.SaveFile(dialog.GetPath(), wxBITMAP_TYPE_JPEG)) {
+      wxMessageBox(wxString::Format(_("An error occurred in writing '%s'."),
+				    (const char *) dialog.GetPath().mb_str()),
+		   _("Error"), wxOK, this);
+    }
+  }
+}
+
+void gbtCorPlotFrame::OnFileExportPNG(wxCommandEvent &)
+{
+  wxFileDialog dialog(this, _("Choose output file"),
+		      wxGetApp().CurrentDir(), wxT(""),
+		      _("PNG files (*.png)|*.png"), wxSAVE);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    wxMemoryDC dc;
+    wxBitmap bitmap(m_plot->GetSize().GetWidth(),
+		    m_plot->GetSize().GetHeight());
+    dc.SelectObject(bitmap);
+    m_plot->OnDraw(dc);
+    if (!bitmap.SaveFile(dialog.GetPath(), wxBITMAP_TYPE_PNG)) {
+      wxMessageBox(wxString::Format(_("An error occurred in writing '%s'."),
+				    (const char *) dialog.GetPath().mb_str()),
+		   _("Error"), wxOK, this);
+    }
+  }
+}
+
+void gbtCorPlotFrame::OnFileExportPS(wxCommandEvent &)
+{
+#if wxUSE_POSTSCRIPT
+  wxPrintData printData;
+
+  wxFileDialog dialog(this, _("Choose output file"),
+		      wxGetApp().CurrentDir(), wxT(""),
+		      _("PostScript files (*.ps)|*.ps"), wxSAVE);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    printData.SetFilename(dialog.GetPath());
+  }
+  else {
+    return;
+  }
+  printData.SetPrintMode(wxPRINT_MODE_FILE);
+
+  wxPostScriptDC dc(printData);
+  dc.StartDoc(_("Quantal response correspondence"));
+  dc.SetBackgroundMode(wxTRANSPARENT);
+  dc.StartPage();
+
+  // The actual size of the plot, in pixels
+  int maxX = m_plot->GetSize().GetWidth();
+  int maxY = m_plot->GetSize().GetHeight();
+
+  // Margins
+  int marginX = 50;
+  int marginY = 50;
+
+  maxX += 2 * marginX;
+  maxY += 2 * marginY;
+
+  // Get the size of the DC in pixels
+  wxCoord w, h;
+  dc.GetSize(&w, &h);
+
+  // Calculate a scaling factor
+  float scaleX = (float) w / (float) maxX;
+  float scaleY = (float) h / (float) maxY;
+
+  float actualScale = (scaleX < scaleY) ? scaleX : scaleY;
+
+  // Calculate the position on the DC to center the plot
+  float posX = (float) ((w - (m_plot->GetSize().GetWidth() * actualScale)) / 2.0);
+  float posY = (float) ((h - (m_plot->GetSize().GetHeight() * actualScale)) / 2.0);
+
+  // Set the scale and origin
+  dc.SetUserScale(actualScale, actualScale);
+  dc.SetDeviceOrigin((long) posX, (long) posY);
+
+  // Draw!
+  m_plot->OnDraw(dc);
+  dc.EndPage();
+  dc.EndDoc();
+#endif  // wxUSE_POSTSCRIPT
+}
 
 //========================================================================
 //              Implementation of gbtNfgCorPlotSupportDialog

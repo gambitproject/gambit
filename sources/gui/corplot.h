@@ -217,12 +217,19 @@ public:
   void SetCorrespondence(gbtCorBranch *p_branch);
   gbtCorBranch *GetCorrespondence(void) const;
 
+  void OnDraw(wxDC &);
+
   DECLARE_EVENT_TABLE()
 };
 
 class gbtCorPlotFrame : public wxFrame {
 protected:
   gbtCorPlotWindow *m_plot;
+
+  void OnFileExportBMP(wxCommandEvent &);
+  void OnFileExportJPEG(wxCommandEvent &);
+  void OnFileExportPNG(wxCommandEvent &);
+  void OnFileExportPS(wxCommandEvent &);
 
   virtual void OnEditSupport(wxCommandEvent &) { }
 
