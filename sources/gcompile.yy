@@ -77,7 +77,9 @@ gStack<gString> GCL_InputFileNames(4);
   int Parse(const gString &line, const gString &file, int lineno); \
   int Execute(void); 
 
-%define CONSTRUCTOR_INIT     : gsm(*_gsm), in_funcdecl(false)
+%define CONSTRUCTOR_INIT     : gsm(*_gsm), \
+                               record_funcbody( false ), \
+                               in_funcdecl(false)
 
 %define CONSTRUCTOR_CODE     
 
@@ -361,13 +363,24 @@ binding:         RARROW    { refs.Append(false); }
 const char CR = (char) 10;
 
 char GCLCompiler::nextchar(void)
-{	
-  return current_expr[current_char++];
+{
+  char c = current_expr[current_char];
+  if( c == 'r' || c == '\n' )
+    ++current_line;
+  if( record_funcbody )
+    funcbody += c;
+  ++current_char;
+  return c;
 }
 
 void GCLCompiler::ungetchar(char /*c*/)
 {
-  current_char--;
+  char c = current_expr[current_char-1];
+  if( (current_char > 0) && (c == 'r' || c == '\n') )
+    --current_line;
+  if( record_funcbody && funcbody.length() > 0 )
+    funcbody = funcbody.left( funcbody.length() - 1 );
+  --current_char;
 }
 
 typedef struct tokens  { long tok; char *name; } TOKENS_T;
@@ -692,7 +705,8 @@ gclExpression *GCLCompiler::DefineFunction(gclExpression *expr)
   if (funcspec.Type != porERROR) {
     FuncInfoType funcinfo = 
       FuncInfoType(expr, funcspec, formals.Length());
-    funcinfo.Desc = funcbody;
+    if( !strstr( funcbody, "/*Private*/" ) )
+      funcinfo.Desc = funcbody;
     if( funcdesc.length() > 0 )
       funcinfo.Desc += "\n\n" + funcdesc;
     funcdesc = "";
