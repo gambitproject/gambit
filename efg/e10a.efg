@@ -1,0 +1,22 @@
+EFG 2 D "Nim with 5 stones" { "Player 1" "Player 2" }
+
+p "5 left" 1 1 "Infoset2" { "take 1" "take 2" } 0
+p "4 left" 2 1 "Infoset3" { "take 1" "take 2" } 0
+p "3 left" 1 2 "Infoset3" { "take 1" "take 2" } 0
+p "2 left" 2 2 "Infoset6" { "take 1" "take 2" } 0
+p "1 left" 1 3 "Infoset6" { "take 1" } 0
+t "0 left" 1 "Red Win" { 1.000000 -1.000000 }
+t "0 left" 2 "Blue Win" { -1.000000 1.000000 }
+p "1 left" 2 3 "Infoset7" { "take 1" } 0
+t "0 left" 2 "Blue Win" { -1.000000 1.000000 }
+p "2 left" 1 4 "Infoset4" { "take 1" "take 2" } 0
+p "1 left" 2 4 "Infoset8" { "take 1" } 0
+t "0 left" 2 "Blue Win" { -1.000000 1.000000 }
+t "0 left" 1 "Red Win" { 1.000000 -1.000000 }
+p "3 left" 2 5 ":1" { "take 1" "take 2" } 0
+p "2 left" 1 5 "Infoset5" { "take 1" "take 2" } 0
+p "1 left" 2 6 "Infoset10" { "take 1" } 0
+t "0 left" 2 "Blue Win" { -1.000000 1.000000 }
+t "0 left" 1 "Red Win" { 1.000000 -1.000000 }
+p "1 left" 1 6 "" { "1" } 0
+t "0 left" 2 "Blue Win" { -1.000000 1.000000 }

@@ -1,0 +1,18 @@
+EFG 2 R "Cho-Kreps (QJE 87) Fig 1, Beer-Quiche Game" { "Player 1" "Player 2" }
+""
+
+c "ROOT" 1 "(0,1)" { "wimp" 1/10 "surly" 9/10 } 0
+p "" 1 1 "Infoset3" { "beer" "quiche" } 0
+p "" 2 1 "(2,1)" { "duel" "don't" } 0
+t "" 1 "Outcome 1" { 0, 1 }
+t "" 2 "Outcome 2" { 2, 0 }
+p "" 2 2 "(2,2)" { "duel" "don't" } 0
+t "" 3 "Outcome 3" { 1, 1 }
+t "" 4 "Outcome 4" { 3, 0 }
+p "" 1 2 "(1,2):1" { "beer" "quiche" } 0
+p "" 2 1 "(2,1)" { "duel" "don't" } 0
+t "" 5 "Outcome 5" { 1, 0 }
+t "" 6 "Outcome 6" { 3, 1 }
+p "" 2 2 "(2,2)" { "duel" "don't" } 0
+t "" 7 "Outcome 7" { 0, 0 }
+t "" 8 "Outcome 8" { 2, 1 }

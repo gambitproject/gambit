@@ -1,4 +1,4 @@
-EFG 2 D "Selten, Figure 2" { "Player 1" "Player 2" }
+EFG 2 D "Selten (IJGT, 75), Figure 2" { "Player 1" "Player 2" }
 
 p "ROOT" 1 1 "(1,1)" { "R" "L" } 0
 t "" 1 "Outcome 1" { 1.000000 1.000000 }

@@ -1,0 +1,111 @@
+EFG 2 D "4 Card poker, from Alix Martin" { "1" "2" }
+
+c "ROOT" 1 "" { "A-K" 1/12 "A-Q" 1/12 "A-J" 1/12 "K-A" 1/12 "K-Q" 1/12 "K-J" 1/12 "Q-A" 1/12 "Q-K" 1/12 "Q-J" 1/12 "J-A" 1/12 "J-K" 1/12 "J-Q" 1/12 } 0
+p "player 1" 1 1 "A" { "raise" "check" } 0
+p "player 2" 2 1 "1rK" { "call" "fold" } 0
+t "" 1 "Outcome 1" { 3 -1 }
+t "" 2 "Outcome 2" { 2 0 }
+p "player 2" 2 2 "1pK" { "raise" "check" } 0
+p "player 1" 1 2 "1p2rA" { "call" "fold" } 0
+t "" 1 "Outcome 1" { 3 -1 }
+t "" 3 "Outcome 3" { 0 2 }
+t "" 2 "Outcome 2" { 2 0 }
+p "" 1 1 "A" { "raise" "check" } 0
+p "player 2" 2 3 "1rQ" { "call" "fold" } 0
+t "" 1 "Outcome 1" { 3 -1 }
+t "" 2 "Outcome 2" { 2 0 }
+p "player 2" 2 4 "1pQ" { "raise" "check" } 0
+p "" 1 2 "1p2rA" { "call" "fold" } 0
+t "" 1 "Outcome 1" { 3 -1 }
+t "" 3 "Outcome 3" { 0 2 }
+t "" 2 "Outcome 2" { 2 0 }
+p "" 1 1 "A" { "raise" "check" } 0
+p "player 2" 2 5 "1rJ" { "call" "fold" } 0
+t "" 1 "Outcome 1" { 3 -1 }
+t "" 2 "Outcome 2" { 2 0 }
+p "player 2" 2 6 "1pJ" { "raise" "check" } 0
+p "" 1 2 "1p2rA" { "call" "fold" } 0
+t "" 1 "Outcome 1" { 3 -1 }
+t "" 3 "Outcome 3" { 0 2 }
+t "" 2 "Outcome 2" { 2 0 }
+p "player 1" 1 3 "K" { "raise" "check" } 0
+p "" 2 7 "1rA" { "call" "fold" } 0
+t "" 4 "Outcome 4" { -1 3 }
+t "" 2 "Outcome 2" { 2 0 }
+p "player 2" 2 8 "1pA" { "raise" "check" } 0
+p "player 1" 1 4 "1p2rK" { "call" "fold" } 0
+t "" 4 "Outcome 4" { -1 3 }
+t "" 3 "Outcome 3" { 0 2 }
+t "" 3 "Outcome 3" { 0 2 }
+p "" 1 3 "K" { "raise" "check" } 0
+p "" 2 3 "1rQ" { "call" "fold" } 0
+t "" 1 "Outcome 1" { 3 -1 }
+t "" 2 "Outcome 2" { 2 0 }
+p "" 2 4 "1pQ" { "raise" "check" } 0
+p "" 1 4 "1p2rK" { "call" "fold" } 0
+t "" 1 "Outcome 1" { 3 -1 }
+t "" 3 "Outcome 3" { 0 2 }
+t "" 2 "Outcome 2" { 2 0 }
+p "" 1 3 "K" { "raise" "check" } 0
+p "" 2 5 "1rJ" { "call" "fold" } 0
+t "" 1 "Outcome 1" { 3 -1 }
+t "" 2 "Outcome 2" { 2 0 }
+p "" 2 6 "1pJ" { "raise" "check" } 0
+p "" 1 4 "1p2rK" { "call" "fold" } 0
+t "" 1 "Outcome 1" { 3 -1 }
+t "" 3 "Outcome 3" { 0 2 }
+t "" 2 "Outcome 2" { 2 0 }
+p "player 1" 1 5 "Q" { "raise" "check" } 0
+p "player 2" 2 7 "1rA" { "call" "fold" } 0
+t "" 4 "Outcome 4" { -1 3 }
+t "" 2 "Outcome 2" { 2 0 }
+p "" 2 8 "1pA" { "raise" "check" } 0
+p "player 1" 1 6 "1p2rQ" { "call" "fold" } 0
+t "" 4 "Outcome 4" { -1 3 }
+t "" 3 "Outcome 3" { 0 2 }
+t "" 3 "Outcome 3" { 0 2 }
+p "" 1 5 "Q" { "raise" "check" } 0
+p "" 2 1 "1rK" { "call" "fold" } 0
+t "" 4 "Outcome 4" { -1 3 }
+t "" 2 "Outcome 2" { 2 0 }
+p "" 2 2 "1pK" { "raise" "check" } 0
+p "" 1 6 "1p2rQ" { "call" "fold" } 0
+t "" 4 "Outcome 4" { -1 3 }
+t "" 3 "Outcome 3" { 0 2 }
+t "" 3 "Outcome 3" { 0 2 }
+p "" 1 5 "Q" { "raise" "check" } 0
+p "" 2 5 "1rJ" { "call" "fold" } 0
+t "" 1 "Outcome 1" { 3 -1 }
+t "" 2 "Outcome 2" { 2 0 }
+p "" 2 6 "1pJ" { "raise" "check" } 0
+p "" 1 6 "1p2rQ" { "call" "fold" } 0
+t "" 1 "Outcome 1" { 3 -1 }
+t "" 3 "Outcome 3" { 0 2 }
+t "" 2 "Outcome 2" { 2 0 }
+p "player 1" 1 7 "J" { "raise" "check" } 0
+p "" 2 7 "1rA" { "call" "fold" } 0
+t "" 4 "Outcome 4" { -1 3 }
+t "" 2 "Outcome 2" { 2 0 }
+p "" 2 8 "1pA" { "raise" "check" } 0
+p "player 1" 1 8 "1p2rJ" { "call" "fold" } 0
+t "" 4 "Outcome 4" { -1 3 }
+t "" 3 "Outcome 3" { 0 2 }
+t "" 3 "Outcome 3" { 0 2 }
+p "" 1 7 "J" { "raise" "check" } 0
+p "" 2 1 "1rK" { "call" "fold" } 0
+t "" 4 "Outcome 4" { -1 3 }
+t "" 2 "Outcome 2" { 2 0 }
+p "" 2 2 "1pK" { "raise" "check" } 0
+p "" 1 8 "1p2rJ" { "call" "fold" } 0
+t "" 4 "Outcome 4" { -1 3 }
+t "" 3 "Outcome 3" { 0 2 }
+t "" 3 "Outcome 3" { 0 2 }
+p "" 1 7 "J" { "raise" "check" } 0
+p "" 2 3 "1rQ" { "call" "fold" } 0
+t "" 4 "Outcome 4" { -1 3 }
+t "" 2 "Outcome 2" { 2 0 }
+p "" 2 4 "1pQ" { "raise" "check" } 0
+p "" 1 8 "1p2rJ" { "call" "fold" } 0
+t "" 4 "Outcome 4" { -1 3 }
+t "" 3 "Outcome 3" { 0 2 }
+t "" 3 "Outcome 3" { 0 2 }

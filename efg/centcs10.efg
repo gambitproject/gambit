@@ -1,0 +1,23 @@
+EFG 2 D "Centipede game, 10 move constant sum" { "Player 1" "Player 2" }
+
+p "" 1 1 "(1,1)" { "TAKE" "PASS" } 0
+t "" 1 "Outcome 1" { 1.600000 1.600000 }
+p "" 2 1 "(2,1)" { "TAKE" "PASS" } 0
+t "" 2 "Outcome 2" { 1.200000 2.000000 }
+p "" 1 2 "(1,2)" { "TAKE" "PASS" } 0
+t "" 3 "Outcome 3" { 2.300000 0.900000 }
+p "" 2 2 "(2,2)" { "TAKE" "PASS" } 0
+t "" 4 "Outcome 4" { 0.680000 2.520000 }
+p "" 1 3 "(1,3)" { "TAKE" "PASS" } 0
+t "" 5 "Outcome 5" { 2.690000 0.510000 }
+p "" 2 3 "(2,3)" { "TAKE" "PASS" } 0
+t "" 6 "Outcome 6" { 0.380000 2.820000 }
+p "" 1 4 "(1,4)" { "TAKE" "PASS" } 0
+t "" 7 "Outcome 7" { 2.920000 0.280000 }
+p "" 2 4 "(2,4)" { "TAKE" "PASS" } 0
+t "" 8 "Outcome 8" { 0.210000 2.990000 }
+p "" 1 5 "(1,5)" { "TAKE" "PASS" } 0
+t "" 9 "Outcome 9" { 3.040000 0.160000 }
+p "" 2 5 "(2,5)" { "TAKE" "PASS" } 0
+t "" 10 "Outcome 10" { 0.120000 3.080000 }
+t "" 11 "Outcome 11" { 3.110000 0.090000 }

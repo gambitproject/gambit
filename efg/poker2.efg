@@ -1,0 +1,13 @@
+EFG 2 D "A Simple Poker Game with an initial ante" { "Player 1" "Player 2" }
+
+c "ROOT" 1 "(0,1)" { "RED" 0.500000 "BLACK" 0.500000 } 4 "Outcome 3" { -1.000000 1.000000 }
+p "" 1 1 "(1,1)" { "RAISE" "FOLD" } 0
+p "" 2 1 "(2,1)" { "MEET" "PASS" } 0
+t "" 1 "Outcome 2" { 2.000000 -2.000000 }
+t "" 2 "Outcome 1" { 1.000000 -1.000000 }
+t "" 4 "Outcome 3" { -1.000000 1.000000 }
+p "" 1 2 "(1,2)" { "RAISE" "FOLD" } 0
+p "" 2 1 "(2,1)" { "MEET" "PASS" } 0
+t "" 3 "Outcome 4" { -2.000000 2.000000 }
+t "" 2 "Outcome 1" { 1.000000 -1.000000 }
+t "" 4 "Outcome 3" { -1.000000 1.000000 }

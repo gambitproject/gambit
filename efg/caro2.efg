@@ -1,0 +1,57 @@
+EFG 2 R "Caro2" { "1" "2" }
+
+c "ROOT" 1 "" { "A- K" 1/6 "A - Q" 1/6 "K - A" 1/6 "K - Q" 1/6 "Q - A" 1/6 "Q - K" 1/6 } 0
+p "player 1" 1 1 "p1 has A" { "raise" "pass" } 0
+p "player 2" 2 1 "p2 r K" { "call" "pass" } 0
+t "" 1 "ArKc" { 3 -1 }
+t "" 2 "ArKp" { 2 0 }
+p "" 2 2 "p1pK" { "raise" "pass" } 0
+p "Ap2r" 1 2 "p2rA" { "call" "pass" } 0
+t "" 1 "ArKc" { 3 -1 }
+t "" 3 "ApKrAp" { 0 2 }
+t "" 2 "ArKp" { 2 0 }
+p "" 1 1 "p1 has A" { "raise" "pass" } 0
+p "player 2" 2 3 "p2 r Q" { "call" "pass" } 0
+t "" 1 "ArKc" { 3 -1 }
+t "" 2 "ArKp" { 2 0 }
+p "" 2 4 "p1pQ" { "raise" "pass" } 0
+p "" 1 2 "p2rA" { "call" "pass" } 0
+t "" 1 "ArKc" { 3 -1 }
+t "" 3 "ApKrAp" { 0 2 }
+t "" 2 "ArKp" { 2 0 }
+p "player1" 1 3 "p1 has K" { "raise" "pass" } 0
+p "player 2" 2 5 "p2 r A" { "call " "pass" } 0
+t "" 4 "KrAc" { -1 3 }
+t "" 2 "ArKp" { 2 0 }
+p "" 2 6 "p1pA" { "raise" "pass" } 0
+p "KpAr" 1 4 "p2rK" { "call" "pass" } 0
+t "" 4 "KrAc" { -1 3 }
+t "" 3 "ApKrAp" { 0 2 }
+t "" 3 "ApKrAp" { 0 2 }
+p "" 1 3 "p1 has K" { "raise" "pass" } 0
+p "" 2 3 "p2 r Q" { "call" "pass" } 0
+t "" 1 "ArKc" { 3 -1 }
+t "" 2 "ArKp" { 2 0 }
+p "" 2 4 "p1pQ" { "raise" "pass" } 0
+p "" 1 4 "p2rK" { "call" "pass" } 0
+t "" 1 "ArKc" { 3 -1 }
+t "" 3 "ApKrAp" { 0 2 }
+t "" 2 "ArKp" { 2 0 }
+p "player 1" 1 5 "p1 has Q" { "raise" "pass" } 0
+p "" 2 5 "p2 r A" { "call " "pass" } 0
+t "" 4 "KrAc" { -1 3 }
+t "" 2 "ArKp" { 2 0 }
+p "" 2 6 "p1pA" { "raise" "pass" } 0
+p "QpAr" 1 6 "p2rQ" { "call" "pass" } 0
+t "" 4 "KrAc" { -1 3 }
+t "" 3 "ApKrAp" { 0 2 }
+t "" 3 "ApKrAp" { 0 2 }
+p "" 1 5 "p1 has Q" { "raise" "pass" } 0
+p "" 2 1 "p2 r K" { "call" "pass" } 0
+t "" 4 "KrAc" { -1 3 }
+t "" 2 "ArKp" { 2 0 }
+p "" 2 2 "p1pK" { "raise" "pass" } 0
+p "" 1 6 "p2rQ" { "call" "pass" } 0
+t "" 4 "KrAc" { -1 3 }
+t "" 3 "ApKrAp" { 0 2 }
+t "" 3 "ApKrAp" { 0 2 }
