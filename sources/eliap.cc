@@ -140,7 +140,7 @@ extern bool Powell(gPVector<double> &p,
 		   gFunction<double> &func,
 		   double &fret, int &iter,
 		   int maxits1, double tol1, int maxitsN, double tolN,
-		   gOutput &tracefile, int tracelevel,
+		   gOutput &tracefile, int tracelevel, bool interior = false,
 		   gStatus &status = gstatus);
 
 
@@ -159,7 +159,7 @@ bool Liap(const Efg<double> &E, EFLiapParams &params,
   int iter;
   bool found;
 
-  for (int i = 1; !params.status.Get() && i <= params.nTries &&
+  for (int i = 1; !params.status.Get() && (params.nTries == 0 || i <= params.nTries) &&
        (params.stopAfter==0 || solutions.Length() < params.stopAfter); 
        i++)   {
     if (i > 1)  PickRandomProfile(p);
@@ -171,7 +171,7 @@ bool Liap(const Efg<double> &E, EFLiapParams &params,
     
     if (found = Powell(p, xi, F, value, iter,
 		       params.maxits1, params.tol1, params.maxitsN, 
-		       params.tolN,*params.tracefile, params.trace-1, 
+		       params.tolN,*params.tracefile, params.trace-1, false, 
 		       params.status)) {
       AddSolution(solutions, p, value);
       if(params.trace>0)

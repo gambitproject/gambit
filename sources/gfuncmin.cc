@@ -255,6 +255,8 @@ double LineMin(double tmin, double tmax,
     tracefile << "   Direction: " << direction << "\n";
   }
 
+  assert(tmin < tmax);
+
   if (!MinBracket(tmin, tmax, func, origin, direction, a, b, c))  {
     xmin = c;
 
@@ -280,7 +282,7 @@ void RayMin(gFunction<double> &func,
 	    gVector<double> &v, gVector<double> &xi,
 	    double &fret,
 	    int maxitsBrent, double tolBrent,
-	    gOutput &tracefile,int tracelevel = 0)
+	    gOutput &tracefile,int tracelevel = 0,bool interior = false)
 {
   static const double BIGNUM = 1.0e20;
 
@@ -299,9 +301,16 @@ void RayMin(gFunction<double> &func,
       if (tt < 0.0 && tt > tjmin)  tjmin = tt;
       if (tt > 0.0 && tt < tjmax)  tjmax = tt;
     }
-
+  double delta = 0.99; 
+  if(interior) {tjmin=delta*tjmin;tjmax=delta*tjmax;}
   fret = LineMin(tjmin, tjmax, func, v, xi, xmin, maxitsBrent, tolBrent,
 	         tracefile,tracelevel);
+
+//  tracefile.SetExpMode();
+//  tracefile << "\nxmin= " << xmin;
+//  tracefile.SetFloatMode();
+//  tracefile << " v = " << v;
+//  tracefile << "\n2a: xi = " << xi;
 
   xi *= xmin;
   v += xi;
@@ -348,9 +357,12 @@ bool DFP(gPVector<double> &p,
   func.Deriv(p, g);
   xi = -g;
   
-  if (tracelevel > 0)  
-    tracefile << "Initializing DFP, location = " << p
-              << "  value = " << fret << "\n\n";
+  if (tracelevel > 0)  {
+    tracefile << "\n\nIn DFP: ";
+    tracefile.SetExpMode() << "\nstart:  val = " << fret << " ";
+    tracefile.SetFloatMode();
+    tracefile << " p = " << p;
+  }
 
   for (i = 1; i <= n; i++) {
     for (j = 1; j <= n; j++)  hessin(i, j) = 0.0;
@@ -423,7 +435,7 @@ bool Powell(gPVector<double> &p,
 	    gFunction<double> &func,
 	    double &fret, int &iter,
 	    int maxits1, double tol1, int maxitsN, double tolN,
-	    gOutput &tracefile, int tracelevel,
+	    gOutput &tracefile, int tracelevel, bool interior = false,
 	    gStatus &status = gstatus)
 {
   int ibig,n;
@@ -436,16 +448,16 @@ bool Powell(gPVector<double> &p,
   gVector<double> xit(n);
   fret=func.Value(p);
   startVal = fret;
-
-  if (tracelevel > 0)  
-    tracefile << "Initializing Powell, location = " << p
-              << "  value = " << fret << "\n\n";
+  
+  if (tracelevel > 0)  {
+    tracefile << "\n\nIn Powell: ";
+    tracefile.SetExpMode() << "\nstart:  val = " << fret << " ";
+    tracefile.SetFloatMode();
+    tracefile << " p = " << p;
+  }
 
   pt=p;
   for (iter=1;!status.Get();iter++) {
-    if (tracelevel > 0)
-      tracefile << "Powell iteration " << iter << '\n';
-
     fp=fret;
     if(startVal>tolN)
       status.SetProgress((double)(startVal-fp)/(double)(startVal-tolN));
@@ -458,7 +470,7 @@ bool Powell(gPVector<double> &p,
 	xi.GetRow(index, xit);
 	fptt=fret;
 
-	RayMin(func, p, xit, fret, maxits1, tol1, tracefile,tracelevel-1);
+	RayMin(func, p, xit, fret, maxits1, tol1, tracefile,tracelevel-1,interior);
       
 	if (fptt-fret > del) {
 	  del=fptt-fret;
@@ -467,6 +479,13 @@ bool Powell(gPVector<double> &p,
       }
     }
     
+    if (tracelevel > 0) {
+      tracefile << "\niter: " << iter;
+      tracefile.SetExpMode() << " val = " << fret << " ";
+      tracefile.SetFloatMode();
+      tracefile << " p = " << p;
+    }
+
     if(status.Get()) return false;
     if (fret <= tolN) return true;
 
@@ -488,8 +507,10 @@ bool Powell(gPVector<double> &p,
       t=2.0*(fp-2.0*fret+fptt)*pow(fp-fret-del,2)-del*pow(fp-fptt,2);
       if (t < 0.0) {
 	Project(xit, p.Lengths());
-	RayMin(func, p, xit, fret, maxits1, tol1, tracefile, tracelevel-2);
+	RayMin(func, p, xit, fret, maxits1, tol1, tracefile, tracelevel-2,interior);
 	xi.SetRow(ibig, xit);
+	for(int kk=1;kk<p.Length();kk++)
+	  assert(p[kk]>=0.0);
       }
     }
     
@@ -502,6 +523,7 @@ bool Powell(gPVector<double> &p,
   }
   return false;
 }
+
 
 
 

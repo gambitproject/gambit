@@ -29,6 +29,7 @@ EFGobitParams::EFGobitParams(gOutput &out, gOutput &pxi, gStatus &s)
 class EFGobitFunc : public gFunction<double>   {
   private:
     long _nevals;
+    bool _domain_err;
     const Efg<double> &_efg;
     double _Lambda;
     gPVector<double> _probs;
@@ -43,6 +44,7 @@ class EFGobitFunc : public gFunction<double>   {
     
     void SetLambda(double l)   { _Lambda = l; }
     long NumEvals(void) const   { return _nevals; }
+    bool DomainErr(void) const { return _domain_err;}
 };
 
 EFGobitFunc::EFGobitFunc(const Efg<double> &E,
@@ -72,14 +74,16 @@ EFGobitFunc::~EFGobitFunc()
   delete [] (_scratch + 1);
 }
 
+
 double EFGobitFunc::Value(const gVector<double> &v)
 {
   static const double PENALTY = 10000.0;
 
   _nevals++;
-  ((gVector<double> &) _p).operator=(v);
-  double val = 0.0, prob, psum, z;
-
+  _domain_err = false;
+ ((gVector<double> &) _p).operator=(v);
+  double val = 0.0, prob, psum, z,rem;
+ 
   _p.CondPayoff(_cpay, _probs);
   
   for (int pl = 1; pl <= _efg.NumPlayers(); pl++)  {
@@ -93,7 +97,10 @@ double EFGobitFunc::Value(const gVector<double> &v)
       
       for (act = 1; act <= _p.GetEFSupport().NumActions(pl, iset); act++)  {
 	z = _Lambda * _cpay(pl, iset, act);
-	z = exp(z);
+	rem=0.0;
+	if(z>500.0) {rem=z-500.0;z=500.0;_domain_err=true;}
+	if(z<-500.0) {rem=z+500.0;z=-500.0;_domain_err=true;}
+	z = exp(z)+rem;
 	psum += z;
 	_cpay(pl, iset, act) = z;
       }
@@ -151,7 +158,11 @@ static void AddSolution(gList<BehavSolution<double> > &solutions,
 {
   int i = solutions.Append(BehavSolution<double>(profile, EfgAlg_GOBIT));
   solutions[i].SetGobit(lambda, value);
-  solutions[i].SetIsSequential(T_YES);
+  solutions[i].SetEpsilon(0.0001);
+  if(solutions[i].IsNash() == T_YES) {
+    solutions[i].SetIsSubgamePerfect(T_YES);
+    solutions[i].SetIsSequential(T_YES);
+  }
 }
 
 extern void Project(gVector<double> &, const gArray<int> &);
@@ -171,7 +182,7 @@ static void InitMatrix(gMatrix<double> &xi, const gArray<int> &dim)
 extern bool Powell(gPVector<double> &p, gMatrix<double> &xi,
 		   gFunction<double> &func, double &fret, int &iter,
 		   int maxits1, double tol1, int maxitsN, double tolN,
-		   gOutput &tracefile, int tracelevel, 
+		   gOutput &tracefile, int tracelevel,  bool interior = false,
 		   gStatus &status = gstatus);
 
 
@@ -200,38 +211,47 @@ void Gobit(const Efg<double> &E, EFGobitParams &params,
 		       log(params.delLam + 1.0));
 
   BehavProfile<double> p(start);
+  BehavProfile<double> pold(start);
   gMatrix<double> xi(p.Length(), p.Length());
 
   InitMatrix(xi, p.Lengths());
 
-  for (nit = 1; !params.status.Get() &&
+  bool powell = true;
+  for (nit = 1; !params.status.Get() && powell && !F.DomainErr() &&
        Lambda <= params.maxLam && Lambda >= params.minLam &&
        value < 10.0; nit++)   {
 
     F.SetLambda(Lambda);
-    Powell(p, xi, F, value, iter,
+    powell = Powell(p, xi, F, value, iter,
 	   params.maxits1, params.tol1, params.maxitsN, params.tolN,
-	   *params.tracefile, params.trace-1);
+	   *params.tracefile, params.trace-1,true);
     
-    if (params.trace>0)  {
-      *params.tracefile << "\nLam: " << Lambda << " val: " << value << " p: " << p;
-    } 
-
-    if (params.pxifile)  {
-      *params.pxifile << "\n" << Lambda << " " << value << " ";
-      for (int pl = 1; pl <= E.NumPlayers(); pl++)
-	for (int iset = 1; iset <= E.PlayerList()[pl]->NumInfosets();
-	     iset++)  {
-	  double prob = 0.0;
-	  for (int act = 1; act <= E.PlayerList()[pl]->InfosetList()[iset]->NumActions(); 
-	       prob += p(pl, iset, act++))
-	    *params.pxifile << p(pl, iset, act) << ' ';
+    if(powell && !F.DomainErr()) {
+      if (params.trace>0)  {
+	*params.tracefile << "\nLam: " << Lambda << " val: ";
+	params.tracefile->SetExpMode();
+	*params.tracefile << value;
+	params.tracefile->SetFloatMode();
+	*params.tracefile << " p: " << p;
+      } 
+      
+      if (params.pxifile)  {
+	*params.pxifile << "\n" << Lambda << " " << value << " ";
+	for (int pl = 1; pl <= E.NumPlayers(); pl++)
+	  for (int iset = 1; iset <= E.PlayerList()[pl]->NumInfosets();
+	       iset++)  {
+	    double prob = 0.0;
+	    for (int act = 1; act <= E.PlayerList()[pl]->InfosetList()[iset]->NumActions(); 
+		 prob += p(pl, iset, act++))
+	      *params.pxifile << p(pl, iset, act) << ' ';
 //	  *params.pxifile << (1.0 - prob) << ' ';
-	}
-    } 
-
-    if (params.fullGraph)
-      AddSolution(solutions, p, Lambda, value);
+	  }
+      } 
+      
+      if (params.fullGraph)
+	AddSolution(solutions, p, Lambda, value);
+      pold=p;                              // pold is last good solution
+    }
 
     Lambda += params.delLam * pow(Lambda, params.powLam);
     params.status.SetProgress((double) step / (double) num_steps);
@@ -239,11 +259,14 @@ void Gobit(const Efg<double> &E, EFGobitParams &params,
   }
 
   if (!params.fullGraph)
-    AddSolution(solutions, p, Lambda, value);
+    AddSolution(solutions, pold, Lambda, value);
 
   if (params.status.Get())    params.status.Reset();
 
   nevals = F.NumEvals();
   nits = 0;
 }
+
+
+
 
