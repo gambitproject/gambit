@@ -1,12 +1,15 @@
+#ifndef NCALCSET_H
+#define NCALCSET_H
+
 class NormalCalcSettings;
 typedef struct	{
   NormalCalcSettings *dl;
-  wxText *dim_item;
-  wxText *l_start_item;
-  wxText *l_stop_item;
-  wxText *l_step_item;
-  wxText *p_step_item;
-  wxText *m_error_item;
+  wxTextCtrl *dim_item;
+  wxTextCtrl *l_start_item;
+  wxTextCtrl *l_stop_item;
+  wxTextCtrl *l_step_item;
+  wxTextCtrl *p_step_item;
+  wxTextCtrl *m_error_item;
   wxRadioBox *data_type_item;
 } enter_game_struct;
 
@@ -47,3 +50,4 @@ void enter_game_func(wxButton &ob,wxCommandEvent &ev);
 void load_game_func(wxButton &ob,wxCommandEvent &ev);
 void save_game_func(wxButton &ob,wxCommandEvent &ev);
 
+#endif // NCALCSET_H

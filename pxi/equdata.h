@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include "general.h"
 #include "gambitio.h"
-#include "gstring.h"
+#include "wx/wx.h"
 #include "gblock.h"
 #include "normequs.h"
 
@@ -33,7 +33,7 @@ private:
   int e_column,delta_column;
   gBlock< gBlock<int> > prob_cols;            // [iset][strategy]
   NormalMatrix *matrix;	// optional
-  gString file_name;
+  wxString file_name;
 public:
   // Constructors
   FileHeader(void):strategies(),prob_cols(),matrix(0)	{}
@@ -67,7 +67,7 @@ public:
   double DataMax(void) const {return data_max;}
   double DataMin(void) const {return data_min;}
   NormalMatrix *Matrix(void) const {return matrix;}
-  gString FileName(void) const {return file_name;}
+  wxString FileName(void) const {return file_name;}
 };
 
 inline gInput  &operator>>(gInput &in,FileHeader &f) {f.Init(in); return in;}

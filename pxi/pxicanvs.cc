@@ -1,7 +1,8 @@
-#include "wx.h"
-#include "wx_form.h"
-#include "wx_mf.h"
-#include "wx_clipb.h"
+#include "wx/wx.h"
+#include "wx/dc.h"
+//#include "wx_form.h"
+//#include "wx_mf.h"
+//#include "wx_clipb.h"
 #include <math.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -30,9 +31,9 @@ char *equ_colors[NUM_COLORS+1]={"BLACK","RED","BLUE","GREEN","CYAN","VIOLET","MA
 //***************************** PLOT LABELS ********************************
 void PxiCanvas::PlotLabels(wxDC &dc, int ch,int cw)
 {
-  dc.SetTextForeground(wxBLACK);
+  dc.SetTextForeground(*wxBLACK);
   //dc.SetBackgroundMode(wxTRANSPARENT);
-  dc.SetFont(draw_settings->GetLabelFont());
+  dc.SetFont(*(draw_settings->GetLabelFont()));
   for (int i=1;i<=labels.Length();i++)
     dc.DrawText(labels[i].label,labels[i].x*cw,labels[i].y*ch);
 }
@@ -74,8 +75,8 @@ void PxiCanvas::DrawToken(wxDC &dc,double x,double y,int st)
 {
   int ts=draw_settings->GetTokenSize();	// token dimentions are 2ts x 2ts
   if (draw_settings->GetColorMode()==COLOR_PROB) {
-    dc.SetPen(wxBLACK_PEN);
-    dc.SetBrush(wxBLACK_BRUSH);
+    dc.SetPen(*wxBLACK_PEN);
+    dc.SetBrush(*wxBLACK_BRUSH);
     switch (st%NUM_TOKENS) {
     case 0: // x (cross diag)
       dc.DrawLine(x-ts,y-ts,x+ts,y+ts);dc.DrawLine(x-ts,y+ts,x+ts,y-ts);break;
@@ -114,18 +115,18 @@ void PxiCanvas::DrawExpPoint_X(wxDC &dc,double cur_e,int iset,int st,int ch,int 
     
     y=CalcY_X((*s).probs[iset][st],ch,plot);
     x=CalcX_X(s->e,cw);
-    dc.SetBrush(exp_data_brush);
+    dc.SetBrush(*exp_data_brush);
     if (draw_settings->GetOverlaySym()==OVERLAY_TOKEN)
       DrawToken(dc,x,y,st);
     else {
       char tmp[10];
       sprintf(tmp,"%d",point_nums[i]);
-      dc.SetFont(draw_settings->GetOverlayFont());
-      dc.SetTextForeground(wxBLACK);
+      dc.SetFont(*(draw_settings->GetOverlayFont()));
+      dc.SetTextForeground(*wxBLACK);
       dc.DrawText(tmp,x-3,y-6);
     }
     if (draw_settings->GetOverlayLines() && st!=1) {
-      dc.SetBrush(wxBLACK_BRUSH);
+      dc.SetBrush(*wxBLACK_BRUSH);
       int y1=(int)CalcY_X((*s).probs[iset][st-1],ch,plot);
       dc.DrawLine(x,y,x,y1);
     }
@@ -168,7 +169,7 @@ void PxiCanvas::PlotData_X(wxDC& dc,int ch,int cw,const FileHeader &f_header,int
 	point_color=2;
       if (point_color>max_equ) max_equ=point_color;
       // next line sets the correct color
-      dc.SetPen(wxThePenList->FindOrCreatePen(equ_colors[(point_color+color_start)%NUM_COLORS+1],1,wxSOLID));
+      dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(point_color+color_start)%NUM_COLORS+1],1,wxSOLID)));
       for (int top=1;top<=draw_settings->GetPlotTop();top++) {
 	iset=draw_settings->GetPlotTop(top);
 	for (st=1;st<=f_header.NumStrategies(iset);st++) {
@@ -176,7 +177,7 @@ void PxiCanvas::PlotData_X(wxDC& dc,int ch,int cw,const FileHeader &f_header,int
 	  y=CalcY_X(probs[iset][st],ch,TOP_PLOT);
 	  if (draw_settings->GetStrategyShow(iset,st)/* && draw_settings->RangeY(probs[iset][st])*/) {
 	    if (draw_settings->GetColorMode()==COLOR_PROB)
-	      dc.SetPen(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID));
+	      dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
 	    if (draw_settings->ConnectDots() && !new_equ)
 	      dc.DrawLine(CalcX_X(prev_point->E(),cw),CalcY_X((*prev_point)[iset][st],ch,TOP_PLOT),x,y);
 	    else
@@ -194,7 +195,7 @@ void PxiCanvas::PlotData_X(wxDC& dc,int ch,int cw,const FileHeader &f_header,int
 	    y=CalcY_X(probs[iset][st],ch,BOTTOM_PLOT);
 	    if (draw_settings->GetStrategyShow(iset,st) /* && draw_settings->RangeY(probs[iset][st])*/) {
 	    if (draw_settings->GetColorMode()==COLOR_PROB)
-	    dc.SetPen(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID));
+	    dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
 	    if (draw_settings->ConnectDots() && !new_equ)
 	    dc.DrawLine(CalcX_X(prev_point->E(),cw),CalcY_X((*prev_point)[iset][st],ch,BOTTOM_PLOT),x,y);
 	    else
@@ -231,14 +232,14 @@ void PxiCanvas::DrawExpPoint_2(wxDC &dc,double cur_e,int pl1,int st1,int pl2,int
     
     if (draw_settings->GetOverlaySym()==OVERLAY_TOKEN) {
       int ts=draw_settings->GetTokenSize();	// token dimentions are 2ts x 2ts
-      dc.SetBrush(exp_data_brush);
+      dc.SetBrush(*exp_data_brush);
       dc.DrawEllipse(x-ts,y-ts,2*ts,2*ts);
     }
     else {
       char tmp[10];
       sprintf(tmp,"%d",point_nums[i]);
-      dc.SetFont(draw_settings->GetOverlayFont());
-      dc.SetTextForeground(wxBLACK);
+      dc.SetFont(*(draw_settings->GetOverlayFont()));
+      dc.SetTextForeground(*wxBLACK);
       dc.DrawText(tmp,x-3,y-6);
     }
     delete s;
@@ -273,7 +274,7 @@ void PxiCanvas::PlotData_2(wxDC& dc,int ch,int cw,const FileHeader &f_header)
       if (probs.E()<draw_settings->GetStopMax() && probs.E()>draw_settings->GetStopMin()) {
 	iset=draw_settings->GetPlotTop(1);
 	point_color=equs.Check_Equ(probs,&new_equ,prev_point);
-	dc.SetPen(wxThePenList->FindOrCreatePen(equ_colors[point_color%NUM_COLORS+1],3,wxSOLID));
+	dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[point_color%NUM_COLORS+1],3,wxSOLID)));
 	/*------------------ ISET #1: plot the point in color ----------------------*/
 	x=XOFF+probs[pl1][st1]*(side-2*XOFF);
 	y=(side-XOFF)-probs[pl2][st2]*(side-2*XOFF);
@@ -340,14 +341,14 @@ void PxiCanvas::DrawExpPoint_3(wxDC &dc,double cur_e,int iset,int st1,int st2,in
     x=CalcX_3((*s).probs[iset][st1],(*s).probs[iset][st2],ch,cw,plot);
     if (draw_settings->GetOverlaySym()==OVERLAY_TOKEN) {
       int ts=draw_settings->GetTokenSize();	// token dimentions are 2ts x 2ts
-      dc.SetBrush(exp_data_brush);
+      dc.SetBrush(*exp_data_brush);
       dc.DrawEllipse(x-ts,y-ts,2*ts,2*ts);
     }
     else {
       char tmp[10];
       sprintf(tmp,"%d",point_nums[i]);
-      dc.SetFont(draw_settings->GetOverlayFont());
-      dc.SetTextForeground(wxBLACK);
+      dc.SetFont(*(draw_settings->GetOverlayFont()));
+      dc.SetTextForeground(*wxBLACK);
       dc.DrawText(tmp,x-3,y-6);
     }
     delete s;
@@ -382,7 +383,8 @@ void PxiCanvas::PlotData_3(wxDC& dc,int ch,int cw,const FileHeader &f_header,int
       point_color=(draw_settings->GetColorMode()==COLOR_EQU) ? equs.Check_Equ(probs,&new_equ,prev_point) : 2;
       if (point_color>max_equ) max_equ=point_color;
       wxPen *cpen=wxThePenList->FindOrCreatePen(equ_colors[(point_color+color_start)%NUM_COLORS+1],3,wxSOLID);
-      if (dc.current_pen!=cpen) dc.SetPen(cpen);
+      //      if (dc.current_pen!=cpen) dc.SetPen(cpen);
+      dc.SetPen(*cpen);
       for (int plots=0;plots<draw_settings->GetNumPlots();plots++) {	// draw one or two triangle plots
 	for (int iset_num=1;iset_num<=((plots) ?  draw_settings->GetPlotBottom() : draw_settings->GetPlotTop());iset_num++) {
 	  iset=(plots) ? draw_settings->GetPlotBottom(iset_num) : draw_settings->GetPlotTop(iset_num);
@@ -422,7 +424,7 @@ void PxiCanvas::Update(wxDC& dc,int device)
   wxBeginBusyCursor();
   GetClientSize(&cw,&ch);
   if (device==PXI_UPDATE_SCREEN) {
-    dc.SetBackground(wxWHITE_BRUSH);
+    dc.SetBackground(*wxWHITE_BRUSH);
     dc.Clear();
   }
   else {
@@ -438,7 +440,7 @@ void PxiCanvas::Update(wxDC& dc,int device)
 #endif
     // For metafile stuff, set transparent text backround
     if (device==PXI_UPDATE_METAFILE) {
-      dc.SetBackground(wxWHITE_BRUSH);
+      dc.SetBackground(*wxWHITE_BRUSH);
       dc.SetBackgroundMode(wxTRANSPARENT);
     }
   }
@@ -459,4 +461,6 @@ void PxiCanvas::Update(wxDC& dc,int device)
   if (draw_settings->GetShowGame()) ShowGame(dc,cw,ch,headers[1]);
   wxEndBusyCursor();
 }
+
+
 

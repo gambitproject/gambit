@@ -1,5 +1,5 @@
-#include "wx.h"
-#include "wx_form.h"
+#include "wx/wx.h"
+//#include "wx_form.h"
 #include "wxmisc.h"
 #pragma hdrstop
 #include <stdlib.h>
@@ -28,6 +28,7 @@ void save_game_func(wxButton &ob,wxCommandEvent &ev)
 
 void enter_game_func(wxButton &ob,wxCommandEvent &ev)
 {
+#ifdef NOT_IMPLEMENTED
   int i,j,dim;
   egf_payoff_struct **array;
   //
@@ -73,6 +74,7 @@ void enter_game_func(wxButton &ob,wxCommandEvent &ev)
   for (i=0;i<dim;i++) delete [] array[i];
   delete [] array;
   delete d;
+#endif // NOT_IMPLEMENTED
 }
 
 void load_game_func(wxButton &ob,wxCommandEvent &ev)
@@ -125,6 +127,7 @@ void load_game_func(wxButton &ob,wxCommandEvent &ev)
 //******************************** Constructor/main ************************
 NormalCalcSettings::NormalCalcSettings(void)
 {
+#ifdef NOT_IMPLEMENTED
   matrix=NULL;
   char	t_file_name[250];
   file_name=new char[250];
@@ -181,6 +184,7 @@ NormalCalcSettings::NormalCalcSettings(void)
   completed=d->Completed();
   data_type=wxListFindString(data_type_list,data_type_str);
   delete d;
+#endif // NOT_IMPLEMENTED
 }
 
 NormalCalcSettings::~NormalCalcSettings(void)

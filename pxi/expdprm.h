@@ -1,5 +1,6 @@
 #include "wxmisc.h"
 
+#ifdef NOT_IMPLEMENTED
 class ExpDataDialog:public MyDialogBox
 {
 private:
@@ -99,4 +100,5 @@ ExpDataDialog::~ExpDataDialog(void)
   if (expfile) delete expfile;
   if (likefile) delete likefile;
 }
+#endif // NOT_IMPLEMENTED
 

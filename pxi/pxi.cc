@@ -41,10 +41,6 @@
 // [Data:]
 // The data, columns separated by white space.
 
-#include "wx.h"
-#include "wx_form.h"
-#include "wx_mf.h"
-#include "wx_clipb.h"
 #include <math.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -66,7 +62,7 @@
 #include "axis.h"
 
 #include "new.h"
-
+#include "wx/sizer.h"
 
 gOutput &operator<<(gOutput &op,const PxiCanvas::LABELSTRUCT &l) 
 {op<<l.x<<' '<<l.y<<' '<<l.label<<'\n';return op;}
@@ -75,12 +71,6 @@ void mem_handler(void)
 {wxFatalError("Memory Error");}
 
 char tempstr[200];
-// Declare the main frame, and a list of children
-PxiFrame   *frame = NULL;
-wxList 		my_children;
-
-// This statement initialises the whole application
-PxiApp     myApp;
 
 // Must initialise these in OnInit, not statically
 wxCursor	*arrow_cursor;
@@ -94,8 +84,26 @@ wxBrush		*exp_data_brush;
 
 // The `main program' equivalent, creating the windows and returning the
 // main frame
-wxFrame *PxiApp::OnInit(void)
+bool PxiApp::OnInit(void)
 {
+  wxConfig config("PXI");
+
+  // Create the main frame window.
+  PxiFrame *pxiFrame = new PxiFrame(0, "PXI", wxPoint(0, 0), wxSize(800, 600));
+  // Set up the help system.
+  wxString helpDir = wxGetWorkingDirectory();
+  config.Read("Help-Directory", &helpDir);
+
+  wxInitHelp(wxString(helpDir.c_str()) + "/gambit", 
+	     "PXI, Version 0.97.3\n"
+	     "Built with " wxVERSION_STRING "\n\n"
+	     "Part of the Gambit Project\n"
+	     "www.hss.caltech.edu/~gambit/Gambit.html\n"
+	     "gambit@hss.caltech.edu\n\n"
+	     "Copyright (C) 1999-2000\n"
+	     "California Institute of Technology\n"
+	     "Funding provided by the National Science Foundation");
+  
   set_new_handler(mem_handler);
   // Create needed cursors
   arrow_cursor = new wxCursor(wxCURSOR_ARROW);
@@ -107,67 +115,297 @@ wxFrame *PxiApp::OnInit(void)
   axis_text_color=new wxColour("BLUE");
   clear_brush = new wxBrush("BLACK",wxTRANSPARENT);
   exp_data_brush=new wxBrush("BLACK",wxSOLID);
-  // Create the main frame window
-  frame = new PxiFrame(NULL, "PXI",0,0,800,600,wxMDI_PARENT | wxDEFAULT_FRAME);
-  // Give it an icon
-  wxIcon *frame_icon;
-#ifdef wx_msw
-  frame_icon = new wxIcon("pxi_icn");
+
+  //  pxiFrame->SetCursor(arrow_cursor);
+
+  pxiFrame->Show(true);
+  if (argc>1) pxiFrame->LoadFile( (wxString) (argv[1]));
+  return true;
+}
+
+IMPLEMENT_APP(PxiApp)
+
+//=====================================================================
+//                       class PxiToolbar
+//=====================================================================
+
+const int PXI_TOOLBAR_ID = 1101;
+
+class PxiToolbar : public wxToolBar {
+private:
+  wxFrame *m_parent;
+
+  // Event handlers
+  void OnMouseEnter(wxCommandEvent &);
+    
+public:
+  PxiToolbar(wxFrame *, const wxPoint &, const wxSize &);
+  virtual ~PxiToolbar() { }
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(PxiToolbar, wxToolBar)
+  EVT_TOOL_ENTER(PXI_TOOLBAR_ID, PxiToolbar::OnMouseEnter)
+END_EVENT_TABLE()
+
+PxiToolbar::PxiToolbar(wxFrame *p_parent, const wxPoint &p_position,
+			     const wxSize &p_size)
+  : wxToolBar(p_parent, PXI_TOOLBAR_ID, p_position, p_size),
+    m_parent(p_parent)
+{
+#ifdef __WXMSW__
+  wxBitmap loadBitmap("OPEN_BITMAP");
+  wxBitmap helpBitmap("HELP_BITMAP");
+#else
+#include "../sources/bitmaps/open.xpm"
+#include "../sources/bitmaps/help.xpm"
+  wxBitmap loadBitmap(open_xpm);
+  wxBitmap helpBitmap(help_xpm);
+#endif  // __WXMSW__
+  
+  SetMargins(2, 2);
+#ifdef __WXMSW__
+  SetToolBitmapSize(wxSize(33, 30));
+#endif  // __WXMSW__
+  AddTool(PXI_LOAD_FILE, loadBitmap);
+  AddSeparator();
+  AddTool(PXI_ABOUT, helpBitmap);
+
+  Realize();
+}
+
+void PxiToolbar::OnMouseEnter(wxCommandEvent &p_event)
+{
+  if (p_event.GetSelection() > 0) {
+    m_parent->SetStatusText(m_parent->GetMenuBar()->GetHelpString(p_event.GetSelection()));
+  }
+  else {
+    m_parent->SetStatusText("");
+  }
+}
+
+//=====================================================================
+//                       class PxiFrame
+//=====================================================================
+
+PxiFrame::PxiFrame(wxFrame *frame, const wxString &p_title,
+		   const wxPoint &p_position, const wxSize &p_size, long p_style) :
+  wxFrame(frame, -1, p_title, p_position, p_size,p_style)
+{
+#ifdef __WXMSW__
+  SetIcon(wxIcon("pxi_icn"));
 #else
 #include "pxi.xpm"
-  frame_icon = new wxIcon(pxi_xpm);
+  SetIcon(wxIcon(pxi_xpm));
 #endif
-  frame->SetIcon(frame_icon);
-  
-  // Make a menubar for the main frame--shown when no windows are open
+    
   wxMenu *file_menu = new wxMenu;
-  file_menu->Append(PXI_LOAD_FILE, "&Load file");
-  file_menu->Append(PXI_QUIT, "&Quit");
   wxMenu *data_menu = new wxMenu;
-  data_menu->Append(PXI_DATA_GRID,"&GridSolver","Create a new file");
   wxMenu *help_menu = new wxMenu;
+  file_menu->Append(PXI_LOAD_FILE, "&Load file", "Load file");
+  file_menu->Append(PXI_QUIT, "&Quit", "Exit PXI");
+  data_menu->Append(PXI_DATA_GRID,"&GridSolver","Create a new file");
   help_menu->Append(PXI_ABOUT,"&About PlotX");
-  
+
   wxMenuBar *menu_bar = new wxMenuBar;
   menu_bar->Append(file_menu, "&File");
   menu_bar->Append(data_menu, "&Data");
   menu_bar->Append(help_menu, "&Help");
-  
-  // Associate the menu bar with the frame
-  frame->SetMenuBar(menu_bar);
-  frame->SetCursor(arrow_cursor);
-  frame->Show(TRUE);
-  
-  // Add support for command line parameters
-  if (argc>1) frame->MakeChild(argv[1]);
-  // Return the main frame window
-  return frame;
+  SetMenuBar(menu_bar);
+
+  wxConfig config("PXI");
+  m_fileHistory.Load(config);
+  m_fileHistory.UseMenu(file_menu);
+  m_fileHistory.AddFilesToMenu();
+
+  CreateStatusBar();
+
+  (void) new PxiToolbar(this, wxPoint(0, 0), wxSize(200, 40));
 }
-// Define my frame constructor
-PxiFrame::PxiFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int type):
-  wxFrame(frame, title, x, y, w, h, type)
+
+PxiFrame::~PxiFrame()
+{
+  wxConfig config("PXI");
+  m_fileHistory.Save(config);
+}
+
+BEGIN_EVENT_TABLE(PxiFrame, wxFrame)
+  EVT_MENU(PXI_LOAD_FILE, PxiFrame::OnFileLoad) 
+  EVT_MENU(PXI_QUIT, wxWindow::Close)
+  EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, PxiFrame::OnMRUFile)
+  EVT_MENU(PXI_DATA_GRID, PxiFrame::OnDataGridSolve)
+  EVT_MENU(PXI_ABOUT, PxiFrame::OnHelpAbout)
+  EVT_CLOSE(PxiFrame::OnCloseWindow)
+END_EVENT_TABLE()
+
+void PxiFrame::OnFileLoad(wxCommandEvent &)
+{
+  Enable(false); // Don't allow anything while the dialog is up.
+
+  wxString filename = wxFileSelector("Load data file", wxGetApp().CurrentDir(),
+				  NULL, NULL, "*.pxi").c_str();
+  Enable(true);
+
+  if (filename == "") {
+    return;
+  }
+
+  wxGetApp().SetCurrentDir(wxPathOnly(filename));
+  
+  LoadFile(filename);
+}
+
+void PxiFrame::OnDataGridSolve(wxCommandEvent &)
 {
 }
 
-PxiChild::PxiChild(wxFrame *frame, char *title, int x, int y, int w, int h, int type):
-  wxFrame(frame, title, x, y, w, h, type)
+void PxiFrame::OnMRUFile(wxCommandEvent &p_event)
 {
+  LoadFile(m_fileHistory.GetHistoryFile(p_event.GetSelection() - wxID_FILE1).c_str());
+}
+
+void PxiFrame::OnHelpAbout(wxCommandEvent &)
+{
+  wxHelpAbout(); 
+}
+
+void PxiFrame::LoadFile(const wxString &p_filename)
+{    
+  wxString filename(wxFileNameFromPath(p_filename));
+  filename = filename.MakeLower();
+
+  if (filename.Contains(".pxi")) {
+    if (!wxFileExists(p_filename)) {
+      wxMessageBox("File could not be found or opened");
+      return;
+    }
+    else {
+      m_fileHistory.AddFileToHistory(p_filename);
+    }
+    PxiChild *subframe = new PxiChild(this,p_filename);
+#ifdef UNUSED
+    // Now build the canvas on top of the subframe
+    int width, height;
+    subframe->GetClientSize(&width, &height);
+    // save the canvas in subframe
+    subframe->canvas = new PxiCanvas(subframe, wxPoint(0, 0), wxSize(width, height),wxRETAINED,p_filename);
+    subframe->Show(TRUE);
+#endif // UNUSED
+  }
+  else
+    wxMessageBox("Unknown file type");
+}
+
+BEGIN_EVENT_TABLE(PxiChild, wxFrame)
+  //  EVT_MENU(PXI_LOAD_FILE, PxiChild::On)
+  EVT_MENU(PXI_OUTPUT, PxiChild::OnFileOutput)
+  EVT_MENU(PXI_CHILD_QUIT, PxiChild::Close)
+  //  EVT_MENU(PXI_PRINT_EPS, PxiChild::OnPrintEps)
+  //  EVT_MENU(PXI_PRINT_MF, PxiChild::OnPrintMF)
+#ifdef wx_msw
+  //  EVT_MENU(PXI_PRINT, PxiChild::OnPrint)
+  //  EVT_MENU(PXI_COPY_MF, PxiChild::OnCopyMF)
+  //  EVT_MENU(PXI_SAVE_MF, PxiChild::OnSaveMF)
+#endif
+  EVT_MENU(PXI_QUIT, PxiChild::Close)
+  /*
+  EVT_MENU(PXI_DATA_GRIDL, PxiChild::OnGrid)
+  EVT_MENU(PXI_DATA_OVERLAY_DATA, PxiChild::OnOverlayData)
+  EVT_MENU(PXI_DATA_OVERLAY_FILE, PxiChild::OnOverlayFile)
+  */
+  //  EVT_MENU(PXI_DATA_ONEDOT, PxiChild::MakeOnedot)
+  EVT_MENU(PXI_FILE_DETAIL, PxiChild::OnFileDetail)
+  EVT_MENU(PXI_DISPLAY_OPTIONS, PxiChild::OnDisplayOptions)
+  EVT_MENU(PXI_ABOUT, PxiChild::OnHelpAbout)
+  EVT_SIZE(PxiChild::OnSize)
+  EVT_CLOSE(PxiChild::OnCloseWindow)
+END_EVENT_TABLE()
+
+void PxiChild::OnFileDetail(wxCommandEvent &)
+{
+  canvas->ShowDetail();
+}
+
+void PxiChild::OnFileOutput(wxCommandEvent &)
+{
+  wxOutputDialogBox dialog(0,this);
+  if (dialog.ShowModal() == wxID_OK) {
+    switch (dialog.GetMedia()) {
+    case wxMEDIA_PRINTER: print(dialog.GetOption()); break;
+    case wxMEDIA_PS:print_eps(dialog.GetOption()); break;
+    case wxMEDIA_CLIPBOARD:print_mf(dialog.GetOption()); break;
+    case wxMEDIA_METAFILE: print_mf(dialog.GetOption(), true); break;
+    case wxMEDIA_PREVIEW: print(dialog.GetOption(), true); break;
+    default:
+      // We'll ignore this silently
+      break;
+    }
+  }
+#ifdef NOT_IMPLEMENTED
+#endif // NOT_IMPLEMENTED
+}
+
+void PxiChild::OnHelpAbout(wxCommandEvent &)
+{
+  wxHelpAbout();
+}
+
+void PxiChild::OnDisplayOptions(wxCommandEvent &)
+{
+  canvas->DrawSettings()->SetOptions(this);
+  wxClientDC dc(this);
+  this->canvas->Update(dc,PXI_UPDATE_SCREEN);
+}
+
+PxiChild::PxiChild(wxFrame *p_parent, const wxString &p_filename) :
+  wxFrame(p_parent, -1, p_filename, wxPoint(0,0),wxSize(480,480)), parent(p_parent)
+  //  canvas(this, wxPoint(0, 0), wxSize(width, height),wxRETAINED,p_filename)
+{
+  SetSizeHints(300, 300);
+
+  // Give the frame an icon
+#ifdef __WXMSW__
+  SetIcon(wxIcon("pxi_icn"));
+#else
+#include "pxi.xpm"
+    SetIcon(wxIcon(pxi_xpm));
+  //  SetIcon(wxIcon(pxi_bits, pxi_width, pxi_height));
+#endif
+
+  CreateStatusBar();
+  MakeMenus();
+
+  //  m_toolbar = new PxiChildToolbar(this, this);
+  int width, height;
+  GetClientSize(&width, &height);
+    // save the canvas in subframe
+  canvas = new PxiCanvas(this, wxPoint(0, 0), wxSize(width, height),wxRETAINED,p_filename);
+  Show(true);
+
+#ifdef UNUSED
   my_children.Append(this);
   Show(FALSE);
   // Give it an icon (this is ignored in MDI mode: uses resources)
   wxIcon *icon = new wxIcon("chrt_icn");
   SetIcon(icon);
   
-  // Make a menubar
+#endif // UNUSED
+}
+
+PxiChild::~PxiChild(void)
+{
+  /*
+    my_children.DeleteObject(this);
+  */
+}
+
+void PxiChild::MakeMenus(void)
+{
   wxMenu *file_menu = new wxMenu;
   file_menu->Append(PXI_LOAD_FILE, "&Load file");
   file_menu->Append(PXI_CHILD_QUIT, "&Close");
-  file_menu->Append(PXI_PRINT_EPS, "Print to &EPS file");
-#ifdef wx_msw
-  file_menu->Append(PXI_PRINT, "&Print");
-  file_menu->Append(PXI_COPY_MF, "&Copy MF");
-  file_menu->Append(PXI_SAVE_MF, "&Save MF");
-#endif
+  file_menu->Append(PXI_OUTPUT, "Output");
   file_menu->AppendSeparator();
   file_menu->Append(PXI_QUIT, "&Quit");
   wxMenu *data_menu= new wxMenu;
@@ -190,12 +428,8 @@ PxiChild::PxiChild(wxFrame *frame, char *title, int x, int y, int w, int h, int 
   SetMenuBar(menu_bar);
 }
 
-PxiChild::~PxiChild(void)
-{
-  my_children.DeleteObject(this);
-}
 
-
+#ifdef UNUSED
 // Intercept menu commands
 void PxiFrame::OnMenuCommand(int id)
 {
@@ -215,36 +449,15 @@ void PxiFrame::OnMenuCommand(int id)
 		       "\nLos Angeles, CA 90025", "About PlotX");break;}
   }
 }
-
-void PxiFrame::MakeChild(char *file_name)
-{
-  // Make another frame, containing a canvas
-  if (!file_name) {
-    char *s=wxFileSelector("Load data file", NULL, NULL, NULL, "*.out;*.pxi");
-    if (s)	file_name=copystring(s);
-  }
-  if (!wxFileExists(file_name)) {
-    wxMessageBox("File could not be found or opened");
-    return;
-  }
-  PxiChild *subframe = new PxiChild(frame,NULL,0,0,480,480,wxMDI_CHILD);
-  // Now build the canvas on top of the subframe
-  int width, height;
-  subframe->GetClientSize(&width, &height);
-  // save the canvas in subframe
-  subframe->canvas = new PxiCanvas(subframe, 0, 0, width, height,wxRETAINED,file_name);
-  subframe->Show(TRUE);
-}
-
-
+#endif //UNUSED
 
 // Show details
 void PxiCanvas::ShowDetail(void)
 {
   FileHeader header=headers[1];
-  gString message;
+  wxString message;
   int		i1,i;
-  sprintf(tempstr,"Detail for: %s\n",FileNameFromPath(header.FileName()));
+  sprintf(tempstr,"Detail for: %s\n",(const char *)FileNameFromPath(header.FileName()));
   message+=tempstr;
   sprintf(tempstr,"Error (lambda) step:  %4.4f\n",header.EStep());
   message+=tempstr;
@@ -284,12 +497,13 @@ void PxiCanvas::ShowDetail(void)
 // Show Game
 void PxiCanvas::ShowGame(wxDC& dc,int cw,int ch,const FileHeader &header)
 {
-  float		th,tw;
+  //  float		th,tw;
+  wxCoord		th,tw;
   int			i1,i;
-  gString matrix_line;
+  wxString matrix_line;
   if (header.Matrix()) {
-    dc.SetFont(game_font);
-    dc.SetTextForeground(game_color);
+    dc.SetFont(*game_font);
+    dc.SetTextForeground(*game_color);
     for (i1=0;i1<header.Matrix()->DimX();i1++) {
       matrix_line="";
       for (i=0;i<header.Matrix()->DimY();i++) {
@@ -300,9 +514,9 @@ void PxiCanvas::ShowGame(wxDC& dc,int cw,int ch,const FileHeader &header)
       dc.DrawText(matrix_line,(cw-2*XOFF-tw)/2+XOFF,XOFF+th*i1*1.5);
     }
   }
-  dc.SetPen(wxBLACK_PEN);
-  dc.SetBrush(clear_brush);
-  dc.DrawRoundedRectangle(XOFF/2+(cw-2*XOFF-tw)/2,XOFF/2,XOFF+tw,th*(header.Matrix()->DimY()-1)*1.5+XOFF*3/2);
+  dc.SetPen(*wxBLACK_PEN);
+  dc.SetBrush(*clear_brush);
+  dc.DrawRoundedRectangle(XOFF/2+(cw-2*XOFF-tw)/2, XOFF/2, XOFF+tw, th, th*(header.Matrix()->DimY()-1)*1.5+XOFF*3/2);
 }
 
 
@@ -315,7 +529,8 @@ void PxiCanvas::StopIt(void)
     //	if (!updating)
     {
       draw_settings->ResetSetStop();
-      OnPaint();
+      wxPaintEvent event;
+      OnPaint(event);
     }
   }
 }
@@ -323,6 +538,7 @@ void PxiCanvas::StopIt(void)
 #include "expdprm.h"
 void PxiCanvas::MakeOverlayData(void)
 {
+#ifdef NOT_IMPLEMENTED
   if (exp_data) {delete exp_data;exp_data=NULL;}
   ExpDataDialog D(headers[1].FileName(),frame);
   if (D.Completed()==wxOK) {
@@ -331,6 +547,7 @@ void PxiCanvas::MakeOverlayData(void)
     exp_data=new ExpData(P);
     D.LoadNow();
   }
+#endif // NOT_IMPLEMENTED
 }
 
 void PxiCanvas::MakeOverlayFile(void)
@@ -351,12 +568,12 @@ void PxiFrame::MakeOneDot(char *in_filename,char *out_filename)
 {
   char *inname,*outname;
   if (!in_filename) {
-    char *s=wxFileSelector("Enter Input File", NULL, NULL, NULL, "*.out");
+    const char *s=wxFileSelector("Enter Input File", NULL, NULL, NULL, "*.out");
     if (s) inname=copystring(s); else return;
   }
   else inname=copystring(in_filename);
   if (!out_filename) {
-    char *s=wxFileSelector("Enter Output File", NULL, NULL, NULL, "*.out");
+    const char *s=wxFileSelector("Enter Output File", NULL, NULL, NULL, "*.out");
     if (s) outname=copystring(s); else return;
   }
   else outname=copystring(out_filename);
@@ -368,6 +585,7 @@ void PxiFrame::MakeOneDot(char *in_filename,char *out_filename)
 
 void PxiCanvas::OnChar(wxKeyEvent &ev)
 {
+#ifdef NOT_IMPLEMENTED
   switch(ev.KeyCode()) {
   case PXI_KEY_STOP:
     StopIt();
@@ -376,6 +594,7 @@ void PxiCanvas::OnChar(wxKeyEvent &ev)
     wxCanvas::OnChar(ev);
     break;
   }
+#endif // NOT_IMPLEMENTED
 }
 
 #define TEXT_MARGIN	.05
@@ -385,14 +604,15 @@ void PxiCanvas::OnEvent(wxMouseEvent &ev)
     int w,h;
     GetClientSize(&w,&h);
     label_struct tmp_label;
-    tmp_label.x=ev.x/w;tmp_label.y=ev.y/h;
+    //    tmp_label.x=ev.x/w;tmp_label.y=ev.y/h;
+    tmp_label.x=ev.GetX()/w;tmp_label.y=ev.GetY()/h;
     // Check if clicked on an already existing text
     int clicked_on=0;
     for (int i=1;i<=labels.Length();i++)
       if (labels[i].x+TEXT_MARGIN>tmp_label.x && labels[i].x-TEXT_MARGIN<tmp_label.x &&
 	  labels[i].y+TEXT_MARGIN>tmp_label.y && labels[i].y-TEXT_MARGIN<tmp_label.y)
 	clicked_on=i;
-    const char * junk = (clicked_on) ? (char *)labels[clicked_on].label : "";
+    const char * junk = (clicked_on) ? (const char *)labels[clicked_on].label : "";
     tmp_label.label=wxGetTextFromUser("Enter Label","Enter Label", (char *)junk);
     //					  (clicked_on) ? (char *)labels[clicked_on].label : "");
     if (!clicked_on)
@@ -402,22 +622,115 @@ void PxiCanvas::OnEvent(wxMouseEvent &ev)
       tmp_label.y=labels[clicked_on].y;
       labels[clicked_on]=tmp_label;
     }
-    OnPaint();
+    wxPaintEvent event;
+    OnPaint(event);
   }
 }
+
+BEGIN_EVENT_TABLE(PxiCanvas, wxScrolledWindow)
+  EVT_PAINT(PxiCanvas::OnPaint)
+END_EVENT_TABLE()
+
 // Define a constructor for my canvas
-PxiCanvas::PxiCanvas(wxFrame *frame, int x, int y, int w, int h, int style,const char *file_name):
-  wxCanvas(frame, x, y, w, h, style),exp_data(NULL),draw_settings(NULL),
-  probs(file_name)
+PxiCanvas::PxiCanvas(wxFrame *frame, const wxPoint &p_position,
+		     const wxSize &p_size, int style,const char *file_name):
+  wxScrolledWindow(frame, -1, p_position, p_size, style),
+  exp_data(NULL),draw_settings(NULL), probs(file_name), painting(false)
 {
   headers.Append(FileHeader(file_name));
   draw_settings=new PxiDrawSettings(headers[1]);
   frame->SetTitle(headers[1].FileName());
+  Show(true);
 }
+
+#ifdef wx_msw
+void PxiChild::print(wxOutputOption fit, bool preview)
+{
+  wxPrinterDC dc(NULL, NULL, NULL);  // Defaults to EPS under UNIX,
+  // normal Windows printing under Win 3.1
+  if (dc.Ok()) {
+    dc.StartDoc("PXI printout");
+    dc.StartPage();
+    this->canvas->Update(dc,PXI_UPDATE_PRINTER);
+    dc.EndPage();
+    dc.EndDoc();
+  }
+  this->canvas->Update(*(this->canvas->GetDC()),PXI_UPDATE_SCREEN);
+}
+#else
+void PxiChild::print(wxOutputOption /*fit*/, bool preview)
+{
+  if (!preview)
+    wxMessageBox("Printing not supported under X");
+  else
+    wxMessageBox("Print Preview is not supported under X");
+}
+#endif
+
+
+
+void PxiChild::print_eps(wxOutputOption fit)
+{
+  wxPostScriptDC dc;
+  if (dc.Ok()) {
+    dc.StartDoc("Pxi printout");
+    dc.StartPage();
+    this->canvas->Update(dc,PXI_UPDATE_FILE);
+    dc.EndPage();
+    dc.EndDoc();
+  }
+}
+
+#ifdef wx_msw
+void PxiChild::print_mf(wxOutputOption fit, bool save_mf)
+{
+  wxMetaFileDC dc;
+  if (dc.Ok()) {
+    this->canvas->Update(dc,PXI_UPDATE_METAFILE);
+    wxMetaFile *mf = dc.Close();
+    if (mf) {
+      mf->SetClipboard((int)(dc.MaxX()+10),(int)(dc.MaxY()+10));
+      delete mf;
+    }
+  }
+  this->canvas->Update(*(this->canvas->GetDC()),PXI_UPDATE_SCREEN);
+}
+#else
+void PxiChild::print_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
+{
+  wxMessageBox("Metafiles are not supported under X");
+}
+#endif
+
+#ifdef wx_msw
+void PxiChild::save_mf(wxOutputOption fit, bool save_mf)
+{
+  char *s=copystring(wxFileSelector("Save Metafile",NULL,NULL,NULL,"*.wmf"));
+  if (s) {
+    wxMetaFileDC dc(s);
+    if (dc.Ok()) {
+      this->canvas->Update(dc,PXI_UPDATE_METAFILE);
+      wxMetaFile *mf = dc.Close();
+      if (mf) {
+	delete mf;
+	wxMakeMetaFilePlaceable(s,dc.MinX(),dc.MinY(),dc.MaxX(),dc.MaxY());
+      }
+    }
+    delete [] s;
+    this->canvas->Update(*(this->canvas->GetDC()),PXI_UPDATE_SCREEN);
+  }
+}
+#else
+void PxiChild::save_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
+{
+  wxMessageBox("Metafiles are not supported under X");
+}
+#endif
 
 // Intercept menu commands
 void PxiChild::OnMenuCommand(int id)
 {
+#ifdef NOT_IMPLEMENTED
   switch (id) {
   case PXI_PRINT_EPS:         // To use the special wxWindows EPS driver
     // under Windows 3.1, specify "PostScript"
@@ -495,10 +808,12 @@ void PxiChild::OnMenuCommand(int id)
     frame->OnMenuCommand(id);
     break;
   }
+#endif // NOT_IMPLEMENTED
 }
 //**************************************************************************
 //********************* Create a new data file *****************************
 //**************************************************************************
+#ifdef NOT_IMPLEMENTED
 void solver_update_func1(int total=-1,wxProgressIndicator1 *_p=NULL)
 {
   static wxProgressIndicator1 *p;
@@ -513,6 +828,7 @@ void solver_update_func1(int total=-1,wxProgressIndicator1 *_p=NULL)
 // solver update func--a function to periodically relinquish the control of the CPU
 void solver_update_func(void)
 {wxYield();solver_update_func1();}
+#endif // NOT_IMPLEMENTED
 
 
 
@@ -547,6 +863,7 @@ unsigned long calc_num_steps(int dim,int steps)
 
 char *PxiFrame::MakeDataFile(void)
 {
+#ifdef NOT_IMPLEMENTED
   char *out_file_name=NULL;
   // Create the settings dialog, get the settings
   NormalCalcSettings *settings=new NormalCalcSettings;
@@ -589,17 +906,33 @@ char *PxiFrame::MakeDataFile(void)
   }
   delete settings;
   return (out_file_name);
+#endif // NOT_IMPLEMENTED
+}
+
+void PxiFrame::OnCloseWindow(wxCloseEvent &)
+{
+  wxKillHelp();
+  //  wout->OnClose(); werr->OnClose();
+  Destroy();
 }
 
 // Define the repainting behaviour
-void PxiCanvas::OnPaint(void)
+void PxiCanvas::OnPaint(wxPaintEvent &)
 {
-  Update(*(GetDC()),PXI_UPDATE_SCREEN);
+  if (painting) 
+    return; // prevent re-entry
+  painting = true;
+  wxPaintDC dc(this);
+  Update(dc,PXI_UPDATE_SCREEN);
+  painting = false;
 }
+
 // Define the behaviour for the frame closing
 // - must delete all frames except for the main one.
+
 Bool PxiFrame::OnClose(void)
 {
+#ifdef UNUSED
   // Must delete children
   wxNode *node = my_children.First();
   while (node) {
@@ -608,6 +941,7 @@ Bool PxiFrame::OnClose(void)
     child->Close();
     node = next;
   }
+#endif // UNUSED
   return TRUE;
 }
 
@@ -656,7 +990,7 @@ PxiDrawSettings::PxiDrawSettings(FileHeader &header)
   plot2_features=DRAW_AXIS|DRAW_TICKS|DRAW_NUMS|DRAW_SQUARE;
 }
 
-// Plot3 mode is now more flexible: it works great (by default) on 2 player
+// Plot3 mode is now more flexible: it works great (by default) on 2d player
 // games, each player having 3 strategies.  It has now been extended to work
 // with N player games with 3+ strategies each
 // In this case, the two desired strategies are selected in the dialog, and
@@ -710,8 +1044,31 @@ Bool PxiDrawSettings::CheckPlot2Mode(void)
   return TRUE;
 }
 #define DELTA			1e-9
-void PxiDrawSettings::SetOptions(wxFrame *parent)
+void PxiDrawSettings::SetOptions(wxWindow *parent)
 {
+  dialogDrawSettings dialog(parent, *this);
+  if(dialog.ShowModal() == wxID_OK){ 
+    stop_min = strtod(dialog.GetMinLam(),NULL);
+    stop_max = strtod(dialog.GetMaxLam(),NULL);
+    data_min = strtod(dialog.GetMinY(),NULL);
+    data_max = strtod(dialog.GetMaxY(),NULL);
+    int mode = dialog.GetPlotMode();
+    if(mode==0)plot_mode=PXI_PLOT_X;
+    if(mode==1)plot_mode=PXI_PLOT_2;
+    if(mode==2)plot_mode=PXI_PLOT_3;
+
+    mode = dialog.GetColorMode();
+    if(mode==0)color_mode=COLOR_EQU;
+    if(mode==1)color_mode=COLOR_PROB;
+    if(mode==2)color_mode=COLOR_NONE;
+
+    show_game = dialog.GetDisplayMatrix();
+    one_or_two=1;
+    if(dialog.GetTwoPlots()) one_or_two = 2;
+    connect_dots = dialog.GetConnectDots();
+    restart_overlay_colors = dialog.GetRestartColors();
+  };
+#ifdef NOT_IMPLEMENTED
   Bool	enable_set_stop=TRUE;
   Bool 	display_two,connectdots;
   int 	i,iset;                       
@@ -844,10 +1201,12 @@ void PxiDrawSettings::SetOptions(wxFrame *parent)
   }
   delete display_dialog;
   delete [] plot_mode_str;
+#endif // NOT_IMPLEMENTED
 }
 
 void PxiDrawSettings::overlay_func(wxButton &ob,wxEvent &)
 {
+#ifdef NOT_IMPLEMENTED
   PxiDrawSettings	*draw_settings=(PxiDrawSettings *)ob.GetClientData();
   MyDialogBox *overlay_dialog=new MyDialogBox(NULL,"Overlay Options");
   wxStringList *overlay_token_list=new wxStringList;
@@ -883,6 +1242,7 @@ void PxiDrawSettings::overlay_func(wxButton &ob,wxEvent &)
     
   }
   delete overlay_dialog;
+#endif // NOT_IMPLEMENTED
 }
 void PxiDrawSettings::plot_features_func(wxButton &ob,wxEvent &)
 {((PxiDrawSettings *)ob.GetClientData())->AskPlotFeatures();}
@@ -890,6 +1250,7 @@ void PxiDrawSettings::plot_features_func(wxButton &ob,wxEvent &)
 
 void PxiDrawSettings::AskPlotFeatures(void)
 {
+#ifdef NOT_IMPLEMENTED
   MyDialogBox *plot_feat_dialog;
   unsigned int feat=PlotFeatures();
   switch (plot_mode) {
@@ -949,6 +1310,7 @@ void PxiDrawSettings::AskPlotFeatures(void)
   }
   SetPlotFeatures(feat);
   delete plot_feat_dialog;
+#endif // NOT_IMPLEMENTED
 }
 
 void PxiDrawSettings::SetPlotFeatures(unsigned int feat)
@@ -970,17 +1332,20 @@ unsigned int PxiDrawSettings::PlotFeatures(void)
 
 void PxiDrawSettings::label_font_func(wxButton &ob,wxEvent &)
 {
+#ifdef NOT_IMPLEMENTED
   PxiDrawSettings	*draw_settings=(PxiDrawSettings *)ob.GetClientData();
   FontDialogBox *f=new FontDialogBox(NULL,draw_settings->GetLabelFont());
   if (f->Completed()==wxOK)
     draw_settings->SetLabelFont(f->MakeFont());
   delete f;
+#endif // NOT_IMPLEMENTED
 }
 
 // Dialog to select what isets and strategies will be displayed.  Take
 // care of large games (so that the dialogs do not get too large)
 void PxiDrawSettings::disp_func(wxButton &ob,wxEvent &)
 {
+#ifdef NOT_IMPLEMENTED
   PxiDrawSettings	*ds=(PxiDrawSettings *)ob.GetClientData();
   MyDialogBox *display_dialog=new MyDialogBox(0,"What to Display");
   display_dialog->Form()->Add(wxMakeFormNewLine());
@@ -1066,13 +1431,282 @@ void PxiDrawSettings::disp_func(wxButton &ob,wxEvent &)
     else
       {delete display_dialog;}
   }
+#endif // NOT_IMPLEMENTED
 }
 
 void PxiDrawSettings::overlay_font_func(wxButton &ob,wxEvent &)
 {
+#ifdef NOT_IMPLEMENTED
   PxiDrawSettings	*draw_settings=(PxiDrawSettings *)ob.GetClientData();
   FontDialogBox *f=new FontDialogBox(NULL,draw_settings->GetOverlayFont());
   if (f->Completed()==wxOK)
     draw_settings->SetOverlayFont(f->MakeFont());
   delete f;
+#endif // NOT_IMPLEMENTED
 }
+//
+// A general-purpose dialog box to display the description of the exception
+//
+
+void pxiExceptionDialog(const wxString &p_message, wxWindow *p_parent,
+            long p_style /*= wxOK | wxCENTRE*/)
+{
+  wxString message = "An internal error occurred in PXI:\n" + p_message;
+  wxMessageBox(message, "PXI Error", p_style, p_parent);
+}
+
+const int idSETTINGS_WHICH_PLOT_LISTBOX = 2018;
+const int idSETTINGS_WHICH_INFOSET_LISTBOX = 2019;
+const int idSETTINGS_INFOSET_LISTBOX = 2020;
+const int idSETTINGS_ACTION_LISTBOX = 2021;
+const int idSETTINGS_OVERLAY_BUTTON = 2022;
+const int idSETTINGS_FONT_BUTTON = 2023;
+const int idSETTINGS_PLOT_BUTTON = 2024;
+
+BEGIN_EVENT_TABLE(dialogDrawSettings, guiAutoDialog)
+  EVT_LISTBOX(idSETTINGS_WHICH_PLOT_LISTBOX, dialogDrawSettings::OnWhichPlot)
+  EVT_LISTBOX(idSETTINGS_WHICH_INFOSET_LISTBOX, dialogDrawSettings::OnWhichInfoset)
+  EVT_LISTBOX(idSETTINGS_INFOSET_LISTBOX, dialogDrawSettings::OnInfoset)
+  EVT_LISTBOX(idSETTINGS_ACTION_LISTBOX, dialogDrawSettings::OnAction)
+  EVT_BUTTON(idSETTINGS_OVERLAY_BUTTON, dialogDrawSettings::OnOverlay)
+  EVT_BUTTON(idSETTINGS_FONT_BUTTON, dialogDrawSettings::OnFont)
+  EVT_BUTTON(idSETTINGS_PLOT_BUTTON, dialogDrawSettings::OnPlot)
+END_EVENT_TABLE()
+
+dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
+  : guiAutoDialog(p_parent, "Draw Settings"), 
+    draw_settings(s)
+{
+  int num_plots = 1;
+  if(draw_settings.one_or_two==2) num_plots = 2;
+  
+  m_whichPlotItem = new wxListBox(this, idSETTINGS_WHICH_PLOT_LISTBOX);
+  for (int i = 1; i <= num_plots; i++) {
+    char tmp[80];
+    sprintf(tmp, "Plot %d", i);
+    m_whichPlotItem->Append(tmp);
+  }
+  m_whichPlotItem->SetSelection(0);
+  
+  m_whichIsetItem = new wxListBox(this, idSETTINGS_WHICH_INFOSET_LISTBOX, 
+				  wxDefaultPosition, wxDefaultSize,0,0,
+#ifdef __WXGTK__  // the wxGTK multiple-selection listbox is flaky (2.1.11)
+				  wxLB_EXTENDED
+#else
+				  wxLB_MULTIPLE
+#endif // __WXGTK__
+				  );
+  wxCommandEvent event;
+  OnWhichPlot(event);
+  
+  m_infosetItem = new wxListBox(this, idSETTINGS_INFOSET_LISTBOX);
+  for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
+    char tmp[80];
+    sprintf(tmp, "Infoset %d", iset);
+    m_infosetItem->Append(tmp);
+  }
+  m_infosetItem->SetSelection(0);
+  
+  m_actionItem = new wxListBox(this, idSETTINGS_ACTION_LISTBOX, 
+			       wxDefaultPosition, wxDefaultSize,0,0,
+#ifdef __WXGTK__  // the wxGTK multiple-selection listbox is flaky (2.1.11)
+			       wxLB_EXTENDED
+#else
+                               wxLB_MULTIPLE
+#endif // __WXGTK__
+			       );
+  OnInfoset(event);
+  
+  char tmp[80];
+  sprintf(tmp, "%f", draw_settings.stop_min);
+  m_minLam = new wxNumberItem(this, "minLam", tmp);
+  sprintf(tmp, "%f", draw_settings.stop_max);
+  m_maxLam = new wxNumberItem(this, "maxLam", tmp);
+  sprintf(tmp, "%f", draw_settings.data_min);
+  m_minY = new wxNumberItem(this, "minLam", tmp);
+  sprintf(tmp, "%f", draw_settings.data_max);
+  m_maxY = new wxNumberItem(this, "maxLam", tmp);
+  
+  wxBoxSizer *lambdaSizer = new wxBoxSizer(wxHORIZONTAL);
+  lambdaSizer->Add(new wxStaticText(this, -1, "X Min"),
+		   0, wxALL | wxCENTER, 5);
+  lambdaSizer->Add(m_minLam, 0, wxALL, 5);
+  lambdaSizer->Add(new wxStaticText(this, -1, "X Max"),
+		   0, wxALL | wxCENTER, 5);
+  lambdaSizer->Add(m_maxLam, 0, wxALL, 5);
+  
+  wxBoxSizer *dataSizer = new wxBoxSizer(wxHORIZONTAL);
+  dataSizer->Add(new wxStaticText(this, -1, "Y Min"),
+		   0, wxALL | wxCENTER, 5);
+  dataSizer->Add(m_minY, 0, wxALL, 5);
+  dataSizer->Add(new wxStaticText(this, -1, "Y Max"),
+		   0, wxALL | wxCENTER, 5);
+  dataSizer->Add(m_maxY, 0, wxALL, 5);
+  
+  wxBoxSizer *plotSizer = new wxBoxSizer(wxHORIZONTAL);
+  plotSizer->Add(m_whichPlotItem, 0, wxCENTRE | wxALL, 5);
+  plotSizer->Add(m_whichIsetItem, 0, wxCENTRE | wxALL, 5);
+  
+  wxBoxSizer *selectSizer = new wxBoxSizer(wxHORIZONTAL);
+  selectSizer->Add(m_infosetItem, 0, wxCENTRE | wxALL, 5);
+  selectSizer->Add(m_actionItem, 0, wxCENTRE | wxALL, 5);
+  
+  wxString plotModeChoices[] = { "Plot X", "Plot 2", "Plot 3" };
+  m_plotMode = new wxRadioBox(this, -1, "Plot Mode",
+			      wxDefaultPosition, wxDefaultSize,
+			      3, plotModeChoices, 0, wxRA_SPECIFY_ROWS);
+  
+  if (draw_settings.plot_mode == PXI_PLOT_X) 
+    m_plotMode->SetSelection(0);
+  else if (draw_settings.plot_mode == PXI_PLOT_2) 
+    m_plotMode->SetSelection(1);
+  else if (draw_settings.plot_mode == PXI_PLOT_3) 
+    m_plotMode->SetSelection(2);
+  
+  wxString colorModeChoices[] = { "Equ", "Prob", "None" };
+  m_colorMode = new wxRadioBox(this, -1, "Color Mode",
+			       wxDefaultPosition, wxDefaultSize,
+			       3, colorModeChoices, 0, wxRA_SPECIFY_ROWS);
+  
+  if (draw_settings.color_mode == PXI_PLOT_X) 
+    m_colorMode->SetSelection(0);
+  else if (draw_settings.color_mode == PXI_PLOT_2) 
+    m_colorMode->SetSelection(1);
+  else if (draw_settings.color_mode == PXI_PLOT_3) 
+    m_colorMode->SetSelection(2);
+  
+  wxBoxSizer *modeSizer = new wxBoxSizer(wxHORIZONTAL);
+  modeSizer->Add(m_plotMode, 0, wxALL, 5);
+  modeSizer->Add(m_colorMode, 0, wxALL, 5);
+  
+  m_overlayButton = new wxButton(this, idSETTINGS_OVERLAY_BUTTON, "Overlay");
+  m_fontButton = new wxButton(this, idSETTINGS_FONT_BUTTON, "Font");
+  m_plotButton = new wxButton(this, idSETTINGS_PLOT_BUTTON, "Plot");
+  
+  m_displayMatrix = new wxCheckBox(this, -1, "Display Matrix");
+  m_displayMatrix->SetValue(draw_settings.show_game);
+    
+  m_twoPlots = new wxCheckBox(this, -1, "Two Plots");
+  if(draw_settings.one_or_two==2)
+    m_twoPlots->SetValue(true);
+  else
+    m_twoPlots->SetValue(false);
+
+  m_connectDots = new wxCheckBox(this, -1, "Connect Dots");
+  m_connectDots->SetValue(draw_settings.ConnectDots());
+
+  m_restartColors = new wxCheckBox(this, -1, "Restart Colors");
+  m_restartColors->SetValue(draw_settings.restart_overlay_colors);
+
+  wxBoxSizer *miscSizer = new wxBoxSizer(wxHORIZONTAL);
+  miscSizer->Add(m_displayMatrix, 0, wxALL, 5);
+  miscSizer->Add(m_twoPlots, 0, wxALL, 5);
+  miscSizer->Add(m_connectDots, 0, wxALL, 5);
+  miscSizer->Add(m_restartColors, 0, wxALL, 5);
+
+  wxBoxSizer *botSizer = new wxBoxSizer(wxHORIZONTAL);
+  botSizer->Add(m_overlayButton, 0, wxALL, 5);
+  botSizer->Add(m_fontButton, 0, wxALL, 5);
+  botSizer->Add(m_plotButton, 0, wxALL, 5);
+
+  wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);
+  allSizer->Add(new wxStaticText(this, -1, "Display Range:"), 0, wxCENTRE | wxALL, 5);
+  allSizer->Add(lambdaSizer, 0, wxCENTRE | wxALL, 5);
+  allSizer->Add(dataSizer, 0, wxCENTRE | wxALL, 5);
+  allSizer->Add(plotSizer, 0, wxCENTRE | wxALL, 5);
+  allSizer->Add(selectSizer, 0, wxCENTRE | wxALL, 5);
+  allSizer->Add(modeSizer, 0, wxCENTRE | wxALL, 5);
+  allSizer->Add(miscSizer, 0, wxCENTRE | wxALL, 5);
+  allSizer->Add(botSizer, 0, wxCENTRE | wxALL, 5);
+  allSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
+  
+  SetSizer(allSizer); 
+  allSizer->Fit(this);
+  allSizer->SetSizeHints(this); 
+  Layout();
+}
+
+dialogDrawSettings::~dialogDrawSettings()
+{ }
+
+void dialogDrawSettings::OnWhichPlot(wxCommandEvent &)
+{
+  int i = m_whichPlotItem->GetSelection()+1; 
+
+  m_whichIsetItem->Clear();
+  for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
+    char tmp[80];
+    sprintf(tmp, "Infoset %d", iset);
+    m_whichIsetItem->Append(tmp);
+  }
+  if(i==1)
+    for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
+      if (draw_settings.plot_top.Contains(iset)) 
+	m_whichIsetItem->SetSelection(iset-1, true);
+    }
+  else
+    for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
+      if (draw_settings.plot_bottom.Contains(iset)) 
+	m_whichIsetItem->SetSelection(iset-1, true);
+    }
+}
+
+void dialogDrawSettings::OnWhichInfoset(wxCommandEvent &)
+{
+  int i = m_whichPlotItem->GetSelection()+1; 
+
+  if(i==1)
+    for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
+      bool flag = m_whichIsetItem->Selected(iset-1);
+      bool member = draw_settings.plot_top.Contains(iset);
+      if (flag && !member) 
+	draw_settings.plot_top.Append(iset);
+      else if (!flag && member) 
+	draw_settings.plot_top.Remove(draw_settings.plot_top.Find(iset));
+    }
+  else 
+    for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
+      bool flag = m_whichIsetItem->Selected(iset-1);
+      bool member = draw_settings.plot_bottom.Contains(iset);
+      if (flag && !member) 
+	draw_settings.plot_bottom.Append(iset);
+      else if(!flag && member)
+	draw_settings.plot_bottom.Remove(draw_settings.plot_bottom.Find(iset));
+    }
+}
+
+void dialogDrawSettings::OnInfoset(wxCommandEvent &)
+{
+  int iset = m_infosetItem->GetSelection()+1; 
+
+  m_actionItem->Clear();
+  for (int act = 1; act <= draw_settings.strategy_show[iset].Length(); act++) {
+    char tmp[80];
+    sprintf(tmp, "Action %d", act);
+    m_actionItem->Append(tmp);
+  }
+  for (int act = 1; act <= draw_settings.strategy_show[iset].Length(); act++) {
+    if(draw_settings.strategy_show[iset][act])
+      m_actionItem->SetSelection(act - 1, true);
+  }
+  m_actionItem->Enable(true);
+}
+
+void dialogDrawSettings::OnAction(wxCommandEvent &)
+{ 
+  int iset = m_infosetItem->GetSelection()+1; 
+
+  for (int act = 1; act <= draw_settings.strategy_show[iset].Length(); act++) 
+    draw_settings.strategy_show[iset][act] = m_actionItem->Selected(act-1);
+  
+}
+
+void dialogDrawSettings::OnOverlay(wxCommandEvent &)
+{ }
+
+void dialogDrawSettings::OnFont(wxCommandEvent &)
+{ }
+
+void dialogDrawSettings::OnPlot(wxCommandEvent &)
+{ }
+

@@ -1,6 +1,3 @@
-#ifndef PXI_H
-#define PXI_H
-
 // Program: PXI.  [Plot X V2.0]
 // This program is designed to plot data from simulations/experiments on
 // normal form games [support for other types of generic infoset/player games
@@ -16,13 +13,23 @@
 // program.
 // See pxi.cc for more details (file format, etc).
 
+#ifndef PXI_H
+#define PXI_H
+
+#include "wx/wx.h"
+#include "wx/dc.h"
+#include "wx/dcps.h"
+#include "wx/config.h"    // for wxConfig
+#include "wx/docview.h"   // for wxFileHistory
+
 #define PXI_QUIT              100
-#define PXI_PRINT             101
+#define PXI_OUTPUT             101
+//#define PXI_PRINT             101
 #define PXI_ABOUT             108
 #define PXI_LOAD_FILE         111
-#define PXI_PRINT_EPS         112  // Windows-only option
-#define PXI_COPY_MF           113  // Windows-only option
-#define PXI_SAVE_MF           114  // Windows-only option
+//#define PXI_PRINT_EPS         112  // Windows-only option
+//#define PXI_COPY_MF           113  // Windows-only option
+//#define PXI_SAVE_MF           114  // Windows-only option
 #define	PXI_NEW_WINDOW	      117
 #define	PXI_CHILD_QUIT	      118
 #define	PXI_JUST_REPAINT      115
@@ -51,12 +58,25 @@
 /*********************** PXI.H ******************************************/
 #define MAXN    10
 
-// Define a new application
+
+
+extern void pxiExceptionDialog(const wxString &p_message, wxWindow *p_parent,
+                               long p_style = wxOK | wxCENTRE);
+
 class PxiApp: public wxApp
 {
+private:
+  wxString m_currentDir; /* Current position in directory tree. */
+
+  bool  OnInit(void);
 public:
-  wxFrame *OnInit(void);
+  virtual ~PxiApp() { }
+
+  const wxString &CurrentDir(void)  { return m_currentDir; }
+  void SetCurrentDir(const wxString &p_dir)  { m_currentDir = p_dir; }
 };
+
+DECLARE_APP(PxiApp)
 
 #define	OVERLAY_TOKEN   1
 #define	OVERLAY_NUMBER  2
@@ -74,6 +94,7 @@ public:
 
 class PxiDrawSettings
 {
+friend class dialogDrawSettings;
 private:
   int 		plot_mode;
   int		data_mode;
@@ -172,7 +193,7 @@ public:
   // PlotFeatures determines if axis and labels,etc. are to be drawn
   unsigned int PlotFeatures(void);
   // Set* functions
-  void	SetOptions(wxFrame *parent);
+  void	SetOptions(wxWindow *parent);
   void	SetStopMax(double sm) {stop_max=sm;}
   void	SetStopMin(double sm) {stop_min=sm;}
   void	ResetSetStop(void) {stop_min=l_start;stop_max=l_stop;}
@@ -189,12 +210,12 @@ public:
 
 
 // Define a new canvas
-class PxiCanvas: public wxCanvas
+class PxiCanvas: public wxScrolledWindow
 {
 public:
   typedef struct LABELSTRUCT {
     friend gOutput &operator<<(gOutput &op,const LABELSTRUCT &l);
-    gString label;
+    wxString label;
     double x,y;
     LABELSTRUCT(void):label(""),x(0.0),y(0.0) {}
     LABELSTRUCT &operator=(const LABELSTRUCT &l)
@@ -212,6 +233,7 @@ private:
   gBlock<FileHeader> headers;           // all the basic info about the file
   Bool	stopped;
   double cur_e;
+  bool painting;
   void PlotData_X(wxDC& dc,int ch,int cw,const FileHeader &f_header,int level);
   void PlotData_3(wxDC& dc,int ch,int cw,const FileHeader &f_header,int level);
   void PlotData_2(wxDC& dc,int ch,int cw,const FileHeader &f_header);
@@ -230,9 +252,10 @@ private:
   
   void DrawToken(wxDC &dc,double x,double y,int st);
 public:
-  PxiCanvas(wxFrame *frame, int x, int y, int w, int h,int style=0,const char *file_name=NULL);
+  PxiCanvas(wxFrame *frame, const wxPoint &p_position,
+	    const wxSize &p_size, int style=0,const char *file_name=NULL);
   void Update(wxDC& dc,int device);
-  void OnPaint(void);
+  void OnPaint(wxPaintEvent &ev);
   void OnChar(wxKeyEvent &ev);
   void OnEvent(wxMouseEvent &ev);
   void ShowDetail(void);
@@ -242,28 +265,110 @@ public:
   void MakeOverlayFile(void);
   void AddFileOverlay(void);
   PxiDrawSettings *DrawSettings(void) {return draw_settings;}
+
+  DECLARE_EVENT_TABLE()
 };
 
 // Define a new frame
 class PxiFrame: public wxFrame
 {
+private:
+  wxFileHistory m_fileHistory;
+
+  // Menu event handlers
+  void OnFileLoad(wxCommandEvent &);
+  void OnMRUFile(wxCommandEvent &);
+  void OnDataGridSolve(wxCommandEvent &);
+  void OnHelpAbout(wxCommandEvent &);
+
+  // Other event handlers
+  void OnCloseWindow(wxCloseEvent &);
+
 public:
-  PxiFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int type);
+  PxiFrame(wxFrame *frame,  const wxString &p_filename,
+	   const wxPoint &p_position, const wxSize &p_size, long p_style = wxDEFAULT_FRAME_STYLE);
+  virtual ~PxiFrame();
+
+  void LoadFile(const wxString &);
+
   Bool OnClose(void);
   void MakeOneDot(char *in_filename=NULL,char *out_filename=NULL);
   char *MakeDataFile(void);
-  void MakeChild(char *file_name=NULL);
-  void OnMenuCommand(int id);
+  //  void OnMenuCommand(int id);
+
+  DECLARE_EVENT_TABLE()
 };
 
 class PxiChild: public wxFrame
 {
+private:
+  wxFrame *parent;
+  PxiCanvas *canvas;
+
+  void OnFileDetail(wxCommandEvent &);
+  void OnFileOutput(wxCommandEvent &);
+  void OnDisplayOptions(wxCommandEvent &);
+  void OnHelpAbout(wxCommandEvent &);
+
+  void MakeMenus(void);
 public:
-  PxiChild(wxFrame *frame, char *title, int x, int y, int w, int h, int type);
+  PxiChild(wxFrame *p_parent, const wxString &p_title);
   ~PxiChild(void);
+
   Bool OnClose(void);
   void OnMenuCommand(int id);
-  PxiCanvas *canvas;
+
+  void  print_eps(wxOutputOption fit);                 // output to postscript file
+  void  print(wxOutputOption fit,bool preview=false);  // output to printer (WIN only)
+  void  print_mf(wxOutputOption fit,bool save_mf=false);  // copy to clipboard (WIN Only)
+  void  save_mf(wxOutputOption fit,bool save_mf=false);  // save clipboard (WIN Only)
+
+
+  DECLARE_EVENT_TABLE()
+};
+
+class dialogDrawSettings : public guiAutoDialog {
+private:
+  PxiDrawSettings &draw_settings;       // draw settings, see above
+  wxListBox *m_infosetItem, *m_actionItem, *m_whichPlotItem, *m_whichIsetItem;
+  wxNumberItem *m_minLam, *m_maxLam, *m_minY, *m_maxY;
+  wxButton *m_overlayButton, *m_fontButton, *m_plotButton;
+  wxRadioBox *m_plotMode, *m_colorMode;
+  wxCheckBox *m_displayMatrix, *m_twoPlots, *m_connectDots, *m_restartColors;
+
+  void OnWhichPlot(wxCommandEvent &);
+  void OnWhichInfoset(wxCommandEvent &);
+  void OnInfoset(wxCommandEvent &);
+  void OnAction(wxCommandEvent &);
+  void OnOverlay(wxCommandEvent &);
+  void OnFont(wxCommandEvent &);
+  void OnPlot(wxCommandEvent &);
+public:
+  dialogDrawSettings(wxWindow *, PxiDrawSettings &);
+  virtual ~dialogDrawSettings();
+
+  const wxString GetMinLam() const 
+    { return m_minLam->GetValue(); }
+  const wxString GetMaxLam() const 
+    { return m_maxLam->GetValue(); }
+  const wxString GetMinY() const 
+    { return m_minY->GetValue(); }
+  const wxString GetMaxY() const 
+    { return m_maxY->GetValue(); }
+  int GetPlotMode() const 
+    { return m_plotMode->GetSelection(); }
+  int GetColorMode() const 
+    { return m_colorMode->GetSelection(); }
+  bool GetDisplayMatrix() const 
+    { return m_displayMatrix->GetValue(); }
+  bool GetTwoPlots() const 
+    { return m_twoPlots->GetValue(); }
+  bool GetConnectDots() const 
+    { return m_connectDots->GetValue(); }
+  bool GetRestartColors() const 
+    { return m_restartColors->GetValue(); }
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif

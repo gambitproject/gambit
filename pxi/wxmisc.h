@@ -12,95 +12,183 @@
 #define	wxRUNNING 12345
 #endif
 #include <stdio.h>
-#include "wx_timer.h"
-#include "wx_form.h"
+#include "wx/wx.h"
+
+//
+// A generic standard dialog box featuring automatic layout, frame control
+// handling, and standard button placement
+//
+class guiAutoDialog : public wxDialog {
+protected:
+  wxButton *m_okButton, *m_cancelButton, *m_helpButton;
+  wxBoxSizer *m_buttonSizer;
+
+  virtual const char *HelpString(void) const { return ""; }
+
+  void OnHelp(void);
+
+  void Go(void);
+
+public:
+  guiAutoDialog(wxWindow *p_parent, char *p_title);
+  virtual ~guiAutoDialog();
+};
+
+#ifdef NOT_IMPLEMENTED
 class MyForm: public wxForm
 {
 private:
-	int _completed;
+  int _completed;
 public:
-	MyForm(int use_buttons,int place_buttons):wxForm(use_buttons,place_buttons) {};
-	void 	OnOk(void) {_completed=wxOK;wx_form_panel->Show(FALSE);}
-	void 	OnCancel(void) {_completed=wxCANCEL;wx_form_panel->Show(FALSE);}
-	int		Completed(void) {return _completed;}
+  MyForm(int use_buttons,int place_buttons):wxForm(use_buttons,place_buttons) {};
+  void OnOk(void) {_completed=wxOK;wx_form_panel->Show(FALSE);}
+  void OnCancel(void) {_completed=wxCANCEL;wx_form_panel->Show(FALSE);}
+  int Completed(void) {return _completed;}
 };
 
 class MyDialogBox: public wxDialogBox
 {
 private:
-	MyForm *form;
+  MyForm *form;
 public:
-	MyDialogBox(wxFrame *parent,char *title):wxDialogBox(parent,title,TRUE)
-	{ form=new MyForm(wxFORM_BUTTON_OK | wxFORM_BUTTON_CANCEL,wxFORM_BUTTON_AT_BOTTOM);}
+  MyDialogBox(wxFrame *parent,char *title):wxDialogBox(parent,title,TRUE)
+    { form=new MyForm(wxFORM_BUTTON_OK | wxFORM_BUTTON_CANCEL,wxFORM_BUTTON_AT_BOTTOM);}
   ~MyDialogBox(void){delete form;}
-	int			Completed(void) {return form->Completed();}
-	MyForm 	*Form(void) {return form;}
-	void	  Go(void)	{form->AssociatePanel(this);Fit();Centre();Show(TRUE);}
-	void		Go1(void)	{Fit();Centre();Show(TRUE);}
+  int Completed(void) {return form->Completed();}
+  MyForm *Form(void) {return form;}
+  void Go(void) {form->AssociatePanel(this);Fit();Centre();Show(TRUE);}
+  void Go1(void) {Fit();Centre();Show(TRUE);}
 };
 
 class FontDialogBox: public MyDialogBox
 {
 private:
-	int		f_name;
-	int		f_size;
-	int		f_style;
-	int		f_weight;
-	Bool	f_under;
-	int f_names[5]; 	//{wxSWISS,wxROMAN,wxDECORATIVE,wxMODERN,wxSCRIPT};
-	int f_styles[3]; 	//{wxNORMAL,wxITALIC,wxSLANT};
-	int f_weights[3];	//{wxNORMAL,wxLIGHT,wxBOLD};
-	char * f_names_str[5]; 	//{wxSWISS,wxROMAN,wxDECORATIVE,wxMODERN,wxSCRIPT};
-	char * f_styles_str[3]; 	//{wxNORMAL,wxITALIC,wxSLANT};
-	char * f_weights_str[3];	//{wxNORMAL,wxLIGHT,wxBOLD};
-
-
+  int f_name;
+  int f_size;
+  int f_style;
+  int f_weight;
+  Bool f_under;
+  int f_names[5];             //{wxSWISS,wxROMAN,wxDECORATIVE,wxMODERN,wxSCRIPT};
+  int f_styles[3];            //{wxNORMAL,wxITALIC,wxSLANT};
+  int f_weights[3];           //{wxNORMAL,wxLIGHT,wxBOLD};
+  char * f_names_str[5];      //{wxSWISS,wxROMAN,wxDECORATIVE,wxMODERN,wxSCRIPT};
+  char * f_styles_str[3];     //{wxNORMAL,wxITALIC,wxSLANT};
+  char * f_weights_str[3];    //{wxNORMAL,wxLIGHT,wxBOLD};
 public:
-	FontDialogBox(wxFrame *frame,wxFont *def=NULL);
-	~FontDialogBox(void);
-
-	int 		FontName(void) {return f_name;}
-	int			FontSize(void) {return f_size;}
-	int			FontStyle(void) {return f_style;}
-	int			FontWeight(void) {return f_weight;}
-	int			FontUnder(void) {return f_under;}
-	wxFont 	*MakeFont(void);
+  FontDialogBox(wxFrame *frame,wxFont *def=NULL);
+  ~FontDialogBox(void);
+  
+  int FontName(void) {return f_name;}
+  int FontSize(void) {return f_size;}
+  int FontStyle(void) {return f_style;}
+  int FontWeight(void) {return f_weight;}
+  int FontUnder(void) {return f_under;}
+  wxFont *MakeFont(void);
 };
+
 //***************************** Progress Indicator ***********************
+
 class wxProgressIndicator:public wxTimer
 {
 private:
-	wxDialogBox *dialog;
-	wxForm *form;
-	wxSlider *slider;
-	int			cur_value;
-	int 		dummy;
-  Bool		done;
+  wxDialogBox *dialog;
+  wxForm *form;
+  wxSlider *slider;
+  int cur_value;
+  int dummy;
+  Bool done;
 public:
-	wxProgressIndicator(long total_time);
-	~wxProgressIndicator(void);
-	void Notify(void);
+  wxProgressIndicator(long total_time);
+  ~wxProgressIndicator(void);
+  void Notify(void);
 };
 
 //***************************** Progress Indicator  1 *********************
+
 class wxProgressIndicator1
 {
 private:
-	wxDialogBox *dialog;
-	wxForm *form;
-	wxSlider *slider;
-	int			cur_value,max;
-	int 		dummy;
-  Bool		done;
+  wxDialogBox *dialog;
+  wxForm *form;
+  wxSlider *slider;
+  int cur_value,max;
+  int dummy;
+  Bool done;
 public:
-	wxProgressIndicator1(void);
-	~wxProgressIndicator1(void);
-	void	SetMax(int total);
-	void	Update(void);
+  wxProgressIndicator1(void);
+  ~wxProgressIndicator1(void);
+  void SetMax(int total);
+  void Update(void);
 };
 
+#endif // NOT_IMPLEMENTED
 
 int wxListFindString(wxList *l,char *s);
 char *wxFontToString(wxFont *f);
 wxFont *wxStringToFont(char *s);
+
+void wxInitHelp(const char *file_name, const char *help_about_str = 0);
+void wxHelpContents(const char *name);
+void wxHelpAbout(const char *help_str = 0);
+void wxKillHelp(void);
+
+class wxIntegerItem : public wxTextCtrl {
+private:
+  int m_value;
+  wxString m_data;
+
+public:
+  wxIntegerItem(wxPanel *p_parent, char *p_label, int p_default = 0,
+		int p_x = -1, int p_y = -1, int p_w = -1, int p_h = -1);
+  virtual ~wxIntegerItem() { }
+
+  void SetInteger(int p_value);
+  int GetInteger(void) const { return m_value; }
+};
+
+class wxNumberItem : public wxTextCtrl {
+private:
+  double m_value;
+  wxString m_data;
+
+public:
+  wxNumberItem(wxPanel *p_parent, char *p_label, const wxString &p_default,
+	       int p_x = -1, int p_y = -1, int p_w = -1, int p_h = -1);
+  virtual ~wxNumberItem() { }
+
+  void SetNumber(const double &p_value);
+  double GetNumber(void) const { return m_value; }
+};
+
+typedef enum {
+  wxWYSIWYG, wxFITTOPAGE
+} wxOutputOption;
+
+typedef enum {
+  wxMEDIA_PRINTER = 0, wxMEDIA_PS, wxMEDIA_CLIPBOARD, 
+  wxMEDIA_METAFILE, wxMEDIA_PREVIEW, wxMEDIA_NUM
+} wxOutputMedia;
+
+class wxOutputDialogBox : public guiAutoDialog {
+private:
+  wxRadioBox *m_mediaBox;
+  wxCheckBox *m_fitBox;
+
+public:
+  wxOutputDialogBox(wxStringList *extra_media = 0, wxWindow *parent = 0);
+  virtual ~wxOutputDialogBox() { }
+
+  /** Returns one of the built-in media types */
+  wxOutputMedia GetMedia(void) const;
+  /** Returns the additional media type given in extra_media, if any */
+  int GetExtraMedia(void) const;
+  /** Returns true if the selection was an extra_media */
+  bool ExtraMedia(void) const;
+  /** Returns either wysiwyg or fit to page if appropriate */
+  wxOutputOption GetOption(void) const;
+};
+
 #endif //WXMISC_H
+
+
+
