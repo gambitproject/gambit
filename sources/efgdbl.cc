@@ -15,14 +15,6 @@ template gOutput &operator<<(gOutput &, const BehavProfile<double> &);
 
 template class PureBehavProfile<double>;
 
-#include "efgiter.imp"
-
-template class EfgIter<double>;
-
-#include "efgciter.imp"
-
-template class EfgContIter<double>;
-
 #include "garray.imp"
 
 template class gArray<BehavNode<double> *>;

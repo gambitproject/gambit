@@ -1,5 +1,5 @@
 //
-// FILE: efgpure.cc -- Find all pure strategy Nash equilibria
+// FILE: efgpure.imp -- Find all pure strategy Nash equilibria
 //
 // $Id$
 //
@@ -17,20 +17,20 @@ int FindPureNash(const EFSupport &sup, const gArray<gNumber> &values,
 		 gList<BehavSolution> &eqs)
 {
   int index;
-  EfgContIter<double> citer(sup);
-  gPVector<double> probs(sup.Game().NumInfosets());
+  EfgContIter citer(sup);
+  gPVector<gNumber> probs(sup.Game().NumInfosets());
 
   do  {
     int flag = 1;
     citer.GetProfile().InfosetProbs(probs);
 
-    EfgIter<double> eiter(citer);
+    EfgIter eiter(citer);
 
     for (int pl = 1; flag && pl <= sup.Game().NumPlayers(); pl++)  {
-      double current = citer.Payoff(pl);
+      gNumber current = citer.Payoff(pl);
       for (int iset = 1; flag && iset <= sup.Game().Players()[pl]->NumInfosets();
 	         iset++)  {
-      	if (probs(pl, iset) == 0)   continue;
+      	if (probs(pl, iset) == gNumber(0))   continue;
 	      Infoset *s = sup.Game().Players()[pl]->Infosets()[iset];
        	for (int act = 1; act <= s->NumActions(); act++)  {
 	  eiter.Next(pl, iset);
@@ -46,7 +46,7 @@ int FindPureNash(const EFSupport &sup, const gArray<gNumber> &values,
       BehavProfile<double> temp(sup, values);
       // zero out all the entries, since any equlibria are pure
       ((gVector<double> &) temp).operator=(0);
-      const PureBehavProfile<double> &profile = citer.GetProfile();
+      const PureBehavProfile<gNumber> &profile = citer.GetProfile();
       for (int pl = 1; pl <= sup.Game().NumPlayers(); pl++)  {
 	for (int iset = 1; iset <= sup.Game().Players()[pl]->NumInfosets();
 	     iset++)

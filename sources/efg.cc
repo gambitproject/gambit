@@ -1366,10 +1366,13 @@ void Efg::Payoff(const gArray<gArray<int> *> &profile,
   Payoff(root, 1.0, profile, payoff);
 }
 
+#include "efgiter.imp"
+#include "efgciter.imp"
 
 #include "efg.imp"
 template class BehavNode<gNumber>;
 template class BehavProfile<gNumber>;
+template class PureBehavProfile<gNumber>;
 template gOutput &operator<<(gOutput &, const BehavProfile<gNumber> &);
 
 template class gArray<BehavNode<gNumber> *>;

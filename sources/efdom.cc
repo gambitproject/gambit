@@ -11,7 +11,7 @@
 
 bool Dominates(const EFSupport &S, int pl, int iset, int a, int b, bool strong,gStatus &status)
 {
-  EfgContIter<gRational> A(S), B(S);
+  EfgContIter A(S), B(S);
     
     A.Freeze(pl, iset);
     A.Set(pl, iset, a);

@@ -6,7 +6,7 @@
 
 #include "efgciter.h"
 
-template <class T> EfgContIter<T>::EfgContIter(const EFSupport &s)
+EfgContIter::EfgContIter(const EFSupport &s)
   : _frozen_pl(0), _frozen_iset(0),
     _efg(&s.Game()), _support(s),
     _profile(s.Game()), _current(s.Game().NumInfosets()),
@@ -15,11 +15,11 @@ template <class T> EfgContIter<T>::EfgContIter(const EFSupport &s)
   First();
 }
 
-template <class T> EfgContIter<T>::~EfgContIter()
+EfgContIter::~EfgContIter()
 { }
 
 
-template <class T> void EfgContIter<T>::First(void)
+void EfgContIter::First(void)
 {
   for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
     for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++)
@@ -30,7 +30,7 @@ template <class T> void EfgContIter<T>::First(void)
   }
 }
 
-template <class T> void EfgContIter<T>::Set(int pl, int iset, int act)
+void EfgContIter::Set(int pl, int iset, int act)
 {
   if (pl != _frozen_pl || iset != _frozen_iset)   return;
 
@@ -38,7 +38,7 @@ template <class T> void EfgContIter<T>::Set(int pl, int iset, int act)
   _profile.Set(_support.Actions(pl, iset)[act]);
 }
 
-template <class T> int EfgContIter<T>::Next(int pl, int iset)
+int EfgContIter::Next(int pl, int iset)
 {
   if (pl != _frozen_pl || iset != _frozen_iset)   return 1;
 
@@ -56,14 +56,14 @@ template <class T> int EfgContIter<T>::Next(int pl, int iset)
 }
   
 
-template <class T> void EfgContIter<T>::Freeze(int pl, int iset)
+void EfgContIter::Freeze(int pl, int iset)
 {
   _frozen_pl = pl;
   _frozen_iset = iset;
   First();
 }
 
-template <class T> int EfgContIter<T>::NextContingency(void)
+int EfgContIter::NextContingency(void)
 {
   int pl = _efg->NumPlayers();
 
@@ -112,13 +112,13 @@ template <class T> int EfgContIter<T>::NextContingency(void)
   return 0;
 }
 
-template <class T> T EfgContIter<T>::Payoff(int pl) const
+gNumber EfgContIter::Payoff(int pl) const
 {
   _profile.Payoff(_payoff);
   return _payoff[pl];
 }
 
-template <class T> void EfgContIter<T>::Dump(gOutput &f) const
+void EfgContIter::Dump(gOutput &f) const
 {
   _current.Dump(f);
 }

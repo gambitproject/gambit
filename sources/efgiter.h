@@ -9,33 +9,33 @@
 
 #include "efg.h"
 
-template <class T> class EfgContIter;
+class EfgContIter;
 
-template <class T> class EfgIter    {
+class EfgIter    {
   private:
     const Efg *_efg;
     EFSupport _support;
-    PureBehavProfile<T> _profile;
+    PureBehavProfile<gNumber> _profile;
     gPVector<int> _current;
-    mutable gVector<T> _payoff;
+    mutable gVector<gNumber> _payoff;
 
   public:
     EfgIter(Efg &);
     EfgIter(const EFSupport &);
-    EfgIter(const EfgIter<T> &);
-    EfgIter(const EfgContIter<T> &);
+    EfgIter(const EfgIter &);
+    EfgIter(const EfgContIter &);
     ~EfgIter();
   
-    EfgIter<T> &operator=(const EfgIter<T> &);
+    EfgIter &operator=(const EfgIter &);
   
     void First(void);
     int Next(int p, int iset);
     int Set(int p, int iset, int act);
   
-    T Payoff(int p) const;
-    void Payoff(gVector<T> &) const;
+    gNumber Payoff(int p) const;
+    void Payoff(gVector<gNumber> &) const;
 
-    const EFSupport &GetEFSupport(void) const;
+    const EFSupport &Support(void) const;
 
     void Dump(gOutput &) const;
 };

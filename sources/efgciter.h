@@ -11,7 +11,7 @@
 
 #include "efg.h"
 
-template <class T> class EfgIter;
+class EfgIter;
 
 //
 // N.B.: Currently, the contingency iterator only allows one information
@@ -22,15 +22,15 @@ template <class T> class EfgIter;
 //       Iterating across all contingencies can be achieved by freezing
 //       player number 0 (this is the default state on initialization)
 //
-template <class T> class EfgContIter    {
-  friend class EfgIter<T>;
+class EfgContIter    {
+  friend class EfgIter;
   private:
     int _frozen_pl, _frozen_iset;
     const Efg *_efg;
     EFSupport _support;
-    PureBehavProfile<T> _profile;
+    PureBehavProfile<gNumber> _profile;
     gPVector<int> _current;
-    mutable gVector<T> _payoff;
+    mutable gVector<gNumber> _payoff;
 
   public:
     EfgContIter(const EFSupport &);
@@ -44,11 +44,11 @@ template <class T> class EfgContIter    {
     void Set(int pl, int iset, int act);
     int Next(int pl, int iset);
   
-    const PureBehavProfile<T> &GetProfile(void) const   { return _profile; }
+    const PureBehavProfile<gNumber> &GetProfile(void) const   { return _profile; }
 
     int NextContingency(void);
   
-    T Payoff(int pl) const;
+    gNumber Payoff(int pl) const;
   
     void Dump(gOutput &) const;
 };
