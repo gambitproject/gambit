@@ -1,13 +1,123 @@
 //
-// FILE: nfgciter.imp -- Implementation of contingency iterator
+// FILE: nfgiter.c -- Implementation of normal form iterators
 //
 // $Id$
 //
 
-#include "nfgciter.h"
+#include "nfgiter.h"
 #include "nfg.h"
 #include "nfstrat.h"
 #include "nfplayer.h"
+#include "nfgciter.h"
+
+//--------------------------------------------------------------------------
+// NfgIter:  Constructors, Destructors, Operators
+//--------------------------------------------------------------------------
+
+NfgIter::NfgIter(Nfg &nfg)
+  : support(nfg),
+    N(&nfg), current_strat(nfg.NumPlayers()), profile(nfg)
+{
+  First();
+}
+
+NfgIter::NfgIter(const NFSupport &s) 
+  : support(s), N((Nfg *) &s.Game()),
+    current_strat(N->NumPlayers()), profile(*N)
+{
+  First();
+}
+
+NfgIter::NfgIter(const NfgIter &it)
+  : support(it.support), N(it.N), current_strat(it.current_strat), 
+    profile(it.profile)
+{ }
+
+NfgIter::NfgIter(const NfgContIter &it)
+  : support(it.support), N(it.N), current_strat(it.current_strat),
+    profile(it.profile)
+{ }
+
+NfgIter::~NfgIter()
+{ }
+
+NfgIter &NfgIter::operator=(const NfgIter &it)
+{
+  if (this != &it)  {
+    N = it.N;
+    profile = it.profile;
+    current_strat = it.current_strat;
+    support = it.support;
+  }
+  return *this;
+}
+
+//-----------------------------
+// NfgIter: Member Functions
+//-----------------------------
+
+void NfgIter::First(void)
+{
+  for (int i = 1; i <= N->NumPlayers(); i++)  {
+    Strategy *s = support.Strategies(i)[1];
+    profile.Set(i, s);
+    current_strat[i] = 1;
+  }
+}
+
+int NfgIter::Next(int p)
+{
+  Strategy *s;
+  if (current_strat[p] < support.NumStrats(p))  {
+    s = support.Strategies(p)[++(current_strat[p])];
+    profile.Set(p, s);
+    return 1;
+  }
+  s = support.Strategies(p)[1];
+  profile.Set(p, s);
+  current_strat[p] = 1;
+  return 0;
+}
+
+int NfgIter::Set(int p, int s)
+{
+  if (p <= 0 || p > N->NumPlayers() ||
+      s <= 0 || s > support.NumStrats(p))
+    return 0;
+  
+  profile.Set(p, support.Strategies(p)[s]);
+  return 1;
+}
+
+void NfgIter::Get(gArray<int> &t) const
+{
+  for (int i = 1; i <= N->NumPlayers(); i++)
+    t[i] = profile[i]->Number();
+}
+
+void NfgIter::Set(const gArray<int> &t)
+{
+  for (int i = 1; i <= N->NumPlayers(); i++){
+    profile.Set(i, support.Strategies(i)[t[i]]);
+    current_strat[i] = t[i];
+  } 
+}
+
+long NfgIter::GetIndex(void) const
+{
+  return profile.GetIndex();
+}
+
+NFOutcome *NfgIter::GetOutcome(void) const
+{
+  return N->GetOutcome(profile);
+}
+
+void NfgIter::SetOutcome(NFOutcome *outcome)
+{
+  N->SetOutcome(profile, outcome);
+}
+
 
 //-------------------------------------
 // NfgContIter: Constructor, Destructor

@@ -1672,5 +1672,4 @@ Nfg *FullEfg::AssociatedAfg(void) const
 }
 
 
-#include "efgiter.imp"
-#include "efgciter.imp"
+

@@ -17,8 +17,8 @@ GPOLY_SOURCES = prepoly.cc gpoly.cc monomial.cc interval.cc double.cc \
 GPOLY_OBJECTS = $(GPOLY_SOURCES:.cc=.o)
 
 
-GAME_SOURCES = readnfg.cc nfstrat.cc nfg.cc nfginst.cc nfgutils.cc \
-               efg.cc efginst.cc readefg.cc efgnfg.cc \
+GAME_SOURCES = readnfg.cc nfstrat.cc nfg.cc nfgiter.cc nfginst.cc nfgutils.cc \
+               efg.cc efgiter.cc efginst.cc readefg.cc efgnfg.cc \
                efgutils.cc efstrat.cc mixedsol.cc behavsol.cc \
                sfstrat.cc sfg.cc algutils.cc
 

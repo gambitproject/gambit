@@ -384,9 +384,3 @@ void Nfg::InitPayoffs(void) const
   m_outcome_revision = RevisionNumber();
 }
 
-// Not really how these should be handled; but it works for now, and
-// we can deal with housekeeping later
-
-#include "nfgiter.imp"
-#include "nfgciter.imp"
-
