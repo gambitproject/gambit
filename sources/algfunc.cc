@@ -92,22 +92,6 @@ static Portion *GSM_Behav(Portion **param)
 
   BehavProfile<gNumber> *bp = new BehavProfile<gNumber>(EFSupport(E));
   MixedToBehav(N, MixedProfile<gNumber>(mp), E, *bp);
-  
-  // hack to get output profile to be all one precision
-  gPrecision prec = precRATIONAL;
-  for (int i = 1; i <= bp->Length(); i++) { 
-    if ((*bp)[i].Precision() == precDOUBLE)
-      prec = precDOUBLE;
-  }
-
-  if (prec == precDOUBLE) {
-    for (int i = 1; i <= bp->Length(); i++)
-      (*bp)[i] = (double) (*bp)[i];
-  }
-  else {
-    for (int i = 1; i <= bp->Length(); i++)
-      (*bp)[i] = (*bp)[i].operator gRational();
-  }
     
   return new BehavPortion(new BehavSolution(*bp));
 }

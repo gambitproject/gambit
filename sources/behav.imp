@@ -283,7 +283,7 @@ BehavProfile<T>::BehavProfile(const BehavSolution &p_solution)
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       Infoset *infoset = player->Infosets()[iset];
       for (int act = 1; act <= infoset->NumActions(); act++)
-	(*this)(pl, iset, act) = p_solution(pl, iset, act);
+	(*this)(pl, iset, act) = p_solution(infoset->Actions()[act]);
     }
   }
 

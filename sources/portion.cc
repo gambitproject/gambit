@@ -1370,13 +1370,13 @@ void BehavPortion::Output(gOutput& s) const
       Infoset *infoset = player->Infosets()[iset];
       for (int act = 1; act <= infoset->NumActions(); act++) {
 	if (_WriteSolutionLabels == triTRUE) {
-	  if ((*rep->value)(pl, iset, act) > gNumber(0)) {
+	  if ((*rep->value)(infoset->Actions()[act]) > gNumber(0)) {
 	    s << infoset->Actions()[act]->GetName() << '=';
-	    s << (*rep->value)(pl, iset, act) << ' ';
+	    s << (*rep->value)(infoset->Actions()[act]) << ' ';
 	  }
 	}
 	else
-	  s << (*rep->value)(pl, iset, act) << ' ';
+	  s << (*rep->value)(infoset->Actions()[act]) << ' ';
       }
       s << "}";
     }

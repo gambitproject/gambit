@@ -41,13 +41,16 @@ void DisplayEfgAlgType(gOutput& o, EfgAlgType i);
 class BehavSolution {
 protected:
   BehavProfile<gNumber> *m_profile;
+  gPrecision m_precision;
   mutable EfgAlgType m_creator;
   mutable gTriState m_isNash, m_isSubgamePerfect, m_isSequential;
   mutable gNumber m_epsilon, m_gobitLambda, m_gobitValue, m_liapValue;
   mutable gDPVector<gNumber> *m_beliefs, *m_regret;
   unsigned int m_id;
 
+  // PRIVATE AUXILIARY MEMBER FUNCTIONS
   void EvalEquilibria(void) const;
+  void LevelPrecision(void);
 
 public:
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
@@ -65,15 +68,16 @@ public:
   bool operator!=(const BehavSolution &p_solution) const
     { return !(*this == p_solution); }
 
-  gNumber &operator()(int, int, int);
-  const gNumber &operator()(int, int, int) const;
+  void Set(Action *, const gNumber &);
+  const gNumber &operator()(Action *) const;
 
   BehavSolution &operator+=(const BehavSolution &);
   BehavSolution &operator-=(const BehavSolution &);
   BehavSolution &operator*=(const gNumber &);
 
   // GENERAL DATA ACCESS
-  Efg &Game(void) const   { return m_profile->Game(); }
+  Efg &Game(void) const { return m_profile->Game(); }
+  gPrecision Precision(void) const { return m_precision; }
 
   // Do probabilities sum to one (within m_epsilon) for each infoset?
   bool IsComplete(void) const;

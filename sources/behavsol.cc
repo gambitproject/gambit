@@ -11,35 +11,35 @@ gText NameEfgAlgType(EfgAlgType p_algorithm)
   switch (p_algorithm) {
   case EfgAlg_USER:
     return "User"; 
-  case EfgAlg_GOBIT: // GobitSolve
+  case EfgAlg_GOBIT:
     return "Gobit"; 
-  case EfgAlg_LIAP: // LiapSolve
+  case EfgAlg_LIAP: 
     return "Liap"; 
-  case EfgAlg_PURENASH: // ?
+  case EfgAlg_PURENASH: 
     return "PureNash"; 
-  case EfgAlg_SEQFORM: // ?
+  case EfgAlg_SEQFORM: 
     return "SeqForm"; 
-  case EfgAlg_LEMKESUB: // LcpSolve
+  case EfgAlg_LEMKESUB: 
     return "LCP(Lemke*)"; 
-  case EfgAlg_SIMPDIVSUB: // SimpDivSolve
+  case EfgAlg_SIMPDIVSUB:
     return "SimpDiv*"; 
-  case EfgAlg_ZSUMSUB: // LpSolve
+  case EfgAlg_ZSUMSUB: //
     return "LP(ZSum*)"; 
-  case EfgAlg_PURENASHSUB: // EnumPureSolve
+  case EfgAlg_PURENASHSUB:
     return "PureNash*"; 
-  case EfgAlg_SEQFORMSUB: // LcpSolve
+  case EfgAlg_SEQFORMSUB:
     return "LCP(Seq*)"; 
   case EfgAlg_ELIAPSUB:
     return "EFLiap*"; 
   case EfgAlg_NLIAPSUB:
     return "NFLiap*"; 
-  case EfgAlg_ENUMSUB: // EnumSolve
+  case EfgAlg_ENUMSUB:
     return "Enum*"; 
   case EfgAlg_CSSEQFORM:
     return "CSSeqForm";
-  case EfgAlg_POLENSUB:  // PolEnumSolve
+  case EfgAlg_POLENSUB:
     return "PolEnum*"; 
-  case EfgAlg_POLENUM:  // PolEnumSolve
+  case EfgAlg_POLENUM:
     return "PolEnum"; 
   default:
     return "ERROR" ;
@@ -58,7 +58,8 @@ void DisplayEfgAlgType(gOutput &p_file, EfgAlgType p_algorithm)
 BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
 			     EfgAlgType p_creator)
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
-    m_creator(p_creator), m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
+    m_precision(precDOUBLE), m_creator(p_creator),
+    m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
     m_isSequential(triUNKNOWN), m_epsilon(0.0),
     m_gobitLambda(-1), m_gobitValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
@@ -83,7 +84,8 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
 BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
 			     EfgAlgType p_creator)
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
-    m_creator(p_creator), m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
+    m_precision(precRATIONAL), m_creator(p_creator),
+    m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
     m_isSequential(triUNKNOWN), m_gobitLambda(-1), m_gobitValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
@@ -106,7 +108,8 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
 BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile, 
 			     EfgAlgType p_creator)
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
-    m_creator(p_creator), m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
+    m_precision(precRATIONAL), m_creator(p_creator),
+    m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
     m_isSequential(triUNKNOWN), m_gobitLambda(-1), m_gobitValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
@@ -124,11 +127,13 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
       }
     }
   }
+  LevelPrecision();
 }
 
 BehavSolution::BehavSolution(const BehavSolution &p_solution)
   : m_profile(new BehavProfile<gNumber>(*p_solution.m_profile)),
-    m_creator(p_solution.m_creator), m_isNash(p_solution.m_isNash),
+    m_precision(p_solution.m_precision), m_creator(p_solution.m_creator),
+    m_isNash(p_solution.m_isNash),
     m_isSubgamePerfect(p_solution.m_isSubgamePerfect),
     m_isSequential(p_solution.m_isSequential), m_epsilon(p_solution.m_epsilon),
     m_gobitLambda(p_solution.m_gobitLambda),
@@ -136,10 +141,12 @@ BehavSolution::BehavSolution(const BehavSolution &p_solution)
     m_liapValue(p_solution.m_liapValue),
     m_beliefs(0), m_regret(0), m_id(0)
 {
-  if (p_solution.m_beliefs)
+  if (p_solution.m_beliefs) {
     m_beliefs = new gDPVector<gNumber>(*p_solution.m_beliefs);
-  if (p_solution.m_regret)
+  }
+  if (p_solution.m_regret) {
     m_regret = new gDPVector<gNumber>(*p_solution.m_regret);   
+  }
 }
 
 BehavSolution::~BehavSolution() 
@@ -153,6 +160,7 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 {
   if (this != &p_solution)   {
     *m_profile = *p_solution.m_profile;
+    m_precision = p_solution.m_precision;
     m_creator = p_solution.m_creator;
     m_isNash = p_solution.m_isNash;
     m_isSubgamePerfect = p_solution.m_isSubgamePerfect;
@@ -166,10 +174,12 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
     else
       m_beliefs = 0;
     if (m_regret)   delete m_regret;
-    if (p_solution.m_regret)
+    if (p_solution.m_regret) {
       m_regret = new gDPVector<gNumber>(*p_solution.m_regret);
-    else
+    }
+    else {
       m_regret = 0;
+    }
   }
 
   return *this;
@@ -182,7 +192,7 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 void BehavSolution::EvalEquilibria(void) const
 {
   if (IsComplete()) {
-    if (m_isNash == triUNKNOWN)
+    if (m_isNash == triUNKNOWN) 
       m_isNash = (m_profile->MaxGripe() <= m_epsilon) ? triTRUE : triFALSE;
   }  
   if (m_isNash == triFALSE) {
@@ -191,12 +201,42 @@ void BehavSolution::EvalEquilibria(void) const
   }
 }
 
+void BehavSolution::LevelPrecision(void)
+{
+  m_precision = precRATIONAL;
+  for (int pl = 1; m_precision == precRATIONAL && pl <= Game().NumPlayers();
+       pl++) {
+    EFPlayer *player = Game().Players()[pl];  
+    for (int iset = 1; (m_precision == precRATIONAL && 
+			iset <= player->NumInfosets()); iset++) {
+      Infoset *infoset = player->Infosets()[iset];
+      for (int act = 1; (m_precision == precRATIONAL && 
+			 act <= infoset->NumActions()); act++) {
+	if ((*m_profile)(pl, iset, act).Precision() == precDOUBLE)
+	  m_precision = precDOUBLE;
+      }
+    }
+  }
+
+  if (m_precision == precDOUBLE) {
+    for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
+      EFPlayer *player = Game().Players()[pl];  
+      for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+	Infoset *infoset = player->Infosets()[iset];
+	for (int act = 1; act <= infoset->NumActions(); act++) {
+	  (*m_profile)(pl, iset, act) = (double) (*m_profile)(pl, iset, act);
+	}
+      }
+    }
+  }
+}
+
 //------------------------
 // Operator overloading
 //------------------------
 
 bool BehavSolution::Equals(const BehavProfile<double> &p_profile) const
-{ 
+{  
   gNumber eps(m_epsilon);
   gEpsilon(eps, 4);  // this should be a function of m_epsilon
 
@@ -212,20 +252,30 @@ bool BehavSolution::Equals(const BehavProfile<double> &p_profile) const
 bool BehavSolution::operator==(const BehavSolution &p_solution) const
 { return (*m_profile == *p_solution.m_profile); }
 
-gNumber &BehavSolution::operator()(int p_player, int p_infoset, int p_action)
+void BehavSolution::Set(Action *p_action, const gNumber &p_prob)
 {
   Invalidate();
-  return (*m_profile)(p_player, p_infoset, p_action);
+
+  Infoset *infoset = p_action->BelongsTo();
+  EFPlayer *player = infoset->GetPlayer();
+  (*m_profile)(player->GetNumber(), infoset->GetNumber(),
+	       p_action->GetNumber()) = p_prob;
+  LevelPrecision();
 }
 
-const gNumber &BehavSolution::operator()(int p_player, int p_infoset,
-					 int p_action) const
-{ return (*m_profile)(p_player, p_infoset, p_action); }
+const gNumber &BehavSolution::operator()(Action *p_action) const
+{
+  Infoset *infoset = p_action->BelongsTo();
+  EFPlayer *player = infoset->GetPlayer();
+  return (*m_profile)(player->GetNumber(), infoset->GetNumber(),
+		      p_action->GetNumber());
+}
 
 BehavSolution &BehavSolution::operator+=(const BehavSolution &p_solution)
 {
   Invalidate(); 
   *m_profile += *p_solution.m_profile;
+  LevelPrecision();
   return *this;
 }
 
@@ -233,6 +283,7 @@ BehavSolution &BehavSolution::operator-=(const BehavSolution &p_solution)
 {
   Invalidate();
   *m_profile -= *p_solution.m_profile;
+  LevelPrecision();
   return *this;
 }
 
@@ -240,6 +291,7 @@ BehavSolution &BehavSolution::operator*=(const gNumber &p_constant)
 { 
   Invalidate();
   *m_profile *= p_constant;
+  LevelPrecision();
   return *this;
 }
 
@@ -256,7 +308,7 @@ bool BehavSolution::IsComplete(void) const
       Infoset *infoset = player->Infosets()[iset];
       sum = -1;
       for (int act = 1; act <= infoset->NumActions(); act++) 
-	sum += (*this)(pl, iset, act);
+	sum += (*m_profile)(pl, iset, act);
       if (sum > m_epsilon || sum < -m_epsilon) 
 	return false;
     }

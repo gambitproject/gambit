@@ -45,10 +45,7 @@ static Portion *GSM_ActionProb(Portion **param)
     return new NumberPortion(infoset->Game()->
 			       GetChanceProb(infoset, action->GetNumber()));
   else if (profile->Support().Find(action))
-    return new NumberPortion((*profile)
-			       (player->GetNumber(),
-				infoset->GetNumber(),
-				profile->Support().Find(action)));
+    return new NumberPortion((*profile)(action));
   else
     return new NumberPortion(0.0);
 }
@@ -70,9 +67,7 @@ static Portion *GSM_ActionProbs(Portion **param)
       Infoset *infoset = player->Infosets()[iset];
       ListPortion *p2 = new ListPortion;
       for (int act = 1; act <= infoset->NumActions(); act++) 
-	p2->Append(new NumberPortion((*profile)(player->GetNumber(),
-						infoset->GetNumber(),
-						act)));
+	p2->Append(new NumberPortion((*profile)(infoset->Actions()[act])));
       p1->Append(p2);
     }
     por->Append(p1);
@@ -536,15 +531,10 @@ static Portion *GSM_Regrets_Behav(Portion **param)
 static Portion *GSM_SetActionProb(Portion **param)
 {
   BehavSolution *P = new BehavSolution(*((BehavPortion *) param[0])->Value());
-  Action *a = ((ActionPortion *) param[1])->Value();
-  int infoset = a->BelongsTo()->GetNumber();
-  int player = a->BelongsTo()->GetPlayer()->GetNumber();
-  int action = P->Support().Find(a);
-
+  Action *action = ((ActionPortion *) param[1])->Value();
   gNumber value = ((NumberPortion *) param[2])->Value();
   
-  if (action != 0)
-    (*P)(player, infoset, action) = value;
+  P->Set(action, value);
   ((BehavPortion *) param[0])->SetValue(P);
   return param[0]->RefCopy();
 }
@@ -599,7 +589,8 @@ static Portion *GSM_SetActionProbs(Portion **param)
     }
 
     assert(p3->Spec().Type == porNUMBER);
-    (*P)(PlayerNum, InfosetNum, k) = ((NumberPortion*) p3)->Value();
+    P->Set((E.Players()[PlayerNum]->Infosets()[InfosetNum]->Actions()[k]),
+	   ((NumberPortion*) p3)->Value());
 
     delete p3;
   }

@@ -159,7 +159,8 @@ void SubgameSolver::FindSubgames(Node *n, gList<BehavSolution> &solns,
 	  assert(index <= infosets[pl]->Length());
 	  
 	  for (int act = 1; act <= subsupport.NumActions(pl, iset); act++)
-	    solns[solns.Length()](pl, index, act) = sol[solno](pl, iset, act);
+	    solns[solns.Length()].Set(((*infosets[pl])[index]->Actions()[act]),
+              sol[solno](subsupport.Actions(pl, iset)[act]));
 	}
 	int j=solns.Length();
 	solns[j].SetCreator( (EfgAlgType) AlgorithmID());

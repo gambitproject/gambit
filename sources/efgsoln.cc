@@ -861,36 +861,36 @@ void EfgSolnShow::UpdateValues(void)
         if (features[BSOLN_LVALUE])
             SetCell(cur_pos, FeaturePos(BSOLN_LVALUE), ToText(cur.LiapValue()));
 
-        for (int j = 1; j <= num_players; j++)
-        {
-            if (dim.Lengths()[j] == 0) continue;
-            SetCell(cur_pos, FeaturePos(BSOLN_PLAYER),
-                    cur.Game().Players()[j]->GetName()); // print the player 's
+        for (int j = 1; j <= num_players; j++) {
+	  if (dim.Lengths()[j] == 0) continue;
+	  SetCell(cur_pos, FeaturePos(BSOLN_PLAYER),
+		  cur.Game().Players()[j]->GetName()); // print the player 's
 
-            if (features[BSOLN_EQUVALS])        // print equ values if requested
-                SetCell(cur_pos, FeaturePos(BSOLN_EQUVALS), ToText(cur.Payoff(j)));
+	  if (features[BSOLN_EQUVALS])        // print equ values if requested
+	    SetCell(cur_pos, FeaturePos(BSOLN_EQUVALS), ToText(cur.Payoff(j)));
+	  
+	  for (int k = 1; k <= dim.Lengths()[j]; k++) {
+	    // Display ISET in the same format as that selected for the main tree
+	    // display below the node.  That is, either the infoset name or the
+	    // infoset id.  Check the TreeDrawSettings for the current value.
+	    gText iset_label;
 
-            for (int k = 1; k <= dim.Lengths()[j]; k++)
-            {
-                // Display ISET in the same format as that selected for the main tree
-                // display below the node.  That is, either the infoset name or the
-                // infoset id.  Check the TreeDrawSettings for the current value.
-                gText iset_label;
+	    if (parent->tw->DrawSettings().LabelNodeBelow() == NODE_BELOW_ISETID)
+	      iset_label = "("+ToText(j)+","+ToText(k)+")";
+	    else
+	      iset_label = cur.Game().Players()[j]->Infosets()[k]->GetName();
 
-                if (parent->tw->DrawSettings().LabelNodeBelow() == NODE_BELOW_ISETID)
-                    iset_label = "("+ToText(j)+","+ToText(k)+")";
-                else
-                    iset_label = cur.Game().Players()[j]->Infosets()[k]->GetName();
-
-                SetCell(cur_pos, FeaturePos(BSOLN_ISET), iset_label);   // print the infoset #s
-                tmp_str = "\\C{"+ToText(gamb_draw_settings.GetPlayerColor(j))+"}{";
-
-                for (int l = 1; l <= dim(j, k); l++)            // print actual values
-                    tmp_str += (ToText(cur(j, k, l))+((l == dim(j, k)) ? "}" : ","));
-
-                SetCell(cur_pos, FeaturePos(BSOLN_DATA), tmp_str);
-                cur_pos++;
-            }
+	    SetCell(cur_pos, FeaturePos(BSOLN_ISET), iset_label);   // print the infoset #s
+	    tmp_str = "\\C{"+ToText(gamb_draw_settings.GetPlayerColor(j))+"}{";
+	    
+	    for (int l = 1; l <= dim(j, k); l++)   {  // print actual values
+	      Action *action = cur.Game().Players()[j]->Infosets()[k]->Actions()[l];
+	      tmp_str += (ToText(cur(action))+((l == dim(j, k)) ? "}" : ","));
+	    }
+	    
+	    SetCell(cur_pos, FeaturePos(BSOLN_DATA), tmp_str);
+	    cur_pos++;
+	  }
         }
     }
 }
@@ -1340,9 +1340,11 @@ BehavSolnEdit::BehavSolnEdit(BehavSolution &soln_,
             SetCell(cur_pos, 2, iset_label);
             int l;
 
-            for (l = 1; l <= dim(j, k); l++)            // print actual values
-                SetCell(cur_pos, 2+l, ToText(soln(j, k, l)));
-
+            for (l = 1; l <= dim(j, k); l++) {
+	      // print actual values
+	      Action *action = soln.Game().Players()[j]->Infosets()[k]->Actions()[l];
+	      SetCell(cur_pos, 2+l, ToText(soln(action)));
+	    }
             for (l = dim(j, k)+1; l <= max_dim; l++) 
                 HiLighted(cur_pos, 2+l, 0, TRUE);
 
@@ -1403,21 +1405,23 @@ void BehavSolnEdit::OnSelectedMoved(int row, int col, SpreadMoveDir /*how*/)
 // OnOK
 void BehavSolnEdit::OnOk(void)
 {
-    int cur_pos = 2;
+  int cur_pos = 2;
 
-    for (int i = 1; i <= dim.Lengths().Length(); i++)
-    {
-        for (int j = 1; j <= dim.Lengths()[i]; j++)
-        {
-            for (int k = 1; k <= dim(i, j); k++)
-                FromText(GetCell(cur_pos, 2+k), soln(i, j, k));
+  for (int i = 1; i <= dim.Lengths().Length(); i++) {
+    for (int j = 1; j <= dim.Lengths()[i]; j++) {
+      for (int k = 1; k <= dim(i, j); k++) {
+	Action *action = soln.Game().Players()[i]->Infosets()[j]->Actions()[k];
+	gNumber value;
+	FromText(GetCell(cur_pos, 2+k), value);
+	soln.Set(action, value);
+      }
 
-            cur_pos++;
-        }
+      cur_pos++;
     }
+  }
 
-    SetCompleted(wxOK);
-    Show(FALSE);
+  SetCompleted(wxOK);
+  Show(FALSE);
 }
 
 
