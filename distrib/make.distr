@@ -11,7 +11,7 @@
 # Edit these if necessary.
 # GMAKEFILE is the generic Makefile.
 
-WXWINDIR  = /home/mill/gambit/wxwin
+WXWINDIR  = /users/gambit/wxwin
 GUI       = motif
 GMAKEFILE = Makefile.generic
 FTPDIR    = /users/ftp/pub/gambit/ver96
@@ -67,7 +67,7 @@ gambit:
 
 	@# Copy the setup and initialization files to ../misc
 	cp ./gambit_setup ./gui-init ../misc
-	cp ../sources/gambit.ini ../misc
+	cp ../sources/.gambitrc ../misc
 	cp ./gambit_setup ..
 
 	@echo
@@ -111,7 +111,7 @@ unixsrc:
 	if [ ! -f $(SRCDIR)/Makefile ]; \
 	then cp $(SRCDIR)/Makefile.generic $(SRCDIR)/Makefile; fi; \
 	zip gunixsrc.zip $(SRCDIR)/*.cc $(SRCDIR)/*.h $(SRCDIR)/*.imp \
-	$(SRCDIR)/*.yy $(SRCDIR)/Makefile  $(SRCDIR)/gambit.ini \
+	$(SRCDIR)/*.yy $(SRCDIR)/Makefile  $(SRCDIR)/.gambitrc \
 	$(SRCDIR)/*.cpp $(SRCDIR)/*.gcl* $(SRCDIR)/*.def $(SRCDIR)/*.rc \
 	$(SRCDIR)/fake/* $(SRCDIR)/fake/sys/* $(SRCDIR)/bitmaps/* \
 	$(SRCDIR)/make.filelist 
