@@ -750,31 +750,31 @@ Portion* GSM_Input(Portion** param)
 //    Write and SetFormat function - possibly belong somewhere else
 //-----------------------------------------------------------------
 
-gNumber _WriteWidth = 0;
-gNumber _WritePrecis = 6;
-gTriState _WriteExpmode = triFALSE;
-gTriState _WriteQuoted = triTRUE;
-gTriState _WriteListBraces = triTRUE;
-gTriState _WriteListCommas = triTRUE;
-gNumber _WriteListLF = 0;
-gNumber _WriteListIndent = 2;
-gNumber _WriteSolutionInfo = 1;
+NumberPortion _WriteWidth(0);
+NumberPortion _WritePrecis(6);
+BoolPortion _WriteExpmode(triFALSE);
+BoolPortion _WriteQuoted(triTRUE);
+BoolPortion _WriteListBraces(triTRUE);
+BoolPortion _WriteListCommas(triTRUE);
+NumberPortion _WriteListLF(0);
+NumberPortion _WriteListIndent(2);
+NumberPortion _WriteSolutionInfo(1);
 
 
 void GSM_SetWriteOptions(void)
 {
-  Portion::_SetWriteWidth(_WriteWidth);
-  Portion::_SetWritePrecis(_WritePrecis);
-  Portion::_SetWriteExpmode(_WriteExpmode);
-  Portion::_SetWriteQuoted(_WriteQuoted);
-  Portion::_SetWriteListBraces(_WriteListBraces);
-  Portion::_SetWriteListCommas(_WriteListCommas);
-  Portion::_SetWriteListLF(_WriteListLF);
-  Portion::_SetWriteListIndent(_WriteListIndent);
-  Portion::_SetWriteSolutionInfo(_WriteSolutionInfo);
+  Portion::_SetWriteWidth(_WriteWidth.Value());
+  Portion::_SetWritePrecis(_WritePrecis.Value());
+  Portion::_SetWriteExpmode(_WriteExpmode.Value());
+  Portion::_SetWriteQuoted(_WriteQuoted.Value());
+  Portion::_SetWriteListBraces(_WriteListBraces.Value());
+  Portion::_SetWriteListCommas(_WriteListCommas.Value());
+  Portion::_SetWriteListLF(_WriteListLF.Value());
+  Portion::_SetWriteListIndent(_WriteListIndent.Value());
+  Portion::_SetWriteSolutionInfo(_WriteSolutionInfo.Value());
 
-  ToTextWidth( _WriteWidth );
-  ToTextPrecision( _WritePrecis );
+  ToTextWidth(_WriteWidth.Value());
+  ToTextPrecision(_WritePrecis.Value());
 }
 
 
@@ -791,17 +791,17 @@ Portion* GSM_ListFormat(Portion** param)
 
   GSM_SetWriteOptions();
 
-  return new BoolPortion(true);
+  return new BoolPortion(triTRUE);
 }
 
 Portion* GSM_GetListFormat(Portion** param)
 {
-  ((BoolPortion*) param[0])->Value() = (_WriteListBraces) ? triTRUE : triFALSE;
-  ((BoolPortion*) param[1])->Value() = (_WriteListCommas) ? triTRUE : triFALSE;
-  ((NumberPortion*) param[2])->Value() = _WriteListLF;
-  ((NumberPortion*) param[3])->Value() = _WriteListIndent;
+  ((BoolPortion*) param[0])->SetValue(_WriteListBraces.Value());
+  ((BoolPortion*) param[1])->SetValue(_WriteListCommas.Value());
+  ((NumberPortion*) param[2])->SetValue(_WriteListLF.Value());
+  ((NumberPortion*) param[3])->SetValue(_WriteListIndent.Value());
 
-  return new BoolPortion(true);
+  return new BoolPortion(triTRUE);
 }
 
 Portion* GSM_FloatFormat(Portion** param)
@@ -817,9 +817,9 @@ Portion* GSM_FloatFormat(Portion** param)
 
 Portion* GSM_GetFloatFormat(Portion** param)
 {
-  ((NumberPortion*) param[1])->Value() = _WriteWidth;
-  ((NumberPortion*) param[2])->Value() = _WritePrecis;
-  ((BoolPortion*) param[3])->Value() = (_WriteExpmode) ? triTRUE : triFALSE;
+  ((NumberPortion*) param[1])->SetValue(_WriteWidth.Value());
+  ((NumberPortion*) param[2])->SetValue(_WritePrecis.Value());
+  ((BoolPortion*) param[3])->SetValue(_WriteExpmode.Value());
 
   return param[0]->RefCopy();
 }
@@ -835,7 +835,7 @@ Portion* GSM_TextFormat(Portion** param)
 
 Portion* GSM_GetTextFormat(Portion** param)
 {
-  ((BoolPortion*) param[1])->Value() = (_WriteQuoted) ? triTRUE : triFALSE;
+  ((BoolPortion*) param[1])->SetValue(_WriteQuoted.Value());
 
   return param[0]->RefCopy();
 }
@@ -852,7 +852,7 @@ Portion* GSM_SolutionFormat(Portion** param)
 
 Portion* GSM_GetSolutionFormat(Portion** param)
 {
-  ((NumberPortion*) param[1])->Value() = _WriteSolutionInfo;
+  ((NumberPortion*) param[1])->SetValue(_WriteSolutionInfo.Value());
 
   return param[0]->RefCopy();
 }
@@ -943,7 +943,7 @@ Portion* GSM_Read_Bool(Portion** param)
     throw gclRuntimeError("No boolean data found");
   }
 
-  ((BoolPortion*) param[1])->Value() = value;
+  ((BoolPortion*) param[1])->SetValue(value);
 
 
   // swap the first parameter with the return value, so things like
@@ -974,7 +974,7 @@ Portion* GSM_Read_Number(Portion** param)
     throw gclRuntimeError("File read error");
   }
 
-  ((NumberPortion*) param[1])->Value() = value;
+  ((NumberPortion*) param[1])->SetValue(value);
 
   // swap the first parameter with the return value, so things like
   //   Input["..."] >> x >> y  would work
@@ -1015,7 +1015,7 @@ Portion* GSM_Read_Text(Portion** param)
     throw gclRuntimeError("End of file reached");
   }
   
-  ((TextPortion*) param[1])->Value() = t;
+  ((TextPortion*) param[1])->SetValue(t);
  
 
   // swap the first parameter with the return value, so things like
@@ -1595,7 +1595,7 @@ Portion* GSM_IsList( Portion** p )
 
 Portion* GSM_SaveGlobalVar( Portion** param )
 {
-  gText& varname = ((TextPortion*) param[0])->Value();
+  const gText &varname = ((TextPortion*) param[0])->Value();
   _gsm->GlobalVarDefine( varname, 
 			 param[1]->ValCopy() );
   return _gsm->GlobalVarValue( varname )->RefCopy();
@@ -1603,7 +1603,7 @@ Portion* GSM_SaveGlobalVar( Portion** param )
 
 Portion* GSM_LoadGlobalVar( Portion** param )
 {
-  gText& varname = ((TextPortion*) param[0])->Value();
+  const gText &varname = ((TextPortion*) param[0])->Value();
   if( _gsm->GlobalVarIsDefined( varname ) )
     return _gsm->GlobalVarValue( varname )->RefCopy();
   else
@@ -1612,7 +1612,7 @@ Portion* GSM_LoadGlobalVar( Portion** param )
 
 Portion* GSM_ExistsGlobalVar( Portion** param )
 {
-  gText& varname = ((TextPortion*) param[0])->Value();
+  const gText &varname = ((TextPortion*) param[0])->Value();
   if( _gsm->GlobalVarIsDefined( varname ) )
     return new BoolPortion( true );
   else
@@ -1859,32 +1859,32 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ListFormat, porBOOL, 4));
   FuncObj->SetParamInfo(0, 0, ParamInfoType
 			("braces", porBOOL,
-			 new BoolPortion(_WriteListBraces, true), BYREF));
+			 _WriteListBraces.RefCopy(), BYREF));
   FuncObj->SetParamInfo(0, 1, ParamInfoType
 			("commas", porBOOL,
-			 new BoolPortion(_WriteListCommas, true), BYREF));
+			 _WriteListCommas.RefCopy(), BYREF));
   FuncObj->SetParamInfo(0, 2, ParamInfoType
 			("lf", porNUMBER,
-			 new NumberPortion(_WriteListLF, true), BYREF ));
+			 _WriteListLF.RefCopy(), BYREF));
   FuncObj->SetParamInfo(0, 3, ParamInfoType
 			("indent", porNUMBER,
-			 new NumberPortion(_WriteListIndent, true), BYREF ));
+			 _WriteListIndent.RefCopy(), BYREF ));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GetListFormat", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GetListFormat, porBOOL, 4));
   FuncObj->SetParamInfo(0, 0, ParamInfoType
 			("braces", porBOOL,
-			 new BoolPortion(_WriteListBraces, true), BYREF));
+			 _WriteListBraces.RefCopy(), BYREF));
   FuncObj->SetParamInfo(0, 1, ParamInfoType
 			("commas", porBOOL,
-			 new BoolPortion(_WriteListCommas, true), BYREF));
+			 _WriteListCommas.RefCopy(), BYREF));
   FuncObj->SetParamInfo(0, 2, ParamInfoType
 			("lf", porNUMBER,
-			 new NumberPortion(_WriteListLF, true), BYREF ));
+			 _WriteListLF.RefCopy(), BYREF));
   FuncObj->SetParamInfo(0, 3, ParamInfoType
 			("indent", porNUMBER,
-			 new NumberPortion(_WriteListIndent, true), BYREF ));
+			 _WriteListIndent.RefCopy(), BYREF));
   gsm->AddFunction(FuncObj);
 
 
@@ -1893,26 +1893,26 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNUMBER) );
   FuncObj->SetParamInfo(0, 1, ParamInfoType
 			("width", porNUMBER, 
-			 new NumberPortion(_WriteWidth, true), BYREF));
+			 _WriteWidth.RefCopy(), BYREF));
   FuncObj->SetParamInfo(0, 2, ParamInfoType
 			("precis", porNUMBER,
-			 new NumberPortion(_WritePrecis, true), BYREF));
+			 _WritePrecis.RefCopy(), BYREF));
   FuncObj->SetParamInfo(0, 3, ParamInfoType
 			("expmode", porBOOL,
-			 new BoolPortion(_WriteExpmode, true), BYREF));
+			 _WriteExpmode.RefCopy(), BYREF));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_TextFormat, porTEXT, 2));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porTEXT) );
   FuncObj->SetParamInfo(1, 1, ParamInfoType
 			("quote", porBOOL,
-			 new BoolPortion(_WriteQuoted, true), BYREF));
+			 _WriteQuoted.RefCopy(), BYREF));
 
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_SolutionFormat,
 				       porBEHAV | porMIXED, 2));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porBEHAV | porMIXED) );
   FuncObj->SetParamInfo(2, 1, ParamInfoType
 			("info", porNUMBER,
-			 new NumberPortion(_WriteSolutionInfo, true), BYREF));
+			 _WriteSolutionInfo.RefCopy(), BYREF));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GetFormat", 3);
@@ -1920,26 +1920,26 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNUMBER) );
   FuncObj->SetParamInfo(0, 1, ParamInfoType
 			("width", porNUMBER, 
-			 new NumberPortion(_WriteWidth, true), BYREF));
+			 _WriteWidth.RefCopy(), BYREF));
   FuncObj->SetParamInfo(0, 2, ParamInfoType
 			("precis", porNUMBER,
-			 new NumberPortion(_WritePrecis, true), BYREF));
+			 _WritePrecis.RefCopy(), BYREF));
   FuncObj->SetParamInfo(0, 3, ParamInfoType
 			("expmode", porBOOL,
-			 new BoolPortion(_WriteExpmode, true), BYREF));
+			 _WriteExpmode.RefCopy(), BYREF));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_GetTextFormat, porTEXT, 2));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porTEXT) );
   FuncObj->SetParamInfo(1, 1, ParamInfoType
 			("quote", porBOOL,
-			 new BoolPortion(_WriteQuoted, true), BYREF));
+			 _WriteQuoted.RefCopy(), BYREF));
 
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_GetSolutionFormat,
 				       porBEHAV | porMIXED, 2));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porBEHAV | porMIXED) );
   FuncObj->SetParamInfo(2, 1, ParamInfoType
 			("info", porNUMBER,
-			 new NumberPortion(_WriteSolutionInfo, true), BYREF));
+			 _WriteSolutionInfo.RefCopy(), BYREF));
   gsm->AddFunction(FuncObj);
 
 

@@ -532,9 +532,9 @@ Portion* GSM_Dot(Portion **param)
   p = new NumberPortion( (gRational) 0 );
   for( i = 1; i <= p1->Length(); i++ )
   {
-    ((NumberPortion*) p)->Value() +=
+    ((NumberPortion*) p)->SetValue(((NumberPortion *) p)->Value() +
       (((NumberPortion*) (*p1)[i])->Value() *
-       ((NumberPortion*) (*p2)[i])->Value());
+       ((NumberPortion*) (*p2)[i])->Value()));
   }
   return p;
 }

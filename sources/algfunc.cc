@@ -71,7 +71,7 @@ static Portion *GSM_AgentForm(Portion **param)
 
   Nfg *N = MakeAfg(E);
   
-  ((NumberPortion *) param[1])->Value() = watch.Elapsed();
+  ((NumberPortion *) param[1])->SetValue(watch.Elapsed());
 
   if (N)
     return new NfgPortion(N);
@@ -117,8 +117,8 @@ static Portion *GSM_EnumMixed_Nfg(Portion **param)
   double time;
   long npivots;
   Enum(*S, params, solutions, npivots, time);
-  ((NumberPortion *) param[3])->Value() = npivots;
-  ((NumberPortion *) param[4])->Value() = time;
+  ((NumberPortion *) param[3])->SetValue(npivots);
+  ((NumberPortion *) param[4])->SetValue(time);
   return new Mixed_ListPortion(solutions);
 }
 
@@ -142,8 +142,8 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
   long npivots;
   gList<BehavSolution> solutions;
   Enum(support, params, solutions, npivots, time);
-  ((NumberPortion *) param[4])->Value() = npivots;
-  ((NumberPortion *) param[5])->Value() = time;
+  ((NumberPortion *) param[4])->SetValue(npivots);
+  ((NumberPortion *) param[5])->SetValue(time);
 
   return new Behav_ListPortion(solutions);
 }
@@ -163,7 +163,7 @@ static Portion *GSM_EnumPure_Nfg(Portion **param)
 
   gList<MixedSolution> solns;
   FindPureNash(S->Game(), *S, solns);
-  ((NumberPortion *) param[3])->Value() = watch.Elapsed();
+  ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
   return new Mixed_ListPortion(solns);
 }
 
@@ -178,14 +178,14 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
     gList<BehavSolution> solutions;
     double time;
     EnumPureNfg(support, solutions, time);
-    ((NumberPortion *) param[4])->Value() = time;
+    ((NumberPortion *) param[4])->SetValue(time);
     return new Behav_ListPortion(solutions);
   }
   else  {
     gList<BehavSolution> solutions;
     double time;
     EnumPure(support, solutions, time);
-    ((NumberPortion *) param[4])->Value() = time;
+    ((NumberPortion *) param[4])->SetValue(time);
     return new Behav_ListPortion(solutions);
   }
 }
@@ -264,9 +264,9 @@ static Portion *GSM_Gobit_Start(Portion **param)
     gList<MixedSolution> solutions;
     Gobit(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
 
-    ((NumberPortion *) param[11])->Value() = watch.Elapsed();
-	  ((NumberPortion *) param[12])->Value() = nevals;
-	  ((NumberPortion *) param[13])->Value() = niters;
+    ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
+    ((NumberPortion *) param[12])->SetValue(nevals);
+    ((NumberPortion *) param[13])->SetValue(niters);
 
     Portion *por = new Mixed_ListPortion(solutions);
 
@@ -301,9 +301,9 @@ static Portion *GSM_Gobit_Start(Portion **param)
     gList<BehavSolution> solutions;
     Gobit(E, EP, start, solutions, nevals, niters);
 
-    ((NumberPortion *) param[11])->Value() = watch.Elapsed();
-	  ((NumberPortion *) param[12])->Value() = nevals;
-	  ((NumberPortion *) param[13])->Value() = niters;
+    ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
+    ((NumberPortion *) param[12])->SetValue(nevals);
+    ((NumberPortion *) param[13])->SetValue(niters);
     
     Portion * por = new Behav_ListPortion(solutions);
 
@@ -347,9 +347,9 @@ static Portion *GSM_KGobit_Start(Portion **param)
     gList<MixedSolution> solutions;
     KGobit(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
 
-    ((NumberPortion *) param[11])->Value() = watch.Elapsed();
-	  ((NumberPortion *) param[12])->Value() = nevals;
-	  ((NumberPortion *) param[13])->Value() = niters;
+    ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
+    ((NumberPortion *) param[12])->SetValue(nevals);
+    ((NumberPortion *) param[13])->SetValue(niters);
 
     Portion *por = new Mixed_ListPortion(solutions);
 
@@ -385,9 +385,9 @@ static Portion *GSM_KGobit_Start(Portion **param)
     gList<BehavSolution> solutions;
     KGobit(E, EP, start, solutions, nevals, niters);
 
-    ((NumberPortion *) param[11])->Value() = watch.Elapsed();
-	  ((NumberPortion *) param[12])->Value() = nevals;
-	  ((NumberPortion *) param[13])->Value() = niters;
+    ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
+    ((NumberPortion *) param[12])->SetValue(nevals);
+    ((NumberPortion *) param[13])->SetValue(niters);
     
     Portion * por = new Behav_ListPortion(solutions);
 
@@ -417,8 +417,8 @@ static Portion *GSM_Lcp_Nfg(Portion **param)
   double time;
   int npivots;
   Lemke(S, params, solutions, npivots, time);
-  ((NumberPortion *) param[3])->Value() = npivots;
-  ((NumberPortion *) param[4])->Value() = time;
+  ((NumberPortion *) param[3])->SetValue(npivots);
+  ((NumberPortion *) param[4])->SetValue(time);
 
   return new Mixed_ListPortion(solutions);
 }
@@ -482,8 +482,8 @@ static Portion *GSM_Lcp_Efg(Portion **param)
     int npivots;
 
     Lemke(S, params, solutions, npivots, time);
-    ((NumberPortion *) param[4])->Value() = npivots;
-    ((NumberPortion *) param[5])->Value() = time;
+    ((NumberPortion *) param[4])->SetValue(npivots);
+    ((NumberPortion *) param[5])->SetValue(time);
     return new Behav_ListPortion(solutions);
   }
   else  {
@@ -499,8 +499,8 @@ static Portion *GSM_Lcp_Efg(Portion **param)
     int npivots;
 
     SeqForm(S, params, solutions, npivots, time);
-    ((NumberPortion *) param[4])->Value() = npivots;
-    ((NumberPortion *) param[5])->Value() = time;
+    ((NumberPortion *) param[4])->SetValue(npivots);
+    ((NumberPortion *) param[5])->SetValue(time);
     return new Behav_ListPortion(solutions);
   }
 }
@@ -537,8 +537,8 @@ static Portion *GSM_Liap_Behav(Portion **param)
     NFLiapBySubgame M(E, LP, start);
     M.Solve();
 
-    ((NumberPortion *) param[8])->Value() = watch.Elapsed();
-    ((NumberPortion *) param[9])->Value() = M.NumEvals();
+    ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
+    ((NumberPortion *) param[9])->SetValue(M.NumEvals());
 
     return new Behav_ListPortion(M.GetSolutions());
   }
@@ -561,11 +561,10 @@ static Portion *GSM_Liap_Behav(Portion **param)
     EFLiapBySubgame M(E, LP, start);
     M.Solve();
 
-    ((NumberPortion *) param[8])->Value() = watch.Elapsed();
-    ((NumberPortion *) param[9])->Value() = M.NumEvals();
+    ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
+    ((NumberPortion *) param[9])->SetValue(M.NumEvals());
 
-    Portion *por = new Behav_ListPortion(M.GetSolutions());
-    return por;
+    return new Behav_ListPortion(M.GetSolutions());
   }
 }
 
@@ -594,8 +593,8 @@ static Portion *GSM_Liap_Mixed(Portion **param)
   gList<MixedSolution> solutions;
   Liap(N, params, start, solutions, nevals, niters);
 
-  ((NumberPortion *) param[7])->Value() = watch.Elapsed();
-  ((NumberPortion *) param[8])->Value() = nevals;
+  ((NumberPortion *) param[7])->SetValue(watch.Elapsed());
+  ((NumberPortion *) param[8])->SetValue(nevals);
 
   return new Mixed_ListPortion(solutions);
 }
@@ -624,8 +623,8 @@ static Portion *GSM_Lp_Nfg(Portion **param)
   double time;
   int npivots;
   ZSum(S, params, solutions, npivots, time);
-  ((NumberPortion *) param[3])->Value() = npivots;
-  ((NumberPortion *) param[4])->Value() = time;
+  ((NumberPortion *) param[3])->SetValue(npivots);
+  ((NumberPortion *) param[4])->SetValue(time);
   return new Mixed_ListPortion(solutions);
 }
 
@@ -653,8 +652,8 @@ Portion* GSM_Lp_List(Portion** param)
     delete b;
     delete c;
   
-    ((BoolPortion*) param[5])->Value() = (isFeasible) ? triTRUE : triFALSE;
-    ((BoolPortion*) param[6])->Value() = (isBounded) ? triTRUE : triFALSE;
+    ((BoolPortion*) param[5])->SetValue((isFeasible) ? triTRUE : triFALSE);
+    ((BoolPortion*) param[6])->SetValue((isBounded) ? triTRUE : triFALSE);
     return result;
   }
   else  {
@@ -676,8 +675,8 @@ Portion* GSM_Lp_List(Portion** param)
     delete b;
     delete c;
   
-    ((BoolPortion*) param[5])->Value() = (isFeasible) ? triTRUE : triFALSE;
-    ((BoolPortion*) param[6])->Value() = (isBounded) ? triTRUE : triFALSE;
+    ((BoolPortion *) param[5])->SetValue((isFeasible) ? triTRUE : triFALSE);
+    ((BoolPortion *) param[6])->SetValue((isBounded) ? triTRUE : triFALSE);
     return result;
   }
 }
@@ -705,8 +704,8 @@ static Portion *GSM_Lp_Efg(Portion **param)
     double time;
     int npivots;
     ZSum(support, params, solutions, npivots, time);
-    ((NumberPortion *) param[4])->Value() = npivots;
-    ((NumberPortion *) param[5])->Value() = time;
+    ((NumberPortion *) param[4])->SetValue(npivots);
+    ((NumberPortion *) param[5])->SetValue(time);
     return new Behav_ListPortion(solutions);
   }
   else  {
@@ -720,8 +719,8 @@ static Portion *GSM_Lp_Efg(Portion **param)
     double time;
     int npivots;
     CSSeqForm(support, params, solutions, npivots, time);
-    ((NumberPortion *) param[4])->Value() = npivots;
-    ((NumberPortion *) param[5])->Value() = time;
+    ((NumberPortion *) param[4])->SetValue(npivots);
+    ((NumberPortion *) param[5])->SetValue(time);
     return new Behav_ListPortion(solutions);
   }
 }
@@ -749,8 +748,8 @@ static Portion *GSM_PolEnum_Nfg(Portion **param)
   double time;
   PolEnum(*S, params, solutions, nevals, time);
 
-	((NumberPortion *) param[3])->Value() = nevals;
-  ((NumberPortion *) param[4])->Value() = time;
+  ((NumberPortion *) param[3])->SetValue(nevals);
+  ((NumberPortion *) param[4])->SetValue(time);
   return new Mixed_ListPortion(solutions);
 }
 
@@ -773,7 +772,7 @@ static Portion *GSM_PolEnum_Efg(Portion **param)
 
     long npivots;
     PolEnum(support, params, solutions, npivots, time);
-    ((NumberPortion *) param[4])->Value() = npivots;
+    ((NumberPortion *) param[4])->SetValue(npivots);
   }
   else {
     EfgPolEnumParams params;
@@ -784,10 +783,10 @@ static Portion *GSM_PolEnum_Efg(Portion **param)
 
     long npivots;
     EfgPolEnum(support, params, solutions, npivots, time);
-    ((NumberPortion *) param[4])->Value() = npivots;
+    ((NumberPortion *) param[4])->SetValue(npivots);
   }
 
-  ((NumberPortion *) param[5])->Value() = time;
+  ((NumberPortion *) param[5])->SetValue(time);
 
   return new Behav_ListPortion(solutions);
 }
@@ -811,8 +810,8 @@ static Portion *GSM_SequentialEquilib(Portion **param)
   long nevals;
   SequentialEquilib(basis, support, params, solutions, nevals, time);
 
-  ((NumberPortion *) param[4])->Value() = nevals;
-  ((NumberPortion *) param[5])->Value() = time;
+  ((NumberPortion *) param[4])->SetValue(nevals);
+  ((NumberPortion *) param[5])->SetValue(time);
 
   return new Behav_ListPortion(solutions);
 }
@@ -830,7 +829,7 @@ static Portion *GSM_Nfg(Portion **param)
 
   Nfg *N = MakeReducedNfg(E, EFSupport(E));
 
-  ((NumberPortion *) param[1])->Value() = watch.Elapsed();
+  ((NumberPortion *) param[1])->SetValue(watch.Elapsed());
 
   if (N)
     return new NfgPortion(N);
@@ -880,15 +879,15 @@ static Portion *GSM_Simpdiv_Nfg(Portion **param)
   if (((PrecisionPortion *) param[4])->Value() == precDOUBLE)  {
     SimpdivModule<double> SM(S, SP);
     SM.Simpdiv();
-    ((NumberPortion *) param[5])->Value() = SM.NumEvals();
-    ((NumberPortion *) param[6])->Value() = SM.Time();
+    ((NumberPortion *) param[5])->SetValue(SM.NumEvals());
+    ((NumberPortion *) param[6])->SetValue(SM.Time());
     return new Mixed_ListPortion(SM.GetSolutions());
   }
   else  {
     SimpdivModule<gRational> SM(S, SP);
     SM.Simpdiv();
-    ((NumberPortion *) param[5])->Value() = SM.NumEvals();
-    ((NumberPortion *) param[6])->Value() = SM.Time();
+    ((NumberPortion *) param[5])->SetValue(SM.NumEvals());
+    ((NumberPortion *) param[6])->SetValue(SM.Time());
     return new Mixed_ListPortion(SM.GetSolutions());
   }
 }
@@ -916,12 +915,12 @@ static Portion *GSM_Simpdiv_Efg(Portion **param)
   double time;
   Simpdiv(support, params, solutions, nevals, niters, time);
 
-  ((NumberPortion *) param[6])->Value() = nevals;
-  ((NumberPortion *) param[7])->Value() = time;
+  ((NumberPortion *) param[6])->SetValue(nevals);
+  ((NumberPortion *) param[7])->SetValue(time);
   return new Behav_ListPortion(solutions);
 }
 
-Portion* GSM_VertEnum( Portion** param )
+static Portion *GSM_VertEnum(Portion** param)
 {
   if (((PrecisionPortion *) param[2])->Value() == precDOUBLE)  {
     gMatrix<double>* A = ListToMatrix_Float((ListPortion*) param[0]);

@@ -154,7 +154,9 @@ public:
   PrecisionPortion(Precision &, bool);
   virtual ~PrecisionPortion();
 
-  Precision& Value(void) const;
+  Precision Value(void) const;
+  void SetValue(Precision); 
+
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -181,12 +183,14 @@ protected:
 
   static gPool pool;
 
+  NumberPortion(gNumber &, bool);
+
 public:
   NumberPortion(const gNumber &);
-  NumberPortion(gNumber &, bool);
   virtual ~NumberPortion();
 
-  gNumber& Value(void) const;
+  const gNumber &Value(void) const;
+  void SetValue(const gNumber &);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -213,12 +217,14 @@ protected:
 
   static gPool pool;
 
+  TextPortion(gText &, bool);
+
 public:
   TextPortion(const gText &);
-  TextPortion(gText &, bool);
   virtual ~TextPortion();
 
-  gText& Value(void) const;
+  const gText &Value(void) const;
+  void SetValue(const gText &);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -245,13 +251,15 @@ protected:
 
   static gPool pool;
 
+  BoolPortion(gTriState &, bool);
+
 public:
   BoolPortion(bool);
   BoolPortion(gTriState);
-  BoolPortion(gTriState &, bool);
   virtual ~BoolPortion();
 
-  gTriState &Value(void);
+  gTriState Value(void) const;
+  void SetValue(gTriState);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;

@@ -351,7 +351,7 @@ static Portion *GSM_ElimDom_Efg(Portion **param)
 				  ((OutputPortion *) param[4])->Value(),
 				  gstatus);
 
-  ((NumberPortion *) param[3])->Value() = watch.Elapsed();
+  ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
   
   Portion *por = (T) ? new EfSupportPortion(T) : new EfSupportPortion(new EFSupport(*S));
 

@@ -249,38 +249,31 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
     {
       result = p1;
 
-      switch(p1Spec.Type)
-      {
+      switch (p1Spec.Type) {
       case porNUMBER:
-	((NumberPortion*) p1)->Value()=((NumberPortion*) p2)->Value();
+	((NumberPortion*) p1)->SetValue(((NumberPortion*) p2)->Value());
 	break;
       case porTEXT:
-	((TextPortion*) p1)->Value() = ((TextPortion*) p2)->Value();
+	((TextPortion*) p1)->SetValue(((TextPortion*) p2)->Value());
 	break;
       case porBOOL:
-	((BoolPortion*) p1)->Value() = ((BoolPortion*) p2)->Value();
+	((BoolPortion*) p1)->SetValue(((BoolPortion*) p2)->Value());
 	break;
-
       case porEFOUTCOME:
 	((EfOutcomePortion *) p1)->SetValue(((EfOutcomePortion *) p2)->Value());
 	break;
-
       case porNFSUPPORT:
 	((NfSupportPortion *) p1)->SetValue(new NFSupport(*((NfSupportPortion *) p2)->Value()));
 	break;
-
       case porEFSUPPORT:
 	((EfSupportPortion *) p1)->SetValue(new EFSupport(*((EfSupportPortion *) p2)->Value()));
 	break;
-
       case porEFBASIS:
 	((EfBasisPortion *) p1)->SetValue(new EFBasis(*((EfBasisPortion *) p2)->Value()));
 	break;
-
       case porINFOSET:
 	((InfosetPortion *) p1)->SetValue(((InfosetPortion *) p2)->Value());
 	break;
-
       case porNFPLAYER:
 	((NfPlayerPortion *) p1)->SetValue(((NfPlayerPortion *) p2)->Value());
 	break;
@@ -296,21 +289,17 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
       case porACTION:
 	((ActionPortion *) p1)->SetValue(((ActionPortion *) p2)->Value());
 	break;
-
       case porNFG:
 	((NfgPortion *) p1)->SetValue(((NfgPortion *) p2)->Value());
 	break;
-
       case porEFG:
 	((EfgPortion *) p1)->SetValue(((EfgPortion *) p2)->Value());
 	break;
-
       case porINPUT:
       case porOUTPUT:
 	delete p1;
 	throw gclRuntimeError("Cannot assign from INPUT/OUTPUT variable" );
 	break;
-
       default:
 	_ErrorMessage(_StdErr, 67, 0, 0, PortionSpecToText(p1Spec));
       }
@@ -425,12 +414,12 @@ Portion* GSM::UnAssignExt(Portion *p)
     {
       delete p;
       delete _VarRemove( varname );
-      return new BoolPortion(true);
+      return new BoolPortion(triTRUE);
     }
     else
     {
       delete p;
-      return new BoolPortion(false);
+      return new BoolPortion(triFALSE);
     }
   }
   else

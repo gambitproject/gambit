@@ -113,7 +113,7 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
   por = (T) ? new NfSupportPortion(T) :
                 new NfSupportPortion(new NFSupport(*S));
 
-  ((NumberPortion *) param[3])->Value() = watch.Elapsed();
+  ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
   
   return por;
 }

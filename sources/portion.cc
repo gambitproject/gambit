@@ -273,8 +273,11 @@ PrecisionPortion::PrecisionPortion(Precision &value, bool ref)
 PrecisionPortion::~PrecisionPortion()
 { }
 
-Precision& PrecisionPortion::Value(void) const
+Precision PrecisionPortion::Value(void) const
 { return *_Value; }
+
+void PrecisionPortion::SetValue(Precision p)
+{ *_Value = p; }
 
 PortionSpec PrecisionPortion::Spec(void) const
 { return PortionSpec(porPRECISION); }
@@ -322,8 +325,11 @@ NumberPortion::NumberPortion(gNumber &value, bool ref)
 NumberPortion::~NumberPortion()
 { }
 
-gNumber& NumberPortion::Value(void) const
+const gNumber &NumberPortion::Value(void) const
 { return *_Value; }
+
+void NumberPortion::SetValue(const gNumber &n)
+{ *_Value = n; }
 
 PortionSpec NumberPortion::Spec(void) const
 { return PortionSpec(porNUMBER); }
@@ -370,8 +376,11 @@ TextPortion::TextPortion(gText &value, bool ref)
 TextPortion::~TextPortion()
 { }
 
-gText& TextPortion::Value(void) const
+const gText &TextPortion::Value(void) const
 { return *_Value; }
+
+void TextPortion::SetValue(const gText &v)
+{ *_Value = v; }
 
 PortionSpec TextPortion::Spec(void) const
 { return PortionSpec(porTEXT); }
@@ -425,8 +434,11 @@ BoolPortion::BoolPortion(gTriState &value, bool ref)
 BoolPortion::~BoolPortion()
 { }
 
-gTriState &BoolPortion::Value(void)
+gTriState BoolPortion::Value(void) const
 { return *_Value; }
+
+void BoolPortion::SetValue(gTriState v)
+{ *_Value = v; }
 
 PortionSpec BoolPortion::Spec(void) const
 { return PortionSpec(porBOOL); }

@@ -1709,7 +1709,7 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 	      switch(_FuncInfo[_FuncIndex].ParamInfo[index].Spec.Type)
 	      {
 	      case porBOOL:
-		_Param[index] = new BoolPortion(false);
+		_Param[index] = new BoolPortion(triFALSE);
 		_RunTimeParamInfo[index].Defined = true;
 		break;
 	      case porNUMBER:
