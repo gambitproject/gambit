@@ -2,7 +2,7 @@
 // FILE: portion.cc -- implementation of Portion base and descendent classes
 //                     companion to GSM
 //
-// $Id$
+// @(#)portion.cc	2.23 19 Jul 1997
 //
 
 
@@ -322,6 +322,52 @@ Portion* ReferencePortion::RefCopy(void) const
 
 bool ReferencePortion::IsReference(void) const
 { return false; }
+
+
+//---------------------------------------------------------------------
+//                          Precision class
+//---------------------------------------------------------------------
+
+PrecisionPortion::PrecisionPortion(Precision value)
+  : _Value(new Precision(value)), _ref(false)
+{ }
+
+PrecisionPortion::PrecisionPortion(Precision &value, bool ref)
+  : _Value(&value), _ref(ref)
+{ }
+
+PrecisionPortion::~PrecisionPortion()
+{ }
+
+Precision& PrecisionPortion::Value(void) const
+{ return *_Value; }
+
+PortionSpec PrecisionPortion::Spec(void) const
+{ return PortionSpec(porPRECISION); }
+
+void PrecisionPortion::Output(gOutput& s) const
+{
+  Portion::Output(s);
+  s << ((*_Value == precDOUBLE) ? "Machine" : "Rational");
+}
+
+gString PrecisionPortion::OutputString( void ) const
+{
+  return (*_Value == precDOUBLE) ? "Machine" : "Rational";
+}
+
+Portion* PrecisionPortion::ValCopy(void) const
+{ return new PrecisionPortion(*_Value); }
+
+Portion* PrecisionPortion::RefCopy(void) const
+{ 
+  Portion* p = new PrecisionPortion(*_Value, true);
+  p->SetOriginal(Original());
+  return p;
+}
+
+bool PrecisionPortion::IsReference(void) const
+{ return _ref; }
 
 
 //---------------------------------------------------------------------

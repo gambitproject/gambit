@@ -1,7 +1,7 @@
 //
 // FILE: gsm.cc  implementation of GSM (Stack machine)
 //
-// @(#)gsm.cc	2.14 6/23/97
+// $Id$
 //
 
 
@@ -229,6 +229,12 @@ bool GSM::Push(const gRational& data)
 bool GSM::Push(const gString& data)
 {
   _Push(new TextPortion(data));
+  return true;
+}
+
+bool GSM::Push(const Precision& data)
+{
+  _Push(new PrecisionPortion(data));
   return true;
 }
 
@@ -1760,6 +1766,11 @@ int GSM::Execute(gList< NewInstr* >& prog, bool user_func)
 	_Push(new TextPortion(instr->TextVal));
 	instr_success = true;
 	break;
+
+      case iPUSH_PREC:
+        _Push(new PrecisionPortion(instr->PrecVal));
+        instr_success = true;
+        break;
 
       case iPUSHINPUT:
 	_Push(new InputRefPortion(*(instr->InputVal)));

@@ -113,6 +113,7 @@ public:
   bool Push ( const double&    data );
   bool Push ( const gRational& data );
   bool Push ( const gString&   data );
+  bool Push ( const Precision& data );
   bool Push ( gInput&    data );
   bool Push ( gOutput&   data );
 

@@ -2,7 +2,7 @@
 // FILE: portion.h -- header file for Portion class
 //                    companion to GSM
 //
-// $Id$
+// @(#)portion.h	2.18 19 Jul 1997
 //
 
 
@@ -165,7 +165,32 @@ public:
 };
 
 
+//---------------------------------------------------------
+//                     Precision class
+//---------------------------------------------------------
 
+class PrecisionPortion : public Portion
+{
+protected:
+  Precision* _Value;
+  bool _ref;
+
+public:
+  PrecisionPortion(Precision);
+  PrecisionPortion(Precision &, bool);
+  virtual ~PrecisionPortion();
+
+  Precision& Value(void) const;
+  PortionSpec Spec(void) const;
+
+  void Output(gOutput& s) const;
+  gString OutputString( void ) const;
+
+  Portion* ValCopy(void) const;
+  Portion* RefCopy(void) const;
+
+  bool IsReference(void) const;
+};
 
 
 //---------------------------------------------------------------------

@@ -1,10 +1,10 @@
-//#
-//# FILE: gsminstr.h -- definition of Instruction classes for GSM's
-//#                     instruction queue subsystem
-//#                     companion to GSM
-//#
-//# @(#)gsminstr.h	1.27 7/24/96
-//#
+//
+// FILE: gsminstr.h -- definition of Instruction classes for GSM's
+//                     instruction queue subsystem
+//                     companion to GSM
+//
+// $Id$
+//
 
 
 
@@ -28,7 +28,7 @@ typedef enum
   iQUIT, iIF_GOTO, iGOTO, iCLEAR,
 
   iPUSH_BOOL, iPUSH_FLOAT, iPUSH_RATIONAL, iPUSH_INTEGER, iPUSH_TEXT,
-  iPUSHINPUT, iPUSHOUTPUT, 
+  iPUSHINPUT, iPUSHOUTPUT, iPUSH_PREC,
   iPUSHLIST, iPUSHREF,
   iASSIGN, iUNASSIGN, iSUBSCRIPT, iCHILD, iREAD, iWRITE,
 
@@ -65,6 +65,7 @@ public:
     double    FloatVal;
     gInput*   InputVal;
     gOutput*  OutputVal;
+    Precision PrecVal;
   };
   gString TextVal;
   long LineNumber;
@@ -77,6 +78,8 @@ public:
     : Code(code), FloatVal(v), LineNumber(0) {}
   NewInstr(Opcode code, const gString& v)
     : Code(code), TextVal(v), LineNumber(0) {}
+  NewInstr(Opcode code, const Precision& v)
+    : Code(code), PrecVal(v), LineNumber(0) {}
   NewInstr(Opcode code, gInput* v)
     : Code(code), InputVal(v), LineNumber(0) {}
   NewInstr(Opcode code, gOutput* v)

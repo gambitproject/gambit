@@ -154,7 +154,8 @@ gStack<gString> GCL_InputFileNames(4);
 %token STDIN
 %token STDOUT
 %token gNULL
-
+%token MACHINEPREC
+%token RATIONALPREC
 
 %token CRLF
 %token EOC
@@ -438,6 +439,8 @@ E9:           BOOLEAN  { emit(new NewInstr(iPUSH_BOOL, bval)); }
   |           STDIN    { emit(new NewInstr(iPUSHINPUT, &gin)); }
   |           STDOUT   { emit(new NewInstr(iPUSHOUTPUT, &gout)); }
   |           gNULL    { emit(new NewInstr(iPUSHOUTPUT, &gnull)); }
+  |           MACHINEPREC { emit(new NewInstr(iPUSH_PREC, precDOUBLE)); }
+  |           RATIONALPREC { emit(new NewInstr(iPUSH_PREC, precRATIONAL)); }
   |           QUIT     { emit(new NewInstr(iQUIT)); }
   ;
 
@@ -676,6 +679,8 @@ I_dont_believe_Im_doing_this:
     else if (s == "NewFunction")   return DEFFUNC;
     else if (s == "DeleteFunction")   return DELFUNC;
     else if (s == "Include")   return INCLUDE;
+    else if (s == "Machine")   return MACHINEPREC;
+    else if (s == "Rational")  return RATIONALPREC;
     else  { tval = s; return NAME; }
   }
 
