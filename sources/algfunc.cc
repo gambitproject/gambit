@@ -1355,7 +1355,7 @@ void Init_algfunc(GSM *gsm)
 				       PortionSpec(porMIXED, 1), 7));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porINTEGER,
-					    new NumberPortion(0)));
+					    new NumberPortion(1)));
   FuncObj->SetParamInfo(0, 2, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
   FuncObj->SetParamInfo(0, 3, gclParameter("nPivots", porINTEGER,
@@ -1374,7 +1374,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOLEAN,
 					    new BoolPortion(false)));
   FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porINTEGER,
-					    new NumberPortion(0)));
+					    new NumberPortion(1)));
   FuncObj->SetParamInfo(1, 3, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
   FuncObj->SetParamInfo(1, 4, gclParameter("nPivots", porINTEGER,
