@@ -149,7 +149,7 @@ public:
   int NumOutcomes(void) const;
   gbtEfgOutcome GetOutcome(int p_id) const;
   gbtEfgOutcome NewOutcome(void);
-  void DeleteOutcome(gbtEfgOutcome &);
+  void DeleteOutcome(gbtEfgOutcome);
 
   // EDITING OPERATIONS
   gbtEfgNode DeleteNode(gbtEfgNode n, gbtEfgNode keep);

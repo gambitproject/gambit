@@ -516,7 +516,7 @@ gbtEfgOutcome gbtEfgGame::NewOutcome(void)
   return NewOutcome(rep->outcomes.Last() + 1);
 }
 
-void gbtEfgGame::DeleteOutcome(gbtEfgOutcome &p_outcome)
+void gbtEfgGame::DeleteOutcome(gbtEfgOutcome p_outcome)
 {
   rep->m_revision++;
 
