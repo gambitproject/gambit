@@ -14,12 +14,14 @@
 
 #include "portion.h"
 
-#define NO_DEFAULT_VALUE (Portion*) 0
+#define NO_DEFAULT_VALUE  (Portion*)  0
+#define PARAM_NOT_FOUND   (int)      -1
+
 
 
 class FuncDescObj
 {
- private:
+ protected:
   struct ParamInfoType
   {
     gString      Name;
@@ -27,20 +29,20 @@ class FuncDescObj
     Portion*     DefaultValue;
   };
 
-  int            num_of_params;
-  ParamInfoType* ParamInfo;
-  Portion*       (*function)(Portion **);
+  gString        _FuncName;
+  Portion*       (*_FuncPtr)(Portion **);
+  int            _NumParams;
+  ParamInfoType* _ParamInfo;
 
  public:
-  FuncDescObj( Portion* (*funcname)(Portion**), const int size = 0 );
+  FuncDescObj( FuncDescObj& func );
+  FuncDescObj
+    ( 
+     const gString&  func_name,
+     Portion*        (*func_ptr)(Portion**),
+     const int       num_params = 0 
+     );
   ~FuncDescObj();
-
-  Portion*    CallFunction      ( Portion** param );
-  int         NumParams         ( void ) const;
-  gString     ParamName         ( const int index ) const;
-  PortionType ParamType         ( const int index ) const;
-  Portion*    ParamDefaultValue ( const int index ) const;
-  int         FindParamName     ( const gString& name ) const;
 
   void SetParamInfo
     ( 
@@ -49,28 +51,33 @@ class FuncDescObj
      const PortionType type,
      Portion*          default_value
      );
+
+  gString     FuncName          ( void ) const;
+  int         NumParams         ( void ) const;
+  gString     ParamName         ( const int index ) const;
+  PortionType ParamType         ( const int index ) const;
+  Portion*    ParamDefaultValue ( const int index ) const;
+  int         FindParamName     ( const gString& param_name ) const;
 };
 
 
 
 
-class CallFunctionObject
+class CallFuncObj : public FuncDescObj
 {
  private:
-  gString       func_name;
-  FuncDescObj*  func_desc_obj;
-  Portion**     param;
-  int           current_param_index;
+  Portion**  _Param;
+  int        _CurrParamIndex;
 
  public:
-  CallFunctionObject( const gString& name, FuncDescObj* func );
+  CallFuncObj( FuncDescObj* func );
 
-  PortionType GetCurrParamType  ( void ) const;
-  int         GetCurrParamIndex ( void ) const;
   void        SetCurrParamIndex ( const int index );
   void        SetCurrParam      ( Portion *new_param );
-  int         FindParamName     ( const gString& name ) const;
-  gString     FuncName          ( void ) const;
+
+  int         GetCurrParamIndex ( void ) const;
+  PortionType GetCurrParamType  ( void ) const;
+
   Portion*    CallFunction      ( void );
 };
 

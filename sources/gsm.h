@@ -18,6 +18,9 @@
 
 
 
+int FuncParamCheck( const PortionType stack_param_type, 
+		    const PortionType func_param_type );
+
 
 // These classes implemented in gsm.cc
 class FunctionHashTable;
@@ -27,10 +30,10 @@ class RefHashTable;
 class GSM
 {
  private:
-  gStack< Portion* >*             stack;
-  gStack< CallFunctionObject* >*  func_call_stack;
-  RefHashTable*                   RefTable;
-  FunctionHashTable*              FuncTable;
+  gStack< Portion* >*      _Stack;
+  gStack< CallFuncObj* >*  _CallFuncStack;
+  RefHashTable*            _RefTable;
+  FunctionHashTable*       _FuncTable;
 
   Portion* resolve_ref( Reference_Portion* p );
 
@@ -40,9 +43,6 @@ class GSM
 
   // This function is located in gsmfunc.cc
   void InitFunctions( void );
-
-  int FuncParamCheck( const PortionType stack_param_type, 
-		     const PortionType func_param_type );
 
 
  public:
@@ -86,8 +86,7 @@ class GSM
   bool Concatenate ( void );
 
   
-  void AddFunction(const gString& funcname, FuncDescObj* func );
-
+  void AddFunction( FuncDescObj* func );
 
   bool InitCallFunction ( const gString& funcname );
   bool Bind             ( void );

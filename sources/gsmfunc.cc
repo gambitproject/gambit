@@ -89,108 +89,105 @@ void GSM::InitFunctions( void )
 
 
 
-//------------------------------------------------------------------
-  // Function descriptor objects
-//------------------------------------------------------------------
+/*******************************************************************/
+//                   Function descriptor objects
+/*******************************************************************/
 
-
-FuncDescObj::FuncDescObj( Portion* (*funcname)(Portion**), const int size )
-     :function(funcname),num_of_params( size )
+   
+FuncDescObj::FuncDescObj( FuncDescObj& func )
 {
-  assert( size >= 0 );
+  int index;
 
-  ParamInfo = new ParamInfoType[ num_of_params ];
+#ifndef NDEBUG
+  if( func._NumParams < 0 )
+  {
+    gerr << "FuncDescObj Error: an invalid or corrupted FuncDescObj passed\n";
+    gerr << "                   as initializer to the constructor\n";
+  }
+  assert( func._NumParams >= 0 );
+#endif // NDEBUG
+
+  _FuncName  = func._FuncName;
+  _FuncPtr   = func._FuncPtr;
+  _NumParams = func._NumParams;
+  _ParamInfo = new ParamInfoType[ _NumParams ];
+  for( index = 0; index < _NumParams; index++ )
+  {
+    _ParamInfo[ index ].Name = func._ParamInfo[ index ].Name;
+    _ParamInfo[ index ].Type = func._ParamInfo[ index ].Type;
+    if( func._ParamInfo[ index ].DefaultValue == NO_DEFAULT_VALUE )
+    {
+      _ParamInfo[ index ].DefaultValue = NO_DEFAULT_VALUE;
+    }
+    else
+    {
+      _ParamInfo[ index ].DefaultValue = 
+	func._ParamInfo[ index ].DefaultValue->Copy();
+    }
+  }
+}
+
+
+FuncDescObj::FuncDescObj
+  (
+   const gString&  func_name,
+   Portion*        (*func_ptr)(Portion**), 
+   const int       num_params
+   )
+   : _FuncName  ( func_name ), 
+     _FuncPtr   ( func_ptr ), 
+     _NumParams ( num_params )
+{
+#ifndef NDEBUG
+  if( _NumParams < 0 )
+  {
+    gerr << "FuncDescObj Error: invalid number of parameters specified for\n";
+    gerr << "                   the function \"" << _FuncName << "\"\n";
+  }
+  assert( _NumParams >= 0 );
+#endif
+
+  _ParamInfo = new ParamInfoType[ _NumParams ];
 }
 
 
 FuncDescObj::~FuncDescObj()
 {
-  int i;
-  for( i = 0; i < num_of_params; i++ )
+  int index;
+
+  for( index = 0; index < _NumParams; index++ )
   {
-    delete ParamInfo[ i ].DefaultValue;
+    delete _ParamInfo[ index ].DefaultValue;
   }
-  delete[] ParamInfo;
-}
-
-
-Portion* FuncDescObj::CallFunction( Portion** param )
-{
-  return function( param );
-}
-
-
-int FuncDescObj::NumParams( void ) const
-{
-  return num_of_params;
-}
-
-
-gString FuncDescObj::ParamName( const int index ) const
-{
-  assert( index >= 0 && index < num_of_params );
-
-  return ParamInfo[ index ].Name;
-}
-
-
-PortionType FuncDescObj::ParamType( const int index ) const
-{
-  assert( index >= 0 && index < num_of_params );
-
-  return ParamInfo[ index ].Type;
-}
-
-
-Portion* FuncDescObj::ParamDefaultValue( const int index ) const
-{
-  assert( index >= 0 && index < num_of_params );
-
-  if( ParamInfo[ index ].DefaultValue == NO_DEFAULT_VALUE )
-  {
-    return 0;
-  }
-  else
-  {
-    return ParamInfo[ index ].DefaultValue->Copy();
-  }
-}
-
-
-
-int FuncDescObj::FindParamName( const gString& name ) const
-{
-  int i;
-  int result = -1;
-
-  for( i = 0; i < num_of_params; i++ )
-  {
-    if( ParamInfo[ i ].Name == name )
-    {
-      result = i;
-      break;
-    }
-  }
-  return result;
+  delete[] _ParamInfo;
 }
 
 
 void FuncDescObj::SetParamInfo
   ( 
-   const int          index, 
-   const gString&     name, 
-   const PortionType  type, 
-   Portion*           default_value
+   const int          param_index,
+   const gString&     param_name, 
+   const PortionType  param_type, 
+   Portion*           param_default_value
    )
 {
-  int i;
+  int index;
   int repeated_variable_declaration = false;
 
-  assert( index >= 0 && index < num_of_params );
-
-  for( i = 0; i < num_of_params; i++ )
+#ifndef NDEBUG
+  if( !( param_index >= 0 && param_index < _NumParams ) )
   {
-    if( ParamInfo[ i ].Name == name )
+    gerr << "FuncDescObj Error: an invalid parameter index specified\n";
+    gerr << "                   for SetParamInfo( ... ) while initializing\n";
+    gerr << "                   the function \"" << _FuncName << "\" for\n";
+    gerr << "                   the parameter \"" << param_name << "\"\n";
+  }
+  assert( param_index >= 0 && param_index < _NumParams );
+#endif // NDEBUG
+
+  for( index = 0; index < _NumParams; index++ )
+  {
+    if( _ParamInfo[ index ].Name == param_name )
     {
       repeated_variable_declaration = true;
       break;
@@ -202,114 +199,193 @@ void FuncDescObj::SetParamInfo
   {
     gerr << "FuncDescObj Error: multiple parameters of a functions were\n";
     gerr << "                   declared with the same formal name \"";
-    gerr << name << "\"\n";
+    gerr << param_name << "\"\n";
     gerr << "                   during initialization\n";
   }
   assert( !repeated_variable_declaration );
 #endif // NDEBUG
   
-  ParamInfo[ index ].Type = type;
-  ParamInfo[ index ].Name = name;
-  ParamInfo[ index ].DefaultValue = default_value;
+  _ParamInfo[ param_index ].Name         = param_name;
+  _ParamInfo[ param_index ].Type         = param_type;
+  _ParamInfo[ param_index ].DefaultValue = param_default_value;
 }
 
 
-
-//-------------------------------------------------------------------
-//                      CallFunctionObject
-//-------------------------------------------------------------------
-
-
-  
-CallFunctionObject::CallFunctionObject( const gString& name, 
-				        FuncDescObj* func )
-     :func_name( name ), func_desc_obj( func )
+gString FuncDescObj::FuncName( void ) const
 {
-  int i;
+  return _FuncName;
+}
 
-  param = new Portion* [ func_desc_obj->NumParams() ];
-  current_param_index = 0;
-  
-  for( i = 0; i < func_desc_obj->NumParams(); i++ )
+
+int FuncDescObj::NumParams( void ) const
+{
+  return _NumParams;
+}
+
+
+gString FuncDescObj::ParamName( const int index ) const
+{
+#ifndef NDEBUG
+  if( !( index >= 0 && index < _NumParams ) )
   {
-    param[ i ] = func_desc_obj->ParamDefaultValue( i );
+    gerr << "FuncDescObj Error: an invalid parameter index specified for\n";
+    gerr << "                   the function \"" << _FuncName << "\" when\n";
+    gerr << "                   calling FuncDescObj::ParamName()\n";
+  }
+  assert( index >= 0 && index < _NumParams );
+#endif // NDEBUG
+
+  return _ParamInfo[ index ].Name;
+}
+
+
+PortionType FuncDescObj::ParamType( const int index ) const
+{
+#ifndef NDEBUG
+  if( !( index >= 0 && index < _NumParams ) )
+  {
+    gerr << "FuncDescObj Error: an invalid parameter index specified for\n";
+    gerr << "                   the function \"" << _FuncName << "\" when\n";
+    gerr << "                   calling FuncDescObj::ParamType()\n";
+  }
+  assert( index >= 0 && index < _NumParams );
+#endif // NDEBUG
+
+  return _ParamInfo[ index ].Type;
+}
+
+
+Portion* FuncDescObj::ParamDefaultValue( const int index ) const
+{
+#ifndef NDEBUG
+  if( !( index >= 0 && index < _NumParams ) )
+  {
+    gerr << "FuncDescObj Error: an invalid parameter index specified for\n";
+    gerr << "                   the function \"" << _FuncName << "\" when\n";
+    gerr << "                   calling FuncDescObj::ParamDefaultValue()\n";
+  }
+  assert( index >= 0 && index < _NumParams );
+#endif // NDEBUG
+
+  if( _ParamInfo[ index ].DefaultValue == NO_DEFAULT_VALUE )
+  {
+    return NO_DEFAULT_VALUE;
+  }
+  else
+  {
+    return _ParamInfo[ index ].DefaultValue->Copy();
   }
 }
 
 
-PortionType CallFunctionObject::GetCurrParamType( void ) const
+int FuncDescObj::FindParamName( const gString& param_name ) const
 {
-  if( current_param_index < func_desc_obj->NumParams() )
+  int index;
+  int result = PARAM_NOT_FOUND;
+
+  for( index = 0; index < _NumParams; index++ )
   {
-    return func_desc_obj->ParamType( current_param_index );
+    if( _ParamInfo[ index ].Name == param_name )
+    {
+      result = index;
+      break;
+    }
   }
-  else // ( current_param_index >= func_desc_obj->NumParams() )
+  return result;
+}
+
+
+
+
+
+
+/*******************************************************************/
+//                      CallFuncObj
+/*******************************************************************/
+
+  
+CallFuncObj::CallFuncObj( FuncDescObj* func )
+     :FuncDescObj( *func )
+{
+  int index;
+
+  _Param = new Portion* [ _NumParams ];
+  _CurrParamIndex = 0;
+  
+  for( index = 0; index < _NumParams; index++ )
   {
-    gerr << "CallFunctionObject Error: too many parameters specified for\n";
-    gerr << "                          function \"" << func_name << "\"\n";
+    if( _ParamInfo[ index ].DefaultValue == NO_DEFAULT_VALUE )
+    {
+      _Param[ index ] = NO_DEFAULT_VALUE;
+    }
+    else
+    {
+      _Param[ index ] = _ParamInfo[ index ].DefaultValue->Copy();
+    }
+  }
+}
+
+
+void CallFuncObj::SetCurrParamIndex( const int index )
+{
+  _CurrParamIndex = index;
+}
+
+
+void CallFuncObj::SetCurrParam( Portion *param )
+{
+  if( _CurrParamIndex < _NumParams )
+  {
+    if( _Param[ _CurrParamIndex ] != NO_DEFAULT_VALUE )
+    {
+      delete _Param[ _CurrParamIndex ];
+    }
+    _Param[ _CurrParamIndex ] = param;
+    _CurrParamIndex++;
+  }
+  else // ( _CurrParamIndex >= _NumParams )
+  {
+    gerr << "CallFuncObj Error: too many parameters specified for\n";
+    gerr << "                          function \"" << _FuncName << "\"\n";
+  }
+}
+
+
+int CallFuncObj::GetCurrParamIndex( void ) const
+{
+  return _CurrParamIndex;
+}
+
+
+PortionType CallFuncObj::GetCurrParamType( void ) const
+{
+  if( _CurrParamIndex < _NumParams )
+  {
+    return _ParamInfo[ _CurrParamIndex ].Type;
+  }
+  else // ( _CurrParamIndex >= _NumParams )
+  {
+    gerr << "CallFuncObj Error: too many parameters specified for\n";
+    gerr << "                          function \"" << _FuncName << "\"\n";
     return porERROR;
   }
 }
 
 
-void CallFunctionObject::SetCurrParam( Portion *new_param )
+Portion* CallFuncObj::CallFunction( void )
 {
-  if( current_param_index < func_desc_obj->NumParams() )
+  int index;
+
+  for( index = 0; index < _NumParams; index++ )
   {
-    if( param[ current_param_index ] != 0 )
+    if( _Param[ index ] == 0 )
     {
-      delete param[ current_param_index ];
-    }
-    param[ current_param_index ] = new_param;
-    current_param_index++;
-  }
-  else // ( current_param_index >= func_desc_obj->NumParams() )
-  {
-    gerr << "CallFunctionObject Error: too many parameters specified for\n";
-    gerr << "                          function \"" << func_name << "\"\n";
-  }
-}
-
-
-void CallFunctionObject::SetCurrParamIndex( const int index )
-{
-  current_param_index = index;
-}
-
-
-int CallFunctionObject::GetCurrParamIndex( void ) const
-{
-  return current_param_index;
-}
-
-
-int CallFunctionObject::FindParamName( const gString& name ) const
-{
-  return func_desc_obj->FindParamName( name );
-}
-
-
-gString CallFunctionObject::FuncName( void ) const
-{
-  return func_name;
-}
-
-
-Portion* CallFunctionObject::CallFunction( void )
-{
-  int i;
-
-  for( i = 0; i < func_desc_obj->NumParams(); i++ )
-  {
-    if( param[ i ] == 0 )
-    {
-      gerr << "GSM Error: required parameter \"" << func_desc_obj->ParamName( i ) << "\"" << " not found while executing\n";
-      gerr << "           CallFunction() on function \"" << func_name << "\"\n";
+      gerr << "GSM Error: required parameter \"" << _ParamInfo[ index ].Name;
+      gerr << "\"" << " not found while executing CallFunction()\n";
+      gerr << "           on function \"" << _FuncName << "\"\n";
       return 0;
     }
-    assert( param[ i ] != 0 );
   }
-  return func_desc_obj->CallFunction( param );
+  return _FuncPtr( _Param );
 }
-
 
