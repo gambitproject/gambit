@@ -1,13 +1,13 @@
 //
 // FILE: nfgensup.h --Enumerate (Undominated) Subsupports of a Support
 //
-// $Id: nfgensup.h
+// $Id$
 //
 
 #include "nfg.h"
 #include "rational.h"
 #include "gstatus.h"
-#include "gsm.h"
+#include "glist.h"
 #include "nfdom.h"
 #include "nfgciter.h"
 

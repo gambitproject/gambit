@@ -8,7 +8,6 @@
 #include "efgciter.h"
 #include "rational.h"
 #include "gstatus.h"
-#include "gsm.h"
 #include "efdom.h"
 
 class ActionCursorForSupport;
