@@ -13,7 +13,7 @@
 int NormalForm::Lemke(int dup_strat)
 {
   int i, j;
-  StrategyProfile s;
+  StrategyProfile s(2);
 
   if (NumPlayers() != 2)   return 0;
   int n1 = strategies[1]->NumStrats();
@@ -27,15 +27,19 @@ int NormalForm::Lemke(int dup_strat)
     case nfDOUBLE:   {
       double min = 0.0, x;
       gTableau<double> T(n);
-      const NFRep<double> &N = *(NFRep<double> *) array;
+      NFRep<double> *N = (NFRep<double> *) array;
+
+//      N->WriteNfgFile(gout);
 
       for (i = 1; i <= n1; i++)
-	for (j = 1; j <= n2; j++)  {
+ 	for (j = 1; j <= n2; j++)  {
 	  s.SetStrategy(strategies[1]->GetStrategy(i));
 	  s.SetStrategy(strategies[2]->GetStrategy(j));
-	  x = N(s,1);
+	  x = (*N)(s,1);
+//	  gout << i << ' ' << j << ' ' << s << " -> " << x << '\n';
 	  if (x < min)  min = x;
-	  x = N(s,2);
+	  x = (*N)(s,2);
+//	  gout << i << ' ' << j << ' ' << s << " -> " << x << '\n';
 	  if (x < min)  min = x;
 	}
 
@@ -51,8 +55,8 @@ int NormalForm::Lemke(int dup_strat)
 	for (j = 1; j <= n2; j++)  {
 	  s.SetStrategy(strategies[1]->GetStrategy(i));
 	  s.SetStrategy(strategies[2]->GetStrategy(j));
-	  T.Entry(i, n1 + j) = N(s,1) - min;
-	  T.Entry(n1 + j, i) = N(s,2) - min;
+	  T.Entry(i, n1 + j) = (*N)(s,1) - min;
+	  T.Entry(n1 + j, i) = (*N)(s,2) - min;
 	}
 
       for (i = 1; i <= n; T.Entry(i++, 0) = -1.0);
@@ -64,15 +68,15 @@ int NormalForm::Lemke(int dup_strat)
     case nfRATIONAL:   {
       Rational min = 0, x;
       gTableau<Rational> T(n);
-      NFRep<Rational> &N = *(NFRep<Rational> *) array;
+      NFRep<Rational> *N = (NFRep<Rational> *) array;
 
       for (i = 1; i <= n1; i++)
 	for (j = 1; j <= n2; j++)  {
 	  s.SetStrategy(strategies[1]->GetStrategy(i));
 	  s.SetStrategy(strategies[2]->GetStrategy(j));
-	  x = N(s,1);
+	  x = (*N)(s,1);
 	  if (x < min)  min = x;
-	  x = N(s,2);
+	  x = (*N)(s,2);
 	  if (x < min)  min = x;
 	}
 
@@ -88,8 +92,8 @@ int NormalForm::Lemke(int dup_strat)
 	for (j = 1; j <= n2; j++)  {
 	  s.SetStrategy(strategies[1]->GetStrategy(i));
 	  s.SetStrategy(strategies[2]->GetStrategy(j));
-	  T.Entry(i, n1 + j) = N(s,1) - min;
-	  T.Entry(n1 + j, i) = N(s,2) - min;
+	  T.Entry(i, n1 + j) = (*N)(s,1) - min;
+	  T.Entry(n1 + j, i) = (*N)(s,2) - min;
 	}
 
       for (i = 1; i <= n; T.Entry(i++, 0) = -1.0);
