@@ -17,7 +17,6 @@
 #include "gambitio.h"
 #include "normal.h"
 #include "normiter.h"
-#include "rational.h"
 #include "grarray.h"
 #include "gpvector.h"
 #include "gwatch.h"
