@@ -16,12 +16,14 @@
 
 #include "nash/nfgpure.h"
 #include "nash/enum.h"
+#include "nash/lemke.h"
 #include "nash/nliap.h"
 #include "nash/nfgalleq.h"
 #include "nash/nfgqre.h"
 #include "nash/simpdiv.h"
 
 const int idCHECKBOX_FINDALL = 2000;
+const int idSPINCTRL_STOPAFTER = 2001;
 
 class panelNfgNashAlgorithm : public wxPanel {
 public:
@@ -175,6 +177,130 @@ nfgNashAlgorithm *panelNfgEnumMixed::GetAlgorithm(void) const
     nfgEnumMixed<gRational> *algorithm = new nfgEnumMixed<gRational>;
     algorithm->SetStopAfter((m_findAll->GetValue()) ?
 			    0 : m_stopAfter->GetValue());
+    return algorithm;
+  }
+}
+
+//========================================================================
+//                         class panelNfgLcp
+//========================================================================
+
+const int idCHECKBOX_LIMITDEPTH = 2002;
+
+class panelNfgLcp : public panelNfgNashAlgorithm {
+private:
+  wxRadioBox *m_precision;
+  wxCheckBox *m_findAll, *m_limitDepth;
+  wxSpinCtrl *m_stopAfter, *m_maxDepth;
+
+  // Private event handlers
+  void OnFindAll(wxCommandEvent &);
+  void OnStopAfter(wxSpinEvent &);
+  void OnLimitDepth(wxCommandEvent &);
+
+public:
+  panelNfgLcp(wxWindow *);
+
+  nfgNashAlgorithm *GetAlgorithm(void) const;
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(panelNfgLcp, panelNfgNashAlgorithm)
+  EVT_CHECKBOX(idCHECKBOX_FINDALL, panelNfgLcp::OnFindAll)
+  EVT_SPINCTRL(idSPINCTRL_STOPAFTER, panelNfgLcp::OnStopAfter)
+  EVT_CHECKBOX(idCHECKBOX_LIMITDEPTH, panelNfgLcp::OnLimitDepth)
+END_EVENT_TABLE()
+
+panelNfgLcp::panelNfgLcp(wxWindow *p_parent)
+  : panelNfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  wxString precisionChoices[] = { "Floating point", "Rational" };
+  m_precision = new wxRadioBox(this, -1, "Precision",
+			       wxDefaultPosition, wxDefaultSize,
+			       2, precisionChoices, 1, wxRA_SPECIFY_ROWS);
+  topSizer->Add(m_precision, 0, wxALL | wxCENTER, 5);
+
+  wxStaticBox *stopAfterBox = new wxStaticBox(this, wxID_STATIC,
+					      "Number to find");
+  wxStaticBoxSizer *stopAfterSizer = new wxStaticBoxSizer(stopAfterBox,
+							  wxHORIZONTAL);
+  m_findAll = new wxCheckBox(this, idCHECKBOX_FINDALL, "Find all");
+  m_findAll->SetValue(false);
+  stopAfterSizer->Add(m_findAll, 0, wxALL | wxCENTER, 5);
+  stopAfterSizer->Add(new wxStaticText(this, wxID_STATIC, "Stop after"),
+		      0, wxALL | wxCENTER, 5);
+  m_stopAfter = new wxSpinCtrl(this, idSPINCTRL_STOPAFTER, "1",
+			       wxDefaultPosition, wxDefaultSize,
+			       wxSP_ARROW_KEYS, 1, 10000);
+  stopAfterSizer->Add(m_stopAfter, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
+
+  wxStaticBox *depthBox = new wxStaticBox(this, wxID_STATIC, 
+					  "Algorithm behavior");
+  wxStaticBoxSizer *depthSizer = new wxStaticBoxSizer(depthBox,
+						      wxHORIZONTAL);
+  m_limitDepth = new wxCheckBox(this, idCHECKBOX_LIMITDEPTH, "Limit depth");
+  m_limitDepth->SetValue(false);
+  m_limitDepth->Enable(false);
+  depthSizer->Add(m_limitDepth, 0, wxALL | wxCENTER, 5);
+  depthSizer->Add(new wxStaticText(this, wxID_STATIC, "Maximum depth"),
+		  0, wxALL | wxCENTER, 5);
+  m_maxDepth = new wxSpinCtrl(this, -1, "10",
+			      wxDefaultPosition, wxDefaultSize,
+			      wxSP_ARROW_KEYS, 1, 1000);
+  m_maxDepth->Enable(false);
+  depthSizer->Add(m_maxDepth, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(depthSizer, 0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+void panelNfgLcp::OnFindAll(wxCommandEvent &)
+{
+  m_stopAfter->Enable(!m_findAll->GetValue());
+  m_limitDepth->Enable(m_findAll->GetValue() || 
+		       m_stopAfter->GetValue() > 1);
+  m_maxDepth->Enable((m_findAll->GetValue() || m_stopAfter->GetValue() > 1) &&
+		     m_limitDepth->GetValue());
+}
+
+void panelNfgLcp::OnStopAfter(wxSpinEvent &)
+{
+  m_limitDepth->Enable(m_stopAfter->GetValue() > 1);
+  m_maxDepth->Enable(m_stopAfter->GetValue() > 1 && m_limitDepth->GetValue());
+}
+
+void panelNfgLcp::OnLimitDepth(wxCommandEvent &)
+{
+  m_maxDepth->Enable(m_limitDepth->GetValue());
+}
+
+nfgNashAlgorithm *panelNfgLcp::GetAlgorithm(void) const
+{
+  if (m_precision->GetSelection() == 0) {
+    nfgLcp<double> *algorithm = new nfgLcp<double>;
+    algorithm->SetStopAfter((m_findAll->GetValue()) ?
+			    0 : m_stopAfter->GetValue());
+    algorithm->SetMaxDepth((m_limitDepth->GetValue()) ?
+			   m_maxDepth->GetValue() : 0);
+    return algorithm;
+  }
+  else {
+    nfgLcp<gRational> *algorithm = new nfgLcp<gRational>;
+    algorithm->SetStopAfter((m_findAll->GetValue()) ?
+			    0 : m_stopAfter->GetValue());
+    algorithm->SetMaxDepth((m_limitDepth->GetValue()) ?
+			   m_maxDepth->GetValue() : 0);
     return algorithm;
   }
 }
@@ -559,13 +685,16 @@ void dialogNfgNash::LoadAlgorithms(const Nfg &p_nfg)
 
   wxTreeItemId custom = m_algorithmTree->AppendItem(root, "Custom algorithms");
   wxTreeItemId id;
-  id = m_algorithmTree->AppendItem(custom, "EnumPure");
+  id = m_algorithmTree->AppendItem(custom, "EnumPureSolve");
   m_algorithms.Define(id, new panelNfgEnumPure(this));
 
   if (p_nfg.NumPlayers() == 2) {
-    id = m_algorithmTree->AppendItem(custom, "EnumMixed");
+    id = m_algorithmTree->AppendItem(custom, "EnumMixedSolve");
     m_algorithms.Define(id, new panelNfgEnumMixed(this));
-    m_algorithmTree->AppendItem(custom, "LcpSolve");
+
+    id = m_algorithmTree->AppendItem(custom, "LcpSolve");
+    m_algorithms.Define(id, new panelNfgLcp(this));
+
     if (IsConstSum(p_nfg)) {
       m_algorithmTree->AppendItem(custom, "LpSolve");
     }

@@ -1,27 +1,43 @@
 //
-// FILE: lemke.h -- Interface to Lemke solution module
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Interface to Lemke-Howson algorithm for computing equilibria in
+// normal form games
 //
 
 #ifndef LEMKE_H
 #define LEMKE_H
 
-#include "base/base.h"
-#include "game/nfg.h"
-#include "mixedsol.h"
-#include "algutils.h"
+#include "lhtab.h"
+#include "nfgalgorithm.h"
 
-class LemkeParams : public AlgParams    {
-public:
-  int dup_strat, maxdepth;
+template <class T> class nfgLcp : public nfgNashAlgorithm  {
+private:
+  int m_stopAfter, m_maxDepth;
+
+  int AddBfs(LHTableau<T> &, gList<BFS<T> > &);
+  gList<MixedSolution> AddSolutions(const NFSupport &,
+				    const gList<BFS<T> > &, const T &);
+  void AllLemke(const NFSupport &, int, LHTableau<T> &B, gList<BFS<T> > &,
+		int depth, gStatus &);
   
-  LemkeParams(void);
+public:
+  nfgLcp(void);
+  virtual ~nfgLcp() { }
+  
+  int StopAfter(void) const { return m_stopAfter; }
+  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
+
+  int MaxDepth(void) const { return m_maxDepth; }
+  void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
+
+  gText GetAlgorithm(void) const { return "Lcp"; }
+  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
 };
 
-int Lemke(const NFSupport &, const LemkeParams &,
-          gList<MixedSolution> &, gStatus &, int &npivots, double &time);
- 
 
 #endif    // LEMKE_H
 
