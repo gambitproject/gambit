@@ -187,7 +187,7 @@ TEMPLATE NFStrategySet *ComputeMixedDominated(const Nfg<gRational> &,
 
 NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
 				 const gArray<int> &players,
-				 gOutput &tracefile, gStatus &status)
+				 gOutput &tracefile, gStatus &status=gstatus)
 {
 	NFSupport *T = new NFSupport(S);
 	bool any = false;

@@ -10,15 +10,6 @@
 #include "nfstrat.h"
 #include "nfgciter.h"
 
-// prototype in nfg.h
-
-template <class T> void RandomNfg(Nfg<T> &nfg)
-{
-  for (int i = 1; i <= nfg.NumPlayers(); i++)
-    for (int j = 0; j < nfg.NumPayPerPlayer; j++)
-      (nfg.payoffs)[i][j] = (T) Uniform();
-}  
-
 
 template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
 {
@@ -55,6 +46,14 @@ template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
 #endif   // __GNUG__, __BORLANDC__
 
 #include "rational.h"
+// prototype in nfg.h
+
+template <class T> void RandomNfg(Nfg<T> &nfg)
+{
+  for (int i = 1; i <= nfg.NumPlayers(); i++)
+    for (int j = 0; j < nfg.NumPayPerPlayer; j++)
+      (nfg.payoffs)[i][j] = (T) Uniform();
+}  
 
 TEMPLATE void RandomNfg(Nfg<double> &nfg);
 TEMPLATE void RandomNfg(Nfg<gRational> &nfg);

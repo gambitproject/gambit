@@ -146,7 +146,7 @@ NFStrategySet *ComputeDominated(NFSupport &S, int pl, bool strong,
 
 NFSupport *ComputeDominated(NFSupport &S, bool strong, 
 			    const gArray<int> &players,
-			    gOutput &tracefile, gStatus &status)
+			    gOutput &tracefile, gStatus &status=gstatus)
 {
   NFSupport *T = new NFSupport(S);
   bool any = false;

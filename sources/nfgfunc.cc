@@ -1,7 +1,7 @@
 //
 // FILE: nfgfunc.cc -- Normal form command language builtins
 //
-// @(#)nfgfunc.cc	1.89 08/30/96
+// $Id$
 //
 
 
@@ -16,6 +16,7 @@
 #include "mixed.h"
 
 #include "gwatch.h"
+#include "gstatus.h"
 
 //
 // Implementations of these are provided as necessary in gsmutils.cc
@@ -68,9 +69,9 @@ Portion *GSM_CompressNfg_Rational(Portion **param)
   return new NfgValPortion(CompressNfg(*N, *S));
 }
   
-extern NFSupport *ComputeDominated(NFSupport &S, bool strong, 
+extern NFSupport *ComputeDominated(NFSupport &S, bool strong,
 				   const gArray<int> &players,
-				   gOutput &tracefile);
+				   gOutput &tracefile,gStatus &status=gstatus);
 
 //--------------
 // ElimAllDom
@@ -189,7 +190,7 @@ Portion *GSM_ElimDom_Nfg(Portion **param)
 
 NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
 				 const gArray<int> &players,
-				 gOutput &tracefile);
+				 gOutput &tracefile,gStatus &status=gstatus);
 
 Portion *GSM_ElimMixedDom_NfSupport(Portion **param)
 {
