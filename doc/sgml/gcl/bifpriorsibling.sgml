@@ -1,0 +1,42 @@
+<refentry id="bif.PriorSibling" xreflabel="PriorSibling">
+
+<refmeta>
+<indexterm>
+<primary>PriorSibling</primary>
+</indexterm>
+
+<refentrytitle>PriorSibling</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>PriorSibling</refname>
+<refpurpose>
+Returns the previous sibling of a node
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+PriorSibling[node->NODE] =: NODE
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>PriorSibling</function> 
+returns the prior sibling of <parameter>node</parameter>.  If <parameter>node</parameter> has
+no prior sibling, the null node is returned.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.NextSibling">.
+</para>
+</refsect1>
+
+</refentry>
+
+

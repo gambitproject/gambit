@@ -1,0 +1,42 @@
+<refentry id="bif.Parentheses" xreflabel="Parentheses">
+
+<refmeta>
+<indexterm>
+<primary>Parentheses</primary>
+</indexterm>
+
+<refentrytitle>Parentheses</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Parentheses</refname>
+<refpurpose>
+Returns its parameter
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Parentheses[x->T*] =: T 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Parentheses</function>
+returns the value passed in <parameter>x</parameter>.  This is used to control
+the order of evaluation of expressions.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>(x)</literal>
+</para>
+</refsect1>
+
+</refentry>
+
+

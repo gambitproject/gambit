@@ -1,0 +1,43 @@
+<refentry id="bif.Parent" xreflabel="Parent">
+
+<refmeta>
+<indexterm>
+<primary>Parent</primary>
+</indexterm>
+
+<refentrytitle>Parent</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Parent</refname>
+<refpurpose>
+Returns the parent of a node
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Parent[node->NODE*] =: NODE 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Parent</function>
+returns the parent of <parameter>node</parameter>.
+If <parameter>node</parameter> is the root node,
+or if <parameter>node</parameter> is null, the null node is returned.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Children">.
+</para>
+</refsect1>
+
+</refentry>
+
+

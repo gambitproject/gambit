@@ -1,0 +1,44 @@
+<refentry id="bif.Platform" xreflabel="Platform">
+
+<refmeta>
+<indexterm>
+<primary>Platform</primary>
+</indexterm>
+
+<refentrytitle>Platform</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Platform</refname>
+<refpurpose>
+Returns a string identifying the system
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Platform[] := TEXT
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Platform</function>
+returns a string identifying the platform that the GCL is
+currently running on.  Can be used in user defined functions to define
+system dependent variables, such as pathnames and command lines for
+shell commands.  
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Shell">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,46 @@
+<refentry id="bif.Player" xreflabel="Player">
+
+<refmeta>
+<indexterm>
+<primary>Player</primary>
+</indexterm>
+
+<refentrytitle>Player</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Player</refname>
+<refpurpose>
+Returns the player corresponding to an object
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Player[infoset->INFOSET*] =: EFPLAYER 
+Player[strategy->STRATEGY*] =: NFPLAYER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Player</function>
+returns the player who chooses at information set <parameter>infoset</parameter>,
+or who has strategy <parameter>strategy</parameter>.
+If <parameter>infoset</parameter> or <parameter>strategy</parameter>,
+as appropriate, is null, the null player is returned.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Infosets">,
+<xref linkend="bif.Strategies">.
+</para>
+</refsect1>
+
+</refentry>
+
+

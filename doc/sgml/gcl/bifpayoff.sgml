@@ -1,0 +1,57 @@
+<refentry id="bif.Payoff" xreflabel="Payoff">
+
+<refmeta>
+<indexterm>
+<primary>Payoff</primary>
+</indexterm>
+
+<refentrytitle>Payoff</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Payoff</refname>
+<refpurpose>
+Returns the payoff associated with an object
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Payoff[outcome->EFOUTCOME*, player->EFPLAYER] =: NUMBER 
+Payoff[outcome->NFOUTCOME*, player->NFPLAYER] =: NUMBER 
+Payoff[profile->BEHAV, player->EFPLAYER] =: NUMBER 
+Payoff[profile->MIXED, player->NFPLAYER] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+The first two versions of
+<function>Payoff</function>
+return the value of the outcome <parameter>outcome</parameter> to the
+player <parameter>player</parameter>.
+</para>
+
+<para>
+The third and fourth versions return the expected payoff to player
+<parameter>player</parameter>, when all players play according to
+<parameter>profile</parameter>.
+</para>
+
+<para>
+In all cases, an error occurs if the parameters are not from the
+same game.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.SetPayoff">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,41 @@
+<refentry id="bif.PossibleNashSupports" xreflabel="PossibleNashSupports">
+
+<refmeta>
+<indexterm>
+<primary>PossibleNashSupports</primary>
+</indexterm>
+
+<refentrytitle>PossibleNashSupports</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>PossibleNashSupports</refname>
+<refpurpose>
+Returns the list of supports that could be supports of Nash equilibria
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+PossibleNashSupports[efg->EFG] =: LIST(EFSUPPORT) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>PossibleNashSupports</function>
+returns the list of supports that could be the supports of Nash
+equilibria.  Specifically, the supports returned are those in which no
+pure strategy is weakly dominated by another strategy in the support,
+since such a pure strategy would have a lower expected payoff for any
+mixed strategy vector that assigned positive probability to all
+elements of the support and no other strategies, and no pure strategy
+in the support is strictly dominated (relative to the support) by a
+pure strategy outside the support.
+</para>
+</refsect1>
+
+</refentry>
+
+

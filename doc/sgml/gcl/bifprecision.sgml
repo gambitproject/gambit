@@ -1,0 +1,34 @@
+<refentry id="bif.Precision" xreflabel="Precision">
+
+<refmeta>
+<indexterm>
+<primary>Precision</primary>
+</indexterm>
+
+<refentrytitle>Precision</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Precision</refname>
+<refpurpose>
+Returns the precision of a number
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Precision[x->NUMBER] =: PRECISION
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Precision</function> 
+returns the precision of <parameter>x</parameter>.
+</para>
+</refsect1>
+
+</refentry>
+
+

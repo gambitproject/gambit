@@ -1,0 +1,35 @@
+<refentry id="bif.PriorAction" xreflabel="PriorAction">
+
+<refmeta>
+<indexterm>
+<primary>PriorAction</primary>
+</indexterm>
+
+<refentrytitle>PriorAction</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>PriorAction</refname>
+<refpurpose>
+Returns the action immediately before a node
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+PriorAction[node->NODE] =: ACTION 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>PriorAction</function> 
+returns the action corresponding to the branch leading to <parameter>node</parameter>.
+If <parameter>node</parameter> is the root node, its prior action is the null action.
+</para>
+</refsect1>
+
+</refentry>
+
+

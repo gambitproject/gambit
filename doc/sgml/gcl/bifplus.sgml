@@ -1,0 +1,56 @@
+<refentry id="bif.Plus" xreflabel="Plus">
+
+<refmeta>
+<indexterm>
+<primary>Plus</primary>
+</indexterm>
+
+<refentrytitle>Plus</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Plus</refname>
+<refpurpose>
+Returns the sum of two numbers or profiles, or the concatenation of two strings
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Plus[x->NUMBER, y->NUMBER] =: NUMBER 
+Plus[x->MIXED, y->MIXED] =: MIXED 
+Plus[x->BEHAV, y->BEHAV] =: BEHAV 
+Plus[x->TEXT, y->TEXT] =: TEXT
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+The first three versions of <function>Plus</function>
+return the sum of <parameter>x</parameter> and
+<parameter>y</parameter>.
+The final version returns the concatentation of
+<parameter>x</parameter> and <parameter>y</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>x + y</literal>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Divide">,
+<xref linkend="bif.Minus">,
+<xref linkend="bif.Times">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,51 @@
+<refentry id="bif.Power" xreflabel="Power">
+
+<refmeta>
+<indexterm>
+<primary>Power</primary>
+</indexterm>
+
+<refentrytitle>Power</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Power</refname>
+<refpurpose>
+Raises a number to a power
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Power[x->NUMBER, y->NUMBER] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Power</function> raises <parameter>x</parameter> to the
+power <parameter>y</parameter>.  <function>Power</function> is not
+implemented for the case where <parameter>x</parameter> is a rational,
+and <parameter>y</parameter> is not an integer.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>x ^ y</literal>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Exp">,
+<xref linkend="bif.Log">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,36 @@
+<refentry id="bif.Players" xreflabel="Players">
+
+<refmeta>
+<indexterm>
+<primary>Players</primary>
+</indexterm>
+
+<refentrytitle>Players</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Players</refname>
+<refpurpose>
+Returns the list of players in a game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Players[efg->EFG] =: LIST(EFPLAYER) 
+Players[nfg->NFG] =: LIST(NFPLAYER) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Players</function>
+returns the list of players defined on the game <parameter>efg</parameter>
+or <parameter>nfg</parameter>.
+</para>
+</refsect1>
+
+</refentry>
+
+
