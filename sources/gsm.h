@@ -24,6 +24,8 @@ int FuncParamCheck( const PortionType stack_param_type,
 class FunctionHashTable;
 class Instruction;
 
+
+
 class GSM
 {
  private:
@@ -32,12 +34,11 @@ class GSM
   RefHashTable*            _RefTable;
   FunctionHashTable*       _FuncTable;
 
-  Portion* resolve_ref    ( Reference_Portion* p );
-  Portion* resolve_subref ( Reference_Portion* p );
+  Portion* _ResolveRef            ( Reference_Portion* p );
+  Portion* _ResolvePrimaryRefOnly ( Reference_Portion* p );
 
-  bool unary_operation  ( OperationMode mode );
-  bool binary_operation ( OperationMode mode );
-
+  bool _UnaryOperation  ( OperationMode mode );
+  bool _BinaryOperation ( OperationMode mode );
 
   // This function is located in gsmfunc.cc
   void InitFunctions( void );
@@ -57,6 +58,7 @@ class GSM
   bool Push ( const gRational& data );
   bool Push ( const gString&   data );
 
+  // This function is only temporarily here for testing reasons
   bool GenerateNfg ( const double& data );
 
   bool PushList ( const int num_of_elements );
@@ -64,7 +66,9 @@ class GSM
   bool PushRef  ( const gString& ref );
   bool PushRef  ( const gString& ref, const gString& subref );
   bool Assign   ( void );
+  bool UnAssign ( void );
   bool UnAssign ( const gString& ref );
+//  bool UnAssign ( const gString& ref, const gString& subref );
 
 
   bool Add      ( void );
@@ -83,8 +87,6 @@ class GSM
   bool AND ( void );
   bool OR  ( void );
   bool NOT ( void );
-
-  bool Concatenate ( void );
 
   
   void AddFunction( FuncDescObj* func );

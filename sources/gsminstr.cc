@@ -167,14 +167,6 @@ bool NOT::Execute( GSM& gsm ) const
 { return gsm.NOT(); }
 
 
-//--------------------------- string operations ------------------------
-
-Opcode Concatenate::Type( void ) const
-{ return iCONCATENATE; }
-bool Concatenate::Execute( GSM& gsm ) const
-{ return gsm.Concatenate(); }
-
-
 //------------------------ function call operations -------------------
 
 InitCallFunction::InitCallFunction( const gString& func_name )

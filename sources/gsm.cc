@@ -163,27 +163,16 @@ bool GSM::Push( const gString& data )
 
 
 
-
-
-
-
-
-
-
-
+// This function is only temporarily here for testing reasons
 bool GSM::GenerateNfg( const double& data )
 {
-  Portion* p;
-  p = new Nfg_Portion( data );
+  Nfg_Portion* p;
+  p = new Nfg_Portion( *(new Nfg) );
+  p->Value().value = data;
+  p->Temporary() = false;
   _Stack->Push( p );
   return true;
 }
-
-
-
-
-
-
 
 
 
@@ -218,7 +207,7 @@ bool GSM::PushList( const int num_of_elements )
   {
     p = _Stack->Pop();
     if( p->Type() == porREFERENCE )
-      p = resolve_ref( (Reference_Portion*) p );
+      p = _ResolveRef( (Reference_Portion*) p );
     list->Insert( p, 1 );
   }
   _Stack->Push( list );
@@ -272,9 +261,10 @@ bool GSM::PushRef( const gString& ref, const gString& subref )
 
 bool GSM::Assign( void )
 {
+  Portion*  p2_copy;
   Portion*  p2;
   Portion*  p1;
-  Portion*  p;
+  Portion*  primary_ref;
   gString   p1_subvalue;
   bool      result = true;
 
@@ -291,33 +281,57 @@ bool GSM::Assign( void )
 
   if ( p1->Type() == porREFERENCE )
   {
-    if( p2->Type() == porREFERENCE )
-      p2 = resolve_ref( (Reference_Portion*) p2 );
-    
     p1_subvalue = ( (Reference_Portion*) p1 )->SubValue();
     if( p1_subvalue == "" )
     {
-      _RefTable->Define( ( (Reference_Portion*) p1 )->Value(), p2->Copy() );
+      if( p2->Type() == porREFERENCE )
+      {
+	p2 = _ResolveRef( (Reference_Portion*) p2 );
+	p2_copy = p2->Copy();
+	p2_copy->CopyDataFrom( p2 );
+      }
+      else
+      {
+	p2_copy = p2->Copy();
+      }
+      p2_copy->Temporary() = false;
+      p2->Temporary() = true;
+      _RefTable->Define( ( (Reference_Portion*) p1 )->Value(), p2_copy );
       delete p2;
       
-      p1 = resolve_ref( (Reference_Portion*) p1 );
+      p1 = _ResolveRef( (Reference_Portion*) p1 );
       _Stack->Push( p1 );
     }
-    else
+
+    else // ( p1_subvalue != "" )
     {
-      p = resolve_subref( (Reference_Portion*) p1 );
-      switch( p->Type() )
+      primary_ref = _ResolvePrimaryRefOnly( (Reference_Portion*) p1 );
+
+#ifndef NDEBUG
+      if( primary_ref->Type() != porNFG )
       {
-      case porNFG:
-	( (Nfg_Portion*) p )->Assign( p1_subvalue, p2->Copy() );
-	break;
-      default:
-	gerr << "GSM Error: attempted to assign a subreference to a type\n";
-	gerr << "           that doesn't support it\n";
+	gerr << "GSM Error: attempted to assign a sub-reference to a type\n";
+	gerr << "           that doesn't support such structures\n";
       }
-      delete p2;
+      assert( primary_ref->Type() == porNFG );
+#endif // NDEBUG
       
-      p1 = resolve_ref( (Reference_Portion*) p1 );
+      if( p2->Type() == porREFERENCE )
+      {
+	p2 = _ResolveRef( (Reference_Portion*) p2 );
+	p2_copy = p2->Copy();
+	p2_copy->CopyDataFrom( p2 );
+      }
+      else
+      {
+	p2_copy = p2->Copy();
+      }
+      p2_copy->Temporary() = false;
+      p2->Temporary() = true;
+      ( (Nfg_Portion*) primary_ref )->Assign( p1_subvalue, p2_copy );
+      delete p2;
+
+      p1 = _ResolveRef( (Reference_Portion*) p1 );
       _Stack->Push( p1 );
     }
   }
@@ -326,34 +340,96 @@ bool GSM::Assign( void )
     gerr << "GSM Error: no reference found to be assigned\n";
     result = false;
   }
-
   return result;
 }
 
 
-bool GSM::UnAssign( const gString& ref )
+bool GSM::UnAssign( void )
 {
-  bool  result = true;
+  Portion*  p1;
+  Portion*  primary_ref;
+  gString   ref;
+  gString   p1_subvalue;
+  bool      result = true;
 
-  if( _RefTable->IsDefined( ref ) )
+#ifndef NDEBUG
+  if( _Stack->Depth() < 1 )
   {
-    _RefTable->Remove( ref );
+    gerr << "GSM Error: not enough operands to execute Assign()\n";
   }
-  else
+  assert( _Stack->Depth() >= 1 );
+#endif // NDEBUG
+
+  p1 = _Stack->Pop();
+
+  if ( p1->Type() == porREFERENCE )
   {
+    ref = ( (Reference_Portion*) p1 )->Value();
+    p1_subvalue = ( (Reference_Portion*) p1 )->SubValue();
+    if( p1_subvalue == "" )
+    {
+      if( _RefTable->IsDefined( ref ) )
+      {
+	_RefTable->Remove( ref );
+      }
+#ifndef NDEBUG
+      else
+      {
+	gerr << "GSM Warning: calling UnAssign() on a undefined reference\n";
+      }
+#endif // NDEBUG
+    }
+
+    else // ( p1_subvalue != "" )
+    {
+      primary_ref = _ResolvePrimaryRefOnly( (Reference_Portion*) p1 );
+
+#ifndef NDEBUG
+      if( primary_ref->Type() != porNFG )
+      {
+	gerr << "GSM Error: attempted to unassign a sub-reference of a type\n";
+	gerr << "           that doesn't support such structures\n";
+      }
+      assert( primary_ref->Type() == porNFG );
+#endif // NDEBUG
+
+      ( (Nfg_Portion*) primary_ref )->UnAssign( p1_subvalue );
+    }
+    delete p1;
+  }
+  else // ( p1->Type() != porREFERENCE )
+  {
+    gerr << "GSM Error: no reference found to be unassigned\n";
     result = false;
   }
   return result;
 }
 
 
+bool GSM::UnAssign( const gString& ref )
+{
+  if( _RefTable->IsDefined( ref ) )
+  {
+    _RefTable->Remove( ref );
+  }
+#ifndef NDEBUG
+  else
+  {
+    gerr << "GSM Warning: calling UnAssign() on a undefined reference\n";
+  }
+#endif // NDEBUG
+
+  return true;
+}
+
+
 
 
 //---------------------------------------------------------------------
-//                        resolve_ref functions
+//                        _ResolveRef functions
 //-----------------------------------------------------------------------
 
-Portion* GSM::resolve_ref( Reference_Portion* p )
+Portion* GSM::_ResolveRef( Reference_Portion* p )
 {
   Portion*  result = 0;
   Portion*  temp;
@@ -387,7 +463,7 @@ Portion* GSM::resolve_ref( Reference_Portion* p )
 }
 
 
-Portion* GSM::resolve_subref( Reference_Portion* p )
+Portion* GSM::_ResolvePrimaryRefOnly( Reference_Portion* p )
 {
   Portion*  result = 0;
   Portion*  temp;
@@ -413,7 +489,7 @@ Portion* GSM::resolve_subref( Reference_Portion* p )
 //                       binary operations
 //------------------------------------------------------------------------
 
-bool GSM::binary_operation( OperationMode mode )
+bool GSM::_BinaryOperation( OperationMode mode )
 {
   Portion*   p2;
   Portion*   p1;
@@ -432,9 +508,9 @@ bool GSM::binary_operation( OperationMode mode )
   p1 = _Stack->Pop();
   
   if( p2->Type() == porREFERENCE )
-    p2 = resolve_ref( (Reference_Portion*) p2 );
+    p2 = _ResolveRef( (Reference_Portion*) p2 );
   if( p1->Type() == porREFERENCE )
-    p1 = resolve_ref( (Reference_Portion*) p1 );
+    p1 = _ResolveRef( (Reference_Portion*) p1 );
 
   if( p1->Type() == p2->Type() )
   {
@@ -470,7 +546,7 @@ bool GSM::binary_operation( OperationMode mode )
 //                        unary operations
 //-----------------------------------------------------------------------
 
-bool GSM::unary_operation( OperationMode mode )
+bool GSM::_UnaryOperation( OperationMode mode )
 {
   Portion*  p1;
   bool      result = true;
@@ -480,7 +556,7 @@ bool GSM::unary_operation( OperationMode mode )
     p1 = _Stack->Pop();
     
     if( p1->Type() == porREFERENCE )
-      p1 = resolve_ref( (Reference_Portion*) p1 );
+      p1 = _ResolveRef( (Reference_Portion*) p1 );
     
     p1->Operation( 0, mode );
     _Stack->Push( p1 );
@@ -502,56 +578,49 @@ bool GSM::unary_operation( OperationMode mode )
 //-----------------------------------------------------------------
 
 bool GSM::Add ( void )
-{ return binary_operation( opADD ); }
+{ return _BinaryOperation( opADD ); }
 
 bool GSM::Subtract ( void )
-{ return binary_operation( opSUBTRACT ); }
+{ return _BinaryOperation( opSUBTRACT ); }
 
 bool GSM::Multiply ( void )
-{ return binary_operation( opMULTIPLY ); }
+{ return _BinaryOperation( opMULTIPLY ); }
 
 bool GSM::Divide ( void )
-{ return binary_operation( opDIVIDE ); }
+{ return _BinaryOperation( opDIVIDE ); }
 
 bool GSM::Negate( void )
-{ return unary_operation( opNEGATE ); }
+{ return _UnaryOperation( opNEGATE ); }
 
 
 
 bool GSM::EqualTo ( void )
-{ return binary_operation( opEQUAL_TO ); }
+{ return _BinaryOperation( opEQUAL_TO ); }
 
 bool GSM::NotEqualTo ( void )
-{ return binary_operation( opNOT_EQUAL_TO ); }
+{ return _BinaryOperation( opNOT_EQUAL_TO ); }
 
 bool GSM::GreaterThan ( void )
-{ return binary_operation( opGREATER_THAN ); }
+{ return _BinaryOperation( opGREATER_THAN ); }
 
 bool GSM::LessThan ( void )
-{ return binary_operation( opLESS_THAN ); }
+{ return _BinaryOperation( opLESS_THAN ); }
 
 bool GSM::GreaterThanOrEqualTo ( void )
-{ return binary_operation( opGREATER_THAN_OR_EQUAL_TO ); }
+{ return _BinaryOperation( opGREATER_THAN_OR_EQUAL_TO ); }
 
 bool GSM::LessThanOrEqualTo ( void )
-{ return binary_operation( opLESS_THAN_OR_EQUAL_TO ); }
+{ return _BinaryOperation( opLESS_THAN_OR_EQUAL_TO ); }
 
 
 bool GSM::AND ( void )
-{ return binary_operation( opLOGICAL_AND ); }
+{ return _BinaryOperation( opLOGICAL_AND ); }
 
 bool GSM::OR ( void )
-{ return binary_operation( opLOGICAL_OR ); }
+{ return _BinaryOperation( opLOGICAL_OR ); }
 
 bool GSM::NOT ( void )
-{ return unary_operation( opLOGICAL_NOT ); }
-
-
-bool GSM::Concatenate( void )
-{ return binary_operation( opCONCATENATE ); }
-
-
-
+{ return _UnaryOperation( opLOGICAL_NOT ); }
 
 
 
@@ -639,7 +708,7 @@ bool GSM::Bind( void )
   param = _Stack->Pop();
   
   if( param->Type() == porREFERENCE )
-    param = resolve_ref( (Reference_Portion *)param );
+    param = _ResolveRef( (Reference_Portion *)param );
   
   curr_param_type = func->GetCurrParamType();
   type_match = FuncParamCheck( param->Type(), curr_param_type );
@@ -783,7 +852,7 @@ void GSM::Output( void )
   p = _Stack->Pop();
   if( p->Type() == porREFERENCE )
   {
-    p = resolve_ref( (Reference_Portion*) p );
+    p = _ResolveRef( (Reference_Portion*) p );
   }
   p->Output( gout );
   delete p;
@@ -834,11 +903,6 @@ void GSM::Flush( void )
 #define TEMPLATE
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
-
-
-#include "hash.imp"
-
-TEMPLATE class HashTable< gString, FuncDescObj* >;
 
 
 

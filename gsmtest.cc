@@ -153,8 +153,8 @@ int main( void )
   gout << "Pushing \'Test2 \'\n";
   machine->Push( (gString)"Test1 " );
   machine->Push( (gString)"Test2 " );
-  gout << "Testing Concatenate()\n";
-  machine->Concatenate();
+  gout << "Testing Add()\n";
+  machine->Add();
   machine->Dump();
 
   gout << "*********************** press return to continue ************";
@@ -543,7 +543,7 @@ int main( void )
   program.Append( new Dump );
   program.Append( new Push<gString>( "hi!" ) );
   program.Append( new Push<gString>( "hello!" ) );
-  program.Append( new Concatenate );
+  program.Append( new Add );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
   program.Append( new EqualTo );
@@ -605,89 +605,139 @@ int main( void )
   machine->PushRef( "x" );
   machine->Dump();
 
-  gout << "*********************** press return to continue ************";
-  gin >> cont;
-
-  machine->PushRef( "x" );
-  machine->PushRef( "x" );
-  machine->PushRef( "z" );
-  machine->PushRef( "z" );
-  machine->PushRef( "z" );
-  machine->PushRef( "x" );
-  machine->PushRef( "x" );
-  machine->PushList( 6 );
-  machine->PushRef( "z" );
-  machine->PushRef( "z" );
-  machine->PushRef( "z" );
-  machine->PushRef( "x" );
-  machine->PushRef( "x" );
-  machine->Dump();
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
 
 
-  machine->PushRef( "x" );
-  machine->GenerateNfg( 100 );
-  machine->Assign();
-  machine->Dump();
-
-  gout << "machine->PushRef( \"x\", \"a\" );\n";
-  machine->PushRef( "x", "a" );
-  gout <<  "machine->Push( (double) 200 );\n";
-  machine->Push( (double) 200 );
-  gout << "machine->Assign();\n";
-  machine->Assign();
-  machine->Dump();
-
-
-  machine->PushRef( "x", "a" );
-  machine->Dump();
-
-  machine->PushRef( "x", "x" );
-  machine->Push( (double) 300 );
-  machine->Assign();
-  machine->Dump();
-
-  machine->PushRef( "y", "a" );
-  machine->Push( (double) 300 );
-  machine->Assign();
-  machine->Dump();
-
-  machine->PushRef( "x", "x" );
-  machine->PushRef( "x", "a" );
-  machine->Dump();
-
-
   machine->GenerateNfg( 100 );
   machine->Dump();
 
   machine->PushRef( "x" );
-  machine->GenerateNfg( 100 );
-  machine->Assign();
-  machine->Dump();
-
-  machine->PushRef( "x", "a" );
-  machine->Push( (gInteger) 20 );
+  machine->GenerateNfg( 1 );
   machine->Assign();
   machine->Dump();
 
   machine->PushRef( "x" );
-  machine->PushRef( "x", "a" );
   machine->Dump();
 
+  machine->PushRef( "x" );
+  machine->GenerateNfg( 2 );
+  machine->Assign();
+  machine->Dump();
 
+  machine->PushRef( "y" );
+  machine->PushRef( "x" );
+  machine->Assign();
+  machine->Dump();
 
+  machine->PushRef( "z" );
+  machine->PushRef( "y" );
+  machine->Assign();
+  machine->Dump();
 
+  machine->PushRef( "x" );
+  machine->PushRef( "z" );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->PushRef( "x" );
+  machine->Assign();
+  machine->Dump();
 
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
+
+
+  machine->PushRef( "x" );
+  machine->GenerateNfg( 1 );
+  machine->Assign();
+  machine->Dump();
+  
+  machine->PushRef( "x", "1" );
+  machine->Push( (double) 1 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x", "2" );
+  machine->PushRef( "y" );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x", "1" );
+  machine->PushRef( "x", "2" );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x", "1" );
+  machine->PushRef( "x", "2" );
+  machine->Dump();
+
+
+
+  machine->PushRef( "x" );
+  machine->Push( (double) 1 );
+  machine->Assign();
+  machine->Dump();
+  
+  machine->PushRef( "x" );
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->UnAssign();
+  machine->Dump();
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+  machine->PushRef( "x" );
+  machine->GenerateNfg( 10 );
+  machine->Assign();
+  machine->PushRef( "x", "a" );
+  machine->Push( (double) 11 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->PushRef( "x", "a" );
+  machine->Dump();
+
+  machine->PushRef( "x", "a" );
+  machine->UnAssign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Dump();
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+  machine->PushRef( "x" );
+  machine->GenerateNfg( 10 );
+  machine->Assign();
+  machine->PushRef( "x", "a" );
+  machine->Push( (double) 11 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->PushRef( "x", "a" );
+  machine->Dump();
+
+  machine->PushRef( "x", "a" );
+  machine->UnAssign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Dump();
 
   gout << "Deleting machine\n";
   delete machine;
 
   return 0;
 }
+
 

@@ -24,8 +24,7 @@ typedef enum
   opADD, opSUBTRACT, opMULTIPLY, opDIVIDE, opNEGATE,
   opEQUAL_TO, opNOT_EQUAL_TO, opGREATER_THAN, opLESS_THAN,
   opGREATER_THAN_OR_EQUAL_TO, opLESS_THAN_OR_EQUAL_TO,
-  opLOGICAL_AND, opLOGICAL_OR, opLOGICAL_NOT,
-  opCONCATENATE
+  opLOGICAL_AND, opLOGICAL_OR, opLOGICAL_NOT
 } OperationMode;
 
 
@@ -52,12 +51,17 @@ class Portion
   // variable used to detect memory leakage
   static int _NumPortions;
 
+ protected:
+  bool       _Temporary;
+
  public:
   Portion();
   virtual ~Portion();
 
+  bool&               Temporary    ( void );
   virtual PortionType Type         ( void ) const = 0;
   virtual Portion*    Copy         ( void ) const = 0;
+  virtual void        CopyDataFrom ( Portion* p );
   virtual bool        Operation    ( Portion* p, OperationMode mode );
   virtual void        Output       ( gOutput& s ) const = 0;
 };
@@ -126,13 +130,13 @@ class Reference_Portion : public Portion
   Reference_Portion( const gString& value );
   Reference_Portion( const gString& value, const gString& subvalue );
 
-  gString&    Value     ( void );
-  gString     Value     ( void ) const;
-  gString&    SubValue  ( void );
-  gString     SubValue  ( void ) const;
-  Portion*    Copy      ( void ) const;
-  PortionType Type      ( void ) const;
-  void        Output    ( gOutput& s ) const;
+  gString&    Value    ( void );
+  gString     Value    ( void ) const;
+  gString&    SubValue ( void );
+  gString     SubValue ( void ) const;
+  Portion*    Copy     ( void ) const;
+  PortionType Type     ( void ) const;
+  void        Output   ( gOutput& s ) const;
 };
 
 
@@ -166,10 +170,6 @@ class List_Portion : public Portion
 };
 
 
-
-
-
-
 class Nfg_Portion : public Portion
 {
  private:
@@ -177,17 +177,17 @@ class Nfg_Portion : public Portion
   RefHashTable*  _RefTable;
 
  public:
-  Nfg_Portion( const double& value );
   Nfg_Portion( Nfg& value );
-  Nfg_Portion( const Nfg_Portion& value );
   ~Nfg_Portion();
 
-  Nfg&        Value     ( void );
-  Nfg         Value     ( void ) const;
-  Portion*    Copy      ( void ) const;
-  PortionType Type      ( void ) const;
-  bool        Operation ( Portion* p, OperationMode mode );
-  void        Output    ( gOutput& s ) const;
+  // Only the passing by reference version of Value() is provided in 
+  // order to eliminate unecessary copying
+  Nfg&        Value        ( void );
+  Portion*    Copy         ( void ) const;
+  void        CopyDataFrom ( Portion* p );
+  PortionType Type         ( void ) const;
+  bool        Operation    ( Portion* p, OperationMode mode );
+  void        Output       ( gOutput& s ) const;
 
   bool        Assign     ( const gString& ref, Portion* data );
   bool        UnAssign   ( const gString& ref );

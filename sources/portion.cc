@@ -27,15 +27,18 @@
 // variable used to detect memory leakage
 #ifdef MEMCHECK
 int Portion::_NumPortions = 0;
-#endif
+#endif // MEMCHECK
+
 
 Portion::Portion()
 {
+  _Temporary = true;
+
   // The following two lines are for detecting memory leakage.
 #ifdef MEMCHECK
   _NumPortions++;
   gout << ">>> Portion ctor -- count: " << _NumPortions << "\n";
-#endif
+#endif // MEMCHECK
 }
 
 
@@ -45,11 +48,28 @@ Portion::~Portion()
 #ifdef MEMCHECK
   _NumPortions--;
   gout << ">>> Portion dtor -- count: " << _NumPortions << "\n";
-#endif
+#endif // MEMCHECK
 }
 
 
-bool Portion::Operation( Portion *p, OperationMode mode )
+bool& Portion::Temporary( void )
+{ return _Temporary; }
+
+
+void Portion::CopyDataFrom( Portion* p )
+{ 
+#ifndef NDEBUG
+  if( this->Type() != p->Type() )
+  {
+    gerr << "Portion Error: attempting to CopyDataFrom() a different\n";
+    gerr << "               Portion type\n";
+  }
+  assert( this->Type() == p->Type() );
+#endif // NDEBUG
+}
+
+
+bool Portion::Operation( Portion* p, OperationMode mode )
 {
   gerr << "Portion Error: attempted to execute an unsupported operation\n";
   assert(0);
@@ -79,11 +99,8 @@ template <class T> Portion* numerical_Portion<T>::Copy( void ) const
 { return new numerical_Portion<T>( _Value ); }
 
 
-template <class T> bool numerical_Portion<T>::Operation
-  ( 
-   Portion* p, 
-   OperationMode mode 
-   )
+template <class T> 
+  bool numerical_Portion<T>::Operation( Portion* p, OperationMode mode )
 {
   bool  result = true;
   T&    p_value = ( (numerical_Portion<T>*) p )->_Value;
@@ -269,7 +286,7 @@ bool gString_Portion::Operation( Portion* p, OperationMode mode )
   {
     switch( mode )
     {
-    case opCONCATENATE:
+    case opADD:
       _Value += p_value;
       break;
     case opEQUAL_TO:
@@ -315,7 +332,7 @@ Reference_Portion::Reference_Portion( const gString& value )
 { }
 
 Reference_Portion::Reference_Portion( const gString& value, 
-				     const gString& subvalue )
+				      const gString& subvalue )
      : _Value( value ), _SubValue( subvalue )
 { }
 
@@ -340,7 +357,7 @@ Portion* Reference_Portion::Copy( void ) const
 
 void Reference_Portion::Output( gOutput& s ) const
 {
-  s << " (Reference) " << _Value << "\n";
+  s << " (Reference) " << _Value << ", " << _SubValue << "\n";
 }
 
 
@@ -450,15 +467,10 @@ void List_Portion::Output( gOutput& s ) const
 
 
 Portion* List_Portion::operator[] ( int index )
-{
-  return _Value[ index ];
-}
-
+{ return _Value[ index ]; }
 
 int List_Portion::Append( Portion* item )
-{
-  return Insert( item, _Value.Length() + 1 );
-}
+{ return Insert( item, _Value.Length() + 1 ); }
 
 
 int List_Portion::Insert( Portion* item, int index )
@@ -496,15 +508,10 @@ int List_Portion::Insert( Portion* item, int index )
 
 
 Portion* List_Portion::Remove( int index )
-{
-  return _Value.Remove( index );
-}
-
+{ return _Value.Remove( index ); }
 
 int List_Portion::Length( void ) const
-{
-  return _Value.Length();
-}
+{ return _Value.Length(); }
 
 
 void List_Portion::Flush( void )
@@ -524,45 +531,21 @@ void List_Portion::Flush( void )
 //---------------------------------------------------------------------
 
 
-Nfg_Portion::Nfg_Portion( const double& value )
-{
-  _RefTable = new RefHashTable;
-  _Value = new Nfg;
-  _Value->value = value;
-}
-
 Nfg_Portion::Nfg_Portion( Nfg& value )
 {
   _RefTable = new RefHashTable;
-  _Value = new Nfg;
   _Value = &value;
 }
 
-Nfg_Portion::Nfg_Portion( const Nfg_Portion& value )
-     : _Value( value._Value )
-{
-  _RefTable = new RefHashTable;
-  _Value->refs++;
-}
 
 Nfg_Portion::~Nfg_Portion()
 {
   delete _RefTable;
-  _Value->refs--;
 
-#ifndef NDEBUG
-  if( _Value->refs < 0 )
-    gerr << "Nfg_Portion Critical Error\n";
-  assert( _Value->refs >= 0 );
-#endif // NDEBUG
-
-  if( _Value->refs == 0 )
+  if( !_Temporary )
     delete _Value;
 }
 
-
-Nfg Nfg_Portion::Value( void ) const
-{ return *_Value; }
 
 Nfg& Nfg_Portion::Value( void )
 { return *_Value; }
@@ -571,13 +554,21 @@ PortionType Nfg_Portion::Type( void ) const
 { return porNFG; }
 
 Portion* Nfg_Portion::Copy( void ) const
-{ return new Nfg_Portion( *this ); }
+{ return new Nfg_Portion( *_Value ); }
+
+
+void Nfg_Portion::CopyDataFrom( Portion* p )
+{
+  Portion::CopyDataFrom( p );
+  _Value = new Nfg;
+  _Value->value = ( (Nfg_Portion*) p )->_Value->value;
+}
 
 
 bool Nfg_Portion::Operation( Portion* p, OperationMode mode )
 {
-  bool   result = true;
-  Nfg&   p_value = *( ( (Nfg_Portion*) p )->_Value );
+  bool  result = true;
+  Nfg&  p_value = *( ( (Nfg_Portion*) p )->_Value );
 
   if( p == 0 )      // unary operations
   {
@@ -601,13 +592,7 @@ bool Nfg_Portion::Operation( Portion* p, OperationMode mode )
 
 
 void Nfg_Portion::Output( gOutput& s ) const
-{
-  s << " (Nfg) " << _Value->value;
-#ifdef MEMCHECK
-  s << ", refs: " << _Value->refs;
-#endif
-  s << "\n";
-}
+{ s << " (Nfg) " << _Value->value << "\n"; }
 
 
 
@@ -617,10 +602,17 @@ void Nfg_Portion::Output( gOutput& s ) const
 
 bool Nfg_Portion::Assign( const gString& ref, Portion *p )
 {
+#ifndef NDEBUG
+  if( p->Type() == porREFERENCE )
+  {
+    gerr << "Portion Error: attempted to Assign a Reference_Portion as the\n";
+    gerr << "               value of a sub-reference in a Nfg_Portion type\n";
+  }
   assert( p->Type() != porREFERENCE );
-  
+#endif // NDEBUG
+
   _RefTable->Define( ref, p );
-  
+
   return true;
 }
 
@@ -630,12 +622,15 @@ bool Nfg_Portion::UnAssign( const gString& ref )
   if( _RefTable->IsDefined( ref ) )
   {
     _RefTable->Remove( ref );
-    return true;
   }
+#ifndef NDEBUG
   else
   {
-    return false;
+    gerr << "GSM Warning: calling UnAssign() on a undefined reference\n";
   }
+#endif // NDEBUG
+
+  return true;
 }
 
 
@@ -685,12 +680,6 @@ TEMPLATE class numerical_Portion<gRational>;
 PortionType numerical_Portion<gRational>::Type( void ) const
 { return porRATIONAL; }
 
-
-
-
-#include "hash.imp"
-
-TEMPLATE class HashTable< gString, Portion* >;
 
 
 

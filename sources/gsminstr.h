@@ -216,16 +216,6 @@ class NOT : public Instruction
 };
 
 
-//--------------------------- string operations ------------------------
-
-class Concatenate : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM& gsm ) const;
-};
-
-
 //------------------------ function call operations -------------------
 
 class InitCallFunction : public Instruction
