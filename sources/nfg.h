@@ -43,6 +43,7 @@ public:
   int NumPlayers(void) const;
   int NumStrats(int pl) const;
   int ProfileLength(void) const;
+  const gArray<int> &Dimensionality(void) const  { return dimensions; }
   const gArray<NFPlayer *> &PlayerList(void) const;
 
 // operator to get strategy s of player p
@@ -85,8 +86,7 @@ public:
 
 };
 
-
-
-
+template <class T> int ReadNfgFile(gInput &, Nfg<T> *&);
+void NfgFileType(gInput &f, bool &valid, DataType &type);
 
 #endif //# NFG_H
