@@ -146,12 +146,6 @@ public:
   polynomial<T>       UnivariateEquivalent(int activar)    const;
                       // assumes UniqueActiveVariable() is true
 
-  //-------------
-  // Conversion:
-  //-------------
-
-  gPoly<gDouble>         TogDouble()                       const;
-
 #endif   // MINI_POLY
 
   T                   Evaluate(const gArray<T> &values)    const;
@@ -189,13 +183,18 @@ public:
   friend gString &operator<<(gString &, const gPoly<T> &);
 };
 
+  //-------------
+  // Conversion:
+  //-------------
+
+template <class T>  gPoly<gDouble>         TogDouble(const gPoly<T>&);
+
 #ifndef MINI_POLY
 // global multiply by scalar operators
 template <class T> gPoly<T> operator*(const T val, const gPoly<T> &poly);
 template <class T> gPoly<T> operator*(const gPoly<T> &poly, const T val);
 #endif   // MINI_POLY
 
-template <class T> gOutput &operator<<(gOutput &, const gPoly<T> &);
 
 #endif //# GPOLY_H
 

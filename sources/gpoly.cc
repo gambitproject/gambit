@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.cc -- Instantiation of gPoly class
 //
-// $Id$
+// @(#)gpoly.cc	2.4 7/26/97
 //
 
 #include "gpoly.imp"
@@ -14,6 +14,7 @@ template class gPoly<gRational>;
 template gPoly<gRational> operator*(const gRational val, const gPoly<gRational> poly);
 template gPoly<gRational> operator*(const gPoly<gRational> poly, const gRational val);
 #endif   // MINI_POLY
+template gPoly<gDouble> TogDouble(const gPoly<gRational>&);
 template gOutput &operator<<(gOutput &f, const gPoly<gRational> &y);
 template gString &operator<<(gString &, const gPoly<gRational> &);
 
@@ -22,6 +23,7 @@ template class gPoly<gNumber>;
 template gPoly<gNumber> operator*(const gNumber val, const gPoly<gNumber> poly);
 template gPoly<gNumber> operator*(const gPoly<gNumber> poly, const gNumber val);
 #endif   // MINI_POLY
+template gPoly<gDouble> TogDouble(const gPoly<gNumber>&);
 template gOutput &operator<<(gOutput &f, const gPoly<gNumber> &y);
 template gString &operator<<(gString &, const gPoly<gNumber> &);
 
@@ -30,6 +32,7 @@ template class gPoly<double>;
 template gPoly<double> operator*(const double val, const gPoly<double> poly);
 template gPoly<double> operator*(const gPoly<double> poly, const double val);
 #endif   // MINI_POLY
+template gPoly<gDouble> TogDouble(const gPoly<double>&);
 template gOutput &operator<<(gOutput &f, const gPoly<double> &y);
 template gString &operator<<(gString &, const gPoly<double> &);
 
@@ -39,6 +42,7 @@ template class gPoly<gDouble>;
 template gPoly<gDouble> operator*(const gDouble val, const gPoly<gDouble> poly);
 template gPoly<gDouble> operator*(const gPoly<gDouble> poly, const gDouble val);
 #endif   // MINI_POLY
+template gPoly<gDouble> TogDouble(const gPoly<gDouble>&);
 template gOutput &operator<<(gOutput &f, const gPoly<gDouble> &y);
 template gString &operator<<(gString &, const gPoly<gDouble> &);
 #endif   // GDOUBLE
@@ -46,6 +50,7 @@ template gString &operator<<(gString &, const gPoly<gDouble> &);
 template class gPoly<long>;
 template gPoly<long> operator*(const long val, const gPoly<long> poly);
 template gPoly<long> operator*(const gPoly<long> poly, const long val);
+template gPoly<gDouble> TogDouble(const gPoly<long>&);
 template gOutput &operator<<(gOutput &f, const gPoly<long> &y);
 */
 

@@ -428,24 +428,6 @@ polynomial<T> gPoly<T>::UnivariateEquivalent(int activar) const
   return  polynomial<T>(coefs);
 }
 
-//----------------------------------
-//           Conversion
-//----------------------------------
-
-template<class T>  
-gPoly<gDouble>  gPoly<T>::TogDouble() const
-{
-  gPoly<gDouble>   answer(GetSpace(),GetOrder());
-  gList<gMono<T> > list = MonomialList();
-  for (int i =1; i <= list.Length(); i++) {
-    gDouble nextcoef = (gDouble)list[i].Coef();
-    gPoly<gDouble> next(GetSpace(),list[i].ExpV(),nextcoef,GetOrder());
-    answer += next;
-  }
-  
-  return answer;
-}
-
 //-------------------------------------------------------------
 //           Private Versions of Arithmetic Operators
 //-------------------------------------------------------------
@@ -785,6 +767,27 @@ template <class T> gString &operator<<(gString &t, const gPoly<T> &p)
   t += s;
   
   return t;
+}
+
+//----------------------------------
+//           Conversion
+//----------------------------------
+
+template<class T>  
+gPoly<gDouble>  TogDouble(const gPoly<T>& given) 
+{
+  gPoly<gDouble>   answer(given.GetSpace(),given.GetOrder());
+  gList<gMono<T> > list = given.MonomialList();
+  for (int i =1; i <= list.Length(); i++) {
+    gDouble nextcoef = (gDouble)list[i].Coef();
+    gPoly<gDouble> next(given.GetSpace(),
+			list[i].ExpV(),
+			nextcoef,
+			given.GetOrder());
+    answer += next;
+  }
+  
+  return answer;
 }
 
 template <class T> gOutput &operator<<(gOutput &f, const gPoly<T> &p)
