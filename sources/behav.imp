@@ -5,10 +5,14 @@
 //#
 
 #include "extform.h"
-#include "node.h"
 #include "player.h"
-#include "outcome.h"
 #include "infoset.h"
+#include "node.h"
+#include "outcome.h"
+
+//------------------------------------------------------------------------
+//                   TypedNode<T>: Class definition
+//------------------------------------------------------------------------
 
 template <class T> class TypedNode : public Node    {
   public:
@@ -271,4 +275,55 @@ template <class T> void ExtForm<T>::Centroid(BehavProfile<T> &profile) const
     }
 }
 
+template <class T> int ReadEfgFile(gInput &f, ExtForm<T> *& E)
+{
+  E = new ExtForm<T>;
+
+  return ReadEfgFile(f, (BaseExtForm *&) E);
+}
+
+//---------------------------------------------------------------------------
+//                    BehavProfile<T> member functions
+//---------------------------------------------------------------------------
+
+template <class T> BehavProfile<T>::BehavProfile(const ExtForm<T> &EF,
+						 bool trunc)
+  : BaseBehavProfile(EF, trunc), gDPVector<T>(EF.Dimensionality(trunc))
+{
+  EF.Centroid(*this);
+}
+
+template <class T> BehavProfile<T>::BehavProfile(const ExtForm<T> &EF,
+						 const gDPVector<T> &profile)
+  : BaseBehavProfile(EF, false), gDPVector<T>(profile)
+{ }
+
+template <class T> BehavProfile<T>::~BehavProfile()   { }
+
+template <class T>
+BehavProfile<T> &BehavProfile<T>::operator=(const BehavProfile<T> &p)
+{
+  BaseBehavProfile::operator=(p);
+  gDPVector<T>::operator=(p);
+  return *this;
+}
+
+#include <assert.h>
+
+template <class T> bool BehavProfile<T>::IsPure(void) const
+{
+  // currently not implemented
+  assert(0);
+  return false;
+}
+
+template <class T> bool BehavProfile<T>::IsPure(int pl) const
+{
+  // currently not implemented
+  assert(0);
+  return false;
+}
+
+template <class T> gOutput &operator<<(gOutput &f, const BehavProfile<T> &p)
+{ p.Dump(f);   return f;  }
 

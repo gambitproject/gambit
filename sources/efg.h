@@ -125,6 +125,7 @@ template <class T> class ExtForm : public BaseExtForm   {
     gPVector<int> Dimensionality(bool trunc = false) const;
     void Centroid(BehavProfile<T> &profile) const;
 
+    void Payoff(const gPVector<int> &profile, gVector<T> &payoff) const;
     T Payoff(int pl, const BehavProfile<T> &) const;
     void CondPayoff(const BehavProfile<T> &profile, gDPVector<T> &value,
 		    gPVector<T> &probs) const;

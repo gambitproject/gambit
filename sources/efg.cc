@@ -5,10 +5,10 @@
 //#
 
 #include "extform.h"
-#include "node.h"
-#include "infoset.h"
-#include "outcome.h"
 #include "player.h"
+#include "infoset.h"
+#include "node.h"
+#include "outcome.h"
 #include "gconvert.h"
 #include <assert.h>
 
@@ -260,6 +260,28 @@ Infoset *BaseExtForm::DeleteAction(Infoset *s, Action *a)
 }
 
 //========================================================================
+
+//---------------------------------------------------------------------------
+//                    BaseBehavProfile member functions
+//---------------------------------------------------------------------------
+
+BaseBehavProfile::BaseBehavProfile(const BaseExtForm &EF, bool trunc)
+  : E(&EF), truncated(trunc)  { }
+
+BaseBehavProfile::~BaseBehavProfile()   { }
+
+BaseBehavProfile &BaseBehavProfile::operator=(const BaseBehavProfile &p)
+{
+  E = p.E;
+  truncated = p.truncated;
+  return *this;
+}
+
+DataType BaseBehavProfile::Type(void) const
+{
+  return E->Type();
+}
+
 
 #ifdef __GNUG__
 #define TEMPLATE template

@@ -58,6 +58,8 @@ class Infoset   {
   public:
     bool IsChanceInfoset(void) const   { return (player->IsChance()); }
 
+    Player *GetPlayer(void) const    { return player; }
+
     void SetName(const gString &s)    { name = s; }
     const gString &GetName(void) const   { return name; }
 
@@ -66,6 +68,10 @@ class Infoset   {
     const gString &GetActionName(int i) const  { return actions[i]->name; }
 
     int NumActions(void) const   { return actions.Length(); }
+
+// This function exists only to facilitate the current version of efg2nfg
+// and is not guaranteed to exist in the future, so do not depend on it!
+    int GetNumber(void) const    { return number; }
 };
 
 template <class T> class ChanceInfoset : public Infoset  {

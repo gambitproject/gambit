@@ -31,6 +31,9 @@ class Node    {
   public:
     int NumChildren(void) const    { return children.Length(); }
     Infoset *GetInfoset(void) const   { return infoset; }
+    Player *GetPlayer(void) const
+      { if (!infoset)   return 0;
+	else  return infoset->GetPlayer(); }
 
     Node *GetChild(int i) const    { return children[i]; }
     Node *GetParent(void) const    { return parent; }

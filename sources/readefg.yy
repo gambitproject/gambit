@@ -9,8 +9,8 @@
 #include "ggrstack.h"
 #include "extform.h"
 #include "player.h"
-#include "node.h"
 #include "infoset.h"
+#include "node.h"
 
 %}
 
@@ -262,8 +262,6 @@ int EfgFileReader::yylex(void)
 
 int ReadEfgFile(gInput &f, BaseExtForm *& E)
 {
-  E = 0;
-
   EfgFileReader R(f, E);
 
   if (R.yyparse())   {
@@ -274,30 +272,12 @@ int ReadEfgFile(gInput &f, BaseExtForm *& E)
   return 0;
 }
 
-template <class T> int ReadEfgFile(gInput &f, ExtForm<T> *& E)
-{
-  E = new ExtForm<T>;
-
-  EfgFileReader R(f, E);
-
-  if (R.yyparse())   {
-    delete E;
-    return 0;
-  }
-
-  return 1;
-}
-
-
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
 #define TEMPLATE
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
-
-TEMPLATE int ReadEfgFile(gInput &, ExtForm<double> *&);
-TEMPLATE int ReadEfgFile(gInput &, ExtForm<gRational> *&);
 
 #include "gstack.imp"
 #include "ggrstack.imp"
