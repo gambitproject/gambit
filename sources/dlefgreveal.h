@@ -1,7 +1,7 @@
 //
 // FILE: dlefgreveal.h -- Selection of players for Edit->Infoset->Reveal
 //
-//
+// $Id$
 //
 
 #ifndef DLEFGREVEAL_H
@@ -18,10 +18,13 @@ private:
     { ((dialogInfosetReveal *) p_object.GetClientData())->OnOK(); }
   static void CallbackCancel(wxButton &p_object, wxEvent &)
     { ((dialogInfosetReveal *) p_object.GetClientData())->OnCancel(); }
+  static void CallbackHelp(wxButton &p_object, wxEvent &)
+    { ((dialogInfosetReveal *) p_object.GetClientData())->OnHelp(); }
 
   void OnOK(void);
   void OnCancel(void);
   Bool OnClose(void);
+  void OnHelp(void);
 
 public:
   dialogInfosetReveal(const Efg &, wxWindow *);
