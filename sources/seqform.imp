@@ -23,6 +23,7 @@ private:
   double time;
   gList<BFS<T> > List;
   gList<BehavSolution> solutions;
+  gList<const Infoset *> isets1, isets2;
 
 public:
   SeqFormModule(const EFSupport &, const SeqFormParams &p);
@@ -50,7 +51,9 @@ public:
 
 template <class T>
 SeqFormModule<T>::SeqFormModule(const EFSupport &S, const SeqFormParams &p) 
-  : EF(S.Game()), support(S), params(p), A(0), b(0), maxpay((T) 0), npivots(0)
+  : EF(S.Game()), support(S), params(p), A(0), b(0), maxpay((T) 0), 
+    npivots(0), isets1(S.ReachableInfosets(EF.Players()[1])),
+    isets2(S.ReachableInfosets(EF.Players()[2])) 
 { 
   int ntot;
   ns1=S.NumSequences(1);
@@ -281,11 +284,10 @@ void SeqFormModule<T>::FillTableau(const Node *n, T prob,
     }
     int pl = n->GetPlayer()->GetNumber();
     if(pl==1) {
-      i1=n->GetInfoset()->GetNumber();
+      i1=isets1.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<i1;i++)
-	snew+=support.NumActions(n->GetPlayer()->Infosets()[i]);
-
+	snew+=support.NumActions(isets1[i]);
       (*A)(s1,ns1+ns2+i1+1) = -(T)1;
       (*A)(ns1+ns2+i1+1,s1) = (T)1;
       for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
@@ -295,10 +297,10 @@ void SeqFormModule<T>::FillTableau(const Node *n, T prob,
       }
     }
     if(pl==2) {
-      i2=n->GetInfoset()->GetNumber();
+      i2=isets2.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<i2;i++)
-	snew+=support.NumActions(n->GetPlayer()->Infosets()[i]);
+	snew+=support.NumActions(isets2[i]);
       (*A)(ns1+s2,ns1+ns2+ni1+i2+1) = -(T)1;
       (*A)(ns1+ns2+ni1+i2+1,ns1+s2) = (T)1;
       for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
@@ -323,11 +325,11 @@ template <class T> void SeqFormModule<T>
 	GetProfile(tab, v,sol,n->GetChild(i),s1,s2);
     }
     pl = n->GetPlayer()->GetNumber();
-    inf= n->GetInfoset()->GetNumber();
     if(pl==1) {
+      inf= isets1.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=support.NumActions(n->GetPlayer()->Infosets()[i]); 
+	snew+=support.NumActions(isets1[i]); 
       for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
 	v(pl,inf,i) = (T)0;
 	if(tab.Member(s1)) {
@@ -344,9 +346,10 @@ template <class T> void SeqFormModule<T>
       }
     }
     if(pl==2) {
+      inf= isets2.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=support.NumActions(n->GetPlayer()->Infosets()[i]); 
+	snew+=support.NumActions(isets2[i]); 
       for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
 	v(pl,inf,i) = (T)0;
 	if(tab.Member(ns1+s2)) {

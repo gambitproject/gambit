@@ -78,6 +78,8 @@ public:
   const gList<const Infoset *> ReachableInfosets(const Node *) const;
   const gList<const Infoset *> ReachableInfosets(const Node *,
 						 Action *) const;
+  const gList<const Infoset *> ReachableInfosets(const EFPlayer *) const;
+
   bool AlwaysReaches(const Infoset *) const;
   bool AlwaysReachesFrom(const Infoset *, const Node *) const;
   bool MayReach(const Node *) const;

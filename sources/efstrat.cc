@@ -486,11 +486,11 @@ void EFSupport::AddAction(const Action *s)
 int EFSupport::NumSequences(int j) const
 {
   if (j < befg->Players().First() || j > befg->Players().Last()) return 1;
-  gArray<Infoset *> isets;
-  isets = befg->Players()[j]->Infosets();
+  gList<const Infoset *> isets;
+  isets = ReachableInfosets(befg->GetPlayer(j));
   int num = 1;
-  for(int i = isets.First();i<= isets.Last();i++)
-    num+=NumActions(j,i);
+  for(int i = 1;i<= isets.Length();i++)
+    num+=NumActions(isets[i]);
   return num;
 }
 
@@ -528,6 +528,18 @@ EFSupport::ReachableNonterminalNodes(const Node *n, Action *a) const
     answer += nn;
     answer += ReachableNonterminalNodes(nn);
   }
+  return answer;
+}
+
+const gList<const Infoset *> EFSupport::ReachableInfosets(const EFPlayer *p) const
+{ 
+  gArray<Infoset *> isets;
+  gList<const Infoset *> answer;
+
+  isets = p->Infosets();
+  for (int i = isets.First(); i <= isets.Last(); i++)
+    if(MayReach(isets[i]))
+      answer += isets[i];
   return answer;
 }
 

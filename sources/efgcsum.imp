@@ -26,6 +26,7 @@ private:
   double time;
   int ns1,ns2,ni1,ni2;
   gList<BFS<T> > List;
+  gList<const Infoset *> isets1, isets2;
 
   void FillTableau(const Node *, T ,int ,int , int ,int );
 
@@ -56,7 +57,9 @@ CSSeqFormModule<T>::CSSeqFormModule(const EFSupport &S,
   : EF(S.Game()), params(p), support(S), A(0), b(0), c(0), npivots(0), 
     ns1(S.NumSequences(1)), ns2(S.NumSequences(2)),
     ni1(EF.Players()[1]->NumInfosets()+1),  
-    ni2(EF.Players()[2]->NumInfosets()+1)
+    ni2(EF.Players()[2]->NumInfosets()+1), 
+    isets1(S.ReachableInfosets(EF.Players()[1])),
+    isets2(S.ReachableInfosets(EF.Players()[2])) 
 { }
 
 template <class T> CSSeqFormModule<T>::~CSSeqFormModule()
@@ -172,11 +175,11 @@ void CSSeqFormModule<T>::GetProfile(gDPVector<T> &v, const BFS<T> &sol,
 	GetProfile(v,sol,n->GetChild(i),s1,s2);
     }
     pl = n->GetPlayer()->GetNumber();
-    inf= n->GetInfoset()->GetNumber();
     if(pl==2) {
+    inf= isets2.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=support.NumActions(n->GetPlayer()->Infosets()[i]); 
+	snew+=support.NumActions(isets2[i]); 
       for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
 	v(pl,inf,i) = (T)0;
 	if(sol.IsDefined(s1)) {
@@ -191,9 +194,10 @@ void CSSeqFormModule<T>::GetProfile(gDPVector<T> &v, const BFS<T> &sol,
       }
     }
     if(pl==1) {
+    inf= isets1.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=support.NumActions(n->GetPlayer()->Infosets()[i]); 
+	snew+=support.NumActions(isets1[i]); 
       for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
 	v(pl,inf,i) = (T)0;
 	if(sol.IsDefined(-s2)) {
@@ -229,10 +233,10 @@ void CSSeqFormModule<T>::FillTableau(const Node *n, T prob,
     }
     int pl = n->GetPlayer()->GetNumber();
     if(pl==1) {
-      i1=n->GetInfoset()->GetNumber();
+      i1=isets1.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<i1;i++)
-	snew+=support.NumActions(n->GetPlayer()->Infosets()[i]);
+	snew+=support.NumActions(isets1[i]);
       (*A)(s1,ns2+i1+1) = (T) +1;
       for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
 	(*A)(snew+i,ns2+i1+1) = (T) -1;
@@ -240,10 +244,10 @@ void CSSeqFormModule<T>::FillTableau(const Node *n, T prob,
       }
     }
     if(pl==2) {
-      i2=n->GetInfoset()->GetNumber();
+      i2=isets2.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<i2;i++)
-	snew+=support.NumActions(n->GetPlayer()->Infosets()[i]);
+	snew+=support.NumActions(isets2[i]);
       (*A)(ns1+i2+1,s2) = (T) -1;
       for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
 	(*A)(ns1+i2+1,snew+i) = (T) +1;
