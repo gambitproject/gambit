@@ -382,7 +382,7 @@ static Portion *GSM_QreGrid_Support(GSM &gsm, Portion **param)
 //---------------
 
 #include "nfgqre.h"
-#include "egobit.h"
+#include "efgqre.h"
 
 static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
 {
@@ -446,12 +446,6 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
     }
 
     EFQreParams EP;
-    if (pxiFile) {
-      EP.pxifile = pxiFile;
-    }
-    else {
-      EP.pxifile = &gnull;
-    }
     EP.minLam = ((NumberPortion *) param[2])->Value();
     EP.maxLam = ((NumberPortion *) param[3])->Value();
     EP.delLam = ((NumberPortion *) param[4])->Value();
@@ -469,7 +463,8 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
       long nevals, niters;
       gWatch watch;
     
-      Qre(E, EP, BehavProfile<gNumber>(start), solutions, 
+      Qre(E, EP, (pxiFile) ? *pxiFile : gnull,
+	  BehavProfile<gNumber>(start), solutions, 
 	  gsm.GetStatusMonitor(), nevals, niters);
 
       ((NumberPortion *) param[8])->SetValue(watch.Elapsed());

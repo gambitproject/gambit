@@ -39,7 +39,7 @@ GAME_SOURCES = readnfg.cc nfstrat.cc nfg.cc nfgiter.cc nfginst.cc nfgutils.cc \
 GAME_OBJECTS = $(GAME_SOURCES:.cc=$(OBJECT_SUFFIX))
 
 
-EALG_SOURCES = egobit.cc eliap.cc seqform.cc subsolve.cc efgpure.cc efdom.cc \
+EALG_SOURCES = efgqre.cc eliap.cc seqform.cc subsolve.cc efgpure.cc efdom.cc \
                efgcsum.cc efbasis.cc epolenum.cc efgensup.cc seqeq.cc \
 	       efgalleq.cc behavextend.cc
 

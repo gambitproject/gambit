@@ -177,7 +177,7 @@ double NFQreFunc::Value(const gVector<double> &v)
 
 void QreJacobian(const Nfg &p_nfg,
 		 const MixedProfile<double> &p_profile,
-		 const double &p_lambda, gMatrix<double> &p_matrix)
+		 const double &p_nu, gMatrix<double> &p_matrix)
 {
   p_matrix = (double) 0;
 
@@ -193,7 +193,7 @@ void QreJacobian(const Nfg &p_nfg,
 
 	  if (pl1 == pl2) {
 	    if (st1 == st2) {
-	      p_matrix(rowno, colno) = 1.0;
+	      p_matrix(rowno, colno) = (1.0 - p_nu) * (1.0 - p_nu);
 	    }
 	    else {
 	      p_matrix(rowno, colno) = 0.0;
@@ -203,7 +203,7 @@ void QreJacobian(const Nfg &p_nfg,
 	    for (int k = 1; k <= p_profile.Support().NumStrats(pl1); k++) {
 	      p_matrix(rowno, colno) += (p_profile.Payoff(pl1, pl1, k, pl2, st2) - p_profile.Payoff(pl1, pl1, st1, pl2, st2)) * p_profile(pl1, k);
 	    }
-	    p_matrix(rowno, colno) *= p_lambda * p_profile(pl1, st1);
+	    p_matrix(rowno, colno) *= p_nu * (1.0-p_nu) * p_profile(pl1, st1);
 	  }
 	}
       }
@@ -219,7 +219,7 @@ void QreJacobian(const Nfg &p_nfg,
 
 void QreComputeStep(const Nfg &p_nfg, const MixedProfile<double> &p_profile,
 		    const gMatrix<double> &p_matrix,
-		    gPVector<double> &p_delta, double &p_lambdainc,
+		    gPVector<double> &p_delta, double &p_nuinc,
 		    double p_initialsign, double p_stepsize)
 {
   double sign = p_initialsign;
@@ -248,7 +248,7 @@ void QreComputeStep(const Nfg &p_nfg, const MixedProfile<double> &p_profile,
     }
   }   
 
-  p_lambdainc = sign * M.Determinant();
+  p_nuinc = sign * M.Determinant();
 
   double norm = 0.0;
   for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
@@ -256,7 +256,7 @@ void QreComputeStep(const Nfg &p_nfg, const MixedProfile<double> &p_profile,
       norm += p_delta(pl, st) * p_delta(pl, st);
     }
   }
-  norm += p_lambdainc * p_lambdainc; 
+  norm += p_nuinc * p_nuinc; 
   
   for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
     for (int st = 1; st <= p_profile.Support().NumStrats(pl); st++) {
@@ -264,7 +264,7 @@ void QreComputeStep(const Nfg &p_nfg, const MixedProfile<double> &p_profile,
     }
   }
 
-  p_lambdainc /= sqrt(norm / p_stepsize);
+  p_nuinc /= sqrt(norm / p_stepsize);
 }
 
 void QreHomotopy(const Nfg &p_nfg, NFQreParams &params, gOutput &p_pxiFile,
@@ -274,38 +274,44 @@ void QreHomotopy(const Nfg &p_nfg, NFQreParams &params, gOutput &p_pxiFile,
 {
   gMatrix<double> H(p_nfg.ProfileLength(), p_nfg.ProfileLength() + 1);
   MixedProfile<double> profile(p_start);
-  double lambda = params.minLam;
-  double stepsize = 0.0001;
+  double nu = 0.0;
+  double stepsize = 0.00001;
 
   WritePXIHeader(p_pxiFile, p_nfg, params);
 
-  // Pick the direction to follow the path so that lambda starts out
+  // Pick the direction to follow the path so that nu starts out
   // increasing
   double initialsign = (p_nfg.ProfileLength() % 2 == 0) ? 1.0 : -1.0;
 
   try {
-    while (lambda <= params.maxLam) {
+    while (nu / (1.0-nu) <= params.maxLam) {
       // Use a first-order Runge-Kutta style method
       gPVector<double> delta1(profile), delta2(profile);
-      double lambdainc1, lambdainc2;
+      double nuinc1, nuinc2;
       
-      QreJacobian(p_nfg, profile, lambda, H);
+      QreJacobian(p_nfg, profile, nu, H);
       QreComputeStep(p_nfg, profile, H,
-		     delta1, lambdainc1, initialsign, stepsize);
+		     delta1, nuinc1, initialsign, stepsize);
     
       MixedProfile<double> profile2(profile);
       profile2 += delta1 * 0.5; 
-      QreJacobian(p_nfg, profile2, lambda + lambdainc1 * 0.5, H);
+      QreJacobian(p_nfg, profile2, nu + nuinc1 * 0.5, H);
       QreComputeStep(p_nfg, profile, H,
-		     delta2, lambdainc2, initialsign, stepsize);
+		     delta2, nuinc2, initialsign, stepsize);
     
       profile += delta1 * 0.5;
       profile += delta2 * 0.5; 
-      lambda += 0.5 * (lambdainc1 + lambdainc2);
+      nu += 0.5 * (nuinc1 + nuinc2);
+
+      if (nu < 0.0 || nu > 1.0) {
+	// negative nu is probably numerical instability;
+	// nu > 1.0 runs past valid region...
+	return;
+      }
 
       // Write out the QreValue as 0 in the PXI file; not generally
       // going to be the case, but QreValue is suspect for large lambda 
-      p_pxiFile << "\n" << lambda << " " << 0.0 << " ";
+      p_pxiFile << "\n" << (nu / (1.0-nu)) << " " << 0.0 << " ";
       for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
 	for (int st = 1; st <= profile.Support().NumStrats(pl); st++) {
 	  p_pxiFile << profile(pl, st) << " ";
@@ -313,22 +319,22 @@ void QreHomotopy(const Nfg &p_nfg, NFQreParams &params, gOutput &p_pxiFile,
       }
  
       if (params.fullGraph) { 
-	p_corresp.Append(1, lambda, MixedSolution(profile, algorithmNfg_QRE));
+	p_corresp.Append(1, nu / (1.0-nu),
+			 MixedSolution(profile, algorithmNfg_QRE));
       }
 
       p_status.Get();
-      p_status.SetProgress((lambda - params.minLam) /
-			   (params.maxLam - params.minLam),
-			   gText("Current lambda: ") + ToText(lambda));
+      p_status.SetProgress(nu * (1.0 + params.maxLam) / params.maxLam,
+			   gText("Current lambda: ") + ToText(nu / (1.0-nu)));
     }
   }
   catch (...) {
-    p_corresp.Append(1, lambda, MixedSolution(profile, algorithmNfg_QRE));
+    p_corresp.Append(1, nu / (1.0-nu), MixedSolution(profile, algorithmNfg_QRE));
     throw;
   }
   
   if (!params.fullGraph) { 
-    p_corresp.Append(1, lambda, MixedSolution(profile, algorithmNfg_QRE));
+    p_corresp.Append(1, nu / (1.0-nu), MixedSolution(profile, algorithmNfg_QRE));
   }
 }
 

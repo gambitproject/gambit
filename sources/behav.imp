@@ -560,15 +560,19 @@ T BehavProfile<T>::DiffActionValue(const Action *p_action,
   for (int i = 1; i <= infoset->NumMembers(); i++) {
     Node *member = infoset->GetMember(i);
 
+    //    gout << member->number << ' ' << player->GetNumber() << ' ' << p_action->BelongsTo()->GetNumber() << ' '  << p_action->number << ' ' << p_oppAction->BelongsTo()->GetPlayer()->GetNumber() << ' ' << p_oppAction->BelongsTo()->GetNumber() << ' ' << p_oppAction->number << ' ';
     deriv += DiffRealizProb(member, p_oppAction) *
       (NodeValue(member->GetChild(p_action->number), player->GetNumber()) -
        ActionValue(p_action));
+    //    gout << DiffRealizProb(member, p_oppAction) << ' ';
 
     deriv += RealizProb(member) *
       DiffNodeValue(member->GetChild(p_action->number), player, p_oppAction);
+    //    gout << DiffNodeValue(member->GetChild(p_action->number), player, p_oppAction);
   }
 
-  return deriv;
+  //  gout << ' ' << (deriv / IsetProb(infoset)) << '\n';
+  return deriv / IsetProb(p_action->BelongsTo());
 }
 
 template <class T>
@@ -577,16 +581,20 @@ T BehavProfile<T>::DiffRealizProb(const Node *p_node,
 {
   ((BehavProfile<T> *) this)->ComputeSolutionData();
   T deriv = (T) 1;
+  bool isPrec = false;
   const Node *node = p_node;
   while (node->GetParent()) {
     Action *prevAction = node->GetAction();
     if (prevAction != p_oppAction) {
       deriv *= GetActionProb(prevAction);
     }
+    else {
+      isPrec = true;
+    }
     node = node->GetParent();
   }
  
-  return deriv;
+  return (isPrec) ? deriv : (T) 0.0;
 }
 
 template <class T>
@@ -594,27 +602,31 @@ T BehavProfile<T>::DiffNodeValue(const Node *p_node, const EFPlayer *p_player,
 				 const Action *p_oppAction) const
 {
   ((BehavProfile<T> *) this)->ComputeSolutionData();
-  T deriv = (T) 0;
 
   if (m_efg->NumChildren(p_node) > 0) {
     Infoset *infoset = p_node->GetInfoset();
 
     if (infoset == p_oppAction->BelongsTo()) {
-      deriv += m_nodeValues(p_node->GetChild(p_oppAction->GetNumber())->number,
-			    p_player->GetNumber());
+      // We've encountered the action; since we assume perfect recall,
+      // we won't encounter it again, and the downtree value must
+      // be the same.
+      return m_nodeValues(p_node->GetChild(p_oppAction->GetNumber())->number,
+			  p_player->GetNumber());
     }
     else {
+      T deriv = (T) 0;
       for (int act = 1; act <= infoset->NumActions(); act++) {
 	deriv += (DiffNodeValue(p_node->GetChild(act), p_player, p_oppAction) *
 		  ActionProb(infoset->Actions()[act]));
       }
+      return deriv;
     }
   }
   else {
-    return m_nodeValues(p_node->number, p_player->GetNumber());
+    // If we reach a terminal node and haven't encountered p_oppAction,
+    // derivative wrt this path is zero.
+    return (T) 0;
   }
-
-  return deriv;
 }
 
 // 
@@ -801,7 +813,9 @@ template <class T> T BehavProfile<T>::LiapValue(void)
   static const T BIG2 = (T) 100;
 
   T x, result = ((T) 0), avg, sum;
-
+  
+  // HACK: force it to recompute data.  FIX THIS.
+  m_cached_data = false;
   ComputeSolutionData();
 
   const gArray<EFPlayer *> &players = m_efg->Players();
@@ -839,7 +853,9 @@ template <class T> T BehavProfile<T>::QreValue(const gVector<T> &lambda, bool &_
   //  gDPVector<T> _cpay(m_support.NumActions());
 
   T val = (T)0, prob, psum, z,factor;
- 
+
+  // HACK: force it to recompute data.  FIX THIS.
+  m_cached_data = false;
   ComputeSolutionData();
 
   const gArray<EFPlayer *> players = m_efg->Players();
@@ -874,6 +890,9 @@ template <class T> T BehavProfile<T>::QreValue(const gVector<T> &lambda, bool &_
       val += (T)100 * z * z;
     }
   }
+
+  // HACK: this procedure screws up action values.  FIX THIS.
+  m_cached_data = false;
 
   return val;
 }

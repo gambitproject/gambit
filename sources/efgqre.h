@@ -1,11 +1,13 @@
 //
-// FILE: egobit.h -- Interface to extensive form Gobit solution module
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
-//
+// DESCRIPTION:
+// Interface to (agent) QRE computation for extensive forms
 
-#ifndef EGOBIT_H
-#define EGOBIT_H
+#ifndef EFGQRE_H
+#define EFGQRE_H
 
 #include "base/base.h"
 #include "algutils.h"
@@ -15,25 +17,24 @@
 
 class EFQreParams : public FuncMinParams  {
 public:
+  bool m_homotopy;
   int powLam;
   double minLam, maxLam, delLam;
   bool fullGraph;
-  gOutput *pxifile;
-  
+
   EFQreParams(void);
-  EFQreParams(gOutput &out, gOutput &pxi);
 };
 
-
-void Qre(const Efg::Game &, EFQreParams &,
+void Qre(const Efg::Game &, EFQreParams &, gOutput &,
 	 const BehavProfile<gNumber> &, gList<BehavSolution > &,
 	 gStatus &, long &nevals, long &nits);
 
-void KQre(const Efg::Game &E, EFQreParams &params,
+void KQre(const Efg::Game &E, EFQreParams &params, gOutput &,
 	  const BehavProfile<gNumber> &start, gList<BehavSolution> &solutions, 
 	  gStatus &, long &nevals, long &nits);
 
-#endif    // NGOBIT_H
+#endif   // EFGQRE_H
+
 
 
 

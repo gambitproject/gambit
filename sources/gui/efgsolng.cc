@@ -1271,7 +1271,7 @@ bool guiefgQreNfg::SolveSetup(void)
 // Qre on efg
 //---------------------
 
-#include "egobit.h"
+#include "efgqre.h"
 
 guiefgQreEfg::guiefgQreEfg(EfgShow *p_parent)
   : guiEfgSolution(p_parent)
@@ -1303,15 +1303,14 @@ gList<BehavSolution> guiefgQreEfg::Solve(const EFSupport &p_support) const
   params.delLam = m_delLam;
   params.SetAccuracy(m_accuracy);
   params.powLam = m_powLam;
-  params.pxifile = m_pxiFile;
   params.trace = m_traceLevel;
-  params.tracefile = m_traceFile;
 
   long nevals, nits;
   gList<BehavSolution> solns;
 
   try {
-    Qre(p_support.GetGame(), params, start, solns, status, nevals, nits);
+    Qre(p_support.GetGame(), params, *m_pxiFile,
+	start, solns, status, nevals, nits);
   }
   catch (gSignalBreak &) { }
 
