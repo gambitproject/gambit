@@ -12,7 +12,6 @@
 #endif    // __GNUG__
 
 #include <string.h>
-#include <assert.h>
 #include "gmisc.h"
 
 class gInput;
@@ -31,8 +30,6 @@ class gText   {
     // INDEX ERROR HANDLER CLASS
     class BadIndex : public gException  {
       public:
-      BadIndex(int, char *);
-
       virtual ~BadIndex()  { }
       gText Description(void) const;
      };
@@ -88,12 +85,12 @@ class gText   {
 
 	  // SUBSCRIPTORS
     char &operator[](unsigned int n)
-      { if (n > strlen(storage))   throw BadIndex(__LINE__, __FILE__);
+      { if (n > strlen(storage))   throw BadIndex();
         return *(storage + n);
       }
 
     char &operator[](unsigned int n) const
-      { if (n > strlen(storage))   throw BadIndex(__LINE__, __FILE__);
+      { if (n > strlen(storage))   throw BadIndex();
         return *(storage + n);
       }
 

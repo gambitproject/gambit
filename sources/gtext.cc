@@ -14,10 +14,6 @@
 #include "gstream.h"
 #include "gtext.h"
 
-gText::BadIndex::BadIndex(int line, char *file)
-  :gException(line,file)
-{ }
-
 gText gText::BadIndex::Description(void) const
 { return "Bad index exception in gText"; }
 
@@ -147,7 +143,7 @@ gText gText::Dncase(void) const
 
 void gText::Insert(char c, unsigned int n)
 {
-  if (n > strlen(storage))  throw BadIndex(__LINE__, __FILE__);
+  if (n > strlen(storage))  throw BadIndex();
 
   char *temp = new char[strlen(storage)+2];
   strncpy(temp, storage, n);
@@ -160,7 +156,7 @@ void gText::Insert(char c, unsigned int n)
 
 void gText::Remove(unsigned int n)
 {
-  if (n > strlen(storage) - 1)  throw BadIndex(__LINE__, __FILE__);
+  if (n > strlen(storage) - 1)  throw BadIndex();
 
   char *temp = new char[strlen(storage)];
   strncpy(temp, storage, n);

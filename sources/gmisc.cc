@@ -12,6 +12,7 @@
 #include <math.h>
 #include <limits.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include "gstream.h"
 #include "gtext.h"
@@ -432,39 +433,5 @@ gText gNewFailed::Description(void) const
   return "Memory exhausted in call to new";
 }
 
-
-gException::gException(void)
-  : line(0)
-{
-  strcpy(file, "unknown");
-}
-
-gException::gException(int l, char *f)
-  : line(l)
-{
-  strncpy(file, f, 19);
-}
-
 gException::~gException()
 { }
-
-int gException::Line(void) const
-{
-  return line;
-}
-
-const char *gException::File(void) const
-{
-  return file;
-}
-
-gText gException::ErrorMessage(void) const
-{
-  char buf[512];
-
-  sprintf(buf, "\nGCL Exception;  Line:%4d  File: %s : ",Line(), File()); 
-  gText text(buf);
-  return buf+Description();
-}
-
-

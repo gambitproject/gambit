@@ -113,19 +113,10 @@ public:
 };
 
 class gException   {
-private:
-  int line;
-  char file[20];
-  
 public:
-  gException(void);
-  gException(int l, char *f);
   virtual ~gException();
   
   virtual gText Description(void) const = 0;
-  int Line(void) const;
-  const char *File(void) const;
-  gText ErrorMessage(void) const;
 };
 
 class gNewFailed : public gException   {

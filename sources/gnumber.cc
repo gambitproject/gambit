@@ -18,9 +18,6 @@
 
 #include "gtext.h"
 
-gNumber::DivideByZero::DivideByZero(int line, char *file)
-  : gException(line, file)
-{ }
 
 gText gNumber::DivideByZero::Description(void) const
 { return "Divide by zero in gNumber"; }
@@ -325,24 +322,24 @@ gNumber &gNumber::operator/=(const gNumber& y)
 {
   if (rep == precDOUBLE)   {
     if (y.rep == precDOUBLE)  {
-      if (y.dval == 0.0)   throw DivideByZero(__LINE__, __FILE__);
+      if (y.dval == 0.0)   throw DivideByZero();
       dval /= y.dval;
     }
     else   {   // if (y.rep == precRATIONAL)
-      if (*y.rval == gRational(0))     throw DivideByZero(__LINE__, __FILE__);
+      if (*y.rval == gRational(0))     throw DivideByZero();
       dval /= double(*y.rval);
     }
   }
   else  {   // this is a rational 
     if (y.rep == precDOUBLE)  {
-      if (y.dval == 0.0)   throw DivideByZero(__LINE__, __FILE__);
+      if (y.dval == 0.0)   throw DivideByZero();
       dval = double(*rval) / y.dval;
       rep = precDOUBLE;
       delete rval;
       rval = 0;
     }
     else   {  // if (y.rep == precRATIONAL)
-      if (*y.rval == gRational(0))    throw DivideByZero(__LINE__, __FILE__);
+      if (*y.rval == gRational(0))    throw DivideByZero();
       *rval /= *y.rval;
     }
   }
@@ -401,21 +398,21 @@ gNumber operator/(const gNumber& x, const gNumber& y)
 {
   if (x.rep == precDOUBLE)   {
     if (y.rep == precDOUBLE)   {
-      if (y.dval == 0.0)    throw gNumber::DivideByZero(__LINE__, __FILE__);
+      if (y.dval == 0.0)    throw gNumber::DivideByZero();
       return gNumber(x.dval / y.dval); 
     }
     else  {   // if (y.rep == precRATIONAL)
-      if (*y.rval == gRational(0))    throw gNumber::DivideByZero(__LINE__, __FILE__);
+      if (*y.rval == gRational(0))    throw gNumber::DivideByZero();
       return gNumber(x.dval / double(*y.rval));
     }
   }
   else   {
     if (y.rep == precDOUBLE)   {
-      if (y.dval == 0.0)   throw gNumber::DivideByZero(__LINE__, __FILE__);
+      if (y.dval == 0.0)   throw gNumber::DivideByZero();
       return gNumber(double(*x.rval) / y.dval);
     }
     else  { // if (y.rep == precRATIONAL)
-      if (*y.rval == gRational(0))   throw gNumber::DivideByZero(__LINE__, __FILE__);
+      if (*y.rval == gRational(0))   throw gNumber::DivideByZero();
       return gNumber(*x.rval / *y.rval);
     }
   }
@@ -429,8 +426,8 @@ bool gNumber::IsInteger(void) const
 
 gNumber pow(const gNumber &x, long n)
 {
-if(x.rep==precDOUBLE)
-  return pow(x.dval,n);
-else
-  return pow(*x.rval,n);
+  if (x.rep == precDOUBLE)
+    return pow(x.dval, n);
+  else
+    return pow(*x.rval, n);
 }

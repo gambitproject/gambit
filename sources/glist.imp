@@ -6,11 +6,7 @@
 
 #include "glist.h"
 #include "gtext.h"
-
-template <class T>
-gList<T>::BadIndex::BadIndex(int line, char *file)
-  : gException(line, file)
-{ }
+#include <assert.h>
 
 template <class T>
 gText gList<T>::BadIndex::Description(void) const
@@ -65,7 +61,7 @@ template <class T> gList<T>::~gList()
 
 template <class T> int gList<T>::InsertAt(const T &t, int num)
 {
-  if (num < 1 || num > length + 1)   throw BadIndex(__LINE__, __FILE__);
+  if (num < 1 || num > length + 1)   throw BadIndex();
   
   if (!length)  {
     head = tail = new gNode(t, 0, 0);
@@ -147,7 +143,7 @@ template <class T> bool gList<T>::operator!=(const gList<T> &b) const
 
 template <class T> const T &gList<T>::operator[](int num) const
 {
-  if (num < 1 || num > length)    throw BadIndex(__LINE__, __FILE__);
+  if (num < 1 || num > length)    throw BadIndex();
 
   int i;
   gNode *n;
@@ -162,7 +158,7 @@ template <class T> const T &gList<T>::operator[](int num) const
 
 template <class T> T &gList<T>::operator[](int num)
 {
-  if (num < 1 || num > length)   throw BadIndex(__LINE__, __FILE__);
+  if (num < 1 || num > length)   throw BadIndex();
   gNode *n;
   int i;
   if( num < CurrIndex )
@@ -249,7 +245,7 @@ template <class T> int gList<T>::Insert(const T &t, int n)
 
 template <class T> T gList<T>::Remove(int num)
 {
-  if (num < 1 || num > length)   throw BadIndex(__LINE__, __FILE__);
+  if (num < 1 || num > length)   throw BadIndex();
   gNode *n;
   int i;
 

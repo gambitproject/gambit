@@ -33,8 +33,6 @@ template <class T> class gList  {
   public:
     class BadIndex : public gException   {
       public:
-        BadIndex(int, char *);
-
         virtual ~BadIndex()   { }
         gText Description(void) const;
     };

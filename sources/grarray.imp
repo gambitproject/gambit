@@ -5,23 +5,13 @@
 //
 
 #include "grarray.h"
-
-#include <assert.h>
 #include "garray.h"
 #include "gtext.h"
-
-template <class T> gRectArray<T>::BadDim::BadDim(int line, char *file)
-  : gException(line, file)
-{ }
 
 template <class T> gText gRectArray<T>::BadDim::Description(void) const
 {
   return "Dimensionality mismatch in gRectArray";
 }
-
-template <class T> gRectArray<T>::BadIndex::BadIndex(int line, char *file)
-  : gException(line, file)
-{ }
 
 template <class T> gText gRectArray<T>::BadIndex::Description(void) const
 {
@@ -151,14 +141,14 @@ template <class T> int gRectArray<T>::MaxCol(void) const { return maxcol; }
 
 template <class T> T &gRectArray<T>::operator()(int r, int c)
 {
-  if (!Check(r, c))  throw BadIndex(__LINE__, __FILE__);
+  if (!Check(r, c))  throw BadIndex();
 
   return data[r][c];
 }
 
 template <class T> const T &gRectArray<T>::operator()(int r, int c) const
 {
-  if (!Check(r, c))  throw BadIndex(__LINE__, __FILE__);
+  if (!Check(r, c))  throw BadIndex();
 
   return data[r][c];
 }
@@ -187,7 +177,7 @@ template <class T> gOutput &operator<<(gOutput &f, const gRectArray<T> &a)
 
 template <class T> void gRectArray<T>::RotateUp(int lo, int hi)
 {
-  if (lo < minrow || hi < lo || maxrow < hi)  throw BadIndex(__LINE__, __FILE__);
+  if (lo < minrow || hi < lo || maxrow < hi)  throw BadIndex();
 
   T *temp = data[lo];
   for (int k = lo; k < hi; k++)
@@ -197,7 +187,7 @@ template <class T> void gRectArray<T>::RotateUp(int lo, int hi)
 
 template <class T> void gRectArray<T>::RotateDown(int lo, int hi)
 {
-  if (lo < minrow || hi < lo || maxrow < hi)  throw BadIndex(__LINE__, __FILE__);
+  if (lo < minrow || hi < lo || maxrow < hi)  throw BadIndex();
 
   T *temp = data[hi];
   for (int k = hi; k > lo; k--)
@@ -207,7 +197,7 @@ template <class T> void gRectArray<T>::RotateDown(int lo, int hi)
 
 template <class T> void gRectArray<T>::RotateLeft(int lo, int hi)
 {
-  if (lo < mincol || hi < lo || maxcol < hi)   throw BadIndex(__LINE__, __FILE__);
+  if (lo < mincol || hi < lo || maxcol < hi)   throw BadIndex();
   
   T temp;
   for (int i = minrow; i <= maxrow; i++)  {
@@ -221,7 +211,7 @@ template <class T> void gRectArray<T>::RotateLeft(int lo, int hi)
 
 template <class T> void gRectArray<T>::RotateRight(int lo, int hi)
 {
-  if (lo < mincol || hi < lo || maxcol < hi)   throw BadIndex(__LINE__, __FILE__);
+  if (lo < mincol || hi < lo || maxcol < hi)   throw BadIndex();
 
   T temp;
   for (int i = minrow; i <= maxrow; i++)  {
@@ -239,8 +229,8 @@ template <class T> void gRectArray<T>::RotateRight(int lo, int hi)
 
 template <class T> void gRectArray<T>::SwitchRow(int row, gArray<T> &v)
 {
-  if (!CheckRow(row))  throw BadIndex(__LINE__, __FILE__);
-  if (!CheckRow(v))    throw BadDim(__LINE__, __FILE__);
+  if (!CheckRow(row))  throw BadIndex();
+  if (!CheckRow(v))    throw BadDim();
 
   T *rowptr = data[row];
   T tmp;
@@ -253,7 +243,7 @@ template <class T> void gRectArray<T>::SwitchRow(int row, gArray<T> &v)
 
 template <class T> void gRectArray<T>::SwitchRows(int i, int j)
 {
-  if (!CheckRow(i) || !CheckRow(j))   throw BadIndex(__LINE__, __FILE__);
+  if (!CheckRow(i) || !CheckRow(j))   throw BadIndex();
   T *temp = data[j];
   data[j] = data[i];
   data[i] = temp;
@@ -261,8 +251,8 @@ template <class T> void gRectArray<T>::SwitchRows(int i, int j)
 
 template <class T> void gRectArray<T>::GetRow(int row, gArray<T> &v) const
 {
-  if (!CheckRow(row))   throw BadIndex(__LINE__, __FILE__);
-  if (!CheckRow(v))     throw BadDim(__LINE__, __FILE__);
+  if (!CheckRow(row))   throw BadIndex();
+  if (!CheckRow(v))     throw BadDim();
 
   T *rowptr = data[row];
   for (int i = mincol; i <= maxcol; i++)
@@ -271,8 +261,8 @@ template <class T> void gRectArray<T>::GetRow(int row, gArray<T> &v) const
 
 template <class T> void gRectArray<T>::SetRow(int row, const gArray<T> &v)
 {
-  if (!CheckRow(row))   throw BadIndex(__LINE__, __FILE__);
-  if (!CheckRow(v))     throw BadDim(__LINE__, __FILE__);
+  if (!CheckRow(row))   throw BadIndex();
+  if (!CheckRow(v))     throw BadDim();
 
   T *rowptr = data[row];
   for (int i = mincol; i <= maxcol; i++)
@@ -285,8 +275,8 @@ template <class T> void gRectArray<T>::SetRow(int row, const gArray<T> &v)
 
 template <class T> void gRectArray<T>::SwitchColumn(int col, gArray<T> &v)
 {
-  if (!CheckColumn(col))   throw BadIndex(__LINE__, __FILE__);
-  if (!CheckColumn(v))     throw BadDim(__LINE__, __FILE__);
+  if (!CheckColumn(col))   throw BadIndex();
+  if (!CheckColumn(v))     throw BadDim();
 
   for (int i = minrow; i <= maxrow; i++)   {
     T tmp = data[i][col];
@@ -297,7 +287,7 @@ template <class T> void gRectArray<T>::SwitchColumn(int col, gArray<T> &v)
 
 template <class T> void gRectArray<T>::SwitchColumns(int a, int b)
 {
-  if (!CheckColumn(a) || !CheckColumn(b))   throw BadIndex(__LINE__, __FILE__);
+  if (!CheckColumn(a) || !CheckColumn(b))   throw BadIndex();
 
   for (int i = minrow; i <= maxrow; i++)   {
     T tmp = data[i][a];
@@ -308,8 +298,8 @@ template <class T> void gRectArray<T>::SwitchColumns(int a, int b)
 
 template <class T> void gRectArray<T>::GetColumn(int col, gArray<T> &v) const
 {
-  if (!CheckColumn(col))  throw BadIndex(__LINE__, __FILE__);
-  if (!CheckColumn(v))    throw BadDim(__LINE__, __FILE__);
+  if (!CheckColumn(col))  throw BadIndex();
+  if (!CheckColumn(v))    throw BadDim();
 
   for (int i = minrow; i <= maxrow; i++)
     v[i] = data[i][col];
@@ -317,8 +307,8 @@ template <class T> void gRectArray<T>::GetColumn(int col, gArray<T> &v) const
 
 template <class T> void gRectArray<T>::SetColumn(int col, const gArray<T> &v)
 {
-  if (!CheckColumn(col))   throw BadIndex(__LINE__, __FILE__);
-  if (!CheckColumn(v))     throw BadDim(__LINE__, __FILE__);
+  if (!CheckColumn(col))   throw BadIndex();
+  if (!CheckColumn(v))     throw BadDim();
 
   for (int i = minrow; i <= maxrow; i++)
     data[i][col] = v[i];

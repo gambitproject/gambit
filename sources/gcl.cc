@@ -164,7 +164,9 @@ int main( int /*argc*/, char* argv[] )
     gCmdLineInput::RestoreTermAttr();
   }
   // The last line of defense for exceptions:
-  catch(gException &w) {gout << w.ErrorMessage() << "; Caught in gcl.cc, main()\n";}
+  catch (gException &w)  {
+    gout << "GCL EXCEPTION:" << w.Description() << "; Caught in gcl.cc, main()\n";
+  }
   
   return 0;
 }
