@@ -554,14 +554,14 @@ gText EfgShow::AsString(TypedSolnValues what, const Node *n, int br) const
 #include "node.h"
 #include "efplayer.h"
 
-gNumber EfgShow::BranchProb(const Node *n, int br)
+gNumber EfgShow::ActionProb(const Node *n, int br)
 {
-    if (n->GetPlayer())
-        if (n->GetPlayer()->IsChance())
-            return ef.GetChanceProb(n->GetInfoset(), br);
-    if (cur_soln && n->GetInfoset())
-        return solns[cur_soln].GetValue(n->GetInfoset(), br);
-    return -1;
+  if (n->GetPlayer())
+    if (n->GetPlayer()->IsChance())
+      return ef.GetChanceProb(n->GetInfoset(), br);
+  if (cur_soln && n->GetInfoset())
+    return solns[cur_soln].GetValue(n->GetInfoset(), br);
+  return -1;
 }
 
 

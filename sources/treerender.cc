@@ -15,7 +15,7 @@
 #include "legendc.h"
 #include "twflash.h"
 #include "treewin.h"
-
+#include "efgshow.h"
 
 int INFOSET_SPACING = 10;
 int SUBGAME_LARGE_ICON_SIZE = 20;
@@ -211,7 +211,7 @@ void TreeRender::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
     break;
     
   case NODE_ABOVE_OUTCOME:
-    label = parent->OutcomeAsString(n, hilight);
+    label = OutcomeAsString(n, hilight);
     break;
         
   case NODE_ABOVE_REALIZPROB:
@@ -268,7 +268,7 @@ void TreeRender::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
     break;
         
   case NODE_BELOW_OUTCOME:
-    label = parent->OutcomeAsString(n, hilight);
+    label = OutcomeAsString(n, hilight);
     break;
         
   case NODE_BELOW_REALIZPROB:
@@ -386,7 +386,7 @@ void TreeRender::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
     break;
             
   case NODE_RIGHT_OUTCOME:
-    label = parent->OutcomeAsString(n, hilight);
+    label = OutcomeAsString(n, hilight);
     break;
             
   case NODE_RIGHT_NAME:
@@ -517,7 +517,8 @@ void TreeRender::RenderSubtree(wxDC &dc)
 	::DrawLine(dc, xs, ys, xe, ye, entry.color);
 
 	// Draw the highlight... y = a + bx = ys + (ye-ys) / (xe-xs) * x
-	double prob = parent->ProbAsDouble(entry.n, child_entry.child_number);
+	double prob = parent->GetEfgFrame()->ActionProb(entry.n,
+							child_entry.child_number);
 	if (prob > 0) {
 	  ::DrawLine(dc, xs, ys, (xs + draw_settings.ForkLength() * prob), 
 		     (ys + (ye - ys) * prob), WX_COLOR_LIST_LENGTH - 1);
@@ -603,6 +604,33 @@ void TreeRender::MakeFlasher(void)
 	     new TreeNodeCursor(GetDC()));
 }
 
+gText TreeRender::OutcomeAsString(const Node *n, bool &/*hilight*/) const
+{
+  if (n->GetOutcome()) {
+    EFOutcome *tv = n->GetOutcome();
+    const gArray<gNumber> &v = n->Game()->Payoff(tv);
+    gText tmp = "(";
+
+    for (int i = v.First(); i <= v.Last(); i++) {
+      if (i != 1) 
+	tmp += ",";
+      
+      if (draw_settings.ColorCodedOutcomes())
+	tmp += ("\\C{"+ToText(draw_settings.GetPlayerColor(i))+"}");
+      
+      tmp += ToText(v[i]);
+    }
+
+    if (draw_settings.ColorCodedOutcomes()) 
+      tmp += ("\\C{"+ToText(WX_COLOR_LIST_LENGTH-1)+"}");
+
+    tmp += ")";
+        
+    return tmp;
+  }
+  else
+    return "";
+}
 
 
 
@@ -682,4 +710,5 @@ void TreeZoomWindow::OnChar(wxKeyEvent &p_event)
 {
   m_parent->OnChar(p_event);
 }
+
 

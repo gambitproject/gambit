@@ -1,5 +1,5 @@
 //
-// FILE: treewin.cc -- Drawing functions for TreeWindow
+// FILE: treewin.cc -- Implementation of TreeWindow class
 //
 // $Id$
 //
@@ -21,6 +21,7 @@
 #include "nodeaddd.h"
 #include "infosetd.h"
 
+#include "efgutils.h"
 #include "glist.imp"
 
 extern int INFOSET_SPACING;
@@ -178,55 +179,9 @@ void TreeWindow::MakeMenus(void)
   edit_menu->SetClientData((char *)frame); // call back to parent later
 }
 
-
-gText TreeWindow::Title(void) const
-{
-    return ef.GetTitle();
-}
-
-Bool TreeWindow::JustRender(void) const 
-{
-    return FALSE;
-}
-
 gText TreeWindow::AsString(TypedSolnValues what, const Node *n, int br) const
 {
     return frame->AsString(what, n, br);
-}
-
-double TreeWindow::ProbAsDouble(const Node *n, int action) const
-{
-    return (double)frame->BranchProb(n, action);
-}
-
-gText TreeWindow::OutcomeAsString(const Node *n, bool &/*hilight*/) const
-{
-    if (n->GetOutcome())
-    {
-        EFOutcome *tv = n->GetOutcome();
-        const gArray<gNumber> &v = ef.Payoff(tv);
-        gText tmp = "(";
-
-        for (int i = v.First(); i <= v.Last(); i++)
-        {
-            if (i != 1) 
-                tmp += ",";
-
-            if (draw_settings.ColorCodedOutcomes())
-                tmp += ("\\C{"+ToText(draw_settings.GetPlayerColor(i))+"}");
-
-            tmp += ToText(v[i]);
-        }
-
-        if (draw_settings.ColorCodedOutcomes()) 
-            tmp += ("\\C{"+ToText(WX_COLOR_LIST_LENGTH-1)+"}");
-
-        tmp += ")";
-        
-        return tmp;
-    }
-    else
-        return "";
 }
 
 //---------------------------------------------------------------------
@@ -364,8 +319,6 @@ void TreeWindow::OnChar(wxKeyEvent& ch)
 // OnEvent -- handle mouse events
 // Currently we support selecting a node by clicking on it
 //
-Action *LastAction(Node *node);
-
 void TreeWindow::OnEvent(wxMouseEvent& ev)
 {
     // Check all the draggers.  Note that they are mutually exclusive
@@ -418,22 +371,6 @@ void TreeWindow::OnPaint(void)
 // of course, they will cause problems if parallel rendering ever occurs 
 int maxlev, maxy, miny, ycoord;
 
-int TreeWindow::PlayerNum(const EFPlayer *p) const
-{
-    if (p->IsChance()) return 0;
-    for (int i = 1; i <= ef.NumPlayers(); i++)
-        if (ef.Players()[i] == p) return i;
-    assert(0 && "Player not found");
-    return -1;
-}
-
-int TreeWindow::IsetNum(const Infoset *s) const
-{
-    for (int i = 1; i <= s->GetPlayer()->NumInfosets(); i++)
-        if (s->GetPlayer()->Infosets()[i] == s) return i;
-    return 0;
-}
-
 NodeEntry *TreeWindow::GetNodeEntry(const Node *n)
 {
     for (int i = 1; i <= node_list.Length(); i++)
@@ -468,7 +405,7 @@ int TreeWindow::FillTable(const Node *n, int level)
         for (int i = 1; i <= n->NumChildren(); i++)
         {
             bool in_sup = true;
-            if (PlayerNum(n->GetPlayer()))        // pn == 0 for chance nodes
+            if (n->GetPlayer()->GetNumber())        // pn == 0 for chance nodes
                 in_sup = disp_sup->Find(n->GetInfoset()->Actions()[i]);
             if (in_sup)
             {
@@ -609,7 +546,7 @@ void TreeWindow::FillInfosetTable(const Node *n)
         for (int i = 1; i <= n->NumChildren(); i++)
         {
             bool in_sup = true;
-            if (PlayerNum(n->GetPlayer()))        // pn == 0 for chance nodes
+            if (n->GetPlayer()->GetNumber())        // pn == 0 for chance nodes
                 in_sup = disp_sup->Find(n->GetInfoset()->Actions()[i]);
             
             if (in_sup || !draw_settings.RootReachable())
@@ -2848,8 +2785,6 @@ void TreeWindow::tree_infosets(void)
 //-----------------------------------------------------------------------
 //                     SUBGAME MENU HANDLER FUNCTIONS
 //-----------------------------------------------------------------------
-
-void LegalSubgameRoots(const Efg &efg, gList<Node *> &list);
 
 void TreeWindow::subgame_solve(void)
 {

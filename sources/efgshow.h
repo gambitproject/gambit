@@ -130,8 +130,7 @@ public:
     const  Efg *InterfaceObjectEfg(void) { return &ef; }
     wxFrame *Frame(void);
 
-    // Solution access for TreeWindow
-    gNumber BranchProb(const Node *n, int br);
+    gNumber ActionProb(const Node *n, int br);
 
     // Reset the supports.
     void GameChanged(void);

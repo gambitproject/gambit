@@ -64,6 +64,7 @@ private:
     void RenderLabels(wxDC &dc, const NodeEntry *child_entry,
                       const NodeEntry *entry);
     void RenderSubtree(wxDC &dc);
+  gText OutcomeAsString(const Node *n, bool &hilight) const;
     
 protected:
     TreeWindow *parent;
@@ -188,8 +189,6 @@ private:
     void  CheckInfosetEntry(NodeEntry *e);
     void  UpdateTableInfosets(void);
     void  UpdateTableParents(void);
-    int PlayerNum(const EFPlayer *p) const ;
-    int IsetNum(const Infoset *i) const ;
     static void OnPopup(wxMenu &ob,wxCommandEvent &ev);
     void MakeMenus(void);
     
@@ -202,111 +201,108 @@ protected:
   void UpdateMenus(void);
     
 public:
-    // CONSTRUCTOR, DESTRUCTOR
-
-    TreeWindow(Efg &ef_,EFSupport * &disp, EfgShow *frame);
-    virtual ~TreeWindow(void);
+  // LIFECYCLE
+  TreeWindow(Efg &ef_,EFSupport * &disp, EfgShow *frame);
+  virtual ~TreeWindow(void);
     
-    // EVENT HANDLERS
-
-    void OnEvent(wxMouseEvent& event);
-    void OnChar(wxKeyEvent& ch);
-    void OnPaint(void);
+  // EVENT HANDLERS
+  void OnEvent(wxMouseEvent& event);
+  void OnChar(wxKeyEvent& ch);
+  void OnPaint(void);
     
-    // MENU EVENT HANDLERS
-    void node_add(void);
-    void node_insert(void);
-    void node_label(void);
-    void node_delete(void);
-    void node_set_mark(void);
-    void node_goto_mark(void);
-    void EditOutcomeAttach(void);
-    void EditOutcomeDetach(void);
-    void EditOutcomeNew(void);
-    void EditOutcomeDelete(void);
-    void EditOutcomeLabel(void);
-    void ChangePayoffs(void);
+  // MENU EVENT HANDLERS
+  void node_add(void);
+  void node_insert(void);
+  void node_label(void);
+  void node_delete(void);
+  void node_set_mark(void);
+  void node_goto_mark(void);
+  void EditOutcomeAttach(void);
+  void EditOutcomeDetach(void);
+  void EditOutcomeNew(void);
+  void EditOutcomeDelete(void);
+  void EditOutcomeLabel(void);
+  void ChangePayoffs(void);
       
-    void action_label(void);
-    void action_insert(void);
-    void action_delete(void);
-    void action_probs(void);
+  void action_label(void);
+  void action_insert(void);
+  void action_delete(void);
+  void action_probs(void);
     
-    void tree_delete(void);
-    void tree_copy(void);
-    void tree_move(void);
-    void tree_label(void);
-    void tree_players(void);
-    void tree_infosets(void);
+  void tree_delete(void);
+  void tree_copy(void);
+  void tree_move(void);
+  void tree_label(void);
+  void tree_players(void);
+  void tree_infosets(void);
     
-    void infoset_merge(void);
-    void infoset_break(void);
-    void infoset_split(void);
-    void infoset_join(void);
-    void infoset_label(void);
-    void infoset_switch_player(void);
-    void infoset_reveal(void);
+  void infoset_merge(void);
+  void infoset_break(void);
+  void infoset_split(void);
+  void infoset_join(void);
+  void infoset_label(void);
+  void infoset_switch_player(void);
+  void infoset_reveal(void);
     
-    void subgame_clear_one(void);
-    void subgame_clear_all(void);
-    void subgame_solve(void);
-    void subgame_collapse_one(void);
-    void subgame_collapse_all(void);
-    void subgame_expand_one(void);
-    void subgame_expand_branch(void);
-    void subgame_expand_all(void);
-    void subgame_toggle(void);
-    void subgame_set(void);
+  void subgame_clear_one(void);
+  void subgame_clear_all(void);
+  void subgame_solve(void);
+  void subgame_collapse_one(void);
+  void subgame_collapse_all(void);
+  void subgame_expand_one(void);
+  void subgame_expand_branch(void);
+  void subgame_expand_all(void);
+  void subgame_toggle(void);
+  void subgame_set(void);
     
-    void display_legends(void);
-    void display_options(void);
-    void display_colors(void);
-    void display_save_options(Bool def=TRUE);
-    void display_load_options(Bool def=TRUE);
-    void display_set_zoom(float z=-1);
-    void display_zoom_fit(void);
-    float display_get_zoom(void);
-    void display_zoom_win(void);
-    void delete_zoom_win(void);
-    
-    Bool file_save(void);
-    void  output(void);
-    void  print_eps(wxOutputOption fit);                 // output to postscript file
-    void  print(wxOutputOption fit,bool preview=false);  // output to printer (WIN3.1 only)
-
-    // copy to clipboard (WIN3.1 only)
-    void  print_mf(wxOutputOption fit,bool save_mf=false);
-    
-    gText Title(void) const;
-    
-    wxFrame *Parent(void) const { return pframe; }
-
-    virtual void Render(wxDC &dc);
-    void HilightInfoset(int pl,int iset);
-
-    // Used by parent EfgShow when disp_sup changes
-    void SupportChanged(void);
-    
-    // Gives access to the parent to the private draw_settings. Used for SolnShow
-    TreeDrawSettings &DrawSettings(void) { return draw_settings; }
-
-    // Gives access to the parent to the current cursor node
-    Node *Cursor(void) const { return m_cursor; }
-
-    // Hilight the subgame root for the currently active subgame
-    void  SetSubgamePickNode(const Node *n);
-
-    // Check if a drag'n'drop object has been activated
-    Node *GotObject(float &mx, float &my, int what);
-    virtual Bool JustRender(void) const;
-
-	// Adjust number of scrollbar steps if needed.
-	void AdjustScrollbarSteps();
-
-    // Access to the numeric values from the renderer
-    double ProbAsDouble(const Node *n, int action) const;
-    gText AsString(TypedSolnValues what, const Node *n, int br = 0) const;
-    gText OutcomeAsString(const Node *n, bool &hilight) const;
+  void display_legends(void);
+  void display_options(void);
+  void display_colors(void);
+  void display_save_options(Bool def=TRUE);
+  void display_load_options(Bool def=TRUE);
+  void display_set_zoom(float z=-1);
+  void display_zoom_fit(void);
+  float display_get_zoom(void);
+  void display_zoom_win(void);
+  void delete_zoom_win(void);
+  
+  Bool file_save(void);
+  void  output(void);
+  void  print_eps(wxOutputOption fit);                 // output to postscript file
+  void  print(wxOutputOption fit,bool preview=false);  // output to printer (WIN3.1 only)
+  
+  // copy to clipboard (WIN3.1 only)
+  void  print_mf(wxOutputOption fit,bool save_mf=false);
+  
+  gText Title(void) const { return ef.GetTitle(); }
+  
+  wxFrame *Parent(void) const { return pframe; }
+  EfgShow *GetEfgFrame(void) const { return frame; }
+  
+  virtual void Render(wxDC &dc);
+  void HilightInfoset(int pl,int iset);
+  
+  // Used by parent EfgShow when disp_sup changes
+  void SupportChanged(void);
+  
+  // Gives access to the parent to the private draw_settings. Used for SolnShow
+  TreeDrawSettings &DrawSettings(void) { return draw_settings; }
+  
+  // Gives access to the parent to the current cursor node
+  Node *Cursor(void) const { return m_cursor; }
+  
+  // Hilight the subgame root for the currently active subgame
+  void  SetSubgamePickNode(const Node *n);
+  
+  // Check if a drag'n'drop object has been activated
+  Node *GotObject(float &mx, float &my, int what);
+  virtual Bool JustRender(void) const { return FALSE; }
+  
+  // Adjust number of scrollbar steps if needed.
+  void AdjustScrollbarSteps();
+  
+  // Access to the numeric values from the renderer
+  gText AsString(TypedSolnValues what, const Node *n, int br = 0) const;
 };
 
 #endif   // TREEWIN_H
