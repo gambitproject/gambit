@@ -36,7 +36,6 @@ libnash_a_SOURCES = \
 	nfgqregrid.cc \
 	nliap.cc \
 	polenum.cc \
-	seqeq.cc \
 	seqform.cc \
 	simpdiv.cc \
 	subsolve.cc

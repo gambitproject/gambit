@@ -55,9 +55,6 @@ libnash_a_SOURCES = \
 	nliap.h \
 	polenum.cc \
 	polenum.h \
-	seqeq.cc \
-	seqeq.h \
-	seqeq.imp \
 	seqform.cc \
 	seqform.h \
 	seqform.imp \
