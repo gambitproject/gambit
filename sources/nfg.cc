@@ -10,7 +10,6 @@
 #include "nfg.imp"
 #include "nfgiter.h"
 #include "rational.h"
-#include "gpset.h"
 #include "nfstrat.h"
 #include "nfplayer.h"
 
