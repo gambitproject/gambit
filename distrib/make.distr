@@ -139,7 +139,7 @@ pxi:
 	@echo
 
 	cd ../pxi; \
-	make -f Makefile.generic pxi GUI = $(GUI); \
+	make -f Makefile.generic pxi GUI=$(GUI); \
 	mv pxi_$(GUI)_$(SYSNAME) ../bin; \
 	strip ../bin/pxi_$(GUI)_$(SYSNAME); \
 	cd ../distrib
