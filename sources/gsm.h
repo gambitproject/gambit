@@ -78,6 +78,7 @@ class GSM
   void Push( const gRational data );
   void Push( const gString   data );
 
+
   void PushRef( const gString data );
 
   void Assign( void );
