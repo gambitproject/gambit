@@ -34,7 +34,7 @@ friend class Lexicon;
 friend void SetEfg(Nfg *, const Efg *);
 #endif   // NFG_ONLY
 protected:
-  gString title;
+  gString title, comment;
   gArray<int> dimensions;
 
   gArray<NFPlayer *> players;
@@ -64,6 +64,9 @@ public:
   // GENERAL DATA ACCESS AND MANIPULATION  
   void SetTitle(const gString &s);
   const gString &GetTitle(void) const;
+
+  void SetComment(const gString &);
+  const gString &GetComment(void) const;
 
   gSpace *Parameters(void) const    { return parameters; }
   term_order *ParamOrder(void) const   { return paramorder; }

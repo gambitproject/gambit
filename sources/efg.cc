@@ -223,7 +223,7 @@ Efg::Efg(gSpace *space, term_order *order)
 }
 
 Efg::Efg(const Efg &E, Node *n /* = 0 */)
-  : sortisets(false), title(E.title),
+  : sortisets(false), title(E.title), comment(E.comment),
     players(E.players.Length()), outcomes(E.outcomes.Length()),
     chance(new EFPlayer(this, 0)),
     parameters(E.parameters), paramorder(E.paramorder),
@@ -468,6 +468,13 @@ void Efg::SetTitle(const gString &s)
 
 const gString &Efg::GetTitle(void) const
 { return title; }
+
+void Efg::SetComment(const gString &s)
+{ comment = s; }
+
+const gString &Efg::GetComment(void) const
+{ return comment; }
+  
 
 //------------------------------------------------------------------------
 //                    Efg: Writing data files

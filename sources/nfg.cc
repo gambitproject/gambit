@@ -42,7 +42,7 @@ Nfg::Nfg(const gArray<int> &dim,
 }
 
 Nfg::Nfg(const Nfg &b)
-  : title(b.title), dimensions(b.dimensions),
+  : title(b.title), comment(b.comment), dimensions(b.dimensions),
     players(b.players.Length()), outcomes(b.outcomes.Length()),
     results(b.results.Length()),
     parameters(b.parameters), paramorder(b.paramorder), efg(0)
@@ -190,14 +190,17 @@ const gArray<Strategy *> &Nfg::Strategies(int p) const
 }
 
 void Nfg::SetTitle(const gString &s) 
-{ 
-  title = s; 
-}
+{ title = s; }
 
 const gString &Nfg::GetTitle(void) const 
-{ 
-  return title; 
-}
+{ return title; }
+
+void Nfg::SetComment(const gString &s)
+{ comment = s; }
+
+const gString &Nfg::GetComment(void) const
+{ return comment; }
+
 
 int Nfg::NumPlayers(void) const 
 { 

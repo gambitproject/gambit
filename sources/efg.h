@@ -43,7 +43,7 @@ friend class Nfg;
 
 protected:
     bool sortisets;
-    gString title;
+    gString title, comment;
     gBlock<EFPlayer *> players;
     gBlock<EFOutcome *> outcomes;
     Node *root;
@@ -102,6 +102,9 @@ protected:
        //# TITLE ACCESS AND MANIPULATION
     void SetTitle(const gString &s);
     const gString &GetTitle(void) const;
+
+    void SetComment(const gString &);
+    const gString &GetComment(void) const;
 
        //# WRITING DATA FILES
     void WriteEfgFile(gOutput &f) const;
