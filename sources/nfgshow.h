@@ -156,6 +156,12 @@ public:
 
   // Access to the actual window
   wxFrame *Frame(void);
+
+  // Access to the draw settings.
+  const NormalDrawSettings& getNormalDrawSettings() { return draw_settings; }
+
+  // Access to the underlying spreadsheet.
+  const NormalSpread& getNormalSpread() { return *spread; }
 };
 
 
@@ -183,7 +189,7 @@ protected:
 public:
   // Constructor
   NormalSpread(const NFSupport *sup, int _pl1, int _pl2, NfgShow *p, 
-	       wxFrame *pframe = 0);
+           wxFrame *pframe = 0);
 
   // Takes care of updating the player's strategy choice boxes
   void UpdateProfile(void);
@@ -233,7 +239,9 @@ public:
 
   // Callback for double clicking on a cell.  Currently this edits the cell
   void OnDoubleClick(int row, int col, int , const gText &) 
-    { parent->ChangePayoffs(row, col); }
+    { 
+        parent->ChangePayoffs(row, col); 
+    }
 
   // Callback for moving the selected cell.  Currently this updates the pl1, pl2 choice boxes
   void OnSelectedMoved(int row, int col, SpreadMoveDir /*how*/ = SpreadMoveJump)
