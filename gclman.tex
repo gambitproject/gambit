@@ -580,6 +580,40 @@ always 13, regardless of the value of \verb+i+ outside of the function.
 
 \subsubsection{Saving and loading normal forms}
 
+\section{Solving games}
+
+\subsection{Gobit}
+
+The {\tt GobitSolve} function computes a branch of the logistic
+quantal response equilibrium correspondence (as described in
+\cite[1995]{McKPal:95a} for normal form games, and in
+\cite[1995b]{McKPal:95b} for extensive form games.  The branch is
+computed for values of $\lambda$ between $\underline{\lambda}$ and
+$\bar{\lambda}.$ The algorithm starts at $\lambda_0 =
+\underline{\lambda}$ if $\delta>0,$ or $\lambda_0 = \bar{\lambda}$ if
+$\delta<0$. It then increments according to the formula
+$$
+\lambda_{t+1} = \lambda_t +\delta \lambda_t^a,
+$$ where $\underline\lambda,$ $\bar\lambda,$ $\delta,$ and $a$ are
+parameters described below. In the computation for the first value of
+$\lambda_0$, the algorithm begins its search for a solution at some
+starting point.  At each
+successive value of $\lambda_t,$ the algorithm begins its search at
+the point found in step $t - 1.$ 
+
+The {\em principal branch} of the logistic quantal response
+equilibrium mapping is the branch that is connected to the centroid of
+the game at $\lambda = 0$.  This branch can be computed by setting
+$\lambda_0$ sufficiently small.  As discussed in McKelvey and Palfrey,
+for generic normal form games, the principal branch of the quantal
+response equilibrium correspondence converges to a unique selection
+from the set of Nash equilibria as $\lambda$ goes to infinity.
+Similarly, for generic extensive form games, the principal branch of
+the quantal response mapping converges to a unique selection from the
+set of sequential equilibria as $\lambda$ goes to infinity.  Hence, in
+extensive form games, this algorithm can be used to compute an
+approximation to a sequential equilibrium.
+
 \section{Function Reference, by Category}
 
 This section contains a list of functions, organized by
@@ -732,12 +766,11 @@ SetPayoff[outcome->OUTCOME, payoff->LIST(RATIONAL)] =: OUTCOME
 \subsection{Normal Form Manipulation}
 
 \begin{verbatim}
-AddStrategy[support->SUPPORT, strategy->STRATEGY] =: SUPPORT
-CompressNfg[nfg<->NFG, support->SUPPORT] =: NFG
+AddStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT
 NewNfg[dim->LIST(INTEGER), {rational->BOOL}] =: NFG
-NewSupport[nfg<->NFG] =: SUPPORT
+NewSupport[nfg<->NFG] =: NFSUPPORT
 RandomNfg[nfg<->NFG, {seed->INTEGER}] =: NFG
-RemoveStrategy[support->SUPPORT, strategy->STRATEGY] =: SUPPORT
+RemoveStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT
 SetName[x<->NFG, name->TEXT] =: NFG
 SetPayoff[list->LIST(INTEGER), payoffs->LIST(FLOAT)] =: LIST(INTEGER)
 SetPayoff[list->LIST(INTEGER), payoffs->LIST(RATIONAL)] =: LIST(INTEGER)
@@ -763,7 +796,7 @@ Text[x->TEXT] =: TEXT
 
 \begin{verbatim}
 Behav[mixed->MIXED] =: BEHAV
-ElimDom[start->SUPPORT, {strong->BOOL}, {time<->FLOAT}] =: SUPPORT 
+ElimDom[start->NFSUPPORT, {strong->BOOL}, {time<->FLOAT}] =: NFSUPPORT 
 EnumMixedSolve[nfg<->NFG, {stopAfter->INTEGER},
                {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 EnumPureSolve[nfg<->NFG, {stopAfter->INTEGER}, 
@@ -808,7 +841,7 @@ SimpDivSolve[nfg<->NFG,{stopAfter->INTEGER},
 \begin{verbatim}
 Actions[infoset->INFOSET] =: LIST(ACTION)
 Centroid[efg->EFG] =: BEHAV
-Centroid[nfg->NFG,support->SUPPORT] =: MIXED
+Centroid[nfg->NFG,support->NFSUPPORT] =: MIXED
 Chance[efg->EFG] =: EFPLAYER
 ChanceProbs[infoset->INFOSET] =: LIST(T)
 Infoset[node->NODE] =: INFOSET
@@ -839,7 +872,7 @@ NumNodes[efg<->EFG] =: INTEGER
 NumOutcomes[efg<->EFG] =: INTEGER
 NumPlayers[efg<->EFG] =: INTEGER
 NumPlayers[nfg<->NFG] =: INTEGER
-NumStrats[player->NFPLAYER, {support->SUPPORT}] =: INTEGER
+NumStrats[player->NFPLAYER, {support->NFSUPPORT}] =: INTEGER
 Outcome[node->NODE] =: OUTCOME
 Outcomes[efg<->EFG] =: LIST(OUTCOME)
 Parent[node->NODE] =: NODE
@@ -914,7 +947,7 @@ all players obey the behavioral strategy profile \verb+strategy+.
 
 \item
 \protect \large \begin{verbatim}
-AddStrategy[support->SUPPORT, strategy->STRATEGY] =: SUPPORT
+AddStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT
 \end{verbatim}\normalsize
 
 \bd
@@ -996,15 +1029,12 @@ attached outcomes.
 
 \item
 \protect \large \begin{verbatim}
-Behav[mixed->MIXED] =: BEHAV
+Behav[mixed->MIXED, efg<->EFG] =: BEHAV
 \end{verbatim}\normalsize
 
 \bd
 Converts the mixed profile \verb+mixed+ to the equivalent
-behavioral profile on the associated extensive form game.  In order to use
-this function the normal form to which \verb+mixed+ belongs must have
-been created from an extensive form game currently stored in a variable
-in the command language.
+behavioral profile on the associated extensive form game \verb+efg+.
 \ed
 
 \item
@@ -1050,7 +1080,7 @@ strategies for each player are equally likely to be choen.
 
 \item
 \protect \large \begin{verbatim}
-Centroid[support->SUPPORT] =: MIXED
+Centroid[support->NFSUPPORT] =: MIXED
 \end{verbatim}\normalsize
 
 \bd
@@ -1083,17 +1113,6 @@ ChanceProbs[infoset->INFOSET] =: LIST(RATIONAL)
 Returns the vector of probabilities over the actions at
 information set \verb+infoset+ as a list.  A run-time error results if
 the given information set does not belong to the chance player.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-CompressNfg[nfg<->NFG, support->SUPPORT] =: NFG
-\end{verbatim}\normalsize
-
-\bd
-Returns a new normal form game with the strategies present
-in the support \verb+support+ and values for each contingency equivalent
-to the values for the corresponding contingencies in the game \verb+nfg+.
 \ed
 
 \item
@@ -1237,77 +1256,52 @@ the stopwatch was running.
 
 \item
 \protect \large \begin{verbatim}
-ElimDom[start->SUPPORT, {strong->BOOL}, {time<->FLOAT} =: SUPPORT
+ElimDom[support->NFSUPPORT, {strong->BOOL}, {time<->FLOAT} =: NFSUPPORT
 \end{verbatim} \normalsize
 
 \bd
-Finds dominated strategies in the normal form game \verb+nfg+.
-The process is controlled by the following parameters:
-
-\bd
-\item
-[start:] The initial support.  If unspecified, it defaults to the full
-strategy set for each player in the game.  
-\item
-[strong:] Determines the type of dominance used.  The default value is
-False, which signifies that weak dominance is used.  If `strong` is
-specified to be True, strong dominance is used.
-\item
-[mixed:] Determines if mixed strategies are used in determining if a
-given pure strategy is dominated.  The default value is False, meaning
-that only pure strategies are used. If \verb+strong+ is specified to
-be True, mixed strategies are used.
-\item
-[players:] A list of players for whom dominant strategies are
-computed.  Default is all players in the game.  
-\item
-[time:] Returns the elapsed time for the operation.
-\ed
+Finds dominated strategies in a support \verb+support+ of a normal
+form game.  By default, all weakly dominated strategies are eliminated;
+if the optional parameter \verb+strong+ is specified and is \verb+True+,
+only strongly dominated strategies are eliminated.  Returns a new support
+containing only the undominated strategies.  If the returned support
+is equal to the input support \verb+support+, no dominated strategies were
+found.  The optional parameter \verb+time+, if specified, upon completion
+contains the amount of time consumed by the elimination.
 \ed
 
 \item
 \protect \large \begin{verbatim}
-EnumMixedSolve[nfg<->NFG, {stopAfter->INTEGER},
+EnumMixedSolve[support->NFSUPPORT, {stopAfter->INTEGER},
                {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
 \bd
-Returns all Nash equilibria (pure and mixed) for a two
-person normal form game \verb+nfg+.  More precisely, it finds the set
-of extreme points of the components of the set of Nash equilibria.
-The procedure is to enumerate the set of complementary basic feasible
-solutions. (See, eg \cite[1964]{Man:64}.)  The following optional
-parameters are permitted: 
-\bd
-\item
-[stopAfter:] Specifies the maximum number of equilibria to find.  If
-not specified, the default value is zero, which means that all
-equilibria are found.
-\item
-[nPivots:] Upon completion, contains the number of pivots done.
-\item
-[time:] Upon completion, contains the elapsed time for the computation.
-\ed
+Returns all Nash equilibria (pure and mixed) for a given support
+\verb+support+ of a two person normal form game.  More precisely, it
+finds the set of extreme points of the components of the set of Nash
+equilibria.  The procedure is to enumerate the set of complementary
+basic feasible solutions. (See, eg \cite[1964]{Man:64}.)  By default,
+all equilibria are found; the optional parameter \verb+stopAfter+ may
+be used to specify a maximum number of equilibria.  Upon completion,
+\verb+nPivots+ returns the number of pivots done by the algorithm, and
+\verb+time+ returns the amount of time consumed by the function.
 \item
 [See also:] {\tt EnumPureSolve}.
 \ed
 
 \item
 \protect \large \begin{verbatim}
-EnumPureSolve[nfg<->NFG, {stopAfter->INTEGER}, 
+EnumPureSolve[support->NFSUPPORT, {stopAfter->INTEGER}, 
               {time<->FLOAT}] =: LIST(MIXED) 
 \end{verbatim}\normalsize
 
 \bd
-Returns all pure strategy Nash equilibria in the
-normal form game \verb+nfg+.  The following optional parameters are
-permitted:
-\bd
-\item
-[stopAfter:] The function finds only up to \verb+stopAfter+ equilibria,then returns.  If unspecified, finds all equilibria.
-\item
-[time:] Upon completion, contains the elapsed time for the computation.
-\ed
+Returns all pure strategy Nash equilibria in the support \verb+support+
+normal form game.  By default, all equilibria are found; the optional
+parameter \verb+stopAfter+ may be used to specify a maximum number of
+equilibria.  Upon completion, \verb+time+ returns the amount of time
+consumed by the function. 
 \item
 [See also:] {\tt EnumMixedSolve}.
 \ed
@@ -1372,116 +1366,70 @@ until $test$ fails to give $True$.
 
 \item
 \protect \large \begin{verbatim}
-GobitSolve[efg<->EFG(FLOAT),
-           {pxifile->OUTPUT}, {time<->FLOAT},
-           {nEvals<->INTEGER}, {nIters<->INTEGER},
-           {fullGraph->BOOL},
-           {minLam->FLOAT}, {maxLam->FLOAT}, 
-           {delLam->FLOAT}, {powLam->INTEGER}, 
-           {start->BEHAV}] =: LIST(BEHAV)
+GobitSolve[start->BEHAV, {pxifile->TEXT},
+           {minLam->FLOAT}, {maxLam->FLOAT},
+           {delLam->FLOAT}, {powLam->INTEGER},
+           {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
+           {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
+           {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(BEHAV)
+GobitSolve[start->MIXED, {pxifile->TEXT},
+           {minLam->FLOAT}, {maxLam->FLOAT},
+           {delLam->FLOAT}, {powLam->INTEGER},
+           {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
+           {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
+           {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
-\protect \large \begin{verbatim}
-GobitSolve[nfg<->NFG(FLOAT),
-           {pxifile->OUTPUT}, {time<->FLOAT},
-           {nEvals<->INTEGER}, {nIters<->INTEGER},
-           {fullGraph->BOOL},
-           {minLam->FLOAT}, {maxLam->FLOAT}, 
-           {delLam->FLOAT}, {powLam->INTEGER}, 
-           {start->MIXED}] =: LIST(MIXED)
-\end{verbatim}\normalsize
-
+\bd 
+Computes a branch of the logistic quantal response equilibrium
+correspondence.  The first version computes for an extensive form
+game, and the second version for a normal form game.  \verb+start+ is
+used as the starting point for the computation of $\lambda_{0}$.  The
+behavior of the algorithm may be modified by specifying some of the
+following optional parameters:
 \bd
 \item
-Computes a branch of the logistic quantal response
-equilibrium correspondence (as described in \cite[1995]{McKPal:95a}
-for normal form games, and in \cite[1995b]{McKPal:95b} for extensive
-form games.  The branch is computed for values of $\lambda$ between
-$\underline{\lambda}$ and $\bar{\lambda}.$ The algorithm starts at
-$\lambda_0 = \underline{\lambda}$ if $\delta>0,$ or $\lambda_0 =
-\bar{\lambda}$ if $\delta<0$. It then increments according to the
-formula 
-$$
-\lambda_{t+1} = \lambda_t +\delta \lambda_t^a,
-$$ where $\underline\lambda,$ $\bar\lambda,$ $\delta,$ and $a$ are
-parameters described below. In the computation for the first value of
-$\lambda_0$, the algorithm begins its search for a solution at the
-starting point determined by the parameter ''start.''  At each
-successive value of $\lambda_t,$ the algorithm begins it's search at
-the point found in step $t - 1.$ 
-
-The {\em principal branch} of the logistic quantal response
-equilibrium mapping is the branch that is connected to the centroid of
-the game at $\lambda = 0$.  This branch can be computed by setting
-$\lambda_0$ sufficiently small.  As discussed in McKelvey and Palfrey,
-for generic normal form games, the principal branch of the quantal
-response equilibrium correspondence converges to a unique selection
-from the set of Nash equilibria as $\lambda$ goes to infinity.
-Similarly, for generic extensive form games, the principal branch of
-the quantal response mapping converges to a unique selection from the
-set of sequential equilibria as $\lambda$ goes to infinity.  Hence, in
-extensive form games, this algorithm can be used to compute an
-approximation to a sequential equilibrium.
+[pxifile:] Generate output to this file for later retrieval and viewing by
+the PXI program.  By default no output file is generated.
 \item
-[Return value:] The List of Mixed (or Behavior) profiles found -- one
-profile for each value of $\lambda_t$.  If \verb+fullGraph+ is
-\verb+False+, then only the last value is returned.  
-\item 
-[Required parameters:]\hfil\null Exactly one of the following
-
-\bd
+[minLam:] Sets $\underline{\lambda}$, the minimum value of $\lambda$.  The 
+default value is $\underline{\lambda}=0.01$.
 \item
-[nfg:] The game in normal form for which the quantal response
-equilibrium solution is to be
-found.
-\item	
-[efg:] The game in extensive form for which the quantal response
-equilibrium solution is to be found.
-\ed
-
+[maxLam:] Sets $\overline{\lambda}$, the maximum value of $\lambda$.  The
+default value is $\overline{\lambda}=30.0$.
 \item
-[Optional parameters:]\hfil\null
-
-\bd
+[delLam:] Sets the constant $\delta$ used in incrementing $\lambda$.  The
+default value is $\delta=0.01$.
 \item
-[pxifile:] Can be used to generate an output file compatible for input
-to pxi, a program for graphical viewing and display of the output.  
+[powLam:] Sets the exponent $a$ used in incrementing $\lambda$.  The default
+value is $a=1$, producing geometric incrementing.  Setting $a=0$ corresponds
+to linear incrementing.
 \item
-[time:] Returns the elapsed time for the operation.
+[fullGraph:] If \verb+True+, the list of behavioral strategy profiles
+returned contains the full sequence of profiles computed from each successive
+value of $\lambda$.  The default value is \verb+False+, in which case only
+the profile for the last value of $\lambda$ computed is returned.
 \item
-[nEvals:] Number of function evaluations.
+[maxitsN:] Sets the maximum number of iterations for the $n$-dimensional
+optimization routine.  The default value is $200$.
 \item
-[nIters:] Number of iterations of the the function minimization.
+[tolN:] Sets the tolerance for the $n$-dimensional optimization routine.
+The default is $1.0^{-10}$.
 \item
-[minLam:] Sets $\underline\lambda,$ the minimum value of $\lambda.$
-Default is $\underline\lambda = 0.01$.
+[maxits1:] Sets the maximum number of iterations for the 1-dimensional
+optimization routine.  The default is $100$.
 \item
-[maxLam:] Sets $\bar\lambda,$ the maximum value of $\lambda.$  Default is
-$\bar\lambda = 30.0.$
+[tol1:] Sets the tolerance for the 1-dimensional optimization routine.
+The default is $2.0^{-10}$.
 \item
-[delLam:]  Constant, $\delta,$ used in incrementing.   Default is
-$\delta = .01.$
+[time:] Upon completion, contains the amount of time consumed by the
+algorithm.
 \item
-[powLam:] Exponent, $a,$ used in incrementing $\lambda.$  Setting $a = 0$
-corresponds to linear incrementing, and $a = 1$ results in geometric
-incrementing.  Default is $a = 1$.
+[nEvals:] Upon completion, contains the number of function evaluations
+performed by the algorithm.
 \item
-[start:] Sets the starting point of the search for the initial value of
-$\lambda.$  Default is the centroid, where all strategies are chosen
-with equal probability.  
-\item
-[maxitsN:] Sets the maximum number of iterations to the
-n-dimensional optimization routine.  Default is 200.
-\item
-[maxits1:] Sets the maximum number of iterations in the
-1-dimensional line search.  Default is 100.
-\item
-[tolN:] Sets the tolerance for the n-dimensional optimization
-routine.  Default is 1.0e-10.
-\item
-[tol1:] Sets the tolerance for the 1-dimensional line search.
-Default is 2.0e-10.
-\item
+[nIters:] Upon completion, contains the number of iterations performed
+by the algorithm.
 \ed
 \ed
 
@@ -1490,13 +1438,25 @@ Default is 2.0e-10.
 Greater[x->INTEGER, y->INTEGER] =: BOOL
 Greater[x->FLOAT, y->FLOAT] =: BOOL
 Greater[x->RATIONAL, y->RATIONAL] =: BOOL
-Greater[x->TEXT, y->TEXT] =: BOOL
 \end{verbatim}\normalsize
 
 \bd
 Returns whether the value of \verb+x+ is greater than
-that of \verb+y+.  For text comparisons, a lexicographic comparison using the
-native character set of the machine is performed.
+that of \verb+y+.
+\item
+[Short form:] \verb+x > y+
+\item
+[See also:] {\tt GreaterThan}, {\tt Less}, {\tt LessEqual}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+Greater[x->TEXT, y->TEXT] =: BOOL
+\end{verbatim}\normalsize
+
+\bd
+Returns whether the string \verb+x+ is lexicographically greater than
+the string \verb+y+, using the native character set of the machine.
 \item
 [Short form:] \verb+x > y+
 \item
@@ -1508,13 +1468,26 @@ native character set of the machine is performed.
 GreaterEqual[x->INTEGER, y->INTEGER] =: BOOL
 GreaterEqual[x->FLOAT, y->FLOAT] =: BOOL
 GreaterEqual[x->RATIONAL, y->RATIONAL] =: BOOL
-GreaterEqual[x->TEXT, y->TEXT] =: BOOL
 \end{verbatim}\normalsize
 
 \bd
 Returns whether the value of \verb+x+ is at least that of
-\verb+y+.  For text comparisons, a lexicographic comparison using the
-native character set of the machine is performed.
+\verb+y+.
+\item
+[Short form:] \verb+x >= y+
+\item
+[See also:] {\tt Greater}, {\tt Less}, {\tt LessEqual}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+GreaterEqual[x->TEXT, y->TEXT] =: BOOL
+\end{verbatim}\normalsize
+
+\bd
+Returns whether the string \verb+x+ is lexicographically greater than
+or equal to the string \verb+y+, using the native character set of the
+machine.
 \item
 [Short form:] \verb+x >= y+
 \item
@@ -1539,7 +1512,8 @@ with it.
 
 \item 
 \protect \large \begin{verbatim}
-If[condition, t, f]
+If[condition, statements]
+If[condition, statements, alternative]
 \end{verbatim} \normalsize
   
 \bd
@@ -1715,7 +1689,7 @@ the root node of the tree and thus has no such action.
 \protect \large \begin{verbatim}
 LCPSolve[efg<->EFG, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
-LCPSolve[nfg<->NFG, {stopAfter->INTEGER},
+LCPSolve[support->NFSUPPORT, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
@@ -1807,13 +1781,25 @@ Returns the number of elements in the list \verb+list+.
 Less[x->INTEGER, y->INTEGER] =: BOOL
 Less[x->FLOAT, y->FLOAT] =: BOOL
 Less[x->RATIONAL, y->RATIONAL] =: BOOL
-Less[x->TEXT, y->TEXT] =: BOOL
 \end{verbatim}\normalsize
 
 \bd
 Returns whehter the value of \verb+x+ is less than that of
-\verb+y+.  For text comparisons, a lexicographic comparison using the
-native character set of the machine is performed.
+\verb+y+.
+\item
+[Short form:] \verb+x < y+
+\item
+[See also:] {\tt Greater}, {\tt GreaterEqual}, {\tt LessEqual}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+Less[x->TEXT, y->TEXT] =: BOOL
+\end{verbatim}\normalsize
+
+\bd
+Returns whether the string \verb+x+ is lexicographically less than
+the string \verb+y+, using the native character set of the machine.
 \item
 [Short form:] \verb+x < y+
 \item
@@ -1825,13 +1811,11 @@ native character set of the machine is performed.
 LessEqual[x->INTEGER, y->INTEGER] =: BOOL
 LessEqual[x->FLOAT, y->FLOAT] =: BOOL
 LessEqual[x->RATIONAL, y->RATIONAL] =: BOOL
-LessEqual[x->TEXT, y->TEXT] =: BOOL
 \end{verbatim}\normalsize
 
 \bd
 Returns whether the value of \verb+x+ is no more than that
-of \verb+y+.  For text comparisons, a lexicographic comparison using the
-native character set of the machine is performed.
+of \verb+y+.
 \item
 [Short form:] \verb+x <= y+
 \item
@@ -1840,15 +1824,28 @@ native character set of the machine is performed.
 
 \item
 \protect \large \begin{verbatim}
-LiapSolve[efg<->EFG, {time<->FLOAT},
-          {nEvals<->INTEGER}, {stopAfter->INTEGER}, {nTries->INTEGER},
-          {start->BEHAV}] =: LIST(BEHAV)
+LessEqual[x->TEXT, y->TEXT] =: BOOL
 \end{verbatim}\normalsize
 
+\bd
+Returns whether the string \verb+x+ is lexicographically less than
+the string \verb+y+, using the native character set of the machine.
+\item
+[Short form:] \verb+x <= y+
+\item
+[See also:] {\tt Greater}, {\tt GreaterEqual}, {\tt Less}.
+\ed
+
+\item
 \protect \large \begin{verbatim}
-LiapSolve[nfg<->NFG, {time<->FLOAT}, {nEvals<->INTEGER},
-          {stopAfter->INTEGER}, {nTries->INTEGER},
-	  {start->MIXED}] =: LIST(MIXED)
+LiapSolve[start->BEHAV, {stopAfter->INTEGER}, {nTries->INTEGER},
+          {maxitsN->INTEGER}, {tolN->FLOAT},
+          {maxits1->INTEGER}, {tol1->FLOAT},
+          {time<->FLOAT}, {nEvals<->INTEGER}] =: LIST(BEHAV)
+LiapSolve[start->MIXED, {stopAfter->INTEGER}, {nTries->INTEGER},
+          {maxitsN->INTEGER}, {tolN->FLOAT},
+          {maxits1->INTEGER}, {tol1->FLOAT},
+          {time<->FLOAT}, {nEvals<->INTEGER}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
 
@@ -1952,7 +1949,7 @@ Computes the natural logarithm of \verb+x+.
 
 \item
 \protect \large \begin{verbatim}
-LPSolve[nfg<->NFG, {nPivots<->INTEGER},
+LPSolve[support->NFSUPPORT, {nPivots<->INTEGER},
         {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
@@ -1977,13 +1974,13 @@ two person constant-sum game, by solving it as a Linear Program.
 
 \item
 \protect \large \begin{verbatim}
-LqreGridSolve[nfg<->NFG, {pxifile->OUTPUT},
+LqreGridSolve[support->NFSUPPORT, {pxifile->TEXT},
               {minLam->FLOAT}, {maxLam->FLOAT}, 
               {delLam->FLOAT}, {powLam->INTEGER}, 
               {delp->FLOAT}, {tol->FLOAT},
               {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 
-LqreGridSolve[nfg<->NFG, {pxifile->OUTPUT},
+LqreGridSolve[support->NFSUPPORT, {pxifile->TEXT},
               {minLam->RATIONAL}, {maxLam->RATIONAL}, 
               {delLam->RATIONAL}, {powLam->INTEGER}, 
               {delp->RATIONAL}, {tol->RATIONAL},
@@ -2202,7 +2199,7 @@ newly created player.
 
 \item
 \protect \large \begin{verbatim}
-NewSupport[nfg<->NFG] =: SUPPORT
+NewSupport[nfg<->NFG] =: NFSUPPORT
 \end{verbatim}\normalsize
 
 \bd
@@ -2441,7 +2438,7 @@ game \verb+nfg+.
 
 \item
 \protect \large \begin{verbatim}
-NumStrats[player->NFPLAYER, {support->SUPPORT}] =: INTEGER
+NumStrats[player->NFPLAYER, {support->NFSUPPORT}] =: INTEGER
 \end{verbatim}\normalsize
 
 \bd
@@ -2747,7 +2744,7 @@ modify the input list \verb+list+.
 
 \item
 \protect \large \begin{verbatim}
-RemoveStrategy[support->SUPPORT, strategy->STRATEGY] =: SUPPORT
+RemoveStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT
 \end{verbatim}\normalsize
 
 \bd
@@ -2902,7 +2899,7 @@ strategies in \verb+list+ are defined.  Returns \verb+list+.
 
 \item
 \protect \large \begin{verbatim}
-SimpDivSolve[nfg<->NFG,{stopAfter->INTEGER}, 
+SimpDivSolve[support->NFSUPPORT, {stopAfter->INTEGER}, 
              {nRestarts->INTEGER}, {leashLength->INTEGER},
              {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
@@ -2988,7 +2985,7 @@ of time since the stopwatch was started.
 
 \item
 \protect \large \begin{verbatim}
-Strategies[player->NFPLAYER, {support->SUPPORT}] =: LIST(STRATEGY)
+Strategies[player->NFPLAYER, {support->NFSUPPORT}] =: LIST(STRATEGY)
 \end{verbatim}\normalsize
 
 \bd
