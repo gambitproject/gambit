@@ -23,6 +23,8 @@ Andrew McLennan\\University of
 Minnesota
 \and 
 Theodore Turocy\\Northwestern University
+\and
+Gary Wu\\California Institute of Technology
 }
 
 \date{Version 0.94\\ \today\\ \jobname.tex}
@@ -66,14 +68,15 @@ Escobar, Eugene Grayver, Todd Kaplan, Brian Trotter, and Gary Wu.  We
 are particularly grateful to Gary Wu for his work on the stack machine
 used by the command language, to Bruce Bell and Nelson Escobar for
 work on data structures, and to Rob Weber for help in compiling this
-manual and testing parts of the language.  We are also grateful to
-Eugene Grayver for his extensive work on the related GUI, and for
-setting up our Web site.
+manual and testing parts of the language.  We are also extremely
+grateful to Eugene Grayver for setting up and maintaining our Web
+site, for compiling the DOS/WINDOWS version of the GCL, and for his
+extensive work on the related GUI and PXI programs.
 
 \section{Installation}
 
 All of the gambit files can be found at the Gambit World Wide Web site
-at 
+at
 
 \begin{verbatim}
 http://www.hss.caltech.edu/~gambit/Gambit.html
@@ -95,26 +98,27 @@ GCL1:
 
 \section{Technical support and bug reports}
 
-User feedback is an important part of Gambit's development cycle.
-Our design choices have been motivated in large part by our experiences
+User feedback is an important part of Gambit's development cycle.  Our
+design choices have been motivated in large part by our experiences
 and by some of the potential uses of the software we have imagined.
 But this is by no means complete, and so we are eager to hear from
 you, Gambit's users, to find out what features are particularly
 useful, and in what areas future releases might be improved.
 
-The authors may be contacted via email at {\tt gambit@hss.caltech.edu}.
-This address will forward a copy of your message to the development team.
-While a personal reply may not always be possible, we will read all
-correspondence and apply as many suggestions as possible to our future
-releases.
+The authors may be contacted via email at {\tt
+gambit@hss.caltech.edu}.  This address will forward a copy of your
+message to the development team.  While a personal reply may not
+always be possible, we will read all correspondence and apply as many
+suggestions as possible to our future releases.
 
-Although we have made every effort to ensure the reliability and correctness of the
-code, it is certain that errors of varying degrees of severity exist.
-(However, as the saying goes, no undiscovered bugs have been found yet.)  If you
-experience problems with the software,
+Although we have made every effort to ensure the reliability and
+correctness of the code, it is certain that errors of varying degrees
+of severity exist.  (However, as the saying goes, no undiscovered bugs
+have been found yet.)  If you experience problems with the software,
 send us email at {\tt gambit@hss.caltech.edu} describing your problem.
 
-When reporting a bug, it is important to include the following information:
+When reporting a bug, it is important to include the following
+information:
 
 \begin{itemize}
 \item the version number
@@ -122,28 +126,30 @@ When reporting a bug, it is important to include the following information:
 \item as complete a description of the circumstances of the problem as possible, including a sequence of steps which reproduces the problem
 \end{itemize}
  
-\noindent Without this information, it will be difficult for us to identify the source of the
-problem to correct it.
+\noindent Without this information, it will be difficult for us to
+identify the source of the problem to correct it.
 
 At this time, no formal technical support mechanism exists for Gambit.
-As time permits, we will make every effort to answer any and all questions
-pertaining to the program an its documentation.
+As time permits, we will make every effort to answer any and all
+questions pertaining to the program an its documentation.
 
-We hope you will find Gambit a useful tool for research and instruction.
+We hope you will find Gambit a useful tool for research and
+instruction.
 
 
 \section{Basic concepts}
 
-The design motifs for GCL come from two principal families of programming
-languages.  The first is traditional imperative programming languages
-such as Pascal, C, and Modula-3.  In particular, the GCL's concept of
-types draws heavily from these languages, although the number of
-predefined types in GCL is much larger due to the specialized nature of
-the language.  The second is more specialized programming languages such
-as Mathematica, from which the GCL's grammar is partially drawn.  Users
-with experience using any of these languages should find the GCL easy to
-learn; however, no programming experience is necessary to begin using the
-language effectively.
+The design motifs for GCL come from two principal families of
+programming languages.  The first is traditional imperative
+programming languages such as Pascal, C, and Modula-3.  In particular,
+the GCL's concept of types draws heavily from these languages,
+although the number of predefined types in GCL is much larger due to
+the specialized nature of the language.  The second is more
+specialized programming languages such as Mathematica, from which the
+GCL's grammar is partially drawn.  Users with experience using any of
+these languages should find the GCL easy to learn; however, no
+programming experience is necessary to begin using the language
+effectively.
 
 \subsection{Statements}
 
@@ -152,11 +158,11 @@ typically an expression built up out of function calls.  A statement
 is terminated by a linefeed or by a semicolon.  The GCL interpreter
 reports the value of each expression evaluated unless the semicolon is
 present. Statements can be continued for more than one line by using
-the continuation character, \verb+\+.   
+the continuation character, \verb+\+.
 
 \subsection{Types}
 
-The built-in data types for the GCL are the following:  
+The built-in data types for the GCL are the following:
 
 \medskip
 
@@ -195,9 +201,9 @@ detailed later in special sections.
 
 \subsubsection{Boolean}
 
-The {\tt BOOLEAN} type represents boolean values, that is to say, ``true'' and
-``false''.  The command language predefines two constant values to
-represent these, {\tt True} and {\tt False}.
+The {\tt BOOLEAN} type represents boolean values, that is to say,
+``true'' and ``false''.  The command language predefines two constant
+values to represent these, {\tt True} and {\tt False}.
 
 \subsubsection{Integer}
 
@@ -208,12 +214,12 @@ overflow or underflow in computations involving these numbers.
 
 \subsubsection{Float}
 
-The {\tt FLOAT} type may contain floating point values.  It is implemented
-as the machine's double-precision floating point type.  These numbers
-are imprecise; for example, operations usually associated with being inverses
-of each other may not be with floating point numbers.  For more precise
-computations, the {\tt RATIONAL} type is available, although these may
-sometimes be bulky and slow.
+The {\tt FLOAT} type may contain floating point values.  It is
+implemented as the machine's double-precision floating point type.
+These numbers are imprecise; for example, operations usually
+associated with being inverses of each other may not be with floating
+point numbers.  For more precise computations, the {\tt RATIONAL} type
+is available, although these may sometimes be bulky and slow.
 
 \subsubsection{Rational}
 
@@ -226,22 +232,22 @@ the {\tt /} operator, described below.
 \subsubsection{Text}
 
 The {\tt TEXT} type is used to store text strings, typically labels
-for parts of games.  It is generally encouraged to label various elements
-of games in the command language for ease of identification; however it
-is not required.  To specify a {\tt TEXT} constant, surround the
-text with double-quote characters ({\tt "}).  Constants may not span
-more than one input line.
+for parts of games.  It is generally encouraged to label various
+elements of games in the command language for ease of identification;
+however it is not required.  To specify a {\tt TEXT} constant,
+surround the text with double-quote characters ({\tt "}).  Constants
+may not span more than one input line.
 
 \subsubsection{Input}
 
-The {\tt INPUT} type is a reference to an input stream, generally a file
-on disk.  Its principal use is to read in external data. 
+The {\tt INPUT} type is a reference to an input stream, generally a
+file on disk.  Its principal use is to read in external data.
 
 \subsubsection{Output}
 
 The {\tt OUTPUT} type is a reference to an output stream, generally a
 file on disk.  Its principal use is as a logging file for writing
-formatting output from an extended command language job.  
+formatting output from an extended command language job.
 
 \subsubsection{List}
 
@@ -280,11 +286,13 @@ as {\tt LIST(FLOAT)}, nor is it the same type as {\tt INTEGER}.
 
 \subsection{Variables}
 
-A variable stores one object of the corresponding data type
-To create a user defined variable, or to give
-a new value to an existing variable, one can use the built-in
-function,
-\verb+Assign+, which has the syntax:
+[NOTE:  Depending on how we decide to document Assign[], this section
+may need rewriting -- RDM]
+
+A variable stores one object of the corresponding data type To create
+a user defined variable, or to give a new value to an existing
+variable, one can use the built-in function, \verb+Assign+, which has
+the syntax:
 \begin{verbatim}
 Assign[x<->T, y->T]
 \end{verbatim}
@@ -334,7 +342,7 @@ be of any type.
 Sometimes, programs contain errors.  The interpreter is able to detect
 errors which violate rules of the language, and reports information
 about the error so the user can correct it.  There are two main
-classes of errors which may arise in GCL programs, parse errors and
+classes of errors which may arise in GCL programs: parse errors and
 run time errors.
 
 A parse error occurs when the GCL interpreter cannot determine the
@@ -351,10 +359,9 @@ execution.  Examples of this type of error include attempting to use a
 variable name which is not defined, and using a value of one type
 where another type was expected.  Also, builtin functions may generate
 this type of error on invalid inputs.  A run time error will result in
-termination of the GCL at the point where the error occurs, ith a
+termination of the GCL at the point where the error occurs, with a
 message indicating the type of error encountered.  However, no line
 number is given for run time errors.  
-
 
 \subsection{Function calls}
 
@@ -408,25 +415,27 @@ example could thus also be written
 Plus[1, 2]
 \end{verbatim}
 
-In not specifying the formal names, however, function calls are restricted
-to specifying parameters in exactly the same order as listed in the function
-prototype.  In our example, the GCL interpreter would have no way of
-distinguishing whether we meant 1 to be the value of \verb+x+ or the
-value of \verb+y+, and vice versa.  While in the case of addition we may
-flip the values of the parameters without having an effect on the result,
-in general this is not the case.
+When used without specifying the formal names, however, function
+calls are restricted to specifying parameters in exactly the same
+order as listed in the function prototype.  In our example, the GCL
+interpreter would have no way of distinguishing whether we meant 1 to
+be the value of \verb+x+ or the value of \verb+y+, and vice versa.
+While in the case of addition we may flip the values of the parameters
+without having an effect on the result, in general this is not the
+case.
 
-It is permitted to mix the two styles of parameter specification, subject
-to the following rules:
+It is permitted to mix the two styles of parameter specification,
+subject to the following rules:
 
 \begin{itemize}
-\item All anonymous parameters must be specified before any named parameters
-\item No parameters may be omitted in the anonymous parameter list.  If
-$k$ parameters are specified anonymously, they must match one-for-one the
-first $k$ parameters in the function's prototype.
-\item Once a named parameter has been specified, all succeeding parameters
-must be named, even if the first named parameter appeared in the same
-place in the parameter list as it does in the prototype.
+\item All anonymous parameters must be specified before any named
+parameters
+\item No parameters may be omitted in the anonymous parameter list.
+If $k$ parameters are specified anonymously, they must match
+one-for-one the first $k$ parameters in the function's prototype.
+\item Once a named parameter has been specified, all succeeding
+parameters must be named, even if the first named parameter appeared
+in the same place in the parameter list as it does in the prototype.
 \end{itemize}
 
 \noindent Therefore, it would be legal to write
@@ -461,45 +470,47 @@ capable of determining which version of the function to use by
 analyzing the names and types of the parameters used.
 
 Since a function may have multiple signatures, it is conceivable that
-a function call might be ambiguous, in the sense that its parameters match
-more than one signature for that function.  However, no function call that
-is complete may be ambiguous from the way that signatures have been
-chosen for the predefined functions.  Any function call flagged by the
-interpreter as ambiguous must be missing at least one parameter.
+a function call might be ambiguous, in the sense that its parameters
+match more than one signature for that function.  However, no function
+call that is complete may be ambiguous from the way that signatures
+have been chosen for the predefined functions.  Any function call
+flagged by the interpreter as ambiguous must be missing at least one
+parameter.
 
-Some functions have parameters which are optional, in the sense that they
-need not be specified in order to call the function.  These parameters
-are indicated in the function's prototype by being surrounded by curly
-braces.  (Note that these braces should not be included in the function
-call when specifying an optional parameter.)  If an optional parameter
-is left unspecified in a function call, a default value is assumed, as
-given in the function's documentation.
+Some functions have parameters which are optional, in the sense that
+they need not be specified in order to call the function.  These
+parameters are indicated in the function's prototype by being
+surrounded by curly braces.  (Note that these braces should not be
+included in the function call when specifying an optional parameter.)
+If an optional parameter is left unspecified in a function call, a
+default value is assumed, as given in the function's documentation.
 
 For a function, all required parameters always precede any optional
 parameters.  Optional parameters may also be specified anonymously,
 subject to the above rules on parameter specification.
 
 All parameters so far have been passed by {\it value}, that is, a copy
-of the value of the parameter is given to the function to which it is passed.
-These parameters may not be modified by the function.  It is also possible
-to have parameters to a function passed by {\it reference}.  This means
-that the function does not receive a copy of the value, but rather the
-memory location of the value itself.  Thus, the function may modify
-the value of a parameter passed by reference.
+of the value of the parameter is given to the function to which it is
+passed.  These parameters may not be modified by the function.  It is
+also possible to have parameters to a function passed by {\it
+reference}.  This means that the function does not receive a copy of
+the value, but rather the memory location of the value itself.  Thus,
+the function may modify the value of a parameter passed by reference.
 
 The symbol for passing a parameter by reference, both in a function's
 prototype and in a function call, is {\tt <->}.  Constants may not be
-passed by reference.  Reference parameters may be specified anonymously
-just like a value parameter, subject to the usual rules.  It is a run-time
-error to attempt to pass a value to a reference parameter, or vice versa.
+passed by reference.  Reference parameters may be specified
+anonymously just like a value parameter, subject to the usual rules.
+It is a run-time error to attempt to pass a value to a reference
+parameter, or vice versa.
 
 \subsection{Aliases for function calls}
 
 There are several functions which are so commonly used that special
-``short'' forms are defined for them.  Most of these are the
-standard arithmetic and logic operators, for which the usual binary
-infix or unary prefix notations are supported.  Our addition example
-may more familiarly be written
+``short'' forms are defined for them.  Most of these are the standard
+arithmetic and logic operators, for which the usual binary infix or
+unary prefix notations are supported.  Our addition example may more
+familiarly be written
 
 \begin{verbatim}
 1 + 2
@@ -510,8 +521,8 @@ call by the interpreter.  Note that formal names may not be specified
 in a ``short form'' call, and the order of parameters is therefore
 significant.
 
-Here is a list of the functions thus abbreviated, and their ``short form''
-equivalents:
+Here is a list of the functions thus abbreviated, and their ``short
+form'' equivalents:
 
 \medskip
 
@@ -535,7 +546,7 @@ NthChar[text, n]	& text[[n]] \\
 NthChild[node, n]	& node\#n \\ 
 NthElement[list, n]	& list[[n]] \\
 Or[x, y]		& x || y, x OR y \\
-Paren[x]		& (x) \\ 
+Parenthesis[x]		& (x) \\ 
 Plus[x, y]		& x + y \\
 Power[x, y]	 	& x $\wedge$ y \\
 Read[in,x]		& in >> x \\
@@ -547,22 +558,22 @@ Write[out,x]		& out << x \\
 When functions are written in their canonical forms, no ambiguity
 arises in the order of evaluation: In order to evaluate a function,
 all arguments must be evaluated first.  Arguments are evaluated from
-left-to-right as specified in the function call.
-This leads to a recursive structure of evaluation,
-which stops only when an argument being evaluated is a constant
-function (i. e., a function with no arguments).
+left-to-right as specified in the function call.  This leads to a
+recursive structure of evaluation, which stops only when an argument
+being evaluated is a constant function (i. e., a function with no
+arguments).
 
 When short form forms are used, then ambiguity can arise in the
-intended order of evaluation.  For example, the statement \verb&a + b * c&,
-could be meant as \verb+Plus[a,Times[b,c]]+ or as
+intended order of evaluation.  For example, the statement \verb&a + b
+* c&, could be meant as \verb+Plus[a,Times[b,c]]+ or as
 \verb+Times[Plus[a,b],c]+.  In order to resolve such ambiguities, all
 functions that have a short form representation are given an order of
 precedence.  When a statement is parsed by the GCL, it is first
-scanned from left to right, replacing each short form expression at the
-top level of precedence with its canonical form.  Then it is scanned
-again replacing each short form expression at the second level of
-precedence with its canonical form, and so on, until all short form
-expressions have been eliminated.  
+scanned from left to right, replacing each short form expression at
+the top level of precedence with its canonical form.  Then it is
+scanned again replacing each short form expression at the second level
+of precedence with its canonical form, and so on, until all short form
+expressions have been eliminated.
 
 The order of precedence for built-in functions is as follows:
 \bd
@@ -599,13 +610,14 @@ Plus[a,Times[b,c]]
 \noindent
 On the other hand, the statement \verb&( a + b ) * c& would become 
 \begin{verbatim}
-Paren[a+b]*c
-Paren[Plus[a,b]]*c
-Times[Paren[Plus[a,b]],c]
+Parenthesis[a+b]*c
+Parenthesis[Plus[a,b]]*c
+Times[Parenthesis[Plus[a,b]],c]
 \end{verbatim}
 
 \noindent
-which, since \verb+Paren+ is just the identity mapping, is equivalent to
+which, since \verb+Parenthesis+ is just the identity mapping, is
+equivalent to
 \begin{verbatim}
 Times[Plus[a,b],c]
 \end{verbatim}
@@ -615,10 +627,10 @@ Times[Plus[a,b],c]
 \subsection{Flow control structures}
 
 The GCL contains three functions which allow flow control within a
-program.  These functions are ``special'' in that their parameters
-are evaluated in a special way (since their parameters are expressions
-and sequences of statements); they also have no ``formal'' names for
-their parameters.
+program.  These functions are ``special'' in that their parameters are
+evaluated in a special way (since their parameters are expressions and
+sequences of statements); they also have no ``formal'' names for their
+parameters.
 
 \subsubsection{Conditional execution with {\tt If}}
 
@@ -629,12 +641,12 @@ only under certain conditions.  The syntax of the function is
 If[boolean-expression, statement-list {, statement-list}]
 \end{verbatim}
 
-\noindent The function is interpreted as follows: If the 
+\noindent The function is interpreted as follows: If the
 \verb+boolean-expression+ evaluates to \verb+True+, then the first
-list of statements is executed.  If it evaluates to \verb+False+,
-and the second (optional) list of statements is present, that list
-is executed; if it is not present, execution falls through to the
-next statement.
+list of statements is executed.  If it evaluates to \verb+False+, and
+the second (optional) list of statements is present, that list is
+executed; if it is not present, execution falls through to the next
+statement.
 
 For example, the statement
 
@@ -642,9 +654,9 @@ For example, the statement
 If[i = 2, j := 1, j := 2]
 \end{verbatim}
 
-\noindent sets \verb+j+ to \verb+1+ if the value of \verb+i+ is \verb+2+,
-and sets \verb+j+ to \verb+2+ if the value of \verb+i+ is not \verb+2+.
-It would also be perfectly legitimate to write
+\noindent sets \verb+j+ to \verb+1+ if the value of \verb+i+ is
+\verb+2+, and sets \verb+j+ to \verb+2+ if the value of \verb+i+ is
+not \verb+2+.  It would also be perfectly legitimate to write
 
 \begin{verbatim}
 If[i = 2, j := 1]
@@ -665,21 +677,21 @@ statements which result in the definition of new variables.
 
 \subsubsection{Repetitive execution with {\tt While}}
 
-Often in writing programs it is necessary to execute a block of statements
-repeatedly, usually with different values for variables.  To this end
-the GCL provides a special function \verb+While+ as a generalized looping
-construct.  The syntax of the function is
+Often in writing programs it is necessary to execute a block of
+statements repeatedly, usually with different values for variables.
+To this end the GCL provides a special function \verb+While+ as a
+generalized looping construct.  The syntax of the function is
 
 \begin{verbatim}
 While[boolean-expression, statement-list]
 \end{verbatim}
 
-The function is interpreted as follows: While \verb+boolean-expression+
-evalutes to \verb+True+, execute the statements in \verb+statement-list+.
-Note that the evaluation of the boolean takes place at the beginning of
-the execution of a block, so it is only important whether the value is
-\verb+True+ or \verb+False+ at the beginning of the block, and not at
-some point in the middle.
+The function is interpreted as follows: While
+\verb+boolean-expression+ evalutes to \verb+True+, execute the
+statements in \verb+statement-list+.  Note that the evaluation of the
+boolean takes place at the beginning of the execution of a block, so
+it is only important whether the value is \verb+True+ or \verb+False+
+at the beginning of the block, and not at some point in the middle.
 
 This simple loop generates the numbers from one to ten:
 
@@ -688,8 +700,8 @@ i := 0;
 While[i <= 10, i := i + 1];
 \end{verbatim}
 
-\noindent Alternately, one can create a list of the values one through ten with
-a small modification:
+\noindent Alternately, one can create a list of the values one through
+ten with a small modification:
 
 \begin{verbatim}
 i := 1;
@@ -697,17 +709,17 @@ list := { };
 While[i <= 10, list := list + { i }; i := i + 1;]
 \end{verbatim}
 
-As with \verb+If+, be wary of declaring a variable implicitly inside a loop.
-A variable is declared only when the corresponding statement is executed;
-so, if the \verb+boolean-expression+ is \verb+False+ the first time it is
-evaluated, the body of the loop never executes, and no variables which
-appear in the loop are considered to be defined.
+As with \verb+If+, be wary of declaring a variable implicitly inside a
+loop.  A variable is declared only when the corresponding statement is
+executed; so, if the \verb+boolean-expression+ is \verb+False+ the
+first time it is evaluated, the body of the loop never executes, and
+no variables which appear in the loop are considered to be defined.
 
 \subsubsection{Special looping with {\tt For}}
 
-The function \verb+For+ is a specialized looping construct, useful mostly
-in cases where some index variable is used to iterate a list or some sequence.
-The general syntax for \verb+For+ is
+The function \verb+For+ is a specialized looping construct, useful
+mostly in cases where some index variable is used to iterate a list or
+some sequence.  The general syntax for \verb+For+ is
 
 \begin{verbatim}
 For[statement-list, boolean-expression, statement-list, statement-list]
@@ -715,18 +727,19 @@ For[statement-list, boolean-expression, statement-list, statement-list]
 
 \noindent The call is interpreted as follows:
 \begin{itemize}
-\item Execute the statements in
-the first \verb+statement-list+ (this is called the {\em initialization}).
+\item Execute the statements in the first \verb+statement-list+ (this
+is called the {\em initialization}).
 \item Evaluate the \verb+boolean-expression+ (called the {\em guard}).
-\item If the \verb+boolean-expression+ is \verb+False+, terminate the loop and
-continue with the first statement after the loop.  If it is \verb+True+,
-execute the third \verb+statement-list+, called the {\em body} of the loop.
-\item Execute the second \verb+statement-list+, called the {\em increment},
-and return to the evaluation of the guard.
+\item If the \verb+boolean-expression+ is \verb+False+, terminate the
+loop and continue with the first statement after the loop.  If it is
+\verb+True+, execute the third \verb+statement-list+, called the {\em
+body} of the loop.
+\item Execute the second \verb+statement-list+, called the {\em
+increment}, and return to the evaluation of the guard.
 \end{itemize}
 
-Returning to the examples in the \verb+While+ section, we see another way
-of writing the two loops:
+Returning to the examples in the \verb+While+ section, we see another
+way of writing the two loops:
 
 \begin{verbatim}
 For[i := 1, i <= 10, i := i + 1, i];
@@ -735,18 +748,19 @@ For[i := 1, list := { }; i <= 10, list := list + {i}; i := i + 1;]
 \end{verbatim}
 
 \noindent The two methods are completely equivalent, but it is often
-more convenient to use the structure afforded by the \verb+For+ function.
+more convenient to use the structure afforded by the \verb+For+
+function.
 
 
 \section{Advanced topics}
 
 \subsection{Including files}
 
-The function {\tt Include[TEXT]} is used to insert the contents of the file
-given into the input stream, as if they had been typed directly by the user.
-This can be particularly useful in conjunction with user defined functions, in that
-a library of useful functions can be constructed and included into the program
-asily.
+The function {\tt Include[TEXT]} is used to insert the contents of the
+file given into the input stream, as if they had been typed directly
+by the user.  This can be particularly useful in conjunction with user
+defined functions, in that a library of useful functions can be
+constructed and included into the program asily.
 
 The {\tt Include} directive may only appear at the ``top level'' of
 the program.  That is to say, it cannot be used inside a loop,
@@ -756,85 +770,90 @@ in turn includes other files.
   
 \subsection{User defined functions}
 
-As GCL programs become more and more complex, frequently there are complicated
-operations which must be performed repeatedly.  The command language therefore
-supports user-defined functions, which allow for defining sections of code
-which may be called later.
+As GCL programs become more and more complex, frequently there are
+complicated operations which must be performed repeatedly.  The
+command language therefore supports user-defined functions, which
+allow for defining sections of code which may be called later.
 
-A new function can be created using the function
-\verb+NewFunction+.  For example, one might define a function to compute
-the absolute value of an {\tt INTEGER} as such:
+A new function can be created using the function \verb+NewFunction+.
+For example, one might define a function to compute the absolute value
+of an {\tt INTEGER} as such:
 
 \begin{verbatim}
 NewFunction[Abs[n->INTEGER],
-                 If[n > 0, n, If[n < 0, -n, 0]]]
+  If[n > 0, n, If[n < 0, -n, 0]];
+];
 \end{verbatim}
 
-\noindent After defining the \verb+Abs+ function, it may be called in exactly
-the same way a system-supplied predefined function may.  The return value
-of the function is the value of the last statement executed. 
+\noindent After defining the \verb+Abs+ function, it may be called in
+exactly the same way a system-supplied predefined function may.  The
+return value of the function is the value of the last statement
+executed.
 
-Parameter type matching rules apply to user defined functions in exactly the
-same way as to predefined functions.  From the function's point of view,
-the parameter list is a list of variables on which assignments are
-automatically done at the beginning of the function execution.  So, taking
-the \verb+Abs+ example above, in executing the call
+Parameter type matching rules apply to user defined functions in
+exactly the same way as to predefined functions.  From the function's
+point of view, the parameter list is a list of variables on which
+assignments are automatically done at the beginning of the function
+execution.  So, taking the \verb+Abs+ example above, in executing the
+call
 
 \begin{verbatim}
 Abs[42]
 \end{verbatim}
 
-\noindent an assignment \verb+n := 42+ is implicitly performed before the
-body of the function is executed.
+\noindent an assignment \verb+n := 42+ is implicitly performed before
+the body of the function is executed.
 
-It is also possible to pass variables by ``reference'' to a user-defined
-function in the same way as a predefined function.  In this case, the
-function's ``local'' variable is stored in the same physical location in the
-computer, and modifying the value locally also takes effect on the variable
-passed to the function.  For example, it might
-be useful instead to define \verb+Abs+ as:
+It is also possible to pass variables by ``reference'' to a
+user-defined function in the same way as a predefined function.  In
+this case, the function's ``local'' variable is stored in the same
+physical location in the computer, and modifying the value locally
+also takes effect on the variable passed to the function.  For
+example, it might be useful instead to define \verb+Abs+ as:
 
 \begin{verbatim}
 NewFunction[Abs[n<->INTEGER],
 		 If[n > 0, n, If[n < 0, n := -n, 0]]]
 \end{verbatim}
 
-\noindent in which case the function would still return the absolute value
-of \verb+n+, but also modify the variable passed to \verb+n+ to be the
-absolute value of the input \verb+n+.  So,
+\noindent in which case the function would still return the absolute
+value of \verb+n+, but also modify the variable passed to \verb+n+ to
+be the absolute value of the input \verb+n+.  So,
 
 \begin{verbatim}
 q := -37;
 Abs[q]
 \end{verbatim}
 
-\noindent would result in the variable \verb+q+ containing the value 37
-at the conclusion of execution.
+\noindent would result in the variable \verb+q+ containing the value
+37 at the conclusion of execution.
 
-Each function has its own ``scope'', or set of variables.  Within a function
-body, the only variables which are visible are those which are declared
-in the parameter list of the function (this is \verb+n+ in the \verb+Abs+
-example above), and those which are created during the function's execution.
-That is, no ``global'' or outside variables may be accessed directly by the
-function.  For example, if the user typed in the following:
+Each function has its own ``scope'', or set of variables.  Within a
+function body, the only variables which are visible are those which
+are declared in the parameter list of the function (this is \verb+n+
+in the \verb+Abs+ example above), and those which are created during
+the function's execution.  That is, no ``global'' or outside variables
+may be accessed directly by the function.  For example, if the user
+typed in the following:
 
 \begin{verbatim}
 i := 4;
 NewFunction[FooFunc[x->INTEGER], x * i]
 \end{verbatim}
 
-\noindent later execution of the \verb+FooFunc+ would yield an ``undefined
-variable i'' error message, since \verb+i+ is never defined within the
-function.  If instead \verb+FooFunc+ had been defined as follows:
+\noindent later execution of the \verb+FooFunc+ would yield an
+``undefined variable i'' error message, since \verb+i+ is never
+defined within the function.  If instead \verb+FooFunc+ had been
+defined as follows:
 
 \begin{verbatim}
 NewFunction[FooFunc[x->INTEGER], i := 13, x * i]
 \end{verbatim}
 
 \noindent \verb+FooFunc+ would always return 13 times the value of the
-parameter \verb+x+, since the value of \verb+i+ inside \verb+FooFunc+ is
-always 13, regardless of the value of \verb+i+ outside of the function.
-
+parameter \verb+x+, since the value of \verb+i+ inside \verb+FooFunc+
+is always 13, regardless of the value of \verb+i+ outside of the
+function.
 
 \subsection{Lists as arguments to functions}
 
@@ -843,7 +862,7 @@ that if there is a version of the function which takes a type \verb+T+
 as the data type for a parameter, then it can be called with
 \verb+LIST(T)+ as well.  This results in the function generating a
 list of the corresponding length and data type as its output.  For
-example, consider a function 
+example, consider a function
 
 \begin{verbatim}
 Foo[x->T,y->S] =: R
@@ -854,13 +873,13 @@ where \verb+T+, \verb+S+, and \verb+R+ represent arbitrary data types.
 Then if \verb+a+ is a \verb+LIST(T)+, and \verb+b+ is of type
 \verb+S+, then \verb+c := Foo[a,b]+ generates \verb+c+ of type
 \verb+LIST(R)+, where the length of \verb+c+ is equal to the length of
-\verb+a+, and where \verb+c[[i]] = Foo[a[[i]],b]+.  
+\verb+a+, and where \verb+c[[i]] = Foo[a[[i]],b]+.
 
 If \verb+Foo[]+ is called with both \verb+a+ and \verb+b+ being lists
 of the correct data type, then the GCL checks whether the length of
 \verb+a+ and \verb+b+ is the same.  If not, it generates a
-dimensionality error. If they are of the same dimension, then 
-\verb+c := Foo[a,b]+ generates \verb+c+ of type \verb+LIST(R)+, where the
+dimensionality error. If they are of the same dimension, then \verb+c
+:= Foo[a,b]+ generates \verb+c+ of type \verb+LIST(R)+, where the
 length of \verb+c+ is equal to the length of \verb+a+, and where
 \verb+c[[i]] = Foo[a[[i]],b[[i]]]+.
 
@@ -875,8 +894,8 @@ Foo[x->LIST(T),y->LIST(S)] =: LIST(R)
 
 The same rules apply recursively using these function prototypes as
 well.  So if \verb+a+ is of type \verb+LIST(LIST(T))+, and \verb+b+ is
-of type \verb+S+, the command \verb+c := Foo[a, b]+ results in
-a listable call to \verb+Foo[x->LIST(T),y->S]+.  Thus, \verb+c+ is of
+of type \verb+S+, the command \verb+c := Foo[a, b]+ results in a
+listable call to \verb+Foo[x->LIST(T),y->S]+.  Thus, \verb+c+ is of
 type \verb+LIST(LIST(R))+, where \verb+c[[i]] = +
 \verb+Foo[a[[i]],b]+.  Hence, \verb+c[[i]][[j]] = +
 \verb+Foo[a[[i]][[j]],b]+.
@@ -894,7 +913,7 @@ GCL3: a+Transpose[a]
 
 While most functions in the GCL are listable, there are some
 exceptions.  Built in functions that are not listable are noted as
-such in the Function Reference section of this document.  
+such in the Function Reference section of this document.
 
 Listability of functions is a powerful tool of the GCL. Many GCL
 programs using flow control statements can be written using listable
@@ -908,13 +927,13 @@ code, while flow control statements are executed in interpreted code.
 \subsection{Input and Output}
 
 Data can be read from an input stream by the \verb+Read[]+ function.
-So if \verb+in+ is an input stream (i. e., of type \verb+INPUT+) then a
-successful call of \verb+Read[in,x]+ will read the exposed data (see
+So if \verb+in+ is an input stream (i. e., of type \verb+INPUT+) then
+a successful call of \verb+Read[in,x]+ will read the exposed data (see
 function reference for definition of ``exposed data'') from the input
 stream, \verb+in+, assign \verb+x+ to have that type and value, and
 position the file pointer at the end of the exposed data, to be ready
-for the next call of \verb+Read[]+.  \verb+Read[in,x]+ has the short form
-\verb+in >> x+.  Since the return value of \verb+Read[in,x]+ is
+for the next call of \verb+Read[]+.  \verb+Read[in,x]+ has the short
+form \verb+in >> x+.  Since the return value of \verb+Read[in,x]+ is
 \verb+in+, these commands can be chained.  In other words,
 
 \begin{verbatim}
@@ -932,14 +951,15 @@ Read[in,y]
 \noindent
 In the statement \verb+Read[in,x]+, if \verb+x+ is undefined, then its
 data type is determined from the exposed data in the input stream.  On
-the other hand if \verb+x+ is previously defined, then the \verb+Read[]+
-function will expect to find the corresponding data type in the input
-stream, and a file read error will be generated if the exposed data is
-of the wrong data type.  If \verb+x+ is previously defined to be a
-\verb+LIST(T)+, then \verb+Read[in,x]+ will successively read elements into
-each element of the list.  If the wrong data type is found for any
-element of the list, a file read error will be returned.  Thus, if the
-file \verb+"file.out"+ contains the following data
+the other hand if \verb+x+ is previously defined, then the
+\verb+Read[]+ function will expect to find the corresponding data type
+in the input stream, and a file read error will be generated if the
+exposed data is of the wrong data type.  If \verb+x+ is previously
+defined to be a \verb+LIST(T)+, then \verb+Read[in,x]+ will
+successively read elements into each element of the list.  If the
+wrong data type is found for any element of the list, a file read
+error will be returned.  Thus, if the file \verb+"file.out"+ contains
+the following data
 
 \begin{verbatim}
 25 1/3 "This is a text string!" False 3.14159 
@@ -968,8 +988,8 @@ variables.  After the last statement,
 \verb+l+ is a \verb+LIST(LIST(INTEGER))+ with value \verb+{{1,0},{0,1}}+, and 
 \verb+x+ is a \verb+LIST(INTEGER)+ with value \verb+{1,2,3,4,5}+.  
 
-Data can be written to an output stream by the use of the \verb+Write[]+
-function.  Thus, the following commands
+Data can be written to an output stream by the use of the
+\verb+Write[]+ function.  Thus, the following commands
 
 \begin{verbatim}
 out:=Output["file.out"]
@@ -979,19 +999,22 @@ Write[out,y]
 \end{verbatim}
 
 \noindent
-creates an output stream, \verb+out+, and then writes out a \verb+RATIONAL+
-number, followed by a list of two \verb+FLOAT+s.  \verb+Write[out,x]+ has the
-short form \verb+out << x+.  Since the return value of \verb+Write[]+ is
-\verb+out+, these commands can be chained.  So the two lines writing out
-\verb+x+ and \verb+y+ in the above example could be written instead
+creates an output stream, \verb+out+, and then writes out a
+\verb+RATIONAL+ number, followed by a list of two \verb+FLOAT+s.
+\verb+Write[out,x]+ has the short form \verb+out << x+.  Since the
+return value of \verb+Write[]+ is \verb+out+, these commands can be
+chained.  So the two lines writing out \verb+x+ and \verb+y+ in the
+above example could be written instead
 
 \begin{verbatim}
 out << x << y
 \end{verbatim}
  
-The \verb+SetFormat[]+ function can be used to control the formatting of data
-written to an output stream.  Note that the \verb+Read[]+ and \verb+Write[]+
-functions are not listable.
+A series of \verb+SetFormat+ functions (\verb+SetNumericFormat+,
+\verb+SetTextFormat+, \verb+SetListFormat+, \verb+SetSolutionFormat+)
+can be used to control the formatting of data written to an output
+stream.  Note that the \verb+Read[]+ and \verb+Write[]+ functions are
+not listable.
 
 The \verb+Read[]+ and \verb+Write[]+ functions can only be used with
 certain data types (see function documentation).  Reading and writing
@@ -1003,20 +1026,20 @@ of \verb+EFG+ and \verb+NFG+ from external files can be done with the
 
 \subsubsection{Creating a new extensive form}
 
-The function {\tt NewEfg[]} can be used to create a new extensive form game.
-In order to do anything with it, a variable should be created to be
-the new extensive form game.  Thus, the command
+The function {\tt NewEfg[]} can be used to create a new extensive form
+game.  In order to do anything with it, a variable should be created
+to be the new extensive form game.  Thus, the command
 
 \begin{verbatim}
 e := NewEfg[]
 \end{verbatim}
 
-\noindent will create a new extensive form game stored in \verb+e+.  The game 
-is a trivial game with only one node, a \verb+root node+, and one
-player, \verb+chance+.  By default, the game will have its data stored
-as \verb+FLOAT+.  You can create a game whose data is \verb+RATIONAL+,
-and which has two players, named \verb+Fred+ and \verb+Alice+  by
-specifying 
+\noindent will create a new extensive form game stored in \verb+e+.
+The game is a trivial game with only one node, a \verb+root node+, and
+one player, \verb+chance+.  By default, the game will have its data
+stored as \verb+FLOAT+.  You can create a game whose data is
+\verb+RATIONAL+, and which has two players, named \verb+Fred+ and
+\verb+Alice+ by specifying
 
 
 \begin{verbatim}
@@ -1067,13 +1090,13 @@ the command
 SaveEfg[e, "filename.efg" ]
 \end{verbatim}
 
-\noindent where \verb+e+ is the extensive form game, and \verb+filename.efg+ is
-the filename of the file to be created.  It is recommended that the
-filename extension \verb+.efg+ be used when saving extensive form
-games, as the Gambit graphics user interface recognizes this extension
-as containing extensive form games.  Once an extensive form game has
-been saved to an external file, it can be loaded by the command
-\verb+LoadEfg+, as follows:
+\noindent where \verb+e+ is the extensive form game, and
+\verb+filename.efg+ is the filename of the file to be created.  It is
+recommended that the filename extension \verb+.efg+ be used when
+saving extensive form games, as the Gambit graphics user interface
+recognizes this extension as containing extensive form games.  Once an
+extensive form game has been saved to an external file, it can be
+loaded by the command \verb+LoadEfg+, as follows:
 
 \begin{verbatim}
 e := LoadEfg["filename.efg" ]
@@ -1085,18 +1108,18 @@ Gambit implements and supports the concept of a game theoretic
 subgame.  When an extensive form is first created, no subgames (except
 for the default ROOT subgame) are defined.  The function
 \verb+MarkSubgames[]+ can be used to mark all of the subgames in the
-extensive form, and \verb+MarkThisSubgame[]+ can be used to check
-whether a specific node is a subgame root, and mark it if it is.
-Similarly, subgames can be unmarked by using \verb+UnmarkSubgames[]+
-and \verb+UnmarkThisSubgame[]+.  The function \verb+SubgameRoots[]+
-returns a list of all currently marked subgame roots.  
+extensive form, and \verb+MarkSubgame[]+ can be used to check whether
+a specific node is a subgame root, and mark it if it is.  Similarly,
+subgames can be unmarked by using \verb+UnmarkSubgames[]+ and
+\verb+UnmarkSubgame[]+.  The function \verb+Subgames[]+ returns a list
+of all currently marked subgame roots.
 
-All of the solution algorithms (with the current exception of the 
-\verb+GobitSolve[]+ algorithms) make use of the marked subgames.  When non-trivial 
-subgames are marked, then the solution algorithms will solve the 
-extensive form game by recursion through the marked subgames.  Thus, a 
-subgame is solved only when all subgames following it have been 
-solved.  
+All of the solution algorithms (with the current exception of the
+\verb+GobitSolve[]+ algorithms) make use of the marked subgames.  When
+non-trivial subgames are marked, then the solution algorithms will
+solve the extensive form game by recursion through the marked
+subgames.  Thus, a subgame is solved only when all subgames following
+it have been solved.
 
 If all subgames are marked, then any Nash equilibrium found will be a
 subgame perfect Nash equilibrium.  Note that the solution algorithms
@@ -1122,12 +1145,13 @@ n := NewNfg[{3,2,2}]
 \end{verbatim}
 
 \noindent 
-will create a new normal form game stored in \verb+n+, with three players, where
-the first player has three strategies, and the second and third
-players each have two strategies.  The game has zero payoffs in each
-strategy profile.  By default, the game will have its data stored in
-\verb+FLOAT+.  You can create a game whose data is \verb+RATIONAL+
-by specifying the parameter \verb+rational+ to be \verb+True+.
+will create a new normal form game stored in \verb+n+, with three
+players, where the first player has three strategies, and the second
+and third players each have two strategies.  The game has zero payoffs
+in each strategy profile.  By default, the game will have its data
+stored in \verb+FLOAT+.  You can create a game whose data is
+\verb+RATIONAL+ by specifying the parameter \verb+rational+ to be
+\verb+True+.
 
 \subsubsection{Creating a normal form from an extensive form}
 
@@ -1150,15 +1174,20 @@ the command \verb+Behav+.  Thus
 \begin{verbatim}
 n := Nfg[e];
 m := LcpSolve[n];
-b := Behav[m,e]
+b := Behav[m]
 \end{verbatim}
 
 \noindent
 will convert the game \verb+e+ to reduced normal form, solve it using
 the LcpSolve algorithm, and then convert all mixed profiles found back
 to behavior profiles, and display the list, \verb+b+ of behavior
-profiles found. 
+profiles found. The avove can also be done in one command without saving
+intermediate steps as follows:  
   
+\begin{verbatim}
+b := Behav[LcpSolve[Nfg[e]]]
+\end{verbatim}
+
 \subsubsection{Modifying a normal form}
 
 The normal form game payoff editing functions can be used to build up any
@@ -1186,31 +1215,30 @@ SaveNfg[n, "filename.nfg" ]
 
 \noindent
 will save the normal form game \verb+n+ to the file
-\verb+filename.nfg+.  It is recommended that the
-filename extension \verb+.nfg+ be used when saving normal form games, as
-the Gambit Graphics user interface recognizes this extension as
-containing normal form games.  Once a normal form game has been
-saved to an external file, it can be loaded by the command
-\verb+LoadNfg+, as follows:
+\verb+filename.nfg+.  It is recommended that the filename extension
+\verb+.nfg+ be used when saving normal form games, as the Gambit
+Graphics user interface recognizes this extension as containing normal
+form games.  Once a normal form game has been saved to an external
+file, it can be loaded by the command \verb+LoadNfg+, as follows:
 
 \begin{verbatim}
 n := LoadNfg["filename.nfg" ]
 \end{verbatim}
 
-\section{Solving games}
+\section{Solution Algorithms}
 
 \subsection{Enum}
 
 The two {\tt Enum} functions can be used to enumerate the pure or
-mixed Nash equilibria for a normal form game. 
+mixed Nash equilibria for a normal form game.
 
 The {\tt EnumPureSolve} function enumerates all pure strategy Nash
-equilibria in the support of a normal form game.  This
-algorithm simply investigates all pure strategy profiles, checking
-each for the Nash equilibrium conditions.  By default, the algorithm
-finds all pure strategy Nash equilibrium.  Optionally it can be set to
-find the first \verb+k+ Nash equilibria.  This algorithm will work on
-any normal form game.  
+equilibria in the support of a normal form game.  This algorithm
+simply investigates all pure strategy profiles, checking each for the
+Nash equilibrium conditions.  By default, the algorithm finds all pure
+strategy Nash equilibrium.  Optionally it can be set to find the first
+\verb+k+ Nash equilibria.  This algorithm will work on any normal form
+game.
 
 The {\tt EnumMixedSolve} function enumerates all Nash equilibria (pure
 and mixed) for a given support of a two person normal form game.  More
@@ -1358,12 +1386,369 @@ convergence.
 
 \section{Function Reference, by Category}
 
-This section contains a list of functions, organized by
-category.  For a description of each function, and the arguments,
-refer to the following, alphabetically organized, section.
+This section contains a list of functions organized by
+category.  For a description of each function and its arguments,
+refer to the following, alphabetically organized, section.  
 
-{\bf This section was so out of date I took it out and am starting it
-over from scratch.}
+In the following list, functions preceded by a \verb+#+ are {\it user
+defined functions} (UDFs) which are defined in the file
+\verb+stdudfs.gcl+.  All the remaining functions are {\it built-in
+functions} (BIFs).  Among the built-in functions, a small subset,
+those preceeded by a \verb+*+ are ``special'' functions, which do not
+necessarily follow all of the rules of GCL functions.  These functions
+are also not documented by the GCL \verb+Help+ function.  
+
+\subsection{General Functionality}
+
+\subsubsection{Variables and Functions}
+
+\begin{verbatim}
+ *Assign 
+ *UnAssign 
+
+ *NewFunction
+ *DeleteFunction
+
+  Clear 
+ *Include
+ *Quit
+\end{verbatim}
+
+\subsubsection{Flow Control}
+
+\begin{verbatim}
+ *For
+ *If
+ *While
+\end{verbatim}
+
+\subsubsection{Help}
+
+\begin{verbatim}
+  Help 
+  HelpVars 
+  Manual 
+  Version 
+\end{verbatim}
+
+
+\subsubsection{Timing}
+
+\begin{verbatim}
+  Date 
+  IsWatchRunning 
+  ElapsedTime 
+  StartWatch 
+  StopWatch 
+\end{verbatim}
+
+\subsubsection{System information and commands}
+
+\begin{verbatim}
+  ExePath 
+  GetEnv 
+  GetPath 
+  Platform 
+  SetEnv 
+  Shell 
+  UnSetEnv 
+ #GambitExe 
+\end{verbatim}
+
+\subsection{Basic Data Types}
+
+\subsubsection{Logic}
+
+\begin{verbatim}
+  And 
+  Not 
+  Or 
+\end{verbatim}
+
+\subsubsection{Relational operators}
+
+\begin{verbatim}
+  Equal 
+  Greater 
+  GreaterEqual 
+  Less 
+  LessEqual 
+  NotEqual 
+\end{verbatim}
+
+\subsubsection{Mathematical operations}
+
+\begin{verbatim}
+  Divide 
+  Exp 
+  IntegerDivide 
+  Log 
+  Minus 
+  Modulus 
+  Negate 
+  Parenthesis 
+  Plus 
+  Randomize 
+  Power 
+  Times 
+\end{verbatim}
+
+\subsubsection{Strings}
+
+\begin{verbatim}
+  Concat
+  Greater
+  GreaterEqual
+  Less
+  LessEqual
+  NthChar 
+  NumChars 
+  Text
+\end{verbatim}
+
+\subsubsection{Lists}
+
+\begin{verbatim}
+  ArgMax 
+  Concat 
+  Contains 
+  Dot 
+  Filter 
+  Flatten 
+  Length 
+  List 
+  NthElement 
+  Remove 
+  Sort 
+ #Sum 
+  Transpose 
+\end{verbatim}
+
+\subsubsection{Data conversions}
+
+\begin{verbatim}
+  Float 
+  Integer 
+  ListForm 
+  Rational 
+  Text 
+\end{verbatim}
+
+\subsection{Input and Output}
+
+\begin{verbatim}
+ #Display 
+  Input 
+  LoadEfg 
+  LoadNfg 
+  Output 
+  Read 
+  SaveEfg 
+  SaveNfg 
+  SetFormat 
+  Write   
+\end{verbatim}
+
+\subsection{Building Games}
+
+\subsubsection{Extensive form manipulation}
+
+\begin{verbatim}
+  AddAction 
+  AppendNode 
+  AttachOutcome 
+  CompressEfg 
+  CopyTree 
+  DeleteAction 
+  DeleteEmptyInfoset 
+ #DeleteEmptyInfosets 
+  DeleteNode 
+  DeleteOutcome 
+  DeleteTree 
+  DetachOutcome 
+  InsertAction 
+  InsertNode 
+  MergeInfosets 
+  MoveToInfoset 
+  MoveTree 
+  NewEfg 
+  NewInfoset 
+ #NewInfoset 
+  NewOutcome 
+  NewPlayer 
+  Randomize 
+  RemoveAction 
+  Reveal 
+  SetChanceProbs 
+  SetName 
+  SetPayoff 
+ #SetPayoff 
+  Support 
+\end{verbatim}
+
+\subsubsection{Normal form manipulation}
+
+\begin{verbatim}
+  AddStrategy 
+  AgentForm 
+  CompressNfg 
+ #ListForm 
+  NewNfg 
+  NewPlayer 
+  Nfg 
+  Randomize 
+  RemoveStrategy 
+  SetName 
+  SetPayoff 
+  Support 
+\end{verbatim}
+
+\subsubsection{Getting Information}
+
+\begin{verbatim}
+  Actions 
+ #Actions 
+ #AllActions 
+ #AllInfosets 
+ #AllMembers 
+  Centroid 
+ #Centroid 
+  Chance 
+  ChanceProb 
+  Children 
+ #Descendants 
+  Game 
+  Infoset 
+  Infosets 
+ #Infosets 
+  IsConstSum 
+  IsNull 
+  IsPerfectRecall 
+  IsPredecessor 
+ #IsRoot 
+  IsSuccessor 
+  Members 
+ #Members 
+  Mixed
+ #Mixed
+  Name 
+  NextSibling 
+  Nodes 
+ #NonterminalNodes 
+  NthChild 
+ #NumActions 
+ #NumChildren 
+ #NumMembers 
+ #NumPlayers 
+ #NumStrats 
+  Outcome 
+  Outcomes 
+  Parent 
+  Payoff 
+  Player 
+ #PlayerNumber 
+  Players 
+  PriorAction 
+  PriorSibling 
+  RootNode 
+  Strategies 
+ #Strategies 
+ #TerminalNodes 
+\end{verbatim}
+
+\subsection{Solving Games}
+
+\subsubsection{Subgames}
+
+\begin{verbatim}
+  MarkSubgames 
+  MarkSubgame 
+  Subgames 
+  UnmarkSubgames 
+  UnmarkSubgame 
+\end{verbatim}
+
+\subsubsection{Dominance elimination and supports}
+
+\begin{verbatim}
+  Actions
+  AddAction
+  AddStrategy
+ #ElimAllDom 
+  ElimDom 
+ #ElimDom 
+  RemoveAction
+  RemoveStrategy
+  Strategies 
+  Support 
+\end{verbatim}
+
+\subsubsection{Solution algorithms}
+
+\begin{verbatim}
+  EnumMixedSolve 
+ #EnumMixedSolve 
+  EnumPureSolve 
+ #EnumPureSolve 
+  GobitGridSolve 
+  GobitSolve 
+ #GobitSolve 
+  LcpSolve 
+ #LcpSolve 
+  LiapSolve 
+ #LiapSolve 
+  LpSolve 
+ #LpSolve 
+  SimpDivSolve 
+ #SimpDivSolve 
+\end{verbatim}
+
+\subsubsection{Equilibria and refinements}
+
+\begin{verbatim}
+ #AllNash
+ #AllPerfect
+ #AllSubgamePerfect
+ #OneNash
+ #OnePerfect
+ #OneSubgamePerfect
+ #OneSequential
+\end{verbatim}
+
+\subsubsection{Solution Information}
+
+\begin{verbatim}
+  ActionProb 
+ #ActionProbs 
+  ActionValue 
+  Belief 
+  Behav 
+ #Behav 
+  GobitLambda 
+  GobitValue 
+  InfosetProb 
+  IsKnownNash 
+  IsKnownNotNash 
+  IsKnownNotPerfect 
+  IsKnownNotSequential 
+  IsKnownNotSubgamePerfect 
+  IsKnownPerfect 
+  IsKnownSequential 
+  IsKnownSubgamePerfect 
+  LiapValue 
+  Mixed
+ #Mixed
+  NodeValue 
+  Payoff 
+ #Payoff 
+  RealizProb 
+  Regret 
+  SetActionProbs 
+  SetStrategyProbs 
+  StrategyProb 
+ #StrategyProbs 
+\end{verbatim}
+
 
 \section{Function Reference, Alphabetical}
 
@@ -1502,6 +1887,19 @@ extensive form game, or if \verb+node+ is not a terminal node.
 \item [See also:] \verb+InsertNode+, \verb+NewInfoset+.
 \ed
 
+
+
+\item 
+\protect \large \begin{verbatim}
+ArgMax[x->LIST(T)] =: T 
+\end{verbatim} \normalsize
+
+{\it for} {\tt T = INTEGER< FLOAT, RATIONAL} 
+\bd 
+Returns the index of the first element of the list \verb+x+ which
+attains the maximum value of any elements in the list.  
+\ed
+
 \item 
 \protect \large \begin{verbatim}
 Assign[x<->T, value->T*] =: T
@@ -1563,7 +1961,7 @@ of \verb+profile+.
 
 \item
 \protect \large \begin{verbatim}
-Belief[profile->MIXED(T), node->NODE] =: T
+Belief[profile->BEHAV(T), node->NODE] =: T
 \end{verbatim}\normalsize
 
 {\it for} {\tt T = FLOAT, RATIONAL}
@@ -1765,11 +2163,13 @@ deleted.
 
 \item
 \protect \large \begin{verbatim}
-DeleteFunction[function-name[argument-list]]
+*DeleteFunction[function-name[argument-list]]
 \end{verbatim}\normalsize
 
 \bd
 Removes the specified function from the list of user-defined functions.
+\item [Note:] Special function. Not listable; cannot be called inside
+a user defined function; not documented in \verb+Help+ or \verb+Manual+.  
 \item [See also:] \verb+NewFunction+.
 \ed
 
@@ -2024,6 +2424,20 @@ to the null value, but is not equal to any non-null value.
 
 \item
 \protect \large \begin{verbatim}
+ExePath[{file->BOOLEAN},{path->BOOLEAN}] =: TEXT 
+\end{verbatim} \normalsize
+
+\bd
+Returns the path of the GCL executable. 
+\bd
+\item [file:] Returns the file name.  Default is True.  
+\item [path:] Returns the path.  Default is True. 
+\ed
+\item [See also:] \verb+GetPath+.
+\ed
+
+\item
+\protect \large \begin{verbatim}
 Exp[x->FLOAT] =: FLOAT
 \end{verbatim} \normalsize
 
@@ -2089,13 +2503,15 @@ Returns a copy of the game \verb+nfg+ or \verb+efg+ of data type
 
 \item
 \protect \large \begin{verbatim}
-For[statement-list, boolean-expression, 
+*For[statement-list, boolean-expression, 
     statement-list, statement-list]
 \end{verbatim}\normalsize
 
 \bd
 Defines a piece of code to be executed repeatedly.  See the section
 on control structures for complete information.
+\item [Note:] Special function.  Not listable; arguments are not GCl
+data types; not documented in \verb+Help+ or \verb+Manual+.  
 \item
 [See also:] \verb+While+.
 \ed
@@ -2106,6 +2522,7 @@ on control structures for complete information.
 \protect \large \begin{verbatim}
 Game[profile->BEHAV(T)] =: EFG(T)
 Game[player->EFPLAYER] =: EFG(T)
+Game[infoset->INFOSET] =: EFG(T)
 Game[support->EFSUPPORT] =: EFG(T)
 Game[profile->MIXED(T)] =: NFG(T)
 Game[player->NFPLAYER] =: NFG(T)
@@ -2118,6 +2535,31 @@ Game[strategy->STRATEGY] =: NFG(T)
 {\it for} {\tt T = FLOAT, RATIONAL}
 \bd
 Returns the game on which the parameter is defined.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+GetEnv[name->TEXT] =: TEXT
+\end{verbatim} \normalsize
+
+\bd
+Returns the string associated with environment variable \verb+name+.
+\item [See also:] \verb+SetEnv+, \verb+UnSetEnv+.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+GetPath[{file->BOOLEAN},{path->BOOLEAN}] =: TEXT 
+\end{verbatim} \normalsize
+
+\bd
+Returns the path to the file in which the command is included.  Can be
+used to identify Include[] files. 
+\bd
+\item [file:] Returns the file name.  Default is True.  
+\item [path:] Returns the path.  Default is true. 
+\ed
+\item [See also:] \verb+ExePath+, \verb+Include+.
 \ed
 
 \item
@@ -2329,7 +2771,7 @@ machine.
 
 \item
 \protect \large \begin{verbatim}
-Help[x->TEXT] =: LIST(TEXT)
+Help[x->TEXT,{udf->BOOLEAN},{bif->BOOLEAN}] =: LIST(TEXT)
 \end{verbatim}\normalsize
 
 \bd 
@@ -2339,7 +2781,10 @@ a list of corresponding function prototypes is returned.  \verb+x+ can
 also contain the regular-expression style wildcards
 \verb+*+ and \verb+?+.  In this
 case, if there is not an exact match, a list of function names
-matching \verb+x+ is returned.
+matching \verb+x+ is returned.  The parameter \verb+udf+ determines if
+user defined functions are listed, and \verb+bif+ determines if built
+in functions are listed.  Both of these parameters are \verb+True+ by
+default. 
 \item
 [See also:] \verb+HelpVars+, \verb+Manual+.
 \ed
@@ -2362,19 +2807,21 @@ is returned.
 
 \item 
 \protect \large \begin{verbatim}
-If[boolean-expression, statement-list]
-If[boolean-expression, statement-list, statement-list]
+*If[boolean-expression, statement-list]
+*If[boolean-expression, statement-list, statement-list]
 \end{verbatim} \normalsize
   
 \bd
 Defines a block of statements to be executed under certain conditions.
 See the section on control structures for complete information. 
+\item [Note:] Special function.  Not listable; arguments are not GCl
+data types; not documented in \verb+Help+ or \verb+Manual+.  
 \ed
 
 
 \item
 \protect \large \begin{verbatim}
-Include[file->TEXT]
+*Include[file->TEXT]
 \end{verbatim}\normalsize
 
 \bd
@@ -2383,17 +2830,20 @@ in the running GCL program.  The program treats the command as if it
 were replaced by the contents of the file.  \verb+Include+ may only be used
 at the top level, that is, it cannot be used inside of \verb+NewFunction+
 or flow control structures.
+\item [Note:] Special function:  Not listable; cannot be called in a
+user defined function; not documented in \verb+Help+ or \verb+Manual+. 
 \ed
 
-\item
-\protect \large \begin{verbatim}
-Index[list->NLIST(T*), x->T*] =: LIST(T)
-\end{verbatim} \normalsize
 
-{\it for all types} {\tt T}
-\bd
-Returns the list of indices in \verb+list+ where \verb+x+ appears.
-\ed
+%\item
+%\protect \large \begin{verbatim}
+%Index[list->NLIST(T*), x->T*] =: LIST(T)
+%\end{verbatim} \normalsize
+
+%{\it for all types} {\tt T}
+%\bd
+%Returns the list of indices in \verb+list+ where \verb+x+ appears.
+%\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -2457,20 +2907,20 @@ error occurs if the file is not able to be opened.
 [See also:]  \verb+Output+, \verb+Read+.
 \ed
 
-\item
-\protect \large \begin{verbatim}
-Insert[list<->NLIST(T*), x->T*, {n->INTEGER}] =: LIST(T)
-Insert[list<->NLIST(T*), x->NLIST(T*), {n->INTEGER}] =: LIST(T) 
-\end{verbatim}\normalsize
+%\item
+%\protect \large \begin{verbatim}
+%Insert[list<->NLIST(T*), x->T*, {n->INTEGER}] =: LIST(T)
+%Insert[list<->NLIST(T*), x->NLIST(T*), {n->INTEGER}] =: LIST(T) 
+%\end{verbatim}\normalsize
 
-{\it for all types} {\tt T}
-\bd
-Inserts the element \verb+x+ into \verb+list+.  If \verb+n+ is
-unspecified, \verb+x+ is appended to \verb+list+; otherwise, \verb+x+
-is inserted as the \verb+n+th element.  It is an error if \verb+n+ is
-nonpositive, or if \verb+n+ is greater than the length of \verb+list+.
-\item [See also:] \verb+Remove+.
-\ed
+%{\it for all types} {\tt T}
+%\bd
+%Inserts the element \verb+x+ into \verb+list+.  If \verb+n+ is
+%unspecified, \verb+x+ is appended to \verb+list+; otherwise, \verb+x+
+%is inserted as the \verb+n+th element.  It is an error if \verb+n+ is
+%nonpositive, or if \verb+n+ is greater than the length of \verb+list+.
+%\item [See also:] \verb+Remove+.
+%\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -2597,18 +3047,18 @@ equilibrium.
 \item [See also:] \verb+IsKnownSequential+.
 \ed
 
-\item
-\protect \large \begin{verbatim}
-IsKnownNotStrictNash[profile->BEHAV(T)] =: BOOLEAN
-IsKnownNotStrictNash[profile->MIXED(T)] =: BOOLEAN
-\end{verbatim}\normalsize
+%\item
+%\protect \large \begin{verbatim}
+%IsKnownNotStrictNash[profile->BEHAV(T)] =: BOOLEAN
+%IsKnownNotStrictNash[profile->MIXED(T)] =: BOOLEAN
+%\end{verbatim}\normalsize
 
-{\it for} {\tt T = FLOAT, RATIONAL}
-\bd
-Returns \verb+True+ if \verb+profile+ is known by Gambit not to be
-a strict Nash equilibrium.
-\item [See also:] \verb+IsKnownStrictNash+.
-\ed
+%{\it for} {\tt T = FLOAT, RATIONAL}
+%\bd
+%Returns \verb+True+ if \verb+profile+ is known by Gambit not to be
+%a strict Nash equilibrium.
+%\item [See also:] \verb+IsKnownStrictNash+.
+%\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -2656,23 +3106,23 @@ form game which is computed via the \verb+LiapSolve+ or
 \item [See also:] \verb+IsKnownNotSequential+.
 \ed
 
-\item
-\protect \large \begin{verbatim}
-IsKnownStrictNash[profile->BEHAV(T)] =: BOOLEAN
-IsKnownStrictNash[profile->MIXED(T)] =: BOOLEAN
-\end{verbatim}\normalsize
+%\item
+%\protect \large \begin{verbatim}
+%IsKnownStrictNash[profile->BEHAV(T)] =: BOOLEAN
+%IsKnownStrictNash[profile->MIXED(T)] =: BOOLEAN
+%\end{verbatim}\normalsize
 
-{\it for} {\tt T = FLOAT, RATIONAL}
-\bd
-Returns \verb+True+ if \verb+profile+ is known by Gambit to be a strict
-Nash equilibrium of the corresponding game.  If \verb+profile+ is
-complete, there is a definitive test for strict Nash equilibrium.
-However, if the profile is incomplete,then it is possible that a profile
-(or the set of all completions of the profile) may be strict Nash, but
-\verb+IsKnownStrictNash+ returns \verb+False+.  If the answer is not
-known to Gambit, then \verb+IsKnownNotStrictNash+ also returns \verb+False+.
-\item [See also:] \verb+IsKnownNash+, \verb+IsKnownNotStrictNash+.
-\ed
+%{\it for} {\tt T = FLOAT, RATIONAL}
+%\bd
+%Returns \verb+True+ if \verb+profile+ is known by Gambit to be a strict
+%Nash equilibrium of the corresponding game.  If \verb+profile+ is
+%complete, there is a definitive test for strict Nash equilibrium.
+%However, if the profile is incomplete,then it is possible that a profile
+%(or the set of all completions of the profile) may be strict Nash, but
+%\verb+IsKnownStrictNash+ returns \verb+False+.  If the answer is not
+%known to Gambit, then \verb+IsKnownNotStrictNash+ also returns \verb+False+.
+%\item [See also:] \verb+IsKnownNash+, \verb+IsKnownNotStrictNash+.
+%\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -2689,6 +3139,16 @@ perfect.  However, any Nash equilibrium of an extensive form game which
 is computed when all subgames are marked will only return a subgame
 perfect equilibrium.  
 \item [See also:] \verb+IsKnownNotSubgamePerfect+.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+IsNull[x->T*] =: BOOLEAN
+\end{verbatim}\normalsize
+
+{\it for any type } {\tt T}.
+\bd
+Returns \verb+True+ if x is a NULL object of type \verb+T+.  
 \ed
 
 \item
@@ -2715,7 +3175,7 @@ in the tree of the node \verb+of+.  A node is considered its own predecessor.
 
 \item
 \protect \large \begin{verbatim}
-IsRoot[node->NODE] =: BOOLEAN
+#IsRoot[node->NODE] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -2968,6 +3428,17 @@ it defaults to 1; if \verb+delta+ is unspecified, it defaults to 0.
 
 \item
 \protect \large \begin{verbatim}
+ListForm[nfg<->NFG(T)] =: NLIST(T)
+\end{verbatim}\normalsize
+
+{\it for} {\tt T = FLOAT, RATIONAL}
+\bd
+Converts a normal form game to a nested list of type T.  
+\item [See also:] \verb+Nfg+.
+\ed
+
+\item
+\protect \large \begin{verbatim}
 LoadEfg[file->TEXT] =: EFG(T)
 \end{verbatim}\normalsize
 
@@ -3049,12 +3520,14 @@ output at all.
 
 \item
 \protect \large \begin{verbatim}
-Manual[x->TEXT] =: TEXT
+Manual[x->TEXT,{y->OUTPUT}] =: TEXT
 \end{verbatim} \normalsize
 
-\bd
+\bd 
 Returns the manual entry for the function \verb+x+.  If there is no
-entry for \verb+x+, the empty string is returned. 
+entry for \verb+x+, the empty string is returned. The parameter
+\verb+y+, which is the null output by default, can be used to print
+the manual entry to an output stream.
 \item [See also:] \verb+Help+, \verb+HelpVars+.
 \ed
 
@@ -3074,14 +3547,37 @@ if \verb+node+ was marked as a subgame (i.e., if it is the root of a subgame).
 
 \item
 \protect \large \begin{verbatim}
-MarkedSubgames[efg->EFG(T)] =: LIST(NODE)
+#MarkSubgames[efg->EFG(T)] =: LIST(NODE)
+\end{verbatim} \normalsize
+
+{\it for} {\tt T = FLOAT, RATIONAL} 
+
+\bd 
+Marks all the nodes in \verb+efg+ which are roots of subgames.  The
+subgame marking is used in solution computation. Returns a list of the
+marked nodes. 
+\item [See also:] \verb+MarkSubgame+, \verb+Subgames+, \verb+UnmarkSubgame+.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+MarkedSubgame[node->NODE] =: BOOLEAN
+\end{verbatim} \normalsize
+
+\bd
+Returns \verb+True+ if \verb+node+ is currently marked as a subgame. 
+\item [See also:] \verb+MarkSubgame+, \verb+Subgames+, \verb+UnmarkSubgame+.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+#MarkedSubgames[efg->EFG(T)] =: LIST(NODE)
 \end{verbatim} \normalsize
 
 {\it for} {\tt T = FLOAT, RATIONAL}
 \bd
 Returns the list of nodes currently marked as roots of subgames in
-\verb+efg+.  The list is ordered such that all children of a node
-that appear in the list appear before the node itself.
+\verb+efg+.  
 \item [See also:] \verb+MarkSubgame+, \verb+Subgames+, \verb+UnmarkSubgame+.
 \ed
 
@@ -3107,6 +3603,7 @@ Moves all the nodes from \verb+infoset2+ into \verb+infoset1+.
 It is an error if the number of actions is not the same at the
 two information sets, or if the information sets are not from the
 same extensive form game.  \verb+infoset1+ is returned.
+\item [See also:] \verb+MoveToInfoset+.
 \ed
 
 \item 
@@ -3156,6 +3653,21 @@ Computes the remainder from dividing \verb+y+ into \verb+x+.  It is an
 error if \verb+y+ is zero.
 \item [Short form:] \verb+x MOD y+
 \item [See also:] \verb+IntegerDivide+.
+\ed
+
+
+\item
+\protect \large \begin{verbatim}
+MoveToInfoset[node->NODE, infoset->INFOSET] =: NODE
+\end{verbatim}\normalsize
+
+\bd
+Removes \verb+node+ from it's current information set, and makes it a
+member of \verb+infoset+. It is an error if the number of actions at
+\verb+node+ is not the same as the number of actions in
+\verb+infoset+, or if \verb+node+ and \verb+infoset+ are from
+different extensive form games.   
+\item [See also:] \verb+MergeInfosets+.
 \ed
 
 
@@ -3221,13 +3733,15 @@ with the empty string.  Returns the newly created game.
 
 \item   
 \protect \large \begin{verbatim}
-NewFunction[name[argument-list], body]
+*NewFunction[name[argument-list], body]
 \end{verbatim}\normalsize
 
 \bd
 Creates a new function.  The function may be called exactly
 as if it were a predefined function of the command language.  See the
 section on user-defined functions for more detailed information.
+\item [Note:]  Special function.  Not listable, cannot be called in a
+user defined function; not documented in \verb+Help+ or \verb+Manual+.  
 \item [See also:] \verb+DeleteFunction+.
 \ed
 
@@ -3262,6 +3776,19 @@ No initialization of the payoffs of the game is done.
 The parameter \verb+name+ specifies the name of the game; by default,
 the game is named with the empty string.
 Returns the newly created game.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+NewNfg[payoffs->NLIST(T)] =: NFG(T) 
+\end{verbatim}\normalsize
+
+{\it for} {\tt T = FLOAT, RATIONAL} 
+\bd 
+Creates an \verb+n+ person normal form game from a \verb&n+1&
+dimensional nested list of payoffs.  It is an error if the array of payoffs
+is not rectangular.  Returns the newly created game.
+\item [See also:] \verb+ListForm+
 \ed
 
 \item
@@ -3315,6 +3842,18 @@ Creates and returns the (structural) reduced normal form game equivalent
 to the extensive form game \verb+efg+.  The optional parameter \verb+time+,
 if specified, contains upon completion the amount of time consumed by
 the transformation.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+Nodes[efg->EFG] =: LIST(NODE)
+\end{verbatim}\normalsize
+
+\bd
+Returns a list of nodes of the extensive form game \verb+efg+.  The
+list is in {\it indexed traversal} order.  This is the order that is
+imposed by a lexicographic ordering of the nodes when each node is
+identified by the sequence of branch numbers taken to reach it.  
 \ed
 
 \item
@@ -3398,6 +3937,16 @@ than the number of elements in \verb+list+.
 
 \item
 \protect \large \begin{verbatim}
+Null[x->T] =: T*
+\end{verbatim}\normalsize
+
+{\it for any type } {\tt T}.
+\bd
+Returns a null object of type \verb+T+.  
+\ed
+
+\item
+\protect \large \begin{verbatim}
 NumChars[text->TEXT] =: INTEGER
 \end{verbatim}\normalsize
 
@@ -3470,7 +4019,7 @@ or if \verb+node+ is null, the null node is returned.
 
 \item
 \protect \large \begin{verbatim}
-Parentheses[x->T] =: T
+Parenthesis[x->T] =: T
 \end{verbatim}\normalsize
 
 {\it for all types} {\tt T}
@@ -3539,6 +4088,19 @@ Payoff[profile->MIXED(T), player->NFPLAYER] =: T
 Returns the payoff to \verb+player+ in a normal form game if all players
 follow \verb+profile+.  It is an error if \verb+profile+ and \verb+player+
 are not from the same normal form game.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+Platform[] =: TEXT
+\end{verbatim} \normalsize
+
+\bd 
+Returns a string identifying the platform that the GCL is
+currently running on.  Can be used in user defined functions to define
+system dependent variables, such as pathnames and command lines for
+shell commands.  
+\item [See also:] \verb+Shell+.
 \ed
 
 \item
@@ -3632,11 +4194,13 @@ no prior sibling, the null node is returned.
 
 \item
 \protect \large \begin{verbatim}
-Quit
+*Quit
 \end{verbatim}\normalsize
 
 \bd
-Exits the command language.
+Exits the command language.  
+\item [notes:] Special function:  Typed without \verb+[ ]+, not
+listable; not documented in \verb+Help+ or \verb+Manual+.  
 \ed
 
 %--R--
@@ -3664,9 +4228,21 @@ Randomize[nfg<->NFG, {seed->INTEGER}] =: NFG
 Assigns a payoff for each contingency for each player in
 the normal form \verb+nfg+ randomly chosen from the uniform distribution
 between 0 and 1.  The optional parameter \verb+seed+ may be used to
-set hte seed of the pseudo-random number generator.  The identical game
+set the seed of the pseudo-random number generator.  The identical game
 randomized with the same seed on the same machine will always produce
 the same results.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+Randomize[x->T, {seed->INTEGER}] =: T
+\end{verbatim}\normalsize
+
+\bd
+Returns a random number of type \verb+T+.  If \verb+x+ is of type
+\verb+INTEGER+, the return value is uniform between 1 and
+\verb+MAXINT=214748367+.  For \verb+x+ of type \verb+RATIONAL+ or
+\verb+FLOAT+, the return value is uniform between zero and one.  
 \ed
 
 \item
@@ -3888,8 +4464,18 @@ An error occurs if \verb+infoset+ does not belong to the chance player.
 
 \item
 \protect \large \begin{verbatim}
+SetEnv[name->TEXT, value->TEXT] =: TEXT
+\end{verbatim} \normalsize
+
+\bd
+Sets the environment variable \verb+name+.
+\item [See also:] \verb+GetEnv+, \verb+UnSetEnv+.
+\ed
+
+\item
+\protect \large \begin{verbatim}
 SetListFormat[{braces->BOOLEAN}, {commas->BOOLEAN},
-              {LF->INTEGER}, {indent->INTEGER}] =: BOOLEAN
+              {lf->INTEGER}, {indent->INTEGER}] =: BOOLEAN
 \end{verbatim} \normalsize
 
 \bd
@@ -3897,11 +4483,11 @@ Sets the formatting style for output of lists on output streams.
 \bd
 \item [braces:] If \verb+True+, lists are delimited by braces.
 \item [commas:] If \verb+True+, elements are delimited by commas.
-\item [LF:] Number of levels of list that are displayed with a line feed.
+\item [lf:] Number of levels of list that are displayed with a line feed.
 \item [indent:] Number of spaces to indent each level of a list.
 \ed
 \item [See also:] \verb+SetNumericFormat+, \verb+SetTextFormat+,
-\verb+Write+.
+\verb+SetSolutionFormat+, \verb+Write+.
 \ed
 
 \item
@@ -3933,7 +4519,8 @@ numbers.
 \item [expmode:] If \verb+True+, floating point numbers are printed in
 exponential format.
 \ed
-\item [See also:] \verb+SetListFormat+, \verb+SetTextFormat+, \verb+Write+.
+\item [See also:] \verb+SetListFormat+, \verb+SetTextFormat+, 
+\verb+SetSolutionFormat+, \verb+Write+.
 \ed
 
 \item
@@ -3964,6 +4551,22 @@ Returns \verb+profile+.
 \item [See also:] \verb+Payoff+.
 \ed
 
+\item
+\protect \large \begin{verbatim}
+SetSolutionFormat[{info->INTEGER}] =: BOOLEAN
+\end{verbatim}\normalsize
+
+\bd
+Sets the formatting style for output of solution types on output streams.
+\bd
+\item [info:] The amount of information to be displayed.  A value of 1
+displays just the strategy or action probabilities.  A value of 2
+displays all of the information about the solution. 
+\ed
+\item [See also:] \verb+SetListFormat+, \verb+SetTextFormat+, 
+\verb+SetNumericFormat+, \verb+Write+.
+\ed
+
 \item 
 \protect \large \begin{verbatim}
 SetStrategyProbs[profile<->MIXED(T), player->NFPLAYER,
@@ -3982,16 +4585,32 @@ support of \verb+profile+.  Returns \verb+profile+.
 
 \item
 \protect \large \begin{verbatim}
-SetTextFormat[{quotes->BOOLEAN}] =: BOOLEAN
+SetTextFormat[{quote->BOOLEAN}] =: BOOLEAN
+\end{verbatim}\normalsize
+
+\bd
+Sets the formatting style for output of text on output streams.
+\bd
+\item [quote:] Whether opening and closing quotation marks are
+written.  The default is True.  
+\ed
+\item [See also:] \verb+SetListFormat+, \verb+SetSolutionFormat+, 
+\verb+SetNumericFormat+, \verb+Write+.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+Shell[{command->}, {spawn->True}] =: INTEGER
 \end{verbatim} \normalsize
 
 \bd
-Sets the formatting style for output of strings on output streams.
+Runs a child process.  
 \bd
-\item [quotes:] If \verb+True+, strings are surrounded by quotes.
+\item [command:] A text string to be executed by the shell.  
+\item [spawn:] Specifies whether to run in the foreground or
+background.  Default is to run in the background.  
 \ed
-\item [See also:] \verb+SetListFormat+, \verb+SetNumericFormat+,
-\verb+Write+.
+\item [See also:] \verb+Platform+.
 \ed
 
 \item
@@ -4239,9 +4858,32 @@ UnmarkSubgame[node->NODE] =: BOOLEAN
 Unmark \verb+node+ as being the root of a subgame for use in later
 computation.  If \verb+node+ is not marked as a subgame root, or if
 \verb+node+ is the root node, this function has no effect.  Returns
-\verb+True+ is \verb+node+ is a subgame root.
+\verb+True+ if \verb+node+ is a subgame root.
 \item [See also:] \verb+MarkSubgame+, \verb+MarkedSubgames+,
 \verb+Subgames+.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+#UnmarkSubgames[efg<->EFG] =: LIST(NODE) 
+\end{verbatim}\normalsize
+
+\bd 
+Unmarks all non trivial subgames in \verb+efg+.  Returns a list of
+roots of currently marked subgames, which will be a singleton list
+containing the root node of \verb+efg+ if the function is successful.
+\item [See also:] \verb+MarkSubgame+, \verb+MarkedSubgames+,
+\verb+Subgames+.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+UnSetEnv[name->TEXT] =: TEXT
+\end{verbatim} \normalsize
+
+\bd
+Un sets the environment variable \verb+name+.
+\item [See also:] \verb+SetEnv+, \verb+GetEnv+.
 \ed
 
 %--V--
@@ -4259,12 +4901,14 @@ Returns the version number of the command language.
 
 \item 
 \protect \large \begin{verbatim}
-While[boolean-expression, statement-list]
+*While[boolean-expression, statement-list]
 \end{verbatim} \normalsize
   
 \bd
 Defines a block of statements to be executed repeatedly.
 See the section on control structures for complete information.
+\item [Note:] Special function.  Not listable; arguments are not GCl
+data types; not documented in \verb+Help+ or \verb+Manual+.  
 \item
 [See also:] \verb+For+.
 \ed
@@ -4440,7 +5084,7 @@ moves, to check various theoretical predictions.
     n:=Nfg[e];
     s:=ElimAllDom[n,strong->True];
     m:=EnumMixedSolve[s,stopAfter->0];
-    b:=Behav[m,e];
+    b:=Behav[m];
   ];
 
   // Create seven stage holdout game
