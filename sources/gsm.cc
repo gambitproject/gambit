@@ -286,6 +286,9 @@ bool GSM::Assign( void )
   else // ( p1->Type() != porREFERENCE )
   {
     gerr << "GSM Error: no reference found to be assigned\n";
+    delete p1;
+    delete p2;
+    _Stack->Push( new Error_Portion );
     result = false;
   }
   return result;
@@ -462,21 +465,6 @@ bool GSM::_BinaryOperation( OperationMode mode )
 
   if( p1->Type() == p2->Type() )
   {
-    // SPECIAL CASE HANDLING - gInteger divisions that produce gRational types
-    if( mode == opDIVIDE && p1->Type() == porINTEGER )
-    {
-      Portion* np1;
-      Portion* np2;
-      np1 = new numerical_Portion<gRational>
-	( (gRational) ( (numerical_Portion<gInteger>*) p1 )->Value() );
-      np2 = new numerical_Portion<gRational>
-	( (gRational) ( (numerical_Portion<gInteger>*) p2 )->Value() );
-      delete p1;
-      delete p2;
-      p1 = np1;
-      p2 = np2;
-    }
-
     // Main operations dispatcher
     result = p1->Operation( p2, mode );
 
@@ -580,9 +568,6 @@ bool GSM::Divide ( void )
 bool GSM::Negate( void )
 { return _UnaryOperation( opNEGATE ); }
 
-
-bool GSM::IntegerDivide ( void )
-{ return _BinaryOperation( opINTEGER_DIVIDE ); }
 
 bool GSM::Modulus ( void )
 { return _BinaryOperation( opMODULUS ); }
@@ -999,9 +984,10 @@ bool GSM::CallFunction( void )
 //                       Execute function
 //----------------------------------------------------------------------------
 
-bool GSM::Execute( gList< Instruction* >& program )
+GSM_ReturnCode GSM::Execute( gList< Instruction* >& program )
 {
-  bool result;
+  GSM_ReturnCode result = rcSUCCESS;
+  bool instr_success;
   bool done = false;
   Portion *p;
   Instruction *instruction;
@@ -1015,9 +1001,11 @@ bool GSM::Execute( gList< Instruction* >& program )
     switch( instruction->Type() )
     {
     case iQUIT:
-      result = true;
+      instr_success = true;
+      result = rcQUIT;
       done = true;
       break;
+
     case iIF_GOTO:
       p = _Stack->Pop();
       if( p->Type() == porBOOL )
@@ -1032,33 +1020,35 @@ bool GSM::Execute( gList< Instruction* >& program )
 	  program_counter++;
 	}
 	delete p;
-	result = true;
+	instr_success = true;
       }
       else
       {
 	gerr << "GSM Error: IfGoto called on a unsupported data type\n";
 	_Stack->Push( p );
 	program_counter++;
+	instr_success = false;
       }
       break;
 
     case iGOTO:
       program_counter = ( (Goto*) instruction )->WhereTo();
       assert( program_counter >= 1 && program_counter <= program_length );
-      result = true;
+      instr_success = true;
       break;
 
     default:
-      result = instruction->Execute( *this );
+      instr_success = instruction->Execute( *this );
       program_counter++;
     }
 
-    if( result == false )
+    if( !instr_success )
     {
       gerr << "GSM Error: instruction #" << program_counter;
       gerr << ": " << instruction << "\n";
       gerr << "           was not executed successfully\n";
       gerr << "           Program abnormally terminated.\n";
+      result = rcFAIL;
       break;
     }
   }

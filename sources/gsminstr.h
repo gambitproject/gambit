@@ -32,7 +32,7 @@ typedef enum
   iASSIGN, iUNASSIGN, iSUBSCRIPT,
 
   iADD, iSUB, iMUL, iDIV, iNEG,
-  iINT_DIV, iMOD,
+  iMOD,
 
   iEQU, iNEQ, iGTN, iLTN, iGEQ, iLEQ,
 
@@ -230,13 +230,6 @@ class Neg : public Instruction
 
 //----------------------------- integer math operators -------------------
 
-class IntDiv : public Instruction
-{
- public:
-  Opcode Type( void ) const;
-  bool Execute( GSM &gsm ) const;
-  void Output( gOutput& s ) const;
-};
 
 class Mod : public Instruction
 {

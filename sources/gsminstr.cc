@@ -202,13 +202,6 @@ void Neg::Output( gOutput& s ) const
 
 //---------------------------- integer math operators ---------------------
 
-Opcode IntDiv::Type( void ) const
-{ return iINT_DIV; }
-bool IntDiv::Execute( GSM &gsm ) const
-{ return gsm.IntegerDivide(); }
-void IntDiv::Output( gOutput& s ) const
-{ s << "IntDiv"; }
-
 
 Opcode Mod::Type( void ) const
 { return iMOD; }

@@ -72,7 +72,10 @@ void Portion::MakeCopyOfData( Portion* p )
 bool Portion::Operation( Portion* p, OperationMode mode )
 {
   gerr << "Portion Error: attempted to execute an unsupported operation\n";
-  assert(0);
+  if( p !=0 )
+  {
+    delete p;
+  }
   return false;
 }
 
@@ -147,31 +150,39 @@ template <class T>
       _Value *= p_value;
       break;
     case opDIVIDE:
-      _Value /= p_value;
-      break;
-
-    case opINTEGER_DIVIDE:
-      if( Type() == porINTEGER )
+      if( p_value != 0 )
       {
 	_Value /= p_value;
       }
       else
       {
-	result = Portion::Operation( p, mode );
+	gerr << "Portion Error: division by zero\n";
+	_Value = 0;
+	result = false;
       }
       break;
+
     case opMODULUS:
-      if( Type() == porINTEGER )
+      if( p_value != 0 )
       {
-	// This is coded as is because the compiler complains when 
-	// instantiating for double and gRational types 
-        // if the % operator is used.  This version is about as fast as
-        // the original C operator %.
-	_Value = _Value - _Value / p_value * p_value;
+	if( Type() == porINTEGER )
+	{
+	  // This is coded as is because the compiler complains when 
+	  // instantiating for double and gRational types 
+	  // if the % operator is used.  This version is about as fast as
+	  // the original C operator %.
+	  _Value = _Value - _Value / p_value * p_value;
+	}
+	else
+	{
+	  result = Portion::Operation( p, mode );
+	}
       }
       else
       {
-	result = Portion::Operation( p, mode );
+	gerr << "Portion Error: division by zero\n";
+	_Value = 0;
+	result = false;
       }
       break;
 
@@ -536,6 +547,7 @@ int List_Portion::Insert( Portion* item, int index )
     {
       gerr << "Portion Error: attempted to insert conflicting Portion types\n";
       gerr << "               into a List_Portion.\n";
+      delete item;
       result = 0;
     }
     else

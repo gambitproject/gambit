@@ -211,31 +211,6 @@ Portion* GSM_Negate( Portion** param )
 //--------------------------------------------------------------------
 
 
-Portion* GSM_IntegerDivide( Portion** param )
-{
-  Portion* result = 0;
-
-  if( param[ 0 ]->Type() != param[ 1 ]->Type() )
-    return 0;
-  
-  switch( param[ 0 ]->Type() )
-  {
-  case porINTEGER:
-    ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() /=
-      ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value();
-    break;
-
-  default:
-    delete param[ 0 ];
-    param[ 0 ] = 0;
-  }
-
-  delete param[ 1 ];
-  result = param[ 0 ];
-  return result;
-}
-
-
 Portion* GSM_Modulus( Portion** param )
 {
   Portion* result = 0;
@@ -651,13 +626,6 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetParamInfo( 0, "x", porNUMERICAL, NO_DEFAULT_VALUE );
   gsm->AddFunction( FuncObj );
 
-
-
-
-  FuncObj = new FuncDescObj( (gString) "IntegerDivide", GSM_IntegerDivide, 2 );
-  FuncObj->SetParamInfo( 0, "x", porINTEGER, NO_DEFAULT_VALUE );
-  FuncObj->SetParamInfo( 1, "y", porINTEGER, NO_DEFAULT_VALUE );
-  gsm->AddFunction( FuncObj );
 
   FuncObj = new FuncDescObj( (gString) "Modulus", GSM_Modulus, 2 );
   FuncObj->SetParamInfo( 0, "x", porINTEGER, NO_DEFAULT_VALUE );

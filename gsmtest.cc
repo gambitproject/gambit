@@ -6,9 +6,15 @@
 #include "rational.h"
 #include "gstring.h"
 
+
+
+#undef CRASHTEST
+
+
+
 int main( void )
 {
-  bool result;
+  GSM_ReturnCode result;
   char cont;
   int i;
   double d_1 = (double) 7.5;
@@ -765,7 +771,7 @@ int main( void )
   gout << "EqualTo\n";
   machine->Push( "hi!" );
   machine->Push( "hello!" );
-  machine->InitCallFunction( "EqualTo" );
+  machine->InitCallFunction( "Equal" );
   machine->Bind();
   machine->Bind();
   machine->CallFunction();
@@ -773,7 +779,7 @@ int main( void )
 
   machine->Push( "hi!" );
   machine->Push( "hello!" );
-  machine->InitCallFunction( "NotEqualTo" );
+  machine->InitCallFunction( "NotEqual" );
   machine->Bind();
   machine->Bind();
   machine->CallFunction();
@@ -781,7 +787,7 @@ int main( void )
 
   machine->Push( "hi!" );
   machine->Push( "hello!" );
-  machine->InitCallFunction( "GreaterThan" );
+  machine->InitCallFunction( "Greater" );
   machine->Bind();
   machine->Bind();
   machine->CallFunction();
@@ -789,7 +795,7 @@ int main( void )
 
   machine->Push( "hi!" );
   machine->Push( "hello!" );
-  machine->InitCallFunction( "LessThan" );
+  machine->InitCallFunction( "Less" );
   machine->Bind();
   machine->Bind();
   machine->CallFunction();
@@ -797,7 +803,7 @@ int main( void )
 
   machine->Push( "hi!" );
   machine->Push( "hello!" );
-  machine->InitCallFunction( "GreaterThanOrEqualTo" );
+  machine->InitCallFunction( "GreaterEqual" );
   machine->Bind();
   machine->Bind();
   machine->CallFunction();
@@ -805,7 +811,7 @@ int main( void )
 
   machine->Push( "hi!" );
   machine->Push( "hello!" );
-  machine->InitCallFunction( "LessThanOrEqualTo" );
+  machine->InitCallFunction( "LessEqual" );
   machine->Bind();
   machine->Bind();
   machine->CallFunction();
@@ -815,7 +821,7 @@ int main( void )
   gout << "AND\n";
   machine->Push( true );
   machine->Push( false );
-  machine->InitCallFunction( "AND" );
+  machine->InitCallFunction( "And" );
   machine->Bind();
   machine->Bind();
   machine->CallFunction();
@@ -823,7 +829,7 @@ int main( void )
 
   machine->Push( true );
   machine->Push( false );
-  machine->InitCallFunction( "OR" );
+  machine->InitCallFunction( "Or" );
   machine->Bind();
   machine->Bind();
   machine->CallFunction();
@@ -831,7 +837,7 @@ int main( void )
 
   machine->Push( true );
   machine->Push( false );
-  machine->InitCallFunction( "NOT" );
+  machine->InitCallFunction( "Not" );
   machine->Bind();
   machine->CallFunction();
   machine->Dump();
@@ -858,10 +864,10 @@ int main( void )
 
   machine->Push( (gInteger) 6 );
   machine->Push( (gInteger) 5 );
-  machine->IntegerDivide();
+  machine->Divide();
   machine->Dump();
 
-  machine->InitCallFunction( "IntegerDivide" );
+  machine->InitCallFunction( "Divide" );
   machine->Push( (gInteger) 6 );
   machine->Bind();
   machine->Push( (gInteger) 5 );
@@ -883,10 +889,6 @@ int main( void )
 
 
   gout << "Testing Instructions:\n";
-  program.Append( new Push<gInteger>( 6 ) );
-  program.Append( new Push<gInteger>( 5 ) );
-  program.Append( new IntDiv );
-  program.Append( new Dump );
 
   program.Append( new Push<gInteger>( 6 ) );
   program.Append( new Push<gInteger>( 5 ) );
@@ -965,7 +967,7 @@ int main( void )
   gin >> cont;
 
   
-  machine->InitCallFunction( "Add" );
+  machine->InitCallFunction( "Plus" );
   machine->Push( (double) 12 );
   machine->Bind( "y" );
   machine->Push( (double) 13 );
@@ -973,7 +975,7 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
-  machine->InitCallFunction( "Add" );
+  machine->InitCallFunction( "Plus" );
   machine->Push( (double) 12 );
   machine->Bind( "x" );
   machine->Push( (double) 13 );
@@ -981,7 +983,7 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
-  machine->InitCallFunction( "Add" );
+  machine->InitCallFunction( "Plus" );
   machine->Push( (double) 12 );
   machine->Bind( "x" );
   machine->Push( (double) 13 );
@@ -989,7 +991,7 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
-  machine->InitCallFunction( "Add" );
+  machine->InitCallFunction( "Plus" );
   machine->Push( (double) 12 );
   machine->Bind();
   machine->Push( (double) 13 );
@@ -997,7 +999,7 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
-  machine->InitCallFunction( "Add" );
+  machine->InitCallFunction( "Plus" );
   machine->Push( (double) 12 );
   machine->Bind();
   machine->Push( (double) 13 );
@@ -1009,6 +1011,136 @@ int main( void )
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
+
+
+
+
+
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 10 );
+  for( i = 1; i <= 9; i++ )
+  {
+    machine->Push( (gInteger) i );
+  }
+  machine->PushList( 10 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 0 );
+  machine->Subscript();
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 9 );
+  machine->Subscript();
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 10 );
+  machine->Subscript();
+  machine->PushRef( "x" );
+  machine->Push( (double) 6 );
+  machine->Subscript();  
+  machine->Dump();
+
+
+
+
+#ifdef CRASHTEST
+  machine->Push( (double) 10 );
+  machine->Push( (double) 11 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Push( (double) 10 );
+  machine->Push( (double) 11 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Push( (double) 10 );
+  machine->Add();
+  machine->Push( (double) 11 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->PushRef( "y" );
+  machine->Add();
+  machine->Push( (double) 10 );
+  machine->Add();
+  machine->Push( (double) 11 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->PushRef( "x1" );
+  machine->PushRef( "x2" );
+  machine->PushRef( "x3" );
+  machine->PushRef( "x4" );
+  machine->PushRef( "x5" );
+  machine->PushList( 5 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) -2 );
+  machine->Subscript();
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 5 );
+  machine->Subscript();
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 7 );
+  machine->Subscript();
+  machine->Dump();
+  
+#endif
+
+
+
+
+#ifdef CRASHTEST
+  machine->PushRef( "x" );
+  machine->Push( (double) 10 );
+  for( i = 1; i <= 9; i++ )
+  {
+    machine->Push( (gInteger) i );
+  }
+  machine->PushList( 9 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 0 );
+  machine->Subscript();
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 9 );
+  machine->Subscript();
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 10 );
+  machine->Subscript();
+  machine->PushRef( "x" );
+  machine->Push( (double) 6 );
+  machine->Subscript();  
+  machine->Dump();
+#endif
+
+
+
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
 
 
   machine->InitCallFunction( "Assign" );
@@ -1060,9 +1192,8 @@ int main( void )
   machine->Dump();
 
   machine->PushRef( "z" );
-  machine->Output();
   machine->PushRef( "z", "a" );
-  machine->Output();
+  machine->Dump();
 
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "q" );
@@ -1072,10 +1203,11 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
+#ifdef CRASHTEST
   machine->PushRef( "q" );
-  machine->Output();
   machine->PushRef( "q", "a" );
-  machine->Output();
+  machine->Dump();
+#endif
 
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "q", "b" );
@@ -1086,9 +1218,8 @@ int main( void )
   machine->Dump();
 
   machine->PushRef( "q" );
-  machine->Output();
   machine->PushRef( "q", "b" );
-  machine->Output();
+  machine->Dump();
 
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "z", "a" );
@@ -1097,7 +1228,6 @@ int main( void )
   machine->Bind();
   machine->CallFunction();
   machine->Dump();
-
 
   program.Append( new InitCallFunction( "Assign" ) );
   program.Append( new PushRef( "z", "a" ) );
@@ -1109,38 +1239,7 @@ int main( void )
   machine->Execute( program );
 
 
-/*
-  machine->PushRef( "x" );
-  machine->Push( (double) 10 );
-  for( i = 0; i < 9; i++ )
-  {
-    machine->Push( (gInteger) i );
-  }
-  machine->PushList( 9 );
-  machine->Assign();
-  machine->Dump();
-
-  machine->PushRef( "x" );
-  machine->Push( (gInteger) 3 );
-  machine->Subscript();
-  machine->Dump();
-
-  machine->PushRef( "x" );
-  machine->Push( (gInteger) 0 );
-  machine->Subscript();
-  machine->PushRef( "x" );
-  machine->Push( (gInteger) 9 );
-  machine->Subscript();
-  machine->PushRef( "x" );
-  machine->Push( (gInteger) 10 );
-  machine->Subscript();
-  machine->PushRef( "x" );
-  machine->Push( (double) 6 );
-  machine->Subscript();  
-  machine->Dump();
-*/
-
-
+#ifdef CRASHTEST
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x", "a" );
   machine->Bind();
@@ -1148,8 +1247,9 @@ int main( void )
   machine->Bind();
   machine->CallFunction();
   machine->Dump();
+#endif
 
-
+#ifdef CRASHTEST
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x" );
   machine->Bind();
@@ -1163,6 +1263,23 @@ int main( void )
   machine->Push( (double) 11 );
   machine->Bind();
   machine->CallFunction();
+  machine->Dump();
+#endif
+
+
+
+  machine->Push( (gInteger) 0 );
+  machine->Push( (gInteger) 0 );
+  machine->Divide();
+  machine->Push( (gRational) 0 );
+  machine->Push( (gRational) 0 );
+  machine->Divide();
+  machine->Push( (double) 0 );
+  machine->Push( (double) 0 );
+  machine->Divide();
+  machine->Push( (gInteger) 0 );
+  machine->Push( (gInteger) 0 );
+  machine->Modulus();
   machine->Dump();
 
 

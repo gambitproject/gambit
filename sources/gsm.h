@@ -18,6 +18,10 @@
 
 
 
+typedef enum { rcFAIL, rcSUCCESS, rcQUIT } GSM_ReturnCode;
+
+
+
 class FunctionHashTable;
 class Instruction;
 
@@ -79,7 +83,6 @@ class GSM
   bool Divide   ( void );
   bool Negate   ( void );
 
-  bool IntegerDivide ( void );
   bool Modulus      ( void );
 
   bool EqualTo              ( void );
@@ -107,7 +110,7 @@ class GSM
   bool BindRef          ( const gString& param_name );
   bool CallFunction     ( void );
 
-  bool Execute( gList< Instruction* >& program );
+  GSM_ReturnCode Execute( gList< Instruction* >& program );
      
   bool Pop ( void );
 
