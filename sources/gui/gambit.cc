@@ -58,14 +58,19 @@ bool GambitApp::OnInit(void)
 		       wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
 		       2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
 		       wxSIMPLE_BORDER | wxSTAY_ON_TOP);
+#ifdef __WXMSW__
+  wxYield();
+#else  // !__WXMSW__
   while (splash->IsShown()) {
     wxYield();
   }
+#endif  // !__WXMSW__
 
   efgGame *efg = new efgGame;
   efg->NewPlayer()->SetName("Player 1");
   efg->NewPlayer()->SetName("Player 2");
   efg->SetTitle("Untitled Extensive Form Game");
+
   EfgShow *efgShow = new EfgShow(*efg, 0);
   efgShow->SetFilename("");
   AddGame(efg, efgShow);
