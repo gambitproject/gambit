@@ -7,36 +7,45 @@
 #ifndef DLELIM_H
 #define DLELIM_H
 
-typedef enum {
-  elimWEAK = 0, elimSTRONG = 1
-} elimStrengthType;
-
-typedef enum {
-  elimPURE = 0, elimMIXED = 1
-} elimMethodType;
-
-class dialogElim : public guiAutoDialog {
+class dialogElimMixed : public guiAutoDialog {
 private:
   wxListBox *m_playerBox;
-  wxCheckBox *m_allBox, *m_compressBox;
+  wxCheckBox *m_allBox;
   wxRadioBox *m_domTypeBox, *m_domMethodBox, *m_domPrecisionBox;
-  bool m_mixed;
 
   const char *HelpString(void) const { return ""; }
   
 public:
-  dialogElim(const gArray<gText> &p_players, bool p_mixed,
-	     wxWindow *p_parent = NULL);
-  virtual ~dialogElim();
+  dialogElimMixed(wxWindow *, const gArray<gText> &p_players);
+  virtual ~dialogElimMixed();
 
   gArray<int> Players(void) const;
-  bool Compress(void) const { return m_compressBox->GetValue(); }
 
-  bool FindAll(void) const { return m_allBox->GetValue(); }
+  bool Iterative(void) const { return m_allBox->GetValue(); }
   bool DomStrong(void) const { return (m_domTypeBox->GetSelection() == 1); }
   bool DomMixed(void) const { return (m_domMethodBox->GetSelection() == 1); }
   gPrecision Precision(void) const
     { return (m_domPrecisionBox->GetSelection() == 0) ? precDOUBLE : precRATIONAL; }
+};
+
+class dialogElimBehav : public guiAutoDialog {
+private:
+  wxListBox *m_playerBox;
+  wxCheckBox *m_allBox;
+  wxRadioBox *m_domTypeBox, *m_domConditionalBox;
+
+  const char *HelpString(void) const { return ""; }
+  
+public:
+  dialogElimBehav(wxWindow *, const gArray<gText> &p_players);
+  virtual ~dialogElimBehav();
+
+  gArray<int> Players(void) const;
+
+  bool Iterative(void) const { return m_allBox->GetValue(); }
+  bool DomStrong(void) const { return (m_domTypeBox->GetSelection() == 1); }
+  bool DomConditional(void) const 
+    { return (m_domConditionalBox->GetSelection() == 0); }
 };
 
 #endif   // DLELIM_H

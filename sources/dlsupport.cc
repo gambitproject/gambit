@@ -16,21 +16,22 @@
 const char *SOLN_SECT = "Soln-Defaults";
 
 //=========================================================================
-//                  class dialogElim: Member functions
+//               class dialogElimMixed: Member functions
 //=========================================================================
 
-dialogElim::dialogElim(const gArray<gText> &p_players, bool p_mixed,
-		       wxWindow *p_parent /* = NULL */)
-  : guiAutoDialog(p_parent, "Dominance Elimination Parameters"),
-    m_mixed(p_mixed)
+dialogElimMixed::dialogElimMixed(wxWindow *p_parent,
+				 const gArray<gText> &p_players)
+  : guiAutoDialog(p_parent, "Dominance Elimination Parameters")
 {
   Bool all = FALSE;
   int domType = 0, domMethod = 0, domPrecision = 0;
-  wxGetResource(SOLN_SECT, "ElimDom-All", &all, gambitApp.ResourceFile());
-  wxGetResource(SOLN_SECT, "ElimDom-Type", &domType, gambitApp.ResourceFile());
-  wxGetResource(SOLN_SECT, "ElimDom-Method", &domMethod,
+  wxGetResource(SOLN_SECT, "ElimDom-Mixed-All", &all,
 		gambitApp.ResourceFile());
-  wxGetResource(SOLN_SECT, "ElimDom-Precision", &domPrecision,
+  wxGetResource(SOLN_SECT, "ElimDom-Mixed-Type", &domType,
+		gambitApp.ResourceFile());
+  wxGetResource(SOLN_SECT, "ElimDom-Mixed-Method", &domMethod,
+		gambitApp.ResourceFile());
+  wxGetResource(SOLN_SECT, "ElimDom-Mixed-Precision", &domPrecision,
 		gambitApp.ResourceFile());
 
   m_allBox = new wxCheckBox(this, 0, "Eliminate iteratively");
@@ -41,13 +42,6 @@ dialogElim::dialogElim(const gArray<gText> &p_players, bool p_mixed,
   m_allBox->GetConstraints()->width.AsIs();
   m_allBox->GetConstraints()->height.AsIs();
 					
-  m_compressBox = new wxCheckBox(this, 0, "Compress");
-  m_compressBox->SetConstraints(new wxLayoutConstraints);
-  m_compressBox->GetConstraints()->top.SameAs(m_allBox, wxTop);
-  m_compressBox->GetConstraints()->left.SameAs(m_allBox, wxRight, 10);
-  m_compressBox->GetConstraints()->width.AsIs();
-  m_compressBox->GetConstraints()->height.AsIs();
-
   char *domTypeList[2] = {"Weak", "Strong"};
   m_domTypeBox = new wxRadioBox(this, NULL, "Type", 1, 1, -1, -1, 2,
 				domTypeList, 1);
@@ -81,11 +75,6 @@ dialogElim::dialogElim(const gArray<gText> &p_players, bool p_mixed,
   m_domPrecisionBox->GetConstraints()->width.AsIs();
   m_domPrecisionBox->GetConstraints()->height.AsIs();
 
-  if (!m_mixed) {
-    m_domMethodBox->Show(FALSE);
-    m_domPrecisionBox->Show(FALSE);
-  }
-
   m_playerBox = new wxListBox(this, NULL, "Players", wxMULTIPLE);
   for (int pl = 1; pl <= p_players.Length(); pl++) {
     m_playerBox->Append(ToText(pl) + ": " + p_players[pl]);
@@ -115,21 +104,121 @@ dialogElim::dialogElim(const gArray<gText> &p_players, bool p_mixed,
   Go();
 }
 
-dialogElim::~dialogElim()
+dialogElimMixed::~dialogElimMixed()
 {
   if (Completed() == wxOK) {
-    wxWriteResource(SOLN_SECT, "ElimDom-All", 
+    wxWriteResource(SOLN_SECT, "ElimDom-Mixed-All", 
 		    m_allBox->GetValue(), gambitApp.ResourceFile());
-    wxWriteResource(SOLN_SECT, "ElimDom-Type", m_domTypeBox->GetSelection(),
-		    gambitApp.ResourceFile());
-    wxWriteResource(SOLN_SECT, "ElimDom-Method",
+    wxWriteResource(SOLN_SECT, "ElimDom-Mixed-Type",
+		    m_domTypeBox->GetSelection(), gambitApp.ResourceFile());
+    wxWriteResource(SOLN_SECT, "ElimDom-Mixed-Method",
 		    m_domMethodBox->GetSelection(), gambitApp.ResourceFile());
-    wxWriteResource(SOLN_SECT, "ElimDom-Precision",
+    wxWriteResource(SOLN_SECT, "ElimDom-Mixed-Precision",
 		    m_domPrecisionBox->GetSelection(), gambitApp.ResourceFile());
   }
 }
 
-gArray<int> dialogElim::Players(void) const
+gArray<int> dialogElimMixed::Players(void) const
+{
+  gBlock<int> players;
+  for (int i = 1; i <= m_playerBox->Number(); i++) {
+    if (m_playerBox->Selected(i-1)) {
+      players.Append(i);
+    }
+  }
+  return players;
+}
+
+//=========================================================================
+//                  class dialogElimBehav: Member functions
+//=========================================================================
+
+dialogElimBehav::dialogElimBehav(wxWindow *p_parent, 
+				 const gArray<gText> &p_players)
+  : guiAutoDialog(p_parent, "Dominance Elimination Parameters")
+{
+  Bool all = FALSE;
+  int domType = 0, domConditional = 0;
+  wxGetResource(SOLN_SECT, "ElimDom-Behav-All", &all,
+		gambitApp.ResourceFile());
+  wxGetResource(SOLN_SECT, "ElimDom-Behav-Type", &domType,
+		gambitApp.ResourceFile());
+  wxGetResource(SOLN_SECT, "ElimDom-Behav-Conditional", &domConditional,
+		gambitApp.ResourceFile());
+
+  m_allBox = new wxCheckBox(this, 0, "Eliminate iteratively");
+  m_allBox->SetValue(all);
+  m_allBox->SetConstraints(new wxLayoutConstraints);
+  m_allBox->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_allBox->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_allBox->GetConstraints()->width.AsIs();
+  m_allBox->GetConstraints()->height.AsIs();
+					
+  char *domTypeList[2] = {"Weak", "Strong"};
+  m_domTypeBox = new wxRadioBox(this, NULL, "Type", 1, 1, -1, -1, 2,
+				domTypeList, 1);
+  if (domType == 0 || domType == 1)
+    m_domTypeBox->SetSelection(domType);
+  m_domTypeBox->SetConstraints(new wxLayoutConstraints);
+  m_domTypeBox->GetConstraints()->top.SameAs(m_allBox, wxBottom, 10);
+  m_domTypeBox->GetConstraints()->left.SameAs(m_allBox, wxLeft);
+  m_domTypeBox->GetConstraints()->width.AsIs();
+  m_domTypeBox->GetConstraints()->height.AsIs();
+  
+  char *domConditionalList[2] = {"Conditional", "Unconditional" };
+  m_domConditionalBox = new wxRadioBox(this, NULL, "Conditional",
+				     -1, -1, -1, -1, 2,
+				     domConditionalList, 1);
+  if (domConditional == 0 || domConditional == 1)
+    m_domConditionalBox->SetSelection(domConditional);
+  m_domConditionalBox->SetConstraints(new wxLayoutConstraints);
+  m_domConditionalBox->GetConstraints()->top.SameAs(m_domTypeBox, wxTop);
+  m_domConditionalBox->GetConstraints()->left.SameAs(m_domTypeBox, wxRight, 10);
+  m_domConditionalBox->GetConstraints()->width.AsIs();
+  m_domConditionalBox->GetConstraints()->height.AsIs();
+
+  m_playerBox = new wxListBox(this, NULL, "Players", wxMULTIPLE);
+  for (int pl = 1; pl <= p_players.Length(); pl++) {
+    m_playerBox->Append(ToText(pl) + ": " + p_players[pl]);
+    m_playerBox->SetSelection(pl - 1, TRUE);
+  }
+  m_playerBox->SetConstraints(new wxLayoutConstraints);
+  m_playerBox->GetConstraints()->top.SameAs(m_domTypeBox, wxBottom, 10);
+  m_playerBox->GetConstraints()->left.SameAs(m_domTypeBox, wxLeft);
+  m_playerBox->GetConstraints()->right.SameAs(m_domConditionalBox, wxRight);
+  m_playerBox->GetConstraints()->height.AsIs();
+  
+  m_okButton->GetConstraints()->top.SameAs(m_playerBox, wxBottom, 10);
+  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
+
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->centreX.SameAs(m_playerBox, wxCentreX);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
+
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_helpButton->GetConstraints()->height.AsIs();
+
+  Go();
+}
+
+dialogElimBehav::~dialogElimBehav()
+{
+  if (Completed() == wxOK) {
+    wxWriteResource(SOLN_SECT, "ElimDom-Behav-All", 
+		    m_allBox->GetValue(), gambitApp.ResourceFile());
+    wxWriteResource(SOLN_SECT, "ElimDom-Behav-Type",
+		    m_domTypeBox->GetSelection(),  gambitApp.ResourceFile());
+    wxWriteResource(SOLN_SECT, "ElimDom-Behav-Conditional",
+		    m_domConditionalBox->GetSelection(), gambitApp.ResourceFile());
+  }
+}
+
+gArray<int> dialogElimBehav::Players(void) const
 {
   gBlock<int> players;
   for (int i = 1; i <= m_playerBox->Number(); i++) {

@@ -1457,22 +1457,24 @@ void EfgShow::SupportUndominated(void)
   gArray<gText> playerNames(ef.NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++)
     playerNames[pl] = ef.Players()[pl]->GetName();
-  dialogElim dialog(playerNames, false, this);
+  dialogElimBehav dialog(this, playerNames);
 
   if (dialog.Completed() == wxOK) {
     EFSupport *sup = cur_sup;
     wxStatus status(this, "Dominance Elimination");
 
     try {
-      if (dialog.FindAll()) {
-	while ((sup = sup->Undominated(dialog.DomStrong(), false,
+      if (dialog.Iterative()) {
+	while ((sup = sup->Undominated(dialog.DomStrong(),
+				       dialog.DomConditional(),
 				       dialog.Players(), gnull, status)) != 0) {
 	  sup->SetName(UniqueSupportName());
 	  supports.Append(sup);
 	}
       }
       else {
-	if ((sup = sup->Undominated(dialog.DomStrong(), false, 
+	if ((sup = sup->Undominated(dialog.DomStrong(),
+				    dialog.DomConditional(),
 				    dialog.Players(), gnull, status)) != 0) {
 	  sup->SetName(UniqueSupportName());
 	  supports.Append(sup);
@@ -1481,7 +1483,7 @@ void EfgShow::SupportUndominated(void)
     }
     catch (gSignalBreak &E) { }
     
-    if (dialog.Compress() && cur_sup != sup) {
+    if (cur_sup != sup) {
       cur_sup = supports[supports.Length()]; // displaying the last created support
       tw->SupportChanged();
     }

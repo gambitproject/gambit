@@ -990,7 +990,7 @@ int NfgShow::SolveElimDom(void)
   gArray<gText> playerNames(nf.NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++)
     playerNames[pl] = nf.Players()[pl]->GetName();
-  dialogElim dialog(playerNames, true, spread);
+  dialogElimMixed dialog(spread, playerNames);
 
   if (dialog.Completed() == wxOK) {
     NFSupport *sup = cur_sup;
@@ -998,7 +998,7 @@ int NfgShow::SolveElimDom(void)
 
     try {
       if (!dialog.DomMixed()) {
-	if (dialog.FindAll()) {
+	if (dialog.Iterative()) {
 	  while ((sup = sup->Undominated(dialog.DomStrong(), 
 					 dialog.Players(), gnull, status)) != 0) {
 	    sup->SetName(UniqueSupportName());
@@ -1014,7 +1014,7 @@ int NfgShow::SolveElimDom(void)
 	}
       }
       else {
-	if (dialog.FindAll()) {
+	if (dialog.Iterative()) {
 	  while ((sup = sup->MixedUndominated(dialog.DomStrong(), precRATIONAL,
 					      dialog.Players(),
 					      gnull, status)) != 0) {
@@ -1034,7 +1034,7 @@ int NfgShow::SolveElimDom(void)
     }
     catch (gSignalBreak &) { }
 
-    if (dialog.Compress() && cur_sup != sup) {
+    if (cur_sup != sup) {
       cur_sup = supports[supports.Length()]; // displaying the last created support
       SetPlayers(pl1, pl2);
     }
