@@ -472,6 +472,7 @@ void NfgShow::OnFileSave(wxCommandEvent &p_event)
     gFileOutput file(m_filename.c_str());
     nfg = CompressNfg(m_nfg, *m_currentSupport);
     nfg->WriteNfgFile(file, 6);
+    m_nfg.SetIsDirty(false);
     delete nfg;
   }
   catch (gFileOutput::OpenFailed &) {

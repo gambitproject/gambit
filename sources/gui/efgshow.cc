@@ -399,6 +399,7 @@ void EfgShow::OnOutcomesEdited(void)
   for (int i = 1; i <= m_profiles.Length(); i++) {
     m_profiles[i].Invalidate();
   }
+  m_treeWindow->RefreshLabels();
   m_treeWindow->Refresh();
   m_outcomeWindow->UpdateValues();
   m_profileTable->UpdateValues();
@@ -751,6 +752,7 @@ void EfgShow::OnFileSave(wxCommandEvent &p_event)
     gFileOutput file(m_filename);
     efg = CompressEfg(m_efg, *GetSupport());
     efg->WriteEfgFile(file, 6);
+    m_efg.SetIsDirty(false);
     delete efg;
   }
   catch (gFileOutput::OpenFailed &) {
