@@ -132,6 +132,14 @@ Portion *GSM_ReadNfg(Portion **param)
     return 0;
 }
 
+Portion *GSM_WriteNfg(Portion **param)
+{
+  NormalForm<double> *N = &((Nfg_Portion<double> *) param[0])->Value();
+  gOutput *f = &((Stream_Portion *) param[1])->Value();
+
+  N->WriteNfgFile(*f);
+  return new numerical_Portion<gInteger>(1);
+}
 
 void Init_nfgfunc(GSM *gsm)
 {
@@ -197,6 +205,11 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_ReadNfg, 0, "file",	porSTRING, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("WriteNfg");
+  FuncObj->SetFuncInfo(GSM_WriteNfg, 2);
+  FuncObj->SetParamInfo(GSM_WriteNfg, 0, "N", porNFG_DOUBLE, NO_DEFAULT_VALUE);
+  FuncObj->SetParamInfo(GSM_WriteNfg, 1, "f", porSTREAM, NO_DEFAULT_VALUE);
+  gsm->AddFunction(FuncObj);
 }
 
 

@@ -26,7 +26,7 @@ Behav_List_Portion<double>::Behav_List_Portion(ExtForm<double> *E,
 //
 // GobitEfg: Parameter assignments:
 // 0   E            EFG 
-// 1   pxifile      TEXT
+// 1   pxifile      STREAM
 // 2   minLam       *DOUBLE
 // 3   maxLam       *DOUBLE
 // 4   delLam       *DOUBLE
@@ -40,10 +40,7 @@ Portion *GSM_GobitEfg(Portion **param)
 {
   EFGobitParams<double> EP;
  
-  gFileOutput f(((gString_Portion *) param[1])->Value());
-
-  if (f.IsValid())    EP.pxifile = &f;
-
+  EP.pxifile = &((Stream_Portion *) param[1])->Value();
   EP.minLam = ((numerical_Portion<double> *) param[2])->Value();
   EP.maxLam = ((numerical_Portion<double> *) param[3])->Value();
   EP.delLam = ((numerical_Portion<double> *) param[4])->Value();
@@ -77,8 +74,13 @@ Portion *GSM_ReadEfg(Portion **param)
   
   if (f.IsValid())   {
     ExtForm<double> *E = new ExtForm<double>;
+
     ReadEfgFile(f, E);
-    return new Efg_Portion<double>(*E);
+
+    if (E)
+      return new Efg_Portion<double>(*E);
+    else
+      return 0;
   }
   else
     return 0;
@@ -87,14 +89,10 @@ Portion *GSM_ReadEfg(Portion **param)
 Portion *GSM_WriteEfg(Portion **param)
 {
   ExtForm<double> *E = &((Efg_Portion<double> *) param[0])->Value();
-  gFileOutput f(((gString_Portion *) param[1])->Value());
+  gOutput &f = ((Stream_Portion *) param[1])->Value();
   
-  if (f.IsValid())   {
-    E->WriteEfgFile(f);
-    return new Efg_Portion<double>(*E);
-  }
-  else
-    return 0;
+  E->WriteEfgFile(f);
+  return new Efg_Portion<double>(*E);
 }
 
 template <class T> int BuildReducedNormal(const ExtForm<T> &,
@@ -167,19 +165,19 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("ReadEfg");
   FuncObj->SetFuncInfo(GSM_ReadEfg, 1);
-  FuncObj->SetParamInfo(GSM_ReadEfg, 0, "file", porSTRING, NO_DEFAULT_VALUE);
+  FuncObj->SetParamInfo(GSM_ReadEfg, 0, "f", porSTRING, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("WriteEfg");
   FuncObj->SetFuncInfo(GSM_WriteEfg, 2);
   FuncObj->SetParamInfo(GSM_WriteEfg, 0, "E", porEFG_DOUBLE, NO_DEFAULT_VALUE);
-  FuncObj->SetParamInfo(GSM_WriteEfg, 1, "file", porSTRING, NO_DEFAULT_VALUE);
+  FuncObj->SetParamInfo(GSM_WriteEfg, 1, "f", porSTREAM, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GobitEfg");
   FuncObj->SetFuncInfo(GSM_GobitEfg, 10);
   FuncObj->SetParamInfo(GSM_GobitEfg, 0, "E", porEFG_DOUBLE, NO_DEFAULT_VALUE);
-  FuncObj->SetParamInfo(GSM_GobitEfg, 1, "pxifile", porSTRING, NO_DEFAULT_VALUE);
+  FuncObj->SetParamInfo(GSM_GobitEfg, 1, "pxifile", porSTREAM, NO_DEFAULT_VALUE);
   FuncObj->SetParamInfo(GSM_GobitEfg, 2, "minLam", porDOUBLE,
 		        new numerical_Portion<double>(.01));
   FuncObj->SetParamInfo(GSM_GobitEfg, 3, "maxLam", porDOUBLE,
