@@ -29,7 +29,7 @@ int main()
     edgelist[i].node2 = edgelist1[i].node2;
   }
   EnumCliques clique(edgelist,MAXINP1,MAXINP2);
-  return 0 ;
+  return 1 ;
 }
 
 // =============== end main =============== 
@@ -345,8 +345,8 @@ void EnumCliques::genincidence(
      *n == number of columns
      */
 {
-  gArray<int> newnode1(maxinp1) ;
-  gArray<int> newnode2(maxinp2) ;
+  gArray<int> newnode1(0,maxinp1-1) ;
+  gArray<int> newnode2(0,maxinp2-1) ;
   int i,j, newi, newj ;
   
   // init newnode 
@@ -419,7 +419,7 @@ int EnumCliques::getconnco(gArray<int> &firstedge,
   */
 {
   int numco, newedge ;
-  gArray<int> co1(maxinp1), co2(maxinp2);   // components of node1,2  
+  gArray<int> co1(0,maxinp1-1), co2(0,maxinp2-1);   // components of node1,2  
   int i, j;  // indices to left and right nodes 
   
   // initialize  component indices of left and right nodes 
