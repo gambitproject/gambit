@@ -9,14 +9,14 @@
 #
 # Executable is named gcl_$(SYSNAME), or gui_$(SYSNAME), where 
 # $(SYSNAME) is a platform specific identifier, (eg gcl_Linux 
-# or gui_SunOS_sun4m).
+# or gui_SunOS_5.6).
 #
 # Object files are put in platform specific subdirectories so that 
 # the same source directory can be used for multiple platforms.  
 # 
-# This Makefile requires 'make.filelist' to exist in the same directory
+# This Makefile requires 'make.filelist' to exist in the same directory.
 # 'make.filelist' contains the current file list, and defines
-# the 'SOURCE' and 'OBJECT' variables. 
+# the 'ALLGCL_OBJECT' and 'ALLGUI_OBJECTS' variables. 
 #
 # The Makefile also requires the subdirectory ./fake to exist. This
 # subdirectory contains "fake" (empty)  wxwin and system header
@@ -25,22 +25,34 @@
 # Do 'cvs co -d. gambit/sources' in your gambit/sources directory to 
 # initialize the ./fake (and other subdirectories) needed by the makefile
 #
+# Note: If files are moved or renamed, this makefile can get "stuck".  
+#       In this case do 'rm *.d' or 'make clean'
 
-.SUFFIXES:   $(.SUFFIXES) .cc
+# define compiler and flags
+
+CC = g++ 
+CFLAGS = -O2 -Wall -DGDOUBLE -D__NO_MATH_INLINES -Dwx_motif $(DEFINES) \
+	-fguiding-decls -fno-implicit-templates $(INCDIR) 
+
+# define variable for system name.  
 
 ifeq ($(shell uname -s), SunOS)
-SYSNAME = $(shell uname -s)_$(shell uname -m)
+SYSNAME = $(shell uname -s)_$(shell uname -r)
 else
 SYSNAME = $(shell uname -s)
 endif
 
+# define directory where object files are put
+
 OBJDIR = obj_$(SYSNAME)
-
 vpath %.o  $(OBJDIR)
-vpath %.h  fake
 
-.cc.o:
+# rule for creating .o (object) files from .cc files
+
+%.o: %.cc
 	$(CC) $(CFLAGS) -c $< -o $(OBJDIR)/$@
+
+# rule for creating .d (dependency) files from .cc files
 
 %.d: %.cc
 	@echo updating dependencies: $@
@@ -48,36 +60,57 @@ vpath %.h  fake
 		| sed '\''s/\($*\)\.o[ :]*/\1.o $@ : /g'\'' > $@; \
 		[ -s $@ ] || rm -f $@'
 
-CC = g++ 
-CFLAGS = -O2 -Wall -DGDOUBLE -D__NO_MATH_INLINES -Dwx_motif \
-	-fguiding-decls -fno-implicit-templates $(INCDIR) 
+# Note: everything from here to 'EndNote' (as well as all gui targets) 
+#       can be removed if only gcl targets are used 
 
-# Generic WxWin information
+# Generic WxWin information:
+# 
+#   WXINCDIR = location of wxwin include files
+#   WXLIBDIR = location of wxwin libraries
+#   WXLIB    = any wx libraries used
+
 WXDIR = /home/mill/gambit/wxwin
-WXLIBDIR = -L$(WXDIR)/lib -L/usr/local/X11/lib -L/usr/X11/lib
+WXLIBDIR = -L$(WXDIR)/lib
 WXINCDIR = -I$(WXDIR)/include/base -I$(WXDIR)/include/x 
 WXLIB = -lwx_motif_$(SYSNAME)
 
-# Site Specific information
+# Site Specific information:
+#
+#   DEFINES = any compiler defines needed 
+#   XINCDIR = location of X include files
+#   XLIBDIR = location of X libraries
+#   XLIB    = any X libraries used
 
-ifeq ($(SYSNAME), SunOS_sun4m)
+ifeq ($(SYSNAME), SunOS_5.6)
 XINCDIR = -I/usr/local/X11R6.4/include/X11
 XLIBDIR = -L/usr/local/X11R6.4/lib 
 XLIB = -lsocket -lnsl -lX11 -lXm -lXt -lgen -lm
 else 
+ifeq ($(SYSNAME), HP-UX)
+DEFINES = -D_HPUX_SOURCE -DSVR4
+XINCDIR = -I/usr/include/X11R5 -I/usr/include/Motif1.2
+XLIBDIR = -L/usr/lib/X11R5 -L/usr/lib/Motif1.2
+XLIB = -lXm -lXt -lX11 -lc -lm -lg++
+else 
 XINCDIR = -I/usr/local/include/X11
 XLIBDIR = -L/usr/local/X11/lib -L/usr/X11/lib
 XLIB = -lX11 -lXm -lXp -lXext -lXt -lm
+endif
 endif
 
 # Combine the site dependent and independent data
 
 LIBDIR = $(WXLIBDIR) $(XLIBDIR)
 INCDIR = $(WXINCDIR) $(XINCDIR) -Ibitmaps
-
 GUILIBS = $(WXLIB) $(XLIB)
 
-# Include the list of source files:
+# EndNote 
+
+# Include the list of files, which defines
+#
+# ALLGCL_SOURCES, ALLGCL_OBJECTS  source, object files for GCL
+# ALLGUI_SOURCES, ALLGUI_OBJECTS  source, object files GUI
+# SOURCES,        OBJECTS         all source and object files
 
 include make.filelist
 
@@ -90,18 +123,15 @@ include	$(SOURCES:.cc=.d)
 $(OBJDIR):
 	mkdir $(OBJDIR)
 
-gcl_$(SYSNAME):	$(OBJDIR) $(ALLGCL_OBJECTS) $(ALLGCL_DEPENDS)
+gcl_$(SYSNAME):	$(OBJDIR) $(ALLGCL_OBJECTS)
 	cd $(OBJDIR); $(CC) $(ALLGCL_OBJECTS) -o ../gcl_$(SYSNAME) -lm; cd ..
 
 gcl:	gcl_$(SYSNAME);
 
-gui_$(SYSNAME):	$(OBJDIR) $(ALLGUI_OBJECTS) 
+gui_$(SYSNAME):	$(OBJDIR) $(ALLGUI_OBJECTS)
 	cd $(OBJDIR); $(CC) $(ALLGUI_OBJECTS) $(LIBDIR) $(GUILIBS) -o ../gui_$(SYSNAME); cd ..
 
 gui:    gui_$(SYSNAME);
-
-clean:	
-	rm -f $(OBJDIR)/*.o
 
 readefg.cc:  readefg.yy
 	bison++ -d -h readefg.h -o readefg.cc readefg.yy
@@ -112,7 +142,8 @@ readnfg.cc:  readnfg.yy
 gcompile.cc: gcompile.yy
 	bison++ -d -h gcompile.h -o gcompile.cc gcompile.yy
 
+clean:	
+	rm -f $(OBJDIR)/*.o
+
 manifest:
 	g++ -MM -MG $(SOURCES) | sed 'y/\ / \n/' | sort | uniq | grep -v ':' > Manifest
-
-
