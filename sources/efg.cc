@@ -189,7 +189,7 @@ const Action *Node::GetAction() const
   if (this == Game()->RootNode()) 
     throw Efg::Exception();
   
-  gArray<Action *> &actions = GetParent()->GetInfoset()->Actions();
+  const gArray<Action *> &actions = GetParent()->GetInfoset()->Actions();
   for (int i = 1; i <= actions.Length(); i++)
     if (this == GetParent()->GetChild(actions[i]))
       return actions[i];
