@@ -14,7 +14,6 @@
 
 bool ComputeMixedDominated(const Nfg &nfg,
 			   const NFSupport &S, NFSupport &R,
-         const gArray<gNumber> &values,
 			   int pl, bool strong, gOutput &tracefile,
 			   gStatus &status)
 {
@@ -55,10 +54,10 @@ bool ComputeMixedDominated(const Nfg &nfg,
     s.First();
     for (n = 1; n <= contingencies; n++) {
       s.Set(pl, 1);
-      B[n] = -nfg.Payoff(s.GetOutcome(), pl).Evaluate(values);
+      B[n] = -nfg.Payoff(s.GetOutcome(), pl);
       for (k = 2; k <= strats; k++) {
 	s.Set(pl, k);
-	A(n, k - 1) = -nfg.Payoff(s.GetOutcome(), pl).Evaluate(values);
+	A(n, k - 1) = -nfg.Payoff(s.GetOutcome(), pl);
       }
       A(n, strats) = (gRational) 1;
       s.NextContingency();
@@ -131,11 +130,11 @@ bool ComputeMixedDominated(const Nfg &nfg,
     s.First();
     for(n=1;n<=contingencies;n++) {
       s.Set(pl, 1);
-      B[n]=-nfg.Payoff(s.GetOutcome(), pl).Evaluate(values);
+      B[n]=-nfg.Payoff(s.GetOutcome(), pl);
       C0 -= B[n];
       for(k=2;k<=strats;k++) {
 	s.Set(pl,k);
-	A(n,k-1)=-nfg.Payoff(s.GetOutcome(), pl).Evaluate(values);
+	A(n,k-1)=-nfg.Payoff(s.GetOutcome(), pl);
 	C[k-1]-=A(n,k-1);
       }
       s.NextContingency();
@@ -193,8 +192,7 @@ bool ComputeMixedDominated(const Nfg &nfg,
   }
 }
 
-NFSupport *ComputeMixedDominated(const Nfg &N, NFSupport &S,
-         const gArray<gNumber> &values, bool strong,
+NFSupport *ComputeMixedDominated(const Nfg &N, NFSupport &S, bool strong,
 				 const gArray<int> &players,
 				 gOutput &tracefile, gStatus &status)
 {
@@ -204,7 +202,7 @@ NFSupport *ComputeMixedDominated(const Nfg &N, NFSupport &S,
   for (int i = 1; i <= players.Length() && !status.Get(); i++)   {
     int pl = players[i];
 
-    any |= ComputeMixedDominated(N, S, *newS, values, pl, strong, tracefile, status);
+    any |= ComputeMixedDominated(N, S, *newS, pl, strong, tracefile, status);
   }
   tracefile << "\n";
   if (!any || status.Get())  {

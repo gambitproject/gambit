@@ -19,14 +19,12 @@ private:
   int rows,cols,level;
   long count,npivots;
   double time;
-  gArray<gNumber> values;
   gList<MixedSolution> solutions;
 
   bool EqZero(T x) const;
   
 public:
-  EnumModule(const NFSupport &, const EnumParams &p,
-	     const gArray<gNumber> &values);
+  EnumModule(const NFSupport &, const EnumParams &p);
   
   int Enum(void);
   
@@ -43,10 +41,9 @@ public:
 //-------------------------------------------------------------------------
 
 template <class T>
-EnumModule<T>::EnumModule(const NFSupport &S, const EnumParams &p,
-			  const gArray<gNumber> &v)
-  : NF(S.Game()), support(S), params(p), rows(S.NumStrats(1)), cols(S.NumStrats(2)), 
-    level(0), count(0), npivots(0), values(v)
+EnumModule<T>::EnumModule(const NFSupport &S, const EnumParams &p)
+  : NF(S.Game()), support(S), params(p), rows(S.NumStrats(1)), 
+    cols(S.NumStrats(2)), level(0), count(0), npivots(0)
 { 
   gEpsilon(eps,12);
 }
@@ -72,15 +69,14 @@ template <class T> int EnumModule<T>::Enum(void)
   gVector<T> b1(1,n1);
   gVector<T> b2(1,n2);
 
-  min = MinPayoff(NF, values) - gNumber(1);
-
+  min = MinPayoff(NF) - gNumber(1);
 
    // construct A1,A2,b1,b2  
 
   for (i=1; i<=n1; i++) {
     for (j=1; j<=n2; j++)  {
-      A1(i, j) = NF.Payoff(iter.GetOutcome(), 1).Evaluate(values) - gNumber(min);
-      A2(j, i) = NF.Payoff(iter.GetOutcome(), 2).Evaluate(values) - gNumber(min);
+      A1(i, j) = NF.Payoff(iter.GetOutcome(), 1) - gNumber(min);
+      A2(j, i) = NF.Payoff(iter.GetOutcome(), 2) - gNumber(min);
       iter.Next(2);
     }
     iter.Next(1);
@@ -129,7 +125,7 @@ template <class T> int EnumModule<T>::Enum(void)
     (*params.tracefile) << "\n v1 = " << v1 << ", v2 = " << v2;
 
   BFS<T> bfs1,bfs2;
-  MixedProfile<T> profile(support, values);
+  MixedProfile<T> profile(support);
   T sum;
   bool nash;
 

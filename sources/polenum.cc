@@ -16,18 +16,17 @@ PolEnumParams::PolEnumParams(gStatus &status_)
 { }
 
 int PolEnum(const NFSupport &support, const PolEnumParams &params,
-	 const gArray<gNumber> &values,
-	 gList<MixedSolution> &solutions, long &nevals, double &time)
+	    gList<MixedSolution> &solutions, long &nevals, double &time)
 {
   if (params.precision == precDOUBLE)  {
-    PolEnumModule<gDouble> module(support, params, values);
+    PolEnumModule<gDouble> module(support, params);
     module.PolEnum();
     nevals = module.NumEvals();
     time = module.Time();
     solutions = module.GetSolutions();
   }
   else if (params.precision == precRATIONAL)  {
-    PolEnumModule<gRational> module(support, params, values);
+    PolEnumModule<gRational> module(support, params);
     module.PolEnum();
     nevals = module.NumEvals();
     time = module.Time();
@@ -59,8 +58,8 @@ PolEnumModule<gDouble>::Equation(int i, int strat1, int strat2) const
       if(i!=k) 
 	term*=Prob(k,support.Find(profile[k]));
     gDouble coeff,ap,bp;
-    ap = (double)NF.Payoff(A.GetOutcome(), i).Evaluate(values);
-    bp = (double)NF.Payoff(B.GetOutcome(), i).Evaluate(values);
+    ap = (double)NF.Payoff(A.GetOutcome(), i);
+    bp = (double)NF.Payoff(B.GetOutcome(), i);
     coeff = ap - bp;
     term*=coeff;
     equation+=term;

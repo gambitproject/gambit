@@ -165,7 +165,7 @@ bool Liap(const Nfg &N, NFLiapParams &params,
 	  gList<MixedSolution> &solutions,
 	  long &nevals, long &niters)
 {
-  MixedProfile<double> p(start.Support(), start.ParameterValues());
+  MixedProfile<double> p(start.Support());
   for (int i = 1; i <= p.Length(); i++)
     p[i] = start[i];
 

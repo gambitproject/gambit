@@ -22,14 +22,12 @@ private:
   gNArray<gArray<gNumber> *> *SF;  // sequence form
   gArray<gRectArray<gNumber> *> *E;   // constraint matrices for sequence form.  
   gArray<int> seq,isets;
-  gArray<gNumber> values;
-
 
   void MakeSequenceForm(const Node *, gNumber,gArray<int>, gArray<int>,
 		      gArray<Sequence *> );
 
 public:
-  Sfg(const EFSupport &, const gArray<gNumber> &values);
+  Sfg(const EFSupport &);
   virtual ~Sfg();  
 
   inline int NumSequences(int pl) const {return seq[pl];}

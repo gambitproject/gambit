@@ -53,8 +53,7 @@ EFGobitFunc::EFGobitFunc(const Efg &E,
 			 const BehavProfile<gNumber> &start)
   : _nevals(0L), _domain_err(false), _efg(E), 
     _Lambda(E.NumPlayers()),_probs(E.NumInfosets()),
-    _p(start.Support(), start.ParameterValues()),
-    _cpay(start.Support(), start.ParameterValues())
+    _p(start.Support()), _cpay(start.Support())
 {
   for (int i = 1; i <= _p.Length(); i++)
     _p[i] = start[i];
@@ -215,7 +214,7 @@ void Gobit(const Efg &E, EFGobitParams &params,
     num_steps = (int) (log(params.maxLam / params.minLam) /
 		       log(params.delLam + 1.0));
 
-  BehavProfile<double> p(start.Support(), start.ParameterValues());
+  BehavProfile<double> p(start.Support());
   for (int i = 1; i <= p.Length(); i++)
     p[i] = start[i];
   BehavProfile<double> pold(p);
@@ -305,8 +304,7 @@ EFKGobitFunc::EFKGobitFunc(const Efg &E,
 				 const EFGobitParams & p)
   :_nevals(0L), _domain_err(false), _efg(E), _K(1.0),
    _probs(E.NumInfosets()),
-   _p(start.Support(), start.ParameterValues()),
-   _cpay(start.Support(), start.ParameterValues()),
+   _p(start.Support()), _cpay(start.Support()),
     F(E,start), params(p)
 {
   for (int i = 1; i <= _p.Length(); i++)
@@ -410,7 +408,7 @@ void KGobit(const Efg &E, EFGobitParams &params, const BehavProfile<gNumber> &st
     num_steps = (int) (log(params.maxLam / params.minLam) /
 		       log(params.delLam + 1.0));
   
-  BehavProfile<double> p(start.Support(), start.ParameterValues());
+  BehavProfile<double> p(start.Support());
   BehavProfile<double> p_old(p);
   
   gMatrix<double> xi(lambda.Length(), lambda.Length());

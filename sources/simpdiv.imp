@@ -25,10 +25,9 @@
 //-------------------------------------------------------------------------
 
 template <class T> SimpdivModule<T>::SimpdivModule(const NFSupport &s,
-						   const SimpdivParams &p,
-						   const gArray<gNumber> &v)
+						   const SimpdivParams &p)
   : N(s.Game()), params(p), support(s), 
-    y(s, v), leash(p.leashLength), t(0), nplayers(N.NumPlayers()),
+    y(s), leash(p.leashLength), t(0), nplayers(N.NumPlayers()),
     ibar(1), nevals(0), nits(0), nstrats(s.NumStrats()),
     ylabel(2), labels(y.Length(), 2), pi(y.Length(), 2),
     U(s.NumStrats()), TT(s.NumStrats()),

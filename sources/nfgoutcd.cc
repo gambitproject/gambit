@@ -19,18 +19,14 @@ private:
 	static void outcome_attach_func(wxButton &ob,wxEvent &);
 	static void outcome_detach_func(wxButton &ob,wxEvent &);
 	static void outcome_delete_func(wxButton &ob,wxEvent &);
-	static void outcome_polyval_func(wxButton &ob,wxEvent &);
 	static void settings_func(wxButton &ob,wxEvent &);
 protected:
 	NfgOutcomeDialog *parent;
 	Nfg &nf;
-	ParameterSetList &params;
 	NfgShow *ns;
 	int prev_outc_num;
-   bool &polyval;
 	class OutcomeDragger;
 	OutcomeDragger *outcome_drag;
-   wxButton *polyval_but;
 	void OnAttach(void);
 	void OnDetach(void);
 	virtual void OnDelete(void);
@@ -41,7 +37,7 @@ protected:
 	virtual void NamePos(int outc_num,int *row,int *col) = 0;
 	virtual Bool OnEventNew(wxMouseEvent &ev);
 public:
-	NfgOutcomeDialogC(int rows,int cols,Nfg &nf,ParameterSetList &params,
+	NfgOutcomeDialogC(int rows,int cols,Nfg &nf,
                      NfgShow *ns,NfgOutcomeDialog *parent);
 	void SetCurOutcome(const gText &out_name);
 	void OnHelp(int );
@@ -121,10 +117,9 @@ return ret;
 
 // Constructor
 NfgOutcomeDialogC::NfgOutcomeDialogC(int rows,int cols,Nfg &nf_,
-               ParameterSetList &params_,NfgShow *ns_,NfgOutcomeDialog *parent_)
+               NfgShow *ns_,NfgOutcomeDialog *parent_)
 				:SpreadSheet3D(rows,cols,1,"Outcomes [S]",0/*(wxFrame *)ns_->GetParent()*/,ANY_BUTTON),
-             parent(parent_), nf(nf_), params(params_), ns(ns_),
-             polyval(params_.PolyVal())
+             parent(parent_), nf(nf_), ns(ns_)
 {
 MakeButtons(OK_BUTTON|PRINT_BUTTON|OPTIONS_BUTTON|HELP_BUTTON);
 AddButton("Opt",(wxFunction)settings_func);
@@ -132,7 +127,6 @@ AddButtonNewLine();
 AddButton("Attach",(wxFunction)outcome_attach_func);
 AddButton("Detach",(wxFunction)outcome_detach_func);
 AddButton("Delete",(wxFunction)outcome_delete_func);
-polyval_but=AddButton("Poly",(wxFunction)outcome_polyval_func);
 prev_outc_num=1;
 outcome_drag=new OutcomeDragger(this,ns);
 CanvasFocus();
@@ -145,20 +139,9 @@ void NfgOutcomeDialogC::outcome_detach_func(wxButton &ob,wxEvent &)
 {((NfgOutcomeDialogC *)ob.GetClientData())->OnDetach();}
 void NfgOutcomeDialogC::outcome_delete_func(wxButton &ob,wxEvent &)
 {((NfgOutcomeDialogC *)ob.GetClientData())->OnDelete();}
-void NfgOutcomeDialogC::outcome_polyval_func(wxButton &ob,wxEvent &)
-{((NfgOutcomeDialogC *)ob.GetClientData())->OnPolyval();}
 
 void NfgOutcomeDialogC::settings_func(wxButton &ob,wxEvent &)
 {((NfgOutcomeDialogC *)ob.GetClientData())->OnSettings();}
-
-// OnPolyval
-void NfgOutcomeDialogC::OnPolyval(void)
-{
-	polyval=(polyval) ? false : true;
-   polyval_but->SetLabel((polyval) ? "Eval" : "Poly");
-   ns->UpdateVals();
-	UpdateValues(); Repaint(); CanvasFocus();
-}
 
 // OnAttach
 void NfgOutcomeDialogC::OnAttach(void)
@@ -260,13 +243,7 @@ for (int i=1;i<=nf.NumOutcomes();i++)
 	{
 		PayoffPos(i,j,&row,&col);
       hilight=false;
-      if (polyval==false)
-      	payoff=ToText(nf.Payoff(tmp, j));
-      else
-      {
-      	payoff=ToText(nf.Payoff(tmp, j).Evaluate(params.CurSet()));
-         if (nf.Payoff(tmp, j).Degree()>0) hilight=true;
-      }
+		payoff=ToText(nf.Payoff(tmp, j));
 		SetCell(row,col,payoff);
       HiLighted(row,col,0,hilight);
 	}
@@ -296,23 +273,13 @@ int prow,pcol;
 for (int j=1;j<=nf.NumPlayers();j++)
 {
 	PayoffPos(outc_num,j,&prow,&pcol);
-	gPoly<gNumber> payoff(nf.Parameters(),GetCell(prow,pcol),nf.ParamOrder());
-	if (polyval==false)
-   {
-		if (nf.Payoff(tmp, j)!=payoff)	{
-			nf.SetPayoff(tmp, j, payoff);
-			outcomes_changed=true;
-		}
-   }
-   else
-   {
-      gText payoff_str=ToText(nf.Payoff(tmp, j).Evaluate(params.CurSet()));
-		if (payoff_str!=GetCell(prow,pcol))	{
-			nf.SetPayoff(tmp, j, payoff);
-			outcomes_changed=true;
-		}
+	gNumber payoff;
+	FromText(GetCell(prow, pcol), payoff);
+	if (nf.Payoff(tmp, j)!=payoff)	{
+	  nf.SetPayoff(tmp, j, payoff);
+	  outcomes_changed=true;
 	}
-}
+      }
 // check if the name has changed
 NamePos(outc_num,&prow,&pcol);
 gText new_name=GetCell(prow,pcol);
@@ -344,8 +311,10 @@ int x=GetSheet()->MaxX(col-1)+TEXT_OFF,y=GetSheet()->MaxY(row-1)+TEXT_OFF;
 GetSheet()->ClientToScreen(&x,&y);
 gText s1=gGetTextLine(s0,this,x,y);
 if (s1!="" && s0!=s1)
-{
-	nf.SetPayoff(tmp, pl, gPoly<gNumber>(nf.Parameters(),s1,nf.ParamOrder()));
+  {
+    gNumber payoff;
+    FromText(s1, payoff);
+    nf.SetPayoff(tmp, pl, payoff);
    UpdateValues();
    ns->UpdateVals();
 	Repaint();
@@ -364,15 +333,16 @@ protected:
 	void PayoffPos(int outc_num,int player,int *row,int *col);
 	void NamePos(int outc_num,int *row,int *col);
 public:
-	NfgOutcomeDialogShort(Nfg &nf,ParameterSetList &params,NfgShow *ns,NfgOutcomeDialog *parent);
+	NfgOutcomeDialogShort(Nfg &nf,NfgShow *ns,NfgOutcomeDialog *parent);
 	void OnSelectedMoved(int row,int col,SpreadMoveDir how);
 	virtual void OnOptionsChanged(unsigned int options=0);
 };
 
-NfgOutcomeDialogShort::NfgOutcomeDialogShort(Nfg &nf_,ParameterSetList &params,
-                                   NfgShow *ns_,NfgOutcomeDialog *parent_)
-						: NfgOutcomeDialogC((nf_.NumOutcomes()) ? nf_.NumOutcomes() : 1,
-														nf_.NumPlayers()+1,nf_,params,ns_,parent_)
+NfgOutcomeDialogShort::NfgOutcomeDialogShort(Nfg &nf_,
+					     NfgShow *ns_,
+					     NfgOutcomeDialog *parent_)
+  : NfgOutcomeDialogC((nf_.NumOutcomes()) ? nf_.NumOutcomes() : 1,
+		      nf_.NumPlayers()+1,nf_,ns_,parent_)
 {
 DrawSettings()->SetLabels(S_LABEL_ROW|S_LABEL_COL);
 DataSettings()->SetChange(S_CAN_GROW_ROW);
@@ -470,16 +440,16 @@ protected:
 	void PayoffPos(int outc_num,int player,int *row,int *col);
 	void NamePos(int outc_num,int *row,int *col);
 public:
-	NfgOutcomeDialogLong(Nfg &nf,ParameterSetList &params,NfgShow *ns,NfgOutcomeDialog *parent);
+	NfgOutcomeDialogLong(Nfg &nf,NfgShow *ns,NfgOutcomeDialog *parent);
 	void OnSelectedMoved(int row,int col,SpreadMoveDir how);
 	virtual void OnOptionsChanged(unsigned int options=0);
 };
 
 
-NfgOutcomeDialogLong::NfgOutcomeDialogLong(Nfg &nf_,ParameterSetList &params,
+NfgOutcomeDialogLong::NfgOutcomeDialogLong(Nfg &nf_,
                                 NfgShow *ns_,NfgOutcomeDialog *parent_)
 				:NfgOutcomeDialogC((nf_.NumOutcomes() ? nf_.NumOutcomes() : 1)*nf_.NumPlayers(),
-												3,nf_,params,ns_,parent_)
+												3,nf_,ns_,parent_)
 {
 DrawSettings()->SetLabels(S_LABEL_ROW|S_LABEL_COL);
 DataSettings()->SetChange(S_CAN_GROW_ROW);
@@ -623,9 +593,9 @@ int dialog_type;
 char *defaults_file="gambit.ini";
 wxGetResource("Gambit","NfgOutcome-Dialog-Type",&dialog_type,defaults_file);
 if (dialog_type==SHORT_ENTRY_OUTCOMES)
-	d=new NfgOutcomeDialogShort(nf,ns->Parameters(),ns,this);
+	d=new NfgOutcomeDialogShort(nf,ns,this);
 else
-	d=new NfgOutcomeDialogLong(nf,ns->Parameters(),ns,this);
+	d=new NfgOutcomeDialogLong(nf,ns,this);
 d->Show(TRUE);
 }
 

@@ -14,21 +14,19 @@ class ZSumBySubgame : public SubgameSolver  {
   private:
     int npivots;
     ZSumParams params;
-    gArray<gNumber> values;
 
     int SolveSubgame(const Efg &, const EFSupport &,
 		     gList<BehavSolution> &);
     EfgAlgType AlgorithmID() const { return EfgAlg_ZSUMSUB; }    
 
   public:
-    ZSumBySubgame(const EFSupport &, const ZSumParams &,
-		  const gArray<gNumber> &, int max = 0);
+    ZSumBySubgame(const EFSupport &, const ZSumParams &, int max = 0);
     virtual ~ZSumBySubgame();
 
     int NumPivots(void) const   { return npivots; }
 };
 
-int ZSum(const EFSupport &, const ZSumParams &, const gArray<gNumber> &,
+int ZSum(const EFSupport &, const ZSumParams &,
 	 gList<BehavSolution> &, int &npivots, double &time);
 
 

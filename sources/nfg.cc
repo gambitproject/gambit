@@ -24,10 +24,9 @@ int Nfg::Product(const gArray<int> &dim)
   return accum;
 }
   
-Nfg::Nfg(const gArray<int> &dim,
-	 gSpace *space, term_order *order)
+Nfg::Nfg(const gArray<int> &dim)
   : dimensions(dim), players(dim.Length()), results(Product(dim)),
-    parameters(space), paramorder(order), efg(0)
+    efg(0)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new NFPlayer(pl, this, dim[pl]);
@@ -44,8 +43,7 @@ Nfg::Nfg(const gArray<int> &dim,
 Nfg::Nfg(const Nfg &b)
   : title(b.title), comment(b.comment), dimensions(b.dimensions),
     players(b.players.Length()), outcomes(b.outcomes.Length()),
-    results(b.results.Length()),
-    parameters(b.parameters), paramorder(b.paramorder), efg(0)
+    results(b.results.Length()), efg(0)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new NFPlayer(pl, this, dimensions[pl]);
@@ -136,12 +134,6 @@ void Nfg::WriteNfgFile(gOutput &f) const
   
   f << "}\n";
 
-  if (parameters->Dmnsn() > 0)   {
-    f << "{ ";
-    for (int var = 1; var <= parameters->Dmnsn(); var++)
-      f << '"' << EscapeQuotes(parameters->GetVariableName(var)) << "\" ";
-    f << "}\n";
-  }
   f << "\"" << EscapeQuotes(comment) << "\"\n\n";
 
   int ncont = 1;
@@ -257,18 +249,17 @@ NFOutcome *Nfg::GetOutcome(const StrategyProfile &p) const
   return results[p.index + 1];
 }
 
-void Nfg::SetPayoff(NFOutcome *outcome,
-                    int pl, const gPoly<gNumber> &value)
+void Nfg::SetPayoff(NFOutcome *outcome, int pl, const gNumber &value)
 {
   if (outcome)   outcome->payoffs[pl] = value;
 }
 
-gPoly<gNumber> Nfg::Payoff(NFOutcome *outcome, int pl) const
+gNumber Nfg::Payoff(NFOutcome *outcome, int pl) const
 {
   if (outcome)
-	  return outcome->payoffs[pl];
+    return outcome->payoffs[pl];
   else
-	  return gPoly<gNumber>(Parameters(), gNumber(0), ParamOrder());
+    return 0;
 }
 
 // ---------------------------------------

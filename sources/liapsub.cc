@@ -9,7 +9,7 @@
 int NFLiapBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 				   gList<BehavSolution> &solns)
 {
-  BehavProfile<double> bp(sup, start.ParameterValues());
+  BehavProfile<double> bp(sup);
   
   subgame_number++;
 
@@ -32,11 +32,11 @@ int NFLiapBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
   ViewNormal(*N, S);
 
-  MixedProfile<double> mp(*S, start.ParameterValues());
+  MixedProfile<double> mp(*S);
 
   BehavToMixed(E, bp, *N, mp);
 
-  MixedProfile<gNumber> st(*S, start.ParameterValues());
+  MixedProfile<gNumber> st(*S);
   for (int i = 1; i <= st.Length(); i++)
     st[i] = mp[i];
 
@@ -60,7 +60,7 @@ int NFLiapBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
 NFLiapBySubgame::NFLiapBySubgame(const Efg &E, const NFLiapParams &p,
 				 const BehavProfile<gNumber> &s, int max)
-  : SubgameSolver(s.Support(), s.ParameterValues(), max),
+  : SubgameSolver(s.Support(), max),
     nevals(0), subgame_number(0),
     infoset_subgames(E.NumInfosets()), params(p), start(s)
 { }

@@ -16,12 +16,11 @@ CSSeqFormParams::CSSeqFormParams(gStatus &status_)
      tracefile(&gnull), status(status_)
 { }
 
-int _CSSeqForm(const EFSupport &support, const gArray<gNumber> &values,
-	       const CSSeqFormParams &params,
+int _CSSeqForm(const EFSupport &support, const CSSeqFormParams &params,
 	       gList<BehavSolution> &solutions, int &npivots, double &time)
 {
   if (params.precision == precDOUBLE)   {
-    CSSeqFormModule<double> module(support, values, params);
+    CSSeqFormModule<double> module(support, params);
     module.CSSeqForm();
     npivots = module.NumPivots();
     time = module.Time();
@@ -29,7 +28,7 @@ int _CSSeqForm(const EFSupport &support, const gArray<gNumber> &values,
     return 1;
   }
   else if (params.precision == precRATIONAL)  {
-    CSSeqFormModule<gRational> module(support, values, params);
+    CSSeqFormModule<gRational> module(support, params);
     module.CSSeqForm();
     npivots = module.NumPivots();
     time = module.Time();
@@ -39,11 +38,10 @@ int _CSSeqForm(const EFSupport &support, const gArray<gNumber> &values,
   return 1;
 }    
 
-int CSSeqForm(const EFSupport &support, const gArray<gNumber> &values,
-	      const CSSeqFormParams &params,
+int CSSeqForm(const EFSupport &support, const CSSeqFormParams &params,
 	      gList<BehavSolution> &solutions, int &npivots, double &time)
 {
-  CSSeqFormBySubgame module(support, values, params);
+  CSSeqFormBySubgame module(support, params);
   module.Solve();
   npivots = module.NumPivots();
   time = module.Time();

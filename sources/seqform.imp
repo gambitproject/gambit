@@ -23,11 +23,9 @@ private:
   double time;
   gList<BFS<T> > List;
   gList<BehavSolution> solutions;
-  gArray<gNumber> values;
 
 public:
-  SeqFormModule(const EFSupport &, const gArray<gNumber> &v,
-		const SeqFormParams &p);
+  SeqFormModule(const EFSupport &, const SeqFormParams &p);
   virtual ~SeqFormModule();
   
   int Lemke(void);
@@ -51,10 +49,8 @@ public:
 //---------------------------------------------------------------------------
 
 template <class T>
-SeqFormModule<T>::SeqFormModule(const EFSupport &S, const gArray<gNumber> &v,
-				const SeqFormParams &p) 
-  : EF(S.Game()), support(S), params(p), A(0), b(0), maxpay((T) 0), npivots(0),
-    values(v)
+SeqFormModule<T>::SeqFormModule(const EFSupport &S, const SeqFormParams &p) 
+  : EF(S.Game()), support(S), params(p), A(0), b(0), maxpay((T) 0), npivots(0)
 { 
   int ntot;
   ns1=S.NumSequences(1);
@@ -69,7 +65,7 @@ SeqFormModule<T>::SeqFormModule(const EFSupport &S, const gArray<gNumber> &v,
   b = new gVector<T>(1,ntot);
   int i,j;
 
-  maxpay = EF.MaxPayoff(values) + gNumber(1);
+  maxpay = EF.MaxPayoff() + gNumber(1);
 
   T prob = (T)1;
   for(i=A->MinRow();i<=A->MaxRow();i++) {
@@ -118,9 +114,8 @@ template <class T> int SeqFormModule<T>::Lemke(void)
   
   gWatch watch;
 
-  gArray<gNumber> values(EF.Parameters()->Dmnsn());
   EFSupport sup(EF);
-  BehavProfile<T> profile(sup, values);
+  BehavProfile<T> profile(sup);
   gVector<T> sol(tab->MinRow(),tab->MaxRow());
     
   solutions.Flush();
@@ -195,9 +190,8 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
 
   np+=B.NumPivots();
   gVector<T> sol(tab->MinRow(),tab->MaxRow());
-  gArray<gNumber> values(EF.Parameters()->Dmnsn());
   EFSupport sup(EF);
-  BehavProfile<T> profile(sup, values);
+  BehavProfile<T> profile(sup);
 
   //* gout << "\nIn All_Lemke() depth: " << depth;
   
@@ -276,19 +270,18 @@ template <class T> double SeqFormModule<T>::Time(void) const
 }
 
 
-template <class T> void SeqFormModule<T>
-::FillTableau(const Node *n, T prob,int s1,int s2, int i1,int i2)
+template <class T>
+void SeqFormModule<T>::FillTableau(const Node *n, T prob,
+				   int s1, int s2, int i1, int i2)
 {
 //  gout << "\ns1,s2,i1,i2: " << s1 << " " << s2  << " " << i1  << " " << i2;
 //  gout << " prob = " << prob;
   int i,snew;
   if(n->GetOutcome()) {
-    gArray<gNumber> values(EF.Parameters()->Dmnsn());
-    for (int j = 1; j <= values.Length(); values[j++] = gNumber(0));
     (*A)(s1,ns1+s2) = gNumber((*A)(s1,ns1+s2)) +
-       gNumber(prob) * EF.Payoff(n->GetOutcome(), 1).Evaluate(values) - gNumber(maxpay);
+       gNumber(prob) * EF.Payoff(n->GetOutcome(), 1) - gNumber(maxpay);
     (*A)(ns1+s2,s1) = gNumber((*A)(ns1+s2,s1)) +
-       gNumber(prob) * EF.Payoff(n->GetOutcome(), 2).Evaluate(values) - gNumber(maxpay);
+       gNumber(prob) * EF.Payoff(n->GetOutcome(), 2) - gNumber(maxpay);
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {

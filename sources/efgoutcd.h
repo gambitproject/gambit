@@ -1,9 +1,13 @@
-// File: efgoutcd.h -- declaration of the EFG outcome editing dialog
+//
+// FILE: efgoutcd.h -- declaration of the EFG outcome editing dialog
+//
 // $Id$
+//
+
 #ifndef EFGOUTCD_H
 #define EFGOUTCD_H
+
 class EfgOutcomeDialogC;
-#include "paramsd.h"
 class EfgOutcomeDialog
 {
 protected:

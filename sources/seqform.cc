@@ -16,19 +16,18 @@ SeqFormParams::SeqFormParams(gStatus &status_)
     tracefile(&gnull), status(status_)
 { }
 
-int _SeqForm(const EFSupport &support, const gArray<gNumber> &values,
-	     const SeqFormParams &params,
+int _SeqForm(const EFSupport &support, const SeqFormParams &params,
 	     gList<BehavSolution> &solutions, int &npivots, double &time)
 {
   if (params.precision == precDOUBLE)  {
-    SeqFormModule<double> module(support, values, params);
+    SeqFormModule<double> module(support, params);
     module.Lemke();
     npivots = module.NumPivots();
     time = module.Time();
     solutions = module.GetSolutions();
   }
   else if (params.precision == precRATIONAL)  {
-    SeqFormModule<gRational> module(support, values, params);
+    SeqFormModule<gRational> module(support, params);
     module.Lemke();
     npivots = module.NumPivots();
     time = module.Time();
@@ -38,11 +37,11 @@ int _SeqForm(const EFSupport &support, const gArray<gNumber> &values,
   return 1;
 }
 
-int SeqForm(const EFSupport &support, const gArray<gNumber> &values,
+int SeqForm(const EFSupport &support,
 	    const SeqFormParams &params, gList<BehavSolution> &solutions,
 	    int &npivots, double &time)
 {
-  SeqFormBySubgame module(support, values, params);
+  SeqFormBySubgame module(support, params);
   module.Solve();
   solutions = module.GetSolutions();
   npivots = module.NumPivots();
@@ -55,7 +54,7 @@ int SeqFormBySubgame::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
 {
   int npiv;
   double time;
-  _SeqForm(sup, values, params, solns, npiv, time);
+  _SeqForm(sup, params, solns, npiv, time);
 
   npivots += npiv;
 
@@ -63,9 +62,8 @@ int SeqFormBySubgame::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
 }
 
 SeqFormBySubgame::SeqFormBySubgame(const EFSupport &S,
-				   const gArray<gNumber> &v,
 				   const SeqFormParams &p, int max)
-  : SubgameSolver(S, v, max), npivots(0), params(p), values(v)
+  : SubgameSolver(S, max), npivots(0), params(p)
 { }
 
 SeqFormBySubgame::~SeqFormBySubgame()   { }

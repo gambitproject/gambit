@@ -13,8 +13,7 @@
 
 #include "efgpure.h"
 
-int FindPureNash(const EFSupport &sup, const gArray<gNumber> &values,
-		 gList<BehavSolution> &eqs)
+int FindPureNash(const EFSupport &sup, gList<BehavSolution> &eqs)
 {
   int index;
   EfgContIter citer(sup);
@@ -43,7 +42,7 @@ int FindPureNash(const EFSupport &sup, const gArray<gNumber> &values,
     }
 
     if (flag)  {
-      BehavProfile<double> temp(sup, values);
+      BehavProfile<double> temp(sup);
       // zero out all the entries, since any equlibria are pure
       ((gVector<double> &) temp).operator=(0);
       const PureBehavProfile<gNumber> &profile = citer.GetProfile();

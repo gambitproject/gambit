@@ -20,7 +20,6 @@ class SubgameSolver   {
     EFSupport support;
     BehavProfile<gNumber> solution;
     gList<BehavSolution> solutions;
-    gArray<gNumber> paramvalues;
 
     gArray<gArray<Infoset *> *> infosets;
 
@@ -39,7 +38,7 @@ class SubgameSolver   {
     virtual EfgAlgType AlgorithmID() const = 0;
 
   public:
-    SubgameSolver(const EFSupport &, const gArray<gNumber> &, int maxsol = 0);
+    SubgameSolver(const EFSupport &, int maxsol = 0);
     virtual ~SubgameSolver();
     
     void Solve(void);

@@ -119,7 +119,7 @@ Nfg *MakeReducedNfg(const Efg &E, const EFSupport &support)
   for (i = 1; i <= E.NumPlayers(); i++)
     dim[i] = L->strategies[i].Length();
 
-  L->MakeLink(&E, new Nfg(dim, E.Parameters(), E.ParamOrder()));
+  L->MakeLink(&E, new Nfg(dim));
   L->N->SetTitle(E.GetTitle());
 
   for (i = 1; i <= E.NumPlayers(); i++)   {
@@ -144,7 +144,7 @@ Nfg *MakeReducedNfg(const Efg &E, const EFSupport &support)
     corr[i] = L->strategies[i][1];
   }
 
-  gPolyArray<gNumber> value(E.Parameters(), E.ParamOrder(), E.NumPlayers());
+  gArray<gNumber> value(E.NumPlayers());
 
   int pl = E.NumPlayers();
   while (1)  {
@@ -177,7 +177,7 @@ Nfg *MakeReducedNfg(const Efg &E, const EFSupport &support)
 
 Nfg *MakeAfg(const Efg &E)
 {
-  Nfg *afg = new Nfg(gArray<int>(E.NumActions()), E.Parameters(), E.ParamOrder());
+  Nfg *afg = new Nfg(gArray<int>(E.NumActions()));
 
   if (!afg)   return 0;
 
@@ -213,8 +213,8 @@ Nfg *MakeAfg(const Efg &E)
 
     for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)
       for (int iset = 1; iset <= E.Players()[epl]->NumInfosets(); iset++, npl++)
-	afg->SetPayoff(iter.GetOutcome(), npl,
-                 gPoly<gNumber>(afg->Parameters(), payoff[epl], afg->ParamOrder()));
+	afg->SetPayoff(iter.GetOutcome(), npl, payoff[epl]);
+
     
     while (pl > 0)  {
       if (iter.Next(pl))  {

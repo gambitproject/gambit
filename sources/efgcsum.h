@@ -23,8 +23,7 @@ class CSSeqFormParams     {
     CSSeqFormParams(gStatus &status_ = gstatus);
 };
 
-int CSSeqForm(const EFSupport &, const gArray<gNumber> &values,
-	      const CSSeqFormParams &,
+int CSSeqForm(const EFSupport &, const CSSeqFormParams &,
 	      gList<BehavSolution> &, int &npivots, double &time);
 
 
@@ -34,14 +33,13 @@ class CSSeqFormBySubgame : public SubgameSolver  {
   private:
     long npivots;
     CSSeqFormParams params;
-    gArray<gNumber> values;
 
     int SolveSubgame(const Efg &, const EFSupport &,
 		     gList<BehavSolution> &);
     EfgAlgType AlgorithmID() const { return EfgAlg_CSSEQFORM; }    
 
   public:
-    CSSeqFormBySubgame(const EFSupport &, const gArray<gNumber> &values,
+    CSSeqFormBySubgame(const EFSupport &,
 		       const CSSeqFormParams &, int max = 0);
     virtual ~CSSeqFormBySubgame();
 

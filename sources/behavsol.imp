@@ -11,7 +11,7 @@
 #include "gmisc.h"
 
 BehavSolution::BehavSolution(const BehavProfile<double>& b, EfgAlgType creator)
-  : BehavProfile<gNumber>(b.Support(), b.ParameterValues()),
+  : BehavProfile<gNumber>(b.Support()),
     _Creator(creator), _IsNash(T_DONTKNOW), _IsSubgamePerfect(T_DONTKNOW),
     _IsSequential(T_DONTKNOW), _GobitLambda(-1), _GobitValue(-1),
     _LiapValue(-1), _Beliefs(0), _Regret(0), _Id(0)
@@ -22,7 +22,7 @@ BehavSolution::BehavSolution(const BehavProfile<double>& b, EfgAlgType creator)
 }
 
 BehavSolution::BehavSolution(const BehavProfile<gRational>& b, EfgAlgType creator)
-  : BehavProfile<gNumber>(b.Support(), b.ParameterValues()),
+  : BehavProfile<gNumber>(b.Support()),
     _Creator(creator), _IsNash(T_DONTKNOW), _IsSubgamePerfect(T_DONTKNOW),
     _IsSequential(T_DONTKNOW), _GobitLambda(-1), _GobitValue(-1),
     _LiapValue(-1), _Beliefs(0), _Regret(0), _Id(0)

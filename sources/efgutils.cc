@@ -1,7 +1,7 @@
 //
 // FILE: efgutils.cc -- useful global functions for the extensive form
 //
-// @(#)efgutils.cc	2.4 6/22/97
+// $Id$
 //
 
 #include "efgutils.h"
@@ -222,7 +222,6 @@ void RandomEfg(Efg &efg)
 {
   for (int i = 1; i <= efg.NumPlayers(); i++)
     for (int j = 1; j <= efg.NumOutcomes(); j++)
-      efg.SetPayoff(efg.outcomes[j], i,
-                    gPoly<gNumber>(efg.Parameters(), gNumber(Uniform()), efg.ParamOrder()));
+      efg.SetPayoff(efg.outcomes[j], i, gNumber(Uniform()));
 }
 

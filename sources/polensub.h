@@ -10,8 +10,8 @@
 #include "polenum.h"
 #include "behavsol.h"
 
-int PolEnum(const EFSupport &, const PolEnumParams &, const gArray<gNumber> &,
-	 gList<BehavSolution> &, long &nevals, double &time);
+int PolEnum(const EFSupport &, const PolEnumParams &,
+	    gList<BehavSolution> &, long &nevals, double &time);
 
 #endif   // POLENSUB_H
 

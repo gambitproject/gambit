@@ -118,39 +118,7 @@ return 0;
 //**************************** OUTCOMES STUFF *********************************
 #define UPDATE1_DIALOG	4
 #define PARAMS_ADD_VAR	5
-void NfgShow::ChangeParameters(int what)
-{
-if (what==CREATE_DIALOG && !params_dialog)
-	params_dialog=new ParameterDialog(nf.Parameters(),this,spread);
-if (what==DESTROY_DIALOG && params_dialog)
-	{delete params_dialog;params_dialog=0;}
-if (what==PARAMS_ADD_VAR)  // Added a variable
-{
-	// Save old poly's in strings to re-create later
-	gRectArray<gText> old_polys(nf.NumOutcomes(),nf.NumPlayers());
-	for (int i=1;i<=nf.NumOutcomes();i++)
-		for (int j=1;j<=nf.NumPlayers();j++)
-			old_polys(i,j)=ToText(nf.Payoff(nf.Outcomes()[i],j));
-	// Create a new variable
-	for (int i=1;i<=Parameters().Length();i++) Parameters()[i].Append(0);
-   nf.Parameters()->CreateVariables();
-	// Re-create the outcomes
-	for (int i=1;i<=nf.NumOutcomes();i++)
-		for (int j=1;j<=nf.NumPlayers();j++)
-			nf.SetPayoff(nf.Outcomes()[i],j,
-             gPoly<gNumber>(nf.Parameters(),old_polys(i,j),nf.ParamOrder()));
-   if (outcome_dialog) outcome_dialog->UpdateVals();
-	UpdateVals();
-}
-if (what==UPDATE1_DIALOG) // Just changed some values
-{
-   if (outcome_dialog) outcome_dialog->UpdateVals();
-	UpdateVals();
-}
-}
 
-ParameterSetList &NfgShow::Parameters(void)
-{return param_sets;}
 
 void NfgShow::SetOutcome(int out,int x, int y)
 {
@@ -184,10 +152,10 @@ else
 //**************************** DOMINATED STRATEGY STUFF ************************
 // SolveElimDom
 #include "wxstatus.h"
-NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, const gArray<gNumber> &, bool strong,
+NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, bool strong,
 			    const gArray<int> &players,gOutput &tracefile, gStatus &status); // nfdom.cc
 NFSupport *ComputeMixedDominated(const Nfg &N, NFSupport &S, 
-                                 const gArray<gNumber> &values, bool strong,
+                                 bool strong,
 				 const gArray<int> &players,gOutput &tracefile, gStatus &status); // nfdommix.cc
 
 #include "elimdomd.h"
@@ -199,18 +167,16 @@ if (EDPD.Completed()==wxOK)
 {
 	NFSupport *sup=cur_sup;
 	wxStatus status(spread,"Dominance Elimination");
-  gArray<gNumber> values(sup->Game().Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
 	if (!EDPD.DomMixed())
 	{
 		if (EDPD.FindAll())
 		{
-			while ((sup=ComputeDominated(sup->Game(),*sup,values,EDPD.DomStrong(),EDPD.Players(),gnull,status)))
+			while ((sup=ComputeDominated(sup->Game(),*sup,EDPD.DomStrong(),EDPD.Players(),gnull,status)))
 				supports.Append(sup);
 		}
 		else
 		{
-			if ((sup=ComputeDominated(sup->Game(),*sup,values,EDPD.DomStrong(),EDPD.Players(),gnull,status)))
+			if ((sup=ComputeDominated(sup->Game(),*sup,EDPD.DomStrong(),EDPD.Players(),gnull,status)))
 				supports.Append(sup);
 		}
 	}
@@ -218,16 +184,12 @@ if (EDPD.Completed()==wxOK)
 	{
 		if (EDPD.FindAll())
 		{
-  gArray<gNumber> values(sup->Game().Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
-			while ((sup=ComputeMixedDominated(sup->Game(),*sup,values,EDPD.DomStrong(),EDPD.Players(),gnull,status)))
+			while ((sup=ComputeMixedDominated(sup->Game(),*sup,EDPD.DomStrong(),EDPD.Players(),gnull,status)))
 				supports.Append(sup);
 		}
 		else
 		{
-  gArray<gNumber> values(sup->Game().Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
-			if ((sup=ComputeMixedDominated(sup->Game(),*sup,values,EDPD.DomStrong(),EDPD.Players(),gnull,status)))
+			if ((sup=ComputeMixedDominated(sup->Game(),*sup,EDPD.DomStrong(),EDPD.Players(),gnull,status)))
 				supports.Append(sup);
 		}
 	}
@@ -828,7 +790,6 @@ case	NFG_SOLVE_ALGORITHM_MENU: parent->SolveSetup(SOLVE_SETUP_CUSTOM); break;
 case  NFG_SOLVE_STANDARD_MENU: parent->SolveSetup(SOLVE_SETUP_STANDARD); break;
 case	NFG_SOLVE_DOMINANCE_MENU: parent->DominanceSetup(); break;
 case	NFG_SOLVE_GAMEINFO_MENU: parent->ShowGameInfo(); break;
-case	NFG_SOLVE_PARAMS_MENU: parent->ChangeParameters(CREATE_DIALOG); break;
 case	NFG_LABEL_GAME: parent->SetLabels(0);break;
 case	NFG_LABEL_STRATS: parent->SetLabels(1);break;
 case	NFG_LABEL_PLAYERS: parent->SetLabels(2);break;

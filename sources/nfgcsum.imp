@@ -23,11 +23,10 @@ private:
   T minpay;
   long npivots;
   double time;
-  gArray<gNumber> values;
   gList<BFS<T> > List;
 
 public:
-  ZSumModule(const NFSupport &, const ZSumParams &p, const gArray<gNumber> &);
+  ZSumModule(const NFSupport &, const ZSumParams &p);
   virtual ~ZSumModule();
 
   bool IsConstSum();
@@ -48,9 +47,8 @@ public:
 //-------------------------------------------------------------------------
 
 template <class T>
-ZSumModule<T>::ZSumModule(const NFSupport &S, const ZSumParams &p,
-			  const gArray<gNumber> &v)
-  : NF(S.Game()), params(p), support(S), A(0), b(0), c(0), npivots(0), values(v)
+ZSumModule<T>::ZSumModule(const NFSupport &S, const ZSumParams &p)
+  : NF(S.Game()), params(p), support(S), A(0), b(0), c(0), npivots(0)
 { }
 
 template <class T> ZSumModule<T>::~ZSumModule()
@@ -72,11 +70,11 @@ template <class T> void ZSumModule<T>::Make_Abc()
   c = new gVector<T>(1,m+1);
   NfgIter iter(support);
 
-  minpay = MinPayoff(NF, values) - gNumber(1);
+  minpay = MinPayoff(NF) - gNumber(1);
 
   for (i = 1; i <= k; i++)  {
     for (j = 1; j <= m; j++)  {
-      (*A)(i, j) = gNumber(minpay) - NF.Payoff(iter.GetOutcome(), 1).Evaluate(values);
+      (*A)(i, j) = gNumber(minpay) - NF.Payoff(iter.GetOutcome(), 1);
       iter.Next(1);
     }
     (*A)(i,m+1) = (T)1;
@@ -181,7 +179,7 @@ void ZSumModule<T>::GetSolutions(gList<MixedSolution > &solutions) const
   solutions.Flush();
 
   for (int i = 1; i <= List.Length(); i++)    {
-    MixedProfile<T> profile(support, values);
+    MixedProfile<T> profile(support);
     int j;
     for (j = 1; j <= n1; j++) 
       if (List[i].IsDefined(j))   

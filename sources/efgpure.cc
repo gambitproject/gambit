@@ -7,10 +7,10 @@
 #include "efgpure.imp"
 #include "rational.h"
 
-int EnumPure(const EFSupport &support, const gArray<gNumber> &values,
+int EnumPure(const EFSupport &support,
 	     gList<BehavSolution> &solutions, double &time)
 {
-  EfgPSNEBySubgame module(support, values);
+  EfgPSNEBySubgame module(support);
   module.Solve();
   time = module.Time();
   solutions = module.GetSolutions();
@@ -20,14 +20,13 @@ int EnumPure(const EFSupport &support, const gArray<gNumber> &values,
 int EfgPSNEBySubgame::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
 				   gList<BehavSolution> &solns)
 {
-  FindPureNash(sup, values, solns);
+  FindPureNash(sup, solns);
 
   return 0;
 }
 
-EfgPSNEBySubgame::EfgPSNEBySubgame(const EFSupport &S, 
-				   const gArray<gNumber> &v, int max)
-  : SubgameSolver(S, v, max), values(v)
+EfgPSNEBySubgame::EfgPSNEBySubgame(const EFSupport &S, int max)
+  : SubgameSolver(S, max)
 { }
 
 EfgPSNEBySubgame::~EfgPSNEBySubgame()   { }

@@ -16,37 +16,19 @@
 //                    MixedProfile<T> member functions
 //---------------------------------------------------------------------------
 
-template <class T> MixedProfile<T>::MixedProfile(const NFSupport &s,
-						 const gArray<gNumber> &params)
+template <class T> MixedProfile<T>::MixedProfile(const NFSupport &s)
   : gPVector<T>(s.NumStrats()), N(&s.Game()), support(s),
-    payoffs(new gRectArray<T>(s.Game().NumOutcomes(), s.Game().NumPlayers())),
-    paramvalues(params)
+    payoffs(new gRectArray<T>(s.Game().NumOutcomes(), s.Game().NumPlayers()))
 {
-  assert(paramvalues.Length() == N->Parameters()->Dmnsn());
   Centroid();
-  for (int i = 1; i <= paramvalues.Length(); paramvalues[i++] = gNumber(0));
   for (int outc = 1; outc <= N->NumOutcomes(); outc++)
     for (int pl = 1; pl <= N->NumPlayers(); pl++)
-      (*payoffs)(outc, pl) = N->Payoff(N->Outcomes()[outc], pl).Evaluate(paramvalues);
+      (*payoffs)(outc, pl) = N->Payoff(N->Outcomes()[outc], pl);
 }
-
-/*
-template <class T> MixedProfile<T>::MixedProfile(const Nfg &NF,
-						 const gPVector<T> &profile)
-  : gPVector<T>(profile), N(&NF), support(NF),
-    payoffs(new gRectArray<T>(NF.NumOutcomes(), NF.NumPlayers())),
-    paramvalues(NF.Parameters()->Dmnsn())
-{
-  for (int i = 1; i <= paramvalues.Length(); paramvalues[i++] = gNumber(0));
-  for (int outc = 1; outc <= N->NumOutcomes(); outc++)
-    for (int pl = 1; pl <= N->NumPlayers(); pl++)
-      (*payoffs)(outc, pl) = N->Payoff(N->Outcomes()[outc], pl).Evaluate(paramvalues);
-}
-*/
 
 template <class T> MixedProfile<T>::MixedProfile(const MixedProfile<T> &p)
   : gPVector<T>(p), N(p.N), support(p.support),
-    payoffs(new gRectArray<T>(*p.payoffs)), paramvalues(p.paramvalues)
+    payoffs(new gRectArray<T>(*p.payoffs))
 { }
 
 template <class T> MixedProfile<T>::~MixedProfile()

@@ -11,12 +11,10 @@
 #define EFGSOLNG_H
 
 #include "behavsol.h"
-#include "paramsd.h"
 
 // An interface class between EfgSolutionG (and related) and ExtensiveShow
 class EfgShowInterface  {
  public:
-  virtual ParameterSetList &Parameters(void) = 0;
   virtual BehavProfile<gNumber> CreateStartProfile(int how) = 0;
   virtual const gText &Filename(void) const = 0;
   virtual wxFrame *Frame(void) = 0;

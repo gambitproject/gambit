@@ -9,7 +9,7 @@
 #include "gmisc.h"
 
 MixedSolution::MixedSolution(const MixedProfile<double> &m, NfgAlgType creator)
-  : MixedProfile<gNumber>(m.Support(), m.ParameterValues()),
+  : MixedProfile<gNumber>(m.Support()),
     _Creator(creator), _IsNash(T_DONTKNOW), _IsPerfect(T_DONTKNOW),
     _IsProper(T_DONTKNOW), _GobitLambda(-1), _GobitValue(-1),
     _LiapValue(-1), _Id(0)
@@ -20,7 +20,7 @@ MixedSolution::MixedSolution(const MixedProfile<double> &m, NfgAlgType creator)
 }
 
 MixedSolution::MixedSolution(const MixedProfile<gRational> &m, NfgAlgType creator)
-  : MixedProfile<gNumber>(m.Support(), m.ParameterValues()),
+  : MixedProfile<gNumber>(m.Support()),
     _Creator(creator), _IsNash(T_DONTKNOW), _IsPerfect(T_DONTKNOW),
     _IsProper(T_DONTKNOW), _GobitLambda(-1), _GobitValue(-1),
     _LiapValue(-1), _Id(0)

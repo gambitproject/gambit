@@ -82,8 +82,7 @@ private:
 	gArray<double> sums;
 	bool Inc1(int row);
 public:
-	MixedProfileGrid(const NFSupport &S, const gArray<gNumber> &,
-			 double step);
+	MixedProfileGrid(const NFSupport &S, double step);
 	MixedProfileGrid(const MixedProfileGrid &P);
 	bool Inc(void);
 	void SetStatic(int static_player);
@@ -91,9 +90,8 @@ public:
 };
 
 
-MixedProfileGrid::MixedProfileGrid(const NFSupport &S, 
-				   const gArray<gNumber> &v, double step_)
-  : MixedProfile<double>(S, v), step(step_), sums(0)
+MixedProfileGrid::MixedProfileGrid(const NFSupport &S, double step_)
+  : MixedProfile<double>(S), step(step_), sums(0)
 {
 int i;
 for (i=1;i<=svlen.Length();i++)
@@ -266,7 +264,6 @@ class GridSolveModule  {
 		gVector<double> tmp; // scratch
 		double lam;
 		int static_player;
-		gArray<gNumber> values;
 
 		gVector<double> UpdateFunc(const MixedProfile<double> &P,int pl,double lam);
 		bool CheckEqu(MixedProfile<double> P,double lam,int cur_grid);
@@ -276,8 +273,7 @@ class GridSolveModule  {
 		// could use norms other then the simple one
 		virtual double Distance(const gVector<double> &a,const gVector<double> &b) const;
 	public:
-		GridSolveModule(const NFSupport &, const gArray<gNumber> &,
-				const GridParams &);
+		GridSolveModule(const NFSupport &, const GridParams &);
 		virtual ~GridSolveModule();
 		void GridSolve(void);
 };
@@ -389,10 +385,8 @@ else								// now redo the search on a finer grid around this point
 return true;
 }
 
-GridSolveModule::GridSolveModule(const NFSupport &S_, const gArray<gNumber> &v,
-                                 const GridParams &P)
-  : N(S_.Game()), S(S_), params(P), P_calc(S_, v), tmp(max(S.NumStrats())),
-    values(v)
+GridSolveModule::GridSolveModule(const NFSupport &S_, const GridParams &P)
+  : N(S_.Game()), S(S_), params(P), P_calc(S_), tmp(max(S.NumStrats()))
 {
   num_strats=S.NumStrats();
 // find the player w/ max num strats and make it static
@@ -415,7 +409,7 @@ if (params.powLam==0)
 	num_steps=(int)((params.maxLam-params.minLam)/params.delLam);
 else
 	num_steps=(int)(log(params.maxLam/params.minLam)/log(params.delLam+1));
-MixedProfileGrid M(S, values, params.delp1);
+MixedProfileGrid M(S, params.delp1);
 M.SetStatic(static_player);
 double lam=params.minLam;
 for (int step=1;step<num_steps  && !params.status.Get();step++)
@@ -434,11 +428,10 @@ if (params.status.Get()) params.status.Reset();
 
 
 
-int GridSolve(const NFSupport &support, const gArray<gNumber> &values,
-              const GridParams &params,
+int GridSolve(const NFSupport &support, const GridParams &params,
               gList<MixedSolution> &/*solutions*/)
 {
-  GridSolveModule module(support, values, params);
+  GridSolveModule module(support, params);
   module.GridSolve();
 //  solutions = module.GetSolutions();
   return 1;

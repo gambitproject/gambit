@@ -637,9 +637,7 @@ static Portion *GSM_Name_EfgElements(Portion **param)
 
 static Portion *GSM_NewEfg(Portion **param)
 {
-  gSpace *space = new gSpace;
-  ORD_PTR ord = &lex;
-  Efg *E = new Efg(space, new term_order(space, ord));
+  Efg *E = new Efg;
   ListPortion *players = (ListPortion *) param[0];
   for (int i = 1; i <= players->Length(); i++)
     E->NewPlayer()->SetName(((TextPortion *) (*players)[i])->Value());
@@ -794,9 +792,7 @@ static Portion *GSM_Payoff(Portion **param)
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
   Efg *efg = player->Game();
 
-  gArray<gNumber> values(efg->Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
-  return new NumberPortion(efg->Payoff(c, player->GetNumber()).Evaluate(values));
+  return new NumberPortion(efg->Payoff(c, player->GetNumber()));
 }
 
 //----------
@@ -1032,8 +1028,7 @@ static Portion *GSM_SetPayoff(Portion **param)
   Efg *efg = player->Game();
   gNumber value = ((NumberPortion *) param[2])->Value();
 
-  efg->SetPayoff(c, player->GetNumber(),
-                 gPoly<gNumber>(efg->Parameters(), value, efg->ParamOrder()));
+  efg->SetPayoff(c, player->GetNumber(), value);
 
   _gsm->InvalidateGameProfile(c->BelongsTo(), true);
 

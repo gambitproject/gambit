@@ -8,10 +8,9 @@
 #include "polensub.imp"
 
 int PolEnum(const EFSupport &support, const PolEnumParams &params,
-	 const gArray<gNumber> &values, 
-	 gList<BehavSolution> &solutions, long &nevals, double &time)
+	    gList<BehavSolution> &solutions, long &nevals, double &time)
 {
-  PolEnumBySubgame module(support, values, params);
+  PolEnumBySubgame module(support, params);
   module.Solve();
   nevals = module.NumEvals();
   time = module.Time();

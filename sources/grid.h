@@ -22,8 +22,7 @@ class GridParams   {
     GridParams(gStatus & = gstatus);
 };
 
-int GridSolve(const NFSupport &, const gArray<gNumber> &,
-	      const GridParams &, gList<MixedSolution> &);
+int GridSolve(const NFSupport &, const GridParams &, gList<MixedSolution> &);
 
 
 #endif    // GRID_H

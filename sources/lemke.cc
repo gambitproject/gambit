@@ -18,12 +18,11 @@ LemkeParams::LemkeParams(gStatus &s)
 
 
 int Lemke(const NFSupport &support, const LemkeParams &params, 
-	  const gArray<gNumber> &values,
           gList<MixedSolution> &solutions,
           int &npivots, double &time)
 {
   if (params.precision == precDOUBLE)  {
-    LemkeModule<double> module(support, params, values);
+    LemkeModule<double> module(support, params);
     module.Lemke();
     for (int i = 1; i <= module.GetSolutions().Length(); i++)  
       solutions.Append(MixedSolution(module.GetSolutions()[i]));
@@ -31,7 +30,7 @@ int Lemke(const NFSupport &support, const LemkeParams &params,
     time = module.Time();
   }
   else  {
-    LemkeModule<gRational> module(support, params, values);
+    LemkeModule<gRational> module(support, params);
     module.Lemke();
     for (int i = 1; i <= module.GetSolutions().Length(); i++)  
       solutions.Append(MixedSolution(module.GetSolutions()[i]));

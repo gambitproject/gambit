@@ -10,13 +10,11 @@
 #define NFGSOLNG_H
 
 #include "mixedsol.h"
-#include "paramsd.h"
 
 // An interface class between NfgSolutionG (and related) and NfgShow
 class NfgShowInterface   {
  public:
   virtual ~NfgShowInterface()  { }
-  virtual ParameterSetList &Parameters(void) = 0;
   virtual MixedProfile<gNumber> CreateStartProfile(int how) = 0;
   virtual const gText &Filename(void) const = 0;
   virtual wxFrame *Frame(void) = 0;

@@ -179,14 +179,13 @@ void SubgameSolver::FindSubgames(Node *n, gList<BehavSolution> &solns,
       for (i = 1; i <= foo.NumPlayers(); i++)  {
 	subval[i] = sol[solno].Payoff(i);
 	if (n->GetOutcome())  {
-	  subval[i] += efg.Payoff(n->GetOutcome(), i).Evaluate(paramvalues);
+	  subval[i] += efg.Payoff(n->GetOutcome(), i);
         }
       }
 
       EFOutcome *ov = efg.NewOutcome();
       for (i = 1; i <= efg.NumPlayers(); i++)
-	efg.SetPayoff(ov, i, gPoly<gNumber>(efg.Parameters(), gNumber(subval[i]),
-                                            efg.ParamOrder()));
+	efg.SetPayoff(ov, i, subval[i]);
  
       values.Append(ov);
     }
@@ -223,10 +222,9 @@ void SubgameSolver::SelectSolutions(int, const Efg &,
 				       gList<BehavSolution> &)
 { }
 
-SubgameSolver::SubgameSolver(const EFSupport &S, const gArray<gNumber> &v,
-			     int max)
-  : max_solns(max), efg(S.Game()), support(efg), solution(S, v),
-    paramvalues(v), infosets(efg.NumPlayers())
+SubgameSolver::SubgameSolver(const EFSupport &S, int max)
+  : max_solns(max), efg(S.Game()), support(efg), solution(S),
+    infosets(efg.NumPlayers())
 {
   for (int i = 1; i <= efg.NumPlayers(); i++)
     infosets[i] = new gArray<Infoset *>(efg.Players()[i]->Infosets());

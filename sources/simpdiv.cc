@@ -12,11 +12,11 @@ SimpdivParams::SimpdivParams(gStatus &status_)
 { }
 
 int Simpdiv(const NFSupport &support, const SimpdivParams &params,
-	    const gArray<gNumber> &values, gList<MixedSolution> &solutions,
+	    gList<MixedSolution> &solutions,
 	    int &nevals, int &niters, double &time)
 {
   if (params.precision == precDOUBLE)  {
-    SimpdivModule<double> module(support, params, values);
+    SimpdivModule<double> module(support, params);
     module.Simpdiv();
     nevals = module.NumEvals();
     niters = module.NumIters();
@@ -24,7 +24,7 @@ int Simpdiv(const NFSupport &support, const SimpdivParams &params,
     solutions = module.GetSolutions();
   }
   else if (params.precision == precRATIONAL)  {
-    SimpdivModule<gRational> module(support, params, values);
+    SimpdivModule<gRational> module(support, params);
     module.Simpdiv();
     nevals = module.NumEvals();
     niters = module.NumIters();

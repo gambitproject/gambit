@@ -151,7 +151,6 @@ menu_bar->Check(SOLVE_STANDARD,use_standard);
 Bool EfgShow::OnClose(void)
 {
 	ChangeSupport(DESTROY_DIALOG);
-   ChangeParameters(DESTROY_DIALOG);
    ChangeOutcomes(DESTROY_DIALOG);
    InspectSolutions(DESTROY_DIALOG);
    Show(FALSE);
@@ -203,7 +202,6 @@ switch (id)
 	case TREE_OUTCOMES: ChangeOutcomes(CREATE_DIALOG); break;
 	case TREE_PLAYERS:tw->tree_players();break;
 	case TREE_INFOSETS:tw->tree_infosets();break;
-	case BUILD_PARAMS: ChangeParameters(CREATE_DIALOG); break;
 // Infoset menu
 	case INFOSET_MERGE:tw->infoset_merge();break;
 	case INFOSET_BREAK:tw->infoset_break();break;
@@ -517,9 +515,7 @@ if (!ef)	// must create a new extensive form from scratch or file
    	gArray<gText> names;
 		if (GetEFParams(names,parent))
       {
-			gSpace *space = new gSpace;
-			ORD_PTR ord = &lex;
-      	ef=new Efg(space, new term_order(space, ord));
+      	ef=new Efg;
          for (int i=1;i<=names.Length();i++)	ef->NewPlayer()->SetName(names[i]);
       }
 	}

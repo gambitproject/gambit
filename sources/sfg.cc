@@ -15,9 +15,8 @@
 //----------------------------------------------------
 
 
-Sfg::Sfg(const EFSupport &S, const gArray<gNumber> &v)
-  : EF(S.Game()), efsupp(S), seq(EF.NumPlayers()),isets(EF.NumPlayers()),
-    values(v)
+Sfg::Sfg(const EFSupport &S)
+  : EF(S.Game()), efsupp(S), seq(EF.NumPlayers()),isets(EF.NumPlayers())
 { 
   int i;
   gArray<int> zero(EF.NumPlayers());
@@ -86,7 +85,7 @@ MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq,
   if(n->GetOutcome()) {
     for(pl = 1;pl<=seq.Length();pl++)
       (*(*SF)[seq])[pl] +=
-      prob * EF.Payoff(n->GetOutcome(),pl ).Evaluate(values);
+      prob * EF.Payoff(n->GetOutcome(),pl);
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
@@ -151,7 +150,7 @@ int Sfg::ActionNumber(int pl, int j) const
 
 BehavProfile<gNumber> Sfg::ToBehav(const gPVector<double> &x) const
 {
-  BehavProfile<gNumber> b(efsupp,values);
+  BehavProfile<gNumber> b(efsupp);
 
   Sequence *sij;
   const Sequence *parent;

@@ -1,7 +1,7 @@
 //
 // FILE: polenum.imp -- Polynomial Nash Enum module
 //
-// @(#)polenum.imp	1.9 02/07/98 
+// $Id$
 //
 
 #include "gwatch.h"
@@ -23,7 +23,6 @@ private:
   int num_vars;
   long count,nevals;
   double time;
-  gArray<gNumber> values;
   gList<MixedSolution> solutions;
 
   bool EqZero(T x) const;
@@ -37,8 +36,7 @@ private:
 
   int SaveSolutions(const gList<gVector<gDouble> > &list);
 public:
-  PolEnumModule(const NFSupport &, const PolEnumParams &p,
-	     const gArray<gNumber> &values);
+  PolEnumModule(const NFSupport &, const PolEnumParams &p);
   
   int PolEnum(void);
   
@@ -55,12 +53,11 @@ public:
 //-------------------------------------------------------------------------
 
 template <class T>
-PolEnumModule<T>::PolEnumModule(const NFSupport &S, const PolEnumParams &p,
-			  const gArray<gNumber> &v)
+PolEnumModule<T>::PolEnumModule(const NFSupport &S, const PolEnumParams &p)
   : NF(S.Game()), support(S), params(p), 
     Space(support.TotalNumStrats()-NF.NumPlayers()), 
     Lex(&Space, &lex), num_vars(support.TotalNumStrats()-NF.NumPlayers()), 
-    count(0), nevals(0), values(v)
+    count(0), nevals(0)
 { 
 //  gEpsilon(eps,12);
 }
@@ -123,7 +120,7 @@ template <class T> int PolEnumModule<T>::PolEnum(void)
 template <class T> int 
 PolEnumModule<T>::SaveSolutions(const gList<gVector<gDouble> > &list)
 {
-  MixedProfile<double> profile(support, values);
+  MixedProfile<double> profile(support);
   int i,j,k,kk,index;
   double sum;
 
@@ -228,8 +225,8 @@ PolEnumModule<T>::Equation(int i, int strat1, int strat2) const
       if(i!=k) 
 	term*=Prob(k,support.Find(profile[k]));
     T coeff,ap,bp;
-    ap = NF.Payoff(A.GetOutcome(), i).Evaluate(values);
-    bp = NF.Payoff(B.GetOutcome(), i).Evaluate(values);
+    ap = NF.Payoff(A.GetOutcome(), i);
+    bp = NF.Payoff(B.GetOutcome(), i);
     coeff = ap - bp;
     term*=coeff;
     equation+=term;

@@ -22,7 +22,7 @@ class ZSumParams     {
     ZSumParams(gStatus &status_ = gstatus);
 };
 
-int ZSum(const NFSupport &, const ZSumParams &, const gArray<gNumber> &,
+int ZSum(const NFSupport &, const ZSumParams &,
 	 gList<MixedSolution> &, int &npivots, double &time);
 
 #endif    // NFGCSUM_H

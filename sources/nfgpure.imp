@@ -18,17 +18,15 @@ int FindPureNash(const Nfg &N, const NFSupport &S, gList<MixedSolution> &eqs)
   int index;
   NfgContIter citer(S);
 
-  gArray<gNumber> values(N.Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
   do  {
     int flag = 1;
     NfgIter niter(citer);
     
     for (int pl = 1; flag && pl <= N.NumPlayers(); pl++)  {
-      double current = N.Payoff(citer.GetOutcome(), pl).Evaluate(values);
+      double current = N.Payoff(citer.GetOutcome(), pl);
       for (int i = 1; i <= S.NumStrats(pl); i++)  {
 	niter.Next(pl);
-	if (N.Payoff(niter.GetOutcome(), pl).Evaluate(values) > (gNumber)current)  {
+	if (N.Payoff(niter.GetOutcome(), pl) > (gNumber)current)  {
 	  flag = 0;
 	  break;
 	}
@@ -36,7 +34,7 @@ int FindPureNash(const Nfg &N, const NFSupport &S, gList<MixedSolution> &eqs)
     }
     
     if (flag)  {
-      MixedProfile<double> temp(S, values);
+      MixedProfile<double> temp(S);
       // zero out all the entries, since any equlibria are pure
       ((gVector<double> &) temp).operator=(0);
       gArray<int> profile = citer.Get();

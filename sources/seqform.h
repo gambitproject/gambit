@@ -34,14 +34,13 @@ class SeqFormBySubgame : public SubgameSolver  {
     EfgAlgType AlgorithmID() const { return EfgAlg_SEQFORMSUB; }    
 
   public:
-    SeqFormBySubgame(const EFSupport &, const gArray<gNumber> &values,
-                     const SeqFormParams &, int max = 0);
+    SeqFormBySubgame(const EFSupport &, const SeqFormParams &, int max = 0);
     virtual ~SeqFormBySubgame();
 
     int NumPivots(void) const  { return npivots; }
 };
 
-int SeqForm(const EFSupport &, const gArray<gNumber> &, const SeqFormParams &,
+int SeqForm(const EFSupport &, const SeqFormParams &,
 	    gList<BehavSolution> &, int &npivots, double &time);
 
 #endif    // SEQFORM_H

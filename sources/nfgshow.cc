@@ -25,7 +25,7 @@ return t;
 
 NfgShow::NfgShow(Nfg &N,EfgNfgInterface *efg,wxFrame *pframe_)
               :EfgNfgInterface(gNFG,efg), nf(N), nf_iter(N),
-               param_sets(N.Parameters(),"Nfg Params"),pframe(pframe_)
+               pframe(pframe_)
 
 {
 pl1=1;pl2=2;		// use the defaults
@@ -39,7 +39,6 @@ spread=new NormalSpread(disp_sup,pl1,pl2,this,pframe);
 support_dialog=0;	// no support dialog yet
 soln_show=0;			// no solution inspect window yet.
 outcome_dialog=0;	// no outcome dialog yet.
-params_dialog=0;	// no parameter dialog yet
 SetPlayers(pl1,pl2,true);
 // Create the accelerators (to add an accelerator, see const.h)
 ReadAccelerators(accelerators,"NfgAccelerators");
@@ -68,13 +67,8 @@ for (i=1;i<=rows;i++)
 		for (int k=1;k<=nf.NumPlayers();k++)
 		{
 			pay_str+=("\\C{"+ToText(draw_settings.GetPlayerColor(k))+"}");
-         if (param_sets.PolyVal()==false)
-				pay_str+=ToText(nf.Payoff(outcome, k));
-         else
-         {
-         	pay_str+=ToText(nf.Payoff(outcome, k).Evaluate(param_sets.CurSet()));
-            if (nf.Payoff(outcome, k).Degree()>0) hilight=true;
-         }
+			pay_str+=ToText(nf.Payoff(outcome, k));
+			
 			if (k!=nf.NumPlayers()) pay_str+=',';
 		}
 	}
@@ -105,7 +99,7 @@ if (sup_to==sup_from) return from;
 gArray<int> dim_from=sup_from.NumStrats();
 gArray<int> dim_to=sup_to.NumStrats();
 assert(dim_from.Length()==dim_to.Length());
-MixedProfile<gNumber> to(sup_to,from.ParameterValues());
+MixedProfile<gNumber> to(sup_to);
 for (int i=1;i<=dim_to.Length();i++)
 	for (int j=1;j<=dim_to[i];j++)
 	{
@@ -212,7 +206,7 @@ class NFChangePayoffs: public MyDialogBox
 public:
 	NFChangePayoffs(Nfg &nf,const gArray<int> &profile,wxWindow *parent);
 	int OutcomeNum(void);
-	gPolyArray<gNumber> Payoffs(void);
+	gArray<gNumber> Payoffs(void);
 };
 
 
@@ -278,7 +272,7 @@ NFOutcome *outc=0;
 if (outc_num<=nf.NumOutcomes())	outc=nf.Outcomes()[outc_num];
 for (int i=1;i<=nf.NumPlayers();i++)
 {
-	gPoly<gNumber> payoff(nf.Parameters(),gNumber(0),nf.ParamOrder());
+  gNumber payoff = 0;
 	if (outc) payoff=nf.Payoff(outc,i);
 	payoff_items[i]->SetValue(ToText(payoff));
 }
@@ -292,12 +286,12 @@ return outcome_item->GetSelection()+1;
 }
 
 
-gPolyArray<gNumber> NFChangePayoffs::Payoffs(void)
+gArray<gNumber> NFChangePayoffs::Payoffs(void)
 {
-gPolyArray<gNumber> payoffs(nf.Parameters(),nf.ParamOrder(),nf.NumPlayers());
-for (int i=1;i<=nf.NumPlayers();i++)
-	payoffs[i]=gPoly<gNumber>(nf.Parameters(),payoff_items[i]->GetValue(),nf.ParamOrder());
-return payoffs;
+  gArray<gNumber> payoffs(nf.NumPlayers());
+  for (int i=1;i<=nf.NumPlayers();i++)
+    FromText(payoff_items[i]->GetValue(), payoffs[i]);
+  return payoffs;
 }
 
 
@@ -323,7 +317,7 @@ NFChangePayoffs *payoffs_dialog=new NFChangePayoffs(nf,profile,spread);
 if (payoffs_dialog->Completed()==wxOK)  {
 	NFOutcome *outc;
 	int outc_num=payoffs_dialog->OutcomeNum();
-	gPolyArray<gNumber> payoffs(payoffs_dialog->Payoffs());
+	gArray<gNumber> payoffs(payoffs_dialog->Payoffs());
 	if (outc_num>nf.NumOutcomes())
 		outc=nf.NewOutcome();
 	else
@@ -499,7 +493,7 @@ spread->EnableInspect(FALSE);
 
 MixedSolution NfgShow::CreateSolution(void)
 {
-return MixedSolution(MixedProfile<gNumber>(*cur_sup,param_sets.CurSet()));
+  return MixedSolution(MixedProfile<gNumber>(*cur_sup));
 }
 
 
@@ -510,7 +504,6 @@ void NfgShow::OnOk(void)
 if (soln_show) {soln_show->OnOk();}
 ChangeSupport(DESTROY_DIALOG);
 if (outcome_dialog) delete outcome_dialog;
-ChangeParameters(DESTROY_DIALOG);
 spread->Close();
 delete &nf;
 }
@@ -625,7 +618,7 @@ wxFrame *NfgShow::Frame(void)
 
 MixedProfile<gNumber> NfgShow::CreateStartProfile(int how)
 {
-MixedSolution start(MixedProfile<gNumber>(*cur_sup,param_sets.CurSet()));
+  MixedProfile<gNumber> start(*cur_sup);
 if (how==0)	start.Centroid();
 if (how==1 || how==2)
 {
@@ -654,7 +647,7 @@ return start;
 //****************************************************************************
 
 #include "gstatus.h"
-NFSupport *ComputeDominated(const Nfg &, NFSupport &S, const gArray<gNumber> &,bool strong,
+NFSupport *ComputeDominated(const Nfg &, NFSupport &S, bool strong,
 const gArray<int> &players, gOutput &tracefile,gStatus &status); // in nfdom.cc
 
 
@@ -664,20 +657,18 @@ NFSupport *sup=new NFSupport(nf);
 DominanceSettings DS;  // reads in dominance defaults
 gArray<int> players(nf.NumPlayers());
 for (int i=1;i<=nf.NumPlayers();i++) players[i]=i;
-gArray<gNumber> values(nf.Parameters()->Dmnsn());
-for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
 
 if (DS.UseElimDom())
 {
   NFSupport *temp_sup;
   if (DS.FindAll())
   {
-      while ((temp_sup=ComputeDominated(sup->Game(),*sup,values,DS.DomStrong(),players,gnull,gstatus)))
+      while ((temp_sup=ComputeDominated(sup->Game(),*sup,DS.DomStrong(),players,gnull,gstatus)))
 			sup=temp_sup;
 	}
 	else
 	{
-		if ((temp_sup=ComputeDominated(sup->Game(),*sup,values,DS.DomStrong(),players,gnull,gstatus)))
+		if ((temp_sup=ComputeDominated(sup->Game(),*sup,DS.DomStrong(),players,gnull,gstatus)))
 			sup=temp_sup;
 	}
 }
@@ -697,7 +688,7 @@ void NfgShow::SolutionToExtensive(const MixedSolution &mp,bool set)
 assert(InterfaceOk());	// we better have someone to send solutions to
 //assert(mp!=Solution());
 EFSupport S(*InterfaceObjectEfg());
-BehavProfile<gNumber> bp(S,param_sets.CurSet());
+BehavProfile<gNumber> bp(S);
 MixedToBehav(nf,mp,*InterfaceObjectEfg(),bp);
 SolutionToEfg(bp,set);
 #endif
@@ -719,9 +710,7 @@ if (nf==0) // must create a new normal form, from scratch or from file
 	{
 		if (GetNFParams(dimensionality,names,parent))
 		{
-		   gSpace *space = new gSpace;
-		   ORD_PTR ord = &lex;
-			nf=new Nfg(dimensionality,space,new term_order(space, ord));
+		  nf=new Nfg(dimensionality);
          for (int i=1;i<=names.Length();i++) nf->Players()[i]->SetName(names[i]);
 		}
 	}

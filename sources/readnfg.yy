@@ -30,20 +30,13 @@
 					    const gList<gNumber> &, \
 					    const gList<gText> &); \
                      void SetPayoff(int cont, int pl, \
-				    const gPoly<gNumber> &); \
-  	             bool ExistsVariable(const gText &); \
+				    const gNumber &); \
 		     int Parse(void); \
                      virtual ~NfgFileReader();
 
 %define CONSTRUCTOR_PARAM     gInput &f, Nfg *& nfg
 
 %define CONSTRUCTOR_INIT      : infile(f), N(nfg)
-
-%union  {
-  gText *text;
-}
-
-%type <text> number
 
 %token LBRACE
 %token RBRACE
@@ -62,7 +55,7 @@ nfgfile:      header
               body  { return 0; }
 
 header:       NAME { title = last_name; pl = 0; }  playerlist 
-              stratlist paramsopt commentopt
+              stratlist commentopt
  
 playerlist:   LBRACE players RBRACE
 
@@ -85,14 +78,6 @@ stratnames:   stratname
           |   stratnames stratname
 
 stratname:    NAME  { stratnames.Append(last_name); numbers[pl] += 1; }
-
-paramsopt:        
-         |         LBRACE paramlist RBRACE
-         ;
-
-paramlist:         NAME  { params.Append(last_name); }
-         |         paramlist NAME  { params.Append(last_name); }
-         ;
 
 commentopt:
           |   NAME   { comment = last_name; }
@@ -121,9 +106,7 @@ payoff:       NUMBER
 		    pl = 1;
 		  }	
 		if (cont > ncont)  YYERROR;
-		SetPayoff(cont, pl, gPoly<gNumber>(N->Parameters(),
-                                                   last_number,
-                                                   N->ParamOrder()));
+		SetPayoff(cont, pl, last_number);
 		pl++;
 	      }
 
@@ -143,42 +126,12 @@ outcome:       LBRACE NAME
 outcpaylist:   outcpay
            |   outcpaylist commaopt outcpay
 
-outcpay:       number   
+outcpay:       NUMBER   
                  { if (pl > N->NumPlayers())  YYERROR;
-                   N->SetPayoff(outcome, pl++, 
-	                        gPoly<gNumber>(N->Parameters(),
-                                               *$1,
-					       N->ParamOrder())); 
-                   delete $1; } 
-       |       polynomial
-                 { if (pl > N->NumPlayers())  YYERROR;
-                   N->SetPayoff(outcome, pl++, 
-	                        gPoly<gNumber>(N->Parameters(),
-                                               last_poly,
-					       N->ParamOrder()));
-                   last_poly = ""; } 
-       |       number '+' 
-                { last_poly = *$1 + " + "; delete $1; }
-               polynomial
-                 { if (pl > N->NumPlayers())  YYERROR;
-                   N->SetPayoff(outcome, pl++, 
-	                        gPoly<gNumber>(N->Parameters(),
-                                               last_poly,
-					       N->ParamOrder()));
-                   last_poly = ""; } 
-       |       number '-' 
-               { last_poly = *$1 + " - "; delete $1; }
-               polynomial
-                 { if (pl > N->NumPlayers())  YYERROR;
-                   N->SetPayoff(outcome, pl++, 
-	                        gPoly<gNumber>(N->Parameters(),
-                                               last_poly,
-					       N->ParamOrder())); 
-	           last_poly = ""; } 
+                   N->SetPayoff(outcome, pl++, last_number);  }
  
 commaopt:    | ','   
 
-number:           NUMBER    { $$ = new gText(ToText(last_number)); }
 
 contingencylist:  contingency
                |  contingencylist contingency
@@ -188,30 +141,6 @@ contingency:   NUMBER
                   if (last_number != gNumber(0))
                     N->SetOutcome(cont++, N->Outcomes()[last_number]); }
               
-polynomial:        polyterm
-          |        polynomial '+' { last_poly += "+ "; } polyterm
-          |        polynomial '-' { last_poly += "- "; } polyterm
-          ;
-
-polyterm:          number { last_poly += *$1 + " "; delete $1; }
-                   variables
-        ;
-
-variables:         variable
-         |         variables variable
-         ;
-
-variable:          varname
-                   { last_poly += " "; }
-        |          varname '^' NUMBER
-                   { last_poly += "^" + ToText(last_number) + " "; }
-        ;
-
-varname:           VARNAME
-                   { if (!ExistsVariable(last_name))  YYERROR;
-                     last_poly += last_name; }
-
-
 %%
 
 void NfgFileReader::yyerror(char *)    { }
@@ -311,11 +240,7 @@ bool NfgFileReader::CreateNfg(const gList<gText> &players,
     if (dim[i] <= 0)   return false;
   }
   
-  ORD_PTR ord = &lex;
-  gSpace *space = new gSpace(params.Length());
-  for (int var = 1; var <= params.Length(); var++)
-    space->SetVariableName(var, params[var]);
-  N = new Nfg(dim, space, new term_order(space, ord));
+  N = new Nfg(dim);
   int strat = 1;
   for (i = 1; i <= dim.Length(); i++)  {
     N->Players()[i]->SetName(players[i]);
@@ -328,19 +253,11 @@ bool NfgFileReader::CreateNfg(const gList<gText> &players,
 }
 
 void NfgFileReader::SetPayoff(int cont, int pl, 
-                              const gPoly<gNumber> &value)
+                              const gNumber &value)
 {
   if (pl == 1)
     N->SetOutcome(cont, N->NewOutcome());
   N->SetPayoff(N->GetOutcome(cont), pl, value);
-}
-
-bool NfgFileReader::ExistsVariable(const gText &varname)
-{
-  for (int var = 1; var <= N->Parameters()->Dmnsn(); var++)
-    if (N->Parameters()->GetVariableName(var) == varname)
-      return true;
-  return false;
 }
 
 int NfgFileReader::Parse(void)

@@ -1,7 +1,6 @@
 //
 // FILE: treewin.cc -- Drawing functions for TreeWindow
 //
-//
 // $Id$
 //
 
@@ -1117,31 +1116,23 @@ double TreeWindow::ProbAsDouble(const Node *n,int action) const
 
 gText TreeWindow::OutcomeAsString(const Node *n,bool &hilight) const
 {
-if (n->GetOutcome())
-{
-	EFOutcome *tv = n->GetOutcome();
-	const gPolyArray<gNumber> &v=ef.Payoff(tv);
-	gText tmp="(";
-	for (int i=v.First();i<=v.Last();i++)
-	{
-		if (i!=1) tmp+=",";
-		if (draw_settings.ColorCodedOutcomes())
-			tmp+=("\\C{"+ToText(draw_settings.GetPlayerColor(i))+"}");
-      if (frame->Parameters().PolyVal()==false)
-			tmp+=ToText(v[i]);
-      else
-      {
-      	tmp+=ToText(v[i].Evaluate(frame->Parameters().CurSet()));
-         if (v[i].Degree()>0) hilight=true;
-      }
-	}
-	if (draw_settings.ColorCodedOutcomes()) tmp+=("\\C{"+ToText(WX_COLOR_LIST_LENGTH-1)+"}");
-	tmp+=")";
-
-	return tmp;
-}
-else
-	return "";
+  if (n->GetOutcome())   {
+    EFOutcome *tv = n->GetOutcome();
+    const gArray<gNumber> &v=ef.Payoff(tv);
+    gText tmp="(";
+    for (int i=v.First();i<=v.Last();i++)   {
+      if (i!=1) tmp+=",";
+      if (draw_settings.ColorCodedOutcomes())
+	tmp+=("\\C{"+ToText(draw_settings.GetPlayerColor(i))+"}");
+      tmp+=ToText(v[i]);
+    }
+    if (draw_settings.ColorCodedOutcomes()) tmp+=("\\C{"+ToText(WX_COLOR_LIST_LENGTH-1)+"}");
+    tmp+=")";
+    
+    return tmp;
+  }
+  else
+    return "";
 }
 
 //---------------------------------------------------------------------

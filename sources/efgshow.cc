@@ -46,10 +46,7 @@ public:
 EfgShow::EfgShow(Efg &ef_,EfgNfgInterface *nfg,int ,wxFrame *frame,
                  const char *title, int x, int y,int w, int h,int type)
 	     : wxFrame(frame,(char *)title, x, y, w, h, type), 
-               EfgNfgInterface(gEFG,nfg), parent(frame), ef(ef_),
-               param_sets(ef_.Parameters(),"Efg Params"), tw(0)
-
-
+               EfgNfgInterface(gEFG,nfg), parent(frame), ef(ef_), tw(0)
 {
 Show(FALSE);
 //--------------Define all the menus----------------------------
@@ -65,7 +62,6 @@ SetIcon(frame_icon);
 // No support dialog yet
 support_dialog=0;
 outcome_dialog=0;
-params_dialog=0;
 // No solution inspect window yet
 soln_show=0;
 // Create the status bar
@@ -269,48 +265,12 @@ OnSelectedMoved(0);	// update the node inspect window if any
 
 BehavSolution EfgShow::CreateSolution(void)
 {
-return BehavSolution(BehavProfile<gNumber>(*cur_sup,param_sets.CurSet()));
+  return BehavSolution(BehavProfile<gNumber>(*cur_sup));
 }
 
 #include "efgoutcd.h"
 #define UPDATE1_DIALOG	4
 #define PARAMS_ADD_VAR	5       
-void EfgShow::ChangeParameters(int what)
-{
-if (what==CREATE_DIALOG && !params_dialog)
-	params_dialog=new ParameterDialog(ef.Parameters(),this,this);
-if (what==DESTROY_DIALOG && params_dialog)
-	{delete params_dialog;params_dialog=0;}
-if (what==PARAMS_ADD_VAR)
-{
-	// Save old poly's in strings to re-create later
-	gRectArray<gText> old_polys(ef.NumOutcomes(),ef.NumPlayers());
-	for (int i=1;i<=ef.NumOutcomes();i++)
-		for (int j=1;j<=ef.NumPlayers();j++)
-			old_polys(i,j)=ToText(ef.Payoff(ef.Outcomes()[i],j));
-	// Create a new variable
-	for (int i=1;i<=Parameters().Length();i++) Parameters()[i].Append(0);
-   ef.Parameters()->CreateVariables();
-	// Re-create the outcomes
-	for (int i=1;i<=ef.NumOutcomes();i++)
-		for (int j=1;j<=ef.NumPlayers();j++)
-			ef.SetPayoff(ef.Outcomes()[i],j,
-             gPoly<gNumber>(ef.Parameters(),old_polys(i,j),ef.ParamOrder()));
-
-   if (outcome_dialog) outcome_dialog->UpdateVals();
-	tw->OnPaint();
-}
-if (what==UPDATE1_DIALOG) // Just changed some values
-{
-   if (outcome_dialog) outcome_dialog->UpdateVals();
-	tw->OnPaint();
-}
-
-}
-
-ParameterSetList &EfgShow::Parameters(void)
-{return param_sets;}
-
 void EfgShow::ChangeOutcomes(int what,const gText out_name)
 {
 if (what==CREATE_DIALOG && !outcome_dialog)
@@ -498,9 +458,9 @@ delete pick;
 
 BehavProfile<gNumber> EfgShow::CreateStartProfile(int how)
 {
-BehavSolution start(BehavProfile<gNumber>(*cur_sup,param_sets.CurSet()));
-if (how==0)	start.Centroid();
-if (how==1 || how==2)
+  BehavProfile<gNumber> start(*cur_sup);
+  if (how==0)	start.Centroid();
+  if (how==1 || how==2)
 {
 	if (starting_points.last==-1 || how==2)
 	{

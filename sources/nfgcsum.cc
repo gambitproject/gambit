@@ -17,19 +17,18 @@ ZSumParams::ZSumParams(gStatus &status_)
 { }
 
 int ZSum(const NFSupport &support, const ZSumParams &params, 
-	 const gArray<gNumber> &values,
 	 gList<MixedSolution> &solutions,
 	 int &npivots, double &time)
 {
   if (params.precision == precDOUBLE)  {
-    ZSumModule<double> module(support, params, values);
+    ZSumModule<double> module(support, params);
     module.ZSum();
     module.GetSolutions(solutions);
     npivots = module.NumPivots();
     time = module.Time();
   }
   else  {
-    ZSumModule<gRational> module(support, params, values);
+    ZSumModule<gRational> module(support, params);
     module.ZSum();
     module.GetSolutions(solutions);
     npivots = module.NumPivots();

@@ -54,8 +54,7 @@ class NFGobitFunc : public gC2Function<double>  {
 
 NFGobitFunc::NFGobitFunc(const Nfg &N,
 			 const MixedProfile<gNumber> &start)
-  : _nevals(0L), _nfg(N), _Lambda(N.NumPlayers()),
-    _p(start.Support(), start.ParameterValues())
+  : _nevals(0L), _nfg(N), _Lambda(N.NumPlayers()), _p(start.Support())
 {
   for (int i = 1; i <= _p.Length(); i++)
     _p[i] = start[i];
@@ -192,7 +191,7 @@ void Gobit(const Nfg &N, NFGobitParams &params,
     num_steps = (int) (log(params.maxLam / params.minLam) /
 		       log(params.delLam + 1.0));
 
-  MixedProfile<double> p(start.Support(), start.ParameterValues());
+  MixedProfile<double> p(start.Support());
   for (int j = 1; j <= p.Length(); j++)
     p[j] = start[j];
 
@@ -271,8 +270,7 @@ NFKGobitFunc::NFKGobitFunc(const Nfg &N,
 				 const MixedProfile<gNumber> &start, 
 				 const NFGobitParams & p)
   :_nevals(0L), _domain_err(false), _nfg(N), _K(1.0),
-   _p(start.Support(), start.ParameterValues()) , 
-    F(N,start), params(p)
+   _p(start.Support()), F(N,start), params(p)
 {
   for (int i = 1; i <= _p.Length(); i++)
     _p[i] = start[i];
@@ -363,7 +361,7 @@ void KGobit(const Nfg &N, NFGobitParams &params,
     num_steps = (int) (log(params.maxLam / params.minLam) /
 		       log(params.delLam + 1.0));
 
-  MixedProfile<double> p(start.Support(), start.ParameterValues());
+  MixedProfile<double> p(start.Support());
   MixedProfile<double> p_old(p);
 
   gMatrix<double> xi(lambda.Length(), lambda.Length());

@@ -108,8 +108,7 @@ bool ComputeDominated(const Nfg &N, const NFSupport &S, NFSupport &newS,
 }
 
 
-NFSupport *ComputeDominated(const Nfg &N, NFSupport &S,
-                            const gArray<gNumber> &params, bool strong,
+NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, bool strong,
 			    const gArray<int> &players,
 			    gOutput &tracefile, gStatus &status)
 {
@@ -119,7 +118,7 @@ NFSupport *ComputeDominated(const Nfg &N, NFSupport &S,
   paytable = new gRectArray<gNumber>(N.NumOutcomes(), N.NumPlayers());
   for (int outc = 1; outc <= N.NumOutcomes(); outc++)  {
     for (int pl = 1; pl <= N.NumPlayers(); pl++)
-      (*paytable)(outc, pl) = N.Payoff(N.Outcomes()[outc], pl).Evaluate(params);
+      (*paytable)(outc, pl) = N.Payoff(N.Outcomes()[outc], pl);
   }
 
   for (int i = 1; i <= players.Length() && !status.Get(); i++)   {

@@ -24,8 +24,8 @@ public:
 };
 
 
-int PolEnum(const NFSupport &, const PolEnumParams &, const gArray<gNumber> &,
-	 gList<MixedSolution> &, long &nevals, double &time);
+int PolEnum(const NFSupport &, const PolEnumParams &, 
+	    gList<MixedSolution> &, long &nevals, double &time);
 
 #endif    // POLENUM_H
 

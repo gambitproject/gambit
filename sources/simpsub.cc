@@ -19,12 +19,12 @@ int SimpdivBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
   int nev;
   int nit;
   double time;
-  Simpdiv(*S, params, values, solutions, nev, nit, time);
+  Simpdiv(*S, params, solutions, nev, nit, time);
 
   nevals += nev;
 
   for (int i = 1; i <= solutions.Length(); i++)  {
-    BehavProfile<gNumber> bp(sup, values);
+    BehavProfile<gNumber> bp(sup);
     MixedToBehav(*N, solutions[i], E, bp);
     solns.Append(bp);
   }
@@ -35,18 +35,17 @@ int SimpdivBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 }
 
 SimpdivBySubgame::SimpdivBySubgame(const EFSupport &S, 
-				   const gArray<gNumber> &v,
 				   const SimpdivParams &p, int max)
-  : SubgameSolver(S, v, max), params(p), values(v)
+  : SubgameSolver(S, max), params(p)
 { }
 
 SimpdivBySubgame::~SimpdivBySubgame()   { }
 
 int Simpdiv(const EFSupport &support, const SimpdivParams &params,
-	    const gArray<gNumber> &values, gList<BehavSolution> &solutions,
+	    gList<BehavSolution> &solutions,
 	    int &nevals, int &/*niters*/, double &time)
 {
-  SimpdivBySubgame module(support, values, params);
+  SimpdivBySubgame module(support, params);
   module.Solve();
   
   solutions = module.GetSolutions();

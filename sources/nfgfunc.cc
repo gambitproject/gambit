@@ -76,12 +76,10 @@ static Portion *GSM_DeleteOutcome(Portion **param)
 }
 
 
-NFSupport *ComputeDominated(const Nfg &, NFSupport &S,
-                            const gArray<gNumber> &params, bool strong,
+NFSupport *ComputeDominated(const Nfg &, NFSupport &S, bool strong,
 			    const gArray<int> &players,
 			    gOutput &tracefile, gStatus &status);
-NFSupport *ComputeMixedDominated(const Nfg &, NFSupport &S,
-         const gArray<gNumber> &values, bool strong,
+NFSupport *ComputeMixedDominated(const Nfg &, NFSupport &S, bool strong,
 				 const gArray<int> &players,
 				 gOutput &tracefile, gStatus &status);
 
@@ -104,14 +102,11 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
   Portion *por;
 
   Nfg *N = (Nfg *) &S->Game();
-  gArray<gNumber> values(N->Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
-
   if (mixed)
-    T = ComputeMixedDominated(*N, *S, values, strong, players,
+    T = ComputeMixedDominated(*N, *S, strong, players,
 			      ((OutputPortion *) param[4])->Value(), gstatus);
   else   {
-    T = ComputeDominated(*N, *S, values, strong, players,
+    T = ComputeDominated(*N, *S, strong, players,
 			   ((OutputPortion *) param[4])->Value(), gstatus);
   }
 
@@ -226,9 +221,7 @@ static Portion *GSM_NewNfg(Portion **param)
   for (int i = 1; i <= dim->Length(); i++)
     d[i] = ((IntPortion *) (*dim)[i])->Value();
 
-  gSpace *space = new gSpace;
-  ORD_PTR ord = &lex;
-  return new NfgPortion(new Nfg(d, space, new term_order(space, ord)));
+  return new NfgPortion(new Nfg(d));
 }
 
 
@@ -297,9 +290,7 @@ static Portion* GSM_Payoff(Portion** param)
   Nfg *nfg = outcome->Game();
   NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
 
-  gArray<gNumber> values(nfg->Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
-  return new NumberPortion(nfg->Payoff(outcome, player->GetNumber()).Evaluate(values));
+  return new NumberPortion(nfg->Payoff(outcome, player->GetNumber()));
 }
 
 
@@ -451,10 +442,9 @@ static Portion* GSM_SetPayoff(Portion** param)
   NFOutcome *outcome = ((NfOutcomePortion *) param[0])->Value();
   Nfg *nfg = outcome->Game();
   NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
-  double value = ((NumberPortion *) param[2])->Value();
+  gNumber value = ((NumberPortion *) param[2])->Value();
 
-  nfg->SetPayoff(outcome, player->GetNumber(),
-                 gPoly<gNumber>(nfg->Parameters(), gNumber(value), nfg->ParamOrder()));
+  nfg->SetPayoff(outcome, player->GetNumber(), value);
 
   _gsm->InvalidateGameProfile((Nfg *) nfg, false);
  

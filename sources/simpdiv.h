@@ -51,8 +51,7 @@ template <class T> class SimpdivModule  {
     int get_b(int j, int h);
   
   public:
-    SimpdivModule(const NFSupport &N, const SimpdivParams &, 
-		  const gArray<gNumber> &);
+    SimpdivModule(const NFSupport &N, const SimpdivParams &);
     virtual ~SimpdivModule();
 
     int NumEvals(void) const  { return nevals; }
@@ -63,7 +62,7 @@ template <class T> class SimpdivModule  {
     const gList<MixedSolution> &GetSolutions(void) const  { return solutions; }
 };
 
-int Simpdiv(const NFSupport &, const SimpdivParams &, const gArray<gNumber> &,
+int Simpdiv(const NFSupport &, const SimpdivParams &,
 	    gList<MixedSolution> &, int &nevals, int &niters, double &time);
 
 

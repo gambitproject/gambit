@@ -14,7 +14,7 @@
 //---------------------------------------------------------------------------
 
 template <class T> gMatrix<T> Make_A1(const Nfg &N, const NFSupport &S,
-                                      const gArray<gNumber> &values, const T &)
+                                      const T &)
 {
   int n1, n2, i,j;
   n1=S.NumStrats(1);
@@ -23,11 +23,11 @@ template <class T> gMatrix<T> Make_A1(const Nfg &N, const NFSupport &S,
   NfgIter iter(S); 
   T min; 
 
-  min = MinPayoff(N, values) - gNumber(1);
+  min = MinPayoff(N) - gNumber(1);
 
   for (i = 1; i <= n1; i++)  {
     for (j = 1; j <= n2; j++)  {
-      A1(i, n1 + j) = N.Payoff(iter.GetOutcome(), 1).Evaluate(values) - gNumber(min);
+      A1(i, n1 + j) = N.Payoff(iter.GetOutcome(), 1) - gNumber(min);
       iter.Next(2);
     }
     iter.Next(1);
@@ -36,7 +36,7 @@ template <class T> gMatrix<T> Make_A1(const Nfg &N, const NFSupport &S,
 }
 
 template <class T> gMatrix<T> Make_A2(const Nfg &N, const NFSupport &S,
-                                      const gArray<gNumber> &values, const T &)
+                                      const T &)
 {
   int n1, n2, i,j;
   n1=S.NumStrats(1);
@@ -45,11 +45,11 @@ template <class T> gMatrix<T> Make_A2(const Nfg &N, const NFSupport &S,
   NfgIter iter(S); 
   T min; 
 
-  min = MinPayoff(N, values) - gNumber(1);
+  min = MinPayoff(N) - gNumber(1);
 
   for (i = 1; i <= n1; i++)  {
     for (j = 1; j <= n2; j++)  {
-      A2(n1 + j, i) = N.Payoff(iter.GetOutcome(), 2).Evaluate(values) - gNumber(min);
+      A2(n1 + j, i) = N.Payoff(iter.GetOutcome(), 2) - gNumber(min);
       iter.Next(2);
     }
     iter.Next(1);
@@ -342,12 +342,12 @@ template <class T> int LHTableau<T>::LemkePath(int dup)
 
 template class LHTableau<double>;
 template class LHTableau<gRational>;
-template gMatrix<double> Make_A1(const Nfg &, const NFSupport &, const gArray<gNumber> &, const double &);
-template gMatrix<gRational> Make_A1(const Nfg &, const NFSupport &, const gArray<gNumber> &, const gRational &);
+template gMatrix<double> Make_A1(const Nfg &, const NFSupport &, const double &);
+template gMatrix<gRational> Make_A1(const Nfg &, const NFSupport &, const gRational &);
 template gVector<double> Make_b1(const Nfg &, const NFSupport &, const double &);
 template gVector<gRational> Make_b1(const Nfg &, const NFSupport &, const gRational &);
-template gMatrix<double> Make_A2(const Nfg &, const NFSupport &, const gArray<gNumber> &, const double &);
-template gMatrix<gRational> Make_A2(const Nfg &, const NFSupport &, const gArray<gNumber> &, const gRational &);
+template gMatrix<double> Make_A2(const Nfg &, const NFSupport &, const double &);
+template gMatrix<gRational> Make_A2(const Nfg &, const NFSupport &, const gRational &);
 template gVector<double> Make_b2(const Nfg &, const NFSupport &, const double &);
 template gVector<gRational> Make_b2(const Nfg &, const NFSupport &, const gRational &);
 

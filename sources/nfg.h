@@ -11,8 +11,6 @@
 #include "gtext.h"
 #include "grblock.h"
 #include "gnumber.h"
-#include "gpoly.h"
-#include "gpolyctr.h"
 
 class NFOutcome;
 
@@ -42,8 +40,6 @@ protected:
 
   gArray<NFOutcome *> results;
 
-  gSpace *parameters;
-  term_order *paramorder;
 #ifndef NFG_ONLY
   const Efg *efg;
 #endif  // NFG_ONLY
@@ -57,7 +53,7 @@ protected:
 
 public:
   // CONSTRUCTORS, DESTRUCTORS, CONSTRUCTIVE OPERATORS
-  Nfg(const gArray<int> &dim, gSpace *, term_order *);
+  Nfg(const gArray<int> &dim);
   Nfg(const Nfg &b);
   ~Nfg();
     
@@ -67,9 +63,6 @@ public:
 
   void SetComment(const gText &);
   const gText &GetComment(void) const;
-
-  gSpace *Parameters(void) const    { return parameters; }
-  term_order *ParamOrder(void) const   { return paramorder; }
 
   void WriteNfgFile(gOutput &) const;
 
@@ -98,14 +91,14 @@ public:
   void SetOutcome(int index, NFOutcome *outcome)  { results[index] = outcome; }
   NFOutcome *GetOutcome(int index) const   { return results[index]; }
 
-  void SetPayoff(NFOutcome *, int pl, const gPoly<gNumber> &value);
-  gPoly<gNumber> Payoff(NFOutcome *, int pl) const;
+  void SetPayoff(NFOutcome *, int pl, const gNumber &value);
+  gNumber Payoff(NFOutcome *, int pl) const;
 
     // defined in nfgutils.cc
   friend void RandomNfg(Nfg &);
   friend bool IsConstSum(const Nfg &);
-  friend gNumber MinPayoff(const Nfg &, const gArray<gNumber> &, int pl = 0);
-  friend gNumber MaxPayoff(const Nfg &, const gArray<gNumber> &, int pl = 0);
+  friend gNumber MinPayoff(const Nfg &, int pl = 0);
+  friend gNumber MaxPayoff(const Nfg &, int pl = 0);
 
 #ifndef NFG_ONLY
   const Efg *AssociatedEfg(void) const   { return efg; }
@@ -120,10 +113,10 @@ class NFOutcome   {
     int number;
     Nfg *nfg;
     gText name;
-    gPolyArray<gNumber> payoffs;
+    gArray<gNumber> payoffs;
 
     NFOutcome(int n, Nfg *N)
-      : number(n), nfg(N), payoffs(N->Parameters(), N->ParamOrder(), N->NumPlayers())  { }
+      : number(n), nfg(N), payoffs(N->NumPlayers())  { }
     NFOutcome(int n, const NFOutcome &c)
       : number(n), nfg(c.nfg),name(c.name), payoffs(c.payoffs) { }
     ~NFOutcome() { }

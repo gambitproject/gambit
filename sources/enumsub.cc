@@ -20,12 +20,12 @@ int EnumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
   long npiv;
   double time;
 
-  Enum(*S, params, values, solutions, npiv, time);
+  Enum(*S, params, solutions, npiv, time);
 
   npivots += npiv;
   
   for (int i = 1; i <= solutions.Length(); i++)  {
-    BehavProfile<gNumber> bp(sup, values);
+    BehavProfile<gNumber> bp(sup);
     MixedToBehav(*N, solutions[i], E, bp);
     solns.Append(bp);
   }
@@ -36,18 +36,16 @@ int EnumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
   return params.status.Get();
 }
 
-EnumBySubgame::EnumBySubgame(const EFSupport &S, const gArray<gNumber> &v,
-			     const EnumParams &p, int max)
-  : SubgameSolver(S, v, max), npivots(0), params(p), values(v)
+EnumBySubgame::EnumBySubgame(const EFSupport &S, const EnumParams &p, int max)
+  : SubgameSolver(S, max), npivots(0), params(p)
 { }
 
 EnumBySubgame::~EnumBySubgame()   { }
 
 int Enum(const EFSupport &support, const EnumParams &params,
-	 const gArray<gNumber> &values, 
 	 gList<BehavSolution> &solutions, long &npivots, double &time)
 {
-  EnumBySubgame module(support, values, params);
+  EnumBySubgame module(support, params);
   module.Solve();
   npivots = module.NumPivots();
   time = module.Time();

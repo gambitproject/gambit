@@ -15,18 +15,17 @@ EfgPolEnumParams::EfgPolEnumParams(gStatus &status_)
 { }
 
 int EfgPolEnum(const EFSupport &support, const EfgPolEnumParams &params,
-	 const gArray<gNumber> &values,
-	 gList<BehavSolution> & solutions, long &nevals, double &time)
+	       gList<BehavSolution> & solutions, long &nevals, double &time)
 {
   if (params.precision == precDOUBLE)  {
-    EfgPolEnumModule<gDouble> module(support, params, values);
+    EfgPolEnumModule<gDouble> module(support, params);
     module.EfgPolEnum();
     nevals = module.NumEvals();
     time = module.Time();
     solutions = module.GetSolutions();
   }
   else if (params.precision == precRATIONAL)  {
-    EfgPolEnumModule<gRational> module(support, params, values);
+    EfgPolEnumModule<gRational> module(support, params);
     module.EfgPolEnum();
     nevals = module.NumEvals();
     time = module.Time();

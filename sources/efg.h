@@ -15,9 +15,6 @@
 #include "grblock.h"
 #include "gnumber.h"
 
-#include "gpoly.h"
-#include "gpolyctr.h"
-
 class EFOutcome;
 class EFPlayer;
 class Infoset;
@@ -48,8 +45,6 @@ protected:
     gBlock<EFOutcome *> outcomes;
     Node *root;
     EFPlayer *chance;
-    gSpace *parameters;
-    term_order *paramorder;
 #ifndef EFG_ONLY
     mutable Nfg *afg;
 #endif  EFG_ONLY
@@ -82,7 +77,7 @@ protected:
     void WriteEfgFile(gOutput &, Node *) const;
 
     void Payoff(Node *n, gNumber, const gPVector<int> &, gVector<gNumber> &) const;
-    void Payoff(Node *n, gNumber, const gArray<gArray<int> *> &, gPolyArray<gNumber> &) const;
+    void Payoff(Node *n, gNumber, const gArray<gArray<int> *> &, gArray<gNumber> &) const;
 
     void InfosetProbs(Node *n, gNumber, const gPVector<int> &, gPVector<gNumber> &) const;
 
@@ -93,7 +88,7 @@ protected:
     void MarkSubgame(Node *, Node *);
 
   public:
-    Efg(gSpace *, term_order *);
+    Efg(void);
     Efg(const Efg &, Node * = 0);
 
        //# DESTRUCTOR
@@ -111,10 +106,8 @@ protected:
 
        //# DATA ACCESS -- GENERAL INFORMATION
     bool IsConstSum(void) const;
-    gNumber MinPayoff(const gArray<gNumber> &, int pl = 0) const;
-    gNumber MaxPayoff(const gArray<gNumber> &, int pl = 0) const;
-    gSpace *Parameters(void) const   { return parameters; }
-    term_order *ParamOrder(void) const   { return paramorder; }
+    gNumber MinPayoff(int pl = 0) const;
+    gNumber MaxPayoff(int pl = 0) const;
 
     Node *RootNode(void) const;
     bool IsSuccessor(const Node *n, const Node *from) const;
@@ -162,9 +155,9 @@ protected:
     gNumber GetChanceProb(Infoset *, int) const;
     gArray<gNumber> GetChanceProbs(Infoset *) const;
 
-    void SetPayoff(EFOutcome *, int pl, const gPoly<gNumber> &value);
-    gPoly<gNumber> Payoff(EFOutcome *, int pl) const;
-    gPolyArray<gNumber> Payoff(EFOutcome *) const;
+    void SetPayoff(EFOutcome *, int pl, const gNumber &value);
+    gNumber Payoff(EFOutcome *, int pl) const;
+    gArray<gNumber> Payoff(EFOutcome *) const;
 
 
     // Unmarks all subgames in the subtree rooted at n
@@ -187,7 +180,7 @@ protected:
         //# COMPUTING VALUES OF PROFILES
     void Payoff(const gPVector<int> &profile, gVector<gNumber> &payoff) const;
     void Payoff(const gArray<gArray<int> *> &profile,
-		gPolyArray<gNumber> &payoff) const;
+		gArray<gNumber> &payoff) const;
 
     void InfosetProbs(const gPVector<int> &profile, gPVector<gNumber> &prob) const;
 

@@ -20,12 +20,12 @@ int LemkeBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
   int npiv;
   double time;
 
-  Lemke(*S, params, values, solutions, npiv, time);
+  Lemke(*S, params, solutions, npiv, time);
 
   npivots += npiv;
 
   for (int i = 1; i <= solutions.Length(); i++)  {
-    BehavProfile<gNumber> bp(sup, values);
+    BehavProfile<gNumber> bp(sup);
     MixedToBehav(*N, solutions[i], E, bp);
     solns.Append(bp);
   }
@@ -36,19 +36,17 @@ int LemkeBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 }
 
 LemkeBySubgame::LemkeBySubgame(const EFSupport &S, const LemkeParams &p,
-				  const gArray<gNumber> &v, int max)
-  : SubgameSolver(S, v, max), npivots(0), params(p),
-    values(v)
+			       int max)
+  : SubgameSolver(S, max), npivots(0), params(p)
 { }
 
 LemkeBySubgame::~LemkeBySubgame()   { }
 
 
 int Lemke(const EFSupport &support, const LemkeParams &params,
-	  const gArray<gNumber> &values,
 	  gList<BehavSolution> &solutions, int &npivots, double &time)
 {
-  LemkeBySubgame module(support, params, values);
+  LemkeBySubgame module(support, params);
   module.Solve();
   npivots = module.NumPivots();
   time = module.Time();

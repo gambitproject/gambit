@@ -24,7 +24,6 @@
 #include "msolnsf.h"
 
 #include "efgnfgi.h"
-#include "paramsd.h"
 
 class NfgSolnShow;
 class NormalSpread;
@@ -43,8 +42,7 @@ public:
 };
 typedef SolutionList<MixedSolution> MixedSolutionList;
 
-class NfgShow: public EfgNfgInterface, public ParametrizedGame,
-               public NfgShowInterface
+class NfgShow: public EfgNfgInterface, public NfgShowInterface
 {
 private:
 	Nfg &nf;
@@ -58,8 +56,6 @@ private:
 		StartingPoints() : last(-1) { }
 	} starting_points;
 	int cur_soln;
-   ParameterSetList param_sets;
-   ParameterDialog *params_dialog;
  // we can display NF for one support, while working on a different support
  // disp_sup always corresponds to the support currently displayed.  cur_sup
  // corresponds to the support that will be operated upon by solution algs.
@@ -68,7 +64,6 @@ private:
 	NormalSpread 	*spread;
 	NFSupportInspectDialog *support_dialog;
 	NfgOutcomeDialog *outcome_dialog;
-   ParameterDialog *param_dialog;
 	int pl1,pl2;
 	int rows,cols;
 	NfgSolnShow *soln_show;	// need to keep track of this to kill at the end
@@ -107,7 +102,6 @@ public:
 	void SetOutcome(int outc,int x=-1, int y=-1);
 	void ChangeOutcomes(int what);
 	void OutcomeOptions(void) {draw_settings.OutcomeOptions();UpdateVals();}
-   void ChangeParameters(int what);
 
    void UpdateVals(void);
 	void UpdateProfile(gArray<int> &profile);
@@ -133,7 +127,6 @@ public:
    // Process Accelerator Keys
 	void EditAccelerators(void);
 	int  CheckAccelerators(wxKeyEvent &ev);
-   ParameterSetList &Parameters(void);
    // Access to the actual window
    wxFrame *Frame(void);
 };

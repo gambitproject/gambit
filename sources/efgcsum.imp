@@ -26,13 +26,11 @@ private:
   double time;
   int ns1,ns2,ni1,ni2;
   gList<BFS<T> > List;
-  gArray<gNumber> values;
 
   void FillTableau(const Node *, T ,int ,int , int ,int );
 
 public:
-  CSSeqFormModule(const EFSupport &, const gArray<gNumber> &v,
-		  const CSSeqFormParams &p);
+  CSSeqFormModule(const EFSupport &, const CSSeqFormParams &p);
   virtual ~CSSeqFormModule();
 
   bool IsConstSum();
@@ -53,13 +51,12 @@ public:
 
 template <class T>
 CSSeqFormModule<T>::CSSeqFormModule(const EFSupport &S,
-				    const gArray<gNumber> &v,
 				    const CSSeqFormParams &p)
 				    
   : EF(S.Game()), params(p), support(S), A(0), b(0), c(0), npivots(0), 
     ns1(S.NumSequences(1)), ns2(S.NumSequences(2)),
     ni1(EF.Players()[1]->NumInfosets()+1),  
-    ni2(EF.Players()[2]->NumInfosets()+1), values(v)
+    ni2(EF.Players()[2]->NumInfosets()+1)
 { }
 
 template <class T> CSSeqFormModule<T>::~CSSeqFormModule()
@@ -76,8 +73,8 @@ template <class T> void CSSeqFormModule<T>::Make_Abc()
   b = new gVector<T>(1,ns1+ni2);
   c = new gVector<T>(1,ns2+ni1);
 
-  maxpay = EF.MaxPayoff(values) + gNumber(1);
-  minpay = EF.MinPayoff(values) - gNumber(1);
+  maxpay = EF.MaxPayoff() + gNumber(1);
+  minpay = EF.MinPayoff() - gNumber(1);
 
   (*A) = (T)0;
   T prob = (T)1;
@@ -234,8 +231,9 @@ template <class T> void CSSeqFormModule<T>
 }
 
 
-template <class T> void CSSeqFormModule<T>
-::FillTableau(const Node *n, T prob,int s1,int s2, int i1,int i2)
+template <class T>
+void CSSeqFormModule<T>::FillTableau(const Node *n, T prob,
+				     int s1, int s2, int i1, int i2)
 {
 //  gout << "\ns1,s2,i1,i2: " << s1 << " " << s2  << " " << i1  << " " << i2;
 //  gout << " prob = " << prob;
@@ -243,10 +241,8 @@ template <class T> void CSSeqFormModule<T>
   if(n->GetOutcome()) {
 //    (*A)(s1,s2) = (*A)(s1,s2) -
 //       prob*(((OutcomeVector<T> &) *n->GetOutcome())[1]-minpay);
-    gArray<gNumber> values(EF.Parameters()->Dmnsn());
-    for (int j = 1; j <= values.Length(); values[j++] = gNumber(0));
     (*A)(s1,s2) = gNumber((*A)(s1,s2)) +
-       gNumber(prob) * EF.Payoff(n->GetOutcome(), 1).Evaluate(values) - gNumber(minpay);
+       gNumber(prob) * EF.Payoff(n->GetOutcome(), 1) - gNumber(minpay);
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
@@ -288,7 +284,7 @@ void CSSeqFormModule<T>::GetSolutions(gList<BehavSolution> &solutions) const
 
   int index;
   for (int i = 1; i <= List.Length(); i++)    {
-    BehavProfile<T> profile(support, values);
+    BehavProfile<T> profile(support);
     GetProfile(profile,List[i],EF.RootNode(),1,1);
     index = solutions.Append(BehavSolution(profile, EfgAlg_CSSEQFORM));
     solutions[index].SetIsNash(T_YES);
@@ -312,8 +308,7 @@ template <class T> double CSSeqFormModule<T>::Time(void) const
 // Interfacing to solve-by-subgame
 //-----------------------------------
 
-int _CSSeqForm(const EFSupport &, const gArray<gNumber> &, 
-	       const CSSeqFormParams &,
+int _CSSeqForm(const EFSupport &, const CSSeqFormParams &,
 	       gList<BehavSolution> &, int &npivots, double &time);
 
 int CSSeqFormBySubgame::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
@@ -321,16 +316,15 @@ int CSSeqFormBySubgame::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
 {
   int npiv;
   double time;
-  _CSSeqForm(sup, values, params, solns, npiv, time);
+  _CSSeqForm(sup, params, solns, npiv, time);
   npivots += npiv;
   return 1;
 }
 
 CSSeqFormBySubgame::CSSeqFormBySubgame(const EFSupport &S,
-				       const gArray<gNumber> &v,
 				       const CSSeqFormParams &p,
 				       int max)
-  : SubgameSolver(S, v, max), npivots(0), params(p), values(v)
+  : SubgameSolver(S, max), npivots(0), params(p)
 { }
 
 CSSeqFormBySubgame::~CSSeqFormBySubgame()   { }

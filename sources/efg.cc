@@ -211,9 +211,9 @@ void Node::DeleteOutcome(EFOutcome *outc)
 int Efg::_NumObj = 0;
 #endif // MEMCHECK
 
-Efg::Efg(gSpace *space, term_order *order)
+Efg::Efg(void)
   : sortisets(true), title("UNTITLED"), chance(new EFPlayer(this, 0)),
-    parameters(space), paramorder(order), afg(0), lexicon(0)
+    afg(0), lexicon(0)
 {
   root = new Node(this, 0);
 #ifdef MEMCHECK
@@ -226,7 +226,6 @@ Efg::Efg(const Efg &E, Node *n /* = 0 */)
   : sortisets(false), title(E.title), comment(E.comment),
     players(E.players.Length()), outcomes(E.outcomes.Length()),
     chance(new EFPlayer(this, 0)),
-    parameters(E.parameters), paramorder(E.paramorder),
     afg(0), lexicon(0)
 {
   for (int i = 1; i <= players.Length(); i++)  {
@@ -556,12 +555,6 @@ void Efg::WriteEfgFile(gOutput &f) const
   for (int i = 1; i <= players.Length(); i++)
     f << '"' << EscapeQuotes(players[i]->name) << "\" ";
   f << "}\n";
-  if (parameters->Dmnsn() > 0)   {
-    f << "{ ";
-    for (int var = 1; var <= parameters->Dmnsn(); var++)
-      f << '"' << EscapeQuotes(parameters->GetVariableName(var)) << "\" ";
-    f << "}\n";
-  }
   f << "\"" << EscapeQuotes(comment) << "\"\n\n";
 
   WriteEfgFile(f, root);
@@ -581,8 +574,7 @@ EFPlayer *Efg::NewPlayer(void)
   players.Append(ret);
 
   for (int outc = 1; outc <= outcomes.Length();
-       outcomes[outc++]->payoffs.Append(gPoly<gNumber>(Parameters(), gNumber(0),
-                                                       ParamOrder())));
+       outcomes[outc++]->payoffs.Append(0));
   DeleteLexicon();
   return ret;
 }
@@ -604,17 +596,17 @@ void Efg::DeleteOutcome(EFOutcome *outc)
   DeleteLexicon();
 }
 
-void Efg::SetPayoff(EFOutcome *outc, int pl, const gPoly<gNumber> &value)
+void Efg::SetPayoff(EFOutcome *outc, int pl, const gNumber &value)
 {
   outc->payoffs[pl] = value;
 }
 
-gPoly<gNumber> Efg::Payoff(EFOutcome *outc, int pl) const
+gNumber Efg::Payoff(EFOutcome *outc, int pl) const
 {
   return outc->payoffs[pl];
 }
 
-gPolyArray<gNumber> Efg::Payoff(EFOutcome *outc) const
+gArray<gNumber> Efg::Payoff(EFOutcome *outc) const
 {
   return outc->payoffs;
 }
@@ -626,17 +618,14 @@ bool Efg::IsConstSum(void) const
 
   if (outcomes.Length() == 0)  return true;
 
-  gArray<gNumber> values(Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
-
   for (pl = 1; pl <= players.Length(); pl++)
-    cvalue += outcomes[1]->payoffs[pl].Evaluate(values);
+    cvalue += outcomes[1]->payoffs[pl];
 
   for (index = 2; index <= outcomes.Length(); index++)  {
     gNumber thisvalue(0);
 
     for (pl = 1; pl <= players.Length(); pl++)
-      thisvalue += outcomes[index]->payoffs[pl].Evaluate(values);
+      thisvalue += outcomes[index]->payoffs[pl];
 
     if (thisvalue > cvalue || thisvalue < cvalue)
       return false;
@@ -645,42 +634,42 @@ bool Efg::IsConstSum(void) const
   return true;
 }
 
-gNumber Efg::MinPayoff(const gArray<gNumber> &values, int pl) const
+gNumber Efg::MinPayoff(int pl) const
 {
   int index, p, p1, p2;
   gNumber minpay;
 
-  if (NumOutcomes() == 0)  return (gNumber) 0;
+  if (NumOutcomes() == 0)  return 0;
 
   if(pl) { p1=p2=pl;}
   else {p1=1;p2=players.Length();}
 
-  minpay = outcomes[1]->payoffs[p1].Evaluate(values);
+  minpay = outcomes[1]->payoffs[p1];
 
   for (index = 1; index <= outcomes.Length(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (outcomes[index]->payoffs[p].Evaluate(values) < minpay)
-	minpay = outcomes[index]->payoffs[p].Evaluate(values);
+      if (outcomes[index]->payoffs[p] < minpay)
+	minpay = outcomes[index]->payoffs[p];
   }
   return minpay;
 }
 
-gNumber Efg::MaxPayoff(const gArray<gNumber> &values, int pl) const
+gNumber Efg::MaxPayoff(int pl) const
 {
   int index, p, p1, p2;
   gNumber maxpay;
 
-  if (NumOutcomes() == 0)  return (gNumber) 0;
+  if (NumOutcomes() == 0)  return 0;
 
   if(pl) { p1=p2=pl;}
   else {p1=1;p2=players.Length();}
 
-  maxpay = outcomes[1]->payoffs[p1].Evaluate(values);
+  maxpay = outcomes[1]->payoffs[p1];
 
   for (index = 1; index <= outcomes.Length(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (outcomes[index]->payoffs[p].Evaluate(values) > maxpay)
-	maxpay = outcomes[index]->payoffs[p].Evaluate(values);
+      if (outcomes[index]->payoffs[p] > maxpay)
+	maxpay = outcomes[index]->payoffs[p];
   }
   return maxpay;
 }
@@ -1305,11 +1294,8 @@ void Efg::Payoff(Node *n, gNumber prob, const gPVector<int> &profile,
 		 gVector<gNumber> &payoff) const
 {
   if (n->outcome)  {
-    gArray<gNumber> values(Parameters()->Dmnsn());
-    for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
-
     for (int i = 1; i <= players.Length(); i++)
-      payoff[i] += prob * n->outcome->payoffs[i].Evaluate(values);
+      payoff[i] += prob * n->outcome->payoffs[i];
   }
 
   if (n->infoset && n->infoset->player->IsChance())
@@ -1351,7 +1337,7 @@ void Efg::InfosetProbs(const gPVector<int> &profile,
 }
 
 void Efg::Payoff(Node *n, gNumber prob, const gArray<gArray<int> *> &profile,
-		    gPolyArray<gNumber> &payoff) const
+		    gArray<gNumber> &payoff) const
 {
   if (n->outcome)   {
     for (int i = 1; i <= players.Length(); i++)
@@ -1369,10 +1355,10 @@ void Efg::Payoff(Node *n, gNumber prob, const gArray<gArray<int> *> &profile,
 }
 
 void Efg::Payoff(const gArray<gArray<int> *> &profile,
-		 gPolyArray<gNumber> &payoff) const
+		 gArray<gNumber> &payoff) const
 {
   for (int i = 1; i <= payoff.Length(); i++)
-    payoff[i] = gPoly<gNumber>(parameters, paramorder);
+    payoff[i] = 0;
   Payoff(root, 1.0, profile, payoff);
 }
 

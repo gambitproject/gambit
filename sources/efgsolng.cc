@@ -72,9 +72,8 @@ if (subg_num==subgame_roots.Length()) parent->SetPickSubgame(0);
 }
 
 // Eliminated dominanted strats, if so requested
-NFSupport *ComputeDominated(const Nfg &, NFSupport &S,
-                            const gArray<gNumber> &params, bool strong,
-								const gArray<int> &players, gOutput &tracefile,gStatus &gstatus); // in nfdom.cc
+NFSupport *ComputeDominated(const Nfg &, NFSupport &S, bool strong,
+const gArray<int> &players, gOutput &tracefile,gStatus &gstatus); // in nfdom.cc
 #include "elimdomd.h"
 #include "nfstrat.h"
 void BaseBySubgameG::BaseViewNormal(const Nfg &N, NFSupport *&sup)
@@ -84,18 +83,16 @@ if (!DS.UseElimDom()) return;
 
 gArray<int> players(N.NumPlayers());
 for (int i=1;i<=N.NumPlayers();i++) players[i]=i;
-gArray<gNumber> values(N.Parameters()->Dmnsn());
-for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
 NFSupport *temp_sup=sup,*temp_sup1=0;
 if (DS.FindAll())
 {
-	while ((temp_sup=ComputeDominated(temp_sup->Game(),*temp_sup,values,DS.DomStrong(),players,gnull,gstatus)))
+	while ((temp_sup=ComputeDominated(temp_sup->Game(),*temp_sup,DS.DomStrong(),players,gnull,gstatus)))
 		{if (temp_sup1) delete temp_sup1; temp_sup1=temp_sup;}
 	if (temp_sup1) sup=temp_sup1;
 }
 else
 {
-	if ((temp_sup=ComputeDominated(temp_sup->Game(),*temp_sup,values,DS.DomStrong(),players,gnull,gstatus)))
+	if ((temp_sup=ComputeDominated(temp_sup->Game(),*temp_sup,DS.DomStrong(),players,gnull,gstatus)))
 		sup=temp_sup;
 }
 }
@@ -185,7 +182,7 @@ void SelectSolutions(int n,const Efg &ef,gList<BehavSolution> &solns)
 public:
 SeqFormBySubgameG(const Efg &E, const EFSupport &S,const SeqFormParams &P,
                   int max = 0,EfgShowInterface *parent_=0):
-                  SeqFormBySubgame(S,parent_->Parameters().CurSet(),P,max),
+                  SeqFormBySubgame(S,P,max),
                   BaseBySubgameG(parent_,E)
 {Solve();}
 };
@@ -224,7 +221,7 @@ void ViewNormal(const Nfg &N, NFSupport *&sup)
 public:
 LemkeBySubgameG(const Efg &E,const EFSupport &S, const LemkeParams &P,
                 int max = 0,EfgShowInterface *parent_=0):
-                LemkeBySubgame(S,P,parent_->Parameters().CurSet(),max),
+                LemkeBySubgame(S,P,max),
                 BaseBySubgameG(parent_,E)
 {Solve();}
 };
@@ -269,7 +266,7 @@ void ViewNormal(const Nfg &N, NFSupport *&sup)
 public:
 PureNashBySubgameG(const Efg &E,const EFSupport &S,
                    int max = 0,EfgShowInterface *parent_=0):
-                   PureNashBySubgame(S,parent_->Parameters().CurSet(),max),
+                   PureNashBySubgame(S,max),
                    BaseBySubgameG(parent_,E)
 {Solve();}
 };
@@ -305,7 +302,7 @@ void SelectSolutions(int n,const Efg &ef,gList<BehavSolution> &solns)
 public:
 EPureNashBySubgameG(const Efg &E,const EFSupport &S,
                     int max = 0,EfgShowInterface *parent_=0):
-                    EfgPSNEBySubgame(S,parent_->Parameters().CurSet(),max),
+                    EfgPSNEBySubgame(S,max),
                     BaseBySubgameG(parent_,E)
 {Solve();}
 };
@@ -344,7 +341,7 @@ void ViewNormal(const Nfg &N, NFSupport *&sup)
 public:
 EnumBySubgameG(const Efg &E,const EFSupport &S,const EnumParams &P,
                int max = 0,EfgShowInterface *parent_=0):
-               EnumBySubgame(S,parent_->Parameters().CurSet(),P,max),
+               EnumBySubgame(S,P,max),
                BaseBySubgameG(parent_,E)
 {Solve();}
 };
@@ -386,7 +383,7 @@ void ViewNormal(const Nfg &N, NFSupport *&sup)
 public:
 ZSumBySubgameG(const Efg &E,const EFSupport &S,const ZSumParams &P,
                int max = 0,EfgShowInterface *parent_=0):
-               ZSumBySubgame(S,P,parent_->Parameters().CurSet(),max),
+               ZSumBySubgame(S,P,max),
                BaseBySubgameG(parent_,E)
 {Solve();}
 };
@@ -429,7 +426,7 @@ void SelectSolutions(int n,const Efg &ef,gList<BehavSolution> &solns)
 public:
 EfgCSumBySubgameG(const Efg &E,const EFSupport &S,const CSSeqFormParams &P,
                   int max = 0,EfgShowInterface *parent_=0):
-                  CSSeqFormBySubgame(S,parent_->Parameters().CurSet(),P,max),
+                  CSSeqFormBySubgame(S,P,max),
                   BaseBySubgameG(parent_,E)
 {Solve();}
 };
@@ -476,7 +473,7 @@ void ViewNormal(const Nfg &N, NFSupport *&sup)
 public:
 SimpdivBySubgameG(const Efg &E,const EFSupport &S,const SimpdivParams &P,
                   int max = 0,EfgShowInterface *parent_=0):
-                  SimpdivBySubgame(S,parent_->Parameters().CurSet(),P,max),
+                  SimpdivBySubgame(S,P,max),
                   BaseBySubgameG(parent_,E)
 {Solve();}
 };
@@ -531,7 +528,7 @@ NFSupport *S=new NFSupport(*N);
 ViewNormal(*N,S);
 
 BehavProfile<gNumber> startb=parent->CreateStartProfile(GSPD.StartOption());
-MixedProfile<gNumber> startm(*N,parent->Parameters().CurSet());
+MixedProfile<gNumber> startm(*N);
 
 BehavToMixed(E,startb,*N,startm);
 
@@ -623,7 +620,7 @@ NFSupport *S=new NFSupport(*N);
 ViewNormal(*N,S);
 
 gList<MixedSolution> solns;
-GridSolve(*S,parent->Parameters().CurSet(),P,solns);
+GridSolve(*S,P,solns);
 
 GSPD.RunPxi();
 delete N;

@@ -27,20 +27,19 @@ template class gStack<Node *>;
 		   gText title, comment; \
                    gStack<Node *> path; \
                    gList<gText> actions, players, params; \
-                   gList<gPoly<gNumber> > values; \
+                   gList<gNumber> values; \
                    EFPlayer *player; Infoset *infoset; EFOutcome *outcome; \
                    int i;  gText iset_name, outc_name; \
                    virtual ~EfgFileReader(); \
                    EFOutcome *NewOutcome(void); \
                    void SetOutcome(EFOutcome *, \
-			           const gList<gPoly<gNumber> > &); \
+			           const gList<gNumber> &); \
                    void SetActionProbs(Infoset *, \
-			               const gList<gPoly<gNumber> > &); \
+			               const gList<gNumber> &); \
                    bool CheckActionProbs(Infoset *, \
-					 const gList<gPoly<gNumber> > &);\
+					 const gList<gNumber > &);\
                    bool CheckOutcome(EFOutcome *, \
-				     const gList<gPoly<gNumber> > &); \
-	           bool ExistsVariable(const gText &); \
+				     const gList<gNumber> &); \
 		   int Parse(void); \
                    void CreateEfg(void);
 
@@ -48,12 +47,6 @@ template class gStack<Node *>;
 %define CONSTRUCTOR_PARAM    gInput &f, Efg *& e
 
 %define CONSTRUCTOR_INIT     : infile(f), polymode(false), E(e), path(32)
-
-%union  {
-  gText *text;
-}
-
-%type <text> number
 
 %token LBRACE
 %token RBRACE
@@ -69,7 +62,7 @@ efgfile:           header  { CreateEfg(); path.Push(E->RootNode()); }
                    body    { E->Reindex();  return 0; }
        ;
 
-header:            NAME  { title = last_name; }  playerlist paramsopt commentopt
+header:            NAME  { title = last_name; }  playerlist commentopt
       ;
 
 playerlist:        LBRACE RBRACE
@@ -81,14 +74,6 @@ players:           player
 
 player:            NAME   { players.Append(last_name); }
       ;
-
-paramsopt:        
-         |         LBRACE paramlist RBRACE
-         ;
-
-paramlist:         NAME   { params.Append(last_name); }
-         |         paramlist NAME  { params.Append(last_name); }
-         ;
 
 commentopt:        
           |        NAME   { comment = last_name; }
@@ -204,9 +189,7 @@ actionproblist:    actionprob
 
 actionprob:        NAME NUMBER
                    { actions.Append(last_name); 
-                     values.Append(gPoly<gNumber>(E->Parameters(),
-     						  last_number,
- 						  E->ParamOrder())); }	
+                     values.Append(last_number); }
           ;
  
 outcome_number:    NUMBER
@@ -246,44 +229,7 @@ commaopt:
         |          ','
         ;
 
-number:            NUMBER    { $$ = new gText(ToText(last_number)); }
-
-payoff:            number
-    { values.Append(gPoly<gNumber>(E->Parameters(), *$1, E->ParamOrder())); delete $1; }
-      |            polynomial 
-    { values.Append(gPoly<gNumber>(E->Parameters(), last_poly, E->ParamOrder())); last_poly = ""; }
-      |            number '+'
-    { last_poly = *$1 + " + ";  delete $1; }
-                  polynomial
-    { values.Append(gPoly<gNumber>(E->Parameters(), last_poly, E->ParamOrder())); last_poly = ""; }
-      |            number '-'
-    { last_poly = *$1 + " - ";  delete $1; }
-                  polynomial
-    { values.Append(gPoly<gNumber>(E->Parameters(), last_poly, E->ParamOrder())); last_poly = ""; }
-      ;
-
-polynomial:        polyterm
-          |        polynomial '+' { last_poly += "+ "; } polyterm
-          |        polynomial '-' { last_poly += "- "; } polyterm
-          ;
-
-polyterm:          number { last_poly += *$1 + " "; delete $1; }
-                   variables
-        ;
-
-variables:         variable
-         |         variables variable
-         ;
-
-variable:          varname
-                   { last_poly += " "; }
-        |          varname '^' number
-                   { last_poly += "^" + *$3 + " ";  delete $3; }
-        ;
-
-varname:           VARNAME
-                   { if (!ExistsVariable(last_name))  YYERROR;
-                     last_poly += last_name; }
+payoff:            NUMBER    { values.Append(last_number); }
 
 %%
 
@@ -375,42 +321,32 @@ EFOutcome *EfgFileReader::NewOutcome(void)
   return E->NewOutcome();
 }
 
-void EfgFileReader::SetOutcome(EFOutcome *c, const gList<gPoly<gNumber> > &p)
+void EfgFileReader::SetOutcome(EFOutcome *c, const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
     E->SetPayoff(c, i, p[i]);
 }
 
 void EfgFileReader::SetActionProbs(Infoset *s,
-	 			   const gList<gPoly<gNumber> > &p)
+	 			   const gList<gNumber> &p)
 {
-  gArray<gNumber> zeroes(E->Parameters()->Dmnsn());
   for (int i = 1; i <= p.Length(); i++)
-    E->SetChanceProb(s, i, p[i].Evaluate(zeroes));
+    E->SetChanceProb(s, i, p[i]);
 }
 
 bool EfgFileReader::CheckActionProbs(Infoset *s, 
-                                     const gList<gPoly<gNumber> > &p)
+                                     const gList<gNumber> &p)
 {
-  gArray<gNumber> zeroes(E->Parameters()->Dmnsn());	
   for (int i = 1; i <= p.Length(); i++)
-    if (E->GetChanceProb(s, i) != p[i].Evaluate(zeroes))  return false;
+    if (E->GetChanceProb(s, i) != p[i])  return false;
   return true;
 }
 
-bool EfgFileReader::CheckOutcome(EFOutcome *c, const gList<gPoly<gNumber> > &p)
+bool EfgFileReader::CheckOutcome(EFOutcome *c, const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
     if (E->Payoff(c, i) != p[i])   return false;
   return true;
-}
-
-bool EfgFileReader::ExistsVariable(const gText &varname)
-{
-  for (int var = 1; var <= E->Parameters()->Dmnsn(); var++)
-    if (E->Parameters()->GetVariableName(var) == varname)
-      return true;
-  return false;
 }
 
 int EfgFileReader::Parse(void)
@@ -430,11 +366,7 @@ int EfgFileReader::Parse(void)
 
 void EfgFileReader::CreateEfg(void)
 {
-  gSpace *space = new gSpace(params.Length());
-  for (int var = 1; var <= params.Length(); var++)
-    space->SetVariableName(var, params[var]);
-  ORD_PTR ord = &lex;
-  E = new Efg(space, new term_order(space, ord));
+  E = new Efg;
 
   E->SetTitle(title);
   E->SetComment(comment);

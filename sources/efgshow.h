@@ -12,7 +12,6 @@
 #include "accels.h"
 #include "efgsolng.h"
 #include "bsolnsf.h"
-#include "paramsd.h"
 
 class EfgSolnShow;
 class EfgShowToolBar;
@@ -34,8 +33,7 @@ public:
 
 typedef SolutionList<BehavSolution> BehavSolutionList;
 
-class EfgShow: public wxFrame, public EfgNfgInterface, public EfgShowInterface,
-               public ParametrizedGame
+class EfgShow: public wxFrame, public EfgNfgInterface, public EfgShowInterface
 {
 private:
 	wxFrame *parent;
@@ -49,8 +47,7 @@ private:
 		StartingPoints() : last(-1) { }
 	} starting_points;
   	int cur_soln;
-   ParameterSetList param_sets;
-   ParameterDialog *params_dialog;
+
    EfgOutcomeDialog *outcome_dialog;
 	// we can display EF for one support, while working on a different support
 	// disp_sup always corresponds to the support currently displayed.  cur_sup
@@ -102,7 +99,6 @@ public:
 	void 		InspectSolutions(int what);
 	void		RemoveSolutions(void);
 	void		ChangeSolution(int soln);
-   void		ChangeParameters(int what);
    void		ChangeOutcomes(int what,const gText out_name=gText());
 	void 		OnSelectedMoved(const Node *n);
 	BehavSolution CreateSolution(void);
@@ -137,7 +133,6 @@ public:
    void SetFileName(void);
 	void SetFileName(const gText &s);
   	const gText &Filename(void) const;
-	ParameterSetList &Parameters(void);   
 };
 
 // Solution constants

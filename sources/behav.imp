@@ -37,11 +37,9 @@ template <class T> PureBehavProfile<T>::PureBehavProfile(const Efg &efg)
     for (int act = 1; act <= efg.GetChance()->Infosets()[iset]->NumActions(); act++)
        (*chanceprobs)(iset, act) = efg.GetChanceProb(efg.GetChance()->Infosets()[iset], act);
 
-  gArray<gNumber> values(E->Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
   for (int outc = 1; outc <= E->NumOutcomes(); outc++)
     for (int pl = 1; pl <= E->NumPlayers(); pl++)
-      (*payoffs)(outc, pl) = E->Payoff(E->Outcomes()[outc], pl).Evaluate(values);
+      (*payoffs)(outc, pl) = E->Payoff(E->Outcomes()[outc], pl);
 
 }
 
@@ -189,8 +187,7 @@ template <class T> BehavNode<T>::~BehavNode()
 template <class T> BehavProfile<T>::BehavProfile(const BehavProfile<T> &p)
   : gDPVector<T>(p), E(p.E),
     root(new BehavNode<T>(p.E->RootNode(), p.E->NumPlayers())),
-    support(p.support), payoffs(new gRectArray<T>(*p.payoffs)),
-    paramvalues(p.paramvalues)
+    support(p.support), payoffs(new gRectArray<T>(*p.payoffs))
 {
   gArray<int> dim(E->GetChance()->NumInfosets());
   for (int iset = 1; iset <= dim.Length(); iset++)
@@ -201,14 +198,11 @@ template <class T> BehavProfile<T>::BehavProfile(const BehavProfile<T> &p)
        (*chanceprobs)(iset, act) = E->GetChanceProb(E->GetChance()->Infosets()[iset], act);
 }
 
-template <class T> BehavProfile<T>::BehavProfile(const EFSupport &s, 
-						 const gArray<gNumber> &params)
+template <class T> BehavProfile<T>::BehavProfile(const EFSupport &s) 
   : gDPVector<T>(s.NumActions()), E(&s.Game()),
     root(new BehavNode<T>(E->RootNode(), E->NumPlayers())), support(s),
-    payoffs(new gRectArray<T>(E->NumOutcomes(), E->NumPlayers())),
-    paramvalues(params)
+    payoffs(new gRectArray<T>(E->NumOutcomes(), E->NumPlayers()))
 {
-  assert(params.Length() == E->Parameters()->Dmnsn());
   gArray<int> dim(E->GetChance()->NumInfosets());
   Centroid();
   for (int iset = 1; iset <= dim.Length(); iset++)
@@ -218,10 +212,9 @@ template <class T> BehavProfile<T>::BehavProfile(const EFSupport &s,
     for (int act = 1; act <= E->GetChance()->Infosets()[iset]->NumActions(); act++)
        (*chanceprobs)(iset, act) = E->GetChanceProb(E->GetChance()->Infosets()[iset], act);
 
-  for (int i = 1; i <= paramvalues.Length(); paramvalues[i++] = gNumber(0));
   for (int outc = 1; outc <= E->NumOutcomes(); outc++)
     for (int pl = 1; pl <= E->NumPlayers(); pl++)
-      (*payoffs)(outc, pl) = E->Payoff(E->Outcomes()[outc], pl).Evaluate(paramvalues);
+      (*payoffs)(outc, pl) = E->Payoff(E->Outcomes()[outc], pl);
 
 }
 

@@ -44,8 +44,7 @@ private:
 
   int SaveSolutions(const gList<gVector<gDouble> > &list);
 public:
-  EfgPolEnumModule(const EFSupport &, const EfgPolEnumParams &p,
-	     const gArray<gNumber> &values);
+  EfgPolEnumModule(const EFSupport &, const EfgPolEnumParams &p);
 
   int EfgPolEnum(void);
   
@@ -63,13 +62,13 @@ public:
 //-------------------------------------------------------------------------
 
 template <class T>
-EfgPolEnumModule<T>::EfgPolEnumModule(const EFSupport &S, const EfgPolEnumParams &p,
-		 const gArray<gNumber> &v)
+EfgPolEnumModule<T>::EfgPolEnumModule(const EFSupport &S,
+				      const EfgPolEnumParams &p)
   : EF(S.Game()), support(S), params(p), 
     Space(support.TotalNumSequences()-EF.TotalNumInfosets()-EF.NumPlayers()), 
     Lex(&Space, &lex), 
     num_vars(support.TotalNumSequences()-EF.TotalNumInfosets()-EF.NumPlayers()), 
-    count(0), nevals(0), SF(S,v)
+    count(0), nevals(0), SF(S)
 { 
 //  gEpsilon(eps,12);
   if(params.trace>1)
