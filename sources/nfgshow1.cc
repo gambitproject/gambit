@@ -860,7 +860,6 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
 
     wxMenu *solve_menu = new wxMenu;
     solve_menu->Append(NFG_SOLVE_OUTCOMES_MENU,  "&Outcomes",    "Set/Edit outcomes");
-    solve_menu->Append(NFG_SOLVE_PARAMS_MENU,    "&Params",      "Set/Edit parameters");
     solve_menu->Append(NFG_SOLVE_SOLVE_MENU,     "&Solve",       "Solution modules");
     solve_menu->Append(NFG_SOLVE_STANDARD_MENU,  "S&tandard...", "Standard solutions", TRUE);
 
@@ -1240,7 +1239,6 @@ NfgShowToolBar::NfgShowToolBar(wxFrame *frame):
 #include "bitmaps/help.xpm"
 #include "bitmaps/options.xpm"
 #include "bitmaps/inspect.xpm"
-#include "bitmaps/params.xpm"
     wxBitmap *ToolbarSaveBitmap = new wxBitmap(save_xpm);
     wxBitmap *ToolbarPrintBitmap = new wxBitmap(print_xpm);
     wxBitmap *ToolbarSolveBitmap = new wxBitmap(solve_xpm);
@@ -1248,7 +1246,6 @@ NfgShowToolBar::NfgShowToolBar(wxFrame *frame):
     wxBitmap *ToolbarHelpBitmap = new wxBitmap(help_xpm);
     wxBitmap *ToolbarOptionsBitmap = new wxBitmap(options_xpm);
     wxBitmap *ToolbarInspectBitmap = new wxBitmap(inspect_xpm);
-    wxBitmap *ToolbarParamBitmap = new wxBitmap(params_xpm);
 
     // Save, Print | Outcomes | Solve, Inspect | Options | Help
     // Create the toolbar
@@ -1262,7 +1259,6 @@ NfgShowToolBar::NfgShowToolBar(wxFrame *frame):
     AddTool(OUTPUT_MENU, ToolbarPrintBitmap);
     AddSeparator();
     AddTool(NFG_SOLVE_OUTCOMES_MENU, ToolbarPayoffBitmap);
-    AddTool(NFG_SOLVE_PARAMS_MENU, ToolbarParamBitmap);
     AddSeparator();
     AddTool(NFG_SOLVE_SOLVE_MENU, ToolbarSolveBitmap);
     AddTool(NFG_SOLVE_INSPECT_MENU, ToolbarInspectBitmap);

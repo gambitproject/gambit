@@ -18,7 +18,6 @@
 #define NFG_SOLVE_STANDARD_MENU         145
 #define NFG_SOLVE_GAMEINFO_MENU         155
 #define NFG_SOLVE_OUTCOMES_MENU         160
-#define NFG_SOLVE_PARAMS_MENU           165
 
 #define NFG_PREFS_OUTCOMES_MENU         350
 

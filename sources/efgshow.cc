@@ -634,7 +634,6 @@ EfgShowToolBar::EfgShowToolBar(wxFrame *frame):
 #include "bitmaps/makenf.xpm"
 #include "bitmaps/inspect.xpm"
 #include "bitmaps/payoff.xpm"
-#include "bitmaps/params.xpm"
     wxBitmap *ToolbarSaveBitmap = new wxBitmap(save_xpm);
     wxBitmap *ToolbarPrintBitmap = new wxBitmap(print_xpm);
     wxBitmap *ToolbarDeleteBitmap = new wxBitmap(delete_xpm);
@@ -647,7 +646,6 @@ EfgShowToolBar::EfgShowToolBar(wxFrame *frame):
     wxBitmap *ToolbarMakenfBitmap = new wxBitmap(makenf_xpm);
     wxBitmap *ToolbarInspectBitmap = new wxBitmap(inspect_xpm);
     wxBitmap *ToolbarPayoffBitmap = new wxBitmap(payoff_xpm);
-    wxBitmap *ToolbarParamBitmap = new wxBitmap(params_xpm);
     
     // Save, Print | Add, Delete, Outcomes | Solve, Inspect, MakeNF | ZoomIn, ZoomOut, Options | Help
     // Create the toolbar
@@ -663,7 +661,6 @@ EfgShowToolBar::EfgShowToolBar(wxFrame *frame):
     AddTool(NODE_ADD, ToolbarAddBitmap);
     AddTool(NODE_DELETE, ToolbarDeleteBitmap);
     AddTool(TREE_OUTCOMES, ToolbarPayoffBitmap);
-    AddTool(BUILD_PARAMS, ToolbarParamBitmap);
     AddSeparator();
     AddTool(SOLVE_SOLVE, ToolbarSolveBitmap);
     AddTool(INSPECT_SOLUTIONS, ToolbarInspectBitmap);

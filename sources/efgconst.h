@@ -17,7 +17,6 @@
 #define BUILD_ACTIONS                       910
 #define BUILD_INFOSET                       920
 #define BUILD_TREE                          930
-#define BUILD_PARAMS                        940
 
 #define NODE_OUTCOME_OUTCOME                1100
 #define NODE_OUTCOME_DIALOG                 1101

@@ -96,7 +96,6 @@ void EfgShow::MakeMenus(void)
     build_menu->Append(BUILD_INFOSET, "&Infoset",  infoset_menu, "Edit infosets");
     build_menu->Append(TREE_OUTCOMES, "&Outcomes", "Edit/View the payoffs");
     build_menu->Append(BUILD_TREE,    "&Tree",     tree_menu,    "Edit the tree");
-    build_menu->Append(BUILD_PARAMS,  "&Params",   "Set/Edit parameters");
 
     wxMenu *subgame_menu = new wxMenu;
     subgame_menu->Append(SUBGAME_SOLVE,        "Mark &All",       "Scan tree for subgames");
@@ -480,12 +479,10 @@ void EfgShow::OnMenuCommand(int id)
     }
 
     // Most menu selections modify the display somehow, so redraw w/ exceptions
-    if (id != FILE_QUIT      &&  id != FILE_CLOSE         && 
-        id != TREE_OUTCOMES  &&  id != SUPPORTS_SUPPORTS  && 
-        id != BUILD_PARAMS)
-    {
-        tw->OnPaint();
-        tw->SetFocus();
+    if (id != FILE_QUIT && id != FILE_CLOSE && id != TREE_OUTCOMES &&
+	id != SUPPORTS_SUPPORTS) {
+      tw->OnPaint();
+      tw->SetFocus();
     }
 }
 
