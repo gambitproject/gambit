@@ -312,7 +312,9 @@ void gCmdLineInput::GetCmdExec( void )
 
   if( historyPos < m_History.Length() + 1 )
     --numInvoke;
-
+  
+  if( c == EOF )
+    m_EOF = true;
   m_History.Append( cmdBuf );
   m_CmdExec = cmdBuf + '\n';
   gout << '\n';
