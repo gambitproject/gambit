@@ -56,6 +56,9 @@ private:
 
 public:
   guinfgEnumMixed(const NFSupport &, NfgShowInterface *);
+  guinfgEnumMixed(const NFSupport &, NfgShowInterface *,
+		  int p_stopAfter, gPrecision p_precision,
+		  bool p_eliminateWeak);
   virtual ~guinfgEnumMixed()   { }
 
   virtual gList<MixedSolution> Solve(void);
@@ -69,6 +72,8 @@ private:
 
 public:
   guinfgLp(const NFSupport &, NfgShowInterface *);
+  guinfgLp(const NFSupport &, NfgShowInterface *,
+	   int p_stopAfter, gPrecision p_precision, bool p_eliminateWeak);
   virtual ~guinfgLp()   { }
 
   virtual gList<MixedSolution> Solve(void);
@@ -82,7 +87,10 @@ private:
 
 public:
   guinfgLcp(const NFSupport &, NfgShowInterface *);
+  guinfgLcp(const NFSupport &, NfgShowInterface *,
+	    int p_stopAfter, gPrecision p_precision, bool p_eliminateWeak);
   virtual ~guinfgLcp()   { }
+
   virtual gList<MixedSolution> Solve(void);
   virtual bool SolveSetup(void);
 };
@@ -91,10 +99,12 @@ class guinfgLiap : public guiNfgSolution   {
 private:
   double m_tolND, m_tol1D;
   int m_maxitsND, m_maxits1D, m_nTries;
-  int m_startOption;
+  int m_stopAfter, m_startOption;
 
 public:
   guinfgLiap(const NFSupport &, NfgShowInterface *);
+  guinfgLiap(const NFSupport &, NfgShowInterface *,
+	     int p_stopAfter, bool p_eliminateWeak);
   virtual ~guinfgLiap()   { }
 
   virtual gList<MixedSolution> Solve(void);
@@ -108,6 +118,9 @@ private:
 
 public:
   guinfgSimpdiv(const NFSupport &, NfgShowInterface *parent);
+  guinfgSimpdiv(const NFSupport &, NfgShowInterface *,
+		int p_stopAfter, gPrecision p_precision,
+		bool p_eliminateWeak);
   virtual ~guinfgSimpdiv()   { }
 
   virtual gList<MixedSolution> Solve(void);

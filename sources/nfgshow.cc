@@ -444,8 +444,6 @@ void NfgShow::InspectSolutions(int what)
 
 void NfgShow::Solve(int id)
 {
-  NfgSolveSettings NSD(nf);
-
   // If we have more than 1 support, we must have created it explicitly.
   // In that case use the currently set support. 
   // Otherwise, use the full support.
@@ -513,11 +511,12 @@ void NfgShow::Solve(int id)
 
   if (old_max_soln != solns.Length()) {
     // Now, transfer the NEW solutions to extensive form if requested
+    /*
     if (NSD.GetExtensive()) {
       for (int i = old_max_soln+1; i <= solns.Length(); i++) 
     SolutionToExtensive(solns[i]);
     }
-
+    */
     if (!spread->HaveProbs()) {
       spread->MakeProbDisp();
       spread->Redraw();
@@ -532,16 +531,10 @@ void NfgShow::Solve(int id)
 
 void NfgShow::SolveStandard(void)
 { 
-  try {
-    if (NfgSolveStandardDialog(nf, (wxWindow *) spread).Completed() != wxOK)
-      return;
-  }
-  catch (guiBadStandardSolve &E) {
-    wxMessageBox((char *) E.Description(), "Standard Solution");
+  dialogNfgSolveStandard dialog(nf, (wxWindow *) spread);
+  
+  if (dialog.Completed() != wxOK)
     return;
-  }
-
-  NfgSolveSettings NSD(nf);
 
   NFSupport *sup = (supports.Length() > 1) ? cur_sup : 0;
 
@@ -552,34 +545,73 @@ void NfgShow::SolveStandard(void)
 
   guiNfgSolution *solver;
 
-  switch (NSD.GetAlgorithm()) {
-  case NFG_ENUMPURE_SOLUTION:
-    solver = new guinfgEnumPure(*sup, this);
+  switch (dialog.Number()) {
+  case nfgSTANDARD_ONE:
+    if (dialog.Type() == nfgSTANDARD_NASH) {
+      if (nf.NumPlayers() == 2) {
+	if (IsConstSum(nf))
+	  solver = new guinfgLp(*sup, this, 1, dialog.Precision(), true);
+	else
+	  solver = new guinfgLcp(*sup, this, 1, dialog.Precision(), true);
+      }
+      else
+	solver = new guinfgSimpdiv(*sup, this, 1, dialog.Precision(), true);
+    }
+    else {  // nfgSTANDARD_PERFECT
+      if (nf.NumPlayers() == 2) {
+	if (IsConstSum(nf))
+	  solver = new guinfgLp(*sup, this, 1, dialog.Precision(), true);
+	else
+	  solver = new guinfgLcp(*sup, this, 1, dialog.Precision(), true);
+      }
+      else
+	solver = new guinfgSimpdiv(*sup, this, 1, dialog.Precision(), true);
+    }
     break;
-  case NFG_ENUMMIXED_SOLUTION:
-    solver = new guinfgEnumMixed(*sup, this);
+
+  case nfgSTANDARD_TWO:
+    if (dialog.Type() == nfgSTANDARD_NASH) {
+      if (nf.NumPlayers() == 2)
+	solver = new guinfgEnumMixed(*sup, this, 2, dialog.Precision(), true);
+      else
+	solver = new guinfgLiap(*sup, this, 2, true);
+    }
+    else {  // nfgSTANDARD_PERFECT
+      if (nf.NumPlayers() == 2) {
+	if (IsConstSum(nf)) 
+	  solver = new guinfgLp(*sup, this, 2, dialog.Precision(), true);
+	else
+	  solver = new guinfgLcp(*sup, this, 2, dialog.Precision(), true);
+	wxMessageBox("Not guaranteed to find 2 solutions", "Warning");
+      }
+      else {
+	wxMessageBox("Two-Perfect not implemented", "Standard Solution");
+	return;
+      }
+    }
     break;
-  case NFG_LCP_SOLUTION:
-    solver = new guinfgLcp(*sup, this);
+
+  case nfgSTANDARD_ALL:
+    if (dialog.Type() == nfgSTANDARD_NASH) {
+      if (nf.NumPlayers() == 2)
+	solver = new guinfgEnumMixed(*sup, this, 0, dialog.Precision(), true);
+      else
+	solver = new guinfgLiap(*sup, this, 0, true);
+    }
+    else {  // nfgSTANDARD_PERFECT
+      if (nf.NumPlayers() == 2) {
+	if (IsConstSum(nf))  
+	  solver = new guinfgLp(*sup, this, 0, dialog.Precision(), true);
+	else
+	  solver = new guinfgLcp(*sup, this, 0, dialog.Precision(), true);
+	wxMessageBox("Not guaranteed to find all solutions", "Warning");
+      }
+      else {
+	wxMessageBox("All-Perfect not implemented", "Standard Solution");
+	return;
+      }
+    }
     break;
-  case NFG_LP_SOLUTION:
-    solver = new guinfgLp(*sup, this);
-    break;
-  case NFG_LIAP_SOLUTION:
-    solver = new guinfgLiap(*sup, this);
-    break;
-  case NFG_SIMPDIV_SOLUTION:
-    solver = new guinfgSimpdiv(*sup, this);
-    break;
-  case NFG_QRE_SOLUTION:
-    solver = new guinfgQre(*sup, this);
-    break;
-  case NFG_QREALL_SOLUTION:
-    solver = new guinfgQreAll(*sup, this);
-    break;
-  default:
-    // shouldn't happen.  we'll ignore silently
-    return;
   }
 
   wxBeginBusyCursor();
@@ -598,11 +630,12 @@ void NfgShow::SolveStandard(void)
 
   if (old_max_soln != solns.Length()) {
     // Now, transfer the NEW solutions to extensive form if requested
+    /*
     if (NSD.GetExtensive()) {
       for (int i = old_max_soln+1; i <= solns.Length(); i++) 
     SolutionToExtensive(solns[i]);
     }
-
+    */
     if (!spread->HaveProbs()) {
       spread->MakeProbDisp();
       spread->Redraw();

@@ -21,7 +21,8 @@
 
 guiNfgSolution::guiNfgSolution(const NFSupport &p_support,
 			       NfgShowInterface *p_parent)
-  : m_nfg(p_support.Game()), m_support(p_support), m_parent(p_parent)
+  : m_nfg(p_support.Game()), m_support(p_support), m_parent(p_parent),
+    m_traceFile(0), m_traceLevel(0)
 { }
 
 #include "nfstrat.h"
@@ -140,6 +141,19 @@ guinfgEnumMixed::guinfgEnumMixed(const NFSupport &p_support,
   : guiNfgSolution(p_support, p_parent)
 { }
 
+guinfgEnumMixed::guinfgEnumMixed(const NFSupport &p_support,
+				 NfgShowInterface *p_parent,
+				 int p_stopAfter, gPrecision p_precision, 
+				 bool p_eliminateWeak)
+  : guiNfgSolution(p_support, p_parent),
+    m_stopAfter(p_stopAfter), m_precision(p_precision)
+{
+  m_eliminate = true;
+  m_eliminateAll = true;
+  m_eliminateWeak = p_eliminateWeak;
+  m_eliminateMixed = false;
+}
+
 gList<MixedSolution> guinfgEnumMixed::Solve(void)
 {
   wxEnumStatus status(m_parent->Frame());
@@ -193,6 +207,18 @@ guinfgLcp::guinfgLcp(const NFSupport &p_support,
   : guiNfgSolution(p_support, p_parent)
 { }
 
+guinfgLcp::guinfgLcp(const NFSupport &p_support, NfgShowInterface *p_parent,
+		     int p_stopAfter, gPrecision p_precision, 
+		     bool p_eliminateWeak)
+  : guiNfgSolution(p_support, p_parent),
+    m_stopAfter(p_stopAfter), m_precision(p_precision)
+{
+  m_eliminate = true;
+  m_eliminateAll = true;
+  m_eliminateWeak = p_eliminateWeak;
+  m_eliminateMixed = false;
+}
+
 gList<MixedSolution> guinfgLcp::Solve(void)
 {
   wxStatus status(m_parent->Frame(), "LcpSolve Progress");
@@ -244,6 +270,18 @@ bool guinfgLcp::SolveSetup(void)
 guinfgLp::guinfgLp(const NFSupport &p_support, NfgShowInterface *p_parent)
   : guiNfgSolution(p_support, p_parent)
 { }
+
+guinfgLp::guinfgLp(const NFSupport &p_support, NfgShowInterface *p_parent,
+		   int p_stopAfter, gPrecision p_precision, 
+		   bool p_eliminateWeak)
+  : guiNfgSolution(p_support, p_parent),
+    m_stopAfter(p_stopAfter), m_precision(p_precision)
+{
+  m_eliminate = true;
+  m_eliminateAll = true;
+  m_eliminateWeak = p_eliminateWeak;
+  m_eliminateMixed = false;
+}
 
 gList<MixedSolution> guinfgLp::Solve(void)
 {
@@ -298,10 +336,28 @@ guinfgLiap::guinfgLiap(const NFSupport &p_support, NfgShowInterface *p_parent)
   : guiNfgSolution(p_support, p_parent)
 { }
 
+guinfgLiap::guinfgLiap(const NFSupport &p_support, NfgShowInterface *p_parent,
+		       int p_stopAfter, bool p_eliminateWeak)
+  : guiNfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter)
+{
+  m_eliminate = true;
+  m_eliminateAll = true;
+  m_eliminateWeak = p_eliminateWeak;
+  m_eliminateMixed = false;
+
+  m_nTries = 10;
+  m_maxits1D = 100;
+  m_maxitsND = 20;
+  m_tol1D = 2.0e-10;
+  m_tolND = 1.0e-10;
+  m_startOption = 0;
+}
+
 gList<MixedSolution> guinfgLiap::Solve(void)
 {
   wxStatus status(m_parent->Frame(), "Liap Algorithm");
   NFLiapParams params(status);
+  params.stopAfter = m_stopAfter;
   params.tol1 = m_tol1D;
   params.tolN = m_tolND;
   params.maxits1 = m_maxits1D;
@@ -330,6 +386,7 @@ bool guinfgLiap::SolveSetup(void)
     m_eliminateWeak = dialog.EliminateWeak();
     m_eliminateMixed = dialog.EliminateMixed();
 
+    m_stopAfter = dialog.StopAfter();
     m_tol1D = dialog.Tol1D();
     m_tolND = dialog.TolND();
     m_maxits1D = dialog.Maxits1D();
@@ -356,6 +413,19 @@ guinfgSimpdiv::guinfgSimpdiv(const NFSupport &p_support,
 			     NfgShowInterface *p_parent)
   : guiNfgSolution(p_support, p_parent)
 { }
+
+guinfgSimpdiv::guinfgSimpdiv(const NFSupport &p_support,
+			     NfgShowInterface *p_parent,
+			     int p_stopAfter, gPrecision p_precision, 
+			     bool p_eliminateWeak)
+  : guiNfgSolution(p_support, p_parent),
+    m_stopAfter(p_stopAfter), m_precision(p_precision)
+{
+  m_eliminate = true;
+  m_eliminateAll = true;
+  m_eliminateWeak = p_eliminateWeak;
+  m_eliminateMixed = false;
+}
 
 gList<MixedSolution> guinfgSimpdiv::Solve(void)
 {
