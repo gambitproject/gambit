@@ -9,7 +9,7 @@
 
 // The gratuitious casts are put in to convince g++ 2.7.2 to compile
 // this function
-Nfg *AssociatedNfg(Efg *E)
+Nfg *AssociatedNfg(const Efg *E)
 {
   if (E->lexicon)
     return E->lexicon->N;
@@ -18,7 +18,7 @@ Nfg *AssociatedNfg(Efg *E)
 }
 
 
-Nfg *AssociatedAfg(Efg *E)
+Nfg *AssociatedAfg(const Efg *E)
 {
   return E->afg;
 }

@@ -47,9 +47,9 @@ protected:
     EFPlayer *chance;
     gRectBlock<gRational> payoffs;
 #ifndef EFG_ONLY
-    Nfg *afg;
+    mutable Nfg *afg;
 #endif  EFG_ONLY
-    Lexicon *lexicon;
+    mutable Lexicon *lexicon;
 
 
     // this is for use with the copy constructor
@@ -71,7 +71,7 @@ protected:
     EFOutcome *CreateOutcomeByIndex(int index);
     void Reindex(void);
 
-    void DeleteLexicon(void) { };
+    void DeleteLexicon(void) const;
 
     EFOutcome *NewOutcome(int index);
 
@@ -184,13 +184,13 @@ protected:
     friend void RandomEfg(Efg &);
 #ifndef EFG_ONLY
     // This function put in to facilitate error-detection in MixedToBehav[]
-    friend Nfg *AssociatedNfg(Efg *E);
-    friend Nfg *AssociatedAfg(Efg *E);
+    friend Nfg *AssociatedNfg(const Efg *E);
+    friend Nfg *AssociatedAfg(const Efg *E);
 #endif   // EFG_ONLY
 
 #ifndef EFG_ONLY
-    friend Nfg *MakeReducedNfg(Efg &, const EFSupport &);
-    friend Nfg *MakeAfg(Efg &);
+    friend Nfg *MakeReducedNfg(const Efg &, const EFSupport &);
+    friend Nfg *MakeAfg(const Efg &);
     friend void MixedToBehav(const Nfg &N, const MixedProfile<double> &mp,
 		             const Efg &E, BehavProfile<double> &bp);
     friend void BehavToMixed(const Efg &, const BehavProfile<double> &,

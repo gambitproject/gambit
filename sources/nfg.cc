@@ -2,7 +2,7 @@
 // FILE: nfg.cc -- Implementation of normal form member functions
 //              -- and Implementation of NFPlayer member functions
 //
-// @(#)nfg.cc	2.15.1.2 7/17/97
+// $Id$
 //
 
 #include "rational.h"
@@ -79,7 +79,7 @@ Nfg::~Nfg()
 
 #ifndef NFG_ONLY
   if (efg)  {
-    Efg *tmp = efg;
+    const Efg *tmp = efg;
     // note that Lexicon dtor unsets the efg member...
 
     delete efg->lexicon;
@@ -94,7 +94,7 @@ void Nfg::BreakLink(void)
 {
 #ifndef NFG_ONLY
   if (efg)  {
-    Efg *tmp = efg;
+    const Efg *tmp = efg;
     // note that Lexicon dtor unsets the efg member...
 
     delete efg->lexicon;

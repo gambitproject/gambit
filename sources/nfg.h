@@ -47,7 +47,7 @@ class Efg;
 class Nfg  {
 #ifndef NFG_ONLY
 friend class Lexicon;
-friend void SetEfg(Nfg *, Efg *);
+friend void SetEfg(Nfg *, const Efg *);
 #endif   // NFG_ONLY
 protected:
   gString title;
@@ -60,7 +60,7 @@ protected:
 
   gRectBlock<gRational> payoffs;
 #ifndef NFG_ONLY
-  Efg *efg;
+  const Efg *efg;
 #endif  // NFG_ONLY
 
   // PRIVATE AUXILIARY MEMBER FUNCTIONS
@@ -117,7 +117,7 @@ public:
   friend gRational MaxPayoff(const Nfg &, int pl = 0);
 
 #ifndef NFG_ONLY
-  Efg *AssociatedEfg(void) const   { return efg; }
+  const Efg *AssociatedEfg(void) const   { return efg; }
 #endif   // NFG_ONLY
 };
 

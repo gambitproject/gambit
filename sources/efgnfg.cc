@@ -27,12 +27,12 @@ Lexicon::~Lexicon()
     N->efg = 0;
 }
 
-void SetEfg(Nfg *nfg, Efg *efg)
+void SetEfg(Nfg *nfg, const Efg *efg)
 {
   nfg->efg = efg;
 }
 
-void Lexicon::MakeLink(Efg *efg, Nfg *nfg)
+void Lexicon::MakeLink(const Efg *efg, Nfg *nfg)
 {
   nfg->efg = efg;
   N = nfg;
@@ -52,7 +52,7 @@ void Lexicon::MakeStrategy(EFPlayer *p)
 }
 
 void Lexicon::MakeReducedStrats(const EFSupport &S,
-				                    EFPlayer *p, Node *n, Node *nn)
+				EFPlayer *p, Node *n, Node *nn)
 {
   int i;
   Node *m, *mm;
@@ -107,7 +107,7 @@ void Lexicon::MakeReducedStrats(const EFSupport &S,
     MakeStrategy(p);
 }
 
-Nfg *MakeReducedNfg(Efg &E, const EFSupport &support)
+Nfg *MakeReducedNfg(const Efg &E, const EFSupport &support)
 {
   int i;
 
@@ -175,7 +175,7 @@ Nfg *MakeReducedNfg(Efg &E, const EFSupport &support)
   return E.lexicon->N;
 }
 
-Nfg *MakeAfg(Efg &E)
+Nfg *MakeAfg(const Efg &E)
 {
   Nfg *afg = new Nfg(gArray<int>(E.NumActions()));
 

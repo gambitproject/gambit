@@ -254,12 +254,28 @@ Efg::Efg(const Efg &E, Node *n /* = 0 */)
 
   root = new Node(this, 0);
   CopySubtree(root, (n ? n : E.RootNode()));
+  
+  if (n)   {
+    for (int pl = 1; pl <= players.Length(); pl++)  {
+      for (int i = 1; i <= players[pl]->infosets.Length(); i++)  {
+	if (players[pl]->infosets[i]->members.Length() == 0)
+	  delete players[pl]->infosets.Remove(i--);
+      }
+    }
+  }
+
+  sortisets = true;
+  SortInfosets();
 
 #ifdef MEMCHECK
   _NumObj++;
   gout << "--- Efg Ctor: " << _NumObj << "\n";
 #endif // MEMCHECK
 }
+
+#ifndef EFG_ONLY
+#include "lexicon.h"
+#endif   // EFG_ONLY
 
 Efg::~Efg()
 {
@@ -270,6 +286,11 @@ Efg::~Efg()
   for (i = 1; i <= players.Length(); delete players[i++]);
   for (i = 1; i <= outcomes.Length(); delete outcomes[i++]);
 
+#ifndef EFG_ONLY
+  if (lexicon)   delete lexicon;
+  lexicon = 0;
+#endif   // EFG_ONLY
+
 #ifdef MEMCHECK
   _NumObj--;
   gout << "--- Efg Dtor: " << _NumObj << "\n";
@@ -279,6 +300,14 @@ Efg::~Efg()
 //------------------------------------------------------------------------
 //                  Efg: Private member functions
 //------------------------------------------------------------------------
+
+void Efg::DeleteLexicon(void) const
+{
+#ifndef EFG_ONLY
+  if (lexicon)   delete lexicon;
+  lexicon = 0;
+#endif   // EFG_ONLY
+}
 
 Infoset *Efg::GetInfosetByIndex(EFPlayer *p, int index) const
 {
