@@ -38,7 +38,7 @@ MYNAME = Makefile2.generic
 CC = g++ 
 CFLAGS = -O2 -Wall -DGDOUBLE -D__NO_MATH_INLINES -Dwx_motif $(DEFINES) \
 	 -fguiding-decls -fno-implicit-templates $(INCDIR) 
-
+GUI=motif
 
 # define directory where object files are put
 
@@ -83,7 +83,7 @@ WXLIB = -lwx_motif_$(SYSNAME)
 ifeq ($(SYSNAME), SunOS_5.6)
 XINCDIR = -I/usr/local/X11R6.4/include/X11
 XLIBDIR = -L/usr/local/X11R6.4/lib 
-XLIB = -lsocket -lnsl -lX11 -lXm -lXt -lgen -lm
+XLIB = -lsocket -lnsl -lX11 -lXm -lXmu -lXt -lgen -lm
 else 
 ifeq ($(SYSNAME), HP-UX)
 DEFINES = -D_HPUX_SOURCE -DSVR4
