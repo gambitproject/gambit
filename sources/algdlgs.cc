@@ -18,7 +18,7 @@ if (fields&OUTPUT_FIELD)
 {
 	outname=new char[250];strcpy(outname,"wout");
 	wxGetResource(PARAMS_SECTION,"Trace-Out",&outname,defaults_file);
-	Add(wxMakeFormString("OutFile",&outname,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL));
+	Add(wxMakeFormString("traceFile",&outname,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL));
 }
 if (fields&ERROR_FIELD)
 {
@@ -181,7 +181,9 @@ if (pxifile && run_pxi && pxi_command && pxiname)
 		pxifilename=pxiname;
 	pxi_run+=pxifilename;
 	delete [] fname;
-	return wxExecute((char *)pxi_run);
+	Bool ok=wxExecute((char *)pxi_run);
+	if (!ok) wxMessageBox("PXI could not run!\nIt was either not found or\n there was insufficient memory/resources.\nPlease check the path and free memory.","PXI Error");
+  return ok;
 }
 else
 	return 0;
