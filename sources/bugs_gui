@@ -51,18 +51,6 @@ with the same name.
 
 //------------------------------
 
-Bug D6: This is not really a bug, just a re-organization and re-naming
-of menu entries.  
-
-The top level menu in the normal form (NF) and Extensive Form (EF) GUI
-should be similar to each other (except for the "Subgame" entry in the
-EF GUI, which has no counterpart in the NF GUI).  To this end, we
-should change the "Build" entry in the EF GUI to be "Edit", we should
-change the "Label" entry in the NF GUI to be "Edit", and then we
-should move the Solve->Outcomes entry to Edit->Outcomes in the NF GUI.
-
-//------------------------------
-
 Bug D7:  Conflict with Netscape
 
 When running the GUI, if netscape is already running, you get the
