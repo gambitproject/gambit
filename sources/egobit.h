@@ -12,9 +12,6 @@
 
 template <class T> class EFGobitParams : public GobitParams<T>  {
   public:
-    int maxitsPOW;
-    T tolPOW;
-
     EFGobitParams(void);
 };
 

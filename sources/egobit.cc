@@ -11,7 +11,6 @@
 #include "gmatrix.h"
 
 template <class T> EFGobitParams<T>::EFGobitParams(void)
-  : tolPOW((T) 1.0e-10)
 { }
 
 
@@ -143,7 +142,7 @@ template <class T> EFGobitModule<T>::~EFGobitModule()
 
 template <class T> GobitFunc<T> *EFGobitModule<T>::CreateFunc(void)
 {
-  return new EFGobitFunc<T>(E, ((EFGobitParams<T> &) params).tolPOW);
+  return new EFGobitFunc<T>(E, params.tolOpt);
 }
 
 

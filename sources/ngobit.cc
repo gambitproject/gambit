@@ -9,7 +9,6 @@
 #include "gfunct.h"
 
 template <class T> NFGobitParams<T>::NFGobitParams(void)
-  : tolDFP((T) 1.0e-10)
 { }
 
 
@@ -172,10 +171,8 @@ template <class T> NFGobitModule<T>::~NFGobitModule()
 
 template <class T> GobitFunc<T> *NFGobitModule<T>::CreateFunc(void)
 {
-  return new NFGobitFunc<T>(N, ((NFGobitParams<T> &) params).tolDFP);
+  return new NFGobitFunc<T>(N, params.tolOpt);
 }
-
-
 
 
 #ifdef __GNUG__

@@ -12,9 +12,6 @@
 
 template <class T> class NFGobitParams : public GobitParams<T>   {
   public:
-    int maxitsDFP;
-    T tolDFP;
-
     NFGobitParams(void);
 };
 
