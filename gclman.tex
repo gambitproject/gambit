@@ -1,7 +1,7 @@
 %
 % FILE: gclman.tex -- source for GCL manual
 %
-% @(#)gclman.tex	1.101 2/24/97
+% $Id$
 %
 
 %\documentclass{book}
@@ -248,7 +248,7 @@ Many objects of interest in game theory are {\it sets} (the set of
 players, of information sets for a player, of actions for an
 information set, etc.)  All objects in the GCL (including lists) can
 be put in lists.  Further, when a GCL function (with a few exceptions
-noted in the Function reference section) is is called with a list for
+noted in the Function reference section) is called with a list for
 one of its arguments, the function is run ``listably''.  This means
 that the function is executed for each element of the list and
 generates a list (or nested list) of the corresponding dimension as
@@ -278,7 +278,7 @@ Type name	& Description \\ \hline
 \tindex{FLOAT} 	& floating-point number \\
 \tindex{RATIONAL} 	& rational number with arbitrary precision \\
 \tindex{TEXT}	& string of arbitrary length \\
-\tindex{INPUT}	& output stream \\
+\tindex{INPUT}	& input stream \\
 \tindex{OUTPUT}	& output stream \\ 
 \hline
 \tindex{NFG}	& normal form game \\
@@ -317,7 +317,7 @@ detailed later in special sections.
 
 \subsection{Boolean}
 
-The \tindex{BOOLEAN} type represents boolean values, that is to say,
+The \tindex{BOOLEAN} type represents the boolean values
 ``true'' and ``false''.  The command language predefines two constants
 to represent these, \tindex{True} and \tindex{False}.
 
@@ -416,12 +416,13 @@ file on disk.  Its principal use is as a logging file for writing
 formatting output from an extended command language job.  The
 constants \tindex{StdOut} and \tindex{NullOut} refer to the standard
 output stream (generally the console) and the null output stream (the
-garbage can), respectively.
+garbage can), respectively.  New \verb+OUTPUT+ streams are created with the 
+function \verb+Output+, documented in the Function Reference section.
 \end{itemize}
 
 \subsection{Normal form data types}
 
-The data type \tindex{NFG} is used to represent a normal form games.  No
+The data type \tindex{NFG} is used to represent a normal form game.  No
 other normal form data type can exist independently of the normal form
 game to which it belongs.  The \tindex{NFPLAYER} and \tindex{STRATEGY}
 data types are used to represent players and strategies in a normal
@@ -437,7 +438,7 @@ until later.
 
 \subsection{Extensive form data types}
 
-The data type \tindex{EFG} is used to represent a normal form games.  As
+The data type \tindex{EFG} is used to represent an extensive form game.  As
 with normal form games, no other extensive form data type can exist
 independently of the extensive form game to which it belongs.  The
 \tindex{EFPLAYER} represents a player in an extensive form game.  The
@@ -506,8 +507,8 @@ hand,
 is not a legal list, since the second element is a {\tt LIST(FLOAT)}.
 
 Lists are distinct in type from each other and from their scalar
-equivalents.  That is to say, {\tt LIST(INTEGER)} is a different data
-type from {\tt LIST(FLOAT)}, and is also a different data type form
+equivalents.  That is to say, {\tt LIST(INTEGER)} is a distinct data
+type from {\tt LIST(FLOAT)}, and is also a distinct data type from
 {\tt INTEGER}.
  
 \subsection{Conglomerate and qualified data types}
@@ -1422,7 +1423,7 @@ executed; so, if the \verb+boolean-expression+ is \verb+False+ the
 first time it is evaluated, the body of the loop never executes, and
 no variables which appear in the loop are considered to be defined.
 
-\subsection{Special looping with \tindex{For}}\index{Flow control!For}
+\subsection{Indexed looping with \tindex{For}}\index{Flow control!For}
 
 The function \verb+For+ is a specialized looping construct, useful
 mostly in cases where some index variable is used to iterate a list or
@@ -1602,7 +1603,7 @@ There are several commands in the GCL that allow you to get
 information from or run processes on the host system.  
 
 A series of functions, \tindex{StartWatch}, \tindex{StopWatch},
-\tindex{ElapsedTime} provide informaion on the amount of cpu time
+\tindex{ElapsedTime} provide information on the amount of cpu time
 used by the GCL, and can be used to time computation.  
 
 Another series of functions, \tindex{GetEnv}, \tindex{SetEnv},
