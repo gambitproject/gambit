@@ -81,7 +81,7 @@ int EfgPSNEBySubgame<T>::SolveSubgame(const Efg<T> &E,
 {
   FindPureNash(E, solns);
 
-  return gstatus.Get();
+  return 0;
 }
 
 template <class T>

@@ -628,6 +628,8 @@ Portion *GSM_GridSolveSupport(Portion **param)
 
 //-------------------------- LiapSolve ---------------------------//
 
+#include "subnliap.h"
+
 Portion *GSM_LiapEfg_EfgFloat(Portion **param)
 {
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
@@ -885,6 +887,7 @@ Portion *GSM_LemkeNfgSupport(Portion **param)
 
 
 #include "seqform.h"
+#include "subnlemk.h"
 
 Portion *GSM_LcpSolveEfgFloat(Portion **param)
 {
@@ -1077,6 +1080,7 @@ Portion *GSM_SimpdivSupport(Portion **param)
   return por;
 }
 
+#include "subnsimp.h"
 
 Portion *GSM_SimpdivEfgFloat(Portion **param)
 {
@@ -1243,6 +1247,7 @@ Portion *GSM_ConstSumSupport(Portion **param)
   return por;
 }
 
+#include "subncsum.h"
 
 Portion *GSM_LpSolveEfgFloat(Portion **param)
 {
@@ -1376,6 +1381,7 @@ Portion *GSM_PureNashSupport(Portion **param)
 }
 
 #include "efgpure.h"
+#include "subnpsne.h"
 
 Portion *GSM_EnumPureEfgFloat(Portion **param)
 {
@@ -1522,6 +1528,7 @@ Portion *GSM_EnumSupport(Portion **param)
   return por;
 }
 
+#include "subnenum.h"
 
 
 Portion *GSM_EnumMixedEfgFloat(Portion **param)

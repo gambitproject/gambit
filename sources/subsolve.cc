@@ -233,7 +233,7 @@ template <class T> SubgameSolver<T>::SubgameSolver(const Efg<T> &E, int max)
 
 template <class T> SubgameSolver<T>::~SubgameSolver()  
 {
-	for (int i = 1; i <= efg.NumPlayers(); i++)
+  for (int i = 1; i <= efg.NumPlayers(); i++)
     delete infosets[i];
 }
 
@@ -247,263 +247,12 @@ void SubgameSolver<T>::Solve(void)
 
   gList<Outcome *> values;
 
-	((gVector<T> &) solution).operator=((T) 0);
+  ((gVector<T> &) solution).operator=((T) 0);
 
-	FindSubgames(efg.RootNode(), solutions, values);
+  FindSubgames(efg.RootNode(), solutions, values);
 
-	time = watch.Elapsed();
+  time = watch.Elapsed();
 }
-
-#pragma option -Jgx
-
-//-------------------------------------------------------------------------
-//                      Hooks to specific algorithms
-//-------------------------------------------------------------------------
-
-
-#include "mixed.h"
-
-//-------------------
-// NFLiap
-//-------------------
-
-int NFLiapBySubgame::SolveSubgame(const Efg<double> &E,
-				   gList<BehavSolution<double> > &solns)
-{
-  Nfg<double> *N = MakeReducedNfg((Efg<double> &) E);
-
-  NFSupport *S=new NFSupport(*N);
-
-  ViewNormal(*N, S);
-
-  MixedProfile<double> mp(*N, *S);
-  
-  long this_nevals, this_niters;
-
-  gList<MixedSolution<double> > subsolns;
-  Liap(*N, params, mp, subsolns, this_nevals, this_niters);
-
-  nevals += this_nevals;
-
-  for (int i = 1; i <= subsolns.Length(); i++)  {
-    BehavProfile<double> bp(E);
-    MixedToBehav(*N, subsolns[i], E, bp);
-    solns.Append(bp);
-  }
-
-  delete N;
-  return params.status.Get();
-}
-
-NFLiapBySubgame::NFLiapBySubgame(const Efg<double> &E, const NFLiapParams &p,
-				 const BehavProfile<double> &s, int max)
-  : SubgameSolver<double>(E, max), nevals(0), params(p), start(s)
-{ }
-
-NFLiapBySubgame::~NFLiapBySubgame()   { }
-
-
-//-------------------
-// Lemke-Howson
-//-------------------
-
-template <class T>
-int LemkeBySubgame<T>::SolveSubgame(const Efg<T> &E, 
-				     gList<BehavSolution<T> > &solns)
-{
-  Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
-
-  NFSupport *S=new NFSupport(*N);
-
-  ViewNormal(*N, S);
-
-  	MixedProfile<T> mp(*N, *S);
-
-  LemkeModule<T> M(*N, params, mp.GetNFSupport());
-  
-  M.Lemke();
-
-  npivots += M.NumPivots();
-
-  for (int i = 1; i <= M.GetSolutions().Length(); i++)  {
-    BehavProfile<T> bp(E);
-    MixedToBehav(*N, M.GetSolutions()[i], E, bp);
-    solns.Append(bp);
-  }
-
-  delete N;
-  return params.status.Get();
-}
-
-template <class T>
-LemkeBySubgame<T>::LemkeBySubgame(const Efg<T> &E, const LemkeParams &p,
-				  int max)
-  : SubgameSolver<T>(E, max), npivots(0), params(p)
-{ }
-
-template <class T> LemkeBySubgame<T>::~LemkeBySubgame()   { }
-
-
-//-------------------
-// Simpdiv
-//-------------------
-
-template <class T>
-int SimpdivBySubgame<T>::SolveSubgame(const Efg<T> &E,
-				       gList<BehavSolution<T> > &solns)
-{
-  Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
-
-  NFSupport *S=new NFSupport(*N);
-
-  ViewNormal(*N, S);
-
-  	MixedProfile<T> mp(*N, *S);
-
-  SimpdivModule<T> M(*N, params, mp.GetNFSupport());
-  
-  M.Simpdiv();
-
-  nevals += M.NumEvals();
-
-  for (int i = 1; i <= M.GetSolutions().Length(); i++)  {
-    BehavProfile<T> bp(E);
-    MixedToBehav(*N, M.GetSolutions()[i], E, bp);
-    solns.Append(bp);
-  }
-
-  delete N;
-  return params.status.Get();
-}
-
-template <class T>
-SimpdivBySubgame<T>::SimpdivBySubgame(const Efg<T> &E, const SimpdivParams &p,
-				      int max)
-  : SubgameSolver<T>(E, max), params(p)
-{ }
-
-template <class T> SimpdivBySubgame<T>::~SimpdivBySubgame()   { }
-
-
-//-------------------
-// Enum
-//-------------------
-
-template <class T>
-int EnumBySubgame<T>::SolveSubgame(const Efg<T> &E,
-				   gList<BehavSolution<T> > &solns)
-{
-  Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
-  
-  NFSupport *S=new NFSupport(*N);
-  
-  ViewNormal(*N, S);
-  
-  MixedProfile<T> mp(*N, *S);
-  
-  EnumModule<T> M(*N, params, mp.GetNFSupport());
-  
-  M.Enum();
-  
-  npivots += M.NumPivots();
-
-  for (int i = 1; i <= M.GetSolutions().Length(); i++)  {
-    BehavProfile<T> bp(E);
-    MixedToBehav(*N, M.GetSolutions()[i], E, bp);
-    solns.Append(bp);
-  }
-  
-  delete N;
-  return params.status.Get();
-}
-
-template <class T>
-EnumBySubgame<T>::EnumBySubgame(const Efg<T> &E, const EnumParams &p, int max)
-  : SubgameSolver<T>(E, max), npivots(0), params(p)
-{ }
-
-template <class T> EnumBySubgame<T>::~EnumBySubgame()   { }
-
-
-//-------------------
-// PureNash
-//-------------------
-
-template <class T>
-int PureNashBySubgame<T>::SolveSubgame(const Efg<T> &E,
-				       gList<BehavSolution<T> > &solns)
-{
-  Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
-
-  NFSupport *S=new NFSupport(*N);
-
-  ViewNormal(*N, S);
-
-  gList<MixedSolution<T> > sol;
-  FindPureNash(*N, sol);
-
-  for (int i = 1; i <= sol.Length(); i++)  {
-    BehavProfile<T> bp(E);
-    MixedToBehav(*N, sol[i], E, bp);
-    solns.Append(bp);
-  }
-
-  delete N;
-  // return params.status.Get();
-  return 0;
-}
-
-template <class T>
-PureNashBySubgame<T>::PureNashBySubgame(const Efg<T> &E, int max)
-  : SubgameSolver<T>(E, max)
-{ }
-
-template <class T> PureNashBySubgame<T>::~PureNashBySubgame()   { }
-
-
-//-------------------
-// ZSum
-//-------------------
-
-template <class T>
-int ZSumBySubgame<T>::SolveSubgame(const Efg<T> &E,
-				    gList<BehavSolution<T> > &solns)
-{
-  Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
-
-	NFSupport *S=new NFSupport(*N);
-
-	ViewNormal(*N, S);
-
-		MixedProfile<T> mp(*N, *S);
-
-	ZSumModule<T> M(*N, params, mp.GetNFSupport());
-
-	M.ZSum();
-
-  npivots += M.NumPivots();
-
-  gList<MixedSolution<T> > sol;
-  M.GetSolutions(sol);
-
-  for (int i = 1; i <= sol.Length(); i++)  {
-    BehavProfile<T> bp(E);
-    MixedToBehav(*N, sol[i], E, bp);
-    solns.Append(bp);
-  }
-
-  delete N;
-  // return params.status.Get();
-  return 0;
-}
-
-template <class T>
-ZSumBySubgame<T>::ZSumBySubgame(const Efg<T> &E, const ZSumParams &p,
-				int max)
-	: SubgameSolver<T>(E, max), npivots(0), params(p)
-{ }
-
-template <class T> ZSumBySubgame<T>::~ZSumBySubgame()   { }
 
 
 #ifdef __GNUG__
@@ -511,22 +260,10 @@ template <class T> ZSumBySubgame<T>::~ZSumBySubgame()   { }
 #elif defined __BORLANDC__
 #pragma option -Jgx
 class gArray<unsigned char>;
-class gArray<BFS<double> >;
-class gArray<BFS<gRational> >;
-class gList<LUupdate<double> >;
-class gList<LUupdate<gRational> >;
 
 class gNode<gArray<int> >;
 class gList<gArray<int> >;
 class gListIter<gArray<int> >;
-
-class gNode<BFS<double> >;
-class gNode<BFS<gRational> >;
-class gList<BFS<double> >;
-class gList<BFS<gRational> >;
-class gListIter<BFS<double> >;
-class gListIter<BFS<gRational> >;
-
 
 bool operator==(const gArray<Outcome *> &a, const gArray<Outcome *> &b)
 {
@@ -560,20 +297,6 @@ bool operator!=(const gArray<int> &a, const gArray<int> &b)
 TEMPLATE class SubgameSolver<double>;
 TEMPLATE class SubgameSolver<gRational>;
 
-TEMPLATE class LemkeBySubgame<double>;
-TEMPLATE class LemkeBySubgame<gRational>;
-
-TEMPLATE class SimpdivBySubgame<double>;
-TEMPLATE class SimpdivBySubgame<gRational>;
-
-TEMPLATE class EnumBySubgame<double>;
-TEMPLATE class EnumBySubgame<gRational>;
-
-TEMPLATE class PureNashBySubgame<double>;
-TEMPLATE class PureNashBySubgame<gRational>;
-
-TEMPLATE class ZSumBySubgame<double>;
-TEMPLATE class ZSumBySubgame<gRational>;
 
 #include "garray.imp"
 
