@@ -11,7 +11,7 @@ BASE_SOURCES = garray.cc gblock.cc glist.cc gmisc.cc gpool.cc \
 # These are found in subdirectory math/
 MATH_SOURCES = complex.cc double.cc integer.cc gdpvect.cc gmatrix.cc \
                gnulib.cc gnumber.cc gpvector.cc gsmatrix.cc gvector.cc \
-               mathinst.cc misc.cc rational.cc
+               mathinst.cc misc.cc rational.cc eigen.cc
 
 GLIB_SOURCES = $(BASE_SOURCES) $(MATH_SOURCES) \
                gfuncmin.cc gfunc.cc system.cc gnarray.cc
