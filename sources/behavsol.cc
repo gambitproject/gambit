@@ -5,6 +5,7 @@
 //
 
 #include "behavsol.h"
+#include "lexicon.h"  // needed for ReducedNormalFormRegrets
 
 // we probably want to break this out into another file (rdm)
 
@@ -88,7 +89,7 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
     m_checkedSubgamePerfect(false), m_checkedSequential(false), 
     m_epsilon(0.0),
     m_qreLambda(-1), m_qreValue(-1),
-    m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
+    m_liapValue(-1), m_beliefs(0), m_regret(0), m_rnf_regret(0), m_id(0)
 {
   gEpsilon(m_epsilon);
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
@@ -117,7 +118,7 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
     m_checkedANFNash(false), m_checkedNash(false),
     m_checkedSubgamePerfect(false), m_checkedSequential(false), 
     m_qreLambda(-1), m_qreValue(-1),
-    m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
+    m_liapValue(-1), m_beliefs(0), m_regret(0), m_rnf_regret(0), m_id(0)
 {
   gEpsilon(m_epsilon);
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
@@ -145,7 +146,7 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
     m_checkedANFNash(false), m_checkedNash(false),
     m_checkedSubgamePerfect(false), m_checkedSequential(false), 
     m_qreLambda(-1), m_qreValue(-1),
-    m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
+    m_liapValue(-1), m_beliefs(0), m_regret(0), m_rnf_regret(0), m_id(0)
 {
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
     EFPlayer *player = Game().Players()[pl];  
@@ -186,13 +187,16 @@ BehavSolution::BehavSolution(const BehavSolution &p_solution)
     m_qreLambda(p_solution.m_qreLambda),
     m_qreValue(p_solution.m_qreValue),
     m_liapValue(p_solution.m_liapValue),
-    m_beliefs(0), m_regret(0), m_id(0)
+    m_beliefs(0), m_regret(0), m_rnf_regret(0), m_id(0)
 {
   if (p_solution.m_beliefs) {
     m_beliefs = new gDPVector<gNumber>(*p_solution.m_beliefs);
   }
   if (p_solution.m_regret) {
     m_regret = new gDPVector<gNumber>(*p_solution.m_regret);   
+  }
+  if (p_solution.m_rnf_regret) {
+    m_rnf_regret = new gPVector<gNumber>(*p_solution.m_regret);   
   }
 }
 
@@ -201,6 +205,7 @@ BehavSolution::~BehavSolution()
   delete m_profile;
   if (m_beliefs) delete m_beliefs;
   if (m_regret)  delete m_regret;
+  if (m_rnf_regret)  delete m_rnf_regret;
 }
 
 BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
@@ -234,6 +239,13 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
     }
     else {
       m_regret = 0;
+    }
+    if (m_rnf_regret)   delete m_rnf_regret;
+    if (p_solution.m_rnf_regret) {
+      m_rnf_regret = new gPVector<gNumber>(*p_solution.m_rnf_regret);
+    }
+    else {
+      m_rnf_regret = 0;
     }
   }
 
@@ -498,6 +510,10 @@ void BehavSolution::Invalidate(void) const
     delete m_regret;
     m_regret = 0;
   }
+  if (m_rnf_regret)  {
+    delete m_rnf_regret;
+    m_rnf_regret = 0;
+  }
 }
 
 //-----------------------------------------
@@ -520,6 +536,46 @@ const gDPVector<gNumber> &BehavSolution::Regret(void) const
   }
 
   return *m_regret;
+}
+
+const gPVector<gNumber> &BehavSolution::ReducedNormalFormRegret(void) const
+{
+  if (!m_rnf_regret)  {
+    const Efg& E = Game(); 
+    Lexicon L(E);
+
+    for (int i = 1; i <= E.NumPlayers(); i++)
+      L.MakeReducedStrats(m_support, E.Players()[i], E.RootNode(), NULL);
+    
+    gArray<int> dim(E.NumPlayers());
+    for (int i = 1; i <= E.NumPlayers(); i++)
+      dim[i] = (L.strategies[i].Length()) ? L.strategies[i].Length() : 1;
+    
+    m_rnf_regret = new gPVector<gNumber>(dim);
+    
+    for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
+      gNumber pay = Payoff(pl);
+      
+      for (int st = 1; st <= (L.strategies[pl]).Length(); st++) {
+	
+	BehavProfile<gNumber> scratch(*this);
+	const gArray<int> *const actions = L.strategies[pl][st];
+	//	gout << "\nstrat: " << st << " actions: " << *actions;
+	
+	for(int j = 1;j<=(*actions).Length();j++) {
+	  int a = (*actions)[j];
+	  for (int k = 1;k<=m_support.NumActions(pl,j);k++)
+	    scratch(pl,j,k) = (gNumber)0;
+	  if(a>0)scratch(pl,j,a) = (gNumber)1;
+	}
+	//	gout << " scratch: " << scratch;
+	gNumber pay2 = scratch.Payoff(pl);
+	gNumber regret = (pay2 < pay) ? (gNumber)0 : pay2 - pay ;
+	(*m_rnf_regret)(pl,st) = regret;
+      }
+    }
+  }
+  return *m_rnf_regret;
 }
 
 //----------------------------------------

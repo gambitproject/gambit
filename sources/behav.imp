@@ -297,6 +297,9 @@ BehavProfile<T>::BehavProfile(const BehavSolution &p_solution)
   for (int iset = 1; iset <= dim.Length(); iset++)
     for (int act = 1; act <= m_efg->GetChance()->Infosets()[iset]->NumActions(); act++)
        (*m_chanceprobs)(iset, act) = m_efg->GetChanceProb(m_efg->GetChance()->Infosets()[iset], act);
+  for (int outc = 1; outc <= m_efg->NumOutcomes(); outc++)
+    for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)
+      (*m_payoffs)(outc, pl) = m_efg->Payoff(m_efg->Outcomes()[outc], pl);
 }
 
 template <class T> BehavProfile<T>::BehavProfile(const EFSupport &p_support) 

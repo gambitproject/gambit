@@ -42,6 +42,7 @@ protected:
   mutable bool m_checkedSubgamePerfect, m_checkedSequential;
   mutable gNumber m_epsilon, m_qreLambda, m_qreValue, m_liapValue;
   mutable gDPVector<gNumber> *m_beliefs, *m_regret;
+  mutable gPVector<gNumber> *m_rnf_regret;
   unsigned int m_id;
 
   // PRIVATE AUXILIARY MEMBER FUNCTIONS
@@ -164,6 +165,7 @@ public:
   const gNumber &LiapValue(void) const;
   const gDPVector<gNumber> &Beliefs(void) const;
   const gDPVector<gNumber> &Regret(void) const;
+  const gPVector<gNumber> &ReducedNormalFormRegret(void) const;
 
   void SetId(unsigned int p_id) { m_id = p_id; }
   void SetCreator(EfgAlgType p_creator) { m_creator = p_creator; }
