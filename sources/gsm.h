@@ -146,6 +146,17 @@ public:
 };
 
 
+class gclRuntimeError : public gException  {
+private:
+  gText message;
+
+public:
+  gclRuntimeError(const gText &);
+  virtual ~gclRuntimeError();
+
+  gText Description(void) const;
+};
+
 
 #endif  // GSM_H
 

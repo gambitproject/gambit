@@ -182,7 +182,7 @@ static Portion *GSM_ChanceProb(Portion **param)
   Action *action = ((ActionPortion *) param[0])->Value();
   Infoset *infoset = action->BelongsTo();
   if (!infoset->GetPlayer()->IsChance()) 
-    return new ErrorPortion("Action must belong to the chance player");
+    throw gclRuntimeError("Action must belong to the chance player");
   Efg *efg = infoset->Game();
 
   return new NumberPortion(efg->GetChanceProb(infoset, action->GetNumber()));
@@ -239,7 +239,7 @@ static Portion *GSM_DeleteAction(Portion **param)
   Infoset *infoset = action->BelongsTo();
 
   if (infoset->NumActions() == 1)
-    return new ErrorPortion("Cannot delete the only action at an infoset.");
+    throw gclRuntimeError("Cannot delete the only action at an infoset.");
 
   infoset->Game()->DeleteAction(infoset, action);
 
@@ -275,7 +275,7 @@ static Portion *GSM_DeleteMove(Portion **param)
   Node *keep = ((NodePortion *) param[1])->Value();
 
   if (keep->GetParent() != n)
-    return new ErrorPortion("keep is not a child of node");
+    throw gclRuntimeError("keep is not a child of node");
 
   _gsm->UnAssignGameElement(n->Game(), true, porBEHAV | porEFSUPPORT);
   for (int i = 1; i <= n->NumChildren(); i++) 
@@ -344,7 +344,7 @@ static Portion *GSM_ElimDom_Efg(Portion **param)
   bool mixed = ((BoolPortion *) param[2])->Value();
 
   if (mixed)
-    return new ErrorPortion("Elimination by mixed strategies not implemented");
+    throw gclRuntimeError("Elimination by mixed strategies not implemented");
 
   gWatch watch;
   gBlock<int> players(S->Game().NumPlayers());
@@ -520,10 +520,10 @@ static Portion *GSM_LoadEfg(Portion **param)
     if (E)
       return new EfgPortion(E);
     else
-      return new ErrorPortion("Not a valid .efg file");
+      throw gclRuntimeError("Not a valid .efg file");
   }
   catch (gFileInput::OpenFailed &)  {
-    return new ErrorPortion("Unable to open file for reading");
+    throw gclRuntimeError("Unable to open file for reading");
   }
 }
 
@@ -683,7 +683,7 @@ static Portion *GSM_NewInfoset(Portion **param)
   int n = ((NumberPortion *) param[1])->Value();
 
   if (n <= 0)
-    return new ErrorPortion("Information sets must have at least one action");
+    throw gclRuntimeError("Information sets must have at least one action");
 
   Infoset *s = p->Game()->CreateInfoset(p, n);
 
@@ -964,7 +964,7 @@ static Portion *GSM_SaveEfg(Portion **param)
     E->WriteEfgFile(f);
   }
   catch (gFileOutput::OpenFailed &)  {
-    return new ErrorPortion("Cannot open file for writing");
+    throw gclRuntimeError("Cannot open file for writing");
   }
 
   return param[0]->ValCopy();
@@ -981,8 +981,7 @@ static Portion *GSM_SetChanceProbs(Portion **param)
   Efg *efg = s->Game();
 
   if (!s->GetPlayer()->IsChance())
-    return new ErrorPortion
-      ("Information set does not belong to chance player");
+    throw gclRuntimeError("Information set does not belong to chance player");
   
   for (int i = 1; i <= p->Length(); i++)
     efg->SetChanceProb(s, i, ((NumberPortion *) (*p)[i])->Value());

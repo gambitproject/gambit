@@ -213,15 +213,14 @@ void gclFunctionCall::AttemptMatch(void)
 Portion *gclFunctionCall::Evaluate(void)
 {
   if (!_gsm._FuncTable->IsDefined(name))  
-    return new ErrorPortion("Undefined function " + name);
+    throw gclRuntimeError("Undefined function " + name);
 
   CallFuncObj *call = new CallFuncObj((*_gsm._FuncTable)(name),
 				      _gsm._StdOut, _gsm._StdErr);
   
   int undefined = 0;
 
-  int i = 0;  
-  for ( i = 1; i <= params->req->NumParams(); i++)   {
+  for (int i = 1; i <= params->req->NumParams(); i++)   {
     Portion *val = (*params->req)[i]->Evaluate();
     if (val->Spec().Type == porERROR)  
       return val;
@@ -237,7 +236,7 @@ Portion *gclFunctionCall::Evaluate(void)
       call->SetCurrParam(val, AUTO_VAL_OR_REF);
   }
   
-  for ( i = 1; i <= params->opt->NumParams(); i++)  {
+  for (int i = 1; i <= params->opt->NumParams(); i++)  {
     call->SetCurrParamIndex(params->opt->FormalName(i));
     Portion *val = (*params->opt)[i]->Evaluate();
     if (val->Spec().Type == porERROR)
@@ -272,7 +271,7 @@ Portion *gclFunctionCall::Evaluate(void)
     }
   }
   else 
-    ret = new ErrorPortion("Parameter " + ToText(undefined) + 
+    throw gclRuntimeError("Parameter " + ToText(undefined) +
                            " undefined in call to " + name);
     
   delete call;
@@ -366,16 +365,15 @@ void gclListConstant::Append(gclExpression *expr)
 Portion *gclListConstant::Evaluate(void)
 {
   ListPortion *ret = new ListPortion;
-  int index = 0;
   bool ErrorOccurred = false;
 
-  for (int i = 1; i <= values.Length(); i++)  
+  for (int i = 1; i <= values.Length(); i++)
   {
     Portion *v = values[i]->Evaluate();
     if (v->Spec().Type == porERROR)
       ErrorOccurred = true;
     _gsm._ResolveRef(v);
-    index = ret->Append(v);
+    int index = ret->Append(v);
     if( index == 0 )
       ErrorOccurred = true;
   }
@@ -385,7 +383,7 @@ Portion *gclListConstant::Evaluate(void)
   else
   {
     delete ret;
-    return new ErrorPortion;
+    throw gclRuntimeError("");
   }
 }
 
@@ -425,7 +423,7 @@ Portion *gclConditional::Evaluate(void)
   _gsm._ResolveRef(guardval);
   if (guardval->Spec().Type != porBOOL ||
       guardval->Spec().ListDepth > 0)
-    return new ErrorPortion("Guard must evaluate to BOOLEAN"); 
+    throw gclRuntimeError("Guard must evaluate to BOOLEAN");
 
   Portion *ret;
   if (((BoolPortion *) guardval)->Value() == T_YES)
@@ -457,7 +455,7 @@ Portion *gclWhileExpr::Evaluate(void)
     _gsm._ResolveRef(guardval);
     if (guardval->Spec().Type != porBOOL ||
 	guardval->Spec().ListDepth > 0)
-      return new ErrorPortion("Guard must evaluate to BOOLEAN"); 
+      throw gclRuntimeError("Guard must evaluate to BOOLEAN");
 
     if (((BoolPortion *) guardval)->Value() != T_YES)  {
       delete guardval;
@@ -504,7 +502,7 @@ Portion *gclForExpr::Evaluate(void)
     _gsm._ResolveRef(guardval);
     if (guardval->Spec().Type != porBOOL ||
 	guardval->Spec().ListDepth > 0)
-      return new ErrorPortion("Guard must evaluate to BOOLEAN"); 
+      throw gclRuntimeError("Guard must evaluate to BOOLEAN"); 
 
     if (((BoolPortion *) guardval)->Value() != T_YES)  {
       delete guardval;

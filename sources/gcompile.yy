@@ -832,10 +832,13 @@ bool GCLCompiler::DeleteFunction(void)
 int GCLCompiler::Execute(void)
 {
   Portion *result = gsm.Execute(exprtree); 
-  if (result->Spec().Type == porERROR)
-    gout << "GCL: " << result << '\n';
 
-  delete result;
+  if (result)  {
+    if (result->Spec().Type == porERROR)
+      gout << "GCL: " << result << '\n';
+
+    delete result;
+  }
   return rcSUCCESS;
 }
 

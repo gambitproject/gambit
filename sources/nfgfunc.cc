@@ -159,7 +159,7 @@ static Portion *GSM_IsConstSum(Portion **param)
 // LoadNfg
 //-----------
 
-extern int ReadNfgFile(gInput &f, Nfg *& Nrat);
+extern int ReadNfgFile(gInput &f, Nfg *& N);
 
 static Portion *GSM_LoadNfg(Portion **param)
 {
@@ -170,11 +170,11 @@ static Portion *GSM_LoadNfg(Portion **param)
   try { 
     gFileInput f(file);
     if (!ReadNfgFile(f, nfg))
-      return new ErrorPortion("Not a valid .nfg file");
+      throw gclRuntimeError("Not a valid .nfg file");
     return new NfgPortion(nfg);
   }
   catch (gFileInput::OpenFailed &)  {
-    return new ErrorPortion("Unable to open file for reading");
+    throw gclRuntimeError("Unable to open file for reading");
   }
 }
 
@@ -247,14 +247,14 @@ static Portion* GSM_Outcome(Portion** param)
     ((StrategyPortion *) (*((ListPortion *) param[0]))[1])->Value()->nfp->Game();
   
   if (nfg.NumPlayers() != ((ListPortion *) param[0])->Length())
-    return new ErrorPortion("Invalid profile");
+    throw gclRuntimeError("Invalid profile");
 
   StrategyProfile profile(nfg);
   for (i = 1; i <= nfg.NumPlayers(); i++)  {
     Strategy *strat =
       ((StrategyPortion *) (*((ListPortion *) param[0]))[i])->Value();
     if (strat->nfp->GetNumber() != i)
-      return new ErrorPortion("Invalid profile");
+      throw gclRuntimeError("Invalid profile");
     profile.Set(i, strat);
   }
   
@@ -359,7 +359,7 @@ static Portion *GSM_SaveNfg(Portion **param)
     N->WriteNfgFile(f);
   }
   catch (gFileOutput::OpenFailed &)  {
-    return new ErrorPortion("Unable to open file for output");
+    throw gclRuntimeError("Unable to open file for output");
   }
 
   return param[0]->ValCopy();
@@ -412,14 +412,14 @@ static Portion* GSM_SetOutcome(Portion** param)
     ((StrategyPortion *) (*((ListPortion *) param[0]))[1])->Value()->nfp->Game();
   
   if (nfg.NumPlayers() != ((ListPortion *) param[0])->Length())
-    return new ErrorPortion("Invalid profile");
+    throw gclRuntimeError("Invalid profile");
 
   StrategyProfile profile(nfg);
   for (int i = 1; i <= nfg.NumPlayers(); i++)  {
     Strategy *strat =
       ((StrategyPortion *) (*((ListPortion *) param[0]))[i])->Value();
     if (strat->nfp->GetNumber() != i)
-      return new ErrorPortion("Invalid profile");
+      throw gclRuntimeError("Invalid profile");
     profile.Set(i, strat);
   }
   

@@ -276,7 +276,7 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
   }  
   else if(p2Spec.Type == porREFERENCE) // assigning from undefined variable
   {
-    result = new ErrorPortion("Undefined variable " +
+    throw gclRuntimeError("Undefined variable " +
 			      ((ReferencePortion *) p2)->Value());
   }
   else if(p1Spec.Type == porREFERENCE) // assigning to a new variable
@@ -358,8 +358,8 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
 
       case porINPUT:
       case porOUTPUT:
-	result = new ErrorPortion("Cannot assign from INPUT/OUTPUT variable" );
 	delete p1;
+	throw gclRuntimeError("Cannot assign from INPUT/OUTPUT variable" );
 	break;
 
       default:
@@ -382,16 +382,16 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
       }
       else // error: assigning to (list of) INPUT or OUTPUT
       {
-	result = new ErrorPortion("Cannot assign from INPUT/OUTPUT variable" );
 	delete p2;
 	delete p1;
+	throw gclRuntimeError("Cannot assign from INPUT/OUTPUT variable" );
       }
     }
     else // error: changing the type of a list
     {
-      result = new ErrorPortion("Cannot change list type");
       delete p2;
       delete p1;
+      throw gclRuntimeError("Cannot change list type");
     }
   }
   else if(varname != "") // make sure variable is associated with a var name
@@ -420,16 +420,16 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
       _ErrorMessage(_StdErr, 66, 0, 0, varname, 
 		    PortionSpecToText(p1Spec),
 		    PortionSpecToText(p2Spec));
-      result = new ErrorPortion;
       delete p2;
       delete p1;
+      throw gclRuntimeError("Changing the type of a variable");
     }
   }
   else
   {
-    result = new ErrorPortion("Must assign to a variable");
     delete p2;
     delete p1;
+    throw gclRuntimeError("Must assign to a variable");
   }
 
   assert( result );
@@ -488,9 +488,7 @@ Portion* GSM::UnAssignExt(Portion *p)
   }
   else
   {
-//    _Push(p);
-    txt = "UnAssign[] called on a non-reference value";
-    return new ErrorPortion(txt);
+    throw gclRuntimeError("UnAssign[] called on a non-reference value");
   }
 }
 
@@ -627,7 +625,8 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
       if( VarDefine(func_info.ParamInfo[i].Name, param[i]) )
 	param[i] = param[i]->RefCopy();
       else
-	param[i] = new ErrorPortion;
+//	param[i] = new ErrorPortion;
+       throw gclRuntimeError("Param matching error");
     }
   }
 
@@ -798,7 +797,7 @@ Portion* GSM::Help(gText funcname, bool udf, bool bif, bool getdesc)
   }
 
   if(!result)
-    result = new ErrorPortion("No match found");      
+    throw gclRuntimeError("No match found");
   return result;
 }
 
@@ -887,7 +886,7 @@ Portion* GSM::HelpVars(gText varname)
   }
 
   if(!result)
-    result = new ErrorPortion("No match found");      
+    throw gclRuntimeError("No match found");      
   return result;
 }
 
@@ -1248,3 +1247,15 @@ void GSM::GlobalVarRemove     ( const gText& var_name )
   assert(var_name != "");
   delete _GlobalRefTable.Remove(var_name);
 }
+
+
+gclRuntimeError::gclRuntimeError(const gText &s)
+  : message(s)
+{ }
+
+gclRuntimeError::~gclRuntimeError()
+{ }
+
+gText gclRuntimeError::Description(void) const
+{ return message; }
+

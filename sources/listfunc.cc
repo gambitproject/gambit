@@ -30,9 +30,7 @@ static Portion* GSM_Concat_List(Portion** param)
     int append_result = ((ListPortion*) result)->Append(p_value[i]->ValCopy());
     if(append_result == 0)  {
       delete result;
-      result = new ErrorPortion
-	("Attempted concatenating lists of different types");
-      break;
+      throw gclRuntimeError("Attempted concatenating lists of different types");
     }
   }
   return result;
@@ -183,7 +181,7 @@ ListPortion* GSM_Filter_Aid(ListPortion* p0, ListPortion* p1)
 Portion* GSM_Filter(Portion** param)
 {
   if(!ListDimCheck((ListPortion*) param[0], (ListPortion*) param[1]))
-    return new ErrorPortion("Mismatching list dimensions");
+    throw gclRuntimeError("Mismatching list dimensions");
   ListPortion* list = GSM_Filter_Aid((ListPortion*) param[0], 
 				     (ListPortion*) param[1]);
   list->SetDataType( param[0]->Spec().Type );
@@ -204,7 +202,7 @@ Portion* GSM_Sort(Portion** param, bool (*compfunc)(Portion*, Portion*),
 
   if(altsort)
     if(n != (unsigned) ((ListPortion*) param[1])->Length())
-      return new ErrorPortion("Mismatching list dimensions");
+      throw gclRuntimeError("Mismatching list dimensions");
   
   Portion* *a=new Portion* [n+1];
   Portion* *b=new Portion* [n+1];
@@ -271,7 +269,7 @@ Portion* GSM_Sort(Portion** param, bool (*compfunc)(Portion*, Portion*),
       return param[1]->ValCopy();
   }
   else
-    return new ErrorPortion("Cannot sort a nested list");
+    throw gclRuntimeError("Cannot sort a nested list");
 }
 
 
@@ -318,7 +316,7 @@ Portion *GSM_NthElement(Portion **param)
 {
   int n = ((NumberPortion *) param[1])->Value();
   if(n <= 0 || n > ((ListPortion *) param[0])->Length())
-    return new ErrorPortion("Subscript out of range");
+    throw gclRuntimeError("Subscript out of range");
   else
     return ((ListPortion *) param[0])->SubscriptCopy(n);
 }
@@ -412,7 +410,7 @@ Portion* GSM_List( Portion** param )
   assert( param[0]->Spec().Type != porERROR );  
 
   if( ((NumberPortion*) param[1])->Value() < gNumber(0))
-    return new ErrorPortion( "Invalid list Length" );
+    throw gclRuntimeError( "Invalid list Length" );
 
   p = new ListPortion();
   p->SetDataType( param[0]->Spec().Type );
@@ -428,7 +426,7 @@ Portion* GSM_List_List( Portion** param )
   assert( param[0]->Spec().Type != porERROR );  
 
   if( ((NumberPortion*) param[1])->Value() < gNumber(0) )
-    return new ErrorPortion( "Invalid list Length" );
+    throw gclRuntimeError( "Invalid list Length" );
 
   p = new ListPortion();
   p->SetDataType( param[0]->Spec().Type );
@@ -444,7 +442,7 @@ Portion* GSM_List_Number( Portion** param )
   int i;
 
   if( ((NumberPortion*) param[1])->Value() < gNumber(0) )
-    return new ErrorPortion( "Invalid list Length" );
+    throw gclRuntimeError( "Invalid list Length" );
 
   p = new ListPortion();
   p->SetDataType( param[0]->Spec().Type );
@@ -463,7 +461,7 @@ Portion* GSM_List_Nfg( Portion** param )
   assert( param[0]->Spec().Type != porERROR );  
 
   if( ((NumberPortion*) param[1])->Value() < gNumber(0) )
-    return new ErrorPortion( "Invalid list Length" );
+    throw gclRuntimeError( "Invalid list Length" );
 
 
   p = new ListPortion();
@@ -484,7 +482,7 @@ Portion* GSM_List_Efg( Portion** param )
   assert( param[0]->Spec().Type != porERROR );  
 
   if( ((NumberPortion*) param[1])->Value() < gNumber(0) )
-    return new ErrorPortion( "Invalid list Length" );
+    throw gclRuntimeError( "Invalid list Length" );
 
 
   p = new ListPortion();
@@ -509,10 +507,10 @@ Portion* GSM_Dot_Check( ListPortion* p1, ListPortion* p2 )
 {
   int i;
   if( p1->Length() != p2->Length() )
-    return new ErrorPortion( "Mismatched dimentionalities" );
+    throw gclRuntimeError( "Mismatched dimentionalities" );
   for( i = 1; i <= p1->Length(); i++ )
     if( (*p1)[ i ]->Spec().ListDepth > 0 )
-      return new ErrorPortion("Can only operate on 1-D lists");
+      throw gclRuntimeError("Can only operate on 1-D lists");
   return 0;
 }
 
@@ -560,7 +558,7 @@ Portion* GSM_ArgMax( Portion** param )
       }
     }
     else
-      return new ErrorPortion( "Bad dimensionality" );
+      throw gclRuntimeError( "Bad dimensionality" );
   }
   return new NumberPortion( index );
 }
@@ -581,12 +579,12 @@ Portion* GSM_Transpose( Portion** param )
   for( i = 1; i <= Length; i++ )
   {
     if( (*(ListPortion*) param[0])[i]->Spec().ListDepth == 0 )
-      return new ErrorPortion( "Bad dimensionality" );
+      throw gclRuntimeError( "Bad dimensionality" );
     if( i == 1 )
       width = ((ListPortion*) (*(ListPortion*) param[0])[i])->Length();
     else 
       if( ((ListPortion*) (*(ListPortion*) param[0])[i])->Length() != width )
-	return new ErrorPortion( "Bad dimensionality" );
+	throw gclRuntimeError( "Bad dimensionality" );
   }
   p = new ListPortion();
   for( i = 1; i <= width; i++ ) {
@@ -613,14 +611,15 @@ Portion* GSM_Inverse( Portion** param )
   for( i = 1; i <= Length; i++ )
   {
     if( (*(ListPortion*) param[0])[i]->Spec().ListDepth == 0 )
-      return new ErrorPortion( "Bad dimensionality" );
+      throw gclRuntimeError( "Bad dimensionality" );
     if( i == 1 ) {
       width = ((ListPortion*) (*(ListPortion*) param[0])[i])->Length();
-      if(width != Length) return new ErrorPortion( "Not a square matrix" );
+      if(width != Length)
+        throw gclRuntimeError( "Not a square matrix" );
     }
     else 
       if( ((ListPortion*) (*(ListPortion*) param[0])[i])->Length() != width )
-	return new ErrorPortion( "Bad dimensionality" );
+	      throw gclRuntimeError( "Bad dimensionality" );
   }
   int j;
   Precision precis = precRATIONAL;

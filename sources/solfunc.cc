@@ -317,7 +317,7 @@ static Portion *GSM_InfosetProb(Portion **param)
   bp->CondPayoff(values, probs);
 
   if (s->IsChanceInfoset())
-    return new ErrorPortion("Not implemented for chance infosets");
+    throw gclRuntimeError("Not implemented for chance infosets");
 
   return new NumberPortion(probs(s->GetPlayer()->GetNumber(),
 				   s->GetNumber()));
@@ -569,9 +569,6 @@ static Portion *GSM_SetActionProb(Portion **param)
   int player = a->BelongsTo()->GetPlayer()->GetNumber();
   int action = P->Support().Find(a);
 
-//  if (action == 0)
-//    return new ErrorPortion("Action not present in support of profile");
-
   gNumber value = ((NumberPortion *) param[2])->Value();
   
   if (action != 0)
@@ -614,7 +611,7 @@ static Portion *GSM_SetActionProbs(Portion **param)
   if (((ListPortion*) param[2])->Length() != 
       P->Support().NumActions(PlayerNum, InfosetNum))  {
     delete P;
-    return new ErrorPortion("Mismatching number of actions");
+    throw gclRuntimeError("Mismatching number of actions");
   }  
 
   for(k = 1; 
@@ -626,7 +623,7 @@ static Portion *GSM_SetActionProbs(Portion **param)
     {
       delete p3;
       delete P;
-      return new ErrorPortion("Mismatching dimensionality");
+      throw gclRuntimeError("Mismatching dimensionality");
     }
 
     assert(p3->Spec().Type == porNUMBER);
@@ -651,8 +648,6 @@ static Portion *GSM_SetStrategyProb(Portion **param)
   int player = s->nfp->GetNumber();
   int strat = (*P).Support().Strategies(player).Find(s);
 
-//  if (strat == 0)
-//    return new ErrorPortion("Strategy not found in support of profile");
   if(strat !=0)
     (*P)(player, strat) = value;
   ((MixedPortion *) param[0])->SetValue(P);
@@ -686,7 +681,7 @@ static Portion *GSM_SetStrategyProbs(Portion **param)
   if (((ListPortion*) param[2])->Length() != 
       P->Support().NumStrats(PlayerNum))  {
     delete P;
-    return new ErrorPortion("Mismatching number of strategies");
+    throw gclRuntimeError("Mismatching number of strategies");
   }
 
   for(j = 1; j <= N.NumStrats(PlayerNum); j++)
@@ -696,7 +691,7 @@ static Portion *GSM_SetStrategyProbs(Portion **param)
     {
       delete p2;
       delete P;
-      return new ErrorPortion("Mismatching dimensionality");
+      throw gclRuntimeError("Mismatching dimensionality");
     }
 
     assert(p2->Spec().Type == porNUMBER);

@@ -104,7 +104,7 @@ static Portion* GSM_Plus_Mixed(Portion** param)
 {
   if(((MixedPortion*) param[0])->Value()->Support() !=
      ((MixedPortion*) param[1])->Value()->Support())
-    return new ErrorPortion("Support mismatch");
+    throw gclRuntimeError("Support mismatch");
 
   MixedPortion *result = new MixedPortion(new MixedSolution(*((MixedPortion *) param[0])->Value()));
   *result->Value() += *((MixedPortion*) param[1])->Value();
@@ -115,7 +115,7 @@ static Portion *GSM_Plus_Behav(Portion** param)
 {
   if(((BehavPortion*) param[0])->Value()->Support() !=
      ((BehavPortion*) param[1])->Value()->Support())
-    return new ErrorPortion("Support mismatch");
+    throw gclRuntimeError("Support mismatch");
 
   BehavPortion *result = new BehavPortion(new BehavSolution(*((BehavPortion *) param[0])->Value()));
   *result->Value() += *((BehavPortion*) param[1])->Value();
@@ -148,7 +148,7 @@ static Portion *GSM_Minus_Mixed(Portion** param)
 {
   if(((MixedPortion*) param[0])->Value()->Support() !=
      ((MixedPortion*) param[1])->Value()->Support())
-    return new ErrorPortion("Support mismatch");
+    throw gclRuntimeError("Support mismatch");
 
   MixedPortion *result = new MixedPortion(new MixedSolution(*((MixedPortion *) param[0])->Value()));
   *result->Value() -= *((MixedPortion*) param[1])->Value();
@@ -159,7 +159,7 @@ static Portion *GSM_Minus_Behav(Portion** param)
 {
   if(((BehavPortion*) param[0])->Value()->Support() !=
      ((BehavPortion*) param[1])->Value()->Support())
-    return new ErrorPortion("Support mismatch");
+    throw gclRuntimeError("Support mismatch");
 
   BehavPortion *result = new BehavPortion(new BehavSolution(*((BehavPortion *) param[0])->Value()));
   *result->Value() -= *((BehavPortion*) param[1])->Value();
@@ -710,7 +710,7 @@ Portion* GSM_Output(Portion** param)
     return new OutputPortion(*new gFileOutput(filename, append));
   }
   catch (gFileInput::OpenFailed &) {
-    return new ErrorPortion((gText) "Error opening file \"" +
+    throw gclRuntimeError((gText) "Error opening file \"" +
 			      ((TextPortion*) param[0])->Value() + "\"");
   }
 }
@@ -726,7 +726,7 @@ Portion* GSM_Input(Portion** param)
     return new InputPortion(*new gFileInput(((TextPortion*) param[0])->Value()));
   }
   catch (gFileInput::OpenFailed &) {
-    return new ErrorPortion((gText) "Error opening file \"" +
+    throw gclRuntimeError((gText) "Error opening file \"" +
 			      ((TextPortion*) param[0])->Value() + "\"");
   }
 }
@@ -898,7 +898,7 @@ Portion* GSM_Read_Bool(Portion** param)
   if(input.eof())
   {
     input.setpos(old_pos);
-    return new ErrorPortion("End of file reached");
+    throw gclRuntimeError("End of file reached");
   }
   while(!input.eof() && isspace(c))
     input.get(c);
@@ -928,7 +928,7 @@ Portion* GSM_Read_Bool(Portion** param)
   if(error)
   {
     input.setpos(old_pos);
-    return new ErrorPortion("No boolean data found");
+    throw gclRuntimeError("No boolean data found");
   }
 
   ((BoolPortion*) param[1])->Value() = value;
@@ -952,14 +952,14 @@ Portion* GSM_Read_Number(Portion** param)
   if(input.eof())
   {
     input.setpos(old_pos);
-    return new ErrorPortion("End of file reached");
+    throw gclRuntimeError("End of file reached");
   }
   try {
     input >> value;
   }
   catch(gFileInput::ReadFailed &) {
     input.setpos(old_pos);
-    return new ErrorPortion("File read error");
+    throw gclRuntimeError("File read error");
   }
 
   ((NumberPortion*) param[1])->Value() = value;
@@ -984,7 +984,7 @@ Portion* GSM_Read_Text(Portion** param)
   if(input.eof())
   {
     input.setpos(old_pos);
-    return new ErrorPortion("End of file reached");
+    throw gclRuntimeError("End of file reached");
   }
   if(!input.eof() && c == '\"')
     input.get(c); 
@@ -992,7 +992,7 @@ Portion* GSM_Read_Text(Portion** param)
   {
     input.unget(c);
     input.setpos(old_pos);
-    return new ErrorPortion("File read error: missing starting \"");
+    throw gclRuntimeError("File read error: missing starting \"");
   }
 
   while(!input.eof() && c != '\"')
@@ -1000,7 +1000,7 @@ Portion* GSM_Read_Text(Portion** param)
   if(input.eof())
   {
     input.setpos(old_pos);
-    return new ErrorPortion("End of file reached");  
+    throw gclRuntimeError("End of file reached");
   }
   
   ((TextPortion*) param[1])->Value() = t;
@@ -1031,7 +1031,7 @@ Portion* GSM_Read_List(Portion** param, PortionSpec spec,
   if(input.eof())
   {
     input.setpos(old_pos);
-    return new ErrorPortion("End of file reached");
+    throw gclRuntimeError("End of file reached");
   }
   if(!ListFormat)
   {
@@ -1045,7 +1045,7 @@ Portion* GSM_Read_List(Portion** param, PortionSpec spec,
     if(c != '{')
     {
       input.setpos(old_pos);
-      return new ErrorPortion("\'{\' expected");
+      throw gclRuntimeError("\'{\' expected");
     }
   }
 
@@ -1111,12 +1111,12 @@ Portion* GSM_Read_List(Portion** param, PortionSpec spec,
     if(c != '}')
     {
       input.setpos(old_pos);
-      return new ErrorPortion("Mismatched braces");
+      throw gclRuntimeError("Mismatched braces");
     }
     if(input.eof())
     {
       input.setpos(old_pos);
-      return new ErrorPortion("End of file reached");
+      throw gclRuntimeError("End of file reached");
     }
   }
 
@@ -1398,7 +1398,7 @@ Portion* GSM_Clear(Portion**)
 Portion* GSM_GetEnv( Portion** param )
 {
   if( ((TextPortion*) param[0])->Value().Length() == 0 )
-    return new ErrorPortion( "Invalid environment variable name" );
+    throw gclRuntimeError( "Invalid environment variable name" );
 
   return 
     new TextPortion( System::GetEnv( ((TextPortion*) param[0])->Value() ) );
@@ -1407,24 +1407,24 @@ Portion* GSM_GetEnv( Portion** param )
 Portion* GSM_SetEnv( Portion** param )
 {
   if( ((TextPortion*) param[0])->Value().Length() == 0 )
-    return new ErrorPortion( "Invalid environment variable name" );
+    throw gclRuntimeError( "Invalid environment variable name" );
 
   if (System::SetEnv(((TextPortion*) param[0])->Value(),
 			               ((TextPortion*) param[1])->Value()) == 0)
     return new BoolPortion(true);
   else
-    return new ErrorPortion( "Insufficient environment space" );
+    throw gclRuntimeError( "Insufficient environment space" );
 }
 
 Portion* GSM_UnSetEnv( Portion** param )
 {
   if( ((TextPortion*) param[0])->Value().Length() == 0 )
-    return new ErrorPortion( "Invalid environment variable name" );
+    throw gclRuntimeError( "Invalid environment variable name" );
 
   if (System::UnSetEnv(((TextPortion*) param[0])->Value()) == 0)
     return new BoolPortion( true );
   else
-    return new ErrorPortion( "Insufficient environment space" );
+    throw gclRuntimeError( "Insufficient environment space" );
 }
 
 Portion* GSM_Shell( Portion** param )
@@ -1584,7 +1584,7 @@ Portion* GSM_LoadGlobalVar( Portion** param )
   if( _gsm->GlobalVarIsDefined( varname ) )
     return _gsm->GlobalVarValue( varname )->RefCopy();
   else
-    return new ErrorPortion( "Variable not found" );
+    throw gclRuntimeError( "Variable not found" );
 }
 
 Portion* GSM_ExistsGlobalVar( Portion** param )
@@ -1613,7 +1613,7 @@ Portion* GSM_LoadLocalVar( Portion** param )
   if( _gsm->GlobalVarIsDefined( varname ) )
     return _gsm->GlobalVarValue( varname )->RefCopy();
   else
-    return new ErrorPortion( "Variable not found" );
+    throw gclRuntimeError( "Variable not found" );
 }
 
 

@@ -76,7 +76,7 @@ static Portion *GSM_AgentForm(Portion **param)
   if (N)
     return new NfgPortion(N);
   else
-    return new ErrorPortion("Conversion to agent form failed");
+    throw gclRuntimeError("Conversion to agent form failed");
 }
 
 //------------
@@ -130,7 +130,7 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
 
   if (!((BoolPortion *) param[1])->Value())
-    return new ErrorPortion("algorithm not implemented for extensive forms");
+    throw gclRuntimeError("algorithm not implemented for extensive forms");
 
   EnumParams params;
   params.stopAfter = ((NumberPortion *) param[2])->Value();
@@ -618,7 +618,7 @@ static Portion *GSM_Lp_Nfg(Portion **param)
   params.trace = ((NumberPortion *) param[6])->Value();
 
   if (N->NumPlayers() > 2 || !IsConstSum(*N))
-	  return new ErrorPortion("Only valid for two-person zero-sum games");
+	  throw gclRuntimeError("Only valid for two-person zero-sum games");
 
   gList<MixedSolution> solutions;
   double time;
@@ -692,7 +692,7 @@ static Portion *GSM_Lp_Efg(Portion **param)
   const Efg &E = support.Game();
   
   if (E.NumPlayers() > 2 || !E.IsConstSum())
-    return new ErrorPortion("Only valid for two-person zero-sum games");
+    throw gclRuntimeError("Only valid for two-person zero-sum games");
 
   if (((BoolPortion *) param[1])->Value())   {
     ZSumParams params;
@@ -835,7 +835,7 @@ static Portion *GSM_Nfg(Portion **param)
   if (N)
     return new NfgPortion(N);
   else
-    return new ErrorPortion("Conversion to reduced nfg failed");
+    throw gclRuntimeError("Conversion to reduced nfg failed");
 }
 
 
@@ -900,7 +900,7 @@ static Portion *GSM_Simpdiv_Efg(Portion **param)
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
 
   if (!((BoolPortion *) param[1])->Value())
-    return new ErrorPortion("algorithm not implemented for extensive forms");
+    throw gclRuntimeError("algorithm not implemented for extensive forms");
 
   SimpdivParams params;
   params.stopAfter = ((NumberPortion *) param[2])->Value();

@@ -173,7 +173,7 @@ Portion* CallFuncObj::CallListFunction(GSM* gsm, Portion** ParamIn)
 	  if(!_ListDimMatch((ListPortion*)ParamIn[i],(ListPortion*)ParamIn[j]))
 	  {
 	    delete[] Listed;
-	    return new ErrorPortion("Mismatched dimensionalities");
+	    throw gclRuntimeError("Mismatched dimensionalities");
 	  }
     }
   }
@@ -235,17 +235,17 @@ Portion* CallFuncObj::CallListFunction(GSM* gsm, Portion** ParamIn)
 
       else if(null_call)
       {
-	result = new ErrorPortion("Null argument encountered");
+	throw gclRuntimeError("Null argument encountered");
       }
       else
-	result = new ErrorPortion("Error in arguments");
+	throw gclRuntimeError("Error in arguments");
 
       for(j = 0; j < NumParams; j++)
 	delete CurrParam[j];
     }
 
     if( result == 0 )
-      result = new ErrorPortion;
+      throw gclRuntimeError("");
 
     if(result->Spec().Type == porERROR)
     {
@@ -253,10 +253,9 @@ Portion* CallFuncObj::CallListFunction(GSM* gsm, Portion** ParamIn)
       result->Output(_StdErr);
       _StdErr << "\n";
       delete result;
-      result = new ErrorPortion;
       _ErrorOccurred = true;
       _ErrorMessage(_StdErr, 27, p->Length()+1, _FuncName);
-      p->Append(new ErrorPortion);
+      throw gclRuntimeError("");
     }
     else
     {
@@ -1872,7 +1871,7 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 
     if(null_call) // if null objects are present in the argument list
     {
-      result = new ErrorPortion("Null argument encountered");
+      throw gclRuntimeError("Null argument encountered");
     }
     else if(!list_op || !(_FuncInfo[_FuncIndex].Flag & funcLISTABLE))
     {
@@ -1888,7 +1887,7 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
     {
       _ErrorMessage(_StdErr, 20, 0, _FuncName);
       _ErrorOccurred = true;
-      result = new ErrorPortion;
+      throw gclRuntimeError("");
     }
     else if(result->Spec().Type == porERROR)
     {
@@ -1896,8 +1895,8 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
       result->Output(_StdErr);
       _StdErr << "\n";
       delete result;
-      result = new ErrorPortion;
       _ErrorOccurred = true;
+      throw gclRuntimeError("");
     }
     else if(result->Spec().Type == porUNDEFINED &&
 	    ((list_op && result->Spec().ListDepth > 
@@ -1917,8 +1916,8 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 		    PortionSpecToText(_FuncInfo[_FuncIndex].ReturnSpec),
 		    PortionSpecToText(result->Spec()));		    
       delete result;
-      result = new ErrorPortion;
       _ErrorOccurred = true;
+      throw gclRuntimeError("");
     }
   }
 
@@ -1958,7 +1957,7 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
   }    
 
   if(result == 0)
-    result = new ErrorPortion;
+    throw gclRuntimeError("");
 
 
   return result;
