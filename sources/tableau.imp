@@ -482,7 +482,7 @@ BasisCode<T>::BasisCode(const Tableau<T> &tab)
 }
 
 template <class T>
-BasisCode<T>::BasisCode(const Tableau<T> &tab, const gTuple<int> &v)
+BasisCode<T>::BasisCode(const Tableau<T> &tab, const gBlock<int> &v)
 : unitflag(tab.A.MinRow(),tab.A.MaxRow()),
   column(tab.A.MinRow(),tab.A.MaxRow()),
   tableau(&tab)
@@ -509,8 +509,8 @@ BasisCode<T>::BasisCode(const Tableau<T> &tab, const gTuple<int> &v)
 
 template <class T>
 BasisCode<T>::BasisCode(const Tableau<T> &tab,
-		     const gTuple<bool> &flag,
-		     const gTuple<int> &v)
+		     const gBlock<bool> &flag,
+		     const gBlock<int> &v)
 : unitflag(tab.A.MinRow(),tab.A.MaxRow()),
   column(tab.A.MinRow(),tab.A.MaxRow())
 {
@@ -549,7 +549,7 @@ void BasisCode<T>::NewBasis()
 }
 
 template <class T>
-void BasisCode<T>::NewBasis(const gTuple<int> &v)
+void BasisCode<T>::NewBasis(const gBlock<int> &v)
 {
   assert( NegOK() );
   assert( v.First()==column.First() && v.First()==column.First() );
@@ -572,7 +572,7 @@ void BasisCode<T>::NewBasis(const gTuple<int> &v)
 }
 
 template <class T>
-void BasisCode<T>::NewBasis(const gTuple<bool> &flag, const gTuple<int> &v)
+void BasisCode<T>::NewBasis(const gBlock<bool> &flag, const gBlock<int> &v)
 {
 
   unitflag= flag;

@@ -40,7 +40,7 @@ LUdecomp<T>::LUdecomp(const gMatrix<T> &M)
 }
 
 template <class T>
-LUdecomp<T>::LUdecomp(const gMatrix<T> &M, const gTuple<int> &basis)
+LUdecomp<T>::LUdecomp(const gMatrix<T> &M, const gBlock<int> &basis)
 : mat(M.MinRow(),M.MaxRow(), basis.First(),basis.Last()),
   rpp(M.MinRow(),M.MaxRow()),
   updates()
@@ -73,7 +73,7 @@ void LUdecomp<T>::refactor(const gMatrix<T> &M)
 }
 
 template<class T>
-void LUdecomp<T>::refactor(const gMatrix<T> &M, const gTuple<int> &basis)
+void LUdecomp<T>::refactor(const gMatrix<T> &M, const gBlock<int> &basis)
 {
   assert(mat.MinCol()==basis.First() && mat.MaxCol()==basis.Last());
 
@@ -91,8 +91,8 @@ void LUdecomp<T>::refactor(const gMatrix<T> &M, const gTuple<int> &basis)
 template<class T>
 void LUdecomp<T>::refactor(
   const gMatrix<T> &M,
-  const gTuple<bool> &unitflag,
-  const gTuple<int> &index)
+  const gBlock<bool> &unitflag,
+  const gBlock<int> &index)
 {
   assert(mat.MinCol()==index.First() && mat.MaxCol()==index.Last());
   assert(mat.MinCol()==unitflag.First() && mat.MaxCol()==unitflag.Last());

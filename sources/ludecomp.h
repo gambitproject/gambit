@@ -9,7 +9,7 @@
 
 #include "gmatrix.h"
 #include "gvector.h"
-#include "gtuple.h"
+#include "gblock.h"
 #include "glist.h"
 #include "gambitio.h"
 
@@ -17,7 +17,7 @@
 // LUupdatelist is used only by LUdecomp
 template <class T> class LUupdate {
  public:
-  gTuple<bool> rowp;
+  gBlock<bool> rowp;
   gVector<T> alpha;
 
   LUupdate();
@@ -72,7 +72,7 @@ template <class T> class LUdecomp {
  private:
  protected:
   gMatrix<T> mat;
-  gTuple<int> rpp;
+  gBlock<int> rpp;
   int rpparity;
   gList< LUupdate<T> > updates;
 
@@ -94,17 +94,17 @@ template <class T> class LUdecomp {
   LUdecomp(int); // create identity matrix [1..length][1..length]
   LUdecomp(int,int); // create identity matrix [a..b][a..b]
   LUdecomp(const gMatrix<T>&); // decompose matrix
-  LUdecomp(const gMatrix<T>&, const gTuple<int>&); // decompose select columns
-  LUdecomp(const gMatrix<T>&, const gTuple<bool>&, const gTuple<int>&);
+  LUdecomp(const gMatrix<T>&, const gBlock<int>&); // decompose select columns
+  LUdecomp(const gMatrix<T>&, const gBlock<bool>&, const gBlock<int>&);
     // decompose select unit and matrix columns
 
   ~LUdecomp();
 
   void update(int, const gVector<T>&); // replace (update) column with vector
   void refactor(const gMatrix<T>&); // factor a new matrix
-  void refactor(const gMatrix<T>&, const gTuple<int>&);
+  void refactor(const gMatrix<T>&, const gBlock<int>&);
     // reinitialize /w selected columns
-  void refactor( const gMatrix<T>&, const gTuple<bool>&, const gTuple<int>&);
+  void refactor( const gMatrix<T>&, const gBlock<bool>&, const gBlock<int>&);
     // reinitialize /w selected unit and matrix columns
   void solve(const gVector<T>&, gVector<T>&) const; // solve:  M x = b
   void solveT(const gVector<T>&, gVector<T>&) const; // solve:  yt M = ct

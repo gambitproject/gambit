@@ -37,23 +37,23 @@ class BasisCode {
   bool NegOK() const;
  protected:
   const Tableau<T> *tableau;
-  gTuple<bool> unitflag;
-  gTuple<int> column;
+  gBlock<bool> unitflag;
+  gBlock<int> column;
  public:
   BasisCode(const Tableau<T> &); // initial basis is unit matrix
-  BasisCode(const Tableau<T> &, const gTuple<int> &);
+  BasisCode(const Tableau<T> &, const gBlock<int> &);
     // use negative index convention
   BasisCode(const Tableau<T> &,
-	    const gTuple<bool> &,
-	    const gTuple<int> &
+	    const gBlock<bool> &,
+	    const gBlock<int> &
 	    ); // use separate index and flag
   BasisCode<T>& operator=(const BasisCode<T>&);
   BasisCode(const BasisCode<T> &);
   ~BasisCode();
 
   void NewBasis();
-  void NewBasis(const gTuple<int> &);
-  void NewBasis(const gTuple<bool> &, const gTuple<int> &);
+  void NewBasis(const gBlock<int> &);
+  void NewBasis(const gBlock<bool> &, const gBlock<int> &);
     // as above ctors
   void change(int basisnum, int column);
   void change(int basisnum, bool unitflag, int column);
