@@ -13,12 +13,15 @@
 
 #include "enum.h"
 
+template <class T> gMatrix<T> Make_A(const NormalForm<T> &);
+template <class T> gVector<T> Make_b(const NormalForm<T> &);
+
 //---------------------------------------------------------------------------
 //                        EnumParams: member functions
 //---------------------------------------------------------------------------
 
-EnumParams::EnumParams(gStatus &status_) : plev(0), stopAfter(0),outfile(0),
-errfile(0),status(status_)
+EnumParams::EnumParams(gStatus &status_) : plev(0), stopAfter(0),
+outfile(0),status(status_)
 { }
 
 //-------------------------------------------------------------------------
@@ -31,37 +34,40 @@ EnumModule<T>::EnumModule(const NormalForm<T> &N, const EnumParams &p)
     level(0), count(0), npivots(0)
 { }
 
+
 template <class T> int EnumModule<T>::Enum(void)
 {
-      // Ted -- is there a better way to do this?  A lot of 
-      //        allocation before finding out there are too 
-      //        many players. (Same in Lemke module I think)
+  // Ted -- is there a better way to do this?  A lot of 
+  //        allocation before finding out there are too 
+  //        many players. (Same in Lemke module I think)
+  
   if (NF.NumPlayers() != 2)   return 0;  
-
+  
   gWatch watch;
-
-	gBlock<int> target(rows+cols);
-	for(int i=1;i<=target.Length();i++)
-		target[i]=i;
-
-	LHTableau<T> tableau(NF);
-
-	i = rows+1;
-
-	while(i<=rows+cols && !params.status.Get())
-		if(params.stopAfter==0 || List.Length()<params.stopAfter) {
-			SubSolve(rows,i,tableau,target);
-			i++;
-      params.status.SetProgress((double)(i-rows-1)/(double)cols);
-		}
-
-	if(params.status.Get()) {
-		gout << "\n User Break \n";
-		params.status.Reset();
-	}
-	for(i=1;i<=List.Length();i++) {
-		gout << "\n";
-		List[i].Dump(gout);
+  
+  gBlock<int> target(rows+cols);
+  for(int i=1;i<=target.Length();i++)
+    target[i]=i;
+  
+  gMatrix<T> A(Make_A(NF));
+  gVector<T> b(Make_b(NF));
+  LTableau<T> tableau(A,b);
+//  gout << "\n in Enum()";
+//  tableau.Dump(gout);
+  
+  for(i=rows+1; i<=rows+cols && !params.status.Get();i++ ) {
+    if(params.stopAfter==0 || List.Length()<params.stopAfter) 
+      SubSolve(rows,i,tableau,target);
+    params.status.SetProgress((double)(i-rows-1)/(double)cols);
+  }
+  
+  if(params.status.Get()) {
+    gout << "\n User Break \n";
+    params.status.Reset();
+  }
+  for(i=1;i<=List.Length();i++) {
+    gout << "\n";
+    List[i].Dump(gout);
   }
   time = (gRational) watch.Elapsed();
   return 1;
@@ -69,24 +75,24 @@ template <class T> int EnumModule<T>::Enum(void)
 
 
 template <class T> void EnumModule<T>
-::SubSolve(int pr, int pcl, LHTableau<T> &B1, gBlock<int> &targ1)
+::SubSolve(int pr, int pcl, LTableau<T> &B1, gBlock<int> &targ1)
 {
   int i,j,ii,jj,pc;
   count++;
+  LTableau<T> B2(B1);
+  B2.NumPivots()=0;
 
-  LHTableau<T> B2(B1);
-
-      // construct new target basis
+  // construct new target basis
   gBlock<int> targ2(targ1);  
   pc = targ1.Find(pcl);
   targ2[pc] = targ2[pr];
   targ2[pr] = pcl;
-
+  
 //  gout << "\n targ = ";
 //  targ2.Dump(gout);
-
-
-      /* pivot to target */
+  
+  
+  /* pivot to target */
   int flag = 1;
   int piv = 1;
   while(piv && flag) {
@@ -107,8 +113,8 @@ template <class T> void EnumModule<T>
 	}
 //	gout << " j,jj : " << j << jj;
 	if(j<=rows+cols) {
-	      // note: may want to pivot for 1 and 2 separately to pick 
-	      // up additional possible feasible solutions.  
+	  // note: may want to pivot for 1 and 2 separately to pick 
+	  // up additional possible feasible solutions.  
 	  if(B2.CanPivot(jj,ii) && B2.CanPivot(-ii,-jj))  {
 //	    gout << " jj,ii, : " << i << j << ii << jj;
 	    B2.CompPivot(jj,ii);
@@ -116,19 +122,19 @@ template <class T> void EnumModule<T>
 	  }
 	  else flag=1;
 	}
-			}
+      }
     }
   }
 //  gout << "\n";
 //  B2.Dump(gout);
-
-
+  
+  npivots+=B2.NumPivots();
   j=0;
   if(B2.IsNash()) {
     List.Append(B2.GetBFS());
     j=1;
   }
-     
+  
   if(params.plev>=3) {
     printf("\nPass# %3ld, Depth =%3d, Target = ",
 	   count, rows-pr+1);
@@ -145,12 +151,10 @@ template <class T> void EnumModule<T>
   }
   
   if(flag) B2=B1;
-
+  
   if(pr>1) {
-    i=targ2[pr-1];
-		while(i+1<targ2[pr] && !params.status.Get())
+    for(i=targ2[pr-1]+1;i<targ2[pr] && !params.status.Get();i++)
       if(params.stopAfter==0 || List.Length()<params.stopAfter) {
-	i++;
 	SubSolve(pr-1,i,B2,targ2);
       }
   }
@@ -194,7 +198,7 @@ gList<gPVector<T> > &EnumTableau<T>::AddSolution(void) const
 }
 */
 
-template <class T> int EnumModule<T>::NumPivots(void) const
+template <class T> long EnumModule<T>::NumPivots(void) const
 {
   return npivots;
 }
@@ -288,7 +292,7 @@ class EnumModule<gRational>;
 template <class T>
 int Enum(const NormalForm<T> &N, const EnumParams &p,
 	  gList<gPVector<T> > &solutions,
-	  int &npivots, gRational &time)
+	  long &npivots, gRational &time)
 {
   EnumModule<T> LM(N, p);
   int result = LM.Enum();

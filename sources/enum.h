@@ -16,7 +16,7 @@
 class EnumParams     {
 public:
   int plev, stopAfter;
-  gOutput *outfile, *errfile;
+  gOutput *outfile;
   gStatus &status;
 
   EnumParams(gStatus &status_=gstatus);
@@ -41,9 +41,9 @@ public:
   EnumModule(const NormalForm<T> &N, const EnumParams &p); 
   
   int Enum(void);
-  void SubSolve(int pr, int pcl, LHTableau<T> &B1, gBlock<int> &targ1);
+  void SubSolve(int pr, int pcl, LTableau<T> &B1, gBlock<int> &targ1);
   
-  int NumPivots(void) const;
+  long NumPivots(void) const;
   double Time(void) const;
   
   EnumParams &Parameters(void);
@@ -64,7 +64,7 @@ public:
 //
 template <class T> int Enum(const NormalForm<T> &N, const EnumParams &p,
 			    gList<gPVector<T> > &solutions,
-			    int &npivots, gRational &time);
+			    long &npivots, gRational &time);
 
 #endif    // ENUM_H
 

@@ -10,13 +10,18 @@
 //                        Lemke Tableau: member functions
 //---------------------------------------------------------------------------
  
+template <class T> LTableau<T>::LTableau(void)
+  : Tableau<T>()
+{ } 
+
+template <class T> LTableau<T>::LTableau(const gMatrix<T> &A, 
+					 const gVector<T> &b)
+  : Tableau<T>(A,b)
+{ } 
+
 template <class T> LTableau<T>::LTableau(Tableau<T> &tab)
   : Tableau<T>(tab) 
 { }
-
-template <class T> LTableau<T>::LTableau(int rl, int rh, int cl, int ch)
-  : Tableau<T>(rl,rh,cl,ch)
-{ } 
 
 template <class T> LTableau<T>::~LTableau(void) 
 { }
@@ -31,37 +36,6 @@ template <class T> int LTableau<T>::PivotIn(int inlabel)
 //  gout << " outindex = " << outindex << "\n\n";
   Pivot(outindex,inlabel);
   return outlabel;
-}
-
-//
-// Executes one step of the Lemke-Howson algorithm
-//
-template <class T> int LTableau<T>::LemkePath(int dup)
-{
-//  if (!At_CBFS())  return 0;
-  int enter, exit;
-//  if(params.plev >=2) {
-//    (*params.output) << "\nbegin path " << dup << "\n";
-//    Dump(*params.output); 
-//  }
-//    (gout) << "\nbegin path " << dup << "\n";
-//    Dump(gout); 
-  enter = dup;
-  if (Member(dup))
-    enter = -dup;
-      // Central loop - pivot until another CBFS is found
-  do  { 
-    exit = PivotIn(enter);
-//    if(params.plev >=2) 
-//      Dump(*params.output);
-//      Dump(gout);
-
-    enter = -exit;
-  } while ((exit != dup) && (exit != -dup));
-      // Quit when at a CBFS.
-//  if(params.plev >=2 ) (*params.output) << "\nend of path " << dup;
-//  gout << "\nend of path " << dup;
-  return 1;
 }
 
 //
@@ -126,6 +100,38 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel) const
   }
   assert(BestSet.Length() > 0);
   return BestSet[1];
+}
+
+//
+// Executes one step of the Lemke-Howson algorithm
+//
+
+template <class T> int LTableau<T>::LemkePath(int dup)
+{
+//  if (!At_CBFS())  return 0;
+  int enter, exit;
+//  if(params.plev >=2) {
+//    (*params.output) << "\nbegin path " << dup << "\n";
+//    Dump(*params.output); 
+//  }
+//    (gout) << "\nbegin path " << dup << "\n";
+//    Dump(gout); 
+  enter = dup;
+  if (Member(dup))
+    enter = -dup;
+      // Central loop - pivot until another CBFS is found
+  do  { 
+    exit = PivotIn(enter);
+//    if(params.plev >=2) 
+//      Dump(*params.output);
+//      Dump(gout);
+
+    enter = -exit;
+  } while ((exit != dup) && (exit != -dup));
+      // Quit when at a CBFS.
+//  if(params.plev >=2 ) (*params.output) << "\nend of path " << dup;
+//  gout << "\nend of path " << dup;
+  return 1;
 }
 
 

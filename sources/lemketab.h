@@ -12,7 +12,8 @@
 
 template <class T> class LTableau : public Tableau<T> {
 public:
-  LTableau(int rl, int rh, int cl, int ch);
+  LTableau(void);
+  LTableau(const gMatrix<T> &A, const gVector<T> &b);
   LTableau(Tableau<T> &);
   virtual ~LTableau();
 
@@ -22,3 +23,13 @@ public:
 };
 
 #endif     // LEMKETAB_H
+
+
+
+
+
+
+
+
+
+
