@@ -33,7 +33,7 @@
 EfgNavigateWindow::EfgNavigateWindow(gbtGameDocument *p_doc,
 				     wxWindow *p_parent)
   : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    m_doc(p_doc)
+    gbtGameView(p_doc)
 {
   CreateGrid(10, 1);
   SetEditable(false);

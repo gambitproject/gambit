@@ -472,7 +472,7 @@ BEGIN_EVENT_TABLE(NfgTable, wxPanel)
 END_EVENT_TABLE()
 
 NfgTable::NfgTable(gbtGameDocument *p_doc, wxWindow *p_parent)
-  : wxPanel(p_parent, -1), m_doc(p_doc),
+  : wxPanel(p_parent, -1), gbtGameView(p_doc),
     m_editable(true), m_cursorMoving(false), m_rowPlayer(1), m_colPlayer(2),
     m_support(*m_doc->m_nfg), m_profile(0),
     m_showProb(0), m_showDom(0), m_showValue(0)

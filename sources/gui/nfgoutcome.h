@@ -27,9 +27,8 @@
 #include "wx/grid.h"
 #include "nfgshow.h"
 
-class NfgOutcomeWindow : public wxGrid {
+class NfgOutcomeWindow : public wxGrid, public gbtGameView {
 private:
-  gbtGameDocument *m_doc;
   wxMenu *m_menu;
 
   void OnChar(wxKeyEvent &);
@@ -41,6 +40,9 @@ private:
   void OnPopupOutcomeDelete(wxCommandEvent &);
   void OnPopupOutcomeAttach(wxCommandEvent &);
   void OnPopupOutcomeDetach(wxCommandEvent &);
+
+  bool IsEfgView(void) const { return false; }
+  bool IsNfgView(void) const { return true; }
 
 public:
   NfgOutcomeWindow(gbtGameDocument *p_doc, wxWindow *p_parent);

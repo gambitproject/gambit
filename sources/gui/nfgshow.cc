@@ -128,11 +128,15 @@ END_EVENT_TABLE()
 
 NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(500, 500)),
-    m_doc(p_doc),
+    gbtGameView(p_doc),
     m_table(0), m_profileTable(0),
     m_solutionSashWindow(0), m_infoSashWindow(0),
     m_navigateWindow(0), m_outcomeWindow(0), m_supportWindow(0)
 {
+  // Temporary hack to make sure this is initialized before
+  // child windows do callbacks -- will be removed once document/view
+  // implementation is complete.
+  p_doc->m_nfgShow = this;
 #ifdef __WXMSW__
   SetIcon(wxIcon("nfg_icn"));
 #else
@@ -140,7 +144,6 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   SetIcon(wxIcon(nfg_bits, nfg_width, nfg_height));
 #endif  // __WXMSW__
 
-  m_doc->m_curMixedProfile = 0;
   m_doc->m_curNfgSupport = new gbtNfgSupport(*m_doc->m_nfg);   // base support
   m_doc->m_curNfgSupport->SetName("Full Support");
   m_doc->m_nfgSupports.Append(m_doc->m_curNfgSupport);
@@ -211,57 +214,18 @@ NfgShow::~NfgShow()
 //                NfgShow: Manipulation of profile list
 //----------------------------------------------------------------------
 
-void NfgShow::AddProfile(const MixedSolution &p_profile, bool p_map)
+void NfgShow::OnProfilesEdited(void)
 {
-  if (p_profile.GetName() == "") {
-    MixedSolution tmp(p_profile);
-    tmp.SetName(UniqueProfileName());
-    m_doc->m_mixedProfiles.Append(tmp);
-  }
-  else {
-    m_doc->m_mixedProfiles.Append(p_profile);
-  }
-
-  if (m_doc->m_nfg->HasAssociatedEfg() && p_map) {
-    wxGetApp().GetWindow(m_doc->m_nfg->AssociatedEfg())->AddProfile(BehavProfile<gNumber>(*p_profile.Profile()), false);
-  }
   m_profileTable->UpdateValues();
   UpdateMenus();
 }
 
-void NfgShow::RemoveProfile(int p_profile)
+void NfgShow::OnChangeProfile(void)
 {
-  m_doc->m_mixedProfiles.Remove(p_profile);
-  if (m_doc->m_curMixedProfile == p_profile) {
-    m_doc->m_curMixedProfile = (m_doc->m_mixedProfiles.Length() > 0) ? 1 : 0;
-  }
-  else if (m_doc->m_curMixedProfile > p_profile) {
-    m_doc->m_curMixedProfile--;
-  }
-  if (m_doc->m_curMixedProfile > 0) {
-    m_table->SetProfile(m_doc->m_mixedProfiles[m_doc->m_curMixedProfile]);
+  if (m_doc->IsProfileSelected()) {
+    m_table->SetProfile(m_doc->GetMixedProfile());
   }
   else {
-    m_table->ClearProfile();
-    if (m_table->ShowProbs()) {
-      m_table->ToggleProbs();
-    }
-    if (m_table->ShowValues()) {
-      m_table->ToggleValues();
-    }
-  }
-  m_profileTable->UpdateValues();
-  UpdateMenus();
-}
-
-void NfgShow::ChangeProfile(int sol)
-{
-  m_doc->m_curMixedProfile = sol;
-
-  if (sol > 0) {
-    m_table->SetProfile(m_doc->m_mixedProfiles[m_doc->m_curMixedProfile]);
-  }
-  else if (sol == 0)  {
     if (m_table->ShowProbs()) {
       m_table->ToggleProbs();
       GetMenuBar()->Check(GBT_NFG_MENU_VIEW_PROBABILITIES, false);
@@ -272,7 +236,6 @@ void NfgShow::ChangeProfile(int sol)
     }
   }
 
-
   if (m_profileTable) {
     m_profileTable->UpdateValues();
   }
@@ -280,29 +243,9 @@ void NfgShow::ChangeProfile(int sol)
 
 void NfgShow::OnProfileSelected(wxListEvent &p_event)
 {
-  m_doc->m_curMixedProfile = p_event.GetIndex() + 1;
-  m_table->SetProfile(m_doc->m_mixedProfiles[m_doc->m_curMixedProfile]);
+  m_doc->SetCurrentProfile(p_event.GetIndex());
 }
  
-gText NfgShow::UniqueProfileName(void) const
-{
-  int number = m_doc->m_mixedProfiles.Length() + 1;
-  while (1) {
-    int i;
-    for (i = 1; i <= m_doc->m_mixedProfiles.Length(); i++) {
-      if (m_doc->m_mixedProfiles[i].GetName() == "Profile" + ToText(number)) {
-	break;
-      }
-    }
-
-    if (i > m_doc->m_mixedProfiles.Length()) {
-      return "Profile" + ToText(number);
-    }
-    
-    number++;
-  }
-}
-
 //----------------------------------------------------------------------
 //            NfgShow: Coordinating updates of child windows
 //----------------------------------------------------------------------
@@ -343,9 +286,6 @@ void NfgShow::UpdateProfile(gArray<int> &profile)
 
 void NfgShow::OnOutcomesEdited(void)
 {
-  for (int i = 1; i <= m_doc->m_mixedProfiles.Length(); i++) {
-    m_doc->m_mixedProfiles[i].Invalidate();
-  }
   m_table->RefreshTable();
   m_profileTable->UpdateValues();
 }
@@ -522,8 +462,8 @@ void NfgShow::UpdateMenus(void)
   wxMenuBar *menu = GetMenuBar();
   gArray<int> profile(GetContingency());
   menu->Enable(GBT_NFG_MENU_FILE_EXPORT_COMLAB, m_doc->m_nfg->NumPlayers() == 2);
-  menu->Enable(GBT_NFG_MENU_VIEW_PROBABILITIES, m_doc->m_mixedProfiles.Length() > 0);
-  menu->Enable(GBT_NFG_MENU_VIEW_VALUES, m_doc->m_mixedProfiles.Length() > 0);
+  menu->Enable(GBT_NFG_MENU_VIEW_PROBABILITIES, m_doc->IsProfileSelected());
+  menu->Enable(GBT_NFG_MENU_VIEW_VALUES, m_doc->IsProfileSelected());
   menu->Check(GBT_NFG_MENU_VIEW_OUTCOME_LABELS, 
 	      !m_table->GetSettings().OutcomeValues());
 }
@@ -987,9 +927,9 @@ void NfgShow::OnToolsEquilibrium(wxCommandEvent &)
       solutions = algorithm->Solve(*m_doc->m_curNfgSupport, status);
 
       for (int soln = 1; soln <= solutions.Length(); soln++) {
-	AddProfile(solutions[soln], true);
+	m_doc->AddProfile(solutions[soln]);
       }
-      ChangeProfile(m_doc->m_mixedProfiles.Length());
+      m_doc->SetCurrentProfile(m_doc->AllMixedProfiles().Length());
    
       if (solutions.Length() > 0 && !m_table->ShowProbs()) {
 	m_table->ToggleProbs();
@@ -1135,43 +1075,36 @@ void NfgShow::OnProfilesNew(wxCommandEvent &)
 
   dialogEditMixed dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
-    AddProfile(dialog.GetProfile(), true);
-    ChangeProfile(m_doc->m_mixedProfiles.Length());
+    m_doc->AddProfile(dialog.GetProfile());
+    m_doc->SetCurrentProfile(m_doc->AllMixedProfiles().Length());
     UpdateMenus();
   }
 }
 
 void NfgShow::OnProfilesDuplicate(wxCommandEvent &)
 {
-  MixedSolution profile(m_doc->m_mixedProfiles[m_doc->m_curMixedProfile]);
+  MixedSolution profile(m_doc->GetMixedProfile());
   
   dialogEditMixed dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
-    AddProfile(dialog.GetProfile(), true);
-    ChangeProfile(m_doc->m_mixedProfiles.Length());
+    m_doc->AddProfile(dialog.GetProfile());
+    m_doc->SetCurrentProfile(m_doc->AllMixedProfiles().Length());
     UpdateMenus();
   }
 }
 
 void NfgShow::OnProfilesDelete(wxCommandEvent &)
 {
-  m_doc->m_mixedProfiles.Remove(m_doc->m_curMixedProfile);
-  if (m_doc->m_nfg->HasAssociatedEfg()) {
-    wxGetApp().GetWindow(m_doc->m_nfg->AssociatedEfg())->RemoveProfile(m_doc->m_curMixedProfile);
-  }
-  m_doc->m_curMixedProfile = (m_doc->m_mixedProfiles.Length() > 0) ? 1 : 0;
-  ChangeProfile(m_doc->m_curMixedProfile);
-  UpdateMenus();
+  m_doc->RemoveProfile(m_doc->AllMixedProfiles().Find(m_doc->GetMixedProfile()));
 }
 
 void NfgShow::OnProfilesProperties(wxCommandEvent &)
 {
-  if (m_doc->m_curMixedProfile > 0) {
-    dialogEditMixed dialog(this, m_doc->m_mixedProfiles[m_doc->m_curMixedProfile]);
+  if (m_doc->IsProfileSelected()) {
+    dialogEditMixed dialog(this, m_doc->GetMixedProfile());
 
     if (dialog.ShowModal() == wxID_OK) {
-      m_doc->m_mixedProfiles[m_doc->m_curMixedProfile] = dialog.GetProfile();
-      ChangeProfile(m_doc->m_curMixedProfile);
+      m_doc->SetCurrentProfile(dialog.GetProfile());
     }
   }
 }

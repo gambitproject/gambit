@@ -31,12 +31,14 @@
 #include "efgshow.h"
 #include "gamedoc.h"
 
-class EfgNavigateWindow : public wxGrid {
+class EfgNavigateWindow : public wxGrid, public gbtGameView {
 private:
-  gbtGameDocument *m_doc;
   gbtEfgNode m_cursor;
 
   void OnEditorShown(wxGridEvent &);
+
+  bool IsEfgView(void) const { return true; }
+  bool IsNfgView(void) const { return false; }
 
 public:
   EfgNavigateWindow(gbtGameDocument *p_doc, wxWindow *p_parent);

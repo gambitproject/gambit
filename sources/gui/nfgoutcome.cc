@@ -49,10 +49,10 @@ END_EVENT_TABLE()
 
 NfgOutcomeWindow::NfgOutcomeWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    m_doc(p_doc)
+    gbtGameView(p_doc)
 {
-  CreateGrid(m_doc->m_nfgShow->GetGame().NumOutcomes(),
-	     m_doc->m_nfgShow->GetGame().NumPlayers() + 1);
+  CreateGrid(m_doc->GetNfg().NumOutcomes(),
+	     m_doc->GetNfg().NumPlayers() + 1);
   for (int row = 0; row < GetRows(); row++) {
     for (int col = 1; col < GetCols(); col++) {
       SetCellEditor(row, col, new NumberEditor);
@@ -82,7 +82,7 @@ NfgOutcomeWindow::NfgOutcomeWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
 
 void NfgOutcomeWindow::UpdateValues(void)
 {
-  gbtNfgGame nfg = m_doc->m_nfgShow->GetGame();
+  gbtNfgGame nfg = m_doc->GetNfg();
 
   if (GetRows() != nfg.NumOutcomes()) {
     DeleteRows(0, GetRows());
@@ -132,13 +132,13 @@ void NfgOutcomeWindow::OnChar(wxKeyEvent &p_event)
       HideCellEditControl();
     }
     gText outcomeName = m_doc->m_nfgShow->UniqueOutcomeName();
-    gbtNfgOutcome outcome = m_doc->m_nfgShow->GetGame().NewOutcome();
+    gbtNfgOutcome outcome = m_doc->GetNfg().NewOutcome();
     outcome.SetLabel(outcomeName);
-    for (int pl = 1; pl <= m_doc->m_nfgShow->GetGame().NumPlayers(); pl++) {
-      outcome.SetPayoff(m_doc->m_nfgShow->GetGame().GetPlayer(pl), gNumber(0));
+    for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
+      outcome.SetPayoff(m_doc->GetNfg().GetPlayer(pl), gNumber(0));
     }
     AppendRows();
-    for (int pl = 1; pl <= m_doc->m_nfgShow->GetGame().NumPlayers(); pl++) {
+    for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
       SetCellEditor(GetRows() - 1, pl, new NumberEditor);
     }
     m_doc->m_nfgShow->OnOutcomesEdited();
@@ -155,14 +155,14 @@ void NfgOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
   int row = p_event.GetRow();
   int col = p_event.GetCol();
 
-  gbtNfgOutcome outcome = m_doc->m_nfgShow->GetGame().GetOutcomeId(row+1);
+  gbtNfgOutcome outcome = m_doc->GetNfg().GetOutcomeId(row+1);
   if (col == 0) { 
     // Edited cell label
     outcome.SetLabel(GetCellValue(row, col).c_str());
   }
   else {
     // Edited payoff
-    outcome.SetPayoff(m_doc->m_nfgShow->GetGame().GetPlayer(col),
+    outcome.SetPayoff(m_doc->GetNfg().GetPlayer(col),
 		      ToNumber(GetCellValue(row, col).c_str()));
   }
 
@@ -182,12 +182,12 @@ void NfgOutcomeWindow::OnLabelRightClick(wxGridEvent &p_event)
 void NfgOutcomeWindow::OnPopupOutcomeNew(wxCommandEvent &)
 {
   gText outcomeName = m_doc->m_nfgShow->UniqueOutcomeName();
-  gbtNfgOutcome outcome = m_doc->m_nfgShow->GetGame().NewOutcome();
+  gbtNfgOutcome outcome = m_doc->GetNfg().NewOutcome();
   outcome.SetLabel(outcomeName);
   // Appending the row here keeps currently selected row selected
   AppendRows();
-  for (int pl = 1; pl <= m_doc->m_nfgShow->GetGame().NumPlayers(); pl++) {
-    outcome.SetPayoff(m_doc->m_nfgShow->GetGame().GetPlayer(pl), gNumber(0));
+  for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
+    outcome.SetPayoff(m_doc->GetNfg().GetPlayer(pl), gNumber(0));
     SetCellEditor(GetRows() - 1, pl, new NumberEditor);
   }
   m_doc->m_nfgShow->OnOutcomesEdited();
@@ -197,7 +197,7 @@ void NfgOutcomeWindow::OnPopupOutcomeNew(wxCommandEvent &)
 void NfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
 {
   if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
-    m_doc->m_nfgShow->GetGame().DeleteOutcome(m_doc->m_nfgShow->GetGame().GetOutcomeId(GetGridCursorRow() + 1));
+    m_doc->GetNfg().DeleteOutcome(m_doc->GetNfg().GetOutcomeId(GetGridCursorRow() + 1));
     m_doc->m_nfgShow->OnOutcomesEdited();
   }
   UpdateValues();
@@ -206,15 +206,15 @@ void NfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
 void NfgOutcomeWindow::OnPopupOutcomeAttach(wxCommandEvent &)
 {
   if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
-    m_doc->m_nfgShow->GetGame().SetOutcome(m_doc->m_nfgShow->GetContingency(),
-				   m_doc->m_nfgShow->GetGame().GetOutcomeId(GetGridCursorRow() + 1));
+    m_doc->GetNfg().SetOutcome(m_doc->m_nfgShow->GetContingency(),
+			       m_doc->GetNfg().GetOutcomeId(GetGridCursorRow() + 1));
     m_doc->m_nfgShow->OnOutcomesEdited();
   }
 }
 
 void NfgOutcomeWindow::OnPopupOutcomeDetach(wxCommandEvent &)
 {
-  m_doc->m_nfgShow->GetGame().SetOutcome(m_doc->m_nfgShow->GetContingency(), 0);
+  m_doc->GetNfg().SetOutcome(m_doc->m_nfgShow->GetContingency(), 0);
   m_doc->m_nfgShow->OnOutcomesEdited();
 }
 

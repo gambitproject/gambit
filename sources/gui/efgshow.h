@@ -44,9 +44,8 @@ class TreeWindow;
 
 const int idEFG_SOLUTION_LIST = 900;
 
-class EfgShow : public wxFrame {
+class EfgShow : public wxFrame, public gbtGameView {
 private:
-  gbtGameDocument *m_doc;
   TreeWindow *m_treeWindow;
 
   EfgProfileList *m_profileTable;
@@ -140,23 +139,21 @@ private:
 
   void OnInfoNotebookPage(wxNotebookEvent &);
 
+  bool IsEfgView(void) const { return true; }
+  bool IsNfgView(void) const { return false; }
+
 public:
   // CONSTRUCTOR AND DESTRUCTOR
   EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~EfgShow();
 
   // PROFILE ACCESS AND MANIPULATION
-  void AddProfile(const BehavSolution &, bool map);
-  void RemoveProfile(int);
-  void RemoveProfiles(void);
-  void ChangeProfile(int);
-  int CurrentProfile(void) const { return m_doc->m_curBehavProfile; }
-  gText UniqueProfileName(void) const;
+  void OnProfilesEdited(void);
+  void OnChangeProfile(void);
 
   // SUPPORT ACCESS AND MANIPULATION
   void SetSupportNumber(int p_number);
   void OnSupportsEdited(void);
-
 
   void UpdateMenus(void);
   int NumDecimals(void) const;

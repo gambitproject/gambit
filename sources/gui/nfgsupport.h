@@ -31,9 +31,8 @@
 #include "nfgshow.h"
 #include "base/gmap.h"
 
-class NfgSupportWindow : public wxPanel {
+class NfgSupportWindow : public wxPanel, public gbtGameView {
 private:
-  gbtGameDocument *m_doc;
   wxChoice *m_supportList;
   wxButton *m_prevButton, *m_nextButton;
   wxTreeCtrl *m_strategyTree;
@@ -44,6 +43,9 @@ private:
   void OnSupportNext(wxCommandEvent &);
 
   void OnTreeItemCollapse(wxTreeEvent &);
+
+  bool IsEfgView(void) const { return false; }
+  bool IsNfgView(void) const { return true; }
 
 public:
   NfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent);

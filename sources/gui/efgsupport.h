@@ -32,9 +32,8 @@
 #include "gamedoc.h"
 #include "base/gmap.h"
 
-class EfgSupportWindow : public wxPanel {
+class EfgSupportWindow : public wxPanel, public gbtGameView {
 private:
-  gbtGameDocument *m_doc;
   wxChoice *m_supportList;
   wxButton *m_prevButton, *m_nextButton;
   wxTreeCtrl *m_actionTree;
@@ -48,6 +47,9 @@ private:
   void OnTreeItemCollapse(wxTreeEvent &);
 
   void OnRightClick(wxMouseEvent &);
+
+  bool IsEfgView(void) const { return true; }
+  bool IsNfgView(void) const { return false; }
 
 public:
   EfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent);

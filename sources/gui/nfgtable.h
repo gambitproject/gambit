@@ -56,9 +56,8 @@ public:
 };
 
 
-class NfgTable : public wxPanel {
+class NfgTable : public wxPanel, public gbtGameView {
 private:
-  gbtGameDocument *m_doc;
   wxGrid *m_grid;
   bool m_editable, m_cursorMoving;
   int m_rowPlayer, m_colPlayer;
@@ -73,6 +72,9 @@ private:
   void OnCellSelect(wxGridEvent &);
   void OnLeftDoubleClick(wxGridEvent &);
   void OnLabelLeftClick(wxGridEvent &);
+
+  bool IsEfgView(void) const { return false; }
+  bool IsNfgView(void) const { return true; }
 
 public:
   NfgTable(gbtGameDocument *p_doc, wxWindow *p_parent);

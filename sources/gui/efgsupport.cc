@@ -106,7 +106,7 @@ END_EVENT_TABLE()
 EfgSupportWindow::EfgSupportWindow(gbtGameDocument *p_doc,
 				   wxWindow *p_parent)
   : wxPanel(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    m_doc(p_doc), m_map(gbtEfgAction())
+    gbtGameView(p_doc), m_map(gbtEfgAction())
 {
   SetAutoLayout(true);
 

@@ -50,7 +50,7 @@ END_EVENT_TABLE()
 EfgOutcomeWindow::EfgOutcomeWindow(gbtGameDocument *p_doc,
 				   wxWindow *p_parent)
   : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    m_doc(p_doc)
+    gbtGameView(p_doc)
 {
   CreateGrid(m_doc->GetEfg().NumOutcomes(),
 	     m_doc->GetEfg().NumPlayers() + 1);

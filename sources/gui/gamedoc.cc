@@ -38,19 +38,21 @@
 #include "nfgshow.h"
 
 gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg)
-  : m_efg(new gbtEfgGame(p_efg)), m_efgShow(0),
-    m_curEfgSupport(0), m_curBehavProfile(0),
+  : m_curProfile(0),
+    m_efg(new gbtEfgGame(p_efg)), m_efgShow(0),
+    m_curEfgSupport(0),
     m_cursor(0), m_copyNode(0), m_cutNode(0),
     m_nfg(0), m_nfgShow(0),
-    m_curNfgSupport(0), m_curMixedProfile(0)
+    m_curNfgSupport(0) 
 { }
 
 gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg)
-  : m_efg(0), m_efgShow(0),
-    m_curEfgSupport(0), m_curBehavProfile(0),
+  : m_curProfile(0),
+    m_efg(0), m_efgShow(0),
+    m_curEfgSupport(0), 
     m_cursor(0), m_copyNode(0), m_cutNode(0),
     m_nfg(new gbtNfgGame(p_nfg)), m_nfgShow(0),
-    m_curNfgSupport(0), m_curMixedProfile(0)
+    m_curNfgSupport(0) 
 { }
 
 gbtGameDocument::~gbtGameDocument()
@@ -117,36 +119,135 @@ void gbtGameDocument::AddSupport(EFSupport *p_support)
 
 
 //==========================================================================
+//                gbtGameDocument: Operations on profiles
+//==========================================================================
+
+gText gbtGameDocument::UniqueBehavProfileName(void) const
+{
+  int number = m_behavProfiles.Length() + 1;
+  while (1) {
+    int i;
+    for (i = 1; i <= m_behavProfiles.Length(); i++) {
+      if (m_behavProfiles[i].GetName() == "Profile" + ToText(number)) {
+	break;
+      }
+    }
+
+    if (i > m_behavProfiles.Length())
+      return "Profile" + ToText(number);
+    
+    number++;
+  }
+}
+
+void gbtGameDocument::AddProfile(const BehavSolution &p_profile)
+{
+  if (p_profile.GetName() == "") {
+    BehavSolution tmp(p_profile);
+    tmp.SetName(UniqueBehavProfileName());
+    m_behavProfiles.Append(tmp);
+  }
+  else {
+    m_behavProfiles.Append(p_profile);
+  }
+
+  if (m_nfg) {
+    MixedSolution mixed(MixedProfile<gNumber>(*p_profile.Profile()),
+			p_profile.Creator());
+    m_mixedProfiles.Append(mixed);
+    m_nfgShow->OnProfilesEdited();
+  }
+
+  m_efgShow->OnProfilesEdited();
+}
+
+void gbtGameDocument::SetCurrentProfile(int p_index)
+{
+  m_curProfile = p_index;
+  if (m_efgShow) {
+    m_efgShow->OnChangeProfile();
+  }
+  if (m_nfgShow) {
+    m_nfgShow->OnChangeProfile();
+  }
+}
+
+void gbtGameDocument::SetCurrentProfile(const BehavSolution &p_profile)
+{
+  m_behavProfiles[m_curProfile] = p_profile;
+
+  if (m_efgShow) {
+    m_efgShow->OnChangeProfile();
+  }
+  if (m_nfgShow) {
+    m_nfgShow->OnChangeProfile();
+  }
+}
+
+void gbtGameDocument::SetCurrentProfile(const MixedSolution &p_profile)
+{
+  m_mixedProfiles[m_curProfile] = p_profile;
+
+  if (m_efgShow) {
+    m_efgShow->OnChangeProfile();
+  }
+  if (m_nfgShow) {
+    m_nfgShow->OnChangeProfile();
+  }
+}
+
+void gbtGameDocument::RemoveProfile(int p_index)
+{
+  if (m_behavProfiles.Length() >= p_index) {
+    m_behavProfiles.Remove(p_index);
+  }
+  if (m_mixedProfiles.Length() >= p_index) {
+    m_mixedProfiles.Remove(p_index);
+  }
+
+  if (m_curProfile == p_index) {
+    m_curProfile = 0;
+  }
+
+  if (m_efgShow) {
+    m_efgShow->OnChangeProfile();
+  }
+  if (m_nfgShow) {
+    m_nfgShow->OnChangeProfile();
+  }
+}
+
+//==========================================================================
 //                     gbtGameDocument: Labels
 //==========================================================================
 
 gText gbtGameDocument::GetRealizProb(const gbtEfgNode &p_node) const
 {
-  if (m_curBehavProfile == 0 || p_node.IsNull()) {
+  if (m_curProfile == 0 || p_node.IsNull()) {
     return "";
   }
-  return ToText(m_behavProfiles[m_curBehavProfile].RealizProb(p_node),
+  return ToText(m_behavProfiles[m_curProfile].RealizProb(p_node),
 		NumDecimals());
 }
 
 gText gbtGameDocument::GetBeliefProb(const gbtEfgNode &p_node) const
 {
-  if (m_curBehavProfile == 0 || p_node.IsNull() ||
+  if (m_curProfile == 0 || p_node.IsNull() ||
       p_node.GetPlayer().IsNull()) {
     return "";
   }
-  return ToText(m_behavProfiles[m_curBehavProfile].BeliefProb(p_node),
+  return ToText(m_behavProfiles[m_curProfile].BeliefProb(p_node),
 		NumDecimals());
 }
 
 gText gbtGameDocument::GetNodeValue(const gbtEfgNode &p_node) const
 {
-  if (m_curBehavProfile == 0 || p_node.IsNull()) {
+  if (m_curProfile == 0 || p_node.IsNull()) {
     return "";
   }
   gText tmp = "(";
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-    tmp += ToText(m_behavProfiles[m_curBehavProfile].NodeValue(p_node)[pl], 
+    tmp += ToText(m_behavProfiles[m_curProfile].NodeValue(p_node)[pl], 
 		  NumDecimals());
     if (pl < m_efg->NumPlayers()) {
       tmp += ",";
@@ -160,17 +261,17 @@ gText gbtGameDocument::GetNodeValue(const gbtEfgNode &p_node) const
 
 gText gbtGameDocument::GetInfosetProb(const gbtEfgNode &p_node) const
 {
-  if (m_curBehavProfile == 0 || p_node.IsNull() ||
+  if (m_curProfile == 0 || p_node.IsNull() ||
       p_node.GetPlayer().IsNull()) {
     return "";
   }
-  return ToText(m_behavProfiles[m_curBehavProfile].IsetProb(p_node.GetInfoset()),
+  return ToText(m_behavProfiles[m_curProfile].IsetProb(p_node.GetInfoset()),
 		NumDecimals());
 }
 
 gText gbtGameDocument::GetInfosetValue(const gbtEfgNode &p_node) const
 {
-  if (m_curBehavProfile == 0 || p_node.IsNull() ||
+  if (m_curProfile == 0 || p_node.IsNull() ||
       p_node.GetPlayer().IsNull() || p_node.GetPlayer().IsChance()) {
     return "";
   }
@@ -191,7 +292,7 @@ gText gbtGameDocument::GetActionProb(const gbtEfgNode &p_node, int p_act) const
 		  NumDecimals());
   }
 
-  if (m_curBehavProfile == 0 || p_node.GetPlayer().IsNull()) {
+  if (m_curProfile == 0 || p_node.GetPlayer().IsNull()) {
     return "";
   }
 
@@ -201,7 +302,7 @@ gText gbtGameDocument::GetActionProb(const gbtEfgNode &p_node, int p_act) const
 
 gText gbtGameDocument::GetActionValue(const gbtEfgNode &p_node, int p_act) const
 {
-  if (m_curBehavProfile == 0 || p_node.IsNull() ||
+  if (m_curProfile == 0 || p_node.IsNull() ||
       p_node.GetPlayer().IsNull() || p_node.GetPlayer().IsChance()) {
     return "";
   }
@@ -222,8 +323,8 @@ gNumber gbtGameDocument::ActionProb(const gbtEfgNode &p_node, int p_action) cons
     return p_node.GetInfoset().GetChanceProb(p_action);
   }
 
-  if (m_curBehavProfile && !p_node.GetInfoset().IsNull()) {
-    return m_behavProfiles[m_curBehavProfile](p_node.GetInfoset().GetAction(p_action));
+  if (m_curProfile && !p_node.GetInfoset().IsNull()) {
+    return m_behavProfiles[m_curProfile](p_node.GetInfoset().GetAction(p_action));
   }
   return -1;
 }
@@ -233,7 +334,113 @@ gNumber gbtGameDocument::ActionProb(const gbtEfgNode &p_node, int p_action) cons
 //               gbtGameDocument: Operations on normal form
 //==========================================================================
 
+void gbtGameDocument::MakeReducedNfg(void)
+{
+  m_nfg = new gbtNfgGame(::MakeReducedNfg(*m_curEfgSupport));
+  m_nfgShow = new NfgShow(this, 0);
+  m_nfgShow->SetFilename("");
+
+  m_mixedProfiles.Flush();
+  for (int i = 1; i <= m_behavProfiles.Length(); i++) {
+    BehavProfile<gNumber> profile(*m_behavProfiles[i].Profile());
+    MixedProfile<gNumber> mixed(profile);
+    AddProfile(MixedSolution(mixed, m_behavProfiles[i].Creator()));
+  }
+  if (m_behavProfiles.Length() > 0) {
+    m_nfgShow->OnChangeProfile();
+  }
+}
+
+gText gbtGameDocument::UniqueMixedProfileName(void) const
+{
+  int number = m_mixedProfiles.Length() + 1;
+  while (1) {
+    int i;
+    for (i = 1; i <= m_mixedProfiles.Length(); i++) {
+      if (m_mixedProfiles[i].GetName() == "Profile" + ToText(number)) {
+	break;
+      }
+    }
+
+    if (i > m_mixedProfiles.Length()) {
+      return "Profile" + ToText(number);
+    }
+    
+    number++;
+  }
+}
+
+void gbtGameDocument::AddProfile(const MixedSolution &p_profile)
+{
+  if (p_profile.GetName() == "") {
+    MixedSolution tmp(p_profile);
+    tmp.SetName(UniqueMixedProfileName());
+    m_mixedProfiles.Append(tmp);
+  }
+  else {
+    m_mixedProfiles.Append(p_profile);
+  }
+
+  if (m_efg) {
+    m_behavProfiles.Append(BehavProfile<gNumber>(*p_profile.Profile()));
+    m_efgShow->OnProfilesEdited();
+  }
+
+  m_nfgShow->OnProfilesEdited();
+}
+
 gArray<int> gbtGameDocument::GetContingency(void) const
 {
   return m_nfgShow->GetContingency();
 }
+
+
+//==========================================================================
+//                 gbtGameDocument: Management of views
+//==========================================================================
+
+void gbtGameDocument::AddView(gbtGameView *p_view)
+{
+  m_views.Append(p_view);
+}
+
+void gbtGameDocument::RemoveView(gbtGameView *p_view)
+{
+  m_views.Remove(m_views.Find(p_view));
+}
+
+void gbtGameDocument::UpdateViews(gbtGameView *p_sender,
+				  bool p_efgViews, bool p_nfgViews)
+{
+  for (int i = 1; i <= m_views.Length(); i++) {
+    if ((m_views[i]->IsEfgView() && p_efgViews) ||
+	(m_views[i]->IsNfgView() && p_nfgViews)) {
+      m_views[i]->OnUpdate(p_sender);
+    }
+  }
+
+}
+
+//==========================================================================
+//                 class gbtGameView: Member functions
+//==========================================================================
+
+gbtGameView::gbtGameView(gbtGameDocument *p_doc)
+  : m_doc(p_doc)
+{
+  
+}
+
+gbtGameView::~gbtGameView()
+{ }
+
+void gbtGameView::OnUpdate(gbtGameView *)
+{ }
+
+
+
+#include "base/garray.imp"
+#include "base/gblock.imp"
+
+template class gArray<gbtGameView *>;
+template class gBlock<gbtGameView *>;

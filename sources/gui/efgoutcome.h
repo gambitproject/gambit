@@ -30,9 +30,8 @@
 #include "wx/grid.h"
 #include "efgshow.h"
 
-class EfgOutcomeWindow : public wxGrid {
+class EfgOutcomeWindow : public wxGrid, public gbtGameView {
 private:
-  gbtGameDocument *m_doc;
   wxMenu *m_menu;
 
   void OnChar(wxKeyEvent &);
@@ -45,6 +44,9 @@ private:
   void OnPopupOutcomeAttach(wxCommandEvent &);
   void OnPopupOutcomeDetach(wxCommandEvent &);
 
+  bool IsEfgView(void) const { return true; }
+  bool IsNfgView(void) const { return false; }
+  
 public:
   EfgOutcomeWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~EfgOutcomeWindow() { }

@@ -51,10 +51,8 @@ class NfgProfileList;
 class NfgTable;
 class dialogNfgSupportInspect;
 
-class NfgShow : public wxFrame {
+class NfgShow : public wxFrame, public gbtGameView {
 private:
-  gbtGameDocument *m_doc;
-
   NfgTable *m_table;
   NfgProfileList *m_profileTable;
   wxNotebook *m_infoNotebook;
@@ -129,24 +127,19 @@ private:
   void OnSetFocus(wxFocusEvent &);
   void OnProfileSelected(wxListEvent &);
 
+  bool IsEfgView(void) const { return false; }
+  bool IsNfgView(void) const { return true; }
+
 public:
   // CONSTRUCTOR AND DESTRUCTOR
   NfgShow(gbtGameDocument *, wxWindow *p_window);
   virtual ~NfgShow();
 
   // PROFILE ACCESS AND MANIPULATION
-  void AddProfile(const MixedSolution &, bool);
-  void RemoveProfile(int);
-  void ChangeProfile(int);
-  int CurrentProfile(void) const { return m_doc->m_curMixedProfile; }
-  const gList<MixedSolution> &Profiles(void) const 
-    { return m_doc->m_mixedProfiles; }
-  gText UniqueProfileName(void) const;
+  void OnProfilesEdited(void);
+  void OnChangeProfile(void);
 
   // SUPPORT ACCESS AND MANIPULATION
-  gbtNfgSupport *GetSupport(void) { return m_doc->m_curNfgSupport; }
-  const gList<gbtNfgSupport *> &Supports(void) const 
-    { return m_doc->m_nfgSupports; }
   void SetSupportNumber(int p_number);
   gText UniqueSupportName(void) const;
   void OnSupportsEdited(void);
@@ -156,8 +149,6 @@ public:
   
   void SetFilename(const wxString &s);
   const wxString &Filename(void) const { return m_filename; }
-
-  gbtNfgGame GetGame(void) const { return *m_doc->m_nfg; }
 
   bool GameIsDirty(void) const { return m_doc->m_nfg->IsDirty(); }
 

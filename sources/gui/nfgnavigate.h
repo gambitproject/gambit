@@ -26,9 +26,8 @@
 
 #include "nfgshow.h"
 
-class NfgNavigateWindow : public wxPanel {
+class NfgNavigateWindow : public wxPanel, public gbtGameView {
 private:
-  gbtGameDocument *m_doc;
   wxStaticText **m_playerNames;
   wxChoice *m_rowChoice, *m_colChoice, **m_stratProfile;
 
@@ -38,6 +37,9 @@ private:
   void OnStrategyChange(wxCommandEvent &);
   void OnRowPlayerChange(wxCommandEvent &);
   void OnColPlayerChange(wxCommandEvent &);
+
+  bool IsEfgView(void) const { return false; }
+  bool IsNfgView(void) const { return true; }
 
 public:
   NfgNavigateWindow(gbtGameDocument *p_doc, wxWindow *p_parent);

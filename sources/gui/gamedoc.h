@@ -35,22 +35,35 @@
 class EfgShow;
 class NfgShow;
 
+// Forward declaration; class declared at bottom
+class gbtGameView;
+
 class gbtGameDocument {
+friend class gbtGameView;
+private:
+  gBlock<gbtGameView *> m_views;
+
+  void AddView(gbtGameView *);
+  void RemoveView(gbtGameView *);
+  void UpdateViews(gbtGameView *, bool, bool);
+
+  int m_curProfile;
+  gList<BehavSolution> m_behavProfiles;
+  gList<MixedSolution> m_mixedProfiles;
+
 public:
   gbtEfgGame *m_efg;
   EfgShow *m_efgShow;
+
   EFSupport *m_curEfgSupport;
   gList<EFSupport *> m_efgSupports;
-  int m_curBehavProfile;
-  gList<BehavSolution> m_behavProfiles;
+
   gbtEfgNode m_cursor, m_copyNode, m_cutNode;
 
   gbtNfgGame *m_nfg;
   NfgShow *m_nfgShow;
   gbtNfgSupport *m_curNfgSupport;
   gList<gbtNfgSupport *> m_nfgSupports;
-  int m_curMixedProfile;
-  gList<MixedSolution> m_mixedProfiles;
 
   gText m_fileName;
 
@@ -76,10 +89,27 @@ public:
     { return m_efgSupports; }
 
   // PROFILES
+  gText UniqueBehavProfileName(void) const;
+  gText UniqueMixedProfileName(void) const;
+
+  void AddProfile(const BehavSolution &);
+  void AddProfile(const MixedSolution &);
   const gList<BehavSolution> &AllBehavProfiles(void) const
     { return m_behavProfiles; }
   const BehavSolution &GetBehavProfile(void) const
-    { return m_behavProfiles[m_curBehavProfile]; }
+    { return m_behavProfiles[m_curProfile]; }
+
+  const gList<MixedSolution> &AllMixedProfiles(void) const
+    { return m_mixedProfiles; }
+  const MixedSolution &GetMixedProfile(void) const
+    { return m_mixedProfiles[m_curProfile]; }
+
+  bool IsProfileSelected(void) const { return (m_curProfile > 0); }
+  void SetCurrentProfile(int p_index);
+  void SetCurrentProfile(const BehavSolution &);
+  void SetCurrentProfile(const MixedSolution &);
+  void RemoveProfile(int p_index);
+
 
   // LABELS
   gText GetRealizProb(const gbtEfgNode &) const;
@@ -92,10 +122,38 @@ public:
   gNumber ActionProb(const gbtEfgNode &, int br) const;
 
   // NORMAL FORM STATE
+  void MakeReducedNfg(void);
+  gbtNfgGame GetNfg(void) const { return *m_nfg; }
+
   gArray<int> GetContingency(void) const;
+
+  gbtNfgSupport *GetNfgSupport(void) const { return m_curNfgSupport; }
+  const gList<gbtNfgSupport *> &AllNfgSupports(void) const
+    { return m_nfgSupports; }
+
 
   // DISPLAY CONFIGURATION
   int NumDecimals(void) const { return 2; }
+};
+
+//
+// Base class for windows or other objects that implement a "view"
+// onto a document.  Override the OnUpdate member to update the
+// view (called after any change to the document).  Views can be on
+// the extensive form and/or the normal form; override IsEfgView()
+// and IsNfgView(), respectively, to indicate this.
+//
+class gbtGameView {
+protected:
+  gbtGameDocument *m_doc;
+
+public:
+  gbtGameView(gbtGameDocument *p_doc);
+  virtual ~gbtGameView();
+
+  virtual void OnUpdate(gbtGameView *p_sender);
+  virtual bool IsEfgView(void) const = 0;
+  virtual bool IsNfgView(void) const = 0;
 };
 
 #endif  // GAMEDOC_H

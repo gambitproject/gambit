@@ -103,7 +103,7 @@ END_EVENT_TABLE()
 
 NfgSupportWindow::NfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxPanel(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    m_doc(p_doc), m_map(gbtNfgStrategy())
+    gbtGameView(p_doc), m_map(gbtNfgStrategy())
 {
   SetAutoLayout(true);
 
@@ -139,33 +139,33 @@ void NfgSupportWindow::UpdateValues(void)
 {
   m_supportList->Clear();
 
-  const gList<gbtNfgSupport *> &supports = m_doc->m_nfgShow->Supports();
+  const gList<gbtNfgSupport *> &supports = m_doc->AllNfgSupports();
 
   for (int i = 1; i <= supports.Length(); i++) {
     m_supportList->Append((char *)
 			  (ToText(i) + ": " + supports[i]->GetName()));
   }
 
-  int supportIndex = supports.Find(m_doc->m_nfgShow->GetSupport());
+  int supportIndex = supports.Find(m_doc->GetNfgSupport());
   m_supportList->SetSelection(supportIndex - 1);
   m_prevButton->Enable((supportIndex > 1) ? true : false);
   m_nextButton->Enable((supportIndex < supports.Length()) ? true : false);
 
   m_strategyTree->DeleteAllItems();
 
-  m_strategyTree->AddRoot((char *) m_doc->m_nfgShow->GetSupport()->GetName());
-  for (int pl = 1; pl <= m_doc->m_nfgShow->GetGame().NumPlayers(); pl++) {
-    gbtNfgPlayer player = m_doc->m_nfgShow->GetGame().GetPlayer(pl);
+  m_strategyTree->AddRoot((char *) m_doc->GetNfgSupport()->GetName());
+  for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
+    gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(pl);
 
     wxTreeItemId id = m_strategyTree->AppendItem(m_strategyTree->GetRootItem(),
 					       (char *) player.GetLabel());
     
-    for (int st = 1; st <= m_doc->m_nfgShow->GetGame().NumStrats(pl); st++) {
-      gbtNfgStrategy strategy = m_doc->m_nfgShow->GetGame().GetPlayer(pl).GetStrategy(st);
+    for (int st = 1; st <= m_doc->GetNfg().NumStrats(pl); st++) {
+      gbtNfgStrategy strategy = m_doc->GetNfg().GetPlayer(pl).GetStrategy(st);
 
       wxTreeItemId stratID = m_strategyTree->AppendItem(id, 
 						       (char *) strategy.GetLabel());
-      if (m_doc->m_nfgShow->GetSupport()->Contains(strategy)) {
+      if (m_doc->GetNfgSupport()->Contains(strategy)) {
 	m_strategyTree->SetItemTextColour(stratID, *wxBLACK);
       }
       else {
@@ -208,13 +208,13 @@ void NfgSupportWindow::ToggleItem(wxTreeItemId p_id)
     return;
   }
 
-  if (m_doc->m_nfgShow->GetSupport()->Contains(strategy) &&
-      m_doc->m_nfgShow->GetSupport()->NumStrats(strategy.GetPlayer()) > 1) {
-    m_doc->m_nfgShow->GetSupport()->RemoveStrategy(strategy);
+  if (m_doc->GetNfgSupport()->Contains(strategy) &&
+      m_doc->GetNfgSupport()->NumStrats(strategy.GetPlayer()) > 1) {
+    m_doc->GetNfgSupport()->RemoveStrategy(strategy);
     m_strategyTree->SetItemTextColour(p_id, *wxLIGHT_GREY);
   }
   else {
-    m_doc->m_nfgShow->GetSupport()->AddStrategy(strategy);
+    m_doc->GetNfgSupport()->AddStrategy(strategy);
     m_strategyTree->SetItemTextColour(p_id, *wxBLACK);
   }
 

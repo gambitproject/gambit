@@ -155,8 +155,8 @@ END_EVENT_TABLE()
 
 EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxFrame(p_parent, -1, "", wxPoint(0, 0), wxSize(600, 400)),
-    m_doc(p_doc), m_treeWindow(0), 
-    m_profileTable(0), m_solutionSashWindow(0),
+    gbtGameView(p_doc),
+    m_treeWindow(0), m_profileTable(0), m_solutionSashWindow(0),
     m_navigateWindow(0), m_outcomeWindow(0), m_supportWindow(0)
 {
   SetSizeHints(300, 300);
@@ -245,88 +245,18 @@ EfgShow::~EfgShow()
   wxGetApp().RemoveGame(*m_doc->m_efg);
 }
 
-
 //---------------------------------------------------------------------
 //               EfgShow: Manipulation of profile list
 //---------------------------------------------------------------------
 
-void EfgShow::ChangeProfile(int sol)
+void EfgShow::OnChangeProfile(void)
 {
-  m_doc->m_curBehavProfile = sol;
   m_treeWindow->RefreshLabels();
   if (m_navigateWindow) {
     m_navigateWindow->Set(m_doc->GetCursor());
   }
   if (m_profileTable) {
     m_profileTable->UpdateValues();
-  }
-}
-
-void EfgShow::RemoveProfile(int p_profile)
-{
-  m_doc->m_behavProfiles.Remove(p_profile);
-  if (m_doc->m_curBehavProfile == p_profile) {
-    m_doc->m_curBehavProfile = (m_doc->m_behavProfiles.Length() > 0) ? 1 : 0;
-  }
-  else if (m_doc->m_curBehavProfile > p_profile) {
-    m_doc->m_curBehavProfile--;
-  }
-
-  m_treeWindow->RefreshLabels();
-  
-  if (m_navigateWindow) {
-    m_navigateWindow->Set(m_doc->GetCursor());
-  }
-  if (m_profileTable) {
-    m_profileTable->UpdateValues();
-  }
-}
-
-void EfgShow::RemoveProfiles(void)
-{
-  m_doc->m_curBehavProfile = 0;
-  m_doc->m_behavProfiles.Flush();
-  if (m_navigateWindow) {
-    m_navigateWindow->Set(m_doc->GetCursor());
-  }
-}
-
-void EfgShow::AddProfile(const BehavSolution &p_profile, bool p_map)
-{
-  if (p_profile.GetName() == "") {
-    BehavSolution tmp(p_profile);
-    tmp.SetName(UniqueProfileName());
-    m_doc->m_behavProfiles.Append(tmp);
-  }
-  else {
-    m_doc->m_behavProfiles.Append(p_profile);
-  }
-
-  if (m_doc->m_efg->HasAssociatedNfg() && p_map) {
-    MixedSolution mixed(MixedProfile<gNumber>(*p_profile.Profile()),
-			p_profile.Creator());
-    wxGetApp().GetWindow(m_doc->m_efg->AssociatedNfg())->AddProfile(mixed, false);
-  }
-
-  m_profileTable->UpdateValues();
-  UpdateMenus();
-}
-
-gText EfgShow::UniqueProfileName(void) const
-{
-  int number = m_doc->m_behavProfiles.Length() + 1;
-  while (1) {
-    int i;
-    for (i = 1; i <= m_doc->m_behavProfiles.Length(); i++) {
-      if (m_doc->m_behavProfiles[i].GetName() == "Profile" + ToText(number)) {
-	break;
-      }
-    }
-
-    if (i > m_doc->m_behavProfiles.Length())
-      return "Profile" + ToText(number);
-    
-    number++;
   }
 }
 
@@ -334,11 +264,14 @@ gText EfgShow::UniqueProfileName(void) const
 //            EfgShow: Coordinating updates of child windows
 //---------------------------------------------------------------------
 
+void EfgShow::OnProfilesEdited(void)
+{
+  m_profileTable->UpdateValues();
+  UpdateMenus();
+}
+
 void EfgShow::OnOutcomesEdited(void)
 {
-  for (int i = 1; i <= m_doc->m_behavProfiles.Length(); i++) {
-    m_doc->m_behavProfiles[i].Invalidate();
-  }
   m_treeWindow->RefreshLabels();
   m_treeWindow->Refresh();
   m_outcomeWindow->UpdateValues();
@@ -1444,9 +1377,9 @@ void EfgShow::OnToolsEquilibrium(wxCommandEvent &)
       solutions = algorithm->Solve(*m_doc->m_curEfgSupport, status);
 
       for (int soln = 1; soln <= solutions.Length(); soln++) {
-	AddProfile(solutions[soln], true);
+	m_doc->AddProfile(solutions[soln]);
       }
-      ChangeProfile(m_doc->m_behavProfiles.Length());
+      m_doc->SetCurrentProfile(m_doc->AllBehavProfiles().Length());
    
       if (!m_solutionSashWindow->IsShown()) {
 	m_profileTable->Show(true);
@@ -1513,19 +1446,7 @@ void EfgShow::OnToolsNormalReduced(wxCommandEvent &)
   }
 
   try {
-    gbtNfgGame nfg = MakeReducedNfg(*m_doc->m_curEfgSupport);
-    m_doc->m_nfgShow = new NfgShow(m_doc, m_parent);
-    m_doc->m_nfgShow->SetFilename("");
-
-    for (int i = 1; i <= m_doc->m_behavProfiles.Length(); i++) {
-      BehavProfile<gNumber> profile(*m_doc->m_behavProfiles[i].Profile());
-      MixedProfile<gNumber> mixed(profile);
-      m_doc->m_nfgShow->AddProfile(MixedSolution(mixed, m_doc->m_behavProfiles[i].Creator()), false);
-    }
-
-    if (m_doc->m_behavProfiles.Length() > 0) {
-      m_doc->m_nfgShow->ChangeProfile(m_doc->m_curBehavProfile);
-    }
+    m_doc->MakeReducedNfg();
   }
   catch (...) {
     wxMessageDialog msgDialog(this,
@@ -1603,40 +1524,34 @@ void EfgShow::OnProfilesNew(wxCommandEvent &)
 
   dialogEditBehav dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
-    AddProfile(dialog.GetProfile(), true);
-    ChangeProfile(m_doc->m_behavProfiles.Length());
+    m_doc->AddProfile(dialog.GetProfile());
+    m_doc->SetCurrentProfile(m_doc->AllBehavProfiles().Length());
   }
 }
 
 void EfgShow::OnProfilesDuplicate(wxCommandEvent &)
 {
-  BehavSolution profile(m_doc->m_behavProfiles[m_doc->m_curBehavProfile]);
+  BehavSolution profile(m_doc->GetBehavProfile());
 
   dialogEditBehav dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
-    AddProfile(dialog.GetProfile(), true);
-    ChangeProfile(m_doc->m_behavProfiles.Length());
+    m_doc->AddProfile(dialog.GetProfile());
+    m_doc->SetCurrentProfile(m_doc->AllBehavProfiles().Length());
   }
 }
 
 void EfgShow::OnProfilesDelete(wxCommandEvent &)
 {
-  m_doc->m_behavProfiles.Remove(m_doc->m_curBehavProfile);
-  if (m_doc->m_efg->HasAssociatedNfg()) {
-    wxGetApp().GetWindow(m_doc->m_efg->AssociatedNfg())->RemoveProfile(m_doc->m_curBehavProfile);
-  }
-  m_doc->m_curBehavProfile = (m_doc->m_behavProfiles.Length() > 0) ? 1 : 0;
-  ChangeProfile(m_doc->m_curBehavProfile);
+  m_doc->RemoveProfile(m_doc->AllBehavProfiles().Find(m_doc->GetBehavProfile()));
 }
 
 void EfgShow::OnProfilesProperties(wxCommandEvent &)
 {
-  if (m_doc->m_curBehavProfile > 0) {
-    dialogEditBehav dialog(this, m_doc->m_behavProfiles[m_doc->m_curBehavProfile]);
+  if (m_doc->IsProfileSelected()) {
+    dialogEditBehav dialog(this, m_doc->GetBehavProfile());
 
     if (dialog.ShowModal() == wxID_OK) {
-      m_doc->m_behavProfiles[m_doc->m_curBehavProfile] = dialog.GetProfile();
-      ChangeProfile(m_doc->m_curBehavProfile);
+      m_doc->SetCurrentProfile(dialog.GetProfile());
     }
   }
 }
@@ -1649,11 +1564,7 @@ void EfgShow::OnProfilesReport(wxCommandEvent &)
 
 void EfgShow::OnProfileSelected(wxListEvent &p_event)
 {
-  m_doc->m_curBehavProfile = p_event.GetIndex() + 1;
-  m_treeWindow->RefreshLabels();
-  if (m_navigateWindow) {
-    m_navigateWindow->Set(m_doc->GetCursor());
-  }
+  m_doc->SetCurrentProfile(p_event.GetIndex() + 1);
 }
 
 //----------------------------------------------------------------------

@@ -33,11 +33,10 @@
 
 class EfgShow;
 
-class TreeWindow : public wxScrolledWindow {
+class TreeWindow : public wxScrolledWindow, public gbtGameView {
 friend class EfgPrintout;
 friend class EfgShow;
 private:
-  gbtGameDocument *m_doc;
   efgTreeLayout m_layout;
   TreeDrawSettings m_drawSettings;
 
@@ -64,6 +63,9 @@ private:
   void OnRightClick(wxMouseEvent &);
   void OnLeftDoubleClick(wxMouseEvent &);
   void OnKeyEvent(wxKeyEvent &);
+
+  bool IsEfgView(void) const { return true; }
+  bool IsNfgView(void) const { return false; }
     
 public:
   TreeWindow(gbtGameDocument *p_doc, wxWindow *p_parent);

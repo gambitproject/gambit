@@ -41,7 +41,7 @@ END_EVENT_TABLE()
 EfgProfileList::EfgProfileList(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxListCtrl(p_parent, idEFG_SOLUTION_LIST, wxDefaultPosition,
 	       wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL),
-    m_doc(p_doc)
+    gbtGameView(p_doc)
 {
   m_menu = new wxMenu("Profiles");
   m_menu->Append(GBT_EFG_MENU_PROFILES_NEW, "New profile", "Create a new profile");
@@ -112,10 +112,10 @@ void EfgProfileList::UpdateValues(void)
     }
   }    
 
-  if (m_doc->AllBehavProfiles().Length() > 0) {
+  if (m_doc->IsProfileSelected()) {
     wxListItem item;
     item.m_mask = wxLIST_MASK_STATE;
-    item.m_itemId = m_doc->m_efgShow->CurrentProfile() - 1;
+    item.m_itemId = m_doc->AllBehavProfiles().Find(m_doc->GetBehavProfile()) - 1;
     item.m_state = wxLIST_STATE_SELECTED;
     item.m_stateMask = wxLIST_STATE_SELECTED;
     SetItem(item);
@@ -124,10 +124,14 @@ void EfgProfileList::UpdateValues(void)
 
 void EfgProfileList::OnRightClick(wxMouseEvent &p_event)
 {
-  m_menu->Enable(GBT_EFG_MENU_PROFILES_DUPLICATE, m_doc->m_efgShow->CurrentProfile() > 0);
-  m_menu->Enable(GBT_EFG_MENU_PROFILES_DELETE, m_doc->m_efgShow->CurrentProfile() > 0);
-  m_menu->Enable(GBT_EFG_MENU_PROFILES_PROPERTIES, m_doc->m_efgShow->CurrentProfile() > 0);
-  m_menu->Enable(GBT_EFG_MENU_PROFILES_REPORT, m_doc->m_efgShow->CurrentProfile() > 0);
+  m_menu->Enable(GBT_EFG_MENU_PROFILES_DUPLICATE, 
+		 m_doc->IsProfileSelected());
+  m_menu->Enable(GBT_EFG_MENU_PROFILES_DELETE,
+		 m_doc->IsProfileSelected());
+  m_menu->Enable(GBT_EFG_MENU_PROFILES_PROPERTIES,
+		 m_doc->IsProfileSelected());
+  m_menu->Enable(GBT_EFG_MENU_PROFILES_REPORT, 
+		 m_doc->IsProfileSelected());
   PopupMenu(m_menu, p_event.m_x, p_event.m_y);
 }
 

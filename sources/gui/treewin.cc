@@ -60,8 +60,8 @@ END_EVENT_TABLE()
 //----------------------------------------------------------------------
 
 TreeWindow::TreeWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
-  : wxScrolledWindow(p_parent),
-    m_doc(p_doc), m_layout(m_doc, this),
+  : wxScrolledWindow(p_parent), gbtGameView(p_doc),
+    m_layout(p_doc, this),
     m_zoom(1.0), m_dragImage(0), m_dragSource(0)
 {
   // Make sure that Chance player has a name

@@ -42,8 +42,8 @@ END_EVENT_TABLE()
 
 NfgNavigateWindow::NfgNavigateWindow(gbtGameDocument *p_doc,
 				     wxWindow *p_parent)
-  : wxPanel(p_parent, -1), 
-    m_doc(p_doc), m_rowPlayer(1), m_colPlayer(2),
+  : wxPanel(p_parent, -1), gbtGameView(p_doc),
+    m_rowPlayer(1), m_colPlayer(2),
     m_support(*m_doc->m_nfg)
 {
   gbtNfgGame nfg = *m_doc->m_nfg;
@@ -216,7 +216,7 @@ void NfgNavigateWindow::OnColPlayerChange(wxCommandEvent &)
 
 void NfgNavigateWindow::UpdateLabels(void)
 {
-  gbtNfgGame nfg = m_doc->m_nfgShow->GetGame();
+  gbtNfgGame nfg = m_doc->GetNfg();
 
   int rowSelection = m_rowChoice->GetSelection();
   int colSelection = m_colChoice->GetSelection();
