@@ -25,7 +25,7 @@ public:
   MixedSolution(const Nfg<T> &, bool truncated = false);
   MixedSolution(const Nfg<T> &, const NFSupport &);
   MixedSolution(const Nfg<T> &, const gPVector<T> &);
-  MixedSolution(const MixedProfile<T> &);
+  MixedSolution(const MixedProfile<T> &, int creator = id_USER);
 
   MixedSolution(const MixedSolution<T> &);
   ~MixedSolution();
@@ -35,11 +35,15 @@ public:
   int IsPerfect() const; //Is it Perfect? Y/N/DK
   int IsProper() const; //Is it Proper? Y/N/DK
   NFSupport Support() const; //Support of Profile
+
+  void SetGobit(T lambda, T value);
   T GobitLambda() const; // lambda from gobit alg
   T GobitValue() const; // objective function from gobit alg
+  void SetLiap(T value);
   T LiapValue() const; // liaponuv function value (to test for Nash)
 
   bool operator==(const MixedSolution<T> &) const;
+  void Dump(gOutput& f) const;
 };
 
 

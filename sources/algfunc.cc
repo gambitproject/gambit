@@ -374,6 +374,37 @@ Portion *GSM_GobitEfg_BehavFloat(Portion **param)
   return por;
 }
 
+//------------------------- GobitLambda, GobitValue -----------------//
+
+Portion* GSM_GobitLambda_BehavFloat(Portion** param)
+{
+  BehavSolution<double>* bs = 
+    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+  return new FloatValPortion( bs->GobitLambda() );
+}
+
+Portion* GSM_GobitLambda_BehavRational(Portion** param)
+{
+  BehavSolution<double>* bs = 
+    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+  return new RationalValPortion( bs->GobitLambda() );
+}
+
+Portion* GSM_GobitValue_BehavFloat(Portion** param)
+{
+  BehavSolution<double>* bs = 
+    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+  return new FloatValPortion( bs->GobitValue() );
+}
+
+Portion* GSM_GobitValue_BehavRational(Portion** param)
+{
+  BehavSolution<double>* bs = 
+    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+  return new RationalValPortion( bs->GobitValue() );
+}
+
+
 
 
 //-------------------------- LiapSolve ---------------------------//
@@ -959,6 +990,10 @@ Portion *GSM_RealizProbsRational(Portion **param)
   
 extern Portion *GSM_GobitNfg_NfgFloat(Portion **param);
 extern Portion *GSM_GobitNfg_MixedFloat(Portion **param);
+extern Portion *GSM_GobitLambda_MixedFloat(Portion** param);
+extern Portion *GSM_GobitLambda_MixedRational(Portion** param);
+extern Portion *GSM_GobitValue_MixedFloat(Portion** param);
+extern Portion *GSM_GobitValue_MixedRational(Portion** param);
 extern Portion *GSM_LiapNfg_NfgFloat(Portion **param);
 extern Portion *GSM_LiapNfg_MixedFloat(Portion **param);
 extern Portion *GSM_LemkeNfgFloat(Portion **param);
@@ -1089,6 +1124,37 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 13, "nIters", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
 
+  gsm->AddFunction(FuncObj);
+
+
+  //------------------------- GobitLambda ------------------------------//
+
+  FuncObj = new FuncDescObj("GobitLambda");
+  FuncObj->SetFuncInfo(GSM_GobitLambda_MixedFloat, 1);
+  FuncObj->SetParamInfo(GSM_GobitLambda_MixedFloat, 0, "x", porMIXED_FLOAT);
+  FuncObj->SetFuncInfo(GSM_GobitLambda_MixedRational, 1);
+  FuncObj->SetParamInfo(GSM_GobitLambda_MixedRational, 0, "x", 
+			porMIXED_RATIONAL);
+  FuncObj->SetFuncInfo(GSM_GobitLambda_BehavFloat, 1);
+  FuncObj->SetParamInfo(GSM_GobitLambda_BehavFloat, 0, "x", porBEHAV_FLOAT);
+  FuncObj->SetFuncInfo(GSM_GobitLambda_BehavRational, 1);
+  FuncObj->SetParamInfo(GSM_GobitLambda_BehavRational, 0, "x", 
+			porBEHAV_RATIONAL);
+  gsm->AddFunction(FuncObj);
+
+  //------------------------- GobitLambda ------------------------------//
+
+  FuncObj = new FuncDescObj("GobitValue");
+  FuncObj->SetFuncInfo(GSM_GobitValue_MixedFloat, 1);
+  FuncObj->SetParamInfo(GSM_GobitValue_MixedFloat, 0, "x", porMIXED_FLOAT);
+  FuncObj->SetFuncInfo(GSM_GobitValue_MixedRational, 1);
+  FuncObj->SetParamInfo(GSM_GobitValue_MixedRational, 0, "x", 
+			porMIXED_RATIONAL);
+  FuncObj->SetFuncInfo(GSM_GobitValue_BehavFloat, 1);
+  FuncObj->SetParamInfo(GSM_GobitValue_BehavFloat, 0, "x", porBEHAV_FLOAT);
+  FuncObj->SetFuncInfo(GSM_GobitValue_BehavRational, 1);
+  FuncObj->SetParamInfo(GSM_GobitValue_BehavRational, 0, "x", 
+			porBEHAV_RATIONAL);
   gsm->AddFunction(FuncObj);
 
 

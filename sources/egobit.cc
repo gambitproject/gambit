@@ -153,8 +153,11 @@ static void WritePXIHeader(gOutput &pxifile, const Efg<double> &E,
 }
 
 static void AddSolution(gList<BehavSolution<double> > &solutions,
-			const BehavProfile<double> &profile)
+			const BehavProfile<double> &profile,
+			double lambda,
+			double value)
 {
+  int i;
   const Efg<double> &E = *profile.BelongsTo();
 
   BehavProfile<double> bar(E);
@@ -170,7 +173,8 @@ static void AddSolution(gList<BehavSolution<double> > &solutions,
     }
   }
 
-  solutions.Append(bar);
+  i = solutions.Append(BehavSolution<double>(bar, id_GOBIT));
+  solutions[i].SetGobit(lambda, value);
 }
 
 extern bool Powell(gVector<double> &p, gMatrix<double> &xi,
@@ -234,7 +238,7 @@ void Gobit(const Efg<double> &E, EFGobitParams &params,
     } 
 
     if (params.fullGraph)
-      AddSolution(solutions, p);
+      AddSolution(solutions, p, Lambda, value);
 
     Lambda += params.delLam * pow(Lambda, params.powLam);
     params.status.SetProgress((double) step / (double) num_steps);
@@ -242,15 +246,11 @@ void Gobit(const Efg<double> &E, EFGobitParams &params,
   }
 
   if (!params.fullGraph)
-    AddSolution(solutions, p);
+    AddSolution(solutions, p, Lambda, value);
 
   if (params.status.Get())    params.status.Reset();
 
   nevals = F.NumEvals();
   nits = 0;
 }
-
-
-
-
 

@@ -9,9 +9,9 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n, bool truncated)
   _IsNash(T_DONTKNOW),
   _IsPerfect(T_DONTKNOW),
   _IsProper(T_DONTKNOW),
-  _GobitLambda(0),
-  _GobitValue(0),
-  _LiapValue(0),
+  _GobitLambda(-1),
+  _GobitValue(-1),
+  _LiapValue(-1),
   _Payoff(0)
 {}
 
@@ -22,9 +22,9 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n, const NFSupport& s)
   _IsNash(T_DONTKNOW),
   _IsPerfect(T_DONTKNOW),
   _IsProper(T_DONTKNOW),
-  _GobitLambda(0),
-  _GobitValue(0),
-  _LiapValue(0)
+  _GobitLambda(-1),
+  _GobitValue(-1),
+  _LiapValue(-1)
 {}
 
 template <class T> 
@@ -34,21 +34,21 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n, const gPVector<T>& v)
   _IsNash(T_DONTKNOW),
   _IsPerfect(T_DONTKNOW),
   _IsProper(T_DONTKNOW),
-  _GobitLambda(0),
-  _GobitValue(0),
-  _LiapValue(0)
+  _GobitLambda(-1),
+  _GobitValue(-1),
+  _LiapValue(-1)
 {}
 
 template <class T> 
-MixedSolution<T>::MixedSolution(const MixedProfile<T>& m)
+MixedSolution<T>::MixedSolution(const MixedProfile<T>& m, int creator)
 : MixedProfile<T>(m),
-  _Creator(id_USER),
+  _Creator(creator),
   _IsNash(T_DONTKNOW),
   _IsPerfect(T_DONTKNOW),
   _IsProper(T_DONTKNOW),
-  _GobitLambda(0),
-  _GobitValue(0),
-  _LiapValue(0)
+  _GobitLambda(-1),
+  _GobitValue(-1),
+  _LiapValue(-1)
 {}
 
 
@@ -85,11 +85,23 @@ template <class T> int MixedSolution<T>::IsProper() const
 template <class T> NFSupport MixedSolution<T>::Support() const
 { return stratset; }
 
+
+template <class T> void MixedSolution<T>::SetGobit(T lambda, T value)
+{
+  _GobitLambda = lambda;
+  _GobitValue = value;
+}
+
 template <class T> T MixedSolution<T>::GobitLambda() const
 { return _GobitLambda; }
 
 template <class T> T MixedSolution<T>::GobitValue() const
 { return _GobitValue; }
+
+template <class T> void MixedSolution<T>::SetLiap(T value)
+{
+  _LiapValue = value;
+}
 
 template <class T> T MixedSolution<T>::LiapValue() const
 { 
@@ -103,12 +115,20 @@ bool MixedSolution<T>::operator==(const MixedSolution<T> & s) const
   return MixedProfile<T>::operator==(s);
 }
 
+template <class T> void MixedSolution<T>::Dump(gOutput& f) const
+{
+  MixedProfile<T>::Dump(f);
+  f << " Creator:"; DisplayID(f, _Creator);
+  f << " IsNash:"; DisplayTriState(f, _IsNash);
+  f << " IsPerfect:"; DisplayTriState(f, _IsPerfect);
+  f << " IsProper:"; DisplayTriState(f, _IsProper);
+  f << " GobitLambda:" << _GobitLambda;
+  f << " GobitValue:" << _GobitValue;
+  f << " LiapValue:" << _LiapValue;
+}
+
 template <class T> gOutput &operator<<(gOutput &f, const MixedSolution<T> &s)
 { 
   s.Dump(f);  
-  // f << " Creator: " << s.Creator();
-  // f << " IsNash: " << s.IsNash();
-  // f << " IsPerfect: " << s.IsPerfect();
-  // f << " IsProper: " << s.IsProper();
   return f;
 }

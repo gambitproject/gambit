@@ -614,6 +614,36 @@ Portion *GSM_GobitNfg_MixedFloat(Portion **param)
 }
 
 
+//------------------------- GobitLambda, GobitValue -----------------//
+
+Portion* GSM_GobitLambda_MixedFloat(Portion** param)
+{
+  MixedSolution<double>* bs = 
+    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+  return new FloatValPortion( bs->GobitLambda() );
+}
+
+Portion* GSM_GobitLambda_MixedRational(Portion** param)
+{
+  MixedSolution<double>* bs = 
+    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+  return new RationalValPortion( bs->GobitLambda() );
+}
+
+Portion* GSM_GobitValue_MixedFloat(Portion** param)
+{
+  MixedSolution<double>* bs = 
+    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+  return new FloatValPortion( bs->GobitValue() );
+}
+
+Portion* GSM_GobitValue_MixedRational(Portion** param)
+{
+  MixedSolution<double>* bs = 
+    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+  return new RationalValPortion( bs->GobitValue() );
+}
+
 
 
 //-------------------------- GobitGridSolve -------------------------//

@@ -23,7 +23,7 @@ public:
   BehavSolution(const Efg<T> &, bool truncated = false);
   BehavSolution(const Efg<T> &, const gDPVector<T> &);
   BehavSolution(const EFSupport &);
-  BehavSolution(const BehavProfile<T> &);
+  BehavSolution(const BehavProfile<T> &, int creator = id_USER);
 
   BehavSolution(const BehavSolution<T> &);
   ~BehavSolution();
@@ -33,12 +33,16 @@ public:
   int IsSubgamePerfect() const; // Is it Subgame Perfect? Y/N/DK
   int IsSequential() const; // Is it Sequential? Y/N/DK
   EFSupport Support() const; // Support of Profile
+
+  void SetGobit(T lambda, T value);
   T GobitLambda() const; // lambda from gobit alg
   T GobitValue() const; // objective function from gobit alg
+  void SetLiap(T value);
   T LiapValue() const; // liapnov function value (to test for Nash)
   gVector<T> Beliefs(); // Belief vector, if a sequential equilibrium
 
   bool operator==(const BehavSolution<T> &) const;
+  void Dump(gOutput& f) const;
 };
 
 #ifndef __BORLANDC__

@@ -11,8 +11,6 @@
 
 
 
-
-
 typedef enum 
 { 
   opERROR, 
@@ -33,11 +31,22 @@ typedef enum
   opINTEGER, opFLOAT, opRATIONAL
 } OperationMode;
 
+
+
 #define id_USER 0
+#define id_GOBIT 1
+#define id_LIAP 2
+
 
 #define T_DONTKNOW 0
 #define T_YES 1
 #define T_NO 2
+
+#include "gambitio.h"
+
+void DisplayID(gOutput& o, int i);
+void DisplayTriState(gOutput& o, int i);
+
 
 
 #define rcFAIL     0

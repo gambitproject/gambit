@@ -173,6 +173,7 @@ void Gobit(const Nfg<double> &N, NFGobitParams &params,
 {
   NFGobitFunc F(N, start);
 
+  int i;
   int iter = 0, nit;
   double Lambda, value = 0.0;
   
@@ -210,7 +211,10 @@ void Gobit(const Nfg<double> &N, NFGobitParams &params,
     }
     
     if (params.fullGraph) 
-      solutions.Append(p);
+    {
+      i = solutions.Append(MixedSolution<double>(p, id_GOBIT));      
+      solutions[i].SetGobit(Lambda, value);
+    }
 
     Lambda += params.delLam * pow(Lambda, params.powLam);
     params.status.SetProgress((double) step / (double) num_steps);
@@ -218,7 +222,10 @@ void Gobit(const Nfg<double> &N, NFGobitParams &params,
   }
 
   if (!params.fullGraph)
-    solutions.Append(p);
+  {
+    i = solutions.Append(MixedSolution<double>(p, id_GOBIT));
+    solutions[i].SetGobit(Lambda, value);
+  }
 
   if (params.status.Get())   params.status.Reset();
 

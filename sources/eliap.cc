@@ -99,6 +99,7 @@ bool Liap(const Efg<double> &E, EFLiapParams &params,
 	  gList<BehavSolution<double> > &solutions,
 	  long &nevals, long &niters)
 {
+  int i;
   EFLiapFunc F(E, start);
 
   BehavProfile<double> p(start);
@@ -113,7 +114,10 @@ bool Liap(const Efg<double> &E, EFLiapParams &params,
   if (found = Powell(p, xi, F, value, iter,
 		     params.maxits1, params.tol1, params.maxitsN, params.tolN,
 		     (params.tracefile) ? *params.tracefile : gnull))
-    solutions.Append(p);
+  {
+    i = solutions.Append(BehavSolution<double>(p, id_LIAP));
+    solutions[i].SetLiap(value);
+  }
 
   nevals = F.NumEvals();
   niters = 0L;
