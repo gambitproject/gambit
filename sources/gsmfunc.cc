@@ -885,8 +885,13 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
     {
       if( _Param[ index ] != 0 )
       {
-	if( !_TypeMatch( _Param[ index ], 
-			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Type ) )
+	if( _Param[ index ]->Type() == porERROR )
+	{
+	  _ErrorMessage( _StdErr, 14, index, _FuncName );
+	  _ErrorOccurred = true;
+	}
+	else if( !_TypeMatch( _Param[ index ], 
+			     _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Type ))
 	{
 	  _ErrorMessage( _StdErr, 7, index, _FuncName );
 	  _ErrorOccurred = true;
@@ -974,7 +979,8 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	  }
 	}
 	else if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference &&
-		!_Param[ index ]->IsReference() )
+		!_Param[ index ]->IsReference() && 
+		_RunTimeParamInfo[ index ].Ref == 0 )
 	{
 	  _ErrorMessage( _StdErr, 13, 0,
 			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name,
@@ -1104,6 +1110,9 @@ void CallFuncObj::_ErrorMessage
   case 13:
     s << "  Attempted to pass reference parameter \"" << str1 << "\"\n";
     s << "  by value while calling function " << str2 << "[]\n";
+    break;
+  case 14:
+    s << "  Function " << str1 << "[] parameter #" << num1 << " undefined\n";
     break;
   default:
     s << "  General error\n";
