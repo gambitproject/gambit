@@ -224,7 +224,7 @@ void EfgOutcomeDialogC::OnSettings(void)
     int dialog_type;
     char *defaults_file = "gambit.ini";
 
-    wxGetResource("Gambit", "EFOutcome-Dialog-Type", &dialog_type, defaults_file);
+    wxGetResource("Gambit", "EfgOutcome-Dialog-Type", &dialog_type, defaults_file);
     strcpy(opt_str, (char *)opt_list->Nth(dialog_type)->Data());
     options_dialog->Add(wxMakeFormString("Dialog Type", &opt_str, wxFORM_RADIOBOX,
                                          new wxList(wxMakeConstraintStrings(opt_list), 0)));
