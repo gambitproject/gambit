@@ -37,12 +37,14 @@ public:
   gOutput &operator<<(long) { return *this; }
   gOutput &operator<<(char) { return *this; }
   gOutput &operator<<(double) { return *this; }
+  gOutput &operator<<(long double) { return *this; }
   gOutput &operator<<(float) { return *this; }
   gOutput &operator<<(const char *) { return *this; }
   gOutput &operator<<(const void *) { return *this; }
   bool IsValid(void) const { return true; }
 
   void SetProgress(double) { }
+  void SetProgress(double, const gText &) { }
   void Get(void) const 
     { if (m_sig) throw gSignalBreak(); }
   void Reset(void) { m_sig = false; }

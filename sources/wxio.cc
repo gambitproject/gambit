@@ -186,6 +186,25 @@ gOutput &gWxOutput::operator<<(double x)
     return *this;
 }
 
+gOutput &gWxOutput::operator<<(long double x)
+{
+  if (!frame) 
+      MakeFrame();
+    
+  switch (Represent) {
+  case 'f':
+    sprintf(wxio_buffer, "%*.*Lf", Width, Prec, x);
+    break;
+
+  case 'e':
+    sprintf(wxio_buffer, "%*.*Le", Width, Prec, x);
+    break;
+  }
+
+  *frame->f << wxio_buffer;
+  return *this;
+}
+
 
 gOutput &gWxOutput::operator<<(float x)
 {

@@ -37,6 +37,7 @@ public:
     gOutput& operator<<(long x);
     gOutput& operator<<(char x);
     gOutput& operator<<(double x);
+    gOutput &operator<<(long double x);
     gOutput& operator<<(float x);
     gOutput& operator<<(const char *x);
     gOutput& operator<<(const void *x);

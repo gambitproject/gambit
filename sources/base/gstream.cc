@@ -302,11 +302,11 @@ gOutput &gStandardOutput::operator<<(double x)
 gOutput &gStandardOutput::operator<<(long double x)
 {
   if (Represent == 'f')   {
-    if (fprintf(f, "%*.*lf", Width, Prec, x) < 0)  
+    if (fprintf(f, "%*.*Lf", Width, Prec, x) < 0)  
       throw WriteFailed();
   }
   else   {   // Represent == 'e'
-    if (fprintf(f, "%*.*e", Width, Prec, x) < 0) 
+    if (fprintf(f, "%*.*Le", Width, Prec, x) < 0) 
       throw WriteFailed();
   }
   return *this;
@@ -476,11 +476,11 @@ gOutput &gFileOutput::operator<<(long double x)
 {
   Open();
   if (Represent == 'f')   {
-    if (fprintf(f, "%*.*lf", Width, Prec, x) < 0)  
+    if (fprintf(f, "%*.*Lf", Width, Prec, x) < 0)  
       throw WriteFailed();
   }
   else   {   // Represent == 'e'
-    if (fprintf(f, "%*.*e", Width, Prec, x) < 0) 
+    if (fprintf(f, "%*.*Le", Width, Prec, x) < 0) 
       throw WriteFailed();
   }
   Close();

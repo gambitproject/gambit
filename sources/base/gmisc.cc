@@ -132,7 +132,7 @@ gText ToText(double p_number, int p_precision)
 gText ToText(long double d)
 {
   // sprintf(gconvert_buffer, "%.*f", precision, d);
-  sprintf(gconvert_buffer, "%*.*lf", width, precision, d);
+  sprintf(gconvert_buffer, "%*.*Lf", width, precision, d);
   return gText(gconvert_buffer);
 }
 

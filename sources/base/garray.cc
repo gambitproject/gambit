@@ -12,6 +12,7 @@ template class gArray<int>;
 template class gArray<long>;
 template class gArray<float>;
 template class gArray<double>;
+template class gArray<long double>;
 template class gArray<gText>;
 template class gArray<gArray<int> >;
 template class gArray<gArray<int> *>;
