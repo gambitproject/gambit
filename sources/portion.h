@@ -51,13 +51,16 @@ typedef unsigned int PortionType;
 #define  porMIXED_DOUBLE   ( 0x0400 )
 #define  porMIXED_RATIONAL ( 0x0800 )
 #define  porMIXED          ( porMIXED_DOUBLE | porMIXED_RATIONAL )
+#define  porBEHAV_DOUBLE   ( 0x1000 )
+#define  porBEHAV_RATIONAL ( 0x2000 )
+#define  porBEHAV          ( porBEHAV_DOUBLE | porBEHAV_RATIONAL )
 
-#define  porREFERENCE  ( 0x1000 )
+#define  porREFERENCE  ( 0x8000 )
 
-#define  porALLOWS_SUBVARIABLES ( porNFG | porEFG | porLIST )
+#define  porALLOWS_SUBVARIABLES ( porNFG | porEFG )
 				  
 #define  porNUMERICAL  ( porDOUBLE | porINTEGER | porRATIONAL )
-#define  porVALUE      ( 0x0FFF )
+#define  porVALUE      ( 0x7FFF )
 #define  porALL        ( 0xFFFF )
 
 
@@ -235,6 +238,29 @@ template <class T> class Mixed_Portion : public Portion
 
 
 
+#include "behav.h"
+
+template <class T> class Behav_Portion : public Portion
+{
+ private:
+  BehavProfile<T> _Value;
+  ExtForm<T>*     _Owner;
+
+ public:
+  Behav_Portion( const BehavProfile<T>& value );
+
+  bool SetOwner( ExtForm<T>* owner );
+
+  BehavProfile<T>& Value     ( void );
+  BehavProfile<T>  Value     ( void ) const;
+  Portion*         Copy      ( void ) const;
+  PortionType      Type      ( void ) const;
+  bool             Operation ( Portion* p, OperationMode mode );
+  void             Output    ( gOutput& s ) const;
+};
+
+
+
 
 
 
@@ -264,6 +290,40 @@ template <class T> class Nfg_Portion : public Portion
   bool        IsDefined  ( const gString& ref ) const;
   Portion*    operator() ( const gString& ref ) const;
 };
+
+
+
+
+
+
+#include "extform.h"
+
+template <class T> class Efg_Portion : public Portion
+{
+ private:
+  ExtForm<T>*    _Value;
+  RefHashTable*  _RefTable;
+
+ public:
+  Efg_Portion( ExtForm<T>& value );
+  ~Efg_Portion();
+
+  // Only the passing by reference version of Value() is provided in 
+  // order to eliminate unecessary copying
+  ExtForm<T>&    Value          ( void );
+  Portion*       Copy           ( void ) const;
+  void           MakeCopyOfData ( Portion* p );
+  PortionType    Type           ( void ) const;
+  bool           Operation      ( Portion* p, OperationMode mode );
+  void           Output         ( gOutput& s ) const;
+
+  bool        Assign     ( const gString& ref, Portion* data );
+  bool        UnAssign   ( const gString& ref );
+  bool        IsDefined  ( const gString& ref ) const;
+  Portion*    operator() ( const gString& ref ) const;
+};
+
+
 
 
 

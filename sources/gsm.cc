@@ -263,10 +263,6 @@ bool GSM::Assign( void )
 	  ( (Nfg_Portion<gRational>*) primary_ref )->
 	    Assign( p1_subvalue, p2_copy );
 	  break;
-	case porLIST:
-	  ( (List_Portion*) primary_ref )->
-	    SetSubscript( atoi( p1_subvalue), p2_copy );
-	  break;
 	  
 	default:
 	  gerr << "GSM Error: unknown type supports subvariables\n";
@@ -420,9 +416,6 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
       case porNFG_RATIONAL:
 	result = ((Nfg_Portion<gRational>*) result )->operator()( subvalue );
 	break;
-      case porLIST:
-	result = ((List_Portion*) result )->GetSubscript( atoi( subvalue ) );
-	break;
 
       default:
 	gerr << "GSM Error: attempted to resolve a subvariable of a type\n";
@@ -490,11 +483,6 @@ Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
 	{
 	  result = 0;
 	}
-      case porLIST:
-	((List_Portion*) result )->GetSubscript( atoi( subvalue ) );
-	if( result != 0 )
-	  result = result->Copy();
-	break;
 
       default:
 	gerr << "GSM Error: attempted to resolve the subvariable of a type\n";
@@ -725,7 +713,7 @@ bool GSM::Subscript ( void )
   Portion* real_list;
   Portion* element;
   Portion* shadow;
-  bool result = false;
+  bool     result = false;
 
   assert( _Stack->Depth() >= 2 );
   p2 = _Stack->Pop();
@@ -794,8 +782,6 @@ bool GSM::Subscript ( void )
 
   delete p2;
   return result;
-
-  //  return _BinaryOperation( opSUBSCRIPT ); 
 }
 
 
@@ -807,32 +793,6 @@ bool GSM::Subscript ( void )
 void GSM::AddFunction( FuncDescObj* func )
 {
   _FuncTable->Define( func->FuncName(), func );
-}
-
-
-bool GSM::_FuncParamCheck( CallFuncObj* func, 
-			  const PortionType stack_param_type )
-{
-  bool type_match;
-  PortionType func_param_type = func->GetCurrParamType();
-  gString funcname = func->FuncName();
-  int index = func->GetCurrParamIndex();
-  bool result = true;
-
-  type_match = (stack_param_type & func_param_type) != 0;
-
-  if( !type_match && func_param_type != porERROR )
-  {
-    gerr << "GSM Error: mismatched parameter type found while executing\n";
-    gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
-    gerr << "           at Parameter #: " << index << "\n";
-    gerr << "           Expected type: ";
-    PrintPortionTypeSpec( gerr, func_param_type );
-    gerr << "           Type found:    ";
-    PrintPortionTypeSpec( gerr, stack_param_type );
-    result = false;
-  }
-  return result;
 }
 
 
@@ -861,7 +821,9 @@ bool GSM::_BindCheck( const gString& param_name ) const
   int           new_index;
   bool          result = true;
 
+#ifndef NDEBUG
   _BindCheck();
+#endif // NDEBUG
   
   func = _CallFuncStack->Peek();
   new_index = func->FindParamName( param_name );
@@ -916,15 +878,15 @@ bool GSM::Bind( void )
 
 bool GSM::BindVal( void )
 {
-  CallFuncObj*  func;
-  PortionType          curr_param_type;
-  Portion*             param = 0;
-  gString              funcname;
-  int                  i;
-  int                  type_match;
-  bool                 result = true;
-  gString ref;
-  Reference_Portion* refp;
+  CallFuncObj*        func;
+  PortionType         curr_param_type;
+  Portion*            param = 0;
+  gString             funcname;
+  int                 i;
+  int                 type_match;
+  gString             ref;
+  Reference_Portion*  refp;
+  bool                result = true;
 
 #ifndef NDEBUG
   _BindCheck();
@@ -952,15 +914,15 @@ bool GSM::BindVal( void )
 bool GSM::BindRef( void )
 {
   CallFuncObj*  func;
-  PortionType          curr_param_type;
-  Portion*             param;
-  Portion*             subparam;
-  gString              funcname;
-  int                  i;
-  int                  type_match;
-  bool                 result = true;
-  gString ref;
-  gString subref;
+  PortionType   curr_param_type;
+  Portion*      param;
+  Portion*      subparam;
+  gString       funcname;
+  int           i;
+  int           type_match;
+  bool          result = true;
+  gString       ref;
+  gString       subref;
 
 #ifndef NDEBUG
   _BindCheck();
@@ -1051,15 +1013,17 @@ bool GSM::BindRef( const gString& param_name )
 
 bool GSM::CallFunction( void )
 {
-  CallFuncObj*  func;
-  Portion** param;
-  int num_params;
-  int index;
-  gString ref;
-  Reference_Portion* refp;
-  Portion*             return_value;
-  bool                 result = true;
-  Portion* p;
+  CallFuncObj*        func;
+  Portion**           param;
+  int                 num_params;
+  int                 index;
+  int                 listindex;
+  gString             ref;
+  Reference_Portion*  refp;
+  Portion*            return_value;
+  Portion*            p;
+  Portion*            shadowof;
+  bool                result = true;
 
 #ifndef NDEBUG
   if( _CallFuncStack->Depth() <= 0 )
@@ -1116,10 +1080,6 @@ bool GSM::CallFunction( void )
 	      ( (Nfg_Portion<gRational>*) p )->
 		Assign( refp->SubValue(), param[ index ]->Copy() );
 	      break;
-	    case porLIST:
-	      ( (List_Portion*) p )->
-		SetSubscript( atoi( refp->SubValue() ), param[index]->Copy() );
-	      break;
 
 	    default:
 	      gerr << "GSM Error: attempted to assign the subvariable of a\n";
@@ -1142,8 +1102,7 @@ bool GSM::CallFunction( void )
       {
 	if( ( refp == 0 ) && ( param[ index ] != 0 ) )
 	{
-	  int listindex = 0;
-	  Portion* shadowof;
+	  listindex = 0;
 	  shadowof = func->GetCurrParamShadowOf();
 	  if( shadowof != 0 )
 	  {
@@ -1192,13 +1151,13 @@ bool GSM::CallFunction( void )
 
 GSM_ReturnCode GSM::Execute( gList< Instruction* >& program )
 {
-  GSM_ReturnCode result = rcSUCCESS;
-  bool instr_success;
-  bool done = false;
-  Portion *p;
-  Instruction *instruction;
-  int program_counter = 1;
-  int program_length = program.Length();
+  GSM_ReturnCode  result          = rcSUCCESS;
+  bool            instr_success;
+  bool            done            = false;
+  Portion*        p;
+  Instruction*    instruction;
+  int             program_counter = 1;
+  int             program_length  = program.Length();
 
   while( ( program_counter <= program_length ) && ( !done ) )
   {
@@ -1378,8 +1337,10 @@ void GSM::Flush( void )
 TEMPLATE class gList< Portion* >;
 TEMPLATE class gNode< Portion* >;
 
+/* already declared in readefg.y
 TEMPLATE class gList< gString >;
 TEMPLATE class gNode< gString >;
+*/
 
 TEMPLATE class gList< FuncDescObj* >;
 TEMPLATE class gNode< FuncDescObj* >;

@@ -398,6 +398,7 @@ void gString_Portion::Output( gOutput& s ) const
 //---------------------------------------------------------------------
 //                          MixedProfile type
 //---------------------------------------------------------------------
+
 template <class T> 
   Mixed_Portion<T>::Mixed_Portion( const MixedProfile<T>& value )
     : _Value( value )
@@ -409,11 +410,10 @@ template <class T>
 template <class T> bool Mixed_Portion<T>::SetOwner( NormalForm<T>* owner )
 {
   if( owner != 0 )
-    if( owner->Type() == _Value.Type() )
-    {
-      _Owner = owner;
-      return true;
-    }
+  {
+    _Owner = owner;
+    return true;
+  }
   return false;
 }
 
@@ -458,6 +458,76 @@ template <class T>
 
 
 template <class T> void Mixed_Portion<T>::Output( gOutput& s ) const
+{
+  _Value.Dump( s );
+}
+
+
+
+
+//---------------------------------------------------------------------
+//                          BehavProfile type
+//---------------------------------------------------------------------
+
+template <class T> 
+  Behav_Portion<T>::Behav_Portion( const BehavProfile<T>& value )
+    : _Value( value )
+{
+  _Owner = 0;
+}
+
+
+template <class T> bool Behav_Portion<T>::SetOwner( ExtForm<T>* owner )
+{
+  if( owner != 0 )
+  {
+    _Owner = owner;
+    return true;
+  }
+  return false;
+}
+
+template <class T> BehavProfile<T> Behav_Portion<T>::Value( void ) const
+{ return _Value; }
+
+template <class T> BehavProfile<T>& Behav_Portion<T>::Value( void )
+{ return _Value; }
+
+template <class T> PortionType Behav_Portion<T>::Type( void ) const
+{ return porBEHAV; }
+
+template <class T> Portion* Behav_Portion<T>::Copy( void ) const
+{ return new Behav_Portion<T>( _Value ); }
+
+
+template <class T>
+  bool Behav_Portion<T>::Operation( Portion* p, OperationMode mode )
+{
+  bool      result = true;
+  BehavProfile<T>&  p_value = ( (Behav_Portion<T>*) p )->_Value;
+
+  if( p == 0 )      // unary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );      
+    }
+  }
+  else               // binary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );
+    }
+    delete p;
+  }
+  return result;
+}
+
+
+template <class T> void Behav_Portion<T>::Output( gOutput& s ) const
 {
   _Value.Dump( s );
 }
@@ -740,6 +810,9 @@ Portion* List_Portion::GetSubscript( int index ) const
 }
 
 
+
+
+
 //---------------------------------------------------------------------
 //                            Nfg type
 //---------------------------------------------------------------------
@@ -774,10 +847,10 @@ template <class T> Portion* Nfg_Portion<T>::Copy( void ) const
 template <class T> void Nfg_Portion<T>::MakeCopyOfData( Portion* p )
 {
   Portion::MakeCopyOfData( p );
-    _Value = new NormalForm<T>
-      (
-       (NormalForm<T> &) *((Nfg_Portion<T> *) p)->_Value
-       );
+  _Value = new NormalForm<T>
+    (
+     (NormalForm<T> &) *((Nfg_Portion<T> *) p)->_Value
+     );
 }
 
 
@@ -812,10 +885,6 @@ template <class T> void Nfg_Portion<T>::Output( gOutput& s ) const
 { s << "NormalForm[ "; _Value->GetTitle(); s << ']'; }
 
 
-
-//---------------------------------------------------------------------
-//     Assign() and UnAssign() for Nfg_Portion
-//---------------------------------------------------------------------
 
 template <class T> 
   bool Nfg_Portion<T>::Assign( const gString& ref, Portion *p )
@@ -873,6 +942,137 @@ template <class T>
 
 
 
+//---------------------------------------------------------------------
+//                            Efg type
+//---------------------------------------------------------------------
+
+
+template <class T> Efg_Portion<T>::Efg_Portion( ExtForm<T>& value )
+{
+  _RefTable = new RefHashTable;
+  _Value = &value;
+}
+
+
+template <class T> Efg_Portion<T>::~Efg_Portion()
+{
+  delete _RefTable;
+
+  if( !_Temporary )
+    delete _Value;
+}
+
+
+template <class T> ExtForm<T>& Efg_Portion<T>::Value( void )
+{ return *_Value; }
+
+template <class T> PortionType Efg_Portion<T>::Type( void ) const
+{ return porEFG; }
+
+template <class T> Portion* Efg_Portion<T>::Copy( void ) const
+{ return new Efg_Portion<T>( *_Value ); }
+
+
+template <class T> void Efg_Portion<T>::MakeCopyOfData( Portion* p )
+{
+  Portion::MakeCopyOfData( p );
+  _Value = new ExtForm<T>();
+    /*
+    (
+     (ExtForm<T> &) *((Efg_Portion<T> *) p)->_Value
+     );
+     */
+}
+
+
+template <class T> 
+  bool Efg_Portion<T>::Operation( Portion* p, OperationMode mode )
+{
+  bool result = true;
+  ExtForm<T>& p_value = *( ( (Efg_Portion<T>*) p )->_Value );
+
+  if( p == 0 )      // unary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );      
+    }
+  }
+  else               // binary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );
+    }
+    delete p;
+  }
+  return result;
+}
+
+
+template <class T> void Efg_Portion<T>::Output( gOutput& s ) const
+{ s << "ExtForm[ "; _Value->GetTitle(); s << ']'; }
+
+
+
+template <class T> 
+  bool Efg_Portion<T>::Assign( const gString& ref, Portion *p )
+{
+#ifndef NDEBUG
+  if( p->Type() == porREFERENCE )
+  {
+    gerr << "Portion Error: attempted to Assign a Reference_Portion as the\n";
+    gerr << "               value of a sub-reference in a Efg_Portion type\n";
+  }
+  assert( p->Type() != porREFERENCE );
+#endif // NDEBUG
+
+  _RefTable->Define( ref, p );
+
+  return true;
+}
+
+
+template <class T> bool Efg_Portion<T>::UnAssign( const gString& ref )
+{
+  if( _RefTable->IsDefined( ref ) )
+  {
+    _RefTable->Remove( ref );
+  }
+  return true;
+}
+
+
+template <class T> bool Efg_Portion<T>::IsDefined( const gString& ref ) const
+{
+  return _RefTable->IsDefined( ref );
+}
+
+
+template <class T> 
+  Portion* Efg_Portion<T>::operator()( const gString& ref ) const
+{
+  Portion* result = 0;
+
+  if( _RefTable->IsDefined( ref ) )
+  {
+    result = (*_RefTable)( ref );
+  }
+  else
+  {
+    gerr << "Portion Error: attempted to access an undefined reference\n";
+    gerr << "               \"" << ref << "\"\n";
+  }
+
+  return result;
+}
+
+
+
+
+
 
 //--------------------------------------------------------------------
 //             miscellaneous PortionType functions
@@ -900,6 +1100,12 @@ void PrintPortionTypeSpec( gOutput& s, PortionType type )
       s << "porLIST ";
     if( type & porNFG )
       s << "porNFG ";
+    if( type & porEFG )
+      s << "porEFG ";
+    if( type & porMIXED )
+      s << "porMIXED ";
+    if( type & porBEHAV )
+      s << "porBEHAV ";
     if( type & porREFERENCE )
       s << "porREFERENCE ";
   }
@@ -959,6 +1165,15 @@ PortionType Mixed_Portion<gRational>::Type( void ) const
 { return porMIXED_RATIONAL; }
 
 
+TEMPLATE class Behav_Portion<double>;
+PortionType Behav_Portion<double>::Type( void ) const
+{ return porBEHAV_DOUBLE; }
+
+TEMPLATE class Behav_Portion<gRational>;
+PortionType Behav_Portion<gRational>::Type( void ) const
+{ return porBEHAV_RATIONAL; }
+
+
 
 TEMPLATE class Nfg_Portion<double>;
 PortionType Nfg_Portion<double>::Type( void ) const
@@ -967,6 +1182,37 @@ PortionType Nfg_Portion<double>::Type( void ) const
 TEMPLATE class Nfg_Portion<gRational>;
 PortionType Nfg_Portion<gRational>::Type( void ) const
 { return porNFG_RATIONAL; }
+
+
+
+
+#include "extform.imp"
+
+TEMPLATE class TypedNode<double>;
+TEMPLATE class TypedNode<gRational>;
+TEMPLATE class OutcomeVector<double>;
+TEMPLATE class OutcomeVector<gRational>;
+TEMPLATE class ChanceInfoset<double>;
+TEMPLATE class ChanceInfoset<gRational>;
+TEMPLATE class BehavProfile<double>;
+TEMPLATE class BehavProfile<gRational>;
+
+TEMPLATE class ExtForm<double>;
+DataType ExtForm<double>::Type( void ) const { return DOUBLE; }
+TEMPLATE class ExtForm<gRational>;
+DataType ExtForm<gRational>::Type( void ) const { return RATIONAL; }
+
+
+TEMPLATE class Efg_Portion<double>;
+PortionType Efg_Portion<double>::Type( void ) const
+{ return porEFG_DOUBLE; }
+
+TEMPLATE class Efg_Portion<gRational>;
+PortionType Efg_Portion<gRational>::Type( void ) const
+{ return porEFG_RATIONAL; }
+
+
+
 
 
 #include "garray.imp"

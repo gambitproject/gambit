@@ -8,7 +8,7 @@
 
 
 
-// #define CRASHTEST
+#define CRASHTEST
 
 
 int main( void )
@@ -1616,6 +1616,17 @@ int main( void )
 #endif // CRASHTEST
 
 
+
+#ifdef CRASHTEST
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+  machine->InitCallFunction( "Times" );
+  machine->Push( (gRational) 3 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+#endif // CRASHTEST
 
   gout << "*********************** press return to continue ************";
   gin >> cont;

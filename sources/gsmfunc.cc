@@ -6,71 +6,6 @@
 //#
 
 
-
-// Usage:
-//
-// For each module of functions to be added to GSM, create an 
-// 'void Init_<name>( GSM* gsm )' function that calls GSM::AddFunction()
-// to add the desired functions into GSM, where <name> is the name of the 
-// particular module.  Then create a header file for that module, and include
-// it in this file.  Put the Init_<name>() function call in the 
-// GSM::InitFunctions() in this file.
-//
-// The definition for GSM::AddFunction is:
-//   GSM::AddFunction( FuncDescObj *func_desc_obj );
-//
-// FuncDescObj is a class which stores the characteristics of each
-// particular function, such as the number of parameters and the type of
-// each parameter.  GSM will pass the function parameters in the form of
-// an array of pointers to Portion class, so all parameter types should
-// be decendents of Portion class.  Each function is expected to have
-// a return type of 'Portion *'.
-//
-// The FuncDescObj is created by passing its constructor with the function
-// name, a pointer to the actual implementation of the function, and the 
-// number of parameters.  Then the type of each parameter can be specified 
-// with FuncDescObj::SetParamInfo() function, as shown in the example.  It 
-// is important to define the types for all parameters.  The valid parameter 
-// types are listed in portion.h, typedef PortionType.
-//
-// Example:
-//   void Init_myfunc( GSM* gsm )
-//   {
-//     FuncDescObj *FuncObj;
-//
-//     FuncObj = new FuncDescObj( (gString) "Sqr", GCL_Sqr, 1 );
-//     FuncObj->SetParamInfo( 0, "n", porNUMERICAL, NO_DEFAULT_VALUE );
-//     gsm->AddFunction( FuncObj );
-//
-//     FuncObj = new FuncDescObj( (gString) "Angle", GCL_Angle, 2 );
-//     FuncObj->SetParamInfo( 0, "x", porDOUBLE, new numerical_Portion<double>( 1 ) );
-//     FuncObj->SetParamInfo( 1, "y", porDOUBLE, new numerical_Portion<double>( 1 ) );
-//     gsm->AddFunction( FuncObj );
-//   }
-//
-// Specifying a parameter type as porNUMERICAL means that the parameter
-// can be any of porDOUBLE, porINTEGER, or porRATIONAL types.  When a
-// parameter can accept multiple parameter types, those type declarations
-// can be ORed together with the bit-wise operater |. It is then up
-// to the function implementation to explicitly type cast those parameters.
-//
-// The current implementation mandates that if a parameter has a default
-// value, then that parameter can only accept a value with the same type
-// as the default value; otherwise the results are unpredictable.
-//
-// If a function returns 0 (null pointer), GSM will halt and give a general
-// error message.  So it may be a good idea to initialize the return value
-// to 0 until all necessary processing has been completed.
-//
-// All the header files should #include "gsm.h".  The definitions for 
-// Portion types are already included in "gsm.h".
-//
-// None of the parameters passed to a function should be deleted, and the
-// return value of each function should be newly allocated in the function.
-//
-// Take a look at gclmath.h and gclmath.cc to see how it works.
-
-
 #include <assert.h>
 #include "gsmfunc.h"
 
@@ -566,9 +501,15 @@ Portion* CallFuncObj::CallFunction( Portion **param )
 	    index++ )
 	{
 	  if( _Param[ index ] != 0 )
+	  {
 	    if( !( _Param[ index ]->Type() & 
 	       _FuncInfo[ f_index ].ParamInfo[ index ].Type ) )
 	      param_match = false;
+	  }
+	  else if( !_FuncInfo[ f_index ].ParamInfo[ index ].PassByReference )
+	  {
+	    param_match = false;
+	  }
 	}
 	if( param_match )
 	{
@@ -586,7 +527,8 @@ Portion* CallFuncObj::CallFunction( Portion **param )
       else
       {
 	gerr << "CallFuncObj Error: no defined parameters; function call\n";
-	gerr << "                   ambiguous\n";
+	gerr << "                   ambiguous for function \"" << _FuncName;
+	gerr << "\"\n";
 	_ErrorOccurred = true;
       }
     }

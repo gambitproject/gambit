@@ -747,7 +747,7 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_Negate_gRational, 1 );
   FuncObj->SetParamInfo( GSM_Negate_gRational, 0, "x", 
-			porINTEGER, NO_DEFAULT_VALUE );
+			porRATIONAL, NO_DEFAULT_VALUE );
 
   gsm->AddFunction( FuncObj );
 

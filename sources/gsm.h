@@ -42,9 +42,6 @@ class GSM
   bool _UnaryOperation  ( OperationMode mode );
   bool _BinaryOperation ( OperationMode mode );
 
-  bool _FuncParamCheck( CallFuncObj* func,
-		       const PortionType func_param_type );
-
   void _BindCheck ( void ) const;
   bool _BindCheck ( const gString& param_name ) const;
 
@@ -66,9 +63,6 @@ class GSM
   bool Push ( const gInteger&  data );
   bool Push ( const gRational& data );
   bool Push ( const gString&   data );
-
-  // This function is only temporarily here for testing reasons
-  // bool GenerateNfg ( const double& data );
 
   bool PushList ( const int num_of_elements );
 
