@@ -252,10 +252,10 @@ template <class T> void gRectBlock<T>::InsertRow(int row, const gArray<T> &v)
   T** pp = new T*[maxrow - minrow + 1];
   T** newidx = pp - minrow;
   
-  for ( i = minrow; i < row; i++)
+  for (int i = minrow; i < row; i++)
     newidx[i] = data[i];
   newidx[row] = newrow;
-  for ( i = row + 1; i <= maxrow; i++)
+  for (int i = row + 1; i <= maxrow; i++)
     newidx[i] = data[i-1];
   delete[] (data + minrow);
   data = newidx;
