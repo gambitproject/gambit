@@ -10,21 +10,11 @@
 #include <unistd.h>
 #endif   // __GNUG__
 
-#ifdef __BORLANDC__
-#include "stdafx.h"
-#include "mainfrm.h"
-#include "wineditdoc.h"
-#include "wineditview.h"
-
-char WinGetChar( void )
-{
-//  ((CWinEditView*) ((CMainFrame*) AfxGetMainWnd())->GetActiveView())->EndWaitCursor();
-  return ((CWinEditView*) ((CMainFrame*) AfxGetMainWnd())->GetActiveView())->GetChar();
-}
-
-#endif   __BORLANDC__
-
 #include "gcmdline.h"
+
+gclCommandLine::gclCommandLine(int p_historyDepth)
+  : m_historyDepth(p_historyDepth)
+{ }
 
 
 int gCmdLineInput::s_NumInstances = 0;
@@ -102,10 +92,8 @@ void gCmdLineInput::SetRawTermAttr( void )
 
 
 gCmdLineInput::gCmdLineInput( int historyDepth )
-: m_HistoryDepth( historyDepth ),
-  m_NumInvoke( 0 ),
-  m_Verbose( true ),
-  m_Prompt( true )
+  : gclCommandLine(historyDepth),
+    m_NumInvoke(0), m_Verbose(true), m_Prompt(true)
 {
   if( s_NumInstances == 0 )
   {
@@ -122,7 +110,12 @@ gCmdLineInput::~gCmdLineInput()
     RestoreTermAttr();
 }
 
-
+char gCmdLineInput::GetNextChar(void)
+{
+  char c;
+  gin.get(c);
+  return c;
+}
 
 void gCmdLineInput::GetCmdExec( void )
 {
@@ -141,20 +134,20 @@ void gCmdLineInput::GetCmdExec( void )
     ++m_NumInvoke;
     if( m_Verbose )
     {
-      if( m_NumInvoke < m_HistoryDepth )
+      if( m_NumInvoke < HistoryDepth() )
 	sprintf( buf, "GCL%d:= << ", m_NumInvoke );
       else
 	sprintf( buf, "GCL%d:=; GCL%d:= << ",
-		m_NumInvoke - m_HistoryDepth,
+		m_NumInvoke - HistoryDepth(),
 		m_NumInvoke );
     }
     else
     {
-      if( m_NumInvoke < m_HistoryDepth )
+      if( m_NumInvoke < HistoryDepth() )
 	sprintf( buf, "GCL%d:= ", m_NumInvoke );
       else
 	sprintf( buf, "GCL%d:=; GCL%d:= ",
-		m_NumInvoke - m_HistoryDepth,
+		m_NumInvoke - HistoryDepth(),
 		m_NumInvoke );
     }
   }
@@ -172,11 +165,7 @@ void gCmdLineInput::GetCmdExec( void )
   gout << cmdBuf;
 
   for( ; ; ) { // infinite loop
-#ifdef __BORLANDC__
-    c = WinGetChar();
-#else
-    gin.get( c );
-#endif // __BORLANDC__
+    c = GetNextChar();
     if( c == EOF || c == '\r' || c == '\n' )
       break;
 
@@ -356,18 +345,13 @@ void gCmdLineInput::GetCmdExec( void )
   gout << '\n';
 
   // if the history is too long now, get rid of the first one
-  if( m_History.Length() > m_HistoryDepth )
+  if( m_History.Length() > HistoryDepth() )
     m_History.Remove( 1 );
   
 }
 
 
-
-
-
-
-
-gCmdLineInput::EscapeCode gCmdLineInput::GetEscapeSequence( void ) const
+gCmdLineInput::EscapeCode gCmdLineInput::GetEscapeSequence(void)
 {
   char c1 = 0;
   char c2 = 0;
@@ -376,26 +360,17 @@ gCmdLineInput::EscapeCode gCmdLineInput::GetEscapeSequence( void ) const
   // remember that the first Escape has already been caught
 
   // the second char must be '[' in an escape sequence
-  if( !gin.eof() )
-#ifdef __BORLANDC__
-//  winio_setecho( winio_current(), false );
-//  c1 = winio_getchar();
-    c1 = WinGetChar();
-#else
-  gin.get( c1 );
-#endif // __BORLANDC__
-  if( c1 != '[' )
+  if (!gin.eof()) {
+    c1 = GetNextChar();
+  }
+  if (c1 != '[') {
     return ESC_ERROR;
+  }
 
+  if (!gin.eof()) {
+    c2 = GetNextChar();
+  }
 
-  if( !gin.eof() )
-#ifdef __BORLANDC__
-//  winio_setecho( winio_current(), false );
-//  c2 = winio_getchar();
-    c2 = WinGetChar();
-#else
-  gin.get( c2 );
-#endif // __BORLANDC__
   switch( c2 )
   {
   case 65: // up arrow
@@ -408,14 +383,9 @@ gCmdLineInput::EscapeCode gCmdLineInput::GetEscapeSequence( void ) const
     return ESC_RIGHT;
 
   case 51: // delete key, if followed by 126
-    if( !gin.eof() )
-#ifdef __BORLANDC__
-//  winio_setecho( winio_current(), false );
-//  c3 = winio_getchar();
-    c3 = WinGetChar();
-#else
-    gin.get( c3 );
-#endif // __BORLANDC__
+    if (!gin.eof()) {
+      c3 = GetNextChar();
+    }
     if( c3 == 126 )
       return ESC_DELETE;
     else
@@ -549,22 +519,12 @@ gText gCmdLineInput::UpdatePromptNum( gText cmdBuf ) const
   else if( match == 2 )
   {
     sprintf( buf, "GCL%d:=; GCL%d:=%s",
-	    m_NumInvoke - m_HistoryDepth, m_NumInvoke, 
+	    m_NumInvoke - HistoryDepth(), m_NumInvoke, 
 	    &cmdBuf[numchars1] );
     cmdBuf = buf;
   }
   return cmdBuf;
 }
 
-
-
-
-
-gCmdLineInput _gcmdline( 20 );
-gCmdLineInput& gcmdline( _gcmdline );
-
-
-
 #include "gstack.imp"
-
-template class gStack< bool >;
+template class gStack<bool>;

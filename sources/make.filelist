@@ -54,8 +54,8 @@ ALG_OBJECTS = $(ALG_SOURCES:.cc=$(OBJECT_SUFFIX))
 
 GCL_SOURCES = gsm.cc gsmfunc.cc gsmoper.cc gsmhash.cc gsminstr.cc portion.cc \
               nfgfunc.cc efgfunc.cc listfunc.cc algfunc.cc solfunc.cc \
-              gsmutils.cc gcompile.cc gsmincl.cc gio.cc gcmdline.cc \
-              gpreproc.cc gclinst.cc gclsig.cc gcl.cc gclstats.cc 
+              gsmutils.cc gcompile.cc gsmincl.cc gcmdline.cc \
+              gpreproc.cc gclinst.cc gclsig.cc
 
 GCL_OBJECTS = $(GCL_SOURCES:.cc=$(OBJECT_SUFFIX))
 
@@ -63,6 +63,21 @@ ALLGCL_SOURCES = $(GLIB_SOURCES) $(GPOLY_SOURCES) $(GAME_SOURCES) \
                  $(ALG_SOURCES) $(GCL_SOURCES)
 
 ALLGCL_OBJECTS = $(ALLGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
+
+TTYGCL_SOURCES = $(ALLGCL_SOURCES) gclstats.cc
+
+TTYGCL_OBJECTS = $(TTYGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
+
+MFCGCL_SOURCES = $(ALLGCL_SOURCES) gio.cc gcl.cc ..\winsrc\stdafx.cc \
+                 ..\winsrc\winedit.cc ..\winsrc\wineditdoc.cc \
+                 ..\winsrc\wineditview.cc ..\winsrc\mainfrm.cc gwstream.cc \
+                 gclstats.cc
+
+MFCGCL_OBJECTS = $(MFCGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
+
+WXGCL_SOURCES = $(ALLGCL_SOURCES) wxgcl.cc wxio.cc gnullsts.cc
+
+WXGCL_OBJECTS = $(WXGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
 
 GUI_SOURCES = gambit.cc treewin.cc twflash.cc treedraw.cc treedrag.cc \
               treerender.cc wxmisc.cc efgshow.cc \

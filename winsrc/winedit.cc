@@ -14,6 +14,15 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+mfcCmdLineInput::mfcCmdLineInput(int p_historyDepth)
+  : gCmdLineInput(p_historyDepth)
+{ }
+
+char mfcCmdLineInput::GetNextChar(void)
+{
+  return ((CWinEditView*) ((CMainFrame*) AfxGetMainWnd())->GetActiveView())->GetChar();
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CWinEditApp
 
@@ -39,7 +48,7 @@ extern char* _SourceDir;
 extern char* _ExePath;
 
 CWinEditApp::CWinEditApp()
-: C(), P(&gcmdline, "Include[\"gclini.gcl\"]")
+: gcmdline(20), C(), P(&gcmdline, "Include[\"gclini.gcl\"]")
 {
 	// TODO: add construction code here,
 	// Place all significant initialization in InitInstance

@@ -1,28 +1,41 @@
-
-
+//
+// FILE: gcmdline.h -- Declaration of command-line editing class
+//
 //  $Id$
+//
 
-#ifndef __gcmdline_h__
-#define __gcmdline_h__
-
+#ifndef GCMDLINE_H
+#define GCMDLINE_H
 
 #include <stdlib.h>
 #ifdef __GNUG__
 #include <termios.h>
-#elif defined __BORLANDC__
-// what goes here ?
-#endif   // __GNUG__, __BORLANDC__
+#endif  // __GNUG__
 
 #include "gstream.h"
 #include "gtext.h"
 #include "glist.h"
 #include "gstack.h"
 
-
-class gCmdLineInput : public gInput
-{
+class gclCommandLine : public gInput {
 private:
-  // the number of instances of thie object
+  int m_historyDepth;
+
+protected:
+  virtual char GetNextChar(void) = 0;
+
+public:
+  gclCommandLine(int p_historyDepth);
+  virtual ~gclCommandLine() { }
+
+  int HistoryDepth(void) const { return m_historyDepth; }
+
+  virtual void SetPrompt(bool) = 0;
+};
+
+class gCmdLineInput : public gclCommandLine {
+private:
+  // the number of instances of the object
   static int s_NumInstances;
 
   // the saved term attributes
@@ -37,8 +50,6 @@ private:
   // the history of commands already executed
   gList< gText > m_History;
   
-  // the maximum history size
-  int m_HistoryDepth;
   int m_NumInvoke;
 
   // the last command being executed
@@ -51,9 +62,11 @@ private:
   bool m_Prompt;
   gStack< bool > m_PromptStack;
 
+  char GetNextChar(void);
+
 private:
-  gCmdLineInput( const gCmdLineInput& );
-  gInput & operator = ( const gCmdLineInput& ); // RDM:  Is this needed?
+  gCmdLineInput(const gCmdLineInput &);
+  gInput &operator=(const gCmdLineInput &);
 
   enum EscapeCode
   {
@@ -67,7 +80,7 @@ private:
     ESC_DELETE
   };
 
-  EscapeCode GetEscapeSequence( void ) const;
+  EscapeCode GetEscapeSequence(void);
 
   // if the last executed command had been used up,
   //   wait until a new line has come in
@@ -116,7 +129,7 @@ public:
   void SetVerbose( bool verbose ) { m_Verbose = verbose; }
   bool Verbose( void ) { return m_Verbose; }
 
-  void SetPrompt( bool prompt ) 
+  void SetPrompt(bool prompt) 
   {    
     if( prompt == false )
       m_PromptStack.Push( false );
@@ -138,8 +151,4 @@ public:
   
 };
 
-
-
-extern gCmdLineInput &gcmdline;
-
-#endif // __gcmdline_h__
+#endif // GCMDLINE_H

@@ -186,6 +186,7 @@ int main( int /*argc*/, char* argv[] )
     _gsm = new GSM;
 
     GCLCompiler C;
+    gCmdLineInput gcmdline(20);
     gPreprocessor P(&gcmdline, "Include[\"gclini.gcl\"]");
     while (!P.eof()) {
       gText line = P.GetLine();

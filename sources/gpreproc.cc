@@ -116,7 +116,7 @@ bool gPreprocessor::IsQuoteEscapeSequence(const gText &p_line) const
 
 
 
-gPreprocessor::gPreprocessor(gCmdLineInput *p_cmdline,
+gPreprocessor::gPreprocessor(gclCommandLine *p_cmdline,
 			     const char *p_cmd /* = NULL */) 
   : m_CmdLine(p_cmdline), m_PrevFileName("console"), m_PrevLineNumber(1),
     m_StartupString(p_cmd)

@@ -57,9 +57,9 @@ gambit.res
 gambit.res :      ..\winsrc\res\gambit.rc 
     brc32 -r -fo.\gambit.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include ..\winsrc\res\gambit
 
-gcl:	$(ALLGCL_OBJECTS) ..\winsrc\stdafx.obj ..\winsrc\winedit.obj ..\winsrc\wineditdoc.obj ..\winsrc\wineditview.obj ..\winsrc\mainfrm.obj gwstream.obj gcl.res winedit.res
+gcl:	$(MFCGCL_OBJECTS) gcl.res winedit.res
   ilink32 $(LINKFLAGS) @&&!
-c0w32.obj $(ALLGCL_OBJECTS) ..\winsrc\stdafx.obj ..\winsrc\winedit.obj ..\winsrc\wineditdoc.obj ..\winsrc\wineditview.obj ..\winsrc\mainfrm.obj gwstream.obj
+c0w32.obj $(MFCGCL_OBJECTS) gwstream.obj
 gcl
 nul
 $(GCLLIBS)
@@ -72,6 +72,19 @@ gcl.res :      ..\winsrc\res\gcl.rc
 
 winedit.res :      ..\winsrc\res\winedit.rc 
     brc32 -r -fo.\winedit.res /i$(BCCDIR)\include /i$(BCCDIR)\include\mfc /i..\winsrc ..\winsrc\res\winedit
+
+wxgcl:	$(WXGCL_OBJECTS)  wxgcl.res
+  ilink32 $(LINKFLAGS) @&&!
+c0w32.obj $(WXGCL_OBJECTS) 
+wxgcl
+nul
+$(GUILIBS)
+
+wxgcl.res
+!
+
+wxgcl.res :      ..\winsrc\res\wxgcl.rc 
+    brc32 -r -fo.\wxgcl.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include ..\winsrc\res\wxgcl
 
 clean:
         -erase *.obj

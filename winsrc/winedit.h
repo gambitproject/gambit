@@ -39,10 +39,18 @@ int gcl_main( int argc, char* argv[] );
 #include "gcmdline.h"
 #include "gpreproc.h"
 
-class CWinEditApp : public CWinApp
-{
-
+class mfcCmdLineInput : public gCmdLineInput {
 private:
+  virtual char GetNextChar(void);
+
+public:
+  mfcCmdLineInput(int p_historyDepth);
+  virtual ~mfcCmdLineInput() { }
+};
+
+class CWinEditApp : public CWinApp {
+private:
+   mfcCmdLineInput gcmdline;
    GCLCompiler C;
    gPreprocessor P;
 

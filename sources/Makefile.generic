@@ -127,8 +127,8 @@ include	$(SOURCES:.cc=.d)
 $(OBJDIR):
 	mkdir $(OBJDIR)
 
-gcl_$(SYSNAME):	$(OBJDIR) $(ALLGCL_OBJECTS)
-	cd $(OBJDIR); $(CC) $(ALLGCL_OBJECTS) -o ../gcl_$(SYSNAME) -lm; cd ..
+gcl_$(SYSNAME):	$(OBJDIR) $(TTYGCL_OBJECTS)
+	cd $(OBJDIR); $(CC) $(TTYGCL_OBJECTS) -o ../gcl_$(SYSNAME) -lm; cd ..
 
 gcl:	
 ifndef SYSNAME

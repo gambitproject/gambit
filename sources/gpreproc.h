@@ -5,8 +5,6 @@
 // $Id$
 //
 
-
-
 #ifndef GPREPROC_H
 #define GPREPROC_H
 
@@ -14,10 +12,9 @@
 #include "gtext.h"
 #include "gstack.h"
 
-
 class gPreprocessor  {
 private:
-  gCmdLineInput *m_CmdLine;
+  gclCommandLine *m_CmdLine;
 
   gStack<gInput *> m_InputStack;
   gStack<int> m_LineNumberStack;
@@ -38,7 +35,7 @@ private:
   bool IsQuoteEscapeSequence(const gText &p_line) const;
 
 public:
-  gPreprocessor(gCmdLineInput *p_cmdline, const char *p_cmd = NULL); 
+  gPreprocessor(gclCommandLine *p_cmdline, const char *p_cmd = NULL); 
   ~gPreprocessor();
 
   //----------------------------------------------
