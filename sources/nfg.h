@@ -110,6 +110,7 @@ class NFPayoffs   {
   public:
     virtual ~NFPayoffs()  { }
     virtual DataType Type(void) const = 0;
+    virtual bool IsConstSum(void) const = 0;
 };
 
 template <class T> class MixedProfile;
@@ -167,6 +168,8 @@ public:
 #ifndef NFG_ONLY
   Efg<T> *AssociatedEfg(void) const   { return efg; }
 #endif   // NFG_ONLY
+
+  bool IsConstSum(void) const   { return ::IsConstSum(*this); }
 
   // defined in nfgutils.cc
   friend void RandomNfg(Nfg<T> &);
