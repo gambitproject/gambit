@@ -66,17 +66,17 @@ inline void DrawLine(wxDC &dc, double x_s, double y_s, double x_e, double y_e,
     if (dc.Colour)  
     {
         if (color > -1 && color < WX_COLOR_LIST_LENGTH)
-		{
+        {
             dc.SetPen(wxThePenList->FindOrCreatePen((char *) wx_color_list[color],
                                                     (thick) ? 8 : 2, wxSOLID));
-		}
+        }
         
         if (color >= WX_COLOR_LIST_LENGTH && color < 2 * WX_COLOR_LIST_LENGTH)
-		{
+        {
             dc.SetPen(wxThePenList->FindOrCreatePen(
                     (char *) wx_hilight_color_list[color % WX_COLOR_LIST_LENGTH],
                     2, wxSOLID));
-		}
+        }
     }
     else
         dc.SetPen(wxThePenList->FindOrCreatePen("BLACK", 2, wxSOLID));
@@ -94,10 +94,10 @@ inline void DrawRectangle(wxDC &dc, int x_s, int y_s, int w, int h,
                           int color = 0)
 {
     if (color > -1)
-	{
+    {
         dc.SetPen(wxThePenList->FindOrCreatePen((char *) wx_color_list[color], 
-												2, wxSOLID));
-	}
+                                                2, wxSOLID));
+    }
 
     dc.DrawRectangle(x_s, y_s, w, h);
 }
@@ -598,28 +598,28 @@ void TreeRender::RenderSubtree(wxDC &dc)
                 if (draw_settings.ShowInfosets())
                 {
                     if (entry.infoset.y != -1)
-					{
+                    {
                         ::DrawThinLine(dc, entry.x+entry.num*INFOSET_SPACING, 
-									   entry.y, 
-									   entry.x+entry.num*INFOSET_SPACING, 
-									   entry.infoset.y, 
-									   entry.color);
-					}
+                                       entry.y, 
+                                       entry.x+entry.num*INFOSET_SPACING, 
+                                       entry.infoset.y, 
+                                       entry.color);
+                    }
 
                     if (entry.infoset.x != -1)  // draw a little arrow in the dir of the iset
-					{
+                    {
                         if (entry.infoset.x > entry.x) // iset is to the right
                             ::DrawLine(dc, entry.x+entry.num*INFOSET_SPACING, 
-									   entry.infoset.y, 
-									   entry.x+(entry.num+1)*INFOSET_SPACING, 
-									   entry.infoset.y, entry.color);
+                                       entry.infoset.y, 
+                                       entry.x+(entry.num+1)*INFOSET_SPACING, 
+                                       entry.infoset.y, entry.color);
                         else // iset is to the left
                             ::DrawLine(dc, entry.x+entry.num*INFOSET_SPACING, 
-									   entry.infoset.y, 
-									   entry.x+(entry.num-1)*INFOSET_SPACING, 
-									   entry.infoset.y, 
-									   entry.color);
-					}
+                                       entry.infoset.y, 
+                                       entry.x+(entry.num-1)*INFOSET_SPACING, 
+                                       entry.infoset.y, 
+                                       entry.color);
+                    }
                 }
                 // Draw a triangle to show sugame roots
                 if (entry.n->GetSubgameRoot() == entry.n)
@@ -640,7 +640,7 @@ void TreeRender::RenderSubtree(wxDC &dc)
                 double prob = parent->ProbAsDouble(entry.n, child_entry.child_number);
                 if (prob > 0)
                     ::DrawLine(dc, xs, ys, xs+draw_settings.ForkLength()*prob, 
-							   ys+(ye-ys)*prob, WX_COLOR_LIST_LENGTH-1);
+                               ys+(ye-ys)*prob, WX_COLOR_LIST_LENGTH-1);
                 xs = xe;
                 ys = ye;
                 xe = child_entry.x;
@@ -657,8 +657,8 @@ void TreeRender::RenderSubtree(wxDC &dc)
             if (!child_entry.has_children)
             {
                 ::DrawLine(dc, xe, ye, 
-						   xe+draw_settings.NodeLength()+child_entry.nums*INFOSET_SPACING, 
-						   ye, draw_settings.GetPlayerColor(-1));
+                           xe+draw_settings.NodeLength()+child_entry.nums*INFOSET_SPACING, 
+                           ye, draw_settings.GetPlayerColor(-1));
 
                 // Collapsed subgame: subgame icon is drawn at this terminal node.
                 if (child_entry.n->GetSubgameRoot() == child_entry.n && !child_entry.expanded)
@@ -667,14 +667,14 @@ void TreeRender::RenderSubtree(wxDC &dc)
                 // Marked Node: a circle is drawn at this terminal node
                 if (child_entry.n == mark_node)
                     ::DrawCircle(dc, 
-								 xe+child_entry.nums*INFOSET_SPACING+draw_settings.NodeLength(), 
-								 ye, 4, draw_settings.CursorColor());
+                                 xe+child_entry.nums*INFOSET_SPACING+draw_settings.NodeLength(), 
+                                 ye, 4, draw_settings.CursorColor());
             }
 
             // Draw a circle to show the marked node
             if (entry.n == mark_node && child_entry.child_number == entry.n->NumChildren())
                 ::DrawCircle(dc, entry.x+entry.nums*INFOSET_SPACING+draw_settings.NodeLength(), 
-							 entry.y, 4, draw_settings.CursorColor());
+                             entry.y, 4, draw_settings.CursorColor());
         }
     }
 }
@@ -682,19 +682,19 @@ void TreeRender::RenderSubtree(wxDC &dc)
 void TreeRender::UpdateCursor(const NodeEntry *entry)
 {
     if (entry->n->GetSubgameRoot() == entry->n && !entry->expanded)
-	{
+    {
         flasher->SetFlashNode(entry->x + draw_settings.NodeLength() +
-							    entry->nums*INFOSET_SPACING-SUBGAME_LARGE_ICON_SIZE,
+                                entry->nums*INFOSET_SPACING-SUBGAME_LARGE_ICON_SIZE,
                               entry->y,
                               entry->x+draw_settings.NodeLength()+entry->nums*INFOSET_SPACING,
                               entry->y, subgameCursor);
-	}
+    }
     else
-	{
+    {
         flasher->SetFlashNode(entry->x+entry->nums*INFOSET_SPACING, entry->y,
                               entry->x+draw_settings.NodeLength()+entry->nums*INFOSET_SPACING-8,
                               entry->y, nodeCursor);
-	}
+    }
 
     flasher->Flash();
 }
@@ -1285,9 +1285,15 @@ TreeWindow::TreeWindow(Efg &ef_, EFSupport * &disp, EfgShow *frame_)
     scissor_cursor = new wxCursor("SCISSORCUR");
 #else
 #include "bitmaps/scissor.xbm"
+#ifndef LINUX_WXXT
     scissor_cursor = new wxCursor(scissor_bits, scissor_width, scissor_height,
                                   -1, -1, scissor_bits);
-#endif
+#else
+    // wxxt uses an older constructor
+    scissor_cursor = new wxCursor(scissor_bits, scissor_width, scissor_height,
+                                  scissor_width/2, scissor_height/2);
+#endif // LINUX_WXXT
+#endif // wx_msw
     
     GetDC()->SetBackgroundMode(wxTRANSPARENT);
     AllowDoubleClick(TRUE);
@@ -1390,7 +1396,7 @@ gText TreeWindow::OutcomeAsString(const Node *n, bool &/*hilight*/) const
         for (int i = v.First(); i <= v.Last(); i++)
         {
             if (i != 1) 
-				tmp += ",";
+                tmp += ",";
 
             if (draw_settings.ColorCodedOutcomes())
                 tmp += ("\\C{"+ToText(draw_settings.GetPlayerColor(i))+"}");
@@ -1399,7 +1405,7 @@ gText TreeWindow::OutcomeAsString(const Node *n, bool &/*hilight*/) const
         }
 
         if (draw_settings.ColorCodedOutcomes()) 
-			tmp += ("\\C{"+ToText(WX_COLOR_LIST_LENGTH-1)+"}");
+            tmp += ("\\C{"+ToText(WX_COLOR_LIST_LENGTH-1)+"}");
 
         tmp += ")";
         
@@ -2204,6 +2210,8 @@ void TreeWindow::ProcessDClick(wxMouseEvent &ev)
 //
 void TreeWindow::ProcessRClick(wxMouseEvent &ev)
 {
+// This #define is a hack to prevent a compiler warning:
+#define  DONT_USE_LEGENDS_SRC
 #include "legend.h"
     float x, y;
     ev.Position(&x, &y);
@@ -2255,6 +2263,8 @@ void TreeWindow::ProcessRClick(wxMouseEvent &ev)
     ViewStart(&x_start, &y_start);
     PopupMenu(build_menu, GetDC()->LogicalToDeviceX(x-x_start*PIXELS_PER_SCROLL),
               GetDC()->LogicalToDeviceY(y-y_start*PIXELS_PER_SCROLL));
+
+#undef  DONT_USE_LEGENDS_SRC
 }
 
 // Double Right Clicking on a label will let you change what is displayed
@@ -2319,8 +2329,13 @@ bool TreeWindow::ProcessShift(wxMouseEvent &ev)
 {
     if (!ev.ShiftDown())
     {
+#ifndef LINUX_WXXT
         if (wx_cursor == scissor_cursor)
             SetCursor(wxSTANDARD_CURSOR);
+#else
+        // wxxt doesn't have a wx_cursor field; this is a hack.
+        SetCursor(wxSTANDARD_CURSOR);
+#endif
         return false;
     }
     
@@ -2364,7 +2379,7 @@ bool TreeWindow::ProcessShift(wxMouseEvent &ev)
 
         // Check if the cursor is on top of an outcome
         if (entry->has_children == 0 && entry->n->GetOutcome())
-		{
+        {
             if (x > entry->x+entry->num*INFOSET_SPACING+10+draw_settings.NodeLength() &&
                 x < entry->x+draw_settings.NodeLength()+
                 entry->num*INFOSET_SPACING+draw_settings.OutcomeLength() &&
@@ -2374,12 +2389,12 @@ bool TreeWindow::ProcessShift(wxMouseEvent &ev)
                 cut_cursor = true;
                 break;
             }
-		}
+        }
         
         // Check if the cursor is on top of a branch
         NodeEntry *parent_entry = GetNodeEntry(entry->n->GetParent());
         if (parent_entry)
-		{
+        {
             if (x > parent_entry->x+draw_settings.NodeLength()+
                 parent_entry->num*INFOSET_SPACING+10 &&
                 x < parent_entry->x+draw_settings.NodeLength()+
@@ -2387,9 +2402,9 @@ bool TreeWindow::ProcessShift(wxMouseEvent &ev)
             {
                 // Good old slope/intercept method for finding a point on a line
                 int y0 = parent_entry->y + 
-					(int) (x - parent_entry->x - 
-						   draw_settings.NodeLength() -
-						   parent_entry->nums*INFOSET_SPACING) *
+                    (int) (x - parent_entry->x - 
+                           draw_settings.NodeLength() -
+                           parent_entry->nums*INFOSET_SPACING) *
                     (entry->y-parent_entry->y)/draw_settings.ForkLength();
 
                 if (y > y0-2 && y < y0+2)
@@ -2399,7 +2414,7 @@ bool TreeWindow::ProcessShift(wxMouseEvent &ev)
                     break;
                 }
             }
-		}
+        }
     }
 
     if (ev.LeftDown() && cut_cursor)
@@ -2440,11 +2455,20 @@ bool TreeWindow::ProcessShift(wxMouseEvent &ev)
         }
     }
     
+#ifndef LINUX_WXXT
     if (!cut_cursor && wx_cursor == scissor_cursor)
         SetCursor(wxSTANDARD_CURSOR);
 
     if (cut_cursor && wx_cursor != scissor_cursor) 
         SetCursor(scissor_cursor);
+#else
+    // wxxt doesn't have a wx_cursor field; this is a hack.
+    if (!cut_cursor)
+        SetCursor(wxSTANDARD_CURSOR);
+
+    if (cut_cursor) 
+        SetCursor(scissor_cursor);
+#endif // LINUX_WXXT
     
     return false;
 }
@@ -2473,10 +2497,10 @@ void TreeWindow::SupportChanged(void)
     // Check if the cursor is still valid
     NodeEntry *ne = GetNodeEntry(cursor);
     if (ne->child_number)
-	{
+    {
         if (!disp_sup->Find(cursor->GetInfoset()->Actions()[ne->child_number]))
             cursor = ef.RootNode();
-	}
+    }
 
     OnPaint();
 }
