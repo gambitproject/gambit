@@ -39,6 +39,8 @@ NfgShow::NfgShow(Nfg &N, EfgNfgInterface *efg, wxFrame *pframe_)
   
   UpdateVals();
   spread->Redraw();
+
+  nf.SetIsDirty(false);
 }
 
 

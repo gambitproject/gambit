@@ -112,6 +112,7 @@ protected:
        //# DATA ACCESS -- GENERAL INFORMATION
     bool IsConstSum(void) const; 
     bool IsDirty(void) const { return m_dirty; }
+    void SetIsDirty(bool p_dirty) { m_dirty = p_dirty; }
     gNumber MinPayoff(int pl = 0) const;
     gNumber MaxPayoff(int pl = 0) const;
 

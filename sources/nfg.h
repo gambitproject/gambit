@@ -79,6 +79,7 @@ public:
   const gText &GetComment(void) const;
 
   bool IsDirty(void) const { return m_dirty; }
+  void SetIsDirty(bool p_dirty) { m_dirty = p_dirty; }
 
   void WriteNfgFile(gOutput &, int) const;
 
