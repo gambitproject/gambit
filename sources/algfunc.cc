@@ -91,7 +91,7 @@ static Portion *GSM_Behav(Portion **param)
   const Efg &E = *(const Efg *) N.AssociatedEfg();
 
   BehavProfile<gNumber> *bp = new BehavProfile<gNumber>(EFSupport(E));
-  MixedToBehav(N, mp, E, *bp);
+  MixedToBehav(N, MixedProfile<gNumber>(mp), E, *bp);
 
   return new BehavPortion(new BehavSolution(*bp));
 }
@@ -262,7 +262,7 @@ static Portion *GSM_Gobit_Start(Portion **param)
     long nevals, niters;
     gWatch watch;
     gList<MixedSolution> solutions;
-    Gobit(N, NP, start, solutions, nevals, niters);
+    Gobit(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
 
     ((NumberPortion *) param[11])->Value() = watch.Elapsed();
 	  ((NumberPortion *) param[12])->Value() = nevals;
@@ -345,7 +345,7 @@ static Portion *GSM_KGobit_Start(Portion **param)
     long nevals, niters;
     gWatch watch;
     gList<MixedSolution> solutions;
-    KGobit(N, NP, start, solutions, nevals, niters);
+    KGobit(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
 
     ((NumberPortion *) param[11])->Value() = watch.Elapsed();
 	  ((NumberPortion *) param[12])->Value() = nevals;
@@ -573,7 +573,7 @@ static Portion *GSM_Liap_Behav(Portion **param)
 
 static Portion *GSM_Liap_Mixed(Portion **param)
 {
-  MixedProfile<gNumber> &start = *((MixedPortion *) param[0])->Value();
+  MixedProfile<gNumber> start(*((MixedPortion *) param[0])->Value());
   Nfg &N = start.Game();
 
   NFLiapParams params;
@@ -854,10 +854,10 @@ Portion* GSM_Payoff_Behav(Portion** param)
 
 Portion* GSM_Payoff_Mixed(Portion** param)
 {
-  MixedProfile<gNumber>* mp = ((MixedPortion*) param[0])->Value();
+  MixedProfile<gNumber> mp(*((MixedPortion*) param[0])->Value());
   NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
 
-  return new NumberPortion(mp->Payoff(player->GetNumber()));
+  return new NumberPortion(mp.Payoff(player->GetNumber()));
 }
 
 //----------------

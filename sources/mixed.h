@@ -13,6 +13,8 @@
 #include "gpvector.h"
 
 class Nfg;
+class MixedSolution;
+
 template <class T> class gRectArray;
 
 template <class T> class MixedProfile : public gPVector<T>  {
@@ -35,6 +37,7 @@ template <class T> class MixedProfile : public gPVector<T>  {
   public:
     MixedProfile(const NFSupport &);
     MixedProfile(const MixedProfile<T> &);
+    MixedProfile(const MixedSolution &);
     virtual ~MixedProfile();
 
     MixedProfile<T> &operator=(const MixedProfile<T> &);

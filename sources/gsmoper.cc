@@ -101,10 +101,6 @@ static Portion *GSM_Plus_Number(Portion** param)
 
 static Portion* GSM_Plus_Mixed(Portion** param)
 {
-  if(((MixedPortion*) param[0])->Value()->Support() !=
-     ((MixedPortion*) param[1])->Value()->Support())
-    throw gclRuntimeError("Support mismatch");
-
   MixedPortion *result = new MixedPortion(new MixedSolution(*((MixedPortion *) param[0])->Value()));
   *result->Value() += *((MixedPortion*) param[1])->Value();
   return result;
@@ -145,10 +141,6 @@ static Portion *GSM_Minus_Number(Portion** param)
 
 static Portion *GSM_Minus_Mixed(Portion** param)
 {
-  if(((MixedPortion*) param[0])->Value()->Support() !=
-     ((MixedPortion*) param[1])->Value()->Support())
-    throw gclRuntimeError("Support mismatch");
-
   MixedPortion *result = new MixedPortion(new MixedSolution(*((MixedPortion *) param[0])->Value()));
   *result->Value() -= *((MixedPortion*) param[1])->Value();
   return result;

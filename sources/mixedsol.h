@@ -12,6 +12,7 @@
 #include "gstream.h"
 #include "gtext.h"
 #include "gnumber.h"
+#include "nfplayer.h"
 
 typedef enum 
 {
@@ -33,67 +34,81 @@ void DisplayNfgAlgType(gOutput& o, NfgAlgType i);
 
 
 
-class MixedSolution : public MixedProfile<gNumber>  {
+class MixedSolution   {
 protected:
-  NfgAlgType _Creator;
-  mutable gTriState _IsNash;
-  mutable gTriState _IsPerfect;
-  mutable gTriState _IsProper;
-  gNumber _Epsilon;
-  gNumber _GobitLambda;
-  gNumber _GobitValue;
-  mutable gNumber _LiapValue;
-  gArray<gNumber> _Payoff;
-  unsigned int _Id;
+  MixedProfile<gNumber> m_profile;
+  mutable NfgAlgType m_creator;
+  mutable gTriState m_isNash, m_isPerfect, m_isProper;
+  mutable gNumber m_epsilon, m_gobitLambda, m_gobitValue, m_liapValue;
+  gArray<gNumber> m_payoff;
+  unsigned int m_id;
   
   void EvalEquilibria(void) const;
   
 public:
+  // CONSTRUCTORS, DESTRUCTOR, AND CONSTRUCTIVE OPERATORS
   MixedSolution(const MixedProfile<double> &, NfgAlgType creator = NfgAlg_USER);
   MixedSolution(const MixedProfile<gRational> &, NfgAlgType creator = NfgAlg_USER);
   MixedSolution(const MixedProfile<gNumber> &, NfgAlgType creator = NfgAlg_USER);
   MixedSolution(const MixedSolution &);
-  
   virtual ~MixedSolution();
 
-  unsigned int Id(void) const;
-  void SetId(unsigned int );
-  void SetCreator(NfgAlgType);
-  NfgAlgType Creator(void) const; //Who created this object? (algorithm ID or user)
-  bool IsComplete(void) const;
-  
-  void SetIsNash(gTriState);
-  gTriState IsNash(void) const; // Is it Nash? Y/N/DK
-  void SetIsPerfect(gTriState);
-  gTriState IsPerfect(void) const; //Is it Perfect? Y/N/DK
-  void SetIsProper(gTriState);
-  gTriState IsProper(void) const; //Is it Proper? Y/N/DK
-  
-  void SetEpsilon(gNumber value);
-  gNumber Epsilon(void) const; // epsilon for zero tolerance
-  
-  void SetGobit(gNumber lambda, gNumber value);
-  gNumber GobitLambda(void) const; // lambda from gobit alg
-  gNumber GobitValue(void) const; // objective function from gobit alg
-  void SetLiap(gNumber value);
-  gNumber LiapValue(void) const; // liapunov function value (to test for Nash)
-  
+  MixedSolution &operator=(const MixedSolution &);
+
+
+  // OPERATOR OVERLOADING
   bool Equals(const MixedProfile<double> &s) const;
   bool operator==(const MixedSolution &) const;
+  bool operator!=(const MixedSolution &S) const { return !(*this == S); } 
+
+  gNumber &operator()(int, int);
+  const gNumber &operator()(int, int) const;
+
+  MixedSolution &operator+=(const MixedSolution &);
+  MixedSolution &operator-=(const MixedSolution &);
+  MixedSolution &operator*=(const gNumber &);
+
+  // GENERAL DATA ACCESS
+  Nfg &Game(void) const  { return m_profile.Game(); }
+
+  // Do probabilities sum to one (within m_epsilon) for each player?)
+  bool IsComplete(void) const;
+
+  unsigned int Id(void) const { return m_id; }
+  NfgAlgType Creator(void) const { return m_creator; }
+  gTriState IsNash(void) const;
+  gTriState IsPerfect(void) const;
+  gTriState IsProper(void) const;
+  const gNumber &Epsilon(void) const { return m_epsilon; }
+  const gNumber &GobitLambda(void) const { return m_gobitLambda; }
+  const gNumber &GobitValue(void) const { return m_gobitValue; }
+  const gNumber &LiapValue(void) const;
+
+  void SetId(unsigned int p_id) { m_id = p_id; }
+  void SetCreator(NfgAlgType p_creator) { m_creator = p_creator; }
+  void SetIsNash(gTriState p_isNash) { m_isNash = p_isNash; }
+  void SetIsPerfect(gTriState p_isPerfect) { m_isPerfect = p_isPerfect; }
+  void SetIsProper(gTriState p_isProper) { m_isProper = p_isProper; }
+  void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
+  void SetGobit(const gNumber &p_gobitLambda, const gNumber &p_gobitValue)
+    { m_gobitLambda = p_gobitLambda; m_gobitValue = p_gobitValue; }
+  void SetLiap(const gNumber &p_liapValue) { m_liapValue = p_liapValue; }
+  
+  // Force the invalidation of cached quantities
+  void Invalidate(void) const;
+  
+
+  // FUNCTIONS FOR COMPATIBILITY WITH GUI
+  // these are all obsolescent :)
+  gNumber Payoff(int p_player) const { return m_profile.Payoff(p_player); }
+  const gArray<int> &Lengths(void) const { return m_profile.Lengths(); }
+  NFSupport Support(void) const { return NFSupport(Game()); }
+  
+  // PAYOFF COMPUTATION
+  gNumber Payoff(NFPlayer *, Strategy *) const;
+
+  // OUTPUT
   void Dump(gOutput& f) const;
-  
-  
-  void Invalidate();
-  
-  gNumber& operator[](int);
-  const gNumber& operator[](int) const;
-  gNumber& operator()(int, int);
-  const gNumber& operator()(int, int) const;
-  
-// for now, we may safely use the predefined assignment operator
-// for MixedProfile.  This must be written if dynamically allocated
-// members are added!!!!!!
-  MixedSolution &operator=(const MixedSolution &);
 };
 
 

@@ -1252,9 +1252,11 @@ void MixedPortion::Output(gOutput& s) const
   Portion::Output(s);
   s << "(Mixed) ";
   if (_WriteSolutionInfo > gNumber(1))
-    (*rep->value).Dump(s);
-  else
-    (*rep->value).MixedProfile<gNumber>::Dump(s);
+    rep->value->Dump(s);
+  else {
+    MixedProfile<gNumber> profile(*rep->value);
+    profile.Dump(s);
+  }
 }
 
 

@@ -25,7 +25,7 @@ int SimpdivBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
   for (int i = 1; i <= solutions.Length(); i++)  {
     BehavProfile<gNumber> bp(sup);
-    MixedToBehav(*N, solutions[i], E, bp);
+    MixedToBehav(*N, MixedProfile<gNumber>(solutions[i]), E, bp);
     solns.Append(bp);
   }
 

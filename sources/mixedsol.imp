@@ -4,210 +4,250 @@
 // $Id$
 //
 
-#include "assert.h"
 #include "mixedsol.h"
 #include "gmisc.h"
 
-MixedSolution::MixedSolution(const MixedProfile<double> &m, NfgAlgType creator)
-  : MixedProfile<gNumber>(m.Support()),
-    _Creator(creator), _IsNash(triMAYBE), _IsPerfect(triMAYBE),
-    _IsProper(triMAYBE), _Epsilon((double)0),
-    _GobitLambda(-1), _GobitValue(-1),
-    _LiapValue(-1), _Id(0)
+//----------------------------------------------------
+// Constructors, Destructor, Constructive Operators
+//----------------------------------------------------
+
+MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
+			     NfgAlgType p_creator)
+  : m_profile(NFSupport(p_profile.Game())),
+    m_creator(p_creator), m_isNash(triMAYBE), m_isPerfect(triMAYBE),
+    m_isProper(triMAYBE), m_epsilon(0.0),
+    m_gobitLambda(-1), m_gobitValue(-1),
+    m_liapValue(-1), m_id(0)
 {
-  gEpsilon(_Epsilon);
-  for (int i = 1; i <= m.Length(); i++)
-    ((gVector<gNumber> &) *this)[i] = m[i]; 
+  gEpsilon(m_epsilon);
+  for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
+    for (int st = 1; st <= Game().NumStrats(pl); st++) {
+      int index = p_profile.Support().Find(Game().Strategies(pl)[st]);
+      if (index > 0)
+	m_profile(pl, st) = p_profile(pl, index);
+      else
+	m_profile(pl, st) = gNumber(0.0);
+    }
+  }
 }
 
-MixedSolution::MixedSolution(const MixedProfile<gRational> &m, NfgAlgType creator)
-  : MixedProfile<gNumber>(m.Support()),
-    _Creator(creator), _IsNash(triMAYBE), _IsPerfect(triMAYBE),
-    _IsProper(triMAYBE), _GobitLambda(-1), _GobitValue(-1),
-    _LiapValue(-1), _Id(0)
+MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
+			     NfgAlgType p_creator)
+  : m_profile(NFSupport(p_profile.Game())),
+    m_creator(p_creator), m_isNash(triMAYBE), m_isPerfect(triMAYBE),
+    m_isProper(triMAYBE), m_gobitLambda(-1), m_gobitValue(-1),
+    m_liapValue(-1), m_id(0)
 {
-  gEpsilon(_Epsilon);
-  for (int i = 1; i <= m.Length(); i++)
-    ((gVector<gNumber> &) *this)[i] = m[i]; 
+  gEpsilon(m_epsilon);
+  for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
+    for (int st = 1; st <= Game().NumStrats(pl); st++) {
+      int index = p_profile.Support().Find(Game().Strategies(pl)[st]);
+      if (index > 0)
+	m_profile(pl, st) = p_profile(pl, index);
+      else
+	m_profile(pl, st) = gNumber(0);
+    }
+  }
 }
 
-MixedSolution::MixedSolution(const MixedProfile<gNumber> &m, NfgAlgType creator)
-  : MixedProfile<gNumber>(m),
-    _Creator(creator), _IsNash(triMAYBE), _IsPerfect(triMAYBE),
-    _IsProper(triMAYBE), _GobitLambda(-1), _GobitValue(-1),
-    _LiapValue(-1), _Id(0)
+MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
+			     NfgAlgType p_creator)
+  : m_profile(NFSupport(p_profile.Game())),
+    m_creator(p_creator), m_isNash(triMAYBE), m_isPerfect(triMAYBE),
+    m_isProper(triMAYBE), m_gobitLambda(-1), m_gobitValue(-1),
+    m_liapValue(-1), m_id(0)
 {
-  gEpsilon(_Epsilon);
+  gEpsilon(m_epsilon);
+  for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
+    for (int st = 1; st <= Game().NumStrats(pl); st++) {
+      int index = p_profile.Support().Find(Game().Strategies(pl)[st]);
+      if (index > 0)
+	m_profile(pl, st) = p_profile(pl, index);
+      else
+	m_profile(pl, st) = gNumber(0);
+    }
+  }
 }
 
-MixedSolution::MixedSolution(const MixedSolution &m)
-  : MixedProfile<gNumber>(m),
-    _Creator(m._Creator), _IsNash(m._IsNash), _IsPerfect(m._IsPerfect),
-    _IsProper(m._IsProper), _Epsilon(m._Epsilon), _GobitLambda(m._GobitLambda),
-    _GobitValue(m._GobitValue), _LiapValue(m._LiapValue), _Id(m._Id)
+MixedSolution::MixedSolution(const MixedSolution &p_solution)
+  : m_profile(p_solution.m_profile), m_creator(p_solution.m_creator), 
+    m_isNash(p_solution.m_isNash), m_isPerfect(p_solution.m_isPerfect),
+    m_isProper(p_solution.m_isProper), m_epsilon(p_solution.m_epsilon),
+    m_gobitLambda(p_solution.m_gobitLambda),
+    m_gobitValue(p_solution.m_gobitValue), 
+    m_liapValue(p_solution.m_liapValue), m_id(p_solution.m_id)
 { }
 
-MixedSolution::~MixedSolution() {}
+MixedSolution::~MixedSolution() { }
 
-MixedSolution &MixedSolution::operator=(const MixedSolution &m)
+MixedSolution &MixedSolution::operator=(const MixedSolution &p_solution)
 {
-  if (this != &m)  {
-    MixedProfile<gNumber>::operator=(m);
-    _Creator = m._Creator;
-    _IsNash = m._IsNash;
-    _IsPerfect = m._IsPerfect;
-    _IsProper = m._IsProper;
-    _Epsilon = m._Epsilon;
-    _GobitLambda = m._GobitLambda;
-    _GobitValue = m._GobitValue;
-    _LiapValue = m._LiapValue;
-    _Id = m._Id;
+  if (this != &p_solution)  {
+    m_profile = p_solution.m_profile;
+    m_creator = p_solution.m_creator;
+    m_isNash = p_solution.m_isNash;
+    m_isPerfect = p_solution.m_isPerfect;
+    m_isProper = p_solution.m_isProper;
+    m_epsilon = p_solution.m_epsilon;
+    m_gobitLambda = p_solution.m_gobitLambda;
+    m_gobitValue = p_solution.m_gobitValue;
+    m_liapValue = p_solution.m_liapValue;
+    m_id = p_solution.m_id;
   }
   return *this;
 }
 
+
+//-----------------------------
+// Private member functions
+//-----------------------------
+
 void MixedSolution::EvalEquilibria(void) const
 {
-  if(IsComplete())
-    if(_IsNash == triMAYBE)
-      if(MaxRegret() <= _Epsilon)
-	_IsNash = triTRUE;
-      else
-	_IsNash = triFALSE;
-  if( _IsNash == triFALSE )
-    {
-      _IsPerfect = triFALSE;
-      _IsProper = triFALSE;
-    }
+  if (IsComplete())   {
+    if (m_isNash == triMAYBE)  
+      m_isNash = (m_profile.MaxRegret() <= m_epsilon) ? triTRUE : triFALSE;
+  }
+  if (m_isNash == triFALSE) {
+    m_isPerfect = triFALSE;
+    m_isProper = triFALSE;
+  }
 }
 
-unsigned int MixedSolution::Id(void) const
-{return _Id;}
-void MixedSolution::SetId(unsigned int i)
-{_Id=i;}
 
-void MixedSolution::SetCreator(NfgAlgType c)
-{ _Creator = c; }
+//------------------------
+// Operator overloading
+//------------------------
 
-NfgAlgType MixedSolution::Creator(void) const
-{ return _Creator; }
+bool MixedSolution::Equals(const MixedProfile<double> &p_profile) const
+{ 
+  gNumber eps(m_epsilon);
+  gEpsilon(eps, 4);   // this should be a function of m_epsilon
+
+  int i = p_profile.First();
+  while (i <= p_profile.Length()) {
+    if (abs(m_profile[i] - (gNumber) p_profile[i]) > eps) 
+      break;
+  }
+  return (i <= p_profile.Length());
+}
+
+bool MixedSolution::operator==(const MixedSolution &p_solution) const
+{ return (m_profile == p_solution.m_profile); }
+
+gNumber &MixedSolution::operator()(int p_player, int p_strategy)
+{ 
+  Invalidate();
+  return m_profile(p_player, p_strategy);
+}
+
+const gNumber &MixedSolution::operator()(int p_player, int p_strategy) const
+{ return m_profile(p_player, p_strategy); }
+
+MixedSolution &MixedSolution::operator+=(const MixedSolution &p_solution)
+{
+  Invalidate();
+  m_profile += p_solution.m_profile;
+  return *this;
+}
+
+MixedSolution &MixedSolution::operator-=(const MixedSolution &p_solution)
+{
+  Invalidate();
+  m_profile -= p_solution.m_profile; 
+  return *this;
+}
+
+MixedSolution &MixedSolution::operator*=(const gNumber &p_constant)
+{ 
+  Invalidate(); 
+  m_profile *= p_constant;
+  return *this; 
+}
+
+
+//-----------------------
+// General data access
+//-----------------------
 
 bool MixedSolution::IsComplete(void) const
 { 
-  gNumber sum;
-  for(int pl= 1; pl <=svlen.Length(); pl++) {
-    sum = -1;
-    for(int str = 1;str <= svlen[pl]; str++) 
-      sum+= svptr[pl][str];
-    if(sum > _Epsilon || sum < -_Epsilon) 
+  for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
+    gNumber sum = -1;
+    for (int st = 1; st <= Game().NumStrats(pl); st++) 
+      sum += m_profile(pl, st);
+    if (sum > m_epsilon || sum < -m_epsilon) 
       return false;
   }
   return true;
 }
 
-void MixedSolution::SetIsNash(gTriState i)
-{ _IsNash = i; }
-
 gTriState MixedSolution::IsNash(void) const
-{ this->EvalEquilibria(); return _IsNash; }
-
-void MixedSolution::SetIsPerfect(gTriState i)
-{ _IsPerfect = i; }
+{
+  EvalEquilibria();
+  return m_isNash;
+}
 
 gTriState MixedSolution::IsPerfect(void) const
-{ this->EvalEquilibria(); return _IsPerfect; }
-
-void MixedSolution::SetIsProper(gTriState i)
-{ _IsProper = i; }
+{
+  EvalEquilibria();
+  return m_isPerfect;
+}
 
 gTriState MixedSolution::IsProper(void) const
-{ this->EvalEquilibria(); return _IsProper; }
-
-
-void MixedSolution::SetEpsilon(gNumber value)
 {
-  _Epsilon = value;
+  EvalEquilibria();
+  return m_isProper;
 }
 
-gNumber MixedSolution::Epsilon(void) const
-{ return _Epsilon; }
-
-void MixedSolution::SetGobit(gNumber lambda, gNumber value)
-{
-  _GobitLambda = lambda;
-  _GobitValue = value;
-}
-
-gNumber MixedSolution::GobitLambda(void) const
-{ return _GobitLambda; }
-
-gNumber MixedSolution::GobitValue(void) const
-{ return _GobitValue; }
-
-void MixedSolution::SetLiap(gNumber value)
-{ _LiapValue = value; }
-
-gNumber MixedSolution::LiapValue(void) const 
+const gNumber &MixedSolution::LiapValue(void) const 
 { 
-  if(_LiapValue < (gNumber)0)
-    this->_LiapValue = MixedProfile<gNumber>::LiapValue();
-  return _LiapValue; 
+  if (m_liapValue < (gNumber) 0)
+    m_liapValue = m_profile.LiapValue();
+  return m_liapValue; 
 }
 
-bool MixedSolution::Equals(const MixedProfile<double> &s) const
+void MixedSolution::Invalidate(void) const
+{
+  m_creator = NfgAlg_USER;
+  m_isNash = triMAYBE;
+  m_isProper = triMAYBE;
+  m_gobitLambda = -1;
+  m_gobitValue = -1;
+  m_liapValue = -1;
+}
+
+//---------------------
+// Payoff computation
+//---------------------
+
+gNumber MixedSolution::Payoff(NFPlayer *p_player, Strategy *p_strategy) const
+{ return m_profile.Payoff(p_player->GetNumber(), p_strategy); }
+
+
+//----------
+// Output
+//----------
+
+void MixedSolution::Dump(gOutput &p_file) const
+{
+  m_profile.Dump(p_file);
+  p_file << " Creator:"; DisplayNfgAlgType(p_file, m_creator);
+  p_file << " IsNash:" << m_isNash;
+  p_file << " IsPerfect:" << m_isPerfect;
+  p_file << " IsProper:" << m_isProper;
+  p_file << " GobitLambda:" << m_gobitLambda;
+  p_file << " GobitValue:" << m_gobitValue;
+  p_file << " LiapValue:" << m_liapValue;
+}
+
+gOutput &operator<<(gOutput &p_file, const MixedSolution &p_solution)
 { 
-  gNumber eps(_Epsilon);
-  gEpsilon(eps,4);   // this should be a function of _Epsilon
-  bool flag=true;
-  int i=s.First();
-  while(flag==true && i<=s.Length()) {
-    if(abs((*this)[i]-(gNumber)s[i]) > eps) 
-      flag=false;
-    i++;
-  }
-  return flag;
+  p_solution.Dump(p_file);
+  return p_file;
 }
 
-bool MixedSolution::operator==(const MixedSolution & s) const
-{ return MixedProfile<gNumber>::operator==(s); }
-
-void MixedSolution::Dump(gOutput& f) const
-{
-  MixedProfile<gNumber>::Dump(f);
-  f << " Creator:"; DisplayNfgAlgType(f, _Creator);
-  f << " IsNash:" << _IsNash;
-  f << " IsPerfect:" << _IsPerfect;
-  f << " IsProper:" << _IsProper;
-  f << " Support:" << Support();
-  f << " GobitLambda:" << _GobitLambda;
-  f << " GobitValue:" << _GobitValue;
-  f << " LiapValue:" << _LiapValue;
-}
-
-gOutput &operator<<(gOutput &f, const MixedSolution &s)
-{ s.Dump(f); return f; }
 
 
-void MixedSolution::Invalidate(void)
-{
-  _Creator = NfgAlg_USER;
-  _IsNash = triMAYBE;
-  _IsProper = triMAYBE;
-  _GobitLambda = -1;
-  _GobitValue = -1;
-  _LiapValue = -1;
-}
-
-gNumber& MixedSolution::operator[](int i)
-{ Invalidate(); return MixedProfile<gNumber>::operator[](i); }
-
-const gNumber& MixedSolution::operator[](int i) const
-{ return MixedProfile<gNumber>::operator[](i); }
-
-gNumber& MixedSolution::operator()(int a, int b)
-{ Invalidate(); return MixedProfile<gNumber>::operator()(a, b); }
-
-const gNumber& MixedSolution::operator()(int a, int b) const
-{ return MixedProfile<gNumber>::operator()(a, b); }
 
 

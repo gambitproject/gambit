@@ -11,6 +11,7 @@
 
 #include "gpvector.h"
 #include "mixed.h"
+#include "mixedsol.h"
 
 //---------------------------------------------------------------------------
 //                    MixedProfile<T> member functions
@@ -30,6 +31,20 @@ template <class T> MixedProfile<T>::MixedProfile(const MixedProfile<T> &p)
   : gPVector<T>(p), N(p.N), support(p.support),
     payoffs(new gRectArray<T>(*p.payoffs))
 { }
+
+template <class T> MixedProfile<T>::MixedProfile(const MixedSolution &p)
+  : gPVector<T>(p.Game().NumStrats()), N(&p.Game()), support(p.Game()),
+    payoffs(new gRectArray<T>(p.Game().NumOutcomes(), p.Game().NumPlayers()))
+{
+  for (int pl = 1; pl <= N->NumPlayers(); pl++)
+    for (int st = 1; st <= N->NumStrats(pl); st++)
+      (*this)(pl, st) = p(pl, st);
+
+  for (int outc = 1; outc <= N->NumOutcomes(); outc++)
+    for (int pl = 1; pl <= N->NumPlayers(); pl++)
+      (*payoffs)(outc, pl) = N->Payoff(N->Outcomes()[outc], pl);
+}  
+
 
 template <class T> MixedProfile<T>::~MixedProfile()
 {

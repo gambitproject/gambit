@@ -90,28 +90,6 @@ static Portion *GSM_ActionProbs(Portion **param)
 
 
 //------------------
-// StrategyValue
-//------------------
-
-static Portion *GSM_StrategyValue(Portion **param)
-{
-  MixedSolution *profile = ((MixedPortion *) param[0])->Value();
-  Strategy* strategy = ((StrategyPortion*) param[1])->Value();
-  Nfg *nfg = &profile->Game();
-
-  const gArray<NFPlayer *> &player = nfg->Players();
-
-  for(int i = 1; i <= nfg->NumPlayers(); i++)  
-    if (profile->Support().Strategies(player[i]->GetNumber()).Find(strategy))
-      return new NumberPortion(profile->Payoff(player[i]->GetNumber(),strategy));
-      
-  return new NullPortion(porNUMBER);
-}
-
-
-
-
-//------------------
 // ActionValue
 //------------------
 
@@ -498,13 +476,13 @@ static Portion *GSM_RealizProbs(Portion **param)
 
 static Portion *GSM_Regret_Mixed(Portion **param)
 {
-  MixedSolution *P = ((MixedPortion*) param[0])->Value();
+  MixedProfile<gNumber> P(*((MixedPortion*) param[0])->Value());
   Strategy* s = ((StrategyPortion*) param[1])->Value();
   NFPlayer* p = s->Player();
   Nfg &n = p->Game();
 
   gPVector<gNumber> v(n.NumStrats());
-  P->Regret(v);
+  P.Regret(v);
 
   return new NumberPortion(v(p->GetNumber(), s->Number()));
 }
@@ -530,18 +508,18 @@ static Portion *GSM_Regret_Behav(Portion **param)
 
 static Portion *GSM_Regrets_Mixed(Portion **param)
 {
-  MixedSolution *profile = ((MixedPortion *) param[0])->Value();
+  MixedProfile<gNumber> profile(*((MixedPortion *) param[0])->Value());
 
-  gPVector<gNumber> v(profile->Game().NumStrats());
+  gPVector<gNumber> v(profile.Game().NumStrats());
 
-  profile->Regret(v);
+  profile.Regret(v);
 
   ListPortion *por = new ListPortion;
   
-  for (int pl = 1; pl <= profile->Lengths().Length(); pl++)  {
+  for (int pl = 1; pl <= profile.Lengths().Length(); pl++)  {
     ListPortion *p1 = new ListPortion;
 
-    for (int st = 1; st <= profile->Lengths()[pl]; st++)
+    for (int st = 1; st <= profile.Lengths()[pl]; st++)
       p1->Append(new NumberPortion(v(pl, st)));
 
     por->Append(p1);
@@ -646,10 +624,7 @@ static Portion *GSM_SetStrategyProb(Portion **param)
   Strategy *s = ((StrategyPortion *) param[1])->Value();
   gNumber value = ((NumberPortion *) param[2])->Value();
   int player = s->Player()->GetNumber();
-  int strat = (*P).Support().Strategies(player).Find(s);
-
-  if(strat !=0)
-    (*P)(player, strat) = value;
+  (*P)(player, s->Number()) = value;
   ((MixedPortion *) param[0])->SetValue(P);
   return param[0]->RefCopy();
 }
@@ -660,26 +635,15 @@ static Portion *GSM_SetStrategyProb(Portion **param)
 
 static Portion *GSM_SetStrategyProbs(Portion **param)
 {
-  int i;
   int j;
   Portion* p2;
-  int PlayerNum = 0;
+  int PlayerNum = ((NfPlayerPortion *) param[1])->Value()->GetNumber();
 
   MixedSolution *P = new MixedSolution(*((MixedPortion *) param[0])->Value());
   Nfg& N = P->Game();
   
-  const gArray<NFPlayer *> &player = N.Players();
-  
-  for(i = 1; i <= N.NumPlayers(); i++)  {
-    if(((NfPlayerPortion*) param[1])->Value() == player[i])
-    {
-      PlayerNum = i;
-      break;
-    }
-  }
-  
   if (((ListPortion*) param[2])->Length() != 
-      P->Support().NumStrats(PlayerNum))  {
+      N.NumStrats(PlayerNum))  {
     delete P;
     throw gclRuntimeError("Mismatching number of strategies");
   }
@@ -714,12 +678,8 @@ static Portion *GSM_StrategyProb(Portion **param)
   Strategy* strategy = ((StrategyPortion*) param[1])->Value();
   NFPlayer* player = strategy->Player();
   
-  if (profile->Support().Strategies(player->GetNumber()).Find(strategy))
-    return new NumberPortion((*profile)
-			     (player->GetNumber(),
-			      profile->Support().Strategies(player->GetNumber()).Find(strategy)));
-  else
-    return new NumberPortion(0.0);
+  return new NumberPortion((*profile)
+			   (player->GetNumber(), strategy->Number()));
 }
 
 //----------------
@@ -729,22 +689,15 @@ static Portion *GSM_StrategyProb(Portion **param)
 static Portion *GSM_StrategyProbs(Portion **param)
 {
   const MixedSolution *profile = ((MixedPortion *) param[0])->Value();
-  const NFSupport *support = &profile->Support();
-  const Nfg &nfg = support->Game();
+  const Nfg &nfg = profile->Game();
 
   ListPortion *por = new ListPortion;
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)  {
     NFPlayer *player = nfg.Players()[pl];
     ListPortion *p1 = new ListPortion;
 
-    for (int st = 1; st <= player->NumStrats(); st++)   {
-      if (support->Find(player->Strategies()[st]))
-	p1->Append(new NumberPortion(
-	      (*profile)(player->GetNumber(),
-			 support->Find(player->Strategies()[st]))));
-      else
-	p1->Append(new NumberPortion(0.0));
-    }
+    for (int st = 1; st <= player->NumStrats(); st++)  
+      p1->Append(new NumberPortion((*profile)(player->GetNumber(), st)));
     por->Append(p1);
   }
 
@@ -752,6 +705,18 @@ static Portion *GSM_StrategyProbs(Portion **param)
 }
 
 
+
+//------------------
+// StrategyValue
+//------------------
+
+static Portion *GSM_StrategyValue(Portion **param)
+{
+  MixedSolution *profile = ((MixedPortion *) param[0])->Value();
+  Strategy *strategy = ((StrategyPortion*) param[1])->Value();
+
+  return new NumberPortion(profile->Payoff(strategy->Player(), strategy));
+}
 
 //---------------
 // Support
@@ -766,7 +731,7 @@ static Portion *GSM_Support_Behav(Portion** param)
 static Portion *GSM_Support_Mixed(Portion** param)
 {
   MixedSolution *P = ((MixedPortion *) param[0])->Value();
-  return new NfSupportPortion(new NFSupport(P->Support()));
+  return new NfSupportPortion(new NFSupport(P->Game()));
 }
 
 
