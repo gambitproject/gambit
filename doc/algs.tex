@@ -1,0 +1,276 @@
+\chapter{Solution Algorithms}\label{SolutionAlgorithms}
+
+\section{EnumMixed}
+Finds all Nash equilibria for a two person game.  More
+precisely, it finds the set of extreme points of the components
+of the set of Nash equilibria.  The procedure is to enumerate the set
+of complementary basic feasible solutions.  
+
+{\em Limitations:}  Only works for two-person normal form games. 
+
+The following parameters can be set:
+
+\begin{description}
+\item[nequilib:] Specifies the maximum number of equilibria to find.  The
+default is zero, which means that all equilibria are found.  To check if
+there is a unique Nash equilibrium, one could set this parameter to 2.
+
+\item[time:] Returns the elapsed time for the operation.
+
+\item[trace:] Sets the print level.  Higher values generate more output.
+The default value is 0.
+\end{description}
+
+
+\section{Gobit}
+Computes a branch of the logistic {\em quantal response equilibrium}
+correspondence for n-person normal form games (as described in
+\cite{McKPal:95a}  and n-person extensive form games (as described
+in \cite{McKPal:95b}.) The branch is computed
+for values of $\lambda$ between $minLam$ and $maxLam.$  The algorithm
+starts at $\lambda(0) = minLam$ if $delLam>0,$ or $\lambda(0) = maxLam$ if
+$delLam<0$. It then increments according to the formula $$
+\lambda(t+1) = \lambda(t) +delLam \lambda(t)^a.
+$$ 
+where $minLam,$ $maxLam,$ $delLam,$ and $a$ are
+parameters described below. In the computation for the first value of
+$\lambda(0)$, the algorithm begins its search for a solution at the
+starting point determined by the parameter $start.$'  At each
+successive value of $\lambda(t)t,$ the algorithm begins it's search at
+the point found in step $t - 1.$  
+
+If the starting point is set to the centroid of the game (this is the
+default), and $delLam > 0,$ then this algorithm computes the {\em principal
+branch} of the logistic Quantal response equilibrium.  In this case
+taking the limit, as $\lambda$ goes to 0, the quantal response equilibrium
+defines a unique selection from the set of Nash equilibrium for generic
+normal form games.  Similarly, for generic extensive form games, it
+defines a unique selection from the set of sequential equilibria.
+Therefore, in extensive form games, this algorithm can be used to compute
+approximations to a sequential equilibrium.
+
+The following parameters can be set:
+
+\begin{description}
+\item[fullGraph:] Determines whether to return the full guantal response 
+graph or just the final value  of equilibria to find for each value of
+$\lambda$.  Has a default value of 1.
+
+\item[minLam:] Sets the minimum value of $\lambda.$
+Default is $lambda = 0.01$.
+
+\item[maxLam:] Sets the maximum value of $\lambda.$  Default is
+$\lambda = 30.0.$
+
+\item[delLam:]  The constant, $\delta,$ used in incrementing.   Default is
+$\delta = .01.$
+
+\item[plotType:] Determines the exponent, $a,$ used in incrementing
+$\lambda.$  {\em Linear} corresponds to setting $a = 0,$ and {\em
+logarithmic} corresponds to setting $a = 1.$ Default is logarithmic.
+
+\item[start:] Sets the starting point of the search for the initial value of
+$\lambda.$  Default is the centroid, where all strategies are chosen
+with equal probability (not implemented yet.)
+
+\item[maxits 1D:] Sets the maximum number of iterations to the
+n-dimensional optimization routine.  Default is 20.
+
+\item[maxits nD:] Sets the maximum number of iterations in the
+1-dimensional line search.  Default is 100.
+
+\item[tol 1D:] Sets the tolerance for the n-dimensional optimization
+routine.  Default is 1.0e-10.
+
+\item[tol nD:] Sets the tolerance for the 1-dimensional line search.
+Default is 2.0e-10.
+
+\item[pxifile:] Can be used to generate an output file compatible for
+input to pxi, a program for graphical viewing and display of the output.
+\end{description}
+
+\section{GobitAll}
+Performs a grid search to compute the complete logistic
+quantal response correspondence (as described in \cite{McKPal:95a}
+for a {\em small} two-person normal form game.  
+
+The algorithm computes approximate fixed points of the correspondence for 
+the correspondence for values of $\lambda$ between $minLam$
+and $maxLam.$  Starting at $\lambda = minLam,$ $\lambda$ is incremented
+according to the formula $$ \lambda(t+1) = \lambda(t) +delLam \lambda(t)^a.
+$$ 
+where $minLam,$ $maxLam,$ $delLam,$ and $a$ are parameters described
+below. For each value of $\lambda$, a grid search is done over all values
+of the probabilities for player $1$, evaluated on a grid of mesh 'del p.'
+Points are evaluated in terms of the value of an objective function that
+measures the distance between the original point, and the best response to
+the best response (under the logistic best response function.)  Points
+with a value of the objective function less than $Tolerance$ are
+approximate fixed points, and are kept, others are discarded.
+
+Limitations:  This algorithm is only implemented for two-person normal
+form games, and is very computationally intensive.
+  
+The following parameters can be set for Grid Solve.
+
+\begin{description}
+\item[minLam:] Sets the minimum value of $\lambda.$
+Default is $\lambda = .01.$
+\item[maxLam:]  Sets the maximum value of $\lambda.$
+Default is $\lambda = 3.$ 
+\item[delLam:] Specifies the rate at which the value of Lambda changes.
+Has a default value of .1.
+\item[Plot Type:] Specifies whether to have geometric or linear incrementing.
+Default is 0, resulting in $a = 1,$ or !geometric incrementing.
+\item[del p:] Grid size for search over probability space.  
+
+\item[pxifile:] Can be used to generate an output file compatible for
+input to pxi, a program for graphical viewing and display of the output.
+\end{description}
+
+\section{LCP}
+For a normal form game, this algorithm searches for equilibria of the
+specified normal form game using the Lemke-Howson algorithm, as described
+in \cite{LemHow:64}. Eaves \cite{Eav:71} lexicographic rule for
+linear complementarity problems is used to avoid cycling.
+
+In the Lemke Howson algorithm equilibria are found by following paths of
+``almost'' equilibria, where one relaxes at most one constaint.
+Equilibria are thus inter-connected by networks of paths that result when
+different of the constraints are relaxed.  One can find the set of
+``accessible''  equilibria in such methods by starting at the extraneous
+solution and then tracing out this entire network.  See, e. g., Shapley,
+xxx.  However, the set of accessible equilibria is not necessarily all
+Nash equilibria.
+
+For extensive form games, this algorithm implements Lemke's algorithm on
+the ``sequence form'' of the game, as described in \cite{KolMegSte:94}.
+
+Limitations:  This algorithm is fast, but currently only works for two
+person games.  \cite{Wilson:1971} and \cite{Rosenmuller:1971} have
+suggested ways in which the Lemke-Howson Algorithm can be extended to
+general $n$-player games, but these extensions require methods of tracing
+the solution to a set of non linear simultaneous equations, and have not
+yet been implemented in GAMBIT.
+
+The following parameters can be specified:
+
+\begin{description}
+\item[n equi:] Specifies the number of equilibria to find.  If not specified,
+the default value is zero, which means that all equilibria reachable by
+the algorithm are to be found.
+\item[max depth]
+Specifies the maximum depth of search.
+\end{description}
+
+\section{Liap}
+Finds Nash equilibria via the Lyapunov function method
+described in \cite{McK:91}.  Works on either the extensive or normal
+form.  This algorithm casts the problem as a function minimization
+problem by use of a Lyapunov function for Nash equilibria.  This is a
+continuously differentiable non negative function whose zeros coincide
+with the set of Nash equilibria of the game.  A standard descent
+algorithm is used to find a constrained local minimum of the function
+from any given starting location.  Since a local minimum need not be a
+global minimum (with value 0,) the algorithm is not guaranteed to find
+a Nash equilibrium from any fixed starting point.  The algorithm thus
+incorporates the capability of restarting.  The algorithm starts from
+the initial starting point determined by the parameter 'start'.  If a
+Nash equilibrium is not found, it will keep searching from new
+randomly chosen starting points until a Nash equilibrium has been
+found or the maximum number of tries (parameter 'ntries') is exceeded,
+whichever comes first.  For an extensive form game, if the algorithm
+converges, it converges to a sequential equilibrium (Andrew Solnick,
+personal communication).
+
+Limitations: The disadvantages of this method are that it is generally
+slower than any of the above methods, and also,  there can be local minima
+to the Liapunov function which are not zeros of the function.  Thus the
+algorithm can potentially converge to a non Nash point.  However,
+inspection of the objective function can determine if this problem has
+occurred.  If the objective function is zero, a Nash equilibrium has been
+found. If it is greater than zero, the point is not Nash.  The algorithm
+will automatically check this.  If the objective function is larger than the
+tolerance, then the point is discarded.
+
+The following parameters can be set;
+
+\begin{description}
+\item[start:] Sets the starting profile for the descent algorithm.  The
+default is the centroid.
+\item[trace:] Sets the print level.  Higher values generate more output.
+The default value is 0.
+\item[ntries:] Sets the maximum number of attempts at finding each
+equilibrium. Default is 10
+\item[nequilib:] Sets the number of equilibria to find.  Has a default
+value of 1.  
+\item[maxits nD:] Sets the maximum number of iterations to the
+n-dimensional optimization routine.  Default is 200.
+\item[maxits 1D:] Sets the maximum number of iterations in the
+1-dimensional line search.  Default is 100.
+\item[tol nD:] Sets the tolerance for the n-dimensional optimization
+routine.  Default is 1.0e-10.
+\item[tol 1D:] Sets the tolerance for the 1-dimensional line search.
+Default is 2.0e-10.
+\end{description}
+
+\section{EnumPure}
+Computation of pure strategy Nash equilibria is done by simple enumeration.
+All pure strategies are checked to see if they are Nash equilibria.  
+
+The following parameters can be set. 
+
+\begin{description}
+\item[num:] Allows the user to set the maximum number of Nash equilibria to
+find.  Has a default value of 1. (not implemented yet) 
+\end{description}
+
+\section{SimpDiv}
+Computes a Nash equilibrium to a normal form game based
+on a simplicial subdivision algorithm.  The algorithm implemented is
+that of \cite{VTH:1987}.  The algorithm is a simplicial subdivision
+algorithm which can start at any point in the simplex.  The algorithm
+starts with a given grid size, follows a path of almost completely labeled
+subsimplexes, and converges to a completely labeled sub-simplex that
+approximates the solution.  Additional accuracy is obtained by refining
+the grid size and restarting from the previously found point.  The idea is
+that by restarting at a close approximation to the solution, each
+successive increase in accuracy will yield a short path, and hence be
+quick.
+
+In its pure form, the algorithm is guaranteed to find at least one
+mixed strategy equilibrium to any n-person game.  Experience shows
+that the algorithm works well, and is acceptably fast for many
+moderate size problems.  But in some examples it can be quite slow.
+The reason for this is that sometimes after restarting with a refined
+grid size, even though the starting point is a good approximation to
+the solution, the algorithm will go to the boundary of the simplex
+before converging back to a point that is close to the original
+starting point.  When this occurs, each halving of the grid size will
+take twice as long to converge as the previous grid size.  If a high
+degree of accuracy is required, or if the normal form is large, this
+can result in the algorithm taking a long time to converge.
+
+In order to combat the above difficulty, a parameter 'leash' has been
+added to the algorithm which places a limit on the distance which the
+algorithm can wander from the restart point. (Setting this parameter
+to 0 results in no limit, and gives the pure form of the algorithm.)
+With this parameter set to a non trivial value, the algorithm is no
+longer guaranteed to converge, and setting small values of the
+parameter will sometimes yield lack of convergence.  However,
+experience shows that values of the parameter on the order of 10
+generally do not destroy convergence, and yield much faster
+convergence.
+
+Parameters:
+
+\begin{description}
+\item[n equilib:] Maximum number of equilibria to find. Default is 1.  
+\item[n Restarts:] Number of restarts.  At each restart the mesh of the
+triangulation is halved.  So this parameter determines the final mesh
+by the formula ${1/2}^{ndivs}$.
+\item[Leash:] Sets the leashlength. Default is 0, which results in no
+constraint, or no leash.  
+\end{description}
+
+
