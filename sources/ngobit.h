@@ -12,8 +12,9 @@
 
 template <class T> class NFGobitParams : public GobitParams<T>   {
   public:
-		NFGobitParams(gStatus &status_=gstatus);
-		NFGobitParams(gOutput &out, gOutput &err, gOutput &pxi,gStatus &status_=gstatus);
+    NFGobitParams(gStatus &status_=gstatus);
+    NFGobitParams(gOutput &out, gOutput &err, gOutput &pxi,
+		  gStatus &status_=gstatus);
 };
 
 
