@@ -115,6 +115,11 @@ template<class T> bool gMono<T>::IsConstant() const
   return exps.IsConstant(); 
 }
 
+template<class T> bool gMono<T>::IsMultiaffine() const 
+{ 
+  return exps.IsMultiaffine(); 
+}
+
 template<class T> T gMono<T>::Evaluate(const gArray<T>& vals) const 
 { 
   T answer = Coef();

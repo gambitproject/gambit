@@ -46,6 +46,7 @@ public:
     int             Dmnsn()                     const;
     int             TotalDegree()               const;
     bool            IsConstant()                const;
+    bool            IsMultiaffine()             const;
     const exp_vect& ExpV()                      const;
     T               Evaluate(const gArray<T>&)  const;
     T               Evaluate(const gVector<T>&) const;
@@ -53,6 +54,25 @@ public:
     // output
   friend gOutput& operator << (gOutput&, const gMono<T>&);
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
