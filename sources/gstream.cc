@@ -26,18 +26,10 @@ gInput::~gInput()   { }
 
 #include "gtext.h"
 
-gFileInput::OpenFailed::OpenFailed(int line, char *file)
-  :gException(line, file)
-{ }
-
 gText gFileInput::OpenFailed::Description(void) const
 {
   return "Open failed in gFileInput";
 }
-
-gFileInput::ReadFailed::ReadFailed(int line, char *file)
-  :gException(line, file)
-{ }
 
 gText gFileInput::ReadFailed::Description(void) const
 {
@@ -46,12 +38,12 @@ gText gFileInput::ReadFailed::Description(void) const
 
 gFileInput::gFileInput(const char *in) : f(fopen(in, "r"))
 {
-  if (!f)  throw OpenFailed(__LINE__, __FILE__);
+  if (!f)   throw OpenFailed();
 }
 
 gFileInput::gFileInput(FILE *in) : f(in)
 {
-  if (!f)  throw OpenFailed(__LINE__, __FILE__);
+  if (!f)   throw OpenFailed();
 }
 
 gFileInput::~gFileInput()
@@ -61,19 +53,19 @@ gFileInput::~gFileInput()
 
 gInput &gFileInput::operator>>(int &x)
 {
-  if (fscanf(f, "%d", &x) != 1)   throw ReadFailed(__LINE__, __FILE__);
+  if (fscanf(f, "%d", &x) != 1)   throw ReadFailed();
   return *this;
 }
 
 gInput &gFileInput::operator>>(unsigned int &x)
 {
-  if (fscanf(f, "%d", &x) != 1)   throw ReadFailed(__LINE__, __FILE__);
+  if (fscanf(f, "%d", &x) != 1)   throw ReadFailed();
   return *this;
 }
 
 gInput &gFileInput::operator>>(long &x)
 {
-  if (fscanf(f, "%ld", &x) != 1)   throw ReadFailed(__LINE__, __FILE__);
+  if (fscanf(f, "%ld", &x) != 1)   throw ReadFailed();
   return *this;
 }
 
@@ -85,19 +77,19 @@ gInput &gFileInput::operator>>(char &x)
 
 gInput &gFileInput::operator>>(double &x)
 {
-  if (fscanf(f, "%lf", &x) != 1)   throw ReadFailed(__LINE__, __FILE__);
+  if (fscanf(f, "%lf", &x) != 1)   throw ReadFailed();
   return *this;
 }
 
 gInput &gFileInput::operator>>(float &x)
 {
-  if (fscanf(f, "%f", &x) != 1)   throw ReadFailed(__LINE__, __FILE__);
+  if (fscanf(f, "%f", &x) != 1)   throw ReadFailed();
   return *this;
 }
 
 gInput &gFileInput::operator>>(char *x)
 {
-  if (fscanf(f, "%s", x) != 1)   throw ReadFailed(__LINE__, __FILE__);
+  if (fscanf(f, "%s", x) != 1)   throw ReadFailed();
   return *this;
 }
 
@@ -207,18 +199,10 @@ gOutput::~gOutput()   { }
 //                         gFileOutput member functions
 //--------------------------------------------------------------------------
 
-gFileOutput::OpenFailed::OpenFailed(int line, char *file)
-  :gException(line, file)
-{ }
-
 gText gFileOutput::OpenFailed::Description(void) const
 {
   return "Open failed in gFileOutput";
 }
-
-gFileOutput::WriteFailed::WriteFailed(int line, char *file)
-  :gException(line, file)
-{ }
 
 gText gFileOutput::WriteFailed::Description(void) const
 {
@@ -228,13 +212,13 @@ gText gFileOutput::WriteFailed::Description(void) const
 gFileOutput::gFileOutput(const char *out, bool append /* = false */)
   : f(fopen(out, (append) ? "a" : "w")), Width(0), Prec(6), Represent('f')
 {
-  if (!f)   throw OpenFailed(__LINE__, __FILE__);
+  if (!f)   throw OpenFailed();
 }
 
 gFileOutput::gFileOutput(FILE *out)
   : f(out), Width(0), Prec(6), Represent('f')
 {
-  if (!f)   throw OpenFailed(__LINE__, __FILE__);
+  if (!f)   throw OpenFailed();
 }
 
 gFileOutput::~gFileOutput()
@@ -283,41 +267,43 @@ char gFileOutput::GetRepMode(void)
 
 gOutput &gFileOutput::operator<<(int x)
 {
-  if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed(__LINE__, __FILE__);
+  if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed();
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(unsigned int x)
 {
-  if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed(__LINE__, __FILE__);
+  if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed();
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(bool x)
 {
-  if (fprintf(f, "%c", (x) ? 'T' : 'F') < 0)   throw WriteFailed(__LINE__, __FILE__);
+  if (fprintf(f, "%c", (x) ? 'T' : 'F') < 0)   throw WriteFailed();
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(long x)
 {
-  if (fprintf(f, "%*ld", Width, x) < 0)   throw WriteFailed(__LINE__, __FILE__);
+  if (fprintf(f, "%*ld", Width, x) < 0)   throw WriteFailed();
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(char x)
 {
-  if (fprintf(f, "%c", x) < 0)   throw WriteFailed(__LINE__, __FILE__);
+  if (fprintf(f, "%c", x) < 0)   throw WriteFailed();
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(double x)
 {
   if (Represent == 'f')   {
-    if (fprintf(f, "%*.*f", Width, Prec, x) < 0)   throw WriteFailed(__LINE__, __FILE__);
+    if (fprintf(f, "%*.*f", Width, Prec, x) < 0)  
+      throw WriteFailed();
   }
   else   {   // Represent == 'e'
-    if (fprintf(f, "%*.*e", Width, Prec, x) < 0)   throw WriteFailed(__LINE__, __FILE__);
+    if (fprintf(f, "%*.*e", Width, Prec, x) < 0) 
+      throw WriteFailed();
   }
   return *this;
 }
@@ -325,23 +311,25 @@ gOutput &gFileOutput::operator<<(double x)
 gOutput &gFileOutput::operator<<(float x)
 {
   if (Represent == 'f')   {
-    if (fprintf(f, "%*.*f", Width, Prec, x) < 0)   throw WriteFailed(__LINE__, __FILE__);
+    if (fprintf(f, "%*.*f", Width, Prec, x) < 0) 
+      throw WriteFailed();
   }
   else   {   // Represent == 'e'
-    if (fprintf(f, "%*.*e", Width, Prec, x) < 0)   throw WriteFailed(__LINE__, __FILE__);
+    if (fprintf(f, "%*.*e", Width, Prec, x) < 0) 
+      throw WriteFailed();
   }
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(const char *x)
 {
-  if (fprintf(f, "%s", x) < 0)   throw WriteFailed(__LINE__, __FILE__);
+  if (fprintf(f, "%s", x) < 0)   throw WriteFailed();
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(const void *x)
 {
-  if (fprintf(f, "%p", x) < 0)   throw WriteFailed(__LINE__, __FILE__);
+  if (fprintf(f, "%p", x) < 0)   throw WriteFailed();
   return *this;
 }
 

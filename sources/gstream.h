@@ -48,17 +48,13 @@ class gFileInput : public gInput  {
 
   public:
     class OpenFailed : public gException   {
-     public:
-      OpenFailed(int, char *);
-
+    public:
       virtual ~OpenFailed()   { }
       gText Description(void) const;
     };
 
     class ReadFailed : public gException   {
-     public:
-      ReadFailed(int, char *);
-
+    public:
       virtual ~ReadFailed()   { }
       gText Description(void) const;
     };
@@ -110,12 +106,10 @@ class gNullInput : public gInput  {
 
 class gOutput  {
   private:
-  
     gOutput(const gOutput &);
     gOutput &operator=(const gOutput &);
 
   public:
-    
     gOutput(void);
     virtual ~gOutput();
 
@@ -149,17 +143,13 @@ class gFileOutput : public gOutput  {
 
   public:
     class OpenFailed : public gException   {
-     public:
-      OpenFailed(int, char *);
-
+    public:
       virtual ~OpenFailed()   { }
       gText Description(void) const;
     };
 
     class WriteFailed : public gException   {
-     public:
-      WriteFailed(int, char *);
-
+    public:
       virtual ~WriteFailed()   { }
       gText Description(void) const;
     };
@@ -229,7 +219,7 @@ class gWinOutput : public gOutput  {
     gWinOutput &operator=(const gWinOutput &);
 
   protected:
-    void OutputString( const char* s ) const;
+    void OutputString(const char* s) const;
 
   public:
     gWinOutput(void);
