@@ -1,6 +1,5 @@
 //
 // FILE: sfg.cc -- Implementation of sequence form member functions
-//              -- and Implementation of NFPlayer member functions
 //
 // $Id$ 
 //
@@ -45,7 +44,6 @@ Sfg::Sfg(const EFSupport &S, const gArray<gNumber> &v)
       for(int k = (*(*E)[i]).MinCol();k<=(*(*E)[i]).MaxCol();k++)
 	(*(*E)[i])(j,k)=(gNumber)0;
     (*(*E)[i])(1,1)=(gNumber)1;
-
   } 
 
   MakeSequenceForm(EF.RootNode(),(gNumber)1,one,zero);
@@ -107,16 +105,34 @@ void Sfg::Dump()
   gIndexOdometer index(seq);
 
   gout << "\nSequence Form: \n";
-  do {
+  while (index.Turn()) {
     gout << "\nrow " << index.CurrentIndices() << ": " << (*(*SF)[index.CurrentIndices()]);
   } 
-  while (index.Turn());
-
+  
   gout << "\nConstraint matrices: \n";
   for(int i=1;i<=EF.NumPlayers();i++) 
     gout << "\nPlayer " << i << ":\n " << (*(*E)[i]);
 }
 
+int Sfg::InfosetNumber(int pl, int sequence) const 
+{
+  int i=1;
+  while (Constraints(pl)(i,sequence) == 0) i++;
+  return i-1;
+}
+
+int Sfg::ActionNumber(int pl, int sequence) const
+{
+  int j,s=1,act=0;
+
+  j=InfosetNumber(pl,sequence);
+  while (s<=sequence) { 
+    if(Constraints(pl)(j+1,s) ==(gNumber)(-1))
+      act++;
+    s++;
+  }
+  return act;
+}
 
 template class gNArray<gArray<gNumber> *>;
 template class gArray<gRectArray<gNumber> *>;

@@ -28,15 +28,17 @@ public:
   Sfg(const EFSupport &, const gArray<gNumber> &values);
   virtual ~Sfg();  
 
-  inline int NumSequences(int pl) {return seq[pl];}
-  inline int NumInfosets(int pl) {return isets[pl];}
-  inline gArray<int> NumSequences() {return seq;}
-  inline gArray<int> NumInfosets() {return isets;}
+  inline int NumSequences(int pl) const {return seq[pl];}
+  inline int NumInfosets(int pl) const {return isets[pl];}
+  inline gArray<int> NumSequences() const {return seq;}
+  inline gArray<int> NumInfosets() const {return isets;}
   
-  inline gArray<gNumber> Payoffs(const gArray<int> & index) {return *((*SF)[index]);}
-  inline gNumber Payoff(const gArray<int> & index,int pl) {return Payoffs(index)[pl];}
+  inline gArray<gNumber> Payoffs(const gArray<int> & index) const {return *((*SF)[index]);}
+  inline gNumber Payoff(const gArray<int> & index,int pl) const {return Payoffs(index)[pl];}
 
-  gRectArray<gNumber> Constraints(int player);
+  gRectArray<gNumber> Constraints(int player) const {return *((*E)[player]);};
+  int InfosetNumber(int pl, int sequence) const;
+  int ActionNumber(int pl, int sequence) const;
   
   void Dump();
 
