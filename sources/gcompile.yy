@@ -808,7 +808,6 @@ void GCLCompiler::Execute(void)
 }
 
 #include "gstack.imp"
-#include "ggrstack.imp"
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -818,16 +817,9 @@ void GCLCompiler::Execute(void)
 #endif   // __GNUG__
 
 TEMPLATE class gStack<gString>;
-TEMPLATE class gGrowableStack<gString>;
-
 TEMPLATE class gStack<int>;
-TEMPLATE class gGrowableStack<int>;
-
 TEMPLATE class gStack<char>;
-TEMPLATE class gGrowableStack<char>;
-
 TEMPLATE class gStack<gInput *>;
-TEMPLATE class gGrowableStack<gInput *>;
 
 #include "glist.imp"
 

@@ -1,10 +1,14 @@
-// File: gcl.cc -- top level of the Gambit Command Line
+//
+// FILE: gcl.cc -- top level of the Gambit Command Line
+//
 // $Id$
+//
+
 #include "rational.h"
 #include "gstring.h"
 #include "glist.h"
 #include "gsm.h"
-#include "ggrstack.h"
+#include "gstack.h"
 #include "gcompile.h"
 #include <signal.h>
 #include <values.h>

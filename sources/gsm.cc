@@ -27,13 +27,6 @@ TEMPLATE class gStack< gStack< Portion* >* >;
 TEMPLATE class gStack< CallFuncObj* >;
 TEMPLATE class gStack< RefHashTable* >;
 
-#include "ggrstack.imp"
-
-TEMPLATE class gStack< Portion* >;
-TEMPLATE class gStack< gStack< Portion* >* >;
-TEMPLATE class gStack< CallFuncObj* >;
-TEMPLATE class gStack< RefHashTable* >;
-
 #ifdef __BORLANDC__
 #pragma option -Jgx
 #endif
