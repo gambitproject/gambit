@@ -34,7 +34,7 @@ libdirs = [ '.', '../base', '../math', '../numerical',
 
 ext = Extension('gambit', [ 'pyefg.cc',
                             'pygambit.cc', 'pymixed.cc',
-                            'pynash.cc', 'pynfg.cc' ],
+                            'pynash.cc', 'pynfg.cc', 'pyplayer.cc' ],
                 include_dirs=[ '..' ],
                 library_dirs=libdirs,
                 libraries=libs,

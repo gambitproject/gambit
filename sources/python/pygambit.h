@@ -28,6 +28,7 @@
 #ifndef PYGAMBIT_H
 #define PYGAMBIT_H
 
+#include "base/base.h"
 #include "game/efg.h"
 #include "game/nfg.h"
 #include "nash/mixedsol.h"
@@ -38,11 +39,27 @@
 
 typedef struct {
   PyObject_HEAD
-  gbtEfgGame m_efg;
+  gbtEfgGame *m_efg;
 } efgobject;
 
 extern PyTypeObject Efgtype;
 #define is_efgobject(v)  ((v)->ob_type == &Efgtype)
+
+efgobject *newefgobject(void);
+
+/*************************************************************************
+ * EFPLAYER OBJECT
+ *************************************************************************/
+
+typedef struct {
+  PyObject_HEAD
+  gbtEfgPlayer *m_efplayer;
+} efplayerobject;
+
+extern PyTypeObject Efplayertype;
+#define is_efplayerobject(v)  ((v)->ob_type == &Efplayertype)
+
+efplayerobject *newefplayerobject(void);
 
 /*************************************************************************
  * NFG OBJECT
@@ -50,11 +67,27 @@ extern PyTypeObject Efgtype;
 
 typedef struct {
   PyObject_HEAD
-  gbtNfgGame m_nfg;
+  gbtNfgGame *m_nfg;
 } nfgobject;
 
 extern PyTypeObject Nfgtype;
 #define is_nfgobject(v)  ((v)->ob_type == &Nfgtype)
+
+nfgobject *newnfgobject(void);
+
+/*************************************************************************
+ * NFPLAYER OBJECT
+ *************************************************************************/
+
+typedef struct {
+  PyObject_HEAD
+  gbtNfgPlayer *m_nfplayer;
+} nfplayerobject;
+
+extern PyTypeObject Nfplayertype;
+#define is_nfplayerobject(v)  ((v)->ob_type == &Nfplayertype)
+
+nfplayerobject *newnfplayerobject(void);
 
 /*************************************************************************
  * MIXED PROFILE OBJECT

@@ -34,6 +34,7 @@
 
 staticforward void nfg_dealloc(nfgobject *);
 staticforward PyObject *nfg_getattr(nfgobject *, char *);
+staticforward int nfg_compare(nfgobject *, nfgobject *);
 staticforward int nfg_print(nfgobject *, FILE *, int);
 
 PyTypeObject Nfgtype = {      /* main python type-descriptor */
@@ -49,7 +50,7 @@ PyTypeObject Nfgtype = {      /* main python type-descriptor */
   (printfunc)   nfg_print,         /* tp_print    "print x"     */
   (getattrfunc) nfg_getattr,       /* tp_getattr  "x.attr"      */
   (setattrfunc) 0,                 /* tp_setattr  "x.attr=v"    */
-  (cmpfunc)     0,                 /* tp_compare  "x > y"       */
+  (cmpfunc)     nfg_compare,       /* tp_compare  "x > y"       */
   (reprfunc)    0,                 /* tp_repr     `x`, print x  */
 
   /* type categories */
@@ -69,13 +70,41 @@ PyTypeObject Nfgtype = {      /* main python type-descriptor */
  *****************************************************************************/
 
 static PyObject *
+nfg_getlabel(nfgobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  return Py_BuildValue("s", (char *) self->m_nfg->GetTitle());
+}
+
+static PyObject *
+nfg_getplayer(nfgobject *self, PyObject *args)
+{
+  int index;
+
+  if (!PyArg_ParseTuple(args, "i", &index)) {
+    return NULL;
+  }
+
+  if (index < 1 || index > self->m_nfg->NumPlayers()) {
+    return NULL;
+  }
+
+  nfplayerobject *player = newnfplayerobject();
+  *player->m_nfplayer = self->m_nfg->GetPlayer(index);
+  return (PyObject *) player;
+}
+
+static PyObject *
 nfg_numoutcomes(nfgobject *self, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
     return NULL;
   }
 
-  return Py_BuildValue("i", self->m_nfg.NumOutcomes());
+  return Py_BuildValue("i", self->m_nfg->NumOutcomes());
 }
 
 static PyObject *
@@ -85,7 +114,21 @@ nfg_numplayers(nfgobject *self, PyObject *args)
     return NULL;
   }
 
-  return Py_BuildValue("i", self->m_nfg.NumPlayers());
+  return Py_BuildValue("i", self->m_nfg->NumPlayers());
+}
+
+static PyObject *
+nfg_setlabel(nfgobject *self, PyObject *args)
+{
+  char *label;
+
+  if (!PyArg_ParseTuple(args, "s", &label)) {
+    return NULL;
+  }
+
+  self->m_nfg->SetTitle(label);
+  Py_INCREF(Py_None);
+  return Py_None;
 }
 
 static PyObject *
@@ -99,7 +142,7 @@ nfg_writenfg(nfgobject *self, PyObject *args)
 
   try {
     gFileOutput file(filename);
-    self->m_nfg.WriteNfgFile(file, 6);
+    self->m_nfg->WriteNfgFile(file, 6);
     Py_INCREF(Py_None);
     return Py_None;
   }
@@ -117,8 +160,11 @@ nfg_writenfg(nfgobject *self, PyObject *args)
 }
 
 static struct PyMethodDef nfg_methods[] = {
+  { "GetLabel", (PyCFunction) nfg_getlabel, 1 },
+  { "GetPlayer", (PyCFunction) nfg_getplayer, 1 },
   { "NumOutcomes", (PyCFunction) nfg_numoutcomes, 1 },
   { "NumPlayers", (PyCFunction) nfg_numplayers, 1 },
+  { "SetLabel", (PyCFunction) nfg_setlabel, 1 }, 
   { "WriteNfg", (PyCFunction) nfg_writenfg, 1 },
   { NULL, NULL }
 };
@@ -127,7 +173,7 @@ static struct PyMethodDef nfg_methods[] = {
  * BASIC TYPE-OPERATIONS
  *****************************************************************************/
 
-static nfgobject *
+nfgobject *
 newnfgobject(void)
 {
   nfgobject *self;
@@ -152,9 +198,25 @@ nfg_getattr(nfgobject *self, char *name)
 }
 
 static int
+nfg_compare(nfgobject *obj1, nfgobject *obj2)
+{
+  // Implementation: If games are the game underlying object, return
+  // equal; otherwise, order by their Python pointer addresses.
+  if (*obj1->m_nfg == *obj2->m_nfg) {
+    return 0;
+  }
+  else if (obj1->m_nfg < obj2->m_nfg) {
+    return -1;
+  }
+  else {
+    return 1;
+  }
+}
+
+static int
 nfg_print(nfgobject *self, FILE *fp, int flags)
 {
-  fprintf(fp, "<{nfg} \"%s\">", (char *) self->m_nfg.GetTitle());
+  fprintf(fp, "<{nfg} \"%s\">", (char *) self->m_nfg->GetTitle());
   return 0;
 }
 
@@ -174,7 +236,7 @@ gbt_read_nfg(PyObject *self, PyObject *args)
   nfgobject *nfg = newnfgobject();
   try {
     gFileInput file(filename);
-    nfg->m_nfg = ReadNfgFile(file);
+    nfg->m_nfg = new gbtNfgGame(ReadNfgFile(file));
     return (PyObject *) nfg;
   }
   catch (const gFileInput::OpenFailed &) {

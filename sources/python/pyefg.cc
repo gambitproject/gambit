@@ -34,6 +34,7 @@
 
 staticforward void efg_dealloc(efgobject *);
 staticforward PyObject *efg_getattr(efgobject *, char *);
+staticforward int efg_compare(efgobject *, efgobject *);
 staticforward int efg_print(efgobject *, FILE *, int); 
 
 PyTypeObject Efgtype = {      /* main python type-descriptor */
@@ -49,7 +50,7 @@ PyTypeObject Efgtype = {      /* main python type-descriptor */
   (printfunc)   efg_print,         /* tp_print    "print x"     */
   (getattrfunc) efg_getattr,       /* tp_getattr  "x.attr"      */
   (setattrfunc) 0,                 /* tp_setattr  "x.attr=v"    */
-  (cmpfunc)     0,                 /* tp_compare  "x > y"       */
+  (cmpfunc)     efg_compare,       /* tp_compare  "x > y"       */
   (reprfunc)    0,                 /* tp_repr     `x`, print x  */
 
   /* type categories */
@@ -69,13 +70,53 @@ PyTypeObject Efgtype = {      /* main python type-descriptor */
  *****************************************************************************/
 
 static PyObject *
+efg_getchance(efgobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  efplayerobject *player = newefplayerobject();
+  *player->m_efplayer = self->m_efg->GetChance();
+  return (PyObject *) player;
+}
+
+static PyObject *
+efg_getlabel(efgobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  return Py_BuildValue("s", (char *) self->m_efg->GetTitle());
+}
+
+static PyObject *
+efg_getplayer(efgobject *self, PyObject *args)
+{
+  int index;
+
+  if (!PyArg_ParseTuple(args, "i", &index)) {
+    return NULL;
+  }
+
+  if (index < 1 || index > self->m_efg->NumPlayers()) {
+    return NULL;
+  }
+
+  efplayerobject *player = newefplayerobject();
+  *player->m_efplayer = self->m_efg->GetPlayer(index);
+  return (PyObject *) player;
+}
+
+static PyObject *
 efg_numoutcomes(efgobject *self, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
     return NULL;
   }
 
-  return Py_BuildValue("i", self->m_efg.NumOutcomes());
+  return Py_BuildValue("i", self->m_efg->NumOutcomes());
 }
 
 static PyObject *
@@ -85,7 +126,21 @@ efg_numplayers(efgobject *self, PyObject *args)
     return NULL;
   }
 
-  return Py_BuildValue("i", self->m_efg.NumPlayers());
+  return Py_BuildValue("i", self->m_efg->NumPlayers());
+}
+
+static PyObject *
+efg_setlabel(efgobject *self, PyObject *args)
+{
+  char *label;
+
+  if (!PyArg_ParseTuple(args, "s", &label)) {
+    return NULL;
+  }
+
+  self->m_efg->SetTitle(label);
+  Py_INCREF(Py_None);
+  return Py_None;
 }
 
 static PyObject *
@@ -99,7 +154,7 @@ efg_writeefg(efgobject *self, PyObject *args)
 
   try {
     gFileOutput file(filename);
-    self->m_efg.WriteEfgFile(file, 6);
+    self->m_efg->WriteEfgFile(file, 6);
     Py_INCREF(Py_None);
     return Py_None;
   }
@@ -117,8 +172,12 @@ efg_writeefg(efgobject *self, PyObject *args)
 }
 
 static struct PyMethodDef efg_methods[] = {
+  { "GetChance", (PyCFunction) efg_getchance, 1 },
+  { "GetLabel", (PyCFunction) efg_getlabel, 1 },
+  { "GetPlayer", (PyCFunction) efg_getplayer, 1 },
   { "NumOutcomes", (PyCFunction) efg_numoutcomes, 1 },
   { "NumPlayers", (PyCFunction) efg_numplayers, 1 },
+  { "SetLabel", (PyCFunction) efg_setlabel, 1 },
   { "WriteEfg", (PyCFunction) efg_writeefg, 1 },
   { NULL, NULL }
 };
@@ -127,7 +186,7 @@ static struct PyMethodDef efg_methods[] = {
  * BASIC TYPE-OPERATIONS
  *****************************************************************************/
 
-static efgobject *
+efgobject *
 newefgobject(void)
 {
   efgobject *self;
@@ -152,9 +211,25 @@ efg_getattr(efgobject *self, char *name)
 }
 
 static int
+efg_compare(efgobject *obj1, efgobject *obj2)
+{
+  // Implementation: If games are the game underlying object, return
+  // equal; otherwise, order by their Python pointer addresses.
+  if (*obj1->m_efg == *obj2->m_efg) {
+    return 0;
+  }
+  else if (obj1->m_efg < obj2->m_efg) {
+    return -1;
+  }
+  else {
+    return 1;
+  }
+}
+
+static int
 efg_print(efgobject *self, FILE *fp, int flags)
 {
-  fprintf(fp, "<{efg} \"%s\">", (char *) self->m_efg.GetTitle());
+  fprintf(fp, "<{efg} \"%s\">", (char *) self->m_efg->GetTitle());
   return 0;
 }
 
@@ -174,7 +249,7 @@ gbt_read_efg(PyObject *self, PyObject *args)
   efgobject *efg = newefgobject();
   try {
     gFileInput file(filename);
-    efg->m_efg = ReadEfgFile(file);
+    efg->m_efg = new gbtEfgGame(ReadEfgFile(file));
     return (PyObject *) efg;
   }
   catch (const gFileInput::OpenFailed &) {
