@@ -20,10 +20,16 @@ private:
 
   void UpdateValues(void);
 
+  // Event handlers
+  void OnAddButton(wxCommandEvent &);
+  void OnDeleteButton(wxCommandEvent &);
+
 public:
   dialogEditData(wxWindow *p_parent, const ExpData &p_data);
 
   ExpData GetData(void) const;
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif   // DLEDITDATA_H

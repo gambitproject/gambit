@@ -78,6 +78,8 @@ PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
   }
   catch (...) { }
 
+  m_expData = ExpData(m_fileHeader.NumStrategies());
+  
   SetSizeHints(300, 300);
 
   // Give the frame an icon

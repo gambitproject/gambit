@@ -57,6 +57,12 @@ ExpData::ExpData(void)
   : m_haveMLEs(false), m_numInfosets(0)
 { }
 
+ExpData::ExpData(const gArray<int> &p_numActions)
+  : m_haveMLEs(false), m_numInfosets(p_numActions.Length()),
+    m_numActions(p_numActions)
+{ }
+				     
+
 //-----------------------------------------------------------------------
 //                   Reading and writing .agg files
 //-----------------------------------------------------------------------
@@ -65,7 +71,7 @@ bool ExpData::LoadData(gInput &p_file)
 {
   try {
     p_file >> m_numInfosets;
-    m_numActions = gBlock<int>(m_numInfosets);
+    m_numActions = gArray<int>(m_numInfosets);
     for (int iset = 1; iset <= m_numInfosets; iset++) {
       p_file >> m_numActions[iset];
     }

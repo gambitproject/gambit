@@ -42,13 +42,14 @@ class ExpData {
 private:
   bool m_haveMLEs;
   int m_numInfosets;
-  gBlock<int> m_numActions;
+  gArray<int> m_numActions;
   gBlock<double> m_fitLambdas, m_fitLikes;
   gRectBlock<gBlock<int> > m_points;
 
 public:
   // LIFECYCLE
   ExpData(void);
+  ExpData(const gArray<int> &m_numActions);
 
   // READING AND WRITING .AGG FILES
   bool LoadData(gInput &);

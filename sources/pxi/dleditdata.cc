@@ -18,10 +18,24 @@
 //               class dialogEditData: Member functions
 //=========================================================================
 
+const int idADD_BUTTON = 2000;
+const int idDELETE_BUTTON = 2001;
+
+//-------------------------------------------------------------------------
+//                            Lifecycle
+//-------------------------------------------------------------------------
+
 dialogEditData::dialogEditData(wxWindow *p_parent, const ExpData &p_data)
   : wxDialog(p_parent, -1, "Edit Experimental Data"),
     m_data(p_data)
 {
+  wxButton *addButton = new wxButton(this, idADD_BUTTON, "Add");
+  wxButton *deleteButton = new wxButton(this, idDELETE_BUTTON, "Delete");
+  
+  wxBoxSizer *editSizer = new wxBoxSizer(wxHORIZONTAL);
+  editSizer->Add(addButton, 0, wxALL, 5);
+  editSizer->Add(deleteButton, 0, wxALL, 5);
+
   m_grid = new wxGrid(this, -1, wxDefaultPosition, wxSize(300, 300));
   m_grid->CreateGrid(p_data.NumPoints(), p_data.NumActions() + 1);
   m_grid->UpdateDimensions();
@@ -46,6 +60,7 @@ dialogEditData::dialogEditData(wxWindow *p_parent, const ExpData &p_data)
   buttonSizer->Add(cancelButton, 0, wxALL, 5);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(editSizer, 0, wxALL | wxCENTER, 5);
   topSizer->Add(m_grid, 0, wxALL | wxCENTER, 5);
   topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
 
@@ -57,6 +72,32 @@ dialogEditData::dialogEditData(wxWindow *p_parent, const ExpData &p_data)
 
   UpdateValues();
 }
+
+//-------------------------------------------------------------------------
+//                            Event handling
+//-------------------------------------------------------------------------
+
+BEGIN_EVENT_TABLE(dialogEditData, wxDialog)
+  EVT_BUTTON(idADD_BUTTON, dialogEditData::OnAddButton)
+  EVT_BUTTON(idDELETE_BUTTON, dialogEditData::OnDeleteButton)
+END_EVENT_TABLE()
+
+void dialogEditData::OnAddButton(wxCommandEvent &)
+{
+  m_grid->AppendRows();
+}
+
+void dialogEditData::OnDeleteButton(wxCommandEvent &)
+{
+  if (m_grid->GetRows() > 0 && m_grid->GetCursorRow() >= 0 &&
+      m_grid->GetCursorRow() < m_grid->GetRows()) {
+    m_grid->DeleteRows(m_grid->GetCursorRow());
+  }
+}
+
+//-------------------------------------------------------------------------
+//                       Data updating and access
+//-------------------------------------------------------------------------
 
 void dialogEditData::UpdateValues(void)
 {
