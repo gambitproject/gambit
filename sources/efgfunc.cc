@@ -2445,13 +2445,16 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetFuncInfo( GSM_Behav_EfgFloat, 2 );
   FuncObj->SetParamInfo( GSM_Behav_EfgFloat, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo( GSM_Behav_EfgFloat, 1, "list", porLIST | porFLOAT );
+  FuncObj->SetParamInfo( GSM_Behav_EfgFloat, 
+			1, "list", porLIST | porFLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 3);
 
   FuncObj->SetFuncInfo( GSM_Behav_EfgRational, 2 );
   FuncObj->SetParamInfo( GSM_Behav_EfgRational, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetParamInfo( GSM_Behav_EfgRational, 
-			1, "list", porLIST | porRATIONAL );
+			1, "list", porLIST | porRATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 3);
 
   FuncObj->SetFuncInfo( GSM_Behav_EFSupport, 2 );
   FuncObj->SetParamInfo( GSM_Behav_EFSupport, 0, "support", porEF_SUPPORT,

@@ -34,7 +34,7 @@
 #define NON_LISTABLE         false
 #define LISTABLE             true
 
-#define NO_PREDEFINED_PARAMS ( (Portion*) 0 )
+#define NO_PREDEFINED_PARAMS ( (ParamInfoType*) 0 )
 
 
 
@@ -62,6 +62,7 @@ private:
   PortionType  Type;
   Portion*     DefaultValue;
   bool         PassByReference;
+  int          NestedListLevel;
 
 public:
   ParamInfoType( void );
@@ -71,7 +72,8 @@ public:
      const gString& name, 
      const PortionType& type,
      Portion* default_value = NO_DEFAULT_VALUE, 
-     const bool pass_by_ref = false
+     const bool pass_by_ref = false,
+     const nested_list_level = 0
      );
   ~ParamInfoType();
 
@@ -113,7 +115,8 @@ private:
      const gString&    name,
      const PortionType type,
      Portion*          default_value,
-     const bool        pass_by_reference
+     const bool        pass_by_reference,
+     const int         nested_list_level
      );
 
 protected:
@@ -151,7 +154,8 @@ public:
      const gString&    name,
      const PortionType type,
      Portion*          default_value = NO_DEFAULT_VALUE,
-     const bool        pass_by_reference = PASS_BY_VALUE
+     const bool        pass_by_reference = PASS_BY_VALUE,
+     const int         nested_list_level = 0
      );
 
   void SetParamInfo
@@ -161,7 +165,8 @@ public:
      const gString&    name,
      const PortionType type,
      Portion*          default_value = NO_DEFAULT_VALUE,
-     const bool        pass_by_reference = PASS_BY_VALUE
+     const bool        pass_by_reference = PASS_BY_VALUE,
+     const int         nested_list_level = 0
      );
   
   void SetParamInfo
@@ -211,6 +216,7 @@ class CallFuncObj : public FuncDescObj
   static bool _TypeMatch( Portion* p, PortionType ExpectedType, bool Listable);
 
   static bool _ListDimMatch( ListPortion* p1, ListPortion* p2 );
+  static int _ListNestedLevel( ListPortion* p );
 
   static void _ErrorMessage
     (

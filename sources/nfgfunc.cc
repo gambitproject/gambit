@@ -1978,13 +1978,16 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetFuncInfo( GSM_Mixed_NfgFloat, 2 );
   FuncObj->SetParamInfo(GSM_Mixed_NfgFloat, 0, "nfg", porNFG_FLOAT, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_Mixed_NfgFloat, 1, "list", porLIST | porFLOAT);
+  FuncObj->SetParamInfo(GSM_Mixed_NfgFloat, 
+			1, "list", porLIST | porFLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2);
 
   FuncObj->SetFuncInfo( GSM_Mixed_NfgRational, 2 );
   FuncObj->SetParamInfo(GSM_Mixed_NfgRational, 0, "nfg", porNFG_RATIONAL, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_Mixed_NfgRational, 
-			1, "list", porLIST | porRATIONAL);
+			1, "list", porLIST | porRATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2);
 
   FuncObj->SetFuncInfo( GSM_Mixed_NFSupport, 2 );
   FuncObj->SetParamInfo(GSM_Mixed_NFSupport, 0, "support", porNF_SUPPORT );
