@@ -69,6 +69,59 @@ public:
 
   void Dump(gOutput &) const;
 
+  // USED IN TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO BEHAV NASH
+  gPolyList<gDouble> ActionProbsSumToOneIneqs(const gSpace &, 
+					      const term_order &,
+					      const EFSupport &,
+					      const gList<gList<int> > &) 
+    const;
+  bool NodeProbabilityPoly(      gPoly<gDouble> &,
+			   const gSpace &, 
+			   const term_order &,
+			   const EFSupport &,
+			   const gList<gList<int> > &,
+			   const Node *,
+			   const int &pl,
+			   const int &i,
+			   const int &j) const;
+  bool NashNodeProbabilityPoly(      gPoly<gDouble> &,
+			       const gSpace &, 
+			       const term_order &,
+			       const EFSupport &,
+			       const gList<gList<int> > &,
+			       const Node *,
+			       const int &pl,
+			       const int &i,
+			       const int &j) const;
+  gPolyList<gDouble> ANFExpectedPayoffDiffPolys(const gSpace &, 
+						const term_order&,
+						const EFSupport &,
+						const EFSupport &,
+						const gList<gList<int> > &) 
+    const;
+  gPolyList<gDouble> NashExpectedPayoffDiffPolys(const gSpace &, 
+						 const term_order&,
+						 const EFSupport &,
+						 const EFSupport &,
+						 const gList<gList<int> > &) 
+    const;
+  gPolyList<gDouble> ExtendsToANFNashIneqs(const gSpace &, 
+					   const term_order&,
+					   const EFSupport&,
+					   const EFSupport&,
+					   const gList<gList<int> > &) const;
+  gPolyList<gDouble> ExtendsToNashIneqs(const gSpace &, 
+					const term_order&,
+					const EFSupport&,
+					const EFSupport&,
+					const gList<gList<int> > &) const;
+
+  // TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO ANF NASH
+  bool ExtendsToANFNash(const EFSupport &, 
+			const EFSupport &, 
+			      gStatus &) const;
+  bool ExtendsToNash(const EFSupport &, const EFSupport &, gStatus &) const;
+
   // COMPUTATION OF INTERESTING QUANTITIES
   T Payoff(int p_player) const;
 

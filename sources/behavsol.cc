@@ -662,6 +662,12 @@ BehavSolution::ExpectedPayoffDiffPolys(const gSpace &BehavStratSpace,
 	    answer += -next_poly + (gDouble)Payoff(pl);
 	  }
     }
+
+  /*
+  //DEBUG
+  gout << "The original no-deviation inequalities are\n" << answer << "\n";
+  */
+
   return answer;
 }
 
@@ -672,6 +678,12 @@ BehavSolution::ExtendsToANFNashIneqs(const gSpace &BehavStratSpace,
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
   answer += ActionProbsSumToOneIneqs(BehavStratSpace, Lex, var_index);
+
+  /*
+  //DEBUG
+  gout << "The original sum-to-one inequalities are\n" << answer;
+  */
+
   answer += ExpectedPayoffDiffPolys(BehavStratSpace, Lex, var_index);
   return answer;
 }
@@ -708,6 +720,11 @@ bool BehavSolution::ExtendsToANFNash(gStatus &m_status) const
 
   num_vars = BehavStratSpace.Dmnsn();
 
+  /*
+  //DEBUG
+  gout << "The original dimension is " << num_vars << ".\n";
+  */
+
   gPolyList<gDouble> inequalities = ExtendsToANFNashIneqs(BehavStratSpace,
 							  Lex,
 							  var_index);
@@ -730,7 +747,13 @@ bool BehavSolution::ExtendsToANFNash(gStatus &m_status) const
   // Set up the test and do it
   IneqSolv<gDouble> extension_tester(inequalities,m_status);
   gVector<gDouble> sample(num_vars);
-  return extension_tester.ASolutionExists(Cube,sample); 
+
+  // Temporarily, we check the old set up vs. the new
+  bool answer = extension_tester.ASolutionExists(Cube,sample); 
+  assert (answer == m_profile->ExtendsToANFNash(Support(),
+						Support(),
+						m_status));
+  return answer;
 }
 
 //----------
