@@ -1,5 +1,5 @@
 // File: gambit.h -- declaration of the very top level of the gambit gui.
-// @(#)gambit.h	1.11 8/7/95
+// $Id$
 #ifndef GAMBIT_H
 #define GAMBIT_H
 
