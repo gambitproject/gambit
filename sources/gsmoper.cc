@@ -469,7 +469,8 @@ Portion* GSM_Divide_double( Portion** param )
   }
   else
   {
-    result = new ErrorPortion( "Division by zero" );
+    result = new NullPortion(porFLOAT);
+    //result = new ErrorPortion( "Division by zero" );
   }
   return result;
 }
@@ -486,7 +487,8 @@ Portion* GSM_Divide_int( Portion** param )
   }
   else
   {
-    result = new ErrorPortion( "Division by zero" );
+    result = new NullPortion(porFLOAT);
+    //result = new ErrorPortion( "Division by zero" );
   }
   return result;
 }
@@ -506,7 +508,8 @@ Portion* GSM_Divide_gRational( Portion** param )
   }
   else
   {
-    result = new ErrorPortion( "Division by zero" );
+    result = new NullPortion(porFLOAT);
+    //result = new ErrorPortion( "Division by zero" );
   }
   return result;
 }
@@ -528,7 +531,8 @@ Portion* GSM_IntegerDivide_int( Portion** param )
   }
   else
   {
-    result = new ErrorPortion( "Division by zero" );
+    result = new NullPortion(porINTEGER);
+    //result = new ErrorPortion( "Division by zero" );
   }
   return result;
 }
@@ -548,7 +552,8 @@ Portion *GSM_Log(Portion **param)
 {
   double d = ((FloatPortion *) param[0])->Value();
   if(d <= 0.0)
-    return new ErrorPortion("Argument must be greater than zero");
+    return new NullPortion(porFLOAT);
+    //return new ErrorPortion("Argument must be greater than zero");
   else
     return new FloatValPortion(log(d));
 }
@@ -655,7 +660,8 @@ Portion* GSM_Modulus_int( Portion** param )
   }
   else
   {
-    result = new ErrorPortion( "Division by zero" );
+    result = new NullPortion(porINTEGER);
+    //result = new ErrorPortion( "Division by zero" );
   }
   return result;
 }

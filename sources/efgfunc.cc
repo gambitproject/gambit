@@ -548,7 +548,8 @@ Portion *GSM_LastAction( Portion** param )
   Node *n = ((NodePortion *) param[0])->Value();
   Action* a = LastAction( n );
   if( a == 0 )
-    return new ErrorPortion( "called on a root node" );
+    return new NullPortion(porACTION);
+  //return new ErrorPortion( "called on a root node" );
 
   Portion* por = new ActionValPortion( a );
   por->SetOwner( param[ 0 ]->Owner() );
@@ -895,7 +896,8 @@ Portion *GSM_NextSibling(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value()->NextSibling();
   if (!n)
-    return new ErrorPortion("Node is the last sibling");
+    return new NullPortion(porNODE);
+  //return new ErrorPortion("Node is the last sibling");
   
   Portion* por = new NodeValPortion(n);
   por->SetOwner( param[ 0 ]->Owner() );
@@ -1038,7 +1040,8 @@ Portion *GSM_Outcome(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
   if (!n->GetOutcome())
-    return new ErrorPortion("No outcome attached to node");
+    return new NullPortion(porOUTCOME);
+  //return new ErrorPortion("No outcome attached to node");
 
   Portion* por = new OutcomeValPortion(n->GetOutcome());
   por->SetOwner( param[ 0 ]->Owner() );
@@ -1069,6 +1072,7 @@ Portion *GSM_Parent(Portion **param)
   Node *n = ((NodePortion *) param[0])->Value();
   if (!n->GetParent())
     return new NullPortion(porNODE);
+  //return new ErrorPortion("Node has no parent");
 
   Portion* por = new NodeValPortion(n->GetParent());
   por->SetOwner( param[ 0 ]->Owner() );
@@ -1150,7 +1154,8 @@ Portion *GSM_PriorSibling(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value()->PriorSibling();
   if (!n)
-    return new ErrorPortion("Node is the first sibling");
+    return new NullPortion(porNODE);
+  //return new ErrorPortion("Node is the first sibling");
   
   Portion* por = new NodeValPortion(n);
   por->SetOwner( param[ 0 ]->Owner() );

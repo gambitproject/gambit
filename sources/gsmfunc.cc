@@ -188,7 +188,19 @@ CallListFunction(GSM* gsm, Portion** ParamIn)
       p->Append(new ErrorPortion);
     }
     else
+    {
+      if(result->Spec().Type == porUNDEFINED &&
+	 ((recurse && result->Spec().ListDepth > 
+	   _FuncInfo[_FuncIndex].ReturnSpec.ListDepth) ||
+	  (!recurse && result->Spec().ListDepth == 
+	   _FuncInfo[_FuncIndex].ReturnSpec.ListDepth)))
+      {
+	assert(result->Spec().ListDepth > 0);
+	((ListPortion*) result)->
+	  SetDataType(_FuncInfo[_FuncIndex].ReturnSpec.Type);      
+      }
       p->Append(result);
+    }
   }
 
   delete[] CurrParam;
@@ -1327,7 +1339,17 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
       delete result;
       result = new ErrorPortion;
       _ErrorOccurred = true;
-    }    
+    }
+    else if(result->Spec().Type == porUNDEFINED &&
+	    ((list_op && result->Spec().ListDepth > 
+	      _FuncInfo[_FuncIndex].ReturnSpec.ListDepth) ||
+	     (!list_op && result->Spec().ListDepth == 
+	      _FuncInfo[_FuncIndex].ReturnSpec.ListDepth)))
+    {
+      assert(result->Spec().ListDepth > 0);
+      ((ListPortion*) result)->
+	SetDataType(_FuncInfo[_FuncIndex].ReturnSpec.Type);      
+    }
     else if(!_TypeMatch(result, _FuncInfo[_FuncIndex].ReturnSpec, 
 			list_op && _FuncInfo[_FuncIndex].Listable, true))
     {
