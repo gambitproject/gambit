@@ -7,6 +7,10 @@
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined(__BORLANDC__)
+template <class T> class gList;
+class gList<int>;
+template <class T> class gNode;
+class gNode<int>;
 #pragma option -Jgd
 #define TEMPLATE
 #else
