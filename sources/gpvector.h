@@ -20,7 +20,7 @@
 
 template <class T> class gPVector: public gVector<T> {
  private:
-  int sum( gTuple<int> &V )
+  int sum(const gTuple<int> &V )
     {
       int total= 0;
       for(int i= V.First(); i<=V.Last(); i++)
@@ -232,13 +232,13 @@ gPVector<T>::~gPVector()
 
 // stream output
 
-template <class T> gOutput &
+template <class T> inline gOutput &
 operator<<(gOutput &to, const gPVector<T> &v)
 {
   v.Dump(to); return to;
 }
 
-template <class T> void
+template <class T> inline void
 gPVector<T>::Dump(gOutput &to) const
 {
   for(int i=svlen.First(); i<=svlen.Last(); i++)
