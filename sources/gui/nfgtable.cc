@@ -61,7 +61,8 @@ public:
   bool AppendCols(size_t numCols = 1);
   bool DeleteCols(size_t pos = 0, size_t numCols = 1);
 
-  wxGridCellAttr *GetAttr(int row, int col);
+  bool CanHaveAttributes(void) { return true; }
+  wxGridCellAttr *GetAttr(int row, int col, wxGridCellAttr::wxAttrKind kind);
 };
 
 NfgGridTable::NfgGridTable(NfgTable *p_table, gbtGameDocument *p_doc)
@@ -192,22 +193,26 @@ wxString NfgGridTable::GetValue(int row, int col)
   else if (row < numRowStrats && 
 	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() - 1) {
     gbtNfgStrategy strategy = support.GetStrategy(rowPlayer, row + 1);
-    return ((char *) ToText(m_doc->GetMixedProfile()(strategy)));
+    return ((char *) ToText(m_doc->GetMixedProfile()(strategy),
+			    m_doc->GetPreferences().NumDecimals()));
   }
   else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() - 1 && 
 	   col < numColStrats) {
     gbtNfgStrategy strategy = support.GetStrategy(colPlayer, col + 1);
-    return ((char *) ToText(m_doc->GetMixedProfile()(strategy)));
+    return ((char *) ToText(m_doc->GetMixedProfile()(strategy),
+			    m_doc->GetPreferences().NumDecimals()));
   }
   else if (row < numRowStrats && 
 	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1) {
     gbtNfgStrategy strategy = support.GetStrategy(rowPlayer, row + 1);
-    return ((char *) ToText(m_doc->GetMixedProfile().Payoff(strategy.GetPlayer(), strategy)));
+    return ((char *) ToText(m_doc->GetMixedProfile().Payoff(strategy.GetPlayer(), strategy),
+			    m_doc->GetPreferences().NumDecimals()));
   }
   else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1 && 
 	   col < numColStrats) {
     gbtNfgStrategy strategy = support.GetStrategy(colPlayer, col + 1);
-    return ((char *) ToText(m_doc->GetMixedProfile().Payoff(strategy.GetPlayer(), strategy)));
+    return ((char *) ToText(m_doc->GetMixedProfile().Payoff(strategy.GetPlayer(), strategy),
+			    m_doc->GetPreferences().NumDecimals()));
   }
 
   return "";
@@ -265,7 +270,8 @@ bool NfgGridTable::DeleteCols(size_t pos, size_t numCols)
   return true;
 }
 
-wxGridCellAttr *NfgGridTable::GetAttr(int row, int col)
+wxGridCellAttr *NfgGridTable::GetAttr(int row, int col,
+				      wxGridCellAttr::wxAttrKind /*any*/)
 {
   wxGridCellAttr *attr = new wxGridCellAttr;
 
@@ -281,7 +287,7 @@ wxGridCellAttr *NfgGridTable::GetAttr(int row, int col)
     attr->SetBackgroundColour(*wxWHITE);
   }
 
-  attr->SetAlignment(wxCENTER, wxCENTER);
+  attr->SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
 
   return attr;
 }
