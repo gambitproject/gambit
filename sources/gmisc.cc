@@ -434,3 +434,33 @@ gText gNewFailed::Description(void) const
 }
 #endif   // USE_EXCEPTIONS
 
+
+#ifdef USE_EXCEPTIONS
+gException::gException(void)
+  : line(0)
+{
+  strcpy(file, "unknown");
+}
+
+gException::gException(int l, char *f)
+  : line(l)
+{
+  strncpy(file, f, 19);
+}
+
+gException::~gException()
+{ }
+
+int gException::Line(void) const
+{
+  return line;
+}
+
+const char *gException::File(void) const
+{
+  return file;
+}
+
+#endif   // USE_EXCEPTIONS
+
+
