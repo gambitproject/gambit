@@ -9,6 +9,8 @@ gambit_SOURCES = \
 	control-player.h \
 	dialog-about.cc \
 	dialog-about.h \
+	dialog-node.cc \
+	dialog-node.h \
 	dialog-tree-label.cc \
 	dialog-tree-label.h \
 	dialog-tree-layout.cc \

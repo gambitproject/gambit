@@ -31,6 +31,7 @@
 #include <wx/dnd.h>    // for drag-and-drop support
 
 #include "tree-display.h"
+#include "dialog-node.h"   // for node properties dialog
 
 //--------------------------------------------------------------------------
 //                         class gbtTreeToolbar
@@ -211,7 +212,8 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
 //--------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(gbtTreeDisplay, wxScrolledWindow)
-  EVT_MOTION(gbtTreeDisplay::OnLeftDown)
+  EVT_MOTION(gbtTreeDisplay::OnMouseMotion)
+  EVT_LEFT_DCLICK(gbtTreeDisplay::OnLeftClick)
 END_EVENT_TABLE()
 
 gbtTreeDisplay::gbtTreeDisplay(wxWindow *p_parent, 
@@ -240,7 +242,7 @@ void gbtTreeDisplay::OnUpdate(void)
   Refresh();
 }
 
-void gbtTreeDisplay::OnLeftDown(wxMouseEvent &p_event)
+void gbtTreeDisplay::OnMouseMotion(wxMouseEvent &p_event)
 {
   if (p_event.LeftIsDown() && p_event.Dragging()) {
     int x, y;
@@ -265,6 +267,30 @@ void gbtTreeDisplay::OnLeftDown(wxMouseEvent &p_event)
 	wxTextDataObject textData(wxString::Format(wxT("M%d"), node->GetId()));
 	wxDropSource source(textData, this);
 	wxDragResult result = source.DoDragDrop(true);
+      }
+    }
+  }
+}
+
+void gbtTreeDisplay::OnLeftClick(wxMouseEvent &p_event)
+{
+  int x, y;
+  CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
+  x = (int) ((float) x / m_doc->GetTreeZoom());
+  y = (int) ((float) y / m_doc->GetTreeZoom());
+  
+  gbtGameNode node = m_layout.NodeHitTest(x, y);
+
+  if (!node.IsNull()) {
+    gbtNodeDialog dialog(this, m_doc->GetGame(), node);
+
+    if (dialog.ShowModal() == wxID_OK) {
+      if (dialog.GetNodeLabel() != node->GetLabel()) {
+	m_doc->SetNodeLabel(node, dialog.GetNodeLabel());
+      }
+      if (node->NumChildren() > 0 &&
+	  dialog.GetInfoset() != node->GetInfoset()) {
+	m_doc->SetInfoset(node, dialog.GetInfoset());
       }
     }
   }

@@ -55,8 +55,9 @@ private:
 
   // Event handlers
   void OnDraw(wxDC &);
-  void OnLeftDown(wxMouseEvent &);
-
+  void OnMouseMotion(wxMouseEvent &);
+  void OnLeftClick(wxMouseEvent &);
+  
 public:
   gbtTreeDisplay(wxWindow *p_parent, gbtGameDocument *p_doc);
 

@@ -255,6 +255,25 @@ void gbtGameDocument::MoveTree(gbtGameNode p_src, gbtGameNode p_dest)
   UpdateViews();
 }
 
+void gbtGameDocument::SetNodeLabel(gbtGameNode p_node,
+				   const std::string &p_label)
+{
+  SaveUndo(_("setting node label"));
+  p_node->SetLabel(p_label);
+  m_modified = true;
+  UpdateViews();
+}
+
+void gbtGameDocument::SetInfoset(gbtGameNode p_node,
+				 gbtGameInfoset p_infoset)
+{
+  SaveUndo(_("changing information set"));
+  p_node->LeaveInfoset();
+  p_node->JoinInfoset(p_infoset);
+  m_modified = true;
+  UpdateViews();
+}
+
 wxColour gbtGameDocument::GetPlayerColor(int p_player) const
 {
   if (p_player == 0) {

@@ -86,6 +86,9 @@ public:
   void SetPlayer(gbtGameInfoset, gbtGamePlayer);
   void CopyTree(gbtGameNode src, gbtGameNode dest);
   void MoveTree(gbtGameNode src, gbtGameNode dest);
+
+  void SetNodeLabel(gbtGameNode p_node, const std::string &p_label);
+  void SetInfoset(gbtGameNode, gbtGameInfoset);
   
   // Various properties of the document
   wxColour GetPlayerColor(int p_index) const;
