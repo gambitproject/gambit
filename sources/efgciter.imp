@@ -25,7 +25,7 @@ template <class T> void EfgContIter<T>::First(void)
     for (int iset = 1; iset <= _efg->PlayerList()[pl]->NumInfosets(); iset++)
       if (pl != _frozen_pl && iset != _frozen_iset)   {
 	_supidx(pl, iset) = 1;
-	_efgidx(pl, iset) = _support.ActionList(pl, iset)[1]->GetNumber();
+	_efgidx(pl, iset) = _support.Actions(pl, iset)[1]->GetNumber();
       }
   }
 }
@@ -35,14 +35,14 @@ template <class T> void EfgContIter<T>::Set(int pl, int iset, int act)
   if (pl != _frozen_pl || iset != _frozen_iset)   return;
 
   _supidx(pl, iset) = act;
-  _efgidx(pl, iset) = _support.ActionList(pl, iset)[act]->GetNumber();
+  _efgidx(pl, iset) = _support.Actions(pl, iset)[act]->GetNumber();
 }
 
 template <class T> int EfgContIter<T>::Next(int pl, int iset)
 {
   if (pl != _frozen_pl || iset != _frozen_iset)   return 1;
 
-  const gArray<Action *> &actions = _support.ActionList(pl, iset);
+  const gArray<Action *> &actions = _support.Actions(pl, iset);
   
   if (_supidx(pl, iset) == actions.Length())   {
     _supidx(pl, iset) = 1;
@@ -91,12 +91,12 @@ template <class T> int EfgContIter<T>::NextContingency(void)
 
     if (_supidx(pl, iset) < _support.NumActions(pl, iset))  {
       _supidx(pl, iset) += 1;
-      _efgidx(pl, iset) = _support.ActionList(pl, iset)[_supidx(pl, iset)]->GetNumber();
+      _efgidx(pl, iset) = _support.Actions(pl, iset)[_supidx(pl, iset)]->GetNumber();
       return 1;
     }
 
     _supidx(pl, iset) = 1;
-    _efgidx(pl, iset) = _support.ActionList(pl, iset)[1]->GetNumber();
+    _efgidx(pl, iset) = _support.Actions(pl, iset)[1]->GetNumber();
 
     iset--;
     if (iset == 0)  {

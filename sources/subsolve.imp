@@ -113,9 +113,8 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
 	  
 	for (int act = 1; act <= p->InfosetList()[iset]->NumActions();
 	     act++)  {
-	  if (!support.Find(pl, index, act))
-	    subsupport.RemoveAction(pl, iset,
-				    p->InfosetList()[iset]->GetActionList()[act]);
+	  if (!support.Find((*infosets[pl])[index]->GetActionList()[act]))
+	    subsupport.RemoveAction(p->InfosetList()[iset]->GetActionList()[act]);
 	}
       }
     }

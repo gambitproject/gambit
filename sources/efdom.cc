@@ -88,7 +88,7 @@ bool ComputeDominated(EFSupport &S, EFSupport &T,
 					int pl, int iset, bool strong,
 					gStatus &status)
 {
-	const gArray<Action *> &actions = S.ActionList(pl, iset);
+  const gArray<Action *> &actions = S.Actions(pl, iset);
 
   gArray<int> set(actions.Length());
   int i;
@@ -134,12 +134,12 @@ bool ComputeDominated(EFSupport &S, EFSupport &T,
 	}
 
 	if (min + 1 <= actions.Length() && !status.Get())   {
-		for (i = min + 1; i <= actions.Length(); i++)
-			T.RemoveAction(pl, iset, actions[set[i]]);
-		return true;
+	  for (i = min + 1; i <= actions.Length(); i++)
+	    T.RemoveAction(actions[set[i]]);
+	  return true;
 	}
 	else
-		return false;
+	  return false;
 }
 
 

@@ -7,6 +7,19 @@
 #include "efg.h"
 #include "efplayer.h"
 
+class EFActionArrays   {
+  friend class EFActionSet;
+protected:
+  gBlock<Action *> acts;
+
+public:
+  EFActionArrays ( const gArray <Action *> &a);
+  EFActionArrays ( const EFActionArrays &a);
+  virtual ~EFActionArrays();
+  EFActionArrays &operator=( const EFActionArrays &a);
+  bool operator==( const EFActionArrays &a) const;
+};
+
 //----------------------------------------------------
 // EFActionArray: Constructors, Destructor, operators
 // ---------------------------------------------------
@@ -45,6 +58,64 @@ bool EFActionArrays::operator==(const EFActionArrays &a) const
 {
   return (acts == a.acts);
 }
+
+class EFActionSet{
+
+protected:
+  EFPlayer *efp;
+  gArray < EFActionArrays *> infosets;
+public:
+  
+  //----------------------------------------
+  // Constructors, Destructor, operators
+  //----------------------------------------
+
+//  EFActionSet();
+  EFActionSet(const EFActionSet &);
+  EFActionSet(EFPlayer &);
+  virtual ~EFActionSet();
+
+  EFActionSet &operator=(const EFActionSet &);
+  bool operator==(const EFActionSet &s) const;
+
+  //--------------------
+  // Member Functions
+  //--------------------
+
+  // Append an action to an infoset;
+  void AddAction(int iset, Action *);
+
+  // Insert an action in a particular place in an infoset;
+  void AddAction(int iset, Action *, int index);
+
+
+  // Remove an action at int i, returns the removed action pointer
+  Action *RemoveAction(int iset, int i);
+
+  // Remove an action from an infoset . 
+  // Returns true if the action was successfully removed, false otherwise.
+  bool RemoveAction(int iset, Action *);
+
+  // Get a garray of the actions in an Infoset
+  const gArray<Action *> &ActionList(int iset) const
+     { return infosets[iset]->acts; }
+  
+  // Get an Action
+  Action *GetAction(int iset, int index);
+
+  // returns the index of the action if it is in the ActionSet
+  int Find(Action *) const;
+
+  // Number of Actions in a particular infoset
+  int NumActions(int iset) const;
+
+  // return the EFPlayer of the EFActionSet
+  EFPlayer &GetPlayer(void) const;
+
+  // checks for a valid EFActionSet
+  bool IsValid(void) const;
+
+};
 
 //--------------------------------------------------
 // EFActionSet: Constructors, Destructor, operators
@@ -222,6 +293,11 @@ int EFSupport::NumActions(int pl, int iset) const
   return sets[pl]->NumActions(iset);
 }
 
+const gArray<Action *> &EFSupport::Actions(int pl, int iset) const
+{
+  return sets[pl]->ActionList(iset);
+}
+
 const BaseEfg &EFSupport::BelongsTo(void) const
 {
   return *befg;
@@ -236,11 +312,6 @@ int EFSupport::Find(Action *a) const
   return sets[pl]->Find(a);
 }
 
-int EFSupport::Find(int pl, int iset, int act) const
-{
-  return sets[pl]->Find(befg->PlayerList()[pl]->InfosetList()[iset]->GetActionList()[act]);
-}
-
 bool EFSupport::IsValid(void) const
 {
   if (sets.Length() == 0)   return false;
@@ -250,7 +321,7 @@ bool EFSupport::IsValid(void) const
   return true;
 }
 
-gPVector<int> EFSupport::Dimensionality(void) const
+gPVector<int> EFSupport::NumActions(void) const
 {
   gArray<int> foo(befg->NumPlayers());
   int i;
@@ -265,24 +336,20 @@ gPVector<int> EFSupport::Dimensionality(void) const
   return bar;
 }  
 
-Action * EFSupport::RemoveAction( int i, int j, int k)
+bool EFSupport::RemoveAction(Action *s)
 {
-  return sets[i]->RemoveAction(k,j);
+  Infoset *infoset = s->BelongsTo();
+  EFPlayer *player = infoset->GetPlayer();
+
+  return sets[player->GetNumber()]->RemoveAction(infoset->GetNumber(), s);
 }
 
-bool EFSupport::RemoveAction( int i, int j, Action *s)
+void EFSupport::AddAction(Action *s)
 {
-  return sets[i]->RemoveAction(j,s);
-}
+  Infoset *infoset = s->BelongsTo();
+  EFPlayer *player = infoset->GetPlayer();
 
-void EFSupport::AddAction( int i, int j, Action *s)
-{
-  sets[i]->AddAction(j,s);
-}
-
-void EFSupport::AddAction( int i, int j, Action *s, int k)
-{
-  sets[i]->AddAction(j,s,k);
+  sets[player->GetNumber()]->AddAction(infoset->GetNumber(), s);
 }
 
 int EFSupport::NumSequences(int j) const

@@ -399,7 +399,7 @@ template <class T> BehavProfile<T>::BehavProfile(const BehavProfile<T> &p)
 { }
 
 template <class T> BehavProfile<T>::BehavProfile(const EFSupport &s)
-  : BaseBehavProfile(s.BelongsTo(), s), gDPVector<T>(s.Dimensionality())
+  : BaseBehavProfile(s.BelongsTo(), s), gDPVector<T>(s.NumActions())
 { 
   Centroid();
 }
@@ -565,7 +565,7 @@ void BehavProfile<T>::Payoff(Node *n, T prob, int pl, T &value) const
     else  {
       int npl = n->infoset->player->number;
       int iset = n->infoset->number;
-      const gArray<Action *> &actions = support.ActionList(npl, iset);
+      const gArray<Action *> &actions = support.Actions(npl, iset);
       
       for (int act = 1; act <= actions.Length(); act++)
 	Payoff(n->children[actions[act]->GetNumber()],
@@ -621,7 +621,7 @@ void BehavProfile<T>::CondPayoff(Node *n, T prob, gPVector<T> &probs,
     int act;
     
     const gArray<Action *> &actions =
-      support.ActionList(n->infoset->player->number, n->infoset->number);
+      support.Actions(n->infoset->player->number, n->infoset->number);
     
     for (act = 1; act <= actions.Length(); act++)  {
       int childno = actions[act]->GetNumber();
@@ -756,7 +756,7 @@ void BehavProfile<T>::Beliefs(Node *n, T prob,
     return;
   }
 
-  const gArray<Action *> &actions = support.ActionList(pl, iset);
+  const gArray<Action *> &actions = support.Actions(pl, iset);
 
   for (i = 1; i <= support.NumActions(pl, iset); i++) {
     newprob = (*this)(pl, n->infoset->number, actions[i]->GetNumber());

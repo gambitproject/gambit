@@ -56,13 +56,13 @@ template <class T> void EfgIter<T>::First(void)
 
   for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
     for (int iset = 1; iset <= _efg->PlayerList()[pl]->NumInfosets(); iset++)
-      _efgidx(pl, iset) = _support.ActionList(pl, iset)[1]->GetNumber();
+      _efgidx(pl, iset) = _support.Actions(pl, iset)[1]->GetNumber();
   }
 }
 
 template <class T> int EfgIter<T>::Next(int pl, int iset)
 {
-  const gArray<Action *> &actions = _support.ActionList(pl, iset);
+  const gArray<Action *> &actions = _support.Actions(pl, iset);
   
   if (_supidx(pl, iset) == actions.Length())   {
     _supidx(pl, iset) = 1;
@@ -83,7 +83,7 @@ template <class T> int EfgIter<T>::Set(int pl, int iset, int act)
     return 0;
 
   _supidx(pl, iset) = act;
-  _efgidx(pl, iset) = _support.ActionList(pl, iset)[act]->GetNumber();
+  _efgidx(pl, iset) = _support.Actions(pl, iset)[act]->GetNumber();
   return 1;
 }
 

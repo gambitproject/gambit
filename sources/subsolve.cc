@@ -58,7 +58,7 @@ void Project(const EFSupport &from, EFSupport &to, Node *n)
 	Infoset *newiset = to.BelongsTo().PlayerList()[pl]->InfosetList()[isetno];
 	for (int act = 1; act <= infoset->NumActions(); act++)  {
 	  if (!from.Find(infoset->GetActionList()[act]))
-	    to.RemoveAction(pl, isetno, newiset->GetActionList()[act]);
+	    to.RemoveAction(newiset->GetActionList()[act]);
 	} 
 	isetno++;
       }

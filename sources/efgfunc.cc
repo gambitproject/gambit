@@ -43,8 +43,8 @@ static Portion *GSM_Actions(Portion **param)
   EFSupport* sup = ((EfSupportPortion*) param[1])->Value();
 
   Portion *por = (s->IsChanceInfoset()) ? ArrayToList(s->GetActionList()) :
-                ArrayToList(sup->ActionList(s->GetPlayer()->GetNumber(),
-					    s->GetNumber()));
+                ArrayToList(sup->Actions(s->GetPlayer()->GetNumber(),
+					 s->GetNumber()));
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -58,10 +58,7 @@ static Portion *GSM_AddAction(Portion **param)
   EFSupport *support = ((EfSupportPortion *) param[0])->Value();
   Action *action = ((ActionPortion *) param[1])->Value();
 
-  Infoset *infoset = action->BelongsTo();
-
-  support->AddAction(infoset->GetPlayer()->GetNumber(),
-		     infoset->GetNumber(), action);
+  support->AddAction(action);
 
   return param[0]->RefCopy();
 }
@@ -1042,10 +1039,8 @@ static Portion *GSM_RemoveAction(Portion **param)
 {  
   EFSupport *support = ((EfSupportPortion *) param[0])->Value();
   Action *action = ((ActionPortion *) param[1])->Value();
-  Infoset *infoset = action->BelongsTo();
 
-  support->RemoveAction(infoset->GetPlayer()->GetNumber(),
-			infoset->GetNumber(), action);
+  support->RemoveAction(action);
 
   return param[0]->RefCopy();
 }
