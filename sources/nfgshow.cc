@@ -1012,9 +1012,11 @@ void NfgShow::SetOutcome(int out, int x, int y)
 
     if (out > 0) {
       nf.SetOutcome(cur_profile, nf.Outcomes()[out]);
+      RemoveSolutions();
     }
     else if (out == 0) {
       nf.SetOutcome(cur_profile, 0);
+      RemoveSolutions();
     }
     else if (out == -1) { } // just update all outcomes
 
