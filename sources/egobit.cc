@@ -1,7 +1,7 @@
 //#
 //# FILE: egobit.cc -- Implementation of extensive form Gobit algorithm
 //#
-//# $Id$
+//# @(#)egobit.cc	1.18 6/1/95
 //#
 
 #include <math.h>
@@ -160,36 +160,39 @@ template <class T> void EFGobitFunc<T>::Optimize(T Lam, int &iter, T &value)
 
 template <class T> void EFGobitFunc<T>::Output(gOutput &f, int format) const
 {
-  int pl, iset, act, nisets;
+	int pl, iset, act, nisets;
 
-      // Header information
-  if (format==3) {
-    nisets=0;
-    for (pl = 1; pl <= E.NumPlayers(); pl++)  
-      nisets += E.PlayerList()[pl]->NumInfosets();
-    f << nisets;
-    for (pl = 1; pl <= E.NumPlayers(); pl++)  
-      for (iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++)  
+			// Header information
+	if (format==3) {
+		nisets=0;
+		f<<"Dimensionality:\n";
+		for (pl = 1; pl <= E.NumPlayers(); pl++)
+			nisets += E.PlayerList()[pl]->NumInfosets();
+		f << nisets;
+		for (pl = 1; pl <= E.NumPlayers(); pl++)
+			for (iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++)
 	f << " " << E.PlayerList()[pl]->InfosetList()[iset]->NumActions();
-    f << "\n";
-  }
-  else if (format==2) {
-    int numcols = 2+E.ProfileLength();
-    f << "\n" << numcols;
-    for(int i=1;i<=numcols;i++) f << ' ' << i;
-  }
-      // PXI output
-  else if (format==1) {
-    f<< " ";
-    for (pl = 1; pl <= E.NumPlayers(); pl++)  
-      for (iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++)  { 
+		f << "\n";
+	}
+	else if (format==2) {
+		int numcols = 2+E.ProfileLength();
+		f<<"DataFormat:";
+		f << "\n" << numcols;
+		for(int i=1;i<=numcols;i++) f << ' ' << i;
+		f<<"\nData:\n";
+	}
+			// PXI output
+	else if (format==1) {
+		f<< " ";
+		for (pl = 1; pl <= E.NumPlayers(); pl++)
+			for (iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++)  {
 	T prob = (T) 0.0;
 	for (act = 1; act < E.PlayerList()[pl]->InfosetList()[iset]->NumActions(); prob += pp(pl, iset, act++))
-	  f << pp(pl,iset,act) << ' ';
+		f << pp(pl,iset,act) << ' ';
 	f << ((T) 1 - prob) << ' ';
-      }
-  }
-  else  f << " pp = " << pp;
+			}
+	}
+	else  f << " pp = " << pp;
 
 }
 
