@@ -56,6 +56,7 @@ template <class T> class gList  {
     gList<T>& operator+=(const gList<T>& b);
 
     gList<T> &Combine(gList<T> &b);
+    gList<T> InteriorSegment(int, int) const;
 
     virtual int Append(const T &);
     int Insert(const T &, int);

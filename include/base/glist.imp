@@ -232,6 +232,17 @@ template <class T> gList<T> &gList<T>::Combine(gList<T> &b)
   return *this;
 }
 
+template <class T> 
+gList<T> gList<T>::InteriorSegment(int first, int last) const
+{
+  gList<T> answer;
+
+  for (int i = first; i <= last; i++)
+    answer += (*this)[i];
+
+  return answer;
+}
+
 template <class T> int gList<T>::Append(const T &t)
 {
   return InsertAt(t, length + 1);
