@@ -101,7 +101,7 @@ void BaseBySubgameG<T>::BaseViewNormal(const Nfg<T> &N, NFSupport *&sup)
 {
 DominanceSettings DS;
 if (!DS.UseElimDom()) return;
-printf("Eliminating dominated strategies\n");
+
 gArray<int> players(N.NumPlayers());
 for (int i=1;i<=N.NumPlayers();i++) players[i]=i;
 NFSupport *temp_sup=sup,*temp_sup1=0;
