@@ -1,0 +1,22 @@
+//
+// GCL functions to do a linear regression
+// 
+
+NewFunction[PartProd[x->LIST(NUMBER),y->LIST(LIST(NUMBER))],
+  x . y;
+];
+
+NewFunction[MatrixProd[x->LIST(LIST(NUMBER)),y->LIST(LIST(NUMBER))],
+  PartProd[x,Transpose[y]];
+];
+
+NewFunction[Regress[y->LIST(NUMBER),x->LIST(LIST(NUMBER)),
+            {covar<->{{0.0}}}]=:LIST(NUMBER),
+  covar := Inverse[MatrixProd[Transpose[x],x]];
+  beta := covar . (Transpose[x] . y);
+  u := y - (x . beta);
+  sigma := (u . u) / (Length[y] - Length[beta]);
+  covar := sigma * covar;
+  beta;
+];
+

@@ -1,0 +1,25 @@
+//
+// GCL functions for computation of Normal density and CDF
+//
+
+NewFunction[Pi[]=:NUMBER,3.141592653589793;];
+
+NewFunction[Normal[x->NUMBER]=:NUMBER,
+  0.398942280401433*Exp[-.5*(x^2)];
+];
+
+NewFunction[CDF[x->NUMBER]=:NUMBER,
+  del:=.01;
+  If[x>=0.0,
+    n:=Integer[x/del]+1;
+    z:=List[0.0,n,del];
+    v1:=Normal[z_1]; vn:=Normal[z_n];
+    v:=.5+del*(Sum[Normal[z]]-.5*(v1+vn));
+    v:=v+.5*(x-z_n)*(vn+Normal[x]),
+    1.0-CDF[-x]];
+];
+
+
+
+
+

@@ -9,7 +9,6 @@ NewFunction[AlgTest[n->NFG,t->TEXT,{out->StdOut},{precision->Float}],
   out << "\nFile: " << t << ".nfg ; " << Name[n] << "; n = " << NumPlayers[n] << "; CSum: " << IsConstSum[n];
   out << "\n";
   out << "\nOneNash\n" << OneNash[n,precision];
-  out << "\nManyNash\n" << ManyNash[n,0,10,precision];
   out << "\nAllNash\n" << AllNash[n,0,10,precision];
   If[NumPlayers[n]<=2,
     out << "\nOnePerfect\n" << OnePerfect[n,precision];
@@ -23,7 +22,6 @@ NewFunction[AlgTest[e->EFG,t->TEXT,{out->StdOut},{precision->Float}],
   out << "\nFile: " << t << ".efg ; " << Name[e] << "; n = " << NumPlayers[e] << "; CSum: " << IsConstSum[e];
   out << "\n";
   out << "\nOneNash\n" << OneNash[e,precision];
-  out << "\nManyNash\n" << ManyNash[e,0,10,precision];
   out << "\nAllNash\n" << AllNash[e,0,10,precision];
   out << "\nOneSubgamePerfect\n" << OneSubgamePerfect[e,precision];
   out << "\nAllSubgamePerfect\n" << AllSubgamePerfect[e,0,10,precision];

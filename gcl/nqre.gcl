@@ -5,10 +5,14 @@
 // It is assumed that the normal form is in filename.nfg, 
 // and that the data is in the file filename.agg.  
 // 
+// The first line of the .agg file gives the number of 
+// players and the number of strategies for each 
+// player.  The second line gives the number of 
+// data sets for which the estimation is to be conducted.  
+// This should be followed by at least that many sets of data.
+
 // The output is put in filename.out, and the pxifile is put in 
 // filename.pxi
-// 
-// Here the program is run on some experiments on a 2x2 game 
 // 
 
 StdOut << "Include[\""+GetPath[]+"\"]\n";
@@ -22,7 +26,14 @@ NewFunction[NQre[filename->TEXT],
   GetListFormat[lf<->lf:=0];
   n := LoadNfg[filename+".nfg"];
   in := Input[filename+".agg"];
-  in >> n1 >> n11 >> n12 >> ndat;
+
+  // discard unused data
+  in >> nplrs;
+  For[i := 1, i <= nplrs, i := i+1, 
+    in >> junk;
+  ];
+
+  in >> ndat;
 
   da:={};
   dat1:=ListForm[Float[Centroid[n]]]; 
