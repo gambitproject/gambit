@@ -1,8 +1,8 @@
-//#
-//# FILE: lemketab.h:  Lemke Tableau class
-//#
-//# $Id$
-//#
+//
+// FILE: lemketab.h:  Lemke Tableau class
+//
+// $Id$
+//
 
 #ifndef LEMKETAB_H
 #define LEMKETAB_H
