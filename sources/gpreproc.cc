@@ -443,12 +443,12 @@ gInput* gPreprocessor::LoadInput( gText& name )
   gText IniFileName;
   
   IniFileName = name;
+  _Input = 0;
 #ifdef USE_EXCEPTIONS
   try   {
     _Input = new gFileInput(IniFileName);
   }
   catch (gFileInput::OpenFailed &)   {
-    delete _Input;
     if (search)   {
       if (System::GetEnv("HOME") != NULL)   {
 	IniFileName = (gText) System::GetEnv("HOME") + 
@@ -456,11 +456,8 @@ gInput* gPreprocessor::LoadInput( gText& name )
 	try   {
 	  _Input = new gFileInput(IniFileName);
 	}
-	catch (gFileInput::OpenFailed &)   {
-	  delete _Input;
-	  _Input = 0;
-	}
-	if(_Input) return _Input;
+	catch (gFileInput::OpenFailed &)
+	if(_Input) {name = IniFileName;return _Input;}
       }
       if (System::GetEnv("GCLLIB") != NULL)  {
 	IniFileName = (gText) System::GetEnv("GCLLIB") + 
@@ -468,22 +465,16 @@ gInput* gPreprocessor::LoadInput( gText& name )
 	try  {
 	  _Input = new gFileInput(IniFileName);
 	}
-	catch (gFileInput::OpenFailed &)   {
-	  delete _Input;
-	  _Input = 0;
-	}
-	if(_Input) return _Input;
+	catch (gFileInput::OpenFailed &)
+	if(_Input)  {name = IniFileName;return _Input;}
       }
       if (SOURCE != NULL)  {
 	IniFileName = (gText) SOURCE + (gText) SLASH + (gText) name;
 	try  {
 	  _Input = new gFileInput(IniFileName);
 	}
-	catch (gFileInput::OpenFailed &)  {
-	  delete _Input;
-	  _Input = 0;
-	}
-	if(_Input) return _Input;
+	catch (gFileInput::OpenFailed &)
+	if(_Input)  {name = IniFileName;return _Input;}
       }
     }
   }
