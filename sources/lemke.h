@@ -52,15 +52,6 @@ public:
 //  void GetSolutions(gList<MixedSolution<T> > &) const;
 };
 
-//
-// Convenience function for "one-shot" evaluations
-//
-
-/*
-template <class T> int Lemke(const Nfg<T> &N, const LemkeParams &p,
-			     gList<MixedSolution<T> > &solutions,
-			     long &npivots, gRational &time);
-*/				   
 
 #endif    // LEMKE_H
 

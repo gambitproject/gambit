@@ -1,11 +1,11 @@
-//#
-//# FILE: csum.h -- Interface to Constant Sum Game Solution Solver
-//#
-//# $Id$
-//#
+//
+// FILE: nfgcsum.h -- Interface to Constant Sum Game Solution Solver
+//
+// $Id$
+//
 
-#ifndef CSUM_H
-#define CSUM_H
+#ifndef NFGCSUM_H
+#define NFGCSUM_H
 
 #include "nfg.h"
 #include "rational.h"
@@ -58,17 +58,7 @@ public:
   void GetSolutions(gList<MixedSolution<T> > &) const;
 };
 
-//
-// Convenience function for "one-shot" evaluations
-//
-
-/*
-template <class T> int ZSum(const Nfg<T> &N, const ZSumParams &p,
-			     gList<MixedProfile<T> > &solutions,
-			     long &npivots, gRational &time);
-*/				   
-
-#endif    // CSUM_H
+#endif    // NFGCSUM_H
 
 
 

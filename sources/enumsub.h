@@ -1,11 +1,11 @@
 //
-// FILE: subnenum.h -- Solve efg by enumeration in nfg
+// FILE: enumsub.h -- Solve efg by enumeration in nfg
 //
 // $Id$
 //
 
-#ifndef SUBNENUM_H
-#define SUBNENUM_H
+#ifndef ENUMSUB_H
+#define ENUMSUB_H
 
 #include "subsolve.h"
 #include "enum.h"
@@ -26,6 +26,6 @@ template <class T> class EnumBySubgame : public SubgameSolver<T>  {
 };
 
 
-#endif   // SUBNENUM_H
+#endif   // ENUMSUB_H
 
 

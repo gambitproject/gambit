@@ -1,11 +1,11 @@
-//#
-//# FILE: efcsum.h -- Interface to Constant Sum Extensive Form Game Solver 
-//#
-//# $Id$
-//#
+//
+// FILE: efgcsum.h -- Interface to Constant Sum Extensive Form Game Solver 
+//
+// $Id$
+//
 
-#ifndef EFCSUM_H
-#define EFCSUM_H
+#ifndef EFGCSUM_H
+#define EFGCSUM_H
 
 #include "efg.h"
 #include "glist.h"
@@ -61,17 +61,7 @@ public:
   void GetSolutions(gList<BehavSolution<T> > &) const;
 };
 
-//
-// Convenience function for "one-shot" evaluations
-//
-
-/*
-template <class T> int CSSeqForm(const Efg<T> &E, const CSSeqFormParams &p,
-			     gList<BehavProfile<T> > &solutions,
-			     long &npivots, gRational &time);
-*/				   
-
-#endif    // EFCSUM_H
+#endif    // EFGCSUM_H
 
 
 

@@ -241,7 +241,7 @@ Portion *GSM_EnumMixed_Support(Portion **param)
   return por;
 }
 
-#include "subnenum.h"
+#include "enumsub.h"
 
 
 Portion *GSM_EnumMixed_EfgFloat(Portion **param)
@@ -377,7 +377,7 @@ Portion *GSM_EnumPure_Support(Portion **param)
 }
 
 #include "efgpure.h"
-#include "subnpsne.h"
+#include "psnesub.h"
 
 Portion *GSM_EnumPure_EfgFloat(Portion **param)
 {
@@ -772,7 +772,7 @@ Portion *GSM_Lcp_Support(Portion **param)
 
 
 #include "seqform.h"
-#include "subnlemk.h"
+#include "lemkesub.h"
 
 Portion *GSM_Lcp_EfgFloat(Portion **param)
 {
@@ -870,7 +870,7 @@ Portion *GSM_Lcp_EfgRational(Portion **param)
 // LiapSolve
 //-------------
 
-#include "subnliap.h"
+#include "liapsub.h"
 #include "eliap.h"
 
 Portion *GSM_Liap_EfgFloat(Portion **param)
@@ -1039,7 +1039,7 @@ Portion *GSM_Liap_MixedFloat(Portion **param)
 // LpSolve
 //------------
 
-#include "csum.h"
+#include "nfgcsum.h"
 
 Portion *GSM_Lp_NfgFloat(Portion **param)
 {
@@ -1142,7 +1142,7 @@ Portion *GSM_Lp_Support(Portion **param)
   return por;
 }
 
-#include "subncsum.h"
+#include "csumsub.h"
 
 Portion *GSM_Lp_EfgFloat(Portion **param)
 {
@@ -1508,7 +1508,7 @@ Portion *GSM_Simpdiv_Support(Portion **param)
   return por;
 }
 
-#include "subnsimp.h"
+#include "simpsub.h"
 
 Portion *GSM_Simpdiv_EfgFloat(Portion **param)
 {

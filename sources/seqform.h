@@ -1,14 +1,13 @@
-//#
-//# FILE: seqform.h -- Interface to Sequence Form solution module
-//#
-//# $Id$ 
-//#
+//
+// FILE: seqform.h -- Interface to Sequence Form solution module
+//
+// $Id$ 
+//
 
 #ifndef SEQFORM_H
 #define SEQFORM_H
 
 #include "efg.h"
-#include "rational.h"
 #include "glist.h"
 #include "gmatrix.h"
 #include "lemketab.h"

@@ -1,10 +1,10 @@
 //
-// FILE: subnliap.cc -- Solve efg by liap on nfg
+// FILE: liapsub.cc -- Solve efg by liap on nfg
 //
 // $Id$
 //
 
-#include "subnliap.h"
+#include "liapsub.h"
 
 int NFLiapBySubgame::SolveSubgame(const Efg<double> &E,
 				   gList<BehavSolution<double> > &solns)

@@ -1,14 +1,14 @@
 //
-// FILE: subncsum.h -- Solve efg by LP on nfg
+// FILE: csumsub.h -- Solve efg by LP on nfg
 //
 // $Id$
 //
 
-#ifndef SUBNCSUM_H
-#define SUBNCSUM_H
+#ifndef CSUMSUB_H
+#define CSUMSUB_H
 
 #include "subsolve.h"
-#include "csum.h"
+#include "nfgcsum.h"
 
 template <class T> class ZSumBySubgame : public SubgameSolver<T>  {
   private:
@@ -26,5 +26,5 @@ template <class T> class ZSumBySubgame : public SubgameSolver<T>  {
 };
 
 
-#endif    // SUBNCSUM_H
+#endif    // CSUMSUB_H
 

@@ -1,11 +1,11 @@
 //
-// FILE: subnlemk.h -- Solve efg by lemke on nfg
+// FILE: lemkesub.h -- Solve efg by lemke on nfg
 //
 // $Id$
 //
 
-#ifndef SUBNLEMK_H
-#define SUBNLEMK_H
+#ifndef LEMKESUB_H
+#define LEMKESUB_H
 
 #include "lemke.h"
 #include "subsolve.h"
@@ -26,4 +26,4 @@ template <class T> class LemkeBySubgame : public SubgameSolver<T>  {
 };
 
 
-#endif   // SUBNLEMK_H
+#endif   // LEMKESUB_H

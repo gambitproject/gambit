@@ -4,53 +4,8 @@
 // $Id$
 //
 
-#include "nfgpure.h"
-
-#include "gambitio.h"
-#include "nfg.h"
-#include "nfgiter.h"
-#include "nfgciter.h"
+#include "nfgpure.imp"
 #include "rational.h"
-#include "glist.h"
-#include "mixed.h"
-
-template <class T> int FindPureNash(const Nfg<T> &N,
-				    gList<MixedSolution<T> > &eqs)
-{
-  int index;
-  NFSupport S(N);
-  NfgContIter<T> citer(&S);
-  
-  do  {
-    int flag = 1;
-    NfgIter<T> niter(citer);
-    
-    for (int pl = 1; flag && pl <= N.NumPlayers(); pl++)  {
-      T current = citer.Payoff(pl);
-      for (int i = 1; i <= N.Dimensionality()[pl]; i++)  {
-	niter.Next(pl);
-	if (niter.Payoff(pl) > current)  {
-	  flag = 0;
-	  break;
-	}
-      }
-    }
-    
-    if (flag)  {
-      MixedProfile<T> temp(N);
-      // zero out all the entries, since any equlibria are pure
-      ((gVector<T> &) temp).operator=((T) 0);
-      gArray<int> profile = citer.Get();
-      for (int i = 1; i <= profile.Length(); i++)
-	temp(i, profile[i]) = (T) 1;
-
-      index = eqs.Append(MixedSolution<T>(temp, id_PURENASH));
-      eqs[index].SetIsNash(T_YES);
-    }
-  }  while (citer.NextContingency());
-  
-  return eqs.Length();
-}
 
 #ifdef __GNUG__
 #define TEMPLATE template

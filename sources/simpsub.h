@@ -1,11 +1,11 @@
 //
-// FILE: subnsimp.h -- Solve efg by simpdiv on nfg
+// FILE: simpsub.h -- Solve efg by simpdiv on nfg
 //
 // $Id$
 //
 
-#ifndef SUBNSIMP_H
-#define SUBNSIMP_H
+#ifndef SIMPSUB_H
+#define SIMPSUB_H
 
 #include "simpdiv.h"
 #include "subsolve.h"

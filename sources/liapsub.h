@@ -1,11 +1,11 @@
 //
-// FILE: subnliap.h -- Solve efg by liap on nfg
+// FILE: liapsub.h -- Solve efg by liap on nfg
 //
 // $Id$
 //
 
-#ifndef SUBNLIAP_H
-#define SUBNLIAP_H
+#ifndef LIAPSUB_H
+#define LIAPSUB_H
 
 #include "nliap.h"
 #include "subsolve.h"
@@ -28,4 +28,4 @@ class NFLiapBySubgame : public SubgameSolver<double>  {
     int NumEvals(void) const   { return nevals; }
 };
 
-#endif   // SUBNLIAP_H
+#endif   // LIAPSUB_H
