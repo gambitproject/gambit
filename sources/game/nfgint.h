@@ -38,6 +38,7 @@
 //
 struct gbt_nfg_outcome_rep;
 struct gbt_nfg_player_rep;
+struct gbt_nfg_infoset_rep;
 struct gbt_nfg_strategy_rep;
 struct gbt_efg_game_rep;
 
@@ -55,15 +56,27 @@ struct gbt_nfg_outcome_rep {
 
 struct gbt_nfg_strategy_rep {
   int m_id;
-  gbt_nfg_player_rep *m_player;
+  gbt_nfg_infoset_rep *m_infoset;
   gbtArray<int> *m_behav;
   bool m_deleted;
   gbtText m_label;
   long m_index;
   int m_refCount;
 
-  gbt_nfg_strategy_rep(gbt_nfg_player_rep *);
+  gbt_nfg_strategy_rep(gbt_nfg_infoset_rep *, int p_id);
   ~gbt_nfg_strategy_rep();
+};
+
+struct gbt_nfg_infoset_rep {
+  int m_id;
+  gbt_nfg_player_rep *m_player;
+  bool m_deleted;
+  gbtText m_label;
+  int m_refCount;
+  gbtBlock<gbt_nfg_strategy_rep *> m_actions;
+
+  gbt_nfg_infoset_rep(gbt_nfg_player_rep *, int id, int br);
+  ~gbt_nfg_infoset_rep();
 };
 
 struct gbt_nfg_player_rep {
@@ -71,7 +84,7 @@ struct gbt_nfg_player_rep {
   gbt_nfg_game_rep *m_nfg;
   bool m_deleted;
   gbtText m_label;
-  gbtBlock<gbt_nfg_strategy_rep *> m_strategies;
+  gbtBlock<gbt_nfg_infoset_rep *> m_infosets;
   int m_refCount;
 
   gbt_nfg_player_rep(gbt_nfg_game_rep *, int, int);

@@ -55,11 +55,10 @@ static void MakeStrategy(gbt_nfg_game_rep *p_nfg, gbtEfgPlayer p_player)
   }
 
   gbt_nfg_player_rep *player = p_nfg->m_players[p_player.GetId()];
-  gbt_nfg_strategy_rep *strategy = new gbt_nfg_strategy_rep(player);
+  gbt_nfg_strategy_rep *strategy = new gbt_nfg_strategy_rep(player->m_infosets[1], player->m_infosets[1]->m_actions.Length() + 1);
   strategy->m_behav = behav;
   strategy->m_label = label;
-  player->m_strategies.Append(strategy);
-  strategy->m_id = player->m_strategies.Length();
+  player->m_infosets[1]->m_actions.Append(strategy);
 }
 
 static void MakeReducedStrats(gbt_nfg_game_rep *p_nfg,
@@ -135,7 +134,7 @@ gbtNfgGame gbtEfgGame::GetReducedNfg(void) const
     nfg->m_players.Append(new gbt_nfg_player_rep(nfg, pl, 0));
     nfg->m_players[pl]->m_label = rep->players[pl]->m_label;
     MakeReducedStrats(nfg, rep->players[pl], rep->root, NULL);
-    nfg->m_dimensions[pl] = nfg->m_players[pl]->m_strategies.Length();
+    nfg->m_dimensions[pl] = nfg->m_players[pl]->m_infosets[1]->m_actions.Length();
   }
   return (rep->m_reducedNfg = nfg);
 }

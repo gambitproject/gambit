@@ -27,11 +27,8 @@
 #ifndef INFOSET_H
 #define INFOSET_H
 
-#if defined(__GNUG__) && !defined(__APPLE_CC__)
-#pragma interface
-#endif   // __GNUG__
-
 #include "math/gvector.h"
+#include "game.h"
 
 class gbtEfgInfoset;
 class gbtEfgNode;
@@ -39,7 +36,7 @@ class gbtEfgPlayer;
 
 struct gbt_efg_action_rep;
 
-class gbtEfgAction {
+class gbtEfgAction : public gbtGameAction {
 friend class gbtEfgGame;
 friend class gbtEfgInfoset;
 protected:
@@ -49,7 +46,7 @@ public:
   gbtEfgAction(void);
   gbtEfgAction(gbt_efg_action_rep *);
   gbtEfgAction(const gbtEfgAction &);
-  ~gbtEfgAction();
+  virtual ~gbtEfgAction();
 
   gbtEfgAction &operator=(const gbtEfgAction &);
 
@@ -70,7 +67,7 @@ public:
 
 gbtOutput &operator<<(gbtOutput &, const gbtEfgAction &);
 
-class gbtEfgInfoset {
+class gbtEfgInfoset : public gbtGameInfoset {
 friend class gbtEfgGame;
 friend class gbtEfgNode;
 protected:

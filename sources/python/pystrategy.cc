@@ -124,7 +124,7 @@ newstrategyobject(void)
   if (self == NULL) {
     return NULL;
   }
-  self->m_strategy = new gbtNfgStrategy();
+  self->m_strategy = new gbtNfgAction();
   return self;
 }
 

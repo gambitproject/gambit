@@ -40,8 +40,9 @@
 
 struct gbt_nfg_player_rep;
 
-gbt_nfg_strategy_rep::gbt_nfg_strategy_rep(gbt_nfg_player_rep *p_player)
-  : m_id(0), m_player(p_player), m_behav(0),
+gbt_nfg_strategy_rep::gbt_nfg_strategy_rep(gbt_nfg_infoset_rep *p_infoset,
+					   int p_id)
+  : m_id(p_id), m_infoset(p_infoset), m_behav(0),
     m_deleted(false), m_index(0L), m_refCount(0)
 { }
 
@@ -52,11 +53,11 @@ gbt_nfg_strategy_rep::~gbt_nfg_strategy_rep()
   }
 }
 
-gbtNfgStrategy::gbtNfgStrategy(void)
+gbtNfgAction::gbtNfgAction(void)
   : rep(0)
 { }
 
-gbtNfgStrategy::gbtNfgStrategy(gbt_nfg_strategy_rep *p_rep)
+gbtNfgAction::gbtNfgAction(gbt_nfg_strategy_rep *p_rep)
   : rep(p_rep)
 {
   if (rep) {
@@ -64,7 +65,7 @@ gbtNfgStrategy::gbtNfgStrategy(gbt_nfg_strategy_rep *p_rep)
   }
 }
 
-gbtNfgStrategy::gbtNfgStrategy(const gbtNfgStrategy &p_outcome)
+gbtNfgAction::gbtNfgAction(const gbtNfgAction &p_outcome)
   : rep(p_outcome.rep)
 {
   if (rep) {
@@ -72,7 +73,7 @@ gbtNfgStrategy::gbtNfgStrategy(const gbtNfgStrategy &p_outcome)
   }
 }
 
-gbtNfgStrategy::~gbtNfgStrategy()
+gbtNfgAction::~gbtNfgAction()
 {
   if (rep) {
     if (--rep->m_refCount == 0) {
@@ -81,7 +82,7 @@ gbtNfgStrategy::~gbtNfgStrategy()
   }
 }
 
-gbtNfgStrategy &gbtNfgStrategy::operator=(const gbtNfgStrategy &p_outcome)
+gbtNfgAction &gbtNfgAction::operator=(const gbtNfgAction &p_outcome)
 {
   if (this == &p_outcome) {
     return *this;
@@ -97,27 +98,27 @@ gbtNfgStrategy &gbtNfgStrategy::operator=(const gbtNfgStrategy &p_outcome)
   return *this;
 }
 
-bool gbtNfgStrategy::operator==(const gbtNfgStrategy &p_outcome) const
+bool gbtNfgAction::operator==(const gbtNfgAction &p_outcome) const
 {
   return (rep == p_outcome.rep);
 } 
 
-bool gbtNfgStrategy::operator!=(const gbtNfgStrategy &p_outcome) const
+bool gbtNfgAction::operator!=(const gbtNfgAction &p_outcome) const
 {
   return (rep != p_outcome.rep);
 } 
 
-int gbtNfgStrategy::GetId(void) const
+int gbtNfgAction::GetId(void) const
 {
   return (rep) ? rep->m_id : 0;
 }
 
-bool gbtNfgStrategy::IsNull(void) const
+bool gbtNfgAction::IsNull(void) const
 {
   return (rep == 0);
 }
 
-gbtText gbtNfgStrategy::GetLabel(void) const
+gbtText gbtNfgAction::GetLabel(void) const
 {
   if (rep) {
     return rep->m_label;
@@ -127,24 +128,24 @@ gbtText gbtNfgStrategy::GetLabel(void) const
   }
 }
 
-void gbtNfgStrategy::SetLabel(const gbtText &p_label)
+void gbtNfgAction::SetLabel(const gbtText &p_label)
 {
   if (rep) {
     rep->m_label = p_label;
   }
 }
 
-gbtNfgPlayer gbtNfgStrategy::GetPlayer(void) const
+gbtNfgPlayer gbtNfgAction::GetPlayer(void) const
 {
   if (rep) {
-    return rep->m_player;
+    return rep->m_infoset->m_player;
   }
   else {
     return 0;
   }
 }
 
-const gbtArray<int> *const gbtNfgStrategy::GetBehavior(void) const
+const gbtArray<int> *const gbtNfgAction::GetBehavior(void) const
 { 
   if (rep) {
     return rep->m_behav;
@@ -154,15 +155,26 @@ const gbtArray<int> *const gbtNfgStrategy::GetBehavior(void) const
   }
 }
 
-long gbtNfgStrategy::GetIndex(void) const
+long gbtNfgAction::GetIndex(void) const
 {
   return (rep) ? rep->m_index : 0L;
 }
 
-gbtOutput &operator<<(gbtOutput &p_stream, const gbtNfgStrategy &)
+gbtOutput &operator<<(gbtOutput &p_stream, const gbtNfgAction &)
 { 
   return p_stream;
 }
+
+gbt_nfg_infoset_rep::gbt_nfg_infoset_rep(gbt_nfg_player_rep *p_player,
+					 int p_id, int p_br)
+  : m_id(p_id), m_player(p_player), m_deleted(false),
+    m_refCount(0), m_actions(p_br)
+{
+  for (int act = 1; act <= p_br; act++) {
+    m_actions[act] = new gbt_nfg_strategy_rep(this, act);
+  }
+}    
+
 
 gbt_nfg_game_rep::gbt_nfg_game_rep(gbt_efg_game_rep *p_efg)
   : m_refCount(1), m_revision(0), m_outcomeRevision(-1),
@@ -233,7 +245,7 @@ gbtNfgGame::gbtNfgGame(const gbtArray<int> &dim)
     rep->m_players[pl] = new gbt_nfg_player_rep(rep, pl, dim[pl]);
     rep->m_players[pl]->m_label = ToText(pl);
     for (int st = 1; st <= dim[pl]; st++) {
-      rep->m_players[pl]->m_strategies[st]->m_label = ToText(st);
+      rep->m_players[pl]->m_infosets[1]->m_actions[st]->m_label = ToText(st);
     }
   }
   IndexStrategies();
@@ -449,7 +461,7 @@ gbtNfgPlayer gbtNfgGame::GetPlayer(int pl) const
 int gbtNfgGame::NumStrats(int pl) const
 {
   return ((pl > 0 && pl <= NumPlayers()) ? 
-	  rep->m_players[pl]->m_strategies.Length() : 0);
+	  rep->m_players[pl]->m_infosets[1]->m_actions.Length() : 0);
 }
 
 const gbtArray<int> &gbtNfgGame::NumStrats(void) const
@@ -461,7 +473,7 @@ int gbtNfgGame::ProfileLength(void) const
 {
   int nprof = 0;
   for (int i = 1; i <= rep->m_players.Length(); i++)
-    nprof += rep->m_players[i]->m_strategies.Length();
+    nprof += rep->m_players[i]->m_infosets[1]->m_actions.Length();
   return nprof;
 }
 
@@ -501,7 +513,7 @@ void gbtNfgGame::IndexStrategies(void)
   for (int i = 1; i <= NumPlayers(); i++)  {
     int j;
     for (j = 1; j <= NumStrats(i); j++)  {
-      gbt_nfg_strategy_rep *s = rep->m_players[i]->m_strategies[j];
+      gbt_nfg_strategy_rep *s = rep->m_players[i]->m_infosets[1]->m_actions[j];
       s->m_id = j;
       s->m_index = (j - 1) * offset;
     }

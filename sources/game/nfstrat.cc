@@ -89,7 +89,7 @@ long gbtNfgContingency::GetIndex(void) const
   return m_index; 
 }
 
-void gbtNfgContingency::SetStrategy(gbtNfgStrategy p_strategy)
+void gbtNfgContingency::SetStrategy(gbtNfgAction p_strategy)
 {
   int pl = p_strategy.GetPlayer().GetId();
   m_index += p_strategy.GetIndex() - m_profile[pl].GetIndex();
@@ -190,7 +190,7 @@ int gbtNfgSupport::ProfileLength(void) const
   return total;
 }
 
-gbtNfgStrategy gbtNfgSupport::GetStrategy(int pl, int st) const
+gbtNfgAction gbtNfgSupport::GetStrategy(int pl, int st) const
 {
   int index = 0;
   for (int i = 1; i <= m_nfg.NumStrats(pl); i++) {
@@ -204,7 +204,7 @@ gbtNfgStrategy gbtNfgSupport::GetStrategy(int pl, int st) const
   return 0;
 }
 
-int gbtNfgSupport::GetIndex(gbtNfgStrategy p_strategy) const
+int gbtNfgSupport::GetIndex(gbtNfgAction p_strategy) const
 {
   int pl = p_strategy.GetPlayer().GetId();
   for (int st = 1; st <= NumStrats(pl); st++) {
@@ -215,7 +215,7 @@ int gbtNfgSupport::GetIndex(gbtNfgStrategy p_strategy) const
   return 0;
 }
 
-bool gbtNfgSupport::Contains(gbtNfgStrategy p_strategy) const
+bool gbtNfgSupport::Contains(gbtNfgAction p_strategy) const
 {
   return m_strategies(p_strategy.GetPlayer().GetId(), p_strategy.GetId());
 }
@@ -224,12 +224,12 @@ bool gbtNfgSupport::Contains(gbtNfgStrategy p_strategy) const
 //                  class gbtNfgSupport: Manipulation
 //--------------------------------------------------------------------------
 
-void gbtNfgSupport::AddStrategy(gbtNfgStrategy s)
+void gbtNfgSupport::AddStrategy(gbtNfgAction s)
 {
   m_strategies(s.GetPlayer().GetId(), s.GetId()) = 1;
 }
 
-void gbtNfgSupport::RemoveStrategy(gbtNfgStrategy s)
+void gbtNfgSupport::RemoveStrategy(gbtNfgAction s)
 {
   m_strategies(s.GetPlayer().GetId(), s.GetId()) = 0;
 }

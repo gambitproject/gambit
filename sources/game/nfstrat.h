@@ -38,7 +38,7 @@ friend class gbtNfgGame;
 private:
   gbtNfgGame m_nfg; 
   long m_index;
-  gbtArray<gbtNfgStrategy> m_profile;
+  gbtArray<gbtNfgAction> m_profile;
   
 public:
   gbtNfgContingency(const gbtNfgGame &);
@@ -56,9 +56,9 @@ public:
   bool IsValid(void) const; 
   long GetIndex(void) const;
   
-  gbtNfgStrategy GetStrategy(int p_player) const
+  gbtNfgAction GetStrategy(int p_player) const
     { return m_profile[p_player]; }
-  void SetStrategy(gbtNfgStrategy);
+  void SetStrategy(gbtNfgAction);
 
   void SetOutcome(const gbtNfgOutcome &);
   gbtNfgOutcome GetOutcome(void) const;
@@ -110,21 +110,21 @@ public:
   gbtArray<int> NumStrats(void) const;
   int ProfileLength(void) const;
 
-  gbtNfgStrategy GetStrategy(int pl, int st) const;
-  int GetIndex(gbtNfgStrategy) const;
-  bool Contains(gbtNfgStrategy) const;
+  gbtNfgAction GetStrategy(int pl, int st) const;
+  int GetIndex(gbtNfgAction) const;
+  bool Contains(gbtNfgAction) const;
 
   // MANIPULATION
-  void AddStrategy(gbtNfgStrategy);
-  void RemoveStrategy(gbtNfgStrategy);
+  void AddStrategy(gbtNfgAction);
+  void RemoveStrategy(gbtNfgAction);
   
   // DATA ACCESS: PROPERTIES
   bool IsSubset(const gbtNfgSupport &s) const;
   bool IsValid(void) const;
 
   // DOMINANCE AND ELIMINATION OF STRATEGIES
-  bool Dominates(gbtNfgStrategy, gbtNfgStrategy, bool strong) const;
-  bool IsDominated(gbtNfgStrategy, bool strong) const; 
+  bool Dominates(gbtNfgAction, gbtNfgAction, bool strong) const;
+  bool IsDominated(gbtNfgAction, bool strong) const; 
 
   gbtNfgSupport Undominated(bool strong, const gbtArray<int> &players,
 			    gbtOutput &tracefile, gbtStatus &status) const;

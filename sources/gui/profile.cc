@@ -346,7 +346,7 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 	wxString ret = wxT("("); 
 	gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(p_col - offset);
 	for (int st = 1; st <= player.NumStrategies(); st++) {
-	  gbtNfgStrategy strategy = player.GetStrategy(st);
+	  gbtNfgAction strategy = player.GetStrategy(st);
 	  if (st > 1) {
 	    ret += wxT(",");
 	  }
@@ -359,7 +359,7 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 	wxString ret;
 	gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(p_col - offset);
 	for (int st = 1; st <= player.NumStrategies(); st++) {
-	  gbtNfgStrategy strategy = player.GetStrategy(st);
+	  gbtNfgAction strategy = player.GetStrategy(st);
 	  if ((*mixed)(strategy) > gbtNumber(0)) {
 	    if (ret != wxT("")) {
 	      ret += wxT("+");

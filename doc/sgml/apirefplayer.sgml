@@ -98,7 +98,7 @@ The empty string is returned if the player object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNfgStrategy gbtNfgPlayer::GetStrategy(int p_index) const
+gbtNfgAction gbtNfgPlayer::GetStrategy(int p_index) const
 </synopsis>
 </para>
 </formalpara>

@@ -63,7 +63,7 @@ gbtNfgSupport gbtNfgSupport::MixedUndominated(bool strong, gbtPrecision precisio
   return newS;
 }
 
-bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
+bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgAction str,
 		      bool strong, gbtPrecision precision,
 		      gbtOutput &tracefile)
 {
@@ -124,10 +124,10 @@ ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,int pl, bool stro
 		      double junk, gbtOutput &tracefile, gbtStatus &status);
 
 template bool
-IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
+IsMixedDominated(const gbtNfgSupport &S, gbtNfgAction str,
 		 bool strong, gbtRational junk, gbtOutput &tracefile);
 template bool
-IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
+IsMixedDominated(const gbtNfgSupport &S, gbtNfgAction str,
 		 bool strong, double junk, gbtOutput &tracefile);
 
 template bool 

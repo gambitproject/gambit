@@ -216,7 +216,7 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
 }
 
 template <class T>
-bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
+bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgAction str,
 		      bool strong, T /*junk*/,
 		      gbtOutput &tracefile)
 {

@@ -48,13 +48,13 @@ public:
   bool GoToNext(void);
 
   // ACCESS TO CURRENT STATE
-  gbtNfgStrategy GetStrategy(void) const;
+  gbtNfgAction GetStrategy(void) const;
   int GetStrategyId(void) const { return st; }
   gbtNfgPlayer GetPlayer(void) const;
   int GetPlayerId(void) const { return pl; }
 
   bool IsLast(void) const;
-  bool IsSubsequentTo(gbtNfgStrategy) const;
+  bool IsSubsequentTo(gbtNfgAction) const;
 };
 
 #endif  // STRITER_H

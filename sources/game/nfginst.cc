@@ -89,14 +89,16 @@ template class gbtRectBlock<gbtRational>;
 
 template class gbtArray<gbt_nfg_strategy_rep *>;
 template class gbtArray<gbt_nfg_outcome_rep *>;
+template class gbtArray<gbt_nfg_infoset_rep *>;
 template class gbtArray<gbt_nfg_player_rep *>;
-template class gbtArray<gbtNfgStrategy>;
+template class gbtArray<gbtNfgAction>;
 
 template class gbtBlock<gbt_nfg_strategy_rep *>;
 template class gbtBlock<gbt_nfg_outcome_rep *>;
+template class gbtBlock<gbt_nfg_infoset_rep *>;
 template class gbtBlock<gbt_nfg_player_rep *>;
-template class gbtBlock<gbtNfgStrategy>;
+template class gbtBlock<gbtNfgAction>;
 
-template class gbtList<gbtNfgStrategy>;
+template class gbtList<gbtNfgAction>;
 
 template class gbtList<const gbtNfgSupport>;

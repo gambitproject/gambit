@@ -68,7 +68,7 @@ template <class T> class gbtMixedProfile : public gbtPVector<T>  {
     void Centroid(void);
 
     T Payoff(int pl) const;
-    T Payoff(int pl, gbtNfgStrategy) const;
+    T Payoff(int pl, gbtNfgAction) const;
     T Payoff(int pl, int player1, int strat1, int player2, int strat2) const;
     void Payoff(int pl, int const_pl, gbtVector<T> &payoff) const;
 

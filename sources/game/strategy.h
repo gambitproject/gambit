@@ -27,25 +27,27 @@
 #ifndef STRATEGY_H
 #define STRATEGY_H
 
+#include "game.h"
+
 struct gbt_nfg_strategy_rep;
 class gbtNfgGame;
 class gbtNfgPlayer;
 
-class gbtNfgStrategy   {
+class gbtNfgAction : public gbtGameAction  {
 friend class gbtNfgGame;
 private:
   gbt_nfg_strategy_rep *rep;
 
 public:
-  gbtNfgStrategy(void);
-  gbtNfgStrategy(gbt_nfg_strategy_rep *);
-  gbtNfgStrategy(const gbtNfgStrategy &);
-  ~gbtNfgStrategy();
+  gbtNfgAction(void);
+  gbtNfgAction(gbt_nfg_strategy_rep *);
+  gbtNfgAction(const gbtNfgAction &);
+  ~gbtNfgAction();
 
-  gbtNfgStrategy &operator=(const gbtNfgStrategy &);
+  gbtNfgAction &operator=(const gbtNfgAction &);
 
-  bool operator==(const gbtNfgStrategy &) const;
-  bool operator!=(const gbtNfgStrategy &) const;
+  bool operator==(const gbtNfgAction &) const;
+  bool operator!=(const gbtNfgAction &) const;
 
   bool IsNull(void) const;
 
@@ -59,6 +61,6 @@ public:
   const gbtArray<int> *const GetBehavior(void) const;
 };
 
-gbtOutput &operator<<(gbtOutput &, const gbtNfgStrategy &);
+gbtOutput &operator<<(gbtOutput &, const gbtNfgAction &);
 
 #endif  // STRATEGY_H

@@ -50,6 +50,25 @@ public:
 };
 
 //
+// An action at a move
+//
+class gbtGameAction : public gbtGameObject {
+public:
+  virtual ~gbtGameAction() { }
+
+  virtual int GetId(void) const = 0;
+};
+
+//
+// An information set: a move made by a player under certain information
+// conditions
+//
+class gbtGameInfoset : public gbtGameObject {
+public:
+  virtual ~gbtGameInfoset() { }
+};
+
+//
 // A player in a game
 //
 class gbtGamePlayer : public gbtGameObject {

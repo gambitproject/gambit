@@ -295,12 +295,9 @@ bool gbtEfgInfosetIterator::End(void) const
 
 gbt_nfg_player_rep::gbt_nfg_player_rep(gbt_nfg_game_rep *p_nfg,
 				       int p_id, int p_strats)
-  : m_id(p_id), m_nfg(p_nfg), m_deleted(false), m_strategies(p_strats),
-    m_refCount(0)
+  : m_id(p_id), m_nfg(p_nfg), m_deleted(false), m_refCount(0)
 {
-  for (int i = 1; i <= p_strats; i++) {
-    m_strategies[i] = new gbt_nfg_strategy_rep(this);
-  }
+  m_infosets.Append(new gbt_nfg_infoset_rep(this, 1, p_strats));
 }
 
 gbtNfgPlayer::gbtNfgPlayer(void)
@@ -432,16 +429,16 @@ int gbtNfgPlayer::NumStrategies(void) const
     throw gbtGameObjectDeleted();
   }
   else {
-    return (rep) ? rep->m_strategies.Length() : 0;
+    return (rep) ? rep->m_infosets[1]->m_actions.Length() : 0;
   }
 }
 
-gbtNfgStrategy gbtNfgPlayer::GetStrategy(int st) const
+gbtNfgAction gbtNfgPlayer::GetStrategy(int st) const
 {
   if (rep && rep->m_deleted) {
     throw gbtGameObjectDeleted();
   }
   else {
-    return (rep) ? rep->m_strategies[st] : 0;
+    return (rep) ? rep->m_infosets[1]->m_actions[st] : 0;
   }
 }

@@ -69,9 +69,9 @@ public:
   bool operator==(const MixedSolution &) const;
   bool operator!=(const MixedSolution &S) const { return !(*this == S); } 
 
-  void SetStrategyProb(gbtNfgStrategy, const gbtNumber &);
-  const gbtNumber &operator()(gbtNfgStrategy) const;
-  const gbtNumber &GetStrategyProb(const gbtNfgStrategy &p_strategy) const
+  void SetStrategyProb(gbtNfgAction, const gbtNumber &);
+  const gbtNumber &operator()(gbtNfgAction) const;
+  const gbtNumber &GetStrategyProb(const gbtNfgAction &p_strategy) const
     { return (*this)(p_strategy); }
 
   MixedSolution &operator+=(const MixedSolution &);
@@ -116,7 +116,7 @@ public:
   
   // PAYOFF COMPUTATION
   gbtNumber GetPayoff(gbtNfgPlayer) const;
-  gbtNumber GetStrategyValue(gbtNfgStrategy) const;
+  gbtNumber GetStrategyValue(gbtNfgAction) const;
 
   // OUTPUT
   void Dump(gbtOutput &) const;

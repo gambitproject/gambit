@@ -74,7 +74,7 @@ public:
 
 struct gbt_nfg_player_rep;
 class gbtNfgGame;
-class gbtNfgStrategy;
+class gbtNfgAction;
 
 class gbtNfgPlayer : public gbtGamePlayer {
 friend class gbtNfgGame;
@@ -104,7 +104,7 @@ public:
   int NumInfosets(void) const { return 1; }
 
   int NumStrategies(void) const;
-  gbtNfgStrategy GetStrategy(int) const;
+  gbtNfgAction GetStrategy(int) const;
 };
 
 #endif  // PLAYER_H

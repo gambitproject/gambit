@@ -56,7 +56,7 @@ public:
   
   void First(void);
   
-  void Freeze(gbtNfgStrategy);
+  void Freeze(gbtNfgAction);
   void Thaw(gbtNfgPlayer);
 
   // This only has an effect if the player is currently frozen

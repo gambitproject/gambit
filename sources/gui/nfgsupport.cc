@@ -41,10 +41,10 @@
 //
 class gbtCmdAddStrategy : public gbtGameCommand {
 private:
-  gbtNfgStrategy m_strategy;
+  gbtNfgAction m_strategy;
 
 public:
-  gbtCmdAddStrategy(gbtNfgStrategy p_strategy) : m_strategy(p_strategy) { }
+  gbtCmdAddStrategy(gbtNfgAction p_strategy) : m_strategy(p_strategy) { }
   virtual ~gbtCmdAddStrategy() { }
 
   void Do(gbtGameDocument *);
@@ -67,10 +67,10 @@ void gbtCmdAddStrategy::Do(gbtGameDocument *p_doc)
 //
 class gbtCmdRemoveStrategy : public gbtGameCommand {
 private:
-  gbtNfgStrategy m_strategy;
+  gbtNfgAction m_strategy;
 
 public:
-  gbtCmdRemoveStrategy(gbtNfgStrategy p_strategy) : m_strategy(p_strategy) { }
+  gbtCmdRemoveStrategy(gbtNfgAction p_strategy) : m_strategy(p_strategy) { }
   virtual ~gbtCmdRemoveStrategy() { }
 
   void Do(gbtGameDocument *);
@@ -117,7 +117,7 @@ void gbtCmdSetNfgSupport::Do(gbtGameDocument *p_doc)
 
 gbtNfgSupportWidget::gbtNfgSupportWidget(wxWindow *p_parent,
 					 wxWindowID p_id)
-  : wxTreeCtrl(p_parent, p_id), m_map(gbtNfgStrategy())
+  : wxTreeCtrl(p_parent, p_id), m_map(gbtNfgAction())
 {
   Connect(p_id, wxEVT_COMMAND_TREE_ITEM_COLLAPSING,
 	  (wxObjectEventFunction) (wxEventFunction)
@@ -136,7 +136,7 @@ void gbtNfgSupportWidget::SetSupport(const gbtNfgSupport &p_support)
 						  (char *) player.GetLabel()));
     
     for (int st = 1; st <= player.NumStrategies(); st++) {
-      gbtNfgStrategy strategy = player.GetStrategy(st);
+      gbtNfgAction strategy = player.GetStrategy(st);
 
       wxTreeItemId stratID = AppendItem(id, 
 					wxString::Format(wxT("%s"),
@@ -291,7 +291,7 @@ void gbtNfgSupportWindow::OnTreeItemActivated(wxTreeEvent &p_event)
 
 void gbtNfgSupportWindow::ToggleStrategy(wxTreeItemId p_id)
 {
-  gbtNfgStrategy strategy = m_supportWidget->GetStrategy(p_id);
+  gbtNfgAction strategy = m_supportWidget->GetStrategy(p_id);
   if (strategy.IsNull()) {
     return;
   }
@@ -378,5 +378,5 @@ void gbtNfgSupportFrame::OnUpdate(gbtGameView *p_sender)
 static gbtOutput &operator<<(gbtOutput &p_output, wxTreeItemId)
 { return p_output; }
 
-template class gbtBaseMap<wxTreeItemId, gbtNfgStrategy>;
-template class gbtOrdMap<wxTreeItemId, gbtNfgStrategy>;
+template class gbtBaseMap<wxTreeItemId, gbtNfgAction>;
+template class gbtOrdMap<wxTreeItemId, gbtNfgAction>;

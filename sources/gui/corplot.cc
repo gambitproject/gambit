@@ -614,7 +614,7 @@ gbtNfgCorPlotSupportDialog::gbtNfgCorPlotSupportDialog(wxWindow *p_parent,
 
 void gbtNfgCorPlotSupportDialog::ToggleStrategy(wxTreeItemId p_id)
 {
-  gbtNfgStrategy strategy = m_supportWidget->GetStrategy(p_id);
+  gbtNfgAction strategy = m_supportWidget->GetStrategy(p_id);
   if (strategy.IsNull()) {
     return;
   }

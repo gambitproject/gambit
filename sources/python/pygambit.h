@@ -167,7 +167,7 @@ nfplayerobject *newnfplayerobject(void);
 
 typedef struct {
   PyObject_HEAD
-  gbtNfgStrategy *m_strategy;
+  gbtNfgAction *m_strategy;
 } strategyobject;
 
 extern PyTypeObject Strategytype;

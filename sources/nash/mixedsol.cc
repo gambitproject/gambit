@@ -246,7 +246,7 @@ bool MixedSolution::Equals(const gbtMixedProfile<double> &p_profile) const
 bool MixedSolution::operator==(const MixedSolution &p_solution) const
 { return (m_profile == p_solution.m_profile); }
 
-void MixedSolution::SetStrategyProb(gbtNfgStrategy p_strategy,
+void MixedSolution::SetStrategyProb(gbtNfgAction p_strategy,
 				    const gbtNumber &p_value)
 { 
   Invalidate();
@@ -256,7 +256,7 @@ void MixedSolution::SetStrategyProb(gbtNfgStrategy p_strategy,
   }
 }
 
-const gbtNumber &MixedSolution::operator()(gbtNfgStrategy p_strategy) const
+const gbtNumber &MixedSolution::operator()(gbtNfgAction p_strategy) const
 {
   gbtNfgPlayer player = p_strategy.GetPlayer();
   return m_profile(player.GetId(), p_strategy.GetId()); 
@@ -367,7 +367,7 @@ gbtNumber MixedSolution::GetPayoff(gbtNfgPlayer p_player) const
   return m_profile.Payoff(p_player.GetId());
 }
 
-gbtNumber MixedSolution::GetStrategyValue(gbtNfgStrategy p_strategy) const
+gbtNumber MixedSolution::GetStrategyValue(gbtNfgAction p_strategy) const
 {
   return m_profile.Payoff(p_strategy.GetPlayer().GetId(), p_strategy); 
 }

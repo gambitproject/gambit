@@ -37,7 +37,7 @@
 //
 class gbtNfgSupportWidget : public wxTreeCtrl {
 private:
-  gbtOrdMap<wxTreeItemId, gbtNfgStrategy> m_map;
+  gbtOrdMap<wxTreeItemId, gbtNfgAction> m_map;
 
   void OnTreeItemCollapse(wxTreeEvent &);
 
@@ -45,7 +45,7 @@ public:
   gbtNfgSupportWidget(wxWindow *p_parent, wxWindowID p_id);
 
   void SetSupport(const gbtNfgSupport &);
-  gbtNfgStrategy GetStrategy(wxTreeItemId p_id) { return m_map(p_id); }
+  gbtNfgAction GetStrategy(wxTreeItemId p_id) { return m_map(p_id); }
 };
 
 class gbtNfgSupportWindow;
