@@ -10,9 +10,12 @@
 #include "gdpvect.h"
 #include "gmatrix.h"
 
+//-------------------------------------------------------------------------
+//                     EFGobitParams<T>: Member functions
+//-------------------------------------------------------------------------
+
 template <class T> EFGobitParams<T>::EFGobitParams(void)
 { }
-
 
 //-------------------------------------------------------------------------
 //                   EFGobitFunc<T>: Class declaration
@@ -32,8 +35,11 @@ class EFGobitFunc : public GobitFunc<T>, public gBFunctMin<T>  {
 
   public:
     EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P);
+    EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P,
+	      const gDPVector<T> &s);
     virtual ~EFGobitFunc();
 
+    void InitScratch(void);
     // These two are inherited virtual functions from GobitFunc
     void Optimize(T Lambda, int &iter, T &value);
     void Output(gOutput &f,int format) const;
@@ -51,15 +57,37 @@ EFGobitFunc<T>::EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P)
 		 probs(EF.Dimensionality().Lengths()),
 		 xi(p.Length(), p.Length())
 {
-  constrained = 1;
-  
+  SetPlev(P.plev);
   // This can later be replaced by ExtForm<T>::Centroid(), when written
+  E.Centroid(pp);
+/*
   for (int i = 1; i <= E.NumPlayers(); i++)
     for (int j = 1; j <= E.NumInfosets(1, i); j++)
       for (int k = 1; k <= E.NumActions(1, i, j); k++)
 	pp(i, j, k) = ((T) 1 / (T) E.NumActions(1, i, j));
+  */
+  InitScratch();
+}
 
-  for (i = 1; i <= p.Length(); i++)
+template <class T>
+EFGobitFunc<T>::EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P,
+			  const gDPVector<T> &s)
+  :gBFunctMin<T>(EF.ProfileLength(),P.tolOpt,P.maxitsOpt,
+		 P.tolBrent,P.maxitsBrent), E(EF), p(EF.Dimensionality()),
+		 pp(EF.Dimensionality()), cpay(EF.Dimensionality()),
+		 probs(EF.Dimensionality().Lengths()),
+		 xi(p.Length(), p.Length())
+{
+  SetPlev(P.plev);
+  InitScratch();
+  pp = s;
+}
+
+template <class T> void EFGobitFunc<T>::InitScratch(void)
+{
+  // Seems to me like this should be a parameter to the gfunct ctor?
+  constrained = 1;
+  for (int i = 1; i <= p.Length(); i++)
     for (int j = 1; j <= p.Length(); j++)  {
       xi(i, j) = (T) 0;
       if (i == j)    xi(i, j) = (T) 1;
@@ -167,11 +195,21 @@ EFGobitModule<T>::EFGobitModule(const ExtForm<T> &EF, EFGobitParams<T> &p)
   : GobitModule<T>(p), E(EF)
 { }
 
+template <class T>
+EFGobitModule<T>::EFGobitModule(const ExtForm<T> &EF, EFGobitParams<T> &p, gDPVector<T> &s)
+  : GobitModule<T>(p,&s), E(EF)
+{ }
+
 template <class T> EFGobitModule<T>::~EFGobitModule()
 { }
 
 template <class T> GobitFunc<T> *EFGobitModule<T>::CreateFunc(void)
 {
+  if(start) {
+    gDPVector<T> s(E.Dimensionality());
+    s=*start;
+    return new EFGobitFunc<T>(E, params, s); 
+  }
   return new EFGobitFunc<T>(E, params);
 }
 

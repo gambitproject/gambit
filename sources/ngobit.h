@@ -24,6 +24,7 @@ template <class T> class NFGobitModule : public GobitModule<T>   {
 
   public:
     NFGobitModule(const NormalForm<T> &NF, NFGobitParams<T> &p);
+    NFGobitModule(const NormalForm<T> &NF, NFGobitParams<T> &p,gPVector<T> &s);
     virtual ~NFGobitModule();
 };
 

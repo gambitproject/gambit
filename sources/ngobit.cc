@@ -8,9 +8,12 @@
 #include "ngobit.h"
 #include "gfunct.h"
 
+//-------------------------------------------------------------------------
+//                     NFGobitParams<T>: Member functions
+//-------------------------------------------------------------------------
+
 template <class T> NFGobitParams<T>::NFGobitParams(void)
 { }
-
 
 //-------------------------------------------------------------------------
 //                   NFGobitFunc<T>: Class declaration
@@ -34,8 +37,11 @@ class NFGobitFunc : public GobitFunc<T>, public gBC2FunctMin<T>  {
 
   public:
     NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P);
+    NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P,
+	      const gPVector<T> &s);
     virtual ~NFGobitFunc();
 
+    void InitScratch(void);
     // These two are inherited virtual functions from GobitFunc
     void Optimize(T Lambda, int &iter, T &value);
     void Output(gOutput &f, int format = 0) const;
@@ -46,15 +52,33 @@ class NFGobitFunc : public GobitFunc<T>, public gBC2FunctMin<T>  {
 //               NFGobitFunc<T>: Constructor and destructor
 //-------------------------------------------------------------------------
 
-template <class T>NFGobitFunc<T>
+template <class T> NFGobitFunc<T>
 ::NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P)
   : gBC2FunctMin<T>(NF.ProfileLength(),P.tolOpt,P.maxitsOpt,
 		    P.tolBrent,P.maxitsBrent), N(NF), p(NF.Dimensionality()),
 		    pp(NF.Dimensionality())
+{ 
+  SetPlev(P.plev);
+  InitScratch();
+  N.Centroid(pp);
+}
+
+template <class T>NFGobitFunc<T>
+::NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P,
+	      const gPVector<T>& s)
+  : gBC2FunctMin<T>(NF.ProfileLength(),P.tolOpt,P.maxitsOpt,
+		    P.tolBrent,P.maxitsBrent), N(NF), p(NF.Dimensionality()),
+		    pp(NF.Dimensionality())
+{
+  SetPlev(P.plev);
+  InitScratch();
+  pp = s;
+}
+
+template <class T> void NFGobitFunc<T>::InitScratch(void)
 {
   // Seems to me like this should be a parameter to the gfunct ctor?
   constrained = 1;
-  N.Centroid(pp);
   scratch1 = new gVector<T> *[N.NumPlayers()] - 1;
   scratch2 = new gVector<T> *[N.NumPlayers()] - 1;
   for (int i = 1; i <= N.NumPlayers(); i++)  {
@@ -62,6 +86,9 @@ template <class T>NFGobitFunc<T>
     scratch2[i] = new gVector<T>(N.NumStrats(i));
   }
 }
+
+//template class NFGobitFunc<double>;
+//template class NFGobitFunc<gRational>;
 
 template <class T> NFGobitFunc<T>::~NFGobitFunc()
 {
@@ -110,7 +137,8 @@ T NFGobitFunc<T>::GobitDerivValue(int i, int j, const gPVector<T> &v)
     gVector<T> &payoff = *scratch1[pl];
     N.Payoff(pl, pl, v, payoff);
     for (int st = 2; st <= N.NumStrats(pl); st++)  {
-      dv = log(v(pl, 1)) - log(v(pl, st)) - Lambda * (payoff[1] - payoff[st]);
+//      dv = log(v(pl, 1)) - log(v(pl, st)) - Lambda * (payoff[1] - payoff[st]);
+      dv = log(v(pl, 1)/v(pl, st)) - Lambda * (payoff[1] - payoff[st]);
       if (pl == i)  {
 	if (j == 1)              x += dv / v(pl, 1);
 	else if (j == st)        x -= dv / v(pl, st);
@@ -133,7 +161,8 @@ template <class T> T NFGobitFunc<T>::Value(const gVector<T> &v)
     gVector<T> &payoff = *scratch1[pl];
     N.Payoff(pl, pl, p, payoff);
     for (int st = 2; st <= N.NumStrats(pl); st++)  {
-      z = log(p(pl, 1)) - log(p(pl, st)) - Lambda * (payoff[1] - payoff[st]);
+//      z = log(p(pl, 1)) - log(p(pl, st)) - Lambda * (payoff[1] - payoff[st]);
+      z = log(p(pl, 1)/p(pl, st)) - Lambda * (payoff[1] - payoff[st]);
       val += z * z;
     }
   }
@@ -179,8 +208,13 @@ template <class T> void NFGobitFunc<T>::Output(gOutput &f,int format) const
 //-------------------------------------------------------------------------
 
 template <class T>
-NFGobitModule<T>::NFGobitModule(const NormalForm<T> &NF, NFGobitParams<T> &p)
+NFGobitModule<T>::NFGobitModule(const NormalForm<T> &NF, NFGobitParams<T> &p) 
   : GobitModule<T>(p), N(NF)
+{ }
+
+template <class T>NFGobitModule<T>
+::NFGobitModule(const NormalForm<T> &NF, NFGobitParams<T> &p, gPVector<T> &s)
+  : GobitModule<T>(p,&s), N(NF)
 { }
 
 template <class T> NFGobitModule<T>::~NFGobitModule()
@@ -188,7 +222,14 @@ template <class T> NFGobitModule<T>::~NFGobitModule()
 
 template <class T> GobitFunc<T> *NFGobitModule<T>::CreateFunc(void)
 {
+
+  if(start) {
+    gPVector<T> s(N.Dimensionality());
+    s=*start;
+    return new NFGobitFunc<T>(N, params, s); 
+  }
   return new NFGobitFunc<T>(N, params);
+
 }
 
 

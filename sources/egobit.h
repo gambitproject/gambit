@@ -24,6 +24,7 @@ template <class T> class EFGobitModule : public GobitModule<T>  {
 
   public:
     EFGobitModule(const ExtForm<T> &EF, EFGobitParams<T> &p);
+    EFGobitModule(const ExtForm<T> &EF, EFGobitParams<T> &p, gDPVector<T> &s);
     virtual ~EFGobitModule();
 };
 
