@@ -8,6 +8,7 @@ EXTRA_DIST = \
 	gambit.ico \
 	gambit.xbm \
 	gambit.xpm \
+	help.bmp \
 	help.xpm \
 	move.xpm \
 	new.bmp \
