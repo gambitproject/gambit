@@ -1418,6 +1418,15 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	break;
       }
 
+    // this check is temporary //
+    if( _FuncInfo[_FuncIndex].UserDefined )
+      for( i = 0; i < _FuncInfo[_FuncIndex].NumParams; i++ )
+	if( _FuncInfo[_FuncIndex].ParamInfo[i].Type & porLIST) 
+	{
+	  list_op = false;
+	  break;
+	}
+
     if( !list_op || !_FuncInfo[_FuncIndex].Listable )
     {
       if( !_FuncInfo[ _FuncIndex ].UserDefined )

@@ -265,7 +265,8 @@ Portion* GSM_ArgMax_Integer( Portion** param )
     p = (*(ListPortion*) param[0])[i];
     if( p->Type() == porINTEGER )
     {
-      if( ((IntPortion*) p)->Value() >= max )
+      if( ((IntPortion*) p)->Value() >= max ||
+	 i == ((ListPortion*) param[0])->Length() )
       {
 	max = ((IntPortion*) p)->Value();
 	index = i;
@@ -289,7 +290,8 @@ Portion* GSM_ArgMax_Float( Portion** param )
     p = (*(ListPortion*) param[0])[i];
     if( p->Type() == porFLOAT )
     {
-      if( ((FloatPortion*) p)->Value() >= max )
+      if( ((FloatPortion*) p)->Value() >= max || 
+	 i == ((ListPortion*) param[0])->Length() )
       {
 	max = ((FloatPortion*) p)->Value();
 	index = i;
@@ -313,7 +315,8 @@ Portion* GSM_ArgMax_Rational( Portion** param )
     p = (*(ListPortion*) param[0])[i];
     if( p->Type() == porRATIONAL )
     {
-      if( ((RationalPortion*) p)->Value() >= max )
+      if( ((RationalPortion*) p)->Value() >= max ||
+	 i == ((ListPortion*) param[0])->Length() )
       {
 	max = ((RationalPortion*) p)->Value();
 	index = i;
@@ -382,7 +385,7 @@ void Init_listfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("Length");
-  FuncObj->SetFuncInfo(GSM_LengthList, 1, NO_PREDEFINED_PARAMS, NON_LISTABLE);
+  FuncObj->SetFuncInfo(GSM_LengthList, 1, NO_PREDEFINED_PARAMS);
   FuncObj->SetParamInfo(GSM_LengthList, 0, "list", porANYLIST | porLIST,
 			NO_DEFAULT_VALUE);
   FuncObj->SetFuncInfo(GSM_LengthText, 1);
