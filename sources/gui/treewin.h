@@ -23,7 +23,6 @@ private:
   EfgShow *m_parent;
   
   Node  *mark_node;                 // Used in mark/goto node operations
-  const Node    *subgame_node;      // Used to mark the 'picking' subgame root
   efgTreeLayout m_layout;
 
   Infoset *hilight_infoset;       // Hilight infoset from the solution disp
@@ -108,14 +107,9 @@ public:
   Infoset *HighlightInfoset(void) const { return hilight_infoset; }
   Infoset *HighlightInfoset1(void) const { return hilight_infoset1; }
 
-  Node *SubgameNode(void) const { return (Node *) subgame_node; }
-
   const TreeDrawSettings &DrawSettings(void) const { return draw_settings; }
 
   void UpdateMenus(void);
-  
-  // Hilight the subgame root for the currently active subgame
-  void  SetSubgamePickNode(Node *n);
   
   // Check if a drag'n'drop object has been activated
   Node *GotObject(long &mx, long &my, int what);

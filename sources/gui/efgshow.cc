@@ -460,33 +460,6 @@ gNumber EfgShow::ActionProb(const Node *p_node, int p_action) const
   return -1;
 }
 
-
-void EfgShow::PickSolutions(const Efg::Game &p_efg, 
-			    gList<BehavSolution> &p_solns)
-{
-#ifdef NOT_PORTED_YET
-  try {
-    m_treeWindow->SetSubgamePickNode(p_rootnode);
-    BehavSolutionList temp_solns;
-    temp_solns += p_solns;       
-    EfgSolnPicker *pick = new EfgSolnPicker(p_efg, temp_solns,
-					    m_treeWindow->DrawSettings(),
-					    sf_options, this);
-    Enable(false);
-    while (pick->Completed() == wxRUNNING) wxYield();
-    Enable(true);
-    p_solns = temp_solns; 
-    delete pick;
-    m_treeWindow->SetSubgamePickNode(0);
-  }
-  catch (...) {
-    m_treeWindow->SetSubgamePickNode(0);
-    throw;
-  }
-#endif // NOT_PORTED_YET
-}
-
-
 //---------------------------------------------------------------------
 //            EfgShow: Coordinating updates of child windows
 //---------------------------------------------------------------------

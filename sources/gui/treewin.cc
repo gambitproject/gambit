@@ -58,7 +58,7 @@ END_EVENT_TABLE()
 TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   : wxScrolledWindow(p_parent),
     m_efg(*p_efgShow->Game()), m_parent(p_efgShow),
-    mark_node(0), subgame_node(0), m_layout(m_efg, this),
+    mark_node(0), m_layout(m_efg, this),
     hilight_infoset(0), hilight_infoset1(0), m_dragImage(0), m_dragSource(0),
     iset_drag(new IsetDragger(this, m_efg)),
     branch_drag(new BranchDragger(this, m_efg)),
@@ -730,24 +730,6 @@ void TreeWindow::SupportChanged(void)
 
   RefreshLayout();
   Refresh();
-}
-
-void TreeWindow::SetSubgamePickNode(Node *n)
-{
-  if (n) {
-    // save the actual cursor, and fake a cursor movement to ensure
-    // that the node is visible
-    Node *cur_cursor = Cursor();
-    SetCursorPosition((Node *) n);
-    ProcessCursor();
-    NodeEntry *ne = m_layout.GetNodeEntry(n);
-    wxClientDC dc(this);
-    PrepareDC(dc);
-    dc.SetUserScale(m_zoom, m_zoom);
-    DrawSubgamePickIcon(dc, *ne);
-    SetCursorPosition(cur_cursor);
-  }
-  subgame_node = n;
 }
 
 Node *TreeWindow::GotObject(long &x, long &y, int what)

@@ -21,7 +21,6 @@
 int INFOSET_SPACING = 10;
 int SUBGAME_LARGE_ICON_SIZE = 20;
 int SUBGAME_SMALL_ICON_SIZE = 10;
-int SUBGAME_PICK_SIZE = 30;
 int DELTA = 8;
 int MAX_TW = 60;
 int MAX_TH = 20;
@@ -94,17 +93,6 @@ void DrawSmallSubgameIcon(wxDC &dc, const NodeEntry &entry)
   points[2].x = entry.x+SUBGAME_SMALL_ICON_SIZE;
   points[2].y = entry.y+SUBGAME_SMALL_ICON_SIZE/2;
   dc.DrawPolygon(3, points);
-}
-
-void DrawSubgamePickIcon(wxDC &dc, const NodeEntry &entry)
-{
-  dc.SetPen(*wxThePenList->FindOrCreatePen("BLACK", 2, wxSOLID));
-  dc.DrawLine(entry.x, entry.y - SUBGAME_PICK_SIZE/2,
-	      entry.x, entry.y + SUBGAME_PICK_SIZE/2);
-  dc.DrawLine(entry.x, entry.y - SUBGAME_PICK_SIZE/2,
-	      entry.x + SUBGAME_PICK_SIZE/2, entry.y - SUBGAME_PICK_SIZE/2);
-  dc.DrawLine(entry.x, entry.y + SUBGAME_PICK_SIZE/2,
-	      entry.x + SUBGAME_PICK_SIZE/2, entry.y + SUBGAME_PICK_SIZE/2);
 }
 
 //-----------------------------------------------------------------------
@@ -910,9 +898,6 @@ void efgTreeLayout::RenderSubtree(wxDC &dc) const
 		   3, entry.color);
     }
       
-    if (child_entry.n == m_parent->SubgameNode())
-      DrawSubgamePickIcon(dc, child_entry);
-    
     // draw the 'branches'
     if (child_entry.n->GetParent() && child_entry.in_sup) {
       // no branches for root node

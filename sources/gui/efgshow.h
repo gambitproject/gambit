@@ -209,9 +209,6 @@ public:
 
   void OnSelectedMoved(const Node *n);
 
-  // Solution interface to the algorithms
-  void PickSolutions(const Efg::Game &, gList<BehavSolution> &);
-
   // Solution interface to normal form
   void AddProfile(const BehavSolution &, bool map);
   FullEfg *Game(void) { return &m_efg; }
