@@ -1478,10 +1478,10 @@ static Portion* GSM_Write_Efg(Portion** param)
 
 static Portion* GSM_ListFormat(Portion** param)
 {
-  _WriteListBraces = ((BoolPortion*) param[0])->Value();
-  _WriteListCommas = ((BoolPortion*) param[1])->Value();
-  _WriteListLF = ((NumberPortion*) param[2])->Value();
-  _WriteListIndent = ((NumberPortion*) param[3])->Value();
+  _WriteListBraces.SetValue(((BoolPortion*) param[0])->Value());
+  _WriteListCommas.SetValue(((BoolPortion*) param[1])->Value());
+  _WriteListLF.SetValue(((NumberPortion*) param[2])->Value());
+  _WriteListIndent.SetValue(((NumberPortion*) param[3])->Value());
 
   GSM_SetWriteOptions();
 
@@ -1500,9 +1500,9 @@ static Portion* GSM_GetListFormat(Portion** param)
 
 static Portion* GSM_FloatFormat(Portion** param)
 {
-  _WriteWidth = ((NumberPortion*) param[1])->Value();
-  _WritePrecis = ((NumberPortion*) param[2])->Value();
-  _WriteExpmode = ((BoolPortion*) param[3])->Value();
+  _WriteWidth.SetValue(((NumberPortion*) param[1])->Value());
+  _WritePrecis.SetValue(((NumberPortion*) param[2])->Value());
+  _WriteExpmode.SetValue(((BoolPortion*) param[3])->Value());
 
   GSM_SetWriteOptions();
 
@@ -1520,7 +1520,7 @@ static Portion* GSM_GetFloatFormat(Portion** param)
 
 static Portion* GSM_TextFormat(Portion** param)
 {
-  _WriteQuoted = ((BoolPortion*) param[1])->Value();
+  _WriteQuoted.SetValue(((BoolPortion*) param[1])->Value());
 
   GSM_SetWriteOptions();
 
@@ -1536,8 +1536,8 @@ static Portion* GSM_GetTextFormat(Portion** param)
 
 static Portion* GSM_SolutionFormat(Portion** param)
 {
-  _WriteSolutionInfo = ((BoolPortion*) param[1])->Value();
-  _WriteSolutionLabels = ((BoolPortion *) param[2])->Value();
+  _WriteSolutionInfo.SetValue(((BoolPortion*) param[1])->Value());
+  _WriteSolutionLabels.SetValue(((BoolPortion *) param[2])->Value());
 
   GSM_SetWriteOptions();
 
