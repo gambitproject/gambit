@@ -41,7 +41,7 @@ extern wxApp *wxTheApp = 1;
 #endif
 
 
-GambitApp   *gambitApp;
+GambitApp   gambitApp;
 GambitFrame *main_gambit_frame;
 
 typedef void (*fptr)(int);
@@ -186,10 +186,6 @@ wxFrame *GambitApp::OnInit(void)
                      "Config Error");
         return NULL;
     }
-
-	// Initialize global App object.
-
-	gambitApp = new GambitApp;
 
 	//
 	// Initialize GUI record/playback globals.
@@ -342,7 +338,7 @@ wxFrame *GambitApp::OnInit(void)
 
     // Set current directory.
 
-    gambitApp->SetCurrentDir(gText(wxGetWorkingDirectory()));
+    gambitApp.SetCurrentDir(gText(wxGetWorkingDirectory()));
 
     // If playing back a log file, read in the log file and
     // execute the log file commands one by one.
@@ -402,7 +398,7 @@ void GambitFrame::LoadFile(char *s)
         {
             Enable(FALSE); // Don't allow anything while the dialog is up.
 
-            s = wxFileSelector("Load data file", gambitApp->CurrentDir(), 
+            s = wxFileSelector("Load data file", gambitApp.CurrentDir(), 
                                NULL, NULL, "*.?fg");
 
             Enable(TRUE);
@@ -411,7 +407,7 @@ void GambitFrame::LoadFile(char *s)
                 return;
 
             // Save the current directory.
-            gambitApp->SetCurrentDir(gText(wxPathOnly(s)));
+            gambitApp.SetCurrentDir(gText(wxPathOnly(s)));
 
             GUI_RECORD_ARG("GambitFrame::LoadFile", 1, s);
 
