@@ -13,8 +13,8 @@
 #include "output.h"
 
 class gString   {
-  friend input& operator>>(input&,gString&);
-  friend output& operator<<(output&,gString&);
+  friend input& operator>>(input&, gString&);
+  friend output& operator<<(output&, const gString&);
   protected:
     char *storage;
 
@@ -29,7 +29,7 @@ class gString   {
     gString(const gString& s);
 
 	// MEMBER FUNCTIONS
-    char *stradr(void)   { return storage; }
+    char *stradr(void)      { return storage; }
     int length(void) const    { return strlen(storage); }
     gString right(int len) const;
     gString left(int len) const;
@@ -44,8 +44,10 @@ class gString   {
     void operator=(const gString& s)   { *this = s.storage; }
 
 	// CONCATENATORS
+    void operator+=(char c);
     void operator+=(const char *s);
     void operator+=(const gString& s)   { *this += s.storage; }
+    gString operator+(char c);
     gString operator+(const char *s);
     gString operator+(const gString& s)  { return *this + s.storage; }
 
@@ -86,31 +88,9 @@ inline gString operator+(const char *c, const gString &s)
     return gString(c) + s;
 }
 
-input& operator>>(input& from,gString& A){
-  char a;
-  char str[256];
-  int i=0;
+input &operator<<(input &from, gString &);
 
-  from >> a;
-  while(a==' '||a=='\n'||a=='\t') from >> a;
-  if(a == '\"'){
-    from >> a;
-    while(a != '\"'){
-      str[i] = a; i++;
-      from >> a;
-    }
-    str[i]= '\0';
-  }
-  else{
-    str[i] = a;
-    from >> &(str[i+1]);
-  }
-  gString B(str);
-  A = B;
-  return from;
-}
-
-output& operator<<(output& to,gString& A){
+inline output& operator<<(output& to, const gString& A){
   to << A.storage; return to;
 }
 

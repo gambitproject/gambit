@@ -55,6 +55,17 @@ void gString::operator=(const char *s)
   strcpy(storage, s);
 }
 
+void gString::operator+=(char c)
+{
+  char *sp = new char[strlen(storage) + 2];
+  assert (sp != 0);
+  strcpy(sp, storage);
+  sp[strlen(storage)] = c;
+  sp[strlen(storage) + 1] = '\0';
+  delete [] storage;
+  storage = sp;
+}
+
 void gString::operator+=(const char *s)
 {
   char *sp = new char[strlen(storage) + strlen(s) + 1];
@@ -63,6 +74,13 @@ void gString::operator+=(const char *s)
   strcat(sp, s);
   delete [] storage;
   storage = sp;
+}
+
+gString gString::operator+(char c)
+{
+  gString tmp(*this);
+  tmp += c;
+  return tmp;
 }
 
 gString gString::operator+(const char *s)
@@ -132,4 +150,29 @@ void gString::remove(int n)
 
     delete [] storage;
     storage = temp;
+}
+
+input& operator>>(input &from, gString &s)
+{
+  char a;
+  
+  s = "";
+  
+  do  {
+    from >> a;
+  }  while (isspace(a));
+
+  if (a == '\"'){
+    from >> a;
+    while  (a != '\"') 
+      s += a;
+  }
+  else  {
+    do  {
+      s += a;
+      from >> a;
+    }  while (!isspace(a));
+  }
+
+  return from;
 }
