@@ -31,15 +31,11 @@
 
 #include "tree-display.h"
 
-gbtTreeDisplay::gbtTreeDisplay(wxWindow *p_parent, 
-			       gbtGameDocument *p_doc)
-  : wxScrolledWindow(p_parent, -1), gbtGameView(p_doc)
-{
-  SetBackgroundColour(*wxWHITE);
-  OnUpdate();
-}
+//--------------------------------------------------------------------------
+//                          class gbtTreeLayout
+//--------------------------------------------------------------------------
 
-void gbtTreeDisplay::DrawOutcome(wxDC &p_dc, const gbtGameNode &p_node)
+void gbtTreeLayout::DrawOutcome(wxDC &p_dc, const gbtGameNode &p_node) const
 {
   wxPoint point = m_nodeLocations[p_node->GetId()];
   point.x += 20;
@@ -58,7 +54,7 @@ void gbtTreeDisplay::DrawOutcome(wxDC &p_dc, const gbtGameNode &p_node)
   }
 }
 
-void gbtTreeDisplay::DrawSubtree(wxDC &p_dc, const gbtGameNode &p_node)
+void gbtTreeLayout::DrawSubtree(wxDC &p_dc, const gbtGameNode &p_node) const
 {
   const wxPoint &point = m_nodeLocations[p_node->GetId()];
   wxColour color;
@@ -85,13 +81,12 @@ void gbtTreeDisplay::DrawSubtree(wxDC &p_dc, const gbtGameNode &p_node)
   }
 }
 
-void gbtTreeDisplay::OnDraw(wxDC &p_dc)
+void gbtTreeLayout::DrawTree(wxDC &p_dc) const
 {
-  p_dc.SetUserScale(m_doc->GetTreeZoom(), m_doc->GetTreeZoom());
   DrawSubtree(p_dc, m_doc->GetGame()->GetRoot());
 }
 
-void gbtTreeDisplay::LayoutSubtree(const gbtGameNode &p_node, int p_depth)
+void gbtTreeLayout::LayoutSubtree(const gbtGameNode &p_node, int p_depth)
 {
   if (p_node->NumChildren() > 0) {
     for (int i = 1; i <= p_node->NumChildren(); i++) {
@@ -112,17 +107,40 @@ void gbtTreeDisplay::LayoutSubtree(const gbtGameNode &p_node, int p_depth)
   }
 }
 
-void gbtTreeDisplay::OnUpdate(void)
+void gbtTreeLayout::LayoutTree(void)
 {
   m_maxX = 0;
   m_maxY = 30;    // initial margin
   m_nodeLocations = gbtArray<wxPoint>(m_doc->GetGame()->NumNodes());
-  m_maxX += 50;   // right margin, to allow for outcome display
-
   LayoutSubtree(m_doc->GetGame()->GetRoot(), 0);
+  m_maxX += 50;   // right margin, to allow for outcome display
+}
+
+//--------------------------------------------------------------------------
+//                         class gbtTreeDisplay
+//--------------------------------------------------------------------------
+
+gbtTreeDisplay::gbtTreeDisplay(wxWindow *p_parent, 
+			       gbtGameDocument *p_doc)
+  : wxScrolledWindow(p_parent, -1), gbtGameView(p_doc),
+    m_layout(p_doc)
+{
+  SetBackgroundColour(*wxWHITE);
+  OnUpdate();
+}
+
+void gbtTreeDisplay::OnDraw(wxDC &p_dc)
+{
+  p_dc.SetUserScale(m_doc->GetTreeZoom(), m_doc->GetTreeZoom());
+  m_layout.DrawTree(p_dc);
+}
+
+void gbtTreeDisplay::OnUpdate(void)
+{
+  m_layout.LayoutTree();
   SetScrollbars(50, 50, 
-		(int) (m_maxX * m_doc->GetTreeZoom() / 50.0) + 1, 
-		(int) (m_maxY * m_doc->GetTreeZoom() / 50.0) + 1);
+		(int) (m_layout.GetMaxX() * m_doc->GetTreeZoom() / 50.0) + 1, 
+		(int) (m_layout.GetMaxY() * m_doc->GetTreeZoom() / 50.0) + 1);
 
   Refresh();
 }

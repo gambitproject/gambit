@@ -37,10 +37,16 @@
 #include "dialog-about.h"        // for "About..." dialog
 
 #include "tree-display.h"
+#include "tree-print.h"
 #include "table-schelling.h"
 #include "table-matrix.h"
 #include "panel-nash.h"
 #include "panel-qre.h"
+
+const int GBT_MENU_FILE_EXPORT = 970;
+const int GBT_MENU_FILE_EXPORT_BMP = 971;
+const int GBT_MENU_FILE_EXPORT_JPG = 972;
+const int GBT_MENU_FILE_EXPORT_PNG = 973;
 
 const int GBT_MENU_VIEW_EFG = 998;
 const int GBT_MENU_VIEW_NFG = 999;
@@ -56,6 +62,12 @@ BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU(wxID_OPEN, gbtGameFrame::OnFileOpen)
   EVT_MENU(wxID_CLOSE, gbtGameFrame::OnFileClose)
   EVT_MENU(wxID_SAVE, gbtGameFrame::OnFileSave)
+  EVT_MENU(wxID_PRINT_SETUP, gbtGameFrame::OnFilePageSetup)
+  EVT_MENU(wxID_PREVIEW, gbtGameFrame::OnFilePrintPreview)
+  EVT_MENU(wxID_PRINT, gbtGameFrame::OnFilePrint)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_BMP, gbtGameFrame::OnFileExportBMP)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_JPG, gbtGameFrame::OnFileExportJPG)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_PNG, gbtGameFrame::OnFileExportPNG)
   EVT_MENU(wxID_EXIT, gbtGameFrame::OnFileExit)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, gbtGameFrame::OnFileMRU)
   EVT_MENU(GBT_MENU_VIEW_EFG, gbtGameFrame::OnViewEfg)
@@ -135,7 +147,25 @@ void gbtGameFrame::MakeMenu(void)
   fileMenu->Append(wxID_CLOSE, _("&Close"), _("Close this window"));
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_SAVE, _("&Save"), _("Save this game"));
+  
+  wxMenu *fileExportMenu = new wxMenu;
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_BMP, _("&BMP"),
+			 _("Export game as a Windows bitmap graphic"));
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_JPG, _("&JPG"),
+			 _("Export game as a JPEG graphic"));
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_PNG, _("&PNG"),
+			 _("Export game as a PNG graphic"));
+  fileMenu->Append(GBT_MENU_FILE_EXPORT, _("&Export"),
+		   fileExportMenu, _("Export the game in a different format"));
   fileMenu->AppendSeparator();
+
+  fileMenu->Append(wxID_PRINT_SETUP, _("Page Se&tup"),
+		   _("Set up preferences for printing"));
+  fileMenu->Append(wxID_PREVIEW, _("Print Pre&view"),
+		   _("View a preview of the game printout"));
+  fileMenu->Append(wxID_PRINT, _("&Print"), _("Print this game"));
+  fileMenu->AppendSeparator();
+
   fileMenu->Append(wxID_EXIT, _("E&xit"), _("Exit Gambit"));
 
   wxMenu *viewMenu = new wxMenu;
@@ -363,6 +393,127 @@ void gbtGameFrame::OnFileSave(wxCommandEvent &)
   }
 }
 
+void gbtGameFrame::OnFileExportBMP(wxCommandEvent &)
+{
+  wxFileDialog dialog(this, _("Choose output file"), 
+		      _T(""), _T(""),
+		      _T("Windows bitmap files (*.bmp)|*.bmp"), 
+		      wxSAVE | wxOVERWRITE_PROMPT);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    wxMemoryDC dc;
+    wxBitmap bitmap(m_treeDisplay->GetLayout().GetMaxX(),
+		    m_treeDisplay->GetLayout().GetMaxY());
+    dc.SelectObject(bitmap);
+    dc.Clear();
+    m_treeDisplay->GetLayout().DrawTree(dc);
+    if (!bitmap.SaveFile(dialog.GetPath(), wxBITMAP_TYPE_BMP)) {
+      wxMessageBox(wxString::Format(_("An error occurred in writing '%s'."),
+				    (const char *) dialog.GetPath().mb_str()),
+		   _("Error"), wxOK, this);
+    }
+  }
+}
+
+void gbtGameFrame::OnFileExportJPG(wxCommandEvent &)
+{
+  wxFileDialog dialog(this, _("Choose output file"), 
+		      _T(""), _T(""),
+		      _T("JPEG image files (*.jpg)|*.jpg|"
+			 "JPEG image files (*.jpeg)|*.jpeg|"), 
+		      wxSAVE | wxOVERWRITE_PROMPT);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    wxMemoryDC dc;
+    wxBitmap bitmap(m_treeDisplay->GetLayout().GetMaxX(),
+		    m_treeDisplay->GetLayout().GetMaxY());
+    dc.SelectObject(bitmap);
+    dc.Clear();
+    m_treeDisplay->GetLayout().DrawTree(dc);
+    if (!bitmap.SaveFile(dialog.GetPath(), wxBITMAP_TYPE_JPEG)) {
+      wxMessageBox(wxString::Format(_("An error occurred in writing '%s'."),
+				    (const char *) dialog.GetPath().mb_str()),
+		   _("Error"), wxOK, this);
+    }
+  }
+}
+
+void gbtGameFrame::OnFileExportPNG(wxCommandEvent &)
+{
+  wxFileDialog dialog(this, _("Choose output file"), 
+		      _T(""), _T(""),
+		      _T("PNG image files (*.png)|*.png"), 
+		      wxSAVE | wxOVERWRITE_PROMPT);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    wxMemoryDC dc;
+    wxBitmap bitmap(m_treeDisplay->GetLayout().GetMaxX(),
+		    m_treeDisplay->GetLayout().GetMaxY());
+    dc.SelectObject(bitmap);
+    dc.Clear();
+    m_treeDisplay->GetLayout().DrawTree(dc);
+    if (!bitmap.SaveFile(dialog.GetPath(), wxBITMAP_TYPE_PNG)) {
+      wxMessageBox(wxString::Format(_("An error occurred in writing '%s'."),
+				    (const char *) dialog.GetPath().mb_str()),
+		   _("Error"), wxOK, this);
+    }
+  }
+}
+
+void gbtGameFrame::OnFilePageSetup(wxCommandEvent &)
+{
+  wxPageSetupDialog dialog(this, &m_pageSetupData);
+  if (dialog.ShowModal() == wxID_OK) {
+    m_printData = dialog.GetPageSetupData().GetPrintData();
+    m_pageSetupData = dialog.GetPageSetupData();
+  }
+}
+
+void gbtGameFrame::OnFilePrintPreview(wxCommandEvent &)
+{
+  wxPrintDialogData data(m_printData);
+  wxPrintPreview *preview = 
+    new wxPrintPreview(new gbtTreePrintout(m_treeDisplay->GetLayout(),
+					   wxString::Format(_T("%s"), 
+							    m_doc->GetGame()->GetLabel().c_str())),
+		       new gbtTreePrintout(m_treeDisplay->GetLayout(),
+					   wxString::Format(_T("%s"), 
+							    m_doc->GetGame()->GetLabel().c_str())),
+		       &data);
+
+  if (!preview->Ok()) {
+    delete preview;
+    return;
+  }
+
+  wxPreviewFrame *frame = new wxPreviewFrame(preview, this,
+					     _("Print Preview"),
+					     wxPoint(100, 100),
+					     wxSize(600, 650));
+  frame->Initialize();
+  frame->Show(true);
+}
+
+void gbtGameFrame::OnFilePrint(wxCommandEvent &)
+{
+  wxPrintDialogData data(m_printData);
+  wxPrinter printer(&data);
+  gbtTreePrintout printout(m_treeDisplay->GetLayout(),
+			   wxString::Format(_T("%s"), 
+					    m_doc->GetGame()->GetLabel().c_str()));
+
+  if (!printer.Print(this, &printout, true)) {
+    if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {
+      wxMessageBox(_("There was an error in printing"), _("Error"), wxOK);
+    }
+    // Otherwise, user hit "cancel"; just be quiet and return.
+    return;
+  }
+  else {
+    m_printData = printer.GetPrintDialogData().GetPrintData();
+  }
+}
+
 void gbtGameFrame::OnFileExit(wxCommandEvent &)
 {
   for (int i = 1; i <= wxGetApp().NumWindows(); i++) {
@@ -467,6 +618,15 @@ void gbtGameFrame::OnUpdate(void)
 			      (m_doc->IsModified()) ? "*" : "",
 			      m_doc->GetGame()->GetLabel().c_str()));
   }
+
+  GetMenuBar()->Enable(GBT_MENU_FILE_EXPORT,
+		       m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
+  GetMenuBar()->Enable(wxID_PRINT_SETUP,
+		       m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
+  GetMenuBar()->Enable(wxID_PREVIEW,
+		       m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
+  GetMenuBar()->Enable(wxID_PRINT,
+		       m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
 
   GetMenuBar()->Check(GBT_MENU_VIEW_EFG, 
 		      m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));

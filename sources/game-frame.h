@@ -27,11 +27,21 @@
 #ifndef GAME_FRAME_H
 #define GAME_FRAME_H
 
+#include <wx/printdlg.h>         // for wxPageSetupData, wxPrintData
+
 #include "game-document.h"
+
+class gbtTreeDisplay;
 
 class gbtGameFrame : public wxFrame, gbtGameView {
 private:
-  wxPanel *m_tablePanel, *m_treeDisplay, *m_algorithmPanel, *m_qrePanel;
+  wxPanel *m_tablePanel, *m_algorithmPanel, *m_qrePanel;
+  gbtTreeDisplay *m_treeDisplay;
+
+  // Printing state... should be part of document instead?
+  wxPageSetupData m_pageSetupData;
+  wxPrintData m_printData;
+
 
   // Auxiliary functions for setting up frame
   void MakeMenu(void);
@@ -43,6 +53,12 @@ private:
   void OnFileOpen(wxCommandEvent &);
   void OnFileClose(wxCommandEvent &);
   void OnFileSave(wxCommandEvent &);
+  void OnFileExportBMP(wxCommandEvent &);
+  void OnFileExportJPG(wxCommandEvent &);
+  void OnFileExportPNG(wxCommandEvent &);
+  void OnFilePageSetup(wxCommandEvent &);
+  void OnFilePrintPreview(wxCommandEvent &);
+  void OnFilePrint(wxCommandEvent &);
   void OnFileExit(wxCommandEvent &);
   void OnFileMRU(wxCommandEvent &);
 
