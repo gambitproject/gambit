@@ -36,6 +36,8 @@ libnash_a_SOURCES = \
 	mixedsol.cc \
 	mixedsol.h \
 	nfgalgorithm.h \
+	nfgch.cc \
+	nfgch.h \
 	nfglcp.cc \
 	nfglcp.h \
 	nfglcp.imp \

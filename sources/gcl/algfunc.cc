@@ -52,6 +52,7 @@
 #include "nash/efglogit.h"
 #include "nash/nfgsimpdiv.h"
 #include "nash/nfgyamamoto.h"
+#include "nash/nfgch.h"
 
 #include "numerical/vertenum.h"
 #include "numerical/lpsolve.h"
@@ -184,6 +185,34 @@ static Portion *GSM_Behav(GSM &, Portion **param)
   bs->SetEpsilon(mp.Epsilon());
     
   return new BehavPortion(bs);
+}
+
+//------------------
+// CHSolve
+//------------------
+
+static Portion *GSM_CH_Nfg(GSM &gsm, Portion **param)
+{
+  const gbtNfgSupport &support = AsNfgSupport(param[0]);
+  gbtNfgBehavCH algorithm;
+  algorithm.SetMinTau(AsNumber(param[1]));
+  algorithm.SetMaxTau(AsNumber(param[2]));
+  algorithm.SetStepTau(AsNumber(param[3]));
+
+  gList<MixedSolution> solutions;
+
+  gsm.StartAlgorithmMonitor("CHSolve Progress");
+  try {
+    solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
+  }
+  catch (gSignalBreak &) { }
+  catch (...) {
+    gsm.EndAlgorithmMonitor();
+    throw;
+  }
+
+  gsm.EndAlgorithmMonitor();
+  return new Mixed_ListPortion(solutions);
 }
 
 
@@ -1136,6 +1165,17 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
+  FuncObj = new gclFunction(*gsm, "CHSolve", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_CH_Nfg,
+				       PortionSpec(porMIXED, 1), 4));
+  FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("minTau", porNUMBER,
+					   new NumberPortion(0.0)));
+  FuncObj->SetParamInfo(0, 2, gclParameter("maxTau", porNUMBER,
+					   new NumberPortion(10.0)));
+  FuncObj->SetParamInfo(0, 3, gclParameter("stepTau", porNUMBER,
+					   new NumberPortion(0.01)));
+  gsm->AddFunction(FuncObj);
 
   FuncObj = new gclFunction(*gsm, "EnumMixedSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_EnumMixed_Nfg, 

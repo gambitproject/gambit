@@ -9,6 +9,8 @@ gambit_SOURCES = \
 	corplot.h \
 	dlabout.cc \
 	dlabout.h \
+	dlch.cc \
+	dlch.h \
 	dleditbehav.cc \
 	dleditbehav.h \
 	dleditcont.cc \

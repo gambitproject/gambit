@@ -58,9 +58,11 @@
 #include "dlnfgnash.h"
 #include "dlnfgqre.h"
 #include "dlqrefile.h"
+#include "dlch.h"
 #include "dlreport.h"
 #include "nash/nfglogit.h"
 #include "nash/nfgqregrid.h"
+#include "nash/nfgch.h"
 
 //=====================================================================
 //                 Implementation of class NfgShow
@@ -101,6 +103,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_TOOLS_DOMINANCE, NfgShow::OnToolsDominance)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM, NfgShow::OnToolsEquilibrium)
   EVT_MENU(NFG_TOOLS_QRE, NfgShow::OnToolsQre)
+  EVT_MENU(NFG_TOOLS_CH, NfgShow::OnToolsCH)
   EVT_MENU(wxID_ABOUT, NfgShow::OnHelpAbout)
   EVT_MENU(NFG_SUPPORT_DUPLICATE, NfgShow::OnSupportDuplicate)
   EVT_MENU(NFG_SUPPORT_DELETE, NfgShow::OnSupportDelete)
@@ -462,6 +465,8 @@ void NfgShow::MakeMenus(void)
 		    "Compute Nash equilibria (and refinements)");
   toolsMenu->Append(NFG_TOOLS_QRE, "&Qre",
 		    "Compute quantal response equilibria");
+  toolsMenu->Append(NFG_TOOLS_CH, "&CH",
+		    "Compute cognitive hierarchy correspondence");
   
   wxMenu *helpMenu = new wxMenu;
   helpMenu->Append(wxID_ABOUT, "&About", "About Gambit");
@@ -1059,6 +1064,42 @@ void NfgShow::OnToolsQre(wxCommandEvent &)
     }
   }
 }
+
+void NfgShow::OnToolsCH(wxCommandEvent &)
+{
+  dialogNfgCH dialog(this, *m_currentSupport);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    gList<MixedSolution> solutions;
+
+    try {
+      gbtNfgBehavCH algorithm;
+      algorithm.SetMinTau(dialog.MinTau());
+      algorithm.SetMaxTau(dialog.MaxTau());
+      algorithm.SetStepTau(dialog.StepTau());
+
+      wxStatus status(this, "CHSolve Progress");
+      gNullOutput gnull;
+      solutions = algorithm.Solve(*m_currentSupport, status);
+    }
+    catch (gSignalBreak &) { }
+    catch (...) {
+      wxMessageDialog message(this,
+			      "An exception occurred in computing equilibria",
+			      "Error", wxID_OK);
+      message.ShowModal();
+    }
+
+    if (solutions.Length() > 0) {
+      dialogQreFile fileDialog(this, solutions);
+      if (fileDialog.ShowModal() == wxID_OK) {
+	
+      }
+    }
+  }
+
+}
+
 
 //----------------------------------------------------------------------
 //                NfgShow: Menu handlers - Help menu

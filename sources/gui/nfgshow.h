@@ -113,6 +113,7 @@ private:
   void OnToolsDominance(wxCommandEvent &);
   void OnToolsEquilibrium(wxCommandEvent &);
   void OnToolsQre(wxCommandEvent &);
+  void OnToolsCH(wxCommandEvent &);
 
   void OnHelpAbout(wxCommandEvent &);
 

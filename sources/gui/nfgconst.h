@@ -55,6 +55,7 @@ const int NFG_FORMAT_FONT_LABELS = 203;
 const int NFG_TOOLS_DOMINANCE = 160;
 const int NFG_TOOLS_EQUILIBRIUM = 498;
 const int NFG_TOOLS_QRE = 499;
+const int NFG_TOOLS_CH = 497;
 
 const int NFG_SUPPORT_DUPLICATE = 710;
 const int NFG_SUPPORT_DELETE = 711;
