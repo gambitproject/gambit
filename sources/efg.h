@@ -20,12 +20,13 @@ class BaseNfg;
 
 class BaseEfg     {
   
-  private:
-    // this is used to track memory leakage; #define MEMCHECK to use it
-    static int _NumObj;
+private:
+  // this is used to track memory leakage; #define MEMCHECK to use it
+  static int _NumObj;
   
-  friend class EfgFileReader;
-  protected:
+friend class EfgFileReader;
+  
+protected:
     gString title;
     gBlock<EFPlayer *> players;
     gBlock<Outcome *> outcomes;
@@ -55,6 +56,7 @@ class BaseEfg     {
     void ScrapInfoset(Infoset *);
     void ScrapOutcome(Outcome *);
 
+  
 // These are auxiliary functions used by the .efg file reader code
     Infoset *GetInfosetByIndex(EFPlayer *p, int index) const;
     Infoset *CreateInfosetByIndex(EFPlayer *p, int index, int br);
@@ -126,6 +128,11 @@ class BaseEfg     {
 
 template <class T> class OutcomeVector;
 #include "behav.h"
+
+#include "gpvector.h"
+
+template <class T> class Efg;
+template <class T> class BehavProfile;
 template <class T> class Nfg;
 template <class T> class MixedProfile;
 
@@ -135,16 +142,7 @@ template <class T> class Efg : public BaseEfg   {
 
     void Payoff(Node *n, T, const gPVector<int> &, gVector<T> &) const;
     void Payoff(Node *n, T, const gArray<gArray<int> *> &, gVector<T> &) const;
-    void Payoff(Node *n, T prob, int pl, T &value,
-		const BehavProfile<T> &profile) const;
-    void NodeValues(Node *n, T prob, int pl, gArray<T> &valarray,
-		    const BehavProfile<T> &profile, int &index) const;
-    void CondPayoff(Node *n, T prob, const BehavProfile<T> &,
-		    gPVector<T> &, gDPVector<T> &) const;
-    void NodeRealizProbs(Node *n, T prob, const BehavProfile<T> &profile,
-			 int &index, gArray<T> &NRProbs);
-    void Beliefs(Node *n, T prob, const BehavProfile<T> &profile,
-		 int &index, gArray<T> &BProbs, gPVector<T> &gpv);
+
 
     Infoset *CreateInfoset(int n, EFPlayer *pl, int br);
     Node *CreateNode(Node *parent);
@@ -169,22 +167,15 @@ template <class T> class Efg : public BaseEfg   {
     Infoset *CreateInfoset(EFPlayer *pl, int br);
 
         //# COMPUTING VALUES OF PROFILES
-//    gDPVector<T> *NewBehavProfile(void) const;
+        //    gDPVector<T> *NewBehavProfile(void) const;
 
 
     int ProfileLength(bool trunc = false) const;
     gPVector<int> Dimensionality(bool trunc = false) const;
-    void Centroid(BehavProfile<T> &profile) const;
 
     void Payoff(const gPVector<int> &profile, gVector<T> &payoff) const;
-    void Payoff(const gArray<gArray<int> *> &profile, gVector<T> &payoff) const;
-    T Payoff(int pl, const BehavProfile<T> &) const;
-    gArray<T> NodeValues(int pl, const BehavProfile<T> &) const;
-    void CondPayoff(const BehavProfile<T> &profile, gDPVector<T> &value,
-		    gPVector<T> &probs) const;
-
-    gArray<T> NodeRealizProbs(const BehavProfile<T> &);
-    gArray<T> Beliefs(const BehavProfile<T> &);
+    void Payoff(const gArray<gArray<int> *> &profile, 
+		gVector<T> &payoff) const;
 
     friend Nfg<T> *MakeReducedNfg(Efg<T> &);
     friend void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,

@@ -1,7 +1,7 @@
 //#
 //# FILE: efg.cc -- Implementation of extensive form data type
 //#
-//# $Id$
+//# @(#)efg.cc	1.78 06 Sep 1995
 //#
 
 class Node;
@@ -43,6 +43,14 @@ TEMPLATE class gBlock<Action *>;
 TEMPLATE class gArray<Outcome *>;
 TEMPLATE class gBlock<Outcome *>;
 
+class EFActionSet;
+class EFActionArrays;
+
+TEMPLATE bool operator==(const gArray<Action *> &, const gArray<Action *> &);
+TEMPLATE class gArray<EFActionSet *>;
+TEMPLATE class gArray<EFActionArrays *>;
+//TEMPLATE class gArray<gBlock <Action *> *>;
+//TEMPLATE class gArray<gArray <Action *> *>;
 #include "glist.imp"
 
 TEMPLATE class gList<Node *>;
@@ -266,7 +274,7 @@ void BaseEfg::WriteEfgFile(gOutput &f) const
 
 
 //------------------------------------------------------------------------
-//                    ExtForm<T>: General data access
+//                    BaseEfg: General data access
 //------------------------------------------------------------------------
 
 int BaseEfg::NumPlayers(void) const
@@ -642,19 +650,25 @@ Infoset *BaseEfg::DeleteAction(Infoset *s, Action *a)
   return s;
 }
 
-
-
 //========================================================================
 
+#include "behav.h"
 //---------------------------------------------------------------------------
 //                    BaseBehavProfile member functions
 //---------------------------------------------------------------------------
 
 BaseBehavProfile::BaseBehavProfile(const BaseEfg &EF, bool trunc)
-  : E(&EF), truncated(trunc)  { }
+  : E(&EF), truncated(trunc), behavsupport(EF)  { }
+
+BaseBehavProfile::BaseBehavProfile(const BaseEfg &EF, bool trunc,
+				   const EFSupport &s)
+  : E(&EF), truncated(trunc), behavsupport(s) 
+{ 
+  behavsupport.SetupSupport();
+}
 
 BaseBehavProfile::BaseBehavProfile(const BaseBehavProfile &p)
-  : E(p.E), truncated(p.truncated)   { }
+  : E(p.E), truncated(p.truncated), behavsupport(p.behavsupport)   { }
 
 BaseBehavProfile::~BaseBehavProfile()   { }
 
@@ -662,6 +676,7 @@ BaseBehavProfile &BaseBehavProfile::operator=(const BaseBehavProfile &p)
 {
   E = p.E;
   truncated = p.truncated;
+  behavsupport = p.behavsupport;
   return *this;
 }
 
@@ -680,8 +695,13 @@ const gString &BaseBehavProfile::GetInfosetName(int p, int iset) const
   return E->PlayerList()[p]->InfosetList()[iset]->GetName();
 }
 
-const gString &BaseBehavProfile::GetActionName(int p, int iset, int act) const
+const gString &BaseBehavProfile::GetActionName(int p, int iset, int act) const 
 {
   return E->PlayerList()[p]->InfosetList()[iset]->GetActionName(act);
+}
+
+EFSupport &BaseBehavProfile::GetEFSupport(void) 
+{
+  return (behavsupport);
 }
 
