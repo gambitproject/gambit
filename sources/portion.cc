@@ -840,8 +840,25 @@ PortionType NfSupportPortion::Type( void ) const
 
 void NfSupportPortion::Output( gOutput& s ) const
 { 
-  s << "(NfSupport) " << *_Value;
-  // s << " \"" << (*_Value)->GetName() << "\""; 
+  int numplayers;
+  int i;
+  int j;
+  gArray<Strategy *> strat;
+
+  assert( *_Value != 0 );
+  s << "(NfSupport) " << *_Value << " { ";
+  numplayers = (*_Value)->BelongsTo().NumPlayers();
+  for( i = 1; i <= numplayers; i++ )
+  {
+    s << "{ ";
+    strat = (*_Value)->GetStrategy( i );
+    for( j = 1; j <= strat.Length(); j++ )
+    {
+      s << "\"" << strat[ j ]->name << "\" ";
+    }
+    s << "} ";
+  }
+  s << "}";
 }
 
 Portion* NfSupportPortion::ValCopy( void ) const
@@ -874,7 +891,11 @@ void NfSupportPortion::AssignFrom( Portion* p )
 bool NfSupportPortion::operator == ( Portion *p ) const
 {
   if( p->Type() == Type() )
-    return ( *_Value == *( (NfSupportPortion*) p )->_Value );
+  {
+    assert( *_Value != 0 && *( (NfSupportPortion*) p )->_Value != 0 );
+    // this calls the operator == in NFSupport
+    return ( **_Value == **( (NfSupportPortion*) p )->_Value );
+  }
   else
     return false;
 }
