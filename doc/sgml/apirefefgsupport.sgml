@@ -40,7 +40,7 @@ void gbtEfgSupport::SetLabel(const gText &amp;p_label)
 
 <para>
 <function>SetLabel</function>
-sets the text label of the support.  The GCL version returns the support.
+sets the text label of the support. 
 </para>
 
 </sect2>

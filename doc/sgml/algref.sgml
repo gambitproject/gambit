@@ -348,10 +348,9 @@ of the algorithm:
 
 \begin{description}
 \item[Singular Supps:] Returns a list of the supports which have
-singular solutions. {\bf Note:} This is currently not implemented in
-the GUI, but is available in the GCL.
+singular solutions. 
 \item[recurse:] Determines whether to recurse to all sub supports.
-Default is {\bf True}. 
+Default is <literal>True</literal>. 
 \end{description}
 </para>
 

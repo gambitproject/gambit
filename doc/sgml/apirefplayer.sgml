@@ -225,7 +225,6 @@ player has in the game.
 <sect2 id="apiref.player.setlabel">
 <title>SetLabel</title>
 <indexterm><primary>SetLabel</primary></indexterm>
-<indexterm><primary>SetName (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
