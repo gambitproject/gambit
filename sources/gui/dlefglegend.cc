@@ -36,8 +36,7 @@
 //                 class dialogLegend: Implementation
 //==========================================================================
 
-dialogLegend::dialogLegend(wxWindow *p_parent,
-			     const TreeDrawSettings &p_options)	
+dialogLegend::dialogLegend(wxWindow *p_parent, const gbtPreferences &p_prefs)
   : wxDialog(p_parent, -1, "Legends")
 {
   wxStaticBoxSizer *nodeGroup = 
@@ -54,21 +53,21 @@ dialogLegend::dialogLegend(wxWindow *p_parent,
   m_nodeAbove = new wxRadioBox(this, -1, "Above Node",
 			       wxDefaultPosition, wxDefaultSize,
 			       9, nodeLabelList, 1, wxRA_SPECIFY_COLS);
-  m_nodeAbove->SetSelection(p_options.NodeAboveLabel());
+  m_nodeAbove->SetSelection(p_prefs.NodeAboveLabel());
   nodeGroup->Add(m_nodeAbove, 0, wxALL, 5);
 
   m_nodeBelow = new wxRadioBox(this, -1, "Below Node",
 			       wxDefaultPosition, wxDefaultSize,
 			       9, nodeLabelList, 1, wxRA_SPECIFY_COLS);
-  m_nodeBelow->SetSelection(p_options.NodeBelowLabel());
+  m_nodeBelow->SetSelection(p_prefs.NodeBelowLabel());
   nodeGroup->Add(m_nodeBelow, 0, wxALL, 5);
 
-  wxString nodeAfterList[] = { "Blank", "Payoffs", "Outcome name" };
-  m_nodeAfter = new wxRadioBox(this, -1, "After Node",
-			       wxDefaultPosition, wxDefaultSize,
-			       3, nodeAfterList, 1, wxRA_SPECIFY_COLS);
-  m_nodeAfter->SetSelection(p_options.NodeRightLabel());
-  nodeGroup->Add(m_nodeAfter, 0, wxALL, 5);
+  wxString nodeAfterList[] = { "Payoffs", "Outcome name" };
+  m_outcome = new wxRadioBox(this, -1, "Outcome",
+			     wxDefaultPosition, wxDefaultSize,
+			     2, nodeAfterList, 1, wxRA_SPECIFY_COLS);
+  m_outcome->SetSelection(p_prefs.OutcomeLabel());
+  nodeGroup->Add(m_outcome, 0, wxALL, 5);
 
   wxStaticBoxSizer *branchGroup =
     new wxStaticBoxSizer(new wxStaticBox(this, -1, "Branch Labelling"),
@@ -79,13 +78,13 @@ dialogLegend::dialogLegend(wxWindow *p_parent,
   m_branchAbove = new wxRadioBox(this, -1, "Above Branch",
 			       wxDefaultPosition, wxDefaultSize,
 			       5, branchLabelList, 1, wxRA_SPECIFY_COLS);
-  m_branchAbove->SetSelection(p_options.BranchAboveLabel());
+  m_branchAbove->SetSelection(p_prefs.BranchAboveLabel());
   branchGroup->Add(m_branchAbove, 0, wxALL, 5);
 
   m_branchBelow = new wxRadioBox(this, -1, "Below Branch",
 				 wxDefaultPosition, wxDefaultSize,
 				 5, branchLabelList, 1, wxRA_SPECIFY_COLS);
-  m_branchBelow->SetSelection(p_options.BranchBelowLabel());
+  m_branchBelow->SetSelection(p_prefs.BranchBelowLabel());
   branchGroup->Add(m_branchBelow, 0, wxALL, 5);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);

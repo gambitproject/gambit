@@ -28,7 +28,7 @@
 #define DLEFGLAYOUT_H
 
 #include "wx/notebook.h"
-#include "treedraw.h"
+#include "prefs.h"
 
 class dialogLayout : public wxDialog {
 private:
@@ -36,10 +36,10 @@ private:
 
 public:
   // Lifecycle
-  dialogLayout(wxWindow *p_parent, const TreeDrawSettings &);
+  dialogLayout(wxWindow *p_parent, const gbtPreferences &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  void GetSettings(TreeDrawSettings &);
+  void GetPreferences(gbtPreferences &);
 };
 
 #endif  // DLEFGLAYOUT_H

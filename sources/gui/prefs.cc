@@ -4,7 +4,7 @@
 // $Date$
 //
 // DESCRIPTION:
-// Display configuration class for the extensive form
+// Class to store user-configurable settings
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -31,14 +31,13 @@
 #include "wx/notebook.h"
 #include "wx/spinctrl.h"
 
-#include "gambit.h"
-#include "treedraw.h"
+#include "prefs.h"
 
 //===========================================================================
-//                 class TreeDrawSettings: Implementation
+//                 class gbtPreferences: Implementation
 //===========================================================================
 
-TreeDrawSettings::TreeDrawSettings(void)
+gbtPreferences::gbtPreferences(void)
   : m_nodeAboveFont(*wxTheFontList->FindOrCreateFont(10, wxDEFAULT, wxNORMAL, wxNORMAL)),
     m_nodeBelowFont(*wxTheFontList->FindOrCreateFont(10, wxDEFAULT, wxNORMAL, wxNORMAL)),
     m_nodeRightFont(*wxTheFontList->FindOrCreateFont(10, wxDEFAULT, wxNORMAL, wxNORMAL)),
@@ -57,7 +56,7 @@ TreeDrawSettings::TreeDrawSettings(void)
   LoadOptions();
 }
 
-void TreeDrawSettings::SaveFont(const wxString &p_prefix, 
+void gbtPreferences::SaveFont(const wxString &p_prefix, 
 				wxConfig &p_config, const wxFont &p_font)
 {
   p_config.Write(p_prefix + "Size", (long) p_font.GetPointSize());
@@ -67,7 +66,7 @@ void TreeDrawSettings::SaveFont(const wxString &p_prefix,
   p_config.Write(p_prefix + "Weight", (long) p_font.GetWeight());
 }
 
-void TreeDrawSettings::LoadFont(const wxString &p_prefix,
+void gbtPreferences::LoadFont(const wxString &p_prefix,
 				const wxConfig &p_config, wxFont &p_font)
 {
   long size, family, style, weight;
@@ -82,7 +81,7 @@ void TreeDrawSettings::LoadFont(const wxString &p_prefix,
 					    false, face);
 }
 
-void TreeDrawSettings::SaveColor(const wxString &p_prefix,
+void gbtPreferences::SaveColor(const wxString &p_prefix,
 				 wxConfig &p_config, const wxColour &p_color)
 {
   p_config.Write(p_prefix + "Red", (long) p_color.Red());
@@ -90,7 +89,7 @@ void TreeDrawSettings::SaveColor(const wxString &p_prefix,
   p_config.Write(p_prefix + "Blue", (long) p_color.Blue());
 }
 
-void TreeDrawSettings::LoadColor(const wxString &p_prefix,
+void gbtPreferences::LoadColor(const wxString &p_prefix,
 				 const wxConfig &p_config, wxColour &p_color)
 {
   long red, green, blue;
@@ -100,7 +99,7 @@ void TreeDrawSettings::LoadColor(const wxString &p_prefix,
   p_color = wxColour(red, green, blue);
 }
 
-void TreeDrawSettings::SaveOptions(void) const
+void gbtPreferences::SaveOptions(void) const
 {
   wxConfig config("Gambit");
 
@@ -123,7 +122,7 @@ void TreeDrawSettings::SaveOptions(void) const
 
   config.Write("/TreeDisplay/NodeAboveLabel", (long) m_nodeAboveLabel);
   config.Write("/TreeDisplay/NodeBelowLabel", (long) m_nodeBelowLabel);
-  config.Write("/TreeDisplay/NodeRightLabel", (long) m_nodeRightLabel);
+  config.Write("/TreeDisplay/OutcomeLabel", (long) m_outcomeLabel);
   config.Write("/TreeDisplay/BranchAboveLabel", (long) m_branchAboveLabel);
   config.Write("/TreeDisplay/BranchBelowLabel", (long) m_branchBelowLabel);
 
@@ -142,14 +141,12 @@ void TreeDrawSettings::SaveOptions(void) const
 
   config.Write("/TreeDisplay/NumDecimals", (long) m_numDecimals);
 
-  config.Write("/NfgDisplay/OutcomeValues", (long) m_outcomeValues);
-
   SaveFont("/NfgDisplay/DataFont", config, m_dataFont);
   SaveFont("/NfgDisplay/LabelFont", config, m_labelFont);
 
 }
 
-void TreeDrawSettings::LoadOptions(void)
+void gbtPreferences::LoadOptions(void)
 {
   wxConfig config("Gambit");
   config.Read("/TreeDisplay/NodeSize", &m_nodeSize, 20);
@@ -171,7 +168,7 @@ void TreeDrawSettings::LoadOptions(void)
 
   config.Read("/TreeDisplay/NodeAboveLabel", &m_nodeAboveLabel, 1);
   config.Read("/TreeDisplay/NodeBelowLabel", &m_nodeBelowLabel, 4);
-  config.Read("/TreeDisplay/NodeRightLabel", &m_nodeRightLabel, 1);
+  config.Read("/TreeDisplay/OutcomeLabel", &m_outcomeLabel, 1);
   config.Read("/TreeDisplay/BranchAboveLabel", &m_branchAboveLabel, 1);
   config.Read("/TreeDisplay/BranchBelowLabel", &m_branchBelowLabel, 2);
 
@@ -189,8 +186,6 @@ void TreeDrawSettings::LoadOptions(void)
   }
 
   config.Read("/TreeDisplay/NumDecimals", &m_numDecimals, 2);
-
-  config.Read("/NfgDisplay/OutcomeValues", &m_outcomeValues, true);
 
   LoadFont("/NfgDisplay/DataFont", config, m_dataFont);
   LoadFont("/NfgDisplay/LabelFont", config, m_labelFont);

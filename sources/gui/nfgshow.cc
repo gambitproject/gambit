@@ -192,8 +192,6 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   m_table = new NfgTable(m_doc, this);
   m_table->SetSize(0, 0, 200, 200);
 
-  GetMenuBar()->Check(GBT_NFG_MENU_VIEW_OUTCOMES,
-		      !m_doc->GetPreferences().OutcomeValues());
   m_table->SetFocus();
 
   AdjustSizes();
@@ -221,36 +219,9 @@ void NfgShow::OnUpdate(gbtGameView *)
   menu->Enable(GBT_NFG_MENU_FILE_EXPORT_COMLAB, m_doc->m_nfg->NumPlayers() == 2);
   menu->Enable(GBT_NFG_MENU_VIEW_PROBABILITIES, m_doc->IsProfileSelected());
   menu->Enable(GBT_NFG_MENU_VIEW_VALUES, m_doc->IsProfileSelected());
-  menu->Check(GBT_NFG_MENU_VIEW_OUTCOME_LABELS, 
-	      !m_doc->GetPreferences().OutcomeValues());
+  menu->Check(GBT_NFG_MENU_VIEW_OUTCOMES,
+	      m_doc->GetPreferences().OutcomeLabel() == GBT_OUTCOME_LABEL_LABEL);
 }
-
-//----------------------------------------------------------------------
-//                NfgShow: Manipulation of profile list
-//----------------------------------------------------------------------
-
-/*
-void NfgShow::OnChangeProfile(void)
-{
-  if (m_doc->IsProfileSelected()) {
-    // m_table->SetProfile(m_doc->GetMixedProfile());
-  }
-  else {
-    if (m_table->ShowProbs()) {
-      m_table->ToggleProbs();
-      GetMenuBar()->Check(GBT_NFG_MENU_VIEW_PROBABILITIES, false);
-    }
-    if (m_table->ShowValues()) {
-      m_table->ToggleValues();
-      GetMenuBar()->Check(GBT_NFG_MENU_VIEW_VALUES, false);
-    }
-  }
-
-  if (m_profileTable) {
-    m_profileTable->UpdateValues();
-  }
-}
-*/
 
 void NfgShow::OnProfileSelected(wxListEvent &p_event)
 {
@@ -744,7 +715,7 @@ void NfgShow::OnViewValues(wxCommandEvent &)
 
 void NfgShow::OnViewOutcomeLabels(wxCommandEvent &)
 {
-  m_doc->GetPreferences().SetOutcomeValues(1 - m_doc->GetPreferences().OutcomeValues());
+  m_doc->GetPreferences().SetOutcomeLabel(1 - m_doc->GetPreferences().OutcomeLabel());
   m_doc->UpdateViews(0, false, true);
 }
 

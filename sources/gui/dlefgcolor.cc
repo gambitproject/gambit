@@ -30,7 +30,7 @@
 #endif  // WX_PRECOMP
 #include "wx/colordlg.h"
 
-#include "treedraw.h"
+#include "prefs.h"
 #include "dlefgcolor.h"
 
 //
@@ -61,7 +61,7 @@ BEGIN_EVENT_TABLE(dialogEfgColor, wxDialog)
 END_EVENT_TABLE()
 
 dialogEfgColor::dialogEfgColor(wxWindow *p_parent,
-			       const TreeDrawSettings &p_settings)
+			       const gbtPreferences &p_prefs)
   : wxDialog(p_parent, -1, "Choose colors")
 {
   SetAutoLayout(true);
@@ -73,13 +73,13 @@ dialogEfgColor::dialogEfgColor(wxWindow *p_parent,
   gridSizer->Add(new wxStaticText(this, -1, "Chance player"), 0,
 		 wxALIGN_CENTER, 0);
   m_chanceButton = new wxButton(this, idBUTTON_CHANCE_COLOR, "");
-  m_chanceButton->SetBackgroundColour(p_settings.ChanceColor());
+  m_chanceButton->SetBackgroundColour(p_prefs.ChanceColor());
   gridSizer->Add(m_chanceButton, 0, wxALIGN_CENTER, 0);
   
   gridSizer->Add(new wxStaticText(this, -1, "Terminal nodes"), 0,
 		 wxALIGN_CENTER, 0);
   m_terminalButton = new wxButton(this, idBUTTON_TERMINAL_COLOR, "");
-  m_terminalButton->SetBackgroundColour(p_settings.TerminalColor());
+  m_terminalButton->SetBackgroundColour(p_prefs.TerminalColor());
   gridSizer->Add(m_terminalButton, 0, wxALIGN_CENTER, 0);
 
   for (int pl = 1; pl <= 8; pl++) {
@@ -87,7 +87,7 @@ dialogEfgColor::dialogEfgColor(wxWindow *p_parent,
 				    wxString::Format("Player %d", pl)),
 		   0, wxALIGN_CENTER, 0);
     m_playerButton[pl-1] = new wxButton(this, idBUTTON_CHANCE_COLOR+pl, "");
-    m_playerButton[pl-1]->SetBackgroundColour(p_settings.PlayerColor(pl));
+    m_playerButton[pl-1]->SetBackgroundColour(p_prefs.PlayerColor(pl));
     gridSizer->Add(m_playerButton[pl-1], 0, wxALIGN_CENTER, 0);
   }
 

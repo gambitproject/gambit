@@ -137,7 +137,7 @@ wxString NfgGridTable::GetValue(int row, int col)
     }
 
     gbtNfgOutcome outcome = m_doc->GetNfg().GetOutcome(profile);
-    if (m_doc->GetPreferences().OutcomeValues()) {
+    if (m_doc->GetPreferences().OutcomeLabel() == GBT_OUTCOME_LABEL_PAYOFFS) {
       wxString ret = "(";
       for (int pl = 1; pl <= strategy.Length(); pl++) {
 	ret += wxString::Format("%s",

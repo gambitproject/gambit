@@ -31,7 +31,7 @@
 #include "nash/behavsol.h"
 #include "game/nfg.h"
 #include "nash/mixedsol.h"
-#include "treedraw.h"
+#include "prefs.h"
 
 // Forward declarations; classes declared at bottom
 class gbtGameView;
@@ -52,7 +52,7 @@ private:
   gList<BehavSolution> m_behavProfiles;
   gList<MixedSolution> m_mixedProfiles;
 
-  TreeDrawSettings m_prefs;
+  gbtPreferences m_prefs;
 
   int m_rowPlayer, m_colPlayer;
   gArray<int> m_contingency;
@@ -86,8 +86,8 @@ public:
   void UpdateViews(gbtGameView *, bool, bool);
   void OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged);
 
-  TreeDrawSettings &GetPreferences(void) { return m_prefs; }
-  const TreeDrawSettings &GetPreferences(void) const { return m_prefs; }
+  gbtPreferences &GetPreferences(void) { return m_prefs; }
+  const gbtPreferences &GetPreferences(void) const { return m_prefs; }
 
   // MARKED NODES
   void SetCursor(gbtEfgNode m_node);

@@ -28,7 +28,6 @@
 #define EFGLAYOUT_H
 
 #include "base/base.h"
-#include "treedraw.h"
 #include "efgconst.h"
 #include "game/efg.h"
 #include "gamedoc.h"
@@ -192,11 +191,9 @@ private:
   void UpdateTableInfosets(void);
   void UpdateTableParents(void);
 
-  wxString CreateNodeAboveLabel(const NodeEntry *) const;
-  wxString CreateNodeBelowLabel(const NodeEntry *) const;
-  wxString CreateNodeRightLabel(const NodeEntry *) const;
-  wxString CreateBranchAboveLabel(const NodeEntry *) const;
-  wxString CreateBranchBelowLabel(const NodeEntry *) const;
+  wxString CreateNodeLabel(const NodeEntry *, int) const;
+  wxString CreateOutcomeLabel(const NodeEntry *) const;
+  wxString CreateBranchLabel(const NodeEntry *, int) const;
 
   void RenderSubtree(wxDC &dc) const;
 

@@ -1109,12 +1109,12 @@ void EfgShow::OnFormatFontsBelowBranch(wxCommandEvent &)
 
 void EfgShow::OnFormatDisplayLayout(wxCommandEvent &)
 {
-  TreeDrawSettings &settings = m_doc->GetPreferences();
+  gbtPreferences &prefs = m_doc->GetPreferences();
 
-  dialogLayout dialog(this, settings);
+  dialogLayout dialog(this, prefs);
 
   if (dialog.ShowModal() == wxID_OK) {
-    dialog.GetSettings(settings);
+    dialog.GetPreferences(prefs);
     m_doc->GetPreferences().SaveOptions();
     m_doc->UpdateViews(0, true, true);
   }
@@ -1127,7 +1127,7 @@ void EfgShow::OnFormatDisplayLegend(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->GetPreferences().SetNodeAboveLabel(dialog.GetNodeAbove());
     m_doc->GetPreferences().SetNodeBelowLabel(dialog.GetNodeBelow());
-    m_doc->GetPreferences().SetNodeRightLabel(dialog.GetNodeAfter());
+    m_doc->GetPreferences().SetOutcomeLabel(dialog.GetOutcome());
     m_doc->GetPreferences().SetBranchAboveLabel(dialog.GetBranchAbove());
     m_doc->GetPreferences().SetBranchBelowLabel(dialog.GetBranchBelow());
     m_doc->GetPreferences().SaveOptions();

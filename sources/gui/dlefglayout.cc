@@ -41,7 +41,7 @@ private:
   wxSpinCtrl *m_nodeSize, *m_terminalSpacing;
 
 public:
-  panelNodes(wxWindow *p_parent, const TreeDrawSettings &p_settings);
+  panelNodes(wxWindow *p_parent, const gbtPreferences &p_prefs);
 
   int NodeSize(void) const { return m_nodeSize->GetValue(); }
   int TerminalSpacing(void) const { return m_terminalSpacing->GetValue(); }
@@ -52,7 +52,7 @@ public:
 };
 
 
-panelNodes::panelNodes(wxWindow *p_parent, const TreeDrawSettings &p_settings)
+panelNodes::panelNodes(wxWindow *p_parent, const gbtPreferences &p_prefs)
   : wxPanel(p_parent, -1)
 {
   const int NODE_LENGTH_MIN = 20;
@@ -70,19 +70,19 @@ panelNodes::panelNodes(wxWindow *p_parent, const TreeDrawSettings &p_settings)
   m_chanceToken = new wxRadioBox(this, -1, "Chance nodes",
 				 wxDefaultPosition, wxDefaultSize,
 				 4, tokenChoices, 1, wxRA_SPECIFY_COLS);
-  m_chanceToken->SetSelection(p_settings.ChanceToken());
+  m_chanceToken->SetSelection(p_prefs.ChanceToken());
   tokenSizer->Add(m_chanceToken, 0, wxALL, 5);
 
   m_playerToken = new wxRadioBox(this, -1, "Player nodes",
 				 wxDefaultPosition, wxDefaultSize,
 				 4, tokenChoices, 1, wxRA_SPECIFY_COLS);
-  m_playerToken->SetSelection(p_settings.PlayerToken());
+  m_playerToken->SetSelection(p_prefs.PlayerToken());
   tokenSizer->Add(m_playerToken, 0, wxALL, 5);
 
   m_terminalToken = new wxRadioBox(this, -1, "Terminal nodes",
 				   wxDefaultPosition, wxDefaultSize,
 				   4, tokenChoices, 1, wxRA_SPECIFY_COLS);
-  m_terminalToken->SetSelection(p_settings.TerminalToken());
+  m_terminalToken->SetSelection(p_prefs.TerminalToken());
   tokenSizer->Add(m_terminalToken, 0, wxALL, 5);
   topSizer->Add(tokenSizer, 0, wxALL, 5);
 
@@ -91,7 +91,7 @@ panelNodes::panelNodes(wxWindow *p_parent, const TreeDrawSettings &p_settings)
   gridSizer->Add(new wxStaticText(this, -1, "Size of nodes"),
 		 0, wxCENTER | wxALL, 5);
   m_nodeSize = new wxSpinCtrl(this, -1,
-			      wxString::Format("%ld", p_settings.NodeSize()),
+			      wxString::Format("%ld", p_prefs.NodeSize()),
 			      wxDefaultPosition, wxDefaultSize,
 			      wxSP_ARROW_KEYS,
 			      NODE_LENGTH_MIN, NODE_LENGTH_MAX);
@@ -101,7 +101,7 @@ panelNodes::panelNodes(wxWindow *p_parent, const TreeDrawSettings &p_settings)
 		 0, wxCENTER | wxALL, 5);
   m_terminalSpacing =
     new wxSpinCtrl(this, -1,
-		   wxString::Format("%ld", p_settings.TerminalSpacing()),
+		   wxString::Format("%ld", p_prefs.TerminalSpacing()),
 		   wxDefaultPosition, wxDefaultSize,
 		   wxSP_ARROW_KEYS, Y_SPACING_MIN, Y_SPACING_MAX);
   gridSizer->Add(m_terminalSpacing, 1, wxEXPAND | wxALL, 5);
@@ -120,7 +120,7 @@ private:
   wxSpinCtrl *m_branchLength, *m_tineLength;
 
 public:
-  panelBranches(wxWindow *p_parent, const TreeDrawSettings &);
+  panelBranches(wxWindow *p_parent, const gbtPreferences &);
 
   int BranchLength(void) const { return m_branchLength->GetValue(); }
   int TineLength(void) const { return m_tineLength->GetValue(); }
@@ -130,7 +130,7 @@ public:
 };
 
 panelBranches::panelBranches(wxWindow *p_parent,
-			     const TreeDrawSettings &p_settings)
+			     const gbtPreferences &p_prefs)
   : wxPanel(p_parent, -1)
 {
   const int BRANCH_LENGTH_MIN = 0;
@@ -148,14 +148,14 @@ panelBranches::panelBranches(wxWindow *p_parent,
   m_branchStyle = new wxRadioBox(this, -1, "Branch style",
 				 wxDefaultPosition, wxDefaultSize,
 				 2, styleChoices, 1, wxRA_SPECIFY_COLS);
-  m_branchStyle->SetSelection(p_settings.BranchStyle());
+  m_branchStyle->SetSelection(p_prefs.BranchStyle());
   styleSizer->Add(m_branchStyle, 0, wxALL, 5);
 
   wxString labelChoices[] = { "Horizontal", "Rotated" };
   m_branchLabels = new wxRadioBox(this, -1, "Branch labels",
 				  wxDefaultPosition, wxDefaultSize,
 				  2, labelChoices, 1, wxRA_SPECIFY_COLS);
-  m_branchLabels->SetSelection(p_settings.BranchLabels());
+  m_branchLabels->SetSelection(p_prefs.BranchLabels());
   styleSizer->Add(m_branchLabels, 0, wxALL, 5);
 
   topSizer->Add(styleSizer, 0, wxALL | wxCENTER, 5);
@@ -165,7 +165,7 @@ panelBranches::panelBranches(wxWindow *p_parent,
 		 0, wxCENTER | wxALL, 5);
   m_branchLength = new wxSpinCtrl(this, -1,
 				  wxString::Format("%ld",
-						   p_settings.BranchLength()),
+						   p_prefs.BranchLength()),
 				  wxDefaultPosition, wxDefaultSize,
 				  wxSP_ARROW_KEYS,
 				  BRANCH_LENGTH_MIN, BRANCH_LENGTH_MAX);
@@ -175,7 +175,7 @@ panelBranches::panelBranches(wxWindow *p_parent,
 		 0, wxCENTER | wxALL, 5);
   m_tineLength = new wxSpinCtrl(this, -1,
 				wxString::Format("%ld",
-						 p_settings.TineLength()),
+						 p_prefs.TineLength()),
 				wxDefaultPosition, wxDefaultSize,
 				wxSP_ARROW_KEYS,
 				TINE_LENGTH_MIN, TINE_LENGTH_MAX);
@@ -193,14 +193,14 @@ private:
   wxRadioBox *m_infosetConnect, *m_infosetJoin;
 
 public:
-  panelInfosets(wxWindow *p_parent, const TreeDrawSettings &);
+  panelInfosets(wxWindow *p_parent, const gbtPreferences &);
 
   int InfosetConnect(void) const { return m_infosetConnect->GetSelection(); }
   int InfosetJoin(void) const { return m_infosetJoin->GetSelection(); }
 };
 
 panelInfosets::panelInfosets(wxWindow *p_parent,
-			     const TreeDrawSettings &p_settings)
+			     const gbtPreferences &p_prefs)
   : wxPanel(p_parent, -1)
 {
   SetAutoLayout(true);
@@ -214,14 +214,14 @@ panelInfosets::panelInfosets(wxWindow *p_parent,
 				    "Connect information set members",
 				    wxDefaultPosition, wxDefaultSize,
 				    3, connectChoices, 1, wxRA_SPECIFY_COLS);
-  m_infosetConnect->SetSelection(p_settings.InfosetConnect());
+  m_infosetConnect->SetSelection(p_prefs.InfosetConnect());
   styleSizer->Add(m_infosetConnect, 0, wxALL, 5);
 
   wxString joinChoices[] = { "Lines", "Circles" };
   m_infosetJoin = new wxRadioBox(this, -1, "Join style",
 				 wxDefaultPosition, wxDefaultSize,
 				 2, joinChoices, 1, wxRA_SPECIFY_COLS);
-  m_infosetJoin->SetSelection(p_settings.InfosetJoin());
+  m_infosetJoin->SetSelection(p_prefs.InfosetJoin());
   styleSizer->Add(m_infosetJoin, 0, wxALL, 5);
 
   topSizer->Add(styleSizer, 0, wxALL | wxCENTER, 5);
@@ -237,13 +237,13 @@ private:
   wxRadioBox *m_subgameStyle;
 
 public:
-  panelSubgames(wxWindow *, const TreeDrawSettings &);
+  panelSubgames(wxWindow *, const gbtPreferences &);
 
   int SubgameStyle(void) const { return m_subgameStyle->GetSelection(); }
 };
 
 panelSubgames::panelSubgames(wxWindow *p_parent, 
-			     const TreeDrawSettings &p_settings)
+			     const gbtPreferences &p_prefs)
   : wxPanel(p_parent, -1)
 {
   SetAutoLayout(true);
@@ -253,7 +253,7 @@ panelSubgames::panelSubgames(wxWindow *p_parent,
   m_subgameStyle = new wxRadioBox(this, -1, "Subgame display",
 				  wxDefaultPosition, wxDefaultSize,
 				  2, styleChoices, 1, wxRA_SPECIFY_COLS);
-  m_subgameStyle->SetSelection(p_settings.SubgameStyle());
+  m_subgameStyle->SetSelection(p_prefs.SubgameStyle());
   topSizer->Add(m_subgameStyle, 0, wxALL | wxCENTER, 5);
 
   SetSizer(topSizer);
@@ -264,18 +264,18 @@ panelSubgames::panelSubgames(wxWindow *p_parent,
 
 
 dialogLayout::dialogLayout(wxWindow *p_parent, 
-			   const TreeDrawSettings &p_settings)
+			   const gbtPreferences &p_prefs)
   : wxDialog(p_parent, -1, "Layout options")
 {
   SetAutoLayout(true);
 
   m_notebook = new wxNotebook(this, -1, wxDefaultPosition, wxDefaultSize);
   wxNotebookSizer *notebookSizer = new wxNotebookSizer(m_notebook);
-  m_notebook->AddPage(new panelNodes(m_notebook, p_settings), "Nodes");
-  m_notebook->AddPage(new panelBranches(m_notebook, p_settings), "Branches");
-  m_notebook->AddPage(new panelInfosets(m_notebook, p_settings),
+  m_notebook->AddPage(new panelNodes(m_notebook, p_prefs), "Nodes");
+  m_notebook->AddPage(new panelBranches(m_notebook, p_prefs), "Branches");
+  m_notebook->AddPage(new panelInfosets(m_notebook, p_prefs),
 		      "Information sets");
-  m_notebook->AddPage(new panelSubgames(m_notebook, p_settings), "Subgames");
+  m_notebook->AddPage(new panelSubgames(m_notebook, p_prefs), "Subgames");
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   wxButton *okButton = new wxButton(this, wxID_OK, "OK");
@@ -296,26 +296,26 @@ dialogLayout::dialogLayout(wxWindow *p_parent,
   CenterOnParent();
 }
 
-void dialogLayout::GetSettings(TreeDrawSettings &p_settings)
+void dialogLayout::GetPreferences(gbtPreferences &p_prefs)
 {
   panelNodes *nodes = (panelNodes *) m_notebook->GetPage(0);
-  p_settings.SetNodeSize(nodes->NodeSize());
-  p_settings.SetTerminalSpacing(nodes->TerminalSpacing());
-  p_settings.SetChanceToken(nodes->ChanceToken());
-  p_settings.SetPlayerToken(nodes->PlayerToken());
-  p_settings.SetTerminalToken(nodes->TerminalToken());
+  p_prefs.SetNodeSize(nodes->NodeSize());
+  p_prefs.SetTerminalSpacing(nodes->TerminalSpacing());
+  p_prefs.SetChanceToken(nodes->ChanceToken());
+  p_prefs.SetPlayerToken(nodes->PlayerToken());
+  p_prefs.SetTerminalToken(nodes->TerminalToken());
 
   panelBranches *branches = (panelBranches *) m_notebook->GetPage(1);
-  p_settings.SetBranchLength(branches->BranchLength());
-  p_settings.SetTineLength(branches->TineLength());
-  p_settings.SetBranchStyle(branches->BranchStyle());
-  p_settings.SetBranchLabels(branches->BranchLabels());
+  p_prefs.SetBranchLength(branches->BranchLength());
+  p_prefs.SetTineLength(branches->TineLength());
+  p_prefs.SetBranchStyle(branches->BranchStyle());
+  p_prefs.SetBranchLabels(branches->BranchLabels());
 
   panelInfosets *infosets = (panelInfosets *) m_notebook->GetPage(2);
-  p_settings.SetInfosetConnect(infosets->InfosetConnect());
-  p_settings.SetInfosetJoin(infosets->InfosetJoin());
+  p_prefs.SetInfosetConnect(infosets->InfosetConnect());
+  p_prefs.SetInfosetJoin(infosets->InfosetJoin());
 
   panelSubgames *subgames = (panelSubgames *) m_notebook->GetPage(3);
-  p_settings.SetSubgameStyle(subgames->SubgameStyle());
+  p_prefs.SetSubgameStyle(subgames->SubgameStyle());
 }
 

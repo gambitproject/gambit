@@ -93,8 +93,8 @@ gambit_SOURCES = \
 	nfgtable.h \
 	numberedit.cc \
 	numberedit.h \
-	treedraw.cc \
-	treedraw.h \
+	prefs.cc \
+	prefs.h \
 	treewin.cc \
 	treewin.h \
 	valnumber.cc \

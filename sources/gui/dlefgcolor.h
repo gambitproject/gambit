@@ -37,7 +37,7 @@ private:
   void OnPlayerColor(wxCommandEvent &);
 
 public:
-  dialogEfgColor(wxWindow *p_parent, const TreeDrawSettings &);
+  dialogEfgColor(wxWindow *p_parent, const gbtPreferences &);
 
   wxColour GetTerminalColor(void) const
   { return m_terminalButton->GetBackgroundColour(); }

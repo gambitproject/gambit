@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Class to store settings related to extensive form layout and rendering
+// Class to store user-configurable settings
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,8 +24,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef TREEDRAW_H
-#define TREEDRAW_H
+#ifndef PREFS_H
+#define PREFS_H
 
 #include "wx/font.h"
 #include "wx/button.h"
@@ -33,64 +33,64 @@
 
 #include "base/base.h"
 
-const int NODE_TOKEN_LINE = 0;
-const int NODE_TOKEN_BOX = 1;
-const int NODE_TOKEN_CIRCLE = 2;
-const int NODE_TOKEN_DIAMOND = 3;
+typedef enum {
+  GBT_NODE_TOKEN_LINE = 0,
+  GBT_NODE_TOKEN_BOX = 1,
+  GBT_NODE_TOKEN_CIRCLE = 2,
+  GBT_NODE_TOKEN_DIAMOND = 3
+};
 
-const int BRANCH_STYLE_LINE = 0;
-const int BRANCH_STYLE_FORKTINE = 1;
+typedef enum {
+  GBT_BRANCH_STYLE_LINE = 0,
+  GBT_BRANCH_STYLE_FORKTINE = 1
+};
 
-const int BRANCH_LABEL_HORIZONTAL = 0;
-const int BRANCH_LABEL_ROTATED = 1;
+typedef enum {
+  GBT_BRANCH_LABEL_HORIZONTAL = 0,
+  GBT_BRANCH_LABEL_ROTATED = 1
+};
 
-const int INFOSET_JOIN_LINES = 0;
-const int INFOSET_JOIN_CIRCLES = 1;
+typedef enum {
+  GBT_INFOSET_JOIN_LINES = 0,
+  GBT_INFOSET_JOIN_CIRCLES = 1
+};
 
-const int INFOSET_CONNECT_NONE = 0;
-const int INFOSET_CONNECT_SAMELEVEL = 1;
-const int INFOSET_CONNECT_ALL = 2;
+typedef enum {
+  GBT_INFOSET_CONNECT_NONE = 0,
+  GBT_INFOSET_CONNECT_SAMELEVEL = 1,
+  GBT_INFOSET_CONNECT_ALL = 2
+};
 
-const int SUBGAME_HIDDEN = 0;
-const int SUBGAME_ARC = 1;
+typedef enum {
+  GBT_SUBGAME_HIDDEN = 0,
+  GBT_SUBGAME_ARC = 1
+};
 
+typedef enum {
+  GBT_NODE_LABEL_NOTHING = 0,
+  GBT_NODE_LABEL_LABEL = 1,
+  GBT_NODE_LABEL_PLAYER = 2,
+  GBT_NODE_LABEL_ISETLABEL = 3,
+  GBT_NODE_LABEL_ISETID = 4,
+  GBT_NODE_LABEL_OUTCOME = 5,
+  GBT_NODE_LABEL_REALIZPROB = 6,
+  GBT_NODE_LABEL_BELIEFPROB = 7,
+  GBT_NODE_LABEL_VALUE = 8
+};
 
-const int NODE_ABOVE_NOTHING = 0;
-const int NODE_ABOVE_LABEL = 1;
-const int NODE_ABOVE_PLAYER = 2;
-const int NODE_ABOVE_ISETLABEL = 3;
-const int NODE_ABOVE_ISETID = 4;
-const int NODE_ABOVE_OUTCOME = 5;
-const int NODE_ABOVE_REALIZPROB = 6;
-const int NODE_ABOVE_BELIEFPROB	= 7;
-const int NODE_ABOVE_VALUE = 8;
+typedef enum {
+  GBT_OUTCOME_LABEL_PAYOFFS = 0,
+  GBT_OUTCOME_LABEL_LABEL = 1
+};
 
-const int NODE_BELOW_NOTHING = 0;
-const int NODE_BELOW_LABEL = 1;
-const int NODE_BELOW_PLAYER = 2;
-const int NODE_BELOW_ISETLABEL = 3;
-const int NODE_BELOW_ISETID = 4;
-const int NODE_BELOW_OUTCOME = 5;
-const int NODE_BELOW_REALIZPROB = 6;
-const int NODE_BELOW_BELIEFPROB = 7;
-const int NODE_BELOW_VALUE = 8;
+typedef enum {
+  GBT_BRANCH_LABEL_NOTHING = 0,
+  GBT_BRANCH_LABEL_LABEL = 1,
+  GBT_BRANCH_LABEL_PROBS = 2,
+  GBT_BRANCH_LABEL_VALUE = 3
+};
 
-const int NODE_RIGHT_NOTHING = 0;
-const int NODE_RIGHT_OUTCOME = 1;
-const int NODE_RIGHT_NAME = 2;
-
-const int BRANCH_ABOVE_NOTHING = 0;
-const int BRANCH_ABOVE_LABEL = 1;
-const int BRANCH_ABOVE_PROBS = 2;
-const int BRANCH_ABOVE_VALUE = 3;
-
-const int BRANCH_BELOW_NOTHING = 0;
-const int BRANCH_BELOW_LABEL = 1;
-const int BRANCH_BELOW_PROBS = 2;
-const int BRANCH_BELOW_VALUE = 3;
-
-
-class TreeDrawSettings {
+class gbtPreferences {
 private:
   // Node styling
   long m_nodeSize, m_terminalSpacing;
@@ -108,7 +108,8 @@ private:
   long m_subgameStyle;
 
   // Legend styling
-  long m_nodeAboveLabel, m_nodeBelowLabel, m_nodeRightLabel;
+  long m_nodeAboveLabel, m_nodeBelowLabel;
+  long m_outcomeLabel;
   long m_branchAboveLabel, m_branchBelowLabel;
 
   // Fonts for legends
@@ -124,10 +125,6 @@ private:
   // Fonts for normal form display
   wxFont m_dataFont, m_labelFont;
 
-  // Display outcomes or payoffs in normal form
-  // FIXME: merge with extensive form display as well?
-  bool m_outcomeValues;
-
   static void LoadFont(const wxString &, const wxConfig &, wxFont &);
   static void SaveFont(const wxString &, wxConfig &, const wxFont &);
 
@@ -136,7 +133,7 @@ private:
   
 public:
   // Lifecycle
-  TreeDrawSettings(void);
+  gbtPreferences(void);
   
   // Node styling
   long NodeSize(void) const { return m_nodeSize; }
@@ -192,8 +189,8 @@ public:
   long NodeBelowLabel(void) const { return m_nodeBelowLabel; }
   void SetNodeBelowLabel(long p_label) { m_nodeBelowLabel = p_label; }
 
-  long NodeRightLabel(void) const { return m_nodeRightLabel; }
-  void SetNodeRightLabel(long p_label) { m_nodeRightLabel = p_label; }
+  long OutcomeLabel(void) const { return m_outcomeLabel; }
+  void SetOutcomeLabel(long p_label) { m_outcomeLabel = p_label; }
 
   long BranchAboveLabel(void) const { return m_branchAboveLabel; }
   void SetBranchAboveLabel(long p_label) { m_branchAboveLabel = p_label; }
@@ -233,10 +230,6 @@ public:
   void SetNumDecimals(long p_decimals) { m_numDecimals = p_decimals; }
 
   // Normal form display
-  void SetOutcomeValues(bool p_outcomeValues) 
-    { m_outcomeValues = p_outcomeValues; }
-  bool OutcomeValues(void) const { return m_outcomeValues; }
-
   void SetDataFont(const wxFont &p_font) { m_dataFont = p_font; }
   const wxFont &GetDataFont(void) const { return m_dataFont; }
 
@@ -249,4 +242,4 @@ public:
   void LoadOptions(void);
 };
 
-#endif  // TREEDRAW_H
+#endif  // PREFS_H
