@@ -97,6 +97,14 @@ gelExpr *GELCompiler::MatchAssignment(gelExpr *lhs, gelExpr *rhs)
       vartable->Define(((gelVariable<MixedSolution *> *) lhs)->Name(), gelMIXED);
       return new gelAssignment<MixedSolution *>(((gelVariable<MixedSolution *> *) lhs)->Name(),
 				      ((gelExpression<MixedSolution *> *) rhs));
+    case gelINPUT:
+      vartable->Define(((gelVariable<gInput *> *) lhs)->Name(), gelINPUT);
+      return new gelAssignment<gInput *>(((gelVariable<gInput *> *) lhs)->Name(),
+					 ((gelExpression<gInput *> *) rhs));
+    case gelOUTPUT:
+      vartable->Define(((gelVariable<gOutput *> *) lhs)->Name(), gelOUTPUT);
+      return new gelAssignment<gOutput *>(((gelVariable<gOutput *> *) lhs)->Name(),
+					  ((gelExpression<gOutput *> *) rhs));
     default:
       delete lhs;
       delete rhs;
@@ -169,6 +177,12 @@ gelExpr *GELCompiler::MatchWhile(gelExpr *guard, gelExpr *body)
     case gelMIXED:
       return new gelWhileLoop<MixedSolution *>(((gelExpression<gTriState *> *) guard),
 				     ((gelExpression<MixedSolution *> *) body));
+    case gelINPUT:
+      return new gelWhileLoop<gInput *>(((gelExpression<gTriState *> *) guard),
+					((gelExpression<gInput *> *) body));
+    case gelOUTPUT:
+      return new gelWhileLoop<gOutput *>(((gelExpression<gTriState *> *) guard),
+					 ((gelExpression<gOutput *> *) body));
 
     default:
       delete guard;
@@ -277,6 +291,16 @@ gelExpr *GELCompiler::MatchFor(gelExpr *init, gelExpr *guard,
 				   (gelExpression<gTriState *> *) guard,
 				   incr,
 				   (gelExpression<MixedSolution *> *) body);
+    case gelINPUT:
+      return new gelForLoop<gInput *>(init,
+				   (gelExpression<gTriState *> *) guard,
+				   incr,
+				   (gelExpression<gInput *> *) body);
+    case gelOUTPUT:
+      return new gelForLoop<gOutput *>(init,
+				   (gelExpression<gTriState *> *) guard,
+				   incr,
+				   (gelExpression<gOutput *> *) body);
     default:
       delete init;
       delete guard;
@@ -372,7 +396,14 @@ gelExpr *GELCompiler::MatchConditional(gelExpr *guard,
       return new gelConditional<MixedSolution *>((gelExpression<gTriState *> *) guard, 
 	    	   		       (gelExpression<MixedSolution *> *) iftrue,
 				       (gelExpression<MixedSolution *> *) iffalse);
-      
+    case gelINPUT:
+      return new gelConditional<gInput *>((gelExpression<gTriState *> *) guard, 
+	    	   		       (gelExpression<gInput *> *) iftrue,
+				       (gelExpression<gInput *> *) iffalse);
+    case gelOUTPUT:
+      return new gelConditional<gOutput *>((gelExpression<gTriState *> *) guard, 
+	    	   		       (gelExpression<gOutput *> *) iftrue,
+				       (gelExpression<gOutput *> *) iffalse);
     default:
       delete guard;
       delete iftrue;
@@ -471,6 +502,10 @@ gelExpr *GELCompiler::LookupVar(const gText &name)
       return new gelVariable<NFSupport *>(name);
     case gelMIXED:
       return new gelVariable<MixedSolution *>(name);
+    case gelINPUT:
+      return new gelVariable<gInput *>(name);
+    case gelOUTPUT:
+      return new gelVariable<gOutput *>(name);
     default:
       return 0;
   }

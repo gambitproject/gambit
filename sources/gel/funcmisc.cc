@@ -14,6 +14,30 @@
 #include "behavsol.h"
 #include "nfg.h"
 
+//----------
+// Input
+//----------
+
+DECLARE_UNARY(gelfuncInput, gText *, gInput *)
+
+gInput *gelfuncInput::EvalItem(gText *filename) const
+{
+  if (!filename)  return 0;
+  return new gFileInput(*filename);
+}
+
+//-----------
+// Output
+//-----------
+
+DECLARE_UNARY(gelfuncOutput, gText *, gOutput *)
+
+gOutput *gelfuncOutput::EvalItem(gText *filename) const
+{
+  if (!filename)   return 0;
+  return new gFileOutput(*filename);
+} 
+
 //-------------
 // Print
 //-------------
@@ -35,7 +59,8 @@ DECLARE_UNARY(gelfuncPrintNFPlayer, NFPlayer *, NFPlayer *)
 DECLARE_UNARY(gelfuncPrintNFOutcome, NFOutcome *, NFOutcome *)
 DECLARE_UNARY(gelfuncPrintNFSupport, NFSupport *, NFSupport *)
 DECLARE_UNARY(gelfuncPrintMixed, MixedSolution *, MixedSolution *)
-
+DECLARE_UNARY(gelfuncPrintInput, gInput *, gInput *)
+DECLARE_UNARY(gelfuncPrintOutput, gOutput *, gOutput *) 
 
 gNestedList<gNumber *> gelfuncPrintNumber::Evaluate(gelVariableTable *vt) const
 {
@@ -146,6 +171,18 @@ MixedSolution *gelfuncPrintMixed::EvalItem(MixedSolution *m) const
   return m;
 }
 
+gInput *gelfuncPrintInput::EvalItem(gInput *f) const
+{
+  gout << f;
+  return f;
+}
+
+gOutput *gelfuncPrintOutput::EvalItem(gOutput *f) const
+{
+  gout << f;
+  return f;
+}
+
 //----------
 // Semi
 //----------
@@ -195,6 +232,8 @@ template class gelfuncSemi<NFPlayer *>;
 template class gelfuncSemi<NFOutcome *>;
 template class gelfuncSemi<NFSupport *>;
 template class gelfuncSemi<MixedSolution *>;
+template class gelfuncSemi<gInput *>;
+template class gelfuncSemi<gOutput *>;
 
 
 #include "gwatch.h"
@@ -261,9 +300,19 @@ gelExpr *GEL_ElapsedTime(const gArray<gelExpr *> &)
   return new gelfuncElapsedTime();
 }
 
+gelExpr *GEL_Input(const gArray<gelExpr *> &params)
+{
+  return new gelfuncInput((gelExpression<gText *> *) params[1]);
+}
+
 gelExpr *GEL_IsWatchRunning(const gArray<gelExpr *> &)
 {
   return new gelfuncIsWatchRunning();
+}
+
+gelExpr *GEL_Output(const gArray<gelExpr *> &params)
+{
+  return new gelfuncOutput((gelExpression<gText *> *) params[1]);
 }
 
 gelExpr *GEL_PrintBoolean(const gArray<gelExpr *> &params)
@@ -349,6 +398,16 @@ gelExpr *GEL_PrintNFSupport(const gArray<gelExpr *> &params)
 gelExpr *GEL_PrintMixed(const gArray<gelExpr *> &params)
 {
   return new gelfuncPrintMixed((gelExpression<MixedSolution *> *) params[1]);
+}
+
+gelExpr *GEL_PrintInput(const gArray<gelExpr *> &params)
+{
+  return new gelfuncPrintInput((gelExpression<gInput *> *) params[1]);
+}
+
+gelExpr *GEL_PrintOutput(const gArray<gelExpr *> &params)
+{
+  return new gelfuncPrintOutput((gelExpression<gOutput *> *) params[1]);
 }
 
 gelExpr *GEL_SemiBoolean(const gArray<gelExpr *> &params)
@@ -453,6 +512,18 @@ gelExpr *GEL_SemiMixed(const gArray<gelExpr *> &params)
 				((gelExpression<MixedSolution *> *) params[2]));
 }
 
+gelExpr *GEL_SemiInput(const gArray<gelExpr *> &params)
+{
+  return new gelfuncSemi<gInput *>(params[1],
+                             (gelExpression<gInput *> *) params[2]);
+}
+
+gelExpr *GEL_SemiOutput(const gArray<gelExpr *> &params)
+{
+  return new gelfuncSemi<gOutput *>(params[1],
+				    (gelExpression<gOutput *> *) params[2]);
+}
+ 
 gelExpr *GEL_StartWatch(const gArray<gelExpr *> &)
 {
   return new gelfuncStartWatch();
@@ -470,7 +541,9 @@ void gelMiscInit(gelEnvironment *env)
 {
   struct  { gelAdapter *func; char *sig; }  sigarray[] = {
     { GEL_ElapsedTime, "ElapsedTime[] =: NUMBER" },
+    { GEL_Input, "Input[filename->TEXT] =: INPUT" },
     { GEL_IsWatchRunning, "IsWatchRunning[] =: BOOLEAN" },
+    { GEL_Output, "Output[filename->TEXT] =: OUTPUT" },
     { GEL_PrintBoolean, "Print[x->BOOLEAN] =: BOOLEAN" },
     { GEL_PrintEfg, "Print[x->EFG] =: EFG" },
     { GEL_PrintNumber, "Print[x->NUMBER] =: NUMBER" },
@@ -488,6 +561,8 @@ void gelMiscInit(gelEnvironment *env)
     { GEL_PrintNFOutcome, "Print[x->NFOUTCOME] =: NFOUTCOME" },
     { GEL_PrintNFSupport, "Print[x->NFSUPPORT] =: NFSUPPORT" },
     { GEL_PrintMixed, "Print[x->MIXED] =: MIXED" },
+    { GEL_PrintInput, "Print[x->INPUT] =: INPUT" },
+    { GEL_PrintOutput, "Print[x->OUTPUT] =: OUTPUT" },
     { GEL_SemiBoolean, "Semi[x->ANYTYPE, y->BOOLEAN] =: BOOLEAN" },
     { GEL_SemiNumber, "Semi[x->ANYTYPE, y->NUMBER] =: NUMBER" },
     { GEL_SemiText, "Semi[x->ANYTYPE, y->TEXT] =: TEXT" },
@@ -505,6 +580,8 @@ void gelMiscInit(gelEnvironment *env)
     { GEL_SemiNFOutcome, "Semi[x->ANYTYPE, y->NFOUTCOME] =: NFOUTCOME" },
     { GEL_SemiNFSupport, "Semi[x->ANYTYPE, y->NFSUPPORT] =: NFSUPPORT" },
     { GEL_SemiMixed, "Semi[x->ANYTYPE, y->MIXED] =: MIXED" },
+    { GEL_SemiInput, "Semi[x->ANYTYPE, y->INPUT] =: INPUT" },
+    { GEL_SemiOutput, "Semi[x->ANYTYPE, y->OUTPUT] =: OUTPUT" },
     { GEL_StartWatch, "StartWatch[] =: NUMBER" },
     { GEL_StopWatch, "StopWatch[] =: NUMBER" },
     { 0, 0 } };
