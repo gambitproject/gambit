@@ -7,10 +7,13 @@
 #define GUIPB_H
 
 #include "gtext.h"
+#include "wx.h"
+#include "wxmisc.h"
 
 // Loggable classes:
 #include "gambit.h"
 #include "efgshow.h"
+#include "spread.h"
 
 #include <stdio.h>
 #include <assert.h>
@@ -57,13 +60,17 @@ private:
                         const gList<gText>& arglist);
 
     // Private callback methods specific to a particular class.
-    void GuiPlayback::ExecuteGambitFrameCommand(GambitFrame *object,
-                                                const gText& command,
-                                                const gList<gText>& arglist);
+    void ExecuteGambitFrameCommand(GambitFrame *object,
+                                   const gText& command,
+                                   const gList<gText>& arglist);
 
-    void GuiPlayback::ExecuteEfgShowCommand(EfgShow *object,
-                                            const gText& command,
-                                            const gList<gText>& arglist);
+    void ExecuteEfgShowCommand(EfgShow *object,
+                               const gText& command,
+                               const gList<gText>& arglist);
+
+    void ExecuteSpreadSheet3DCommand(SpreadSheet3D *object,
+                                     const gText& command,
+                                     const gList<gText>& arglist);
 
 public:
     // ================== Exception classes. ====================

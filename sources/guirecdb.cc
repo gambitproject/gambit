@@ -66,6 +66,13 @@ bool GuiObject::check() const
         break;
     }
 
+    case SPREADSHEET3D:
+    {
+        SpreadSheet3D* spreadsheet3d = (SpreadSheet3D *)object;
+        assert(spreadsheet3d->is_SpreadSheet3D());
+        break;
+    }
+
     default:
         fprintf(stderr, "Unknown GuiObject type ID: %d\n", ID);
         return false;
@@ -98,6 +105,14 @@ void GuiObject::dump() const
         printf("EFG_SHOW object at %x\n", (unsigned int)object);
         EfgShow *efg_show = (EfgShow *)object;
         efg_show->EfgShow_hello();
+        break;
+    }
+
+    case SPREADSHEET3D:
+    {
+        printf("SPREADSHEET3D object at %x\n", (unsigned int)object);
+        SpreadSheet3D *spreadsheet3d = (SpreadSheet3D *)object;
+        spreadsheet3d->SpreadSheet3D_hello();
         break;
     }
 

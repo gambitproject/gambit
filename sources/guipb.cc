@@ -279,7 +279,7 @@ void GuiPlayback::ExecuteCommand(const gText& object_name,
                                  const gList<gText>& arglist)
 {
 #ifdef GUIPB_DEBUG
-    printf("in ExecuteCommand...\n");
+    printf("in GuiPlayback::ExecuteCommand...\n");
 
     printf("object_name: %s\n", (char *)object_name);
     printf("command: %s\n", (char *)command);
@@ -307,8 +307,8 @@ void GuiPlayback::ExecuteCommand(const gText& object_name,
     // a const function!
 
     gText obj(object_name);  
-    int length        = obj.Length();
-    int position      = obj.LastOccur('#');
+    int length   = obj.Length();
+    int position = obj.LastOccur('#');
 
     if (position == -1) // '#' not found
     {
@@ -323,7 +323,7 @@ void GuiPlayback::ExecuteCommand(const gText& object_name,
     gText num         = obj.Right(length - position - 1);  // CHECKME: memory leak?
 
 #ifdef GUIPB_DEBUG
-    int   number      = atoi((char *)num);
+    int number = atoi((char *)num);
     printf("object type: %s\n", (char *)object_type);
     printf("number: %d\n", number);
 #endif
@@ -360,6 +360,20 @@ void GuiPlayback::ExecuteCommand(const gText& object_name,
 #endif
 
         ExecuteEfgShowCommand(efg_show, command, arglist);
+    }
+    else if (object_type == "SpreadSheet3D")
+    {
+#ifdef GUIPB_DEBUG
+        printf("object type found: %s\n", (char *)object_type);
+#endif 
+
+        SpreadSheet3D *spreadsheet3d = (SpreadSheet3D *)(object->get_object());
+        assert(spreadsheet3d->is_SpreadSheet3D());
+#ifdef GUIPB_DEBUG
+        spreadsheet3d->SpreadSheet3D_hello();
+#endif
+
+        ExecuteSpreadSheet3DCommand(spreadsheet3d, command, arglist);
     }
     else  // The object is not of a loggable class.
     {
@@ -399,7 +413,7 @@ void GuiPlayback::ExecuteGambitFrameCommand(GambitFrame *object,
                                             const gList<gText>& arglist)
 {
 #ifdef GUIPB_DEBUG
-    printf("in ExecuteGambitFrameCommand...\n");
+    printf("in GuiPlayback::ExecuteGambitFrameCommand...\n");
     printf("command: %s\n", (char *)command);
 
     for (int i = 1; i <= arglist.Length(); i++)
@@ -430,7 +444,7 @@ void GuiPlayback::ExecuteEfgShowCommand(EfgShow *object,
                                         const gList<gText>& arglist)
 {
 #ifdef GUIPB_DEBUG
-    printf("in ExecuteEfgShowCommand...\n");
+    printf("in GuiPlayback::ExecuteEfgShowCommand...\n");
     printf("command: %s\n", (char *)command);
     
     for (int i = 1; i <= arglist.Length(); i++)
@@ -449,3 +463,29 @@ void GuiPlayback::ExecuteEfgShowCommand(EfgShow *object,
     }
 }
 
+
+// SpreadSheet3D class
+
+void GuiPlayback::ExecuteSpreadSheet3DCommand(SpreadSheet3D *object,
+                                              const gText& command,
+                                              const gList<gText>& arglist)
+{
+#ifdef GUIPB_DEBUG
+    printf("in GuiPlayback::ExecuteEfgShowCommand...\n");
+    printf("command: %s\n", (char *)command);
+    
+    for (int i = 1; i <= arglist.Length(); i++)
+        printf("arglist[%d] = %s\n", i, (char *)arglist[i]);
+#endif
+    
+    // FIXME! add commands.
+    
+    if (command == "PRINT")
+    {
+        object->OnPrint_Playback((char *)arglist[1], (char *)arglist[2]);
+    }
+    else
+    {
+        throw InvalidCommandForObject();
+    }
+}

@@ -5,15 +5,20 @@
 
 #ifndef GUIRECDB_H
 #define GUIRECDB_H
- 
+
+#include "wx.h"
+#include "wxmisc.h"
+
+#include "gmisc.h" 
 #include "gstream.h"  
 #include "gtext.h"
-#include "gmisc.h"
 #include "hash.h"
 
-// Header files for bjects to be logged:
+
+// Header files for objects to be logged:
 #include "gambit.h"
 #include "efgshow.h"
+#include "spread.h"
 
 #include <assert.h>
 
@@ -60,11 +65,12 @@ gui_recorder_db.Define(N, new GuiObject(I, O)); assert(gui_recorder_db.check());
 enum GuiObjectTypeID
 {
     GAMBIT_FRAME,
-    EFG_SHOW
+    EFG_SHOW,
+    SPREADSHEET3D
 };
 
 #define FIRST_GUI_ID GAMBIT_FRAME
-#define LAST_GUI_ID  EFG_SHOW
+#define LAST_GUI_ID  SPREADSHEET3D
 
 
 // The GuiObject class.
