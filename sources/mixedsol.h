@@ -56,6 +56,8 @@ public:
 
   void SetCreator(NfgAlgType);
   NfgAlgType Creator(void) const; //Who created this object? (algorithm ID or user)
+  bool IsComplete(void) const; 
+
   void SetIsNash(TriState);
   TriState IsNash(void) const; // Is it Nash? Y/N/DK
   void SetIsPerfect(TriState);

@@ -63,6 +63,7 @@ public:
 
   int Id(void) const;
   void SetCreator(EfgAlgType);
+  bool IsComplete(void) const;
 
   EfgAlgType Creator(void) const; //Who created this object? (algorithm ID or user)
   void SetIsNash(TriState);

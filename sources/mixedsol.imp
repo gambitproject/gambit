@@ -83,16 +83,17 @@ template <class T> MixedSolution<T>::~MixedSolution() {}
 
 template <class T> void MixedSolution<T>::EvalEquilibria()
 {
-  if(_IsNash == T_DONTKNOW)
-    if(MaxGripe() <= _Epsilon)
-      _IsNash = T_YES;
-    else
-      _IsNash = T_NO;
+  if(IsComplete())
+    if(_IsNash == T_DONTKNOW)
+      if(MaxGripe() <= _Epsilon)
+	_IsNash = T_YES;
+      else
+	_IsNash = T_NO;
   if( _IsNash == T_NO )
-  {
-    _IsPerfect = T_NO;
-    _IsProper = T_NO;
-  }
+    {
+      _IsPerfect = T_NO;
+      _IsProper = T_NO;
+    }
 }
 
 
@@ -101,6 +102,19 @@ template <class T> void MixedSolution<T>::SetCreator(NfgAlgType c)
 
 template <class T> NfgAlgType MixedSolution<T>::Creator(void) const
 { return _Creator; }
+
+template <class T> bool MixedSolution<T>::IsComplete(void) const
+{ 
+  T sum;
+  for(int pl= 1; pl <=svlen.Length(); pl++) {
+    sum = -(T)1;
+    for(int str = 1;str <= svlen[pl]; str++) 
+      sum+= svptr[pl][str];
+    if(sum > _Epsilon || sum < -_Epsilon) 
+      return false;
+  }
+  return true;
+}
 
 template <class T> void MixedSolution<T>::SetIsNash(TriState i)
 { _IsNash = i; }
