@@ -27,7 +27,7 @@ public:
   wxString GetValue(int row, int col);
   wxString GetRowLabelValue(int);
   wxString GetColLabelValue(int);
-  void SetValue(int, int, const wxString &) { /* ignore */ }
+  void SetValue(int, int, const wxString &);
   bool IsEmptyCell(int, int) { return false; }
 
   bool InsertRows(size_t pos = 0, size_t numRows = 1);
@@ -189,6 +189,12 @@ wxString NfgGridTable::GetValue(int row, int col)
   return "";
 }
 
+void NfgGridTable::SetValue(int row, int col, const wxString &)
+{
+  wxGridTableMessage msg(this, wxGRIDTABLE_REQUEST_VIEW_GET_VALUES, row, col);
+  GetView()->ProcessTableMessage(msg);
+}
+	
 bool NfgGridTable::InsertRows(size_t pos, size_t numRows)
 {
   wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_INSERTED,
@@ -534,9 +540,11 @@ void NfgTable::OnLeftDoubleClick(wxGridEvent &p_event)
   if (m_editable &&
       p_event.GetRow() < m_support.NumStrats(GetRowPlayer()) &&
       p_event.GetCol() < m_support.NumStrats(GetColPlayer())) {
+    /*
     wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
 			 NFG_EDIT_OUTCOMES_PAYOFFS);
     m_parent->AddPendingEvent(event);
+    */
   }
 }
 
@@ -567,6 +575,16 @@ void NfgTable::ClearSolution(void)
   if (m_solution) {
     delete m_solution;
     m_solution = 0;
+  }
+}
+
+void NfgTable::RefreshTable(void)
+{
+  // This is a crude but effective way to get the table to refresh
+  for (int row = 0; row < m_grid->GetRows(); row++) {
+    for (int col = 0; col < m_grid->GetCols(); col++) {
+      m_grid->SetCellValue("", row, col);
+    }
   }
 }
 

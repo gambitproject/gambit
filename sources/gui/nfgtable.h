@@ -91,6 +91,8 @@ public:
   void SetSolution(const MixedSolution &);
   const MixedSolution &GetSolution(void) const { return *m_solution; }
   void ClearSolution(void);
+  
+  void RefreshTable(void);
 
   DECLARE_EVENT_TABLE()
 };

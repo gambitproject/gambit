@@ -35,8 +35,6 @@
 
 #include "gambit.h"
 #include "efgshow.h"
-#include "dlnfgpayoff.h"
-#include "dlnfgoutcome.h"
 #include "dlnfgeditsupport.h"
 #include "dlstrategies.h"
 #include "dlnfgproperties.h"
@@ -74,11 +72,6 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(wxID_EXIT, NfgShow::OnFileExit)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, NfgShow::OnFileMRUFile)
   EVT_MENU(NFG_EDIT_STRATS, NfgShow::OnEditStrategies)
-  EVT_MENU(NFG_EDIT_OUTCOMES_NEW, NfgShow::OnEditOutcomeNew)
-  EVT_MENU(NFG_EDIT_OUTCOMES_DELETE, NfgShow::OnEditOutcomeDelete)
-  EVT_MENU(NFG_EDIT_OUTCOMES_ATTACH, NfgShow::OnEditOutcomeAttach)
-  EVT_MENU(NFG_EDIT_OUTCOMES_DETACH, NfgShow::OnEditOutcomeDetach)
-  EVT_MENU(NFG_EDIT_OUTCOMES_PAYOFFS, NfgShow::OnEditOutcomePayoffs)
   EVT_MENU(NFG_EDIT_GAME, NfgShow::OnEditGame)
   EVT_MENU(NFG_VIEW_PROFILES, NfgShow::OnViewProfiles)
   EVT_MENU(NFG_VIEW_NAVIGATION, NfgShow::OnViewNavigation)
@@ -300,7 +293,7 @@ void NfgShow::UpdateProfile(gArray<int> &profile)
 
 void NfgShow::OnOutcomesEdited(void)
 {
-  m_table->Refresh();
+  m_table->RefreshTable();
 }
 
 //----------------------------------------------------------------------
@@ -327,21 +320,6 @@ void NfgShow::MakeMenus(void)
   
   wxMenu *editMenu = new wxMenu;
   editMenu->Append(NFG_EDIT_STRATS, "&Strategies", "Edit strategy names");
-
-  wxMenu *editOutcomesMenu = new wxMenu;
-  editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_NEW, "&New",
-			   "Create a new outcome");
-  editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_DELETE, "Dele&te",
-			   "Delete an outcome");
-  editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_ATTACH, "&Attach",
-			   "Attach an outcome to the current contingency");
-  editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_DETACH, "&Detach",
-			   "Set the outcome for the current contingency to null");
-  editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_PAYOFFS, "&Payoffs",
-			   "Set the payoffs for outcome of the current contingency");
-  editMenu->Append(NFG_EDIT_OUTCOMES,  "&Outcomes",  editOutcomesMenu,
-		    "Set/Edit outcomes");
-  editMenu->AppendSeparator();
   editMenu->Append(NFG_EDIT_GAME, "&Game", "Edit game properties");
 
   wxMenu *viewMenu = new wxMenu;
@@ -497,11 +475,6 @@ void NfgShow::UpdateMenus(void)
   wxMenuBar *menu = GetMenuBar();
   gArray<int> profile(GetProfile());
 
-  menu->Enable(NFG_EDIT_OUTCOMES_DELETE, m_nfg.NumOutcomes() > 0);
-  menu->Enable(NFG_EDIT_OUTCOMES_ATTACH, m_nfg.NumOutcomes() > 0);
-  menu->Enable(NFG_EDIT_OUTCOMES_DETACH, m_nfg.GetOutcome(profile) != 0);
-  menu->Enable(NFG_EDIT_OUTCOMES_PAYOFFS, m_nfg.GetOutcome(profile) != 0);
-
   menu->Enable(NFG_TOOLS_SUPPORT_SELECT_FROMLIST, NumSupports() > 1);
   menu->Enable(NFG_TOOLS_SUPPORT_SELECT_PREVIOUS, NumSupports() > 1);
   menu->Enable(NFG_TOOLS_SUPPORT_SELECT_NEXT, NumSupports() > 1);
@@ -650,61 +623,6 @@ void NfgShow::OnEditStrategies(wxCommandEvent &)
 
   if (dialog.GameChanged()) {
     m_table->Refresh();
-  }
-}
-
-void NfgShow::OnEditOutcomeAttach(wxCommandEvent &)
-{
-  if (m_nfg.NumOutcomes() == 0)
-    return;
-
-  dialogNfgOutcomeSelect dialog(m_nfg, this);
-    
-  if (dialog.ShowModal() == wxID_OK) {
-    m_nfg.SetOutcome(GetProfile(), dialog.GetOutcome());
-    m_table->Refresh();
-  }
-}
-
-void NfgShow::OnEditOutcomeDetach(wxCommandEvent &)
-{
-  m_nfg.SetOutcome(GetProfile(), 0);
-  m_table->Refresh();
-}
-
-void NfgShow::OnEditOutcomeNew(wxCommandEvent &)
-{
-  dialogNfgPayoffs dialog(m_nfg, 0, this);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    NFOutcome *outc = m_nfg.NewOutcome();
-    gArray<gNumber> payoffs(dialog.Payoffs());
-
-    for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++)
-      m_nfg.SetPayoff(outc, pl, payoffs[pl]);
-    outc->SetName(dialog.Name());
-  }
-}
-
-void NfgShow::OnEditOutcomeDelete(wxCommandEvent &)
-{
-  if (m_nfg.NumOutcomes() == 0)
-    return;
-
-  dialogNfgOutcomeSelect dialog(m_nfg, this);
-    
-  if (dialog.ShowModal() == wxID_OK) {
-    m_nfg.DeleteOutcome(dialog.GetOutcome());
-    m_table->Refresh();
-  }
-}
-
-void NfgShow::OnEditOutcomePayoffs(wxCommandEvent &)
-{
-  if (m_table->GetRowStrategy() <= m_currentSupport->NumStrats(m_table->GetRowPlayer()) &&
-      m_table->GetColStrategy() <= m_currentSupport->NumStrats(m_table->GetColPlayer())) {
-    OutcomePayoffs(m_table->GetRowStrategy(),
-		   m_table->GetColStrategy(), false);
   }
 }
 
@@ -1540,31 +1458,6 @@ void NfgShow::SetFilename(const wxString &p_name)
     SetTitle(wxString::Format("Gambit - %s", (char *) m_nfg.GetTitle()));
   }
   wxGetApp().SetFilename(this, p_name.c_str());
-}
-
-void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
-{
-  gArray<int> profile(GetProfile());
-  profile[m_table->GetRowPlayer()] = st1;
-  profile[m_table->GetColPlayer()] = st2;
-
-  dialogNfgPayoffs dialog(m_nfg, m_nfg.GetOutcome(profile), this);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    NFOutcome *outc = m_nfg.GetOutcome(profile);
-    gArray<gNumber> payoffs(dialog.Payoffs());
-
-    if (!outc) {
-      outc = m_nfg.NewOutcome();
-      m_nfg.SetOutcome(profile, outc);
-    }
-
-    for (int i = 1; i <= m_nfg.NumPlayers(); i++)
-      m_nfg.SetPayoff(outc, i, payoffs[i]);
-    outc->SetName(dialog.Name());
-
-    m_table->Refresh();
-  }
 }
 
 const gList<MixedSolution> &NfgShow::Solutions(void) const

@@ -69,11 +69,6 @@ private:
   void OnFileMRUFile(wxCommandEvent &);
 
   void OnEditStrategies(wxCommandEvent &);
-  void OnEditOutcomeNew(wxCommandEvent &);
-  void OnEditOutcomeDelete(wxCommandEvent &);
-  void OnEditOutcomeAttach(wxCommandEvent &);
-  void OnEditOutcomeDetach(wxCommandEvent &);
-  void OnEditOutcomePayoffs(wxCommandEvent &);
   void OnEditGame(wxCommandEvent &);
 
   void OnViewProfiles(wxCommandEvent &);
@@ -138,7 +133,6 @@ public:
   NFSupport *CurrentSupport(void) const { return m_currentSupport; }
   int NumSupports(void) const { return m_supports.Length(); }
   
-  void OutcomePayoffs(int st1, int st2, bool next = false);
   void UpdateProfile(gArray<int> &profile);
   void SetStrategy(int p_player, int p_strategy);
   
