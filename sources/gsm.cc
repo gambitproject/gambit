@@ -79,18 +79,8 @@ GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
 
 GSM::~GSM()
 {
-  int i;
-
   _NumObj--;
 
-  /*
-  if( _CallFuncStack->Depth() != 0 )
-    _ErrorMessage( _StdErr, 47 );
-  for( i = _CallFuncStack->Depth(); i > 0; i-- )
-  {
-    CallFunction();
-  }
-  */
   assert( _CallFuncStack->Depth() == 0 );
   delete _CallFuncStack;
 

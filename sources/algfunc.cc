@@ -26,7 +26,10 @@ Portion *GSM_BehavFloat(Portion **param)
   BehavProfile<double> *bp = new BehavProfile<double>(E);
   MixedToBehav(N, (gPVector<double> &) mp, E, (gDPVector<double> &) *bp);
 
-  return new BehavValPortion(bp);
+  Portion* por = new BehavValPortion(bp);
+  por->SetOwner( param[ 1 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_Payoff(Portion **param)
@@ -113,7 +116,10 @@ Portion *GSM_GobitEfg(Portion **param)
   ((IntPortion *) param[3])->Value() = M.NumEvals();
   ((IntPortion *) param[4])->Value() = M.NumIters();
 
-  return new Behav_ListPortion<double>(M.GetSolutions());
+  Portion* por = new Behav_ListPortion<double>(M.GetSolutions());
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_LiapEfg(Portion **param)
@@ -134,7 +140,10 @@ Portion *GSM_LiapEfg(Portion **param)
   ((IntPortion *) param[1])->Value() = LM.NumEvals();
   ((FloatPortion *) param[2])->Value() = LM.Time();
 
-  return new Behav_ListPortion<double>(LM.GetSolutions());
+  Portion* por = new Behav_ListPortion<double>(LM.GetSolutions());
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 #include "seqform.h"
@@ -152,7 +161,10 @@ Portion *GSM_LemkeEfgFloat(Portion **param)
   ((IntPortion *) param[2])->Value() = SM.NumPivots();
   ((FloatPortion *) param[3])->Value() = SM.Time();
   
-  return new Behav_ListPortion<double>(SM.GetSolutions());
+  Portion* por = new Behav_ListPortion<double>(SM.GetSolutions());
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_LemkeEfgRational(Portion **param)
@@ -167,7 +179,10 @@ Portion *GSM_LemkeEfgRational(Portion **param)
   ((IntPortion *) param[2])->Value() = SM.NumPivots();
   ((FloatPortion *) param[3])->Value() = SM.Time();
 
-  return new Behav_ListPortion<gRational>(SM.GetSolutions());
+  Portion* por = new Behav_ListPortion<gRational>(SM.GetSolutions());
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 extern double Funct_tolBrent, Funct_tolN;
