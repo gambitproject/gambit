@@ -9,10 +9,20 @@
 \newcommand{\ed}{\end{description}}
 \begin{document}
 
-\title{GAMBIT COMMAND LANGUAGE}
+\title{GAMBIT COMMAND LANGUAGE\thanks{This project was funded in part
+by National Science Foundation grants SBR-9308637 to the California
+Institute of Technology and SBR-9308862 to the University of
+Minnesota.  We are grateful to Rob Weber for help in compiling this manual
+and testing parts of the language.}}
 
-\author{Division of Humanities \& Social Sciences\\
-California Institute of Technology}
+\author{Richard D. McKelvey\\California Institute of
+Technology
+\and
+Andrew McLennan\\University of
+Minnesota
+\and 
+Ted Turocy\\California Institute of Technology
+}
 
 \date{\today\\ \jobname.tex}
 
@@ -39,10 +49,12 @@ control statements allow for repetitive operations (such as
 investigating games as one changes various parameters) or conditional
 operations.
 
-
 \section{Installing and Running the GCL}
+
+[TED: add some stuff here on installation?]
+
 Typing 'gcl [CR]' at the unix prompt will start the GCL (in
-interpreted mode.)  As long as the GCL is running, you will get the
+interpreted mode.)  You will get the
 GCL prompt:
 \begin{verbatim}
 GCL>
@@ -85,104 +97,237 @@ command language to an external text file.  For example, at the unix prompt:
 \subsection{Grammar and syntax}
 
 The central pardigm of the GCL is that we can think of every legal
-statement as a function, which may return a value, and which may or may
-not have some special shorthand format.  A function in the GCL takes the
-form 
+statement as a function call.  The function may return a value, and
+may or may not have some special shorthand format.
+
+At any point in time, there is a set of ``visible functions.''
+Functions can be either built-in functions, or user created functions.
+Each function is identified by its \verb+FunctionName+, which is a
+unique \verb+Name+.  A \verb+Name+ is any sequence of upper or lower
+case letters or numbers beginning with a letter.  The set of all
+built-in functions is listed in the Function Reference section of this
+manual.  The built-in functions are always visible, unless they are
+explicitly deleted.
+
+A statement in the GCL has the
+following syntax
 \begin{verbatim}
-FunctionName[ArgName1->a1, ... , ArgNamen->an]
+FunctionName[ArgumentList]
 \end{verbatim}
-where some or all of the arguments may be optional.  
-
-Arguments to a function may be optional or required, and they may be
-passed by value or by reference, depending on whether the function
-changes their value.  To pass an argument by value, the syntax is
-\verb+ArgumentName->argval+.  To pass by reference, the syntax is
-\verb+ArgumentName<->argref+.  
-
-The name \verb+ArgumentName+ is the formal name of the argument.  The
-formal argument names for each function are listed in the reference
-section.  When passing by value, \verb+argval+ can be any
-expression that evaluates to the correct data type for the
-corresponding argument.  When passing by reference, \verb+argref+
-must be a variable name of the correct type for the corresponding
-argument. 
-
-FunctionNames are reserved words.  For each function, the reference section
-lists the formal argument names, whether they are optional or required,
-and whether they are to be passed by reference or value.  
- 
-A rough description of the formal grammar follows:
-
+where \verb+FunctionName+ is a unique name, and \verb+ArgumentList+ is
+a sequence of arguments, separated by commas, each of which takes one
+of the following two forms:
 \begin{verbatim}
-argumentname: name
-
-argument: argumentname -> argumentvalue
-        | argumentname <-> argumentvalue
-
-argumentlist: argument
-        | argument, argumentlist
-
-functionname: name
-
-function: functionname[argumentlist]
-
-variablename: name
-
-expression: variablename
-        | function
-
-statement: expression
-        | variablename := expression
+ArgumentName->argval
+\end{verbatim}
+or
+\begin{verbatim}
+ArgumentName<->argref
 \end{verbatim}
 
+Each function, when originally created, is given a list of formal
+argument names, and each formal argument is assigned a data type,
+which is one of the allowable data types listed in the section below
+on data types.  For each of the built in functions, the formal
+arguments and their data types are listed in the entry for that
+function in the Function Reference section.  In the above syntax,
+\verb+ArgumentName+, must be one of the list of possible formal
+arguments for the given function, and \verb+argval+ or \verb+argref+
+is any function that evaluates to correct data type for the
+corresponding argument. 
 
-\subsection{Output}
+The arguments to a function can be either optional ar required.
+Required arguments must be specified in \verb+ArgumentList+ when the
+function is called.  Each optional argument has a default value, which
+is also determined when the function is created.  Optional arguments
+need only be specified when the default is to be changed.
 
-Output can be produced by a program or command using the following
-command:
+The arguments to a function can be specified in any order, as long as
+the above syntax for the \verb+ArgumentList+ is used.  However, the
+argument list for a function ca also be called with without specifying
+the prefix \verb+ArgumentName->+ or \verb+ArgumentName<->+ as long as
+the arguments are specified in the correct order.  In fact a mixture
+is allowed in which the prefix is specified for some arguments and not
+sepecified for others as long as all of the arguments which do not
+include the prefix preceed those that to.  In this case, it is assumed
+that those that do not include a prefix are in the correct order.  
+
+Arguments can be passed in one of two ways, either by value or by
+reference.  To pass an argument by value, the syntax is
+\verb+ArgumentName->argval+.  If an argument is passed by value, then the
+function whose name is specified in \verb+argval+ cannot be be called
+or changed by the function \verb+FunctionName+ unless it is in some
+other way made visible to the function (specifically, if it is called
+by reference in a different argument to the same function, or if is a
+funcion of global scope -- described below).  To pass by reference,
+the syntax is \verb+ArgumentName<->argref+.  If an argument is passed
+by reference, then the function whose name is specified in
+\verb+argref+ can be called and changed by the function
+\verb+FunctionName+.  
+
+Finally, a function with no required arguments can be called by just
+specifying the function name.  That function is then called with
+default values for all optional arguments (if there are any.)
+
+Summarizing, a rough description of the formal grammar of the GCL
+follows:
 
 \begin{verbatim}
-	Output[{expression1}, {expression2}, . . . ]
-\end{verbatim}
+Name: [A-Za-z]([A-Za-z0-9])
 
-The command produces a line of output containing the values or strings
-specified by the expressions.  An expression can be a variable of any
-type or can evaluate to any value or string which can be contained in
-a variable.  The brackets {\tt "{ }"} are not a part of the language
-and are used only to enclose expressions which are also not a part of
-the language.
+Statement: FunctionName
+        | FunctionName[ArgumentList]
+
+FunctionName: Name
+
+ArgumentList: Argument
+        | Argument, Argumentlist
+
+Argument: ArgumentName -> Function
+        | ArgumentName <-> Function
+        | Function
+
+ArgumentName: Name
+\end{verbatim}
 
 \subsection{Variables}
 
-Like most high-level languages, GCL has a typing system which permits
-only one type of data to be stored in a given variable.  However, GCL
-is a bit unusual in that it has implicit typing of variables.  That
-is, a variable's type is determined by its first use in the program.
-It is an error to use a variable in an expression before it has had
-its value set.
+The simplest kind of function is a ``variable''.  A ``variable'' is a
+constant function with no arguments.  A variable stores one object of
+the corresponding data type, and returns it when called.  To create a
+user defined variable, one can use the built-in function,
+\verb+Assign+, which has the syntax:
+\begin{verbatim}
+Assign[name->varname, expression->statement,scope->bool]
+\end{verbatim}
+where \verb+varname+ is a name that is different from any previously
+defined function.  This creates a variable with name \verb+varname+
+which stores the value returned by the expression \verb+statement+.
+The variable \verb+varname+ has the same return data type as
+\verb+statement+.  The \verb+Assign+ function returns a boolean data
+type indicating if it was successful (1 for success, 0 for failure.)
+On success, it adds the variable \verb+varname+, along with it's
+scope and data type, to the list of currently visible functions.  The
+argument \verb+scope+ determines the scope of the new variable.  The
+scope can be either global (if bool evaluates to 1) or local (if bool
+evaluates to 0.) A variable with local socpe is not visible to the
+body of any function that is called.  A variable with golbal scope is
+visible to functions that are called.  Note that if a 
 
-Variables can be defined and given a value using the {\tt ":="} symbol
-where the name of the variable is to the left of the symbol and to the
-right there is an expression which evaluates to a value of the type
-desired for the variable. A variable can be of the following types:
+If \verb+Assign+ is called with an argument \verb+varname+ which is a
+currently visible function. it results in an error if the data type
+which \verb+expression+ evaluates to is different that the current
+data type of \verb+varname+.  [TED: I don't recall why we had this
+restriction.  Do we want to get rid of it?] On the other hand, if the
+data types match, then \verb+varname+ is ``modified:'' \verb+varname+
+is first deleted from the list of visible functions and then
+\verb+Assign+ is executed.  
+
+The Assign function is used so frequently, it has the following shorthand
+representation:
+\begin{verbatim}
+varname := statement
+\end{verbatim}
+
+\subsection{User defined functions}
+
+\subsubsection{Creating functions}
+A user defined function can be created using the function
+\verb+NewFunction+, which has the following format.
+
+\begin{verbatim}
+NewFunction[name->TEXT,arglist->LIST[ TEXT, BOOLEAN, TEXT], 
+            body->STATEMENTLIST,scope->BOOLEAN] =: BOOLEAN
+\end{verbatim}
+
+\subsubsection{Using functions}
+
+When a user defined function is evaluated, the following things,
+happen, in order:
+
+\begin{enumerate}
+\item
+The current list of visible functions is 
+replaced with a new set of visible functions, consisting of the
+previous set of visible functions with global scope.  
+ 
+\item
+\begin{itemize}
+\item
+For each argument in the argument list which is called by
+value, a new variable of local scope is created, whose name is the
+corresponding \verb+ArgumentName+, and it is assigned the value
+which results from evaluating the argument \verb+argval+.  
+\item
+For each
+argument that is called by reference, the name \verb+ArgumentName+ is
+added to the list of visible functions, and this name is treated as a
+proxy (a reference) for the function name of \verb+argref+.  In other
+words, this function remains visible, but is given a different name by
+which it is referred to while in the function.  It is very important
+to note that this means that any changes to the function with name
+\verb+ArgumentName+ will result to the exact same change to
+\verb+argref+, once that function is again visible, since
+\verb+ArgumentName+ and \verb+argref+ are just different names for the
+same function.
+\end{itemize}
+
+\item
+The statements in the body of the function are evaluated, in
+order, until a \verb+Return+ function is encountered.  
+
+\item
+When a return function is evaluated, the list of visible
+functions is restored to what it was before the \verb+FunctionName+
+was evaluated, and the argument of the Return function is evaluated
+and returned as the evaluation of \verb+FunctionName+. 
+\end{enumerate}
+
+\subsection{Data types}
+
+Like most high-level languages, GCL has a data typing system which
+permits only one type of data to be returned by a given function.
+However, GCL is a bit unusual in that it has implicit typing of
+functions.  That is, a function's return type is determined by its
+first use in the program.  For a user defined function, this is in the
+NewFunction command that first creates the function.  For a user
+defined variable, this will be in the \verb+Assign+ function that
+first creates the variable.
+
+The built-in data types for the GCL are the following:  
 
 \medskip
 
 \begin{tabular}{lp{4in}}
 BOOLEAN & Boolean (evaluates to constants: True or False)\\ 
+
 INTEGER & Evaluates to an integer of arbitrary size \\ 
+
 RATIONAL & Evaluates to a rational number of arbitrary precision\\ 
+
+FLOAT 	& Evaluates to a floating point number (Not fully implemented yet)\\
+
 TEXT	& String of arbitrary length enclosed in quotation marks\\ 
-EFG	& Game in extensive form (created or read)\\ 
-NFG	& Game in normal form (created or read)\\ 
+
+EFG	& Game in extensive form.  An extensive form is defined as any
+element of the set of possible return values of built-in functions
+that return data type EFG.\\
+
+NFG	& Game in normal form.  A normal form is defined as any
+element of the set of possible return values of built-in functions
+that return data type NFG\\
+
 NODE	& A node (may only be a subvariable of an extensive
 form problem) \\ 
+
 DATATYPE & Defines precision (constants: Float or
 Rational) \\ 
+
 MIXED	& {Profile of mixed strategies.  Can only be a
 subvariable of a normal form problem.  That is, if n is a problem in
 normal form, a variable of type MIXED can only be assigned to a
 subvariable of the form n.x.}\\ 
+
 BEHAV	& Profile of behavioral
 strategies.  Can only be a subvariable of an extensive form problem.
 That is, if e is a problem in extensive form, a variable of type BEHAV
@@ -219,8 +364,10 @@ TEXT, respectively.
 
 \subsection{Flow Control}
 
-Gambit Command Language also contains mechanisms which allow flow
-control within a program in one of three manners.
+The GCL contains three functions which allow flow control within a
+program.  Flow control functions differ from other functions in that
+when they are evaluated, the list of visible functions does not
+change.
 
 \medskip
 
@@ -262,11 +409,34 @@ Paremeters enclosed in brackets {\tt "{ }"} represent optional
 parameters which are not necessary for the procedure to function.
 
 \begin{itemize}
+\item 
+\protect \large \begin{verbatim}
+And[x1->BOOLEAN, x2->BOOLEAN] =: BOOLEAN
+\end{verbatim} \normalsize
+  
+\bd
+\item
+[Short form:] \verb+x1 && x2+
+\item
+[Description:] Logical And.
+\item
+[Return value:] Returns the minimum of $x1$ and $x2.$  
+\item
+[Required parameters:]\hfil\null
+\bd
+\item
+[x1:] First argument.  
+\item
+[x2:] Second argument
+\ed
+\item
+[Optional parameters:] None.
+\ed
+
 \item
 \protect \large \begin{verbatim}
 AppendNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
-\end{verbatim}
-\normalsize
+\end{verbatim} \normalsize
 
 \bd
 \item
@@ -290,6 +460,34 @@ is created automatically.
 [br:] The number of branches to be appended to the node.
 \ed
 
+\item
+[Optional parameters:] None.
+\ed
+
+\item 
+\protect \large \begin{verbatim}
+Assign[name->TEXT, expression->statement] =: INTEGER
+\end{verbatim} \normalsize
+
+where \verb+statement+ is a function with any return type.  
+\bd
+\item
+[Short form:] \verb+name := expression+
+\item
+[Description:] Creates a variable (a function with no arguments) with name
+given by \verb+name+ and return data type the same as that of
+\verb+expression+
+\item
+[Return value:] Returns 1 on success, 0 on failure.  
+\item
+[Required parameters:]\hfil\null
+\bd
+\item
+[name:] The name of the variable to be created.  This must be a different
+name from any previously existing function.  
+\item
+[expression:] Returns the value to be stored by the variable
+\ed
 \item
 [Optional parameters:] None.
 \ed
@@ -716,8 +914,7 @@ StopWatch[] match.
 \protect \large \begin{verbatim}
 ElimDom[N->NFG, {pl->LIST(INTEGER)}, {strong->BOOLEAN},
 {time<->RATIONAL}, 	{output->TEXT}, {NIT->INTEGER}] =: INTEGER
-\end{verbatim}
-\normalsize
+\end{verbatim} \normalsize
 
 \bd
 \item
@@ -790,6 +987,8 @@ are equal.
 [Optional parameters:] None.
 
 \ed
+
+
 
 \item
 \protect \large \begin{verbatim}
@@ -1252,6 +1451,32 @@ Default is 0, resulting in $a = 1,$ or !geometric incrementing.
 [time:] Returns the elapsed time for the operation.
 \ed
 \ed
+
+\item 
+\protect \large \begin{verbatim}
+If[antecedent->BOOLEAN, then->STATEMENTLIST, else->STATEMENTLIST] =: BOOLEAN
+\end{verbatim} \normalsize
+  
+\bd
+\item
+[Description:] If antecedent is true, evaluates then.  If
+antecedent is false, evaluates else. 
+\item
+[Return value:] If antecedent is true, returns value of then.  If
+antecedent is false, returns value of else.  
+\item
+[Required parameters:]\hfil\null
+\bd
+\item
+[antecedent:] Antecedent.  
+\item
+[then:] Statement list to be evaluated if antecedent is true. 
+\ed
+\item
+[else:] Statement list to be evaluated if antecedent is false. 
+\ed
+
+
 
 \item
 \protect \large \begin{verbatim}
@@ -1762,6 +1987,39 @@ form problem.
 
 \item
 \protect \large \begin{verbatim}
+NewFunction[name->TEXT,arglist->LIST[ TEXT, BOOLEAN, TEXT], 
+            body->STATEMENTLIST] =: BOOLEAN
+\end{verbatim}\normalsize
+
+\bd
+\item [Notes:] Not implemented yet.  
+\item
+[Description:] Creates a new function.  The return data type of the
+function is the return type of \verb+body+ on first evaluation.  It is
+a run time error to ever return a different data type.  A function is
+visible only after it is created.  Functions created within the body
+of a function are only visible to the body, and to functions created
+within the body.
+\item
+[Return value:] 1 if success, 0 if failure.  
+\item
+[Required parameters:]
+\bd
+\item[name:] The name of the newly created name.  Must be different
+than all function names in current scope.  
+\ed
+\item
+[Optional parameters:]\hfil\null
+
+\bd
+\item
+[type:] Specifies the type (Float or Rational) of the new extensive
+form problem.
+\ed
+\ed
+
+\item
+\protect \large \begin{verbatim}
 NewOutcome[E->EFG, {outc->INTEGER}] =: INTEGER
 \end{verbatim}\normalsize
 
@@ -1908,9 +2166,7 @@ be counted.
 \item
 \protect \large \begin{verbatim}
 NumOutcomes[E->EFG] =: INTEGER
-\end{verbatim}
-
-\normalsize
+\end{verbatim} \normalsize
 
 \bd
 \item
@@ -1957,8 +2213,7 @@ be found.
 
 \protect \large \begin{verbatim}
 NumPlayers[E->EFG] =: INTEGER
-\end{verbatim}
-\normalsize
+\end{verbatim} \normalsize
 
 \bd
 \item
@@ -2014,6 +2269,32 @@ strategy set is used.
 
 \ed
 \ed
+
+\item 
+\protect \large \begin{verbatim}
+Or[x1->BOOLEAN, x2->BOOLEAN] =: BOOLEAN
+\end{verbatim} \normalsize
+  
+\bd
+\item
+[Short form:] \verb+x1 || x2+
+\item
+[Description:] Logical Or.
+\item
+[Return value:] Returns the maximum of $x1$ and $x2.$  
+\item
+[Required parameters:]\hfil\null
+\bd
+\item
+[x1:] First argument.  
+\item
+[x2:] Second argument
+\ed
+\item
+[Optional parameters:] None.
+\ed
+
+
 
 \item
 
@@ -2086,6 +2367,30 @@ specified node.
 [n:] The node for which the player making the decision is to be found.
 \ed
 
+\item
+[Optional parameters:] None.
+\ed
+
+\item 
+\protect \large \begin{verbatim}
+Plus[x1->RATIONAL, x2->RATIONAL] =: RATIONAL
+\end{verbatim} \normalsize
+  
+\bd
+\item
+[Short form:] \verb%x1 + x2%
+\item
+[Description:] Adds $x1$ and $x2$.
+\item
+[Return value:] Returns the value of $x1 + x2$  
+\item
+[Required parameters:]\hfil\null
+\bd
+\item
+[x1:] First argument.  
+\item
+[x2:] Second argument
+\ed
 \item
 [Optional parameters:] None.
 \ed
@@ -2743,6 +3048,59 @@ StopWatch[] =: INTEGER
 \ed
 
 \item
+
+\item 
+\protect \large \begin{verbatim}
+Times[x1->RATIONAL, x2->RATIONAL] =: RATIONAL
+\end{verbatim} \normalsize
+  
+\bd
+\item
+[Short form:] \verb+x1 * x2+
+\item
+[Description:] Multiplies $x1$ and $x2$.
+\item
+[Return value:] Returns the value of $x1 * x2$  
+\item
+[Required parameters:]\hfil\null
+\bd
+\item
+[x1:] First argument.  
+\item
+[x2:] Second argument
+\ed
+\item
+[Optional parameters:] None.
+\ed
+
+\item 
+\protect \large \begin{verbatim}
+While[test->BOOLEAN, do->STATEMENTLIST] =: BOOLEAN
+\end{verbatim} \normalsize
+  
+\bd
+\item
+[Description:] If test is true, evaluates the statement list consisting of
+\verb+do+ followed by itself.  If test fails, evaluates the empty
+statement list.
+\item
+[Return value:] If test fails, returns 1, if test passes, evaluates do and
+then returns value of itself.  (Note that this is a recursive function.
+It either returns 1 or never terminates.)
+
+\item
+[Required parameters:]\hfil\null
+\bd
+\item
+[antecedent:] Antecedent.  
+\item
+[then:] Statement list to be evaluated if antecedent is true. 
+\ed
+\item
+[else:] Statement list to be evaluated if antecedent is false. 
+\ed
+
+
 
 \protect \large \begin{verbatim}
 WriteEfgFile[E->EFG, file->TEXT] =: EFG
