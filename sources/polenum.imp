@@ -70,24 +70,35 @@ template <class T> int PolEnumModule<T>::PolEnum(void)
   
   gPolyList<T> equations(&Space,&Lex);
 
+  gArray<int> strats(NF.NumPlayers());
   gArray<gNumber> values(NF.Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+  for (i = 1; i <= values.Length(); values[i++] = gNumber(0));
+  NfgContIter A(support), B(support);
 
   for( i=1;i<=NF.NumPlayers();i++) {
     for(j=1;j<support.NumStrats(i);j++) {
-      NfgContIter A(support), B(support);
       gPoly<T> equation(&Space,&Lex);
-      gArray<int> exps;
+      gArray<int> exps(num);
       do {
 	A.Freeze(i);
 	A.Set(i, j);
 	B.Freeze(i);
 	B.Set(i, j+1);
+	strats = A.Get();
+	int k,kk = 0;
+	for(k=1;k<=NF.NumPlayers();k++) 
+	  if(i!=k) {
+	    exps[k+kk]=1;
+	    kk+=(NF.NumStrats(k)-1);
+	  }
 	exp_vect exponent(&Space,exps);
-	T coeff;
+	T ap = NF.Payoff(A.GetOutcome(), i).Evaluate(values);
+	T bp = NF.Payoff(B.GetOutcome(), i).Evaluate(values);
+	T coeff = ap - bp;
 	gMono<T> term(coeff,exponent);
 	gPoly<T> new_term(&Space,term,&Lex);
 	equation+=new_term;
+	A.NextContingency();
       } while (B.NextContingency());
       equations+=equation;    
     }
@@ -107,6 +118,9 @@ template <class T> int PolEnumModule<T>::PolEnum(void)
   timer.Start();
 
   QuikSolv<T> quickie(equations);
+  gout << "\nThe first test system is\n" 
+    << quickie.UnderlyingEquations() ;
+    /*
   if (quickie.FindRoots(Cube,22,2000))
     gout << "\nThe first test system is\n" 
 	 << quickie.UnderlyingEquations() 
@@ -115,7 +129,7 @@ template <class T> int PolEnumModule<T>::PolEnum(void)
   else
     gout << "The system\n" << quickie.UnderlyingEquations()
 	 << " could not be resolved by FindRoots.\n";
-
+  */
   timer.Stop();
   gout << "The QuikSolv computation of roots took " 
     << (int)timer.Elapsed() << " seconds.\n\n";
