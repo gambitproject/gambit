@@ -459,7 +459,7 @@ gText BoolPortion::OutputString(void) const
   else if (*_Value == triFALSE)
     return "False";
   else /* (*_Value == triMAYBE) */
-    return "Maybe";
+    return "Unknown";
 }
 
 Portion* BoolPortion::ValCopy(void) const
