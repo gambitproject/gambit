@@ -11,6 +11,7 @@
 #include "wx/wx.h"
 #include "wx/config.h"    // for wxConfig
 #include "wx/docview.h"   // for wxFileHistory
+#include "wx/listctrl.h"
 
 extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
                                long p_style = wxOK | wxCENTRE);
@@ -35,23 +36,13 @@ class Efg;
 class EfgShow;
 class Nfg;
 class NfgShow;
+class Game;
 
 class GambitFrame : public wxFrame {
 private:
   wxFileHistory m_fileHistory;
   wxListCtrl *m_gameListCtrl;
-
-  class Game {
-  public:
-    Efg *m_efg;
-    EfgShow *m_efgShow;
-    Nfg *m_nfg;
-    NfgShow *m_nfgShow;
-
-    Game(Efg *p_efg) : m_efg(p_efg), m_efgShow(0), m_nfg(0), m_nfgShow(0) { }
-    Game(Nfg *p_nfg) : m_efg(0), m_efgShow(0), m_nfg(p_nfg), m_nfgShow(0) { }
-  };
-
+  
   gBlock<Game *> m_gameList;
 
   // Menu event handlers

@@ -7,8 +7,8 @@
 #include "wx/wx.h"
 #include "wxmisc.h"
 
-#include "base/base.h"
 #include "efstrat.h"
+#include "base/base.h"
 #include "gambit.h"
 #include "nfgshow.h"
 #include "dlelim.h"

@@ -151,6 +151,17 @@ IMPLEMENT_APP(GambitApp)
 
 const int idGAMELISTCTRL = 1300;
 
+class Game {
+public:
+  Efg *m_efg;
+  EfgShow *m_efgShow;
+  Nfg *m_nfg;
+  NfgShow *m_nfgShow;
+
+  Game(Efg *p_efg) : m_efg(p_efg), m_efgShow(0), m_nfg(0), m_nfgShow(0) { }
+  Game(Nfg *p_nfg) : m_efg(0), m_efgShow(0), m_nfg(p_nfg), m_nfgShow(0) { }
+};
+
 GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
 			 const wxPoint &p_position, const wxSize &p_size)
   : wxFrame(p_parent, -1, p_title, p_position, p_size),
@@ -733,5 +744,5 @@ void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
 #include "base/garray.imp"
 #include "base/gblock.imp"
 
-template class gArray<GambitFrame::Game *>;
-template class gBlock<GambitFrame::Game *>;
+template class gArray<Game *>;
+template class gBlock<Game *>;

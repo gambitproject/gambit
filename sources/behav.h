@@ -41,7 +41,7 @@ public:
 protected:
   const Efg *m_efg;
   BehavNode *m_root;
-  EFSupport m_support;
+  EFSupport *m_support;
   gArray<BehavInfoset *> m_isets;
   mutable bool m_cached_data;
   
@@ -244,8 +244,8 @@ public:
   // GENERAL DATA ACCESS
 
   Efg &Game(void) const   { return const_cast<Efg &>(*m_efg); }
-  const EFSupport &Support(void) const   { return m_support; }
-  const EFSupport *SupportPtr(void) const   { return &m_support; }
+  const EFSupport &Support(void) const   { return *m_support; }
+  const EFSupport *SupportPtr(void) const   { return m_support; }
   
   const T &GetRealizProb(const Node *node);
   const T &GetBeliefProb(const Node *node);
