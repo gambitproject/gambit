@@ -16,6 +16,16 @@
 #include "gwatch.h"
 #include "mixed.h"
 
+
+
+
+extern double Funct_tolBrent;
+extern double Funct_tolN;
+extern int Funct_maxitsBrent;
+extern int Funct_maxitsN;
+
+
+
 Portion *GSM_BehavFloat(Portion **param)
 {
   MixedProfile<double> &mp = * (MixedProfile<double>*) ((MixedPortion*) param[0])->Value();
@@ -276,29 +286,47 @@ Behav_ListPortion<gRational>::Behav_ListPortion(
     Append( new BehavValPortion( new BehavProfile<gRational>(list[i])));
 }
 
-Portion *GSM_GobitEfg(Portion **param)
+
+
+//--------------------------- GobitSolve -----------------------------//
+
+Portion *GSM_GobitEfg_EfgFloat(Portion **param)
 {
+  int old_Funct_maxitsN = Funct_maxitsN;
+  double old_Funct_tolN = Funct_tolN;
+  int old_Funct_maxitsBrent = Funct_maxitsBrent;
+  double old_Funct_tolBrent = Funct_tolBrent;
+
   Efg<double> &E = *(Efg<double> *) ((EfgPortion *) param[0])->Value();
+  BehavProfile<double> start(E);
   
   EFGobitParams<double> EP;
- 
-  EP.pxifile = &((OutputPortion *) param[1])->Value();
-  EP.fullGraph = ((BoolPortion *) param[5])->Value();
-  EP.minLam = ((FloatPortion *) param[6])->Value();
-  EP.maxLam = ((FloatPortion *) param[7])->Value();
-  EP.delLam = ((FloatPortion *) param[8])->Value();
-  EP.powLam = ((IntPortion *) param[9])->Value();
-  
-  BehavProfile<double> *foo = (BehavProfile<double> *) ((BehavPortion *) param[10])->Value();
-  BehavProfile<double> start(E);
-  if (foo)   start = *foo;
+  if( ((TextPortion*) param[1])->Value() != "" )
+    EP.pxifile = new gFileOutput( ((TextPortion*) param[1])->Value() );
+  else
+    EP.pxifile = &gnull;
+  EP.minLam = ((FloatPortion *) param[2])->Value();
+  EP.maxLam = ((FloatPortion *) param[3])->Value();
+  EP.delLam = ((FloatPortion *) param[4])->Value();
+  EP.powLam = ((IntPortion *) param[5])->Value();
+  EP.fullGraph = ((BoolPortion *) param[6])->Value();
 
+  Funct_maxitsN = ( (IntPortion*) param[7] )->Value();
+  Funct_tolN = ( (FloatPortion*) param[8] )->Value();
+  Funct_maxitsBrent = ( (IntPortion*) param[9] )->Value();
+  Funct_tolBrent = ( (FloatPortion*) param[10] )->Value();
+  
   EFGobitModule<double> M(E, EP, start);
   M.Gobit(1);
 
-  ((FloatPortion *) param[2])->Value() = M.Time();
-  ((IntPortion *) param[3])->Value() = M.NumEvals();
-  ((IntPortion *) param[4])->Value() = M.NumIters();
+  ((FloatPortion *) param[11])->Value() = M.Time();
+  ((IntPortion *) param[12])->Value() = M.NumEvals();
+  ((IntPortion *) param[13])->Value() = M.NumIters();
+
+  Funct_maxitsN = old_Funct_maxitsN;
+  Funct_tolN = old_Funct_tolN;
+  Funct_maxitsBrent = old_Funct_maxitsBrent;
+  Funct_tolBrent = old_Funct_tolBrent;
 
   Portion* por = new Behav_ListPortion<double>(M.GetSolutions());
   por->SetOwner( param[ 0 ]->Original() );
@@ -306,29 +334,140 @@ Portion *GSM_GobitEfg(Portion **param)
   return por;
 }
 
-Portion *GSM_LiapEfg(Portion **param)
+
+Portion *GSM_GobitEfg_BehavFloat(Portion **param)
 {
+  int old_Funct_maxitsN = Funct_maxitsN;
+  double old_Funct_tolN = Funct_tolN;
+  int old_Funct_maxitsBrent = Funct_maxitsBrent;
+  double old_Funct_tolBrent = Funct_tolBrent;
+
+  BehavProfile<double>& start = 
+    * (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
+  Efg<double> &E = *( start.BelongsTo() );
+  
+  EFGobitParams<double> EP;
+  if( ((TextPortion*) param[1])->Value() != "" )
+    EP.pxifile = new gFileOutput( ((TextPortion*) param[1])->Value() );
+  else
+    EP.pxifile = &gnull;
+  EP.minLam = ((FloatPortion *) param[2])->Value();
+  EP.maxLam = ((FloatPortion *) param[3])->Value();
+  EP.delLam = ((FloatPortion *) param[4])->Value();
+  EP.powLam = ((IntPortion *) param[5])->Value();
+  EP.fullGraph = ((BoolPortion *) param[6])->Value();
+
+  Funct_maxitsN = ( (IntPortion*) param[7] )->Value();
+  Funct_tolN = ( (FloatPortion*) param[8] )->Value();
+  Funct_maxitsBrent = ( (IntPortion*) param[9] )->Value();
+  Funct_tolBrent = ( (FloatPortion*) param[10] )->Value();
+  
+  EFGobitModule<double> M(E, EP, start);
+  M.Gobit(1);
+
+  ((FloatPortion *) param[11])->Value() = M.Time();
+  ((IntPortion *) param[12])->Value() = M.NumEvals();
+  ((IntPortion *) param[13])->Value() = M.NumIters();
+
+  Funct_maxitsN = old_Funct_maxitsN;
+  Funct_tolN = old_Funct_tolN;
+  Funct_maxitsBrent = old_Funct_maxitsBrent;
+  Funct_tolBrent = old_Funct_tolBrent;
+
+  Portion* por = new Behav_ListPortion<double>(M.GetSolutions());
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
+}
+
+
+
+
+
+
+
+
+
+//-------------------------- LiapSolve ---------------------------//
+
+Portion *GSM_LiapEfg_EfgFloat(Portion **param)
+{
+  int old_Funct_maxitsN = Funct_maxitsN;
+  double old_Funct_tolN = Funct_tolN;
+  int old_Funct_maxitsBrent = Funct_maxitsBrent;
+  double old_Funct_tolBrent = Funct_tolBrent;
+
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
+  BehavProfile<double> start(E);
 
   EFLiapParams<double> LP;
 
-  LP.stopAfter = ((IntPortion *) param[3])->Value();
-  LP.nTries = ((IntPortion *) param[4])->Value();
+  LP.stopAfter = ((IntPortion *) param[1])->Value();
+  LP.nTries = ((IntPortion *) param[2])->Value();
  
-  BehavProfile<double> *foo = (BehavProfile<double> *) ((BehavPortion *) param[5])->Value();
-  BehavProfile<double> start(E);
+  Funct_maxitsN = ( (IntPortion*) param[3] )->Value();
+  Funct_tolN = ( (FloatPortion*) param[4] )->Value();
+  Funct_maxitsBrent = ( (IntPortion*) param[5] )->Value();
+  Funct_tolBrent = ( (FloatPortion*) param[6] )->Value();
 
-  EFLiapModule<double> LM(E, LP, (foo) ? *foo : start);
+  EFLiapModule<double> LM(E, LP, start);
   LM.Liap();
 
-  ((IntPortion *) param[1])->Value() = LM.NumEvals();
-  ((FloatPortion *) param[2])->Value() = LM.Time();
+  ((FloatPortion *) param[7])->Value() = LM.Time();
+  ((IntPortion *) param[8])->Value() = LM.NumEvals();
+
+  Funct_maxitsN = old_Funct_maxitsN;
+  Funct_tolN = old_Funct_tolN;
+  Funct_maxitsBrent = old_Funct_maxitsBrent;
+  Funct_tolBrent = old_Funct_tolBrent;
 
   Portion* por = new Behav_ListPortion<double>(LM.GetSolutions());
   por->SetOwner( param[ 0 ]->Original() );
   por->AddDependency();
   return por;
 }
+
+Portion *GSM_LiapEfg_BehavFloat(Portion **param)
+{
+  int old_Funct_maxitsN = Funct_maxitsN;
+  double old_Funct_tolN = Funct_tolN;
+  int old_Funct_maxitsBrent = Funct_maxitsBrent;
+  double old_Funct_tolBrent = Funct_tolBrent;
+
+  BehavProfile<double> &start = 
+    * (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
+  Efg<double> &E = *( start.BelongsTo() );
+
+  EFLiapParams<double> LP;
+
+  LP.stopAfter = ((IntPortion *) param[1])->Value();
+  LP.nTries = ((IntPortion *) param[2])->Value();
+ 
+  Funct_maxitsN = ( (IntPortion*) param[3] )->Value();
+  Funct_tolN = ( (FloatPortion*) param[4] )->Value();
+  Funct_maxitsBrent = ( (IntPortion*) param[5] )->Value();
+  Funct_tolBrent = ( (FloatPortion*) param[6] )->Value();
+
+  EFLiapModule<double> LM(E, LP, start);
+  LM.Liap();
+
+  ((FloatPortion *) param[7])->Value() = LM.Time();
+  ((IntPortion *) param[8])->Value() = LM.NumEvals();
+
+  Funct_maxitsN = old_Funct_maxitsN;
+  Funct_tolN = old_Funct_tolN;
+  Funct_maxitsBrent = old_Funct_maxitsBrent;
+  Funct_tolBrent = old_Funct_tolBrent;
+
+  Portion* por = new Behav_ListPortion<double>(LM.GetSolutions());
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
+}
+
+
+
+
 
 #include "seqform.h"
 
@@ -369,8 +508,6 @@ Portion *GSM_LemkeEfgRational(Portion **param)
   return por;
 }
 
-extern double Funct_tolBrent, Funct_tolN;
-extern int Funct_maxitsBrent, Funct_maxitsN;
 
 Portion *GSM_SetFloatOptions(Portion **param)
 {
@@ -558,96 +695,228 @@ Portion *GSM_RealizProbsRational(Portion **param)
 }
   
   
-extern Portion *GSM_GobitNfg(Portion **param);
-extern Portion *GSM_LiapNfg(Portion **param);
+extern Portion *GSM_GobitNfg_NfgFloat(Portion **param);
+extern Portion *GSM_GobitNfg_MixedFloat(Portion **param);
+extern Portion *GSM_LiapNfg_NfgFloat(Portion **param);
+extern Portion *GSM_LiapNfg_MixedFloat(Portion **param);
 extern Portion *GSM_LemkeNfgFloat(Portion **param);
 extern Portion *GSM_LemkeNfgRational(Portion **param);
+extern Portion *GSM_LemkeNfgSupport(Portion **param);
 
 void Init_algfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
   FuncObj = new FuncDescObj("GobitSolve");
-  FuncObj->SetFuncInfo(GSM_GobitEfg, 11);
-  FuncObj->SetParamInfo(GSM_GobitEfg, 0, "efg", porEFG_FLOAT, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo(GSM_GobitEfg, 1, "pxifile", porOUTPUT,
-			new OutputRefPortion(gnull));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 2, "time", porFLOAT,
-			new FloatValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GobitEfg, 3, "nEvals", porINTEGER,
-			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GobitEfg, 4, "nIters", porINTEGER,
-			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GobitEfg, 5, "fullGraph", porBOOL,
-			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 6, "minLam", porFLOAT,
+  FuncObj->SetFuncInfo(GSM_GobitEfg_EfgFloat, 14);
+  FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 0, "efg", porEFG_FLOAT, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 1, "pxifile", porTEXT,
+			new TextValPortion("") );
+  FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 2, "minLam", porFLOAT,
 			new FloatRefPortion(Gobit_default_minLam));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 7, "maxLam", porFLOAT,
+  FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 3, "maxLam", porFLOAT,
 			new FloatRefPortion(Gobit_default_maxLam));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 8, "delLam", porFLOAT,
+  FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 4, "delLam", porFLOAT,
 			new FloatRefPortion(Gobit_default_delLam));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 9, "powLam", porINTEGER,
-		        new IntValPortion(1));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 10, "start", porBEHAV_FLOAT,
-			new BehavValPortion(0));
+  FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 5, "powLam", porINTEGER,
+		        new IntRefPortion( (long&) Gobit_default_powLam));
+  FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 6, "fullGraph", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 7, "maxitsN", porINTEGER,
+			new IntRefPortion( (long&) Funct_maxitsN ));
+  FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 8, "tolN", porFLOAT,
+			new FloatRefPortion( Funct_tolN ));
+  FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 9, "maxits1", porINTEGER,
+			new IntRefPortion( (long&) Funct_maxitsBrent ));
+  FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 10, "tol1", porFLOAT,
+			new FloatRefPortion( Funct_tolBrent ));
+  FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 11, "time", porFLOAT,
+			new FloatValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 12, "nEvals", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 13, "nIters", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
 
-  FuncObj->SetFuncInfo(GSM_GobitNfg, 11);
-  FuncObj->SetParamInfo(GSM_GobitNfg, 0, "nfg", 
-			porNFG_FLOAT, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo(GSM_GobitNfg, 1, "pxifile", porOUTPUT,
-			new OutputRefPortion(gnull));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 2, "time", porFLOAT,
-			new FloatValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GobitNfg, 3, "nEvals", porINTEGER,
-			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GobitNfg, 4, "nIters", porINTEGER,
-			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GobitNfg, 5, "fullGraph", porBOOL,
-			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 6, "minLam", porFLOAT,
+  FuncObj->SetFuncInfo(GSM_GobitEfg_BehavFloat, 14);
+  FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 0, "start", porBEHAV_FLOAT);
+  FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 1, "pxifile", porTEXT,
+			new TextValPortion("") );
+  FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 2, "minLam", porFLOAT,
 			new FloatRefPortion(Gobit_default_minLam));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 7, "maxLam", porFLOAT,
+  FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 3, "maxLam", porFLOAT,
 			new FloatRefPortion(Gobit_default_maxLam));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 8, "delLam", porFLOAT,
+  FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 4, "delLam", porFLOAT,
 			new FloatRefPortion(Gobit_default_delLam));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 9, "powLam", porINTEGER,
-			new IntValPortion(1));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 10, "start", porMIXED_FLOAT,
-			new MixedValPortion(0));
+  FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 5, "powLam", porINTEGER,
+		        new IntRefPortion( (long&) Gobit_default_powLam));
+  FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 6, "fullGraph", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 7, "maxitsN", porINTEGER,
+			new IntRefPortion( (long&) Funct_maxitsN ));
+  FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 8, "tolN", porFLOAT,
+			new FloatRefPortion( Funct_tolN ));
+  FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 9, "maxits1", porINTEGER,
+			new IntRefPortion( (long&) Funct_maxitsBrent ));
+  FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 10, "tol1", porFLOAT,
+			new FloatRefPortion( Funct_tolBrent ));
+  FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 11, "time", porFLOAT,
+			new FloatValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 12, "nEvals", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 13, "nIters", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+
+
+  FuncObj->SetFuncInfo(GSM_GobitNfg_NfgFloat, 14);
+  FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 0, "nfg", porNFG_FLOAT, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 1, "pxifile", porTEXT,
+			new TextValPortion("") );
+  FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 2, "minLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_minLam));
+  FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 3, "maxLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_maxLam));
+  FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 4, "delLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_delLam));
+  FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 5, "powLam", porINTEGER,
+		        new IntRefPortion( (long&) Gobit_default_powLam));
+  FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 6, "fullGraph", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 7, "maxitsN", porINTEGER,
+			new IntRefPortion( (long&) Funct_maxitsN ));
+  FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 8, "tolN", porFLOAT,
+			new FloatRefPortion( Funct_tolN ));
+  FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 9, "maxits1", porINTEGER,
+			new IntRefPortion( (long&) Funct_maxitsBrent ));
+  FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 10, "tol1", porFLOAT,
+			new FloatRefPortion( Funct_tolBrent ));
+  FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 11, "time", porFLOAT,
+			new FloatValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 12, "nEvals", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 13, "nIters", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+
+
+  FuncObj->SetFuncInfo(GSM_GobitNfg_MixedFloat, 14);
+  FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 0, "start", porMIXED_FLOAT);
+  FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 1, "pxifile", porTEXT,
+			new TextValPortion("") );
+  FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 2, "minLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_minLam));
+  FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 3, "maxLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_maxLam));
+  FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 4, "delLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_delLam));
+  FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 5, "powLam", porINTEGER,
+		        new IntRefPortion( (long&) Gobit_default_powLam));
+  FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 6, "fullGraph", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 7, "maxitsN", porINTEGER,
+			new IntRefPortion( (long&) Funct_maxitsN ));
+  FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 8, "tolN", porFLOAT,
+			new FloatRefPortion( Funct_tolN ));
+  FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 9, "maxits1", porINTEGER,
+			new IntRefPortion( (long&) Funct_maxitsBrent ));
+  FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 10, "tol1", porFLOAT,
+			new FloatRefPortion( Funct_tolBrent ));
+  FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 11, "time", porFLOAT,
+			new FloatValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 12, "nEvals", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 13, "nIters", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
 
   gsm->AddFunction(FuncObj);
+
+
+  //------------------------- LiapSolve ------------------------------//
 
   FuncObj = new FuncDescObj("LiapSolve");
-  FuncObj->SetFuncInfo(GSM_LiapEfg, 6);
-  FuncObj->SetParamInfo(GSM_LiapEfg, 0, "efg", porEFG_FLOAT, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo(GSM_LiapEfg, 1, "time", porFLOAT,
-			new FloatValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LiapEfg, 2, "nEvals", porINTEGER,
-			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LiapEfg, 3, "stopAfter", porINTEGER,
+  FuncObj->SetFuncInfo(GSM_LiapEfg_EfgFloat, 9);
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 0, "efg", porEFG_FLOAT, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 1, "stopAfter", porINTEGER,
 		        new IntValPortion(1));
-  FuncObj->SetParamInfo(GSM_LiapEfg, 4, "nTries", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 2, "nTries", porINTEGER,
 		        new IntValPortion(10));
-  FuncObj->SetParamInfo(GSM_LiapEfg, 5, "start", porBEHAV_FLOAT,
-			new BehavValPortion(0));
-
-  FuncObj->SetFuncInfo(GSM_LiapNfg, 6);
-  FuncObj->SetParamInfo(GSM_LiapNfg, 0, "nfg", porNFG_FLOAT, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LiapNfg, 1, "time", porFLOAT,
-			new FloatValPortion(0.0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LiapNfg, 2, "nEvals", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 3, "maxitsN", porINTEGER,
+			new IntRefPortion( (long&) Funct_maxitsN ));
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 4, "tolN", porFLOAT,
+			new FloatRefPortion( Funct_tolN ));
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 5, "maxits1", porINTEGER,
+			new IntRefPortion( (long&) Funct_maxitsBrent ));
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 6, "tol1", porFLOAT,
+			new FloatRefPortion( Funct_tolBrent ));
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 7, "time", porFLOAT,
+			new FloatValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 8, "nEvals", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LiapNfg, 3, "stopAfter", porINTEGER,
-			new IntValPortion(1));
-  FuncObj->SetParamInfo(GSM_LiapNfg, 4, "nTries", porINTEGER,
-			new IntValPortion(10));
-  FuncObj->SetParamInfo(GSM_LiapNfg, 5, "start", porMIXED_FLOAT,
-			new MixedValPortion(0));
+
+  FuncObj->SetFuncInfo(GSM_LiapEfg_BehavFloat, 9);
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 0, "start", porBEHAV_FLOAT );
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 1, "stopAfter", porINTEGER,
+		        new IntValPortion(1));
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 2, "nTries", porINTEGER,
+		        new IntValPortion(10));
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 3, "maxitsN", porINTEGER,
+			new IntRefPortion( (long&) Funct_maxitsN ));
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 4, "tolN", porFLOAT,
+			new FloatRefPortion( Funct_tolN ));
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 5, "maxits1", porINTEGER,
+			new IntRefPortion( (long&) Funct_maxitsBrent ));
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 6, "tol1", porFLOAT,
+			new FloatRefPortion( Funct_tolBrent ));
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 7, "time", porFLOAT,
+			new FloatValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 8, "nEvals", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+
+
+  FuncObj->SetFuncInfo(GSM_LiapNfg_NfgFloat, 9);
+  FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 0, "nfg", porNFG_FLOAT, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 1, "stopAfter", porINTEGER,
+		        new IntValPortion(1));
+  FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 2, "nTries", porINTEGER,
+		        new IntValPortion(10));
+  FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 3, "maxitsN", porINTEGER,
+			new IntRefPortion( (long&) Funct_maxitsN ));
+  FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 4, "tolN", porFLOAT,
+			new FloatRefPortion( Funct_tolN ));
+  FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 5, "maxits1", porINTEGER,
+			new IntRefPortion( (long&) Funct_maxitsBrent ));
+  FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 6, "tol1", porFLOAT,
+			new FloatRefPortion( Funct_tolBrent ));
+  FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 7, "time", porFLOAT,
+			new FloatValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 8, "nEvals", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_LiapNfg_MixedFloat, 9);
+  FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 0, "start", porMIXED_FLOAT );
+  FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 1, "stopAfter", porINTEGER,
+		        new IntValPortion(1));
+  FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 2, "nTries", porINTEGER,
+		        new IntValPortion(10));
+  FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 3, "maxitsN", porINTEGER,
+			new IntRefPortion( (long&) Funct_maxitsN ));
+  FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 4, "tolN", porFLOAT,
+			new FloatRefPortion( Funct_tolN ));
+  FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 5, "maxits1", porINTEGER,
+			new IntRefPortion( (long&) Funct_maxitsBrent ));
+  FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 6, "tol1", porFLOAT,
+			new FloatRefPortion( Funct_tolBrent ));
+  FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 7, "time", porFLOAT,
+			new FloatValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 8, "nEvals", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+
   gsm->AddFunction(FuncObj);
+
+
+  //------------------------- LCPSolve -------------------------//
 
   FuncObj = new FuncDescObj("LCPSolve");
   FuncObj->SetFuncInfo(GSM_LemkeEfgFloat, 4);
@@ -693,6 +962,17 @@ void Init_algfunc(GSM *gsm)
 			porINTEGER, new IntValPortion(0),
 		        PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LemkeNfgRational, 3, "time", 
+			porFLOAT, new FloatValPortion(0),
+			PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_LemkeNfgSupport, 4);
+  FuncObj->SetParamInfo(GSM_LemkeNfgSupport, 0, "support", porNF_SUPPORT );
+  FuncObj->SetParamInfo(GSM_LemkeNfgSupport, 1, "stopAfter", 
+			porINTEGER, new IntValPortion(0));
+  FuncObj->SetParamInfo(GSM_LemkeNfgSupport, 2, "nPivots", 
+			porINTEGER, new IntValPortion(0),
+		        PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LemkeNfgSupport, 3, "time", 
 			porFLOAT, new FloatValPortion(0),
 			PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
@@ -856,3 +1136,5 @@ void Init_algfunc(GSM *gsm)
 
 TEMPLATE class Behav_ListPortion<double>;
 TEMPLATE class Behav_ListPortion<gRational>;
+
+
