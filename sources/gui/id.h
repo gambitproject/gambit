@@ -110,7 +110,7 @@ typedef enum {
   GBT_MENU_OUTCOMES_DELETE = 801,
   GBT_MENU_OUTCOMES_DETACH = 802,
   GBT_MENU_OUTCOMES_NEW = 803
-};
+} gbtMenuIds;
 
 #endif // ID_H
 

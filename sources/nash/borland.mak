@@ -28,6 +28,7 @@ libnash_a_SOURCES = \
 	efgsubsolve.cc \
 	lhtab.cc \
 	mixedsol.cc \
+        nfgch.cc \
 	nfglcp.cc \
 	nfgliap.cc \
 	nfglogit.cc \

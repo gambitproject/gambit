@@ -12,14 +12,15 @@
 !include ..\makedef.bcc
 
 WXLIBDIR = $(WXDIR)\lib
-WXLIB = wx32 tiff jpeg winpng zlib
+WXLIB = wx32s tiff jpeg winpng zlib
 
-EXTRACPPFLAGS = -v -I$(WXDIR)\include -I$(BCCDIR)\include -I.. -D__BCC55__ -DVERSION=\"0.97.1.0\"
+EXTRACPPFLAGS = -v -I$(WXDIR)\include -I$(WXDIR)\lib\msw -I$(BCCDIR)\include -I.. -D__BCC55__ -DVERSION=\"0.97.1.0\"
 EXTRALINKFLAGS = 
 
 gambit_SOURCES = \
 	corplot.cc \
         dlabout.cc \
+        dlch.cc \
 	dleditbehav.cc \
 	dleditcont.cc \
 	dleditefg.cc \
@@ -45,21 +46,20 @@ gambit_SOURCES = \
 	dlspinctrl.cc \
 	efglayout.cc \
 	efgnavigate.cc \
-	efgoutcome.cc \
 	efgprint.cc \
-	efgprofile.cc \
 	efgshow.cc \
 	efgsupport.cc \
 	gambit.cc \
+        gamedoc.cc \
 	nfgnavigate.cc \
-	nfgoutcome.cc \
-	nfgprofile.cc \
 	nfgprint.cc \
 	nfgshow.cc \
 	nfgsupport.cc \
 	nfgtable.cc \
         numberedit.cc \
-	treedraw.cc \
+	outcomes.cc \
+        prefs.cc \
+	profile.cc \
 	treewin.cc \
         valnumber.cc \
         wxstatus.cc 

@@ -72,7 +72,7 @@ EFActionArray &EFActionArray::operator=( const EFActionArray &a)
 }
 
 #ifdef __BORLANDC__
-bool operator==(const gArray<Action *> &a, const gArray<Action *> &b)
+bool operator==(const gArray<gbtEfgAction> &a, const gArray<gbtEfgAction> &b)
 {
   if (a.First() != b.First() || a.Last() != b.Last())  {
     return false;

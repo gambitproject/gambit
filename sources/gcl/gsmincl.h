@@ -64,7 +64,7 @@ typedef enum {
   porSTRATEGY       = 0x20000000,
   porNULL           = 0x40000000,
   porUNDEFINED      = 0x80000000
-};
+} gbtPortionTypes;
 
 const unsigned int porANYTYPE = 0xFFFFFFFF;
 

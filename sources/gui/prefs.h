@@ -38,33 +38,33 @@ typedef enum {
   GBT_NODE_TOKEN_BOX = 1,
   GBT_NODE_TOKEN_CIRCLE = 2,
   GBT_NODE_TOKEN_DIAMOND = 3
-};
+} gbtNodeTokenStyle;
 
 typedef enum {
   GBT_BRANCH_STYLE_LINE = 0,
   GBT_BRANCH_STYLE_FORKTINE = 1
-};
+} gbtBranchLineStyle;
 
 typedef enum {
   GBT_BRANCH_LABEL_HORIZONTAL = 0,
   GBT_BRANCH_LABEL_ROTATED = 1
-};
+} gbtBranchLabelOrientation;
 
 typedef enum {
   GBT_INFOSET_JOIN_LINES = 0,
   GBT_INFOSET_JOIN_CIRCLES = 1
-};
+} gbtInfosetJoinStyle;
 
 typedef enum {
   GBT_INFOSET_CONNECT_NONE = 0,
   GBT_INFOSET_CONNECT_SAMELEVEL = 1,
   GBT_INFOSET_CONNECT_ALL = 2
-};
+} gbtInfosetConnectStyle;
 
 typedef enum {
   GBT_SUBGAME_HIDDEN = 0,
   GBT_SUBGAME_ARC = 1
-};
+} gbtSubgameStyle;
 
 typedef enum {
   GBT_NODE_LABEL_NOTHING = 0,
@@ -76,19 +76,19 @@ typedef enum {
   GBT_NODE_LABEL_REALIZPROB = 6,
   GBT_NODE_LABEL_BELIEFPROB = 7,
   GBT_NODE_LABEL_VALUE = 8
-};
+} gbtNodeLabelStyle;
 
 typedef enum {
   GBT_OUTCOME_LABEL_PAYOFFS = 0,
   GBT_OUTCOME_LABEL_LABEL = 1
-};
+} gbtOutcomeLabelStyle;
 
 typedef enum {
   GBT_BRANCH_LABEL_NOTHING = 0,
   GBT_BRANCH_LABEL_LABEL = 1,
   GBT_BRANCH_LABEL_PROBS = 2,
   GBT_BRANCH_LABEL_VALUE = 3
-};
+} gbtBranchLabelStyle;
 
 //
 // Convention to use for displaying randomized strategies:
@@ -100,7 +100,7 @@ typedef enum {
   GBT_PROFILES_GRID = 0,
   GBT_PROFILES_VECTOR = 1,
   GBT_PROFILES_MYERSON = 2
-};
+} gbtProfileStyle;
 
 class gbtPreferences {
 private:

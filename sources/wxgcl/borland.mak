@@ -12,9 +12,9 @@
 !include ..\makedef.bcc
 
 WXLIBDIR = $(WXDIR)\lib
-WXLIB = wx32 tiff jpeg winpng zlib
+WXLIB = wx32s tiff jpeg winpng zlib
 
-EXTRACPPFLAGS = -v -I$(WXDIR)\include -I$(BCCDIR)\include -I.. -D__BCC55__ -DVERSION=\"0.97.1.0\"
+EXTRACPPFLAGS = -v -I$(WXDIR)\include -I$(WXDIR)\lib\msw -I$(BCCDIR)\include -I.. -D__BCC55__ -DVERSION=\"0.97.1.0\"
 EXTRALINKFLAGS = 
 
 wxgcl_SOURCES = dlabout.cc wxgcl.cc wxstatus.cc

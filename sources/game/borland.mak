@@ -27,6 +27,7 @@ libgame_a_SOURCES = \
 	efgnfg.cc \
 	efgutils.cc \
 	efstrat.cc \
+        infoset.cc \
 	nfdom.cc \
 	nfdommix.cc \
 	nfg.cc \
@@ -35,6 +36,9 @@ libgame_a_SOURCES = \
 	nfgiter.cc \
 	nfgutils.cc \
 	nfstrat.cc \
+        node.cc \
+        outcome.cc \
+        player.cc \
 	readefg.cc \
 	readnfg.cc \
 	sfg.cc \

@@ -73,7 +73,7 @@ EFNodeArrays &EFNodeArrays::operator=( const EFNodeArrays &n)
 }
 
 #ifdef __BORLANDC__
-bool operator==(const gArray<Node *> &a, const gArray<Node *> &b)
+bool operator==(const gArray<gbtEfgNode> &a, const gArray<gbtEfgNode> &b)
 {
   if (a.First() != b.First() || a.Last() != b.Last())  {
     return false;
