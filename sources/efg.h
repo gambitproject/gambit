@@ -34,6 +34,7 @@ protected:
     Node *root;
     EFPlayer *chance;
     Lexicon *lexicon;
+    BaseNfg *afg;
 
     gBlock<Node *> dead_nodes;
     gBlock<Infoset *> dead_infosets;
@@ -131,7 +132,8 @@ protected:
     void Reveal(Infoset *, const gArray<EFPlayer *> &);
 
     // This function put in to facilitate error-detection in MixedToBehav[]
-    friend BaseNfg* AssociatedNfg( BaseEfg* E );
+    friend BaseNfg *AssociatedNfg(BaseEfg *E);
+    friend BaseNfg *AssociatedAfg(BaseEfg *E);
 
     // Find all subgames in the subtree rooted at 'n'
     void FindSubgames(Node *n);
@@ -195,6 +197,7 @@ template <class T> class Efg : public BaseEfg   {
 		gVector<T> &payoff) const;
 
     friend Nfg<T> *MakeReducedNfg(Efg<T> &);
+    friend Nfg<T> *MakeAfg(Efg<T> &);
     friend void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
 		             const Efg<T> &E, BehavProfile<T> &bp);
 
