@@ -13,8 +13,8 @@
 #include "garray.h"
 #include "glist.h"
 #include "gblock.h"
+#include "gvector.h"
 #include "rational.h"
-#include "glpsolv1.h"
 
 /*
    The classes in this file are prior to the notion of a 
