@@ -100,6 +100,7 @@ gInput& operator >> (gInput& f, gNumber& y)
   int sign = 1;
   bool isDouble = false;
   gInteger num = 0, denom = 1;
+  long old_pos = f.getpos();
 
   while (isspace(ch))    f >> ch;
   
@@ -123,16 +124,13 @@ gInput& operator >> (gInput& f, gNumber& y)
       f >> ch;
     }
   }
-  else if (ch == '.')  {
-    isDouble = true;
-    denom = 1;
-    f >> ch;
-    while (ch >= '0' && ch <= '9')  {
-      denom *= 10;
-      num *= 10;
-      num += (int) (ch - '0');
-      f >> ch;
-    }
+  else if (ch == '.')  {  
+    double dval;
+
+    f.setpos(old_pos);
+    f >> dval;
+    y = dval;
+    return f;
   }
 
   f.unget(ch);
