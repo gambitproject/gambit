@@ -1,4 +1,4 @@
-// $Id$
+// @(#)csumprm.h	1.2 9/11/95
 #ifndef ZSUMPRM_H
 #define ZSUMPRM_H
 

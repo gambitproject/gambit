@@ -1,4 +1,4 @@
-// $Id$
+// @(#)enumprm.h	1.7 9/11/95
 #ifndef ENUMPRM_H
 #define ENUMPRM_H
 

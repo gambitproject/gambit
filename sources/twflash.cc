@@ -3,7 +3,7 @@
 // form tree.  Can be set to flash at regular intervals or be solid.  If
 // not flashing, make sure to call Flash after every move.
 //
-// $Id$
+// @(#)twflash.cc	1.11 9/11/95
 //
 
 #include "wx.h"

@@ -1,5 +1,5 @@
 // File: accels.cc -- functions for working with accelerators
-// $Id$
+// @(#)accels.cc	1.9 9/11/95
 //
 
 #include "wx.h"
