@@ -1,7 +1,7 @@
 %
 % FILE: gclman.tex -- source for GCL manual
 %
-% $Id$
+% @(#)gclman.tex	1.101 2/24/97
 %
 
 %\documentclass{book}
@@ -16,16 +16,18 @@
 \input{psfig}
 
 % stuff for lex 
+% to put dictionary style headers in function ref sections
+
 \newcommand{\lex}[1]{\mark{#1}}
 
 \makeatletter
-
-%\def\ps@lexicon{\def\@oddhead{\firstmark\hfil \botmark\quad\thepage}
-%\def\@evenhead{\thepage\quad\firstmark\hfil \botmark}}
-
-\def\ps@lexicon{\def\@oddhead{\thesection\hfil \botmark\quad\thepage}
-\def\@evenhead{\thepage\quad\firstmark\hfil \thesection}}
+\def\ps@lexicon{\def\@oddhead{\slshape\mysectionname\hfil 
+{\Large\verb+\botmark+}\quad\thepage}
+\def\@evenhead{\thepage\quad{\Large\verb+\firstmark+}\hfil \slshape\mysectionname}}
 \makeatother
+
+\newcommand{\mysectionname}{\thesection\,\, BUILT-IN FUNCTIONS}
+
 % end stuff for lex
 
 
@@ -302,7 +304,7 @@ game \\
 \medskip
 
 The remainder of this section details the rules concerning the
-standare types
+standard types
 {\tt BOOLEAN}, {\tt INTEGER}, {\tt FLOAT}, {\tt RATIONAL}, {\tt TEXT},
 {\tt INPUT} and {\tt OUTPUT}, as well as general rules for typing.
 The extensive form and normal form types, and their related types, are
@@ -2139,11 +2141,11 @@ Fred moves:
   If Fred Folds, 
     Fred wins the pot if his card is Red (net gain of $1.00 to Fred).
     Fred loses the pot if his card is Black (net loss of $1.00 to Fred).
-  If Fred Raises, then Fred throws a dollar in the pot, and Sue moves:
-    If Sue Passes, then Fred wins the pot (net gain of $1.00 to Fred)
-    If Sue Meets, she throws a dollar in the pot; Fred must show the card: 
+  If Fred Raises, then Fred throws a dollar in the pot, and Alice moves:
+    If Alice Passes, then Fred wins the pot (net gain of $1.00 to Fred)
+    If Alice Meets, she throws a dollar in the pot; Fred must show the card: 
       If the card is Red Fred wins the pot (net gain of $2.00 to Fred).
-      If the card is Black Sue wins the pot (net loss of $2.00 to Fred)
+      If the card is Black Alice wins the pot (net loss of $2.00 to Fred)
 \end{verbatim}
 \caption{A simple poker game}
 \end{figure}
@@ -6299,7 +6301,7 @@ StrategyProbs[profile->MIXED(T), player->NFPLAYER] =: T
 
 {\it for} {\tt T = FLOAT, RATIONAL}
 \bd
-Returns a list of the probabilities with which \verb+player adopts
+Returns a list of the probabilities with which \verb+player+ adopts
 each strategy.  It is an error if \verb+profile+
 and \verb+player+ are not from the same normal form game.
 \item [See also:] \verb+StrategyProb+, \verb+SetStrategyProbs+.
@@ -6521,6 +6523,7 @@ Does a formatted write of \verb+x+ to \verb+output+.
 \end{itemize}
 
 \section{Standard User Defined Functions}
+\renewcommand{\mysectionname}{\thesection\,\, USER DEFINED FUNCTIONS}
 
 The functions listed in this section are user defined functions that
 are provided in the file \verb+stdudfs.gcl+.  For each function, the
