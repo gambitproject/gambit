@@ -154,15 +154,18 @@ MixedSolution &MixedSolution::operator=(const MixedSolution &p_solution)
 // Private member functions
 //-----------------------------
 
-void MixedSolution::EvalEquilibria(void) const
+void MixedSolution::SetIsNash(void) const
 {
-  if (IsComplete()) 
-    if (m_isNash == triUNKNOWN)  
+  if (m_isNash == triUNKNOWN) {
+    if(IsComplete())
       m_isNash = (m_profile.MaxRegret() <= m_epsilon) ? triTRUE : triFALSE;
-  if (m_isNash == triFALSE) {
-    m_checkedPerfect = true;
-    m_isPerfect = triFALSE;
-    m_isProper = triFALSE;
+    else
+      m_isNash = triFALSE;
+    if (m_isNash == triFALSE) {
+      m_checkedPerfect = true;
+      m_isPerfect = triFALSE;
+      m_isProper = triFALSE;
+    }
   }
 }
 
@@ -273,15 +276,14 @@ bool MixedSolution::IsComplete(void) const
 
 gTriState MixedSolution::IsNash(void) const
 {
-  EvalEquilibria();
+  SetIsNash();
   return m_isNash;
 }
 
 gTriState MixedSolution::IsPerfect(void) const
 {
   if(m_checkedPerfect == false) {
-    EvalEquilibria();
-    if(m_isNash)
+    if(IsNash())
       if(IsMixedDominated(*this,false,m_precision,gnull))
 	m_isPerfect = triFALSE;
       else if(Game().NumPlayers()==2)
@@ -293,7 +295,7 @@ gTriState MixedSolution::IsPerfect(void) const
 
 gTriState MixedSolution::IsProper(void) const
 {
-  EvalEquilibria();
+  SetIsNash();
   return m_isProper;
 }
 

@@ -475,3 +475,10 @@ template <class T> LPSolve<T>::~LPSolve()
   if(cost) delete cost; 
 }
 
+template <class T> T LPSolve<T>::Epsilon(int i = 2) const
+{
+if(i == 1) return eps1;
+if(i == 3)return eps3;
+return eps2;
+}
+

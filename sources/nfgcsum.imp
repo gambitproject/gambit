@@ -20,7 +20,7 @@ private:
   const NFSupport &support;
   gMatrix<T> *A;
   gVector<T> *b, *c;
-  T minpay;
+  T minpay, eps;
   long npivots;
   double time;
   gList<BFS<T> > List;
@@ -107,6 +107,8 @@ template <class T> int ZSumModule<T>::ZSum(int /*dup*/)
   
   Make_Abc();
   LPSolve<T> LP(*A,*b,*c,1,params.status);
+  eps = LP.Epsilon();
+
 
   if(!LP.IsAborted())
     Add_BFS(LP); 
@@ -193,7 +195,8 @@ void ZSumModule<T>::GetSolutions(gList<MixedSolution > &solutions) const
 	profile(2, j) = (T) 0;
 
     index = solutions.Append(MixedSolution(profile, algorithmNfg_LP));
-    solutions[index].SetIsNash(triTRUE);
+    solutions[index].SetEpsilon(eps);
+    solutions[index].SetIsNash();
   }
 }
 

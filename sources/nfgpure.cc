@@ -51,10 +51,7 @@ void FindPureNash(const NFSupport &p_support, int p_stopAfter,
       
       int index = p_solutions.Append(MixedSolution(temp,
 						   algorithmNfg_ENUMPURE));
-      if (p_solutions[index].LiapValue() <= p_solutions[index].Epsilon())
-	p_solutions[index].SetIsNash(triTRUE);
-      else
-	p_solutions[index].SetIsNash(triFALSE);
+      p_solutions[index].SetIsNash();
     }
     contNumber++;
   }  while ((p_stopAfter == 0 || p_solutions.Length() < p_stopAfter) &&

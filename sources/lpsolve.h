@@ -63,6 +63,7 @@ public:
   int IsBounded(void) const;
   long NumPivots(void) const;
   void OptBFS(BFS<T> &b) const;
+  T Epsilon(int i = 2) const;
 };
 
 #endif   // LPSOLVE_H
