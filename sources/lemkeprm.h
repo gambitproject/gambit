@@ -7,7 +7,6 @@
 class LemkeParamsSettings : public virtual OutputParamsSettings
 {
 protected:
-	int maxDepth;
 	void SaveDefaults(void);
 public:
 	LemkeParamsSettings(void);
@@ -25,17 +24,15 @@ public:
 
 LemkeParamsSettings::LemkeParamsSettings(void)
 {
-wxGetResource(PARAMS_SECTION,"Lemke-maxDepth",&maxDepth,defaults_file);
 }
 
 void LemkeParamsSettings::SaveDefaults(void)
 {
-wxWriteResource(PARAMS_SECTION,"Lemke-maxDepth",maxDepth,defaults_file);
 }
 
 void LemkeParamsSettings::GetParams(LemkeParams &P)
 {
-P.stopAfter=StopAfter();P.maxdepth=maxDepth;
+P.stopAfter=StopAfter();
 // Output stuff
 P.trace=TraceLevel();P.tracefile=OutFile();
 }
