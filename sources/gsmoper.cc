@@ -2276,9 +2276,9 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetFuncInfo( GSM_Subtract_int, 2, xy_Int );
   FuncObj->SetFuncInfo( GSM_Subtract_gRational, 2, xy_Rational );
   FuncObj->SetFuncInfo( GSM_Subtract_MixedFloat, 2, xy_MixedFloat );
-  FuncObj->SetFuncInfo( GSM_Add_MixedRational, 2, xy_MixedRational );
-  FuncObj->SetFuncInfo( GSM_Add_BehavFloat, 2, xy_BehavFloat );
-  FuncObj->SetFuncInfo( GSM_Add_BehavRational, 2, xy_BehavRational );
+  FuncObj->SetFuncInfo( GSM_Subtract_MixedRational, 2, xy_MixedRational );
+  FuncObj->SetFuncInfo( GSM_Subtract_BehavFloat, 2, xy_BehavFloat );
+  FuncObj->SetFuncInfo( GSM_Subtract_BehavRational, 2, xy_BehavRational );
   gsm->AddFunction( FuncObj );
 
 
