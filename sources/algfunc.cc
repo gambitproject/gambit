@@ -193,10 +193,12 @@ static Portion *GSM_EnumPure_Nfg(Portion **param)
   gList<MixedSolution> solutions;
 
   try {
-    FindPureNash(S->Game(), *S, solutions);
+    FindPureNash(*S, ((NumberPortion *) param[1])->Value(),
+		 gstatus, solutions);
     ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
   }
   catch (gSignalBreak &) {
+    gstatus.Reset();
   }
 
   return new Mixed_ListPortion(solutions);
@@ -214,10 +216,11 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
 
     try {
       double time;
-      EnumPureNfg(support, solutions, time);
+      EnumPureNfg(support, 0, gstatus, solutions, time);
       ((NumberPortion *) param[4])->SetValue(time);
     }
     catch (gSignalBreak &) {
+      gstatus.Reset();
     }
     return new Behav_ListPortion(solutions);
   }
@@ -1214,18 +1217,16 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("EnumPureSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_EnumPure_Nfg, 
-				       PortionSpec(porMIXED, 1), 6));
+				       PortionSpec(porMIXED, 1), 5));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 2, gclParameter("precision", porPRECISION,
-              new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(0, 3, gclParameter("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 2, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 4, gclParameter("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 3, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(0, 5, gclParameter("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 4, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
 
   FuncObj->SetFuncInfo(1, gclSignature(GSM_EnumPure_Efg, 

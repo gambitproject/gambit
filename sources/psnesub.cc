@@ -17,7 +17,7 @@ int PureNashBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
   ViewNormal(*N, S);
 
   gList<MixedSolution> sol;
-  FindPureNash(*N, *S, sol);
+  FindPureNash(*S, 0, m_status, sol);
 
   for (int i = 1; i <= sol.Length(); i++)  {
     BehavProfile<gNumber> bp(sup);
@@ -27,22 +27,22 @@ int PureNashBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
   delete S;
   delete N;
-  // return params.status.Get();
   return 0;
 }
 
-PureNashBySubgame::PureNashBySubgame(const EFSupport &S, int max) 
-  : SubgameSolver(S, max)
+PureNashBySubgame::PureNashBySubgame(const EFSupport &p_support,
+				     gStatus &p_status, int p_max) 
+  : SubgameSolver(p_support, p_max), m_status(p_status)
 { }
 
 PureNashBySubgame::~PureNashBySubgame()   { }
 
-int EnumPureNfg(const EFSupport &support, 
-		gList<BehavSolution> &solutions, double &time)
+int EnumPureNfg(const EFSupport &p_support, int p_max, gStatus &p_status,
+		gList<BehavSolution> &p_solutions, double &p_time)
 {
-  PureNashBySubgame module(support);
+  PureNashBySubgame module(p_support, p_status, p_max);
   module.Solve();
-  time = module.Time();
-  solutions = module.GetSolutions();
+  p_time = module.Time();
+  p_solutions = module.GetSolutions();
   return 1;
 }

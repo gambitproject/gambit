@@ -8,12 +8,11 @@
 #define NFGPURE_H
 
 #include "nfg.h"
-#include "mixed.h"
 #include "mixedsol.h"
 #include "glist.h"
+#include "gstatus.h"
 
-
-int FindPureNash(const Nfg &N, const NFSupport &, gList<MixedSolution> &);
+void FindPureNash(const NFSupport &, int, gStatus &, gList<MixedSolution> &);
 
 
 #endif    // NFGPURE_H

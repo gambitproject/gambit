@@ -408,11 +408,9 @@ NewFunction[EnumMixedSolve[efg->EFG, {asNfg->False},{stopAfter->00},
   traceFile, traceLevel, cliques]
 ]
 
-NewFunction[EnumPureSolve[nfg->NFG, {stopAfter->00}, {precision->Machine}, 
-  {time<->0.00}, {traceFile<->NullOut}, 
-  {traceLevel->00}] =: LIST(MIXED),
-  EnumPureSolve[Support[nfg], stopAfter, precision, time, traceFile,
-  traceLevel]
+NewFunction[EnumPureSolve[nfg->NFG, {stopAfter->00}, {time<->0.00},
+  {traceFile<->NullOut}, {traceLevel->00}] =: LIST(MIXED),
+  EnumPureSolve[Support[nfg], stopAfter, time, traceFile, traceLevel]
 ]
 
 NewFunction[EnumPureSolve[efg->EFG, {stopAfter->00},  {precision->Machine},
