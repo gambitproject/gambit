@@ -2,7 +2,7 @@
 // FILE: gsmoper.cc -- implementations for GSM operator functions
 //                     companion to GSM
 //
-// @(#)gsmoper.cc	1.89 8/19/96
+// $Id$
 //
 
 #include <stdlib.h>
@@ -729,6 +729,12 @@ Portion* GSM_Equal_Boolean(Portion** param)
 			    ((BoolPortion *) param[1])->Value());
 }
 
+Portion* GSM_Equal_Efg(Portion** param)
+{
+  return new BoolValPortion(((EfgPortion *) param[0])->Value() ==
+			    ((EfgPortion *) param[1])->Value());
+}
+
 Portion* GSM_Equal_EfPlayer(Portion** param)
 {
   return new BoolValPortion(((EfPlayerPortion *) param[0])->Value() ==
@@ -777,6 +783,12 @@ Portion* GSM_Equal_BehavRational(Portion** param)
   return new BoolValPortion
     ((*(BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value()) ==
      (*(BehavSolution<gRational> *) ((BehavPortion *) param[1])->Value()));
+}
+
+Portion *GSM_Equal_Nfg(Portion** param)
+{
+  return new BoolValPortion(((NfgPortion *) param[0])->Value() ==
+			    ((NfgPortion *) param[1])->Value());
 }
 
 Portion* GSM_Equal_NfPlayer(Portion** param)
@@ -845,6 +857,12 @@ Portion* GSM_NotEqual_Boolean(Portion** param)
 			    ((BoolPortion *) param[1])->Value());
 }
 
+Portion* GSM_NotEqual_Efg(Portion** param)
+{
+  return new BoolValPortion(((EfgPortion *) param[0])->Value() !=
+			    ((EfgPortion *) param[1])->Value());
+}
+
 Portion* GSM_NotEqual_EfPlayer(Portion** param)
 {
   return new BoolValPortion(((EfPlayerPortion *) param[0])->Value() !=
@@ -905,6 +923,12 @@ Portion* GSM_NotEqual_Strategy(Portion** param)
 {
   return new BoolValPortion(((StrategyPortion *) param[0])->Value() !=
 			    ((StrategyPortion *) param[1])->Value());
+}
+
+Portion* GSM_NotEqual_Nfg(Portion** param)
+{
+  return new BoolValPortion(((NfgPortion *) param[0])->Value() !=
+			    ((NfgPortion *) param[1])->Value());
 }
 
 Portion* GSM_NotEqual_NfSupport(Portion** param)
@@ -2230,6 +2254,11 @@ void Init_gsmoper(GSM* gsm)
     ParamInfoType("y", porBEHAV_RATIONAL)
   };
 
+  ParamInfoType xy_Efg[] =
+  {
+    ParamInfoType("x", porEFG),
+    ParamInfoType("y", porEFG)
+  };
 
   ParamInfoType xy_EfPlayer[] =
   {
@@ -2272,6 +2301,13 @@ void Init_gsmoper(GSM* gsm)
     ParamInfoType("x", porSTRATEGY),
     ParamInfoType("y", porSTRATEGY)
   };
+
+  ParamInfoType xy_Nfg[] =
+  {
+    ParamInfoType("x", porNFG),
+    ParamInfoType("y", porNFG)
+  };
+
 
 
   ParamInfoType x_Float[] =
@@ -2474,7 +2510,7 @@ void Init_gsmoper(GSM* gsm)
 
   //-------------------------- Equal ---------------------------
 
-  FuncObj = new FuncDescObj("Equal", 18);
+  FuncObj = new FuncDescObj("Equal", 20);
 
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Equal_Float, 
 				       porBOOL, 2, xy_Float));
@@ -2487,39 +2523,41 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Equal_Boolean, 
 				       porBOOL, 2, xy_Bool));
 
-  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Equal_EfPlayer, 
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Equal_Efg, porBOOL, 2, xy_Efg));
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Equal_EfPlayer, 
 				       porBOOL, 2, xy_EfPlayer));
-  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Equal_Node, 
+  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Equal_Node, 
 				       porBOOL, 2, xy_Node));
-  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Equal_Infoset, 
+  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Equal_Infoset, 
 				       porBOOL, 2, xy_Infoset));
-  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Equal_Outcome, 
+  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Equal_Outcome, 
 				       porBOOL, 2, xy_Outcome));
-  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Equal_Action, 
+  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_Equal_Action, 
 				       porBOOL, 2, xy_Action));
-  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_Equal_EfSupport,
+  FuncObj->SetFuncInfo(11, FuncInfoType(GSM_Equal_EfSupport,
 					porBOOL, 2, xy_EfSupport));
-  FuncObj->SetFuncInfo(11, FuncInfoType(GSM_Equal_BehavFloat, 
+  FuncObj->SetFuncInfo(12, FuncInfoType(GSM_Equal_BehavFloat, 
 					porBOOL, 2, xy_BehavFloat));
-  FuncObj->SetFuncInfo(12, FuncInfoType(GSM_Equal_BehavRational, 
+  FuncObj->SetFuncInfo(13, FuncInfoType(GSM_Equal_BehavRational, 
 					porBOOL, 2, xy_BehavRational));
 
-  FuncObj->SetFuncInfo(13, FuncInfoType(GSM_Equal_NfPlayer,
+  FuncObj->SetFuncInfo(14, FuncInfoType(GSM_Equal_Nfg, porBOOL, 2, xy_Nfg));
+  FuncObj->SetFuncInfo(15, FuncInfoType(GSM_Equal_NfPlayer,
 					porBOOL, 2, xy_NfPlayer));
-  FuncObj->SetFuncInfo(14, FuncInfoType(GSM_Equal_Strategy,
+  FuncObj->SetFuncInfo(16, FuncInfoType(GSM_Equal_Strategy,
 					porBOOL, 2, xy_Strategy));
-  FuncObj->SetFuncInfo(15, FuncInfoType(GSM_Equal_NfSupport,
+  FuncObj->SetFuncInfo(17, FuncInfoType(GSM_Equal_NfSupport,
 					porBOOL, 2, xy_NfSupport));
-  FuncObj->SetFuncInfo(16, FuncInfoType(GSM_Equal_MixedFloat, 
+  FuncObj->SetFuncInfo(18, FuncInfoType(GSM_Equal_MixedFloat, 
 					porBOOL, 2, xy_MixedFloat));
-  FuncObj->SetFuncInfo(17, FuncInfoType(GSM_Equal_MixedRational, 
+  FuncObj->SetFuncInfo(19, FuncInfoType(GSM_Equal_MixedRational, 
 					porBOOL, 2, xy_MixedRational));
   gsm->AddFunction(FuncObj);
 
 
   //-------------------------- NotEqual ---------------------------
 
-  FuncObj = new FuncDescObj("NotEqual", 18);
+  FuncObj = new FuncDescObj("NotEqual", 20);
 
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NotEqual_Float, 
 				       porBOOL, 2, xy_Float));
@@ -2532,32 +2570,36 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetFuncInfo(4, FuncInfoType(GSM_NotEqual_Boolean, 
 				       porBOOL, 2, xy_Bool));
 
-  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_NotEqual_EfPlayer, 
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_NotEqual_Efg,
+				       porBOOL, 2, xy_Efg));
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_NotEqual_EfPlayer, 
 				       porBOOL, 2, xy_EfPlayer));
-  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_NotEqual_Node, 
+  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_NotEqual_Node, 
 				       porBOOL, 2, xy_Node));
-  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_NotEqual_Infoset, 
+  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_NotEqual_Infoset, 
 				       porBOOL, 2, xy_Infoset));
-  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_NotEqual_Outcome, 
+  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_NotEqual_Outcome, 
 				       porBOOL, 2, xy_Outcome));
-  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_NotEqual_Action, 
+  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_NotEqual_Action, 
 				       porBOOL, 2, xy_Action));
-  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_NotEqual_EfSupport,
+  FuncObj->SetFuncInfo(11, FuncInfoType(GSM_NotEqual_EfSupport,
 					porBOOL, 2, xy_EfSupport));
-  FuncObj->SetFuncInfo(11, FuncInfoType(GSM_NotEqual_BehavFloat, 
+  FuncObj->SetFuncInfo(12, FuncInfoType(GSM_NotEqual_BehavFloat, 
 					porBOOL, 2, xy_BehavFloat));
-  FuncObj->SetFuncInfo(12, FuncInfoType(GSM_NotEqual_BehavRational, 
+  FuncObj->SetFuncInfo(13, FuncInfoType(GSM_NotEqual_BehavRational, 
 					porBOOL, 2, xy_BehavRational));
 
-  FuncObj->SetFuncInfo(13, FuncInfoType(GSM_NotEqual_NfPlayer,
+  FuncObj->SetFuncInfo(14, FuncInfoType(GSM_NotEqual_Nfg,
+					porBOOL, 2, xy_Nfg));
+  FuncObj->SetFuncInfo(15, FuncInfoType(GSM_NotEqual_NfPlayer,
 					porBOOL, 2, xy_NfPlayer));
-  FuncObj->SetFuncInfo(14, FuncInfoType(GSM_NotEqual_Strategy,
+  FuncObj->SetFuncInfo(16, FuncInfoType(GSM_NotEqual_Strategy,
 					porBOOL, 2, xy_Strategy));
-  FuncObj->SetFuncInfo(15, FuncInfoType(GSM_NotEqual_NfSupport,
+  FuncObj->SetFuncInfo(17, FuncInfoType(GSM_NotEqual_NfSupport,
 					porBOOL, 2, xy_NfSupport));
-  FuncObj->SetFuncInfo(16, FuncInfoType(GSM_NotEqual_MixedFloat, 
+  FuncObj->SetFuncInfo(18, FuncInfoType(GSM_NotEqual_MixedFloat, 
 					porBOOL, 2, xy_MixedFloat));
-  FuncObj->SetFuncInfo(17, FuncInfoType(GSM_NotEqual_MixedRational, 
+  FuncObj->SetFuncInfo(19, FuncInfoType(GSM_NotEqual_MixedRational, 
 					porBOOL, 2, xy_MixedRational));
   gsm->AddFunction(FuncObj);
 
