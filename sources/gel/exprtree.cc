@@ -96,6 +96,8 @@ template <class T> gelAssignment<T>::~gelAssignment()
 template <class T> T gelAssignment<T>::Evaluate(gelVariableTable *vt) const
 {
   T value = rhs->Evaluate(vt);
+  if( !vt->IsDefined( name ) )
+    vt->Define( name, Type() );
   vt->SetValue(name, value);
   return value;
 }
