@@ -3,7 +3,7 @@
 %
 % $Id$
 %
-\documentstyle[widetext]{article}
+\documentstyle[widetext,chicagob]{article}
 \renewcommand{\baselinestretch}{.9}
 \newcommand{\bd}{\begin{description}}
 \newcommand{\ed}{\end{description}}
@@ -18,24 +18,45 @@ California Institute of Technology}
 
 \maketitle
 
-\section*{General Overview}
+\tableofcontents
 
-The general purpose of the language is to allow the user to perform a
-series of operations and procedures on games in extensive or normal
-form through a set of commands.  The games can be randomly generated
-by a procedure within the program, read into the program from external
-files, or created in extensive form using the language.  Games created
-or contained in the extensive form can be transformed into the normal
-form using a procedure within the program.
+\section{General Overview}
 
-The language consists of a series of statements, each ending in a
-semi-colon or carriage return.  A carriage return will not be
+This document describes the GAMBIT Command Language (GCL).  GAMBIT is
+a computer program that allows one to build, manipulate, and solve
+finite extensive and normal form games. The GCL provides a method of
+directing the operation of GAMBIT that is analagous to that of a high
+level general purpose programming language.
+
+The general purpose of the GCL is to provide a simple, but powerful
+and flexible language by which one can perform complicated or
+repetitive operations and procedures on games in extensive or normal
+form.  The language has facilities for building and editing an
+extensive or normal form game, converting back and forth between the
+extensive and normal form representations, and then solving the
+resulting game for various game theoretic equilibria of interest. Flow
+control statements allow for repetitive operations (such as
+investigating games as one changes various parameters) or conditional
+operations.
+
+
+\section{Installing and Running the GCL}
+Typing 'gcl [CR]' at the unix prompt will start the GCL (in
+interpreted mode.)  As long as the GCL is running, you will get the
+GCL prompt:
+\begin{verbatim}
+GCL>
+\end{verbatim}
+
+A GCL program consists of a series of statements, each ending in a
+semi-colon or carriage return. A carriage return will not be
 interpreted as the end of a statement, however, if there are unmatched
 parentheses or brackets.  For example, the following two lines are
 interpreted as one statement:
 
 \begin{verbatim}
-	Output[1, 2]
+	Output[1, 
+	2]
 \end{verbatim}
 
 If both lines are followed by a carriage return, the statement will
@@ -53,13 +74,69 @@ the language as a program by placing an input file command {\tt "<"}
 followed by the name of the file, following the command which enters
 the command language.  By using an output file command {\tt ">"}
 followed by the name of a file, the user can direct the output of the
-command language to an external text file.  For example:
+command language to an external text file.  For example, at the unix prompt:
 
 \begin{verbatim}
-	> gcl_sun < input.gcl > output.out
+	> gcl < input.gcl > output.out
 \end{verbatim}
 
-\subsection*{Output}
+\section{Language Description}
+
+\subsection{Grammar and syntax}
+
+The central pardigm of the GCL is that we can think of every legal
+statement as a function, which may return a value, and which may or may
+not have some special shorthand format.  A function in the GCL takes the
+form 
+\begin{verbatim}
+FunctionName[ArgName1->a1, ... , ArgNamen->an]
+\end{verbatim}
+where some or all of the arguments may be optional.  
+
+Arguments to a function may be optional or required, and they may be
+passed by value or by reference, depending on whether the function
+changes their value.  To pass an argument by value, the syntax is
+\verb+ArgumentName->argval+.  To pass by reference, the syntax is
+\verb+ArgumentName<->argref+.  
+
+The name \verb+ArgumentName+ is the formal name of the argument.  The
+formal argument names for each function are listed in the reference
+section.  When passing by value, \verb+argval+ can be any
+expression that evaluates to the correct data type for the
+corresponding argument.  When passing by reference, \verb+argref+
+must be a variable name of the correct type for the corresponding
+argument. 
+
+FunctionNames are reserved words.  For each function, the reference section
+lists the formal argument names, whether they are optional or required,
+and whether they are to be passed by reference or value.  
+ 
+A rough description of the formal grammar follows:
+
+\begin{verbatim}
+argumentname: name
+
+argument: argumentname -> argumentvalue
+        | argumentname <-> argumentvalue
+
+argumentlist: argument
+        | argument, argumentlist
+
+functionname: name
+
+function: functionname[argumentlist]
+
+variablename: name
+
+expression: variablename
+        | function
+
+statement: expression
+        | variablename := expression
+\end{verbatim}
+
+
+\subsection{Output}
 
 Output can be produced by a program or command using the following
 command:
@@ -75,7 +152,14 @@ a variable.  The brackets {\tt "{ }"} are not a part of the language
 and are used only to enclose expressions which are also not a part of
 the language.
 
-\subsection*{Variables}
+\subsection{Variables}
+
+Like most high-level languages, GCL has a typing system which permits
+only one type of data to be stored in a given variable.  However, GCL
+is a bit unusual in that it has implicit typing of variables.  That
+is, a variable's type is determined by its first use in the program.
+It is an error to use a variable in an expression before it has had
+its value set.
 
 Variables can be defined and given a value using the {\tt ":="} symbol
 where the name of the variable is to the left of the symbol and to the
@@ -85,17 +169,21 @@ desired for the variable. A variable can be of the following types:
 \medskip
 
 \begin{tabular}{lp{4in}}
-BOOLEAN & Boolean (evaluates to constants: True or False)\\ INTEGER &
-Evaluates to an integer of arbitrary size \\ RATIONA & Evaluates to a
-rational number of arbitrary precision\\ TEXT	& String of arbitrary
-length enclosed in quotation marks\\ EFG	& Game in extensive
-form (created or read)\\ NFG	& Game in normal form (created or
-read)\\ NODE	& A node (may only be a subvariable of an extensive
-form problem) \\ DATATYPE & Defines precision (constants: Float or
-Rational) \\ MIXED	& {Profile of mixed strategies.  Can only be a
+BOOLEAN & Boolean (evaluates to constants: True or False)\\ 
+INTEGER & Evaluates to an integer of arbitrary size \\ 
+RATIONAL & Evaluates to a rational number of arbitrary precision\\ 
+TEXT	& String of arbitrary length enclosed in quotation marks\\ 
+EFG	& Game in extensive form (created or read)\\ 
+NFG	& Game in normal form (created or read)\\ 
+NODE	& A node (may only be a subvariable of an extensive
+form problem) \\ 
+DATATYPE & Defines precision (constants: Float or
+Rational) \\ 
+MIXED	& {Profile of mixed strategies.  Can only be a
 subvariable of a normal form problem.  That is, if n is a problem in
 normal form, a variable of type MIXED can only be assigned to a
-subvariable of the form n.x.}\\ BEHAV	& Profile of behavioral
+subvariable of the form n.x.}\\ 
+BEHAV	& Profile of behavioral
 strategies.  Can only be a subvariable of an extensive form problem.
 That is, if e is a problem in extensive form, a variable of type BEHAV
 can only be assigned to a subvariable of the form e.x. \\
@@ -129,7 +217,7 @@ LIST(MIXED), LIST(RATIONAL), and LIST(TEXT) can be created and
 accessed for variables of type BEHAV, INTEGER, MIXED, RATIONAL, and
 TEXT, respectively.
 
-\subsection*{Flow Control}
+\subsection{Flow Control}
 
 Gambit Command Language also contains mechanisms which allow flow
 control within a program in one of three manners.
@@ -159,7 +247,7 @@ performs the series of commands once if the expression evaluates to
 TRUE.
 \end{tabular}
 
-\section*{Procedures}
+\section{Function Reference}
 
 The following is a list of procedures with the operations that they
 perform in the Gambit Command Language:
@@ -541,7 +629,7 @@ strategy set unless otherwise specified.
 
 \bd
 \item
-[SSET:] The number of the strategy set of the specified normal form
+[sset:] The number of the strategy set of the specified normal form
 problem which is to be used in displaying the problem.  If not
 specified, the last (smallest) strategy set is used.
 \ed
@@ -1001,16 +1089,31 @@ the title has not been assigned, the empty string is returned.
 \item
 \protect \large \begin{verbatim}
 Gobit[N->NFG, E->EFG, {plev->INTEGER}, {nequilib->INTEGER},
-{type->INTEGER}, 	{maxitsOpt->INTEGER}, {maxitsBrent->INTEGER},
-{minLam->RATIONAL}, {maxLam->RATIONAL}, 	{delLam->RATIONAL},
-{tolOpt->RATIONAL}, 	{tolBrent}->RATIONAL}, {time<->RATIONAL},
+{minLam->RATIONAL}, {maxLam->RATIONAL}, {delLam->RATIONAL},
+{type->INTEGER}, {start-> MIXED or BEHAV} ,
+{maxitsOpt->INTEGER}, {maxitsBrent->INTEGER},
+{tolOpt->RATIONAL}, {tolBrent}->RATIONAL}, {time<->RATIONAL},
 {output->TEXT}, {pxifile->TEXT}] =: INTEGER
 \end{verbatim}\normalsize
 
 \bd
 \item
-[Description:] Computes the Gobit solution for the specified problem
-in either extensive or normal form.
+[Description:] Computes a branch of the logistic quantal response
+correspondence (as described in \cite[1995]{MckPal:1994} for 
+the specified extensive or normal form game.  The branch is computed
+for values of $\lambda$ between $\underline{\lambda}$ and
+$\bar{\lambda}.$ The algorithm starts at $\lambda_0 =
+\underline{\lambda}$ if $\delta>0,$ or $\lambda_0 = \bar{\lambda}$ 
+if $\delta<0$. It then increments according to the formula 
+$$
+\lambda_{t+1} = \lambda_t +\delta \lambda_t^a,
+$$ 
+where $\underline\lambda,$ $\bar\lambda,$ $\delta,$ and $a$ are
+parameters described below. In the computation for the first value of
+$\lambda_0$, the algorithm begins it's search for a solution at the
+starting point determined by the parameter ''start.''  At each
+successive value of $\lambda_t,$ the algorithm begins it's search at
+the point found in step $t - 1$
 \item
 [Return value:] XXXX.
 \item 
@@ -1033,20 +1136,27 @@ be found.
 [plev:] Sets the print level.  Higher values generate more output.
 The default value is 0.
 \item
-[nequilib:] Sets the number of equilibria to find.  Has a default
-value of 1.
+[nequilib:] Sets the number of equilibria to find for each value of
+$\lambda$.  Has a default value of 1.
 \item
-[type:] Type of incrementing
-	
-\bd
+[minLam:] Sets $\underline\lambda,$ the minimum value of $\lambda.$
+Default is $\underline\lambda = 0.01$.
 \item
-0 means $Lambda_t = Lambda_{t-1}$ * delLam
-\item 
-1 means $Lambda_t = Lambda_{t-1}$ + delLam
-\ed
-
+[maxLam:] Sets $\bar\lambda,$ the maximum value of $\lambda.$  Default is
+$\bar\lambda = 30.0.$
 \item
-[maxitsOpt:] Sets the masimum number of iterations to the
+[delLam:]  Constant, $\delta,$ used in incrementing.   Default is
+$\delta = .01.$
+\item
+[type:] Exponent, $a,$ used in incrementing $\lambda.$  Setting $a = 0$
+corresponds to linear incrementing, and $a = 1$ results in geometric
+incrementing.  Default is $a = 1$.
+\item
+[start:] Sets the tarting point of the search for the initial value of
+$\lambda.$  Default is the centroid, where all strategies are chosen
+with equal probability.  
+\item
+[maxitsOpt:] Sets the maximum number of iterations to the
 n-dimensional optimization routine.  Default is 200.
 \item
 [maxitsBrent:] Sets the maximum number of iterations in the
@@ -1058,23 +1168,14 @@ routine.  Default is 1.0e-10.
 [tolBrent:] Sets the tolerance for the 1-dimensional line search.
 Default is 2.0e-10.
 \item
-[minLam:] Sets the minimum value of Lambda.  Has a default value of
-0.01.
-\item
-[maxLam:] Sets the maximum value of Lambda.  Has a default value of
-30.
-\item
-[delLam:] Specifies the rate at which the value of Lambda changes. Has
-a default value of 1.01.
-\item
 [time:] Returns the elapsed time for the operation.
 \item
 [output:] Can be used to redirect the output of this procedure to a
 file.  Directing output to ``/dev/null'' under Unix turns output off.
 By default, output is directed to the screen.
 \item
-[pxifile:]Can be used to generate an output file compatible for input
-to pxi
+[pxifile:] Can be used to generate an output file compatible for input
+to pxi, a program for graphical viewing and display of the output.  
 \ed
 \ed
 
@@ -1088,7 +1189,25 @@ GridSolve[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT},
 
 \bd
 \item
-[Description:] XXXX .
+[Description:] Performs a grid search to compute the complete logistic
+quantal response correspondence (as described in McKelvey and Palfrey
+[1994, 1995]) for a (small) two-person normal form game.  The
+correspondence is computed for values of $\lambda$ between
+$\underline{\lambda}$ and $\bar{\lambda}.$ Points are evaluated in
+terms of the value of an objective function, that measures the
+distance between the original point, and the best response to the best
+response (under the logistic best response function.)  Points that are
+close (within 'tol') to being fixed points are kept, others are
+discarded.  The first value of $\lambda$ is $\lambda_0 =
+\underline\lambda.$ $\lambda$ is incremented according to the formula
+
+$$  
+\lambda_{t+1} = \lambda_t +\delta \lambda_t^a,
+$$ 
+Here, $a$ is given by $1.0 - $ 'type', and $\underline\lambda,$
+$\bar\lambda,$ and $\delta,$ are parameters described below.  Values
+of the probabilities are evaluated on a grid of mesh 'delp.'
+
 \item
 [Return value:] XXXX .
 \item
@@ -1114,18 +1233,19 @@ By default, output is directed to the screen.
 [errors:] Can be used to redirect the error stream of this procedure
 to a file.  By default, output is directed to the screen.
 \item
-[minLam:] Sets the minimum value of Lambda.  Has a default value of
-XXXX .
+[minLam:] Sets $\underline\lambda,$ the minimum value of $\lambda.$
+Default is $\underline\lambda = $ XXXX.
 \item
-[maxLam:] Sets the maximum value of Lambda.  Has a default value of
-XXXX .
+[maxLam:]  Sets $\bar\lambda,$ the maximum value of $\lambda.$
+Default is $\bar\lambda = $ XXXX.
 \item
 [delLam:] Specifies the rate at which the value of Lambda changes.
 Has a default value of XXXX .
 \item
-[type:] XXXX .
+[type:] Specifies whether to have geometric or linear incrementing.
+Default is 0, resulting in $a = 1,$ or !geometric incrementing.
 \item
-[delp:] XXXX .
+[delp:] Grid size for search over probability space.  Default is XXXX .
 \item
 [tol:] XXXX .
 \item
@@ -1627,7 +1747,7 @@ NewEfg[{type->DATATYPE}] =: EFG
 \item
 [Description:] Allocates and returns a new extensive form game.
 \item
- Return value:] The newly allocated problem in extensive form.
+[Return value:] The newly allocated problem in extensive form.
 \item
 [Required parameters:] None.
 \item
@@ -2516,7 +2636,7 @@ SimpDiv[N->NFG, {plev->INTEGER}, {output->text}, {errors->TEXT},
 \item
 [Description:] Computes a Nash equilibrium to a normal form game based
 on a simplicial subdivision algorithm.  The algorithm implemented is
-that of van der Laan, Talman, and van der Heyden [1987].  The
+that of \cite{VTH:1987}.  The 
 algorithm is a simplicial subdivision algorithm which can start at any
 point in the simplex.  The algorithm starts with a given grid size,
 follows a path of almost completely labeled subsimplexes, and
@@ -2676,6 +2796,9 @@ to be written.
 \ed
 \ed
 \end{itemize}
+\bibliographystyle{chicagob}
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliography{gambit}
 \end{document}
 
 
@@ -2684,7 +2807,7 @@ to be written.
 
 
 
-
+ 
 
 
 
