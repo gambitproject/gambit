@@ -1,7 +1,10 @@
-//
-//  File:  header file for Portion class, campanion to GSM
-//
-//
+//#
+//# FILE: portion.h -- header file for Portion class
+//#                    companion to GSM
+//#
+//# $Id$
+//#
+
 
 
 
@@ -51,11 +54,11 @@ class Portion
  public:
   Portion();
   virtual ~Portion();
-  virtual PortionType Type( void ) const = 0;
-  virtual Portion *Copy( void ) const = 0;
 
-  virtual int Operation( Portion *p, OperationMode mode );
-  virtual void Output( gOutput& s ) const = 0;
+  virtual PortionType Type      ( void ) const = 0;
+  virtual Portion*    Copy      ( void ) const = 0;
+  virtual int         Operation ( Portion* p, OperationMode mode );
+  virtual void        Output    ( gOutput& s ) const = 0;
 };
 
 
@@ -69,14 +72,13 @@ template <class T> class numerical_Portion : public Portion
  public:
   numerical_Portion( const T& new_value );
 
-  T Value( void ) const;
-  T& Value( void );
-  PortionType Type( void ) const;
-  Portion *Copy( void ) const;
-  int Operation( Portion *p, OperationMode mode );
-  void Output( gOutput& s ) const;
+  T&          Value     ( void );
+  T           Value     ( void ) const;
+  Portion*    Copy      ( void ) const;
+  PortionType Type      ( void ) const;
+  int         Operation ( Portion* p, OperationMode mode );
+  void        Output    ( gOutput& s ) const;
 };
-
 
 
 class bool_Portion : public Portion
@@ -87,13 +89,14 @@ class bool_Portion : public Portion
  public:
   bool_Portion( const bool& new_value );
 
-  bool Value( void ) const;
-  bool& Value( void );
-  PortionType Type( void ) const;
-  Portion *Copy( void ) const;
-  int Operation( Portion *p, OperationMode mode );
-  void Output( gOutput& s ) const;
+  bool&       Value     ( void );
+  bool        Value     ( void ) const;
+  Portion*    Copy      ( void ) const;
+  PortionType Type      ( void ) const;
+  int         Operation ( Portion* p, OperationMode mode );
+  void        Output    ( gOutput& s ) const;
 };
+
 
 class gString_Portion : public Portion
 {
@@ -103,13 +106,14 @@ class gString_Portion : public Portion
  public:
   gString_Portion( const gString& new_value );
 
-  gString Value( void ) const;
-  gString& Value( void );
-  PortionType Type( void ) const;
-  Portion *Copy( void ) const;
-  int Operation( Portion *p, OperationMode mode );
-  void Output( gOutput& s ) const;
+  gString&    Value     ( void );
+  gString     Value     ( void ) const;
+  Portion*    Copy      ( void ) const;
+  PortionType Type      ( void ) const;
+  int         Operation ( Portion* p, OperationMode mode );
+  void        Output    ( gOutput& s ) const;
 };
+
 
 class Reference_Portion : public Portion
 {
@@ -119,41 +123,41 @@ class Reference_Portion : public Portion
  public:
   Reference_Portion( const gString& new_value );
 
-  gString Value( void ) const;
-  gString& Value( void );
-  PortionType Type( void ) const;
-  Portion *Copy( void ) const;
-  void Output( gOutput& s ) const;
+  gString&    Value  ( void );
+  gString     Value  ( void ) const;
+  Portion*    Copy   ( void ) const;
+  PortionType Type   ( void ) const;
+  void        Output ( gOutput& s ) const;
 };
-
 
 
 class List_Portion : public Portion
 {
  private:
-  gBlock<Portion *> value;
-  PortionType data_type;
-  int TypeCheck( Portion *item );
+  gBlock<Portion*> value;
+  PortionType      data_type;
+
+  int TypeCheck( Portion* item );
 
  public:
   List_Portion( void );
-  List_Portion( const gBlock<Portion *>& new_value );
+  List_Portion( const gBlock<Portion*>& new_value );
   ~List_Portion();
 
-  gBlock<Portion *> Value( void ) const;
-  gBlock<Portion *>& Value( void );
-  PortionType Type( void ) const;
-  PortionType DataType( void ) const;
-  Portion *Copy( void ) const;
-  int Operation( Portion *p, OperationMode mode );
-  void Output( gOutput& s ) const;
+  gBlock<Portion*>& Value     ( void );
+  gBlock<Portion*>  Value     ( void ) const;
+  Portion*          Copy      ( void ) const;
+  PortionType       Type      ( void ) const;
+  PortionType       DataType  ( void ) const;
+  int               Operation ( Portion* p, OperationMode mode );
+  void              Output    ( gOutput& s ) const;
 
-  Portion *operator[] ( int index );
-  int Append( Portion *item );
-  int Insert( Portion *item, int index );
-  Portion *Remove( int index );
-  int Length( void ) const;
-  void Flush( void );
+  Portion* operator[] ( int index );
+  int      Append     ( Portion* item );
+  int      Insert     ( Portion* item, int index );
+  Portion* Remove     ( int index );
+  int      Length     ( void ) const;
+  void     Flush      ( void );
 };
 
 

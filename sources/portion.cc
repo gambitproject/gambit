@@ -1,7 +1,9 @@
-//
-//  FILE: portion.cc  implementation of Portion base and descendent classes
-//                    companion to gsm.cc
-//
+//#
+//# FILE: portion.h -- implementation of Portion base and descendent classes
+//#                    companion to GSM
+//#
+//# $Id$
+//#
 
 
 
@@ -27,6 +29,7 @@ Portion::Portion()
   // gout << "Portions:" << num_of_Portions << "\n";
 }
 
+
 Portion::~Portion()
 {
   // The following two lines are for detecting memory leakage.
@@ -44,7 +47,7 @@ int Portion::Operation( Portion *p, OperationMode mode )
 
 
 //-----------------------------------------------------------------------
-//------------------------- numerical type ------------------------------
+//                        numerical type 
 //-----------------------------------------------------------------------
 template <class T> 
   numerical_Portion<T>::numerical_Portion( const T& new_value )
@@ -52,21 +55,28 @@ template <class T>
 {
 }
 
+
 template <class T> T numerical_Portion<T>::Value( void ) const
 { return value; }
+
 template <class T> T& numerical_Portion<T>::Value( void )
 { return value; }
+
 template <class T> PortionType numerical_Portion<T>::Type( void ) const
 { return porERROR; }
-template <class T> Portion *numerical_Portion<T>::Copy( void ) const
+
+template <class T> Portion* numerical_Portion<T>::Copy( void ) const
 { return new numerical_Portion<T>( value ); }
 
-template <class T> 
-  int numerical_Portion<T>::
-  Operation( Portion *p, OperationMode mode )
+
+template <class T> int numerical_Portion<T>::Operation
+  ( 
+   Portion* p, 
+   OperationMode mode 
+   )
 {
   int result = 0;
-  T& p_value = ( (numerical_Portion<T> *)p )->Value();
+  T& p_value = ( (numerical_Portion<T>*) p )->Value();
 
   if( p == 0 )      // unary operations
   {
@@ -145,26 +155,31 @@ template <class T> void numerical_Portion<T>::Output( gOutput& s ) const
 
 
 //---------------------------------------------------------------------
-//------------------------- bool type ------------------------------
+//                            bool type
 //---------------------------------------------------------------------
 bool_Portion::bool_Portion( const bool& new_value )
      : value( new_value )
 {
 }
 
+
 bool bool_Portion::Value( void ) const
 { return value; }
+
 bool& bool_Portion::Value( void )
 { return value; }
+
 PortionType bool_Portion::Type( void ) const
 { return porBOOL; }
-Portion *bool_Portion::Copy( void ) const
+
+Portion* bool_Portion::Copy( void ) const
 { return new bool_Portion( value ); }
 
-int bool_Portion::Operation( Portion *p, OperationMode mode )
+
+int bool_Portion::Operation( Portion* p, OperationMode mode )
 {
   int result = 0;
-  bool& p_value = ( (bool_Portion *)p )->Value();
+  bool& p_value = ( (bool_Portion*) p )->Value();
 
   if( p == 0 )      // unary operations
   {
@@ -195,6 +210,7 @@ int bool_Portion::Operation( Portion *p, OperationMode mode )
   return result;
 }
 
+
 void bool_Portion::Output( gOutput& s ) const
 {
   s << " (bool) ";
@@ -207,26 +223,31 @@ void bool_Portion::Output( gOutput& s ) const
 
 
 //---------------------------------------------------------------------
-//------------------------- gString type ------------------------------
+//                          gString type
 //---------------------------------------------------------------------
 gString_Portion::gString_Portion( const gString& new_value )
      : value( new_value )
 {
 }
 
+
 gString gString_Portion::Value( void ) const
 { return value; }
+
 gString& gString_Portion::Value( void )
 { return value; }
+
 PortionType gString_Portion::Type( void ) const
 { return porSTRING; }
-Portion *gString_Portion::Copy( void ) const
+
+Portion* gString_Portion::Copy( void ) const
 { return new gString_Portion( value ); }
 
-int gString_Portion::Operation( Portion *p, OperationMode mode )
+
+int gString_Portion::Operation( Portion* p, OperationMode mode )
 {
   int result = 0;
-  gString& p_value = ( (gString_Portion *)p )->Value();
+  gString& p_value = ( (gString_Portion*) p )->Value();
 
   if( p == 0 )      // unary operations
   {
@@ -269,6 +290,7 @@ int gString_Portion::Operation( Portion *p, OperationMode mode )
   return result;
 }
 
+
 void gString_Portion::Output( gOutput& s ) const
 {
   s << " (gString) " << value << "\n";
@@ -278,20 +300,24 @@ void gString_Portion::Output( gOutput& s ) const
 
 
 //---------------------------------------------------------------------
-//------------------------- Reference type ------------------------------
+//                        Reference type
 //---------------------------------------------------------------------
 Reference_Portion::Reference_Portion( const gString& new_value )
      : value( new_value )
 {
 }
 
+
 gString Reference_Portion::Value( void ) const
 { return value; }
+
 gString& Reference_Portion::Value( void )
 { return value; }
+
 PortionType Reference_Portion::Type( void ) const
 { return porREFERENCE; }
-Portion *Reference_Portion::Copy( void ) const
+
+Portion* Reference_Portion::Copy( void ) const
 { return new Reference_Portion( value ); }
 
 void Reference_Portion::Output( gOutput& s ) const
@@ -302,19 +328,20 @@ void Reference_Portion::Output( gOutput& s ) const
 
 
 
-
 //---------------------------------------------------------------------
-//------------------------- List type ------------------------------
+//                             List type
 //---------------------------------------------------------------------
 List_Portion::List_Portion( void )
 {
   data_type = porERROR;
 }
 
-List_Portion::List_Portion( const gBlock<Portion *>& new_value )
+
+List_Portion::List_Portion( const gBlock<Portion*>& new_value )
      : value( new_value )
 {
-  int i, length;
+  int i;
+  int length;
   int type_match;
 
   data_type = new_value[ 1 ]->Type();
@@ -330,42 +357,50 @@ List_Portion::List_Portion( const gBlock<Portion *>& new_value )
   }
 }
 
+
 List_Portion::~List_Portion()
 {
   Flush();
 }
 
-gBlock<Portion *> List_Portion::Value( void ) const
+
+gBlock<Portion*> List_Portion::Value( void ) const
 { return value; }
-gBlock<Portion *>& List_Portion::Value( void )
+
+gBlock<Portion*>& List_Portion::Value( void )
 { return value; }
+
 PortionType List_Portion::Type( void ) const
 { return porLIST; }
+
 PortionType List_Portion::DataType( void ) const
 { return data_type; }
-Portion *List_Portion::Copy( void ) const
+
+Portion* List_Portion::Copy( void ) const
 { return new List_Portion( value ); }
 
 
-int List_Portion::TypeCheck( Portion *item )
+int List_Portion::TypeCheck( Portion* item )
 {
   int result = false;
+
   if( item->Type() == data_type )
+  {
     result = true;
-  else 
-    if( item->Type() == porLIST )
-      if( ( (List_Portion *)item )->data_type == data_type )
-	result = true;
+  }
+  else if( item->Type() == porLIST )
+  {
+    if( ( (List_Portion*) item )->data_type == data_type )
+      result = true;
+  }
   return result;
 }
 
 
-
-
-int List_Portion::Operation( Portion *p, OperationMode mode )
+int List_Portion::Operation( Portion* p, OperationMode mode )
 {
   int result = 0;
-  gBlock<Portion *>& p_value = ( (List_Portion *)p )->Value();
+  gBlock<Portion*>& p_value = ( (List_Portion*) p )->Value();
 
   if( p == 0 )      // unary operations
   {
@@ -387,9 +422,11 @@ int List_Portion::Operation( Portion *p, OperationMode mode )
   return result;
 }
 
+
 void List_Portion::Output( gOutput& s ) const
 {
-  int i, length;
+  int i;
+  int length;
 
   s << " (List)\n"; 
   s << "  {\n";
@@ -402,19 +439,19 @@ void List_Portion::Output( gOutput& s ) const
 }
 
 
-
-
-Portion *List_Portion::operator[] ( int index )
+Portion* List_Portion::operator[] ( int index )
 {
   return value[ index ];
 }
 
-int List_Portion::Append( Portion *item )
+
+int List_Portion::Append( Portion* item )
 {
   return Insert( item, value.Length() + 1 );
 }
 
-int List_Portion::Insert( Portion *item, int index )
+
+int List_Portion::Insert( Portion* item, int index )
 {
   int result;
   int type_match;
@@ -428,7 +465,7 @@ int List_Portion::Insert( Portion *item, int index )
   if( value.Length() == 0 )  // creating a new list
   {
     if( item->Type() == porLIST )
-      data_type = ( (List_Portion *)item )->data_type;
+      data_type = ( (List_Portion*) item )->data_type;
     else
       data_type = item->Type();
   }
@@ -442,21 +479,22 @@ int List_Portion::Insert( Portion *item, int index )
       assert(0);
     }
   }
-
   result = value.Insert( item, index );
-
   return result;
 }
 
-Portion *List_Portion::Remove( int index )
+
+Portion* List_Portion::Remove( int index )
 {
   return value.Remove( index );
 }
+
 
 int List_Portion::Length( void ) const
 {
   return value.Length();
 }
+
 
 void List_Portion::Flush( void )
 {
@@ -467,6 +505,7 @@ void List_Portion::Flush( void )
   }
   value.Flush();
 }
+
 
 
 //----------------------------------------------------------------------
@@ -501,4 +540,4 @@ PortionType numerical_Portion<gRational>::Type( void ) const
 
 #include "gblock.imp"
 
-TEMPLATE class gBlock<Portion *>;
+TEMPLATE class gBlock<Portion*>;

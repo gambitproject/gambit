@@ -4,61 +4,64 @@
 //# $Id$
 //#
 
+
 #include "gambitio.h"
 #include "glist.h"
 #include "hash.h"
 
 
-template <class K, class T> HashTable<K,T>::HashTable()
+template <class K, class T> HashTable<K, T>::HashTable()
 {
   num_of_buckets = 0;
 }
 
 
-template <class K, class T> void HashTable<K,T>::Init( void )
+template <class K, class T> void HashTable<K, T>::Init( void )
 {
   if( num_of_buckets == 0 )
   {
     if( NumBuckets() > 0 )
     {
       num_of_buckets = NumBuckets();
-      key_bucket = new gList<K>[ num_of_buckets ];
-      value_bucket = new gList<T>[ num_of_buckets ];
+      key_bucket = new gList<K> [ num_of_buckets ];
+      value_bucket = new gList<T> [ num_of_buckets ];
     }
     else
     {
-      gerr << "** HashTable Error: NumBuckets() returned an illegal number\n";
+      gerr << "HashTable Error: NumBuckets() returned an illegal number\n";
       assert(0);
     }
   }
 }
 
-template <class K, class T> void HashTable<K,T>::Flush( void )
+
+template <class K, class T> void HashTable<K, T>::Flush( void )
 {
   int i;
-  K removed_key;
-  T removed_value;
+  K   removed_key;
+  T   removed_value;
 
   for( i = 0; i < num_of_buckets; i++ )
   {
-    while( key_bucket[i].Length() > 0 )
+    while( key_bucket[ i ].Length() > 0 )
     {
-      removed_key = key_bucket[i].Remove( 1 );
-      removed_value = value_bucket[i].Remove( 1 );
+      removed_key = key_bucket[ i ].Remove( 1 );
+      removed_value = value_bucket[ i ].Remove( 1 );
       DeleteAction( removed_value );
     }
   }
 }
 
-template <class K, class T> HashTable<K,T>::~HashTable()
+
+template <class K, class T> HashTable<K, T>::~HashTable()
 {
   int i;
 
   for( i = 0; i < num_of_buckets; i++ )
   {
-    if( key_bucket[i].Length() > 0 )
+    if( key_bucket[ i ].Length() > 0 )
     {
-      gerr << "** HashTable Error: decendent class dtor did not call Flush()\n";
+      gerr << "HashTable Error: decendent class dtor did not call Flush()\n";
       assert(0);
     }
   }
@@ -68,41 +71,42 @@ template <class K, class T> HashTable<K,T>::~HashTable()
 }
 
 
-template <class K, class T> int HashTable<K,T>::ValidatedHash( K key ) const
+template <class K, class T> int HashTable<K, T>::ValidatedHash( K key ) const
 {
-  int i;
-  i = Hash( key );
+  int i = Hash( key );
 
-  if( i < 0 || i >= num_of_buckets )
+  if( ( i < 0 ) || ( i >= num_of_buckets ) )
   {
-    gerr << "** HashTable Error: Hash() generated an illegal index\n";
-    if( num_of_buckets == 0 && NumBuckets() > 0 )
-      gerr << "** HashTable Error: decendent class ctor did not call Init()\n";
+    gerr << "HashTable Error: Hash() generated an illegal index\n";
+    if( ( num_of_buckets == 0 ) && ( NumBuckets() > 0 ) )
+    {
+      gerr << "HashTable Error: decendent class ctor did not call Init()\n";
+    }    
     assert(0);
   }  
   return i;
 }
 
 
-template <class K, class T> int HashTable<K,T>::IsDefined( K key ) const
+template <class K, class T> int HashTable<K, T>::IsDefined( K key ) const
 {
-  int i;
-  i = ValidatedHash( key );
-  return key_bucket[i].Find( key );
+  int i = ValidatedHash( key );
+  return key_bucket[ i ].Find( key );
 }
 
 
-template <class K, class T> void HashTable<K,T>::Define( K key, T value )
+template <class K, class T> void HashTable<K, T>::Define( K key, T value )
 {
-  int i, position;
+  int i;
+  int position;
 
   i = ValidatedHash( key );
-  position = IsDefined( key );  //ok because IsDefined returns the position
-                                //of the key in the list if it is found
+  position = IsDefined( key );  // ok because IsDefined returns the position
+                                // of the key in the list if it is found
   if( position == 0 )           // == 0 means not previously defined
   {
-    key_bucket[i].Append( key );
-    value_bucket[i].Append( value );
+    key_bucket[ i ].Append( key );
+    value_bucket[ i ].Append( value );
   }
   else
   {
@@ -111,59 +115,63 @@ template <class K, class T> void HashTable<K,T>::Define( K key, T value )
   }
 }
 
-template <class K, class T> void HashTable<K,T>::Remove( K key )
+
+template <class K, class T> void HashTable<K, T>::Remove( K key )
 {
-  int i, position;
-  K removed_key;
-  T removed_value;
+  int i;
+  int position;
+  K   removed_key;
+  T   removed_value;
 
   position = IsDefined( key );
   if( position != 0 )
   {
     i = ValidatedHash( key );
-    removed_key = key_bucket[i].Remove( position );
-    removed_value = value_bucket[i].Remove( position );
+    removed_key = key_bucket[ i ].Remove( position );
+    removed_value = value_bucket[ i ].Remove( position );
     DeleteAction( removed_value );
     assert( key == removed_key );
   }
 }
 
   
-template <class K, class T> T HashTable<K,T>::operator()( K key ) const
+template <class K, class T> T HashTable<K, T>::operator()( K key ) const
 {
-  int i, position;
-  T return_value;
+  int i;
+  int position;
+  T   return_value;
 
   position = IsDefined( key );
   if( position != 0 )
   {
     i = ValidatedHash( key );
-    return_value = (value_bucket[i])[position];    
+    return_value = (value_bucket[ i ])[position];    
   }
   else
   {
-    gerr << "** HashTable Error: attempted to query the value of a non-existent key\n";
-    gerr << "                    The return value should be ignored.\n";
+    gerr << "HashTable Error: querying the value of an undefined key\n";
+    gerr << "                 The return value should be ignored.\n";
     return_value = illegal_value;
   }
   return return_value;
 }
 
   
-template <class K, class T> T& HashTable<K,T>::operator()( K key )
+template <class K, class T> T& HashTable<K, T>::operator()( K key )
 {
-  int i, position;
-  T return_value;
+  int i;
+  int position;
+  T   return_value;
 
   position = IsDefined( key );
   if( position != 0 )
   {
     i = ValidatedHash( key );
-    return (value_bucket[i])[position];    
+    return (value_bucket[ i ])[position];    
   }
   else
   {
-    gerr << "** HashTable Error: attempted to modify the value of a non-existent key\n";
+    gerr << "HashTable Error: modifying the value of an undefined key\n";
     return illegal_value;
   }
 }
