@@ -9,7 +9,7 @@
 #define ALGDLGS_H
 
 #include "wx/wx.h"
-#include "wxmisc.h"
+#include "guishare/wxmisc.h"
 
 #include "math/gnumber.h"  
 

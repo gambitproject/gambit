@@ -14,8 +14,8 @@
 #include "wx/notebook.h"
 
 #include "dlformataxis.h"
-#include "gui/valinteger.h"
-#include "gui/valnumber.h"
+#include "guishare/valinteger.h"
+#include "guishare/valnumber.h"
 
 //=========================================================================
 //                   class DisplayPanel implementation

@@ -11,7 +11,7 @@
 
 #include "efglayout.h"
 #include "twflash.h"
-#include "wxmisc.h"
+#include "guishare/wxmisc.h"
 
 class EfgShow;
 

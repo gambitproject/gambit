@@ -12,8 +12,8 @@
 #include "wx/fontdlg.h"
 #include "wx/printdlg.h"
 #include "wx/wizard.h"
-#include "wxmisc.h"
-#include "wxstatus.h"
+#include "guishare/wxmisc.h"
+#include "guishare/wxstatus.h"
 
 #include "math/math.h"
 #include "efg.h"

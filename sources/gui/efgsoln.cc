@@ -8,7 +8,7 @@
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
-#include "wxmisc.h"
+#include "guishare/wxmisc.h"
 #include "base/base.h"
 #include "math/rational.h"
 #include "efgsoln.h"

@@ -9,7 +9,7 @@
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
 
-#include "wxmisc.h"
+#include "guishare/wxmisc.h"
 #include "gambit.h"
 #include "treedraw.h"
 #include "legend.h"

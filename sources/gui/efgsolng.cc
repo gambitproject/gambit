@@ -9,8 +9,8 @@
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
-#include "wxmisc.h"
-#include "wxstatus.h"
+#include "guishare/wxmisc.h"
+#include "guishare/wxstatus.h"
 #include "gnullstatus.h"
 #include "subsolve.h"
 #include "gfunc.h"

@@ -10,7 +10,7 @@
 #endif  // WX_PRECOMP
 #include "wx/sizer.h"
 
-#include "wxmisc.h"
+#include "guishare/wxmisc.h"
 
 #include "efgconst.h"
 

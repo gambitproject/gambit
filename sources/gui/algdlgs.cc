@@ -14,10 +14,10 @@
 #include "wxio.h"
 #include "gambit.h"
 #include "algdlgs.h"
-#include "wxmisc.h"
 
-#include "valnumber.h"
-#include "valinteger.h"
+#include "guishare/wxmisc.h"
+#include "guishare/valnumber.h"
+#include "guishare/valinteger.h"
 
 #include "nfgconst.h"
 

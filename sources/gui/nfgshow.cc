@@ -12,7 +12,7 @@
 #include "wx/fontdlg.h"
 #include "wx/wizard.h"
 
-#include "wxstatus.h"
+#include "guishare/wxstatus.h"
 #include "nfgshow.h"
 #include "nfgtable.h"
 #include "nfgsoln.h"

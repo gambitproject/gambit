@@ -10,7 +10,7 @@
 #endif  // WX_PRECOMP
 #include "wx/dcps.h"
 #include "wx/dragimag.h"
-#include "wxmisc.h"
+#include "guishare/wxmisc.h"
 
 #include "base/gmisc.h"
 #include "math/math.h"

@@ -11,7 +11,7 @@
 #include "wx/listctrl.h"
 #include "wx/sashwin.h"
 #include "wx/printdlg.h"
-#include "wxmisc.h"
+#include "guishare/wxmisc.h"
 
 #include "base/gmisc.h"
 

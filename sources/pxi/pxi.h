@@ -29,7 +29,7 @@
 #include "wx/config.h"    // for wxConfig
 #include "wx/docview.h"   // for wxFileHistory
 #include "expdata.h"
-#include "../gui/wxmisc.h"
+#include "guishare/wxmisc.h"
 
 //
 // wxWindows does not provide this constant

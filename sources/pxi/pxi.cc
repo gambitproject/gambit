@@ -56,7 +56,7 @@
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
 
-#include "gui/dlabout.h"
+#include "guishare/dlabout.h"
 
 #include "expdata.h"
 #include "dlgpxi.h"

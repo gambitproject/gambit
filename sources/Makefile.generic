@@ -95,7 +95,7 @@ OBJECT_SUFFIX = .o
 #
 OBJDIR = obj_gtk_linux
 vpath %.o  $(OBJDIR)
-vpath %.cc  base:math:gui:pxi
+vpath %.cc  base:math:guishare:gui:pxi
 
 # rule for creating .o (object) files from .cc files
 

@@ -25,7 +25,7 @@ WXLIBDIR = $(WXDIR)\lib
 WXLIB = wx32 xpm tiff jpeg winpng zlib
 WXINC = -I$(WXDIR)\include
 
-.path.cc = .;base;math;gui;pxi
+.path.cc = .;base;math;guishae;gui;pxi
 
 $(SOURCE_SUFFIX).obj:
 	bcc32 $(CPPFLAGS) -P -c {$< }

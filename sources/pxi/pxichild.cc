@@ -16,8 +16,8 @@
 #include "wx/colordlg.h"
 #include "wx/printdlg.h"
 
-#include "gui/valinteger.h"
-#include "gui/valnumber.h"
+#include "guishare/valinteger.h"
+#include "guishare/valnumber.h"
 
 #include "pxichild.h"
 #include "pxiplotn.h"

@@ -15,9 +15,9 @@
 #include "wx/image.h"
 
 #include "gambit.h"
-#include "wxmisc.h"
+#include "guishare/wxmisc.h"
+#include "guishare/dlabout.h"
 #include "splash.h"
-#include "dlabout.h"
 #include "efgshow.h"
 #include "nfgshow.h"
 #include "system.h"

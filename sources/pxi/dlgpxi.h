@@ -12,7 +12,7 @@
 
 #include "wx/slider.h"
 
-#include "gui/wxmisc.h"
+#include "guishare/wxmisc.h"
 #include "base/gstream.h"
 #include "pxi.h"
 #include "pxiplot.h"

@@ -6,8 +6,8 @@
 //
 
 #include "wx/wx.h"
-#include "wxmisc.h"
-#include "wxstatus.h"
+#include "guishare/wxmisc.h"
+#include "guishare/wxstatus.h"
 #include "base/base.h"
 #include "gnullstatus.h"
 #include "gpoly.h"
