@@ -65,7 +65,6 @@ const int idTREEWINDOW = 999;
 const int idNODEWINDOW = 998;
 const int idTOOLWINDOW = 997;
 const int idSOLUTIONWINDOW = 996;
-const int idZOOM_COMBOBOX = 995;
 
 BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuFILE_SAVE, EfgShow::OnFileSave)
@@ -170,7 +169,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_SASH_DRAGGED_RANGE(idSOLUTIONWINDOW, idTREEWINDOW, EfgShow::OnSashDrag)
   EVT_ACTIVATE(EfgShow::OnActivate)
   EVT_LIST_ITEM_SELECTED(idEFG_SOLUTION_LIST, EfgShow::OnSolutionSelected)
-  EVT_COMBOBOX(idZOOM_COMBOBOX, EfgShow::OnSetZoom)
 END_EVENT_TABLE()
 
 //---------------------------------------------------------------------
@@ -766,13 +764,6 @@ void EfgShow::MakeToolbar(void)
   toolBar->AddTool(efgmenuSOLVE_NFG_REDUCED, wxBITMAP(table), wxNullBitmap,
 		   false, -1, -1, 0, "Normal form",
 		   "Generate reduced normal form");
-  wxComboBox *combo = new wxComboBox(toolBar, idZOOM_COMBOBOX);
-  combo->Append("100%");
-  combo->Append("75%");
-  combo->Append("50%");
-  combo->Append("25%");
-  combo->Append("10%");
-  toolBar->AddControl(combo);
   toolBar->AddSeparator();
 
   toolBar->AddTool(wxID_HELP, wxBITMAP(help), wxNullBitmap, false,
