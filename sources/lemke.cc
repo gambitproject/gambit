@@ -20,7 +20,7 @@
 //---------------------------------------------------------------------------
 
 LemkeParams::LemkeParams(void) 
-  : dup_strat(0), plev(0), nequilib(0), output(&gnull)
+  : plev(0), nequilib(0), output(&gnull)
 { }
 
 //---------------------------------------------------------------------------
@@ -421,13 +421,13 @@ template <class T> int LemkeModule<T>::Lemke(void)
 {
   if (nf.NumPlayers() != 2 || !params.output)   return 0;
 
-  if (params.dup_strat < 0 ||
-      params.dup_strat > nf.NumStrats(1) + nf.NumStrats(2))   return 0;
+//  if (params.dup_strat < 0 ||
+//      params.dup_strat > nf.NumStrats(1) + nf.NumStrats(2))   return 0;
   
   gWatch watch;
 
   LemkeTableau<T> LT(nf, *params.output, params.plev);
-  LT.Lemke(params.dup_strat);
+  LT.Lemke((params.nequilib == 1) ? 1 : 0);
 
   time = watch.Elapsed();
   npivots = LT.NumPivots();
