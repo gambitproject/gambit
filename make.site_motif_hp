@@ -9,4 +9,4 @@ GUISUFFIX = _motif
 # XWindows information
 XINCDIR = -I/usr/include/X11R5 -I/usr/include/Motif1.2
 XLIBDIR = -L/usr/lib/X11R5 -L/usr/lib/Motif1.2
-XLIB = -lXm -lXt -lX11 -lm -lg++
+XLIB = -lXm -lXt -lX11 -lc -lm -lg++
