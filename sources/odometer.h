@@ -70,15 +70,16 @@ class gPermutationOdometer {
   const int   n;
   gArray<int> CurIndices;
   int         CurSign;
-   
+
+  // Declared but not defined to prohibit assignment
+  gPermutationOdometer &operator=(const gPermutationOdometer &);
+
  public:
    gPermutationOdometer(const int&);  
    gPermutationOdometer(const gPermutationOdometer &);
-
    ~gPermutationOdometer();                 // Deletes all pointees
 
    // Operators
-   gPermutationOdometer& operator= (const gPermutationOdometer &);
 
    bool       operator==(const gPermutationOdometer &) const;
    bool       operator!=(const gPermutationOdometer &) const;

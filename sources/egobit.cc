@@ -198,7 +198,7 @@ void Qre(const Efg &E, EFQreParams &params,
 {
   EFQreFunc F(E, start);
 
-  int iter = 0, nit;
+  int iter = 0;
   double Lambda, value = 0.0;
 
   if (params.pxifile)
@@ -223,9 +223,9 @@ void Qre(const Efg &E, EFQreParams &params,
   InitMatrix(xi, p.Lengths());
 
   bool powell = true;
-  for (nit = 1; powell && !F.DomainErr() &&
+  for (/*nit = 1*/; powell && !F.DomainErr() &&
        Lambda <= params.maxLam && Lambda >= params.minLam &&
-       value < 10.0; nit++)   {
+       value < 10.0; /*nit++*/)   {
     params.status.Get();
     F.SetLambda(Lambda);
     powell = Powell(p, xi, F, value, iter,

@@ -225,6 +225,7 @@ gText ToText(const gComplex /* d */)
   gout << "\nError: ToText(gComplex) must be defined for compilation,";
   gout << " but is not functional.\n";
   exit(0);
+  return "";
 }
 
 // conversions from strings to numbers
@@ -234,6 +235,7 @@ gComplex TOgComplex(const gText & /* s */)
   gout << "\nError: TOgComplex must be defined for compilation,";
   gout << " but is not functional.\n";
   exit(0);
+  return gComplex(0, 0);
 }
 
 #include "glist.imp"

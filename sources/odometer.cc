@@ -214,28 +214,11 @@ gPermutationOdometer::gPermutationOdometer(const gPermutationOdometer & odo)
 }
 
 gPermutationOdometer::~gPermutationOdometer()
-{
-}
+{ }
 
 //----------------------------------
 //        Operators
 //----------------------------------
-
- 
-gPermutationOdometer& gPermutationOdometer::operator=(const gPermutationOdometer & rhs)
-{  
-  gout << "For const'ness, operator = not allowed for gPermutationOdometer's\n";
-  exit (0);
-  gout << rhs; // suppresses warnings compiling with -Wall
-/*
-  if (*this != rhs) {
-    n = rhs.n;
-    CurIndices = rhs.CurIndices;
-    CurSign = rhs.CurSign;
-  }
-*/
-}
-
   
 bool gPermutationOdometer::operator==(const gPermutationOdometer & rhs) const
 {

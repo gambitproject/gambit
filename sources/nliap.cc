@@ -166,8 +166,7 @@ bool Liap(const Nfg &N, NFLiapParams &params,
 	  long &nevals, long &niters)
 {
   MixedProfile<double> p(start.Support());
-  int i = 0;
-  for ( i = 1; i <= p.Length(); i++)
+  for (int i = 1; i <= p.Length(); i++)
     p[i] = start[i];
 
   NFLiapFunc F(N, p);
@@ -178,7 +177,7 @@ bool Liap(const Nfg &N, NFLiapParams &params,
 
   solutions.Flush();
 
-  for (i = 1;  
+  for (int i = 1;  
        (params.nTries == 0 || i <= params.nTries) &&
 	 (params.stopAfter==0 || solutions.Length() < params.stopAfter);
        i++) { 
@@ -188,9 +187,9 @@ bool Liap(const Nfg &N, NFLiapParams &params,
     if (params.trace>0)
       *params.tracefile << "\nTry #: " << i << " p: ";
     
-    if (found = DFP(p, F, value, iter, params.maxits1, params.tol1,
-		    params.maxitsN, params.tolN, *params.tracefile,
-		    params.trace-1, false, params.status))  {
+    if ((found = DFP(p, F, value, iter, params.maxits1, params.tol1,
+		     params.maxitsN, params.tolN, *params.tracefile,
+		     params.trace-1, false, params.status)) == true)  {
       bool add = true;
       int ii = 1;
       while (ii <= solutions.Length() && add == true) {

@@ -45,13 +45,13 @@ public:
    TreeOfPartials(const TreeOfPartials<T> &);
    ~TreeOfPartials();
 
-   inline const bool operator ==(const TreeOfPartials<T>& rhs) const 
+   inline bool operator ==(const TreeOfPartials<T>& rhs) const 
      { return (PartialTree == rhs.PartialTree); }
-   inline const bool operator !=(const TreeOfPartials<T>& rhs) const 
+   inline bool operator !=(const TreeOfPartials<T>& rhs) const 
      { return !(*this == rhs); }
-   inline const int Dmnsn()                                    const 
+   inline int Dmnsn()                                    const 
      { return RootNode()->GetData().Dmnsn(); }
-   inline const T EvaluateRootPoly(const gVector<T>& point)    const 
+   inline T EvaluateRootPoly(const gVector<T>& point)    const 
      { return RootNode()->GetData().Evaluate(point); }
 
 

@@ -1,8 +1,8 @@
-//#
-//# FILE: gsmatrix.imp -- Implementation of square matrices
-//#
-//#  $Id$ - Determinant fixed by AMM on 10/19/96
-//#
+//
+// FILE: gsmatrix.imp -- Implementation of square matrices
+//
+//  $Id$ - Determinant fixed by AMM on 10/19/96
+//
 
 #include "gsmatrix.h"
 #include <assert.h>
@@ -107,7 +107,7 @@ template <class T> gSquareMatrix<T> gSquareMatrix<T>::Inverse(void) const
 
 template <class T> T gSquareMatrix<T>::Determinant(void) const
 {
-  T factor = (T) 1;
+  T factor;
   gSquareMatrix<T> M(*this);
 
   for (int row = minrow; row <= maxrow; row++)  {
@@ -130,14 +130,13 @@ template <class T> T gSquareMatrix<T>::Determinant(void) const
 
     // now do row operations to clear the row'th column
     // below the diagonal
-    for (int row1 = row+1; row1 <= maxrow; row1++)
-      {
-	factor = -M.data[row1][row]/M.data[row][row];
-	for (int i = mincol; i <= maxcol; i++)
-	  M.data[row1][i] += M.data[row][i]*factor;
-      }
+    for (int row1 = row+1; row1 <= maxrow; row1++) {
+      T factor = -M.data[row1][row]/M.data[row][row];
+      for (int i = mincol; i <= maxcol; i++)
+	M.data[row1][i] += M.data[row][i]*factor;
+    }
   }
-
+  
   // finally we multiply the diagonal elements
   T det = (T) 1;
   for (int row = minrow; row <= maxrow; row++)    det *= M.data[row][row];

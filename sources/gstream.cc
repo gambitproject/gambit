@@ -70,7 +70,7 @@ gInput &gFileInput::operator>>(long &x)
 
 gInput &gFileInput::operator>>(char &x)
 {
-  x = fgetc(f);
+  x = (char) fgetc(f);
   return *this;
 }
 
@@ -94,7 +94,7 @@ gInput &gFileInput::operator>>(char *x)
 
 int gFileInput::get(char &c)
 {
-  c = fgetc(f);
+  c = (char) fgetc(f);
   return (!feof(f));
 }
 

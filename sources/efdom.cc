@@ -140,7 +140,7 @@ bool InfosetHasDominatedElement(const EFSupport &S,
 				const Infoset *i,
 				const bool strong,
 				const bool conditional,
-				const gStatus &status)
+				const gStatus &/*status*/)
 {
   gList<Action *> actions = S.ListOfActions(i);
   for (int i = 1; i <= actions.Length(); i++)

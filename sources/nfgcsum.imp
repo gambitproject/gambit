@@ -119,12 +119,12 @@ template <class T> int ZSumModule<T>::ZSum(int /*dup*/)
 template <class T> int ZSumModule<T>::Add_BFS( /*const*/ LPSolve<T> &lp)
 {
   BFS<T> cbfs((T) 0);
-  T value;
+  //  T value;
 
   if (params.stopAfter ==1)
   {
     lp.OptBFS(cbfs);
-    value=cbfs(NF.NumStrats(1)+1)+minpay;
+    //    value=cbfs(NF.NumStrats(1)+1)+minpay;
     cbfs.Remove(NF.NumStrats(1)+1);
     cbfs.Remove(-NF.NumStrats(2)-1);
   //  cbfs.Dump(gout);
@@ -144,7 +144,7 @@ template <class T> int ZSumModule<T>::Add_BFS( /*const*/ LPSolve<T> &lp)
     for (int k = 1; k <= bList.Length(); k++)
     {
       cbfs = bList[k];
-      value=cbfs(NF.NumStrats(1)+1)+minpay;
+      //      value=cbfs(NF.NumStrats(1)+1)+minpay;
       cbfs.Remove(NF.NumStrats(1)+1);
       cbfs.Remove(-NF.NumStrats(2)-1);
       if (List.Contains(cbfs))  return 0;
@@ -158,7 +158,7 @@ template <class T> int ZSumModule<T>::Add_BFS( /*const*/ LPSolve<T> &lp)
     for (int k = 1; k <= bList.Length() && k <= params.stopAfter ; k++)
     {
       cbfs = bList[k];
-      value=cbfs(NF.NumStrats(1)+1)+minpay;
+      //      value=cbfs(NF.NumStrats(1)+1)+minpay;
       cbfs.Remove(NF.NumStrats(1)+1);
       cbfs.Remove(-NF.NumStrats(2)-1);
       if (List.Contains(cbfs))  return 0;

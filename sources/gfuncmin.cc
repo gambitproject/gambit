@@ -173,9 +173,9 @@ double Brent(double ax, double bx, double cx,
     double tol2 = 2.0 * tol1;
 
     if (abs(x - xm) <= (tol2 - 0.5 * (b - a)))  {
-      double lhs, rhs;
-      lhs = abs(x - xm);
-      rhs = tol2 - 0.5 * (b-a);
+      //      double lhs, rhs;
+      //      lhs = abs(x - xm);
+      //      rhs = tol2 - 0.5 * (b-a);
       xmin = x;
       return fx;
     }
@@ -408,8 +408,6 @@ bool DFP(gPVector<double> &p,
     dg = g - dg;
     hdg = hessin * dg;
 
-    fac = 0.0;
-    fae = 0.0;
     fac = dg * xi;
     fae = dg * hdg;
     
@@ -548,7 +546,6 @@ bool Powell(gPVector<double> &p,
       tracefile.SetFloatMode();
     }
   }
-  return false;
 }
 
 
@@ -638,7 +635,6 @@ bool OldPowell(gVector<double> &p,
       tracefile.SetFloatMode();
     }
   }
-  return false;
 }
 
 

@@ -56,12 +56,11 @@ NFQreFunc::NFQreFunc(const Nfg &N,
 			 const MixedProfile<gNumber> &start)
   : _nevals(0L), _nfg(N), _Lambda(N.NumPlayers()), _p(start.Support())
 {
-  int i = 0;
-  for ( i = 1; i <= _p.Length(); i++)
+  for (int i = 1; i <= _p.Length(); i++)
     _p[i] = start[i];
 
   _scratch = new gVector<double> *[_nfg.NumPlayers()] - 1;
-  for ( i = 1; i <= _nfg.NumPlayers(); i++)
+  for (int i = 1; i <= _nfg.NumPlayers(); i++)
     _scratch[i] = new gVector<double>(_p.Support().NumStrats(i));
 }
 
@@ -178,7 +177,7 @@ void Qre(const Nfg &N, NFQreParams &params,
   NFQreFunc F(N, start);
 
   int i;
-  int iter = 0, nit;
+  int iter = 0;
   double Lambda, value = 0.0;
   
   if (params.pxifile) 
@@ -196,9 +195,9 @@ void Qre(const Nfg &N, NFQreParams &params,
   for (int j = 1; j <= p.Length(); j++)
     p[j] = start[j];
 
-  for (nit = 1;
+  for (/*nit = 1*/;
        Lambda <= params.maxLam &&
-       Lambda >= params.minLam && value < 10.0; nit++)  {
+       Lambda >= params.minLam && value < 10.0; /*nit++*/)  {
     params.status.Get();
     F.SetLambda(Lambda);
     DFP(p, F, value, iter,
@@ -271,12 +270,11 @@ NFKQreFunc::NFKQreFunc(const Nfg &N,
   :_nevals(0L), _domain_err(false), _nfg(N), _K(1.0),
    _p(start.Support()), F(N,start), params(p)
 {
-  int i = 0;
-  for ( i = 1; i <= _p.Length(); i++)
+  for (int i = 1; i <= _p.Length(); i++)
     _p[i] = start[i];
 
   _scratch = new gVector<double> *[_nfg.NumPlayers()] - 1;
-  for ( i = 1; i <= _nfg.NumPlayers(); i++)
+  for (int i = 1; i <= _nfg.NumPlayers(); i++)
     _scratch[i] = new gVector<double>(_p.Support().NumStrats(i));
 }
 

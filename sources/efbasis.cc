@@ -385,8 +385,7 @@ bool EFBasis::IsConsistent()
   (*A) = 0.0; (*b) = 0.0; (*c)= 0.0;
 
   MakeAb();
-  int i = 0;
-  for( i=1;i<=num_act_vars;i++)
+  for (int i = 1; i <= num_act_vars; i++)
     (*c)[i]=-1.0;
 
   // gout << "\nA: \n" << (*A);
@@ -399,7 +398,7 @@ bool EFBasis::IsConsistent()
   if(!lp.IsWellFormed()) gout << "\nLP not well formed";
   if(!lp.IsBounded()) gout << "\nLP not bounded";
   bool flag = lp.IsFeasible();
-  for( i=1;i<=num_act_vars;i++)
+  for (int i = 1; i <= num_act_vars; i++)
     if(lp.OptimumVector()[i]<=0.0) flag = false;
   if(flag)
     GetConsistencySolution(lp.OptimumVector());
