@@ -8,6 +8,8 @@
 #include "efgutils.h"
 #include "subsolve.h"
 
+#include "gwatch.h"
+
 //-------------------------------------------------------------------------
 //                Implementation of base solver algorithm
 //-------------------------------------------------------------------------
@@ -88,7 +90,11 @@ template <class T> SubgameSolver<T>::~SubgameSolver()
 template <class T> 
 const BehavProfile<T> &SubgameSolver<T>::Solve(void)
 {
+  gWatch watch;
+
   FindSubgames(efg.RootNode());
+
+  time = watch.Elapsed();
 
   return solution;
 }
@@ -110,20 +116,23 @@ void EFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
   
   EM.Liap();
 
+  nevals += EM.NumEvals();
+
   if (EM.GetSolutions().Length() > 0)
     bp = EM.GetSolutions()[1];
 }
 
 template <class T>
-EFLiapBySubgame<T>::EFLiapBySubgame(const Efg<T> &E, const EFLiapParams<T> &p)
-  : SubgameSolver<T>(E), params(p)
+EFLiapBySubgame<T>::EFLiapBySubgame(const Efg<T> &E, const EFLiapParams<T> &p,
+				    const BehavProfile<T> &s)
+  : SubgameSolver<T>(E), nevals(0), params(p), start(s)
 { }
 
 template <class T>  EFLiapBySubgame<T>::~EFLiapBySubgame()   { }
 
 
 //-------------------
-// EFLiap
+// Sequence form
 //-------------------
 
 template <class T>
@@ -133,13 +142,15 @@ void SeqFormBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
   
   M.Lemke();
 
+  npivots += M.NumPivots();
+
   if (M.GetSolutions().Length() > 0)
     bp = M.GetSolutions()[1];
 }
 
 template <class T>
 SeqFormBySubgame<T>::SeqFormBySubgame(const Efg<T> &E, const SeqFormParams &p)
-  : SubgameSolver<T>(E), params(p)
+  : SubgameSolver<T>(E), npivots(0), params(p)
 { }
 
 template <class T>  SeqFormBySubgame<T>::~SeqFormBySubgame()   { }
@@ -162,6 +173,8 @@ void NFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
   
   M.Liap();
 
+  nevals += M.NumEvals();
+
   if (M.GetSolutions().Length() > 0)
     MixedToBehav(*N, M.GetSolutions()[1], E, bp);
 
@@ -169,8 +182,10 @@ void NFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
 }
 
 template <class T>
-NFLiapBySubgame<T>::NFLiapBySubgame(const Efg<T> &E, const NFLiapParams<T> &p)
-  : SubgameSolver<T>(E), params(p)
+NFLiapBySubgame<T>::NFLiapBySubgame(const Efg<T> &E, const NFLiapParams<T> &p,
+				    const BehavProfile<T> &s)
+
+  : SubgameSolver<T>(E), nevals(0), params(p), start(s)
 { }
 
 template <class T> NFLiapBySubgame<T>::~NFLiapBySubgame()   { }
@@ -191,6 +206,8 @@ void LemkeBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
   
   M.Lemke();
 
+  npivots += M.NumPivots();
+
   if (M.GetSolutions().Length() > 0)
     MixedToBehav(*N, M.GetSolutions()[1], E, bp);
 
@@ -199,7 +216,7 @@ void LemkeBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
 
 template <class T>
 LemkeBySubgame<T>::LemkeBySubgame(const Efg<T> &E, const LemkeParams &p)
-  : SubgameSolver<T>(E), params(p)
+  : SubgameSolver<T>(E), npivots(0), params(p)
 { }
 
 template <class T> LemkeBySubgame<T>::~LemkeBySubgame()   { }
@@ -219,6 +236,8 @@ void SimpdivBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
   SimpdivModule<T> M(*N, params, mp.GetNFSupport());
   
   M.Simpdiv();
+
+  nevals += M.NumEvals();
 
   if (M.GetSolutions().Length() > 0)
     MixedToBehav(*N, M.GetSolutions()[1], E, bp);
@@ -249,6 +268,8 @@ void EnumBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
   
   M.Enum();
 
+  npivots += M.NumPivots();
+
   if (M.GetSolutions().Length() > 0)
     MixedToBehav(*N, M.GetSolutions()[1], E, bp);
 
@@ -257,7 +278,7 @@ void EnumBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
 
 template <class T>
 EnumBySubgame<T>::EnumBySubgame(const Efg<T> &E, const EnumParams &p)
-  : SubgameSolver<T>(E), params(p)
+  : SubgameSolver<T>(E), npivots(0),params(p)
 { }
 
 template <class T> EnumBySubgame<T>::~EnumBySubgame()   { }
@@ -304,6 +325,8 @@ void ZSumBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
   
   M.ZSum();
 
+  npivots += M.NumPivots();
+
   gList<MixedProfile<T> > solns;
   M.GetSolutions(solns);
 
@@ -315,7 +338,7 @@ void ZSumBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
 
 template <class T>
 ZSumBySubgame<T>::ZSumBySubgame(const Efg<T> &E, const ZSumParams &p)
-  : SubgameSolver<T>(E), params(p)
+  : SubgameSolver<T>(E), npivots(0), params(p)
 { }
 
 template <class T> ZSumBySubgame<T>::~ZSumBySubgame()   { }

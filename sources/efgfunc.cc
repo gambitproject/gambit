@@ -76,6 +76,14 @@ Portion *ArrayToList(const gArray<Node *> &A)
   return ret;
 }
 
+Portion *ArrayToList(const gList<Node *> &A)
+{
+  ListPortion *ret = new ListValPortion;
+  for (int i = 1; i <= A.Length(); i++)
+    ret->Append(new NodeValPortion(A[i]));
+  return ret;
+}
+
 //
 // Implementation of extensive form editing functions, in alpha order
 //
@@ -155,6 +163,18 @@ Portion *GSM_DeleteOutcome(Portion **param)
   return new BoolValPortion(true);
 }
 
+Portion *GSM_UnmarkSubgame(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+
+  n->BelongsTo()->RemoveSubgame(n);
+  
+  Portion *por = new NodeValPortion(n);
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+
 Portion *GSM_DeleteTree(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
@@ -173,6 +193,36 @@ Portion *GSM_DetachOutcome(Portion **param)
 
   Portion* por = new NodeValPortion(n);
   por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
+}
+
+Portion *GSM_MarkAllSubgamesEfg(Portion **param)
+{
+  BaseEfg &E = *((EfgPortion*) param[0])->Value();
+
+  E.FindSubgames(E.RootNode());
+
+  gList<Node *> roots;
+  SubgameRoots(E, roots);
+
+  Portion *por = ArrayToList(roots);
+  por->SetOwner(param[0]->Original());
+  por->AddDependency();
+  return por;
+}
+
+Portion *GSM_MarkAllSubgamesNode(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+
+  n->BelongsTo()->FindSubgames(n);
+  
+  gList<Node *> roots;
+  SubgameRoots(*n->BelongsTo(), roots);
+  
+  Portion *por = ArrayToList(roots);
+  por->SetOwner(param[0]->Owner());
   por->AddDependency();
   return por;
 }
@@ -351,75 +401,14 @@ Portion *GSM_NewPlayer(Portion **param)
   return por;
 }
 
-
-
-Portion* GSM_Nodes( Portion** param )
+Portion *GSM_MarkSubgame(Portion **param)
 {
-  int i;
+  Node *n = ((NodePortion *) param[0])->Value();
 
-  BaseEfg& E = *((EfgPortion*) param[0])->Value();
-  gList< Node* > list;
-  Nodes( E, list );
+  n->BelongsTo()->DefineSubgame(n);
 
-  Portion* por = new ListValPortion;
-  for( i = 1; i <= list.Length(); i++ )
-  {
-    ( (ListPortion*) por )->Append( new NodeValPortion( list[ i ] ) );
-  }
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
-  return por;
+  return new NodeValPortion(n);
 }
-
-
-Portion* GSM_TerminalNodes( Portion** param )
-{
-  int i;
-
-  BaseEfg& E = *((EfgPortion*) param[0])->Value();
-  gList< Node* > list;
-  TerminalNodes( E, list );
-
-  Portion* por = new ListValPortion;
-  for( i = 1; i <= list.Length(); i++ )
-  {
-    ( (ListPortion*) por )->Append( new NodeValPortion( list[ i ] ) );
-  }
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
-  return por;  
-}
-
-
-Portion* GSM_NonterminalNodes( Portion** param )
-{
-  int i;
-
-  BaseEfg& E = *((EfgPortion*) param[0])->Value();
-  gList< Node* > list;
-  NonTerminalNodes( E, list );
-
-  Portion* por = new ListValPortion;
-  for( i = 1; i <= list.Length(); i++ )
-  {
-    ( (ListPortion*) por )->Append( new NodeValPortion( list[ i ] ) );
-  }
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
-  return por;  
-}
-
-
-Portion* GSM_NumNodes( Portion** param )
-{
-
-  BaseEfg& E = *((EfgPortion*) param[0])->Value();
-  return new IntValPortion( NumNodes( E ) );  
-}
-
-
-
-
 
 Portion *GSM_RandomEfgFloat(Portion **param)
 {
@@ -1020,6 +1009,7 @@ Portion *GSM_NthChild(Portion **param)
 }
 
 
+
 //---------------------- NumActions --------------------------//
 
 Portion *GSM_NumActions(Portion **param)
@@ -1246,6 +1236,64 @@ Portion *GSM_SaveEfg(Portion **param)
   return param[0]->RefCopy();
 }
 
+
+//---------------------- Node lists ---------------------------
+
+Portion *GSM_Nodes(Portion **param)
+{
+  BaseEfg& E = *((EfgPortion *) param[0])->Value();
+  gList<Node *> list;
+  Nodes(E, list);
+
+  Portion *por = ArrayToList(list);
+  por->SetOwner(param[0]->Original());
+  por->AddDependency();
+  return por;
+}
+
+Portion *GSM_SubgameRoots(Portion **param)
+{
+  BaseEfg& E = *((EfgPortion*) param[0])->Value();
+  gList<Node *> list;
+  SubgameRoots(E, list);
+
+  Portion *por = ArrayToList(list);
+  por->SetOwner(param[0]->Original());
+  por->AddDependency();
+  return por;  
+}  
+
+Portion *GSM_TerminalNodes(Portion **param)
+{
+  BaseEfg& E = *((EfgPortion*) param[0])->Value();
+  gList<Node *> list;
+  TerminalNodes(E, list);
+
+  Portion *por = ArrayToList(list);
+  por->SetOwner(param[0]->Original());
+  por->AddDependency();
+  return por;  
+}
+
+
+Portion* GSM_NonterminalNodes( Portion** param )
+{
+  BaseEfg& E = *((EfgPortion *) param[0])->Value();
+  gList<Node *> list;
+  NonTerminalNodes(E, list);
+
+  Portion *por = ArrayToList(list);
+  por->SetOwner(param[0]->Original());
+  por->AddDependency();
+  return por;  
+}
+
+
+Portion* GSM_NumNodes(Portion ** param)
+{
+  BaseEfg& E = *((EfgPortion*) param[0])->Value();
+  return new IntValPortion(NumNodes(E));  
+}
 
 //--------------------------- List ---------------------------//
 
@@ -1826,6 +1874,11 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_DeleteOutcome, 0, "outcome", porOUTCOME);
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("UnmarkSubgame");
+  FuncObj->SetFuncInfo(GSM_UnmarkSubgame, 1);
+  FuncObj->SetParamInfo(GSM_UnmarkSubgame, 0, "node", porNODE);
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("DeleteTree");
   FuncObj->SetFuncInfo(GSM_DeleteTree, 1);
   FuncObj->SetParamInfo(GSM_DeleteTree, 0, "node", porNODE);
@@ -1834,6 +1887,15 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("DetachOutcome");
   FuncObj->SetFuncInfo(GSM_DetachOutcome, 1);
   FuncObj->SetParamInfo(GSM_DetachOutcome, 0, "node", porNODE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("MarkAllSubgames");
+  FuncObj->SetFuncInfo(GSM_MarkAllSubgamesEfg, 1);
+  FuncObj->SetParamInfo(GSM_MarkAllSubgamesEfg, 0, "efg", porEFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_MarkAllSubgamesNode, 1);
+  FuncObj->SetParamInfo(GSM_MarkAllSubgamesNode, 0, "node", porNODE);
   gsm->AddFunction(FuncObj);
   
   FuncObj = new FuncDescObj("HasOutcome");
@@ -1911,6 +1973,11 @@ void Init_efgfunc(GSM *gsm)
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_NewPlayer, 1, "name", porTEXT,
 			new TextValPortion(""));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("MarkSubgame");
+  FuncObj->SetFuncInfo(GSM_MarkSubgame, 1);
+  FuncObj->SetParamInfo(GSM_MarkSubgame, 0, "node", porNODE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("RandomEfg");
@@ -2176,6 +2243,12 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo( GSM_Nodes, 0, "efg", porEFG, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   gsm->AddFunction( FuncObj );
+
+  FuncObj = new FuncDescObj("SubgameRoots");
+  FuncObj->SetFuncInfo(GSM_SubgameRoots, 1);
+  FuncObj->SetParamInfo(GSM_SubgameRoots, 0, "efg", porEFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj( "TerminalNodes" );
   FuncObj->SetFuncInfo( GSM_TerminalNodes, 1 );

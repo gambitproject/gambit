@@ -18,6 +18,8 @@
 
 
 
+#include "subsolve.h"
+
 
 extern double Funct_tolBrent;
 extern double Funct_tolN;
@@ -415,30 +417,47 @@ Portion *GSM_LiapEfg_EfgFloat(Portion **param)
   double old_Funct_tolBrent = Funct_tolBrent;
 
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
+
+  Funct_maxitsN = ( (IntPortion*) param[4] )->Value();
+  Funct_tolN = ( (FloatPortion*) param[5] )->Value();
+  Funct_maxitsBrent = ( (IntPortion*) param[6] )->Value();
+  Funct_tolBrent = ( (FloatPortion*) param[7] )->Value();
+  
+  gList<BehavProfile<double> > solns;
+
   BehavProfile<double> start(E);
 
-  EFLiapParams<double> LP;
+  if (((BoolPortion *) param[1])->Value())   {
+    NFLiapParams<double> LP;
 
-  LP.stopAfter = ((IntPortion *) param[1])->Value();
-  LP.nTries = ((IntPortion *) param[2])->Value();
+    LP.stopAfter = ((IntPortion *) param[2])->Value();
+    LP.nTries = ((IntPortion *) param[3])->Value();
+
+    NFLiapBySubgame<double> LM(E, LP, start);
+    solns.Append(LM.Solve());
+
+    ((FloatPortion *) param[8])->Value() = LM.Time();
+    ((IntPortion *) param[9])->Value() = LM.NumEvals();
+  }
+  else  {
+    EFLiapParams<double> LP;
+
+    LP.stopAfter = ((IntPortion *) param[2])->Value();
+    LP.nTries = ((IntPortion *) param[3])->Value();
  
-  Funct_maxitsN = ( (IntPortion*) param[3] )->Value();
-  Funct_tolN = ( (FloatPortion*) param[4] )->Value();
-  Funct_maxitsBrent = ( (IntPortion*) param[5] )->Value();
-  Funct_tolBrent = ( (FloatPortion*) param[6] )->Value();
+    EFLiapBySubgame<double> LM(E, LP, start);
+    solns.Append(LM.Solve());
 
-  EFLiapModule<double> LM(E, LP, start);
-  LM.Liap();
-
-  ((FloatPortion *) param[7])->Value() = LM.Time();
-  ((IntPortion *) param[8])->Value() = LM.NumEvals();
+    ((FloatPortion *) param[8])->Value() = LM.Time();
+    ((IntPortion *) param[9])->Value() = LM.NumEvals();
+  }
 
   Funct_maxitsN = old_Funct_maxitsN;
   Funct_tolN = old_Funct_tolN;
   Funct_maxitsBrent = old_Funct_maxitsBrent;
   Funct_tolBrent = old_Funct_tolBrent;
 
-  Portion* por = new Behav_ListPortion<double>(LM.GetSolutions());
+  Portion* por = new Behav_ListPortion<double>(solns);
   por->SetOwner( param[ 0 ]->Original() );
   por->AddDependency();
   return por;
@@ -489,45 +508,81 @@ Portion *GSM_LiapEfg_BehavFloat(Portion **param)
 
 #include "seqform.h"
 
-Portion *GSM_LemkeEfgFloat(Portion **param)
+Portion *GSM_LcpSolveEfgFloat(Portion **param)
 {
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
 
-  SeqFormParams SP;
-  SP.nequilib = ((IntPortion *) param[1])->Value();
-
-  EFSupport SUP(E);
-  SeqFormModule<double> SM(E, SP, SUP);
-  SM.Lemke();
-
-  ((IntPortion *) param[2])->Value() = SM.NumPivots();
-  ((FloatPortion *) param[3])->Value() = SM.Time();
+  gList<BehavProfile<double> > solns;
   
-  Portion* por = new Behav_ListPortion<double>(SM.GetSolutions());
-  por->SetOwner( param[ 0 ]->Original() );
+  if (((BoolPortion *) param[1])->Value())  {
+    LemkeParams LP;
+    LP.stopAfter = ((IntPortion *) param[2])->Value();
+
+    LemkeBySubgame<double> LM(E, LP);
+    
+    solns.Append(LM.Solve());
+
+    ((IntPortion *) param[3])->Value() = LM.NumPivots();
+    ((FloatPortion *) param[4])->Value() = LM.Time();
+  }
+  else   {
+    SeqFormParams SP;
+    SP.nequilib = ((IntPortion *) param[2])->Value();
+
+    SeqFormBySubgame<double> SM(E, SP);
+    
+    solns.Append(SM.Solve());
+
+    ((IntPortion *) param[3])->Value() = SM.NumPivots();
+    ((FloatPortion *) param[4])->Value() = SM.Time();
+  }
+
+  Portion *por = new Behav_ListPortion<double>(solns);
+  por->SetOwner(param[0]->Original());
   por->AddDependency();
+
   return por;
 }
 
-Portion *GSM_LemkeEfgRational(Portion **param)
+Portion *GSM_LcpSolveEfgRational(Portion **param)
 {
   Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
 
-  SeqFormParams SP;
-  SP.nequilib = ((IntPortion *) param[1])->Value();
-  EFSupport SUP(E);
-  SeqFormModule<gRational> SM(E, SP, SUP);
-  SM.Lemke();
+  gList<BehavProfile<gRational> > solns;
   
-  ((IntPortion *) param[2])->Value() = SM.NumPivots();
-  ((FloatPortion *) param[3])->Value() = SM.Time();
+  if (((BoolPortion *) param[1])->Value())  {
+    LemkeParams LP;
+    LP.stopAfter = ((IntPortion *) param[2])->Value();
 
-  Portion* por = new Behav_ListPortion<gRational>(SM.GetSolutions());
-  por->SetOwner( param[ 0 ]->Original() );
+    LemkeBySubgame<gRational> LM(E, LP);
+    
+    solns.Append(LM.Solve());
+
+    ((IntPortion *) param[3])->Value() = LM.NumPivots();
+    ((FloatPortion *) param[4])->Value() = LM.Time();
+  }
+  else   {
+    SeqFormParams SP;
+    SP.nequilib = ((IntPortion *) param[2])->Value();
+
+    SeqFormBySubgame<gRational> SM(E, SP);
+    
+    solns.Append(SM.Solve());
+
+    ((IntPortion *) param[3])->Value() = SM.NumPivots();
+    ((FloatPortion *) param[4])->Value() = SM.Time();
+  }
+
+  Portion *por = new Behav_ListPortion<gRational>(solns);
+  por->SetOwner(param[0]->Original());
   por->AddDependency();
+
   return por;
 }
 
+
+/* NOTE: LcpSolve[EFSUPPORT] is currently disabled as it doesn't do
+         anything all that useful anyway and isn't too well-defined. --TLT
 
 Portion *GSM_LemkeEfgSupport(Portion **param)
 {
@@ -567,10 +622,208 @@ Portion *GSM_LemkeEfgSupport(Portion **param)
   return por;
 }
 
+*/
 
 
+//------------------ Simpdiv -------------------------
+
+Portion *GSM_SimpdivEfgFloat(Portion **param)
+{
+  Efg<double> &E = * (Efg<double> *) ((EfgPortion*) param[0])->Value();
+  
+  if (!((BoolPortion *) param[1])->Value())  
+    return new ErrorPortion("algorithm not implemented for extensive forms");
+
+  SimpdivParams SP;
+  SP.stopAfter = ((IntPortion *) param[2])->Value();
+  SP.nRestarts = ((IntPortion *) param[3])->Value();
+  SP.leashLength = ((IntPortion *) param[4])->Value();
+
+  SimpdivBySubgame<double> SM(E, SP);
+  gList<BehavProfile<double> > solns;
+
+  solns.Append(SM.Solve());
+
+  ((IntPortion *) param[5])->Value() = SM.NumEvals();
+  ((FloatPortion *) param[6])->Value() = SM.Time();
+  
+  Portion* por = new Behav_ListPortion<double>(solns);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
+}
+
+Portion *GSM_SimpdivEfgRational(Portion **param)
+{
+  Efg<gRational> &E = * (Efg<gRational> *) ((EfgPortion*) param[0])->Value();
+  
+  if (!((BoolPortion *) param[1])->Value())  
+    return new ErrorPortion("algorithm not implemented for extensive forms");
+
+  SimpdivParams SP;
+  SP.stopAfter = ((IntPortion *) param[2])->Value();
+  SP.nRestarts = ((IntPortion *) param[3])->Value();
+  SP.leashLength = ((IntPortion *) param[4])->Value();
+
+  SimpdivBySubgame<gRational> SM(E, SP);
+  gList<BehavProfile<gRational> > solns;
+
+  solns.Append(SM.Solve());
+
+  ((IntPortion *) param[5])->Value() = SM.NumEvals();
+  ((FloatPortion *) param[6])->Value() = SM.Time();
+  
+  Portion* por = new Behav_ListPortion<gRational>(solns);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
+}
 
 
+//------------------ LpSolve -------------------------
+
+Portion *GSM_LpSolveEfgFloat(Portion **param)
+{
+  Efg<double> &E = * (Efg<double> *) ((EfgPortion*) param[0])->Value();
+  
+  if (!((BoolPortion *) param[1])->Value())  
+    return new ErrorPortion("algorithm not implemented for extensive forms");
+
+  ZSumParams ZP;
+
+  ZSumBySubgame<double> ZM(E, ZP);
+  gList<BehavProfile<double> > solns;
+
+  solns.Append(ZM.Solve());
+
+  ((IntPortion *) param[2])->Value() = ZM.NumPivots();
+  ((FloatPortion *) param[3])->Value() = ZM.Time();
+  
+  Portion* por = new Behav_ListPortion<double>(solns);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
+}
+
+Portion *GSM_LpSolveEfgRational(Portion **param)
+{
+  Efg<gRational> &E = * (Efg<gRational> *) ((EfgPortion*) param[0])->Value();
+  
+  if (!((BoolPortion *) param[1])->Value())  
+    return new ErrorPortion("algorithm not implemented for extensive forms");
+
+  ZSumParams ZP;
+
+  ZSumBySubgame<gRational> ZM(E, ZP);
+  gList<BehavProfile<gRational> > solns;
+
+  solns.Append(ZM.Solve());
+
+  ((IntPortion *) param[2])->Value() = ZM.NumPivots();
+  ((FloatPortion *) param[3])->Value() = ZM.Time();
+  
+  Portion* por = new Behav_ListPortion<gRational>(solns);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
+}
+
+
+//----------------------- EnumPureSolve --------------------------//
+
+Portion *GSM_EnumPureEfgFloat(Portion **param)
+{
+  Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
+
+  if (!((BoolPortion *) param[1])->Value())
+    return new ErrorPortion("algorithm not implemented for extensive forms");
+
+  gList<BehavProfile<double> > solns;
+
+  PureNashBySubgame<double> M(E);
+
+  solns.Append(M.Solve());
+
+  ((FloatPortion *) param[3])->Value() = M.Time();
+  
+  Portion* por = new Behav_ListPortion<double>(solns);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
+}
+
+Portion *GSM_EnumPureEfgRational(Portion **param)
+{
+  Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
+
+  if (!((BoolPortion *) param[1])->Value())
+    return new ErrorPortion("algorithm not implemented for extensive forms");
+
+  gList<BehavProfile<gRational> > solns;
+
+  PureNashBySubgame<gRational> M(E);
+
+  solns.Append(M.Solve());
+
+  ((FloatPortion *) param[3])->Value() = M.Time();
+  
+  Portion* por = new Behav_ListPortion<gRational>(solns);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
+}
+
+  //-----------------------EnumMixedSolve------------------------
+
+Portion *GSM_EnumMixedEfgFloat(Portion **param)
+{
+  Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
+
+  if (!((BoolPortion *) param[1])->Value())
+    return new ErrorPortion("algorithm not implemented for extensive forms");
+
+  EnumParams EP;
+  EP.stopAfter = ((IntPortion *) param[2])->Value();
+  
+  EnumBySubgame<double> EM(E, EP);
+  
+  gList<BehavProfile<double> > solns;
+
+  solns.Append(EM.Solve());
+
+  ((IntPortion *) param[3])->Value() = EM.NumPivots();
+  ((FloatPortion *) param[4])->Value() = EM.Time();
+
+  Portion* por = new Behav_ListPortion<double>(solns);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
+}
+
+Portion *GSM_EnumMixedEfgRational(Portion **param)
+{
+  Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
+
+  if (!((BoolPortion *) param[1])->Value())
+    return new ErrorPortion("algorithm not implemented for extensive forms");
+
+  EnumParams EP;
+  EP.stopAfter = ((IntPortion *) param[2])->Value();
+  
+  EnumBySubgame<gRational> EM(E, EP);
+  
+  gList<BehavProfile<gRational> > solns;
+
+  solns.Append(EM.Solve());
+
+  ((IntPortion *) param[3])->Value() = EM.NumPivots();
+  ((FloatPortion *) param[4])->Value() = EM.Time();
+
+  Portion* por = new Behav_ListPortion<gRational>(solns);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
+}
 
 
 
@@ -900,24 +1153,26 @@ void Init_algfunc(GSM *gsm)
   //------------------------- LiapSolve ------------------------------//
 
   FuncObj = new FuncDescObj("LiapSolve");
-  FuncObj->SetFuncInfo(GSM_LiapEfg_EfgFloat, 9);
+  FuncObj->SetFuncInfo(GSM_LiapEfg_EfgFloat, 10);
   FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 0, "efg", porEFG_FLOAT, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 1, "stopAfter", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 1, "asNfg", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 2, "stopAfter", porINTEGER,
 		        new IntValPortion(1));
-  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 2, "nTries", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 3, "nTries", porINTEGER,
 		        new IntValPortion(10));
-  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 3, "maxitsN", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 4, "maxitsN", porINTEGER,
 			new IntRefPortion( (long&) Funct_maxitsN ));
-  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 4, "tolN", porFLOAT,
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 5, "tolN", porFLOAT,
 			new FloatRefPortion( Funct_tolN ));
-  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 5, "maxits1", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 6, "maxits1", porINTEGER,
 			new IntRefPortion( (long&) Funct_maxitsBrent ));
-  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 6, "tol1", porFLOAT,
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 7, "tol1", porFLOAT,
 			new FloatRefPortion( Funct_tolBrent ));
-  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 7, "time", porFLOAT,
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 8, "time", porFLOAT,
 			new FloatValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 8, "nEvals", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 9, "nEvals", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
 
   FuncObj->SetFuncInfo(GSM_LiapEfg_BehavFloat, 9);
@@ -985,26 +1240,31 @@ void Init_algfunc(GSM *gsm)
   //------------------------- LcpSolve -------------------------//
 
   FuncObj = new FuncDescObj("LcpSolve");
-  FuncObj->SetFuncInfo(GSM_LemkeEfgFloat, 4);
-  FuncObj->SetParamInfo(GSM_LemkeEfgFloat, 0, "efg", porEFG_FLOAT,
+  FuncObj->SetFuncInfo(GSM_LcpSolveEfgFloat, 5);
+  FuncObj->SetParamInfo(GSM_LcpSolveEfgFloat, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LemkeEfgFloat, 1, "stopAfter", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LcpSolveEfgFloat, 1, "asNfg", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_LcpSolveEfgFloat, 2, "stopAfter", porINTEGER,
 			new IntValPortion(0));
-  FuncObj->SetParamInfo(GSM_LemkeEfgFloat, 2, "nPivots", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LcpSolveEfgFloat, 3, "nPivots", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LemkeEfgFloat, 3, "time", porFLOAT,
+  FuncObj->SetParamInfo(GSM_LcpSolveEfgFloat, 4, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   
-  FuncObj->SetFuncInfo(GSM_LemkeEfgRational, 4);
-  FuncObj->SetParamInfo(GSM_LemkeEfgRational, 0, "efg", porEFG_RATIONAL,
+  FuncObj->SetFuncInfo(GSM_LcpSolveEfgRational, 5);
+  FuncObj->SetParamInfo(GSM_LcpSolveEfgRational, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LemkeEfgRational, 1, "stopAfter", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LcpSolveEfgRational, 1, "asNFG", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_LcpSolveEfgRational, 2, "stopAfter", porINTEGER,
 			new IntValPortion(0));
-  FuncObj->SetParamInfo(GSM_LemkeEfgRational, 2, "nPivots", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LcpSolveEfgRational, 3, "nPivots", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LemkeEfgRational, 3, "time", porFLOAT,
+  FuncObj->SetParamInfo(GSM_LcpSolveEfgRational, 4, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
 
+/*
   FuncObj->SetFuncInfo(GSM_LemkeEfgSupport, 4);
   FuncObj->SetParamInfo(GSM_LemkeEfgSupport, 0, "support", porEF_SUPPORT );
   FuncObj->SetParamInfo(GSM_LemkeEfgSupport, 1, "stopAfter", porINTEGER,
@@ -1013,6 +1273,8 @@ void Init_algfunc(GSM *gsm)
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LemkeEfgSupport, 3, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  */
+
 
   FuncObj->SetFuncInfo(GSM_LemkeNfgFloat, 4);
   FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 0, "nfg",
@@ -1051,6 +1313,119 @@ void Init_algfunc(GSM *gsm)
 			porFLOAT, new FloatValPortion(0),
 			PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
+
+  //------------------------- SimpDivSolve -------------------------//
+
+  FuncObj = new FuncDescObj("SimpDivSolve");
+  FuncObj->SetFuncInfo(GSM_SimpdivEfgFloat, 7);
+  FuncObj->SetParamInfo(GSM_SimpdivEfgFloat, 0, "efg", porEFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SimpdivEfgFloat, 1, "asNfg", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_SimpdivEfgFloat, 2, "stopAfter", porINTEGER,
+			new IntValPortion(1));
+  FuncObj->SetParamInfo(GSM_SimpdivEfgFloat, 3, "nRestarts", porINTEGER,
+			new IntValPortion(1));
+  FuncObj->SetParamInfo(GSM_SimpdivEfgFloat, 4, "leashLength", porINTEGER,
+			new IntValPortion(0));
+  FuncObj->SetParamInfo(GSM_SimpdivEfgFloat, 5, "nEvals", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SimpdivEfgFloat, 6, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_SimpdivEfgRational, 7);
+  FuncObj->SetParamInfo(GSM_SimpdivEfgRational, 0, "efg", porEFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SimpdivEfgRational, 1, "asNfg", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_SimpdivEfgRational, 2, "stopAfter", porINTEGER,
+			new IntValPortion(1));
+  FuncObj->SetParamInfo(GSM_SimpdivEfgRational, 3, "nRestarts", porINTEGER,
+			new IntValPortion(1));
+  FuncObj->SetParamInfo(GSM_SimpdivEfgRational, 4, "leashLength", porINTEGER,
+			new IntValPortion(0));
+  FuncObj->SetParamInfo(GSM_SimpdivEfgRational, 5, "nEvals", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SimpdivEfgRational, 6, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  //-------------------------- LpSolve ------------------------------//
+
+  FuncObj = new FuncDescObj("LpSolve");
+  FuncObj->SetFuncInfo(GSM_LpSolveEfgFloat, 4);
+  FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 0, "efg", porEFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 1, "asNfg", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 2, "nPivots", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 3, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_LpSolveEfgRational, 4);
+  FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 0, "efg", porEFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 1, "asNfg", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 2, "nPivots", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 3, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  //-------------------------EnumMixedSolve-------------------------
+
+  FuncObj = new FuncDescObj("EnumMixedSolve");
+  FuncObj->SetFuncInfo(GSM_EnumMixedEfgFloat, 5);
+  FuncObj->SetParamInfo(GSM_EnumMixedEfgFloat, 0, "efg", porEFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo(GSM_EnumMixedEfgFloat, 1, "asNfg", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_EnumMixedEfgFloat, 2, "stopAfter", porINTEGER,
+			new IntValPortion(0));
+  FuncObj->SetParamInfo(GSM_EnumMixedEfgFloat, 3, "nPivots", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_EnumMixedEfgFloat, 4, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_EnumMixedEfgRational, 5);
+  FuncObj->SetParamInfo(GSM_EnumMixedEfgRational, 0, "efg", porEFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo(GSM_EnumMixedEfgRational, 1, "asNfg", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_EnumMixedEfgRational, 2, "stopAfter", porINTEGER,
+			new IntValPortion(0));
+  FuncObj->SetParamInfo(GSM_EnumMixedEfgRational, 3, "nPivots", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_EnumMixedEfgRational, 4, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  //-------------------------- EnumPureSolve ------------------------//
+
+  FuncObj = new FuncDescObj("EnumPureSolve");
+  FuncObj->SetFuncInfo(GSM_EnumPureEfgFloat, 4);
+  FuncObj->SetParamInfo(GSM_EnumPureEfgFloat, 0, "efg", porEFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_EnumPureEfgFloat, 1, "asNfg", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_EnumPureEfgFloat, 2, "stopAfter", porINTEGER,
+			new IntValPortion(0));
+  FuncObj->SetParamInfo(GSM_EnumPureEfgFloat, 3, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_EnumPureEfgRational, 4);
+  FuncObj->SetParamInfo(GSM_EnumPureEfgRational, 0, "efg", porEFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_EnumPureEfgRational, 1, "asNfg", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_EnumPureEfgRational, 2, "stopAfter", porINTEGER,
+			new IntValPortion(0));
+  FuncObj->SetParamInfo(GSM_EnumPureEfgRational, 3, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
 
   FuncObj = new FuncDescObj("SetOptions");
   FuncObj->SetFuncInfo(GSM_SetFloatOptions, 3);
