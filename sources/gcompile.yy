@@ -96,6 +96,7 @@
 %token QUIT
 %token DEFFUNC
 %token INCLUDE
+%token UNASSIGN
 
 %token NAME
 %token BOOLEAN
@@ -153,7 +154,13 @@ statement:    { triv = true; }
          |    whileloop { triv = false; }
          |    forloop   { triv = false; }
          |    include 
+         |    unassignment
          |    QUIT     { triv = false; quit = true; emit(new Quit); }
+
+unassignment: UNASSIGN LBRACK NAME RBRACK
+              { emit(new PushRef(tval));
+		emit(new UnAssign);
+	      }
 
 include:      INCLUDE LBRACK TEXT RBRACK
               { inputs.Push(new gFileInput(tval));
@@ -319,8 +326,8 @@ named_arg:    NAME RARROW { formalstack.Push(tval); } expression
                            { emit(new PushRef(tval));
                              emit(new BindRef(formalstack.Pop())); }
 
-list:         LBRACE { listlen.Push(0); } listels RBRACE
-    |         LBRACE { listlen.Push(0); }  RBRACE
+list:         LBRACE  { listlen.Push(0); } listels RBRACE
+    |         LBRACE  { listlen.Push(0); } RBRACE
 
 listels:      listel
        |      listels CRLFopt COMMA CRLFopt listel
@@ -487,6 +494,7 @@ I_dont_believe_Im_doing_this:
     else if (s == "Quit")   return QUIT;
     else if (s == "NewFunction")   return DEFFUNC;
     else if (s == "Include")   return INCLUDE;
+    else if (s == "UnAssign")  return UNASSIGN;
     else  { tval = s; return NAME; }
   }
 
