@@ -29,11 +29,12 @@
 
 #include "game-document.h"
 
-class gbtNashPanel;
+class gbtTextWindow;
 
 class gbtNashPanel : public wxPanel, public gbtGameView {
 private:
-  wxStaticText *m_text;
+  gbtTextWindow *m_count;
+  int m_countValue;
   wxButton *m_startButton, *m_cancelButton;
   wxThread *m_thread;
   gbtList<gbtMixedProfile<double> > m_eqa;
@@ -43,6 +44,9 @@ private:
   void OnStartButton(wxCommandEvent &);
   void OnCancelButton(wxCommandEvent &);
   void OnThreadDone(wxCommandEvent &);
+
+  void OnCountButton(wxCommandEvent &);
+  void OnMenu(wxCommandEvent &);
   
 public:
   gbtNashPanel(wxWindow *p_parent, gbtGameDocument *);
