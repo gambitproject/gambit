@@ -2588,7 +2588,7 @@ Portion* GSM_Read_Undefined(Portion** param)
   /* will go through and try to read the input as different format until
      it succeeds */
 
-  Portion** sub_param;
+  Portion* sub_param[2];
   char c = ' ';  
   gInput& input = ((InputPortion*) param[0])->Value();
   long old_pos = input.getpos();
@@ -2606,19 +2606,38 @@ Portion* GSM_Read_Undefined(Portion** param)
   {
     param[1] = new ListValPortion();
 
-    sub_param = new Portion*[2];
-    
+    bool read_success = true;
+
     do
     {
       sub_param[0] = param[0];
       sub_param[1] = 0;
       result = GSM_Read_Undefined(sub_param);
       if(result->Spec().Type != porERROR)
+      {
 	((ListPortion*) param[1])->Append(sub_param[1]);
+
+	// okay, complicated things going on here
+	// we want to delete the return value, but
+	//   result is actually swapped with sub_param[0] in the
+	//   GSM_Read() functions!  So, can't just delete p;
+	//   need to swap result and sub_param[0] first.
+	
+	// just to make sure that the above description is still
+	//   correct...
+	assert( result == param[0] );
+	assert( sub_param[0] != param[0] );
+	
+	// delete and swap
+	delete sub_param[0];
+	sub_param[0] = result;
+	result = NULL;
+      }
       else
       {
 	delete result;
-	result = 0;
+	result = NULL;
+	read_success = false;
       }
 
       c = ' ';
@@ -2627,31 +2646,32 @@ Portion* GSM_Read_Undefined(Portion** param)
       if(!input.eof() && c != ',')
 	input.unget(c);
 
-    } while(result != 0 && !input.eof());
+    } while(read_success && !input.eof());
 
-    delete[] sub_param;
-
+    
+    assert( result == NULL );
+    
     c = ' ';
     while(!input.eof() && isspace(c))
       input.get(c);
     if(input.eof())
     {
-      delete result;
       delete param[1];
       param[1] = 0;
       result = new ErrorPortion("End of file reached");
     }
     else if(c != '}')
     {
-      delete result;
       delete param[1];
       param[1] = 0;
       result = new ErrorPortion("Mismatching braces");
     }
     else
     {
-      assert(result == 0);
-      result = param[0]->RefCopy();
+      // swap the first parameter with the return value, so things like
+      //   Input["..."] >> x >> y  would work
+      result = param[0];
+      param[0] = result->RefCopy();
     }
 
   }
