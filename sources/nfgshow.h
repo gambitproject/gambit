@@ -129,9 +129,12 @@ public:
   // OnOK clean up
   void OnOk(void);
 
+  void NewOutcome(void);
+  void DeleteOutcome(void);
   void AttachOutcome(void);
   void DetachOutcome(void);
   void RenameOutcome(void);
+  void ChangePayoffs(int st1, int st2, bool next = false);
 
   // Now come the solution functions
   void Solve(int);
@@ -145,7 +148,6 @@ public:
 
   // Project solutions to EF.
   void SolutionToExtensive(const MixedSolution &mp, bool set = false);
-  void ChangePayoffs(int st1, int st2, bool next = false);
 
   // Filename support
   void SetFileName(const gText &s);

@@ -245,7 +245,12 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
   edit_menu->Append(NFG_EDIT_GAME,      "&Game",      "Edit the entire game");
   edit_menu->Append(NFG_EDIT_STRATS,    "&Strats",    "Edit player strategies");
   edit_menu->Append(NFG_EDIT_PLAYERS,   "&Players",   "Edit players");
+
   wxMenu *editOutcomesMenu = new wxMenu;
+  editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_NEW, "&New",
+			   "Create a new outcome");
+  editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_DELETE, "Dele&te",
+			   "Delete an outcome");
   editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_ATTACH, "&Attach",
 			   "Attach an outcome to the current contingency");
   editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_DETACH, "&Detach",
@@ -573,6 +578,12 @@ void NormalSpread::OnMenuCommand(int id)
       break;
     case NFG_EDIT_PLAYERS: 
       parent->SetLabels(2);
+      break;
+    case NFG_EDIT_OUTCOMES_NEW:
+      parent->NewOutcome();
+      break;
+    case NFG_EDIT_OUTCOMES_DELETE:
+      parent->DeleteOutcome();
       break;
     case NFG_EDIT_OUTCOMES_ATTACH:
       parent->AttachOutcome();

@@ -45,6 +45,8 @@
 #define NFG_EDIT_OUTCOMES_DETACH        305
 #define NFG_EDIT_OUTCOMES_LABEL         306
 #define NFG_EDIT_OUTCOMES_PAYOFFS       307
+#define NFG_EDIT_OUTCOMES_NEW           308
+#define NFG_EDIT_OUTCOMES_DELETE        309
 
 #define NFG_FILE_SAVE                   250
 

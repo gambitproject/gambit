@@ -747,92 +747,6 @@ MixedProfile<gNumber> NfgShow::CreateStartProfile(int how)
     return start;
 }
 
-void NfgShow::AttachOutcome(void)
-{
-  if (nf.NumOutcomes() == 0)
-    return;
-
-  MyDialogBox *dialog = new MyDialogBox(spread, "Attach Outcome");
-    
-  wxStringList *outcome_list = new wxStringList;
-  char *outcome_name = new char[256];
-        
-  for (int outc = 1; outc <= nf.NumOutcomes(); outc++) {
-    NFOutcome *outcome = nf.Outcomes()[outc];
-    gText tmp = ToText(outc) + ": " + outcome->GetName() + " (";
-    tmp += ToText(nf.Payoff(outcome, 1)) + ", " + ToText(nf.Payoff(outcome, 2));
-    if (nf.NumPlayers() > 2) {
-      tmp += ", " + ToText(nf.Payoff(outcome, 3));
-      if (nf.NumPlayers() > 3) 
-	tmp += ",...)";
-      else
-	tmp += ")";
-    }
-    else
-      tmp += ")";
-  
-    outcome_list->Add(tmp);
-  }
-
-  if (solns.Length() > 0) {
-    dialog->Add(wxMakeFormMessage("Pressing OK will delete computed solutions"));
-    dialog->Add(wxMakeFormNewLine());
-  }
-  dialog->Add(wxMakeFormString("Outcome", &outcome_name,
-			       wxFORM_CHOICE,
-			       new wxList(wxMakeConstraintStrings(outcome_list), 0)));
-
-  dialog->Go();
-  
-  if (dialog->Completed() == wxOK) {
-    for (int i = 0; ; i++) {
-      if (outcome_name[i] == ':') {
-	outcome_name[i] = '\0';
-	break;
-      }
-    }
-    
-    int outc = (int) ToDouble(outcome_name);
-    nf.SetOutcome(spread->GetProfile(), nf.Outcomes()[outc]);
-    InterfaceDied();
-    UpdateVals();
-  }
-
-  delete dialog;
-  delete [] outcome_name;
-}
-
-void NfgShow::DetachOutcome(void)
-{
-  nf.SetOutcome(spread->GetProfile(), 0);
-  InterfaceDied();
-  UpdateVals();
-}
-
-void NfgShow::RenameOutcome(void)
-{
-  gArray<int> profile(spread->GetProfile());
-  if (!nf.GetOutcome(profile))
-    return;
-
-  char *name = new char[40];
-  strncpy(name, nf.GetOutcome(profile)->GetName(), 40);
-
-  MyDialogBox *dialog = new MyDialogBox(spread, "Label outcome");
-  dialog->Form()->Add(wxMakeFormString("New outcome label", &name, wxFORM_TEXT,
-				       0, 0, 0, 220));
-  dialog->Go();
-
-  if (dialog->Completed() == wxOK) {
-    nf.GetOutcome(profile)->SetName(name);
-  }
-  
-  delete dialog;
-  delete [] name;
-
-  UpdateVals();
-}
-
 //****************************************************************************
 //                           NORMAL SOLUTIONS
 //****************************************************************************
@@ -1067,6 +981,304 @@ NFSupport *NfgShow::MakeSupport(void)
 
     delete support;
     return 0;
+}
+
+#undef ENTRIES_PER_ROW
+#define ENTRIES_PER_ROW 5
+
+class NFChangePayoffs : public MyDialogBox {
+private:
+  NFOutcome *outcome;
+  Nfg &nf;
+
+  wxText *name_item;
+  wxText **payoff_items;
+
+public:
+  NFChangePayoffs(Nfg &, NFOutcome *, bool, wxWindow *parent);
+  gArray<gNumber> Payoffs(void);
+  gText Name(void) const { return name_item->GetValue(); }
+};
+
+NFChangePayoffs::NFChangePayoffs(Nfg &p_nfg, NFOutcome *p_outcome,
+				 bool p_solutions, wxWindow *p_parent)
+  : MyDialogBox(p_parent, "Change Payoffs"), outcome(p_outcome), nf(p_nfg)
+{
+  Add(wxMakeFormMessage("Change payoffs for outcome:"));
+  Add(wxMakeFormNewLine());
+
+  char *new_name = new char[40];
+  wxFormItem *name_fitem = Add(wxMakeFormString("Outcome:", &new_name, 
+						wxFORM_TEXT,
+						0, 0, 0, 160));
+  Add(wxMakeFormNewLine());
+
+  if (p_solutions) {
+    Add(wxMakeFormMessage("Pressing OK will delete computed solutions"));
+    Add(wxMakeFormNewLine());
+  }
+
+  // Payoff items
+  char **new_payoffs = new char *[nf.NumPlayers()+1];
+  wxFormItem **payoff_fitems = new wxFormItem *[nf.NumPlayers()+1];
+  payoff_items = new wxText *[nf.NumPlayers()+1];
+
+  for (int i = 1; i <= nf.NumPlayers(); i++) {
+    new_payoffs[i] = new char[40];
+    payoff_fitems[i] = Add(wxMakeFormString("", &(new_payoffs[i]), wxFORM_TEXT, 0, 0, 0, 160));
+
+    if (i % ENTRIES_PER_ROW == 0)
+      Add(wxMakeFormNewLine());
+  }
+
+  AssociatePanel();
+
+  for (int i = 1; i <= nf.NumPlayers(); i++) {
+    payoff_items[i] = (wxText *)payoff_fitems[i]->GetPanelItem();
+    gNumber payoff = 0;
+    if (outcome)
+      payoff = nf.Payoff(outcome, i);
+    payoff_items[i]->SetValue(ToText(payoff));
+  }
+
+  if (p_outcome) {
+    payoff_items[1]->SetFocus();
+  }
+
+  name_item = (wxText *) name_fitem->GetPanelItem();
+  if (outcome) 
+    name_item->SetValue(outcome->GetName());
+  else
+    name_item->SetValue("Outcome " + ToText(nf.NumOutcomes() + 1));
+ 
+  Go1();
+
+  for (int i = 1; i <= nf.NumPlayers(); i++) 
+    delete [] new_payoffs[i];
+
+  delete [] new_payoffs;
+}
+
+
+gArray<gNumber> NFChangePayoffs::Payoffs(void)
+{
+  gArray<gNumber> payoffs(nf.NumPlayers());
+
+  for (int i = 1; i <= nf.NumPlayers(); i++)
+    FromText(payoff_items[i]->GetValue(), payoffs[i]);
+
+  return payoffs;
+}
+
+void NfgShow::ChangePayoffs(int st1, int st2, bool next)
+{
+  if (st1 > rows || st2 > cols)
+    return;
+
+  if (next) { 
+    // facilitates quickly editing the nf -> automatically moves to next cell
+    if (st2 < cols) {
+      st2++;
+    }
+    else {
+      if (st1 < rows) {
+	st1++;
+	st2 = 1;
+      }
+      else {
+	st1 = 1;
+	st2 = 1;
+      }
+    }
+
+    spread->SetCurRow(st1);
+    spread->SetCurCol(st2);
+  }
+
+  gArray<int> profile(spread->GetProfile());
+  profile[pl1] = st1;
+  profile[pl2] = st2;
+  nf_iter.Set(pl1, st1);
+  nf_iter.Set(pl2, st2);
+
+  NFChangePayoffs *payoffs_dialog = new NFChangePayoffs(nf, nf.GetOutcome(profile),
+							solns.Length() > 0,
+							spread);
+
+  if (payoffs_dialog->Completed() == wxOK) {
+    NFOutcome *outc = nf.GetOutcome(profile);
+    gArray<gNumber> payoffs(payoffs_dialog->Payoffs());
+
+    if (!outc) {
+      outc = nf.NewOutcome();
+      nf.SetOutcome(profile, outc);
+    }
+
+    for (int i = 1; i <= nf.NumPlayers(); i++)
+      nf.SetPayoff(outc, i, payoffs[i]);
+    outc->SetName(payoffs_dialog->Name());
+
+    UpdateVals();
+    RemoveSolutions();
+    InterfaceDied();
+  }
+  
+  delete payoffs_dialog;
+}
+
+void NfgShow::AttachOutcome(void)
+{
+  if (nf.NumOutcomes() == 0)
+    return;
+
+  MyDialogBox *dialog = new MyDialogBox(spread, "Attach Outcome");
+    
+  wxStringList *outcome_list = new wxStringList;
+  char *outcome_name = new char[256];
+        
+  for (int outc = 1; outc <= nf.NumOutcomes(); outc++) {
+    NFOutcome *outcome = nf.Outcomes()[outc];
+    gText tmp = ToText(outc) + ": " + outcome->GetName() + " (";
+    tmp += ToText(nf.Payoff(outcome, 1)) + ", " + ToText(nf.Payoff(outcome, 2));
+    if (nf.NumPlayers() > 2) {
+      tmp += ", " + ToText(nf.Payoff(outcome, 3));
+      if (nf.NumPlayers() > 3) 
+	tmp += ",...)";
+      else
+	tmp += ")";
+    }
+    else
+      tmp += ")";
+  
+    outcome_list->Add(tmp);
+  }
+
+  if (solns.Length() > 0) {
+    dialog->Add(wxMakeFormMessage("Pressing OK will delete computed solutions"));
+    dialog->Add(wxMakeFormNewLine());
+  }
+  dialog->Add(wxMakeFormString("Outcome", &outcome_name,
+			       wxFORM_CHOICE,
+			       new wxList(wxMakeConstraintStrings(outcome_list), 0)));
+
+  dialog->Go();
+  
+  if (dialog->Completed() == wxOK) {
+    for (int i = 0; ; i++) {
+      if (outcome_name[i] == ':') {
+	outcome_name[i] = '\0';
+	break;
+      }
+    }
+    
+    int outc = (int) ToDouble(outcome_name);
+    nf.SetOutcome(spread->GetProfile(), nf.Outcomes()[outc]);
+    InterfaceDied();
+    UpdateVals();
+  }
+
+  delete dialog;
+  delete [] outcome_name;
+}
+
+void NfgShow::DetachOutcome(void)
+{
+  nf.SetOutcome(spread->GetProfile(), 0);
+  InterfaceDied();
+  UpdateVals();
+}
+
+void NfgShow::NewOutcome(void)
+{
+  NFChangePayoffs *dialog = new NFChangePayoffs(nf, 0, solns.Length() > 0,
+						pframe);
+
+  if (dialog->Completed() == wxOK) {
+    NFOutcome *outc = nf.NewOutcome();
+    gArray<gNumber> payoffs(dialog->Payoffs());
+
+    for (int i = 1; i <= nf.NumPlayers(); i++)
+      nf.SetPayoff(outc, i, payoffs[i]);
+    outc->SetName(dialog->Name());
+    InterfaceDied();
+  }
+  
+  delete dialog;
+}
+
+void NfgShow::DeleteOutcome(void)
+{
+  if (nf.NumOutcomes() == 0)
+    return;
+
+  MyDialogBox *dialog = new MyDialogBox(pframe, "Delete Outcome");
+    
+  wxStringList *outcome_list = new wxStringList;
+  char *outcome_name = new char[256];
+        
+  for (int outc = 1; outc <= nf.NumOutcomes(); outc++) {
+    NFOutcome *outcome = nf.Outcomes()[outc];
+    gText tmp = ToText(outc) + ": " + outcome->GetName() + " (";
+    tmp += ToText(nf.Payoff(outcome, 1)) + ", " + ToText(nf.Payoff(outcome, 2));
+    if (nf.NumPlayers() > 2) {
+      tmp += ", " + ToText(nf.Payoff(outcome, 3));
+      if (nf.NumPlayers() > 3) 
+	tmp += ",...)";
+      else
+	tmp += ")";
+    }
+    else
+      tmp += ")";
+  
+    outcome_list->Add(tmp);
+  }
+
+  dialog->Add(wxMakeFormString("Outcome", &outcome_name,
+			       wxFORM_CHOICE,
+			       new wxList(wxMakeConstraintStrings(outcome_list), 0)));
+
+  dialog->Go();
+  
+  if (dialog->Completed() == wxOK) {
+    for (int i = 0; ; i++) {
+      if (outcome_name[i] == ':') {
+	outcome_name[i] = '\0';
+	break;
+      }
+    }
+    
+    int outc = (int) ToDouble(outcome_name);
+    nf.DeleteOutcome(nf.Outcomes()[outc]);
+    InterfaceDied();
+    UpdateVals();
+  }
+
+  delete dialog;
+  delete [] outcome_name;
+}
+
+void NfgShow::RenameOutcome(void)
+{
+  gArray<int> profile(spread->GetProfile());
+  if (!nf.GetOutcome(profile))
+    return;
+
+  char *name = new char[40];
+  strncpy(name, nf.GetOutcome(profile)->GetName(), 40);
+
+  MyDialogBox *dialog = new MyDialogBox(spread, "Label outcome");
+  dialog->Form()->Add(wxMakeFormString("New outcome label", &name, wxFORM_TEXT,
+				       0, 0, 0, 220));
+  dialog->Go();
+
+  if (dialog->Completed() == wxOK) {
+    nf.GetOutcome(profile)->SetName(name);
+  }
+  
+  delete dialog;
+  delete [] name;
+
+  UpdateVals();
 }
 
 
@@ -1546,161 +1758,6 @@ void NfgShow::EditAccelerators(void)
     WriteAccelerators(accelerators, "NfgAccelerators");
 }
 
-#undef ENTRIES_PER_ROW
-#define ENTRIES_PER_ROW 5
-
-class NFChangePayoffs : public MyDialogBox {
-private:
-  const gArray<int> &profile;
-  Nfg &nf;
-
-  wxText *m_outcomeNameItem;
-  wxText **payoff_items;
-
-public:
-  NFChangePayoffs(Nfg &, const gArray<int> &, bool, wxWindow *parent);
-  gArray<gNumber> Payoffs(void);
-};
-
-NFChangePayoffs::NFChangePayoffs(Nfg &p_nfg, const gArray<int> &p_profile,
-				 bool p_solutions, wxWindow *p_parent)
-  : MyDialogBox(p_parent, "Change Payoffs"), profile(p_profile), nf(p_nfg)
-{
-  Add(wxMakeFormMessage("Change payoffs for outcome of profile:"));
-  gText profile_str = "(";
-
-  for (int pl = 1; pl <= profile.Length(); pl++) {
-    if (nf.Strategies(pl)[profile[pl]]->Name() != "")
-      profile_str += nf.Strategies(pl)[profile[pl]]->Name();
-    else
-      profile_str += ToText(profile[pl]);
-
-    if (pl == profile.Length())
-      profile_str += ")";
-    else
-      profile_str += ",";
-  }
-
-  Add(wxMakeFormMessage(profile_str));
-  Add(wxMakeFormNewLine());
-
-  if (p_solutions) {
-    Add(wxMakeFormMessage("Pressing OK will delete computed solutions"));
-    Add(wxMakeFormNewLine());
-  }
-
-  NFOutcome *outc = nf.GetOutcome(profile);
-
-  if (outc) {
-    Add(wxMakeFormMessage("Outcome:")); 
-    if (outc->GetName() != "")
-      Add(wxMakeFormMessage(outc->GetName()));
-    else
-      Add(wxMakeFormMessage("Outcome " + ToText(outc->GetNumber())));
-  }
-  else
-    Add(wxMakeFormMessage("Defining new outcome: Outcome " +
-			  ToText(nf.NumOutcomes() + 1)));
-
-  Add(wxMakeFormNewLine());
-
-  // Payoff items
-  char **new_payoffs = new char *[profile.Length()+1];
-  wxFormItem **payoff_fitems = new wxFormItem *[profile.Length()+1];
-  payoff_items = new wxText *[profile.Length()+1];
-
-  for (int i = 1; i <= nf.NumPlayers(); i++) {
-    new_payoffs[i] = new char[40];
-    payoff_fitems[i] = Add(wxMakeFormString("", &(new_payoffs[i]), wxFORM_TEXT, 0, 0, 0, 160));
-
-    if (i % ENTRIES_PER_ROW == 0)
-      Add(wxMakeFormNewLine());
-  }
-
-  AssociatePanel();
-
-  for (int i = 1; i <= nf.NumPlayers(); i++) {
-    payoff_items[i] = (wxText *)payoff_fitems[i]->GetPanelItem();
-    gNumber payoff = 0;
-    if (outc)
-      payoff = nf.Payoff(outc, i);
-    payoff_items[i]->SetValue(ToText(payoff));
-  }
-
-  Go1();
-
-  for (int i = 1; i <= profile.Length(); i++) 
-    delete [] new_payoffs[i];
-
-  delete [] new_payoffs;
-}
-
-
-gArray<gNumber> NFChangePayoffs::Payoffs(void)
-{
-  gArray<gNumber> payoffs(nf.NumPlayers());
-
-  for (int i = 1; i <= nf.NumPlayers(); i++)
-    FromText(payoff_items[i]->GetValue(), payoffs[i]);
-
-  return payoffs;
-}
-
-void NfgShow::ChangePayoffs(int st1, int st2, bool next)
-{
-  if (st1 > rows || st2 > cols)
-    return;
-
-  if (next) { 
-    // facilitates quickly editing the nf -> automatically moves to next cell
-    if (st2 < cols) {
-      st2++;
-    }
-    else {
-      if (st1 < rows) {
-	st1++;
-	st2 = 1;
-      }
-      else {
-	st1 = 1;
-	st2 = 1;
-      }
-    }
-
-    spread->SetCurRow(st1);
-    spread->SetCurCol(st2);
-  }
-
-  gArray<int> profile(spread->GetProfile());
-  profile[pl1] = st1;
-  profile[pl2] = st2;
-  nf_iter.Set(pl1, st1);
-  nf_iter.Set(pl2, st2);
-
-  NFChangePayoffs *payoffs_dialog = new NFChangePayoffs(nf, profile,
-							solns.Length() > 0,
-							spread);
-
-  if (payoffs_dialog->Completed() == wxOK) {
-    NFOutcome *outc = nf.GetOutcome(profile);
-    gArray<gNumber> payoffs(payoffs_dialog->Payoffs());
-
-    if (!outc) {
-      outc = nf.NewOutcome();
-      nf.SetOutcome(profile, outc);
-      outc->SetName("Outcome " + ToText(nf.NumOutcomes()));
-    }
-
-    for (int i = 1; i <= nf.NumPlayers(); i++)
-      nf.SetPayoff(outc, i, payoffs[i]);
-
-    UpdateVals();
-    RemoveSolutions();
-    InterfaceDied();
-  }
-  
-  delete payoffs_dialog;
-}
 
 template class SolutionList<MixedSolution>;
 
