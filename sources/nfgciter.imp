@@ -52,7 +52,7 @@ template <class T> ContIter<T>::~ContIter()
 template <class T> void ContIter<T>::First(void)
 {
   for (int i = 1; i <= thawed.Length(); i++)
-    profile->Set(thawed[i], (*N->strategies[sset])(thawed[i], 1));
+    profile->Set(thawed[i], N->GetStrategy(thawed[i], 1, sset));
 }
 
 template <class T> void ContIter<T>::Set(int pl, int num)
@@ -100,7 +100,7 @@ template <class T> int ContIter<T>::NextContingency(void)
       profile->Set(pl, s);
       return 1;
     }
-    profile->Set(pl, (*N->strategies[sset])(pl, 1));
+    profile->Set(pl, N->GetStrategy(pl, 1, sset));
     j--;
     if (j == 0)
       return 0;
