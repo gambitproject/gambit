@@ -251,7 +251,7 @@ static void TracePath(const MixedProfile<double> &p_start,
 		      gList<MixedSolution> &p_solutions)
 {
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
-  const double c_maxDecel = 2.0;   // maximal deceleration factor
+  const double c_maxDecel = 1.1;   // maximal deceleration factor
   const double c_maxDist = 0.4;    // maximal distance to curve
   const double c_maxContr = 0.6;   // maximal contraction rate in corrector
   const double c_eta = 0.1;        // perturbation to avoid cancellation
@@ -404,8 +404,16 @@ static void TracePath(const MixedProfile<double> &p_start,
     }
     p_solutions.Append(MixedSolution(foo, algorithmNfg_QRE));
     p_solutions[p_solutions.Length()].SetQre(x[x.Last()], 0);
-
-    q.GetRow(q.NumRows(), t);  // new tangent
+    
+    gVector<double> newT(t);
+    q.GetRow(q.NumRows(), newT);  // new tangent
+    if (t * newT < 0.0) {
+      // Bifurcation detected; for now, just "jump over" and continue,
+      // taking into account the change in orientation of the curve.
+      // Someday, we need to do more here! :)
+      omega = -omega;
+    }
+    t = newT;
   }
 }
 
