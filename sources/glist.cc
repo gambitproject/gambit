@@ -1,8 +1,8 @@
-//#
-//# FILE: glist.cc -- Provide implementations for commonly-used lists
-//#
-//# $Id$
-//#
+//
+// FILE: glist.cc -- Provide implementations for commonly-used lists
+//
+// $Id$
+//
 
 #include "gmisc.h"
 #include "glist.imp"
@@ -40,7 +40,6 @@ TEMPLATE class gList<gBlock<int> >;
 TEMPLATE class gNode<gBlock<int> >;
 
 TEMPLATE class gList<gArray<int> >;
-TEMPLATE class gListIter<gArray<int> >;
 TEMPLATE class gNode<gArray<int> >;
 
 

@@ -1,11 +1,10 @@
-//#
-//# FILE: glist.imp -- Implementation of a generic array container class
-//#
-//# $Id$
-//#
+//
+// FILE: glist.imp -- Implementation of a generic array container class
+//
+// $Id$
+//
 
 #include "glist.h"
-#include "glistit.h"
 
 #include <assert.h>
 
@@ -340,104 +339,3 @@ template <class T> gOutput &operator<<(gOutput &f, const gList<T> &b)
 
 
 
-//--------------------------------------------------------------------------
-//                      gListIter<T>: Member functions
-//--------------------------------------------------------------------------
-
-template <class T> gListIter<T>::gListIter(gList<T> *l)
-  : list(l), position(l->head), location(1)
-{ }
-
-template <class T> gListIter<T>::gListIter(gList<T> &l)
-  : list(&l), position(l.head), location(1)
-{ }
-
-template <class T> gListIter<T>::~gListIter()
-{ }
-
-template <class T> void gListIter<T>::operator++(void)
-{
-  if (position)    {
-    position = position->next;
-    location++;
-  }
-}
-
-template <class T> void gListIter<T>::operator++(int)
-{
-  if (position)   {
-    position = position->next;
-    location++;
-  }
-}
-
-template <class T> void gListIter<T>::operator--(void)
-{
-  if (position)   {
-    position = position->prev;
-    location--;
-  }
-}
-
-template <class T> void gListIter<T>::operator--(int)
-{
-  if (position)  {
-    position = position->prev;
-    location--;
-  }
-}
-
-template <class T> void gListIter<T>::GoFirst(void)
-{
-  position = list->head;
-  location = 1;
-}
-
-template <class T> void gListIter<T>::GoLast(void)
-{
-  position = list->tail;
-  location = list->length;
-}
-
-template <class T> int gListIter<T>::AtBeginning(void) const
-{
-  return (location == 1);
-}
-
-template <class T> int gListIter<T>::AtEnd(void) const
-{
-  return (location == list->length);
-}
-
-template <class T> int gListIter<T>::PastBeginning(void) const
-{
-  return (location < 1);
-}
-
-template <class T> int gListIter<T>::PastEnd(void) const
-{
-  return (location > list->length);
-}
-
-template <class T> const T &gListIter<T>::GetValue(void) const
-{
-  assert(position);
-  return position->data;
-}
-
-template <class T> T &gListIter<T>::GetValue(void)
-{
-  assert(position);
-  return position->data;
-}
-
-template <class T> T gListIter<T>::Remove(void)
-{
-  assert(position);
-  return list->Remove(location);
-}
-
-template <class T> void gListIter<T>::Insert(const T &t)
-{
-  list->Insert(t, location);
-}
