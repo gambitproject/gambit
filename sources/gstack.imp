@@ -5,13 +5,11 @@
 //
 
 #include "gstack.h"
-#include <assert.h>
 
 template <class T> gStack<T>::gStack(int md) : depth(0), max_depth(md)
 {
-  assert(md > 0);
+  if (md <= 0)   throw StackUnderflow();
   contents = new T[md];
-  assert(contents != 0);
 }
 
 template <class T> gStack<T>::~gStack()
@@ -35,19 +33,19 @@ template <class T> void gStack<T>::Push(T new_el)
 
 template <class T> T gStack<T>::Pop(void)
 {
-  assert(depth > 0);
+  if (depth <= 0)   throw StackUnderflow();
   return contents[--depth];
 }
 
 template <class T> T& gStack<T>::Peek(void)
 {
-  assert(depth > 0);
+  if (depth <= 0)   throw StackUnderflow();
   return contents[depth - 1];
 }
 
 template <class T> T gStack<T>::Peek(void) const
 {
-  assert(depth > 0);
+  if (depth <= 0)   throw StackUnderflow();
   return contents[depth - 1];
 }
 
@@ -56,7 +54,7 @@ template <class T> void gStack<T>::Flush(void)
   depth = 0;
 }
 
-template <class T> void gStack<T>::Resize( int new_max_depth )
+template <class T> void gStack<T>::Resize(int new_max_depth)
 {
   if (new_max_depth > depth)   {
     T *new_contents = new T[new_max_depth];
