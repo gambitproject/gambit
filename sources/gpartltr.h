@@ -105,7 +105,7 @@ public:
     { assert (Length() > 0); return PartialTreeList[1].Dmnsn(); }
   gMatrix<T> DerivativeMatrix(const gVector<T>&)                  const; 
   gSquareMatrix<T> SquareDerivativeMatrix(const gVector<T>&)      const; 
-  gVector<T> ValuesOfRootPolys(const gVector<T>&)                 const;
+  gVector<T> ValuesOfRootPolys(const gVector<T>&, const int&)     const;
 
 friend gOutput& operator << (gOutput& output, const ListOfPartialTrees<T>& x);
 };

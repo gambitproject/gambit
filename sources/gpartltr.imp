@@ -307,10 +307,11 @@ ListOfPartialTrees<T>::SquareDerivativeMatrix(const gVector<T>& p) const
 }
 
 template <class T> gVector<T> 
-ListOfPartialTrees<T>::ValuesOfRootPolys(const gVector<T>& point) const
+ListOfPartialTrees<T>::ValuesOfRootPolys(const gVector<T>& point,
+					 const int& NoEquations) const
 {
-  gVector<T> answer(Dmnsn());
-  for (int i = 1; i <= Dmnsn(); i++)
+  gVector<T> answer(NoEquations);
+  for (int i = 1; i <= NoEquations; i++)
     answer[i] = PartialTreeList[i].EvaluateRootPoly(point);
 
   return answer;
