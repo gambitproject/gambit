@@ -43,6 +43,17 @@ template <class T> gMatrix<T> &gMatrix<T>::operator=(const gMatrix<T> &M)
 //                     gMatrix<T>: Additive operators
 //-------------------------------------------------------------------------
 
+
+template <class T> gMatrix<T>& 
+gMatrix<T>::operator=(T c)
+{
+  for(int i=minrow;i<=maxrow;i++) 
+    for(int j=mincol;j<=maxcol;j++) 
+      (*this)(i,j) = c;
+  return (*this);
+}
+
+
 template <class T> gMatrix<T> gMatrix<T>::operator+(const gMatrix<T> &M) const
 {
   assert(CheckBounds(M));

@@ -23,6 +23,7 @@ template <class T> class gMatrix : public gRectArray<T>  {
     virtual ~gMatrix();
 
     gMatrix<T> &operator=(const gMatrix<T> &);
+    gMatrix<T> & operator=(T c);
 
        // ADDITIVE OPERATORS
     gMatrix<T> operator+(const gMatrix<T> &) const;
