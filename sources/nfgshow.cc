@@ -390,7 +390,6 @@ void NfgShow::RemoveSolutions(void)
 
   cur_soln = 0;
   solns.Flush();
-  spread->EnableInspect(FALSE);
 }
 
 
@@ -525,7 +524,6 @@ void NfgShow::Solve(int id)
     }
 
     ChangeSolution(solns.VisibleLength());
-    spread->EnableInspect(TRUE);
     
     InspectSolutions(CREATE_DIALOG);
   }
@@ -611,7 +609,6 @@ void NfgShow::SolveStandard(void)
     }
 
     ChangeSolution(solns.VisibleLength());
-    spread->EnableInspect(TRUE);
     
     InspectSolutions(CREATE_DIALOG);
   }  
@@ -1562,7 +1559,7 @@ NormalSpread::NormalSpread(const NFSupport *sup, int _pl1, int _pl2, NfgShow *p,
     sub_panel->Fit();
     SetEditable(FALSE);
     SetMenuBar(MakeMenuBar(0));
-
+    UpdateMenus();
     Redraw();
     Show(TRUE);
 }
@@ -1577,6 +1574,8 @@ void NormalSpread::UpdateProfile(void)
   parent->UpdateProfile(profile);
   SetCurRow(profile[pl1]);
   SetCurCol(profile[pl2]);
+
+  UpdateMenus();
 }
 
 void NormalSpread::SetProfile(const gArray<int> &profile)
@@ -1586,6 +1585,7 @@ void NormalSpread::SetProfile(const gArray<int> &profile)
 
   SetCurRow(profile[pl1]);
   SetCurCol(profile[pl2]);
+  UpdateMenus();
 }
 
 gArray<int> NormalSpread::GetProfile(void)
@@ -1692,11 +1692,22 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
   tmp_menubar->Append(prefs_menu,    "&Prefs");
   tmp_menubar->Append(help_menu,     "&Help");
   
-  // Need these to enable/disable them depending on existance of solutions
-  inspect_item = tmp_menubar->FindMenuItem("Solve", "Inspect");
-  tmp_menubar->Enable(inspect_item, FALSE);
-
   return tmp_menubar;
+}
+
+void NormalSpread::UpdateMenus(void)
+{
+  wxMenuBar *menu = GetMenuBar();
+  const Nfg &nfg = parent->Game();
+  gArray<int> profile(GetProfile());
+
+  menu->Enable(NFG_EDIT_OUTCOMES_DETACH, nfg.GetOutcome(profile) != 0);
+  menu->Enable(NFG_EDIT_OUTCOMES_LABEL, nfg.GetOutcome(profile) != 0);
+  menu->Enable(NFG_EDIT_OUTCOMES_PAYOFFS, nfg.GetOutcome(profile) != 0);
+
+  menu->Enable(NFG_SOLVE_CUSTOM_ENUMMIXED, nfg.NumPlayers() == 2);
+  menu->Enable(NFG_SOLVE_CUSTOM_LP, nfg.NumPlayers() == 2 && IsConstSum(nfg));
+  menu->Enable(NFG_SOLVE_CUSTOM_LCP, nfg.NumPlayers() == 2);
 }
 
 Bool NormalSpread::OnClose(void)
@@ -2005,6 +2016,9 @@ void NormalSpread::OnMenuCommand(int id)
   catch (gException &E) {
     guiExceptionDialog(E.Description(), this);
   }
+
+  if (id != CLOSE_MENU)
+    UpdateMenus();
 }
 
 

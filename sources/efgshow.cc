@@ -1488,6 +1488,15 @@ void EfgShow::UpdateMenus(Node *p_cursor, Node *p_markNode)
 		  (p_cursor->GetOutcome()) ? TRUE : FALSE);
   menuBar->Enable(efgmenuEDIT_OUTCOMES_DELETE,
 		  (ef.NumOutcomes() > 0) ? TRUE : FALSE);
+
+  menuBar->Enable(efgmenuSOLVE_CUSTOM_EFG_LP,
+		  ef.NumPlayers() == 2 && ef.IsConstSum());
+  menuBar->Enable(efgmenuSOLVE_CUSTOM_EFG_LCP, ef.NumPlayers() == 2);
+
+  menuBar->Enable(efgmenuSOLVE_CUSTOM_NFG_LP,
+		  ef.NumPlayers() == 2 && ef.IsConstSum());
+  menuBar->Enable(efgmenuSOLVE_CUSTOM_NFG_LCP, ef.NumPlayers() == 2);
+  menuBar->Enable(efgmenuSOLVE_CUSTOM_NFG_ENUMMIXED, ef.NumPlayers() == 2);
 }
 
 

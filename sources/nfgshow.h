@@ -147,7 +147,8 @@ public:
   // Filename support
   void SetFileName(const gText &s);
   const gText &Filename(void) const { return filename; }
-  
+
+  const Nfg &Game(void) const { return nf; }  
   // Display some inherent game properties
   void ShowGameInfo(void);
   bool GameIsDirty(void) const { return nf.IsDirty(); }
@@ -172,7 +173,6 @@ private:
   gArray<wxChoice *> strat_profile;
   wxChoice *row_choice, *col_choice;
   wxSlider *slider;
-  int inspect_item;
   NfgShow *parent;
   int pl1, pl2;
   gArray<int> dimensionality;
@@ -187,6 +187,7 @@ private:
 
 protected:
   wxMenuBar *MakeMenuBar(long menus);
+  void UpdateMenus(void);
 
 public:
   // Constructor
@@ -235,10 +236,6 @@ public:
   void RemoveValDisp(void);
   int  HaveVal(void) const { return features.val; }
   
-    // Functions to enable/disable menuiterms
-  void EnableInspect(Bool enable) 
-    { GetMenuBar()->Enable(inspect_item, enable); }
-
   // Callback for double clicking on a cell.
   void OnDoubleClick(int row, int col, int, const gText &) 
     { parent->OutcomePayoffs(row, col); }
@@ -248,6 +245,7 @@ public:
     {
       strat_profile[pl1]->SetSelection(row-1);
       strat_profile[pl2]->SetSelection(col-1);
+      UpdateMenus();
     }
 
   // Callback for changing the options function

@@ -190,12 +190,6 @@ guinfgLcp::guinfgLcp(const NFSupport &p_support,
 
 gList<MixedSolution> guinfgLcp::Solve(void)
 {
-  if (m_nfg.NumPlayers() != 2) {
-    wxMessageBox("LCP algorithm only works on 2 player games.",
-		 "Algorithm Error");
-    return gList<MixedSolution>();
-  }
-
   wxStatus status(m_parent->Frame(), "LcpSolve Progress");
 
   LemkeParams params(status);
@@ -244,11 +238,6 @@ guinfgLp::guinfgLp(const NFSupport &p_support, NfgShowInterface *p_parent)
 
 gList<MixedSolution> guinfgLp::Solve(void)
 {
-  if (m_nfg.NumPlayers() > 2 || !IsConstSum(m_nfg)) {
-    wxMessageBox("Only valid for two-person zero-sum games");
-    return gList<MixedSolution>();
-  }
-
   wxStatus status(m_parent->Frame(), "LpSolve Progress");
   status << "Progress not implemented\n" << "Cancel button disabled\n";
 

@@ -390,11 +390,6 @@ guiefgLcpEfg::guiefgLcpEfg(const EFSupport &p_support,
 
 gList<BehavSolution> guiefgLcpEfg::Solve(void) const
 {
-  if (m_efg.NumPlayers() != 2) {
-    wxMessageBox("Only valid for two-player games");
-    return gList<BehavSolution>();
-  }
-
   wxStatus status(m_parent->Frame(), "LcpSolve Progress");
   SeqFormParams params(status);
   params.stopAfter = m_stopAfter;
@@ -463,12 +458,6 @@ guiefgLcpNfg::guiefgLcpNfg(const EFSupport &p_support,
 
 gList<BehavSolution> guiefgLcpNfg::Solve(void) const
 {
-  if (m_efg.NumPlayers() != 2)  {
-    wxMessageBox("LCP algorithm only works on 2 player games.",
-		 "Algorithm Error");
-    return gList<BehavSolution>();
-  }
-
   wxStatus status(m_parent->Frame(), "LcpSolve Progress");
 
   LemkeParams params(status);
@@ -749,11 +738,6 @@ guiefgLpNfg::guiefgLpNfg(const EFSupport &p_support,
 
 gList<BehavSolution> guiefgLpNfg::Solve(void) const
 {
-  if (m_efg.NumPlayers() > 2 || !m_efg.IsConstSum()) {
-    wxMessageBox("Only valid for two-person zero-sum games");
-    return gList<BehavSolution>();
-  }
-
   wxStatus status(m_parent->Frame(), "LpSolve Progress");
   status << "Progress not implemented\n" << "Cancel button disabled\n";
   ZSumParams params;
@@ -820,11 +804,6 @@ guiefgLpEfg::guiefgLpEfg(const EFSupport &p_support,
 
 gList<BehavSolution> guiefgLpEfg::Solve(void) const
 {
-  if (m_efg.NumPlayers() > 2 || !m_efg.IsConstSum()) {
-    wxMessageBox("Only valid for two-person zero-sum games");
-    return gList<BehavSolution>();
-  }
-  
   wxStatus status(m_parent->Frame(), "LpSolve Progress");
   status << "Progress not implemented\n" << "Cancel button disabled\n";
 
