@@ -122,11 +122,11 @@ template <class T> int EnumModule<T>::Enum(void)
       // need only check complementarity, since it is feasible
 
       nash=1;
-      for(k=1;k<=n1;k++)
+      for(k=1;k<=n1 && nash==1;k++)
 	if(bfs1.IsDefined(k) && bfs2.IsDefined(-k))
 	  if(!EqZero(bfs1(k)*bfs2(-k)))
 	    nash=0;
-      for(k=1;k<=n2;k++)
+      for(k=1;k<=n2 && nash==1;k++)
 	if(bfs2.IsDefined(k) && bfs1.IsDefined(-k))
 	  if(!EqZero(bfs2(k)*bfs1(-k)))
 	    nash=0;
