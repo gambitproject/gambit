@@ -604,57 +604,55 @@ static Portion *GSM_Lp_Nfg(Portion **param)
 
 #include "lpsolve.h"
 
-Portion* GSM_Lp_ListFloat(Portion** param)
+Portion* GSM_Lp_List(Portion** param)
 {
-  gMatrix<double>* a = ListToMatrix_Float((ListPortion*) param[0]);
-  gVector<double>* b = ListToVector_Float((ListPortion*) param[1]);
-  gVector<double>* c = ListToVector_Float((ListPortion*) param[2]);
-  if(!a || !b || !c)
-    return 0;
-  int nequals = ((IntPortion*) param[3])->Value();
-  bool isFeasible;
-  bool isBounded;
+  if (((PrecisionPortion *) param[4])->Value() == precDOUBLE)  {
+    gMatrix<double>* a = ListToMatrix_Float((ListPortion*) param[0]);
+    gVector<double>* b = ListToVector_Float((ListPortion*) param[1]);
+    gVector<double>* c = ListToVector_Float((ListPortion*) param[2]);
+    assert(a && b && c);
+
+    int nequals = ((IntPortion*) param[3])->Value();
+    bool isFeasible;
+    bool isBounded;
   
-  LPSolve<double>* s = new LPSolve<double>(*a, *b, *c, nequals);
-  Portion* result = ArrayToList(s->OptimumVector());
-  isFeasible = s->IsFeasible();
-  isBounded = s->IsBounded();
-  delete s;
-  delete a;
-  delete b;
-  delete c;
+    LPSolve<double>* s = new LPSolve<double>(*a, *b, *c, nequals);
+    Portion* result = ArrayToList(s->OptimumVector());
+    isFeasible = s->IsFeasible();
+    isBounded = s->IsBounded();
+    delete s;
+    delete a;
+    delete b;
+    delete c;
   
-  ((BoolPortion*) param[4])->Value() = isFeasible;
-  ((BoolPortion*) param[5])->Value() = isBounded;
-  return result;
+    ((BoolPortion*) param[5])->Value() = isFeasible;
+    ((BoolPortion*) param[6])->Value() = isBounded;
+    return result;
+  }
+  else  {
+    gMatrix<gRational>* a = ListToMatrix_Rational((ListPortion*) param[0]);
+    gVector<gRational>* b = ListToVector_Rational((ListPortion*) param[1]);
+    gVector<gRational>* c = ListToVector_Rational((ListPortion*) param[2]);
+    assert(a && b && c);
+
+    int nequals = ((IntPortion*) param[3])->Value();
+    bool isFeasible;
+    bool isBounded;
+  
+    LPSolve<gRational>* s = new LPSolve<gRational>(*a, *b, *c, nequals);
+    Portion* result = ArrayToList(s->OptimumVector());
+    isFeasible = s->IsFeasible();
+    isBounded = s->IsBounded();
+    delete s;
+    delete a;
+    delete b;
+    delete c;
+  
+    ((BoolPortion*) param[5])->Value() = isFeasible;
+    ((BoolPortion*) param[6])->Value() = isBounded;
+    return result;
+  }
 }
-
-Portion* GSM_Lp_ListRational(Portion** param)
-{
-  gMatrix<gRational>* a = ListToMatrix_Rational((ListPortion*) param[0]);
-  gVector<gRational>* b = ListToVector_Rational((ListPortion*) param[1]);
-  gVector<gRational>* c = ListToVector_Rational((ListPortion*) param[2]);
-  if(!a || !b || !c)
-    return 0;
-  int nequals = ((IntPortion*) param[3])->Value();
-  bool isFeasible;
-  bool isBounded;
-  
-  LPSolve<gRational>* s = new LPSolve<gRational>(*a, *b, *c, nequals);
-  Portion* result = ArrayToList(s->OptimumVector());
-  isFeasible = s->IsFeasible();
-  isBounded = s->IsBounded();
-  delete s;
-  delete a;
-  delete b;
-  delete c;
-  
-  ((BoolPortion*) param[4])->Value() = isFeasible;
-  ((BoolPortion*) param[5])->Value() = isBounded;
-  return result;
-}
-
-
 
 
 #include "csumsub.h"
@@ -1158,7 +1156,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("LpSolve", 4);
+  FuncObj = new FuncDescObj("LpSolve", 3);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Lp_Nfg, 
 				       PortionSpec(porMIXED, 1), 6));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
@@ -1191,18 +1189,17 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 6, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
 
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Lp_ListFloat, 
-				       PortionSpec(porNUMBER, 1), 6));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("a", PortionSpec(porNUMBER,2),
-					    REQUIRED, BYVAL));
-  FuncObj->SetParamInfo(2, 1, ParamInfoType("b", PortionSpec(porNUMBER,1),
-					    REQUIRED, BYVAL));
-  FuncObj->SetParamInfo(2, 2, ParamInfoType("c", PortionSpec(porNUMBER,1),
-					    REQUIRED, BYVAL));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Lp_List, 
+				       PortionSpec(porNUMBER, 1), 7));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("a", PortionSpec(porNUMBER, 2)));
+  FuncObj->SetParamInfo(2, 1, ParamInfoType("b", PortionSpec(porNUMBER, 1)));
+  FuncObj->SetParamInfo(2, 2, ParamInfoType("c", PortionSpec(porNUMBER, 1)));
   FuncObj->SetParamInfo(2, 3, ParamInfoType("nEqualities", porINTEGER));
-  FuncObj->SetParamInfo(2, 4, ParamInfoType("isFeasible", porBOOL,
+  FuncObj->SetParamInfo(2, 4, ParamInfoType("precision", porPRECISION,
+					    new PrecisionPortion(precDOUBLE)));
+  FuncObj->SetParamInfo(2, 5, ParamInfoType("isFeasible", porBOOL,
 					    new BoolPortion(false), BYREF));
-  FuncObj->SetParamInfo(2, 5, ParamInfoType("isBounded", porBOOL,
+  FuncObj->SetParamInfo(2, 6, ParamInfoType("isBounded", porBOOL,
 					    new BoolPortion(false), BYREF));
 
   gsm->AddFunction(FuncObj);
