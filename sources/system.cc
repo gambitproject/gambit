@@ -40,7 +40,6 @@ const char* System::GetEnv( const char* name )
 
 int System::SetEnv( const char* name, const char* value )
 {
-  int result = 0;
   assert( name != NULL );
   assert( strlen( name ) > 0 );
   assert( value != NULL );

@@ -1,8 +1,8 @@
-//#
-//# FILE: gmisc.cc -- Miscellaneous generally-useful functions
-//#
-//# $Id$
-//#
+//
+// FILE: gmisc.cc -- Miscellaneous generally-useful functions
+//
+// $Id$
+//
 
 #include "gmisc.h"
 #include "rational.h"
@@ -169,7 +169,7 @@ gString ToString(int i)
 gString ToString(long l)
 {
   // sprintf(gconvert_buffer, "%.*ld", precision, l);
-  sprintf(gconvert_buffer, "%*d", width, l);
+  sprintf(gconvert_buffer, "%*ld", width, l);
   return gString(gconvert_buffer);
 }
 

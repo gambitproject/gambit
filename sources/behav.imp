@@ -675,7 +675,7 @@ void BehavProfile<T>::NodeRealizProbs(Node *n, T prob, int &index,
 				      gArray<T> &NRProbs) const
 {
   NRProbs[index] = prob;
-  int anum;
+  int anum = 0;
   int pl = (n->infoset) ? n->infoset->player->number : -1;
 
   T newprob((T) 0);

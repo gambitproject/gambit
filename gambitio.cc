@@ -1,8 +1,8 @@
-//#
-//# FILE: gambitio.cc -- Implementation of I/O streaming functions
-//#
-//# $Id$
-//#
+//
+// FILE: gambitio.cc -- Implementation of I/O streaming functions
+//
+// $Id$
+//
 
 #ifdef __GNUG__
 #pragma implementation "gambitio.h"
@@ -379,7 +379,7 @@ gOutput &gFileOutput::operator<<(double x)
 
 gOutput &gFileOutput::operator<<(float x)
 {
-  int c;
+  int c = 0;
 
   gio_error(f);
   switch (Represent) {

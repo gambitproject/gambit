@@ -766,7 +766,7 @@ void BaseEfg::Reveal(Infoset *where, const gArray<EFPlayer *> &who)
   bool flag;
   gBlock<Node*> OldMembers;
   Node *n;
-  Infoset *newiset;
+  Infoset *newiset = 0;
 
   if(where->actions.Length()<=1)return;
   UnmarkSubtree(root);  // start with a clean tree
