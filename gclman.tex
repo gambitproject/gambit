@@ -309,7 +309,7 @@ Assign[y, 3.0]
 \end{verbatim}
 
 \noindent The first call defines {\tt y} to be of type {\tt INTEGER}.  The
-second call, then, is interpreted as {\tt Assign[INTEGER, FLOAT]}, which does
+second is interpreted as {\tt Assign[ INTEGER, FLOAT]}, which does
 not match the definition of {\tt Assign}.
 
 An existing variable may be deleted by the use of the {\tt UnAssign} function
@@ -860,12 +860,13 @@ Foo[x->T,y->LIST(S)] =: LIST(R)
 Foo[x->LIST(T),y->LIST(S)] =: LIST(R)
 \end{verbatim}
 
-The rules above apply recursively using these function prototypes as
-well.  So if we call \verb+c := Foo[a, b]+ where \verb+a+ is of type
-\verb+LIST(LIST(T))+, and \verb+b+ is of type \verb+S+, it results in
+The same rules apply recursively using these function prototypes as
+well.  So if \verb+a+ is of type \verb+LIST(LIST(T))+, and \verb+b+ is
+of type \verb+S+, the command \verb+c := Foo[a, b]+ results in
 a listable call to \verb+Foo[x->LIST(T),y->S]+.  Thus, \verb+c+ is of
-type \verb+LIST(LIST(R))+, where \verb+c[[i]] = Foo[a[[i]],b]+.
-Hence, \verb+c[[i]][[j]] = + \verb+Foo[a[[i]][[j]],b]+.
+type \verb+LIST(LIST(R))+, where \verb+c[[i]] = +
+\verb+Foo[a[[i]],b]+.  Hence, \verb+c[[i]][[j]] = +
+\verb+Foo[a[[i]][[j]],b]+.
 
 Note that many vector and matrix math operations follow directly as
 listable calls to the basic arithmetic functions.  For example:
@@ -874,8 +875,7 @@ listable calls to the basic arithmetic functions.  For example:
 GCL1: a:={{1,2},{3,4}};
 GCL2: 2*a
 {{2,4},{6,8}}
-GCL3: b:=Transpose[a];
-GCL4: a+b
+GCL3: a+Transpose[a]
 {{2,5},{5,8}}
 \end{verbatim}
 
@@ -1375,12 +1375,15 @@ Times[x->BEHAV, y->RATIONAL] =: BEHAV
 \subsection{Extensive Form Manipulation}
 
 \begin{verbatim}
-AddAction[support->EFSUPPORT, infoset->INFOSET, action->ACTION] =: EFSUPPORT
+AddAction[support->EFSUPPORT, infoset->INFOSET, 
+          action->ACTION] =: EFSUPPORT
 AppendAction[infoset->INFOSET] =: ACTION
 AppendNode[node->NODE, infoset->INFOSET] =: NODE
 AttachOutcome[node->NODE, outcome->OUTCOME] =: OUTCOME
-Behav[efg<->EFG | support->EFSUPPORT, {list->LIST(LIST(LIST(FLOAT)))}] =: BEHAV
-Behav[efg<->EFG | support->EFSUPPORT, {list->LIST(LIST(LIST(RATIONAL)))}] =: BEHAV
+Behav[efg<->EFG | support->EFSUPPORT, 
+      {list->LIST(LIST(LIST(FLOAT)))}] =: BEHAV
+Behav[efg<->EFG | support->EFSUPPORT, 
+      {list->LIST(LIST(LIST(RATIONAL)))}] =: BEHAV
 CopyTree[from->NODE, to->NODE] =: NODE
 DeleteAction[infoset->INFOSET, action->ACTION] =: ACTION
 DeleteNode[node->NODE, keep->NODE] =: NODE
@@ -1604,7 +1607,8 @@ parameters which are not necessary for the procedure to function.
 
 \item
 \protect \large \begin{verbatim} 
-AddAction[support->EFSUPPORT, infoset->INFOSET, action->ACTION] =: EFSUPPORT
+AddAction[support->EFSUPPORT, infoset->INFOSET, 
+          action->ACTION] =: EFSUPPORT
 \end{verbatim}\normalsize
 
 \bd 
@@ -1630,8 +1634,10 @@ Returns the list of actions available at the information set
 
 \item
 \protect \large \begin{verbatim}
-ActionValues[strategy->BEHAV, infoset->INFOSET] =: LIST(FLOAT)
-ActionValues[strategy->BEHAV, infoset->INFOSET] =: LIST(RATIONAL)
+ActionValues[strategy->BEHAV, 
+             infoset->INFOSET] =: LIST(FLOAT)
+ActionValues[strategy->BEHAV, 
+             infoset->INFOSET] =: LIST(RATIONAL)
 \end{verbatim}\normalsize
 
 \bd
@@ -1645,7 +1651,8 @@ all players obey the behavioral strategy profile \verb+strategy+.
 
 \item
 \protect \large \begin{verbatim}
-AddStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT
+AddStrategy[support->NFSUPPORT, 
+            strategy->STRATEGY] =: NFSUPPORT
 \end{verbatim}\normalsize
 
 \bd
@@ -1740,8 +1747,10 @@ attached outcomes.
 
 \item
 \protect \large \begin{verbatim}
-Behav[efg<->EFG | support->EFSUPPORT, {list->LIST(LIST(LIST(FLOAT)))}] =: BEHAV
-Behav[efg<->EFG | support->EFSUPPORT, {list->LIST(LIST(LIST(RATIONAL)))}] =: BEHAV
+Behav[efg<->EFG | support->EFSUPPORT, 
+      {list->LIST(LIST(LIST(FLOAT)))}] =: BEHAV
+Behav[efg<->EFG | support->EFSUPPORT, 
+      {list->LIST(LIST(LIST(RATIONAL)))}] =: BEHAV
 \end{verbatim}\normalsize
 
 \bd Creates a behavioral profile for the game \verb+efg+, or EFSUPPORT
@@ -2005,7 +2014,7 @@ ElapsedTime[] =: FLOAT
 \bd
 If the system stopwatch is currently running, returns the
 time elapsed since the stopwatch was started.  If the system stopwatch
-is not runnign, returns the time elapsed during the last period during which
+is not running, returns the time elapsed during the last period during which
 the stopwatch was running.
 \item
 [See also:] {\tt IsWatchRunning}, {\tt StartWatch}, {\tt StopWatch}.
@@ -2032,10 +2041,12 @@ other {\em pure} strategies are eliminated.)
 
 \item
 \protect \large \begin{verbatim}
-EnumMixedSolve[efg<->EFG, {asNfg->BOOLEAN}, {stopAfter->INTEGER},
-               {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
-EnumMixedSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
-               {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
+EnumMixedSolve[efg<->EFG, {asNfg->BOOLEAN}, 
+               {stopAfter->INTEGER}, {nPivots<->INTEGER}, 
+               {time<->FLOAT}] =: LIST(BEHAV)
+EnumMixedSolve[nfg<->NFG | support->NFSUPPORT, 
+               {stopAfter->INTEGER}, {nPivots<->INTEGER}, 
+               {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
 \bd
@@ -2073,10 +2084,10 @@ of the algorithm.
 
 \item
 \protect \large \begin{verbatim}
-EnumPureSolve[efg<->EFG, {asNfg->BOOLEAN}, {stopAfter->INTEGER},
-              {time<->FLOAT}] =: LIST(BEHAV)
-EnumPureSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
-              {time<->FLOAT}] =: LIST(MIXED) 
+EnumPureSolve[efg<->EFG, {asNfg->BOOLEAN},
+        {stopAfter->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
+EnumPureSolve[nfg<->NFG | support->NFSUPPORT,
+        {stopAfter->INTEGER}, {time<->FLOAT}] =: LIST(MIXED) 
 \end{verbatim}\normalsize
 
 \bd
@@ -2148,7 +2159,8 @@ of precision.
 
 \item
 \protect \large \begin{verbatim}
-For[statement-list, boolean-expression, statement-list, statement-list]
+For[statement-list, boolean-expression, 
+    statement-list, statement-list]
 \end{verbatim}\normalsize
 
 \bd
@@ -2163,10 +2175,10 @@ on control structures for complete information.
 \item
 \protect \large \begin{verbatim}
 GobitGridSolve[nfg<->NFG | support->NFSUPPORT, {pxifile->TEXT},
-              {minLam->FLOAT}, {maxLam->FLOAT}, 
-              {delLam->FLOAT}, {powLam->INTEGER}, 
-              {delp->FLOAT}, {tol->FLOAT},
-              {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
+         {minLam->FLOAT}, {maxLam->FLOAT}, 
+         {delLam->FLOAT}, {powLam->INTEGER}, 
+         {delp->FLOAT}, {tol->FLOAT},
+         {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
 \bd
@@ -2192,17 +2204,17 @@ is $0.02$.
 \item
 \protect \large \begin{verbatim}
 GobitSolve[efg<->EFG | start->BEHAV, {pxifile->TEXT},
-           {minLam->FLOAT}, {maxLam->FLOAT},
-           {delLam->FLOAT}, {powLam->INTEGER},
-           {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
-           {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
-           {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(BEHAV)
+         {minLam->FLOAT}, {maxLam->FLOAT},
+         {delLam->FLOAT}, {powLam->INTEGER},
+         {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
+         {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
+         {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(BEHAV)
 GobitSolve[nfg<->NFG | start->MIXED, {pxifile->TEXT},
-           {minLam->FLOAT}, {maxLam->FLOAT},
-           {delLam->FLOAT}, {powLam->INTEGER},
-           {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
-           {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
-           {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(MIXED)
+         {minLam->FLOAT}, {maxLam->FLOAT},
+         {delLam->FLOAT}, {powLam->INTEGER},
+         {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
+         {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
+         {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
 \bd 
@@ -2723,7 +2735,7 @@ Default is 2.0e-10.
 
 \item
 [Note:] Solution of extensive form via normal form is not currently
-available; if \verb+start->BEHAV+ is specified, subgame markings are ignored.
+available; if \verb+start->+ \verb+BEHAV+ is specified, subgame markings are ignored.
 \ed
 
 \item
@@ -2880,7 +2892,8 @@ Returns the difference $x - y$.
 
 \item
 \protect \large \begin{verbatim}
-Mixed[nfg<->NFG | support->NFSUPPORT, list->LIST(LIST(T))] =: MIXED
+Mixed[nfg<->NFG | support->NFSUPPORT, 
+      list->LIST(LIST(T))] =: MIXED
 \end{verbatim}\normalsize
 
 \bd
@@ -3627,7 +3640,8 @@ EFSUPPORT \verb+support+.
 
 \item
 \protect \large \begin{verbatim}
-RemoveStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT
+RemoveStrategy[support->NFSUPPORT, 
+               strategy->STRATEGY] =: NFSUPPORT
 \end{verbatim}\normalsize
 
 \bd
@@ -3706,7 +3720,8 @@ of the game.  Returns \verb+support+.
 
 \item
 \protect \large \begin{verbatim} 
-SetComponent[behav<->BEHAV, infoset->INFOSET, list->LIST(T)] =: BEHAV 
+SetComponent[behav<->BEHAV, infoset->INFOSET, 
+             list->LIST(T)] =: BEHAV 
 \end{verbatim}\normalsize
 
 \bd
@@ -3717,7 +3732,8 @@ Returns \verb+behav+.
 
 \item
 \protect \large \begin{verbatim} 
-SetComponent[mixed<->MIXED, player->PLAYER, list->LIST(T)] =: MIXED 
+SetComponent[mixed<->MIXED, player->PLAYER, 
+             list->LIST(T)] =: MIXED 
 \end{verbatim}\normalsize
 
 \bd
@@ -3728,8 +3744,10 @@ Returns \verb+mixed+.
 
 \item
 \protect \large \begin{verbatim} 
-SetChanceProbs[infoset->INFOSET, probs->LIST(FLOAT)] =: INFOSET
-SetChanceProbs[infoset->INFOSET, probs->LIST(RATIONAL)] =: INFOSET
+SetChanceProbs[infoset->INFOSET, 
+               probs->LIST(FLOAT)] =: INFOSET
+SetChanceProbs[infoset->INFOSET, 
+               probs->LIST(RATIONAL)] =: INFOSET
 \end{verbatim}\normalsize
 
 \bd
@@ -3829,12 +3847,14 @@ strategies in \verb+list+ are defined.  Returns \verb+list+.
 
 \item
 \protect \large \begin{verbatim}
-SimpDivSolve[efg<->EFG, {asNfg->BOOLEAN}, {stopAfter->INTEGER},
-             {nRestarts->INTEGER}, {leashLength->INTEGER},
-             {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
-SimpDivSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
-             {nRestarts->INTEGER}, {leashLength->INTEGER},
-             {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
+SimpDivSolve[efg<->EFG, {asNfg->BOOLEAN}, 
+       {stopAfter->INTEGER}, {nRestarts->INTEGER}, 
+       {leashLength->INTEGER}, {nEvals<->INTEGER}, 
+       {time<->FLOAT}] =: LIST(BEHAV)
+SimpDivSolve[nfg<->NFG | support->NFSUPPORT, 
+       {stopAfter->INTEGER}, {nRestarts->INTEGER}, 
+       {leashLength->INTEGER}, {nEvals<->INTEGER}, 
+       {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
 \bd
@@ -3873,17 +3893,17 @@ different from 0, the algorithm is no longer guaranteed to converge.
 StartWatch[] =: FLOAT
 \end{verbatim}\normalsize
 
-\bd
-Starts the system stopwatch running.  If the stopwatch
-is already running, {\tt StartWatch} has no effect.  Returns the amount
-of time since the stopwatch was started.
+\bd Starts the system stopwatch running.  This command has no
+effect if the stopwatch is already running.
+Returns the amount of time since the stopwatch was started.
 \item
 [See also:] {\tt ElapsedTime}, {\tt IsWatchRunning}, {\tt StopWatch}.
 \ed
 
 \item
 \protect \large \begin{verbatim}
-Strategies[player->NFPLAYER, {support->NFSUPPORT}] =: LIST(STRATEGY)
+Strategies[player->NFPLAYER, 
+           {support->NFSUPPORT}] =: LIST(STRATEGY)
 \end{verbatim}\normalsize
 
 \bd
@@ -4046,9 +4066,9 @@ See the section on control structures for complete information.
 \item
 \protect \large \begin{verbatim}
 Write[x->T, {output->OUTPUT}] =: OUTPUT  
-      for T = BEHAV,BOOL,FLOAT,INTEGER,MIXED,RATIONAL,TEXT,LIST(T)
+     for T=BEHAV,BOOL,FLOAT,INTEGER,MIXED,RATIONAL,TEXT,LIST(T)
 Write[x<->T, {output->OUTPUT}] =: OUTPUT 
-      for T = EFG, NFG
+     for T=EFG, NFG
 \end{verbatim}\normalsize
 
 \bd
