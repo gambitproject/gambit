@@ -115,7 +115,7 @@ void dialogEditMixed::OnSelChanged(wxCommandEvent &p_event)
 {
   if (m_probGrid->IsCellEditControlEnabled()) {
     m_probGrid->SaveEditControlValue();
-    m_probGrid->HideCellEditControl();
+    m_probGrid->DisableCellEditControl();
   }
 
   gbtNfgPlayer oldPlayer = m_profile.GetGame().GetPlayer(m_selection);

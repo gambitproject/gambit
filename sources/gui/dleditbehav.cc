@@ -219,7 +219,7 @@ void dialogEditBehav::OnOK(wxCommandEvent &p_event)
 {
   if (m_probGrid->IsCellEditControlEnabled()) {
     m_probGrid->SaveEditControlValue();
-    m_probGrid->HideCellEditControl();
+    m_probGrid->DisableCellEditControl();
   }
 
   gbtEfgInfoset infoset = m_map.Lookup(m_infosetTree->GetSelection());
