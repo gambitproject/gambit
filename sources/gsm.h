@@ -33,8 +33,9 @@ template <class T> class gGrowableStack;
 class GSM
 {
 private:
-  gOutput&                         _StdOut;
-  gOutput&                         _StdErr;
+  gInput&  _StdIn;
+  gOutput& _StdOut;
+  gOutput& _StdErr;
   
   gGrowableStack< gGrowableStack< Portion* >* >* _StackStack;
   gGrowableStack< CallFuncObj* >*                _CallFuncStack;
@@ -71,7 +72,10 @@ private:
 
 
 public:
-  GSM( int size, gOutput& s_out = gout, gOutput& s_err = gerr );
+  GSM( int size = 10, 
+      gInput&  s_in  = gin, 
+      gOutput& s_out = gout, 
+      gOutput& s_err = gerr );
   ~GSM();
 
   int Depth    ( void ) const;

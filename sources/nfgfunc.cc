@@ -13,6 +13,45 @@
 
 #include "glist.h"
 
+
+//---------------------------------------------------------------
+//                  default Nfg related functions
+//---------------------------------------------------------------
+
+
+extern Portion* _DefaultNfgShadow;
+
+Portion* GSM_DefaultNfg( Portion** param )
+{
+  return _DefaultNfgShadow->ShadowOf()->Copy();
+}
+
+Portion *GSM_ReadDefaultNfg(Portion **param)
+{
+  gInput &f = ((Input_Portion *) param[0])->Value();
+  
+  if (f.IsValid())  
+  {
+    NormalForm<double> *N = new NormalForm<double>(f);
+    delete _DefaultNfgShadow->ShadowOf();
+    _DefaultNfgShadow->ShadowOf() = new Nfg_Portion<double>(*N);
+    return new bool_Portion( true );
+  }
+  else
+    return 0;
+}
+
+Portion* GSM_CopyDefaultNfg( Portion** param )
+{
+  delete _DefaultNfgShadow->ShadowOf();
+  _DefaultNfgShadow->ShadowOf() = param[0]->Copy();
+  return param[0]->Copy();
+}
+
+
+//----------------------------------------------------------------------
+
+
 Portion *GSM_DisplayNfg(Portion **param)
 {
   NormalForm<double> *N = &((Nfg_Portion<double> *) param[0])->Value();
@@ -161,6 +200,11 @@ Portion *GSM_NumPlayers(Portion **param)
 }
 */
 
+
+
+//---------------------------------------------------------------------
+
+
 void Init_nfgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
@@ -243,7 +287,25 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_WriteNfg, 1, "nfg", porNFG);
   FuncObj->SetParamInfo(GSM_WriteNfg, 2, "sset", porINTEGER);
   gsm->AddFunction(FuncObj);
+
+
+  //---------- default Nfg functions ---------------
+  FuncObj = new FuncDescObj("DefaultNfg");
+  FuncObj->SetFuncInfo(GSM_DefaultNfg, 0);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("ReadDefaultNfg");
+  FuncObj->SetFuncInfo(GSM_ReadDefaultNfg, 1);
+  FuncObj->SetParamInfo(GSM_ReadDefaultNfg, 0, "file", porINPUT);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("CopyDefaultNfg");
+  FuncObj->SetFuncInfo(GSM_CopyDefaultNfg, 1);
+  FuncObj->SetParamInfo(GSM_CopyDefaultNfg, 0, "nfg", porNFG);
+  gsm->AddFunction(FuncObj);
+
 }
+
 
 
 #ifdef __GNUG__

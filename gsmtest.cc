@@ -45,7 +45,7 @@ int main( void )
   gOutput* sout = new gFileOutput( "sout" );
   gOutput* serr = new gFileOutput( "serr" );
 
-  machine = new GSM( 32, gout, gerr );
+  machine = new GSM( 32, gin, gout, gerr );
 
   gList< Instruction* > program;
 
@@ -2610,6 +2610,93 @@ int main( void )
   machine->Dump();
 
   machine->InitCallFunction( "TestDefEfg" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "TestDefEfg" );
+  machine->InitCallFunction( "NewEfg" );
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "TestDefEfg" );
+  machine->CallFunction();
+  machine->Dump();
+
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+#endif
+
+
+  machine->PushRef( "OUTPUT" );
+  machine->Dump();
+
+  machine->PushRef( "OUTPUT" );
+  machine->PushOutput( "hello" );
+  machine->Assign();
+  machine->Dump();
+
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+  machine->InitCallFunction( "DefaultNfg" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "ReadDefaultNfg" );
+  machine->InitCallFunction( "NewInput" );
+  machine->Push( "2x2.nfg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+  
+  machine->InitCallFunction( "DefaultNfg" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "ReadDefaultNfg" );
+  machine->InitCallFunction( "NewInput" );
+  machine->Push( "e02.nfg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+  
+  machine->InitCallFunction( "DefaultNfg" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "test_nfg" );
+  machine->InitCallFunction( "ReadNfg" );
+  machine->InitCallFunction( "NewInput" );
+  machine->Push( "2x2.nfg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Dump();
+
+  machine->InitCallFunction( "CopyDefaultNfg" );
+  machine->PushRef( "test_nfg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+  
+  machine->InitCallFunction( "DefaultNfg" );
   machine->CallFunction();
   machine->Dump();
 

@@ -20,6 +20,8 @@
 #include "infoset.h"
 #include "node.h"
 
+#include "garray.h"
+#include "normal.h"
 #include "extform.h"
 
 
@@ -27,15 +29,20 @@
 //                 global variables
 //--------------------------------------------------------------------
 
+Portion* _DefaultNfgShadow = 0;
 Portion* _DefaultEfgShadow = 0;
+
+Portion* _OUTPUT = 0;
+Portion* _INPUT = 0;
+Portion* _NULL = 0;
 
 
 //--------------------------------------------------------------------
 //              implementation of GSM (Stack machine)
 //--------------------------------------------------------------------
 
-GSM::GSM( int size, gOutput& s_out, gOutput& s_err )
-:_StdOut( s_out ), _StdErr( s_err )
+GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
+:_StdIn( s_in ), _StdOut( s_out ), _StdErr( s_err )
 {
 #ifndef NDEBUG
   if( size <= 0 )
@@ -47,17 +54,26 @@ GSM::GSM( int size, gOutput& s_out, gOutput& s_err )
   _CallFuncStack = new gGrowableStack< CallFuncObj* >( size ) ;
   _RefTableStack = new gGrowableStack< RefHashTable* >( 1 );
   _RefTableStack->Push( new RefHashTable );
- 
+
+  // global function default variables initialization
+  // these should be done before InitFunctions() is called
+  gArray<int> dim( 2 );
+  dim[ 1 ] = 2;
+  dim[ 2 ] = 2;
+  _DefaultNfgShadow = new Error_Portion;
+  _DefaultNfgShadow->ShadowOf() = 
+    new Nfg_Portion<double>( * new NormalForm<double>( dim ) );
+
   _DefaultEfgShadow = new Error_Portion;
   _DefaultEfgShadow->ShadowOf() = 
     new Efg_Portion<double>( * new ExtForm<double> );
+
+  _INPUT  = new Input_Portion ( _StdIn,   true );
+  _OUTPUT = new Output_Portion( _StdOut,  true );
+  _NULL   = new Output_Portion( gnull,    true );
   
   _FuncTable     = new FunctionHashTable;
   InitFunctions();  // This function is located in gsmfunc.cc
-
-  _VarDefine( "OUTPUT" , new Output_Portion( gout, true ) );
-  _VarDefine( "INPUT" , new Input_Portion( gin, true ) );
-  _VarDefine( "NULL" , new Output_Portion( gnull, true ) );
 }
 
 
@@ -66,8 +82,17 @@ GSM::~GSM()
   Flush();
   delete _FuncTable;
 
+
+  delete _DefaultNfgShadow->ShadowOf();
+  delete _DefaultNfgShadow;
+
   delete _DefaultEfgShadow->ShadowOf();
   delete _DefaultEfgShadow;
+
+  delete _INPUT;
+  delete _OUTPUT;
+  delete _NULL;
+
 
   assert( _RefTableStack->Depth() == 1 );
   delete _RefTableStack->Pop();
@@ -196,7 +221,10 @@ bool GSM::_VarIsDefined( const gString& var_name ) const
   bool result;
   RefHashTable* ref_table;
 
-  result = _RefTableStack->Peek()->IsDefined( var_name );
+  if( var_name == "OUTPUT" || var_name == "INPUT" || var_name == "NULL" )
+    result = true;
+  else
+    result = _RefTableStack->Peek()->IsDefined( var_name );
   return result;
 }
 
@@ -206,9 +234,14 @@ bool GSM::_VarDefine( const gString& var_name, Portion* p )
   RefHashTable* ref_table;
   Portion* old_value;
   bool type_match = true;
+  bool read_only = false;
   bool result = true;
 
-  if( _RefTableStack->Peek()->IsDefined( var_name ) )
+  if( var_name == "OUTPUT" || var_name == "INPUT" || var_name == "NULL" )
+  {
+    read_only = true;
+  }
+  else if( _RefTableStack->Peek()->IsDefined( var_name ) )
   {
     old_value = (*_RefTableStack->Peek())( var_name );
     if( old_value->Type() != p->Type() )
@@ -242,15 +275,21 @@ bool GSM::_VarDefine( const gString& var_name, Portion* p )
     }
   }
 
-  if( type_match )
+  if( read_only )
   {
-    _RefTableStack->Peek()->Define( var_name, p );
+    _ErrorMessage( _StdErr, 46, 0, 0, var_name );
+    delete p;
+    result = false;
   }
-  else
+  else if( !type_match )
   {
     _ErrorMessage( _StdErr, 42, 0, 0, var_name );
     delete p;
     result = false;
+  }
+  else
+  {
+    _RefTableStack->Peek()->Define( var_name, p );
   }
   return result;
 }
@@ -261,7 +300,15 @@ Portion* GSM::_VarValue( const gString& var_name ) const
   Portion* result;
   RefHashTable* ref_table;
 
-  result = (*_RefTableStack->Peek())( var_name );
+  if( var_name == "INPUT" )
+    result = _INPUT;
+  else if( var_name == "OUTPUT" )
+    result = _OUTPUT;
+  else if( var_name == "NULL" )
+    result = _NULL;
+  else
+    result = (*_RefTableStack->Peek())( var_name );
+
   return result;
 }
 
@@ -1393,8 +1440,10 @@ void GSM::_ErrorMessage
     s << "  Attempted operating on different types\n";
     s << "  Type of Operand 1: ";
     PrintPortionTypeSpec( s, (PortionType) num1.as_long() );
+    s << "\n";
     s << "  Type of Operand 2: ";
     PrintPortionTypeSpec( s, (PortionType) num2.as_long() );
+    s << "\n";
     break;
   case 18:
     s << "  Not enough operands to perform unary operation\n";
@@ -1501,6 +1550,9 @@ void GSM::_ErrorMessage
   case 44:
   case 45:
     s << "  User-defined function error\n";
+    break;
+  case 46:
+    s << "  Attempted to assign to a read-only variable \"" << str1 << "\"\n";
     break;
   default:
     s << "  General error\n";

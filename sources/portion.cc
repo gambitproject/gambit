@@ -960,7 +960,10 @@ template <class T> Portion* Nfg_Portion<T>::Copy( bool new_data ) const
 
 
 template <class T> void Nfg_Portion<T>::Output( gOutput& s ) const
-{ s << "NormalForm[ "; _Value->GetTitle(); s << ']'; }
+{
+  s << "NormalForm[ "; _Value->GetTitle(); s << ']'; 
+  PrintPortionTypeSpec( s, Type() );
+}
 
 
 
@@ -1060,7 +1063,7 @@ template <class T> Portion* Efg_Portion<T>::Copy( bool new_data ) const
 
 template <class T> void Efg_Portion<T>::Output( gOutput& s ) const
 {
-  s << "ExtForm[ "; _Value->GetTitle(); s << "] "; 
+  s << "ExtForm[ "; _Value->GetTitle(); s << ']';
   PrintPortionTypeSpec( s, Type() );
 }
 
@@ -1247,7 +1250,7 @@ PortionType Output_Portion::Type( void ) const
 { return porOUTPUT; }
 
 Portion* Output_Portion::Copy( bool new_data ) const
-{ return new Output_Portion( *_Value ); }
+{ return new Output_Portion( *_Value, _Static ); }
 
 
 void Output_Portion::Output( gOutput& s ) const
@@ -1315,7 +1318,7 @@ PortionType Input_Portion::Type( void ) const
 { return porINPUT; }
 
 Portion* Input_Portion::Copy( bool new_data ) const
-{ return new Input_Portion( *_Value ); }
+{ return new Input_Portion( *_Value, _Static ); }
 
 
 void Input_Portion::Output( gOutput& s ) const
@@ -1371,63 +1374,62 @@ void PrintPortionTypeSpec( gOutput& s, PortionType type )
 {
   if( type == porERROR )
   {
-    s << "porERROR ";
+    s << " porERROR";
   }
   else
   {
     if( type & porBOOL )
-      s << "porBOOL ";
+      s << " porBOOL";
     if( type & porDOUBLE )
-      s << "porDOUBLE ";
+      s << " porDOUBLE";
     if( type & porINTEGER )
-      s << "porINTEGER ";
+      s << " porINTEGER";
     if( type & porRATIONAL )
-      s << "porRATIONAL ";
+      s << " porRATIONAL";
     if( type & porSTRING )
-      s << "porSTRING ";
+      s << " porSTRING";
     if( type & porLIST )
-      s << "porLIST ";
+      s << " porLIST";
 
     if( type & porNFG_DOUBLE )
-      s << "porNFG_DOUBLE ";
+      s << " porNFG_DOUBLE";
     if( type & porNFG_RATIONAL )
-      s << "porNFG_RATIONAL ";
+      s << " porNFG_RATIONAL";
     if( type & porEFG_DOUBLE )
-      s << "porEFG_DOUBLE ";
+      s << " porEFG_DOUBLE";
     if( type & porEFG_RATIONAL )
-      s << "porEFG_RATIONAL ";
+      s << " porEFG_RATIONAL";
     if( type & porMIXED_DOUBLE )
-      s << "porMIXED_DOUBLE ";
+      s << " porMIXED_DOUBLE";
     if( type & porMIXED_RATIONAL )
-      s << "porMIXED_RATIONAL ";
+      s << " porMIXED_RATIONAL";
     if( type & porBEHAV_DOUBLE )
-      s << "porBEHAV_DOUBLE ";
+      s << " porBEHAV_DOUBLE";
     if( type & porBEHAV_RATIONAL )
-      s << "porBEHAV_RATIONAL ";
+      s << " porBEHAV_RATIONAL";
 
     if( type & porOUTCOME )
-      s << "porOUTCOME ";
+      s << " porOUTCOME";
     if( type & porPLAYER )
-      s << "porPLAYER ";
+      s << " porPLAYER";
     if( type & porINFOSET )
-      s << "porINFOSET ";
+      s << " porINFOSET";
     if( type & porNODE )
-      s << "porNODE ";
+      s << " porNODE";
     if( type & porACTION )
-      s << "porACTION ";
+      s << " porACTION";
 
     if( type & porOUTPUT )
-      s << "porOUTPUT ";
+      s << " porOUTPUT";
     if( type & porINPUT )
-      s << "porINPUT ";
+      s << " porINPUT";
 
     if( type & porREFERENCE )
-      s << "porREFERENCE ";
+      s << " porREFERENCE";
 
     if( type & porUNKNOWN )
-      s << "porUNKNOWN ";
+      s << " porUNKNOWN";
   }
-  s << "\n";
 }
 
 
