@@ -184,3 +184,37 @@ void* AllocRing::alloc(int s)
   if (current >= n) current = 0;
   return p;
 }
+
+/*
+ common functions on built-in types
+*/
+
+long gcd(long x, long y)        // euclid's algorithm
+{
+  long a = abs(x);
+  long b = abs(y);
+
+  long tmp;
+  
+  if (b > a)
+  {
+    tmp = a; a = b; b = tmp;
+  }
+  for(;;)
+  {
+    if (b == 0)
+      return a;
+    else if (b == 1)
+      return b;
+    else
+    {
+      tmp = b;
+      b = a % b;
+      a = tmp;
+    }
+  }
+}
+
+
+
+
