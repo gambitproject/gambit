@@ -62,7 +62,8 @@ gambit:
 	cd ../distrib
 
 	@# Copy the setup and initialization files to ../misc
-	cp ../sources/gambit.ini ./gambit_setup ../sources/*.gcl ../misc
+	cp ../sources/gambit.ini ./gambit_setup ./gui-init \
+	  ../sources/*.gcl ../misc
 	cp ./gambit_setup ../..
 
 	@echo
