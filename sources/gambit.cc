@@ -3,11 +3,11 @@
 //
 // @(#)gambit.cc	1.4 4/7/94
 //
-
-#pragma hdrstop
+ 
 #include "wx.h"
 #include "wx_help.h"
-#include "extform.h"
+#pragma hdrstop
+#include "zfortify.hpp"
 #include "const.h"
 #include "gambit.h"
 #include "normgui.h"
@@ -17,20 +17,20 @@ GambitFrame   *gambit_frame = NULL;
 wxHelpInstance *help_instance = NULL;
 wxList 		my_children;
 wxCursor *arrow_cursor;
-#ifdef _AIX
+#ifdef _AIX                          
 extern wxApp *wxTheApp=1;
 #endif
 GambitApp gambitApp;
 //---------------------------------------------------------------------
 //                     GAMBITFRAME: CONSTRUCTOR
 //---------------------------------------------------------------------
-
+ 
 // The `main program' equivalent, creating the windows and returning the
 // main frame
 wxFrame *GambitApp::OnInit(void)
-{
+{                                         
 arrow_cursor = new wxCursor(wxCURSOR_ARROW);
-// Create the main frame window
+// Create the main frame window                                   
 gambit_frame = new GambitFrame(NULL, "Gambit", 0, 0, 200, 100,wxMDI_PARENT | wxDEFAULT_FRAME);
 // Give it an icon
 wxIcon *frame_icon;
@@ -61,8 +61,9 @@ menu_bar->Append(help_menu,	"&Help");
 
 // Associate the menu bar with the frame
 gambit_frame->SetMenuBar(menu_bar);
-// Process command line arguments, if any
+
 gambit_frame->Show(TRUE);
+// Process command line arguments, if any
 if (argc>1) gambit_frame->file_load(argv[1]);
 
 // Return the main frame window

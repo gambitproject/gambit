@@ -21,17 +21,13 @@ char *OutcomeToString(const gVector<T> &v,TreeDrawSettings &draw_settings,Bool c
 {
 char tempstr[20];
 static gString gvts;
-gvts="";
+gvts="(";
+ToStringPrecision(2);
 for (int i=v.First();i<=v.Last();i++)
 {
-	gvts+=(i==1) ? '(' : ',';
-	if (color_coded)
-	{
-		sprintf(tempstr,"\\C{%d}",draw_settings.GetPlayerColor(i));
-		gvts+=tempstr;
-	}
-	sprintf(tempstr,"%2.2f",(double)v[i]);
-	gvts+=tempstr;
+	if (i!=1) gvts+=",";
+	if (color_coded) gvts+=("\\C{"+ToString(draw_settings.GetPlayerColor(i))+"}");
+	gvts+=ToString(v[i]);
 }
 gvts+=')';
 
@@ -83,19 +79,20 @@ return (double)frame->GetActionProb(n,action);
 template <class T>
 gString TreeWindow<T>::ProbAsString(const Node *n,int action)
 {
-return ToString(frame->GetActionProb(n,action));
+T prob=frame->GetActionProb(n,action);
+if (prob<(T)0) return ""; else return ToString(prob);
 }
 
 template <class T>
 gString TreeWindow<T>::OutcomeAsString(const Node *n)
 {
 if (n->GetOutcome())
-  {
-    Outcome *t=n->GetOutcome();
-    OutcomeVector<T> *tv=(OutcomeVector<T> *)t;
-    gVector<T> *ttv=(gVector<T> *)tv;
-    return OutcomeToString(*ttv,draw_settings);
-  }
+{
+	Outcome *t=n->GetOutcome();
+	OutcomeVector<T> *tv=(OutcomeVector<T> *)t;
+	gVector<T> *ttv=(gVector<T> *)tv;
+	return OutcomeToString(*ttv,draw_settings);
+}
 return "";
 }
 

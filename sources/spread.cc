@@ -321,6 +321,8 @@ if (ev.LeftDown() || ev.ButtonDClick())
 // Keyboard message handler
 void SpreadSheetC::OnChar(wxKeyEvent &ev)
 {
+// Allow the default behavior to be overiden
+if (top_frame->OnCharNew(ev)) return;
 int ch=ev.KeyCode();
 // Cursor keys to move the hilight
 if (IsCursor(ev) || IsEnter(ev))	{ProcessCursor(ch);return;}
@@ -343,7 +345,7 @@ if (ch==WXK_F3)
 		gSpreadValType cell_type=sheet->GetType(cell.row,cell.col);
 		if ((cell_type==gSpreadNum && IsNumeric(ev)) ||	(cell_type==gSpreadStr && IsAlphaNum(ev)))
 		{
-			if (cell.editing==FALSE) cell.editing=TRUE;
+			if (cell.editing==FALSE){cell.editing=TRUE;cell.str="";} // this implements 'overwrite'
 			cell.str+=ch;
 		}
 		if (IsDelete(ev))
@@ -355,6 +357,7 @@ if (ch==WXK_F3)
 	}
 }
 }
+
 void SpreadSheetC::ProcessCursor(int ch)
 {
 if (cell.editing && ch!=0) sheet->SetValue(cell.row,cell.col,cell.str);

@@ -44,11 +44,14 @@ UpdatePlayerColor(pl);
 player_colors[pl]=(cl%WX_COLOR_LIST_LENGTH);
 }
 // GetPlayerColor: used to get the players display color.
-int GambitDrawSettings::GetPlayerColor(int pl)
+int GambitDrawSettings::GetPlayerColor(int pl)  const
 {
-pl+=2;
-UpdatePlayerColor(pl);
-return player_colors[pl];
+pl+=2;	// +2 is not used anymore...remnant of old player numbering
+//UpdatePlayerColor(pl);
+if (player_colors.Length()<pl)
+	return (pl%WX_COLOR_LIST_LENGTH+1);
+else
+	return player_colors[pl];
 }
 
 // LoadOptions: used to get the player colors from a config file
@@ -68,7 +71,7 @@ for (int i=1;i<=num_player_colors;i++)
 delete [] l_tempstr;
 }
 // SaveOptions: used to store the player colors to a config file
-void GambitDrawSettings::SaveOptions(char *s)
+void GambitDrawSettings::SaveOptions(char *s) const
 {
 char *file_name;
 

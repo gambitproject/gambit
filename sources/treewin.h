@@ -87,8 +87,6 @@ public:
 	void OnPaint(void);
 	void OnEvent(wxMouseEvent& event);
 	void OnChar(wxKeyEvent& ch);
-
-
 	// Menu event handlers (these are mostly in treewin1.cc)
 	void node_add(void);
 	void node_game(void);
@@ -119,6 +117,9 @@ public:
 	void infoset_merge(void);
 	void infoset_break(void);
 	void infoset_join(void);
+	void infoset_label(void);
+  void infoset_action_label(void);
+
 	void edit_outcome(void);
 	void display_legends(void);
 	void display_options(void);
@@ -142,6 +143,8 @@ public:
 	gString Title(void) const;
 
 	void Render(wxDC &dc);
+	// Gives access to the parent to the private draw_settings. Used for SolnShow
+	const TreeDrawSettings &DrawSettings(void) {return draw_settings;}
 };
 
 template <class T> class ExtensiveShow;

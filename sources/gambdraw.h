@@ -13,9 +13,9 @@ public:
 	GambitDrawSettings(void);
 // Controls the color each player gets
 	void	SetPlayerColor(int pl,int cl);
-	int		GetPlayerColor(int pl);
+	int		GetPlayerColor(int pl) const;
 // Allows to save/restore settings from file
-	void	SaveOptions(char *f=0);
+	void	SaveOptions(char *f=0) const;
 	void	LoadOptions(char *f);
 // GUI Set colors
 	void	PlayerColorDialog(gArray<gString> &);

@@ -48,6 +48,13 @@
 // The spreadsheet now supports the gDrawText extended text format, which
 // allows for multiple colors to be used in the same cell.  See wxmisc
 
+// In order to make this class as widely useable as possible, most functions
+// are declared virtual for easy overiding.  Note that you can overide
+// OnMenuCommand, OnCharNew (this receives events from the active canvas),
+// OnSize, OnOk, OnCancel, OnDoubleClick (Ctrl-Click in X), and some others.
+ 
+// $Id$
+
 #ifndef	SPREAD_H
 #define	SPREAD_H
 
@@ -395,26 +402,7 @@ public:
 //**************************** SPREAD SHEET 3D ******************************
 // Feature control constants: the low byte is used by the panel/buttons,
 // and the high byte is used by the menubar/menus
-#define ANY_BUTTON			1			// Specify this to create an empty panel
-#define ALL_BUTTONS			255
-#define	PRINT_BUTTON		2
-#define	CHANGE_BUTTON		4
-#define	OK_BUTTON				8
-#define	CANCEL_BUTTON		16
-#define OPTIONS_BUTTON	32
-#define HELP_BUTTON			64
-
-
-#define	ANY_MENU				256		// Specify this to create an empty menubar
-#define	ALL_MENUS       65280
-#define OUTPUT_MENU			512
-#define CLOSE_MENU			1024
-#define OPTIONS_MENU		2048
-#define CHANGE_MENU			4096
-#define HELP_MENU				8192
-
-#define HELP_MENU_ABOUT			8193
-#define HELP_MENU_CONTENTS	8194
+#include "sprconst.h"
 
 class SpreadSheet3D: public wxFrame
 {
@@ -453,8 +441,8 @@ public:
 	}
 	// Windows Events Handlers
 	void Update(wxDC *dc=NULL);
-	void OnSize(int w,int h);
-  void OnMenuCommand(int id);
+	virtual void OnSize(int w,int h);
+	virtual void OnMenuCommand(int id);
 	static void spread_slider_func(wxSlider &ob,wxCommandEvent &ev);
 	static void spread_ok_func(wxButton	&ob,wxEvent &ev);
 	static void spread_cancel_func(wxButton	 &ob,wxEvent &ev);
@@ -467,6 +455,7 @@ public:
 	virtual void OnSelectedMoved(int row,int col) { }
 	virtual void OnPrint(void);
 	virtual void OnHelp(int help_type=0) { }
+	virtual Bool OnCharNew(wxKeyEvent &ev) {return FALSE;}
 	// General data access
 	void		SetType(int row,int col,gSpreadValType t) {data[cur_level].SetType(row,col,t);}
 	gSpreadValType GetType(int row,int col) {return data[cur_level].GetType(row,col);}

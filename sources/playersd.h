@@ -55,6 +55,7 @@ Player *player=ef.GetPlayer(prev_name);
 if (strcmp(player->GetName(),new_name_item->GetValue())!=0)	// name changed
 {
 	player->SetName(new_name_item->GetValue());	// might want to check if there already exists one
+  if (new_name==prev_name) new_name=player->GetName();
 	name_item->Clear();
 	for (int i=1;i<=ef.NumPlayers();i++) name_item->Append((ef.PlayerList()[i])->GetName());
 	name_item->SetStringSelection(new_name);
