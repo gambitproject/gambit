@@ -14,7 +14,7 @@ main()
   ReadNfgFile(gin, N);
   EnumParams EP;
 //  EP.stopAfter=8;
-//  EP.trace=3;
+//   EP.trace=3;
   EP.tracefile=&gout;
   NFSupport S(*N);
   EnumModule<double> LM( *N, EP,S);

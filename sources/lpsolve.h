@@ -1,7 +1,7 @@
 //#
 //# FILE: lpsolve.h -- Linear program solution module
 //#
-//# $Id$
+//# @(#)lpsolve.h	1.1 8/17/95
 //#
 
 #ifndef LPSOLVE_H

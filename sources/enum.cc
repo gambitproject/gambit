@@ -90,6 +90,8 @@ template <class T> int EnumModule<T>::Enum(void)
   v1=poly1.VertexList().Last();
   v2=poly2.VertexList().Last();
 
+  gout << "\n v1 = " << v1 << ", v2 = " << v2 << "\n";
+
   BFS<T> bfs1,bfs2;
   MixedProfile<T> profile(NF,support);
   T sum;

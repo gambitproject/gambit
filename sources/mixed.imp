@@ -185,6 +185,53 @@ template <class T> void MixedProfile<T>::Centroid(void)
       svptr[i][j] = center;
   }
 }
+
+template <class T> T MixedProfile<T>::LiapValue(void) const
+{
+  static const T BIG1 = (T) 100;
+  static const T BIG2 = (T) 100;
+
+  MixedProfile<T> p(*this);
+  ((gVector<T> &) p).operator=(*this);
+  MixedProfile<T> tmp(p);
+  gPVector<T> payoff(p);
+  T x, result((T) 0), avg, sum;
+  payoff = (T) 0;
+
+  result = (T) 0;
+  for(int i = 1; i <= N->NumPlayers(); i++) {
+    tmp.CopyRow(i, payoff);
+    avg = sum = (T) 0;
+    // then for each strategy for that player set it to 1 and evaluate
+    int j;
+    for (j = 1; j <= p.GetNFSupport().NumStrats(i); j++) {
+      tmp(i, j) = (T) 1;
+      x = p(i, j);
+      payoff(i, j) = tmp.Payoff(i);
+      avg += x * payoff(i, j);
+      sum += x;
+      if (x>(T)0) x=0;
+      result += BIG1*x*x;         // add penalty for neg probabilities
+      tmp(i,j) = (T) 0;
+    }
+    tmp.CopyRow(i, p);
+    for(j=1;j<=p.GetNFSupport().NumStrats(i);j++) {
+      x=payoff(i,j)-avg;
+      if (x<=(T)0) x=(T)0;
+      result += x*x;          // add penalty if not best response
+    }
+    x=sum - ((T) 1);
+    result += BIG2*x*x ;          // add penalty for sum not equal to 1
+  }
+  return result;
+}
+
+template <class T> bool MixedProfile<T>::IsNash(void) const
+{
+  if(LiapValue()==(T)0) return 1;
+  return 0;
+}
+
 template <class T> bool MixedProfile<T>::IsPure(void) const
 {
   for (int i = 1; i <= svlen.Length(); i++)

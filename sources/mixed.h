@@ -67,6 +67,8 @@ template <class T> class MixedProfile
 
     Nfg<T> *BelongsTo(void) const  { return (Nfg<T> *) N; }
 
+    T LiapValue(void) const;
+    bool IsNash(void) const;
     bool IsPure(void) const;
     bool IsPure(int pl) const;
     void Centroid(void);
