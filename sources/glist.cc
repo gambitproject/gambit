@@ -16,6 +16,8 @@
 #define TEMPLATE template
 #elif defined __BORLANDC__
 #define TEMPLATE
+bool operator!=(const gArray<int> &, const gArray<int> &);
+void gList<gBlock<int> >::Dump(gOutput &) const { };
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
