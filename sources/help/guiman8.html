@@ -1,0 +1,61 @@
+<HTML>
+<head><title>The Extensive Form</title></head>
+
+<BODY BGCOLOR=#FFFFFF>
+<A NAME="extformsec"></A><CENTER>
+<A HREF="guiman_contents.html">Contents</A> <A HREF="guiman7.html#topic5">Up</A> <A HREF="guiman7.html#topic5">&lt;&lt;</A> <A HREF="guiman9.html#topic6">&gt;&gt;</A> </CENTER><HR>
+
+<H2>The Extensive Form</H2>
+<P>
+The extensive form is a detailed description of a sequence of decisions 
+that must be made by a group of individuals. To illustrate the basic ideas,
+ Figure 3.1 
+shows how the extensive form of a simple 
+<A HREF="guiman108.html#pokergloss">two player poker game</A> (from [1] is represented
+ in the Gambit GUI.  <P>
+
+<CENTER></CENTER><A HREF="poker_ef">Picture</A>
+<CENTER></CENTER>
+Figure 3.1: GAMBIT Display of Extensive Form of
+  a Simple Two Player Poker Game
+<P>
+In Gambit, the extensive form <A HREF="guiman117.html#toptreegloss">game tree</A>, is drawn with the 
+<A HREF="guiman112.html#rootnodegloss">root node</A> being the node furthest to the left,
+branches going from left to right, and successive 
+nodes to the right of 
+their predecessors.  So nodes further to the right represent decisions 
+that occur later in time.  Each player, (including chance) is represented by a color.  <P>
+A <A HREF="guiman106.html#nodegloss">node</A> is represented as a horizontal line.  Every
+non-terminal node is a <A HREF="guiman99.html#decnodegloss">decision node</A> and is
+represented by the color of the player who makes a decision at that
+node.  Nodes are connected by <A HREF="guiman97.html#branchgloss">branches</A>, which
+are represented by two connected line segments, the "fork'' and the
+"tine''.  The fork is used in the graphics display to indicate
+graphically the probabilities of taking each branch.  The tine is used
+as a location at which to display textual information about the
+branch.  In gambit <A HREF="guiman107.html#outcomegloss">Outcomes</A> can be attached to
+either non terminal or terminal nodes and can be displayed either by
+label or by payoff next to the node to which they are attached.<P>
+<A HREF="guiman104.html#infosetgloss">Information sets</A> in Gambit are identified by a
+pair of numbers, the first representing the player number and the
+second representing the information set number.  This information can
+be displayed on the extensive form next to each node to identify which
+nodes are in which information sets.  Whenever possible information
+sets are also represented by vertical lines connecting the nodes that
+are members of the same information set.  It is only possible to do
+this when nodes in the same information set are at the same level of
+the tree.  When two member nodes of the same information set are not
+at the same level, the information set is indicated by a "lagged''
+line, the end of which points in the direction of the next node, as
+illustrated in Figure 3.2.<P>
+
+<CENTER></CENTER><A HREF="lag_iset">Picture</A>
+<CENTER></CENTER>
+Figure 3.2: GAMBIT Display of information set when member nodes are at different levels
+<P>
+
+<A HREF="guiman9.html#topic6"><B>Labeling</B></A><BR>
+
+<A HREF="guiman10.html#infosetnumbering"><B>Numbering</B></A><BR>
+
+</BODY></HTML>

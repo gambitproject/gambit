@@ -1,0 +1,25 @@
+<HTML>
+<head><title>Ancestors</title></head>
+
+<BODY BGCOLOR=#FFFFFF>
+<A NAME="ExtAncestors"></A><CENTER>
+<A HREF="gclman_contents.html">Contents</A> <A HREF="gclman42.html#topic28">Up</A> <A HREF="gclman54.html#ExtAllSubgamePerfect">&lt;&lt;</A> &gt;&gt; </CENTER><HR>
+
+<H2>Ancestors</H2>
+
+
+<FONT SIZE=4>
+<PRE>
+Ancestors[n-&gt;NODE] =: LIST(NODE) 
+</PRE>
+</FONT><P>
+
+Returns a nested list of the nodes in the tree following a given one.  <P>
+<B>Definition:</B>
+<PRE>
+  If[IsRoot[n],{n},Flatten[{Ancestors[Parent[n]]}&{n}]]
+</PRE>
+<P>
+<P>
+
+</BODY></HTML>

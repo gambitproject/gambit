@@ -1,0 +1,27 @@
+<HTML>
+<head><title>AllSubgamePerfect</title></head>
+
+<BODY BGCOLOR=#FFFFFF>
+<A NAME="ExtAllSubgamePerfect"></A><CENTER>
+<A HREF="gclman_contents.html">Contents</A> <A HREF="gclman42.html#topic28">Up</A> <A HREF="gclman53.html#ExtAllSequential">&lt;&lt;</A> <A HREF="gclman55.html#ExtAncestors">&gt;&gt;</A> </CENTER><HR>
+
+<H2>AllSubgamePerfect</H2>
+
+
+<PRE>
+AllSubgamePerfect[e-&gt;EFG, {stopAfter-&gt;0}, {nTries-&gt;0}, 
+                  {precision-&gt;Float}] =: LIST(BEHAV) 
+</PRE>
+ Searches for all subgame perfect Nash equilibria of the extensive
+form game <TT>e</TT>.  Returns a list containing the equilibria found.<P>
+<B>Definition:</B>
+<PRE>
+  ms:=MarkedSubgames[e];MarkSubgames[e];
+  If[NumPlayers[e] = 2, 
+    b:=EnumMixedSolve[e,True,0,precision],
+    b:=PolEnumSolve[e,False,stopAfter]
+  ];
+  MarkSubgames[ms];b
+</PRE>
+
+</BODY></HTML>

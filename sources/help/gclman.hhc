@@ -1,0 +1,236 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="tex2rtf">
+<!-- Sitemap 1.0 -->
+</HEAD><BODY>
+<OBJECT type="text/site properties">
+ <param name="ImageType" value="Folder">
+</OBJECT>
+<UL>
+<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="gclman_contents.html">
+<param name="Name" value="Contents">
+</OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman1.html#topic0">
+  <param name="Name" value="Copyright Notice">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman2.html#topic1">
+  <param name="Name" value="Acknowledgements">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman3.html#topic2">
+  <param name="Name" value="Function Reference, by Category">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman4.html#topic3">
+  <param name="Name" value="General Functionality">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman5.html#topic4">
+  <param name="Name" value="Variables and Functions">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman6.html#topic5">
+  <param name="Name" value="Flow Control">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman7.html#topic6">
+  <param name="Name" value="Help">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman8.html#topic7">
+  <param name="Name" value="Timing">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman9.html#topic8">
+  <param name="Name" value="System information and commands">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman10.html#topic9">
+  <param name="Name" value="Basic Data Types">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman11.html#topic10">
+  <param name="Name" value="Logic">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman12.html#topic11">
+  <param name="Name" value="Relational operators">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman13.html#topic12">
+  <param name="Name" value="Mathematical operations">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman14.html#topic13">
+  <param name="Name" value="Strings">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman15.html#topic14">
+  <param name="Name" value="Lists">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman16.html#topic15">
+  <param name="Name" value="Data conversions">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman17.html#topic16">
+  <param name="Name" value="Input and Output">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman18.html#topic17">
+  <param name="Name" value="Building Games">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman19.html#topic18">
+  <param name="Name" value="Extensive form manipulation">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman20.html#topic19">
+  <param name="Name" value="Normal form manipulation">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman21.html#topic20">
+  <param name="Name" value="Getting Information">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman22.html#topic21">
+  <param name="Name" value="Solving Games">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman23.html#topic22">
+  <param name="Name" value="Subgames">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman24.html#topic23">
+  <param name="Name" value="Dominance elimination and supports">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman25.html#topic24">
+  <param name="Name" value="Solution algorithms">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman26.html#topic25">
+  <param name="Name" value="Equilibria and refinements">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman27.html#topic26">
+  <param name="Name" value="Solution Information">
+  </OBJECT>
+</UL></UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman28.html#topic27">
+  <param name="Name" value="Alphabetical function reference">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman29.html#PrimAccuracy">
+  <param name="Name" value="Accuracy">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman30.html#PrimActionNumber">
+  <param name="Name" value="ActionNumber">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman31.html#PrimActionProb">
+  <param name="Name" value="ActionProb">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman32.html#PrimActions">
+  <param name="Name" value="Actions">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman33.html#PrimActionValue">
+  <param name="Name" value="ActionValue">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman34.html#PrimAddAction">
+  <param name="Name" value="AddAction">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman35.html#PrimAddMove">
+  <param name="Name" value="AddMove">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman36.html#PrimAddNode">
+  <param name="Name" value="AddNode">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman37.html#PrimAddStrategy">
+  <param name="Name" value="AddStrategy">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman38.html#PrimAgentForm">
+  <param name="Name" value="AgentForm">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman39.html#PrimAnd">
+  <param name="Name" value="And">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman40.html#PrimArgMax">
+  <param name="Name" value="ArgMax">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman41.html#PrimAssign">
+  <param name="Name" value="Assign">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman42.html#topic28">
+  <param name="Name" value="Standard user-defined functions">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman43.html#ExtActionNumber">
+  <param name="Name" value="ActionNumber">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman44.html#ExtActionProbs">
+  <param name="Name" value="ActionProbs">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman45.html#ExtActionValues">
+  <param name="Name" value="ActionValues">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman46.html#ExtActions">
+  <param name="Name" value="Actions">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman47.html#ExtAddMove">
+  <param name="Name" value="AddMove">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman48.html#ExtAllActions">
+  <param name="Name" value="AllActions">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman49.html#ExtAllInfosets">
+  <param name="Name" value="AllInfosets">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman50.html#ExtAllMembers">
+  <param name="Name" value="AllMembers">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman51.html#ExtAllNash">
+  <param name="Name" value="AllNash">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman52.html#ExtAllPerfect">
+  <param name="Name" value="AllPerfect">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman53.html#ExtAllSequential">
+  <param name="Name" value="AllSequential">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman54.html#ExtAllSubgamePerfect">
+  <param name="Name" value="AllSubgamePerfect">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="gclman55.html#ExtAncestors">
+  <param name="Name" value="Ancestors">
+  </OBJECT>
+</UL>
+</UL>

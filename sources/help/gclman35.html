@@ -1,0 +1,25 @@
+<HTML>
+<head><title>AddMove</title></head>
+
+<BODY BGCOLOR=#FFFFFF>
+<A NAME="PrimAddMove"></A><CENTER>
+<A HREF="gclman_contents.html">Contents</A> <A HREF="gclman28.html#topic27">Up</A> <A HREF="gclman34.html#PrimAddAction">&lt;&lt;</A> <A HREF="gclman36.html#PrimAddNode">&gt;&gt;</A> </CENTER><HR>
+
+<H2>AddMove</H2>
+
+
+<PRE>
+AddMove[infoset-&gt;INFOSET, node-&gt;NODE] =: NODE 
+</PRE>
+Places a terminal <TT>node</TT> into the information set
+<TT>infoset</TT>.  The result is <TT>node</TT> becomes a decision node,
+with number of branches equal to the number of actions in <TT>infoset</TT>.
+New child nodes are created as successor nodes to the actions in the
+information set.  The child which succeeds the first action is returned.
+It is an error if <TT>node</TT> and <TT>infoset</TT> are not from the same
+extensive form game, or if <TT>node</TT> is not a terminal node.<P>
+<B>See also:</B> <TT>InsertMove</TT> (REF NOT FOUND),
+<TT>DeleteMove</TT> (REF NOT FOUND),
+<TT>NewInfoset</TT> (REF NOT FOUND).<P>
+
+</BODY></HTML>

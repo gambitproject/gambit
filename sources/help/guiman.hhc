@@ -1,0 +1,484 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="tex2rtf">
+<!-- Sitemap 1.0 -->
+</HEAD><BODY>
+<OBJECT type="text/site properties">
+ <param name="ImageType" value="Folder">
+</OBJECT>
+<UL>
+<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="guiman_contents.html">
+<param name="Name" value="Contents">
+</OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman1.html#topic0">
+  <param name="Name" value="Copyright notice">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman2.html#gambitproject">
+  <param name="Name" value="Acknowledgments">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman3.html#topic1">
+  <param name="Name" value="Introduction">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman4.html#topic2">
+  <param name="Name" value="Hardware and Installation">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman5.html#topic3">
+  <param name="Name" value="Platforms">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman6.html#topic4">
+  <param name="Name" value="Installation">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman7.html#topic5">
+  <param name="Name" value="Representation of Games in GAMBIT">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman8.html#extformsec">
+  <param name="Name" value="The Extensive Form">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman9.html#topic6">
+  <param name="Name" value="Labeling">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman10.html#infosetnumbering">
+  <param name="Name" value="Numbering">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman11.html#topic7">
+  <param name="Name" value="Strategies and The Normal Form">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman12.html#topic8">
+  <param name="Name" value="Wildcard notation">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman13.html#normformsec">
+  <param name="Name" value="Normal Form">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman14.html#topic9">
+  <param name="Name" value="Types of Games">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman15.html#perfrecallsec">
+  <param name="Name" value="perfect recall">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman16.html#incinfsec">
+  <param name="Name" value="Games of incomplete information">
+  </OBJECT>
+</UL></UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman17.html#topic10">
+  <param name="Name" value="GAMBIT GUI">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman18.html#topic11">
+  <param name="Name" value="File menu">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman19.html#DataTypes">
+  <param name="Name" value="Data Types">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman20.html#GUIDialogs">
+  <param name="Name" value="Dialogs">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman21.html#SolutionInspect">
+  <param name="Name" value="Solutions Inspect">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman22.html#NormalSolutionInspect">
+  <param name="Name" value="Normal Form Solution Inspect">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman23.html#ExtensiveSolutionInspect">
+  <param name="Name" value="Extensive Form Solution Inspect">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman24.html#SolnSortFilt">
+  <param name="Name" value="Sorting and Filtering Solutions">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman25.html#SolnAddEdit">
+  <param name="Name" value="Adding and Editing Solutions">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman26.html#OutputMedia">
+  <param name="Name" value="Output Media Dialog">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman27.html#StandardSolution">
+  <param name="Name" value="Standard Solution Dialog">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman28.html#ChangePayoff">
+  <param name="Name" value="Change Payoffs Dialog">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman29.html#SelectOutcome">
+  <param name="Name" value="Select Outcome Dialog">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman30.html#DrawOptions">
+  <param name="Name" value="Draw Options Dialog">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman31.html#InspectNode">
+  <param name="Name" value="Inspect Node Dialog">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman32.html#ZoomWindow">
+  <param name="Name" value="Zoom Window">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman33.html#AcceleratorSec">
+  <param name="Name" value="Accelerators Dialog">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman34.html#UnDominated">
+  <param name="Name" value="Dominance Elimination Dialog">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman35.html#EditSupport">
+  <param name="Name" value="Creating and Editing Supports">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman36.html#AddMove">
+  <param name="Name" value="Add Move Dialog">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman37.html#Legends">
+  <param name="Name" value="Legends Dialog">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman38.html#TableWindow">
+  <param name="Name" value="Table Window">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman39.html#topic12">
+  <param name="Name" value="Mathematical Errors">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman40.html#NFGUI">
+  <param name="Name" value="Normal Form GUI">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman41.html#topic13">
+  <param name="Name" value="Normal Form Display">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman42.html#topic14">
+  <param name="Name" value="Row and Column Players">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman43.html#topic15">
+  <param name="Name" value="Strategy Profile">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman44.html#topic16">
+  <param name="Name" value="Normal Form Menu">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman45.html#nffile">
+  <param name="Name" value="File Menu (nfg)">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman46.html#nfedit">
+  <param name="Name" value="Edit Menu (nfg)">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman47.html#nfsupports">
+  <param name="Name" value="Supports Menu (nfg)">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman48.html#nfsolve">
+  <param name="Name" value="Solve Menu (nfg)">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman49.html#nfinspectsec">
+  <param name="Name" value="View Menu (nfg)">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman50.html#topic17">
+  <param name="Name" value="Prefs Menu (nfg)">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman51.html#NormalFormSolutions">
+  <param name="Name" value="Normal Form Solutions">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman52.html#NFGStandardSolutions">
+  <param name="Name" value="NFG Standard Solutions">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman53.html#NFGCustomSolutions">
+  <param name="Name" value="NFG Custom Solutions">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman54.html#NormFormDefAccl">
+  <param name="Name" value="Default Accelerator Keys">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman55.html#EFGUI">
+  <param name="Name" value="Extensive Form GUI">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman56.html#topic18">
+  <param name="Name" value="Extensive Form Display">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman57.html#topic19">
+  <param name="Name" value="Navigating the Extensive Form">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman58.html#DragAndDrop">
+  <param name="Name" value="Drag and Drop">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman59.html#topic21">
+  <param name="Name" value="Extensive Form Menu">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman60.html#effile">
+  <param name="Name" value="File Menu (efg)">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman61.html#efedit">
+  <param name="Name" value="Edit Menu (efg)">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman62.html#SubgamesMenu">
+  <param name="Name" value="Subgames Menu (efg)">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman63.html#efsupport">
+  <param name="Name" value="Supports Menu (efg)">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman64.html#efsolve">
+  <param name="Name" value="Solve Menu (efg)">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman65.html#efinspect">
+  <param name="Name" value="Inspect Menu (efg)">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman66.html#displaymenu">
+  <param name="Name" value="Prefs Menu (efg)">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman67.html#ExtensiveFormSolutions">
+  <param name="Name" value="Extensive Form Solutions">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman68.html#Subgames">
+  <param name="Name" value="Subgames">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman69.html#topic23">
+  <param name="Name" value="Extensive form Supports">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman70.html#EFGStandardSolutions">
+  <param name="Name" value="EFG Standard Solutions">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman71.html#EFGCustomSolutions">
+  <param name="Name" value="EFG Custom Solutions">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman72.html#EFGSolnSubg">
+  <param name="Name" value="EFG Solutions and Subgames">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman73.html#ExtFormDefAccl">
+  <param name="Name" value="Default Accelerator Keys">
+  </OBJECT>
+</UL></UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman74.html#topic24">
+  <param name="Name" value="Solutions of Games">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman75.html#supportsec">
+  <param name="Name" value="Supports">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman76.html#topic25">
+  <param name="Name" value="Equilibria">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman77.html#nashsec">
+  <param name="Name" value="Nash Equilibrium">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman78.html#purenashsec">
+  <param name="Name" value="Pure Equilibria">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman79.html#csumsec">
+  <param name="Name" value="Two Person Constant Sum Games">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman80.html#twopersec">
+  <param name="Name" value="Two Person Games">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman81.html#npernashsec">
+  <param name="Name" value="N Person Games">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman82.html#seqnashsec">
+  <param name="Name" value="sequential equilibrium">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman83.html#SolutionAlgorithms">
+  <param name="Name" value="Solution Algorithms">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman84.html#EnumMixed">
+  <param name="Name" value="EnumMixed">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman85.html#EnumPure">
+  <param name="Name" value="EnumPure">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman86.html#QRE">
+  <param name="Name" value="QRE">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman87.html#QREAll">
+  <param name="Name" value="QRE Grid">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman88.html#Lcp">
+  <param name="Name" value="Lcp">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman89.html#Liap">
+  <param name="Name" value="Liap">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman90.html#Lp">
+  <param name="Name" value="Lp">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman91.html#PolEnum">
+  <param name="Name" value="PolEnum">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman92.html#SimpDiv">
+  <param name="Name" value="SimpDiv">
+  </OBJECT>
+</UL></UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman93.html#topic26">
+  <param name="Name" value="External Programs">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman94.html#bibliography">
+  <param name="Name" value="References">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman95.html#topic27">
+  <param name="Name" value="Glossary">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman96.html#actiongloss">
+  <param name="Name" value="Action">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman97.html#branchgloss">
+  <param name="Name" value="Branch">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman98.html#continggloss">
+  <param name="Name" value="Contingency">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman99.html#decnodegloss">
+  <param name="Name" value="Decision Node">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman100.html#dominationgloss">
+  <param name="Name" value="Domination">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman101.html#guigloss">
+  <param name="Name" value="GUI">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman102.html#gclgloss">
+  <param name="Name" value="GCL">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman103.html#indextravgloss">
+  <param name="Name" value="Indexed Traversal Order">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman104.html#infosetgloss">
+  <param name="Name" value="Information Set">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman105.html#nashequigloss">
+  <param name="Name" value="Nash Equilibrium">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman106.html#nodegloss">
+  <param name="Name" value="Node">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman107.html#outcomegloss">
+  <param name="Name" value="Outcome">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman108.html#pokergloss">
+  <param name="Name" value="Poker Description">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman109.html#purestratgloss">
+  <param name="Name" value="PureStrategies">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman110.html#realprobgloss">
+  <param name="Name" value="Realization Probability">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman111.html#rednormgloss">
+  <param name="Name" value="Reduced Normal Form">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman112.html#rootnodegloss">
+  <param name="Name" value="Root Node">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman113.html#stratprofgloss">
+  <param name="Name" value="Strategy Profile">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman114.html#subgamegloss">
+  <param name="Name" value="Subgame">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman115.html#subtreegloss">
+  <param name="Name" value="Subtree">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman116.html#termnodegloss">
+  <param name="Name" value="Terminal Node">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="guiman117.html#toptreegloss">
+  <param name="Name" value="Topological Tree">
+  </OBJECT>
+</UL>
+</UL>

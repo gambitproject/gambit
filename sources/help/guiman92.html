@@ -1,0 +1,64 @@
+<HTML>
+<head><title>SimpDiv</title></head>
+
+<BODY BGCOLOR=#FFFFFF>
+<A NAME="SimpDiv"></A><CENTER>
+<A HREF="guiman_contents.html">Contents</A> <A HREF="guiman83.html#SolutionAlgorithms">Up</A> <A HREF="guiman91.html#PolEnum">&lt;&lt;</A> <A HREF="guiman93.html#topic26">&gt;&gt;</A> </CENTER><HR>
+
+<H3>SimpDiv</H3>
+
+Computes a Nash equilibrium to a normal form game based on a
+simplicial subdivision algorithm.  The algorithm implemented is that
+of [17].  The algorithm is a simplicial subdivision
+algorithm which can start at any point in the simplex.  The algorithm
+starts with a given grid size, follows a path of almost completely
+labeled subsimplexes, and converges to a completely labeled
+sub-simplex that approximates the solution.  Additional accuracy is
+obtained by refining the grid size and restarting from the previously
+found point.  The idea is that by restarting at a close approximation
+to the solution, each successive increase in accuracy will yield a
+short path, and hence be quick.<P>
+In its pure form, the algorithm is guaranteed to find at least one
+mixed strategy equilibrium to any n-person game.  Experience shows
+that the algorithm works well, and is acceptably fast for many
+moderate size problems.  But in some examples it can be quite slow.
+The reason for this is that sometimes after restarting with a refined
+grid size, even though the starting point is a good approximation to
+the solution, the algorithm will go to the boundary of the simplex
+before converging back to a point that is close to the original
+starting point.  When this occurs, each halving of the grid size will
+take twice as long to converge as the previous grid size.  If a high
+degree of accuracy is required, or if the normal form is large, this
+can result in the algorithm taking a long time to converge.<P>
+In order to combat the above difficulty, a parameter 'leash' has been
+added to the algorithm which places a limit on the distance which the
+algorithm can wander from the restart point. (Setting this parameter
+to 0 results in no limit, and gives the pure form of the algorithm.)
+With this parameter set to a non trivial value, the algorithm is no
+longer guaranteed to converge, and setting small values of the
+parameter will sometimes yield lack of convergence.  However,
+experience shows that values of the parameter on the order of 10
+generally do not destroy convergence, and yield much faster
+convergence.<P>
+Parameters:<P>
+<DL>
+
+
+</TD>
+<DT> Stop after:
+<DD> Maximum number of equilibria to find. Default is 1.  
+
+</TD>
+<DT> n Restarts:
+<DD> Number of restarts.  At each restart the mesh of the
+triangulation is halved.  So this parameter determines the final mesh
+by the formula 1/2^ndivs.
+
+</TD>
+<DT> Leash:
+<DD> Sets the leashlength. Default is 0, which results in no
+constraint, or no leash.  
+</DL>
+<P>
+
+</BODY></HTML>

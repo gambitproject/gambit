@@ -1,0 +1,53 @@
+<HTML>
+<head><title>PolEnum</title></head>
+
+<BODY BGCOLOR=#FFFFFF>
+<A NAME="PolEnum"></A><CENTER>
+<A HREF="guiman_contents.html">Contents</A> <A HREF="guiman83.html#SolutionAlgorithms">Up</A> <A HREF="guiman90.html#Lp">&lt;&lt;</A> <A HREF="guiman92.html#SimpDiv">&gt;&gt;</A> </CENTER><HR>
+
+<H3>PolEnum</H3>
+
+Solves for all totally mixed Nash equilibrium of the game on a given
+support. The algorithm iterates through all sub-supports of the
+initial support to find the full support equilibria on each
+sub-support.  Supports with singular solutions are skipped by the
+algorithm when determined to have singular solutions.<P>
+On each sub-support, the algorithm starts with a cube containing the
+space of possible solutions and proceeds recursively.  The recursion
+step begins with a subcube.  The subcube is discarded if the cube is
+irrelevant in the sense of lying outside the space of possible
+solutions.  Otherwise a modified Newton's method is used to search for
+a solution in the subcube.  In the event that such a solution is
+found, Taylor's series information at the solution is used to inquire
+whether the solution is necessarily the unique solution in the
+subcube.  If Newton's method leaves the subcube before finding a
+solution, Taylor's series information at the center is used to inquire
+whether we can be sure that the subcube contains no solutions.  If
+neither of these procedures resolves the issue, the subcube is
+subdivided and this recursion is performed on each smaller subcube.
+Supports with singular solutions <P>
+The following optional parameters may be used to modify the behavior
+of the algorithm:<P>
+<DL>
+
+
+</TD>
+<DT> Stop After:
+<DD> By default, all equilibria are found.  This
+parameter may be used to specify a maximum number of equilibria to be
+found.
+
+</TD>
+<DT> Singular Supps:
+<DD> Returns a list of the supports which have
+singular solutions. <B>Note:</B> This is currently not implemented in
+the GUI, but is available in the GCL.
+
+</TD>
+<DT> recurse:
+<DD> Determines whether to recurse to all sub supports.
+Default is <B>True</B>. 
+</DL>
+<P>
+
+</BODY></HTML>

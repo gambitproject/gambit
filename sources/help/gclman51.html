@@ -1,0 +1,44 @@
+<HTML>
+<head><title>AllNash</title></head>
+
+<BODY BGCOLOR=#FFFFFF>
+<A NAME="ExtAllNash"></A><CENTER>
+<A HREF="gclman_contents.html">Contents</A> <A HREF="gclman42.html#topic28">Up</A> <A HREF="gclman50.html#ExtAllMembers">&lt;&lt;</A> <A HREF="gclman52.html#ExtAllPerfect">&gt;&gt;</A> </CENTER><HR>
+
+<H2>AllNash</H2>
+
+
+<PRE>
+AllNash[e-&gt;EFG, {stopAfter-&gt;0}, {nTries-&gt;0}, 
+        {precision-&gt;Float}] =: LIST(BEHAV) 
+</PRE>
+Finds all Nash equilibria of the extensive form game
+<TT>e</TT>.  Returns a list containing the equilibria found.<P>
+<B>Definition:</B>
+<PRE>
+  ms:=MarkedSubgames[e];UnMarkSubgames[e];
+  If[NumPlayers[e] = 2, 
+    s:=IterativeUnDominated[Nfg[e],strong-&gt;True];
+    b:=Behav[EnumMixedSolve[s,0,precision]],
+    b:=PolEnumSolve[e,False,stopAfter]
+  ];
+  MarkSubgames[ms];b
+</PRE>
+<HR>
+<P>
+<PRE>
+AllNash[n-&gt;NFG, {stopAfter-&gt;0}, {nTries-&gt;0}, 
+        {precision-&gt;Float}] =: LIST(MIXED) 
+</PRE>
+Finds all Nash equilibria of the normal form game
+<TT>n</TT>.  Returns a list containing the equilibria found.<P>
+<B>Definition:</B>
+<PRE>
+  s:=IterativeUnDominated[n,strong-&gt;True];
+  If[NumPlayers[n] = 2, 
+    EnumMixedSolve[s,0,precision],
+    PolEnumSolve[s,stopAfter]
+  ]
+</PRE>
+
+</BODY></HTML>

@@ -1,0 +1,136 @@
+<HTML>
+<head><title>EFG Standard Solutions</title></head>
+
+<BODY BGCOLOR=#FFFFFF>
+<A NAME="EFGStandardSolutions"></A><CENTER>
+<A HREF="guiman_contents.html">Contents</A> <A HREF="guiman67.html#ExtensiveFormSolutions">Up</A> <A HREF="guiman69.html#topic23">&lt;&lt;</A> <A HREF="guiman71.html#EFGCustomSolutions">&gt;&gt;</A> </CENTER><HR>
+
+<H3>EFG Standard Solutions</H3>
+
+The standard solutions are selected by the <B>Solve-&gt;Standard</B> menu.
+The particular settings are then picked in the dialog box.  You can
+select a refinement of Nash equilibrium to compute (Nash, Subgame
+perfect, and Sequential), and a maximum number of solutions to
+compute.  When you select a standard solution setting, it
+automatically sets various parameters that control the solution
+computation.  These factors include whether to mark subgames before
+solving, whether and how to iteratively eliminate dominated
+strategies, which algorithm to use for the computation, and the
+maximum number of solutions to search for before finishing the
+computation.  The settings for each of the standard solutions are
+given in the following table:<P>
+<TABLE BORDER>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Type</TD><TD ALIGN=CENTER WIDTH=79>Number</TD><TD ALIGN=CENTER WIDTH=119>Game Type</TD><TD ALIGN=CENTER WIDTH=79>Subgames</TD><TD ALIGN=CENTER WIDTH=79>UnDominated</TD><TD ALIGN=CENTER WIDTH=119>Algorithm</TD>
+<TD ALIGN=LEFT>Notes</TD>
+</TR>
+ 
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Nash</TD><TD ALIGN=CENTER WIDTH=79>One</TD><TD ALIGN=CENTER WIDTH=119>2-person constant sum</TD><TD ALIGN=CENTER WIDTH=79>Mark</TD><TD ALIGN=CENTER WIDTH=79>Weak</TD><TD ALIGN=CENTER WIDTH=119>EF/LP-1</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119>2-person general sum</TD><TD ALIGN=CENTER WIDTH=79>Mark</TD><TD ALIGN=CENTER WIDTH=79>Weak</TD><TD ALIGN=CENTER WIDTH=119>EF/LCP-1</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119>n-person</TD><TD ALIGN=CENTER WIDTH=79>Mark</TD><TD ALIGN=CENTER WIDTH=79>Weak</TD><TD ALIGN=CENTER WIDTH=119>NF/SimpDiv-1</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Nash</TD><TD ALIGN=CENTER WIDTH=79>Two</TD><TD ALIGN=CENTER WIDTH=119>2-person</TD><TD ALIGN=CENTER WIDTH=79>Unmark</TD><TD ALIGN=CENTER WIDTH=79>Strong</TD><TD ALIGN=CENTER WIDTH=119>NF/EnumMixed-2</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119>n-person</TD><TD ALIGN=CENTER WIDTH=79>Unmark</TD><TD ALIGN=CENTER WIDTH=79>Strong</TD><TD ALIGN=CENTER WIDTH=119>EF/Liap-2</TD>
+<TD ALIGN=LEFT>Not guaranteed</TD>
+</TR>
+
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Nash</TD><TD ALIGN=CENTER WIDTH=79>All</TD><TD ALIGN=CENTER WIDTH=119>2-person</TD><TD ALIGN=CENTER WIDTH=79>Unmark</TD><TD ALIGN=CENTER WIDTH=79>Strong</TD><TD ALIGN=CENTER WIDTH=119>NF/EnumMixed-0</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119>n-person</TD><TD ALIGN=CENTER WIDTH=79>Unmark</TD><TD ALIGN=CENTER WIDTH=79>Strong</TD><TD ALIGN=CENTER WIDTH=119>EF/PolEnum</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Subgame Perfect</TD><TD ALIGN=CENTER WIDTH=79>One</TD><TD ALIGN=CENTER WIDTH=119>2-person constant sum</TD><TD ALIGN=CENTER WIDTH=79>Mark</TD><TD ALIGN=CENTER WIDTH=79>Weak</TD><TD ALIGN=CENTER WIDTH=119>EF/LP-1</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119>2-person general sum</TD><TD ALIGN=CENTER WIDTH=79>Mark</TD><TD ALIGN=CENTER WIDTH=79>Weak</TD><TD ALIGN=CENTER WIDTH=119>EF/LCP-1</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119>n-person</TD><TD ALIGN=CENTER WIDTH=79>Mark</TD><TD ALIGN=CENTER WIDTH=79>Weak</TD><TD ALIGN=CENTER WIDTH=119>NF/SimpDiv-1</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Subgame Perfect</TD><TD ALIGN=CENTER WIDTH=79>Two</TD><TD ALIGN=CENTER WIDTH=119>2-person</TD><TD ALIGN=CENTER WIDTH=79>Mark</TD><TD ALIGN=CENTER WIDTH=79>Strong</TD><TD ALIGN=CENTER WIDTH=119>NF/EnumMixed-2</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119>n-person</TD><TD ALIGN=CENTER WIDTH=79>Mark</TD><TD ALIGN=CENTER WIDTH=79>Strong</TD><TD ALIGN=CENTER WIDTH=119>NF/Liap-2</TD>
+<TD ALIGN=LEFT>Not guaranteed</TD>
+</TR>
+
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Subgame Perfect</TD><TD ALIGN=CENTER WIDTH=79>All</TD><TD ALIGN=CENTER WIDTH=119>2-person</TD><TD ALIGN=CENTER WIDTH=79>Mark</TD><TD ALIGN=CENTER WIDTH=79>Strong</TD><TD ALIGN=CENTER WIDTH=119>NF/EnumMixed-0</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119>n-person</TD><TD ALIGN=CENTER WIDTH=79>Mark</TD><TD ALIGN=CENTER WIDTH=79>Strong</TD><TD ALIGN=CENTER WIDTH=119>EF/Liap-0</TD>
+<TD ALIGN=LEFT>Not guaranteed</TD>
+</TR>
+
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Sequential</TD><TD ALIGN=CENTER WIDTH=79>One</TD><TD ALIGN=CENTER WIDTH=119>2 or n-person</TD><TD ALIGN=CENTER WIDTH=79>Unmark</TD><TD ALIGN=CENTER WIDTH=79>None</TD><TD ALIGN=CENTER WIDTH=119>EF/QRE-1</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Sequential</TD><TD ALIGN=CENTER WIDTH=79>Two</TD><TD ALIGN=CENTER WIDTH=119>2 or n-person</TD><TD ALIGN=CENTER WIDTH=79>Unmark</TD><TD ALIGN=CENTER WIDTH=79>None</TD><TD ALIGN=CENTER WIDTH=119>EF/Liap-2</TD>
+<TD ALIGN=LEFT>Not guaranteed</TD>
+</TR>
+
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Sequential</TD><TD ALIGN=CENTER WIDTH=79>All</TD><TD ALIGN=CENTER WIDTH=119>2 or n-person</TD><TD ALIGN=CENTER WIDTH=79>Unmark</TD><TD ALIGN=CENTER WIDTH=79>None</TD><TD ALIGN=CENTER WIDTH=119>EF/Liap-0</TD>
+<TD ALIGN=LEFT>Not guaranteed</TD>
+</TR>
+
+
+</TABLE>
+<P>
+In the entry for the algorithm for the above table, first is indicated
+whether the algorithm is applied to the extensive (EF) or normal (NF)
+form. Then the name of the algorithm is given.  Finally, the number
+after the algorithm indicates the maximum number of solutions to be
+found.  If this number is 0, the algorithm will only terminate when it
+has found all solutions.  For algorithms which are not guaranteed to
+find all solutions (such as Liap), the algorithm will enter an
+infinite loop, and continue to search until the computation is aborted
+by the user.<P>
+
+</BODY></HTML>
