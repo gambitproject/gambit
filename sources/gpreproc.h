@@ -102,7 +102,7 @@ public:
 
   ~gPreprocessor()
   {
-    while( m_InputStack.Depth() > 0 )
+    while( m_InputStack.Depth() > 1 )
       delete m_InputStack.Pop();
   }
 

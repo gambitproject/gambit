@@ -414,9 +414,11 @@ gText gPreprocessor::GetLine( void )
     gerr << "GCL Error: " << errorMsg << '\n';
 
 
-  if( m_InputStack.Peek()->eof() )
-  {
-    delete m_InputStack.Pop();
+  if( m_InputStack.Peek()->eof() ) {
+    if (m_InputStack.Depth() > 1)
+      delete m_InputStack.Pop();
+    else
+      m_InputStack.Pop();
     (void) m_FileNameStack.Pop();
     (void) m_LineNumberStack.Pop();
   }
