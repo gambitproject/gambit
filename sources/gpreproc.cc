@@ -421,7 +421,6 @@ gString gPreprocessor::GetLine( void )
     (void) m_LineNumberStack.Pop();
   }
 
-  gerr << ">>> " << line << '\n';
   return line;
 }
 
