@@ -1246,6 +1246,70 @@ Portion *GSM_SaveNfg_Support(Portion **param)
 }
 
 
+//--------------------------- List ---------------------------//
+
+
+Portion *GSM_List_MixedFloat(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p1;
+  Portion* p2;
+  Portion* por;
+
+  MixedProfile<double> *P = 
+    (MixedProfile<double>*) ((MixedPortion*) param[0])->Value();
+  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0]->Owner())->Value();
+  por = new ListValPortion();
+
+  for( i = 1; i <= N.NumPlayers(); i++ )
+  {
+    p1 = new ListValPortion();
+
+    for( j = 1; j <= N.NumStrats( i ); j++ )
+    {
+      p2 = new FloatValPortion( (*P)( i, j ) );
+      ((ListValPortion*) p1)->Append( p2 );
+    }
+
+    ((ListValPortion*) por)->Append( p1 );
+  }
+  return por;
+}
+
+
+Portion *GSM_List_MixedRational(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p1;
+  Portion* p2;
+  Portion* por;
+
+  MixedProfile<gRational> *P = 
+    (MixedProfile<gRational>*) ((MixedPortion*) param[0])->Value();
+  Nfg<gRational> &N = 
+    * (Nfg<gRational>*) ((NfgPortion*) param[0]->Owner())->Value();
+  por = new ListValPortion();
+
+  for( i = 1; i <= N.NumPlayers(); i++ )
+  {
+    p1 = new ListValPortion();
+
+    for( j = 1; j <= N.NumStrats( i ); j++ )
+    {
+      p2 = new RationalValPortion( (*P)( i, j ) );
+      ((ListValPortion*) p1)->Append( p2 );
+    }
+
+    ((ListValPortion*) por)->Append( p1 );
+  }
+  return por;
+}
+
+
+
+
 
 //---------------------- Mixed -------------------//
 
@@ -1949,6 +2013,19 @@ void Init_nfgfunc(GSM *gsm)
 			2, "list", porLIST | porRATIONAL );
 
   gsm->AddFunction( FuncObj );
+
+
+
+  //----------------------- List --------------------------//
+  FuncObj = new FuncDescObj( "List" );
+  FuncObj->SetFuncInfo( GSM_List_MixedFloat, 1 );
+  FuncObj->SetParamInfo(GSM_List_MixedFloat, 
+			0, "mixed", porMIXED_FLOAT );
+  FuncObj->SetFuncInfo( GSM_List_MixedRational, 1 );
+  FuncObj->SetParamInfo(GSM_List_MixedRational, 
+			0, "mixed", porMIXED_RATIONAL );
+  gsm->AddFunction( FuncObj );
+
 }
 
 

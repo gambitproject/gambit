@@ -1247,6 +1247,89 @@ Portion *GSM_SaveEfg(Portion **param)
 }
 
 
+//--------------------------- List ---------------------------//
+
+Portion *GSM_List_BehavFloat(Portion **param)
+{
+  int i;
+  int j;
+  int k;
+  Portion* p1;
+  Portion* p2;
+  Portion* p3;
+  Portion* por;
+
+  BehavProfile<double> *P = 
+    (BehavProfile<double>*) ((BehavPortion*) param[0])->Value();
+  Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0]->Owner())->Value();
+  por = new ListValPortion();
+
+  
+  for( i = 1; i <= E.NumPlayers(); i++ )
+  {
+    p1 = new ListValPortion();
+
+    for( j = 1; j <= E.PlayerList()[i]->NumInfosets(); j++ )
+    {
+      p2 = new ListValPortion();
+
+      for( k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++ )
+      {
+	p3 = new FloatValPortion( (*P)( i, j, k ) );
+	((ListPortion*) p2)->Append( p3 );
+      }
+      ((ListPortion*) p1)->Append( p2 );
+    }
+    ((ListPortion*) por)->Append( p1 );
+  }
+
+  return por;
+
+}
+
+
+Portion *GSM_List_BehavRational(Portion **param)
+{
+  int i;
+  int j;
+  int k;
+  Portion* p1;
+  Portion* p2;
+  Portion* p3;
+  Portion* por;
+
+  BehavProfile<gRational> *P = 
+    (BehavProfile<gRational>*) ((BehavPortion*) param[0])->Value();
+  Efg<gRational> &E = 
+    * (Efg<gRational>*) ((EfgPortion*) param[0]->Owner())->Value();
+  por = new ListValPortion();
+
+  
+  for( i = 1; i <= E.NumPlayers(); i++ )
+  {
+    p1 = new ListValPortion();
+
+    for( j = 1; j <= E.PlayerList()[i]->NumInfosets(); j++ )
+    {
+      p2 = new ListValPortion();
+
+      for( k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++ )
+      {
+	p3 = new RationalValPortion( (*P)( i, j, k ) );
+	((ListPortion*) p2)->Append( p3 );
+      }
+      ((ListPortion*) p1)->Append( p2 );
+    }
+    ((ListPortion*) por)->Append( p1 );
+  }
+
+  return por;
+
+}
+
+
+
+
 
 
 //----------------------- Behav -------------------------//
@@ -2269,6 +2352,17 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo( GSM_SetComponent_BehavRational,
 			2, "list", porLIST | porRATIONAL );
 
+  gsm->AddFunction( FuncObj );
+
+
+  //----------------------- List --------------------------//
+  FuncObj = new FuncDescObj( "List" );
+  FuncObj->SetFuncInfo( GSM_List_BehavFloat, 1 );
+  FuncObj->SetParamInfo(GSM_List_BehavFloat, 
+			0, "behav", porBEHAV_FLOAT );
+  FuncObj->SetFuncInfo( GSM_List_BehavRational, 1 );
+  FuncObj->SetParamInfo(GSM_List_BehavRational, 
+			0, "behav", porBEHAV_RATIONAL );
   gsm->AddFunction( FuncObj );
 
 }
