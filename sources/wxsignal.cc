@@ -1,21 +1,21 @@
-//#
-//# FILE: wxsig.cc -- Definition of signal handler for the GUI
-//#
-//#  $Id$
-//#
+//
+// FILE: wxsignal.cc -- Definition of signal handler for the GUI
+//
+//  $Id$
+//
 
 #include "gsignal.h"
 
 class WxSignal : public gSignal   {
-	private:
-		bool sig;
+private:
+  bool sig;
 
-	public:
-		WxSignal(void): sig(false) { };
-		virtual ~WxSignal() { };
+public:
+  WxSignal(void): sig(false) { }
+  virtual ~WxSignal() { }
 
-		bool Get(void) const {return sig;}
-		void Reset(void) {sig=false;}
+  void Get(void) { if (sig)  throw gSignalBreak(); } 
+  void Reset(void) { sig = false; }
 };
 
 WxSignal _gbreak;
