@@ -1,7 +1,7 @@
 #ifndef SIMPPRM_H
 #define SIMPPRM_H
 
-#include "outprm.h"
+#include "algdlgs.h"
 
 class SimpdivSolveParamsDialog : public OutputParamsDialog
 {

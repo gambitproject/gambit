@@ -1,6 +1,6 @@
 #ifndef GRIDPRM_H
 #define GRIDPRM_H
-#include "outprm.h"
+#include "algdlgs.h"
 
 template <class T>
 class GridSolveParamsDialog : public PxiParamsDialog

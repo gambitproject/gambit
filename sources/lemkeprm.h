@@ -1,7 +1,7 @@
 #ifndef LEMKEPRM_H
 #define LEMKEPRM_H
 
-#include "outprm.h"
+#include "algdlgs.h"
 
 class LemkeSolveParamsDialog : public OutputParamsDialog
 {
