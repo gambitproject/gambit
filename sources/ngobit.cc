@@ -241,7 +241,7 @@ template <class T> GobitFunc<T> *NFGobitModule<T>::CreateFunc(void)
 template <class T>
 void NFGobitModule<T>::AddSolution(const GobitFunc<T> *const F)
 {
-  solutions.Append(MixedProfile<T>(N, ((NFGobitFunc<T> *) F)->GetProfile()));
+  solutions.Append(MixedProfile<T>(((NFGobitFunc<T> *) F)->GetProfile()));
 }
 
 #define BIGNUM 1.0e100
