@@ -3638,7 +3638,6 @@ ActionProb[profile->BEHAV, action->ACTION] =: NUMBER
 \end{verbatim}\normalsize
 
 \bd
-\marginpar{Check this function works this way}
 Returns the probability that \verb+action+ is chosen at its
 information set when all players are following \verb+profile+.
 If \verb+action+ is a chance action, the probability of chance selecting
@@ -3824,7 +3823,6 @@ Assign[name->TEXT, value<->T*] =: T
 
 {\it for all types} {\tt T} 
 \bd 
-\marginpar{The usual objections apply.}
 Creates a new variable \verb+name+, with return value of \verb+value+.
 Returns the value assigned.  If \verb+name+ is already a defined
 variable in the current scope, then if it is of type \verb+T+, it is
@@ -4293,7 +4291,6 @@ Equal[x->T*, y->T*] =: BOOLEAN
 \end{verbatim}\normalsize
 
 {\it for all types} {\tt T}
-\marginpar{Verify Null implementation}
 \bd
 Returns \verb+True+ when \verb+x+ and \verb+y+ are equal.  For games,
 \verb+x+ and \verb+y+ are considered equal when they refer to the same
@@ -5268,9 +5265,10 @@ ListFormat[{braces<->True}, {commas<->True},
            {lf<->2}, {indent<->2}] =: BOOLEAN
 \end{verbatim} \normalsize
 
-\marginpar{Mention it gets old settings!}
 \bd
-Sets the formatting style for output of lists on output streams.
+Sets the formatting style for output of lists on output streams.  The
+parameters passed are set to the prior style settings on return.
+
 \bd
 \item [braces:] If \verb+True+, lists are delimited by braces.
 \item [commas:] If \verb+True+, elements are delimited by commas.
@@ -5716,7 +5714,6 @@ NotEqual[x->T*, y->T*] =: BOOLEAN
 \end{verbatim}\normalsize
 
 {\it for all types} {\tt T}
-\marginpar{Check for null implementation}
 \bd
 Returns \verb+True+ when the values of \verb+x+ and \verb+y+ are
 not equal.
@@ -5758,7 +5755,6 @@ NthElement[list<->NLIST(T*), n->INTEGER] =: T
 \end{verbatim}\normalsize
 
 {\it for all types} {\tt T}
-\marginpar{Check for null implementation}
 \bd
 Returns the \verb+n+th element of \verb+list+.
 By convention, the first element of a list is indexed by 1.
@@ -5913,7 +5909,6 @@ the order of evaluation of expressions.
 \protect \large \begin{verbatim}
 Payoff[outcome->EFOUTCOME*, player->EFPLAYER] =: NUMBER 
 \end{verbatim}\normalsize
-\marginpar{Nulls?}
 \bd
 Returns the payoff to \verb+player+ at \verb+outcome+.  It is an error if
 \verb+player+ and \verb+outcome+ are not from the same extensive form game.
@@ -6892,7 +6887,18 @@ game.
 \item [See also:] \verb+StrategyProb+. 
 \ed
 
-\marginpar{Add {\tt StrategyValues}}
+\item\lex{StrategyValues}
+\protect \large \begin{verbatim}
+StrategyValues[profile->MIXEd] =: LIST(LIST(NUMBER)) 
+\end{verbatim}\normalsize
+
+\bd
+Returns a list of expected payoffs of each strategy (to the player
+who chooses that strategy).  The \verb+(i,j)+th entry is
+the expected payoff to player \verb+i+ of
+strategy \verb+j+, where the index numbers correspond to the output of
+\verb+Players+ and \verb+Strategies+, respectively.
+\ed
 
 \item\lex{Subgames}
 \protect \large \begin{verbatim}
