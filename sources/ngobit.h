@@ -1,41 +1,35 @@
-//#
-//# FILE: ngobit.h -- Interface to normal form Gobit solution module
-//#
-//# $Id$
-//#
+//
+// FILE: ngobit.h -- Interface to normal form Gobit solution module
+//
+// $Id$
+//
 
 #ifndef NGOBIT_H
 #define NGOBIT_H
 
-#include "nfg.h"
-#include "gobit.h"
+#include "gambitio.h"
+#include "gstatus.h"
 #include "glist.h"
+
+#include "nfg.h"
 #include "mixed.h"
 
-template <class T> class NFGobitParams : public GobitParams<T>   {
+class NFGobitParams  {
   public:
-    NFGobitParams(gStatus &status_=gstatus);
-    NFGobitParams(gOutput &out, gOutput &pxi,
-		  gStatus &status_=gstatus);
+    int trace, powLam, maxits1, maxitsN;
+    double minLam, maxLam, delLam, tol1, tolN;
+    bool fullGraph;
+    gOutput *tracefile, *pxifile;
+    gStatus &status;
+
+    NFGobitParams(gStatus & = gstatus);
+    NFGobitParams(gOutput &out, gOutput &pxi, gStatus & = gstatus);
 };
 
 
-template <class T> class NFGobitModule : public GobitModule<T>   {
-  protected:
-    const Nfg<T> &N;
-    gList<MixedProfile<T> > solutions;
-    MixedProfile<T> S;
-
-    GobitFunc<T> *CreateFunc(void);
-    void AddSolution(const GobitFunc<T> *const);
-
-  public:
-    NFGobitModule(const Nfg<T> &NF, NFGobitParams<T> &p,
-		  MixedProfile<T> &s);
-    virtual ~NFGobitModule();
-    const gList<MixedProfile<T> > &GetSolutions(void) const;
-};
-
+void Gobit(const Nfg<double> &, NFGobitParams &,
+	   const MixedProfile<double> &, gList<MixedProfile<double> > &,
+	   long &nevals, long &nits);
 
 
 #endif    // NGOBIT_H

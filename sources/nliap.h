@@ -1,39 +1,33 @@
-//#
-//# FILE: nliap.h -- Interface to normal form Liapunov solution module
-//#
-//# $Id$
-//#
+//
+// FILE: nliap.h -- Interface to normal form Liap solution module
+//
+// $Id$
+//
 
 #ifndef NLIAP_H
 #define NLIAP_H
 
-#include "nfg.h"
-#include "liap.h"
+#include "gambitio.h"
+#include "gstatus.h"
 #include "glist.h"
+
+#include "nfg.h"
 #include "mixed.h"
 
-class NFLiapParams : public LiapParams  {
+class NFLiapParams   {
   public:
-    NFLiapParams(gStatus &status_ = gstatus);
-};
+    int trace, maxits1, maxitsN;
+    double tol1, tolN;
+    gOutput *tracefile;
+    gStatus &status;
 
-template <class T> class NFLiapModule : public LiapModule<T>  {
-  private:
-    const Nfg<T> &N;
-    MixedProfile<T> S;
-    gList<MixedProfile<T> > solutions;
-
-    LiapFunc<T> *CreateFunc(void);
-    void AddSolution(const LiapFunc<T> *const);
-
-  public:
-    NFLiapModule(const Nfg<T> &N, NFLiapParams &p, MixedProfile<T> &s); 
-    virtual ~NFLiapModule();
-    const gList<MixedProfile<T> > &GetSolutions(void) const;
+    NFLiapParams(gStatus & = gstatus);
 };
 
 
-#endif    // NLIAP_H
+bool Liap(const Nfg<double> &, NFLiapParams &,
+	  const MixedProfile<double> &, gList<MixedProfile<double> > &,
+	  long &nevals, long &niters);
 
-
+#endif   // NLIAP_H
 

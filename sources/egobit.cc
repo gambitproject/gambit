@@ -1,289 +1,256 @@
-//#
-//# FILE: egobit.cc -- Implementation of extensive form Gobit algorithm
-//#
-//# $Id$
-//#
+//
+// FILE: egobit.cc -- Implementation of gobit on extensive form games
+//
+// $Id$
+//
 
 #include <math.h>
+
 #include "egobit.h"
-#include "gfunct.h"
-#include "gdpvect.h"
+
+#include "gfunc.h"
 #include "gmatrix.h"
 
-#include "behav.h"
-#include "efplayer.h"
-#include "infoset.h"
-
-//-------------------------------------------------------------------------
-//                     EFGobitParams<T>: Member functions
-//-------------------------------------------------------------------------
-
-template <class T> EFGobitParams<T>::EFGobitParams(gStatus &status_)
-  : GobitParams<T>(status_)
+EFGobitParams::EFGobitParams(gStatus &s)
+  : trace(0), powLam(1), maxits1(100), maxitsN(20),
+    minLam(0.01), maxLam(30.0), delLam(0.01), tol1(2.0e-10), tolN(1.0e-10),
+    fullGraph(false), tracefile(&gnull), pxifile(&gnull),
+    status(s)
 { }
 
-template <class T>
-EFGobitParams<T>::EFGobitParams(gOutput &out, gOutput &pxi, gStatus &status_)
-  : GobitParams<T>(out, pxi, status_)
+EFGobitParams::EFGobitParams(gOutput &out, gOutput &pxi, gStatus &s)
+  : trace(0), powLam(1), maxits1(100), maxitsN(20),
+    minLam(0.01), maxLam(30.0), delLam(0.01), tol1(2.0e-10), tolN(1.0e-10),
+    fullGraph(false), tracefile(&out), pxifile(&pxi),
+    status(s)
 { }
 
-//-------------------------------------------------------------------------
-//                   EFGobitFunc<T>: Class declaration
-//-------------------------------------------------------------------------
 
-template <class T>
-class EFGobitFunc : public GobitFunc<T>, public gBFunctMin<T>  {
-private:
-  long niters, nevals;
-  T Lambda;
-  gPVector<T> probs;
-  BehavProfile<T> p, pp, cpay;
-  gMatrix<T> xi;
-  const Efg<T> &E;
-  gVector<T> ***scratch;
-    
-      // Inherited virtual function from gBFunctMin
-  T Value(const gVector<T> &x);
-  
-public:
-  EFGobitFunc(const Efg<T> &EF, const GobitParams<T> &P,
-	      const BehavProfile<T> &s);
+class EFGobitFunc : public gFunction<double>   {
+  private:
+    long _nevals;
+    const Efg<double> &_efg;
+    double _Lambda;
+    gPVector<double> _probs;
+    BehavProfile<double> _p, _cpay;
+    gVector<double> ***_scratch;
+
+    double Value(const gVector<double> &);
+
+  public:
+    EFGobitFunc(const Efg<double> &, const BehavProfile<double> &);
     virtual ~EFGobitFunc();
-  
-  void Init(void);
-      // These two are inherited virtual functions from GobitFunc
-  void Optimize(T Lambda, int &iter, T &value);
-  void Output(gOutput &f, int format = 0) const;
-  long NumIters(void) const;
-  long NumEvals(void) const;
-  
-  const BehavProfile<T> &GetProfile(void) const;
+    
+    void SetLambda(double l)   { _Lambda = l; }
+    long NumEvals(void) const   { return _nevals; }
 };
 
-//-------------------------------------------------------------------------
-//               EFGobitFunc<T>: Constructor and destructor
-//-------------------------------------------------------------------------
-
-template <class T>
-EFGobitFunc<T>::EFGobitFunc(const Efg<T> &EF, const GobitParams<T> &,
-			    const BehavProfile<T> &start)
-  :gBFunctMin<T>(EF.ProfileLength(true)), niters(0), nevals(0), 
-   probs(EF.Dimensionality().Lengths()),
-   p(EF, true), pp(EF, true), cpay(EF),
-   xi(p.Length(), p.Length()), E(EF)
+EFGobitFunc::EFGobitFunc(const Efg<double> &E,
+			 const BehavProfile<double> &start)
+  : _nevals(0L), _efg(E), _probs(E.Dimensionality().Lengths()),
+    _p(E, true), _cpay(E)
 {
-  Init();
-  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
+  int pl;
+
+  _scratch = new gVector<double> **[_efg.NumPlayers()] - 1;
+  for (pl = 1; pl <= _efg.NumPlayers(); pl++)  {
+    int nisets = (_efg.PlayerList()[pl])->NumInfosets();
+    _scratch[pl] = new gVector<double> *[nisets + 1] - 1;
+    for (int iset = 1; iset <= nisets; iset++)
+      _scratch[pl][iset] = new gVector<double>(_p.GetEFSupport().NumActions(pl, iset));
+  }
+  
+  for (pl = 1; pl <= _efg.NumPlayers(); pl++)  {
     EFPlayer *p = E.PlayerList()[pl];
     for (int iset = 1; iset <= p->NumInfosets(); iset++)  {
       Infoset *s = p->InfosetList()[iset];
       for (int act = 1; act < s->NumActions(); act++)  {
-	pp(pl, iset, act) = start(pl, iset, act);
+	_p(pl, iset, act) = start(pl, iset, act);
       }
-	 }
+    }
   }
 }
 
-template <class T> void EFGobitFunc<T>::Init(void)
+EFGobitFunc::~EFGobitFunc()
 {
-  // Seems to me like this should be a parameter to the gfunct ctor?
-  constrained = 1;
-  xi.MakeIdent();
-  scratch = new gVector<T> **[E.NumPlayers()] -1;
-  for(int i=1;i<=E.NumPlayers();i++) {
-	 int nisets = (E.PlayerList()[i])->NumInfosets();
-	 scratch[i] = new gVector<T> *[nisets+1] -1 ;
-	 for(int j=1;j<=nisets;j++) {
-		scratch[i][j] = new gVector<T>(pp.GetEFSupport().NumActions(i,j));
-	 }
+  for (int pl = 1; pl <= _efg.NumPlayers(); pl++)  {
+    int nisets = (_efg.PlayerList()[pl])->NumInfosets();
+    for (int iset = 1; iset <= nisets; iset++)
+      delete _scratch[pl][iset];
+    delete [] (_scratch[pl] + 1);
   }
+  delete [] (_scratch + 1);
 }
 
-template <class T> EFGobitFunc<T>::~EFGobitFunc()
+double EFGobitFunc::Value(const gVector<double> &v)
 {
-  for(int i=1;i<=E.NumPlayers();i++) {
-	 int nisets = (E.PlayerList()[i])->NumInfosets();
-	 for(int j=1;j<=nisets;j++) {
-		delete scratch[i][j];
-	 }
-	 delete [] (scratch[i]+1);
-  }
-  delete [] (scratch + 1);
-}
+  static const double PENALTY = 10000.0;
 
-//-------------------------------------------------------------------------
-//           EFGobitFunc<T>: Implementation of function members
-//-------------------------------------------------------------------------
+  _nevals++;
+  ((gVector<double> &) _p).operator=(v);
+  double val = 0.0, prob, psum, z;
 
-template <class T> T EFGobitFunc<T>::Value(const gVector<T> &v)
-{
-  static const T PENALTY1 = (T) 10000.0;
-
-  nevals++;
-  ((gVector<T> &) p).operator=(v);
-  T val((T) 0), prob, psum, z;
-//  gVector<T> &payoff = *scratch
-  p.CondPayoff(cpay, probs);
-
-  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
-    EFPlayer *player = E.PlayerList()[pl];
+  _p.CondPayoff(_cpay, _probs);
+  
+  for (int pl = 1; pl <= _efg.NumPlayers(); pl++)  {
+    EFPlayer *player = _efg.PlayerList()[pl];
+    
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
-      prob = (T) 0;
-      psum = (T) 0;
-      
+      prob = 0.0;
+      psum = 0.0;
+
       Infoset *s = player->InfosetList()[iset];
       int act;
+      
       for (act = 1; act <= s->NumActions(); act++)  {
-	z = Lambda * cpay(pl, iset, act);
+	z = _Lambda * _cpay(pl, iset, act);
 	z = exp(z);
 	psum += z;
-	cpay(pl, iset, act) = z;
-      }
-
-      for (act = 1; act < s->NumActions(); act++)  {
-	z = p(pl, iset, act);
-	prob += z;
-	if (z < (T) 0)
-	  val += PENALTY1 * z * z;
-	z -= cpay(pl, iset, act) / psum;
-	val += z * z;
+	_cpay(pl, iset, act) = z;
       }
       
-      z = (T) 1 - prob;
-      if (z < (T) 0)
-	val += PENALTY1 * z * z;
-      z -= cpay(pl, iset, act) / psum;
-      val += z * z;
+      for (act = 1; act < s->NumActions(); act++)  {
+	z = _p(pl, iset, act);
+	prob += z;
+	if (z < 0.0)
+	  val += PENALTY * z * z;
+	z -= _cpay(pl, iset, act) / psum;
+	val += z * z;
+      }
 
-/*  This is obsoleted by the constraint that sum(prob) = 1  */
-/*      z = (T) 1 - prob;
-      val += PENALTY2 * z * z;  */
+      z = 1.0 - prob;
+      if (z < 0.0)
+	val += PENALTY * z * z;
+      z -= _cpay(pl, iset, act) / psum;
+      val += z * z;
     }
   }
 
   return val;
-};
-  
-
-//------------------------------------------------------------------------
-//            EFGobitFunc<T>: Implementation of gobit members
-//------------------------------------------------------------------------
-
-template <class T> void EFGobitFunc<T>::Optimize(T Lam, int &iter, T &value)
-{
-  Lambda = Lam;
-  Powell(pp, xi, iter, value);
-}
-
-template <class T> void EFGobitFunc<T>::Output(gOutput &f, int format) const
-{
-	int pl, iset, act, nisets;
-
-			// Header information
-	if (format==3) {
-		nisets=0;
-		f<<"Dimensionality:\n";
-		for (pl = 1; pl <= E.NumPlayers(); pl++)
-			nisets += E.PlayerList()[pl]->NumInfosets();
-		f << nisets;
-		for (pl = 1; pl <= E.NumPlayers(); pl++)
-			for (iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++)
-	f << " " << E.PlayerList()[pl]->InfosetList()[iset]->NumActions();
-		f << "\n";
-	}
-	else if (format==2) {
-		int numcols = 2+E.ProfileLength();
-		f<<"DataFormat:";
-		f << "\n" << numcols;
-		for(int i=1;i<=numcols;i++) f << ' ' << i;
-		f<<"\nData:\n";
-	}
-			// PXI output
-	else if (format==1) {
-		f<< " ";
-		for (pl = 1; pl <= E.NumPlayers(); pl++)
-			for (iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++)  {
-	T prob = (T) 0.0;
-	for (act = 1; act < E.PlayerList()[pl]->InfosetList()[iset]->NumActions(); prob += pp(pl, iset, act++))
-		f << pp(pl,iset,act) << ' ';
-	f << ((T) 1 - prob) << ' ';
-			}
-	}
-	else  f << " pp = " << pp;
-
-}
-
-template <class T> const BehavProfile<T> &EFGobitFunc<T>::GetProfile(void) const
-{
-  return pp;
-}
-
-template <class T> long  EFGobitFunc<T>::NumIters(void) const
-{
-  return niters;
-}
-
-template <class T> long EFGobitFunc<T>::NumEvals(void) const
-{
-  return nevals;
 }
 
 
-//------------------------------------------------------------------------
-//                  EFGobitModule<T>: Member functions
-//------------------------------------------------------------------------
-
-template <class T>
-EFGobitModule<T>::EFGobitModule(const Efg<T> &EF, EFGobitParams<T> &p,
-				BehavProfile<T> &s)
-  : GobitModule<T>(p), E(EF), start(s)
-{ }
-
-template <class T> EFGobitModule<T>::~EFGobitModule()
-{ }
-
-template <class T>
-const gList<BehavProfile<T> > &EFGobitModule<T>::GetSolutions(void) const
+static void WritePXIHeader(gOutput &pxifile, const Efg<double> &E,
+			   const EFGobitParams &/*params*/)
 {
-  return solutions;
+  int pl, iset, nisets = 0;
+
+  pxifile << "Dimensionality:\n";
+  for (pl = 1; pl <= E.NumPlayers(); pl++)
+    nisets += E.PlayerList()[pl]->NumInfosets();
+  pxifile << nisets;
+  for (pl = 1; pl <= E.NumPlayers(); pl++)
+    for (iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++)
+      pxifile << " " << E.PlayerList()[pl]->InfosetList()[iset]->NumActions();
+  pxifile << "\n";
+
+  int numcols = E.ProfileLength() + 2;
+  pxifile << "DataFormat:";
+  pxifile << "\n" << numcols;
+  for (int i = 1; i <= numcols; i++)
+    pxifile << ' ' << i;
+  pxifile << "\nData:\n";
 }
 
-template <class T> GobitFunc<T> *EFGobitModule<T>::CreateFunc(void)
+static void AddSolution(gList<BehavProfile<double> > &solutions,
+			const BehavProfile<double> &profile)
 {
-  if(E.ProfileLength(true)) 
-    return new EFGobitFunc<T>(E, params, start);
-  return 0;
-}
+  const Efg<double> &E = *profile.BelongsTo();
 
-template <class T>
-void EFGobitModule<T>::AddSolution(const GobitFunc<T> *const F)
-{
-  BehavProfile<T> foo(((EFGobitFunc<T> *) F)->GetProfile());
-
-  BehavProfile<T> bar(E);
-  for (int pl = 1; pl <= E.NumPlayers(); pl++)   {
+  BehavProfile<double> bar(E);
+  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
     for (int iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++)  {
-      T accum = (T) 0;
+      double accum = 0.0;
       int act;
       for (act = 1; act < E.PlayerList()[pl]->InfosetList()[iset]->NumActions(); act++)  {
-	bar(pl, iset, act) = foo(pl, iset, act);
-	accum += foo(pl, iset, act);
+	bar(pl, iset, act) = profile(pl, iset, act);
+	accum += profile(pl, iset, act);
       }
-      bar(pl, iset, act) = (T) 1 - accum;
+      bar(pl, iset, act) = 1.0 - accum;
     }
   }
 
   solutions.Append(bar);
 }
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
+extern bool Powell(gVector<double> &p, gMatrix<double> &xi,
+		   gFunction<double> &func, double &fret, int &iter,
+		   int maxits1, double tol1, int maxitsN, double tolN,
+		   gOutput &tracefile);
 
-TEMPLATE class EFGobitParams<double>;
-TEMPLATE class EFGobitFunc<double>;
-TEMPLATE class EFGobitModule<double>;
+
+
+void Gobit(const Efg<double> &E, EFGobitParams &params,
+	   const BehavProfile<double> &start,
+	   gList<BehavProfile<double> > &solutions,
+	   long &nevals, long &nits)
+{
+  EFGobitFunc F(E, start);
+
+  int iter = 0, nit;
+  double Lambda, value = 0.0;
+
+  if (params.pxifile)
+    WritePXIHeader(*params.pxifile, E, params);
+
+  Lambda = (params.delLam < 0.0) ? params.maxLam : params.minLam;
+
+  int num_steps, step = 0;
+
+  if (params.powLam == 0)
+    num_steps = (int) ((params.maxLam - params.minLam) / params.delLam);
+  else
+    num_steps = (int) (log(params.maxLam / params.minLam) /
+		       log(params.delLam + 1.0));
+
+  BehavProfile<double> p(E, true);
+  p.Centroid();
+
+  gMatrix<double> xi(p.Length(), p.Length());
+  xi.MakeIdent();
+
+  for (nit = 1; !params.status.Get() &&
+       Lambda <= params.maxLam && Lambda >= params.minLam &&
+       value < 10.0; nit++)   {
+
+    F.SetLambda(Lambda);
+    Powell(p, xi, F, value, iter,
+	   params.maxits1, params.tol1, params.maxitsN, params.tolN,
+	   gerr);
+    
+    // tracefile stuff omitted for now
+
+    if (params.pxifile)  {
+      *params.pxifile << "\n" << Lambda << " " << value;
+      *params.pxifile << " ";
+      for (int pl = 1; pl <= E.NumPlayers(); pl++)
+	for (int iset = 1; iset <= E.PlayerList()[pl]->NumInfosets();
+	     iset++)  {
+	  double prob = 0.0;
+	  for (int act = 1; act < E.PlayerList()[pl]->InfosetList()[iset]->NumActions(); prob += p(pl, iset, act++))
+	    *params.pxifile << p(pl, iset, act) << ' ';
+	  *params.pxifile << (1.0 - prob) << ' ';
+	}
+    } 
+
+    if (params.fullGraph)
+      AddSolution(solutions, p);
+
+    Lambda += params.delLam * pow(Lambda, params.powLam);
+    params.status.SetProgress((double) step / (double) num_steps);
+    step++;
+  }
+
+  if (!params.fullGraph)
+    AddSolution(solutions, p);
+
+  if (params.status.Get())    params.status.Reset();
+
+  nevals = F.NumEvals();
+  nits = 0;
+}
+
+
+
+
 

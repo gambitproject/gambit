@@ -1,257 +1,186 @@
-//#
-//# FILE: nliap.cc -- Normal form Liapunov module
-//#
-//# $Id$
-//#
+//
+// FILE: nliap.cc -- Implementation of Liapunov algorithm for normal forms
+//
+// $Id$
+//
 
-#define MAXIT 10
-#define TOL (T)(.00000001)
-
-#include <math.h>
 #include "nliap.h"
-#include "gfunct.h"
 
-//-------------------------------------------------------------------------
-//                     NFLiapParams: Member functions
-//-------------------------------------------------------------------------
+#include "gfunc.h"
 
-NFLiapParams::NFLiapParams(gStatus &status_)
-  : LiapParams(status_)
+NFLiapParams::NFLiapParams(gStatus &s)
+  : trace(0), maxits1(100), maxitsN(20), tol1(2.0e-10), tolN(1.0e-10),
+    tracefile(0), status(s)
 { }
 
-//-------------------------------------------------------------------------
-//                      NFLiapFunc<T>: Class definition
-//-------------------------------------------------------------------------
 
-template <class T>
-class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
+
+class NFLiapFunc : public gC2Function<double>   {
   private:
-    int niters, nevals;
-    const Nfg<T> &N;
-    MixedProfile<T> p, pp;
-//    NFLiapParams<T> &params;
+    long _nevals;
+    const Nfg<double> &_nfg;
+    MixedProfile<double> _p;
 
-    T Value(const gVector<T> &x);
-    int Deriv(const gVector<T> &p, gVector<T> &d);
-    int Hess(const gVector<T> &p, gMatrix<T> &d);
+    double Value(const gVector<double> &);
 
-    T LiapDerivValue(int i, int j, const MixedProfile<T> &p) const;
+    double LiapDerivValue(int, int, const MixedProfile<double> &);
+    
+    bool Deriv(const gVector<double> &, gVector<double> &);
+    bool Hessian(const gVector<double> &, gMatrix<double> &);
 
   public:
-    NFLiapFunc(const Nfg<T> &NF, const LiapParams &P, 
-	       const MixedProfile<T> &s); 
+    NFLiapFunc(const Nfg<double> &, const MixedProfile<double> &);
     virtual ~NFLiapFunc();
-
-    void Randomize(void);
-    int Optimize(int &iter, T &value);
-    void Output(gOutput &f) const;
-
-    long NumIters(void) const;
-    long NumEvals(void) const;
-
-    const MixedProfile<T> &GetProfile(void) const;
+    
+    long NumEvals(void) const  { return _nevals; }
 };
 
-//------------------------------------------------------------------------
-//               NFLiapFunc<T>: Constructor and destructor
-//------------------------------------------------------------------------
-
-template <class T>
-NFLiapFunc<T>::NFLiapFunc(const Nfg<T> &NF, const LiapParams & LP,
-			  const MixedProfile<T>& s)
-  : gBC2FunctMin<T>(s.Length(),LP.status), niters(0), nevals(0),
-    N(NF), p(s), pp(s)
+NFLiapFunc::NFLiapFunc(const Nfg<double> &N,
+		       const MixedProfile<double> &start)
+  : _nevals(0L), _nfg(N), _p(start)
 { }
 
-template <class T> NFLiapFunc<T>::~NFLiapFunc()
+NFLiapFunc::~NFLiapFunc()
 { }
 
 
-template <class T> const MixedProfile<T> &NFLiapFunc<T>::GetProfile(void) const
+bool NFLiapFunc::Hessian(const gVector<double> &, gMatrix<double> &)
 {
-  return pp;
-}
+  return true;
+} 
 
-template <class T> void NFLiapFunc<T>::Output(gOutput &f) const
+double NFLiapFunc::LiapDerivValue(int i1, int j1,
+				  const MixedProfile<double> &p)
 {
-  f << "\np = " << pp;
- }
-
-template <class T> long NFLiapFunc<T>::NumIters(void) const
-{
-  return niters;
-}
-
-template <class T> long NFLiapFunc<T>::NumEvals(void) const
-{
-  return nevals;
-}
-
-template <class T> int NFLiapFunc<T>::Optimize(int &iter, T &value)
-{
-//  if (params.plev >= 3 && params.outfile)
-//    *params.outfile << "\np= " << pp;
-//  T val = (T) 0;
-//  int iter = 0;
-  return   DFP(pp, iter, value);
-//  if (params.plev > 0 && params.outfile)
-//    *params.outfile << "\np= " << pp << " f = " << val;
-//  return (val < (T) ((T) 1 / (T) 100000));
-}
-
-template <class T> void NFLiapFunc<T>::Randomize(void)
-{
-  T sum, tmp;
-
-  for (int i = 1; i <= N.NumPlayers(); i++)  {
-    sum = (T) 0;
-    int j;
-    for (j = 1; j < pp.GetNFSupport().NumStrats(i); j++)  {
-      do
-	tmp = (T) Uniform();
-      while (tmp + sum > (T) 1);
-      pp(i,j) = tmp;
-      sum += tmp;
+  int i, j;
+  double x, x1, psum;
+  
+  x = 0.0;
+  for (i = 1; i <= _nfg.NumPlayers(); i++)  {
+    psum = 0.0;
+    for (j = 1; j <= p.GetNFSupport().NumStrats(i); j++)  {
+      psum += p(i,j);
+      x1 = p.Payoff(i, i, j) - p.Payoff(i);
+      if (i1 == i) {
+	if (x1 > 0.0)
+	  x -= x1 * p.Payoff(i, i1, j1);
+      }
+      else {
+	if (x1> 0.0)
+	  x += x1 * (p.Payoff(i, i, j, i1, j1) - p.Payoff(i, i1, j1));
+      }
     }
-    pp(i,j) = (T) 1 - sum;
+    if (i == i1)  x += psum - 1.0;
   }
+  if (p(i1, j1) < 0.0)   x += p(i1, j1);
+  return 2.0 * x;
 }
 
-template <class T> T NFLiapFunc<T>::Value(const gVector<T> &v)
+bool NFLiapFunc::Deriv(const gVector<double> &v, gVector<double> &d)
 {
-  static const T BIG1 = (T) 100;
-  static const T BIG2 = (T) 100;
+  ((gVector<double> &) _p).operator=(v);
+  int i1, j1, ii;
+  double avg;
+  
+  for (i1 = 1, ii = 1; i1 <= _nfg.NumPlayers(); i1++) {
+    avg = 0.0;
+    for (j1 = 1; j1 <= _p.GetNFSupport().NumStrats(i1); j1++) {
+      d[ii] = LiapDerivValue(i1, j1, _p);
+      avg += d[ii];
+      ii++;
+    }
 
-  nevals++;
+    avg /= _p.GetNFSupport().NumStrats(i1);
+    ii -= _p.GetNFSupport().NumStrats(i1);
+    for (j1 = 1; j1 <= _p.GetNFSupport().NumStrats(i1); j1++) {
+      d[ii] -= avg;
+      ii++;
+    }
+  }
 
-  ((gVector<T> &) p).operator=(v);
-  MixedProfile<T> tmp(p);
-  gPVector<T> payoff(p);
-  T x, result((T) 0), avg, sum;
-  payoff = (T) 0;
+  return true;
+}
+  
+double NFLiapFunc::Value(const gVector<double> &v)
+{
+  static const double BIG1 = 100.0;
+  static const double BIG2 = 100.0;
 
-  result = (T) 0;
-  for(int i = 1; i <= N.NumPlayers(); i++) {
+  _nevals++;
+
+  ((gVector<double> &) _p).operator=(v);
+  
+  _p.Dump(gerr);
+
+  MixedProfile<double> tmp(_p);
+  gPVector<double> payoff(_p);
+
+  double x, result = 0.0, avg, sum;
+  payoff = 0.0;
+  
+  for (int i = 1; i <= _nfg.NumPlayers(); i++)  {
     tmp.CopyRow(i, payoff);
-    avg = sum = (T) 0;
-	// then for each strategy for that player set it to 1 and evaluate
+    avg = sum = 0.0;
+
+    // then for each strategy for player i, consider the value of
+    // deviating to that strategy
+
     int j;
-    for (j = 1; j <= p.GetNFSupport().NumStrats(i); j++) {
-      tmp(i, j) = (T) 1;
-      x = p(i, j);
+    for (j = 1; j <= _p.GetNFSupport().NumStrats(i); j++)  {
+      tmp(i, j) = 1.0;
+      x = _p(i, j);
       payoff(i, j) = tmp.Payoff(i);
       avg += x * payoff(i, j);
       sum += x;
-      if (x>(T)0) x=0;
-      result += BIG1*x*x;         // add penalty for neg probabilities
-      tmp(i,j) = (T) 0;
+      if (x > 0.0)  x = 0.0;
+      result += BIG1 * x * x;   // penalty for neg probabilities
+      tmp(i, j) = 0.0;
     }
-    tmp.CopyRow(i, p);
-    for(j=1;j<=p.GetNFSupport().NumStrats(i);j++) {
-      x=payoff(i,j)-avg;
-      if (x<=(T)0) x=(T)0;
-      result += x*x;          // add penalty if not best response
+
+    tmp.CopyRow(i, _p);
+    for (j = 1; j <= _p.GetNFSupport().NumStrats(i); j++)  {
+      x = payoff(i, j) - avg;
+      if (x < 0.0)  x = 0.0;
+      result += x * x;        // penalty for not best response
     }
-    x=sum - ((T) 1);
-    result += BIG2*x*x ;          // add penalty for sum not equal to 1
+    
+    x = sum - 1.0;
+    result += BIG2 * x * x;   // penalty for not summing to 1
   }
+
+  gerr << "   " << result << '\n';
+
   return result;
 }
 
-template <class T> int NFLiapFunc<T>::Deriv(const gVector<T> &v, gVector<T> &d)
+extern bool DFP(gVector<double> &p,
+		gC2Function<double> &func,
+		double &fret, int &iter,
+		int maxits1, double tol1, int maxitsN, double tolN);
+
+
+bool Liap(const Nfg<double> &N, NFLiapParams &params,
+	  const MixedProfile<double> &start,
+	  gList<MixedProfile<double> > &solutions,
+	  long &nevals, long &niters)
 {
-  ((gVector<T> &) p).operator=(v);
-  int i1,j1,ii;
-  T avg;
+  NFLiapFunc F(N, start);
+
+  MixedProfile<double> p(start);
+
+  double value;
+  int iter;
+  bool found;
+
+  if (found = DFP(p, F, value, iter, params.maxits1, params.tol1,
+		  params.maxitsN, params.tolN))
+    solutions.Append(p);
   
-  for(i1=1,ii=1;i1<=N.NumPlayers();i1++) {
-    avg=(T)0;
-    for(j1=1;j1<=p.GetNFSupport().NumStrats(i1);j1++) {
-      d[ii]=LiapDerivValue(i1,j1,p);
-      avg+=d[ii];
-      ii++;
-    }
-    avg/=(T)p.GetNFSupport().NumStrats(i1);
-    ii-=p.GetNFSupport().NumStrats(i1);
-    for(j1=1;j1<=p.GetNFSupport().NumStrats(i1);j1++) {
-      d[ii]-=avg;
-      ii++;
-    }
-  }
-  return 1;
+  nevals = F.NumEvals();
+  niters = 0L;
+
+  return found;
 }
 
-template <class T>
-T NFLiapFunc<T>::LiapDerivValue(int i1, int j1, const MixedProfile<T> &p) const
-{
-  int i, j;
-  T x, x1,psum;
+
   
-  x=(T)0;
-  for(i=1;i<=N.NumPlayers();i++) {
-    psum=(T)0.0;
-    for(j=1;j<=p.GetNFSupport().NumStrats(i);j++) {
-      psum+=p(i,j);
-      x1=p.Payoff(i,i,j)-p.Payoff(i);
-      if(i1==i) {
-	if(x1>(T)0)x-=x1*(p.Payoff(i,i1,j1));
-      }
-      else {
-	if(x1>(T)0)x+=x1*(p.Payoff(i,i,j,i1,j1)-p.Payoff(i,i1,j1));
-      }
-    }
-    if(i==i1)x+=psum-(T)1.0;
-  }
-  if(p(i1,j1)<(T)0.0)x+=p(i1,j1);
-  return (T)2.0*x;
-};
-
-template <class T> int NFLiapFunc<T>::Hess(const gVector<T> &, gMatrix<T> &)
-{
-  return 1;
-}
-
-
-//------------------------------------------------------------------------
-//                    NFLiapModule<T>: Member functions
-//------------------------------------------------------------------------
-
-template <class T>
-NFLiapModule<T>::NFLiapModule(const Nfg<T> &N, NFLiapParams &p,
-			      MixedProfile<T> &s)
-  : LiapModule<T>(p), N(N), S(s)
-{ }
-
-template <class T> NFLiapModule<T>::~NFLiapModule()
-{ }
-
-template <class T>
-const gList<MixedProfile<T> > &NFLiapModule<T>::GetSolutions(void) const
-{
-  return solutions;
-}
-
-template <class T> LiapFunc<T> *NFLiapModule<T>::CreateFunc(void)
-{
-//  return new NFLiapFunc<T>(nf, (NFLiapParams&) params);
-  return new NFLiapFunc<T>(N, params, S);
-}
-
-template <class T>
-void NFLiapModule<T>::AddSolution(const LiapFunc<T> *const F)
-{
-  solutions.Append(MixedProfile<T>(((NFLiapFunc<T> *) F)->GetProfile()));
-}
-
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
-TEMPLATE class NFLiapModule<double>;
-TEMPLATE class NFLiapFunc<double>;
-
-

@@ -40,6 +40,8 @@ TEMPLATE class gNode<gArray<Outcome *> >;
 
 #pragma option -Jgx
 
+#include "nfg.h"
+#include "nfstrat.h"
 #include "subsolve.h"
 
 #include "gwatch.h"
@@ -251,28 +253,24 @@ void SubgameSolver<T>::Solve(void)
 // EFLiap
 //-------------------
 
-template <class T>
-void EFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E,
-				      gList<BehavProfile<T> > &solns)
+void EFLiapBySubgame::SolveSubgame(const Efg<double> &E,
+				   gList<BehavProfile<double> > &solns)
 {
-  BehavProfile<T> bp(E);
+  BehavProfile<double> bp(E);
 
-  EFLiapModule<double> EM(E, params, bp);
-  
-  EM.Liap();
+  long this_nevals, this_niters;
 
-  nevals += EM.NumEvals();
+  Liap(E, params, bp, solns, this_nevals, this_niters);
 
-  solns = EM.GetSolutions();
+  nevals += this_nevals;
 }
 
-template <class T>
-EFLiapBySubgame<T>::EFLiapBySubgame(const Efg<T> &E, const EFLiapParams &p,
-				    const BehavProfile<T> &s, int max)
-  : SubgameSolver<T>(E, max), nevals(0), params(p), start(s)
+EFLiapBySubgame::EFLiapBySubgame(const Efg<double> &E, const EFLiapParams &p,
+				 const BehavProfile<double> &s, int max)
+  : SubgameSolver<double>(E, max), nevals(0), params(p), start(s)
 { }
 
-template <class T>  EFLiapBySubgame<T>::~EFLiapBySubgame()   { }
+EFLiapBySubgame::~EFLiapBySubgame()   { }
 
 
 //-------------------
@@ -309,40 +307,39 @@ template <class T>  SeqFormBySubgame<T>::~SeqFormBySubgame()   { }
 // NFLiap
 //-------------------
 
-template <class T>
-void NFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E,
-				      gList<BehavProfile<T> > &solns)
+void NFLiapBySubgame::SolveSubgame(const Efg<double> &E,
+				   gList<BehavProfile<double> > &solns)
 {
-  Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
+  Nfg<double> *N = MakeReducedNfg((Efg<double> &) E);
 
   NFSupport *S=new NFSupport(*N);
 
   ViewNormal(*N, S);
 
-  	MixedProfile<T> mp(*N, *S);
-
-  NFLiapModule<T> M(*N, params, mp);
+  MixedProfile<double> mp(*N, *S);
   
-  M.Liap();
+  long this_nevals, this_niters;
 
-  nevals += M.NumEvals();
+  gList<MixedProfile<double> > subsolns;
+  Liap(*N, params, mp, subsolns, this_nevals, this_niters);
 
-  for (int i = 1; i <= M.GetSolutions().Length(); i++)  {
-    BehavProfile<T> bp(E);
-    MixedToBehav(*N, M.GetSolutions()[i], E, bp);
+  nevals += this_nevals;
+
+  for (int i = 1; i <= subsolns.Length(); i++)  {
+    BehavProfile<double> bp(E);
+    MixedToBehav(*N, subsolns[i], E, bp);
     solns.Append(bp);
   }
 
   delete N;
 }
 
-template <class T>
-NFLiapBySubgame<T>::NFLiapBySubgame(const Efg<T> &E, const NFLiapParams &p,
-				    const BehavProfile<T> &s, int max)
-  : SubgameSolver<T>(E, max), nevals(0), params(p), start(s)
+NFLiapBySubgame::NFLiapBySubgame(const Efg<double> &E, const NFLiapParams &p,
+				 const BehavProfile<double> &s, int max)
+  : SubgameSolver<double>(E, max), nevals(0), params(p), start(s)
 { }
 
-template <class T> NFLiapBySubgame<T>::~NFLiapBySubgame()   { }
+NFLiapBySubgame::~NFLiapBySubgame()   { }
 
 
 //-------------------
@@ -597,12 +594,8 @@ gOutput &operator<<(gOutput &, const gArray<gRational> &);
 TEMPLATE class SubgameSolver<double>;
 TEMPLATE class SubgameSolver<gRational>;
 
-TEMPLATE class EFLiapBySubgame<double>;
-
 TEMPLATE class SeqFormBySubgame<double>;
 TEMPLATE class SeqFormBySubgame<gRational>;
-
-TEMPLATE class NFLiapBySubgame<double>;
 
 TEMPLATE class LemkeBySubgame<double>;
 TEMPLATE class LemkeBySubgame<gRational>;

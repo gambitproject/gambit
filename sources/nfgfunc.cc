@@ -1,8 +1,8 @@
-//#
-//# FILE: nfgfunc.cc -- Normal form command language builtins
-//#
-//# $Id$
-//#
+//
+// FILE: nfgfunc.cc -- Normal form command language builtins
+//
+// $Id$
+//
 
 
 #include "gsm.h"
@@ -13,20 +13,6 @@
 
 #include "glist.h"
 #include "mixed.h"
-
-
-
-extern double Funct_tolBrent;
-extern double Funct_tolN;
-extern int Funct_maxitsBrent;
-extern int Funct_maxitsN;
-
-
-
-
-
-
-
 
 
 
@@ -548,97 +534,84 @@ Portion *GSM_EnumSupport(Portion **param)
 
 Portion *GSM_GobitNfg_NfgFloat(Portion **param)
 {
-  int old_Funct_maxitsN = Funct_maxitsN;
-  double old_Funct_tolN = Funct_tolN;
-  int old_Funct_maxitsBrent = Funct_maxitsBrent;
-  double old_Funct_tolBrent = Funct_tolBrent;
-
-  Nfg<double> &E = *(Nfg<double> *) ((NfgPortion *) param[0])->Value();
-  MixedProfile<double> start(E);
+  Nfg<double> &N = *(Nfg<double> *) ((NfgPortion *) param[0])->Value();
+  MixedProfile<double> start(N);
   
-  NFGobitParams<double> EP;
+  NFGobitParams NP;
   if( ((TextPortion*) param[1])->Value() != "" )
-    EP.pxifile = new gFileOutput( ((TextPortion*) param[1])->Value() );
+    NP.pxifile = new gFileOutput( ((TextPortion*) param[1])->Value() );
   else
-    EP.pxifile = &gnull;
-  EP.minLam = ((FloatPortion *) param[2])->Value();
-  EP.maxLam = ((FloatPortion *) param[3])->Value();
-  EP.delLam = ((FloatPortion *) param[4])->Value();
-  EP.powLam = ((IntPortion *) param[5])->Value();
-  EP.fullGraph = ((BoolPortion *) param[6])->Value();
+    NP.pxifile = &gnull;
+  NP.minLam = ((FloatPortion *) param[2])->Value();
+  NP.maxLam = ((FloatPortion *) param[3])->Value();
+  NP.delLam = ((FloatPortion *) param[4])->Value();
+  NP.powLam = ((IntPortion *) param[5])->Value();
+  NP.fullGraph = ((BoolPortion *) param[6])->Value();
 
-  Funct_maxitsN = ( (IntPortion*) param[7] )->Value();
-  Funct_tolN = ( (FloatPortion*) param[8] )->Value();
-  Funct_maxitsBrent = ( (IntPortion*) param[9] )->Value();
-  Funct_tolBrent = ( (FloatPortion*) param[10] )->Value();
-  
-  NFGobitModule<double> M(E, EP, start);
-  M.Gobit(1);
+  NP.maxitsN = ((IntPortion *) param[7])->Value();
+  NP.tolN = ((FloatPortion *) param[8])->Value();
+  NP.maxits1 = ((IntPortion *) param[9])->Value();
+  NP.tol1 = ((FloatPortion *) param[10] )->Value();
 
-  ((FloatPortion *) param[11])->Value() = M.Time();
+  gWatch watch;
+  gList<MixedProfile<double> > solutions;
+  Gobit(N, NP, start, solutions,
+        ((IntPortion *) param[12])->Value(),
+        ((IntPortion *) param[13])->Value());
+
+  ((FloatPortion *) param[11])->Value() = watch.Elapsed();
+/*
   ((IntPortion *) param[12])->Value() = M.NumEvals();
   ((IntPortion *) param[13])->Value() = M.NumIters();
+  */
 
-  Funct_maxitsN = old_Funct_maxitsN;
-  Funct_tolN = old_Funct_tolN;
-  Funct_maxitsBrent = old_Funct_maxitsBrent;
-  Funct_tolBrent = old_Funct_tolBrent;
+  if (NP.pxifile != &gnull)  delete NP.pxifile;
 
-  if (EP.pxifile != &gnull)  delete EP.pxifile;
-
-  Portion* por = new Mixed_ListPortion<double>(M.GetSolutions());
-  por->SetOwner( param[ 0 ]->Original() );
+  Portion *por = new Mixed_ListPortion<double>(solutions);
+  por->SetOwner(param[0]->Original());
   por->AddDependency();
   return por;
 }
-
 
 Portion *GSM_GobitNfg_MixedFloat(Portion **param)
 {
-  int old_Funct_maxitsN = Funct_maxitsN;
-  double old_Funct_tolN = Funct_tolN;
-  int old_Funct_maxitsBrent = Funct_maxitsBrent;
-  double old_Funct_tolBrent = Funct_tolBrent;
-
-  MixedProfile<double>& start = 
+  MixedProfile<double> &start = 
     * (MixedProfile<double> *) ((MixedPortion *) param[0])->Value();
-  Nfg<double> &E = *( start.BelongsTo() );
+  Nfg<double> &N = *start.BelongsTo();
   
-  NFGobitParams<double> EP;
-  if( ((TextPortion*) param[1])->Value() != "" )
-    EP.pxifile = new gFileOutput( ((TextPortion*) param[1])->Value() );
+  NFGobitParams NP;
+  if (((TextPortion *) param[1])->Value() != "")
+    NP.pxifile = new gFileOutput(((TextPortion *) param[1])->Value());
   else
-    EP.pxifile = &gnull;
-  EP.minLam = ((FloatPortion *) param[2])->Value();
-  EP.maxLam = ((FloatPortion *) param[3])->Value();
-  EP.delLam = ((FloatPortion *) param[4])->Value();
-  EP.powLam = ((IntPortion *) param[5])->Value();
-  EP.fullGraph = ((BoolPortion *) param[6])->Value();
+    NP.pxifile = &gnull;
+  NP.minLam = ((FloatPortion *) param[2])->Value();
+  NP.maxLam = ((FloatPortion *) param[3])->Value();
+  NP.delLam = ((FloatPortion *) param[4])->Value();
+  NP.powLam = ((IntPortion *) param[5])->Value();
+  NP.fullGraph = ((BoolPortion *) param[6])->Value();
 
-  Funct_maxitsN = ( (IntPortion*) param[7] )->Value();
-  Funct_tolN = ( (FloatPortion*) param[8] )->Value();
-  Funct_maxitsBrent = ( (IntPortion*) param[9] )->Value();
-  Funct_tolBrent = ( (FloatPortion*) param[10] )->Value();
-  
-  NFGobitModule<double> M(E, EP, start);
-  M.Gobit(1);
+  NP.maxitsN = ((IntPortion *) param[7])->Value();
+  NP.tolN = ((FloatPortion *) param[8])->Value();
+  NP.maxits1 = ((IntPortion *) param[9])->Value();
+  NP.tol1 = ((FloatPortion *) param[10])->Value();
 
-  ((FloatPortion *) param[11])->Value() = M.Time();
+  gWatch watch;
+  gList<MixedProfile<double> > solutions;
+  Gobit(N, NP, start, solutions, 
+        ((IntPortion *) param[12])->Value(),
+        ((IntPortion *) param[13])->Value());
+
+  ((FloatPortion *) param[11])->Value() = watch.Elapsed();
+/*
   ((IntPortion *) param[12])->Value() = M.NumEvals();
   ((IntPortion *) param[13])->Value() = M.NumIters();
+  */
 
-  Funct_maxitsN = old_Funct_maxitsN;
-  Funct_tolN = old_Funct_tolN;
-  Funct_maxitsBrent = old_Funct_maxitsBrent;
-  Funct_tolBrent = old_Funct_tolBrent;
-
-  Portion* por = new Mixed_ListPortion<double>(M.GetSolutions());
-  por->SetOwner( param[ 0 ]->Owner() );
+  Portion *por = new Mixed_ListPortion<double>(solutions);
+  por->SetOwner(param[0]->Owner());
   por->AddDependency();
   return por;
 }
-
-
 
 
 
@@ -858,78 +831,67 @@ Portion *GSM_LemkeNfgSupport(Portion **param)
 
 #include "nliap.h"
 
-
 Portion *GSM_LiapNfg_NfgFloat(Portion **param)
 {
-  int old_Funct_maxitsN = Funct_maxitsN;
-  double old_Funct_tolN = Funct_tolN;
-  int old_Funct_maxitsBrent = Funct_maxitsBrent;
-  double old_Funct_tolBrent = Funct_tolBrent;
+  Nfg<double> &N = *(Nfg<double> *) ((NfgPortion*) param[0])->Value();
+  MixedProfile<double> start(N);
 
-  Nfg<double> &E = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
-  MixedProfile<double> start(E);
+  NFLiapParams params;
 
-  NFLiapParams LP;
-
+/*
   LP.stopAfter = ((IntPortion *) param[1])->Value();
   LP.nTries = ((IntPortion *) param[2])->Value();
+  */
+
+  params.maxitsN = ((IntPortion *) param[3])->Value();
+  params.tolN = ((FloatPortion *) param[4])->Value();
+  params.maxits1 = ((IntPortion *) param[5])->Value();
+  params.tol1 = ((FloatPortion *) param[6])->Value();
  
-  Funct_maxitsN = ( (IntPortion*) param[3] )->Value();
-  Funct_tolN = ( (FloatPortion*) param[4] )->Value();
-  Funct_maxitsBrent = ( (IntPortion*) param[5] )->Value();
-  Funct_tolBrent = ( (FloatPortion*) param[6] )->Value();
+  long niters;
+  gWatch watch;
+  gList<MixedProfile<double> > solutions;
+  Liap(N, params, start, solutions,
+       ((IntPortion *) param[8])->Value(),
+       niters);
 
-  NFLiapModule<double> LM(E, LP, start);
-  LM.Liap();
+  ((FloatPortion *) param[7])->Value() = watch.Elapsed();
 
-  ((FloatPortion *) param[7])->Value() = LM.Time();
-  ((IntPortion *) param[8])->Value() = LM.NumEvals();
-
-  Funct_maxitsN = old_Funct_maxitsN;
-  Funct_tolN = old_Funct_tolN;
-  Funct_maxitsBrent = old_Funct_maxitsBrent;
-  Funct_tolBrent = old_Funct_tolBrent;
-
-  Portion* por = new Mixed_ListPortion<double>(LM.GetSolutions());
-  por->SetOwner( param[ 0 ]->Original() );
+  Portion *por = new Mixed_ListPortion<double>(solutions);
+  por->SetOwner(param[0]->Original());
   por->AddDependency();
   return por;
 }
 
 Portion *GSM_LiapNfg_MixedFloat(Portion **param)
 {
-  int old_Funct_maxitsN = Funct_maxitsN;
-  double old_Funct_tolN = Funct_tolN;
-  int old_Funct_maxitsBrent = Funct_maxitsBrent;
-  double old_Funct_tolBrent = Funct_tolBrent;
-
   MixedProfile<double> &start = 
     * (MixedProfile<double> *) ((MixedPortion *) param[0])->Value();
-  Nfg<double> &E = *( start.BelongsTo() );
+  Nfg<double> &N = *start.BelongsTo();
 
-  NFLiapParams LP;
-
-  LP.stopAfter = ((IntPortion *) param[1])->Value();
-  LP.nTries = ((IntPortion *) param[2])->Value();
- 
-  Funct_maxitsN = ( (IntPortion*) param[3] )->Value();
-  Funct_tolN = ( (FloatPortion*) param[4] )->Value();
-  Funct_maxitsBrent = ( (IntPortion*) param[5] )->Value();
-  Funct_tolBrent = ( (FloatPortion*) param[6] )->Value();
+  NFLiapParams params;
   
-  NFLiapModule<double> LM(E, LP, start);
-  LM.Liap();
+/*
+  P.stopAfter = ((IntPortion *) param[1])->Value();
+  P.nTries = ((IntPortion *) param[2])->Value();
+  */
 
-  ((FloatPortion *) param[7])->Value() = LM.Time();
-  ((IntPortion *) param[8])->Value() = LM.NumEvals();
+  params.maxitsN = ((IntPortion *) param[3])->Value();
+  params.tolN = ((FloatPortion *) param[4])->Value();
+  params.maxits1 = ((IntPortion *) param[5])->Value();
+  params.tol1 = ((FloatPortion *) param[6])->Value();
+ 
+  long niters;
+  gWatch watch;
+  gList<MixedProfile<double> > solutions;
+  Liap(N, params, start, solutions,
+       ((IntPortion *) param[8])->Value(),
+       niters);
 
-  Funct_maxitsN = old_Funct_maxitsN;
-  Funct_tolN = old_Funct_tolN;
-  Funct_maxitsBrent = old_Funct_maxitsBrent;
-  Funct_tolBrent = old_Funct_tolBrent;
+  ((FloatPortion *) param[7])->Value() = watch.Elapsed();
 
-  Portion* por = new Mixed_ListPortion<double>(LM.GetSolutions());
-  por->SetOwner( param[ 0 ]->Owner() );
+  Portion *por = new Mixed_ListPortion<double>(solutions);
+  por->SetOwner(param[0]->Owner());
   por->AddDependency();
   return por;
 }
@@ -1782,13 +1744,13 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_GridSolveFloat, 1, "pxifile", porTEXT,
 			new TextValPortion("") );
   FuncObj->SetParamInfo(GSM_GridSolveFloat, 2, "minLam", porFLOAT,
-			new FloatRefPortion(Gobit_default_minLam));
+			new FloatValPortion(0.01));
   FuncObj->SetParamInfo(GSM_GridSolveFloat, 3, "maxLam", porFLOAT,
-			new FloatRefPortion(Gobit_default_maxLam));
+			new FloatValPortion(30.0));
   FuncObj->SetParamInfo(GSM_GridSolveFloat, 4, "delLam", porFLOAT,
-			new FloatRefPortion(Gobit_default_delLam));
+			new FloatValPortion(0.01));
   FuncObj->SetParamInfo(GSM_GridSolveFloat, 5, "powLam", porINTEGER,
-		        new IntRefPortion( (long&) Gobit_default_powLam));
+		        new IntValPortion(1));
   FuncObj->SetParamInfo(GSM_GridSolveFloat, 6, "delp", porFLOAT,
 			new FloatValPortion(.01));
   FuncObj->SetParamInfo(GSM_GridSolveFloat, 7, "tol", porFLOAT,
@@ -1803,13 +1765,13 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_GridSolveSupport, 1, "pxifile", porTEXT,
 			new TextValPortion("") );
   FuncObj->SetParamInfo(GSM_GridSolveSupport, 2, "minLam", porFLOAT,
-			new FloatRefPortion(Gobit_default_minLam));
+			new FloatValPortion(0.01));
   FuncObj->SetParamInfo(GSM_GridSolveSupport, 3, "maxLam", porFLOAT,
-			new FloatRefPortion(Gobit_default_maxLam));
+			new FloatValPortion(30.0));
   FuncObj->SetParamInfo(GSM_GridSolveSupport, 4, "delLam", porFLOAT,
-			new FloatRefPortion(Gobit_default_delLam));
+			new FloatValPortion(0.01));
   FuncObj->SetParamInfo(GSM_GridSolveSupport, 5, "powLam", porINTEGER,
-		        new IntRefPortion( (long&) Gobit_default_powLam));
+		        new IntValPortion(1));
   FuncObj->SetParamInfo(GSM_GridSolveSupport, 6, "delp", porFLOAT,
 			new FloatValPortion(.01));
   FuncObj->SetParamInfo(GSM_GridSolveSupport, 7, "tol", porFLOAT,
@@ -1819,29 +1781,6 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_GridSolveSupport, 9, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
 
-  /*
-  FuncObj->SetFuncInfo(GSM_GridSolveRational, 10);
-  FuncObj->SetParamInfo(GSM_GridSolveRational, 0, "nfg", porNFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GridSolveFloat, 1, "pxifile", porTEXT,
-			new TextValPortion("") );
-  FuncObj->SetParamInfo(GSM_GobitSolveFloat, 2, "minLam", porFLOAT,
-			new FloatRefPortion(Gobit_default_minLam));
-  FuncObj->SetParamInfo(GSM_GobitSolveFloat, 3, "maxLam", porFLOAT,
-			new FloatRefPortion(Gobit_default_maxLam));
-  FuncObj->SetParamInfo(GSM_GobitSolveFloat, 4, "delLam", porFLOAT,
-			new FloatRefPortion(Gobit_default_delLam));
-  FuncObj->SetParamInfo(GSM_GobitSolveFloat, 5, "powLam", porINTEGER,
-		        new IntRefPortion( (long&) Gobit_default_powLam));
-  FuncObj->SetParamInfo(GSM_GridSolveRational, 6, "delp", porRATIONAL,
-			new FloatValPortion(.01));
-  FuncObj->SetParamInfo(GSM_GridSolveRational, 7, "tol", porRATIONAL,
-			new FloatValPortion(.01));
-  FuncObj->SetParamInfo(GSM_GridSolveRational, 8, "nEvals", porINTEGER,
-			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GridSolveRational, 9, "time", porRATIONAL,
-			new FloatValPortion(0.0), PASS_BY_REFERENCE);
-  */
   gsm->AddFunction(FuncObj);
 
 

@@ -8,6 +8,7 @@
 #define SUBSOLVE_H
 
 #include "efg.h"
+#include "nfg.h"
 
 template <class T> class SubgameSolver   {
   private:
@@ -28,7 +29,7 @@ template <class T> class SubgameSolver   {
     virtual void ViewSubgame(int, const Efg<T> &);
 
     virtual void ViewNormal(const Nfg<T> &, NFSupport *&);
-		virtual void SelectSolutions(int, const Efg<T> &, gList<BehavProfile<T> > &);
+    virtual void SelectSolutions(int, const Efg<T> &, gList<BehavProfile<T> > &);
 
   public:
     SubgameSolver(const Efg<T> &E, int maxsol = 0);
@@ -38,7 +39,6 @@ template <class T> class SubgameSolver   {
 
     double Time(void) const   { return time; }
     const gList<BehavProfile<T> > &GetSolutions(void) const
-
       { return solutions; }
 };
 
@@ -60,23 +60,22 @@ template <class T> class SeqFormBySubgame : public SubgameSolver<T>  {
 
 #include "eliap.h"
 
-template <class T> class EFLiapBySubgame : public SubgameSolver<T>  {
+class EFLiapBySubgame : public SubgameSolver<double>  {
   private:
     int nevals;
     EFLiapParams params;
-    BehavProfile<T> start;
+    BehavProfile<double> start;
     
-    void SolveSubgame(const Efg<T> &, gList<BehavProfile<T> > &);
+    void SolveSubgame(const Efg<double> &, gList<BehavProfile<double> > &);
 
   public:
-    EFLiapBySubgame(const Efg<T> &E, const EFLiapParams &,
-		    const BehavProfile<T> &, int max = 0);
+    EFLiapBySubgame(const Efg<double> &E, const EFLiapParams &,
+		    const BehavProfile<double> &, int max = 0);
     virtual ~EFLiapBySubgame();
 
     int NumEvals(void) const   { return nevals; }
 };
 
-#include "nfg.h"
 
 #include "lemke.h"
 
@@ -96,17 +95,18 @@ template <class T> class LemkeBySubgame : public SubgameSolver<T>  {
 
 #include "nliap.h"
 
-template <class T> class NFLiapBySubgame : public SubgameSolver<T>  {
+class NFLiapBySubgame : public SubgameSolver<double>  {
   private:
     int nevals;
     NFLiapParams params;
-    BehavProfile<T> start;
+    BehavProfile<double> start;
 
-    void SolveSubgame(const Efg<T> &, gList<BehavProfile<T> > &);
+    void SolveSubgame(const Efg<double> &,
+		      gList<BehavProfile<double> > &);
 
   public:
-    NFLiapBySubgame(const Efg<T> &E, const NFLiapParams &,
-		    const BehavProfile<T> &, int max = 0);
+    NFLiapBySubgame(const Efg<double> &E, const NFLiapParams &,
+		    const BehavProfile<double> &, int max = 0);
     virtual ~NFLiapBySubgame();
 
     int NumEvals(void) const   { return nevals; }

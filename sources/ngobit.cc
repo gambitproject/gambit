@@ -1,177 +1,132 @@
-//#
-//# FILE: ngobit.cc -- Implementation of normal form Gobit algorithm
-//#
-//# $Id$
-//#
+//
+// FILE: ngobit.cc -- Implementation of gobit on normal form games
+//
+// $Id$
+//
 
 #include <math.h>
+
 #include "ngobit.h"
-#include "gfunct.h"
-#include "rational.h"
 
-//-------------------------------------------------------------------------
-//                     NFGobitParams<T>: Member functions
-//-------------------------------------------------------------------------
+#include "gfunc.h"
 
-template <class T> NFGobitParams<T>::NFGobitParams(gStatus &status_)
-  : GobitParams<T>(status_)
+NFGobitParams::NFGobitParams(gStatus &s)
+  : trace(0), powLam(1), maxits1(100), maxitsN(20),
+    minLam(0.01), maxLam(30.0), delLam(0.01), tol1(2.0e-10), tolN(1.0e-10),
+    fullGraph(false), tracefile(&gnull), pxifile(&gnull),
+    status(s)
 { }
 
-template <class T>
-NFGobitParams<T>::NFGobitParams(gOutput &out, gOutput &pxi, gStatus &status_)
-  : GobitParams<T>(out, pxi, status_)
+NFGobitParams::NFGobitParams(gOutput &out, gOutput &pxi, gStatus &s)
+  : trace(0), powLam(1), maxits1(100), maxitsN(20),
+    minLam(0.01), maxLam(30.0), delLam(0.01), tol1(2.0e-10), tolN(1.0e-10),
+    fullGraph(false), tracefile(&out), pxifile(&pxi),
+    status(s)
 { }
 
-//-------------------------------------------------------------------------
-//                   NFGobitFunc<T>: Class declaration
-//-------------------------------------------------------------------------
 
-template <class T>
-class NFGobitFunc : public GobitFunc<T>, public gBC2FunctMin<T>  {
-private:
-  int niters, nevals;
-  T Lambda;
-  MixedProfile<T> p, pp;
-  const Nfg<T> &N;
-  gVector<T> **scratch1, **scratch2;
-  
-      // These three are inherited virtual functions from gBC2FunctMin<T>:
-  int Deriv(const gVector<T> &v, gVector<T> &d);
-  int Hess(const gVector<T> &v, gMatrix<T> &d);
-  T Value(const gVector<T> &x);
+class NFGobitFunc : public gC2Function<double>  {
+  private:
+    long _nevals;
+    const Nfg<double> &_nfg;
+    double _Lambda;
+    gVector<double> **_scratch;
+    MixedProfile<double> _p;
 
-      // Used in computation of Deriv() above
-  T GobitDerivValue(int i, int j, const MixedProfile<T> &v);
-  
-public:
-  NFGobitFunc(const Nfg<T> &NF, const GobitParams<T> &P,
-	      const MixedProfile<T> &s);
-  virtual ~NFGobitFunc();
-  
-  void Init(void);
-      // These two are inherited virtual functions from GobitFunc
-  void Optimize(T Lambda, int &iter, T &value);
-  void Output(gOutput &f, int format = 0) const;
-  long NumIters(void) const;
-  long NumEvals(void) const;
-  const MixedProfile<T> &GetProfile(void) const;
+    double Value(const gVector<double> &);
+    
+    double GobitDerivValue(int, int, const MixedProfile<double> &);
+
+    bool Deriv(const gVector<double> &, gVector<double> &);
+    bool Hessian(const gVector<double> &, gMatrix<double> &);
+
+  public:
+    NFGobitFunc(const Nfg<double> &, const MixedProfile<double> &);
+    virtual ~NFGobitFunc();
+    
+    void SetLambda(double l)   { _Lambda = l; }
+    long NumEvals(void) const  { return _nevals; }
 };
 
 
-//-------------------------------------------------------------------------
-//               NFGobitFunc<T>: Constructor and destructor
-//-------------------------------------------------------------------------
-
-template <class T>
-NFGobitFunc<T>::NFGobitFunc(const Nfg<T> &NF, const GobitParams<T> &,
-			    const MixedProfile<T> &s)
-  : gBC2FunctMin<T>(s.Length()), niters(0), nevals(0), 
-    p(s), pp(s), N(NF)
+NFGobitFunc::NFGobitFunc(const Nfg<double> &N,
+			 const MixedProfile<double> &start)
+  : _nevals(0L), _nfg(N), _p(start)
 {
-  Init();
+  _scratch = new gVector<double> *[_nfg.NumPlayers()] - 1;
+  for (int i = 1; i <= _nfg.NumPlayers(); i++)  
+    _scratch[i] = new gVector<double>(_p.GetNFSupport().GetStrategy(i).Length());
 }
 
-template <class T> void NFGobitFunc<T>::Init(void)
+NFGobitFunc::~NFGobitFunc()
 {
-  // Seems to me like this should be a parameter to the gfunct ctor?
-  constrained = 1;
-  scratch1 = new gVector<T> *[N.NumPlayers()] - 1;
-  scratch2 = new gVector<T> *[N.NumPlayers()] - 1;
-  for (int i = 1; i <= N.NumPlayers(); i++)  {
-    scratch1[i] = new gVector<T>(pp.GetNFSupport().GetStrategy(i).Length());
-    scratch2[i] = new gVector<T>(pp.GetNFSupport().GetStrategy(i).Length());
-  }
+  for (int i = 1; i <= _nfg.NumPlayers(); i++) 
+    delete _scratch[i];
+
+  delete [] (_scratch + 1);
 }
 
-template <class T> NFGobitFunc<T>::~NFGobitFunc()
+bool NFGobitFunc::Hessian(const gVector<double> &, gMatrix<double> &)
 {
-  for (int i = 1; i <= N.NumPlayers(); i++)  {
-    delete scratch1[i];
-    delete scratch2[i];
-  }
-
-  delete [] (scratch1 + 1);
-  delete [] (scratch2 + 1);
+  return true;
 }
 
-template <class T> 
-const MixedProfile<T> &NFGobitFunc<T>::GetProfile(void) const
+double NFGobitFunc::GobitDerivValue(int i, int j,
+				    const MixedProfile<double> &v)
 {
-  return pp;
-}
-
-template <class T> long NFGobitFunc<T>::NumIters(void) const
-{
-  return niters;
-}
-
-template <class T> long NFGobitFunc<T>::NumEvals(void) const
-{
-  return nevals;
-}
-
-//-------------------------------------------------------------------------
-//           NFGobitFunc<T>: Implementation of function members
-//-------------------------------------------------------------------------
-
-template <class T> int NFGobitFunc<T>::Hess(const gVector<T> &, gMatrix<T> &)
-{
-  return 1;
-}
-
-template <class T>
-int NFGobitFunc<T>::Deriv(const gVector<T> &v, gVector<T> &d)
-{
-  ((gVector<T> &) p).operator=(v);
-  T avg;
+  double x = 0.0, dv;
   
-  for (int pl = 1, index = 1; pl <= N.NumPlayers(); pl++)  {
-    avg = (T) 0;
-    int nstrats = pp.GetNFSupport().GetStrategy(pl).Length();
-    int st;
-    for (st = 1; st <= nstrats;
-	 avg += (d[index++] = GobitDerivValue(pl, st++, p)));
-    avg /= (T) nstrats;
-    for (st = 1, index -= nstrats; st <= nstrats; st++, d[index++] -= avg);
-  }
-
-  return 1;
-}
-
-template <class T>
-T NFGobitFunc<T>::GobitDerivValue(int i, int j, const MixedProfile<T> &v)
-{
-  T x((T) 0), dv;
-  
-  for (int pl = 1; pl <= N.NumPlayers(); pl++)  {
-    gVector<T> &payoff = *scratch1[pl];
+  for (int pl = 1; pl <= _nfg.NumPlayers(); pl++)  {
+    gVector<double> &payoff = *_scratch[pl];
     v.Payoff(pl, pl, payoff);
-    for (int st = 2; st <= pp.GetNFSupport().GetStrategy(pl).Length(); st++)  {
-      dv =(T)log(v(pl, 1)) - (T)log(v(pl, st)) - Lambda * (payoff[1] - payoff[st]);
+    for (int st = 2; st <= _p.GetNFSupport().GetStrategy(pl).Length(); st++) {
+      dv = (double) log(v(pl, 1)) - (double) log(v(pl, st)) -
+	_Lambda * (payoff[1] - payoff[st]);
       if (pl == i)  {
-	if (j == 1)              x += dv / v(pl, 1);
-	else if (j == st)        x -= dv / v(pl, st);
+	if (j == 1)          x += dv / v(pl, 1);
+	else if (j == st)    x -= dv / v(pl, st);
       }
       else
-	x -= dv * Lambda * (v.Payoff(pl, pl, 1, i, j) -
-			    v.Payoff(pl, pl, st, i, j));
+	x -= dv * _Lambda * (v.Payoff(pl, pl, 1, i, j) -
+			     v.Payoff(pl, pl, st, i, j));
     }
   }
 
-  return ((T) 2.0) * x; 
+  return 2.0 * x;
 }
 
-template <class T> T NFGobitFunc<T>::Value(const gVector<T> &v)
+
+bool NFGobitFunc::Deriv(const gVector<double> &v, gVector<double> &d)
 {
-  nevals++;
-  ((gVector<T> &) p).operator=(v);
-  T val((T) 0), z;
+  ((gVector<double> &) _p).operator=(v);
+  double avg;
   
-  for (int pl = 1; pl <= N.NumPlayers(); pl++)  {
-    gVector<T> &payoff = *scratch1[pl];
-    p.Payoff(pl, pl, payoff);
-    for (int st = 2; st <= pp.GetNFSupport().GetStrategy(pl).Length(); st++)  {
-      z = (T)log(p(pl, 1)) - (T)log(p(pl, st)) - Lambda * (payoff[1] - payoff[st]);
+  for (int pl = 1, index = 1; pl <= _nfg.NumPlayers(); pl++)  {
+    avg = 0.0;
+    int nstrats = _p.GetNFSupport().GetStrategy(pl).Length();
+    int st;
+
+    for (st = 1; st <= nstrats;
+	 avg += (d[index++] = GobitDerivValue(pl, st++, _p)));
+    avg /= (double) nstrats;
+    for (st = 1, index -= nstrats; st <= nstrats; st++, d[index++] -= avg);
+  }
+
+  return true;
+}
+  
+double NFGobitFunc::Value(const gVector<double> &v)
+{
+  _nevals++;
+  ((gVector<double> &) _p).operator=(v);
+  double val = 0.0, z;
+  
+  for (int pl = 1; pl <= _nfg.NumPlayers(); pl++)  {
+    gVector<double> &payoff = *_scratch[pl];
+    _p.Payoff(pl, pl, payoff);
+    for (int st = 2; st <= _p.GetNFSupport().GetStrategy(pl).Length(); st++) {
+      z = log(_p(pl, 1)) - log(_p(pl, st)) -
+          _Lambda * (payoff[1] - payoff[st]);
       val += z * z;
     }
   }
@@ -179,86 +134,94 @@ template <class T> T NFGobitFunc<T>::Value(const gVector<T> &v)
   return val;
 }
 
-//-------------------------------------------------------------------------
-//            NFGobitFunc<T>: Implementation of gobit members
-//-------------------------------------------------------------------------
 
-template <class T> void NFGobitFunc<T>::Optimize(T Lam, int &iter, T &value)
+
+static void WritePXIHeader(gOutput &pxifile, const Nfg<double> &N,
+			   const NFGobitParams &params)
 {
-  Lambda = Lam;
-  DFP(pp, iter, value);
+  pxifile << "Dimensionality:\n";
+  pxifile << N.NumPlayers() << " ";
+  for (int pl = 1; pl <= N.NumPlayers(); pl++)
+    pxifile << N.NumStrats(pl) << " ";
+  pxifile << "\n";
+  N.WriteNfgFile(pxifile);
+
+  pxifile << "Settings:\n" << params.minLam;
+  pxifile << "\n" << params.maxLam << "\n" << params.delLam;
+  pxifile << "\n" << 0 << "\n" << 1 << "\n" << params.powLam << "\n";
+  
+  int numcols = N.ProfileLength() + 2;
+
+  pxifile << "DataFormat:\n" << numcols;
+  
+  for (int i = 1; i <= numcols; i++)
+    pxifile << " " << i;
+ 
+  pxifile << "\nData:\n";
 }
 
+extern bool DFP(gVector<double> &p, gC2Function<double> &func,
+		double &fret, int &iter,
+	        int maxits1, double tol1, int maxitsN, double tolN);
 
-template <class T> void NFGobitFunc<T>::Output(gOutput &f,int format) const
+
+
+void Gobit(const Nfg<double> &N, NFGobitParams &params,
+	   const MixedProfile<double> &start,
+	   gList<MixedProfile<double> > &solutions,
+	   long &nevals, long &nits)
 {
-  // Header information
-  if(format==3) {
-    f<<"Dimensionality:\n";
-    int n=N.NumPlayers();
-    f << n << " ";
-    for(int i=1;i<=n;i++)
-      f << N.NumStrats(i) << " ";
-    f << "\n";
-//    N.WriteNfgFile(f);
+  NFGobitFunc F(N, start);
+
+  int iter = 0, nit;
+  double Lambda, value = 0.0;
+  
+  if (params.pxifile) 
+    WritePXIHeader(*params.pxifile, N, params);
+
+  Lambda = (params.delLam < 0.0) ? params.maxLam : params.minLam;
+  int num_steps, step = 0;
+  if (params.powLam == 0)
+    num_steps = (int) ((params.maxLam - params.minLam) / params.delLam);
+  else
+    num_steps = (int) (log(params.maxLam / params.minLam) /
+		       log(params.delLam));
+
+  MixedProfile<double> p(start);
+
+  for (nit = 1; !params.status.Get() &&
+       Lambda <= params.maxLam &&
+       Lambda >= params.minLam && value < 10.0; nit++)  {
+
+    F.SetLambda(Lambda);
+    DFP(p, F, value, iter,
+        params.maxits1, params.tol1, params.maxitsN, params.tolN);
+
+    // tracefile stuff goes in here... omitted for now
+    
+    if (params.pxifile)   {
+      *params.pxifile << "\n" << Lambda << " " << value;
+      *params.pxifile << " ";
+      for (int pl = 1; pl <= N.NumPlayers(); pl++)
+	for (int strat = 1;
+	     strat <= p.GetNFSupport().GetStrategy(pl).Length();
+	     strat++)
+	  *params.pxifile << p(pl, strat) << " ";
+    }
+    
+    if (params.fullGraph) 
+      solutions.Append(p);
+
+    Lambda += params.delLam * pow(Lambda, params.powLam);
+    params.status.SetProgress((double) step / (double) num_steps);
+    step++;
   }
-  else if(format==2) {
-    int numcols = 2+N.ProfileLength();
-    f<<"DataFormat:\n";
-    f << numcols;
-    for(int i=1;i<=numcols;i++) f << " " << i;
-    f<<"\nData:\n";
-  }
-  // PXI output
-  else if(format==1) {
-    f<< " ";
-    for (int pl = 1; pl <= N.NumPlayers(); pl++)
-      for (int strat = 1; strat <= pp.GetNFSupport().GetStrategy(pl).Length(); strat++)  
-	f << pp(pl,strat) << " ";
-  }
-  else  f << " pp = " << pp;
+
+  if (!params.fullGraph)
+    solutions.Append(p);
+
+  if (params.status.Get())   params.status.Reset();
+
+  nevals = F.NumEvals();
+  nits = 0;
 }
-
-
-//-------------------------------------------------------------------------
-//                  NFGobitModule<T>: Member functions
-//-------------------------------------------------------------------------
-
-template <class T>
-NFGobitModule<T>::NFGobitModule(const Nfg<T> &NF, NFGobitParams<T> &p,
-				MixedProfile<T> &s)
-  : GobitModule<T>(p), N(NF), S(s)
-{ }
-
-template <class T> NFGobitModule<T>::~NFGobitModule()
-{ }
-
-template <class T>
-const gList<MixedProfile<T> > &NFGobitModule<T>::GetSolutions(void) const
-{
-  return solutions;
-}
-
-template <class T> GobitFunc<T> *NFGobitModule<T>::CreateFunc(void)
-{
-  return new NFGobitFunc<T>(N, params, S); 
-}
-
-template <class T>
-void NFGobitModule<T>::AddSolution(const GobitFunc<T> *const F)
-{
-  solutions.Append(MixedProfile<T>(((NFGobitFunc<T> *) F)->GetProfile()));
-}
-
-#define BIGNUM 1.0e100
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
-TEMPLATE class NFGobitParams<double>;
-TEMPLATE class NFGobitFunc<double>;
-TEMPLATE class NFGobitModule<double>;

@@ -1,227 +1,124 @@
-//#
-//# FILE: eliap.cc -- Extensive Form Liapunov module
-//#
-//# $Id$
-//#
+//
+// FILE: eliap.cc -- Extensive Form Liapunov module
+//
+// $Id$
+//
 
-#define MAXIT 10
-#define TOL (T)(.00000001)
-
-#include <math.h>
 #include "eliap.h"
-#include "gfunct.h"
-#include "gdpvect.h"
+
+#include "gfunc.h"
 #include "gmatrix.h"
-#include "rational.h"
 
-#include "behav.h"
-#include "efplayer.h"
-#include "infoset.h"
-
-//-------------------------------------------------------------------------
-//                     EFLiapParams<T>: Member functions
-//-------------------------------------------------------------------------
-
-EFLiapParams::EFLiapParams(gStatus &status_)
-  : LiapParams(status_)
+EFLiapParams::EFLiapParams(gStatus &s)
+  : trace(0), maxits1(100), maxitsN(20), tol1(2.0e-10), tolN(1.0e-10),
+    tracefile(0), status(s)
 { }
 
-//-------------------------------------------------------------------------
-//                      EFLiapFunc<T>: Class definition
-//-------------------------------------------------------------------------
 
-template <class T>
-class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
-	private:
-		long niters, nevals;
-		const Efg<T> &E;
-		BehavProfile<T> p, pp;
-		gDPVector<T> cpay;
-    gMatrix<T> xi;
 
-    T Value(const gVector<T> &x);
+class EFLiapFunc : public gFunction<double>  {
+  private:
+    long _nevals;
+    const Efg<double> &_efg;
+    BehavProfile<double> _p;
+    gDPVector<double> _cpay;
+
+    double Value(const gVector<double> &x);
 
   public:
-    EFLiapFunc(const Efg<T> &EF, const LiapParams &P); 
-    EFLiapFunc(const Efg<T> &EF, const LiapParams &P,
-	     const BehavProfile<T> &s); 
+    EFLiapFunc(const Efg<double> &, const BehavProfile<double> &);
     virtual ~EFLiapFunc();
-
-    int Optimize(int &iter, T &value);
-    void Output(gOutput &f) const;
-
-    void Randomize(void);
-    long NumIters(void) const;
-    long NumEvals(void) const;
-
-    const BehavProfile<T> &GetProfile(void) const;
+    
+    long NumEvals(void) const  { return _nevals; }
 };
 
-//----------------------------------------------------------------------
-//               EFLiapFunct<T>: Constructor and destructor
-//----------------------------------------------------------------------
 
-template <class T>
-EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams &LP)
-  : gBFunctMin<T>(EF.ProfileLength(),LP.status), niters(0), nevals(0), E(EF),
-    p(EF, false), pp(EF, false), cpay(EF.Dimensionality()),
-    xi(p.Length(), p.Length())
-{
-  xi.MakeIdent();
-}
+EFLiapFunc::EFLiapFunc(const Efg<double> &E,
+		       const BehavProfile<double> &start)
+  : _nevals(0L), _efg(E), _p(start), _cpay(E.Dimensionality())
+{ }
 
-template <class T>
-EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams &LP,
-			  const BehavProfile<T> &start)
-  : gBFunctMin<T>(EF.ProfileLength(),LP.status), niters(0), nevals(0), E(EF),
-    p(EF, false), pp(EF,false), cpay(EF.Dimensionality()),
-    xi(p.Length(),p.Length())
-{
-  xi.MakeIdent();
-  for (int pl = 1; pl <= E.NumPlayers(); pl++)   {
-    EFPlayer *p = E.PlayerList()[pl];
-    for (int iset = 1; iset <= p->NumInfosets(); iset++)  {
-      Infoset *s = p->InfosetList()[iset];
-      for (int act = 1; act < s->NumActions(); act++)
-	pp(pl, iset, act) = start(pl, iset, act);
-    }
-  }
-}
-
-template <class T> EFLiapFunc<T>::~EFLiapFunc()
+EFLiapFunc::~EFLiapFunc()
 { }
 
 
-template <class T> const BehavProfile<T> &EFLiapFunc<T>::GetProfile(void) const
+double EFLiapFunc::Value(const gVector<double> &v)
 {
-  return pp;
-}
+  static const double BIG1 = 10000.0;
+  static const double BIG2 = 100.0;
 
-template <class T> void EFLiapFunc<T>::Output(gOutput &f) const
-{
-  f << "\np = " << pp;
- }
+  _nevals++;
 
-template <class T> long EFLiapFunc<T>::NumIters(void) const
-{
-  return niters;
-}
 
-template <class T> long EFLiapFunc<T>::NumEvals(void) const
-{
-  return nevals;
-}
-
-template <class T> int EFLiapFunc<T>::Optimize(int &iter, T &value)
-{
-  return Powell(pp, xi, iter, value);
-}
-
-template <class T> void EFLiapFunc<T>::Randomize(void)
-{
-  T sum, tmp;
-
-  for (int i = 1; i <= E.NumPlayers(); i++) {
-    EFPlayer *player = E.PlayerList()[i];
-    for(int j=1;j<=player->NumInfosets();j++) {
-      sum = (T) 0;
-      Infoset *s = player->InfosetList()[j];
-      int k;
-      for (k = 1; k < s->NumActions(); k++)  {
-	do
-	  tmp = (T) Uniform();
-	while (tmp + sum > (T) 1);
-	pp(i,j,k) = tmp;
-	sum += tmp;
-      }
-      
-      pp(i,j,k) = (T) 1 - sum;
-    }
-  }
-}
-
-template <class T> T EFLiapFunc<T>::Value(const gVector<T> &v)
-{
-  static const T BIG1 = (T) 10000.0;
-  static const T BIG2 = (T) 100.0;
-
-  nevals++;
-
-  ((gVector<T> &) p).operator=(v);
-  BehavProfile<T> tmp(p);
-  T x, result((T) 0), avg, sum;
+  ((gVector<double> &) _p).operator=(v);
+  BehavProfile<double> tmp(_p);
+  double x, result = 0.0, avg, sum;
 
       // Ted -- only reason for this is because you 
       // got rid of CondPayoff ( . , . )
-  gPVector<T> probs(E.Dimensionality().Lengths());  
-  tmp.CondPayoff(cpay,probs);
+  gPVector<double> probs(_efg.Dimensionality().Lengths());  
+  tmp.CondPayoff(_cpay, probs);
 
-//  gout << "\nv = " << v << "\np = " << p << "\ncpay = " << cpay;
-  
-  for(int i = 1; i <= E.NumPlayers(); i++) {
-    EFPlayer *player = E.PlayerList()[i];
-    for(int j=1;j<=player->NumInfosets();j++) {
-      avg = sum = (T) 0;
+  for (int i = 1; i <= _efg.NumPlayers(); i++) {
+    EFPlayer *player = _efg.PlayerList()[i];
+    for (int j = 1; j <= player->NumInfosets(); j++) {
+      avg = sum = 0.0;
       Infoset *s = player->InfosetList()[j];
       int k;
       for (k = 1; k <= s->NumActions(); k++) {
-	x = p(i, j, k); 
-	avg += (x * cpay(i, j, k));
+	x = _p(i, j, k); 
+	avg += x * _cpay(i, j, k);
 	sum += x;
-	if(x > (T)0 ) x = (T)0;
-	result += BIG1*x*x;         // add penalty for neg probabilities
+	if (x > 0.0)  x = 0.0;
+	result += BIG1 * x * x;         // add penalty for neg probabilities
       }
-      for(k=1; k<=s->NumActions(); k++) {
-	x=cpay(i,j,k)-avg;
-	if(x < (T)0 ) x = (T)0;
-	result += x*x;          // add penalty if not best response
+      for (k = 1; k <= s->NumActions(); k++) {
+	x = _cpay(i, j, k) - avg;
+	if (x < 0.0) x = 0.0;
+	result += x * x;          // add penalty if not best response
       }
-      x=sum - ((T) 1);
-      result += BIG2*x*x ;          // add penalty for sum not equal to 1
+      x = sum - 1.0;
+      result += BIG2 * x * x;       // add penalty for sum not equal to 1
     }
   }
+
   return result;
-
 }
 
-//------------------------------------------------------------------------
-//                    EFLiapModule<T>: Member functions
-//------------------------------------------------------------------------
 
-template <class T>
-EFLiapModule<T>::EFLiapModule(const Efg<T> &E, EFLiapParams &p,
-			      BehavProfile<T> &s)
-  : LiapModule<T>(p), E(E), start(s)
-{ }
+extern bool Powell(gVector<double> &p,
+		   gMatrix<double> &xi,
+		   gFunction<double> &func,
+		   double &fret, int &iter,
+		   int maxits1, double tol1, int maxitsN, double tolN,
+		   gOutput &tracefile);
 
-template <class T> EFLiapModule<T>::~EFLiapModule()
-{ }
 
-template <class T>
-const gList<BehavProfile<T> > &EFLiapModule<T>::GetSolutions(void) const
+bool Liap(const Efg<double> &E, EFLiapParams &params,
+	  const BehavProfile<double> &start,
+	  gList<BehavProfile<double> > &solutions,
+	  long &nevals, long &niters)
 {
-  return solutions;
+  EFLiapFunc F(E, start);
+
+  BehavProfile<double> p(start);
+  
+  gMatrix<double> xi(p.Length(), p.Length());
+  xi.MakeIdent();
+
+  double value;
+  int iter;
+  bool found;
+
+  if (found = Powell(p, xi, F, value, iter,
+		     params.maxits1, params.tol1, params.maxitsN, params.tolN,
+		     (params.tracefile) ? *params.tracefile : gnull))
+    solutions.Append(p);
+
+  nevals = F.NumEvals();
+  niters = 0L;
+
+  return found;
 }
-
-template <class T> LiapFunc<T> *EFLiapModule<T>::CreateFunc(void)
-{
-  return new EFLiapFunc<T>(E, params, start);
-}
-
-template <class T>
-void EFLiapModule<T>::AddSolution(const LiapFunc<T> *const F)
-{
-  solutions.Append(((EFLiapFunc<T> *) F)->GetProfile());
-}
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
-TEMPLATE class EFLiapModule<double>;
-TEMPLATE class EFLiapFunc<double>;
 
 

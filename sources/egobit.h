@@ -1,42 +1,38 @@
-//#
-//# FILE: egobit.h -- Interface to Gobit solution module
-//#
-//# $Id$
-//#
+//
+// FILE: egobit.h -- Interface to extensive form Gobit solution module
+//
+// $Id$
+//
 
 #ifndef EGOBIT_H
 #define EGOBIT_H
 
-#include "efg.h"
-#include "gobit.h"
+#include "gambitio.h"
+#include "gstatus.h"
 #include "glist.h"
 
-template <class T> class EFGobitParams : public GobitParams<T>  {
+#include "efg.h"
+#include "behav.h"
+
+class EFGobitParams   {
   public:
-    EFGobitParams(gStatus &status_=gstatus);
-    EFGobitParams(gOutput &out, gOutput &pxi, gStatus &status_=gstatus);
+    int trace, powLam, maxits1, maxitsN;
+    double minLam, maxLam, delLam, tol1, tolN;
+    bool fullGraph;
+    gOutput *tracefile, *pxifile;
+    gStatus &status;
+
+    EFGobitParams(gStatus & = gstatus);
+    EFGobitParams(gOutput &out, gOutput &pxi, gStatus & = gstatus);
 };
 
 
-template <class T> class EFGobitModule : public GobitModule<T>  {
-  protected:
-    const Efg<T> &E;
-    gList<BehavProfile<T> > solutions;
-    BehavProfile<T> start;
-
-    GobitFunc<T> *CreateFunc(void);
-    void AddSolution(const GobitFunc<T> *const);
-
-  public:
-    EFGobitModule(const Efg<T> &EF, EFGobitParams<T> &p, BehavProfile<T> &s);
-    virtual ~EFGobitModule();
-    const gList<BehavProfile<T> > &GetSolutions(void) const;
-};
-
-#endif    // EGOBIT_H
+void Gobit(const Efg<double> &, EFGobitParams &,
+	   const BehavProfile<double> &, gList<BehavProfile<double> > &,
+	   long &nevals, long &nits);
 
 
-
+#endif    // NGOBIT_H
 
 
 
