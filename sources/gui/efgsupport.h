@@ -27,17 +27,34 @@
 #ifndef EFGSUPPORT_H
 #define EFGSUPPORT_H
 
-#include "wx/treectrl.h"
+#include <wx/treectrl.h>
 #include "efgshow.h"
 #include "gamedoc.h"
 #include "base/gmap.h"
+
+//
+// This is a generic tree control widget that graphically represents
+// a support in an extensive form game.  Actions not in the support are
+// drawn in grey, actions in the support are drawn in black.
+//
+class gbtEfgSupportWidget : public wxTreeCtrl {
+private:
+  gbtOrdMap<wxTreeItemId, gbtEfgAction> m_map;
+
+  void OnTreeItemCollapse(wxTreeEvent &);
+
+public:
+  gbtEfgSupportWidget(wxWindow *p_parent, wxWindowID p_id);
+
+  void SetSupport(const gbtEfgSupport &);
+  gbtEfgAction GetAction(wxTreeItemId p_id) { return m_map(p_id); }
+};
 
 class gbtEfgSupportWindow;
 
 class gbtEfgSupportFrame : public wxFrame, public gbtGameView {
 private:
   gbtEfgSupportWindow *m_panel;
-  
 
   // Event handlers
   void OnClose(wxCloseEvent &);
