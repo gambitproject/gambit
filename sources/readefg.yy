@@ -219,7 +219,7 @@ int EfgFileReader::yylex(void)
 
 EfgFileReader::~EfgFileReader()   { }
 
-void EfgFileType(gInput &f, DataType &type, bool &valid)
+void EfgFileType(gInput &f, bool &valid, DataType &type)
 {
   f.seekp(0);
   static char *prologue = { "EFG 1 " };
