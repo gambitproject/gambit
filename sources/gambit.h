@@ -1,5 +1,8 @@
-// File: gambit.h -- declaration of the very top level of the gambit gui.
+//
+// FILE: gambit.h -- declaration of the very top level of the gambit gui.
+//
 // $Id$
+//
 
 #ifndef GAMBIT_H
 #define GAMBIT_H
@@ -62,7 +65,7 @@ public:
 
 #define GAMBIT_GUI_HELP "Using Gambit GUI"
 
-#define GAMBIT_VERSION                      93
+const int GAMBIT_VERSION = 96;
 
 #endif // GAMBIT_H
 
