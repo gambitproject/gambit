@@ -55,6 +55,9 @@ public:
   virtual double GetMaxParameter(void) const = 0;
   // Get the minimum value of the parameter
   virtual double GetMinParameter(void) const = 0;
+
+  // Get the label associated with dimension 'p_dim'
+  virtual gText GetLabel(int p_dim) const { return "Series " + ToText(p_dim); }
 };
 
 class gbtCorBranchMixed : public gbtCorBranch {
