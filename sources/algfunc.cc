@@ -948,49 +948,15 @@ static Portion *GSM_Lp_Efg(Portion **param)
 
 #ifndef MINI_POLY
 
-//------------------
-// PolEnumSolve
-//------------------
-
-#include "polenum.h"
-
-static Portion *GSM_PolEnum_Nfg(Portion **param)
-{
-  NFSupport* S = ((NfSupportPortion*) param[0])->Value();
-
-  PolEnumParams params;
-  params.stopAfter = ((NumberPortion *) param[1])->Value();
-  params.tracefile = &((OutputPortion *) param[4])->Value();
-  params.trace = ((NumberPortion *) param[5])->Value();
-  
-  gList<MixedSolution> solutions;
-  bool is_singular;
-
-  try {
-    long nevals;
-    double time;
-    PolEnum(*S, params, solutions, nevals, time, is_singular);
-    ((NumberPortion *) param[2])->SetValue(nevals);
-    ((NumberPortion *) param[3])->SetValue(time);
-    if (is_singular)
-      ((BoolPortion *) param[6])->SetValue(triTRUE);
-    else
-      ((BoolPortion *) param[6])->SetValue(triFALSE);
-  }
-  catch (gSignalBreak &) {
-    params.status.Reset();
-  }
-
-  return new Mixed_ListPortion(solutions);
-}
 
 //------------------
-//  AllNashSolve
+//  PolEnumSolve (was AllNashSolve)
 //------------------
 
 #include "nfgalleq.h"
 
-static Portion *GSM_AllNashSolve_Nfg(Portion **param)
+
+static Portion *GSM_PolEnumSolve_Nfg(Portion **param)
 {
   const NFSupport &S = *((NfSupportPortion*) param[0])->Value();
   PolEnumParams params;
@@ -1035,15 +1001,11 @@ static Portion *GSM_AllNashSolve_Nfg(Portion **param)
 }
 
 #include "efgalleq.h"
+#include "polensub.h"
 
-static Portion *GSM_AllNashSolve_Efg(Portion **param)
+static Portion *GSM_PolEnumSolve_Efg(Portion **param)
 {
   const EFSupport &S = *((EfSupportPortion*) param[0])->Value();
-  EfgPolEnumParams params;
-  //  bool asNfg = ((BoolPortion *) param[1])->Value();
-  params.stopAfter = ((NumberPortion *) param[2])->Value();
-  params.tracefile = &((OutputPortion *) param[5])->Value();
-  params.trace = ((NumberPortion *) param[6])->Value();
   bool recurse = ((BoolPortion *) param[8])->Value();
   gList<BehavSolution> solutions;
   gList<const EFSupport> singular_supports;
@@ -1051,65 +1013,18 @@ static Portion *GSM_AllNashSolve_Efg(Portion **param)
   if (!IsPerfectRecall(S.Game())) {
     gout << "WARNING: Solving game of imperfect recall with AllNash; results not guaranteed\n";
   }
-
-  if(recurse) {
-    try {
-      long nevals = 0;
-      double time = 0.0;
-      AllEFNashSolve(S, params, solutions, nevals, time, singular_supports);
-      
-      ((NumberPortion *) param[3])->SetValue(nevals);
-      ((NumberPortion *) param[4])->SetValue(time);
-      ((EfSupport_ListPortion *) param[7])->SetValue(singular_supports);
-    }
-    catch (gSignalBreak &) {
-      params.status.Reset();
-    }
-  }
-  else {
-    bool is_singular = false;
-    try {
-      long nevals;
-      double time;
-      EfgPolEnum(S, params, solutions, nevals, time, is_singular);
-      //      EfgPolEnum(S, params, solutions, nevals, time);
-      ((NumberPortion *) param[3])->SetValue(nevals);
-      ((NumberPortion *) param[4])->SetValue(time);
-      if(is_singular)
-	singular_supports.Append(S);
-      ((EfSupport_ListPortion *) param[7])->SetValue(singular_supports);
-    }
-    catch (gSignalBreak &) {
-      params.status.Reset();
-    }
-  }
-  return new Behav_ListPortion(solutions);
-}
-
-#include "epolenum.h"
-#include "polensub.h"
-
-static Portion *GSM_PolEnum_Efg(Portion **param)
-{
-  EFSupport &support = *((EfSupportPortion *) param[0])->Value();
-  
-  if (!IsPerfectRecall(support.Game())) {
-    gout << "WARNING: Solving game of imperfect recall with PolEnum; results not guaranteed\n";
-  }
-
-  double time;
-  gList<BehavSolution> solutions;
-  bool is_singular(false);
-  
+  // If asNfg->True (salvaged from old PolEnum_Efg)  
   if (((BoolPortion *) param[1])->Value()) {
+    // need to add recurse capability here
+    if(recurse) 
+      throw gclRuntimeError("Recursion not implemented for asNfg->True");
     PolEnumParams params;
     params.stopAfter = ((NumberPortion *) param[2])->Value();
     params.tracefile = &((OutputPortion *) param[5])->Value();
     params.trace = ((NumberPortion *) param[6])->Value();
-
     try {
-      efgPolEnumNfgSolve algorithm(support, params);
-      solutions = algorithm.Solve(support);
+      efgPolEnumNfgSolve algorithm(S, params);
+      solutions = algorithm.Solve(S);
       ((NumberPortion *) param[3])->SetValue(algorithm.NumEvals());
     }
     catch (gSignalBreak &) {
@@ -1117,74 +1032,41 @@ static Portion *GSM_PolEnum_Efg(Portion **param)
     }
   }
   else {
+    // end salvage
     EfgPolEnumParams params;
     params.stopAfter = ((NumberPortion *) param[2])->Value();
     params.tracefile = &((OutputPortion *) param[5])->Value();
     params.trace = ((NumberPortion *) param[6])->Value();
-
-    try {
-      long npivots;
-      EfgPolEnum(support, params, solutions, npivots, time,is_singular);
-      ((NumberPortion *) param[3])->SetValue(npivots);
+    if(recurse) {
+      try {
+	long nevals = 0;
+	double time = 0.0;
+	AllEFNashSolve(S, params, solutions, nevals, time, singular_supports);
+	
+	((NumberPortion *) param[3])->SetValue(nevals);
+	((NumberPortion *) param[4])->SetValue(time);
+	((EfSupport_ListPortion *) param[7])->SetValue(singular_supports);
+      }
+      catch (gSignalBreak &) {
+	params.status.Reset();
+      }
     }
-    catch (gSignalBreak &) {
-      params.status.Reset();
-    }
-  }
-
-  ((NumberPortion *) param[4])->SetValue(time);
-
-  return new Behav_ListPortion(solutions);
-}
-
-//------------------
-//  AllEFNashSolve
-//------------------
-
-static Portion *GSM_AllEFNashSolve_Efg(Portion **param)
-{
-  const EFSupport &S = *((EfSupportPortion*) param[0])->Value();
-  EfgPolEnumParams params;
-  params.stopAfter = ((NumberPortion *) param[1])->Value();
-  params.tracefile = &((OutputPortion *) param[4])->Value();
-  params.trace = ((NumberPortion *) param[5])->Value();
-  bool recurse = ((BoolPortion *) param[7])->Value();
-  gList<BehavSolution> solutions;
-  gList<const EFSupport> singular_supports;
-
-  if (!IsPerfectRecall(S.Game())) {
-    gout << "WARNING: Solving game of imperfect recall with AllNash; results not guaranteed\n";
-  }
-
-  if(recurse) {
-    try {
-      long nevals = 0;
-      double time = 0.0;
-      AllEFNashSolve(S, params, solutions, nevals, time, singular_supports);
-      
-      ((NumberPortion *) param[2])->SetValue(nevals);
-      ((NumberPortion *) param[3])->SetValue(time);
-      ((EfSupport_ListPortion *) param[6])->SetValue(singular_supports);
-    }
-    catch (gSignalBreak &) {
-      params.status.Reset();
-    }
-  }
-  else {
-    bool is_singular = false;
-    try {
-      long nevals;
-      double time;
-      EfgPolEnum(S, params, solutions, nevals, time, is_singular);
-      //      EfgPolEnum(S, params, solutions, nevals, time);
-      ((NumberPortion *) param[2])->SetValue(nevals);
-      ((NumberPortion *) param[3])->SetValue(time);
-      if(is_singular)
-	singular_supports.Append(S);
-      ((EfSupport_ListPortion *) param[6])->SetValue(singular_supports);
-    }
-    catch (gSignalBreak &) {
-      params.status.Reset();
+    else {
+      bool is_singular = false;
+      try {
+	long nevals;
+	double time;
+	EfgPolEnum(S, params, solutions, nevals, time, is_singular);
+	//      EfgPolEnum(S, params, solutions, nevals, time);
+	((NumberPortion *) param[3])->SetValue(nevals);
+	((NumberPortion *) param[4])->SetValue(time);
+	if(is_singular)
+	  singular_supports.Append(S);
+	((EfSupport_ListPortion *) param[7])->SetValue(singular_supports);
+      }
+      catch (gSignalBreak &) {
+	params.status.Reset();
+      }
     }
   }
   return new Behav_ListPortion(solutions);
@@ -1776,43 +1658,7 @@ void Init_algfunc(GSM *gsm)
 #ifndef MINI_POLY
 
   FuncObj = new gclFunction("PolEnumSolve", 2);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_PolEnum_Nfg, 
-				       PortionSpec(porMIXED, 1), 7));
-  FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
-  FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porINTEGER,
-					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 2, gclParameter("nEvals", porINTEGER,
-					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 3, gclParameter("time", porNUMBER,
-					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 4, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
-					    BYREF));
-  FuncObj->SetParamInfo(0, 5, gclParameter("traceLevel", porNUMBER,
-					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 6, gclParameter("issingular", porBOOLEAN,
-					    new BoolPortion(false), BYREF));
-
-  FuncObj->SetFuncInfo(1, gclSignature(GSM_PolEnum_Efg, 
-				       PortionSpec(porBEHAV, 1), 7));
-  FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOLEAN,
-					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porINTEGER,
-					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(1, 3, gclParameter("nEvals", porINTEGER,
-					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(1, 4, gclParameter("time", porNUMBER,
-					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(1, 5, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
-					    BYREF));
-  FuncObj->SetParamInfo(1, 6, gclParameter("traceLevel", porNUMBER,
-					    new NumberPortion(0)));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new gclFunction("AllNashSolve", 2);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_AllNashSolve_Nfg, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_PolEnumSolve_Nfg, 
 				       PortionSpec(porMIXED, 1), 8));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porINTEGER,
@@ -1832,7 +1678,7 @@ void Init_algfunc(GSM *gsm)
 					   BYREF));
   FuncObj->SetParamInfo(0, 7, gclParameter("recurse",porBOOLEAN, 
 					   new BoolPortion(true)));
-  FuncObj->SetFuncInfo(1, gclSignature(GSM_AllNashSolve_Efg, 
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_PolEnumSolve_Efg, 
 				       PortionSpec(porBEHAV, 1), 9));
   FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
   FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOLEAN,
@@ -1853,29 +1699,6 @@ void Init_algfunc(GSM *gsm)
 					   new EfSupport_ListPortion(), 
 					   BYREF));
   FuncObj->SetParamInfo(1, 8, gclParameter("recurse",porBOOLEAN, 
-					   new BoolPortion(true)));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new gclFunction("AllEFNashSolve", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_AllEFNashSolve_Efg, 
-				       PortionSpec(porBEHAV, 1), 8));
-  FuncObj->SetParamInfo(0, 0, gclParameter("supersupport", porEFSUPPORT));
-  FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porINTEGER,
-					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 2, gclParameter("nEvals", porINTEGER,
-					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 3, gclParameter("time", porNUMBER,
-					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 4, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
-					    BYREF));
-  FuncObj->SetParamInfo(0, 5, gclParameter("traceLevel", porNUMBER,
-					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 6, gclParameter("singularsubsupps", 
-					   PortionSpec(porEFSUPPORT,1),
-					   new EfSupport_ListPortion(), 
-					   BYREF));
-  FuncObj->SetParamInfo(0, 7, gclParameter("recurse",porBOOLEAN, 
 					   new BoolPortion(true)));
   gsm->AddFunction(FuncObj);
 
