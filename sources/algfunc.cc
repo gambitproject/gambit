@@ -433,6 +433,9 @@ Portion *GSM_Gobit_Start(Portion **param)
     NP.tolN = ((FloatPortion *) param[8])->Value();
     NP.maxits1 = ((IntPortion *) param[9])->Value();
     NP.tol1 = ((FloatPortion *) param[10])->Value();
+    
+    NP.tracefile = &((OutputPortion *) param[14])->Value();
+    NP.trace = ((IntPortion *) param[15])->Value();
 
     gWatch watch;
     gList<MixedSolution<double> > solutions;
