@@ -5,15 +5,28 @@
 //#
 
 #include "rational.h"
-#include "efg.h"
 #include "glist.h"
 #include "glistit.h"
+
+//#include "extform.h"
 
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
+template <class T> class TypedNode;
+class TypedNode<double>;
+template <class T> class BehavProfile;
 class BehavProfile<double>;
+template <class T> class Efg;
 class Efg<double>;
+template <class T> class OutcomeVector;
+class OutcomeVector<double>;
+class Node;
+class gString;
+class gList<gString>;
+class gListIter<gString>;
+class gList<gRational>;
+class gListIter<gRational>;
 class gList<Node *>;
 class gListIter<Node *>;
 #define TEMPLATE

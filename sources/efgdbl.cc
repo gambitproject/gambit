@@ -3,20 +3,32 @@
 //#
 //# $Id$
 //#
-
 #include "rational.h"
-#include "efg.h"
 #include "glist.h"
 #include "glistit.h"
+
+//#include "extform.h"
 
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
+
+template <class T> class TypedNode;
+class TypedNode<gRational>;
+template <class T> class BehavProfile;
 class BehavProfile<gRational>;
+template <class T> class Efg;
 class Efg<gRational>;
+template <class T> class OutcomeVector;
+class OutcomeVector<gRational>;
+class Node;
+class gString;
+class gList<gString>;
+class gListIter<gString>;
+class gList<gRational>;
+class gListIter<gRational>;
 class gList<Node *>;
 class gListIter<Node *>;
-
 #define TEMPLATE
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
@@ -42,6 +54,4 @@ TEMPLATE int ReadEfgFile(gInput &, Efg<double> *&);
 
 TEMPLATE class gList<BehavProfile<double> >;
 TEMPLATE class gNode<BehavProfile<double> >;
-
-
-
+                                                                     
