@@ -606,23 +606,21 @@ inline gbtEfgPlayer AsEfgPlayer(Portion *portion)
 // Infoset
 //----------
 
-class Infoset;
-
 class InfosetPortion : public Portion  {
 protected:
-  Infoset** _Value;
-  bool _ref;
+  gbtEfgInfoset *m_value;
+  bool m_ref;
 
   static gPool pool;
 
-  InfosetPortion(Infoset *&, bool);
+  InfosetPortion(gbtEfgInfoset *&, bool);
 
 public:
-  InfosetPortion(Infoset *);
+  InfosetPortion(gbtEfgInfoset); 
   virtual ~InfosetPortion();
 
-  Infoset *Value(void) const;
-  void SetValue(Infoset *);
+  gbtEfgInfoset Value(void) const;
+  void SetValue(gbtEfgInfoset); 
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -637,7 +635,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
-
+inline gbtEfgInfoset AsEfgInfoset(Portion *portion) 
+{ return (dynamic_cast<InfosetPortion *>(portion))->Value(); }
 
 //--------
 // Node

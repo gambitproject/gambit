@@ -61,7 +61,7 @@ void ChildSubgames(const efgGame &, Node *, gList<Node *> &);
 // determines if a game is perfect recall.  
 // if not, returns a pair of infosets violating the definition
 bool IsPerfectRecall(const efgGame &);
-bool IsPerfectRecall(const efgGame &, Infoset *&, Infoset *&);
+bool IsPerfectRecall(const efgGame &, gbtEfgInfoset &, gbtEfgInfoset &);
 
 void RandomEfg(const efgGame &);
 efgGame *CompressEfg(const efgGame &, const EFSupport &);

@@ -38,7 +38,7 @@ private:
   int ns1,ns2,ni1,ni2;
   T maxpay,eps;
   gList<BFS<T> > List;
-  gList<Infoset *> isets1, isets2;
+  gList<gbtEfgInfoset> isets1, isets2;
 
   void FillTableau(const EFSupport &, gMatrix<T> &, const Node *, T,
 		   int, int, int, int);

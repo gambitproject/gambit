@@ -42,7 +42,7 @@ Sfg::Sfg(const EFSupport &S)
     isetRow(S.GetGame().NumInfosets()), infosets(EF.NumPlayers())
 { 
   int i;
-  gArray<Infoset *> zero(EF.NumPlayers());
+  gArray<gbtEfgInfoset> zero(EF.NumPlayers());
   gArray<int> one(EF.NumPlayers());
 
   EFSupport support(EF);
@@ -111,7 +111,7 @@ Sfg::~Sfg()
 
 void 
 Sfg::MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq, 
-		      gArray<Infoset *> iset, gArray<Sequence *> parent) 
+		      gArray<gbtEfgInfoset> iset, gArray<Sequence *> parent) 
 { 
   int i,pl;
 
@@ -119,7 +119,7 @@ Sfg::MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq,
     for(pl = 1;pl<=seq.Length();pl++)
       (*(*SF)[seq])[pl] += prob * EF.Payoff(n, EF.GetPlayer(pl));
   }
-  if(n->GetInfoset()) {
+  if (!n->GetInfoset().IsNull()) {
     if (n->GetPlayer().IsChance()) {
       for(i=1;i<=n->NumChildren();i++)
 	MakeSequenceForm(n->GetChild(i),
@@ -128,7 +128,7 @@ Sfg::MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq,
     else {
       int pl = n->GetPlayer().GetId();
       iset[pl]=n->GetInfoset();
-      int isetnum = iset[pl]->GetNumber();
+      int isetnum = iset[pl].GetId();
       gArray<int> snew(seq);
       snew[pl]=1;
       for(i=1;i<isetnum;i++)
@@ -144,11 +144,11 @@ Sfg::MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq,
 	flag =true;
       }
       for(i=1;i<=n->NumChildren();i++) {
-	if(efsupp.Contains(n->GetInfoset()->GetAction(i))) {
+	if(efsupp.Contains(n->GetInfoset().GetAction(i))) {
 	  snew[pl]+=1;
 	  if(flag) {
 	    Sequence* child;
-	    child = new Sequence(n->GetPlayer(),n->GetInfoset()->GetAction(i), 
+	    child = new Sequence(n->GetPlayer(),n->GetInfoset().GetAction(i), 
 				 myparent,snew[pl]);
 	    parent[pl]=child;
 	    ((*sequences)[pl])->AddSequence(child);
@@ -169,14 +169,14 @@ GetSequenceDims(const Node *n)
 { 
   int i;
 
-  if(n->GetInfoset()) {
+  if (!n->GetInfoset().IsNull()) {
     if(n->GetPlayer().IsChance()) {
       for(i=1;i<=n->NumChildren();i++)
 	GetSequenceDims(n->GetChild(i));
     }
     else {
       int pl = n->GetPlayer().GetId();
-      int isetnum = n->GetInfoset()->GetNumber();
+      int isetnum = n->GetInfoset().GetId();
     
       bool flag = false;
       if(!isetFlag(pl,isetnum)) {   // on first visit to iset, create new sequences
@@ -186,7 +186,7 @@ GetSequenceDims(const Node *n)
 	flag =true;
       }
       for(i=1;i<=n->NumChildren();i++) {
-	if(efsupp.Contains(n->GetInfoset()->GetAction(i))) {
+	if(efsupp.Contains(n->GetInfoset().GetAction(i))) {
 	  if(flag) {
 	    seq[pl]++;
 	  }
@@ -232,7 +232,7 @@ int Sfg::NumPlayerInfosets() const
 int Sfg::InfosetRowNumber(int pl, int j) const 
 {
   if(j==1) return 0;
-  int isetnum = (*sequences)[pl]->Find(j)->GetInfoset()->GetNumber();
+  int isetnum = (*sequences)[pl]->Find(j)->GetInfoset().GetId();
   return isetRow(pl,isetnum);
 }
 
@@ -242,7 +242,7 @@ int Sfg::ActionNumber(int pl, int j) const
   return efsupp.GetIndex(GetAction(pl,j));
 }
 
-const Infoset*  Sfg::GetInfoset(int pl, int j) const 
+gbtEfgInfoset Sfg::GetInfoset(int pl, int j) const 
 {
   if(j==1) return 0;
   return (*sequences)[pl]->Find(j)->GetInfoset();
@@ -279,7 +279,7 @@ BehavProfile<gNumber> Sfg::ToBehav(const gPVector<double> &x) const
       else
 	value = (gNumber)0;
 
-      b(i,sij->GetInfoset()->GetNumber(),efsupp.GetIndex(sij->GetAction()))= value;
+      b(i,sij->GetInfoset().GetId(),efsupp.GetIndex(sij->GetAction()))= value;
     }
   return b;
 }
@@ -295,8 +295,8 @@ template class gArray<gRectArray<gNumber> *>;
 #ifndef __BCC55__
 template gOutput &operator<<(gOutput &, const gArray<gNumber> &);
 #endif // __BCC55__
-template class gArray<gList<Infoset *> >;
-template gOutput &operator<<(gOutput &, const gArray<gList<Infoset *> > &);
+template class gArray<gList<gbtEfgInfoset> >;
+template gOutput &operator<<(gOutput &, const gArray<gList<gbtEfgInfoset> > &);
 #ifndef __BCC55__
-template gOutput &operator<<(gOutput &, const gList<Infoset *> &);
+template gOutput &operator<<(gOutput &, const gList<gbtEfgInfoset> &);
 #endif // __BCC55__

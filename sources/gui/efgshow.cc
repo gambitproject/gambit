@@ -409,7 +409,7 @@ gText EfgShow::GetActionProb(const Node *p_node, int p_act) const
     return "";
   }
 
-  return ToText(GetCurrentProfile().ActionProb(p_node->GetInfoset()->GetAction(p_act)),
+  return ToText(GetCurrentProfile().ActionProb(p_node->GetInfoset().GetAction(p_act)),
 		NumDecimals());
 }
 
@@ -421,7 +421,7 @@ gText EfgShow::GetActionValue(const Node *p_node, int p_act) const
   }
 
   if (GetCurrentProfile().IsetProb(p_node->GetInfoset()) > gNumber(0)) {
-    return ToText(GetCurrentProfile().ActionValue(p_node->GetInfoset()->GetAction(p_act)),
+    return ToText(GetCurrentProfile().ActionValue(p_node->GetInfoset().GetAction(p_act)),
 		  NumDecimals());
   }
   else  {
@@ -436,8 +436,8 @@ gNumber EfgShow::ActionProb(const Node *p_node, int p_action) const
     return m_efg.GetChanceProb(p_node->GetInfoset(), p_action);
   }
 
-  if (m_currentProfile && p_node->GetInfoset()) {
-    return m_profiles[m_currentProfile](p_node->GetInfoset()->GetAction(p_action));
+  if (m_currentProfile && !p_node->GetInfoset().IsNull()) {
+    return m_profiles[m_currentProfile](p_node->GetInfoset().GetAction(p_action));
   }
   return -1;
 }
@@ -732,7 +732,7 @@ void EfgShow::UpdateMenus(void)
   menuBar->Enable(GBT_EFG_MENU_EDIT_DELETE,
 		  (cursor && cursor->NumChildren() > 0) ? true : false);
   menuBar->Enable(GBT_EFG_MENU_EDIT_REVEAL, 
-		  (cursor && cursor->GetInfoset()) ? true : false);
+		  (cursor && !cursor->GetInfoset().IsNull()) ? true : false);
 
   menuBar->Enable(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
 		  (cursor && m_efg.IsLegalSubgame(cursor) &&
@@ -749,7 +749,7 @@ void EfgShow::UpdateMenus(void)
 
   menuBar->Enable(GBT_EFG_MENU_EDIT_NODE, (cursor) ? true : false);
   menuBar->Enable(GBT_EFG_MENU_EDIT_MOVE,
-		  (cursor && cursor->GetInfoset()) ? true : false);
+		  (cursor && !cursor->GetInfoset().IsNull()) ? true : false);
 
   if (m_treeWindow) {
     menuBar->Check(GBT_EFG_MENU_VIEW_SUPPORT_REACHABLE,
@@ -1089,7 +1089,7 @@ void EfgShow::OnEditInsert(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK)  {
     try {
-      if (!dialog.GetInfoset()) {
+      if (dialog.GetInfoset().IsNull()) {
 	m_efg.InsertNode(Cursor(), dialog.GetPlayer(), dialog.GetActions());
 	OnTreeChanged(true, true);
       }
@@ -1218,20 +1218,20 @@ void EfgShow::OnEditNode(wxCommandEvent &)
 
 void EfgShow::OnEditMove(wxCommandEvent &)
 {
-  Infoset *infoset = Cursor()->GetInfoset();
+  gbtEfgInfoset infoset = Cursor()->GetInfoset();
 
   dialogEditMove dialog(this, infoset);
   if (dialog.ShowModal() == wxID_OK) {
-    infoset->SetName(dialog.GetInfosetName().c_str());
+    infoset.SetLabel(dialog.GetInfosetName().c_str());
     
-    if (!infoset->IsChanceInfoset() && 
-	dialog.GetPlayer() != infoset->GetPlayer().GetId()) {
+    if (!infoset.IsChanceInfoset() && 
+	dialog.GetPlayer() != infoset.GetPlayer().GetId()) {
       m_efg.SwitchPlayer(infoset, m_efg.GetPlayer(dialog.GetPlayer()));
     }
 
-    for (int act = 1; act <= infoset->NumActions(); act++) {
-      if (!dialog.GetActions().Find(infoset->GetAction(act))) {
-	m_efg.DeleteAction(infoset, infoset->GetAction(act));
+    for (int act = 1; act <= infoset.NumActions(); act++) {
+      if (!dialog.GetActions().Find(infoset.GetAction(act))) {
+	m_efg.DeleteAction(infoset, infoset.GetAction(act));
 	act--;
       }
     }
@@ -1241,26 +1241,26 @@ void EfgShow::OnEditMove(wxCommandEvent &)
       gbtEfgAction action = dialog.GetActions()[act];
       if (!action.IsNull()) {
 	action.SetLabel(dialog.GetActionName(act));
-	if (infoset->IsChanceInfoset()) {
+	if (infoset.IsChanceInfoset()) {
 	  m_efg.SetChanceProb(infoset, action.GetId(),
 			      dialog.GetActionProb(act));
 	}
 	insertAt = dialog.GetActions()[act].GetId() + 1;
       }
-      else if (insertAt > infoset->NumActions()) {
+      else if (insertAt > infoset.NumActions()) {
 	gbtEfgAction newAction = m_efg.InsertAction(infoset);
 	insertAt++;
 	newAction.SetLabel(dialog.GetActionName(act));
-	if (infoset->IsChanceInfoset()) {
+	if (infoset.IsChanceInfoset()) {
 	  m_efg.SetChanceProb(infoset, newAction.GetId(), 
 			      dialog.GetActionProb(act));
 	}
       }
       else {
 	gbtEfgAction newAction =
-	  m_efg.InsertAction(infoset, infoset->GetAction(insertAt++));
+	  m_efg.InsertAction(infoset, infoset.GetAction(insertAt++));
 	newAction.SetLabel(dialog.GetActionName(act));
-	if (infoset->IsChanceInfoset()) {
+	if (infoset.IsChanceInfoset()) {
 	  m_efg.SetChanceProb(infoset, newAction.GetId(), 
 			      dialog.GetActionProb(act));
 	}

@@ -33,7 +33,7 @@ private:
   wxTextCtrl *m_nodeName;
   wxCheckBox *m_markedSubgame;
   wxChoice *m_outcome, *m_infoset;
-  gBlock<Infoset *> m_infosetList;
+  gBlock<gbtEfgInfoset> m_infosetList;
 
 public:
   // Lifecycle
@@ -42,7 +42,7 @@ public:
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetNodeName(void) const { return m_nodeName->GetValue(); }
   int GetOutcome(void) const { return m_outcome->GetSelection(); }
-  Infoset *GetInfoset(void) const;
+  gbtEfgInfoset GetInfoset(void) const;
   bool MarkedSubgame(void) const { return m_markedSubgame->GetValue(); }
 };
 

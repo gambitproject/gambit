@@ -126,9 +126,9 @@ public:
     { return m_profile->GetBeliefProb(node); }
   gVector<gNumber> NodeValue(const Node *node) const
     { return m_profile->GetNodeValue(node); }
-  gNumber IsetProb(const Infoset *iset) const
+  gNumber IsetProb(const gbtEfgInfoset &iset) const
     { return m_profile->GetIsetProb(iset); }
-  gNumber IsetValue(const Infoset *iset) const
+  gNumber IsetValue(const gbtEfgInfoset &iset) const
     { return m_profile->GetIsetValue(iset); }
   gNumber ActionProb(const gbtEfgAction &act) const
     { return m_profile->GetActionProb(act); }

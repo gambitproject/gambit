@@ -42,10 +42,10 @@ private:
   gArray<gRectArray<gNumber> *> *E;   // constraint matrices for sequence form.  
   gArray<int> seq;
   gPVector<int> isetFlag,isetRow;
-  gArray<gList<Infoset *> > infosets;
+  gArray<gList<gbtEfgInfoset> > infosets;
 
-  void MakeSequenceForm(const Node *, gNumber,gArray<int>, gArray<Infoset *>,
-		      gArray<Sequence *>);
+  void MakeSequenceForm(const Node *, gNumber,gArray<int>, 
+			gArray<gbtEfgInfoset>, gArray<Sequence *>);
   void GetSequenceDims(const Node *);
 
 public:
@@ -65,7 +65,7 @@ public:
   gRectArray<gNumber> Constraints(int player) const {return *((*E)[player]);};
   int InfosetRowNumber(int pl, int sequence) const;
   int ActionNumber(int pl, int sequence) const;
-  const Infoset* GetInfoset(int pl, int sequence) const;
+  gbtEfgInfoset GetInfoset(int pl, int sequence) const;
   gbtEfgAction GetAction(int pl, int sequence) const;
   const efgGame &GetEfg(void) const {return EF;}
   BehavProfile<gNumber> ToBehav(const gPVector<double> &x) const;

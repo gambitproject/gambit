@@ -82,7 +82,7 @@ void EfgNavigateWindow::Set(const Node *p_cursor)
 	tmpstr = "CHANCE";
       else
 	tmpstr = ("(" + ToText(m_cursor->GetPlayer().GetId()) + "," +
-		  ToText(m_cursor->GetInfoset()->GetNumber()) + ")");
+		  ToText(m_cursor->GetInfoset().GetId()) + ")");
     }
 	  
     SetCellValue((char *) tmpstr, 3, 0);

@@ -56,8 +56,8 @@ static Portion *GSM_ActionProb(GSM &, Portion **param)
 {
   const BehavSolution *profile = ((BehavPortion *) param[0])->Value();
   gbtEfgAction action = AsEfgAction(param[1]);
-  Infoset* infoset = action.GetInfoset();
-  gbtEfgPlayer player = infoset->GetPlayer();
+  gbtEfgInfoset infoset = action.GetInfoset();
+  gbtEfgPlayer player = infoset.GetPlayer();
   
   if (player.IsChance()) {
     return new NumberPortion(profile->ActionProb(action));
@@ -78,9 +78,9 @@ static Portion *GSM_ActionValue(GSM &, Portion **param)
 {
   BehavSolution *profile = ((BehavPortion *) param[0])->Value();
   gbtEfgAction action = AsEfgAction(param[1]);
-  Infoset *infoset = action.GetInfoset();
+  gbtEfgInfoset infoset = action.GetInfoset();
 
-  if (infoset->GetPlayer().IsChance())
+  if (infoset.GetPlayer().IsChance())
     return new NullPortion(porNUMBER);
   else if (profile->Support().Contains(action))  {
     if(profile->IsetProb(infoset)>gNumber(0.0))
@@ -110,9 +110,10 @@ static Portion *GSM_Belief(GSM &, Portion **param)
 {
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   Node* n = ((NodePortion*) param[1])->Value();
-  Infoset *s = n->GetInfoset();
-  if(!s)
+  gbtEfgInfoset s = n->GetInfoset();
+  if (s.IsNull()) {
     return new NullPortion(porNUMBER);
+  }
   return new NumberPortion(bp->BeliefProb(n));
 }
 
@@ -190,7 +191,7 @@ static Portion *GSM_InfosetProb(GSM &, Portion **param)
     return new NullPortion( porNUMBER );
 
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
-  Infoset* s = ((InfosetPortion*) param[1])->Value();
+  gbtEfgInfoset s = AsEfgInfoset(param[1]);
   //  if (s->IsChanceInfoset())
   //    throw gclRuntimeError("Not implemented for chance infosets");
 
@@ -228,8 +229,8 @@ static Portion *GSM_InfosetValue(GSM &, Portion **param)
     return new NullPortion( porNUMBER );
 
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
-  Infoset* s = ((InfosetPortion*) param[1])->Value();
-  if (s->IsChanceInfoset())
+  gbtEfgInfoset s = AsEfgInfoset(param[1]);
+  if (s.IsChanceInfoset())
     return new NullPortion( porNUMBER );
 
   return new NumberPortion(bp->IsetValue(s));
@@ -378,7 +379,7 @@ static Portion *GSM_Regret_Behav(GSM &, Portion **param)
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
   gbtEfgAction action = AsEfgAction(param[1]);
 
-  if (action.GetInfoset()->IsChanceInfoset()) {
+  if (action.GetInfoset().IsChanceInfoset()) {
     return new NullPortion(porNUMBER);
   }
     
@@ -480,7 +481,7 @@ static Portion *GSM_SetActionProbs(GSM &, Portion **param)
   }  
 
   for (k = 1; 
-       k <= E.GetPlayer(PlayerNum).GetInfoset(InfosetNum)->NumActions();
+       k <= E.GetPlayer(PlayerNum).GetInfoset(InfosetNum).NumActions();
        k++) {
     p3 = ((ListPortion*) param[2])->SubscriptCopy(k);
     if(p3->Spec().ListDepth > 0)
@@ -491,7 +492,7 @@ static Portion *GSM_SetActionProbs(GSM &, Portion **param)
     }
 
     assert(p3->Spec().Type == porNUMBER);
-    P->Set((E.GetPlayer(PlayerNum).GetInfoset(InfosetNum)->GetAction(k)),
+    P->Set((E.GetPlayer(PlayerNum).GetInfoset(InfosetNum).GetAction(k)),
 	   ((NumberPortion*) p3)->Value());
 
     delete p3;

@@ -53,7 +53,7 @@ class Node    {
     int number; // This is a unique identifier, not related to infoset memship
     efgGame *E;
     gText name;
-    Infoset *infoset;
+    gbt_efg_infoset_rep *infoset;
     Node *parent;
     gbt_efg_outcome_rep *outcome;
     gBlock<Node *> children;
@@ -70,7 +70,7 @@ class Node    {
     int NumChildren(void) const    { return children.Length(); }
     int GetNumber(void) const { return number; }
     int NumberInInfoset(void) const;
-    Infoset *GetInfoset(void) const   { return infoset; }
+    gbtEfgInfoset GetInfoset(void) const;
     bool IsTerminal(void) const { return (children.Length() == 0); }
     bool IsNonterminal(void) const { return !IsTerminal(); }
     gbtEfgPlayer GetPlayer(void) const;

@@ -32,7 +32,6 @@
 #include "math/gmatrix.h"
 #include "efstrat.h"
 
-class Infoset;
 class Nfg;
 template <class T> class MixedProfile;
 template <class T> class gPVector;
@@ -89,18 +88,18 @@ protected:
   T &NodeValue(const Node *node, int pl)
     { return m_nodeValues(node->number, pl); }
 
-  T IsetProb(const Infoset *iset) const;
+  T IsetProb(const gbtEfgInfoset &iset) const;
 
-  const T &IsetValue(const Infoset *iset) const;
-  T &IsetValue(const Infoset *iset);
+  const T &IsetValue(const gbtEfgInfoset &iset) const;
+  T &IsetValue(const gbtEfgInfoset &iset);
 
   const T &ActionValue(const gbtEfgAction &act) const 
-    { return m_actionValues(act.GetInfoset()->GetPlayer().GetId(),
-			    act.GetInfoset()->GetNumber(),
+    { return m_actionValues(act.GetInfoset().GetPlayer().GetId(),
+			    act.GetInfoset().GetId(),
 			    act.GetId()); }
   T &ActionValue(const gbtEfgAction &act)
-    { return m_actionValues(act.GetInfoset()->GetPlayer().GetId(),
-			    act.GetInfoset()->GetNumber(),
+    { return m_actionValues(act.GetInfoset().GetPlayer().GetId(),
+			    act.GetInfoset().GetId(),
 			    act.GetId()); }
   
   T ActionProb(const gbtEfgAction &act) const;
@@ -158,8 +157,8 @@ public:
   const T &GetRealizProb(const Node *node);
   const T &GetBeliefProb(const Node *node);
   gVector<T> GetNodeValue(const Node *node);
-  T GetIsetProb(const Infoset *iset);
-  const T &GetIsetValue(const Infoset *iset);
+  T GetIsetProb(const gbtEfgInfoset &iset);
+  const T &GetIsetValue(const gbtEfgInfoset &iset);
   T GetActionProb(const gbtEfgAction &act) const;
   const T &GetActionValue(const gbtEfgAction &act) const;
   const T &GetRegret(const gbtEfgAction &act);

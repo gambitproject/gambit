@@ -29,7 +29,7 @@
 
 class dialogEditMove : public wxDialog {
 private:
-  Infoset *m_infoset;
+  gbtEfgInfoset m_infoset;
   wxChoice *m_player;
   wxTextCtrl *m_infosetName, *m_actionName, *m_actionProb;
   wxString m_actionProbValue;
@@ -49,7 +49,7 @@ private:
 
 public:
   // Lifecycle
-  dialogEditMove(wxWindow *p_parent, Infoset *p_infoset);
+  dialogEditMove(wxWindow *p_parent, gbtEfgInfoset p_infoset);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetInfosetName(void) const { return m_infosetName->GetValue(); }

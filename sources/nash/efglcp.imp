@@ -223,7 +223,7 @@ void gbtEfgNashLcp<T>::FillTableau(const EFSupport &p_support, gMatrix<T> &A,
     A(ns1+s2,s1) = gNumber(A(ns1+s2,s1)) +
       gNumber(prob) * (p_support.GetGame().Payoff(n, p_support.GetGame().GetPlayer(2)) - gNumber(maxpay));
   }
-  if (n->GetInfoset()) {
+  if (!n->GetInfoset().IsNull()) {
     if (n->GetPlayer().IsChance()) {
       for (int i = 1; i <= n->NumChildren(); i++) {
 	FillTableau(p_support, A, n->GetChild(i),
@@ -272,7 +272,7 @@ void gbtEfgNashLcp<T>::GetProfile(const EFSupport &p_support,
 				  const Node *n, int s1,int s2)
 {
   int i,pl,inf,snew,ind,ind2;
-  if(n->GetInfoset()) {
+  if (!n->GetInfoset().IsNull()) {
     if (n->GetPlayer().IsChance()) {
       for (i = 1; i <= n->NumChildren();i++)
 	GetProfile(p_support, tab, v,sol,n->GetChild(i),s1,s2);

@@ -78,7 +78,7 @@ static Portion *GSM_Actions(GSM &, Portion **param)
   if (param[0]->Spec().Type == porNULL)
     return new ListPortion;
 
-  Infoset *infoset = ((InfosetPortion *) param[0])->Value();
+  gbtEfgInfoset infoset = AsEfgInfoset(param[0]);
   EFSupport *support = ((EfSupportPortion *) param[1])->Value();
 
   ListPortion *ret = new ListPortion;
@@ -93,13 +93,13 @@ static Portion *GSM_BasisActions(GSM &, Portion **param)
   if( param[0]->Spec().Type == porNULL )
     return new ListPortion;
 
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  gbtEfgInfoset s = AsEfgInfoset(param[0]);
   EFBasis* sup = ((EfBasisPortion*) param[1])->Value();
 
   ListPortion *ret = new ListPortion;
-  if (s->IsChanceInfoset()) {
-    for (int act = 1; act <= s->NumActions(); act++) {
-      ret->Append(new ActionPortion(s->GetAction(act)));
+  if (s.IsChanceInfoset()) {
+    for (int act = 1; act <= s.NumActions(); act++) {
+      ret->Append(new ActionPortion(s.GetAction(act)));
     }
   }
   else {
@@ -153,13 +153,13 @@ static Portion *GSM_BasisNodes(GSM &, Portion **param)
   if( param[0]->Spec().Type == porNULL )
     return new ListPortion;
 
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  gbtEfgInfoset s = AsEfgInfoset(param[0]);
   EFBasis* sup = ((EfBasisPortion*) param[1])->Value();
 
   ListPortion *ret = new ListPortion;
-  if (s->IsChanceInfoset()) {
-    for (int i = 1; i <= s->NumMembers(); i++) {
-      ret->Append(new NodePortion(s->GetMember(i)));
+  if (s.IsChanceInfoset()) {
+    for (int i = 1; i <= s.NumMembers(); i++) {
+      ret->Append(new NodePortion(s.GetMember(i)));
     }
   }
   else {
@@ -188,7 +188,7 @@ static Portion *GSM_AddBasisNode(GSM &, Portion **param)
 
 static Portion *GSM_AddMove(GSM &gsm, Portion **param)
 {
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  gbtEfgInfoset s = AsEfgInfoset(param[0]);
   Node *n = ((NodePortion *) param[1])->Value();
 
   n->Game()->AppendNode(n, s);
@@ -216,11 +216,11 @@ static Portion *GSM_Chance(GSM &, Portion **param)
 static Portion *GSM_ChanceProb(GSM &, Portion **param)
 {
   gbtEfgAction action = AsEfgAction(param[0]);
-  Infoset *infoset = action.GetInfoset();
-  if (!infoset->GetPlayer().IsChance()) { 
+  gbtEfgInfoset infoset = action.GetInfoset();
+  if (!infoset.GetPlayer().IsChance()) { 
     throw gclRuntimeError("Action must belong to the chance player");
   }
-  efgGame *efg = infoset->Game();
+  efgGame *efg = infoset.GetGame();
 
   return new NumberPortion(efg->GetChanceProb(infoset, action.GetId()));
 }
@@ -282,14 +282,14 @@ static Portion *GSM_CopyTree(GSM &gsm, Portion **param)
 static Portion *GSM_DeleteAction(GSM &gsm, Portion **param)
 {
   gbtEfgAction action = AsEfgAction(param[0]);
-  Infoset *infoset = action.GetInfoset();
+  gbtEfgInfoset infoset = action.GetInfoset();
 
-  if (infoset->NumActions() == 1)
+  if (infoset.NumActions() == 1)
     throw gclRuntimeError("Cannot delete the only action at an infoset.");
 
-  infoset->Game()->DeleteAction(infoset, action);
+  infoset.GetGame()->DeleteAction(infoset, action);
 
-  gsm.UnAssignGameElement(infoset->Game(), true, porBEHAV | porEFSUPPORT);
+  gsm.UnAssignGameElement(infoset.GetGame(), true, porBEHAV | porEFSUPPORT);
 
   return new InfosetPortion(infoset);
 }
@@ -300,12 +300,11 @@ static Portion *GSM_DeleteAction(GSM &gsm, Portion **param)
 
 static Portion *GSM_DeleteEmptyInfoset(GSM &gsm, Portion **param)
 {
-  Infoset *infoset = ((InfosetPortion *) param[0])->Value();
+  gbtEfgInfoset infoset = AsEfgInfoset(param[0]);
 
-  gsm.UnAssignGameElement(infoset->Game(), true, porBEHAV | porEFSUPPORT);
-  gsm.UnAssignEfgElement(infoset->Game(), porINFOSET, infoset);
+  gsm.UnAssignGameElement(infoset.GetGame(), true, porBEHAV | porEFSUPPORT);
 
-  return new BoolPortion(infoset->Game()->DeleteEmptyInfoset(infoset));
+  return new BoolPortion(infoset.GetGame()->DeleteEmptyInfoset(infoset));
 }
 
 //----------------
@@ -420,7 +419,7 @@ static Portion *GSM_Infoset_Node(GSM &, Portion **param)
 
   Node *n = ((NodePortion *) param[0])->Value();
 
-  if (!n->GetInfoset())
+  if (n->GetInfoset().IsNull())
     return new NullPortion(porINFOSET);
 
   return new InfosetPortion(n->GetInfoset());
@@ -436,7 +435,7 @@ static Portion *GSM_Infoset_Action(GSM &, Portion **param)
 
   gbtEfgAction a = AsEfgAction(param[0]);
 
-  if (!a.GetInfoset())
+  if (a.GetInfoset().IsNull())
     return new NullPortion(porINFOSET);
 
   return new InfosetPortion(a.GetInfoset());
@@ -464,21 +463,21 @@ static Portion *GSM_Infosets(GSM &, Portion **param)
 
 static Portion *GSM_InsertAction(GSM &gsm, Portion **param)
 {
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  gbtEfgInfoset s = AsEfgInfoset(param[0]);
 
-  gsm.UnAssignGameElement(s->Game(), true, porBEHAV | porEFSUPPORT);
+  gsm.UnAssignGameElement(s.GetGame(), true, porBEHAV | porEFSUPPORT);
 
-  return new ActionPortion(s->Game()->InsertAction(s));
+  return new ActionPortion(s.GetGame()->InsertAction(s));
 }
 
 static Portion *GSM_InsertActionAt(GSM &gsm, Portion **param)
 {
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  gbtEfgInfoset s = AsEfgInfoset(param[0]);
   gbtEfgAction a = AsEfgAction(param[1]);
 
-  gsm.UnAssignGameElement(s->Game(), true, porBEHAV | porEFSUPPORT);
+  gsm.UnAssignGameElement(s.GetGame(), true, porBEHAV | porEFSUPPORT);
 
-  return new ActionPortion(s->Game()->InsertAction(s, a));
+  return new ActionPortion(s.GetGame()->InsertAction(s, a));
 }
 
 //--------------
@@ -487,12 +486,12 @@ static Portion *GSM_InsertActionAt(GSM &gsm, Portion **param)
 
 static Portion *GSM_InsertMove(GSM &gsm, Portion **param)
 {
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  gbtEfgInfoset s = AsEfgInfoset(param[0]);
   Node *n = ((NodePortion *) param[1])->Value();
 
   n->Game()->InsertNode(n, s);
 
-  gsm.UnAssignGameElement(s->Game(), true, porBEHAV | porEFSUPPORT);
+  gsm.UnAssignGameElement(s.GetGame(), true, porBEHAV | porEFSUPPORT);
 
   return new NodePortion(n->GetParent());
 }
@@ -568,7 +567,7 @@ static Portion *GSM_LoadEfg(GSM &, Portion **param)
 
 static Portion *GSM_IsPerfectRecall(GSM &, Portion **param)
 {
-  Infoset *s1, *s2;
+  gbtEfgInfoset s1, s2;
   efgGame &efg = * ((EfgPortion *) param[0])->Value();
   return new BoolPortion(IsPerfectRecall(efg, s1, s2));
 }
@@ -604,11 +603,11 @@ static Portion *GSM_Members(GSM &, Portion **param)
   if (param[0]->Spec().Type == porNULL)
     return new ListPortion();
 
-  Infoset *infoset = ((InfosetPortion *) param[0])->Value();
+  gbtEfgInfoset infoset = AsEfgInfoset(param[0]);
 
   ListPortion *ret = new ListPortion;
-  for (int i = 1; i <= infoset->NumMembers(); i++) {
-    ret->Append(new NodePortion(infoset->GetMember(i)));
+  for (int i = 1; i <= infoset.NumMembers(); i++) {
+    ret->Append(new NodePortion(infoset.GetMember(i)));
   }
   return ret;
 }
@@ -619,12 +618,12 @@ static Portion *GSM_Members(GSM &, Portion **param)
 
 static Portion *GSM_MergeInfosets(GSM &gsm, Portion **param)
 {
-  Infoset *s1 = ((InfosetPortion *) param[0])->Value();
-  Infoset *s2 = ((InfosetPortion *) param[1])->Value();
+  gbtEfgInfoset s1 = AsEfgInfoset(param[0]);
+  gbtEfgInfoset s2 = AsEfgInfoset(param[1]);
   
-  s1->Game()->MergeInfoset(s1, s2);
+  s1.GetGame()->MergeInfoset(s1, s2);
   
-  gsm.UnAssignGameElement(s1->Game(), true, porBEHAV | porEFSUPPORT);
+  gsm.UnAssignGameElement(s1.GetGame(), true, porBEHAV | porEFSUPPORT);
 
   return new InfosetPortion(s1);
 }
@@ -636,11 +635,11 @@ static Portion *GSM_MergeInfosets(GSM &gsm, Portion **param)
 static Portion *GSM_MoveToInfoset(GSM &gsm, Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  Infoset *s = ((InfosetPortion *) param[1])->Value();
+  gbtEfgInfoset s = AsEfgInfoset(param[1]);
   
-  s->Game()->JoinInfoset(s, n);
+  s.GetGame()->JoinInfoset(s, n);
   
-  gsm.UnAssignGameElement(s->Game(), true, porBEHAV | porEFSUPPORT);
+  gsm.UnAssignGameElement(s.GetGame(), true, porBEHAV | porEFSUPPORT);
 
   return new NodePortion(n);
 }
@@ -672,8 +671,7 @@ static Portion *GSM_Name(GSM &, Portion **param)
   case porACTION:
     return new TextPortion(AsEfgAction(param[0]).GetLabel());
   case porINFOSET:
-    return new TextPortion(((InfosetPortion *) param[0])->Value()->
-			   GetName());
+    return new TextPortion(AsEfgInfoset(param[0]).GetLabel());
   case porNODE:
     return new TextPortion(((NodePortion *) param[0])->Value()->
 			   GetName());
@@ -720,7 +718,7 @@ static Portion *GSM_NewInfoset(GSM &gsm, Portion **param)
     throw gclRuntimeError("Information sets must have at least one action");
   }
 
-  Infoset *s = player.GetGame()->CreateInfoset(player, n);
+  gbtEfgInfoset s = player.GetGame()->CreateInfoset(player, n);
   gsm.UnAssignGameElement(player.GetGame(), true, porBEHAV | porEFSUPPORT);
   return new InfosetPortion(s);
 }
@@ -869,14 +867,12 @@ static Portion *GSM_Payoff(GSM &, Portion **param)
 
 static Portion *GSM_Player(GSM &, Portion **param)
 {
-  if( param[0]->Spec().Type == porNULL )
-  {
-    return new NullPortion( porEFPLAYER );
+  if (param[0]->Spec().Type == porNULL) {
+    return new NullPortion(porEFPLAYER);
   }
 
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
-
-  return new EfPlayerPortion(s->GetPlayer());
+  gbtEfgInfoset s = AsEfgInfoset(param[0]);
+  return new EfPlayerPortion(s.GetPlayer());
 }
 
 //------------
@@ -988,14 +984,14 @@ static Portion *GSM_RemoveBasisNode(GSM &, Portion **param)
 
 static Portion *GSM_Reveal(GSM &gsm, Portion **param)
 {
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  gbtEfgInfoset s = AsEfgInfoset(param[0]);
   ListPortion *players = (ListPortion *) param[1];
 
   for (int i = 1; i <= players->Length(); i++) {
-    s->Game()->Reveal(s, AsEfgPlayer((*players)[i]));
+    s.GetGame()->Reveal(s, AsEfgPlayer((*players)[i]));
   }
 
-  gsm.UnAssignGameElement(s->Game(), true, porBEHAV | porEFSUPPORT);
+  gsm.UnAssignGameElement(s.GetGame(), true, porBEHAV | porEFSUPPORT);
 
   return new InfosetPortion(s);
 }
@@ -1158,17 +1154,17 @@ static Portion *GSM_SfgConstraints(GSM &, Portion **param)
 
 static Portion *GSM_SetChanceProbs(GSM &gsm, Portion **param)
 {
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  gbtEfgInfoset s = AsEfgInfoset(param[0]);
   ListPortion *p = (ListPortion *) param[1];
-  efgGame *efg = s->Game();
+  efgGame *efg = s.GetGame();
 
-  if (!s->GetPlayer().IsChance()) {
+  if (!s.GetPlayer().IsChance()) {
     throw gclRuntimeError("Information set does not belong to chance player");
   }
   
   for (int i = 1; i <= p->Length(); i++)
     efg->SetChanceProb(s, i, ((NumberPortion *) (*p)[i])->Value());
-  gsm.InvalidateGameProfile(s->Game(), true);
+  gsm.InvalidateGameProfile(s.GetGame(), true);
 
   return new InfosetPortion(s);
 }
@@ -1198,7 +1194,7 @@ static Portion *GSM_SetName(GSM &, Portion **param)
     AsEfgAction(param[0]).SetLabel(name);
     break;
   case porINFOSET:
-    ((InfosetPortion *) param[0])->Value()->SetName(name);
+    AsEfgInfoset(param[0]).SetLabel(name);
     break;
   case porNODE:
     ((NodePortion *) param[0])->Value()->SetName(name);

@@ -144,7 +144,8 @@ EfgContIter::EfgContIter(const EFSupport &s)
   First();
 }
 
-EfgContIter::EfgContIter(const EFSupport &s, const gList<Infoset *>& active)
+EfgContIter::EfgContIter(const EFSupport &s, 
+			 const gList<gbtEfgInfoset >&active)
   : _frozen_pl(0), _frozen_iset(0),
     _efg(&s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
@@ -195,8 +196,8 @@ void EfgContIter::Set(int pl, int iset, int act)
 
 void EfgContIter::Set(const gbtEfgAction &a)
 {
-  if (a.GetInfoset()->GetPlayer().GetId() != _frozen_pl ||
-      a.GetInfoset()->GetNumber() != _frozen_iset) return;
+  if (a.GetInfoset().GetPlayer().GetId() != _frozen_pl ||
+      a.GetInfoset().GetId() != _frozen_iset) return;
   _profile.Set(a);
 }
 
@@ -289,7 +290,7 @@ EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s)
 }
 
 EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s, 
-					       const gList<Infoset *>& active)
+					       const gList<gbtEfgInfoset> &active)
   : _efg(&s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
     _is_active(),

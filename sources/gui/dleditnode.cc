@@ -59,12 +59,12 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Node *p_node)
     for (int pl = 1; pl <= p_node->Game()->NumPlayers(); pl++) {
       for (gbtEfgInfosetIterator infoset(p_node->Game()->GetPlayer(pl));
 	   !infoset.End(); infoset++) {
-	if (!(*infoset)->IsChanceInfoset() &&
-	    (*infoset)->NumActions() == p_node->NumChildren()) {
+	if (!(*infoset).IsChanceInfoset() &&
+	    (*infoset).NumActions() == p_node->NumChildren()) {
 	  m_infosetList.Append(*infoset);
 	  m_infoset->Append(wxString::Format("Player %d, Infoset %d",
-					     (*infoset)->GetPlayer().GetId(),
-					     (*infoset)->GetNumber()));
+					     (*infoset).GetPlayer().GetId(),
+					     (*infoset).GetId()));
 	  if (*infoset == p_node->GetInfoset()) {
 	    selection = m_infoset->GetCount() - 1;
 	  }
@@ -150,7 +150,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Node *p_node)
   CenterOnParent();
 }
 
-Infoset *dialogEditNode::GetInfoset(void) const
+gbtEfgInfoset dialogEditNode::GetInfoset(void) const
 {
   if (m_infoset->GetSelection() == 0) {
     return 0;

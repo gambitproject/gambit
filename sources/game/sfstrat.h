@@ -34,7 +34,6 @@
 class Efg;
 class Sfg;
 class Action;
-class Infoset;
 */
 
 struct Sequence {
@@ -59,7 +58,7 @@ public:
   gList<gbtEfgAction> History(void) const;
   int GetNumber(void) const        { return number; }
   gbtEfgAction GetAction(void) const  {return action; }
-  const Infoset *GetInfoset(void) const 
+  gbtEfgInfoset GetInfoset(void) const 
   { if (!action.IsNull()) return action.GetInfoset(); else return 0; }
   gbtEfgPlayer Player(void) const  { return player; }
   const Sequence *Parent(void) const   { return parent; }

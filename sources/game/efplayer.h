@@ -33,7 +33,7 @@
 
 struct gbt_efg_player_rep;
 class efgGame;
-class Infoset;
+class gbtEfgInfoset;
 
 class gbtEfgPlayer {
 friend class efgGame;
@@ -60,7 +60,7 @@ public:
 
   bool IsChance(void) const;
   int NumInfosets(void) const;
-  Infoset *GetInfoset(int p_index) const;
+  gbtEfgInfoset GetInfoset(int p_index) const;
 };
 
 class gbtEfgPlayerIterator {
@@ -86,7 +86,7 @@ private:
 public:
   gbtEfgInfosetIterator(const gbtEfgPlayer &p_player);
   
-  Infoset *operator*(void) const;
+  gbtEfgInfoset operator*(void) const;
   gbtEfgInfosetIterator &operator++(int);
 
   bool Begin(void);

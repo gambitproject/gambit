@@ -55,19 +55,19 @@ public:
   void SetName(const gText &p_name) { m_name = p_name; }
 
   int NumActions(int pl, int iset) const;
-  int NumActions(const Infoset *) const;
+  int NumActions(const gbtEfgInfoset &) const;
   gPVector<int> NumActions(void) const;
   int NumDegreesOfFreedom(void) const;
 
   // Checks to see that every infoset in the support has at least one
   // action in it.
-  bool HasActiveActionAt(const Infoset *) const;
+  bool HasActiveActionAt(const gbtEfgInfoset &) const;
   bool HasActiveActionsAtAllInfosets(void) const;
 
   bool Contains(const gbtEfgAction &) const;
   bool Contains(int pl, int iset, int act) const;
   int GetIndex(const gbtEfgAction &) const;
-  gbtEfgAction GetAction(Infoset *, int index) const;
+  gbtEfgAction GetAction(const gbtEfgInfoset &, int index) const;
   gbtEfgAction GetAction(int pl, int iset, int index) const;
 
   // Action editing functions
@@ -81,14 +81,14 @@ public:
   // Reachable Nodes and Information Sets
   gList<Node *> ReachableNonterminalNodes(const Node *) const;
   gList<Node *> ReachableNonterminalNodes(const Node *, const gbtEfgAction &) const;
-  gList<Infoset *> ReachableInfosets(const Node *) const;
-  gList<Infoset *> ReachableInfosets(const Node *, const gbtEfgAction &) const;
-  gList<Infoset *> ReachableInfosets(const gbtEfgPlayer &) const;
+  gList<gbtEfgInfoset> ReachableInfosets(const Node *) const;
+  gList<gbtEfgInfoset> ReachableInfosets(const Node *, const gbtEfgAction &) const;
+  gList<gbtEfgInfoset> ReachableInfosets(const gbtEfgPlayer &) const;
 
-  bool AlwaysReaches(const Infoset *) const;
-  bool AlwaysReachesFrom(const Infoset *, const Node *) const;
+  bool AlwaysReaches(const gbtEfgInfoset &) const;
+  bool AlwaysReachesFrom(const gbtEfgInfoset &, const Node *) const;
   bool MayReach(const Node *) const;
-  bool MayReach(const Infoset *) const;
+  bool MayReach(const gbtEfgInfoset &) const;
 
   bool Dominates(const gbtEfgAction &, const gbtEfgAction &,
 		 bool strong, bool conditional) const;
@@ -123,15 +123,15 @@ protected:
 
   void activate(const Node *);
   void deactivate(const Node *);
-  void activate(const Infoset *);
-  void deactivate(const Infoset *);
+  void activate(const gbtEfgInfoset &);
+  void deactivate(const gbtEfgInfoset &);
   bool infoset_has_active_nodes(const int pl, const int iset) const;
-  bool infoset_has_active_nodes(const Infoset *i) const;
+  bool infoset_has_active_nodes(const gbtEfgInfoset &) const;
   void activate_this_and_lower_nodes(const Node *);
   void deactivate_this_and_lower_nodes(const Node *);
   void deactivate_this_and_lower_nodes_returning_deactivated_infosets(
                                                  const Node *,
-						 gList<Infoset *> *);
+						 gList<gbtEfgInfoset> *);
 
 public:
   EFSupportWithActiveInfo ( const efgGame &);
@@ -145,21 +145,21 @@ public:
   bool operator!=(const EFSupportWithActiveInfo &) const;
 
   // Find the reachable nodes at an infoset
-  const gList<const Node *> ReachableNodesInInfoset(const Infoset *) const;
-  const gList<const Node *> ReachableNonterminalNodes() const;
+  gList<const Node *> ReachableNodesInInfoset(const gbtEfgInfoset &) const;
+  gList<const Node *> ReachableNonterminalNodes() const;
 
   // Action editing functions
   void AddAction(const gbtEfgAction &);
   bool RemoveAction(const gbtEfgAction &);
   bool RemoveActionReturningDeletedInfosets(const gbtEfgAction &,
-					    gList<Infoset *> *);
+					    gList<gbtEfgInfoset> *);
   //  void GoToNextSubsupportOf(const EFSupport &);
 
   // Information
   bool InfosetIsActive(const int pl, const int iset) const;
-  bool InfosetIsActive(const Infoset *) const;
+  bool InfosetIsActive(const gbtEfgInfoset &) const;
   int  NumActiveNodes(const int pl, const int iset) const;
-  int  NumActiveNodes(const Infoset *) const;
+  int  NumActiveNodes(const gbtEfgInfoset &) const;
   bool NodeIsActive(const int pl, const int iset, const int node) const;
   bool NodeIsActive(const Node *) const;
 

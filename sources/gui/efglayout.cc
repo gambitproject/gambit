@@ -319,7 +319,7 @@ Node *efgTreeLayout::InfosetHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     NodeEntry *entry = m_nodeList[i];
-    if (entry->GetNextMember() && entry->GetNode()->GetInfoset()) {
+    if (entry->GetNextMember() && !entry->GetNode()->GetInfoset().IsNull()) {
       if (p_x > entry->X() + entry->GetSublevel() * m_infosetSpacing - 2 &&
 	  p_x < entry->X() + entry->GetSublevel() * m_infosetSpacing + 2) {
 	if (p_y > entry->Y() && p_y < entry->GetNextMember()->Y()) {
@@ -351,12 +351,12 @@ wxString efgTreeLayout::CreateNodeAboveLabel(const NodeEntry *p_entry) const
 	     n->GetPlayer().GetLabel() : gText("")));
   case NODE_ABOVE_ISETLABEL:
     return ((const char *)
-	    ((n->GetInfoset()) ? n->GetInfoset()->GetName() : gText("")));
+	    (!(n->GetInfoset().IsNull()) ? n->GetInfoset().GetLabel() : gText("")));
   case NODE_ABOVE_ISETID:
     return ((const char *)
-	    ((n->GetInfoset()) ?
+	    ((!n->GetInfoset().IsNull()) ?
 	     ("(" + ToText(n->GetPlayer().GetId()) +
-	      "," + ToText(n->GetInfoset()->GetNumber()) + ")") : gText("")));
+	      "," + ToText(n->GetInfoset().GetId()) + ")") : gText("")));
   case NODE_ABOVE_OUTCOME:
     return (const char *) m_parent->OutcomeAsString(n);
   case NODE_ABOVE_REALIZPROB:
@@ -385,12 +385,12 @@ wxString efgTreeLayout::CreateNodeBelowLabel(const NodeEntry *p_entry) const
 	     n->GetPlayer().GetLabel() : gText("")));
   case NODE_BELOW_ISETLABEL:
     return ((const char *)
-	    ((n->GetInfoset()) ? n->GetInfoset()->GetName() : gText("")));
+	    ((!n->GetInfoset().IsNull()) ? n->GetInfoset().GetLabel() : gText("")));
   case NODE_BELOW_ISETID:
     return ((const char *)
-	    ((n->GetInfoset()) ?
+	    ((!n->GetInfoset().IsNull()) ?
 	     ("(" + ToText(n->GetPlayer().GetId()) +
-	      "," + ToText(n->GetInfoset()->GetNumber()) + ")") : gText("")));
+	      "," + ToText(n->GetInfoset().GetId()) + ")") : gText("")));
   case NODE_BELOW_OUTCOME:
     return (const char *) m_parent->OutcomeAsString(n);
   case NODE_BELOW_REALIZPROB:
@@ -428,7 +428,7 @@ wxString efgTreeLayout::CreateBranchAboveLabel(const NodeEntry *p_entry) const
   case BRANCH_ABOVE_NOTHING:
     return "";
   case BRANCH_ABOVE_LABEL:
-    return (const char *) parent->GetInfoset()->GetAction(p_entry->GetChildNumber()).GetLabel();
+    return (const char *) parent->GetInfoset().GetAction(p_entry->GetChildNumber()).GetLabel();
   case BRANCH_ABOVE_PROBS:
     return (const char *) m_parent->Parent()->GetActionProb(parent,
 							    p_entry->GetChildNumber());
@@ -448,7 +448,7 @@ wxString efgTreeLayout::CreateBranchBelowLabel(const NodeEntry *p_entry) const
   case BRANCH_BELOW_NOTHING:
     return "";
   case BRANCH_BELOW_LABEL:
-    return (const char *) parent->GetInfoset()->GetAction(p_entry->GetChildNumber()).GetLabel();
+    return (const char *) parent->GetInfoset().GetAction(p_entry->GetChildNumber()).GetLabel();
   case BRANCH_BELOW_PROBS:
     return (const char *) m_parent->Parent()->GetActionProb(parent,
 							    p_entry->GetChildNumber());
@@ -538,7 +538,7 @@ int efgTreeLayout::LayoutSubtree(Node *p_node, const EFSupport &p_support,
       }
 
       if (!p_node->GetPlayer().IsChance() &&
-	  !p_support.Contains(p_node->GetInfoset()->GetAction(i))) {
+	  !p_support.Contains(p_node->GetInfoset().GetAction(i))) {
 	m_nodeList[p_node->GetChild(i)->GetNumber()]->SetInSupport(false);
       }
     }
@@ -668,7 +668,7 @@ void efgTreeLayout::FillInfosetTable(Node *n, const EFSupport &cur_sup)
     for (int i = 1; i <= n->NumChildren(); i++) {
       bool in_sup = true;
       if (n->GetPlayer().GetId()) {
-	in_sup = cur_sup.Contains(n->GetInfoset()->GetAction(i));
+	in_sup = cur_sup.Contains(n->GetInfoset().GetAction(i));
       }
             
       if (in_sup || !draw_settings.RootReachable()) {

@@ -112,12 +112,12 @@ void TreeWindow::MakeMenus(void)
 
 static Node *PriorSameIset(const Node *n)
 {
-  Infoset *iset = n->GetInfoset();
-  if (!iset) return 0;
-  for (int i = 1; i <= iset->NumMembers(); i++)
-    if (iset->GetMember(i) == n)
+  gbtEfgInfoset iset = n->GetInfoset();
+  if (iset.IsNull()) return 0;
+  for (int i = 1; i <= iset.NumMembers(); i++)
+    if (iset.GetMember(i) == n)
       if (i > 1)
-	return iset->GetMember(i-1);
+	return iset.GetMember(i-1);
       else 
 	return 0;
   return 0;
@@ -125,12 +125,12 @@ static Node *PriorSameIset(const Node *n)
 
 static Node *NextSameIset(const Node *n)
 {
-  Infoset *iset = n->GetInfoset();
-  if (!iset) return 0;
-  for (int i = 1; i <= iset->NumMembers(); i++)
-    if (iset->GetMember(i) == n)
-      if (i < iset->NumMembers()) 
-	return iset->GetMember(i+1); 
+  gbtEfgInfoset iset = n->GetInfoset();
+  if (iset.IsNull()) return 0;
+  for (int i = 1; i <= iset.NumMembers(); i++)
+    if (iset.GetMember(i) == n)
+      if (i < iset.NumMembers()) 
+	return iset.GetMember(i+1); 
       else
 	return 0;
   return 0;
@@ -562,9 +562,9 @@ void TreeWindow::UpdateMenus(void)
 				  m_parent->CutNode()) ? true : false);
   m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_INSERT, (cursor) ? true : false);
   m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_REVEAL,
-		     (cursor && cursor->GetInfoset()));
+		     (cursor && !cursor->GetInfoset().IsNull()));
   m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_MOVE, 
-		     (cursor && cursor->GetInfoset()));
+		     (cursor && !cursor->GetInfoset().IsNull()));
 
   m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
 		     (cursor && m_efg.IsLegalSubgame(cursor) &&

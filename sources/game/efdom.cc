@@ -43,20 +43,20 @@ gText efgDominanceException::Description(void) const
 bool EFSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
 			  bool strong, const bool conditional) const
 {
-  const Infoset *infoset = a.GetInfoset();
+  gbtEfgInfoset infoset = a.GetInfoset();
   if (infoset != b.GetInfoset())
     throw efgDominanceException
       ("Dominates(..) needs actions in same infoset.\n");
 
   const EFSupportWithActiveInfo SAct(*this);
-  gbtEfgPlayer player = infoset->GetPlayer();
+  gbtEfgPlayer player = infoset.GetPlayer();
   int pl = player.GetId();
   bool equal = true;
 
   if (!conditional) {
     EfgContIter A(*this), B(*this);
-    A.Freeze(player.GetId(), infoset->GetNumber()); 
-    B.Freeze(player.GetId(), infoset->GetNumber());
+    A.Freeze(player.GetId(), infoset.GetId()); 
+    B.Freeze(player.GetId(), infoset.GetId());
     A.Set(a);
     B.Set(b);
 
@@ -77,14 +77,13 @@ bool EFSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
     if (nodelist.Length() == 0) {
       // This may not be a good idea; I suggest checking for this 
       // prior to entry
-      for (int i = 1; i <= infoset->NumMembers(); i++) {
-	nodelist.Append(infoset->GetMember(i));
+      for (int i = 1; i <= infoset.NumMembers(); i++) {
+	nodelist.Append(infoset.GetMember(i));
       }
     }
     
     for (int n = 1; n <= nodelist.Length(); n++) {
-      
-      gList<Infoset *> L;
+      gList<gbtEfgInfoset> L;
       L += ReachableInfosets(nodelist[n], a);
       L += ReachableInfosets(nodelist[n], b);
       L.RemoveRedundancies();
@@ -139,10 +138,9 @@ bool EFSupport::IsDominated(const gbtEfgAction &a,
 }
 
 bool InfosetHasDominatedElement(const EFSupport &S, 
-				Infoset *infoset,
-				const bool strong,
-				const bool conditional,
-				const gStatus &/*status*/)
+				gbtEfgInfoset infoset,
+				bool strong, bool conditional,
+				gStatus &/*status*/)
 {
   gArray<gbtEfgAction> actions(S.NumActions(infoset));
   for (int i = 1; i <= actions.Length(); i++) {

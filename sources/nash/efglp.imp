@@ -109,7 +109,7 @@ template <class T> void gbtEfgNashLp<T>::GetProfile(const EFSupport &p_support,
   int i,pl,inf,snew;
   T eps = (T)0;
 //  eps = tab->Epsilon();
-  if(n->GetInfoset()) {
+  if (!n->GetInfoset().IsNull()) {
     if(n->GetPlayer().IsChance()) {
       for(i=1;i<=n->NumChildren();i++)
 	GetProfile(p_support,v,sol,n->GetChild(i),s1,s2);
@@ -165,7 +165,7 @@ void gbtEfgNashLp<T>::FillTableau(const EFSupport &p_support,
     A(s1,s2) = gNumber(A(s1,s2)) +
       gNumber(prob) * n->Game()->Payoff(n, n->Game()->GetPlayer(1)) - gNumber(minpay);
   }
-  if(n->GetInfoset()) {
+  if (!n->GetInfoset().IsNull()) {
     if(n->GetPlayer().IsChance()) {
       for(i=1;i<=n->NumChildren();i++)
 	FillTableau(p_support, A, n->GetChild(i),

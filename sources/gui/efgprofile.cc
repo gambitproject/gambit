@@ -76,8 +76,8 @@ void EfgProfileList::UpdateValues(void)
   for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
     gbtEfgPlayer player = efg.GetPlayer(pl);
     for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-      Infoset *infoset = player.GetInfoset(iset);
-      for (int act = 1; act <= infoset->NumActions(); act++) {
+      gbtEfgInfoset infoset = player.GetInfoset(iset);
+      for (int act = 1; act <= infoset.NumActions(); act++) {
 	InsertColumn(++maxColumn,
 		     wxString::Format("(%d,%d):%d", pl, iset, act));
       }
@@ -103,10 +103,10 @@ void EfgProfileList::UpdateValues(void)
     for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
       gbtEfgPlayer player = efg.GetPlayer(pl);
       for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-	Infoset *infoset = player.GetInfoset(iset);
-	for (int act = 1; act <= infoset->NumActions(); act++) {
+	gbtEfgInfoset infoset = player.GetInfoset(iset);
+	for (int act = 1; act <= infoset.NumActions(); act++) {
 	  SetItem(i - 1, ++column,
-		  (char *) ToText(profile(infoset->GetAction(act))));
+		  (char *) ToText(profile(infoset.GetAction(act))));
 	}
       }
     }
@@ -192,13 +192,13 @@ wxString EfgProfileList::GetReport(void) const
       report += wxString::Format("%s\n", (const char *) player.GetLabel());
 
       for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-	Infoset *infoset = player.GetInfoset(iset);
+	gbtEfgInfoset infoset = player.GetInfoset(iset);
 
-	report += wxString::Format("%s\n", (const char *) infoset->GetName());
+	report += wxString::Format("%s\n", (const char *) infoset.GetLabel());
 
-	for (int act = 1; act <= infoset->NumActions(); act++) {
+	for (int act = 1; act <= infoset.NumActions(); act++) {
 	  report += wxString::Format("%2d: %-6s", act,
-				     (const char *) infoset->GetAction(act).GetLabel());
+				     (const char *) infoset.GetAction(act).GetLabel());
 
 	  for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
 	    report += wxString::Format("%-15s ", 

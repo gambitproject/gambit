@@ -63,7 +63,7 @@ dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, Node *p_node)
   m_branchList = new wxListBox(this, -1);
   for (int act = 1; act <= m_node->NumChildren(); act++) {
     m_branchList->Append((char *) (ToText(act) + ": " + 
-				   m_node->GetInfoset()->GetAction(act).GetLabel()));
+				   m_node->GetInfoset().GetAction(act).GetLabel()));
   }
   m_branchList->SetSelection(0);
   m_branchList->Enable(false);

@@ -57,7 +57,7 @@ class EfgContIter    {
 
   public:
     EfgContIter(const EFSupport &);
-    EfgContIter(const EFSupport &, const gList<Infoset *> &);
+    EfgContIter(const EFSupport &, const gList<gbtEfgInfoset> &);
     ~EfgContIter();
   
     void First(void);
@@ -95,7 +95,7 @@ class EfgConditionalContIter    {
 
   public:
     EfgConditionalContIter(const EFSupport &);
-    EfgConditionalContIter(const EFSupport &, const gList<Infoset *> &);
+    EfgConditionalContIter(const EFSupport &, const gList<gbtEfgInfoset> &);
     ~EfgConditionalContIter();
   
     void First(void); // Sets each infoset's action to the first in the support

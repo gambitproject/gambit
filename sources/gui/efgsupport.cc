@@ -163,11 +163,11 @@ void EfgSupportWindow::UpdateValues(void)
 					       (char *) player.GetLabel());
     
     for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-      Infoset *infoset = player.GetInfoset(iset);
+      gbtEfgInfoset infoset = player.GetInfoset(iset);
       wxTreeItemId isetID = m_actionTree->AppendItem(id, 
-						     (char *) infoset->GetName());
-      for (int act = 1; act <= infoset->NumActions(); act++) {
-	gbtEfgAction action = infoset->GetAction(act);
+						     (char *) infoset.GetLabel());
+      for (int act = 1; act <= infoset.NumActions(); act++) {
+	gbtEfgAction action = infoset.GetAction(act);
 	wxTreeItemId actID = m_actionTree->AppendItem(isetID,
 						      (char *) action.GetLabel());
 	if (m_parent->GetSupport()->Contains(action)) {
@@ -176,7 +176,7 @@ void EfgSupportWindow::UpdateValues(void)
 	else {
 	  m_actionTree->SetItemTextColour(actID, *wxLIGHT_GREY);
 	}
-	m_map.Define(actID, infoset->GetAction(act));
+	m_map.Define(actID, infoset.GetAction(act));
       }
 
       m_actionTree->Expand(isetID);

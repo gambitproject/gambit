@@ -84,7 +84,7 @@ gList<BehavSolution> gbtEfgNashEnumPure::Solve(const EFSupport &p_support,
 	for (gbtEfgInfosetIterator infoset(*player);
 	     !infoset.End(); infoset++) {
 	  temp((*player).GetId(),
-	       (*infoset)->GetNumber(),
+	       (*infoset).GetId(),
 	       profile.GetAction(*infoset).GetId()) = 1;
 	}
       }

@@ -37,6 +37,7 @@
 
 class Node;
 class Lexicon;
+class gbtEfgInfoset;
 
 struct gbt_efg_action_rep;
 
@@ -58,7 +59,7 @@ public:
 
   bool IsNull(void) const;
   int GetId(void) const;
-  Infoset *GetInfoset(void) const;
+  gbtEfgInfoset GetInfoset(void) const;
   gText GetLabel(void) const;
   void SetLabel(const gText &);
 
@@ -67,32 +68,55 @@ public:
 
 gOutput &operator<<(gOutput &, const gbtEfgAction &);
 
-#ifdef UNUSED
-class Action   {
-  friend class efgGame;
-  friend class BehavProfile<double>;
-  friend class BehavProfile<gRational>;
-  friend class BehavProfile<gNumber>;
-  friend class Infoset;
-  private:
-    int number;
-    gText name;
-    Infoset *owner;
+class gbtEfgInfoset {
+friend class efgGame;
+protected:
+  struct gbt_efg_infoset_rep *rep;
 
-    Action(int br, const gText &n, Infoset *s)
-      : number(br), name(n), owner(s)  { }
-    ~Action()   { }
+public:
+  gbtEfgInfoset(void);
+  gbtEfgInfoset(gbt_efg_infoset_rep *);
+  gbtEfgInfoset(const gbtEfgInfoset &);
+  ~gbtEfgInfoset();
 
-  public:
-    const gText &GetLabel(void) const   { return name; }
-    void SetLabel(const gText &s)       { name = s; }
+  gbtEfgInfoset &operator=(const gbtEfgInfoset &);
 
-    int GetId(void) const        { return number; }
-    Infoset *GetInfoset(void) const   { return owner; }
-    bool Precedes(const Node *) const;
+  bool operator==(const gbtEfgInfoset &) const;
+  bool operator!=(const gbtEfgInfoset &) const;
+
+  bool IsNull(void) const;
+  int GetId(void) const;
+  efgGame *GetGame(void) const;
+  gText GetLabel(void) const;
+  void SetLabel(const gText &);
+
+  bool IsChanceInfoset(void) const;
+  gbtEfgPlayer GetPlayer(void) const;
+
+  void SetChanceProb(int act, const gNumber &value);
+  const gNumber &GetChanceProb(int act) const;
+
+  gbtEfgAction InsertAction(int where);
+  void RemoveAction(int which);
+
+  gbtEfgAction GetAction(int act) const;
+  int NumActions(void) const;
+
+  Node *GetMember(int m) const;
+  int NumMembers(void) const;
+
+  bool Precedes(const Node *) const;
+
+  bool GetFlag(void) const;
+  void SetFlag(bool);
+
+  int GetWhichBranch(void) const;
+  void SetWhichBranch(int);
 };
-#endif  // UNUSED
 
+gOutput &operator<<(gOutput &, const gbtEfgInfoset &);
+
+#ifdef UNUSED
 class Infoset   {
   friend class efgGame;
   friend class BehavProfile<double>;
@@ -120,8 +144,8 @@ class Infoset   {
     virtual bool IsChanceInfoset(void) const { return false; }
     gbtEfgPlayer GetPlayer(void) const;
 
-    void SetName(const gText &s)    { name = s; }
-    const gText &GetName(void) const   { return name; }
+    void SetLabel(const gText &s)    { name = s; }
+    const gText &GetLabel(void) const   { return name; }
 
     virtual gbtEfgAction InsertAction(int where);
     virtual void RemoveAction(int which);
@@ -132,7 +156,7 @@ class Infoset   {
     Node *GetMember(int m) const { return members[m]; }
     int NumMembers(void) const   { return members.Length(); }
 
-    int GetNumber(void) const    { return number; }
+    int GetId(void) const    { return number; }
 
     bool Precedes(const Node *) const;
 };
@@ -164,5 +188,6 @@ class ChanceInfoset : public Infoset  {
     const gNumber &GetActionProb(int i) const   { return probs[i]; }
     const gArray<gNumber> &GetActionProbs(void) const  { return probs; }
 };
+#endif  // UNUSED
 
 #endif   //# INFOSET_H

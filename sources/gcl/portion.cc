@@ -1090,7 +1090,7 @@ void EfPlayerPortion::SetValue(gbtEfgPlayer p_value)
 }
 
 PortionSpec EfPlayerPortion::Spec(void) const
-{ return porNFPLAYER; }
+{ return porEFPLAYER; }
 
 void EfPlayerPortion::Output(gOutput& s) const
 {
@@ -1126,50 +1126,49 @@ bool EfPlayerPortion::IsReference(void) const
 
 gPool InfosetPortion::pool(sizeof(InfosetPortion));
 
-InfosetPortion::InfosetPortion(Infoset *value)
-  : _Value(new Infoset *(value)), _ref(false)
+InfosetPortion::InfosetPortion(gbtEfgInfoset p_value)
+  : m_value(new gbtEfgInfoset(p_value)), m_ref(false)
 {
-  SetGame(value->Game());
+  SetGame(p_value.GetGame());
 }
 
-InfosetPortion::InfosetPortion(Infoset *& value, bool ref)
-  : _Value(&value), _ref(ref)
+InfosetPortion::InfosetPortion(gbtEfgInfoset *&p_value, bool p_ref)
+  : m_value(p_value), m_ref(p_ref)
 {
-  if (!_ref) {
-    SetGame(value->Game());
+  if (!p_ref) {
+    SetGame(p_value->GetGame());
   }
 }
 
 InfosetPortion::~InfosetPortion()
 {
-  if (!_ref)   delete _Value;
+  if (!m_ref) {
+    delete m_value;
+  }
 }
 
-Infoset *InfosetPortion::Value(void) const
-{ return *_Value; }
+gbtEfgInfoset InfosetPortion::Value(void) const
+{ return *m_value; }
 
-void InfosetPortion::SetValue(Infoset *value)
+void InfosetPortion::SetValue(gbtEfgInfoset p_value)
 {
-  if (_ref) {
-    ((InfosetPortion *) Original())->SetValue(value);
+  if (m_ref) {
+    ((InfosetPortion *) Original())->SetValue(p_value);
   }
   else {
-    SetGame(value->Game());
-    *_Value = value;
+    SetGame(p_value.GetGame());
+    *m_value = p_value;
   }
 }
 
 PortionSpec InfosetPortion::Spec(void) const
-{
-  return PortionSpec(porINFOSET);
-}
+{ return porINFOSET; }
 
 void InfosetPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
-  s << "(Infoset) " << *_Value;
-  if(*_Value)
-    s << " \"" << (*_Value)->GetName() << "\""; 
+  s << "(Infoset) ";
+  s << " \"" << (*m_value).GetLabel() << "\""; 
 }
 
 gText InfosetPortion::OutputString(void) const
@@ -1178,21 +1177,19 @@ gText InfosetPortion::OutputString(void) const
 }
 
 Portion* InfosetPortion::ValCopy(void) const
-{ 
-  return new InfosetPortion(*_Value);
+{
+  return new InfosetPortion(*m_value); 
 }
 
 Portion* InfosetPortion::RefCopy(void) const
 {
-  Portion* p = new InfosetPortion(*_Value, true); 
+  Portion *p = new InfosetPortion((gbtEfgInfoset *) m_value, true); 
   p->SetOriginal(Original());
   return p;
 }
 
 bool InfosetPortion::IsReference(void) const
-{
-  return _ref;
-}
+{ return m_ref; }
 
 //--------
 // Node
@@ -1275,14 +1272,14 @@ gPool ActionPortion::pool(sizeof(ActionPortion));
 ActionPortion::ActionPortion(gbtEfgAction p_value)
   : m_value(new gbtEfgAction(p_value)), m_ref(false)
 {
-  SetGame(p_value.GetInfoset()->Game());
+  SetGame(p_value.GetInfoset().GetGame());
 }
 
 ActionPortion::ActionPortion(gbtEfgAction *&p_value, bool p_ref)
   : m_value(p_value), m_ref(p_ref)
 {
   if (!p_ref) {
-    SetGame(p_value->GetInfoset()->Game());
+    SetGame(p_value->GetInfoset().GetGame());
   }
 }
 
@@ -1302,13 +1299,13 @@ void ActionPortion::SetValue(gbtEfgAction p_value)
     ((ActionPortion *) Original())->SetValue(p_value);
   }
   else {
-    SetGame(p_value.GetInfoset()->Game());
+    SetGame(p_value.GetInfoset().GetGame());
     *m_value = p_value;
   }
 }
 
 PortionSpec ActionPortion::Spec(void) const
-{ return porNFPLAYER; }
+{ return porACTION; }
 
 void ActionPortion::Output(gOutput& s) const
 {
@@ -1493,15 +1490,15 @@ void BehavPortion::Output(gOutput& s) const
     gbtEfgPlayer player = rep->value->GetGame().GetPlayer(pl);
     for (gbtEfgInfosetIterator infoset(player); !infoset.End(); infoset++) {
       s << "{ ";
-      for (int act = 1; act <= (*infoset)->NumActions(); act++) {
+      for (int act = 1; act <= (*infoset).NumActions(); act++) {
 	if (_WriteSolutionLabels == triTRUE) {
-	  if ((*rep->value)((*infoset)->GetAction(act)) > gNumber(0)) {
-	    s << (*infoset)->GetAction(act).GetLabel() << '=';
-	    s << (*rep->value)((*infoset)->GetAction(act)) << ' ';
+	  if ((*rep->value)((*infoset).GetAction(act)) > gNumber(0)) {
+	    s << (*infoset).GetAction(act).GetLabel() << '=';
+	    s << (*rep->value)((*infoset).GetAction(act)) << ' ';
 	  }
 	}
 	else
-	  s << (*rep->value)((*infoset)->GetAction(act)) << ' ';
+	  s << (*rep->value)((*infoset).GetAction(act)) << ' ';
       }
       s << "}";
     }
@@ -1853,10 +1850,6 @@ bool ListPortion::MatchGameData( void* game, void* data ) const
       }
       if (spec.Type & porEFBASIS)  {
 	if (((EfBasisPortion*) (*rep->value)[i])->Value() == data)
-	  return true;
-      }
-      if (spec.Type & porINFOSET)  {
-	if (((InfosetPortion*) (*rep->value)[i])->Value() == data)
 	  return true;
       }
       if (spec.Type & porNODE)  {

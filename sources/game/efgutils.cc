@@ -144,39 +144,39 @@ gbtEfgAction LastAction(const efgGame &e, Node *node)
   if (parent == 0)  return 0;
   for (int i = 1; i <= node->NumChildren(); i++) 
     if (parent->GetChild(i) == node)  
-      return parent->GetInfoset()->GetAction(i);
+      return parent->GetInfoset().GetAction(i);
   return 0;
 }
 
 bool IsPerfectRecall(const efgGame &p_efg)
 {
-  Infoset *s1, *s2;
+  gbtEfgInfoset s1, s2;
   return IsPerfectRecall(p_efg, s1, s2);
 }
 
-bool IsPerfectRecall(const efgGame &efg, Infoset *&s1, Infoset *&s2)
+bool IsPerfectRecall(const efgGame &efg, gbtEfgInfoset &s1, gbtEfgInfoset &s2)
 {
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)   {
     gbtEfgPlayer player = efg.GetPlayer(pl);
     
     for (int i = 1; i <= player.NumInfosets(); i++)  {
-      Infoset *iset1 = player.GetInfoset(i);
+      gbtEfgInfoset iset1 = player.GetInfoset(i);
       for (int j = 1; j <= player.NumInfosets(); j++)   {
-	Infoset *iset2 = player.GetInfoset(j);
+	gbtEfgInfoset iset2 = player.GetInfoset(j);
 
 	bool precedes = false;
 	int action = 0;
 	
-	for (int m = 1; m <= iset2->NumMembers(); m++)  {
+	for (int m = 1; m <= iset2.NumMembers(); m++)  {
 	  int n;
-	  for (n = 1; n <= iset1->NumMembers(); n++)  {
-	    if (efg.IsPredecessor(iset1->GetMember(n),
-				  iset2->GetMember(m)) &&
-	        iset1->GetMember(n) != iset2->GetMember(m))  {
+	  for (n = 1; n <= iset1.NumMembers(); n++)  {
+	    if (efg.IsPredecessor(iset1.GetMember(n),
+				  iset2.GetMember(m)) &&
+	        iset1.GetMember(n) != iset2.GetMember(m))  {
 	      precedes = true;
-	      for (int act = 1; act <= iset1->NumActions(); act++)  {
-		if (efg.IsPredecessor(iset1->GetMember(n)->GetChild(act),
-				      iset2->GetMember(m)))  {
+	      for (int act = 1; act <= iset1.NumActions(); act++)  {
+		if (efg.IsPredecessor(iset1.GetMember(n)->GetChild(act),
+				      iset2.GetMember(m)))  {
 		  if (action != 0 && action != act)  {
 		    s1 = iset1;
 		    s2 = iset2;
@@ -195,7 +195,7 @@ bool IsPerfectRecall(const efgGame &efg, Infoset *&s1, Infoset *&s2)
 	    return false;
 	  }
 
-	  if (n > iset1->NumMembers() && precedes)  {
+	  if (n > iset1.NumMembers() && precedes)  {
 	    s1 = iset1;
 	    s2 = iset2;
 	    return false;
@@ -217,11 +217,11 @@ efgGame *CompressEfg(const efgGame &efg, const EFSupport &S)
   for (int pl = 1; pl <= newefg->NumPlayers(); pl++)   { 
     gbtEfgPlayer player = newefg->GetPlayer(pl);
     for (int iset = 1; iset <= player.NumInfosets(); iset++)  {
-      Infoset *infoset = player.GetInfoset(iset);
-      for (int act = infoset->NumActions(); act >= 1; act--)  {
-	gbtEfgAction oldact = efg.GetPlayer(pl).GetInfoset(iset)->GetAction(act);
+      gbtEfgInfoset infoset = player.GetInfoset(iset);
+      for (int act = infoset.NumActions(); act >= 1; act--)  {
+	gbtEfgAction oldact = efg.GetPlayer(pl).GetInfoset(iset).GetAction(act);
 	if (!S.Contains(oldact)) {
-	  newefg->DeleteAction(infoset, infoset->GetAction(act));
+	  newefg->DeleteAction(infoset, infoset.GetAction(act));
 	}
       }
     }

@@ -63,8 +63,8 @@ void Lexicon::MakeStrategy(gbtEfgPlayer p)
   lexCorrespondence *c = new lexCorrespondence(p.NumInfosets());
   
   for (int i = 1; i <= p.NumInfosets(); i++)  {
-    if (p.GetInfoset(i)->flag == 1)
-      (*c)[i] = p.GetInfoset(i)->whichbranch;
+    if (p.GetInfoset(i).GetFlag())
+      (*c)[i] = p.GetInfoset(i).GetWhichBranch();
     else
       (*c)[i] = 0;
   }
@@ -80,23 +80,23 @@ void Lexicon::MakeReducedStrats(const EFSupport &S,
   if (!n->parent)  n->ptr = 0;
 
   if (n->NumChildren() > 0)  {
-    if (gbtEfgPlayer(n->infoset->player) == p)  {
-      if (n->infoset->flag == 0)  {
+    if (n->GetInfoset().GetPlayer() == p)  {
+      if (!n->GetInfoset().GetFlag())  {
 	// we haven't visited this infoset before
-	n->infoset->flag = 1;
+	n->GetInfoset().SetFlag(true);
 	for (i = 1; i <= n->NumChildren(); i++)   {
-	  if (S.Contains(n->infoset->GetAction(i)))  {
+	  if (S.Contains(n->GetInfoset().GetAction(i)))  {
 	    Node *m = n->GetChild(i);
 	    n->whichbranch = m;
-	    n->infoset->whichbranch = i;
+	    n->GetInfoset().SetWhichBranch(i);
 	    MakeReducedStrats(S, p, m, nn);
 	  }
 	}
-	n->infoset->flag = 0;
+	n->GetInfoset().SetFlag(false);
       }
       else  {
 	// we have visited this infoset, take same action
-	MakeReducedStrats(S, p, n->children[n->infoset->whichbranch], nn);
+	MakeReducedStrats(S, p, n->children[n->GetInfoset().GetWhichBranch()], nn);
       }
     }
     else  {
@@ -104,8 +104,8 @@ void Lexicon::MakeReducedStrats(const EFSupport &S,
       if (nn != NULL)
 	n->ptr = nn->parent;
       n->whichbranch = n->children[1];
-      if (n->infoset)
-	n->infoset->whichbranch = 0;
+      if (n->infoset) 
+	n->GetInfoset().SetWhichBranch(0);
       MakeReducedStrats(S, p, n->children[1], n->children[1]);
     }
   }
@@ -213,8 +213,8 @@ Nfg *MakeAfg(const efgGame &E)
 
   for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)   {
     for (int iset = 1; iset <= E.GetPlayer(epl).NumInfosets(); iset++, npl++)  {
-      Infoset *s = E.GetPlayer(epl).GetInfoset(iset);
-      for (int act = 1; act <= s->NumActions(); act++)  {
+      gbtEfgInfoset s = E.GetPlayer(epl).GetInfoset(iset);
+      for (int act = 1; act <= s.NumActions(); act++)  {
 	afg->GetPlayer(npl).GetStrategy(act).SetLabel(ToText(act));
       }
     }

@@ -35,11 +35,11 @@
 class dialogEditBehav : public wxDialog {
 private:
   mutable BehavSolution m_profile;
-  Infoset *m_lastInfoset;
+  gbtEfgInfoset m_lastInfoset;
   wxTextCtrl *m_profileName;
   wxTreeCtrl *m_infosetTree;
   wxGrid *m_probGrid;
-  gOrdMap<wxTreeItemId, Infoset *> m_map;
+  gOrdMap<wxTreeItemId, gbtEfgInfoset> m_map;
 
   // Event handlers
   void OnItemCollapsing(wxTreeEvent &);

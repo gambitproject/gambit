@@ -470,7 +470,7 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const BehavProfile<gNumber> &sol)
   for (int pl = 1; pl <= EF.NumPlayers(); pl++) {
     gbtEfgPlayer player = EF.GetPlayer(pl);
     for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-      const Infoset *infoset = player.GetInfoset(iset);
+      gbtEfgInfoset infoset = player.GetInfoset(iset);
       if ( support.MayReach(infoset) )
 	numvars += support.NumActions(infoset) - 1;
     }
@@ -482,7 +482,7 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const BehavProfile<gNumber> &sol)
   for (int pl = 1; pl <= EF.NumPlayers(); pl++) {
     gbtEfgPlayer player = EF.GetPlayer(pl);
     for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-      Infoset *infoset = player.GetInfoset(iset);
+      gbtEfgInfoset infoset = player.GetInfoset(iset);
       if ( support.MayReach(infoset) ) {
 	for (int act = 1; act <= support.NumActions(infoset) - 1; act++) {
 	  count++;

@@ -50,7 +50,7 @@ public:
   // ACCESS TO CURRENT STATE
   gbtEfgAction GetAction(void) const;
   int GetActionId(void) const { return act; }
-  Infoset *GetInfoset(void) const;
+  gbtEfgInfoset GetInfoset(void) const;
   int GetInfosetId(void) const { return iset; }
   gbtEfgPlayer GetPlayer(void) const;
   int GetPlayerId(void) const { return pl; }
@@ -65,7 +65,7 @@ protected:
   int pl, iset, act;
 
 public:
-  gbtActionIterator(const EFSupport &, Infoset *);
+  gbtActionIterator(const EFSupport &, gbtEfgInfoset);
   gbtActionIterator(const EFSupport &, int pl, int iset);
 
   gbtEfgAction operator*(void) const;

@@ -120,10 +120,10 @@ void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
 	    break;
 	  
 	assert(index <= infosets[pl]->Length());
-	for (int act = 1; act <= p.GetInfoset(iset)->NumActions();
+	for (int act = 1; act <= p.GetInfoset(iset).NumActions();
 	     act++)  {
-          if (!p_support.Contains((*infosets[pl])[index]->GetAction(act))) {
-            subsupport.RemoveAction(p.GetInfoset(iset)->GetAction(act));
+          if (!p_support.Contains((*infosets[pl])[index].GetAction(act))) {
+            subsupport.RemoveAction(p.GetInfoset(iset).GetAction(act));
 	  }
 	}
       }
@@ -267,10 +267,10 @@ gList<BehavSolution> gbtEfgNashSubgames::Solve(const EFSupport &p_support,
   ((gVector<gNumber> &) *solution).operator=(gNumber(0));
 
   efgGame efg((const efgGame &) p_support.GetGame());
-  infosets = gArray<gArray<Infoset *> *>(efg.NumPlayers());
+  infosets = gArray<gArray<gbtEfgInfoset> *>(efg.NumPlayers());
 
   for (int i = 1; i <= efg.NumPlayers(); i++) {
-    infosets[i] = new gArray<Infoset *>(efg.GetPlayer(i).NumInfosets());
+    infosets[i] = new gArray<gbtEfgInfoset>(efg.GetPlayer(i).NumInfosets());
     for (int j = 1; j <= efg.GetPlayer(i).NumInfosets(); j++) {
       (*infosets[i])[j] = efg.GetPlayer(i).GetInfoset(j);
     }
@@ -281,10 +281,10 @@ gList<BehavSolution> gbtEfgNashSubgames::Solve(const EFSupport &p_support,
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
     gbtEfgPlayer player = p_support.GetGame().GetPlayer(pl);
     for (int iset = 1; iset <= player.NumInfosets(); iset++)  {
-      Infoset *infoset = player.GetInfoset(iset);
-      for (int act = 1; act <= infoset->NumActions(); act++) { 
-	if (!p_support.Contains(infoset->GetAction(act))) {
-	  support.RemoveAction(efg.GetPlayer(pl).GetInfoset(iset)->GetAction(act));
+      gbtEfgInfoset infoset = player.GetInfoset(iset);
+      for (int act = 1; act <= infoset.NumActions(); act++) { 
+	if (!p_support.Contains(infoset.GetAction(act))) {
+	  support.RemoveAction(efg.GetPlayer(pl).GetInfoset(iset).GetAction(act));
 	}
       }
     }
@@ -323,7 +323,7 @@ gText gbtEfgNashSubgames::GetAlgorithm(void) const
 
 #include "base/garray.imp"
 
-template class gArray<gArray<Infoset *> *>;
+template class gArray<gArray<gbtEfgInfoset> *>;
 
 template bool operator==(const gArray<gbtEfgOutcome> &,
 			 const gArray<gbtEfgOutcome> &);

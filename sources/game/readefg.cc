@@ -95,7 +95,7 @@ InfosetData *NodeData::AddInfosetData(const gText &m_infosetName)
 class DefinedInfosetData {
 public:
   int m_fileID;
-  Infoset *m_infoset;
+  gbtEfgInfoset m_infoset;
   DefinedInfosetData *m_next;
 
   DefinedInfosetData(void) : m_fileID(-1), m_infoset(0), m_next(0) { }
@@ -109,8 +109,8 @@ public:
 
   PlayerData(void);
   ~PlayerData();
-  void AddInfoset(int p_number, Infoset *p_infoset);
-  Infoset *GetInfoset(int p_number);
+  void AddInfoset(int p_number, gbtEfgInfoset p_infoset);
+  gbtEfgInfoset GetInfoset(int p_number);
 };
 
 PlayerData::PlayerData(void)
@@ -127,7 +127,7 @@ PlayerData::~PlayerData()
   }
 }
 
-void PlayerData::AddInfoset(int p_number, Infoset *p_infoset)
+void PlayerData::AddInfoset(int p_number, gbtEfgInfoset p_infoset)
 {
   DefinedInfosetData *infoset = new DefinedInfosetData;
   infoset->m_fileID = p_number;
@@ -148,7 +148,7 @@ void PlayerData::AddInfoset(int p_number, Infoset *p_infoset)
 // been created, returns the pointer to the Infoset structure; otherwise,
 // returns null.
 //
-Infoset *PlayerData::GetInfoset(int p_number)
+gbtEfgInfoset PlayerData::GetInfoset(int p_number)
 {
   for (DefinedInfosetData *infoset = m_firstInfoset;
        infoset; infoset = infoset->m_next) {
@@ -662,18 +662,18 @@ static void BuildSubtree(efgGame *p_efg, Node *p_node,
     PlayerData *player = p_treeData.m_firstPlayer;
     for (int i = 1; i < (*p_nodeData)->m_player; i++, player = player->m_next);
 
-    if (player->GetInfoset((*p_nodeData)->m_infoset)) {
-      Infoset *infoset = player->GetInfoset((*p_nodeData)->m_infoset);
+    if (!player->GetInfoset((*p_nodeData)->m_infoset).IsNull()) {
+      gbtEfgInfoset infoset = player->GetInfoset((*p_nodeData)->m_infoset);
       p_efg->AppendNode(p_node, infoset);
     }
     else {
-      Infoset *infoset =
+      gbtEfgInfoset infoset =
 	p_efg->AppendNode(p_node, p_efg->GetPlayer((*p_nodeData)->m_player),
 			  (*p_nodeData)->m_infosetData->m_actions.Length());
 
-      infoset->SetName((*p_nodeData)->m_infosetData->m_name);
-      for (int act = 1; act <= infoset->NumActions(); act++) {
-	infoset->GetAction(act).SetLabel((*p_nodeData)->m_infosetData->m_actions[act]);
+      infoset.SetLabel((*p_nodeData)->m_infosetData->m_name);
+      for (int act = 1; act <= infoset.NumActions(); act++) {
+	infoset.GetAction(act).SetLabel((*p_nodeData)->m_infosetData->m_actions[act]);
       }
       player->AddInfoset((*p_nodeData)->m_infoset, infoset);
     }
@@ -686,17 +686,17 @@ static void BuildSubtree(efgGame *p_efg, Node *p_node,
   else if ((*p_nodeData)->m_player == 0) {
     PlayerData *player = &p_treeData.m_chancePlayer;
 
-    if (player->GetInfoset((*p_nodeData)->m_infoset)) {
-      Infoset *infoset = player->GetInfoset((*p_nodeData)->m_infoset);
+    if (!player->GetInfoset((*p_nodeData)->m_infoset).IsNull()) {
+      gbtEfgInfoset infoset = player->GetInfoset((*p_nodeData)->m_infoset);
       p_efg->AppendNode(p_node, infoset);
     }
     else {
-      Infoset *infoset = p_efg->AppendNode(p_node, p_efg->GetChance(),
-					   (*p_nodeData)->m_infosetData->m_actions.Length());
+      gbtEfgInfoset infoset = p_efg->AppendNode(p_node, p_efg->GetChance(),
+						(*p_nodeData)->m_infosetData->m_actions.Length());
 
-      infoset->SetName((*p_nodeData)->m_infosetData->m_name);
-      for (int act = 1; act <= infoset->NumActions(); act++) {
-	infoset->GetAction(act).SetLabel((*p_nodeData)->m_infosetData->m_actions[act]);
+      infoset.SetLabel((*p_nodeData)->m_infosetData->m_name);
+      for (int act = 1; act <= infoset.NumActions(); act++) {
+	infoset.GetAction(act).SetLabel((*p_nodeData)->m_infosetData->m_actions[act]);
 	p_efg->SetChanceProb(infoset, act, 
 			     (*p_nodeData)->m_infosetData->m_probs[act]);
       }

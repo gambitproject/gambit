@@ -101,6 +101,8 @@ protected:
   void TerminalDescendants(const Node *, const EFSupport&, 
 			   gList<Node *> &) const;
 
+  gbt_efg_infoset_rep *CreateInfoset(int n, gbtEfgPlayer, int br);
+
 public:
   class Exception : public gException   {
   public:
@@ -140,7 +142,7 @@ public:
   gList<Node *> TerminalDescendants(const Node&, 
 				    const EFSupport&) const;
   gList<Node *> TerminalNodes(void) const;
-  gList<Infoset*> DescendantInfosets(const Node&, const EFSupport&) const;
+  gList<gbtEfgInfoset> DescendantInfosets(const Node&, const EFSupport&) const;
 
   // DATA ACCESS -- PLAYERS
   int NumPlayers(void) const;
@@ -159,36 +161,35 @@ public:
   void SetLabel(gbtEfgOutcome &, const gText &);
  
   // EDITING OPERATIONS
-  Infoset *AppendNode(Node *n, gbtEfgPlayer, int br);
-  Infoset *AppendNode(Node *n, Infoset *s);
+  gbtEfgInfoset AppendNode(Node *n, gbtEfgPlayer, int br);
+  gbtEfgInfoset AppendNode(Node *n, gbtEfgInfoset s);
   Node *DeleteNode(Node *n, Node *keep);
-  Infoset *InsertNode(Node *n, gbtEfgPlayer, int br);
-  Infoset *InsertNode(Node *n, Infoset *s);
+  gbtEfgInfoset InsertNode(Node *n, gbtEfgPlayer, int br);
+  gbtEfgInfoset InsertNode(Node *n, gbtEfgInfoset s);
 
-  Infoset *CreateInfoset(gbtEfgPlayer, int br);
-  bool DeleteEmptyInfoset(Infoset *);
+  gbtEfgInfoset CreateInfoset(gbtEfgPlayer, int br);
+  bool DeleteEmptyInfoset(gbtEfgInfoset);
   void DeleteEmptyInfosets(void);
-  Infoset *JoinInfoset(Infoset *s, Node *n);
-  Infoset *LeaveInfoset(Node *n);
-  Infoset *SplitInfoset(Node *n);
-  Infoset *MergeInfoset(Infoset *to, Infoset *from);
+  gbtEfgInfoset JoinInfoset(gbtEfgInfoset, Node *n);
+  gbtEfgInfoset LeaveInfoset(Node *n);
+  gbtEfgInfoset SplitInfoset(Node *n);
+  gbtEfgInfoset MergeInfoset(gbtEfgInfoset to, gbtEfgInfoset from);
 
-  Infoset *SwitchPlayer(Infoset *s, gbtEfgPlayer p);
+  gbtEfgInfoset SwitchPlayer(gbtEfgInfoset s, gbtEfgPlayer p);
   
   Node *CopyTree(Node *src, Node *dest);
   Node *MoveTree(Node *src, Node *dest);
   Node *DeleteTree(Node *n);
 
-  gbtEfgAction InsertAction(Infoset *s);
-  gbtEfgAction InsertAction(Infoset *s, const gbtEfgAction &at);
-  Infoset *DeleteAction(Infoset *s, const gbtEfgAction &a);
+  gbtEfgAction InsertAction(gbtEfgInfoset);
+  gbtEfgAction InsertAction(gbtEfgInfoset, const gbtEfgAction &at);
+  gbtEfgInfoset DeleteAction(gbtEfgInfoset s, const gbtEfgAction &a);
 
-  void Reveal(Infoset *, gbtEfgPlayer);
+  void Reveal(gbtEfgInfoset, gbtEfgPlayer);
 
-  void SetChanceProb(Infoset *, int, const gNumber &);
-  gNumber GetChanceProb(Infoset *, int) const;
+  void SetChanceProb(gbtEfgInfoset, int, const gNumber &);
+  gNumber GetChanceProb(gbtEfgInfoset, int) const;
   gNumber GetChanceProb(const gbtEfgAction &) const;
-  gArray<gNumber> GetChanceProbs(Infoset *) const;
 
   void SetPayoff(gbtEfgOutcome, int pl, const gNumber &value);
   gNumber Payoff(const gbtEfgOutcome &, const gbtEfgPlayer &) const;
@@ -229,17 +230,15 @@ public:
   friend Nfg *MakeAfg(const efgGame &);
 
   // These are auxiliary functions used by the .efg file reader code
-  Infoset *GetInfosetByIndex(gbtEfgPlayer, int index) const;
-  Infoset *CreateInfosetByIndex(gbtEfgPlayer, int index, int br);
+  gbtEfgInfoset GetInfosetByIndex(gbtEfgPlayer, int index) const;
+  gbtEfgInfoset CreateInfosetByIndex(gbtEfgPlayer, int index, int br);
   gbtEfgOutcome GetOutcomeByIndex(int index) const;
   gbtEfgOutcome CreateOutcomeByIndex(int index);
   void Reindex(void);
-  Infoset *CreateInfoset(int n, gbtEfgPlayer, int br);
 };
 
 //#include "behav.h"
 
-#include "infoset.h"
 #include "node.h"
 
 efgGame *ReadEfgFile(gInput &);
@@ -269,10 +268,10 @@ template <class T> class PureBehavProfile   {
     //    void Set(const gbtEfgPlayer &, const gArray<const Action *> &);
 
     // Information
-    gbtEfgAction GetAction(const Infoset *) const;
+    gbtEfgAction GetAction(const gbtEfgInfoset &) const;
     
     const T Payoff(const gbtEfgOutcome &, const int &pl) const;
-    const T ChanceProb(const Infoset *, const int &act) const;
+    const T ChanceProb(const gbtEfgInfoset &, const int &act) const;
     
     const T Payoff(const Node *, const int &pl) const;
   //    T    Payoff(const int &pl) const;

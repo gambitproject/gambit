@@ -70,13 +70,13 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
 
   for (gbtEfgPlayerIterator player(GetGame()); !player.End(); player++) {
     for (gbtEfgInfosetIterator infoset(*player); !infoset.End(); infoset++) {
-      for (int act = 1; act <= (*infoset)->NumActions(); act++) {
-	int index = p_profile.Support().GetIndex((*infoset)->GetAction(act));
+      for (int act = 1; act <= (*infoset).NumActions(); act++) {
+	int index = p_profile.Support().GetIndex((*infoset).GetAction(act));
 	if (index > 0)
-	  (*m_profile)((*player).GetId(), (*infoset)->GetNumber(), act) =
-	    p_profile((*player).GetId(), (*infoset)->GetNumber(), index);
+	  (*m_profile)((*player).GetId(), (*infoset).GetId(), act) =
+	    p_profile((*player).GetId(), (*infoset).GetId(), index);
 	else
-	  (*m_profile)((*player).GetId(), (*infoset)->GetNumber(), act) =
+	  (*m_profile)((*player).GetId(), (*infoset).GetId(), act) =
 	    gNumber(0.0);
       }
     }
@@ -97,9 +97,9 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
   for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
     gbtEfgPlayer player = GetGame().GetPlayer(pl);
     for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-      Infoset *infoset = player.GetInfoset(iset);
-      for (int act = 1; act <= infoset->NumActions(); act++) {
-	int index = p_profile.Support().GetIndex(infoset->GetAction(act));
+      gbtEfgInfoset infoset = player.GetInfoset(iset);
+      for (int act = 1; act <= infoset.NumActions(); act++) {
+	int index = p_profile.Support().GetIndex(infoset.GetAction(act));
 	if (index > 0)
 	  (*m_profile)(pl, iset, act) = p_profile(pl, iset, index);
 	else
@@ -121,9 +121,9 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
   for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
     gbtEfgPlayer player = GetGame().GetPlayer(pl);
     for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-      Infoset *infoset = player.GetInfoset(iset);
-      for (int act = 1; act <= infoset->NumActions(); act++) {
-	int index = p_profile.Support().GetIndex(infoset->GetAction(act));
+      gbtEfgInfoset infoset = player.GetInfoset(iset);
+      for (int act = 1; act <= infoset.NumActions(); act++) {
+	int index = p_profile.Support().GetIndex(infoset.GetAction(act));
 	if (index > 0)
 	  (*m_profile)(pl, iset, act) = p_profile(pl, iset, index);
 	else
@@ -331,9 +331,9 @@ void BehavSolution::LevelPrecision(void)
     gbtEfgPlayer player = GetGame().GetPlayer(pl);
     for (int iset = 1; (m_precision == precRATIONAL && 
 			iset <= player.NumInfosets()); iset++) {
-      Infoset *infoset = player.GetInfoset(iset);
+      gbtEfgInfoset infoset = player.GetInfoset(iset);
       for (int act = 1; (m_precision == precRATIONAL && 
-			 act <= infoset->NumActions()); act++) {
+			 act <= infoset.NumActions()); act++) {
 	if ((*m_profile)(pl, iset, act).Precision() == precDOUBLE)
 	  m_precision = precDOUBLE;
       }
@@ -344,8 +344,8 @@ void BehavSolution::LevelPrecision(void)
     for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
       gbtEfgPlayer player = GetGame().GetPlayer(pl);
       for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-	Infoset *infoset = player.GetInfoset(iset);
-	for (int act = 1; act <= infoset->NumActions(); act++) {
+	gbtEfgInfoset infoset = player.GetInfoset(iset);
+	for (int act = 1; act <= infoset.NumActions(); act++) {
 	  (*m_profile)(pl, iset, act) = (double) (*m_profile)(pl, iset, act);
 	}
       }
@@ -378,10 +378,9 @@ void BehavSolution::Set(const gbtEfgAction &p_action, const gNumber &p_prob)
 {
   Invalidate();
 
-  Infoset *infoset = p_action.GetInfoset();
-  gbtEfgPlayer player = infoset->GetPlayer();
-  (*m_profile)(player.GetId(), infoset->GetNumber(),
-	       p_action.GetId()) = p_prob;
+  gbtEfgInfoset infoset = p_action.GetInfoset();
+  gbtEfgPlayer player = infoset.GetPlayer();
+  (*m_profile)(player.GetId(), infoset.GetId(), p_action.GetId()) = p_prob;
   if (m_precision != p_prob.Precision())
     LevelPrecision();
 }
@@ -398,9 +397,9 @@ void BehavSolution::Set(int p_player, int p_infoset, int p_action,
 
 const gNumber &BehavSolution::operator()(const gbtEfgAction &p_action) const
 {
-  Infoset *infoset = p_action.GetInfoset();
-  gbtEfgPlayer player = infoset->GetPlayer();
-  return (*m_profile)(player.GetId(), infoset->GetNumber(),
+  gbtEfgInfoset infoset = p_action.GetInfoset();
+  gbtEfgPlayer player = infoset.GetPlayer();
+  return (*m_profile)(player.GetId(), infoset.GetId(),
 		      p_action.GetId());
 }
 
@@ -411,8 +410,8 @@ gNumber BehavSolution::operator[](const gbtEfgAction &p_action) const
 
 gNumber &BehavSolution::operator[](const gbtEfgAction &p_action)
 {
-  return (*m_profile)(p_action.GetInfoset()->GetPlayer().GetId(),
-		      p_action.GetInfoset()->GetNumber(),
+  return (*m_profile)(p_action.GetInfoset().GetPlayer().GetId(),
+		      p_action.GetInfoset().GetId(),
 		      p_action.GetId());
 }
 
@@ -453,9 +452,9 @@ bool BehavSolution::IsComplete(void) const
   for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
     gbtEfgPlayer player = GetGame().GetPlayer(pl);
     for (int iset = 1; iset <= player.NumInfosets(); iset++) { 
-      Infoset *infoset = player.GetInfoset(iset);
+      gbtEfgInfoset infoset = player.GetInfoset(iset);
       sum = -1;
-      for (int act = 1; act <= infoset->NumActions(); act++) 
+      for (int act = 1; act <= infoset.NumActions(); act++) 
 	sum += (*m_profile)(pl, iset, act);
       if (sum > m_epsilon || sum < -m_epsilon) 
 	return false;
@@ -643,8 +642,8 @@ SubgamePerfectChecker::SubgamePerfectChecker(const efgGame &E, const BehavProfil
     for (int iset = 1; iset <= player.NumInfosets(); iset++)  {
       int index;
       
-      Infoset *infoset = player.GetInfoset(iset);
-      Node *member = infoset->GetMember(1);
+      gbtEfgInfoset infoset = player.GetInfoset(iset);
+      Node *member = infoset.GetMember(1);
       
       for (index = 1; index <= subroots.Length() &&
 	     member->GetSubgameRoot() != subroots[index]; index++);

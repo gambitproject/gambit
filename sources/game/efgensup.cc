@@ -36,20 +36,20 @@
 static bool
 DeletionsViolateActiveCommitments(gbtAllActionIterator &cursor,
 				  const EFSupportWithActiveInfo *S,
-				  const gList<Infoset *> *infosetlist)
+				  const gList<gbtEfgInfoset> *infosetlist)
 {
   for (int i = 1; i <= infosetlist->Length(); i++) {
-    const Infoset *infoset = (*infosetlist)[i];
-    if (infoset->GetPlayer().GetId() < cursor.GetPlayerId() ||
-	( infoset->GetPlayer().GetId() == cursor.GetPlayerId() &&
-	  infoset->GetNumber() < cursor.GetInfosetId()) )
+    gbtEfgInfoset infoset = (*infosetlist)[i];
+    if (infoset.GetPlayer().GetId() < cursor.GetPlayerId() ||
+	( infoset.GetPlayer().GetId() == cursor.GetPlayerId() &&
+	  infoset.GetId() < cursor.GetInfosetId()) )
       if (S->NumActions(infoset) > 0)
 	return true;
-    if (infoset->GetPlayer().GetId() == cursor.GetPlayerId() &&
-	infoset->GetNumber() == cursor.GetInfosetId() )
+    if (infoset.GetPlayer().GetId() == cursor.GetPlayerId() &&
+	infoset.GetId() == cursor.GetInfosetId() )
       for (int act = 1; act < cursor.GetActionId(); act++)
-	if ( S->Contains(infoset->GetPlayer().GetId(),
-			 infoset->GetNumber(),
+	if ( S->Contains(infoset.GetPlayer().GetId(),
+			 infoset.GetId(),
 			 act) )
 	  return true;
   }
@@ -60,10 +60,10 @@ DeletionsViolateActiveCommitments(gbtAllActionIterator &cursor,
 static bool
 InfosetGuaranteedActiveByPriorCommitments(gbtAllActionIterator &cursor,
 					  const EFSupportWithActiveInfo *S,
-					  const Infoset *infoset)
+					  gbtEfgInfoset infoset)
 {
-  for (int i = 1; i <= infoset->NumMembers(); i++) {
-    const Node* current = infoset->GetMember(i);
+  for (int i = 1; i <= infoset.NumMembers(); i++) {
+    const Node* current = infoset.GetMember(i);
     if ( current == S->GetGame().RootNode() )
       return true;
     else
@@ -131,8 +131,7 @@ void AllInequivalentSubsupportsRECURSIVE(const EFSupport *s,
 
   do {
     if ( sact->Contains(c_copy.GetAction()) ) {
-
-      gList<Infoset *> deactivated_infosets;
+      gList<gbtEfgInfoset> deactivated_infosets;
       sact->RemoveActionReturningDeletedInfosets(c_copy.GetAction(),
 						 &deactivated_infosets); 
 
@@ -198,7 +197,7 @@ void AllUndominatedSubsupportsRECURSIVE(const EFSupport *s,
     gList<gbtEfgAction> actual_deletions;
     for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
       actual_deletions += deletion_list[i];
-      gList<Infoset *> deactivated_infosets;
+      gList<gbtEfgInfoset> deactivated_infosets;
       
       sact->RemoveActionReturningDeletedInfosets(deletion_list[i],
 						   &deactivated_infosets); 
@@ -231,7 +230,7 @@ void AllUndominatedSubsupportsRECURSIVE(const EFSupport *s,
     do {
       if ( sact->Contains(c_copy.GetAction()) ) {
 	
-	gList<Infoset *> deactivated_infosets;
+	gList<gbtEfgInfoset> deactivated_infosets;
 	sact->RemoveActionReturningDeletedInfosets(c_copy.GetAction(),
 						   &deactivated_infosets); 
 	
@@ -316,7 +315,7 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
     gList<gbtEfgAction> actual_deletions;
     for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
       actual_deletions += deletion_list[i];
-      gList<Infoset *> deactivated_infosets;
+      gList<gbtEfgInfoset> deactivated_infosets;
       sact->RemoveActionReturningDeletedInfosets(deletion_list[i],
 						   &deactivated_infosets); 
       if (DeletionsViolateActiveCommitments(*c,sact,&deactivated_infosets))
@@ -339,7 +338,7 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
     gbtAllActionIterator c_copy(*c);
     do {
       if ( sact->Contains(c_copy.GetAction()) ) {
-	gList<Infoset *> deactivated_infosets;
+	gList<gbtEfgInfoset> deactivated_infosets;
 	sact->RemoveActionReturningDeletedInfosets(c_copy.GetAction(),
 						   &deactivated_infosets); 
 	if (!DeletionsViolateActiveCommitments(c_copy,sact,
@@ -421,8 +420,8 @@ gList<const EFSupport> PossibleNashSubsupports(const EFSupport &S,
     do {
       gbtEfgAction act = crsr.GetAction();
       if (current.Contains(act)) 
-	for (int j = 1; j <= act.GetInfoset()->NumActions(); j++) {
-	  gbtEfgAction other_act = act.GetInfoset()->GetAction(j);
+	for (int j = 1; j <= act.GetInfoset().NumActions(); j++) {
+	  gbtEfgAction other_act = act.GetInfoset().GetAction(j);
 	  if (other_act != act)
 	    if (current.Contains(other_act)) {
 	      if (current.Dominates(other_act,act,false,true) ||
