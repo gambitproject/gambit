@@ -114,6 +114,8 @@ class gInput  {
       { assert(f);  fscanf(f, "%s", x);    return *this; }
 //-grp
 
+    int get(char &c)   { c = fgetc(f);  return (!feof(f)); }
+
 //
 // Unget the character given.  Only one character of pushback is guaranteed.
 //
