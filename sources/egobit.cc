@@ -61,7 +61,7 @@ EFGobitFunc::EFGobitFunc(const Efg<double> &E,
   }
   
   for (pl = 1; pl <= _efg.NumPlayers(); pl++)  {
-    EFPlayer *p = E.PlayerList()[pl];
+    EFPlayer *p = _efg.PlayerList()[pl];
     for (int iset = 1; iset <= p->NumInfosets(); iset++)  {
       Infoset *s = p->InfosetList()[iset];
       for (int act = 1; act < s->NumActions(); act++)  {
@@ -209,6 +209,17 @@ void Gobit(const Efg<double> &E, EFGobitParams &params,
 
   BehavProfile<double> p(E, true);
   p.Centroid();
+
+  // convert from non-truncated to truncated vector for starting point
+  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
+    EFPlayer *player = E.PlayerList()[pl];
+    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
+      Infoset *s = player->InfosetList()[iset];
+      for (int act = 1; act < s->NumActions(); act++)  {
+	p(pl, iset, act) = start(pl, iset, act);
+      }
+    }
+  }
 
   gMatrix<double> xi(p.Length(), p.Length());
   xi.MakeIdent();
