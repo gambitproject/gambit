@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "gambitio.h"
 #include "gstring.h"
 
 #ifndef __GNUG__

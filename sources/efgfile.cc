@@ -144,199 +144,14 @@ void write_player_names(FILE *f)
   fprintf(f, "}\n");
 }
 
-
-/*
-void write_outcomes(FILE *f)
-{
-  fprintf(f, "{ ");
-  
-  for (struct outc *oc = whichpblm->firstoutcome->nextoutcome; oc != NULLoutc;
-       oc = oc->nextoutcome)   {
-    if (oc != whichpblm->firstoutcome->nextoutcome)
-      fprintf(f, "\n  ");
-    fprintf(f, "{ %d { ", oc->outnumber);
-    for (struct plyr *pp = whichpblm->firstplayer; pp != NULLplyr;
-	 pp = pp->nextplayer)
-      fprintf(f, "%f ", oc->component[pp->plyrnumber]);
-    fprintf(f, "} \"%s\" }", oc->outname);
-  }
-  
-  fprintf(f, " }\n");
-}
-
-// This labels the game number and player number for the subtree in a game
-// rooted at node n
-void part_nodes_into_games(struct node *n, int game)
-{
-  n->game = game;
-  if (n->infoset != NULLiset)
-    n->player = n->infoset->playr->plyrnumber;
-  else if (n->firstbranch != NULLnode)
-    n->player = 0;
-  else
-    n->player = -1;
-
-  for (struct node *m = n->firstbranch; m != NULLnode; m = m->nextbranch)  {
-    for (struct game *g = whichpblm->firstgame;
-	 g != NULLgame && g->rootnode != m;
-	 g = g->nextgame);
-    if (g == NULLgame)   part_nodes_into_games(m, game);
-  }
-}
-
-void mark_nodes(void)
-{
-  for (struct game *g = whichpblm->firstgame; g != NULLgame; g = g->nextgame) {
-	// first, label all nodes belonging to this game with the
-	// correct game number and player number
-    part_nodes_into_games(g->rootnode, g->gamenumber);
-
-	// second, go through infosets for "real" players
-    for (struct plyr *p = whichpblm->firstplayer; p != NULLplyr;
-	 p = p->nextplayer)  {
-      int iset = 1;
-
-      for (struct iset *s = whichpblm->firstinfoset; s != NULLiset;
-	   s = s->nextiset)  {
-	if (s->playr == p && s->firstmember->game == g->gamenumber)  {
-	  int member = 1;
-	  for (struct node *n = s->firstmember; n != NULLnode;
-	       n = n->nextmember, member++)  {
-	    n->iset = iset;
-	    n->index = member;
-	  }
-	  iset++;
-	}
-      }
-    }
-
-
-    int dummyct = 1, chancect = 1;
-	// now, label the infosets for dummy player
-    for (struct node *n = whichpblm->firstnode; n != NULLnode;
-	 n = n->nextnode)  {
-      if (n->game == g->gamenumber && n->player == -1)   {
-	n->iset = dummyct++;
-	n->index = 1;
-      }
-      else if (n->game == g->gamenumber && n->player == 0)  {
-	n->iset = chancect++;
-	n->index = 1;
-      }
-    }
-  }
-}
-
-void write_infosets(FILE *f, int game)
-{
-  fprintf(f, "  { ");
-
-      // first, we make the infosets belonging to the chance player
-  fprintf(f, "{ ");
-  for (struct node *n = whichpblm->firstnode; n != NULLnode; n = n->nextnode)
-    if (n->game == game && n->player == 0)  {
-      if (n->iset != 1)
-	fprintf(f, "\n      ");
-      fprintf(f, "{ \"\" { ");
-      for (struct node *m = n->firstbranch; m != NULLnode;
-	   m = m->nextbranch)
-	fprintf(f, "\"%s\" ", m->branchname);
-      fprintf(f, "} { ");
-      for (m = n->firstbranch; m != NULLnode; m = m->nextbranch)
-	fprintf(f, "%lf ", m->probability);
-      fprintf(f, "} }");
-    }
-  fprintf(f, " }\n");
-
-  for (struct plyr *p = whichpblm->firstplayer; p != NULLplyr; 
-       p = p->nextplayer)  {
-    int flag = 0;
-    fprintf(f, "    {");
-    for (struct iset *s = whichpblm->firstinfoset; s != NULLiset;
-	 s = s->nextiset)  {
-      if (s->playr == p && s->firstmember->game == game)  {
-	if (flag)
-	  fprintf(f, "\n     ");
-	else
-	  flag = 1;
-	fprintf(f, " { \"%s\" ", s->isetname);
-	fprintf(f, "{ ");
-	for (struct node *m = s->firstmember->firstbranch; m != NULLnode;
-	     m = m->nextbranch)
-	  fprintf(f, "\"%s\" ", m->branchname);
-	fprintf(f, "} }");
-      }
-    }    
-    fprintf(f, " }\n");
-  } 
-  
-  fprintf(f, "  }\n");
-}
-
-void write_node(FILE *f, struct node *n)
-{
-  fprintf(f, "    (%d,%d,%d): ", n->player, n->iset, n->index);
-  for (struct game *g = whichpblm->firstgame;
-       g != NULLgame && g->rootnode != n;
-       g = g->nextgame);
-  if (n->parent == NULLnode || g != NULLgame)  
-    fprintf(f, "(0,0,0) 0 ");
-  else  {
-    int foo = 1;
-    for (struct node *m = n->parent->firstbranch; m != n;
-	 m = m->nextbranch, foo++);
-    fprintf(f, "(%d,%d,%d) %d ", n->parent->player, n->parent->iset,
-	    n->parent->index, foo);
-  }
-
-  if (n->nextgame == NULLgame)
-    fprintf(f, "0 ");
-  else
-    fprintf(f, "%d ", n->nextgame->gamenumber);
-
-  if (n->outcome == NULLoutc)
-    fprintf(f, "0 ");
-  else
-    fprintf(f, "%d ", n->outcome->outnumber);
-
-  fprintf(f, "\"%s\"\n", n->nodename);
-}
-
-void write_nodes(FILE *f, int game)
-{
-  fprintf(f, "  {\n");
-  
-      // first, the dummy nodes
-  for (struct node *n = whichpblm->firstnode; n != NULLnode; n = n->nextnode) 
-    if (n->game == game && n->player == -1)   
-      write_node(f, n);
-
-      // then, the chance nodes
-  for (n = whichpblm->firstnode; n != NULLnode; n = n->nextnode)  
-    if (n->game == game && n->player == 0)
-      write_node(f, n);
-
-      // finally, the "real" player nodes
-  for (struct plyr *p = whichpblm->firstplayer; p != NULLplyr;
-       p = p->nextplayer) 
-    for (struct iset *s = whichpblm->firstinfoset; s != NULLiset;
-	 s = s->nextiset) 
-      if (s->playr == p && s->firstmember->game == game)
-	for (n = s->firstmember; n != NULLnode; n = n->nextmember)
-	  write_node(f, n);
-  
-  fprintf(f, "  }\n");
-}
-*/
-
 int cisets;
 
 void write_node(FILE *f, struct node *n)
 {
   if (n->infoset != NULLiset)   {
-    fprintf(f, "p \"%s\" \"Player %d\" \"(%d,%d)\" {", n->nodename,
-	    n->infoset->playr->plyrnumber, n->infoset->playr->plyrnumber,
-	    n->infoset->isetplyrnumber);
+    fprintf(f, "p \"%s\" %d %d \"%s\" {", n->nodename,
+	    n->infoset->playr->plyrnumber, n->infoset->isetplyrnumber,
+	    n->infoset->isetname);
     int br = 1;
     for (struct node *m = n->firstbranch; m != NULLnode; 
 	 m = m->nextbranch, br++)
@@ -348,18 +163,18 @@ void write_node(FILE *f, struct node *n)
     fprintf(f, " } ");
     
     if (n->outcome != whichpblm->firstoutcome)  {
-      fprintf(f, "\"Outcome %p\" { ", n->outcome->outnumber);
+      fprintf(f, "%d \"%s\" { ", n->outcome->outnumber, n->outcome->outname);
       for (int pl = 1; pl <= whichpblm->nplayers; pl++)
 	fprintf(f, "%lf ", n->outcome->component[pl]);
       fprintf(f, "}");
     }
     else
-      fprintf(f, "\"\"");
+      fprintf(f, "0");
 
     fprintf(f, "\n");
   }
   else if (n->firstbranch != NULLnode)   {
-    fprintf(f, "c \"%s\" \"(0,%d)\" {", n->nodename, cisets++);
+    fprintf(f, "c \"%s\" %d \"\" {", n->nodename, cisets++);
     int br = 1;
     
     for (struct node *m = n->firstbranch; m != NULLnode; 
@@ -374,26 +189,26 @@ void write_node(FILE *f, struct node *n)
     fprintf(f, " } ");
 
     if (n->outcome != whichpblm->firstoutcome)  {
-      fprintf(f, "\"Outcome %p\" { ", n->outcome->outnumber);
+      fprintf(f, "%d \"%s\" { ", n->outcome->outnumber, n->outcome->outname);
       for (int pl = 1; pl <= whichpblm->nplayers; pl++)
 	fprintf(f, "%lf ", n->outcome->component[pl]);
       fprintf(f, "}");
     }
     else
-      fprintf(f, "\"\"");
+      fprintf(f, "0");
 
     fprintf(f, "\n");
   }
   else   {    // terminal node
     fprintf(f, "t \"%s\" ", n->nodename);
     if (n->outcome != whichpblm->firstoutcome)  {
-      fprintf(f, "\"Outcome %d\" { ", n->outcome->outnumber);
+      fprintf(f, "%d \"%s\" { ", n->outcome->outnumber, n->outcome->outname);
       for (int pl = 1; pl <= whichpblm->nplayers; pl++)
 	fprintf(f, "%lf ", n->outcome->component[pl]);
       fprintf(f, "}");
     }
     else
-      fprintf(f, "\"\"");
+      fprintf(f, "0");
     fprintf(f, "\n");
   }
 
@@ -404,7 +219,7 @@ void write_node(FILE *f, struct node *n)
   
 void write_efg_file(FILE *f)
 {
-  fprintf(f, "EFG 1 D \"%s\" {", whichpblm->title);
+  fprintf(f, "EFG 2 D \"%s\" {", whichpblm->title);
 
   for (struct plyr *p = whichpblm->firstplayer; p != NULLplyr;
        p = p->nextplayer)   {

@@ -6,6 +6,7 @@
 #include <malloc.h>
 #include <ctype.h>
 #include <string.h>
+#include "gambitio.h"
 #include "gstring.h"
 #include "dt1strct.h"
 #include "dt1util.h"
