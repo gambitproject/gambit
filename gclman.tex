@@ -1582,11 +1582,9 @@ above example could be written instead
 out << x << y
 \end{verbatim}
  
-A series of \tindex{SetFormat} functions (\tindex{SetNumericFormat},
-\tindex{SetTextFormat}, \tindex{SetListFormat}, \tindex{SetSolutionFormat})
-can be used to control the formatting of data written to an output
-stream.  Note that the \tindex{Read} and \tindex{Write} functions are
-not listable.
+The \tindex{Format} and \tindex{ListFormat} functions can be used to
+control the formatting of data written to an output stream.  Note that
+the \tindex{Read} and \tindex{Write} functions are not listable.
 
 The \verb+Read[]+ and \verb+Write[]+ functions can only be used with
 certain data types (see function documentation).  Reading and writing
@@ -2600,7 +2598,7 @@ listed in section on ``information about solutions'' in the
 Categorical Function Reference chapter.  To view all of the
 information that is known about a mixed or behavior profile, you can
 change the format by which solutions are displayed using the
-\tindex{SetSolutionFormat} function.
+\tindex{Format} function.
 
 \section{Solution Algorithms}\index{Solving games!Algorithms}
 
@@ -3218,11 +3216,13 @@ appreciate getting feedback on this.
 \begin{multicols}{3}
 \begin{verbatim}
 # Display 
-  GetListFormat 
-  GetNumericFormat 
-  GetSolutionFormat 
-  GetTextFormat 
+  Format
+# GetListFormat 
+# GetNumericFormat 
+# GetSolutionFormat 
+# GetTextFormat 
   Input 
+  ListFormat
   LoadEfg 
   LoadNfg 
   Output 
@@ -3230,10 +3230,10 @@ appreciate getting feedback on this.
   Read 
   SaveEfg 
   SaveNfg 
-  SetListFormat 
-  SetNumericFormat 
-  SetSolutionFormat 
-  SetTextFormat 
+# SetListFormat 
+# SetNumericFormat 
+# SetSolutionFormat 
+# SetTextFormat 
   SetVerbose
   Write   
 \end{verbatim}
@@ -4276,6 +4276,76 @@ data types; not documented in \verb+Help+ or \verb+Manual+.
 [See also:] \verb+While+.
 \ed
 
+\item\lex{Format}
+\protect \large \begin{verbatim}
+Format[x->INTEGER, {width<->0}] =: INTEGER
+\end{verbatim} \normalsize
+
+\bd 
+Sets the formatting style for output of INTEGER data types on
+output streams.
+\bd
+\item [width:] The width for a numeric field.  If the width of the
+data is greater than \verb+width+, the width is overridden.  (The
+default is 0.)
+\ed
+\item [See also:] \verb+Write+, \verb+ListFormat+.
+\ed
+
+
+\item\lex{Format}
+\protect \large \begin{verbatim}
+Format[x->FLOAT, {width<->0}, {precis<->6}, {expmode<->False}] =: FLOAT
+\end{verbatim} \normalsize
+
+\bd
+Sets the formatting style for output of FLOAT data types on output streams.
+\bd
+\item [width:] The width for a numeric field.  If the width of the
+data is greater than \verb+width+, the width is overridden.  (The
+default is 0.)
+\item [precis:] The number of decimal places shown for floating point
+numbers.
+\item [expmode:] If \verb+True+, floating point numbers are printed in
+exponential format.
+\ed
+\item [See also:] \verb+Write+, \verb+ListFormat+.
+\ed
+
+\item\lex{Format}
+\protect \large \begin{verbatim}
+Format[x->TEXT, {quote<->False}] =: TEXT
+\end{verbatim} \normalsize
+
+\bd
+Sets the formatting style for output of text on output streams.
+\bd
+\item [quote:] Whether opening and closing quotation marks are
+written.  The default is True.  
+\ed
+\item [See also:] \verb+Write+, \verb+ListFormat+.
+\ed
+
+
+\item\lex{Format}
+\protect \large \begin{verbatim}
+Format[x->MIXED(T), {info<->1}] =: MIXED(T)
+Format[x->BEHAV(T), {info<->1}] =: MIXED(T)
+\end{verbatim} \normalsize
+
+{\it for} {\tt T = FLOAT, RATIONAL}
+
+\bd
+Sets the formatting style for output of solution types on output streams.
+\bd
+\item [info:] The amount of information to be displayed.  A value of 1
+displays just the strategy or action probabilities.  A value of 2
+displays all of the information about the solution. 
+\ed
+\item [See also:] \verb+Write+, \verb+ListFormat+.
+\ed
+
+
 %--G--
 
 \item\lex{Game}
@@ -4308,29 +4378,6 @@ Returns the string associated with environment variable \verb+name+.
 \ed
 
 
-\item\lex{GetListFormat}
-\protect \large \begin{verbatim}
-GetListFormat[{braces<->BOOLEAN}, {commas<->BOOLEAN},
-              {lf<->INTEGER}, {indent<->INTEGER}] =: BOOLEAN
-\end{verbatim} \normalsize
-
-\bd
-Gets the current values of the formatting parameters for lists.  See
-\verb+SetListFormat+ for definitions of the parameters. 
-\ed
-
-\item\lex{GetNumericVormat}
-\protect \large \begin{verbatim}
-GetNumericFormat[{width<->INTEGER}, {precis<->INTEGER}, 
-  {expmode<->BOOLEAN}] =: BOOLEAN 
-\end{verbatim} \normalsize
-
-\bd 
-Gets the current values of the formatting parameters for numeric
-data types.  See \verb+SetNumericFormat+ for definitions of the
-parameters.  
-\ed
-
 \item\lex{GetPath}
 \protect \large \begin{verbatim}
 GetPath[{file->BOOLEAN},{path->BOOLEAN}] =: TEXT 
@@ -4344,27 +4391,6 @@ used to identify Include[] files.
 \item [path:] Returns the path.  Default is true. 
 \ed
 \item [See also:] \verb+ExePath+, \verb+Include+.
-\ed
-
-\item\lex{GetSolutionFormat}
-\protect \large \begin{verbatim}
-GetSolutionFormat[{info<->INTEGER}] =: BOOLEAN 
-\end{verbatim} \normalsize
-
-\bd
-Gets the current values of the formatting parameters for Mixed and
-Behavior strategy solution data types.  See \verb+SetSolutionFormat+ for
-definitions of the parameters.  
-\ed
-
-\item\lex{GetTextFormat}
-\protect \large \begin{verbatim}
-GetTextFormat[{quote<->False}] =: BOOLEAN 
-\end{verbatim} \normalsize
-
-\bd
-Gets the current values of the formatting parameters for text strings.  See
-\verb+SetTextFormat+ for definitions of the parameters. 
 \ed
 
 \item\lex{GobitGridSolve}
@@ -5267,6 +5293,22 @@ Converts a normal form game to a nested list of type T.
 \item [See also:] \verb+Nfg+.
 \ed
 
+\item\lex{ListFormat}
+\protect \large \begin{verbatim}
+ListFormat[{braces<->True}, {commas<->True}, {lf<->1}, {indent<->2}] =: BOOLEAN
+\end{verbatim} \normalsize
+
+\bd
+Sets the formatting style for output of lists on output streams.
+\bd
+\item [braces:] If \verb+True+, lists are delimited by braces.
+\item [commas:] If \verb+True+, elements are delimited by commas.
+\item [lf:] Number of levels of list that are displayed with a line feed.
+\item [indent:] Number of spaces to indent each level of a list.
+\ed
+\item [See also:] \verb+Write+, \verb+Format+.
+\ed
+
 \item\lex{LoadEfg}
 \protect \large \begin{verbatim}
 LoadEfg[file->TEXT] =: EFG(T)
@@ -5877,8 +5919,8 @@ Opens a new output stream for writing to \verb+file+.  By default,
 an existing file is overwritten; specifying \verb+append+ to be \verb+True+
 opens the file in append mode.  An error occurs if \verb+file+ is not
 able to be opened.
-\item [See also:] \verb+Input+, \verb+SetListFormat+, \verb+SetNumericFormat+,
-\verb+SetTextFormat+, \verb+Write+.
+\item [See also:] \verb+Input+, \verb+ListFormat+, \verb+Format+,
+\verb+Write+.
 \ed
 
 %--P--
@@ -6042,10 +6084,10 @@ Print[x->T] =: T
 \bd
 Prints \verb+x+ at the console.  When relevant, the output is
 formatted according to the current settings determined by the
-\verb+SetFormat+ commands.  Returns \verb+x+.  
+\verb+Format+ commands.  Returns \verb+x+.  
 \item [Short form:] \verb+<< x+.
-\item [See also:] \verb+SetVerbose+, \verb+Write+, \verb+SetListFormat+, 
-\verb+SetNumericFormat+, \verb+SetTextFormat+, \verb+SetSolutionFormat+.  
+\item [See also:] \verb+SetVerbose+, \verb+Write+, \verb+ListFormat+, 
+\verb+Format+.  
 \ed
 
 \item\lex{PriorAction}
@@ -6385,24 +6427,6 @@ Sets the environment variable \verb+name+.
 \item [See also:] \verb+GetEnv+, \verb+UnSetEnv+.
 \ed
 
-\item\lex{SetListFormat}
-\protect \large \begin{verbatim}
-SetListFormat[{braces->BOOLEAN}, {commas->BOOLEAN},
-              {lf->INTEGER}, {indent->INTEGER}] =: BOOLEAN
-\end{verbatim} \normalsize
-
-\bd
-Sets the formatting style for output of lists on output streams.
-\bd
-\item [braces:] If \verb+True+, lists are delimited by braces.
-\item [commas:] If \verb+True+, elements are delimited by commas.
-\item [lf:] Number of levels of list that are displayed with a line feed.
-\item [indent:] Number of spaces to indent each level of a list.
-\ed
-\item [See also:] \verb+SetNumericFormat+, \verb+SetTextFormat+,
-\verb+SetSolutionFormat+, \verb+Write+.
-\ed
-
 \item\lex{SetName}
 \protect \large \begin{verbatim}
 SetName[x->T, name->TEXT] =: T
@@ -6413,27 +6437,6 @@ NODE, EFOUTCOME, STRATEGY}
 \bd
 Sets the name of \verb+x+ to \verb+name+.  Returns \verb+x+.
 \item [See also:] \verb+Name+.
-\ed
-
-\item\lex{SetNumericFormat}
-\protect \large \begin{verbatim}
-SetNumericFormat[{width->INTEGER}, {precis->INTEGER},
-                 {expmode->BOOLEAN}] =: BOOLEAN
-\end{verbatim}\normalsize
-
-\bd
-Sets the formatting style for output of numeric types on output streams.
-\bd
-\item [width:] The width for a numeric field.  If the width of the
-data is greater than \verb+width+, the width is overridden.  (The
-default is 0.)
-\item [precis:] The number of decimal places shown for floating point
-numbers.
-\item [expmode:] If \verb+True+, floating point numbers are printed in
-exponential format.
-\ed
-\item [See also:] \verb+SetListFormat+, \verb+SetTextFormat+, 
-\verb+SetSolutionFormat+, \verb+Write+.
 \ed
 
 \item\lex{SetOutcome}
@@ -6492,22 +6495,6 @@ Returns \verb+profile+.
 \item [See also:] \verb+Payoff+.
 \ed
 
-\item\lex{SetSolution}
-\protect \large \begin{verbatim}
-SetSolutionFormat[{info->INTEGER}] =: BOOLEAN
-\end{verbatim}\normalsize
-
-\bd
-Sets the formatting style for output of solution types on output streams.
-\bd
-\item [info:] The amount of information to be displayed.  A value of 1
-displays just the strategy or action probabilities.  A value of 2
-displays all of the information about the solution. 
-\ed
-\item [See also:] \verb+SetListFormat+, \verb+SetTextFormat+, 
-\verb+SetNumericFormat+, \verb+Write+.
-\ed
-
 \item\lex{SetStrategyProbs} 
 \protect \large \begin{verbatim}
 SetStrategyProbs[profile<->MIXED(T), player->NFPLAYER,
@@ -6522,21 +6509,6 @@ are not from the same normal form game, or if the length of \verb+value+
 is not the same as the number of strategies for \verb+player+ in the
 support of \verb+profile+.  Returns \verb+profile+.
 \item [See also:] \verb+StrategyProb+.
-\ed
-
-\item\lex{SetTextFormat}
-\protect \large \begin{verbatim}
-SetTextFormat[{quote->BOOLEAN}] =: BOOLEAN
-\end{verbatim}\normalsize
-
-\bd
-Sets the formatting style for output of text on output streams.
-\bd
-\item [quote:] Whether opening and closing quotation marks are
-written.  The default is True.  
-\ed
-\item [See also:] \verb+SetListFormat+, \verb+SetSolutionFormat+, 
-\verb+SetNumericFormat+, \verb+Write+.
 \ed
 
 \item\lex{SetVerbose}
@@ -6909,8 +6881,8 @@ NFG, NFSUPPORT, MIXED, RATIONAL, STRATEGY, TEXT, LIST}
 \bd
 Does a formatted write of \verb+x+ to \verb+output+.
 \item [Short form:] \verb+output << x+
-\item [See also:] \verb+Output+, \verb+Read+, \verb+SetListFormat+,
-\verb+SetNumericFormat+, \verb+SetTextFormat+.
+\item [See also:] \verb+Output+, \verb+Read+, \verb+ListFormat+,
+\verb+Format+.
 \ed
 
 %--X--
@@ -7434,6 +7406,62 @@ If[p="HP UX",f:="gui_motif_hp"];
 If[p="SPARC",f:="gui_motif_sun4"];
 If[(h:=GetEnv["GAMBIT_HOME"])="",p:=ExePath[file->False]&f,p:=h&f];
 p;
+\end{verbatim} 
+\ed
+
+\item\lex{GetListFormat}
+\protect \large \begin{verbatim}
+GetListFormat[{braces<->BOOLEAN}, {commas<->BOOLEAN},
+              {lf<->INTEGER}, {indent<->INTEGER}] =: BOOLEAN
+\end{verbatim} \normalsize
+
+\bd
+Gets the current values of the formatting parameters for lists.  See
+\verb+ListFormat+ for definitions of the parameters. 
+\begin{verbatim}
+ListFormat[braces,commas,lf,indent];
+\end{verbatim} 
+\ed
+
+\item\lex{GetNumericFormat}
+\protect \large \begin{verbatim}
+GetNumericFormat[{width<->INTEGER}, {precis<->INTEGER}, 
+  {expmode<->BOOLEAN}] =: BOOLEAN 
+\end{verbatim} \normalsize
+
+\bd 
+Gets the current values of the formatting parameters for numeric
+data types.  See \verb+Format+ for definitions of the
+parameters.  
+\begin{verbatim}
+  !IsNull[Format[1.0,width,precis,expmode]];
+\end{verbatim} 
+\ed
+
+\item\lex{GetSolutionFormat}
+\protect \large \begin{verbatim}
+GetSolutionFormat[{info<->INTEGER}] =: BOOLEAN 
+\end{verbatim} \normalsize
+
+\bd
+Gets the current values of the formatting parameters for Mixed and
+Behavior strategy solution data types.  See \verb+Format+ for
+definitions of the parameters.  
+\begin{verbatim}
+  !IsNull[Format[Centroid[NewEfg[]],info]];
+\end{verbatim} 
+\ed
+
+\item\lex{GetTextFormat}
+\protect \large \begin{verbatim}
+GetTextFormat[{quote<->False}] =: BOOLEAN 
+\end{verbatim} \normalsize
+
+\bd
+Gets the current values of the formatting parameters for text strings.  See
+\verb+Format+ for definitions of the parameters. 
+\begin{verbatim}
+  !IsNull[Format["",quote]];
 \end{verbatim} 
 \ed
 
@@ -8219,6 +8247,36 @@ Profiles[Support[nfg]];
 \end{verbatim} 
 \ed
 
+\item\lex{SetListFormat}
+\protect \large \begin{verbatim}
+SetListFormat[{braces->BOOLEAN}, {commas->BOOLEAN},
+              {lf->INTEGER}, {indent->INTEGER}] =: BOOLEAN
+\end{verbatim} \normalsize
+
+\bd
+Sets the formatting style for output of lists on output streams. See
+\verb+ListFormat+ for definitions of the parameters. 
+\item [See also:] \verb+SetNumericFormat+, \verb+SetTextFormat+,
+\verb+SetSolutionFormat+, \verb+Write+.
+\begin{verbatim}
+  ListFormat[braces,commas,lf,indent];
+\end{verbatim} 
+\ed
+
+\item\lex{SetNumericFormat}
+\protect \large \begin{verbatim}
+SetNumericFormat[{width->INTEGER}, {precis->INTEGER},
+                 {expmode->BOOLEAN}] =: BOOLEAN
+\end{verbatim}\normalsize
+
+\bd Sets the formatting style for output of numeric types on output
+streams.  See \verb+Format+ for definitions of the parameters.
+\item [See also:] \verb+SetListFormat+, \verb+SetTextFormat+, 
+\verb+SetSolutionFormat+, \verb+Write+.
+\begin{verbatim}
+  !IsNull[Format[1.0,width,precis,expmode]];
+\end{verbatim} 
+\ed
 
 \item\lex{SetPayoffs}
 \protect \large \begin{verbatim}
@@ -8232,6 +8290,8 @@ Sets the payoffs of a normal form game at the pure strategy profile
 a list of strategies, whose \verb+i+th entry is a strategy for player
 \verb+i+, and \verb+payoff+ is a list whose \verb+i+th
 entry is a payoff for player \verb+i+.
+
+
 \begin{verbatim}
 SetPayoff[profile,Players[Game[profile]],payoff];
 \end{verbatim} 
@@ -8254,6 +8314,35 @@ player \verb+i+.
 \begin{verbatim}
 SetPayoff[outcome,Players[Game[outcome]],payoff];
 outcome;
+\end{verbatim} 
+\ed
+
+\item\lex{SetSolutionFormat}
+\protect \large \begin{verbatim}
+SetSolutionFormat[{info->INTEGER}] =: BOOLEAN
+\end{verbatim}\normalsize
+
+\bd Sets the formatting style for output of solution types on output
+streams.  See \verb+Format+ for definitions of the parameters.
+\item [See also:] \verb+SetListFormat+, \verb+SetTextFormat+, 
+\verb+SetNumericFormat+, \verb+Write+.
+\begin{verbatim}
+  !IsNull[Format[Centroid[NewEfg[]],info]];
+\end{verbatim} 
+\ed
+
+\item\lex{SetTextFormat}
+\protect \large \begin{verbatim}
+SetTextFormat[{quote->BOOLEAN}] =: BOOLEAN
+\end{verbatim}\normalsize
+
+\bd 
+Sets the formatting style for output of text on output streams.
+See \verb+Format+ for definitions of the parameters.
+\item [See also:] \verb+SetListFormat+, \verb+SetSolutionFormat+, 
+\verb+SetNumericFormat+, \verb+Write+.
+\begin{verbatim}
+  !IsNull[Format["",quote]];
 \end{verbatim} 
 \ed
 
