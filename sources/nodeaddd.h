@@ -45,7 +45,7 @@ public:
 
 //************************************** CONSTRUCTOR **************************
 NodeAddDialog::NodeAddDialog(Efg &ef_,EFPlayer *player,Infoset *infoset,int branches_,wxFrame *frame)
-  :MyDialogBox(frame,"Add Node",EFG_NODE_HELP),ef(ef_),branches(branches_),player_names(ef_.NumPlayers())
+  :MyDialogBox(frame,"Add Move",EFG_NODE_HELP),ef(ef_),branches(branches_),player_names(ef_.NumPlayers())
 {
   set_names=TRUE;
   wxStringList *player_list=new wxStringList;player_name=new char[20];

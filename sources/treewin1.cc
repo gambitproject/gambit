@@ -66,9 +66,6 @@ void TreeWindow::node_add(void)
   static Infoset *infoset = 0;
   static Efg *last_ef = 0; // need this to make sure player,infoset are valid
 
-  if (cursor->NumChildren() > 0)  
-    return;
- 
   if (last_ef != &ef)  {
     player = 0;
     infoset = 0;
