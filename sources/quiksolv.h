@@ -54,13 +54,22 @@ template <class T> class QuikSolv {
   const ListOfPartialTrees<gDouble>  TreesOfPartials;
         bool                         HasBeenSolved;
         gList<gVector<gDouble> >     Roots;
+  const bool                         isMultiaffine;
+  const gRectArray<bool>             Equation_i_uses_var_j;
 
+  // Supporting routines for the constructors
+
+  gRectArray<bool> Eq_i_Uses_j()                                         const;
 
   // Check whether roots are impossible
 
+   bool MultiaffinePolyHasNoRootsIn(const gRectangle<gDouble>&, const int&)
+                                                                         const;
    bool PolyHasNoRootsIn(const gRectangle<gDouble>&, const int&)         const;
    bool PolyEverywhereNegativeIn(const gRectangle<gDouble>&, 
 				 const int&)                             const;
+   bool MultiaffinePolyEverywhereNegativeIn(const gRectangle<gDouble>&, 
+					    const int&)                  const;
    bool SystemHasNoRootsIn(const gRectangle<gDouble>& r, gArray<int>&)   const;
 
 
@@ -143,6 +152,8 @@ template <class T> class QuikSolv {
      { return HasBeenSolved; }
    inline const gList<gVector<gDouble> > RootList()                  const
      { return Roots; }
+   inline const bool                     IsMultiaffine()             const
+     { return isMultiaffine; }
 
   // Checks for complex singular roots
    bool     MightHaveSingularRoots()                                 const;

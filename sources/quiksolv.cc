@@ -7,6 +7,9 @@
 
 #include "quiksolv.imp"
 #include "double.h"
+#include "grarray.imp"
+
+template class gRectArray<bool>;
 
 template class QuikSolv<gRational>;
 template gOutput &operator<<(gOutput &f, const QuikSolv<gRational> &y);

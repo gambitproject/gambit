@@ -1,3 +1,4 @@
+
 //
 // File: quiksolv.imp  
 //        -- Implementation of class gPolyList
@@ -21,7 +22,10 @@ template <class T> QuikSolv<T>::QuikSolv(const gPolyList<T>& given)
   NoEquations( gmin(System.Dmnsn(),System.Length()) ),
   NoInequalities( gmax(System.Length() - System.Dmnsn(),0) ),
   TreesOfPartials(gDoubleSystem),
-  HasBeenSolved(false), Roots()
+  HasBeenSolved(false), 
+  Roots(),
+  isMultiaffine(System.IsMultiaffine()),
+  Equation_i_uses_var_j(Eq_i_Uses_j())
 {
 }
 
@@ -32,7 +36,10 @@ template <class T> QuikSolv<T>::QuikSolv(const gPolyList<T>& given,
   NoEquations(no_eqs),
   NoInequalities(System.Length() - no_eqs),
   TreesOfPartials(gDoubleSystem),
-  HasBeenSolved(false), Roots()
+  HasBeenSolved(false), 
+  Roots(),
+  isMultiaffine(System.IsMultiaffine()),
+  Equation_i_uses_var_j(Eq_i_Uses_j())
 {
 }
 
@@ -43,7 +50,9 @@ template<class T> QuikSolv<T>::QuikSolv(const QuikSolv& qs)
   NoInequalities(qs.NoEquations),
   TreesOfPartials(qs.TreesOfPartials), 
   HasBeenSolved(qs.HasBeenSolved), 
-  Roots(qs.Roots)
+  Roots(qs.Roots),
+  isMultiaffine(qs.isMultiaffine),
+  Equation_i_uses_var_j(qs.Equation_i_uses_var_j)
 {
 }
 
@@ -51,57 +60,138 @@ template<class T> QuikSolv<T>::~QuikSolv()
 {
 }
 
-//----------------------------------
-//      Supporting Calculations
-//----------------------------------
+//-------------------------------------------------------
+//      Supporting Calculations for the Constructors
+//-------------------------------------------------------
+
+template <class T> gRectArray<bool> QuikSolv<T>::Eq_i_Uses_j() const
+{
+  gRectArray<bool> answer(System.Length(),Dmnsn());
+  for (int i = 1; i <= System.Length(); i++)
+    for (int j = 1; j <= Dmnsn(); j++)
+      if (System[i].DegreeOfVar(j) > 0)
+	answer(i,j) = true;
+      else
+	answer(i,j) = false;
+  return answer;
+}
+
 
 //---------------------------
 // Is a root impossible?
 //---------------------------
 
 template<class T> bool
+QuikSolv<T>::MultiaffinePolyHasNoRootsIn(const gRectangle<gDouble>& r, 
+					 const int &index) const
+{
+  int sign;
+  if (TreesOfPartials[index].RootNode()->GetData().Evaluate(r.Center()) > 0)
+    sign = 1;
+  else
+    sign = -1;
+  
+  gArray<int> zeros(Dmnsn());
+  gArray<int> ones(Dmnsn());
+  for (int j = 1; j <= Dmnsn(); j++) {
+    zeros[j] = 0; 
+    if (Equation_i_uses_var_j(index,j)) ones[j] = 1; 
+    else                                ones[j] = 0;
+  }
+  gIndexOdometer topbottoms(zeros,ones);
+  
+  while (topbottoms.Turn()) {
+    gVector<gDouble> point(Dmnsn());
+    for (int i = 1; i <= Dmnsn(); i++)
+      if (topbottoms[i] == 0)
+	point[i] = r.LowerBoundOfCoord(i);
+      else
+	point[i] = r.UpperBoundOfCoord(i);
+    if ((gDouble)sign * TreesOfPartials[index].RootNode()->GetData().
+	                                              Evaluate(point) <=  0)
+      return false;
+  }
+  
+  return true;
+}
+
+template<class T> bool
 QuikSolv<T>::PolyHasNoRootsIn(const gRectangle<gDouble>& r, 
 			      const int &index) const
 {
-  gVector<gDouble> center = r.Center();
+  if (IsMultiaffine())
+    return MultiaffinePolyHasNoRootsIn(r,index);
+  else {
+    gVector<gDouble> center = r.Center();
+    
+    gDouble constant = 
+      TreesOfPartials[index].RootNode()->GetData().Evaluate(center);
+    if (constant < (gDouble)0) constant = - constant;
+    
+    gVector<gDouble> HalvesOfSideLengths = r.SideLengths();
+    for (int k = 1; k <= Dmnsn(); k++) HalvesOfSideLengths[k] /= (gDouble)2;
+    
+    gDouble max = TreesOfPartials[index].MaximalNonconstantContribution(
+						     center,
+						     HalvesOfSideLengths);
+  
+    if (max >= constant) 
+      return false;
+    else 
+      return true;
+  }
+}
 
-//DEBUG
-//gout << "In PolyHasNoRootsIn with center = " << center << "\n";
-
-  gDouble constant = 
-    TreesOfPartials[index].RootNode()->GetData().Evaluate(center);
-  if (constant < (gDouble)0) constant = - constant;
-
-  gVector<gDouble> HalvesOfSideLengths = r.SideLengths();
-  for (int k = 1; k <= Dmnsn(); k++) HalvesOfSideLengths[k] /= (gDouble)2;
-
-  gDouble max = TreesOfPartials[index].MaximalNonconstantContribution(
-							center,
-							HalvesOfSideLengths);
-
-  if (max >= constant) return false;
-  else                return true;
+template<class T> bool
+QuikSolv<T>::MultiaffinePolyEverywhereNegativeIn(const gRectangle<gDouble>& r, 
+						 const int &index) const
+{ 
+  gArray<int> zeros(Dmnsn());
+  gArray<int> ones(Dmnsn());
+  for (int j = 1; j <= Dmnsn(); j++) {
+    zeros[j] = 0; 
+    if (Equation_i_uses_var_j(index,j)) ones[j] = 1; 
+    else                                ones[j] = 0;
+  }
+  gIndexOdometer topbottoms(zeros,ones);
+  
+  while (topbottoms.Turn()) {
+    gVector<gDouble> point(Dmnsn());
+    for (int i = 1; i <= Dmnsn(); i++)
+      if (topbottoms[i] == 0)
+	point[i] = r.LowerBoundOfCoord(i);
+      else
+	point[i] = r.UpperBoundOfCoord(i);
+    if (TreesOfPartials[index].RootNode()->GetData().Evaluate(point) >=  0)
+      return false;
+  }
+  
+  return true;
 }
 
 template<class T> bool
 QuikSolv<T>::PolyEverywhereNegativeIn(const gRectangle<gDouble>& r, 
 				      const int &index) const
 {
-  gVector<gDouble> center = r.Center();
+  if (IsMultiaffine())
+    return MultiaffinePolyEverywhereNegativeIn(r,index);
+  else {
+    gVector<gDouble> center = r.Center();
 
-  gDouble constant = 
-    TreesOfPartials[index].RootNode()->GetData().Evaluate(center);
-  if (constant >= (gDouble)0) return false;
-
-  gVector<gDouble> HalvesOfSideLengths = r.SideLengths();
-  for (int k = 1; k <= Dmnsn(); k++) HalvesOfSideLengths[k] /= (gDouble)2;
-
-  gDouble max = TreesOfPartials[index].MaximalNonconstantContribution(
+    gDouble constant = 
+      TreesOfPartials[index].RootNode()->GetData().Evaluate(center);
+    if (constant >= (gDouble)0) return false;
+    
+    gVector<gDouble> HalvesOfSideLengths = r.SideLengths();
+    for (int k = 1; k <= Dmnsn(); k++) HalvesOfSideLengths[k] /= (gDouble)2;
+    
+    gDouble max = TreesOfPartials[index].MaximalNonconstantContribution(
 							center,
 							HalvesOfSideLengths);
 
-  if (max + constant >= 0) return false;
-  else                     return true;
+    if (max + constant >= 0) return false;
+    else                     return true;
+  }
 }
 
 template<class T> 
