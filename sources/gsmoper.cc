@@ -1302,7 +1302,7 @@ Portion* GSM_Read_Undefined(Portion** param)
 	sub_param[0] = result;
 	result = NULL;
       }
-      catch (...) {
+      catch (gclRuntimeError &) {
 	read_success = false;
       }
 
@@ -1339,27 +1339,29 @@ Portion* GSM_Read_Undefined(Portion** param)
     param[1] = new BoolPortion(false);
     
     try {
-      result = GSM_Read_Bool(param);
+      return GSM_Read_Bool(param);
     }
-    catch (...) {
+    catch (gclRuntimeError &) {
       delete param[1];
       param[1] = new NumberPortion(0);
-      try {
-	result = GSM_Read_Number(param);    
-      }
-      catch (...) {
-	delete param[1];
-	param[1] = new TextPortion("");
-	try {
-	  result = GSM_Read_Text(param);    
-	}
-	catch (...) {
-	  delete param[1];
-	  param[1] = 0;
-	  input.setpos(old_pos);
-	  throw gclRuntimeError("Cannot determine data type");
-	}
-      }
+    }
+
+    try {
+      return GSM_Read_Number(param);    
+    }
+    catch (gclRuntimeError &) {
+      delete param[1];
+      param[1] = new TextPortion("");
+    }
+
+    try {
+      return GSM_Read_Text(param);    
+    }
+    catch (gclRuntimeError &) {
+      delete param[1];
+      param[1] = 0;
+      input.setpos(old_pos);
+      throw gclRuntimeError("Cannot determine data type");
     }
   }
 
