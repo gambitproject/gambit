@@ -165,6 +165,16 @@ void gbtNashPNSMixedThread::Compute(void)
 }
 
 //==========================================================================
+//                 class gbtNashSimpdivMixedThread
+//==========================================================================
+
+void gbtNashSimpdivMixedThread::Compute(void)
+{
+  m_eqa.Flush();
+  //m_eqa.Append(gbtNashSimpdivNfg(m_parent->GetDocument()->GetGame()));
+}
+
+//==========================================================================
 //                 class gbtNashYamamotoMixedThread
 //==========================================================================
 

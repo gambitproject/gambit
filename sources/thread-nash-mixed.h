@@ -215,6 +215,20 @@ private:
 };
 
 //==========================================================================
+//                  class gbtNashSimpdivMixedThread
+//==========================================================================
+
+class gbtNashSimpdivMixedThread : public gbtNashMixedThread {
+public:
+  gbtNashSimpdivMixedThread(gbtNashPanel *p_parent,
+			    gbtList<gbtMixedProfile<double> > &p_eqa)
+    : gbtNashMixedThread(p_parent, p_eqa) { }
+
+private:
+  void Compute(void);
+};
+
+//==========================================================================
 //                 class gbtNashYamamotoMixedThread
 //==========================================================================
 

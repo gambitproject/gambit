@@ -51,9 +51,10 @@ const int GBT_MENU_METHOD_LIAP = 908;
 const int GBT_MENU_METHOD_LOGIT = 909;
 const int GBT_MENU_METHOD_ENUMPOLY = 910;
 const int GBT_MENU_METHOD_PNS = 911;
-const int GBT_MENU_METHOD_YAMAMOTO = 912;
-const int GBT_MENU_METHOD_GNM = 913;
-const int GBT_MENU_METHOD_IPA = 914;
+const int GBT_MENU_METHOD_SIMPDIV = 912;
+const int GBT_MENU_METHOD_YAMAMOTO = 913;
+const int GBT_MENU_METHOD_GNM = 914;
+const int GBT_MENU_METHOD_IPA = 915;
 const int GBT_MENU_LAST = 950;
 
 const int GBT_BUTTON_START = 997;
@@ -181,6 +182,9 @@ void gbtNashPanel::OnStartButton(wxCommandEvent &)
     m_thread = new gbtNashPNSMixedThread(this, m_eqa,
 					 (m_countValue == GBT_MENU_COUNT_ALL) ? 0 : 1);
     break;
+  case GBT_MENU_METHOD_SIMPDIV:
+    m_thread = new gbtNashSimpdivMixedThread(this, m_eqa);
+    break;
   case GBT_MENU_METHOD_YAMAMOTO:
     m_thread = new gbtNashYamamotoMixedThread(this, m_eqa);
     break;
@@ -256,6 +260,7 @@ void gbtNashPanel::OnMethodButton(wxCommandEvent &)
   menu->Append(GBT_MENU_METHOD_PNS,
 	       "enumeration of possible supports");
   if (m_countValue == GBT_MENU_COUNT_ONE) {
+    menu->Append(GBT_MENU_METHOD_SIMPDIV, "simplicial subdivision");
     menu->Append(GBT_MENU_METHOD_YAMAMOTO, 
 		 "Yamamoto's path-following procedure");
     menu->Append(GBT_MENU_METHOD_IPA,
@@ -310,6 +315,10 @@ void gbtNashPanel::OnMenu(wxCommandEvent &p_event)
   case GBT_MENU_METHOD_PNS:
     m_method->SetLabel("enumeration of possible supports");
     m_methodValue = GBT_MENU_METHOD_PNS;
+    break;
+  case GBT_MENU_METHOD_SIMPDIV:
+    m_method->SetLabel("simplicial subdivision");
+    m_methodValue = GBT_MENU_METHOD_SIMPDIV;
     break;
   case GBT_MENU_METHOD_YAMAMOTO:
     m_method->SetLabel("Yamamoto's path-following procedure");
