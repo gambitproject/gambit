@@ -180,6 +180,10 @@ Portion* GSM_Add_MixedFloat(Portion** param)
      ((MixedPortion*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
 
+  if(((MixedPortion*) param[0])->Value()->GetNFSupport() !=
+     ((MixedPortion*) param[1])->Value()->GetNFSupport())
+    return new ErrorPortion("Support mismatch");
+
   result = param[0]->ValCopy();
   (* (MixedSolution<double>*) ((MixedPortion*) result)->Value()) +=
     (* (MixedSolution<double>*) ((MixedPortion*) param[1])->Value());
@@ -192,6 +196,10 @@ Portion* GSM_Add_MixedRational(Portion** param)
   if(((MixedPortion*) param[0])->Value() == 0 ||
      ((MixedPortion*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
+
+  if(((MixedPortion*) param[0])->Value()->GetNFSupport() !=
+     ((MixedPortion*) param[1])->Value()->GetNFSupport())
+    return new ErrorPortion("Support mismatch");
 
   result = param[0]->ValCopy();
   (* (MixedSolution<gRational>*) ((MixedPortion*) result)->Value()) +=
@@ -207,6 +215,10 @@ Portion* GSM_Add_BehavFloat(Portion** param)
      ((BehavPortion*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Behav value");
 
+  if(((BehavPortion*) param[0])->Value()->GetEFSupport() !=
+     ((BehavPortion*) param[1])->Value()->GetEFSupport())
+    return new ErrorPortion("Support mismatch");
+
   result = param[0]->ValCopy();
   (* (BehavSolution<double>*) ((BehavPortion*) result)->Value()) +=
     (* (BehavSolution<double>*) ((BehavPortion*) param[1])->Value());
@@ -219,6 +231,10 @@ Portion* GSM_Add_BehavRational(Portion** param)
   if(((BehavPortion*) param[0])->Value() == 0 ||
      ((BehavPortion*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
+
+  if(((BehavPortion*) param[0])->Value()->GetEFSupport() !=
+     ((BehavPortion*) param[1])->Value()->GetEFSupport())
+    return new ErrorPortion("Support mismatch");
 
   result = param[0]->ValCopy();
   (* (BehavSolution<gRational>*) ((BehavPortion*) result)->Value()) +=
@@ -308,6 +324,10 @@ Portion* GSM_Subtract_MixedFloat(Portion** param)
      ((MixedPortion*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
 
+  if(((MixedPortion*) param[0])->Value()->GetNFSupport() !=
+     ((MixedPortion*) param[1])->Value()->GetNFSupport())
+    return new ErrorPortion("Support mismatch");
+
   result = param[0]->ValCopy();
   (* (MixedSolution<double>*) ((MixedPortion*) result)->Value()) -=
     (* (MixedSolution<double>*) ((MixedPortion*) param[1])->Value());
@@ -320,6 +340,10 @@ Portion* GSM_Subtract_MixedRational(Portion** param)
   if(((MixedPortion*) param[0])->Value() == 0 ||
      ((MixedPortion*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
+
+  if(((MixedPortion*) param[0])->Value()->GetNFSupport() !=
+     ((MixedPortion*) param[1])->Value()->GetNFSupport())
+    return new ErrorPortion("Support mismatch");
 
   result = param[0]->ValCopy();
   (* (MixedSolution<gRational>*) ((MixedPortion*) result)->Value()) -=
@@ -335,6 +359,10 @@ Portion* GSM_Subtract_BehavFloat(Portion** param)
      ((BehavPortion*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Behav value");
 
+  if(((BehavPortion*) param[0])->Value()->GetEFSupport() !=
+     ((BehavPortion*) param[1])->Value()->GetEFSupport())
+    return new ErrorPortion("Support mismatch");
+
   result = param[0]->ValCopy();
   (* (BehavSolution<double>*) ((BehavPortion*) result)->Value()) -=
     (* (BehavSolution<double>*) ((BehavPortion*) param[1])->Value());
@@ -347,6 +375,10 @@ Portion* GSM_Subtract_BehavRational(Portion** param)
   if(((BehavPortion*) param[0])->Value() == 0 ||
      ((BehavPortion*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
+
+  if(((BehavPortion*) param[0])->Value()->GetEFSupport() !=
+     ((BehavPortion*) param[1])->Value()->GetEFSupport())
+    return new ErrorPortion("Support mismatch");
 
   result = param[0]->ValCopy();
   (* (BehavSolution<gRational>*) ((BehavPortion*) result)->Value()) -=
