@@ -4,27 +4,33 @@
 
 StdOut << "Include[\""+GetPath[]+"\"]\n";
 
-NewFunction[AlgTest[n->NFG,{out->StdOut},{precision->Float}],
-  << "\nGame: "+Name[n];
-  out << "\nGame: " << Name[n] << " n = " << NumPlayers[n];
+NewFunction[AlgTest[n->NFG,t->TEXT,{out->StdOut},{precision->Float}],
+  StdOut << "\nFile: " << t << ".nfg ; " << Name[n] << "; n = " << NumPlayers[n] << "; CSum: " << IsConstSum[n];
+  out << "\nFile: " << t << ".nfg ; " << Name[n] << "; n = " << NumPlayers[n] << "; CSum: " << IsConstSum[n];
   out << "\n";
   out << "\nOneNash\n" << OneNash[n,precision];
+  out << "\nManyNash\n" << ManyNash[n,0,10,precision];
   out << "\nAllNash\n" << AllNash[n,0,10,precision];
-  out << "\nOnePerfect\n" << OnePerfect[n,precision];
-  out << "\nAllPerfect\n" << AllPerfect[n,0,10,precision];
+  If[NumPlayers[n]<=2,
+    out << "\nOnePerfect\n" << OnePerfect[n,precision];
+    out << "\nAllPerfect\n" << AllPerfect[n,0,10,precision];
+  ];
   out << "\n";
 ];
 
-NewFunction[AlgTest[e->EFG,{out->StdOut},{precision->Float}],
-  << "\nGame: "+Name[e];
-  out << "\nGame: " << Name[e] << " n = " << NumPlayers[e];
+NewFunction[AlgTest[e->EFG,t->TEXT,{out->StdOut},{precision->Float}],
+  StdOut << "\nFile: " << t << ".efg ; " << Name[e] << "; n = " << NumPlayers[e] << "; CSum: " << IsConstSum[e];
+  out << "\nFile: " << t << ".efg ; " << Name[e] << "; n = " << NumPlayers[e] << "; CSum: " << IsConstSum[e];
   out << "\n";
   out << "\nOneNash\n" << OneNash[e,precision];
+  out << "\nManyNash\n" << ManyNash[e,0,10,precision];
   out << "\nAllNash\n" << AllNash[e,0,10,precision];
   out << "\nOneSubgamePerfect\n" << OneSubgamePerfect[e,precision];
   out << "\nAllSubgamePerfect\n" << AllSubgamePerfect[e,0,10,precision];
-  out << "\nOneSequential\n" << OneSequential[e];
-  out << "\nAllSequential\n" << AllSequential[e,0,10];
+  b:=OneSequential[e];
+  out << "\nOneSequential\n" << b << "\nBeliefs\n:" << Beliefs[b];
+  b:=AllSequential[e,0,10];
+  out << "\nAllSequential\n" << b << "\nBeliefs\n:" << Beliefs[b];
   out << "\n";
 ];
 
@@ -32,6 +38,7 @@ NewFunction[AlgTest[e->EFG,{out->StdOut},{precision->Float}],
 out:=Output["algtest.out"];
 SetListFormat[lf->1];
 SetNumericFormat[decimals->4];
+SetSolutionFormat[True];
 
 time:=StartWatch[];
 
@@ -39,7 +46,7 @@ gamelist:={"wink3","winkels","deg1","deg2","sh3","todd2","oneill","coord3","8x8"
 r:=Rational;m:=Float;
 prec:={r,m,r,r,m,m,r,m,m,m,m,m}
 g:=LoadNfg["../nfg/"+gamelist+".nfg"]
-AlgTest[g,out,prec];
+AlgTest[g,gamelist,out,prec];
 g:=
 time:=StopWatch[];
 out << "\n\nTime = " << time;
@@ -47,9 +54,7 @@ time:=StartWatch[];
 
 gamelist:={"e01","e02","e03","e04","e05","e06","e07","cent3","g1","g2","g3","coord3","coord4","coord2ts"};
 g:=LoadEfg["../efg/"+gamelist+".efg"]
-AlgTest[g,out];
+AlgTest[g,gamelist,out];
 time:=StopWatch[];
 out << "\n\nTime = " << time;
 << "Finished algtest.gcl";
-
-
