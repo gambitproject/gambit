@@ -67,11 +67,11 @@ template class gbtBlock<gbtGameOutcomeBase *>;
 template class gbtArray<gbtBlock<bool> >;
 template class gbtBlock<gbtBlock<bool> >;
 
-class gbtGameActionSet;
-class gbtGameActionArray;
+class gbtEfgSupportInfoset;
+class gbtEfgSupportPlayer;
 
-template class gbtArray<gbtGameActionSet *>;
-template class gbtArray<gbtGameActionArray *>;
+template class gbtArray<gbtEfgSupportInfoset *>;
+template class gbtArray<gbtEfgSupportPlayer *>;
 
 template class gbtList<gbtGameNode>;
 template class gbtList<gbtGameAction>;

@@ -30,8 +30,6 @@
 #include "base/gstatus.h"
 #include "game.h"
 
-class gbtGameActionSet;
-
 //
 // A gbtEfgSupport is an extensive form game, restricted to a subset of
 // the actions in the game.

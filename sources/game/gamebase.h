@@ -719,11 +719,13 @@ public:
   gbtNfgSupport NewNfgSupport(void) const { return m_support->NewNfgSupport(); }
 };
 
+class gbtEfgSupportPlayer;
+
 class gbtEfgSupportBase : public gbtEfgSupportRep {
 public:
   gbtText m_label;
   gbtGame m_efg;
-  gbtArray<gbtGameActionSet *> m_players;
+  gbtArray<gbtEfgSupportPlayer *> m_players;
 
   // The following members were added from a derived class.
   // The proper factoring of these features is uncertain...
