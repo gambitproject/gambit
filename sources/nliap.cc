@@ -67,12 +67,12 @@ template <class T> int LiapModule<T>::Liap(int number)
   int n=0;
   T tmp,sum;
 //  gPVector<T> p(rep.Centroid());
-//  gPVector<T> p(rep.Dimensionality());
+  gPVector<T> pp(rep.Dimensionality());
   for(int i=1;i<=rep.NumPlayers();i++)
     for(int j= 1;j<= rep.NumStrats(i);j++)
-      p(i,j)=((T)(1)/(T)(rep.NumStrats(i)));
+      pp(i,j)=((T)(1)/(T)(rep.NumStrats(i)));
 
-  n+=(Liap(p));
+  n+=(Liap(pp));
   gout << " n = " << n;
 
   int it = 0;
@@ -83,12 +83,12 @@ template <class T> int LiapModule<T>::Liap(int number)
       for(int j=1;j<rep.NumStrats(i);j++) {
 	tmp=(T)(2);
 	while (tmp + sum > ((T)(1)) ) tmp = (T)((T)rand()/(T)INT_MAX);
-	p(i,j)=tmp;
+	pp(i,j)=tmp;
 	sum+= tmp;
       }
-      p(i,j)=(T)(1)-sum;
+      pp(i,j)=(T)(1)-sum;
     }
-    n+=(Liap(p));
+    n+=(Liap(pp));
   }
   return n;
 };

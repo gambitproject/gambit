@@ -63,9 +63,12 @@ public:
 
 template <class T> int GobitModule<T>::Gobit(int number)
 {
+  gPVector<T> pp(rep.Dimensionality());
+
   for(int i=1;i<=rep.NumPlayers();i++)
     for(int j=1;j<=rep.NumStrats(i);j++)
-      p(i,j)=((T)(1)/(T)(rep.NumStrats(i)));
+      pp(i,j)=((T)(1)/(T)(rep.NumStrats(i)));
+
   
   int iter=0;
   
@@ -75,7 +78,7 @@ template <class T> int GobitModule<T>::Gobit(int number)
   int nit=0;
   while(nit < maxits && Lambda<=(T)(params.maxLam)) {
     nit++;
-    DFP(p, (T)(params.tolDFP), iter, value);
+    DFP(pp, (T)(params.tolDFP), iter, value);
     gout << "\nLam = " << Lambda << " nits= " << iter;
     gout << " val = " << value << " p = " << p;
     gout << " evals = " << Nevals();

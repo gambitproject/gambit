@@ -48,7 +48,7 @@ public:
 	      const ExtGobitParams &params)
     :  SolutionModule(ofile,efile,params.plev), rep(N), Lambda(0),
   p(rep.Dimensionality()), params(params), liap_its(0),
-  maxits(500), gBFunctMin<T>(N.ProfileLength()){ constrained=1;
+  maxits(500), gBFunctMin<T>(N.ProfileLength()){ constrained=0;
 					       SetPlev(params.plev);}
   virtual ~ExtGobitModule() {}
   
@@ -68,11 +68,12 @@ template <class T> int ExtGobitModule<T>::Gobit(int number)
 {
   int i,j,k,ndim=p.Length();
   gMatrix<T> xi(ndim,ndim);
+  gDPVector<T> pp(rep.Dimensionality());
 
   for(i=1;i<=rep.NumPlayers();i++)
     for(j=1;j<=rep.NumInfosets(1,i);j++)
       for(k=1;k<=rep.NumActions(1,i,j);k++)
-	p(i,j,k)=((T)(1)/(T)(rep.NumActions(1,i,j)));
+	pp(i,j,k)=((T)(1)/(T)(rep.NumActions(1,i,j)));
   
   for(i=1;i<=ndim;i++)
     for(j=1;j<=ndim;j++) {
@@ -88,11 +89,11 @@ template <class T> int ExtGobitModule<T>::Gobit(int number)
   int nit=0;
   while(nit < maxits && Lambda<=(T)(params.maxLam)) {
     nit++;
-    Powell(p,xi,(T)(params.tolPOW),iter,value);
+    Powell(pp,xi,(T)(params.tolPOW),iter,value);
 //    DFP(p, (T)(params.tolDFP), iter, value);
 
     gout << "\nLam = " << Lambda << " nits= " << iter;
-    gout << " val = " << value << " p = " << p;
+    gout << " val = " << value << " pp = " << pp;
     gout << " evals = " << liap_its;
     if(value>=10.0)return nit;
     Lambda = Lambda * ((T)(params.delLam));
