@@ -112,7 +112,7 @@ actionlist:  NAME   { actions.Append(last_name); }
           |  actionlist NAME  { actions.Append(last_name); }
 
 chance_node: 'c' NAME  { path.Peek()->SetName(last_name); }
-                 NAME  { player = E->GetPlayer(0);
+                 NAME  { player = E->GetChance();
 			 infoset = player->GetInfoset(iset_name = last_name);
 			 actions.Flush();  values.Flush();
 		       }
@@ -264,7 +264,10 @@ int ReadEfgFile(gInput &f, BaseExtForm *& E)
 
   EfgFileReader R(f, E);
 
-  R.yyparse();
+  if (R.yyparse())   {
+    if (E) delete E;
+    return 0;
+  }
 
   return 0;
 }
@@ -275,7 +278,10 @@ template <class T> int ReadEfgFile(gInput &f, ExtForm<T> *& E)
 
   EfgFileReader R(f, E);
 
-  R.yyparse();
+  if (R.yyparse())   {
+    delete E;
+    return 0;
+  }
 
   return 1;
 }
