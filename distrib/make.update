@@ -1,119 +1,118 @@
+#
 # $Id$
+#
+
 # An update script/makefile combination to create/update GAMBIT components
 # and automatically place them onto the primary GAMBIT ftp site.
 
 # Usage: 
-#update TARGET=[gui,gcl,src,guidoc,gcldoc,all] 
-#       HOST=[sun4,rs6000,solaris,hp,all] 
-#       GUI=[motif,xview,all] SCCS=[true,false]
-# update is an alias for 'make -f make.update'
-# The SCCS argument should always be set to 'true' unless an update is desired
-# using out-of-date files.
+# make -f make.update TARGET=[gambit, gcl, src, guidoc, gcldoc, all] 
+#                     SYSTYPE=[Linux, SunOS_5_6, HPUX, all] 
+#                     GUI=[motif, xt, all] 
+#
 # This can be started on any of the hss machines and it will update the files
-# on the appropriate platform using rsh.  Due to some SCCS weirdness, it is
-# best to run the first update on HOST=sun4.  Since the GUI argument is not 
+# on the appropriate platform using rsh.  Since the GUI argument is not 
 # used for any target except gui, it may be left out in other cases.  However,
 # to save a LOT of disk space and some time by avoiding recompiling all the
-# on-gui common files, it is better to set GUI=motif if it is not used. One
-# problem with this approach is that the file 'gambitio.o' must be removed
-# between the gui/gcl compiles (it is shared but not identical).
-
-# A site configuration file must exist in the same directory.  It must be
-# called make.site_$(GUI)_$(HOST) where GUI and HOST are appropriate to the
-# machine.  If a nongui target is being built, _$(GUI) is set to 'none', or
-# to 'motif' (see note above).
+# on-gui common files, it is better to set GUI=motif if it is not used.
 
 # Note that specifying 'all' for any of the parameters will attempt to build
 # targets with the parameter set to each of its possible values succesively.
 # This may produce some duplicate combinations if more than one of the 
 # parameters is set to all.  Duplicate builds take very little time and are
 # not a problem.  Thus, to rebuild ALL of the components the command would be:
-# update HOST=all TARGET=all GUI=all SCCS=true
+# update SYSTYPE=all TARGET=all GUI=all
 
-# Note on  Gambit source distribution.  The windows versions of gui&gcl require
-# a few non-ascii files that can not be checked into SCCS.  These files
-# (*.ide *.ico) must be placed in the distrib directory manually.
+#
+# Default machines for each platform 
+#
 
-#Default machines for each platform 
-MACHINE_sun4=dosh.hum.caltech.edu
-MACHINE_solaris=minimax.caltech.edu
-MACHINE_rs6000=billandal.hum.caltech.edu
-MACHINE_hp=jilt.hum.caltech.edu
-MACHINE_linux=eeps1.caltech.edu
-MACHINE_latex=hss.caltech.edu
+#MACHINE_sun4      = dosh.hum.caltech.edu
+#MACHINE_rs6000    = billandal.hum.caltech.edu
+#MACHINE_HPUX      = jilt.hum.caltech.edu
+MACHINE_SunOS_5_6 = minimax.caltech.edu
+MACHINE_Linux     = mill.caltech.edu
+MACHINE_latex     = mill.caltech.edu
 
-#Default values--these must be specified on commandline
-HOST=none
-GUI=none
-TARGET=none
-SCCS=none
-#Values controlling SCCS updates.  
-GET_false=/home/gostek/gambit/distrib/fake_get # used to avoid SCCS updates
-GET_true=$(GET)
+#
+# Default values -- these must be specified on the command line.
+#
+
+SYSNAME   =  none
+GUI       =  none
+TARGET    =  none
+
+#
+# Distribution directory.
+#
+
+DISTRIBDIR = /home/mill/gambit/distrib96/distrib
 
 all:
-#Check which targets we are building, if all, build all
-ifeq ($(SCCS),none)
-	@$(MAKE) -f make.update error \
-		ERRORNAME='Must specify SCCS state [true,false]'
-endif
+# Check which targets we are building, if all, build all
 ifeq ($(TARGET),none)
-	@$(MAKE) -f make.update error \
-		ERRORNAME='Must specify a TARGET [gui,gcl,src,guidoc,gcldoc]'
+	@make -f make.update error \
+		ERRORNAME='Must specify a TARGET [gambit, gcl, src, guidoc, gcldoc]'
 endif
+	
 ifeq ($(TARGET),all)
-	@$(MAKE)  -f make.update TARGET=gui HOST=$(HOST) GUI=$(GUI) SCCS=$(SCCS)
-	@$(MAKE)  -f make.update TARGET=gcl HOST=$(HOST) GUI=none SCCS=$(SCCS)
-	@$(MAKE)  -f make.update TARGET=src HOST=sun4 GUI=none SCCS=$(SCCS)
-	@$(MAKE)  -f make.update TARGET=gcldoc HOST=sun4 GUI=none SCCS=$(SCCS)
-endif	
-#Check GUI target options
-ifeq ($(TARGET),gui)
-#Check if a valid GUI type is specified for a gui target
-ifeq ($(GUI),none)
-	@$(MAKE) -f make.update error \
-		ERRORNAME='Must specify a GUI type [motif,xview]'
-endif
-#Check which gui platforms to build
-ifeq ($(GUI),all)
-	@$(MAKE) -f make.update TARGET=gui HOST=$(HOST) GUI=motif SCCS=$(SCCS)
-	@$(MAKE) -f make.update TARGET=gui HOST=sun4 GUI=xview SCCS=$(SCCS)
-	@$(MAKE) -f make.update TARGET=gui HOST=linux GUI=xt SCCS=$(SCCS)
-endif
-endif
-#Check which hosts to build on
-ifeq ($(HOST),none)
-	@$(MAKE) -f make.update error \
-		ERRORNAME='Must specify a HOST type [sun4,solaris,rs6000,hp]'
-endif
-ifeq ($(HOST),all)
-	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=sun4 GUI=$(GUI) SCCS=$(SCCS)
-	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=solaris GUI=$(GUI) SCCS=$(SCCS)
-	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=rs6000 GUI=$(GUI) SCCS=$(SCCS)
-	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=hp GUI=$(GUI) SCCS=$(SCCS)
-	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=linux GUI=$(GUI) SCCS=$(SCCS)
+	@make  -f make.update TARGET=gambit SYSNAME=$(SYSNAME) GUI=$(GUI) 
+	@make  -f make.update TARGET=gcl    SYSNAME=$(SYSNAME) GUI=none 
+	@make  -f make.update TARGET=src    SYSNAME=Linux      GUI=none 
+	@make  -f make.update TARGET=gcldoc SYSNAME=Linux      GUI=none 
+	@make  -f make.update TARGET=guidoc SYSNAME=Linux      GUI=none 
 endif
 
-#Do the actual building
-ifneq ($(HOST),all)
-ifeq ($(TARGET),gui)
-	rsh $(MACHINE_$(HOST)) "cd ~/distrib; \
-	make -f make.distr gui HOST=$(HOST) GUI=$(GUI) GET=$(GET_$(SCCS))"
+#
+# Check GUI target options.
+#
+
+ifeq ($(TARGET),gambit)
+# Check if a valid GUI type is specified for a gambit target.
+ifeq ($(GUI),none)
+	@make -f make.update error \
+		ERRORNAME='Must specify a GUI type [motif, xt]'
+endif
+# Check which gui platforms to build.
+ifeq ($(GUI),all)
+	@make -f make.update TARGET=gambit SYSNAME=$(SYSNAME) GUI=motif 
+	@make -f make.update TARGET=gambit SYSNAME=Linux      GUI=xt
+endif
+endif
+# Check which SYSNAMEs to build on.
+ifeq ($(SYSNAME),none)
+	@make -f make.update error \
+		ERRORNAME='Must specify a SYSNAME [Linux, SunOS_5_6, HPUX]'
+endif
+ifeq ($(SYSNAME),all)
+	@make -f make.update TARGET=$(TARGET) SYSNAME=Linux     GUI=$(GUI)
+	@make -f make.update TARGET=$(TARGET) SYSNAME=SunOS_5_6 GUI=$(GUI)
+	#@make -f make.update TARGET=$(TARGET) SYSNAME=HPUX      GUI=$(GUI) 
+endif
+
+# Do the actual building.
+ifneq ($(SYSNAME),all)
+ifeq ($(TARGET),gambit)
+	rsh $(MACHINE_$(SYSNAME)) "cd $(DISTRIBDIR); \
+	make -f make.distr gambit SYSNAME=$(SYSNAME) GUI=$(GUI)"
 endif
 ifeq ($(TARGET),gcl)
-	rsh $(MACHINE_$(HOST)) "cd ~/distrib; \
-	make -f make.distr gcl HOST=$(HOST) GUI=$(GUI) GET=$(GET_$(SCCS))"
+	rsh $(MACHINE_$(SYSNAME)) "cd $(DISTRIBDIR); \
+	make -f make.distr gcl SYSNAME=$(SYSNAME) GUI=$(GUI)"
 endif
 endif
 
-ifeq ($(TARGET),src) # Build sources only on DOSH
-	rsh $(MACHINE_sun4) "cd ~/distrib; make -f make.distr src"
+ifeq ($(TARGET),src) # Build sources only on mill.
+	rsh $(MACHINE_Linux) "cd $(DISTRIBDIR); make -f make.distr src"
 endif
-ifeq ($(TARGET),gcldoc) # Build manuals only on hss (latex machine)
+
+# FIXME! this is outdated.
+ifeq ($(TARGET),gcldoc) # Build manuals only on mill.
 	rsh $(MACHINE_latex) "cd /home/ironbark/gambit/distrib/manuals/gclman;\
 				make"
 endif
+
 error:
 	@echo $(ERRORNAME)
-	@tryagain # intentionally cause an error to drop out of MAKE
+	@exit 1
 

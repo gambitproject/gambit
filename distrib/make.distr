@@ -19,8 +19,9 @@ SRCDIR    = ./sources
 WSRCDIR    = ./winsrc
 
 all:
-	@echo Specify a target: gcl, gui, src.
-	@echo If specifying gui, make sure to add GUI=xt/motif
+	@echo Specify a target: gcl, gambit, src.
+	@echo If specifying gambit \(gambit gui\), make sure to add GUI=xt/motif
+	@echo
 
 gambit:
 	@echo
