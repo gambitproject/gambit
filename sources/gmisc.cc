@@ -184,8 +184,8 @@ gString ToString(const gRational &r, bool )
   if (approx)   {
     // This might be quite slow, but it does allow one to have reasonable
     // looking fractions.  I.e. .2500001 =1/4 not xxxxxxxxxxxxxx/yyyyyyyy
-    // first check if this is just an integer (denominator==1)
-    if (r.denominator() == gInteger(1))
+		// first check if this is just an integer (denominator==1)
+		if (r.denominator() == gInteger(1))
       strncpy(gconvert_buffer, Itoa(r.numerator()), GCONVERT_BUFFER_LENGTH);
     else   {
       // first check if the num,den are already reasonable #'s. i.e.
@@ -195,7 +195,7 @@ gString ToString(const gRational &r, bool )
       if (log(num)<=precision && log(den)<=precision)
 	return ToString(r,false);	// exact will do just fine.
       // these are nasty, huge numbers.  Make num be precision digits long,
-      // and hope den will follow
+			// and hope den will follow
       double order=pow(10.0,ceil(log(gmin(num,den))));
       double prec=pow(10.0,(double)precision);
       den/=order;	// make a double 0-1
@@ -213,9 +213,12 @@ gString ToString(const gRational &r, bool )
   else
     */
   {
-    strncpy(gconvert_buffer, Itoa(r.numerator()), GCONVERT_BUFFER_LENGTH);
-    strcat(gconvert_buffer, "/");
-    strncat(gconvert_buffer, Itoa(r.denominator()), GCONVERT_BUFFER_LENGTH);
+		strncpy(gconvert_buffer, Itoa(r.numerator()), GCONVERT_BUFFER_LENGTH);
+		if (r.denominator() != gInteger(1))
+		{
+			strcat(gconvert_buffer, "/");
+			strncat(gconvert_buffer, Itoa(r.denominator()), GCONVERT_BUFFER_LENGTH);
+		}
   }
   
   return gString(gconvert_buffer);
@@ -255,7 +258,7 @@ gRational FromString(const gString &f,gRational &y)
   }
   else if (ch == '.')  {
     denom = 1;
-    ch=f[index++];
+		ch=f[index++];
     while (ch >= '0' && ch <= '9' && index<=length)  {
       denom *= 10;
       num *= 10;

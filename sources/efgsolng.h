@@ -1,7 +1,7 @@
 // File: efgsolng.h -- declarations for the GUI part of the extensive form
 // algorithm solutions.  Each solution algorithm is contained in a separate class
 // and the ExtensiveShow does not need to know any details
-// @(#)efgsolng.h	1.5 8/6/96
+// $Id$
 #ifndef EFGSOLNG_H
 #define EFGSOLNG_H
 #include "behavsol.h"
@@ -20,9 +20,10 @@ template <class T> class ExtensiveSolutionG
 {
 protected:
 	const Efg<T> &ef;
+	const EFSupport &sup;
 	ExtensiveShowInterf<T> *parent;
 public:
-	ExtensiveSolutionG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
+	ExtensiveSolutionG(const Efg<T> &E,const EFSupport &S,ExtensiveShowInterf<T> *parent);
 	virtual gList<BehavSolution<T> > Solve(void) const = 0;
 	virtual void SolveSetup(void) const = 0;
 };
@@ -31,7 +32,7 @@ public:
 template <class T> class EFLiapG : public ExtensiveSolutionG<T>
 {
 public:
-	EFLiapG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
+	EFLiapG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
 	virtual gList<BehavSolution<T> > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
@@ -40,7 +41,7 @@ public:
 template <class T> class NFLiapG : public ExtensiveSolutionG<T>
 {
 public:
-	NFLiapG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
+	NFLiapG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
 	virtual gList<BehavSolution<T> > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
@@ -49,7 +50,7 @@ public:
 template <class T> class SeqFormG : public ExtensiveSolutionG<T>
 {
 public:
-	SeqFormG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
+	SeqFormG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
 	virtual gList<BehavSolution<T> > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
@@ -58,7 +59,7 @@ public:
 template <class T> class LemkeG : public ExtensiveSolutionG<T>
 {
 public:
-	LemkeG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
+	LemkeG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
 	virtual gList<BehavSolution<T> > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
@@ -67,7 +68,7 @@ public:
 template <class T> class PureNashG : public ExtensiveSolutionG<T>
 {
 public:
-	PureNashG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
+	PureNashG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
 	virtual gList<BehavSolution<T> > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
@@ -75,7 +76,7 @@ public:
 template <class T> class EPureNashG : public ExtensiveSolutionG<T>
 {
 public:
-	EPureNashG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
+	EPureNashG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
 	virtual gList<BehavSolution<T> > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
@@ -84,7 +85,7 @@ public:
 template <class T> class EnumG : public ExtensiveSolutionG<T>
 {
 public:
-	EnumG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
+	EnumG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
 	virtual gList<BehavSolution<T> > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
@@ -93,7 +94,7 @@ public:
 template <class T> class ZSumG : public ExtensiveSolutionG<T>
 {
 public:
-	ZSumG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
+	ZSumG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
 	virtual gList<BehavSolution<T> > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
@@ -102,7 +103,7 @@ public:
 template <class T> class EfgCSumG : public ExtensiveSolutionG<T>
 {
 public:
-	EfgCSumG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
+	EfgCSumG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
 	virtual gList<BehavSolution<T> > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
@@ -111,7 +112,7 @@ public:
 template <class T> class SimpdivG : public ExtensiveSolutionG<T>
 {
 public:
-	SimpdivG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
+	SimpdivG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
 	virtual gList<BehavSolution<T> > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
@@ -120,7 +121,7 @@ public:
 template <class T> class GobitAllG : public ExtensiveSolutionG<T>
 {
 public:
-	GobitAllG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
+	GobitAllG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
 	virtual gList<BehavSolution<T> > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
@@ -129,7 +130,7 @@ public:
 template <class T> class NGobitG : public ExtensiveSolutionG<T>
 {
 public:
-	NGobitG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
+	NGobitG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
 	virtual gList<BehavSolution<T> > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
@@ -138,7 +139,7 @@ public:
 template <class T> class EGobitG : public ExtensiveSolutionG<T>
 {
 public:
-	EGobitG(const Efg<T> &E,ExtensiveShowInterf<T> *parent);
+	EGobitG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
 	virtual gList<BehavSolution<T> > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };

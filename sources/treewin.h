@@ -1,7 +1,7 @@
 //
 // FILE: treewin.h -- Interface for TreeWindow class
 //
-// $Id$
+// @(#)treewin.h	1.46 12/20/96
 //
 
 #ifndef TREEWINDOW_H
@@ -218,6 +218,7 @@ public:
 	void display_save_options(Bool def=TRUE);
 	void display_load_options(Bool def=TRUE);
 	void display_set_zoom(float z=-1);
+  void display_zoom_fit(void);
 	float display_get_zoom(void);
 	Bool display_zoom_win(void);
 

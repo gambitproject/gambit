@@ -363,40 +363,40 @@ Portion *GSM_EnumPure_Efg(Portion **param)
 
 Portion *GSM_GobitGrid_Support(Portion **param)
 {
-  NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  BaseNfg* N = (BaseNfg*) &(S.BelongsTo());
-  Portion* por = 0;
+	NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
+	BaseNfg* N = (BaseNfg*) &(S.BelongsTo());
+	Portion* por = 0;
 
-  GridParams<double> GP;
+	GridParams GP;
 
-  if(((TextPortion*) param[1])->Value() != "")
-    GP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
-  else
-    GP.pxifile = &gnull;
-  GP.minLam = ((FloatPortion *) param[2])->Value();
-  GP.maxLam = ((FloatPortion *) param[3])->Value();
-  GP.delLam = ((FloatPortion *) param[4])->Value();
-  GP.powLam = ((IntPortion *) param[5])->Value();
-  GP.delp = ((FloatPortion *) param[6])->Value();
-  GP.tol = ((FloatPortion *) param[7])->Value();
+	if(((TextPortion*) param[1])->Value() != "")
+		GP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
+	else
+		GP.pxifile = &gnull;
+	GP.minLam = ((FloatPortion *) param[2])->Value();
+	GP.maxLam = ((FloatPortion *) param[3])->Value();
+	GP.delLam = ((FloatPortion *) param[4])->Value();
+	GP.powLam = ((IntPortion *) param[5])->Value();
+	GP.delp = ((FloatPortion *) param[6])->Value();
+	GP.tol = ((FloatPortion *) param[7])->Value();
 
-  switch(N->Type())
-  {
-  case DOUBLE:
-    {
-      GridSolveModule<double> GM(* (Nfg<double>*) N, GP, S);
-      GM.GridSolve();
-      // ((IntPortion *) param[8])->Value() = GM.NumEvals();
-      // ((FloatPortion *) param[9])->Value() = GM.Time();
-      gList<MixedSolution<double> > solns;
-      por = new Mixed_ListPortion<double>(solns);
-    }
-    break;
-  case RATIONAL:
-    return new ErrorPortion("The rational version of GobitGridSolve is not implemented");
-    break;
-  default:
-    assert(0);
+	switch(N->Type())
+	{
+	case DOUBLE:
+		{
+			GridSolveModule GM(* (Nfg<double>*) N, GP, S);
+			GM.GridSolve();
+			// ((IntPortion *) param[8])->Value() = GM.NumEvals();
+			// ((FloatPortion *) param[9])->Value() = GM.Time();
+			gList<MixedSolution<double> > solns;
+			por = new Mixed_ListPortion<double>(solns);
+		}
+		break;
+	case RATIONAL:
+		return new ErrorPortion("The rational version of GobitGridSolve is not implemented");
+		break;
+	default:
+		assert(0);
   }
 
   assert(por != 0);

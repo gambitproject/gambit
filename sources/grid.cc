@@ -37,6 +37,13 @@ Then keep any values of (p,q,f_r(p,q)) where v(p,q) < tolerance.
 #include "nfg.h"
 #include "gwatch.h"
 
+static int max(const gArray<int> &a)
+{
+int m=a[1];
+for (int i=2;i<=a.Length();i++) if (a[i]>m) m=a[i];
+return m;
+}
+
 // Probability Vector class.  This
 // class is used by the GridSolve algorithm to generate a uniform grid of
 // probabilities over n players w/ Si strategies each.  The class makes
@@ -239,14 +246,13 @@ return true;
 }
 
 GridSolveModule::GridSolveModule(const Nfg<double> &N_, const GridParams &P, const NFSupport &S_)
-										:N(N_),S(S_),params(P),P_calc(N_,S_)
+										:N(N_),S(S_),params(P),P_calc(N_,S_),tmp(max(S.SupportDimensions()))
 {
 num_strats=S.SupportDimensions();
 // find the player w/ max num strats and make it static
 static_player=1;
 for (int i=2;i<=num_strats.Length();i++)
 	if (num_strats[i]>num_strats[static_player]) static_player=i;
-tmp=gVector<double>(num_strats[static_player]); // max_strats
 }
 
 GridSolveModule::~GridSolveModule() { }
