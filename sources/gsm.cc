@@ -1074,7 +1074,7 @@ void GSM::Flush( void )
 {
   int       i;
   Portion*  p;
-  bool = result;
+  bool result;
 
   assert( _Stack->Depth() >= 0 );
   for( i = _Stack->Depth() - 1; i >= 0; i-- )
