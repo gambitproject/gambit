@@ -168,13 +168,13 @@ Node *Node::PriorSibling(void) const
 Action *Node::GetAction() const
 {
   if (this == Game()->RootNode()) 
-    throw gclRuntimeError("GetAction() called on RootNode().\n");
+    throw Efg::Exception();
   
   gArray<Action *> actions = GetParent()->GetInfoset()->Actions();
   for (int i = 1; i <= actions.Length(); i++)
     if (this == GetParent()->GetChild(actions[i]))
       return actions[i];
-  throw gclRuntimeError("No action found in Node::GetAction().\n");
+  throw Efg::Exception();
 }
 
 void Node::DeleteOutcome(EFOutcome *outc)
