@@ -49,6 +49,14 @@ Portion *ArrayToList(const gArray<EFPlayer *> &A)
   return ret;
 }
 
+Portion *ArrayToList(const gArray<Infoset *> &A)
+{
+  ListPortion *ret = new ListValPortion;
+  for (int i = 1; i <= A.Length(); i++)
+    ret->Append(new InfosetValPortion(A[i]));
+  return ret;
+}
+
 Portion *ArrayToList(const gArray<Outcome *> &A)
 {
   ListPortion *ret = new ListValPortion;
@@ -521,6 +529,16 @@ Portion *GSM_Infoset(Portion **param)
     return new ErrorPortion("Terminal nodes have no information set\n");
   Portion* por = new InfosetValPortion(n->GetInfoset());
   por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
+}
+
+Portion *GSM_Infosets(Portion **param)
+{
+  EFPlayer *p = ((EfPlayerPortion *) param[0])->Value();
+
+  Portion* por = ArrayToList(p->InfosetList());
+  por->SetOwner(param[0]->Owner());
   por->AddDependency();
   return por;
 }
@@ -1044,6 +1062,11 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Infoset");
   FuncObj->SetFuncInfo(GSM_Infoset, 1);
   FuncObj->SetParamInfo(GSM_Infoset, 0, "node", porNODE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Infosets");
+  FuncObj->SetFuncInfo(GSM_Infosets, 1);
+  FuncObj->SetParamInfo(GSM_Infosets, 0, "player", porPLAYER_EFG);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("IsPredecessor");

@@ -231,6 +231,125 @@ Portion *GSM_SetIntegerOptions(Portion **param)
     return 0;
 }
 
+extern Portion *ArrayToList(const gArray<double> &A);
+extern Portion *ArrayToList(const gArray<gRational> &A);
+
+Portion *GSM_ActionValuesFloat(Portion **param)
+{
+  BehavProfile<double> *bp = (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
+  Infoset *s = ((InfosetPortion *) param[1])->Value();
+
+  if (s->BelongsTo() != bp->BelongsTo())
+    return new ErrorPortion("Profile and infoset must belong to same game\n");
+  
+  if (s->GetPlayer()->IsChance())
+    return new ErrorPortion("Infoset must belong to personal player\n");
+
+  Efg<double> *E = bp->BelongsTo();
+
+  gDPVector<double> values(E->Dimensionality());
+  gPVector<double> probs(E->Dimensionality().Lengths());
+
+  E->CondPayoff(*bp, values, probs);
+  
+  gVector<double> ret(s->NumActions());
+  for (int i = 1; i <= s->NumActions(); i++)
+    ret[i] = values(s->GetPlayer()->GetNumber(), s->GetNumber(), i);
+
+  return ArrayToList(ret);
+}
+
+Portion *GSM_ActionValuesRational(Portion **param)
+{
+  BehavProfile<gRational> *bp = (BehavProfile<gRational> *) ((BehavPortion *) param[0])->Value();
+  Infoset *s = ((InfosetPortion *) param[1])->Value();
+
+  if (s->BelongsTo() != bp->BelongsTo())
+    return new ErrorPortion("Profile and infoset must belong to same game\n");
+  
+  if (s->GetPlayer()->IsChance())
+    return new ErrorPortion("Infoset must belong to personal player\n");
+
+  Efg<gRational> *E = bp->BelongsTo();
+
+  gDPVector<gRational> values(E->Dimensionality());
+  gPVector<gRational> probs(E->Dimensionality().Lengths());
+
+  E->CondPayoff(*bp, values, probs);
+  
+  gVector<gRational> ret(s->NumActions());
+  for (int i = 1; i <= s->NumActions(); i++)
+    ret[i] = values(s->GetPlayer()->GetNumber(), s->GetNumber(), i);
+
+  return ArrayToList(ret);
+}
+
+Portion *GSM_BeliefsFloat(Portion **param)
+{
+  BehavProfile<double> *bp = (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
+
+  return ArrayToList(bp->BelongsTo()->Beliefs(*bp));
+}
+
+Portion *GSM_BeliefsRational(Portion **param)
+{
+  BehavProfile<gRational> *bp = (BehavProfile<gRational> *) ((BehavPortion *) param[0])->Value();
+
+  return ArrayToList(bp->BelongsTo()->Beliefs(*bp));
+}
+
+Portion *GSM_InfosetProbsFloat(Portion **param)
+{
+  BehavProfile<double> *bp = (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
+
+  Efg<double> *E = bp->BelongsTo();
+
+  gDPVector<double> values(E->Dimensionality());
+  gPVector<double> probs(E->Dimensionality().Lengths());
+
+  E->CondPayoff(*bp, values, probs);
+
+  ListPortion *ret = new ListValPortion;
+
+  for (int i = 1; i <= E->NumPlayers(); i++)
+    ret->Append(ArrayToList(probs.GetRow(i)));
+
+  return ret;
+}
+
+Portion *GSM_InfosetProbsRational(Portion **param)
+{
+  BehavProfile<gRational> *bp = (BehavProfile<gRational> *) ((BehavPortion *) param[0])->Value();
+
+  Efg<gRational> *E = bp->BelongsTo();
+
+  gDPVector<gRational> values(E->Dimensionality());
+  gPVector<gRational> probs(E->Dimensionality().Lengths());
+
+  E->CondPayoff(*bp, values, probs);
+
+  ListPortion *ret = new ListValPortion;
+
+  for (int i = 1; i <= E->NumPlayers(); i++)
+    ret->Append(ArrayToList(probs.GetRow(i)));
+
+  return ret;
+}
+ 
+Portion *GSM_RealizProbsFloat(Portion **param)
+{
+  BehavProfile<double> *bp = (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
+  
+  return ArrayToList(bp->BelongsTo()->NodeRealizProbs(*bp));
+}  
+  
+Portion *GSM_RealizProbsRational(Portion **param)
+{
+  BehavProfile<gRational> *bp = (BehavProfile<gRational> *) ((BehavPortion *) param[0])->Value();
+  
+  return ArrayToList(bp->BelongsTo()->NodeRealizProbs(*bp));
+}
+  
   
 void Init_algfunc(GSM *gsm)
 {
@@ -340,6 +459,45 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_Payoff, 2);
   FuncObj->SetParamInfo(GSM_Payoff, 0, "behav", porBEHAV_FLOAT);
   FuncObj->SetParamInfo(GSM_Payoff, 1, "player", porINTEGER);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("ActionValues");
+  FuncObj->SetFuncInfo(GSM_ActionValuesFloat, 2);
+  FuncObj->SetParamInfo(GSM_ActionValuesFloat, 0, "strategy",
+			porBEHAV_FLOAT);
+  FuncObj->SetParamInfo(GSM_ActionValuesFloat, 1, "infoset", porINFOSET);
+
+  FuncObj->SetFuncInfo(GSM_ActionValuesRational, 2);
+  FuncObj->SetParamInfo(GSM_ActionValuesRational, 0, "strategy",
+			porBEHAV_RATIONAL);
+  FuncObj->SetParamInfo(GSM_ActionValuesRational, 1, "infoset", porINFOSET);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Beliefs");
+  FuncObj->SetFuncInfo(GSM_BeliefsFloat, 1);
+  FuncObj->SetParamInfo(GSM_BeliefsFloat, 0, "strategy", porBEHAV_FLOAT);
+
+  FuncObj->SetFuncInfo(GSM_BeliefsRational, 1);
+  FuncObj->SetParamInfo(GSM_BeliefsRational, 0, "strategy",
+			porBEHAV_RATIONAL);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("InfosetProbs");
+  FuncObj->SetFuncInfo(GSM_InfosetProbsFloat, 1);
+  FuncObj->SetParamInfo(GSM_InfosetProbsFloat, 0, "strategy", porBEHAV_FLOAT);
+
+  FuncObj->SetFuncInfo(GSM_InfosetProbsRational, 1);
+  FuncObj->SetParamInfo(GSM_InfosetProbsRational, 0, "strategy",
+			porBEHAV_RATIONAL);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("RealizProbs");
+  FuncObj->SetFuncInfo(GSM_RealizProbsFloat, 1);
+  FuncObj->SetParamInfo(GSM_RealizProbsFloat, 0, "strategy", porBEHAV_FLOAT);
+
+  FuncObj->SetFuncInfo(GSM_RealizProbsRational, 1);
+  FuncObj->SetParamInfo(GSM_RealizProbsRational, 0, "strategy",
+			porBEHAV_RATIONAL);
   gsm->AddFunction(FuncObj);
 
 }
