@@ -195,6 +195,10 @@ void EfgShow::SolveStandard(void)
   }
 
   try {
+    if (ESS.MarkSubgames())
+      tw->subgame_solve();
+    else
+      tw->subgame_clear_all();
     solns += solver->Solve();
     wxEndBusyCursor();
   }

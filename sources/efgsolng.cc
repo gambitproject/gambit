@@ -101,26 +101,25 @@ void BaseBySubgameG::BaseViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
   for (int i = 1; i <= p_nfg.NumPlayers(); i++) 
     players[i] = i;
 
-  NFSupport *temp_sup = p_support, *temp_sup1 = 0;
 
   if (m_iterative) {
-    while ((temp_sup = ComputeDominated(temp_sup->Game(), 
-					*temp_sup, m_strong,
-					players, gnull, gstatus))) {
-      if (temp_sup1) 
-	delete temp_sup1;
-      
-      temp_sup1 = temp_sup;
+    NFSupport *oldSupport = p_support, *newSupport;
+    while ((newSupport = ComputeDominated(oldSupport->Game(), 
+					  *oldSupport, m_strong,
+					  players, gnull, gstatus)) != 0) {
+      delete oldSupport;
+      oldSupport = newSupport;
     }
 
-    if (temp_sup1) 
-      p_support = temp_sup1;
+    p_support = oldSupport;
   }
   else {
-    if ((temp_sup = ComputeDominated(temp_sup->Game(), 
-				     *temp_sup, m_strong,
-				     players, gnull, gstatus))) {
-      p_support = temp_sup;
+    NFSupport *newSupport;
+    if ((newSupport = ComputeDominated(p_support->Game(), 
+				       *p_support, m_strong,
+				       players, gnull, gstatus)) != 0) {
+      delete p_support;
+      p_support = newSupport;
     }
   }
 }
@@ -740,10 +739,11 @@ protected:
 
 public:
   EnumBySubgameG(const Efg &p_efg, const EFSupport &p_support,
-		 const EnumParams &p_params, int p_max = 0,
-		 EfgShowInterface *p_parent = 0)
+		 const EnumParams &p_params,
+		 bool p_eliminate, bool p_iterative, bool p_strong,
+		 int p_max = 0, EfgShowInterface *p_parent = 0)
     : EnumBySubgame(p_support, p_params, p_max), 
-      BaseBySubgameG(p_parent, p_efg)
+      BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
     { Solve(); }
 };
 
@@ -760,7 +760,8 @@ gList<BehavSolution> EfgEnumG::Solve(void) const
   EPS.GetParams(P);
 
   try {
-    EnumBySubgameG M(ef, sup, P, EPS.MaxSolns(), parent);
+    EnumBySubgameG M(ef, sup, P, Eliminate(), EliminateAll(),
+		     DominanceType(), EPS.MaxSolns(), parent);
     return M.GetSolutions();
   }
   catch (gSignalBreak &) {
@@ -841,10 +842,11 @@ protected:
 
 public:
   ZSumBySubgameG(const Efg &p_efg, const EFSupport &p_support,
-		 const ZSumParams &p_params, int p_max = 0,
+		 const ZSumParams &p_params, bool p_eliminate,
+		 bool p_iterative, bool p_strong, int p_max = 0,
 		 EfgShowInterface *p_parent = 0)
     : ZSumBySubgame(p_support, p_params, p_max), 
-      BaseBySubgameG(p_parent, p_efg)
+      BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
     { Solve(); }
 };
 
@@ -861,13 +863,14 @@ gList<BehavSolution> EfgZSumG::Solve(void) const
   }
 
   LPParamsSettings LPPS;
-  wxStatus status(parent->Frame(), "LP Algorithm");
+  wxStatus status(parent->Frame(), "LPSolve Algorithm");
   status << "Progress not implemented\n" << "Cancel button disabled\n";
   ZSumParams P;
   LPPS.GetParams(P);
 
   try {
-    ZSumBySubgameG M(ef, sup, P, LPPS.MaxSolns(), parent);
+    ZSumBySubgameG M(ef, sup, P, Eliminate(), EliminateAll(), DominanceType(),
+		     LPPS.MaxSolns(), parent);
     return M.GetSolutions();
   }
   catch (gSignalBreak &) {
@@ -1015,7 +1018,8 @@ protected:
 
 public:
   SimpdivBySubgameG(const Efg &p_efg, const EFSupport &p_support,
-		    const SimpdivParams &p_params, int p_max = 0,
+		    const SimpdivParams &p_params, bool p_eliminate,
+		    bool p_iterative, bool p_strong, int p_max = 0,
 		    EfgShowInterface *p_parent = 0)
     : SimpdivBySubgame(p_support, p_params, p_max),
       BaseBySubgameG(p_parent, p_efg)
@@ -1035,7 +1039,8 @@ gList<BehavSolution> EfgSimpdivG::Solve(void) const
   SPS.GetParams(P);
 
   try {
-    SimpdivBySubgameG M(ef, sup, P, SPS.MaxSolns(), parent);
+    SimpdivBySubgameG M(ef, sup, P, Eliminate(), EliminateAll(),
+			DominanceType(), SPS.MaxSolns(), parent);
     return M.GetSolutions();
   }
   catch (gSignalBreak &) {
@@ -1192,14 +1197,17 @@ protected:
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
-  NGobitBySubgameG(const Efg &, EfgShowInterface * = 0);
+  NGobitBySubgameG(const Efg &, bool p_eliminate, bool p_iterative,
+		   bool p_strong, EfgShowInterface * = 0);
 
   gList<BehavSolution> GetSolutions(void) const { return m_solutions; }
 };
 
 NGobitBySubgameG::NGobitBySubgameG(const Efg &p_efg,
+				   bool p_eliminate, bool p_iterative,
+				   bool p_strong,
 				   EfgShowInterface *p_parent /*= 0*/)
-  : BaseBySubgameG(p_parent, p_efg)
+  : BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
 {
   GobitParamsSettings GSPD(m_parent->Filename());
   wxStatus status(m_parent->Frame(), "Gobit Algorithm");
@@ -1243,7 +1251,7 @@ EfgNGobitG::EfgNGobitG(const Efg &p_efg, const EFSupport &p_support,
 gList<BehavSolution> EfgNGobitG::Solve(void) const
 {
   // exception handler is located in the ctor
-  NGobitBySubgameG M(ef, parent);
+  NGobitBySubgameG M(ef, Eliminate(), EliminateAll(), DominanceType(), parent);
   return M.GetSolutions();
 }
 
@@ -1461,14 +1469,17 @@ protected:
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
-  GobitAllBySubgameG(const Efg &, const EFSupport &, EfgShowInterface *);
+  GobitAllBySubgameG(const Efg &, const EFSupport &, bool p_eliminate,
+		     bool p_iterative, bool p_strong, EfgShowInterface *);
 
 };
 
 GobitAllBySubgameG::GobitAllBySubgameG(const Efg &p_efg, 
-				       const EFSupport &p_support, 
+				       const EFSupport &p_support,
+				       bool p_eliminate, bool p_iterative,
+				       bool p_strong,
 				       EfgShowInterface *p_parent)
-  : BaseBySubgameG(p_parent, p_efg)
+  : BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
 {
   GridParamsSettings GSPD(m_parent->Filename());
   wxStatus status(m_parent->Frame(), "GobitAll Solve");
@@ -1497,7 +1508,8 @@ EfgGobitAllG::EfgGobitAllG(const Efg &p_efg, const EFSupport &p_support,
 
 gList<BehavSolution> EfgGobitAllG::Solve(void) const
 {
-  GobitAllBySubgameG M(ef, sup, parent);
+  GobitAllBySubgameG M(ef, sup, Eliminate(), EliminateAll(),
+		       DominanceType(), parent);
   return solns;
 }
 

@@ -36,18 +36,17 @@ protected:
   mutable gOutput *outfile, *errfile;
   wxStringList *trace_list, *m_precisionList;
   char *trace_str, *m_precisionStr;
- // max solutions_per_subgame, max total solutions
+
   int m_stopAfter, m_maxSolns;
   char *defaults_file;
   gPrecision m_precision;
 
-  Bool use_elimdom,all;
   int	dom_type,dom_method;
 
   Bool markSubgames;
 
-  char *dom_type_str,*dom_method_str, *m_domDepthStr;
-  wxStringList *dom_type_list,*dom_method_list, *m_domDepthList;
+  char *dom_type_str, *dom_method_str, *m_domDepthStr;
+  wxStringList *dom_type_list, *dom_method_list, *m_domDepthList;
 
   gOutput *MakeOutputFile(const char *s, gOutput *&outp) const;
   void SaveDefaults(void); // Called automatically in the destructor
@@ -65,8 +64,9 @@ public:
   int StopAfter(void) const { return m_stopAfter; }
   int MaxSolns(void) const { return m_maxSolns; }
 
-  Bool Eliminate(void) const { return use_elimdom; }
-  Bool EliminateAll(void) const { return all; }
+  Bool Eliminate(void) const { return (strcmp(m_domDepthStr, "None") != 0); }
+  Bool EliminateAll(void) const 
+    { return (strcmp(m_domDepthStr, "Iterative") == 0); }
 
   int DominanceType(void) const { return dom_type; }
   int DominanceMethod(void) const { return dom_method; }

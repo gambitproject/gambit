@@ -55,10 +55,11 @@ OutputParamsSettings::OutputParamsSettings(void)
   outfile = 0;
   errfile = 0;
 
-  wxGetResource(SOLN_SECT,"Nfg-ElimDom-All",&all,defaults_file);
+  m_domDepthStr = new char[20];
+  wxGetResourceStr(SOLN_SECT,"Nfg-ElimDom-Depth", m_domDepthStr,
+		   defaults_file);
   wxGetResource(SOLN_SECT,"Nfg-ElimDom-Type",&dom_type,defaults_file);
   wxGetResource(SOLN_SECT,"Nfg-ElimDom-Method",&dom_method,defaults_file);
-  wxGetResource(SOLN_SECT,"Nfg-ElimDom-Use",&use_elimdom,defaults_file);
 
   wxGetResource(SOLN_SECT, "Efg-Mark-Subgames", &markSubgames, defaults_file);
 }
@@ -69,6 +70,7 @@ OutputParamsSettings::~OutputParamsSettings(void)
   delete [] outname;
   delete [] errname;
   delete [] trace_str;
+  delete [] m_domDepthStr;
   delete trace_list;
 
   delete [] m_precisionStr;
@@ -90,10 +92,9 @@ void OutputParamsSettings::SaveDefaults(void)
   wxWriteResource(PARAMS_SECTION, "Max-Solns", m_maxSolns, defaults_file);
   wxWriteResource(PARAMS_SECTION, "Precision", m_precisionStr, defaults_file);
 
-  wxWriteResource(SOLN_SECT,"Nfg-ElimDom-All",all,defaults_file);
+  wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Depth",m_domDepthStr,defaults_file);
   wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Type",dom_type,defaults_file);
   wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Method",dom_method,defaults_file);
-  wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",use_elimdom,defaults_file);
 
   wxWriteResource(SOLN_SECT, "Efg-Mark-Subgames", markSubgames,
 		  defaults_file);
@@ -171,13 +172,6 @@ void OutputParamsDialog::MakeDominanceFields(void)
   Add(wxMakeFormNewLine());
 
   m_domDepthList = new wxStringList("None", "Once", "Iterative", 0);
-  m_domDepthStr = new char[20];
-  if (use_elimdom && all)
-    strcpy(m_domDepthStr, "Iterative");
-  else if (use_elimdom && !all)
-    strcpy(m_domDepthStr, "Once");
-  else
-    strcpy(m_domDepthStr, "None");
   Add(wxMakeFormString("Depth", &m_domDepthStr, wxFORM_RADIOBOX,
 		       new wxList(wxMakeConstraintStrings(m_domDepthList), 0),
 		       0, wxVERTICAL));
