@@ -43,6 +43,11 @@ TEMPLATE class gBlock<Action *>;
 TEMPLATE class gArray<Outcome *>;
 TEMPLATE class gBlock<Outcome *>;
 
+#include "glist.imp"
+
+TEMPLATE class gList<Node *>;
+TEMPLATE class gNode<Node *>;
+
 #pragma -Jgx
 
 #include "efg.h"
