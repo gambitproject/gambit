@@ -242,7 +242,8 @@ BehavProfile<T>::BehavProfile(const BehavProfile<T> &p_profile)
   : gDPVector<T>(p_profile), m_efg(p_profile.m_efg),
     m_root(new BehavNode((Efg *)p_profile.m_efg, p_profile.m_efg->RootNode(),
 			 p_profile.m_efg->NumPlayers())),
-    m_support(p_profile.m_support), m_isets(p_profile.m_isets.Length()), 
+    m_support(new EFSupport(*p_profile.m_support)),
+    m_isets(p_profile.m_isets.Length()), 
     m_cached_data(false)
 {
   InitProfile();
