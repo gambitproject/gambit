@@ -434,7 +434,10 @@ Portion *GSM_LiapEfg_EfgFloat(Portion **param)
     LP.nTries = ((IntPortion *) param[3])->Value();
 
     NFLiapBySubgame<double> LM(E, LP, start);
-    solns.Append(LM.Solve());
+
+    LM.Solve();
+
+    solns = LM.GetSolutions();
 
     ((FloatPortion *) param[8])->Value() = LM.Time();
     ((IntPortion *) param[9])->Value() = LM.NumEvals();
@@ -446,7 +449,10 @@ Portion *GSM_LiapEfg_EfgFloat(Portion **param)
     LP.nTries = ((IntPortion *) param[3])->Value();
  
     EFLiapBySubgame<double> LM(E, LP, start);
-    solns.Append(LM.Solve());
+
+    LM.Solve();
+
+    solns = LM.GetSolutions();
 
     ((FloatPortion *) param[8])->Value() = LM.Time();
     ((IntPortion *) param[9])->Value() = LM.NumEvals();
@@ -519,8 +525,10 @@ Portion *GSM_LcpSolveEfgFloat(Portion **param)
     LP.stopAfter = ((IntPortion *) param[2])->Value();
 
     LemkeBySubgame<double> LM(E, LP);
-    
-    solns.Append(LM.Solve());
+
+    LM.Solve();
+
+    solns = LM.GetSolutions();
 
     ((IntPortion *) param[3])->Value() = LM.NumPivots();
     ((FloatPortion *) param[4])->Value() = LM.Time();
@@ -531,7 +539,9 @@ Portion *GSM_LcpSolveEfgFloat(Portion **param)
 
     SeqFormBySubgame<double> SM(E, SP);
     
-    solns.Append(SM.Solve());
+    SM.Solve();
+
+    solns = SM.GetSolutions();
 
     ((IntPortion *) param[3])->Value() = SM.NumPivots();
     ((FloatPortion *) param[4])->Value() = SM.Time();
@@ -556,7 +566,9 @@ Portion *GSM_LcpSolveEfgRational(Portion **param)
 
     LemkeBySubgame<gRational> LM(E, LP);
     
-    solns.Append(LM.Solve());
+    LM.Solve();
+
+    solns = LM.GetSolutions();
 
     ((IntPortion *) param[3])->Value() = LM.NumPivots();
     ((FloatPortion *) param[4])->Value() = LM.Time();
@@ -567,7 +579,9 @@ Portion *GSM_LcpSolveEfgRational(Portion **param)
 
     SeqFormBySubgame<gRational> SM(E, SP);
     
-    solns.Append(SM.Solve());
+    SM.Solve();
+
+    solns = SM.GetSolutions();
 
     ((IntPortion *) param[3])->Value() = SM.NumPivots();
     ((FloatPortion *) param[4])->Value() = SM.Time();
@@ -640,9 +654,9 @@ Portion *GSM_SimpdivEfgFloat(Portion **param)
   SP.leashLength = ((IntPortion *) param[4])->Value();
 
   SimpdivBySubgame<double> SM(E, SP);
-  gList<BehavProfile<double> > solns;
+  SM.Solve();
 
-  solns.Append(SM.Solve());
+  gList<BehavProfile<double> > solns(SM.GetSolutions());
 
   ((IntPortion *) param[5])->Value() = SM.NumEvals();
   ((FloatPortion *) param[6])->Value() = SM.Time();
@@ -666,9 +680,10 @@ Portion *GSM_SimpdivEfgRational(Portion **param)
   SP.leashLength = ((IntPortion *) param[4])->Value();
 
   SimpdivBySubgame<gRational> SM(E, SP);
-  gList<BehavProfile<gRational> > solns;
 
-  solns.Append(SM.Solve());
+  SM.Solve();
+
+  gList<BehavProfile<gRational> > solns(SM.GetSolutions());
 
   ((IntPortion *) param[5])->Value() = SM.NumEvals();
   ((FloatPortion *) param[6])->Value() = SM.Time();
@@ -689,9 +704,11 @@ Portion *GSM_LpSolveEfgFloat(Portion **param)
   ZSumParams ZP;
 
   ZSumBySubgame<double> ZM(E, ZP);
-  gList<BehavProfile<double> > solns;
 
-  solns.Append(ZM.Solve());
+  ZM.Solve();
+
+  gList<BehavProfile<double> > solns(ZM.GetSolutions());
+
 
   ((IntPortion *) param[1])->Value() = ZM.NumPivots();
   ((FloatPortion *) param[2])->Value() = ZM.Time();
@@ -709,9 +726,10 @@ Portion *GSM_LpSolveEfgRational(Portion **param)
   ZSumParams ZP;
 
   ZSumBySubgame<gRational> ZM(E, ZP);
-  gList<BehavProfile<gRational> > solns;
 
-  solns.Append(ZM.Solve());
+  ZM.Solve();
+
+  gList<BehavProfile<gRational> > solns(ZM.GetSolutions());
 
   ((IntPortion *) param[1])->Value() = ZM.NumPivots();
   ((FloatPortion *) param[2])->Value() = ZM.Time();
@@ -732,11 +750,11 @@ Portion *GSM_EnumPureEfgFloat(Portion **param)
   if (!((BoolPortion *) param[1])->Value())
     return new ErrorPortion("algorithm not implemented for extensive forms");
 
-  gList<BehavProfile<double> > solns;
-
   PureNashBySubgame<double> M(E);
 
-  solns.Append(M.Solve());
+  M.Solve();
+
+  gList<BehavProfile<double> > solns(M.GetSolutions());
 
   ((FloatPortion *) param[3])->Value() = M.Time();
   
@@ -753,11 +771,11 @@ Portion *GSM_EnumPureEfgRational(Portion **param)
   if (!((BoolPortion *) param[1])->Value())
     return new ErrorPortion("algorithm not implemented for extensive forms");
 
-  gList<BehavProfile<gRational> > solns;
-
   PureNashBySubgame<gRational> M(E);
 
-  solns.Append(M.Solve());
+  M.Solve();
+
+  gList<BehavProfile<gRational> > solns(M.GetSolutions());
 
   ((FloatPortion *) param[3])->Value() = M.Time();
   
@@ -781,9 +799,8 @@ Portion *GSM_EnumMixedEfgFloat(Portion **param)
   
   EnumBySubgame<double> EM(E, EP);
   
-  gList<BehavProfile<double> > solns;
-
-  solns.Append(EM.Solve());
+  EM.Solve();
+  gList<BehavProfile<double> > solns(EM.GetSolutions());
 
   ((IntPortion *) param[3])->Value() = EM.NumPivots();
   ((FloatPortion *) param[4])->Value() = EM.Time();
@@ -806,9 +823,9 @@ Portion *GSM_EnumMixedEfgRational(Portion **param)
   
   EnumBySubgame<gRational> EM(E, EP);
   
-  gList<BehavProfile<gRational> > solns;
+  EM.Solve();
 
-  solns.Append(EM.Solve());
+  gList<BehavProfile<gRational> > solns(EM.GetSolutions());
 
   ((IntPortion *) param[3])->Value() = EM.NumPivots();
   ((FloatPortion *) param[4])->Value() = EM.Time();

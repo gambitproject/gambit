@@ -15,12 +15,17 @@
 //-------------------------------------------------------------------------
 
 template <class T>
-void SubgameSolver<T>::FindSubgames(Node *n)
+void SubgameSolver<T>::FindSubgames(Node *n, BehavProfile<T> &soln)
 {
   int i;
 
-  for (i = 1; i <= n->NumChildren(); i++)
-    FindSubgames(n->GetChild(i));
+  for (i = 1; i <= n->NumChildren(); i++)  {
+    BehavProfile<T> subsoln(solution);
+    ((gVector<T> &) subsoln).operator=((T) 0);
+    FindSubgames(n->GetChild(i), subsoln);
+
+    soln += subsoln;
+  }
   
   if (n->GetSubgameRoot() == n)  {
     Efg<T> foo(efg, n);
@@ -59,7 +64,7 @@ void SubgameSolver<T>::FindSubgames(Node *n)
 
 	for (int act = 1; act <= p->InfosetList()[iset]->NumActions();
 	     act++)
-	  solution(pl, index, act) = bp(pl, iset, act);
+	  soln(pl, index, act) = bp(pl, iset, act);
       }
     }
  
@@ -88,15 +93,19 @@ template <class T> SubgameSolver<T>::~SubgameSolver()
 }
 
 template <class T> 
-const BehavProfile<T> &SubgameSolver<T>::Solve(void)
+void SubgameSolver<T>::Solve(void)
 {
   gWatch watch;
 
-  FindSubgames(efg.RootNode());
+  solutions.Flush();
+
+  ((gVector<T> &) solution).operator=((T) 0);
+
+  FindSubgames(efg.RootNode(), solution);
 
   time = watch.Elapsed();
 
-  return solution;
+  solutions.Append(solution);
 }
 
 //-------------------------------------------------------------------------

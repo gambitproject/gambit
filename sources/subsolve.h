@@ -14,10 +14,11 @@ template <class T> class SubgameSolver   {
     double time;
     Efg<T> efg;
     BehavProfile<T> solution;
+    gList<BehavProfile<T> > solutions;
 
     gArray<gArray<Infoset *> *> infosets;
 
-    void FindSubgames(Node *);
+    void FindSubgames(Node *, BehavProfile<T> &);
 
   protected:
     virtual void SolveSubgame(const Efg<T> &, BehavProfile<T> &) = 0;
@@ -26,9 +27,11 @@ template <class T> class SubgameSolver   {
     SubgameSolver(const Efg<T> &E);
     virtual ~SubgameSolver();
     
-    const BehavProfile<T> &Solve(void);
+    void Solve(void);
 
     double Time(void) const   { return time; }
+    const gList<BehavProfile<T> > GetSolutions(void) const
+      { return solutions; }
 };
 
 #include "seqform.h"
