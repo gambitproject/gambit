@@ -123,6 +123,18 @@ Bug C21: Algorithms producing nonsense on games of imperfect recall
   GCL6:= << IsNash[GCL5] 
   { Maybe }
 
+//------------------------------
+
+Bug C23:  Bug in LcpSolve, reported by Stengel 9/4/98
+
+Include["stengel3.efg"]
+GCL2:= << LcpSolve[e]
+gcl_Linux: lemketab.cc:123: int LTableau<double>::SF_ExitIndex(int): Assertion `BestSet.Length() > 0' failed.
+A segmentation fault has occurred
+
+(the file is in the directory ~rdm/gambit/test)
+
+
 
 
 //---------------  These are not bugs but suggested improvements ------------
