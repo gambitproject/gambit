@@ -49,6 +49,8 @@ template <class T> bool Nfg<T>::IsConstSum(void) const
 {
   int pl, index;
   T cvalue = (T) 0;
+  T eps;
+  gEpsilon(eps);
 
   for (pl = 1; pl <= players.Length(); pl++)
     cvalue += payoffs[pl][0];
@@ -59,7 +61,7 @@ template <class T> bool Nfg<T>::IsConstSum(void) const
     for (pl = 1; pl <= players.Length(); pl++)
       thisvalue += payoffs[pl][index];
 
-    if (thisvalue != cvalue)
+    if (thisvalue > cvalue + eps || thisvalue < cvalue - eps)
       return false;
   }
   
