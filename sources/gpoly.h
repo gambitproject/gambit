@@ -12,8 +12,8 @@
 #include "garray.h"
 #include "glist.h"
 #include "gblock.h"
-#include "ufortify.hpp"
-#include "ZFortify.hpp"
+//#include "ufortify.hpp" // Memory Leak Checks
+//#include "ZFortify.hpp" //
 
 // These classes are used to store and mathematically manipulate polynomials.
 // 
