@@ -1,10 +1,16 @@
-<chapter>
-    <title>Introduction</title>
-    <para>An introduction to Gambit</para>
+<chapter id="intro">
+<title>Introduction</title>
+
+<para>
+Gambit is an Open Source Software project with the goal of providing
+software tools and libraries for computational analysis of finite
+extensive and normal form games.  All Gambit code is licensed under
+the GNU General Public License.
+</para>
 
 <sect1 id="intro.history">
 <title>History and acknowledgements</title>
-      <para>
+<para>
 The Gambit Project is a project for the development of computer code
 for the solution of extensive and normal form games.  The software
 developed under the project is distributed under the GNU General Public

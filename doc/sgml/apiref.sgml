@@ -78,7 +78,7 @@ information and plans.
 
 &apirefmixed;
 
-<sect1>
+<sect1 id="apiref.gcl">
 <title>GCL-specific functions</title>
 
 <para>
