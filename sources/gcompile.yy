@@ -23,6 +23,8 @@
   gRational rval; \
   gString tval, formal;  \
   gList<Instruction *> program; \
+  gGrowableStack<gString> formalstack; \
+  gGrowableStack<int> labels; \
   GSM gsm; \
   \
   char nextchar(void); \
@@ -33,7 +35,7 @@
   int Parse(const gString &s); \
   void Execute(void);
 
-%define CONSTRUCTOR_INIT     : index(0), gsm(256)
+%define CONSTRUCTOR_INIT     : index(0), gsm(256), formalstack(4), labels(4)
 
 %token LOR
 %token LAND
@@ -53,6 +55,7 @@
 %token LBRACK
 %token RBRACK
 %token RARROW
+%token DBLARROW
 %token COMMA
 
 %token NAME
@@ -65,6 +68,9 @@
 %token LPAREN
 %token RPAREN
 
+%token IF
+%token WHILE
+
 %token BOOLEAN
 %token INTEGER
 %token FLOAT
@@ -74,17 +80,45 @@
 
 %%
 
-program:      statements   { emit(new Output); }
+program:      statements   { emit(new Display); }
 
 statements:   statement
           |   statements SEMI statement
 
 statement:
          |    expression
-         |    lvalue ASSIGN expression   { emit(new Assign); }
+         |    assignment
+         |    conditional
+         |    whileloop
+
+assignment:   lvalue ASSIGN expression   { emit(new Assign); }
 
 lvalue:       NAME     { emit(new PushRef(tval)); }
 
+conditional:  IF LBRACK expression COMMA 
+              { emit(new NOT); emit(0);
+                labels.Push(program.Length()); } statements 
+              { emit(0);
+		program[labels.Pop()] = new IfGoto(program.Length() + 1);
+		labels.Push(program.Length());
+	      }
+              alternative RBRACK
+              { emit(new NOP);
+		program[labels.Pop()] = new Goto(program.Length());
+              } 
+
+alternative:   
+           |  COMMA statements
+
+whileloop:    WHILE LBRACK { labels.Push(program.Length() + 1); }
+              expression { emit(new NOT); emit(0);
+			   labels.Push(program.Length()); }
+              COMMA statements RBRACK 
+              { program[labels.Pop()] = new IfGoto(program.Length() + 2);
+		emit(new Goto(labels.Pop()));
+		emit(new NOP);
+	      }
+ 
 expression:   E1
           |   expression LOR E1  { emit(new OR); }
           ;
@@ -149,10 +183,10 @@ unnamed_arg:  expression  { emit(new Bind()); }
 named_args:   named_arg
           |   named_args COMMA named_arg
 
-named_arg:
-             NAME RARROW { formal = tval; } expression
-                           { emit(new Bind(formal)); }
-
+named_arg:    NAME RARROW { formalstack.Push(tval); } expression
+                           { emit(new Bind(formalstack.Pop())); }
+         |    NAME DBLARROW  { formalstack.Push(tval); } lvalue
+                           { emit(new Bind(formalstack.Pop())); }
 %%
 
 
@@ -200,6 +234,8 @@ int GCLCompiler::yylex(void)
     else if (s == "NOT")    return LNOT;
     else if (s == "DIV")    return DIV;
     else if (s == "MOD")    return PERCENT;
+    else if (s == "If")     return IF;
+    else if (s == "While")  return WHILE;
     else  { tval = s; return NAME; }
   }
 
@@ -263,7 +299,14 @@ int GCLCompiler::yylex(void)
 		else   { ungetchar(c);  return LNOT; }
     case '<':   c = nextchar();
                 if (c == '=')  return LEQ;
-                else   { ungetchar(c);  return LTN; }
+                else if (c != '-')  { ungetchar(c);  return LTN; }
+                else   { 
+		  c = nextchar();
+		  if (c == '>')   return DBLARROW;
+		  ungetchar(c);
+		  ungetchar('-');
+		  return LTN;
+		}
     case '>':   c = nextchar();
                 if (c == '>')  return GEQ;
                 else   { ungetchar(c);  return GTN; }
@@ -302,4 +345,24 @@ void GCLCompiler::Execute(void)
   gsm.Execute(program);
   gsm.Flush();
 }
+
+#include "gstack.imp"
+#include "ggrstack.imp"
+
+#ifdef __GNUG__
+template class gStack<gString>;
+template class gGrowableStack<gString>;
+
+template class gStack<int>;
+template class gGrowableStack<int>;
+#elif defined __BORLANDC__
+#pragma option -Jgd
+class gStack<gString>;
+class gGrowableStack<gString>;
+
+class gStack<int>;
+class gGrowableStack<int>;
+#endif   // __GNUG__, __BORLANDC__
+
+
 
