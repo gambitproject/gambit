@@ -149,7 +149,7 @@ void LUdecomp<T>::apply(LUupdate<T> &update, gVector<T> &v) const
 // Z^-1 v is done in place
 {
   assert( mat.CheckColumn(v) );
-  assert( v.First()<=update.First() && update.Last()=v.Last()-1 );
+  assert( v.First()<=update.First() && update.Last()==v.Last()-1 );
   T tmp;
 
   for(int i=update.First(); i<=update.Last(); i++)
@@ -184,7 +184,7 @@ void LUdecomp<T>::Usolve(const gVector<T> &b, gVector<T> &x) const
 
 
 template<class T>
-void LUdecomp<T>::solve(gVector<T> &x, const gVector<T> &b) const
+void LUdecomp<T>::solve(const gVector<T> &b, gVector<T> &x)
 // solve A x = b
 {
   // &x can be the same as &b...
@@ -194,7 +194,7 @@ void LUdecomp<T>::solve(gVector<T> &x, const gVector<T> &b) const
 
   PermuteColumn(b,x);
   Lsolve(x,tmp);
-  for( gListIter<LUupdate<T>> iter(updates);
+  for( gListIter< LUupdate<T> > iter= gListIter< LUupdate<T> >(updates);
        ! iter.PastEnd();
        iter++
      )
@@ -255,7 +255,7 @@ void LUdecomp<T>::factor()
       T tmax= abs( mat(pindex,k) );
       for(row=max; row>k; row--)
 	{
-	  temp= abs( mat(row,c) );
+	  temp= abs( mat(row,k) );
 	  if( temp>tmax )
 	    {
 	      pindex= row;
@@ -265,9 +265,9 @@ void LUdecomp<T>::factor()
       if( pindex != k )
 	{
 	  mat.SwitchRows(k,pindex);
-	  int tmp= rpp(k);
-	  rpp(k)= rpp(pindex);
-	  rpp(pindex)= tmp;
+	  int tmp= rpp[k];
+	  rpp[k]= rpp[pindex];
+	  rpp[pindex]= tmp;
 	  rpparity++;
 	}
       assert( mat(k,k) != (T)0 );
@@ -277,7 +277,7 @@ void LUdecomp<T>::factor()
 	{
 	  // calculate L element
 	  temp= mat(row,k)/ mat(k,k);
-	  mat(row,k)= temp
+	  mat(row,k)= temp;
 
 	  // calculate A_k elements
 	  for(col=max; col>k; col--)
@@ -291,7 +291,7 @@ template<class T>
 void LUdecomp<T>::update(int column, const gVector<T> &v)
 // delete column, add v on the right (mat.MaxCol()), update LU decomposition
 {
-  assert( CheckColumn(column) && CheckColumn(v) );
+  assert( mat.CheckColumn(column) && mat.CheckColumn(v) );
 
   int min= v.First(), max= v.Last();
   gVector<T> temp(min,max);
@@ -302,9 +302,9 @@ void LUdecomp<T>::update(int column, const gVector<T> &v)
   Lsolve(temp,Ucol); // Ucol is new U column
   mat.GetColumn(column,temp); // temp is temp. storage for L column
   mat.RotateLeft(column,max); // shift columns over
-  mat.PutColumn(mat.MaxCol(),Ucol); // insert new U column
+  mat.SetColumn(mat.MaxCol(),Ucol); // insert new U column
 
-  LUupdate update(column, mat.MaxCol()-1);
+  LUupdate<T> update(column, mat.MaxCol()-1);
   T tmp, alpha;
   for(int k=column; k<max; k++)
     {
@@ -317,7 +317,7 @@ void LUdecomp<T>::update(int column, const gVector<T> &v)
           update.rowp[k]= 0;
           update.alpha[k]= alpha;
 	  for(int i=max; i>k; i--)
-            mat[k+1,i]-= alpha*mat[k,i];
+            mat(k+1,i)-= alpha*mat(k,i);
 	}
       else
 	{
@@ -328,14 +328,14 @@ void LUdecomp<T>::update(int column, const gVector<T> &v)
 	  // switch U rows (but not L rows -- perm. stored in factored form)
 	  for(int i=max; i>k; i--)
 	    {
-	      tmp= mat[k+1,i];
-	      mat[k+1,i]= mat[k,i] - tmp*alpha;
-	      mat[k,i]= tmp;
+	      tmp= mat(k+1,i);
+	      mat(k+1,i)= mat(k,i) - tmp*alpha;
+	      mat(k,i)= tmp;
 	    }
 	}
 
       // append update to updates list
-      updates.append(update);
+      updates.Append(update);
 
       // switch L column with temp
       for(int i=max; i>k; i--)
@@ -347,7 +347,7 @@ void LUdecomp<T>::update(int column, const gVector<T> &v)
     } // end for(k)
 
   // make sure U is nonsingular (practically useless as written...)
-  assert( mat(max,max) != (T)0 )
+  assert( mat(max,max) != (T)0 );
 } // end update()
 
 

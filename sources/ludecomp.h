@@ -11,28 +11,51 @@
 #include "gvector.h"
 #include "gtuple.h"
 #include "glist.h"
+#include "gambitio.h"
 
 
 // LUupdatelist is used only by LUdecomp
 template <class T> class LUupdate {
  public:
-  LUupdate *next, *prev;
   gTuple<bool> rowp;
   gVector<T> alpha;
 
+  LUupdate();
   LUupdate(int,int);
   ~LUupdate();
+
+  // required for list class
+  int operator==(const LUupdate<T>) const;
+  int operator!=(const LUupdate<T>) const;
+
   int First();
   int Last();
 }; // end class updatelist
 
 template <class T>
-LUupdate<T>::LUupdate(int,int): rowp(lo,hi), alpha(lo,hi)
-{ next=prev= NULL; }
+gOutput& operator<<(gOutput &out, LUupdate<T> u)
+{ return out<<u.alpha<<u.rowp; }
+
+template <class T>
+LUupdate<T>::LUupdate()
+{ assert( 0 ); } // required for list class; currently, shouldn't be called
+
+template <class T>
+LUupdate<T>::LUupdate(int lo,int hi): rowp(lo,hi), alpha(lo,hi)
+{ }
 
 template <class T>
 LUupdate<T>::~LUupdate()
 { }
+
+
+template <class T>
+int LUupdate<T>::operator==(const LUupdate<T> u) const
+{ return rowp==u.rowp && alpha==u.alpha; }
+
+template <class T>
+int LUupdate<T>::operator!=(const LUupdate<T> u) const
+{ return rowp!=u.rowp || alpha!=u.alpha; }
 
 template <class T>
 int LUupdate<T>::First()
@@ -51,7 +74,7 @@ template <class T> class LUdecomp {
   gMatrix<T> mat;
   gTuple<int> rpp;
   int rpparity;
-  gList<LUupdate<T>> updates;
+  gList< LUupdate<T> > updates;
 
   void null_rpp(); // initialize row permutation to identity
   void identity(); // fill mat with identity matrix (already factored...)
@@ -73,8 +96,8 @@ template <class T> class LUdecomp {
   void refactor(gMatrix<T>&); // factor a new matrix
   void refactor(gMatrix<T>&, gTuple<int>&); // reinitialize /w selected columns
 
-  void solve(gVector<T>&, const gVector<T>&) const; // solve:  M x = b
-  void solveT(gVector<T>&, const gVector<T>&) const; // solve:  yt M = ct
+  void solve(const gVector<T>&, gVector<T>&); // solve:  M x = b
+  void solveT(const gVector<T>&, gVector<T>&) const; // solve:  yt M = ct
   T Determinant() const; // compute determinant
 
 }; // end class LUdecomp
