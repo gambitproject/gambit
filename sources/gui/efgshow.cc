@@ -674,7 +674,6 @@ void EfgShow::UpdateMenus(void)
 #include "bitmaps/print.xpm"
 #include "bitmaps/zoomin.xpm"
 #include "bitmaps/zoomout.xpm"
-#include "bitmaps/table.xpm"
 #include "bitmaps/help.xpm"
 
 void EfgShow::MakeToolbar(void)
@@ -702,11 +701,6 @@ void EfgShow::MakeToolbar(void)
 		   false, -1, -1, 0, "Zoom in", "Increase magnification");
   toolBar->AddTool(efgmenuVIEW_ZOOMOUT, wxBITMAP(zoomout), wxNullBitmap,
 		   false, -1, -1, 0, "Zoom out", "Decrease magnification");
-  toolBar->AddSeparator();
-
-  toolBar->AddTool(efgmenuTOOLS_NFG_REDUCED, wxBITMAP(table), wxNullBitmap,
-		   false, -1, -1, 0, "Normal form",
-		   "Generate reduced normal form");
   toolBar->AddSeparator();
 
   toolBar->AddTool(wxID_HELP_CONTENTS, wxBITMAP(help), wxNullBitmap, false,

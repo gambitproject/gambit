@@ -1,6 +1,7 @@
 ## Process this file with automake to create Makefile.in
 
 EXTRA_DIST = \
+	copy.xpm \
 	efg.ico \
 	efg.xbm \
 	gambit.bmp \
@@ -8,6 +9,7 @@ EXTRA_DIST = \
 	gambit.xbm \
 	gambit.xpm \
 	help.xpm \
+	move.xpm \
 	new.bmp \
 	new.xpm \
 	nfg.ico \
