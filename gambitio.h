@@ -1,7 +1,7 @@
 //#
 //# FILE: gambitio.h -- Declaration of input and output classes
 //#
-//# @(#)gambitio.h	1.5 11/3/94
+//# $Id$
 //#
 
 #ifndef GAMBITIO_H
@@ -41,7 +41,8 @@ class gInput  {
 class gFileInput : public gInput  {
   private:
     FILE *f;
-		int valid;
+    int valid;
+
     gFileInput(const gFileInput &);
     gFileInput &operator=(const gFileInput &);
 
@@ -97,7 +98,8 @@ class gOutput  {
 class gFileOutput : public gOutput  {
   private:
     FILE *f;
-		int valid;
+    int valid;
+
     gFileOutput(const gFileOutput &);
     gFileOutput &operator=(const gFileOutput &);
 
