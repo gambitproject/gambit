@@ -28,7 +28,7 @@ int FindPureNash(const Nfg &N, const NFSupport &S, gList<MixedSolution> &eqs)
       double current = N.Payoff(citer.GetOutcome(), pl).Evaluate(values);
       for (int i = 1; i <= S.NumStrats(pl); i++)  {
 	niter.Next(pl);
-	if (N.Payoff(niter.GetOutcome(), pl).Evaluate(values) > current)  {
+	if (N.Payoff(niter.GetOutcome(), pl).Evaluate(values) > (gNumber)current)  {
 	  flag = 0;
 	  break;
 	}

@@ -12,8 +12,8 @@
 #include "gnumber.h"
 
 template class gPoly<gRational>;
-template gPoly<gRational> operator*(const gRational val, const gPoly<gRational> poly);
-template gPoly<gRational> operator*(const gPoly<gRational> poly, const gRational val);
+template gPoly<gRational> operator*(const gRational val, const gPoly<gRational> &poly);
+template gPoly<gRational> operator*(const gPoly<gRational> &poly, const gRational val);
 
 #ifdef GDOUBLE
 template gPoly<gDouble> TogDouble(const gPoly<gRational>&);
@@ -22,8 +22,8 @@ template gOutput &operator<<(gOutput &f, const gPoly<gRational> &y);
 template gString &operator<<(gString &, const gPoly<gRational> &);
 
 template class gPoly<gNumber>;
-template gPoly<gNumber> operator*(const gNumber val, const gPoly<gNumber> poly);
-template gPoly<gNumber> operator*(const gPoly<gNumber> poly, const gNumber val);
+template gPoly<gNumber> operator*(const gNumber val, const gPoly<gNumber> &poly);
+template gPoly<gNumber> operator*(const gPoly<gNumber> &poly, const gNumber val);
 
 #ifdef GDOUBLE
 template gPoly<gDouble> TogDouble(const gPoly<gNumber>&);
@@ -32,8 +32,8 @@ template gOutput &operator<<(gOutput &f, const gPoly<gNumber> &y);
 template gString &operator<<(gString &, const gPoly<gNumber> &);
 
 template class gPoly<double>;
-template gPoly<double> operator*(const double val, const gPoly<double> poly);
-template gPoly<double> operator*(const gPoly<double> poly, const double val);
+template gPoly<double> operator*(const double val, const gPoly<double> &poly);
+template gPoly<double> operator*(const gPoly<double> &poly, const double val);
 
 #ifdef GDOUBLE
 template gPoly<gDouble> TogDouble(const gPoly<double>&);

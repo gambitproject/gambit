@@ -132,7 +132,7 @@ contingencylist:  contingency
 
 contingency:   NUMBER
                 { if (cont > ncont)  YYERROR;
-                  if (last_number != 0)
+                  if (last_number != gNumber(0))
                     N->SetOutcome(cont++, N->Outcomes()[last_number]); }
               
 
