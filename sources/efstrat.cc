@@ -127,8 +127,7 @@ Action* EFActionSet::RemoveAction(int iset, int i)
 //Action was successfully removed, false otherwise.
 bool EFActionSet::RemoveAction(int  iset, Action *s ) 
 { 
-  int t; 
-  t = infosets[iset]->acts.Find(s); 
+  int t = infosets[iset]->acts.Find(s); 
   if (t>0) infosets[iset]->acts.Remove(t); 
   return (t>0); 
 } 
@@ -313,17 +312,14 @@ void EFSupport::Dump(gOutput& s) const
 
   s << "{ ";
   numplayers = befg->NumPlayers();
-  for( i = 1; i <= numplayers; i++ )
-  {
+  for (i = 1; i <= numplayers; i++)  {
     EFPlayer& player = sets[i]->GetPlayer();
     s << '"' << player.GetName() << "\" { ";
-    for( j = 1; j <= player.NumInfosets(); j++ )
-    {
-      Infoset* infoset = player.InfosetList()[ j ];
+    for (j = 1; j <= player.NumInfosets(); j++)  {
+      Infoset* infoset = player.InfosetList()[j];
       s << '"' << infoset->GetName() << "\" { ";
-      for( k = 1; k <= infoset->NumActions(); k++ )
-      {
-	Action* action = infoset->GetActionList()[ k ];
+      for (k = 1; k <= NumActions(i, j); k++)  {
+	Action* action = sets[i]->ActionList(j)[k];
 	s << '"' << action->GetName() << "\" ";
       }
       s << "} ";
