@@ -1,6 +1,7 @@
 //#
-//# File: gpoly.imp  -- Implementation of gPoly data type
-//# @(#) gpoly.imp	1.3 8/2/95
+//# FILE: gpoly.imp  -- Implementation of gPoly data type
+//#
+//# $Id$
 //#
 
 #include "gpoly.h"
@@ -163,12 +164,13 @@ template<class T> void gPoly<T>::operator+=(const gPoly<T> &p)
   assert(List == p.List);
 
   Power<T> *temp;
+
   temp = Adder(Root, p.Root);
   Remover (Root);
   Root = temp;
 
 //DEBUG
-  gout << "In operator +=, after Adder, *this = " << *this << "\n\n";
+//  gout << "In operator +=, after Adder, *this = " << *this << "\n\n";
 
   ZeroCoefRemover(Root, NULL);
   Collapsor(Root, NULL);
@@ -898,7 +900,7 @@ template <class T> void gPoly<T>::CreateTree(const gArray<int> &Powers, int i,
 
 template <class T> Power<T> *gPoly<T>::Adder( Power<T> *One, Power<T> *Two)
 {
-  Power<T> *i, *j, *k, *pk, *kRoot, *nexti, *nextj, *temp, *temp2, *one, *two;
+  Power<T> *i, *j, *pk, *kRoot, *nexti, *nextj, *one, *two;
   kRoot = NULL;
   
   one = One; two = Two;
@@ -910,22 +912,22 @@ template <class T> Power<T> *gPoly<T>::Adder( Power<T> *One, Power<T> *Two)
     kRoot->pow = 0;  
     kRoot->down = new term<T>;
     if (two->down->Var->number < one->down->Var->number){
-      temp = one; one = two; two = temp;
+      Power<T> *temp = one; one = two; two = temp;
     }
     if (two->down->Var->number > one->down->Var->number){
-      temp = LowZero(two);
+      Power<T> *temp = LowZero(two);
       if (one->pow == 0 && one->down->down == NULL && temp != NULL){
 	if (temp->down->down == NULL){
-	  k = CreatDupl(two);
+	  Power<T> *k = CreatDupl(two);
 	  LowZero(k)->down->Coef += one->down->Coef;
 	  kRoot->next = CreatDupl(one->next);
 	  kRoot->down->Var = one->down->Var;
 	  kRoot->down->down = k;
 	}
 	else {
-	  k = CreatDupl(two);
+	  Power<T> *k = CreatDupl(two);
 	  temp = LowZero(k);
-	  temp2 = new Power<T>;
+	  Power<T> *temp2 = new Power<T>;
 	  temp2->down = new term<T>;
 	  temp2->pow = 0;
 	  temp2->down->Var = temp->down->down->down->Var;
@@ -940,30 +942,39 @@ template <class T> Power<T> *gPoly<T>::Adder( Power<T> *One, Power<T> *Two)
 	}
       }
       else if (one->pow == 0 && one->down->down == NULL && temp == NULL){
-	k = CreatDupl(two);
-	temp2 = new Power<T>;
+	Power<T> *k = CreatDupl(two);
+	Power<T> *temp2 = new Power<T>;
 	temp2->down = new term<T>;
 	temp2->pow = 0;
 	temp2->down->Var = k->down->Var;
 	temp2->down->Coef = one->down->Coef;
 	temp2->down->down = NULL;
 	temp2->next = k;
-	k = temp2;
 	kRoot->next = CreatDupl(one->next);
 	kRoot->down->Var = one->down->Var;
-	kRoot->down->down = k;
+	kRoot->down->down = temp2;
       }
       else {
-	if (one->pow == 0) kRoot->next = CreatDupl(one->next);
-	else kRoot->next = CreatDupl(one);
+	Power<T> *k = CreatDupl(two);
+	Power<T> *temp2 = new Power<T>;
+	temp2->down = new term<T>;
+	temp2->pow = one->pow;
+	temp2->down->Var = one->down->Var;
+	temp2->down->Coef = one->down->Coef;
+	temp2->down->down = CreatDupl(one->down->down);
+	temp2->next = k;
+	kRoot->next = CreatDupl(one->next);
 	kRoot->down->Var = one->down->Var;
-	kRoot->down->down = Adder(one->down->down, two);
+	kRoot->down->down = temp2;
+
+
       }	
     }    
   }
   
 // BIG CASE #2
   else {
+    Power<T> *k;
     for (i = one, j = two, pk = NULL; i != NULL 
 	 || j!=NULL; i = nexti, j = nextj, pk = k){
       if (i == NULL) {
@@ -1022,10 +1033,10 @@ template <class T> Power<T> *gPoly<T>::Adder( Power<T> *One, Power<T> *Two)
 	  if (i->down->down != NULL) k->down->down = CreatDupl(i->down->down);
 	  else k->down->down = CreatDupl(j->down->down);
 
-	  temp = LowZero(k);
+	  Power<T> *temp = LowZero(k);
 
 	  if (temp == NULL || temp->down->down != NULL) {
-	    temp2 = new Power<T>;
+	    Power<T> *temp2 = new Power<T>;
 	    temp2->down = new term<T>;
 	    temp2->pow = 0;
 	    if (i->down->down != NULL) {
