@@ -1,7 +1,7 @@
 //#
 //# FILE: grarray.imp -- Implementation of base rectangular array class
 //#
-//# $Id$
+//# @(#)grarray.imp	1.4 6/5/95
 //#
 
 #include "grarray.h"
@@ -47,37 +47,40 @@ template <class T> gRectArray<T>::gRectArray(const gRectArray<T> &a)
   : minrow(a.minrow), maxrow(a.maxrow), mincol(a.mincol), maxcol(a.maxcol)
 {
   data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : 0;
-  for (int i = minrow; i <= maxrow; i++)  {
-    data[i] = new T[maxcol - mincol + 1] - mincol;
-    for (int j = mincol; j <= maxcol; j++)
-      data[i][j] = a.data[i][j];
-  }
+	for (int i = minrow; i <= maxrow; i++)  {
+		data[i] = new T[maxcol - mincol + 1] - mincol;
+		for (int j = mincol; j <= maxcol; j++)
+			data[i][j] = a.data[i][j];
+	}
 }
 
 template <class T> gRectArray<T>::~gRectArray()
 {
-  for (int i = minrow; i <= maxrow; delete [] (data[i++] + mincol));
-  if (data)  delete [] (data + minrow);
+	for (int i = minrow; i <= maxrow; delete [] (data[i++] + mincol));
+	if (data)  delete [] (data + minrow);
 }
 
 template <class T>
 gRectArray<T> &gRectArray<T>::operator=(const gRectArray<T> &a)
 {
-  for (int i = minrow; i <= maxrow; delete [] (data[i++] + mincol));
-  if (data)  delete [] (data + minrow);
+	for (int i = minrow; i <= maxrow; delete [] (data[i++] + mincol));
+	if (data)  delete [] (data + minrow);
 
-  minrow = a.minrow;
-  maxrow = a.maxrow;
-  mincol = a.mincol;
-  maxcol = a.maxcol;
+	minrow = a.minrow;
+	maxrow = a.maxrow;
+	mincol = a.mincol;
+	maxcol = a.maxcol;
 
-  data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : 0;
+	data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : 0;
 
-  for (i = minrow; i <= maxrow; i++)
-    for (int j = mincol; j <= maxcol; j++)
-      data[i][j] = a.data[i][j];
+	for (i = minrow; i <= maxrow; i++)
+	{
+		data[i] = new T[maxcol - mincol + 1] - mincol;
+		for (int j = mincol; j <= maxcol; j++)
+			data[i][j] = a.data[i][j];
+	}
 
-  return *this;
+	return *this;
 }
 
 //------------------------------------------------------------------------
