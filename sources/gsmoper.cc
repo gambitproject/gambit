@@ -1906,7 +1906,7 @@ void Init_gsmoper(GSM* gsm)
 			("width", porNUMBER, 
 			 _WriteWidth.RefCopy(), BYREF));
   FuncObj->SetParamInfo(0, 2, gclParameter
-			("precis", porNUMBER,
+			("decimals", porNUMBER,
 			 _WritePrecis.RefCopy(), BYREF));
   FuncObj->SetParamInfo(0, 3, gclParameter
 			("expmode", porBOOLEAN,
@@ -1930,7 +1930,7 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetFuncInfo(3, gclSignature(GSM_GameFormat,
 				       porEFG | porNFG, 2));
   FuncObj->SetParamInfo(3, 0, gclParameter("x", porEFG | porNFG));
-  FuncObj->SetParamInfo(3, 1, gclParameter("nDecimals", porNUMBER,
+  FuncObj->SetParamInfo(3, 1, gclParameter("decimals", porNUMBER,
 					   _WriteGameDecimals.RefCopy(), BYREF));
   gsm->AddFunction(FuncObj);
 
@@ -1941,7 +1941,7 @@ void Init_gsmoper(GSM* gsm)
 			("width", porNUMBER, 
 			 _WriteWidth.RefCopy(), BYREF));
   FuncObj->SetParamInfo(0, 2, gclParameter
-			("precis", porNUMBER,
+			("decimals", porNUMBER,
 			 _WritePrecis.RefCopy(), BYREF));
   FuncObj->SetParamInfo(0, 3, gclParameter
 			("expmode", porBOOLEAN,
@@ -1965,7 +1965,7 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetFuncInfo(3, gclSignature(GSM_GetGameFormat,
 				       porEFG | porNFG, 2));
   FuncObj->SetParamInfo(3, 0, gclParameter("x", porEFG | porNFG));
-  FuncObj->SetParamInfo(3, 1, gclParameter("nDecimals", porNUMBER,
+  FuncObj->SetParamInfo(3, 1, gclParameter("decimals", porNUMBER,
 					   _WriteGameDecimals.RefCopy(),
 					   BYREF));
   gsm->AddFunction(FuncObj);

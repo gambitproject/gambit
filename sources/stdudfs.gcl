@@ -2,13 +2,13 @@
 
 StdOut << "Include[\""+GetPath[]+"\"]\n"
 
-NewFunction[SetNumericFormat[{width->0},{precis->6},{expmode->False}]=:BOOLEAN,
-  !IsNull[Format[1.0,width,precis,expmode]]
+NewFunction[SetNumericFormat[{width->0},{decimals->6},{expmode->False}]=:BOOLEAN,
+  !IsNull[Format[1.0,width,decimals,expmode]]
 ]
 
-NewFunction[GetNumericFormat[{width<->0}, {precis<->6},
+NewFunction[GetNumericFormat[{width<->0}, {decimals<->6},
   {expmode<->False}]=:BOOLEAN,
-  GetFormat[1.0,width,precis,expmode];
+  GetFormat[1.0,width,decimals,expmode];
   True
 ]
 

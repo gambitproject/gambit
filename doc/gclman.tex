@@ -4390,7 +4390,7 @@ default is 0.)
 
 \item\lex{Format}
 \protect \large \begin{verbatim}
-Format[x->NUMBER, {width<->0}, {precis<->6}, {expmode<->False}] =: NUMBER 
+Format[x->NUMBER, {width<->0}, {decimals<->6}, {expmode<->False}] =: NUMBER 
 \end{verbatim} \normalsize
 
 \bd
@@ -4399,7 +4399,7 @@ Sets the formatting style for output of NUMBER data types on output streams.
 \item [width:] The width for a numeric field.  If the width of the
 data is greater than \verb+width+, the width is overridden.  (The
 default is 0.)
-\item [precis:] The number of decimal places shown for floating point
+\item [decimals:] The number of decimal places shown for floating point
 numbers.
 \item [expmode:] If \verb+True+, floating point numbers are printed in
 exponential format.
@@ -4440,6 +4440,21 @@ by their strategy or action labels.  If \verb+False+, the whole vector
 (including zeroes) is printed, without any labels.
 \ed
 \item [See also:] \verb+ListFormat+, verb+Write+.
+\ed
+
+\item\lex{Format}
+\protect \large \begin{verbatim}
+Format[x->EFG, {decimals<->6}] =: EFG
+Format[x->NFG, {decimals<->6}] =: NFG
+\end{verbatim} \normalsize
+
+\bd
+Sets the formatting style for .efg and .nfg files.
+\bd
+\item [nDecimals:] The number of decimal places to use in representing
+floating-point numbers.
+\ed
+\item [See also:] \verb+SaveEfg+, \verb+SaveNfg+.
 \ed
 
 
@@ -4492,14 +4507,14 @@ output streams.
 
 \item\lex{GetFormat}
 \protect \large \begin{verbatim}
-GetFormat[x->NUMBER, {width<->0}, {precis<->6}, {expmode<->False}] =: NUMBER 
+GetFormat[x->NUMBER, {width<->0}, {decimals<->6}, {expmode<->False}] =: NUMBER 
 \end{verbatim} \normalsize
 
 \bd Gets the current formatting style for output of {\tt NUMBER} data types
 on output streams.  
 \bd
 \item [width:] The width for a numeric field.  
-\item [precis:] The number of decimal places shown for floating point
+\item [decimals:] The number of decimal places shown for floating point
 numbers.
 \item [expmode:] Whether floating point numbers are printed in
 exponential format.
@@ -4538,6 +4553,21 @@ by their strategy or action labels.  If \verb+False+, the whole vector
 (including zeroes) is printed, without any labels.
 \ed
 \item [See also:] \verb+Format+.
+\ed
+
+\item\lex{GetFormat}
+\protect \large \begin{verbatim}
+GetFormat[x->EFG, {nDecimals<->6}] =: EFG
+GetFormat[x->NFG, {nDecimals<->6}] =: NFG
+\end{verbatim} \normalsize
+
+\bd
+Sets the formatting style for .efg and .nfg files.
+\bd
+\item [nDecimals:] The number of decimal places to use in representing
+floating-point numbers.
+\ed
+\item [See also:] \verb+Format+, \verb+SaveEfg+, \verb+SaveNfg+.
 \ed
 
 \item\lex{GetListFormat}
