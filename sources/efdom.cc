@@ -9,74 +9,62 @@
 #include "rational.h"
 #include "gstatus.h"
 
-// With strong set to false, the following routine returns true 
-// if action a weakly dominates b.  With strong set to true, true is 
-// returned when a yields a strictly greater payoff, regardless of
-// others' behavior, which means that the infoset must be reached with
-// positive probability in every play of the game.
+// The following computes whether action a dominates action b.
+// If `conditional' is false, then the computation is with respect
+// to whether a dominates b with respect to all possibilities for 
+// the game allowed by the support.  The argument `strong' describes
+// whether domination is supposed to be strong or weak.  In particular,
+// if strong is true and conditional is false, true cannot be
+// returned unless all plays (given the support) go through the
+// infoset where a and b might be chosen.
 
-bool Dominates(const EFSupport &S, int pl, int iset, int a, int b, bool strong,gStatus &status)
-{
-
-  EfgContIter A(S), B(S);
-    
-    A.Freeze(pl, iset);
-    A.Set(pl, iset, a);
-    B.Freeze(pl, iset);
-    B.Set(pl, iset, b);
-
-    if (strong)  {
-      do  {
-	status.Get();
-	gRational ap = A.Payoff(pl);
-	gRational bp = B.Payoff(pl);
-	if (ap <= bp)  return false;
-	A.NextContingency();
-      } while (B.NextContingency());
-      return true;
-    }
-
-    bool equal = true;
-
-    do   {
-      status.Get();
-      gRational ap = A.Payoff(pl);
-      gRational bp = B.Payoff(pl);
-      if (ap < bp)   return false;
-      else if (ap > bp)  equal = false;
-      A.NextContingency();
-    } while (B.NextContingency());
-    
-    return (!equal);
-}
-
-// With strong set to false, the following routine returns true 
-// if action a weakly dominates b.  This is the same as the routine 
-// above, but the procedure is more efficient.  With strong set to true,
-// the following returns true when, conditional on any node in the
-// infoset having been reached, a yields a strictly higher payoff.
-
-bool ConditionallyDominates(const EFSupport &S, 
+bool Dominates(const EFSupport &S, 
 			    int pl, 
 			    int iset, 
 			    int a, int b, 
 			    bool strong,
+			    bool conditional,
 			    gStatus &status)
 {
-  const Action *aAct = S.Actions(pl,iset)[a];
-  const Action *bAct = S.Actions(pl,iset)[b];
-  const EFSupportWithActiveNodes SAct(S);
-
-  bool equal = true;
-
   const Infoset *infoset = S.Game().GetInfosetByIndex(pl,iset);
 
+  if (!conditional) {
+    if (!S.MayReach(infoset))
+      return false;
+    if (S.AlwaysReaches(infoset) || !strong)
+      return Dominates(S,pl,iset,a,b,strong,true,status);
+    else
+      return false;
+  }
+
+    //DEBUG
+  //    gout << "Got here with conditional being true...\n";
+
+  const EFSupportWithActiveNodes SAct(S);
+
+    //DEBUG
+  //    gout << "Got past the construction of SAct...\n";
+
+  const Action *aAct = S.Actions(pl,iset)[a];
+  const Action *bAct = S.Actions(pl,iset)[b];
+
+    //DEBUG
+  //    gout << "Got to the point of defining nodelist...\n";
+
   gList<const Node *> nodelist = SAct.ReachableNodesInInfoset(infoset);  
-
   if (nodelist.Length() == 0)
-    nodelist = infoset->ListOfMembers();  // This may not be a good idea
+    nodelist = infoset->ListOfMembers();  // This may not be a good idea;
+                                          // I suggest checking for this 
+                                          // prior to entry
 
+    //DEBUG
+  // gout << "Got past the definition of nodelist...\n";
+
+  bool equal = true;
   for (int n = 1; n <= nodelist.Length(); n++) {
+
+    //DEBUG
+    //    gout << "Got to the loop over nodes...\n";
 
     gList<const Infoset *> L;
     L += S.ReachableInfosets(nodelist[n],aAct);
@@ -91,8 +79,6 @@ bool ConditionallyDominates(const EFSupport &S,
       status.Get();
       gRational ap = A.Payoff(nodelist[n],pl);  
       gRational bp = B.Payoff(nodelist[n],pl);
-      // gRational ap = A.Payoff(pl);  
-      // gRational bp = B.Payoff(pl);
       if (strong)
 	{ if (ap <= bp)  return false; }
       else
@@ -104,7 +90,6 @@ bool ConditionallyDominates(const EFSupport &S,
   if (strong) return true;
   else return (!equal);
 }
-
 
 bool ComputeDominated(EFSupport &S, EFSupport &T,
 					int pl, int iset, bool strong,
@@ -122,7 +107,7 @@ bool ComputeDominated(EFSupport &S, EFSupport &T,
     status.Get();
     int pp;
     for (pp = 0;
-	 pp < min && !Dominates(S, pl, iset, set[pp+1], set[dis+1], strong,status);
+	 pp < min && !Dominates(S, pl, iset, set[pp+1], set[dis+1], strong,false,status);
 	 pp++);
     if (pp < min)
       dis--;
@@ -133,12 +118,12 @@ bool ComputeDominated(EFSupport &S, EFSupport &T,
 
       for (int inc = min + 1; inc <= dis; )  {
 	status.Get();
-	if (Dominates(S, pl, iset, set[min+1], set[dis+1], strong,status))  {
+	if (Dominates(S, pl, iset, set[min+1], set[dis+1], strong, false,status))  {
 		status << actions[set[dis+1]]->GetNumber() << " dominated by "
 				<< actions[set[min+1]]->GetNumber() << '\n';
 		dis--;
 	}
-	else if (Dominates(S, pl, iset, set[dis+1], set[min+1], strong,status))  {
+	else if (Dominates(S, pl, iset, set[dis+1], set[min+1], strong,false,status))  {
 		status << actions[set[min+1]]->GetNumber() << " dominated by "
 			<< actions[set[dis+1]]->GetNumber() << '\n';
 		foo = set[dis+1];
