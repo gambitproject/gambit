@@ -581,8 +581,8 @@ bool GSM::_BinaryOperation( const gString& funcname )
 {
   Portion*   p2;
   Portion*   p1;
-  Portion*   p;
-  Portion*   result = 0;
+  gList< Instruction* > prog;
+  GSM_ReturnCode result;
 
 #ifndef NDEBUG
   if( _Depth() < 2 )
@@ -591,85 +591,23 @@ bool GSM::_BinaryOperation( const gString& funcname )
   }
   assert( _Depth() >= 2 );
 #endif // NDEBUG
-  
+
+  // bind the parameters in correct order
   p2 = _Pop();
   p1 = _Pop();
+  _Push( p2 );
+  _Push( p1 );
   
-  p2 = _ResolveRef( p2 );
-  p1 = _ResolveRef( p1 );
+  prog.Append( new class InitCallFunction( funcname ) );
+  prog.Append( new class Bind );
+  prog.Append( new class Bind );
+  prog.Append( new class CallFunction );
+  result = Execute( prog );
 
-  if( p1->Type() == porREFERENCE || p2->Type() == porREFERENCE )
-  {
-    if( p1->Type() == porREFERENCE )
-      _ErrorMessage( _StdErr, 16, 0, 0, ( (ReferencePortion*) p1 )->Value() );
-    if( p2->Type() == porREFERENCE )
-      _ErrorMessage( _StdErr, 16, 0, 0, ( (ReferencePortion*) p2 )->Value() );
-    delete p1;
-    delete p2;
-    p1 = new ErrorPortion;
-    result = new ErrorPortion;
-  }
-
-  else if( p1->Type() == p2->Type() )
-  {
-    // SPECIAL CASE HANDLING - Integer division to produce gRationals
-    if( funcname == "Divide" && p1->Type() == porINTEGER &&
-       ( (IntPortion*) p2 )->Value() != 0 )
-    {
-      p = new RationalValPortion( ( (IntPortion*) p1 )->Value() );
-      ( (RationalPortion*) p )->Value() /= ( ( (IntPortion*) p2 )->Value() );
-      delete p2;
-      delete p1;
-      p1 = p;
-    }
-    else
-    {
-      // Main operations dispatcher
-      InitCallFunction( funcname );
-      _Push( p1 );
-      Bind();
-      _Push( p2 );
-      Bind();
-      CallFunction();
-      result = _Pop();
-      if( result->Type() != porERROR )
-      {
-	p1 = result;
-	result = 0;
-      }
-      else
-      {
-	p1 = new ErrorPortion;
-      }
-    }
-  }
-
-  else // ( p1->Type() != p2->Type() )
-  {
-    _ErrorMessage( _StdErr, 17 );
-    delete p1;
-    delete p2;
-    p1 = new ErrorPortion;
-    result = new ErrorPortion;
-  }
-
-
-  if( result == 0 )
-  {
-    _Push( p1 );
+  if( result == rcSUCCESS )
     return true;
-  }
   else
-  {
-    assert( result->Type() == porERROR );
-    if( ( (ErrorPortion*) result )->Value() != "" )
-      result->Output( _StdErr );
-    delete result;
-    delete p1;
-    p1 = new ErrorPortion;
-    _Push( p1 );
     return false;
-  }
 }
 
 
@@ -681,7 +619,8 @@ bool GSM::_BinaryOperation( const gString& funcname )
 
 bool GSM::_UnaryOperation( const gString& funcname )
 {
-  Portion*  result = 0;
+  gList< Instruction* > prog;
+  GSM_ReturnCode result;
 
 #ifndef NDEBUG
   if( _Depth() < 1 )
@@ -691,19 +630,15 @@ bool GSM::_UnaryOperation( const gString& funcname )
   assert( _Depth() >= 1 );
 #endif // NDEBUG
 
-  InitCallFunction( funcname );
-  Bind();
-  CallFunction();
-  result = _StackStack->Peek()->Peek();
-  if( result->Type() != porERROR )
+  prog.Append( new class InitCallFunction( funcname ) );
+  prog.Append( new class Bind );
+  prog.Append( new class CallFunction );
+  result = Execute( prog );
+
+  if( result == rcSUCCESS )
     return true;
   else
-  {
-    assert( result->Type() == porERROR );
-    if( ( (ErrorPortion*) result )->Value() != "" )
-      result->Output( _StdErr );
     return false;
-  }
 }
 
 
@@ -1060,13 +995,7 @@ bool GSM::BindVal( const gString& param_name )
       }
       else
       {
-	/*
-	_ErrorMessage( _StdErr, 61, 0, 0,
-		      ( (ReferencePortion*) param )->Value() );
-	func->SetErrorOccurred();
 	delete param;
-	result = false;
-	*/
 	result = func->SetCurrParam( 0 );
       }
 
@@ -1491,12 +1420,6 @@ void GSM::_ErrorMessage
   case 13:
     s << "Attempted to resolve undefined reference \"" << str1 << "\"\n";
     break;
-  case 16:
-    s << "Attempted operation on undefined variable \"" << str1 << "\"\n";
-    break;
-  case 17:
-    s << "Attempted binary operation on incompatible types\n";
-    break;
   case 20:
     s << "Attempted to take the subscript of an unsupported type\n";
     break;
@@ -1562,10 +1485,6 @@ void GSM::_ErrorMessage
     break;
   case 60:
     s << "New function parameters are ambiguous with an existing function\n";
-    break;
-  case 61:
-    s << "Attempted passing undefined reference \"" << str1 << "\" ";
-    s << "to a function by value\n";
     break;
   default:
     s << "General error\n";

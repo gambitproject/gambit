@@ -224,11 +224,9 @@ Portion* GSM_Divide_int( Portion** param )
   Portion* result = 0;
   if( ( (IntPortion*) param[ 1 ] )->Value() != 0 )
   {
-    result = new IntValPortion
-      (
-       ( (IntPortion*) param[ 0 ] )->Value() /
-       ( (IntPortion*) param[ 1 ] )->Value()
-       );
+    result = new RationalValPortion( ( (IntPortion*) param[ 0 ] )->Value() );
+    ( (RationalPortion*) result )->Value() /= 
+      ( (IntPortion*) param[ 1 ] )->Value();
   }
   else
   {
@@ -246,6 +244,29 @@ Portion* GSM_Divide_gRational( Portion** param )
       (
        ( (RationalPortion*) param[ 0 ] )->Value() /
        ( (RationalPortion*) param[ 1 ] )->Value()
+       );
+  }
+  else
+  {
+    result = new ErrorPortion( "Division by zero" );
+  }
+  return result;
+}
+
+
+
+//---------------------------- GSM_Divide -------------------------------
+
+
+Portion* GSM_IntegerDivide_int( Portion** param )
+{
+  Portion* result = 0;
+  if( ( (IntPortion*) param[ 1 ] )->Value() != 0 )
+  {
+    result = new IntValPortion
+      (
+       ( (IntPortion*) param[ 0 ] )->Value() /
+       ( (IntPortion*) param[ 1 ] )->Value()
        );
   }
   else
@@ -1137,7 +1158,7 @@ void Init_gsmoper( GSM* gsm )
   //----------------------- IntegerDivide ------------------------
 
   FuncObj = new FuncDescObj( (gString) "IntegerDivide" );
-  FuncObj->SetFuncInfo( GSM_Divide_int, 2, xy_Int );
+  FuncObj->SetFuncInfo( GSM_IntegerDivide_int, 2, xy_Int );
   gsm->AddFunction( FuncObj );
 
 

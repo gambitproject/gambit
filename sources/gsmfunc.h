@@ -179,9 +179,9 @@ class CallFuncObj : public FuncDescObj
  private:
   struct RunTimeParamInfoType
   {
+    ReferencePortion* Ref;
     bool              Defined;
     bool              AutoValOrRef;
-    ReferencePortion* Ref;
   };
 
   gOutput&              _StdOut;
@@ -192,10 +192,13 @@ class CallFuncObj : public FuncDescObj
   int                   _NumParamsDefined;
   Portion**             _Param;
   RunTimeParamInfoType* _RunTimeParamInfo;
+  bool*                 _FuncMatch;
   int                   _CurrParamIndex;
   bool                  _ErrorOccurred;
 
   bool _TypeMatch( Portion* p, PortionType ExpectedType ) const;
+
+  gString _ParamName( const int index ) const;
 
   static void _ErrorMessage
     (
@@ -203,7 +206,9 @@ class CallFuncObj : public FuncDescObj
      const int error_num, 
      const long& num1 = 0,
      const gString& str1 = "",
-     const gString& str2 = ""
+     const gString& str2 = "",
+     const gString& str3 = "",
+     const gString& str4 = ""
      );
 
  public:
