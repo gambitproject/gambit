@@ -8,12 +8,6 @@
 
 #include <assert.h>
 
-//----------------------------------------------------------------------
-//                         class instantiations
-//----------------------------------------------------------------------
-
-
-
 class Portion;
 
 #include "garray.imp"
@@ -33,9 +27,9 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
 
 
 
-//---------------------------------------------------------------------
-//                          base class
-//---------------------------------------------------------------------
+//-----------
+// Portion
+//-----------
 
 
 long Portion::_WriteWidth = 0;
@@ -68,7 +62,6 @@ void Portion::_SetWriteSolutionInfo(long x)
 { _WriteSolutionInfo = x; }
 
 
-
 void Portion::Output(gOutput& s) const
 {
   s.SetWidth((int) _WriteWidth);
@@ -78,7 +71,6 @@ void Portion::Output(gOutput& s) const
   else
     s.SetFloatMode();
 }
-
 
 
 #ifdef MEMCHECK
@@ -113,30 +105,25 @@ void Portion::SetOriginal(const Portion* p)
   _Original = (Portion*) p;
 }
 
-Portion* Portion::Original(void) const
+Portion *Portion::Original(void) const
 { 
-  if(!IsReference())
-  {
+  if (!IsReference()){
     assert(!_Original);
     return (Portion*) this;
   }
-  else
-  {
+  else  {
     return _Original; 
   }
 }
 
-
-
-void* Portion::Game(void) const
+void *Portion::Game(void) const
 {
   return _Game;
 }
 
 bool Portion::GameIsEfg(void) const
 {
-  switch(Spec().Type)
-  {
+  switch (Spec().Type)  {
   case porNFG:
     return false;
   case porEFG:
@@ -170,7 +157,6 @@ void Portion::SetGame(const Nfg *game)
   }
 }
 
-
 void Portion::SetGame(const Efg *game)
 {
   if (game != _Game)  {
@@ -195,12 +181,12 @@ void Portion::SetGame(const Efg *game)
   }
 }
 
-//---------------------------------------------------------------------
-//                          Error class
-//---------------------------------------------------------------------
+//---------
+// Error
+//---------
 
 ErrorPortion::ErrorPortion(const gText& value)
-: _Value(value)
+  : _Value(value)
 { }
 
 ErrorPortion::~ErrorPortion()
@@ -218,7 +204,7 @@ void ErrorPortion::Output(gOutput& s) const
   s << OutputString();
 }
 
-gText ErrorPortion::OutputString( void ) const
+gText ErrorPortion::OutputString(void) const
 {
   if(_Value == "")
     return "(Error)";
@@ -237,9 +223,11 @@ bool ErrorPortion::IsReference(void) const
 { return false; }
 
 
-//---------------------------------------------------------------------
-//                          Null class
-//---------------------------------------------------------------------
+//--------
+// Null
+//--------
+
+gPool NullPortion::pool(sizeof(NullPortion));
 
 NullPortion::NullPortion(const unsigned long datatype)
 : _DataType(datatype)
@@ -260,7 +248,7 @@ void NullPortion::Output(gOutput& s) const
   s << OutputString();
 }
 
-gText NullPortion::OutputString( void ) const
+gText NullPortion::OutputString(void) const
 {
   return (gText) "Null(" + PortionSpecToText(_DataType) + ")";
 }
@@ -275,9 +263,11 @@ bool NullPortion::IsReference(void) const
 { return false; }
 
 
-//---------------------------------------------------------------------
-//                          Reference class
-//---------------------------------------------------------------------
+//-------------
+// Reference
+//-------------
+
+gPool ReferencePortion::pool(sizeof(ReferencePortion));
 
 ReferencePortion::ReferencePortion(const gText& value)
 : _Value(value)
@@ -298,7 +288,7 @@ void ReferencePortion::Output(gOutput& s) const
   s << OutputString();
 }
 
-gText ReferencePortion::OutputString( void ) const
+gText ReferencePortion::OutputString(void) const
 {
   return (gText) "(Reference) \"" + _Value + "\""; 
 }
@@ -313,9 +303,11 @@ bool ReferencePortion::IsReference(void) const
 { return false; }
 
 
-//---------------------------------------------------------------------
-//                          Precision class
-//---------------------------------------------------------------------
+//-------------
+// Precision
+//-------------
+
+gPool PrecisionPortion::pool(sizeof(PrecisionPortion));
 
 PrecisionPortion::PrecisionPortion(Precision value)
   : _Value(new Precision(value)), _ref(false)
@@ -340,7 +332,7 @@ void PrecisionPortion::Output(gOutput& s) const
   s << ((*_Value == precDOUBLE) ? "Machine" : "Rational");
 }
 
-gText PrecisionPortion::OutputString( void ) const
+gText PrecisionPortion::OutputString(void) const
 {
   return (*_Value == precDOUBLE) ? "Machine" : "Rational";
 }
@@ -359,9 +351,11 @@ bool PrecisionPortion::IsReference(void) const
 { return _ref; }
 
 
-//---------------------------------------------------------------------
-//                          int class
-//---------------------------------------------------------------------
+//-------
+// Int
+//-------
+
+gPool IntPortion::pool(sizeof(IntPortion));
 
 IntPortion::IntPortion(long value)
   : _Value(new long(value)), _ref(false)
@@ -386,7 +380,7 @@ void IntPortion::Output(gOutput& s) const
   s << *_Value; 
 }
 
-gText IntPortion::OutputString( void ) const
+gText IntPortion::OutputString(void) const
 {
   return ToText( *_Value );
 }
@@ -405,9 +399,11 @@ bool IntPortion::IsReference(void) const
 { return _ref; }
 
 
-//---------------------------------------------------------------------
-//                          Rational class
-//---------------------------------------------------------------------
+//---------
+// Number
+//---------
+
+gPool NumberPortion::pool(sizeof(NumberPortion));
 
 NumberPortion::NumberPortion(const gNumber &value)
   : _Value(new gNumber(value)), _ref(false)
@@ -432,7 +428,7 @@ void NumberPortion::Output(gOutput& s) const
   s << *_Value; 
 }
 
-gText NumberPortion::OutputString( void ) const
+gText NumberPortion::OutputString(void) const
 {
   return ToText(*_Value);
 }
@@ -451,11 +447,11 @@ bool NumberPortion::IsReference(void) const
 { return _ref; }
 
 
+//--------
+// Text
+//--------
 
-
-//---------------------------------------------------------------------
-//                          Text class
-//---------------------------------------------------------------------
+gPool TextPortion::pool(sizeof(TextPortion));
 
 TextPortion::TextPortion(const gText &value)
   : _Value(new gText(value)), _ref(false)
@@ -480,7 +476,7 @@ void TextPortion::Output(gOutput& s) const
   s << OutputString();
 }
 
-gText TextPortion::OutputString( void ) const
+gText TextPortion::OutputString(void) const
 {
   gText text = *_Value;
   if(_WriteQuoted) 
@@ -502,9 +498,11 @@ bool TextPortion::IsReference(void) const
 { return _ref; }
 
 
-//---------------------------------------------------------------------
-//                          Bool class
-//---------------------------------------------------------------------
+//--------
+// Bool
+//--------
+
+gPool BoolPortion::pool(sizeof(BoolPortion));
 
 BoolPortion::BoolPortion(bool value)
   : _Value(new bool(value)), _ref(false)
@@ -529,7 +527,7 @@ void BoolPortion::Output(gOutput& s) const
   s << OutputString();
 }
 
-gText BoolPortion::OutputString( void ) const
+gText BoolPortion::OutputString(void) const
 {
   return (*_Value ? "True" : "False");  
 }
@@ -548,9 +546,11 @@ bool BoolPortion::IsReference(void) const
 { return _ref; }
 
 
-//---------------------------------------------------------------------
-//                          EFOutcome class
-//---------------------------------------------------------------------
+//-------------
+// EFOutcome
+//-------------
+
+gPool EfOutcomePortion::pool(sizeof(EfOutcomePortion));
 
 EfOutcomePortion::EfOutcomePortion(EFOutcome *value)
   : _Value(new EFOutcome *(value)), _ref(false)
@@ -592,7 +592,7 @@ void EfOutcomePortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->GetName() << "\"\n";
 }
 
-gText EfOutcomePortion::OutputString( void ) const
+gText EfOutcomePortion::OutputString(void) const
 {
   return "(EFOutcome)";
 }
@@ -613,11 +613,13 @@ bool EfOutcomePortion::IsReference(void) const
 { return _ref; }
 
 
-//---------------------------------------------------------------------
-//                          NfPlayer class
-//---------------------------------------------------------------------
+//-----------
+// NfPlayer
+//-----------
 
 #include "nfplayer.h"
+
+gPool NfPlayerPortion::pool(sizeof(NfPlayerPortion));
 
 NfPlayerPortion::NfPlayerPortion(NFPlayer *value)
   : _Value(new NFPlayer *(value)), _ref(false)
@@ -656,7 +658,7 @@ void NfPlayerPortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
-gText NfPlayerPortion::OutputString( void ) const
+gText NfPlayerPortion::OutputString(void) const
 {
   return "(NfPlayer)";
 }
@@ -677,9 +679,11 @@ bool NfPlayerPortion::IsReference(void) const
 { return _ref; }
 
 
-//---------------------------------------------------------------------
-//                          Strategy class
-//---------------------------------------------------------------------
+//------------
+// Strategy
+//------------
+
+gPool StrategyPortion::pool(sizeof(StrategyPortion));
 
 StrategyPortion::StrategyPortion(Strategy *value)
   : _Value(new Strategy *(value)), _ref(false)
@@ -718,7 +722,7 @@ void StrategyPortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->name << "\""; 
 }
 
-gText StrategyPortion::OutputString( void ) const
+gText StrategyPortion::OutputString(void) const
 {
   return "(Strategy)";
 }
@@ -740,10 +744,11 @@ bool StrategyPortion::IsReference(void) const
 
 
 
-//---------------------------------------------------------------------
-//                          NfOutcome class
-//---------------------------------------------------------------------
+//-------------
+// NfOutcome
+//-------------
 
+gPool NfOutcomePortion::pool(sizeof(NfOutcomePortion));
 
 NfOutcomePortion::NfOutcomePortion(NFOutcome *value)
   : _Value(new NFOutcome *(value)), _ref(false)
@@ -785,7 +790,7 @@ void NfOutcomePortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->GetName() << "\"";
 }
 
-gText NfOutcomePortion::OutputString( void ) const
+gText NfOutcomePortion::OutputString(void) const
 {
   return "(Outcome)";
 }
@@ -806,9 +811,11 @@ bool NfOutcomePortion::IsReference(void) const
 { return _ref; }
 
 
-//---------------------------------------------------------------------
-//                          NfSupport class
-//---------------------------------------------------------------------
+//-------------
+// NfSupport
+//-------------
+
+gPool NfSupportPortion::pool(sizeof(NfSupportPortion));
 
 NfSupportPortion::NfSupportPortion(NFSupport *value)
   : _Value(new NFSupport *(value)), _ref(false)
@@ -853,7 +860,7 @@ void NfSupportPortion::Output(gOutput& s) const
     s << ' ' << **_Value;  
 }
 
-gText NfSupportPortion::OutputString( void ) const
+gText NfSupportPortion::OutputString(void) const
 {
   return "(NfSupport)";
 }
@@ -870,18 +877,15 @@ Portion* NfSupportPortion::RefCopy(void) const
   return p;
 }
 
-
 bool NfSupportPortion::IsReference(void) const
 { return _ref; }
 
 
+//-------------
+// EfSupport
+//-------------
 
-
-
-//---------------------------------------------------------------------
-//                          EfSupport class
-//---------------------------------------------------------------------
-
+gPool EfSupportPortion::pool(sizeof(EfSupportPortion));
 
 EfSupportPortion::EfSupportPortion(EFSupport *value)
   : _Value(new EFSupport *(value)), _ref(false)
@@ -926,7 +930,7 @@ void EfSupportPortion::Output(gOutput& s) const
     s << ' ' << **_Value;
 }
 
-gText EfSupportPortion::OutputString( void ) const
+gText EfSupportPortion::OutputString(void) const
 {
   return "(EfSupport)";
 }
@@ -947,11 +951,13 @@ bool EfSupportPortion::IsReference(void) const
 { return _ref; }
 
 
-//---------------------------------------------------------------------
-//                          EfBasis class
-//---------------------------------------------------------------------
+//----------
+// EfBasis
+//----------
 
 #include "efbasis.h"
+
+gPool EfBasisPortion::pool(sizeof(EfBasisPortion));
 
 EfBasisPortion::EfBasisPortion(EFBasis *value)
   : _Value(new EFBasis *(value)), _ref(false)
@@ -996,7 +1002,7 @@ void EfBasisPortion::Output(gOutput& s) const
     s << ' ' << **_Value;
 }
 
-gText EfBasisPortion::OutputString( void ) const
+gText EfBasisPortion::OutputString(void) const
 {
   return "(EfBasis)";
 }
@@ -1017,9 +1023,11 @@ bool EfBasisPortion::IsReference(void) const
 { return _ref; }
 
 
-//---------------------------------------------------------------------
-//                          EfPlayer class
-//---------------------------------------------------------------------
+//------------
+// EfPlayer
+//------------
+
+gPool EfPlayerPortion::pool(sizeof(EfPlayerPortion));
 
 EfPlayerPortion::EfPlayerPortion(EFPlayer *value)
   : _Value(new EFPlayer *(value)), _ref(false)
@@ -1058,7 +1066,7 @@ void EfPlayerPortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
-gText EfPlayerPortion::OutputString( void ) const
+gText EfPlayerPortion::OutputString(void) const
 {
   return "(EfPlayer)";
 }
@@ -1080,9 +1088,11 @@ bool EfPlayerPortion::IsReference(void) const
   return _ref;
 }
 
-//---------------------------------------------------------------------
-//                          Infoset class
-//---------------------------------------------------------------------
+//----------
+// Infoset
+//----------
+
+gPool InfosetPortion::pool(sizeof(InfosetPortion));
 
 InfosetPortion::InfosetPortion(Infoset *value)
   : _Value(new Infoset *(value)), _ref(false)
@@ -1124,7 +1134,7 @@ void InfosetPortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
-gText InfosetPortion::OutputString( void ) const
+gText InfosetPortion::OutputString(void) const
 {
   return "(Infoset)";
 }
@@ -1146,9 +1156,11 @@ bool InfosetPortion::IsReference(void) const
   return _ref;
 }
 
-//---------------------------------------------------------------------
-//                          Node class
-//---------------------------------------------------------------------
+//--------
+// Node
+//--------
+
+gPool NodePortion::pool(sizeof(NodePortion));
 
 NodePortion::NodePortion(Node *value)
   : _Value(new Node *(value)), _ref(false)
@@ -1187,7 +1199,7 @@ void NodePortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
-gText NodePortion::OutputString( void ) const
+gText NodePortion::OutputString(void) const
 {
   return "(Node)";
 }
@@ -1209,9 +1221,11 @@ bool NodePortion::IsReference(void) const
   return _ref;
 }
 
-//---------------------------------------------------------------------
-//                          Action class
-//---------------------------------------------------------------------
+//----------
+// Action
+//----------
+
+gPool ActionPortion::pool(sizeof(ActionPortion));
 
 ActionPortion::ActionPortion(Action *value)
   : _Value(new Action *(value)), _ref(false)
@@ -1250,7 +1264,7 @@ void ActionPortion::Output(gOutput& s) const
     s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
-gText ActionPortion::OutputString( void ) const
+gText ActionPortion::OutputString(void) const
 {
   return "(Action)";
 }
@@ -1272,9 +1286,11 @@ bool ActionPortion::IsReference(void) const
   return _ref;
 }
 
-//---------------------------------------------------------------------
-//                            Mixed class
-//---------------------------------------------------------------------
+//---------
+// Mixed
+//---------
+
+gPool MixedPortion::pool(sizeof(MixedPortion));
 
 MixedPortion::MixedPortion(MixedSolution *value)
   : rep(new struct mixedrep(value)), _ref(false)
@@ -1327,7 +1343,7 @@ void MixedPortion::Output(gOutput& s) const
 }
 
 
-gText MixedPortion::OutputString( void ) const
+gText MixedPortion::OutputString(void) const
 {
   return "(Mixed)";
 }
@@ -1350,10 +1366,11 @@ bool MixedPortion::IsReference(void) const
 }
 
 
+//---------
+// Behav
+//---------
 
-//---------------------------------------------------------------------
-//                            Behav class
-//---------------------------------------------------------------------
+gPool BehavPortion::pool(sizeof(BehavPortion));
 
 BehavPortion::BehavPortion(BehavSolution *value)
   : rep(new struct behavrep(value)), _ref(false)
@@ -1405,7 +1422,7 @@ void BehavPortion::Output(gOutput& s) const
     (*rep->value).BehavProfile<gNumber>::Dump(s);
 }
 
-gText BehavPortion::OutputString( void ) const
+gText BehavPortion::OutputString(void) const
 {
   return "(Behav)";
 }
@@ -1426,9 +1443,11 @@ bool BehavPortion::IsReference(void) const
 { return _ref; }
 
 
-//---------------------------------------------------------------------
-//                            new Nfg class
-//---------------------------------------------------------------------
+//-------
+// Nfg
+//-------
+
+gPool NfgPortion::pool(sizeof(NfgPortion));
 
 NfgPortion::NfgPortion(Nfg *value)
   : _Value(new Nfg *(value)), _ref(false)
@@ -1477,7 +1496,7 @@ void NfgPortion::Output(gOutput& s) const
   s << "(Nfg) \"" << (*_Value)->GetTitle() << "\"";
 }
 
-gText NfgPortion::OutputString( void ) const
+gText NfgPortion::OutputString(void) const
 {
   return "(Nfg)";
 }
@@ -1499,9 +1518,11 @@ bool NfgPortion::IsReference(void) const
 
 
 
-//---------------------------------------------------------------------
-//                            new Efg class
-//---------------------------------------------------------------------
+//-------
+// Efg
+//-------
+
+gPool EfgPortion::pool(sizeof(EfgPortion));
 
 EfgPortion::EfgPortion(Efg *value)
   : _Value(new Efg *(value)), _ref(false)
@@ -1550,7 +1571,7 @@ void EfgPortion::Output(gOutput& s) const
   s << "(Efg) \"" << (*_Value)->GetTitle() << "\""; 
 }
 
-gText EfgPortion::OutputString( void ) const
+gText EfgPortion::OutputString(void) const
 {
   return "(Efg)";
 }
@@ -1573,9 +1594,11 @@ bool EfgPortion::IsReference(void) const
 }
 
 
-//---------------------------------------------------------------------
-//                          Output class
-//---------------------------------------------------------------------
+//----------
+// Output
+//----------
+
+gPool OutputPortion::pool(sizeof(OutputPortion));
 
 OutputPortion::OutputPortion(gOutput& value)
   : rep(new struct outputrep(&value)), _ref(false)
@@ -1626,10 +1649,11 @@ bool OutputPortion::IsReference(void) const
 
 
 
-//---------------------------------------------------------------------
-//                          Input class
-//---------------------------------------------------------------------
+//--------
+// Input
+//--------
 
+gPool InputPortion::pool(sizeof(InputPortion));
 
 InputPortion::InputPortion(gInput& value)
   : rep(new struct inputrep(&value)), _ref(false)
@@ -1659,7 +1683,7 @@ void InputPortion::Output(gOutput& s) const
   s << "(Input)"; 
 }
 
-gText InputPortion::OutputString( void ) const
+gText InputPortion::OutputString(void) const
 {
   return "(Input)";
 }
@@ -1680,11 +1704,13 @@ bool InputPortion::IsReference(void) const
 { return _ref; }
 
 
-//---------------------------------------------------------------------
-//                          List class
-//---------------------------------------------------------------------
+//--------
+// List
+//--------
 
 #include "glist.h"
+
+gPool ListPortion::pool(sizeof(ListPortion));
 
 ListPortion::listrep::listrep(void)
   : value(new gList<Portion *>), _ContainsListsOnly(true),
@@ -1940,15 +1966,13 @@ void ListPortion::Output(gOutput& s, long ListLF) const
 }
 
 
-gText ListPortion::OutputString( void ) const
+gText ListPortion::OutputString(void) const
 {
   gText text( "{ " );
-  int i = 0;
-  for( i = 1; i <= Length(); i++ )
-  {
+  for (int i = 1; i <= Length(); i++)  {
     if( i > 1 )
       text += ", ";
-    text += operator[]( i )->OutputString();
+    text += operator[](i)->OutputString();
   }
   text += " }";
   return text;
@@ -2109,38 +2133,31 @@ Portion* ListPortion::SubscriptCopy(int index) const
     return 0;
 }
 
-
 bool ListPortion::IsReference(void) const
 {
   return _ref;
 }
 
-//-------------------------------------------------------------------
-//--------------------------------------------------------------------
 
+//---------------------------
+// Miscellaneous functions
+//---------------------------
 
-
-
-
-gOutput& operator << (gOutput& s, Portion* p)
+gOutput& operator<<(gOutput& s, Portion* p)
 {
   p->Output(s);
   return s;
 }
 
-
-bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
+bool PortionEqual(Portion* p1, Portion* p2, bool &type_found)
 {
   bool b = false;
 
   if(!(p1->Spec() == p2->Spec())) 
     return false;
-  
 
   if( p1->Spec().ListDepth > 0 )
     return ((ListPortion*) p1)->operator==( (ListPortion*) p2 );
-
-
 
   type_found = true;
 
@@ -2193,18 +2210,12 @@ bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
   else if(p1->Spec().Type & porNULL)
     b = false;
 
-  else
-  {
+  else  {
     type_found = false;
     assert( 0 );
   }
   return b;
 }
-
-
-
-
-
 
 
 

@@ -5,12 +5,8 @@
 // $Id$
 //
 
-
-
-
 #ifndef PORTION_H
 #define PORTION_H
-
 
 #include "gsmincl.h"
 #include "gblock.h"
@@ -18,11 +14,12 @@
 #include "gtext.h"
 #include "gnumber.h"
 
+#include "gpool.h"
 
 
-//---------------------------------------------------------------------
-//                          base class
-//---------------------------------------------------------------------
+//-------------
+// Portion
+//-------------
 
 class Efg;
 class Nfg;
@@ -73,7 +70,7 @@ public:
   virtual PortionSpec Spec(void) const = 0;
 
   virtual void Output(gOutput& s) const;
-  virtual gText OutputString( void ) const = 0;
+  virtual gText OutputString(void) const = 0;
 
   virtual Portion* ValCopy(void) const = 0;
   virtual Portion* RefCopy(void) const = 0;
@@ -85,12 +82,14 @@ public:
 
 
 
-//---------------------------------------------------------------------
-//                          Error class
-//---------------------------------------------------------------------
+//--------
+// Error
+//--------
 
-class ErrorPortion : public Portion
-{
+// NB: This class is obsolecent.  The functionality will be replaced by
+// C++ exceptions.
+
+class ErrorPortion : public Portion  {
 protected:
   gText _Value;
 
@@ -102,7 +101,7 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -111,14 +110,15 @@ public:
 
 
 
-//---------------------------------------------------------------------
-//                          Null class
-//---------------------------------------------------------------------
+//---------
+// Null
+//---------
 
-class NullPortion : public Portion
-{
+class NullPortion : public Portion  {
 protected:
   unsigned long _DataType;
+
+  static gPool pool;
 
 public:
   NullPortion(const unsigned long datatype);
@@ -128,23 +128,27 @@ public:
   unsigned long DataType(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); } 
 };
 
 
 
-//---------------------------------------------------------------------
-//                          Reference class
-//---------------------------------------------------------------------
+//------------
+// Reference
+//------------
 
-class ReferencePortion : public Portion
-{
+class ReferencePortion : public Portion  {
 protected:
   gText _Value;
+
+  static gPool pool;
 
 public:
   ReferencePortion(const gText& value);
@@ -154,23 +158,27 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
-//---------------------------------------------------------
-//                     Precision class
-//---------------------------------------------------------
+//-------------
+// Precision
+//-------------
 
-class PrecisionPortion : public Portion
-{
+class PrecisionPortion : public Portion  {
 protected:
   Precision* _Value;
   bool _ref;
+
+  static gPool pool;
 
 public:
   PrecisionPortion(Precision);
@@ -181,24 +189,28 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
-//---------------------------------------------------------------------
-//                          int class
-//---------------------------------------------------------------------
+//-------
+// Int
+//-------
 
-class IntPortion : public Portion
-{
+class IntPortion : public Portion  {
 protected:
   long* _Value;
   bool _ref;
+
+  static gPool pool;
 
 public:
   IntPortion(long);
@@ -209,24 +221,28 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
-//---------------------------------------------------------------------
-//                          Number class
-//---------------------------------------------------------------------
+//----------
+// Number
+//----------
 
-class NumberPortion : public Portion
-{
+class NumberPortion : public Portion  {
 protected:
   gNumber* _Value;
   bool _ref;
+
+  static gPool pool;
 
   NumberPortion(gNumber &, bool);
 
@@ -238,24 +254,28 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
-//---------------------------------------------------------------------
-//                          Text class
-//---------------------------------------------------------------------
+//--------
+// Text
+//--------
 
-class TextPortion : public Portion
-{
+class TextPortion : public Portion  {
 protected:
   gText* _Value;
   bool _ref;
+
+  static gPool pool;
 
 public:
   TextPortion(const gText &);
@@ -266,25 +286,28 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
-//---------------------------------------------------------------------
-//                          Bool class
-//---------------------------------------------------------------------
+//--------
+// Bool
+//--------
 
-class BoolPortion : public Portion
-{
+class BoolPortion : public Portion  {
 protected:
   bool* _Value;
   bool _ref;
 
+  static gPool pool;
 
 public:
   BoolPortion(bool);
@@ -295,26 +318,30 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); } 
 };
 
 
-//---------------------------------------------------------------------
-//                          EFOutcome class
-//---------------------------------------------------------------------
+//-------------
+// EFOutcome
+//-------------
 
 class EFOutcome;
 
-class EfOutcomePortion : public Portion
-{
+class EfOutcomePortion : public Portion  {
 protected:
   EFOutcome** _Value;
   bool _ref;
+
+  static gPool pool;
 
   EfOutcomePortion(EFOutcome *&, bool);
 
@@ -327,26 +354,30 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
-//---------------------------------------------------------------------
-//                          NfPlayer class
-//---------------------------------------------------------------------
+//------------
+// NfPlayer
+//------------
 
 class NFPlayer;
 
-class NfPlayerPortion : public Portion
-{
+class NfPlayerPortion : public Portion  {
 protected:
   NFPlayer** _Value;
   bool _ref;
+
+  static gPool pool;
 
   NfPlayerPortion(NFPlayer *&, bool);
 
@@ -359,25 +390,29 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
-//---------------------------------------------------------------------
-//                          Strategy class
-//---------------------------------------------------------------------
+//-----------
+// Strategy
+//-----------
 
 class Strategy;
 
-class StrategyPortion : public Portion
-{
+class StrategyPortion : public Portion  {
 protected:
   Strategy** _Value;
   bool _ref;
+
+  static gPool pool;
 
   StrategyPortion(Strategy *&, bool);
 
@@ -390,26 +425,30 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
-//---------------------------------------------------------------------
-//                          NfOutcome class
-//---------------------------------------------------------------------
+//------------
+// NfOutcome
+//------------
 
 class NFOutcome;
 
-class NfOutcomePortion : public Portion
-{
+class NfOutcomePortion : public Portion  {
 protected:
   NFOutcome** _Value;
   bool _ref;
+
+  static gPool pool;
 
   NfOutcomePortion(NFOutcome *&, bool);
 
@@ -422,19 +461,22 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
 
-//---------------------------------------------------------------------
-//                          NfSupport class
-//---------------------------------------------------------------------
+//-------------
+// NfSupport
+//-------------
 
 class NFSupport;
 class NFPayoffs;
@@ -443,6 +485,8 @@ class NfSupportPortion : public Portion   {
 protected:
   NFSupport** _Value;
   bool _ref;
+
+  static gPool pool;
 
   NfSupportPortion(NFSupport *&, bool);
 
@@ -455,27 +499,30 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
-//---------------------------------------------------------------------
-//                          EfSupport class
-//---------------------------------------------------------------------
-
+//-------------
+// EfSupport
+//-------------
 
 class EFSupport;
 
-class EfSupportPortion : public Portion
-{
+class EfSupportPortion : public Portion  {
 protected:
   EFSupport** _Value;
   bool _ref;
+
+  static gPool pool;
 
   EfSupportPortion(EFSupport *&, bool);
 
@@ -488,28 +535,31 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
 
-//---------------------------------------------------------------------
-//                          EfBasis class
-//---------------------------------------------------------------------
-
+//-----------
+// EfBasis
+//-----------
 
 class EFBasis;
 
-class EfBasisPortion : public Portion
-{
+class EfBasisPortion : public Portion  {
 protected:
   EFBasis** _Value;
   bool _ref;
+
+  static gPool pool;
 
   EfBasisPortion(EFBasis *&, bool);
 
@@ -522,27 +572,30 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
-
-//---------------------------------------------------------------------
-//                          EfPlayer class
-//---------------------------------------------------------------------
+//------------
+// EfPlayer
+//------------
 
 class EFPlayer;
 
-class EfPlayerPortion : public Portion
-{
+class EfPlayerPortion : public Portion  {
 protected:
   EFPlayer** _Value;
   bool _ref;
+
+  static gPool pool;
 
   EfPlayerPortion(EFPlayer *&, bool);
 
@@ -555,26 +608,30 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
-//---------------------------------------------------------------------
-//                          Infoset class
-//---------------------------------------------------------------------
+//----------
+// Infoset
+//----------
 
 class Infoset;
 
-class InfosetPortion : public Portion
-{
+class InfosetPortion : public Portion  {
 protected:
   Infoset** _Value;
   bool _ref;
+
+  static gPool pool;
 
   InfosetPortion(Infoset *&, bool);
 
@@ -587,27 +644,31 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
 
-//---------------------------------------------------------------------
-//                          Node class
-//---------------------------------------------------------------------
+//--------
+// Node
+//--------
 
 class Node;
 
-class NodePortion : public Portion
-{
+class NodePortion : public Portion  {
 protected:
   Node** _Value;
   bool _ref;  
+
+  static gPool pool;
 
   NodePortion(Node *&, bool);
 
@@ -620,27 +681,31 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
 
-//---------------------------------------------------------------------
-//                          Action class
-//---------------------------------------------------------------------
+//----------
+// Action
+//----------
 
 class Action;
 
-class ActionPortion : public Portion
-{
+class ActionPortion : public Portion  {
 protected:
   Action** _Value;
   bool _ref;
+
+  static gPool pool;
 
   ActionPortion(Action *&, bool); 
 
@@ -653,17 +718,20 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
-//---------------------------------------------------------------------
-//                           Mixed class
-//---------------------------------------------------------------------
+//---------
+// Mixed
+//---------
 
 #include "mixedsol.h"
 
@@ -679,6 +747,8 @@ protected:
   
   struct mixedrep *rep; 
   bool _ref;
+
+  static gPool pool;
 
   MixedPortion(const MixedPortion *, bool);
 
@@ -697,13 +767,16 @@ public:
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
 
-//---------------------------------------------------------------------
-//                            Behav class
-//---------------------------------------------------------------------
+//--------
+// Behav
+//--------
 
 #include "behavsol.h"
 
@@ -719,6 +792,8 @@ protected:
   
   struct behavrep *rep; 
   bool _ref;
+
+  static gPool pool;
 
   BehavPortion(const BehavPortion *, bool);
 
@@ -737,18 +812,24 @@ public:
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
 
-//---------------------------------------------------------------------
-//                          new Nfg class
-//---------------------------------------------------------------------
+//-------
+// Nfg
+//-------
 
 class NfgPortion : public Portion   {
 protected:
   Nfg ** _Value;
   bool _ref;
+
+  static gPool pool;
+
   NfgPortion(Nfg *&, bool);
 
 public:
@@ -766,18 +847,24 @@ public:
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
-//---------------------------------------------------------------------
-//                          new Efg class
-//---------------------------------------------------------------------
+//-------
+// Efg
+//-------
 
 
 class EfgPortion : public Portion   {
 protected:
   Efg** _Value;
   bool _ref;
+
+  static gPool pool;
+
   EfgPortion(Efg *&, bool);
 
 public:
@@ -789,18 +876,21 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
-//---------------------------------------------------------------------
-//                          Output class
-//---------------------------------------------------------------------
+//---------
+// Output
+//---------
 
 class OutputPortion : public Portion  {
 protected:
@@ -815,6 +905,8 @@ protected:
   struct outputrep *rep; 
   bool _ref;
 
+  static gPool pool;
+
   OutputPortion(const OutputPortion *, bool);
 
 public:
@@ -826,20 +918,23 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
 
 
-//---------------------------------------------------------------------
-//                          Input class
-//---------------------------------------------------------------------
+//---------
+// Input
+//---------
 
 class InputPortion : public Portion  {
 protected:
@@ -854,6 +949,8 @@ protected:
   struct inputrep *rep; 
   bool _ref;
 
+  static gPool pool;
+
   InputPortion(const InputPortion *, bool);
 
 public:
@@ -864,19 +961,22 @@ public:
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gText OutputString( void ) const;
+  gText OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
 
-//---------------------------------------------------------------------
-//                          List class
-//---------------------------------------------------------------------
+//--------
+// List
+//--------
 
 template <class T> class gList;
 
@@ -898,6 +998,8 @@ protected:
   
   struct listrep *rep;
   bool _ref;
+
+  static gPool pool;
 
   ListPortion(const ListPortion *, bool);
 
@@ -941,12 +1043,15 @@ public:
   Portion* SubscriptCopy(int index) const;
 
   bool IsReference(void) const;
+
+  void *operator new(size_t) { return pool.Alloc(); }
+  void operator delete(void *p) { pool.Free(p); }
 };
 
 
-//-----------------------------------------------------------------
-//                 Miscellaneous Portion functions
-//-----------------------------------------------------------------
+//-----------------------------------
+// Miscellaneous Portion functions
+//-----------------------------------
 
 
 gOutput& operator << (gOutput& s, Portion* p);
