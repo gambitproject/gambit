@@ -1240,7 +1240,7 @@ void dialogQreGrid::AlgorithmFields(void)
   m_plotType->GetConstraints()->top.SameAs(m_tol2, wxBottom, 10);
   m_plotType->GetConstraints()->left.SameAs(m_minLam, wxLeft);
 #else
-  m_plotType->GetConstraints()->top.SameAs(m_tol2, wxTop);
+  m_plotType->GetConstraints()->top.SameAs(m_tol2, wxBottom, 10);
   m_plotType->GetConstraints()->left.SameAs(m_minLam, wxRight, 10);
 #endif  // wx_motif
   m_plotType->GetConstraints()->width.AsIs();
