@@ -1069,7 +1069,7 @@ void gbtEfgFrame::OnToolsDominance(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     gbtEfgSupport support(m_doc->GetEfgSupport());
-    wxStatus status(this, "Dominance Elimination");
+    gbtProgressDialog status(this, "Dominance Elimination");
 
     try {
       gbtEfgSupport newSupport(support);
@@ -1119,7 +1119,8 @@ void gbtEfgFrame::OnToolsEquilibrium(wxCommandEvent &)
     }
 
     try {
-      wxStatus status(this, algorithm->GetAlgorithm() + "Solve Progress");
+      gbtProgressDialog status(this, 
+			       algorithm->GetAlgorithm() + "Solve Progress");
       gbtList<BehavSolution> solutions;
       solutions = algorithm->Solve(m_doc->GetEfgSupport(), status);
 
@@ -1154,12 +1155,12 @@ void gbtEfgFrame::OnToolsQre(wxCommandEvent &)
     algorithm.SetFullGraph(true);
     algorithm.SetMaxLambda(10000000);
 
-    wxStatus status(this, "QreSolve Progress");
+    gbtProgressDialog status(this, "QreSolve Progress");
     gbtList<BehavSolution> solutions = algorithm.Solve(m_doc->GetEfgSupport(),
-						     status);
+						       status);
 
     if (solutions.Length() > 0) {
-      dialogQreFile *fileDialog = new dialogQreFile(this, m_doc, solutions);
+      (void) new dialogQreFile(this, m_doc, solutions);
     }
   }
   catch (...) {

@@ -693,7 +693,7 @@ void gbtNfgFrame::OnToolsDominance(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     gbtNfgSupport support(m_doc->GetNfgSupport());
-    wxStatus status(this, "Dominance Elimination");
+    gbtProgressDialog status(this, "Dominance Elimination");
 
     try {
       gbtNfgSupport newSupport(support);
@@ -751,7 +751,8 @@ void gbtNfgFrame::OnToolsEquilibrium(wxCommandEvent &)
     }
 
     try {
-      wxStatus status(this, algorithm->GetAlgorithm() + "Solve Progress");
+      gbtProgressDialog status(this,
+			       algorithm->GetAlgorithm() + "Solve Progress");
       gbtList<MixedSolution> solutions;
       solutions = algorithm->Solve(m_doc->GetNfgSupport(), status);
 
@@ -792,7 +793,7 @@ void gbtNfgFrame::OnToolsQre(wxCommandEvent &)
 	algorithm.SetTol1(dialog.Tol1());
 	algorithm.SetTol2(dialog.Tol2());
 
-	wxStatus status(this, "QreGridSolve Progress");
+	gbtProgressDialog status(this, "QreGridSolve Progress");
 	gbtNullOutput gnull;
 	algorithm.Solve(m_doc->GetNfgSupport(), gnull, status, solutions);
       }
@@ -801,7 +802,7 @@ void gbtNfgFrame::OnToolsQre(wxCommandEvent &)
 	algorithm.SetFullGraph(true);
 	algorithm.SetMaxLambda(10000000);
 
-	wxStatus status(this, "QreSolve Progress");
+	gbtProgressDialog status(this, "QreSolve Progress");
 	solutions = algorithm.Solve(m_doc->GetNfgSupport(), status);
       }
     }

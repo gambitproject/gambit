@@ -24,13 +24,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
 #include "wxstatus.h"
 
-wxStatus::wxStatus(wxWindow *p_parent, const gbtText &p_caption)
+gbtProgressDialog::gbtProgressDialog(wxWindow *p_parent, const gbtText &p_caption)
   : wxProgressDialog(wxString::Format(wxT("%s"), (char *) p_caption),
 		     wxT(""), 100, p_parent,
 		     wxPD_AUTO_HIDE | wxPD_CAN_ABORT | wxPD_APP_MODAL |
@@ -39,30 +39,33 @@ wxStatus::wxStatus(wxWindow *p_parent, const gbtText &p_caption)
     m_width(0), m_prec(6), m_represent('f'), m_sig(false), m_value(0)
 { }
 
-wxStatus::~wxStatus()
+gbtProgressDialog::~gbtProgressDialog()
 { }
 
-void wxStatus::Get(void) const  
+void gbtProgressDialog::Get(void) const  
 {
   wxProgressDialog *nonconstthis = (wxProgressDialog *) this;
   if (!nonconstthis->Update(m_value)) {
     throw gbtSignalBreak();
   }
+  wxGetApp().Yield();
 }
 
-gbtOutput &wxStatus::operator<<(int x)
+gbtOutput &gbtProgressDialog::operator<<(int x)
 {
   m_buffer += wxString::Format(wxT("%d"), x);
+  wxGetApp().Yield();
   return *this;
 }
 
-gbtOutput &wxStatus::operator<<(unsigned int x)
+gbtOutput &gbtProgressDialog::operator<<(unsigned int x)
 { 
   m_buffer += wxString::Format(wxT("%d"), x);
+  wxGetApp().Yield();
   return *this;
 }
 
-gbtOutput &wxStatus::operator<<(bool x)
+gbtOutput &gbtProgressDialog::operator<<(bool x)
 {
   if (x) {
     m_buffer += wxT("True");
@@ -70,56 +73,64 @@ gbtOutput &wxStatus::operator<<(bool x)
   else {
     m_buffer += wxT("False");
   }
+  wxGetApp().Yield();
   return *this;
 }
 
-gbtOutput &wxStatus::operator<<(long x)
+gbtOutput &gbtProgressDialog::operator<<(long x)
 {
   m_buffer += wxString::Format(wxT("%ld"), x);
+  wxGetApp().Yield();
   return *this;
 }
 
-gbtOutput &wxStatus::operator<<(char x)
+gbtOutput &gbtProgressDialog::operator<<(char x)
 {
   m_buffer += wxString::Format(wxT("%c"), x);
+  wxGetApp().Yield();
   return *this;
 }
 
-gbtOutput &wxStatus::operator<<(double x)
+gbtOutput &gbtProgressDialog::operator<<(double x)
 {
   m_buffer += wxString::Format(wxT("%lf"), x);
+  wxGetApp().Yield();
   return *this;
 }
 
-gbtOutput &wxStatus::operator<<(long double x)
+gbtOutput &gbtProgressDialog::operator<<(long double x)
 {
-  m_buffer += wxString::Format(wxT("%lf"), x);
+  m_buffer += wxString::Format(wxT("%Lf"), x);
+  wxGetApp().Yield();
   return *this;
 }
 
-gbtOutput &wxStatus::operator<<(float x)
+gbtOutput &gbtProgressDialog::operator<<(float x)
 {
   m_buffer += wxString::Format(wxT("%f"), x);
+  wxGetApp().Yield();
   return *this;
 }
 
-gbtOutput &wxStatus::operator<<(const char *x)
+gbtOutput &gbtProgressDialog::operator<<(const char *x)
 {
   m_buffer += wxString::Format(wxT("%s"), x);
   while (m_buffer.Contains("\n")) {
     wxLogVerbose(m_buffer.Left(m_buffer.Find("\n")));
     m_buffer = m_buffer.Mid(m_buffer.Find("\n") + 1);
   }
+  wxGetApp().Yield();
   return *this; 
 }
 
-gbtOutput &wxStatus::operator<<(const void *x)
+gbtOutput &gbtProgressDialog::operator<<(const void *x)
 {
   m_buffer += wxString::Format(wxT("%p"), x);
+  wxGetApp().Yield();
   return *this;
 }
 
-void wxStatus::SetProgress(double p_value)
+void gbtProgressDialog::SetProgress(double p_value)
 {
   if (p_value >= 1.0) {
     m_value = 100;
@@ -131,9 +142,10 @@ void wxStatus::SetProgress(double p_value)
     m_value = (int) (p_value * 100.0);
   }
   Update(m_value);
+  wxGetApp().Yield();
 }
 
-void wxStatus::SetProgress(double p_value, const gbtText &p_message)
+void gbtProgressDialog::SetProgress(double p_value, const gbtText &p_message)
 {
   if (p_value >= 1.0) {
     m_value = 100;
@@ -145,4 +157,5 @@ void wxStatus::SetProgress(double p_value, const gbtText &p_message)
     m_value = (int) (p_value * 100.0);
   }
   Update(m_value, wxString::Format(wxT("%s"), (const char *) p_message));
+  wxGetApp().Yield();
 }

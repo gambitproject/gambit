@@ -27,11 +27,11 @@
 #ifndef WXSTATUS_H
 #define WXSTATUS_H
 
-#include "wx/wx.h"
-#include "wx/progdlg.h"
+#include <wx/progdlg.h>
 #include "base/gstatus.h"
+#include "gambit.h"
 
-class wxStatus : public wxProgressDialog, public gbtStatus {
+class gbtProgressDialog : public wxProgressDialog, public gbtStatus {
 protected:
   int m_width, m_prec;
   char m_represent;
@@ -41,8 +41,8 @@ protected:
   int m_value;
   
 public:
-  wxStatus(wxWindow *, const gbtText &);
-  virtual ~wxStatus();
+  gbtProgressDialog(wxWindow *, const gbtText &);
+  virtual ~gbtProgressDialog();
     
   // functions for gbtOutput
   int GetWidth(void) const { return m_width; }
