@@ -86,7 +86,7 @@ class Infoset   {
     const gArray<Node *> &Members(void) const   { return members; }
     int NumMembers(void) const   { return members.Length(); }
 
-    const gList<Node *> ListOfMembers(void) const;
+    const gList<const Node *> ListOfMembers(void) const;
 
     int GetNumber(void) const    { return number; }
 };
