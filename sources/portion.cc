@@ -262,21 +262,21 @@ bool ReferencePortion::IsReference(void) const
 
 gPool PrecisionPortion::pool(sizeof(PrecisionPortion));
 
-PrecisionPortion::PrecisionPortion(Precision value)
-  : _Value(new Precision(value)), _ref(false)
+PrecisionPortion::PrecisionPortion(gPrecision value)
+  : _Value(new gPrecision(value)), _ref(false)
 { }
 
-PrecisionPortion::PrecisionPortion(Precision &value, bool ref)
+PrecisionPortion::PrecisionPortion(gPrecision &value, bool ref)
   : _Value(&value), _ref(ref)
 { }
 
 PrecisionPortion::~PrecisionPortion()
 { }
 
-Precision PrecisionPortion::Value(void) const
+gPrecision PrecisionPortion::Value(void) const
 { return *_Value; }
 
-void PrecisionPortion::SetValue(Precision p)
+void PrecisionPortion::SetValue(gPrecision p)
 { *_Value = p; }
 
 PortionSpec PrecisionPortion::Spec(void) const

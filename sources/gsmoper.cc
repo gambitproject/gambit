@@ -940,10 +940,10 @@ static Portion *GSM_Power(Portion** param)
   gNumber base = ((NumberPortion*) param[0])->Value();
   gNumber exponent = ((NumberPortion*) param[1])->Value();
 
-  if (base.GetPrecision() == precDOUBLE || 
-      exponent.GetPrecision() == precDOUBLE)
+  if (base.Precision() == precDOUBLE || 
+      exponent.Precision() == precDOUBLE)
     return new NumberPortion(pow((double) base, (double) exponent));
-  else if (base.GetPrecision() == precRATIONAL && exponent.IsInteger())
+  else if (base.Precision() == precRATIONAL && exponent.IsInteger())
     return new NumberPortion(pow(base.operator gRational(),
 				 exponent.operator gRational().numerator()));
   else
@@ -956,7 +956,7 @@ static Portion *GSM_Power(Portion** param)
 
 static Portion* GSM_Precision(Portion** param)
 {
-  return new PrecisionPortion(((NumberPortion *) param[0])->Value().GetPrecision());
+  return new PrecisionPortion(((NumberPortion *) param[0])->Value().Precision());
 }
 
 //--------

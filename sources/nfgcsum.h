@@ -15,7 +15,7 @@
 class ZSumParams     {
   public:
     int trace, stopAfter;
-    Precision precision;
+    gPrecision precision;
     gOutput *tracefile;
     gStatus &status;
     

@@ -14,7 +14,7 @@
 class SeqFormParams     {
   public:
     int trace, stopAfter, maxdepth;
-    Precision precision;
+    gPrecision precision;
     gOutput *tracefile;
     gStatus &status;
     

@@ -626,10 +626,10 @@ Portion* GSM_Inverse( Portion** param )
 	      throw gclRuntimeError( "Bad dimensionality" );
   }
   int j;
-  Precision precis = precRATIONAL;
+  gPrecision precis = precRATIONAL;
   for(i=1; precis==precRATIONAL && i <= Length; i++ )
     for(j=1; precis==precRATIONAL && j<=width; j++)
-      if((((NumberPortion*) ((*(ListPortion*) (*(ListPortion*) param[0])[i])[j]))->Value()).GetPrecision() != precRATIONAL) 
+      if((((NumberPortion*) ((*(ListPortion*) (*(ListPortion*) param[0])[i])[j]))->Value()).Precision() != precRATIONAL) 
 	precis = precDOUBLE;
   gNumber gn;
   if(precis == precRATIONAL) {

@@ -94,9 +94,9 @@ static Portion *GSM_Behav(Portion **param)
   MixedToBehav(N, MixedProfile<gNumber>(mp), E, *bp);
   
   // hack to get output profile to be all one precision
-  Precision prec = precRATIONAL;
+  gPrecision prec = precRATIONAL;
   for (int i = 1; i <= bp->Length(); i++) { 
-    if ((*bp)[i].GetPrecision() == precDOUBLE)
+    if ((*bp)[i].Precision() == precDOUBLE)
       prec = precDOUBLE;
   }
 

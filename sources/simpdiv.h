@@ -16,7 +16,7 @@
 class SimpdivParams     {
   public:
     int trace, stopAfter, nRestarts, leashLength;
-    Precision precision;
+    gPrecision precision;
     gOutput *tracefile;
     gStatus &status;
 

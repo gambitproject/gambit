@@ -178,7 +178,7 @@ gText ToText(double d)
 
 gText ToText(const gNumber &n)
 {
-  if (n.GetPrecision() == precDOUBLE)
+  if (n.Precision() == precDOUBLE)
     return ToText((double) n);
   else
     return ToText(n.operator gRational());
@@ -359,7 +359,7 @@ void gEpsilon(gRational &v, int /* i */)
 
 void gEpsilon(gNumber &n, int i)
 {
-  if (n.GetPrecision() == precRATIONAL)
+  if (n.Precision() == precRATIONAL)
     n = (gRational)0;
   else
     n = pow(10.0,(double)-i);

@@ -144,18 +144,19 @@ public:
 
 class PrecisionPortion : public Portion  {
 protected:
-  Precision* _Value;
+  gPrecision* _Value;
   bool _ref;
 
   static gPool pool;
 
+  PrecisionPortion(gPrecision &, bool);
+
 public:
-  PrecisionPortion(Precision);
-  PrecisionPortion(Precision &, bool);
+  PrecisionPortion(gPrecision);
   virtual ~PrecisionPortion();
 
-  Precision Value(void) const;
-  void SetValue(Precision); 
+  gPrecision Value(void) const;
+  void SetValue(gPrecision); 
 
   PortionSpec Spec(void) const;
 

@@ -15,8 +15,6 @@ typedef unsigned long ulong;
 typedef unsigned short ushort;
 
 
-typedef enum { precERROR, precDOUBLE, precRATIONAL, precMIXED }  Precision;
-
 typedef enum { triFALSE = 0, triTRUE = 1, triUNKNOWN = 2 } gTriState;
 
 class gText;

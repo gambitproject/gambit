@@ -21,6 +21,11 @@
 gText gNumber::DivideByZero::Description(void) const
 { return "Divide by zero in gNumber"; }
 
+gPool gNumber::pool(sizeof(gNumber));
+
+//-------------------------------------------------------------------------
+//     gNumber: Constructors, Destructor, and Constructive Operators
+//-------------------------------------------------------------------------
 
 gNumber::gNumber(void) 
   : rep(precRATIONAL), rval(new gRational)
@@ -47,12 +52,17 @@ gNumber::gNumber(const gRational &y)
 { }
 
 gNumber::gNumber(const gNumber &y) 
-  : rep(y.rep), rval((y.rval) ? new gRational(*y.rval) : 0), dval(y.dval)
-{ }
+  : rep(y.rep)
+{
+  if (rep == precDOUBLE)
+    dval = y.dval;
+  else
+    rval = new gRational(*y.rval);
+}
 
 gNumber::~gNumber() 
 {
-  if (rval)  delete rval;
+  if (rep == precRATIONAL)  delete rval;
 }
 
 gNumber &gNumber::operator=(const gNumber &y)
@@ -71,6 +81,252 @@ gNumber &gNumber::operator=(const gNumber &y)
   return *this;
 }
 
+//-------------------------------------------------------------------------
+//                     gNumber: Operator overloading
+//-------------------------------------------------------------------------
+
+bool operator==(const gNumber &x, const gNumber &y)
+{
+  if (x.rep != y.rep)   return false;
+  if (x.rep == precDOUBLE)
+    return x.dval == y.dval;
+  else 
+    return *x.rval == *y.rval;
+}
+
+bool operator!=(const gNumber &x, const gNumber &y)
+{
+  if (x.rep != y.rep)   return true;
+  if (x.rep == precDOUBLE)
+    return x.dval != y.dval;
+  else
+    return *x.rval != *y.rval;
+}
+
+bool operator<(const gNumber &x, const gNumber &y)
+{
+  if (x.rep == precDOUBLE && y.rep == precDOUBLE)
+    return x.dval < y.dval;
+  else if (x.rep == precRATIONAL && y.rep == precRATIONAL)
+    return *(x.rval) < *(y.rval);
+  else if (x.rep == precRATIONAL && y.rep == precDOUBLE)
+    return y.dval > double(*(x.rval));
+  else // (x.rep == precDOUBLE && y.rep == precRATIONAL)
+    return x.dval < double(*(y.rval));
+}
+
+bool operator<=(const gNumber &x, const gNumber &y)
+{
+  if (x.rep == precDOUBLE && y.rep == precDOUBLE)
+    return x.dval <= y.dval;
+  else if (x.rep == precRATIONAL && y.rep == precRATIONAL)
+    return *(x.rval) <= *(y.rval);
+  else if (x.rep == precRATIONAL && y.rep == precDOUBLE)
+  {
+    double eps;
+    gEpsilon(eps, 8);
+    return y.dval >= (double(*(x.rval)) - eps);
+  }
+  else // (x.rep == precDOUBLE && y.rep == precRATIONAL)
+  {
+    double eps;
+    gEpsilon(eps, 8);
+    return x.dval <= (double(*(y.rval)) + eps);
+  }
+}
+
+bool operator>(const gNumber &x, const gNumber &y)
+{
+  if (x.rep == precDOUBLE && y.rep == precDOUBLE)
+    return x.dval > y.dval;
+  else if (x.rep == precRATIONAL && y.rep == precRATIONAL)
+    return *(x.rval) > *(y.rval);
+  else if (x.rep == precRATIONAL && y.rep == precDOUBLE)
+    return y.dval < double(*(x.rval));
+  else // (x.rep == precDOUBLE && y.rep == precRATIONAL)
+    return x.dval > double(*(y.rval));
+}
+
+bool operator>=(const gNumber &x, const gNumber &y)
+{
+  if (x.rep == precDOUBLE && y.rep == precDOUBLE)
+    return x.dval >= y.dval;
+  else if (x.rep == precRATIONAL && y.rep == precRATIONAL)
+    return *(x.rval) >= *(y.rval);
+  else if (x.rep == precRATIONAL && y.rep == precDOUBLE) {
+    double eps;
+    gEpsilon(eps, 8);
+    return y.dval <= (double(*(x.rval)) + eps);
+  }
+  else { // (x.rep == precDOUBLE && y.rep == precRATIONAL)
+    double eps;
+    gEpsilon(eps, 8);
+    return x.dval >= (double(*(y.rval)) - eps);
+  }
+}
+
+gNumber &gNumber::operator += (const gNumber &y) 
+{
+  if (rep == precDOUBLE)   {
+    if (y.rep == precDOUBLE)
+      dval += y.dval;
+    else    // if (y.rep == precRATIONAL)
+      dval += double(*y.rval);
+  }
+  else   {  // this is a rational
+    if (y.rep == precDOUBLE)   {
+      dval = double(*rval) + y.dval;
+      rep = precDOUBLE;
+      delete rval;
+      rval = 0;
+    }
+    else // if (y.rep == precRATIONAL;
+      *rval += *y.rval;
+  }
+  return *this;
+}
+
+gNumber &gNumber::operator-=(const gNumber &y) 
+{
+  if (rep == precDOUBLE)  {
+    if (y.rep == precDOUBLE)
+      dval -= y.dval;
+    else    // if (y.rep == precRATIONAL)
+      dval -= double(*y.rval);
+  }
+  else  {  // this is a rational
+    if (y.rep == precDOUBLE)  {
+      dval = double(*rval) - y.dval;
+      rep = precDOUBLE;
+      delete rval;
+      rval = 0;
+    }
+    else    // if (y.rep == precRATIONAL)
+      *rval -= *y.rval;
+  }
+  return *this;
+}
+
+gNumber &gNumber::operator*=(const gNumber &y) 
+{
+  if (rep == precDOUBLE)   {
+    if (y.rep == precDOUBLE)
+      dval *= y.dval;
+    else    // if (y.rep == precRATIONAL)
+      dval *= double(*y.rval);
+  }
+  else   {  // this is a rational
+    if (y.rep == precDOUBLE)  {
+      dval = double(*rval) * y.dval;
+      rep = precDOUBLE;
+      delete rval;
+      rval = 0;
+    }
+    else    // if (y.rep == precRATIONAL)
+      *rval *= *y.rval;
+  }
+  return *this;
+}
+
+gNumber &gNumber::operator/=(const gNumber &y) 
+{
+  if (rep == precDOUBLE)   {
+    if (y.rep == precDOUBLE)  {
+      if (y.dval == 0.0)   throw DivideByZero();
+      dval /= y.dval;
+    }
+    else   {   // if (y.rep == precRATIONAL)
+      if (*y.rval == gRational(0))     throw DivideByZero();
+      dval /= double(*y.rval);
+    }
+  }
+  else  {   // this is a rational 
+    if (y.rep == precDOUBLE)  {
+      if (y.dval == 0.0)   throw DivideByZero();
+      dval = double(*rval) / y.dval;
+      rep = precDOUBLE;
+      delete rval;
+      rval = 0;
+    }
+    else   {  // if (y.rep == precRATIONAL)
+      if (*y.rval == gRational(0))    throw DivideByZero();
+      *rval /= *y.rval;
+    }
+  }
+  return *this;
+}
+
+gNumber operator+(const gNumber &x, const gNumber &y) 
+{
+  if (x.rep == precDOUBLE)   {
+    if (y.rep == precDOUBLE)
+      return gNumber(x.dval + y.dval);
+    else   // if (y.rep == precRATIONAL)
+      return gNumber(x.dval + double(*y.rval));
+  }
+  else   {
+    if (y.rep == precDOUBLE)  
+      return gNumber(double(*x.rval) + y.dval);
+    else   // if (y.rep == precRATIONAL)
+      return gNumber(*x.rval + *y.rval);
+  }
+}
+
+gNumber operator-(const gNumber &x, const gNumber &y)
+{
+  if (x.rep == precDOUBLE)   {
+    if (y.rep == precDOUBLE)
+      return gNumber(x.dval - y.dval);
+    else   // if (y.rep == precRATIONAL)
+      return gNumber(x.dval - double(*y.rval));
+  }
+  else  {
+    if (y.rep == precDOUBLE)
+      return gNumber(double(*x.rval) - y.dval);
+    else   // if (y.rep == precRATIONAL)
+      return gNumber(*x.rval - *y.rval);
+  }
+}
+
+gNumber operator*(const gNumber &x, const gNumber &y)
+{
+  if (x.rep == precDOUBLE)  {
+    if (y.rep == precDOUBLE)
+      return gNumber(x.dval * y.dval);
+    else    // if (y.rep == precRATIONAL)
+      return gNumber(x.dval * double(*y.rval));
+  }
+  else  {
+    if (y.rep == precDOUBLE)  
+      return gNumber(double(*x.rval) * y.dval);
+    else    // if (y.rep == precRATIONAL\)
+      return gNumber(*x.rval * *y.rval);
+  }
+}
+
+gNumber operator/(const gNumber &x, const gNumber &y)
+{
+  if (x.rep == precDOUBLE)   {
+    if (y.rep == precDOUBLE)   {
+      if (y.dval == 0.0)    throw gNumber::DivideByZero();
+      return gNumber(x.dval / y.dval); 
+    }
+    else  {   // if (y.rep == precRATIONAL)
+      if (*y.rval == gRational(0))    throw gNumber::DivideByZero();
+      return gNumber(x.dval / double(*y.rval));
+    }
+  }
+  else   {
+    if (y.rep == precDOUBLE)   {
+      if (y.dval == 0.0)   throw gNumber::DivideByZero();
+      return gNumber(double(*x.rval) / y.dval);
+    }
+    else  { // if (y.rep == precRATIONAL)
+      if (*y.rval == gRational(0))   throw gNumber::DivideByZero();
+      return gNumber(*x.rval / *y.rval);
+    }
+  }
+}
 
 gNumber operator-(const gNumber &x)
 {
@@ -82,9 +338,9 @@ gNumber operator-(const gNumber &x)
   return r;
 }
 
-gOutput& operator << (gOutput& s, const gNumber& x)
+gOutput& operator<<(gOutput& s, const gNumber &x)
 {
-  if (x.GetPrecision() == precDOUBLE)
+  if (x.Precision() == precDOUBLE)
     s << x.dval;
   else
     s << *x.rval;
@@ -93,7 +349,7 @@ gOutput& operator << (gOutput& s, const gNumber& x)
 
   //  Basically identical to the rational >> operator, but sets y to be 
   // either a double or rational depending on input.
-gInput& operator >> (gInput& f, gNumber& y)
+gInput& operator>>(gInput& f, gNumber &y)
 {
   char ch = ' ';
   int sign = 1;
@@ -148,7 +404,21 @@ gInput& operator >> (gInput& f, gNumber& y)
   return f;
 }
 
+//-------------------------------------------------------------------------
+//           gNumber: Miscellaneous mathematical functions 
+//-------------------------------------------------------------------------
 
+gNumber pow(const gNumber &x, long n)
+{
+  if (x.rep == precDOUBLE)
+    return pow(x.dval, n);
+  else
+    return pow(*x.rval, n);
+}
+
+//-------------------------------------------------------------------------
+//           gNumber: Precision-related functions and casts
+//-------------------------------------------------------------------------
 
 gNumber::operator double(void) const
 {
@@ -166,267 +436,9 @@ gNumber::operator gRational(void) const
     return *rval;
 }
 
-Precision gNumber::GetPrecision(void) const
-{
-  return rep;
-}
-
-  // Comparison operators
-bool operator==(const gNumber& x, const gNumber& y)
-{
-  if (x.rep != y.rep)   return false;
-  if (x.rep == precDOUBLE)
-    return x.dval == y.dval;
-  else 
-    return *x.rval == *y.rval;
-}
-
-bool operator!=(const gNumber& x, const gNumber& y)
-{
-  if (x.rep != y.rep)   return true;
-  if (x.rep == precDOUBLE)
-    return x.dval != y.dval;
-  else
-    return *x.rval != *y.rval;
-}
-
-bool operator<(const gNumber& x, const gNumber& y)
-{
-  if (x.rep == precDOUBLE && y.rep == precDOUBLE)
-    return x.dval < y.dval;
-  else if (x.rep == precRATIONAL && y.rep == precRATIONAL)
-    return *(x.rval) < *(y.rval);
-  else if (x.rep == precRATIONAL && y.rep == precDOUBLE)
-    return y.dval > double(*(x.rval));
-  else // (x.rep == precDOUBLE && y.rep == precRATIONAL)
-    return x.dval < double(*(y.rval));
-}
-
-bool operator<=(const gNumber& x, const gNumber& y)
-{
-  if (x.rep == precDOUBLE && y.rep == precDOUBLE)
-    return x.dval <= y.dval;
-  else if (x.rep == precRATIONAL && y.rep == precRATIONAL)
-    return *(x.rval) <= *(y.rval);
-  else if (x.rep == precRATIONAL && y.rep == precDOUBLE)
-  {
-    double eps;
-    gEpsilon(eps, 8);
-    return y.dval >= (double(*(x.rval)) - eps);
-  }
-  else // (x.rep == precDOUBLE && y.rep == precRATIONAL)
-  {
-    double eps;
-    gEpsilon(eps, 8);
-    return x.dval <= (double(*(y.rval)) + eps);
-  }
-}
-
-bool operator >  (const gNumber& x, const gNumber& y)
-{
-  if (x.rep == precDOUBLE && y.rep == precDOUBLE)
-    return x.dval > y.dval;
-  else if (x.rep == precRATIONAL && y.rep == precRATIONAL)
-    return *(x.rval) > *(y.rval);
-  else if (x.rep == precRATIONAL && y.rep == precDOUBLE)
-    return y.dval < double(*(x.rval));
-  else // (x.rep == precDOUBLE && y.rep == precRATIONAL)
-    return x.dval > double(*(y.rval));
-}
-
-bool operator >= (const gNumber& x, const gNumber& y)
-{
-  if (x.rep == precDOUBLE && y.rep == precDOUBLE)
-    return x.dval >= y.dval;
-  else if (x.rep == precRATIONAL && y.rep == precRATIONAL)
-    return *(x.rval) >= *(y.rval);
-  else if (x.rep == precRATIONAL && y.rep == precDOUBLE)
-  {
-    double eps;
-    gEpsilon(eps, 8);
-    return y.dval <= (double(*(x.rval)) + eps);
-  }
-  else // (x.rep == precDOUBLE && y.rep == precRATIONAL)
-  {
-    double eps;
-    gEpsilon(eps, 8);
-    return x.dval >= (double(*(y.rval)) - eps);
-  }
-}
-
-gNumber &gNumber::operator += (const gNumber& y) 
-{
-  if (rep == precDOUBLE)   {
-    if (y.rep == precDOUBLE)
-      dval += y.dval;
-    else    // if (y.rep == precRATIONAL)
-      dval += double(*y.rval);
-  }
-  else   {  // this is a rational
-    if (y.rep == precDOUBLE)   {
-      dval = double(*rval) + y.dval;
-      rep = precDOUBLE;
-      delete rval;
-      rval = 0;
-    }
-    else // if (y.rep == precRATIONAL;
-      *rval += *y.rval;
-  }
-  return *this;
-}
-
-gNumber &gNumber::operator -= (const gNumber& y) 
-{
-  if (rep == precDOUBLE)  {
-    if (y.rep == precDOUBLE)
-      dval -= y.dval;
-    else    // if (y.rep == precRATIONAL)
-      dval -= double(*y.rval);
-  }
-  else  {  // this is a rational
-    if (y.rep == precDOUBLE)  {
-      dval = double(*rval) - y.dval;
-      rep = precDOUBLE;
-      delete rval;
-      rval = 0;
-    }
-    else    // if (y.rep == precRATIONAL;
-      *rval -= *y.rval;
-  }
-  return *this;
-}
-
-gNumber &gNumber::operator *= (const gNumber& y) 
-{
-  if (rep == precDOUBLE)   {
-    if (y.rep == precDOUBLE)
-      dval *= y.dval;
-    else    // if (y.rep == precRATIONAL)
-      dval *= double(*y.rval);
-  }
-  else   {  // this is a rational
-    if (y.rep == precDOUBLE)  {
-      dval = double(*rval) * y.dval;
-      rep = precDOUBLE;
-      delete rval;
-      rval = 0;
-    }
-    else    // if (y.rep == precRATIONAL)
-      *rval *= *y.rval;
-  }
-  return *this;
-}
-
-gNumber &gNumber::operator/=(const gNumber& y) 
-{
-  if (rep == precDOUBLE)   {
-    if (y.rep == precDOUBLE)  {
-      if (y.dval == 0.0)   throw DivideByZero();
-      dval /= y.dval;
-    }
-    else   {   // if (y.rep == precRATIONAL)
-      if (*y.rval == gRational(0))     throw DivideByZero();
-      dval /= double(*y.rval);
-    }
-  }
-  else  {   // this is a rational 
-    if (y.rep == precDOUBLE)  {
-      if (y.dval == 0.0)   throw DivideByZero();
-      dval = double(*rval) / y.dval;
-      rep = precDOUBLE;
-      delete rval;
-      rval = 0;
-    }
-    else   {  // if (y.rep == precRATIONAL)
-      if (*y.rval == gRational(0))    throw DivideByZero();
-      *rval /= *y.rval;
-    }
-  }
-  return *this;
-}
-
-gNumber operator + (const gNumber& x, const gNumber& y) 
-{
-  if (x.rep == precDOUBLE)   {
-    if (y.rep == precDOUBLE)
-      return gNumber(x.dval + y.dval);
-    else   // if (y.rep == precRATIONAL)
-      return gNumber(x.dval + double(*y.rval));
-  }
-  else   {
-    if (y.rep == precDOUBLE)  
-      return gNumber(double(*x.rval) + y.dval);
-    else   // if (y.rep == precRATIONAL)
-      return gNumber(*x.rval + *y.rval);
-  }
-}
-
-gNumber operator-(const gNumber& x, const gNumber& y)
-{
-  if (x.rep == precDOUBLE)   {
-    if (y.rep == precDOUBLE)
-      return gNumber(x.dval - y.dval);
-    else   // if (y.rep == precRATIONAL)
-      return gNumber(x.dval - double(*y.rval));
-  }
-  else  {
-    if (y.rep == precDOUBLE)
-      return gNumber(double(*x.rval) - y.dval);
-    else   // if (y.rep == precRATIONAL)
-      return gNumber(*x.rval - *y.rval);
-  }
-}
-
-gNumber operator*(const gNumber& x, const gNumber& y)
-{
-  if (x.rep == precDOUBLE)  {
-    if (y.rep == precDOUBLE)
-      return gNumber(x.dval * y.dval);
-    else    // if (y.rep == precRATIONAL)
-      return gNumber(x.dval * double(*y.rval));
-  }
-  else  {
-    if (y.rep == precDOUBLE)  
-      return gNumber(double(*x.rval) * y.dval);
-    else    // if (y.rep == precRATIONAL\)
-      return gNumber(*x.rval * *y.rval);
-  }
-}
-
-gNumber operator/(const gNumber& x, const gNumber& y)
-{
-  if (x.rep == precDOUBLE)   {
-    if (y.rep == precDOUBLE)   {
-      if (y.dval == 0.0)    throw gNumber::DivideByZero();
-      return gNumber(x.dval / y.dval); 
-    }
-    else  {   // if (y.rep == precRATIONAL)
-      if (*y.rval == gRational(0))    throw gNumber::DivideByZero();
-      return gNumber(x.dval / double(*y.rval));
-    }
-  }
-  else   {
-    if (y.rep == precDOUBLE)   {
-      if (y.dval == 0.0)   throw gNumber::DivideByZero();
-      return gNumber(double(*x.rval) / y.dval);
-    }
-    else  { // if (y.rep == precRATIONAL)
-      if (*y.rval == gRational(0))   throw gNumber::DivideByZero();
-      return gNumber(*x.rval / *y.rval);
-    }
-  }
-}
-
 bool gNumber::IsInteger(void) const
 {
   return ((rep == precDOUBLE && fmod(dval, 1.0) == 0.0) ||
 	  (rep == precRATIONAL && rval->denominator() == 1));
 }
 
-gNumber pow(const gNumber &x, long n)
-{
-  if (x.rep == precDOUBLE)
-    return pow(x.dval, n);
-  else
-    return pow(*x.rval, n);
-}
