@@ -23,13 +23,8 @@ template <class T> gSortList<T>::~gSortList()
 
 template <class T> void gSortList<T>::Swap(int a, int b)
 {
-#ifdef USE_EXCEPTIONS
   if (a < 1 || a > length)   throw BadIndex(__LINE__, __FILE__);
   if (b < 1 || b > length)   throw BadIndex(__LINE__, __FILE__);
-#else
-  assert(a >= 1 && a <= length);
-  assert(b >= 1 && b <= length);
-#endif   // USE_EXCEPTIONS
 
   if (a == b)   return;
 
@@ -95,7 +90,6 @@ template <class T> T gSortList<T>::Remove(int a)
 {
   if (a <= vis_length)  vis_length--;
   
-#ifdef USE_EXCEPTIONS
   try  {
     return gList<T>::Remove(a);
   }
@@ -103,9 +97,6 @@ template <class T> T gSortList<T>::Remove(int a)
     if (a <= vis_length - 1)  vis_length++;
     throw;
   }
-#else
-  return gList<T>::Remove(a);
-#endif   // USE_EXCEPTIONS
 }
 
 

@@ -28,7 +28,6 @@ class gText   {
     gText(int len);
 
   public:
-#ifdef USE_EXCEPTIONS
     // INDEX ERROR HANDLER CLASS
     class BadIndex : public gException  {
       public:
@@ -37,7 +36,6 @@ class gText   {
       virtual ~BadIndex()  { }
       gText Description(void) const;
      };
-#endif   // USE_EXCEPTIONS
 
     // CONSTRUCTORS, DESTRUCTORS, AND CONSTRUCTIVE OPERATORS
     gText(void);
@@ -89,29 +87,15 @@ class gText   {
     bool operator>=(const char *s) const     { return strcmp(storage, s) >= 0; }
 
 	  // SUBSCRIPTORS
-#ifdef USE_EXCEPTIONS
     char &operator[](unsigned int n)
       { if (n > strlen(storage))   throw BadIndex(__LINE__, __FILE__);
         return *(storage + n);
       }
-#else
-    char &operator[](unsigned int n)      
-      { assert(n <= strlen(storage));
-	return *(storage + n);
-      }
-#endif   // USE_EXCEPTIONS
 
-#ifdef USE_EXCEPTIONS
     char &operator[](unsigned int n) const
       { if (n > strlen(storage))   throw BadIndex(__LINE__, __FILE__);
         return *(storage + n);
       }
-#else
-    char &operator[](unsigned int n) const      
-      { assert(n <= strlen(storage));
-	return *(storage + n);
-      }
-#endif   // USE_EXCEPTIONS
 
     char *operator+(int n)        { return storage + n; }
 

@@ -143,9 +143,7 @@ int main( int /*argc*/, char* argv[] )
   gPreprocessor P(&gcmdline);
 
   while (!P.eof())  { 
-#ifdef USE_EXCEPTIONS
     try   {
-#endif // USE_EXCEPTIONS
       gelExpr *expr = C.Compile(P.GetLine(), P.GetFileName(),
                                 P.GetLineNumber(), P.GetRawLine());
       if (expr)   {
@@ -155,7 +153,6 @@ int main( int /*argc*/, char* argv[] )
       }
       else  
         gout << "A compile error occurred\n";
-#ifdef USE_EXCEPTIONS
     }
     catch (gException &e)  {
       gout << "EXCEPTION: " << e.Description() << '\n';
@@ -163,7 +160,6 @@ int main( int /*argc*/, char* argv[] )
     catch (...)   {
       gout << "Whoa... exception!!!!\n";
     }
-#endif // USE_EXCEPTIONS
   }
 
   delete[] _SourceDir;

@@ -18,14 +18,12 @@
 
 #include "gtext.h"
 
-#ifdef USE_EXCEPTIONS
 gNumber::DivideByZero::DivideByZero(int line, char *file)
   : gException(line, file)
 { }
 
 gText gNumber::DivideByZero::Description(void) const
 { return "Divide by zero in gNumber"; }
-#endif   // USE_EXCEPTIONS
 
 
 gNumber::gNumber(void) 
@@ -327,32 +325,24 @@ gNumber &gNumber::operator/=(const gNumber& y)
 {
   if (rep == precDOUBLE)   {
     if (y.rep == precDOUBLE)  {
-#ifdef USE_EXCEPTIONS
       if (y.dval == 0.0)   throw DivideByZero(__LINE__, __FILE__);
-#endif   // USE_EXCEPTIONS
       dval /= y.dval;
     }
     else   {   // if (y.rep == precRATIONAL)
-#ifdef USE_EXCEPTIONS
       if (*y.rval == gRational(0))     throw DivideByZero(__LINE__, __FILE__);
-#endif   // USE_EXCEPTIONS
       dval /= double(*y.rval);
     }
   }
   else  {   // this is a rational 
     if (y.rep == precDOUBLE)  {
-#ifdef USE_EXCEPTIONS
       if (y.dval == 0.0)   throw DivideByZero(__LINE__, __FILE__);
-#endif   // USE_EXCEPTIONS
       dval = double(*rval) / y.dval;
       rep = precDOUBLE;
       delete rval;
       rval = 0;
     }
     else   {  // if (y.rep == precRATIONAL)
-#ifdef USE_EXCEPTIONS
       if (*y.rval == gRational(0))    throw DivideByZero(__LINE__, __FILE__);
-#endif   // USE_EXCEPTIONS
       *rval /= *y.rval;
     }
   }
@@ -411,29 +401,21 @@ gNumber operator/(const gNumber& x, const gNumber& y)
 {
   if (x.rep == precDOUBLE)   {
     if (y.rep == precDOUBLE)   {
-#ifdef USE_EXCEPTIONS
       if (y.dval == 0.0)    throw gNumber::DivideByZero(__LINE__, __FILE__);
-#endif   // USE_EXCEPTIONS
       return gNumber(x.dval / y.dval); 
     }
     else  {   // if (y.rep == precRATIONAL)
-#ifdef USE_EXCEPTIONS
       if (*y.rval == gRational(0))    throw gNumber::DivideByZero(__LINE__, __FILE__);
-#endif   // USE_EXCEPTIONS
       return gNumber(x.dval / double(*y.rval));
     }
   }
   else   {
     if (y.rep == precDOUBLE)   {
-#ifdef USE_EXCEPTIONS
       if (y.dval == 0.0)   throw gNumber::DivideByZero(__LINE__, __FILE__);
-#endif   // USE_EXCEPTIONS
       return gNumber(double(*x.rval) / y.dval);
     }
     else  { // if (y.rep == precRATIONAL)
-#ifdef USE_EXCEPTIONS
       if (*y.rval == gRational(0))   throw gNumber::DivideByZero(__LINE__, __FILE__);
-#endif   // USE_EXCEPTIONS
       return gNumber(*x.rval / *y.rval);
     }
   }

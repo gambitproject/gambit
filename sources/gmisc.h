@@ -112,7 +112,6 @@ public:
   friend gOutput& operator << (gOutput& output, const index_pair& x);  
 };
 
-#ifdef USE_EXCEPTIONS
 class gException   {
 private:
   int line;
@@ -135,7 +134,6 @@ public:
   gText Description(void) const;
 }; 
 
-#endif   // USE_EXCEPTIONS
 
 #endif    // GMISC_H
 

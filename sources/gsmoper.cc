@@ -1402,9 +1402,8 @@ Portion* GSM_Manual(Portion** param)
 
   ManFileName = (gText) name;
   f = 0;
-#ifdef USE_EXCEPTIONS
   try {
-  f = new gFileInput( ManFileName );
+    f = new gFileInput( ManFileName );
   }
   catch(gFileInput::OpenFailed &) {
     if( search ) {
@@ -1439,73 +1438,6 @@ Portion* GSM_Manual(Portion** param)
 
   if (f == NULL)
     return new BoolPortion(false);
-#else
-  f = new gFileInput( ManFileName );
-  if (!f->IsValid())
-  {
-	 delete f;
-	 f = NULL;
-  }
-  else
-  {  
-    man_found = true;
-  }
-
-  if( search )
-  {
-
-    if( !man_found && (System::GetEnv( "HOME" ) != NULL) )
-    {
-      ManFileName = (gText) System::GetEnv( "HOME" ) + SLASH + name;
-      f = new gFileInput( ManFileName );
-      if (!f->IsValid())
-      {
-	delete f;
-	f = NULL;
-      }
-      else
-      {  
-        man_found = true;
-      }
-    }
-
-    if( !man_found && (System::GetEnv( "GCLLIB" ) != NULL) )
-    {
-      ManFileName = (gText) System::GetEnv( "GCLLIB" ) + SLASH + name;
-      f = new gFileInput( ManFileName );
-      if (!f->IsValid())
-      {
-	delete f;
-	f = NULL;
-      }
-      else
-      {
-        man_found = true;
-      }
-    }
-
-    if( !man_found && (SOURCE != NULL) )
-    {
-      ManFileName = (gText) SOURCE + SLASH + name;
-      f = new gFileInput( ManFileName );
-      if (!f->IsValid())
-      {
-        delete f;
-	f = NULL;
-      }
-      else
-      {  
-        man_found = true;
-      }
-    }
-
-  }
-
-  // End bad section
-
-  if (f == NULL)
-    return new BoolPortion(false);
-#endif // USE_EXCEPTIONS
 
   gText line;
   gText line_out;

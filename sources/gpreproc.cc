@@ -444,7 +444,6 @@ gInput* gPreprocessor::LoadInput( gText& name )
   
   IniFileName = name;
   _Input = 0;
-#ifdef USE_EXCEPTIONS
   try   {
     _Input = new gFileInput(IniFileName);
   }
@@ -479,52 +478,6 @@ gInput* gPreprocessor::LoadInput( gText& name )
     }
   }
   return _Input;
-#else
-  _Input = new gFileInput( IniFileName );
-  if (_Input->IsValid())  {
-    name = IniFileName;
-    return _Input;
-  }
-  else
-    delete _Input;
-  
-  if (search)  {
-    if (System::GetEnv("HOME") != NULL )  {
-      IniFileName = (gText) System::GetEnv( "HOME" ) + (gText) SLASH + (gText) name;
-      _Input = new gFileInput( IniFileName );
-      if (_Input->IsValid())  {
-	name = IniFileName;
-	return _Input;
-      }
-      else
-	delete _Input;
-    }
-    
-    if (System::GetEnv("GCLLIB") != NULL)  {
-      IniFileName = (gText) System::GetEnv( "GCLLIB" ) + (gText) SLASH + (gText) name;
-      _Input = new gFileInput( IniFileName );
-      if (_Input->IsValid())  {
-	name = IniFileName;
-	return _Input;
-      }
-      else
-	delete _Input;
-    }
-    
-    if (SOURCE != NULL)  {
-      IniFileName = (gText) SOURCE + (gText) SLASH + (gText) name;
-      _Input = new gFileInput( IniFileName );
-      if (_Input->IsValid())  {
-	name = IniFileName;
-	return _Input;
-      }
-      else
-	delete _Input;
-    }
-  }
-
-  return NULL;
-#endif    // USE_EXCEPTIONS
 }
 
 

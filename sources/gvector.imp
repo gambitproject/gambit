@@ -5,10 +5,6 @@
 //
 
 #include "gvector.h"
-#include <assert.h>
-
-#ifdef USE_EXCEPTIONS
-
 #include "gtext.h"
 
 template <class T>
@@ -21,7 +17,6 @@ gText gVector<T>::BadDim::Description(void) const
 {
   return "Mismatched vector lengths";
 }
-#endif   // USE_EXCEPTIONS
 
 //------------------------------------------------------------------------
 //     gVector<T>: Constructors, destructor, constructive operators
@@ -42,11 +37,7 @@ template <class T> gVector<T>::~gVector()   { }
 
 template <class T> gVector<T>& gVector<T>::operator=(const gVector<T>& V)
 {
-#ifdef USE_EXCEPTIONS
   if (!Check(V))   throw BadDim(__LINE__, __FILE__);
-#else
-  assert(Check(V));
-#endif   // USE_EXCEPTIONS
   gArray<T>::operator=(V);
   return *this;
 }
@@ -86,11 +77,7 @@ template<class T> gVector<T>& gVector<T>::operator=(T c)
 template <class T> gVector<T>
 gVector<T>::operator+(const gVector<T>& V) const
 {
-#ifdef USE_EXCEPTIONS
   if (!Check(V))   throw BadDim(__LINE__, __FILE__);
-#else
-  assert( Check(V) );
-#endif   // USE_EXCEPTIONS
 
   gVector<T> tmp(mindex,maxdex);
   for(int i=mindex; i<=maxdex; i++)
@@ -101,11 +88,7 @@ gVector<T>::operator+(const gVector<T>& V) const
 template <class T> gVector<T>
 gVector<T>::operator-(const gVector<T>& V) const
 {
-#ifdef USE_EXCEPTIONS
   if (!Check(V))   throw BadDim(__LINE__, __FILE__);
-#else
-  assert( Check(V) );
-#endif   // USE_EXCEPTIONS
 
   gVector<T> tmp(mindex,maxdex);
   for(int i=mindex; i<=maxdex; i++)
@@ -116,11 +99,7 @@ gVector<T>::operator-(const gVector<T>& V) const
 template <class T> gVector<T>&
 gVector<T>::operator+=(const gVector<T>& V)
 {
-#ifdef USE_EXCEPTIONS
   if (!Check(V))   throw BadDim(__LINE__, __FILE__);
-#else
-  assert( Check(V) );
-#endif    // USE_EXCEPTIONS
 
   for(int i=mindex; i<=maxdex; i++)
     (*this)[i] += V[i];
@@ -130,11 +109,7 @@ gVector<T>::operator+=(const gVector<T>& V)
 template <class T> gVector<T>&
 gVector<T>::operator-=(const gVector<T>& V)
 {
-#ifdef USE_EXCEPTIONS
   if (!Check(V))    throw BadDim(__LINE__, __FILE__);
-#else
-  assert( Check(V) );
-#endif    // USE_EXCEPTIONS
 
   for(int i=mindex; i<=maxdex; i++)
     (*this)[i] -= V[i];
@@ -166,11 +141,7 @@ template <class T> gVector<T> &gVector<T>::operator*=(T c)
 
 template <class T> T gVector<T>::operator*(const gVector<T>& V) const
 {
-#ifdef USE_EXCEPTIONS
   if (!Check(V))   throw BadDim(__LINE__, __FILE__);
-#else
-  assert( Check(V) );
-#endif   // USE_EXCEPTIONS
 
   T sum= (T)0;
   for(int i=mindex; i<=maxdex; i++)
@@ -190,11 +161,7 @@ template <class T> gVector<T> gVector<T>::operator/(T c) const
 
 template <class T> bool gVector<T>::operator==(const gVector<T>& V) const
 {
-#ifdef USE_EXCEPTIONS
   if (!Check(V))   throw BadDim(__LINE__, __FILE__);
-#else
-  assert( Check(V) );
-#endif   // USE_EXCEPTIONS
 
   for(int i=mindex; i<=maxdex; i++)
     if( (*this)[i] != V[i] )

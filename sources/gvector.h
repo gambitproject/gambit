@@ -23,7 +23,6 @@ template <class T> class gMatrix;
 template <class T> class gVector : public gArray<T>   {
   friend class gMatrix<T>;
 public:
-#ifdef USE_EXCEPTIONS
   class BadDim : public gException  {
   public:
     BadDim(int,  char *);
@@ -31,7 +30,7 @@ public:
     virtual ~BadDim()   { }
     gText Description(void) const;
   };
-#endif   // USE_EXCEPTIONS
+
   //# CONSTRUCTORS
   // Create a vector of length len, starting at 1
   gVector(unsigned int len = 0);

@@ -8,8 +8,6 @@
 
 #include <assert.h>
 #include "garray.h"
-
-#ifdef USE_EXCEPTIONS
 #include "gtext.h"
 
 template <class T> gRectArray<T>::BadDim::BadDim(int line, char *file)
@@ -29,7 +27,6 @@ template <class T> gText gRectArray<T>::BadIndex::Description(void) const
 {
   return "Index out of range in gRectArray";
 }
-#endif   // USE_EXCEPTIONS
 
 //------------------------------------------------------------------------
 //            gRectArray<T>: Private/protected member functions
@@ -154,22 +151,14 @@ template <class T> int gRectArray<T>::MaxCol(void) const { return maxcol; }
 
 template <class T> T &gRectArray<T>::operator()(int r, int c)
 {
-#ifdef USE_EXCEPTIONS
   if (!Check(r, c))  throw BadIndex(__LINE__, __FILE__);
-#else
-  assert(Check(r, c));
-#endif   // USE_EXCEPTIONS
 
   return data[r][c];
 }
 
 template <class T> const T &gRectArray<T>::operator()(int r, int c) const
 {
-#ifdef USE_EXCEPTIONS
   if (!Check(r, c))  throw BadIndex(__LINE__, __FILE__);
-#else
-  assert(Check(r, c));
-#endif   // USE_EXCEPTIONS
 
   return data[r][c];
 }
@@ -198,11 +187,7 @@ template <class T> gOutput &operator<<(gOutput &f, const gRectArray<T> &a)
 
 template <class T> void gRectArray<T>::RotateUp(int lo, int hi)
 {
-#ifdef USE_EXCEPTIONS
   if (lo < minrow || hi < lo || maxrow < hi)  throw BadIndex(__LINE__, __FILE__);
-#else
-  assert(lo >= minrow && hi >= lo && maxrow >= hi);
-#endif   // USE_EXCEPTIONS
 
   T *temp = data[lo];
   for (int k = lo; k < hi; k++)
@@ -212,11 +197,7 @@ template <class T> void gRectArray<T>::RotateUp(int lo, int hi)
 
 template <class T> void gRectArray<T>::RotateDown(int lo, int hi)
 {
-#ifdef USE_EXCEPTIONS
   if (lo < minrow || hi < lo || maxrow < hi)  throw BadIndex(__LINE__, __FILE__);
-#else
-  assert(lo >= minrow && hi >= lo && maxrow >= hi);
-#endif   // USE_EXCEPTIONS
 
   T *temp = data[hi];
   for (int k = hi; k > lo; k--)
@@ -226,11 +207,7 @@ template <class T> void gRectArray<T>::RotateDown(int lo, int hi)
 
 template <class T> void gRectArray<T>::RotateLeft(int lo, int hi)
 {
-#ifdef USE_EXCEPTIONS
   if (lo < mincol || hi < lo || maxcol < hi)   throw BadIndex(__LINE__, __FILE__);
-#else
-  assert(lo >= mincol && hi >= lo && maxcol >= hi);
-#endif   // USE_EXCEPTIONS
   
   T temp;
   for (int i = minrow; i <= maxrow; i++)  {
@@ -244,11 +221,7 @@ template <class T> void gRectArray<T>::RotateLeft(int lo, int hi)
 
 template <class T> void gRectArray<T>::RotateRight(int lo, int hi)
 {
-#ifdef USE_EXCEPTIONS
   if (lo < mincol || hi < lo || maxcol < hi)   throw BadIndex(__LINE__, __FILE__);
-#else
-  assert(lo >= mincol && hi >= lo && maxcol >= hi);
-#endif   // USE_EXCEPTIONS
 
   T temp;
   for (int i = minrow; i <= maxrow; i++)  {
@@ -266,12 +239,8 @@ template <class T> void gRectArray<T>::RotateRight(int lo, int hi)
 
 template <class T> void gRectArray<T>::SwitchRow(int row, gArray<T> &v)
 {
-#ifdef USE_EXCEPTIONS
   if (!CheckRow(row))  throw BadIndex(__LINE__, __FILE__);
   if (!CheckRow(v))    throw BadDim(__LINE__, __FILE__);
-#else
-  assert(CheckRow(row) && CheckRow(v));
-#endif   // USE_EXCEPTIONS
 
   T *rowptr = data[row];
   T tmp;
@@ -284,11 +253,7 @@ template <class T> void gRectArray<T>::SwitchRow(int row, gArray<T> &v)
 
 template <class T> void gRectArray<T>::SwitchRows(int i, int j)
 {
-#ifdef USE_EXCEPTIONS
   if (!CheckRow(i) || !CheckRow(j))   throw BadIndex(__LINE__, __FILE__);
-#else
-  assert(CheckRow(i) && CheckRow(j));
-#endif   // USE_EXCEPTIONS
   T *temp = data[j];
   data[j] = data[i];
   data[i] = temp;
@@ -296,13 +261,9 @@ template <class T> void gRectArray<T>::SwitchRows(int i, int j)
 
 template <class T> void gRectArray<T>::GetRow(int row, gArray<T> &v) const
 {
-#ifdef USE_EXCEPTIONS
   if (!CheckRow(row))   throw BadIndex(__LINE__, __FILE__);
   if (!CheckRow(v))     throw BadDim(__LINE__, __FILE__);
-#else
-  assert(CheckRow(row));
-  assert(CheckRow(v));
-#endif   // USE_EXCEPTIONS
+
   T *rowptr = data[row];
   for (int i = mincol; i <= maxcol; i++)
     v[i] = rowptr[i];
@@ -310,13 +271,8 @@ template <class T> void gRectArray<T>::GetRow(int row, gArray<T> &v) const
 
 template <class T> void gRectArray<T>::SetRow(int row, const gArray<T> &v)
 {
-#ifdef USE_EXCEPTIONS
   if (!CheckRow(row))   throw BadIndex(__LINE__, __FILE__);
   if (!CheckRow(v))     throw BadDim(__LINE__, __FILE__);
-#else
-  assert(CheckRow(row));
-  assert(CheckRow(v));
-#endif   // USE_EXCEPTIONS
 
   T *rowptr = data[row];
   for (int i = mincol; i <= maxcol; i++)
@@ -329,12 +285,8 @@ template <class T> void gRectArray<T>::SetRow(int row, const gArray<T> &v)
 
 template <class T> void gRectArray<T>::SwitchColumn(int col, gArray<T> &v)
 {
-#ifdef USE_EXCEPTIONS
   if (!CheckColumn(col))   throw BadIndex(__LINE__, __FILE__);
   if (!CheckColumn(v))     throw BadDim(__LINE__, __FILE__);
-#else
-  assert(CheckColumn(col) && CheckColumn(v));
-#endif   // USE_EXCEPTIONS
 
   for (int i = minrow; i <= maxrow; i++)   {
     T tmp = data[i][col];
@@ -345,11 +297,8 @@ template <class T> void gRectArray<T>::SwitchColumn(int col, gArray<T> &v)
 
 template <class T> void gRectArray<T>::SwitchColumns(int a, int b)
 {
-#ifdef USE_EXCEPTIONS
   if (!CheckColumn(a) || !CheckColumn(b))   throw BadIndex(__LINE__, __FILE__);
-#else
-  assert(CheckColumn(a) && CheckColumn(b));
-#endif   // USE_EXCEPTIONS
+
   for (int i = minrow; i <= maxrow; i++)   {
     T tmp = data[i][a];
     data[i][a] = data[i][b];
@@ -359,13 +308,8 @@ template <class T> void gRectArray<T>::SwitchColumns(int a, int b)
 
 template <class T> void gRectArray<T>::GetColumn(int col, gArray<T> &v) const
 {
-#ifdef USE_EXCEPTIONS
   if (!CheckColumn(col))  throw BadIndex(__LINE__, __FILE__);
   if (!CheckColumn(v))    throw BadDim(__LINE__, __FILE__);
-#else
-  assert(CheckColumn(col));
-  assert(CheckColumn(v));
-#endif   // USE_EXCEPTIONS
 
   for (int i = minrow; i <= maxrow; i++)
     v[i] = data[i][col];
@@ -373,13 +317,9 @@ template <class T> void gRectArray<T>::GetColumn(int col, gArray<T> &v) const
 
 template <class T> void gRectArray<T>::SetColumn(int col, const gArray<T> &v)
 {
-#ifdef USE_EXCEPTIONS
   if (!CheckColumn(col))   throw BadIndex(__LINE__, __FILE__);
   if (!CheckColumn(v))     throw BadDim(__LINE__, __FILE__);
-#else
-  assert(CheckColumn(col));
-  assert(CheckColumn(v));
-#endif   // USE_EXCEPTIONS
+
   for (int i = minrow; i <= maxrow; i++)
     data[i][col] = v[i];
 }

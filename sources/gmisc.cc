@@ -427,15 +427,12 @@ gOutput& operator << (gOutput& output, const index_pair& x)
 
 //--------------------Exceptions Related Stuff---------------------
 
-#ifdef USE_EXCEPTIONS
 gText gNewFailed::Description(void) const
 {
   return "Memory exhausted in call to new";
 }
-#endif   // USE_EXCEPTIONS
 
 
-#ifdef USE_EXCEPTIONS
 gException::gException(void)
   : line(0)
 {
@@ -469,7 +466,5 @@ gText gException::ErrorMessage(void) const
   gText text(buf);
   return buf+Description();
 }
-
-#endif   // USE_EXCEPTIONS
 
 

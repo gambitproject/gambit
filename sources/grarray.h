@@ -18,7 +18,6 @@ template <class T> class gRectArray    {
     T **data;
 
   public:
-#ifdef USE_EXCEPTIONS
     class BadIndex : public gException  { 
       public:
         BadIndex(int, char *);
@@ -33,7 +32,6 @@ template <class T> class gRectArray    {
         virtual ~BadDim()   { }
 	gText Description(void) const;
     };
-#endif   // USE_EXCEPTIONS
 
        // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
     gRectArray(void);

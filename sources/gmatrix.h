@@ -13,7 +13,6 @@
 
 template <class T> class gMatrix : public gRectArray<T>  {
   public:
-#ifdef USE_EXCEPTIONS
     class DivideByZero : public gException  {
       public:
         DivideByZero(int, char *);
@@ -21,7 +20,6 @@ template <class T> class gMatrix : public gRectArray<T>  {
         virtual ~DivideByZero()   { }
         gText Description(void) const;
     };
-#endif   // USE_EXCEPTIONS
 
        // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
     gMatrix(void);

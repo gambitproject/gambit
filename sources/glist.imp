@@ -5,10 +5,6 @@
 //
 
 #include "glist.h"
-
-#include <assert.h>
-
-#ifdef USE_EXCEPTIONS
 #include "gtext.h"
 
 template <class T>
@@ -19,8 +15,6 @@ gList<T>::BadIndex::BadIndex(int line, char *file)
 template <class T>
 gText gList<T>::BadIndex::Description(void) const
 { return "Bad index in gList"; }
-
-#endif    // USE_EXCEPTIONS
 
 
 //--------------------------------------------------------------------------
@@ -71,11 +65,7 @@ template <class T> gList<T>::~gList()
 
 template <class T> int gList<T>::InsertAt(const T &t, int num)
 {
-#ifdef USE_EXCEPTIONS
   if (num < 1 || num > length + 1)   throw BadIndex(__LINE__, __FILE__);
-#else
-  assert( num >= 1 && num <= length + 1 );
-#endif   // USE_EXCEPTIONS
   
   if (!length)  {
     head = tail = new gNode(t, 0, 0);
@@ -157,15 +147,10 @@ template <class T> bool gList<T>::operator!=(const gList<T> &b) const
 
 template <class T> const T &gList<T>::operator[](int num) const
 {
-#ifdef USE_EXCEPTIONS
   if (num < 1 || num > length)    throw BadIndex(__LINE__, __FILE__);
-#else
-  assert(num >= 1 && num <= length);
-#endif   // USE_EXCEPTIONS
 
-  assert(CurrIndex >= 1 && CurrIndex <= length);
-  gNode *n;
   int i;
+  gNode *n;
   if( num < CurrIndex )
     for (i = CurrIndex, n = CurrNode; i > num; i--, n = n->prev);
   else
@@ -177,13 +162,7 @@ template <class T> const T &gList<T>::operator[](int num) const
 
 template <class T> T &gList<T>::operator[](int num)
 {
-#ifdef USE_EXCEPTIONS
   if (num < 1 || num > length)   throw BadIndex(__LINE__, __FILE__);
-#else
-  assert(num >= 1 && num <= length);
-#endif   // USE_EXCEPTIONS
-
-  assert(CurrIndex >= 1 && CurrIndex <= length);
   gNode *n;
   int i;
   if( num < CurrIndex )
@@ -270,13 +249,7 @@ template <class T> int gList<T>::Insert(const T &t, int n)
 
 template <class T> T gList<T>::Remove(int num)
 {
-#ifdef USE_EXCEPTIONS
   if (num < 1 || num > length)   throw BadIndex(__LINE__, __FILE__);
-#else
-  assert(num >= 1 && num <= length);
-#endif   // USE_EXCEPTIONS
-
-  assert(CurrIndex >= 1 && CurrIndex <= length);
   gNode *n;
   int i;
 

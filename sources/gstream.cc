@@ -24,7 +24,6 @@ gInput::~gInput()   { }
 //                       gFileInput member functions
 //--------------------------------------------------------------------------
 
-#ifdef USE_EXCEPTIONS
 #include "gtext.h"
 
 gFileInput::OpenFailed::OpenFailed(int line, char *file)
@@ -44,24 +43,15 @@ gText gFileInput::ReadFailed::Description(void) const
 {
   return "Read failed in gFileInput";
 }
-#endif   // USE_EXCEPTIONS
 
 gFileInput::gFileInput(const char *in) : f(fopen(in, "r"))
 {
-#ifdef USE_EXCEPTIONS
   if (!f)  throw OpenFailed(__LINE__, __FILE__);
-#else
-  valid = (f != 0);
-#endif   // USE_EXCEPTIONS
 }
 
 gFileInput::gFileInput(FILE *in) : f(in)
 {
-#ifdef USE_EXCEPTIONS
   if (!f)  throw OpenFailed(__LINE__, __FILE__);
-#else
-  valid = (f != 0);
-#endif   // USE_EXCEPTIONS
 }
 
 gFileInput::~gFileInput()
@@ -71,31 +61,19 @@ gFileInput::~gFileInput()
 
 gInput &gFileInput::operator>>(int &x)
 {
-#ifdef USE_EXCEPTIONS
   if (fscanf(f, "%d", &x) != 1)   throw ReadFailed(__LINE__, __FILE__);
-#else
-  valid = (fscanf(f, "%d", &x) == 1);
-#endif   // USE_EXCEPTIONS
   return *this;
 }
 
 gInput &gFileInput::operator>>(unsigned int &x)
 {
-#ifdef USE_EXCEPTIONS
   if (fscanf(f, "%d", &x) != 1)   throw ReadFailed(__LINE__, __FILE__);
-#else
-  valid = (fscanf(f, "%d", &x) == 1);
-#endif   // USE_EXCEPTIONS
   return *this;
 }
 
 gInput &gFileInput::operator>>(long &x)
 {
-#ifdef USE_EXCEPTIONS
   if (fscanf(f, "%ld", &x) != 1)   throw ReadFailed(__LINE__, __FILE__);
-#else
-  valid = (fscanf(f, "%ld", &x) == 1);
-#endif   // USE_EXCEPTIONS
   return *this;
 }
 
@@ -107,31 +85,19 @@ gInput &gFileInput::operator>>(char &x)
 
 gInput &gFileInput::operator>>(double &x)
 {
-#ifdef USE_EXCEPTIONS
   if (fscanf(f, "%lf", &x) != 1)   throw ReadFailed(__LINE__, __FILE__);
-#else
-  valid = (fscanf(f, "%lf", &x) == 1);
-#endif   // USE_EXCEPTIONS
   return *this;
 }
 
 gInput &gFileInput::operator>>(float &x)
 {
-#ifdef USE_EXCEPTIONS
   if (fscanf(f, "%f", &x) != 1)   throw ReadFailed(__LINE__, __FILE__);
-#else
-  valid = (fscanf(f, "%f", &x) == 1);
-#endif   // USE_EXCEPTIONS
   return *this;
 }
 
 gInput &gFileInput::operator>>(char *x)
 {
-#ifdef USE_EXCEPTIONS
   if (fscanf(f, "%s", x) != 1)   throw ReadFailed(__LINE__, __FILE__);
-#else
-  valid = (fscanf(f, "%s", x) == 1);
-#endif   // USE_EXCEPTIONS
   return *this;
 }
 
@@ -166,17 +132,10 @@ void gFileInput::setpos(long x) const
   fseek(f, x, 0);
 }
 
-#ifdef USE_EXCEPTIONS
 bool gFileInput::IsValid(void) const
 {
   return true;
 }
-#else
-bool gFileInput::IsValid(void) const
-{
-  return valid;
-}
-#endif   // USE_EXCEPTIONS
 
 //--------------------------------------------------------------------------
 //                         gNullInput member functions
@@ -255,7 +214,6 @@ gOutput::~gOutput()   { }
 //                         gFileOutput member functions
 //--------------------------------------------------------------------------
 
-#ifdef USE_EXCEPTIONS
 gFileOutput::OpenFailed::OpenFailed(int line, char *file)
   :gException(line, file)
 { }
@@ -273,26 +231,17 @@ gText gFileOutput::WriteFailed::Description(void) const
 {
   return "Write failed in gFileOutput";
 }
-#endif   // USE_EXCEPTIONS
 
 gFileOutput::gFileOutput(const char *out, bool append /* = false */)
   : f(fopen(out, (append) ? "a" : "w")), Width(0), Prec(6), Represent('f')
 {
-#ifdef USE_EXCEPTIONS
   if (!f)   throw OpenFailed(__LINE__, __FILE__);
-#else
-  valid = (f != 0);
-#endif   // USE_EXCEPTIONS
 }
 
 gFileOutput::gFileOutput(FILE *out)
   : f(out), Width(0), Prec(6), Represent('f')
 {
-#ifdef USE_EXCEPTIONS
   if (!f)   throw OpenFailed(__LINE__, __FILE__);
-#else
-  valid = (f != 0);
-#endif   // USE_EXCEPTIONS
 }
 
 gFileOutput::~gFileOutput()
@@ -341,69 +290,41 @@ char gFileOutput::GetRepMode(void)
 
 gOutput &gFileOutput::operator<<(int x)
 {
-#ifdef USE_EXCEPTIONS
   if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed(__LINE__, __FILE__);
-#else
-  valid = (fprintf(f, "%*d", Width, x) >= 0);
-#endif   // USE_EXCEPTIONS
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(unsigned int x)
 {
-#ifdef USE_EXCEPTIONS
   if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed(__LINE__, __FILE__);
-#else
-  valid = (fprintf(f, "%*d", Width, x) >= 0);
-#endif   // USE_EXCEPTIONS
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(bool x)
 {
-#ifdef USE_EXCEPTIONS
   if (fprintf(f, "%c", (x) ? 'T' : 'F') < 0)   throw WriteFailed(__LINE__, __FILE__);
-#else
-  valid = (fprintf(f, "%c", (x) ? 'T' : 'F') >= 0);
-#endif   // USE_EXCEPTIONS
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(long x)
 {
-#ifdef USE_EXCEPTIONS
   if (fprintf(f, "%*ld", Width, x) < 0)   throw WriteFailed(__LINE__, __FILE__);
-#else
-  valid = (fprintf(f, "%*ld", Width, x) >= 0);
-#endif   // USE_EXCEPTIONS
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(char x)
 {
-#ifdef USE_EXCEPTIONS
   if (fprintf(f, "%c", x) < 0)   throw WriteFailed(__LINE__, __FILE__);
-#else
-  valid = (fprintf(f, "%c", x) >= 0);
-#endif   // USE_EXCEPTIONS
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(double x)
 {
   if (Represent == 'f')   {
-#ifdef USE_EXCEPTIONS
     if (fprintf(f, "%*.*f", Width, Prec, x) < 0)   throw WriteFailed(__LINE__, __FILE__);
-#else
-    valid = (fprintf(f, "%*.*f", Width, Prec, x) >= 0);
-#endif   // USE_EXCEPTIONS
   }
   else   {   // Represent == 'e'
-#ifdef USE_EXCEPTIONS
     if (fprintf(f, "%*.*e", Width, Prec, x) < 0)   throw WriteFailed(__LINE__, __FILE__);
-#else
-    valid = (fprintf(f, "%*.*e", Width, Prec, x) >= 0);
-#endif   // USE_EXCEPTIONS
   }
   return *this;
 }
@@ -411,53 +332,31 @@ gOutput &gFileOutput::operator<<(double x)
 gOutput &gFileOutput::operator<<(float x)
 {
   if (Represent == 'f')   {
-#ifdef USE_EXCEPTIONS
     if (fprintf(f, "%*.*f", Width, Prec, x) < 0)   throw WriteFailed(__LINE__, __FILE__);
-#else
-    valid = (fprintf(f, "%*.*f", Width, Prec, x) >= 0);
-#endif   // USE_EXCEPTIONS
   }
   else   {   // Represent == 'e'
-#ifdef USE_EXCEPTIONS
     if (fprintf(f, "%*.*e", Width, Prec, x) < 0)   throw WriteFailed(__LINE__, __FILE__);
-#else
-    valid = (fprintf(f, "%*.*e", Width, Prec, x) >= 0);
-#endif   // USE_EXCEPTIONS
   }
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(const char *x)
 {
-#ifdef USE_EXCEPTIONS
   if (fprintf(f, "%s", x) < 0)   throw WriteFailed(__LINE__, __FILE__);
-#else
-  valid = (fprintf(f, "%s", x) >= 0);
-#endif   // USE_EXCEPTIONS
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(const void *x)
 {
-#ifdef USE_EXCEPTIONS
   if (fprintf(f, "%p", x) < 0)   throw WriteFailed(__LINE__, __FILE__);
-#else
-  valid = (fprintf(f, "%p", x) >= 0);
-#endif   // USE_EXCEPTIONS
   return *this;
 }
 
-#ifdef USE_EXCEPTIONS
 bool gFileOutput::IsValid(void) const
 {
   return true;
 }
-#else
-bool gFileOutput::IsValid(void) const
-{
-  return valid;
-}
-#endif   // USE_EXCEPTIONS
+
 
 
 //--------------------------------------------------------------------------

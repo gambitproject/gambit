@@ -44,15 +44,12 @@ class gInput  {
 class gFileInput : public gInput  {
   private:
     FILE *f;
-#ifndef USE_EXCEPTIONS
     bool valid;
-#endif   // USE_EXCEPTIONS
 
     gFileInput(const gFileInput &);
     gFileInput &operator=(const gFileInput &);
 
   public:
-#ifdef USE_EXCEPTIONS
     class OpenFailed : public gException   {
      public:
       OpenFailed(int, char *);
@@ -68,7 +65,6 @@ class gFileInput : public gInput  {
       virtual ~ReadFailed()   { }
       gText Description(void) const;
     };
-#endif   // USE_EXCEPTIONS
 
     gFileInput(FILE *);
     gFileInput(const char *);
@@ -91,8 +87,6 @@ class gFileInput : public gInput  {
 
     bool IsValid(void) const;
 };
-
-//extern gFileInput gin;
 
 class gNullInput : public gInput  {
   private:
@@ -156,9 +150,6 @@ class gOutput  {
 class gFileOutput : public gOutput  {
   private:
     FILE *f;
-#ifndef USE_EXCEPTIONS
-    bool valid;
-#endif   // USE_EXCEPTIONS
     int Width, Prec;
     char Represent;
 
@@ -166,7 +157,6 @@ class gFileOutput : public gOutput  {
     gFileOutput &operator=(const gFileOutput &);
 
   public:
-#ifdef USE_EXCEPTIONS
     class OpenFailed : public gException   {
      public:
       OpenFailed(int, char *);
@@ -182,7 +172,7 @@ class gFileOutput : public gOutput  {
       virtual ~WriteFailed()   { }
       gText Description(void) const;
     };
-#endif   // USE_EXCEPTIONS
+
     gFileOutput(const char *, bool append = false);
     gFileOutput(FILE *);
     virtual ~gFileOutput();

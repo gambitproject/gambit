@@ -31,7 +31,6 @@ template <class T> class gList  {
     int InsertAt(const T &t, int where);
 
   public:
-#ifdef USE_EXCEPTIONS
     class BadIndex : public gException   {
       public:
         BadIndex(int, char *);
@@ -39,7 +38,6 @@ template <class T> class gList  {
         virtual ~BadIndex()   { }
         gText Description(void) const;
     };
-#endif   // USE_EXCEPTIONS
 
     gList(void);
     gList(const gList<T> &);

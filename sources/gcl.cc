@@ -103,11 +103,7 @@ int main( int /*argc*/, char* argv[] )
 #endif // __BORLANDC__
 
 {
-
-#ifdef USE_EXCEPTIONS
   try {
-#endif
-
     _ExePath = new char[strlen(argv[0]) + 2];
     strcpy(_ExePath, argv[0]);
     
@@ -166,12 +162,9 @@ int main( int /*argc*/, char* argv[] )
     //   in gcmdline.cc, but apparently the destructors for
     //   global static objects are not called, hence this
     gCmdLineInput::RestoreTermAttr();
-
-#ifdef USE_EXCEPTIONS
   }
   // The last line of defense for exceptions:
   catch(gException &w) {gout << w.ErrorMessage() << "; Caught in gcl.cc, main()\n";}
-#endif
   
   return 0;
 }

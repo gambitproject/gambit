@@ -20,7 +20,6 @@ protected:
   double dval;
 
 public:
-#ifdef USE_EXCEPTIONS
   class DivideByZero : public gException  {
   public:
     DivideByZero(int, char *);
@@ -28,7 +27,6 @@ public:
     virtual ~DivideByZero()  { }
     gText Description(void) const;
   };
-#endif   // USE_EXCEPTIONS
 
   gNumber(void);
   gNumber(double);

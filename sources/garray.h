@@ -18,7 +18,6 @@ template <class T> class gArray  {
     T *data;
 
   public:
-#ifdef USE_EXCEPTIONS
     class BadIndex : public gException  {
     public:
       BadIndex(int, char *);
@@ -34,7 +33,6 @@ template <class T> class gArray  {
       virtual ~BadRange();
       gText Description(void) const;
     };
-#endif    // USE_EXCEPTIONS
 
 //
 // Constructs a gArray of length 'len', starting at '1'

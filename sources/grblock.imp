@@ -42,7 +42,6 @@ gRectBlock<T> &gRectBlock<T>::operator=(const gRectBlock<T> &a)
 //             The members
 //------------------------------------------------------------------------
 
-#ifdef USE_EXCEPTIONS
 template <class T> void gRectBlock<T>::AddRow(const gArray<T> &v)
 {
   if (v.First() != mincol || v.Last() != maxcol)   throw BadIndex(__LINE__, __FILE__);
@@ -73,36 +72,10 @@ template <class T> void gRectBlock<T>::AddRow(const gArray<T> &v)
     throw;
   }
 }
-#else
-template <class T> void gRectBlock<T>::AddRow(const gArray<T> &v)
-{
-  assert(v.First() == mincol && v.Last() == maxcol);
-  maxrow++;
-
-  T* p = new T[maxcol - mincol + 1];
-  T* newrow = p - mincol;
-  int i = 0;
-  for ( i = mincol; i <= maxcol; i++)
-    newrow[i]= v[i];
-
-  T** pp = new T*[maxrow - minrow + 1];
-  T** newidx = pp - minrow;
-
-  for ( i = minrow; i < maxrow; i++)
-    newidx[i]= data[i];
-  newidx[maxrow] = newrow;
-  if (data)   delete [] (data + minrow);
-  data = newidx;
-}
-#endif   // USE_EXCEPTION
 
 template <class T> void gRectBlock<T>::RemoveRow(int row)
 {
-#ifdef USE_EXCEPTIONS
   if (minrow > row || row > maxrow)   throw BadIndex(__LINE__, __FILE__);
-#else
-  assert( minrow <= row && row <= maxrow);
-#endif   // USE_EXCEPTIONS
   maxrow--;
   
   if (maxrow < minrow)   {
@@ -125,7 +98,6 @@ template <class T> void gRectBlock<T>::RemoveRow(int row)
   data = newidx;
 }
 
-#ifdef USE_EXCEPTIONS
 template <class T> void gRectBlock<T>::AddColumn(const gArray<T> &v)
 {
   if (v.First() != minrow || v.Last() != maxrow)   throw BadDim(__LINE__, __FILE__);
@@ -155,35 +127,12 @@ template <class T> void gRectBlock<T>::AddColumn(const gArray<T> &v)
     throw;
   }
 }
-#else
-template <class T> void gRectBlock<T>::AddColumn(const gArray<T> &v)
-{
-  assert(v.First() == minrow && v.Last() == maxrow);
-
-  maxcol++;
-  for (int i = minrow; i <= maxrow; i++)    {
-    T* p = new T[maxcol - mincol + 1];
-    T* newrow = p - mincol;
-
-    T* oldrow = data[i];
-    for (int j = mincol; j < maxcol; j++)
-      newrow[j] = oldrow[j];
-    newrow[maxcol] = v[i];
-    delete [] (oldrow + mincol);
-    data[i] = newrow;
-  }
-}
-#endif   // USE_EXCEPTIONS
 
 template<class T> void gRectBlock<T>::RemoveColumn(int col)
 {
   // note: RemoveColumn does not reallocate memory --
   // it shrinks the rows in place.
-#ifdef USE_EXCEPTIONS
   if (mincol > col || col > maxcol)   throw BadIndex(__LINE__, __FILE__);
-#else
-  assert (mincol <= col && col <= maxcol);
-#endif   // USE_EXCEPTIONS
 
   maxcol--;
   for (int i = minrow; i <= maxrow; i++)  {
@@ -193,7 +142,6 @@ template<class T> void gRectBlock<T>::RemoveColumn(int col)
   }
 }
 
-#ifdef USE_EXCEPTIONS
 template <class T> void gRectBlock<T>::InsertRow(int row, const gArray<T> &v)
 {
   if (v.First() != mincol || v.Last() != maxcol)   throw BadDim(__LINE__, __FILE__);
@@ -232,39 +180,7 @@ template <class T> void gRectBlock<T>::InsertRow(int row, const gArray<T> &v)
     throw;
   }
 }
-#else
-template <class T> void gRectBlock<T>::InsertRow(int row, const gArray<T> &v)
-{
-  assert( v.First() == mincol && v.Last() == maxcol);
-  assert( minrow <= row && row <= maxrow+1);
 
-  if (row == maxrow + 1)  {
-    AddRow(v);
-    return;
-  }
-
-  maxrow++;
-
-  T *p = new T[maxcol - mincol + 1];
-  T* newrow = p - mincol;
-  int i;
-  for (i = mincol; i <= maxcol; i++)
-    newrow[i] = v[i];
-
-  T** pp = new T*[maxrow - minrow + 1];
-  T** newidx = pp - minrow;
-
-  for (i = minrow; i < row; i++)
-    newidx[i] = data[i];
-  newidx[row] = newrow;
-  for (i = row + 1; i <= maxrow; i++)
-    newidx[i] = data[i-1];
-  delete[] (data + minrow);
-  data = newidx;
-}
-#endif   // USE_EXCEPTIONS
-
-#ifdef USE_EXCEPTIONS
 template <class T>
 void gRectBlock<T>::InsertColumn(int col, const gArray<T> &v)
 {
@@ -305,32 +221,3 @@ void gRectBlock<T>::InsertColumn(int col, const gArray<T> &v)
     throw;
   }
 }
-#else
-template <class T>
-void gRectBlock<T>::InsertColumn(int col, const gArray<T> &v)
-{
-  assert (v.First() == minrow && v.Last() == maxrow);
-  assert (mincol <= col && col <= maxcol+1);
-
-  if (col == maxcol + 1) {
-    AddColumn(v);
-    return;
-  }
-
-  maxcol++;
-  for (int i = minrow; i <= maxrow; i++)  {
-    T* p = new T[maxcol - mincol + 1];
-    T* newrow = p - mincol;
-      
-    T* oldrow = data[i];
-    int j = 0;
-    for ( j = mincol; j < col; j++)
-      newrow[j] = oldrow[j];
-    newrow[col] = v[i];
-    for ( j = col + 1; j <= maxcol; j++)
-      newrow[j] = oldrow[j-1];
-    delete [] (oldrow + mincol);
-    data[i] = newrow;
-  }
-}
-#endif   // USE_EXCEPTIONS
