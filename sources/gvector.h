@@ -7,15 +7,17 @@
 #ifndef GVECTOR_H
 #define GVECTOR_H
 
-#include "basic.h"
 #include <assert.h>
+#include "basic.h"
+#include "output.h"
+
 template <class T> class gVector  {
   private:
     T *storage;
     int mindex, maxdex;
 
-		int DimCheck(const gVector<T>& v) const
-			{ return (mindex == v.mindex && maxdex == v.maxdex); }
+    int DimCheck(const gVector<T>& v) const
+      { return (mindex == v.mindex && maxdex == v.maxdex); }
 
   public:
 	// CONSTRUCTORS
@@ -27,27 +29,27 @@ template <class T> class gVector  {
     T& operator[](int index);
     T operator[](int index) const;
 
-		gVector<T> operator+(const gVector<T>& V) const;
+    gVector<T> operator+(const gVector<T>& V) const;
     gVector<T> operator+(T c) const;
-		gVector<T> operator-(const gVector<T>& V) const;
+    gVector<T> operator-(const gVector<T>& V) const;
     gVector<T> operator*(T c) const;
-		T operator*(const gVector<T>& V) const;
+    T operator*(const gVector<T>& V) const;
     gVector<T> operator/(T c) const;
-		gVector<T> operator/(const gVector<T>& V) const;
+    gVector<T> operator/(const gVector<T>& V) const;
 
-		int operator==(const gVector<T>& V) const;
+    int operator==(const gVector<T>& V) const;
     int operator==(T c) const;
-		int operator!=(const gVector<T>& V) const;
+    int operator!=(const gVector<T>& V) const;
     int operator!=(T c) const;
 
-		gVector<T>& operator=(const gVector<T>& V);
-		gVector<T>& operator=(T c);
+    gVector<T>& operator=(const gVector<T>& V);
+    gVector<T>& operator=(T c);
 
         // DATA ACCESS
-		uint First(void) const  { return mindex;}
-		uint Last(void) const   { return maxdex;}
-		uint Length(void) const { return maxdex - mindex + 1; }
-		gVector<T> Stretch(int i) const;
+    uint First(void) const  { return mindex;}
+    uint Last(void) const   { return maxdex;}
+    uint Length(void) const { return maxdex - mindex + 1; }
+    gVector<T> Stretch(int i) const;
     gVector<T> Sqwzz(int i) const;
 
         // DESTRUCTOR
@@ -262,5 +264,15 @@ template <class T> gVector<T> gVector<T>::Sqwzz(int i) const
   return result;
 }
 
+template <class T> INLINE output &operator<<(output &op, const gVector<T> &v)
+{
+  op << '{' << ' ';
+  for (int i = v.First(); i <= v.Last(); i++)  
+    op << v[i] << ' ';
+  op << '}';
+  return op;
+}
+
 #endif   // GVECTOR_H
+
 

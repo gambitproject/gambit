@@ -58,8 +58,7 @@ Outcome::GetOutcomeVector(int num_players) const
 {
   gVector<double> outVect(1, num_players);
   for (uint i = 1; i <= num_players; i++)
-    {
-      outVect[i] = values[i];};
+    outVect[i] = (*this)[i];
   return outVect;
 }
 
