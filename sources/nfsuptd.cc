@@ -2,7 +2,7 @@
 // FILE: nfsuptd.cc -- Implementation of dialogs for selecting supports on
 //                     the normal form
 //
-// 
+// $Id$
 //
 
 #include "wx.h"
@@ -12,7 +12,7 @@
 #include "glist.h"
 #include "nfgconst.h"
 #include "nfgshow.h"
-#include "elimdomd.h"
+#include "dlelim.h"
 #include "nfsuptd.h"
 
 void NFSupportInspectDialog::OnNewSupport(void)

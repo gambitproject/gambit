@@ -2,7 +2,7 @@
 // FILE: efsuptd.cc -- Implementation of dialogs for selecting supports
 //                     on the extensive form
 //
-//
+// $Id$
 //
 
 #include "wx.h"
@@ -12,6 +12,7 @@
 
 #include "efgshow.h"
 #include "efsuptd.h"
+#include "dlelim.h"
 
 void EFSupportInspectDialog::OnNewSupport(void)
 {

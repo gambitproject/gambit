@@ -8,8 +8,6 @@
 #ifndef EFSUPTD_H
 #define EFSUPTD_H
 
-#include "elimdomd.h"
-
 class EFSupportInspectDialog : public wxDialogBox {
 private:
   EfgShow *es;

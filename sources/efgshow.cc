@@ -18,6 +18,8 @@
 #include "efgnfgi.h"
 #include "efsuptd.h"
 
+#include "dlelim.h"
+
 //=====================================================================
 //                       class EfgShowToolBar
 //=====================================================================
@@ -173,8 +175,6 @@ EfgShow::~EfgShow(void)
   delete toolbar;
   delete tw;
 }
-
-#include "elimdomd.h"
 
 void EfgShow::OnSelectedMoved(const Node *n)
 {
@@ -1353,28 +1353,27 @@ void EfgShow::ChangeSupport(int what)
 }
 
 #include "wxstatus.h"
-#include "elimdomd.h"
 #include "efdom.h"
 
 void EfgShow::SolveElimDom(void)
 {
-  ElimDomParamsDialog EDPD(ef.NumPlayers(), this);
+  dialogElim dialog(ef.NumPlayers(), this);
 
-  if (EDPD.Completed() == wxOK) {
+  if (dialog.Completed() == wxOK) {
     EFSupport *sup = cur_sup;
     wxStatus status(this, "Dominance Elimination");
 
     try {
-      if (!EDPD.DomMixed()) {
-	if (EDPD.FindAll()) {
-	  while ((sup = ComputeDominated(*sup, EDPD.DomStrong(), false,
-					 EDPD.Players(), gnull, status)) != 0) {
+      if (!dialog.DomMixed()) {
+	if (dialog.FindAll()) {
+	  while ((sup = ComputeDominated(*sup, dialog.DomStrong(), false,
+					 dialog.Players(), gnull, status)) != 0) {
 	    supports.Append(sup);
 	  }
 	}
 	else {
-	  if ((sup = ComputeDominated(*sup, EDPD.DomStrong(), false, 
-				      EDPD.Players(), gnull, status)) != 0) {
+	  if ((sup = ComputeDominated(*sup, dialog.DomStrong(), false, 
+				      dialog.Players(), gnull, status)) != 0) {
 	    supports.Append(sup);
 	  }
 	}
@@ -1386,7 +1385,7 @@ void EfgShow::SolveElimDom(void)
   }
   catch (gSignalBreak &E) { }
 
-    if (EDPD.Compress() && disp_sup != sup) {
+    if (dialog.Compress() && disp_sup != sup) {
       cur_sup = supports[supports.Length()]; // displaying the last created support
       disp_sup = cur_sup;
       tw->SupportChanged();

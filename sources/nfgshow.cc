@@ -16,6 +16,8 @@
 #include "dlstrategies.h"
 #include "dlnfgsave.h"
 
+#include "dlelim.h"
+
 //======================================================================
 //                 NfgShow: Constructor and destructor
 //======================================================================
@@ -440,7 +442,6 @@ void NfgShow::InspectSolutions(int what)
 
 
 #include "nfgsolvd.h"
-#include "elimdomd.h"
 #include "nfgsolng.h"
 
 void NfgShow::Solve(int id)
@@ -941,44 +942,43 @@ void NfgShow::OutcomeLabel(void)
 }
 
 #include "wxstatus.h"
-#include "elimdomd.h"
 #include "nfsuptd.h"
 
 int NfgShow::SolveElimDom(void)
 {
-  ElimDomParamsDialog EDPD(nf.NumPlayers(), spread);
+  dialogElim dialog(nf.NumPlayers(), spread);
 
-  if (EDPD.Completed() == wxOK) {
+  if (dialog.Completed() == wxOK) {
     NFSupport *sup = cur_sup;
     wxStatus status(spread, "Dominance Elimination");
 
     try {
-      if (!EDPD.DomMixed()) {
-	if (EDPD.FindAll()) {
+      if (!dialog.DomMixed()) {
+	if (dialog.FindAll()) {
 	  while ((sup = ComputeDominated(sup->Game(), 
-					 *sup, EDPD.DomStrong(), 
-					 EDPD.Players(), gnull, status)) != 0)
+					 *sup, dialog.DomStrong(), 
+					 dialog.Players(), gnull, status)) != 0)
 	    supports.Append(sup);
 	}
 	else {
 	  if ((sup = ComputeDominated(sup->Game(), 
-				      *sup, EDPD.DomStrong(), 
-				      EDPD.Players(), gnull, status)) != 0)
+				      *sup, dialog.DomStrong(), 
+				      dialog.Players(), gnull, status)) != 0)
 	    supports.Append(sup);
 	}
       }
       else {
-	if (EDPD.FindAll()) {
+	if (dialog.FindAll()) {
 	  while ((sup = ComputeMixedDominated(*sup, 
-					      EDPD.DomStrong(), precRATIONAL,
-					      EDPD.Players(),
+					      dialog.DomStrong(), precRATIONAL,
+					      dialog.Players(),
 					      gnull, status)) != 0)
 	    supports.Append(sup);
 	}
 	else {
 	  if ((sup = ComputeMixedDominated(*sup,
-					   EDPD.DomStrong(), precRATIONAL,
-					   EDPD.Players(),
+					   dialog.DomStrong(), precRATIONAL,
+					   dialog.Players(),
 					   gnull, status)) != 0)
 	    supports.Append(sup);
 	}
@@ -986,7 +986,7 @@ int NfgShow::SolveElimDom(void)
     }
     catch (gSignalBreak &) { }
 
-    if (EDPD.Compress() && disp_sup != sup) {
+    if (dialog.Compress() && disp_sup != sup) {
       disp_sup = supports[supports.Length()]; // displaying the last created support
       SetPlayers(pl1, pl2);
     }
