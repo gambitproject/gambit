@@ -72,10 +72,10 @@ int Basis::MinCol() const
 int Basis::MaxCol() const
 { return cols.Last();}
 
-inline bool Basis::IsRegColumn( int col ) const
+bool Basis::IsRegColumn( int col ) const
 {return col >= cols.First() && col <= cols.Last();} 
   
-inline bool Basis::IsSlackColumn( int col ) const 
+bool Basis::IsSlackColumn( int col ) const 
 {return  -col >= basis.First() && -col <= basis.Last();} 
   
 int Basis::Pivot(int outindex, int col)
