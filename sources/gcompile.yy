@@ -1002,7 +1002,6 @@ void GCLCompiler::LoadInputs( const char* name )
     search = true;
   gString IniFileName;
 
-  assert( inputs.Depth() == 0 );
   IniFileName = (gString) name;
   inputs.Push( new gFileInput( IniFileName ) );
   if (!inputs.Peek()->IsValid())
