@@ -146,7 +146,7 @@ public:
   bool IsValid(void) const;
 
   // Returns a gPVector representing the Dimensionality of the support.
-  gPVector<int> Dimensionality(bool trunc) const;
+  gPVector<int> Dimensionality(void) const;
 
   // Number of Sequences for the player
   int NumSequences(int pl) const;

@@ -979,13 +979,13 @@ void BaseEfg::UnmarkSubgames(Node *n)
 }
 
 
-int BaseEfg::ProfileLength(bool trunc) const
+int BaseEfg::ProfileLength(void) const
 {
   int sum = 0;
 
   for (int i = 1; i <= players.Length(); i++)
     for (int j = 1; j <= players[i]->infosets.Length(); j++)
-      sum += players[i]->infosets[j]->actions.Length() - ((trunc) ? 1 : 0);
+      sum += players[i]->infosets[j]->actions.Length();
 
   return sum;
 }
@@ -1000,7 +1000,7 @@ gArray<int> BaseEfg::PureDimensionality(void) const
   return foo;
 }
 
-gPVector<int> BaseEfg::Dimensionality(bool trunc) const
+gPVector<int> BaseEfg::Dimensionality(void) const
 {
   gArray<int> foo(players.Length());
   int i;
@@ -1010,12 +1010,12 @@ gPVector<int> BaseEfg::Dimensionality(bool trunc) const
   gPVector<int> bar(foo);
   for (i = 1; i <= players.Length(); i++)
     for (int j = 1; j <= players[i]->infosets.Length(); j++)
-      bar(i, j) = players[i]->infosets[j]->actions.Length() -((trunc) ? 1 : 0);
+      bar(i, j) = players[i]->infosets[j]->actions.Length();
 
   return bar;
 }  
 
-gPVector<int> BaseEfg::BeliefDimensionality(bool trunc) const
+gPVector<int> BaseEfg::BeliefDimensionality(void) const
 {
   gArray<int> foo(players.Length());
   int i;
@@ -1025,7 +1025,7 @@ gPVector<int> BaseEfg::BeliefDimensionality(bool trunc) const
   gPVector<int> bar(foo);
   for (i = 1; i <= players.Length(); i++)
     for (int j = 1; j <= players[i]->infosets.Length(); j++)
-      bar(i, j) = players[i]->infosets[j]->members.Length() -((trunc) ? 1 : 0);
+      bar(i, j) = players[i]->infosets[j]->members.Length();
 
   return bar;
 }  
@@ -1039,25 +1039,23 @@ gPVector<int> BaseEfg::BeliefDimensionality(bool trunc) const
 
 #include "behav.h"
 
-BaseBehavProfile::BaseBehavProfile(const BaseEfg &EF, bool trunc)
-  : E(&EF), truncated(trunc), support(EF)  { }
+BaseBehavProfile::BaseBehavProfile(const BaseEfg &EF)
+  : E(&EF), support(EF)  { }
 
-BaseBehavProfile::BaseBehavProfile(const BaseEfg &EF, bool trunc,
-				   const EFSupport &s)
-  : E(&EF), truncated(trunc), support(s) 
+BaseBehavProfile::BaseBehavProfile(const BaseEfg &EF, const EFSupport &s)
+  : E(&EF), support(s) 
 {
   assert(support.IsValid());
 }
 
 BaseBehavProfile::BaseBehavProfile(const BaseBehavProfile &p)
-  : E(p.E), truncated(p.truncated), support(p.support)   { }
+  : E(p.E), support(p.support)   { }
 
 BaseBehavProfile::~BaseBehavProfile()   { }
 
 BaseBehavProfile &BaseBehavProfile::operator=(const BaseBehavProfile &p)
 {
   E = p.E;
-  truncated = p.truncated;
   support = p.support;
   return *this;
 }

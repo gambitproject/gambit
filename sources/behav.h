@@ -16,11 +16,10 @@ class BaseEfg;
 class BaseBehavProfile   {
   protected:
     const BaseEfg *E;
-    bool truncated;
     EFSupport support;
-    BaseBehavProfile(const BaseEfg &, bool trunc);
+    BaseBehavProfile(const BaseEfg &);
     BaseBehavProfile(const BaseBehavProfile &);
-    BaseBehavProfile(const BaseEfg &, bool trunc, const EFSupport &);
+    BaseBehavProfile(const BaseEfg &, const EFSupport &);
     BaseBehavProfile &operator=(const BaseBehavProfile &);
 
   public:
@@ -29,7 +28,6 @@ class BaseBehavProfile   {
     DataType Type(void) const;
     virtual bool IsPure(void) const = 0;
     virtual bool IsPure(int pl) const = 0;
-    bool IsTruncated(void) const    { return truncated; }
     const EFSupport &GetEFSupport(void) const;
     const gString &GetPlayerName(int p) const;
     const gString &GetInfosetName(int p, int iset) const;
@@ -55,7 +53,7 @@ template <class T> class BehavProfile
 		 gPVector<T> &gpv) const;
 
   public:
-    BehavProfile(const Efg<T> &, bool truncated = false);
+    BehavProfile(const Efg<T> &);
     BehavProfile(const Efg<T> &, const gDPVector<T> &);
     BehavProfile(const EFSupport &);
     BehavProfile(const BehavProfile<T> &);
@@ -80,7 +78,7 @@ template <class T> class BehavProfile
     T LiapValue(void) const;
     bool IsNash(void) const;
     void Gripe(gDPVector<T> &value) const;
-    T MaxGripe() const;
+    T MaxGripe(void) const;
 
     void Centroid(void) const;
 

@@ -150,10 +150,10 @@ protected:
     void RemoveSubgame(Node *n);
 
 
-    int ProfileLength(bool trunc = false) const;
+    int ProfileLength(void) const;
     gArray<int> PureDimensionality(void) const;
-    gPVector<int> Dimensionality(bool trunc = false) const;
-    gPVector<int> BeliefDimensionality(bool trunc = false) const;
+    gPVector<int> Dimensionality(void) const;
+    gPVector<int> BeliefDimensionality(void) const;
 };
 
 

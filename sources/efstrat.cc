@@ -254,7 +254,7 @@ bool EFSupport::IsValid(void) const
   return true;
 }
 
-gPVector<int> EFSupport::Dimensionality(bool trunc) const
+gPVector<int> EFSupport::Dimensionality(void) const
 {
   gArray<int> foo(befg->NumPlayers());
   int i;
@@ -264,7 +264,7 @@ gPVector<int> EFSupport::Dimensionality(bool trunc) const
   gPVector<int> bar(foo);
   for (i = 1; i <= befg->NumPlayers(); i++)
     for (int j = 1; j <= sets[i]->GetPlayer().NumInfosets(); j++)
-      bar(i, j) = NumActions(i,j) -((trunc) ? 1 : 0);
+      bar(i, j) = NumActions(i,j);
 
   return bar;
 }  

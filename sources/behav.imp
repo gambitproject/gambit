@@ -379,25 +379,23 @@ void Efg<T>::Payoff(const gArray<gArray<int> *> &profile,
 //                    BehavProfile<T> member functions
 //-------------------------------------------------------------------------
 
-template <class T> BehavProfile<T>::BehavProfile(const Efg<T> &EF,
-						 bool trunc)
-: BaseBehavProfile(EF, trunc), gDPVector<T>(EF.Dimensionality(trunc))
+template <class T> BehavProfile<T>::BehavProfile(const Efg<T> &EF)
+  : BaseBehavProfile(EF), gDPVector<T>(EF.Dimensionality())
 {
   Centroid();
 }
 
 template <class T> BehavProfile<T>::BehavProfile(const Efg<T> &EF,
 						 const gDPVector<T> &profile)
-: BaseBehavProfile(EF, false), gDPVector<T>(profile)
+  : BaseBehavProfile(EF), gDPVector<T>(profile)
 { }
 
 template <class T> BehavProfile<T>::BehavProfile(const BehavProfile<T> &p)
-: BaseBehavProfile(p), gDPVector<T>(p)
+  : BaseBehavProfile(p), gDPVector<T>(p)
 { }
 
 template <class T> BehavProfile<T>::BehavProfile(const EFSupport &s)
-: BaseBehavProfile(s.BelongsTo(),false, s), 
-  gDPVector<T>(s.Dimensionality(false))
+  : BaseBehavProfile(s.BelongsTo(), s), gDPVector<T>(s.Dimensionality())
 { 
   Centroid();
 }
@@ -422,9 +420,8 @@ template <class T> void BehavProfile<T>::Centroid(void) const
     for (int iset = 1; iset <= dvlen[pl]; iset++)  {
       center = ((T) 1 / (T) support.NumActions(pl, iset));
       int act;
-      for (act = 1; act < svlen[dvidx[pl] + iset - 1]; act++)
+      for (act = 1; act <= svlen[dvidx[pl] + iset - 1]; act++)
 	dvptr[pl][iset][act] = center;
-      if (!truncated)  dvptr[pl][iset][act] = center;
     }
 }
 
@@ -452,8 +449,6 @@ template <class T> T BehavProfile<T>::LiapValue(void) const
   BehavProfile<T> tmp(p);
   T x, result = ((T) 0), avg, sum;
 
-      // Ted -- only reason for this is because you 
-      // got rid of CondPayoff ( . , . )
   gDPVector<T> cpay(((Efg<T> *)E)->Dimensionality());  
   gPVector<T> probs(((Efg<T> *)E)->Dimensionality().Lengths());  
   tmp.CondPayoff(cpay, probs);
@@ -527,8 +522,7 @@ template <class T> T BehavProfile<T>::MaxGripe(void) const
 
 template <class T> bool BehavProfile<T>::IsNash(void) const
 {
-  if(MaxGripe()==(T)0) return 1;
-  return 0;
+  return (MaxGripe() == (T) 0);
 }
 
 template <class T>
@@ -562,50 +556,23 @@ void BehavProfile<T>::Payoff(Node *n, T prob, int pl, T &value) const
 {
   if (n->outcome)
     value += prob * ((OutcomeVector<T> &) *n->outcome)[pl];
-  if (n->children.Length())
-    if (IsTruncated())   {
-      T p = (T) 0.0;
-      
-      if (n->infoset->player->number == 0)  {
-	for (int i = 1; i <= n->children.Length(); i++)
-	  Payoff(n->children[i],
-		 prob * ((ChanceInfoset<T> *) n->infoset)->probs[i],
-		 pl, value);
-      }
-      else  {
-	int npl = n->infoset->player->number;
-	int iset = n->infoset->number;
-	const gArray<Action *> &actions = support.ActionList(npl, iset);
-
-	int act;
-	for (act = 1; act < actions.Length(); act++)  {
-	  Payoff(n->children[actions[act]->GetNumber()],
-		 prob * (*this)(npl, iset, act), pl, value);
-
-	  p += (*this)(npl, iset, act);
-	}
-
-	Payoff(n->children[actions[act]->GetNumber()],
-	       prob * ((T) 1 - p), pl, value);
-      }
+  if (n->children.Length())  {
+    if (n->infoset->player->number == 0)  {
+      for (int i = 1; i <= n->children.Length(); i++)
+	Payoff(n->children[i],
+	       prob * ((ChanceInfoset<T> *) n->infoset)->probs[i],
+	       pl, value);
     }
     else  {
-      if (n->infoset->player->number == 0)  {
-	for (int i = 1; i <= n->children.Length(); i++)
-	  Payoff(n->children[i],
-		 prob * ((ChanceInfoset<T> *) n->infoset)->probs[i],
-		 pl, value);
-      }
-      else  {
-	int npl = n->infoset->player->number;
-	int iset = n->infoset->number;
-	const gArray<Action *> &actions = support.ActionList(npl, iset);
-	
-	for (int act = 1; act <= actions.Length(); act++)
-	  Payoff(n->children[actions[act]->GetNumber()],
-		 prob * (*this)(npl, iset, act), pl, value);
-      }
+      int npl = n->infoset->player->number;
+      int iset = n->infoset->number;
+      const gArray<Action *> &actions = support.ActionList(npl, iset);
+      
+      for (int act = 1; act <= actions.Length(); act++)
+	Payoff(n->children[actions[act]->GetNumber()],
+	       prob * (*this)(npl, iset, act), pl, value);
     }
+  }
 }
 
 template <class T> T BehavProfile<T>::Payoff(int pl) const
@@ -632,7 +599,7 @@ void BehavProfile<T>::CondPayoff(Node *n, T prob, gPVector<T> &probs,
   for (i = 1, nc = n->children.Length(); i <= nc; i++)
     *((TypedNode<T> *) n->children[i])->scratch = *((TypedNode<T> *) n)->scratch;
   
-  T cumprob((T) 0), newprob((T) 0);
+  T newprob((T) 0);
   
   if (nc == 0)   return;
 
@@ -644,7 +611,8 @@ void BehavProfile<T>::CondPayoff(Node *n, T prob, gPVector<T> &probs,
       
       for (int j = 1; j <= ((TypedNode<T> *) n)->scratch->Length(); j++)
 	(*((TypedNode<T> *) n)->scratch)[j] += 
-	newprob * (*((TypedNode<T> *) n->children[i])->scratch)[j];
+	((ChanceInfoset<T> *) n->infoset)->probs[i] *
+	(*((TypedNode<T> *) n->children[i])->scratch)[j];
     }
   }
   else  {    // player decision node
@@ -653,10 +621,9 @@ void BehavProfile<T>::CondPayoff(Node *n, T prob, gPVector<T> &probs,
     const gArray<Action *> &actions =
       support.ActionList(n->infoset->player->number, n->infoset->number);
     
-    for (act = 1; act < actions.Length(); act++)  {
+    for (act = 1; act <= actions.Length(); act++)  {
       int childno = actions[act]->GetNumber();
       newprob = (*this)(pl, n->infoset->number, act);
-      cumprob += newprob;
       CondPayoff(n->children[childno], prob * newprob, probs, payoff);
       
       for (int j = 1; j <= ((TypedNode<T> *) n)->scratch->Length(); j++)
@@ -666,20 +633,6 @@ void BehavProfile<T>::CondPayoff(Node *n, T prob, gPVector<T> &probs,
       payoff(pl, iset, childno) += 
 	prob * (*((TypedNode<T> *) n->children[childno])->scratch)[pl];
     }
-
-    int childno = actions[act]->GetNumber();
-	if (truncated)
-		newprob = ((T) 1.0 - cumprob);
-	else
-			newprob = (*this)(pl, n->infoset->number, act);
-
-    CondPayoff(n->children[childno], prob * newprob, probs, payoff);
-
-    for (int j = 1; j <= ((TypedNode<T> *) n)->scratch->Length(); j++)
-      (*((TypedNode<T> *) n)->scratch)[j] += 
-      newprob * (*((TypedNode<T> *) n->children[childno])->scratch)[j];
-    payoff(pl, iset, childno) += 
-      prob * (*((TypedNode<T> *) n->children[childno])->scratch)[pl];
   }
   
   if (pl > 0)
@@ -688,7 +641,7 @@ void BehavProfile<T>::CondPayoff(Node *n, T prob, gPVector<T> &probs,
 
 
 template <class T> 
-void BehavProfile<T>::CondPayoff( gDPVector<T> &payoff, 
+void BehavProfile<T>::CondPayoff(gDPVector<T> &payoff, 
 				 gPVector<T> &probs) const
 {
   ((gVector<T> &) payoff).operator=((T) 0);
@@ -718,12 +671,11 @@ template <class T>
 void BehavProfile<T>::NodeRealizProbs(Node *n, T prob, int &index, 
 				      gArray<T> &NRProbs) const
 {
-
   NRProbs[index] = prob;
   int anum;
   int pl = (n->infoset) ? n->infoset->player->number : -1;
 
-  T cumprob((T) 0), newprob((T) 0);
+  T newprob((T) 0);
   int i, nc = n->children.Length();
 
   if (nc == 0)   return;
@@ -736,7 +688,6 @@ void BehavProfile<T>::NodeRealizProbs(Node *n, T prob, int &index,
       
       newprob = ((pl) ? (*this)(pl, n->infoset->number, anum) :
 		 ((ChanceInfoset<T> *) n->infoset)->probs[i]);
-      cumprob += newprob;
       NodeRealizProbs(n->children[i], prob * newprob, ++index,
 		      NRProbs);
     }
@@ -749,10 +700,8 @@ void BehavProfile<T>::NodeRealizProbs(Node *n, T prob, int &index,
       if (pl !=0 && pl != -1)
 	anum = support.GetNumber(n->infoset->actions[i]);
       
-      if (truncated)
-	newprob = (T) 1.0 - cumprob;
-      else newprob = ((pl) ? (*this)(pl, n->infoset->number, anum) :
-		      ((ChanceInfoset<T> *) n->infoset)->probs[i]);
+      newprob = ((pl) ? (*this)(pl, n->infoset->number, anum) :
+		 ((ChanceInfoset<T> *) n->infoset)->probs[i]);
       
       NodeRealizProbs(n->children[nc], prob * newprob, ++index,
 		      NRProbs);
@@ -781,7 +730,7 @@ void BehavProfile<T>::Beliefs(Node *n, T prob,
 {
   int pl = (n->infoset) ? n->infoset->player->number : -1;
   int iset = (n->infoset) ? n->infoset->number : 0;
-  T cumprob((T) 0), newprob((T) 0);
+  T newprob((T) 0);
   int i, nc = n->children.Length();
   int mnum=1;
 
@@ -806,18 +755,11 @@ void BehavProfile<T>::Beliefs(Node *n, T prob,
 
   const gArray<Action *> &actions = support.ActionList(pl, iset);
 
-  for (i = 1; i < support.NumActions(pl, iset); i++) {
+  for (i = 1; i <= support.NumActions(pl, iset); i++) {
     newprob = (*this)(pl, n->infoset->number, actions[i]->GetNumber());
     Beliefs(n->children[actions[i]->GetNumber()],
 	    prob * newprob, BProbs, gpv);
   }
-  
-  if (truncated)
-    newprob = (T) 1.0 - cumprob;
-  else
-    newprob = (*this)(pl, n->infoset->number, actions[nc]->GetNumber());
-  Beliefs(n->children[actions[nc]->GetNumber()],
-	  prob * newprob, BProbs, gpv);
 }
 
 template <class T> gDPVector<T> BehavProfile<T>::Beliefs(void) const
@@ -866,44 +808,20 @@ void BehavProfile<T>::NodeValues(Node *n, int pl,
     return;
   }
 
-  if (truncated)   {
-    T p = (T) 0.0;
-
-    int i, npl, iset;
-    for (i = 1, npl = n->infoset->player->number,
-	 iset = n->infoset->number; i < n->children.Length(); i++)  {
-      if (support.Contains(n->infoset->actions[i]))  {
-	int anum = support.GetNumber(n->infoset->actions[i]);
-	p += ((npl) ? (*this)(npl, iset, anum) :
-	      ((ChanceInfoset<T> *) n->infoset)->probs[i]);
-	NodeValues(n->children[i], pl, valarray, ++index);
-	value += ((npl) ? (*this)(npl, iset, anum) :
-		  ((ChanceInfoset<T> *) n->infoset)->probs[i]) *
-		    ((TypedNode<T> *) n->children[i])->nval;
-      }
-      else
-	NodeValues(n->children[i], pl, valarray, ++index);
+  for (int i = 1, npl = n->infoset->player->number,
+       iset = n->infoset->number; i <= n->children.Length(); i++)  {
+    if (support.Contains(n->infoset->actions[i])) {
+      int anum = support.GetNumber(n->infoset->actions[i]);
+      NodeValues(n->children[i], pl, valarray, ++index);
+      value += ((npl) ? (*this)(npl, iset, anum) :
+		((ChanceInfoset<T> *) n->infoset)->probs[i]) *
+		  ((TypedNode<T> *) n->children[i])->nval;
     }
-      
-    NodeValues(n->children[i], pl, valarray, ++index);
-    value += ((T) 1 - p) * ((TypedNode<T> *) n->children[i])->nval;
+    else
+      NodeValues(n->children[i], pl, valarray, ++index);
   }
-  else  {
-    for (int i = 1, npl = n->infoset->player->number,
-	 iset = n->infoset->number; i <= n->children.Length(); i++)  {
-      if (support.Contains(n->infoset->actions[i])) {
-	int anum = support.GetNumber(n->infoset->actions[i]);
-	NodeValues(n->children[i], pl, valarray, ++index);
-	value += ((npl) ? (*this)(npl, iset, anum) :
-		  ((ChanceInfoset<T> *) n->infoset)->probs[i]) *
-		    ((TypedNode<T> *) n->children[i])->nval;
-      }
-      else
-	NodeValues(n->children[i], pl, valarray, ++index);
-    }
-
-    ((TypedNode<T> *) n)->nval = value;
-  }
+  
+  ((TypedNode<T> *) n)->nval = value;
 
   valarray[tindex] = ((TypedNode<T> *) n)->nval;
 }

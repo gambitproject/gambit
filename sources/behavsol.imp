@@ -12,7 +12,7 @@
 
 template <class T> 
 BehavSolution<T>::BehavSolution(const Efg<T>& e)
-  : BehavProfile<T>(e, false),
+  : BehavProfile<T>(e),
   _Creator(EfgAlg_USER),
   _IsNash(T_DONTKNOW),
   _IsSubgamePerfect(T_DONTKNOW),
