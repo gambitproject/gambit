@@ -2662,17 +2662,14 @@ void TreeWindow::display_colors(void)
 // Controls the size of the various tree parts
 void TreeWindow::display_save_options(Bool def)
 {
-    if (def)
-        draw_settings.SaveOptions();
-    else
-    {
-        char *s = wxFileSelector("Save Configuration", NULL, NULL, NULL, "*.cfg");
-        if (s)
-        {
-            draw_settings.SaveOptions(copystring(s)); 
-            delete [] s;
-        }
+  if (def)
+    draw_settings.SaveOptions();
+  else {
+    char *s = wxFileSelector("Save Configuration", NULL, NULL, NULL, "*.cfg");
+    if (s) {
+      draw_settings.SaveOptions(copystring(s)); 
     }
+  }
 }
 
 //***********************************************************************
