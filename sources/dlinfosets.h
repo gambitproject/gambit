@@ -7,7 +7,7 @@
 #ifndef DLINFOSETS_H
 #define DLINFOSETS_H
 
-class dialogInfosets : public wxDialogBox {
+class dialogInfosets : public guiAutoDialog {
 private:
   Efg &m_efg;
   bool m_gameChanged;
@@ -23,19 +23,14 @@ private:
   static void CallbackNew(wxButton &, wxCommandEvent &);
   static void CallbackRemove(wxButton &, wxCommandEvent &);
 
-  static void CallbackOk(wxButton &, wxCommandEvent &);
-  static void CallbackHelp(wxButton &, wxCommandEvent &);
-
-  void OnOk(void);
-  Bool OnClose(void);
-  void OnHelp(void);
-
   void OnPlayer(int);
   void OnInfoset(void);
   void OnEdit(void);
 
   void NewInfoset(void);
   void RemoveInfoset(void);
+
+  const char *HelpString(void) const { return "Tree Menu"; }
 
 public:
   dialogInfosets(Efg &, wxFrame * = 0);
