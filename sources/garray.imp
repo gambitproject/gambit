@@ -1,8 +1,8 @@
-//#
-//# FILE: garray.imp - Implementation of gArray data type
-//#
-//# $Id$
-//#
+//
+// FILE: garray.imp - Implementation of gArray data type
+//
+// $Id$
+//
 
 #include <stdlib.h>
 #include <assert.h>
@@ -10,29 +10,51 @@
 #include "gambitio.h"
 
 
-template <class T> gArray<T>::gArray(int len) : mindex(1), maxdex(len)
+template <class T> gArray<T>::gArray(unsigned int len) 
+  : mindex(1), maxdex(len), data((len) ? new T[len] - 1 : 0)   
 {
-  assert(len>=0);
-  data = (len) ? new T[len] - 1 : 0;
+#ifdef USE_EXCEPTIONS
+  if (len > 0 && !data)   throw AllocFail();
+#else
+  assert(len == 0 || data);
+#endif   // USE_EXCEPTIONS
 }
 
-template <class T> gArray<T>::gArray(int lo, int hi) : mindex(lo), maxdex(hi)
+template <class T> gArray<T>::gArray(int lo, int hi)
+  : mindex(lo), maxdex(hi)
 {
+#ifdef USE_EXCEPTIONS
+  if (maxdex + 1 < mindex)   throw BadRange();
+#else
   assert(maxdex + 1 >= mindex);
-  data = (maxdex>=mindex) ? new T[maxdex-mindex+1] - mindex : 0;
+#endif   // USE_EXCEPTIONS
+   
+  data = (maxdex >= mindex) ? new T[maxdex -mindex + 1] - mindex : 0;
+
+#ifdef USE_EXCEPTIONS
+  if (maxdex >= mindex && !data)   throw AllocFail();
+#else
+  assert(maxdex < mindex || data);
+#endif   // USE_EXCEPTIONS
 }
 
 template <class T> gArray<T>::gArray(const gArray<T> &a) 
-  : mindex(a.mindex), maxdex(a.maxdex)
+  : mindex(a.mindex), maxdex(a.maxdex),
+    data((maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : 0)
 {
-  data = (maxdex>=mindex) ? new T[maxdex-mindex+1] - mindex : 0;
+#ifdef USE_EXCEPTIONS
+  if (maxdex >= mindex && !data)   throw AllocFail();
+#else
+  assert(maxdex < mindex || data);
+#endif    // USE_EXCEPTIONS
+
   for (int i = mindex; i <= maxdex; i++)
     data[i] = a.data[i];
 }
 
 template <class T> gArray<T>::~gArray()
 {
-  if (maxdex>=mindex)  delete [] (data + mindex);
+  if (maxdex >= mindex)  delete [] (data + mindex);
 }
 
 template <class T> gArray<T> & gArray<T>::operator=(const gArray<T> &a)
@@ -47,10 +69,17 @@ template <class T> gArray<T> & gArray<T>::operator=(const gArray<T> &a)
       if (data)   delete [] (data + mindex);
       mindex = a.mindex;   maxdex = a.maxdex;
       data = (maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : 0;
+#ifdef USE_EXCEPTIONS
+      if (maxdex >= mindex && !data)    throw AllocFail();
+#else
+      assert(maxdex < mindex || data);
+#endif   // USE_EXCEPTIONS
     }
+
     for (int i = mindex; i <= maxdex; i++)
       data[i] = a.data[i];
   }
+
   return *this;
 }
 
@@ -71,13 +100,23 @@ template <class T> int gArray<T>::Last(void) const
 
 template <class T> const T &gArray<T>::operator[](int index) const
 {
+#ifdef USE_EXCEPTIONS
+  if (index < mindex || index > maxdex)   throw BadIndex();
+#else
   assert(index >= mindex && index <= maxdex);
+#endif   // USE_EXCEPTIONS
+
   return data[index];
 }	
 
 template <class T> T &gArray<T>::operator[](int index)
 {
+#ifdef USE_EXCEPTIONS
+  if (index < mindex || index > maxdex)   throw BadIndex();
+#else
   assert(index >= mindex && index <= maxdex);
+#endif   // USE_EXCEPTIONS
+
   return data[index];
 }
 
@@ -88,6 +127,7 @@ template <class T> void gArray<T>::Dump(gOutput &f) const
     f << data[i] << ' ';
   f << '}';
 }
+
 #ifndef __BORLANDC__
 template <class T> bool operator==(const gArray<T> &a, const gArray<T> &b)
 {
@@ -101,7 +141,8 @@ template <class T> bool operator!=(const gArray<T> &a, const gArray<T> &b)
 {
   return !(a == b);
 }
-#endif
+#endif   // __BORLANDC__
+
 template <class T> gOutput &operator<<(gOutput &f, const gArray<T> &a)
 {
   a.Dump(f);
