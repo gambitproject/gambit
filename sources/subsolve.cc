@@ -91,7 +91,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns,
 
 	newsubrootvalues.Append(subrootvalues[soln]);
 	newsubrootvalues[newsubrootvalues.Length()][i] = subvalues[subsoln];
-			}
+      }
 
     thissolns = newsolns;
     subrootvalues = newsubrootvalues;
@@ -110,6 +110,9 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns,
       subroots[i]->SetOutcome(subrootvalues[soln][i]);
 
     Efg<T> foo(efg, n);
+// this prevents double-counting of outcomes at roots of subgames
+// by convention, we will just put the payoffs in the parent subgame
+    foo.RootNode()->SetOutcome(0);
 
     ViewSubgame(subgame_number, foo);
 
