@@ -634,7 +634,6 @@ void gbtEfgGame::SetComment(const gText &amp;p_comment)
 <para>
 <synopsis>
 SetComment[efg->EFG, comment->TEXT] =: EFG
-SetComment[nfg->NFG, comment->TEXT] =: NFG
 </synopsis>
 </para>
 </formalpara>

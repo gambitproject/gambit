@@ -1,0 +1,213 @@
+<sect1 id="apiref.outcome">
+<title>Outcomes</title>
+
+<para>
+</para>
+
+
+<sect2 id="apiref.outcome.deleteoutcome">
+<title>DeleteOutcome</title>
+<indexterm><primary>DeleteOutcome</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+This part of the interface is currently in flux in C++ and Python.
+Consult the source code or the Gambit development team for information
+if you require this function.
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+DeleteOutcome[outcome->EFOUTCOME] =: LIST(NODE) 
+DeleteOutcome[outcome->NFOUTCOME] =: BOOLEAN 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>DeleteOutcome</function> removes
+<parameter>outcome</parameter> from its game.  All nodes (for
+extensive forms) or contingencies (for normal forms) with the
+specified outcome attached are reset to having no outcome attached.
+The extensive form version returns the list of nodes to which the
+outcome was attached; the normal form version returns
+<literal>True</literal>.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.outcome.getgame">
+<title>GetGame</title>
+<indexterm><primary>GetGame</primary></indexterm>
+<indexterm><primary>Game (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtEfgGame gbtEfgOutcome::GetGame(void) const
+gbtNfgGame gbtNfgOutcome::GetGame(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Game[player->EFOUTCOME] =: EFG
+Game[player->NFOUTCOME] =: NFG
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetGame</function> (or <function>Game</function> in the GCL)
+returns the extensive or normal form game to which the outcome belongs.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.outcome.getlabel">
+<title>GetLabel</title>
+<indexterm><primary>GetLabel</primary></indexterm>
+<indexterm><primary>Name (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gText gbtEfgOutcome::GetLabel(void) const
+gText gbtNfgOutcome::GetLabel(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Name[x->EFPLAYER*] =: TEXT
+Name[x->NFPLAYER*] =: TEXT
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetLabel</function> (<function>Name</function> in the GCL)
+returns the text label of the outcome.
+The empty string is returned if the outcome object is null.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.outcome.payoff">
+<title>Payoff</title>
+<indexterm><primary>Payoff</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+This part of the interface is currently in flux in C++ and Python.
+Consult the source code or the Gambit development team for information
+if you require this function.
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Payoff[outcome->EFOUTCOME*, player->EFPLAYER] =: NUMBER 
+Payoff[outcome->NFOUTCOME*, player->NFPLAYER] =: NUMBER 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>Payoff</function>
+returns the value of the outcome <parameter>outcome</parameter> to the
+player <parameter>player</parameter>.
+An error occurs if the parameters are not from the
+same game.
+</para>
+
+</sect2>
+
+
+<sect2>
+<title>SetLabel</title>
+<indexterm><primary>SetLabel</primary></indexterm>
+<indexterm><primary>SetName (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+void gbtEfgOutcome::SetLabel(const gText &amp;p_label)
+void gbtNfgOutcome::SetLabel(const gText &amp;p_label)
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+SetName[x->EFOUTCOME, name->TEXT] =: EFOUTCOME
+SetName[x->NFOUTCOME, name->TEXT] =: NFOUTCOME
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>SetLabel</function> (<function>SetName</function> in the GCL) 
+sets the text label of the outcome.  The GCL version returns the outcome.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.outcome.setpayoff">
+<title>SetPayoff</title>
+<indexterm><primary>SetPayoff</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+This part of the interface is currently in flux in C++ and Python.
+Consult the source code or the Gambit development team for information
+if you require this function.
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+SetPayoff[outcome->EFOUTCOME, player->EFPLAYER,
+          payoff->NUMBER] =: EFOUTCOME 
+SetPayoff[outcome->NFOUTCOME, player->NFPLAYER, 
+          payoff->NUMBER] =: NFOUTCOME 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>SetPayoff</function> sets the payoff of
+<parameter>outcome</parameter> for <parameter>player</parameter> to
+<parameter>payoff</parameter>.  It is an error if
+<parameter>outcome</parameter> and <parameter>player</parameter> are
+not from the same game.  Returns <parameter>outcome</parameter>.
+</para>
+
+</sect2>
+
+
+</sect1>
+

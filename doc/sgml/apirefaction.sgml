@@ -1,0 +1,103 @@
+<sect1 id="apiref.action">
+<title>Actions</title>
+
+<para>
+</para>
+
+
+<sect2 id="apiref.action.getinfoset">
+<title>GetInfoset</title>
+<indexterm><primary>GetInfoset</primary></indexterm>
+<indexterm><primary>Infoset (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtEfgInfoset gbtEfgAction::GetInfoset(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Infoset[action->ACTION*] =: INFOSET 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetInfoset</function> (<function>Infoset</function> in the GCL)
+returns the information set to which <parameter>action</parameter> belongs.
+The null
+action is assumed to belong to the null information set.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.action.getlabel">
+<title>GetLabel</title>
+<indexterm><primary>GetLabel</primary></indexterm>
+<indexterm><primary>Name (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gText gbtEfgAction::GetLabel(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Name[x->ACTION*] =: TEXT
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetLabel</function> (<function>Name</function> in the GCL)
+returns the text label of the action.
+The empty string is returned if the action object is null.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.action.setlabel"> 
+<title>SetLabel</title>
+<indexterm><primary>SetLabel</primary></indexterm>
+<indexterm><primary>SetName (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+void gbtEfgAction::SetLabel(const gText &amp;p_label)
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+SetName[x->ACTION, name->TEXT] =: ACTION
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>SetLabel</function> (<function>SetName</function> in the GCL) 
+sets the text label of the action.  The GCL version returns the action.
+</para>
+
+</sect2>
+
+</sect1>
+

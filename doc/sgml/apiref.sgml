@@ -54,20 +54,7 @@ information and plans.
 
 &apirefplayer;
 
-<sect1 id="apiref.outcome">
-<title>Outcomes</title>
-
-<para>
-</para>
-
-&bifdeleteoutcome;
-&bifgame;
-&bifname;
-&bifpayoff;
-&bifsetname;
-&bifsetpayoff;
-
-</sect1>
+&apirefoutcome;
 
 &apirefnode;
 
@@ -93,18 +80,7 @@ information and plans.
 
 </sect1>
 
-<sect1 id="apiref.action">
-<title>Actions</title>
-
-<para>
-</para>
-
-&bifinfoset;
-&bifisdominated;
-&bifname;
-&bifsetname;
-
-</sect1>
+&apirefaction;
 
 <sect1 id="apiref.strategy">
 <title>Strategies</title>
@@ -126,6 +102,7 @@ information and plans.
 </para>
 
 &bifaddaction;
+&bifisdominated;
 &bifname;
 &bifremoveaction;
 &bifsetname;
