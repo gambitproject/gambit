@@ -46,6 +46,190 @@ extern void Project(gVector<double> &, const gArray<int> &);
 //             QRE Correspondence Computation via Homotopy
 //=========================================================================
 
+//
+// The following code implements a homotopy approach to computing
+// the logistic QRE correspondence.  This implementation is a basic
+// Euler-Newton approach with adaptive step size, based upon the
+// ideas and codes presented in Allgower and Georg's
+// _Numerical Continuation Methods_.
+//
+// Many of these functions are duplicated in efgqre.cc and nfgqre.cc.
+// This should be fixed in future!
+//
+
+inline double sqr(double x) { return x*x; }
+
+static void Givens(gMatrix<double> &b, gMatrix<double> &q,
+		   double &c1, double &c2, int l1, int l2, int l3)
+{
+  if (fabs(c1) + fabs(c2) == 0.0) {
+    return;
+  }
+
+  double sn;
+  if (fabs(c2) >= fabs(c1)) {
+    sn = sqrt(1.0 + sqr(c1/c2)) * fabs(c2);
+  }
+  else {
+    sn = sqrt(1.0 + sqr(c2/c1)) * fabs(c1);
+  }
+  double s1 = c1/sn;
+  double s2 = c2/sn;
+
+  for (int k = 1; k <= q.NumColumns(); k++) {
+    double sv1 = q(l1, k);
+    double sv2 = q(l2, k);
+    q(l1, k) = s1 * sv1 + s2 * sv2;
+    q(l2, k) = -s2 * sv1 + s1 * sv2;
+  }
+
+  for (int k = l3; k <= b.NumColumns(); k++) {
+    double sv1 = b(l1, k);
+    double sv2 = b(l2, k);
+    b(l1, k) = s1 * sv1 + s2 * sv2;
+    b(l2, k) = -s2 * sv1 + s1 * sv2;
+  }
+
+  c1 = sn;
+  c2 = 0.0;
+}
+
+static void QRDecomp(gMatrix<double> &b, gMatrix<double> &q)
+{
+  q.MakeIdent();
+  for (int m = 1; m <= b.NumColumns(); m++) {
+    for (int k = m + 1; k <= b.NumRows(); k++) {
+      Givens(b, q, b(m, m), b(k, m), m, k, m + 1);
+    }
+  }
+}
+
+static void NewtonStep(gMatrix<double> &q, gMatrix<double> &b,
+		       gVector<double> &u, gVector<double> &y,
+		       double &d)
+{
+  for (int k = 1; k <= b.NumColumns(); k++) {
+    for (int l = 1; l <= k - 1; l++) {
+      y[k] -= b(l, k) * y[l];
+    }
+    y[k] /= b(k, k);
+  }
+
+  d = 0.0;
+  for (int k = 1; k <= b.NumRows(); k++) {
+    double s = 0.0;
+    for (int l = 1; l <= b.NumColumns(); l++) {
+      s += q(l, k) * y[l];
+    }
+    u[k] -= s;
+    d += s * s;
+  }
+  d = sqrt(d);
+}
+
+static void QreLHS(const EFSupport &p_support, const gVector<double> &p_point,
+		   gVector<double> &p_lhs)
+{
+  BehavProfile<double> profile(p_support);
+  for (int i = 1; i <= profile.Length(); i++) {
+    profile[i] = p_point[i];
+  }
+  double lambda = p_point[p_point.Length()];
+
+  p_lhs = 0.0;
+  int rowno = 0;
+
+  for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
+    EFPlayer *player = p_support.GetGame().Players()[pl];
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      rowno++;
+      for (int act = 1; act <= p_support.NumActions(pl, iset); act++) {
+	p_lhs[rowno] += profile(pl, iset, act);
+      }
+      p_lhs[rowno] -= 1.0;
+
+      for (int act = 2; act <= p_support.NumActions(pl, iset); act++) {
+	p_lhs[++rowno] = log(profile(pl, iset, act) / profile(pl, iset, 1));
+	p_lhs[rowno] -= (lambda *
+			 (profile.GetActionValue(p_support.Actions(pl, iset)[act]) -
+			  profile.GetActionValue(p_support.Actions(pl, iset)[1])));
+	p_lhs[rowno] *= profile(pl, iset, 1) * profile(pl, iset, act);
+      }
+    }
+  }
+}
+
+static void QreJacobian(const EFSupport &p_support,
+			const gVector<double> &p_point,
+			gMatrix<double> &p_matrix)
+{
+  const efgGame &efg = p_support.GetGame();
+  BehavProfile<double> profile(p_support);
+  for (int i = 1; i <= profile.Length(); i++) {
+    profile[i] = p_point[i];
+  }
+  double lambda = p_point[p_point.Length()];
+
+  int rowno = 0; 
+  for (int pl1 = 1; pl1 <= efg.NumPlayers(); pl1++) {
+    EFPlayer *player1 = efg.Players()[pl1];
+    for (int iset1 = 1; iset1 <= player1->NumInfosets(); iset1++) {
+      Infoset *infoset1 = player1->Infosets()[iset1];
+      rowno++;
+      // First, do the "sum to one" equation
+      int colno = 0;
+      for (int pl2 = 1; pl2 <= efg.NumPlayers(); pl2++) {
+	EFPlayer *player2 = efg.Players()[pl2];
+	for (int iset2 = 1; iset2 <= player2->NumInfosets(); iset2++) {
+	  for (int act2 = 1; act2 <= p_support.NumActions(pl2, iset2); act2++) {
+	    colno++;
+	    if (pl1 == pl2 && iset1 == iset2) {
+	      p_matrix(colno, rowno) = 1.0;
+	    }
+	    else {
+	      p_matrix(colno, rowno) = 0.0;
+	    }
+	  }
+	}
+      }
+      p_matrix(p_matrix.NumRows(), rowno) = 0.0;
+					    
+      for (int act1 = 2; act1 <= p_support.NumActions(pl1, iset1); act1++) {
+	rowno++;
+	int colno = 0;
+
+	for (int pl2 = 1; pl2 <= efg.NumPlayers(); pl2++) {
+	  EFPlayer *player2 = efg.Players()[pl2];
+	  for (int iset2 = 1; iset2 <= player2->NumInfosets(); iset2++) {
+	    Infoset *infoset2 = player2->Infosets()[iset2];
+
+	    for (int act2 = 1; act2 <= p_support.NumActions(pl2, iset2); act2++) {
+	      colno++;
+	      if (infoset1 == infoset2) {
+		if (act2 == 1) {
+		  p_matrix(colno, rowno) = -profile(pl1, iset1, act1);
+		}
+		else if (act1 == act2) {
+		  p_matrix(colno, rowno) = profile(pl1, iset1, 1);
+		}
+		else {
+		  p_matrix(colno, rowno) = 0.0;
+		}
+	      }
+	      else {   // infoset1 != infoset2
+		p_matrix(colno, rowno) = -lambda * profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile.DiffActionValue(p_support.Actions(pl1, iset1)[act1], p_support.Actions(pl2, iset2)[act2]) - profile.DiffActionValue(p_support.Actions(pl1, iset1)[1], p_support.Actions(pl2, iset2)[act2]));
+	      }
+	    }
+	  }
+	}
+
+	p_matrix(p_matrix.NumRows(), rowno) = -profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile.GetActionValue(p_support.Actions(pl1, iset1)[act1]) - profile.GetActionValue(p_support.Actions(pl1, iset1)[1]));
+      }
+    }
+  }
+}
+
+#ifdef OLD_VERSION
 static void QreJacobian(const efgGame &p_efg,
 			const BehavProfile<double> &p_profile,
 			const double &p_lambda, gMatrix<double> &p_matrix)
@@ -96,50 +280,181 @@ static void QreJacobian(const efgGame &p_efg,
     }
   }
 }
+#endif  // OLD_VERSION
 
-static void QreComputeStep(const efgGame &p_efg, 
-			   const BehavProfile<double> &p_profile,
-			   const gMatrix<double> &p_matrix,
-			   gDPVector<double> &p_delta, double &p_lambdainc,
-			   double p_initialsign, double p_stepsize)
+static void TracePath(const BehavProfile<double> &p_start,
+		      double p_startLambda, double p_maxLambda,
+		      gStatus &p_status,
+		      gList<BehavSolution> &p_solutions)
 {
-  double sign = p_initialsign;
-  int rowno = 0; 
+  const double c_tol = 1.0e-4;     // tolerance for corrector iteration
+  const double c_maxDecel = 1.1;   // maximal deceleration factor
+  const double c_maxDist = 0.4;    // maximal distance to curve
+  const double c_maxContr = 0.6;   // maximal contraction rate in corrector
+  const double c_eta = 0.1;        // perturbation to avoid cancellation
+                                   // in calculating contraction rate
+  double h = .03;                  // initial stepsize
+  const double c_hmin = 1.0e-5;    // minimal stepsize
 
-  gSquareMatrix<double> M(p_matrix.NumRows());
-
-  for (int row = 1; row <= M.NumRows(); row++) {
-    for (int col = 1; col <= M.NumColumns(); col++) {
-      M(row, col) = p_matrix(row, col + 1);
-    }
+  gVector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
+  for (int i = 1; i <= p_start.Length(); i++) {
+    x[i] = p_start[i];
   }
+  x[x.Length()] = p_startLambda;
+  gVector<double> t(p_start.Length() + 1);
+  gVector<double> y(p_start.Length());
 
-  for (int i = 1; i <= p_delta.Length(); i++) {
-    rowno++;
-    p_delta[i] = sign * M.Determinant();   
-    sign *= -1.0;
+  gMatrix<double> b(p_start.Length() + 1, p_start.Length());
+  gSquareMatrix<double> q(p_start.Length() + 1);
+  QreJacobian(p_start.Support(), x, b);
+  QRDecomp(b, q);
+  q.GetRow(q.NumRows(), t);
+  
+  double omega = 1.0;     // orientation along the curve
+  int niters = 0;
 
-    for (int row = 1; row <= M.NumRows(); row++) {
-      M(row, rowno) = p_matrix(row, rowno);
-      if (rowno < M.NumColumns()) {
-	M(row, rowno + 1) = p_matrix(row, rowno + 2);
+  while (x[x.Length()] >= 0.0 && x[x.Length()] < p_maxLambda) {
+    if (niters++ % 25 == 0) {
+      p_status.Get();
+      p_status.SetProgress(x[x.Length()] / p_maxLambda,
+			   gText("Lambda = ") + ToText(x[x.Length()]));
+    }
+
+    bool accept = true;
+
+    if (fabs(h) <= c_hmin) {
+      return;
+    }
+
+    // Predictor step
+    for (int k = 1; k <= x.Length(); k++) {
+      u[k] = x[k] + h * omega * t[k];
+      if (k < x.Length() && u[k] < 0.0) {
+	accept = false;
+	break;
       }
     }
-  }   
 
-  p_lambdainc = sign * M.Determinant();
+    if (!accept) {
+      h *= 0.5;
+      continue;
+    }
 
-  double norm = 0.0;
-  for (int i = 1; i <= p_delta.Length(); i++) {
-    norm += p_delta[i] * p_delta[i];
+    double decel = 1.0 / c_maxDecel;  // initialize deceleration factor
+    QreJacobian(p_start.Support(), u, b);
+    QRDecomp(b, q);
+
+    int iter = 1;
+    double disto = 0.0;
+    while (true) {
+      double dist;
+
+      QreLHS(p_start.Support(), u, y);
+      NewtonStep(q, b, u, y, dist); 
+      if (dist >= c_maxDist) {
+	accept = false;
+	break;
+      }
+      for (int i = 1; i < u.Length(); i++) {
+	if (u[i] < 0.0) {
+	  // don't go negative
+	  accept = false;
+	  break;
+	}
+      }
+      if (!accept) {
+	break;
+      }
+      
+      decel = gmax(decel, sqrt(dist / c_maxDist) * c_maxDecel);
+      if (iter >= 2) {
+	double contr = dist / (disto + c_tol * c_eta);
+	if (contr > c_maxContr) {
+	  accept = false;
+	  break;
+	}
+	decel = gmax(decel, sqrt(contr / c_maxContr) * c_maxDecel);
+      }
+
+      if (dist <= c_tol) {
+	// Success; break out of iteration
+	break;
+      }
+      disto = dist;
+      iter++;
+    }
+
+    if (!accept) {
+      h /= c_maxDecel;   // PC not accepted; change stepsize and retry
+      if (fabs(h) <= c_hmin) {
+	return;
+      }
+
+      continue;
+    }
+
+    // Determine new stepsize
+    if (decel > c_maxDecel) {
+      decel = c_maxDecel;
+    }
+    h = fabs(h / decel);
+
+    // PC step was successful; update and iterate
+    for (int i = 1; i < x.Length(); i++) {
+      if (u[i] < 1.0e-10) {
+	// Drop this strategy from the support, then recursively call
+	// to continue tracing
+	EFSupport newSupport(p_start.Support());
+	int index = 1;
+	for (int pl = 1; pl <= newSupport.GetGame().NumPlayers(); pl++) {
+	  EFPlayer *player = newSupport.GetGame().Players()[pl];
+	  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+	    for (int act = 1; act <= newSupport.NumActions(pl, iset); act++) {
+	      if (index++ == i) {
+		newSupport.RemoveAction(newSupport.Actions(pl, iset)[act]);
+	      }
+	    }
+	  }
+	}
+
+	BehavProfile<double> newProfile(newSupport);
+	for (int j = 1; j <= newProfile.Length(); j++) {
+	  if (j < i) {
+	    newProfile[j] = u[j];
+	  }
+	  else if (j >= i) {
+	    newProfile[j] = u[j+1];
+	  }
+	}
+
+	TracePath(newProfile, u[u.Length()], p_maxLambda,
+		  p_status, p_solutions);
+	return;
+      }
+      else {
+	x[i] = u[i];
+      }
+    }
+
+    x[x.Length()] = u[u.Length()];
+
+    BehavProfile<double> foo(p_start);
+    for (int i = 1; i <= foo.Length(); i++) {
+      foo[i] = x[i];
+    }
+    p_solutions.Append(BehavSolution(foo, algorithmEfg_QRE_EFG));
+    p_solutions[p_solutions.Length()].SetQre(x[x.Last()], 0);
+    
+    gVector<double> newT(t);
+    q.GetRow(q.NumRows(), newT);  // new tangent
+    if (t * newT < 0.0) {
+      // Bifurcation detected; for now, just "jump over" and continue,
+      // taking into account the change in orientation of the curve.
+      // Someday, we need to do more here! :)
+      omega = -omega;
+    }
+    t = newT;
   }
-  norm += p_lambdainc * p_lambdainc; 
-
-  for (int i = 1; i <= p_delta.Length(); i++) {
-    p_delta[i] /= sqrt(norm / p_stepsize);
-  }
-
-  p_lambdainc /= sqrt(norm / p_stepsize);
 }
 
 efgQre::efgQre(void)
@@ -150,72 +465,40 @@ gList<BehavSolution> efgQre::Solve(const EFSupport &p_support,
 				   gStatus &p_status)
 {
   gList<BehavSolution> solutions;
-
-  const efgGame &efg = p_support.GetGame();
-  gMatrix<double> H(efg.ProfileLength(), efg.ProfileLength() + 1);
-  BehavProfile<double> profile(efg);
-  double lambda = 0.0;
-  int numSteps = 0;
-
-  //  WritePXIHeader(gnull, efg);
-
-  // Pick the direction to follow the path so that lambda starts out
-  // increasing
-  double initialsign = (efg.ProfileLength() % 2 == 0) ? 1.0 : -1.0;
+  BehavProfile<double> start(p_support);
+  //  WritePXIHeader(gnull, p_support.Game());
 
   try {
-    while (lambda <= m_maxLam) {
-      // Use a first-order Runge-Kutta style method
-      gDPVector<double> delta1(profile.GetDPVector());
-      gDPVector<double> delta2(profile.GetDPVector());
-      double lambdainc1, lambdainc2;
+    TracePath(start, 0.0, m_maxLam, p_status, solutions);
 
-      QreJacobian(efg, profile, lambda, H);
-      QreComputeStep(efg, profile, H,
-		     delta1, lambdainc1, initialsign, m_stepSize);
-
-      BehavProfile<double> profile2(profile);
-      delta1 *= 0.5;
-      profile2 += delta1;
-      QreJacobian(efg, profile2, lambda + lambdainc1 * 0.5, H);
-      QreComputeStep(efg, profile, H,
-		     delta2, lambdainc2, initialsign, m_stepSize);
-
-      profile += delta1;
-      delta2 *= 0.5;
-      profile += delta2; 
-      lambda += 0.5 * (lambdainc1 + lambdainc2);
-
+#ifdef UNUSED
       // Write out the QreValue as 0 in the PXI file; not generally
       // going to be the case, but QreValue is suspect for large lambda 
-      // p_pxifile << "\n" << lambda << " " << 0.0 << " ";
-      // for (int i = 1; i <= profile.Length(); i++) {
-      //   p_pxifile << profile[i] << " ";
-      // }
- 
-      if (m_fullGraph) { 
-	solutions.Append(BehavSolution(profile, algorithmEfg_QRE_EFG));
-	solutions[solutions.Length()].SetQre(lambda, 0);
-	//	solutions[solutions.Length()].SetEpsilon(params.Accuracy());
+      p_pxiFile << "\n" << (nu / (1.0-nu)) << " " << 0.0 << " ";
+      for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
+	for (int st = 1; st <= profile.Support().NumStrats(pl); st++) {
+	  p_pxiFile << profile(pl, st) << " ";
+	}
       }
 
-      if (numSteps++ % 50 == 0) {
-	p_status.Get();
-	p_status.SetProgress(lambda / m_maxLam,
-			     gText("Current lambda: ") + ToText(lambda));
+      if (m_fullGraph) { 
+	p_corresp.Append(1, nu / (1.0-nu),
+			 BehavSolution(profile, algorithmNfg_QRE));
       }
+
+      p_status.Get();
+      p_status.SetProgress(nu * (1.0 + m_maxLam) / m_maxLam,
+			   gText("Current lambda: ") + ToText(nu / (1.0-nu)));
+#endif // UNUSED
+  }
+  catch (...) { }
+
+  if (!m_fullGraph) { 
+    while (solutions.Length() > 1) {
+      solutions.Remove(1);
     }
   }
-  catch (...) {
-    return solutions;
-  }
 
-  if (!m_fullGraph) {
-    solutions.Append(BehavSolution(profile, algorithmEfg_QRE_EFG));
-    solutions[solutions.Length()].SetQre(lambda, 0);
-    // This doesn't really apply, at least currently...
-    //    solutions[solutions.Length()].SetEpsilon(params.Accuracy());
-  }
   return solutions;
 }
 
