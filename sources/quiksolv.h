@@ -35,7 +35,7 @@ singular roots.
 /*
    The main constructor for this takes a gPolyList<T>.  The list must
 be at least as long as the dimension Dmnsn() of the space of the
-system.  The first Dmnsn() polynomials are interpreted as equtions,
+system.  The first Dmnsn() polynomials are interpreted as equations,
 while remaining polynomials are interpreted as inequalities in the
 sense that the polynomial is required to be nonnegative.
 */
@@ -53,7 +53,6 @@ template <class T> class QuikSolv {
         bool                         HasBeenSolved;
         gList<gVector<gDouble> >     Roots;
 
-  // SUPPORTING CALCULATIONS - conceptually, some of these belong elsewhere
 
   // Check whether roots are impossible
 
@@ -62,9 +61,12 @@ template <class T> class QuikSolv {
 				 const int&)                             const;
    bool SystemHasNoRootsIn(const gRectangle<gDouble>& r, gArray<int>&)   const;
 
+
   // Ask whether Newton's method leads to a root without leaving the rectangle
+
    bool NewtonRootInRectangle(const gRectangle<gDouble>&, 
 			            gVector<gDouble>&) const;
+
 
   // Ask whether we can prove that there is no root other than 
   // the one produced by the last step
@@ -85,17 +87,21 @@ template <class T> class QuikSolv {
 				      const gRectangle<gDouble>&,
 				      const gVector<gDouble>&,
 				      const gSquareMatrix<gDouble>&)     const;
-
    gDouble MaximalContributionOfHigherOrderTerms(const gPoly<gDouble>&,
 						 const gDouble&)         const;
    bool HasNoOtherRootsIn(const gRectangle<gDouble>&,
 			  const gVector<gDouble>&,
 			  const gSquareMatrix<gDouble>&)                 const;
+
+
   // Combine the last two steps into a single query
+
    bool NewtonRootIsOnlyInRct(const gRectangle<gDouble>&, 
 			            gVector<gDouble>&) const;
 
+
   // Recursive part of recursive method
+
   void               FindRootsRecursion(      gList<gVector<gDouble> >*,
 					const gRectangle<gDouble>&, 
 					const int&,
