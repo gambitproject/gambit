@@ -26,6 +26,9 @@ DECLARE_BINARY(gelfuncActionProb, BehavSolution *, Action *, gNumber *)
 
 gNumber *gelfuncActionProb::EvalItem(BehavSolution *b, Action *a) const
 {
+  if (!b || !a)  return 0;
+  if (&b->Game() != a->BelongsTo()->Game())
+    throw gelGameMismatchError("ActionProb");
   if (a->BelongsTo()->GetPlayer()->IsChance())
     return new gNumber(b->Game().GetChanceProb(a->BelongsTo(),
                                                a->GetNumber()));
@@ -45,6 +48,9 @@ DECLARE_BINARY(gelfuncActionValue, BehavSolution *, Action *, gNumber *)
 
 gNumber *gelfuncActionValue::EvalItem(BehavSolution *b, Action *a) const
 {
+  if (!b || !a)   return 0;
+  if (&b->Game() != a->BelongsTo()->Game())
+    throw gelGameMismatchError("ActionValue");
   if (a->BelongsTo()->GetPlayer()->IsChance())
     return 0;
   else if (b->Support().Find(a))  {
@@ -58,8 +64,8 @@ gNumber *gelfuncActionValue::EvalItem(BehavSolution *b, Action *a) const
     if (probs(a->BelongsTo()->GetPlayer()->GetNumber(),
 	            a->BelongsTo()->GetNumber()) > gNumber(0.0))
       return new gNumber(values(a->BelongsTo()->GetPlayer()->GetNumber(),
-					                      a->BelongsTo()->GetNumber(),
-					                      b->Support().Find(a)));
+				a->BelongsTo()->GetNumber(),
+				b->Support().Find(a)));
     else
       return 0;
   }
@@ -86,6 +92,9 @@ DECLARE_BINARY(gelfuncBelief, BehavSolution *, Node *, gNumber *)
 
 gNumber *gelfuncBelief::EvalItem(BehavSolution *b, Node *n) const
 {
+  if (!b || !n)  return 0;
+  if (&b->Game() != n->Game())
+    throw gelGameMismatchError("Belief");
   const gDPVector<gNumber> &values(b->Beliefs());
   Infoset *s = n->GetInfoset();
   const gArray<Node *> &members = s->Members();
@@ -188,6 +197,8 @@ DECLARE_BINARY(gelfuncInfosetProb, BehavSolution *, Infoset *, gNumber *)
 gNumber *gelfuncInfosetProb::EvalItem(BehavSolution *b, Infoset *s) const
 {
   if (!b || !s)   return 0;
+  if (&b->Game() != s->Game())
+    throw gelGameMismatchError("InfosetProb");
   if (s->IsChanceInfoset())   return 0;
 
   Efg *E = &b->Game();
@@ -198,7 +209,7 @@ gNumber *gelfuncInfosetProb::EvalItem(BehavSolution *b, Infoset *s) const
   b->CondPayoff(values, probs);
 
   return new gNumber(probs(s->GetPlayer()->GetNumber(),
-				                   s->GetNumber()));
+			   s->GetNumber()));
 }
 
 //---------
@@ -316,6 +327,11 @@ DECLARE_BINARY(gelfuncRealizProb, BehavSolution *, Node *, gNumber *)
 
 gNumber *gelfuncRealizProb::EvalItem(BehavSolution *b, Node *n) const
 {
+  if (!b || !n)  return 0;
+  if (&b->Game() != n->Game())
+    throw gelGameMismatchError("RealizProb");
+
+  // don't nodes have numbers now? -- check on this
   Efg* E = &b->Game();
   gList<Node *> list;
   Nodes(*E, list);
@@ -335,6 +351,9 @@ DECLARE_BINARY(gelfuncRegretBehav, BehavSolution *, Action *, gNumber *)
 
 gNumber *gelfuncRegretBehav::EvalItem(BehavSolution *b, Action *a) const
 {
+  if (!b || !a)  return 0;
+  if (&b->Game() != a->BelongsTo()->Game())
+    throw gelGameMismatchError("Regret");
   Infoset* s = a->BelongsTo();
   EFPlayer* p = s->GetPlayer();
 
@@ -342,18 +361,21 @@ gNumber *gelfuncRegretBehav::EvalItem(BehavSolution *b, Action *a) const
     return 0;
   
   return new gNumber(b->Regret()(p->GetNumber(), s->GetNumber(),
-					                       a->GetNumber()));
+				 a->GetNumber()));
 }
 
 DECLARE_BINARY(gelfuncRegretMixed, MixedSolution *, Strategy *, gNumber *)
 
-gNumber *gelfuncRegretMixed::EvalItem(MixedSolution *b, Strategy *s) const
+gNumber *gelfuncRegretMixed::EvalItem(MixedSolution *m, Strategy *s) const
 {
+  if (!m || !s)  return 0;
+  if (&m->Game() != &s->nfp->Game())
+    throw gelGameMismatchError("Regret");
   NFPlayer* p = s->nfp;
   Nfg &n = p->Game();
 
   gPVector<gNumber> v(n.NumStrats());
-  b->Regret(v);
+  m->Regret(v);
 
   return new gNumber(v(p->GetNumber(), s->number));
 }
@@ -366,6 +388,9 @@ DECLARE_BINARY(gelfuncStrategyProb, MixedSolution *, Strategy *, gNumber *)
 
 gNumber *gelfuncStrategyProb::EvalItem(MixedSolution *m, Strategy *s) const
 {
+  if (!m || !s)  return 0;
+  if (&m->Game() != &s->nfp->Game())
+    throw gelGameMismatchError("StrategyProb");
   NFPlayer* player = s->nfp;
   
   if (m->Support().Find(s))
@@ -382,6 +407,10 @@ DECLARE_BINARY(gelfuncStrategyValue, MixedSolution *, Strategy *, gNumber *)
 
 gNumber *gelfuncStrategyValue::EvalItem(MixedSolution *m, Strategy *s) const
 {
+  if (!m || !s)  return 0;
+  if (&m->Game() != &s->nfp->Game())
+    throw gelGameMismatchError("StrategyValue");
+
   if (m->Support().Find(s))
     return new gNumber(m->Payoff(s->nfp->GetNumber(), s));
   else
@@ -396,14 +425,14 @@ DECLARE_UNARY(gelfuncSupportBehav, BehavSolution *, EFSupport *)
 
 EFSupport *gelfuncSupportBehav::EvalItem(BehavSolution *b) const
 {
-  return new EFSupport(b->Support());
+  return (b) ? new EFSupport(b->Support()) : 0;
 }
 
 DECLARE_UNARY(gelfuncSupportMixed, MixedSolution *, NFSupport *)
 
-NFSupport *gelfuncSupportMixed::EvalItem(MixedSolution *b) const
+NFSupport *gelfuncSupportMixed::EvalItem(MixedSolution *m) const
 {
-  return new NFSupport(b->Support());
+  return (m) ? new NFSupport(m->Support()) : 0;
 }
 
 
