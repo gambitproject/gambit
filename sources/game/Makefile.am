@@ -15,6 +15,7 @@ libgambit_game_la_SOURCES = \
 	game-node.h \
 	game-outcome.h \
 	game-player.h \
+	game-sequence.h \
 	game-strategy.h \
 	game-strategy-mixed.h \
 	sfg.cc \
