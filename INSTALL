@@ -12,8 +12,19 @@ make install
 Note that we do most of our development on Linux, so it is possible the
 configure script is not doing enough checking for things that happen 
 on other Linux flavors.  If you encounter compile problems, please report
-them to us at gambit (at) hss (dot) caltech (dot) edu, or the 
+them to us at gambit (at) econweb (dot) tamu (dot) edu, or the 
 gambit-devel mailing list, so we can address them.
+
+If you are building from CVS instead of a released source package, you will
+need to precede the above steps with
+
+aclocal
+automake
+autoconf
+
+You should only need to do this the first time you build after your initial
+CVS checkout.  Subsequent updates should build by just running 'make'
+as usual.
 
 Command-line options are available to modify the configuration process;
 do `./configure --help` for information.  
