@@ -509,7 +509,7 @@ Node *BaseExtForm::DeleteTree(Node *n)
 Infoset *BaseExtForm::AppendAction(Infoset *s)
 {
   assert(s);
-  s->actions.Append(new Action(""));
+  s->InsertAction(s->NumActions() + 1);
   for (int i = 1; i <= s->members.Length(); i++)
     s->members[i]->children.Append(CreateNode(s->members[i]));
   return s;
@@ -521,7 +521,7 @@ Infoset *BaseExtForm::InsertAction(Infoset *s, Action *a)
   for (int where = 1; where <= s->actions.Length() && s->actions[where] != a;
        where++);
   if (where > s->actions.Length())   return s;
-  s->actions.Insert(new Action(""), where);
+  s->InsertAction(where);
   for (int i = 1; i <= s->members.Length(); i++)
     s->members[i]->children.Insert(CreateNode(s->members[i]), where);
 
@@ -534,7 +534,7 @@ Infoset *BaseExtForm::DeleteAction(Infoset *s, Action *a)
   for (int where = 1; where <= s->actions.Length() && s->actions[where] != a;
        where++);
   if (where > s->actions.Length())   return s;
-  delete s->actions.Remove(where);
+  s->RemoveAction(where);
   for (int i = 1; i <= s->members.Length(); i++)   {
     DeleteTree(s->members[i]->children[where]);
     delete s->members[i]->children.Remove(where);

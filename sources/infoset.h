@@ -14,12 +14,15 @@
 
 class Node;
 
+template <class T> class ChanceInfoset;
+
 class Action   {
   friend class BaseExtForm;
   friend class ExtForm<double>;
   friend class ExtForm<gRational>;
   friend class Infoset;
-
+  friend class ChanceInfoset<double>;
+  friend class ChanceInfoset<gRational>;
   private:
     gString name;
 
@@ -70,6 +73,11 @@ class Infoset   {
     void SetName(const gString &s)    { name = s; }
     const gString &GetName(void) const   { return name; }
 
+    virtual void InsertAction(int where)
+      { actions.Insert(new Action(""), where); }
+    virtual void RemoveAction(int which)
+      { delete actions.Remove(which); }
+
     void SetActionName(int i, const gString &s)
       { actions[i]->name = s; }
     const gString &GetActionName(int i) const  { return actions[i]->name; }
@@ -97,7 +105,7 @@ template <class T> class ChanceInfoset : public Infoset  {
   friend class ExtForm<gRational>;
 
   private:
-    gVector<T> probs;
+    gBlock<T> probs;
 
     ChanceInfoset(BaseExtForm *E, int n, Player *p, int br)
       : Infoset(E, n, p, br), probs(br)
@@ -113,9 +121,19 @@ template <class T> class ChanceInfoset : public Infoset  {
 	f << "}";
       }
   public:
+    void InsertAction(int where)
+      { actions.Insert(new Action(""), where);
+	probs.Insert((T) 0, where);
+      }
+
+    void RemoveAction(int which)
+      { delete actions.Remove(which);
+	probs.Remove(which);
+      }
+
     void SetActionProb(int i, const T &value)  { probs[i] = value; }
     const T &GetActionProb(int i) const   { return probs[i]; }
-    const gVector<T> &GetActionProbs(void) const  { return probs; }
+    const gArray<T> &GetActionProbs(void) const  { return probs; }
 };
 
 

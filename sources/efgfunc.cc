@@ -119,6 +119,13 @@ Portion *ArrayToList(const gArray<Outcome *> &A)
 //
 // Implementation of extensive form editing functions, in alpha order
 //
+Portion *GSM_AppendAction(Portion **param)
+{
+  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  s->BelongsTo()->AppendAction(s);
+  return new InfosetValPortion(s);
+}
+
 Portion *GSM_AppendNode(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
@@ -141,6 +148,21 @@ Portion *GSM_AttachOutcome(Portion **param)
   return new OutcomeValPortion(c);
 }
 
+Portion *GSM_DeleteAction(Portion **param)
+{
+  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  Action *a = ((ActionPortion *) param[1])->Value();
+  s->BelongsTo()->DeleteAction(s, a);
+  return new InfosetValPortion(s);
+}
+
+Portion *GSM_DeleteNode(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  Node *keep = ((NodePortion *) param[1])->Value();
+  return new NodeValPortion(n->BelongsTo()->DeleteNode(n, keep));
+}
+
 Portion *GSM_DeleteTree(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
@@ -153,6 +175,14 @@ Portion *GSM_DetachOutcome(Portion **param)
   Node *n = ((NodePortion *) param[0])->Value();
   n->SetOutcome(0);
   return new NodeValPortion(n);
+}
+
+Portion *GSM_InsertAction(Portion **param)
+{
+  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  Action *a = ((ActionPortion *) param[1])->Value();
+  s->BelongsTo()->InsertAction(s, a);
+  return new InfosetValPortion(s);
 }
 
 Portion *GSM_InsertNode(Portion **param)
@@ -697,6 +727,11 @@ void Init_efgfunc(GSM *gsm)
 
 //-----------------------------------------------------------
 
+  FuncObj = new FuncDescObj("AppendAction");
+  FuncObj->SetFuncInfo(GSM_AppendAction, 1);
+  FuncObj->SetParamInfo(GSM_AppendAction, 0, "infoset", porINFOSET);
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("AppendNode");
   FuncObj->SetFuncInfo(GSM_AppendNode, 2);
   FuncObj->SetParamInfo(GSM_AppendNode, 0, "node", porNODE);
@@ -709,6 +744,18 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_AttachOutcome, 1, "outcome", porOUTCOME);
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("DeleteAction");
+  FuncObj->SetFuncInfo(GSM_DeleteAction, 2);
+  FuncObj->SetParamInfo(GSM_DeleteAction, 0, "infoset", porINFOSET);
+  FuncObj->SetParamInfo(GSM_DeleteAction, 1, "action", porACTION);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("DeleteNode");
+  FuncObj->SetFuncInfo(GSM_DeleteNode, 2);
+  FuncObj->SetParamInfo(GSM_DeleteNode, 0, "node", porNODE);
+  FuncObj->SetParamInfo(GSM_DeleteNode, 1, "keep", porNODE);
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("DeleteTree");
   FuncObj->SetFuncInfo(GSM_DeleteTree, 1);
   FuncObj->SetParamInfo(GSM_DeleteTree, 0, "node", porNODE);
@@ -717,6 +764,12 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("DetachOutcome");
   FuncObj->SetFuncInfo(GSM_DetachOutcome, 1);
   FuncObj->SetParamInfo(GSM_DetachOutcome, 0, "node", porNODE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("InsertAction");
+  FuncObj->SetFuncInfo(GSM_InsertAction, 2);
+  FuncObj->SetParamInfo(GSM_InsertAction, 0, "infoset", porINFOSET);
+  FuncObj->SetParamInfo(GSM_InsertAction, 1, "at", porACTION);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("InsertNode");
