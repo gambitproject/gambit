@@ -393,18 +393,14 @@ named_args:   named_arg
 
 named_arg:    NAME RARROW { formalstack.Push(tval); } expression
                            { emit(new BindVal(formalstack.Pop())); }
-         |    NAME DBLARROW  { formalstack.Push(tval); } NAME
+         |    NAME DBLARROW  { formalstack.Push(tval); } name_or_io
                            { emit(new PushRef(tval));
                              emit(new BindRef(formalstack.Pop())); }
-         |    NAME DBLARROW  { formalstack.Push(tval); } STDIN
-                           { emit(new PushInput(gin));
-                             emit(new BindRef(formalstack.Pop())); }
-         |    NAME DBLARROW  { formalstack.Push(tval); } STDOUT
-                           { emit(new PushOutput(gout));
-                             emit(new BindRef(formalstack.Pop())); }
-         |    NAME DBLARROW  { formalstack.Push(tval); } gNULL
-                           { emit(new PushOutput(gnull));
-                             emit(new BindRef(formalstack.Pop())); }
+
+name_or_io:   NAME     { emit(new PushRef(tval)); }
+         |    STDIN    { emit(new PushInput(gin)); }
+         |    STDOUT   { emit(new PushOutput(gout)); }
+         |    gNULL    { emit(new PushOutput(gnull)); }
 
 list:         LBRACE CRLFopt  { listlen.Push(0); } listels CRLFopt RBRACE
     |         LBRACE CRLFopt  { listlen.Push(0); } RBRACE
