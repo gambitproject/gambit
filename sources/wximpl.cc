@@ -11,3 +11,12 @@ TEMPLATE class gArray<wxChoice *>;
 #include "glist.imp"
 class wxFrame;
 TEMPLATE class gList<wxFrame *>;
+TEMPLATE class gNode<wxFrame *>;
+
+
+
+
+
+
+
+
