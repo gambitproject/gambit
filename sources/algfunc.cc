@@ -14,12 +14,6 @@
 #include "rational.h"
 
 
-template <class T> int BuildReducedNormal(const Efg<T> &,
-					  NormalForm<T> *&);
-template <class T>
-void MixedToBehav(const NormalForm<T> &N, const gPVector<T> &mp,
-		  const Efg<T> &E, gDPVector<T> &bp);
-
 #include "gwatch.h"
 #include "mixed.h"
 
@@ -46,23 +40,31 @@ Portion *GSM_Payoff(Portion **param)
 Portion *GSM_NfgFloat(Portion **param)
 {
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
-  NormalForm<double> *N = 0;
   gWatch watch;
-  BuildReducedNormal(E, (NormalForm<double>*&) N);
+
+  NormalForm<double> *N = MakeReducedNfg(E);
   
   ((FloatPortion *) param[1])->Value() = watch.Elapsed();
-  return new NfgValPortion(N);
+  
+  if (N)
+    return new NfgValPortion(N);
+  else
+    return new ErrorPortion("Conversion to reduced nfg failed.\n");
 }
 
 Portion *GSM_NfgRational(Portion **param)
 {
   Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
-  NormalForm<gRational> *N = 0;
   gWatch watch;
-  BuildReducedNormal(E, (NormalForm<gRational>*&) N);
+
+  NormalForm<gRational> *N = MakeReducedNfg(E);
   
   ((FloatPortion *) param[1])->Value() = watch.Elapsed();
-  return new NfgValPortion(N);
+
+  if (N)
+    return new NfgValPortion(N);
+  else
+    return new ErrorPortion("Conversion to reduced nfg failed.\n");
 }
 
 template <class T> class Behav_ListPortion : public ListValPortion   {
@@ -313,7 +315,7 @@ void Init_algfunc(GSM *gsm)
 			new FloatValPortion(0), PASS_BY_REFERENCE);
 
   FuncObj->SetFuncInfo(GSM_NfgRational, 2);
-  FuncObj->SetParamInfo(GSM_NfgRational, 0, "efg", porEFG_FLOAT,
+  FuncObj->SetParamInfo(GSM_NfgRational, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE, DEFAULT_EFG );
   FuncObj->SetParamInfo(GSM_NfgRational, 1, "time", porFLOAT,

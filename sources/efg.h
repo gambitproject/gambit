@@ -15,6 +15,7 @@ class EFPlayer;
 class Infoset;
 class Node;
 class Action;
+class Lexicon;
 
 class BaseEfg     {
   
@@ -29,6 +30,7 @@ class BaseEfg     {
     gBlock<Outcome *> outcomes;
     Node *root;
     EFPlayer *chance;
+    Lexicon *lexicon;
 
     gBlock<Node *> dead_nodes;
     gBlock<Infoset *> dead_infosets;
@@ -56,6 +58,8 @@ class BaseEfg     {
     Outcome *GetOutcomeByIndex(int index) const;
     virtual Outcome *CreateOutcomeByIndex(int index) = 0;
     void Reindex(void);
+    
+    void DeleteLexicon(void);
 
   public:
        //# DESTRUCTOR
@@ -114,12 +118,14 @@ class BaseEfg     {
 
 template <class T> class OutcomeVector;
 #include "behav.h"
+template <class T> class NormalForm;
 
 template <class T> class Efg : public BaseEfg   {
   private:
     Efg<T> &operator=(const Efg<T> &);
 
     void Payoff(Node *n, T, const gPVector<int> &, gVector<T> &) const;
+    void Payoff(Node *n, T, const gArray<gArray<int> *> &, gVector<T> &) const;
     void Payoff(Node *n, T prob, int pl, T &value,
 		const BehavProfile<T> &profile) const;
     void CondPayoff(Node *n, T prob, const BehavProfile<T> &,
@@ -154,9 +160,14 @@ template <class T> class Efg : public BaseEfg   {
     void Centroid(BehavProfile<T> &profile) const;
 
     void Payoff(const gPVector<int> &profile, gVector<T> &payoff) const;
+    void Payoff(const gArray<gArray<int> *> &profile, gVector<T> &payoff) const;
     T Payoff(int pl, const BehavProfile<T> &) const;
     void CondPayoff(const BehavProfile<T> &profile, gDPVector<T> &value,
 		    gPVector<T> &probs) const;
+
+    friend NormalForm<T> *MakeReducedNfg(Efg<T> &);
+    friend void MixedToBehav(const NormalForm<T> &N, const gPVector<T> &mp,
+		             const Efg<T> &E, gDPVector<T> &bp);
 };
 
 #include "efplayer.h"

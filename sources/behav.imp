@@ -99,7 +99,7 @@ template <class T> Efg<T>::Efg(const Efg<T> &E)
     chance->infosets.Append(s);
   }
 
-  root = new TypedNode<T>(this, 0, 0);
+  root = new TypedNode<T>(this, 0, E.NumPlayers());
   CopySubtree(root, E.root);
 }
 
@@ -173,6 +173,32 @@ void Efg<T>::Payoff(Node *n, T prob, const gPVector<int> &profile,
 
 template <class T>
 void Efg<T>::Payoff(const gPVector<int> &profile, gVector<T> &payoff) const
+{
+  ((gVector<T> &) payoff).operator=((T) 0);
+  Payoff(root, (T) 1.0, profile, payoff);
+}
+
+template <class T>
+void Efg<T>::Payoff(Node *n, T prob, const gArray<gArray<int> *> &profile,
+		    gVector<T> &payoff) const
+{
+  if (n->outcome)
+    for (int i = 1; i <= players.Length(); i++)
+      payoff[i] += prob * ((OutcomeVector<T> &) *n->outcome)[i];
+  
+  if (n->infoset && n->infoset->player->IsChance())
+    for (int i = 1; i <= n->children.Length(); i++)
+      Payoff(n->children[i],
+	     prob * ((ChanceInfoset<T> &) *n->infoset).probs[i],
+	     profile, payoff);
+  else if (n->infoset)
+    Payoff(n->children[(*profile[n->infoset->player->number])[n->infoset->number]],
+	   prob, profile, payoff);
+}
+
+template <class T>
+void Efg<T>::Payoff(const gArray<gArray<int> *> &profile,
+		    gVector<T> &payoff) const
 {
   ((gVector<T> &) payoff).operator=((T) 0);
   Payoff(root, (T) 1.0, profile, payoff);

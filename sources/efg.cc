@@ -74,7 +74,8 @@ Infoset *EFPlayer::GetInfoset(const gString &name) const
 int BaseEfg::_NumObj = 0;
 #endif // MEMCHECK
 
-BaseEfg::BaseEfg(void) : title("UNTITLED"), chance(new EFPlayer(this, 0))
+BaseEfg::BaseEfg(void)
+  : title("UNTITLED"), chance(new EFPlayer(this, 0)), lexicon(0)
 {
 #ifdef MEMCHECK
   _NumObj++;
@@ -83,7 +84,8 @@ BaseEfg::BaseEfg(void) : title("UNTITLED"), chance(new EFPlayer(this, 0))
 }
 
 BaseEfg::BaseEfg(const BaseEfg &E)
-  : title(E.title), players(E.players.Length()), chance(new EFPlayer(this, 0))
+  : title(E.title), players(E.players.Length()), chance(new EFPlayer(this, 0)),
+    lexicon(0)
 {
   for (int i = 1; i <= players.Length(); i++)  {
     (players[i] = new EFPlayer(this, i))->name = E.players[i]->name;
@@ -107,6 +109,7 @@ BaseEfg::~BaseEfg()
 {
   delete root;
   delete chance;
+  DeleteLexicon();
   int i;
 
   for (i = 1; i <= players.Length(); delete players[i++]);
@@ -269,7 +272,9 @@ int BaseEfg::NumOutcomes(void) const
 void BaseEfg::DeleteOutcome(Outcome *outc)
 {
   root->DeleteOutcome(outc);
+  outcomes.Remove(outcomes.Find(outc));
   ScrapOutcome(outc);
+  DeleteLexicon();
 }
 
 Node *BaseEfg::RootNode(void) const
@@ -280,7 +285,7 @@ bool BaseEfg::IsSuccessor(const Node *n, const Node *from) const
 
 bool BaseEfg::IsPredecessor(const Node *n, const Node *of) const
 { 
-  while (n && n != of)    n = n->parent;
+  while (of && n != of)    of = of->parent;
 
   return (n == of);
 }
@@ -301,6 +306,7 @@ EFPlayer *BaseEfg::NewPlayer(void)
   root->Resize(players.Length());
   for (int i = 1; i <= outcomes.Length(); i++)
     outcomes[i]->Resize(players.Length());
+  DeleteLexicon();
   return ret;
 }
 
@@ -315,6 +321,7 @@ Infoset *BaseEfg::AppendNode(Node *n, EFPlayer *p, int count)
       n->children.Append(CreateNode(n));
   }
 
+  DeleteLexicon();
   return n->infoset;
 }  
 
@@ -329,6 +336,7 @@ Infoset *BaseEfg::AppendNode(Node *n, Infoset *s)
       n->children.Append(CreateNode(n));
   }
 
+  DeleteLexicon();
   return s;
 }
   
@@ -347,6 +355,7 @@ Node *BaseEfg::DeleteNode(Node *n, Node *keep)
     root = keep;
 
   ScrapNode(n);
+  DeleteLexicon();
 
   return keep;
 }
@@ -367,6 +376,7 @@ Infoset *BaseEfg::InsertNode(Node *n, EFPlayer *p, int count)
   while (--count)
     m->children.Append(CreateNode(m));
 
+  DeleteLexicon();
   return m->infoset;
 }
 
@@ -386,7 +396,8 @@ Infoset *BaseEfg::InsertNode(Node *n, Infoset *s)
   int count = s->actions.Length();
   while (--count)
     m->children.Append(CreateNode(m));
-  
+
+  DeleteLexicon();
   return m->infoset;
 }
 
@@ -408,6 +419,7 @@ Infoset *BaseEfg::JoinInfoset(Infoset *s, Node *n)
 
   n->infoset = s;
 
+  DeleteLexicon();
   return s;
 }
 
@@ -429,6 +441,7 @@ Infoset *BaseEfg::LeaveInfoset(Node *n)
   for (int i = 1; i <= s->actions.Length(); i++)
     n->infoset->actions[i]->name = s->actions[i]->name;
 
+  DeleteLexicon();
   return n->infoset;
 }
 
@@ -443,6 +456,8 @@ Infoset *BaseEfg::MergeInfoset(Infoset *to, Infoset *from)
   for (int i = 1; i <= from->members.Length(); i++)
     from->members[i]->infoset = to;
   dead_infosets.Append(from->player->infosets.Remove(from->player->infosets.Find(from)));
+
+  DeleteLexicon();
   return to;
 }
 
@@ -456,6 +471,7 @@ Infoset *BaseEfg::SwitchPlayer(Infoset *s, EFPlayer *p)
   s->player = p;
   p->infosets.Append(s);
 
+  DeleteLexicon();
   return s;
 }
 
@@ -480,6 +496,7 @@ Node *BaseEfg::CopyTree(Node *src, Node *dest)
 
   CopySubtree(src, dest, dest);
 
+  DeleteLexicon();
   return dest;
 }
 
@@ -500,6 +517,7 @@ Node *BaseEfg::MoveTree(Node *src, Node *dest)
   dest->name = "";
   dest->outcome = 0;
   
+  DeleteLexicon();
   return dest;
 }
 
@@ -524,6 +542,7 @@ Node *BaseEfg::DeleteTree(Node *n)
   n->outcome = 0;
   n->name = "";
 
+  DeleteLexicon();
   return n;
 }
 
@@ -533,6 +552,7 @@ Infoset *BaseEfg::AppendAction(Infoset *s)
   s->InsertAction(s->NumActions() + 1);
   for (int i = 1; i <= s->members.Length(); i++)
     s->members[i]->children.Append(CreateNode(s->members[i]));
+  DeleteLexicon();
   return s;
 }
 
@@ -546,6 +566,7 @@ Infoset *BaseEfg::InsertAction(Infoset *s, Action *a)
   for (int i = 1; i <= s->members.Length(); i++)
     s->members[i]->children.Insert(CreateNode(s->members[i]), where);
 
+  DeleteLexicon();
   return s;
 }
 
@@ -560,6 +581,7 @@ Infoset *BaseEfg::DeleteAction(Infoset *s, Action *a)
     DeleteTree(s->members[i]->children[where]);
     delete s->members[i]->children.Remove(where);
   }
+  DeleteLexicon();
   return s;
 }
 
