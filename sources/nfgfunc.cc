@@ -478,7 +478,7 @@ static Portion *GSM_Randomize_NfgFloat(Portion **param)
   Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
   
   RandomNfg(N);
-  return param[0]->RefCopy();
+  return param[0]->ValCopy();
 }
 
 static Portion *GSM_Randomize_NfgRational(Portion **param)
@@ -486,7 +486,7 @@ static Portion *GSM_Randomize_NfgRational(Portion **param)
   Nfg<gRational> &N = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
   
   RandomNfg(N);
-  return param[0]->RefCopy();
+  return param[0]->ValCopy();
 }
 
 static Portion *GSM_Randomize_NfgSeedFloat(Portion **param)
@@ -496,7 +496,7 @@ static Portion *GSM_Randomize_NfgSeedFloat(Portion **param)
 
   SetSeed(seed);
   RandomNfg(N);
-  return param[0]->RefCopy();
+  return param[0]->ValCopy();
 }
 
 static Portion *GSM_Randomize_NfgSeedRational(Portion **param)
@@ -506,7 +506,7 @@ static Portion *GSM_Randomize_NfgSeedRational(Portion **param)
 
   SetSeed(seed);
   RandomNfg(N);
-  return param[0]->RefCopy();
+  return param[0]->ValCopy();
 }  
 
 //------------
@@ -782,24 +782,20 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Randomize", 4);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Randomize_NfgFloat, 
 				       porNFG_FLOAT, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNFG_FLOAT,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNFG_FLOAT, REQUIRED));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Randomize_NfgRational, 
 				       porNFG_RATIONAL, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porNFG_RATIONAL,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porNFG_RATIONAL, REQUIRED));
 
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Randomize_NfgSeedFloat, 
 				       porNFG_FLOAT, 2));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porNFG_FLOAT,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porNFG_FLOAT, REQUIRED));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("seed", porINTEGER));
 
   FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Randomize_NfgSeedRational, 
 				       porNFG_RATIONAL, 2));
-  FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porNFG_RATIONAL,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porNFG_RATIONAL, REQUIRED));
   FuncObj->SetParamInfo(3, 1, ParamInfoType("seed", porINTEGER));
   gsm->AddFunction(FuncObj);
 

@@ -326,6 +326,10 @@ Portion *GSM_Contains(Portion **param)
   return new BoolValPortion(((ListPortion *) param[0])->Contains(param[1]));
 }
 
+Portion *GSM_NumElements(Portion **param)
+{
+  return new IntValPortion(((ListPortion *) param[0])->Length());
+}
 
 Portion *GSM_LengthList(Portion **param)
 {
@@ -769,6 +773,13 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 1, ParamInfoType("x", PortionSpec(porANYTYPE, 1)));
   gsm->AddFunction(FuncObj);
 
+
+  FuncObj = new FuncDescObj("NumElements", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NumElements, porINTEGER, 1,
+				       0, funcNONLISTABLE ));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("list", 
+                              PortionSpec(porANYTYPE, 1, porNULLSPEC )));
+  gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("Length", 1);

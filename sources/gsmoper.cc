@@ -104,10 +104,21 @@ Portion* GSM_Randomize_Rational(Portion** param)
 Portion* GSM_Assign(Portion** param)
 {
   _gsm->PushRef(((TextPortion*) param[0])->Value());
-  Portion* p = param[1]->ValCopy();
-  _gsm->Push(p);
+  Portion* p = 0;
+  Portion* result = 0;
+  if( param[1]->IsReference() )
+  {
+    p = param[1]->RefCopy();
+    result = param[1]->RefCopy();
+  }
+  else
+  {
+    p = param[1]->ValCopy();
+    result = param[1]->ValCopy();
+  }
+  _gsm->Push( p );
   _gsm->Assign();
-  return p->RefCopy();
+  return result;
 }
 
 Portion* GSM_UnAssign(Portion** param)
