@@ -295,7 +295,7 @@ efgGame::~efgGame()
   delete chance;
 
   for (int i = 1; i <= players.Length(); delete players[i++]);
-  for (int i = 0; i <= outcomes.Last(); delete outcomes[i++]);
+  for (int i = 1; i <= outcomes.Last(); delete outcomes[i++]);
 
   if (lexicon)   delete lexicon;
   lexicon = 0;
@@ -596,9 +596,9 @@ EFPlayer *efgGame::NewPlayer(void)
   EFPlayer *ret = new EFPlayer(this, players.Length() + 1);
   players.Append(ret);
 
-  for (int outc = 0; outc <= outcomes.Last();
+  for (int outc = 1; outc <= outcomes.Last();
        outcomes[outc++]->m_payoffs.Append(0));
-  for (int outc = 0; outc <= outcomes.Last();
+  for (int outc = 1; outc <= outcomes.Last();
        outcomes[outc++]->m_doublePayoffs.Append(0));
   DeleteLexicon();
   return ret;
