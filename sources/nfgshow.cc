@@ -10,7 +10,6 @@
 
 #include "wxstatus.h"
 #include "nfgshow.h"
-#include "nfgpanel.h"
 #include "nfgtable.h"
 #include "nfgsoln.h"
 #include "nfgprint.h"
@@ -38,7 +37,6 @@
 #include "dlelim.h"
 #include "dlsupportselect.h"
 
-const int idPANELWINDOW = 3001;
 const int idSOLUTIONWINDOW = 3002;
 
 //----------------------------------------------------------------------
@@ -89,7 +87,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_PROFILES_DELETE, NfgShow::OnProfilesDelete)
   EVT_SIZE(NfgShow::OnSize)
   EVT_CLOSE(NfgShow::OnCloseWindow)
-  EVT_SASH_DRAGGED_RANGE(idPANELWINDOW, idSOLUTIONWINDOW, NfgShow::OnSashDrag)
+  EVT_SASH_DRAGGED(idSOLUTIONWINDOW, NfgShow::OnSashDrag)
   EVT_LIST_ITEM_SELECTED(idNFG_SOLUTION_LIST, NfgShow::OnSolutionSelected)
 END_EVENT_TABLE()
 
@@ -101,8 +99,7 @@ NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
   : wxFrame(p_frame, -1, "", wxDefaultPosition, wxSize(500, 500)),
     EfgNfgInterface(gNFG, efg),
     m_nfg(p_nfg),
-    m_panel(0), m_table(0), m_solutionTable(0),
-    m_panelSashWindow(0), m_solutionSashWindow(0),
+    m_table(0), m_solutionTable(0), m_solutionSashWindow(0),
     m_rowPlayer(1), m_colPlayer(2)
 {
 #ifdef __WXMSW__
@@ -132,16 +129,8 @@ NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
   CreateStatusBar(3);
   MakeToolbar();
 
-  m_panelSashWindow = new wxSashWindow(this, idPANELWINDOW,
-				       wxPoint(0, 40), wxSize(200, 200),
-				       wxNO_BORDER | wxSW_3D);
-  m_panelSashWindow->SetSashVisible(wxSASH_RIGHT, true);
-
-  m_panel = new NfgPanel(this, m_panelSashWindow);
-  m_panel->SetSize(200, 200);
-
   m_table = new NfgTable(this);
-  m_table->SetSize(200, 0, 200, 200);
+  m_table->SetSize(0, 0, 200, 200);
 
   m_solutionSashWindow = new wxSashWindow(this, idSOLUTIONWINDOW,
 					  wxDefaultPosition,
@@ -151,8 +140,6 @@ NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
   m_solutionTable = new NfgProfileList(this, m_solutionSashWindow);
   m_solutionTable->Show(true);
   m_solutionSashWindow->Show(false);
-
-  m_panelSashWindow->Show(true);
 
   SetPlayers(1, 2);
 
@@ -418,10 +405,6 @@ void NfgShow::AdjustSizes(void)
 				  width, m_solutionSashWindow->GetRect().height);
     height -= m_solutionSashWindow->GetRect().height;
   }
-  if (m_panelSashWindow) {
-    m_panelSashWindow->SetSize(0, 0, m_panelSashWindow->GetRect().width,
-			       height);
-  }
   if (m_table) {
     m_table->SetSize(m_table->GetRect().x, m_table->GetRect().y,
 		     width - m_table->GetRect().x, height);
@@ -440,24 +423,10 @@ void NfgShow::OnSashDrag(wxSashEvent &p_event)
   GetClientSize(&clientWidth, &clientHeight);
 
   switch (p_event.GetId()) {
-  case idPANELWINDOW:
-    m_table->SetSize(p_event.GetDragRect().width,
-		     m_table->GetRect().y,
-		     clientWidth - p_event.GetDragRect().width,
-		     m_table->GetRect().height);
-    m_panelSashWindow->SetSize(m_panelSashWindow->GetRect().x,
-			       m_panelSashWindow->GetRect().y,
-			       p_event.GetDragRect().width,
-			       m_panelSashWindow->GetRect().height);
-    break;
   case idSOLUTIONWINDOW:
     m_table->SetSize(m_table->GetRect().x, m_table->GetRect().y,
 		     m_table->GetRect().width,
 		     clientHeight - p_event.GetDragRect().height - 40);
-    m_panelSashWindow->SetSize(m_panelSashWindow->GetRect().x,
-			       m_panelSashWindow->GetRect().y,
-			       m_panelSashWindow->GetRect().width,
-			       clientHeight - p_event.GetDragRect().height - 40);
     m_solutionSashWindow->SetSize(0, clientHeight - p_event.GetDragRect().height,
 				  clientWidth, p_event.GetDragRect().height);
     break;
@@ -588,7 +557,7 @@ void NfgShow::OnEditOutcomeAttach(wxCommandEvent &)
   dialogNfgOutcomeSelect dialog(m_nfg, this);
     
   if (dialog.ShowModal() == wxID_OK) {
-    m_nfg.SetOutcome(m_panel->GetProfile(), dialog.GetOutcome());
+    m_nfg.SetOutcome(m_table->GetProfile(), dialog.GetOutcome());
     InterfaceDied();
     m_table->OnChangeValues();
   }
@@ -596,7 +565,7 @@ void NfgShow::OnEditOutcomeAttach(wxCommandEvent &)
 
 void NfgShow::OnEditOutcomeDetach(wxCommandEvent &)
 {
-  m_nfg.SetOutcome(m_panel->GetProfile(), 0);
+  m_nfg.SetOutcome(m_table->GetProfile(), 0);
   InterfaceDied();
   m_table->OnChangeValues();
 }
@@ -632,10 +601,10 @@ void NfgShow::OnEditOutcomeDelete(wxCommandEvent &)
 
 void NfgShow::OnEditOutcomePayoffs(wxCommandEvent &)
 {
-  if (m_table->GetCursorRow() < m_currentSupport->NumStrats(m_rowPlayer) &&
-      m_table->GetCursorColumn() < m_currentSupport->NumStrats(m_colPlayer)) {
-    OutcomePayoffs(m_table->GetCursorRow() + 1,
-		   m_table->GetCursorColumn() + 1, false);
+  if (m_table->GetRowStrategy() <= m_currentSupport->NumStrats(m_rowPlayer) &&
+      m_table->GetColStrategy() <= m_currentSupport->NumStrats(m_colPlayer)) {
+    OutcomePayoffs(m_table->GetRowStrategy(),
+		   m_table->GetColStrategy(), false);
   }
 }
 
@@ -1103,7 +1072,7 @@ void NfgShow::OnPrefsDisplayColumns(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     for (int i = 1; i <= m_currentSupport->NumStrats(m_colPlayer); i++) {
-      m_table->SetColumnWidth(i - 1, dialog.GetValue());
+      //      m_table->SetColumnWidth(i - 1, dialog.GetValue());
     }
   }
 }
@@ -1125,7 +1094,7 @@ void NfgShow::OnPrefsFontData(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_drawSettings.SetDataFont(dialog.GetFontData().GetChosenFont());
-    m_table->SetCellTextFont(dialog.GetFontData().GetChosenFont());
+    //    m_table->SetCellTextFont(dialog.GetFontData().GetChosenFont());
     m_table->OnChangeValues();
   }
 }
@@ -1137,7 +1106,7 @@ void NfgShow::OnPrefsFontLabels(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_drawSettings.SetLabelFont(dialog.GetFontData().GetChosenFont());
-    m_table->SetLabelFont(dialog.GetFontData().GetChosenFont());
+    //    m_table->SetLabelFont(dialog.GetFontData().GetChosenFont());
     m_table->OnChangeLabels();
   }
 }
@@ -1162,12 +1131,11 @@ void NfgShow::OnPrefsLoad(wxCommandEvent &)
 
 gArray<int> NfgShow::GetProfile(void) const
 {
-  return m_panel->GetProfile();
+  return m_table->GetProfile();
 }
 
 void NfgShow::SetStrategy(int p_player, int p_strategy)
 {
-  m_panel->SetStrategy(p_player, p_strategy);
   m_table->SetStrategy(p_player, p_strategy);
 }
 
@@ -1247,13 +1215,13 @@ void NfgShow::SetPlayers(int p_rowPlayer, int p_colPlayer)
   SetStrategy(m_rowPlayer, 1);
   SetStrategy(m_colPlayer, 1);
   m_table->OnChangeLabels();
-  m_panel->SetSupport(*m_currentSupport);
+  m_table->SetSupport(*m_currentSupport);
   m_table->OnChangeValues();
 }
 
 void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
 {
-  gArray<int> profile(m_panel->GetProfile());
+  gArray<int> profile(m_table->GetProfile());
   profile[m_rowPlayer] = st1;
   profile[m_colPlayer] = st2;
 

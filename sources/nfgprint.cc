@@ -31,7 +31,10 @@ bool NfgPrintout::OnPrintPage(int)
   float marginY = 1*ppiPrinterY;
   dc->SetDeviceOrigin(marginX*pageScaleX, marginY*pageScaleY);
 
+#if 0
+  // Temporarily commented out for changes to grid setup
   m_table->DrawGridCellArea(*dc);
+#endif
   return true;
 }
 

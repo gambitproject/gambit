@@ -28,17 +28,14 @@ class NfgProfileList;
 class NfgTable;
 class dialogNfgSupportInspect;
 
-class NfgPanel;
-
 class NfgShow : public wxFrame, public EfgNfgInterface {
 private:
   Nfg &m_nfg;
 
-  NfgPanel *m_panel;
   NfgTable *m_table;
   NfgProfileList *m_solutionTable;
 
-  wxSashWindow *m_panelSashWindow, *m_solutionSashWindow;
+  wxSashWindow *m_solutionSashWindow;
 
   gList<NFSupport *> m_supports;
   NFSupport *m_currentSupport;
