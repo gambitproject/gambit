@@ -75,8 +75,6 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(wxID_CLOSE, NfgShow::Close)
   EVT_MENU(wxID_SAVE, NfgShow::OnFileSave)
   EVT_MENU(wxID_SAVEAS, NfgShow::OnFileSave)
-  EVT_MENU(GBT_MENU_FILE_IMPORT_COMLAB, NfgShow::OnFileImportComLab)
-  EVT_MENU(GBT_MENU_FILE_EXPORT_COMLAB, NfgShow::OnFileExportComLab)
   EVT_MENU(GBT_MENU_FILE_EXPORT_HTML, NfgShow::OnFileExportHTML)
   EVT_MENU(wxID_PRINT_SETUP, NfgShow::OnFilePageSetup)
   EVT_MENU(wxID_PREVIEW, NfgShow::OnFilePrintPreview)
@@ -217,14 +215,7 @@ void NfgShow::MakeMenus(void)
     fileMenu->Append(wxID_SAVE, "&Save\tCtrl-S", "Save this game");
     fileMenu->Append(wxID_SAVEAS, "Save &as", "Save game to a different file");
     fileMenu->AppendSeparator();
-    wxMenu *fileImportMenu = new wxMenu;
-    fileImportMenu->Append(GBT_MENU_FILE_IMPORT_COMLAB, "&ComLabGames",
-			   "Import a game saved in ComLabGames format");
-    fileMenu->Append(GBT_MENU_FILE_IMPORT, "&Import", fileImportMenu,
-		     "Import a game from various formats");
     wxMenu *fileExportMenu = new wxMenu;
-    fileExportMenu->Append(GBT_MENU_FILE_EXPORT_COMLAB, "&ComLabGames",
-			   "Export game to ComLabGames format");
     fileExportMenu->Append(GBT_MENU_FILE_EXPORT_HTML, "&HTML",
 			   "Save this game in HTML format");
     fileMenu->Append(GBT_MENU_FILE_EXPORT, "&Export", fileExportMenu,
@@ -417,39 +408,6 @@ void NfgShow::OnFileSave(wxCommandEvent &p_event)
   }
   catch (gException &) {
     wxMessageBox("Internal exception in Gambit", "Error", wxOK, this);
-  }
-}
-
-void NfgShow::OnFileImportComLab(wxCommandEvent &)
-{
-  wxGetApp().OnFileImportComLab(this);
-}
-
-void NfgShow::OnFileExportComLab(wxCommandEvent &)
-{
-  wxFileDialog dialog(this, "Choose file", wxGetApp().CurrentDir(), "",
-		      "ComLabGames strategic form games (*.sfg)|*.sfg",
-		      wxSAVE);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      gFileOutput file(dialog.GetPath().c_str());
-      WriteComLabSfg(file, m_doc->GetNfg());
-    }
-    catch (gFileOutput::OpenFailed &) { 
-      wxMessageBox(wxString::Format("Could not open %s for writing.",
-				    dialog.GetPath().c_str()),
-		   "Error", wxOK, this);
-    }
-    catch (gFileOutput::WriteFailed &) {
-      wxMessageBox(wxString::Format("Write error occurred in saving %s.\n",
-				    dialog.GetPath().c_str()),
-		   "Error", wxOK, this);
-    }
-    catch (...) {
-      wxMessageBox("An internal exeception occurred in Gambit", "Error",
-		   wxOK, this);
-    }
   }
 }
 

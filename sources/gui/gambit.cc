@@ -156,27 +156,6 @@ void GambitApp::OnFileMRUFile(wxCommandEvent &p_event)
   LoadFile(m_fileHistory.GetHistoryFile(p_event.GetId() - wxID_FILE1));
 }
 
-void GambitApp::OnFileImportComLab(wxWindow *p_parent)
-{
-  wxFileDialog dialog(p_parent, "Choose file", CurrentDir(), "",
-		      "ComLabGames strategic form games (*.sfg)|*.sfg|"
-		      "All files|*.*");
-
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      gFileInput infile(dialog.GetPath().c_str());
-      gbtNfgGame nfg = ReadComLabSfg(infile);
-      (void) new NfgShow(new gbtGameDocument(nfg), 0);
-    }
-    catch (gFileInput::OpenFailed &) {
-      wxMessageBox(wxString::Format("Could not open '%s' for reading",
-				    dialog.GetPath().c_str()),
-		   "Error", wxOK, 0);
-      return;
-    }
-  }
-}
-
 void GambitApp::OnHelpContents(void)
 {
 }

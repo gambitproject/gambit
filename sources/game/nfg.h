@@ -112,9 +112,6 @@ public:
 class gbtNfgParserError { };
 gbtNfgGame ReadNfgFile(gInput &);
 
-gbtNfgGame ReadComLabSfg(gInput &);
-void WriteComLabSfg(gOutput &, const gbtNfgGame &);
-
 #include "nfstrat.h"
 #include "mixed.h"
 

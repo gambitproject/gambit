@@ -85,7 +85,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(wxID_CLOSE, EfgShow::Close)
   EVT_MENU(wxID_SAVE, EfgShow::OnFileSave)
   EVT_MENU(wxID_SAVEAS, EfgShow::OnFileSave)
-  EVT_MENU(GBT_MENU_FILE_IMPORT_COMLAB, EfgShow::OnFileImportComLab)
   EVT_MENU(GBT_MENU_FILE_EXPORT_BMP, EfgShow::OnFileExportBMP)
   EVT_MENU(GBT_MENU_FILE_EXPORT_JPEG, EfgShow::OnFileExportJPEG)
   EVT_MENU(GBT_MENU_FILE_EXPORT_PNG, EfgShow::OnFileExportPNG)
@@ -263,11 +262,6 @@ void EfgShow::MakeMenus(void)
   fileMenu->Append(wxID_SAVE, "&Save\tCtrl-S", "Save this game");
   fileMenu->Append(wxID_SAVEAS, "Save &as", "Save game to a different file");
   fileMenu->AppendSeparator();
-  wxMenu *fileImportMenu = new wxMenu;
-  fileImportMenu->Append(GBT_MENU_FILE_IMPORT_COMLAB, "&ComLabGames",
-			 "Import a game saved in ComLabGames format");
-  fileMenu->Append(GBT_MENU_FILE_IMPORT, "&Import", fileImportMenu,
-		   "Import a game from various formats");
   wxMenu *fileExportMenu = new wxMenu;
   fileExportMenu->Append(GBT_MENU_FILE_EXPORT_BMP, "&BMP",
 			 "Save a rendering of the game as a Windows bitmap");
@@ -536,11 +530,6 @@ void EfgShow::OnFilePrint(wxCommandEvent &)
   else {
     m_printData = printer.GetPrintDialogData().GetPrintData();
   }
-}
-
-void EfgShow::OnFileImportComLab(wxCommandEvent &)
-{
-  wxGetApp().OnFileImportComLab(this);
 }
 
 void EfgShow::OnFileExportBMP(wxCommandEvent &)
