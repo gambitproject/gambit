@@ -15,7 +15,7 @@
 template <class T> gRectBlock<T>::gRectBlock(void)   { }
 
 template <class T> gRectBlock<T>::gRectBlock(unsigned int nrows,
-					     unsigned int ncols)
+                         unsigned int ncols)
   : gRectArray<T>(nrows, ncols)
 { }
 
@@ -98,35 +98,54 @@ template <class T> void gRectBlock<T>::RemoveRow(int row)
   data = newidx;
 }
 
-template <class T> void gRectBlock<T>::AddColumn(const gArray<T> &v)
-{
-  if (v.First() != minrow || v.Last() != maxrow)   throw BadDim();
 
-  maxcol++;
-  
-  T **new_data = 0;
-  try  {
-    new_data = new T *[maxrow - minrow + 1] - minrow;
-    int i;
-    for (i = minrow; i <= maxrow; new_data[i++] = 0);
-    for (i = minrow; i <= maxrow; i++)    {
-      new_data[i] = new T[maxcol - mincol + 1] - mincol;
-      T *oldrow = data[i];
-      for (int j = mincol; j < maxcol; j++)
-	new_data[i][j] = oldrow[j];
-      new_data[i][maxcol] = v[i];
+template <class T> 
+void gRectBlock<T>::AddColumn(const gArray<T> &v)
+{
+    if (v.First() != minrow || v.Last() != maxrow)   
+        throw BadDim();
+    
+    maxcol++;
+    
+    T **new_data = 0;
+    try  
+    {
+        new_data = new T *[maxrow - minrow + 1] - minrow;
+        int i, j;
+
+        for (i = minrow; i <= maxrow; new_data[i++] = 0);
+        for (i = minrow; i <= maxrow; i++)    
+        {
+            new_data[i] = new T[maxcol - mincol + 1] - mincol;
+            T *oldrow = data[i];
+
+            for (j = mincol; j < maxcol; j++)
+                new_data[i][j] = oldrow[j];
+
+            new_data[i][maxcol] = v[i];
+
+            data[i] = new_data[i];
+            delete [] (oldrow + mincol);            
+        }
     }
-  }
-  catch (...)   {   // probably a failure of new
-    if (new_data)   {
-      for (int i = minrow; i <= maxrow; i++)
-	if (new_data[i])   delete (new_data[i] + mincol);
-      delete (new_data + minrow);
+    catch (...)   // probably a failure of new
+    {   
+        if (new_data)   
+        {
+            for (int i = minrow; i <= maxrow; i++)
+            {
+                if (new_data[i])
+                    delete (new_data[i] + mincol);
+            }
+
+            delete (new_data + minrow);
+        }
+
+        maxcol--;
+        throw;
     }
-    maxcol--;
-    throw;
-  }
 }
+
 
 template<class T> void gRectBlock<T>::RemoveColumn(int col)
 {
@@ -181,44 +200,63 @@ template <class T> void gRectBlock<T>::InsertRow(int row, const gArray<T> &v)
   }
 }
 
+
 template <class T>
 void gRectBlock<T>::InsertColumn(int col, const gArray<T> &v)
 {
-  if (v.First() != minrow || v.Last() != maxrow)   throw BadDim();
-  if (mincol > col || col > maxcol + 1)   throw BadIndex();
-
-  if (col == maxcol + 1) {
-    AddColumn(v);
-    return;
-  }
-
-  maxcol++;
-  
-  T **new_data = 0;
-  try  {
-    new_data = new T *[maxrow - minrow + 1] - minrow;
-    int i,j;
-    for (i = minrow; i <= maxrow; new_data[i++] = 0);
-    for (i = minrow; i <= maxrow; i++)    {
-      new_data[i] = new T[maxcol - mincol + 1] - mincol;
-      T *oldrow = data[i];
-      for (j = mincol; j < col; j++)
-	new_data[i][j] = oldrow[j];
-      new_data[i][col] = v[i];
-      for (j = col + 1; j <= maxcol; j++)
-	new_data[i][j] = oldrow[j-1];
-	  data[i] = new_data[i];
-	  delete [] (oldrow + mincol);
+    if (v.First() != minrow || v.Last() != maxrow)   
+        throw BadDim();
+    
+    if (mincol > col || col > maxcol + 1)
+        throw BadIndex();
+    
+    if (col == maxcol + 1) 
+    {
+        AddColumn(v);
+        return;
     }
-  }
-  catch (...)   {   // probably a failure of new
-    if (new_data)   {
-      for (int i = minrow; i <= maxrow; i++)
-	if (new_data[i])   delete (new_data[i] + mincol);
-      delete (new_data + minrow);
+    
+    maxcol++;
+    
+    T **new_data = 0;
+    try  
+    {
+        new_data = new T *[maxrow - minrow + 1] - minrow;
+        int i, j;
+        
+        for (i = minrow; i <= maxrow; new_data[i++] = 0);
+        for (i = minrow; i <= maxrow; i++)    
+        {
+            new_data[i] = new T[maxcol - mincol + 1] - mincol;
+            T *oldrow = data[i];
+            
+            for (j = mincol; j < col; j++)
+                new_data[i][j] = oldrow[j];
+            
+            new_data[i][col] = v[i];
+            
+            for (j = col + 1; j <= maxcol; j++)
+                new_data[i][j] = oldrow[j-1];
+            
+            data[i] = new_data[i];
+            delete [] (oldrow + mincol);
+        }
     }
-    maxcol--;
-    throw;
-  }
+    catch (...)   // probably a failure of new
+    {   
+        if (new_data)   
+        {
+            for (int i = minrow; i <= maxrow; i++)
+            {
+                if (new_data[i])   
+                    delete (new_data[i] + mincol);
+            }
+
+            delete (new_data + minrow);
+        }
+
+        maxcol--;
+        throw;
+    }
 }
 
