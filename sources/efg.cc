@@ -638,7 +638,13 @@ Node *BaseEfg::CopyTree(Node *src, Node *dest)
   if (src == dest || dest->children.Length())   return src;
   if (src->gameroot != dest->gameroot)  return src;
 
+  Outcome *destoutc = dest->outcome;
+  gString destname = dest->name;
+
   CopySubtree(src, dest, dest);
+
+  dest->outcome = destoutc;
+  dest->name = destname;
 
   DeleteLexicon();
   SortInfosets();
