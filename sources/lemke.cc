@@ -34,12 +34,16 @@ template <class T> class LemkeSolution : public MixedSolution<T>   {
 class BaseLemke    {
   public:
     virtual int Lemke(int) = 0;
+    virtual gBlock<Solution *> GetSolutions(void) const = 0;
     virtual ~BaseLemke()   { }
 };
 
 template <class T> class LemkeTableau
   : public gTableau<T>, public BaseLemke, public SolutionModule  {
   private:
+    const NFRep<T> &rep;
+    BFS_List List;
+    
     int Lemke_Step(int);
     int At_CBFS(void) const;
     int All_Lemke(BFS_List &List, int j);
@@ -51,8 +55,8 @@ template <class T> class LemkeTableau
     virtual ~LemkeTableau()   { }
 
     int Lemke(int);
+    gBlock<Solution *> GetSolutions(void) const;
 };
-
 
 //
 // Pivot implements the pivoting procedure.
@@ -78,7 +82,7 @@ template <class T> void LemkeTableau<T>::Pivot(int row, int col)
   Row_Labels[row] = Col_Labels[col];
   Col_Labels[col] = temp;
  
-  if (printlevel >= 2)
+  if (printlevel >= 3)
     Dump(output);
 
      // Now switch the col column and the Num_Strat + 1 (scratch) column,
@@ -95,9 +99,10 @@ template <class T> void LemkeTableau<T>::Pivot(int row, int col)
 //
 template <class T> int LemkeTableau<T>::Lemke(int Duplicate_Label)
 {
-  BFS_List List;
   BFS<T> cbfs((T) 0);
   int i;
+
+  List = BFS_List();
 
   if (Duplicate_Label == 0)
     All_Lemke(List, 0);
@@ -109,7 +114,7 @@ template <class T> int LemkeTableau<T>::Lemke(int Duplicate_Label)
     List.Append(cbfs);
   }
 
-  if (printlevel >= 2)  {
+  if (printlevel >= 1)  {
     for (i = 1; i <= List.Length(); i++)   {
       List[i].Dump(output);
       output << "\n";
@@ -144,14 +149,14 @@ template <class T> int LemkeTableau<T>::Lemke_Step(int Duplicate_Label)
     exit_label = Row_Labels[row];           // The corresponding label.
     newcol = Col_Labels.Find(-exit_label);  // The column corresponding to 
                                             // The dual label of exit_label.
-    if (printlevel >= 2)  {
+    if (printlevel >= 3)  {
       Dump(output);
       output << "\npivot row = " << row << " col = " << col << "\n";
     }
 
     Pivot(row, col);
 
-    if (printlevel >= 2) 
+    if (printlevel >= 3) 
       Dump(output);
 
     col = newcol;                   // The new column to enter the basis.
@@ -186,7 +191,7 @@ template <class T> int LemkeTableau<T>::All_Lemke(BFS_List &List, int j)
     if (Row_Labels[i] > 0)
       cbfs.Define(Row_Labels[i], Tableau(i,0));
 
-  if (printlevel >= 2)  {
+  if (printlevel >= 3)  {
     output << "\npath " << j ;
     output << " Basis:  " ;
     for (i = 1; i <= Num_Strats; i++)
@@ -197,19 +202,19 @@ template <class T> int LemkeTableau<T>::All_Lemke(BFS_List &List, int j)
   if (List.Contains(cbfs))  return 1;
   List.Append(cbfs);
 
-  if (printlevel >= 1)
+  if (printlevel >= 2)
     cbfs.Dump(output);
 
-  if (printlevel >= 2)  {
+  if (printlevel >= 3)  {
     output << "\npath " << j << " Basis:  " ;
     for (i = 1; i <= Num_Strats; i++)
       output << Row_Labels[i] << " " ;
   }
 
-  if (printlevel >= 1)
+  if (printlevel >= 2)
     output << "\n";
 
-  if (printlevel >= 2)
+  if (printlevel >= 3)
     Dump(output);
 
   for (i = 1; i <= Num_Strats; i++)
@@ -217,10 +222,10 @@ template <class T> int LemkeTableau<T>::All_Lemke(BFS_List &List, int j)
       LemkeTableau<T> Tcopy(*this);
       Tcopy.Lemke_Step(i);
 
-      if (printlevel >= 2)      Tcopy.Dump(output);
+      if (printlevel >= 3)      Tcopy.Dump(output);
       Tcopy.All_Lemke(List, i);
 
-      if (printlevel >= 2)      Tcopy.Dump(output);
+      if (printlevel >= 3)      Tcopy.Dump(output);
     }
   return 1;
 }
@@ -279,11 +284,52 @@ template <class T> int LemkeTableau<T>::Exit_Row(int col)
   return BestSet[1];
 }
 
+template <class T> gBlock<Solution *> LemkeTableau<T>::GetSolutions(void) const
+{
+  gBlock<Solution *> solutions;
+  
+  for (int i = 1; i <= List.Length(); i++)    {
+    MixedProfile<T> prof(rep);
+
+    gVector<T> strat1(1, rep.NumStrats(1)), strat2(1, rep.NumStrats(2));
+    T sum = (T) 0;
+
+    for (int j = 1; j <= rep.NumStrats(1); j++)
+      if (List[i].IsDefined(j))   sum += List[i](j);
+
+    if (sum == (T) 0)  continue;
+
+    for (j = 1; j <= rep.NumStrats(1); j++) 
+      if (List[i].IsDefined(j))   strat1[j] = List[i](j) / sum;
+      else  strat1[j] = (T) 0;
+
+    sum = (T) 0;
+
+    for (j = 1; j <= rep.NumStrats(2); j++)
+      if (List[i].IsDefined(rep.NumStrats(1) + j))  
+	sum += List[i](rep.NumStrats(1) + j);
+
+    if (sum == (T) 0)  continue;
+
+    for (j = 1; j <= rep.NumStrats(2); j++)
+      if (List[i].IsDefined(rep.NumStrats(1) + j))
+	strat2[j] = List[i](rep.NumStrats(1) + j) / sum;
+      else
+	strat2[j] = (T) 0;
+
+    prof.SetMixedStrategy(1, strat1);
+    prof.SetMixedStrategy(2, strat2);
+    solutions.Append(new LemkeSolution<T>(prof));
+  }
+
+  return solutions;
+}
+
 template <class T>
 LemkeTableau<T>::LemkeTableau(const NFRep<T> &r,
 			      gOutput &ofile, gOutput &efile, int plev)
      : gTableau<T>(r.NumStrats(1) + r.NumStrats(2)), 
-       SolutionModule(ofile, efile, plev)
+       SolutionModule(ofile, efile, plev), rep(r)
 {
   NormalIter<T> iter(r);
   T min = (T) 0, x;
@@ -322,8 +368,6 @@ LemkeTableau<T>::LemkeTableau(const NFRep<T> &r,
   for (i = 1; i <= n1 + n2; Tableau(i++, n1 + n2 + 1) = 0.0);
 }
 
-
-
 int NormalForm::Lemke(int dup_strat)
 {
   if (NumPlayers() != 2)   return 0;
@@ -331,20 +375,29 @@ int NormalForm::Lemke(int dup_strat)
   if (dup_strat < 0 || dup_strat > data->NumStrats(1)+data->NumStrats(2))
     dup_strat = 0;
 
-  switch (type)   {
-    case nfDOUBLE:  {
-      LemkeTableau<double> T((NFRep<double> &) *data, gout, gerr, 1);
-      T.Lemke(dup_strat);
-      return 1;
-    }
+  BaseLemke *T;
 
-    case nfRATIONAL:   {
-      LemkeTableau<Rational> T((NFRep<Rational> &) *data, gout, gerr, 1);
-      T.Lemke(dup_strat);
-      return 1;
-    }
+  switch (type)   {
+    case nfDOUBLE:
+      T = new LemkeTableau<double>((NFRep<double> &) *data, gout, gerr, 0);
+      break;
+
+    case nfRATIONAL:
+      T = new LemkeTableau<Rational>((NFRep<Rational> &) *data,
+				     gout, gerr, 0);
+      break;
   }
+
+  T->Lemke(dup_strat);
+
+  gBlock<Solution *> solutions(T->GetSolutions());
+  gout << "Equilibria found:\n";
+  for (int i = 1; i <= solutions.Length(); i++)
+    gout << *solutions[i];
+
+  while (solutions.Length())   delete solutions.Remove(1);
 }
+
 
 
 
