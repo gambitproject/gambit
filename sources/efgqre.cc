@@ -431,7 +431,7 @@ void QreHomotopy(const Efg::Game &p_efg, EFQreParams &params,
   gMatrix<double> H(p_efg.ProfileLength(), p_efg.ProfileLength() + 1);
   BehavProfile<double> profile(p_start);
   double lambda = 0.0;
-  double stepsize = 0.00001;
+  double stepsize = 0.0001;
   int numSteps = 0;
 
   WritePXIHeader(p_pxifile, p_efg, params);
@@ -471,15 +471,12 @@ void QreHomotopy(const Efg::Game &p_efg, EFQreParams &params,
       }
  
       if (params.fullGraph) { 
-	gVector<double> lambdas(2);
-	lambdas = lambda;
 	solutions.Append(BehavSolution(profile, algorithmEfg_QRE_EFG));
-	bool foo;
-	solutions[solutions.Length()].SetQre(lambda, 
-					     profile.QreValue(lambdas, foo));
+	solutions[solutions.Length()].SetQre(lambda, 0);
+	solutions[solutions.Length()].SetEpsilon(params.Accuracy());
       }
 
-      if (numSteps++ % 25 == 0) {
+      if (numSteps++ % 50 == 0) {
 	p_status.Get();
 	p_status.SetProgress(lambda / params.maxLam,
 			     gText("Current lambda: ") + ToText(lambda));
@@ -487,10 +484,15 @@ void QreHomotopy(const Efg::Game &p_efg, EFQreParams &params,
     }
   }
   catch (...) {
-    p_pxifile << "Caught some exception\n";
+    return;
   }
 
-  solutions.Append(BehavSolution(profile, algorithmEfg_QRE_EFG));
+  if (!params.fullGraph) {
+    solutions.Append(BehavSolution(profile, algorithmEfg_QRE_EFG));
+    solutions[solutions.Length()].SetQre(lambda, 0);
+    // This doesn't really apply, at least currently...
+    solutions[solutions.Length()].SetEpsilon(params.Accuracy());
+  }
 }
 
 class EFKQreFunc : public gFunction<double>   {
