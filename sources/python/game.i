@@ -186,6 +186,7 @@ public:
   bool IsPerfectRecall(void) const { return (*self)->IsPerfectRecall(); }
   gbtRational GetMinPayoff(void) const { return (*self)->GetMinPayoff(); }
   gbtRational GetMaxPayoff(void) const { return (*self)->GetMaxPayoff(); }
+  void Canonicalize(void)  { (*self)->Canonicalize(); }
 
   //--------------------------------------------------------------------
   //                Information about the game tree

@@ -144,7 +144,6 @@ void gbtTreeActionRep::DeleteAction(void)
   m_deleted = true;
 
   m_infoset->m_player->m_efg->OnStrategiesChanged();
-  m_infoset->m_player->m_efg->SortInfosets();
 }
 
 //======================================================================
@@ -235,7 +234,6 @@ void gbtTreeInfosetRep::SetPlayer(const gbtGamePlayer &p_player)
   m_player->m_infosets.Append(this);
 
   m_player->m_efg->OnStrategiesChanged();
-  m_player->m_efg->SortInfosets();
 }
 
 //----------------------------------------------------------------------
@@ -294,7 +292,6 @@ void gbtTreeInfosetRep::MergeInfoset(const gbtGameInfoset &p_from)
   from->m_members.Flush();
 
   m_player->m_efg->OnStrategiesChanged();
-  m_player->m_efg->SortInfosets();
 }
 
 void gbtTreeInfosetRep::DeleteInfoset(void)
@@ -324,7 +321,6 @@ gbtGameAction gbtTreeInfosetRep::InsertAction(int where)
 
   }
   m_player->m_efg->OnStrategiesChanged();
-  m_player->m_efg->SortInfosets();
   return action;
 }
 
@@ -361,6 +357,5 @@ void gbtTreeInfosetRep::Reveal(const gbtGamePlayer &p_player)
   }
 
   m_player->m_efg->OnStrategiesChanged();
-  m_player->m_efg->SortInfosets();
 }
 

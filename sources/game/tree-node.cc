@@ -229,7 +229,6 @@ gbtGameNode gbtTreeNodeRep::InsertMove(gbtGameInfoset p_infoset)
   }
 
   m_efg->OnStrategiesChanged();
-  m_efg->SortInfosets();
 
   return m_parent;
 }
@@ -242,9 +241,6 @@ gbtGameNode gbtTreeNodeRep::InsertMove(gbtGameInfoset p_infoset)
 void gbtTreeNodeRep::DeleteMove(void)
 {
   if (!m_parent) return;
-
-  // turn infoset sorting off during tree deletion 
-  m_efg->m_sortInfosets = false;
 
   m_parent->m_children.Remove(m_parent->m_children.Find(this));
   m_parent->DeleteTree();
@@ -259,8 +255,6 @@ void gbtTreeNodeRep::DeleteMove(void)
   m_parent->Delete();
 
   m_efg->OnStrategiesChanged();
-  m_efg->m_sortInfosets = true;
-  m_efg->SortInfosets();
 }
 
 //!
@@ -285,11 +279,8 @@ void gbtTreeNodeRep::DeleteSubtree(void)
 
 void gbtTreeNodeRep::DeleteTree(void)
 {
-  m_efg->m_sortInfosets = false;
   DeleteSubtree();
-  m_efg->m_sortInfosets = true;
   m_efg->OnStrategiesChanged();
-  m_efg->SortInfosets();
 }
 
 //!
@@ -334,7 +325,6 @@ gbtGameNode gbtTreeNodeRep::CopyTree(gbtGameNode p_src)
     }
     
     m_efg->OnStrategiesChanged();
-    m_efg->SortInfosets();
   }
 
   return dest;
@@ -369,7 +359,6 @@ gbtGameNode gbtTreeNodeRep::MoveTree(gbtGameNode p_src)
   dest->m_outcome = 0;
   
   m_efg->OnStrategiesChanged();
-  m_efg->SortInfosets();
   return dest;
 }
 
@@ -389,7 +378,6 @@ void gbtTreeNodeRep::JoinInfoset(const gbtGameInfoset &p_infoset)
   m_infoset = infoset;
 
   m_efg->OnStrategiesChanged();
-  m_efg->SortInfosets();
 }
 
 
@@ -409,7 +397,6 @@ gbtGameInfoset gbtTreeNodeRep::LeaveInfoset(void)
   }
 
   m_efg->OnStrategiesChanged();
-  m_efg->SortInfosets();
   return m_infoset;
 }
 

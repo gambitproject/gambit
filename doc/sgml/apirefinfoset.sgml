@@ -66,9 +66,10 @@ int gbtGameInfoset::GetId(void) const
 
 <para>
 <function>GetId</function> returns the ID number of the information set.
-The ID is unique among the information sets of a player.  Information
-sets are numbered in the order they are first encountered when traversing
-the game tree.
+The ID is unique among the information sets of a player.  The ID assigned
+to the information set may depend on the order of operations in constructing
+the game; to obtain an ID ordering that is independent of the order of
+operations, call <xref linkend="apiref.game.canonicalize">.
 </para>
 
 </sect2>

@@ -224,15 +224,14 @@ public:
   //@{
   /// Returns true if the game is constant sum.
   virtual bool IsConstSum(void) const = 0; 
-
   /// Returns true if the game is perfect recall.
   virtual bool IsPerfectRecall(void) const = 0;
-
   /// Returns the smallest payoff to any player possible in the game.
   virtual gbtRational GetMinPayoff(void) const = 0;
-
   /// Returns the largest payoff to any player possible in the game.
   virtual gbtRational GetMaxPayoff(void) const = 0;
+  /// Sets all ID numbers in the game in a "canonical" fashion.
+  virtual void Canonicalize(void) = 0;
   //@}
 
   //!

@@ -151,12 +151,11 @@ int gbtGameNode::GetId(void) const
 
 <para>
 <function>GetId</function> returns the ID number of the node.
-The ID is unique within a game, and is assigned in the order nodes
-are encountered in a traversal of the tree.  Note that this implies the
-&quot;same&quot; node may have different ID numbers as the tree is
-edited, but that two independently built games that have equivalent
-tree structures will be such that corresponding nodes will have the same
-ID, no matter how the tree is built.
+The ID assigned
+to the node may depend on the order of operations in constructing
+the game; to obtain an ID ordering that is independent of the order of
+operations, call <xref linkend="apiref.game.canonicalize">.
+
 </para>
 
 </sect2>

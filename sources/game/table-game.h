@@ -82,6 +82,7 @@ public:
   gbtRational GetMinPayoff(void) const;
   gbtRational GetMaxPayoff(void) const;
   bool IsDeleted(void) const { return false; }
+  void Canonicalize(void) { }
   //@}
 
   /// @name Information about the game tree

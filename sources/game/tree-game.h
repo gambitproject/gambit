@@ -49,7 +49,6 @@ class gbtTreePlayerRep;
 class gbtTreeGameRep : public gbtGameRep {
 public:
   int m_refCount;
-  bool m_sortInfosets;
   mutable bool m_hasStrategies;
   std::string m_label, m_comment;
   gbtBlock<gbtTreePlayerRep *> m_players;
@@ -87,6 +86,7 @@ public:
   gbtRational GetMinPayoff(void) const;
   gbtRational GetMaxPayoff(void) const;
   bool IsDeleted(void) const { return false; }
+  void Canonicalize(void);
   //@}
 
   /// @name Information about the game tree
@@ -147,7 +147,6 @@ public:
 
   /// @name Member functions private to the implementation
   //@{
-  void SortInfosets(void);
   void NumberNodes(gbtTreeNodeRep *);
   void OnStrategiesChanged(void);
 

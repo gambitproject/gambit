@@ -42,6 +42,41 @@ the total number of actions at all information sets for all players.
 
 </sect2>
 
+<sect2 id="apiref.game.canonicalize">
+<title>Canonicalize</title>
+<indexterm><primary>Canonicalize</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+void gbtGame::Canonicalize(void)
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>Canonicalize</function> renumbers the IDs of nodes and information
+sets in a canonical ordering.  The canonical ordering numbers these
+objects in the order in which they are encountered when traversing the
+game tree.  Calling this function thus ensures that two games which are 
+structurally identical will have the property that corresponding game
+members will have the same ID numbers, regardless of the API calls
+used to construct the game.
+</para>
+
+<note>
+<para>
+In versions prior to 0.97.1.3, this function was automatically called
+every time a game was edited, ensuring the object IDs were always
+canonicalized.  Starting with 0.97.1.3, the program should call this
+function explicitly if the ordering of the ID numbers is significant
+for the application.
+</para>
+</note>
+
+</sect2>
+
 <sect2 id="apiref.game.getchance">
 <title>GetChance</title>
 <indexterm><primary>GetChance</primary></indexterm>
