@@ -63,6 +63,9 @@ public:
   // ------------------------
     
   // copy constructor
+  // note:  This will fail an assertion if you try to update or delete
+  //        the original before the copy has been deleted, refactored
+  //        Or set to something else.
   LUdecomp( const LUdecomp<T> & );
 
   // Decompose given matrix
@@ -75,6 +78,9 @@ public:
   ~LUdecomp();
 
   // Equality operator
+  // note:  This will fail an assertion if you try to delete or update
+  //        the original before the copy has been deleted, refactored, or set 
+  //        equal to something else.
   LUdecomp<T>& operator=(const LUdecomp<T>&);
 
 
@@ -112,8 +118,9 @@ public:
   //-------------------
 
 private:
-    
+  
   void FactorBasis();
+
   void GaussElem( gMatrix<T> &, int, int );
 
   bool CheckBasis();
