@@ -1344,7 +1344,8 @@ gArray<int> Efg::NumInfosets(void) const
 
 int Efg::NumPlayersInfosets(const int pl) const
 {
-  return players[pl]->infosets.Length();
+  if (pl == 0) return chance->infosets.Length();
+  else         return players[pl]->infosets.Length();
 }
 
 int Efg::TotalNumInfosets(void) const

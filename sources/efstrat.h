@@ -93,9 +93,10 @@ gOutput &operator<<(gOutput &f, const EFSupport &);
 
 class EFSupportWithActiveInfo : public EFSupport {
 protected:
-  gList<gList<bool> >         is_infoset_active;
-  gList<gList<gList<bool> > > is_nonterminal_node_active;
+  gArray<gList<bool> >         is_infoset_active;
+  gArray<gList<gList<bool> > > is_nonterminal_node_active;
 
+  void InitializeActiveListsToAllActive();
   void InitializeActiveListsToAllInactive();
   void InitializeActiveLists();
 
@@ -126,6 +127,7 @@ public:
   // Action editing functions
   void AddAction(Action *);
   bool RemoveAction(Action *);
+  void GoToNextSubsupportOf(const EFSupport &);
 
   // Information
   bool ActionIsActive(const int pl, const int iset, const int act) const;
@@ -136,6 +138,9 @@ public:
   int  NumActiveNodes(const Infoset *) const;
   bool NodeIsActive(const int pl, const int iset, const int node) const;
   bool NodeIsActive(const Node *) const;
+
+  bool FinalSubsupportAtInfoset(const EFSupport &S) const;
+  bool IsFinalSubsupportOf(const EFSupport &S) const;
 };
 
 
