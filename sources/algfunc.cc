@@ -783,6 +783,30 @@ static Portion *GSM_PolEnum_Efg(Portion **param)
   return new Behav_ListPortion(solutions);
 }
 
+#include "seqeq.h"
+
+static Portion *GSM_SequentialEquilib(Portion **param)
+{
+  EFBasis &basis = *((EfBasisPortion *) param[0])->Value();
+  EFSupport &support = *((EfSupportPortion *) param[1])->Value();
+  
+  double time;
+  gList<BehavSolution> solutions;
+  
+  SeqEquilibParams params;
+  params.stopAfter = ((IntPortion *) param[2])->Value();
+  params.precision = ((PrecisionPortion *) param[3])->Value();
+  params.tracefile = &((OutputPortion *) param[6])->Value();
+  params.trace = ((IntPortion *) param[7])->Value();
+
+  SequentialEquilib(basis, support, params, solutions,
+	    ((IntPortion *) param[4])->Value(), time);
+
+  ((NumberPortion *) param[5])->Value() = time;
+
+  return new Behav_ListPortion(solutions);
+}
+
 #endif // ! MINI_POLY
 
 //---------
@@ -889,34 +913,66 @@ static Portion *GSM_Simpdiv_Efg(Portion **param)
 
 Portion* GSM_VertEnum( Portion** param )
 {
-  gMatrix<double>* A = ListToMatrix_Float((ListPortion*) param[0]);
-  gVector<double>* b = ListToVector_Float((ListPortion*) param[1]);
-  gVector<double>* start = ListToVector_Float((ListPortion*) param[2]);
-
-  gList< gVector< double > > verts;
-
-  if( start->Length() == 0 ) {
-    VertEnum< double >* vertenum = NULL;
-    vertenum = new VertEnum< double >( *A, *b );
-    vertenum->Vertices( verts );
-    delete vertenum;
+  if (((PrecisionPortion *) param[3])->Value() == precDOUBLE)  {
+    gMatrix<double>* A = ListToMatrix_Float((ListPortion*) param[0]);
+    gVector<double>* b = ListToVector_Float((ListPortion*) param[1]);
+    gVector<double>* start = ListToVector_Float((ListPortion*) param[2]);
+    
+    gList< gVector< double > > verts;
+    
+    if( start->Length() == 0 ) {
+      VertEnum< double >* vertenum = NULL;
+      vertenum = new VertEnum< double >( *A, *b );
+      vertenum->Vertices( verts );
+      delete vertenum;
+    }
+    else {
+      NewVertEnum< double >* vertenum = NULL;
+      vertenum = new NewVertEnum< double >( *A, *b, *start );
+      vertenum->Vertices( verts );
+      delete vertenum;
+    }
+    
+    delete A;
+    delete b;
+    delete start;
+    
+  ListPortion* list = new ListPortion();
+    for (int i = 1; i <= verts.Length(); i++)  
+      list->Append( ArrayToList( verts[i] ) );
+    
+    return list;
   }
   else {
-    NewVertEnum< double >* vertenum = NULL;
-    vertenum = new NewVertEnum< double >( *A, *b, *start );
-    vertenum->Vertices( verts );
-    delete vertenum;
+    gMatrix<gRational>* A = ListToMatrix_Rational((ListPortion*) param[0]);
+    gVector<gRational>* b = ListToVector_Rational((ListPortion*) param[1]);
+    gVector<gRational>* start = ListToVector_Rational((ListPortion*) param[2]);
+    
+    gList< gVector< gRational > > verts;
+    
+    if( start->Length() == 0 ) {
+      VertEnum< gRational >* vertenum = NULL;
+      vertenum = new VertEnum< gRational >( *A, *b );
+      vertenum->Vertices( verts );
+      delete vertenum;
+    }
+    else {
+      NewVertEnum< gRational >* vertenum = NULL;
+      vertenum = new NewVertEnum< gRational >( *A, *b, *start );
+      vertenum->Vertices( verts );
+      delete vertenum;
+    }
+    
+    delete A;
+    delete b;
+    delete start;
+    
+    ListPortion* list = new ListPortion();
+    for (int i = 1; i <= verts.Length(); i++)  
+      list->Append( ArrayToList( verts[i] ) );
+    
+    return list;
   }
-
-  delete A;
-  delete b;
-  delete start;
-
-  ListPortion* list = new ListPortion();
-  for (int i = 1; i <= verts.Length(); i++)  
-    list->Append( ArrayToList( verts[i] ) );
-
-  return list;
 }
 
 void Init_algfunc(GSM *gsm)
@@ -1338,6 +1394,26 @@ void Init_algfunc(GSM *gsm)
 					    new IntPortion(0)));
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("SeqEquilibSolve", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SequentialEquilib, 
+				       PortionSpec(porBEHAV, 1), 8));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("basis", porEFBASIS));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("stopAfter", porINTEGER,
+					    new IntPortion(0)));
+  FuncObj->SetParamInfo(0, 3, ParamInfoType("precision", porPRECISION,
+              new PrecisionPortion(precDOUBLE)));
+  FuncObj->SetParamInfo(0, 4, ParamInfoType("nEvals", porINTEGER,
+					    new IntPortion(0), BYREF));
+  FuncObj->SetParamInfo(0, 5, ParamInfoType("time", porNUMBER,
+					    new NumberPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(0, 6, ParamInfoType("traceFile", porOUTPUT,
+					    new OutputPortion(gnull), 
+					    BYREF));
+  FuncObj->SetParamInfo(0, 7, ParamInfoType("traceLevel", porINTEGER,
+					    new IntPortion(0)));
+  gsm->AddFunction(FuncObj);
+
 #endif // ! MINI_POLY
 
 
@@ -1401,18 +1477,17 @@ void Init_algfunc(GSM *gsm)
 					    new IntPortion(0)));
   gsm->AddFunction(FuncObj);
 
-
-
-
   FuncObj = new FuncDescObj("VertEnum", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_VertEnum,
-				       PortionSpec(porNUMBER, 2), 3));
+				       PortionSpec(porNUMBER, 2), 4));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("A", PortionSpec(porNUMBER,2),
 					    REQUIRED, BYVAL));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("b", PortionSpec(porNUMBER,1),
 					    REQUIRED, BYVAL));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("start", PortionSpec(porNUMBER,1),
 					    new ListPortion(), BYVAL));
+  FuncObj->SetParamInfo(0, 3, ParamInfoType("precision", porPRECISION,
+					    new PrecisionPortion(precDOUBLE)));
   gsm->AddFunction(FuncObj);
 
 }
