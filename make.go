@@ -44,9 +44,9 @@ endif
 	GUILIBS = $(WXLIB) $(XLIB)
 
 
-GLIB_SOURCES = gmisc.cc gambitio.cc garray.cc gblock.cc gstring.cc integer.cc rational.cc gnulib.cc gvector.cc gpvector.cc gdpvect.cc grarray.cc gmatrix.cc gclsig.cc glpsolve.cc bfs.cc gwatch.cc gmessage.cc gfunct.cc gclstats.cc glist.cc listmath.cc subsolve.cc
+GLIB_SOURCES = gmisc.cc gambitio.cc garray.cc gblock.cc gstring.cc integer.cc rational.cc gnulib.cc gvector.cc gpvector.cc gdpvect.cc grarray.cc gmatrix.cc gclsig.cc glpsolve.cc bfs.cc gwatch.cc gmessage.cc gfunct.cc gclstats.cc glist.cc subsolve.cc
 
-GLIB_OBJECTS = gmisc.o gambitio.o garray.o gblock.o gstring.o integer.o rational.o gnulib.o gvector.o gpvector.o gdpvect.o grarray.o gmatrix.o glpsolve.o bfs.o gwatch.o gmessage.o gfunct.o gclstats.o glist.o listmath.o subsolve.o
+GLIB_OBJECTS = gmisc.o gambitio.o garray.o gblock.o gstring.o integer.o rational.o gnulib.o gvector.o gpvector.o gdpvect.o grarray.o gmatrix.o glpsolve.o bfs.o gwatch.o gmessage.o gfunct.o gclstats.o glist.o subsolve.o
 
 GAME_SOURCES = readnfg.cc readefg.cc nfg.cc nfgdbl.cc nfgrat.cc nfgutils.cc \
 		efg.cc efgdbl.cc efgrat.cc nfstrat.cc efgnfg.cc efgutils.cc \
@@ -150,7 +150,7 @@ integer.o: /usr/include/sys/errno.h /usr/include/fcntl.h
 integer.o: /usr/include/sys/fcntlcom.h /usr/include/sys/stat.h
 integer.o: /usr/include/sys/types.h /usr/include/sys/sysmacros.h
 integer.o: /usr/include/math.h /usr/include/floatingpoint.h
-integer.o: /usr/include/sys/ieeefp.h /usr/include/ctype.h ./wx_fake/float.h
+integer.o: /usr/include/sys/ieeefp.h /usr/include/ctype.h
 integer.o: /usr/include/limits.h /usr/include/assert.h
 rational.o: gambitio.h /usr/include/stdio.h gmisc.h gstring.h
 rational.o: /usr/include/string.h /usr/include/sys/stdtypes.h rational.h
@@ -160,8 +160,7 @@ rational.o: /usr/include/stdlib.h /usr/include/memory.h /usr/include/errno.h
 rational.o: /usr/include/sys/errno.h /usr/include/fcntl.h
 rational.o: /usr/include/sys/fcntlcom.h /usr/include/sys/stat.h
 rational.o: /usr/include/sys/types.h /usr/include/sys/sysmacros.h
-rational.o: /usr/include/values.h ./wx_fake/float.h /usr/include/assert.h
-rational.o: /usr/include/ctype.h
+rational.o: /usr/include/values.h /usr/include/assert.h /usr/include/ctype.h
 gnulib.o: /usr/include/assert.h /usr/include/values.h gnulib.h
 gnulib.o: /usr/include/stddef.h /usr/include/sys/stdtypes.h
 gnulib.o: /usr/include/stdlib.h /usr/include/string.h /usr/include/memory.h
@@ -228,14 +227,6 @@ glist.o: gmisc.h gstring.h /usr/include/string.h /usr/include/sys/stdtypes.h
 glist.o: glist.imp glist.h gambitio.h /usr/include/stdio.h glistit.h
 glist.o: /usr/include/assert.h rational.h integer.h /usr/include/math.h
 glist.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h
-listmath.o: /usr/include/assert.h gsm.h gsmincl.h gambitio.h
-listmath.o: /usr/include/stdio.h gmisc.h gstring.h /usr/include/string.h
-listmath.o: /usr/include/sys/stdtypes.h gsmfunc.h portion.h mixed.h nfstrat.h
-listmath.o: gblock.h /usr/include/stdlib.h garray.h gpvector.h gvector.h
-listmath.o: nfg.h efg.h behav.h efstrat.h gdpvect.h efplayer.h infoset.h
-listmath.o: rational.h integer.h /usr/include/math.h
-listmath.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h node.h
-listmath.o: outcome.h glist.h nfplayer.h gsmoper.h listfunc.h
 subsolve.o: efg.h gstring.h /usr/include/string.h /usr/include/sys/stdtypes.h
 subsolve.o: gblock.h /usr/include/stdlib.h /usr/include/assert.h garray.h
 subsolve.o: gambitio.h /usr/include/stdio.h gmisc.h behav.h efstrat.h
@@ -464,110 +455,118 @@ nfdom.o: /usr/include/assert.h gambitio.h /usr/include/stdio.h gmisc.h
 nfdom.o: gstring.h /usr/include/string.h gpvector.h gvector.h nfstrat.h
 nfdom.o: gblock.h contiter.h rational.h integer.h /usr/include/math.h
 nfdom.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h
-extshow.o: ./wx_fake/wx.h ./wx_fake/wx_form.h wxmisc.h /usr/include/stdio.h
-extshow.o: ./wx_fake/wx_timer.h efg.h gstring.h /usr/include/string.h
-extshow.o: /usr/include/sys/stdtypes.h gblock.h /usr/include/stdlib.h
-extshow.o: /usr/include/assert.h garray.h gambitio.h gmisc.h behav.h
-extshow.o: efstrat.h gpvector.h gvector.h gdpvect.h efplayer.h infoset.h
-extshow.o: rational.h integer.h /usr/include/math.h
-extshow.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h node.h
-extshow.o: outcome.h efgconst.h gambit.h treewin.h glist.h treedraw.h
-extshow.o: treecons.h gambdraw.h twflash.h extshow.h efgnfgi.h accels.h
-extshow.o: spread.h grblock.h grarray.h extsoln.h normgui.h wxio.h delsolnd.h
-extshow.o: eliap.h liap.h liapprm.h algdlgs.h seqform.h gmatrix.h lemketab.h
-extshow.o: tableau.h ludecomp.h bfs.h gmap.h gmessage.h seqfprm.h
-treedraw.o: ./wx_fake/wx.h ./wx_fake/wx_form.h wxmisc.h /usr/include/stdio.h
-treedraw.o: ./wx_fake/wx_timer.h treedraw.h gblock.h /usr/include/stdlib.h
-treedraw.o: /usr/include/sys/stdtypes.h /usr/include/assert.h garray.h
-treedraw.o: gambitio.h gmisc.h gstring.h /usr/include/string.h treecons.h
-treedraw.o: gambdraw.h legendc.h legend.h
-twflash.o: ./wx_fake/wx.h twflash.h ./wx_fake/wx_timer.h
-extsoln.o: ./wx_fake/wx.h wxmisc.h /usr/include/stdio.h ./wx_fake/wx_timer.h
-extsoln.o: ./wx_fake/wx_form.h spread.h glist.h gambitio.h gmisc.h gstring.h
-extsoln.o: /usr/include/string.h /usr/include/sys/stdtypes.h gblock.h
-extsoln.o: /usr/include/stdlib.h /usr/include/assert.h garray.h grblock.h
-extsoln.o: grarray.h rational.h integer.h /usr/include/math.h
-extsoln.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h extsoln.h
-extsoln.o: efg.h behav.h efstrat.h gpvector.h gvector.h gdpvect.h efplayer.h
-extsoln.o: infoset.h node.h outcome.h efgconst.h extshow.h efgnfgi.h gambit.h
-extsoln.o: accels.h
-btreewni.o: glist.imp glist.h gambitio.h /usr/include/stdio.h gmisc.h
-btreewni.o: gstring.h /usr/include/string.h /usr/include/sys/stdtypes.h
-btreewni.o: glistit.h /usr/include/assert.h
-bextshow.o: ./wx_fake/wx.h ./wx_fake/wx_form.h ./wx_fake/wx_tbar.h wxmisc.h
-bextshow.o: /usr/include/stdio.h ./wx_fake/wx_timer.h efg.h gstring.h
-bextshow.o: /usr/include/string.h /usr/include/sys/stdtypes.h gblock.h
-bextshow.o: /usr/include/stdlib.h /usr/include/assert.h garray.h gambitio.h
-bextshow.o: gmisc.h behav.h efstrat.h gpvector.h gvector.h gdpvect.h
-bextshow.o: efplayer.h infoset.h rational.h integer.h /usr/include/math.h
-bextshow.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h node.h
-bextshow.o: outcome.h efgconst.h gambit.h treewin.h glist.h treedraw.h
-bextshow.o: treecons.h gambdraw.h twflash.h extshow.h efgnfgi.h accels.h
-bextshow.o: spread.h grblock.h grarray.h efgaccl.h
-normshow.o: normshow.h ./wx_fake/wx.h wxmisc.h /usr/include/stdio.h
-normshow.o: ./wx_fake/wx_timer.h ./wx_fake/wx_form.h wxio.h
-normshow.o: /usr/include/assert.h gambitio.h gmisc.h gstring.h
-normshow.o: /usr/include/string.h /usr/include/sys/stdtypes.h gambit.h
-normshow.o: spread.h glist.h gblock.h /usr/include/stdlib.h garray.h
-normshow.o: grblock.h grarray.h normgui.h normdraw.h gambdraw.h efgnfgi.h
-normshow.o: accels.h rational.h integer.h /usr/include/math.h
-normshow.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h nfg.h
-normshow.o: gpvector.h gvector.h nfgiter.h contiter.h normsoln.h nfgconst.h
-normshow.o: nfplayer.h nliap.h liap.h mixed.h nfstrat.h liapprm.h algdlgs.h
-normshow.o: simpdiv.h gstatus.h gsignal.h gprogres.h simpprm.h enum.h lhtab.h
-normshow.o: lemketab.h tableau.h ludecomp.h gmatrix.h bfs.h gmap.h gmessage.h
-normshow.o: enumprm.h csum.h lpsolve.h csumprm.h
-bnormshw.o: normshow.h ./wx_fake/wx.h wxmisc.h /usr/include/stdio.h
-bnormshw.o: ./wx_fake/wx_timer.h ./wx_fake/wx_form.h wxio.h
-bnormshw.o: /usr/include/assert.h gambitio.h gmisc.h gstring.h
-bnormshw.o: /usr/include/string.h /usr/include/sys/stdtypes.h gambit.h
-bnormshw.o: spread.h glist.h gblock.h /usr/include/stdlib.h garray.h
-bnormshw.o: grblock.h grarray.h normgui.h normdraw.h gambdraw.h efgnfgi.h
-bnormshw.o: accels.h rational.h integer.h /usr/include/math.h
-bnormshw.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h nfg.h
-bnormshw.o: gpvector.h gvector.h nfgiter.h contiter.h normsoln.h nfplayer.h
-bnormshw.o: normaccl.h nfgconst.h sprdaccl.h sprconst.h
-wxmisc.o: ./wx_fake/wx.h ./wx_fake/wx_form.h ./wx_fake/wx_help.h wxmisc.h
-wxmisc.o: /usr/include/stdio.h ./wx_fake/wx_timer.h general.h
-wxmisc.o: /usr/include/stdlib.h /usr/include/sys/stdtypes.h
-wxmisc.o: /usr/include/string.h
-wximpl.o: garray.imp /usr/include/stdlib.h /usr/include/sys/stdtypes.h
-wximpl.o: /usr/include/assert.h garray.h gambitio.h /usr/include/stdio.h
-wximpl.o: gmisc.h gstring.h /usr/include/string.h glist.imp glist.h glistit.h
-gambdraw.o: ./wx_fake/wx.h wxmisc.h /usr/include/stdio.h ./wx_fake/wx_timer.h
-gambdraw.o: ./wx_fake/wx_form.h gambdraw.h gblock.h /usr/include/stdlib.h
-gambdraw.o: /usr/include/sys/stdtypes.h /usr/include/assert.h garray.h
-gambdraw.o: gambitio.h gmisc.h gstring.h /usr/include/string.h
-wxio.o: wxio.h /usr/include/stdio.h /usr/include/assert.h ./wx_fake/wx.h
-wxio.o: gambitio.h gmisc.h gstring.h /usr/include/string.h
-wxio.o: /usr/include/sys/stdtypes.h
-spread.o: /usr/include/stdio.h ./wx_fake/wx.h ./wx_fake/wx_mf.h general.h
-spread.o: /usr/include/stdlib.h /usr/include/sys/stdtypes.h
-spread.o: /usr/include/string.h wxmisc.h ./wx_fake/wx_timer.h
-spread.o: ./wx_fake/wx_form.h spread.h glist.h gambitio.h gmisc.h gstring.h
-spread.o: gblock.h /usr/include/assert.h garray.h grblock.h grarray.h
-spreadim.o: ./wx_fake/wx.h wxmisc.h /usr/include/stdio.h ./wx_fake/wx_timer.h
-spreadim.o: ./wx_fake/wx_form.h grblock.h grarray.h gambitio.h gmisc.h
-spreadim.o: gstring.h /usr/include/string.h /usr/include/sys/stdtypes.h
-spreadim.o: garray.h /usr/include/stdlib.h /usr/include/assert.h spread.h
-spreadim.o: glist.h gblock.h rational.h integer.h /usr/include/math.h
-spreadim.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h glist.imp
-spreadim.o: glistit.h grarray.imp grblock.imp garray.imp
-gambit.o: /usr/include/assert.h /usr/include/string.h
-gambit.o: /usr/include/sys/stdtypes.h ./wx_fake/wx.h ./wx_fake/wx_tbar.h
-gambit.o: wxio.h /usr/include/stdio.h gambitio.h gmisc.h gstring.h gambit.h
-gambit.o: wxmisc.h ./wx_fake/wx_timer.h ./wx_fake/wx_form.h normgui.h
-gambit.o: extgui.h /usr/include/signal.h /usr/include/sys/signal.h
-gambit.o: /usr/include/vm/faultcode.h
-accels.o: ./wx_fake/wx.h wxmisc.h /usr/include/stdio.h ./wx_fake/wx_timer.h
-accels.o: ./wx_fake/wx_form.h keynames.h gmisc.h gstring.h
-accels.o: /usr/include/string.h /usr/include/sys/stdtypes.h glist.imp glist.h
-accels.o: gambitio.h glistit.h /usr/include/assert.h accels.h garray.h
-accels.o: /usr/include/stdlib.h garray.imp
-wxstatus.o: ./wx_fake/wx.h wxstatus.h gstatus.h gsignal.h gmisc.h gstring.h
-wxstatus.o: /usr/include/string.h /usr/include/sys/stdtypes.h gprogres.h
-wxstatus.o: gambitio.h /usr/include/stdio.h
-efgnfgi.o: efgnfgi.h rational.h integer.h /usr/include/math.h
-efgnfgi.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h
-general.o: general.h /usr/include/stdio.h /usr/include/stdlib.h
-general.o: /usr/include/sys/stdtypes.h /usr/include/string.h
+gcompile.o: /usr/include/stdio.h /usr/include/stdlib.h
+gcompile.o: /usr/include/sys/stdtypes.h /usr/include/ctype.h gmisc.h
+gcompile.o: gstring.h /usr/include/string.h gambitio.h rational.h integer.h
+gcompile.o: /usr/include/math.h /usr/include/floatingpoint.h
+gcompile.o: /usr/include/sys/ieeefp.h glist.h ggrstack.h gstack.h gsm.h
+gcompile.o: gsmincl.h gsmfunc.h portion.h mixed.h nfstrat.h gblock.h
+gcompile.o: /usr/include/assert.h garray.h gpvector.h gvector.h nfg.h efg.h
+gcompile.o: behav.h efstrat.h gdpvect.h efplayer.h infoset.h node.h outcome.h
+gcompile.o: nfplayer.h gsminstr.h gstack.imp ggrstack.imp glist.imp glistit.h
+gsm.o: gstack.imp gstack.h /usr/include/assert.h ggrstack.imp ggrstack.h
+gsm.o: gsm.h gsmincl.h gambitio.h /usr/include/stdio.h gmisc.h gstring.h
+gsm.o: /usr/include/string.h /usr/include/sys/stdtypes.h gsmfunc.h portion.h
+gsm.o: mixed.h nfstrat.h gblock.h /usr/include/stdlib.h garray.h gpvector.h
+gsm.o: gvector.h nfg.h efg.h behav.h efstrat.h gdpvect.h efplayer.h infoset.h
+gsm.o: rational.h integer.h /usr/include/math.h /usr/include/floatingpoint.h
+gsm.o: /usr/include/sys/ieeefp.h node.h outcome.h glist.h nfplayer.h
+gsm.o: gsminstr.h gsmhash.h hash.h normal.h
+gsmfunc.o: gsmfunc.h gsmincl.h gmisc.h gstring.h /usr/include/string.h
+gsmfunc.o: /usr/include/sys/stdtypes.h portion.h gambitio.h
+gsmfunc.o: /usr/include/stdio.h mixed.h nfstrat.h gblock.h
+gsmfunc.o: /usr/include/stdlib.h /usr/include/assert.h garray.h gpvector.h
+gsmfunc.o: gvector.h nfg.h efg.h behav.h efstrat.h gdpvect.h efplayer.h
+gsmfunc.o: infoset.h rational.h integer.h /usr/include/math.h
+gsmfunc.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h node.h
+gsmfunc.o: outcome.h glist.h nfplayer.h gsm.h gsmhash.h hash.h gsminstr.h
+gsmoper.o: /usr/include/stdlib.h /usr/include/sys/stdtypes.h
+gsmoper.o: /usr/include/ctype.h gsm.h gsmincl.h gambitio.h
+gsmoper.o: /usr/include/stdio.h gmisc.h gstring.h /usr/include/string.h
+gsmoper.o: gsmfunc.h portion.h mixed.h nfstrat.h gblock.h
+gsmoper.o: /usr/include/assert.h garray.h gpvector.h gvector.h nfg.h efg.h
+gsmoper.o: behav.h efstrat.h gdpvect.h efplayer.h infoset.h rational.h
+gsmoper.o: integer.h /usr/include/math.h /usr/include/floatingpoint.h
+gsmoper.o: /usr/include/sys/ieeefp.h node.h outcome.h glist.h nfplayer.h
+gsmhash.o: gstring.h /usr/include/string.h /usr/include/sys/stdtypes.h
+gsmhash.o: glist.imp glist.h gambitio.h /usr/include/stdio.h gmisc.h
+gsmhash.o: glistit.h /usr/include/assert.h hash.imp hash.h gsmhash.h
+gsmhash.o: portion.h gsmincl.h mixed.h nfstrat.h gblock.h
+gsmhash.o: /usr/include/stdlib.h garray.h gpvector.h gvector.h nfg.h efg.h
+gsmhash.o: behav.h efstrat.h gdpvect.h efplayer.h infoset.h rational.h
+gsmhash.o: integer.h /usr/include/math.h /usr/include/floatingpoint.h
+gsmhash.o: /usr/include/sys/ieeefp.h node.h outcome.h nfplayer.h gsmfunc.h
+gclmath.o: /usr/include/math.h /usr/include/floatingpoint.h
+gclmath.o: /usr/include/sys/ieeefp.h gsm.h gsmincl.h gambitio.h
+gclmath.o: /usr/include/stdio.h gmisc.h gstring.h /usr/include/string.h
+gclmath.o: /usr/include/sys/stdtypes.h gsmfunc.h portion.h mixed.h nfstrat.h
+gclmath.o: gblock.h /usr/include/stdlib.h /usr/include/assert.h garray.h
+gclmath.o: gpvector.h gvector.h nfg.h efg.h behav.h efstrat.h gdpvect.h
+gclmath.o: efplayer.h infoset.h rational.h integer.h node.h outcome.h glist.h
+gclmath.o: nfplayer.h
+gsminstr.o: gmisc.h gstring.h /usr/include/string.h
+gsminstr.o: /usr/include/sys/stdtypes.h gsminstr.h gsm.h gsmincl.h gambitio.h
+gsminstr.o: /usr/include/stdio.h gsmfunc.h portion.h mixed.h nfstrat.h
+gsminstr.o: gblock.h /usr/include/stdlib.h /usr/include/assert.h garray.h
+gsminstr.o: gpvector.h gvector.h nfg.h efg.h behav.h efstrat.h gdpvect.h
+gsminstr.o: efplayer.h infoset.h rational.h integer.h /usr/include/math.h
+gsminstr.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h node.h
+gsminstr.o: outcome.h glist.h nfplayer.h glist.imp glistit.h
+portion.o: /usr/include/assert.h /usr/include/string.h
+portion.o: /usr/include/sys/stdtypes.h garray.imp /usr/include/stdlib.h
+portion.o: garray.h gambitio.h /usr/include/stdio.h gmisc.h gstring.h
+portion.o: gblock.imp gblock.h portion.h gsmincl.h mixed.h nfstrat.h
+portion.o: gpvector.h gvector.h nfg.h efg.h behav.h efstrat.h gdpvect.h
+portion.o: efplayer.h infoset.h rational.h integer.h /usr/include/math.h
+portion.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h node.h
+portion.o: outcome.h glist.h nfplayer.h gsmhash.h hash.h
+nfgfunc.o: gsm.h gsmincl.h gambitio.h /usr/include/stdio.h gmisc.h gstring.h
+nfgfunc.o: /usr/include/string.h /usr/include/sys/stdtypes.h gsmfunc.h
+nfgfunc.o: portion.h mixed.h nfstrat.h gblock.h /usr/include/stdlib.h
+nfgfunc.o: /usr/include/assert.h garray.h gpvector.h gvector.h nfg.h efg.h
+nfgfunc.o: behav.h efstrat.h gdpvect.h efplayer.h infoset.h rational.h
+nfgfunc.o: integer.h /usr/include/math.h /usr/include/floatingpoint.h
+nfgfunc.o: /usr/include/sys/ieeefp.h node.h outcome.h glist.h nfplayer.h
+nfgfunc.o: gwatch.h csum.h gstatus.h gsignal.h gprogres.h tableau.h
+nfgfunc.o: ludecomp.h gmatrix.h grarray.h bfs.h gmap.h gmessage.h lpsolve.h
+nfgfunc.o: enum.h lhtab.h lemketab.h ngobit.h gobit.h grid.h lemke.h nliap.h
+nfgfunc.o: liap.h simpdiv.h purenash.h
+efgfunc.o: gsm.h gsmincl.h gambitio.h /usr/include/stdio.h gmisc.h gstring.h
+efgfunc.o: /usr/include/string.h /usr/include/sys/stdtypes.h gsmfunc.h
+efgfunc.o: portion.h mixed.h nfstrat.h gblock.h /usr/include/stdlib.h
+efgfunc.o: /usr/include/assert.h garray.h gpvector.h gvector.h nfg.h efg.h
+efgfunc.o: behav.h efstrat.h gdpvect.h efplayer.h infoset.h rational.h
+efgfunc.o: integer.h /usr/include/math.h /usr/include/floatingpoint.h
+efgfunc.o: /usr/include/sys/ieeefp.h node.h outcome.h glist.h nfplayer.h
+efgfunc.o: efgutils.h
+listfunc.o: gsm.h gsmincl.h gambitio.h /usr/include/stdio.h gmisc.h gstring.h
+listfunc.o: /usr/include/string.h /usr/include/sys/stdtypes.h gsmfunc.h
+listfunc.o: portion.h mixed.h nfstrat.h gblock.h /usr/include/stdlib.h
+listfunc.o: /usr/include/assert.h garray.h gpvector.h gvector.h nfg.h efg.h
+listfunc.o: behav.h efstrat.h gdpvect.h efplayer.h infoset.h rational.h
+listfunc.o: integer.h /usr/include/math.h /usr/include/floatingpoint.h
+listfunc.o: /usr/include/sys/ieeefp.h node.h outcome.h glist.h nfplayer.h
+listfunc.o: gwatch.h
+algfunc.o: gsm.h gsmincl.h gambitio.h /usr/include/stdio.h gmisc.h gstring.h
+algfunc.o: /usr/include/string.h /usr/include/sys/stdtypes.h gsmfunc.h
+algfunc.o: portion.h mixed.h nfstrat.h gblock.h /usr/include/stdlib.h
+algfunc.o: /usr/include/assert.h garray.h gpvector.h gvector.h nfg.h efg.h
+algfunc.o: behav.h efstrat.h gdpvect.h efplayer.h infoset.h rational.h
+algfunc.o: integer.h /usr/include/math.h /usr/include/floatingpoint.h
+algfunc.o: /usr/include/sys/ieeefp.h node.h outcome.h glist.h nfplayer.h
+algfunc.o: egobit.h gobit.h gstatus.h gsignal.h gprogres.h eliap.h liap.h
+algfunc.o: gwatch.h subsolve.h seqform.h gmatrix.h grarray.h lemketab.h
+algfunc.o: tableau.h ludecomp.h bfs.h gmap.h gmessage.h lemke.h nliap.h
+algfunc.o: simpdiv.h enum.h lhtab.h purenash.h csum.h lpsolve.h
+gcl.o: rational.h integer.h /usr/include/math.h /usr/include/floatingpoint.h
+gcl.o: /usr/include/sys/ieeefp.h gstring.h /usr/include/string.h
+gcl.o: /usr/include/sys/stdtypes.h glist.h gambitio.h /usr/include/stdio.h
+gcl.o: gmisc.h gsm.h gsmincl.h gsmfunc.h portion.h mixed.h nfstrat.h gblock.h
+gcl.o: /usr/include/stdlib.h /usr/include/assert.h garray.h gpvector.h
+gcl.o: gvector.h nfg.h efg.h behav.h efstrat.h gdpvect.h efplayer.h infoset.h
+gcl.o: node.h outcome.h nfplayer.h ggrstack.h gstack.h gcompile.h
+gcl.o: /usr/include/signal.h /usr/include/sys/signal.h
+gcl.o: /usr/include/vm/faultcode.h
+gclsig.o: gsignal.h gmisc.h gstring.h /usr/include/string.h
+gclsig.o: /usr/include/sys/stdtypes.h /usr/include/signal.h
+gclsig.o: /usr/include/sys/signal.h /usr/include/vm/faultcode.h
