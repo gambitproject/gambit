@@ -256,6 +256,7 @@ public:
 
   // DATA ACCESS -- OUTCOMES
   virtual gbtGameOutcome NewOutcome(void) = 0;
+  virtual void DeleteOutcome(gbtGameOutcome) = 0;
 
   // EDITING OPERATIONS
   virtual void DeleteEmptyInfosets(void) = 0;

@@ -50,8 +50,6 @@ public:
 
   //  virtual double GetPayoffDouble(int p_playerId) const = 0;
   virtual void SetPayoff(const gbtGamePlayer &, const gbtNumber &) = 0;
-
-  virtual void DeleteOutcome(void) = 0;
 };
 
 gbtOutput &operator<<(gbtOutput &, const gbtGameOutcomeRep &);

@@ -44,7 +44,6 @@ class gbtGameBase;
 class gbtGameOutcomeBase : public gbtGameOutcomeRep {
 public:
   int m_id;
-  gbtGameBase *m_efg;
   gbtText m_label;
   gbtBlock<gbtNumber> m_payoffs;
 
@@ -59,8 +58,6 @@ public:
   { return m_payoffs[p_player->GetId()]; }
   void SetPayoff(const gbtGamePlayer &p_player, const gbtNumber &p_value)
   { m_payoffs[p_player->GetId()] = p_value; } 
-
-  void DeleteOutcome(void);
 };
 
 class gbtGameStrategyBase : public gbtGameStrategyRep {
@@ -313,7 +310,7 @@ public:
 
   void DeleteAction(gbtGameInfosetBase *, gbtGameActionBase *);
 
-  void DeleteOutcome(gbtGameOutcomeBase *p_outcome);
+  void DeleteOutcome(gbtGameOutcome p_outcome);
 
   // Utility routines for subgames
   void MarkTree(const gbtGameNodeBase *, const gbtGameNodeBase *);

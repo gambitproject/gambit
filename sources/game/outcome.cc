@@ -42,15 +42,10 @@
 //----------------------------------------------------------------------
 
 gbtGameOutcomeBase::gbtGameOutcomeBase(gbtGameBase *p_efg, int p_id)
-  : m_id(p_id), m_efg(p_efg),
+  : m_id(p_id),
     m_payoffs(p_efg->m_players.Length())
 {
   for (int i = 1; i <= m_payoffs.Length(); m_payoffs[i++] = 0);
-}
-
-void gbtGameOutcomeBase::DeleteOutcome(void)
-{
-  m_efg->DeleteOutcome(this);
 }
 
 gbtOutput &operator<<(gbtOutput &p_stream, const gbtGameOutcomeBase &)

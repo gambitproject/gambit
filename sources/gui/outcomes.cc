@@ -81,7 +81,7 @@ public:
 
 void gbtCmdDeleteOutcome::Do(gbtGameDocument *p_doc)
 {
-  p_doc->GetGame()->GetOutcome(m_id)->DeleteOutcome();
+  p_doc->GetGame()->DeleteOutcome(p_doc->GetGame()->GetOutcome(m_id));
 }
 
 //-------------------------------------------------------------------------

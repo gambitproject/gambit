@@ -256,21 +256,24 @@ void gbtGameBase::DeleteInfoset(gbtGameInfosetBase *p_infoset)
 // Deletes the outcome from the extensive form.
 // Assumes outcome is not null.
 //
-void gbtGameBase::DeleteOutcome(gbtGameOutcomeBase *p_outcome)
+void gbtGameBase::DeleteOutcome(gbtGameOutcome p_outcome)
 {
+  gbtGameOutcomeBase *outcome = 
+    dynamic_cast<gbtGameOutcomeBase *>(p_outcome.Get());
+
   // Remove references to the outcome from the tree
   if (root) {
-    root->DeleteOutcome(p_outcome);
+    root->DeleteOutcome(outcome);
   }
 
   for (int i = 1; i <= m_results.Length(); i++) {
-    if (m_results[i] == p_outcome) {
+    if (m_results[i] == outcome) {
       m_results[i] = 0;
     }
   }
 
   // Remove the outcome from the list of defined outcomes
-  m_outcomes.Remove(m_outcomes.Find(p_outcome));
+  m_outcomes.Remove(m_outcomes.Find(outcome));
 
   // Renumber the remaining outcomes
   for (int outc = 1; outc <= m_outcomes.Length(); outc++) {
