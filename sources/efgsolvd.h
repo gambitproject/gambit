@@ -26,11 +26,14 @@ private:
     { ((dialogEfgSolveStandard *) p_object.GetClientData())->OnOK(); }
   static void CallbackCancel(wxButton &p_object, wxEvent &)
     { ((dialogEfgSolveStandard *) p_object.GetClientData())->OnCancel(); }
+  static void CallbackHelp(wxButton &p_object, wxEvent &)
+    { ((dialogEfgSolveStandard *) p_object.GetClientData())->OnHelp(); }
   static void CallbackChanged(wxRadioBox &p_object, wxEvent &)
     { ((dialogEfgSolveStandard *) p_object.GetClientData())->OnChanged(); }
 
   void OnOK(void);
   void OnCancel(void);
+  void OnHelp(void);
   Bool OnClose(void);
   
   void OnChanged(void);

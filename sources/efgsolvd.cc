@@ -66,7 +66,7 @@ dialogEfgSolveStandard::dialogEfgSolveStandard(const Efg &p_efg,
   okButton->SetClientData((char *) this);
   okButton->SetDefault();
   constraints = new wxLayoutConstraints;
-  constraints->centreX.PercentOf(this, wxWidth, 35);
+  constraints->centreX.PercentOf(this, wxWidth, 25);
   constraints->bottom.SameAs(this, wxBottom, 5);
   constraints->width.PercentOf(this, wxWidth, 20);
   constraints->height.PercentOf(this, wxHeight, 20);
@@ -76,11 +76,21 @@ dialogEfgSolveStandard::dialogEfgSolveStandard(const Efg &p_efg,
 					"Cancel");
   cancelButton->SetClientData((char *) this);
   constraints = new wxLayoutConstraints;
-  constraints->centreX.PercentOf(this, wxWidth, 65);
+  constraints->centreX.PercentOf(this, wxWidth, 50);
   constraints->bottom.SameAs(okButton, wxBottom);
   constraints->width.PercentOf(this, wxWidth, 20);
   constraints->height.PercentOf(this, wxHeight, 20);
   cancelButton->SetConstraints(constraints);
+
+  wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp,
+					"Help");
+  helpButton->SetClientData((char *) this);
+  constraints = new wxLayoutConstraints;
+  constraints->centreX.PercentOf(this, wxWidth, 75);
+  constraints->bottom.SameAs(okButton, wxBottom);
+  constraints->width.PercentOf(this, wxWidth, 20);
+  constraints->height.PercentOf(this, wxHeight, 20);
+  helpButton->SetConstraints(constraints);
 
   OnChanged();
 
@@ -118,6 +128,11 @@ Bool dialogEfgSolveStandard::OnClose(void)
   m_completed = wxCANCEL;
   Show(FALSE);
   return FALSE;
+}
+
+void dialogEfgSolveStandard::OnHelp(void)
+{
+  wxHelpContents("EFG Standard Solutions");
 }
 
 void dialogEfgSolveStandard::OnChanged(void)
