@@ -19,6 +19,7 @@ public:
   typedef enum { tokenLINE = 0, tokenELLIPSE, tokenRECTANGLE } NodeType;
 
 private:
+  Node *m_node;       // the corresponding node in the game
   bool m_selected;    // true if node is selected
   bool m_cursor;      // true if node is 'cursor'
   int m_size;         // horizontal size of the node
@@ -26,6 +27,8 @@ private:
 
   int m_level;        // depth of the node in tree
   int m_sublevel;     // # of the infoset line on this level
+
+  wxString m_nodeAboveLabel, m_nodeBelowLabel;
 
 public:
   int x, y;
@@ -36,11 +39,12 @@ public:
   int has_children;   // how many children this node has
   int child_number;   // what branch # is this node from the parent
   bool in_sup;        // is this node in cur_sup
-  Node *n;
   NodeEntry *parent;
   bool expanded;      // Is this subgame root expanded or collapsed?
 
-  NodeEntry(void);
+  NodeEntry(Node *);
+
+  Node *GetNode(void) const { return m_node; }
 
   bool IsCursor(void) const { return m_cursor; }
   bool IsSelected(void) const { return m_selected; }
@@ -57,6 +61,14 @@ public:
   int GetLevel(void) const { return m_level; }
   void SetSublevel(int p_sublevel) { m_sublevel = p_sublevel; }
   int GetSublevel(void) const { return m_sublevel; }
+
+  const wxString &GetNodeAboveLabel(void) const { return m_nodeAboveLabel; }
+  void SetNodeAboveLabel(const wxString &p_label)
+    { m_nodeAboveLabel = p_label; }
+
+  const wxString &GetNodeBelowLabel(void) const { return m_nodeBelowLabel; }
+  void SetNodeBelowLabel(const wxString &p_label)
+    { m_nodeBelowLabel = p_label; }
 
   int GetX(void) const;
 
@@ -95,6 +107,9 @@ private:
   void FillInfosetTable(Node *, const EFSupport &);
   void UpdateTableInfosets(void);
   void UpdateTableParents(void);
+
+  wxString CreateNodeAboveLabel(const NodeEntry *) const;
+  wxString CreateNodeBelowLabel(const NodeEntry *) const;
 
   void RenderLabels(wxDC &dc, const NodeEntry *child_entry,
 		    const NodeEntry *entry) const;

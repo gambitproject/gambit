@@ -137,13 +137,13 @@ void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
     switch (p_event.KeyCode()) {
     case WXK_LEFT:
       if (Cursor()->GetParent()) {
-	SetCursorPosition(m_layout.GetValidParent(Cursor())->n);
+	SetCursorPosition(m_layout.GetValidParent(Cursor())->GetNode());
 	c = true;
       }
       break;
     case WXK_RIGHT:
       if (m_layout.GetValidChild(Cursor())) {
-	SetCursorPosition(m_layout.GetValidChild(Cursor())->n);
+	SetCursorPosition(m_layout.GetValidChild(Cursor())->GetNode());
 	c = true;
       }
       break;
@@ -354,7 +354,7 @@ void TreeWindow::UpdateCursor(void)
 #endif  // UNUSED
 }
 
-gText TreeWindow::OutcomeAsString(const Node *n, bool &/*hilight*/) const
+gText TreeWindow::OutcomeAsString(const Node *n) const
 {
   Efg::Outcome outcome = n->Game()->GetOutcome(n);
   if (!outcome.IsNull()) {

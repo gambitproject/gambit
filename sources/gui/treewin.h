@@ -118,7 +118,7 @@ public:
   void FitZoom(void);
 
   // Access to the numeric values from the renderer
-  gText OutcomeAsString(const Node *n, bool &hilight) const;
+  gText OutcomeAsString(const Node *n) const;
 
   DECLARE_EVENT_TABLE()
 };

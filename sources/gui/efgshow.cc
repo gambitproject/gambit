@@ -29,7 +29,6 @@
 
 #include "efgconst.h"
 #include "treewin.h"
-#include "treezoom.h"
 #include "efgprint.h"
 #include "efgshow.h"
 #include "efgprofile.h"
@@ -297,10 +296,6 @@ EfgShow::EfgShow(FullEfg &p_efg, wxWindow *p_parent)
 
   m_efg.SetIsDirty(false);
 
-#ifdef ZOOM_WINDOW
-  m_treeZoomWindow = new TreeZoomWindow(this, m_treeWindow);
-#endif  // ZOOM_WINDOW
-
   AdjustSizes();
   m_treeWindow->FitZoom();
 
@@ -517,9 +512,6 @@ void EfgShow::OnSelectedMoved(const Node *n)
   if (m_navigateWindow) {
     m_navigateWindow->Set(n);
   }
-#ifdef ZOOM_WINDOW
-  m_treeZoomWindow->UpdateCursor();
-#endif  // ZOOM_WINDOW
   UpdateMenus();
 }
 

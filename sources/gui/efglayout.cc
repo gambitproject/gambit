@@ -98,8 +98,9 @@ void DrawSmallSubgameIcon(wxDC &dc, const NodeEntry &entry)
 //                   class NodeEntry: Member functions
 //-----------------------------------------------------------------------
 
-NodeEntry::NodeEntry(void)
-  : m_selected(false), m_cursor(false), m_size(20), m_token(tokenELLIPSE),
+NodeEntry::NodeEntry(Node *p_node)
+  : m_node(p_node), m_selected(false), m_cursor(false), m_size(20),
+    m_token(tokenELLIPSE),
     m_sublevel(0), nums(0)
 { }
 
@@ -111,6 +112,10 @@ void NodeEntry::SetCursor(bool p_cursor)
   }
 }
 
+//
+// Draws the node token itself, as well as the incoming branch
+// (if not the root node)
+//
 void NodeEntry::Draw(wxDC &p_dc) const
 {
   p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, (IsSelected()) ? 4 : 2,
@@ -129,6 +134,24 @@ void NodeEntry::Draw(wxDC &p_dc) const
     p_dc.DrawRectangle(GetX() - 3, y - 3, 7, 7);
     p_dc.DrawRectangle(GetX() + m_size - 3, y - 3, 7, 7);
   }      
+
+  if (m_node->GetParent() && in_sup) {
+    ::DrawLine(p_dc, parent->GetX() + parent->GetSize(), parent->y, 
+	       GetX(), y, parent->color);
+#ifdef UNUSED
+      // Draw the highlight... y = a + bx = ys + (ye-ys) / (xe-xs) * x
+    double prob = m_parent->Parent()->ActionProb(entry.n,  child_entry.child_number);
+    if (prob > 0) {
+      ::DrawLine(dc, xs, ys, (xs + m_parent->DrawSettings().ForkLength() * prob), 
+		 (ys + (ye - ys) * prob), *wxBLACK);
+    }
+#endif  // UNUSED
+  }
+
+  int tw, th;
+  p_dc.GetTextExtent(m_nodeAboveLabel, &tw, &th);
+  p_dc.DrawText(m_nodeAboveLabel, GetX(), y - th - 9);
+  p_dc.DrawText(m_nodeBelowLabel, GetX(), y + 9);
 }
 
 int NodeEntry::GetX(void) const
@@ -158,7 +181,7 @@ Node *efgTreeLayout::NodeHitTest(int p_x, int p_y) const
 	       + entry->nums*INFOSET_SPACING) &&
 	p_y > entry->y - DELTA &&
 	p_y < entry->y + DELTA) {
-      return entry->n;
+      return entry->GetNode();
     }
   }
 
@@ -170,13 +193,13 @@ Node *efgTreeLayout::SubgameHitTest(int p_x, int p_y) const
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     NodeEntry *entry = m_nodeList[i];
 
-    if (entry->n->GetSubgameRoot() == entry->n)  {
+    if (entry->GetNode()->GetSubgameRoot() == entry->GetNode())  {
       if (entry->expanded &&
 	  p_x > entry->x &&
 	  p_x < entry->x + SUBGAME_SMALL_ICON_SIZE &&
 	  p_y > entry->y - SUBGAME_SMALL_ICON_SIZE/2 &&
 	  p_y < entry->y + SUBGAME_SMALL_ICON_SIZE/2) {
-	return entry->n;
+	return entry->GetNode();
       }
       else if (!entry->expanded && 
 	       p_x > (entry->x + m_parent->DrawSettings().NodeLength() +
@@ -185,7 +208,7 @@ Node *efgTreeLayout::SubgameHitTest(int p_x, int p_y) const
 		      entry->nums*INFOSET_SPACING+SUBGAME_LARGE_ICON_SIZE) &&
 	       p_y > entry->y-SUBGAME_LARGE_ICON_SIZE/2 &&
 	       p_y < entry->y+SUBGAME_LARGE_ICON_SIZE/2) {
-	return entry->n;
+	return entry->GetNode();
       }
     }
   }
@@ -201,7 +224,7 @@ Node *efgTreeLayout::NodeAboveHitTest(int p_x, int p_y) const
 	p_x < entry->x + MAX_TW &&
 	p_y > entry->y - MAX_TH && 
 	p_y < entry->y + DELTA) {
-      return entry->n;
+      return entry->GetNode();
     }
   }
   return 0;
@@ -216,7 +239,7 @@ Node *efgTreeLayout::NodeBelowHitTest(int p_x, int p_y) const
 	p_x < entry->x + MAX_TW &&
 	p_y > entry->y + DELTA && 
 	p_y < entry->y + MAX_TH + DELTA)  {
-      return entry->n;
+      return entry->GetNode();
     }
   }
   return 0;
@@ -232,7 +255,7 @@ Node *efgTreeLayout::NodeRightHitTest(int p_x, int p_y) const
 	       m_parent->DrawSettings().OutcomeLength() * 3) &&
 	p_y > entry->y - DELTA &&
 	p_y < entry->y + DELTA) {
-      return entry->n;
+      return entry->GetNode();
     }
   }
   return 0;
@@ -242,7 +265,7 @@ Node *efgTreeLayout::BranchHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     NodeEntry *entry = m_nodeList[i];
-    NodeEntry *parent_entry = GetNodeEntry(entry->n->GetParent());
+    NodeEntry *parent_entry = GetNodeEntry(entry->GetNode()->GetParent());
 
     if (parent_entry) {
       if (p_x > (parent_entry->x + m_parent->DrawSettings().NodeLength() + 
@@ -259,7 +282,7 @@ Node *efgTreeLayout::BranchHitTest(int p_x, int p_y) const
 		  m_parent->DrawSettings().ForkLength());
 
 	if (p_y > y0-2 && p_y < y0+2) {
-	  return entry->n;
+	  return entry->GetNode();
 	}
       }
     }
@@ -279,7 +302,7 @@ Node *efgTreeLayout::BranchAboveHitTest(int p_x, int p_y) const
 	p_x < entry->x - m_parent->DrawSettings().BranchLength() + MAX_TW &&
 	p_y > entry->y - MAX_TH &&
 	p_y < entry->y + DELTA) {
-      return entry->n;
+      return entry->GetNode();
     }
   }
   return 0;
@@ -295,7 +318,7 @@ Node *efgTreeLayout::BranchBelowHitTest(int p_x, int p_y) const
 	p_x < entry->x - m_parent->DrawSettings().BranchLength() + MAX_TW &&
 	p_y > entry->y + DELTA && 
 	p_y < entry->y + MAX_TH) {
-      return entry->n;
+      return entry->GetNode();
     }
   }
   return 0;
@@ -305,16 +328,16 @@ Node *efgTreeLayout::InfosetHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     NodeEntry *entry = m_nodeList[i];
-    if (entry->infoset.y != -1 && entry->n->GetInfoset()) {
+    if (entry->infoset.y != -1 && entry->GetNode()->GetInfoset()) {
       if (p_x > entry->x + entry->GetSublevel() * INFOSET_SPACING - 2 &&
 	  p_x < entry->x + entry->GetSublevel() * INFOSET_SPACING + 2) {
 	if (p_y > entry->y && p_y < entry->infoset.y) {
 	  // next iset is below this one
-	  return entry->n;
+	  return entry->GetNode();
 	}
 	else if (p_y > entry->infoset.y && p_y < entry->y) {
 	  // next iset is above this one
-	  return entry->n;
+	  return entry->GetNode();
 	}
       }
     }
@@ -322,6 +345,70 @@ Node *efgTreeLayout::InfosetHitTest(int p_x, int p_y) const
   return 0;
 }
 
+wxString efgTreeLayout::CreateNodeAboveLabel(const NodeEntry *p_entry) const
+{
+  const Node *n = p_entry->GetNode();
+    
+  switch (m_parent->DrawSettings().LabelNodeAbove()) {
+  case NODE_ABOVE_NOTHING:
+    return "";
+  case NODE_ABOVE_LABEL:
+    return (const char *) n->GetName();
+  case NODE_ABOVE_PLAYER:
+    return (const char *) ((n->GetPlayer()) ? n->GetPlayer()->GetName() : "");
+  case NODE_ABOVE_ISETLABEL:
+    return ((const char *)
+	    ((n->GetInfoset()) ? n->GetInfoset()->GetName() : ""));
+  case NODE_ABOVE_ISETID:
+    return ((const char *)
+	    ((n->GetInfoset()) ?
+	     ("(" + ToText(n->GetPlayer()->GetNumber()) +
+	      "," + ToText(n->GetInfoset()->GetNumber()) + ")") : ""));
+  case NODE_ABOVE_OUTCOME:
+    return (const char *) m_parent->OutcomeAsString(n);
+  case NODE_ABOVE_REALIZPROB:
+    return (const char *) m_parent->Parent()->GetRealizProb(n);
+  case NODE_ABOVE_BELIEFPROB:
+    return (const char *) m_parent->Parent()->GetBeliefProb(n);
+  case NODE_ABOVE_VALUE:
+    return (const char *) m_parent->Parent()->GetNodeValue(n);
+  default:
+    return "";
+  }
+}    
+
+wxString efgTreeLayout::CreateNodeBelowLabel(const NodeEntry *p_entry) const
+{
+  const Node *n = p_entry->GetNode();
+
+  switch (m_parent->DrawSettings().LabelNodeBelow()) { 
+  case NODE_BELOW_NOTHING:
+    return "";
+  case NODE_BELOW_LABEL:
+    return (const char *) n->GetName();
+  case NODE_BELOW_PLAYER:
+    return (const char *) ((n->GetPlayer()) ? n->GetPlayer()->GetName() : "");
+  case NODE_BELOW_ISETLABEL:
+    return ((const char *)
+	    ((n->GetInfoset()) ? n->GetInfoset()->GetName() : ""));
+  case NODE_BELOW_ISETID:
+    return ((const char *)
+	    ((n->GetInfoset()) ?
+	     ("(" + ToText(n->GetPlayer()->GetNumber()) +
+	      "," + ToText(n->GetInfoset()->GetNumber()) + ")") : ""));
+  case NODE_BELOW_OUTCOME:
+    return (const char *) m_parent->OutcomeAsString(n);
+  case NODE_BELOW_REALIZPROB:
+    return (const char *) m_parent->Parent()->GetRealizProb(n);
+  case NODE_BELOW_BELIEFPROB:
+    return (const char *) m_parent->Parent()->GetBeliefProb(n);
+  case NODE_BELOW_VALUE:
+    return (const char *) m_parent->Parent()->GetNodeValue(n);
+  default:
+    return "";
+  }
+}
+    
 
 NodeEntry *efgTreeLayout::GetValidParent(Node *e)
 {
@@ -352,7 +439,7 @@ NodeEntry *efgTreeLayout::GetValidChild(Node *e)
 NodeEntry *efgTreeLayout::GetEntry(Node *p_node) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
-    if (m_nodeList[i]->n == p_node) {
+    if (m_nodeList[i]->GetNode() == p_node) {
       return m_nodeList[i];
     }
   }
@@ -365,7 +452,7 @@ Node *efgTreeLayout::PriorSameLevel(Node *p_node) const
   if (entry) {
     for (int i = m_nodeList.Find(entry) - 1; i >= 1; i--) {
       if (m_nodeList[i]->GetLevel() == entry->GetLevel())
-	return m_nodeList[i]->n;
+	return m_nodeList[i]->GetNode();
     }
   }
   return 0;
@@ -377,7 +464,7 @@ Node *efgTreeLayout::NextSameLevel(Node *p_node) const
   if (entry) {
     for (int i = m_nodeList.Find(entry) + 1; i <= m_nodeList.Length(); i++) {
       if (m_nodeList[i]->GetLevel() == entry->GetLevel()) { 
-	return m_nodeList[i]->n;
+	return m_nodeList[i]->GetNode();
       }
     }
   }
@@ -403,11 +490,12 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
     
   SubgameEntry &subgame_entry = GetSubgameEntry(n->GetSubgameRoot());
     
-  NodeEntry *entry = new NodeEntry;
-  entry->n = n;   // store the node the entry is for
+  NodeEntry *entry = new NodeEntry(n);
   entry->SetSize(draw_settings.NodeLength());
-  m_nodeList += entry;
   entry->in_sup = true;
+  entry->SetNodeAboveLabel(CreateNodeAboveLabel(entry));
+  entry->SetNodeBelowLabel(CreateNodeBelowLabel(entry));
+  m_nodeList += entry;
   if (n->Game()->NumChildren(n)>0 && subgame_entry.expanded) {
     for (int i = 1; i <= n->Game()->NumChildren(n); i++) {
       bool in_sup = true;
@@ -484,7 +572,7 @@ NodeEntry *efgTreeLayout::NextInfoset(NodeEntry *e)
   for (int pos = m_nodeList.Find(e) + 1; pos <= m_nodeList.Length(); pos++) {
     NodeEntry *e1 = m_nodeList[pos];
     // infosets are the same and the nodes are on the same level
-    if (e->n->GetInfoset() == e1->n->GetInfoset()) {
+    if (e->GetNode()->GetInfoset() == e1->GetNode()->GetInfoset()) {
       if (draw_settings.ShowInfosets() == SHOWISET_ALL) {
 	return e1;
       }
@@ -514,7 +602,7 @@ void efgTreeLayout::CheckInfosetEntry(NodeEntry *e)
   for (pos = 1; pos <= m_nodeList.Length(); pos++) {
     e1 = m_nodeList[pos];
     // if the infosets are the same and they are on the same level and e1 has been processed
-    if (e->n->GetInfoset() == e1->n->GetInfoset() && 
+    if (e->GetNode()->GetInfoset() == e1->GetNode()->GetInfoset() && 
 	e->GetLevel() == e1->GetLevel() && e1->GetSublevel() > 0) {
       e->SetSublevel(e1->GetSublevel());
       if (infoset_entry) {
@@ -608,8 +696,8 @@ void efgTreeLayout::UpdateTableParents(void)
 {
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
     NodeEntry *e = m_nodeList[pos];
-    e->parent = (e->n == m_efg.RootNode()) ? e : GetValidParent(e->n);
-    if (!GetValidChild(e->n)) e->has_children = 0;
+    e->parent = (e->GetNode() == m_efg.RootNode()) ? e : GetValidParent(e->GetNode());
+    if (!GetValidChild(e->GetNode())) e->has_children = 0;
   }
 }
 
@@ -648,124 +736,11 @@ void efgTreeLayout::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
 			       const NodeEntry *entry) const
 {
   gText label = "";     // temporary to hold the label
-  const Node *n = child_entry->n;
+  const Node *n = child_entry->GetNode();
   long tw, th;
   bool hilight = false;
     
-  // First take care of labeling the node on top.
-  switch (m_parent->DrawSettings().LabelNodeAbove()) {
-  case NODE_ABOVE_NOTHING:
-    label ="";  
-    break;
-        
-  case NODE_ABOVE_LABEL:
-    label = n->GetName();  
-    break;
-        
-  case NODE_ABOVE_PLAYER:
-    if (n->GetPlayer()) 
-      label = n->GetPlayer()->GetName();
-    else
-      label = "";
-    break;
-        
-  case NODE_ABOVE_ISETLABEL:
-    if (n->GetInfoset()) 
-      label = n->GetInfoset()->GetName();
-    break;
-        
-  case NODE_ABOVE_ISETID:
-    if (n->GetInfoset())
-      label = ("(" + ToText(n->GetPlayer()->GetNumber()) +
-	       "," + ToText(n->GetInfoset()->GetNumber()) + ")");
-    break;
-    
-  case NODE_ABOVE_OUTCOME:
-    label = m_parent->OutcomeAsString(n, hilight);
-    break;
-        
-  case NODE_ABOVE_REALIZPROB:
-    label = m_parent->Parent()->GetRealizProb(n);
-    break;
-        
-  case NODE_ABOVE_BELIEFPROB:
-    label = m_parent->Parent()->GetBeliefProb(n);
-    break;
-        
-  case NODE_ABOVE_VALUE:
-    label = m_parent->Parent()->GetNodeValue(n);
-    break;
-        
-  default:
-    label = "";
-    break;
-  }
-    
-  if (label != "") {
-    dc.SetFont(m_parent->DrawSettings().NodeAboveFont());
-    dc.GetTextExtent("0", &tw, &th);
-    gDrawText(dc, label, 
-	      child_entry->x + child_entry->nums * INFOSET_SPACING + 3,
-	      child_entry->y - th - 9);
-  }
-  
-  // Take care of labeling the node on the bottom.
-  switch (m_parent->DrawSettings().LabelNodeBelow()) { 
-  case NODE_BELOW_NOTHING:
-    label = "";
-    break;
-        
-  case NODE_BELOW_LABEL:
-    label = n->GetName();
-    break;
-        
-  case NODE_BELOW_PLAYER:
-    if (n->GetPlayer()) 
-      label = n->GetPlayer()->GetName(); 
-    else 
-      label = ""; 
-    break;
-        
-  case NODE_BELOW_ISETLABEL:
-    if (n->GetInfoset()) 
-      label = n->GetInfoset()->GetName();
-    break;
-    
-  case NODE_BELOW_ISETID:
-    if (n->GetInfoset())
-      label = ("(" + ToText(n->GetPlayer()->GetNumber()) +
-	       "," + ToText(n->GetInfoset()->GetNumber()) + ")");
-    break;
-        
-  case NODE_BELOW_OUTCOME:
-    label = m_parent->OutcomeAsString(n, hilight);
-    break;
-        
-  case NODE_BELOW_REALIZPROB:
-    label = m_parent->Parent()->GetRealizProb(n);
-    break;
-        
-  case NODE_BELOW_BELIEFPROB:
-    label = m_parent->Parent()->GetBeliefProb(n);
-    break;
-        
-  case NODE_BELOW_VALUE:
-    label = m_parent->Parent()->GetNodeValue(n);
-    break;
-        
-  default:
-    label = "";
-    break;
-  }
-    
-  if (label != "") {
-    dc.SetFont(m_parent->DrawSettings().NodeBelowFont());
-    gDrawText(dc, label, 
-	      child_entry->x + child_entry->nums * INFOSET_SPACING + 3,
-	      child_entry->y + 5);
-  }
-  
-  if (child_entry->n != entry->n) {   // no branches for root
+  if (child_entry->GetNode() != entry->GetNode()) {   // no branches for root
     // Now take care of branches....
     // Take care of labeling the branch on the top.
     switch (m_parent->DrawSettings().LabelBranchAbove()) {
@@ -775,22 +750,24 @@ void efgTreeLayout::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
             
     case BRANCH_ABOVE_LABEL:
       if (child_entry->child_number != 0)
-	label = entry->n->GetInfoset()->GetActionName(child_entry->child_number);
+	label = entry->GetNode()->GetInfoset()->GetActionName(child_entry->child_number);
       else
 	label = "";
       break;
             
     case BRANCH_ABOVE_PLAYER:
-      if (entry->n->GetPlayer()) 
-	label = entry->n->GetPlayer()->GetName();
+      if (entry->GetNode()->GetPlayer()) 
+	label = entry->GetNode()->GetPlayer()->GetName();
       break;
             
     case BRANCH_ABOVE_PROBS:
-      label = m_parent->Parent()->GetActionProb(entry->n, child_entry->child_number);
+      label = m_parent->Parent()->GetActionProb(entry->GetNode(),
+						child_entry->child_number);
       break;
       
     case BRANCH_ABOVE_VALUE:
-      label = m_parent->Parent()->GetActionValue(entry->n, child_entry->child_number);
+      label = m_parent->Parent()->GetActionValue(entry->GetNode(),
+						 child_entry->child_number);
       break;
             
     default:
@@ -816,22 +793,22 @@ void efgTreeLayout::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
             
     case BRANCH_BELOW_LABEL:
       if (child_entry->child_number != 0)
-	label = entry->n->GetInfoset()->GetActionName(child_entry->child_number);
+	label = entry->GetNode()->GetInfoset()->GetActionName(child_entry->child_number);
       else
 	label = "";
       break;
             
     case BRANCH_BELOW_PLAYER:
-      if (entry->n->GetPlayer()) 
-	label = entry->n->GetPlayer()->GetName();
+      if (entry->GetNode()->GetPlayer()) 
+	label = entry->GetNode()->GetPlayer()->GetName();
       break;
       
     case BRANCH_BELOW_PROBS:
-      label = m_parent->Parent()->GetActionProb(entry->n, child_entry->child_number);
+      label = m_parent->Parent()->GetActionProb(entry->GetNode(), child_entry->child_number);
       break;
             
     case BRANCH_BELOW_VALUE:
-      label = m_parent->Parent()->GetActionValue(entry->n, child_entry->child_number);
+      label = m_parent->Parent()->GetActionValue(entry->GetNode(), child_entry->child_number);
       break;
             
     default:
@@ -858,7 +835,7 @@ void efgTreeLayout::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
     break;
             
   case NODE_RIGHT_OUTCOME:
-    label = m_parent->OutcomeAsString(n, hilight);
+    label = m_parent->OutcomeAsString(n);
     break;
             
   case NODE_RIGHT_NAME:
@@ -899,112 +876,31 @@ void efgTreeLayout::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
 // zoom window.  It might be used for the main window if scrollbars prove to
 // be a limitation.
 //
-void efgTreeLayout::RenderSubtree(wxDC &dc) const
+void efgTreeLayout::RenderSubtree(wxDC &p_dc) const
 {
-  // x-start, x-end, y-start, y-end: coordinates for drawing branches 
-  int xs, xe, ys, ye;
-  NodeEntry entry, child_entry;
-  // Determine the visible region on screen to implement clipping
-  int x_start, y_start, width, height;
-
-  m_parent->ViewStart(&x_start, &y_start);
-  m_parent->GetClientSize(&width, &height);
-  
-  // go through the list of nodes, plotting them
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
-    child_entry = *m_nodeList[pos];    // must make a copy to use Translate
-    entry = *child_entry.parent;
+    NodeEntry *entry = m_nodeList[pos];  
+    NodeEntry *parentEntry = entry->parent;
         
-    // draw the labels
-    RenderLabels(dc, &child_entry, &entry);
+    RenderLabels(p_dc, entry, parentEntry);
 
-    // Draw a triangle to show subgame roots
-    if (entry.n->GetSubgameRoot() == entry.n) {
-      if (entry.expanded) 
-	DrawSmallSubgameIcon(dc, entry);
-    }
+    if (entry->child_number == 1) {
+      parentEntry->Draw(p_dc);
 
-    // Only draw the node line once for all children.
-    if (child_entry.child_number == 1) {
-      // draw the 'node' line
-      entry.Draw(dc);
-
-#ifdef UNUSED
-      // show the infoset lines, if required by draw settings
-      ::DrawCircle(dc, entry.x + entry.GetSublevel() * INFOSET_SPACING,
-		   entry.y, 3, entry.color);
-#endif  // UNUSED
-    }
-      
-    // draw the 'branches'
-    if (child_entry.n->GetParent() && child_entry.in_sup) {
-      // no branches for root node
-      ::DrawLine(dc, entry.GetX() + entry.GetSize(), entry.y, 
-		 child_entry.GetX(), child_entry.y, entry.color);
-
-#ifdef UNUSED
-      // Draw the highlight... y = a + bx = ys + (ye-ys) / (xe-xs) * x
-      double prob = m_parent->Parent()->ActionProb(entry.n,  child_entry.child_number);
-      if (prob > 0) {
-	::DrawLine(dc, xs, ys, (xs + m_parent->DrawSettings().ForkLength() * prob), 
-		   (ys + (ye - ys) * prob), *wxBLACK);
-      }
-#endif  // UNUSED
-      
-#ifdef UNUSED
-      // code for "branch" drawing; not really used in new style
-      xs = xe;
-      ys = ye;
-      xe = child_entry.x;
-      ye = ys;
-      ::DrawLine(dc, xs, ye, xe, ye, entry.color);
-#endif  // UNUSED
-    }
-    else {
-      xe = entry.x;
-      ye = entry.y;
-    }
-      
-    // Take care of terminal nodes
-    // (either real terminal or collapsed subgames)
-    if (!child_entry.has_children) { 
-      child_entry.Draw(dc);
-      
-      // Collapsed subgame: subgame icon is drawn at this terminal node.
-      if ((child_entry.n->GetSubgameRoot() == child_entry.n) && 
-	  !child_entry.expanded)
-	DrawLargeSubgameIcon(dc, child_entry, m_parent->DrawSettings().NodeLength());
-      
-      // Marked Node: a circle is drawn at this terminal node
-      if (child_entry.n == m_parent->MarkNode()) {
-	::DrawCircle(dc, 
-		     xe + child_entry.nums * INFOSET_SPACING +
-		     m_parent->DrawSettings().NodeLength(), ye, 
-		     4, m_parent->DrawSettings().CursorColor());
-      }
-    }
-
-    // Draw a circle to show the marked node
-    if ((entry.n == m_parent->MarkNode()) && 
-	(child_entry.child_number == entry.n->Game()->NumChildren(entry.n))) {
-      ::DrawCircle(dc, entry.x + entry.nums * INFOSET_SPACING + 
-		   m_parent->DrawSettings().NodeLength(), entry.y, 
-		   4, m_parent->DrawSettings().CursorColor());
-    }
-
-    if (child_entry.child_number == 1) {
       if (m_parent->DrawSettings().ShowInfosets()) {
-	if (entry.infoset.y != -1) {
+	if (parentEntry->infoset.y != -1) {
 #ifdef __WXGTK__
 	  // A problem with using styled pens and user scaling on wxGTK
-	  dc.SetPen(wxPen(entry.color, 1, wxSOLID));
+	  p_dc.SetPen(wxPen(parentEntry->color, 1, wxSOLID));
 #else
-	  dc.SetPen(wxPen(entry.color, 1, wxDOT));
+	  p_dc.SetPen(wxPen(parentEntry->color, 1, wxDOT));
 #endif   // __WXGTK__
-	  dc.DrawLine(entry.GetX(), entry.y, 
-		      entry.GetX(), entry.infoset.y); 
-	  dc.DrawLine(entry.GetX() + entry.GetSize(), entry.y,
-		      entry.GetX() + entry.GetSize(), entry.infoset.y);
+	  p_dc.DrawLine(parentEntry->GetX(), parentEntry->y, 
+			parentEntry->GetX(), parentEntry->infoset.y); 
+	  p_dc.DrawLine(parentEntry->GetX() + parentEntry->GetSize(), 
+			parentEntry->y,
+			parentEntry->GetX() + parentEntry->GetSize(), 
+			parentEntry->infoset.y);
 	}
 
 #ifdef UNUSED	  
@@ -1029,6 +925,11 @@ void efgTreeLayout::RenderSubtree(wxDC &dc) const
 #endif  // UNUSED
       }
     }
+
+    if (!entry->has_children) { 
+      entry->Draw(p_dc);
+    }
+
   }
 }
 
@@ -1037,86 +938,3 @@ void efgTreeLayout::Render(wxDC &p_dc) const
   RenderSubtree(p_dc);
 }
 
-#ifdef ZOOM_WINDOW
-
-//----------------------------------------------------------------------
-//                   TreeZoomWindow: Member functions
-//----------------------------------------------------------------------
-
-TreeZoomWindow::TreeZoomWindow(wxFrame *frame, TreeWindow *parent)
-  : TreeRender(frame, parent),
-    m_parent(parent), m_zoom(1.0)
-{
-  MakeFlasher();
-  UpdateCursor();
-  Show(false);
-}
-
-//
-// This Render function takes into account the current position of the cursor.
-// Calculates ox and oy so that the cursor is located in the middle of the
-// window.
-//
-void TreeZoomWindow::Render(wxDC &dc)
-{
-  int width, height;
-  GetClientSize(&width, &height);
-  width = (int)(width/m_zoom);
-  height = (int)(height/m_zoom);
-
-  // coordinates of the middle of the cursor
-  int xm = (xs+xe)/2, ym = (ys+ye)/2;
-  ox = width/2-xm;
-  oy = height/2-ym;
-  dc.SetDeviceOrigin(0, 0); // should not be necessary, but its a bug
-  Clear();
-  dc.SetDeviceOrigin(ox * m_zoom, oy * m_zoom);
-
-  TreeRender::Render(dc);
-  flasher->Flash(dc);
-}
-
-void TreeZoomWindow::UpdateCursor(void)
-{
-  TreeRender::UpdateCursor();
-  flasher->GetFlashNode(xs, ys, xe, ye);
-  wxClientDC dc(this);
-  dc.SetUserScale(m_zoom, m_zoom);
-  Render(dc);
-}
-
-void TreeZoomWindow::SetZoom(float p_zoom)
-{
-  m_zoom = p_zoom;
-}
-
-float TreeZoomWindow::GetZoom(void) const
-{
-  return m_zoom;
-}
-
-int TreeZoomWindow::NumDecimals(void) const
-{ return parent->NumDecimals(); }
-
-Infoset *TreeZoomWindow::HighlightInfoset(void) const
-{ return parent->HighlightInfoset(); }
-
-Infoset *TreeZoomWindow::HighlightInfoset1(void) const
-{ return parent->HighlightInfoset1(); }
-
-Node *TreeZoomWindow::MarkNode(void) const
-{ return parent->MarkNode(); }
-
-Node *TreeZoomWindow::SubgameNode(void) const
-{ return parent->SubgameNode(); }
-
-efgTreeLayout &TreeZoomWindow::NodeList(void)
-{ return parent->NodeList(); }
-
-const TreeDrawSettings &TreeZoomWindow::DrawSettings(void) const
-{ return parent->DrawSettings(); }
-
-Node *TreeZoomWindow::Cursor(void) const
-{ return parent->Cursor(); }
-
-#endif  // ZOOM_WINDOW
