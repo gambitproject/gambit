@@ -1,0 +1,7 @@
+NFG 1 D "Two person 2x2 coordination game with 3 Nash equilibria" { "Player 1" "Player 2" }
+
+{ { "1" "2" }
+{ "1" "2" }
+}
+
+3.000000 2.000000 0.000000 0.000000 0.000000 0.000000 2.000000 2.000000 

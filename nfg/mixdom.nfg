@@ -1,0 +1,7 @@
+NFG 1 R "Two person 4x4 game needing mixed domination" { "1" "2" } { 4 4 }
+
+6 -6 7 -7 5 -5 1 -1 
+2 -2 1 -1 4 -4 3 -3
+1 -1 2 -2 6 -6 7 -7
+4 -4 5 -5 7 -7 2 -2
+

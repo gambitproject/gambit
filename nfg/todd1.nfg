@@ -1,0 +1,7 @@
+NFG 1 R "Todd's (incorrect) example of incaccessible equilibria" { "1" "2" }
+
+{ { "1" "2" "3" "4" "5" }
+{ "1" "2" "3" }
+}
+
+8 4 6 0 12 0 0 0 0 0 -4 0 3 0 0 4 0 4 4 1 8 0 6 4 0 0 12 0 0 0 
