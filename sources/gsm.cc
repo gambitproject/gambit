@@ -402,6 +402,7 @@ bool GSM::Assign( void )
   p1 = _Pop();
   if(p1->Type() == porREFERENCE)
     varname = ((ReferencePortion*) p1)->Value();
+
   p2 = _ResolveRef(p2);
   p1 = _ResolveRef(p1);
   
@@ -426,7 +427,23 @@ bool GSM::Assign( void )
   }
   else if(p1->Type() == p2->Type())
   {
-    if(p1->Type() != porLIST)
+    if(varname != "")
+    {
+      if(p2->IsReference)
+      {
+	_VarDefine(varname, p2->ValCopy());
+	delete p2;
+	delete p1;
+	_Push(_VarValue(varname)->RefCopy());
+      }
+      else
+      {
+	_VarDefine(varname, p2);
+	delete p1;
+	_Push(_VarValue(varname)->RefCopy());
+      }
+    }
+    else if(p1->Type() != porLIST)
     {
       if(!(p1->Type() & (porINPUT|porOUTPUT))) 
       {
@@ -439,7 +456,7 @@ bool GSM::Assign( void )
 	  ((FloatPortion*) p1)->Value() = ((FloatPortion*) p2)->Value();
 	  break;
 	case porRATIONAL:
-	  ((RationalPortion*) p1)->Value() = ((RationalPortion*) p2)->Value();
+	  ((RationalPortion*) p1)->Value()=((RationalPortion*) p2)->Value();
 	  break;
 	case porTEXT:
 	  ((TextPortion*) p1)->Value() = ((TextPortion*) p2)->Value();
@@ -457,35 +474,35 @@ bool GSM::Assign( void )
 	  break;
 	case porPLAYER_NFG:
 	  p1->RemoveDependency();
-	  ((NfPlayerPortion*) p1)->Value() = ((NfPlayerPortion*) p2)->Value();
+	  ((NfPlayerPortion*) p1)->Value()=((NfPlayerPortion*) p2)->Value();
 	  p1->SetOwner( p2->Owner() );
 	  p1->SetIsValid( p2->IsValid() );
 	  p1->AddDependency();
 	  break;
 	case porSTRATEGY:
 	  p1->RemoveDependency();
-	  ((StrategyPortion*) p1)->Value() = ((StrategyPortion*) p2)->Value();
+	  ((StrategyPortion*) p1)->Value()=((StrategyPortion*) p2)->Value();
 	  p1->SetOwner( p2->Owner() );
 	  p1->SetIsValid( p2->IsValid() );
 	  p1->AddDependency();
 	  break;
 	case porNF_SUPPORT:
 	  p1->RemoveDependency();
-	  ((NfSupportPortion*) p1)->Value() =((NfSupportPortion*) p2)->Value();
+	  ((NfSupportPortion*) p1)->Value()=((NfSupportPortion*)p2)->Value();
 	  p1->SetOwner( p2->Owner() );
 	  p1->SetIsValid( p2->IsValid() );
 	  p1->AddDependency();
 	  break;
 	case porEF_SUPPORT:
 	  p1->RemoveDependency();
-	  ((EfSupportPortion*) p1)->Value() =((EfSupportPortion*) p2)->Value();
+	  ((EfSupportPortion*) p1)->Value()=((EfSupportPortion*)p2)->Value();
 	  p1->SetOwner( p2->Owner() );
 	  p1->SetIsValid( p2->IsValid() );
 	  p1->AddDependency();
 	  break;
 	case porPLAYER_EFG:
 	  p1->RemoveDependency();
-	  ((EfPlayerPortion*) p1)->Value() = ((EfPlayerPortion*) p2)->Value();
+	  ((EfPlayerPortion*) p1)->Value()=((EfPlayerPortion*) p2)->Value();
 	  p1->SetOwner( p2->Owner() );
 	  p1->SetIsValid( p2->IsValid() );
 	  p1->AddDependency();
@@ -547,13 +564,13 @@ bool GSM::Assign( void )
 	  ((NfgPortion*) p1)->RemoveAllDependents();
 	  delete ((NfgPortion*) p1)->Value();
 	  ((NfgPortion*) p1)->Value() = new Nfg<double>
-	    (*(Nfg<double>*) ((NfgPortion*) p2)->Value()); 
+	    (*((Nfg<double>*) ((NfgPortion*) p2)->Value())); 
 	  break;
 	case porNFG_RATIONAL:
 	  ((NfgPortion*) p1)->RemoveAllDependents();
 	  delete ((NfgPortion*) p1)->Value();
 	  ((NfgPortion*) p1)->Value() =  new Nfg<gRational>
-	    (*(Nfg<gRational>*) ((NfgPortion*) p2)->Value()); 
+	    (*((Nfg<gRational>*) ((NfgPortion*) p2)->Value())); 
 	  break;
 	case porEFG_FLOAT:
 	  ((EfgPortion*) p1)->RemoveAllDependents();
