@@ -15,65 +15,11 @@
 #include "mixed.h"
 
 
-
-Portion *ArrayToList(const gArray<NFPlayer *> &A)
-{
-  ListPortion *ret = new ListValPortion;
-  for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new NfPlayerValPortion(A[i]));
-  return ret;
-}
-
-Portion *ArrayToList(const gArray<Strategy *> &A)
-{
-  ListPortion *ret = new ListValPortion;
-  for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new StrategyValPortion(A[i]));
-  return ret;
-}
-
 //
-// These functions are added to the function list in efgfunc.cc along with
-// their extensive form counterparts.
-// What's a good way of dealing with these sorts of functions?
+// Implementations of these are provided as necessary in gsmutils.cc
 //
-Portion *GSM_CentroidNfgFloat(Portion **param)
-{
-  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
-  MixedSolution<double> *P = new MixedSolution<double>(N);
-
-  Portion* por = new MixedValPortion(P);
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
-  return por;
-}
-
-Portion *GSM_CentroidNfgRational(Portion **param)
-{
-  Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
-  MixedSolution<gRational> *P = new MixedSolution<gRational>(N);
-
-  Portion* por = new MixedValPortion(P);
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
-  return por;
-}
-
-Portion *GSM_CentroidNFSupport(Portion **param)
-{
-  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
-  BaseMixedProfile *P;
-
-  if (S->BelongsTo().Type() == DOUBLE)
-    P = new MixedSolution<double>((Nfg<double> &) S->BelongsTo(), *S);
-  else
-    P = new MixedSolution<gRational>((Nfg<gRational> &) S->BelongsTo(), *S);
-
-  Portion *por = new MixedValPortion(P);
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
-  return por;
-}
+Portion *ArrayToList(const gArray<NFPlayer *> &);
+Portion *ArrayToList(const gArray<Strategy *> &);
 
 Portion *GSM_IsConstSumNfg(Portion **param)
 {
@@ -129,6 +75,18 @@ Portion *GSM_RemoveStrategy(Portion **param)
   return por;
 }
 
+Portion* GSM_NameNfPlayer( Portion** param )
+{
+  NFPlayer *p = ( (NfPlayerPortion*) param[ 0 ] )->Value();
+  return new TextValPortion( p->GetName() );
+}
+
+Portion* GSM_NameStrategy( Portion** param )
+{
+  Strategy *s = ( (StrategyPortion*) param[ 0 ] )->Value();
+  return new TextValPortion( s->name );
+}
+
 Portion *GSM_SetNameNfg(Portion **param)
 {
   BaseNfg &N = * ((NfgPortion*) param[0])->Value();
@@ -136,6 +94,26 @@ Portion *GSM_SetNameNfg(Portion **param)
   N.SetTitle(name);
   return param[0]->ValCopy();
 }
+
+Portion *GSM_SetNameNfPlayer(Portion **param)
+{
+  NFPlayer *p = ((NfPlayerPortion *) param[0])->Value();
+  gString name = ((TextPortion *) param[1])->Value();
+  p->SetName(name);
+  return param[0]->ValCopy();
+}
+
+Portion *GSM_SetNameStrategy(Portion **param)
+{
+  Strategy *s = ((StrategyPortion *) param[0])->Value();
+  gString name = ((TextPortion *) param[1])->Value();
+  s->name = name;
+  return param[0]->ValCopy();
+}
+
+
+
+
 
 
 Portion *GSM_NumStrats( Portion** param )
@@ -1275,20 +1253,22 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_SetNameNfg, 0, "x", porNFG, NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SetNameNfg, 1, "name", porTEXT);
+
+  FuncObj->SetFuncInfo(GSM_SetNameNfPlayer, 2);
+  FuncObj->SetParamInfo(GSM_SetNameNfPlayer, 0, "x", porPLAYER_NFG);
+  FuncObj->SetParamInfo(GSM_SetNameNfPlayer, 1, "name", porTEXT);
+
+  FuncObj->SetFuncInfo(GSM_SetNameStrategy, 2);
+  FuncObj->SetParamInfo(GSM_SetNameStrategy, 0, "x", porSTRATEGY);
+  FuncObj->SetParamInfo(GSM_SetNameStrategy, 1, "name", porTEXT);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Centroid");
-  FuncObj->SetFuncInfo(GSM_CentroidNfgFloat, 1);
-  FuncObj->SetParamInfo(GSM_CentroidNfgFloat, 0, "nfg", porNFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj = new FuncDescObj("Name");
+  FuncObj->SetFuncInfo(GSM_NameNfPlayer, 1);
+  FuncObj->SetParamInfo(GSM_NameNfPlayer, 0, "x", porPLAYER_NFG);
 
-  FuncObj->SetFuncInfo(GSM_CentroidNfgRational, 1);
-  FuncObj->SetParamInfo(GSM_CentroidNfgRational, 0, "nfg", porNFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-
-  FuncObj->SetFuncInfo(GSM_CentroidNFSupport, 1);
-  FuncObj->SetParamInfo(GSM_CentroidNFSupport, 0, "support",
-			porNF_SUPPORT);
+  FuncObj->SetFuncInfo(GSM_NameStrategy, 1);
+  FuncObj->SetParamInfo(GSM_NameStrategy, 0, "x", porSTRATEGY);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("IsConstSum");
