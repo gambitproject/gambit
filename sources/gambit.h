@@ -27,13 +27,25 @@
 #ifndef GAMBIT_H
 #define GAMBIT_H
 
+#include <gambit/base/base.h>
+
+class gbtGameFrame;
+
 class gbtApplication : public wxApp {
 private:
+  gbtBlock<gbtGameFrame *> m_windows;
+
   bool OnInit(void);
 
 public:
   gbtApplication(void);
   virtual ~gbtApplication();
+
+  int NumWindows(void) const  { return m_windows.Length(); }
+  gbtGameFrame *GetWindow(int i) const { return m_windows[i]; }
+  void AddWindow(gbtGameFrame *p_window) { m_windows.Append(p_window); }
+  void RemoveWindow(gbtGameFrame *p_window)  
+    { m_windows.Remove(m_windows.Find(p_window)); }
 };
 
 DECLARE_APP(gbtApplication)

@@ -50,6 +50,7 @@ BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU(wxID_EXIT, gbtGameFrame::OnFileExit)
   EVT_MENU(GBT_MENU_TOOLS_EQM, gbtGameFrame::OnToolsEquilibrium)
   EVT_MENU(wxID_ABOUT, gbtGameFrame::OnHelpAbout)
+  EVT_CLOSE(gbtGameFrame::OnCloseWindow)
 END_EVENT_TABLE()
 
 //-------------------------------------------------------------------------
@@ -61,6 +62,7 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
 	    wxDefaultPosition, wxSize(800, 600)), 
     gbtGameView(p_doc)
 {
+  wxGetApp().AddWindow(this);
   MakeMenu();
 
   if (p_doc->GetGame()->NumPlayers() == 2) {
@@ -79,7 +81,13 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   SetSizer(sizer);
   Layout();
 
+  OnUpdate();
   Show(true);
+}
+
+gbtGameFrame::~gbtGameFrame()
+{
+  wxGetApp().RemoveWindow(this);
 }
 
 //-------------------------------------------------------------------------
@@ -112,6 +120,18 @@ void gbtGameFrame::MakeMenu(void)
   SetMenuBar(menuBar);
 }
 
+void gbtGameFrame::OnCloseWindow(wxCloseEvent &p_event)
+{
+  if (p_event.CanVeto() && m_doc->IsModified()) {
+    if (wxMessageBox("Game has been modified.  Close anyway?", "Warning",
+		     wxOK | wxCANCEL) == wxCANCEL) {
+      p_event.Veto();
+      return;
+    }
+  }
+  p_event.Skip();
+}
+
 //-------------------------------------------------------------------------
 //                 gbtGameFrame: Menu command handlers
 //-------------------------------------------------------------------------
@@ -119,7 +139,9 @@ void gbtGameFrame::MakeMenu(void)
 void gbtGameFrame::OnFileNew(wxCommandEvent &)
 {
   gbtArray<int> dim(2);  dim[1] = dim[2] = 2;
-  (void) new gbtGameFrame(0, new gbtGameDocument(NewNfg(dim)));
+  gbtGame nfg = NewNfg(dim);
+  nfg->SetLabel("Untitled normal form game");
+  (void) new gbtGameFrame(0, new gbtGameDocument(nfg));
 }
 
 
@@ -141,7 +163,9 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
 		       _("Error"), wxOK, 0);
 	}
 	else {
-	  (void) new gbtGameFrame(0, new gbtGameDocument(nfg));
+	  gbtGameDocument *doc = new gbtGameDocument(nfg);
+	  doc->SetFilename(dialog.GetPath());
+	  (void) new gbtGameFrame(0, doc);
 	}
       }
       else {
@@ -159,7 +183,7 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
   }
 }
 
-void gbtGameFrame::OnFileClose(wxCommandEvent &)
+void gbtGameFrame::OnFileClose(wxCommandEvent &p_event)
 {
   Close();
 }
@@ -167,16 +191,14 @@ void gbtGameFrame::OnFileClose(wxCommandEvent &)
 void gbtGameFrame::OnFileSave(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose file"),
-		      //		      wxPathOnly(m_doc->GetFilename()),
-		      _T(""),
-		      //		      wxFileNameFromPath(m_doc->GetFilename()), 
-		      _T(""),
+		      wxPathOnly(m_doc->GetFilename()),
+		      wxFileNameFromPath(m_doc->GetFilename()), 
 		      wxT("Normal form files (*.nfg)|*.nfg"),
 		      wxSAVE | wxOVERWRITE_PROMPT);
 
   switch (dialog.ShowModal()) {
   case wxID_OK:
-    // Save the filename in the document...
+    m_doc->SetFilename(dialog.GetPath());
     break;
   case wxID_CANCEL:
   default:
@@ -192,6 +214,9 @@ void gbtGameFrame::OnFileSave(wxCommandEvent &)
 				      (const char *) dialog.GetPath().mb_str()),
 		     _("Error"), wxOK, this);
       }      
+      else {
+	m_doc->SetModified(false);
+      }
     }
     else {
       wxMessageBox(wxString::Format(_("Could not open %s for writing."),
@@ -207,6 +232,18 @@ void gbtGameFrame::OnFileSave(wxCommandEvent &)
 
 void gbtGameFrame::OnFileExit(wxCommandEvent &)
 {
+  for (int i = 1; i <= wxGetApp().NumWindows(); i++) {
+    if (wxGetApp().GetWindow(i)->GetDocument()->IsModified()) {
+      if (wxMessageBox("There are modified games.  Exit anyway?", "Warning",
+		       wxOK | wxCANCEL) == wxCANCEL) {
+	return;
+      }
+      else {
+	break;
+      }
+    }
+  }
+
   while (wxGetApp().GetTopWindow()) {
     delete wxGetApp().GetTopWindow();
   }
@@ -231,5 +268,15 @@ void gbtGameFrame::OnHelpAbout(wxCommandEvent &)
 
 void gbtGameFrame::OnUpdate(void)
 {
-
+  if (m_doc->GetFilename() == "") {
+    SetTitle(wxString::Format("Gambit: [<no file>%s] %s",
+			      (m_doc->IsModified()) ? "*" : "",
+			      m_doc->GetGame()->GetLabel().c_str()));
+  }
+  else {
+    SetTitle(wxString::Format("Gambit: [%s%s] %s",
+			      m_doc->GetFilename().c_str(),
+			      (m_doc->IsModified()) ? "*" : "",
+			      m_doc->GetGame()->GetLabel().c_str()));
+  }
 }

@@ -38,7 +38,9 @@ gbtApplication::gbtApplication(void)
 bool gbtApplication::OnInit(void)
 {
   gbtArray<int> dim(2);  dim[1] = dim[2] = 2;
-  (void) new gbtGameFrame(0, new gbtGameDocument(NewNfg(dim)));
+  gbtGame nfg = NewNfg(dim);
+  nfg->SetLabel("Untitled normal form game");
+  (void) new gbtGameFrame(0, new gbtGameDocument(nfg));
   return true;
 }
 

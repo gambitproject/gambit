@@ -38,6 +38,8 @@ private:
 
   // Properties
   wxColour m_playerColor[8];
+  bool m_modified;
+  wxString m_filename;
 
   // Management of view list
   gbtList<gbtGameView *> m_views;
@@ -51,16 +53,21 @@ public:
   const gbtGame &GetGame(void) const { return m_game; }
 
   // non-const member access to control updating of views
-  gbtGameOutcome NewOutcome(void) 
-    { gbtGameOutcome r = m_game->NewOutcome(); UpdateViews(); return r; }
+  gbtGameOutcome NewOutcome(void);
   void SetPayoff(gbtGameOutcome p_outcome,
-		 const gbtGamePlayer &p_player, const gbtRational &p_value)
-    { p_outcome->SetPayoff(p_player, p_value); UpdateViews(); }
-
+		 const gbtGamePlayer &p_player, const gbtRational &p_value);
 
   // Various properties of the document
   wxColour GetPlayerColor(int p_index) const;
   void SetPlayerColor(int p_index, const wxColour &);
+
+  bool IsModified(void) const { return m_modified; }
+  void SetModified(bool p_modified) 
+    { m_modified = p_modified; UpdateViews(); }
+
+  const wxString &GetFilename(void) const { return m_filename; }
+  void SetFilename(const wxString &p_filename) 
+    { m_filename = p_filename; UpdateViews(); }
 };
 
 

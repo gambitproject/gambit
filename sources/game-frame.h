@@ -36,6 +36,8 @@ private:
   // Auxiliary functions for setting up frame
   void MakeMenu(void);
 
+  void OnCloseWindow(wxCloseEvent &);
+
   // Menu command handlers
   void OnFileNew(wxCommandEvent &);
   void OnFileOpen(wxCommandEvent &);
@@ -52,6 +54,7 @@ private:
 
 public:
   gbtGameFrame(wxWindow *, gbtGameDocument *);
+  virtual ~gbtGameFrame();
 
   DECLARE_EVENT_TABLE()
 };

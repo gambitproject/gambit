@@ -449,6 +449,10 @@ wxString gbtMixedProfileDetail::GetCellValue(const wxSheetCoords &p_coords)
 wxSheetCellAttr gbtMixedProfileDetail::GetAttr(const wxSheetCoords &p_coords,
 					       wxSheetAttr_Type) const
 {
+  if (IsColLabelCell(p_coords) || IsCornerLabelCell(p_coords)) {
+    return GetSheetRefData()->m_defaultGridCellAttr;
+  }
+
   if (p_coords.GetRow() == 0) {
     wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
     if (IsRowLabelCell(p_coords)) {
@@ -477,7 +481,6 @@ wxSheetCellAttr gbtMixedProfileDetail::GetAttr(const wxSheetCoords &p_coords,
     attr.SetForegroundColour(m_doc->GetPlayerColor(p_coords.GetRow()));
     return attr;
   }
-  return GetSheetRefData()->m_defaultGridCellAttr;
 }
 
 BEGIN_EVENT_TABLE(gbtNashPanel, wxPanel)
@@ -538,7 +541,7 @@ gbtNashPanel::gbtNashPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
 			 wxVERTICAL);
   m_profileDetail = new gbtMixedProfileDetail(this, p_doc, m_eqa);
   detailSizer->Add(m_profileDetail, 1, wxALL | wxEXPAND, 5);
-  
+    
   topSizer->Add(detailSizer, 1, wxALL | wxEXPAND, 5);
 
   SetSizer(topSizer);
