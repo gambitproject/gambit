@@ -827,7 +827,6 @@ gMatrix<T>::GetSlice(int rl, int rh, int cl, int ch) const
   return m;
 }
 
-/* commented out to avoid 'null character' bug
 template<class T> gMatrix<T>
 gMatrix<T>::GetSubMatrix(const gBlock<int> &rowV,
 			  const gBlock<int> &colV) const
@@ -849,7 +848,6 @@ gMatrix<T>::GetSubMatrix(const gBlock<int> &rowV,
     }
   return m;
 }
-*/
 
 template<class T> gMatrix<T>
 gMatrix<T>::Invert(void) const
