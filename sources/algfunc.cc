@@ -171,16 +171,16 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
 
   EnumParams EP;
   EP.stopAfter = ((IntPortion *) param[2])->Value();
-  EP.tracefile = &((OutputPortion *) param[5])->Value();
-  EP.trace = ((IntPortion *) param[6])->Value();
+  EP.tracefile = &((OutputPortion *) param[6])->Value();
+  EP.trace = ((IntPortion *) param[7])->Value();
 
   if (((PrecisionPortion *) param[3])->Value() == precDOUBLE)  {
     EnumBySubgame<double> EM(E, support, EP);
 
     EM.Solve();
 
-    ((IntPortion *) param[3])->Value() = EM.NumPivots();
-    ((NumberPortion *) param[4])->Value() = EM.Time();
+    ((IntPortion *) param[4])->Value() = EM.NumPivots();
+    ((NumberPortion *) param[5])->Value() = EM.Time();
 
     return new Behav_ListPortion<double>(EM.GetSolutions());
   }
@@ -189,8 +189,8 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
 
     EM.Solve();
 
-    ((IntPortion *) param[3])->Value() = EM.NumPivots();
-    ((NumberPortion *) param[4])->Value() = EM.Time();
+    ((IntPortion *) param[4])->Value() = EM.NumPivots();
+    ((NumberPortion *) param[5])->Value() = EM.Time();
 
     return new Behav_ListPortion<gRational>(EM.GetSolutions());
   }
@@ -247,9 +247,11 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
   }
   else  {
     if (((PrecisionPortion *) param[2])->Value() == precDOUBLE)  {
+      gout << "ok...\n";
       EfgPSNEBySubgame<double> M(E, support);
 	    M.Solve();
 	    ((NumberPortion *) param[3])->Value() = M.Time();
+      gout << "hmmmm\n";
       return new Behav_ListPortion<double>(M.GetSolutions());
     }
     else  {
