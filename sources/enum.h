@@ -11,8 +11,7 @@
 #include "rational.h"
 #include "glist.h"
 #include "gstatus.h"
-#include "tableau.h"
-#include "gtableau.h"
+#include "lhtab.h"
 
 class EnumParams     {
 public:
@@ -30,9 +29,9 @@ public:
 template <class T> class EnumModule  {
 private:
   BFS_List List;
-  DumbTableau<T> tab;
+  const NormalForm<T> &NF;
   EnumParams params;
-  int rows,cols,level,players;
+  int rows,cols,level;
   long count,npivots;
   gRational time;
   
@@ -42,7 +41,7 @@ public:
   EnumModule(const NormalForm<T> &N, const EnumParams &p); 
   
   int Enum(void);
-  void SubSolve(int pr, int pcl, Tableau<T> &B1, gBlock<int> &targ1);
+  void SubSolve(int pr, int pcl, LHTableau<T> &B1, gBlock<int> &targ1);
   
   int NumPivots(void) const;
   gRational Time(void) const;

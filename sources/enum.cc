@@ -27,8 +27,8 @@ errfile(0),status(status_)
 
 template <class T>
 EnumModule<T>::EnumModule(const NormalForm<T> &N, const EnumParams &p)
-  : tab(N), params(p), rows(N.NumStrats(1)), cols(N.NumStrats(2)), 
-    npivots(0),level(0),count(0),List(),players(N.NumPlayers())
+  : NF(N), params(p), rows(N.NumStrats(1)), cols(N.NumStrats(2)), 
+    npivots(0),level(0),count(0),List()
 { }
 
 template <class T> int EnumModule<T>::Enum(void)
@@ -36,7 +36,7 @@ template <class T> int EnumModule<T>::Enum(void)
       // Ted -- is there a better way to do this?  A lot of 
       //        allocation before finding out there are too 
       //        many players. (Same in Lemke module I think)
-  if (players != 2)   return 0;  
+  if (NF.NumPlayers() != 2)   return 0;  
 
   gWatch watch;
 
@@ -44,7 +44,7 @@ template <class T> int EnumModule<T>::Enum(void)
 	for(int i=1;i<=target.Length();i++)
 		target[i]=i;
 
-	Tableau<T> tableau(tab);
+	LHTableau<T> tableau(NF);
 
 	i = rows+1;
 
@@ -69,12 +69,12 @@ template <class T> int EnumModule<T>::Enum(void)
 
 
 template <class T> void EnumModule<T>
-::SubSolve(int pr, int pcl, Tableau<T> &B1, gBlock<int> &targ1)
+::SubSolve(int pr, int pcl, LHTableau<T> &B1, gBlock<int> &targ1)
 {
   int i,j,ii,jj,pc;
   count++;
 
-  Tableau<T> B2(B1);
+  LHTableau<T> B2(B1);
 
       // construct new target basis
   gBlock<int> targ2(targ1);  
