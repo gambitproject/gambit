@@ -269,8 +269,8 @@ bool GSM::PushList(const int num_of_elements)
     }
     else
     {
-      delete p;
       _ErrorMessage(_StdErr, 49, 0, 0, ((ReferencePortion*) p)->Value());
+      delete p;
       result = false;
     }
   }
