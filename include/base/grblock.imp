@@ -77,8 +77,8 @@ template <class T> void gRectBlock<T>::RemoveRow(int row)
   maxrow--;
   
   if (maxrow < minrow)   {
-    delete (data[minrow] + mincol);
-    delete (data + minrow);
+    delete [] (data[minrow] + mincol);
+    delete [] (data + minrow);
     data = 0;
     return;
   }
