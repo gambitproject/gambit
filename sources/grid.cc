@@ -21,7 +21,7 @@
 template <class T>
 GridParams<T>::GridParams(void) :
 	plev(0),outfile(0),errfile(0),pxifile(0),update_func(0),
-	minLam(.01), maxLam(30), delLam(.01), tol((T) 1.0e-10)
+	minLam(.01), maxLam(30), delLam(.01), tol(.01), delp(.01)
 { }
 template <class T>
 GridParams<T>::GridParams(const GridParams<T> &p) :
