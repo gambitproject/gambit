@@ -1,8 +1,10 @@
 //
-// FILE: portion.h -- header file for Portion class
-//                    companion to GSM
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Interface to Portion classes, implementing the GCL type system
 //
 
 #ifndef PORTION_H
@@ -10,17 +12,12 @@
 
 #include "base/base.h"
 #include "math/gnumber.h"
+#include "game/efg.h"
 #include "gsmincl.h"
 
 //-------------
 // Portion
 //-------------
-
-namespace FullEfgNamespace {
-  class FullEfg;
-}
-
-using FullEfgNamespace::FullEfg;
 
 class Nfg;
 
@@ -48,7 +45,7 @@ protected:
   static gTriState _WriteSolutionInfo;
   static gTriState _WriteSolutionLabels;
 
-  void SetGame(const FullEfg *game);
+  void SetGame(const efgGame *game);
   void SetGame(const Nfg *game);
 
 public:
@@ -174,6 +171,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
+inline gPrecision AsPrecision(Portion *portion) 
+{ return ((PrecisionPortion *) portion)->Value(); }
 
 //----------
 // Number
@@ -208,6 +207,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
+inline const gNumber &AsNumber(Portion *portion)
+{ return ((NumberPortion *) portion)->Value(); }
 
 //--------
 // Text
@@ -276,6 +277,9 @@ public:
   void *operator new(size_t) { return pool.Alloc(); }
   void operator delete(void *p) { pool.Free(p); } 
 };
+
+inline bool AsBool(Portion *portion)
+{ return ((BoolPortion *) portion)->Value(); }
 
 
 //-------------
@@ -468,6 +472,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
+inline const NFSupport &AsNfgSupport(Portion *portion)
+{ return *((NfSupportPortion *) portion)->Value(); }
 
 //-------------
 // EfSupport
@@ -513,6 +519,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
+inline const EFSupport &AsEfgSupport(Portion *portion)
+{ return *((EfSupportPortion *) portion)->Value(); }
 
 
 //-----------
@@ -739,6 +747,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
+inline const MixedSolution &AsMixed(Portion *portion)
+{ return *((MixedPortion *) portion)->Value(); }
 
 
 //--------
@@ -784,6 +794,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
+inline const BehavSolution &AsBehav(Portion *portion)
+{ return *((BehavPortion *) portion)->Value(); }
 
 
 //-------
@@ -827,19 +839,19 @@ public:
 
 class EfgPortion : public Portion   {
 protected:
-  FullEfg** _Value;
+  efgGame ** _Value;
   bool _ref;
 
   static gPool pool;
 
-  EfgPortion(FullEfg *&, bool);
+  EfgPortion(efgGame *&, bool);
 
 public:
-  EfgPortion(FullEfg *value);
+  EfgPortion(efgGame *value);
   virtual ~EfgPortion();
 
-  FullEfg *Value(void) const;
-  void SetValue(FullEfg *);
+  efgGame *Value(void) const;
+  void SetValue(efgGame *);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -853,6 +865,9 @@ public:
   void *operator new(size_t) { return pool.Alloc(); }
   void operator delete(void *p) { pool.Free(p); }
 };
+
+inline efgGame &AsEfg(Portion *portion)
+{ return *((EfgPortion *) portion)->Value(); }
 
 
 //---------
@@ -911,7 +926,7 @@ protected:
     int nref;
 
     inputrep(gInput *v) : value(v), nref(1)  { }
-    ~inputrep()  { if (value != &gin)  delete value; }
+    ~inputrep()  { delete value; }
   };
   
   struct inputrep *rep; 

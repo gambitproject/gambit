@@ -70,9 +70,7 @@ private:
 
 
 public:
-  GSM(gInput&  s_in  = gin, 
-      gOutput& s_out = gout, 
-      gOutput& s_err = gerr );
+  GSM(gInput &p_input, gOutput &p_output, gOutput &p_error);
   virtual ~GSM();
 
   static int& GameRefCount(void*);

@@ -1,7 +1,10 @@
 //
-// FILE: algfunc.cc -- Solution algorithm functions for GCL
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Functions for computing Nash equilibria
 //
 
 #include "base/base.h"
@@ -12,13 +15,30 @@
 
 #include "math/rational.h"
 
-#include "nash/mixedsol.h"
-#include "nash/behavsol.h"
 #include "game/nfg.h"
 #include "game/nfplayer.h"
 #include "game/efg.h"
 
+#include "nash/subsolve.h"
+#include "nash/nfgpure.h"
+#include "nash/efgpure.h"
+#include "nash/enum.h"
+#include "nash/lemke.h"
+#include "nash/seqform.h"
+#include "nash/nliap.h"
+#include "nash/eliap.h"
+#include "nash/nfgcsum.h"
+#include "nash/efgcsum.h"
+#include "nash/nfgalleq.h"
+#include "nash/efgalleq.h"
+#include "nash/nfgqregrid.h"
+#include "nash/nfgqre.h"
+#include "nash/efgqre.h"
+#include "nash/simpdiv.h"
+
 #include "numerical/vertenum.h"
+#include "numerical/lpsolve.h"
+
 
 template <class T> Portion *ArrayToList(const gArray<T> &);
 extern gVector<double>* ListToVector_Float(ListPortion* list);
@@ -121,7 +141,7 @@ void EfSupport_ListPortion::SetValue(const gList<const EFSupport> &list)
 
 static Portion *GSM_AgentForm(GSM &, Portion **param)
 {
-  Efg::Game &E = *((EfgPortion*) param[0])->Value();
+  efgGame &E = *((EfgPortion*) param[0])->Value();
   gWatch watch;
 
   Nfg *N = MakeAfg(E);
@@ -180,76 +200,93 @@ static Portion *GSM_Behav(GSM &, Portion **param)
 // EnumMixedSolve
 //------------------
 
-#include "nash/enum.h"
+static nfgNashAlgorithm *GSM_EnumMixed_Nfg_Double(int p_stopAfter,
+						  bool p_cliques)
+{
+  nfgEnumMixed<double> *algorithm = new nfgEnumMixed<double>;
+  algorithm->SetStopAfter(p_stopAfter);
+  algorithm->SetCliques(p_cliques);
+  return algorithm;
+}
+
+static nfgNashAlgorithm *GSM_EnumMixed_Nfg_Rational(int p_stopAfter,
+						    bool p_cliques)
+{
+  nfgEnumMixed<gRational> *algorithm = new nfgEnumMixed<gRational>;
+  algorithm->SetStopAfter(p_stopAfter);
+  algorithm->SetCliques(p_cliques);
+  return algorithm;
+}
 
 static Portion *GSM_EnumMixed_Nfg(GSM &gsm, Portion **param)
 {
-  NFSupport* S = ((NfSupportPortion*) param[0])->Value();
+  const NFSupport &support = AsNfgSupport(param[0]);
+  nfgNashAlgorithm *algorithm = 0;
 
-  EnumParams params;
-  params.stopAfter = ((NumberPortion *) param[1])->Value();
-  params.precision = ((PrecisionPortion *) param[2])->Value();
-  params.tracefile = &((OutputPortion *) param[5])->Value();
-  params.trace = ((NumberPortion *) param[6])->Value();
-  params.cliques = ((BoolPortion *) param[7])->Value();
-  
+  if (((PrecisionPortion *) param[2])->Value() == precDOUBLE) {
+    algorithm = GSM_EnumMixed_Nfg_Double(AsNumber(param[1]), AsBool(param[7]));
+  }
+  else {
+    algorithm = GSM_EnumMixed_Nfg_Rational(AsNumber(param[1]),
+					   AsBool(param[7]));
+  }
+
   gList<MixedSolution> solutions;
 
   gsm.StartAlgorithmMonitor("EnumMixedSolve Progress");
   try {
-    double time;
-    long npivots;
-    nfgEnumMixed algorithm;
-    // Set parameters
-    solutions = algorithm.Solve(*S, gsm.GetStatusMonitor());
-    ((NumberPortion *) param[3])->SetValue(npivots);
-    ((NumberPortion *) param[4])->SetValue(time);
+    solutions = algorithm->Solve(support, gsm.GetStatusMonitor());
   }
   catch (gSignalBreak &) { }
   catch (...) {
     gsm.EndAlgorithmMonitor();
+    delete algorithm;
     throw;
   }
 
+  delete algorithm;
   gsm.EndAlgorithmMonitor();
   return new Mixed_ListPortion(solutions);
 }
 
-#include "nash/enumsub.h"
-
 static Portion *GSM_EnumMixed_Efg(GSM &gsm, Portion **param)
 {
-  EFSupport &support = *((EfSupportPortion *) param[0])->Value();
+  const EFSupport &support = AsEfgSupport(param[0]);
 
-  if (!((BoolPortion *) param[1])->Value()) {
+  if (!AsBool(param[1])) {
     throw gclRuntimeError("algorithm not implemented for extensive forms");
   }
 
-  EnumParams params;
-  params.stopAfter = ((NumberPortion *) param[2])->Value();
-  params.precision = ((PrecisionPortion *) param[3])->Value();
-  params.tracefile = &((OutputPortion *) param[6])->Value();
-  params.trace = ((NumberPortion *) param[7])->Value();
-  params.cliques = ((BoolPortion *) param[8])->Value();
+  nfgNashAlgorithm *nfgAlgorithm = 0;
+
+  if (((PrecisionPortion *) param[3])->Value() == precDOUBLE) {
+    nfgAlgorithm = GSM_EnumMixed_Nfg_Double(AsNumber(param[2]),
+					    AsBool(param[8]));
+  }
+  else {
+    nfgAlgorithm = GSM_EnumMixed_Nfg_Rational(AsNumber(param[2]),
+					      AsBool(param[8]));
+  }
 
   if (!IsPerfectRecall(support.GetGame())) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with EnumMixed; results not guaranteed\n";
   }
 
+  SubgameSolver *algorithm = new SubgameSolver;
+  algorithm->SetAlgorithm(nfgAlgorithm);
+
   gsm.StartAlgorithmMonitor("EnumMixedSolve Progress");
   gList<BehavSolution> solutions;
   try {
-    double time;
-    long npivots;
-    Enum(support, params, solutions, gsm.GetStatusMonitor(), npivots, time);
-    ((NumberPortion *) param[4])->SetValue(npivots);
-    ((NumberPortion *) param[5])->SetValue(time);
+    solutions = algorithm->Solve(support, gsm.GetStatusMonitor());
   }
   catch (gSignalBreak &) { }
   catch (...) {
     gsm.EndAlgorithmMonitor();
+    delete algorithm;
     throw;
   }
+  delete algorithm;
   gsm.EndAlgorithmMonitor();
   return new Behav_ListPortion(solutions);
 }
@@ -258,8 +295,6 @@ static Portion *GSM_EnumMixed_Efg(GSM &gsm, Portion **param)
 //-----------------
 // EnumPureSolve
 //-----------------
-
-#include "nash/nfgpure.h"
 
 static Portion *GSM_EnumPure_Nfg(GSM &gsm, Portion **param)
 {
@@ -285,25 +320,24 @@ static Portion *GSM_EnumPure_Nfg(GSM &gsm, Portion **param)
   return new Mixed_ListPortion(solutions);
 }
 
-#include "nash/efgpure.h"
-#include "nash/psnesub.h"
-
 static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
 {
-  EFSupport &support = *((EfSupportPortion *) param[0])->Value();
+  const EFSupport &support = AsEfgSupport(param[0]);
 
   if (!IsPerfectRecall(support.GetGame())) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with EnumPure; results not guaranteed\n";
   }
 
   gsm.StartAlgorithmMonitor("EnumPureSolve Progress");
-  gList<BehavSolution> solutions;
 
-  if (((BoolPortion *) param[1])->Value())   {
+  gList<BehavSolution> solutions;
+  if (AsBool(param[1])) {
     try {
-      efgEnumPureNfgSolve algorithm(((NumberPortion *) param[2])->Value());
+      nfgEnumPure *nfgAlgorithm = new nfgEnumPure;
+      nfgAlgorithm->SetStopAfter(AsNumber(param[2]));
+      SubgameSolver algorithm;
+      algorithm.SetAlgorithm(nfgAlgorithm);
       solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
-      ((NumberPortion *) param[4])->SetValue(algorithm.Time());
     }
     catch (gSignalBreak &) { }
     catch (...) {
@@ -313,10 +347,9 @@ static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
   }
   else  {
     try {
-      gWatch watch;
-      efgEnumPure algorithm(((NumberPortion *) param[2])->Value()); 
+      efgEnumPure algorithm;
+      algorithm.SetStopAfter(AsNumber(param[2]));
       solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
-      ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
     }
     catch (gSignalBreak &) { }
     catch (...) {
@@ -328,335 +361,114 @@ static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
   return new Behav_ListPortion(solutions);
 }
 
-//------------------
-// QreGridSolve
-//------------------
-
-#include "nash/nfgqregrid.h"
-
-static Portion *GSM_QreGrid_Support(GSM &gsm, Portion **param)
-{
-  NFSupport &support = *((NfSupportPortion*) param[0])->Value();
-
-  gOutput *pxiFile = 0;
-  if (((TextPortion *) param[1])->Value() != "") {
-    pxiFile = new gFileOutput(((TextPortion *) param[1])->Value());
-  }
-
-  QreNfgGrid qre;
-  qre.SetMinLambda(((NumberPortion *) param[2])->Value());
-  qre.SetMaxLambda(((NumberPortion *) param[3])->Value());
-  qre.SetDelLambda(((NumberPortion *) param[4])->Value());
-  qre.SetPowLambda(((NumberPortion *) param[5])->Value());
-  qre.SetFullGraph(((BoolPortion *) param[6])->Value());
-  qre.SetDelP1(((NumberPortion *) param[7])->Value());
-  qre.SetTol1(((NumberPortion *) param[8])->Value());
-  qre.SetDelP2(((NumberPortion *) param[9])->Value());
-  qre.SetTol2(((NumberPortion *) param[10])->Value());
-
-  gList<MixedSolution> solutions;
-  gsm.StartAlgorithmMonitor("QreGridSolve Progress");
-
-  try {
-    qre.Solve(support, (pxiFile) ? *pxiFile : gnull,
-	      gsm.GetStatusMonitor(), solutions);
-  }
-  catch (gSignalBreak &) { }
-  catch (...) {
-    if (pxiFile) delete pxiFile;
-    gsm.EndAlgorithmMonitor();
-    throw;
-  }
-
-  if (pxiFile) delete pxiFile;
-  gsm.EndAlgorithmMonitor();
-
-  return new Mixed_ListPortion(solutions);
-}
-
-//---------------
-// QreSolve
-//---------------
-
-#include "nash/nfgqre.h"
-#include "nash/efgqre.h"
-
-static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
-{
-  gOutput *pxiFile = 0;
-  if (((TextPortion *) param[1])->Value() != "") {
-    pxiFile = new gFileOutput(((TextPortion *) param[1])->Value());
-  }
-
-  if (param[0]->Spec().Type == porMIXED)  {
-    MixedSolution &start = *((MixedPortion *) param[0])->Value();
-
-    QreNfg qre;
-    qre.SetMaxLambda(((NumberPortion *) param[3])->Value());
-    qre.SetFullGraph(((BoolPortion *) param[6])->Value());
-
-    gList<MixedSolution> qreCorresp;
-    gsm.StartAlgorithmMonitor("QreSolve Progress");
-    try {
-      gWatch watch;
-      qre.Solve(start.Support(),
-		(pxiFile) ? *pxiFile : gnull,
-		gsm.GetStatusMonitor(), qreCorresp);
-
-      ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
-    }
-    catch (gSignalBreak &) { }
-    catch (...) {
-      if (pxiFile) delete pxiFile;  
-      gsm.EndAlgorithmMonitor();
-      throw;
-    }
-
-    if (pxiFile) delete pxiFile;
-    gsm.EndAlgorithmMonitor();
-    return new Mixed_ListPortion(qreCorresp);
-  }
-  else  {     // BEHAV
-    BehavSolution &start = *((BehavPortion *) param[0])->Value();
-    Efg::Game &E = start.GetGame();
-  
-    if (!IsPerfectRecall(E)) {
-      gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Qre; results not guaranteed\n";
-    }
-
-    QreEfg qre;
-    qre.SetMaxLambda(((NumberPortion *) param[3])->Value());
-    qre.SetFullGraph(((NumberPortion *) param[6])->Value());
-    
-    gList<BehavSolution> solutions;
-    gsm.StartAlgorithmMonitor("QreSolve Progress");
-    try {
-      long nevals, niters;
-      gWatch watch;
-    
-      qre.Solve(E, (pxiFile) ? *pxiFile : gnull, 
-		gsm.GetStatusMonitor(), solutions);
-
-      ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
-      ((NumberPortion *) param[9])->SetValue(nevals);
-      ((NumberPortion *) param[10])->SetValue(niters);
-    }
-    catch (gSignalBreak &) { }
-    catch (...) {
-      if (pxiFile) delete pxiFile;
-      gsm.EndAlgorithmMonitor();
-      throw;
-    }
-
-    if (pxiFile) delete pxiFile;
-    gsm.EndAlgorithmMonitor();
-
-    return new Behav_ListPortion(solutions);
-  }
-}
-
-#ifdef INTERNAL_VERSION
-
-//---------------
-// KQreSolve
-//---------------
-
-static Portion *GSM_KQre_Start(GSM &gsm, Portion **param)
-{
-  if (param[0]->Spec().Type == porMIXED)  {
-    MixedSolution &start = *((MixedPortion *) param[0])->Value();
-    Nfg &N = start.Game();
-
-    NFQreParams NP;
-    if (((TextPortion *) param[1])->Value() != "")
-      NP.pxifile = new gFileOutput(((TextPortion *) param[1])->Value());
-    else
-      NP.pxifile = &gnull;
-    NP.minLam = ((NumberPortion *) param[2])->Value();
-    NP.maxLam = ((NumberPortion *) param[3])->Value();
-    NP.delLam = ((NumberPortion *) param[4])->Value();
-    NP.powLam = ((NumberPortion *) param[5])->Value();
-    NP.fullGraph = ((BoolPortion *) param[6])->Value();
-
-    NP.SetAccuracy( ((NumberPortion *) param[7])->Value());
-
-    NP.tracefile = &((OutputPortion *) param[11])->Value();
-    NP.trace = ((NumberPortion *) param[12])->Value();
-
-    gList<MixedSolution> solutions;
-    try {
-      long nevals, niters;
-      gWatch watch;
-      KQre(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
-
-      ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
-      ((NumberPortion *) param[9])->SetValue(nevals);
-      ((NumberPortion *) param[10])->SetValue(niters);
-    }
-    catch (gSignalBreak &) {
-      NP.status.Reset();
-    }
-    catch (...) {
-      if (NP.pxifile != &gnull)  delete NP.pxifile;
-      throw;
-    }
-
-    if (NP.pxifile != &gnull)  delete NP.pxifile;
-    return new Mixed_ListPortion(solutions);
-  }
-  else  {     // BEHAV
-    BehavSolution &start = *((BehavPortion *) param[0])->Value();
-    Efg &E = start.Game();
-  
-    if (!IsPerfectRecall(E)) {
-      gsm.OutputStream() << "WARNING: Solving game of imperfect recall with KQre; results not guaranteed\n";
-    }
-
-    EFQreParams EP;
-    if(((TextPortion*) param[1])->Value() != "")
-      EP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
-    else
-      EP.pxifile = &gnull;
-    EP.minLam = ((NumberPortion *) param[2])->Value();
-    EP.maxLam = ((NumberPortion *) param[3])->Value();
-    EP.delLam = ((NumberPortion *) param[4])->Value();
-    EP.powLam = ((NumberPortion *) param[5])->Value();
-    EP.fullGraph = ((BoolPortion *) param[6])->Value();
-    
-    EP.SetAccuracy( ((NumberPortion *) param[7])->Value());
-
-    EP.tracefile = &((OutputPortion *) param[11])->Value();
-    EP.trace = ((NumberPortion *) param[12])->Value();
-    
-    gList<BehavSolution> solutions;
-    try {
-      long nevals, niters;
-      gWatch watch;
-    
-      KQre(E, EP, BehavProfile<gNumber>(start), solutions, nevals, niters);
-
-      ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
-      ((NumberPortion *) param[9])->SetValue(nevals);
-      ((NumberPortion *) param[10])->SetValue(niters);
-    }
-    catch (gSignalBreak &) {
-      EP.status.Reset();
-    }
-    catch (...) {
-      if (EP.pxifile != &gnull)  delete EP.pxifile;
-      throw;
-    }
-
-    if (EP.pxifile != &gnull)   delete EP.pxifile;
-    return new Behav_ListPortion(solutions);
-  }
-}
-
-#endif // INTERNAL_VERSION
-
 //------------
 // LcpSolve
 //------------
 
-#include "nash/lemke.h"
+static nfgNashAlgorithm *GSM_Lcp_Nfg_Double(int p_stopAfter)
+{
+  nfgLcp<double> *algorithm = new nfgLcp<double>;
+  algorithm->SetStopAfter(p_stopAfter);
+  return algorithm;
+}
+
+static nfgNashAlgorithm *GSM_Lcp_Nfg_Rational(int p_stopAfter)
+{
+  nfgLcp<gRational> *algorithm = new nfgLcp<gRational>;
+  algorithm->SetStopAfter(p_stopAfter);
+  return algorithm;
+}
 
 static Portion *GSM_Lcp_Nfg(GSM &gsm, Portion **param)
 {
-  NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  const Nfg *N = &S.Game();
+  const NFSupport &support = AsNfgSupport(param[0]);
+  const Nfg &nfg = support.Game();
 
-  if (N->NumPlayers() > 2)
+  if (nfg.NumPlayers() != 2) {
     throw gclRuntimeError("Only valid for two-person games");
+  }
 
-  LemkeParams params;
-  params.stopAfter = ((NumberPortion *) param[1])->Value();
-  params.precision = ((PrecisionPortion *) param[2])->Value();
-  params.tracefile = &((OutputPortion *) param[5])->Value();
-  params.trace = ((NumberPortion *) param[6])->Value();
+  nfgNashAlgorithm *algorithm = 0;
+
+  if (((PrecisionPortion *) param[2])->Value() == precDOUBLE) {
+    algorithm = GSM_Lcp_Nfg_Double(AsNumber(param[1]));
+  }
+  else {
+    algorithm = GSM_Lcp_Nfg_Rational(AsNumber(param[1]));
+  }
 
   gList<MixedSolution> solutions;
+
   gsm.StartAlgorithmMonitor("LcpSolve Progress");
   try {
-    double time;
-    int npivots;
-    Lemke(S, params, solutions, gsm.GetStatusMonitor(), npivots, time);
-    ((NumberPortion *) param[3])->SetValue(npivots);
-    ((NumberPortion *) param[4])->SetValue(time);
+    solutions = algorithm->Solve(support, gsm.GetStatusMonitor());
+  }
+  catch (gSignalBreak &) { }
+  catch (...) {
+    gsm.EndAlgorithmMonitor();
+    delete algorithm;
+    throw;
+  }
+
+  delete algorithm;
+  gsm.EndAlgorithmMonitor();
+  return new Mixed_ListPortion(solutions);
+}
+
+static efgNashAlgorithm *GSM_Lcp_Efg_Double(int p_stopAfter)
+{
+  efgLcp<double> *algorithm = new efgLcp<double>;
+  algorithm->SetStopAfter(p_stopAfter);
+  return algorithm;
+}
+
+static efgNashAlgorithm *GSM_Lcp_Efg_Rational(int p_stopAfter)
+{
+  efgLcp<gRational> *algorithm = new efgLcp<gRational>;
+  algorithm->SetStopAfter(p_stopAfter);
+  return algorithm;
+}
+
+static Portion *GSM_Lcp_Efg(GSM &gsm, Portion **param)
+{
+  const EFSupport &support = AsEfgSupport(param[0]);
+  const efgGame &efg = support.GetGame();
+
+  if (efg.NumPlayers() != 2) {
+    throw gclRuntimeError("Only valid for two-person games");
+  }
+
+  SubgameSolver algorithm;
+  
+  if (AsBool(param[1])) {
+    if (((PrecisionPortion *) param[3])->Value() == precDOUBLE) {
+      algorithm.SetAlgorithm(GSM_Lcp_Nfg_Double(AsNumber(param[2])));
+    }
+    else {
+      algorithm.SetAlgorithm(GSM_Lcp_Nfg_Rational(AsNumber(param[2])));	
+    }
+  }
+  else {
+    if (((PrecisionPortion *) param[3])->Value() == precDOUBLE) {
+      algorithm.SetAlgorithm(GSM_Lcp_Efg_Double(AsNumber(param[2])));
+    }
+    else {
+      algorithm.SetAlgorithm(GSM_Lcp_Efg_Rational(AsNumber(param[2])));
+    }
+  }
+
+  gsm.StartAlgorithmMonitor("LcpSolve Progress");
+  gList<BehavSolution> solutions;
+  try {
+    algorithm.Solve(support, gsm.GetStatusMonitor());
   }
   catch (gSignalBreak &) { }
   catch (...) {
     gsm.EndAlgorithmMonitor();
     throw;
   }
-
   gsm.EndAlgorithmMonitor();
-  return new Mixed_ListPortion(solutions);
-}
-
-#include "nash/seqform.h"
-#include "nash/lemkesub.h"
-
-static Portion *GSM_Lcp_Efg(GSM &gsm, Portion **param)
-{
-  EFSupport &support = *((EfSupportPortion*) param[0])->Value();
-  const Efg::Game *E = &support.GetGame();
-
-  if (E->NumPlayers() > 2)
-    throw gclRuntimeError("Only valid for two-person games");
-
-  if (!IsPerfectRecall(support.GetGame())) {
-    gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Lcp; results not guaranteed\n";
-  }
-
-  gsm.StartAlgorithmMonitor("LcpSolve Progress");
-  if (((BoolPortion *) param[1])->Value())   {
-    LemkeParams params;
-    
-    params.stopAfter = ((NumberPortion *) param[2])->Value();
-    params.precision = ((PrecisionPortion *) param[3])->Value();
-    params.tracefile = &((OutputPortion *) param[6])->Value();
-    params.trace = ((NumberPortion *) param[7])->Value();
-
-    gList<BehavSolution> solutions;
-    try {
-      efgLcpNfgSolve algorithm(params);
-      solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
-      ((NumberPortion *) param[4])->SetValue(algorithm.NumPivots());
-      ((NumberPortion *) param[5])->SetValue(algorithm.Time());
-    }
-    catch (gSignalBreak &) { }
-    catch (...) {
-      gsm.EndAlgorithmMonitor();
-      throw;
-    }
-
-    gsm.EndAlgorithmMonitor();
-    return new Behav_ListPortion(solutions);
-  }
-  else  {
-    SeqFormParams params;
-
-    params.stopAfter = ((NumberPortion *) param[2])->Value();
-    params.precision = ((PrecisionPortion *) param[3])->Value();
-    params.tracefile = &((OutputPortion *) param[6])->Value();
-    params.trace = ((NumberPortion *) param[7])->Value();
-
-    gList<BehavSolution> solutions;
-    try {
-      efgLcpSolve algorithm(params);
-      solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
-      ((NumberPortion *) param[4])->SetValue(algorithm.NumPivots());
-      ((NumberPortion *) param[5])->SetValue(algorithm.Time());
-    }
-    catch (gSignalBreak &) { }
-    catch (...) {
-      gsm.EndAlgorithmMonitor();
-      throw;
-    }
-
-    gsm.EndAlgorithmMonitor();
-    return new Behav_ListPortion(solutions);
-  }
+  return new Behav_ListPortion(solutions);
 }
 
 #include "numerical/lemketab.h"
@@ -709,109 +521,59 @@ Portion* GSM_Lcp_ListNumber(GSM &, Portion** param)
 // LiapSolve
 //-------------
 
-#include "nash/liapsub.h"
 #include "nash/eliap.h"
 
 static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
 {
-  BehavProfile<gNumber> start(*(*((BehavPortion *) param[0])->Value()).Profile());
-  Efg::Game &E = start.GetGame();
-  const EFSupport &supp = (*((BehavPortion *) param[0])->Value()).Support();
+  const BehavProfile<gNumber> &start = *AsBehav(param[0]).Profile();
+  const efgGame &efg = start.GetGame();
+  const EFSupport &support = start.Support();
   
   gsm.StartAlgorithmMonitor("LiapSolve Progress");
-  if (((BoolPortion *) param[1])->Value())   {
-    NFLiapParams LP;
 
-    LP.stopAfter = ((NumberPortion *) param[2])->Value();
-    LP.nTries = ((NumberPortion *) param[3])->Value();
+  SubgameSolver algorithm;
 
-    LP.SetAccuracy( ((NumberPortion *) param[4])->Value());
-
-    LP.tracefile = &((OutputPortion *) param[7])->Value();
-    LP.trace = ((NumberPortion *) param[8])->Value();
-
-    gWatch watch;
-
-    gList<BehavSolution> solutions;
-
-    try {
-      efgLiapNfgSolve algorithm(E, LP, start);
-      solutions = algorithm.Solve(supp, gsm.GetStatusMonitor());
-      ((NumberPortion *) param[5])->SetValue(watch.Elapsed());
-      ((NumberPortion *) param[6])->SetValue(algorithm.NumEvals());
-    }
-    catch (gSignalBreak &) { }
-    catch (...) {
-      gsm.EndAlgorithmMonitor();
-      throw;
-    }
-
-    gsm.EndAlgorithmMonitor();
-    return new Behav_ListPortion(solutions);
+  if (AsBool(param[1])) {
+    nfgLiap *nfgAlgorithm = new nfgLiap;
+    nfgAlgorithm->SetStopAfter(AsNumber(param[2]));
+    nfgAlgorithm->SetNumTries(AsNumber(param[3]));
+    algorithm.SetAlgorithm(nfgAlgorithm);
   }
-  else  {
-    EFLiapParams LP;
-
-    if (!IsPerfectRecall(E)) {
-      gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Liap; results not guaranteed\n";
-    }
-
-    LP.stopAfter = ((NumberPortion *) param[2])->Value();
-    LP.nTries = ((NumberPortion *) param[3])->Value();
-
-    LP.SetAccuracy( ((NumberPortion *) param[4])->Value());
-
-    LP.tracefile = &((OutputPortion *) param[7])->Value();
-    LP.trace = ((NumberPortion *) param[8])->Value();
-
-    gWatch watch;
-
-    gList<BehavSolution> solutions;
-
-    try {
-      efgLiapSolve algorithm(E, LP, start);
-      solutions = algorithm.Solve(supp, gsm.GetStatusMonitor());
-      ((NumberPortion *) param[5])->SetValue(watch.Elapsed());
-      ((NumberPortion *) param[6])->SetValue(algorithm.NumEvals());
-    }
-    catch (gSignalBreak &) { }
-    catch (...) {
-      gsm.EndAlgorithmMonitor();
-      throw;
-    }
-
-    gsm.EndAlgorithmMonitor();
-    return new Behav_ListPortion(solutions);
+  else {
+    efgLiap *efgAlgorithm = new efgLiap;
+    efgAlgorithm->SetStopAfter(AsNumber(param[2]));
+    efgAlgorithm->SetNumTries(AsNumber(param[3]));
+    algorithm.SetAlgorithm(efgAlgorithm);
   }
+
+  gList<BehavSolution> solutions;
+
+  try {
+    solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
+  }
+  catch (gSignalBreak &) { }
+  catch (...) {
+    gsm.EndAlgorithmMonitor();
+    throw;
+  }
+
+  gsm.EndAlgorithmMonitor();
+  return new Behav_ListPortion(solutions);
 }
-
-#include "nash/nliap.h"
 
 static Portion *GSM_Liap_Mixed(GSM &gsm, Portion **param)
 {
-  MixedProfile<gNumber> start(*(*((MixedPortion *) param[0])->Value()).Profile());
-  Nfg &N = start.Game();
+  const MixedProfile<gNumber> &start = *AsMixed(param[0]).Profile();
+  const Nfg &nfg = start.Game();
 
-  NFLiapParams params;
-  
-  params.stopAfter = ((NumberPortion *) param[1])->Value();
-  params.nTries = ((NumberPortion *) param[2])->Value();
-
-  params.SetAccuracy( ((NumberPortion *) param[3])->Value());
-
-  params.tracefile = &((OutputPortion *) param[6])->Value();
-  params.trace = ((NumberPortion *) param[7])->Value();
+  nfgLiap algorithm;
+  algorithm.SetStopAfter(AsNumber(param[1]));
+  algorithm.SetNumTries(AsNumber(param[2]));
 
   gList<MixedSolution> solutions;
   gsm.StartAlgorithmMonitor("LiapSolve Progress");
   try {
-    long nevals, niters;
-    gWatch watch;
-  
-    Liap(N, params, start, solutions, gsm.GetStatusMonitor(), nevals, niters);
-
-    ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
-    ((NumberPortion *) param[5])->SetValue(nevals);
+    solutions = algorithm.Solve(start.Support(), gsm.GetStatusMonitor());
   }
   catch (gSignalBreak &) { }
   catch (...) {
@@ -827,30 +589,36 @@ static Portion *GSM_Liap_Mixed(GSM &gsm, Portion **param)
 // LpSolve
 //------------
 
-#include "nash/nfgcsum.h"
+static nfgNashAlgorithm *GSM_Lp_Nfg_Double(void)
+{
+  nfgLcp<double> *algorithm = new nfgLcp<double>;
+  algorithm->SetStopAfter(1);
+  return algorithm;
+}
+
+static nfgNashAlgorithm *GSM_Lp_Nfg_Rational(void)
+{
+  nfgLcp<gRational> *algorithm = new nfgLcp<gRational>;
+  algorithm->SetStopAfter(1);
+  return algorithm;
+}
 
 static Portion *GSM_Lp_Nfg(GSM &gsm, Portion **param)
 {
-  NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  const Nfg *N = &S.Game();
+  const NFSupport &support = AsNfgSupport(param[0]);
+  const Nfg &nfg = support.Game();
 
-  if (N->NumPlayers() > 2 || !IsConstSum(*N))
+  if (nfg.NumPlayers() != 2 || !IsConstSum(nfg)) {
     throw gclRuntimeError("Only valid for two-person zero-sum games");
+  }
 
-  ZSumParams params;
-  params.stopAfter = 1;
-  params.precision = ((PrecisionPortion *) param[1])->Value();
-  params.tracefile = &((OutputPortion *) param[4])->Value();
-  params.trace = ((NumberPortion *) param[5])->Value();
+  nfgNashAlgorithm *algorithm =
+    (AsBool(param[1])) ? GSM_Lp_Nfg_Double() : GSM_Lp_Nfg_Rational();
 
   gList<MixedSolution> solutions;
   gsm.StartAlgorithmMonitor("LpSolve Progress");
   try {
-    double time;
-    int npivots;
-    ZSum(S, params, solutions, gsm.GetStatusMonitor(), npivots, time);
-    ((NumberPortion *) param[2])->SetValue(npivots);
-    ((NumberPortion *) param[3])->SetValue(time);
+    solutions = algorithm->Solve(support, gsm.GetStatusMonitor());
   }
   catch (gSignalBreak &) { }
   catch (...) {
@@ -862,8 +630,6 @@ static Portion *GSM_Lp_Nfg(GSM &gsm, Portion **param)
   return new Mixed_ListPortion(solutions);
 }
 
-
-#include "numerical/lpsolve.h"
 
 Portion* GSM_Lp_List(GSM &gsm, Portion** param)
 {
@@ -921,253 +687,127 @@ Portion* GSM_Lp_List(GSM &gsm, Portion** param)
   }
 }
 
+static efgNashAlgorithm *GSM_Lp_Efg_Double(void)
+{
+  efgLcp<double> *algorithm = new efgLcp<double>;
+  algorithm->SetStopAfter(1);
+  return algorithm;
+}
 
-#include "nash/csumsub.h"
-#include "nash/efgcsum.h"
+static efgNashAlgorithm *GSM_Lp_Efg_Rational(void)
+{
+  efgLcp<gRational> *algorithm = new efgLcp<gRational>;
+  algorithm->SetStopAfter(1);
+  return algorithm;
+}
+
 
 static Portion *GSM_Lp_Efg(GSM &gsm, Portion **param)
 {
-  EFSupport &support = *((EfSupportPortion *) param[0])->Value();
-  const Efg::Game &E = support.GetGame();
+  const EFSupport &support = AsEfgSupport(param[0]);
+  const efgGame &efg = support.GetGame();
   
-  if (E.NumPlayers() > 2 || !E.IsConstSum())
+  if (efg.NumPlayers() != 2 || !efg.IsConstSum()) {
     throw gclRuntimeError("Only valid for two-person zero-sum games");
+  }
 
-  if (!IsPerfectRecall(E)) {
+  if (!IsPerfectRecall(efg)) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Lp; results not guaranteed\n";
   }
 
+  SubgameSolver algorithm;
+  
+  if (AsBool(param[1])) {
+    if (((PrecisionPortion *) param[2])->Value() == precDOUBLE) {
+      algorithm.SetAlgorithm(GSM_Lp_Nfg_Double());
+    }
+    else {
+      algorithm.SetAlgorithm(GSM_Lp_Nfg_Rational());
+    }
+  }
+  else {
+    if (((PrecisionPortion *) param[2])->Value() == precDOUBLE) {
+      algorithm.SetAlgorithm(GSM_Lp_Efg_Double());
+    }
+    else {
+      algorithm.SetAlgorithm(GSM_Lp_Efg_Rational());
+    }
+  }
+
   gsm.StartAlgorithmMonitor("LpSolve Progress");
-  if (((BoolPortion *) param[1])->Value())   {
-    ZSumParams params;
-    params.stopAfter = 1;
-    params.precision = ((PrecisionPortion *) param[2])->Value();
-    params.tracefile = &((OutputPortion *) param[5])->Value();
-    params.trace = ((NumberPortion *) param[6])->Value();
-
-    gList<BehavSolution> solutions;
-    try {
-      efgLpNfgSolve algorithm(params);
-      solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
-      ((NumberPortion *) param[3])->SetValue(algorithm.NumPivots());
-      ((NumberPortion *) param[4])->SetValue(algorithm.Time());
-    }
-    catch (gSignalBreak &) { }
-    catch (...) {
-      gsm.EndAlgorithmMonitor();
-      throw;
-    }
-
-    gsm.EndAlgorithmMonitor();
-    return new Behav_ListPortion(solutions);
+  gList<BehavSolution> solutions;
+  try {
+    algorithm.Solve(support, gsm.GetStatusMonitor());
   }
-  else  {
-    CSSeqFormParams params;
-    params.stopAfter = 1;
-    params.precision = ((PrecisionPortion *) param[2])->Value();
-    params.tracefile = &((OutputPortion *) param[5])->Value();
-    params.trace = ((NumberPortion *) param[6])->Value();
-
-    gList<BehavSolution> solutions;
-
-    try {
-      efgLpSolve algorithm(params);
-      solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
-      ((NumberPortion *) param[3])->SetValue(algorithm.NumPivots());
-      ((NumberPortion *) param[4])->SetValue(algorithm.Time());
-    }
-    catch (gSignalBreak &) { }
-    catch (...) {
-      gsm.EndAlgorithmMonitor();
-      throw;
-    }
-
+  catch (gSignalBreak &) { }
+  catch (...) {
     gsm.EndAlgorithmMonitor();
-    return new Behav_ListPortion(solutions);
+    throw;
   }
+  gsm.EndAlgorithmMonitor();
+  return new Behav_ListPortion(solutions);
 }
 
 
 //------------------
-//  PolEnumSolve (was AllNashSolve)
+//  PolEnumSolve
 //------------------
-
-#include "nash/nfgalleq.h"
 
 static Portion *GSM_PolEnumSolve_Nfg(GSM &gsm, Portion **param)
 {
-  const NFSupport &S = *((NfSupportPortion*) param[0])->Value();
-  PolEnumParams params;
-  params.stopAfter = ((NumberPortion *) param[1])->Value();
-  params.tracefile = &((OutputPortion *) param[4])->Value();
-  params.trace = ((NumberPortion *) param[5])->Value();
-  bool recurse = ((BoolPortion *) param[7])->Value();
+  const NFSupport &support = AsNfgSupport(param[0]);
+  
+  nfgPolEnum algorithm;
+  algorithm.SetStopAfter(AsNumber(param[1]));
   gList<MixedSolution> solutions;
-  gList<const NFSupport> singular_supports;
 
   gsm.StartAlgorithmMonitor("PolEnumSolve Progress");
-  if (recurse) {
-    try {
-      long nevals = 0;
-      double time = 0.0;
-      AllNashSolve(S, params, solutions, gsm.GetStatusMonitor(),
-		   nevals, time, singular_supports);
-      
-      ((NumberPortion *) param[2])->SetValue(nevals);
-      ((NumberPortion *) param[3])->SetValue(time);
-      ((NfSupport_ListPortion *) param[6])->SetValue(singular_supports);
-    }
-    catch (gSignalBreak &) { }
-    catch (...) {
-      gsm.EndAlgorithmMonitor();
-      throw;
-    }
+  try {
+    solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
   }
-  else {
-    bool is_singular;
-    try {
-      long nevals;
-      double time;
-      PolEnum(S, params, solutions, gsm.GetStatusMonitor(),
-	      nevals, time, is_singular);
-      ((NumberPortion *) param[2])->SetValue(nevals);
-      ((NumberPortion *) param[3])->SetValue(time);
-      if (is_singular) {
-	singular_supports.Append(S);
-      }
-      ((NfSupport_ListPortion *) param[6])->SetValue(singular_supports);
-    }
-    catch (gSignalBreak &) { }
-    catch (...) {
-      gsm.EndAlgorithmMonitor();
-      throw;
-    }
+  catch (gSignalBreak &) { }
+  catch (...) {
+    gsm.EndAlgorithmMonitor();
+    throw;
   }
   gsm.EndAlgorithmMonitor();
   return new Mixed_ListPortion(solutions);
 }
 
-#include "nash/efgalleq.h"
-#include "nash/polensub.h"
-
 static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
 {
-  const EFSupport &S = *((EfSupportPortion*) param[0])->Value();
-  bool recurse = ((BoolPortion *) param[8])->Value();
-  gList<BehavSolution> solutions;
-  gList<const EFSupport> singular_supports;
+  const EFSupport &support = AsEfgSupport(param[0]);
 
-  if (!IsPerfectRecall(S.GetGame())) {
-    gsm.OutputStream() << "WARNING: Solving game of imperfect recall with AllNash; results not guaranteed\n";
+  if (!IsPerfectRecall(support.GetGame())) {
+    gsm.OutputStream() << "WARNING: Solving game of imperfect recall with PolEnum; results not guaranteed\n";
   }
-  // If asNfg->True (salvaged from old PolEnum_Efg)  
 
   gsm.StartAlgorithmMonitor("PolEnumSolve Progress");
-  if (((BoolPortion *) param[1])->Value()) {
-    // need to add recurse capability here
-    if (recurse) { 
-      gsm.EndAlgorithmMonitor();
-      throw gclRuntimeError("Recursion not implemented for asNfg->True");
-    }
-    PolEnumParams params;
-    params.stopAfter = ((NumberPortion *) param[2])->Value();
-    params.tracefile = &((OutputPortion *) param[5])->Value();
-    params.trace = ((NumberPortion *) param[6])->Value();
-    try {
-      efgPolEnumNfgSolve algorithm(params);
-      solutions = algorithm.Solve(S, gsm.GetStatusMonitor());
-      ((NumberPortion *) param[3])->SetValue(algorithm.NumEvals());
-    }
-    catch (gSignalBreak &) { }
-    catch (...) {
-      gsm.EndAlgorithmMonitor();
-      throw;
-    }
+
+  gList<BehavSolution> solutions;
+  SubgameSolver algorithm;
+  if (AsBool(param[1])) {
+    nfgPolEnum *nfgAlgorithm = new nfgPolEnum;
+    nfgAlgorithm->SetStopAfter(AsNumber(param[2]));
+    algorithm.SetAlgorithm(nfgAlgorithm);
   }
   else {
-    // end salvage
-    EfgPolEnumParams params;
-    params.stopAfter = ((NumberPortion *) param[2])->Value();
-    params.tracefile = &((OutputPortion *) param[5])->Value();
-    params.trace = ((NumberPortion *) param[6])->Value();
-    if (recurse) {
-      try {
-	long nevals = 0;
-	double time = 0.0;
-	AllEFNashSolve(S, params, solutions, gsm.GetStatusMonitor(), 
-		       nevals, time, singular_supports);
-	
-	((NumberPortion *) param[3])->SetValue(nevals);
-	((NumberPortion *) param[4])->SetValue(time);
-	((EfSupport_ListPortion *) param[7])->SetValue(singular_supports);
-      }
-      catch (gSignalBreak &) { }
-      catch (...) {
-	gsm.EndAlgorithmMonitor();
-	throw;
-      }
-    }
-    else {
-      bool is_singular = false;
-      try {
-	long nevals;
-	double time;
-	EfgPolEnum(S, params, solutions, gsm.GetStatusMonitor(),
-		   nevals, time, is_singular);
-	((NumberPortion *) param[3])->SetValue(nevals);
-	((NumberPortion *) param[4])->SetValue(time);
-	if (is_singular) {
-	  singular_supports.Append(S);
-	}
-	((EfSupport_ListPortion *) param[7])->SetValue(singular_supports);
-      }
-      catch (gSignalBreak &) { }
-      catch (...) {
-	gsm.EndAlgorithmMonitor();
-	throw;
-      }
-    }
+    efgPolEnum *efgAlgorithm = new efgPolEnum;
+    efgAlgorithm->SetStopAfter(AsNumber(param[2]));
+    algorithm.SetAlgorithm(efgAlgorithm);
+  }
+
+  try {
+    solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
+  }
+  catch (gSignalBreak &) { }
+  catch (...) {
+    gsm.EndAlgorithmMonitor();
+    throw;
   }
   gsm.EndAlgorithmMonitor();
   return new Behav_ListPortion(solutions);
 }
-
-#ifdef INTERNAL_VERSION
-
-#include "seqeq.h"
-
-static Portion *GSM_SequentialEquilib(GSM &gsm, Portion **param)
-{
-  EFBasis &basis = *((EfBasisPortion *) param[0])->Value();
-  EFSupport &support = *((EfSupportPortion *) param[1])->Value();
-  
-  if (!IsPerfectRecall(support.Game())) {
-    gsm.OutputStream() << "WARNING: Solving game of imperfect recall with SequentialEquilib; results not guaranteed\n";
-  }
-
-  double time;
-  gList<BehavSolution> solutions;
-  
-  SeqEquilibParams params;
-  params.stopAfter = ((NumberPortion *) param[2])->Value();
-  params.precision = ((PrecisionPortion *) param[3])->Value();
-  params.tracefile = &((OutputPortion *) param[6])->Value();
-  params.trace = ((NumberPortion *) param[7])->Value();
-
-  try {
-    long nevals;
-    SequentialEquilib(basis, support, params, solutions, nevals, time);
-
-    ((NumberPortion *) param[4])->SetValue(nevals);
-    ((NumberPortion *) param[5])->SetValue(time);
-  }
-  catch (gSignalBreak &) {
-    params.status.Reset();
-  }
-
-  return new Behav_ListPortion(solutions);
-}
-#endif // INTERNAL_VERSION
 
 //---------
 // Nfg
@@ -1175,17 +815,14 @@ static Portion *GSM_SequentialEquilib(GSM &gsm, Portion **param)
 
 static Portion *GSM_Nfg(GSM &, Portion **param)
 {
-  Efg::Game &E = * ((EfgPortion*) param[0])->Value();
-  gWatch watch;
-
-  Nfg *N = MakeReducedNfg(EFSupport(E));
-
-  ((NumberPortion *) param[1])->SetValue(watch.Elapsed());
-
-  if (N)
-    return new NfgPortion(N);
-  else
+  const efgGame &efg = AsEfg(param[0]);
+  Nfg *nfg = MakeReducedNfg(EFSupport(efg));
+  if (nfg) {
+    return new NfgPortion(nfg);
+  }
+  else {
     throw gclRuntimeError("Conversion to reduced nfg failed");
+  }
 }
 
 
@@ -1209,101 +846,222 @@ Portion* GSM_Payoff_Mixed(GSM &, Portion** param)
 
   return new NumberPortion(mp.Payoff(player->GetNumber()));
 }
+//------------------
+// QreGridSolve
+//------------------
+
+static Portion *GSM_QreGrid_Support(GSM &gsm, Portion **param)
+{
+  NFSupport &support = *((NfSupportPortion*) param[0])->Value();
+
+  gOutput *pxiFile = 0;
+  if (((TextPortion *) param[1])->Value() != "") {
+    pxiFile = new gFileOutput(((TextPortion *) param[1])->Value());
+  }
+  else {
+    pxiFile = new gNullOutput;
+  }
+
+  QreNfgGrid qre;
+  qre.SetMinLambda(((NumberPortion *) param[2])->Value());
+  qre.SetMaxLambda(((NumberPortion *) param[3])->Value());
+  qre.SetDelLambda(((NumberPortion *) param[4])->Value());
+  qre.SetPowLambda(((NumberPortion *) param[5])->Value());
+  qre.SetFullGraph(((BoolPortion *) param[6])->Value());
+  qre.SetDelP1(((NumberPortion *) param[7])->Value());
+  qre.SetTol1(((NumberPortion *) param[8])->Value());
+  qre.SetDelP2(((NumberPortion *) param[9])->Value());
+  qre.SetTol2(((NumberPortion *) param[10])->Value());
+
+  gList<MixedSolution> solutions;
+  gsm.StartAlgorithmMonitor("QreGridSolve Progress");
+
+  try {
+    qre.Solve(support, *pxiFile, 
+	      gsm.GetStatusMonitor(), solutions);
+  }
+  catch (gSignalBreak &) { }
+  catch (...) {
+    delete pxiFile;
+    gsm.EndAlgorithmMonitor();
+    throw;
+  }
+
+  delete pxiFile;
+  gsm.EndAlgorithmMonitor();
+
+  return new Mixed_ListPortion(solutions);
+}
+
+//---------------
+// QreSolve
+//---------------
+
+static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
+{
+  gOutput *pxiFile = 0;
+  if (((TextPortion *) param[1])->Value() != "") {
+    pxiFile = new gFileOutput(((TextPortion *) param[1])->Value());
+  }
+  else {
+    pxiFile = new gNullOutput;
+  }
+
+  if (param[0]->Spec().Type == porMIXED)  {
+    const MixedSolution &start = AsMixed(param[0]);
+    nfgQre algorithm;
+    algorithm.SetMaxLambda(AsNumber(param[3]));
+    algorithm.SetFullGraph(AsBool(param[6]));
+
+    gList<MixedSolution> solutions;
+    gsm.StartAlgorithmMonitor("QreSolve Progress");
+    try {
+      solutions = algorithm.Solve(start.Support(), gsm.GetStatusMonitor());
+    }
+    catch (gSignalBreak &) { }
+    catch (...) {
+      delete pxiFile;  
+      gsm.EndAlgorithmMonitor();
+      throw;
+    }
+
+    delete pxiFile;
+    gsm.EndAlgorithmMonitor();
+    return new Mixed_ListPortion(solutions);
+  }
+  else  {     // BEHAV
+    const BehavSolution &start = AsBehav(param[0]);
+    efgGame &efg = start.GetGame();
+  
+    if (!IsPerfectRecall(efg)) {
+      gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Qre; results not guaranteed\n";
+    }
+
+    efgQre algorithm;
+    algorithm.SetMaxLambda(AsNumber(param[3]));
+    algorithm.SetFullGraph(AsNumber(param[6]));
+    
+    gList<BehavSolution> solutions;
+    gsm.StartAlgorithmMonitor("QreSolve Progress");
+    try {
+      solutions = algorithm.Solve(start.Support(), gsm.GetStatusMonitor());
+    }
+    catch (gSignalBreak &) { }
+    catch (...) {
+      delete pxiFile;
+      gsm.EndAlgorithmMonitor();
+      throw;
+    }
+
+    delete pxiFile;
+    gsm.EndAlgorithmMonitor();
+
+    return new Behav_ListPortion(solutions);
+  }
+}
+
 
 //----------------
 // SimpDivSolve
 //----------------
 
-#include "nash/simpdiv.h"
+static nfgNashAlgorithm *GSM_Simpdiv_Nfg_Double(int p_stopAfter,
+						int p_numRestarts,
+						int p_leashLength)
+{
+  nfgSimpdiv<double> *algorithm = new nfgSimpdiv<double>;
+  //  algorithm->SetStopAfter(p_stopAfter);
+  algorithm->SetNumRestarts(p_numRestarts);
+  algorithm->SetLeashLength(p_leashLength);
+  return algorithm;
+}
+
+static nfgNashAlgorithm *GSM_Simpdiv_Nfg_Rational(int p_stopAfter,
+						  int p_numRestarts,
+						  int p_leashLength)
+{
+  nfgSimpdiv<gRational> *algorithm = new nfgSimpdiv<gRational>;
+  //  algorithm->SetStopAfter(p_stopAfter);
+  algorithm->SetNumRestarts(p_numRestarts);
+  algorithm->SetLeashLength(p_leashLength);
+  return algorithm;
+}
 
 static Portion *GSM_Simpdiv_Nfg(GSM &gsm, Portion **param)
 {
-  NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  SimpdivParams SP;
-  SP.stopAfter = ((NumberPortion *) param[1])->Value();
-  SP.nRestarts = ((NumberPortion *) param[2])->Value();
-  SP.leashLength = ((NumberPortion *) param[3])->Value();
-
-  SP.tracefile = &((OutputPortion *) param[7])->Value();
-  SP.trace = ((NumberPortion *) param[8])->Value();
+  const NFSupport &support = AsNfgSupport(param[0]);
+  nfgNashAlgorithm *algorithm;
+  if (AsPrecision(param[4]) == precDOUBLE) {
+    algorithm = GSM_Simpdiv_Nfg_Double(AsNumber(param[1]),
+				       AsNumber(param[2]),
+				       AsNumber(param[3]));
+  }
+  else {
+    algorithm = GSM_Simpdiv_Nfg_Rational(AsNumber(param[1]),
+					 AsNumber(param[2]),
+					 AsNumber(param[3]));
+  }
 
   gsm.StartAlgorithmMonitor("SimpDivSolve Progress");
-  if (((PrecisionPortion *) param[4])->Value() == precDOUBLE)  {
-    gList<MixedSolution> solutions;
+  gList<MixedSolution> solutions;
 
-    try {
-      SimpdivModule<double> SM(S, SP);
-      SM.Simpdiv(gsm.GetStatusMonitor());
-      solutions = SM.GetSolutions();
-      ((NumberPortion *) param[5])->SetValue(SM.NumEvals());
-      ((NumberPortion *) param[6])->SetValue(SM.Time());
-    }
-    catch (gSignalBreak &) { }
-    catch (...) {
-      gsm.EndAlgorithmMonitor();
-      throw;
-    }
-
-    gsm.EndAlgorithmMonitor();
-    return new Mixed_ListPortion(solutions);
+  try {
+    solutions = algorithm->Solve(support, gsm.GetStatusMonitor());
   }
-  else  {
-    gList<MixedSolution> solutions;
-
-    try {
-      SimpdivModule<gRational> SM(S, SP);
-      SM.Simpdiv(gsm.GetStatusMonitor());
-      solutions = SM.GetSolutions();
-
-      ((NumberPortion *) param[5])->SetValue(SM.NumEvals());
-      ((NumberPortion *) param[6])->SetValue(SM.Time());
-    }
-    catch (gSignalBreak &) { }
-    catch (...) {
-      gsm.EndAlgorithmMonitor();
-      throw;
-    }
-
+  catch (gSignalBreak &) { }
+  catch (...) {
+    delete algorithm;
     gsm.EndAlgorithmMonitor();
-    return new Mixed_ListPortion(solutions);
+    throw;
   }
+
+  delete algorithm;
+  gsm.EndAlgorithmMonitor();
+  return new Mixed_ListPortion(solutions);
 }
-
-#include "nash/simpsub.h"
 
 static Portion *GSM_Simpdiv_Efg(GSM &gsm, Portion **param)
 {
-  EFSupport &support = *((EfSupportPortion *) param[0])->Value();
+  const EFSupport &support = AsEfgSupport(param[0]);
 
-  if (!((BoolPortion *) param[1])->Value())
+  if (!AsBool(param[1])) {
     throw gclRuntimeError("algorithm not implemented for extensive forms");
+  }
 
   if (!IsPerfectRecall(support.GetGame())) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Simpdiv; results not guaranteed\n";
   }
 
-  SimpdivParams params;
-  params.stopAfter = ((NumberPortion *) param[2])->Value();
-  params.nRestarts = ((NumberPortion *) param[3])->Value();
-  params.leashLength = ((NumberPortion *) param[4])->Value();
-  params.precision = ((PrecisionPortion *) param[5])->Value();
-  params.tracefile = &((OutputPortion *) param[8])->Value();
-  params.trace = ((NumberPortion *) param[9])->Value();
+  nfgNashAlgorithm *nfgAlgorithm = 0;
 
-  gList<BehavSolution> solutions;
+  if (((PrecisionPortion *) param[5])->Value() == precDOUBLE) {
+    nfgAlgorithm = GSM_Simpdiv_Nfg_Double(AsNumber(param[2]),
+					  AsNumber(param[3]),
+					  AsNumber(param[4]));
+  }
+  else {
+    nfgAlgorithm = GSM_Simpdiv_Nfg_Rational(AsNumber(param[2]),
+					    AsNumber(param[3]),
+					    AsNumber(param[4]));
+  }
+
+  if (!IsPerfectRecall(support.GetGame())) {
+    gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Simpdiv; results not guaranteed\n";
+  }
+
+  SubgameSolver algorithm;
+  algorithm.SetAlgorithm(nfgAlgorithm);
+
   gsm.StartAlgorithmMonitor("SimpDivSolve Progress");
+  gList<BehavSolution> solutions;
   try {
-    efgSimpDivNfgSolve algorithm(params);
     solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
-    ((NumberPortion *) param[6])->SetValue(algorithm.NumEvals());
-    ((NumberPortion *) param[7])->SetValue(algorithm.Time());
   }
   catch (gSignalBreak &) { }
   catch (...) {
     gsm.EndAlgorithmMonitor();
-    throw;
+     throw;
   }
-
   gsm.EndAlgorithmMonitor();
   return new Behav_ListPortion(solutions);
 }
@@ -1385,7 +1143,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 4, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 5, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
+					    new OutputPortion(*new gNullOutput), 
 					    BYREF));
   FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
@@ -1406,7 +1164,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 5, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(1, 6, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
+					    new OutputPortion(*new gNullOutput), 
 					    BYREF));
   FuncObj->SetParamInfo(1, 7, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
@@ -1425,7 +1183,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 2, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 3, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
+					    new OutputPortion(*new gNullOutput), 
 					    BYREF));
   FuncObj->SetParamInfo(0, 4, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
@@ -1442,7 +1200,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 4, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(1, 5, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
+					    new OutputPortion(*new gNullOutput), 
 					    BYREF));
   FuncObj->SetParamInfo(1, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
@@ -1478,7 +1236,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 12, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 13, gclParameter("traceFile", porOUTPUT,
-					     new OutputPortion(gnull),
+					     new OutputPortion(*new gNullOutput),
 					     BYREF));
   FuncObj->SetParamInfo(0, 14, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
@@ -1511,7 +1269,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 10, gclParameter("nIters", porINTEGER,
 					     new NumberPortion(0), BYREF));
   FuncObj->SetParamInfo(0, 11, gclParameter("traceFile", porOUTPUT,
-					     new OutputPortion(gnull), 
+					     new OutputPortion(*new gNullOutput), 
 					     BYREF));
   FuncObj->SetParamInfo(0, 12, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
@@ -1547,7 +1305,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 10, gclParameter("nIters", porINTEGER,
 					     new NumberPortion(0), BYREF));
   FuncObj->SetParamInfo(0, 11, gclParameter("traceFile", porOUTPUT,
-					     new OutputPortion(gnull), 
+					     new OutputPortion(*new gNullOutput), 
 					     BYREF));
   FuncObj->SetParamInfo(0, 12, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
@@ -1568,7 +1326,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 4, gclParameter("time", porNUMBER,
 					    new NumberPortion(0), BYREF));
   FuncObj->SetParamInfo(0, 5, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull),
+					    new OutputPortion(*new gNullOutput),
 					    BYREF));
   FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
@@ -1587,7 +1345,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 5, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(1, 6, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
+					    new OutputPortion(*new gNullOutput), 
 					    BYREF));
   FuncObj->SetParamInfo(1, 7, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
@@ -1621,7 +1379,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 6, gclParameter("nEvals", porINTEGER,
 					    new NumberPortion(0), BYREF));
   FuncObj->SetParamInfo(0, 7, gclParameter("traceFile", porOUTPUT,
-					     new OutputPortion(gnull), 
+					     new OutputPortion(*new gNullOutput), 
 					     BYREF));
   FuncObj->SetParamInfo(0, 8, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
@@ -1640,7 +1398,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 5, gclParameter("nEvals", porINTEGER,
 					    new NumberPortion(0), BYREF));
   FuncObj->SetParamInfo(1, 6, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
+					    new OutputPortion(*new gNullOutput), 
 					    BYREF));
   FuncObj->SetParamInfo(1, 7, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
@@ -1659,7 +1417,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 3, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 4, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull),
+					    new OutputPortion(*new gNullOutput),
 					    BYREF));
   FuncObj->SetParamInfo(0, 5, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
@@ -1676,7 +1434,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 4, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(1, 5, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
+					    new OutputPortion(*new gNullOutput), 
 					    BYREF));
   FuncObj->SetParamInfo(1, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
@@ -1717,7 +1475,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 3, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 4, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
+					    new OutputPortion(*new gNullOutput), 
 					    BYREF));
   FuncObj->SetParamInfo(0, 5, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
@@ -1739,7 +1497,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 4, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(1, 5, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
+					    new OutputPortion(*new gNullOutput), 
 					   BYREF));
   FuncObj->SetParamInfo(1, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
@@ -1766,7 +1524,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 5, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 6, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
+					    new OutputPortion(*new gNullOutput), 
 					    BYREF));
   FuncObj->SetParamInfo(0, 7, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
@@ -1805,7 +1563,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 6, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 7, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull),
+					    new OutputPortion(*new gNullOutput),
 					    BYREF));
   FuncObj->SetParamInfo(0, 8, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
@@ -1828,7 +1586,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 7, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(1, 8, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull),
+					    new OutputPortion(*new gNullOutput),
 					    BYREF));
   FuncObj->SetParamInfo(1, 9, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
