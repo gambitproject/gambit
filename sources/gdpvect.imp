@@ -16,24 +16,13 @@ int gDPVector<T>::sum(int part, const gPVector<int> &v) const
 {
   int s = 0;
 
-  gTuple<int> len(v.Lengths());
+  gArray<int> len(v.Lengths());
   for (int j = 1; j <= len[part]; j++)
     s += v(part, j);
 
   return s;
 }
 
-template <class T>
-gTuple<int> gDPVector<T>::Flatten(const gPVector<int> &v) const
-{
-  gTuple<int> t(v.Length());
-  
-  for (int i = 1; i <= v.Length(); i++)
-    t[i] = v[i];
-
-  return t;
-}
-  
 template <class T> void gDPVector<T>::setindex(void)
 {
   int index = 1;
@@ -44,6 +33,13 @@ template <class T> void gDPVector<T>::setindex(void)
     index += dvlen[i];
   }
 }
+
+template <class T> bool gDPVector<T>::Check(const gDPVector<T> &v) const
+{
+  for (int i = 1; i <= dvlen.Length(); i++)
+    if (dvlen[i] != v.dvlen[i])   return false;
+  return true;
+}
     
 //--------------------------------------------------------------------------
 //    gDPVector<T>: Constructors, destructor, and constructive operators
@@ -53,7 +49,7 @@ template <class T> gDPVector<T>::gDPVector(void) : dvptr(0)
 { }
 
 template <class T> gDPVector<T>::gDPVector(const gPVector<int> &sig)
-  : gPVector<T>(Flatten(sig)), dvlen(sig.Lengths().Length()),
+  : gPVector<T>(sig), dvlen(sig.Lengths().Length()),
     dvidx(sig.Lengths().Length())
 {
   dvptr = new T **[dvlen.Length()];
@@ -67,7 +63,7 @@ template <class T> gDPVector<T>::gDPVector(const gPVector<int> &sig)
 
 template <class T> gDPVector<T>::gDPVector(const gVector<T> &val,
 					   const gPVector<int> &sig)
-  : gPVector<T>(val, Flatten(sig)), dvlen(sig.Lengths().Length()),
+  : gPVector<T>(val, sig), dvlen(sig.Lengths().Length()),
     dvidx(sig.Lengths().Length())
 {
   dvptr = new T **[dvlen.Length()];
@@ -95,7 +91,7 @@ template <class T> gDPVector<T>::~gDPVector()
 
 template <class T> gDPVector<T> &gDPVector<T>::operator=(const gDPVector<T> &v)
 {
-  assert(dvlen == v.dvlen);
+  assert(Check(v));
   gPVector<T>::operator=(v);
   return *this;
 }
@@ -143,7 +139,7 @@ template <class T> const T &gDPVector<T>::operator()(int a, int b, int c) const
 template <class T>
 gDPVector<T> gDPVector<T>::operator+(const gDPVector<T> &v) const
 {
-  assert(dvlen == v.dvlen);
+  assert(Check(v));
   gDPVector<T> tmp(*this);
   tmp.gPVector<T>::operator+=(v);
   return tmp;
@@ -152,7 +148,7 @@ gDPVector<T> gDPVector<T>::operator+(const gDPVector<T> &v) const
 template <class T>
 gDPVector<T> &gDPVector<T>::operator+=(const gDPVector<T> &v)
 {
-  assert(dvlen == v.dvlen);
+  assert(Check(v));
   gPVector<T>::operator+=(v);
   return *this;
 }
@@ -168,7 +164,7 @@ template <class T> gDPVector<T> gDPVector<T>::operator-(void) const
 template <class T>
 gDPVector<T> gDPVector<T>::operator-(const gDPVector<T> &v) const
 {
-  assert(dvlen == v.dvlen);
+  assert(Check(v));
   gDPVector<T> tmp(*this);
   tmp.gPVector<T>::operator-=(v);
   return tmp;
@@ -177,14 +173,14 @@ gDPVector<T> gDPVector<T>::operator-(const gDPVector<T> &v) const
 template <class T>
 gDPVector<T> &gDPVector<T>::operator-=(const gDPVector<T> &v)
 {
-  assert(dvlen == v.dvlen);
+  assert(Check(v));
   gPVector<T>::operator-=(v);
   return *this;
 }
 
 template <class T> T gDPVector<T>::operator*(const gDPVector<T> &v) const
 {
-  assert(dvlen == v.dvlen);
+  assert(Check(v));
   return (*this).gPVector<T>::operator*(v);
 }
 
@@ -203,7 +199,7 @@ template <class T> gDPVector<T> gDPVector<T>::operator/(const T &c) const
 
 template <class T> int gDPVector<T>::operator==(const gDPVector<T> &v) const
 {
-  assert(dvlen == v.dvlen);
+  assert(Check(v));
   return gPVector<T>::operator==(v);
 }
 
@@ -216,9 +212,10 @@ template <class T> int gDPVector<T>::operator!=(const gDPVector<T> &v) const
 //                 gDPVector<T>: General data access
 //-------------------------------------------------------------------------
 
-template <class T> void gDPVector<T>::CopySubRow(int row, int col, const gDPVector<T> &v)
+template <class T>
+void gDPVector<T>::CopySubRow(int row, int col, const gDPVector<T> &v)
 {
-  assert(dvlen == v.dvlen);
+  assert(Check(v));
   assert(dvlen.First() <= row && row <= dvlen.Last());
   assert(1 <= col && col <= dvlen[row]);
 
@@ -228,7 +225,7 @@ template <class T> void gDPVector<T>::CopySubRow(int row, int col, const gDPVect
 
 
 
-template <class T> const gTuple<int> &gDPVector<T>::DPLengths(void) const
+template <class T> const gArray<int> &gDPVector<T>::DPLengths(void) const
 {
   return dvlen;
 }

@@ -246,7 +246,7 @@ template <class T> int ExtForm<T>::ProfileLength(bool trunc) const
 
 template <class T> gPVector<int> ExtForm<T>::Dimensionality(bool trunc) const
 {
-  gTuple<int> foo(players.Length());
+  gArray<int> foo(players.Length());
   for (int i = 1; i <= players.Length(); i++)
     foo[i] = players[i]->infosets.Length();
 

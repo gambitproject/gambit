@@ -11,13 +11,14 @@
 
 template <class T> class gDPVector : public gPVector<T>  {
   private:
-    gTuple<int> Flatten(const gPVector<int> &V) const;
     int sum(int part, const gPVector<int> &v) const;
     void setindex(void);
 
+    bool Check(const gDPVector<T> &) const;
+
   protected:
     T ***dvptr;
-    gTuple<int> dvlen, dvidx;
+    gArray<int> dvlen, dvidx;
 
   public:
     gDPVector(void);
@@ -49,7 +50,7 @@ template <class T> class gDPVector : public gPVector<T>  {
     int operator==(const gDPVector<T> &v) const;
     int operator!=(const gDPVector<T> &v) const;
 
-    const gTuple<int> &DPLengths(void) const;
+    const gArray<int> &DPLengths(void) const;
 
     void Dump(gOutput &) const;
 };

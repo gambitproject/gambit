@@ -11,7 +11,7 @@
 //          gPVector<T>: Private and protected member functions
 //-------------------------------------------------------------------------
 
-template <class T> int gPVector<T>::sum(const gTuple<int> &V) const
+template <class T> int gPVector<T>::sum(const gArray<int> &V) const
 {
   for (int i = V.First(), total = 0; i <= V.Last(); total += V[i++]);
   return total;
@@ -30,7 +30,12 @@ template <class T> void gPVector<T>::setindex(void)
 
 template <class T> int gPVector<T>::Check(const gPVector<T> &v) const
 {
-  return (v.min == min && v.max == max && v.svlen == svlen);
+  if (v.min == min && v.max == max)  {
+    for (int i = 1; i <= svlen.Length(); i++)
+      if (svlen[i] != v.svlen[i])   return 0;
+    return 1;
+  }
+  return 0;
 }
 
 //-------------------------------------------------------------------------
@@ -40,7 +45,7 @@ template <class T> int gPVector<T>::Check(const gPVector<T> &v) const
 template <class T> gPVector<T>::gPVector(void) : svptr(0)
 { }
 
-template <class T> gPVector<T>::gPVector(const gTuple<int> &sig)
+template <class T> gPVector<T>::gPVector(const gArray<int> &sig)
   : gVector<T>(sum(sig)), svlen(sig)
 {
   svptr = new T *[sig.Last() - sig.First() + 1];
@@ -49,7 +54,7 @@ template <class T> gPVector<T>::gPVector(const gTuple<int> &sig)
 }
 
 template <class T> gPVector<T>::gPVector(const gVector<T> &val,
-					 const gTuple<int> &sig)
+					 const gArray<int> &sig)
   : gVector<T>(val), svlen(sig)
 {
   assert(sum(svlen) == val.Length());
@@ -73,7 +78,7 @@ template <class T> gPVector<T>::~gPVector()
 
 template <class T> gPVector<T>& gPVector<T>::operator=(const gPVector<T> &v)
 {
-  assert(svlen == v.svlen);
+  assert(Check(v));
   gVector<T>::operator=(v);
   return (*this);
 }
@@ -113,7 +118,7 @@ template <class T> const T& gPVector<T>::operator()(int a, int b) const
 template <class T>
 gPVector<T> gPVector<T>::operator+(const gPVector<T> &v) const
 {
-  assert( svlen==v.svlen );
+  assert(Check(v));
   gPVector<T> tmp(*this);
   tmp.gVector<T>::operator+=(v);
   return tmp;
@@ -121,7 +126,7 @@ gPVector<T> gPVector<T>::operator+(const gPVector<T> &v) const
 
 template <class T> gPVector<T>& gPVector<T>::operator+=(const gPVector<T> &v)
 {
-  assert( svlen==v.svlen );
+  assert(Check(v));
   gVector<T>::operator+=(v);
   return (*this);
 }
@@ -137,7 +142,7 @@ template <class T> gPVector<T> gPVector<T>::operator-(void) const
 template <class T>
 gPVector<T> gPVector<T>::operator-(const gPVector<T> &v) const
 {
-  assert( svlen==v.svlen );
+  assert(Check(v));
   gPVector<T> tmp(*this);
   tmp.gVector<T>::operator-=(v);
   return tmp;
@@ -145,14 +150,14 @@ gPVector<T> gPVector<T>::operator-(const gPVector<T> &v) const
 
 template <class T> gPVector<T>& gPVector<T>::operator-=(const gPVector<T> &v)
 {
-  assert( svlen==v.svlen );
+  assert(Check(v));
   gVector<T>::operator-=(v);
   return (*this);
 }
 
 template <class T> T gPVector<T>::operator*(const gPVector<T> &v) const
 {
-  assert( svlen==v.svlen );
+  assert(Check(v));
   return (*this).gVector<T>::operator*(v);
 }
 
@@ -171,7 +176,7 @@ template <class T> gPVector<T> gPVector<T>::operator/(T c)
 
 template <class T> int gPVector<T>::operator==(const gPVector<T> &v) const
 {
-  assert( svlen==v.svlen );
+  assert(Check(v));
   return (*this).gVector<T>::operator==(v);
 }
 
@@ -212,14 +217,14 @@ template <class T> void gPVector<T>::SetRow(int row, const gVector<T> &v)
 
 template <class T> void gPVector<T>::CopyRow(int row, const gPVector<T> &v)
 {
-  assert(svlen == v.svlen);
+  assert(Check(v));
   assert(svlen.First() <= row && row <= svlen.Last());
 
   for (int i = 1; i <= svlen[row]; i++)
     svptr[row][i] = v.svptr[row][i];
 }
 
-template <class T> const gTuple<int> &gPVector<T>::Lengths(void) const
+template <class T> const gArray<int> &gPVector<T>::Lengths(void) const
 {
   return svlen;
 }

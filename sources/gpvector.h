@@ -8,16 +8,15 @@
 #define GPVECTOR_H
 
 #include "gvector.h"
-#include "gtuple.h"
 
 template <class T> class gPVector : public gVector<T> {
  private:
-  int sum(const gTuple<int> &V) const;
+  int sum(const gArray<int> &V) const;
   void setindex(void);
 
  protected:
   T **svptr;
-  gTuple<int> svlen;
+  gArray<int> svlen;
 
   int Check(const gPVector<T> &v) const;
 
@@ -26,8 +25,8 @@ template <class T> class gPVector : public gVector<T> {
   // constructors
 
   gPVector(void);
-  gPVector(const gTuple<int> &sig);
-  gPVector(const gVector<T> &val, const gTuple<int> &sig);
+  gPVector(const gArray<int> &sig);
+  gPVector(const gVector<T> &val, const gArray<int> &sig);
   gPVector(const gPVector<T> &v);
   virtual ~gPVector();
 
@@ -61,7 +60,7 @@ template <class T> class gPVector : public gVector<T> {
   int operator!=(const gPVector<T> &v) const;
 
   // parameter access functions
-  const gTuple<int>& Lengths(void) const;
+  const gArray<int>& Lengths(void) const;
 
   void Dump(gOutput &) const;
 };
