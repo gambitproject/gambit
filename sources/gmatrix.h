@@ -158,6 +158,8 @@ public:
   void SwitchRow(int, const gVector<T> &);
   void SwitchRows(int, int);
   gVector<T> GetRow(int) const;
+  void GetRow(int, gVector<T>&) const;
+  void SetRow(int, const gVector<T>&);
 
   void AddColumn(const gVector<T> &);
   void RemoveColumn(int);
@@ -165,6 +167,8 @@ public:
   void SwitchColumnWithVector(int, gVector<T> &);
   void SwitchColumns(int, int);
   gVector<T> GetColumn(int) const;
+  void GetColumn(int, gVector<T>&) const;
+  void SetColumn(int, const gVector<T>&);
 
   gMatrix<T> GetSlice(int, int, int, int) const;
   gMatrix<T> GetSubMatrix(const gBlock<int> &, const gBlock<int> &) const;
@@ -511,6 +515,24 @@ gMatrix<T>::GetRow(int row) const
 }
 
 template <class T> void
+gMatrix<T>::GetRow(int row, gVector<T> &v) const
+{
+  assert( CheckRow(row) );
+  assert( CheckRow(v) );
+  for(int i=mincol; i<=maxcol; i++)
+    v[i]= (*this)(row,i);
+}
+
+template <class T> void
+gMatrix<T>::SetRow(int row, const gVector<T> &v)
+{
+  assert( CheckRow(row) );
+  assert( CheckRow(v) );
+  for(int i=mincol; i<=maxcol; i++)
+    (*this)(row,i)= v[i];
+}
+
+template <class T> void
 gMatrix<T>::RotateUp(int lo, int hi)
 {
   assert( CheckRow(lo) && CheckRow(hi) );
@@ -610,6 +632,24 @@ gMatrix<T>::GetColumn(int col) const
   for(int i=minrow; i<=maxrow; i++)
     v[i]= (*this)(i,col);
   return v;
+}
+
+template <class T> void
+gMatrix<T>::GetColumn(int col, gVector<T> &v) const
+{
+  assert( CheckColumn(col) );
+  assert( CheckColumn(v) );
+  for(int i=minrow; i<=maxrow; i++)
+    v[i]= (*this)(i,col);
+}
+
+template <class T> void
+gMatrix<T>::SetColumn(int col, const gVector<T> &v)
+{
+  assert( CheckColumn(col) );
+  assert( CheckColumn(v) );
+  for(int i=minrow; i<=maxrow; i++)
+    (*this)(i,col)= v[i];
 }
 
 
