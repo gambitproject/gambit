@@ -2605,6 +2605,7 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
+
   machine->InitCallFunction( "ReadDefaultEfg" );
   machine->InitCallFunction( "Input" );
   machine->Push( "e02rat.efg" );
@@ -2613,7 +2614,7 @@ int main( void )
   machine->Bind();
   machine->CallFunction();
   machine->Dump();
-  
+
   machine->InitCallFunction( "DefaultEfg" );
   machine->CallFunction();
   machine->Dump();
@@ -2865,7 +2866,113 @@ int main( void )
   machine->PushRef( "OUTPUT" );
   machine->UnAssign();
   machine->Dump();
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
   
+
+  prog = new gList< Instruction* >;
+  prog->Append( new PushRef( "a" ) );
+  prog->Append( new Push<double>( 1 ) );
+  prog->Append( new Assign );
+
+  func = new FuncDescObj( "TestRef" );
+  func->SetFuncInfo( prog, 1 );
+  func->SetParamInfo( prog, 0, "a", porFLOAT, 
+		     NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  machine->AddFunction( func );
+
+
+  machine->PushRef( "dx1" );
+  machine->Push( (double) 2 );
+  machine->Assign();
+  machine->Dump();
+
+
+  machine->InitCallFunction( "TestRef" );
+  machine->PushRef( "dx1" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "dx1" );
+  machine->Dump();
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+
+  machine->PushRef( "E" );
+  machine->InitCallFunction( "ReadEfg" );
+  machine->InitCallFunction( "Input" );
+  machine->Push( "e02.efg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Output();
+
+
+/*
+  machine->InitCallFunction( "WriteEfg" );
+
+  machine->InitCallFunction( "WriteEfg" );
+  machine->InitCallFunction( "Output" );
+  machine->Push( "e02out.efg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->PushRef( "E" );
+  machine->Bind();
+  machine->CallFunction();
+
+  machine->Bind();
+  machine->PushRef( "E" );
+  machine->Bind();
+  machine->CallFunction();
+
+  machine->Output();
+  
+  machine->Dump();
+*/
+
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+  
+
+  machine->PushRef( "la" );
+  machine->PushList( 0 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "la" );
+  machine->PushRef( "la" );
+  machine->Push( (long) 1 );
+  machine->PushList( 1 );
+  machine->Add();
+  machine->Assign();
+  machine->Dump();
+  
+  machine->PushRef( "la" );
+  machine->Dump();
+
+
+
 
   gout << "*********************** Press Return to continue ************";
   gin >> cont;

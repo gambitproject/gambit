@@ -335,11 +335,15 @@ Portion *GSM_RootNode(Portion **param)
 
 Portion *GSM_WriteEfg(Portion **param)
 {
+  Portion* result;
   gOutput &f = ((OutputPortion *) param[0])->Value();
   BaseExtForm *E = &((BaseEfgPortion *) param[1])->Value();
   
   E->WriteEfgFile(f);
-  return new OutputValPortion(f);
+
+  result = param[ 0 ];
+  param[ 0 ] = 0;
+  return result;
 }
 
 void Init_efgfunc(GSM *gsm)

@@ -1312,7 +1312,8 @@ void ListPortion::AssignFrom( Portion* p )
   gBlock< Portion* >& value = *( ( (ListPortion*) p )->_Value );
 
   assert( p->Type() == Type() );
-  assert( ( (ListPortion*) p )->_DataType == _DataType );
+  assert( ( (ListPortion*) p )->_DataType == _DataType || 
+	 _DataType == porUNKNOWN);
 
   Flush();
   delete _Value;
