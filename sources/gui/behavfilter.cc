@@ -123,9 +123,6 @@ bool BehavListFilter::LessThan(const BehavSolution &a,
   case BSORT_BY_SEQ:
     return (a.IsSequential() < b.IsSequential());
 
-  case BSORT_BY_GVALUE:
-    return (a.QreValue() < b.QreValue());
-
   case BSORT_BY_GLAMBDA:
     return (a.QreLambda() < b.QreLambda());
 

@@ -38,21 +38,21 @@ dialogEfgSolveStandard::dialogEfgSolveStandard(wxWindow *p_parent,
   wxString typeChoices[] = { "Nash", "Subgame Perfect", "Sequential" };
   m_standardType = new wxRadioBox(this, idTYPE_RADIOBOX, "Type",
 				  wxDefaultPosition, wxDefaultSize,
-				  3, typeChoices, 0, wxRA_SPECIFY_ROWS);
+				  3, typeChoices, 1, wxRA_SPECIFY_COLS);
   m_standardType->SetStringSelection(standardType);
   radioSizer->Add(m_standardType, 0, wxALL, 5);
 
   wxString numChoices[] = { "One", "Two", "All" };
   m_standardNum = new wxRadioBox(this, idNUM_RADIOBOX, "Number",
 				 wxDefaultPosition, wxDefaultSize,
-				 3, numChoices, 0, wxRA_SPECIFY_ROWS);
+				 3, numChoices, 1, wxRA_SPECIFY_COLS);
   m_standardNum->SetStringSelection(standardNum);
   radioSizer->Add(m_standardNum, 0, wxALL, 5);
 
   wxString precisionChoices[] = { "Float", "Rational" };
   m_precision = new wxRadioBox(this, -1, "Precision",
 			       wxDefaultPosition, wxDefaultSize,
-			       2, precisionChoices, 0, wxRA_SPECIFY_ROWS);
+			       2, precisionChoices, 1, wxRA_SPECIFY_COLS);
   m_precision->SetStringSelection(precision);
   radioSizer->Add(m_precision, 0, wxALL, 5);
   

@@ -2161,6 +2161,12 @@ void EfgShow::OnToolsEquilibriumStandard(wxCommandEvent &)
 
   ChangeProfile(m_profileTable->Length());
   UpdateMenus();
+  if (!m_solutionSashWindow->IsShown())  {
+    m_profileTable->Show(true);
+    m_solutionSashWindow->Show(true);
+    GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+    AdjustSizes();
+  }
 }
 
 void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
@@ -2259,6 +2265,12 @@ void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
  
   ChangeProfile(m_profileTable->Length());
   UpdateMenus();
+  if (!m_solutionSashWindow->IsShown())  {
+    m_profileTable->Show(true);
+    m_solutionSashWindow->Show(true);
+    GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+    AdjustSizes();
+  }
 }
 
 void EfgShow::OnToolsEquilibriumQre(wxCommandEvent &)

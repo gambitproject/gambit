@@ -10,7 +10,6 @@
 #endif  // WX_PRECOMP
 #include "efgprofile.h"
 
-#include "legendc.h"
 #include "treewin.h"
 
 //-------------------------------------------------------------------------
@@ -39,7 +38,7 @@ EfgProfileList::EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent)
   m_menu->Append(efgmenuPROFILES_EDIT, "Edit", "Edit this profile");
   m_menu->Append(efgmenuPROFILES_DELETE, "Delete", "Delete this profile");
 
-  CreateGrid(0, 8);
+  CreateGrid(0, 7);
   SetLabelValue(wxHORIZONTAL, "Name", 0);
   SetLabelValue(wxHORIZONTAL, "Creator", 1);
   SetLabelValue(wxHORIZONTAL, "Nash", 2);
@@ -47,7 +46,6 @@ EfgProfileList::EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent)
   SetLabelValue(wxHORIZONTAL, "Sequential", 4);
   SetLabelValue(wxHORIZONTAL, "Liap Value", 5);
   SetLabelValue(wxHORIZONTAL, "Qre Lambda", 6);
-  SetLabelValue(wxHORIZONTAL, "Qre Value", 7);
 
   EnableGridLines(false);
   SetLabelSize(wxVERTICAL, 0);
@@ -73,6 +71,10 @@ void EfgProfileList::UpdateValues(void)
   if (GetRows() > 0) {
     DeleteRows(0, GetRows());
   }
+  if (m_displayOrder.Length() != Length()) {
+    // probably a profile was added/deleted; better rebuild display order
+    Resort();
+  }
   if (!m_options.FilterNash()[1] || !m_options.FilterNash()[2] ||
       !m_options.FilterNash()[3]) {
     SetCellTextColour(*wxGREEN, -1, 2);
@@ -93,11 +95,9 @@ void EfgProfileList::UpdateValues(void)
     if (solution.Creator() == algorithmEfg_QRE_EFG ||
 	solution.Creator() == algorithmEfg_QRE_NFG) {
       SetCellValue(i - 1, 6, (char *) ToText(solution.QreLambda()));
-      SetCellValue(i - 1, 7, (char *) ToText(solution.QreValue()));
     }
     else {
-      SetCellValue(i - 1, 6, "N/A");
-      SetCellValue(i - 1, 7, "N/A");
+      SetCellValue(i - 1, 6, "--");
     }
     if (m_options.SortBy() != BSORT_NONE) {
       SetCellBackgroundColour(i - 1, m_options.SortBy() - 1, *wxCYAN);
@@ -151,8 +151,6 @@ void EfgProfileList::Resort(void)
 		     (sol1.LiapValue() > sol2.LiapValue()));
       outoforder |= (m_options.SortBy() == BSORT_BY_GLAMBDA &&
 		     (sol1.QreLambda() > sol2.QreLambda()));
-      outoforder |= (m_options.SortBy() == BSORT_BY_GVALUE &&
-		     (sol1.QreValue() > sol2.QreValue()));
       if (outoforder) {
 	int foo = m_displayOrder[i];
 	m_displayOrder[i] = m_displayOrder[i+1];
@@ -190,7 +188,11 @@ int EfgProfileList::Append(const BehavSolution &p_solution)
 void EfgProfileList::OnLeftClick(wxGridEvent &p_event)
 {
   m_parent->ChangeProfile(m_displayOrder[p_event.GetRow() + 1]);
+  for (int j = 0; j < GetCols(); j++) {
+    SetCellTextColour(p_event.GetRow(), j, *wxRED);
+  }
   p_event.Veto();
+  Refresh();
 }
 
 void EfgProfileList::OnRightClick(wxGridEvent &p_event)
