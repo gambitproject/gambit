@@ -12,7 +12,6 @@ gui:
 	$(MAKE) -f Makefile gui GUI=$(GUI) HOST=$(HOST) GET=$(GET)
 #	-strip gui_$(GUI)_$(HOST)
 	cp $(WXDIR)/utils/wxhelp/src/wxhelp_$(GUI)_$(HOST) ./wxhelp
-	cp ~/.gambit.ini .
 	zip gambit_$(GUI)_$(HOST) gui_$(GUI)_$(HOST) wxhelp gambit.xlp \
 		./efg/*.efg ./nfg/*.nfg .gambit.ini
 	ftp_put gambit_$(GUI)_$(HOST).zip
