@@ -204,6 +204,8 @@ LiapDerivValue(int i1, int j1, const gPVector<T> &p) const
 //{
 //}
 
+template class LiapModule<double>;
+
 int LiapSolver::Liap(void)
 //int LiapModule::Liap(int number, int plev, gOutput &out, gOutput &err,
 //		   int &nevals, int &nits)
