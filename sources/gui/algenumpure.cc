@@ -27,7 +27,7 @@
 
 const int idSTOPAFTER = 9000;
 
-class panelEnumPure : public wxPanel {
+class dialogEnumPure : public wxDialog {
 private:
   wxRadioBox *m_stopAfter;
   wxStaticText *m_stopAfterText;
@@ -38,25 +38,29 @@ private:
   void OnStopAfter(wxCommandEvent &);
 
 public:
-  panelEnumPure(wxWindow *p_parent);
+  dialogEnumPure(wxWindow *p_parent);
 
-  virtual bool Validate(void);
-
+  // Data access
+  bool SelectSolutions(void) const { return true; }
   int StopAfter(void) const;
+
+  // Redefined virtual functions
+  bool Validate(void);
 
   DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(panelEnumPure, wxPanel)
-  EVT_RADIOBOX(idSTOPAFTER, panelEnumPure::OnStopAfter)
+BEGIN_EVENT_TABLE(dialogEnumPure, wxDialog)
+  EVT_RADIOBOX(idSTOPAFTER, dialogEnumPure::OnStopAfter)
 END_EVENT_TABLE()
 
-panelEnumPure::panelEnumPure(wxWindow *p_parent)
-  : wxPanel(p_parent, -1), m_stopAfterValue("1")
+dialogEnumPure::dialogEnumPure(wxWindow *p_parent)
+  : wxDialog(p_parent, -1, "EnumPureSolve Parameters"),
+    m_stopAfterValue("1")
 {
   SetAutoLayout(true);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer *paramSizer = new wxBoxSizer(wxHORIZONTAL);
 
   wxString stopAfterChoices[] = { "Find one", "Find two",
 				  "Find n", "Find all" };
@@ -64,7 +68,7 @@ panelEnumPure::panelEnumPure(wxWindow *p_parent)
 			       wxDefaultPosition, wxDefaultSize,
 			       4, stopAfterChoices, 1, wxRA_SPECIFY_COLS);
   m_stopAfter->SetSelection(0);
-  topSizer->Add(m_stopAfter, 0, wxALL, 5);
+  paramSizer->Add(m_stopAfter, 0, wxALL, 5);
 
   wxBoxSizer *stopAfterSizer = new wxBoxSizer(wxVERTICAL);
   m_stopAfterText = new wxStaticText(this, wxID_STATIC,
@@ -76,7 +80,21 @@ panelEnumPure::panelEnumPure(wxWindow *p_parent)
 				    "Stop After");
   m_stopAfterCount->SetValue(m_stopAfterValue);
   stopAfterSizer->Add(m_stopAfterCount, 0, wxALL | wxCENTER, 5);
-  topSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 0);
+  paramSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 0);
+
+  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, wxID_CANCEL, "Cancel");
+  wxButton *helpButton = new wxButton(this, wxID_HELP, "Help");
+
+  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  buttonSizer->Add(okButton, 0, wxALL, 5);
+  buttonSizer->Add(cancelButton, 0, wxALL, 5);
+  buttonSizer->Add(helpButton, 0, wxALL, 5);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(paramSizer, 0, wxALL, 5);
+  topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -87,13 +105,13 @@ panelEnumPure::panelEnumPure(wxWindow *p_parent)
   m_stopAfterCount->Show(m_stopAfter->GetSelection() == 2);
 }
 
-void panelEnumPure::OnStopAfter(wxCommandEvent &)
+void dialogEnumPure::OnStopAfter(wxCommandEvent &)
 {
   m_stopAfterText->Show(m_stopAfter->GetSelection() == 2);
   m_stopAfterCount->Show(m_stopAfter->GetSelection() == 2);
 }
 
-int panelEnumPure::StopAfter(void) const
+int dialogEnumPure::StopAfter(void) const
 {
   switch (m_stopAfter->GetSelection()) {
   case 0:
@@ -108,71 +126,9 @@ int panelEnumPure::StopAfter(void) const
   }
 }
 
-bool panelEnumPure::Validate(void)
+bool dialogEnumPure::Validate(void)
 {
   return (m_stopAfter->GetSelection() != 2 || wxWindow::Validate());
-}
-
-class dialogEnumPure : public wxDialog {
-private:
-  wxNotebook *m_notebook;
-  panelEnumPure *m_algorithm;
-
-  // Event handlers
-  void OnOK(wxCommandEvent &);
-
-public:
-  dialogEnumPure(wxWindow *p_parent);
-  bool SelectSolutions(void) const { return true; }
-  int StopAfter(void) const { return m_algorithm->StopAfter(); }
-
-  DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(dialogEnumPure, wxDialog)
-  EVT_BUTTON(wxID_OK, dialogEnumPure::OnOK)
-END_EVENT_TABLE()
-
-dialogEnumPure::dialogEnumPure(wxWindow *p_parent)
-  : wxDialog(p_parent, -1, "EnumPureSolve Parameters")
-{
-  SetAutoLayout(true);
-
-  m_notebook = new wxNotebook(this, -1);
-  m_algorithm = new panelEnumPure(m_notebook);
-  m_notebook->AddPage(m_algorithm, "Algorithm");
-  wxPanel *tracePanel = new wxPanel(m_notebook, -1);
-  m_notebook->AddPage(tracePanel, "Trace");
-
-  wxNotebookSizer *notebookSizer = new wxNotebookSizer(m_notebook);
-
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, wxID_CANCEL, "Cancel");
-  wxButton *helpButton = new wxButton(this, wxID_HELP, "Help");
-
-  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(cancelButton, 0, wxALL, 5);
-  buttonSizer->Add(helpButton, 0, wxALL, 5);
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(notebookSizer, 1, wxALL | wxEXPAND, 5);
-  topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-  Layout();
-}
-
-void dialogEnumPure::OnOK(wxCommandEvent &)
-{
-  if (!m_algorithm->Validate()) {
-    m_notebook->SetSelection(0);
-    return;
-  }
-
-  EndModal(wxID_OK);
 }
 
 //========================================================================
