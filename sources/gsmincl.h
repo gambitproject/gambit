@@ -10,6 +10,8 @@
 #define GSMINCL_H
 
 #include "gstring.h"
+#include "gmisc.h"
+
 class gString;
 class gOutput;
 

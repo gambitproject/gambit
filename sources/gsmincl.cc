@@ -102,7 +102,7 @@ gString PortionSpecToText(const PortionSpec& spec)
 	  result = result + " " + _PortionSpecText[i].Text;
   
   for(i=0; i<spec.ListDepth; i++)
-    result = (gString) "LIST(" + result + ')';    
+    result = (gString) "LIST(" + result + ")";    
   return result;
 }
 
@@ -125,7 +125,7 @@ PortionSpec TextToPortionSpec(const gString& text)
     {
       result.Type = result.Type | _PortionSpecText[i].Type;
       t = t.right(t.length() - strlen(_PortionSpecText[i].Text));
-      if(t.left(1) == ' ')
+      if(t.left(1) == " ")
 	t.remove(0);
     }
   return result;
