@@ -1749,7 +1749,7 @@ GCL2:= r:=RootNode[e]
 GCL3:= n:=r#1#1
 GCL4:= DeleteTree[r#1]
 GCL5:= << n
-GCL: Parameter 1 undefined in call to Print
+ERROR: Print[]: Undefined reference "n" passed for parameter #1
 \end{verbatim}
 
 \noindent
@@ -1762,7 +1762,7 @@ GCL1:= e:=LoadEfg["poker.efg"]
 GCL2:= t:=TerminalNodes[e]
 GCL3:= DeleteTree[RootNode[e]#1]
 GCL4:= << t
-GCL: Parameter 1 undefined in call to Print
+ERROR: Print[]: Undefined reference "t" passed for parameter #1
 \end{verbatim}
 
 In this case, a variable \verb+t+ is defined to refer to the list of
@@ -1777,13 +1777,14 @@ underlying game to which they refer change in a way to invalidate the
 solutions.  In the following example, a solution to the game \verb+e+
 is saved as a variable \verb+b+ of type \verb+BEHAV+.  
 
+\marginpar{should we change default to asNfg->True?}
 \begin{verbatim}
 GCL1:= e:=LoadEfg["poker.efg"]
-GCL2:= << b:=EnumMixedSolve[e]_1
+GCL2:= << b:=EnumMixedSolve[e,asNfg->True]_1
 (Behav) { { 1.000 0.000 }{ 0.333 0.667 } }{ { 0.667 0.333 } }
 GCL3:= DeleteTree[RootNode[e]#1]
 GCL4:= << b
-GCL: Parameter 1 undefined in call to Print
+ERROR: Print[]: Undefined reference "b" passed for parameter #1
 \end{verbatim}
 
 The game is subsequently edited, making the solution no longer valid
@@ -1867,13 +1868,12 @@ the pure profile \verb+p+\\
 \verb+# Payoffs[n]+ &Normal form game payoffs of \verb+n+ as a nested list\\ 
 \verb+# Payoffs[o]+ &Payoffs of outcome \verb+o+\\ 
 \verb+# Payoffs[m]+ &Payoffs of mixed profile \verb+m+ \\ 
-
+\verb+# Randomize[n,j]+ &Randomizes the payoffs in \verb+n+ with seed \verb+j+\\
 \verb+# Strategies[pl]+ &Strategies for player \verb+pl+\\ 
 \verb+# Strategies[n]+ &Strategies for game \verb+n+ \\ 
 
 \verb+  SetPayoff[o, pl, pay]+ &Set payoff to player \verb+pl+ in outcome \verb+o+ to \verb+pay+\\ 
 
-\verb+# SetPayoffs[p, pay]+ &Attach new outcome to pure profile \verb+p+ with payoffs \verb+pay+\\ 
 \verb+# SetPayoffs[o, pay]+ &Set payoffs of outcome \verb+o+ to vector \verb+pay+.  \\ 
 \hline
 \multicolumn{2}{c}{\ }\\
@@ -1923,10 +1923,11 @@ GCL2:= Randomize[NewNfg[{2,2},True],34]
 
 \noindent
 You can look at the payoffs of the game by using the standard UDF,
-\tindex{Payoffs}:
+\tindex{Payoffs} (we use \verb+Float+ to convert the game to floating
+point precision first):
 
 \begin{verbatim}
-GCL3:= << Payoffs[Randomize[NewNfg[{2,2},True],34]]
+GCL3:= << Payoffs[Float[Randomize[NewNfg[{2,2},True],34]]]
 { { { 0.159964, 0.026784 }, { 0.421515, 0.399322 } },
   { { 0.233245, 0.923402 }, { 0.039071, 0.695271 } } }
 \end{verbatim}  
@@ -1997,7 +1998,7 @@ GCL7:= << Payoffs[n]
 Note that the above can be done equivalently and more simply by using
 the standard UDF, \tindex{Nfg} to create the game directly from a payoff
 list:
-
+xxx
 \begin{verbatim}
 GCL1:= n:=Nfg[{{{9,9},{0,10}},{{10,0},{1,1}}}]
 GCL2:= << Payoffs[n]
@@ -2024,6 +2025,7 @@ listability of vector and matrix operations to set the payoffs in the
 normal form according to a formula.  In this example, we create a
 version of the ``stag hunt'' game.
 
+\marginpar{this example is not working now}
 \begin{verbatim}
 GCL1:= << strat:=List[1,3,1]
 { 1, 2, 3 }
@@ -2193,6 +2195,7 @@ Function Name	& Description \\
 \verb+  Parent[n]+ & Parent node of node \verb+n+ \\
 \verb+  Payoff[o,p]+ & Payoff  of outcome \verb+o+ for player \verb+p+ \\
 \verb+# Payoffs[o]+ & Payoff vector of outcome \verb+o+ \\
+\verb+# Payoffs[b]+ & Payoff vector of profile \verb+b+ \\
 \verb+  Player[i]+ & Player of information set \verb+i+ \\
 \verb+  Players[e]+ & Players of the game \verb+e+ \\
 \verb+  PriorAction[n]+ & Action preceeding node \verb+n+ \\
@@ -2230,20 +2233,20 @@ Function Name	& Description \\
 \verb+  CopyTree[n1,n2]+ &Copies tree rooted at node \verb+n1+ to node \verb+n2+ \\
 \verb+  InsertAction[i]+ &Inserts an action into information set \verb+i+ \\
 \verb+  InsertMove[i,n]+ &Inserts a move from infoset \verb+i+ at node \verb+n+\\
-\verb+  MergeInfosets[i1,i2]+ &Moves nodes from infoset \verb+i1+ into \verb+i2+\\
-\verb+  MoveToInfosets[n,i]+ &Moves node \verb+n+ into infoset \verb+i+\\
+\verb+  MergeInfosets[i1,i2]+ &Moves nodes from infoset \verb+i2+ into \verb+i1+\\
+\verb+  MoveToInfoset[n,i]+ &Moves node \verb+n+ into infoset \verb+i+\\
 \verb+  NewInfoset[p,j]+ &Creates a new infoset for player \verb+p+ with \verb+j+ actions\\
-\verb+  NewInfoset[p,list]+ &Creates a new infoset for \verb+p+ with action names as in \verb+list+\\
+\verb+# NewInfoset[p,list]+ &Creates a new infoset for \verb+p+ with action names as in \verb+list+\\
 \verb+# NewOutcome[e,t]+ &Creates a new outcome for the game \verb+e+
 with name \verb+t+\\
 \verb+# NewPlayer[e,t]+ &Creates a new player for the game \verb+e+
 with name \verb+t+\\
-\verb+  Randomize[e,j]+ &Randomizes the payoffs in \verb+e+ with seed \verb+j+\\
+\verb+# Randomize[e,j]+ &Randomizes the payoffs in \verb+e+ with seed \verb+j+\\
 \verb+  Reveal[i,list]+ &Reveals infoset \verb+i+ to players in \verb+list+\\
 \verb+  SetChanceProbs[i,list]+ &Sets chance probs in infoset \verb+i+ to values in \verb+list+\\
 \verb+  SetOutcome[n,o]+ &Attaches outcome \verb+o+ to node \verb+n+ \\
 \verb+  SetPayoff[o,p,v]+ &Sets payoff of outcome \verb+o+ for player \verb+o+ to value \verb+v+\\
-\verb+  SetPayoffs[o,list]+ &Sets payoff of outcome \verb+o+ to values in \verb+list+\\
+\verb+# SetPayoffs[o,list]+ &Sets payoff of outcome \verb+o+ to values in \verb+list+\\
 \hline
 \multicolumn{2}{c}{\ }\\
 \multicolumn{2}{c}{Table 4}\\
