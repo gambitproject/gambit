@@ -18,13 +18,13 @@
 #include "behav.h"
 #include "player.h"
 #include "infoset.h"
-
+#ifdef __GNUG__ 
 #include "glist.imp"
 template class gList<gDPVector<double> >;
 template class gList<gDPVector<gRational> >;
 template class gNode<gDPVector<double> >;
 template class gNode<gDPVector<gRational> >;
-
+#endif
 //-------------------------------------------------------------------------
 //                     EFLiapParams<T>: Member functions
 //-------------------------------------------------------------------------
