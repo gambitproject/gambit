@@ -127,6 +127,7 @@ public:
   bool IsPositive()                                const;
   bool IsNonnegative()                             const;
   bool IsConstant()                                const;
+  bool IsMultiaffine()                             const;
   bool IsUnivariate()                              const;
   int  SoleActiveVariable()                        const;
   int  TotalDegree()                               const;

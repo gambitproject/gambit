@@ -413,6 +413,13 @@ bool  exp_vect::IsConstant() const
   return true;
 }
 
+bool  exp_vect::IsMultiaffine() const
+{
+  for (int i = 1; i <= Dmnsn(); i++)
+    if ((*this)[i] > 1) return false;
+  return true;
+}
+
 bool  exp_vect::IsUnivariate() const
 {
   int no_active_variables = 0;
