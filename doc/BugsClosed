@@ -33,3 +33,44 @@ regardless of operating system.  (This works fine for DOS paths.)
 
 ---------------
 
+ITEM 0010:  GCL segfaults; orphan variables suspected
+
+DATE:     9/8/1999 by TLT (was Bug C33 in bugs_gcl)
+AFFECTS:  GCL (all platforms?)
+STATUS:   CLOSED 9/9/1999 by TLT
+SEVERITY: CRUCIAL
+DETAILS:
+
+Put the following commands in the file test.gcl
+
+  e:= NewEfg[];
+  P1 := NewPlayer[e, "P1"];
+  e:= NewEfg[];
+  P1 := NewPlayer[e, "P1"];
+  e:= NewEfg[];
+  P1 := NewPlayer[e, "P1"];
+
+Then 
+
+  Include["test.gcl"] leads to   
+
+GCL1:= << Include["test.gcl"]     
+True
+A segmentation fault has occurred
+
+On the other hand, if P1 is deallocated before each call, as in 
+
+  e:= NewEfg[];
+  P1 := NewPlayer[e, "P1"];
+  e:= NewEfg[];
+  P1:=;P1 := NewPlayer[e, "P1"];
+  e:= NewEfg[];
+  P1:=;P1 := NewPlayer[e, "P1"];
+
+then it is OK.  Also, if the contents of test.gcl are run from the
+command line, it is OK.
+
+COMMENTS:
+TLT 9/9/1999.  Turned out to be a problem in accurately keeping track
+of references to games when using reference-type Portions.  This affected
+all game types, not just EFPLAYER.
