@@ -98,6 +98,7 @@ LemkeTableau<T>::LemkeTableau(const Nfg<T> &NF, const NFSupport &S,
     for (int j = n1 + 1; j <= n1 + n2; j++)
       Tableau(i, j) = 0.0;
 
+  min-= (T)1;
 
   for (i = 1; i <= n1; i++)  {
     for (int j = 1; j <= n2; j++)  {
