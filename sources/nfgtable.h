@@ -85,6 +85,7 @@ public:
   void SetLabelFont(const wxFont &p_font) { m_grid->SetLabelFont(p_font); }
 
   void SetSupport(const NFSupport &);
+  const NFSupport &GetSupport(void) const { return m_support; }
 
   bool IsEditable(void) const { return m_editable; }
   void SetEditable(bool p_editable) { m_editable = p_editable; }
@@ -93,6 +94,7 @@ public:
   int GetColPlayer(void) const { return m_colPlayer; }
 
   void SetSolution(const MixedSolution &);
+  const MixedSolution &GetSolution(void) const { return *m_solution; }
   void ClearSolution(void);
 
   DECLARE_EVENT_TABLE()

@@ -36,6 +36,8 @@ public:
   bool InsertCols(size_t pos = 0, size_t numCols = 1);
   bool AppendCols(size_t numCols = 1);
   bool DeleteCols(size_t pos = 0, size_t numCols = 1);
+
+  wxGridCellAttr *GetAttr(int row, int col);
 };
 
 NfgGridTable::NfgGridTable(NfgTable *p_table, Nfg *p_nfg)
@@ -44,69 +46,141 @@ NfgGridTable::NfgGridTable(NfgTable *p_table, Nfg *p_nfg)
 
 int NfgGridTable::GetNumberRows(void)
 {
-  return m_nfg->NumStrats(m_table->GetRowPlayer());
+  return (m_nfg->NumStrats(m_table->GetRowPlayer()) +
+	  m_table->ShowProbs() + m_table->ShowDominance() +
+	  m_table->ShowValues());
 }
 
 int NfgGridTable::GetNumberCols(void)
 {
-  return m_nfg->NumStrats(m_table->GetColPlayer());
+  return (m_nfg->NumStrats(m_table->GetColPlayer()) +
+	  m_table->ShowProbs() + m_table->ShowDominance() + 
+	  m_table->ShowValues());
 }
 
 wxString NfgGridTable::GetRowLabelValue(int p_row)
 {
-  if (p_row + 1 <= m_nfg->NumStrats(m_table->GetRowPlayer())) {
+  int numStrats = m_nfg->NumStrats(m_table->GetRowPlayer());
+  if (p_row + 1 <= numStrats) {
     return (char *) m_nfg->Strategies(m_table->GetRowPlayer())[p_row+1]->Name();
   }
+  else if (p_row + 1 == numStrats + m_table->ShowDominance()) {
+    return "Dom";
+  }
+  else if (p_row + 1 == 
+	   numStrats + m_table->ShowDominance() + m_table->ShowProbs()) {
+    return "Prob";
+  }
   else {
-    return "";
+    return "Val";
   }
 }
 
 wxString NfgGridTable::GetColLabelValue(int p_col)
 {
-  if (p_col + 1 <= m_nfg->NumStrats(m_table->GetColPlayer())) {
+  int numStrats = m_nfg->NumStrats(m_table->GetColPlayer());
+  if (p_col + 1 <= numStrats) {
     return (char *) m_nfg->Strategies(m_table->GetColPlayer())[p_col+1]->Name();
   }
+  else if (p_col + 1 == numStrats + m_table->ShowDominance()) {
+    return "Dom";
+  }
+  else if (p_col + 1 == 
+	   numStrats + m_table->ShowDominance() + m_table->ShowProbs()) {
+    return "Prob";
+  }
   else {
-    return "";
+    return "Val";
   }
 }
 
 wxString NfgGridTable::GetValue(int row, int col)
 {
-  if (row + 1 > m_nfg->NumStrats(m_table->GetRowPlayer()) ||
-      col + 1 > m_nfg->NumStrats(m_table->GetColPlayer())) {
-    return "";
-  }
-  gArray<int> strategy(m_table->GetProfile());
-  strategy[m_table->GetRowPlayer()] = row + 1;
-  strategy[m_table->GetColPlayer()] = col + 1;
-  NFOutcome *outcome = m_nfg->GetOutcome(strategy);
-  if (m_table->OutcomeValues()) {
-    wxString ret = "(";
-    for (int pl = 1; pl <= strategy.Length(); pl++) {
-      ret += wxString::Format("%s",
-			      (char *) ToText(m_nfg->Payoff(outcome, pl),
-					      m_table->GetDecimals()));
-      if (pl < strategy.Length()) {
-	ret += wxString(",");
+  int rowPlayer = m_table->GetRowPlayer();
+  int colPlayer = m_table->GetColPlayer();
+  const NFSupport &support = m_table->GetSupport();
+  int numRowStrats = support.NumStrats(rowPlayer);
+  int numColStrats = support.NumStrats(colPlayer);
+
+  if (row < numRowStrats && col < numColStrats) {
+    gArray<int> strategy(m_table->GetProfile());
+    strategy[m_table->GetRowPlayer()] = row + 1;
+    strategy[m_table->GetColPlayer()] = col + 1;
+    NFOutcome *outcome = m_nfg->GetOutcome(strategy);
+    if (m_table->OutcomeValues()) {
+      wxString ret = "(";
+      for (int pl = 1; pl <= strategy.Length(); pl++) {
+	ret += wxString::Format("%s",
+				(char *) ToText(m_nfg->Payoff(outcome, pl),
+						m_table->GetDecimals()));
+	if (pl < strategy.Length()) {
+	  ret += wxString(",");
+	}
       }
-    }
-    ret += ")";
-    return ret;
-  }
-  else {
-    if (outcome) {
-      wxString ret = (char *) outcome->GetName();
-      if (ret == "") {
-	ret = (char *) (gText("Outcome") + ToText(outcome->GetNumber()));
-      }
+      ret += ")";
       return ret;
     }
     else {
-      return "Null";
+      if (outcome) {
+	wxString ret = (char *) outcome->GetName();
+	if (ret == "") {
+	  ret = (char *) (gText("Outcome") + ToText(outcome->GetNumber()));
+	}
+	return ret;
+      }
+      else {
+	return "Null";
+      }
     }
   }
+  else if (row < numRowStrats &&
+	   col == numColStrats + m_table->ShowDominance() - 1) {
+    Strategy *strategy = support.GetStrategy(rowPlayer, row + 1);
+    if (support.IsDominated(strategy, true)) {
+      return "S";
+    }
+    else if (support.IsDominated(strategy, false)) {
+      return "W";
+    }
+    else {
+      return "N";
+    }
+  }
+  else if (row == numRowStrats + m_table->ShowDominance() - 1 &&
+	   col < numColStrats) {
+    Strategy *strategy = support.GetStrategy(colPlayer, col + 1);
+    if (support.IsDominated(strategy, true)) {
+      return "S";
+    }
+    else if (support.IsDominated(strategy, false)) {
+      return "W";
+    }
+    else {
+      return "N";
+    }
+  }
+  else if (row < numRowStrats && 
+	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() - 1) {
+    Strategy *strategy = support.GetStrategy(rowPlayer, row + 1);
+    return ((char *) ToText(m_table->GetSolution()(strategy)));
+  }
+  else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() - 1 && 
+	   col < numColStrats) {
+    Strategy *strategy = support.GetStrategy(colPlayer, col + 1);
+    return ((char *) ToText(m_table->GetSolution()(strategy)));
+  }
+  else if (row < numRowStrats && 
+	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1) {
+    Strategy *strategy = support.GetStrategy(rowPlayer, row + 1);
+    return ((char *) ToText(m_table->GetSolution().Payoff(strategy->Player(), strategy)));
+  }
+  else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1 && 
+	   col < numColStrats) {
+    Strategy *strategy = support.GetStrategy(colPlayer, col + 1);
+    return ((char *) ToText(m_table->GetSolution().Payoff(strategy->Player(), strategy)));
+  }
+
+  return "";
 }
 
 bool NfgGridTable::InsertRows(size_t pos, size_t numRows)
@@ -155,7 +229,26 @@ bool NfgGridTable::DeleteCols(size_t pos, size_t numCols)
   return true;
 }
 
+wxGridCellAttr *NfgGridTable::GetAttr(int row, int col)
+{
+  wxGridCellAttr *attr = new wxGridCellAttr;
 
+  if (row >= m_nfg->NumStrats(m_table->GetRowPlayer()) &&
+      col >= m_nfg->NumStrats(m_table->GetColPlayer())) {
+    attr->SetBackgroundColour(*wxBLACK);
+  }
+  else if (row >= m_nfg->NumStrats(m_table->GetRowPlayer()) ||
+	   col >= m_nfg->NumStrats(m_table->GetColPlayer())) {
+    attr->SetBackgroundColour(*wxLIGHT_GREY);
+  }
+  else {
+    attr->SetBackgroundColour(*wxWHITE);
+  }
+
+  attr->SetAlignment(wxCENTER, wxCENTER);
+
+  return attr;
+}
 
 class ColoredStringRenderer : public wxGridCellRenderer {
 public:
@@ -448,6 +541,14 @@ void NfgTable::SetStrategy(int p_player, int p_strategy)
 void NfgTable::ToggleProbs(void)
 {
   m_showProb = 1 - m_showProb;
+  if (m_showProb) {
+    m_grid->AppendCols();
+    m_grid->AppendRows();
+  }
+  else {
+    m_grid->DeleteCols();
+    m_grid->DeleteRows();
+  }
   m_grid->AdjustScrollbars();
   m_grid->Refresh();
 }
@@ -455,6 +556,14 @@ void NfgTable::ToggleProbs(void)
 void NfgTable::ToggleDominance(void)
 {
   m_showDom = 1 - m_showDom;
+  if (m_showDom) {
+    m_grid->AppendCols();
+    m_grid->AppendRows();
+  }
+  else {
+    m_grid->DeleteCols();
+    m_grid->DeleteRows();
+  }
   m_grid->AdjustScrollbars();
   m_grid->Refresh();
 }
@@ -462,6 +571,14 @@ void NfgTable::ToggleDominance(void)
 void NfgTable::ToggleValues(void)
 {
   m_showValue = 1 - m_showValue;
+  if (m_showValue) {
+    m_grid->AppendCols();
+    m_grid->AppendRows();
+  }
+  else {
+    m_grid->DeleteCols();
+    m_grid->DeleteRows();
+  }
   m_grid->AdjustScrollbars();
   m_grid->Refresh();
 }
