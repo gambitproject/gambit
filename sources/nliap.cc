@@ -175,9 +175,10 @@ bool Liap(const Nfg<double> &N, NFLiapParams &params,
 
   solutions.Flush();
 
-  for (int i = 1; !params.status.Get() &&
-       i <= params.nTries && solutions.Length() < params.stopAfter; i++)   {
-    if (i > 1)   PickRandomProfile(p);
+  for (int i = 1; !params.status.Get() && i <= params.nTries &&
+       (params.stopAfter==0 || solutions.Length() < params.stopAfter);
+       i++) { 
+    if (i > 1) PickRandomProfile(p);
 
     if (found = DFP(p, F, value, iter, params.maxits1, params.tol1,
 		    params.maxitsN, params.tolN, *params.tracefile,
