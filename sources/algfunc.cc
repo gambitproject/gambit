@@ -882,6 +882,50 @@ Portion *GSM_EnumMixedEfgRational(Portion **param)
 extern Portion *ArrayToList(const gArray<double> &A);
 extern Portion *ArrayToList(const gArray<gRational> &A);
 
+Portion* gDPVectorToList(const gDPVector<double>& A)
+{
+  ListPortion* p;
+  ListPortion* s1;
+  ListPortion* s2;
+  p = new ListValPortion();
+  int l = 1;
+  for (int i = 1; i <= A.DPLengths().Length(); i++)  {
+    s1 = new ListValPortion();
+    for (int j = 1; j <= A.DPLengths()[i]; j++)  {
+      s2 = new ListValPortion();
+      for (int k = 1; k <= A.Lengths()[l]; k++)
+	s2->Append(new FloatValPortion(A(i, j, k)));
+      l++;
+      s1->Append(s2);
+    }
+    p->Append(s1);
+  }
+  return p;
+}
+
+Portion* gDPVectorToList(const gDPVector<gRational>& A)
+{
+  ListPortion* p;
+  ListPortion* s1;
+  ListPortion* s2;
+  p = new ListValPortion();
+  int l = 1;
+  for (int i = 1; i <= A.DPLengths().Length(); i++)  {
+    s1 = new ListValPortion();
+    for (int j = 1; j <= A.DPLengths()[i]; j++)  {
+      s2 = new ListValPortion();
+      for (int k = 1; k <= A.Lengths()[l]; k++)
+	s2->Append(new RationalValPortion(A(i, j, k)));
+      l++;
+      s1->Append(s2);
+    }
+    p->Append(s1);
+  }
+  return p;
+}
+
+
+
 Portion *GSM_ActionValuesFloat(Portion **param)
 {
   BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
@@ -936,15 +980,13 @@ Portion *GSM_ActionValuesRational(Portion **param)
 Portion *GSM_BeliefsFloat(Portion **param)
 {
   BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
-
-  return ArrayToList(bp->Beliefs());
+  return gDPVectorToList(bp->Beliefs());
 }
 
 Portion *GSM_BeliefsRational(Portion **param)
 {
   BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
-
-  return ArrayToList(bp->Beliefs());
+  return gDPVectorToList(bp->Beliefs());
 }
 
 Portion *GSM_InfosetProbsFloat(Portion **param)
@@ -1580,11 +1622,14 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Beliefs");
   FuncObj->SetFuncInfo(GSM_BeliefsFloat, 1);
-  FuncObj->SetParamInfo(GSM_BeliefsFloat, 0, "strategy", porBEHAV_FLOAT);
+  FuncObj->SetParamInfo(GSM_BeliefsFloat, 0, "strategy", 
+			porBEHAV_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
 
   FuncObj->SetFuncInfo(GSM_BeliefsRational, 1);
   FuncObj->SetParamInfo(GSM_BeliefsRational, 0, "strategy",
-			porBEHAV_RATIONAL);
+			porBEHAV_RATIONAL, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("InfosetProbs");
