@@ -1,9 +1,0 @@
-*.d
-*~
-*.o
-*.obj
-*.lib
-*.a
-.deps
-Makefile
-Makefile.in

@@ -1,3 +1,0 @@
-Format["",quote->False];
-ListFormat[lf->1];
-Include["stdudfs.gcl"];
