@@ -133,11 +133,11 @@ public:
   gPolyList<gDouble> ExpectedPayoffDiffPolys(const gSpace &, 
 					     const term_order&,
 					     const gList<gList<int> > &) const;
-  gPolyList<gDouble> ExtendsToNashIneqs(const gSpace &, 
+  gPolyList<gDouble> ExtendsToANFNashIneqs(const gSpace &, 
 					const term_order&,
 					const gList<gList<int> > &) const;
-  // TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO BEHAV NASH
-  bool ExtendsToNash(gStatus &) const;
+  // TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO ANF NASH
+  bool ExtendsToANFNash(gStatus &) const;
 
   // OUTPUT
   void Dump(gOutput &) const;

@@ -44,7 +44,7 @@ private:
 //  gPoly<T> Equation(int i, int strat2, int strat2) const;
 
   int SaveSolutions(const gList<gVector<gDouble> > &list);
-  bool ExtendsToNash(const BehavSolution &, gStatus &);
+  bool ExtendsToANFNash(const BehavSolution &, gStatus &);
 
 public:
   EfgPolEnumModule(const EFSupport &, const EfgPolEnumParams &p);
@@ -169,9 +169,10 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
 }
 
 template <class T> bool 
-EfgPolEnumModule<T>::ExtendsToNash(const BehavSolution &bs, gStatus &m_status)
+EfgPolEnumModule<T>::ExtendsToANFNash(const BehavSolution &bs, 
+				            gStatus &m_status)
 {
-  return bs.ExtendsToNash(m_status);
+  return bs.ExtendsToANFNash(m_status);
 }
 
 template <class T> int 
@@ -191,7 +192,7 @@ EfgPolEnumModule<T>::SaveSolutions(const gList<gVector<gDouble> > &list)
 
     BehavSolution sol(SF.ToBehav(x), algorithmEfg_POLENUM_EFG);
 
-    if(ExtendsToNash(sol,params.status)) { 
+    if(ExtendsToANFNash(sol,params.status)) { 
       index = solutions.Append(sol);
       solutions[index].SetEpsilon(0);
       //    solutions[index].SetIsNash(triTRUE);
