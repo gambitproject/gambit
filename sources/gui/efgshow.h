@@ -90,14 +90,15 @@ private:
   void OnViewZoomOut(wxCommandEvent &);
   void OnViewSupportReachable(wxCommandEvent &);
 
-  void OnFormatLegend(wxCommandEvent &);
+  void OnFormatDisplayLayout(wxCommandEvent &);
+  void OnFormatDisplayLegend(wxCommandEvent &);
+  void OnFormatDisplayColors(wxCommandEvent &);
+  void OnFormatDisplayDecimals(wxCommandEvent &);
   void OnFormatFontsAboveNode(wxCommandEvent &);
   void OnFormatFontsBelowNode(wxCommandEvent &);
   void OnFormatFontsAfterNode(wxCommandEvent &);
   void OnFormatFontsAboveBranch(wxCommandEvent &);
   void OnFormatFontsBelowBranch(wxCommandEvent &);
-  void OnFormatDisplayLayout(wxCommandEvent &);
-  void OnFormatDisplayDecimals(wxCommandEvent &);
 
   void OnToolsDominance(wxCommandEvent &);
   void OnToolsEquilibrium(wxCommandEvent &);

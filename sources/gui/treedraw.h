@@ -98,13 +98,20 @@ private:
   wxFont m_nodeAboveFont, m_nodeBelowFont, m_nodeRightFont;
   wxFont m_branchAboveFont, m_branchBelowFont;
 
+  // Colors for nodes
+  wxColour m_chanceColor, m_terminalColor, m_playerColor[8];
+
   // Decimal places to display
   int m_numDecimals;
-  
+
   static void LoadFont(const wxString &, const wxConfig &, wxFont &);
   static void SaveFont(const wxString &, wxConfig &, const wxFont &);
+
+  static void LoadColor(const wxString &, const wxConfig &, wxColour &);
+  static void SaveColor(const wxString &, wxConfig &, const wxColour &);
   
 public:
+  // Lifecycle
   TreeDrawSettings(void);
   
   // Node styling
@@ -185,6 +192,17 @@ public:
 
   const wxFont &BranchBelowFont(void) const { return m_branchBelowFont; }
   void SetBranchBelowFont(const wxFont &p_font) { m_branchBelowFont = p_font; }
+
+  // Colors
+  const wxColour &ChanceColor(void) const { return m_chanceColor; }
+  void SetChanceColor(const wxColour &p_color) { m_chanceColor = p_color; }
+
+  const wxColour &TerminalColor(void) const { return m_terminalColor; }
+  void SetTerminalColor(const wxColour &p_color) { m_terminalColor = p_color; }
+
+  const wxColour &PlayerColor(int pl) const { return m_playerColor[pl-1]; }
+  void SetPlayerColor(int pl, const wxColour &p_color)
+  { m_playerColor[pl-1] = p_color; }
 
   // Decimals
   int NumDecimals(void) const { return m_numDecimals; }

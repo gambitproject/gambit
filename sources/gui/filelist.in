@@ -6,6 +6,7 @@ gambit_SOURCES = \
 	dleditmixed.cc \
 	dleditmove.cc \
 	dleditnode.cc \
+	dlefgcolor.cc \
 	dlefgdelete.cc \
 	dlefglayout.cc \
 	dlefglegend.cc \
@@ -40,7 +41,6 @@ gambit_SOURCES = \
 	splash.cc \
 	treedraw.cc \
 	treewin.cc \
-	userprefs.cc \
         valinteger.cc \
         valnumber.cc \
         wxstatus.cc 

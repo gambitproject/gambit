@@ -26,8 +26,17 @@ TreeDrawSettings::TreeDrawSettings(void)
     m_nodeBelowFont(*wxTheFontList->FindOrCreateFont(10, wxDEFAULT, wxNORMAL, wxNORMAL)),
     m_nodeRightFont(*wxTheFontList->FindOrCreateFont(10, wxDEFAULT, wxNORMAL, wxNORMAL)),
     m_branchAboveFont(*wxTheFontList->FindOrCreateFont(10, wxDEFAULT, wxNORMAL, wxNORMAL)),
-    m_branchBelowFont(*wxTheFontList->FindOrCreateFont(10, wxDEFAULT, wxNORMAL, wxNORMAL))
+    m_branchBelowFont(*wxTheFontList->FindOrCreateFont(10, wxDEFAULT, wxNORMAL, wxNORMAL)),
+    m_chanceColor(*wxLIGHT_GREY), m_terminalColor(*wxBLACK)
 {
+  for (int pl = 0; pl < 8; pl++) {
+    if (pl % 2 == 0) {
+      m_playerColor[pl] = *wxRED;
+    }
+    else {
+      m_playerColor[pl] = *wxBLUE;
+    }
+  }
   LoadOptions();
 }
 
@@ -54,6 +63,24 @@ void TreeDrawSettings::LoadFont(const wxString &p_prefix,
 
   p_font = *wxTheFontList->FindOrCreateFont(size, family, style, weight,
 					    false, face);
+}
+
+void TreeDrawSettings::SaveColor(const wxString &p_prefix,
+				 wxConfig &p_config, const wxColour &p_color)
+{
+  p_config.Write(p_prefix + "Red", (long) p_color.Red());
+  p_config.Write(p_prefix + "Green", (long) p_color.Green());
+  p_config.Write(p_prefix + "Blue", (long) p_color.Blue());
+}
+
+void TreeDrawSettings::LoadColor(const wxString &p_prefix,
+				 const wxConfig &p_config, wxColour &p_color)
+{
+  int red, green, blue;
+  p_config.Read(p_prefix + "Red", &red, p_color.Red());
+  p_config.Read(p_prefix + "Green", &green, p_color.Green());
+  p_config.Read(p_prefix + "Blue", &blue, p_color.Blue());
+  p_color = wxColour(red, green, blue);
 }
 
 void TreeDrawSettings::SaveOptions(void) const
@@ -89,6 +116,13 @@ void TreeDrawSettings::SaveOptions(void) const
   SaveFont("/TreeDisplay/BranchAboveFont", config, m_branchAboveFont);
   SaveFont("/TreeDisplay/BranchBelowFont", config, m_branchBelowFont);
 
+  SaveColor("/TreeDisplay/ChanceColor", config, m_chanceColor);
+  SaveColor("/TreeDisplay/TerminalColor", config, m_terminalColor);
+  for (int pl = 0; pl < 8; pl++) {
+    SaveColor(wxString::Format("/TreeDisplay/Player%dColor", pl + 1),
+	      config, m_playerColor[pl]);
+  }
+
   config.Write("/TreeDisplay/NumDecimals", (long) m_numDecimals);
 }
 
@@ -123,6 +157,13 @@ void TreeDrawSettings::LoadOptions(void)
   LoadFont("/TreeDisplay/NodeRightFont", config, m_nodeRightFont);
   LoadFont("/TreeDisplay/BranchAboveFont", config, m_branchAboveFont);
   LoadFont("/TreeDisplay/BranchBelowFont", config, m_branchBelowFont);
+
+  LoadColor("/TreeDisplay/ChanceColor", config, m_chanceColor);
+  LoadColor("/TreeDisplay/TerminalColor", config, m_terminalColor);
+  for (int pl = 0; pl < 8; pl++) {
+    LoadColor(wxString::Format("/TreeDisplay/Player%dColor", pl + 1),
+	      config, m_playerColor[pl]);
+  }
 
   config.Read("/TreeDisplay/NumDecimals", &m_numDecimals, 2);
 }

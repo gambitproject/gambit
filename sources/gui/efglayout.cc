@@ -533,17 +533,17 @@ int efgTreeLayout::LayoutSubtree(Node *p_node, const EFSupport &p_support,
 						    settings.BranchLength() +
 						    settings.TineLength()));
   }
-  const UserPreferences &prefs = wxGetApp().GetPreferences();
+
   if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
-    entry->SetColor(prefs.GetChanceColor());
+    entry->SetColor(settings.ChanceColor());
     entry->SetToken(settings.ChanceToken());
   }
   else if (p_node->GetPlayer()) {
-    entry->SetColor(prefs.GetPlayerColor(p_node->GetPlayer()->GetNumber()));
+    entry->SetColor(settings.PlayerColor(p_node->GetPlayer()->GetNumber()));
     entry->SetToken(settings.PlayerToken());
   }
   else {
-    entry->SetColor(prefs.GetTerminalColor());
+    entry->SetColor(settings.TerminalColor());
     entry->SetToken(settings.TerminalToken());
   }  
   

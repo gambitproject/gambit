@@ -44,6 +44,7 @@
 #include "dleditefg.h"
 #include "dlefglayout.h"
 #include "dlefglegend.h"
+#include "dlefgcolor.h"
 #include "dlelimbehav.h"
 #include "dlefgnash.h"
 #include "dleditbehav.h"
@@ -86,13 +87,14 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuVIEW_ZOOMIN, EfgShow::OnViewZoomIn)
   EVT_MENU(efgmenuVIEW_ZOOMOUT, EfgShow::OnViewZoomOut)
   EVT_MENU(efgmenuVIEW_SUPPORT_REACHABLE, EfgShow::OnViewSupportReachable)
-  EVT_MENU(efgmenuFORMAT_LEGEND, EfgShow::OnFormatLegend)
   EVT_MENU(efgmenuFORMAT_FONTS_ABOVENODE, EfgShow::OnFormatFontsAboveNode)
   EVT_MENU(efgmenuFORMAT_FONTS_BELOWNODE, EfgShow::OnFormatFontsBelowNode)
   EVT_MENU(efgmenuFORMAT_FONTS_AFTERNODE, EfgShow::OnFormatFontsAfterNode)
   EVT_MENU(efgmenuFORMAT_FONTS_ABOVEBRANCH, EfgShow::OnFormatFontsAboveBranch)
   EVT_MENU(efgmenuFORMAT_FONTS_BELOWBRANCH, EfgShow::OnFormatFontsBelowBranch)
   EVT_MENU(efgmenuFORMAT_DISPLAY_LAYOUT, EfgShow::OnFormatDisplayLayout)
+  EVT_MENU(efgmenuFORMAT_DISPLAY_LEGEND, EfgShow::OnFormatDisplayLegend)
+  EVT_MENU(efgmenuFORMAT_DISPLAY_COLORS, EfgShow::OnFormatDisplayColors)
   EVT_MENU(efgmenuFORMAT_DISPLAY_DECIMALS, EfgShow::OnFormatDisplayDecimals)
   EVT_MENU(efgmenuTOOLS_DOMINANCE, EfgShow::OnToolsDominance)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM, EfgShow::OnToolsEquilibrium)
@@ -571,9 +573,9 @@ void EfgShow::MakeMenus(void)
 		   "Display and edit supports", true);
   viewMenu->Check(efgmenuVIEW_SUPPORTS, false);
   viewMenu->AppendSeparator();
-  viewMenu->Append(efgmenuVIEW_ZOOMIN, "Zoom &in\t+",
+  viewMenu->Append(efgmenuVIEW_ZOOMIN, "Zoom &in",
 		   "Increase display magnification");
-  viewMenu->Append(efgmenuVIEW_ZOOMOUT, "Zoom &out\t-",
+  viewMenu->Append(efgmenuVIEW_ZOOMOUT, "Zoom &out",
 		   "Decrease display magnification");
   viewMenu->AppendSeparator();
   viewMenu->Append(efgmenuVIEW_SUPPORT_REACHABLE, "&Root Reachable",
@@ -582,15 +584,17 @@ void EfgShow::MakeMenus(void)
   
   wxMenu *formatMenu = new wxMenu;
   wxMenu *formatDisplayMenu = new wxMenu;
+  formatDisplayMenu->Append(efgmenuFORMAT_DISPLAY_LAYOUT, "&Layout",
+			    "Set tree layout parameters");
+  formatDisplayMenu->Append(efgmenuFORMAT_DISPLAY_LEGEND, "Le&gends",
+			    "Set legends");
+  formatDisplayMenu->Append(efgmenuFORMAT_DISPLAY_COLORS, "&Colors",
+			    "Set colors");
   formatDisplayMenu->Append(efgmenuFORMAT_DISPLAY_DECIMALS, "&Decimal Places",
 			   "Set number of decimal places to display");
-  formatDisplayMenu->Append(efgmenuFORMAT_DISPLAY_LAYOUT, "&Layout",
-			   "Set tree layout parameters");
   formatMenu->Append(efgmenuFORMAT_DISPLAY, "&Display", formatDisplayMenu,
 		     "Set display options");
-  formatMenu->Append(efgmenuFORMAT_LEGEND, "&Legends...",
-		     "Set legends");
-
+  
   wxMenu *formatFontsMenu = new wxMenu;
   formatFontsMenu->Append(efgmenuFORMAT_FONTS_ABOVENODE, "Above Node",
 			 "Font for label above nodes");
@@ -1138,21 +1142,6 @@ void EfgShow::OnViewSupportReachable(wxCommandEvent &)
 //               EfgShow: Menu handlers - Format menu
 //----------------------------------------------------------------------
 
-void EfgShow::OnFormatLegend(wxCommandEvent &)
-{
-  dialogLegend dialog(this, m_treeWindow->DrawSettings());
-
-  if (dialog.ShowModal() == wxID_OK) {
-    m_treeWindow->DrawSettings().SetNodeAboveLabel(dialog.GetNodeAbove());
-    m_treeWindow->DrawSettings().SetNodeBelowLabel(dialog.GetNodeBelow());
-    m_treeWindow->DrawSettings().SetNodeRightLabel(dialog.GetNodeAfter());
-    m_treeWindow->DrawSettings().SetBranchAboveLabel(dialog.GetBranchAbove());
-    m_treeWindow->DrawSettings().SetBranchBelowLabel(dialog.GetBranchBelow());
-    m_treeWindow->DrawSettings().SaveOptions();
-    m_treeWindow->RefreshLabels();
-  }
-}
-
 void EfgShow::OnFormatFontsAboveNode(wxCommandEvent &)
 {
   wxFontData data;
@@ -1225,6 +1214,37 @@ void EfgShow::OnFormatDisplayLayout(wxCommandEvent &)
     m_treeWindow->DrawSettings().SaveOptions();
     m_treeWindow->RefreshLayout();
     m_treeWindow->Refresh();
+  }
+}
+
+void EfgShow::OnFormatDisplayLegend(wxCommandEvent &)
+{
+  dialogLegend dialog(this, m_treeWindow->DrawSettings());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    m_treeWindow->DrawSettings().SetNodeAboveLabel(dialog.GetNodeAbove());
+    m_treeWindow->DrawSettings().SetNodeBelowLabel(dialog.GetNodeBelow());
+    m_treeWindow->DrawSettings().SetNodeRightLabel(dialog.GetNodeAfter());
+    m_treeWindow->DrawSettings().SetBranchAboveLabel(dialog.GetBranchAbove());
+    m_treeWindow->DrawSettings().SetBranchBelowLabel(dialog.GetBranchBelow());
+    m_treeWindow->DrawSettings().SaveOptions();
+    m_treeWindow->RefreshLabels();
+  }
+}
+
+void EfgShow::OnFormatDisplayColors(wxCommandEvent &)
+{
+  dialogEfgColor dialog(this, m_treeWindow->DrawSettings());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    m_treeWindow->DrawSettings().SetChanceColor(dialog.GetChanceColor());
+    m_treeWindow->DrawSettings().SetTerminalColor(dialog.GetTerminalColor());
+    for (int pl = 1; pl <= 8; pl++) {
+      m_treeWindow->DrawSettings().SetPlayerColor(pl,
+						  dialog.GetPlayerColor(pl));
+    }
+    m_treeWindow->DrawSettings().SaveOptions();
+    m_treeWindow->RefreshTree();
   }
 }
 

@@ -1,7 +1,10 @@
 //
-// FILE: gambit.h -- declaration of the very top level of the gambit gui.
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Declaration of application-level class for Gambit graphical interface
 //
 
 #ifndef GAMBIT_H
@@ -13,8 +16,6 @@
 #include "wx/docview.h"   // for wxFileHistory
 #include "wx/wxhtml.h"    // for wxHtmlHelpController
 #include "wx/listctrl.h"
-
-#include "userprefs.h"
 
 extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
                                long p_style = wxOK | wxCENTRE);
@@ -32,7 +33,6 @@ private:
   wxString m_currentDir; /* Current position in directory tree. */
   wxHtmlHelpController m_help;
   wxFileHistory m_fileHistory;
-  UserPreferences m_prefs;
 
   gBlock<Game *> m_gameList;
 
@@ -46,8 +46,6 @@ public:
   void SetCurrentDir(const wxString &p_dir)  { m_currentDir = p_dir; }
 
   wxHtmlHelpController &HelpController(void) { return m_help; }
-
-  UserPreferences &GetPreferences(void) { return m_prefs; }
 
   void AddGame(efgGame *, EfgShow *);
   void AddGame(Nfg *, NfgShow *);
