@@ -11,7 +11,6 @@
 
 !include ..\makedef.bcc
 
-WXDIR = c:\wx2
 WXLIBDIR = $(WXDIR)\lib
 WXLIB = wx32 xpm tiff jpeg winpng zlib
 
