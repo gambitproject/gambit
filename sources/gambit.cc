@@ -174,6 +174,7 @@ void GambitToolBar::OnMouseEnter(int tool)
 
 static gText ResolveVersion(void)
 {
+#ifdef __BORLANDC__
   gText resourceFile = "gambit.ini";
   gText firstPath = System::GetEnv("GAMBITHOME");
 
@@ -202,6 +203,15 @@ static gText ResolveVersion(void)
     return resourceFile;
 
   return "";
+
+#else   // non-microsoft platforms
+  int ver = 0;
+  wxGetResource("Gambit", "Gambit-Version", &ver, "gambit.ini");
+  if (ver == GAMBIT_VERSION)
+    return "gambit.ini";
+  else
+    return "";
+#endif
 }
 
 // The `main program' equivalent, creating the windows and returning the
