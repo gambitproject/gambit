@@ -62,7 +62,9 @@ libnash_a_SOURCES = \
 	simpdiv.h \
 	simpdiv.imp \
 	subsolve.cc \
-	subsolve.h
+	subsolve.h \
+	yamamoto.cc \
+	yamamoto.h
 
 EXTRA_DIST = borland.mak
 

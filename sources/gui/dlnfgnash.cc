@@ -40,6 +40,7 @@
 #include "nash/nfgalleq.h"
 #include "nash/nfgqre.h"
 #include "nash/simpdiv.h"
+#include "nash/yamamoto.h"
 
 const int idCHECKBOX_FINDALL = 2000;
 const int idSPINCTRL_STOPAFTER = 2001;
@@ -1195,6 +1196,41 @@ nfgNashAlgorithm *panelNfgSimpdiv::GetAlgorithm(void) const
 }
 
 //========================================================================
+//                      class panelNfgYamamoto
+//========================================================================
+
+class panelNfgYamamoto : public panelNfgNashAlgorithm {
+public:
+  panelNfgYamamoto(wxWindow *);
+
+  nfgNashAlgorithm *GetAlgorithm(void) const;
+};
+
+panelNfgYamamoto::panelNfgYamamoto(wxWindow *p_parent)
+  : panelNfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+nfgNashAlgorithm *panelNfgYamamoto::GetAlgorithm(void) const
+{
+  return new nfgYamamoto;
+}
+
+//========================================================================
 //                        class dialogNfgNash
 //========================================================================
 
@@ -1299,6 +1335,9 @@ void dialogNfgNash::LoadAlgorithms(const Nfg &p_nfg)
 
   id = m_algorithmTree->AppendItem(custom, "SimpdivSolve");
   m_algorithms.Define(id, panel = new panelNfgSimpdiv(this));
+
+  id = m_algorithmTree->AppendItem(custom, "YamamotoSolve");
+  m_algorithms.Define(id, panel = new panelNfgYamamoto(this));
 
   m_algorithmTree->Expand(standard);
   m_algorithmTree->Expand(custom);
