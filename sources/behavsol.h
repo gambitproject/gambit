@@ -22,7 +22,7 @@ protected:
   T _GobitLambda;
   T _GobitValue;
   T _LiapValue;
-  gVector<T> _Beliefs;
+  gDPVector<T> _Beliefs;
 
 public:
   BehavSolution(const Efg<T> &, bool truncated = false);
@@ -35,8 +35,11 @@ public:
 
   void SetCreator(int);
   int Creator() const; // Who created this object?  (algorithm ID or user)
+  void SetIsNash(int);
   int IsNash(); // Is it Nash? Y/N/DK
+  void SetIsSubgamePerfect(int);
   int IsSubgamePerfect() const; // Is it Subgame Perfect? Y/N/DK
+  void SetIsSequential(int);
   int IsSequential(); // Is it Sequential? Y/N/DK
   EFSupport Support() const; // Support of Profile
 
@@ -45,7 +48,7 @@ public:
   T GobitValue() const; // objective function from gobit alg
   void SetLiap(T value);
   T LiapValue(); // liapnov function value (to test for Nash)
-  gVector<T> Beliefs(); // Belief vector, if a sequential equilibrium
+  gDPVector<T> Beliefs(); // Belief vector, if a sequential equilibrium
 
   bool operator==(const BehavSolution<T> &) const;
   void Dump(gOutput& f) const;

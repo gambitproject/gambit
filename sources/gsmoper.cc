@@ -138,8 +138,8 @@ Portion* GSM_Add_MixedFloat( Portion** param )
     return new ErrorPortion( "Cannot operate on a null Mixed value" );
 
   result = param[ 0 ]->ValCopy();
-  ( * (MixedProfile<double>*) ( (MixedPortion*) result )->Value() ) +=
-    ( * (MixedProfile<double>*) ( (MixedPortion*) param[ 1 ] )->Value() );
+  ( * (MixedSolution<double>*) ( (MixedPortion*) result )->Value() ) +=
+    ( * (MixedSolution<double>*) ( (MixedPortion*) param[ 1 ] )->Value() );
   return result;
 }
 
@@ -151,8 +151,8 @@ Portion* GSM_Add_MixedRational( Portion** param )
     return new ErrorPortion( "Cannot operate on a null Mixed value" );
 
   result = param[ 0 ]->ValCopy();
-  ( * (MixedProfile<gRational>*) ( (MixedPortion*) result )->Value() ) +=
-    ( * (MixedProfile<gRational>*) ( (MixedPortion*) param[ 1 ] )->Value() );
+  ( * (MixedSolution<gRational>*) ( (MixedPortion*) result )->Value() ) +=
+    ( * (MixedSolution<gRational>*) ( (MixedPortion*) param[ 1 ] )->Value() );
   return result;
 }
 
@@ -165,8 +165,8 @@ Portion* GSM_Add_BehavFloat( Portion** param )
     return new ErrorPortion( "Cannot operate on a null Behav value" );
 
   result = param[ 0 ]->ValCopy();
-  ( * (BehavProfile<double>*) ( (BehavPortion*) result )->Value() ) +=
-    ( * (BehavProfile<double>*) ( (BehavPortion*) param[ 1 ] )->Value() );
+  ( * (BehavSolution<double>*) ( (BehavPortion*) result )->Value() ) +=
+    ( * (BehavSolution<double>*) ( (BehavPortion*) param[ 1 ] )->Value() );
   return result;
 }
 
@@ -178,8 +178,8 @@ Portion* GSM_Add_BehavRational( Portion** param )
     return new ErrorPortion( "Cannot operate on a null Mixed value" );
 
   result = param[ 0 ]->ValCopy();
-  ( * (BehavProfile<gRational>*) ( (BehavPortion*) result )->Value() ) +=
-    ( * (BehavProfile<gRational>*) ( (BehavPortion*) param[ 1 ] )->Value() );
+  ( * (BehavSolution<gRational>*) ( (BehavPortion*) result )->Value() ) +=
+    ( * (BehavSolution<gRational>*) ( (BehavPortion*) param[ 1 ] )->Value() );
   return result;
 }
 
@@ -266,8 +266,8 @@ Portion* GSM_Subtract_MixedFloat( Portion** param )
     return new ErrorPortion( "Cannot operate on a null Mixed value" );
 
   result = param[ 0 ]->ValCopy();
-  ( * (MixedProfile<double>*) ( (MixedPortion*) result )->Value() ) -=
-    ( * (MixedProfile<double>*) ( (MixedPortion*) param[ 1 ] )->Value() );
+  ( * (MixedSolution<double>*) ( (MixedPortion*) result )->Value() ) -=
+    ( * (MixedSolution<double>*) ( (MixedPortion*) param[ 1 ] )->Value() );
   return result;
 }
 
@@ -279,8 +279,8 @@ Portion* GSM_Subtract_MixedRational( Portion** param )
     return new ErrorPortion( "Cannot operate on a null Mixed value" );
 
   result = param[ 0 ]->ValCopy();
-  ( * (MixedProfile<gRational>*) ( (MixedPortion*) result )->Value() ) -=
-    ( * (MixedProfile<gRational>*) ( (MixedPortion*) param[ 1 ] )->Value() );
+  ( * (MixedSolution<gRational>*) ( (MixedPortion*) result )->Value() ) -=
+    ( * (MixedSolution<gRational>*) ( (MixedPortion*) param[ 1 ] )->Value() );
   return result;
 }
 
@@ -293,8 +293,8 @@ Portion* GSM_Subtract_BehavFloat( Portion** param )
     return new ErrorPortion( "Cannot operate on a null Behav value" );
 
   result = param[ 0 ]->ValCopy();
-  ( * (BehavProfile<double>*) ( (BehavPortion*) result )->Value() ) -=
-    ( * (BehavProfile<double>*) ( (BehavPortion*) param[ 1 ] )->Value() );
+  ( * (BehavSolution<double>*) ( (BehavPortion*) result )->Value() ) -=
+    ( * (BehavSolution<double>*) ( (BehavPortion*) param[ 1 ] )->Value() );
   return result;
 }
 
@@ -306,8 +306,8 @@ Portion* GSM_Subtract_BehavRational( Portion** param )
     return new ErrorPortion( "Cannot operate on a null Mixed value" );
 
   result = param[ 0 ]->ValCopy();
-  ( * (BehavProfile<gRational>*) ( (BehavPortion*) result )->Value() ) -=
-    ( * (BehavProfile<gRational>*) ( (BehavPortion*) param[ 1 ] )->Value() );
+  ( * (BehavSolution<gRational>*) ( (BehavPortion*) result )->Value() ) -=
+    ( * (BehavSolution<gRational>*) ( (BehavPortion*) param[ 1 ] )->Value() );
   return result;
 }
 
@@ -356,7 +356,7 @@ Portion* GSM_Multiply_MixedFloat1( Portion** param )
     return new ErrorPortion( "Cannot operate on a null Mixed value" );
   
   result = param[ 1 ]->ValCopy();
-  ( * (MixedProfile<double>*) ( (MixedPortion*) result )->Value() ) *=
+  ( * (MixedSolution<double>*) ( (MixedPortion*) result )->Value() ) *=
     ( (FloatPortion*) param[ 0 ] )->Value();
   return result;
 }
@@ -368,7 +368,7 @@ Portion* GSM_Multiply_MixedFloat2( Portion** param )
     return new ErrorPortion( "Cannot operate on a null Mixed value" );
   
   result = param[ 0 ]->ValCopy();
-  ( * (MixedProfile<double>*) ( (MixedPortion*) result )->Value() ) *=
+  ( * (MixedSolution<double>*) ( (MixedPortion*) result )->Value() ) *=
     ( (FloatPortion*) param[ 1 ] )->Value();
   return result;
 }
@@ -381,7 +381,7 @@ Portion* GSM_Multiply_MixedRational1( Portion** param )
     return new ErrorPortion( "Cannot operate on a null Mixed value" );
   
   result = param[ 1 ]->ValCopy();
-  ( * (MixedProfile<gRational>*) ( (MixedPortion*) result )->Value() ) *=
+  ( * (MixedSolution<gRational>*) ( (MixedPortion*) result )->Value() ) *=
     ( (RationalPortion*) param[ 0 ] )->Value();
   return result;
 }
@@ -393,7 +393,7 @@ Portion* GSM_Multiply_MixedRational2( Portion** param )
     return new ErrorPortion( "Cannot operate on a null Mixed value" );
   
   result = param[ 0 ]->ValCopy();
-  ( * (MixedProfile<gRational>*) ( (MixedPortion*) result )->Value() ) *=
+  ( * (MixedSolution<gRational>*) ( (MixedPortion*) result )->Value() ) *=
     ( (RationalPortion*) param[ 1 ] )->Value();
   return result;
 }
@@ -406,7 +406,7 @@ Portion* GSM_Multiply_BehavFloat1( Portion** param )
     return new ErrorPortion( "Cannot operate on a null Behav value" );
   
   result = param[ 1 ]->ValCopy();
-  ( * (BehavProfile<double>*) ( (BehavPortion*) result )->Value() ) *=
+  ( * (BehavSolution<double>*) ( (BehavPortion*) result )->Value() ) *=
     ( (FloatPortion*) param[ 0 ] )->Value();
   return result;
 }
@@ -418,7 +418,7 @@ Portion* GSM_Multiply_BehavFloat2( Portion** param )
     return new ErrorPortion( "Cannot operate on a null Behav value" );
   
   result = param[ 0 ]->ValCopy();
-  ( * (BehavProfile<double>*) ( (BehavPortion*) result )->Value() ) *=
+  ( * (BehavSolution<double>*) ( (BehavPortion*) result )->Value() ) *=
     ( (FloatPortion*) param[ 1 ] )->Value();
   return result;
 }
@@ -431,7 +431,7 @@ Portion* GSM_Multiply_BehavRational1( Portion** param )
     return new ErrorPortion( "Cannot operate on a null Behav value" );
   
   result = param[ 1 ]->ValCopy();
-  ( * (BehavProfile<gRational>*) ( (BehavPortion*) result )->Value() ) *=
+  ( * (BehavSolution<gRational>*) ( (BehavPortion*) result )->Value() ) *=
     ( (RationalPortion*) param[ 0 ] )->Value();
   return result;
 }
@@ -443,7 +443,7 @@ Portion* GSM_Multiply_BehavRational2( Portion** param )
     return new ErrorPortion( "Cannot operate on a null Behav value" );
   
   result = param[ 0 ]->ValCopy();
-  ( * (BehavProfile<gRational>*) ( (BehavPortion*) result )->Value() ) *=
+  ( * (BehavSolution<gRational>*) ( (BehavPortion*) result )->Value() ) *=
     ( (RationalPortion*) param[ 1 ] )->Value();
   return result;
 }
@@ -787,8 +787,8 @@ Portion* GSM_EqualTo_MixedFloat( Portion** param )
   
   result = new BoolValPortion
     (
-     ( * (MixedProfile<double>*) ( (MixedPortion*) param[ 0 ] )->Value() ) ==
-     ( * (MixedProfile<double>*) ( (MixedPortion*) param[ 1 ] )->Value() )
+     ( * (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value() ) ==
+     ( * (MixedSolution<double>*) ( (MixedPortion*) param[ 1 ] )->Value() )
      );
   return result;
 }
@@ -802,8 +802,8 @@ Portion* GSM_EqualTo_MixedRational( Portion** param )
   
   result = new BoolValPortion
     (
-     (* (MixedProfile<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value() ) ==
-     (* (MixedProfile<gRational>*) ( (MixedPortion*) param[ 1 ] )->Value() )
+     (* (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value() ) ==
+     (* (MixedSolution<gRational>*) ( (MixedPortion*) param[ 1 ] )->Value() )
      );
   return result;
 }
@@ -818,8 +818,8 @@ Portion* GSM_EqualTo_BehavFloat( Portion** param )
   
   result = new BoolValPortion
     (
-     ( * (BehavProfile<double>*) ( (BehavPortion*) param[ 0 ] )->Value() ) ==
-     ( * (BehavProfile<double>*) ( (BehavPortion*) param[ 1 ] )->Value() )
+     ( * (BehavSolution<double>*) ( (BehavPortion*) param[ 0 ] )->Value() ) ==
+     ( * (BehavSolution<double>*) ( (BehavPortion*) param[ 1 ] )->Value() )
      );
   return result;
 }
@@ -833,8 +833,8 @@ Portion* GSM_EqualTo_BehavRational( Portion** param )
   
   result = new BoolValPortion
     (
-     (* (BehavProfile<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value() ) ==
-     (* (BehavProfile<gRational>*) ( (BehavPortion*) param[ 1 ] )->Value() )
+     (* (BehavSolution<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value() ) ==
+     (* (BehavSolution<gRational>*) ( (BehavPortion*) param[ 1 ] )->Value() )
      );
   return result;
 }
@@ -969,8 +969,8 @@ Portion* GSM_NotEqualTo_MixedFloat( Portion** param )
   
   result = new BoolValPortion
     (
-     ( * (MixedProfile<double>*) ( (MixedPortion*) param[ 0 ] )->Value() ) !=
-     ( * (MixedProfile<double>*) ( (MixedPortion*) param[ 1 ] )->Value() )
+     ( * (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value() ) !=
+     ( * (MixedSolution<double>*) ( (MixedPortion*) param[ 1 ] )->Value() )
      );
   return result;
 }
@@ -984,8 +984,8 @@ Portion* GSM_NotEqualTo_MixedRational( Portion** param )
   
   result = new BoolValPortion
     (
-     (* (MixedProfile<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value() ) !=
-     (* (MixedProfile<gRational>*) ( (MixedPortion*) param[ 1 ] )->Value() )
+     (* (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value() ) !=
+     (* (MixedSolution<gRational>*) ( (MixedPortion*) param[ 1 ] )->Value() )
      );
   return result;
 }
@@ -1000,8 +1000,8 @@ Portion* GSM_NotEqualTo_BehavFloat( Portion** param )
   
   result = new BoolValPortion
     (
-     ( * (BehavProfile<double>*) ( (BehavPortion*) param[ 0 ] )->Value() ) !=
-     ( * (BehavProfile<double>*) ( (BehavPortion*) param[ 1 ] )->Value() )
+     ( * (BehavSolution<double>*) ( (BehavPortion*) param[ 0 ] )->Value() ) !=
+     ( * (BehavSolution<double>*) ( (BehavPortion*) param[ 1 ] )->Value() )
      );
   return result;
 }
@@ -1015,8 +1015,8 @@ Portion* GSM_NotEqualTo_BehavRational( Portion** param )
   
   result = new BoolValPortion
     (
-     (* (BehavProfile<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value() ) !=
-     (* (BehavProfile<gRational>*) ( (BehavPortion*) param[ 1 ] )->Value() )
+     (* (BehavSolution<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value() ) !=
+     (* (BehavSolution<gRational>*) ( (BehavPortion*) param[ 1 ] )->Value() )
      );
   return result;
 }
@@ -1396,10 +1396,10 @@ Portion* GSM_Write_Mixed( Portion** param )
   switch( mixed->Type() )
   {
   case DOUBLE:
-    s << * (MixedProfile<double>*) mixed; 
+    s << * (MixedSolution<double>*) mixed; 
     break;
   case RATIONAL:
-    s << * (MixedProfile<gRational>*) mixed; 
+    s << * (MixedSolution<gRational>*) mixed; 
     break;
   default:
     assert( 0 );
@@ -1416,10 +1416,10 @@ Portion* GSM_Write_Behav( Portion** param )
   switch( behav->Type() )
   {
   case DOUBLE:
-    s << * (BehavProfile<double>*) behav; 
+    s << * (BehavSolution<double>*) behav; 
     break;
   case RATIONAL:
-    s << * (BehavProfile<gRational>*) behav; 
+    s << * (BehavSolution<gRational>*) behav; 
     break;
   default:
     assert( 0 );
@@ -1998,10 +1998,7 @@ Portion* GSM_Read_Undefined( Portion** param )
   /* will go through and try to read the input as different format until
      it succeeds */
 
-  Portion* p;
   Portion** sub_param;
-  ListPortion* list;
-  int i;
   char c = ' ';  
   gInput& input = ((InputPortion*) param[0])->Value();
   long old_pos = input.getpos();

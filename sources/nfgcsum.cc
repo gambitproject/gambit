@@ -132,6 +132,7 @@ template <class T> int ZSumModule<T>::Add_BFS(const LPSolve<T> &lp)
 template <class T>
 void ZSumModule<T>::GetSolutions(gList<MixedSolution<T> > &solutions) const
 {
+  int index;
   int n1=support.NumStrats(1);
   int n2=support.NumStrats(2);
   solutions.Flush();
@@ -150,7 +151,8 @@ void ZSumModule<T>::GetSolutions(gList<MixedSolution<T> > &solutions) const
       else
 	profile(2, j) = (T) 0;
 
-    solutions.Append(MixedSolution<T>(profile, id_ZSUM));
+    index = solutions.Append(MixedSolution<T>(profile, id_ZSUM));
+    solutions[index].SetIsNash(T_YES);
   }
 }
 

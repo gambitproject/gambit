@@ -399,6 +399,8 @@ template <class T> T SimpdivModule<T>::getlabel(MixedProfile<T> &yy)
 template <class T> int SimpdivModule<T>::Simpdiv(void)
 {
   int qf,soln,i,j,k,ii;
+  int index;
+  bool add;
 
   gWatch watch;
 
@@ -441,7 +443,18 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
     }
     *params.tracefile << "\nSimpDiv solution # " << soln+1 << " : " << y;
     *params.tracefile << " maxz = " << maxz; 
-    solutions.Append(MixedSolution<T>(MixedProfile<T>(y), id_SIMPDIV));
+
+    add = false;
+    MixedProfile<T> profile(y);
+    if((params.status.Get() != 1) || 
+       (params.status.Get() == 1 && profile.IsNash()))
+      add = true;
+    if(add)
+    {
+      index=solutions.Append(MixedSolution<T>(profile, id_SIMPDIV));
+      if(params.status.Get() != 1)
+	solutions[index].SetIsNash(T_YES);
+    }    
   }
   if(params.status.Get()) params.status.Reset();
 

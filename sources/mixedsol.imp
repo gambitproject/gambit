@@ -72,8 +72,14 @@ template <class T> MixedSolution<T>::MixedSolution(const MixedSolution<T>& m)
 template <class T> MixedSolution<T>::~MixedSolution() {}
 
 
+template <class T> void MixedSolution<T>::SetCreator(int c)
+{ _Creator = c; }
+
 template <class T> int MixedSolution<T>::Creator() const
 { return _Creator; }
+
+template <class T> void MixedSolution<T>::SetIsNash(int i)
+{ _IsNash = i; }
 
 template <class T> int MixedSolution<T>::IsNash()
 { 
@@ -82,14 +88,14 @@ template <class T> int MixedSolution<T>::IsNash()
   return _IsNash; 
 }
 
+template <class T> void MixedSolution<T>::SetIsPerfect(int i)
+{ _IsPerfect = i; }
+
 template <class T> int MixedSolution<T>::IsPerfect()
-{ 
-  if(_Creator == id_LEMKE)
-    _IsPerfect = T_YES;
-  else
-    _IsPerfect = T_DONTKNOW; 
-  return _IsPerfect;
-}
+{ return _IsPerfect; }
+
+template <class T> void MixedSolution<T>::SetIsProper(int i)
+{ _IsProper = i; }
 
 template <class T> int MixedSolution<T>::IsProper() const
 { return _IsProper; }

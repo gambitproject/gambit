@@ -17,6 +17,7 @@
 template <class T> int FindPureNash(const Nfg<T> &N,
 				    gList<MixedSolution<T> > &eqs)
 {
+  int index;
   NFSupport S(N);
   ContIter<T> citer(&S);
   
@@ -42,7 +43,9 @@ template <class T> int FindPureNash(const Nfg<T> &N,
       gArray<int> profile = citer.Get();
       for (int i = 1; i <= profile.Length(); i++)
 	temp(i, profile[i]) = (T) 1;
-      eqs.Append(MixedSolution<T>(temp, id_PURENASH));
+
+      index = eqs.Append(MixedSolution<T>(temp, id_PURENASH));
+      eqs[index].SetIsNash(T_YES);
     }
   }  while (citer.NextContingency());
   

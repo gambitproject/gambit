@@ -376,6 +376,8 @@ template <class T>
 void LemkeTableau<T>::GetSolutions(gList<MixedSolution<T> > &solutions) const
 {
   solutions.Flush();
+  int index;
+  bool add;
 
   for (int i = 1; i <= List.Length(); i++)    {
     MixedProfile<T> profile(N, support);
@@ -405,7 +407,19 @@ void LemkeTableau<T>::GetSolutions(gList<MixedSolution<T> > &solutions) const
       else
 	profile(2, j) = (T) 0;
 
-    solutions.Append(MixedSolution<T>(profile, id_LEMKE));
+    add = false;
+    if((status.Get() != 1) || 
+       (status.Get() == 1 && profile.IsNash()))
+      add = true;
+    if(add)
+    {
+      index = solutions.Append(MixedSolution<T>(profile, id_LEMKE));
+      if(status.Get() != 1)
+      {
+	solutions[index].SetIsNash(T_YES);
+	solutions[index].SetIsPerfect(T_YES);
+      }
+    }    
   }
 }
 

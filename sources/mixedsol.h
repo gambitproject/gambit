@@ -35,9 +35,13 @@ public:
   MixedSolution(const MixedSolution<T> &);
   ~MixedSolution();
 
+  void SetCreator(int);
   int Creator() const; // Who created this object? (algorithm ID or user)
+  void SetIsNash(int);
   int IsNash(); // Is it Nash? Y/N/DK
+  void SetIsPerfect(int);
   int IsPerfect(); //Is it Perfect? Y/N/DK
+  void SetIsProper(int);
   int IsProper() const; //Is it Proper? Y/N/DK
   NFSupport Support() const; //Support of Profile
 

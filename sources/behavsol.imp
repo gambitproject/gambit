@@ -18,7 +18,7 @@ BehavSolution<T>::BehavSolution(const Efg<T>& e, bool truncated)
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
-  _Beliefs(0)
+  _Beliefs()
 {}
 
 template <class T> 
@@ -31,7 +31,7 @@ BehavSolution<T>::BehavSolution(const Efg<T>& e, const gDPVector<T>& v)
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
-  _Beliefs(0)
+  _Beliefs()
 {}
 
 template <class T> 
@@ -44,7 +44,7 @@ BehavSolution<T>::BehavSolution(const EFSupport& s)
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
-  _Beliefs(0)
+  _Beliefs()
 {}
 
 template <class T> 
@@ -57,7 +57,7 @@ BehavSolution<T>::BehavSolution(const BehavProfile<T>& b, int creator)
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
-  _Beliefs(0)
+  _Beliefs()
 {}
 
 
@@ -81,6 +81,9 @@ template <class T> void BehavSolution<T>::SetCreator(int c)
 template <class T> int BehavSolution<T>::Creator() const
 { return _Creator; }
 
+template <class T> void BehavSolution<T>::SetIsNash(int i)
+{ _IsNash = i; }
+
 template <class T> int BehavSolution<T>::IsNash()
 { 
   if( _IsNash == T_DONTKNOW )
@@ -88,8 +91,14 @@ template <class T> int BehavSolution<T>::IsNash()
   return _IsNash; 
 }
 
+template <class T> void BehavSolution<T>::SetIsSubgamePerfect(int i)
+{ _IsSubgamePerfect = i; }
+
 template <class T> int BehavSolution<T>::IsSubgamePerfect() const
 { return _IsSubgamePerfect; }
+
+template <class T> void BehavSolution<T>::SetIsSequential(int i)
+{ _IsSequential = i; }
 
 template <class T> int BehavSolution<T>::IsSequential()
 {
@@ -127,7 +136,7 @@ template <class T> T BehavSolution<T>::LiapValue()
   return _LiapValue; 
 }
 
-template <class T> gVector<T> BehavSolution<T>::Beliefs()
+template <class T> gDPVector<T> BehavSolution<T>::Beliefs()
 { return _Beliefs; }
 
 

@@ -38,6 +38,9 @@ EnumModule<T>::EnumModule(const Nfg<T> &N, const EnumParams &p,
 
 template <class T> int EnumModule<T>::Enum(void)
 {
+  int index;
+  bool add;
+
   if (NF.NumPlayers() != 2)   return 0;  
   int n1, n2, v1,v2,i,j,k;
 
@@ -180,7 +183,17 @@ template <class T> int EnumModule<T>::Enum(void)
 	  if(bfs2.IsDefined(k)) 
 	    profile(2,k)/=sum;
 	} 
-	solutions.Append(MixedSolution<T>(profile, id_ENUM));
+
+	add = false;
+	if((params.status.Get() != 1) || 
+	   (params.status.Get() == 1 && profile.IsNash()))
+	  add = true;
+	if(add)
+	{
+	  index = solutions.Append(MixedSolution<T>(profile, id_ENUM));
+	  if(params.status.Get() != 1)
+	    solutions[index].SetIsNash(T_YES);
+	}
       }
     }
 

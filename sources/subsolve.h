@@ -24,7 +24,8 @@ template <class T> class SubgameSolver   {
 		      gList<Outcome *> &);
 
   protected:
-    virtual void SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &) = 0;
+    virtual int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &) = 0;
+    // changed to return int = status.Get()
 
     virtual void ViewSubgame(int, const Efg<T> &);
 
@@ -50,7 +51,7 @@ template <class T> class SeqFormBySubgame : public SubgameSolver<T>  {
     int npivots;
     SeqFormParams params;
 
-    void SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
+    int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
     int AlgorithmID() const { return id_SEQFORMSUB; }    
 
   public:
@@ -68,7 +69,7 @@ class EFLiapBySubgame : public SubgameSolver<double>  {
     EFLiapParams params;
     BehavProfile<double> start;
     
-    void SolveSubgame(const Efg<double> &, gList<BehavSolution<double> > &);
+    int SolveSubgame(const Efg<double> &, gList<BehavSolution<double> > &);
     int AlgorithmID() const { return id_ELIAPSUB; }    
 
   public:
@@ -87,7 +88,7 @@ template <class T> class LemkeBySubgame : public SubgameSolver<T>  {
     int npivots;
     LemkeParams params;
 
-    void SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
+    int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
     int AlgorithmID() const { return id_LEMKESUB; }    
 
   public:
@@ -105,7 +106,7 @@ class NFLiapBySubgame : public SubgameSolver<double>  {
     NFLiapParams params;
     BehavProfile<double> start;
 
-    void SolveSubgame(const Efg<double> &,
+    int SolveSubgame(const Efg<double> &,
 		      gList<BehavSolution<double> > &);
     int AlgorithmID() const { return id_NLIAPSUB; }    
 
@@ -124,7 +125,7 @@ template <class T> class SimpdivBySubgame : public SubgameSolver<T>  {
     int nevals;
     SimpdivParams params;
 
-    void SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
+    int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
     int AlgorithmID() const { return id_SIMPDIVSUB; }    
 
   public:
@@ -141,7 +142,7 @@ template <class T> class EnumBySubgame : public SubgameSolver<T>  {
     int npivots;
     EnumParams params;
 
-    void SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
+    int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
     int AlgorithmID() const { return id_ENUMSUB; }    
 
   public:
@@ -156,7 +157,7 @@ template <class T> class EnumBySubgame : public SubgameSolver<T>  {
 
 template <class T> class PureNashBySubgame : public SubgameSolver<T>  {
   private:
-    void SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
+    int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
     int AlgorithmID() const { return id_PURENASHSUB; }    
 
   public:
@@ -172,7 +173,7 @@ template <class T> class ZSumBySubgame : public SubgameSolver<T>  {
     int npivots;
     ZSumParams params;
 
-    void SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
+    int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
     int AlgorithmID() const { return id_ZSUMSUB; }    
 
   public:

@@ -171,13 +171,24 @@ bool Liap(const Nfg<double> &N, NFLiapParams &params,
   double value;
   int iter;
   bool found;
-  int i;
+  int index;
+  bool add;
 
   if (found = DFP(p, F, value, iter, params.maxits1, params.tol1,
 		  params.maxitsN, params.tolN))
   {
-    i = solutions.Append(MixedSolution<double>(p, id_LIAP));
-    solutions[i].SetLiap(value);
+    add = false;
+    if((params.status.Get() != 1) || 
+       (params.status.Get() == 1 && p.IsNash()))
+      add = true;
+    if(add)
+    {
+    index = solutions.Append(MixedSolution<double>(p, id_LIAP));
+    solutions[index].SetLiap(value);
+    if(params.status.Get() != 1)
+      solutions[index].SetIsNash(T_YES);
+    }   
+
   }
   
   nevals = F.NumEvals();
