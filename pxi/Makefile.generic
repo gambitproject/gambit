@@ -43,7 +43,7 @@ vpath %.o  $(OBJDIR)
 #   WXLIBDIR = location of wxwin libraries
 #   WXLIB    = any wx libraries used
 
-WXDIR = /home/mill/gambit/wxwin-new
+WXDIR = /home/mill/gambit/wxwin
 WXLIBDIR = -L$(WXDIR)/lib
 WXINCDIR = -I$(WXDIR)/include/base -I$(WXDIR)/include/x
 WXLIB = -lwx_$(GUI)_$(SYSNAME)
