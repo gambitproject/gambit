@@ -1,3 +1,8 @@
+//#
+//# FILE: lemke.cc -- Lemke-Howson module
+//#
+//# $Id$
+//#
 
 #include "normal.h"
 #include "gtableau.h"
@@ -5,13 +10,13 @@
 //#include "rational.h"
 #define Rational double
 
-NormalForm::Lemke(int dup_strat)
+int NormalForm::Lemke(int dup_strat)
 {
   Rational min,x;
   int i,j;
   StrategyProfile s;
 
-  if(NumberOfPlayers()>2)return 0;
+  if (NumPlayers() != 2)   return 0;
   int n1 = strategies[1]->GetNumberOfStrategies();
   int n2= strategies[2]->GetNumberOfStrategies();
   int n=n1+n2;
