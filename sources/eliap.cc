@@ -112,10 +112,11 @@ static void PickRandomProfile(BehavProfile<double> &p)
 
 static void AddSolution(gList<BehavSolution<double> > &solutions,
 			const BehavProfile<double> &profile,
-		        double value)
+		        double value, double epsilon)
 {
   int i = solutions.Append(BehavSolution<double>(profile, EfgAlg_LIAP));
   solutions[i].SetLiap(value);
+  solutions[i].SetEpsilon(epsilon);
   solutions[i].SetIsNash(T_YES);
   solutions[i].SetIsSubgamePerfect(T_YES);
   solutions[i].SetIsSequential(T_YES);
@@ -171,14 +172,28 @@ bool Liap(const Efg<double> &E, EFLiapParams &params,
     
     if (found = Powell(p, xi, F, value, iter,
 		       params.maxits1, params.tol1, params.maxitsN, 
-		       params.tolN,*params.tracefile, params.trace-1, false, 
+		       params.tolN,*params.tracefile, params.trace-1, true, 
 		       params.status)) {
-      AddSolution(solutions, p, value);
-      if(params.trace>0)
-	*params.tracefile << p;
+      
+      bool add = false;
+      if (!params.status.Get()) {
+	add=true;
+	int ii=1;
+	while(ii<=solutions.Length() && add == true) {
+	  if(solutions[ii].Equals(p)) 
+	    add = false;
+	  ii++;
+	}
+      }
+      if (add)  {
+	if(params.trace>0)
+	  *params.tracefile << p;
+	
+	AddSolution(solutions, p, value, pow(params.tolN,.5));
+      }
     }
-    if(params.status.Get()) params.status.Reset();
   }
+  if(params.status.Get()) params.status.Reset();
 
   nevals = F.NumEvals();
   niters = 0L;

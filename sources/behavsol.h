@@ -87,6 +87,7 @@ public:
 
   const gDPVector<T> &Regret(void);
 	 
+  bool Equals(const BehavProfile<T> &) const;
   bool operator==(const BehavSolution<T> &) const;
   void Dump(gOutput& f) const;
 

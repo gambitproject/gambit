@@ -175,6 +175,21 @@ template <class T> T MixedSolution<T>::LiapValue(void) const
 }
 
 template <class T> 
+bool MixedSolution<T>::Equals(const MixedProfile<T> & s) const
+{ 
+  T eps;
+  gEpsilon(eps,4);   // this should be a function of _Epsilon
+  bool flag=true;
+  int i=s.First();
+  while(flag==true && i<=s.Length()) {
+    if(abs((*this)[i]-s[i]) > eps) 
+      flag=false;
+    i++;
+  }
+  return flag;
+}
+
+template <class T> 
 bool MixedSolution<T>::operator==(const MixedSolution<T> & s) const
 { return MixedProfile<T>::operator==(s); }
 

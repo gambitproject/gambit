@@ -175,11 +175,12 @@ bool Liap(const Nfg<double> &N, NFLiapParams &params,
 
   solutions.Flush();
 
-  for (int i = 1; !params.status.Get() && (params.nTries == 0 || i <= params.nTries) &&
+  for (int i = 1; !params.status.Get() && 
+       (params.nTries == 0 || i <= params.nTries) &&
        (params.stopAfter==0 || solutions.Length() < params.stopAfter);
        i++) { 
     if (i > 1) PickRandomProfile(p);
-
+    
     if(params.trace>0)
       *params.tracefile << "\nTry #: " << i << " p: ";
     
@@ -187,14 +188,19 @@ bool Liap(const Nfg<double> &N, NFLiapParams &params,
 		    params.maxitsN, params.tolN, *params.tracefile,
 		    params.trace-1, false, params.status))  {
       bool add = false;
-      if ((!params.status.Get()) 
-//	  || (params.status.Get() && p.IsNash())
-	)
-	add = true;
+      if (!params.status.Get()) {
+	add=true;
+	int ii=1;
+	while(ii<=solutions.Length() && add == true) {
+	  if(solutions[ii].Equals(p)) 
+	    add = false;
+	  ii++;
+	}
+      }
       if (add)  {
 	if(params.trace>0)
 	  *params.tracefile << p;
-	
+
 	int index = solutions.Append(MixedSolution<double>(p, NfgAlg_LIAP));
 	solutions[index].SetLiap(value);
 	if (!params.status.Get()) {
@@ -203,8 +209,8 @@ bool Liap(const Nfg<double> &N, NFLiapParams &params,
 	}
       }   
     }
-    if(params.status.Get()) params.status.Reset(); 
   }
+  if(params.status.Get()) params.status.Reset(); 
 
   nevals = F.NumEvals();
   niters = 0L;

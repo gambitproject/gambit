@@ -218,6 +218,21 @@ template <class T> const gDPVector<T> &BehavSolution<T>::Regret(void)
 }
 
 template <class T> 
+bool BehavSolution<T>::Equals(const BehavProfile<T> & s) const
+{ 
+  T eps;
+  gEpsilon(eps,4);  // this should be a function of _Epsilon
+  bool flag=true;
+  int i=s.First();
+  while(flag==true && i<=s.Length()) {
+    if(abs((*this)[i]-s[i]) > eps) 
+      flag=false;
+    i++;
+  }
+  return flag;
+}
+
+template <class T> 
 bool BehavSolution<T>::operator==(const BehavSolution<T> & s) const
 {
   return BehavProfile<T>::operator==(s);
