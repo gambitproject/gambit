@@ -887,17 +887,17 @@ int TreeWindow::NodeDragger::OnEvent(wxMouseEvent &ev, Bool &nodes_changed)
         ev.Position(&x, &y); c = ev.ControlDown();
         ret = DRAG_STOP;
         if (start_node && end_node && start_node != end_node) {
-	  try {
-	    if (c)
-	      ef.MoveTree(start_node, end_node);    // move
-	    else
-	      ef.CopyTree(start_node, end_node);    // copy
-	    nodes_changed = TRUE;
-	  }
-	  catch (gException &E) {
-	    guiExceptionDialog(E.Description(), parent->Parent());
-	  }
-	  parent->OnPaint();
+      try {
+        if (c)
+          ef.MoveTree(start_node, end_node);    // move
+        else
+          ef.CopyTree(start_node, end_node);    // copy
+        nodes_changed = TRUE;
+      }
+      catch (gException &E) {
+        guiExceptionDialog(E.Description(), parent->Parent());
+      }
+      parent->OnPaint();
         }
     }
     return ret;
@@ -2636,12 +2636,29 @@ Node *TreeWindow::GotObject(float &x, float &y, int what)
 //                      FILE-SAVE MENU HANDLER
 //***********************************************************************
 Efg *CompressEfg(const Efg &, const EFSupport &);
+
 void TreeWindow::file_save(void)
 {
     gText filename = frame->Filename();
+
     gText s = wxFileSelector("Save data file", wxPathOnly(filename),
                              wxFileNameFromPath(filename), ".efg", "*.efg",
                              wxSAVE|wxOVERWRITE_PROMPT);
+
+#ifdef UNIX
+    // Overwrite protection doesn't work in Unix, so we
+    // have to check explicitly.
+
+    if (wxFileExists((char *)s))  // Ask for confirmation.
+    {
+        if (wxMessageBox("File exists.  Overwrite?", "Confirm", wxOK|wxCANCEL) 
+            != wxOK)
+        {
+            return;
+        }
+    }
+#endif
+
     if (s != "")
     {
         // Change description if saving under a different filename
