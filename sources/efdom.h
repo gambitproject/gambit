@@ -84,12 +84,12 @@ bool ElimDominatedForPlayer(const EFSupport &S, EFSupport &T,
 			    const bool conditional,
 		                  gStatus &status);
 
-EFSupport *SupportWithoutDominatedOfPlayerList(const EFSupport &S, 
-					       const bool strong,
-					       const bool conditional,
-					       const gArray<int> &players,
-					             gOutput &, // tracefile 
-					             gStatus &status);
+EFSupport *ComputeDominated(const EFSupport &S, 
+			    const bool strong,
+			    const bool conditional,
+			    const gArray<int> &players,
+			    gOutput &, // tracefile 
+			    gStatus &status);
 
 EFSupport *DominanceTruncatedSupport(const EFSupport &S, 
 				     const bool strong,

@@ -39,11 +39,6 @@ public:
   virtual gList<BehavSolution> Solve(void) const = 0;
   virtual bool SolveSetup(void) = 0;
 
-  bool Eliminate(void) const { return m_eliminate; }
-  bool EliminateAll(void) const { return m_eliminateAll; }
-  bool EliminateWeak(void) const { return m_eliminateWeak; }
-  bool EliminateMixed(void) const { return m_eliminateMixed; }
-
   bool MarkSubgames(void) const { return m_markSubgames; }
 };
 

@@ -1334,14 +1334,14 @@ void EfgShow::SolveElimDom(void)
 
     if (!EDPD.DomMixed()) {
       if (EDPD.FindAll()) {
-	while ((sup = SupportWithoutDominatedOfPlayerList(*sup, EDPD.DomStrong(), false,
-							  EDPD.Players(), gnull, status)) != 0) {
+	while ((sup = ComputeDominated(*sup, EDPD.DomStrong(), false,
+				       EDPD.Players(), gnull, status)) != 0) {
 	  supports.Append(sup);
 	}
       }
       else {
-	if ((sup = SupportWithoutDominatedOfPlayerList(*sup, EDPD.DomStrong(), false, 
-						       EDPD.Players(), gnull, status)) != 0) {
+	if ((sup = ComputeDominated(*sup, EDPD.DomStrong(), false, 
+				    EDPD.Players(), gnull, status)) != 0) {
 	  supports.Append(sup);
 	}
       }

@@ -183,8 +183,6 @@ bool ElimDominatedInInfoset(const EFSupport &S, EFSupport &T,
 	if (Dominates(S, pl, iset, i, j, strong, conditional, status)) {
 	  is_dominated[j] = true;
 	  status.Get();
-	  status << actions[j]->GetNumber() << " dominated by "
-		 << actions[i]->GetNumber() << '\n';
 	}
       
   bool action_was_eliminated = false;
@@ -210,10 +208,8 @@ bool ElimDominatedForPlayer(const EFSupport &S, EFSupport &T,
 {
   bool action_was_eliminated = false;
 
-  status << "Dominated strategies for player " << pl << ":\n";
   for (int iset = 1; iset <= S.Game().Players()[pl]->NumInfosets(); iset++) {
     status.Get();
-    status << "Dominated strategies in infoset " << iset << ":\n";
     if (ElimDominatedInInfoset(S, T, pl, iset, strong, conditional, status)) 
       action_was_eliminated = true;
   }
@@ -221,12 +217,12 @@ bool ElimDominatedForPlayer(const EFSupport &S, EFSupport &T,
   return action_was_eliminated;
 }
 
-EFSupport *SupportWithoutDominatedOfPlayerList(const EFSupport &S, 
-					       const bool strong,
-					       const bool conditional,
-					       const gArray<int> &players,
-					             gOutput &, // tracefile 
-					             gStatus &status)
+EFSupport *ComputeDominated(const EFSupport &S, 
+			    const bool strong,
+			    const bool conditional,
+			    const gArray<int> &players,
+			    gOutput &, // tracefile 
+			    gStatus &status)
 {
   EFSupport *T = new EFSupport(S);
   bool any = false;
@@ -234,7 +230,6 @@ EFSupport *SupportWithoutDominatedOfPlayerList(const EFSupport &S,
   for (int i = 1; i <= players.Length(); i++)   {
     status.Get();
     int pl = players[i];
-    status << "Dominated strategies for player " << pl << ":\n";
     if (ElimDominatedForPlayer(S, *T, pl, strong, conditional, status)) 
       any = true;
   }
@@ -263,7 +258,5 @@ EFSupport *DominanceTruncatedSupport(const EFSupport &S,
   int i;
   for (i = 1; i <= players.Length(); i++)   players[i] = i;
 
-  return SupportWithoutDominatedOfPlayerList(S, 
-					    strong, conditional, players, 
-					    out, status);
+  return ComputeDominated(S, strong, conditional, players, out, status);
 }
