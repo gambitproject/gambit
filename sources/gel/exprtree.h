@@ -20,10 +20,14 @@ typedef enum
   gelACTION,
   gelEFPLAYER,
   gelEFOUTCOME,
+  gelEFSUPPORT,
+  gelBEHAV,
   gelNFG,
   gelSTRATEGY,
   gelNFPLAYER,
   gelNFOUTCOME,
+  gelNFSUPPORT,
+  gelMIXED,
   gelINPUT,
   gelOUTPUT,
   gelANYTYPE
@@ -35,10 +39,14 @@ class Infoset;
 class Action;
 class EFPlayer;
 class EFOutcome;
+class EFSupport;
+class BehavSolution;
 class Nfg;
 class NFPlayer;
 class NFOutcome;
 class Strategy;
+class NFSupport;
+class MixedSolution;
 
 #include <assert.h>
 
