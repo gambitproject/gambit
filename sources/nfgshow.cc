@@ -10,6 +10,10 @@
 #include "nfgconst.h"
 #include "nfplayer.h" 
 
+#include "dlnfgpayoff.h"
+#include "dlnfgoutcome.h"
+#include "dlnfgsave.h"
+
 //======================================================================
 //                 NfgShow: Constructor and destructor
 //======================================================================
@@ -206,105 +210,12 @@ void NfgShow::UpdateProfile(gArray<int> &profile)
     UpdateVals();
 }
 
-Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S); // in nfgutils.cc
-
-class nfgFileSaveDialog : public wxDialogBox {
-private:
-  int m_completed;
-
-  wxText *m_fileName, *m_treeLabel;
-  wxSlider *m_numDecimals;
-  
-  static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((nfgFileSaveDialog *) p_object.GetClientData())->OnOK(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((nfgFileSaveDialog *) p_object.GetClientData())->OnCancel(); }
-  static void CallbackBrowse(wxButton &p_object, wxEvent &)
-    { ((nfgFileSaveDialog *) p_object.GetClientData())->OnBrowse(); }
-
-  void OnOK(void);
-  void OnCancel(void);
-  void OnBrowse(void);
-  Bool OnClose(void);
-
-public:
-  nfgFileSaveDialog(const gText &, const gText &, int, wxWindow *);
-  virtual ~nfgFileSaveDialog() { }
-
-  int Completed(void) const { return m_completed; }
-  gText Filename(void) const { return m_fileName->GetValue(); }
-  gText Label(void) const { return m_treeLabel->GetValue(); }
-  int NumDecimals(void) const { return m_numDecimals->GetValue(); }
-};
-
-nfgFileSaveDialog::nfgFileSaveDialog(const gText &p_name,
-				     const gText &p_label, int p_decimals,
-				     wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Save File", TRUE)
-{
-  m_fileName = new wxText(this, 0, "Path:");
-  m_fileName->SetValue(p_name);
-
-  wxButton *browseButton = new wxButton(this, (wxFunction) CallbackBrowse,
-					"Browse...");
-  browseButton->SetClientData((char *) this);
-  NewLine();
-
-  m_treeLabel = new wxText(this, 0, "Description:", p_label, -1, -1, 300);
-  m_treeLabel->SetValue(p_label);
-  NewLine();
-
-  m_numDecimals = new wxSlider(this, 0, "Decimal places:",
-			       p_decimals, 0, 25, 100);
-  NewLine();
-
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  cancelButton->SetClientData((char *) this);
-
-  Fit();
-  Show(TRUE);
-}
-
-void nfgFileSaveDialog::OnOK(void)
-{
-  m_completed = wxOK;
-  Show(FALSE);
-}
-
-void nfgFileSaveDialog::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool nfgFileSaveDialog::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
-
-void nfgFileSaveDialog::OnBrowse(void)
-{
-  char *file = wxFileSelector("Save data file", 
-			      gPathOnly(m_fileName->GetValue()),
-			      gFileNameFromPath(m_fileName->GetValue()),
-			      ".nfg", "*.nfg");
-
-  if (file) {
-    m_fileName->SetValue(file);
-  }
-}
-
+extern Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S); // in nfgutils.cc
 
 Bool NfgShow::Save(void)
 {
   static int s_nDecimals = 6;
-  nfgFileSaveDialog dialog(Filename(), nf.GetTitle(), s_nDecimals, pframe);
+  dialogNfgSave dialog(Filename(), nf.GetTitle(), s_nDecimals, pframe);
 
   if (dialog.Completed() == wxOK) {
     if (wxFileExists(dialog.Filename())) {
@@ -1042,204 +953,6 @@ NFSupport *NfgShow::MakeSupport(void)
 }
 
 
-//=========================================================================
-//                        class nfgOutcomePayoffsDialog 
-//=========================================================================
-
-class nfgOutcomePayoffsDialog : public wxDialogBox {
-private:
-  NFOutcome *m_outcome;
-  const Nfg &m_nfg;
-  gArray<gNumber> m_payoffs;
-  gText m_name;
-  int m_completed;
-  wxText *m_outcomeName;
-  wxText **m_outcomePayoffs;
-
-  static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((nfgOutcomePayoffsDialog *) p_object.GetClientData())->OnOK(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((nfgOutcomePayoffsDialog *) p_object.GetClientData())->OnCancel(); }
-
-  void OnOK(void);
-  void OnCancel(void);
-  Bool OnClose(void);
-
-public:
-  nfgOutcomePayoffsDialog(const Nfg &, NFOutcome *, bool, wxWindow *parent);
-  virtual ~nfgOutcomePayoffsDialog() { }
-
-  int Completed(void) const { return m_completed; }
-  const gArray<gNumber> &Payoffs(void) const { return m_payoffs; }
-  gText Name(void) const { return m_name; }
-};
-
-nfgOutcomePayoffsDialog::nfgOutcomePayoffsDialog(const Nfg &p_nfg,
-						 NFOutcome *p_outcome,
-						 bool p_solutions,
-						 wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Change Payoffs", TRUE),
-    m_outcome(p_outcome), m_nfg(p_nfg),
-    m_payoffs(p_nfg.NumPlayers())
-{
-  (void) new wxMessage(this, "Change payoffs for outcome:");
-  NewLine();
-
-  m_outcomeName = new wxText(this, 0, "Outcome");
-  if (p_outcome)
-    m_outcomeName->SetValue(p_outcome->GetName());
-  else
-    m_outcomeName->SetValue("Outcome" + ToText(p_nfg.NumOutcomes() + 1));
-  NewLine();
-
-  if (p_solutions) {
-    (void) new wxMessage(this, "Pressing OK will delete computed solutions");
-    NewLine();
-  }
-
-  m_outcomePayoffs = new wxText *[m_nfg.NumPlayers()];
-
-  const int ENTRIES_PER_ROW = 3;
-
-  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
-    m_outcomePayoffs[pl - 1] = new wxText(this, 0, "");
-    m_outcomePayoffs[pl - 1]->SetValue(ToText(m_nfg.Payoff(p_outcome, pl)));
-    if (pl % ENTRIES_PER_ROW == 0)
-      NewLine();
-  }
-
-  m_outcomePayoffs[0]->SetFocus();
-#ifndef LINUX_WXXT
-  m_outcomePayoffs[0]->SetSelection(0, strlen(m_outcomePayoffs[0]->GetValue()));
-#endif
-
-  NewLine();
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  cancelButton->SetClientData((char *) this);
-
-  Fit();
-  Show(TRUE);
-}
-
-void nfgOutcomePayoffsDialog::OnOK(void)
-{
-  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++)
-    FromText(m_outcomePayoffs[pl - 1]->GetValue(), m_payoffs[pl]);
-  m_name = m_outcomeName->GetValue();
-
-  m_completed = wxOK;
-  Show(FALSE);
-}
-
-void nfgOutcomePayoffsDialog::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool nfgOutcomePayoffsDialog::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
-
-//=========================================================================
-//                        class nfgOutcomeSelectDialog 
-//=========================================================================
-
-class nfgOutcomeSelectDialog : public wxDialogBox {
-private:
-  Nfg &m_nfg;
-  int m_outcomeSelected, m_completed;
-  wxListBox *m_outcomeList;
-
-  static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((nfgOutcomeSelectDialog *) p_object.GetClientData())->OnOK(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((nfgOutcomeSelectDialog *) p_object.GetClientData())->OnCancel(); }
-
-  void OnOK(void);
-  void OnCancel(void);
-  Bool OnClose(void);
-
-public:
-  nfgOutcomeSelectDialog(Nfg &, wxWindow * = 0);
-  virtual ~nfgOutcomeSelectDialog() { }
-
-  int Completed(void) const { return m_completed; }
-  NFOutcome *GetOutcome(void); 
-};
-
-nfgOutcomeSelectDialog::nfgOutcomeSelectDialog(Nfg &p_nfg, wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Select Outcome", TRUE), m_nfg(p_nfg)
-{
-  m_outcomeList = new wxListBox(this, 0, "Outcome");
-  
-  for (int outc = 1; outc <= m_nfg.NumOutcomes(); outc++) {
-    NFOutcome *outcome = m_nfg.Outcomes()[outc];
-    gText item = outcome->GetName();
-    if (item == "")
-      item = "Outcome" + ToText(outc);
-
-    item += (" (" + ToText(m_nfg.Payoff(outcome, 1)) + ", " +
-	     ToText(m_nfg.Payoff(outcome, 2)));
-    if (m_nfg.NumPlayers() > 2) {
-      item += ", " + ToText(m_nfg.Payoff(outcome, 3));
-      if (m_nfg.NumPlayers() > 3) 
-	item += ",...)";
-      else
-	item += ")";
-    }
-    else
-      item += ")";
-
-    m_outcomeList->Append(item);
-  }
-
-  m_outcomeList->SetSelection(0);
-
-  NewLine();
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  cancelButton->SetClientData((char *) this);
-  
-  Fit();
-  Show(TRUE);
-}
-
-void nfgOutcomeSelectDialog::OnOK(void)
-{
-  m_outcomeSelected = m_outcomeList->GetSelection();
-  m_completed = wxOK;
-  Show(FALSE);
-}
-
-void nfgOutcomeSelectDialog::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool nfgOutcomeSelectDialog::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
-
-NFOutcome *nfgOutcomeSelectDialog::GetOutcome(void)
-{
-  return m_nfg.Outcomes()[m_outcomeSelected + 1];
-}
-
 void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
 {
   if (st1 > rows || st2 > cols)
@@ -1270,8 +983,8 @@ void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
   nf_iter.Set(pl1, st1);
   nf_iter.Set(pl2, st2);
 
-  nfgOutcomePayoffsDialog dialog(nf, nf.GetOutcome(profile),
-				 solns.Length() > 0, spread);
+  dialogNfgPayoffs dialog(nf, nf.GetOutcome(profile), solns.Length() > 0,
+			  spread);
 
   if (dialog.Completed() == wxOK) {
     NFOutcome *outc = nf.GetOutcome(profile);
@@ -1297,7 +1010,7 @@ void NfgShow::OutcomeAttach(void)
   if (nf.NumOutcomes() == 0)
     return;
 
-  nfgOutcomeSelectDialog dialog(nf, spread);
+  dialogNfgOutcomeSelect dialog(nf, spread);
     
   if (dialog.Completed() == wxOK) {
     nf.SetOutcome(spread->GetProfile(), dialog.GetOutcome());
@@ -1315,7 +1028,7 @@ void NfgShow::OutcomeDetach(void)
 
 void NfgShow::OutcomeNew(void)
 {
-  nfgOutcomePayoffsDialog dialog(nf, 0, solns.Length() > 0, pframe);
+  dialogNfgPayoffs dialog(nf, 0, solns.Length() > 0, pframe);
 
   if (dialog.Completed() == wxOK) {
     NFOutcome *outc = nf.NewOutcome();
@@ -1333,7 +1046,7 @@ void NfgShow::OutcomeDelete(void)
   if (nf.NumOutcomes() == 0)
     return;
 
-  nfgOutcomeSelectDialog dialog(nf, spread);
+  dialogNfgOutcomeSelect dialog(nf, spread);
     
   if (dialog.Completed() == wxOK) {
     nf.DeleteOutcome(dialog.GetOutcome());
