@@ -7,8 +7,8 @@
 
 
 
-#ifndef __gpreproc_h__
-#define __gpreproc_h__
+#ifndef GPREPROC_H
+#define GPREPROC_H
 
 
 #include <assert.h>
@@ -96,7 +96,7 @@ public:
     m_FileNameStack.Push( m_PrevFileName );
     m_LineNumberStack.Push( m_PrevLineNumber );
 
-    if( !EOL( m_StartupString[ m_StartupString.Length() - 1 ] ) )
+    if(cmd && !EOL( m_StartupString[ m_StartupString.Length() - 1 ] ) )
       m_StartupString += '\n';
   }
 
