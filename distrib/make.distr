@@ -9,11 +9,11 @@
 #
 
 # Edit these if necessary.
-# GMAKEFILE is the generic Makefile.
+# GMAKEFILE is Makefile.generic, edited as necessary, and copied to Makefile
 
 WXWINDIR  = /users/gambit/wxwin
 GUI       = motif
-GMAKEFILE = Makefile.generic
+GMAKEFILE = Makefile
 FTPDIR    = /users/ftp/pub/gambit/ver96
 SRCDIR    = ./sources
 WSRCDIR   = ./winsrc
