@@ -258,7 +258,7 @@ gFileOutput::gFileOutput(void)
 
 gFileOutput::gFileOutput(const char *out, bool append /* = false */)
 {
-  f = fopen(out, (append) ? "w" : "a");
+  f = fopen(out, (append) ? "a" : "w");
   valid = (f != NULL);
   Width=0;
   Prec=6;

@@ -16,6 +16,33 @@
 
 
 
+
+//------------
+// Index
+//------------
+
+Portion* GSM_Index( Portion** param )
+{
+  ListPortion* result = new ListValPortion();
+  ListPortion& list = *(ListPortion*) param[0];
+  int i = 0;
+  bool type_found = false;
+  for( i = 1; i <= list.Length(); i++ )
+  {
+    if( PortionEqual( list[i], param[1], type_found ) )
+      result->Append( new IntValPortion( i ) );
+  }
+  return result;
+}
+
+
+
+
+//-------------------
+// Flatten
+//-------------------
+
+
 void GSM_Flatten_Top(ListPortion* list, int levels, int depth, 
 		     ListPortion* result)
 {
@@ -724,6 +751,17 @@ void Init_listfunc(GSM *gsm)
   {
     ParamInfoType( "x", porRATIONAL )
   };
+
+
+
+  FuncObj = new FuncDescObj("Index", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Index, 
+				       PortionSpec(porINTEGER, 1), 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("list", 
+					    PortionSpec(porANYTYPE, NLIST)));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("x", porANYTYPE));
+  gsm->AddFunction(FuncObj);
+
 
 
   FuncObj = new FuncDescObj("Length", 1);
