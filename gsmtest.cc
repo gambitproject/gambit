@@ -27,11 +27,8 @@ int main( void )
   gString *name;
   GSM *machine;
 
-  gOutput* sout = new gFileOutput( "sout" );
-  gOutput* serr = new gFileOutput( "serr" );
 
-
-  machine = new GSM( 32, *sout, *serr );
+  machine = new GSM( 32, gout, gerr );
 
   gList< Instruction* > program;
 
@@ -39,6 +36,7 @@ int main( void )
   gout << "Machine setup done\n";
   gout << "*********************** press return to continue ************";
   gin >> cont;
+
 
 
   gout << "\n";
@@ -1699,6 +1697,8 @@ int main( void )
 #endif // CRASHTEST
 
 
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
 
 
   machine->PushRef( "x1" );
@@ -1728,8 +1728,6 @@ int main( void )
 
   gout << "\nDeleting machine\n";
   delete machine;
-  delete sout;
-  delete serr;
 
   return 0;
 }

@@ -448,21 +448,35 @@ class Node_Portion : public Portion
 
 
 
+
+class gStreamOutput : public gFileOutput
+{
+ private:
+  int _RefCount;
+  static int _NumStreams;
+
+ public:
+  gStreamOutput( const gString& filename );
+  ~gStreamOutput();
+  int& RefCount( void );
+};
+
+
 class Stream_Portion : public Portion
 {
  private:
-  gFileOutput* _Value;
-  gString      _FileName;
+  gStreamOutput* _Value;
 
  public:
+  Stream_Portion( gStreamOutput& value );
   Stream_Portion( const gString& filename );
   ~Stream_Portion();
 
-  gFileOutput&  Value     ( void );
-  Portion*      Copy      ( void ) const;
-  PortionType   Type      ( void ) const;
-  bool          Operation ( Portion* p, OperationMode mode );
-  void          Output    ( gOutput& s ) const;
+  gFileOutput&  Value          ( void );
+  Portion*      Copy           ( void ) const;
+  PortionType   Type           ( void ) const;
+  bool          Operation      ( Portion* p, OperationMode mode );
+  void          Output         ( gOutput& s ) const;
 };
 
 

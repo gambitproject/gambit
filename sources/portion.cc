@@ -27,7 +27,7 @@ int Portion::_NumPortions = 0;
 Portion::Portion()
 {
   _GSM = 0;
-  _Temporary = true;
+  _Temporary = false;
   _ShadowOf = 0;
 
   // The following two lines are for detecting memory leakage.
@@ -91,8 +91,8 @@ void Portion::MakeCopyOfData( Portion* p )
 #ifndef NDEBUG
   if( this->Type() != p->Type() )
   {
-    Error( "Portion Error: attempting to MakeCopyOfData() a different\n" );
-    Error( "               Portion type\n" );
+    Error( "Portion Error: attempting to MakeCopyOfData() from a\n" );
+    Error( "               different Portion type\n" );
   }
   assert( this->Type() == p->Type() );
 #endif // NDEBUG
@@ -893,7 +893,12 @@ template <class T> PortionType Nfg_Portion<T>::Type( void ) const
 { return porNFG; }
 
 template <class T> Portion* Nfg_Portion<T>::Copy( void ) const
-{ return new Nfg_Portion<T>( *_Value ); }
+{ 
+  Portion* p;
+  p = new Nfg_Portion<T>( *_Value ); 
+  p->Temporary() = true;
+  return p;
+}
 
 
 template <class T> void Nfg_Portion<T>::MakeCopyOfData( Portion* p )
@@ -1025,7 +1030,11 @@ template <class T> PortionType Efg_Portion<T>::Type( void ) const
 { return porEFG; }
 
 template <class T> Portion* Efg_Portion<T>::Copy( void ) const
-{ return new Efg_Portion<T>( *_Value ); }
+{ 
+  Portion* p;
+  p = new Efg_Portion<T>( *_Value );
+  p->Temporary() = true;
+}
 
 
 template <class T> void Efg_Portion<T>::MakeCopyOfData( Portion* p )
@@ -1406,26 +1415,71 @@ void Node_Portion::Output( gOutput& s ) const
 //---------------------------------------------------------------------
 //                            Stream type
 //---------------------------------------------------------------------
+
+#ifdef MEMCHECK
+int gStreamOutput::_NumStreams = 0;
+#endif // MEMCHECK
+
+gStreamOutput::gStreamOutput( const gString& filename )
+     : gFileOutput( filename )
+{
+  _RefCount = 1;
+#ifdef MEMCHECK
+  _NumStreams++;
+  gout << ">>> gStreamOutput ctor -- count: " << _NumStreams << "\n";
+#endif // MEMCHECK
+}
+
+int& gStreamOutput::RefCount( void )
+{
+  return _RefCount;
+}
+
+gStreamOutput::~gStreamOutput()
+{
+#ifdef MEMCHECK
+  _NumStreams--;
+  gout << ">>> gStreamOutput dtor -- count: " << _NumStreams << "\n";
+#endif // MEMCHECK
+}
+
+
+//--------------------- Stream_Portion ------------------
+
+
 Stream_Portion::Stream_Portion( const gString& filename )
 {
-  _FileName = filename;
-  _Value = new gFileOutput( _FileName );
+  _Value = new gStreamOutput( filename );
+}
+
+Stream_Portion::Stream_Portion( gStreamOutput& value )
+{
+  _Value = &value;
+  _Value->RefCount()++;
 }
 
 Stream_Portion::~Stream_Portion()
 {
-  delete _Value;
+  _Value->RefCount()--;
+  if( _Value->RefCount() <= 0 )
+    delete _Value;
 }
 
 
 gFileOutput& Stream_Portion::Value( void )
-{ return *_Value; }
+{ return *( (gFileOutput*) _Value ); }
 
 PortionType Stream_Portion::Type( void ) const
 { return porSTREAM; }
 
 Portion* Stream_Portion::Copy( void ) const
-{ return new Stream_Portion( _FileName ); }
+{ 
+  Portion* p;
+  p = new Stream_Portion( *_Value );
+  p->Temporary() = true;
+  return p;
+}
+
 
 
 bool Stream_Portion::Operation( Portion* p, OperationMode mode )
