@@ -117,7 +117,7 @@ Nfg *MakeReducedNfg(const EFSupport &support)
 
   gArray<int> dim(E.NumPlayers());
   for (i = 1; i <= E.NumPlayers(); i++)
-    dim[i] = L->strategies[i].Length();
+    dim[i] = (L->strategies[i].Length()) ? L->strategies[i].Length() : 1;
 
   L->MakeLink(&E, new Nfg(dim));
   L->N->SetTitle(E.GetTitle());
@@ -141,7 +141,10 @@ Nfg *MakeReducedNfg(const EFSupport &support)
   gArray<int> corrs(E.NumPlayers());
   for (i = 1; i <= E.NumPlayers(); i++)  {
     corrs[i] = 1;
-    corr[i] = L->strategies[i][1];
+    if (L->N->NumStrats(i) > 0)
+      corr[i] = L->strategies[i][1];
+    else
+      corr[i] = new gArray<int>(0);
   }
 
   gArray<gNumber> value(E.NumPlayers());
