@@ -86,8 +86,17 @@ void gbtNashAllMixedThread::Compute(void)
 
 void gbtNashEnumMixedThread::Compute(void)
 {
-  m_eqa = gbtNashEnumMixedNfg(m_parent->GetDocument()->GetGame(),
+  gbtList<gbtMixedComponent<double> > comps;
+  comps = gbtNashEnumMixedNfg(m_parent->GetDocument()->GetGame(),
 			      (double) 0.0, m_stopAfter);
+
+  // For now, we just ignore the component structure and return
+  // a list of the extreme points
+  for (int i = 1; i <= comps.Length(); i++) {
+    for (int j = 1; j <= comps[i].NumExtrema(); j++) {
+      m_eqa.Append(comps[i].GetExtremum(j));
+    }
+  }
 }
 
 //=========================================================================
