@@ -8,22 +8,27 @@ all:
 	@echo Specify a target: gcll, gui, source.
 	@echo If specifying gui, make sure to add GUI=ol/motif
 gui:
-	@echo Updating gambit_$(GUI)_$(HOSTTYPE) on hss
-	cp $(WXDIR)/utils/wxhelp/src/wxhelp_$(GUI)_$(HOSTTYPE) ./wxhelp
-	strip gambgui
+	@echo Updating gambit_$(GUI)_$(HOST) on hss
+	$(MAKE) -f Makefile gui GUI=$(GUI) HOST=$(HOST)
+	strip gui_$(GUI)_$(HOST)
+	cp $(WXDIR)/utils/wxhelp/src/wxhelp_$(GUI)_$(HOST) ./wxhelp
 	strip wxhelp
-	zip gambit_$(GUI)_$(HOSTTYPE) gambgui wxhelp gambit.xlp \
+	zip gambit_$(GUI)_$(HOST) gui_$(GUI)_$(HOST) wxhelp gambit.xlp \
 		./efg/*.efg ./nfg/*.nfg
-	ftp_put gambit_$(GUI)_$(HOSTTYPE).zip
-	rm gambit_$(GUI)_$(HOSTTYPE).zip
-gcll:	
-	@echo Updating gcl_$(HOSTTYPE) on hss
-	strip gcl
-	zip gcl_$(HOSTTYPE) gcl ./efg/*.efg ./nfg/*.nfg
-	ftp_put gcl_$(HOSTTYPE).zip
-	rm gcl_$(HOSTTYPE).zip
+	ftp_put gambit_$(GUI)_$(HOST).zip
+	rm gambit_$(GUI)_$(HOST).zip
+gcl:	
+	@echo Updating gcl_$(HOST) on hss
+	$(MAKE) -f Makefile gcl GUI=$(GUI) HOST=$(HOST)
+	strip gcl_$(HOST)
+	zip gcl_$(HOST) gcl_$(HOST) ./efg/*.efg ./nfg/*.nfg ./gcl/*.gcl
+	ftp_put gcl_$(HOST).zip
+	rm gcl_$(HOST).zip
 source:
 	@echo Updating source code on hss
+	# get the BCC specific binary files from my (egrayver's) dir
+#	cp /egrayver/job/gambit/*.ide .
+#	cp ~egrayver/job/gambit/*.ico .
 	zip gambsrc *.cc *.h *.imp *.ide *.ico *.xbm *.def *.rc *.y \
 		Makefile ../bisondos/* ./bin/dummy 
 	ftp_put gambsrc.zip
