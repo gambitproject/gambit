@@ -222,7 +222,7 @@ wxSize gbtSchellingRenderer::GetBestSize(wxGrid &p_grid,
 					 wxDC &p_dc, int p_row, int p_col)
 {
   return DoGetBestSize(p_attr, p_dc,
-		       _T("(") + p_grid.GetCellValue(p_row, p_col) + _T(")"));
+		       p_grid.GetCellValue(p_row, p_col));
 }
 
 void gbtSchellingRenderer::Draw(wxGrid &p_grid, wxGridCellAttr &p_attr,
@@ -364,7 +364,8 @@ wxString NfgGridTable::GetValue(int row, int col)
       profile.Set(pl, support.GetStrategy(pl, strategy[pl]));
     }
 
-    if (m_doc->GetPreferences().OutcomeLabel() == GBT_OUTCOME_LABEL_PAYOFFS) {
+    if (m_doc->HasEfg() ||
+	m_doc->GetPreferences().OutcomeLabel() == GBT_OUTCOME_LABEL_PAYOFFS) {
       wxString ret = "";
       for (int pl = 1; pl <= strategy.Length(); pl++) {
 	ret += (char *) ToText(profile.GetPayoff(m_doc->GetNfg().GetPlayer(pl)),
@@ -560,6 +561,11 @@ gbtNfgTable::gbtNfgTable(gbtGameDocument *p_doc, wxWindow *p_parent)
 
 void gbtNfgTable::OnUpdate(gbtGameView *)
 { 
+  if (!m_doc->ShowNfg()) {
+    Show(false);
+    return;
+  }
+
   SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
   SetLabelFont(m_doc->GetPreferences().GetLabelFont());
 
@@ -583,6 +589,11 @@ void gbtNfgTable::OnUpdate(gbtGameView *)
     InsertCols(0, support.NumStrats(colPlayer) - stratCols);
   }
 
+#ifdef UNUSED
+  // This is currently disabled, as it scales very badly due to the
+  // expense in the generation of cell values in the virtual table.
+  // Hopefully, we can bring this back soon when the table views are
+  // made "smarter".
   AutoSizeRows();
   AutoSizeColumns();
   // Set all strategy columns to be the same width, which is
@@ -596,6 +607,7 @@ void gbtNfgTable::OnUpdate(gbtGameView *)
   for (int col = 0; col < support.NumStrats(colPlayer); col++) {
     SetColSize(col, max);
   }
+#endif  // UNUSED
 
   SetGridCursor(m_doc->GetContingency()[m_doc->GetRowPlayer()] - 1,
 		m_doc->GetContingency()[m_doc->GetColPlayer()] - 1);
@@ -603,6 +615,7 @@ void gbtNfgTable::OnUpdate(gbtGameView *)
   AdjustScrollbars();
   ForceRefresh();
   Layout();
+  Show(true);
 }
 
 void gbtNfgTable::ToggleProbs(void)

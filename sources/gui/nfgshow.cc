@@ -96,6 +96,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
 	   NfgShow::OnFormatDisplayDecimals)
   EVT_MENU(GBT_MENU_FORMAT_FONTS_DATA, NfgShow::OnFormatFontData)
   EVT_MENU(GBT_MENU_FORMAT_FONTS_LABELS, NfgShow::OnFormatFontLabels)
+  EVT_MENU(GBT_MENU_FORMAT_AUTOSIZE, NfgShow::OnFormatAutosize)
   EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, NfgShow::OnToolsDominance)
   EVT_MENU(GBT_MENU_TOOLS_EQUILIBRIUM, NfgShow::OnToolsEquilibrium)
   EVT_MENU(GBT_MENU_TOOLS_QRE, NfgShow::OnToolsQre)
@@ -269,11 +270,14 @@ void NfgShow::MakeMenus(void)
 		   "Display solution probabilities", TRUE);
   viewMenu->Append(GBT_MENU_VIEW_VALUES, "&Values",
 		   "Display strategy values", TRUE);
-  viewMenu->AppendSeparator();
-  // This probably belongs in formatting instead
-  viewMenu->Append(GBT_MENU_VIEW_OUTCOME_LABELS, "Outcome &Labels",
-		   "Display outcome labels", TRUE);
-  
+  if (!m_doc->HasEfg()) {
+    // "Outcomes" aren't implemented in reduced normal forms
+    // This probably belongs in formatting instead
+    viewMenu->AppendSeparator();
+    viewMenu->Append(GBT_MENU_VIEW_OUTCOME_LABELS, "Outcome &Labels",
+		     "Display outcome labels", TRUE);
+  }
+
   wxMenu *formatMenu = new wxMenu;
   wxMenu *formatDisplayMenu = new wxMenu;
   formatDisplayMenu->Append(GBT_MENU_FORMAT_DISPLAY_COLORS,
@@ -291,6 +295,8 @@ void NfgShow::MakeMenus(void)
 			  "Set label font");
   formatMenu->Append(GBT_MENU_FORMAT_FONTS, "&Fonts",
 		     formatFontsMenu, "Set fonts");
+  formatMenu->Append(GBT_MENU_FORMAT_AUTOSIZE, "&Autosize",
+		     "Automatically size grid rows and columns");
 
   wxMenu *toolsMenu = new wxMenu;
   toolsMenu->Append(GBT_MENU_TOOLS_DOMINANCE, "&Dominance",
@@ -649,6 +655,23 @@ void NfgShow::OnFormatFontLabels(wxCommandEvent &)
     m_doc->GetPreferences().SetLabelFont(dialog.GetFontData().GetChosenFont());
     m_doc->GetPreferences().SaveOptions();
     m_doc->UpdateViews();
+  }
+}
+
+void NfgShow::OnFormatAutosize(wxCommandEvent &)
+{
+  m_table->AutoSizeRows();
+  m_table->AutoSizeColumns();
+  // Set all strategy columns to be the same width, which is
+  // the narrowest width which fits all the entries
+  int max = 0, colPlayer = m_doc->GetColPlayer();
+  for (int col = 0; col < m_doc->GetNfgSupport().NumStrats(colPlayer); col++) {
+    if (m_table->GetColSize(col) > max) {
+      max = m_table->GetColSize(col);
+    }
+  }
+  for (int col = 0; col < m_doc->GetNfgSupport().NumStrats(colPlayer); col++) {
+    m_table->SetColSize(col, max);
   }
 }
 

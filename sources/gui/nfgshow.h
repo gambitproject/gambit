@@ -79,6 +79,7 @@ private:
   void OnFormatDisplayDecimals(wxCommandEvent &);
   void OnFormatFontData(wxCommandEvent &);
   void OnFormatFontLabels(wxCommandEvent &);
+  void OnFormatAutosize(wxCommandEvent &);
 
   void OnToolsDominance(wxCommandEvent &);
   void OnToolsEquilibrium(wxCommandEvent &);
