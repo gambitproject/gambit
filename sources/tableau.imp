@@ -8,23 +8,16 @@
 #include "normal.h"
 #include "normiter.h"
 
-    // Ted -- To prevent multiple definitions
-    //  perhaps this should go elsewhere
-#ifndef EPSILON_TAB
-#define EPSILON_TAB
-
     // These are the values recommended by Murtagh (1981) for 15 digit 
     // accuracy in LP problems 
-void Epsilon_Tab(double &v, int i)
+void Epsilon_T(double &v, int i)
 {
   if(i==1)v=(double)1.0e-5;
   if(i==2)v=(double)1.0e-8;
   if(i==3)v=(double)1.0e-6;
 }
 
-void Epsilon_Tab(gRational &v, int i) { v = (gRational)0;}
-
-#endif // EPSILON_TAB
+void Epsilon_T(gRational &v, int i) { v = (gRational)0;}
 
 template <class T> 
 Basis<T>::Basis(const gMatrix<T> &A)
@@ -180,7 +173,7 @@ Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
     basis(A),  B(A.MinRow(), A.MaxRow()),
     solution(A.MinRow(),A.MaxRow()) 
 {
-  Epsilon_Tab(eps2,2);
+  Epsilon_T(eps2,2);
   B.refactor(A, basis.label);
   B.solve(b, solution);
 };

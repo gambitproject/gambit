@@ -6,7 +6,6 @@
 
 #include "lpsolve.imp"
 #include "rational.h"
-#include "tableau.imp"
 
 #ifdef __GNUG__
 #define TEMPLATE template
