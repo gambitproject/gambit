@@ -2,7 +2,7 @@
 // FILE: gsmoper.cc -- implementations for GSM operator functions
 //                     companion to GSM
 //
-// @(#)gsmoper.cc	2.22 23 Jul 1997
+// $Id$
 //
 
 #include <stdlib.h>
@@ -1390,9 +1390,7 @@ Portion* GSM_Read_Integer(Portion** param)
 
 Portion* GSM_Read_Number(Portion** param)
 {
-  int numerator = 0;
-  int denominator = 0;
-  char c = ' ';
+  gNumber value;
   gInput& input = ((InputPortion*) param[0])->Value();
   long old_pos = input.getpos();
 
@@ -1401,48 +1399,14 @@ Portion* GSM_Read_Number(Portion** param)
     input.setpos(old_pos);
     return new ErrorPortion("End of file reached");
   }
-  input >> numerator;
+  input >> value;
   if(!input.IsValid())
   {
     input.setpos(old_pos);
     return new ErrorPortion("File read error");
   }
 
-  input.get(c);
-  while(!input.eof() && isspace(c)) 
-    input.get(c); 
-  if(!input.eof() && c == '.')
-  {
-    input.setpos(old_pos);
-    return new ErrorPortion("Expected NUMBER, got FLOAT");
-  }
-  if(input.eof() || c != '/')
-  {
-    input.setpos(old_pos);
-    return new ErrorPortion("Expected NUMBER, got INTEGER");
-  }
-
-  if(input.eof())
-  {
-    input.setpos(old_pos);
-    return new ErrorPortion("End of file reached");
-  }
-  input >> denominator;
-  if(!input.IsValid())
-  {
-    input.setpos(old_pos);
-    return new ErrorPortion("File read error");
-  }
-
-  if(denominator == 0)
-  {
-    input.setpos(old_pos);
-    return new ErrorPortion("Division by zero");
-  }
-
-  ((NumberPortion*) param[1])->Value() = numerator;
-  ((NumberPortion*) param[1])->Value() /= denominator;
- 
+  ((NumberPortion*) param[1])->Value() = value;
 
   // swap the first parameter with the return value, so things like
   //   Input["..."] >> x >> y  would work

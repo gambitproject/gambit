@@ -178,7 +178,7 @@ gString ToString(double d)
 
 gString ToString(const gNumber &n)
 {
-  if (n.GetRep() == precDOUBLE)
+  if (n.GetPrecision() == precDOUBLE)
     return ToString((double) n);
   else
     return ToString((gRational) n);
@@ -372,7 +372,7 @@ void gEpsilon(gRational &v, int /* i */)
 
 void gEpsilon(gNumber &n, int i)
 {
-  if (n.GetRep() == precRATIONAL)
+  if (n.GetPrecision() == precRATIONAL)
     n = (gRational)0;
   else
     n = pow(10.0,-i);
