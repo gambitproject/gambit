@@ -1082,14 +1082,16 @@ static Portion *GSM_SetChanceProbs(Portion **param)
     return new ErrorPortion("Wrong number of probabilities");
 
   switch (p->Spec().Type)   {
-    case porFLOAT:
+    case porFLOAT:  {
       for (int i = 1; i <= p->Length(); i++) 
 	((Efg<double> *) efg)->SetChanceProb(s, i, ((FloatPortion *) (*p)[i])->Value());
       break;
-    case porRATIONAL:
-      for (i = 1; i <= p->Length(); i++)
+    }
+    case porRATIONAL:  {
+      for (int i = 1; i <= p->Length(); i++)
 	((Efg<gRational> *) efg)->SetChanceProb(s, i, ((RationalPortion *) (*p)[i])->Value());
       break;
+    }
   }
 
   _gsm->InvalidateGameProfile(s->BelongsTo(), true);
