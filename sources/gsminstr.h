@@ -137,8 +137,9 @@ class PushRef : public Instruction
 {
  private:
   gString _Ref;
+  gString _SubRef;
  public:
-  PushRef( const gString& ref );
+  PushRef( const gString& ref, const gString& subref = "" );
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
   void Output( gOutput& s ) const;

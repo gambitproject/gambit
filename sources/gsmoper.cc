@@ -17,6 +17,13 @@ void Init_gsmoper( GSM* gsm )
 {
   FuncDescObj* FuncObj;
 
+  FuncObj = new FuncDescObj( (gString) "Assign", GSM_Assign, 2 );
+  FuncObj->SetParamInfo( 0, "x", porVALUE, NO_DEFAULT_VALUE, true );
+  FuncObj->SetParamInfo( 1, "y", porVALUE, NO_DEFAULT_VALUE );
+  gsm->AddFunction( FuncObj );
+
+
+
   FuncObj = new FuncDescObj( (gString) "Add", GSM_Add, 2 );
   FuncObj->SetParamInfo( 0, "x", porNUMERICAL, NO_DEFAULT_VALUE );
   FuncObj->SetParamInfo( 1, "y", porNUMERICAL, NO_DEFAULT_VALUE );
@@ -105,10 +112,24 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetParamInfo( 0, "x", porBOOL, NO_DEFAULT_VALUE );
   gsm->AddFunction( FuncObj );
 
-
 }
 
 
+
+
+
+Portion* GSM_Assign( Portion** param )
+{
+  Portion* result = 0;
+  if( param[ 0 ] != 0 )
+  {
+    delete param[ 0 ];
+  }
+  param[ 0 ] = param[ 1 ]->Copy();
+  result = param[ 1 ]->Copy();
+  delete param[ 1 ];
+  return result;
+}
 
 
 //-------------------------------------------------------------------

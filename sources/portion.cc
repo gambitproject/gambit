@@ -55,12 +55,12 @@ bool& Portion::Temporary( void )
 { return _Temporary; }
 
 
-void Portion::CopyDataFrom( Portion* p )
+void Portion::MakeCopyOfData( Portion* p )
 { 
 #ifndef NDEBUG
   if( this->Type() != p->Type() )
   {
-    gerr << "Portion Error: attempting to CopyDataFrom() a different\n";
+    gerr << "Portion Error: attempting to MakeCopyOfData() a different\n";
     gerr << "               Portion type\n";
   }
   assert( this->Type() == p->Type() );
@@ -606,9 +606,9 @@ Portion* Nfg_Portion::Copy( void ) const
 { return new Nfg_Portion( *_Value ); }
 
 
-void Nfg_Portion::CopyDataFrom( Portion* p )
+void Nfg_Portion::MakeCopyOfData( Portion* p )
 {
-  Portion::CopyDataFrom( p );
+  Portion::MakeCopyOfData( p );
   _Value = new Nfg;
   _Value->value = ( (Nfg_Portion*) p )->_Value->value;
 }

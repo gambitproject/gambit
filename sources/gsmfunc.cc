@@ -135,6 +135,7 @@ FuncDescObj::FuncDescObj( FuncDescObj& func )
       _ParamInfo[ index ].DefaultValue = 
 	func._ParamInfo[ index ].DefaultValue->Copy();
     }
+    _ParamInfo[ index ].PassByReference = func._ParamInfo[ index ].PassByReference;
   }
 }
 
@@ -179,7 +180,8 @@ void FuncDescObj::SetParamInfo
    const int          param_index,
    const gString&     param_name, 
    const PortionType  param_type, 
-   Portion*           param_default_value
+   Portion*           param_default_value,
+   bool               param_pass_by_reference
    )
 {
   int index;
@@ -216,9 +218,10 @@ void FuncDescObj::SetParamInfo
   assert( !repeated_variable_declaration );
 #endif // NDEBUG
   
-  _ParamInfo[ param_index ].Name         = param_name;
-  _ParamInfo[ param_index ].Type         = param_type;
-  _ParamInfo[ param_index ].DefaultValue = param_default_value;
+  _ParamInfo[ param_index ].Name            = param_name;
+  _ParamInfo[ param_index ].Type            = param_type;
+  _ParamInfo[ param_index ].DefaultValue    = param_default_value;
+  _ParamInfo[ param_index ].PassByReference = param_pass_by_reference;
 }
 
 
@@ -289,6 +292,12 @@ Portion* FuncDescObj::ParamDefaultValue( const int index ) const
 }
 
 
+bool FuncDescObj::ParamPassByReference( const int index ) const
+{
+  return _ParamInfo[ index ].PassByReference;
+}
+
+
 int FuncDescObj::FindParamName( const gString& param_name ) const
 {
   int index;
@@ -307,9 +316,6 @@ int FuncDescObj::FindParamName( const gString& param_name ) const
 
 
 
-
-
-
 /*******************************************************************/
 //                      CallFuncObj
 /*******************************************************************/
@@ -321,7 +327,7 @@ CallFuncObj::CallFuncObj( FuncDescObj* func )
   int index;
 
   _Param = new Portion* [ _NumParams ];
-  _ParamDefined = new bool [ _NumParams ];
+  _RunTimeParamInfo = new RunTimeParamInfoType [ _NumParams ];
   _CurrParamIndex = 0;
   
   for( index = 0; index < _NumParams; index++ )
@@ -334,14 +340,14 @@ CallFuncObj::CallFuncObj( FuncDescObj* func )
     {
       _Param[ index ] = _ParamInfo[ index ].DefaultValue->Copy();
     }
-    _ParamDefined[ index ] = false;
+    _RunTimeParamInfo[ index ].Defined = false;
   }
 }
 
 
 CallFuncObj::~CallFuncObj()
 {
-  delete[] _ParamDefined;
+  delete[] _RunTimeParamInfo;
   delete[] _Param;
 }
 
@@ -351,6 +357,12 @@ void CallFuncObj::SetCurrParamIndex( const int index )
   _CurrParamIndex = index;
 }
 
+void CallFuncObj::SetCurrParamRefName( const gString& ref_name )
+{
+  assert( _CurrParamIndex < _NumParams );
+  _RunTimeParamInfo[ _CurrParamIndex ].RefName = ref_name;
+}
+
 
 bool CallFuncObj::SetCurrParam( Portion *param )
 {
@@ -358,14 +370,14 @@ bool CallFuncObj::SetCurrParam( Portion *param )
 
   if( _CurrParamIndex < _NumParams )
   {
-    if( !_ParamDefined[ _CurrParamIndex ] )
+    if( !_RunTimeParamInfo[ _CurrParamIndex ].Defined )
     {
       if( _Param[ _CurrParamIndex ] != NO_DEFAULT_VALUE )
       {
 	delete _Param[ _CurrParamIndex ];
       }
       _Param[ _CurrParamIndex ] = param;
-      _ParamDefined[ _CurrParamIndex ] = true;
+      _RunTimeParamInfo[ _CurrParamIndex ].Defined = true;
       _CurrParamIndex++;
     }
     else
@@ -388,6 +400,12 @@ bool CallFuncObj::SetCurrParam( Portion *param )
 }
 
 
+gString& CallFuncObj::GetParamRefName( const int index ) const
+{
+  return _RunTimeParamInfo[ index ].RefName;
+}
+
+
 int CallFuncObj::GetCurrParamIndex( void ) const
 {
   return _CurrParamIndex;
@@ -407,14 +425,26 @@ PortionType CallFuncObj::GetCurrParamType( void ) const
 }
 
 
-Portion* CallFuncObj::CallFunction( void )
+bool CallFuncObj::GetCurrParamPassByReference( void ) const
+{
+  return _ParamInfo[ _CurrParamIndex ].PassByReference;
+}
+
+
+gString& CallFuncObj::GetCurrParamRefName( void ) const
+{
+  return _RunTimeParamInfo[ _CurrParamIndex ].RefName;
+}
+
+
+Portion* CallFuncObj::CallFunction( Portion **param )
 {
   int index;
   Portion* result = 0;
 
   for( index = 0; index < _NumParams; index++ )
   {
-    if( _Param[ index ] == 0 )
+    if( ( !_RunTimeParamInfo[ index ].Defined ) && ( _Param[ index ] == 0 ) )
     {
       gerr << "GSM Error: required parameter \"" << _ParamInfo[ index ].Name;
       gerr << "\"" << " not found while executing CallFunction()\n";
@@ -422,8 +452,13 @@ Portion* CallFuncObj::CallFunction( void )
       return 0;
     }
   }
+
   result = _FuncPtr( _Param );
-  
+
+  for( index = 0; index < _NumParams; index++ )
+  {
+    param[ index ] = _Param[ index ];
+  }
+
   return result;
 }
-

@@ -17,6 +17,7 @@
 #define NO_DEFAULT_VALUE  (Portion*)  0
 #define PARAM_NOT_FOUND   (int)      -1
 
+#define PASS_BY_REFERENCE true
 
 
 class FuncDescObj
@@ -27,6 +28,7 @@ class FuncDescObj
     gString      Name;
     PortionType  Type;
     Portion*     DefaultValue;
+    bool         PassByReference;
   };
 
   gString        _FuncName;
@@ -49,15 +51,17 @@ class FuncDescObj
      const int         index, 
      const gString&    name,
      const PortionType type,
-     Portion*          default_value
+     Portion*          default_value,
+     bool              pass_by_reference = false
      );
 
-  gString     FuncName          ( void ) const;
-  int         NumParams         ( void ) const;
-  gString     ParamName         ( const int index ) const;
-  PortionType ParamType         ( const int index ) const;
-  Portion*    ParamDefaultValue ( const int index ) const;
-  int         FindParamName     ( const gString& param_name ) const;
+  gString     FuncName             ( void ) const;
+  int         NumParams            ( void ) const;
+  gString     ParamName            ( const int index ) const;
+  PortionType ParamType            ( const int index ) const;
+  Portion*    ParamDefaultValue    ( const int index ) const;
+  bool        ParamPassByReference ( const int index ) const;
+  int         FindParamName        ( const gString& param_name ) const;
 };
 
 
@@ -66,21 +70,31 @@ class FuncDescObj
 class CallFuncObj : public FuncDescObj
 {
  private:
-  Portion**  _Param;
-  bool*      _ParamDefined;
-  int        _CurrParamIndex;
+  struct RunTimeParamInfoType
+  {
+    bool    Defined;
+    gString RefName;
+  };
+  Portion**             _Param;
+  RunTimeParamInfoType* _RunTimeParamInfo;
+  int                   _CurrParamIndex;
 
  public:
   CallFuncObj( FuncDescObj* func );
   ~CallFuncObj();
 
-  void        SetCurrParamIndex ( const int index );
-  bool        SetCurrParam      ( Portion *new_param );
+  void        SetCurrParamIndex   ( const int index );
+  bool        SetCurrParam        ( Portion *new_param );
+  void        SetCurrParamRefName ( const gString& ref_name );
 
-  int         GetCurrParamIndex ( void ) const;
-  PortionType GetCurrParamType  ( void ) const;
+  gString&    GetParamRefName ( const int index ) const;
 
-  Portion*    CallFunction      ( void );
+  int         GetCurrParamIndex           ( void ) const;
+  PortionType GetCurrParamType            ( void ) const;
+  bool        GetCurrParamPassByReference ( void ) const;
+  gString&    GetCurrParamRefName         ( void ) const;
+
+  Portion*    CallFunction      ( Portion** param );
 };
 
 

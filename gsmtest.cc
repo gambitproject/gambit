@@ -31,7 +31,8 @@ int main( void )
 
   gList< Instruction* > program;
 
-/*
+
+
   gout << "\n";
   machine->Push( d_1 );
   machine->Push( d_2 );
@@ -466,6 +467,16 @@ int main( void )
   result = machine->Execute( program );
   gout << "Program Status: " << result << "\n";
 
+
+  program.Append( new InitCallFunction( (gString) "Sqr" ) );
+  program.Append( new Push<double>( (double) 4 ) );
+  program.Append( new Bind );
+  program.Append( new CallFunction );
+  program.Append( new Dump );
+  result = machine->Execute( program );
+  gout << "Program Status: " << result << "\n";
+
+
   program.Append( new Push<double>( (double) 1 ) );
   program.Append( new Push<double>( (double) 2 ) );
   program.Append( new InitCallFunction( (gString) "Angle" ) );
@@ -478,6 +489,7 @@ int main( void )
   result = machine->Execute( program );
   gout << "Program Status: " << result << "\n";
 
+
   program.Append( new PushRef( x ) );
   program.Append( new PushRef( y ) );
   program.Append( new InitCallFunction( (gString) "Angle" ) );
@@ -488,6 +500,7 @@ int main( void )
   program.Append( new Dump );
   result = machine->Execute( program );
   gout << "Program Status: " << result << "\n";
+
 
   program.Append( new Push<gString>( "hi!" ) );
   program.Append( new Push<gString>( "how are you?" ) );
@@ -748,6 +761,7 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
+
   gout << "EqualTo\n";
   machine->Push( "hi!" );
   machine->Push( "hello!" );
@@ -924,6 +938,7 @@ int main( void )
   program.Append( new Neq );
   program.Append( new Dump );
 
+
   program.Append( new InitCallFunction( "Modulus" ) );
   program.Append( new Push<gInteger>( 6 ) );
   program.Append( new Bind );
@@ -932,6 +947,7 @@ int main( void )
   program.Append( new CallFunction );
   program.Append( new Dump );
 
+
   program.Append( new InitCallFunction( "Modulus" ) );
   program.Append( new Push<gInteger>( 6 ) );
   program.Append( new Bind );
@@ -939,6 +955,7 @@ int main( void )
   program.Append( new Bind );
   program.Append( new CallFunction );
   program.Append( new Dump );
+
 
   program.Dump( gout );
 
@@ -988,14 +1005,40 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
-*/
 
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+
+
+  machine->InitCallFunction( "Assign" );
   machine->PushRef( "x" );
-  machine->GenerateNfg( 100 );
-  machine->Assign();
-  machine->PushRef( "x", "y" );
+  machine->Bind();
+  machine->Push( (double) 10 );
+  machine->Bind();
+  machine->CallFunction();
   machine->Dump();
 
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "y" );
+  machine->Bind();
+  machine->PushRef( "x" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Dump();
+
+  
+  program.Append( new InitCallFunction( "Assign" ) );
+  program.Append( new PushRef( "z" ) );
+  program.Append( new Bind );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new Bind );
+  program.Append( new CallFunction );
+  program.Append( new Dump );
+  machine->Execute( program );
 
 
 

@@ -104,15 +104,25 @@ void PushList::Output( gOutput& s ) const
 { s << "PushList( " << _NumElements << " )"; }
 
 
-PushRef::PushRef( const gString& ref )
-     :_Ref( ref )
+PushRef::PushRef( const gString& ref, const gString& subref )
+     :_Ref( ref ), _SubRef( subref )
 { }
 Opcode PushRef::Type( void ) const
 { return iPUSHREF; }
 bool PushRef::Execute( GSM& gsm ) const
-{ return gsm.PushRef( _Ref ); }
+{ 
+  if( _SubRef == "" )
+    return gsm.PushRef( _Ref ); 
+  else
+    return gsm.PushRef( _Ref, _SubRef ); 
+}
 void PushRef::Output( gOutput& s ) const
-{ s << "PushRef( \"" << _Ref << "\" )"; }
+{ 
+  if( _SubRef == "" )
+    s << "PushRef( \"" << _Ref << "\" )";
+  else
+    s << "PushRef( \"" << _Ref << "\" , \"" << _SubRef << "\" )";    
+}
 
 
 Opcode Assign::Type( void ) const
@@ -121,7 +131,6 @@ bool Assign::Execute( GSM& gsm ) const
 { return gsm.Assign(); }
 void Assign::Output( gOutput& s ) const
 { s << "Assign"; }
-
 
 
 Opcode UnAssign::Type( void ) const

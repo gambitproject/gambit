@@ -34,18 +34,20 @@ typedef enum
 
 typedef unsigned int PortionType;
 
-#define  porERROR      ( 0x00 )
-#define  porBOOL       ( 0x01 )
-#define  porDOUBLE     ( 0x02 )
-#define  porINTEGER    ( 0x04 )
-#define  porRATIONAL   ( 0x08 )
+#define  porERROR      ( 0x0000 )
+#define  porBOOL       ( 0x0001 )
+#define  porDOUBLE     ( 0x0002 )
+#define  porINTEGER    ( 0x0004 )
+#define  porRATIONAL   ( 0x0008 )
+#define  porSTRING     ( 0x0010 )
+#define  porLIST       ( 0x0020 )
+#define  porNFG        ( 0x0040 )
+#define  porEFG        ( 0x0080 )
+#define  porREFERENCE  ( 0x0100 )
+
 #define  porNUMERICAL  ( porDOUBLE | porINTEGER | porRATIONAL )
-#define  porSTRING     ( 0x10 )
-#define  porLIST       ( 0x20 )
-#define  porNFG        ( 0x40 )
-#define  porREFERENCE  ( 0x80 )
-
-
+#define  porVALUE      ( 0x00FF )
+#define  porALL        ( 0xFFFF )
 
 
 
@@ -67,12 +69,12 @@ class Portion
   Portion();
   virtual ~Portion();
 
-  bool&               Temporary    ( void );
-  virtual PortionType Type         ( void ) const = 0;
-  virtual Portion*    Copy         ( void ) const = 0;
-  virtual void        CopyDataFrom ( Portion* p );
-  virtual bool        Operation    ( Portion* p, OperationMode mode );
-  virtual void        Output       ( gOutput& s ) const = 0;
+  bool&               Temporary      ( void );
+  virtual PortionType Type           ( void ) const = 0;
+  virtual Portion*    Copy           ( void ) const = 0;
+  virtual void        MakeCopyOfData ( Portion* p );
+  virtual bool        Operation      ( Portion* p, OperationMode mode );
+  virtual void        Output         ( gOutput& s ) const = 0;
 };
 
 
@@ -200,12 +202,12 @@ class Nfg_Portion : public Portion
 
   // Only the passing by reference version of Value() is provided in 
   // order to eliminate unecessary copying
-  Nfg&        Value        ( void );
-  Portion*    Copy         ( void ) const;
-  void        CopyDataFrom ( Portion* p );
-  PortionType Type         ( void ) const;
-  bool        Operation    ( Portion* p, OperationMode mode );
-  void        Output       ( gOutput& s ) const;
+  Nfg&        Value          ( void );
+  Portion*    Copy           ( void ) const;
+  void        MakeCopyOfData ( Portion* p );
+  PortionType Type           ( void ) const;
+  bool        Operation      ( Portion* p, OperationMode mode );
+  void        Output         ( gOutput& s ) const;
 
   bool        Assign     ( const gString& ref, Portion* data );
   bool        UnAssign   ( const gString& ref );

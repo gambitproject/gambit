@@ -232,7 +232,7 @@ bool GSM::Assign( void )
       {
 	p2 = _ResolveRef( (Reference_Portion*) p2 );
 	p2_copy = p2->Copy();
-	p2_copy->CopyDataFrom( p2 );
+	p2_copy->MakeCopyOfData( p2 );
       }
       else
       {
@@ -264,7 +264,7 @@ bool GSM::Assign( void )
       {
 	p2 = _ResolveRef( (Reference_Portion*) p2 );
 	p2_copy = p2->Copy();
-	p2_copy->CopyDataFrom( p2 );
+	p2_copy->MakeCopyOfData( p2 );
       }
       else
       {
@@ -630,6 +630,7 @@ bool GSM::Bind( void )
   int                  i;
   int                  type_match;
   bool                 result = true;
+  gString ref;
 
 #ifndef NDEBUG
   if( _CallFuncStack->Depth() <= 0 )
@@ -649,24 +650,46 @@ bool GSM::Bind( void )
   func = _CallFuncStack->Pop();
   param = _Stack->Pop();
   
-  if( param->Type() == porREFERENCE )
-    param = _ResolveRef( (Reference_Portion *)param );
-  
-  curr_param_type = func->GetCurrParamType();
-  type_match = FuncParamCheck( param->Type(), curr_param_type );
-  if( !type_match && curr_param_type != porERROR )
+  if( !func->GetCurrParamPassByReference() )
   {
-    funcname = func->FuncName();
-    i        = func->GetCurrParamIndex();
-    gerr << "GSM Error: mismatched parameter type found while executing\n";
-    gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
-    gerr << "           at Parameter #: " << i << "\n";
-    gerr << "           Expected type: ";
-    PrintPortionTypeSpec( gerr, func->GetCurrParamType() );
-    gerr << "           Type found:    ";
-    PrintPortionTypeSpec( gerr, param->Type() );
-    result = false;
+    if( param->Type() == porREFERENCE )
+      param = _ResolveRef( (Reference_Portion *)param );
   }
+  else
+  {
+    assert( param->Type() == porREFERENCE );
+    ref = ( (Reference_Portion*) param )->Value();
+    delete param;
+    if( _RefTable->IsDefined( ref ) )
+    {
+      param = (*_RefTable)( ref )->Copy();
+    }
+    else
+    {
+      param = 0;
+    }
+    func->SetCurrParamRefName( ref );
+  }
+  
+  if( param != 0 )
+  {
+    curr_param_type = func->GetCurrParamType();
+    type_match = FuncParamCheck( param->Type(), curr_param_type );
+    if( !type_match && curr_param_type != porERROR )
+    {
+      funcname = func->FuncName();
+      i        = func->GetCurrParamIndex();
+      gerr << "GSM Error: mismatched parameter type found while executing\n";
+      gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
+      gerr << "           at Parameter #: " << i << "\n";
+      gerr << "           Expected type: ";
+      PrintPortionTypeSpec( gerr, func->GetCurrParamType() );
+      gerr << "           Type found:    ";
+      PrintPortionTypeSpec( gerr, param->Type() );
+      result = false;
+    }
+  }
+
   if( result == true )
   {
     result = func->SetCurrParam( param ); 
@@ -715,6 +738,10 @@ bool GSM::Bind( const gString& param_name )
 bool GSM::CallFunction( void )
 {
   CallFuncObj*  func;
+  Portion** param;
+  int num_params;
+  int index;
+  gString ref;
   Portion*             return_value;
   bool                 result = true;
 
@@ -728,8 +755,11 @@ bool GSM::CallFunction( void )
 #endif // NDEBUG
 
   func = _CallFuncStack->Pop();
-  return_value = func->CallFunction();
-  delete func;
+
+  num_params = func->NumParams();
+  param = new Portion*[ num_params ];
+
+  return_value = func->CallFunction( param );
 
   if( return_value == 0 )
   {
@@ -738,8 +768,26 @@ bool GSM::CallFunction( void )
     return_value = new Error_Portion;
     result = false;
   }
+
   _Stack->Push( return_value );
 
+
+  for( index = 0; index < num_params; index++ )
+  {
+    if( func->ParamPassByReference( index ) )
+    {
+      func->SetCurrParamIndex( index );
+      ref = func->GetCurrParamRefName();
+      assert( param[ index ] != 0 );
+      _RefTable->Define( ref, param[ index ] );
+    }
+  }
+
+
+  delete func;
+
+  delete[] param;
+  
   return result;
 }
 
