@@ -52,9 +52,8 @@ public:
   
   long GetIndex(void) const;
   
-  const T &Payoff(int pl) const;
-  void Payoff(gVector<T> &) const;
-  void SetPayoff(int pl, const T &value);
+  NFOutcome<T> *Outcome(void) const;
+  void SetOutcome(NFOutcome<T> *);
   
   void Dump(gOutput &) const;
 };

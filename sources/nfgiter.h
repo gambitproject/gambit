@@ -43,8 +43,8 @@ public:
   
   long GetIndex(void) const;
   
-  const T &Payoff(int p) const;
-  void SetPayoff(int p, const T &);
+  NFOutcome<T> *Outcome(void) const;
+  void SetOutcome(NFOutcome<T> *);
 
   const NFSupport &Support(void) const { return support; }
 };

@@ -30,7 +30,7 @@ template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
   
   do   {
     for (int pl = 1; pl <= nfg.NumPlayers(); pl++)
-      niter.SetPayoff(pl, oiter.Payoff(pl));
+      (*niter.Outcome())[pl] = (*oiter.Outcome())[pl];
 
     oiter.NextContingency();
   }  while (niter.NextContingency());
@@ -51,8 +51,8 @@ template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
 template <class T> void RandomNfg(Nfg<T> &nfg)
 {
   for (int i = 1; i <= nfg.NumPlayers(); i++)
-    for (int j = 0; j < nfg.NumPayPerPlayer; j++)
-      (nfg.payoffs)[i][j] = (T) Uniform();
+    for (int j = 1; j <= nfg.payoffs.Length(); j++)
+      (*nfg.payoffs[j])[i] = (T) Uniform();
 }  
 
 TEMPLATE void RandomNfg(Nfg<double> &nfg);

@@ -46,6 +46,7 @@ TEMPLATE int ReadNfgFile(gInput &, Nfg<gRational> *&);
 
 TEMPLATE class NfgIter<gRational>;
 TEMPLATE class NfgContIter<gRational>;
+TEMPLATE class NFOutcome<gRational>;
 
 TEMPLATE class MixedProfile<gRational>;
 TEMPLATE gOutput &operator<<(gOutput &, const MixedProfile<gRational> &);
@@ -55,7 +56,7 @@ TEMPLATE gOutput &operator<<(gOutput &, const MixedSolution<gRational> &);
 
 #include "garray.imp"
 
-TEMPLATE class gArray<gRational *>;
+TEMPLATE class gArray<NFOutcome<gRational> *>;
 
 #include "glist.imp"
 
@@ -65,3 +66,5 @@ TEMPLATE class gNode<MixedProfile<gRational> >;
 TEMPLATE class gList<MixedSolution<gRational> >;
 TEMPLATE class gNode<MixedSolution<gRational> >;
 
+TEMPLATE class gList<NFOutcome<gRational> *>;
+TEMPLATE class gNode<NFOutcome<gRational> *>;

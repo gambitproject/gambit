@@ -55,10 +55,10 @@ bool ComputeMixedDominated(const Nfg<T> &nfg,
     s.First();
     for (n = 1; n <= contingencies; n++) {
       s.Set(pl, 1);
-      B[n] = -s.Payoff(pl);
+      B[n] = -(*s.Outcome())[pl];
       for (k = 2; k <= strats; k++) {
 	s.Set(pl, k);
-	A(n, k - 1) = -s.Payoff(pl);
+	A(n, k - 1) = -(*s.Outcome())[pl];
       }
       A(n, strats) = (T) 1;
       s.NextContingency();
@@ -131,11 +131,11 @@ bool ComputeMixedDominated(const Nfg<T> &nfg,
     s.First();
     for(n=1;n<=contingencies;n++) {
       s.Set(pl, 1);
-      B[n]=-s.Payoff(pl);
+      B[n]=-(*s.Outcome())[pl];
       C0 -= B[n];
       for(k=2;k<=strats;k++) {
 	s.Set(pl,k);
-	A(n,k-1)=-s.Payoff(pl);
+	A(n,k-1)=-(*s.Outcome())[pl];
 	C[k-1]-=A(n,k-1);
       }
       s.NextContingency();

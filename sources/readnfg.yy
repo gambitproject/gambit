@@ -79,7 +79,7 @@ intlist:      integer
 
 integer:      NUMBER  { numbers.Append(last_rational); }
 
-body:         { cont = 0; pl = 1; } payofflist
+body:         { cont = 1; pl = 1; } payofflist
 
 payofflist:   payoff
           |   payofflist payoff
@@ -89,7 +89,7 @@ payoff:       NUMBER
 		  cont++;
 		  pl = 1;
 		}
-		if (cont >= ncont)  YYERROR;
+		if (cont > ncont)  YYERROR;
 		SetPayoff(cont, pl, last_rational);
 		pl++;
 	      }

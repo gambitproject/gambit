@@ -117,16 +117,15 @@ template <class T> void NfgContIter<T>::Get(gArray<int> &t) const
     t[i] = (*profile)[i]->number;
 }
 
-template <class T> const T &NfgContIter<T>::Payoff(int p) const
+template <class T> NFOutcome<T> *NfgContIter<T>::Outcome(void) const
 {
-  return N->Payoff(p, profile);
+  return N->Outcome(profile);
 }
 
-template <class T> void NfgContIter<T>::SetPayoff(int p, const T &value)
+template <class T> void NfgContIter<T>::SetOutcome(NFOutcome<T> *outcome)
 {
-  N->SetPayoff(p, profile, value);
+  N->SetOutcome(profile, outcome);
 }
-
 
 template <class T> void NfgContIter<T>::Dump(gOutput &f) const
 {

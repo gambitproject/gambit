@@ -115,16 +115,15 @@ template <class T> long NfgIter<T>::GetIndex(void) const
   return profile->GetIndex();
 }
 
-template <class T> const T &NfgIter<T>::Payoff(int p) const
+template <class T> NFOutcome<T> *NfgIter<T>::Outcome(void) const
 {
-  return N->Payoff(p, profile);
+  return N->Outcome(profile);
 }
 
-template <class T> void NfgIter<T>::SetPayoff(int p, const T &value)
+template <class T> void NfgIter<T>::SetOutcome(NFOutcome<T> *outcome)
 {
-  N->SetPayoff(p, profile, value);
+  N->SetOutcome(profile, outcome);
 }
-
 
 
 

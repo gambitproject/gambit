@@ -71,13 +71,30 @@ template <class T> class NfgFile;
 
 #include "gpvector.h"
 
+template <class T> class NFOutcome   {
+  private:
+    gVector<T> payoffs;
+
+  public:
+    NFOutcome(const gVector<T> &p) : payoffs(p)  { }
+    ~NFOutcome() { }
+
+    const gVector<T> &Payoffs(const)   { return payoffs; }
+    const T &operator[](int pl) const    { return payoffs[pl]; }
+    T &operator[](int pl)       { return payoffs[pl]; }
+};
+
+#include "glist.h"
+
 template <class T> class Nfg : public BaseNfg {
 
 friend class MixedProfile<T>;
 friend class NfgFile<T>;
 private:
-  int NumPayPerPlayer;
-  gArray<T *> payoffs;
+  gArray<NFOutcome<T> *> payoffs;
+  gList<NFOutcome<T> *> outcomes;
+
+  int Product(const gArray<int> &);
 
 public:
   Nfg(const gArray<int> &dim);
@@ -92,10 +109,10 @@ public:
 
   void WriteNfgFile(gOutput &) const;
 
-  void SetPayoff(int pl, const gArray<int> &profile, const T &value);
-  const T &Payoff(int pl, const gArray<int> &profile) const;
-  void SetPayoff(int pl, const StrategyProfile *p, const T &value);
-  const T &Payoff(int pl, const StrategyProfile *p) const;
+  void SetOutcome(const gArray<int> &profile, NFOutcome<T> *outcome);
+  NFOutcome<T> *Outcome(const gArray<int> &profile) const;
+  void SetOutcome(const StrategyProfile *p, NFOutcome<T> *outcome);
+  NFOutcome<T> *Outcome(const StrategyProfile *p) const;
 
   // defined in nfgutils.cc
   friend void RandomNfg(Nfg<T> &);

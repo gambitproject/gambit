@@ -253,41 +253,39 @@ GridParams::GridParams(gStatus &st)
 // Output header
 void GridSolveModule::OutputHeader(gOutput &out)
 {
-out<<"Dimensionality:\n";
-out<<N.NumPlayers()<<' ';
-for (int pl = 1; pl <= N.NumPlayers(); pl++) out << N.NumStrats(pl) << ' ';
-out << '\n';
-if (N.NumPlayers()==2)		// output the matrix in case of a 2x2 square game
-	if (N.NumStrats(1)==N.NumStrats(2))
-	{
-		out<<"Game:\n";
-		out<<"3 2 1\n";
-		gArray<int> profile(2);
-		for (int i=1;i<=N.NumStrats(1);i++)
-		{
-			for (int j=1;j<=N.NumStrats(2);j++)
-			{
-				profile[1]=i;profile[2]=j;
-				out<<N.Payoff(1,profile)<<' '<<N.Payoff(2,profile)<<' ';
-			}
-			out<<'\n';
-		}
+  out<<"Dimensionality:\n";
+  out<<N.NumPlayers()<<' ';
+  for (int pl = 1; pl <= N.NumPlayers(); pl++) out << N.NumStrats(pl) << ' ';
+  out << '\n';
+  if (N.NumPlayers()==2)		// output the matrix in case of a 2x2 square game
+    if (N.NumStrats(1)==N.NumStrats(2))  {
+      out<<"Game:\n";
+      out<<"3 2 1\n";
+      gArray<int> profile(2);
+      for (int i=1;i<=N.NumStrats(1);i++)  {
+	for (int j=1;j<=N.NumStrats(2);j++) {
+	  profile[1]=i;profile[2]=j;
+	  out << (*N.Outcome(profile))[1] << ' ' <<
+	         (*N.Outcome(profile))[2] << ' ';
 	}
-out<<"Settings:\n";
-out<<params.minLam<<'\n'<<params.maxLam<<'\n'<<params.delLam<<'\n';
-out<<0<<'\n'<<1<<'\n'<<params.powLam<<'\n';
+	out<<'\n';
+      }
+    }
+  out<<"Settings:\n";
+  out<<params.minLam<<'\n'<<params.maxLam<<'\n'<<params.delLam<<'\n';
+  out<<0<<'\n'<<1<<'\n'<<params.powLam<<'\n';
+  
+  out<<"Extra:\n";
+  out<<1<<'\n'<<params.tol1<<'\n'<<params.delp1<<'\n';
 
-out<<"Extra:\n";
-out<<1<<'\n'<<params.tol1<<'\n'<<params.delp1<<'\n';
+  out<<"DataFormat:\n";
+  int numcols = N.ProfileLength() + 2;
+  out << numcols<<' '; // Format: Lambda, ObjFunc, Prob1,0..1,n1 , Prob2,0..2,n2 , ...
+  for (int i = 1; i <= numcols; i++) out << i << ' ';
 
-out<<"DataFormat:\n";
-int numcols = N.ProfileLength() + 2;
-out << numcols<<' '; // Format: Lambda, ObjFunc, Prob1,0..1,n1 , Prob2,0..2,n2 , ...
-for (int i = 1; i <= numcols; i++) out << i << ' ';
+  out<<'\n';
 
-out<<'\n';
-
-out<<"Data:\n";
+  out<<"Data:\n";
 }
 
 void GridSolveModule::OutputResult(gOutput &out,const MixedProfile<double> P,

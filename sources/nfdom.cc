@@ -25,40 +25,8 @@ bool Dominates(const NFSupport &S, int pl, int a, int b, bool strong)
   
       if (strong)  {
 	do  {
-	  double ap = A.Payoff(pl);
-	  double bp = B.Payoff(pl);
-	  if (ap <= bp)  return false;
-	  A.NextContingency();
-	} while (B.NextContingency());
-	
-	return true;
-      }
-
-		bool equal = true;
-      
-      do   {
-	double ap = A.Payoff(pl);
-	double bp = B.Payoff(pl);
-	if (ap < bp)   return false;
-	else if (ap > bp)  equal = false;
-	A.NextContingency();
-      } while (B.NextContingency());
-
-		return (!equal);
-    }
-
-    case RATIONAL:  {
-      NfgContIter<gRational> A(S), B(S);
-
-      A.Freeze(pl);
-      A.Set(pl, a);
-		B.Freeze(pl);
-      B.Set(pl, b);
-  
-      if (strong)  {
-	do  {
-	  gRational ap = A.Payoff(pl);
-	  gRational bp = B.Payoff(pl);
+	  double ap = (*A.Outcome())[pl];
+	  double bp = (*B.Outcome())[pl];
 	  if (ap <= bp)  return false;
 	  A.NextContingency();
 	} while (B.NextContingency());
@@ -69,8 +37,40 @@ bool Dominates(const NFSupport &S, int pl, int a, int b, bool strong)
       bool equal = true;
       
       do   {
-	gRational ap = A.Payoff(pl);
-	gRational bp = B.Payoff(pl);
+	double ap = (*A.Outcome())[pl];
+	double bp = (*B.Outcome())[pl];
+	if (ap < bp)   return false;
+	else if (ap > bp)  equal = false;
+	A.NextContingency();
+      } while (B.NextContingency());
+
+      return (!equal);
+    }
+
+    case RATIONAL:  {
+      NfgContIter<gRational> A(S), B(S);
+
+      A.Freeze(pl);
+      A.Set(pl, a);
+      B.Freeze(pl);
+      B.Set(pl, b);
+  
+      if (strong)  {
+	do  {
+	  gRational ap = (*A.Outcome())[pl];
+	  gRational bp = (*B.Outcome())[pl];
+	  if (ap <= bp)  return false;
+	  A.NextContingency();
+	} while (B.NextContingency());
+	
+	return true;
+      }
+
+      bool equal = true;
+      
+      do   {
+	gRational ap = (*A.Outcome())[pl];
+	gRational bp = (*B.Outcome())[pl];
 	if (ap < bp)   return false;
 	else if (ap > bp)  equal = false;
 	A.NextContingency();

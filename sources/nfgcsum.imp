@@ -45,7 +45,7 @@ template <class T> void ZSumModule<T>::Make_Abc()
 
   for (i = 1; i <= k; i++)  {
     for (j = 1; j <= m; j++)  {
-      (*A)(i, j) = minpay-iter.Payoff(1);
+      (*A)(i, j) = minpay - (*iter.Outcome())[1];
       iter.Next(1);
     }
     (*A)(i,m+1) = (T)1;

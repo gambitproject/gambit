@@ -51,8 +51,8 @@ template <class T> int EnumModule<T>::Enum(void)
   
   for (i=1; i<=n1; i++) {
     for (j=1; j<=n2; j++)  {
-      A1(i, j) = iter.Payoff(1) - min;
-      A2(j, i) = iter.Payoff(2) - min;
+      A1(i, j) = (*iter.Outcome())[1] - min;
+      A2(j, i) = (*iter.Outcome())[2] - min;
       iter.Next(2);
     }
     iter.Next(1);

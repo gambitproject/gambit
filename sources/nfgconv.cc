@@ -35,7 +35,7 @@ Nfg<gRational> *ConvertNfg(const Nfg<double> &orig)
   
   do   {
     for (int pl = 1; pl <= N->NumPlayers(); pl++)
-      C2.SetPayoff(pl, gRational(C1.Payoff(pl)));
+      (*C2.Outcome())[pl] = gRational((*C1.Outcome())[pl]);
 
     C2.NextContingency();
   } while (C1.NextContingency());
@@ -69,7 +69,7 @@ Nfg<double> *ConvertNfg(const Nfg<gRational> &orig)
   
   do   {
     for (int pl = 1; pl <= N->NumPlayers(); pl++)
-      C2.SetPayoff(pl, (double) C1.Payoff(pl));
+      (*C2.Outcome())[pl] = (double) (*C1.Outcome())[pl];
 
     C2.NextContingency();
   } while (C1.NextContingency());
