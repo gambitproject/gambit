@@ -156,12 +156,8 @@ void Portion::SetGame(const Nfg *game)
 #ifdef MEMCHECK
       gout<<"Game "<<_Game<<" ref count-: "<< _gsm->GameRefCount(_Game) <<'\n';
 #endif
-      /*
-	 gwu: this is commented out due to some problems with ref counting
-              need to be fixed somehow
       if(_gsm->GameRefCount(_Game) == 0) 
         delete (Nfg *) _Game;
-      */
     }    
      
     _Game = (void *) game;
@@ -181,16 +177,12 @@ void Portion::SetGame(const Efg *game)
 {
   if (game != _Game)  {
     if (_Game)  {
-      _gsm->GameRefCount(_Game)++;
+      _gsm->GameRefCount(_Game)--;
 #ifdef MEMCHECK
       gout<<"Game "<<_Game<<" ref count-: "<< _gsm->GameRefCount(_Game) <<'\n';
 #endif
-      /*
-	 gwu: this is commented out due to some problems with ref counting
-              need to be fixed somehow
       if (_gsm->GameRefCount(_Game) == 0)   
 	delete (Efg*) _Game;
-      */
     }
     
     _Game = (void *) game;
@@ -1379,11 +1371,16 @@ NfgPortion::NfgPortion(Nfg *value)
 NfgPortion::NfgPortion(Nfg *&value, bool ref)
   : _Value(&value), _ref(ref)
 { 
-  SetGame(*_Value);
+  // for games, only call SetGame for ValPortions, not RefPortions!
+  if( !_ref )
+    SetGame(*_Value);
 }
 
 NfgPortion::~NfgPortion()
 { 
+  // for games, only call SetGame for ValPortions, not RefPortions!
+  if( _ref )
+    assert( !Game() );
   if (!_ref)
   {
     delete _Value; 
@@ -1395,8 +1392,8 @@ Nfg *NfgPortion::Value(void) const
 
 void NfgPortion::SetValue(Nfg *value)
 {
-  // gwu: this is wrong!  must be changed to fix ref-count problem
-  SetGame( value );
+  // for games, only call SetGame for ValPortions, not RefPortions!
+  ((NfgPortion*) Original())->SetGame( value );
   *_Value = value;
 }
 
@@ -1447,11 +1444,16 @@ EfgPortion::EfgPortion(Efg *value)
 EfgPortion::EfgPortion(Efg *&value, bool ref)
   : _Value(&value), _ref(ref)
 { 
-  SetGame(*_Value);
+  // for games, only call SetGame for ValPortions, not RefPortions!
+  if( !_ref )
+    SetGame(*_Value);
 }
 
 EfgPortion::~EfgPortion()
 { 
+  // for games, only call SetGame for ValPortions, not RefPortions!
+  if( _ref )
+    assert( !Game() );
   if (!_ref)
   {
     delete _Value; 
@@ -1463,8 +1465,8 @@ Efg *EfgPortion::Value(void) const
 
 void EfgPortion::SetValue(Efg *value)
 {
-  // gwu: this is wrong!  must be changed to fix ref-count problem
-  SetGame( value );
+  // for games, only call SetGame for ValPortions, not RefPortions!
+  ((EfgPortion*) Original())->SetGame( value );
   *_Value = value;
 }
 
