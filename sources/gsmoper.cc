@@ -45,7 +45,8 @@ BoolPortion _WriteListBraces(triTRUE);
 BoolPortion _WriteListCommas(triTRUE);
 NumberPortion _WriteListLF(0);
 NumberPortion _WriteListIndent(2);
-NumberPortion _WriteSolutionInfo(1);
+BoolPortion _WriteSolutionInfo(triFALSE);
+BoolPortion _WriteSolutionLabels(triTRUE);
 
 static void GSM_SetWriteOptions(void)
 {
@@ -58,6 +59,7 @@ static void GSM_SetWriteOptions(void)
   Portion::_SetWriteListLF(_WriteListLF.Value());
   Portion::_SetWriteListIndent(_WriteListIndent.Value());
   Portion::_SetWriteSolutionInfo(_WriteSolutionInfo.Value());
+  Portion::_SetWriteSolutionLabels(_WriteSolutionLabels.Value());
 
   ToTextWidth(_WriteWidth.Value());
   ToTextPrecision(_WritePrecis.Value());
@@ -1500,7 +1502,8 @@ static Portion* GSM_GetTextFormat(Portion** param)
 
 static Portion* GSM_SolutionFormat(Portion** param)
 {
-  _WriteSolutionInfo = ((NumberPortion*) param[1])->Value();
+  _WriteSolutionInfo = ((BoolPortion*) param[1])->Value();
+  _WriteSolutionLabels = ((BoolPortion *) param[2])->Value();
 
   GSM_SetWriteOptions();
 
@@ -1509,7 +1512,7 @@ static Portion* GSM_SolutionFormat(Portion** param)
 
 static Portion* GSM_GetSolutionFormat(Portion** param)
 {
-  ((NumberPortion*) param[1])->SetValue(_WriteSolutionInfo.Value());
+  ((BoolPortion*) param[1])->SetValue(_WriteSolutionInfo.Value());
 
   return param[0]->RefCopy();
 }
@@ -1982,11 +1985,13 @@ void Init_gsmoper(GSM* gsm)
 			 _WriteQuoted.RefCopy(), BYREF));
 
   FuncObj->SetFuncInfo(2, gclSignature(GSM_SolutionFormat,
-				       porBEHAV | porMIXED, 2));
+				       porBEHAV | porMIXED, 3));
   FuncObj->SetParamInfo(2, 0, gclParameter("x", porBEHAV | porMIXED) );
   FuncObj->SetParamInfo(2, 1, gclParameter
-			("info", porNUMBER,
+			("info", porBOOLEAN,
 			 _WriteSolutionInfo.RefCopy(), BYREF));
+  FuncObj->SetParamInfo(2, 2, gclParameter("names", porBOOLEAN,
+					   _WriteSolutionLabels.RefCopy(), BYREF));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GetFormat", 3);
@@ -2009,11 +2014,13 @@ void Init_gsmoper(GSM* gsm)
 			 _WriteQuoted.RefCopy(), BYREF));
 
   FuncObj->SetFuncInfo(2, gclSignature(GSM_GetSolutionFormat,
-				       porBEHAV | porMIXED, 2));
+				       porBEHAV | porMIXED, 3));
   FuncObj->SetParamInfo(2, 0, gclParameter("x", porBEHAV | porMIXED) );
   FuncObj->SetParamInfo(2, 1, gclParameter
-			("info", porNUMBER,
+			("info", porBOOLEAN,
 			 _WriteSolutionInfo.RefCopy(), BYREF));
+  FuncObj->SetParamInfo(2, 2, gclParameter("names", porBOOLEAN,
+					   _WriteSolutionLabels.RefCopy(), BYREF));
   gsm->AddFunction(FuncObj);
 
 

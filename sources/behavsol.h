@@ -123,7 +123,8 @@ public:
     { return m_profile->GetValue(s, act); }
 
   // OUTPUT
-  void Dump(gOutput& f) const;
+  void Dump(gOutput &) const;
+  void DumpInfo(gOutput &) const;
 };
 
 gOutput &operator<<(gOutput &f, const BehavSolution &);

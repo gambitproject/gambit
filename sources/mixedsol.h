@@ -109,7 +109,8 @@ public:
   gNumber Payoff(NFPlayer *, Strategy *) const;
 
   // OUTPUT
-  void Dump(gOutput& f) const;
+  void Dump(gOutput &) const;
+  void DumpInfo(gOutput &) const;
 };
 
 

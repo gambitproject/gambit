@@ -421,21 +421,6 @@ bool BehavProfile<T>::operator==(const BehavProfile<T> &p_profile) const
 template <class T> void BehavProfile<T>::Dump(gOutput &p_file) const
 {
   gDPVector<T>::Dump(p_file);
-  /*
-  for (int pl = 1; pl <= Game().NumPlayers(); pl++)  {
-    p_file << "{ ";
-    EFPlayer *player = Game().Players()[pl];
-    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
-      p_file << "{ ";
-      for (int act = 1; act <= Support().NumActions(pl, iset); act++) {
-	p_file << '"' << Support().Actions(pl, iset)[act]->GetName() << "\"=";
-        p_file << (*this)(pl, iset, act) << ' ';
-      }
-      p_file << "}";
-    }
-    p_file << " }";
-  }
-  */
 }
 
 

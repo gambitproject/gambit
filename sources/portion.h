@@ -45,7 +45,8 @@ protected:
   static gTriState _WriteListCommas;
   static gNumber _WriteListLF;
   static gNumber _WriteListIndent;
-  static gNumber _WriteSolutionInfo;
+  static gTriState _WriteSolutionInfo;
+  static gTriState _WriteSolutionLabels;
 
   void SetGame(const Efg *game);
   void SetGame(const Nfg *game);
@@ -59,7 +60,8 @@ public:
   static void _SetWriteListCommas(bool);
   static void _SetWriteListLF(long);
   static void _SetWriteListIndent(long);
-  static void _SetWriteSolutionInfo(long);
+  static void _SetWriteSolutionInfo(bool);
+  static void _SetWriteSolutionLabels(bool);
 
   virtual ~Portion();
 

@@ -34,7 +34,8 @@ gTriState Portion::_WriteListBraces = triTRUE;
 gTriState Portion::_WriteListCommas = triTRUE;
 gNumber Portion::_WriteListLF = 0;
 gNumber Portion::_WriteListIndent = 2;
-gNumber Portion::_WriteSolutionInfo = 1;
+gTriState Portion::_WriteSolutionInfo = triFALSE;
+gTriState Portion::_WriteSolutionLabels = triTRUE;
 
 void Portion::_SetWriteWidth(long x)
 { _WriteWidth = x; }
@@ -52,8 +53,10 @@ void Portion::_SetWriteListLF(long x)
 { _WriteListLF = x; }
 void Portion::_SetWriteListIndent(long x)
 { _WriteListIndent = x; }
-void Portion::_SetWriteSolutionInfo(long x)
-{ _WriteSolutionInfo = x; }
+void Portion::_SetWriteSolutionInfo(bool x)
+{ _WriteSolutionInfo = (x) ? triTRUE : triFALSE; }
+void Portion::_SetWriteSolutionLabels(bool x)
+{ _WriteSolutionLabels = (x) ? triTRUE : triFALSE; }
 
 
 void Portion::Output(gOutput& s) const
@@ -1263,12 +1266,25 @@ void MixedPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
   s << "(Mixed) ";
-  if (_WriteSolutionInfo > gNumber(1))
-    rep->value->Dump(s);
-  else {
-    MixedProfile<gNumber> profile(*rep->value);
-    profile.Dump(s);
+
+  for (int pl = 1; pl <= rep->value->Game().NumPlayers(); pl++)  {
+    s << "{ ";
+    NFPlayer *player = rep->value->Game().Players()[pl];
+    for (int st = 1; st <= player->NumStrats(); st++) {
+      if (_WriteSolutionLabels == triTRUE) {
+	if ((*rep->value)(pl, st) > gNumber(0)) {
+	  s << player->Strategies()[st]->Name() << '=';
+	  s << (*rep->value)(pl, st) << ' ';
+	}
+      }
+      else
+	s << (*rep->value)(pl, st) << ' ';
+      }
+    s << "}";
   }
+
+  if (_WriteSolutionInfo == triTRUE)
+    rep->value->DumpInfo(s);
 }
 
 
@@ -1345,12 +1361,30 @@ void BehavPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
   s << "(Behav) ";
-  if (_WriteSolutionInfo > gNumber(1))
-    rep->value->Dump(s);
-  else {
-    BehavProfile<gNumber> P(*rep->value);
-    P.Dump(s);
+
+  for (int pl = 1; pl <= rep->value->Game().NumPlayers(); pl++)  {
+    s << "{ ";
+    EFPlayer *player = rep->value->Game().Players()[pl];
+    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
+      s << "{ ";
+      Infoset *infoset = player->Infosets()[iset];
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	if (_WriteSolutionLabels == triTRUE) {
+	  if ((*rep->value)(pl, iset, act) > gNumber(0)) {
+	    s << infoset->Actions()[act]->GetName() << '=';
+	    s << (*rep->value)(pl, iset, act) << ' ';
+	  }
+	}
+	else
+	  s << (*rep->value)(pl, iset, act) << ' ';
+      }
+      s << "}";
+    }
+    s << " }";
   }
+
+  if (_WriteSolutionInfo == triTRUE)
+    rep->value->DumpInfo(s);
 }
 
 gText BehavPortion::OutputString(void) const

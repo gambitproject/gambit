@@ -269,6 +269,11 @@ gNumber MixedSolution::Payoff(NFPlayer *p_player, Strategy *p_strategy) const
 void MixedSolution::Dump(gOutput &p_file) const
 {
   m_profile.Dump(p_file);
+  DumpInfo(p_file);
+}
+
+void MixedSolution::DumpInfo(gOutput &p_file) const
+{
   p_file << " Creator:"; DisplayNfgAlgType(p_file, m_creator);
   p_file << " IsNash:" << m_isNash;
   p_file << " IsPerfect:" << m_isPerfect;

@@ -339,6 +339,11 @@ const gDPVector<gNumber> &BehavSolution::Regret(void) const
 void BehavSolution::Dump(gOutput &p_file) const
 {
   p_file << *m_profile;
+  DumpInfo(p_file);
+}
+
+void BehavSolution::DumpInfo(gOutput &p_file) const
+{
   p_file << " Creator:"; DisplayEfgAlgType(p_file, m_creator);
   p_file << " IsNash:" << m_isNash;
   p_file << " IsSubgamePerfect:" << m_isSubgamePerfect;
