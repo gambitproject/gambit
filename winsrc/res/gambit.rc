@@ -14,6 +14,8 @@ open           BITMAP bitmaps\open.bmp
 save           BITMAP bitmaps\save.bmp
 print          BITMAP bitmaps\print.bmp
 preview        BITMAP bitmaps\preview.bmp
+zoomin         BITMAP bitmaps\zoomin.bmp
+zoomout        BITMAP bitmaps\zoomout.bmp
 table          BITMAP bitmaps\table.bmp
 help           BITMAP bitmaps\help.bmp
 
