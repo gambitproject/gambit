@@ -178,10 +178,10 @@ gMatrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const gVector<T>& p) const
 template <class T> gSquareMatrix<T> 
 ListOfPartialTrees<T>::SquareDerivativeMatrix(const gVector<T>& p) const
 {
-  assert (Length() == Dmnsn());
+  assert (Length() >= Dmnsn());
   gSquareMatrix<T> answer(Dmnsn());
   int ii;
-  for (ii = 1; ii <= Length(); ii++)
+  for (ii = 1; ii <= Dmnsn(); ii++)
     for (int j = 1; j <= Dmnsn(); j++)
       answer(ii,j) = (*this)[ii].ValueOfPartialOfRootPoly(j,p);
  
@@ -191,8 +191,8 @@ ListOfPartialTrees<T>::SquareDerivativeMatrix(const gVector<T>& p) const
 template <class T> gVector<T> 
 ListOfPartialTrees<T>::ValuesOfRootPolys(const gVector<T>& point) const
 {
-  gVector<T> answer(Length());
-  for (int i = 1; i <= Length(); i++)
+  gVector<T> answer(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++)
     answer[i] = PartialTreeList[i].EvaluateRootPoly(point);
 
   return answer;
@@ -237,20 +237,24 @@ template<class T> QuikSolv<T>::~QuikSolv()
 //---------------------------
 
 template<class T> bool
-QuikSolv<T>::PolyHasNoRootsIn(const gRectangle<gDouble>& r, const int &Dummy) const
+QuikSolv<T>::PolyHasNoRootsIn(const gRectangle<gDouble>& r, 
+			      const int &index) const
 {
   gVector<gDouble> center = r.Center();
 
-  gDouble constant = TreesOfPartials[Dummy].RootNode()->GetData().Evaluate(center);
+  gDouble constant = 
+    TreesOfPartials[index].RootNode()->GetData().Evaluate(center);
   if (constant < (gDouble)0) constant = - constant;
 
   gVector<gDouble> HalvesOfSideLengths = r.SideLengths();
   for (int k = 1; k <= Dmnsn(); k++) HalvesOfSideLengths[k] /= (gDouble)2;
 
+/*  - The following seems to do nothing
   gVector<int> WithRespectTos(r.Dmnsn());
   for (int i = 1; i <= r.Dmnsn(); i++) WithRespectTos[i] = 0;
+*/
 
-  gDouble max = TreesOfPartials[Dummy].MaximalNonconstantContribution(
+  gDouble max = TreesOfPartials[index].MaximalNonconstantContribution(
 							center,
 							HalvesOfSideLengths);
 
@@ -258,12 +262,36 @@ QuikSolv<T>::PolyHasNoRootsIn(const gRectangle<gDouble>& r, const int &Dummy) co
   else                return true;
 }
 
+template<class T> bool
+QuikSolv<T>::PolyEverywhereNegativeIn(const gRectangle<gDouble>& r, 
+				      const int &index) const
+{
+  gVector<gDouble> center = r.Center();
+
+  gDouble constant = 
+    TreesOfPartials[index].RootNode()->GetData().Evaluate(center);
+  if (constant >= (gDouble)0) return false;
+
+  gVector<gDouble> HalvesOfSideLengths = r.SideLengths();
+  for (int k = 1; k <= Dmnsn(); k++) HalvesOfSideLengths[k] /= (gDouble)2;
+
+  gDouble max = TreesOfPartials[index].MaximalNonconstantContribution(
+							center,
+							HalvesOfSideLengths);
+
+  if (max + constant >= 0) return false;
+  else                     return true;
+}
+
 template<class T> 
 bool QuikSolv<T>::SystemHasNoRootsIn(const gRectangle<gDouble>& r,
 				     gArray<int>& precedence)        const
 {
-  for (int i = 1; i <= Dmnsn(); i++)
-    if (PolyHasNoRootsIn(r, precedence[i])) { 
+  for (int i = 1; i <= System.Length(); i++)
+    if ( (precedence[i] <= Dmnsn() && 
+	                      PolyHasNoRootsIn(r, precedence[i])) ||
+         (precedence[i] >  Dmnsn() && 
+	                      PolyEverywhereNegativeIn(r, precedence[i])) ) { 
       if (i != 1) { // We have found a new "most likely to never vanish"
 	int tmp = precedence[i];
 	for (int j = 1; j <= i-1; j++) 
@@ -283,7 +311,7 @@ template <class T>
 bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
 					      gVector<gDouble>& point) const
 {
-  assert(TreesOfPartials.Length() == Dmnsn());
+  assert(TreesOfPartials.Length() == System.Length());
 
   gVector<gDouble> zero(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) zero[i] = (gDouble)0;
@@ -292,7 +320,7 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
 
   if ( oldevals == zero ) 
     if (r.Contains(point)) return true;
-    else               return false;
+    else                   return false;
 
   while (true) {
     gSquareMatrix<gDouble> Df = TreesOfPartials.SquareDerivativeMatrix(point);
@@ -307,7 +335,7 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
     if (newevals * newevals > oldevals * oldevals) return false;
     if ( newevals == zero )
       if (r.Contains(point)) return true;
-      else                   return false;
+      else                   return false;                
 
     oldevals = newevals;
   }
@@ -525,7 +553,7 @@ bool QuikSolv<T>::operator!=(const QuikSolv<T> & rhs) const
 //-------------------------------------------
 
 template<class T> bool
-QuikSolv<T>::MightHaveSingularRoots()
+QuikSolv<T>::MightHaveSingularRoots() const
 {
   gPoly<gDouble> newpoly = 
     gDoubleSystem.ReductionOf(  gDoubleSystem.DetOfDerivativeMatrix(),
@@ -562,8 +590,9 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
 {
   gList<gVector<gDouble> >* rootlistptr = new gList<gVector<gDouble> >();
 
-  gArray<int> precedence(Dmnsn());  // Orders search for nonvanishing poly
-  for (int i = 1; i <= Dmnsn(); i++) precedence[i] = i;
+  gArray<int> precedence(System.Length());  
+            // Orders search for nonvanishing poly
+  for (int i = 1; i <= System.Length(); i++) precedence[i] = i;
 
   int iterations = 0;
 
@@ -616,6 +645,9 @@ QuikSolv<T>::FindRootsRecursion(      gList<gVector<gDouble> >* rootlistptr,
 
   gVector<gDouble> point = r.Center();
   if ( NewtonRootIsOnlyInRct(r, point) ) {
+    for (int i = Dmnsn() + 1; i <= System.Length(); i++)
+      if (TreesOfPartials[i].ValueOfRootPoly(point) < (gDouble)0)
+	return;
     bool already_found = false;
     for (int i = 1; i <= rootlistptr->Length(); i++)
       if (point == (*rootlistptr)[i])

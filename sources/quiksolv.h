@@ -16,19 +16,20 @@
 
 /*
     The (optimistically named) class described in this file is a method
-of finding the roots of a system of polynomials, with equal numbers of
-equations and unknowns, that lie inside a given rectangle.  The
-general idea is to first ask whether the Taylor's series information
-at the center of the rectangle precludes the existence of roots, and
-if it does not, whether Newton's method leads to a root, and if it does,
-whether the Taylor's series information at the root precludes the existence
-of another root.  If the roots in the rectangle are not resolved by
-these queries, the rectangle is subdivided into 2^d subrectangles, and
-the process is repeated on each.  This continues until it has been shown
-that all roots have been found, or a predetermined search depth is reached.
-The bound on depth is necessary because the procedure will not terminate
-if there are singular roots.
- */
+of finding the roots of a system of polynomials and inequalities, with
+equal numbers of equations and unknowns, that lie inside a given
+rectangle.  The general idea is to first ask whether the Taylor's
+series information at the center of the rectangle precludes the
+existence of roots, and if it does not, whether Newton's method leads
+to a root, and if it does, whether the Taylor's series information at
+the root precludes the existence of another root.  If the roots in the
+rectangle are not resolved by these queries, the rectangle is
+subdivided into 2^d subrectangles, and the process is repeated on
+each.  This continues until it has been shown that all roots have been
+found, or a predetermined search depth is reached.  The bound on depth
+is necessary because the procedure will not terminate if there are
+singular roots.
+*/
 
 // ****************************
 //      class TreeOfPartials
@@ -36,13 +37,13 @@ if there are singular roots.
 
 template <class T> class TreeOfPartials {
 private:
-        gTree<gPoly<T> >     PartialTree;
+  gTree<gPoly<T> > PartialTree;
 
 // Recursive Construction
-   void                      TreeOfPartialsRECURSIVE(gTree<gPoly<T> >&,
-				            gTreeNode<gPoly<T> >*) const;
+   void TreeOfPartialsRECURSIVE(gTree<gPoly<T> >&,
+				gTreeNode<gPoly<T> >*)         const;
 
-   T                         MaximalNonconstantContributionRECURSIVE(
+   T MaximalNonconstantContributionRECURSIVE(
 				const gTreeNode<gPoly<T> >*,
 		      	        const gVector<T>&,
 			        const gVector<T>&,
@@ -57,17 +58,22 @@ public:
      { return (PartialTree == rhs.PartialTree); }
    inline const bool operator !=(const TreeOfPartials<T>& rhs) const 
      { return !(*this == rhs); }
-   inline const int Dmnsn() const 
+   inline const int Dmnsn()                                    const 
      { return RootNode()->GetData().Dmnsn(); }
-   inline const T EvaluateRootPoly(const gVector<T>& point) const 
+   inline const T EvaluateRootPoly(const gVector<T>& point)    const 
      { return RootNode()->GetData().Evaluate(point); }
 
 
-   T  MaximalNonconstantContribution(const gVector<T>&, const gVector<T>&)    const;
+   T MaximalNonconstantContribution(const gVector<T>&, 
+				    const gVector<T>&)         const;
 
-   inline gTreeNode<gPoly<T> >* RootNode() const { return PartialTree.RootNode(); }
-   inline gPoly<T> RootPoly() const { return RootNode()->GetData(); }
-   T ValueOfPartialOfRootPoly(const int&, const gVector<T>&) const;
+   inline gTreeNode<gPoly<T> >* RootNode()                     const 
+     { return PartialTree.RootNode(); }
+   inline gPoly<T> RootPoly()                                  const 
+     { return RootNode()->GetData(); }
+   inline T ValueOfRootPoly(const gVector<T>& point)           const 
+     { return RootPoly().Evaluate(point); }
+   T ValueOfPartialOfRootPoly(const int&, const gVector<T>&)   const;
 
 friend gOutput& operator << (gOutput& output, const TreeOfPartials<T>& x);
 };
@@ -87,18 +93,26 @@ public:
    ListOfPartialTrees(const ListOfPartialTrees<T> &);
    ~ListOfPartialTrees();
 
-  inline const TreeOfPartials<T>& operator[](const int& i) const 
+  inline const TreeOfPartials<T>& operator[](const int& i)        const 
     { return PartialTreeList[i]; }
 
   // Information
-  inline int Length() const
+  inline int Length()                                             const
     { return PartialTreeList.Length(); }
-  inline int Dmnsn() const
+  inline int Dmnsn()                                              const
     { assert (Length() > 0); return PartialTreeList[1].Dmnsn(); }
-  gMatrix<T> DerivativeMatrix(const gVector<T>&) const; 
-  gSquareMatrix<T> SquareDerivativeMatrix(const gVector<T>&) const; 
-  gVector<T> ValuesOfRootPolys(const gVector<T>&) const;
+  gMatrix<T> DerivativeMatrix(const gVector<T>&)                  const; 
+  gSquareMatrix<T> SquareDerivativeMatrix(const gVector<T>&)      const; 
+  gVector<T> ValuesOfRootPolys(const gVector<T>&)                 const;
 };
+
+/*
+   The main constructor for this takes a gPolyList<T>.  The list must
+be at least as long as the dimension Dmnsn() of the space of the
+system.  The first Dmnsn() polynomials are interpreted as equtions,
+while remaining polynomials are interpreted as inequalities in the
+sense that the polynomial is required to be nonnegative.
+*/
 
 
 // ***********************
@@ -117,11 +131,14 @@ template <class T> class QuikSolv {
 
   // Check whether roots are impossible
 
-   bool PolyHasNoRootsIn(const gRectangle<gDouble>&, const int&)             const;
-   bool SystemHasNoRootsIn(const gRectangle<gDouble>& r, gArray<int>&)       const;
+   bool PolyHasNoRootsIn(const gRectangle<gDouble>&, const int&)         const;
+   bool PolyEverywhereNegativeIn(const gRectangle<gDouble>&, 
+				 const int&)                             const;
+   bool SystemHasNoRootsIn(const gRectangle<gDouble>& r, gArray<int>&)   const;
 
   // Ask whether Newton's method leads to a root without leaving the rectangle
-   bool NewtonRootInRectangle(const gRectangle<gDouble>&, gVector<gDouble>&) const;
+   bool NewtonRootInRectangle(const gRectangle<gDouble>&, 
+			            gVector<gDouble>&) const;
 
   // Ask whether we can prove that there is no root other than 
   // the one produced by the last step
@@ -132,54 +149,34 @@ template <class T> class QuikSolv {
 				  const gVector<gDouble>&)               const;
    gPolyList<gDouble> TranslateOfSystem(const gPolyList<gDouble>&,
 				  const gVector<gDouble>&)               const;
-/*
-   gPolyList<gDouble> TranslateOfSystem(const gPolyList<gDouble>& old,
-				  const gVector<gDouble>& new_origin)    const {
-     gList<gPoly<gDouble> > new_polys;
-     for (int i = 1; i <= UnderlyingEquations().Length(); i++)
-       new_polys += gPoly<gDouble>( TranslateOfPoly(old[i],new_origin) );
-     return gPolyList<gDouble>(AmbientSpace(),TermOrder(),new_polys);
-   };
-*/
-
    gPoly<gDouble> MonoInNewCoordinates(const gMono<gDouble>&, 
 				 const gSquareMatrix<gDouble>&)          const;
    gPoly<gDouble> PolyInNewCoordinates(const gPoly<gDouble>&, 
 				 const gSquareMatrix<gDouble>&)          const;
    gPolyList<gDouble> SystemInNewCoordinates(const gPolyList<gDouble>&,
 				       const gSquareMatrix<gDouble>&)    const;
-/*
-   gPolyList<gDouble> SystemInNewCoordinates(const gPolyList<gDouble>& old,
-                                 const gSquareMatrix<gDouble>& M)         const {
-     gList<gPoly<gDouble> > new_polys;
-     for (int i = 1; i <= UnderlyingEquations().Length(); i++)
-       new_polys += gPoly<gDouble>( PolyInNewCoordinates(old[i],M) );
-     return gPolyList<gDouble>(AmbientSpace(),TermOrder(),new_polys);
-   };
-*/
    gDouble MaxDistanceFromPointToVertexAfterTransformation(
 				      const gRectangle<gDouble>&,
 				      const gVector<gDouble>&,
 				      const gSquareMatrix<gDouble>&)     const;
+
    gDouble MaximalContributionOfHigherOrderTerms(const gPoly<gDouble>&,
 						 const gDouble&)         const;
-
    bool HasNoOtherRootsIn(const gRectangle<gDouble>&,
 			  const gVector<gDouble>&,
 			  const gSquareMatrix<gDouble>&)                 const;
-
   // Combine the last two steps into a single query
-   bool NewtonRootIsOnlyInRct(const gRectangle<gDouble>&, gVector<gDouble>&) const;
+   bool NewtonRootIsOnlyInRct(const gRectangle<gDouble>&, 
+			            gVector<gDouble>&) const;
 
   // Recursive part of recursive method
-//   gList<gVector<gDouble> >  
-  void                       FindRootsRecursion(      gList<gVector<gDouble> >*,
-						const gRectangle<gDouble>&, 
-						const int&,
-					              gArray<int>&,
-					              int&,
-						const int&,
-						      int*)                  const;
+  void               FindRootsRecursion(      gList<gVector<gDouble> >*,
+					const gRectangle<gDouble>&, 
+					const int&,
+					      gArray<int>&,
+					      int&,
+					const int&,
+					      int*)                  const;
 
  public:
    QuikSolv(const gPolyList<T> &);  
@@ -206,7 +203,7 @@ template <class T> class QuikSolv {
      { return Roots; }
 
   // Checks for complex singular roots
-   bool     MightHaveSingularRoots();
+   bool     MightHaveSingularRoots()                                 const;
 
   // The grand calculation - returns true if successful
    bool     FindCertainNumberOfRoots  (const gRectangle<T>&, 
