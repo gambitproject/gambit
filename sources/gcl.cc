@@ -160,11 +160,11 @@ int main(int argc, char *argv[])
     gCmdLineInput gcmdline(20);
 #endif   // __BORLANDC__
 
-    gText initString = "Include[\"gclini.gcl\"]\n";
+    gText initString = "Include[\"gclini.gcl\"];\n";
     for (int i = 1; i < argc; i++) {
       initString += "Include[\"";
       initString += argv[i];
-      initString += "\"]\n";
+      initString += "\"];\n";
     }
 
     gPreprocessor P(*gsm, &gcmdline, initString);

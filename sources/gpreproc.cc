@@ -87,7 +87,23 @@ void gPreprocessor::SetPrompt(bool p_prompt)
 
 void gPreprocessor::GetChar(char &p_char)
 {
-  if (m_StartupString.Length() > 0)  {
+  // Input is sought first from any open Include[] files
+  // (in particular, gclini.gcl and other command-line arguments);
+  // then from any unexecuted parts of the initString;
+  // finally, from the GCL::CommandLine object ("standard input")
+
+  if (m_InputStack.Depth() > 1 && !m_InputStack.Peek()->eof()) {
+    if (m_InputStack.Peek()->getpos() == 0L) {
+      m_environment.OutputStream() << "GCL: Reading file \"";
+      m_environment.OutputStream() << m_FileNameStack.Peek();
+      m_environment.OutputStream() << "\".\n";
+    }
+    m_InputStack.Peek()->get(p_char);
+    if (EOL(p_char)) {
+      ++m_LineNumberStack.Peek();
+    }
+  }
+  else if (m_StartupString.Length() > 0)  {
     p_char = m_StartupString[0];
     m_StartupString = m_StartupString.Right(m_StartupString.Length() - 1);
   }
@@ -95,6 +111,12 @@ void gPreprocessor::GetChar(char &p_char)
     m_InputStack.Peek()->get(p_char);
     if (EOL(p_char))
       ++m_LineNumberStack.Peek();
+  }
+
+  // This is a bit of a hack to eliminate spurious error messages at the
+  // end of include files.
+  if (!isprint(p_char) && !isspace(p_char)) {
+    p_char = '\n';
   }
 
   m_RawLine += p_char;
@@ -288,7 +310,7 @@ gText gPreprocessor::GetLine(void)
 	    GetChar(c);
 
 	  if (c != '[') {
-	    line += "False";
+	    line += "False;";
 	    errorMsg = "Include[] syntax error; opening '[' not found";
 	    error = true;
 	    break;
@@ -299,7 +321,7 @@ gText gPreprocessor::GetLine(void)
 		  m_StartupString.Length() > 0) && c == ' ')
 	    GetChar(c);
 	  if (c != '\"') {
-	    line += "False";
+	    line += "False;";
 	    errorMsg = "Include[] syntax error; opening '\"' not found";
 	    error = true;
 	    break;
@@ -316,7 +338,7 @@ gText gPreprocessor::GetLine(void)
 	  }
 
 	  if (EOL(c)) {
-	    line += "False";
+	    line += "False;";
 	    errorMsg = "Include[] syntax error; closing '\"' not found";
 	    error = true;
 	    break;
@@ -327,7 +349,7 @@ gText gPreprocessor::GetLine(void)
 		  m_StartupString.Length() > 0) && c == ' ')
 	    GetChar(c);
 	  if (c != ']') {
-	    line += "False";
+	    line += "False;";
 	    errorMsg = "Include[] syntax error; closing ']' not found";
 	    error = true;
 	    break;
@@ -346,13 +368,13 @@ gText gPreprocessor::GetLine(void)
 	  gInput *input = LoadInput(filename);
 	  
 	  if (input) {
-	    line += "True";
+	    line += "True;";
 	    m_InputStack.Push(input);
 	    m_FileNameStack.Push(filename);
 	    m_LineNumberStack.Push(1);
 	  }
 	  else {
-	    line += "False";
+	    line += "False;";
 	    m_environment.ErrorStream() << "GCL Warning: Include file \"" << filename;
 	    m_environment.ErrorStream() << "\" not found.\n";
 	  }
