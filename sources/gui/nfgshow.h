@@ -20,6 +20,7 @@
 #include "game/mixedsol.h"
 
 #include "gambit.h"
+#include "nfgconst.h"
 
 const int idNFG_SOLUTION_LIST = 1900;
 
@@ -89,13 +90,7 @@ private:
   void OnFormatSave(wxCommandEvent &);
   void OnFormatLoad(wxCommandEvent &);
 
-  void OnToolsSupportUndominated(wxCommandEvent &);
-  void OnToolsSupportNew(wxCommandEvent &);
-  void OnToolsSupportEdit(wxCommandEvent &);
-  void OnToolsSupportDelete(wxCommandEvent &);
-  void OnToolsSupportSelectFromList(wxCommandEvent &);
-  void OnToolsSupportSelectPrevious(wxCommandEvent &);
-  void OnToolsSupportSelectNext(wxCommandEvent &);
+  void OnToolsDominance(wxCommandEvent &);
 
   void OnToolsEquilibriumStandard(wxCommandEvent &);
   void OnToolsEquilibriumCustomEnumPure(wxCommandEvent &);
@@ -111,6 +106,9 @@ private:
   void OnHelpContents(wxCommandEvent &);
   void OnHelpIndex(wxCommandEvent &);
   void OnHelpAbout(wxCommandEvent &);
+
+  void OnSupportDuplicate(wxCommandEvent &);
+  void OnSupportDelete(wxCommandEvent &);
 
   void OnProfilesNew(wxCommandEvent &);
   void OnProfilesClone(wxCommandEvent &);

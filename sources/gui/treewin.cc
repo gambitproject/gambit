@@ -495,7 +495,7 @@ void TreeWindow::SupportChanged(void)
   if (!m_layout.GetNodeEntry(m_parent->Cursor())) {
     m_parent->SetCursor(0);
   }
-  RefreshLayout();
+  RefreshTree();
   Refresh();
 }
 

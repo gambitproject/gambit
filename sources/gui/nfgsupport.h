@@ -32,6 +32,8 @@ public:
   virtual ~NfgSupportWindow() { }
 
   void UpdateValues(void);
+  int GetSupport(void) const { return m_supportList->GetSelection(); }
+  void ToggleItem(wxTreeItemId);
 
   DECLARE_EVENT_TABLE()
 };

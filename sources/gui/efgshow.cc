@@ -49,8 +49,6 @@
 #include "dllegends.h"
 
 #include "dlelim.h"
-#include "dlsupportselect.h"
-#include "dlefgeditsupport.h"
 
 #include "algenumpure.h"
 #include "algenummixed.h"
@@ -97,6 +95,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuVIEW_SUPPORTS, EfgShow::OnViewSupports)
   EVT_MENU(efgmenuVIEW_ZOOMIN, EfgShow::OnViewZoomIn)
   EVT_MENU(efgmenuVIEW_ZOOMOUT, EfgShow::OnViewZoomOut)
+  EVT_MENU(efgmenuVIEW_SUPPORT_REACHABLE, EfgShow::OnViewSupportReachable)
   EVT_MENU(efgmenuFORMAT_LEGEND, EfgShow::OnFormatLegend)
   EVT_MENU(efgmenuFORMAT_FONTS_ABOVENODE, EfgShow::OnFormatFontsAboveNode)
   EVT_MENU(efgmenuFORMAT_FONTS_BELOWNODE, EfgShow::OnFormatFontsBelowNode)
@@ -111,17 +110,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuTOOLS_SUBGAME_MARK, EfgShow::OnToolsSubgamesMark)
   EVT_MENU(efgmenuTOOLS_SUBGAME_UNMARKALL, EfgShow::OnToolsSubgamesUnMarkAll)
   EVT_MENU(efgmenuTOOLS_SUBGAME_UNMARK, EfgShow::OnToolsSubgamesUnMark)
-  EVT_MENU(efgmenuTOOLS_SUPPORT_UNDOMINATED,
-	   EfgShow::OnToolsSupportUndominated)
-  EVT_MENU(efgmenuTOOLS_SUPPORT_NEW, EfgShow::OnToolsSupportNew)
-  EVT_MENU(efgmenuTOOLS_SUPPORT_EDIT, EfgShow::OnToolsSupportEdit)
-  EVT_MENU(efgmenuTOOLS_SUPPORT_DELETE, EfgShow::OnToolsSupportDelete)
-  EVT_MENU(efgmenuTOOLS_SUPPORT_SELECT_FROMLIST,
-	   EfgShow::OnToolsSupportSelectFromList)
-  EVT_MENU(efgmenuTOOLS_SUPPORT_SELECT_PREVIOUS, 
-	   EfgShow::OnToolsSupportSelectPrevious)
-  EVT_MENU(efgmenuTOOLS_SUPPORT_SELECT_NEXT, EfgShow::OnToolsSupportSelectNext)
-  EVT_MENU(efgmenuTOOLS_SUPPORT_REACHABLE, EfgShow::OnToolsSupportReachable)
+  EVT_MENU(efgmenuTOOLS_DOMINANCE, EfgShow::OnToolsDominance)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_STANDARD, 
 	   EfgShow::OnToolsEquilibriumStandard)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_ENUMPURE, 
@@ -159,6 +148,8 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(wxID_HELP_CONTENTS, EfgShow::OnHelpContents)
   EVT_MENU(wxID_HELP_INDEX, EfgShow::OnHelpIndex)
   EVT_MENU(wxID_ABOUT, EfgShow::OnHelpAbout)
+  EVT_MENU(efgmenuSUPPORT_DUPLICATE, EfgShow::OnSupportDuplicate)
+  EVT_MENU(efgmenuSUPPORT_DELETE, EfgShow::OnSupportDelete)
   EVT_MENU(efgmenuPROFILES_NEW, EfgShow::OnProfilesNew)
   EVT_MENU(efgmenuPROFILES_CLONE, EfgShow::OnProfilesClone)
   EVT_MENU(efgmenuPROFILES_RENAME, EfgShow::OnProfilesRename)
@@ -576,32 +567,8 @@ void EfgShow::MakeMenus(void)
   toolsMenu->Append(efgmenuTOOLS_SUBGAME, "&Subgame", toolsSubgameMenu,
 		    "Manipulate subgames");
 
-  wxMenu *toolsSupportsMenu = new wxMenu;
-  toolsSupportsMenu->Append(efgmenuTOOLS_SUPPORT_UNDOMINATED, "&Undominated",
-			    "Find undominated strategies");
-  toolsSupportsMenu->Append(efgmenuTOOLS_SUPPORT_NEW, "&New",
-			    "Create a new support");
-  toolsSupportsMenu->Append(efgmenuTOOLS_SUPPORT_EDIT, "&Edit",
-			    "Edit the currently displayed support");
-  toolsSupportsMenu->Append(efgmenuTOOLS_SUPPORT_DELETE, "&Delete",
-			    "Delete a support");
-  wxMenu *supportsSelectMenu = new wxMenu;
-  supportsSelectMenu->Append(efgmenuTOOLS_SUPPORT_SELECT_FROMLIST, 
-			     "From &List...",
-			     "Select a support from the list of defined supports");
-  supportsSelectMenu->Append(efgmenuTOOLS_SUPPORT_SELECT_PREVIOUS, "&Previous",
-			     "Select the previous support from the list");
-  supportsSelectMenu->Append(efgmenuTOOLS_SUPPORT_SELECT_NEXT, "&Next",
-			     "Select the next support from the list");
-  toolsSupportsMenu->Append(efgmenuTOOLS_SUPPORT_SELECT, "&Select",
-			    supportsSelectMenu,
-			    "Change the current support");
-  toolsSupportsMenu->AppendSeparator();
-  toolsSupportsMenu->Append(efgmenuTOOLS_SUPPORT_REACHABLE, "&Root Reachable",
-			    "Display only nodes that are support-reachable",
-			    true);
-  toolsMenu->Append(efgmenuTOOLS_SUPPORT, "S&upport", toolsSupportsMenu,
-		    "Manipulate supports");
+  toolsMenu->Append(efgmenuTOOLS_DOMINANCE, "&Dominance",
+		    "Find undominated actions");
 
   wxMenu *toolsEquilibriumMenu = new wxMenu;
   toolsEquilibriumMenu->Append(efgmenuTOOLS_EQUILIBRIUM_STANDARD,
@@ -691,6 +658,10 @@ void EfgShow::MakeMenus(void)
 		   "Increase display magnification");
   viewMenu->Append(efgmenuVIEW_ZOOMOUT, "Zoom &out\t-",
 		   "Decrease display magnification");
+  viewMenu->AppendSeparator();
+  viewMenu->Append(efgmenuVIEW_SUPPORT_REACHABLE, "&Root Reachable",
+		   "Display only nodes that are support-reachable",
+		   true);
   
   wxMenu *formatMenu = new wxMenu;
   wxMenu *formatDisplayMenu = new wxMenu;
@@ -754,7 +725,7 @@ void EfgShow::UpdateMenus(void)
 		  (cursor && cursor->GetInfoset()) ? true : false);
 
   if (m_treeWindow) {
-    menuBar->Check(efgmenuTOOLS_SUPPORT_REACHABLE,
+    menuBar->Check(efgmenuVIEW_SUPPORT_REACHABLE,
 		   m_treeWindow->DrawSettings().RootReachable());
   }
 
@@ -1200,6 +1171,13 @@ void EfgShow::OnViewZoomOut(wxCommandEvent &)
   m_treeWindow->SetZoom(zoom);
 }
 
+void EfgShow::OnViewSupportReachable(wxCommandEvent &)
+{
+  m_treeWindow->DrawSettings().SetRootReachable(!m_treeWindow->DrawSettings().RootReachable());
+  m_treeWindow->RefreshLayout();
+  m_treeWindow->Refresh();
+}
+
 //----------------------------------------------------------------------
 //               EfgShow: Menu handlers - Format menu
 //----------------------------------------------------------------------
@@ -1338,108 +1316,10 @@ void EfgShow::OnToolsSubgamesUnMark(wxCommandEvent &)
 
 
 //----------------------------------------------------------------------
-//          EfgShow: Menu handlers - Tools->Support menu
+//             EfgShow: Menu handler - Tools->Dominance
 //----------------------------------------------------------------------
 
-void EfgShow::OnToolsSupportNew(wxCommandEvent &)
-{
-  EFSupport newSupport(m_efg);
-  newSupport.SetName(UniqueSupportName());
-  dialogEfgEditSupport dialog(newSupport, this);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      EFSupport *support = new EFSupport(dialog.Support());
-      m_supports.Append(support);
-
-      m_currentSupport = support;
-      OnSupportsEdited();
-    }
-    catch (gException &E) {
-      guiExceptionDialog(E.Description(), this);
-    }
-  }
-}
-
-void EfgShow::OnToolsSupportEdit(wxCommandEvent &)
-{
-  dialogEfgEditSupport dialog(*m_currentSupport, this);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      *m_currentSupport = dialog.Support();
-      m_currentSupport->SetName(dialog.Name());
-      OnSupportsEdited();
-    }
-    catch (gException &E) {
-      guiExceptionDialog(E.Description(), this);
-    }
-  }
-}
-
-void EfgShow::OnToolsSupportDelete(wxCommandEvent &)
-{
-  if (m_supports.Length() == 1)  return;
-
-  dialogSupportSelect dialog(this, m_supports, m_currentSupport,
-			     "Delete Support");
-
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      delete m_supports.Remove(dialog.Selected());
-      if (!m_supports.Find(m_currentSupport)) {
-	m_currentSupport = m_supports[1];
-	OnSupportsEdited();
-      }
-    }
-    catch (gException &E) {
-      guiExceptionDialog(E.Description(), this);
-    }
-  }
-}
-
-void EfgShow::OnToolsSupportSelectFromList(wxCommandEvent &)
-{
-  dialogSupportSelect dialog(this, m_supports, m_currentSupport, 
-			     "Select Support");
-
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      m_currentSupport = m_supports[dialog.Selected()];
-      OnSupportsEdited();
-    }
-    catch (gException &E) {
-      guiExceptionDialog(E.Description(), this);
-    }
-  }
-}
-
-void EfgShow::OnToolsSupportSelectPrevious(wxCommandEvent &)
-{
-  int index = m_supports.Find(m_currentSupport);
-  if (index == 1) {
-    m_currentSupport = m_supports[m_supports.Length()];
-  }
-  else {
-    m_currentSupport = m_supports[index - 1];
-  }
-  OnSupportsEdited();
-}
-
-void EfgShow::OnToolsSupportSelectNext(wxCommandEvent &)
-{
-  int index = m_supports.Find(m_currentSupport);
-  if (index == m_supports.Length()) {
-    m_currentSupport = m_supports[1];
-  }
-  else {
-    m_currentSupport = m_supports[index + 1];
-  }
-  OnSupportsEdited();
-}
-
-
-void EfgShow::OnToolsSupportUndominated(wxCommandEvent &)
+void EfgShow::OnToolsDominance(wxCommandEvent &)
 {
   gArray<gText> playerNames(m_efg.NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++)
@@ -1475,13 +1355,6 @@ void EfgShow::OnToolsSupportUndominated(wxCommandEvent &)
       OnSupportsEdited();
     }
   }
-}
-
-void EfgShow::OnToolsSupportReachable(wxCommandEvent &)
-{
-  m_treeWindow->DrawSettings().SetRootReachable(!m_treeWindow->DrawSettings().RootReachable());
-  m_treeWindow->RefreshLayout();
-  m_treeWindow->Refresh();
 }
 
 //----------------------------------------------------------------------
@@ -1992,6 +1865,26 @@ void EfgShow::OnHelpIndex(wxCommandEvent &)
 void EfgShow::OnHelpAbout(wxCommandEvent &)
 {
   wxGetApp().OnHelpAbout(this);
+}
+
+//----------------------------------------------------------------------
+//               EfgShow: Menu handlers - Support menu
+//----------------------------------------------------------------------
+
+void EfgShow::OnSupportDuplicate(wxCommandEvent &)
+{
+  EFSupport *newSupport = new EFSupport(*m_currentSupport);
+  newSupport->SetName(UniqueSupportName());
+  m_supports.Append(newSupport);
+  m_currentSupport = newSupport;
+  OnSupportsEdited();
+}
+
+void EfgShow::OnSupportDelete(wxCommandEvent &)
+{
+  delete m_supports.Remove(m_supports.Find(m_currentSupport));
+  m_currentSupport = m_supports[1];
+  OnSupportsEdited();
 }
 
 //----------------------------------------------------------------------

@@ -25,6 +25,7 @@ typedef enum {
   efgmenuVIEW_SUPPORTS = 1862,
   efgmenuVIEW_ZOOMIN = 1601,
   efgmenuVIEW_ZOOMOUT = 1602,
+  efgmenuVIEW_SUPPORT_REACHABLE = 1814,
 
   efgmenuFORMAT_LEGEND = 1604,
   efgmenuFORMAT_SAVE = 1605,
@@ -45,16 +46,7 @@ typedef enum {
   efgmenuTOOLS_SUBGAME_UNMARKALL = 1352,
   efgmenuTOOLS_SUBGAME_UNMARK = 1354,
 
-  efgmenuTOOLS_SUPPORT = 1799,
-  efgmenuTOOLS_SUPPORT_UNDOMINATED = 1800,
-  efgmenuTOOLS_SUPPORT_NEW = 1801,
-  efgmenuTOOLS_SUPPORT_EDIT = 1802,
-  efgmenuTOOLS_SUPPORT_DELETE = 1803,
-  efgmenuTOOLS_SUPPORT_SELECT = 1810,
-  efgmenuTOOLS_SUPPORT_SELECT_FROMLIST = 1811,
-  efgmenuTOOLS_SUPPORT_SELECT_PREVIOUS = 1812,
-  efgmenuTOOLS_SUPPORT_SELECT_NEXT = 1813,
-  efgmenuTOOLS_SUPPORT_REACHABLE = 1814,
+  efgmenuTOOLS_DOMINANCE = 1800,
 
   efgmenuTOOLS_EQUILIBRIUM = 1539,
   efgmenuTOOLS_EQUILIBRIUM_STANDARD = 1540,
@@ -80,6 +72,10 @@ typedef enum {
   efgmenuTOOLS_NFG = 1521,
   efgmenuTOOLS_NFG_REDUCED = 1504,
   efgmenuTOOLS_NFG_AGENT = 1519,
+
+  // Menu items for support window
+  efgmenuSUPPORT_DUPLICATE = 2020,
+  efgmenuSUPPORT_DELETE = 2021,
   
   // Menu items for profiles window
   efgmenuPROFILES_FILTER = 2000,

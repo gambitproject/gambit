@@ -13,10 +13,71 @@
 #endif  // WX_PRECOMP
 #include "efgsupport.h"
 
+const int idACTIONTREE = 8003;
+
+class widgetActionTree : public wxTreeCtrl {
+private:
+  EfgSupportWindow *m_parent;
+  wxMenu *m_menu;
+
+  void OnRightClick(wxTreeEvent &);
+  void OnMiddleClick(wxTreeEvent &);
+  void OnKeypress(wxTreeEvent &);
+
+public:
+  widgetActionTree(EfgSupportWindow *p_parent);
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(widgetActionTree, wxTreeCtrl)
+  EVT_TREE_KEY_DOWN(idACTIONTREE, widgetActionTree::OnKeypress)
+  EVT_TREE_ITEM_MIDDLE_CLICK(idACTIONTREE, widgetActionTree::OnMiddleClick)
+  EVT_TREE_ITEM_RIGHT_CLICK(idACTIONTREE, widgetActionTree::OnRightClick)
+END_EVENT_TABLE()
+
+widgetActionTree::widgetActionTree(EfgSupportWindow *p_parent)
+  : wxTreeCtrl(p_parent, idACTIONTREE), m_parent(p_parent)
+{ 
+  m_menu = new wxMenu;
+  m_menu->Append(efgmenuSUPPORT_DUPLICATE, "Duplicate support",
+		 "Duplicate this support");
+  m_menu->Append(efgmenuSUPPORT_DELETE, "Delete support",
+		 "Delete this support");
+}
+
+void widgetActionTree::OnRightClick(wxTreeEvent &p_event)
+{
+  // Cannot delete the "full support"
+  m_menu->Enable(efgmenuSUPPORT_DELETE, (m_parent->GetSupport() > 0));
+  PopupMenu(m_menu, p_event.GetPoint());
+}
+
+void widgetActionTree::OnKeypress(wxTreeEvent &p_event)
+{
+  if (m_parent->GetSupport() == 0) {
+    return;
+  }
+  if (p_event.GetCode() == WXK_SPACE) {
+    m_parent->ToggleItem(GetSelection());
+  }
+}
+
+void widgetActionTree::OnMiddleClick(wxTreeEvent &p_event)
+{
+  if (m_parent->GetSupport() == 0) {
+    return;
+  }
+  m_parent->ToggleItem(p_event.GetItem());
+}
+
+//===========================================================================
+//                       class EfgSupportWindow 
+//===========================================================================
+
 const int idSUPPORTLISTCHOICE = 8000;
 const int idSUPPORTPREVBUTTON = 8001;
 const int idSUPPORTNEXTBUTTON = 8002;
-const int idACTIONTREE = 8003;
 
 BEGIN_EVENT_TABLE(EfgSupportWindow, wxPanel)
   EVT_CHOICE(idSUPPORTLISTCHOICE, EfgSupportWindow::OnSupportList)
@@ -38,8 +99,7 @@ EfgSupportWindow::EfgSupportWindow(EfgShow *p_efgShow, wxWindow *p_parent)
 			      wxDefaultPosition, wxSize(30, 30));
   m_nextButton = new wxButton(this, idSUPPORTNEXTBUTTON, "->",
 			      wxDefaultPosition, wxSize(30, 30));
-  m_actionTree = new wxTreeCtrl(this, idACTIONTREE,
-				wxDefaultPosition, wxDefaultSize);
+  m_actionTree = new widgetActionTree(this);
   UpdateValues();
 
   wxBoxSizer *selectSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -93,8 +153,12 @@ void EfgSupportWindow::UpdateValues(void)
 	Action *action = infoset->Actions()[act];
 	wxTreeItemId actID = m_actionTree->AppendItem(isetID,
 						      (char *) action->GetName());
-	m_actionTree->SetItemBold(actID,
-				  (m_parent->GetSupport()->Find(action)));
+	if (m_parent->GetSupport()->Find(action)) {
+	  m_actionTree->SetItemTextColour(actID, *wxBLACK);
+	}
+	else {
+	  m_actionTree->SetItemTextColour(actID, *wxLIGHT_GREY);
+	}
 	m_map.Define(actID, infoset->Actions()[act]);
       }
 
@@ -128,6 +192,27 @@ void EfgSupportWindow::OnTreeItemCollapse(wxTreeEvent &p_event)
     p_event.Veto();
   }
 }
+
+void EfgSupportWindow::ToggleItem(wxTreeItemId p_id)
+{
+  Action *action = m_map(p_id);
+  if (!action) {
+    return;
+  }
+
+  if (m_parent->GetSupport()->Find(action) &&
+      m_parent->GetSupport()->NumActions(action->BelongsTo()) > 1) {
+    m_parent->GetSupport()->RemoveAction(action);
+    m_actionTree->SetItemTextColour(p_id, *wxLIGHT_GREY);
+  }
+  else {
+    m_parent->GetSupport()->AddAction(action);
+    m_actionTree->SetItemTextColour(p_id, *wxBLACK);
+  }
+
+  m_parent->SetSupportNumber(m_supportList->GetSelection() + 1);
+}
+
 
 #include "base/gmap.imp"
 

@@ -82,6 +82,7 @@ private:
   void OnViewSupports(wxCommandEvent &);
   void OnViewZoomIn(wxCommandEvent &);
   void OnViewZoomOut(wxCommandEvent &);
+  void OnViewSupportReachable(wxCommandEvent &);
 
   void OnFormatLegend(wxCommandEvent &);
   void OnFormatFontsAboveNode(wxCommandEvent &);
@@ -99,14 +100,7 @@ private:
   void OnToolsSubgamesUnMarkAll(wxCommandEvent &);
   void OnToolsSubgamesUnMark(wxCommandEvent &);
 
-  void OnToolsSupportUndominated(wxCommandEvent &);
-  void OnToolsSupportNew(wxCommandEvent &);
-  void OnToolsSupportEdit(wxCommandEvent &);
-  void OnToolsSupportDelete(wxCommandEvent &);
-  void OnToolsSupportSelectFromList(wxCommandEvent &);
-  void OnToolsSupportSelectPrevious(wxCommandEvent &);
-  void OnToolsSupportSelectNext(wxCommandEvent &);
-  void OnToolsSupportReachable(wxCommandEvent &);
+  void OnToolsDominance(wxCommandEvent &);
 
   void OnToolsEquilibriumStandard(wxCommandEvent &);
   void OnToolsEquilibriumCustomEfgEnumPure(wxCommandEvent &);
@@ -131,6 +125,9 @@ private:
   void OnHelpContents(wxCommandEvent &);
   void OnHelpIndex(wxCommandEvent &);
   void OnHelpAbout(wxCommandEvent &);
+
+  void OnSupportDuplicate(wxCommandEvent &);
+  void OnSupportDelete(wxCommandEvent &);
 
   void OnProfilesNew(wxCommandEvent &);
   void OnProfilesClone(wxCommandEvent &);

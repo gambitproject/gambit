@@ -20,6 +20,7 @@ private:
   wxButton *m_prevButton, *m_nextButton;
   wxTreeCtrl *m_actionTree;
   gOrdMap<wxTreeItemId, Action *> m_map;
+  wxMenu *m_menu;
 
   void OnSupportList(wxCommandEvent &);
   void OnSupportPrev(wxCommandEvent &);
@@ -27,11 +28,16 @@ private:
 
   void OnTreeItemCollapse(wxTreeEvent &);
 
+  void OnRightClick(wxMouseEvent &);
+
 public:
   EfgSupportWindow(EfgShow *p_efgShow, wxWindow *p_parent);
   virtual ~EfgSupportWindow() { }
 
   void UpdateValues(void);
+
+  int GetSupport(void) const { return m_supportList->GetSelection(); }
+  void ToggleItem(wxTreeItemId);
 
   DECLARE_EVENT_TABLE()
 };

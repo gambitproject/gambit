@@ -13,10 +13,69 @@
 #endif  // WX_PRECOMP
 #include "nfgsupport.h"
 
+const int idSTRATEGYTREE = 8003;
+
+class widgetStrategyTree : public wxTreeCtrl {
+private:
+  NfgSupportWindow *m_parent;
+  wxMenu *m_menu;
+
+  void OnRightClick(wxTreeEvent &);
+  void OnMiddleClick(wxTreeEvent &);
+  void OnKeypress(wxTreeEvent &);
+
+public:
+  widgetStrategyTree(NfgSupportWindow *p_parent);
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(widgetStrategyTree, wxTreeCtrl)
+  EVT_TREE_KEY_DOWN(idSTRATEGYTREE, widgetStrategyTree::OnKeypress)
+  EVT_TREE_ITEM_MIDDLE_CLICK(idSTRATEGYTREE, widgetStrategyTree::OnMiddleClick)
+  EVT_TREE_ITEM_RIGHT_CLICK(idSTRATEGYTREE, widgetStrategyTree::OnRightClick)
+END_EVENT_TABLE()
+
+widgetStrategyTree::widgetStrategyTree(NfgSupportWindow *p_parent)
+  : wxTreeCtrl(p_parent, idSTRATEGYTREE), m_parent(p_parent)
+{ 
+  m_menu = new wxMenu;
+  m_menu->Append(NFG_SUPPORT_DUPLICATE, "Duplicate support",
+		 "Duplicate this support");
+  m_menu->Append(NFG_SUPPORT_DELETE, "Delete support",
+		 "Delete this support");
+}
+
+void widgetStrategyTree::OnRightClick(wxTreeEvent &p_event)
+{
+  // Cannot delete the "full support"
+  m_menu->Enable(NFG_SUPPORT_DELETE, (m_parent->GetSupport() > 0));
+  PopupMenu(m_menu, p_event.GetPoint());
+}
+
+void widgetStrategyTree::OnKeypress(wxTreeEvent &p_event)
+{
+  if (m_parent->GetSupport() == 0) {
+    return;
+  }
+  if (p_event.GetCode() == WXK_SPACE) {
+    m_parent->ToggleItem(GetSelection());
+  }
+}
+
+void widgetStrategyTree::OnMiddleClick(wxTreeEvent &p_event)
+{
+  if (m_parent->GetSupport() == 0) {
+    return;
+  }
+  m_parent->ToggleItem(p_event.GetItem());
+}
+
+
+
 const int idSUPPORTLISTCHOICE = 8000;
 const int idSUPPORTPREVBUTTON = 8001;
 const int idSUPPORTNEXTBUTTON = 8002;
-const int idSTRATEGYTREE = 8003;
 
 BEGIN_EVENT_TABLE(NfgSupportWindow, wxPanel)
   EVT_CHOICE(idSUPPORTLISTCHOICE, NfgSupportWindow::OnSupportList)
@@ -38,8 +97,7 @@ NfgSupportWindow::NfgSupportWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
 			      wxDefaultPosition, wxSize(30, 30));
   m_nextButton = new wxButton(this, idSUPPORTNEXTBUTTON, "->",
 			      wxDefaultPosition, wxSize(30, 30));
-  m_strategyTree = new wxTreeCtrl(this, idSTRATEGYTREE,
-				  wxDefaultPosition, wxDefaultSize);
+  m_strategyTree = new widgetStrategyTree(this);
   UpdateValues();
 
   wxBoxSizer *selectSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -85,13 +143,18 @@ void NfgSupportWindow::UpdateValues(void)
     wxTreeItemId id = m_strategyTree->AppendItem(m_strategyTree->GetRootItem(),
 					       (char *) player->GetName());
     
-    for (int st = 1; st <= m_parent->GetSupport()->NumStrats(pl); st++) {
-      Strategy *strategy = m_parent->GetSupport()->GetStrategy(pl, st);
+    for (int st = 1; st <= m_parent->Game().NumStrats(pl); st++) {
+      Strategy *strategy = m_parent->Game().Strategies(pl)[st];
 
       wxTreeItemId stratID = m_strategyTree->AppendItem(id, 
 						       (char *) strategy->Name());
+      if (m_parent->GetSupport()->Find(strategy)) {
+	m_strategyTree->SetItemTextColour(stratID, *wxBLACK);
+      }
+      else {
+	m_strategyTree->SetItemTextColour(stratID, *wxLIGHT_GREY);
+      }
       m_map.Define(stratID, strategy);
-      m_strategyTree->Expand(stratID);
     }
     m_strategyTree->Expand(id);
   }
@@ -119,6 +182,26 @@ void NfgSupportWindow::OnTreeItemCollapse(wxTreeEvent &p_event)
   if (p_event.GetItem() == m_strategyTree->GetRootItem()) {
     p_event.Veto();
   }
+}
+
+void NfgSupportWindow::ToggleItem(wxTreeItemId p_id)
+{
+  Strategy *strategy = m_map(p_id);
+  if (!strategy) {
+    return;
+  }
+
+  if (m_parent->GetSupport()->Find(strategy) &&
+      m_parent->GetSupport()->NumStrats(strategy->Player()) > 1) {
+    m_parent->GetSupport()->RemoveStrategy(strategy);
+    m_strategyTree->SetItemTextColour(p_id, *wxLIGHT_GREY);
+  }
+  else {
+    m_parent->GetSupport()->AddStrategy(strategy);
+    m_strategyTree->SetItemTextColour(p_id, *wxBLACK);
+  }
+
+  m_parent->SetSupportNumber(m_supportList->GetSelection() + 1);
 }
 
 #include "base/gmap.imp"

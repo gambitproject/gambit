@@ -15,7 +15,6 @@
 #include "gambit.h"
 #include "nfgshow.h"
 #include "dlelim.h"
-#include "dlsupportselect.h"
 
 //=========================================================================
 //               class dialogElimMixed: Member functions
@@ -207,78 +206,11 @@ gArray<int> dialogElimBehav::Players(void) const
 {
   gBlock<int> players;
   for (int i = 1; i <= m_playerBox->Number(); i++) {
-    if (m_playerBox->Selected(i-1)) {
+    // Some weirdness in wxListBox 
+    //    if (m_playerBox->Selected(i-1)) {
       players.Append(i);
-    }
+      //    }
   }
   return players;
 }
 
-//=========================================================================
-//                class dialogSupportSelect: Member functions
-//=========================================================================
-
-dialogSupportSelect::dialogSupportSelect(wxWindow *p_parent,
-					 const gList<NFSupport *> &p_supports,
-					 NFSupport *p_current,
-					 const gText &p_caption)
-  : guiAutoDialog(p_parent, p_caption)
-{
-  m_supportList = new wxListBox(this, -1);
-  for (int s = 1; s <= p_supports.Length(); s++) {
-    NFSupport *support = p_supports[s];
-    gText item = ToText(s) + ": " + support->GetName();
-
-    item += (" (" + ToText(support->NumStrats(1)) + ", " +
-	     ToText(support->NumStrats(2)));
-    if (support->Game().NumPlayers() > 2) {
-      item += ", " + ToText(support->NumStrats(3));
-      if (support->Game().NumPlayers() > 3) 
-	item += ",...)";
-      else
-	item += ")";
-    }
-    else
-      item += ")";
-
-    m_supportList->Append((char *) item);
-    if (p_supports[s] == p_current) {
-      m_supportList->SetSelection(s - 1);
-    }
-  }
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(m_supportList, 1, wxCENTER | wxALL, 5);
-  topSizer->Add(m_buttonSizer, 0, wxCENTER | wxALL, 5);
-
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-  Layout();
-}
-
-dialogSupportSelect::dialogSupportSelect(wxWindow *p_parent, 
-					 const gList<EFSupport *> &p_supports,
-					 EFSupport *p_current,
-					 const gText &p_caption)
-  : guiAutoDialog(p_parent, p_caption)
-{
-  m_supportList = new wxListBox(this, -1);
-  for (int s = 1; s <= p_supports.Length(); s++) {
-    EFSupport *support = p_supports[s];
-    gText item = ToText(s) + ": " + support->GetName();
-    m_supportList->Append((char *) item);
-    if (p_supports[s] == p_current) {
-      m_supportList->SetSelection(s - 1);
-    }
-  }
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(m_supportList, 1, wxCENTER | wxALL, 5);
-  topSizer->Add(m_buttonSizer, 0, wxCENTER | wxALL, 5);
-
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-  Layout();
-}

@@ -35,7 +35,6 @@
 
 #include "gambit.h"
 #include "efgshow.h"
-#include "dlnfgeditsupport.h"
 #include "dlstrategies.h"
 #include "dleditcont.h"
 #include "dlnfgproperties.h"
@@ -51,7 +50,6 @@
 #include "algsimpdiv.h"
 
 #include "dlelim.h"
-#include "dlsupportselect.h"
 
 //=====================================================================
 //                 Implementation of class NfgShow
@@ -90,15 +88,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_FORMAT_COLORS, NfgShow::OnFormatColors)
   EVT_MENU(NFG_FORMAT_SAVE, NfgShow::OnFormatSave)
   EVT_MENU(NFG_FORMAT_LOAD, NfgShow::OnFormatLoad)
-  EVT_MENU(NFG_TOOLS_SUPPORT_UNDOMINATED, NfgShow::OnToolsSupportUndominated)
-  EVT_MENU(NFG_TOOLS_SUPPORT_NEW, NfgShow::OnToolsSupportNew)
-  EVT_MENU(NFG_TOOLS_SUPPORT_EDIT, NfgShow::OnToolsSupportEdit)
-  EVT_MENU(NFG_TOOLS_SUPPORT_DELETE, NfgShow::OnToolsSupportDelete)
-  EVT_MENU(NFG_TOOLS_SUPPORT_SELECT_FROMLIST, 
-	   NfgShow::OnToolsSupportSelectFromList)
-  EVT_MENU(NFG_TOOLS_SUPPORT_SELECT_PREVIOUS,
-	   NfgShow::OnToolsSupportSelectPrevious)
-  EVT_MENU(NFG_TOOLS_SUPPORT_SELECT_NEXT, NfgShow::OnToolsSupportSelectNext)
+  EVT_MENU(NFG_TOOLS_DOMINANCE, NfgShow::OnToolsDominance)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM_STANDARD, NfgShow::OnToolsEquilibriumStandard)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMPURE,
 	   NfgShow::OnToolsEquilibriumCustomEnumPure)
@@ -121,6 +111,8 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(wxID_HELP_CONTENTS, NfgShow::OnHelpContents)
   EVT_MENU(wxID_HELP_INDEX, NfgShow::OnHelpIndex)
   EVT_MENU(wxID_ABOUT, NfgShow::OnHelpAbout)
+  EVT_MENU(NFG_SUPPORT_DUPLICATE, NfgShow::OnSupportDuplicate)
+  EVT_MENU(NFG_SUPPORT_DELETE, NfgShow::OnSupportDelete)
   EVT_MENU(NFG_PROFILES_NEW, NfgShow::OnProfilesNew)
   EVT_MENU(NFG_PROFILES_CLONE, NfgShow::OnProfilesClone)
   EVT_MENU(NFG_PROFILES_RENAME, NfgShow::OnProfilesRename)
@@ -379,27 +371,8 @@ void NfgShow::MakeMenus(void)
   formatMenu->Append(NFG_FORMAT_LOAD, "&Load", "Load configuration");
 
   wxMenu *toolsMenu = new wxMenu;
-  wxMenu *supportsMenu = new wxMenu;
-  supportsMenu->Append(NFG_TOOLS_SUPPORT_UNDOMINATED, "&Undominated",
+  toolsMenu->Append(NFG_TOOLS_DOMINANCE, "&Dominance",
 		       "Find undominated strategies");
-  supportsMenu->Append(NFG_TOOLS_SUPPORT_NEW, "&New",
-		       "Create a new support");
-  supportsMenu->Append(NFG_TOOLS_SUPPORT_EDIT, "&Edit",
-		       "Edit the currently displayed support");
-  supportsMenu->Append(NFG_TOOLS_SUPPORT_DELETE, "&Delete",
-		       "Delete a support");
-  wxMenu *supportsSelectMenu = new wxMenu;
-  supportsSelectMenu->Append(NFG_TOOLS_SUPPORT_SELECT_FROMLIST,
-			     "From &List...",
-			     "Select a support from the list of defined supports");
-  supportsSelectMenu->Append(NFG_TOOLS_SUPPORT_SELECT_PREVIOUS, "&Previous",
-			     "Select the previous support from the list");
-  supportsSelectMenu->Append(NFG_TOOLS_SUPPORT_SELECT_NEXT, "&Next",
-			     "Select the next support from the list");
-  supportsMenu->Append(NFG_TOOLS_SUPPORT_SELECT, "&Select", supportsSelectMenu,
-		       "Change the current support");
-  toolsMenu->Append(NFG_TOOLS_SUPPORT, "&Support", supportsMenu,
-		    "Manipulate supports");
 
   wxMenu *solveMenu = new wxMenu;
   solveMenu->Append(NFG_TOOLS_EQUILIBRIUM_STANDARD,  "S&tandard...",
@@ -486,10 +459,6 @@ void NfgShow::UpdateMenus(void)
 {
   wxMenuBar *menu = GetMenuBar();
   gArray<int> profile(GetProfile());
-
-  menu->Enable(NFG_TOOLS_SUPPORT_SELECT_FROMLIST, NumSupports() > 1);
-  menu->Enable(NFG_TOOLS_SUPPORT_SELECT_PREVIOUS, NumSupports() > 1);
-  menu->Enable(NFG_TOOLS_SUPPORT_SELECT_NEXT, NumSupports() > 1);
 
   menu->Enable(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMMIXED, 
 	       m_nfg.NumPlayers() == 2);
@@ -829,10 +798,10 @@ void NfgShow::OnFormatLoad(wxCommandEvent &)
 }
 
 //----------------------------------------------------------------------
-//            NfgShow: Menu handlers - Tools->Support menu
+//            NfgShow: Menu handlers - Tools->Dominance
 //----------------------------------------------------------------------
 
-void NfgShow::OnToolsSupportUndominated(wxCommandEvent &)
+void NfgShow::OnToolsDominance(wxCommandEvent &)
 {
   gArray<gText> playerNames(m_nfg.NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++)
@@ -891,105 +860,6 @@ void NfgShow::OnToolsSupportUndominated(wxCommandEvent &)
       UpdateMenus();
     }
   }
-}
-
-void NfgShow::OnToolsSupportNew(wxCommandEvent &)
-{
-  NFSupport newSupport(m_nfg);
-  newSupport.SetName(UniqueSupportName());
-  dialogNfgEditSupport dialog(newSupport, this);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      NFSupport *support = new NFSupport(dialog.Support());
-      support->SetName(dialog.Name());
-      m_supports.Append(support);
-
-      m_currentSupport = support;
-      OnSupportsEdited();
-    }
-    catch (gException &E) {
-      guiExceptionDialog(E.Description(), this);
-    }
-  }
-}
-
-void NfgShow::OnToolsSupportEdit(wxCommandEvent &)
-{
-  dialogNfgEditSupport dialog(*m_currentSupport, this);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      *m_currentSupport = dialog.Support();
-      m_currentSupport->SetName(dialog.Name());
-      OnSupportsEdited();
-      m_table->Refresh();
-    }
-    catch (gException &E) {
-      guiExceptionDialog(E.Description(), this);
-    }
-  }
-}
-
-void NfgShow::OnToolsSupportDelete(wxCommandEvent &)
-{
-  if (m_supports.Length() == 1)  return;
-
-  dialogSupportSelect dialog(this, m_supports,
-			     m_currentSupport, "Delete Support");
-
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      delete m_supports.Remove(dialog.Selected());
-      if (!m_supports.Find(m_currentSupport)) {
-	m_currentSupport = m_supports[1];
-      }
-      OnSupportsEdited();
-    }
-    catch (gException &E) {
-      guiExceptionDialog(E.Description(), this);
-    }
-  }
-}
-
-void NfgShow::OnToolsSupportSelectFromList(wxCommandEvent &)
-{
-  dialogSupportSelect dialog(this, m_supports,
-			     m_currentSupport, "Select Support");
-
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      m_currentSupport = m_supports[dialog.Selected()];
-      OnSupportsEdited();
-    }
-    catch (gException &E) {
-      guiExceptionDialog(E.Description(), this);
-    }
-  }
-}
-
-void NfgShow::OnToolsSupportSelectPrevious(wxCommandEvent &)
-{
-  int index = m_supports.Find(m_currentSupport);
-  if (index == 1) {
-    m_currentSupport = m_supports[m_supports.Length()];
-  }
-  else {
-    m_currentSupport = m_supports[index - 1];
-  }
-  OnSupportsEdited();
-}
-
-void NfgShow::OnToolsSupportSelectNext(wxCommandEvent &)
-{
-  int index = m_supports.Find(m_currentSupport);
-  if (index == m_supports.Length()) {
-    m_currentSupport = m_supports[1];
-  }
-  else {
-    m_currentSupport = m_supports[index + 1];
-  }
-  OnSupportsEdited();
 }
 
 //----------------------------------------------------------------------
@@ -1285,7 +1155,27 @@ void NfgShow::OnHelpAbout(wxCommandEvent &)
 }
 
 //----------------------------------------------------------------------
-//              EfgShow: Menu handlers - Profiles menu
+//               NfgShow: Menu handlers - Support menu
+//----------------------------------------------------------------------
+
+void NfgShow::OnSupportDuplicate(wxCommandEvent &)
+{
+  NFSupport *newSupport = new NFSupport(*m_currentSupport);
+  newSupport->SetName(UniqueSupportName());
+  m_supports.Append(newSupport);
+  m_currentSupport = newSupport;
+  OnSupportsEdited();
+}
+
+void NfgShow::OnSupportDelete(wxCommandEvent &)
+{
+  delete m_supports.Remove(m_supports.Find(m_currentSupport));
+  m_currentSupport = m_supports[1];
+  OnSupportsEdited();
+}
+
+//----------------------------------------------------------------------
+//              NfgShow: Menu handlers - Profiles menu
 //----------------------------------------------------------------------
 
 void NfgShow::OnProfilesNew(wxCommandEvent &)
