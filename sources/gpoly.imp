@@ -151,13 +151,15 @@ template<class T> gPoly<T> gPoly<T>::operator-(const gPoly<T> &p)
 template<class T> void gPoly<T>::operator-=(const gPoly<T> &p)
 {
   assert(Fam == p.Fam);
-  gPoly<T> dif(Fam), neg(p);
-  Negate (neg.Root);
-  dif.Fam = Fam;
-  dif.Root = Adder(Root, neg.Root);
-  ZeroCoefRemover(dif.Root, NULL);
-  Collapsor(dif.Root, NULL);
-  (*this) = dif;
+
+  gPoly<T> neg = p;
+  Negate(neg.Root);
+  Power<T> *temp;
+  temp = Adder(Root, neg.Root);
+  Remover (Root);
+  Root = temp;
+  ZeroCoefRemover(Root, NULL);
+  Collapsor(Root, NULL);
 }
 
 template<class T> gPoly<T> gPoly<T>::operator+(const gPoly<T> &p)
@@ -959,7 +961,6 @@ template <class T> Power<T> *gPoly<T>::Mult(Power<T> *One, Power<T> *Two)
     if (two->down->Var->number < one->down->Var->number){
       temp = one; one = two; two = temp;
     }
-    else { 
       for (i = one; i != NULL; i = i->next, pk = k) {
 	k = new Power<T>;
 	k->down = new term<T>;
@@ -975,8 +976,6 @@ template <class T> Power<T> *gPoly<T>::Mult(Power<T> *One, Power<T> *Two)
 	if (pk == NULL) kRoot = k;
 	else pk->next = k;
       }
-    }   
-   
   }
   else {
     pk = NULL;
