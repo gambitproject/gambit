@@ -61,32 +61,50 @@ Bool dialogAlgorithm::OnClose(void)
   return FALSE;
 }
 
-void dialogAlgorithm::DominanceFields(bool p_mixed)
+void dialogAlgorithm::OnDepth(void)
 {
-  (void) new wxMessage(this, "Dominance elimination:");
+  m_typeChoice->Enable(m_depthChoice->GetSelection() > 0);
+  if (m_methodChoice)
+    m_methodChoice->Enable(m_depthChoice->GetSelection() > 0);
+}
+
+
+void dialogAlgorithm::DominanceFields(bool p_usesNfg)
+{
+  wxMessage *header = new wxMessage(this, "");
+  header->SetLabelFont(new wxFont(12, wxROMAN, wxNORMAL, wxBOLD, false));
+  if (p_usesNfg)
+    header->SetLabel("Eliminate dominated mixed strategies");
+  else
+    header->SetLabel("Eliminate dominated behavior strategies");
   NewLine();
-  
+
   char *depthChoices[] = { "None", "Once", "Iterative" };
-  m_depthChoice = new wxRadioBox(this, 0, "Depth", -1, -1, -1, -1,
-				 3, depthChoices);
+  m_depthChoice = new wxRadioBox(this, (wxFunction) CallbackDepth, "Depth",
+				 -1, -1, -1, -1, 3, depthChoices);
+  m_depthChoice->SetClientData((char *) this);
   NewLine();
 
   char *typeChoices[] = { "Weak", "Strong" };
   m_typeChoice = new wxRadioBox(this, 0, "Type", -1, -1, -1, -1,
 				2, typeChoices);
-  NewLine();
+  if (m_depthChoice->GetSelection() == 0)
+    m_typeChoice->Enable(FALSE);
 
-  if (p_mixed) {
+  if (p_usesNfg) {
     char *methodChoices[] = { "Pure", "Mixed" };
     m_methodChoice = new wxRadioBox(this, 0, "Method", -1, -1, -1, -1,
 				    2, methodChoices);
-    NewLine();
+    if (m_depthChoice->GetSelection() == 0)
+      m_methodChoice->Enable(FALSE);
   }
+  NewLine();
 }
 
 void dialogAlgorithm::SubgameFields(void)
 {
-  (void) new wxMessage(this, "Subgames:");
+  wxMessage *header = new wxMessage(this, "Subgames");
+  header->SetLabelFont(new wxFont(12, wxROMAN, wxNORMAL, wxBOLD, false));
   NewLine();
 
   m_markSubgames = new wxCheckBox(this, 0, "Mark subgames before solving");
@@ -97,9 +115,9 @@ void dialogAlgorithm::SubgameFields(void)
 }
 
 void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
-					  bool/* p_vianfg*/)
+				       bool p_usesNfg)
 {
-  if (p_dominance)   DominanceFields(false);
+  if (p_dominance)   DominanceFields(p_usesNfg);
   if (p_subgames)    SubgameFields();
   AlgorithmFields();
 
@@ -173,8 +191,11 @@ void dialogEnumPure::AlgorithmFields(void)
   int x, y;
   GetCursor(&x, &y);
 
-  new wxGroupBox(this, "Algorithm parameters", -1, -1, 150, 70);
-  m_stopAfter = new wxIntegerItem(this, "Stop after", 0, x + 10, y + 50, 100);
+  wxMessage *header = new wxMessage(this, "");
+  header->SetLabelFont(new wxFont(12, wxROMAN, wxNORMAL, wxBOLD, false));
+  header->SetLabel("Algorithm parameters");
+  NewLine();
+  m_stopAfter = new wxIntegerItem(this, "Stop after", 0);
   NewLine();
 }
 

@@ -16,12 +16,6 @@
 
 #define PARAMS_SECTION  "Algorithm Params"      // section in .ini file
 
-#define     ERROR_FIELD         1
-#define     OUTPUT_FIELD        2
-#define     SPS_FIELD           4
-#define     MAXSOLN_FIELD       8
-#define     PRECISION_FIELD     16
-
 //=========================================================================
 //                 dialogAlgorithm: Class declaration
 //=========================================================================
@@ -33,9 +27,14 @@ private:
   static void CallbackCancel(wxButton &p_object, wxEvent &)
     { ((dialogAlgorithm *) p_object.GetClientData())->OnCancel(); }
 
-  virtual void OnOK(void);
+  static void CallbackDepth(wxRadioBox &p_object, wxEvent &)
+    { ((dialogAlgorithm *) p_object.GetClientData())->OnDepth(); }
+
+  void OnOK(void);
   void OnCancel(void);
   Bool OnClose(void);
+
+  void OnDepth(void);
 
 protected:
   int m_completed;
