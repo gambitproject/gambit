@@ -17,62 +17,155 @@
 #include "legendc.h"
 
 TreeDrawSettings::TreeDrawSettings(void)
+  : x_origin(0), y_origin(0), 
+    node_above_font(NULL), node_below_font(NULL), node_right_font(NULL),
+    branch_above_font(NULL), branch_below_font(NULL),
+    zoom_factor(1.0)
 {
-    zoom_factor = 1.0;
+  LoadOptions(INIFILE);
+}
 
-    x_origin = 0;
-    y_origin = 0;
-    node_above_font = NULL;
-    node_below_font = NULL;
-    node_right_font = NULL;
-    branch_above_font  = NULL;
-    branch_below_font  = NULL;
+class dialogTreeOptions : public guiAutoDialog {
+private:
+  wxSlider *m_branchLength, *m_nodeLength, *m_forkLength, *m_ySpacing;
+  wxSlider *m_decimals;
+  wxCheckBox *m_flashingCursor, *m_coloredOutcomes;
+  wxRadioBox *m_infosetLines;
 
-    LoadOptions(INIFILE);
+public:
+  dialogTreeOptions(const TreeDrawSettings &p_settings, wxWindow *p_parent);
+  virtual ~dialogTreeOptions() { }
+
+  int BranchLength(void) const { return m_branchLength->GetValue(); }
+  int NodeLength(void) const { return m_nodeLength->GetValue(); }
+  int ForkLength(void) const { return m_forkLength->GetValue(); }
+  int YSpacing(void) const { return m_ySpacing->GetValue(); }
+  int Decimals(void) const { return m_decimals->GetValue(); }
+
+  bool FlashingCursor(void) const { return m_flashingCursor->GetValue(); }
+  bool ColoredOutcomes(void) const { return m_coloredOutcomes->GetValue(); }
+  
+  int InfosetStyle(void) const { return m_infosetLines->GetSelection(); }
+};
+
+dialogTreeOptions::dialogTreeOptions(const TreeDrawSettings &p_settings,
+				     wxWindow *p_parent)
+  : guiAutoDialog(p_parent, "Draw Options")
+{
+  m_branchLength = new wxSlider(this, 0, "Branch Length",
+				p_settings.BranchLength(),
+				BRANCH_LENGTH_MIN, BRANCH_LENGTH_MAX,
+				250, 1, 1);
+  m_nodeLength = new wxSlider(this, 0, "Node Length",
+			      p_settings.NodeLength(),
+			      NODE_LENGTH_MIN, NODE_LENGTH_MAX,
+			      250, 1, 1);
+  m_forkLength = new wxSlider(this, 0, "Fork Length",
+			      p_settings.ForkLength(),
+			      FORK_LENGTH_MIN, FORK_LENGTH_MAX,
+			      250, 1, 1);
+  m_ySpacing = new wxSlider(this, 0, "Vertical Spacing",
+			    p_settings.YSpacing(),
+			    Y_SPACING_MIN, Y_SPACING_MAX, 250, 1, 1);
+
+  wxGroupBox *layoutGroup = new wxGroupBox(this, "Tree layout parameters");
+  layoutGroup->SetConstraints(new wxLayoutConstraints);
+  layoutGroup->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  layoutGroup->GetConstraints()->top.SameAs(this, wxTop, 10);
+  layoutGroup->GetConstraints()->right.SameAs(m_ySpacing, wxRight, -10);
+  layoutGroup->GetConstraints()->bottom.SameAs(m_ySpacing, wxBottom, -10);
+
+  m_branchLength->SetConstraints(new wxLayoutConstraints);
+  m_branchLength->GetConstraints()->left.SameAs(layoutGroup, wxLeft, 10);
+  m_branchLength->GetConstraints()->top.SameAs(layoutGroup, wxTop, 20);
+  m_branchLength->GetConstraints()->width.AsIs();
+  m_branchLength->GetConstraints()->height.AsIs();
+
+  m_nodeLength->SetConstraints(new wxLayoutConstraints);
+  m_nodeLength->GetConstraints()->left.SameAs(m_branchLength, wxLeft);
+  m_nodeLength->GetConstraints()->top.SameAs(m_branchLength, wxBottom, 10);
+  m_nodeLength->GetConstraints()->width.AsIs();
+  m_nodeLength->GetConstraints()->height.AsIs();
+
+  m_forkLength->SetConstraints(new wxLayoutConstraints);
+  m_forkLength->GetConstraints()->left.SameAs(m_nodeLength, wxLeft);
+  m_forkLength->GetConstraints()->top.SameAs(m_nodeLength, wxBottom, 10);
+  m_forkLength->GetConstraints()->width.AsIs();
+  m_forkLength->GetConstraints()->height.AsIs();
+
+  m_ySpacing->SetConstraints(new wxLayoutConstraints);
+  m_ySpacing->GetConstraints()->left.SameAs(m_forkLength, wxLeft);
+  m_ySpacing->GetConstraints()->top.SameAs(m_forkLength, wxBottom, 10);
+  m_ySpacing->GetConstraints()->width.AsIs();
+  m_ySpacing->GetConstraints()->height.AsIs();
+
+  m_flashingCursor = new wxCheckBox(this, 0, "Flashing Cursor");
+  m_flashingCursor->SetValue(p_settings.FlashingCursor());
+  m_flashingCursor->SetConstraints(new wxLayoutConstraints);
+  m_flashingCursor->GetConstraints()->left.SameAs(m_ySpacing, wxLeft);
+  m_flashingCursor->GetConstraints()->top.SameAs(layoutGroup, wxBottom, 10);
+  m_flashingCursor->GetConstraints()->width.AsIs();
+  m_flashingCursor->GetConstraints()->height.AsIs();
+
+  m_coloredOutcomes = new wxCheckBox(this, 0, "Color-coded Outcomes");
+  m_coloredOutcomes->SetValue(p_settings.ColorCodedOutcomes());
+  m_coloredOutcomes->SetConstraints(new wxLayoutConstraints);
+  m_coloredOutcomes->GetConstraints()->left.SameAs(m_flashingCursor,
+						   wxRight, 10);
+  m_coloredOutcomes->GetConstraints()->top.SameAs(m_flashingCursor, wxTop);
+  m_coloredOutcomes->GetConstraints()->width.AsIs();
+  m_coloredOutcomes->GetConstraints()->height.AsIs();
+
+  char *lineChoices[] = { "None", "Same Level", "All Levels" };
+  m_infosetLines = new wxRadioBox(this, 0, "Show Infoset Lines",
+				  1, 1, -1, -1, 3, lineChoices);
+  m_infosetLines->SetSelection(p_settings.ShowInfosets());
+  m_infosetLines->SetConstraints(new wxLayoutConstraints);
+  m_infosetLines->GetConstraints()->left.SameAs(layoutGroup, wxLeft);
+  m_infosetLines->GetConstraints()->top.SameAs(m_flashingCursor, wxBottom, 10);
+  m_infosetLines->GetConstraints()->width.AsIs();
+  m_infosetLines->GetConstraints()->height.AsIs();
+
+  m_decimals = new wxSlider(this, 0, "Decimal Places",
+			    p_settings.NumDecimals(), 0, 16, 250, 1, 1);
+  m_decimals->SetConstraints(new wxLayoutConstraints);
+  m_decimals->GetConstraints()->left.SameAs(m_infosetLines, wxLeft);
+  m_decimals->GetConstraints()->top.SameAs(m_infosetLines, wxBottom, 10);
+  m_decimals->GetConstraints()->width.AsIs();
+  m_decimals->GetConstraints()->height.AsIs();
+
+  m_okButton->GetConstraints()->top.SameAs(m_decimals, wxBottom, 10);
+  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
+
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->centreX.SameAs(layoutGroup, wxCentreX);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
+
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_helpButton->GetConstraints()->height.AsIs();
+
+  Go();
 }
 
 void TreeDrawSettings::SetOptions(void)
 {
-    MyDialogBox *tree_options_dialog = new MyDialogBox(NULL, "Draw Options");
-    tree_options_dialog->Form()->Add(wxMakeFormMessage("Size Settings"));
-    tree_options_dialog->Form()->Add(wxMakeFormNewLine());
-    tree_options_dialog->Form()->Add(wxMakeFormShort("Branch Length", 
-        &branch_length, wxFORM_SLIDER,
-        new wxList(wxMakeConstraintRange(BRANCH_LENGTH_MIN, BRANCH_LENGTH_MAX), 0),
-        NULL, wxHORIZONTAL));
-    tree_options_dialog->Form()->Add(wxMakeFormNewLine());
-    tree_options_dialog->Form()->Add(wxMakeFormShort("Node Length  ", 
-        &node_length, wxFORM_SLIDER,
-        new wxList(wxMakeConstraintRange(NODE_LENGTH_MIN, NODE_LENGTH_MAX), 0),
-        NULL, wxHORIZONTAL));
-    tree_options_dialog->Form()->Add(wxMakeFormNewLine());
-    tree_options_dialog->Form()->Add(wxMakeFormShort("Fork Length  ", 
-        &fork_length, wxFORM_SLIDER,
-        new wxList(wxMakeConstraintRange(FORK_LENGTH_MIN, FORK_LENGTH_MAX), 0),
-        NULL, wxHORIZONTAL));
-    tree_options_dialog->Form()->Add(wxMakeFormNewLine());
-    tree_options_dialog->Form()->Add(wxMakeFormShort("Y Spacing    ", 
-        &y_spacing, wxFORM_SLIDER,
-        new wxList(wxMakeConstraintRange(Y_SPACING_MIN, Y_SPACING_MAX), 0),
-        NULL, wxHORIZONTAL));
-    tree_options_dialog->Form()->Add(wxMakeFormNewLine());
-    tree_options_dialog->Form()->Add(wxMakeFormBool("Flashing Cursor", 
-        &flashing_cursor, wxFORM_CHECKBOX));
-    tree_options_dialog->Form()->Add(wxMakeFormBool("Color Coded Outcomes", 
-        &color_coded_outcomes, wxFORM_CHECKBOX));
-    tree_options_dialog->Form()->Add(wxMakeFormNewLine());
-    wxStringList *iset_list = new wxStringList("None", "Same Level", "All Levels", 0);
-    char *iset_str = new char[20];
-    strcpy(iset_str, (char *)iset_list->Nth(show_infosets)->Data());
-    tree_options_dialog->Add(wxMakeFormString("Show Infoset Lines", 
-        &iset_str, wxFORM_RADIOBOX,
-        new wxList(wxMakeConstraintStrings(iset_list), 0), 0, wxVERTICAL));
-    tree_options_dialog->Form()->Add(wxMakeFormNewLine());
-    tree_options_dialog->Add(wxMakeFormShort("Output precision", 
-        &num_prec, wxFORM_SLIDER, new wxList(wxMakeConstraintRange(0, 16), 0)));
+  dialogTreeOptions dialog(*this, 0);
 
-    tree_options_dialog->Go();
-    show_infosets = wxListFindString(iset_list, iset_str);
+  if (dialog.Completed() == wxOK) {
+    branch_length = dialog.BranchLength();
+    node_length = dialog.NodeLength();
+    fork_length = dialog.ForkLength();
+    y_spacing = dialog.YSpacing();
+    flashing_cursor = dialog.FlashingCursor();
+    color_coded_outcomes = dialog.ColoredOutcomes();
+    show_infosets = dialog.InfosetStyle();
+    num_prec = dialog.Decimals();
+  }
 }
 
 

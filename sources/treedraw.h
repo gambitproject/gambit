@@ -90,6 +90,9 @@ public:
     int     OutcomeLength(void) const       { return outcome_length;       }
     void    SetOutcomeColor(Bool c)         { color_coded_outcomes = c;    }
     Bool    ColorCodedOutcomes(void) const  { return color_coded_outcomes; }
+  int NumDecimals(void) const { return num_prec; }
+  void SetNumDecimals(int p_decimals) { num_prec = p_decimals; } 
+
 
     // Legends
     void    SetLabelNodeAbove(int l)      { node_above_label = l;       }
