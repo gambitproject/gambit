@@ -1,4 +1,3 @@
-// $Id$
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
@@ -9,6 +8,8 @@
 #include "garray.imp"
 class wxChoice;
 TEMPLATE class gArray<wxChoice *>;
+class wxCheckBox;
+TEMPLATE class gArray<wxCheckBox *>;
 #include "glist.imp"
 class wxFrame;
 TEMPLATE class gList<wxFrame *>;
