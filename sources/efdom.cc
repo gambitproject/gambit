@@ -242,7 +242,7 @@ EFSupport *DominanceTruncatedSupport(const EFSupport &S,
 				           gOutput & out, // tracefile 
 				           gStatus &status)
 {
-  AndyTest(S); exit(0);
+  //  AndyTest(S); exit(0);
 
   gBlock<int> players(S.Game().NumPlayers());
   int i;
