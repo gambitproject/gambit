@@ -1116,7 +1116,9 @@ void NfgShow::PrefsDisplayColumns(void)
 			 spread->DrawSettings()->GetColWidthRaw(spread->CurCol()));
 
   if (dialog.Completed() == wxOK) {
-    spread->DrawSettings()->SetColWidth(dialog.GetValue(), spread->CurCol());
+    for (int i = 1; i <= cur_sup->NumStrats(pl2); i++) {
+      spread->DrawSettings()->SetColWidth(dialog.GetValue(), i);
+    }
     spread->Repaint();
   }
 }
