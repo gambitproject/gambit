@@ -8,6 +8,7 @@
 #include <values.h>
 #include <math.h>
 #include <assert.h>
+#include <stdlib.h>
 
 #include "rational.h"
 #include "gstring.h"
@@ -15,6 +16,7 @@
 #include "gsm.h"
 #include "gstack.h"
 #include "gcompile.h"
+#include "gcmdline.h"
 
 
 
@@ -104,10 +106,11 @@ int main( int /*argc*/, char* argv[] )
   }
     
   
-	// Set up the error handling functions:
-	#ifndef __BORLANDC__
-	signal(SIGFPE, (fptr)SigFPEHandler);
-	#endif  
+  // Set up the error handling functions:
+#ifndef __BORLANDC__
+  signal(SIGFPE, (fptr)SigFPEHandler);
+#endif  
+
   _gsm = new GSM(256);
   GCLCompiler *C = new GCLCompiler;
   
@@ -116,6 +119,12 @@ int main( int /*argc*/, char* argv[] )
   delete[] _SourceDir;
   delete C;
   delete _gsm;
+
+
+  // this is normally done in destructor for gCmdLineInput,
+  //   in gcmdline.cc, but apparently the destructors for
+  //   global static objects are not called, hence this
+  gCmdLineInput::RestoreTermAttr();
   
   return 0;
 }

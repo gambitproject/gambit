@@ -194,8 +194,8 @@ public:
   void UnAssignEfgSubTree( BaseEfg* game, Node* node ); 
 
 
-  void SetVerbose( bool verbose ) { _Verbose = verbose; }
-  bool Verbose( void ) const { return _Verbose; }
+  // void SetVerbose( bool verbose ) { _Verbose = verbose; }
+  // bool Verbose( void ) const { return _Verbose; }
 
 };
 

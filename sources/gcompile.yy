@@ -12,7 +12,10 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "gmisc.h"
+
 #include "gambitio.h"
+#include "gcmdline.h"
+
 #include "gstring.h"
 #include "rational.h"
 #include "glist.h"
@@ -171,7 +174,7 @@ toplevel:     statements
         |     funcdecl toplevel
         |     delfunc toplevel
 
-statements:   statement                     
+statements:   statement               
           |   statements sep statement
 
 sep:          SEMI    { semi = true; }
@@ -181,7 +184,8 @@ sep:          SEMI    { semi = true; }
 writeopt:    
         |     WRITE
 
-funcdecl:     writeopt DEFFUNC LBRACK NAME
+funcdecl:     writeopt DEFFUNC LBRACK { gcmdline.SetPrompt( false ); }
+              NAME
               { funcname = tval; function = new gList<NewInstr*>; 
                 statementcount = 0; }
               LBRACK formallist RBRACK TYPEopt COMMA 
@@ -193,10 +197,12 @@ funcdecl:     writeopt DEFFUNC LBRACK NAME
               }
               optfuncdesc
               RBRACK   {/* if (!triv && !semi) emit(new NewInstr(iOUTPUT));*/
-			 if (!DefineFunction())  YYERROR; } 
+			 if (!DefineFunction())  YYERROR; 
+                         gcmdline.SetPrompt( true ); } 
 
 optfuncdesc:  | { funcdesc = ""; }
-              COMMA CRLFopt TEXT CRLFopt { funcdesc = tval; }
+              COMMA CRLFopt TEXT CRLFopt 
+              { funcdesc = tval; }
 
 delfunc:      writeopt DELFUNC LBRACK NAME
               { funcname = tval; function = new gList<NewInstr*>; 
@@ -275,7 +281,8 @@ include:      writeopt INCLUDE LBRACK TEXT RBRACK semiopt EOC
 semiopt:   | SEMI
 
 
-conditional:  IF LBRACK CRLFopt expression CRLFopt COMMA 
+conditional:  IF { gcmdline.SetPrompt( false ); }
+              LBRACK CRLFopt expression CRLFopt COMMA 
               { emit(new NewInstr(iNOT)); emit(0);
                 labels.Push(ProgLength()); } statements 
               { emit(0);
@@ -296,6 +303,7 @@ conditional:  IF LBRACK CRLFopt expression CRLFopt COMMA
 		  program[labels.Pop()] = 
                     new NewInstr(iGOTO, (long) ProgLength());
               } 
+              { gcmdline.SetPrompt( true ); }
 
 alternative:   
            |  COMMA statements
@@ -304,7 +312,8 @@ CRLFopt:    | CRLFs
 
 CRLFs:     CRLF | CRLFs CRLF
 
-whileloop:    WHILE LBRACK CRLFopt { labels.Push(ProgLength() + 1); }
+whileloop:    WHILE { gcmdline.SetPrompt( false ); }
+              LBRACK CRLFopt { labels.Push(ProgLength() + 1); }
               expression { emit(new NewInstr(iNOT)); emit(0);
 			   labels.Push(ProgLength()); }
               CRLFopt COMMA statements RBRACK 
@@ -317,9 +326,11 @@ whileloop:    WHILE LBRACK CRLFopt { labels.Push(ProgLength() + 1); }
                     new NewInstr(iIF_GOTO, (long) ProgLength() + 2);
 		emit(new NewInstr(iGOTO, (long) labels.Pop()));
 		emit(new NewInstr(iNOP));
-	      }
+              }
+              { gcmdline.SetPrompt( true ); }
 
-forloop:      FOR LBRACK CRLFopt exprlist CRLFopt COMMA CRLFopt 
+forloop:      FOR { gcmdline.SetPrompt( false ); }
+              LBRACK CRLFopt exprlist CRLFopt COMMA CRLFopt 
               { labels.Push(ProgLength() + 1); }
               expression CRLFopt COMMA CRLFopt
               {  index = labels.Pop();   // index is loc of begin of guard eval
@@ -358,6 +369,7 @@ forloop:      FOR LBRACK CRLFopt exprlist CRLFopt COMMA CRLFopt
                     new NewInstr(iIF_GOTO, (long) ProgLength() + 1);
 		emit(new NewInstr(iNOP));
 	      }
+              { gcmdline.SetPrompt( true ); }
 
 exprlist:     expression  { emit(new NewInstr(iPOP)); }
         |     exprlist SEMI expression  { emit(new NewInstr(iPOP)); }
@@ -425,7 +437,10 @@ E8:           E9
   |           LPAREN expression RPAREN
   |           NAME          { emit(new NewInstr(iPUSHREF, tval)); }
   |           function      { emit(new NewInstr(iCALL_FUNCTION)); }
-  |           list          { emit(new NewInstr(iPUSHLIST, 
+  |           { gcmdline.SetPrompt( false ); }
+              list
+              { gcmdline.SetPrompt( true ); }
+                                { emit(new NewInstr(iPUSHLIST, 
                                 (long) listlen.Pop())); }
   ;
 
@@ -464,8 +479,8 @@ name_or_io:   NAME     { emit(new NewInstr(iPUSHREF, tval)); }
          |    STDOUT   { emit(new NewInstr(iPUSHOUTPUT, &gout)); }
          |    gNULL    { emit(new NewInstr(iPUSHOUTPUT, &gnull)); }
 
-list:         LBRACE CRLFopt  { listlen.Push(0); } listels CRLFopt RBRACE
-    |         LBRACE CRLFopt  { listlen.Push(0); } RBRACE
+list:         LBRACE CRLFopt  { listlen.Push(0); } listels CRLFopt RBRACE 
+    |         LBRACE CRLFopt  { listlen.Push(0); } RBRACE 
 
 listels:      listel
        |      listels CRLFopt COMMA CRLFopt listel
@@ -488,7 +503,8 @@ char GCLCompiler::nextchar(void)
   }
 
   if (inputs.Depth() == 0)
-    gin >> c;
+    // gin >> c;
+    gcmdline >> c;
   else
     *inputs.Peek() >> c;
 
@@ -504,7 +520,8 @@ char GCLCompiler::nextchar(void)
 void GCLCompiler::ungetchar(char c)
 {
   if (inputs.Depth() == 0)
-    gin.unget(c);
+    // gin.unget(c);
+    gcmdline.unget(c);
   else
     inputs.Peek()->unget(c);
 
@@ -667,12 +684,14 @@ I_dont_believe_Im_doing_this:
   }
 
   if (c == '"')   {
+    gcmdline.SetPrompt( false );
     tval = "";
     c = nextchar();
     while (c != '"')   {
       tval += c;
       c = nextchar();
     }
+    gcmdline.SetPrompt( true );
     return TEXT;
   }
 
@@ -785,7 +804,7 @@ I_dont_believe_Im_doing_this:
     case CR:    if (matching.Depth())
                   return CRLF;
     case EOF:   return EOC;
-    default:    if ((inputs.Depth() == 0 && gin.eof()) ||
+    default:    if ((inputs.Depth() == 0 && gcmdline.eof()) ||
                     (inputs.Depth() > 0 && inputs.Peek()->eof())) return EOC;
                 return c;
   }
@@ -795,7 +814,7 @@ int GCLCompiler::Parse(void)
 {
   int command = 1;
 
-  while (!quit && (inputs.Depth() > 0 || !gin.eof()))  {
+  while (!quit && (inputs.Depth() > 0 || !gcmdline.eof()))  {
 
     while (inputs.Depth() && inputs.Peek()->eof())  {
       delete inputs.Pop();
@@ -804,11 +823,13 @@ int GCLCompiler::Parse(void)
     }
 
     if (inputs.Depth() == 0)  {
-      gout << "GCL" << command << ": ";
+      // gout << "GCL" << command << ": ";
+      /*
       if (gsm.Verbose())  {
         gout << "<< ";
 	force_output = true;
       }	
+      */
     }
     matching.Flush();
     if (!yyparse())  {
@@ -858,6 +879,8 @@ void GCLCompiler::RecoverFromError(void)
     GCL_InputFileNames.Pop();
     lines.Pop();
   }
+
+  gcmdline.ResetPrompt();
 }
     
 

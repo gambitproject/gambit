@@ -26,6 +26,10 @@
 #include "gstack.h"
 #include "gstring.h"
 
+
+#include "gcmdline.h"
+
+
 extern GSM* _gsm;
 
 
@@ -1516,8 +1520,10 @@ Portion* GSM_GetSolutionFormat(Portion** param)
 
 Portion* GSM_SetVerbose(Portion** param)
 {
-  _gsm->SetVerbose( ((BoolPortion*) param[0])->Value() );
-  return new BoolValPortion( _gsm->Verbose() );
+  gcmdline.SetVerbose( ((BoolPortion*) param[0])->Value() );
+  return new BoolValPortion( gcmdline.Verbose() );
+  // _gsm->SetVerbose( ((BoolPortion*) param[0])->Value() );
+  // return new BoolValPortion( _gsm->Verbose() );
 }
 
 
