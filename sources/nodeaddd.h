@@ -118,12 +118,12 @@ EFPlayer *NodeAddDialog::ResolvePlayer(const char *name)
   if (!strcmp(name, "Chance"))   return ef.GetChance();
   if (!strcmp(name, "New Player"))   return 0;
   
-  char tmp[10];
+  char tmp[30];
   int i;
   for (i = 0; name[i] != ':'; i++);
   strncpy(tmp, name, i);
-  // return ef.Players()[atoi(tmp)];
-  return ef.Players()[1];
+  return ef.Players()[atoi(tmp)];
+  // return ef.Players()[1];
 }
 
 EFPlayer *NodeAddDialog::GetPlayer(void)
