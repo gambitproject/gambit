@@ -81,16 +81,21 @@ void gCmdLineInput::SetRawTermAttr( void )
   rawTerm.c_iflag &= ~ICRNL;
   rawTerm.c_iflag &= ~IXON;
   rawTerm.c_iflag &= ~IXOFF;
+#ifdef IUCLC
+  // This is apparently not defined in FreeBSD
   rawTerm.c_iflag &= ~IUCLC;
+#endif  // IUCLC
   rawTerm.c_iflag &= ~IXANY;
   rawTerm.c_iflag &= ~IMAXBEL;
 
   rawTerm.c_oflag |= OPOST;
 
-  // rawTerm.c_lflag &= ~ISIG;
   rawTerm.c_lflag |= ISIG;
   rawTerm.c_lflag &= ~ICANON;
+#ifdef XCASE
+  // This is apparently not defined in FreeBSD
   rawTerm.c_lflag &= ~XCASE;
+#endif  // XCASE
   rawTerm.c_lflag &= ~ECHO;
 
   rawTerm.c_cc[VTIME] = 0;

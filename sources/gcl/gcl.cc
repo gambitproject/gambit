@@ -25,7 +25,6 @@
 //
 
 #include <signal.h>
-#include <values.h>
 #include <math.h>
 #include <stdlib.h>
 
