@@ -128,6 +128,41 @@ Portion *ArrayToList(const gArray<Outcome *> &A)
 }
 
 //
+// Implementation of extensive form editing functions, in alpha order
+//
+Portion *GSM_AppendNode(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  Infoset *s = ((InfosetPortion *) param[1])->Value();
+
+  if (n->BelongsTo() != s->BelongsTo())   return 0;
+  n->BelongsTo()->AppendNode(n, s);
+
+  return new NodeValPortion(n->GetChild(1));
+}
+
+Portion *GSM_NewInfoset(Portion **param)
+{
+  Player *p = ((EfPlayerPortion *) param[0])->Value();
+  int n = ((IntPortion *) param[1])->Value();
+  gString name = ((TextPortion *) param[2])->Value();
+
+  Infoset *s = p->BelongsTo()->CreateInfoset(p, n);
+  s->SetName(name);
+  return new InfosetValPortion(s);
+}
+ 
+Portion *GSM_NewPlayer(Portion **param)
+{
+  BaseExtForm &E = ((BaseEfgPortion *) param[0])->Value();
+  gString name = ((TextPortion *) param[1])->Value();
+
+  Player *p = E.NewPlayer();
+  p->SetName(name);
+  return new EfPlayerValPortion(p);
+}
+
+//
 // Implementation of extensive form query functions, in alpha order
 //
 
@@ -243,6 +278,10 @@ Portion *GSM_NumPlayersEfg(Portion **param)
   BaseExtForm &E = ((BaseEfgPortion *) param[0])->Value();
   return new IntValPortion(E.NumPlayers());
 }
+
+// This function currently lives in with the normal form stuff...
+extern Portion*GSM_NumPlayersNfg(Portion **);
+
 
 Portion *GSM_Outcome(Portion **param)
 {
@@ -374,7 +413,32 @@ void Init_efgfunc(GSM *gsm)
 			NO_DEFAULT_VALUE, PASS_BY_VALUE, DEFAULT_EFG);
   gsm->AddFunction(FuncObj);
 
+//-----------------------------------------------------------
 
+  FuncObj = new FuncDescObj("AppendNode");
+  FuncObj->SetFuncInfo(GSM_AppendNode, 2);
+  FuncObj->SetParamInfo(GSM_AppendNode, 0, "node", porNODE,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_AppendNode, 1, "infoset", porINFOSET,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("NewInfoset");
+  FuncObj->SetFuncInfo(GSM_NewInfoset, 3);
+  FuncObj->SetParamInfo(GSM_NewInfoset, 0, "player", porEF_PLAYER,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_NewInfoset, 1, "actions", porINTEGER);
+  FuncObj->SetParamInfo(GSM_NewInfoset, 2, "name", porTEXT,
+			new TextValPortion(""));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("NewPlayer");
+  FuncObj->SetFuncInfo(GSM_NewPlayer, 2);
+  FuncObj->SetParamInfo(GSM_NewPlayer, 0, "efg", porEFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG);
+  FuncObj->SetParamInfo(GSM_NewPlayer, 1, "name", porTEXT,
+			new TextValPortion(""));
+  gsm->AddFunction(FuncObj);
 
 //-----------------------------------------------------------
 
@@ -452,13 +516,16 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("NumOutcomes");
   FuncObj->SetFuncInfo(GSM_NumOutcomes, 1);
   FuncObj->SetParamInfo(GSM_NumOutcomes, 0, "efg", porEFG, 
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, DEFAULT_EFG );
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, DEFAULT_EFG);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NumPlayers");
   FuncObj->SetFuncInfo(GSM_NumPlayersEfg, 1);
   FuncObj->SetParamInfo(GSM_NumPlayersEfg, 0, "efg", porEFG,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, DEFAULT_EFG );
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, DEFAULT_EFG);
+  FuncObj->SetFuncInfo(GSM_NumPlayersNfg, 1);
+  FuncObj->SetParamInfo(GSM_NumPlayersNfg, 0, "nfg", porNFG,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, DEFAULT_NFG);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Outcome");

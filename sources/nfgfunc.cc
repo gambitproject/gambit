@@ -53,6 +53,18 @@ Portion* GSM_CopyDefaultNfg( Portion** param )
 //----------------------------------------------------------------------
 
 
+//
+// This function is added to the function list in efgfunc.cc along with
+// its extensive form counterpart.
+// What's a good way of dealing with these sorts of functions?
+//
+Portion *GSM_NumPlayersNfg(Portion **param)
+{
+  BaseNormalForm &N = ((BaseNfgPortion *) param[0])->Value();
+  return new IntValPortion(N.NumPlayers());
+}
+
+
 Portion *GSM_ElimDom(Portion **param)
 {
   NormalForm<double> *N = &((NfgPortion<double> *) param[0])->Value();
