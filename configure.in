@@ -46,6 +46,9 @@ fi
 
 CXXFLAGS="-DNEWSTYLE_TEMPLATES ${CXXFLAGS} ${WX_CXXFLAGS}"
 CXXFLAGS=`echo $CXXFLAGS | sed 's/-fno-exceptions//g'`
+dnl Newer versions of gcc issue a warning if /usr/local/include listed
+dnl in search path
+CXXFLAGS=`echo $CXXFLAGS | sed 's/-I\/usr\/local\/include//g'`
 LDFLAGS="${LDFLAGS} ${WX_LIBS}"
 
 GUI_LIBS="${WX_LIBS}"
