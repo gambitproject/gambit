@@ -9,6 +9,7 @@
 #include "gtext.h"
 #include "rational.h"
 #include "gnumber.h"
+#include "glist.h"
 
 template class gArray<bool>;
 template class gArray<int>;
@@ -23,8 +24,18 @@ template class gArray<gArray<int> >;
 template class gArray<gArray<int> *>;
 template class gArray<gArray<double> >;
 template class gArray<void *>;
+template class gArray<gList<bool> >;
+template class gArray<gList<gList<bool> > >;
 template bool operator==(const gArray<int> &, const gArray<int> &);
 template bool operator!=(const gArray<int> &, const gArray<int> &);
+template bool operator==(const gArray<gList<bool> > &, 
+			 const gArray<gList<bool> > &);
+template bool operator!=(const gArray<gList<bool> > &, 
+			 const gArray<gList<bool> > &);
+template bool operator==(const gArray<gList<gList<bool> > > &, 
+			 const gArray<gList<gList<bool> > > &);
+template bool operator!=(const gArray<gList<gList<bool> > > &, 
+			 const gArray<gList<gList<bool> > > &);
 
 /* commented out for now
 
