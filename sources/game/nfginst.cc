@@ -29,19 +29,19 @@
 #include "mixed.imp"
 #include "math/rational.h"
 
-TEMPLATE_SPECIALIZATION()
+template<>
 const gNumber MixedProfile<gNumber>::Payoff(const gbtNfgOutcome &o, int pl) const
 { 
   return N->Payoff(o, pl);
 }
 
-TEMPLATE_SPECIALIZATION()
+template<>
 const gRational MixedProfile<gRational>::Payoff(const gbtNfgOutcome &o, int pl) const
 { 
   return N->Payoff(o, pl);
 }
 
-TEMPLATE_SPECIALIZATION()
+template<>
 const double MixedProfile<double>::Payoff(const gbtNfgOutcome &o, int pl) const
 { 
   return N->Payoff(o, pl);

@@ -23,7 +23,7 @@ template <class T> class LPTableau;
 // Tableau<double>
 //  
 
-TEMPLATE_SPECIALIZATION()
+template<>
 class Tableau<double> : public TableauInterface<double>{
 private:
   LUdecomp<double> B;     // LU decomposition
@@ -63,7 +63,7 @@ public:
 // Tableau<gRational> 
 //  
 
-TEMPLATE_SPECIALIZATION()
+template<>
 class Tableau<gRational> : public TableauInterface<gRational>{
 private:
   int remap(int col_index) const;  // aligns the column indexes

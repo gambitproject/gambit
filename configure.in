@@ -44,7 +44,7 @@ if test "$WXCONFIG" != 1; then
     ])
 fi
 
-CXXFLAGS="-DNEWSTYLE_TEMPLATES ${CXXFLAGS} ${WX_CXXFLAGS}"
+CXXFLAGS="${CXXFLAGS} ${WX_CXXFLAGS}"
 CXXFLAGS=`echo $CXXFLAGS | sed 's/-fno-exceptions//g'`
 dnl Newer versions of gcc issue a warning if /usr/local/include listed
 dnl in search path

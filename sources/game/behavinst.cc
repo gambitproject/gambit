@@ -29,7 +29,7 @@
 
 class ChanceInfoset;
 
-TEMPLATE_SPECIALIZATION()
+template<>
 gNumber BehavProfile<gNumber>::Payoff(const gbtEfgOutcome &p_outcome,
 				      int pl) const
 { 
@@ -37,7 +37,7 @@ gNumber BehavProfile<gNumber>::Payoff(const gbtEfgOutcome &p_outcome,
   return m_efg->Payoff(p_outcome, m_efg->Players()[pl]);
 }
 
-TEMPLATE_SPECIALIZATION()
+template<>
 gRational BehavProfile<gRational>::Payoff(const gbtEfgOutcome &p_outcome,
 					  int pl) const
 { 
@@ -45,7 +45,7 @@ gRational BehavProfile<gRational>::Payoff(const gbtEfgOutcome &p_outcome,
   return m_efg->Payoff(p_outcome, m_efg->Players()[pl]);
 }
 
-TEMPLATE_SPECIALIZATION()
+template<>
 double BehavProfile<double>::Payoff(const gbtEfgOutcome &p_outcome, int pl) const
 { 
   //  return p_outcome->m_doublePayoffs[pl];

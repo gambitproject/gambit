@@ -48,7 +48,7 @@ LPTableau<T>& LPTableau<T>::operator=(const LPTableau<T> &orig)
 
 // cost-based functions
 
-TEMPLATE_SPECIALIZATION()
+template<>
 void LPTableau<gRational>::SetCost(const gVector<gRational>& c)
 {
   int i;
@@ -73,7 +73,7 @@ void LPTableau<gRational>::SetCost(const gVector<gRational>& c)
   SolveDual();
 }
 
-TEMPLATE_SPECIALIZATION()
+template<>
 void LPTableau<double>::SetCost(const gVector<double>& c)
 {
   int i;
@@ -130,14 +130,14 @@ gVector<T> LPTableau<T>::GetUnitCost(void) const
   return x;
 }
 
-TEMPLATE_SPECIALIZATION() double LPTableau<double>::TotalCost(void)
+template<> double LPTableau<double>::TotalCost(void)
 {
   gVector<double> tmpcol(MinRow(),MaxRow());
   BasisSelect(unitcost,cost,tmpcol);
   return tmpcol*solution;
 }
 
-TEMPLATE_SPECIALIZATION() gRational LPTableau<gRational>::TotalCost(void)
+template<> gRational LPTableau<gRational>::TotalCost(void)
 {
   gVector<gRational> tmpcol(MinRow(),MaxRow());
   gVector<gRational> sol(MinRow(),MaxRow());
@@ -149,13 +149,13 @@ TEMPLATE_SPECIALIZATION() gRational LPTableau<gRational>::TotalCost(void)
   return tmpcol*sol;
 }
 
-TEMPLATE_SPECIALIZATION()
+template<>
 void LPTableau<double>::DualVector(gVector<double> &L) const
 {
   L= dual;
 }
 
-TEMPLATE_SPECIALIZATION()
+template<>
 void LPTableau<gRational>::DualVector(gVector<gRational> &out) const
 {
   out= dual;
