@@ -1,7 +1,7 @@
 //
 // FILE: treedrag.h -- Interface to dragging implementation classes
 //
-//
+// $Id$
 //
 
 #ifndef TREEDRAG_H
@@ -22,7 +22,7 @@ typedef enum { DRAG_NONE = 0, DRAG_START = 1, DRAG_CONTINUE = 2,
 //
 class TreeWindow::NodeDragger {
 private:
-  Efg &ef;
+  FullEfg &ef;
   wxBitmap *m_b, *c_b;
   wxMemoryDC *move_dc, *copy_dc;
   TreeWindow *parent;
@@ -35,7 +35,7 @@ private:
   void RedrawObject(void);
     
 public:
-  NodeDragger(TreeWindow *parent, Efg &ef);
+  NodeDragger(TreeWindow *parent, FullEfg &ef);
   ~NodeDragger();
     
   int OnEvent(wxMouseEvent &ev, Bool &nodes_changed);
@@ -54,7 +54,7 @@ public:
 //
 class TreeWindow::IsetDragger {
 private:
-  Efg &ef;
+  FullEfg &ef;
   TreeWindow *parent;
   wxCanvasDC *dc;
   int drag_now;
@@ -64,7 +64,7 @@ private:
   void RedrawObject(void);
     
 public:
-  IsetDragger(TreeWindow *parent, Efg &ef);
+  IsetDragger(TreeWindow *parent, FullEfg &ef);
   ~IsetDragger();
     
   int OnEvent(wxMouseEvent &ev, Bool &infosets_changed);
@@ -82,7 +82,7 @@ public:
 //
 class TreeWindow::BranchDragger {
 private:
-  Efg &ef;
+  FullEfg &ef;
   TreeWindow *parent;
   wxCanvasDC *dc;
   int drag_now;
@@ -93,7 +93,7 @@ private:
   void RedrawObject(void);
     
 public:
-  BranchDragger(TreeWindow *parent, Efg &ef);
+  BranchDragger(TreeWindow *parent, FullEfg &ef);
   ~BranchDragger();
     
   int OnEvent(wxMouseEvent &ev, Bool &infosets_changed);
@@ -106,7 +106,7 @@ public:
 
 class TreeWindow::OutcomeDragger {
 private:
-  Efg &ef;
+  FullEfg &ef;
   TreeWindow *parent;
   int drag_now;
   EFOutcome *outcome;
@@ -115,7 +115,7 @@ private:
   wxCursor *outcome_cursor;
     
 public:
-  OutcomeDragger(TreeWindow *parent, Efg &ef);
+  OutcomeDragger(TreeWindow *parent, FullEfg &ef);
   ~OutcomeDragger();
     
   int Dragging(void) const { return drag_now; }

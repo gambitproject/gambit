@@ -36,7 +36,7 @@ typedef SolutionList<BehavSolution> BehavSolutionList;
 class EfgShow: public wxFrame, public EfgNfgInterface, public EfgShowInterface {
 private:
     wxFrame *parent;
-    Efg &ef;
+    FullEfg &ef;
 
     // Solution routines
     BehavSolutionList solns;
@@ -82,7 +82,7 @@ public:
   TreeWindow *tw;
 
   // CONSTRUCTOR AND DESTRUCTOR
-  EfgShow(Efg &p_efg, EfgNfgInterface *p_nfg = 0, int p_subgame = 1, 
+  EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg = 0, int p_subgame = 1, 
 	  wxFrame *p_frame = 0, char *p_title = 0, 
 	  int p_x = -1, int p_y = -1, int p_w = 600,
 	  int p_h = 400, int p_type = wxDEFAULT_FRAME);

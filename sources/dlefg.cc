@@ -249,7 +249,7 @@ dialogNodeDelete::dialogNodeDelete(Node *p_node, wxWindow *p_parent)
 {
   SetLabelPosition(wxVERTICAL);
   m_branchList = new wxListBox(this, 0, "Keep subtree at branch");
-  for (int act = 1; act <= p_node->NumChildren(); act++) {
+  for (int act = 1; act <= p_node->Game()->NumChildren(p_node); act++) {
     m_branchList->Append(ToText(act) + ": " +
 			 p_node->GetInfoset()->Actions()[act]->GetName());
   }
@@ -356,13 +356,15 @@ dialogActionProbs::dialogActionProbs(Infoset *p_infoset, wxWindow *p_parent)
 //                    dialogEfgPayoffs: Member functions
 //=========================================================================
 
-dialogEfgPayoffs::dialogEfgPayoffs(const Efg &p_efg, EFOutcome *p_outcome,
+dialogEfgPayoffs::dialogEfgPayoffs(const FullEfg &p_efg, EFOutcome *p_outcome,
 				   wxWindow *p_parent)
   : guiPagedDialog(p_parent, "Change Payoffs", p_efg.NumPlayers()),
     m_outcome(p_outcome), m_efg(p_efg)
 {
-  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)
-    SetValue(pl, ToText(m_efg.Payoff(p_outcome, pl)));
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+    EFPlayer *player = m_efg.Players()[pl];
+    SetValue(pl, ToText(m_efg.Payoff(p_outcome, player)));
+  }
 
   m_outcomeName = new wxText(this, 0, "Outcome", "", 1, 1);
   if (p_outcome)
@@ -455,7 +457,7 @@ gArray<EFPlayer *> dialogInfosetReveal::GetPlayers(void) const
 
 #include "dlinfosets.h"
 
-dialogInfosets::dialogInfosets(Efg &p_efg, wxFrame *p_parent)
+dialogInfosets::dialogInfosets(FullEfg &p_efg, wxFrame *p_parent)
   : guiAutoDialog(p_parent, "Infoset Information"), m_efg(p_efg),
     m_gameChanged(false), m_prevInfoset(0)
 {
@@ -664,7 +666,7 @@ void dialogInfosets::CallbackRemove(wxButton &p_object, wxCommandEvent &)
 //                   dialogEfgPlayers: Member functions
 //=========================================================================
 
-dialogEfgPlayers::dialogEfgPlayers(Efg &p_efg, wxWindow *p_parent)
+dialogEfgPlayers::dialogEfgPlayers(FullEfg &p_efg, wxWindow *p_parent)
   : guiAutoDialog(p_parent, "Player Names"), m_efg(p_efg)
 {
   m_playerNameList = new wxListBox(this, 0, "Player", wxSINGLE);
@@ -731,10 +733,10 @@ void dialogEfgPlayers::OnNew(void)
   char *newName = wxGetTextFromUser("New Player's name", "Enter Name",
                                     defaultName, this);
   if (newName) {
-	EFPlayer *newPlayer = m_efg.NewPlayer();
-	newPlayer->SetName(newName);
-	m_playerNameList->Append(ToText(m_efg.NumPlayers()) + ": " + newName);
-	m_playerNameList->SetSelection(m_efg.NumPlayers() - 1);
+    EFPlayer *newPlayer = m_efg.NewPlayer();
+    newPlayer->SetName(newName);
+    m_playerNameList->Append(ToText(m_efg.NumPlayers()) + ": " + newName);
+    m_playerNameList->SetSelection(m_efg.NumPlayers() - 1);
   }
 }
 
@@ -742,7 +744,8 @@ void dialogEfgPlayers::OnNew(void)
 //                dialogEfgOutcomeSelect: Member functions
 //=========================================================================
 
-dialogEfgOutcomeSelect::dialogEfgOutcomeSelect(Efg &p_efg, wxWindow *p_parent)
+dialogEfgOutcomeSelect::dialogEfgOutcomeSelect(FullEfg &p_efg,
+					       wxWindow *p_parent)
   : guiAutoDialog(p_parent, "Select Outcome"), m_efg(p_efg)
 {
   m_outcomeList = new wxListBox(this, 0, "Outcome", wxSINGLE, 1, 1);
@@ -753,10 +756,10 @@ dialogEfgOutcomeSelect::dialogEfgOutcomeSelect(Efg &p_efg, wxWindow *p_parent)
     if (item == "")
       item = "Outcome" + ToText(outc);
 
-    item += (" (" + ToText(m_efg.Payoff(outcome, 1)) + ", " +
-	     ToText(m_efg.Payoff(outcome, 2)));
+    item += (" (" + ToText(m_efg.Payoff(outcome, m_efg.Players()[1])) + ", " +
+	     ToText(m_efg.Payoff(outcome, m_efg.Players()[2])));
     if (m_efg.NumPlayers() > 2) {
-      item += ", " + ToText(m_efg.Payoff(outcome, 3));
+      item += ", " + ToText(m_efg.Payoff(outcome, m_efg.Players()[3]));
       if (m_efg.NumPlayers() > 3) 
 	item += ",...)";
       else

@@ -9,7 +9,7 @@
 
 class dialogInfosets : public guiAutoDialog {
 private:
-  Efg &m_efg;
+  FullEfg &m_efg;
   bool m_gameChanged;
   Infoset *m_prevInfoset;
 
@@ -33,7 +33,7 @@ private:
   const char *HelpString(void) const { return "Tree Menu"; }
 
 public:
-  dialogInfosets(Efg &, wxFrame * = 0);
+  dialogInfosets(FullEfg &, wxFrame * = 0);
   virtual ~dialogInfosets() { }
 
   bool GameChanged(void) const { return m_gameChanged; } 

@@ -559,7 +559,7 @@ void TreeRender::RenderSubtree(wxDC &dc)
 
       // Draw a circle to show the marked node
       if ((entry.n == mark_node) && 
-	  (child_entry.child_number == entry.n->NumChildren())) {
+	  (child_entry.child_number == entry.n->Game()->NumChildren(entry.n))) {
 	::DrawCircle(dc, entry.x + entry.nums * INFOSET_SPACING + 
 		     draw_settings.NodeLength(), entry.y, 
 		     4, draw_settings.CursorColor());

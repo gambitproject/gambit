@@ -8,15 +8,15 @@
 #include "gtext.h"
 
 class wxFrame;
-class Efg;
+class FullEfg;
 class EfgNfgInterface;
 
 class EfgGUI {
 private:
-  int GetParams(Efg &, wxFrame *parent);
+  int GetParams(FullEfg &, wxFrame *parent);
 
 public:
-  EfgGUI(Efg *p_efg, const gText &p_filename,
+  EfgGUI(FullEfg *p_efg, const gText &p_filename,
 	 EfgNfgInterface *p_interface = 0, wxFrame *p_parent = 0);
 };
 

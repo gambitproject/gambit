@@ -30,7 +30,7 @@ extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
 // NodeDragger
 //--------------------
 
-TreeWindow::NodeDragger::NodeDragger(TreeWindow *parent_, Efg &ef_)
+TreeWindow::NodeDragger::NodeDragger(TreeWindow *parent_, FullEfg &ef_)
   : ef(ef_), parent(parent_), dc(parent_->GetDC()), drag_now(0),
     start_node(0), end_node(0)
 {
@@ -115,7 +115,7 @@ int TreeWindow::NodeDragger::OnEvent(wxMouseEvent &ev, Bool &nodes_changed)
 // IsetDragger
 //--------------------
 
-TreeWindow::IsetDragger::IsetDragger(TreeWindow *parent_, Efg &ef_)
+TreeWindow::IsetDragger::IsetDragger(TreeWindow *parent_, FullEfg &ef_)
   : ef(ef_), parent(parent_), dc(parent_->GetDC()), drag_now(0),
     start_node(0), end_node(0)
 { }
@@ -179,7 +179,7 @@ int TreeWindow::IsetDragger::OnEvent(wxMouseEvent &ev, Bool &infosets_changed)
 // BranchDragger
 //--------------------
 
-TreeWindow::BranchDragger::BranchDragger(TreeWindow *parent_, Efg &ef_)
+TreeWindow::BranchDragger::BranchDragger(TreeWindow *parent_, FullEfg &ef_)
   : ef(ef_), parent(parent_), dc(parent_->GetDC()), drag_now(0),
     br(0), start_node(0)
 { }
@@ -254,7 +254,7 @@ int TreeWindow::BranchDragger::OnEvent(wxMouseEvent &ev,
 // OutcomeDragger
 //--------------------
 
-TreeWindow::OutcomeDragger::OutcomeDragger(TreeWindow *parent_, Efg &ef_)
+TreeWindow::OutcomeDragger::OutcomeDragger(TreeWindow *parent_, FullEfg &ef_)
     : ef(ef_), parent(parent_), drag_now(0), outcome(0),
       outcome_cursor(new wxCursor("OUTCOMECUR"))
 { }

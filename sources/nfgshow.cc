@@ -750,7 +750,7 @@ void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)
   
   const Efg *efg = InterfaceObjectEfg();
 
-  if (AssociatedNfg(efg) != &nf) 
+  if (efg->AssociatedNfg() != &nf) 
     return;
 
   if (!IsPerfectRecall(*efg)) {
@@ -763,8 +763,7 @@ void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)
   }
 
   EFSupport S(*InterfaceObjectEfg());
-  BehavProfile<gNumber> bp(S);
-  MixedToBehav(mp.Game(), mp, S.Game(), bp);
+  BehavProfile<gNumber> bp(mp);
   SolutionToEfg(bp, set);
 }
 

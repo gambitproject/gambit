@@ -259,7 +259,7 @@ NfgSolnShow::NfgSolnShow(gSortList<MixedSolution> &solns_, int num_players_,
       if (parent) {
 	if (!parent->InterfaceOk()) 
 	  extensive_button->Enable(FALSE);
-	else if (AssociatedNfg(parent->InterfaceObjectEfg()) != 
+	else if (parent->InterfaceObjectEfg()->AssociatedNfg() != 
 		 &solns_[1].Game())
 	  extensive_button->Enable(FALSE);
       }

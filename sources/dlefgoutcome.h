@@ -9,13 +9,13 @@
 
 class dialogEfgOutcomeSelect : public guiAutoDialog {
 private:
-  Efg &m_efg;
+  FullEfg &m_efg;
   wxListBox *m_outcomeList;
 
   const char *HelpString(void) const { return "Outcome Menu"; }
 
 public:
-  dialogEfgOutcomeSelect(Efg &, wxWindow * = 0);
+  dialogEfgOutcomeSelect(FullEfg &, wxWindow * = 0);
   virtual ~dialogEfgOutcomeSelect() { }
 
   EFOutcome *GetOutcome(void); 

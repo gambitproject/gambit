@@ -142,7 +142,7 @@ public:
     } SubgameEntry;
 
 private:
-    Efg &ef;
+    FullEfg &ef;
     EFSupport * &cur_sup;    // We only need to know the displayed support.
     EfgShow *frame;           // Actual extensive game show
     wxFrame *pframe;          // Our parent window
@@ -205,7 +205,7 @@ protected:
     
 public:
   // LIFECYCLE
-  TreeWindow(Efg &ef_,EFSupport * &disp, EfgShow *frame);
+  TreeWindow(FullEfg &ef_,EFSupport * &disp, EfgShow *frame);
   virtual ~TreeWindow(void);
     
   // EVENT HANDLERS

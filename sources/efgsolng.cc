@@ -1156,9 +1156,7 @@ gList<BehavSolution> guiefgQreNfg::Solve(void) const
 
   Nfg *N = MakeReducedNfg(EFSupport(m_efg));
 
-  MixedProfile<gNumber> startm(*N);
-
-  BehavToMixed(m_efg, startb, *N, startm);
+  MixedProfile<gNumber> startm(startb);
   
   long nevals, nits;
   gList<MixedSolution> nfg_solns;
@@ -1177,7 +1175,7 @@ gList<BehavSolution> guiefgQreNfg::Solve(void) const
   gList<BehavSolution> solutions;
 
   for (int i = 1; i <= nfg_solns.Length(); i++) {
-    MixedToBehav(*N, nfg_solns[i], m_efg, startb);
+    startb = BehavProfile<gNumber>(nfg_solns[i]);
     solutions.Append(BehavSolution(startb, algorithmEfg_QRE_NFG));
   }
 
@@ -1360,9 +1358,8 @@ gList<BehavSolution> guiefgQreAllNfg::Solve(void) const
 
   gList<BehavSolution> solutions;
 
-  BehavProfile<gNumber> startb(m_support);
   for (int i = 1; i <= nfg_solns.Length(); i++) {
-    MixedToBehav(*N, nfg_solns[i], m_efg, startb);
+    BehavProfile<gNumber> startb(nfg_solns[i]);
     solutions.Append(BehavSolution(startb, algorithmEfg_QRE_NFG));
   }
 

@@ -59,7 +59,7 @@ wxCursor *scissor_cursor;
 //                  TreeWindow: Constructor and destructor
 //----------------------------------------------------------------------
 
-TreeWindow::TreeWindow(Efg &ef_, EFSupport * &disp, EfgShow *frame_) 
+TreeWindow::TreeWindow(FullEfg &ef_, EFSupport * &disp, EfgShow *frame_) 
     : TreeRender(frame_, this, node_list, (const Infoset *&) hilight_infoset,
 		 (const Infoset *&) hilight_infoset1,
                  (const Node *&) mark_node, subgame_node, draw_settings),
@@ -431,9 +431,9 @@ int TreeWindow::FillTable(const Node *n, int level)
     entry->n = n;   // store the node the entry is for
     node_list += entry;
     entry->in_sup = true;
-    if (n->NumChildren()>0 && subgame_entry.expanded)
+    if (n->Game()->NumChildren(n)>0 && subgame_entry.expanded)
     {
-        for (int i = 1; i <= n->NumChildren(); i++)
+        for (int i = 1; i <= n->Game()->NumChildren(n); i++)
         {
             bool in_sup = true;
             if (n->GetPlayer()->GetNumber())        // pn == 0 for chance nodes
@@ -463,14 +463,14 @@ int TreeWindow::FillTable(const Node *n, int level)
     }
     
     entry->level = level;
-    entry->has_children = n->NumChildren();
+    entry->has_children = n->Game()->NumChildren(n);
     // Find out what branch of the parent this node is on
     if (n == ef.RootNode())
         entry->child_number = 0;
     else
     {
         Node *parent = n->GetParent();
-        for (int i = 1; i <= parent->NumChildren(); i++)
+        for (int i = 1; i <= parent->Game()->NumChildren(parent); i++)
             if (parent->GetChild(i) == n)
                 entry->child_number = i;
     }
@@ -573,8 +573,8 @@ NodeEntry *TreeWindow::NextInfoset(const NodeEntry * const e)
 void TreeWindow::FillInfosetTable(const Node *n)
 {
     NodeEntry *entry = GetNodeEntry(n);
-    if (n->NumChildren()>0)
-        for (int i = 1; i <= n->NumChildren(); i++)
+    if (n->Game()->NumChildren(n)>0)
+        for (int i = 1; i <= n->Game()->NumChildren(n); i++)
         {
             bool in_sup = true;
             if (n->GetPlayer()->GetNumber())        // pn == 0 for chance nodes
@@ -631,18 +631,16 @@ NodeEntry *TreeWindow::GetValidParent(const Node *e)
 
 NodeEntry *TreeWindow::GetValidChild(const Node *e)
 {
-    for (int i = 1; i <= e->NumChildren(); i++)
-    {
-        NodeEntry *n = GetNodeEntry(e->GetChild(i));
-        if (n)
-            return n;
-        else
-        {
-            n = GetValidChild(e->GetChild(i));
-            if (n) return n;
-        }
+  for (int i = 1; i <= e->Game()->NumChildren(e); i++)  {
+    NodeEntry *n = GetNodeEntry(e->GetChild(i));
+    if (n)
+      return n;
+    else  {
+      n = GetValidChild(e->GetChild(i));
+      if (n) return n;
     }
-    return 0;
+  }
+  return 0;
 }
 
 void TreeWindow::UpdateTableParents(void)
@@ -1262,7 +1260,7 @@ bool TreeWindow::ProcessShift(wxMouseEvent &ev)
         if (branch_cut_entry)  // cut a branch
         {
             ef.DeleteAction(branch_cut_entry->n->GetParent()->GetInfoset(),
-                            LastAction((Node *)branch_cut_entry->n));
+                            LastAction(ef, (Node *)branch_cut_entry->n));
             nodes_changed = TRUE;
             OnPaint();
             return true;
@@ -1346,7 +1344,7 @@ Node *TreeWindow::GotObject(float &x, float &y, int what)
         NodeEntry *entry = node_list[i];
         
         if (what == DRAG_NODE_START) // check if clicked a non terminal node
-            if (entry->n->NumChildren() != 0)
+            if (entry->n->Game()->NumChildren(entry->n) != 0)
                 if(x > entry->x+entry->nums*INFOSET_SPACING &&
                    x < entry->x+draw_settings.NodeLength()+
                    entry->nums*INFOSET_SPACING-10 &&
@@ -1354,14 +1352,14 @@ Node *TreeWindow::GotObject(float &x, float &y, int what)
                     return (Node *)entry->n;
         
         if (what == DRAG_NODE_END) // check if clicked on a terminal node
-            if (entry->n->NumChildren() == 0)
+            if (entry->n->Game()->NumChildren(entry->n) == 0)
                 if(x > entry->x+entry->nums*INFOSET_SPACING &&
                    x < entry->x+draw_settings.NodeLength()+entry->nums*INFOSET_SPACING &&
                    y > entry->y-DELTA && y < entry->y+DELTA)
                     return (Node *)entry->n;
         
         if (what == DRAG_OUTCOME_START) // check if clicked on a terminal node
-            if (entry->n->NumChildren() == 0 && entry->n->GetOutcome())
+            if (entry->n->Game()->NumChildren(entry->n) == 0 && entry->n->GetOutcome())
                 if(x > entry->x+entry->nums*INFOSET_SPACING+draw_settings.NodeLength() &&
                    x < entry->x+draw_settings.NodeLength()+
                    entry->nums*INFOSET_SPACING + draw_settings.OutcomeLength()&&
@@ -1376,7 +1374,7 @@ Node *TreeWindow::GotObject(float &x, float &y, int what)
         
         if (what == DRAG_ISET_START || what == DRAG_ISET_END)
             // check if clicked on a non terminal node
-            if (entry->n->NumChildren() != 0)
+            if (entry->n->Game()->NumChildren(entry->n) != 0)
                 if(x > entry->x+entry->num*INFOSET_SPACING-4 && 
                    x < entry->x+entry->num*INFOSET_SPACING+4 &&
                    y > entry->y-4 && y < entry->y+4)
@@ -1405,13 +1403,13 @@ Node *TreeWindow::GotObject(float &x, float &y, int what)
             int xs = start_entry->x+draw_settings.NodeLength()+
                 draw_settings.ForkLength()+start_entry->nums*INFOSET_SPACING;
             if (x > xs && x < xs+draw_settings.BranchLength() &&
-                y < start_entry->y+(start_entry->n->NumChildren()+1)*draw_settings.YSpacing() &&
-                y > start_entry->y-(start_entry->n->NumChildren()+1)*draw_settings.YSpacing())
+                y < start_entry->y+(start_entry->n->Game()->NumChildren(start_entry->n)+1)*draw_settings.YSpacing() &&
+                y > start_entry->y-(start_entry->n->Game()->NumChildren(start_entry->n)+1)*draw_settings.YSpacing())
             {
                 // figure out at what branch # the mouse was released
                 int br = 1;
                 NodeEntry *child_entry, *child_entry1;
-                for (int ii = 1; ii <= start_entry->n->NumChildren()-1; ii++)
+                for (int ii = 1; ii <= start_entry->n->Game()->NumChildren(start_entry->n)-1; ii++)
                 {
                     child_entry = GetNodeEntry(start_entry->n->GetChild(ii));
                     if (ii == 1) 
@@ -1426,9 +1424,9 @@ Node *TreeWindow::GotObject(float &x, float &y, int what)
                         br = ii+1;
                         break;
                     }
-                    if (ii == start_entry->n->NumChildren()-1 && y > child_entry1->y)
+                    if (ii == start_entry->n->Game()->NumChildren(start_entry->n)-1 && y > child_entry1->y)
                     {
-                        br = start_entry->n->NumChildren()+1;
+                        br = start_entry->n->Game()->NumChildren(start_entry->n)+1;
                         break;
                     }
                 }
@@ -1461,7 +1459,7 @@ Bool TreeWindow::file_save(void)
 
     ef.SetTitle(dialog.Label());
 
-    Efg *efg = 0;
+    FullEfg *efg = 0;
     try {
       gFileOutput file(dialog.Filename());
       efg = CompressEfg(ef, *frame->GetSupport());
@@ -1499,9 +1497,9 @@ void TreeWindow::SetCursorPosition(Node *p_cursor)
 void TreeWindow::UpdateMenus(void)
 {
   edit_menu->Enable(efgmenuEDIT_NODE_ADD,
-		    (m_cursor->NumChildren() > 0) ? FALSE : TRUE);
+		    (ef.NumChildren(m_cursor) > 0) ? FALSE : TRUE);
   edit_menu->Enable(efgmenuEDIT_NODE_DELETE,
-		    (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
+		    (ef.NumChildren(m_cursor) > 0) ? TRUE : FALSE);
   edit_menu->Enable(efgmenuEDIT_INFOSET_MERGE,
 		    (mark_node && mark_node->GetInfoset() &&
 		     m_cursor->GetInfoset() &&
@@ -1526,17 +1524,17 @@ void TreeWindow::UpdateMenus(void)
 		    (m_cursor->GetInfoset() &&
 		     m_cursor->GetInfoset()->NumActions() > 0) ? TRUE : FALSE);
   edit_menu->Enable(efgmenuEDIT_ACTION_INSERT,
-		    (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
+		    (ef.NumChildren(m_cursor) > 0) ? TRUE : FALSE);
   edit_menu->Enable(efgmenuEDIT_ACTION_APPEND,
-		    (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
+		    (ef.NumChildren(m_cursor) > 0) ? TRUE : FALSE);
   edit_menu->Enable(efgmenuEDIT_ACTION_DELETE,
-		    (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
+		    (ef.NumChildren(m_cursor) > 0) ? TRUE : FALSE);
   edit_menu->Enable(efgmenuEDIT_ACTION_PROBS,
 		    (m_cursor->GetInfoset() &&
 		     m_cursor->GetPlayer()->IsChance()) ? TRUE : FALSE);
 
   edit_menu->Enable(efgmenuEDIT_TREE_DELETE,
-		    (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
+		    (ef.NumChildren(m_cursor) > 0) ? TRUE : FALSE);
   edit_menu->Enable(efgmenuEDIT_TREE_COPY,
 		    (mark_node &&
 		     m_cursor->GetSubgameRoot() == mark_node->GetSubgameRoot()) ? TRUE : FALSE);
@@ -2174,7 +2172,7 @@ void TreeWindow::SubgameMark(void)
     return;
   }
 
-  ef.DefineSubgame(Cursor());
+  ef.MarkSubgame(Cursor());
   subgame_list.Append(SubgameEntry(Cursor(), true)); // collapse
   must_recalc = true;
 }
@@ -2185,7 +2183,7 @@ void TreeWindow::SubgameUnmark(void)
       Cursor()->GetSubgameRoot() == ef.RootNode())
     return;
     
-  ef.RemoveSubgame(Cursor());
+  ef.UnmarkSubgame(Cursor());
 
   for (int i = 1; i <= subgame_list.Length(); i++) {
     if (subgame_list[i].root == Cursor())

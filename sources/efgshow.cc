@@ -1,7 +1,7 @@
 //
 // FILE: efgshow.cc -- Implementation of class EfgShow
 //
-//  $Id$
+// $Id$
 //
 
 #include "wx.h"
@@ -139,7 +139,7 @@ void guiEfgShowToolBar::OnMouseEnter(int p_toolIndex)
 //               EfgShow: Constructor and destructor
 //---------------------------------------------------------------------
 
-EfgShow::EfgShow(Efg &p_efg, EfgNfgInterface *p_nfg, int, wxFrame *p_frame,
+EfgShow::EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, int, wxFrame *p_frame,
                  char *p_title, int p_x, int p_y, int p_w, int p_h, int p_type)
   : wxFrame(p_frame, p_title, p_x, p_y, p_w, p_h, p_type), 
     EfgNfgInterface(gEFG, p_nfg), 
@@ -1566,9 +1566,9 @@ void EfgShow::UpdateMenus(Node *p_cursor, Node *p_markNode)
 {
   wxMenuBar *menuBar = GetMenuBar();
   menuBar->Enable(efgmenuEDIT_NODE_ADD,
-		  (p_cursor->NumChildren() > 0) ? FALSE : TRUE);
+		  (ef.NumChildren(p_cursor) > 0) ? FALSE : TRUE);
   menuBar->Enable(efgmenuEDIT_NODE_DELETE,
-		  (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
+		  (ef.NumChildren(p_cursor) > 0) ? TRUE : FALSE);
   menuBar->Enable(efgmenuEDIT_NODE_GOTO_MARK, (p_markNode) ? TRUE : FALSE);
   menuBar->Enable(efgmenuEDIT_INFOSET_MERGE,
 		  (p_markNode && p_markNode->GetInfoset() &&
@@ -1595,17 +1595,17 @@ void EfgShow::UpdateMenus(Node *p_cursor, Node *p_markNode)
 		  (p_cursor->GetInfoset() &&
 		   p_cursor->GetInfoset()->NumActions() > 0) ? TRUE : FALSE);
   menuBar->Enable(efgmenuEDIT_ACTION_INSERT,
-		  (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
+		  (ef.NumChildren(p_cursor) > 0) ? TRUE : FALSE);
   menuBar->Enable(efgmenuEDIT_ACTION_APPEND,
-		  (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
+		  (ef.NumChildren(p_cursor) > 0) ? TRUE : FALSE);
   menuBar->Enable(efgmenuEDIT_ACTION_DELETE, 
-		  (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
+		  (ef.NumChildren(p_cursor) > 0) ? TRUE : FALSE);
   menuBar->Enable(efgmenuEDIT_ACTION_PROBS,
 		  (p_cursor->GetInfoset() &&
 		   p_cursor->GetPlayer()->IsChance()) ? TRUE : FALSE);
 
   menuBar->Enable(efgmenuEDIT_TREE_DELETE,
-		  (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
+		  (ef.NumChildren(p_cursor) > 0) ? TRUE : FALSE);
   menuBar->Enable(efgmenuEDIT_TREE_COPY,
 		  (p_markNode &&
 		   p_cursor->GetSubgameRoot() == p_markNode->GetSubgameRoot()) ? TRUE : FALSE);
@@ -1646,13 +1646,13 @@ void EfgShow::UpdateMenus(Node *p_cursor, Node *p_markNode)
 //                        EfgGUI: Member functions
 //-------------------------------------------------------------------------
 
-EfgGUI::EfgGUI(Efg *p_efg, const gText &p_filename,
+EfgGUI::EfgGUI(FullEfg *p_efg, const gText &p_filename,
                EfgNfgInterface *p_interface, wxFrame *p_parent)
 {
   if (!p_efg) {
     // must create a new extensive form from scratch or file
     if (p_filename == "") {  // from scratch
-      p_efg = new Efg;
+      p_efg = new FullEfg;
       p_efg->NewPlayer();
       p_efg->NewPlayer();
       if (!GetParams(*p_efg, p_parent)) {
@@ -1664,7 +1664,7 @@ EfgGUI::EfgGUI(Efg *p_efg, const gText &p_filename,
       // from data file
       try {
 	gFileInput infile(p_filename);
-	ReadEfgFile(infile, p_efg);
+	p_efg = ReadEfgFile(infile);
                 
 	if (!p_efg) {
 	  wxMessageBox(p_filename + " is not a valid .efg file");
@@ -1690,7 +1690,7 @@ EfgGUI::EfgGUI(Efg *p_efg, const gText &p_filename,
     efgShow->SetFileName(p_filename);
 }
 
-int EfgGUI::GetParams(Efg &p_efg, wxFrame *p_parent)
+int EfgGUI::GetParams(FullEfg &p_efg, wxFrame *p_parent)
 {
   dialogEfgPlayers dialog(p_efg, p_parent);
   return (dialog.Completed() == wxOK);

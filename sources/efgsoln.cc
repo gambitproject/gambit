@@ -273,7 +273,7 @@ void NodeSolnShow::Set(const Node *n)
 	  if (p) {
 	    int branch = 1;
 
-	    for (int i = 1; i <= p->NumChildren(); i++) {
+	    for (int i = 1; i <= p->Game()->NumChildren(p); i++) {
 	      if (p->GetChild(i) == n) 
 		branch = i;
 	    }
@@ -293,7 +293,7 @@ void NodeSolnShow::Set(const Node *n)
 	  if (p) {
 	    int branch = 1;
 	    
-	    for (int i = 1; i <= p->NumChildren(); i++) {
+	    for (int i = 1; i <= p->Game()->NumChildren(p); i++) {
 	      if (p->GetChild(i) == n) 
 		branch = i;
 	    }

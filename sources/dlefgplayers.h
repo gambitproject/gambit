@@ -10,7 +10,7 @@
 class dialogEfgPlayers : public guiAutoDialog {
 private:
   int m_lastSelection;
-  Efg &m_efg;
+  FullEfg &m_efg;
 
   wxListBox *m_playerNameList;
 
@@ -25,7 +25,7 @@ private:
   const char *HelpString(void) const { return "Tree Menu"; }
 
 public:
-  dialogEfgPlayers(Efg &p_efg, wxWindow *p_parent = 0);
+  dialogEfgPlayers(FullEfg &p_efg, wxWindow *p_parent = 0);
   virtual ~dialogEfgPlayers()  { }
 };
 
