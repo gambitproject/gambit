@@ -123,6 +123,25 @@ const gRectangle<T> gRectangle<T>::SameCenterDoubleSideLengths() const
 }
 
 template<class T> 
+const gRectangle<T> gRectangle<T>::CubeContainingCrcmscrbngSphere() const 
+{ 
+  T maxlength((T)0);
+  T sumsquares((T)0);
+  for (int i = 1; i <= Dmnsn(); i++) {
+    sumsquares += sides[i].Length() * sides[i].Length();
+    if (sides[i].Length() > maxlength)
+      maxlength = sides[i].Length();
+  }
+  T diameter((T)0);
+  while (diameter * diameter < sumsquares) diameter += maxlength;
+  
+  gList<gInterval<T> > new_sides;
+  for (int i = 1; i <= Dmnsn(); i++)
+    new_sides += CartesianFactor(i).SameCenterWithNewLength(diameter);
+  return gRectangle<T>(new_sides);
+}
+
+template<class T> 
 const gRectangle<T> 
 gRectangle<T>::Orthant(const gArray<int>& top_or_bot) const 
 { 
