@@ -1199,7 +1199,7 @@ if (panel_new_line)
 	{panel_y+=40;panel_x=PANEL_LEFT_MARGIN;panel_new_line=FALSE;}
 wxButton *button=new wxButton(panel,fun,(char *)label,panel_x,panel_y);
 #else
-if (panel_new_line) panel->NewLine();
+if (panel_new_line) {panel->NewLine();panel_new_line=FALSE;}
 wxButton *button=new wxButton(panel,fun,(char *)label);
 #endif
 button->SetClientData((char *)this);

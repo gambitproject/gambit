@@ -82,22 +82,22 @@ class TreeDrawSettings:public GambitDrawSettings
 		int		LabelNodeTerminal(void) const{return node_terminal_label;}
 	// Controls the fonts
 		void		SetNodeAboveFont(wxFont *f)
-			{if (node_above_font) delete node_above_font;node_above_font=f;}
+			{/*if (node_above_font) delete node_above_font;*/node_above_font=f;}
 		wxFont 	*NodeAboveFont(void) const {return node_above_font;}
 		void		SetNodeRightFont(wxFont *f)
-			{if (node_right_font) delete node_right_font;node_right_font=f;}
+			{/*if (node_right_font) delete node_right_font;*/node_right_font=f;}
 		wxFont 	*NodeRightFont(void) const {return node_right_font;}
 		void		SetNodeBelowFont(wxFont *f)
-			{if (node_below_font) delete node_below_font;node_below_font=f;}
+			{/*if (node_below_font) delete node_below_font;*/node_below_font=f;}
 		wxFont 	*NodeBelowFont(void) const {return node_below_font;}
 		void		SetBranchAboveFont(wxFont *f)
-			{if (branch_above_font) delete branch_above_font;branch_above_font=f;}
+			{/*if (branch_above_font) delete branch_above_font;*/branch_above_font=f;}
 		wxFont 	*BranchAboveFont(void) const {return branch_above_font;}
 		void		SetBranchBelowFont(wxFont *f)
-			{if (branch_below_font) delete branch_below_font;branch_below_font=f;}
+			{/*if (branch_below_font) delete branch_below_font;*/branch_below_font=f;}
 		wxFont 	*BranchBelowFont(void) const {return branch_below_font;}
 		void		SetNodeTerminalFont(wxFont *f)
-			{if (node_terminal_font) delete node_terminal_font; node_terminal_font=f;}
+			{/*if (node_terminal_font) delete node_terminal_font;*/node_terminal_font=f;}
 		wxFont	*NodeTerminalFont(void) const {return node_terminal_font;}
 	// Controls the cursor style [flashing or non-flashing]
 		void		SetFlashingCursor(Bool f)	{flashing_cursor=f;}
