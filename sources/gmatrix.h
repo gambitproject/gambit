@@ -384,19 +384,21 @@ gMatrix<T>::Invert(void) const
   T temp;
   gMatrix<T> out(NumRows(), NumColumns());
   gMatrix<T> tmp(*this);
-  for(i = MinIndex(); i <= Width(); i++)
+  int oRa = out.MinIndex(), oCa = out.MinCol();
+  int tRa = tmp.MinIndex(), tCa = tmp.MinCol();
+  for(i = out.MinIndex(); i <= out.Width(); i++)
     out(i,i) = 1;
-  for(i = MinIndex(); i <= Width(); i++)
+  for(i = 0; i < NumRows(); i++)
     {
-      temp = tmp(i,i);
-      out.data[i] = out.data[i]/temp;
-      tmp.data[i] = tmp.data[i]/temp;
-      for(j = MinIndex(); j <= Height(); j++)
+      temp = tmp(i + tRa, i + tCa);
+      out.data[i + oRa] = out.data[i + oRa]/temp;
+      tmp.data[i + tRa] = tmp.data[i + tRa]/temp;
+      for(j = 0; j < NumColumns(); j++)
 	if(j != i)
 	  {
-	    temp = tmp(i,j);
-	    out.data[j] = out.data[j] - (out.data[j] * temp);
-	    tmp.data[j] = tmp.data[j] - (tmp.data[j] * temp);
+	    temp = tmp(j + tRa,i + tCa);
+	    out.data[j + oRa] = out.data[j + oRa] - (out.data[j + oRa] * temp);
+	    tmp.data[j + tRa] = tmp.data[j + tRa] - (tmp.data[j + tRa] * temp);
 	  }
     }
   return out;
@@ -407,9 +409,10 @@ gMatrix<T>::Determinant(void) const
 {
   assert(NumRows() == NumColumns());
   T result = 0;
-  if(Height() == 2)
-    result = (*this)(1,1) * (*this)(2,2) - (*this)(1,2) * (*this)(2,1);
-  else if(Height() == 1) result = (*this)(1,1);
+  if(NumRows() == 2)
+    result = (*this)(MinIndex(),MinCol()) * (*this)(MinIndex()+1,MinCol()+1) -
+      (*this)(MinIndex(),MinCol()+1) * (*this)(MinIndex()+1,MinCol());
+  else if(NumRows() == 1) result = (*this)(MinIndex(),MinCol());
   else
     {
       gMatrix<T> tmp;
