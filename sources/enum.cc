@@ -28,7 +28,7 @@ tracefile(&gnull),status(status_)
 template <class T>
 EnumModule<T>::EnumModule(const Nfg<T> &N, const EnumParams &p,
 			  const NFSupport &S)
-  : NF(N), support(S), params(p), rows(N.NumStrats(1)), cols(N.NumStrats(2)), 
+  : NF(N), support(S), params(p), rows(S.NumStrats(1)), cols(S.NumStrats(2)), 
     level(0), count(0), npivots(0)
 { }
 
