@@ -270,30 +270,6 @@ down would also appear in the GCL, so this is more of a GCL bug than
 a GUI bug, apparently.  (It is possible similar problems could occur
 in the GUI as well though.)
 
-//------------------------------
-
-Bug D33: Incorrect handling of games of imperfect recall.  
-
-On Myerson.efg, EnumPure finds 2 solutions that it claims are Nash.
-Also, standard Solution All Nash finds one solution that it claims is
-Nash.  But the game has no Nash equilibria.  
-
-In the same game, if you convert to normal form and solve for a mixed
-strategy equilibrium, and then convert back to a behav strategy, the
-resulting strategy is not even a behav strategy.  Probs add to more
-than one on last infoset for player 1.  The problem is that the mixed
-nash equilibrium for the normal form game has no realization
-equivalent behavior strategy.  What should happen is that a warning
-should be issued that since the game is not perfect recall, it is not
-be possible to convert themixed to an equivalent behav.
-
-//------------------------------
-
-Bug D34: Zoom window focus problem
-
-When the focus is in the zoom window, the arrow keys do not move the
-cursor around the tree.  Same problem for the Inspect Cursor window. 
-
 -------------  older bugs that still remain ---------------
 
 //------------------------------
