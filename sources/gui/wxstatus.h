@@ -36,6 +36,7 @@ protected:
   int m_width, m_prec;
   char m_represent;
   bool m_sig;
+  wxString m_buffer;
   
   int m_value;
   

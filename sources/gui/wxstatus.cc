@@ -51,37 +51,73 @@ void wxStatus::Get(void) const
 }
 
 gbtOutput &wxStatus::operator<<(int x)
-{ return *this; }
+{
+  m_buffer += wxString::Format(wxT("%d"), x);
+  return *this;
+}
 
 gbtOutput &wxStatus::operator<<(unsigned int x)
-{ return *this; }
+{ 
+  m_buffer += wxString::Format(wxT("%d"), x);
+  return *this;
+}
 
 gbtOutput &wxStatus::operator<<(bool x)
-{ return *this; }
+{
+  if (x) {
+    m_buffer += wxT("True");
+  }
+  else {
+    m_buffer += wxT("False");
+  }
+  return *this;
+}
 
 gbtOutput &wxStatus::operator<<(long x)
-{ return *this; }
+{
+  m_buffer += wxString::Format(wxT("%ld"), x);
+  return *this;
+}
 
 gbtOutput &wxStatus::operator<<(char x)
-{ return *this; }
+{
+  m_buffer += wxString::Format(wxT("%c"), x);
+  return *this;
+}
 
 gbtOutput &wxStatus::operator<<(double x)
-{ return *this; }
+{
+  m_buffer += wxString::Format(wxT("%lf"), x);
+  return *this;
+}
 
 gbtOutput &wxStatus::operator<<(long double x)
-{ return *this; }
+{
+  m_buffer += wxString::Format(wxT("%lf"), x);
+  return *this;
+}
 
 gbtOutput &wxStatus::operator<<(float x)
-{ return *this; }
+{
+  m_buffer += wxString::Format(wxT("%f"), x);
+  return *this;
+}
 
 gbtOutput &wxStatus::operator<<(const char *x)
 {
-  Update(m_value, wxString::Format(wxT("%s"), x));
+  m_buffer += wxString::Format(wxT("%s"), x);
+  while (m_buffer.Contains("\n")) {
+    wxLogVerbose(m_buffer.Left(m_buffer.Find("\n")));
+    m_buffer = m_buffer.Mid(m_buffer.Find("\n") + 1);
+  }
   return *this; 
 }
 
 gbtOutput &wxStatus::operator<<(const void *x)
-{ return *this; }
+{
+  m_buffer += wxString::Format(wxT("%p"), x);
+  return *this;
+}
 
 void wxStatus::SetProgress(double p_value)
 {
