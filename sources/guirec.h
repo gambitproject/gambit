@@ -1,6 +1,8 @@
 //
-// guirec.h  -- interface of class for recording gui actions
-//              as commands into a log file.
+// FILE: guirec.h  -- interface of class for recording gui actions
+//                    as commands into a log file.
+//
+// $Id$
 //
 
 #ifndef GUIREC_H
@@ -25,7 +27,7 @@ extern GuiRecorder gui_recorder;
 // Write a line of the form: "object, command" to the log file without 
 // a newline at the end.
 #define GUI_RECORD(X) \
-if (gui_recorder.IsRecording()) { gui_recorder.writeToFile(GuiLogName, X); }
+if (gui_recorder.IsRecording()) { gui_recorder.writeToFile(get_log_name(), X); }
 
 // Append a string to the last line in the log file; don't add a newline at the end.
 #define GUI_RECORD_A(X) \
@@ -34,7 +36,7 @@ if (gui_recorder.IsRecording()) { gui_recorder.writeArgsToFile(X); }
 // Write a line of the form: "object, command" to the log file with
 // a newline at the end.
 #define GUI_RECORD_N(X) \
-if (gui_recorder.IsRecording()) { gui_recorder.writeToFile_newline(GuiLogName, X); }
+if (gui_recorder.IsRecording()) { gui_recorder.writeToFile_newline(get_log_name(), X); }
 
 // Append a string to the last line in the log file; add a newline at the end.
 #define GUI_RECORD_AN(X) \

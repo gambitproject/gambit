@@ -1,15 +1,18 @@
 //
 // FILE: guirecdb.cc -- the GUI recorder database.
 //
+// $Id$
+//
 
 #include "guirecdb.h"
 #include "stdio.h"  // for debugging
+#include "guiobj.h"
 
 #include "glist.imp"
 #include "hash.imp"
 
 
-// Instantiate the Hashtable template class used in the
+// Instantiate the HashTable template class used in the
 // GuiRecorderDatabase class.  The gList template is necessary 
 // because the hash implementation uses gLists.
 
@@ -25,110 +28,12 @@ bool GuiRecorderDatabase::instantiated = false;
 
 
 // ----------------------------------------------------------------------
-//                          GuiObject class
-// ----------------------------------------------------------------------
-
-// Debugging functions.
-
-bool GuiObject::is_GuiObject() const
-{
-    return true;
-}
-
-
-void GuiObject::GuiObject_hello() const
-{
-    printf("instance of class GuiObject accessed at %x\n", 
-           (unsigned int)this);
-}
-
-
-bool GuiObject::check() const
-{
-    assert((ID >= FIRST_GUI_ID) && (ID <= LAST_GUI_ID));
-
-    // These initializers must be outside the switch statement for
-    // some reason or g++ complains.
-
-    switch (ID)
-    {
-    case GAMBIT_FRAME:
-    {
-        GambitFrame *gambit_frame = (GambitFrame *)object;
-        assert(gambit_frame->is_GambitFrame());
-        break;
-    }
-
-    case EFG_SHOW:
-    {
-        EfgShow* efgshow = (EfgShow *)object;
-        assert(efgshow->is_EfgShow());
-        break;
-    }
-
-    case SPREADSHEET3D:
-    {
-        SpreadSheet3D* spreadsheet3d = (SpreadSheet3D *)object;
-        assert(spreadsheet3d->is_SpreadSheet3D());
-        break;
-    }
-
-    default:
-        fprintf(stderr, "Unknown GuiObject type ID: %d\n", ID);
-        return false;
-    }
-
-    return true;
-}
-
-
-void GuiObject::dump() const
-{
-    printf("GuiObject dump:\n");
-    assert((ID >= FIRST_GUI_ID) && (ID <= LAST_GUI_ID));
-    
-    // These initializers must be outside the switch statement for
-    // some reason or g++ complains.
-
-    switch (ID)
-    {
-    case GAMBIT_FRAME:
-    {
-        printf("GAMBIT_FRAME object at %x\n", (unsigned int)object);
-        GambitFrame *gambit_frame = (GambitFrame *)object;
-        gambit_frame->GambitFrame_hello();
-        break;
-    }
-
-    case EFG_SHOW:
-    {
-        printf("EFG_SHOW object at %x\n", (unsigned int)object);
-        EfgShow *efg_show = (EfgShow *)object;
-        efg_show->EfgShow_hello();
-        break;
-    }
-
-    case SPREADSHEET3D:
-    {
-        printf("SPREADSHEET3D object at %x\n", (unsigned int)object);
-        SpreadSheet3D *spreadsheet3d = (SpreadSheet3D *)object;
-        spreadsheet3d->SpreadSheet3D_hello();
-        break;
-    }
-
-    default:
-        fprintf(stderr, "Unknown GuiObject type ID: %d\n", ID);
-    }
-}
-
-
-// ----------------------------------------------------------------------
 //                  GuiRecorderDatabase exception classes
 // ----------------------------------------------------------------------
 
 gText GuiRecorderDatabase::DatabaseInUse::Description(void) const
 {
-    return "GuiRecorderDatabase is already in use.";
+    return "The unique GuiRecorderDatabase object is already in use.";
 }
 
 
@@ -201,48 +106,6 @@ void GuiRecorderDatabase::GuiRecorderDatabase_hello() const
 }
 
 
-bool GuiRecorderDatabase::check() const
-{
-    //printf("checking GuiRecorderDatabase...\n");
-
-    // Go through all keys in the database and 
-    // check the associated GuiObjects.
-
-    int nb = NumBuckets();
-
-    assert(nb > 0);
-
-    const gList<gText> *keys = Key();
-    int entries = 0;
-
-    for (int i = 0; i < nb; i++)
-    {
-        entries += keys[i].Length();
-    }
-
-    assert(entries >= 0);
-
-    if (entries == 0)
-    {
-        return true;
-    }
-
-    for (int i = 0; i < nb; i++)
-    {
-        const gList<gText>& keylist = keys[i];
-
-        for (int j = 0; j < keylist.Length(); j++)
-        {
-            int index = j + 1;  // $%*#@$^ 1-based indexing!
-            const gText& current_key = keylist[index];
-            GuiObject *gui_object = operator()(current_key);
-            gui_object->check();
-        }
-    }
-
-    return true;
-}
-
 
 void GuiRecorderDatabase::dump() const
 {
@@ -281,8 +144,6 @@ void GuiRecorderDatabase::dump() const
             int index = j + 1;  // $%*#@$^ 1-based indexing!
             const gText& current_key = keylist[index];
             printf("\tkey[%d][%d] = %s\n", i, index, (char *)current_key);
-            GuiObject *gui_object = operator()(current_key);
-            gui_object->dump();
         }
     }
 }

@@ -78,6 +78,13 @@
 #include "grblock.h"
 #include "gtext.h"
 
+// For gui logging ------------
+#include "guiobj.h"
+#include "guirec.h"
+#include "guirecdb.h"
+#include "guipb.h"
+// ----------------------------
+
 #define XSTEPS                  20      // Scroll steps horizontally
 #define YSTEPS                  20      // Scroll steps vertically
 
@@ -630,23 +637,11 @@ public:
 
 class wxToolBar;
 
-class SpreadSheet3D: public wxFrame
+class SpreadSheet3D: public wxFrame, public GuiObject
 {
     friend gOutput &operator<<(gOutput &op, const SpreadSheet3D &s);
 
 private:
-    // ---------------------------------------
-    // For gui logging:
-    // ---------------------------------------
-    
-    // Class variables: 
-    static gText GuiLogRootName;
-    static int   GuiLogNameCount;
-    
-    // Instance variables:
-    gText GuiLogName;
-    
-    // ---------------------------------------
 
     gList<SpreadSheet>  data;
     SpreadSheetDrawSettings     *draw_settings;
@@ -707,7 +702,7 @@ public:
                                  SpreadMoveDir how = SpreadMoveJump);
     virtual void OnOptionsChanged(unsigned int /*opts*/ = 0) { }
     virtual void OnPrint(void);
-    virtual void OnPrint_Playback(char *type, char *s);  // For GUI logging only.
+	virtual void OnPrint_Playback(char *type, char *s);  // For GUI logging only.
     virtual void OnHelp(int =0);
     virtual Bool OnCharNew(wxKeyEvent &)          { return FALSE; }
     virtual Bool OnEventNew(wxMouseEvent &/*ev*/) { return FALSE; }
@@ -949,8 +944,9 @@ public:
 
     // Debugging
     void  Dump(void);
-    bool  is_SpreadSheet3D() const;
-    void  SpreadSheet3D_hello() const;
+
+    // Gui playback:
+    void ExecuteLoggedCommand(const class gText &, const class gList<gText> &);
 };
 
 #endif

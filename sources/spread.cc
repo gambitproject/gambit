@@ -16,10 +16,6 @@
 #include    "spread.h"
 #include    "gmisc.h"
 
-#include "guirec.h"
-#include "guirecdb.h"
-#include "guipb.h"
-
 // Global GDI objects
 wxPen       *grid_line_pen;
 wxPen       *grid_border_pen;
@@ -29,15 +25,6 @@ wxPen       *s_white_pen;
 wxBrush *s_white_brush;
 wxBrush *s_hilight_brush;
 
-
-// ----------------------------------------
-// For GUI logging:
-// ----------------------------------------
- 
-gText SpreadSheet3D::GuiLogRootName  = "SpreadSheet3D#";
-int   SpreadSheet3D::GuiLogNameCount = 1;
- 
-// ----------------------------------------
 
 
 gOutput &operator<<(gOutput &op, const SpreadSheet3D &)
@@ -1297,16 +1284,9 @@ SpreadSheet3D::SpreadSheet3D(int rows, int cols, int _levels, char *title,
                              wxFrame *parent, unsigned int _features, 
                              SpreadSheetDrawSettings *drs,
                              SpreadSheetDataSettings *dts)
-    : wxFrame(parent, title)
+    : wxFrame(parent, title), GuiObject(gText("SpreadSheet3D"))
 {
     assert(rows > 0 && cols > 0 && _levels > 0 && "SpreadSheet3D::Bad Dimensions");
-
-    // Give the object a unique name usable by the GUI playback system,
-    // and add it to the database.
- 
-    GuiLogName = gText(GuiLogRootName) + ToText(GuiLogNameCount);
-    GuiLogNameCount++;
-    GUI_RECORDER_ADD_TO_DB(GuiLogName, SPREADSHEET3D, (void *)this);
 
     // Initialize some global GDI objects
     grid_line_pen   = wxThePenList->FindOrCreatePen("BLACK", 1, wxDOT);
@@ -1604,7 +1584,9 @@ printf("SpreadSheet3D::OnPrint_Playback: Printing contents of spreadsheet...\n")
     {
         if (s != NULL)
         {
+#ifdef GUIPB_DEBUG
             printf("output to file: %s\n", s);
+#endif
             gFileOutput out(s);
             data[cur_level].Dump(out);
         }
@@ -2017,17 +1999,27 @@ void SpreadSheet3D::OnSelectedMoved(int , int , SpreadMoveDir )
 { }
 
 
-// Debugging functions.
+// Gui playback code:
 
-bool SpreadSheet3D::is_SpreadSheet3D() const
+void SpreadSheet3D::ExecuteLoggedCommand(const gText& command,
+                                         const gList<gText>& arglist)
 {
-    return true;
+#ifdef GUIPB_DEBUG
+    printf("in SpreadSheet3D::ExecuteLoggedCommand...\n");
+    printf("command: %s\n", (char *)command);
+    
+    for (int i = 1; i <= arglist.Length(); i++)
+        printf("arglist[%d] = %s\n", i, (char *)arglist[i]);
+#endif
+    
+    // FIXME! add commands.
+    
+    if (command == "PRINT")
+    {
+        OnPrint_Playback((char *)arglist[1], (char *)arglist[2]);
+    }
+    else
+    {
+        throw InvalidCommand();
+    }
 }
-
-
-void SpreadSheet3D::SpreadSheet3D_hello() const
-{
-    printf("instance of class SpreadSheet3D accessed at %x\n", (unsigned int)this);
-    printf("Log name: %s\n", (char *)GuiLogName);
-}
-

@@ -22,11 +22,9 @@
 #include "wx_tbar.h"
 #endif
 
-// GUI recorder.
-
+// For gui logging ------------
 #include "guirec.h"
-#include "guirecdb.h"
-#include "guipb.h"
+// ----------------------------
 
 
 class EfgShowToolBar:
@@ -320,6 +318,7 @@ void EfgShow::OnMenuCommand(int id)
         break;
 
     case FILE_CLOSE:
+        GUI_RECORD_N("FILE:CLOSE");
         Close();
         break;
 

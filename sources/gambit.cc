@@ -32,12 +32,6 @@
 #include "bitmaps/efg.xpm"
 #include "bitmaps/nfg.xpm"
 
-// GUI recorder.
-
-#include "guirec.h"
-#include "guirecdb.h"
-#include "guipb.h"
-
 #ifndef wx_msw
 #include "bitmaps/gambi.xpm"
 #endif
@@ -50,17 +44,6 @@ extern wxApp *wxTheApp = 1;
 GambitApp gambitApp;
 
 typedef void (*fptr)(int);
-
-
-// ----------------------------------------
-// For GUI logging:
-// ----------------------------------------
-
-gText GambitFrame::GuiLogRootName  = "GambitFrame#";
-int   GambitFrame::GuiLogNameCount = 1;
-
-// ----------------------------------------
-
 
 
 void SigFPEHandler(int type)
@@ -347,10 +330,6 @@ wxFrame *GambitApp::OnInit(void)
     // If playing back a log file, read in the log file and
     // execute the log file commands one by one.
 
-#ifdef GUIPB_DEBUG
-    gambit_frame->GambitFrame_hello();
-#endif
-
     if (playback_requested)
     {
         try
@@ -379,16 +358,9 @@ int GambitApp::OnExit(void)
 
 
 // Define my frame constructor.
-GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int ):
-    wxFrame(frame, title, x, y, w, h)
-{
-    // Give the object a unique name usable by the GUI playback system,
-    // and add it to the database.
-
-    GuiLogName = gText(GuiLogRootName) + ToText(GuiLogNameCount);
-    GuiLogNameCount++;
-    GUI_RECORDER_ADD_TO_DB(GuiLogName, GAMBIT_FRAME, (void *)this);
-}
+GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int )
+    : wxFrame(frame, title, x, y, w, h), GuiObject(gText("GambitFrame"))
+{ }
 
 
 //--------------------------------------------------------------------
@@ -506,17 +478,33 @@ Bool GambitFrame::OnClose()
 }
 
 
-// Debugging functions.
+// Gui playback code:
 
-bool GambitFrame::is_GambitFrame() const
+void GambitFrame::ExecuteLoggedCommand(const gText& command,
+                                       const gList<gText>& arglist)
 {
-    return true;
+#ifdef GUIPB_DEBUG
+    printf("in GambitFrame::ExecuteLoggedCommand...\n");
+    printf("command: %s\n", (char *)command);
+
+    for (int i = 1; i <= arglist.Length(); i++)
+        printf("arglist[%d] = %s\n", i, (char *)arglist[i]);
+#endif
+
+    // FIXME! add more commands.
+
+    if (command == "FILE:QUIT")
+    {
+        Close();
+    }
+    else if (command == "FILE:LOAD")
+    {
+        LoadFile((char *)arglist[1]);
+    }
+    else
+    {
+        throw InvalidCommand();
+    }
 }
 
-
-void GambitFrame::GambitFrame_hello() const
-{
-    printf("instance of class GambitFrame accessed at %x\n", (unsigned int)this);
-    printf("Log name: %s\n", (char *)GuiLogName);
-}
 

@@ -2,6 +2,8 @@
 // FILE: guirec.cc -- implementation of class for recording gui actions
 //                    as commands into a log file.
 //
+// $Id$
+//
 
 #include "guirec.h"
 

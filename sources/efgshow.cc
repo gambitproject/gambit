@@ -15,20 +15,6 @@
 #include "efgnfgi.h"
 #include "behavsol.h"
 
-// GUI recorder.
-
-#include "guirec.h"
-#include "guirecdb.h"
-#include "guipb.h"
-
-// ----------------------------------------
-// For GUI logging:
-// ----------------------------------------
-
-gText EfgShow::GuiLogRootName  = "EfgShow#";
-int   EfgShow::GuiLogNameCount = 1;
-
-// ----------------------------------------
 
 //=====================================================================
 //                   EfgShow MEMBER FUNCTIONS
@@ -63,15 +49,10 @@ public:
 EfgShow::EfgShow(Efg &ef_, EfgNfgInterface *nfg, int , wxFrame *frame,
                  const char *title, int x, int y, int w, int h, int type)
     : wxFrame(frame, (char *)title, x, y, w, h, type), 
-      EfgNfgInterface(gEFG, nfg), parent(frame), ef(ef_), tw(0)
+      EfgNfgInterface(gEFG, nfg), 
+      GuiObject(gText("EfgShow")),
+      parent(frame), ef(ef_), tw(0)
 {
-    // Give the object a unique name usable by the GUI playback system,
-    // and add it to the database.
-  
-    GuiLogName = gText(GuiLogRootName) + ToText(GuiLogNameCount);
-    GuiLogNameCount++;
-    GUI_RECORDER_ADD_TO_DB(GuiLogName, EFG_SHOW, (void *)this);
-
     Show(FALSE);
 
 
@@ -686,17 +667,32 @@ void EfgShowToolBar::OnMouseEnter(int tool)
 }
 
 
-// Debugging functions.
+// Gui playback code:
 
-bool EfgShow::is_EfgShow() const
+void EfgShow::ExecuteLoggedCommand(const gText& command,
+                                   const gList<gText>& arglist)
 {
-    return true;
-}
-
-
-void EfgShow::EfgShow_hello() const
-{
-    printf("instance of class EfgShow accessed at %x\n", (unsigned int)this);
-    printf("Log name: %s\n", (char *)GuiLogName);
+#ifdef GUIPB_DEBUG
+    printf("in EfgShow::ExecuteLoggedCommand...\n");
+    printf("command: %s\n", (char *)command);
+    
+    for (int i = 1; i <= arglist.Length(); i++)
+        printf("arglist[%d] = %s\n", i, (char *)arglist[i]);
+#endif
+    
+    // FIXME! add commands.
+    
+    if (command == "SOLVE:SOLVE")
+    {
+        Solve();
+    }
+    else if (command == "FILE:CLOSE")
+    {
+        Close();
+    }
+    else
+    {
+        throw InvalidCommand();
+    }
 }
 

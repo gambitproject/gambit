@@ -14,6 +14,13 @@
 #include "bsolnsf.h"
 #include "efgconst.h"
 
+// For gui logging ------------
+#include "guiobj.h"
+#include "guirec.h"
+#include "guirecdb.h"
+#include "guipb.h"
+// ----------------------------
+
 class EfgSolnShow;
 class EfgShowToolBar;
 class EFSupportInspectDialog;
@@ -35,24 +42,11 @@ public:
 
 typedef SolutionList<BehavSolution> BehavSolutionList;
 
-class EfgShow: public wxFrame, public EfgNfgInterface, public EfgShowInterface
+class EfgShow: public wxFrame, public EfgNfgInterface, public EfgShowInterface, public GuiObject
 {
 private:
     wxFrame *parent;
     Efg &ef;
-
-    // ---------------------------------------
-    // For gui logging:
-    // ---------------------------------------
-    
-    // Class variables: 
-    static gText GuiLogRootName;
-    static int   GuiLogNameCount;
-    
-    // Instance variables:
-    gText GuiLogName;
-
-    // ---------------------------------------
 
     // Solution routines
     BehavSolutionList solns;
@@ -173,9 +167,8 @@ public:
     void         SetFileName(const gText &s);
     const gText &Filename(void) const;
 
-    // Debugging.
-    bool is_EfgShow() const;
-    void EfgShow_hello() const;
+	// Gui playback:
+    void ExecuteLoggedCommand(const class gText &, const class gList<gText> &);
 };
 
 

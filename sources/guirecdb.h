@@ -1,6 +1,8 @@
 //
-// guirecdb.h  -- a database class which is used in the gui
-//                recording process
+// FILE: guirecdb.h  -- a database class which is used in the gui
+//                      recording process
+//
+// $Id$
 //
 
 #ifndef GUIRECDB_H
@@ -13,12 +15,11 @@
 #include "gstream.h"  
 #include "gtext.h"
 #include "hash.h"
+#include "guiobj.h"
 
 
 // Header files for objects to be logged:
 #include "gambit.h"
-#include "efgshow.h"
-#include "spread.h"
 
 #include <assert.h>
 
@@ -52,58 +53,6 @@
 class GuiRecorderDatabase;
 extern GuiRecorderDatabase gui_recorder_db;
 
-
-// Macros; these make it easy to record objects into the database.
-
-#define GUI_RECORDER_ADD_TO_DB(N, I, O) \
-gui_recorder_db.Define(N, new GuiObject(I, O)); assert(gui_recorder_db.check());
-
-
-// The Gui object type enumerators.
-// FIXME: add to this as necessary.
-
-enum GuiObjectTypeID
-{
-    GAMBIT_FRAME,
-    EFG_SHOW,
-    SPREADSHEET3D
-};
-
-#define FIRST_GUI_ID GAMBIT_FRAME
-#define LAST_GUI_ID  SPREADSHEET3D
-
-
-// The GuiObject class.
-
-class GuiObject
-{
-private:
-    GuiObjectTypeID   ID;
-    void             *object;
-
-public:
-    // Constructor, destructor.
-    GuiObject(GuiObjectTypeID i, void *o) 
-    {
-        ID = i;
-        object = o;
-    }
-
-    virtual ~GuiObject() { }
-
-    // Access functions.
-    GuiObjectTypeID get_id() const { return ID;     }
-    const void *get_object() const { return object; }
-
-    // Debugging.
-    bool is_GuiObject() const;
-    void GuiObject::GuiObject_hello() const;
-    bool check() const;
-    void dump()  const;
-};
-
-
-
 // The GuiRecorderDatabase class.  This is just a hash table of
 // GuiObject pointers.  It should only have one instance.
 
@@ -135,8 +84,7 @@ public:
 
     // Debugging.
     bool is_GuiRecorderDatabase() const;
-    void GuiRecorderDatabase::GuiRecorderDatabase_hello() const;
-    bool check() const;
+    void GuiRecorderDatabase_hello() const;
     void dump()  const;
 };
 

@@ -1,8 +1,8 @@
-
 //
 // FILE: guipb.cc -- the GUI playback class.
 //
-
+// $Id$
+//
 
 #include "glist.h"
 #include "guirecdb.h"
@@ -109,12 +109,6 @@ gText GuiPlayback::ObjectNotFound::Description(void) const
 gText GuiPlayback::UnknownObjectType::Description(void) const
 {
     return "Unknown GUI object type in log file.";
-}
-
-
-gText GuiPlayback::InvalidCommandForObject::Description(void) const
-{
-    return "Invalid command for object type in log file.";
 }
 
 
@@ -328,57 +322,9 @@ void GuiPlayback::ExecuteCommand(const gText& object_name,
     printf("number: %d\n", number);
 #endif
 
-    // Cast the object to the correct type.  Check that the object is
-    // indeed what it claims to be.  Call the function appropriate for the
-    // object with the command and arglist as arguments.
+    // Call the object's logging command.
 
-    // FIXME! Add lots of "else if" clauses here as I extend it...
-    if (object_type == "GambitFrame")
-    {
-#ifdef GUIPB_DEBUG
-        printf("object type found: %s\n", (char *)object_type);
-#endif 
-
-        GambitFrame *gambit_frame = (GambitFrame *)(object->get_object());
-        assert(gambit_frame->is_GambitFrame());
-#ifdef GUIPB_DEBUG
-        gambit_frame->GambitFrame_hello();
-#endif
-
-        ExecuteGambitFrameCommand(gambit_frame, command, arglist);
-    }
-    else if (object_type == "EfgShow")
-    {
-#ifdef GUIPB_DEBUG
-        printf("object type found: %s\n", (char *)object_type);
-#endif 
-
-        EfgShow *efg_show = (EfgShow *)(object->get_object());
-        assert(efg_show->is_EfgShow());
-#ifdef GUIPB_DEBUG
-        efg_show->EfgShow_hello();
-#endif
-
-        ExecuteEfgShowCommand(efg_show, command, arglist);
-    }
-    else if (object_type == "SpreadSheet3D")
-    {
-#ifdef GUIPB_DEBUG
-        printf("object type found: %s\n", (char *)object_type);
-#endif 
-
-        SpreadSheet3D *spreadsheet3d = (SpreadSheet3D *)(object->get_object());
-        assert(spreadsheet3d->is_SpreadSheet3D());
-#ifdef GUIPB_DEBUG
-        spreadsheet3d->SpreadSheet3D_hello();
-#endif
-
-        ExecuteSpreadSheet3DCommand(spreadsheet3d, command, arglist);
-    }
-    else  // The object is not of a loggable class.
-    {
-        throw UnknownObjectType();
-    }
+    object->ExecuteLoggedCommand(command, arglist);
 }
 
 
@@ -397,95 +343,3 @@ void GuiPlayback::GuiPlayback_hello() const
 }
 
 
-// ============================================================
-//
-//       Object-specific functions.
-//
-// NOTE: it may be better in the long run to farm these out to
-//       their classes.
-//
-// ============================================================
-
-// GambitFrame class
-
-void GuiPlayback::ExecuteGambitFrameCommand(GambitFrame *object,
-                                            const gText& command,
-                                            const gList<gText>& arglist)
-{
-#ifdef GUIPB_DEBUG
-    printf("in GuiPlayback::ExecuteGambitFrameCommand...\n");
-    printf("command: %s\n", (char *)command);
-
-    for (int i = 1; i <= arglist.Length(); i++)
-        printf("arglist[%d] = %s\n", i, (char *)arglist[i]);
-#endif
-
-    // FIXME! add commands.
-
-    if (command == "FILE:QUIT")
-    {
-        object->Close();
-    }
-    else if (command == "FILE:LOAD")
-    {
-        object->LoadFile((char *)arglist[1]);
-    }
-    else
-    {
-        throw InvalidCommandForObject();
-    }
-}
-
-
-// EfgShow class
-
-void GuiPlayback::ExecuteEfgShowCommand(EfgShow *object,
-                                        const gText& command,
-                                        const gList<gText>& arglist)
-{
-#ifdef GUIPB_DEBUG
-    printf("in GuiPlayback::ExecuteEfgShowCommand...\n");
-    printf("command: %s\n", (char *)command);
-    
-    for (int i = 1; i <= arglist.Length(); i++)
-        printf("arglist[%d] = %s\n", i, (char *)arglist[i]);
-#endif
-    
-    // FIXME! add commands.
-    
-    if (command == "SOLVE:SOLVE")
-    {
-        object->Solve();
-    }
-    else
-    {
-        throw InvalidCommandForObject();
-    }
-}
-
-
-// SpreadSheet3D class
-
-void GuiPlayback::ExecuteSpreadSheet3DCommand(SpreadSheet3D *object,
-                                              const gText& command,
-                                              const gList<gText>& arglist)
-{
-#ifdef GUIPB_DEBUG
-    printf("in GuiPlayback::ExecuteEfgShowCommand...\n");
-    printf("command: %s\n", (char *)command);
-    
-    for (int i = 1; i <= arglist.Length(); i++)
-        printf("arglist[%d] = %s\n", i, (char *)arglist[i]);
-#endif
-    
-    // FIXME! add commands.
-    
-    if (command == "PRINT")
-    {
-        object->OnPrint_Playback((char *)arglist[1], (char *)arglist[2]);
-    }
-    else
-    {
-        throw InvalidCommandForObject();
-    }
-}

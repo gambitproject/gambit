@@ -2,6 +2,8 @@
 // guipb.h  -- a class which implements the playback of 
 //             previously-recorded GUI actions.
 //
+// $Id$
+//
 
 #ifndef GUIPB_H
 #define GUIPB_H
@@ -12,8 +14,6 @@
 
 // Loggable classes:
 #include "gambit.h"
-#include "efgshow.h"
-#include "spread.h"
 
 #include <stdio.h>
 #include <assert.h>
@@ -58,19 +58,6 @@ private:
     void PlaybackLine(const gText& line);
     void ExecuteCommand(const gText& object_name, const gText& command,
                         const gList<gText>& arglist);
-
-    // Private callback methods specific to a particular class.
-    void ExecuteGambitFrameCommand(GambitFrame *object,
-                                   const gText& command,
-                                   const gList<gText>& arglist);
-
-    void ExecuteEfgShowCommand(EfgShow *object,
-                               const gText& command,
-                               const gList<gText>& arglist);
-
-    void ExecuteSpreadSheet3DCommand(SpreadSheet3D *object,
-                                     const gText& command,
-                                     const gList<gText>& arglist);
 
 public:
     // ================== Exception classes. ====================
@@ -117,13 +104,6 @@ public:
         gText Description() const;
     };
 
-    class InvalidCommandForObject : public gException   
-    {
-    public:
-        virtual ~InvalidCommandForObject()   { }
-        gText Description() const;
-    };
-
     // ==========================================================
 
     // Constructor, destructor.
@@ -135,7 +115,7 @@ public:
 
     // Debugging.
     bool is_GuiPlayback() const;
-    void GuiPlayback::GuiPlayback_hello() const;
+    void GuiPlayback_hello() const;
 };
 
 

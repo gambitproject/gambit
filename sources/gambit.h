@@ -7,6 +7,13 @@
 #include "gtext.h"
 #include "wx.h"
 
+// For gui logging ------------
+#include "guiobj.h"
+#include "guirec.h"
+#include "guirecdb.h"
+#include "guipb.h"
+// ----------------------------
+
 class GambitApp: public wxApp
 {
 public:
@@ -14,39 +21,17 @@ public:
     int OnExit(void);
 };
 
-class GambitFrame : public wxFrame
+
+class GambitFrame : public wxFrame, public GuiObject
 {
-private:
-    // ---------------------------------------
-    // For gui logging:
-    // ---------------------------------------
-    
-    // Class variables: 
-    static gText GuiLogRootName;
-    static int   GuiLogNameCount;
-    
-    // Instance variables:
-    gText GuiLogName;
-    
-    // ---------------------------------------
-    
 public:
     GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int type);
     Bool OnClose(void);
     void OnMenuCommand(int id);
-    void LoadFile(char *s=0);
+    void LoadFile(char *s = 0);
 
-    // ---------------------------------------
-    // For gui logging:
-    // ---------------------------------------
-
-    const gText& get_log_name() { return GuiLogName; }
-
-    // ---------------------------------------
-
-    // Debugging.
-    bool is_GambitFrame() const;
-    void GambitFrame_hello() const;
+    // Gui playback:
+    void ExecuteLoggedCommand(const class gText &, const class gList<gText> &);
 };
 
 
