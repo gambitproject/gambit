@@ -592,7 +592,6 @@ bool operator!=(const gArray<int> &a, const gArray<int> &b)
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-#include "rational.h"
 
 TEMPLATE class SubgameSolver<double>;
 TEMPLATE class SubgameSolver<gRational>;

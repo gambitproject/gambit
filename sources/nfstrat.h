@@ -9,6 +9,7 @@
 
 #include "gstring.h"
 #include "gblock.h"
+#include "gambitio.h"
 
 class NFPlayer;
 
@@ -143,17 +144,19 @@ public:
   void SetNFStrategySet(int pl, NFStrategySet *s);   
 	NFStrategySet *GetNFStrategySet(int pl) const    { return sups[pl]; }
 
-	Strategy *GetStrategy(int pl, int num) const;
-	const gBlock<Strategy *> &GetStrategy(int pl) const;
-	int NumStrats(int pl) const  { return sups[pl]->NumStrats(); }
+  Strategy *GetStrategy(int pl, int num) const;
+  const gBlock<Strategy *> &GetStrategy(int pl) const;
+  int NumStrats(int pl) const  { return sups[pl]->NumStrats(); }
+  
+  const BaseNfg &BelongsTo(void) const;
+  const gArray<int> SupportDimensions(void) const;
+  
+  bool IsSubset(const NFSupport &s) const;
 
-	const BaseNfg &BelongsTo(void) const;
-	const gArray<int> SupportDimensions(void) const;
-
-	bool IsSubset(const NFSupport &s) const;
+  void Dump(gOutput&s) const;
 };
 
-
+gOutput &operator<<(gOutput &f, const NFSupport &);
 
 #endif //#NFSTRAT_H
 

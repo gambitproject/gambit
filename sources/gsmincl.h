@@ -36,11 +36,12 @@ typedef enum
 #define id_USER 0
 #define id_GOBIT 1
 #define id_LIAP 2
+#define id_LEMKE 3
 
 
-#define T_DONTKNOW 0
+#define T_DONTKNOW 2
 #define T_YES 1
-#define T_NO 2
+#define T_NO 0
 
 #include "gambitio.h"
 

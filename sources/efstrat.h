@@ -167,7 +167,13 @@ public:
 
   // Returns a gPVector representing the Dimensionality of the support.
   gPVector<int> Dimensionality(bool trunc) const;
+
+  void Dump(gOutput& s) const;
 };
+
+gOutput &operator<<(gOutput &f, const EFSupport &);
+
+
 #endif  //# EFSTRAT_H
 
 

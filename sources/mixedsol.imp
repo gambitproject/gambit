@@ -7,7 +7,6 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n, bool truncated)
 : MixedProfile<T>(n, truncated),
   _Creator(id_USER),
   _IsNash(T_DONTKNOW),
-  _IsPerfect(T_DONTKNOW),
   _IsProper(T_DONTKNOW),
   _GobitLambda(-1),
   _GobitValue(-1),
@@ -20,7 +19,6 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n, const NFSupport& s)
 : MixedProfile<T>(n, s),
   _Creator(id_USER),
   _IsNash(T_DONTKNOW),
-  _IsPerfect(T_DONTKNOW),
   _IsProper(T_DONTKNOW),
   _GobitLambda(-1),
   _GobitValue(-1),
@@ -32,7 +30,6 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n, const gPVector<T>& v)
 : MixedProfile<T>(n, v),
   _Creator(id_USER),
   _IsNash(T_DONTKNOW),
-  _IsPerfect(T_DONTKNOW),
   _IsProper(T_DONTKNOW),
   _GobitLambda(-1),
   _GobitValue(-1),
@@ -44,7 +41,6 @@ MixedSolution<T>::MixedSolution(const MixedProfile<T>& m, int creator)
 : MixedProfile<T>(m),
   _Creator(creator),
   _IsNash(T_DONTKNOW),
-  _IsPerfect(T_DONTKNOW),
   _IsProper(T_DONTKNOW),
   _GobitLambda(-1),
   _GobitValue(-1),
@@ -56,7 +52,6 @@ template <class T> MixedSolution<T>::MixedSolution(const MixedSolution<T>& m)
 : MixedProfile<T>(m), 
   _Creator(m._Creator),
   _IsNash(m._IsNash),
-  _IsPerfect(m._IsPerfect),
   _IsProper(m._IsProper),
   _GobitLambda(m._GobitLambda),
   _GobitValue(m._GobitValue),
@@ -77,7 +72,12 @@ template <class T> int MixedSolution<T>::IsNash()
 }
 
 template <class T> int MixedSolution<T>::IsPerfect() const
-{ return _IsPerfect; }
+{ 
+  if(_Creator == id_LEMKE)
+    return T_YES;
+  else
+    return T_DONTKNOW; 
+}
 
 template <class T> int MixedSolution<T>::IsProper() const
 { return _IsProper; }
@@ -103,10 +103,11 @@ template <class T> void MixedSolution<T>::SetLiap(T value)
   _LiapValue = value;
 }
 
-template <class T> T MixedSolution<T>::LiapValue() const
+template <class T> T MixedSolution<T>::LiapValue() 
 { 
-  return MixedProfile<T>::LiapValue();
-  //return _LiapValue; 
+  if(_LiapValue < 0)
+    _LiapValue = MixedProfile<T>::LiapValue();
+  return _LiapValue; 
 }
 
 template <class T> 
@@ -120,8 +121,9 @@ template <class T> void MixedSolution<T>::Dump(gOutput& f) const
   MixedProfile<T>::Dump(f);
   f << " Creator:"; DisplayID(f, _Creator);
   f << " IsNash:"; DisplayTriState(f, _IsNash);
-  f << " IsPerfect:"; DisplayTriState(f, _IsPerfect);
+  f << " IsPerfect:"; DisplayTriState(f, IsPerfect());
   f << " IsProper:"; DisplayTriState(f, _IsProper);
+  f << " Support:" << Support();
   f << " GobitLambda:" << _GobitLambda;
   f << " GobitValue:" << _GobitValue;
   f << " LiapValue:" << _LiapValue;

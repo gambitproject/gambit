@@ -73,14 +73,24 @@ template <class T> BehavSolution<T>::~BehavSolution() {}
 template <class T> int BehavSolution<T>::Creator() const
 { return _Creator; }
 
-template <class T> int BehavSolution<T>::IsNash() const
-{ return _IsNash; }
+template <class T> int BehavSolution<T>::IsNash()
+{ 
+  if( _IsNash == T_DONTKNOW )
+    _IsNash = BehavProfile<T>::IsNash();
+  return _IsNash; 
+}
 
 template <class T> int BehavSolution<T>::IsSubgamePerfect() const
 { return _IsSubgamePerfect; }
 
-template <class T> int BehavSolution<T>::IsSequential() const
-{ return _IsSequential; }
+template <class T> int BehavSolution<T>::IsSequential()
+{
+  if((_Creator == id_LIAP || _Creator == id_GOBIT) && IsNash() == T_YES)
+    _IsSequential = T_YES;
+  else
+    _IsSequential = T_DONTKNOW;
+  return _IsSequential;
+}
 
 template <class T> EFSupport BehavSolution<T>::Support() const
 { return behavsupport; }
@@ -102,8 +112,12 @@ template <class T> void BehavSolution<T>::SetLiap(T value)
   _LiapValue = value;
 }
 
-template <class T> T BehavSolution<T>::LiapValue() const
-{ return _LiapValue; }
+template <class T> T BehavSolution<T>::LiapValue()
+{ 
+  if(_LiapValue < 0)
+    _LiapValue = BehavProfile<T>::LiapValue();
+  return _LiapValue; 
+}
 
 template <class T> gVector<T> BehavSolution<T>::Beliefs()
 { return _Beliefs; }
@@ -122,6 +136,7 @@ template <class T> void BehavSolution<T>::Dump(gOutput& f) const
   f << " IsNash:"; DisplayTriState(f, _IsNash);
   f << " IsPerfect:"; DisplayTriState(f, _IsSubgamePerfect);
   f << " IsProper:"; DisplayTriState(f, _IsSequential);
+  f << " Support:" << Support();
   f << " GobitLambda:" << _GobitLambda;
   f << " GobitValue:" << _GobitValue;
   f << " LiapValue:" << _LiapValue;

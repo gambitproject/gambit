@@ -14,7 +14,6 @@ template <class T> class MixedSolution : public MixedProfile<T>
 protected:
   int _Creator;
   int _IsNash;
-  int _IsPerfect;
   int _IsProper;
   T _GobitLambda;
   T _GobitValue;
@@ -40,7 +39,7 @@ public:
   T GobitLambda() const; // lambda from gobit alg
   T GobitValue() const; // objective function from gobit alg
   void SetLiap(T value);
-  T LiapValue() const; // liaponuv function value (to test for Nash)
+  T LiapValue(); // liaponuv function value (to test for Nash)
 
   bool operator==(const MixedSolution<T> &) const;
   void Dump(gOutput& f) const;

@@ -1626,14 +1626,14 @@ Portion *GSM_IsNash_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
     (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new BoolValPortion(P->IsNash());
+  return new IntValPortion(P->IsNash());
 }
 
 Portion *GSM_IsNash_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
     (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new BoolValPortion(P->IsNash());
+  return new IntValPortion(P->IsNash());
 }
 
 Portion *GSM_LiapValue_MixedFloat(Portion **param)

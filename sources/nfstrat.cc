@@ -284,4 +284,30 @@ bool NFSupport::IsSubset(const NFSupport &s) const
 }
 
 
+void NFSupport::Dump(gOutput&s) const
+{
+  int numplayers;
+  int i;
+  int j;
+  gArray<Strategy *> strat;
 
+  s << "{ ";
+  numplayers = BelongsTo().NumPlayers();
+  for( i = 1; i <= numplayers; i++ )
+  {
+    s << "{ ";
+    strat = GetStrategy( i );
+    for( j = 1; j <= strat.Length(); j++ )
+    {
+      s << "\"" << strat[ j ]->name << "\" ";
+    }
+    s << "} ";
+  }
+  s << "} ";
+}
+
+gOutput& operator<<(gOutput& s, const NFSupport& n)
+{
+  n.Dump(s);
+  return s;
+}

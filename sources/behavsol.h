@@ -29,16 +29,16 @@ public:
   ~BehavSolution();
 
   int Creator() const; // Who created this object?  (algorithm ID or user)
-  int IsNash() const; // Is it Nash? Y/N/DK
+  int IsNash(); // Is it Nash? Y/N/DK
   int IsSubgamePerfect() const; // Is it Subgame Perfect? Y/N/DK
-  int IsSequential() const; // Is it Sequential? Y/N/DK
+  int IsSequential(); // Is it Sequential? Y/N/DK
   EFSupport Support() const; // Support of Profile
 
   void SetGobit(T lambda, T value);
   T GobitLambda() const; // lambda from gobit alg
   T GobitValue() const; // objective function from gobit alg
   void SetLiap(T value);
-  T LiapValue() const; // liapnov function value (to test for Nash)
+  T LiapValue(); // liapnov function value (to test for Nash)
   gVector<T> Beliefs(); // Belief vector, if a sequential equilibrium
 
   bool operator==(const BehavSolution<T> &) const;

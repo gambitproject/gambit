@@ -345,12 +345,38 @@ EFPlayer &EFSupport::GetPlayer( int pl )
   return sets[pl]->GetPlayer();
 }
 
+void EFSupport::Dump(gOutput& s) const
+{
+  int numplayers;
+  int i;
+  int j;
+  int k;
 
+  s << "{ ";
+  numplayers = NumPlayers();
+  for( i = 1; i <= numplayers; i++ )
+  {
+    EFPlayer& player = sets[i]->GetPlayer();
+    s << '"' << player.GetName() << "\" { ";
+    for( j = 1; j <= player.NumInfosets(); j++ )
+    {
+      Infoset* infoset = player.InfosetList()[ j ];
+      s << '"' << infoset->GetName() << "\" { ";
+      for( k = 1; k <= infoset->NumActions(); k++ )
+      {
+	Action* action = infoset->GetActionList()[ k ];
+	s << '"' << action->GetName() << "\" ";
+      }
+      s << "} ";
+    }
+    s << "} ";
+  }
+  s << "} ";
+}
 
-
-
-
-
-
-
+gOutput& operator<<(gOutput&s, const EFSupport& e)
+{
+  e.Dump(s);
+  return s;
+}
 

@@ -924,25 +924,7 @@ PortionType NfSupportPortion::Type( void ) const
 void NfSupportPortion::Output( gOutput& s ) const
 { 
   Portion::Output( s );
-  int numplayers;
-  int i;
-  int j;
-  gArray<Strategy *> strat;
-
-  assert( *_Value != 0 );
-  s << "(NfSupport) " << *_Value << " { ";
-  numplayers = (*_Value)->BelongsTo().NumPlayers();
-  for( i = 1; i <= numplayers; i++ )
-  {
-    s << "{ ";
-    strat = (*_Value)->GetStrategy( i );
-    for( j = 1; j <= strat.Length(); j++ )
-    {
-      s << "\"" << strat[ j ]->name << "\" ";
-    }
-    s << "} ";
-  }
-  s << "} ";
+  s << "(NfSupport) " << *_Value << ' ' << **_Value;  
 }
 
 Portion* NfSupportPortion::ValCopy( void ) const
@@ -1031,32 +1013,8 @@ PortionType EfSupportPortion::Type( void ) const
 void EfSupportPortion::Output( gOutput& s ) const
 { 
   Portion::Output( s );
-  int numplayers;
-  int i;
-  int j;
-  int k;
+  s << "(EfSupport) " << *_Value << ' ' << **_Value;
 
-  assert( *_Value != 0 );
-  s << "(EfSupport) " << *_Value << " { ";
-  numplayers = (*_Value)->NumPlayers();
-  for( i = 1; i <= numplayers; i++ )
-  {
-    EFPlayer& player = (*_Value)->GetPlayer( i );
-    s << '"' << player.GetName() << "\" { ";
-    for( j = 1; j <= player.NumInfosets(); j++ )
-    {
-      Infoset* infoset = player.InfosetList()[ j ];
-      s << '"' << infoset->GetName() << "\" { ";
-      for( k = 1; k <= infoset->NumActions(); k++ )
-      {
-	Action* action = infoset->GetActionList()[ k ];
-	s << '"' << action->GetName() << "\" ";
-      }
-      s << "} ";
-    }
-    s << "} ";
-  }
-  s << "} ";
 }
 
 Portion* EfSupportPortion::ValCopy( void ) const
@@ -2852,12 +2810,4 @@ gOutput& operator << ( gOutput& s, Portion* p )
   p->Output( s );
   return s;
 }
-
-
-
-
-
-
-
-
 
