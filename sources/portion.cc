@@ -43,6 +43,8 @@ int Portion::_NumObj = 0;
 
 Portion::Portion( void )
 {
+  _Owner = 0;
+
 #ifdef MEMCHECK
   _NumObj++;
   gout << "--- Portion Ctor, count: " << _NumObj << "\n";
@@ -57,10 +59,19 @@ Portion::~Portion()
 #endif
 }
 
+
+void Portion::SetOwner( Portion* p )
+{ _Owner = p; }
+
+Portion* Portion::Owner( void ) const
+{ return _Owner; }
+
+
 bool Portion::operator == ( Portion* p ) const
 {
   return false;
 }
+
 
 
 
@@ -570,10 +581,18 @@ void EfPlayerPortion::Output( gOutput& s ) const
 { s << "(EfPlayer) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
 
 Portion* EfPlayerPortion::ValCopy( void ) const
-{ return new EfPlayerValPortion( *_Value ); }
+{
+  Portion* p =new EfPlayerValPortion( *_Value ); 
+  p->SetOwner( _Owner );
+  return p;
+}
 
 Portion* EfPlayerPortion::RefCopy( void ) const
-{ return new EfPlayerRefPortion( *_Value ); }
+{
+  Portion* p = new EfPlayerRefPortion( *_Value ); 
+  p->SetOwner( _Owner );
+  return p;
+}
 
 void EfPlayerPortion::AssignFrom( Portion* p )
 {
@@ -1326,8 +1345,20 @@ ListPortion::ListPortion( void )
 ListPortion::~ListPortion()
 { }
 
+
 gBlock< Portion* >& ListPortion::Value( void ) const
 { return *_Value; }
+
+void ListPortion::SetOwner( Portion* p )
+{
+  int i;
+  int length = _Value->Length();
+  _Owner = p;
+  for( i = 1; i < length; i++ )
+  {
+    (*_Value)[ i ]->SetOwner( p );
+  }
+}
 
 PortionType ListPortion::Type( void ) const
 { return porLIST; }
@@ -1336,7 +1367,11 @@ Portion* ListPortion::ValCopy( void ) const
 { return new ListValPortion( *_Value ); }
 
 Portion* ListPortion::RefCopy( void ) const
-{ return new ListRefPortion( *_Value ); }
+{ 
+  Portion* p = new ListRefPortion( *_Value ); 
+  ( (ListPortion*) p )->_DataType = _DataType;
+  return p;
+}
 
 void ListPortion::AssignFrom( Portion* p )
 {
@@ -1616,47 +1651,49 @@ struct PortionTypeTextType
 };  
 
 
-#define NumPortionTypes 31
+#define NumPortionTypes 33
 
 PortionTypeTextType _PortionTypeText[] =
 {
-  { porERROR,          "ERROR" },
+  { porERROR,            "ERROR" },
   
-  { porBOOL,           "BOOL" },
-  { porFLOAT,          "FLOAT" },
-  { porINTEGER,        "INTEGER" },
-  { porRATIONAL,       "RATIONAL" },
-  { porTEXT,           "TEXT" },
-  { porLIST,           "LIST" },
-  { porNFG_FLOAT,      "NFG_FLOAT" },
-  { porNFG_RATIONAL,   "NFG_RATIONAL" },
-  { porNFG,            "NFG" },
-  { porEFG_FLOAT,      "EFG_FLOAT" },
-  { porEFG_RATIONAL,   "EFG_RATIONAL" },
-  { porEFG,            "EFG" },
-  { porMIXED_FLOAT,    "MIXED_FLOAT" },
-  { porMIXED_RATIONAL, "MIXED_RATIONAL" },
-  { porMIXED,          "MIXED" },
-  { porBEHAV_FLOAT,    "BEHAV_FLOAT" },
-  { porBEHAV_RATIONAL, "BEHAV_RATIONAL" },
-  { porBEHAV,          "BEHAV" },
+  { porBOOL,             "BOOL" },
+  { porFLOAT,            "FLOAT" },
+  { porINTEGER,          "INTEGER" },
+  { porRATIONAL,         "RATIONAL" },
+  { porTEXT,             "TEXT" },
+  { porLIST,             "LIST" },
+  { porNFG_FLOAT,        "NFG_FLOAT" },
+  { porNFG_RATIONAL,     "NFG_RATIONAL" },
+  { porNFG,              "NFG" },
+  { porEFG_FLOAT,        "EFG_FLOAT" },
+  { porEFG_RATIONAL,     "EFG_RATIONAL" },
+  { porEFG,              "EFG" },
+  { porMIXED_FLOAT,      "MIXED_FLOAT" },
+  { porMIXED_RATIONAL,   "MIXED_RATIONAL" },
+  { porMIXED,            "MIXED" },
+  { porBEHAV_FLOAT,      "BEHAV_FLOAT" },
+  { porBEHAV_RATIONAL,   "BEHAV_RATIONAL" },
+  { porBEHAV,            "BEHAV" },
 
-  { porOUTCOME,        "OUTCOME" },
-  { porEF_PLAYER,      "EF_PLAYER" },
-  { porINFOSET,        "INFOSET" },
-  { porNODE,           "NODE" },
-  { porACTION,         "ACTION" },
+  { porOUTCOME_FLOAT,    "OUTCOME_FLOAT" },
+  { porOUTCOME_RATIONAL, "OUTCOME_RATIONAL" },
+  { porOUTCOME_RATIONAL, "OUTCOME" },
+  { porEF_PLAYER,        "EF_PLAYER" },
+  { porINFOSET,          "INFOSET" },
+  { porNODE,             "NODE" },
+  { porACTION,           "ACTION" },
 
-  { porREFERENCE,      "REFERENCE" },
+  { porREFERENCE,        "REFERENCE" },
 
-  { porOUTPUT,         "OUTPUT" },
-  { porINPUT,          "INPUT" },
+  { porOUTPUT,           "OUTPUT" },
+  { porINPUT,            "INPUT" },
 
-  { porUNKNOWN,        "UNKNOWN" },
+  { porUNKNOWN,          "UNKNOWN" },
 
-  { porNUMERICAL,      "NUMERICAL" },
-  { porALL,            "ALL" },
-  { porVALUE,          "VALUE" }
+  { porNUMERICAL,        "NUMERICAL" },
+  { porALL,              "ALL" },
+  { porVALUE,            "VALUE" }
 };
 
 
