@@ -283,11 +283,11 @@ public:
   void display_colors(void);
   void display_save_options(Bool def=TRUE);
   void display_load_options(Bool def=TRUE);
-  void display_set_zoom(float z=-1);
+  void display_zoom_in(void);
+  void display_zoom_out(void);
   void display_zoom_fit(void);
   float display_get_zoom(void);
   void display_zoom_win(void);
-  void delete_zoom_win(void);
   
   Bool file_save(void);
   void  output(void);

@@ -2499,6 +2499,7 @@ void TreeWindow::print_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
 //***********************************************************************
 //                      DISPLAY-ZOOM WINDOW MENU HANDLER
 //***********************************************************************
+
 void TreeWindow::display_zoom_win(void)
 {
   if (!zoom_window) {
@@ -2509,29 +2510,35 @@ void TreeWindow::display_zoom_win(void)
 				     (const Node *&) subgame_node, 
 				     draw_settings, GetNodeEntry(Cursor()));
   }
-}
-
-void TreeWindow::delete_zoom_win(void)
-{
-  // We don't delete this because this is called from zoom_window's
-  // parent frame... would be bad :)
-  // The virtual destructors should result in the window being deleted
-  // by the system upon closing, so there ought to be no memory leakage
-  zoom_window = 0;
+  else {
+    zoom_window->GetParent()->Show(!zoom_window->GetParent()->IsShown());
+  }
 }
 
 //***********************************************************************
 //                      DISPLAY-ZOOM MENU HANDLER
 //***********************************************************************
 
-void TreeWindow::display_set_zoom(float z)
+const float ZOOM_DELTA = .1;
+const float ZOOM_MAX = 1;
+const float ZOOM_MIN = .2;
+
+void TreeWindow::display_zoom_in(void)
 {
   if (zoom_window) {
-    zoom_window->SetZoom(z);
+    float zoom = zoom_window->GetZoom();
+    zoom = gmin(zoom + ZOOM_DELTA, ZOOM_MAX);
+    zoom_window->SetZoom(zoom);
   }
-  //    draw_settings.SetZoom(z);
-  //  GetDC()->SetUserScale(draw_settings.Zoom(), draw_settings.Zoom());
-  //  must_recalc = TRUE;
+}
+
+void TreeWindow::display_zoom_out(void)
+{
+  if (zoom_window) {
+    float zoom = zoom_window->GetZoom();
+    zoom = gmax(zoom - ZOOM_DELTA, ZOOM_MIN);
+    zoom_window->SetZoom(zoom);
+  }
 }
 
 float TreeWindow::display_get_zoom(void)

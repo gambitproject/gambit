@@ -652,12 +652,16 @@ public:
 
 TreeZoomFrame::TreeZoomFrame(wxFrame *p_frame, TreeWindow *p_parent)
   : wxFrame(p_frame, "Zoom Window", -1, -1, 250, 250), m_parent(p_parent)
-{ }
+{
+  // Make sure the frame doesn't get any smaller than the default size
+  SetSizeHints(250, 250);
+}
 
 Bool TreeZoomFrame::OnClose(void)
 {
-  m_parent->delete_zoom_win();
-  return TRUE;
+  Show(FALSE);
+  m_parent->GetEfgFrame()->OnZoomWindowClose();
+  return FALSE;
 }
 
 TreeZoomWindow::TreeZoomWindow(wxFrame *frame, TreeWindow *parent,

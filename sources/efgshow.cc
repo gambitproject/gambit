@@ -901,14 +901,16 @@ void EfgShow::MakeMenus(void)
   inspect_menu->Append(efgmenuINSPECT_INFOSETS, "&Infosets",
 		       "Inspect information sets", TRUE);
   inspect_menu->Append(efgmenuINSPECT_ZOOM_WIN, "Zoom &Window",
-		       "Open zoom-in window");
+		       "Open zoom window", TRUE);
   inspect_menu->AppendSeparator();
   inspect_menu->Append(efgmenuINSPECT_GAMEINFO, "Game&Info",
 		       "Information about this game");
   
   wxMenu *prefs_menu = new wxMenu;
-  prefs_menu->Append(efgmenuPREFS_SET_ZOOM, "&Zoom",
-		     "Specify zoom level");
+  prefs_menu->Append(efgmenuPREFS_DEC_ZOOM, "Zoom &In",
+		     "Zoom in");
+  prefs_menu->Append(efgmenuPREFS_INC_ZOOM, "Zoom &Out", 
+		     "Zoom out");
 
   wxMenu *prefsDisplayMenu = new wxMenu;
   prefsDisplayMenu->Append(efgmenuPREFS_DISPLAY_DECIMALS, "&Decimal Places",
@@ -990,8 +992,6 @@ void EfgShow::OnSetFocus(void)
 
 void EfgShow::OnMenuCommand(int id)
 {
-  const double ZOOM_DELTA = 0.2;
-
   try {
     switch (id) {
     case efgmenuFILE_OUTPUT:
@@ -1202,14 +1202,11 @@ void EfgShow::OnMenuCommand(int id)
       SolveStandard();
       break;
 
-    case efgmenuPREFS_SET_ZOOM:
-      tw->display_set_zoom();
-      break;
     case efgmenuPREFS_INC_ZOOM:
-      tw->display_set_zoom(tw->display_get_zoom() + ZOOM_DELTA);
+      tw->display_zoom_in();
       break;
     case efgmenuPREFS_DEC_ZOOM:
-      tw->display_set_zoom(tw->display_get_zoom() - ZOOM_DELTA);
+      tw->display_zoom_out();
       break;
     case efgmenuPREFS_LEGEND:
       tw->display_legends();
@@ -1537,6 +1534,10 @@ int EfgShow::NumDecimals(void) const
   return tw->NumDecimals();
 }
 
+void EfgShow::OnZoomWindowClose(void)
+{
+  GetMenuBar()->Check(efgmenuINSPECT_ZOOM_WIN, FALSE);
+}
 
 void EfgShow::UpdateMenus(Node *p_cursor, Node *p_markNode)
 {

@@ -104,9 +104,8 @@ typedef enum {
   efgmenuINSPECT_ZOOM_WIN = 1880,
   efgmenuINSPECT_GAMEINFO = 1870,
 
-  efgmenuPREFS_SET_ZOOM = 1600,
-  efgmenuPREFS_INC_ZOOM = 1601,  // toolbar only
-  efgmenuPREFS_DEC_ZOOM = 1602,  // toolbar only
+  efgmenuPREFS_INC_ZOOM = 1601,
+  efgmenuPREFS_DEC_ZOOM = 1602,
   efgmenuPREFS_LEGEND = 1604,
   efgmenuPREFS_COLORS = 1609,
   efgmenuPREFS_ACCELS = 1610,

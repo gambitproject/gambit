@@ -9,7 +9,7 @@
 
 #include "accels.h"
 
-const int NUM_EFG_EVENTS = 78;
+const int NUM_EFG_EVENTS = 77;
 
 AccelEvent efg_events[NUM_EFG_EVENTS] = 
 {
@@ -79,7 +79,6 @@ AccelEvent efg_events[NUM_EFG_EVENTS] =
   AccelEvent("InspectInfosets", efgmenuINSPECT_INFOSETS),
   AccelEvent("InspectZoomWindow", efgmenuINSPECT_ZOOM_WIN),
   AccelEvent("InspectGameInfo", efgmenuINSPECT_GAMEINFO),
-  AccelEvent("PrefsZoom", efgmenuPREFS_SET_ZOOM),
   AccelEvent("PrefsDisplay", efgmenuPREFS_DISPLAY),
   AccelEvent("PrefsLegend", efgmenuPREFS_LEGEND),
   AccelEvent("PrefsColors", efgmenuPREFS_COLORS),
