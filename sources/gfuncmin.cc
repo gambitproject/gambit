@@ -197,7 +197,9 @@ double Brent(double ax, double bx, double cx,
       }
       else {
 	if (q == 0.0)  {
+#ifdef DEBUG_WITH_GOUT
 	  gout << "\nq=0";
+#endif  // DEBUG_WITH_GOUT
 	  return 0.0;
 	}
 
@@ -242,7 +244,9 @@ double Brent(double ax, double bx, double cx,
       }
     }
   }
+#ifdef DEBUG_WITH_GOUT
   gout << "\nToo many iterations in BRENT";
+#endif  // DEBUG_WITH_GOUT
   xmin = x;
   return fx;
 
@@ -442,7 +446,9 @@ bool DFP(gPVector<double> &p,
 
   }
 
+#ifdef DEBUG_WITH_GOUT
   gout << "Too many iterations in DFP";
+#endif  // DEBUG_WITH_GOUT
   return false;
 }
 
