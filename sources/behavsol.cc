@@ -422,7 +422,7 @@ gTriState BehavSolution::IsSequential(void) const
 {
   CheckIsNash();
   if(m_checkedSequential == false) {
-    if(IsSubgamePerfect()) {
+    if(IsSubgamePerfect()==triTRUE) {
       // Liap and QRE should be returning Nash solutions that give positive 
       // probability to all actions, and hence will be approximations to 
       // sequential equilibria.  But we should add code to check up on these 
@@ -439,6 +439,8 @@ gTriState BehavSolution::IsSequential(void) const
 	if(flag==true) m_isSequential = triTRUE;
       }
     }
+    else 
+      m_isSequential = IsSubgamePerfect();
     m_checkedSequential = true;
   }
   return m_isSequential;

@@ -185,7 +185,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
       //	solns[j].SetIsSubgamePerfect(triTRUE); 
       if (solns[j].Creator() == algorithmEfg_LIAP_EFG && m_isPerfectRecall) {
 	solns[j].SetLiap(solns[j].LiapValue());
-	solns[j].SetIsSequential(triTRUE);      // even if marked = false
+	//	solns[j].SetIsSequential(triTRUE);      // even if marked = false
 	//	solns[j].SetIsSubgamePerfect(triTRUE);  // even if marked = false
       }
 

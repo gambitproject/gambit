@@ -94,8 +94,6 @@ public:
 
   void SetId(unsigned int p_id) { m_id = p_id; }
   void SetCreator(EfgAlgType p_creator) { m_creator = p_creator; }
-  void SetIsSequential(gTriState p_isSequential)
-    { m_isSequential = p_isSequential; }
   void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
   void SetQre(const gNumber &p_qreLambda, const gNumber &p_qreValue)
     { m_qreLambda = p_qreLambda; m_qreValue = p_qreValue; }
