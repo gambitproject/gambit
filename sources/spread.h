@@ -85,6 +85,7 @@
 #define	DEFAULT_ROW_HEIGHT	30
 #define	DEFAULT_COL_WIDTH		6
 #define MIN_BUTTON_SPACE		60
+#define MIN_MENU_SPACE                  550
 #define	ROW_LABEL_WIDTH			30
 #define	COL_LABEL_HEIGHT		30
 #define	COL_WIDTH_UNIT			10

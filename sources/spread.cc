@@ -1133,6 +1133,9 @@ if (panel)
 {
 	Panel()->Fit();Panel()->GetSize(&w1,&h1);
 	w=gmax(w,w1);
+	#ifdef wx_xview
+	w=gmax(w,MIN_MENU_SPACE); // need this to fit a menu under xview
+	#endif
 	h1=gmax(h1,MIN_BUTTON_SPACE);
 	Panel()->SetSize(0,h,w,h1);
 }
