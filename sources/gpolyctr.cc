@@ -198,3 +198,9 @@ template <class T> void gBlock<T>::Flush(void)
 
 template class gPolyArray<gNumber>;
 template class gPolyBlock<gNumber>;
+
+
+#include "glist.imp"
+
+template class gList<gPoly<gNumber> >;
+template class gNode<gPoly<gNumber> >;
