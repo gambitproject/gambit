@@ -10,7 +10,7 @@
 #include "normal.h"
 #include "rational.h"
 #include "glist.h"
-#include "gtuple.h"
+
 
 template <class T> int FindPureNash(const NormalForm<T> &N,
 				    gList<gPVector<T> > &);

@@ -62,6 +62,7 @@ menu_bar->Append(help_menu,	"&Help");
 // Associate the menu bar with the frame
 gambit_frame->SetMenuBar(menu_bar);
 // Process command line arguments, if any
+gambit_frame->Show(TRUE);
 if (argc>1) gambit_frame->file_load(argv[1]);
 
 // Return the main frame window
