@@ -9,8 +9,8 @@
 #include "strategy.h"
 
 template <class T> ContIter<T>::ContIter(NormalForm<T> &nf, int set)
-  : N(&nf), profile(new StrategyProfile(N->NumPlayers())),
-    thawed(N->NumPlayers()), sset(set)
+  : sset(set), N(&nf), profile(new StrategyProfile(N->NumPlayers())),
+    thawed(N->NumPlayers())
 {
   for (int i = 1; i <= thawed.Length(); i++)
     thawed[i] = i;
@@ -18,8 +18,8 @@ template <class T> ContIter<T>::ContIter(NormalForm<T> &nf, int set)
 }
 
 template <class T> ContIter<T>::ContIter(NormalForm<T> *nf, int set)
-  : N(nf), profile(new StrategyProfile(N->NumPlayers())),
-    thawed(N->NumPlayers()), sset(set)
+  : sset(set), N(nf), profile(new StrategyProfile(N->NumPlayers())),
+    thawed(N->NumPlayers())
 {
   for (int i = 1; i <= thawed.Length(); i++)
     thawed[i] = i;
@@ -27,8 +27,8 @@ template <class T> ContIter<T>::ContIter(NormalForm<T> *nf, int set)
 }
 
 template <class T> ContIter<T>::ContIter(NormalForm<T> &nf)
-  : N(&nf), profile(new StrategyProfile(N->NumPlayers())),
-    thawed(N->NumPlayers()), sset(nf.NumStratSets())
+  : sset(nf.NumStratSets()), N(&nf),
+    profile(new StrategyProfile(N->NumPlayers())), thawed(N->NumPlayers())
 {
   for (int i = 1; i <= thawed.Length(); i++)
     thawed[i] = i;
@@ -36,8 +36,8 @@ template <class T> ContIter<T>::ContIter(NormalForm<T> &nf)
 }
 
 template <class T> ContIter<T>::ContIter(NormalForm<T> *nf)
-  : N(nf), profile(new StrategyProfile(N->NumPlayers())),
-    thawed(N->NumPlayers()), sset(nf->NumStratSets())
+  : sset(nf->NumStratSets()), N(nf),
+    profile(new StrategyProfile(N->NumPlayers())), thawed(N->NumPlayers())
 {
   for (int i = 1; i <= thawed.Length(); i++)
     thawed[i] = i;
