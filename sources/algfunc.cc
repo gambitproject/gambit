@@ -78,7 +78,7 @@ Behav_ListPortion<gRational>::Behav_ListPortion(
 // AgentForm
 //-------------
 
-Portion *GSM_AgentForm_Float(Portion **param)
+static Portion *GSM_AgentForm_Float(Portion **param)
 {
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
   gWatch watch;
@@ -93,7 +93,7 @@ Portion *GSM_AgentForm_Float(Portion **param)
     return new ErrorPortion("Conversion to agent form failed");
 }
 
-Portion *GSM_AgentForm_Rational(Portion **param)
+static Portion *GSM_AgentForm_Rational(Portion **param)
 {
   Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
   gWatch watch;
@@ -112,7 +112,7 @@ Portion *GSM_AgentForm_Rational(Portion **param)
 // Behav
 //------------
 
-Portion *GSM_Behav_Float(Portion **param)
+static Portion *GSM_Behav_Float(Portion **param)
 {
   MixedSolution<double> &mp = * (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
 
@@ -127,7 +127,7 @@ Portion *GSM_Behav_Float(Portion **param)
   return por;
 }
 
-Portion *GSM_Behav_Rational(Portion **param)
+static Portion *GSM_Behav_Rational(Portion **param)
 {
   MixedSolution<gRational> &mp = 
     * (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
@@ -149,7 +149,7 @@ Portion *GSM_Behav_Rational(Portion **param)
 
 #include "enum.h"
 
-Portion *GSM_EnumMixed_Nfg(Portion **param)
+static Portion *GSM_EnumMixed_Nfg(Portion **param)
 {
   NFSupport* S = ((NfSupportPortion*) param[0])->Value();
   BaseNfg* N = (BaseNfg*) &(S->BelongsTo());
@@ -194,7 +194,7 @@ Portion *GSM_EnumMixed_Nfg(Portion **param)
 #include "enumsub.h"
 
 
-Portion *GSM_EnumMixed_Efg(Portion **param)
+static Portion *GSM_EnumMixed_Efg(Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
   const BaseEfg &E = support.BelongsTo();
@@ -252,7 +252,7 @@ Portion *GSM_EnumMixed_Efg(Portion **param)
 
 #include "nfgpure.h"
 
-Portion *GSM_EnumPure_Nfg(Portion **param)
+static Portion *GSM_EnumPure_Nfg(Portion **param)
 {
   NFSupport* S = ((NfSupportPortion*) param[0])->Value();
   BaseNfg* N = (BaseNfg*) &(S->BelongsTo());
@@ -289,7 +289,7 @@ Portion *GSM_EnumPure_Nfg(Portion **param)
 #include "efgpure.h"
 #include "psnesub.h"
 
-Portion *GSM_EnumPure_Efg(Portion **param)
+static Portion *GSM_EnumPure_Efg(Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
   const BaseEfg &E = support.BelongsTo();
@@ -350,48 +350,48 @@ Portion *GSM_EnumPure_Efg(Portion **param)
 
 #include "grid.h"
 
-Portion *GSM_GobitGrid_Support(Portion **param)
+static Portion *GSM_GobitGrid_Support(Portion **param)
 {
-	NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-	BaseNfg* N = (BaseNfg*) &(S.BelongsTo());
-	Portion* por = 0;
+  NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
+  BaseNfg* N = (BaseNfg*) &(S.BelongsTo());
+  Portion* por = 0;
 
-	GridParams GP;
+  GridParams GP;
+  
+  if(((TextPortion*) param[1])->Value() != "")
+    GP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
+  else
+    GP.pxifile = &gnull;
+  GP.minLam = ((FloatPortion *) param[2])->Value();
+  GP.maxLam = ((FloatPortion *) param[3])->Value();
+  GP.delLam = ((FloatPortion *) param[4])->Value();
+  GP.powLam = ((IntPortion *) param[5])->Value();
+  GP.delp1 = ((FloatPortion *) param[6])->Value();
+  GP.tol1 = ((FloatPortion *) param[7])->Value();
+  
+  GP.delp2 = ((FloatPortion *) param[8])->Value();
+  GP.tol2 = ((FloatPortion *) param[9])->Value();
 
-	if(((TextPortion*) param[1])->Value() != "")
-		GP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
-	else
-		GP.pxifile = &gnull;
-	GP.minLam = ((FloatPortion *) param[2])->Value();
-	GP.maxLam = ((FloatPortion *) param[3])->Value();
-	GP.delLam = ((FloatPortion *) param[4])->Value();
-	GP.powLam = ((IntPortion *) param[5])->Value();
-	GP.delp1 = ((FloatPortion *) param[6])->Value();
-	GP.tol1 = ((FloatPortion *) param[7])->Value();
+  GP.multi_grid = 0;
+  if(GP.delp2 > 0.0 && GP.tol2 > 0.0)GP.multi_grid = 1;
 
-	GP.delp2 = ((FloatPortion *) param[8])->Value();
-	GP.tol2 = ((FloatPortion *) param[9])->Value();
-
-	GP.multi_grid = 0;
-	if(GP.delp2 > 0.0 && GP.tol2 > 0.0)GP.multi_grid = 1;
-
-	switch(N->Type())
-	{
-	case DOUBLE:
-		{
-			GridSolveModule GM(* (Nfg<double>*) N, GP, S);
-			GM.GridSolve();
-			// ((IntPortion *) param[10])->Value() = GM.NumEvals();
-			// ((FloatPortion *) param[11])->Value() = GM.Time();
-			gList<MixedSolution<double> > solns;
-			por = new Mixed_ListPortion<double>(solns);
-		}
-		break;
-	case RATIONAL:
-		return new ErrorPortion("The rational version of GobitGridSolve is not implemented");
-		break;
-	default:
-		assert(0);
+  switch(N->Type())
+    {
+    case DOUBLE:
+      {
+	GridSolveModule GM(* (Nfg<double>*) N, GP, S);
+	GM.GridSolve();
+	// ((IntPortion *) param[10])->Value() = GM.NumEvals();
+	// ((FloatPortion *) param[11])->Value() = GM.Time();
+	gList<MixedSolution<double> > solns;
+	por = new Mixed_ListPortion<double>(solns);
+      }
+      break;
+    case RATIONAL:
+      return new ErrorPortion("The rational version of GobitGridSolve is not implemented");
+      break;
+    default:
+      assert(0);
   }
 
   assert(por != 0);
@@ -406,7 +406,7 @@ Portion *GSM_GobitGrid_Support(Portion **param)
 #include "ngobit.h"
 #include "egobit.h"
 
-Portion *GSM_Gobit_Start(Portion **param)
+static Portion *GSM_Gobit_Start(Portion **param)
 {
   if (param[0]->Spec().Type == porMIXED_FLOAT)  {
     MixedSolution<double> &start = 
@@ -490,7 +490,7 @@ Portion *GSM_Gobit_Start(Portion **param)
 
 #include "lemke.h"
 
-Portion *GSM_Lcp_Nfg(Portion **param)
+static Portion *GSM_Lcp_Nfg(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
   BaseNfg* N = (BaseNfg*) &(S.BelongsTo());
@@ -572,7 +572,7 @@ Portion* GSM_Lcp_ListRational(Portion** param)
 #include "seqform.h"
 #include "lemkesub.h"
 
-Portion *GSM_Lcp_Efg(Portion **param)
+static Portion *GSM_Lcp_Efg(Portion **param)
 {
   EFSupport& S = *((EfSupportPortion*) param[0])->Value();
   Portion* por;
@@ -632,7 +632,7 @@ Portion *GSM_Lcp_Efg(Portion **param)
 #include "liapsub.h"
 #include "eliap.h"
 
-Portion *GSM_Liap_BehavFloat(Portion **param)
+static Portion *GSM_Liap_BehavFloat(Portion **param)
 {
   BehavSolution<double> &start = 
     * (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
@@ -694,7 +694,7 @@ Portion *GSM_Liap_BehavFloat(Portion **param)
 
 #include "nliap.h"
 
-Portion *GSM_Liap_MixedFloat(Portion **param)
+static Portion *GSM_Liap_MixedFloat(Portion **param)
 {
   MixedSolution<double> &start = 
     * (MixedSolution<double> *) ((MixedPortion *) param[0])->Value();
@@ -733,7 +733,7 @@ Portion *GSM_Liap_MixedFloat(Portion **param)
 
 #include "nfgcsum.h"
 
-Portion *GSM_Lp_Nfg(Portion **param)
+static Portion *GSM_Lp_Nfg(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
   BaseNfg* N = (BaseNfg*) &(S.BelongsTo());
@@ -836,7 +836,7 @@ Portion* GSM_Lp_ListRational(Portion** param)
 #include "csumsub.h"
 #include "efgcsum.h"
 
-Portion *GSM_Lp_Efg(Portion **param)
+static Portion *GSM_Lp_Efg(Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
   const BaseEfg &E = support.BelongsTo();
@@ -935,7 +935,7 @@ Portion *GSM_Lp_Efg(Portion **param)
 // Nfg
 //---------
 
-Portion *GSM_Nfg_Float(Portion **param)
+static Portion *GSM_Nfg_Float(Portion **param)
 {
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
   gWatch watch;
@@ -950,7 +950,7 @@ Portion *GSM_Nfg_Float(Portion **param)
     return new ErrorPortion("Conversion to reduced nfg failed");
 }
 
-Portion *GSM_Nfg_Rational(Portion **param)
+static Portion *GSM_Nfg_Rational(Portion **param)
 {
   Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
   gWatch watch;
@@ -1012,7 +1012,7 @@ Portion* GSM_Payoff_MixedRational(Portion** param)
 
 #include "simpdiv.h"
 
-Portion *GSM_Simpdiv_Nfg(Portion **param)
+static Portion *GSM_Simpdiv_Nfg(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
   BaseNfg* N = (BaseNfg*) &(S.BelongsTo());
@@ -1057,7 +1057,7 @@ Portion *GSM_Simpdiv_Nfg(Portion **param)
 
 #include "simpsub.h"
 
-Portion *GSM_Simpdiv_Efg(Portion **param)
+static Portion *GSM_Simpdiv_Efg(Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
   const BaseEfg &E = support.BelongsTo();
@@ -1459,21 +1459,25 @@ void Init_algfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("Payoff", 4);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Payoff_BehavFloat, porFLOAT, 2));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Payoff_BehavFloat, porFLOAT, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porEFPLAYER));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Payoff_BehavRational,
-				       porRATIONAL, 2));
+				       porRATIONAL, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porEFPLAYER));
 
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Payoff_MixedFloat, porFLOAT, 2));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Payoff_MixedFloat, porFLOAT, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("profile", porMIXED_FLOAT));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("player", porNFPLAYER));
   
   FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Payoff_MixedRational, 
-				       porRATIONAL, 2));
+				       porRATIONAL, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("profile", porMIXED_RATIONAL));
   FuncObj->SetParamInfo(3, 1, ParamInfoType("player", porNFPLAYER));
 
