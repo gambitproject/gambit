@@ -22,8 +22,6 @@
 #include "dlefgplayer.h"
 #include "dlefgdelete.h"
 #include "dlefgreveal.h"
-#include "dlefgpayoff.h"
-#include "dlefgoutcome.h"
 #include "dlefgeditsupport.h"
 
 //=========================================================================
@@ -127,55 +125,6 @@ void dialogEfgDelete::OnDeleteTree(wxCommandEvent &)
 }
 
 //=========================================================================
-//                    dialogEfgPayoffs: Member functions
-//=========================================================================
-
-dialogEfgPayoffs::dialogEfgPayoffs(const FullEfg &p_efg, 
-				   const Efg::Outcome &p_outcome,
-				   wxWindow *p_parent)
-  : guiPagedDialog(p_parent, "Change Payoffs", p_efg.NumPlayers()),
-    m_outcome(p_outcome), m_efg(p_efg)
-{
-  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-    EFPlayer *player = m_efg.Players()[pl];
-    SetValue(pl, ToText(m_efg.Payoff(p_outcome, player)));
-  }
-
-  m_outcomeName = new wxTextCtrl(this, -1);
-  if (!p_outcome.IsNull()) {
-    m_outcomeName->SetValue((char *) m_efg.GetOutcomeName(p_outcome));
-  }
-  else {
-    m_outcomeName->SetValue((char *) ("Outcome" + ToText(p_efg.NumOutcomes() + 1)));
-  }
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(m_outcomeName, 0, wxALL, 5);
-  topSizer->Add(m_grid, 0, wxALL, 5);
-  topSizer->Add(m_buttonSizer, 0, wxALL, 5);
-
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-
-  Layout();
-}
-
-gArray<gNumber> dialogEfgPayoffs::Payoffs(void) const
-{
-  gArray<gNumber> ret(m_efg.NumPlayers());
-  for (int pl = 1; pl <= ret.Length(); pl++) {
-    ret[pl] = ToNumber(GetValue(pl));
-  }
-  return ret;
-}
-
-gText dialogEfgPayoffs::Name(void) const
-{
-  return m_outcomeName->GetValue().c_str();
-}
-
-//=========================================================================
 //                  dialogInfosetReveal: Member functions
 //=========================================================================
 
@@ -219,55 +168,6 @@ gArray<EFPlayer *> dialogInfosetReveal::GetPlayers(void) const
   }
 
   return players;
-}
-
-//=========================================================================
-//                dialogEfgOutcomeSelect: Member functions
-//=========================================================================
-
-dialogEfgOutcomeSelect::dialogEfgOutcomeSelect(FullEfg &p_efg,
-					       wxWindow *p_parent)
-  : guiAutoDialog(p_parent, "Select Outcome"), m_efg(p_efg)
-{
-  m_outcomeList = new wxListBox(this, -1);
-  
-  for (int outc = 1; outc <= m_efg.NumOutcomes(); outc++) {
-    Efg::Outcome outcome = m_efg.GetOutcome(outc);
-    gText item = ToText(outc) + ": " + m_efg.GetOutcomeName(outcome);
-    if (item == "")
-      item = "Outcome" + ToText(outc);
-
-    item += (" (" + ToText(m_efg.Payoff(outcome, m_efg.Players()[1])) + ", " +
-	     ToText(m_efg.Payoff(outcome, m_efg.Players()[2])));
-    if (m_efg.NumPlayers() > 2) {
-      item += ", " + ToText(m_efg.Payoff(outcome, m_efg.Players()[3]));
-      if (m_efg.NumPlayers() > 3) 
-	item += ",...)";
-      else
-	item += ")";
-    }
-    else
-      item += ")";
-
-    m_outcomeList->Append((char *) item);
-  }
-  m_outcomeList->SetSelection(0);
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(new wxStaticText(this, -1, "Outcome"), 0, wxCENTRE | wxALL, 5);
-  topSizer->Add(m_outcomeList, 0, wxCENTRE | wxALL, 5);
-  topSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
-
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-
-  Layout();
-}
-
-Efg::Outcome dialogEfgOutcomeSelect::GetOutcome(void)
-{
-  return m_efg.GetOutcome(m_outcomeList->GetSelection() + 1);
 }
 
 //=========================================================================

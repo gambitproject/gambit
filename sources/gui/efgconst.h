@@ -22,10 +22,6 @@ typedef enum {
   efgmenuEDIT_INFOSET_REVEAL = 1407,
   efgmenuEDIT_INFOSET_SPLIT = 1410,
 
-  efgmenuEDIT_OUTCOMES = 1319,
-  efgmenuEDIT_OUTCOMES_DELETE = 1325,
-  efgmenuEDIT_OUTCOMES_NEW = 1326,
-
   efgmenuEDIT_GAME = 1419,
   efgmenuEDIT_NODE = 1420,
   efgmenuEDIT_MOVE = 1421,

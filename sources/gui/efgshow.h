@@ -79,9 +79,6 @@ private:
   void OnEditInfosetPlayer(wxCommandEvent &);
   void OnEditInfosetReveal(wxCommandEvent &);
 
-  void OnEditOutcomesNew(wxCommandEvent &);
-  void OnEditOutcomesDelete(wxCommandEvent &);
-
   void OnEditMove(wxCommandEvent &);
   void OnEditGame(wxCommandEvent &);
 

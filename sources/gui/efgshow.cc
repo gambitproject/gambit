@@ -41,8 +41,6 @@
 #include "dlefgplayer.h"
 #include "dlinsertmove.h"
 #include "dlefgdelete.h"
-#include "dlefgoutcome.h"
-#include "dlefgpayoff.h"
 #include "dlefgreveal.h"
 #include "dleditnode.h"
 #include "dleditmove.h"
@@ -96,8 +94,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuEDIT_INFOSET_JOIN, EfgShow::OnEditInfosetJoin)
   EVT_MENU(efgmenuEDIT_INFOSET_PLAYER, EfgShow::OnEditInfosetPlayer)
   EVT_MENU(efgmenuEDIT_INFOSET_REVEAL, EfgShow::OnEditInfosetReveal)
-  EVT_MENU(efgmenuEDIT_OUTCOMES_NEW, EfgShow::OnEditOutcomesNew)
-  EVT_MENU(efgmenuEDIT_OUTCOMES_DELETE, EfgShow::OnEditOutcomesDelete)
   EVT_MENU(efgmenuEDIT_NODE, EfgShow::OnEditNode)
   EVT_MENU(efgmenuEDIT_MOVE, EfgShow::OnEditMove)
   EVT_MENU(efgmenuEDIT_GAME, EfgShow::OnEditGame)
@@ -578,16 +574,8 @@ void EfgShow::MakeMenus(void)
   infosetMenu->Append(efgmenuEDIT_INFOSET_REVEAL, "&Reveal", 
 		      "Reveal choice at information set to players");
 
-  wxMenu *outcomeMenu = new wxMenu;
-  outcomeMenu->Append(efgmenuEDIT_OUTCOMES_NEW, "&New",
-		      "Create a new outcome");
-  outcomeMenu->Append(efgmenuEDIT_OUTCOMES_DELETE, "Dele&te",
-		      "Delete an outcome");
-
   editMenu->Append(efgmenuEDIT_INFOSET, "&Infoset", infosetMenu,
 		   "Edit infosets");
-  editMenu->Append(efgmenuEDIT_OUTCOMES, "&Outcomes", outcomeMenu,
-		   "Edit outcomes and payoffs");
   editMenu->AppendSeparator();
   editMenu->Append(efgmenuEDIT_NODE, "&Node",
 		   "Edit properties of the node");
@@ -793,9 +781,6 @@ void EfgShow::UpdateMenus(void)
 		   !cursor->GetPlayer()->IsChance()) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_REVEAL, 
 		  (cursor && cursor->GetInfoset()) ? true : false);
-
-  menuBar->Enable(efgmenuEDIT_OUTCOMES_DELETE,
-		  (m_efg.NumOutcomes() > 0) ? true : false);
 
   menuBar->Enable(efgmenuEDIT_NODE, (cursor) ? true : false);
   menuBar->Enable(efgmenuEDIT_MOVE,
@@ -1027,50 +1012,6 @@ void EfgShow::OnEditDelete(wxCommandEvent &)
   }
   catch (gException &ex) {
     guiExceptionDialog(ex.Description(), this);
-  }
-}
-
-//----------------------------------------------------------------------
-//           EfgShow: Menu handlers - Edit->Outcomes menu
-//----------------------------------------------------------------------
-
-void EfgShow::OnEditOutcomesNew(wxCommandEvent &)
-{
-  dialogEfgPayoffs dialog(m_efg, m_efg.GetNullOutcome(), this);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      Efg::Outcome outcome = m_efg.NewOutcome();
-      gArray<gNumber> payoffs(dialog.Payoffs());
-
-      for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-	m_efg.SetPayoff(outcome, pl, payoffs[pl]);
-      }
-      m_efg.SetOutcomeName(outcome, dialog.Name());
-      
-      m_treeWindow->Refresh();
-      m_outcomeWindow->UpdateValues();
-      UpdateMenus();
-    }
-    catch (gException &ex) {
-      guiExceptionDialog(ex.Description(), this);
-    }
-  }
-}
-
-void EfgShow::OnEditOutcomesDelete(wxCommandEvent &)
-{
-  dialogEfgOutcomeSelect dialog(m_efg, this);
-  
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      m_efg.DeleteOutcome(dialog.GetOutcome());
-      m_treeWindow->Refresh();
-      UpdateMenus();
-    }
-    catch (gException &ex) {
-      guiExceptionDialog(ex.Description(), this);
-    }
   }
 }
 
