@@ -1516,6 +1516,7 @@ void NfgShow::EditAccelerators(void)
     WriteAccelerators(accelerators, "NfgAccelerators");
 }
 
+#undef ENTRIES_PER_ROW
 #define ENTRIES_PER_ROW 5
 
 class NFChangePayoffs : public MyDialogBox {
