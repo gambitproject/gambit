@@ -139,6 +139,8 @@ public:
   virtual ~FuncDescObj();
 
   void SetFuncInfo(int funcindex, FuncInfoType funcinfo);
+  void SetFuncInfo(int funcindex, const gString& s, 
+                   Portion* (*funcptr)(Portion**)  );
   void SetParamInfo(int funcindex, int index, const ParamInfoType paraminfo);  
   void SetParamInfo(int funcindex, const ParamInfoType paraminfo[]);
   

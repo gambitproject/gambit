@@ -504,6 +504,165 @@ void FuncDescObj::SetFuncInfo(int funcindex, FuncInfoType funcinfo)
       _RefCountTable(funcinfo.FuncInstr)++;
 }
 
+void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
+                              Portion* (*funcptr)(Portion**)  )
+{
+
+  // Here we will parse the gString and call the above SetFuncInfo function.
+  char ch = ' ';
+  int index=0, length=s.length();
+  int numbers=0, bools=0;
+  
+  while (ch != '[' && index<=length)  
+    ch=s[index++];
+  ch=s[index++];
+
+  // We are now at the first variable name (most likely "X")
+
+  while (ch != '>' && index<=length)  
+    ch=s[index++];
+  ch=s[index++];
+
+  // ch now holds the first letter of the type of the first variable
+
+  if (ch == 'N' /*&& ch++ == 'U' && ch++=='M'*/)
+  {
+    while (ch != 'R' && index<=length)  
+      ch=s[index++];
+    numbers++;
+  }
+  else if (ch == 'B' /*&& ch++ == 'O' && ch++=='O'*/)
+  {
+    while (ch != 'N' && index<=length)  
+      ch=s[index++];
+    bools++;
+  }
+
+  while (ch != '>' && index<=length)  
+    ch=s[index++];
+  ch=s[index++];
+  
+  // ch now holds the first letter of the type of the second variable
+
+
+  if (ch == 'N' /*&& ch++ == 'U' && ch++=='M'*/)
+  {
+    while (ch != 'R' && index<=length)  
+      ch=s[index++];
+    numbers++;
+  }
+  else if (ch == 'B' /*&& ch++ == 'O' && ch++=='O'*/)
+  {
+    while (ch != 'N' && index<=length)  
+      ch=s[index++];
+    bools++;
+  }
+
+
+    // Move ch till ch holds the first char of the return type.
+  while (ch != ':' && index<=length)  
+    ch=s[index++];
+  ch=s[index++];
+  ch=s[index++];
+  
+    // Output, for bugging purposes
+  /*gout << "Nums: " << numbers << "   Bools: " << bools << "\n\n";*/
+
+    // Make proper function call to SetFuncInfo based on return and arguments.
+  if (ch == 'N' /*&& ch++ == 'U' && ch++=='M'*/)  // If return type is number
+  {
+    while (ch != 'R' && index<=length)  
+      ch=s[index++];
+    if (numbers == 1)
+    {
+      ParamInfoType x_Number[] =
+      {
+        ParamInfoType("x", porNUMBER)
+      };
+      SetFuncInfo(funcindex, FuncInfoType(funcptr, porNUMBER, 2, x_Number));
+    }
+    else if (numbers == 2)
+    {
+      ParamInfoType xy_Number[] =
+      {
+        ParamInfoType("x", porNUMBER),
+        ParamInfoType("y", porNUMBER)
+      };
+      SetFuncInfo(funcindex, FuncInfoType(funcptr, porNUMBER, 2, xy_Number));
+    }
+    else if (bools == 2)
+    {
+      ParamInfoType xy_Bool[] =
+      {
+        ParamInfoType("x", porBOOL),
+        ParamInfoType("y", porBOOL)
+      };
+      SetFuncInfo(funcindex, FuncInfoType(funcptr, porNUMBER, 2, xy_Bool));
+    }
+    else
+    {
+      gout << "Invalid call to SetFuncInfo.\n\n";
+      assert(0);
+    }
+  }
+  else if (ch == 'B' /*&& ch++ == 'O' && ch++=='O'*/)  // If return type is bool
+  {
+    while (ch != 'N' && index<=length)  
+      ch=s[index++];
+    if (numbers == 1)
+    {
+      ParamInfoType x_Number[] =
+      {
+        ParamInfoType("x", porNUMBER)
+      };
+      SetFuncInfo(funcindex, FuncInfoType(funcptr, porBOOL, 2, x_Number));
+    }
+    else if (numbers == 2)
+    {
+      ParamInfoType xy_Number[] =
+      {
+        ParamInfoType("x", porNUMBER),
+        ParamInfoType("y", porNUMBER)
+      };
+      SetFuncInfo(funcindex, FuncInfoType(funcptr, porBOOL, 2, xy_Number));
+    }
+    else if (bools == 2)
+    {
+      ParamInfoType xy_Bool[] =
+      {
+        ParamInfoType("x", porBOOL),
+        ParamInfoType("y", porBOOL)
+      };
+      SetFuncInfo(funcindex, FuncInfoType(funcptr, porBOOL, 2, xy_Bool));
+    }
+    else
+    {
+      gout << "Invalid call to SetFuncInfo.\n\n";
+      assert(0);
+    }
+  }
+  else  // If return type is crap
+  {
+    gout << "Invalid call to SetFuncInfo.\n\n";
+    assert(0);
+  }
+    
+  if (numbers == 1)
+    return;
+  else if (numbers == 2)
+    return;
+  else if (bools == 2)
+    return;
+  else
+  {
+    gout << "Invalid call to SetFuncInfo.\n\n";
+    assert(0);
+  }
+
+  gout << "Nums: " << numbers << "   Bools: " << bools << "\n\n";
+  
+}
+
 void FuncDescObj::SetParamInfo(int funcindex, int index, 
 			       const ParamInfoType param)
 {
