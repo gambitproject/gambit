@@ -1,8 +1,8 @@
-//#
-//# FILE: bfs.cc -- Instantiation of Basic Feasible Solutions class
-//#
-//# $Id$
-//#
+//
+// FILE: bfs.cc -- Instantiation of Basic Feasible Solutions class
+//
+// $Id$
+//
 
 #include "rational.h"
 
@@ -74,8 +74,6 @@ TEMPLATE class gListIter<BFS<gRational> >;
 
 TEMPLATE class gBaseMap<int, double>;
 TEMPLATE class gOrdMap<int, double>;
-TEMPLATE class gBaseMapMessage<int, double>;
 TEMPLATE class gBaseMap<int, gRational>;
 TEMPLATE class gOrdMap<int, gRational>;
-TEMPLATE class gBaseMapMessage<int, gRational>;
 
