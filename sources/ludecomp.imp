@@ -1,11 +1,283 @@
 //
 // FILE: ludecomp.imp -- implementation of the LUdecomp class
-//
+//                       and Basis class (for now).
 // $Id$
 //
 //
 
 #include "ludecomp.h"
+
+// ---------------------------------------------------------------------------
+// Class Basis
+// ---------------------------------------------------------------------------
+
+// -----------------------
+// C-tor, D-tor, Operators
+// -----------------------
+
+template <class T> 
+Basis<T>::Basis(const gMatrix<T> &mat)
+: A(&mat), label( mat.MinRow(), mat.MaxRow() ), 
+  cols( mat.MinCol(), mat.MaxCol() ), rows( mat.MinRow(), mat.MaxRow() ), 
+  arts(), artificial()
+{
+
+  for(int i = mat.MinCol(); i <= mat.MaxCol(); i++) 
+    cols[i] = 0;
+
+  for(int i = label.First(); i <= label.Last(); i++) {
+    label[i]= - i;
+    rows[i] = i;
+  }
+  IsBasisIdent = true;
+}
+
+template <class T>
+Basis<T>::Basis(const Basis<T> &bas)
+: A(bas.A), label(bas.label), cols( bas.cols ), rows( bas.rows ),
+  arts(bas.arts), artificial(bas.artificial), IsBasisIdent(bas.IsBasisIdent)
+{ }
+
+template <class T>
+Basis<T>::~Basis()
+{ }
+
+template <class T>
+Basis<T>& Basis<T>::operator=(const Basis<T> &orig)
+{
+  if(this != &orig) {
+    A = orig.A;
+    label = orig.label; 
+    cols = orig.cols;
+    rows = orig.rows;
+    arts = orig.arts;
+    artificial = orig.artificial;
+    IsBasisIdent = orig.IsBasisIdent;
+
+  }
+  return *this;
+}
+
+
+// -------------------------
+// Public Members
+// -------------------------
+
+template <class T>
+int Basis<T>::Pivot(int outindex, int col)
+{
+  if ( col < 0 ) 
+    assert(A->CheckRow(-col) );
+  else if ( col > A->MaxCol() )
+    assert ( col > A->MaxCol() && 
+	    col <= A->MaxCol() + artificial.Length() && 
+	    A->CheckRow( artificial[col - A->MaxRow()] ) );
+  else 
+    assert( A->CheckColumn(col) );
+
+  int outlabel = label[outindex];
+ 
+  if ( -col >= A->MinRow() && -col <= A->MaxRow() ) rows[-col] = outindex;
+  else if ( col >= A->MinCol() && col <= A->MaxCol() ) cols[col] = outindex;
+  else if ( col > A->MaxCol() && col <= A->MaxCol() + artificial.Length() ) 
+    arts[col - A->MaxCol()] = outindex;
+  else assert(0); // not a valid column to pivot in.
+  
+  if ( -outlabel >= A->MinRow() && -outlabel <= A->MaxRow() ) 
+    rows[-outlabel] = 0;
+  else if ( outlabel >= A->MinCol() && outlabel <= A->MaxCol() ) 
+    cols[outlabel] = 0;
+  else if ( outlabel > A->MaxCol() && 
+	   outlabel <= A->MaxCol() + artificial.Length() ) 
+    arts[outlabel - A->MaxCol()] = 0;
+  else assert(0); // not a valid column to pivot in.
+  
+  label[outindex] = col;
+  CheckBasis();
+  
+  return outlabel;
+}
+
+template <class T>
+bool Basis<T>::Member( int col ) const
+{
+  int ret;
+
+  if ( -col >= A->MinRow() && -col <= A->MaxRow() ) ret = rows[-col];
+  else if ( col >= A->MinCol() && col <= A->MaxCol() ) ret = cols[col];
+  else if ( col > A->MaxCol() && col <= A->MaxCol() + artificial.Length() ) 
+    ret = arts[col - A->MaxCol()];
+  else ret = 0;
+
+  return (ret != 0);
+}
+
+
+template <class T>
+int Basis<T>::Find( int col ) const
+{
+  int ret;
+
+  if ( -col >= A->MinRow() && -col <= A->MaxRow() ) ret = rows[-col];
+  else if ( col >= A->MinCol() && col <= A->MaxCol() ) ret = cols[col];
+  else if ( col > A->MaxCol() && col <= A->MaxCol() + artificial.Length() ) 
+    ret = arts[col - A->MaxCol()];
+  else ret = 0;
+  
+  assert (ret != 0);
+  return ret;
+}
+
+template <class T>
+int Basis<T>::Label(int index) const
+{
+  return  label[index];
+}
+
+template <class T>
+void Basis<T>::BasisSelect(const gVector<T> &rowv, gVector<T> &colv) const
+{
+  assert(A->CheckColumn(colv) && A->CheckRow(rowv));
+
+  for(int i=label.First(); i<=label.Last(); i++) {
+    if(label[i]<0)
+      colv[i]= 0;
+    else
+      colv[i]= rowv[label[i]];
+  }
+}
+
+template <class T>
+void Basis<T>::BasisSelect(const gVector<T> &unitv,
+			   const gVector<T> &rowv,
+			   gVector<T> &colv ) const
+{
+  assert(A->CheckColumn(colv)
+	 && A->CheckColumn(unitv)
+	 && A->CheckRow(rowv) );
+  
+  for(int i=label.First(); i<=label.Last(); i++) {
+    if(label[i]<0)
+      colv[i]= unitv[-label[i]];
+    else
+      colv[i]= rowv[label[i]];
+  }
+}
+
+template <class T> 
+bool Basis<T>::IsSpecialColumn( int col )
+{
+  return ( (-col >= label.First() && -col <= label.Last()) ||
+	  ( col > A->MaxCol() && col <= A->MaxCol() + artificial.Length()) ); 
+}
+ 
+template <class T>
+void Basis<T>::GetColumn( int col, gVector<T> &ret ) 
+{
+  
+  if ( IsSpecialColumn( col ) ) {
+    if ( col < 0 ) {
+      ret = (T) 0;
+      ret[-col] = (T) 1;
+    }
+    else { // its an artificial variable
+      ret = (T) 0;
+      ret[col - A->MaxCol()] = (T) 1;
+    }
+  }
+  else 
+    A->GetColumn(col, ret);
+  
+}
+
+
+template <class T>
+int InsertArtificial( int art, int col )
+{
+  arts[ arts.Insert( art, col - A->MaxCol() ) ] = 0;
+  return ( artificial.Insert( art, col - A->MaxCol() ) + A->MaxCol() );
+}
+
+template <class T>
+int AppendArtificial( int art )
+{
+  arts[ arts.Append(art) ] = 0;
+  return ( artificial.Append( art ) + A->MaxCol() );
+}
+
+template <class T>
+int RemoveArtificial( int col )
+{
+  arts.Remove(col);
+  return artificial.Remove( col - A->MaxCol() );
+}
+
+template <class T>
+void FlushArtificial()
+{
+  arts.Flush();
+  artificial.Flush();
+}
+
+template <class T>
+int LastARtificial()
+{
+  return ( artificial.Last() + A->MaxCol() );
+}
+
+template <class T> 
+gOutput &operator<<(gOutput &to, const Basis<T> &v)
+{
+  v.Dump(to); return to;
+}
+
+template <class T>
+void Basis<T>::Dump(gOutput &to) const
+{ 
+  to << "{";
+  for(int i=label.First();i<=label.Last();i++) {
+    to << "  " << label[i];  
+  }
+  to << " }";
+}
+
+template<class T>
+void Basis<T>::CheckBasis() 
+{
+  int i;
+  bool check = true;
+
+  for ( i =label.First(); i <= label.Last() && check != false; 
+       i++){
+    check = check && ( label[i] == -i  || ( label[i] == i + A->MaxCol() ));
+  }
+
+//  if ( !check ) {
+//    check = true;
+//    for ( i = label.First(); i <= label.Last() && check != false; i++ ) {
+//      if (basis[i] > 0) {
+//	for ( j = (*A).MinRow(); j <= (*A).MaxRow() && check != false; j++ ) {
+//	  if ( i == j ) {
+//	    check = check && ( (*A)(j,label[i])  == (T) 1 );
+//	  }
+//	  else {
+//	    check = check && ( (*A)(j,label[i])  == (T) 0 );
+//	  }
+//	}
+//      }
+//      else if (label[i] != -i ) check = false;
+//    }
+//  }
+
+  IsBasisIdent = check;
+}
+
+template<class T>
+bool Basis<T>::IsIdent()
+{
+  return IsBasisIdent;
+}
+
 
 // ---------------------------------------------------------------------------
 // Class EtaMatrix
@@ -31,7 +303,7 @@ bool EtaMatrix<T>::operator!=(const EtaMatrix<T> &a) const
 }
 
 // ---------------------------------------------------------------------------
-// Class Decomp
+// Class LUdecomp
 // ---------------------------------------------------------------------------
 // -------------------------
 //  C-tors, D-tor, Operators
@@ -40,9 +312,10 @@ bool EtaMatrix<T>::operator!=(const EtaMatrix<T> &a) const
 // copy constructor
 
 template <class T> 
-LUdecomp<T>::LUdecomp( const LUdecomp<T> &a)
-: A(a.A), basis(a.basis), IsBasisIdent(a.IsBasisIdent),
-  scratch1(basis.First(), basis.Last()), scratch2(basis.First(), basis.Last()),
+LUdecomp<T>::LUdecomp( const LUdecomp<T> &a, Basis<T> &bas)
+: basis( bas ), 
+  scratch1(basis.label.First(), basis.label.Last()), 
+  scratch2(basis.label.First(), basis.label.Last()),
   refactor_number( a.refactor_number ), iterations(a.iterations),
   total_operations( a.total_operations),
   parent(&a), copycount(0)
@@ -54,31 +327,15 @@ LUdecomp<T>::LUdecomp( const LUdecomp<T> &a)
 // Decomposes given matrix
 
 template <class T> 
-LUdecomp<T>::LUdecomp( const gMatrix<T> &mat, int rfac = -1 )
-: A(&mat), basis(mat.MinRow(), mat.MaxRow()), IsBasisIdent(true), 
-  scratch1(basis.First(), basis.Last()), scratch2(basis.First(), basis.Last()),
+LUdecomp<T>::LUdecomp( Basis<T> &bas,
+		      int rfac = -1 )	
+: basis(bas),  
+  scratch1(basis.label.First(), basis.label.Last()), 
+  scratch2(basis.label.First(), basis.label.Last()),
   refactor_number(rfac), iterations(0), parent(NULL), copycount(0)
 {
-  int i;
-  for ( i = mat.MinRow(); i <= mat.MaxRow(); i++ ) basis[i] = -i;
-  int m = basis.Length();
+  int m = basis.label.Length();
   total_operations = (m - 1) * m * (2 * m - 1) / 6;
-}
-
-// Decomposes the selected columnts of the given matrix
-
-template <class T>
-LUdecomp<T>::LUdecomp( const gMatrix<T> &mat, const gBlock<int> &bas, 
-		      int rfac = -1 )
-: A(&mat), basis(bas), scratch1(basis.First(), basis.Last()),
-  scratch2(basis.First(), basis.Last()),
-  refactor_number(rfac), iterations(0), parent(NULL), copycount(0)
-      
-{
-  assert ( bas.First() == mat.MinRow() && bas.Last() == mat.MaxRow() );
-  IsBasisIdent = CheckBasis();
-
-  refactor();
 }
 
 // Destructor
@@ -89,24 +346,27 @@ template <class T> LUdecomp<T>::~LUdecomp()
   assert ( copycount == 0 );
 }
 
-// Assignment operator
 
+
+// -------------------------
+//  Public Members
+// -------------------------
+
+// use this to copy ludecomps.... 
 template <class T>
-LUdecomp<T>& LUdecomp<T>::operator=(const LUdecomp<T> &orig)
+void LUdecomp<T>::Copy(const LUdecomp<T> &orig, Basis<T> &bas)
 {
   if(this != &orig) {
     if (parent != NULL)
       ((LUdecomp<T> &) *parent).copycount--;
  
-    A = orig.A;
-    basis = orig.basis;
+    basis = bas;
     
     L.Flush();
     P.Flush();
     E.Flush();
     U.Flush();
 
-    IsBasisIdent = orig.IsBasisIdent;
     refactor_number = orig.refactor_number;
     iterations = orig.iterations;
     total_operations = orig.total_operations;
@@ -114,106 +374,47 @@ LUdecomp<T>& LUdecomp<T>::operator=(const LUdecomp<T> &orig)
     copycount = 0;
     ((LUdecomp<T> &)*parent).copycount++;
   }
-  return *this;
 }
-
-// -------------------------
-//  Public Members
-// -------------------------
-
 
 template <class T>
 void LUdecomp<T>::update( int col, int matcol )
 {
 
   assert( copycount == 0 );
-  basis[col] = matcol;
-
-  IsBasisIdent = CheckBasis();
 
   iterations++;
   if (( refactor_number > 0 && iterations >= refactor_number ) ||
       ( refactor_number == 0 && RefactorCheck()) )  
     refactor();
   else {
-
-    if( matcol<0 ) { 
-      scratch1=(T)0; 
-      scratch1[-matcol]=(T)1; 
-    }
-    else (*A).GetColumn(matcol,scratch1);
-    
-    solve(scratch1,scratch1);
+    basis.GetColumn( matcol, scratch1); 
+    solve( scratch1, scratch1 );
     E.Append( EtaMatrix<T>( col, scratch1 ) );
     
-    total_operations += iterations * basis.Length() +  
-      2 * basis.Length() * basis.Length();
-    
+    total_operations += iterations * basis.label.Length() +  
+      2 * basis.label.Length() * basis.label.Length();    
   }
   
 }
 
 
 template <class T> 
-void LUdecomp<T>::refactor( const gMatrix<T> &m, int rfac = -1 )
-{
-
-  int i;
-  A = &m;
-  for ( i = m.MinRow(); i <= m.MaxRow(); i++ ) basis[i] = -i;
-  IsBasisIdent = true;
-
-  L.Flush();
-  U.Flush();
-  E.Flush();
-  P.Flush();
-
-  iterations = 0;
-  
-  int z = basis.Length();
-  total_operations = (z - 1) * z * (2 * z - 1) / 6;
-
-  parent = NULL;
-  if (parent != NULL) ((LUdecomp<T> &)*parent).copycount--;
-  refactor_number = rfac;
-
-}
-
-template <class T> 
 void LUdecomp<T>::refactor( ) 
 {
 
-//gout << " Refactored at : " << iterations << " ##########################\n";
   L.Flush();
   U.Flush();
   E.Flush();
   P.Flush();
 
-  if ( !IsBasisIdent ) FactorBasis();
+  if ( !basis.IsIdent() ) FactorBasis();
 
   iterations = 0;
-  int m = basis.Length();
+  int m = basis.label.Length();
   total_operations = (m - 1) * m * (2 * m - 1) / 6;
   if (parent != NULL) ((LUdecomp<T> &)*parent).copycount--;
   parent = NULL;
   
-}
-
-template <class T> 
-void LUdecomp<T>::refactor( const gMatrix<T> &mat, const gBlock<int> &bas,
-			   int rfac = -1)
-{
-
-  assert ( bas.First() == mat.MinRow() && bas.Last() == mat.MaxRow() );
-
-  A = &mat;
-  basis = bas;
-
-  IsBasisIdent = CheckBasis();
-  
-  refactor();
-
-  refactor_number = rfac;
 }
 
 template <class T>
@@ -221,10 +422,11 @@ void LUdecomp<T>::solveT( const gVector<T> &c, gVector<T> &y ) const
 {
 
   assert ( c.First() == y.First() && c.Last() == y.Last() );
-  assert ( c.First() == (*A).MinRow() && c.Last() == (*A).MaxRow());
+  assert ( c.First() == (*(basis.A)).MinRow() 
+	  && c.Last() == (*(basis.A)).MaxRow());
 
   y = c;
-  if ( IsBasisIdent != true ) {
+  if ( basis.IsIdent() != true ) {
 
     BTransE( y );
 
@@ -243,10 +445,11 @@ void LUdecomp<T>::solve( const gVector<T> &a, gVector<T> &d ) const
 {
 
   assert ( a.First() == d.First() && a.Last() == d.Last() );
-  assert ( a.First() == (*A).MinRow() && a.Last() == (*A).MaxRow() );
+  assert ( a.First() == (*(basis.A)).MinRow() 
+	  && a.Last() == (*(basis.A)).MaxRow() );
   
   d = a;
-  if ( IsBasisIdent != true ) {
+  if ( basis.IsIdent() != true ) {
     
     if ( parent != NULL ) {
       (*parent).solve(a,d);
@@ -278,16 +481,13 @@ void LUdecomp<T>::FactorBasis()
   int i, j, piv;
   T pivVal;
 
-  gMatrix<T> B((*A).MinRow(), (*A).MaxRow(), basis.First(), basis.Last());
+  gMatrix<T> B((*(basis.A)).MinRow(), (*(basis.A)).MaxRow(), 
+	       basis.label.First(), basis.label.Last());
 
-  for( i = basis.First(); i <= basis.Last(); i++ ) {
-    if ( basis[i] >= 0 ) {
-      (*A).GetColumn( basis[i], scratch2 );
-    }
-    else {
-      scratch2 = (T) 0;      
-      scratch2[ -basis[i] ] = 1;
-    }
+  for( i = basis.label.First(); i <= basis.label.Last(); i++ ) {
+    
+    basis.GetColumn( basis.label[i], scratch2 );
+    basis.CheckBasis();
     B.SetColumn( i, scratch2 );
   }
   
@@ -302,7 +502,7 @@ void LUdecomp<T>::FactorBasis()
     }
     P.Append(piv);
     B.SwitchRows(i,piv);
-
+    
     scratch2 = (T) 0;
     scratch2[i] = (T) 1 / B( i, i );
     for ( j = i+1; j <= B.MaxRow(); j++ ) {
@@ -312,7 +512,7 @@ void LUdecomp<T>::FactorBasis()
     GaussElem(B, i, i);
 
   }
-
+  
   for ( j = B.MinCol(); j <= B.MaxCol(); j++ ) {
     B.GetColumn( j, scratch2 );
     U.Append( EtaMatrix<T>( j, scratch2 ));
@@ -508,29 +708,12 @@ void LUdecomp<T>::LPd_mult( gVector<T> &d, int j, gVector<T> &ans ) const
 template<class T>
 bool LUdecomp<T>::CheckBasis() 
 {
-  int i,j;
+  int i;
   bool ret = true;
 
-  for ( i = basis.First(); i <= basis.Last() && ret != false; 
+  for ( i = basis.label.First(); i <= basis.label.Last() && ret != false; 
        i++){
-    ret = ret && ( basis[i] == -i );
-  }
-
-  if ( !ret ) {
-    ret = true;
-    for ( i = basis.First(); i <= basis.Last() && ret != false; i++ ) {
-      if (basis[i] > 0) {
-	for ( j = (*A).MinRow(); j <= (*A).MaxRow() && ret != false; j++ ) {
-	  if ( i == j ) {
-	    ret = ret && ( (*A)(j,basis[i])  == (T) 1 );
-	  }
-	  else {
-	    ret = ret && ( (*A)(j,basis[i])  == (T) 0 );
-	  }
-	}
-      }
-      else if (basis[i] != -i ) ret = false;
-    }
+    ret = ret && ( basis.label[i] == -i );
   }
 
   return ret;
@@ -539,7 +722,7 @@ bool LUdecomp<T>::CheckBasis()
 template<class T>
 bool LUdecomp<T>::RefactorCheck()
 {
-  int m = basis.Length();
+  int m = basis.label.Length();
   int i = iterations * (iterations * m + 2 * m * m );
   int k = total_operations + iterations * m + 2 * m * m;
 

@@ -1,5 +1,5 @@
 //#
-//# FILE: tableau.h:  tableau and basis classes
+//# FILE: tableau.h:  tableau classes
 //#
 //# $Id$
 //#
@@ -11,40 +11,14 @@
 #include "ludecomp.h"
 #include "bfs.h"
 
-template <class T> class Basis;
 template <class T> class Tableau;
 template <class T> class LPTableau;
 
-template <class T> class Basis {
-friend class Tableau<T>;
-friend class LPTableau<T>;
-protected:
-  const gMatrix<T> *A;
-  gBlock<int> label;    
-public:
-  Basis(const gMatrix<T> &A);
-  Basis(const Basis<T> &);
-  ~Basis();
-  
-  Basis<T>& operator=(const Basis<T>&);
-  
-  int Pivot(int outindex, int col); 
-    //remove outindex, insert label, return outlabel
-  bool Member(int label) const;
-      // return true iff label is a Basis member
-  int Find(int label) const;
-      // finds Basis index corresponding to label number,
-      // fails assert if label not in Basis
-  int Label(int index) const;
-      // finds label of variable corresponding to Basis index
-  void BasisSelect(const gVector<T>&rowv, gVector<T> &colv) const;
-      // select Basis elements according to Tableau rows and cols
-  void BasisSelect(const gVector<T>&unitv,
-		   const gVector<T>&rowv,
-		   gVector<T>&colv
-		 ) const; // as above, but unit column elements nonzero
-  void Dump(gOutput &) const;
-};
+
+// ---------------------------------------------------------------------------
+// Tableau Stuff
+// ---------------------------------------------------------------------------
+
 
 template <class T> class BaseTableau {
 public:
@@ -170,6 +144,25 @@ public:
   void DualReversePivots(gList<gArray<int> > &);
   bool IsDualReversePivot(int i, int j);
   BFS<T> DualBFS(void) const;
+
+  // Inserts an artificial variable
+  // valid column numbers are from A->MaxCol() + 1 A->MaxCol + number of
+  // artificial variables already added.
+  int InsertArtificial( int art, int col );
+
+  // Appends an artificial variable
+  int AppendArtificial( int art );
+
+  // Removes an artificial variable located at col.
+  // valid column numbers are from A->MaxCol() + 1 A->MaxCol + number of
+  // artificial variables there.
+  int RemoveArtificial( int col );
+
+  // returns the index of the last artificial variable
+  int LastArtificial( void );
+
+  // Removes all artificial variables
+  void FlushArtificial( void );
 };
 
 #ifdef __GNUG__

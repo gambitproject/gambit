@@ -16,9 +16,6 @@
 #error Unsupported compiler type
 #endif // __GNUG__, __BORLANDC__
 
-TEMPLATE class Basis<double>;
-TEMPLATE class Basis<gRational>;
-
 TEMPLATE class BaseTableau<double>;
 TEMPLATE class BaseTableau<gRational>;
 

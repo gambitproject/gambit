@@ -14,10 +14,113 @@
 #include "glist.h"
 #include "gambitio.h"
 #include "gblock.h"
-#include "gwatch.h"
+
+//---------------------------------------------------------------------------
+// Class Basis
+//---------------------------------------------------------------------------
+
+template <class T> class LUdecomp;
+
+template <class T> class Basis {
+
+//friend class Tableau<T>;
+//friend class LPTableau<T>;
+friend class LUdecomp<T>;
+  
+protected:
+
+  const gMatrix<T> *A;
+  gBlock<int> label;
+  gBlock<int> cols;
+  gBlock<int> rows;
+  gBlock<int> arts;
+  gBlock<int> artificial;
+  bool IsBasisIdent;
+
+public:
+
+  //-------------------------------------------
+  // Constructors, Destructor, Operators
+  //-------------------------------------------
+  
+
+  Basis(const gMatrix<T> &A);
+  Basis(const Basis<T> &);
+  virtual ~Basis();
+  
+  Basis<T>& operator=(const Basis<T>&);
+
+  //------------------------------
+  // Public Members
+  //------------------------------
+  
+  //remove outindex, insert label, return outlabel
+  int Pivot(int outindex, int col); 
+
+  // return true iff label is a Basis member
+  bool Member(int label) const;
+
+  // finds Basis index corresponding to label number,
+  // fails assert if label not in Basis
+  int Find(int label) const;
+
+  // finds label of variable corresponding to Basis index
+  int Label(int index) const;
+
+  // select Basis elements according to Tableau rows and cols
+  void BasisSelect(const gVector<T>&rowv, gVector<T> &colv) const;
+
+  // as above, but unit column elements nonzero
+  void BasisSelect(const gVector<T>&unitv,
+		   const gVector<T>&rowv,
+		   gVector<T>&colv
+		   ) const; 
+  
+
+  // returns whether the basis is the identity matrix
+  bool IsIdent();
+
+  // returns true if the column is special in some way
+  bool IsSpecialColumn( int col );
+  
+  // returns a column from the matrix  
+  void GetColumn( int col, gVector<T> & );
+  
+  // Insert an artificial variable.  Returns the index where it was inserted
+  int InsertArtificial( int art, int col );
+
+  // Append an artificial variable.  Returns the index to the highest index
+  // ( ie where the artificial variable was appended ).
+  int AppendArtificial( int art );
+
+  // Remove an artificial variable, returns which artificial variable
+  // was removed.
+  int RemoveArtificial( int col );
+  
+  // Clears out all the artificial variables
+  void FlushArtificial();
+
+  // Returns the index of the last artificial variable
+  int LastArtificial();
+
+  void Dump(gOutput &) const;
+
+  // ----------------
+  // Private members
+  // ----------------
+
+  virtual void CheckBasis();
+
+};
+
+
+
+// ---------------------------------------------------------------------------
+// Class EtaMatrix
+// ---------------------------------------------------------------------------
 
 template <class T> class EtaMatrix {
- public:
+  public:
   int col;
   gVector<T> etadata;
   
@@ -32,14 +135,15 @@ bool operator!=(const EtaMatrix<T> &) const;
 
 template <class T> gOutput &operator<<( gOutput &, const EtaMatrix<T> &);
 
+// ---------------------------------------------------------------------------
+// Class LUdecomp
+// ---------------------------------------------------------------------------
+
 template <class T> class LUdecomp {
 
 private:
-public:  // just for debugging.
-  const gMatrix<T> *A;
-  gBlock<int> basis;
 
-  bool IsBasisIdent;     //set true if basis is the identity matrix
+  Basis<T> &basis;
 
   gList< EtaMatrix<T> > L;
   gList< EtaMatrix<T> > U;
@@ -62,45 +166,38 @@ public:
   // Constructors, Destructor
   // ------------------------
     
+
+  // don't use this copy constructor
+  LUdecomp( const LUdecomp<T> &a) : basis(a.basis) { assert(0); };
+
   // copy constructor
-  // note:  This will fail an assertion if you try to update or delete
+  // note:  Copying will fail an assertion if you try to update or delete
   //        the original before the copy has been deleted, refactored
   //        Or set to something else.
-  LUdecomp( const LUdecomp<T> & );
+  LUdecomp( const LUdecomp<T> &, Basis<T> & );
 
   // Decompose given matrix
-  LUdecomp( const gMatrix<T> &, int rfac = 0 ); 
-
-  // Decompose the selected columns of the given matrix
-  LUdecomp( const gMatrix<T> &, const gBlock<int> &, int rfac = 0 );
+  LUdecomp( Basis<T> &, int rfac = -1 ); 
 
   // Destructor
   ~LUdecomp();
 
-  // Equality operator
-  // note:  This will fail an assertion if you try to delete or update
-  //        the original before the copy has been deleted, refactored, or set 
-  //        equal to something else.
-  LUdecomp<T>& operator=(const LUdecomp<T>&);
+  // don't use the equals operator, use the Copy function instead
+  LUdecomp<T>& operator=(const LUdecomp<T>&) { assert(0); return *this; };
 
 
   // --------------------
   // Public Members
   // --------------------
 
+  // copies the LUdecomp given (expect for the basis &).
+  void Copy( const LUdecomp<T> &, Basis<T> & );
+
   // replace (update) the column given with the vector given.
   void update( int, int matcol ); // matcol is the column number in the matrix
 
   // refactor 
   void refactor();
-  
-  // factor a new matrix.
-  void refactor( const gMatrix<T> &, int rfac = 0 );
-
-  // reinitialize with selected columns 
-  // a negative index specifies that the column is an identity column
-  // with the one in the abs(index) position.
-  void refactor( const gMatrix<T> &, const gBlock<int> &, int rfac = 0 );
   
   // solve: Bk d = a
   void solve (const gVector<T> &, gVector<T> & ) const;

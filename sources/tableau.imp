@@ -17,139 +17,6 @@ void Epsilon_T(double &v, int i)
 
 void Epsilon_T(gRational &v, int) { v = (gRational)0;}
 
-template <class T> 
-Basis<T>::Basis(const gMatrix<T> &A)
-  :  A(&A), label(A.MinRow(), A.MaxRow())
-{
-  for(int i=label.First(); i<=label.Last(); i++)
-    label[i]= - i;
-}
-
-
-template <class T>
-Basis<T>::Basis(const Basis<T> &bas)
-  : A(bas.A), label(bas.label)
-{ }
-
-template <class T>
-Basis<T>::~Basis()
-{ }
-
-template <class T>
-Basis<T>& Basis<T>::operator=(const Basis<T> &code)
-{
-  if(this != &code) {
-    A = code.A;
-    label= code.label; }
-  return *this;
-}
-
-
-//
-// ordinary Basis methods:
-//
-
-template <class T>
-int Basis<T>::Pivot(int outindex, int col)
-{
-  // gout << "\nPivot: comp = " << outindex << " out= ";
-  // gout << label[outindex] << " in= " << col;
-  if( col<0 ) 
-    assert(A->CheckRow(-col) );
-  else 
-    assert( A->CheckColumn(col) );
-
-//  label.Append(col);
-//  return label.Remove(outindex);
-//
-//     with gBlocks, the following is faster than the above
-
-  /*
-    // this is for the old LUDecomp code
-  int i;
-  int outlabel = label[outindex];
-  for(i=outindex;i<label.Last();i++)
-    label[i]=label[i+1];
-  label[i]=col;
-  return outlabel;
-  */
-
-    // this is for the new LUDecomp code
-  int outlabel = label[outindex];
-  label[outindex] = col;
-  return outlabel;
-}
-
-template <class T>
-bool Basis<T>::Member(int col) const
-{
-  for(int i=label.First(); i<=label.Last(); i++)
-    if(label[i]==col )
-      return 1;
-  return 0;
-}
-
-template <class T>
-int Basis<T>::Find(int col) const
-{
-  for(int i=label.First(); i<=label.Last(); i++)
-    if( label[i]==col )
-      return i; // returns Tableau index
-  assert(0); // couldn't find column (also, assumes there are no duplicates)
-  return 0;
-}
-
-template <class T>
-int Basis<T>::Label(int index) const
-{
-  return  label[index];
-}
-
-template <class T>
-void Basis<T>::BasisSelect(const gVector<T> &rowv, gVector<T> &colv) const
-{
-  assert(A->CheckColumn(colv) && A->CheckRow(rowv));
-
-  for(int i=label.First(); i<=label.Last(); i++) {
-    if(label[i]<0)
-      colv[i]= 0;
-    else
-      colv[i]= rowv[label[i]];
-  }
-}
-
-template <class T>
-void Basis<T>::BasisSelect(const gVector<T> &unitv,
-			   const gVector<T> &rowv,
-			   gVector<T> &colv ) const
-{
-  assert(A->CheckColumn(colv)
-	 && A->CheckColumn(unitv)
-	 && A->CheckRow(rowv) );
-  
-  for(int i=label.First(); i<=label.Last(); i++) {
-    if(label[i]<0)
-      colv[i]= unitv[-label[i]];
-    else
-      colv[i]= rowv[label[i]];
-  }
-}
-
-template <class T> gOutput &operator<<(gOutput &to, const Basis<T> &v)
-{
-  v.Dump(to); return to;
-}
-
-template <class T>
-void Basis<T>::Dump(gOutput &to) const
-{ 
-  to << "{";
-  for(int i=label.First();i<=label.Last();i++) {
-    to << "  " << label[i];  
-  }
-  to << " }";
-}
-
 //
 // Tableau method definitions
 //
@@ -159,7 +26,7 @@ void Basis<T>::Dump(gOutput &to) const
 template <class T>
 Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
   : npivots(0), tmpcol(A.MinRow(),A.MaxRow()), A(&A), b(&b), 
-    basis(A),  B(A),
+    basis(A),  B(basis),
     solution(A.MinRow(),A.MaxRow()) 
 {
   Epsilon_T(eps1,1);
@@ -176,7 +43,7 @@ Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
 template <class T> 
 Tableau<T>::Tableau(const Tableau<T> &orig) 
   : npivots(0), eps1(orig.eps1), eps2(orig.eps2), tmpcol(orig.tmpcol),
-    A(orig.A),b(orig.b), basis(orig.basis), B(orig.B),
+    A(orig.A),b(orig.b), basis(orig.basis), B(orig.B, basis),
     solution(orig.solution) 
 { }
 
@@ -192,7 +59,7 @@ Tableau<T>& Tableau<T>::operator=(const Tableau<T> &orig)
     A = orig.A;
     b = orig.b;
     basis= orig.basis;
-    B= orig.B;
+    B.Copy( orig.B, basis );
     solution= orig.solution;
     npivots = orig.npivots;
   }
@@ -990,5 +857,33 @@ BFS<T> LPTableau<T>::DualBFS() const
   return cbfs;
 }
 
+template <class T>
+int InsertArtificial( int art, int col )
+{
+  return basis.InsertArtificial( art, col );
+}
 
+template <class T>
+int AppendArtificial( int art )
+{
+  return basis.AppendArtificial( art );
+}
+
+template <class T>
+int RemoveArtificial( int col )
+{
+  return basis.RemoveArtificial( col );
+}
+
+template <class T>
+int LastArtificial( void )
+{
+  return basis.LastArtificial();
+}
+
+template <class T>
+int FlushArtificial( void )
+{
+  return basis.FlushArtificial();
+}
   
