@@ -7,29 +7,17 @@
 #ifndef DLNODEDELETE_H
 #define DLNODEDELETE_H
 
-class dialogNodeDelete : public wxDialogBox {
+class dialogNodeDelete : public guiAutoDialog {
 private:
   Node *m_node;
-  int m_completed;
   wxListBox *m_branchList;
 
-  static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((dialogNodeDelete *) p_object.GetClientData())->OnOK(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((dialogNodeDelete *) p_object.GetClientData())->OnCancel(); }
-  static void CallbackHelp(wxButton &p_object, wxEvent &)
-    { ((dialogNodeDelete *) p_object.GetClientData())->OnHelp(); }
-
-  void OnOK(void);
-  void OnCancel(void);
-  Bool OnClose(void);
-  void OnHelp(void);
+  const char *HelpString(void) const  { return "Node Menu"; }
 
 public:
   dialogNodeDelete(Node *, wxWindow *);
   virtual ~dialogNodeDelete() { }
 
-  int Completed(void) const { return m_completed; }
   Node *KeepNode(void) const
     { return m_node->GetChild(m_branchList->GetSelection() + 1); }
 };
