@@ -42,58 +42,30 @@ gInput *gPreprocessor::LoadInput(gText &p_name)
   
   bool search = (strchr((char *) p_name, SLASH) == NULL);
   gText IniFileName = p_name;
-  
-  try   {
-    return new gFileInput(IniFileName);
-  }
-  catch (gFileInput::OpenFailed &) {
-    // I'm thinking there's a more elegant way than this.
-    // But I don't know what it is.
-    if (search)   {
-      if (System::GetEnv("HOME") != NULL)   {
-	IniFileName = ((gText) System::GetEnv("HOME") + 
-		       (gText) SLASH + (gText) p_name);
-	try   {
-	  infile = new gFileInput(IniFileName);
-	  p_name = IniFileName;
-	  return infile;
-	}
-	catch (gFileInput::OpenFailed &) {
-	  infile = 0;
-	  // didn't find in home directory... fall on through
-	}
-      }
-      if (System::GetEnv("GCLLIB") != NULL)  {
-	IniFileName = ((gText) System::GetEnv("GCLLIB") + 
-		       (gText) SLASH + (gText) p_name);
-	try  {
-	  infile = new gFileInput(IniFileName);
-	  p_name = IniFileName;
-	  return infile;
-	}
-	catch (gFileInput::OpenFailed &) {
-	  infile = 0;
-	  // didn't find it in GCLLIB directory either... keep going
-	}
-      }
-      if (SOURCE != NULL)  {
-	IniFileName = (gText) SOURCE + (gText) SLASH + (gText) p_name;
-	try  {
-	  infile = new gFileInput(IniFileName);
-	  p_name = IniFileName;
-	  return infile;
-	}
-	catch (gFileInput::OpenFailed &) {
-	  // give up!
-	  return 0;
-	}
-      }
-      return 0;
+
+  gList<gText> paths;
+  paths.Append(p_name);
+  if (search) {
+    if (System::GetEnv("HOME") != NULL) 
+      paths.Append(((gText) System::GetEnv("HOME") + 
+		    (gText) SLASH + (gText) p_name));
+    if (System::GetEnv("GCLLIB") != NULL) 
+      paths.Append(((gText) System::GetEnv("GCLLIB") + 
+		    (gText) SLASH + (gText) p_name));
+    if (SOURCE != NULL) 
+      paths.Append((gText) SOURCE + (gText) SLASH + (gText) p_name);
+  }    
+
+  for (int i = 1; i <= paths.Length(); i++) {
+    try {
+      infile = new gFileInput(paths[i]);
+      return infile;
     }
-    else {  // don't search, just give up
-      return 0;
+    catch (gFileInput::OpenFailed &) {
     }
   }
+
+  return 0;
 }
 
 void gPreprocessor::SetPrompt(bool p_prompt)
