@@ -390,13 +390,11 @@ int NormalForm::Lemke(int dup_strat)
 
   T->Lemke(dup_strat);
 
-  gBlock<Solution *> solutions(T->GetSolutions());
-  gout << "Equilibria found:\n";
-  for (int i = 1; i <= solutions.Length(); i++)
-    gout << *solutions[i];
+  solutions += T->GetSolutions();
 
-  while (solutions.Length())   delete solutions.Remove(1);
+  PrintSolutions(gout);
 }
+
 
 
 
