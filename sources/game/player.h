@@ -104,8 +104,6 @@ public:
   virtual int GetId(void) const = 0;
   virtual gbtText GetLabel(void) const = 0;
 
-  virtual gbtGame GetGame(void) const = 0;
-
   virtual bool IsChance(void) const = 0;
 
   virtual int NumInfosets(void) const = 0;

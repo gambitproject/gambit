@@ -32,13 +32,12 @@ public:
   virtual int GetId(void) const = 0;
   virtual gbtText GetLabel(void) const = 0;
 
-  virtual gbtGame GetGame(void) const = 0;
-
   virtual int NumChildren(void) const = 0;
   virtual gbtGameNode GetChild(int i) const = 0;
   virtual gbtGameNode GetChild(const gbtGameAction &) const = 0; 
   bool IsTerminal(void) const { return (NumChildren() == 0); }
   bool IsNonterminal(void) const { return !IsTerminal(); }
+  virtual bool IsRoot(void) const = 0;
   virtual bool IsPredecessorOf(const gbtGameNode &) const = 0;
 
   virtual gbtGameNode GetParent(void) const = 0;

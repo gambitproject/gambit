@@ -67,9 +67,6 @@ gbtGamePlayerBase::~gbtGamePlayerBase()
   */
 }
 
-gbtGame gbtGamePlayerBase::GetGame(void) const
-{ return m_efg; }
-
 gbtGameInfoset gbtGamePlayerBase::NewInfoset(int p_actions)
 {
   if (p_actions <= 0) {

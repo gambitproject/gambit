@@ -55,7 +55,7 @@ gbtGameActionBase::gbtGameActionBase(gbtGameInfosetBase *p_infoset,
 
 bool gbtGameActionBase::Precedes(gbtGameNode n) const
 {
-  while (n != n->GetGame()->GetRoot()) {
+  while (!n->IsRoot()) {
     if (n->GetPriorAction().Get() == this) {
       return true;
     }

@@ -1001,7 +1001,7 @@ void gbtEfgFrame::OnEditUnmarkSubgameTree(wxCommandEvent &)
 
 void gbtEfgFrame::OnEditNode(wxCommandEvent &)
 {
-  dialogEditNode dialog(this, m_doc->GetCursor());
+  dialogEditNode dialog(this, m_doc->GetGame(), m_doc->GetCursor());
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->GetCursor()->SetLabel(gbtText(dialog.GetNodeName().mb_str()));
     if (dialog.GetOutcome() > 0) {

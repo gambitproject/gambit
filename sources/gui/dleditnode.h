@@ -37,7 +37,7 @@ private:
 
 public:
   // Lifecycle
-  dialogEditNode(wxWindow *p_parent, gbtGameNode p_node);
+  dialogEditNode(wxWindow *p_parent, gbtGame p_game, gbtGameNode p_node);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetNodeName(void) const { return m_nodeName->GetValue(); }

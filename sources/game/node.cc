@@ -134,11 +134,6 @@ gbtGameInfoset gbtGameNodeBase::GetInfoset(void) const
   return m_infoset;
 }
 
-gbtGame gbtGameNodeBase::GetGame(void) const
-{
-  return m_efg;
-}
-
 gbtGameNode gbtGameNodeBase::GetParent(void) const
 {
   return m_parent;

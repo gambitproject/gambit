@@ -49,7 +49,6 @@ public:
       m_support(p_support) { }
   virtual ~gbtNfgSupportPlayerRep() { }
 
-  gbtGame GetGame(void) const { return m_player->GetGame(); }
   gbtText GetLabel(void) const { return m_player->GetLabel(); }
   void SetLabel(const gbtText &p_label) { m_player->SetLabel(p_label); }
   int GetId(void) const { return m_player->GetId(); }

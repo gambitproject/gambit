@@ -98,7 +98,6 @@ public:
   gbtGamePlayerBase(gbtGameBase *, int);
   virtual ~gbtGamePlayerBase();
 
-  gbtGame GetGame(void) const;
   gbtText GetLabel(void) const { return m_label; }
   void SetLabel(const gbtText &p_label) { m_label = p_label; }
   int GetId(void) const { return m_id; }
@@ -210,11 +209,12 @@ public:
   gbtText GetLabel(void) const { return m_label; }
   void SetLabel(const gbtText &p_label) { m_label = p_label; }
   int GetId(void) const { return m_id; }
-  gbtGame GetGame(void) const;
 
   int NumChildren(void) const;
   gbtGameNode GetChild(int i) const;
   gbtGameNode GetChild(const gbtGameAction &) const; 
+
+  bool IsRoot(void) const { return (m_parent != 0); }
   bool IsPredecessorOf(const gbtGameNode &) const;
 
   gbtGameNode GetParent(void) const;
