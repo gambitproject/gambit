@@ -131,11 +131,18 @@ static Portion *GSM_EnumMixed_Nfg(Portion **param)
   params.cliques = ((BoolPortion *) param[7])->Value();
   
   gList<MixedSolution> solutions;
-  double time;
-  long npivots;
-  Enum(*S, params, solutions, npivots, time);
-  ((NumberPortion *) param[3])->SetValue(npivots);
-  ((NumberPortion *) param[4])->SetValue(time);
+
+  try {
+    double time;
+    long npivots;
+    Enum(*S, params, solutions, npivots, time);
+    ((NumberPortion *) param[3])->SetValue(npivots);
+    ((NumberPortion *) param[4])->SetValue(time);
+  }
+  catch (gSignalBreak &) {
+    params.status.Reset();
+  }
+
   return new Mixed_ListPortion(solutions);
 }
 
@@ -156,13 +163,17 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
   params.trace = ((NumberPortion *) param[7])->Value();
   params.cliques = ((BoolPortion *) param[8])->Value();
 
-  double time;
-  long npivots;
   gList<BehavSolution> solutions;
-  Enum(support, params, solutions, npivots, time);
-  ((NumberPortion *) param[4])->SetValue(npivots);
-  ((NumberPortion *) param[5])->SetValue(time);
-
+  try {
+    double time;
+    long npivots;
+    Enum(support, params, solutions, npivots, time);
+    ((NumberPortion *) param[4])->SetValue(npivots);
+    ((NumberPortion *) param[5])->SetValue(time);
+  }
+  catch (gSignalBreak &) {
+    params.status.Reset();
+  }
   return new Behav_ListPortion(solutions);
 }
 
@@ -179,10 +190,16 @@ static Portion *GSM_EnumPure_Nfg(Portion **param)
 
   gWatch watch;
 
-  gList<MixedSolution> solns;
-  FindPureNash(S->Game(), *S, solns);
-  ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
-  return new Mixed_ListPortion(solns);
+  gList<MixedSolution> solutions;
+
+  try {
+    FindPureNash(S->Game(), *S, solutions);
+    ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
+  }
+  catch (gSignalBreak &) {
+  }
+
+  return new Mixed_ListPortion(solutions);
 }
 
 #include "efgpure.h"
@@ -194,16 +211,26 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
 
   if (((BoolPortion *) param[1])->Value())   {
     gList<BehavSolution> solutions;
-    double time;
-    EnumPureNfg(support, solutions, time);
-    ((NumberPortion *) param[4])->SetValue(time);
+
+    try {
+      double time;
+      EnumPureNfg(support, solutions, time);
+      ((NumberPortion *) param[4])->SetValue(time);
+    }
+    catch (gSignalBreak &) {
+    }
     return new Behav_ListPortion(solutions);
   }
   else  {
     gList<BehavSolution> solutions;
-    double time;
-    EnumPure(support, solutions, time);
-    ((NumberPortion *) param[4])->SetValue(time);
+
+    try {
+      double time;
+      EnumPure(support, solutions, time);
+      ((NumberPortion *) param[4])->SetValue(time);
+    }
+    catch (gSignalBreak &) {
+    }
     return new Behav_ListPortion(solutions);
   }
 }
@@ -235,10 +262,21 @@ static Portion *GSM_GobitGrid_Support(Portion **param)
   GP.tol2 = ((NumberPortion *) param[9])->Value();
 
   GP.multi_grid = 0;
-  if(GP.delp2 > 0.0 && GP.tol2 > 0.0)GP.multi_grid = 1;
+  if (GP.delp2 > 0.0 && GP.tol2 > 0.0)
+    GP.multi_grid = 1;
   
   gList<MixedSolution> solutions;
-  GridSolve(S, GP, solutions);
+
+  try {
+    GridSolve(S, GP, solutions);
+  }
+  catch (gSignalBreak &) {
+    GP.status.Reset();
+  }
+  catch (...) {
+    if (GP.pxifile != &gnull)  delete GP.pxifile;
+    throw;
+  }
 
   if (GP.pxifile != &gnull)  delete GP.pxifile;
 
@@ -277,19 +315,26 @@ static Portion *GSM_Gobit_Start(Portion **param)
     NP.tracefile = &((OutputPortion *) param[14])->Value();
     NP.trace = ((NumberPortion *) param[15])->Value();
 
-    long nevals, niters;
-    gWatch watch;
     gList<MixedSolution> solutions;
-    Gobit(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
+    try {
+      long nevals, niters;
+      gWatch watch;
+      Gobit(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
 
-    ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
-    ((NumberPortion *) param[12])->SetValue(nevals);
-    ((NumberPortion *) param[13])->SetValue(niters);
-
-    Portion *por = new Mixed_ListPortion(solutions);
+      ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
+      ((NumberPortion *) param[12])->SetValue(nevals);
+      ((NumberPortion *) param[13])->SetValue(niters);
+    }
+    catch (gSignalBreak &) {
+      NP.status.Reset();
+    }
+    catch (...) {
+      if (NP.pxifile != &gnull)  delete NP.pxifile;
+      throw;
+    }
 
     if (NP.pxifile != &gnull)  delete NP.pxifile;
-    return por;
+    return new Mixed_ListPortion(solutions);
   }
   else  {     // BEHAV
     BehavSolution &start = *((BehavPortion *) param[0])->Value();
@@ -314,19 +359,28 @@ static Portion *GSM_Gobit_Start(Portion **param)
     EP.tracefile = &((OutputPortion *) param[14])->Value();
     EP.trace = ((NumberPortion *) param[15])->Value();
     
-    long nevals, niters;
-    gWatch watch;
     gList<BehavSolution> solutions;
-    Gobit(E, EP, BehavProfile<gNumber>(start), solutions, nevals, niters);
-
-    ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
-    ((NumberPortion *) param[12])->SetValue(nevals);
-    ((NumberPortion *) param[13])->SetValue(niters);
+    try {
+      long nevals, niters;
+      gWatch watch;
     
-    Portion * por = new Behav_ListPortion(solutions);
+      Gobit(E, EP, BehavProfile<gNumber>(start), solutions, nevals, niters);
+
+      ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
+      ((NumberPortion *) param[12])->SetValue(nevals);
+      ((NumberPortion *) param[13])->SetValue(niters);
+    }
+    catch (gSignalBreak &) {
+      EP.status.Reset();
+    }
+    catch (...) {
+      if (EP.pxifile != &gnull)  delete EP.pxifile;
+      throw;
+    }
 
     if (EP.pxifile != &gnull)   delete EP.pxifile;
-    return por;
+
+    return new Behav_ListPortion(solutions);
   }
 }
 
@@ -360,21 +414,28 @@ static Portion *GSM_KGobit_Start(Portion **param)
     NP.tracefile = &((OutputPortion *) param[14])->Value();
     NP.trace = ((NumberPortion *) param[15])->Value();
 
-    long nevals, niters;
-    gWatch watch;
     gList<MixedSolution> solutions;
-    KGobit(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
+    try {
+      long nevals, niters;
+      gWatch watch;
+      KGobit(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
 
-    ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
-    ((NumberPortion *) param[12])->SetValue(nevals);
-    ((NumberPortion *) param[13])->SetValue(niters);
-
-    Portion *por = new Mixed_ListPortion(solutions);
+      ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
+      ((NumberPortion *) param[12])->SetValue(nevals);
+      ((NumberPortion *) param[13])->SetValue(niters);
+    }
+    catch (gSignalBreak &) {
+      NP.status.Reset();
+    }
+    catch (...) {
+      if (NP.pxifile != &gnull)  delete NP.pxifile;
+      throw;
+    }
 
     if (NP.pxifile != &gnull)  delete NP.pxifile;
-    return por;
+    return new Mixed_ListPortion(solutions);
   }
-  else  {     // BEHAV_FLOAT  
+  else  {     // BEHAV
     BehavSolution &start = *((BehavPortion *) param[0])->Value();
     Efg &E = start.Game();
   
@@ -397,20 +458,27 @@ static Portion *GSM_KGobit_Start(Portion **param)
     EP.tracefile = &((OutputPortion *) param[14])->Value();
     EP.trace = ((NumberPortion *) param[15])->Value();
     
-    long nevals, niters;
-    gWatch watch;
-    
     gList<BehavSolution> solutions;
-    KGobit(E, EP, BehavProfile<gNumber>(start), solutions, nevals, niters);
-
-    ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
-    ((NumberPortion *) param[12])->SetValue(nevals);
-    ((NumberPortion *) param[13])->SetValue(niters);
+    try {
+      long nevals, niters;
+      gWatch watch;
     
-    Portion * por = new Behav_ListPortion(solutions);
+      KGobit(E, EP, BehavProfile<gNumber>(start), solutions, nevals, niters);
+
+      ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
+      ((NumberPortion *) param[12])->SetValue(nevals);
+      ((NumberPortion *) param[13])->SetValue(niters);
+    }
+    catch (gSignalBreak &) {
+      EP.status.Reset();
+    }
+    catch (...) {
+      if (EP.pxifile != &gnull)  delete EP.pxifile;
+      throw;
+    }
 
     if (EP.pxifile != &gnull)   delete EP.pxifile;
-    return por;
+    return new Behav_ListPortion(solutions);
   }
 }
 
@@ -432,11 +500,16 @@ static Portion *GSM_Lcp_Nfg(Portion **param)
   params.trace = ((NumberPortion *) param[6])->Value();
 
   gList<MixedSolution> solutions;
-  double time;
-  int npivots;
-  Lemke(S, params, solutions, npivots, time);
-  ((NumberPortion *) param[3])->SetValue(npivots);
-  ((NumberPortion *) param[4])->SetValue(time);
+  try {
+    double time;
+    int npivots;
+    Lemke(S, params, solutions, npivots, time);
+    ((NumberPortion *) param[3])->SetValue(npivots);
+    ((NumberPortion *) param[4])->SetValue(time);
+  }
+  catch (gSignalBreak &) {
+    params.status.Reset();
+  }
 
   return new Mixed_ListPortion(solutions);
 }
@@ -457,12 +530,18 @@ static Portion *GSM_Lcp_Efg(Portion **param)
     params.trace = ((NumberPortion *) param[7])->Value();
 
     gList<BehavSolution> solutions;
-    double time;
-    int npivots;
+    try {
+      double time;
+      int npivots;
+      
+      Lemke(S, params, solutions, npivots, time);
+      ((NumberPortion *) param[4])->SetValue(npivots);
+      ((NumberPortion *) param[5])->SetValue(time);
+    }
+    catch (gSignalBreak &) {
+      params.status.Reset();
+    }
 
-    Lemke(S, params, solutions, npivots, time);
-    ((NumberPortion *) param[4])->SetValue(npivots);
-    ((NumberPortion *) param[5])->SetValue(time);
     return new Behav_ListPortion(solutions);
   }
   else  {
@@ -474,12 +553,18 @@ static Portion *GSM_Lcp_Efg(Portion **param)
     params.trace = ((NumberPortion *) param[7])->Value();
 
     gList<BehavSolution> solutions;
-    double time;
-    int npivots;
+    try {
+      double time;
+      int npivots;
 
-    SeqForm(S, params, solutions, npivots, time);
-    ((NumberPortion *) param[4])->SetValue(npivots);
-    ((NumberPortion *) param[5])->SetValue(time);
+      SeqForm(S, params, solutions, npivots, time);
+      ((NumberPortion *) param[4])->SetValue(npivots);
+      ((NumberPortion *) param[5])->SetValue(time);
+    }
+    catch (gSignalBreak &) {
+      params.status.Reset();
+    }
+
     return new Behav_ListPortion(solutions);
   }
 }
@@ -548,13 +633,21 @@ static Portion *GSM_Liap_Behav(Portion **param)
 
     gWatch watch;
 
-    NFLiapBySubgame M(E, LP, start);
-    M.Solve();
+    gList<BehavSolution> solutions;
 
-    ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
-    ((NumberPortion *) param[9])->SetValue(M.NumEvals());
+    try {
+      NFLiapBySubgame M(E, LP, start);
+      M.Solve();
+      solutions = M.GetSolutions();
 
-    return new Behav_ListPortion(M.GetSolutions());
+      ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
+      ((NumberPortion *) param[9])->SetValue(M.NumEvals());
+    }
+    catch (gSignalBreak &) {
+      LP.status.Reset();
+    }
+
+    return new Behav_ListPortion(solutions);
   }
   else  {
     EFLiapParams LP;
@@ -572,13 +665,21 @@ static Portion *GSM_Liap_Behav(Portion **param)
 
     gWatch watch;
 
-    EFLiapBySubgame M(E, LP, start);
-    M.Solve();
+    gList<BehavSolution> solutions;
 
-    ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
-    ((NumberPortion *) param[9])->SetValue(M.NumEvals());
+    try {
+      EFLiapBySubgame M(E, LP, start);
+      M.Solve();
+      solutions = M.GetSolutions();
 
-    return new Behav_ListPortion(M.GetSolutions());
+      ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
+      ((NumberPortion *) param[9])->SetValue(M.NumEvals());
+    }
+    catch (gSignalBreak &) {
+      LP.status.Reset();
+    }
+
+    return new Behav_ListPortion(solutions);
   }
 }
 
@@ -602,14 +703,21 @@ static Portion *GSM_Liap_Mixed(Portion **param)
   params.tracefile = &((OutputPortion *) param[9])->Value();
   params.trace = ((NumberPortion *) param[10])->Value();
 
-  long nevals, niters;
-  gWatch watch;
   gList<MixedSolution> solutions;
-  Liap(N, params, start, solutions, nevals, niters);
 
-  ((NumberPortion *) param[7])->SetValue(watch.Elapsed());
-  ((NumberPortion *) param[8])->SetValue(nevals);
+  try {
+    long nevals, niters;
+    gWatch watch;
+  
+    Liap(N, params, start, solutions, nevals, niters);
 
+    ((NumberPortion *) param[7])->SetValue(watch.Elapsed());
+    ((NumberPortion *) param[8])->SetValue(nevals);
+  }
+  catch (gSignalBreak &) {
+    params.status.Reset();
+  }
+  
   return new Mixed_ListPortion(solutions);
 }
 
@@ -631,14 +739,21 @@ static Portion *GSM_Lp_Nfg(Portion **param)
   params.trace = ((NumberPortion *) param[6])->Value();
 
   if (N->NumPlayers() > 2 || !IsConstSum(*N))
-	  throw gclRuntimeError("Only valid for two-person zero-sum games");
+    throw gclRuntimeError("Only valid for two-person zero-sum games");
 
   gList<MixedSolution> solutions;
-  double time;
-  int npivots;
-  ZSum(S, params, solutions, npivots, time);
-  ((NumberPortion *) param[3])->SetValue(npivots);
-  ((NumberPortion *) param[4])->SetValue(time);
+ 
+  try {
+    double time;
+    int npivots;
+    ZSum(S, params, solutions, npivots, time);
+    ((NumberPortion *) param[3])->SetValue(npivots);
+    ((NumberPortion *) param[4])->SetValue(time);
+  }
+  catch (gSignalBreak &) {
+    params.status.Reset();
+  }
+
   return new Mixed_ListPortion(solutions);
 }
 
@@ -713,11 +828,17 @@ static Portion *GSM_Lp_Efg(Portion **param)
     params.trace = ((NumberPortion *) param[7])->Value();
 
     gList<BehavSolution> solutions;
-    double time;
-    int npivots;
-    ZSum(support, params, solutions, npivots, time);
-    ((NumberPortion *) param[4])->SetValue(npivots);
-    ((NumberPortion *) param[5])->SetValue(time);
+    try {
+      double time;
+      int npivots;
+      ZSum(support, params, solutions, npivots, time);
+      ((NumberPortion *) param[4])->SetValue(npivots);
+      ((NumberPortion *) param[5])->SetValue(time);
+    }
+    catch (gSignalBreak &) {
+      params.status.Reset();
+    }
+
     return new Behav_ListPortion(solutions);
   }
   else  {
@@ -728,11 +849,18 @@ static Portion *GSM_Lp_Efg(Portion **param)
     params.trace = ((NumberPortion *) param[7])->Value();
 
     gList<BehavSolution> solutions;
-    double time;
-    int npivots;
-    CSSeqForm(support, params, solutions, npivots, time);
-    ((NumberPortion *) param[4])->SetValue(npivots);
-    ((NumberPortion *) param[5])->SetValue(time);
+
+    try {
+      double time;
+      int npivots;
+      CSSeqForm(support, params, solutions, npivots, time);
+      ((NumberPortion *) param[4])->SetValue(npivots);
+      ((NumberPortion *) param[5])->SetValue(time);
+    }
+    catch (gSignalBreak &) {
+      params.status.Reset();
+    }
+
     return new Behav_ListPortion(solutions);
   }
 }
@@ -756,12 +884,19 @@ static Portion *GSM_PolEnum_Nfg(Portion **param)
   params.trace = ((NumberPortion *) param[6])->Value();
   
   gList<MixedSolution> solutions;
-  long nevals;
-  double time;
-  PolEnum(*S, params, solutions, nevals, time);
 
-  ((NumberPortion *) param[3])->SetValue(nevals);
-  ((NumberPortion *) param[4])->SetValue(time);
+  try {
+    long nevals;
+    double time;
+    PolEnum(*S, params, solutions, nevals, time);
+
+    ((NumberPortion *) param[3])->SetValue(nevals);
+    ((NumberPortion *) param[4])->SetValue(time);
+  }
+  catch (gSignalBreak &) {
+    params.status.Reset();
+  }
+
   return new Mixed_ListPortion(solutions);
 }
 
@@ -782,9 +917,14 @@ static Portion *GSM_PolEnum_Efg(Portion **param)
     params.tracefile = &((OutputPortion *) param[6])->Value();
     params.trace = ((NumberPortion *) param[7])->Value();
 
-    long npivots;
-    PolEnum(support, params, solutions, npivots, time);
-    ((NumberPortion *) param[4])->SetValue(npivots);
+    try {
+      long npivots;
+      PolEnum(support, params, solutions, npivots, time);
+      ((NumberPortion *) param[4])->SetValue(npivots);
+    }
+    catch (gSignalBreak &) {
+      params.status.Reset();
+    }
   }
   else {
     EfgPolEnumParams params;
@@ -793,9 +933,14 @@ static Portion *GSM_PolEnum_Efg(Portion **param)
     params.tracefile = &((OutputPortion *) param[6])->Value();
     params.trace = ((NumberPortion *) param[7])->Value();
 
-    long npivots;
-    EfgPolEnum(support, params, solutions, npivots, time);
-    ((NumberPortion *) param[4])->SetValue(npivots);
+    try {
+      long npivots;
+      EfgPolEnum(support, params, solutions, npivots, time);
+      ((NumberPortion *) param[4])->SetValue(npivots);
+    }
+    catch (gSignalBreak &) {
+      params.status.Reset();
+    }
   }
 
   ((NumberPortion *) param[5])->SetValue(time);
@@ -819,11 +964,16 @@ static Portion *GSM_SequentialEquilib(Portion **param)
   params.tracefile = &((OutputPortion *) param[6])->Value();
   params.trace = ((NumberPortion *) param[7])->Value();
 
-  long nevals;
-  SequentialEquilib(basis, support, params, solutions, nevals, time);
+  try {
+    long nevals;
+    SequentialEquilib(basis, support, params, solutions, nevals, time);
 
-  ((NumberPortion *) param[4])->SetValue(nevals);
-  ((NumberPortion *) param[5])->SetValue(time);
+    ((NumberPortion *) param[4])->SetValue(nevals);
+    ((NumberPortion *) param[5])->SetValue(time);
+  }
+  catch (gSignalBreak &) {
+    params.status.Reset();
+  }
 
   return new Behav_ListPortion(solutions);
 }
@@ -889,18 +1039,37 @@ static Portion *GSM_Simpdiv_Nfg(Portion **param)
   SP.trace = ((NumberPortion *) param[8])->Value();
 
   if (((PrecisionPortion *) param[4])->Value() == precDOUBLE)  {
-    SimpdivModule<double> SM(S, SP);
-    SM.Simpdiv();
-    ((NumberPortion *) param[5])->SetValue(SM.NumEvals());
-    ((NumberPortion *) param[6])->SetValue(SM.Time());
-    return new Mixed_ListPortion(SM.GetSolutions());
+    gList<MixedSolution> solutions;
+
+    try {
+      SimpdivModule<double> SM(S, SP);
+      SM.Simpdiv();
+      solutions = SM.GetSolutions();
+      ((NumberPortion *) param[5])->SetValue(SM.NumEvals());
+      ((NumberPortion *) param[6])->SetValue(SM.Time());
+    }
+    catch (gSignalBreak &) {
+      SP.status.Reset();
+    }
+    
+    return new Mixed_ListPortion(solutions);
   }
   else  {
-    SimpdivModule<gRational> SM(S, SP);
-    SM.Simpdiv();
-    ((NumberPortion *) param[5])->SetValue(SM.NumEvals());
-    ((NumberPortion *) param[6])->SetValue(SM.Time());
-    return new Mixed_ListPortion(SM.GetSolutions());
+    gList<MixedSolution> solutions;
+
+    try {
+      SimpdivModule<gRational> SM(S, SP);
+      SM.Simpdiv();
+      solutions = SM.GetSolutions();
+
+      ((NumberPortion *) param[5])->SetValue(SM.NumEvals());
+      ((NumberPortion *) param[6])->SetValue(SM.Time());
+    }
+    catch (gSignalBreak &) {
+      SP.status.Reset();
+    }
+     
+    return new Mixed_ListPortion(solutions);
   }
 }
 
@@ -922,13 +1091,18 @@ static Portion *GSM_Simpdiv_Efg(Portion **param)
   params.trace = ((NumberPortion *) param[9])->Value();
 
   gList<BehavSolution> solutions;
-  int nevals;
-  int niters;
-  double time;
-  Simpdiv(support, params, solutions, nevals, niters, time);
+  try {
+    int nevals, niters;
+    double time;
+    Simpdiv(support, params, solutions, nevals, niters, time);
 
-  ((NumberPortion *) param[6])->SetValue(nevals);
-  ((NumberPortion *) param[7])->SetValue(time);
+    ((NumberPortion *) param[6])->SetValue(nevals);
+    ((NumberPortion *) param[7])->SetValue(time);
+  }
+  catch (gSignalBreak &) { 
+    params.status.Reset();
+  }
+
   return new Behav_ListPortion(solutions);
 }
 
