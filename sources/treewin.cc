@@ -6,6 +6,10 @@
 
 #include "wx.h"
 #include "wxmisc.h"
+#ifdef wx_msw
+#include "wx_mf.h"
+#endif  // wx_msw
+
 #include "gmisc.h"
 #include "efg.h"
 #include "legendc.h"
