@@ -31,7 +31,7 @@
 #include "efgprint.h"
 #include "math/gmath.h"
 
-gbtEfgPrintout::gbtEfgPrintout(TreeWindow *p_treeWindow, const wxString &p_title)
+gbtEfgPrintout::gbtEfgPrintout(gbtTreeView *p_treeWindow, const wxString &p_title)
   : wxPrintout(p_title), m_treeWindow(p_treeWindow)
 { }
 

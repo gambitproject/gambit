@@ -170,7 +170,7 @@ template<class T> gbtList<gbtVector<gbtDouble> > gSolver<T>::Roots()
 //gout << "Before entering Linear Combination, SubMatrix is\n" 
 //  << SubMatrix << "\n";
 
-      LinearCombination<T> Attempt(SubMatrix);
+      gbtLinearCombination<T> Attempt(SubMatrix);
       if (Attempt.LastRowIsSpanned()) {
 	polynomial<T> root_eqn_i(Attempt.LinearDependence());
 	UnivariateRootEquations += root_eqn_i;

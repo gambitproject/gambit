@@ -81,27 +81,27 @@ friend gbtOutput& operator << (gbtOutput& output, const gbtIndexOdometer& x);
 
 
 // *****************************
-//      class gPermutationOdometer
+//      class gbtPermutationOdometer
 // *****************************
 
-class gPermutationOdometer {
+class gbtPermutationOdometer {
  private:
   const int   n;
   gbtArray<int> CurIndices;
   int         CurSign;
 
   // Declared but not defined to prohibit assignment
-  gPermutationOdometer &operator=(const gPermutationOdometer &);
+  gbtPermutationOdometer &operator=(const gbtPermutationOdometer &);
 
  public:
-   gPermutationOdometer(const int&);  
-   gPermutationOdometer(const gPermutationOdometer &);
-   ~gPermutationOdometer();                 // Deletes all pointees
+   gbtPermutationOdometer(const int&);  
+   gbtPermutationOdometer(const gbtPermutationOdometer &);
+   ~gbtPermutationOdometer();                 // Deletes all pointees
 
    // Operators
 
-   bool       operator==(const gPermutationOdometer &) const;
-   bool       operator!=(const gPermutationOdometer &) const;
+   bool       operator==(const gbtPermutationOdometer &) const;
+   bool       operator!=(const gbtPermutationOdometer &) const;
 
    int        operator[](const int)         const;
 
@@ -113,7 +113,7 @@ class gPermutationOdometer {
   gbtArray<int>     CurrentIndices()      const;
   int             CurrentSign()         const;
 
-friend gbtOutput& operator << (gbtOutput& output, const gPermutationOdometer& x);
+friend gbtOutput& operator << (gbtOutput& output, const gbtPermutationOdometer& x);
 };  
 
 #endif // ODOMETER_H

@@ -40,8 +40,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-BEGIN_EVENT_TABLE(gNumberValidator, wxValidator)
-  EVT_CHAR(gNumberValidator::OnChar)
+BEGIN_EVENT_TABLE(gbtNumberValidator, wxValidator)
+  EVT_CHAR(gbtNumberValidator::OnChar)
 END_EVENT_TABLE()
 
 static bool IsNumeric(const wxString &p_value)
@@ -73,32 +73,32 @@ static bool IsNumeric(const wxString &p_value)
 }
 
 //------------------------------------------------------------------------
-//               class gNumberValidator: Member functions
+//               class gbtNumberValidator: Member functions
 //------------------------------------------------------------------------
 
-gNumberValidator::gNumberValidator(wxString *p_value)
+gbtNumberValidator::gbtNumberValidator(wxString *p_value)
   : m_stringValue(p_value), m_hasMin(false), m_hasMax(false)
 { }
 
-gNumberValidator::gNumberValidator(wxString *p_value,
+gbtNumberValidator::gbtNumberValidator(wxString *p_value,
 				   const gbtNumber &p_minValue)
   : m_stringValue(p_value), m_hasMin(true), m_hasMax(false),
     m_minValue(p_minValue)
 { }
 
-gNumberValidator::gNumberValidator(wxString *p_value,
+gbtNumberValidator::gbtNumberValidator(wxString *p_value,
 				   const gbtNumber &p_minValue,
 				   const gbtNumber &p_maxValue)
   : m_stringValue(p_value), m_hasMin(true), m_hasMax(true),
     m_minValue(p_minValue), m_maxValue(p_maxValue)
 { }
 
-gNumberValidator::gNumberValidator(const gNumberValidator &p_validator)
+gbtNumberValidator::gbtNumberValidator(const gbtNumberValidator &p_validator)
 {
   Copy(p_validator);
 }
 
-bool gNumberValidator::Copy(const gNumberValidator &p_validator)
+bool gbtNumberValidator::Copy(const gbtNumberValidator &p_validator)
 {
   wxValidator::Copy(p_validator);
   m_stringValue = p_validator.m_stringValue;
@@ -109,7 +109,7 @@ bool gNumberValidator::Copy(const gNumberValidator &p_validator)
   return true;
 }
 
-bool gNumberValidator::Validate(wxWindow *p_parent)
+bool gbtNumberValidator::Validate(wxWindow *p_parent)
 {
   if (!m_stringValue) {
     return false;
@@ -147,7 +147,7 @@ bool gNumberValidator::Validate(wxWindow *p_parent)
   return true;
 }
 
-bool gNumberValidator::TransferToWindow(void)
+bool gbtNumberValidator::TransferToWindow(void)
 {
   if (!m_stringValue) {
     return false;
@@ -159,7 +159,7 @@ bool gNumberValidator::TransferToWindow(void)
   return true;
 }
 
-bool gNumberValidator::TransferFromWindow(void)
+bool gbtNumberValidator::TransferFromWindow(void)
 {
   if (!m_stringValue) {
     return false;
@@ -171,7 +171,7 @@ bool gNumberValidator::TransferFromWindow(void)
   return TRUE;
 }
 
-void gNumberValidator::OnChar(wxKeyEvent &p_event)
+void gbtNumberValidator::OnChar(wxKeyEvent &p_event)
 {
   if (m_validatorWindow) {
     int keyCode = (int) p_event.KeyCode();

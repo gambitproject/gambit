@@ -35,38 +35,38 @@
 #include "actiter.h"
 #include "numerical/lpsolve.h"   
 
-class EFNodeArrays   {
+class gbtEfgNodeArrays   {
 friend class gbtEfgNodeSet;
 protected:
   gbtBlock<gbtEfgNode> nodes;
   
 public:
-  EFNodeArrays(const gbtArray<gbtEfgNode> &a);
-  EFNodeArrays ( const EFNodeArrays &a);
-  virtual ~EFNodeArrays();
-  EFNodeArrays &operator=( const EFNodeArrays &a);
-  bool operator==( const EFNodeArrays &a) const;
+  gbtEfgNodeArrays(const gbtArray<gbtEfgNode> &a);
+  gbtEfgNodeArrays ( const gbtEfgNodeArrays &a);
+  virtual ~gbtEfgNodeArrays();
+  gbtEfgNodeArrays &operator=( const gbtEfgNodeArrays &a);
+  bool operator==( const gbtEfgNodeArrays &a) const;
 };
 
 //----------------------------------------------------
 // EFNodeArray: Constructors, Destructor, operators
 // ---------------------------------------------------
 
-EFNodeArrays::EFNodeArrays(const gbtArray<gbtEfgNode> &n)
+gbtEfgNodeArrays::gbtEfgNodeArrays(const gbtArray<gbtEfgNode> &n)
   : nodes(n.Length())
 {
   for (int i = 1; i <= nodes.Length(); i++)
     nodes[i] = n[i];
 }
 
-EFNodeArrays::EFNodeArrays(const EFNodeArrays &n)
+gbtEfgNodeArrays::gbtEfgNodeArrays(const gbtEfgNodeArrays &n)
   : nodes(n.nodes)
 { }
 
-EFNodeArrays::~EFNodeArrays ()
+gbtEfgNodeArrays::~gbtEfgNodeArrays ()
 { }
 
-EFNodeArrays &EFNodeArrays::operator=( const EFNodeArrays &n)
+gbtEfgNodeArrays &gbtEfgNodeArrays::operator=( const gbtEfgNodeArrays &n)
 {
   nodes = n.nodes; 
   return *this;
@@ -85,7 +85,7 @@ bool operator==(const gbtArray<gbtEfgNode> &a, const gbtArray<gbtEfgNode> &b)
 }
 #endif
 
-bool EFNodeArrays::operator==(const EFNodeArrays &a) const
+bool gbtEfgNodeArrays::operator==(const gbtEfgNodeArrays &a) const
 {
   return (nodes == a.nodes);
 }
@@ -94,7 +94,7 @@ class gbtEfgNodeSet{
 
 protected:
   gbtEfgPlayer efp;
-  gbtArray < EFNodeArrays *> infosets;
+  gbtArray < gbtEfgNodeArrays *> infosets;
 public:
   
   //----------------------------------------
@@ -160,7 +160,7 @@ gbtEfgNodeSet::gbtEfgNodeSet(const gbtEfgPlayer &p)
     for (int j = 1; j <= members.Length(); j++) {
       members[j] = p.GetInfoset(i).GetMember(j);
     }
-    infosets[i] = new EFNodeArrays(members);
+    infosets[i] = new gbtEfgNodeArrays(members);
   }
 }
 
@@ -169,7 +169,7 @@ gbtEfgNodeSet::gbtEfgNodeSet( const gbtEfgNodeSet &s )
 {
   efp = s.efp;
   for (int i = 1; i <= s.infosets.Length(); i++){
-    infosets[i] = new EFNodeArrays(*(s.infosets[i]));
+    infosets[i] = new gbtEfgNodeArrays(*(s.infosets[i]));
   }
 }
 
@@ -184,7 +184,7 @@ gbtEfgNodeSet &gbtEfgNodeSet::operator=(const gbtEfgNodeSet &s)
   if (this != &s && efp == s.efp) {
     for (int i = 1; i<= infosets.Length(); i++)  {
       delete infosets[i];
-      infosets[i] = new EFNodeArrays(*(s.infosets[i]));
+      infosets[i] = new gbtEfgNodeArrays(*(s.infosets[i]));
     }
   }    
   return *this;
@@ -665,7 +665,7 @@ gbtOutput& operator<<(gbtOutput&s, const gbtEfgBasis& e)
 }
 
 template class gbtArray<gbtEfgNodeSet *>;
-template class gbtArray<EFNodeArrays *>;
+template class gbtArray<gbtEfgNodeArrays *>;
 template class gbtDPVector<int>;
 #ifndef __BCC55__
 template gbtOutput & operator<< (gbtOutput&, const gbtDPVector<int>&);

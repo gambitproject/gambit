@@ -122,19 +122,19 @@ public:
   void Dump(gbtOutput &) const;
 };
 
-class SequenceProfile   {
+class gbtSfgContingency   {
   friend class gbtSfgGame;
 private:
   long index;
   gbtArray<gbtSfgSequence *> profile;
   
 public:
-  SequenceProfile(const gbtSfgGame &);
-  SequenceProfile(const SequenceProfile &p);
+  gbtSfgContingency(const gbtSfgGame &);
+  gbtSfgContingency(const gbtSfgContingency &p);
 
-  ~SequenceProfile();
+  ~gbtSfgContingency();
   
-  SequenceProfile &operator=(const SequenceProfile &);
+  gbtSfgContingency &operator=(const gbtSfgContingency &);
   
   bool IsValid(void) const; 
   

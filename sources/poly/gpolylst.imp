@@ -485,7 +485,7 @@ const gPoly<T> gPolyList<T>::DetOfDerivativeMatrix() const
   gbtRectArray<gPoly<T>*> deriv_matrix = DerivativeMatrix();
   gPoly<T> answer(Space, Order);
 
-  gPermutationOdometer odo(n);
+  gbtPermutationOdometer odo(n);
 
   while (odo.Turn()) {
     gPoly<T> increment(Space, (T)1, Order);

@@ -44,24 +44,24 @@
 
 
 //----------------------------------------------------------------------
-//                      TreeWindow: Member functions
+//                      gbtTreeView: Member functions
 //----------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(TreeWindow, wxScrolledWindow)
-  EVT_SIZE(TreeWindow::OnSize)
-  EVT_MOTION(TreeWindow::OnMouseMotion)
-  EVT_LEFT_DOWN(TreeWindow::OnLeftClick)
-  EVT_LEFT_DCLICK(TreeWindow::OnLeftDoubleClick)
-  EVT_LEFT_UP(TreeWindow::OnMouseMotion)
-  EVT_RIGHT_DOWN(TreeWindow::OnRightClick)
-  EVT_CHAR(TreeWindow::OnKeyEvent)
+BEGIN_EVENT_TABLE(gbtTreeView, wxScrolledWindow)
+  EVT_SIZE(gbtTreeView::OnSize)
+  EVT_MOTION(gbtTreeView::OnMouseMotion)
+  EVT_LEFT_DOWN(gbtTreeView::OnLeftClick)
+  EVT_LEFT_DCLICK(gbtTreeView::OnLeftDoubleClick)
+  EVT_LEFT_UP(gbtTreeView::OnMouseMotion)
+  EVT_RIGHT_DOWN(gbtTreeView::OnRightClick)
+  EVT_CHAR(gbtTreeView::OnKeyEvent)
 END_EVENT_TABLE()
 
 //----------------------------------------------------------------------
-//                  TreeWindow: Constructor and destructor
+//                  gbtTreeView: Constructor and destructor
 //----------------------------------------------------------------------
 
-TreeWindow::TreeWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
+gbtTreeView::gbtTreeView(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxScrolledWindow(p_parent), gbtGameView(p_doc),
     m_layout(p_doc),
     m_zoom(1.0), m_dragImage(0), m_dragSource(0)
@@ -72,10 +72,10 @@ TreeWindow::TreeWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
   OnUpdate(0);
 }
 
-TreeWindow::~TreeWindow()
+gbtTreeView::~gbtTreeView()
 { }
 
-void TreeWindow::MakeMenus(void)
+void gbtTreeView::MakeMenus(void)
 {
   m_nodeMenu = new wxMenu;
 
@@ -112,7 +112,7 @@ void TreeWindow::MakeMenus(void)
 }
 
 //---------------------------------------------------------------------
-//                  TreeWindow: Event-hook members
+//                  gbtTreeView: Event-hook members
 //---------------------------------------------------------------------
 
 static gbtEfgNode PriorSameIset(const gbtEfgNode &n)
@@ -152,7 +152,7 @@ static gbtEfgNode NextSameIset(const gbtEfgNode &n)
 // be visible in the current display.  Thus, find the first predecessor
 // that is visible (ROOT is always visible)
 //
-void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
+void gbtTreeView::OnKeyEvent(wxKeyEvent &p_event)
 {
   if (!m_doc->GetCursor().IsNull() && !p_event.ShiftDown()) {
     bool c = false;   // set to true if cursor position has changed
@@ -205,10 +205,10 @@ void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
 }
 
 //---------------------------------------------------------------------
-//                   TreeWindow: Drawing functions
+//                   gbtTreeView: Drawing functions
 //---------------------------------------------------------------------
 
-void TreeWindow::OnUpdate(gbtGameView *)
+void gbtTreeView::OnUpdate(gbtGameView *)
 {
   m_layout.BuildNodeList(m_doc->GetEfgSupport());
   m_layout.Layout(m_doc->GetEfgSupport());
@@ -247,7 +247,7 @@ void TreeWindow::OnUpdate(gbtGameView *)
   Refresh();
 }
 
-void TreeWindow::AdjustScrollbarSteps(void)
+void gbtTreeView::AdjustScrollbarSteps(void)
 {
   int width, height;
   GetClientSize(&width, &height);
@@ -264,7 +264,7 @@ void TreeWindow::AdjustScrollbarSteps(void)
 		scrollX, scrollY);
 }
 
-void TreeWindow::FitZoom(void)
+void gbtTreeView::FitZoom(void)
 {
   int width, height;
   GetClientSize(&width, &height);
@@ -277,7 +277,7 @@ void TreeWindow::FitZoom(void)
   m_zoom = gmin(zoomx, zoomy) * .9;
 }
 
-void TreeWindow::SetZoom(double p_zoom)
+void gbtTreeView::SetZoom(double p_zoom)
 {
   m_zoom = p_zoom;
   AdjustScrollbarSteps();
@@ -285,7 +285,7 @@ void TreeWindow::SetZoom(double p_zoom)
   Refresh();
 }
 
-void TreeWindow::OnDraw(wxDC &dc)
+void gbtTreeView::OnDraw(wxDC &dc)
 {
   if (!m_doc->GetCursor().IsNull()) {
     if (!m_layout.GetNodeEntry(m_doc->GetCursor())) {
@@ -302,7 +302,7 @@ void TreeWindow::OnDraw(wxDC &dc)
   dc.EndDrawing();
 }
 
-void TreeWindow::OnDraw(wxDC &p_dc, double p_zoom)
+void gbtTreeView::OnDraw(wxDC &p_dc, double p_zoom)
 {
   // Bit of a hack: this allows us to set zoom separately in printout code
   double saveZoom = m_zoom;
@@ -311,7 +311,7 @@ void TreeWindow::OnDraw(wxDC &p_dc, double p_zoom)
   m_zoom = saveZoom;
 }
 
-void TreeWindow::EnsureCursorVisible(void)
+void gbtTreeView::EnsureCursorVisible(void)
 {
   if (m_doc->GetCursor().IsNull()) {
     return;
@@ -364,7 +364,7 @@ void TreeWindow::EnsureCursorVisible(void)
   Scroll(xScroll, yScroll);
 }
 
-void TreeWindow::ProcessCursor(void)
+void gbtTreeView::ProcessCursor(void)
 {
   if (!m_doc->GetCursor().IsNull()) {
     gbtEfgLayoutNode *entry = m_layout.GetNodeEntry(m_doc->GetCursor()); 
@@ -379,7 +379,7 @@ void TreeWindow::ProcessCursor(void)
   Refresh();
 }
 
-void TreeWindow::UpdateCursor(void)
+void gbtTreeView::UpdateCursor(void)
 {
   gbtEfgLayoutNode *entry = m_layout.GetNodeEntry(m_doc->GetCursor());
 
@@ -391,7 +391,7 @@ void TreeWindow::UpdateCursor(void)
 //#include "bitmaps/copy.xpm"
 //#include "bitmaps/move.xpm"
 
-void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
+void gbtTreeView::OnMouseMotion(wxMouseEvent &p_event)
 {
   if (p_event.LeftIsDown() && p_event.Dragging()) {
     if (!m_dragImage) {
@@ -463,7 +463,7 @@ void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
 // With shift key, selects whole subtree (not yet implemented)
 // With control key, adds node to selection (not yet implemented)
 //
-void TreeWindow::OnLeftClick(wxMouseEvent &p_event)
+void gbtTreeView::OnLeftClick(wxMouseEvent &p_event)
 {
   int x, y;
   CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
@@ -480,7 +480,7 @@ void TreeWindow::OnLeftClick(wxMouseEvent &p_event)
 // Left mouse button double-click:
 // Sets selection, brings up node properties dialog
 //
-void TreeWindow::OnLeftDoubleClick(wxMouseEvent &p_event)
+void gbtTreeView::OnLeftDoubleClick(wxMouseEvent &p_event)
 {
   int x, y;
   CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
@@ -501,7 +501,7 @@ void TreeWindow::OnLeftDoubleClick(wxMouseEvent &p_event)
 // Right mouse-button click:
 // Set selection, display context-sensitive popup menu
 //
-void TreeWindow::OnRightClick(wxMouseEvent &p_event)
+void gbtTreeView::OnRightClick(wxMouseEvent &p_event)
 {
   int x, y;
   CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
@@ -530,7 +530,7 @@ void TreeWindow::OnRightClick(wxMouseEvent &p_event)
 //                     DISPLAY MENU HANDLER FUNCTIONS
 //-----------------------------------------------------------------------
 
-void TreeWindow::OnSize(wxSizeEvent &p_event)
+void gbtTreeView::OnSize(wxSizeEvent &p_event)
 {
   if (m_layout.MaxX() == 0 || m_layout.MaxY() == 0) {
     m_layout.Layout(m_doc->GetEfgSupport());

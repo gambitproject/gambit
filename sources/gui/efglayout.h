@@ -166,7 +166,7 @@ public:
   void DrawIncomingBranch(wxDC &) const;
 };
 
-class TreeWindow;
+class gbtTreeView;
 
 class gbtEfgLayout {
 private:

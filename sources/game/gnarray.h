@@ -68,29 +68,4 @@ template <class T> class gbtNDArray   {
     void Output(gbtOutput &) const;
 };
 
-#ifdef UNUSED
-template <class T> class gIndexedNArray : private gbtNDArray<T>   {
-  private:
-    gbtArray<long> *index;
-    
-  public:
-    gIndexedNArray(void);
-    gIndexedNArray(const gbtVector<int> &d);
-    gIndexedNArray(const gIndexedNArray<T> &);
-	 ~gIndexedNArray();
-
-	 gIndexedNArray<T> &operator=(const gIndexedNArray<T> &);
-
-    T operator[](const gbtVector<int> &) const;
-	 T &operator[](const gbtVector<int> &);
-    
-    const gbtVector<int> &Dimensionality(void) const   { return dim; }
-
-    void Input(gbtInput &f, const gbtVector<int> &v, int i)
-      { gbtNDArray<T>::Input(f, v, i); }
-    void Output(gbtOutput &f) const
-      { gbtNDArray<T>::Output(f); }
-};
-#endif   // UNUSED
-
 #endif    // GNARRAY_H

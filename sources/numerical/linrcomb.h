@@ -41,7 +41,7 @@ independent.
 #include "math/rational.h"
 #include "math/gmatrix.h"
 
-template <class T> class LinearCombination  {
+template <class T> class gbtLinearCombination  {
   private:
     gbtMatrix<T> scrambled;
     gbtVector<T> weights;
@@ -56,19 +56,19 @@ template <class T> class LinearCombination  {
 				 gbtMatrix<T>& B);
 
   // This function is left unimplemented to avoid copying
-    LinearCombination<T>& operator=(const LinearCombination<T> &);
+    gbtLinearCombination<T>& operator=(const gbtLinearCombination<T> &);
   
   public:
        // Constructors, Destructor, Constructive Operators
-    LinearCombination(const gbtMatrix<T> &);
-    LinearCombination(const LinearCombination<T> &);
+    gbtLinearCombination(const gbtMatrix<T> &);
+    gbtLinearCombination(const gbtLinearCombination<T> &);
 
-    virtual ~LinearCombination();
+    virtual ~gbtLinearCombination();
 
 
        // Comparison Operators
-    bool operator==(const LinearCombination<T> &) const;
-    bool operator!=(const LinearCombination<T> &) const;
+    bool operator==(const gbtLinearCombination<T> &) const;
+    bool operator!=(const gbtLinearCombination<T> &) const;
 
        // Information
     bool       LastRowIsSpanned() const;
@@ -78,7 +78,7 @@ template <class T> class LinearCombination  {
 };
 
 template <class T> gbtOutput &operator<<(gbtOutput &,
-				       const LinearCombination<T> &);
+				       const gbtLinearCombination<T> &);
 
 
 #endif     // LinearCombination_H

@@ -32,10 +32,10 @@
 template gbtVector<gbtDouble> operator* (const gbtVector<gbtDouble>&,
 			  	     const gbtMatrix<gbtDouble>&);
 
-template class LinearCombination<double>;
-template class LinearCombination<gbtDouble>;
-template class LinearCombination<gbtRational>;
+template class gbtLinearCombination<double>;
+template class gbtLinearCombination<gbtDouble>;
+template class gbtLinearCombination<gbtRational>;
 
-template gbtOutput & operator<< (gbtOutput&, const LinearCombination<double>&);
-template gbtOutput & operator<< (gbtOutput&, const LinearCombination<gbtDouble>&);
-template gbtOutput & operator<< (gbtOutput&, const LinearCombination<gbtRational>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtLinearCombination<double>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtLinearCombination<gbtDouble>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtLinearCombination<gbtRational>&);

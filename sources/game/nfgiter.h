@@ -38,7 +38,7 @@ class gbtNfgContIterator;
 // This class is useful for iterating around the normal form.
 //
 
-class NfgIter    {
+class gbtNfgIterator    {
 private:
   gbtNfgSupport support;
   gbtNfgGame m_nfg;
@@ -46,13 +46,13 @@ private:
   gbtNfgContingency profile;
 
 public:
-  NfgIter(gbtNfgGame);
-  NfgIter(const gbtNfgSupport &s);
-  NfgIter(const NfgIter &);
-  NfgIter(const gbtNfgContIterator &);
-  ~NfgIter();
+  gbtNfgIterator(gbtNfgGame);
+  gbtNfgIterator(const gbtNfgSupport &s);
+  gbtNfgIterator(const gbtNfgIterator &);
+  gbtNfgIterator(const gbtNfgContIterator &);
+  ~gbtNfgIterator();
 
-  NfgIter &operator=(const NfgIter &);
+  gbtNfgIterator &operator=(const gbtNfgIterator &);
 
   void First(void);
   int Next(int p);

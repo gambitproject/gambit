@@ -30,19 +30,19 @@
 #include "numerical/lemketab.h"
 #include "game/nfg.h"
 
-template <class T> class LHTableau : public gbtBaseTableau<T>{
+template <class T> class gbtLemkeHowsonTableau : public gbtBaseTableau<T>{
 protected:
   gbtLemkeTableau<T> T1,T2;
   gbtVector<T> tmp1,tmp2; // temporary column vectors, to avoid allocation
   gbtVector<T> solution;
 public:
       // constructors and destructors
-  LHTableau(const gbtMatrix<T> &A1, const gbtMatrix<T> &A2, 
+  gbtLemkeHowsonTableau(const gbtMatrix<T> &A1, const gbtMatrix<T> &A2, 
 	    const gbtVector<T> &b1, const gbtVector<T> &b2); 
-  LHTableau(const LHTableau<T>&);
-  virtual ~LHTableau();
+  gbtLemkeHowsonTableau(const gbtLemkeHowsonTableau<T>&);
+  virtual ~gbtLemkeHowsonTableau();
   
-  LHTableau<T>& operator=(const LHTableau<T>&);
+  gbtLemkeHowsonTableau<T>& operator=(const gbtLemkeHowsonTableau<T>&);
   
       // information
   int MinRow() const;

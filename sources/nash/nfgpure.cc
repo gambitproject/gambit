@@ -49,7 +49,7 @@ gbtList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
     p_status.SetProgress((double) contNumber / (double) ncont);
 
     bool flag = true;
-    NfgIter niter(citer);
+    gbtNfgIterator niter(citer);
     
     for (int pl = 1; flag && pl <= nfg.NumPlayers(); pl++)  {
       gbtNumber current = citer.GetPayoff(nfg.GetPlayer(pl));

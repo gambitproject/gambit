@@ -26,8 +26,8 @@
 
 #include "lhtab.imp"
 
-template class LHTableau<double>;
-template class LHTableau<gbtRational>;
+template class gbtLemkeHowsonTableau<double>;
+template class gbtLemkeHowsonTableau<gbtRational>;
 template gbtMatrix<double> Make_A1(const gbtNfgGame &,
 				 const gbtNfgSupport &, const double &);
 template gbtMatrix<gbtRational> Make_A1(const gbtNfgGame &,

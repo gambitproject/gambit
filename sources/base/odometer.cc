@@ -214,40 +214,40 @@ gbtOutput& operator << (gbtOutput& output, const gbtIndexOdometer& odo)
 
 
 //---------------------------------------------------------------
-//                      gPermutationOdometer
+//                      gbtPermutationOdometer
 //---------------------------------------------------------------
 
 //---------------------------
 // Constructors / Destructors
 //---------------------------
 
-gPermutationOdometer::gPermutationOdometer(const int& given_n) 
+gbtPermutationOdometer::gbtPermutationOdometer(const int& given_n) 
 : n(given_n), CurIndices(n), CurSign(0)
 {
   CurIndices[1] = 0;                   // Codes for virginity - see Turn() below
   for (int i = 2; i <= n; i++) CurIndices[i] = i;
 }
 
-gPermutationOdometer::gPermutationOdometer(const gPermutationOdometer & odo)
+gbtPermutationOdometer::gbtPermutationOdometer(const gbtPermutationOdometer & odo)
 : n(odo.n), CurIndices(odo.CurIndices), CurSign(odo.CurSign)
 {
 }
 
-gPermutationOdometer::~gPermutationOdometer()
+gbtPermutationOdometer::~gbtPermutationOdometer()
 { }
 
 //----------------------------------
 //        Operators
 //----------------------------------
   
-bool gPermutationOdometer::operator==(const gPermutationOdometer & rhs) const
+bool gbtPermutationOdometer::operator==(const gbtPermutationOdometer & rhs) const
 {
   if (n != rhs.n)                           return false;
   for (int i = 1; i <= n; i++) 
     if (CurIndices[i] != rhs.CurIndices[i]) return false;
 
   if (CurSign != rhs.CurSign) {
-    //gout << "Error in gPermutationOdometer\n"; 
+    //gout << "Error in gbtPermutationOdometer\n"; 
     exit(1);
   }
 
@@ -255,12 +255,12 @@ bool gPermutationOdometer::operator==(const gPermutationOdometer & rhs) const
 }
 
   
-bool gPermutationOdometer::operator!=(const gPermutationOdometer & rhs) const
+bool gbtPermutationOdometer::operator!=(const gbtPermutationOdometer & rhs) const
 {
   return !(*this == rhs);
 }
 
-int gPermutationOdometer::operator[](const int place) const
+int gbtPermutationOdometer::operator[](const int place) const
 {
   assert(1 <= place && place <= n);
   return CurIndices[place];
@@ -270,7 +270,7 @@ int gPermutationOdometer::operator[](const int place) const
 //            Manipulate
 //----------------------------------
 
-bool gPermutationOdometer::Turn()
+bool gbtPermutationOdometer::Turn()
 {
   if (CurIndices[1] == 0) { // First turn gives identity permutation
     CurIndices[1] = 1;
@@ -309,17 +309,17 @@ bool gPermutationOdometer::Turn()
 //           Information
 //----------------------------------
 
-int gPermutationOdometer::NoIndices() const 
+int gbtPermutationOdometer::NoIndices() const 
 { 
   return n;
 }
 
-gbtArray<int> gPermutationOdometer::CurrentIndices() const
+gbtArray<int> gbtPermutationOdometer::CurrentIndices() const
 {
   return CurIndices;
 }
 
-int  gPermutationOdometer::CurrentSign() const
+int  gbtPermutationOdometer::CurrentSign() const
 {
   return CurSign;
 }
@@ -328,7 +328,7 @@ int  gPermutationOdometer::CurrentSign() const
 //           Printing
 //----------------------------------
 
-gbtOutput& operator << (gbtOutput& output, const gPermutationOdometer& odo)
+gbtOutput& operator << (gbtOutput& output, const gbtPermutationOdometer& odo)
 {
   output << "[" << odo.CurIndices[1];
   for(int t = 2; t <= odo.NoIndices(); t++)

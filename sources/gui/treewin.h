@@ -33,7 +33,7 @@
 
 class gbtEfgFrame;
 
-class TreeWindow : public wxScrolledWindow, public gbtGameView {
+class gbtTreeView : public wxScrolledWindow, public gbtGameView {
 friend class gbtEfgPrintout;
 friend class gbtEfgFrame;
 private:
@@ -67,8 +67,8 @@ private:
   void OnUpdate(gbtGameView *);
     
 public:
-  TreeWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
-  virtual ~TreeWindow();
+  gbtTreeView(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtTreeView();
     
   virtual void OnDraw(wxDC &dc);
   void OnDraw(wxDC &, double);

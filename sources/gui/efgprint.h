@@ -32,10 +32,10 @@
 
 class gbtEfgPrintout : public wxPrintout {
 private:
-  TreeWindow *m_treeWindow;
+  gbtTreeView *m_treeWindow;
     
 public:
-  gbtEfgPrintout(TreeWindow *, const wxString &);
+  gbtEfgPrintout(gbtTreeView *, const wxString &);
   virtual ~gbtEfgPrintout() { }
 
   bool OnPrintPage(int page);

@@ -34,7 +34,7 @@
 #include "wx/validate.h"
 #include "math/gnumber.h"
 
-class gNumberValidator : public wxValidator {
+class gbtNumberValidator : public wxValidator {
 protected:
   wxString *m_stringValue;
   bool m_hasMin, m_hasMax;
@@ -44,14 +44,14 @@ protected:
   void OnChar(wxKeyEvent &);
 
 public:
-  gNumberValidator(wxString *);
-  gNumberValidator(wxString *, const gbtNumber &);
-  gNumberValidator(wxString *, const gbtNumber &, const gbtNumber &);
-  gNumberValidator(const gNumberValidator &);
-  virtual ~gNumberValidator() { }
+  gbtNumberValidator(wxString *);
+  gbtNumberValidator(wxString *, const gbtNumber &);
+  gbtNumberValidator(wxString *, const gbtNumber &, const gbtNumber &);
+  gbtNumberValidator(const gbtNumberValidator &);
+  virtual ~gbtNumberValidator() { }
 
-  virtual wxObject *Clone(void) const { return new gNumberValidator(*this); }
-  bool Copy(const gNumberValidator &);
+  virtual wxObject *Clone(void) const { return new gbtNumberValidator(*this); }
+  bool Copy(const gbtNumberValidator &);
 
   virtual bool Validate(wxWindow *parent);
   virtual bool TransferToWindow(void);

@@ -134,7 +134,7 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, gbtEfgInfoset p_infoset)
 					 (char *) ToText(p_infoset.GetChanceProb(1)));
     m_actionProb = new wxTextCtrl(this, -1, wxT(""),
 				  wxDefaultPosition, wxDefaultSize,
-				  0, gNumberValidator(&m_actionProbValue,
+				  0, gbtNumberValidator(&m_actionProbValue,
 						      0, 1),
 				  wxT("action probability"));
     editProbSizer->Add(m_actionProb, 0, wxALL | wxEXPAND, 5);

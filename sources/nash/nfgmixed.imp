@@ -51,7 +51,7 @@ gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_supp
   
   gbtList<MixedSolution> solutions;
 
-  NfgIter iter(p_support); 
+  gbtNfgIterator iter(p_support); 
 
   T min = MinPayoff(nfg) - gbtNumber(1);
   T max = MaxPayoff(nfg);

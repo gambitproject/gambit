@@ -174,7 +174,7 @@ gbtEfgFrame::gbtEfgFrame(gbtGameDocument *p_doc, wxWindow *p_parent)
   MakeMenus();
   MakeToolbar();
   
-  m_treeWindow = new TreeWindow(m_doc, this);
+  m_treeWindow = new gbtTreeView(m_doc, this);
   m_treeWindow->SetSize(GetClientSize());
   m_treeWindow->FitZoom();
 

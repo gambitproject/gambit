@@ -30,11 +30,11 @@
 #include "wx/printdlg.h"
 #include "gamedoc.h"
 
-class TreeWindow;
+class gbtTreeView;
 
 class gbtEfgFrame : public wxFrame, public gbtGameView {
 private:
-  TreeWindow *m_treeWindow;
+  gbtTreeView *m_treeWindow;
 
   wxPageSetupData m_pageSetupData;
   wxPrintData m_printData;

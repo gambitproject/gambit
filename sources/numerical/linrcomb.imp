@@ -28,14 +28,14 @@
 #include "linrcomb.h"
 
 //-------------------------------------------------------------------------
-// LinearCombination<T>: Constructors, destructors, constructive operators
+// gbtLinearCombination<T>: Constructors, destructors, constructive operators
 //-------------------------------------------------------------------------
 
 //DEBUG
 #include "math/gsmatrix.h"
 
 template <class T> 
-LinearCombination<T>::LinearCombination(const gbtMatrix<T> &M)
+gbtLinearCombination<T>::gbtLinearCombination(const gbtMatrix<T> &M)
 : scrambled(M), weights(M.NumRows()), last_row_is_spanned(true)
 { 
   int K = scrambled.NumRows() - 1;
@@ -61,7 +61,7 @@ LinearCombination<T>::LinearCombination(const gbtMatrix<T> &M)
       else { c++; i1 = i; }
     if (c > M.NumColumns()) {
       //      gout << "First NumRows() rows not linearly independent in "
-      //	<< "LinearCombination(gbtMatrix<T> M).\n";
+      //	<< "gbtLinearCombination(gbtMatrix<T> M).\n";
       exit(1);
     }
 
@@ -91,7 +91,7 @@ LinearCombination<T>::LinearCombination(const gbtMatrix<T> &M)
 	   scrambled(PivotRow[K],PivotColumn[K]) == (T)0 ) PivotColumn[K]++;
     if (PivotColumn[K] > M.NumColumns()) {
       //      gout << "First NumRows()-1 rows not linearly independent in "
-      //	<< "LinearCombination(gbtMatrix<T> M).\n";
+      //	<< "gbtLinearCombination(gbtMatrix<T> M).\n";
       // gout << "At the time of failure, scrambled is \n"
       //	<< scrambled << "\n";
       exit(1);
@@ -126,21 +126,21 @@ LinearCombination<T>::LinearCombination(const gbtMatrix<T> &M)
 }
 
 template <class T> 
-LinearCombination<T>::LinearCombination(const LinearCombination<T> &L)
+gbtLinearCombination<T>::gbtLinearCombination(const gbtLinearCombination<T> &L)
 : scrambled(L.scrambled), 
   weights(L.weights),
   last_row_is_spanned(L.last_row_is_spanned)
 { }
  
-template <class T> LinearCombination<T>::~LinearCombination()
+template <class T> gbtLinearCombination<T>::~gbtLinearCombination()
 { }
 
 //-------------------------------------------------------------------------
-//                    LinearCombination<T>: Comparison operators
+//                    gbtLinearCombination<T>: Comparison operators
 //-------------------------------------------------------------------------
 
 template <class T> 
-bool LinearCombination<T>::operator==(const LinearCombination<T> &L) const
+bool gbtLinearCombination<T>::operator==(const gbtLinearCombination<T> &L) const
 {
   if (scrambled == L.scrambled && 
       last_row_is_spanned == L.last_row_is_spanned &&
@@ -150,10 +150,10 @@ bool LinearCombination<T>::operator==(const LinearCombination<T> &L) const
 }
 
 template <class T> 
-bool LinearCombination<T>::operator!=(const LinearCombination<T> &L) const
+bool gbtLinearCombination<T>::operator!=(const gbtLinearCombination<T> &L) const
 { return !(*this == L); }
 
-template <class T> void LinearCombination<T>::Output(gbtOutput &to) const
+template <class T> void gbtLinearCombination<T>::Output(gbtOutput &to) const
 {
   if (last_row_is_spanned) {
     to << "The last row of the input matrix is spanned by the other rows,\n"
@@ -165,32 +165,32 @@ template <class T> void LinearCombination<T>::Output(gbtOutput &to) const
 }
 
 template <class T> gbtOutput &operator<<(gbtOutput &p_file, 
-				       const LinearCombination<T> &p_comb)
+				       const gbtLinearCombination<T> &p_comb)
 {
   p_comb.Output(p_file);
   return p_file;
 }
 
 //-------------------------------------------------------------------------
-//                    LinearCombination<T>: Information
+//                    gbtLinearCombination<T>: Information
 //-------------------------------------------------------------------------
 
-template <class T> bool LinearCombination<T>::LastRowIsSpanned() const
+template <class T> bool gbtLinearCombination<T>::LastRowIsSpanned() const
 {
   return last_row_is_spanned;
 }
 
-template <class T> gbtVector<T> LinearCombination<T>::LinearDependence() const
+template <class T> gbtVector<T> gbtLinearCombination<T>::LinearDependence() const
 {
   return weights;
 }
 
 //-------------------------------------------------------------------------
-//                  LinearCombination<T>: Private Members
+//                  gbtLinearCombination<T>: Private Members
 //-------------------------------------------------------------------------
 
 template <class T> 
-void LinearCombination<T>::AddMultipleOfRowiToRowj(const int& i, 
+void gbtLinearCombination<T>::AddMultipleOfRowiToRowj(const int& i, 
 						   const int& j,
 						   const T& scalar,
 						   gbtMatrix<T>& B)
@@ -200,7 +200,7 @@ void LinearCombination<T>::AddMultipleOfRowiToRowj(const int& i,
 }
 
 template <class T> 
-void LinearCombination<T>::AddMultipleOfRowiToRowj(const int& i, 
+void gbtLinearCombination<T>::AddMultipleOfRowiToRowj(const int& i, 
 						   const int& j,
 						   const T& scalar)
 {

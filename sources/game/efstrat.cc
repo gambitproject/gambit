@@ -28,17 +28,17 @@
 #include "player.h"
 #include "efstrat.h"
 
-class EFActionArray   {
+class gbtEfgActionArray   {
   friend class gbtEfgActionSet;
 protected:
   gbtBlock<gbtEfgAction> acts;
 
 public:
-  EFActionArray ( const gbtArray<gbtEfgAction> &a);
-  EFActionArray ( const EFActionArray &a);
-  virtual ~EFActionArray();
-  EFActionArray &operator=( const EFActionArray &a);
-  bool operator==( const EFActionArray &a) const;
+  gbtEfgActionArray ( const gbtArray<gbtEfgAction> &a);
+  gbtEfgActionArray ( const gbtEfgActionArray &a);
+  virtual ~gbtEfgActionArray();
+  gbtEfgActionArray &operator=( const gbtEfgActionArray &a);
+  bool operator==( const gbtEfgActionArray &a) const;
   const gbtEfgAction &operator[](int i) const { return acts[i]; }
   gbtEfgAction operator[](int i) { return acts[i]; }
   void Set(int i, const gbtEfgAction &action) { acts[i] = action; }
@@ -48,24 +48,24 @@ public:
 };
 
 //----------------------------------------------------
-// EFActionArray: Constructors, Destructor, operators
+// gbtEfgActionArray: Constructors, Destructor, operators
 // ---------------------------------------------------
 
-EFActionArray::EFActionArray(const gbtArray<gbtEfgAction> &a)
+gbtEfgActionArray::gbtEfgActionArray(const gbtArray<gbtEfgAction> &a)
   : acts(a.Length())
 {
   for (int i = 1; i <= acts.Length(); i++)
     acts[i] = a[i];
  }
 
-EFActionArray::EFActionArray(const EFActionArray &a)
+gbtEfgActionArray::gbtEfgActionArray(const gbtEfgActionArray &a)
   : acts(a.acts)
 { }
 
-EFActionArray::~EFActionArray ()
+gbtEfgActionArray::~gbtEfgActionArray ()
 { }
 
-EFActionArray &EFActionArray::operator=( const EFActionArray &a)
+gbtEfgActionArray &gbtEfgActionArray::operator=( const gbtEfgActionArray &a)
 {
   acts = a.acts; 
   return *this;
@@ -85,7 +85,7 @@ bool operator==(const gbtArray<gbtEfgAction> &a, const gbtArray<gbtEfgAction> &b
 }
 #endif
 
-bool EFActionArray::operator==(const EFActionArray &a) const
+bool gbtEfgActionArray::operator==(const gbtEfgActionArray &a) const
 {
   return (acts == a.acts);
 }
@@ -93,7 +93,7 @@ bool EFActionArray::operator==(const EFActionArray &a) const
 class gbtEfgActionSet  {
 protected:
   gbtEfgPlayer efp;
-  gbtArray < EFActionArray *> infosets;
+  gbtArray < gbtEfgActionArray *> infosets;
 public:
   
   //----------------------------------------
@@ -130,12 +130,12 @@ public:
   //  const gbtArray<Action *> &ActionList(int iset) const
   //   { return infosets[iset]->acts; }
 
-  // Get the EFActionArray of an iset
-  const EFActionArray *ActionArray(int iset) const
+  // Get the gbtEfgActionArray of an iset
+  const gbtEfgActionArray *ActionArray(int iset) const
      { return infosets[iset]; }
 
-  // Get the EFActionArray of an Infoset
-  const EFActionArray *ActionArray(const gbtEfgInfoset &i) const
+  // Get the gbtEfgActionArray of an Infoset
+  const gbtEfgActionArray *ActionArray(const gbtEfgInfoset &i) const
      { return infosets[i.GetId()]; }
   
   // Get an Action
@@ -164,7 +164,7 @@ gbtEfgActionSet::gbtEfgActionSet(const gbtEfgPlayer &p)
   : efp(p), infosets(p.NumInfosets())
 {
   for (int i = 1; i <= p.NumInfosets(); i++) {
-    infosets[i] = new EFActionArray(p.GetInfoset(i).NumActions());
+    infosets[i] = new gbtEfgActionArray(p.GetInfoset(i).NumActions());
     for (int j = 1; j <= p.GetInfoset(i).NumActions(); j++) {
       infosets[i]->Set(j, p.GetInfoset(i).GetAction(j));
     }
@@ -176,7 +176,7 @@ gbtEfgActionSet::gbtEfgActionSet( const gbtEfgActionSet &s )
 {
   efp = s.efp;
   for (int i = 1; i <= s.infosets.Length(); i++){
-    infosets[i] = new EFActionArray(*(s.infosets[i]));
+    infosets[i] = new gbtEfgActionArray(*(s.infosets[i]));
   }
 }
 
@@ -191,7 +191,7 @@ gbtEfgActionSet &gbtEfgActionSet::operator=(const gbtEfgActionSet &s)
   if (this != &s && efp == s.efp) {
     for (int i = 1; i<= infosets.Length(); i++)  {
       delete infosets[i];
-      infosets[i] = new EFActionArray(*(s.infosets[i]));
+      infosets[i] = new gbtEfgActionArray(*(s.infosets[i]));
     }
   }    
   return *this;

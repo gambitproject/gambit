@@ -30,37 +30,37 @@
 #include "nfgciter.h"
 
 //--------------------------------------------------------------------------
-// NfgIter:  Constructors, Destructors, Operators
+// gbtNfgIterator:  Constructors, Destructors, Operators
 //--------------------------------------------------------------------------
 
-NfgIter::NfgIter(gbtNfgGame p_nfg)
+gbtNfgIterator::gbtNfgIterator(gbtNfgGame p_nfg)
   : support(p_nfg),
     m_nfg(p_nfg), current_strat(p_nfg.NumPlayers()), profile(p_nfg)
 {
   First();
 }
 
-NfgIter::NfgIter(const gbtNfgSupport &s) 
+gbtNfgIterator::gbtNfgIterator(const gbtNfgSupport &s) 
   : support(s), m_nfg(s.GetGame()),
     current_strat(m_nfg.NumPlayers()), profile(m_nfg)
 {
   First();
 }
 
-NfgIter::NfgIter(const NfgIter &it)
+gbtNfgIterator::gbtNfgIterator(const gbtNfgIterator &it)
   : support(it.support), m_nfg(it.m_nfg), current_strat(it.current_strat), 
     profile(it.profile)
 { }
 
-NfgIter::NfgIter(const gbtNfgContIterator &p_iterator)
+gbtNfgIterator::gbtNfgIterator(const gbtNfgContIterator &p_iterator)
   : support(p_iterator.m_support), m_nfg(p_iterator.m_nfg), 
     current_strat(p_iterator.m_current), profile(p_iterator.m_profile)
 { }
 
-NfgIter::~NfgIter()
+gbtNfgIterator::~gbtNfgIterator()
 { }
 
-NfgIter &NfgIter::operator=(const NfgIter &it)
+gbtNfgIterator &gbtNfgIterator::operator=(const gbtNfgIterator &it)
 {
   if (this != &it)  {
     m_nfg = it.m_nfg;
@@ -72,10 +72,10 @@ NfgIter &NfgIter::operator=(const NfgIter &it)
 }
 
 //-----------------------------
-// NfgIter: Member Functions
+// gbtNfgIterator: Member Functions
 //-----------------------------
 
-void NfgIter::First(void)
+void gbtNfgIterator::First(void)
 {
   for (int i = 1; i <= m_nfg.NumPlayers(); i++)  {
     gbtNfgStrategy s = support.GetStrategy(i, 1);
@@ -84,7 +84,7 @@ void NfgIter::First(void)
   }
 }
 
-int NfgIter::Next(int p)
+int gbtNfgIterator::Next(int p)
 {
   if (current_strat[p] < support.NumStrats(p))  {
     gbtNfgStrategy s = support.GetStrategy(p, ++(current_strat[p]));
@@ -99,7 +99,7 @@ int NfgIter::Next(int p)
   }
 }
 
-int NfgIter::Set(int p, int s)
+int gbtNfgIterator::Set(int p, int s)
 {
   if (p <= 0 || p > m_nfg.NumPlayers() ||
       s <= 0 || s > support.NumStrats(p))
@@ -109,14 +109,14 @@ int NfgIter::Set(int p, int s)
   return 1;
 }
 
-void NfgIter::Get(gbtArray<int> &t) const
+void gbtNfgIterator::Get(gbtArray<int> &t) const
 {
   for (int i = 1; i <= m_nfg.NumPlayers(); i++) {
     t[i] = profile[i].GetId();
   }
 }
 
-void NfgIter::Set(const gbtArray<int> &t)
+void gbtNfgIterator::Set(const gbtArray<int> &t)
 {
   for (int i = 1; i <= m_nfg.NumPlayers(); i++){
     profile.Set(i, support.GetStrategy(i, t[i]));
@@ -124,12 +124,12 @@ void NfgIter::Set(const gbtArray<int> &t)
   } 
 }
 
-gbtNfgOutcome NfgIter::GetOutcome(void) const
+gbtNfgOutcome gbtNfgIterator::GetOutcome(void) const
 {
   return profile.GetOutcome();
 }
 
-void NfgIter::SetOutcome(gbtNfgOutcome outcome)
+void gbtNfgIterator::SetOutcome(gbtNfgOutcome outcome)
 {
   profile.SetOutcome(outcome);
 }

@@ -64,11 +64,11 @@ template class gbtArray<gbtBlock<bool> >;
 template class gbtBlock<gbtBlock<bool> >;
 
 class gbtEfgActionSet;
-class EFActionArray;
+class gbtEfgActionArray;
 
 //template bool operator==(const gbtArray<Action *> &, const gbtArray<Action *> &);
 template class gbtArray<gbtEfgActionSet *>;
-template class gbtArray<EFActionArray *>;
+template class gbtArray<gbtEfgActionArray *>;
 
 template class gbtList<gbtEfgNode>;
 template class gbtList<gbtEfgAction>;

@@ -156,7 +156,7 @@ gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
     }
   }
 
-  NfgIter iter(afg);
+  gbtNfgIterator iter(afg);
   int pl = afg.NumPlayers();
 
   gbtArray<int> dim(p_efg.NumPlayers());

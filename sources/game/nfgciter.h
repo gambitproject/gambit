@@ -42,7 +42,7 @@
 // the total number of possible contingencies in increments of 1.
 //
 class gbtNfgContIterator    {
-friend class NfgIter;
+friend class gbtNfgIterator;
 private:
   gbtNfgSupport m_support;
   gbtArray<int> m_current;

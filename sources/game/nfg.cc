@@ -334,7 +334,7 @@ long gbtNfgGame::RevisionNumber(void) const
 { return rep->m_revision; }
 
 static void WriteNfg(const gbtNfgGame &p_game,
-		     NfgIter &p_iter, int pl, gbtOutput &p_file)
+		     gbtNfgIterator &p_iter, int pl, gbtOutput &p_file)
 {
   p_iter.Set(pl, 1);
   do {
@@ -402,7 +402,7 @@ void gbtNfgGame::WriteNfg(gbtOutput &p_file) const
   }
   else {
     gbtNfgSupport support(*this);
-    NfgIter iter(support);
+    gbtNfgIterator iter(support);
     ::WriteNfg(*this, iter, NumPlayers(), p_file);
   }
 }
