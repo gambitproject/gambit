@@ -10,15 +10,10 @@
 #include "hash.h"
 
 
-
 //--------------------------------------------------------------------
-//                     hash tables used by GSM
+//                     date structures used by GSM
 //-------------------------------------------------------------------
 
-gOutput& operator << ( class gOutput& s, class Portion* (*funcname)() )
-{
-  return s << funcname;
-}
 
 class FunctionHashTable : public HashTable<gString, FuncDescObj*>
 {
@@ -102,18 +97,21 @@ GSM::GSM( int size )
   assert( size > 0 );
 #endif // NDEBUG
 
-  stack = new gStack<Portion*>( size );
-  RefTable = new RefHashTable;
+  stack           = new gStack< Portion* >( size );
+  func_call_stack = new gStack< CallFunctionObject* >( size ) ;
+  RefTable        = new RefHashTable;
+  FuncTable       = new FunctionHashTable;
 
-  FuncTable = new FunctionHashTable;
-  InitFunctions();           // This function is located in gsmfunc.cc
+  InitFunctions();  // This function is located in gsmfunc.cc
 }
 
 
 GSM::~GSM()
 {
   Flush();
+  delete FuncTable;
   delete RefTable;
+  delete func_call_stack;
   delete stack;
 }
 
@@ -551,129 +549,166 @@ int GSM::FuncParamCheck( const PortionType stack_param_type,
 }
 
 
-bool GSM::CallFunction
-  ( 
-   const gString&  funcname,             // name of the function to be called
-   const int       num_of_params_passed, // number of parameters passed in
-   const gString*  name                  // the correponding formal names
-   )
+
+
+
+bool GSM::InitCallFunction( const gString& funcname )
 {
-  FuncDescObj*  func;          // Function Descriptor Object
-  Portion*      return_value;  // stores the function return value
-  Portion**     param;         // parameter list to pass to the function
-  int           i;             // index to the parameter list
-  int           old_i;         // used to check parameter redefinitions
-  Portion**     passed_param;  // parameter list received
-  int           passed_i;      // index to the parameter list received
-  int           num_of_params; // actual number of paramater of the function
-  int           type_match;    // status variable
-  int           result = true;
+  FuncDescObj*         func_desc_obj;
+  CallFunctionObject*  call_func_obj;
+  bool                 result = true;
 
+  assert( func_call_stack->Depth() < func_call_stack->MaxDepth() );
 
-  func = (*FuncTable)( funcname );
-  num_of_params = func->NumParams();
-
-
-  if( !FuncTable->IsDefined( funcname ) )
+  if( FuncTable->IsDefined( funcname ) )
   {
-    gerr << "GSM Error: CallFunction() called with an undefined function\n";
-    gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
-    return false;
+    func_desc_obj = (*FuncTable)( funcname );
+    call_func_obj = new CallFunctionObject( funcname, func_desc_obj );
+    func_call_stack->Push( call_func_obj );
   }
-
-  param = new Portion* [ num_of_params ];
-  for( i = 0; i < num_of_params; i++ )
+  else // ( !FuncTable->IsDefined( funcname ) )
   {
-    param[ i ] = func->ParamDefaultValue( i );
+    gerr << "GSM Error: undefined function name:\n";
+    gerr << "           InitCallFunction( \"" << funcname << "\", ... )\n";
+    result = false;
   }
-  
-  passed_param = new Portion* [ num_of_params_passed ];
-  for( passed_i = num_of_params_passed - 1; passed_i >= 0; passed_i-- )
-  {
-    passed_param[ passed_i ] = stack->Pop();
-  }
-  
-  // Maps the parameters into their correct positions in the parameter list
-  i = 0;
-  for( passed_i = 0; passed_i < num_of_params_passed; passed_i++ )
-  {
-    if( i >= num_of_params )
-    {
-      gerr << "FuncDescObj Error: CallFunction( \"" << funcname;
-      gerr << "\", ... ) executed with\n";
-      gerr << "                   too many function parameters\n";
-      return false;
-    }
-    
-    if( ( func->ParamName( i ) != name[ passed_i ] ) &&
-       ( name[ passed_i ] != "" ) )
-    {
-      old_i = i;
-      i = func->FindParamName( name[ passed_i ] );
-      
-      if( i <= old_i )
-      {
-	gerr << "GSM Error: multiple definitions found for parameter \"";
-	gerr << name[ passed_i ] << "\" while executing\n";
-	gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
-	return false;
-      }
-      
-      if( i == -1 )
-      {
-	gerr << "FuncDescObj Error: parameter \"" << name[ passed_i ];
-	gerr << "\" is not defined for\n";
-	gerr << "                   the function \"" << funcname << "\"\n";
-	return false;
-      }
-    }
-    
-    param[ i ] = passed_param[ passed_i ];
-    i++;
-  }
-  
-  for( i = 0; i < num_of_params; i++ )
-  {
-    if( param[ i ] == 0 )
-    {
-      gerr << "GSM Error: required parameter found missing while executing\n";
-      gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
-      gerr << "   Missing Parameter: \"" << func->ParamName( i ) << "\"\n";
-      return false;
-    }
-    
-    if( param[ i ]->Type() == porREFERENCE )
-      param[ i ] = resolve_ref( (Reference_Portion *)param[ i ] );
-    
-    type_match = FuncParamCheck( param[ i ]->Type(), func->ParamType( i ) );
-    if( !type_match )
-    {
-      gerr << "GSM Error: mismatched parameter type found while executing\n";
-      gerr << "           CallFunction( \"" << funcname << "\", ... )\n\n";
-      gerr << "    Error at Parameter #: " << i << "\n";
-      gerr << "           Expected type: " << func->ParamType( i ) << "\n";
-      gerr << "           Type found:    " << param[ i ]->Type() << "\n";
-      return false;
-    }
-  }
-  
-  return_value = func->CallFunction( param );
-  
-#ifndef NDEBUG
-  if( return_value == 0 )
-  {
-    gerr << "GSM Error: an error occurred while attempting to execute\n";
-    gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
-  }
-  assert( return_value != 0 );
-#endif // NDEBUG
-  
-  stack->Push( return_value );
-
   return result;
 }
 
 
+bool GSM::Bind( void )
+{
+  CallFunctionObject*  call_func_obj;
+  PortionType          curr_param_type;
+  Portion*             param;
+  gString              funcname;
+  int                  i;
+  int                  type_match;
+  bool                 result = true;
+
+#ifndef NDEBUG
+  if( func_call_stack->Depth() <= 0 )
+  {
+    gerr << "GSM Error: the CallFunction() subsystem was not initialized by\n";
+    gerr << "           calling InitCallFunction() first\n";
+  }
+  assert( func_call_stack->Depth() > 0 );
+
+  if( stack->Depth() <= 0 )
+  {
+    gerr << "GSM Error: no value found to assign to a function parameter\n";
+  }
+  assert( stack->Depth() > 0 );
+#endif // NDEBUG
+
+  call_func_obj = func_call_stack->Pop();
+  param = stack->Pop();
+  
+  if( param->Type() == porREFERENCE )
+    param = resolve_ref( (Reference_Portion *)param );
+  
+  curr_param_type = call_func_obj->GetCurrParamType();
+  type_match = FuncParamCheck( param->Type(), curr_param_type );
+  if( type_match )
+  {
+    call_func_obj->SetCurrParam( param ); 
+  }
+  else // ( !type_match )
+  {
+    if( curr_param_type != porERROR )
+    {
+      funcname = call_func_obj->FuncName();
+      i        = call_func_obj->GetCurrParamIndex();
+      gerr << "GSM Error: mismatched parameter type found while executing\n";
+      gerr << "           CallFunction( \"" << funcname << "\", ... )\n\n";
+      gerr << "Error at Parameter #: " << i << "\n";
+      gerr << "       Expected type: " << call_func_obj->GetCurrParamType() << "\n";
+      gerr << "       Type found:    " << param->Type() << "\n";
+      result = false;
+    }
+  }
+  func_call_stack->Push( call_func_obj );
+  return result;
+}
+
+
+bool GSM::Bind( const gString& param_name )
+{
+  CallFunctionObject*  call_func_obj;
+  int                  new_index;
+  int                  result = true;
+  
+#ifndef NDEBUG
+  if( func_call_stack->Depth() <= 0 )
+  {
+    gerr << "GSM Error: the CallFunction() subsystem was not initialized by\n";
+    gerr << "           calling InitCallFunction() first\n";
+  }
+  assert( func_call_stack->Depth() > 0 );
+#endif // NDEBUG
+
+  call_func_obj = func_call_stack->Pop();
+  new_index = call_func_obj->FindParamName( param_name );
+  
+  if( new_index >= 0 )
+  {
+    if( new_index >= call_func_obj->GetCurrParamIndex() )
+    {
+      call_func_obj->SetCurrParamIndex( new_index );
+      func_call_stack->Push( call_func_obj );
+      result = Bind();
+    }
+    else // ( new_index < call_func_obj->GetCurrParamIndex() )
+    {
+      gerr << "GSM Error: multiple definitions found for parameter \"";
+      gerr << param_name << "\" while executing\n";
+      gerr << "           CallFunction( \"" << call_func_obj->FuncName() << "\", ... )\n";
+      result = false;
+    }
+  }
+  else // ( new_index == -1 )
+  {
+    gerr << "FuncDescObj Error: parameter \"" << param_name;
+    gerr << "\" is not defined for\n";
+    gerr << "                   the function \"" << call_func_obj->FuncName() << "\"\n";
+    result = false;
+  }
+  return result;
+}
+
+
+bool GSM::CallFunction( void )
+{
+  CallFunctionObject*  call_func_obj;
+  Portion*             return_value;
+  bool                 result = true;
+
+#ifndef NDEBUG
+  if( func_call_stack->Depth() <= 0 )
+  {
+    gerr << "GSM Error: the CallFunction() subsystem was not initialized by\n";
+    gerr << "           calling InitCallFunction() first\n";
+  }
+  assert( func_call_stack->Depth() > 0 );
+#endif // NDEBUG
+
+  call_func_obj = func_call_stack->Pop();
+  return_value = call_func_obj->CallFunction();
+  delete call_func_obj;
+
+#ifndef NDEBUG
+  if( return_value == 0 )
+  {
+    gerr << "GSM Error: an error occurred while attempting to execute\n";
+    gerr << "           CallFunction( \"" << call_func_obj->FuncName() << "\", ... )\n";
+  }
+  assert( return_value != 0 );
+#endif // NDEBUG
+
+  stack->Push( return_value );
+
+  return result;
+}
 
 
 
@@ -744,22 +779,29 @@ void GSM::Flush( void )
 
 #include "hash.imp"
 
-TEMPLATE class HashTable<gString, Portion*>;
-TEMPLATE class HashTable<gString, FuncDescObj*>;
+TEMPLATE class HashTable< gString, Portion* >;
+TEMPLATE class HashTable< gString, FuncDescObj* >;
 
 
 #include "glist.imp"
 
-TEMPLATE class gList<Portion*>;
-TEMPLATE class gNode<Portion*>;
+TEMPLATE class gList< Portion* >;
+TEMPLATE class gNode< Portion* >;
 
-TEMPLATE class gList<gString>;
-TEMPLATE class gNode<gString>;
+TEMPLATE class gList< gString >;
+TEMPLATE class gNode< gString >;
 
-TEMPLATE class gList<FuncDescObj*>;
-TEMPLATE class gNode<FuncDescObj*>;
+TEMPLATE class gList< FuncDescObj* >;
+TEMPLATE class gNode< FuncDescObj* >;
 
 
 #include "gstack.imp"
 
-TEMPLATE class gStack<Portion*>;
+TEMPLATE class gStack< Portion* >;
+TEMPLATE class gStack< CallFunctionObject* >;
+
+
+gOutput& operator << ( class gOutput& s, class Portion* (*funcname)() )
+{ return s << funcname; }
+
+

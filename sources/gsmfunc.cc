@@ -105,6 +105,11 @@ FuncDescObj::FuncDescObj( Portion* (*funcname)(Portion**), const int size )
 
 FuncDescObj::~FuncDescObj()
 {
+  int i;
+  for( i = 0; i < num_of_params; i++ )
+  {
+    delete ParamInfo[ i ].DefaultValue;
+  }
   delete[] ParamInfo;
 }
 
@@ -170,7 +175,6 @@ int FuncDescObj::FindParamName( const gString& name ) const
 }
 
 
-
 void FuncDescObj::SetParamInfo
   ( 
    const int          index, 
@@ -208,4 +212,104 @@ void FuncDescObj::SetParamInfo
   ParamInfo[ index ].Name = name;
   ParamInfo[ index ].DefaultValue = default_value;
 }
+
+
+
+//-------------------------------------------------------------------
+//                      CallFunctionObject
+//-------------------------------------------------------------------
+
+
+  
+CallFunctionObject::CallFunctionObject( const gString& name, 
+				        FuncDescObj* func )
+     :func_name( name ), func_desc_obj( func )
+{
+  int i;
+
+  param = new Portion* [ func_desc_obj->NumParams() ];
+  current_param_index = 0;
+  
+  for( i = 0; i < func_desc_obj->NumParams(); i++ )
+  {
+    param[ i ] = func_desc_obj->ParamDefaultValue( i );
+  }
+}
+
+
+PortionType CallFunctionObject::GetCurrParamType( void ) const
+{
+  if( current_param_index < func_desc_obj->NumParams() )
+  {
+    return func_desc_obj->ParamType( current_param_index );
+  }
+  else // ( current_param_index >= func_desc_obj->NumParams() )
+  {
+    gerr << "CallFunctionObject Error: too many parameters specified for\n";
+    gerr << "                          function \"" << func_name << "\"\n";
+    return porERROR;
+  }
+}
+
+
+void CallFunctionObject::SetCurrParam( Portion *new_param )
+{
+  if( current_param_index < func_desc_obj->NumParams() )
+  {
+    if( param[ current_param_index ] != 0 )
+    {
+      delete param[ current_param_index ];
+    }
+    param[ current_param_index ] = new_param;
+    current_param_index++;
+  }
+  else // ( current_param_index >= func_desc_obj->NumParams() )
+  {
+    gerr << "CallFunctionObject Error: too many parameters specified for\n";
+    gerr << "                          function \"" << func_name << "\"\n";
+  }
+}
+
+
+void CallFunctionObject::SetCurrParamIndex( const int index )
+{
+  current_param_index = index;
+}
+
+
+int CallFunctionObject::GetCurrParamIndex( void ) const
+{
+  return current_param_index;
+}
+
+
+int CallFunctionObject::FindParamName( const gString& name ) const
+{
+  return func_desc_obj->FindParamName( name );
+}
+
+
+gString CallFunctionObject::FuncName( void ) const
+{
+  return func_name;
+}
+
+
+Portion* CallFunctionObject::CallFunction( void )
+{
+  int i;
+
+  for( i = 0; i < func_desc_obj->NumParams(); i++ )
+  {
+    if( param[ i ] == 0 )
+    {
+      gerr << "GSM Error: required parameter \"" << func_desc_obj->ParamName( i ) << "\"" << " not found while executing\n";
+      gerr << "           CallFunction() on function \"" << func_name << "\"\n";
+      return 0;
+    }
+    assert( param[ i ] != 0 );
+  }
+  return func_desc_obj->CallFunction( param );
+}
+
 

@@ -53,4 +53,27 @@ class FuncDescObj
 
 
 
+
+class CallFunctionObject
+{
+ private:
+  gString       func_name;
+  FuncDescObj*  func_desc_obj;
+  Portion**     param;
+  int           current_param_index;
+
+ public:
+  CallFunctionObject( const gString& name, FuncDescObj* func );
+
+  PortionType GetCurrParamType  ( void ) const;
+  int         GetCurrParamIndex ( void ) const;
+  void        SetCurrParamIndex ( const int index );
+  void        SetCurrParam      ( Portion *new_param );
+  int         FindParamName     ( const gString& name ) const;
+  gString     FuncName          ( void ) const;
+  Portion*    CallFunction      ( void );
+};
+
+
+
 #endif  // GSMFUNC_H

@@ -13,13 +13,13 @@
 #include "gstack.h"
 #include "gambitio.h"
 
-
 #include "portion.h"
 #include "gsmfunc.h"
 
 
 
-// These two classes implemented in gsm.cc
+
+// These classes implemented in gsm.cc
 class FunctionHashTable;
 class RefHashTable;
 
@@ -27,9 +27,10 @@ class RefHashTable;
 class GSM
 {
  private:
-  gStack<Portion*>*   stack;
-  RefHashTable*       RefTable;
-  FunctionHashTable*  FuncTable;
+  gStack< Portion* >*             stack;
+  gStack< CallFunctionObject* >*  func_call_stack;
+  RefHashTable*                   RefTable;
+  FunctionHashTable*              FuncTable;
 
   Portion* resolve_ref( Reference_Portion* p );
 
@@ -87,12 +88,11 @@ class GSM
   
   void AddFunction(const gString& funcname, FuncDescObj* func );
 
-  bool CallFunction
-    ( 
-     const gString&  funcname,
-     const int       num_of_params_passed,
-     const gString*  name
-     );
+
+  bool InitCallFunction ( const gString& funcname );
+  bool Bind             ( void );
+  bool Bind             ( const gString& param_name );
+  bool CallFunction     ( void );
 
      
   void Output ( void );

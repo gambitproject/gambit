@@ -24,9 +24,9 @@ int main( void )
   gString y = "y";
   gString z = "z";
   gString *name;
+  GSM *machine;
 
-
-  GSM *machine = new GSM( 32 );
+  machine = new GSM( 32 );
   
 
   gout << "\n";
@@ -77,17 +77,6 @@ int main( void )
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
-
-/*
-  gout << "Testing PushRef()\n";
-  machine->PushRef( x );
-  machine->PushRef( y );
-  machine->PushRef( z );
-  machine->PushRef( x );
-  machine->PushRef( y );
-  machine->PushRef( z );
-  machine->Dump();
-*/  
 
 
   gout << "Assigning x = (double)7\n";
@@ -276,38 +265,6 @@ int main( void )
   gin >> cont;
 
   machine->Flush();
-/*
-  gout << "Testing CallFunction(\"Sign\")\n";
-  machine->CallFunction( (gString) "Sign" );
-  gout << "Testing CallFunction(\"Abs\")\n";
-  machine->CallFunction( (gString) "Abs" );
-  gout << "Testing CallFunction(\"Sqr\")\n";
-  machine->CallFunction( (gString) "Sqr" );
-  machine->Dump();
-*/
-
-  gout << "Pushing (double) 8\n";
-  machine->Push( (double) 8 );
-  gout << "Testing CallFunction(\"Sqr\")\n";
-  name = new gString[1];
-  name[0] = "n";
-  machine->CallFunction( (gString) "Sqr", 1, name );
-  delete[] name;
-  machine->Dump();
-
-  machine->Flush();
-  gout << "Testing CallFunction(\"Sqr\") 3 times on (double) 300\n";
-  machine->Push( (double) 300 );
-  name = new gString[1];
-  name[0] = "n";
-  machine->CallFunction( (gString) "Sqr", 1, name );
-  machine->CallFunction( (gString) "Sqr", 1, name );
-  machine->CallFunction( (gString) "Sqr", 1, name );
-  delete[] name;
-  machine->Dump();
-
-
-  machine->Flush();
   gout << "Assigning x = (double) 7\n";
   machine->PushRef( x );
   machine->Push( (double) 7 );
@@ -321,95 +278,83 @@ int main( void )
   machine->Push( (double) 13 );
   machine->Assign();
 
+  gout << "Testing CallFunction( \"Sqr\" ) on x\n";
+  machine->Flush();
+  machine->InitCallFunction( (gString) "Sqr" );
+  machine->PushRef( x );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
   gout << "Testing CallFunction( \"Angle\" )\n";
   machine->Flush();
-  name = new gString[0];
-  machine->CallFunction( (gString) "Angle", 0,  name );
-  delete[] name;
-  machine->Dump();
-
-  machine->Flush();
+  machine->InitCallFunction( (gString) "Angle" );
   machine->PushRef( x );
-  name = new gString[1];
-  name[0] = "";
-  machine->CallFunction( (gString) "Angle", 1,  name );
-  delete[] name;
-  machine->Dump();
-
-  machine->Flush();
-  machine->PushRef( x );
-  name = new gString[1];
-  name[0] = "x";
-  machine->CallFunction( (gString) "Angle", 1,  name );
-  delete[] name;
-  machine->Dump();
-
-  machine->Flush();
+  machine->Bind();
   machine->PushRef( y );
-  name = new gString[1];
-  name[0] = "y";
-  machine->CallFunction( (gString) "Angle", 1,  name );
-  delete[] name;
+  machine->Bind();
+  machine->CallFunction();
   machine->Dump();
 
+  gout << "Testing nested CallFunction(); should give same result as before\n";
   machine->Flush();
+  machine->InitCallFunction( (gString) "Angle" );
+  machine->InitCallFunction( (gString) "Sqr" );
   machine->PushRef( x );
-  machine->PushRef( y );
-  name = new gString[2];
-  name[0] = "";
-  name[1] = "";
-  machine->CallFunction( (gString) "Angle", 2,  name );
-  delete[] name;
-  machine->Dump();
-
-  machine->Flush();
   machine->PushRef( x );
+  machine->Multiply();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
   machine->PushRef( y );
-  name = new gString[2];
-  name[0] = "x";
-  name[1] = "";
-  machine->CallFunction( (gString) "Angle", 2,  name );
-  delete[] name;
+  machine->Bind();
+  machine->CallFunction();
   machine->Dump();
-
-  machine->Flush();
-  machine->PushRef( x );
-  machine->PushRef( y );
-  name = new gString[2];
-  name[0] = "";
-  name[1] = "y";
-  machine->CallFunction( (gString) "Angle", 2,  name );
-  delete[] name;
-  machine->Dump();
-
-  machine->Flush();
-  machine->PushRef( x );
-  machine->PushRef( y );
-  name = new gString[2];
-  name[0] = "x";
-  name[1] = "y";
-  machine->CallFunction( (gString) "Angle", 2,  name );
-  delete[] name;
-  machine->Dump();
-
-
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
+  
+  gout << "\nCrash testing CallFunction()\n\n";
 
-
+/*
   machine->Flush();
   machine->PushRef( x );
+  machine->InitCallFunction( (gString) "Angle" );
+  machine->InitCallFunction( (gString) "Sqr" );
   machine->PushRef( x );
-  name = new gString[2];
-  name[0] = "";
-  name[1] = "x";
-  machine->CallFunction( (gString) "Angle", 2,  name );
-  delete[] name;
+  machine->PushRef( x );
+  machine->Multiply();
+  machine->Bind( "n" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind( "x" );
+  machine->PushRef( y );
+  machine->Bind( "y" );
+  machine->CallFunction();
+  machine->Dump();
+*/
+
+
+  machine->InitCallFunction( (gString) "Angle" );
+  machine->CallFunction();
+  machine->Dump();
+  machine->InitCallFunction( (gString) "Angle" );
+  machine->CallFunction();
+  machine->Dump();
+  machine->InitCallFunction( (gString) "Angle" );
+  machine->CallFunction();
   machine->Dump();
 
-
-
+/*
+  machine->InitCallFunction( (gString) "Sqr" );
+  machine->CallFunction();
+  machine->Dump();
+*/
+/*
+  machine->InitCallFunction( (gString) "Sqr" );
+  machine->CallFunction();
+  machine->Dump();
+*/
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
@@ -606,6 +551,10 @@ int main( void )
 */
 
 
+  delete machine;
+
+  gout << "\nnewing and deleting another GSM\n";
+  machine = new GSM( 256 );
   delete machine;
 
   return 0;
