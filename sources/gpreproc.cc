@@ -59,6 +59,7 @@ gInput *gPreprocessor::LoadInput(gText &p_name)
   for (int i = 1; i <= paths.Length(); i++) {
     try {
       infile = new gFileInput(paths[i]);
+      p_name = paths[i];
       return infile;
     }
 
