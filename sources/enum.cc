@@ -128,11 +128,13 @@ template <class T> int EnumModule<T>::Enum(void)
   gListIter< BFS<T> > iter1((gList< BFS<T> > &) verts1);
   gListIter< BFS<T> > iter2((gList< BFS<T> > &) verts2);
 
+  i=0;
   for( iter2.GoFirst(),iter2++; 
        ! iter2.PastEnd() &&  !params.status.Get(); iter2++ ) {
     bfs1 = iter2.GetValue();
     params.status.SetProgress((double)(i-2)/(double)v2);
 //    gout << "\nProgress = " << (double)(i-2)/(double)v2;
+    i++;
     for( iter1.GoFirst(),iter1++; ! iter1.PastEnd(); iter1++ ) {
       bfs2 = iter1.GetValue();
       
