@@ -419,8 +419,8 @@ guinfgSimpdiv::guinfgSimpdiv(const NFSupport &p_support,
 			     int p_stopAfter, gPrecision p_precision, 
 			     bool p_eliminateWeak)
   : guiNfgSolution(p_support, p_parent),
-    m_stopAfter(p_stopAfter), m_precision(p_precision),
-    m_nRestarts(20), m_leashLength(0)
+    m_stopAfter(p_stopAfter), m_nRestarts(20), m_leashLength(0),
+    m_precision(p_precision)
 {
   m_eliminate = true;
   m_eliminateAll = true;
