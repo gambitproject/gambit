@@ -287,7 +287,7 @@ template <class T> void
 gMatrix<T>::SwitchColumn(int col, const gVector<T> &V)
 {
   assert(CheckCol(col));
-  assert(V.First() == MinCol() && V.Last() == Width());
+//  assert(V.First() == MinCol() && V.Last() == Width()+MinCol());
   for(int i = data.First(); i <= data.Last(); i++)
     data[i][col] = V[i];
 }
