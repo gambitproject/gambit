@@ -324,6 +324,21 @@ template <class T>
 void Tableau<T>::Dump(gOutput &to) const
 { basis.Dump(to);to << "\n";solution.Dump(to); }
 
+template <class T>
+void Tableau<T>::BigDump(gOutput &to) const
+{ 
+  to << "\nBasis:\n";
+  Dump(to);
+  gMatrix<T> AA(*A);
+  gVector<T> bb(*b);
+  for(int j=AA.MinCol();j<=AA.MaxCol();j++) {
+    SolveColumn(j, bb);
+    for(int i=AA.MinRow();i<=AA.MaxRow();i++) 
+      AA(i,j) = bb[i];
+  }
+  to << "\nTableau:\n" << AA;
+}
+
 
 //
 // LP Tableau member definitions 

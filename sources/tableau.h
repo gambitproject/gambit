@@ -120,6 +120,7 @@ public:
   BFS<T> GetBFS1(void) const; 
   BFS<T> GetBFS(void) const;  // used in lpsolve for some reason
   void Dump(gOutput &) const;
+  void BigDump(gOutput &) const;
 };
 
 template <class T> class LPTableau : public Tableau<T> {
