@@ -474,6 +474,18 @@ void NfgTable::OnUpdate(gbtGameView *)
 
   m_grid->AutoSizeRows();
   m_grid->AutoSizeColumns();
+  // Set all strategy columns to be the same width, which is
+  // the narrowest width which fits all the entries
+  int max = 0;
+  for (int col = 0; col < support.NumStrats(colPlayer); col++) {
+    if (m_grid->GetColSize(col) > max) {
+      max = m_grid->GetColSize(col);
+    }
+  }
+  for (int col = 0; col < support.NumStrats(colPlayer); col++) {
+    m_grid->SetColSize(col, max);
+  }
+
   m_grid->SetGridCursor(m_doc->GetContingency()[m_doc->GetRowPlayer()] - 1,
 			m_doc->GetContingency()[m_doc->GetColPlayer()] - 1);
   m_grid->EndBatch();
