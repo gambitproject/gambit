@@ -1384,6 +1384,7 @@ void GSM::Dump( void )
     {
       _StdOut << "Stack element " << i << " : ";
       Output();
+      Pop();
     }
   }
   _StdOut << "\n";
