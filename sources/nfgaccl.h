@@ -7,7 +7,7 @@
 #include "accels.h"
 #include "nfgconst.h"
 
-#define 	NUM_NFG_EVENTS	33
+#define 	NUM_NFG_EVENTS	32
 AccelEvent nfg_events[NUM_NFG_EVENTS]=
 {
 AccelEvent("FileSave",NFG_FILE_SAVE),
@@ -19,7 +19,6 @@ AccelEvent("EditPlayers",NFG_EDIT_PLAYERS),
 AccelEvent("EditOutcomes",NFG_EDIT_OUTCOMES),
 AccelEvent("OutcomeAttach",NFG_EDIT_OUTCOMES_ATTACH),
 AccelEvent("OutcomeDetach",NFG_EDIT_OUTCOMES_DETACH),
-AccelEvent("OutcomeLabel",NFG_EDIT_OUTCOMES_LABEL),
 AccelEvent("OutcomePayoffs",NFG_EDIT_OUTCOMES_PAYOFFS),
 AccelEvent("SupportsElimDom",NFG_SUPPORT_UNDOMINATED),
 AccelEvent("SupportsSelect",NFG_SUPPORT_SELECT),

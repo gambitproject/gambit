@@ -86,7 +86,7 @@ void NfgShow::UpdateVals(void)
 	    pay_str = "Outcome"+ToText(outcome->GetNumber());
 	}
 	else {
-	  pay_str = "Outcome 0";
+	  pay_str = "Null";
 	}
       }
 
@@ -965,30 +965,6 @@ void NfgShow::OutcomeDelete(void)
   }
 }
 
-void NfgShow::OutcomeLabel(void)
-{
-  gArray<int> profile(spread->GetProfile());
-  if (!nf.GetOutcome(profile))
-    return;
-
-  char *name = new char[40];
-  strncpy(name, nf.GetOutcome(profile)->GetName(), 40);
-
-  MyDialogBox *dialog = new MyDialogBox(spread, "Label outcome");
-  dialog->Form()->Add(wxMakeFormString("New outcome label", &name, wxFORM_TEXT,
-				       0, 0, 0, 220));
-  dialog->Go();
-
-  if (dialog->Completed() == wxOK) {
-    nf.GetOutcome(profile)->SetName(name);
-  }
-  
-  delete dialog;
-  delete [] name;
-
-  UpdateVals();
-}
-
 #include "wxstatus.h"
 
 int NfgShow::SolveElimDom(void)
@@ -1218,15 +1194,15 @@ void NfgShow::SetPlayerLabels(void)
 
 void NfgShow::ShowGameInfo(void)
 {
-  gText tmp;
-  char tempstr[200];
-  sprintf(tempstr, "Number of Players: %d", nf.NumPlayers());
-  tmp += tempstr;
-  tmp += "\n";
-  sprintf(tempstr, "Is %sconstant sum", (IsConstSum(nf)) ? "" : "NOT ");
-  tmp += tempstr;
-  tmp += "\n";
-  wxMessageBox(tmp, "Nfg Game Info", wxOK, spread);
+  gText message = "Number of Players: " + ToText(nf.NumPlayers()) + "\n";
+  message += "Is";
+  message += ((IsConstSum(nf)) ? " " : "NOT ");
+  message += "constant sum\n";
+  message += "Game ";
+  message += ((nf.IsDirty()) ? "HAS " : "has not ");
+  message += "been modified\n";
+
+  wxMessageBox(message, "Game Information", wxOK, spread);
 }
 
 
@@ -1627,8 +1603,6 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
 			   "Attach an outcome to the current contingency");
   editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_DETACH, "&Detach",
 			   "Set the outcome for the current contingency to null");
-  editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_LABEL, "&Label",
-			   "Label the outcome for the current contingency");
   editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_PAYOFFS, "&Payoffs",
 			   "Set the payoffs for outcome of the current contingency");
   edit_menu->Append(NFG_EDIT_OUTCOMES,  "&Outcomes",  editOutcomesMenu,
@@ -1729,8 +1703,9 @@ void NormalSpread::UpdateMenus(void)
   const Nfg &nfg = parent->Game();
   gArray<int> profile(GetProfile());
 
+  menu->Enable(NFG_EDIT_OUTCOMES_DELETE, nfg.NumOutcomes() > 0);
+  menu->Enable(NFG_EDIT_OUTCOMES_ATTACH, nfg.NumOutcomes() > 0);
   menu->Enable(NFG_EDIT_OUTCOMES_DETACH, nfg.GetOutcome(profile) != 0);
-  menu->Enable(NFG_EDIT_OUTCOMES_LABEL, nfg.GetOutcome(profile) != 0);
   menu->Enable(NFG_EDIT_OUTCOMES_PAYOFFS, nfg.GetOutcome(profile) != 0);
 
   menu->Enable(NFG_SOLVE_CUSTOM_ENUMMIXED, nfg.NumPlayers() == 2);
@@ -2064,9 +2039,6 @@ void NormalSpread::OnMenuCommand(int id)
       break;
     case NFG_EDIT_OUTCOMES_DETACH:
       parent->OutcomeDetach();
-      break;
-    case NFG_EDIT_OUTCOMES_LABEL:
-      parent->OutcomeLabel();
       break;
     case NFG_EDIT_OUTCOMES_PAYOFFS:
       parent->OutcomePayoffs(CurRow(), CurCol(), false);

@@ -116,7 +116,6 @@ public:
   void OutcomeDelete(void);
   void OutcomeAttach(void);
   void OutcomeDetach(void);
-  void OutcomeLabel(void);
   void OutcomePayoffs(int st1, int st2, bool next = false);
   void OutcomeOptions(void)
     { draw_settings.SetOutcomeDisp(1 - draw_settings.OutcomeDisp());
