@@ -47,6 +47,7 @@ public:
       // perform pivot operation -- outgoing is row, incoming is column
   void CompPivot(int outlabel,int col);
   virtual long NumPivots() const = 0;
+
   
   
       // raw Tableau functions
@@ -77,6 +78,8 @@ public:
   int MaxRow() const;
   int MinCol() const;
   int MaxCol() const;
+  const gMatrix<T> & Get_A(void) const;
+  const gVector<T> & Get_b(void) const;
   
   bool Member(int i) const;
   int Label(int i) const;   // return variable in i'th position of Tableau
@@ -89,6 +92,12 @@ public:
 //  void CompPivot(int outlabel,int col);
   long NumPivots() const;
   long &NumPivots();
+
+  // marks/unmarks label to block it from entering basis
+  void Mark(int label);
+
+  // returns true if label is blocked from entering basis
+  bool IsBlocked(int label) const;
   
   
       // raw Tableau functions
@@ -108,6 +117,7 @@ public:
   bool LeZero(T x) const;
   bool GeZero(T x) const;
   T Epsilon(int i = 2) const;
+  bool IsFeasible();
   bool IsLexMin();
   BFS<T> GetBFS1(void) const; 
   BFS<T> GetBFS(void) const;  // used in lpsolve for some reason
@@ -131,7 +141,8 @@ public:
       // cost information
   void SetCost(const gVector<T>& ); // unit column cost := 0
   void SetCost(const gVector<T>&, const gVector<T>& );
-  void GetCost(gVector<T>&, gVector<T>& ) const;
+  gVector<T> GetCost() const;
+  gVector<T> GetUnitCost() const;
   T TotalCost(); // cost of current solution
   T RelativeCost(int) const; // negative index convention
   void RelativeCostVector(gVector<T> &, gVector<T> &); 

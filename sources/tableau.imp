@@ -95,6 +95,11 @@ int Tableau<T>::MinCol() const { return A->MinCol(); }
 template <class T>
 int Tableau<T>::MaxCol() const { return A->MaxCol(); }
 
+template <class T>
+const gMatrix<T> & Tableau<T>::Get_A(void) const {return *A; }
+
+template <class T>
+const gVector<T> & Tableau<T>::Get_b(void) const {return *b;}
 
 template <class T>
 bool Tableau<T>::Member(int i) const
@@ -150,6 +155,16 @@ template <class T> long Tableau<T>::NumPivots() const
 
 template <class T> long &Tableau<T>::NumPivots()
 { return npivots; }
+
+template <class T> void Tableau<T>::Mark(int label)
+{
+  basis.Mark(label);
+}
+
+template <class T> bool Tableau<T>::IsBlocked(int label) const
+{
+  return basis.IsBlocked(label);
+}
 
 //
 // raw Tableau functions
@@ -255,6 +270,14 @@ template <class T> T Tableau<T>::Epsilon(int i) const
   assert(i==1 || i==2);
   if(i==1) return eps1;
   return eps2;
+}
+
+template <class T> bool Tableau<T>::IsFeasible()
+{
+  B.solve(*b, solution);
+  for(int i=solution.First();i<=solution.Last();i++)
+    if(solution[i]>=eps2) return false;
+  return true;
 }
 
 template <class T> bool Tableau<T>::IsLexMin()
@@ -382,10 +405,15 @@ void LPTableau<T>::SetCost(const gVector<T> &uc, const gVector<T> &c)
 
 
 template <class T>
-void LPTableau<T>::GetCost(gVector<T> &uc, gVector<T> &c) const
+gVector<T> LPTableau<T>::GetCost(void) const
 {
-  uc= unitcost;
-  c=cost; 
+  return cost; 
+}
+
+template <class T>
+gVector<T> LPTableau<T>::GetUnitCost(void) const
+{
+  return unitcost; 
 }
 
 template <class T>
@@ -463,6 +491,7 @@ void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
   gArray<int> pivot(2);
   gVector<T> tmpdual(MinRow(),MaxRow());
 
+//  for(j=-MaxRow();j<=MaxCol();j++) if(j && !Member(j)  && !IsBlocked(j)) {
   for(j=-MaxRow();j<=MaxCol();j++) if(j && !Member(j)) {
     SolveColumn(j,tmpcol);
     // gout << "\nColumn " << j;
