@@ -7,9 +7,9 @@
 
 // $Id$
 
-// g++ generates a spurious warning about legends_src[6] being unused;
-// I don't know how to get around it.
+// This is a hack to get around a compiler warning:
 
+#ifndef DONT_USE_LEGENDS_SRC
 char *legends_src[] = 
 {
     "Above Node",
@@ -19,6 +19,7 @@ char *legends_src[] =
     "At Terminal Node",
     "Right of Node"
 };
+#endif
 
 
 typedef struct 
