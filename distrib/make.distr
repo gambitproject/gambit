@@ -11,8 +11,7 @@
 # Edit these if necessary.
 # GMAKEFILE is the generic Makefile.
 
-#WXWINDIR  = /home/mill/gambit/wxwin
-WXWINDIR  = /home/mill/gambit/wxwin-new
+WXWINDIR  = /home/mill/gambit/wxwin
 GUI       = motif
 GMAKEFILE = Makefile2.generic
 #FTPDIR    = /home/mill/ftp/pub/gambit/ver96
@@ -120,9 +119,9 @@ wxwin:
 
 	cd $(WXWINDIR) ; cd ..; \
 	zip wx_$(GUI)_$(SYSNAME).zip \
-	  wxwin-new/include/base/* \
-	  wxwin-new/include/x/* \
-	  wxwin-new/lib/libwx_$(GUI)_$(SYSNAME).a; \
+	  wxwin/include/base/* \
+	  wxwin/include/x/* \
+	  wxwin/lib/libwx_$(GUI)_$(SYSNAME).a; \
 	mv wx_$(GUI)_$(SYSNAME).zip $(FTPDIR)
 
 doc:
