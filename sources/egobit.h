@@ -7,39 +7,27 @@
 #ifndef EGOBIT_H
 #define EGOBIT_H
 
-#ifdef __GNUG__
-#pragma interface
-#endif   // __GNUG__
-
 #include "extform.h"
+#include "gobit.h"
 
-class ExtGobitParams     {
+template <class T> class EFGobitParams : public GobitParams<T>  {
   public:
-    int plev, nequilib, type, maxitsPOW, maxitsBrent;
-    gRational minLam, maxLam, delLam, tolPOW, tolBrent;                       
-    gString outfile, errfile;
-    
-    ExtGobitParams(void);
+    int maxitsPOW;
+    T tolPOW;
+
+    EFGobitParams(void);
 };
 
-class ExtGobitSolver  {
-  private:
-    const BaseExtForm &ef;
-    ExtGobitParams params;
-    int nevals;
-    gRational time;
+
+template <class T> class EFGobitModule : public GobitModule<T>  {
+  protected:
+    const ExtForm<T> &E;
+
+    GobitFunc<T> *CreateFunc(void);
 
   public:
-    ExtGobitSolver(const BaseExtForm &E, const ExtGobitParams &p) 
-      : ef(E), params(p)   { }
-    ~ExtGobitSolver()   { }
-
-    int Gobit(void);
-    
-    int NumEvals(void) const    { return nevals; }
-    gRational Time(void) const   { return time; }
-
-    ExtGobitParams &Parameters(void)   { return params; }
+    EFGobitModule(const ExtForm<T> &EF, EFGobitParams<T> &p);
+    virtual ~EFGobitModule();
 };
 
 #endif    // EGOBIT_H
