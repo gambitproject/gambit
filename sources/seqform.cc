@@ -1,5 +1,5 @@
 //#
-//# FILE: lemke1.cc -- Sequence Form module
+//# FILE: seqform.cc -- Sequence Form module
 //#
 //# $Id$ 
 //#
@@ -13,17 +13,6 @@
 #include "player.h"
 #include "infoset.h"
 
-#include "glist.imp"
-template class gList<gDPVector<double> >;
-template class gList<gDPVector<gRational> >;
-template class gNode<gDPVector<double> >;
-template class gNode<gDPVector<gRational> >;
-
-
-//---------------------------------------------------------------------------
-//                        LemkeBasis: member functions
-//---------------------------------------------------------------------------
- 
 //---------------------------------------------------------------------------
 //                        SeqFormParams: member functions
 //---------------------------------------------------------------------------
@@ -62,7 +51,7 @@ template <class T> int SeqFormModule<T>::Lemke(int dup)
     }
   }
   gVector<T> sol(B.MinRow(),B.MaxRow());
-  gDPVector<T> profile(EF.Dimensionality());
+  BehavProfile<T> profile(EF);
   B.BasisVector(sol);
   B.GetProfile(profile,sol,EF.RootNode(),1,1);
 //  gout << "\nprofile = " << profile << "\n";
@@ -102,7 +91,7 @@ template <class T> int SeqFormModule<T>::Add_BFS(const SFTableau<T> &B)
 //-------------------------------------------------------------------------
 
 template <class T> 
-const gList<gDPVector<T> > &SeqFormModule<T>::GetSolutions(void) const
+const gList<BehavProfile<T> > &SeqFormModule<T>::GetSolutions(void) const
 {
   return solutions;
 }
@@ -118,8 +107,7 @@ template <class T> int SeqFormModule<T>::NumPivots(void) const
 
 template <class T>
 SeqFormModule<T>::SeqFormModule(const ExtForm<T> &E, const SeqFormParams &p)
-  : EF(E), params(p), npivots(0), 
-    List()
+  : EF(E), params(p), npivots(0)
 { }
 
 template <class T> SeqFormModule<T>::~SeqFormModule()
@@ -147,8 +135,8 @@ class SeqFormModule<gRational>;
 
 template <class T>
 int SeqForm(const ExtForm<T> &E, const SeqFormParams &p,
-	  gList<gDPVector<T> > &solutions,
-	  int &npivots, gRational &time)
+	  gList<BehavProfile<T> > &solutions,
+	  int &npivots, double &time)
 { 
   SeqFormModule<T> SM(E, p);
   int result = SM.Lemke();
@@ -163,15 +151,15 @@ int SeqForm(const ExtForm<T> &E, const SeqFormParams &p,
 
 #ifdef __GNUG__
 template int SeqForm(const ExtForm<double> &, const SeqFormParams &,
-		   gList<gDPVector<double> > &, int &, gRational &);
+		   gList<BehavProfile<double> > &, int &, double &);
 template int SeqForm(const ExtForm<gRational> &, const SeqFormParams &,
-		   gList<gDPVector<gRational> > &, int &, gRational &);
+		   gList<BehavProfile<gRational> > &, int &, double &);
 #elif defined __BORLANDC__
 #pragma option -Jgd
 int SeqForm(const ExtForm<double> &, const SeqFormParams &,
-	  gList<gDPVector<double> > &, int &, gRational &);
+	  gList<BehavProfile<double> > &, int &, double &);
 int SeqForm(const ExtForm<gRational> &, const SeqFormParams &,
-	  gList<gDPVector<gRational> > &, int &, gRational &);
+	  gList<BehavProfile<gRational> > &, int &, double &);
 #pragma option -Jgx
 #endif   // __GNUG__, __BORLANDC__
 

@@ -32,7 +32,7 @@ private:
   int npivots;
   double time;
   BFS_List List;
-  gList< gDPVector<T> > solutions;
+  gList< BehavProfile<T> > solutions;
 
 public:
   SeqFormModule(const ExtForm<T> &E, const SeqFormParams &p);
@@ -44,7 +44,7 @@ public:
   int NumPivots(void) const;
   double Time(void) const;
   
-  const gList<gDPVector<T> > &GetSolutions() const;
+  const gList<BehavProfile<T> > &GetSolutions() const;
 };
 
 //
@@ -54,7 +54,7 @@ public:
 /*
 template <class T> int SeqForm(const ExtForm<T> &N, const SeqFormParams &p,
 			     gList<gDPVector<T> > &solutions,
-			     int &npivots, gRational &time);
+			     int &npivots, double &time);
 */				   
 
 #endif    // SEQFORM_H
