@@ -148,10 +148,9 @@ MixedSolution &MixedSolution::operator=(const MixedSolution &p_solution)
 
 void MixedSolution::EvalEquilibria(void) const
 {
-  if (IsComplete())   {
+  if (IsComplete()) 
     if (m_isNash == triUNKNOWN)  
       m_isNash = (m_profile.MaxRegret() <= m_epsilon) ? triTRUE : triFALSE;
-  }
   if (m_isNash == triFALSE) {
     m_isPerfect = triFALSE;
     m_isProper = triFALSE;
@@ -161,24 +160,25 @@ void MixedSolution::EvalEquilibria(void) const
 void MixedSolution::LevelPrecision(void)
 {
   m_precision = precRATIONAL;
+  m_epsilon = 0;
   for (int pl = 1; m_precision == precRATIONAL && pl <= Game().NumPlayers();
        pl++) {
     NFPlayer *player = Game().Players()[pl];  
     for (int st = 1; (m_precision == precRATIONAL && 
 		      st <= player->NumStrats()); st++) {
-      if (m_profile(pl, st).Precision() == precDOUBLE)
+      if (m_profile(pl, st).Precision() == precDOUBLE) {
 	m_precision = precDOUBLE;
+	m_epsilon = 0.0;
+	gEpsilon(m_epsilon);
+      }
     }
   }
 
   if (m_precision == precDOUBLE) {
-    for (int pl = 1; m_precision == precRATIONAL && pl <= Game().NumPlayers();
-	 pl++) {
+    for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
       NFPlayer *player = Game().Players()[pl];  
-      for (int st = 1; (m_precision == precRATIONAL && 
-			st <= player->NumStrats()); st++) {
+      for (int st = 1; st <= player->NumStrats(); st++) 
 	m_profile(pl, st) = (double) m_profile(pl, st);
-      }
     }
   }
 }
