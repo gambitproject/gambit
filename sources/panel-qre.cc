@@ -31,6 +31,7 @@
 #include "sheet.h"    // for wxSheet
 
 #include <libgambit/nash/nfglogit.h>
+#include <fstream>
 
 #include "panel-qre.h"
 
@@ -240,6 +241,7 @@ private:
   // Event handlers
   void OnRightDown(wxMouseEvent &);
   void OnSave(wxCommandEvent &);
+  void OnPxiFile(wxCommandEvent &);
 
 public:
   gbtMixedLogitGraph(wxWindow *, gbtGameDocument *, gbtMixedLogitBranch &);
@@ -255,11 +257,13 @@ const int GBT_LOGIT_SAVE_PNG = 4000;
 const int GBT_LOGIT_SAVE_BMP = 4001;
 const int GBT_LOGIT_SAVE_JPG = 4002;
 const int GBT_LOGIT_SAVE_PS = 4003;
+const int GBT_LOGIT_SAVE_PXI = 4004;
 
 BEGIN_EVENT_TABLE(gbtMixedLogitGraph, wxScrolledWindow)
   EVT_MENU(GBT_LOGIT_SAVE_BMP, gbtMixedLogitGraph::OnSave)
   EVT_MENU(GBT_LOGIT_SAVE_JPG, gbtMixedLogitGraph::OnSave)
   EVT_MENU(GBT_LOGIT_SAVE_PNG, gbtMixedLogitGraph::OnSave)
+  EVT_MENU(GBT_LOGIT_SAVE_PXI, gbtMixedLogitGraph::OnPxiFile)
   EVT_RIGHT_DOWN(gbtMixedLogitGraph::OnRightDown)
 END_EVENT_TABLE()
 
@@ -410,6 +414,9 @@ void gbtMixedLogitGraph::OnRightDown(wxMouseEvent &p_event)
 {
   wxMenu *menu = new wxMenu;
 
+  menu->Append(GBT_LOGIT_SAVE_PXI, _("Save to PXI file"),
+	       _("Save correspondence to PXI file"));
+  menu->AppendSeparator();
   menu->Append(GBT_LOGIT_SAVE_BMP, _("Save as BMP"),
 	       _("Save graph in BMP format"));
   menu->Append(GBT_LOGIT_SAVE_JPG, _("Save as JPG"),
@@ -471,6 +478,53 @@ void gbtMixedLogitGraph::OnSave(wxCommandEvent &p_event)
 				    dialog.GetPath().c_str()),
 		   _("Error"), wxOK, this);
     }
+  }
+}
+
+void gbtMixedLogitGraph::OnPxiFile(wxCommandEvent &)
+{
+  wxFileDialog dialog(this, _T("Save PXI file"), _T(""), _T(""), 
+		      _T("*.pxi"), wxSAVE);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    try {
+      std::ofstream file(dialog.GetPath().mb_str());
+
+      file << "Dimensionality:\n";
+      file << m_doc->GetGame()->NumPlayers() << ' ';
+      for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
+	file << m_doc->GetGame()->GetPlayer(pl)->NumStrategies() << ' ';
+      }
+      file << "\n";
+	
+      file << "Settings:\n";
+      file << m_cor.GetLambda(1) << '\n';
+      file << m_cor.GetLambda(m_cor.NumPoints()) << '\n';
+      file << 0.1 << '\n';
+      file << 0 << '\n' << 1 << '\n' << 1 << '\n';
+      
+      file << "DataFormat:\n";
+      int numcols = m_doc->GetGame()->StrategyProfileLength() + 2;
+      file << numcols << ' ';
+      for (int i = 1; i <= numcols; i++) {
+	file << i << ' ';
+      }
+      file << '\n';
+      
+      file << "Data:\n";
+      
+      for (int i = 1; i <= m_cor.NumPoints(); i++) {
+	const gbtMixedProfile<double> &profile = m_cor.GetProfile(i);
+	file << m_cor.GetLambda(i) << " 0.000000 ";
+	
+	for (int j = 1; j <= profile->StrategyProfileLength(); j++) {
+	  file << profile[j] << ' ';
+	}
+	
+	file << '\n';
+      }
+    }
+    catch (...) { }
   }
 }
 
