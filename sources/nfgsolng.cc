@@ -2,7 +2,7 @@
 // FILE: nfgsolng.cc -- definition of the class dealing with the GUI part of the
 // normal form solutions.
 //
-//  $Id$
+// $Id$
 //
 
 #include "wx.h"
@@ -39,7 +39,7 @@ LemkeParamsSettings LPS;
 LemkeParams P(status);
 LPS.GetParams(P);
 int npivots;double time;
-Lemke(sup,P,parent->Parameters().CurSet(),(gList<MixedSolution> &)solns,npivots,time);
+Lemke(sup,P,(gList<MixedSolution> &)solns,npivots,time);
 return solns;
 }
 
@@ -79,7 +79,7 @@ GridParamsSettings GSPD(parent->Filename());
 wxStatus *status=new wxStatus(parent->Frame(),"GobitAll Solve");
 GridParams P(*status);
 GSPD.GetParams(P);
-GridSolve(sup,parent->Parameters().CurSet(),P,(gList<MixedSolution> &)solns);
+GridSolve(sup,P,(gList<MixedSolution> &)solns);
 delete status;
 GSPD.RunPxi();
 return solns;
@@ -150,7 +150,7 @@ wxStatus status(parent->Frame(),"Simpdiv Algorithm");
 SimpdivParams P(status);
 SPS.GetParams(P);
 int nevals,niters;double time;
-Simpdiv(sup,P,parent->Parameters().CurSet(),(gList<MixedSolution> &)solns,nevals,niters,time);
+Simpdiv(sup,P,(gList<MixedSolution> &)solns,nevals,niters,time);
 return solns;
 }
 
@@ -171,7 +171,7 @@ wxEnumStatus status(parent->Frame());
 EnumParams P(status);
 EPS.GetParams(P);
 long npivots;double time;
-Enum(sup,P,parent->Parameters().CurSet(),(gList<MixedSolution> &)solns,npivots,time);
+Enum(sup,P,(gList<MixedSolution> &)solns,npivots,time);
 return solns;
 }
 
@@ -195,7 +195,7 @@ LPParamsSettings LPPS;
 ZSumParams P;
 LPPS.GetParams(&P);
 int npivots;double time;
-ZSum(sup,P,parent->Parameters().CurSet(),(gList<MixedSolution> &)solns,npivots,time);
+ZSum(sup,P,(gList<MixedSolution> &)solns,npivots,time);
 return solns;
 }
 

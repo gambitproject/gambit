@@ -2,7 +2,7 @@
 // FILE: nfgshow1.cc -- remainder of the normal form GUI
 // contains classes NfgShow and NormalSpread
 //
-//  $Id$
+// $Id$
 //
 
 #include "nfgshow.h"
@@ -43,16 +43,16 @@ if (spread->HaveVal()) spread->MakeValDisp();
 // Set new title
 spread->SetTitle(nf.GetTitle()+" : "+nf.Players()[pl1]->GetName()+" x "+nf.Players()[pl2]->GetName());
 // Set new labels
-gString label;
+gText label;
 int i;
 for (i=1;i<=rows;i++)
 {
-	label=disp_sup->Strategies(pl1)[i]->name; if (label=="") label=ToString(i);
+	label=disp_sup->Strategies(pl1)[i]->name; if (label=="") label=ToText(i);
 	spread->SetLabelRow(i,label);
 }
 for (i=1;i<=cols;i++)
 {
-	label=disp_sup->Strategies(pl2)[i]->name; if (label=="") label=ToString(i);
+	label=disp_sup->Strategies(pl2)[i]->name; if (label=="") label=ToText(i);
 	spread->SetLabelCol(i,label);
 }
 // Update the sheet's players
@@ -118,39 +118,7 @@ return 0;
 //**************************** OUTCOMES STUFF *********************************
 #define UPDATE1_DIALOG	4
 #define PARAMS_ADD_VAR	5
-void NfgShow::ChangeParameters(int what)
-{
-if (what==CREATE_DIALOG && !params_dialog)
-	params_dialog=new ParameterDialog(nf.Parameters(),this,spread);
-if (what==DESTROY_DIALOG && params_dialog)
-	{delete params_dialog;params_dialog=0;}
-if (what==PARAMS_ADD_VAR)  // Added a variable
-{
-	// Save old poly's in strings to re-create later
-	gRectArray<gString> old_polys(nf.NumOutcomes(),nf.NumPlayers());
-	for (int i=1;i<=nf.NumOutcomes();i++)
-		for (int j=1;j<=nf.NumPlayers();j++)
-			old_polys(i,j)=ToString(nf.Payoff(nf.Outcomes()[i],j));
-	// Create a new variable
-	for (int i=1;i<=Parameters().Length();i++) Parameters()[i].Append(0);
-   nf.Parameters()->CreateVariables();
-	// Re-create the outcomes
-	for (int i=1;i<=nf.NumOutcomes();i++)
-		for (int j=1;j<=nf.NumPlayers();j++)
-			nf.SetPayoff(nf.Outcomes()[i],j,
-             gPoly<gNumber>(nf.Parameters(),old_polys(i,j),nf.ParamOrder()));
-   if (outcome_dialog) outcome_dialog->UpdateVals();
-	UpdateVals();
-}
-if (what==UPDATE1_DIALOG) // Just changed some values
-{
-   if (outcome_dialog) outcome_dialog->UpdateVals();
-	UpdateVals();
-}
-}
 
-ParameterSetList &NfgShow::Parameters(void)
-{return param_sets;}
 
 void NfgShow::SetOutcome(int out,int x, int y)
 {
@@ -184,9 +152,10 @@ else
 //**************************** DOMINATED STRATEGY STUFF ************************
 // SolveElimDom
 #include "wxstatus.h"
-NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, const gArray<gNumber> &, bool strong,
+NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, bool strong,
 			    const gArray<int> &players,gOutput &tracefile, gStatus &status); // nfdom.cc
-NFSupport *ComputeMixedDominated(const Nfg &N, NFSupport &S, bool strong,
+NFSupport *ComputeMixedDominated(const Nfg &N, NFSupport &S, 
+                                 bool strong,
 				 const gArray<int> &players,gOutput &tracefile, gStatus &status); // nfdommix.cc
 
 #include "elimdomd.h"
@@ -198,18 +167,16 @@ if (EDPD.Completed()==wxOK)
 {
 	NFSupport *sup=cur_sup;
 	wxStatus status(spread,"Dominance Elimination");
-  gArray<gNumber> values(sup->Game().Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
 	if (!EDPD.DomMixed())
 	{
 		if (EDPD.FindAll())
 		{
-			while ((sup=ComputeDominated(sup->Game(),*sup,values,EDPD.DomStrong(),EDPD.Players(),gnull,status)))
+			while ((sup=ComputeDominated(sup->Game(),*sup,EDPD.DomStrong(),EDPD.Players(),gnull,status)))
 				supports.Append(sup);
 		}
 		else
 		{
-			if ((sup=ComputeDominated(sup->Game(),*sup,values,EDPD.DomStrong(),EDPD.Players(),gnull,status)))
+			if ((sup=ComputeDominated(sup->Game(),*sup,EDPD.DomStrong(),EDPD.Players(),gnull,status)))
 				supports.Append(sup);
 		}
 	}
@@ -282,10 +249,10 @@ if (spread->HaveDom()) // Display the domination info, if its turned on
 	int dom_pos=spread->HaveProbs()+1;
 	for (int i=1;i<=rows;i++)
 		if (nf.IsDominated(pl1,i,disp_sset))
-			spread->SetCell(i,cols+dom_pos,ToString(nf.GetDominator(pl1,i,disp_sset)));
+			spread->SetCell(i,cols+dom_pos,ToText(nf.GetDominator(pl1,i,disp_sset)));
 	for (i=1;i<=cols;i++)
 		if (nf.IsDominated(pl2,i,disp_sset))
-			spread->SetCell(rows+dom_pos,i,ToString(nf.GetDominator(pl2,i,disp_sset)));
+			spread->SetCell(rows+dom_pos,i,ToText(nf.GetDominator(pl2,i,disp_sset)));
 }
 spread->Repaint();
 */
@@ -386,7 +353,7 @@ if (what==2) // label players
 	{
 		player_labels[i]=new char[LABEL_LENGTH];
 		strcpy(player_labels[i],nf.Players()[i]->GetName());
-		labels->Add(wxMakeFormString(ToString(i),&player_labels[i]));
+		labels->Add(wxMakeFormString(ToText(i),&player_labels[i]));
 		if (i%ENTRIES_PER_ROW==0) labels->Add(wxMakeFormNewLine());
 	}
 	labels->Go();
@@ -399,7 +366,7 @@ spread->SetLabels(disp_sup,what);
 
 void NfgShow::ShowGameInfo(void)
 {
-gString tmp;
+gText tmp;
 char tempstr[200];
 sprintf(tempstr,"Number of Players: %d",nf.NumPlayers());
 tmp+=tempstr;tmp+="\n";
@@ -411,8 +378,8 @@ wxMessageBox(tmp,"Nfg Game Info",wxOK,spread);
 // SetColors
 void NfgShow::SetColors(void)
 {
-gArray<gString> names(nf.NumPlayers());
-for (int i=1;i<=names.Length();i++) names[i]=ToString(i);
+gArray<gText> names(nf.NumPlayers());
+for (int i=1;i<=names.Length();i++) names[i]=ToText(i);
 draw_settings.PlayerColorDialog(names);
 UpdateVals();
 spread->Repaint();
@@ -553,7 +520,7 @@ SetSize(200,600);
 #endif
 int num_players=dimensionality.Length();
 // column widths
-DrawSettings()->SetColWidth(num_players*(3+ToStringPrecision()));
+DrawSettings()->SetColWidth(num_players*(3+ToTextPrecision()));
 DrawSettings()->SetLabels(S_LABEL_ROW|S_LABEL_COL);
 //------------------take care of the frame/window stuff
 // Give the frame an icon
@@ -576,7 +543,7 @@ for (i=0;i<num_players;i++)
 	if (features.verbose && nf.Players()[i+1]->GetName()!="")
 		player_names[i]=copystring(nf.Players()[i+1]->GetName());
 	else
-		player_names[i]=copystring(ToString(i+1));
+		player_names[i]=copystring(ToText(i+1));
 sub_panel->SetLabelPosition(wxVERTICAL);
 row_choice=new wxChoice(sub_panel,(wxFunction)NormalSpread::normal_player_func,"Row Player",-1,-1,-1,-1,num_players,player_names);
 col_choice=new wxChoice(sub_panel,(wxFunction)NormalSpread::normal_player_func,"Col Player",-1,-1,-1,-1,num_players,player_names);
@@ -596,7 +563,7 @@ for (i=1;i<=num_players;i++)
 		if (features.verbose)
 			strat_profile_str[j]=copystring(sup->Strategies(i)[j+1]->name);
 		else
-			strat_profile_str[j]=copystring(ToString(j+1));
+			strat_profile_str[j]=copystring(ToText(j+1));
 	strat_profile[i]=new wxChoice(sub_panel,(wxFunction)NormalSpread::normal_strat_func,"",-1,-1,-1,-1,dimensionality[i],strat_profile_str);
 	strat_profile[i]->SetSelection(0);
 	strat_profile[i]->SetClientData((char *)this);
@@ -716,7 +683,7 @@ int col=dimensionality[pl2]+1;
 if (!features.prob)
 {
 	AddRow(row);	AddCol(col);
-	DrawSettings()->SetColWidth((3+ToStringPrecision()),col);
+	DrawSettings()->SetColWidth((3+ToTextPrecision()),col);
 }
 // Note: this insures that Prob is always the FIRST extra after the
 // regular data, and Domin is AFTER the prob.
@@ -766,7 +733,7 @@ int col=dimensionality[pl2]+features.prob+features.dom+1;
 if (!features.val)
 {
 	AddRow(row);AddCol(col);
-	DrawSettings()->SetColWidth((3+ToStringPrecision()),col);
+	DrawSettings()->SetColWidth((3+ToTextPrecision()),col);
 }
 SetLabelRow(row,"Value");SetLabelCol(col,"Value");
 features.val=1;
@@ -823,7 +790,6 @@ case	NFG_SOLVE_ALGORITHM_MENU: parent->SolveSetup(SOLVE_SETUP_CUSTOM); break;
 case  NFG_SOLVE_STANDARD_MENU: parent->SolveSetup(SOLVE_SETUP_STANDARD); break;
 case	NFG_SOLVE_DOMINANCE_MENU: parent->DominanceSetup(); break;
 case	NFG_SOLVE_GAMEINFO_MENU: parent->ShowGameInfo(); break;
-case	NFG_SOLVE_PARAMS_MENU: parent->ChangeParameters(CREATE_DIALOG); break;
 case	NFG_LABEL_GAME: parent->SetLabels(0);break;
 case	NFG_LABEL_STRATS: parent->SetLabels(1);break;
 case	NFG_LABEL_PLAYERS: parent->SetLabels(2);break;
@@ -850,7 +816,7 @@ void NormalSpread::OnOptionsChanged(unsigned int options)
 if (options&S_PREC_CHANGED)
 {
 	// column widths
-	DrawSettings()->SetColWidth(dimensionality.Length()*(3+ToStringPrecision()));
+	DrawSettings()->SetColWidth(dimensionality.Length()*(3+ToTextPrecision()));
 	parent->UpdateVals();
   Redraw();Repaint();
 }

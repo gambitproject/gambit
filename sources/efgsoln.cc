@@ -1,7 +1,7 @@
 //
 // FILE: efgsoln.cc -- all solution display related routines for the efg
 //
-//  $Id$
+// $Id$
 //
 
 #include "wx.h"
@@ -61,7 +61,7 @@ for (i=1;i<=NUM_FEATURES;i++)
 	wxGetResource(NODESOLN_SECTION,feature_names[i],&features[i],defaults_file);
 int rows=0; for (i=1;i<=NUM_FEATURES;i++) if (features[i]) rows++;
 
-int	width=(features[NODEVALUE]) ? 2+num_players*(4+ToStringPrecision()) :	(2+ToStringPrecision());
+int	width=(features[NODEVALUE]) ? 2+num_players*(4+ToTextPrecision()) :	(2+ToTextPrecision());
 SetEditable(FALSE);
 SetDimensions(rows,1);
 DrawSettings()->SetColWidth(width);
@@ -172,7 +172,7 @@ if (!n) // no data available
 	return;
 }
 // if we got here, the node is valid.
-gString tmpstr;
+gText tmpstr;
 for (int feature=1;feature<=NUM_FEATURES;feature++)
 	if (features[feature])
 		switch(feature)
@@ -185,8 +185,8 @@ for (int feature=1;feature<=NUM_FEATURES;feature++)
 					if (n->GetPlayer()->IsChance())
 						tmpstr="CHANCE";
 					else
-						tmpstr="("+ToString(n->GetPlayer()->GetNumber())+","+
-														ToString(n->GetInfoset()->GetNumber())+")";
+						tmpstr="("+ToText(n->GetPlayer()->GetNumber())+","+
+														ToText(n->GetInfoset()->GetNumber())+")";
 				}
 				SetCell(Pos(feature),1,tmpstr); break;
 			case REALIZPROB : SetCell(Pos(feature),1,parent->AsString(tRealizProb,n)); break;
@@ -205,7 +205,7 @@ for (int feature=1;feature<=NUM_FEATURES;feature++)
 					SetCell(Pos(feature),1,parent->AsString(tBranchProb,p,branch));
 				 }
 				 else
-					SetCell(Pos(feature),1,ToString(1));
+					SetCell(Pos(feature),1,ToText(1));
 				 break;
 			}
 			case BRANCHVALUE:
@@ -232,7 +232,7 @@ void NodeSolnShow::OnOptionsChanged(unsigned int options)
 if (options&S_PREC_CHANGED)
 {
 	Set(cur_n);
-	int	width=(features[NODEVALUE]) ? 2+num_players*(4+ToStringPrecision()) :	(2+ToStringPrecision());
+	int	width=(features[NODEVALUE]) ? 2+num_players*(4+ToTextPrecision()) :	(2+ToTextPrecision());
 	DrawSettings()->SetColWidth(width);
   Resize();Repaint();
 }
@@ -262,8 +262,8 @@ public:
 	int Completed(void);
 };
 
-BSolnSortFilterDialog::BSolnSortFilterDialog(BSolnSortFilterOptions &options_):options(options_),
-															wxDialogBox(0,"Sort & Filter",TRUE)
+BSolnSortFilterDialog::BSolnSortFilterDialog(BSolnSortFilterOptions &options_)
+  : wxDialogBox(0,"Sort & Filter",TRUE), options(options_) 
 {
 SetLabelPosition(wxVERTICAL);
 char *sort_by_str[] = { "Id", "Creator", "Nash", "Perfect", "Sequential", "G Value", "G Lambda", "L Value" };
@@ -409,7 +409,7 @@ if (opts&BSOLN_O_OPTIONS)
 			AddCol(col);
 			SetCell(1,col,feature_names[i]);Bold(1,col,0,TRUE);
 			if (feature_width[i]==-1)	// precision dependent
-				DrawSettings()->SetColWidth(2+ToStringPrecision(),col);
+				DrawSettings()->SetColWidth(2+ToTextPrecision(),col);
 			else											// precision independent
 				DrawSettings()->SetColWidth(feature_width[i],col);
 		}
@@ -421,7 +421,7 @@ else
 DrawSettings()->SetColWidth(4,FeaturePos(BSOLN_ID));	// Id # "Id"=3 chars
 DrawSettings()->SetColWidth(8,FeaturePos(BSOLN_PLAYER));	// Player name "Player #"=8 chars
 DrawSettings()->SetColWidth(5,FeaturePos(BSOLN_ISET));	// Iset name (assume 5 letters average);
-DrawSettings()->SetColWidth(gmin(max_actions*(2+ToStringPrecision())+4,MAX_SOLNSHOW_WIDTH),FeaturePos(BSOLN_DATA));
+DrawSettings()->SetColWidth(gmin(max_actions*(2+ToTextPrecision())+4,MAX_SOLNSHOW_WIDTH),FeaturePos(BSOLN_DATA));
 SetCell(1,FeaturePos(BSOLN_ID),"ID");Bold(FeaturePos(BSOLN_ID),1,0,TRUE);
 SetCell(1,FeaturePos(BSOLN_PLAYER),"Player");Bold(1,FeaturePos(BSOLN_PLAYER),0,TRUE);
 SetCell(1,FeaturePos(BSOLN_ISET),"Iset");Bold(1,FeaturePos(BSOLN_ISET),0,TRUE);
@@ -537,7 +537,7 @@ if (options_dialog->Completed()==wxOK)
 					AddCol(col);
 					SetCell(1,col,feature_names[i]);Bold(1,col,0,TRUE);
 					if (feature_width[i]==-1)	// precision dependent
-						DrawSettings()->SetColWidth(2+ToStringPrecision(),col);
+						DrawSettings()->SetColWidth(2+ToTextPrecision(),col);
 					else											// precision independent
 						DrawSettings()->SetColWidth(feature_width[i],col);
 				}
@@ -564,7 +564,7 @@ if (options&S_PREC_CHANGED)
 	for (int i=1;i<=num_players;i++)
 		for (int j=1;j<=dim.Lengths()[i];j++) max_actions=gmax(dim(i,j),max_actions);
 
-	DrawSettings()->SetColWidth(gmin(max_actions*(2+ToStringPrecision())+4,MAX_SOLNSHOW_WIDTH),FeaturePos(BSOLN_DATA));
+	DrawSettings()->SetColWidth(gmin(max_actions*(2+ToTextPrecision())+4,MAX_SOLNSHOW_WIDTH),FeaturePos(BSOLN_DATA));
 	UpdateValues();
 	Resize();Repaint();
 }
@@ -594,12 +594,12 @@ return (2+((soln_num) ? (soln_num-1)*num_isets : -1));
 #include "legendc.h" // needed for NODE_BELOW for iset_label
 void EfgSolnShow::UpdateValues(void)
 {
-gString tmp_str;
+gText tmp_str;
 int cur_pos=2;
 for (int i=1;i<=num_solutions;i++)
 {
 	const BehavSolution &cur=solns[i];
-		SetCell(cur_pos,FeaturePos(BSOLN_ID),ToString((int)cur.Id()));
+		SetCell(cur_pos,FeaturePos(BSOLN_ID),ToText((int)cur.Id()));
 	if (features[BSOLN_CREATOR])
 		SetCell(cur_pos,FeaturePos(BSOLN_CREATOR),NameEfgAlgType(cur.Creator()));
 	if (features[BSOLN_ISNASH])
@@ -610,36 +610,36 @@ for (int i=1;i<=num_solutions;i++)
 		SetCell(cur_pos,FeaturePos(BSOLN_ISSEQ),NameTriState(cur.IsSequential()));
 	if (features[BSOLN_GLAMBDA])
 		if (cur.Creator()==EfgAlg_GOBIT)
-		SetCell(cur_pos,FeaturePos(BSOLN_GLAMBDA),ToString(cur.GobitLambda()));
+		SetCell(cur_pos,FeaturePos(BSOLN_GLAMBDA),ToText(cur.GobitLambda()));
 		else
 		SetCell(cur_pos,FeaturePos(BSOLN_GLAMBDA),"---------");
 	if (features[BSOLN_GVALUE])
 		if (cur.Creator()==EfgAlg_GOBIT)
-		SetCell(cur_pos,FeaturePos(BSOLN_GVALUE),ToString(cur.GobitValue()));
+		SetCell(cur_pos,FeaturePos(BSOLN_GVALUE),ToText(cur.GobitValue()));
 		else
 		SetCell(cur_pos,FeaturePos(BSOLN_GVALUE),"---------");
 	if (features[BSOLN_LVALUE])
-		SetCell(cur_pos,FeaturePos(BSOLN_LVALUE),ToString(cur.LiapValue()));
+		SetCell(cur_pos,FeaturePos(BSOLN_LVALUE),ToText(cur.LiapValue()));
 	for (int j=1;j<=num_players;j++)
 	{
 		if (dim.Lengths()[j]==0) continue;
 		SetCell(cur_pos,FeaturePos(BSOLN_PLAYER),cur.Game().Players()[j]->GetName());	// print the player 's
 		if (features[BSOLN_EQUVALS])		// print equ values if requested
-			SetCell(cur_pos,FeaturePos(BSOLN_EQUVALS),ToString(cur.Payoff(j)));
+			SetCell(cur_pos,FeaturePos(BSOLN_EQUVALS),ToText(cur.Payoff(j)));
 		for (int k=1;k<=dim.Lengths()[j];k++)
 		{
 			// Display ISET in the same format as that selected for the main tree
 			// display below the node.  That is, either the infoset name or the
 			// infoset id.  Check the TreeDrawSettings for the current value.
-			gString iset_label;
+			gText iset_label;
 			if (parent->tw->DrawSettings().LabelNodeBelow()==NODE_BELOW_ISETID)
-				iset_label="("+ToString(j)+","+ToString(k)+")";
+				iset_label="("+ToText(j)+","+ToText(k)+")";
 			else
 			  iset_label=cur.Game().Players()[j]->Infosets()[k]->GetName();
 			SetCell(cur_pos,FeaturePos(BSOLN_ISET),iset_label);	// print the infoset #s
-			tmp_str="\\C{"+ToString(gamb_draw_settings.GetPlayerColor(j))+"}{";
+			tmp_str="\\C{"+ToText(gamb_draw_settings.GetPlayerColor(j))+"}{";
 			for (int l=1;l<=dim(j,k);l++)			// print actual values
-				tmp_str+=(ToString(cur(j,k,l))+((l==dim(j,k)) ? "}" : ","));
+				tmp_str+=(ToText(cur(j,k,l))+((l==dim(j,k)) ? "}" : ","));
 			SetCell(cur_pos,FeaturePos(BSOLN_DATA),tmp_str);
 			cur_pos++;
 		}
@@ -675,7 +675,7 @@ parent->SolutionToExtensive(solns[new_soln]);
 */
 }
 
-void EfgSolnShow::OnDoubleClick(int row,int col,int ,const gString &)
+void EfgSolnShow::OnDoubleClick(int row,int col,int ,const gText &)
 {
 if (col==FeaturePos(BSOLN_ID)) UpdateSoln(row,col);		// change solution
 if (col==FeaturePos(BSOLN_ISET)) // hilight infoset
@@ -774,11 +774,11 @@ if (completed==wxOK)
 int old_num_sol=num_solutions;  // current state
 const BehavSolution *cur_solnp=0;
 if (cur_soln) cur_solnp=&solns[cur_soln];
-BSolnSorterFilter SF(solns,sf_options);
-int new_num_sol=solns.VisLength();	// new state
+//BSolnSorterFilter SF(solns,sf_options);
+int new_num_sol=solns.VisibleLength();	// new state
 int i,j;
 int new_soln=0;									// try to find the new pos of cur_soln
-for (i=1;i<=solns.VisLength();i++) if (cur_solnp==&solns[i]) new_soln=i;
+for (i=1;i<=solns.VisibleLength();i++) if (cur_solnp==&solns[i]) new_soln=i;
 if (old_num_sol>new_num_sol)
 	for (i=old_num_sol;i>new_num_sol;i--)
 		for (j=1;j<=num_isets;j++)
@@ -787,7 +787,7 @@ if (old_num_sol<new_num_sol)
 	for (i=old_num_sol+1;i<=new_num_sol;i++)
 		for (j=1;j<=num_isets;j++)
 			AddRow();
-num_solutions=solns.VisLength();
+num_solutions=solns.VisibleLength();
 UpdateValues();
 // make sure we do not try to access non-displayed solutions
 if (cur_soln>num_solutions) cur_soln=0;
@@ -925,15 +925,15 @@ for (j=1;j<=num_players;j++)        // print the player 's
 		// Display ISET in the same format as that selected for the main tree
 		// display below the node.  That is, either the infoset name or the
 		// infoset id.  Check the TreeDrawSettings for the current value.
-		gString iset_label;
+		gText iset_label;
 		if (iset_disp==NODE_BELOW_ISETID)
-			iset_label="("+ToString(j)+","+ToString(k)+")";
+			iset_label="("+ToText(j)+","+ToText(k)+")";
 		else
 		  iset_label=soln.Game().Players()[j]->Infosets()[k]->GetName();
 		SetCell(cur_pos,2,iset_label);
 		int l;
 		for (l=1;l<=dim(j,k);l++)			// print actual values
-			SetCell(cur_pos,2+l,ToString(soln(j,k,l)));
+			SetCell(cur_pos,2+l,ToText(soln(j,k,l)));
 		for (l=dim(j,k)+1;l<=max_dim;l++) HiLighted(cur_pos,2+l,0,TRUE);
 		cur_pos++;
 	}
@@ -976,7 +976,7 @@ for (int i=1;i<=dim.Lengths().Length();i++)
 	for (int j=1;j<=dim.Lengths()[i];j++)
 	{
 		for (int k=1;k<=dim(i,j);k++)
-			FromString(GetCell(cur_pos,2+k),soln(i,j,k));
+			FromText(GetCell(cur_pos,2+k),soln(i,j,k));
 		cur_pos++;
 	}
 SetCompleted(wxOK);
@@ -1029,7 +1029,7 @@ Repaint();
 }
 
 
-void EfgSolnPicker::OnDoubleClick(int row,int col,int ,const gString &)
+void EfgSolnPicker::OnDoubleClick(int row,int col,int ,const gText &)
 {if (col==1) PickSoln(row);}
 
 // OnOk: remove all of the unselected solutions
@@ -1125,7 +1125,7 @@ Repaint();
 }
 
 
-void Ext1SolnPicker::OnDoubleClick(int row,int col,int ,const gString &)
+void Ext1SolnPicker::OnDoubleClick(int row,int col,int ,const gText &)
 {
 if (col==1) PickSoln(row);
 if (col==FeaturePos(BSOLN_DATA))	// edit solution

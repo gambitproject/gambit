@@ -1,7 +1,7 @@
 //
 // File: normshow.h -- header declarations for classes used in Normal Form GUI
 //
-//  $Id$
+// $Id$
 //
 
 #ifndef NORMSHOW_H
@@ -24,7 +24,6 @@
 #include "msolnsf.h"
 
 #include "efgnfgi.h"
-#include "paramsd.h"
 
 class NfgSolnShow;
 class NormalSpread;
@@ -43,8 +42,7 @@ public:
 };
 typedef SolutionList<MixedSolution> MixedSolutionList;
 
-class NfgShow: public EfgNfgInterface, public ParametrizedGame,
-               public NfgShowInterface
+class NfgShow: public EfgNfgInterface, public NfgShowInterface
 {
 private:
 	Nfg &nf;
@@ -58,8 +56,6 @@ private:
 		StartingPoints() : last(-1) { }
 	} starting_points;
 	int cur_soln;
-   ParameterSetList param_sets;
-   ParameterDialog *params_dialog;
  // we can display NF for one support, while working on a different support
  // disp_sup always corresponds to the support currently displayed.  cur_sup
  // corresponds to the support that will be operated upon by solution algs.
@@ -68,14 +64,13 @@ private:
 	NormalSpread 	*spread;
 	NFSupportInspectDialog *support_dialog;
 	NfgOutcomeDialog *outcome_dialog;
-   ParameterDialog *param_dialog;
 	int pl1,pl2;
 	int rows,cols;
 	NfgSolnShow *soln_show;	// need to keep track of this to kill at the end
 	NormalDrawSettings	draw_settings;
 	MSolnSortFilterOptions sf_options;
 	gList<Accel>	accelerators;
-	gString filename;
+	gText filename;
 	// Private functions
 	void UpdateSoln(void);
 	void UpdateDom(void);
@@ -107,7 +102,6 @@ public:
 	void SetOutcome(int outc,int x=-1, int y=-1);
 	void ChangeOutcomes(int what);
 	void OutcomeOptions(void) {draw_settings.OutcomeOptions();UpdateVals();}
-   void ChangeParameters(int what);
 
    void UpdateVals(void);
 	void UpdateProfile(gArray<int> &profile);
@@ -126,14 +120,13 @@ public:
 	void SolutionToExtensive(const MixedSolution &mp,bool set=false);
 	void ChangePayoffs(int st1,int st2,bool next=false);
 	// Filename support
-	void SetFileName(const gString &s);
-	const gString &Filename(void) const;
+	void SetFileName(const gText &s);
+	const gText &Filename(void) const;
 	// Display some inherent game properties
 	void ShowGameInfo(void);
    // Process Accelerator Keys
 	void EditAccelerators(void);
 	int  CheckAccelerators(wxKeyEvent &ev);
-   ParameterSetList &Parameters(void);
    // Access to the actual window
    wxFrame *Frame(void);
 };
@@ -206,7 +199,7 @@ public:
 	// Functions to enable/disable menuiterms
 	void EnableInspect(Bool enable) {GetMenuBar()->Enable(inspect_item,enable);}
 	// Callback for double clicking on a cell.  Currently this edits the cell
-	void OnDoubleClick(int row,int col,int ,const gString &) {parent->ChangePayoffs(row,col);}
+	void OnDoubleClick(int row,int col,int ,const gText &) {parent->ChangePayoffs(row,col);}
 	// Callback for moving the selected cell.  Currently this updates the pl1,pl2 choice boxes
 	void OnSelectedMoved(int row,int col,SpreadMoveDir /*how*/=SpreadMoveJump)
 	{strat_profile[pl1]->SetSelection(row-1);strat_profile[pl2]->SetSelection(col-1);}

@@ -1,7 +1,7 @@
 //
 // FILE: treewin.h -- Interface for TreeWindow class
 //
-//  $Id$
+// @(#)treewin.h	2.7 02/11/98
 //
 
 #ifndef TREEWIN_H
@@ -152,6 +152,11 @@ private:
   class OutcomeDragger;					// Class to take care of outcome copy/move by
   OutcomeDragger *outcome_drag;	// drag and dropping
 
+  // These are the "copied" objects
+  Infoset *copied_infoset;
+  EFOutcome *copied_outcome;
+  Node *copied_subtree;
+  
   // Private Functions
   int 	FillTable(const Node *n,int level);
   void 	ProcessCursor(void);
@@ -191,6 +196,12 @@ public:
   void OnPaint(void);
 
   // MENU EVENT HANDLERS
+
+  void edit_copy_infoset(void);
+  void edit_copy_outcome(void);
+  void edit_copy_subtree(void);
+  void edit_paste(void);
+  
   void node_add(void);
   void node_game(void);
   void node_label(void);

@@ -1,7 +1,7 @@
 //
 // FILE: NfgShow.cc -- normal form GUI
 //
-//  $Id$
+// @(#)nfgshow.cc	1.9 02/16/98
 //
 
 #include "wx.h"
@@ -25,7 +25,7 @@ return t;
 
 NfgShow::NfgShow(Nfg &N,EfgNfgInterface *efg,wxFrame *pframe_)
               :EfgNfgInterface(gNFG,efg), nf(N), nf_iter(N),
-               param_sets(N.Parameters(),"Nfg Params"),pframe(pframe_)
+               pframe(pframe_)
 
 {
 pl1=1;pl2=2;		// use the defaults
@@ -39,7 +39,6 @@ spread=new NormalSpread(disp_sup,pl1,pl2,this,pframe);
 support_dialog=0;	// no support dialog yet
 soln_show=0;			// no solution inspect window yet.
 outcome_dialog=0;	// no outcome dialog yet.
-params_dialog=0;	// no parameter dialog yet
 SetPlayers(pl1,pl2,true);
 // Create the accelerators (to add an accelerator, see const.h)
 ReadAccelerators(accelerators,"NfgAccelerators");
@@ -60,21 +59,16 @@ for (i=1;i<=rows;i++)
  for (j=1;j<=cols;j++)
  {
 	nf_iter.Set(pl1,i);nf_iter.Set(pl2,j);
-	gString pay_str;
+	gText pay_str;
 	NFOutcome *outcome = nf_iter.GetOutcome();
    bool hilight=false;
 	if (draw_settings.OutcomeDisp()==OUTCOME_VALUES)
 	{
 		for (int k=1;k<=nf.NumPlayers();k++)
 		{
-			pay_str+=("\\C{"+ToString(draw_settings.GetPlayerColor(k))+"}");
-         if (param_sets.PolyVal()==false)
-				pay_str+=ToString(nf.Payoff(outcome, k));
-         else
-         {
-         	pay_str+=ToString(nf.Payoff(outcome, k).Evaluate(param_sets.CurSet()));
-            if (nf.Payoff(outcome, k).Degree()>0) hilight=true;
-         }
+			pay_str+=("\\C{"+ToText(draw_settings.GetPlayerColor(k))+"}");
+			pay_str+=ToText(nf.Payoff(outcome, k));
+			
 			if (k!=nf.NumPlayers()) pay_str+=',';
 		}
 	}
@@ -83,7 +77,7 @@ for (i=1;i<=rows;i++)
 		if (outcome)
 		{
 			pay_str=outcome->GetName();
-			if (pay_str=="") pay_str="Outcome"+ToString(outcome->GetNumber());
+			if (pay_str=="") pay_str="Outcome"+ToText(outcome->GetNumber());
 		}
 		else
 			pay_str="Outcome 0";
@@ -105,7 +99,7 @@ if (sup_to==sup_from) return from;
 gArray<int> dim_from=sup_from.NumStrats();
 gArray<int> dim_to=sup_to.NumStrats();
 assert(dim_from.Length()==dim_to.Length());
-MixedProfile<gNumber> to(sup_to,from.ParameterValues());
+MixedProfile<gNumber> to(sup_to);
 for (int i=1;i<=dim_to.Length();i++)
 	for (int j=1;j<=dim_to[i];j++)
 	{
@@ -157,18 +151,18 @@ if (spread->HaveProbs())
 	// Print out the probability in the next column/row
 	int i;
 	for (i=1;i<=rows;i++)
-		spread->SetCell(i,cols+1,ToString(soln(pl1,i)));
+		spread->SetCell(i,cols+1,ToText(soln(pl1,i)));
 	for (i=1;i<=cols;i++)
-		spread->SetCell(rows+1,i,ToString(soln(pl2,i)));
+		spread->SetCell(rows+1,i,ToText(soln(pl2,i)));
 }
 if (spread->HaveVal())
 {
 	// Print out the probability in the last column/row
 	int i,j;
 	for (i=1;i<=rows;i++)
-		spread->SetCell(i,cols+spread->HaveProbs()+spread->HaveDom()+1,ToString(soln.Payoff(pl1,pl1,i)));
+		spread->SetCell(i,cols+spread->HaveProbs()+spread->HaveDom()+1,ToText(soln.Payoff(pl1,pl1,i)));
 	for (j=1;j<=cols;j++)
-		spread->SetCell(rows+spread->HaveProbs()+spread->HaveDom()+1,j,ToString(soln.Payoff(pl2,pl2,j)));
+		spread->SetCell(rows+spread->HaveProbs()+spread->HaveDom()+1,j,ToText(soln.Payoff(pl2,pl2,j)));
 }
 
 spread->Repaint();
@@ -185,7 +179,7 @@ const MixedSolution &soln=solns[cur_soln];
 gNumber cont_prob(1);
 for (int i=1;i<=nf.NumPlayers();i++)
 	if (i!=pl1 && i!=pl2) cont_prob*=soln(i,profile[i]);
-spread->SetCell(rows+1,cols+1,ToString(cont_prob));
+spread->SetCell(rows+1,cols+1,ToText(cont_prob));
 }
 
 
@@ -212,7 +206,7 @@ class NFChangePayoffs: public MyDialogBox
 public:
 	NFChangePayoffs(Nfg &nf,const gArray<int> &profile,wxWindow *parent);
 	int OutcomeNum(void);
-	gPolyArray<gNumber> Payoffs(void);
+	gArray<gNumber> Payoffs(void);
 };
 
 
@@ -223,9 +217,9 @@ int i;
 Add(wxMakeFormMessage("This invalidates all solutions!"));
 Add(wxMakeFormNewLine());
 Add(wxMakeFormMessage("Change payoffs for profile:"));
-gString profile_str="(";
+gText profile_str="(";
 for (i=1;i<=profile.Length();i++)
-	profile_str+=ToString(profile[i])+((i==profile.Length()) ? ")" : ",");
+	profile_str+=ToText(profile[i])+((i==profile.Length()) ? ")" : ",");
 Add(wxMakeFormMessage(profile_str));
 Add(wxMakeFormNewLine());
 // Outcome item
@@ -235,11 +229,11 @@ NFOutcome *outc=nf.GetOutcome(profile);
 for (i=1;i<=nf.NumOutcomes();i++)
 {
 	NFOutcome *outc_tmp=nf.Outcomes()[i];
-	gString outc_name;
+	gText outc_name;
 	if (outc_tmp->GetName()!="")
 		outc_name=outc_tmp->GetName();
 	else
-		outc_name="Outcome "+ToString(i);
+		outc_name="Outcome "+ToText(i);
 	outcome_list->Add(outc_name);
 	if (outc_tmp==outc) strcpy(outcome_name,outc_name);
 }
@@ -278,9 +272,9 @@ NFOutcome *outc=0;
 if (outc_num<=nf.NumOutcomes())	outc=nf.Outcomes()[outc_num];
 for (int i=1;i<=nf.NumPlayers();i++)
 {
-	gPoly<gNumber> payoff(nf.Parameters(),gNumber(0),nf.ParamOrder());
+  gNumber payoff = 0;
 	if (outc) payoff=nf.Payoff(outc,i);
-	payoff_items[i]->SetValue(ToString(payoff));
+	payoff_items[i]->SetValue(ToText(payoff));
 }
 payoff_items[1]->SetFocus();
 }
@@ -292,12 +286,12 @@ return outcome_item->GetSelection()+1;
 }
 
 
-gPolyArray<gNumber> NFChangePayoffs::Payoffs(void)
+gArray<gNumber> NFChangePayoffs::Payoffs(void)
 {
-gPolyArray<gNumber> payoffs(nf.Parameters(),nf.ParamOrder(),nf.NumPlayers());
-for (int i=1;i<=nf.NumPlayers();i++)
-	payoffs[i]=gPoly<gNumber>(nf.Parameters(),payoff_items[i]->GetValue(),nf.ParamOrder());
-return payoffs;
+  gArray<gNumber> payoffs(nf.NumPlayers());
+  for (int i=1;i<=nf.NumPlayers();i++)
+    FromText(payoff_items[i]->GetValue(), payoffs[i]);
+  return payoffs;
 }
 
 
@@ -323,7 +317,7 @@ NFChangePayoffs *payoffs_dialog=new NFChangePayoffs(nf,profile,spread);
 if (payoffs_dialog->Completed()==wxOK)  {
 	NFOutcome *outc;
 	int outc_num=payoffs_dialog->OutcomeNum();
-	gPolyArray<gNumber> payoffs(payoffs_dialog->Payoffs());
+	gArray<gNumber> payoffs(payoffs_dialog->Payoffs());
 	if (outc_num>nf.NumOutcomes())
 		outc=nf.NewOutcome();
 	else
@@ -353,8 +347,8 @@ Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S); // in nfgutils.cc
 
 void NfgShow::Save(void)
 {
-gString filename=Filename();
-gString s=wxFileSelector("Save data file",wxPathOnly(filename),wxFileNameFromPath(filename),".nfg", "*.nfg",wxSAVE|wxOVERWRITE_PROMPT);
+gText filename=Filename();
+gText s=wxFileSelector("Save data file",wxPathOnly(filename),wxFileNameFromPath(filename),".nfg", "*.nfg",wxSAVE|wxOVERWRITE_PROMPT);
 if (s!="")
 {
 	// Change description if saving under a different filename
@@ -499,7 +493,7 @@ spread->EnableInspect(FALSE);
 
 MixedSolution NfgShow::CreateSolution(void)
 {
-return MixedSolution(MixedProfile<gNumber>(*cur_sup,param_sets.CurSet()));
+  return MixedSolution(MixedProfile<gNumber>(*cur_sup));
 }
 
 
@@ -510,7 +504,6 @@ void NfgShow::OnOk(void)
 if (soln_show) {soln_show->OnOk();}
 ChangeSupport(DESTROY_DIALOG);
 if (outcome_dialog) delete outcome_dialog;
-ChangeParameters(DESTROY_DIALOG);
 spread->Close();
 delete &nf;
 }
@@ -543,7 +536,7 @@ NfgSolveSettings NSD(nf);
 // case use the currently set support.  Otherwise, only the default support
 // exists and we should use a support dictated by dominance defaults.
 NFSupport *sup=(supports.Length()>1) ? cur_sup : 0;
-bool solved=false;
+//bool solved=false;
 
 if (!sup) sup=MakeSolnSupport();
 int old_max_soln=solns.Length();	// used for extensive update
@@ -567,7 +560,7 @@ if (old_max_soln!=solns.Length())
 	if (NSD.GetExtensive())// Now, transfer the NEW solutions to extensive form if requested
 		for (int i=old_max_soln+1;i<=solns.Length();i++) SolutionToExtensive(solns[i]);
 	if (!spread->HaveProbs()) {spread->MakeProbDisp();spread->Redraw();}
-	ChangeSolution(solns.VisLength());
+	ChangeSolution(solns.VisibleLength());
 	spread->EnableInspect(TRUE);
 	if (NSD.AutoInspect()) InspectSolutions(CREATE_DIALOG);
 }
@@ -581,7 +574,7 @@ void NfgShow::SolveSetup(int what)
 if (what==SOLVE_SETUP_CUSTOM)
 {
 	NfgSolveParamsDialog NSD(nf,InterfaceOk(),(wxWindow *)spread);
-   bool from_efg=0;
+//   bool from_efg=0;
 	if (NSD.GetResult()==SD_PARAMS)
    switch (NSD.GetAlgorithm())
 	{
@@ -608,14 +601,14 @@ else	// SOLVE_SETUP_STANDARD
 
 
 
-void NfgShow::SetFileName(const gString &s)
+void NfgShow::SetFileName(const gText &s)
 {
 if (s!="") filename=s; else filename="untitled.nfg";
 // Title the window
-spread->SetTitle("["+gString(wxFileNameFromPath(filename))+"] "+nf.GetTitle());
+spread->SetTitle("["+filename+"] "+nf.GetTitle());
 }
 
-const gString &NfgShow::Filename(void) const
+const gText &NfgShow::Filename(void) const
 {return filename;}
 
 wxFrame *NfgShow::Frame(void)
@@ -625,7 +618,7 @@ wxFrame *NfgShow::Frame(void)
 
 MixedProfile<gNumber> NfgShow::CreateStartProfile(int how)
 {
-MixedSolution start(MixedProfile<gNumber>(*cur_sup,param_sets.CurSet()));
+  MixedProfile<gNumber> start(*cur_sup);
 if (how==0)	start.Centroid();
 if (how==1 || how==2)
 {
@@ -654,7 +647,7 @@ return start;
 //****************************************************************************
 
 #include "gstatus.h"
-NFSupport *ComputeDominated(const Nfg &, NFSupport &S, const gArray<gNumber> &,bool strong,
+NFSupport *ComputeDominated(const Nfg &, NFSupport &S, bool strong,
 const gArray<int> &players, gOutput &tracefile,gStatus &status); // in nfdom.cc
 
 
@@ -664,20 +657,18 @@ NFSupport *sup=new NFSupport(nf);
 DominanceSettings DS;  // reads in dominance defaults
 gArray<int> players(nf.NumPlayers());
 for (int i=1;i<=nf.NumPlayers();i++) players[i]=i;
-gArray<gNumber> values(nf.Parameters()->Dmnsn());
-for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
 
 if (DS.UseElimDom())
 {
   NFSupport *temp_sup;
   if (DS.FindAll())
   {
-      while ((temp_sup=ComputeDominated(sup->Game(),*sup,values,DS.DomStrong(),players,gnull,gstatus)))
+      while ((temp_sup=ComputeDominated(sup->Game(),*sup,DS.DomStrong(),players,gnull,gstatus)))
 			sup=temp_sup;
 	}
 	else
 	{
-		if ((temp_sup=ComputeDominated(sup->Game(),*sup,values,DS.DomStrong(),players,gnull,gstatus)))
+		if ((temp_sup=ComputeDominated(sup->Game(),*sup,DS.DomStrong(),players,gnull,gstatus)))
 			sup=temp_sup;
 	}
 }
@@ -697,7 +688,7 @@ void NfgShow::SolutionToExtensive(const MixedSolution &mp,bool set)
 assert(InterfaceOk());	// we better have someone to send solutions to
 //assert(mp!=Solution());
 EFSupport S(*InterfaceObjectEfg());
-BehavProfile<gNumber> bp(S,param_sets.CurSet());
+BehavProfile<gNumber> bp(S);
 MixedToBehav(nf,mp,*InterfaceObjectEfg(),bp);
 SolutionToEfg(bp,set);
 #endif
@@ -708,20 +699,18 @@ template class SolutionList<MixedSolution>;
 
 //******************** NORMAL FORM GUI ******************************
 #include "nfggui.h"
-NfgGUI::NfgGUI(Nfg *nf,const gString infile_name,EfgNfgInterface *inter,wxFrame *parent)
+NfgGUI::NfgGUI(Nfg *nf,const gText infile_name,EfgNfgInterface *inter,wxFrame *parent)
 {
 // an already created normal form has been passed
 if (nf==0) // must create a new normal form, from scratch or from file
 {
 	gArray<int> dimensionality;
-   gArray<gString> names;
-	if (infile_name==gString())	// from scratch
+   gArray<gText> names;
+	if (infile_name==gText())	// from scratch
 	{
 		if (GetNFParams(dimensionality,names,parent))
 		{
-		   gSpace *space = new gSpace;
-		   ORD_PTR ord = &lex;
-			nf=new Nfg(dimensionality,space,new term_order(space, ord));
+		  nf=new Nfg(dimensionality);
          for (int i=1;i<=names.Length();i++) nf->Players()[i]->SetName(names[i]);
 		}
 	}
@@ -750,7 +739,7 @@ if (nf)
 #define MAX_PLAYERS 100
 #define MAX_STRATEGIES	100
 #define NUM_PLAYERS_PER_LINE 8
-int NfgGUI::GetNFParams(gArray<int> &dimensionality,gArray<gString> &names,wxFrame *parent)
+int NfgGUI::GetNFParams(gArray<int> &dimensionality,gArray<gText> &names,wxFrame *parent)
 {
 
 int num_players=2;
@@ -770,7 +759,7 @@ dimensionality=gArray<int>(num_players);
 for (int i=1;i<=num_players;i++)
 {
 	dimensionality[i]=2;  // Why 2?  why not?
-	make_nf_dim->Add(wxMakeFormShort(ToString(i),&dimensionality[i],wxFORM_TEXT,
+	make_nf_dim->Add(wxMakeFormShort(ToText(i),&dimensionality[i],wxFORM_TEXT,
 										 new wxList(wxMakeConstraintRange(1, MAX_STRATEGIES), 0),NULL,0,70));
 	if (i%NUM_PLAYERS_PER_LINE==0) make_nf_dim->Add(wxMakeFormNewLine());
 }
@@ -781,12 +770,12 @@ if (ok!=wxOK)	return 0;
 
 // Now get player names
 MyDialogBox *make_nf_names=new MyDialogBox(parent,"Player Names");
-names=gArray<gString>(num_players);
+names=gArray<gText>(num_players);
 char **names_str=new char*[num_players+1];
 for (int i=1;i<=num_players;i++)
 {
-	names_str[i]=new char[20];strcpy(names_str[i],"Player"+ToString(i));
-	make_nf_names->Add(wxMakeFormString(ToString(i),&names_str[i],wxFORM_TEXT,
+	names_str[i]=new char[20];strcpy(names_str[i],"Player"+ToText(i));
+	make_nf_names->Add(wxMakeFormString(ToText(i),&names_str[i],wxFORM_TEXT,
                       NULL,NULL,0,140));
 	if (i%(NUM_PLAYERS_PER_LINE/2)==0) make_nf_names->Add(wxMakeFormNewLine());
 }

@@ -1,6 +1,6 @@
 // File: bsolnsf.cc -- Actual code to implement sorting and filtering of
 // behav solutions
-//  $Id$
+// $Id$
 
 #include "bsolnsf.h"
 /****************************************************************************
@@ -89,73 +89,30 @@ return true;
 
 // Sorting function
 
-CompareResult BSolnSorterFilter::Compare(const BehavSolution &a_,const BehavSolution &b_) const
+bool BSolnSorterFilter::LessThan(const BehavSolution &a,
+                                 const BehavSolution &b) const
 {
-// casting away CONST @@
-BehavSolution &a=(BehavSolution &)a_;
-BehavSolution &b=(BehavSolution &)b_;
+  switch (options.SortBy())   {
+  case BSORT_BY_ID:
+    return (a.Id() < b.Id());
+  case BSORT_BY_CREATOR:
+    return (NameEfgAlgType(a.Creator()) < NameEfgAlgType(b.Creator()));
+  case BSORT_BY_NASH:
+    return (a.IsNash() < b.IsNash());
+  case BSORT_BY_PERFECT:
+    return (a.IsSubgamePerfect() < b.IsSubgamePerfect());
+  case BSORT_BY_SEQ:
+    return (a.IsSequential() < b.IsSequential());
+  case BSORT_BY_GVALUE:
+    return (a.GobitValue() < b.GobitValue());
+  case BSORT_BY_GLAMBDA:
+    return (a.GobitLambda() < b.GobitLambda());
+  case BSORT_BY_LVALUE:
+    return (a.LiapValue() < b.LiapValue());
+  default: assert(0 && "Unknown sort criterion");
+  }
 
-switch (options.SortBy())
-{
-case BSORT_BY_ID:
-			if (a.Id()>b.Id()) return GreaterThan;
-      if (a.Id()<b.Id()) return LessThan;
-			return Equal;
-case BSORT_BY_CREATOR:
-			if (NameEfgAlgType(a.Creator())>NameEfgAlgType(b.Creator())) return GreaterThan;
-			if (NameEfgAlgType(a.Creator())<NameEfgAlgType(b.Creator())) return LessThan;
-			return Equal;
-case BSORT_BY_NASH:
-			if (a.IsNash()==b.IsNash())
-				return Equal;
-			else
-				if (a.IsNash()>b.IsNash())
-					return GreaterThan;
-				else
-					return LessThan;
-case BSORT_BY_PERFECT:
-			if (a.IsSubgamePerfect()==b.IsSubgamePerfect())
-				return Equal;
-			else
-				if (a.IsSubgamePerfect()>b.IsSubgamePerfect())
-					return GreaterThan;
-				else
-					return LessThan;
-case BSORT_BY_SEQ:
-			if (a.IsSequential()==b.IsSequential())
-				return Equal;
-			else
-				if (a.IsSequential()>b.IsSequential())
-					return GreaterThan;
-				else
-					return LessThan;
-case BSORT_BY_GVALUE:
-			if (a.GobitValue()==b.GobitValue())
-				return Equal;
-			else
-				if (a.GobitValue()>b.GobitValue())
-					return GreaterThan;
-				else
-					return LessThan;
-case BSORT_BY_GLAMBDA:
-			if (a.GobitLambda()==b.GobitLambda())
-				return Equal;
-			else
-				if (a.GobitLambda()>b.GobitLambda())
-					return GreaterThan;
-				else
-					return LessThan;
-case BSORT_BY_LVALUE:
-			if (a.LiapValue()==b.LiapValue())
-				return Equal;
-			else
-				if (a.LiapValue()>b.LiapValue())
-					return GreaterThan;
-				else
-					return LessThan;
-default: assert(0 && "Unknown sort criterion");
-}
-return Equal;
+  return false;
 }
 
 #include "rational.h"

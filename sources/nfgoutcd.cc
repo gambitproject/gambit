@@ -1,5 +1,5 @@
 // File: outcomed.cc -- code for the NFG outcome editing dialog
-//  $Id$
+// $Id$
 #include "wx.h"
 #include "wxmisc.h"
 #include "spread.h"
@@ -19,18 +19,14 @@ private:
 	static void outcome_attach_func(wxButton &ob,wxEvent &);
 	static void outcome_detach_func(wxButton &ob,wxEvent &);
 	static void outcome_delete_func(wxButton &ob,wxEvent &);
-	static void outcome_polyval_func(wxButton &ob,wxEvent &);
 	static void settings_func(wxButton &ob,wxEvent &);
 protected:
 	NfgOutcomeDialog *parent;
 	Nfg &nf;
-	ParameterSetList &params;
 	NfgShow *ns;
 	int prev_outc_num;
-   bool &polyval;
 	class OutcomeDragger;
 	OutcomeDragger *outcome_drag;
-   wxButton *polyval_but;
 	void OnAttach(void);
 	void OnDetach(void);
 	virtual void OnDelete(void);
@@ -41,15 +37,15 @@ protected:
 	virtual void NamePos(int outc_num,int *row,int *col) = 0;
 	virtual Bool OnEventNew(wxMouseEvent &ev);
 public:
-	NfgOutcomeDialogC(int rows,int cols,Nfg &nf,ParameterSetList &params,
+	NfgOutcomeDialogC(int rows,int cols,Nfg &nf,
                      NfgShow *ns,NfgOutcomeDialog *parent);
-	void SetCurOutcome(const gString &out_name);
+	void SetCurOutcome(const gText &out_name);
 	void OnHelp(int );
 	// This implements the behavior that a new row is created automatically
 	// below the greatest ENTERED row.  Also, if we move to a new row, the
 	// previous row is automatically saved in the nf.
 	virtual void OnSelectedMoved(int ,int ,SpreadMoveDir ) { };
-	virtual void OnDoubleClick(int ,int ,int ,const gString &);
+	virtual void OnDoubleClick(int ,int ,int ,const gText &);
    virtual void UpdateValues(void);
 	virtual void OnOk(void);
 	virtual int  OutcomeNum(int row=0,int col=0) = 0;
@@ -121,10 +117,9 @@ return ret;
 
 // Constructor
 NfgOutcomeDialogC::NfgOutcomeDialogC(int rows,int cols,Nfg &nf_,
-               ParameterSetList &params_,NfgShow *ns_,NfgOutcomeDialog *parent_)
+               NfgShow *ns_,NfgOutcomeDialog *parent_)
 				:SpreadSheet3D(rows,cols,1,"Outcomes [S]",0/*(wxFrame *)ns_->GetParent()*/,ANY_BUTTON),
-             parent(parent_), nf(nf_), params(params_), ns(ns_),
-             polyval(params_.PolyVal())
+             parent(parent_), nf(nf_), ns(ns_)
 {
 MakeButtons(OK_BUTTON|PRINT_BUTTON|OPTIONS_BUTTON|HELP_BUTTON);
 AddButton("Opt",(wxFunction)settings_func);
@@ -132,7 +127,6 @@ AddButtonNewLine();
 AddButton("Attach",(wxFunction)outcome_attach_func);
 AddButton("Detach",(wxFunction)outcome_detach_func);
 AddButton("Delete",(wxFunction)outcome_delete_func);
-polyval_but=AddButton("Poly",(wxFunction)outcome_polyval_func);
 prev_outc_num=1;
 outcome_drag=new OutcomeDragger(this,ns);
 CanvasFocus();
@@ -145,20 +139,9 @@ void NfgOutcomeDialogC::outcome_detach_func(wxButton &ob,wxEvent &)
 {((NfgOutcomeDialogC *)ob.GetClientData())->OnDetach();}
 void NfgOutcomeDialogC::outcome_delete_func(wxButton &ob,wxEvent &)
 {((NfgOutcomeDialogC *)ob.GetClientData())->OnDelete();}
-void NfgOutcomeDialogC::outcome_polyval_func(wxButton &ob,wxEvent &)
-{((NfgOutcomeDialogC *)ob.GetClientData())->OnPolyval();}
 
 void NfgOutcomeDialogC::settings_func(wxButton &ob,wxEvent &)
 {((NfgOutcomeDialogC *)ob.GetClientData())->OnSettings();}
-
-// OnPolyval
-void NfgOutcomeDialogC::OnPolyval(void)
-{
-	polyval=(polyval) ? false : true;
-   polyval_but->SetLabel((polyval) ? "Eval" : "Poly");
-   ns->UpdateVals();
-	UpdateValues(); Repaint(); CanvasFocus();
-}
 
 // OnAttach
 void NfgOutcomeDialogC::OnAttach(void)
@@ -171,7 +154,7 @@ void NfgOutcomeDialogC::OnDelete(void)
 {
 char tmp_str[256];
 int outc_num=OutcomeNum();
-gString outc_name=nf.Outcomes()[outc_num]->GetName();
+gText outc_name=nf.Outcomes()[outc_num]->GetName();
 sprintf(tmp_str,"Delete Outcome '%s'?",(const char *)outc_name);
 if (wxMessageBox(tmp_str,"Confirm",wxOK|wxCANCEL)==wxOK)
 {
@@ -216,7 +199,7 @@ void NfgOutcomeDialogC::OnHelp(int )
 
 
 // SetCurOutcome
-void NfgOutcomeDialogC::SetCurOutcome(const gString &out_name)
+void NfgOutcomeDialogC::SetCurOutcome(const gText &out_name)
 {
 int out=0;
 if (out_name!="")
@@ -251,7 +234,7 @@ void NfgOutcomeDialogC::UpdateValues(void)
 {
 int row,col;
 NFOutcome *tmp;
-gString payoff;
+gText payoff;
 bool hilight;
 for (int i=1;i<=nf.NumOutcomes();i++)
 {
@@ -260,13 +243,7 @@ for (int i=1;i<=nf.NumOutcomes();i++)
 	{
 		PayoffPos(i,j,&row,&col);
       hilight=false;
-      if (polyval==false)
-      	payoff=ToString(nf.Payoff(tmp, j));
-      else
-      {
-      	payoff=ToString(nf.Payoff(tmp, j).Evaluate(params.CurSet()));
-         if (nf.Payoff(tmp, j).Degree()>0) hilight=true;
-      }
+		payoff=ToText(nf.Payoff(tmp, j));
 		SetCell(row,col,payoff);
       HiLighted(row,col,0,hilight);
 	}
@@ -285,7 +262,7 @@ NFOutcome *tmp;
 if (outc_num>nf.NumOutcomes())
 {
 	tmp=nf.NewOutcome();
-	tmp->SetName("Outcome "+ToString(nf.NumOutcomes()));
+	tmp->SetName("Outcome "+ToText(nf.NumOutcomes()));
 }
 else
 	tmp=nf.Outcomes()[outc_num];
@@ -296,26 +273,16 @@ int prow,pcol;
 for (int j=1;j<=nf.NumPlayers();j++)
 {
 	PayoffPos(outc_num,j,&prow,&pcol);
-	gPoly<gNumber> payoff(nf.Parameters(),GetCell(prow,pcol),nf.ParamOrder());
-	if (polyval==false)
-   {
-		if (nf.Payoff(tmp, j)!=payoff)	{
-			nf.SetPayoff(tmp, j, payoff);
-			outcomes_changed=true;
-		}
-   }
-   else
-   {
-      gString payoff_str=ToString(nf.Payoff(tmp, j).Evaluate(params.CurSet()));
-		if (payoff_str!=GetCell(prow,pcol))	{
-			nf.SetPayoff(tmp, j, payoff);
-			outcomes_changed=true;
-		}
+	gNumber payoff;
+	FromText(GetCell(prow, pcol), payoff);
+	if (nf.Payoff(tmp, j)!=payoff)	{
+	  nf.SetPayoff(tmp, j, payoff);
+	  outcomes_changed=true;
 	}
-}
+      }
 // check if the name has changed
 NamePos(outc_num,&prow,&pcol);
-gString new_name=GetCell(prow,pcol);
+gText new_name=GetCell(prow,pcol);
 if (new_name!=tmp->GetName())
 	if (new_name!="")
 	{
@@ -330,7 +297,7 @@ if (new_name!=tmp->GetName())
 if (outcomes_changed) ns->SetOutcome(-1);
 }
 
-void NfgOutcomeDialogC::OnDoubleClick(int row,int col,int /* level*/,const gString &)
+void NfgOutcomeDialogC::OnDoubleClick(int row,int col,int /* level*/,const gText &)
 {
 static bool busy=false;
 if (busy) return;
@@ -339,13 +306,15 @@ NFOutcome *tmp=nf.Outcomes()[outc_num];
 int pl=PlayerNum(row,col);
 busy=true;
 if (pl==0) return; // double click only edits player payoffs.
-gString s0=ToString(nf.Payoff(tmp, pl));
+gText s0=ToText(nf.Payoff(tmp, pl));
 int x=GetSheet()->MaxX(col-1)+TEXT_OFF,y=GetSheet()->MaxY(row-1)+TEXT_OFF;
 GetSheet()->ClientToScreen(&x,&y);
-gString s1=gGetTextLine(s0,this,x,y);
+gText s1=gGetTextLine(s0,this,x,y);
 if (s1!="" && s0!=s1)
-{
-	nf.SetPayoff(tmp, pl, gPoly<gNumber>(nf.Parameters(),s1,nf.ParamOrder()));
+  {
+    gNumber payoff;
+    FromText(s1, payoff);
+    nf.SetPayoff(tmp, pl, payoff);
    UpdateValues();
    ns->UpdateVals();
 	Repaint();
@@ -364,15 +333,16 @@ protected:
 	void PayoffPos(int outc_num,int player,int *row,int *col);
 	void NamePos(int outc_num,int *row,int *col);
 public:
-	NfgOutcomeDialogShort(Nfg &nf,ParameterSetList &params,NfgShow *ns,NfgOutcomeDialog *parent);
+	NfgOutcomeDialogShort(Nfg &nf,NfgShow *ns,NfgOutcomeDialog *parent);
 	void OnSelectedMoved(int row,int col,SpreadMoveDir how);
 	virtual void OnOptionsChanged(unsigned int options=0);
 };
 
-NfgOutcomeDialogShort::NfgOutcomeDialogShort(Nfg &nf_,ParameterSetList &params,
-                                   NfgShow *ns_,NfgOutcomeDialog *parent_)
-						: NfgOutcomeDialogC((nf_.NumOutcomes()) ? nf_.NumOutcomes() : 1,
-														nf_.NumPlayers()+1,nf_,params,ns_,parent_)
+NfgOutcomeDialogShort::NfgOutcomeDialogShort(Nfg &nf_,
+					     NfgShow *ns_,
+					     NfgOutcomeDialog *parent_)
+  : NfgOutcomeDialogC((nf_.NumOutcomes()) ? nf_.NumOutcomes() : 1,
+		      nf_.NumPlayers()+1,nf_,ns_,parent_)
 {
 DrawSettings()->SetLabels(S_LABEL_ROW|S_LABEL_COL);
 DataSettings()->SetChange(S_CAN_GROW_ROW);
@@ -381,7 +351,7 @@ DataSettings()->SetAutoLabelStr("Out:%d",S_AUTO_LABEL_ROW);
 DrawSettings()->SetColWidth(9,GetCols()); // 'Outcome #'=9 chars
 SetLabelCol(GetCols(),"Name");
 int i,j;
-for (j=1;j<=nf.NumPlayers();j++) DrawSettings()->SetColWidth(2+ToStringPrecision(),j);
+for (j=1;j<=nf.NumPlayers();j++) DrawSettings()->SetColWidth(2+ToTextPrecision(),j);
 // make all the cells string input
 for (i=1;i<=GetRows();i++)
 	for (j=1;j<=GetCols();j++)
@@ -451,7 +421,7 @@ if (options&S_PREC_CHANGED)
 {
 	UpdateValues();
 	for (int j=1;j<=nf.NumPlayers();j++)
-	DrawSettings()->SetColWidth(2+ToStringPrecision(),j);
+	DrawSettings()->SetColWidth(2+ToTextPrecision(),j);
 	Resize();Repaint();
 }
 }
@@ -470,16 +440,16 @@ protected:
 	void PayoffPos(int outc_num,int player,int *row,int *col);
 	void NamePos(int outc_num,int *row,int *col);
 public:
-	NfgOutcomeDialogLong(Nfg &nf,ParameterSetList &params,NfgShow *ns,NfgOutcomeDialog *parent);
+	NfgOutcomeDialogLong(Nfg &nf,NfgShow *ns,NfgOutcomeDialog *parent);
 	void OnSelectedMoved(int row,int col,SpreadMoveDir how);
 	virtual void OnOptionsChanged(unsigned int options=0);
 };
 
 
-NfgOutcomeDialogLong::NfgOutcomeDialogLong(Nfg &nf_,ParameterSetList &params,
+NfgOutcomeDialogLong::NfgOutcomeDialogLong(Nfg &nf_,
                                 NfgShow *ns_,NfgOutcomeDialog *parent_)
 				:NfgOutcomeDialogC((nf_.NumOutcomes() ? nf_.NumOutcomes() : 1)*nf_.NumPlayers(),
-												3,nf_,params,ns_,parent_)
+												3,nf_,ns_,parent_)
 {
 DrawSettings()->SetLabels(S_LABEL_ROW|S_LABEL_COL);
 DataSettings()->SetChange(S_CAN_GROW_ROW);
@@ -500,7 +470,7 @@ for (j=1;j<=nf.NumOutcomes();j++)				// set player and outcome names
 		Bold((j-1)*nf.NumPlayers()+i,1,0,TRUE);
 	}
 	SetCell((j-1)*nf.NumPlayers()+1,3,nf.Outcomes()[j]->GetName());
-	SetLabelRow((j-1)*nf.NumPlayers()+1,"Out:"+ToString(j));
+	SetLabelRow((j-1)*nf.NumPlayers()+1,"Out:"+ToText(j));
 	SetType((j-1)*nf.NumPlayers()+1,3,gSpreadStr);
 }
 SetCurRow(1);SetCurCol(2);
@@ -518,7 +488,7 @@ int i;
 for (i=1;i<=nf.NumPlayers();i++)
 	DelRow(nf.NumPlayers()*outc_num-i+1);
 for (i=outc_num+1;i<=nf.NumOutcomes();i++)
-	SetLabelRow((i-1)*nf.NumPlayers()+1,"Out:"+ToString(i));
+	SetLabelRow((i-1)*nf.NumPlayers()+1,"Out:"+ToText(i));
 
 Redraw();
 }
@@ -567,7 +537,7 @@ if (row==GetRows() && EnteredCell(row,2))	// add an outcome
 		SetCell(GetRows(),1,nf.Players()[i]->GetName());
 		Bold(GetRows(),1,0,TRUE);
 	}
-	SetLabelRow(GetRows()-nf.NumPlayers()+1,"Out:"+ToString(nf.NumOutcomes()+1));
+	SetLabelRow(GetRows()-nf.NumPlayers()+1,"Out:"+ToText(nf.NumOutcomes()+1));
 	Redraw();OnPaint();
 }
 }
@@ -607,7 +577,7 @@ void NfgOutcomeDialogLong::OnOptionsChanged(unsigned int options)
 if (options&S_PREC_CHANGED)
 {
 	UpdateValues();
-	DrawSettings()->SetColWidth(2+ToStringPrecision(),2);
+	DrawSettings()->SetColWidth(2+ToTextPrecision(),2);
 	Resize();Repaint();
 }
 }
@@ -623,16 +593,16 @@ int dialog_type;
 char *defaults_file="gambit.ini";
 wxGetResource("Gambit","NfgOutcome-Dialog-Type",&dialog_type,defaults_file);
 if (dialog_type==SHORT_ENTRY_OUTCOMES)
-	d=new NfgOutcomeDialogShort(nf,ns->Parameters(),ns,this);
+	d=new NfgOutcomeDialogShort(nf,ns,this);
 else
-	d=new NfgOutcomeDialogLong(nf,ns->Parameters(),ns,this);
+	d=new NfgOutcomeDialogLong(nf,ns,this);
 d->Show(TRUE);
 }
 
 NfgOutcomeDialog::~NfgOutcomeDialog()
 {d->Show(FALSE);delete d;}
 
-void NfgOutcomeDialog::SetOutcome(const gString &outc_name)
+void NfgOutcomeDialog::SetOutcome(const gText &outc_name)
 {d->SetCurOutcome(outc_name);d->SetFocus();}
 
 void NfgOutcomeDialog::UpdateVals(void)

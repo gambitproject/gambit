@@ -1,5 +1,5 @@
 // File: accels.cc -- functions for working with accelerators
-//  $Id$
+// $Id$
 //
 
 #include "wx.h"
@@ -11,7 +11,6 @@
 #include "glist.imp"
 #include "accels.h"
 template class gList<Accel>;
-template class gNode<Accel>;
 #include "garray.imp"
 template class gArray<AccelEvent>;
 
@@ -53,11 +52,11 @@ private:
 	static void close_func(wxButton& ob, wxCommandEvent& ev);
 	static void help_func(wxButton& ob, wxCommandEvent& ev);
 	// Event handlers. High level
-	void OnEventFunc(const gString &name);
+	void OnEventFunc(const gText &name);
 	void OnAddFunc(void);
 	void OnDeleteFunc(void);
 	// Subsidiary functions
-	int	 GetEventId(const gString &name);
+	int	 GetEventId(const gText &name);
 	int	 RealKey(void);
 public:
 	// Constructor and destructor
@@ -103,7 +102,7 @@ EditAccelDialog::~EditAccelDialog(void)
 {}
 
 // Find the event's id
-int EditAccelDialog::GetEventId(const gString &name)
+int EditAccelDialog::GetEventId(const gText &name)
 {
 int id=0;
 for (int i=1;i<=events.Length() && !id;i++) if (events[i].name==name) id=events[i].id;
@@ -140,7 +139,7 @@ key_text->SetValue("");
 }
 
 // Check to see if this event is already defined.  If so, fill in the fields
-void EditAccelDialog::OnEventFunc(const gString &name)
+void EditAccelDialog::OnEventFunc(const gText &name)
 {
 int i,id=GetEventId(name);
 // Now, check if it is defined
