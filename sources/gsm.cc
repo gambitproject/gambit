@@ -5,11 +5,18 @@
 //#
 
 
-#include <assert.h>
-#include "gambitio.h"
-
-
 #include "gsm.h"
+
+#include <assert.h>
+
+#include "glist.h"
+#include "ggrstack.h"
+
+#include "portion.h"
+#include "gsmfunc.h"
+#include "gsminstr.h"
+#include "gsmhash.h"
+
 
 
 //--------------------------------------------------------------------
@@ -27,7 +34,8 @@ GSM::GSM( int size, gOutput& s_out, gOutput& s_err )
   
   _Stack         = new gGrowableStack< Portion* >( size );
   _CallFuncStack = new gGrowableStack< CallFuncObj* >( size ) ;
-  _RefTable      = new RefHashTable;
+  _RefTableStack = new gGrowableStack< RefHashTable* >( 1 );
+  _RefTableStack->Push( new RefHashTable );
   _FuncTable     = new FunctionHashTable;
   
   InitFunctions();  // This function is located in gsmfunc.cc
@@ -38,7 +46,9 @@ GSM::~GSM()
 {
   Flush();
   delete _FuncTable;
-  delete _RefTable;
+  assert( _RefTableStack->Depth() == 1 );
+  delete _RefTableStack->Pop();
+  delete _RefTableStack;
   delete _CallFuncStack;
   delete _Stack;
 }
@@ -225,7 +235,8 @@ bool GSM::Assign( void )
       {
 	p2_copy = p2->Copy();
       }
-      _RefTable->Define( ( (Reference_Portion*) p1 )->Value(), p2_copy );
+      _RefTableStack->Peek()->
+	Define( ( (Reference_Portion*) p1 )->Value(), p2_copy );
       delete p1;
     }
 
@@ -343,9 +354,9 @@ bool GSM::UnAssign( void )
     p1_subvalue = ( (Reference_Portion*) p1 )->SubValue();
     if( p1_subvalue == "" )
     {
-      if( _RefTable->IsDefined( ref ) )
+      if( _RefTableStack->Peek()->IsDefined( ref ) )
       {
-	_RefTable->Remove( ref );
+	_RefTableStack->Peek()->Remove( ref );
       }
     }
 
@@ -425,15 +436,15 @@ Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
   gString&  ref = p->Value();
   gString&  subvalue = p->SubValue();
 
-  if( _RefTable->IsDefined( ref ) )
+  if( _RefTableStack->Peek()->IsDefined( ref ) )
   {
     if( subvalue == "" )
     {
-      result = (*_RefTable)( ref )->Copy();
+      result = (*_RefTableStack->Peek())( ref )->Copy();
     }
     else
     {
-      primary_ref = (*_RefTable)( ref );
+      primary_ref = (*_RefTableStack->Peek())( ref );
       switch( primary_ref->Type() )
       {
       case porNFG_DOUBLE:
@@ -480,9 +491,9 @@ Portion* GSM::_ResolvePrimaryRefOnly( Reference_Portion* p )
   Portion*  result = 0;
   gString&  ref = p->Value();
 
-  if( _RefTable->IsDefined( ref ) )
+  if( _RefTableStack->Peek()->IsDefined( ref ) )
   {
-    result = (*_RefTable)( ref );
+    result = (*_RefTableStack->Peek())( ref );
   }
   else
   {
@@ -699,8 +710,9 @@ bool GSM::Subscript ( void )
   {
     refp = p1;
 
-    if( _RefTable->IsDefined( ( (Reference_Portion*) refp )->Value() ) )
-      p1 = (*_RefTable)( ( (Reference_Portion*) refp )->Value() );
+    if( _RefTableStack->Peek()->
+       IsDefined( ( (Reference_Portion*) refp )->Value() ) )
+      p1 = (*_RefTableStack->Peek())( ( (Reference_Portion*) refp )->Value() );
     else
       p1 = 0;
 
@@ -1009,13 +1021,13 @@ bool GSM::CallFunction( void )
       {
 	if( refp->SubValue() == "" )
 	{
-	  _RefTable->Define( refp->Value(), param[ index ] );
+	  _RefTableStack->Peek()->Define( refp->Value(), param[ index ] );
 	}
 	else // ( refp->SubValue != "" )
 	{
-	  if( _RefTable->IsDefined( refp->Value() ) )
+	  if( _RefTableStack->Peek()->IsDefined( refp->Value() ) )
 	  {
-	    p = ( *_RefTable )( refp->Value() );
+	    p = ( *_RefTableStack->Peek() )( refp->Value() );
 	    switch( p->Type() )
 	    {
 	    case porNFG_DOUBLE:
@@ -1042,7 +1054,7 @@ bool GSM::CallFunction( void )
 	    }
 	    delete param[ index ];
 	  }
-	  else // ( !_RefTable->IsDefined( refp->Value() ) )
+	  else // ( !_RefTableStack->Peek()->IsDefined( refp->Value() ) )
 	  {
 	    _ErrorMessage( _StdErr, 29 );
 	    delete param[ index ];
@@ -1102,7 +1114,7 @@ bool GSM::CallFunction( void )
 //                       Execute function
 //----------------------------------------------------------------------------
 
-GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool destruct )
+GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool user_func )
 {
   GSM_ReturnCode  result          = rcSUCCESS;
   bool            instr_success;
@@ -1111,6 +1123,12 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool destruct )
   Instruction*    instruction;
   int             program_counter = 1;
   int             program_length  = program.Length();
+
+
+  if( user_func )
+  {
+    _RefTableStack->Push( new RefHashTable );
+  }
 
   while( ( program_counter <= program_length ) && ( !done ) )
   {
@@ -1167,7 +1185,11 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool destruct )
     }
   }
 
-  if( destruct )
+  if( user_func )
+  {
+    delete _RefTableStack->Pop();
+  }
+  else
   {
     while( program.Length() > 0 )
     {
@@ -1463,14 +1485,14 @@ void GSM::_ErrorMessage
 
 TEMPLATE class gStack< Portion* >;
 TEMPLATE class gStack< CallFuncObj* >;
-TEMPLATE class gStack< List_Portion* >;
+TEMPLATE class gStack< RefHashTable* >;
 
 
 #include "ggrstack.imp"
 
 TEMPLATE class gGrowableStack< Portion* >;
 TEMPLATE class gGrowableStack< CallFuncObj* >;
-TEMPLATE class gGrowableStack< List_Portion* >;
+TEMPLATE class gGrowableStack< RefHashTable* >;
 
 
 gOutput& operator << ( class gOutput& s, class Portion* (*funcname)() )

@@ -6,6 +6,13 @@
 
 
 #include "gsm.h"
+#include "integer.h"
+#include "rational.h"
+#include "gstring.h"
+#include "gambitio.h"
+#include "glist.h"
+#include "gsminstr.h"
+#include "gsmfunc.h"
 
 
 
@@ -1822,6 +1829,7 @@ int main( void )
   gin >> cont;
 #endif
 
+/*
   machine->InitCallFunction( "GobitEfg" );
   machine->PushRef( "E" );
   machine->Bind( "E" );
@@ -1834,6 +1842,8 @@ int main( void )
 
   machine->PushRef( "time" );
   machine->Dump();
+*/
+
 #endif // CRASHTEST
 
 
@@ -1872,7 +1882,7 @@ int main( void )
 
 
 
-
+/*
   machine->PushRef( "F" );
   machine->InitCallFunction( "ReadEfg" );
   machine->Push( "e02.efg" );
@@ -1910,7 +1920,7 @@ int main( void )
   machine->CallFunction();
   machine->Assign();
   machine->Dump();
-
+*/
 
 #ifdef INTERACTIVE
   gout << "*********************** Press Return to continue ************";
@@ -2041,7 +2051,7 @@ int main( void )
 
   prog = new gList< Instruction* >;
   prog->Append( new PushRef( "x" ) );
-  prog->Append( new Push<double>( 10 ) );
+  prog->Append( new Push<double>( 20 ) );
   prog->Append( new Assign );
   prog->Append( new Dump );
 

@@ -8,19 +8,26 @@
 #ifndef GSM_H
 #define GSM_H
 
-#include "glist.h"
-#include "ggrstack.h"
-
-#include "portion.h"
-#include "gsmfunc.h"
-#include "gsminstr.h"
-#include "gsmhash.h"
 
 
+#include "gsmincl.h"
+#include "gambitio.h"
 
 
-class FunctionHashTable;
 class Instruction;
+class FuncDescObj;
+class CallFuncObj;
+class Portion;
+class Reference_Portion;
+class RefHashTable;
+class FunctionHashTable;
+
+class gString;
+class gInteger;
+class gRational;
+
+template <class T> class gList;
+template <class T> class gGrowableStack;
 
 
 
@@ -32,7 +39,7 @@ private:
   
   gGrowableStack< Portion* >*      _Stack;
   gGrowableStack< CallFuncObj* >*  _CallFuncStack;
-  RefHashTable*                    _RefTable;
+  gGrowableStack< RefHashTable* >* _RefTableStack;
   FunctionHashTable*               _FuncTable;
 
   Portion* _ResolveRef            ( Reference_Portion* p );
@@ -126,7 +133,8 @@ public:
   bool BindRef          ( const gString& param_name );
   bool CallFunction     ( void );
 
-  GSM_ReturnCode Execute( gList<Instruction*>& program, bool destruct = true );
+  GSM_ReturnCode Execute( gList<Instruction*>& program, 
+			 bool user_func = false );
   
   bool Pop ( void );
 

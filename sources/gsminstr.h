@@ -12,8 +12,11 @@
 #define GSMINSTR_H
 
 
-#include "gsm.h"
-#include "gambitio.h"
+#include "gstring.h"
+
+
+class GSM;
+class gOutput;
 
 
 //-------------------------------------------------------------------

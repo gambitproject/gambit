@@ -6,8 +6,15 @@
 //#
 
 
+#include "gsmfunc.h"
+
 #include <assert.h>
+#include "glist.h"
+
 #include "gsm.h"
+#include "portion.h"
+#include "gsmhash.h"
+#include "gsminstr.h"
 
 
 
@@ -23,12 +30,11 @@ extern void Init_efgfunc( GSM* );
 
 void GSM::InitFunctions( void )
 {
+  Init_gclmath( this );
   Init_gsmoper( this );
 
-  Init_gclmath( this );
-
   Init_nfgfunc( this );
-  Init_efgfunc( this );
+  // Init_efgfunc( this );
 }
 
 
@@ -738,13 +744,14 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       result = _FuncInfo[ _FuncIndex ].FuncPtr( _Param );
     else
     {
-      // GSM* gsm = new GSM( 32, _StdOut, _StdErr );
-      return_code = gsm->Execute( *(_FuncInfo[_FuncIndex].FuncInstr), false );
-      // delete gsm;
+      return_code = gsm->Execute( *(_FuncInfo[_FuncIndex].FuncInstr), true );
       if( return_code == rcSUCCESS )
 	result = new bool_Portion( true );
       else
-	result = new bool_Portion( false );
+      {
+	result = 0;
+	_ErrorOccurred = true;
+      }
     }
 
     if( result == 0 )

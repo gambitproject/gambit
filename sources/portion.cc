@@ -7,15 +7,15 @@
 
 
 #include <assert.h>
-#include <stdio.h>
-#include "basic.h"
 
 #include "portion.h"
 #include "gsm.h"
 #include "gsmhash.h"
 
+#include "gambitio.h"
 
-
+#include "normal.h"
+#include "extform.h"
 
 
 

@@ -12,13 +12,10 @@
 #define GSMFUNC_H
 
 
-#include "portion.h"
-#include "glist.h"
-#include "gsmhash.h"
+#include "gsmincl.h"
 
-
-
-typedef enum { rcFAIL, rcSUCCESS, rcQUIT } GSM_ReturnCode;
+#include "basic.h"
+#include "gstring.h"
 
 
 
@@ -30,8 +27,14 @@ typedef enum { rcFAIL, rcSUCCESS, rcQUIT } GSM_ReturnCode;
 #define PASS_BY_REFERENCE true
 
 
+class gInteger;
 class GSM;
 class Instruction;
+class Portion;
+class Reference_Portion;
+
+template <class T> class gList;
+template <class T> class RefCountHashTable;
 
 
 class FuncDescObj

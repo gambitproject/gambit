@@ -10,9 +10,12 @@
 
 #include "gsminstr.h"
 
-
-
+#include "gsm.h"
 #include "gambitio.h"
+#include "integer.h"
+#include "rational.h"
+
+
 
 #ifdef MEMCHECK
 int Instruction::_NumInstructions = 0;
@@ -397,13 +400,13 @@ void Flush::Output( gOutput& s ) const
 
 
 
+
+
 TEMPLATE class Push< bool >;
 TEMPLATE class Push< double >;
 TEMPLATE class Push< gInteger >;
 TEMPLATE class Push< gRational >;
 TEMPLATE class Push< gString >;
-
-
 
 
 #include "glist.imp"

@@ -5,7 +5,11 @@
 //# $Id$
 //#
 
+
 #include "gsm.h"
+#include "portion.h"
+#include "gsmfunc.h"
+
 
 Portion* GSM_Assign( Portion** param )
 {
