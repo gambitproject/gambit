@@ -149,6 +149,7 @@ public:
 
   bool Pop    ( void );
   void Flush  ( void );
+  void Clear  ( void );
 };
 
 

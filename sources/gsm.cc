@@ -1446,6 +1446,18 @@ void GSM::Flush( void )
 }
 
 
+void GSM::Clear( void )
+{
+  Flush();
+
+  assert( _RefTableStack->Depth() == 1 );
+  delete _RefTableStack->Pop();
+  delete _RefTableStack;
+
+  _RefTableStack = new gGrowableStack< RefHashTable* >( 1 );
+  _RefTableStack->Push( new RefHashTable );
+
+}
 
 //-----------------------------------------------------------------------
 //                         _ErrorMessage

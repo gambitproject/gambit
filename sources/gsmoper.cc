@@ -5,6 +5,8 @@
 //# $Id$
 //#
 
+#include <stdlib.h>
+#include <ctype.h>
 
 #include "gsm.h"
 #include "portion.h"
@@ -499,6 +501,54 @@ Portion *GSM_Log(Portion **param)
   return new FloatValPortion
     (log(((FloatPortion *) param[0])->Value()));
 }
+
+
+//------------------------ GSM_Power ------------------------
+
+Portion* GSM_Power_Int_Int(Portion** param)
+{
+  long base = ((IntPortion*) param[0])->Value();
+  long exponent = ((IntPortion*) param[1])->Value();
+  return new IntValPortion( (long) pow( base, exponent ) );
+}
+
+Portion* GSM_Power_Float_Int(Portion** param)
+{
+  double base = ((FloatPortion*) param[0])->Value();
+  long exponent = ((IntPortion*) param[1])->Value();
+  return new FloatValPortion( pow( base, (double) exponent ) );
+}
+
+Portion* GSM_Power_Rational_Int(Portion** param)
+{
+  gRational base = ((RationalPortion*) param[0])->Value();
+  long exponent = ((IntPortion*) param[1])->Value();
+  return new RationalValPortion( pow( base, exponent ) );
+}
+
+
+Portion* GSM_Power_Int_Float(Portion** param)
+{
+  long base = ((IntPortion*) param[0])->Value();
+  double exponent = ((FloatPortion*) param[1])->Value();
+  return new IntValPortion( (long) pow( (double) base, exponent ) );
+}
+
+Portion* GSM_Power_Float_Float(Portion** param)
+{
+  double base = ((FloatPortion*) param[0])->Value();
+  double exponent = ((FloatPortion*) param[1])->Value();
+  return new FloatValPortion( pow( base, exponent ) );
+}
+
+Portion* GSM_Power_Rational_Float(Portion** param)
+{
+  gRational base = ((RationalPortion*) param[0])->Value();
+  double exponent = ((FloatPortion*) param[1])->Value();
+  return new RationalValPortion( pow( base, ((long) exponent) ) );
+}
+
+
 
 
 //------------------------ GSM_Negate ------------------------
@@ -1401,6 +1451,200 @@ Portion* GSM_Write_list_Text( Portion** param )
 
 
 
+//------------------------------ Read --------------------------//
+
+Portion* GSM_Read_Parse( gString s );
+Portion* GSM_Read_Parse_List( gString s );
+
+Portion* GSM_Read( Portion** param )
+{
+  gInput& input = ((InputPortion*) param[0])->Value();
+  char c;
+  gString s;
+  int braces = 0;
+  Portion* result;
+
+  c = ' ';
+  while( c == ' ' && !input.eof() )
+  {
+    input.get( c );
+  }
+  if( input.eof() )
+    return new ErrorPortion( "End of file reached" );
+
+  if( c == '\"' )
+  {
+    c = ' ';
+    while( !input.eof() && c != '\"' )
+    {
+      input.get( c );
+      if( c != '\"' )
+	s += c;
+    }
+    result = new TextValPortion( s );
+  }
+  else if( c == '{' )
+  {
+    s = "{";
+    braces = 1;
+    while( !input.eof() && braces > 0 )
+    {
+      input.get( c );
+      s += c;
+      if( c == '{' )
+	braces++;
+      else if( c == '}' )
+	braces--;
+    }
+    result = GSM_Read_Parse_List( s );
+  }
+  else
+  {
+    s += c;
+    while( !input.eof() && c != ' ' && c != '\"' )
+    {
+      input.get( c );
+      if( c != ' ' && c != '\"' )
+	s += c;
+    }
+    if( c == '\"' )
+      input.unget( c );
+    result = GSM_Read_Parse( s );
+  }
+  return result;
+}
+
+
+Portion* GSM_Read_Parse( gString s )
+{
+  bool all_digits = true;
+  int decimals = 0;
+  int divisions = 0;
+  int i;
+  int index;
+
+
+  for( i = 0; i < s.length(); i++ )
+  {
+    if( !isdigit( s[i] ) && s[i]!='.' && s[i]!='/' )
+      all_digits = false;
+    if( s[i] == '.' )
+    {
+      decimals++;
+      index = i;
+    }
+    if( s[i] == '/' )
+    {
+      divisions++;
+      index = i;
+    }
+  }
+
+  if( all_digits && ( decimals + divisions <= 1 ) )
+  {
+    if( decimals == 1 )
+      return new FloatValPortion( atof( s ) );
+    else if( divisions == 1 )
+    {
+      gString numerator = s.left( index );
+      gString denominator = s.right( s.length() - index - 1 );
+      return new RationalValPortion( ( (gRational) atoi( numerator ) ) /
+				    ( (gRational) atoi( denominator ) ) );
+    }
+    else
+      return new IntValPortion( atoi( s ) );
+  }
+  else
+    return new TextValPortion( s );
+}
+
+
+Portion* GSM_Read_Parse_List( gString s )
+{
+  Portion* por = new ListValPortion();
+  Portion* element;
+  assert( s[0] == '{' );
+  int i = 1;
+  int token_first = 1;
+  int token_last = 0;
+  bool error_occurred = false;
+  gString substring;
+  int result;
+  int braces;
+
+  while( i < s.length() )
+  {
+    if( s[i] == ' ' && token_first == 1 )
+    {
+      token_first = i + 1;
+    }
+    else if( s[i] == ',' || s[i] == '}' )
+    {
+      token_last = i - 1;
+      if( token_last < token_first )
+	error_occurred = true;
+      else
+      {
+	substring = s.mid( token_last - token_first + 1, token_first + 1 );
+	gout << "orig:\"" << s << "\"\n";
+	gout << "first:" << token_first << "\n";
+	gout << "last:" << token_last << "\n";
+	gout << "sub:\"" << substring << "\"\n";
+	element = GSM_Read_Parse( substring );
+	if( element != 0 )
+	{
+	  result = ((ListPortion*) por )->Append( element );
+	  if( result == 0 )
+	    error_occurred = true;
+	}
+	else
+	  error_occurred = true;
+      }
+
+      if( s[i] == '}' )
+	break;
+
+      token_first = i + 1;
+    }
+    else if( s[i] == '{' )
+    {
+      substring = s.right( s.length() - i );
+      element = GSM_Read_Parse_List( substring );
+      if( element != 0 )
+      {
+	result = ((ListPortion*) por )->Append( element );
+	if( result == 0 )
+	  error_occurred = true;
+      }
+      else
+	error_occurred = true;
+      
+      braces = 1;
+      while( i < s.length() && braces > 0 )
+      {
+	i++;
+	if( s[i] == '{' )
+	  braces++;
+	else if( s[i] == '}' )
+	  braces--;
+      }
+      token_first = i + 1;
+      token_last = token_first - 1;
+    }
+
+    i++;
+  }
+
+  if( !error_occurred )
+    return por;
+  else
+  {
+    delete por;
+    return 0;
+  }
+}
+
+
 
 
 void Init_gsmoper( GSM* gsm )
@@ -1606,6 +1850,33 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetFuncInfo( GSM_Divide_double, 2, xy_Float );
   FuncObj->SetFuncInfo( GSM_Divide_int, 2, xy_Int );
   FuncObj->SetFuncInfo( GSM_Divide_gRational, 2, xy_Rational );
+  gsm->AddFunction( FuncObj );
+
+
+  //----------------------- Power -------------------------
+
+  FuncObj = new FuncDescObj( (gString) "Power" );
+
+  FuncObj->SetFuncInfo( GSM_Power_Int_Int, 2 );
+  FuncObj->SetParamInfo( GSM_Power_Int_Int, 0, "x", porINTEGER );
+  FuncObj->SetParamInfo( GSM_Power_Int_Int, 1, "y", porINTEGER );
+  FuncObj->SetFuncInfo( GSM_Power_Float_Int, 2 );
+  FuncObj->SetParamInfo( GSM_Power_Float_Int, 0, "x", porFLOAT );
+  FuncObj->SetParamInfo( GSM_Power_Float_Int, 1, "y", porINTEGER );
+  FuncObj->SetFuncInfo( GSM_Power_Rational_Int, 2 );
+  FuncObj->SetParamInfo( GSM_Power_Rational_Int, 0, "x", porRATIONAL );
+  FuncObj->SetParamInfo( GSM_Power_Rational_Int, 1, "y", porINTEGER );
+
+  FuncObj->SetFuncInfo( GSM_Power_Int_Float, 2 );
+  FuncObj->SetParamInfo( GSM_Power_Int_Float, 0, "x", porINTEGER );
+  FuncObj->SetParamInfo( GSM_Power_Int_Float, 1, "y", porFLOAT );
+  FuncObj->SetFuncInfo( GSM_Power_Float_Float, 2 );
+  FuncObj->SetParamInfo( GSM_Power_Float_Float, 0, "x", porFLOAT );
+  FuncObj->SetParamInfo( GSM_Power_Float_Float, 1, "y", porFLOAT );
+  FuncObj->SetFuncInfo( GSM_Power_Rational_Float, 2 );
+  FuncObj->SetParamInfo( GSM_Power_Rational_Float, 0, "x", porRATIONAL );
+  FuncObj->SetParamInfo( GSM_Power_Rational_Float, 1, "y", porFLOAT );
+
   gsm->AddFunction( FuncObj );
 
 
@@ -1840,6 +2111,13 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetParamInfo( GSM_SetFormat, 3, "quote", porBOOL,
 			new BoolRefPortion( _WriteQuoted ) );
   gsm->AddFunction( FuncObj );
+
+
+  FuncObj = new FuncDescObj( "Read" );
+  FuncObj->SetFuncInfo( GSM_Read, 1 );
+  FuncObj->SetParamInfo( GSM_Read, 0, "input", porINPUT );
+  gsm->AddFunction( FuncObj );
+
 }
 
 
