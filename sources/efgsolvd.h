@@ -33,7 +33,7 @@ protected:
 	void StandardSettings(void)
 	{
 	int stopAfter,max_solns,dom_type;
-	bool use_elimdom,all,subg;
+	bool use_elimdom,all;
 	// a separate case for each of the possible alg/num/game combinations
 	// One Nash for 2 person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ONE && ef.NumPlayers()==2)
@@ -41,7 +41,7 @@ protected:
 	use_nfg=FALSE;algorithm=EFG_LCP_SOLUTION;
 	stopAfter=1;max_solns=1;
 	use_elimdom=true;all=true;dom_type=DOM_WEAK;
-	subg=TRUE;
+	subgames=TRUE;
 	}
 	// One Nash for n person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ONE && ef.NumPlayers()!=2)
@@ -49,7 +49,7 @@ protected:
 	use_nfg=TRUE;algorithm=NFG_SIMPDIV_SOLUTION;
 	stopAfter=1;max_solns=1;
 	use_elimdom=true;all=true;dom_type=DOM_WEAK;
-	subg=TRUE;
+	subgames=TRUE;
 	}
 	// Two Nash 2 person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_TWO && ef.NumPlayers()==2)
@@ -57,7 +57,7 @@ protected:
 	use_nfg=TRUE;algorithm=NFG_ENUMMIXED_SOLUTION;
 	stopAfter=2;max_solns=2;
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
-	subg=FALSE;
+	subgames=FALSE;
 	}
 	// Two Nash n person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_TWO && ef.NumPlayers()!=2)
@@ -65,7 +65,7 @@ protected:
 	use_nfg=FALSE;algorithm=EFG_LIAP_SOLUTION;
 	stopAfter=2;max_solns=2;
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
-	subg=FALSE;
+	subgames=FALSE;
 	wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
 	}
 	// All Nash 2 person
@@ -74,7 +74,7 @@ protected:
 	use_nfg=TRUE;algorithm=NFG_ENUMMIXED_SOLUTION;
 	stopAfter=0;max_solns=0;
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
-	subg=FALSE;
+	subgames=FALSE;
 	}
 	// ALL Nash n person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ALL && ef.NumPlayers()!=2)
@@ -82,7 +82,7 @@ protected:
 	use_nfg=FALSE;algorithm=EFG_LIAP_SOLUTION;
 	stopAfter=0;max_solns=0;
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
-	subg=FALSE;
+	subgames=FALSE;
 	Warn("Not guaranteed to find all solutions for 'All Nash n-person'\n");
 	wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
 	}
@@ -93,7 +93,7 @@ protected:
 	use_nfg=FALSE;algorithm=EFG_LCP_SOLUTION;
 	stopAfter=1;max_solns=1;
 	use_elimdom=true;all=true;dom_type=DOM_WEAK;
-	subg=TRUE;
+	subgames=TRUE;
 	}
 	// One Subgame Pefect for n person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ONE && ef.NumPlayers()!=2)
@@ -101,7 +101,7 @@ protected:
 	use_nfg=TRUE;algorithm=NFG_SIMPDIV_SOLUTION;
 	stopAfter=1;max_solns=1;
 	use_elimdom=true;all=true;dom_type=DOM_WEAK;
-	subg=TRUE;
+	subgames=TRUE;
 	}
 	// Two Subgame Perfect 2 person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_TWO && ef.NumPlayers()==2)
@@ -109,7 +109,7 @@ protected:
 	use_nfg=TRUE;algorithm=NFG_ENUMMIXED_SOLUTION;
 	stopAfter=2;max_solns=2;
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
-	subg=TRUE;
+	subgames=TRUE;
 	}
 	// Two Subgame Perfect n person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_TWO && ef.NumPlayers()!=2)
@@ -117,7 +117,7 @@ protected:
 	use_nfg=TRUE;algorithm=NFG_LIAP_SOLUTION;
 	stopAfter=2;max_solns=2;
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
-	subg=TRUE;
+	subgames=TRUE;
 	wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
 	}
 	// All Subgame Perfect 2 person
@@ -126,7 +126,7 @@ protected:
 	use_nfg=TRUE;algorithm=NFG_ENUMMIXED_SOLUTION;
 	stopAfter=0;max_solns=0;
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
-	subg=TRUE;
+	subgames=TRUE;
 	}
 	// All Subgame Perfect n person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ALL && ef.NumPlayers()!=2)
@@ -134,7 +134,7 @@ protected:
 	use_nfg=FALSE;algorithm=EFG_LIAP_SOLUTION;
 	stopAfter=0;max_solns=0;
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
-	subg=TRUE;
+	subgames=TRUE;
 	Warn("Not guaranteed to find all solutions for 'All Subgame Perfect n-person'\n");
 	wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
 	}
@@ -144,7 +144,7 @@ protected:
 	use_nfg=FALSE;algorithm=EFG_GOBIT_SOLUTION;
 	stopAfter=1;max_solns=1;
 	use_elimdom=false;all=true;dom_type=DOM_STRONG;
-	subg=FALSE;
+	subgames=FALSE;
 	}
 	// Two Sequential
 	if (standard_type==STANDARD_SEQUENTIAL && standard_num==STANDARD_TWO)
@@ -152,7 +152,7 @@ protected:
 	use_nfg=FALSE;algorithm=EFG_LIAP_SOLUTION;
 	stopAfter=2;max_solns=2;
 	use_elimdom=false;all=true;dom_type=DOM_STRONG;
-	subg=FALSE;
+	subgames=FALSE;
 	Warn("Not guaranteed to find all solutions for 'Two Sequential'\n");
 	wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
 	}
@@ -162,7 +162,7 @@ protected:
 	use_nfg=FALSE;algorithm=EFG_LIAP_SOLUTION;
 	stopAfter=0;max_solns=0;
 	use_elimdom=false;all=true;dom_type=DOM_STRONG;
-	subg=FALSE;
+	subgames=FALSE;
 	Warn("Not guaranteed to find all solutions for 'All Sequential'\n");
 	wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
 	}
@@ -176,7 +176,7 @@ protected:
 	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-All",all,defaults_file);
 	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Type",dom_type,defaults_file);
 	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",use_elimdom,defaults_file);
-	wxWriteResource(SOLN_SECT,"Efg-Mark-Subgames",subg,defaults_file);
+	wxWriteResource(SOLN_SECT,"Efg-Mark-Subgames",subgames,defaults_file);
 	wxWriteResource(SOLN_SECT,"Efg-Interactive-Solns",pick_solns,defaults_file);
 }
 virtual void Warn(const char *warning) // only warn when solving
