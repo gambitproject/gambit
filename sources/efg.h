@@ -119,6 +119,7 @@ protected:
     Infoset *InsertNode(Node *n, Infoset *s);
 
     virtual Infoset *CreateInfoset(EFPlayer *pl, int br) = 0;
+    bool DeleteEmptyInfoset(Infoset *);
     Infoset *JoinInfoset(Infoset *s, Node *n);
     Infoset *LeaveInfoset(Node *n);
     Infoset *SplitInfoset(Node *n);
