@@ -19,7 +19,7 @@ Main Programmer: Theodore Turocy\\
 Front End: Eugene Grayver\\
  \\
 California Institute of Technology\\ \today.\\
-Version 0.91\\
+Version 0.92\\
  \\
 Part of the Gambit Project:\\
 Richard D. McKelvey and Andrew McLennan, PI's\\
@@ -305,15 +305,17 @@ problem. [Note -- this option is not yet implemented].
 Games of incomplete information are games in which different players have 
 different beliefs about the underlying parameters (such as the utility 
 functions, strategy sets, or number of players) of the game.  The standard 
-way of treating such games is tgiven in \cite{Harsanyi:1967}, who showed that
+way of treating such games is given in \cite{Harsanyi:1967}, where it
+is shown that 
  such games were equivalent to games in which players have some common
 prior distribution over the joint distribution of characteristics, and
  then individuals observe their own type, but not that of the other players 
 in the game.  
 
-Games of incomplete information can be modelled in GAMBIT having an initial 
-chance move determine the distribution of types, and then have each 
-individual observe its own type.    
+Games of incomplete information can be modelled in GAMBIT having an
+initial chance move determine the distribution of types, and then
+defining information sets so each individual observes only its own
+type.
 
 \chapter{Using GAMBIT GUI}
 
@@ -397,7 +399,7 @@ new values in the dialog.}
 
 \subsection{Row and Column Players} The row and column player choice boxes
 determine which players' strategies get displayed on the horizontal and
-vertial axis of the matrix.  Each box can contain a value from 1 to the
+vertical axis of the matrix.  Each box can contain a value from 1 to the
 total number of players in the game.  The dimensions of the matrix are
 determined by the number of strategies for the row and column players.
 Note that it is meaningless to select the same player for both the row and
@@ -642,7 +644,7 @@ of the inserted node.
 \item[Label:]  Each node can have a label associated with it. 
 This function allows the entering or modification of this label.  The
 display of these labels is controled in the Legends Dialog.
-\item[Set Mark:]  The GUI allows to mark (memorize) one
+\item[Set Mark:]  The GUI allows you to mark (memorize) one
 node for later use.  The marked node is required in some tree operations. 
 The marked node indicated by a small circular token 
 on the game tree.  
@@ -697,29 +699,55 @@ selected.
 \end{description}
 
 \subsubsection{Subgame Menu}
-Gambit implements and supports the concept of a game theoretical subgame. The
-conditions necessary for a subtree to be qualified as a subgame, see the
-theory section of this document.  When an extensive form is first created or
+Gambit implements and supports the concept of a game theoretical
+subgame. The 
+conditions necessary for a subtree to be qualified as a subgame, see
+the 
+theory section of this document.  When an extensive form is first
+created or 
 read in from a file, no subgames (except for the default ROOT subgame) are 
-defined.  If a node is a subgame root, a small rectangle is drawn at its base.
-If a subgame is collapsed, all of the nodes it contains, up to the next
-subgame root are not displayed but replaced by a subgame icon.
-The following list describes the command for working with subgames.
-Refer to the following picture for an example of subgame structures.
+defined.  If a node is a subgame root, a small rectangle is drawn at
+its base. 
+If a subgame is collapsed, all of the nodes it contains, up to the
+next 
+subgame root are not displayed but replaced by a subgame icon. 
+Refer to the following picture for an example of subgame structures. 
+
+
 \begin{figure}
 $$\image{0cm;0cm}{subgame}$$
 \caption{Simple efg with nontrivial subgames}\label{fig_subgames}
 \end{figure}
 
+All of the solution algorithms (with the current exception of the 
+Gobit algorithms) make use of the marked subgames.  When non-trivial 
+subgames are defined, then the solution algorithms will solve the 
+extensive form game by recursion through the marked subgames.  Thus, a 
+subgame is solved only when all subgames following it have been 
+solved.  
+
+If all subgames are marked, then any Nash equilibrium found will be a 
+subgame perfect Nash equilibrium.  
+Note that the solution algorithms only 
+respect marked subgames, and hence if you want the solution 
+algorithms to make use of subgames, you must mark the subgames.  
+
+[Note: If there are non trivial marked subgames, the solution
+algorithms will currently only find one equilibrium in each subgame.
+If no non-trivial subgames are marked, then as many solutions as are
+requested will be found.]
+
+The following list describes the commands for working with subgames. 
 \begin{description}
-\item[Create:] Uses a built in algorithm to scan the entire tree and mark
-those portions that satisfy the subgame requirements as subgames.  Once the
+\item[Mark All:] Uses a built in algorithm to scan the entire tree and mark
+those nodes that are root nodes of subgames.  Once the
 subgames have been defined, they are all collapsed except for the ROOT subgame.
-\item[Set:] Set the cursor node to be a subgame root.  If the cursor node is
-not a root of a valid subgame, a warning is issued.
-\item[Clear All:] Removes all subgame information, consequently expanding all
+\item[Mark:] Check whether the cursor node is a subgame root, and mark 
+it if it is.  If the cursor node is 
+not a root of a valid subgame, a warning is issued. 
+\item[Un-mark All:] Unmarks all subgames, consequently expanding all
 subgames.
-\item[Clear:] If the cursor node is a subgame root, that subgame is removed
+\item[Un-mark:] If the cursor node is a marked subgame, that subgame is removed
 from the list of subgames and is no longer considered either for display or
 solution purposes.  If the cursor node is not a subgame root, a warning is
 issued.
@@ -727,7 +755,7 @@ issued.
 collapsed and all of the nodes contained in it, up to the successor subgame
 roots are replaced with a subgame icon.  The cursor changes shape to reflect
 this.
-\item[Collapse:] Applies {\em Collapse} to every node that is marked as a 
+\item[Collapse All:] Applies {\em Collapse} to every node that is marked as a 
 subgame root, including the ROOT node.
 \item[Expand:] If the cursor node is a subgame root, that subgame is expanded
 and all of the nodes it contains are displayed.
@@ -890,7 +918,7 @@ to the previous dialog box.  For information on setting/using the newly created 
 the \helpref{Examining EF Supports}{efsuptexam} section.
 
 \subsubsection{Examining EF Supports}\label{efsuptexam}
-The main supports dialog is accessed my selecting the Solve->Supports menu item.  This dialog
+The main supports dialog is accessed by selecting the Solve->Supports menu item.  This dialog
 contains two choiceboxes with a list of all available supports (created manually or 
 by some solution algorithm).
 Two supports are defined for every EF window:
@@ -964,7 +992,7 @@ never overriden.
 
 Many frequently executed commands are much more efficiently entered
 through the keyboard than by using a mouse.  To speed up the use of the
-GUI for an experienced use, most of the 'mouseable' commands can also be
+GUI for an experienced user, most of the 'mouseable' commands can also be
 done by entering a combination of keys on the keyboard.  Both the normal
 and the extensive forms possess this functionality.  GAMBIT comes with a
 pre-defined set of accelerator keys described in the corresponding 
@@ -1090,7 +1118,7 @@ long as computations are done in rationals.  The
 \helpref{Lcp algorithm}{Lcp} solves a two person 
 game using this approach.  Note that the Lcp algorithm can also be used 
 directly on an extensive form game, where it implements the Koller, Megiddo, 
-von Stengel Sequence form.  To find {\em one} Nash equilibrium 
+von Stengel Sequence form \cite{KolMegSte:94}.  To find {\em one} Nash equilibrium 
 use Lcp with nEquilib set to 1.  
 
 For a two person game the \helpref{EnumMixed algorithm}{EnumMixed} 
@@ -1181,10 +1209,17 @@ default), and $delLam > 0$, then this algorithm computes the {\em principal
 branch} of the logistic Quantal response equilibrium.  In this case
 taking the limit, as $\lambda$ goes to 0, the quantal response equilibrium
 defines a unique selection from the set of Nash equilibrium for generic
-normal form games.  Similarly, for generic extensive form games, it
-defines a unique selection from the set of sequential equilibria.
+normal form games.  Similarly, for extensive form games, it
+defines a selection from the set of sequential equilibria.
 Therefore, in extensive form games, this algorithm can be used to compute
 approximations to a sequential equilibrium.
+
+Limitations:  This algorithm currently can become numerically unstable 
+on some problems for high values of $\lambda$, and may generate 
+singularity errors.  Hence 
+on some problems it may not be possible with the current
+implementation to obtain a sufficiently close approximation to an
+equilibrium. 
 
 The following parameters can be set:
 
@@ -1269,15 +1304,21 @@ solution and then tracing out this entire network.  See, e. g., Shapley,
 \cite{Sha:74}.  However, the set of accessible equilibria is not necessarily all
 Nash equilibria.
 
-For extensive form games, this algorithm implements Lemke's algorithm on
-the ``sequence form'' of the game, as defined by Koller, Megiddo and von Stengel, in  \cite{KolMegSte:94}.
+For extensive form games, this algorithm implements Lemke's algorithm
+on the ``sequence form'' of the game, as defined by Koller, Megiddo 
+and von Stengel, in \cite{KolMegSte:94}.
 
-Limitations:  This algorithm is fast, but only works for two
-person games.  \cite{Wilson:1971} and \cite{Rosenmuller:1971} have
-suggested ways in which the Lemke-Howson Algorithm can be extended to
-general $n$-player games, but these extensions require methods of tracing
-the solution to a set of non linear simultaneous equations, and have not
-been implemented in GAMBIT.
+Limitations: This algorithm is fast, but only works for two person
+games.  \cite{Wilson:1971} and \cite{Rosenmuller:1971} have suggested
+ways in which the Lemke-Howson Algorithm can be extended to general
+$n$-player games, but these extensions require methods of tracing the
+solution to a set of non linear simultaneous equations, and have not
+been implemented in GAMBIT.  Also, on some problems with data type of
+Double, the current implementation can exhibit numerical instability
+which in extreme cases can even lead to incorrect solutions.  Solving
+the same problem with Rationals will resolve any such difficulties.
+However, the algorithm is much slower when operating on Rationals than
+on Doubles.
 
 The following parameters can be specified:
 
@@ -1402,12 +1443,6 @@ constraint, or no leash.
 \end{description}
 
 \chapter{External Programs}
-Gambit is a full featured program that attempts to address most common
-needs for researchers and students alike.  However, like any other program,
-some tasks are best left to specialized programs.  If gambit becomes widely
-used, we expect a large number of suplimental programs to be developed to 
-work in conjunction with gambit.
-
 One particularly useful feature of gambit is the ability to generate complete 
 logistic quantal response correspondence for normal form games.  These
 algorithms generate a very large amount of data that is not easily visualised.
@@ -1456,8 +1491,8 @@ set, which are indistinguishable to the player making a decision at that
 information set. 
 
 In Figure~\ref{fig_samp1}, each information set has two actions.  For the 
-second player, at her information set, the two branches labelled ``MEET'' are one 
-action, and the two branches labeled ``PASS'' are another action.  
+second player, at her information set, the two branches labelled MEET are one 
+action, and the two branches labeled PASS are another action.
  
 \gloss{Branch}\label{branchgloss}
 A branch is the line connecting two nodes, one of which immediately 
