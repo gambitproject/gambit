@@ -244,7 +244,16 @@ void BehavSolution::CheckIsNash(void) const
   if (m_checkedNash == false) {
     if (IsPerfectRecall(m_profile->Game()))
       if(IsComplete() 
-	 /* || Creator == algorithmEfg_LCP_EFG || Creator == algorithmEfg_LP_EFG */ ) 
+	 // For now, we trust the following algorithms if profile is incomplete:
+	 || m_creator == algorithmEfg_LCP_EFG 
+	 || m_creator == algorithmEfg_LP_EFG 
+	 || m_creator == algorithmEfg_ENUMPURE_EFG 
+	 || m_creator == algorithmEfg_POLENUM_EFG)
+	// This is how it was, but this needs rewriting to allow for 
+	// simultaneous deviations at multiple isets of same player. 
+	// As written, the test may mark some profiles as Nash that are not. 
+	// Hopefully, none of our algs would return such profiles(??), but a 
+	// user defined profile could get marked incorrectly.  (rdm 9/26/99):
 	m_isNash = (m_profile->MaxGripe() <= m_epsilon) ? triTRUE : triFALSE;
     if (m_isNash == triFALSE) {
       m_isSubgamePerfect = triFALSE; m_checkedSubgamePerfect = true;
@@ -565,7 +574,10 @@ void SubgamePerfectChecker::SolveSubgame(const Efg &E, const EFSupport &sup,
       }
     }
   }
+  //  We need to add function to check if bp is Nash on Subgame.  
   //  gTriState x = IsNashOnSubgame(E,bp,eps);
+  // for now, we do the following, which may give wrong answer if player can deviate at
+  // multiple isets simultaneously.  :
   gTriState x = triFALSE;
   if(bp.MaxGripe() <= eps) x = triTRUE;
 
