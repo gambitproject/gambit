@@ -46,7 +46,7 @@ template <class T> void ContIter<T>::Set(int pl, int num)
   if (!frozen.Contains(pl))   return;
 
   profile->Set(pl, stratset->GetStrategy(pl, num));
-  
+  current_strat[pl] = num;
 }
 
 template <class T> void ContIter<T>::Freeze(const gBlock<int> &freeze)
