@@ -162,6 +162,17 @@ cursor, but this may be harder to achieve.
 //------------------------------
 
 Bug D19: Problems with Standard Solution output.  
+<<<<<<< bugs_gui
+
+There are numerous problems with the GUI Standard Solutions output:
+ 
+  All Sequential finds none on coord3.efg (Same bug as D8)
+
+  AllNash finds none on 2x2x2.efg (Same as bug D8)
+
+  AllNash crashes the GUI on 2x2x2.nfg  (fixed, RDM 12/27/98)
+=======
+>>>>>>> 2.31
 
 (magyar 1/8/98): I've removed the earlier list of problems for this
 bug since they have been rectified.  However, what still needs done
@@ -230,6 +241,26 @@ Gui should display nfg.ico.
 
 //------------------------------
 
+Bug D27: Solution Numbering
+
+Numbering of solutions should begin afresh when solutions are deleted
+in the solution display windows
+
+//------------------------------
+
+Bug D28: Problems in converting to normal form in the gui
+
+This problem only occurs under MS-Win version.  
+
+Load poker.efg, convert it to reduced normal form, and then try to
+save this as a normal form game (junk.nfg).  The gui crashes.
+Similarly, if you try to solve the game with the QRE algorithm, the
+gui crashes.
+
+RDM: The above is now fixed (12/29/98)
+
+//------------------------------
+
 Bug D29: .efg and .nfg files not recognized in Linux/wxxt port of gambit
 
 When you start up the gambit gui compiled with wxxt and try to load
@@ -243,6 +274,17 @@ Bug D30: "Inspect node" window comes up transiently in Linux/wxxt when
          efg is loaded.
 
 This is a cosmetic bug only, but it's irritating.
+
+//------------------------------
+
+Bug D31: Default normal form game is buggy
+
+The following sequence from the opening GUI window causes a crash:
+
+  File->New->Normal->OK->OK->OK->Solve->Standard->(One-Nash-Rational)
+
+Also, most other operations done on the default normal form game (like
+trying to save it) cause a crash.
 
 -------------  older bugs that still remain ---------------
 
