@@ -72,7 +72,7 @@ gbtGame gbtGamePlayerBase::GetGame(void) const
 gbtGameInfoset gbtGamePlayerBase::NewInfoset(int p_actions)
 {
   if (p_actions <= 0) {
-    throw gbtEfgException();
+    throw gbtGameException();
   }
   return m_efg->NewInfoset(this, this->m_infosets.Length() + 1, p_actions);
 }

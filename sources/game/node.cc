@@ -241,7 +241,7 @@ bool gbtGameNodeBase::IsSubgameRoot(void) const
 gbtGameNode gbtGameNodeBase::InsertMove(gbtGameInfoset p_infoset)
 {
   if (p_infoset.IsNull()) {
-    throw gbtEfgNullObject();
+    throw gbtGameException();
   }
 
   gbtGameInfosetBase *infoset = dynamic_cast<gbtGameInfosetBase *>(p_infoset.Get());
@@ -278,7 +278,7 @@ void gbtGameNodeBase::DeleteTree(void)
 void gbtGameNodeBase::JoinInfoset(gbtGameInfoset p_infoset)
 {
   if (p_infoset.IsNull())  {
-    throw gbtEfgNullObject();
+    throw gbtGameException();
   }
 
   gbtGameInfosetBase *infoset = dynamic_cast<gbtGameInfosetBase *>(p_infoset.Get());

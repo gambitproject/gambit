@@ -706,7 +706,7 @@ void gbtEfgFrame::OnFileSave(wxCommandEvent &p_event)
 				  (const char *) m_doc->GetFilename().mb_str()),
 		 _("Error"), wxOK, this);
   }
-  catch (gbtEfgException &) {
+  catch (gbtGameException &) {
     wxMessageBox(_("Internal exception in extensive form"), _("Error"),
 		 wxOK, this);
   }

@@ -171,7 +171,7 @@ gbtGamePlayer gbtGameInfosetBase::GetPlayer(void) const
 void gbtGameInfosetBase::SetPlayer(gbtGamePlayer p_player)
 {
   if (GetPlayer()->IsChance() || p_player->IsChance()) {
-    throw gbtEfgException();
+    throw gbtGameException();
   }
   
   if (GetPlayer() == p_player) {

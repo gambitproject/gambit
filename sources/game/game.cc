@@ -951,7 +951,7 @@ void gbtGameBase::CopySubtree(gbtGameNodeBase *src, gbtGameNodeBase *dest,
 gbtGameNode gbtGameBase::CopyTree(gbtGameNode p_src, gbtGameNode p_dest)
 {
   if (p_src.IsNull() || p_dest.IsNull())  {
-    throw gbtEfgNullObject();
+    throw gbtGameException();
   }
   if (p_src == p_dest || p_dest->NumChildren() > 0)   return p_src;
 
@@ -978,7 +978,7 @@ gbtGameNode gbtGameBase::CopyTree(gbtGameNode p_src, gbtGameNode p_dest)
 gbtGameNode gbtGameBase::MoveTree(gbtGameNode p_src, gbtGameNode p_dest)
 {
   if (p_src.IsNull() || p_dest.IsNull())  {
-    throw gbtEfgNullObject();
+    throw gbtGameException();
   }
   gbtGameNodeBase *src = dynamic_cast<gbtGameNodeBase *>(p_src.Get());
   gbtGameNodeBase *dest = dynamic_cast<gbtGameNodeBase *>(p_dest.Get());
@@ -1015,7 +1015,7 @@ gbtGameNode gbtGameBase::MoveTree(gbtGameNode p_src, gbtGameNode p_dest)
 gbtGameAction gbtGameBase::InsertAction(gbtGameInfoset s)
 {
   if (s.IsNull()) {
-    throw gbtEfgNullObject();
+    throw gbtGameException();
   }
 
   m_revision++;
@@ -1030,10 +1030,11 @@ gbtGameAction gbtGameBase::InsertAction(gbtGameInfoset s)
   return action;
 }
 
-gbtGameAction gbtGameBase::InsertAction(gbtGameInfoset s, const gbtGameAction &a)
+gbtGameAction gbtGameBase::InsertAction(gbtGameInfoset s,
+					const gbtGameAction &a)
 {
   if (a.IsNull() || s.IsNull()) {
-    throw gbtEfgNullObject();
+    throw gbtGameException();
   }
 
   m_revision++;

@@ -60,35 +60,16 @@ protected:
 public:
   gbtGameObject(void) : m_refCount(1) { }
   virtual ~gbtGameObject() { }
-
-  virtual gbtText GetLabel(void) const = 0;
-  virtual void SetLabel(const gbtText &) = 0;
 };
 
 //
 // Exception classes for the various bad stuff that can happen
 //
-class gbtEfgException : public gbtException {
+class gbtGameException : public gbtException {
 public:
-  virtual ~gbtEfgException() { }
+  virtual ~gbtGameException() { }
   gbtText Description(void) const    { return "Error in gbtGame"; }
 };
-
-class gbtEfgNullObject : public gbtEfgException {
-public:
-  virtual ~gbtEfgNullObject() { }
-};
-
-class gbtGameMismatch : public gbtEfgException {
-public:
-  virtual ~gbtGameMismatch() { }
-};
-
-class gbtEfgNonterminalNode : public gbtEfgException {
-public:
-  virtual ~gbtEfgNonterminalNode() { }
-};
-
 
 //
 // Forward declarations of game objects
