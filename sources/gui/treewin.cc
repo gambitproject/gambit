@@ -64,9 +64,6 @@ TreeWindow::TreeWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
     m_layout(p_doc, this),
     m_zoom(1.0), m_dragImage(0), m_dragSource(0)
 {
-  // Make sure that Chance player has a name
-  m_doc->GetEfg().GetChance().SetLabel("Chance");
-
   SetBackgroundColour(*wxWHITE);
   MakeMenus();
 }
@@ -475,18 +472,14 @@ void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
     if (!node.IsNull() && node.NumChildren() == 0) {
       try {
 	if (m_dragMode == dragCOPY) {
-	  m_doc->GetEfg().CopyTree(m_dragSource, node);
-	  m_doc->OnTreeChanged(true, false);
-	  m_doc->UpdateViews(this, true, false);
+	  m_doc->Submit(new gbtCmdCopyTree(m_dragSource, node));
 	}
 	else if (m_dragMode == dragMOVE) {
-	  m_doc->GetEfg().MoveTree(m_dragSource, node);
-	  m_doc->OnTreeChanged(true, false);
-	  m_doc->UpdateViews(this, true, false);
+	  m_doc->Submit(new gbtCmdMoveTree(m_dragSource, node));
 	}
 	else if (m_dragMode == dragOUTCOME) { 
-	  node.SetOutcome(m_dragSource.GetOutcome());
-	  m_doc->UpdateViews(this, true, false);
+	  m_doc->Submit(new gbtCmdSetOutcome(node,
+					     m_dragSource.GetOutcome()));
 	}
       }
       catch (gException &ex) {
@@ -602,6 +595,34 @@ void TreeWindow::OnSize(wxSizeEvent &p_event)
   AdjustScrollbarSteps();
 
   Refresh();
+}
+
+
+//=======================================================================
+//                class gbtCmdMoveTree: Implementation
+//=======================================================================
+
+void gbtCmdMoveTree::Do(gbtGameDocument *p_doc)  
+{
+  p_doc->GetEfg().MoveTree(m_src, m_dest);
+}
+
+//=======================================================================
+//                class gbtCmdCopyTree: Implementation
+//=======================================================================
+
+void gbtCmdCopyTree::Do(gbtGameDocument *p_doc)  
+{
+  p_doc->GetEfg().CopyTree(m_src, m_dest);
+}
+
+//=======================================================================
+//               class gbtCmdSetOutcome: Implementation
+//=======================================================================
+
+void gbtCmdSetOutcome::Do(gbtGameDocument *p_doc)  
+{
+  m_node.SetOutcome(m_outcome);
 }
 
 template class gList<NodeEntry *>;

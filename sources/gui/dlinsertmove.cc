@@ -28,8 +28,77 @@
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
-#include "game/efg.h"
 #include "dlinsertmove.h"
+
+//=========================================================================
+//                class gbtCmdInsertMove: Implementation
+//=========================================================================
+
+class gbtCmdInsertMove : public gbtGameCommand {
+private:
+  int m_playerNumber, m_actions;
+
+public:
+  gbtCmdInsertMove(int p_playerNumber, int p_actions)
+    : m_playerNumber(p_playerNumber), m_actions(p_actions) { }
+  virtual ~gbtCmdInsertMove() { }
+
+  void Do(gbtGameDocument *);
+};
+  
+
+void gbtCmdInsertMove::Do(gbtGameDocument *p_doc)
+{
+  gbtEfgPlayer player;
+
+  if (m_playerNumber == 0) {
+    player = p_doc->GetEfg().GetChance();
+  }
+  else if (m_playerNumber <= p_doc->GetEfg().NumPlayers()) {
+    player = p_doc->GetEfg().GetPlayer(m_playerNumber);
+  }
+  else {
+    gbtEfgPlayer player = p_doc->GetEfg().NewPlayer();
+    player.SetLabel("Player " + ToText(p_doc->GetEfg().NumPlayers()));
+  }
+
+  p_doc->GetCursor().InsertMove(player.NewInfoset(m_actions));
+}
+
+//=========================================================================
+//             class gbtCmdInsertMoveInfoset: Implementation
+//=========================================================================
+
+class gbtCmdInsertMoveInfoset : public gbtGameCommand {
+private:
+  int m_playerNumber, m_infosetNumber;
+
+public:
+  gbtCmdInsertMoveInfoset(int p_playerNumber, int p_infosetNumber)
+    : m_playerNumber(p_playerNumber), m_infosetNumber(p_infosetNumber) { }
+  virtual ~gbtCmdInsertMoveInfoset() { }
+
+  void Do(gbtGameDocument *);
+};
+  
+
+void gbtCmdInsertMoveInfoset::Do(gbtGameDocument *p_doc)
+{
+  gbtEfgPlayer player;
+
+  if (m_playerNumber == 0) {
+    player = p_doc->GetEfg().GetChance();
+  }
+  else if (m_playerNumber <= p_doc->GetEfg().NumPlayers()) {
+    player = p_doc->GetEfg().GetPlayer(m_playerNumber);
+  }
+  else {
+    gbtEfgPlayer player = p_doc->GetEfg().NewPlayer();
+    player.SetLabel("Player " + ToText(p_doc->GetEfg().NumPlayers()));
+  }
+
+  p_doc->GetCursor().InsertMove(player.GetInfoset(m_infosetNumber));
+}
 
 //=========================================================================
 //                   dialogInsertMove: Member functions
@@ -43,21 +112,22 @@ BEGIN_EVENT_TABLE(dialogInsertMove, wxDialog)
   EVT_LISTBOX(idMOVE_INFOSET_LISTBOX, dialogInsertMove::OnInfoset)
 END_EVENT_TABLE()
 
-dialogInsertMove::dialogInsertMove(wxWindow *p_parent, gbtEfgGame &p_efg)
-  : wxDialog(p_parent, -1, "Insert Move"), m_efg(p_efg)
+dialogInsertMove::dialogInsertMove(wxWindow *p_parent, 
+				   gbtGameDocument *p_doc)
+  : wxDialog(p_parent, -1, "Insert Move"), m_doc(p_doc)
 {
   m_playerItem = new wxListBox(this, idMOVE_PLAYER_LISTBOX);
   m_playerItem->Append("Chance");
-  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
     m_playerItem->Append((char *)
-			 (ToText(pl) + ": " + m_efg.GetPlayer(pl).GetLabel()));
+			 (ToText(pl) + ": " + m_doc->GetEfg().GetPlayer(pl).GetLabel()));
   }
   m_playerItem->Append("New Player");
   m_playerItem->SetSelection(1);
 
   m_infosetItem = new wxListBox(this, idMOVE_INFOSET_LISTBOX);
   m_infosetItem->Append("New");
-  gbtEfgPlayer player = p_efg.GetPlayer(1);
+  gbtEfgPlayer player = p_doc->GetEfg().GetPlayer(1);
   for (int iset = 1; iset <= player.NumInfosets(); iset++) {
     m_infosetItem->Append((char *) (ToText(iset) + ": " +
 				    player.GetInfoset(iset).GetLabel()));
@@ -111,9 +181,9 @@ void dialogInsertMove::OnPlayer(wxCommandEvent &)
 
   gbtEfgPlayer player;
   if (playerNumber == 0)
-    player = m_efg.GetChance();
-  else if (playerNumber <= m_efg.NumPlayers())
-    player = m_efg.GetPlayer(playerNumber);
+    player = m_doc->GetEfg().GetChance();
+  else if (playerNumber <= m_doc->GetEfg().NumPlayers())
+    player = m_doc->GetEfg().GetPlayer(playerNumber);
 
   m_infosetItem->Clear();
   m_infosetItem->Append("New");
@@ -136,9 +206,9 @@ void dialogInsertMove::OnInfoset(wxCommandEvent &)
     int playerNumber = m_playerItem->GetSelection();
     gbtEfgInfoset infoset;
     if (playerNumber == 0)
-      infoset = m_efg.GetChance().GetInfoset(infosetNumber);
+      infoset = m_doc->GetEfg().GetChance().GetInfoset(infosetNumber);
     else
-      infoset = m_efg.GetPlayer(playerNumber).GetInfoset(infosetNumber);
+      infoset = m_doc->GetEfg().GetPlayer(playerNumber).GetInfoset(infosetNumber);
     m_actions->Enable(false);
     m_actions->SetValue(infoset.NumActions());
   }
@@ -148,43 +218,17 @@ void dialogInsertMove::OnInfoset(wxCommandEvent &)
   }
 }
 
-gbtEfgPlayer dialogInsertMove::GetPlayer(void) const
+gbtGameCommand *dialogInsertMove::GetCommand(void) const
 {
   int playerNumber = m_playerItem->GetSelection();
+  int infosetNumber = m_infosetItem->GetSelection();
 
-  if (playerNumber == 0) {
-    return m_efg.GetChance();
-  }
-  else if (playerNumber <= m_efg.NumPlayers()) {
-    return m_efg.GetPlayer(playerNumber);
+  if (infosetNumber > 0) {
+    return new gbtCmdInsertMoveInfoset(playerNumber, infosetNumber);
   }
   else {
-    gbtEfgPlayer player = m_efg.NewPlayer();
-    player.SetLabel("Player " + ToText(m_efg.NumPlayers()));
-    return player;
+    return new gbtCmdInsertMove(playerNumber, m_actions->GetValue());
   }
 }
 
-gbtEfgInfoset dialogInsertMove::GetInfoset(void) const
-{
-  if (m_playerItem->GetSelection() <= m_efg.NumPlayers()) {
-    gbtEfgPlayer player = GetPlayer();
-    int infosetNumber = m_infosetItem->GetSelection();
-    
-    if (!player.IsNull() && infosetNumber > 0) {
-      return player.GetInfoset(infosetNumber);
-    }
-    else {
-      return 0;
-    }
-  }
-  else {
-    return 0;
-  }
-}
-
-int dialogInsertMove::GetActions(void) const
-{
-  return (!GetInfoset().IsNull()) ? GetInfoset().NumActions() : m_actions->GetValue();
-}
 

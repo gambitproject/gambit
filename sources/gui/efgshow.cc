@@ -185,10 +185,6 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   MakeMenus();
   MakeToolbar();
   
-  m_doc->m_curEfgSupport = new EFSupport(*m_doc->m_efg);
-  m_doc->m_curEfgSupport->SetName("Full Support");
-  m_doc->AddSupport(m_doc->m_curEfgSupport);
-
   m_nodeSashWindow = new wxSashWindow(this, idNODEWINDOW,
 				      wxPoint(0, 40), wxSize(200, 200),
 				      wxNO_BORDER | wxSW_3D);
@@ -772,39 +768,23 @@ void EfgShow::OnEditCopy(wxCommandEvent &)
 
 void EfgShow::OnEditPaste(wxCommandEvent &)
 {
-  try {
-    if (!m_doc->GetCopyNode().IsNull()) {
-      m_doc->m_efg->CopyTree(m_doc->GetCopyNode(), m_doc->GetCursor());
-    }
-    else {
-      m_doc->m_efg->MoveTree(m_doc->GetCutNode(), m_doc->GetCursor());
-    }
-    m_doc->UpdateViews(this, true, false);
+  if (!m_doc->GetCopyNode().IsNull()) {
+    m_doc->Submit(new gbtCmdCopyTree(m_doc->GetCopyNode(),
+				     m_doc->GetCursor()));
   }
-  catch (gException &ex) {
-    guiExceptionDialog(ex.Description(), this);
+  else {
+    m_doc->Submit(new gbtCmdMoveTree(m_doc->GetCutNode(), 
+				     m_doc->GetCursor()));
   }
 }
 
 void EfgShow::OnEditInsert(wxCommandEvent &)
 { 
-  dialogInsertMove dialog(this, *m_doc->m_efg);
+  dialogInsertMove dialog(this, m_doc);
 
   if (dialog.ShowModal() == wxID_OK)  {
-    try {
-      if (dialog.GetInfoset().IsNull()) {
-	gbtEfgInfoset infoset = dialog.GetPlayer().NewInfoset(dialog.GetActions());
-	m_doc->GetCursor().InsertMove(infoset);
-	m_doc->OnTreeChanged(true, true);
-      }
-      else {
-	m_doc->GetCursor().InsertMove(dialog.GetInfoset());
-	m_doc->OnTreeChanged(true, false);
-      }
-    }
-    catch (gException &ex) {
-      guiExceptionDialog(ex.Description(), this);
-    }
+    printf("About to submit...\n");
+    m_doc->Submit(dialog.GetCommand());
   }
 }
 

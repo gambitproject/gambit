@@ -44,7 +44,16 @@ gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg)
     m_cursor(0), m_copyNode(0), m_cutNode(0),
     m_nfg(0), m_nfgShow(0),
     m_curNfgSupport(0) 
-{ }
+{
+  // Make sure that Chance player has a name
+  if (m_efg->GetChance().GetLabel() == "") {
+    m_efg->GetChance().SetLabel("Chance");
+  }
+
+  m_curEfgSupport = new EFSupport(*m_efg);
+  m_curEfgSupport->SetName("Full Support");
+  m_efgSupports.Append(m_curEfgSupport);
+}
 
 gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg)
   : m_curProfile(0),
@@ -399,7 +408,6 @@ gArray<int> gbtGameDocument::GetContingency(void) const
 void gbtGameDocument::AddView(gbtGameView *p_view)
 {
   m_views.Append(p_view);
-  UpdateViews(0, true, true);
 }
 
 void gbtGameDocument::RemoveView(gbtGameView *p_view)
@@ -419,6 +427,22 @@ void gbtGameDocument::UpdateViews(gbtGameView *p_sender,
 
 }
 
+void gbtGameDocument::Submit(gbtGameCommand *p_command)
+{
+  try {
+    p_command->Do(this);
+  }
+  catch (...) {
+    guiExceptionDialog("", wxGetApp().GetTopWindow());
+  }
+
+  UpdateViews(0, true, true);
+
+  // Someday, we might save the command for undo/redo; for now, 
+  // just delete it.
+  delete p_command;
+}
+
 //==========================================================================
 //                 class gbtGameView: Member functions
 //==========================================================================
@@ -426,11 +450,13 @@ void gbtGameDocument::UpdateViews(gbtGameView *p_sender,
 gbtGameView::gbtGameView(gbtGameDocument *p_doc)
   : m_doc(p_doc)
 {
-  
+  m_doc->AddView(this);
 }
 
 gbtGameView::~gbtGameView()
-{ }
+{
+  m_doc->RemoveView(this);
+}
 
 void gbtGameView::OnUpdate(gbtGameView *)
 { }

@@ -94,5 +94,58 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
+//
+// Tree-editing commands
+// These are placed here because they're used by multiple windows currently.
+// They may deserve their own file down the road.
+//
+
+//
+// Move the subtree rooted at 'src' to 'dest'
+//
+class gbtCmdMoveTree : public gbtGameCommand {
+private:
+  gbtEfgNode m_src, m_dest;
+
+public:
+  gbtCmdMoveTree(gbtEfgNode p_src, gbtEfgNode p_dest)
+    : m_src(p_src), m_dest(p_dest) { }
+  virtual ~gbtCmdMoveTree() { }
+
+  void Do(gbtGameDocument *);
+};
+
+//
+// Copy the subtree rooted at 'src' to 'dest'
+//
+class gbtCmdCopyTree : public gbtGameCommand {
+private:
+  gbtEfgNode m_src, m_dest;
+
+public:
+  gbtCmdCopyTree(gbtEfgNode p_src, gbtEfgNode p_dest)
+    : m_src(p_src), m_dest(p_dest) { }
+  virtual ~gbtCmdCopyTree() { }
+
+  void Do(gbtGameDocument *);
+};
+
+//
+// Set the outcome of the 'node' to 'outcome'
+//
+class gbtCmdSetOutcome : public gbtGameCommand {
+private:
+  gbtEfgNode m_node;
+  gbtEfgOutcome m_outcome;
+
+public:
+  gbtCmdSetOutcome(gbtEfgNode p_node, gbtEfgOutcome p_outcome) 
+    : m_node(p_node), m_outcome(p_outcome) { }
+  virtual ~gbtCmdSetOutcome() { }
+
+  void Do(gbtGameDocument *);
+};
+
+
 #endif   // TREEWIN_H
 

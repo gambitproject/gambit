@@ -35,8 +35,9 @@
 class EfgShow;
 class NfgShow;
 
-// Forward declaration; class declared at bottom
+// Forward declarations; classes declared at bottom
 class gbtGameView;
+class gbtGameCommand;
 
 class gbtGameDocument {
 friend class gbtGameView;
@@ -72,6 +73,7 @@ public:
 
   gbtEfgGame GetEfg(void) const { return *m_efg; }
 
+  void Submit(gbtGameCommand *);
   void UpdateViews(gbtGameView *, bool, bool);
   void OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged);
 
@@ -156,6 +158,19 @@ public:
   virtual void OnUpdate(gbtGameView *p_sender);
   virtual bool IsEfgView(void) const = 0;
   virtual bool IsNfgView(void) const = 0;
+};
+
+//
+// Model for a command that changes the state of the game document.
+// Override the Do() member to update the document; this function is
+// required to ensure the state of the document remains consistent
+// upon its completion.
+//
+class gbtGameCommand {
+public:
+  virtual ~gbtGameCommand() { }
+
+  virtual void Do(gbtGameDocument *) = 0;
 };
 
 #endif  // GAMEDOC_H
