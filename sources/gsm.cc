@@ -1475,11 +1475,13 @@ bool GSM::CallFunction( void )
 }
 
 
+#include "garray.h"
+
 //----------------------------------------------------------------------------
 //                       Execute function
 //----------------------------------------------------------------------------
 
-int GSM::Execute( gList< Instruction* >& program, bool user_func )
+int GSM::Execute( gList< Instruction* >& prog, bool user_func )
 {
   int             result          = rcSUCCESS;
   bool            instr_success;
@@ -1487,10 +1489,15 @@ int GSM::Execute( gList< Instruction* >& program, bool user_func )
   Portion*        p;
   Instruction*    instruction;
   int             program_counter = 1;
-  int             program_length  = program.Length();
+  int             program_length  = prog.Length();
   int             initial_num_of_funcs = _CallFuncStack->Depth();
   int             i;
   CallFuncObj*    funcobj;
+  gArray<Instruction*> program(prog.Length());
+
+  for(i=1; i<=prog.Length(); i++)
+    program[i] = prog[i];
+  
 
   while( ( program_counter <= program_length ) && ( !done ) )
   {
@@ -1559,11 +1566,12 @@ int GSM::Execute( gList< Instruction* >& program, bool user_func )
   assert( _CallFuncStack->Depth() == initial_num_of_funcs );
 
 
+
   if( !user_func )
   {
-    while( program.Length() > 0 )
+    while( prog.Length() > 0 )
     {
-      delete program.Remove( 1 );
+      delete prog.Remove( 1 );
     }
   }
 
@@ -1876,3 +1884,15 @@ void GSM::_ErrorMessage
   }
 }
 
+
+#include "garray.imp"
+
+
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#pragma option -Jgd
+#define TEMPLATE
+#endif   // __GNUG__, __BORLANDC__
+
+TEMPLATE class gArray<Instruction*>;
