@@ -17,6 +17,7 @@ gambit_SOURCES = \
 	dlnfgproperties.cc \
 	dlnfgqre.cc \
 	dlnfgstrategies.cc \
+	dlqrefile.cc \
 	dlspinctrl.cc \
 	efglayout.cc \
 	efgnavigate.cc \

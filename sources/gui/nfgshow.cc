@@ -41,6 +41,9 @@
 #include "dlelimmixed.h"
 #include "dlnfgnash.h"
 #include "dlnfgqre.h"
+#include "dlqrefile.h"
+#include "nash/nfgqre.h"
+#include "nash/nfgqregrid.h"
 
 //=====================================================================
 //                 Implementation of class NfgShow
@@ -883,7 +886,37 @@ void NfgShow::OnToolsQre(wxCommandEvent &)
   dialogNfgQre dialog(this, *m_currentSupport);
 
   if (dialog.ShowModal() == wxID_OK) {
+    gList<MixedSolution> solutions;
 
+    if (dialog.UseGridSearch()) {
+      QreNfgGrid algorithm;
+      algorithm.SetFullGraph(true);
+      algorithm.SetMinLambda(dialog.StartLambda());
+      algorithm.SetMaxLambda(dialog.StopLambda());
+      algorithm.SetDelLambda(dialog.StepLambda());
+      algorithm.SetPowLambda(1);
+      algorithm.SetDelP1(dialog.Del1());
+      algorithm.SetDelP2(dialog.Del2());
+      algorithm.SetTol1(dialog.Tol1());
+      algorithm.SetTol2(dialog.Tol2());
+
+      wxStatus status(this, "QreGridSolve Progress");
+      algorithm.Solve(*m_currentSupport, gnull, status, solutions);
+    }
+    else {
+      nfgQre algorithm;
+      algorithm.SetFullGraph(true);
+
+      wxStatus status(this, "QreSolve Progress");
+      solutions = algorithm.Solve(*m_currentSupport, status);
+    }
+
+    if (solutions.Length() > 0) {
+      dialogQreFile fileDialog(this, solutions);
+      if (fileDialog.ShowModal() == wxID_OK) {
+	
+      }
+    }
   }
 }
 
