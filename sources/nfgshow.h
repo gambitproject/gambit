@@ -74,7 +74,6 @@ private:
   gText filename;
   
   // Private functions
-  void UpdateSoln(void);
   void UpdateContingencyProb(const gArray<int> &profile);
   void DumpAscii(Bool all_cont);
 
@@ -92,7 +91,6 @@ public:
   // output in the following formats: Printer(win),
   // PostScript, Metafile/Clipboard(win), PrintPreview(win), Ascii
   void Print(void);
-  void SetOptions(void);
   void SetColors(void);
 
   void EditLabel(void);
@@ -127,6 +125,7 @@ public:
     }
 
   void UpdateVals(void);
+  void UpdateSoln(void);
   void UpdateProfile(gArray<int> &profile);
   
   // OnOK clean up
@@ -141,6 +140,8 @@ public:
   MixedSolution CreateSolution(void);
   void ChangeSolution(int sol);
   MixedProfile<gNumber> CreateStartProfile(int how);
+
+  int NumSolutions(void) const { return solns.Length(); }
 
   // Project solutions to EF.
   void SolutionToExtensive(const MixedSolution &mp, bool set = false);
@@ -249,9 +250,6 @@ public:
       UpdateMenus();
     }
 
-  // Callback for changing the options function
-  void OnOptions(void) { parent->SetOptions(); }
-  
   // Callback function for all output
   void OnPrint(void);
 

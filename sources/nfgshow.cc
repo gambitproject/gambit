@@ -412,6 +412,9 @@ void NfgShow::ChangeSolution(int sol)
   }
   else {
     cur_soln = 0;
+    spread->RemoveProbDisp();
+    spread->RemoveValDisp();
+    UpdateVals();
     spread->Repaint();
   }
 }
@@ -1230,69 +1233,6 @@ void NfgShow::SetColors(void)
   spread->Repaint();
 }
 
-
-void NfgShow::SetOptions(void)
-{
-  Bool disp_probs = spread->HaveProbs();
-  Bool disp_dom   = spread->HaveDom();
-  Bool disp_val   = spread->HaveVal();
-
-  MyDialogBox *norm_options = 
-    new MyDialogBox(spread, "Normal GUI Options", NFG_FEATURES_HELP);
-  wxFormItem *prob_fitem = 
-        norm_options->Add(wxMakeFormBool("Display strategy probs", &disp_probs));
-  norm_options->Add(wxMakeFormNewLine());
-  wxFormItem *val_fitem = 
-    norm_options->Add(wxMakeFormBool("Display strategy values", &disp_val));
-  norm_options->Add(wxMakeFormNewLine());
-  
-  norm_options->Add(wxMakeFormBool("Display dominance", &disp_dom));
-  norm_options->AssociatePanel();
-
-  if (!cur_soln && !disp_probs) 
-    ((wxCheckBox *)prob_fitem->GetPanelItem())->Enable(FALSE);
-
-  if (!cur_soln && !disp_val) 
-    ((wxCheckBox *)val_fitem->GetPanelItem())->Enable(FALSE);
-
-  norm_options->Go1();
-  
-  if (norm_options->Completed() == wxOK) {
-    bool change = false;
-    if (!disp_probs && spread->HaveProbs()) {
-      spread->RemoveProbDisp();
-      change = true;
-    }
-
-    if (!disp_dom && spread->HaveDom()) {
-      spread->RemoveDomDisp();
-      change = true;
-    }
-
-    if (!disp_val && spread->HaveVal()) {
-      spread->RemoveValDisp();
-      change = true;
-    }
-
-    if (disp_probs && !spread->HaveProbs() && cur_soln) {
-      spread->MakeProbDisp();
-      change = true;
-    }
-
-    if (disp_val && !spread->HaveVal() && cur_soln) {
-      spread->MakeValDisp();
-      change = true;
-    }
-
-    if (change) {
-      UpdateSoln();
-      spread->Redraw();
-    }
-  }
-  
-  delete norm_options;
-}
-
 #include "nfgaccl.h"
 #include "sprdaccl.h"
 
@@ -1718,7 +1658,7 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
 			"Change the current support");
 
   wxMenu *solve_menu = new wxMenu;
-  solve_menu->Append(NFG_SOLVE_STANDARD_MENU,  "S&tandard...",
+  solve_menu->Append(NFG_SOLVE_STANDARD,  "S&tandard...",
 		     "Standard solutions");
   
   wxMenu *solveCustomMenu = new wxMenu;
@@ -1745,9 +1685,16 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
 
   
   wxMenu *inspect_menu = new wxMenu;
-  inspect_menu->Append(NFG_SOLVE_INSPECT_MENU,   "&Solutions", "Inspect existing solutions");
-  inspect_menu->Append(NFG_SOLVE_FEATURES_MENU,  "In&fo",      "Advanced solution features");
-  inspect_menu->Append(NFG_SOLVE_GAMEINFO_MENU,  "Game&Info", "Display some game info");
+  inspect_menu->Append(NFG_INSPECT_SOLUTIONS, "&Solutions",
+		       "Inspect solutions");
+  inspect_menu->Append(NFG_INSPECT_DOMINANCE, "&Dominance",
+		       "Display dominance information", TRUE);
+  inspect_menu->Append(NFG_INSPECT_PROBABILITIES, "&Probabilities",
+		       "Display solution probabilities", TRUE);
+  inspect_menu->Append(NFG_INSPECT_VALUES, "&Values",
+		       "Display strategy values", TRUE);
+  inspect_menu->Append(NFG_INSPECT_GAMEINFO,  "Game&Info",
+		       "Display information about the game");
   
   wxMenu *prefs_menu = new wxMenu;
   prefs_menu->Append(NFG_PREFS_OUTCOMES_MENU, "&Outcomes", "Configure outcome display");
@@ -1784,6 +1731,9 @@ void NormalSpread::UpdateMenus(void)
   menu->Enable(NFG_SOLVE_CUSTOM_ENUMMIXED, nfg.NumPlayers() == 2);
   menu->Enable(NFG_SOLVE_CUSTOM_LP, nfg.NumPlayers() == 2 && IsConstSum(nfg));
   menu->Enable(NFG_SOLVE_CUSTOM_LCP, nfg.NumPlayers() == 2);
+
+  menu->Enable(NFG_INSPECT_PROBABILITIES, parent->NumSolutions() > 0);
+  menu->Enable(NFG_INSPECT_VALUES, parent->NumSolutions() > 0);
 }
 
 Bool NormalSpread::OnClose(void)
@@ -1878,6 +1828,7 @@ void NormalSpread::MakeProbDisp(void)
   SetLabelRow(row, "Prob");
   SetLabelCol(col, "Prob");
   features.prob = 1;
+  GetMenuBar()->Check(NFG_INSPECT_PROBABILITIES, TRUE);
 }
 
 
@@ -1890,6 +1841,7 @@ void NormalSpread::RemoveProbDisp(void)
     DelCol(col);
     features.prob = 0;
   }
+  GetMenuBar()->Check(NFG_INSPECT_PROBABILITIES, FALSE);
 }
 
 
@@ -1910,6 +1862,8 @@ void NormalSpread::MakeDomDisp(void)
   SetLabelRow(row, "Domin");
   SetLabelCol(col, "Domin");
   features.dom = 1;
+
+  GetMenuBar()->Check(NFG_INSPECT_DOMINANCE, TRUE);
 }
 
 
@@ -1922,6 +1876,7 @@ void NormalSpread::RemoveDomDisp(void)
     DelCol(col);
     features.dom = 0;
   }
+  GetMenuBar()->Check(NFG_INSPECT_DOMINANCE, FALSE);
 }
 
 
@@ -1942,6 +1897,7 @@ void NormalSpread::MakeValDisp(void)
   SetLabelRow(row, "Value");
   SetLabelCol(col, "Value");
   features.val = 1;
+  GetMenuBar()->Check(NFG_INSPECT_VALUES, TRUE);
 }
 
 
@@ -1954,6 +1910,7 @@ void NormalSpread::RemoveValDisp(void)
     DelCol(col);
     features.val = 0;
   }
+  GetMenuBar()->Check(NFG_INSPECT_VALUES, FALSE);
 }
 
 
@@ -2015,13 +1972,45 @@ void NormalSpread::OnMenuCommand(int id)
       parent->EditAccelerators();
       break;
 
-    case NFG_SOLVE_FEATURES_MENU: 
-      parent->SetOptions();
-      break;
-
-    case NFG_SOLVE_INSPECT_MENU: 
+    case NFG_INSPECT_SOLUTIONS:
       parent->InspectSolutions(CREATE_DIALOG);
       break;
+    case NFG_INSPECT_DOMINANCE:
+      if (HaveDom()) {
+	RemoveDomDisp();
+      }
+      else {
+	MakeDomDisp();
+      }
+      parent->UpdateVals();
+      Redraw();
+      break;
+    case NFG_INSPECT_PROBABILITIES:
+      if (HaveProbs()) {
+	RemoveProbDisp();
+      }
+      else {
+	MakeProbDisp();
+      }
+      parent->UpdateVals();
+      parent->UpdateSoln();
+      Redraw();
+      break;
+    case NFG_INSPECT_VALUES:
+      if (HaveVal()) {
+	RemoveValDisp();
+      }
+      else {
+	MakeValDisp();
+      }
+      parent->UpdateVals();
+      parent->UpdateSoln();
+      Redraw();
+      break;
+    case NFG_INSPECT_GAMEINFO:
+      parent->ShowGameInfo();
+      break;
+
 
     case NFG_SUPPORT_UNDOMINATED:
       parent->SolveElimDom();
@@ -2039,12 +2028,8 @@ void NormalSpread::OnMenuCommand(int id)
       parent->SupportSelect();
       break;
       
-    case NFG_SOLVE_STANDARD_MENU: 
+    case NFG_SOLVE_STANDARD: 
       parent->SolveStandard();
-      break;
-
-    case NFG_SOLVE_GAMEINFO_MENU: 
-      parent->ShowGameInfo();
       break;
 
     case NFG_EDIT_GAME: 
@@ -2169,8 +2154,8 @@ NfgShowToolBar::NfgShowToolBar(wxFrame *frame):
     AddTool(NFG_FILE_SAVE, ToolbarSaveBitmap);
     AddTool(OUTPUT_MENU, ToolbarPrintBitmap);
     AddSeparator();
-    AddTool(NFG_SOLVE_STANDARD_MENU, ToolbarSolveBitmap);
-    AddTool(NFG_SOLVE_INSPECT_MENU, ToolbarInspectBitmap);
+    AddTool(NFG_SOLVE_STANDARD, ToolbarSolveBitmap);
+    AddTool(NFG_INSPECT_SOLUTIONS, ToolbarInspectBitmap);
     AddSeparator();
     AddTool(OPTIONS_MENU, ToolbarOptionsBitmap);
     AddSeparator();

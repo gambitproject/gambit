@@ -8,37 +8,7 @@
 #define NFGCONST_H
 
 // must make sure that none of the menus are a power of two
-#define NFG_SOLVE_INSPECT_MENU          101
-#define NFG_SOLVE_COMPRESS_MENU         104
-#define NFG_SOLVE_SUPPORTS_MENU         105
-#define NFG_SOLVE_FEATURES_MENU         110
-#define NFG_SOLVE_ALGORITHM_MENU        120
-#define NFG_SOLVE_SETTINGS_MENU         135
-#define NFG_SOLVE_S_ALLNASH_MENU        140
-#define NFG_SOLVE_STANDARD_MENU         145
-#define NFG_SOLVE_GAMEINFO_MENU         155
-
-#define NFG_SUPPORT_UNDOMINATED         160
-#define NFG_SUPPORT_NEW                 161
-#define NFG_SUPPORT_EDIT                162
-#define NFG_SUPPORT_DELETE              163
-#define NFG_SUPPORT_SELECT              164
-
-#define NFG_PREFS_OUTCOMES_MENU         350
-
-#define NFG_SOLVE_CUSTOM                499
-#define NFG_SOLVE_CUSTOM_ENUMPURE       500
-#define NFG_SOLVE_CUSTOM_ENUMMIXED      501
-#define NFG_SOLVE_CUSTOM_LCP            502
-#define NFG_SOLVE_CUSTOM_LP             503
-#define NFG_SOLVE_CUSTOM_LIAP           504
-#define NFG_SOLVE_CUSTOM_SIMPDIV        505
-#define NFG_SOLVE_CUSTOM_POLENUM        506
-#define NFG_SOLVE_CUSTOM_QRE            507
-#define NFG_SOLVE_CUSTOM_QREGRID        508
-
-#define NFG_DISPLAY_COLORS              200
-#define NFG_DISPLAY_ACCELS              202
+#define NFG_FILE_SAVE                   250
 
 #define NFG_EDIT_GAME                   300
 #define NFG_EDIT_STRATS                 301
@@ -51,7 +21,34 @@
 #define NFG_EDIT_OUTCOMES_NEW           308
 #define NFG_EDIT_OUTCOMES_DELETE        309
 
-#define NFG_FILE_SAVE                   250
+#define NFG_SUPPORT_UNDOMINATED         160
+#define NFG_SUPPORT_NEW                 161
+#define NFG_SUPPORT_EDIT                162
+#define NFG_SUPPORT_DELETE              163
+#define NFG_SUPPORT_SELECT              164
+
+#define NFG_SOLVE_STANDARD              145
+#define NFG_SOLVE_CUSTOM                499
+#define NFG_SOLVE_CUSTOM_ENUMPURE       500
+#define NFG_SOLVE_CUSTOM_ENUMMIXED      501
+#define NFG_SOLVE_CUSTOM_LCP            502
+#define NFG_SOLVE_CUSTOM_LP             503
+#define NFG_SOLVE_CUSTOM_LIAP           504
+#define NFG_SOLVE_CUSTOM_SIMPDIV        505
+#define NFG_SOLVE_CUSTOM_POLENUM        506
+#define NFG_SOLVE_CUSTOM_QRE            507
+#define NFG_SOLVE_CUSTOM_QREGRID        508
+
+#define NFG_INSPECT_SOLUTIONS           101
+#define NFG_INSPECT_DOMINANCE           103
+#define NFG_INSPECT_PROBABILITIES       104
+#define NFG_INSPECT_VALUES              105
+#define NFG_INSPECT_GAMEINFO            155
+
+#define NFG_PREFS_OUTCOMES_MENU         350
+
+#define NFG_DISPLAY_COLORS              200
+#define NFG_DISPLAY_ACCELS              202
 
 #define NFG_ACCL_PAYOFF                 400     // these are not real menus, just accels
 #define NFG_ACCL_NEXT_PAYOFF            410
