@@ -578,7 +578,11 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
       ch=s[index++];
 
     if (ch == ']')  // If we hit the end (this should NEVER happen)
+    {
+      gout << "hit end when unexpected\n\n";
+      assert(0);
       done = true;
+    }
     else
     {
       ch=s[index++];
@@ -702,9 +706,17 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
 
       specList.Append(word);
       listList.Append(listNum);
+
+        // See if it is modified by a star
+      if (s[index] == '*')
+      {  
+        gout << "HEY!! STAR!!";  
+        index++;
+      }
   
         // Move ch past the right parentheses (and braces), if applicable
       while (ch == ')') {  ch=s[index++];  }
+      while (ch == '}') {  ch=s[index++];  }
 
       if (ch == ',')  // If there will be another variable
       {
