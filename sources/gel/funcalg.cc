@@ -47,13 +47,13 @@ gNestedList<BehavSolution *> gelfuncLiapSolveEfg::Evaluate(gelVariableTable *vt)
     if( arg1.Dim()[1] == 0 )  {  /* the first argument is a scalar */
       gNestedList<BehavSolution *> ret(arg2.Dim());
       for (int i = 1; i <= arg2.Data().Length(); i++)                  
-	ret.Data().Append(EvalItem(arg1.Data()[1], arg2.Data()[i]));   
+	ret[i] = EvalItem(arg1.Data()[1], arg2.Data()[i]);   
       return ret;                                                      
     }                                                                  
     else   { /* the second argument is a scalar */
       gNestedList<BehavSolution *> ret(arg1.Dim());
       for (int i = 1; i <= arg1.Data().Length(); i++)                  
-	ret.Data().Append(EvalItem(arg1.Data()[i], arg2.Data()[1]));   
+	ret[i] = EvalItem(arg1.Data()[i], arg2.Data()[1]);   
       return ret;                                                      
     }                                                                  
                                                                        
@@ -65,7 +65,7 @@ gNestedList<BehavSolution *> gelfuncLiapSolveEfg::Evaluate(gelVariableTable *vt)
     if( arg1.Dim() != arg2.Dim() )                                     
       throw gDimMismatchException();                                   
     for (int i = 1; i <= arg1.Data().Length(); i++)                    
-      ret.Data().Append(EvalItem(arg1.Data()[i], arg2.Data()[i]));     
+      ret[i] = EvalItem(arg1.Data()[i], arg2.Data()[i]);     
     return ret;                                                        
   }                                                                    
 }

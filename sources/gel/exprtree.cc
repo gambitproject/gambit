@@ -63,7 +63,7 @@ template class gelConstant<gTriState *>;
 template class gelConstant<gText *>;
 
 gelConstant<gNumber *>::gelConstant(gNumber *v)
-{ m_Value.Data().Append(v); }
+{ m_Value[1] = v; }
 gelConstant<gNumber *>::gelConstant(const gNestedList<gNumber *> &v)
   : m_Value(v) { }
 gelConstant<gNumber *>::~gelConstant()   { }
@@ -71,7 +71,7 @@ gNestedList<gNumber *> gelConstant<gNumber *>::Evaluate(gelVariableTable *) cons
 { return m_Value; }
 
 gelConstant<gTriState *>::gelConstant(gTriState *v)
-{ m_Value.Data().Append(v); }
+{ m_Value[1] = v; }
 gelConstant<gTriState *>::gelConstant(const gNestedList<gTriState *>& v)
   : m_Value(v) { }
 gelConstant<gTriState *>::~gelConstant() { }
@@ -79,7 +79,7 @@ gNestedList<gTriState *> gelConstant<gTriState *>::Evaluate(gelVariableTable *) 
 { return m_Value; }
 
 gelConstant<gText *>::gelConstant(gText *v) 
-{ m_Value.Data().Append(v); }
+{ m_Value[1] = v; }
 gelConstant<gText *>::gelConstant(const gNestedList<gText *>& v) 
   : m_Value(v) { }
 gelConstant<gText *>::~gelConstant()   { }
@@ -193,7 +193,7 @@ gNestedList<T> gelConditional<T>::Evaluate(gelVariableTable *vt) const
     return falsebr->Evaluate(vt);
   else   {
     gNestedList<T> ret;
-    ret.Data().Append(0);
+    ret[1] = 0;
     return ret;
   }
 }
@@ -320,7 +320,7 @@ gNestedList<gTriState *> gelQuitExpr::Evaluate(gelVariableTable *) const
   gCmdLineInput::RestoreTermAttr();
   exit(0);
   gNestedList<gTriState *> ret;
-  ret.Data().Append(new gTriState(triTRUE));
+  ret[1] = new gTriState(triTRUE);
   return ret;
 }
 

@@ -17,6 +17,17 @@ template <class T> gText gNestedList<T>::InternalError::Description(void) const
 //
 //---------------------------------------------------------------
 
+template <class T> gNestedList<T>::gNestedList(const gList<int>& dim)
+  : m_Dim(dim)
+{
+  if (m_Dim.Length() == 1 && m_Dim[1] == 0)
+    m_Data.Append(0);
+  else  {
+    for (int i = 1; i <= dim.Length(); i++)
+      for (int j = 1; j <= abs(dim[i]) - 1; j++)
+        m_Data.Append(0);
+  }
+}
 
   //------------------------------------------------------------------
   // GetElementInfo
@@ -59,7 +70,7 @@ void gNestedList<T>::GetElementInfo( int el,
 
   k_end = 1;
   int depth = 1;
-  int steps = abs( Dim()[2] ) - 1;
+  int steps = (int) abs( Dim()[2] ) - 1;
 
   for (int index = 1; index <= el; ++index )
   {
@@ -73,7 +84,7 @@ void gNestedList<T>::GetElementInfo( int el,
 	++depth;
       else
 	--depth;
-      steps = abs( Dim()[k_end+1] ) - 1;
+      steps = (int) abs( Dim()[k_end+1] ) - 1;
     }
 
     ++el_end;
@@ -95,13 +106,22 @@ void gNestedList<T>::GetElementInfo( int el,
 	else
 	  --depth;
 	el_end += steps;
-	steps = abs( Dim()[k_end+1] ) - 1;
+	steps = (int) abs( Dim()[k_end+1] ) - 1;
       }
     }
   }
 
 }
 
+
+template <class T> void gNestedList<T>::Append(const T &value)
+{
+  if (m_Dim[1] == 0)  // not a list
+    throw InternalError(__LINE__);
+  
+  m_Data.Append(value);
+  m_Dim[m_Dim.Length()]--;
+}
 
 template <class T> 
 void gNestedList<T>::Output( gOutput& out ) const 
@@ -180,8 +200,10 @@ gNestedList<T> gNestedList<T>::NthElement( int el ) const
   }
 
   gNestedList<T> ret(dim);
-  for(int i = el_start; i <= el_end; ++i )
-    ret.Data().Append( Data()[ i ] );
+  for (int i = 1; i <= el_end - el_start + 1; i++)
+    ret[i] = Data()[i + el_start - 1];
+//  for(int i = el_start; i <= el_end; ++i )
+//    ret.Append( Data()[ i ] );
   return ret;
 }
 
@@ -207,7 +229,7 @@ int gNestedList<T>::NumElements( void ) const
     if (m_Dim[k] == 0)
       throw InternalError(__LINE__);
     if( depth == 1 )
-      num += abs( m_Dim[k] ) - 1;
+      num += (int) abs( m_Dim[k] ) - 1;
     else if( m_Dim[k] < 0 && depth == 2)
       ++num;
       
@@ -259,7 +281,7 @@ void gNestedList<T>::Remove( int el )
     if (el_start != el_end ||
         k_end >= Dim().Length())
       throw InternalError(__LINE__);
-    Data().Remove( el_start );
+    m_Data.Remove( el_start );
     m_Dim[k_end+1] += (m_Dim[k_end+1]>0?1:-1) * -1;
   }
   else  {
@@ -267,8 +289,8 @@ void gNestedList<T>::Remove( int el )
         k_end >= Dim().Length())
       throw InternalError(__LINE__);
     for( int i = el_end; i >= el_start; --i )
-      Data().Remove( i );
-    m_Dim[k_end+1] += (m_Dim[k_end+1]>0?1:-1)*( abs( Dim()[k_start] ) - 1 );
+      m_Data.Remove( i );
+    m_Dim[k_end+1] += (m_Dim[k_end+1]>0?1:-1)*((int) abs( Dim()[k_start] ) - 1 );
     for( int k = k_end; k >= k_start; --k )
       m_Dim.Remove( k );
   }

@@ -53,9 +53,10 @@ public:
   };
 
     // CONSTRUCTORS, DESTRUCTOR, AND CONSTRUCTIVE OPERATORS
-  gNestedList(void) { m_Dim.Append(0); }
-  gNestedList(const gList<int>& dim)
-    : m_Dim(dim) { }
+    // construct a "scalar" (0-dimensional) list
+  gNestedList(void) { m_Dim.Append(0); m_Data.Append(0); }
+    // construct a "real" list
+  gNestedList(const gList<int>& dim);
   gNestedList(const gList<T> &data, const gList<int> &dim)
     : m_Data(data), m_Dim(dim) { }
   virtual ~gNestedList() {}
@@ -65,17 +66,23 @@ public:
     // DATA ACCESS
   const gList<int> &Dim(void) const { return m_Dim; }
   const gList<T> &Data(void) const { return m_Data; }
-  gList<T> &Data(void) { return m_Data; }
+//  gList<T> &Data(void) { return m_Data; }
   
   gNestedList<T> NthElement(int i) const;
   int NumElements(void) const;
   bool Contains(const gNestedList<T> &) const;
 
   void Remove( int i );
+  void Append(const T &);
+  void Append(const gList<T> &);
   int Depth(void) const;
 
   bool operator==(const gNestedList<T> &b) const;
   bool operator!=(const gNestedList<T> &b) const;
+     // these operators index "globally" into the list
+     // i.e., the ith element is the ith value in "print order"
+  T &operator[](int index)   { return m_Data[index]; }
+  const T &operator[](int index) const   { return m_Data[index]; }
 
   void Output(gOutput &out) const;
 };

@@ -214,7 +214,7 @@ gNestedList<T> funcclass :: Evaluate(gelVariableTable *vt) const    \
   gNestedList<type1> arg1 = op1->Evaluate( vt );      \
   gNestedList<T> ret( arg1.Dim() );                   \
   for (int i = 1; i <= arg1.Data().Length(); i++)     \
-    ret.Data().Append(EvalItem(arg1.Data()[i]));      \
+    ret[i] = EvalItem(arg1.Data()[i]);         \
   return ret;                                         \
 }
 
@@ -267,14 +267,14 @@ gNestedList<T> funcclass::Evaluate(gelVariableTable *vt) const     \
     {                                                                  \
       gNestedList<T> ret( arg2.Dim() );                                \
       for (int i = 1; i <= arg2.Data().Length(); i++)                  \
-	ret.Data().Append(EvalItem(arg1.Data()[1], arg2.Data()[i]));   \
+	ret[i] = EvalItem(arg1.Data()[1], arg2.Data()[i]);   \
       return ret;                                                      \
     }                                                                  \
     else /* the second argument is a scalar */                         \
     {                                                                  \
       gNestedList<T> ret( arg1.Dim() );                                \
       for (int i = 1; i <= arg1.Data().Length(); i++)                  \
-	ret.Data().Append(EvalItem(arg1.Data()[i], arg2.Data()[1]));   \
+	ret[i] = EvalItem(arg1.Data()[i], arg2.Data()[1]);   \
       return ret;                                                      \
     }                                                                  \
                                                                        \
@@ -287,7 +287,7 @@ gNestedList<T> funcclass::Evaluate(gelVariableTable *vt) const     \
     if( arg1.Dim() != arg2.Dim() )                                     \
       throw gDimMismatchException();                                   \
     for (int i = 1; i <= arg1.Data().Length(); i++)                    \
-      ret.Data().Append(EvalItem(arg1.Data()[i], arg2.Data()[i]));     \
+      ret[i] = EvalItem(arg1.Data()[i], arg2.Data()[i]);     \
     return ret;                                                        \
   }                                                                    \
 }                                                                      \

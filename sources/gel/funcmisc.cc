@@ -249,7 +249,7 @@ DECLARE_NOPARAM(gelfuncElapsedTime, gNumber *)
 gNestedList<gNumber *> gelfuncElapsedTime::Evaluate(gelVariableTable *) const
 {
   gNestedList<gNumber *> ret;
-  ret.Data().Append(new gNumber(_gelStopwatch.Elapsed()));
+  ret[1] = new gNumber(_gelStopwatch.Elapsed());
   return ret;
 }
 
@@ -262,7 +262,7 @@ DECLARE_NOPARAM(gelfuncIsWatchRunning, gTriState *)
 gNestedList<gTriState *> gelfuncIsWatchRunning::Evaluate(gelVariableTable *) const
 {
   gNestedList<gTriState *> ret;
-  ret.Data().Append(new gTriState((_gelStopwatch.IsRunning()) ? triTRUE : triFALSE));
+  ret[1] = new gTriState((_gelStopwatch.IsRunning()) ? triTRUE : triFALSE);
   return ret;
 }
 
@@ -276,7 +276,7 @@ gNestedList<gNumber *> gelfuncStartWatch::Evaluate(gelVariableTable *) const
 {
   _gelStopwatch.Start();
   gNestedList<gNumber *> ret;
-  ret.Data().Append(new gNumber(0));
+  ret[1] = new gNumber(0);
   return ret;
 }
 
@@ -290,7 +290,7 @@ gNestedList<gNumber *> gelfuncStopWatch::Evaluate(gelVariableTable *) const
 {
   _gelStopwatch.Stop();
   gNestedList<gNumber *> ret;
-  ret.Data().Append(new gNumber(_gelStopwatch.Elapsed()));
+  ret[1] = new gNumber(_gelStopwatch.Elapsed());
   return ret;
 }
 
