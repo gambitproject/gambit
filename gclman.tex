@@ -613,7 +613,8 @@ GetTitle[E->EFG] =: TEXT
 Gobit[N->NFG, {nequilib->INTEGER}, {type->INTEGER},
 	{maxitsOpt->INTEGER}, {maxitsBrent->INTEGER}, {minLam->RATIONAL},
 	{maxLam->RATIONAL}, {delLam->RATIONAL}, {tolDFP->RATIONAL},
-	{tolBrent}->RATIONAL}, {time<->RATIONAL}, {output->TEXT}] =: INTEGER
+	{tolBrent}->RATIONAL}, {time<->RATIONAL}, 
+	{output->TEXT}, {pxifile->TEXT}] =: INTEGER
 
    -	Description:  Computes the Gobit solution for the specified problem in
 	normal form.  
@@ -624,24 +625,29 @@ Gobit[N->NFG, {nequilib->INTEGER}, {type->INTEGER},
    -	Optional parameters:
 	  *  nequilib:  Sets the number of equilibria to find.  Has a default 
 		value of 1.  
-	  *  type:   XXXX.  
-	  *  maxitsOpt:  XXXX.
-	  *  maxitsBrent:  Sets the maximum number of iterations in Brent and 
-		has a default value of XXXX.  
+	  *  type:   Type of incrementing 
+			0 means Lambda_t = Lambda_{t-1} + delLam
+			1 means Lambda_t = Lambda_{t-1} * delLam
+	  *  maxitsOpt:  Sets the masimum number of iterations to the 
+		n-dimensional optimization routine.  Default is 200.
+	  *  maxitsBrent:  Sets the maximum number of iterations in
+		the 1-dimensional line search.  Default is 100.
+	  *  tolOpt:  Sets the tolerance for the n-dimensional
+		optimization routine.  Default is 1.0e-10.
+	  *  tolBrent:  Sets the tolerance for the 1-dimensional line
+		search.  Default is 2.0e-10.
 	  *  minLam:  Sets the minimum value of Lambda.  Has a default value of
 		0.01.
 	  *  maxLam:  Sets the maximum value of Lambda.  Has a default value of
 		30.
 	  *  delLam:  Specifies the rate at which the value of Lambda changes.
 		Has a default value of 1.01.
-	  *  tolOpt:  Specifies optimization tolerance.  Has a default value of
-		XXXX .
-	  *  tolBrent:  XXXX .
 	  *  time:  Returns the elapsed time for the operation.
 	  *  output:  Can be used to redirect the output of this procedure to a
 		file.  Directing output to ``/dev/null'' under Unix turns 
 		output off.  By default, output is directed to the screen.
-
+	  *  pxifile: Can be used to generate an output file
+		compatible for input to pxi
 ----------
 
 GridSolve[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT},
