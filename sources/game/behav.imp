@@ -342,9 +342,13 @@ T BehavProfile<T>::ActionProb(const Action *action) const
   if (action->BelongsTo()->GetPlayer()->IsChance()) {
     return m_efg->GetChanceProb(action);
   }
+  else if (!m_support.Find(action)) {
+    return (T) 0.0;
+  }
   else {
     return (*this)(action->BelongsTo()->GetPlayer()->GetNumber(),
-		   action->BelongsTo()->GetNumber(), action->number);
+		   action->BelongsTo()->GetNumber(),
+		   m_support.Find(action));
   }
 }
 
