@@ -230,13 +230,6 @@ Gui should display nfg.ico.
 
 //------------------------------
 
-Bug D27: Solution Numbering
-
-Numbering of solutions should begin afresh when solutions are deleted
-in the solution display windows
-
-//------------------------------
-
 Bug D28: Problems in converting to normal form in the gui
 
 This problem only occurs under MS-Win version.  
@@ -256,13 +249,6 @@ When you start up the gambit gui compiled with wxxt and try to load
 either an nfg or an efg, you get an error window that says "Unknown
 file type".  On the other hand, if you load the file from the command
 line ("gui foo.efg") it works.
-
-//------------------------------
-
-Bug D30: "Inspect node" window comes up transiently in Linux/wxxt when
-         efg is loaded.
-
-This is a cosmetic bug only, but it's irritating.
 
 //------------------------------
 
@@ -322,13 +308,6 @@ Bug D34: Zoom window focus problem
 
 When the focus is in the zoom window, the arrow keys do not move the
 cursor around the tree.  Same problem for the Inspect Cursor window. 
-
-//------------------------------
-
-Bug D35: Editing a normal form does not invalidate solutions.  
-
-It should invalidate all solutions when you make any changes to the
-normal form.
 
 -------------  older bugs that still remain ---------------
 
