@@ -96,7 +96,7 @@ GUISHARE_SOURCES = dlabout.cc fontpanel.cc numberedit.cc \
 GUISHARE_OBJECTS = $(GUISHARE_SOURCES:.cc=.o)
 
 # These are found in subdirectory gui/
-GUI_SOURCES = gambit.cc treewin.cc treedraw.cc treedrag.cc \
+GUI_SOURCES = gambit.cc treewin.cc treedraw.cc \
               efglayout.cc splash.cc efgshow.cc \
 	      efgsolvd.cc efgoutcome.cc efgsupport.cc \
               nfgsolvd.cc dlefg.cc dlnfg.cc \

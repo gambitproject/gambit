@@ -95,8 +95,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuEDIT_DELETE, EfgShow::OnEditDelete)
   EVT_MENU(efgmenuEDIT_NODE_ADD, EfgShow::OnEditNodeAdd)
   EVT_MENU(efgmenuEDIT_NODE_INSERT, EfgShow::OnEditNodeInsert)
-  EVT_MENU(efgmenuEDIT_NODE_SET_MARK, EfgShow::OnEditNodeSetMark)
-  EVT_MENU(efgmenuEDIT_NODE_GOTO_MARK, EfgShow::OnEditNodeGotoMark)
   EVT_MENU(efgmenuEDIT_ACTION_DELETE, EfgShow::OnEditActionDelete)
   EVT_MENU(efgmenuEDIT_ACTION_INSERT, EfgShow::OnEditActionInsert)
   EVT_MENU(efgmenuEDIT_ACTION_APPEND, EfgShow::OnEditActionAppend)
@@ -109,8 +107,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuEDIT_INFOSET_REVEAL, EfgShow::OnEditInfosetReveal)
   EVT_MENU(efgmenuEDIT_OUTCOMES_NEW, EfgShow::OnEditOutcomesNew)
   EVT_MENU(efgmenuEDIT_OUTCOMES_DELETE, EfgShow::OnEditOutcomesDelete)
-  EVT_MENU(efgmenuEDIT_TREE_COPY, EfgShow::OnEditTreeCopy)
-  EVT_MENU(efgmenuEDIT_TREE_MOVE, EfgShow::OnEditTreeMove)
   EVT_MENU(efgmenuEDIT_TREE_INFOSETS, EfgShow::OnEditTreeInfosets)
   EVT_MENU(efgmenuEDIT_GAME, EfgShow::OnEditGame)
   EVT_MENU(efgmenuEDIT_PROPERTIES, EfgShow::OnEditProperties)
@@ -514,7 +510,7 @@ void EfgShow::SetSupportNumber(int p_number)
 
 int EfgShow::NumDecimals(void) const
 {
-  return m_treeWindow->NumDecimals();
+  return m_treeWindow->DrawSettings().NumDecimals();
 }
 
 void EfgShow::OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged)
@@ -532,6 +528,7 @@ void EfgShow::OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged)
 
   if (p_infosetsChanged || p_nodesChanged) {
     m_treeWindow->RefreshTree();
+    m_treeWindow->Refresh();
   }
   
   UpdateMenus();
@@ -581,10 +578,6 @@ void EfgShow::MakeMenus(void)
   nodeMenu->Append(efgmenuEDIT_NODE_ADD, "&Add Move", "Add a move");
   nodeMenu->Append(efgmenuEDIT_NODE_INSERT, "&Insert Move",
 		   "Insert move at cursor");
-  nodeMenu->AppendSeparator();
-  nodeMenu->Append(efgmenuEDIT_NODE_SET_MARK, "Set &Mark", "Mark cursor node");
-  nodeMenu->Append(efgmenuEDIT_NODE_GOTO_MARK, "Go&to Mark", 
-		   "Goto marked node");
 
   wxMenu *actionMenu = new wxMenu;
   actionMenu->Append(efgmenuEDIT_ACTION_DELETE, "&Delete",
@@ -617,10 +610,6 @@ void EfgShow::MakeMenus(void)
 		      "Delete an outcome");
 
   wxMenu *treeMenu = new wxMenu;
-  treeMenu->Append(efgmenuEDIT_TREE_COPY, "&Copy",
-		   "Copy tree from marked node");
-  treeMenu->Append(efgmenuEDIT_TREE_MOVE, "&Move",
-		   "Move tree from marked node");
   treeMenu->Append(efgmenuEDIT_TREE_INFOSETS, "&Infosets",
 		   "Edit/View infosets");
 
@@ -821,7 +810,7 @@ void EfgShow::MakeMenus(void)
 
 void EfgShow::UpdateMenus(void)
 {
-  Node *cursor = Cursor(), *markNode = m_treeWindow->MarkNode();
+  Node *cursor = Cursor();
   wxMenuBar *menuBar = GetMenuBar();
 
   menuBar->Enable(efgmenuEDIT_DELETE,
@@ -830,22 +819,14 @@ void EfgShow::UpdateMenus(void)
   menuBar->Enable(efgmenuEDIT_NODE_ADD,
 		  (!cursor || m_efg.NumChildren(cursor) > 0) ? false : true);
   menuBar->Enable(efgmenuEDIT_NODE_INSERT, (cursor) ? true : false);
-  menuBar->Enable(efgmenuEDIT_NODE_SET_MARK, (cursor) ? true : false);
-  menuBar->Enable(efgmenuEDIT_NODE_GOTO_MARK, (markNode) ? true : false);
 
-  menuBar->Enable(efgmenuEDIT_INFOSET_MERGE,
-		  (markNode && markNode->GetInfoset() &&
-		   cursor && cursor->GetInfoset() &&
-		   markNode->GetSubgameRoot() == cursor->GetSubgameRoot() &&
-		   markNode->GetPlayer() == cursor->GetPlayer()) ? true : false);
+  menuBar->Enable(efgmenuEDIT_INFOSET_MERGE, false);
   menuBar->Enable(efgmenuEDIT_INFOSET_BREAK, 
 		  (cursor && cursor->GetInfoset()) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_SPLIT,
 		  (cursor && cursor->GetInfoset()) ? true : false);
-  menuBar->Enable(efgmenuEDIT_INFOSET_JOIN, 
-		  (markNode && markNode->GetInfoset() &&
-		   cursor && cursor->GetInfoset() &&
-		   markNode->GetSubgameRoot() == cursor->GetSubgameRoot()) ? true : false);
+  menuBar->Enable(efgmenuEDIT_INFOSET_JOIN, false);
+
   menuBar->Enable(efgmenuEDIT_INFOSET_PLAYER,
 		  (cursor && cursor->GetInfoset() &&
 		   !cursor->GetPlayer()->IsChance()) ? true : false);
@@ -861,13 +842,6 @@ void EfgShow::UpdateMenus(void)
   menuBar->Enable(efgmenuEDIT_ACTION_PROBS,
 		  (cursor && cursor->GetInfoset() &&
 		   cursor->GetPlayer()->IsChance()) ? true : false);
-
-  menuBar->Enable(efgmenuEDIT_TREE_COPY,
-		  (markNode && cursor &&
-		   cursor->GetSubgameRoot() == markNode->GetSubgameRoot()) ? true : false);
-  menuBar->Enable(efgmenuEDIT_TREE_MOVE,
-		  (markNode && cursor &&
-		   cursor->GetSubgameRoot() == markNode->GetSubgameRoot()) ? true : false);
 
   menuBar->Enable(efgmenuEDIT_OUTCOMES_DELETE,
 		  (m_efg.NumOutcomes() > 0) ? true : false);
@@ -1162,17 +1136,6 @@ void EfgShow::OnEditNodeInsert(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnEditNodeSetMark(wxCommandEvent &)
-{
-  m_treeWindow->node_set_mark();
-  m_treeWindow->Refresh();
-}
-
-void EfgShow::OnEditNodeGotoMark(wxCommandEvent &)
-{
-  m_treeWindow->node_goto_mark();
-}
-
 //----------------------------------------------------------------------
 //            EfgShow: Menu handlers - Edit->Action menu
 //----------------------------------------------------------------------
@@ -1287,8 +1250,8 @@ void EfgShow::OnEditOutcomesDelete(wxCommandEvent &)
 void EfgShow::OnEditInfosetMerge(wxCommandEvent &)
 {
   try {
-    m_efg.MergeInfoset(m_treeWindow->MarkNode()->GetInfoset(),
-		       Cursor()->GetInfoset());
+    //    m_efg.MergeInfoset(m_treeWindow->MarkNode()->GetInfoset(),
+    //		       Cursor()->GetInfoset());
   }
   catch (gException &ex) {
     guiExceptionDialog(ex.Description(), this);
@@ -1318,7 +1281,7 @@ void EfgShow::OnEditInfosetSplit(wxCommandEvent &)
 void EfgShow::OnEditInfosetJoin(wxCommandEvent &)
 {
   try {
-    m_efg.JoinInfoset(m_treeWindow->MarkNode()->GetInfoset(), Cursor());
+    //    m_efg.JoinInfoset(m_treeWindow->MarkNode()->GetInfoset(), Cursor());
   }
   catch (gException &ex) {
     guiExceptionDialog(ex.Description(), this);
@@ -1358,26 +1321,6 @@ void EfgShow::OnEditInfosetReveal(wxCommandEvent &)
 //----------------------------------------------------------------------
 //           EfgShow: Menu handlers - Edit->Tree menu
 //----------------------------------------------------------------------
-
-void EfgShow::OnEditTreeCopy(wxCommandEvent &)
-{
-  try {
-    m_efg.CopyTree(m_treeWindow->MarkNode(), Cursor());
-  }
-  catch (gException &ex) {
-    guiExceptionDialog(ex.Description(), this);
-  }
-}
-
-void EfgShow::OnEditTreeMove(wxCommandEvent &)
-{
-  try {
-    m_efg.MoveTree(m_treeWindow->MarkNode(), Cursor());
-  }
-  catch (gException &ex) {
-    guiExceptionDialog(ex.Description(), this);
-  }
-}
 
 void EfgShow::OnEditTreeInfosets(wxCommandEvent &)
 {

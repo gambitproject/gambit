@@ -77,8 +77,6 @@ private:
 
   void OnEditNodeAdd(wxCommandEvent &);
   void OnEditNodeInsert(wxCommandEvent &);
-  void OnEditNodeSetMark(wxCommandEvent &);
-  void OnEditNodeGotoMark(wxCommandEvent &);
 
   void OnEditActionDelete(wxCommandEvent &);
   void OnEditActionInsert(wxCommandEvent &);
@@ -95,12 +93,9 @@ private:
   void OnEditOutcomesNew(wxCommandEvent &);
   void OnEditOutcomesDelete(wxCommandEvent &);
 
-  void OnEditTreeCopy(wxCommandEvent &);
-  void OnEditTreeMove(wxCommandEvent &);
   void OnEditTreeInfosets(wxCommandEvent &);
 
   void OnEditGame(wxCommandEvent &);
-  void OnEditProperties(wxCommandEvent &);
 
   void OnViewProfiles(wxCommandEvent &);
   void OnViewCursor(wxCommandEvent &);
@@ -167,9 +162,6 @@ private:
 
   void OnInfoNotebookPage(wxNotebookEvent &);
 
-  // EfgClient members
-  void OnTreeChanged(bool, bool);
-
 public:
   // CONSTRUCTOR AND DESTRUCTOR
   EfgShow(FullEfg &p_efg, wxWindow *p_parent);
@@ -209,11 +201,13 @@ public:
 
   void OnOutcomesEdited(void);
 
-  // File name
   void SetFilename(const wxString &s);
   const wxString &Filename(void) const { return m_filename; }
 
   Node *Cursor(void) const;
+
+  void OnEditProperties(wxCommandEvent &);
+  void OnTreeChanged(bool, bool);
 
   DECLARE_EVENT_TABLE()
 };

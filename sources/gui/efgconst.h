@@ -17,8 +17,6 @@ typedef enum {
   efgmenuEDIT_NODE = 900,
   efgmenuEDIT_NODE_ADD = 1105,
   efgmenuEDIT_NODE_INSERT = 1109,
-  efgmenuEDIT_NODE_SET_MARK = 1112,
-  efgmenuEDIT_NODE_GOTO_MARK = 1113,
 
   efgmenuEDIT_ACTIONS = 910,
   efgmenuEDIT_ACTION_DELETE = 1205,
@@ -39,9 +37,6 @@ typedef enum {
   efgmenuEDIT_OUTCOMES_NEW = 1326,
 
   efgmenuEDIT_TREE = 930,
-  efgmenuEDIT_TREE_COPY = 1303,
-  efgmenuEDIT_TREE_INSERT = 1304,
-  efgmenuEDIT_TREE_MOVE = 1307,
   efgmenuEDIT_TREE_INFOSETS = 1310,
 
   efgmenuEDIT_GAME = 1419,
