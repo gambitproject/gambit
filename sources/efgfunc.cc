@@ -741,6 +741,7 @@ Portion *GSM_Name_EfgElements(Portion **param)
       return new TextValPortion(((EfPlayerPortion *) param[0])->Value()->GetName());
     default:
       assert(0);
+      return 0;
   }
 }
 
