@@ -190,6 +190,26 @@ ActionCursorForSupport::operator!=(const ActionCursorForSupport &rhs) const
  return (!(*this==rhs));
 }
 
+// We now build a series of functions of increasing complexity.  The
+// final one, which is our goal, is the undominated support function.
+// We begin by simply enumerating all subsupports.
+
+gList<const EFSupport> AllSubsupports(const EFSupport *S)
+{
+  gList<const EFSupport> answer;
+
+  EFSupportWithActiveInfo SAct(*S);
+  /*
+  while (!SAct.IsFinalSubsupportOf(S)) {
+    answer += (EFSupport)SAct;
+    SAct.GoToNextSubsupportOf(S);
+  }
+  */
+  answer += (EFSupport)SAct;
+
+  return answer;
+}
+
 
 // Subsupports of a given support are _path equivalent_ if they
 // agree on every infoset that can be reached under either, hence both,
@@ -216,10 +236,13 @@ gList<const EFSupport> AllInequivalentSubsupports(const EFSupport *S)
 // The code below is old, and uses indexing mechanisms that I do not
 // understand, which look error-prone. amm-8/98
 
-bool ComputeDominated(EFSupport &S, EFSupport &T,
-					int pl, int iset, bool strong,
+bool ComputeDominated(const EFSupport &S, EFSupport &T,
+		      const int pl, const int iset, const bool strong,
 					gStatus &status)
 {
+  //DEBUG
+  gout << "Got into ComputeDominated().\n";
+
   const gArray<Action *> &actions = S.Actions(pl, iset);
 
   gArray<int> set(actions.Length());
@@ -268,9 +291,16 @@ bool ComputeDominated(EFSupport &S, EFSupport &T,
 	}
 
 	if (min + 1 <= actions.Length())   {
+
+	  //DEBUG
+	  gout << "Got in.\n";
+
 	  status.Get();
 	  for (i = min + 1; i <= actions.Length(); i++)
 	    T.RemoveAction(actions[set[i]]);
+	  //DEBUG
+	  gout << "About to leave.\n";
+
 	  return true;
 	}
 	else
