@@ -7,7 +7,7 @@
 #ifndef LPSOLVE_H
 #define LPSOLVE_H
 
-#include "tableau.h"
+#include "lptab.h"
 #include "glist.h"
 #include "bfs.h"
 #include "gstatus.h"
