@@ -181,13 +181,8 @@ ITEM 0008:  Slow redrawing in MFC version of GCL
 
 DATE:     9/8/1999 by TLT (was Bug C32, point 2, in bugs_gcl)
 AFFECTS:  GCL (MSWindows)
-STATUS:   OPEN
+STATUS:   CLOSED 5/7/2000 by TLT
 SEVERITY: MINOR
-DETAILS:
-
-Re-display of the command line after using the editing functions,
-like the up arrow and down arrow is much too slow.  This needs to be
-speeded up.
 
 ---------------
 
@@ -195,15 +190,8 @@ ITEM 0009:  Cut-and-paste issues in MFC version of GCL
 
 DATE:     9/8/1999 by TLT (was Bug C32, point 3, in bugs_gcl)
 AFFECTS:  GCL (MSWindows)
-STATUS:   OPEN
+STATUS:   CLOSED 5/7/2000 by TLT
 SEVERITY: MINOR
-DETAILS:
-
-Right now, the OnContextMenu() function is overridden to paste text
-into the command line.  It would be better if after highlighting text
-in the GCL window, the right mouse button would bring up the context
-menu (as in Notepad) to allow to cut or paste text into the GCL window
-in the standard MS-windows way.
 
 ---------------
 
@@ -283,18 +271,8 @@ ITEM 0013:  Scrolling problems in extensive and normal form displays
 
 DATE:     9/8/1999 by TLT (was Bug D11 in bugs_gui)
 AFFECTS:  GUI (all platforms?)
-STATUS:   OPEN
+STATUS:   CLOSED 5/7/2000 by TLT
 SEVERITY: MAJOR
-DETAILS:
-
-For both EFGs and NFGs, using the arrow keys to scroll doesn't affect the
-scrollbar position and doesn't redraw the entire screen.
-
-COMMENTS:
-TLT 1/8/1999.  I don't experience this problem in the Windows version
-at all, *except* when using the increase-magnification feature.  The
-cursor is not always visible on the screen immediately following a
-zoom operation (but will become so after a move with the arrow keys)
 
 ---------------
 
@@ -481,24 +459,8 @@ ITEM 0026:  Scrolling problems in GUI
 
 DATE:     9/8/1999 by TLT (was Bug 7.1 in bugs_gui)
 AFFECTS:  GUI (all platforms?)
-STATUS:   OPEN
+STATUS:   CLOSED 5/7/2000
 SEVERITY: MAJOR
-DETAILS:
-
-> I'm using version 0.94 on a Windows 95 Pentium 133.
-> 
-> Bugs(?):
-> 1. With large games one can't scroll to the bottom right of the matrix.
-> The scrollbar will only move in jumps, and moves over parts of the game,
-> which seem to be inaccesible (maybe one can work around this by
-> changing the font size).  If one clicks on a cell, then presses a cursor
-> key, the associated cell may go off the screen, and there is no way of
-> telling where it is (assuming the matrix is large enough that the
-> names of the actions are off the screen).
-
-COMMENTS: 
-RDM ??/??/19??.  Still a problem.  This may be related to
-similar problems in extensive form window (cf. Items 0024 and 0025).
 
 ---------------
 
@@ -506,16 +468,8 @@ ITEM 0027:  Screen does not refresh while solving
 
 DATE:     9/8/1999 by TLT (was Bug 7.3 in bugs_gui)
 AFFECTS:  GUI (all platforms?)
-STATUS:   OPEN
+STATUS:   CLOSED 5/7/2000
 SEVERITY: INTERMEDIATE
-DETAILS:
-
-> 3. The screen is not rewritten when a program that wrote over the previous
-> screen is closed and Gambit is busy solving a game.  That is, one opens
-> Gambit, starts it off looking for equilibria, then opens another program
-> that displays on top of the Gambit screen; when one closes that program,
-> the Gambit screen is just blank (so that, in particular, one cannot cancel
-> the solution process in progress).
 
 ---------------
 
@@ -600,41 +554,8 @@ ITEM 0030:  Problem under XView
 
 DATE:     9/8/1999 by TLT (was Bug 10.2 in bugs_gui)
 AFFECTS:  GUI (all platforms?)
-STATUS:   OPEN
+STATUS:   CLOSED 5/7/2000 by TLT
 SEVERITY: INTERMEDIATE
-DETAILS:
-
-(This point replied to On Mon, 22 Jun 1998, Richard McKelvey wrote:)
-
-> 2) Below is a game that I can't see unless I take the POSTSCRIPT detour
->    (it's the game generated with level 2)
->    I have a hunch the  xview  stuff on our machine is uncompatible.
->    Can't see any help files either.  Perhaps due to  
->    XView warning: Cannot load font '-*-times-bold-r-normal-*-*-160-*-*-*-*-*-*' (Font package)
->    etc.?
-> 
-> EFG 2 R "UNTITLED" { "P1" "P2" }
-> 
-> p "" 1 1 "" { "L" "R" } 0
-> p "" 2 1 "" { "L" "R" } 0
-> t "" 1 "" { 43 65 }
-> t "" 2 "" { 47 69 }
-> p "" 2 1 "" { "L" "R" } 0
-> t "" 3 "" { 6 94 }
-> t "" 4 "" { 69 69 }
-
-This is a Gambit BUG.  Or at least, I get the same problem running under
-xview. It appears to be that the scroll is not working correctly under
-XView. You can view the game in the zoom window (in prefs menu), but that
-only shows the part near the cursor.  
-
-Perhaps this is a problem in wxwin support of xview, as there is no
-problem viewing the game under the motif version or the Windows version of
-the GUI.
-
-COMMENTS:
-RDM ??/??/19??. I reproduced this under version .94 on Xview.  We need
-to compile the new code under Xview to see if this still exists.
 
 ---------------
 
@@ -701,14 +622,6 @@ DATE:     9/8/1999 by TLT/RDM
 AFFECTS:  GUI, GCL; all platforms
 STATUS:   CLOSED 9/10/99 by RDM
 SEVERITY: CRUCIAL
-DETAILS:
-
-Added the following functions on 9/10/99:
-
-  SequenceForm[support->EFSUPPORT] =: NLIST(NUMBER)
-  SequenceFormConstraints[support->EFSUPPORT, player->EFPLAYER] =: LIST(LIST(NUMBER))
-  SequenceFormStrats[support->EFSUPPORT, player->EFPLAYER] =: LIST(LIST(ACTION))
-  WriteSequenceForm[output<->OUTPUT, support->EFSUPPORT] =: OUTPUT
 
 ---------------
 
