@@ -935,7 +935,7 @@ protected:
     bool _ContainsListsOnly;
     unsigned long _DataType;
     bool _IsNull;
-    int _ListDepth;
+    unsigned int _ListDepth;
 
     int nref;
 
