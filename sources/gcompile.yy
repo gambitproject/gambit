@@ -195,7 +195,7 @@ funcdecl:     DEFFUNC LBRACK NAME
 			 if (!DefineFunction())  YYERROR; } 
 
 optfuncdesc:  | { funcdesc = ""; }
-              COMMA TEXT { funcdesc = tval; }
+              COMMA CRLFopt TEXT CRLFopt { funcdesc = tval; }
 
 delfunc:      DELFUNC LBRACK NAME
               { funcname = tval; function = new gList<NewInstr*>; 
