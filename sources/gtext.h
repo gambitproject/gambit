@@ -41,7 +41,7 @@ class gText   {
     gText(const gText &s);
     ~gText()     { delete [] storage; }
     gText &operator=(const char *s);
-    gText &operator=(const gText &s)   { *this = s.storage; return *this; }
+    gText &operator=(const gText &s);
 
 	  // MEMBER FUNCTIONS
     int Length(void) const    { return strlen(storage); }

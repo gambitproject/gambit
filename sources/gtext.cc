@@ -54,6 +54,14 @@ gText::gText(int len)
 }
 
 
+gText &gText::operator=(const gText &s)
+{ 
+  if (this != &s) {
+    *this = s.storage; 
+  }  
+  return *this; 
+}
+
 gText &gText::operator=(const char *s)
 {
   delete [] storage;

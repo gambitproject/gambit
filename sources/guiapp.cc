@@ -84,11 +84,11 @@ void gambitFrame::OnQuit(wxCommandEvent& WXUNUSED(event) )
 
 void gambitFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
 {
-  wxMessageBox("Gambit -- Graphics User Interface, Version 0.96\n\n"
+  wxMessageBox("Gambit -- Graphics User Interface, Version 0.96.2\n\n"
 	       "Developed by Richard D. McKelvey (rdm@hss.caltech.edu)\n"
 	       "Main Programmer:  Theodore Turocy (arbiter@nwu.edu)\n"
 	       "Front End: Eugene Grayver (egrayver@hss.caltech.edu)\n"
-	       "California Institute of Technology, 1996-9.\n"
+	       "California Institute of Technology, 1996-2000.\n"
 	       "Funding provided by the National Science Foundation",
 	       "About Gambit");
 }
