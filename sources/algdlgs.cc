@@ -127,6 +127,11 @@ void dialogAlgorithm::DominanceFields(bool p_usesNfg)
 {
   int depth = 0, type = 0, method = 0;
 
+  wxLayoutConstraints *constraints;
+  SetAutoLayout(TRUE);
+
+  wxGroupBox *dominanceBox = new wxGroupBox(this, "Eliminate strategies");
+
   if (p_usesNfg) {
     (void) new wxMessage(this, "Eliminate dominated mixed strategies");
     wxGetResource("Soln-Defaults", "Nfg-ElimDom-Depth", &depth, gambitApp.ResourceFile());
@@ -145,7 +150,7 @@ void dialogAlgorithm::DominanceFields(bool p_usesNfg)
   m_depthChoice = new wxRadioBox(this, (wxFunction) CallbackDepth, "Depth",
 				 -1, -1, -1, -1, 3, depthChoices);
   m_depthChoice->SetClientData((char *) this);
-  if (depth >= 0 && depth <= 2) 
+  if (depth >= 0 && depth <= 2)
     m_depthChoice->SetSelection(depth);
 
   NewLine();
@@ -157,6 +162,13 @@ void dialogAlgorithm::DominanceFields(bool p_usesNfg)
     m_typeChoice->Enable(FALSE);
   else if (type == 0 || type == 1)
     m_typeChoice->SetSelection(type);
+
+  constraints = new wxLayoutConstraints;
+  constraints->top.SameAs(m_depthChoice, wxTop, -20);
+  constraints->bottom.SameAs(m_typeChoice, wxBottom, -20);
+  constraints->centreX.SameAs(m_depthChoice, wxCentreX);
+  constraints->width.PercentOf(m_depthChoice, wxWidth, 110);
+  dominanceBox->SetConstraints(constraints);
 
   if (p_usesNfg) {
     char *methodChoices[] = { "Pure", "Mixed" };
