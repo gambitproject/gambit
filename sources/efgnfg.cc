@@ -1,15 +1,8 @@
 //
 // FILE: efgnfg.cc -- efg<->nfg conversion routines
 //
-// @(#)efgnfg.cc	2.2 3/27/97
+// @($Id$
 //
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
 
 #include "efg.h"
 #include "nfg.h"
@@ -19,6 +12,13 @@
 #include "glist.h"
 #include "nfgiter.h"
 #include "nfgciter.h"
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
+
 #include "lexicon.h"
 
 
