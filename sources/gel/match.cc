@@ -571,7 +571,7 @@ extern void gelSolInit(gelEnvironment *);
 gelEnvironment::gelEnvironment(void)
 {
   gelMathInit(this);
-  // gelListInit(this);
+  gelListInit(this);
   gelEfgInit(this);
   gelNfgInit(this);
   gelAlgInit(this);
