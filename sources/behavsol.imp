@@ -1,3 +1,8 @@
+//#
+//# FILE: behavsol.imp -- Behav strategy solution classes
+//#
+//# $Id$
+//#
 
 
 #include "behavsol.h"
@@ -69,6 +74,9 @@ template <class T> BehavSolution<T>::BehavSolution(const BehavSolution<T>& b)
 {}
 
 template <class T> BehavSolution<T>::~BehavSolution() {}
+
+template <class T> void BehavSolution<T>::SetCreator(int c)
+{ _Creator = c; }
 
 template <class T> int BehavSolution<T>::Creator() const
 { return _Creator; }

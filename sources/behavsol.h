@@ -1,3 +1,8 @@
+//#
+//# FILE: behavsol.h -- Behav strategy solution classes
+//#
+//# $Id$
+//#
 
 #ifndef BEHAVSOL_H
 #define BEHAVSOL_H
@@ -28,6 +33,7 @@ public:
   BehavSolution(const BehavSolution<T> &);
   ~BehavSolution();
 
+  void SetCreator(int);
   int Creator() const; // Who created this object?  (algorithm ID or user)
   int IsNash(); // Is it Nash? Y/N/DK
   int IsSubgamePerfect() const; // Is it Subgame Perfect? Y/N/DK

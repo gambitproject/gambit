@@ -47,6 +47,10 @@ typedef enum
 #define id_SIMPDIVSUB 11
 #define id_ZSUMSUB 12
 #define id_PURENASHSUB 13
+#define id_SEQFORMSUB 14
+#define id_ELIAPSUB 15
+#define id_NLIAPSUB 16
+#define id_ENUMSUB 17
 
 
 #define T_DONTKNOW 2

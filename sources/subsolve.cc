@@ -137,8 +137,8 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
     gList<Node *> nodes;
     Nodes(efg, n, nodes);
 
-		for (int solno = 1; solno <= sol.Length(); solno++)  {
-			solns.Append(thissolns[soln]);
+    for (int solno = 1; solno <= sol.Length(); solno++)  {
+      solns.Append(thissolns[soln]);
 
       for (int pl = 1; pl <= foo.NumPlayers(); pl++)  {
 	EFPlayer *p = foo.PlayerList()[pl];
@@ -156,20 +156,21 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
 	      nodes[index]->GetInfoset())  break;
 	
 	assert(base <= efg.PlayerList()[pl]->NumInfosets());
-
+	
 	for (int iset = 1; iset <= p->NumInfosets(); iset++)  {
-		for (index = 1; index <= infosets[pl]->Length(); index++)
+	  for (index = 1; index <= infosets[pl]->Length(); index++)
 	    if ((*infosets[pl])[index] == efg.PlayerList()[pl]->InfosetList()[iset + base - 1])
 	      break;
-
+	  
 	  assert(index <= infosets[pl]->Length());
 	  
 	  for (int act = 1; act <= p->InfosetList()[iset]->NumActions();
 	       act++)
-			solns[solns.Length()](pl, index, act) = sol[solno](pl, iset, act);
+	    solns[solns.Length()](pl, index, act) = sol[solno](pl, iset, act);
 	}
-			}
-    
+	solns[solns.Length()].SetCreator(AlgorithmID());
+      }
+      
       gVector<T> subval(foo.NumPlayers());
       for (i = 1; i <= foo.NumPlayers(); i++)  {
 	subval[i] = sol[solno].Payoff(i);
@@ -371,7 +372,7 @@ void LemkeBySubgame<T>::SolveSubgame(const Efg<T> &E,
   for (int i = 1; i <= M.GetSolutions().Length(); i++)  {
     BehavProfile<T> bp(E);
     MixedToBehav(*N, M.GetSolutions()[i], E, bp);
-    solns.Append(BehavSolution<T>(bp, id_LEMKESUB));
+    solns.Append(bp);
   }
 
   delete N;
@@ -411,7 +412,7 @@ void SimpdivBySubgame<T>::SolveSubgame(const Efg<T> &E,
   for (int i = 1; i <= M.GetSolutions().Length(); i++)  {
     BehavProfile<T> bp(E);
     MixedToBehav(*N, M.GetSolutions()[i], E, bp);
-    solns.Append(BehavSolution<T>(bp, id_SIMPDIVSUB));
+    solns.Append(bp);
   }
 
   delete N;
@@ -485,7 +486,7 @@ void PureNashBySubgame<T>::SolveSubgame(const Efg<T> &E,
   for (int i = 1; i <= sol.Length(); i++)  {
     BehavProfile<T> bp(E);
     MixedToBehav(*N, sol[i], E, bp);
-    solns.Append(BehavSolution<T>(bp, id_PURENASHSUB));
+    solns.Append(bp);
   }
 
   delete N;
@@ -527,7 +528,7 @@ void ZSumBySubgame<T>::SolveSubgame(const Efg<T> &E,
   for (int i = 1; i <= sol.Length(); i++)  {
     BehavProfile<T> bp(E);
     MixedToBehav(*N, sol[i], E, bp);
-    solns.Append(BehavSolution<T>(bp, id_ZSUMSUB));
+    solns.Append(bp);
   }
 
   delete N;

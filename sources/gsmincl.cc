@@ -39,6 +39,14 @@ void DisplayID(gOutput& o, int i)
     o << "LpSolve(ZSumBySubgame)"; break;
   case id_PURENASHSUB: // EnumPureSolve
     o << "EnumPureSolve(PureNashBySubgame)"; break;
+  case id_SEQFORMSUB: // LcpSolve
+    o << "LcpSolve(SeqFormBySubgame)"; break;
+  case id_ELIAPSUB:
+    o << "(EFLiapBySubgame)"; break;
+  case id_NLIAPSUB:
+    o << "(NFLiapBySubgame)"; break;
+  case id_ENUMSUB:
+    o << "(EnumBySubgame)"; break;
   default:
     o << "ERROR" ; break;
   }
