@@ -25,26 +25,31 @@ int Tableau<gRational>::remap(int col_index) const
       
 
 // function that actually turns the matrix into integers
-double Integerize(gMatrix<gRational> &stuff)
+double Integerize(gMatrix<gRational> &stuff, gVector<gRational> &vec)
 {
   int i, j;
-  int idex1,idex2,jdex;
+  int jdex2,idex,jdex;
   double real_lcm;
-  int len(stuff.NumRows()*stuff.NumColumns());
+  int len(stuff.NumRows()*stuff.NumColumns()+vec.Length());
   gInteger darray[len];
-  for(i=stuff.MinCol();i<=stuff.MaxCol();++i){
-    for(j=stuff.MinRow();j<=stuff.MaxRow();++j){
-      idex1=(i-stuff.MinCol());  
-      idex2=(stuff.MaxRow()-stuff.MinRow()+1);  
-      jdex=j-stuff.MinRow(); 
-      darray[idex1*idex2+jdex]=gRational(stuff(j,i)).denominator();
+  
+  jdex2=stuff.NumRows();  
+  for(i=stuff.MinRow();i<=stuff.MaxRow();++i){
+    idex=i-stuff.MinRow(); 
+    for(j=stuff.MinCol();j<=stuff.MaxCol();++j){
+      jdex=j-stuff.MinCol();  
+      darray[jdex*jdex2+idex]=gRational(stuff(i,j)).denominator();
     }
+    jdex=stuff.NumColumns();
+    darray[jdex*jdex2+idex]=gRational(vec[i]).denominator();
   }
+
   real_lcm = find_lcm(len,darray);
   for(i=stuff.MinRow(); i<=stuff.MaxRow();++i){
     for(j=stuff.MinCol(); j<=stuff.MaxCol();++j){
       stuff(i,j)=update(real_lcm,stuff(i,j));
     }
+    vec[i]=update(real_lcm,vec[i]);
   }
   return(real_lcm);
 }
@@ -74,28 +79,11 @@ Tableau<gRational>::Tableau(const gMatrix<gRational> &A, const gVector<gRational
 {
   gout << "\nMY CODE\n";
 
-  gMatrix<gRational> TempTabdat(A.MinRow(),A.MaxRow(),A.MinCol(), A.MaxCol()+1);
-
-  int i,j;
+  int j;
   for(j=A.MinCol();j<=A.MaxCol();j++) 
     nonbasic[j] = j;
 
-  for (i=A.MinRow();i<=A.MaxRow();++i){
-    for (j=A.MinCol();j<=A.MaxCol();++j){
-      TempTabdat(i,j)=A(i,j);
-    }
-    TempTabdat(i,A.MaxCol()+1) = b[i];
-  }
-  //  solution = b;
-
-  totdenom = Integerize(TempTabdat);
-
-  for (i=A.MinRow();i<=A.MaxRow();++i){
-    for (j=A.MinCol();j<=A.MaxCol();++j){
-      Tabdat(i,j)=TempTabdat(i,j);
-    }
-    Coeff[i] = TempTabdat(i,A.MaxCol()+1);
-  }
+  totdenom = Integerize(Tabdat,Coeff);
   solution = Coeff;
 }
 
@@ -176,21 +164,6 @@ void Tableau<gRational>::Pivot(int outrow,int in_col)
 }
 
 
-    // solve A x = b 
-
-void LPTableau<gRational>::Solve(const gVector<gRational> &b, gVector<gRational> &x) const
-{
-  B.solve(b,x);
-}
-
-    // solve y A = c 
-
-void LPTableau<gRational>::SolveT(const gVector<gRational> &c, gVector<gRational> &y) const
-{
-  B.solveT(c,y);
-}
-
-
 void Tableau<gRational>::SolveColumn(int in_col, gVector<gRational> &out)
 {
   // gout << "\nTableau<gRational>::SolveColumn  " << MinRow() << " " << MaxRow(); 
@@ -210,16 +183,6 @@ void Tableau<gRational>::SolveColumn(int in_col, gVector<gRational> &out)
 
 
 
-void Tableau<gRational>::GetColumn(int col, gVector<gRational> &out) const
-{
-  reintden();
-  basis.GetColumn(col,out);
-  unintden();
-}
-
-
-// Get these too...
-
 void Tableau<gRational>::SetConst(const gVector<gRational> &bnew)
 {
   assert(bnew.First()==b->First() && bnew.Last()==b->Last());
@@ -238,48 +201,7 @@ void Tableau<gRational>::SetBasis(const Basis<gRational> &in)
 
 
 
-void Tableau<gRational>::GetBasis(Basis<gRational> &out) const
-{
-  reintden();
-  out= basis;
-  unintden();
-}
-
 // miscellaneous functions
-
- bool Tableau<gRational>::EqZero(gRational x) const
-{ 
-  return (LeZero(x) && GeZero(x));
-}
-
- bool Tableau<gRational>::LtZero(gRational x) const
-{ 
-  return !GeZero(x);
-}
-
- bool Tableau<gRational>::GtZero(gRational x) const
-{ 
-  return !LeZero(x);
-}
-
- bool Tableau<gRational>::LeZero(gRational x) const
-{ 
-  if(x <=eps2) return 1;
-  return 0;
-}
-
- bool Tableau<gRational>::GeZero(gRational x) const
-{ 
-  if(x >= -eps2) return 1;
-  return 0;
-}
-
- gRational Tableau<gRational>::Epsilon(int i) const
-{
-  assert(i==1 || i==2);
-  if(i==1) return eps1;
-  return eps2;
-}
 
  bool Tableau<gRational>::IsFeasible()
 {

@@ -217,7 +217,8 @@ void Tableau<double>::SolveColumn(int col, gVector<double> &out)
 }
 
 
-void Tableau<double>::GetColumn(int col, gVector<double> &out) const
+template <class T>
+void Tableau<T>::GetColumn(int col, gVector<T> &out) const
 {
   basis.GetColumn(col,out);
 }
@@ -239,41 +240,48 @@ void Tableau<double>::SetBasis(const Basis<double> &in)
 }
 
 
-void Tableau<double>::GetBasis(Basis<double> &out) const
+template <class T>
+void Tableau<T>::GetBasis(Basis<T> &out) const
 {
   out= basis;
 }
 
 // miscellaneous functions
 
-bool Tableau<double>::EqZero(double x) const
+template <class T>
+bool Tableau<T>::EqZero(T x) const
 { 
   return (LeZero(x) && GeZero(x));
 }
 
-bool Tableau<double>::LtZero(double x) const
+template <class T>
+bool Tableau<T>::LtZero(T x) const
 { 
   return !GeZero(x);
 }
 
-bool Tableau<double>::GtZero(double x) const
+template <class T>
+bool Tableau<T>::GtZero(T x) const
 { 
   return !LeZero(x);
 }
 
-bool Tableau<double>::LeZero(double x) const
+template <class T>
+bool Tableau<T>::LeZero(T x) const
 { 
   if(x <=eps2) return 1;
   return 0;
 }
 
-bool Tableau<double>::GeZero(double x) const
+template <class T>
+bool Tableau<T>::GeZero(T x) const
 { 
   if(x >= -eps2) return 1;
   return 0;
 }
 
-double Tableau<double>::Epsilon(int i) const
+template <class T>
+T Tableau<T>::Epsilon(int i) const
 {
   assert(i==1 || i==2);
   if(i==1) return eps1;
@@ -563,14 +571,16 @@ void LPTableau<double>::Pivot(int outrow,int col)
 
     // solve A x = b 
 
-void LPTableau<double>::Solve(const gVector<double> &b, gVector<double> &x) const
+template <class T>
+void LPTableau<T>::Solve(const gVector<T> &b, gVector<T> &x) const
 {
   B.solve(b,x);
 }
 
     // solve y A = c 
 
-void LPTableau<double>::SolveT(const gVector<double> &c, gVector<double> &y) const
+template <class T>
+void LPTableau<T>::SolveT(const gVector<T> &c, gVector<T> &y) const
 {
   B.solveT(c,y);
 }
