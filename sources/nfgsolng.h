@@ -97,9 +97,8 @@ public:
 
 class guinfgLiap : public guiNfgSolution   {
 private:
-  double m_tolND, m_tol1D;
-  int m_maxitsND, m_maxits1D, m_nTries;
-  int m_stopAfter, m_startOption;
+  double m_accuracy;
+  int m_nTries, m_stopAfter, m_startOption;
 
 public:
   guinfgLiap(const NFSupport &, NfgShowInterface *);
@@ -141,8 +140,8 @@ public:
 
 class guinfgQre : public guiNfgSolution   {
 private:
-  int m_stopAfter, m_startOption, m_maxits1D, m_maxitsND, m_powLam;
-  double m_minLam, m_maxLam, m_delLam, m_tol1D, m_tolND;
+  int m_stopAfter, m_startOption, m_powLam;
+  double m_minLam, m_maxLam, m_delLam, m_accuracy;
   gOutput *m_pxiFile;
   bool m_runPxi;
   gText m_pxiCommand, m_pxiFilename;

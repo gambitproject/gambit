@@ -76,7 +76,7 @@ dialogTrace::dialogTrace(wxWindow *p_parent,
 
   char *traceChoices[] = { "None", "Window", "File" };
   m_traceDest = new wxRadioBox(this, (wxFunction) CallbackTrace,
-			       "Destination", -1, -1, -1, -1,
+			       "Destination", 1, 1, -1, -1,
 			       3, traceChoices);
   m_traceDest->SetSelection(p_traceDest);
   m_traceDest->SetClientData((char *) this);
@@ -84,17 +84,17 @@ dialogTrace::dialogTrace(wxWindow *p_parent,
   m_traceFile = new wxText(this, 0, "Filename");
   m_traceFile->SetValue(p_traceFile);
   m_traceFile->Enable(p_traceDest == 2);
-  m_traceLevel = new wxIntegerItem(this, "Level", 0, -1, -1, 100, -1);
+  m_traceLevel = new wxIntegerItem(this, "Level", 0, 1, 1, 100, -1);
   m_traceLevel->SetInteger(p_traceLevel);
   m_traceLevel->Enable(p_traceDest > 0);
   NewLine();
 
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "OK");
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "OK", 1, 1);
   okButton->SetClientData((char *) this);
   okButton->SetDefault();
 
   wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
+					"Cancel", 1, 1);
   cancelButton->SetClientData((char *) this);
 
   okButton->SetConstraints(new wxLayoutConstraints);
@@ -421,7 +421,7 @@ void dialogAlgorithm::StopAfterField(void)
   int stopAfter = 0;
   wxGetResource("Algorithm Params", "StopAfter", &stopAfter, gambitApp.ResourceFile());
 
-  m_findAll = new wxCheckBox(this, (wxFunction) CallbackAll, "Find all");
+  m_findAll = new wxCheckBox(this, (wxFunction) CallbackAll, "Find all", 1, 1);
   m_findAll->SetClientData((char *) this);
 
   m_stopAfter = new wxIntegerItem(this, "Stop after",
@@ -727,19 +727,14 @@ dialogLiap::~dialogLiap()
   if (m_completed == wxOK) {
     wxWriteResource("Algorithm Params", "Liap-nTries", NumTries(), 
 		    gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "Func-tolND", TolND(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "Func-tol1D", Tol1D(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "Func-maxitsND",
-		    MaxitsND(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "Func-maxits1D",
-		    Maxits1D(), gambitApp.ResourceFile());
+    wxWriteResource("Algorithm Params", "Liap-accuracy", Accuracy(),
+		    gambitApp.ResourceFile());
   }
 }
 
 void dialogLiap::AlgorithmFields(void)
 {
-  m_algorithmGroup = new wxGroupBox(this, "Algorithm parameters");
-  NewLine();
+  m_algorithmGroup = new wxGroupBox(this, "Algorithm parameters", 1, 1);
   StopAfterField();
 
   m_findAll->SetConstraints(new wxLayoutConstraints);
@@ -756,7 +751,7 @@ void dialogLiap::AlgorithmFields(void)
 
   int nTries = 0;
   wxGetResource("Algorithm Params", "Liap-nTries", &nTries, gambitApp.ResourceFile());
-  m_nTries = new wxIntegerItem(this, "nTries", nTries);
+  m_nTries = new wxIntegerItem(this, "nTries", nTries, 1, 1);
   m_nTries->SetConstraints(new wxLayoutConstraints);
   m_nTries->GetConstraints()->top.SameAs(m_stopAfter, wxBottom, 10);
   m_nTries->GetConstraints()->left.SameAs(m_findAll, wxLeft);
@@ -764,54 +759,28 @@ void dialogLiap::AlgorithmFields(void)
   m_nTries->GetConstraints()->height.AsIs();
   NewLine();
 
-  int tolND = 8;
-  wxGetResource("Algorithm Params", "Func-tolND", &tolND, gambitApp.ResourceFile());
-  m_tolND = new wxIntegerItem(this, "Tol n-D: 1.0 e -", tolND, -1, -1, 150, -1);
-  m_tolND->SetConstraints(new wxLayoutConstraints);
-  m_tolND->GetConstraints()->top.SameAs(m_nTries, wxBottom, 10);
-  m_tolND->GetConstraints()->left.SameAs(m_findAll, wxLeft);
-  m_tolND->GetConstraints()->width.AsIs();
-  m_tolND->GetConstraints()->height.AsIs();
-  int tol1D = 8;
-  wxGetResource("Algorithm Params", "Func-tol1D", &tol1D, gambitApp.ResourceFile());
-  m_tol1D = new wxIntegerItem(this, "Tol 1-D: 1.0 e -", tol1D, -1, -1, 150, -1);
-  m_tol1D->SetConstraints(new wxLayoutConstraints);
-  m_tol1D->GetConstraints()->top.SameAs(m_tolND, wxTop);
-  m_tol1D->GetConstraints()->left.SameAs(m_tolND, wxRight, 10);
-  m_tol1D->GetConstraints()->width.AsIs();
-  m_tol1D->GetConstraints()->height.AsIs();
-  NewLine();
-
-  int maxitsND = 0;
-  wxGetResource("Algorithm Params", "Func-maxitsND", &maxitsND, gambitApp.ResourceFile());
-  m_maxitsND = new wxIntegerItem(this, "Iterations n-D", maxitsND,
-				 -1, -1, 150, -1);
-  m_maxitsND->SetConstraints(new wxLayoutConstraints);
-  m_maxitsND->GetConstraints()->top.SameAs(m_tolND, wxBottom, 10);
-  m_maxitsND->GetConstraints()->left.SameAs(m_findAll, wxLeft);
-  m_maxitsND->GetConstraints()->width.AsIs();
-  m_maxitsND->GetConstraints()->height.AsIs();
-  int maxits1D = 0;
-  wxGetResource("Algorithm Params", "Func-maxits1D", &maxits1D, gambitApp.ResourceFile());
-  m_maxits1D = new wxIntegerItem(this, "Iterations 1-D", maxits1D,
-				 -1, -1, 150, -1);
-  m_maxits1D->SetConstraints(new wxLayoutConstraints);
-  m_maxits1D->GetConstraints()->top.SameAs(m_maxitsND, wxTop);
-  m_maxits1D->GetConstraints()->left.SameAs(m_maxitsND, wxRight, 10);
-  m_maxits1D->GetConstraints()->width.AsIs();
-  m_maxits1D->GetConstraints()->height.AsIs();
+  int accuracy = 4;
+  wxGetResource("Algorithm Params", "Liap-accuracy", 
+		&accuracy, gambitApp.ResourceFile());
+  m_accuracy = new wxIntegerItem(this, "Accuracy: 1.0 e -", accuracy,
+				 1, 1, 150, -1);
+  m_accuracy->SetConstraints(new wxLayoutConstraints);
+  m_accuracy->GetConstraints()->top.SameAs(m_nTries, wxBottom, 10);
+  m_accuracy->GetConstraints()->left.SameAs(m_findAll, wxLeft);
+  m_accuracy->GetConstraints()->width.AsIs();
+  m_accuracy->GetConstraints()->height.AsIs();
   NewLine();
 
   int startOption = 0;
   wxGetResource("Algorithm Params", "Start-Option", &startOption,
 		gambitApp.ResourceFile());
   char *startOptions[] = { "Default", "Saved", "Prompt" };
-  m_startOption = new wxRadioBox(this, 0, "Start", -1, -1, -1, -1,
+  m_startOption = new wxRadioBox(this, 0, "Start", 1, 1, -1, -1,
 				 3, startOptions);
   if (startOption >= 0 && startOption <= 2)
     m_startOption->SetSelection(startOption);
   m_startOption->SetConstraints(new wxLayoutConstraints);
-  m_startOption->GetConstraints()->top.SameAs(m_maxitsND, wxBottom, 10);
+  m_startOption->GetConstraints()->top.SameAs(m_accuracy, wxBottom, 10);
   m_startOption->GetConstraints()->left.SameAs(m_findAll, wxLeft);
   m_startOption->GetConstraints()->width.AsIs();
   m_startOption->GetConstraints()->height.AsIs();
@@ -825,7 +794,7 @@ void dialogLiap::AlgorithmFields(void)
     m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
   }
   m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
-  m_algorithmGroup->GetConstraints()->right.SameAs(m_maxits1D, wxRight, -10);
+  m_algorithmGroup->GetConstraints()->right.SameAs(m_stopAfter, wxRight, -10);
   m_algorithmGroup->GetConstraints()->bottom.SameAs(m_startOption, wxBottom, -10);
 }
 
@@ -1119,14 +1088,8 @@ dialogQre::~dialogQre()
 		    m_maxLam->GetValue(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Qre-delLam",
 		    m_delLam->GetValue(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "Func-tolND",
-		    m_tolND->GetInteger(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "Func-tol1D",
-		    m_tol1D->GetInteger(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "Func-maxitsND",
-		    m_maxitsND->GetInteger(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "Func-maxits1D",
-		    m_maxits1D->GetInteger(), gambitApp.ResourceFile());
+    wxWriteResource("Algorithm Params", "Qre-accuracy",
+		    m_accuracy->GetInteger(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Qre-startOption",
 		    m_startOption->GetSelection(), gambitApp.ResourceFile());
   }
@@ -1138,14 +1101,11 @@ void dialogQre::AlgorithmFields(void)
   NewLine();
 
   gText minLam, maxLam, delLam;
-  int tolND, tol1D, maxitsND, maxits1D;
+  int accuracy = 4;
   wxGetResourceStr("Algorithm Params", "Qre-minLam", minLam, gambitApp.ResourceFile());
   wxGetResourceStr("Algorithm Params", "Qre-maxLam", maxLam, gambitApp.ResourceFile());
   wxGetResourceStr("Algorithm Params", "Qre-delLam", delLam, gambitApp.ResourceFile());
-  wxGetResource("Algorithm Params", "Func-tolND", &tolND, gambitApp.ResourceFile());
-  wxGetResource("Algorithm Params", "Func-tol1D", &tol1D, gambitApp.ResourceFile());
-  wxGetResource("Algorithm Params", "Func-maxitsND", &maxitsND, gambitApp.ResourceFile());
-  wxGetResource("Algorithm Params", "Func-maxits1D", &maxits1D, gambitApp.ResourceFile());
+  wxGetResource("Algorithm Params", "Qre-accuracy", &accuracy, gambitApp.ResourceFile());
 
   m_minLam = new wxNumberItem(this, "minLam", minLam);
   m_minLam->SetConstraints(new wxLayoutConstraints);
@@ -1170,36 +1130,13 @@ void dialogQre::AlgorithmFields(void)
   m_delLam->GetConstraints()->height.AsIs();
   NewLine();
 
-  m_tolND = new wxIntegerItem(this, "Tol n-D: 1.0 e -", tolND, -1, -1, -1, -1);
-  m_tolND->SetConstraints(new wxLayoutConstraints);
-  m_tolND->GetConstraints()->top.SameAs(m_minLam, wxTop);
-  m_tolND->GetConstraints()->left.SameAs(m_minLam, wxRight, 10);
-  m_tolND->GetConstraints()->width.AsIs();
-  m_tolND->GetConstraints()->height.AsIs();
+  m_accuracy = new wxIntegerItem(this, "Accuracy: 1.0 e -", accuracy, -1, -1, -1, -1);
+  m_accuracy->SetConstraints(new wxLayoutConstraints);
+  m_accuracy->GetConstraints()->top.SameAs(m_minLam, wxTop);
+  m_accuracy->GetConstraints()->left.SameAs(m_minLam, wxRight, 10);
+  m_accuracy->GetConstraints()->width.AsIs();
+  m_accuracy->GetConstraints()->height.AsIs();
 
-  m_tol1D = new wxIntegerItem(this, "Tol 1-D: 1.0 e -", tol1D, -1, -1, -1, -1);
-  m_tol1D->SetConstraints(new wxLayoutConstraints);
-  m_tol1D->GetConstraints()->top.SameAs(m_tolND, wxBottom, 10);
-  m_tol1D->GetConstraints()->left.SameAs(m_tolND, wxLeft);
-  m_tol1D->GetConstraints()->width.AsIs();
-  m_tol1D->GetConstraints()->height.AsIs();
-  NewLine();
-
-  m_maxitsND = new wxIntegerItem(this, "Iterations n-D", maxitsND,
-				 -1, -1, -1, -1);
-  m_maxitsND->SetConstraints(new wxLayoutConstraints);
-  m_maxitsND->GetConstraints()->top.SameAs(m_tol1D, wxBottom, 10);
-  m_maxitsND->GetConstraints()->left.SameAs(m_tolND, wxLeft);
-  m_maxitsND->GetConstraints()->width.AsIs();
-  m_maxitsND->GetConstraints()->height.AsIs();
-
-  m_maxits1D = new wxIntegerItem(this, "Iterations 1-D", maxits1D,
-				 -1, -1, -1, -1);
-  m_maxits1D->SetConstraints(new wxLayoutConstraints);
-  m_maxits1D->GetConstraints()->top.SameAs(m_maxitsND, wxBottom, 10);
-  m_maxits1D->GetConstraints()->left.SameAs(m_tol1D, wxLeft);
-  m_maxits1D->GetConstraints()->width.AsIs();
-  m_maxits1D->GetConstraints()->height.AsIs();
   NewLine();
 
   int startOption;
@@ -1212,7 +1149,7 @@ void dialogQre::AlgorithmFields(void)
     m_startOption->SetSelection(startOption);
 
   m_startOption->SetConstraints(new wxLayoutConstraints);
-  m_startOption->GetConstraints()->top.SameAs(m_maxits1D, wxBottom, 10);
+  m_startOption->GetConstraints()->top.SameAs(m_delLam, wxBottom, 10);
   m_startOption->GetConstraints()->left.SameAs(m_minLam, wxLeft);
   m_startOption->GetConstraints()->width.AsIs();
   m_startOption->GetConstraints()->height.AsIs();
@@ -1243,7 +1180,7 @@ void dialogQre::AlgorithmFields(void)
   m_algorithmGroup->SetConstraints(new wxLayoutConstraints);
   m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
   m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
-  m_algorithmGroup->GetConstraints()->right.SameAs(m_tolND, wxRight, -10);
+  m_algorithmGroup->GetConstraints()->right.SameAs(m_accuracy, wxRight, -10);
   m_algorithmGroup->GetConstraints()->bottom.SameAs(m_plotType, wxBottom, -10);
 
   PxiFields();

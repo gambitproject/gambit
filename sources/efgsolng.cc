@@ -241,10 +241,7 @@ guiefgLiapEfg::guiefgLiapEfg(const EFSupport &p_support,
   m_eliminateMixed = false;
   m_markSubgames = false;
 
-  m_maxits1D = 100;
-  m_maxitsND = 20;
-  m_tol1D = 2.0e-10;
-  m_tolND = 1.0e-10;
+  m_accuracy = 1.0e-4;
   m_startOption = 0;
 }
 
@@ -255,10 +252,7 @@ gList<BehavSolution> guiefgLiapEfg::Solve(void) const
 
   EFLiapParams params(status);
   params.stopAfter = m_stopAfter;
-  params.tol1 = m_tol1D;
-  params.tolN = m_tolND;
-  params.maxits1 = m_maxits1D;
-  params.maxitsN = m_maxitsND;
+  params.SetFuncMinParams(m_accuracy);
   params.nTries = m_nTries;
   params.trace = m_traceLevel;
   params.tracefile = m_traceFile;
@@ -284,10 +278,7 @@ bool guiefgLiapEfg::SolveSetup(void)
     m_markSubgames = dialog.MarkSubgames();
 
     m_stopAfter = dialog.StopAfter();
-    m_tol1D = pow(10, -dialog.Tol1D());
-    m_tolND = pow(10, -dialog.TolND());
-    m_maxits1D = dialog.Maxits1D();
-    m_maxitsND = dialog.MaxitsND();
+    m_accuracy = pow(10, -dialog.Accuracy());
     m_nTries = dialog.NumTries();
     m_startOption = dialog.StartOption();
 
@@ -337,10 +328,8 @@ gList<BehavSolution> guiefgLiapNfg::Solve(void) const
   BehavProfile<gNumber> start = m_parent->CreateStartProfile(m_startOption);
 
   NFLiapParams params(status);
-  params.tol1 = m_tol1D;
-  params.tolN = m_tolND;
-  params.maxits1 = m_maxits1D;
-  params.maxitsN = m_maxitsND;
+  params.stopAfter = m_stopAfter;
+  params.SetFuncMinParams(m_accuracy);
   params.nTries = m_nTries;
   params.trace = m_traceLevel;
   params.tracefile = m_traceFile;
@@ -366,12 +355,10 @@ bool guiefgLiapNfg::SolveSetup(void)
     m_eliminateMixed = dialog.EliminateMixed();
     m_markSubgames = dialog.MarkSubgames();
 
-    m_tol1D = dialog.Tol1D();
-    m_tolND = dialog.TolND();
-    m_maxits1D = dialog.Maxits1D();
-    m_maxitsND = dialog.MaxitsND();
+    m_accuracy = pow(10, -dialog.Accuracy());
     m_nTries = dialog.NumTries();
     m_startOption = dialog.StartOption();
+    m_stopAfter = dialog.StopAfter();
 
     m_traceFile = dialog.TraceFile();
     m_traceLevel = dialog.TraceLevel();
@@ -1161,10 +1148,7 @@ gList<BehavSolution> guiefgQreNfg::Solve(void) const
   params.minLam = m_minLam;
   params.maxLam = m_maxLam;
   params.delLam = m_delLam;
-  params.tol1 = m_tol1D;
-  params.tolN = m_tolND;
-  params.maxits1 = m_maxits1D;
-  params.maxitsN = m_maxitsND;
+  params.SetFuncMinParams(m_accuracy);
   params.powLam = m_powLam;
   params.pxifile = m_pxiFile;
   params.trace = m_traceLevel;
@@ -1217,10 +1201,7 @@ bool guiefgQreNfg::SolveSetup(void)
     m_minLam = dialog.MinLam();
     m_maxLam = dialog.MaxLam();
     m_delLam = dialog.DelLam();
-    m_tol1D = pow(10, -dialog.Tol1D());
-    m_tolND = pow(10, -dialog.TolND());
-    m_maxits1D = dialog.Maxits1D();
-    m_maxitsND = dialog.MaxitsND();
+    m_accuracy = pow(10, -dialog.Accuracy());
     m_powLam = (dialog.LinearPlot()) ? 0 : 1;
 
     m_pxiFile = dialog.PxiFile();
@@ -1260,10 +1241,7 @@ guiefgQreEfg::guiefgQreEfg(const EFSupport &p_support,
   m_minLam = 0.01;
   m_maxLam = 30.0;
   m_delLam = 0.01;
-  m_tol1D = 2.0e-10;
-  m_tolND = 1.0e-10;
-  m_maxits1D = 100;
-  m_maxitsND = 20;
+  m_accuracy = 1.0e-4;
   m_powLam = 1;
 }
 
@@ -1275,10 +1253,7 @@ gList<BehavSolution> guiefgQreEfg::Solve(void) const
   params.minLam = m_minLam;
   params.maxLam = m_maxLam;
   params.delLam = m_delLam;
-  params.tol1 = m_tol1D;
-  params.tolN = m_tolND;
-  params.maxits1 = m_maxits1D;
-  params.maxitsN = m_maxitsND;
+  params.SetFuncMinParams(m_accuracy);
   params.powLam = m_powLam;
   params.pxifile = m_pxiFile;
   params.trace = m_traceLevel;
@@ -1322,10 +1297,7 @@ bool guiefgQreEfg::SolveSetup(void)
     m_minLam = dialog.MinLam();
     m_maxLam = dialog.MaxLam();
     m_delLam = dialog.DelLam();
-    m_tol1D = dialog.Tol1D();
-    m_tolND = dialog.TolND();
-    m_maxits1D = dialog.Maxits1D();
-    m_maxitsND = dialog.MaxitsND();
+    m_accuracy = pow(10, -dialog.Accuracy());
     m_powLam = (dialog.LinearPlot()) ? 0 : 1;
 
     m_pxiFile = dialog.PxiFile();

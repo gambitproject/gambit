@@ -345,10 +345,7 @@ guinfgLiap::guinfgLiap(const NFSupport &p_support, NfgShowInterface *p_parent,
   m_eliminateWeak = p_eliminateWeak;
   m_eliminateMixed = false;
 
-  m_maxits1D = 100;
-  m_maxitsND = 20;
-  m_tol1D = 2.0e-10;
-  m_tolND = 1.0e-10;
+  m_accuracy = 1.0e-4;
   m_startOption = 0;
 }
 
@@ -357,10 +354,7 @@ gList<MixedSolution> guinfgLiap::Solve(void)
   wxStatus status(m_parent->Frame(), "Liap Algorithm");
   NFLiapParams params(status);
   params.stopAfter = m_stopAfter;
-  params.tol1 = m_tol1D;
-  params.tolN = m_tolND;
-  params.maxits1 = m_maxits1D;
-  params.maxitsN = m_maxitsND;
+  params.SetFuncMinParams(m_accuracy);
   params.nTries = m_nTries;
   params.trace = m_traceLevel;
   params.tracefile = m_traceFile;
@@ -386,10 +380,7 @@ bool guinfgLiap::SolveSetup(void)
     m_eliminateMixed = dialog.EliminateMixed();
 
     m_stopAfter = dialog.StopAfter();
-    m_tol1D = pow(10, -dialog.Tol1D());
-    m_tolND = pow(10, -dialog.TolND());
-    m_maxits1D = dialog.Maxits1D();
-    m_maxitsND = dialog.MaxitsND();
+    m_accuracy = pow(10, -dialog.Accuracy());
     m_nTries = dialog.NumTries();
     m_startOption = dialog.StartOption();
 
@@ -541,10 +532,7 @@ gList<MixedSolution> guinfgQre::Solve(void)
   params.minLam = m_minLam;
   params.maxLam = m_maxLam;
   params.delLam = m_delLam;
-  params.tol1 = m_tol1D;
-  params.tolN = m_tolND;
-  params.maxits1 = m_maxits1D;
-  params.maxitsN = m_maxitsND;
+  params.SetFuncMinParams(m_accuracy);
   params.powLam = m_powLam;
   params.pxifile = m_pxiFile;
   params.trace = m_traceLevel;
@@ -582,10 +570,7 @@ bool guinfgQre::SolveSetup(void)
     m_minLam = dialog.MinLam();
     m_maxLam = dialog.MaxLam();
     m_delLam = dialog.DelLam();
-    m_tol1D = pow(10, -dialog.Tol1D());
-    m_tolND = pow(10, -dialog.TolND());
-    m_maxits1D = dialog.Maxits1D();
-    m_maxitsND = dialog.MaxitsND();
+    m_accuracy = pow(10, -dialog.Accuracy());
     m_powLam = (dialog.LinearPlot()) ? 0 : 1;
 
     m_pxiFile = dialog.PxiFile();
