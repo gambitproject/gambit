@@ -1499,7 +1499,11 @@ Portion* GSM_SetVerbose(Portion** param)
 
 
 
-
+Portion *GSM_Print(Portion **param)
+{
+  gout << param[0] << '\n';
+  return param[0]->ValCopy();
+}
 
 
 Portion* GSM_Write_numerical(Portion** param)
@@ -3600,6 +3604,12 @@ void Init_gsmoper(GSM* gsm)
   //------------------- Formatted Output -------------------
 
   GSM_SetWriteOptions();
+
+  FuncObj = new FuncDescObj("Print", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Print, porANYTYPE, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE));
+  gsm->AddFunction(FuncObj);
+
 
   FuncObj = new FuncDescObj("Write", 10);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Write_numerical, 

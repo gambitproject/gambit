@@ -1,13 +1,13 @@
 %{
-//#
-//# FILE: gcompile.yy -- yaccer/compiler for the GCL
-//#
-//# This parser/compiler is dedicated to the memory of
-//# Jan L. A. van de Snepscheut, who wrote a program after which
-//# this code is modeled.
-//#
-//# @(#)gcompile.yy	1.61 9/11/96
-//#
+//
+// FILE: gcompile.yy -- yaccer/compiler for the GCL
+//
+// This parser/compiler is dedicated to the memory of
+// Jan L. A. van de Snepscheut, who wrote a program after which
+// this code is modeled.
+//
+// $Id$
+//
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -54,7 +54,7 @@ gStack<gString> GCL_InputFileNames(4);
 %define MEMBERS   \
   int index; \
   gString input_text; \
-  bool bval, triv, semi; \
+  bool force_output, bval, triv, semi; \
   int statementcount; \
   gInteger ival; \
   double dval; \
@@ -162,8 +162,7 @@ gStack<gString> GCL_InputFileNames(4);
 
 program: 
               toplevel EOC 	
-              { if (!triv || !semi) emit(new NewInstr(iOUTPUT)); 
-              emit(new NewInstr(iPOP)); return 0; }
+              { return 0; }
        |      error EOC   { RecoverFromError();  return 1; }
        |      error CRLF  { RecoverFromError();  return 1; }
 
@@ -172,15 +171,17 @@ toplevel:     statements
         |     funcdecl toplevel
         |     delfunc toplevel
 
-statements:   statement
+statements:   statement                     
           |   statements sep statement
 
 sep:          SEMI    { semi = true; }
-   |          CRLF    { semi = false; 
-                        if (!triv)  { emit(new NewInstr(iOUTPUT)); } }
+   |          CRLF    { semi = false; }
 
 
-funcdecl:     DEFFUNC LBRACK NAME
+writeopt:    
+        |     WRITE
+
+funcdecl:     writeopt DEFFUNC LBRACK NAME
               { funcname = tval; function = new gList<NewInstr*>; 
                 statementcount = 0; }
               LBRACK formallist RBRACK TYPEopt COMMA 
@@ -191,13 +192,13 @@ funcdecl:     DEFFUNC LBRACK NAME
                   funcbody.remove( funcbody.length() - 1 );
               }
               optfuncdesc
-              RBRACK   { if (!triv && !semi) emit(new NewInstr(iOUTPUT));
+              RBRACK   {/* if (!triv && !semi) emit(new NewInstr(iOUTPUT));*/
 			 if (!DefineFunction())  YYERROR; } 
 
 optfuncdesc:  | { funcdesc = ""; }
               COMMA CRLFopt TEXT CRLFopt { funcdesc = tval; }
 
-delfunc:      DELFUNC LBRACK NAME
+delfunc:      writeopt DELFUNC LBRACK NAME
               { funcname = tval; function = new gList<NewInstr*>; 
                 statementcount = 0; }
               LBRACK formallist RBRACK TYPEopt
@@ -259,11 +260,11 @@ statement:    { triv = true; statementcount++; }
          |    conditional { triv = false; }
          |    whileloop { triv = false; }
          |    forloop   { triv = false; }
-         |    QUIT     { triv = false; quit = true; 
+         |    writeopt QUIT     { triv = false; quit = true; 
                          emit(new NewInstr(iQUIT)); }
 
 
-include:      INCLUDE LBRACK TEXT RBRACK
+include:      writeopt INCLUDE LBRACK TEXT RBRACK
               { 
                 LoadInputs( tval );
 	      }
@@ -356,6 +357,7 @@ exprlist:     expression  { emit(new NewInstr(iPOP)); }
         |     exprlist SEMI expression  { emit(new NewInstr(iPOP)); }
 
 expression:   Ea
+          |   WRITE expression  { emit(new NewInstr(iOUTPUT)); }
           |   Ea ASSIGN expression { emit(new NewInstr(iASSIGN)); }
           |   Ea ASSIGN { emit(new NewInstr(iUNASSIGN)); }
           ;
@@ -577,6 +579,11 @@ int GCLCompiler::yylex(void)
 {
   char c;
 
+  if (force_output)  {
+    force_output = false;
+    return WRITE;
+  }	
+
 I_dont_believe_Im_doing_this:
 
   while (1)  {
@@ -788,12 +795,16 @@ int GCLCompiler::Parse(void)
       lines.Pop();
     }
 
-    if (inputs.Depth() == 0)
+    if (inputs.Depth() == 0)  {
       gout << "GCL" << command << ": ";
+      if (gsm.Verbose())
+        gout << "<< ";
+    }
     matching.Flush();
+    if (gsm.Verbose() && inputs.Depth() == 0)
+      force_output = true;
     if (!yyparse())  {
       Execute();
-//      gsm.Dump();
       if (inputs.Depth() == 0) command++;
     }
     else 

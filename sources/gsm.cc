@@ -134,7 +134,7 @@ public:
 int GSM::_NumObj = 0;
 
 GSM::GSM(int size, gInput& s_in, gOutput& s_out, gOutput& s_err)
-:_Verbose(false), _StdIn(s_in), _StdOut(s_out), _StdErr(s_err)
+:_Verbose(true), _StdIn(s_in), _StdOut(s_out), _StdErr(s_err)
 {
 #ifndef NDEBUG
   if(size <= 0)
@@ -905,6 +905,7 @@ bool GSM::Add (void)
       ((FloatPortion*) p)->Value() += ((FloatPortion*) p2)->Value();
     else if(p->Spec().Type==porRATIONAL)
       ((RationalPortion*) p)->Value() += ((RationalPortion*) p2)->Value();
+/*
     else if(p->Spec().Type==porMIXED_FLOAT)
       (*((MixedSolution<double>*) ((MixedPortion*) p)->Value())) += 
 	(*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
@@ -917,7 +918,8 @@ bool GSM::Add (void)
     else if(p->Spec().Type==porBEHAV_RATIONAL)
       (*((BehavSolution<gRational>*) ((BehavPortion*) p)->Value())) += 
 	(*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
-    else
+*/ 
+   else
       result = false;
   }
 
@@ -950,6 +952,7 @@ bool GSM::Subtract (void)
       ((FloatPortion*) p)->Value() -= ((FloatPortion*) p2)->Value();
     else if(p->Spec().Type==porRATIONAL)
       ((RationalPortion*) p)->Value() -= ((RationalPortion*) p2)->Value();
+/*
     else if(p->Spec().Type==porMIXED_FLOAT)
       (*((MixedSolution<double>*) ((MixedPortion*) p)->Value())) -= 
 	(*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
@@ -962,7 +965,8 @@ bool GSM::Subtract (void)
     else if(p->Spec().Type==porBEHAV_RATIONAL)
       (*((BehavSolution<gRational>*) ((BehavPortion*) p)->Value())) -= 
 	(*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
-    else
+*/ 
+   else
       result = false;
   }
 
@@ -1946,10 +1950,13 @@ int GSM::Execute(gList< NewInstr* >& prog, bool user_func)
 	break;
 
       case iPOP:
+/*
 	assert(_Depth() >= 0);	
 	if(_Depth() > 0)
 	  delete _Pop();
 	instr_success = true;
+	*/
+	instr_success = Pop();
 	break;
       case iOUTPUT:
 	Output();
@@ -2120,10 +2127,15 @@ void GSM::Output(void)
   else
   {
     p = _Pop();
-    p = _ResolveRef(p);
 
-    p->Output(_StdOut);
-    if(p->Spec().Type == porREFERENCE)
+// push it right back, as Output is now a non-destructive operation
+    Portion *q = p->RefCopy();
+    _Push(p);
+
+    q = _ResolveRef(q);
+
+    q->Output(_StdOut);
+    if(q->Spec().Type == porREFERENCE)
       _StdOut << " (undefined)";
     _StdOut << "\n";
     
@@ -2141,7 +2153,7 @@ void GSM::Output(void)
     }
     */
     
-    _Push(p);
+//    _Push(p);
   }
 }
 
@@ -2179,18 +2191,15 @@ bool GSM::Pop(void)
 
   if(_Depth() > 0)
   {
-#ifdef NEW_OUTPUT
-    if( _Verbose )
+    if( _Verbose )  {
       Output();
+      delete _Pop();
+    }
     else
     {
       p = _Pop();
       delete p;
     }
-#else
-    p = _Pop();
-    delete p;
-#endif
     result = true;
   }
   else
@@ -2225,13 +2234,15 @@ Portion* GSM::PopValue( void )
 void GSM::Flush(void)
 {
   int       i;
-  bool result;
 
   assert(_Depth() >= 0);
   for(i = _Depth() - 1; i >= 0; i--)
   {
+    delete _Pop();
+/*
     result = Pop();
     assert(result == true);
+    */
   }
 
   assert(_Depth() == 0);
