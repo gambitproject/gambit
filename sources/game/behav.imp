@@ -55,18 +55,18 @@ gbtBehavProfileBase<T>::gbtBehavProfileBase(const gbtBehavProfileBase<T> &p_prof
 }
 
 template <class T>
-gbtBehavProfileBase<T>::gbtBehavProfileBase(const gbtEfgSupport &p_support) 
-  : m_profile(p_support->NumActions()), 
-    m_support(p_support),
+gbtBehavProfileBase<T>::gbtBehavProfileBase(const gbtEfgSupportBase &p_support)
+  : m_profile(p_support.NumActions()), 
+    m_support(new gbtEfgSupportBase(p_support)),
     m_cached_data(false),
-    m_realizProbs(p_support->NumNodes()),
-    m_beliefs(p_support->NumNodes()),
-    m_nvals(p_support->NumNodes()),
-    m_bvals(p_support->NumNodes()),
-    m_nodeValues(p_support->NumNodes(), p_support->NumPlayers()),
-    m_infosetValues(p_support->NumInfosets()),
-    m_actionValues(p_support->NumActions()),
-    m_gripe(p_support->NumActions())
+    m_realizProbs(p_support.NumNodes()),
+    m_beliefs(p_support.NumNodes()),
+    m_nvals(p_support.NumNodes()),
+    m_bvals(p_support.NumNodes()),
+    m_nodeValues(p_support.NumNodes(), p_support.NumPlayers()),
+    m_infosetValues(p_support.NumInfosets()),
+    m_actionValues(p_support.NumActions()),
+    m_gripe(p_support.NumActions())
 {
   InitProfile();
   Centroid();
@@ -75,7 +75,7 @@ gbtBehavProfileBase<T>::gbtBehavProfileBase(const gbtEfgSupport &p_support)
 template <class T>
 gbtBehavProfileBase<T>::gbtBehavProfileBase(const gbtMixedProfileTree<T> &p_profile)
   : m_profile(p_profile.GetGame()->NumActions()), 
-    m_support(p_profile.GetGame()->NewEfgSupport()),
+    m_support(new gbtEfgSupportBase(*p_profile.m_efgSupport)),
     m_cached_data(false),
     m_realizProbs(p_profile.GetGame()->NumNodes()),
     m_beliefs(p_profile.GetGame()->NumNodes()),
@@ -745,19 +745,19 @@ gbtBehavProfileBase<T>::operator gbtMixedProfile<T>(void) const
 template <class T>
 gbtBehavProfile<double> gbtBehavProfileBase<T>::NewBehavProfile(double) const
 {
-  return new gbtBehavProfileBase<double>(m_support);
+  return new gbtBehavProfileBase<double>(*m_support);
 }
 
 template <class T> gbtBehavProfile<gbtRational>
 gbtBehavProfileBase<T>::NewBehavProfile(const gbtRational &) const
 {
-  return new gbtBehavProfileBase<gbtRational>(m_support);
+  return new gbtBehavProfileBase<gbtRational>(*m_support);
 }
 
 template <class T> gbtBehavProfile<gbtNumber>
 gbtBehavProfileBase<T>::NewBehavProfile(const gbtNumber &) const
 {
-  return new gbtBehavProfileBase<gbtNumber>(m_support);
+  return new gbtBehavProfileBase<gbtNumber>(*m_support);
 }
 
 

@@ -205,7 +205,7 @@ gbtMixedProfile<double> gbtNfgSupportBase::NewMixedProfile(double) const
     return new gbtMixedProfileTable<double>(*const_cast<gbtNfgSupportBase *>(this));
   }
   else {
-    return new gbtMixedProfileTree<double>(const_cast<gbtNfgSupportBase *>(this));
+    return new gbtMixedProfileTree<double>(gbtEfgSupportBase(m_nfg));
   }
 }
 
@@ -216,7 +216,7 @@ gbtNfgSupportBase::NewMixedProfile(const gbtRational &) const
     return new gbtMixedProfileTable<gbtRational>(*const_cast<gbtNfgSupportBase *>(this));
   }
   else {
-    return new gbtMixedProfileTree<gbtRational>(const_cast<gbtNfgSupportBase *>(this));
+    return new gbtMixedProfileTree<gbtRational>(gbtEfgSupportBase(m_nfg));
   }
 }
 
@@ -227,7 +227,7 @@ gbtNfgSupportBase::NewMixedProfile(const gbtNumber &) const
     return new gbtMixedProfileTable<gbtNumber>(*const_cast<gbtNfgSupportBase *>(this));
   }
   else {
-    return new gbtMixedProfileTree<gbtNumber>(const_cast<gbtNfgSupportBase *>(this));
+    return new gbtMixedProfileTree<gbtNumber>(gbtEfgSupportBase(m_nfg));
   }
 }
 

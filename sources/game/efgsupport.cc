@@ -208,7 +208,7 @@ bool gbtEfgSupportPlayer::HasActiveActionsAtAllInfosets(void) const
 // gbtEfgSupportBase: Constructors, Destructors, Operators
 //--------------------------------------------------
 
-gbtEfgSupportBase::gbtEfgSupportBase(const gbtGame &p_efg)
+gbtEfgSupportBase::gbtEfgSupportBase(gbtGameBase *p_efg)
   : m_efg(p_efg), m_players(p_efg->NumPlayers()),
     is_infoset_active(0, p_efg->NumPlayers()), 
     is_nonterminal_node_active(0, p_efg->NumPlayers())
@@ -538,19 +538,19 @@ gbtEfgSupport gbtEfgSupportBase::NewEfgSupport(void) const
 
 gbtBehavProfile<double> gbtEfgSupportBase::NewBehavProfile(double) const
 {
-  return new gbtBehavProfileBase<double>(NewEfgSupport());
+  return new gbtBehavProfileBase<double>(*this);
 }
 
 gbtBehavProfile<gbtRational>
 gbtEfgSupportBase::NewBehavProfile(const gbtRational &) const
 {
-  return new gbtBehavProfileBase<gbtRational>(NewEfgSupport());
+  return new gbtBehavProfileBase<gbtRational>(*this);
 }
 
 gbtBehavProfile<gbtNumber>
 gbtEfgSupportBase::NewBehavProfile(const gbtNumber &) const
 {
-  return new gbtBehavProfileBase<gbtNumber>(NewEfgSupport());
+  return new gbtBehavProfileBase<gbtNumber>(*this);
 }
 
 gbtOutput& operator<<(gbtOutput&s, const gbtEfgSupport &p_support)

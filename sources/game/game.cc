@@ -768,7 +768,7 @@ gbtGameOutcome gbtGameBase::GetOutcome(int p_index) const
 
 gbtEfgSupport gbtGameBase::NewEfgSupport(void) const
 {
-  return new gbtEfgSupportBase(gbtGame(const_cast<gbtGameBase *>(this)));
+  return new gbtEfgSupportBase(const_cast<gbtGameBase *>(this));
 }
 
 bool gbtGameBase::IsConstSum(void) const
@@ -1457,19 +1457,19 @@ gbtNfgContingency gbtGameBase::NewContingency(void) const
 
 gbtBehavProfile<double> gbtGameBase::NewBehavProfile(double) const
 {
-  return new gbtBehavProfileBase<double>(NewEfgSupport());
+  return new gbtBehavProfileBase<double>(gbtEfgSupportBase(const_cast<gbtGameBase *>(this)));
 }
 
 gbtBehavProfile<gbtRational>
 gbtGameBase::NewBehavProfile(const gbtRational &) const
 {
-  return new gbtBehavProfileBase<gbtRational>(NewEfgSupport());
+  return new gbtBehavProfileBase<gbtRational>(gbtEfgSupportBase(const_cast<gbtGameBase *>(this)));
 }
 
 gbtBehavProfile<gbtNumber>
 gbtGameBase::NewBehavProfile(const gbtNumber &) const
 {
-  return new gbtBehavProfileBase<gbtNumber>(NewEfgSupport());
+  return new gbtBehavProfileBase<gbtNumber>(gbtEfgSupportBase(const_cast<gbtGameBase *>(this)));
 }
 
 gbtMixedProfile<double> gbtGameBase::NewMixedProfile(double) const
@@ -1478,7 +1478,7 @@ gbtMixedProfile<double> gbtGameBase::NewMixedProfile(double) const
     return new gbtMixedProfileTable<double>(gbtNfgSupportBase(const_cast<gbtGameBase *>(this)));
   }
   else {
-    return new gbtMixedProfileTree<double>(NewNfgSupport());
+    return new gbtMixedProfileTree<double>(gbtEfgSupportBase(const_cast<gbtGameBase *>(this)));
   }
 }
 
@@ -1489,7 +1489,7 @@ gbtGameBase::NewMixedProfile(const gbtRational &) const
     return new gbtMixedProfileTable<gbtRational>(gbtNfgSupportBase(const_cast<gbtGameBase *>(this)));
   }
   else {
-    return new gbtMixedProfileTree<gbtRational>(NewNfgSupport());
+    return new gbtMixedProfileTree<gbtRational>(gbtEfgSupportBase(const_cast<gbtGameBase *>(this)));
   }
 }
 
@@ -1500,7 +1500,7 @@ gbtGameBase::NewMixedProfile(const gbtNumber &) const
     return new gbtMixedProfileTable<gbtNumber>(gbtNfgSupportBase(const_cast<gbtGameBase *>(this)));
   }
   else {
-    return new gbtMixedProfileTree<gbtNumber>(NewNfgSupport());
+    return new gbtMixedProfileTree<gbtNumber>(gbtEfgSupportBase(const_cast<gbtGameBase *>(this)));
   }
 }
 

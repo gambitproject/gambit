@@ -638,23 +638,24 @@ public:
   gbtNfgSupport NewNfgSupport(void) const { return m_support->NewNfgSupport(); }
 };
 
-template <class T> class gbtBehavProfileRep;
+template <class T> class gbtBehavProfileBase;
+class gbtEfgSupportBase;
 
 template <class T>
 class gbtMixedProfileTree : public gbtMixedProfileRep<T> {
-private:
-  gbtPVector<T> m_profile;
-  gbtNfgSupport m_support;
-
 public:
-  gbtMixedProfileTree(const gbtNfgSupport &);
+  gbtPVector<T> m_profile;
+  gbtEfgSupportBase *m_efgSupport;
+  gbtNfgSupportBase *m_nfgSupport;
+
+  gbtMixedProfileTree(const gbtEfgSupportBase &);
   gbtMixedProfileTree(const gbtMixedProfileTree<T> &);
-  gbtMixedProfileTree(const gbtBehavProfileRep<T> &);
+  gbtMixedProfileTree(const gbtBehavProfileBase<T> &);
   virtual ~gbtMixedProfileTree() { }
 
   gbtMixedProfileTree<T> *Copy(void) const;
   
-  gbtGame GetGame(void) const  { return m_support->GetGame(); }
+  gbtGame GetGame(void) const  { return m_nfgSupport->GetGame(); }
   
   T Payoff(int pl) const;
   T Payoff(int pl, gbtGameStrategy) const;
@@ -663,7 +664,7 @@ public:
 
   bool operator==(const gbtMixedProfileRep<T> &) const;
 
-  gbtNfgSupport GetSupport(void) const   { return m_support; }
+  gbtNfgSupport GetSupport(void) const   { return m_nfgSupport; }
 
   operator gbtBehavProfile<T>(void) const;
 
@@ -690,33 +691,34 @@ public:
   gbtText GetComment(void) const { return ""; }
 
   // IMPLEMENTATION OF gbtConstGameRep INTERFACE
-  bool IsTree(void) const { return m_support->IsTree(); }
-  bool IsMatrix(void) const { return m_support->IsMatrix(); }
+  bool IsTree(void) const { return true; }
+  bool IsMatrix(void) const { return false; }
   
-  int NumPlayers(void) const { return m_support->NumPlayers(); }
-  gbtGamePlayer GetPlayer(int index) const { return m_support->GetPlayer(index); }
+  int NumPlayers(void) const { return m_nfgSupport->NumPlayers(); }
+  gbtGamePlayer GetPlayer(int index) const { return m_nfgSupport->GetPlayer(index); }
   
-  int NumOutcomes(void) const { return m_support->NumOutcomes(); }
+  int NumOutcomes(void) const { return m_nfgSupport->NumOutcomes(); }
   gbtGameOutcome GetOutcome(int index) const 
-  { return m_support->GetOutcome(index); }
+  { return m_nfgSupport->GetOutcome(index); }
 
-  bool IsConstSum(void) const { return m_support->IsConstSum(); }
-  gbtNumber MaxPayoff(int pl = 0) const { return m_support->MaxPayoff(pl); }
-  gbtNumber MinPayoff(int pl = 0) const { return m_support->MinPayoff(pl); }
+  bool IsConstSum(void) const { return m_nfgSupport->IsConstSum(); }
+  gbtNumber MaxPayoff(int pl = 0) const { return m_nfgSupport->MaxPayoff(pl); }
+  gbtNumber MinPayoff(int pl = 0) const { return m_nfgSupport->MinPayoff(pl); }
 
   gbtMixedProfile<double> NewMixedProfile(double) const;
   gbtMixedProfile<gbtRational> NewMixedProfile(const gbtRational &) const;
   gbtMixedProfile<gbtNumber> NewMixedProfile(const gbtNumber &) const;
 
   // IMPLEMENTATION OF gbtConstNfgRep INTERFACE
-  virtual gbtArray<int> NumStrategies(void) const 
-  { return m_support->NumStrategies(); }
-  virtual int MixedProfileLength(void) const
-  { return m_support->MixedProfileLength(); }
+  gbtArray<int> NumStrategies(void) const 
+  { return m_nfgSupport->NumStrategies(); }
+  int MixedProfileLength(void) const
+  { return m_nfgSupport->MixedProfileLength(); }
 
   gbtNfgContingency NewContingency(void) const;
 
-  gbtNfgSupport NewNfgSupport(void) const { return m_support->NewNfgSupport(); }
+  gbtNfgSupport NewNfgSupport(void) const 
+  { return m_nfgSupport->NewNfgSupport(); }
 };
 
 class gbtEfgSupportPlayer;
@@ -724,7 +726,7 @@ class gbtEfgSupportPlayer;
 class gbtEfgSupportBase : public gbtEfgSupportRep {
 public:
   gbtText m_label;
-  gbtGame m_efg;
+  gbtGameBase *m_efg;
   gbtArray<gbtEfgSupportPlayer *> m_players;
 
   // The following members were added from a derived class.
@@ -750,7 +752,7 @@ public:
                                                  const gbtGameNode &,
 						 gbtList<gbtGameInfoset> *);
 
-  gbtEfgSupportBase(const gbtGame &);
+  gbtEfgSupportBase(gbtGameBase *);
   gbtEfgSupportBase(const gbtEfgSupportBase &);
   virtual ~gbtEfgSupportBase();
 
@@ -886,7 +888,7 @@ template <class T>
 class gbtBehavProfileBase : public gbtBehavProfileRep<T> {
 public:
   gbtDPVector<T> m_profile;
-  gbtEfgSupport m_support;
+  gbtEfgSupportBase *m_support;
   mutable bool m_cached_data;
 
   // structures for storing cached data: nodes
@@ -961,7 +963,7 @@ public:
   };
 
   // CONSTRUCTORS, DESTRUCTOR
-  gbtBehavProfileBase(const gbtEfgSupport &);
+  gbtBehavProfileBase(const gbtEfgSupportBase &);
   gbtBehavProfileBase(const gbtBehavProfileBase<T> &);
   gbtBehavProfileBase(const gbtMixedProfileTree<T> &);
   virtual ~gbtBehavProfileBase();

@@ -353,15 +353,19 @@ gbtMixedProfileTable<T>::operator gbtBehavProfile<T>(void) const
 //---------------------------------------------------------------------------
 
 template <class T>
-gbtMixedProfileTree<T>::gbtMixedProfileTree(const gbtNfgSupport &p_support)
-  : m_profile(p_support->NumStrategies()), m_support(p_support)
+gbtMixedProfileTree<T>::gbtMixedProfileTree(const gbtEfgSupportBase &p_efgSupport)
+  : m_profile(gbtNfgSupportBase(p_efgSupport.m_efg).NumStrategies()),
+    m_efgSupport(new gbtEfgSupportBase(p_efgSupport)),
+    m_nfgSupport(new gbtNfgSupportBase(p_efgSupport.m_efg))
 {
   SetCentroid();
 }
 
 template <class T> 
 gbtMixedProfileTree<T>::gbtMixedProfileTree(const gbtMixedProfileTree<T> &p_profile)
-  : m_profile(p_profile.m_profile), m_support(p_profile.m_support)
+  : m_profile(p_profile.m_profile),
+    m_efgSupport(new gbtEfgSupportBase(*p_profile.m_efgSupport)),
+    m_nfgSupport(new gbtNfgSupportBase(*p_profile.m_nfgSupport))
 { }
 
 
@@ -373,11 +377,11 @@ template <class T> T gbtMixedProfileTree<T>::Payoff(int pl) const
 template <class T> T
 gbtMixedProfileTree<T>::Payoff(int pl, gbtGameStrategy strategy) const
 {
-  gbtMixedProfileTree<T> foo(m_support);
-  gbtGamePlayer player = m_support->GetPlayer(strategy->GetPlayer()->GetId());
+  gbtMixedProfileTree<T> foo(*m_efgSupport);
+  gbtGamePlayer player = m_efgSupport->GetPlayer(strategy->GetPlayer()->GetId());
   for (int st = 1; st <= player->NumStrategies();
        foo(strategy->GetPlayer()->GetId(), st++) = 0);
-  foo(strategy->GetPlayer()->GetId(), m_support->GetIndex(strategy)) = 1;
+  foo(strategy->GetPlayer()->GetId(), m_nfgSupport->GetIndex(strategy)) = 1;
   return gbtBehavProfileBase<T>(foo).Payoff(pl);
 }
 
@@ -387,10 +391,10 @@ gbtMixedProfileTree<T>::Payoff(int pl,
 			int player2, int strat2) const
 {
   if (player1 == player2) return (T) 0;
-  gbtMixedProfileTree<T> foo(m_support);
-  for (int st = 1; st <= m_support->GetPlayer(player1)->NumStrategies();
+  gbtMixedProfileTree<T> foo(*m_efgSupport);
+  for (int st = 1; st <= m_efgSupport->GetPlayer(player1)->NumStrategies();
        foo(player1, st++) = 0);
-  for (int st = 1; st <= m_support->GetPlayer(player2)->NumStrategies();
+  for (int st = 1; st <= m_efgSupport->GetPlayer(player2)->NumStrategies();
        foo(player2, st++) = 0);
   foo(player1, strat1) = 1;
   foo(player2, strat2) = 1;
@@ -409,20 +413,21 @@ void gbtMixedProfileTree<T>::Payoff(int pl, int player1, gbtVector<T> &value) co
 template <class T>
 bool gbtMixedProfileTree<T>::operator==(const gbtMixedProfileRep<T> &mp) const
 {
-  return (m_support ==
-	  dynamic_cast<const gbtMixedProfileTree<T> &>(mp).m_support &&
+  return (*m_nfgSupport ==
+	  *dynamic_cast<const gbtMixedProfileTree<T> &>(mp).m_nfgSupport &&
 	  m_profile == 
 	  dynamic_cast<const gbtMixedProfileTree<T> &>(mp).m_profile);
 }
 
 template <class T>
-gbtMixedProfileTree<T>::gbtMixedProfileTree(const gbtBehavProfileRep<T> &p_profile)
+gbtMixedProfileTree<T>::gbtMixedProfileTree(const gbtBehavProfileBase<T> &p_profile)
   : m_profile(p_profile.GetGame()->NumStrategies()),
-    m_support(p_profile.GetGame()->NewNfgSupport())
+    m_efgSupport(new gbtEfgSupportBase(*p_profile.m_support)),
+    m_nfgSupport(new gbtNfgSupportBase(p_profile.m_support->m_efg))
 {
   gbtGame efg = p_profile.GetGame();
-  for (int pl = 1; pl <= m_support->NumPlayers(); pl++)  {
-    gbtGamePlayer player = m_support->GetPlayer(pl);
+  for (int pl = 1; pl <= m_nfgSupport->NumPlayers(); pl++)  {
+    gbtGamePlayer player = m_nfgSupport->GetPlayer(pl);
     for (int st = 1; st <= player->NumStrategies(); st++)  {
       T prob = (T) 1;
       const gbtArray<int> &behav = player->GetStrategy(st)->GetBehavior();
@@ -439,7 +444,7 @@ gbtMixedProfileTree<T>::gbtMixedProfileTree(const gbtBehavProfileRep<T> &p_profi
 template <class T>
 gbtNfgContingency gbtMixedProfileTree<T>::NewContingency(void) const
 {
-  return m_support->NewContingency(); 
+  return m_nfgSupport->NewContingency(); 
 }
 
 template <class T>
@@ -454,19 +459,19 @@ gbtMixedProfileTree<T> *gbtMixedProfileTree<T>::Copy(void) const
 template <class T> gbtMixedProfile<double> 
 gbtMixedProfileTree<T>::NewMixedProfile(double) const
 {
-  return new gbtMixedProfileTree<double>(m_support);
+  return new gbtMixedProfileTree<double>(*m_efgSupport);
 }
 
 template <class T> gbtMixedProfile<gbtRational>
 gbtMixedProfileTree<T>::NewMixedProfile(const gbtRational &) const
 {
-  return new gbtMixedProfileTree<gbtRational>(m_support);
+  return new gbtMixedProfileTree<gbtRational>(*m_efgSupport);
 }
 
 template <class T> gbtMixedProfile<gbtNumber>
 gbtMixedProfileTree<T>::NewMixedProfile(const gbtNumber &) const
 {
-  return new gbtMixedProfileTree<gbtNumber>(m_support);
+  return new gbtMixedProfileTree<gbtNumber>(*m_efgSupport);
 }
 
 template <class T>
