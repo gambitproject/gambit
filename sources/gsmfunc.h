@@ -179,7 +179,8 @@ class CallFuncObj : public FuncDescObj
  private:
   struct RunTimeParamInfoType
   {
-    bool               Defined;
+    bool              Defined;
+    bool              AutoValOrRef;
     ReferencePortion* Ref;
   };
 
@@ -213,7 +214,7 @@ class CallFuncObj : public FuncDescObj
   int         FindParamName        ( const gString& param_name );
 
   void  SetCurrParamIndex   ( const int index );
-  bool  SetCurrParam ( Portion* param );
+  bool  SetCurrParam ( Portion* param, bool auto_val_or_ref = false );
 
   void        SetErrorOccurred ( void );
 

@@ -622,6 +622,7 @@ CallFuncObj::CallFuncObj( FuncDescObj* func, gOutput& s_out, gOutput& s_err )
   {
     _Param[ index ] = NO_DEFAULT_VALUE;
     _RunTimeParamInfo[ index ].Defined = false;
+    _RunTimeParamInfo[ index ].AutoValOrRef = false;
     _RunTimeParamInfo[ index ].Ref = 0;
   }
 }
@@ -747,7 +748,7 @@ void CallFuncObj::SetCurrParamIndex( const int index )
 }
 
 
-bool CallFuncObj::SetCurrParam( Portion *param )
+bool CallFuncObj::SetCurrParam( Portion *param, bool auto_val_or_ref )
 {
   ReferencePortion* ref_param = 0;
   
@@ -787,6 +788,7 @@ bool CallFuncObj::SetCurrParam( Portion *param )
   assert( _Param[ _CurrParamIndex ] == 0 );
   _Param[ _CurrParamIndex ] = param;
   _RunTimeParamInfo[ _CurrParamIndex ].Defined = true;
+  _RunTimeParamInfo[ _CurrParamIndex ].AutoValOrRef = auto_val_or_ref;
   _RunTimeParamInfo[ _CurrParamIndex ].Ref = ref_param;
   _CurrParamIndex++;
   _NumParamsDefined++;
@@ -957,10 +959,19 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	if( !_FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference &&
 	   _Param[ index ]->IsReference() )
 	{
-	  _ErrorMessage( _StdErr, 12, 0,
-			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name,
-			_FuncName );
-	  _ErrorOccurred = true;
+	  if( _RunTimeParamInfo[ index ].AutoValOrRef )
+	  {
+	    Portion* old = _Param[ index ];
+	    _Param[ index ] = old->ValCopy();
+	    delete old;
+	  }
+	  else
+	  {
+	    _ErrorMessage( _StdErr, 12, 0,
+			  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name,
+			  _FuncName );
+	    _ErrorOccurred = true;
+	  }
 	}
 	else if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference &&
 		!_Param[ index ]->IsReference() )

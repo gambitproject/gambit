@@ -989,7 +989,38 @@ bool GSM::InitCallFunction( const gString& funcname )
 
 bool GSM::Bind( const gString& param_name )
 {
-  return BindRef( param_name );
+  CallFuncObj*       func;
+  Portion*           param;
+  bool               result    = true;
+
+#ifndef NDEBUG
+  _BindCheck();
+#endif // NDEBUG
+
+  if( param_name != "" )
+    result = _BindCheck( param_name );
+
+  if( result )
+  {
+    param = _Pop();
+    
+    param = _ResolveRef( param );
+    if( param->IsValid() )
+    {
+      func = _CallFuncStack->Pop();
+      result = func->SetCurrParam( param, true );
+      _CallFuncStack->Push( func );
+    }
+    else
+    {
+      _CallFuncStack->Peek()->SetErrorOccurred();
+      _ErrorMessage( _StdErr, 59 );
+      delete param;
+      result = false;
+    }
+  }
+
+  return result;
 }
 
 
