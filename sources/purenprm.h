@@ -21,7 +21,8 @@ public:
 class PureNashSolveParamsDialog : public OutputParamsDialog,
 				  public PureNashParamsSettings {
 public:
-  PureNashSolveParamsDialog(wxWindow *p_parent = 0, bool p_subgames = false);
+  PureNashSolveParamsDialog(wxWindow *p_parent = 0, bool p_subgames = false,
+			    bool p_vianfg = false);
 };
 
 #endif  // PURENPRM_H

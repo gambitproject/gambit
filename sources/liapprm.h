@@ -30,7 +30,8 @@ public:
 class LiapSolveParamsDialog : public OutputParamsDialog,
 			      public LiapParamsSettings {
 public:
-  LiapSolveParamsDialog(wxWindow *p_parent, bool p_subgames = false);
+  LiapSolveParamsDialog(wxWindow *p_parent, bool p_subgames = false,
+			bool p_vianfg = false);
   //	~LiapSolveParamsDialog(void);
 };
 

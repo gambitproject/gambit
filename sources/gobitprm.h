@@ -32,7 +32,8 @@ public:
 class QreSolveParamsDialog : public PxiParamsDialog,
 			       public QreParamsSettings {
 public:
-  QreSolveParamsDialog(wxWindow *parent,const gText filename);
+  QreSolveParamsDialog(wxWindow *parent, const gText filename,
+		       bool p_vianfg = false);
   //	~QreSolveParamsDialog(void);
 };
 

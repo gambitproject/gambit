@@ -23,7 +23,8 @@ public:
 class EnumSolveParamsDialog : public OutputParamsDialog,
 			      public EnumParamsSettings {
 public:
-  EnumSolveParamsDialog(wxWindow *parent = 0, bool subgames = false);
+  EnumSolveParamsDialog(wxWindow *parent = 0, bool subgames = false,
+			bool vianfg = false);
 };
 
 //

@@ -183,10 +183,10 @@ void LiapParamsSettings::GetParams(NFLiapParams &p_params)
 }
 
 LiapSolveParamsDialog::LiapSolveParamsDialog(wxWindow *p_parent,
-					     bool p_subgames)
+					     bool p_subgames, bool p_vianfg)
   : OutputParamsDialog("LiapSolve Parameters", p_parent)
 {
-  MakeCommonFields(true, p_subgames);
+  MakeCommonFields(true, p_subgames, p_vianfg);
 
   Add(wxMakeFormShort("Max # Tries", &nTries, wxFORM_DEFAULT, NULL, NULL,
 		      wxVERTICAL, 100));
@@ -383,7 +383,7 @@ SeqFormParamsDialog::SeqFormParamsDialog(wxWindow *p_parent /* =0 */,
 					 bool p_subgames /* = false */)
   : OutputParamsDialog("LcpSolve Params", p_parent)
 {
-  MakeCommonFields(true, p_subgames);
+  MakeCommonFields(true, p_subgames, false);
 
   Add(wxMakeFormBool("All Solutions", &dup_strat));
   Add(wxMakeFormNewLine());
@@ -468,10 +468,11 @@ void LemkeParamsSettings::GetParams(LemkeParams &p_params)
 }
 
 LemkeSolveParamsDialog::LemkeSolveParamsDialog(wxWindow *p_parent /* = 0 */,
-					       bool p_subgames /* = false */)
+					       bool p_subgames /* = false */,
+					       bool p_vianfg /* = false */)
   : OutputParamsDialog("LcpSolve Params", p_parent, LCP_HELP)
 {
-  MakeCommonFields(true, p_subgames);
+  MakeCommonFields(true, p_subgames, p_vianfg);
 
   MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD | PRECISION_FIELD |
 		   ((p_subgames) ? SPS_FIELD : 0));
@@ -526,7 +527,7 @@ gList<BehavSolution> EfgLemkeG::Solve(void) const
 
 bool EfgLemkeG::SolveSetup(void) const
 {
-  LemkeSolveParamsDialog LSPD(parent->Frame(), true); 
+  LemkeSolveParamsDialog LSPD(parent->Frame(), true, true); 
 
   if (LSPD.Completed() == wxOK) {
     eliminate = LSPD.Eliminate();
@@ -553,10 +554,11 @@ bool EfgLemkeG::SolveSetup(void) const
 #include "purenprm.h"
 
 PureNashSolveParamsDialog::PureNashSolveParamsDialog(wxWindow *p_parent /*=0*/,
-						     bool p_subgames/*=false*/)
+						     bool p_subgames/*=false*/,
+						     bool p_vianfg/*=false*/)
   : OutputParamsDialog("EnumPureSolve Params", p_parent)
 {
-  MakeCommonFields(true, p_subgames);
+  MakeCommonFields(true, p_subgames, p_vianfg);
 
   MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD |
 		   ((p_subgames) ? SPS_FIELD : 0));
@@ -603,7 +605,7 @@ gList<BehavSolution> EfgPureNashG::Solve(void) const
 
 bool EfgPureNashG::SolveSetup(void) const
 {
-  PureNashSolveParamsDialog PNPD(parent->Frame(), true); 
+  PureNashSolveParamsDialog PNPD(parent->Frame(), true, true); 
 
   if (PNPD.Completed() == wxOK) {
     eliminate = PNPD.Eliminate();
@@ -659,7 +661,7 @@ gList<BehavSolution> EfgEPureNashG::Solve(void) const
 
 bool EfgEPureNashG::SolveSetup(void) const
 {
-  PureNashSolveParamsDialog PNPD(parent->Frame(), true); 
+  PureNashSolveParamsDialog PNPD(parent->Frame(), true);
 
   if (PNPD.Completed() == wxOK) {
     eliminate = PNPD.Eliminate();
@@ -694,10 +696,11 @@ void EnumParamsSettings::GetParams(EnumParams &p_params)
 }
 
 EnumSolveParamsDialog::EnumSolveParamsDialog(wxWindow *p_parent,
-					     bool p_subgames)
+					     bool p_subgames,
+					     bool p_vianfg)
   : OutputParamsDialog("EnumMixedSolve Params", p_parent, ENUMMIXED_HELP)
 {
-  MakeCommonFields(true, p_subgames);
+  MakeCommonFields(true, p_subgames, p_vianfg);
 
   Add(wxMakeFormNewLine());
 
@@ -816,10 +819,11 @@ void LPParamsSettings::GetParams(CSSeqFormParams &p_params)
   p_params.tracefile = OutFile();
 }
 
-LPSolveParamsDialog::LPSolveParamsDialog(wxWindow *p_parent, bool p_subgames)
+LPSolveParamsDialog::LPSolveParamsDialog(wxWindow *p_parent, bool p_subgames,
+					 bool p_vianfg)
   : OutputParamsDialog("LpSolve Params", p_parent, LP_HELP)
 {
-  MakeCommonFields(true, p_subgames);
+  MakeCommonFields(true, p_subgames, p_vianfg);
   Add(wxMakeFormNewLine());
 
   MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD | PRECISION_FIELD |
@@ -880,7 +884,7 @@ gList<BehavSolution> EfgZSumG::Solve(void) const
 
 bool EfgZSumG::SolveSetup(void) const
 {
-  LPSolveParamsDialog ZSPD(parent->Frame(), true); 
+  LPSolveParamsDialog ZSPD(parent->Frame(), true, true); 
 
   if (ZSPD.Completed() == wxOK) {
     eliminate = ZSPD.Eliminate();
@@ -997,7 +1001,7 @@ SimpdivSolveParamsDialog::SimpdivSolveParamsDialog(wxWindow *p_parent /*=0*/,
 						   bool p_subgames /*=false*/)
   : OutputParamsDialog("SimpdivSolve Params", p_parent, SIMPDIV_HELP)
 {
-  MakeCommonFields(true, p_subgames);
+  MakeCommonFields(true, p_subgames, true);
 
   Add(wxMakeFormNewLine());
   Add(wxMakeFormShort("# Restarts", &nRestarts));
@@ -1086,10 +1090,11 @@ void guiPolEnumParamsSettings::GetParams(PolEnumParams &p_params)
 }
 
 guiPolEnumParamsDialog::guiPolEnumParamsDialog(wxWindow *p_parent,
-					       bool p_subgames)
+					       bool p_subgames,
+					       bool p_vianfg)
   : OutputParamsDialog("PolEnumSolve Parameters", p_parent, LP_HELP)
 {
-  MakeCommonFields(true, p_subgames);
+  MakeCommonFields(true, p_subgames, p_vianfg);
   Add(wxMakeFormNewLine());
 
   MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD |
@@ -1140,7 +1145,7 @@ gList<BehavSolution> guiPolEnumEfgNfg::Solve(void) const
 
 bool guiPolEnumEfgNfg::SolveSetup(void) const
 {
-  guiPolEnumParamsDialog D(parent->Frame(), true); 
+  guiPolEnumParamsDialog D(parent->Frame(), true, true); 
 
   if (D.Completed() == wxOK) {
     eliminate = D.Eliminate();
@@ -1256,12 +1261,13 @@ void QreParamsSettings::GetParams(NFQreParams &p_params)
 
 
 QreSolveParamsDialog::QreSolveParamsDialog(wxWindow *p_parent,
-					       const gText p_filename)
+					   const gText p_filename,
+					   bool p_vianfg)
   : PxiParamsDialog("Qre","QRESolve Params", p_filename, p_parent,
 		    QRE_HELP),
     QreParamsSettings(p_filename), PxiParamsSettings("Qre", p_filename)
 {
-  MakeCommonFields(true, false);
+  MakeCommonFields(true, false, p_vianfg);
 
   Add(wxMakeFormFloat("minLam", &minLam, wxFORM_DEFAULT,
 		      NULL, NULL, wxVERTICAL, 100));
@@ -1377,7 +1383,7 @@ gList<BehavSolution> EfgNQreG::Solve(void) const
 
 bool EfgNQreG::SolveSetup(void) const
 {
-  QreSolveParamsDialog GSPD(parent->Frame(), parent->Filename());
+  QreSolveParamsDialog GSPD(parent->Frame(), parent->Filename(), true);
 
   if (GSPD.Completed() == wxOK) {
     eliminate = GSPD.Eliminate();

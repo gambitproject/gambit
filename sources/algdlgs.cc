@@ -166,10 +166,14 @@ OutputParamsDialog::OutputParamsDialog(const char *label,
 OutputParamsDialog::~OutputParamsDialog(void)
 { }
 
-void OutputParamsDialog::MakeCommonFields(bool p_dominance, bool p_subgames)
+void OutputParamsDialog::MakeCommonFields(bool p_dominance, bool p_subgames,
+					  bool p_vianfg)
 {
   if (p_dominance) {
-    Add(wxMakeFormMessage("Dominance elimination:"));
+    if (p_subgames && p_vianfg)
+      Add(wxMakeFormMessage("Dominance elimination on normal forms:"));
+    else
+      Add(wxMakeFormMessage("Dominance elimination:"));
     Add(wxMakeFormNewLine());
 
     m_domDepthList = new wxStringList("None", "Once", "Iterative", 0);

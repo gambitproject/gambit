@@ -91,7 +91,7 @@ public:
   virtual ~OutputParamsDialog(void);
 
   // Create the fields
-  void MakeCommonFields(bool p_dominance, bool p_subgames);
+  void MakeCommonFields(bool p_dominance, bool p_subgames, bool p_vianfg);
   void MakeOutputFields(unsigned int fields = OUTPUT_FIELD);
 };
 

@@ -22,7 +22,8 @@ public:
 class LemkeSolveParamsDialog : public OutputParamsDialog,
 			       public LemkeParamsSettings {
 public:
-  LemkeSolveParamsDialog(wxWindow *p_parent = 0, bool p_subgames = false);
+  LemkeSolveParamsDialog(wxWindow *p_parent = 0, bool p_subgames = false,
+			 bool p_vianfg = false);
 };
 
 #endif  // LEMKEPRM_H

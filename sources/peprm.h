@@ -24,7 +24,8 @@ public:
 class guiPolEnumParamsDialog : public OutputParamsDialog,
 			       public guiPolEnumParamsSettings {
 public:
-  guiPolEnumParamsDialog(wxWindow *p_parent = 0, bool p_subgames = false);
+  guiPolEnumParamsDialog(wxWindow *p_parent = 0, bool p_subgames = false,
+			 bool p_vianfg = false);
 };
 
 #endif  // PEPRM_H

@@ -26,7 +26,8 @@ public:
 class LPSolveParamsDialog : public OutputParamsDialog,
 			    public LPParamsSettings {
 public:
-  LPSolveParamsDialog(wxWindow *p_parent = 0, bool p_subgames = false);
+  LPSolveParamsDialog(wxWindow *p_parent = 0, bool p_subgames = false,
+		      bool p_vianfg = false);
 };
 
 #endif  // CSUMPRM_H
