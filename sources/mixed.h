@@ -78,9 +78,9 @@ template <class T> class MixedProfile
 
     
 };
-
+#ifndef __BORLANDC__
 template <class T> gOutput &operator<<(gOutput &f, const MixedProfile<T> &);
-
+#endif
 #endif    // MIXED_H
 
 
