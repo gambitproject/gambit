@@ -106,6 +106,16 @@ Portion *ArrayToList(const gList<Node *> &A)
   return ret;
 }
 
+Portion *ArrayToList(const gList<const EFSupport> &A)
+{
+  ListPortion *ret = new ListPortion;
+  for (int i = 1; i <= A.Length(); i++) {
+    EFSupport sup = A[i];
+    ret->Append(new EfSupportPortion(sup));
+  }
+  return ret;
+}
+
 Portion *gDPVectorToList(const gDPVector<double> &A)
 {
   ListPortion* p;
