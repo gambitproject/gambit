@@ -44,7 +44,7 @@ void RealizationProbs(const Nfg &N, const MixedProfile<T> &mp,
 	prob = (T) 0;
     }
     else  {   // n.GetPlayer() == 0
-      prob = (gRational) E.GetChanceProb(node->GetInfoset(), i);
+      prob = E.GetChanceProb(node->GetInfoset(), i).operator gRational();
     }
 
     BehavNode<T> *child = n->children[i];
