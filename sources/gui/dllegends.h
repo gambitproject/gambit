@@ -1,7 +1,10 @@
 //
-// FILE: dllegends.h -- Extensive form legend selection dialog
+// $Source$
+// $Revision$
+// $Date$
 //
-// $Id$
+// DESCRIPTION:
+// Dialog for setting legends for extensive form display
 //
 
 #ifndef DLLEGENDS_H
@@ -11,8 +14,8 @@
 
 class dialogLegends : public guiAutoDialog {
 private:
-  wxChoice *m_nodeAbove, *m_nodeBelow, *m_nodeAfter;
-  wxChoice *m_branchAbove, *m_branchBelow;
+  wxRadioBox *m_nodeAbove, *m_nodeBelow, *m_nodeAfter;
+  wxRadioBox *m_branchAbove, *m_branchBelow;
 
   const char *HelpString(void) const { return "Legends Dialog"; }
 

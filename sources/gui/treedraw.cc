@@ -1,7 +1,10 @@
 //
-// FILE: treedraw.cc -- Display configuration class for the extensive form
+// $Source$
+// $Revision$
+// $Date$
 //
-// $Id$
+// DESCRIPTION:
+// Display configuration class for the extensive form
 //
 
 #include "wx/wxprec.h"
@@ -27,19 +30,16 @@ TreeDrawSettings::TreeDrawSettings(void)
 }
 
 dialogLayout::dialogLayout(wxWindow *p_parent,
-			   int p_branchLength, int p_nodeLength,
+			   int p_nodeLength,
 			   int p_forkLength, int p_ySpacing,
 			   int p_infosetStyle)
   : guiAutoDialog(p_parent, "Layout Options")
 {
-  const int BRANCH_LENGTH_MIN = 0;
-  const int BRANCH_LENGTH_MAX = 100;
-
   const int NODE_LENGTH_MIN = 20;
   const int NODE_LENGTH_MAX = 100;
 
-  const int FORK_LENGTH_MIN = 0;
-  const int FORK_LENGTH_MAX = 100;
+  const int BRANCH_LENGTH_MIN = 0;
+  const int BRANCH_LENGTH_MAX = 100;
 
   const int Y_SPACING_MIN = 15;
   const int Y_SPACING_MAX = 60;
@@ -47,47 +47,34 @@ dialogLayout::dialogLayout(wxWindow *p_parent,
   wxStaticBoxSizer *layoutSizer =
     new wxStaticBoxSizer(new wxStaticBox(this, -1, "Tree layout parameters"),
 			 wxVERTICAL);
-			 
-  wxBoxSizer *branchSizer = new wxBoxSizer(wxHORIZONTAL);
-  branchSizer->Add(new wxStaticText(this, -1, "Branch length"),
-		   0, wxCENTER | wxALL, 5);
-  m_branchLength = new wxSlider(this, -1, p_branchLength, 
-				BRANCH_LENGTH_MIN, BRANCH_LENGTH_MAX,
+  wxFlexGridSizer *gridSizer = new wxFlexGridSizer(2);
+		
+  gridSizer->Add(new wxStaticText(this, -1, "Node length"),
+		 0, wxCENTER | wxALL, 5);
+  m_nodeLength = new wxSpinCtrl(this, -1, wxString::Format("%d", p_nodeLength),
 				wxDefaultPosition, wxDefaultSize,
-				wxSL_HORIZONTAL | wxSL_LABELS);
-  branchSizer->Add(m_branchLength, 1, wxALL | wxEXPAND, 5);
+				wxSP_ARROW_KEYS,
+				NODE_LENGTH_MIN, NODE_LENGTH_MAX);
+  gridSizer->Add(m_nodeLength, 1, wxEXPAND | wxALL, 5);
 
-  wxBoxSizer *nodeSizer = new wxBoxSizer(wxHORIZONTAL);
-  nodeSizer->Add(new wxStaticText(this, -1, "Node length"),
+  gridSizer->Add(new wxStaticText(this, -1, "Branch length"),
 		 0, wxCENTER | wxALL, 5);
-  m_nodeLength = new wxSlider(this, -1, p_nodeLength,
-			      NODE_LENGTH_MIN, NODE_LENGTH_MAX,
-			      wxDefaultPosition, wxDefaultSize,
-			      wxSL_HORIZONTAL | wxSL_LABELS);
-  nodeSizer->Add(m_nodeLength, 1, wxEXPAND | wxALL, 5);
+  m_branchLength = new wxSpinCtrl(this, -1,
+				  wxString::Format("%d", p_forkLength),
+				  wxDefaultPosition, wxDefaultSize,
+				  wxSP_ARROW_KEYS,
+				  BRANCH_LENGTH_MIN, BRANCH_LENGTH_MAX);
+  gridSizer->Add(m_branchLength, 1, wxEXPAND | wxALL, 5);
 
-  wxBoxSizer *forkSizer = new wxBoxSizer(wxHORIZONTAL);
-  forkSizer->Add(new wxStaticText(this, -1, "Fork length"),
+  gridSizer->Add(new wxStaticText(this, -1, "Vertical spacing"),
 		 0, wxCENTER | wxALL, 5);
-  m_forkLength = new wxSlider(this, -1, p_forkLength,
-			      FORK_LENGTH_MIN, FORK_LENGTH_MAX,
+  m_ySpacing = new wxSpinCtrl(this, -1, wxString::Format("%d", p_ySpacing),
 			      wxDefaultPosition, wxDefaultSize,
-			      wxSL_HORIZONTAL | wxSL_LABELS);
-  forkSizer->Add(m_forkLength, 1, wxEXPAND | wxALL, 5);
+			      wxSP_ARROW_KEYS,
+			      Y_SPACING_MIN, Y_SPACING_MAX);
+  gridSizer->Add(m_ySpacing, 1, wxEXPAND | wxALL, 5);
 
-  wxBoxSizer *spacingSizer = new wxBoxSizer(wxHORIZONTAL);
-  spacingSizer->Add(new wxStaticText(this, -1, "Vertical spacing"),
-		    0, wxCENTER | wxALL, 5);
-  m_ySpacing = new wxSlider(this, -1, p_ySpacing,
-			    Y_SPACING_MIN, Y_SPACING_MAX,
-			    wxDefaultPosition, wxDefaultSize,
-			    wxSL_HORIZONTAL | wxSL_LABELS);
-  spacingSizer->Add(m_ySpacing, 1, wxEXPAND | wxALL, 5);
-
-  layoutSizer->Add(branchSizer, 0, wxEXPAND | wxALL, 5);
-  layoutSizer->Add(nodeSizer, 0, wxEXPAND | wxALL, 5);
-  layoutSizer->Add(forkSizer, 0, wxEXPAND | wxALL, 5);
-  layoutSizer->Add(spacingSizer, 0, wxEXPAND | wxALL, 5);
+  layoutSizer->Add(gridSizer, 0, wxEXPAND | wxALL, 5);
 
   wxString lineChoices[] = { "None", "Same Level", "All Levels" };
   m_infosetStyle = new wxRadioBox(this, -1, "Show Infoset Lines",
@@ -112,70 +99,52 @@ dialogLegends::dialogLegends(wxWindow *p_parent,
   : guiAutoDialog(p_parent, "Legends")
 {
   wxStaticBoxSizer *nodeGroup = 
-    new wxStaticBoxSizer(new wxStaticBox(this, -1, "Nodes"), wxHORIZONTAL);
+    new wxStaticBoxSizer(new wxStaticBox(this, -1, "Node Labeling"),
+			 wxHORIZONTAL);
 
-  wxString nodeLabelList[] = { "Nothing", "Node Label", "Player",
-			       "Infoset Label", "Infoset ID",
-			       "Outcome", "Realiz Prob", "Belief Prob",
-			       "Value" };
+  wxString nodeLabelList[] = { "Blank", "Node label", "Player",
+			       "Information set label",
+			       "Information set number",
+			       "Outcome", "Realization probability", 
+			       "Belief probability",
+			       "Node value" };
 
-  wxBoxSizer *nodeAboveSizer = new wxBoxSizer(wxVERTICAL);
-  nodeAboveSizer->Add(new wxStaticText(this, -1, "Above"),
-		      0, wxCENTER | wxALL, 5);
-  m_nodeAbove = new wxChoice(this, -1,
-			     wxDefaultPosition, wxDefaultSize,
-			     9, nodeLabelList);
+  m_nodeAbove = new wxRadioBox(this, -1, "Above Node",
+			       wxDefaultPosition, wxDefaultSize,
+			       9, nodeLabelList, 1, wxRA_SPECIFY_COLS);
   m_nodeAbove->SetSelection(p_options.LabelNodeAbove());
-  nodeAboveSizer->Add(m_nodeAbove, 0, wxALL, 5);
+  nodeGroup->Add(m_nodeAbove, 0, wxALL, 5);
 
-  wxBoxSizer *nodeBelowSizer = new wxBoxSizer(wxVERTICAL);
-  nodeBelowSizer->Add(new wxStaticText(this, -1, "Below"),
-		      0, wxALL | wxCENTER, 5);
-  m_nodeBelow = new wxChoice(this, -1,
-			     wxDefaultPosition, wxDefaultSize,
-			     9, nodeLabelList);
+  m_nodeBelow = new wxRadioBox(this, -1, "Below Node",
+			       wxDefaultPosition, wxDefaultSize,
+			       9, nodeLabelList, 1, wxRA_SPECIFY_COLS);
   m_nodeBelow->SetSelection(p_options.LabelNodeBelow());
-  nodeBelowSizer->Add(m_nodeBelow, 0, wxALL, 5);
+  nodeGroup->Add(m_nodeBelow, 0, wxALL, 5);
 
-  wxBoxSizer *nodeAfterSizer = new wxBoxSizer(wxVERTICAL);
-  nodeAfterSizer->Add(new wxStaticText(this, -1, "Right"),
-		      0, wxALL | wxCENTER, 5);
-  wxString nodeAfterList[] = { "Nothing", "Payoffs", "Name" };
-  m_nodeAfter = new wxChoice(this, -1,
-			     wxDefaultPosition, wxDefaultSize,
-			     3, nodeAfterList);
+  wxString nodeAfterList[] = { "Blank", "Payoffs", "Outcome name" };
+  m_nodeAfter = new wxRadioBox(this, -1, "After Node",
+			       wxDefaultPosition, wxDefaultSize,
+			       3, nodeAfterList, 1, wxRA_SPECIFY_COLS);
   m_nodeAfter->SetSelection(p_options.LabelNodeRight());
-  nodeAfterSizer->Add(m_nodeAfter, 0, wxALL, 5);
-
-  nodeGroup->Add(nodeAboveSizer, 0, wxALL, 5);
-  nodeGroup->Add(nodeBelowSizer, 0, wxALL, 5);
-  nodeGroup->Add(nodeAfterSizer, 0, wxALL, 5);
+  nodeGroup->Add(m_nodeAfter, 0, wxALL, 5);
 
   wxStaticBoxSizer *branchGroup =
-    new wxStaticBoxSizer(new wxStaticBox(this, -1, "Branches"), wxHORIZONTAL);
+    new wxStaticBoxSizer(new wxStaticBox(this, -1, "Branch Labelling"),
+			 wxHORIZONTAL);
 
-  wxBoxSizer *branchAboveSizer = new wxBoxSizer(wxVERTICAL);
-  branchAboveSizer->Add(new wxStaticText(this, -1, "Above"),
-			0, wxALL | wxCENTER, 5);  
-  wxString branchLabelList[] = { "Nothing", "Label", "Player",
-				 "Probs", "Value" };
-  m_branchAbove = new wxChoice(this, -1, 
+  wxString branchLabelList[] = { "Blank", "Action label",
+				 "Action probability", "Action value" };
+  m_branchAbove = new wxRadioBox(this, -1, "Above Branch",
 			       wxDefaultPosition, wxDefaultSize,
-			       5, branchLabelList);
+			       5, branchLabelList, 1, wxRA_SPECIFY_COLS);
   m_branchAbove->SetSelection(p_options.LabelBranchAbove());
-  branchAboveSizer->Add(m_branchAbove, 0, wxALL, 5);
+  branchGroup->Add(m_branchAbove, 0, wxALL, 5);
 
-  wxBoxSizer *branchBelowSizer = new wxBoxSizer(wxVERTICAL);
-  branchBelowSizer->Add(new wxStaticText(this, -1, "Below"),
-			0, wxALL | wxCENTER, 5);
-  m_branchBelow = new wxChoice(this, -1,
-			       wxDefaultPosition, wxDefaultSize,
-			       5, branchLabelList);
+  m_branchBelow = new wxRadioBox(this, -1, "Below Branch",
+				 wxDefaultPosition, wxDefaultSize,
+				 5, branchLabelList, 1, wxRA_SPECIFY_COLS);
   m_branchBelow->SetSelection(p_options.LabelBranchBelow());
-  branchBelowSizer->Add(m_branchBelow, 0, wxALL, 5);
-
-  branchGroup->Add(branchAboveSizer, 0, wxALL, 5);
-  branchGroup->Add(branchBelowSizer, 0, wxALL, 5);
+  branchGroup->Add(m_branchBelow, 0, wxALL, 5);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(nodeGroup, 0, wxCENTER | wxALL, 5);
@@ -217,13 +186,11 @@ void TreeDrawSettings::LoadFont(const wxString &p_prefix,
 void TreeDrawSettings::SaveOptions(void)
 {
   wxConfig config("Gambit");
-  config.Write("/TreeDisplay/BranchLength", (long) branch_length);
-  config.Write("/TreeDisplay/ForkLength", (long) fork_length);
+  config.Write("/TreeDisplay/BranchLength", (long) m_branchLength);
   config.Write("/TreeDisplay/OutcomeLength", (long) outcome_length);
   config.Write("/TreeDisplay/YSpacing", (long) y_spacing);
 
   config.Write("/TreeDisplay/ChanceColor", (long) chance_color);
-  config.Write("/TreeDisplay/CursorColor", (long) cursor_color);
   config.Write("/TreeDisplay/ShowInfosets", (long) show_infosets);
   config.Write("/TreeDisplay/NodeAboveLabel", (long) node_above_label);
   config.Write("/TreeDisplay/NodeBelowLabel", (long) node_below_label);
@@ -237,7 +204,6 @@ void TreeDrawSettings::SaveOptions(void)
   SaveFont("/TreeDisplay/BranchAboveFont", config, m_branchAboveFont);
   SaveFont("/TreeDisplay/BranchBelowFont", config, m_branchBelowFont);
 
-  config.Write("/TreeDisplay/FlashingCursor",  (long) flashing_cursor);
   config.Write("/TreeDisplay/ColorOutcomes", (long) color_coded_outcomes);
   config.Write("/TreeDisplay/RootReachable", (long) root_reachable);
 }
@@ -246,16 +212,14 @@ void TreeDrawSettings::LoadOptions(void)
 {
   wxConfig config("Gambit");
 
-  config.Read("/TreeDisplay/BranchLength", &branch_length, 0);
   config.Read("/TreeDisplay/NodeLength", &node_length, 20);
-  config.Read("/TreeDisplay/ForkLength", &fork_length, 60);
+  config.Read("/TreeDisplay/BranchLength", &m_branchLength, 60);
   config.Read("/TreeDisplay/OutcomeLength", &outcome_length, 60);
   config.Read("/TreeDisplay/YSpacing", &y_spacing, 45);
 
   config.Read("/TreeDisplay/DisplayPrecision", &num_prec, 2);
 
   config.Read("/TreeDisplay/ChanceColor", &chance_color, 0);
-  config.Read("/TreeDisplay/CursorColor", &cursor_color, 10);
   config.Read("/TreeDisplay/ShowInfosets", &show_infosets, 2);
   config.Read("/TreeDisplay/NodeAboveLabel", &node_above_label, 1);
   config.Read("/TreeDisplay/NodeBelowLabel", &node_below_label, 4);
@@ -269,7 +233,6 @@ void TreeDrawSettings::LoadOptions(void)
   LoadFont("/TreeDisplay/BranchAboveFont", config, m_branchAboveFont);
   LoadFont("/TreeDisplay/BranchBelowFont", config, m_branchBelowFont);
 
-  config.Read("/TreeDisplay/FlashingCursor", &flashing_cursor, 1);
   config.Read("/TreeDisplay/ColorOutcomes", &color_coded_outcomes, 1);
   config.Read("/TreeDisplay/RootReachable", &root_reachable, 0);
 }

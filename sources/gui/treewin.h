@@ -89,6 +89,7 @@ public:
   void HilightInfoset(int pl,int iset);
 
   void RefreshLayout(void);
+  void RefreshLabels(void);
   void OutcomeChange(void) { outcomes_changed = true; }
   
   // Used by parent EfgShow when cur_sup changes

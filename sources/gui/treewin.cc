@@ -203,6 +203,12 @@ void TreeWindow::RefreshLayout(void)
   AdjustScrollbarSteps();
 }
 
+void TreeWindow::RefreshLabels(void)
+{
+  m_layout.GenerateLabels();
+  Refresh();
+}
+
 void TreeWindow::AdjustScrollbarSteps(void)
 {
   int width, height;

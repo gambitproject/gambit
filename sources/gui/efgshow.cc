@@ -1703,6 +1703,7 @@ void EfgShow::OnFormatLegend(wxCommandEvent &)
     m_treeWindow->DrawSettings().SetLabelNodeRight(dialog.GetNodeAfter());
     m_treeWindow->DrawSettings().SetLabelBranchAbove(dialog.GetBranchAbove());
     m_treeWindow->DrawSettings().SetLabelBranchBelow(dialog.GetBranchBelow());
+    m_treeWindow->RefreshLabels();
   }
 }
 
@@ -1714,7 +1715,7 @@ void EfgShow::OnFormatFontsAboveNode(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetNodeAboveFont(dialog.GetFontData().GetChosenFont());
-    m_treeWindow->Refresh();
+    m_treeWindow->RefreshLabels();
   }
 }
 
@@ -1725,7 +1726,7 @@ void EfgShow::OnFormatFontsBelowNode(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetNodeBelowFont(dialog.GetFontData().GetChosenFont());
-    m_treeWindow->Refresh();
+    m_treeWindow->RefreshLabels();
   }
 }
 
@@ -1736,7 +1737,7 @@ void EfgShow::OnFormatFontsAfterNode(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetNodeRightFont(dialog.GetFontData().GetChosenFont());
-    m_treeWindow->Refresh();
+    m_treeWindow->RefreshLabels();
   }
 }
 
@@ -1747,7 +1748,7 @@ void EfgShow::OnFormatFontsAboveBranch(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetBranchAboveFont(dialog.GetFontData().GetChosenFont());
-    m_treeWindow->Refresh();
+    m_treeWindow->RefreshLabels();
   }
 }
 
@@ -1758,7 +1759,7 @@ void EfgShow::OnFormatFontsBelowBranch(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetBranchBelowFont(dialog.GetFontData().GetChosenFont());
-    m_treeWindow->Refresh();
+    m_treeWindow->RefreshLabels();
   }
 }
 
@@ -1767,14 +1768,13 @@ void EfgShow::OnFormatDisplayLayout(wxCommandEvent &)
   TreeDrawSettings &settings = m_treeWindow->DrawSettings();
 
   dialogLayout dialog(this,
-		      settings.BranchLength(), settings.NodeLength(),
-		      settings.ForkLength(), settings.YSpacing(),
+		      settings.NodeLength(),
+		      settings.BranchLength(), settings.YSpacing(),
 		      settings.ShowInfosets());
 
   if (dialog.ShowModal() == wxID_OK) {
-    settings.SetBranchLength(dialog.BranchLength());
     settings.SetNodeLength(dialog.NodeLength());
-    settings.SetForkLength(dialog.ForkLength());
+    settings.SetBranchLength(dialog.BranchLength());
     settings.SetYSpacing(dialog.YSpacing());
     settings.SetShowInfosets(dialog.InfosetStyle());
 

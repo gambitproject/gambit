@@ -15,11 +15,11 @@
 
 class TreeDrawSettings {
 private:
-  int branch_length, node_length, fork_length, y_spacing;
+  int node_length, m_branchLength, y_spacing;
   int outcome_length;
 
   // Colors
-  int chance_color, cursor_color;
+  int chance_color;
 
   // Labeling info
   int show_infosets;
@@ -32,9 +32,6 @@ private:
   wxFont m_nodeAboveFont, m_nodeBelowFont, m_nodeRightFont;
   wxFont m_branchAboveFont, m_branchBelowFont;
 
-  // Cursor stuff.
-  bool    flashing_cursor;
-
   // Display only those nodes in the support that are reachable from root.
   bool root_reachable;
 
@@ -44,12 +41,9 @@ private:
 public:
   TreeDrawSettings(void);
   
-  // Size of the various tree parts.
-  int     BranchLength(void) const  { return branch_length; }
-  void    SetBranchLength(int l)    { branch_length = l;    }
-  int     ForkLength(void) const    { return fork_length;   }
-  void    SetForkLength(int l)      { fork_length = l;      }
-  int     NodeLength(void) const    { return node_length;   }
+  int BranchLength(void) const { return m_branchLength; }
+  void SetBranchLength(int p_length) { m_branchLength = p_length; }
+  int     NodeLength(void) const    { return node_length; }
   void    SetNodeLength(int l)      { node_length = l;      }
   int     YSpacing(void) const      { return y_spacing;     }
   void    SetYSpacing(int l)        { y_spacing = l;        }
@@ -87,14 +81,6 @@ public:
   const wxFont &BranchAboveFont(void) const { return m_branchAboveFont; }
   void SetBranchBelowFont(const wxFont &p_font) { m_branchBelowFont = p_font; }
   const wxFont &BranchBelowFont(void) const { return m_branchBelowFont; }
-
-  // Control the cursor style [flashing or non-flashing].
-  void    SetFlashingCursor(bool f)  { flashing_cursor = f;    }
-  bool    FlashingCursor(void) const { return flashing_cursor; }
-
-  // Control the color of the cursor.
-  int     CursorColor(void) const { return cursor_color; }
-  void    SetCursorColor(int _cl) { cursor_color = _cl;  }
 
   // Control what nodes are displayed in the support.
   bool    RootReachable(void) const { return root_reachable; }

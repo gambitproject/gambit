@@ -27,22 +27,20 @@ const int NODE_BELOW_REALIZPROB = 6;
 const int NODE_BELOW_BELIEFPROB = 7;
 const int NODE_BELOW_VALUE = 8;
 
-
-const int BRANCH_ABOVE_NOTHING = 0;
-const int BRANCH_ABOVE_LABEL = 1;
-const int BRANCH_ABOVE_PLAYER = 2;
-const int BRANCH_ABOVE_PROBS = 3;
-const int BRANCH_ABOVE_VALUE = 4;
-
-const int BRANCH_BELOW_NOTHING = 0;
-const int BRANCH_BELOW_LABEL = 1;
-const int BRANCH_BELOW_PLAYER = 2;
-const int BRANCH_BELOW_PROBS = 3;
-const int BRANCH_BELOW_VALUE = 4;
-
 const int NODE_RIGHT_NOTHING = 0;
 const int NODE_RIGHT_OUTCOME = 1;
 const int NODE_RIGHT_NAME = 2;
+
+const int BRANCH_ABOVE_NOTHING = 0;
+const int BRANCH_ABOVE_LABEL = 1;
+const int BRANCH_ABOVE_PROBS = 2;
+const int BRANCH_ABOVE_VALUE = 3;
+
+const int BRANCH_BELOW_NOTHING = 0;
+const int BRANCH_BELOW_LABEL = 1;
+const int BRANCH_BELOW_PROBS = 2;
+const int BRANCH_BELOW_VALUE = 3;
+
 
 
 typedef struct {
@@ -82,7 +80,6 @@ const l_struct branch_above_src[] =
 {
   {"Nothing",        BRANCH_ABOVE_NOTHING},
   {"Label",          BRANCH_ABOVE_LABEL},
-  {"Player",         BRANCH_ABOVE_PLAYER},
   {"Probs",          BRANCH_ABOVE_PROBS},
   {"Value",          BRANCH_ABOVE_VALUE},
   {"",               -1}
@@ -92,7 +89,6 @@ const l_struct branch_below_src[] =
 {
   {"Nothing",        BRANCH_BELOW_NOTHING},
   {"Label",          BRANCH_BELOW_LABEL},
-  {"Player",         BRANCH_BELOW_PLAYER},
   {"Probs",          BRANCH_BELOW_PROBS},
   {"Value",          BRANCH_BELOW_VALUE},
   {"",               -1}

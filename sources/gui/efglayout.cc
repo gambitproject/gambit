@@ -313,7 +313,7 @@ Node *efgTreeLayout::BranchHitTest(int p_x, int p_y) const
       if (p_x > (parent_entry->x + m_parent->DrawSettings().NodeLength() + 
 		 parent_entry->GetSublevel() * INFOSET_SPACING + 10) &&
 	  p_x < (parent_entry->x + m_parent->DrawSettings().NodeLength() +
-		 m_parent->DrawSettings().ForkLength() +
+		 m_parent->DrawSettings().BranchLength() +
 		 parent_entry->GetSublevel() * INFOSET_SPACING)) {
 	// Good old slope/intercept method for finding a point on a line
 	int y0 = (parent_entry->y + 
@@ -321,7 +321,7 @@ Node *efgTreeLayout::BranchHitTest(int p_x, int p_y) const
 			 m_parent->DrawSettings().NodeLength() -
 			 parent_entry->nums * INFOSET_SPACING) *
 		  (entry->y - parent_entry->y) / 
-		  m_parent->DrawSettings().ForkLength());
+		  m_parent->DrawSettings().BranchLength());
 
 	if (p_y > y0-2 && p_y < y0+2) {
 	  return entry->GetNode();
@@ -336,6 +336,8 @@ Node *efgTreeLayout::BranchHitTest(int p_x, int p_y) const
 
 Node *efgTreeLayout::BranchAboveHitTest(int p_x, int p_y) const
 {
+#ifdef UNUSED
+  // Needs to be updated for new tree style
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     NodeEntry *entry = m_nodeList[i];
 
@@ -347,11 +349,13 @@ Node *efgTreeLayout::BranchAboveHitTest(int p_x, int p_y) const
       return entry->GetNode();
     }
   }
+#endif
   return 0;
 }
 
 Node *efgTreeLayout::BranchBelowHitTest(int p_x, int p_y) const
 {
+#ifdef UNUSED
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     NodeEntry *entry = m_nodeList[i];
 
@@ -363,6 +367,7 @@ Node *efgTreeLayout::BranchBelowHitTest(int p_x, int p_y) const
       return entry->GetNode();
     }
   }
+#endif
   return 0;
 }
 
@@ -483,8 +488,6 @@ wxString efgTreeLayout::CreateBranchAboveLabel(const NodeEntry *p_entry) const
     return "";
   case BRANCH_ABOVE_LABEL:
     return (const char *) parent->GetInfoset()->GetActionName(p_entry->child_number);
-  case BRANCH_ABOVE_PLAYER:
-    return (const char *) parent->GetPlayer()->GetName();
   case BRANCH_ABOVE_PROBS:
     return (const char *) m_parent->Parent()->GetActionProb(parent,
 							    p_entry->child_number);
@@ -505,8 +508,6 @@ wxString efgTreeLayout::CreateBranchBelowLabel(const NodeEntry *p_entry) const
     return "";
   case BRANCH_BELOW_LABEL:
     return (const char *) parent->GetInfoset()->GetActionName(p_entry->child_number);
-  case BRANCH_BELOW_PLAYER:
-    return (const char *) parent->GetPlayer()->GetName();
   case BRANCH_BELOW_PROBS:
     return (const char *) m_parent->Parent()->GetActionProb(parent,
 							    p_entry->child_number);
@@ -645,9 +646,8 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
     
   entry->infoset.y = -1;
   entry->infoset.x = -1;
-  entry->x = level * 
-    (draw_settings.NodeLength() + draw_settings.BranchLength() +
-     draw_settings.ForkLength());
+  entry->x = level * (draw_settings.NodeLength() +
+		      draw_settings.BranchLength());
   if (n->GetPlayer() && n->GetPlayer()->IsChance()) {
     entry->color = wxGetApp().GetPreferences().GetChanceColor();
   }
