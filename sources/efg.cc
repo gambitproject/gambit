@@ -569,7 +569,10 @@ Infoset *BaseEfg::SwitchPlayer(Infoset *s, EFPlayer *p)
 
 void BaseEfg::CopySubtree(Node *src, Node *dest, Node *stop)
 {
-  if (src == stop)   return;
+  if (src == stop) {
+    dest->outcome = src->outcome;
+    return;
+  }
 
   if (src->children.Length())  {
     AppendNode(dest, src->infoset);
