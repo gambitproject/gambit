@@ -112,7 +112,8 @@ gString gString::operator+(const char *s) const
 
 gString gString::right(int len) const
 {
-  return gString(storage + strlen(storage) - len);
+  int pos = strlen( storage ) - len;
+  return gString(storage + ( pos > 0 ? pos : 0 ) );
 }
 
 gString gString::left(int len) const
