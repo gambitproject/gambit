@@ -421,12 +421,10 @@ void GambitFrame::LoadFile(char *s)
       //  filename = wxStrLwr(filename);  // ignore case
       // FileNameFromPath() is buggy if there is no path, so do following instead
 
-      gout << "\ns: " << s;
       gText filename(s);
       if(strstr("/",s) || strstr("\\",s))
 	filename = FileNameFromPath(s);
       filename = filename.Dncase();
-      gout << "\nfilename: " << filename;
         
 #ifndef EFG_ONLY
         if (strstr((const char *)filename, ".nfg"))       // This must be a normal form.
