@@ -8,7 +8,7 @@
 #ifndef GMATRIX_H
 #define GMATRIX_H
 
-#include "gbmatrix.2.h"
+#include "gbmatrix.h"
 
 #ifdef __GNUC__
 #define INLINE inline
