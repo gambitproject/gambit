@@ -153,6 +153,7 @@ void PxiChild::MakeMenus(void)
 }
 
 #include "../sources/bitmaps/open.xpm"
+#include "../sources/bitmaps/preview.xpm"
 #include "../sources/bitmaps/print.xpm"
 #include "../sources/bitmaps/zoomin.xpm"
 #include "../sources/bitmaps/zoomout.xpm"
@@ -167,8 +168,10 @@ void PxiChild::MakeToolbar(void)
 
   toolBar->AddTool(wxID_OPEN, wxBITMAP(open), wxNullBitmap, false,
 		   -1, -1, 0, "Open", "Open a saved datafile");
-  toolBar->AddTool(wxID_PREVIEW, wxBITMAP(print), wxNullBitmap, false,
+  toolBar->AddTool(wxID_PREVIEW, wxBITMAP(preview), wxNullBitmap, false,
 		   -1, -1, 0, "Preview", "View a preview of the printout");
+  toolBar->AddTool(wxID_PRINT, wxBITMAP(print), wxNullBitmap, false,
+		   -1, -1, 0, "Print", "Print this graph");
   toolBar->AddSeparator();
   toolBar->AddTool(PXI_VIEW_ZOOM_IN, wxBITMAP(zoomin), wxNullBitmap, false,
 		   -1, -1, 0, "Zoom in", "Zoom in");
@@ -243,8 +246,9 @@ void PxiChild::OnFilePrint(wxCommandEvent &)
   PxiPrintout printout(*canvas, "PXI printout");
 
   if (!printer.Print(this, &printout, TRUE)) {
-    wxMessageBox("There was an error in printing", "Error", wxOK);
-    return;
+    if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {
+      wxMessageBox("There was an error in printing", "Error", wxOK);
+    }
   }
   else {
     m_printData = printer.GetPrintDialogData().GetPrintData();
