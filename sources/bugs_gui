@@ -37,12 +37,7 @@ to a directory where the help files live.
 
 //------------------------------
 
-Bug D5: Loading and saving files
-
-When you load a file (efg or nfg) in the GUI, it should
-remember the directory you got it from, and next time you try and load
-a file, start the file load menu in that directory, rather than
-starting in the same location as it started the first time.  
+Bug D5: Saving files
 
 When saving a file in the GUI, it should remember the current
 name of the file, and use the same name when saving the file.  Also,

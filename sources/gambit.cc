@@ -344,7 +344,7 @@ wxFrame *GambitApp::OnInit(void)
     }
 
     // Return the main frame window.
-	main_gambit_frame = gambit_frame;
+    main_gambit_frame = gambit_frame;
     return gambit_frame;
 }
 
@@ -386,7 +386,16 @@ void GambitFrame::LoadFile(char *s)
         }
         else
         {
-            s = wxFileSelector("Load data file", NULL, NULL, NULL, "*.?fg");
+            // Load current directory into default path.
+            static char path[1024] = "";
+            if (strcmp(path, "") == 0)
+                strcpy(path, wxGetWorkingDirectory());
+
+            s = wxFileSelector("Load data file", path, NULL, NULL, "*.?fg");
+
+            // Save the current directory.
+            strcpy(path, wxPathOnly(s));
+
             GUI_RECORD_ARG("GambitFrame::LoadFile", 1, s);
         }
     }
