@@ -161,7 +161,7 @@ void EFLiapG<T>::SolveSetup(void) const
 TEMPLATE class EFLiapG<double>;
 
 
-EFLiapG<gRational>::EFLiapG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<T>(E,parent)
+EFLiapG<gRational>::EFLiapG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<gRational>(E,parent)
 
 { }
 
@@ -211,7 +211,7 @@ void NFLiapG<T>::SolveSetup(void) const
 
 TEMPLATE class NFLiapG<double>;
 
-NFLiapG<gRational>::NFLiapG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<T>(E,parent)
+NFLiapG<gRational>::NFLiapG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<gRational>(E,parent)
 { }
 
 void NFLiapG<gRational>::SolveSetup(void) const
@@ -566,7 +566,7 @@ void NGobitG<double>::SolveSetup(void) const
 {GobitSolveParamsDialog<double> GSPD(parent->Frame(),parent->Filename());}
 
 
-NGobitG<gRational>::NGobitG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<T>(E,parent)
+NGobitG<gRational>::NGobitG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<gRational>(E,parent)
 { }
 
 void NGobitG<gRational>::SolveSetup(void) const
@@ -598,7 +598,7 @@ void EGobitG<double>::SolveSetup(void) const
 {GobitSolveParamsDialog<double> GSPD(parent->Frame(),parent->Filename());}
 
 
-EGobitG<gRational>::EGobitG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<T>(E,parent)
+EGobitG<gRational>::EGobitG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<gRational>(E,parent)
 { }
 
 void EGobitG<gRational>::SolveSetup(void) const
@@ -662,7 +662,7 @@ void GobitAllG<T>::SolveSetup(void) const
 
 TEMPLATE class GobitAllG<double>;
 
-GobitAllG<gRational>::GobitAllG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<T>(E,parent)
+GobitAllG<gRational>::GobitAllG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<gRational>(E,parent)
 { }
 
 void GobitAllG<gRational>::SolveSetup(void) const
