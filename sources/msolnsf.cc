@@ -158,6 +158,10 @@ return Equal;
 #include "gslist.imp"
 TEMPLATE class gSortList<MixedSolution<double> >;
 TEMPLATE class gSortList<MixedSolution<gRational> >;
+TEMPLATE class gListSorter<MixedSolution<gRational> >;
+TEMPLATE class gListSorter<MixedSolution<double> >;
+TEMPLATE class  gListFilter<MixedSolution<gRational> >;
+TEMPLATE class  gListFilter<MixedSolution<double> >;
 
 TEMPLATE class MSolnSorterFilter<double>;
 TEMPLATE class MSolnSorterFilter<gRational>;
