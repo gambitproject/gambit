@@ -1,0 +1,212 @@
+//
+// FILE: subsolve.imp -- Implementation of solve-by-subgame algorithms
+//
+// $Id$
+//
+
+#include "subsolve.h"
+
+//-------------------------------------------------------------------------
+//                Implementation of base solver algorithm
+//-------------------------------------------------------------------------
+
+template <class T>
+void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
+						gList<Outcome *> &values)
+{
+  int i;
+  int failed;
+  
+  gList<BehavProfile<T> > thissolns;
+  thissolns.Append(solution);
+  ((gVector<T> &) thissolns[1]).operator=((T) 0);
+  
+  gList<Node *> subroots;
+  ChildSubgames(n, subroots);
+  
+  gList<gArray<Outcome *> > subrootvalues;
+  subrootvalues.Append(gArray<Outcome *>(subroots.Length()));
+  
+  for (i = 1; i <= subroots.Length(); i++)  {
+    gList<BehavSolution<T> > subsolns;
+    gList<Outcome *> subvalues;
+    
+    FindSubgames(subroots[i], subsolns, subvalues);
+    
+    if (subsolns.Length() == 0)  {
+      solns.Flush();
+      return;
+    }
+    
+    assert(subvalues.Length() == subsolns.Length());
+    
+    gList<BehavProfile<T> > newsolns;
+    gList<gArray<Outcome *> > newsubrootvalues;
+    
+    for (int soln = 1; soln <= thissolns.Length() &&
+	 (max_solns == 0 || newsolns.Length() <= max_solns);
+	 soln++)
+      for (int subsoln = 1; subsoln <= subsolns.Length() &&
+	   (max_solns == 0 || newsolns.Length() <= max_solns); subsoln++)  {
+	BehavProfile<T> bp(thissolns[soln]);
+	bp += subsolns[subsoln];
+	newsolns.Append(bp);
+	
+	newsubrootvalues.Append(subrootvalues[soln]);
+	newsubrootvalues[newsubrootvalues.Length()][i] = subvalues[subsoln];
+      }
+    
+    thissolns = newsolns;
+    subrootvalues = newsubrootvalues;
+  }
+  
+  assert(n->GetSubgameRoot() == n);
+  
+  // This is here to allow called hook code to figure out which subgame
+  // is currently being solved.  The number should correspond to the index
+  // of the subgame in the list returned by SubgameRoots().
+  
+  subgame_number++;
+  
+  for (int soln = 1; soln <= thissolns.Length(); soln++)   {
+    for (i = 1; i <= subroots.Length(); i++)
+      subroots[i]->SetOutcome(subrootvalues[soln][i]);
+    
+    Efg<T> foo(efg, n);
+    // this prevents double-counting of outcomes at roots of subgames
+    // by convention, we will just put the payoffs in the parent subgame
+    foo.RootNode()->SetOutcome(0);
+    
+    ViewSubgame(subgame_number, foo);
+    
+    gList<BehavSolution<T> > sol;
+    failed = SolveSubgame(foo, sol);
+    
+    SelectSolutions(subgame_number, foo, sol);
+    
+    // put behav profile in "total" solution here...
+    
+    if (sol.Length() == 0)  {
+      solns.Flush();
+      return;
+    }
+    
+    gList<Node *> nodes;
+    Nodes(efg, n, nodes);
+    
+    for (int solno = 1; solno <= sol.Length(); solno++)  {
+      solns.Append(thissolns[soln]);
+      
+      for (int pl = 1; pl <= foo.NumPlayers(); pl++)  {
+	EFPlayer *p = foo.PlayerList()[pl];
+	int index;
+	
+	for (index = 1; index <= nodes.Length() &&
+	     nodes[index]->GetPlayer() != efg.PlayerList()[pl]; index++);
+	
+	if (index > nodes.Length())  continue;
+	
+	int base;
+	
+	for (base = 1; base <= efg.PlayerList()[pl]->NumInfosets(); base++)
+	  if (efg.PlayerList()[pl]->InfosetList()[base] ==
+	      nodes[index]->GetInfoset())  break;
+	
+	assert(base <= efg.PlayerList()[pl]->NumInfosets());
+	
+	for (int iset = 1; iset <= p->NumInfosets(); iset++)  {
+	  for (index = 1; index <= infosets[pl]->Length(); index++)
+	    if ((*infosets[pl])[index] == efg.PlayerList()[pl]->InfosetList()[iset + base - 1])
+	      break;
+	  
+	  assert(index <= infosets[pl]->Length());
+	  
+	  for (int act = 1; act <= p->InfosetList()[iset]->NumActions();
+	       act++)
+	    solns[solns.Length()](pl, index, act) = sol[solno](pl, iset, act);
+	}
+	
+	solns[solns.Length()].SetCreator(AlgorithmID());
+	if(failed == 0)
+	  solns[solns.Length()].SetIsNash(T_YES);
+      }
+      
+      gVector<T> subval(foo.NumPlayers());
+      for (i = 1; i <= foo.NumPlayers(); i++)  {
+	subval[i] = sol[solno].Payoff(i);
+	if (n->GetOutcome())
+	  subval[i] += ((OutcomeVector<T> &) *n->GetOutcome())[i];
+      }
+
+      OutcomeVector<T> *ov = efg.NewOutcome();
+      for (i = 1; i <= efg.NumPlayers(); i++)
+	(*ov)[i] = subval[i];
+ 
+      values.Append(ov);
+    }
+  }
+
+  efg.DeleteTree(n);
+}
+
+// These are dummies... for specific applications, these can be overriden
+// in derived classes to allow interactive access to the solution process
+
+// This is called immediately after the subgame is constructed in the
+// solution process.  Mostly to allow viewing of the subgame, but probably
+// isn't generally useful.
+
+template <class T>
+void SubgameSolver<T>::ViewSubgame(int, const Efg<T> &)
+{ }
+
+// This is called in the normal-form solution modules after the normal
+// form is constructed.  Note especially that the Nfg is passed
+// non-const, so that strategies may be eliminated as seen fit.
+// It is assumed that the NFSupport returned is "sensible"
+
+template <class T>
+void SubgameSolver<T>::ViewNormal(const Nfg<T> &, NFSupport *&)
+{ }
+// This is called for each subgame after the solutions have been computed
+// The idea is for the called code to possibly allow for viewing or
+// selection of "interesting" equilibria for further computation during
+// the process.  Again, there is no restriction that one can't
+// muck about with the solution list in "bad" ways using this.
+// Caveat utor!
+
+template <class T>
+void SubgameSolver<T>::SelectSolutions(int, const Efg<T> &,
+				       gList<BehavSolution<T> > &)
+{ }
+
+template <class T> SubgameSolver<T>::SubgameSolver(const Efg<T> &E, int max)
+  : max_solns(max), efg(E), solution(E), infosets(E.NumPlayers())
+{
+  for (int i = 1; i <= efg.NumPlayers(); i++)
+    infosets[i] = new gArray<Infoset *>(efg.PlayerList()[i]->InfosetList());
+}
+
+template <class T> SubgameSolver<T>::~SubgameSolver()  
+{
+  for (int i = 1; i <= efg.NumPlayers(); i++)
+    delete infosets[i];
+}
+
+template <class T> 
+void SubgameSolver<T>::Solve(void)
+{
+  gWatch watch;
+
+  solutions.Flush();
+  subgame_number = 0;
+
+  gList<Outcome *> values;
+
+  ((gVector<T> &) solution).operator=((T) 0);
+
+  FindSubgames(efg.RootNode(), solutions, values);
+
+  time = watch.Elapsed();
+}
+
