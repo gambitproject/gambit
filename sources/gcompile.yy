@@ -118,9 +118,9 @@ statements:   statement
           |   statements sep statement
           |   funcdecl
 
-sep:          SEMI    { semi = true;  emit(new Pop); }
+sep:          SEMI    { semi = true; }
    |          CRLF    { semi = false; 
-                        if (!triv)  { emit(new Display); emit(new Pop); } }
+                        if (!triv)  { emit(new Display); } }
 
 funcdecl:     DEFFUNC LBRACK NAME
               { funcname = tval; function = new gList<Instruction *>; }
@@ -309,11 +309,11 @@ named_arg:    NAME RARROW { formalstack.Push(tval); } expression
                            { emit(new PushRef(tval));
                              emit(new Bind(formalstack.Pop())); }
 
-list:         LBRACE  { listlen.Push(0); } listels RBRACE
-    |         LBRACE  { listlen.Push(0); }  RBRACE
+list:         LBRACE { listlen.Push(0); } listels RBRACE
+    |         LBRACE { listlen.Push(0); }  RBRACE
 
 listels:      listel
-       |      listels COMMA listel
+       |      listels CRLFopt COMMA CRLFopt listel
 
 listel:       expression   { listlen.Push(listlen.Pop() + 1); }
 
