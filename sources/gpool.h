@@ -4,6 +4,9 @@
 // $Id$
 //
 
+#ifndef GPOOL_H
+#define GPOOL_H
+
 class gPool   {
 private:
   struct gLink  { gLink *next; };
@@ -40,4 +43,6 @@ inline void gPool::Free(void *b)
   p->next = head;
   head = p;
 }
+
+#endif   // GPOOL_H
 
