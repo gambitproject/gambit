@@ -1,5 +1,5 @@
 //
-// FILE: gstring.h -- Definition of gText class
+// FILE: gtext.h -- Definition of gText class
 //
 // $Id$
 //
@@ -87,21 +87,30 @@ class gText   {
     bool operator>=(const char *s) const     { return strcmp(storage, s) >= 0; }
 
 	  // SUBSCRIPTORS
-    char &operator[](unsigned int n)      
-     { if (n <= strlen(storage))  return *(storage + n); 
 #ifdef USE_EXCEPTIONS
-       throw BadIndex(); }
+    char &operator[](unsigned int n)
+      { if (n > strlen(storage))   throw BadIndex();
+        return *(storage + n);
+      }
 #else
-       assert(0); }
+    char &operator[](unsigned int n)      
+      { assert(n <= strlen(storage));
+	return *(storage + n);
+      }
 #endif   // USE_EXCEPTIONS
 
-    char operator[](unsigned int n) const 
-     { if (n <= strlen(storage))  return *(storage + n);
 #ifdef USE_EXCEPTIONS
-       throw BadIndex(); }
+    char &operator[](unsigned int n) const
+      { if (n > strlen(storage))   throw BadIndex();
+        return *(storage + n);
+      }
 #else
-       assert(0); }
-#endif    // USE_EXCEPTIONS 
+    char &operator[](unsigned int n) const      
+      { assert(n <= strlen(storage));
+	return *(storage + n);
+      }
+#endif   // USE_EXCEPTIONS
+
     char *operator+(int n)        { return storage + n; }
 
    	// CONVERSIONS
