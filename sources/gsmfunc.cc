@@ -534,44 +534,46 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
                               Portion* (*funcptr)(Portion**)  )
 {
 
-  // Here we will parse the gString and call the above SetFuncInfo function.
+    // Here we will parse the gString and call the above SetFuncInfo function.
   char ch = ' ';
   int index=0, length=s.length();
   int numArgs=0;
   bool done = false;
+  bool required = false;
   gList<gString> specList;
   gList<gString> nameList;
   gList<int>     listList;
   gList<Portion*>     reqList;
   
-    // Move ch to the first variable name (most likely x)
+    // Move ch to the first variable name
   while (ch != '[' && index<=length)  
     ch=s[index++];
-  ch=s[index++];
+  ch=s[index++];  // ch should now hold first letter of the first name
 
-  if (ch == '{')
+  while (!done)  // ch should always be at beginning of next name here
   {
-    int* silly = new int;
-    reqList.Append( (Portion *)silly);
+  
+    if (ch == '{')  // If the argument is optional
+    {
+      ch=s[index++];
+      required = false;
+    }
+    else            // The argument is required
+    {
+      required = true;
+    }
+  
+      // name gets the name of the variable
+    gString name = ch;
     ch=s[index++];
-  }
-  else
-  {
-    reqList.Append( REQUIRED );
-  }
-
-  gString name = ch;
-  ch=s[index++];
-  while (isalpha(ch)) { name += ch; ch = s[index++]; }
-  nameList.Append(name);
-
-
-  while (!done)
-  {
+    while (isalpha(ch)) { name += ch; ch = s[index++]; }
+    nameList.Append(name);
+  
       // Move ch so that it holds the first character of the type;
     while (ch != '>' && ch != ']' && index<=length)  
       ch=s[index++];
-    if (ch == ']')
+
+    if (ch == ']')  // If we hit the end (this should NEVER happen)
       done = true;
     else
     {
@@ -581,13 +583,95 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
       gString word = ch;
       int     listNum = 0;
       ch=s[index++];
-      while (isalpha(ch)) { word += ch; ch = s[index++]; }
+      if (required)  // If required, get word in normal fashion.
+      {
+        reqList.Append( REQUIRED );
+        while (isalpha(ch)) { word += ch; ch = s[index++]; }
+      }
+      else  // If optional, get default argument and parse.
+      {
+        while (ch != '}') { word += ch; ch = s[index++]; }
+        ch=s[index++];
+        
+        if (word == "true" || word == "True" || word == "TRUE")
+        {
+          bool* tmp = new bool(true);
+          reqList.Append((Portion*)tmp);
+          word = "BOOLEAN";
+        }
+        else if (word == "false" || word == "False" || word == "FALSE")
+        {
+          bool* tmp = new bool(false);
+          reqList.Append((Portion*)tmp);
+          word = "BOOLEAN";
+        }
+          // If it is a number (int or double)
+        else if ((word[0] >= '0' && word[0] <= '9') || word[0] == '-')
+        {
+          char cha = ' ';
+          int sign = 1;
+          int index2 = 0;
+          bool isDouble = false;
+          /*gInteger num = 0, denom = 1;*/
+          gNumber* num = new gNumber(0);
+        
+          cha = word[index2++];
+        
+          if (cha == '-')  {  // If the number is negative
+            sign = -1;
+            cha = word[index2++];
+          }
+        
+          while (cha >= '0' && cha <= '9')   {  // Read number
+            *num *= 10;
+            *num += (int) (cha - '0');
+            cha = word[index2++];
+          }
+        
+          if (cha == '.')    // If it is a float
+          {
+            isDouble = true;
+            int factor = 1;
+            cha = word[index2++];
+        
+            while (cha >= '0' && cha <= '9')   {
+              *num += ( ((float) (cha - '0')) / (pow(10, factor)) );
+              factor++;
+              cha = word[index2++];
+            }
+  
+            *num *= sign;
+          }  // If it is a float
+        
+          if (isDouble)
+          {
+            word = "NUMBER";
+            reqList.Append((Portion*) num);
+          }
+          else
+          {
+            word = "INTEGER";
+            gInteger* tmp = new gInteger((int)*num);
+            reqList.Append((Portion*) tmp);
+            delete num;
+          }
+
+        } // If it is int or float
+
+        else
+        {
+          int* silly = new int;
+          reqList.Append( (Portion *)silly);
+          word = "MIXED";    // TEMPORARY ONLY SO THAT IT WORKS -- REMOVE!!
+        }
+
+      }
+
       numArgs++;
   
-        // Check to see if it is a list
+        // Check to see if it is a list  (should prolly only do if req.)
       if (word == "LIST")
       {
-        /*numArgs++;*/
         while (word == "LIST")
         {
           // increment counter, and while it is a list, keep incrementing.
@@ -606,26 +690,20 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
       specList.Append(word);
       listList.Append(listNum);
   
-      /*gout << "Word: " << word << "\n";*/
-
-        // Move ch past the right parentheses, if applicable
+        // Move ch past the right parentheses (and braces), if applicable
       while (ch == ')') {  ch=s[index++];  }
+      while (ch == '}') {  ch=s[index++]; gout << "KHFDKHSKFKSDFKDFKDF";  }
 
       if (ch == ',')  // If there will be another variable
       {
-        // Move ch to the first letter of the next variable name 
+          // Move ch to the first letter of the next variable name 
         ch=s[index++];
         ch=s[index++];
-    
-        gString name = ch;
-        ch=s[index++];
-        while (isalpha(ch)) { name += ch; ch = s[index++]; }
-        nameList.Append(name);
       }
       else
         done = true;
 
-    }
+    } // if not done (didn't hit ], and we found a ',')
   }  // while not done
 
     // Move ch to point to first char of return type
@@ -668,8 +746,8 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   /*nameList.Dump(gout);*/
   /*gout << "ListList: \n";*/
   /*listList.Dump(gout);*/
-  /*int sl = specList.Length();*/
-  /*gout << "Length: " << sl << "\n";*/
+  /*int rl = reqList.Length();*/
+  /*gout << "ReqL Length: " << rl << "\n";*/
   /*gout << "NumArgs: " << numArgs << "\n";*/
   /*gout << "\n\n";*/
 
@@ -679,7 +757,8 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   {
       ParamInfoType pit[] =
       {
-        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]))
+        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),
+                      reqList[1])
       };
       SetFuncInfo(funcindex, 
                   FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit));
@@ -687,8 +766,10 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   {
       ParamInfoType pit2[] =
       {
-        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1])),
-        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]))
+        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),
+                      reqList[1]),
+        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]),
+                      reqList[2])
       };
       SetFuncInfo(funcindex, 
                   FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit2));
@@ -696,9 +777,12 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   {
       ParamInfoType pit3[] =
       {
-        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1])),
-        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2])),
-        ParamInfoType(nameList[3], ToSpec(specList[3], listList[3]))
+        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),
+                      reqList[1]),
+        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]),
+                      reqList[2]),
+        ParamInfoType(nameList[3], ToSpec(specList[3], listList[3]),
+                      reqList[3])
       };
       SetFuncInfo(funcindex, 
                   FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit3));
@@ -706,10 +790,14 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   {
       ParamInfoType pit4[] =
       {
-        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1])),
-        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2])),
-        ParamInfoType(nameList[3], ToSpec(specList[3], listList[3])),
-        ParamInfoType(nameList[4], ToSpec(specList[4], listList[4]))
+        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),
+                      reqList[1]),
+        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]),
+                      reqList[2]),
+        ParamInfoType(nameList[3], ToSpec(specList[3], listList[3]),
+                      reqList[3]),
+        ParamInfoType(nameList[4], ToSpec(specList[4], listList[4]),
+                      reqList[4])
       };
       SetFuncInfo(funcindex, 
                   FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit4));
@@ -717,11 +805,16 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   {
       ParamInfoType pit5[] =
       {
-        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1])),
-        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2])),
-        ParamInfoType(nameList[3], ToSpec(specList[3], listList[3])),
-        ParamInfoType(nameList[4], ToSpec(specList[4], listList[4])),
-        ParamInfoType(nameList[5], ToSpec(specList[5], listList[5]))
+        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),
+                      reqList[1]),
+        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]),
+                      reqList[2]),
+        ParamInfoType(nameList[3], ToSpec(specList[3], listList[3]),
+                      reqList[3]),
+        ParamInfoType(nameList[4], ToSpec(specList[4], listList[4]),
+                      reqList[4]),
+        ParamInfoType(nameList[5], ToSpec(specList[5], listList[5]),
+                      reqList[5])
       };
       SetFuncInfo(funcindex, 
                   FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit5));
@@ -729,12 +822,18 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   {
       ParamInfoType pit6[] =
       {
-        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1])),
-        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2])),
-        ParamInfoType(nameList[3], ToSpec(specList[3], listList[3])),
-        ParamInfoType(nameList[4], ToSpec(specList[4], listList[4])),
-        ParamInfoType(nameList[5], ToSpec(specList[5], listList[5])),
-        ParamInfoType(nameList[6], ToSpec(specList[6], listList[6]))
+        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),
+                      reqList[1]),
+        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]),
+                      reqList[2]),
+        ParamInfoType(nameList[3], ToSpec(specList[3], listList[3]),
+                      reqList[3]),
+        ParamInfoType(nameList[4], ToSpec(specList[4], listList[4]),
+                      reqList[4]),
+        ParamInfoType(nameList[5], ToSpec(specList[5], listList[5]),
+                      reqList[5]),
+        ParamInfoType(nameList[6], ToSpec(specList[6], listList[6]),
+                      reqList[6])
       };
       SetFuncInfo(funcindex, 
                   FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit6));
