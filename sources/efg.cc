@@ -799,19 +799,19 @@ template <class T> int ExtForm<T>::IsOutcomeDefined(int outc) const
 //
 // Returns the payoff vector associated with an outcome
 //
-template <class T> gTuple<T> ExtForm<T>::GetOutcomeValues(int outc) const
+template <class T> gVector<T> ExtForm<T>::GetOutcomeValues(int outc) const
 {
   if (outcomes.IsDefined(outc))
     return outcomes(outc)->GetOutcomeVector(players.Last());
   else
-    return gTuple<T>();
+    return gVector<T>();
 }
 
 //
 // Set the payoff vector associated with an outcome
 //
 template <class T>
-void ExtForm<T>::SetOutcomeValues(int outc, const gTuple<T> &vals)
+void ExtForm<T>::SetOutcomeValues(int outc, const gVector<T> &vals)
 {
   if (outcomes.IsDefined(outc))
     outcomes(outc)->SetOutcome(vals);

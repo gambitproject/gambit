@@ -149,8 +149,8 @@ template <class T> class ExtForm    {
     gString GetOutcomeLabel(int outc) const;
     void LabelOutcome(int outc, const gString &name);
     int IsOutcomeDefined(int outc) const;
-    gTuple<T> GetOutcomeValues(int outc) const;
-    void SetOutcomeValues(int outc, const gTuple<T> &vals);
+    gVector<T> GetOutcomeValues(int outc) const;
+    void SetOutcomeValues(int outc, const gVector<T> &vals);
     void SetOutcomeValue(int outc, int pl, T value);
 
         //# MANAGEMENT OF VARIABLES
