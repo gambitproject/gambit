@@ -1641,8 +1641,10 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
 		    "Set/Edit outcomes");
 
   wxMenu *supports_menu = new wxMenu;
-  supports_menu->Append(NFG_SOLVE_COMPRESS_MENU, "&ElimDom",  "Dominated strategies");
-  supports_menu->Append(NFG_SOLVE_SUPPORTS_MENU, "&Select", "Select/Create NF support");
+  supports_menu->Append(NFG_SOLVE_COMPRESS_MENU, "&Undominated",
+			"Find undominated strategies");
+  supports_menu->Append(NFG_SOLVE_SUPPORTS_MENU, "&Select",
+			"Select and create supports");
 
   wxMenu *solve_menu = new wxMenu;
   solve_menu->Append(NFG_SOLVE_STANDARD_MENU,  "S&tandard...",

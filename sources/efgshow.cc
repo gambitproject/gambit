@@ -795,9 +795,9 @@ void EfgShow::MakeMenus(void)
 		       "Scan tree for subgames");
   subgame_menu->Append(efgmenuSUBGAME_MARK, "&Mark",
 		       "Set node subgame root");
-  subgame_menu->Append(efgmenuSUBGAME_UNMARKALL, "Unmark &All",
+  subgame_menu->Append(efgmenuSUBGAME_UNMARKALL, "UnMark &All",
 		       "Clear all subgame info");
-  subgame_menu->Append(efgmenuSUBGAME_UNMARK, "&Unmark",
+  subgame_menu->Append(efgmenuSUBGAME_UNMARK, "&UnMark",
 		       "Unmark node subgame");
   subgame_menu->Append(efgmenuSUBGAME_COLLAPSE, "Collapse &Level",
 		       "Collapse node subgame");
@@ -811,8 +811,8 @@ void EfgShow::MakeMenus(void)
 		       "Expand all subgames");
   
   wxMenu *supports_menu = new wxMenu;
-  supports_menu->Append(efgmenuSUPPORTS_ELIMDOM, "&ElimDom",
-			"Compute dominated strategies");
+  supports_menu->Append(efgmenuSUPPORTS_ELIMDOM, "&Undominated",
+			"Find undominated strategies");
   supports_menu->Append(efgmenuSUPPORTS_SELECT, "&Select",
 			"Select and create supports");
   
