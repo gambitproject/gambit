@@ -462,8 +462,6 @@ MixedSolution NfgShow::CreateSolution(void)
 }
 
 
-#define SUPPORT_CLOSE       1 // in elimdomd.h
-
 void NfgShow::OnOk(void)
 {
     if (soln_show)

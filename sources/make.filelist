@@ -61,7 +61,7 @@ GUI_SOURCES = gambit.cc treewin.cc treewin1.cc twflash.cc treedraw.cc \
               bsolnsf.cc efgoutcd.cc efgsoln.cc accels.cc nfgshow.cc \
               nfgshow1.cc nfgsoln.cc nfgsolng.cc msolnsf.cc nfgoutcd.cc \
               gambdraw.cc wxio.cc guipb.cc guirec.cc guirecdb.cc guiobj.cc \
-              gclstats.cc efgsolvd.cc nfgsolvd.cc
+              gclstats.cc efgsolvd.cc nfgsolvd.cc elimdomd.cc
 
 GUI_OBJECTS = $(GUI_SOURCES:.cc=.o)
 
