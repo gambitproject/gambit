@@ -34,6 +34,7 @@
 #include "efgprofile.h"
 #include "efgcursor.h"
 #include "efgoutcome.h"
+#include "efgsupport.h"
 #include "efgsoln.h"
 #include "efgsolng.h"
 #include "nfgshow.h"
@@ -191,8 +192,8 @@ EfgShow::EfgShow(FullEfg &p_efg, GambitFrame *p_parent)
     EfgClient(&p_efg),
     m_parent(p_parent), m_efg(p_efg), m_treeWindow(0), 
     m_treeZoomWindow(0), cur_soln(0),
-    m_solutionTable(0), m_solutionSashWindow(0), m_cursorWindow(0),
-    m_outcomeWindow(0)
+    m_solutionTable(0), m_solutionSashWindow(0),
+    m_cursorWindow(0), m_outcomeWindow(0), m_supportWindow(0)
 {
   SetSizeHints(300, 300);
 
@@ -246,10 +247,9 @@ EfgShow::EfgShow(FullEfg &p_efg, GambitFrame *p_parent)
   m_cursorWindow->SetSize(200, 200);
   m_infoNotebook->AddPage(m_outcomeWindow, "Outcomes");
 
-  wxPanel *supportPanel = new wxPanel(m_infoNotebook, -1);
-  (void) new wxStaticText(supportPanel, -1,
-			  "Hi!  I'm going to be the support window");
-  m_infoNotebook->AddPage(supportPanel, "Supports");
+  m_supportWindow = new EfgSupportWindow(this, m_infoNotebook);
+  m_supportWindow->SetSize(200, 200);
+  m_infoNotebook->AddPage(m_supportWindow, "Supports");
   m_infoNotebook->SetSelection(0);
 
   m_nodeSashWindow->Show(true);
@@ -1532,7 +1532,7 @@ void EfgShow::OnSupportNew(wxCommandEvent &)
       m_supports.Append(support);
 
       m_currentSupport = support;
-      m_treeWindow->SupportChanged();
+      OnSupportsEdited();
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), this);
@@ -1548,7 +1548,7 @@ void EfgShow::OnSupportEdit(wxCommandEvent &)
     try {
       *m_currentSupport = dialog.Support();
       m_currentSupport->SetName(dialog.Name());
-      m_treeWindow->SupportChanged();
+      OnSupportsEdited();
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), this);
@@ -1568,7 +1568,7 @@ void EfgShow::OnSupportDelete(wxCommandEvent &)
       delete m_supports.Remove(dialog.Selected());
       if (!m_supports.Find(m_currentSupport)) {
 	m_currentSupport = m_supports[1];
-	m_treeWindow->SupportChanged();
+	OnSupportsEdited();
       }
     }
     catch (gException &E) {
@@ -1585,7 +1585,7 @@ void EfgShow::OnSupportSelectFromList(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     try {
       m_currentSupport = m_supports[dialog.Selected()];
-      m_treeWindow->SupportChanged();
+      OnSupportsEdited();
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), this);
@@ -1602,7 +1602,7 @@ void EfgShow::OnSupportSelectPrevious(wxCommandEvent &)
   else {
     m_currentSupport = m_supports[index - 1];
   }
-  m_treeWindow->SupportChanged();
+  OnSupportsEdited();
 }
 
 void EfgShow::OnSupportSelectNext(wxCommandEvent &)
@@ -1614,7 +1614,7 @@ void EfgShow::OnSupportSelectNext(wxCommandEvent &)
   else {
     m_currentSupport = m_supports[index + 1];
   }
-  m_treeWindow->SupportChanged();
+  OnSupportsEdited();
 }
 
 
@@ -1651,7 +1651,7 @@ void EfgShow::OnSupportUndominated(wxCommandEvent &)
     
     if (m_currentSupport != sup) {
       m_currentSupport = m_supports[m_supports.Length()]; 
-      m_treeWindow->SupportChanged();
+      OnSupportsEdited();
     }
   }
 }
@@ -1662,6 +1662,13 @@ void EfgShow::OnSupportReachable(wxCommandEvent &)
   m_treeWindow->RefreshLayout();
   m_treeWindow->Refresh();
 }
+
+void EfgShow::OnSupportsEdited(void)
+{
+  m_treeWindow->SupportChanged();
+  m_supportWindow->UpdateValues();
+}
+
 
 void EfgShow::OnSolveStandard(wxCommandEvent &)
 {
@@ -2440,9 +2447,17 @@ void EfgShow::SetFileName(const gText &p_name)
   SetTitle((char *) ("[" + filename + "] " + m_efg.GetTitle()));
 }
 
-const EFSupport *EfgShow::GetSupport(void)
+EFSupport *EfgShow::GetSupport(void)
 {
   return m_currentSupport;
+}
+
+void EfgShow::SetSupportNumber(int p_number)
+{
+  if (p_number >= 1 && p_number <= m_supports.Length()) {
+    m_currentSupport = m_supports[p_number];
+    OnSupportsEdited();
+  }
 }
 
 int EfgShow::NumDecimals(void) const

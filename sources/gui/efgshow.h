@@ -18,6 +18,7 @@
 class EfgProfileList;
 class EfgCursorWindow;
 class EfgOutcomeWindow;
+class EfgSupportWindow;
 class TreeWindow;
 class TreeZoomWindow;
 
@@ -43,6 +44,7 @@ private:
   wxNotebook *m_infoNotebook;
   EfgCursorWindow *m_cursorWindow;
   EfgOutcomeWindow *m_outcomeWindow;
+  EfgSupportWindow *m_supportWindow;
 
   wxPageSetupData m_pageSetupData;
   wxPrintData m_printData;
@@ -203,7 +205,11 @@ public:
   virtual gText AsString(TypedSolnValues what, const Node *n, int br = 0) const;
 
   // Currently used support
-  const EFSupport *GetSupport(void);
+  EFSupport *GetSupport(void);
+  const gList<EFSupport *> &Supports(void) const { return m_supports; }
+  void SetSupportNumber(int p_number);
+  void OnSupportsEdited(void);
+
   TreeWindow *GetTreeWindow(void) const { return m_treeWindow; }
   
   void UpdateMenus(void);
