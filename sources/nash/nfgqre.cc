@@ -13,7 +13,6 @@
 #include "nfgqre.h"
 
 #include "base/gnullstatus.h"
-#include "numerical/gfunc.h"
 #include "math/gmath.h"
 #include "math/gmatrix.h"
 #include "math/gsmatrix.h"

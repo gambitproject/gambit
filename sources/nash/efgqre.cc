@@ -11,7 +11,6 @@
 #include "base/gnullstatus.h"
 #include "math/gmath.h"
 #include "math/gsmatrix.h"
-#include "numerical/gfunc.h"
 #include "efgqre.h"
 
 //=========================================================================
