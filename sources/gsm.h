@@ -112,6 +112,7 @@ public:
   bool Multiply ( void );
   bool Divide   ( void );
   bool Negate   ( void );
+  bool Power    ( void );
 
   bool IntegerDivide ( void );
   bool Modulus       ( void );

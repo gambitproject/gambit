@@ -702,6 +702,10 @@ bool GSM::Divide ( void )
 bool GSM::Negate( void )
 { return _UnaryOperation( "Negate" ); }
 
+bool GSM::Power( void )
+{ return _BinaryOperation( "Power" ); }
+
+
 
 bool GSM::IntegerDivide ( void )
 { return _BinaryOperation( "IntegerDivide" ); }
