@@ -739,83 +739,86 @@ void NfgShow::InspectSolutions(int what)
 #include "nfgsolvd.h"
 #include "elimdomd.h"
 #include "nfgsolng.h"
-// Solve
 
 void NfgShow::Solve(void)
 {
-    NfgSolveSettings NSD(nf);
+  NfgSolveSettings NSD(nf);
 
-    // If we have more than 1 support, we must have created it explicitly.
-    // In that case use the currently set support.  Otherwise, only the
-    // default support exists and we should use a support dictated by
-    // dominance defaults.
-    NFSupport *sup = (supports.Length() > 1) ? cur_sup : 0;
+  // If we have more than 1 support, we must have created it explicitly.
+  // In that case use the currently set support.  Otherwise, only the
+  // default support exists and we should use a support dictated by
+  // dominance defaults.
+  NFSupport *sup = (supports.Length() > 1) ? cur_sup : 0;
 
-    //bool solved = false;
+  if (!sup)
+    sup = MakeSolnSupport();
 
-    if (!sup)
-        sup = MakeSolnSupport();
+  int old_max_soln = solns.Length();  // used for extensive update
 
-    int old_max_soln = solns.Length();  // used for extensive update
+  wxBeginBusyCursor();
 
-    switch (NSD.GetAlgorithm())
-    {
+  try {
+    switch (NSD.GetAlgorithm()) {
     case NFG_ENUMPURE_SOLUTION: 
-        solns += NfgEnumPureG(nf, *cur_sup, this).Solve();
-        break;
+      solns += NfgEnumPureG(nf, *cur_sup, this).Solve();
+      break;
 
     case NFG_LCP_SOLUTION:      
-        solns += NfgLemkeG(nf, *cur_sup, this).Solve();
-        break;
+      solns += NfgLemkeG(nf, *cur_sup, this).Solve();
+      break;
 
     case NFG_LIAP_SOLUTION:      
-        solns += NfgLiapG(nf, *cur_sup, this).Solve();
-        break;
+      solns += NfgLiapG(nf, *cur_sup, this).Solve();
+      break;
 
     case NFG_GOBITALL_SOLUTION: 
-        solns += NfgGobitAllG(nf, *cur_sup, this).Solve();
-        break;
+      solns += NfgGobitAllG(nf, *cur_sup, this).Solve();
+      break;
 
     case NFG_GOBIT_SOLUTION:     
-        solns += NfgGobitG(nf, *cur_sup, this).Solve();
-        break;
+      solns += NfgGobitG(nf, *cur_sup, this).Solve();
+      break;
 
     case NFG_SIMPDIV_SOLUTION:   
-        solns += NfgSimpdivG(nf, *cur_sup, this).Solve();
-        break;
+      solns += NfgSimpdivG(nf, *cur_sup, this).Solve();
+      break;
 
     case NFG_ENUMMIXED_SOLUTION:
-        solns += NfgEnumG(nf, *cur_sup, this).Solve();
-        break;
+      solns += NfgEnumG(nf, *cur_sup, this).Solve();
+      break;
 
     case NFG_LP_SOLUTION:       
-        solns += NfgZSumG(nf, *cur_sup, this).Solve();
-        break;
+      solns += NfgZSumG(nf, *cur_sup, this).Solve();
+      break;
 
     default:
-        wxError("Internal Error!\nUnknown NFG algorithm\nContact the author");
-        break;
+      // shouldn't happen.  we'll ignore silently
+      break;
+    }
+    wxEndBusyCursor();
+  }
+  catch (gException &E) {
+    guiExceptionDialog(E.Description(), Frame());
+    wxEndBusyCursor();
+  }
+    
+  if (old_max_soln != solns.Length()) {
+    // Now, transfer the NEW solutions to extensive form if requested
+    if (NSD.GetExtensive()) {
+      for (int i = old_max_soln+1; i <= solns.Length(); i++) 
+	SolutionToExtensive(solns[i]);
     }
 
-    if (old_max_soln != solns.Length())
-    {
-        if (NSD.GetExtensive()) // Now, transfer the NEW solutions to extensive form if requested
-        {
-            for (int i = old_max_soln+1; i <= solns.Length(); i++) 
-                SolutionToExtensive(solns[i]);
-        }
-
-        if (!spread->HaveProbs())
-        {
-            spread->MakeProbDisp();
-            spread->Redraw();
-        }
-
-        ChangeSolution(solns.VisibleLength());
-        spread->EnableInspect(TRUE);
-
-        if (NSD.AutoInspect()) InspectSolutions(CREATE_DIALOG);
+    if (!spread->HaveProbs()) {
+      spread->MakeProbDisp();
+      spread->Redraw();
     }
+
+    ChangeSolution(solns.VisibleLength());
+    spread->EnableInspect(TRUE);
+    
+    if (NSD.AutoInspect()) InspectSolutions(CREATE_DIALOG);
+  }
 }
 
 
