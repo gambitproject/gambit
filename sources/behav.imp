@@ -114,7 +114,7 @@ template <class T> Efg<T>::Efg(const Efg<T> &E, Node *n)
 {
   int i;
 
-  assert(n->BelongsTo() == &E);
+  assert(n->BelongsTo() == (BaseEfg *) &E);
 
   for (i = 1; i <= E.outcomes.Length(); i++)
     outcomes.Append(new OutcomeVector<T>(this, 
