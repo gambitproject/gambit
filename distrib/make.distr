@@ -13,10 +13,10 @@
 
 WXWINDIR  = /home/mill/gambit/wxwin
 GUI       = motif
-GMAKEFILE = Makefile2.generic
+GMAKEFILE = Makefile.generic
 FTPDIR    = /users/ftp/pub/gambit/ver96
 SRCDIR    = ./sources
-WSRCDIR    = ./winsrc
+WSRCDIR   = ./winsrc
 
 all:
 	@echo Specify a target: gcl, gambit, src.

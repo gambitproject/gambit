@@ -7,7 +7,7 @@
 
 # Usage: 
 # make -f make.update TARGET=[gambit, src, guidoc, gcldoc, all] 
-#                     SYSTYPE=[Linux, SunOS_5.6, HPUX, all] 
+#                     SYSNAME=[Linux, SunOS_5.6, HPUX, all] 
 #                     GUI=[motif, xt, all] 
 #
 # This can be started on any of the hss machines and it will update the files
@@ -21,7 +21,7 @@
 # This may produce some duplicate combinations if more than one of the 
 # parameters is set to all.  Duplicate builds take very little time and are
 # not a problem.  Thus, to rebuild ALL of the components the command would be:
-# update SYSTYPE=all TARGET=all GUI=all
+# update SYSNAME=all TARGET=all GUI=all
 
 #
 # Default machines for each platform 
