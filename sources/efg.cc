@@ -730,14 +730,12 @@ const gText &FullEfg::GetOutcomeName(const efgOutcome &p_outcome) const
 efgOutcome FullEfg::GetOutcome(const Node *p_node) const
 {
   if (p_node->outcome) {
-    for (int i = 1; i <= outcomes.Last(); i++) {
-      if (outcomes[i] == p_node->outcome) {
-	return efgOutcomeFullEfg(i, const_cast<FullEfg *>(this));
-      }
-    }
+    return efgOutcomeFullEfg(p_node->outcome->m_number,
+			     const_cast<FullEfg *>(this));
   }
-  
-  return GetNullOutcome();
+  else {
+    return GetNullOutcome();
+  }
 }
 
 void FullEfg::SetOutcome(Node *p_node, const efgOutcome &p_outcome)
