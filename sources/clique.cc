@@ -345,8 +345,8 @@ void EnumCliques::genincidence(
      *n == number of columns
      */
 {
-  int newnode1[maxinp1] ;
-  int newnode2[maxinp2] ;
+  gArray<int> newnode1(maxinp1) ;
+  gArray<int> newnode2(maxinp2) ;
   int i,j, newi, newj ;
   
   // init newnode 
@@ -419,7 +419,7 @@ int EnumCliques::getconnco(gArray<int> &firstedge,
   */
 {
   int numco, newedge ;
-  int co1[maxinp1], co2[maxinp2];   // components of node1,2  
+  gArray<int> co1(maxinp1), co2(maxinp2);   // components of node1,2  
   int i, j;  // indices to left and right nodes 
   
   // initialize  component indices of left and right nodes 
