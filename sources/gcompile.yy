@@ -588,12 +588,13 @@ int GCLCompiler::Parse(void)
   int command = 1;
 
   while (!quit && (inputs.Depth() > 0 || !gin.eof()))  {
-    gout << "GCL" << command << ": ";
+    if (inputs.Depth() == 0)
+      gout << "GCL" << command << ": ";
     matching.Flush();
     if (!yyparse())  {
       Execute();
 //      gsm.Dump();
-      command++;
+      if (inputs.Depth() == 0) command++;
     }
     else 
       while (program.Length() > 0)   delete program.Remove(1);
