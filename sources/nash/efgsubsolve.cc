@@ -216,13 +216,13 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
       for (i = 1; i <= foo.NumPlayers(); i++)  {
 	subval[i] = sol[solno].Payoff(i);
 	if (!n.GetOutcome().IsNull())  {
-	  subval[i] += n.GetOutcome().GetPayoff(efg.GetPlayer(i));
+	  subval[i] += n.GetOutcome()->GetPayoff(efg.GetPlayer(i));
         }
       }
 
       gbtEfgOutcome ov = efg.NewOutcome();
       for (i = 1; i <= efg.NumPlayers(); i++) {
-	ov.SetPayoff(efg.GetPlayer(i), subval[i]);
+	ov->SetPayoff(efg.GetPlayer(i), subval[i]);
       }
  
       values.Append(ov);

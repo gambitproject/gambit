@@ -42,7 +42,14 @@ public:
 // to all.
 //
 class gbtGameObject {
+protected:
+  int m_refCount;
+
+  void Reference(void) { m_refCount++; }
+  bool Dereference(void) { return (--m_refCount == 0); }
+
 public:
+  gbtGameObject(void) : m_refCount(1) { }
   virtual ~gbtGameObject() { }
 
   virtual gbtText GetLabel(void) const = 0;
@@ -76,14 +83,6 @@ public:
   virtual ~gbtGamePlayer() { }
 
   virtual int NumInfosets(void) const = 0;
-};
-
-//
-// An outcome in a game
-//
-class gbtGameOutcome : public gbtGameObject {
-public:
-  virtual ~gbtGameOutcome() { }
 };
 
 //

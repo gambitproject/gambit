@@ -230,7 +230,7 @@ T gbtMixedProfile<T>::PPayoff(int pl, int index, int i) const
 
   if (i > m_nfg.NumPlayers())  {
     if (!m_nfg.GetOutcomeIndex(index).IsNull()) {
-      return m_nfg.GetOutcomeIndex(index).GetPayoff(m_nfg.GetPlayer(pl));
+      return m_nfg.GetOutcomeIndex(index)->GetPayoff(m_nfg.GetPlayer(pl));
     }
     else {
       return (T) 0;

@@ -226,9 +226,9 @@ void gbtEfgNashLcp<T>::FillTableau(const gbtEfgSupport &p_support, gbtMatrix<T> 
   int snew;
   if (!n.GetOutcome().IsNull()) {
     A(s1,ns1+s2) = gbtNumber(A(s1,ns1+s2)) +
-      gbtNumber(prob) * (n.GetOutcome().GetPayoff(p_support.GetGame().GetPlayer(1)) - gbtNumber(maxpay));
+      gbtNumber(prob) * (n.GetOutcome()->GetPayoff(p_support.GetGame().GetPlayer(1)) - gbtNumber(maxpay));
     A(ns1+s2,s1) = gbtNumber(A(ns1+s2,s1)) +
-      gbtNumber(prob) * (n.GetOutcome().GetPayoff(p_support.GetGame().GetPlayer(2)) - gbtNumber(maxpay));
+      gbtNumber(prob) * (n.GetOutcome()->GetPayoff(p_support.GetGame().GetPlayer(2)) - gbtNumber(maxpay));
   }
   if (!n.GetInfoset().IsNull()) {
     if (n.GetPlayer().IsChance()) {

@@ -96,9 +96,9 @@ void gbtNfgContingency::SetStrategy(gbtNfgAction p_strategy)
   m_profile[pl] = p_strategy;
 }
 
-void gbtNfgContingency::SetOutcome(const gbtNfgOutcome &outcome)
+void gbtNfgContingency::SetOutcome(const gbtNfgOutcome &p_outcome)
 {
-  m_nfg.rep->m_results[m_index + 1] = outcome.rep;
+  m_nfg.rep->m_results[m_index + 1] = dynamic_cast<gbtNfgOutcomeBase *>(p_outcome.Get());
   m_nfg.rep->m_revision++;
   m_nfg.BreakLink();
 }

@@ -278,7 +278,7 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 					    *infoset,
 					    (*infoset).GetAction(j))) {
 		  node_prob *= 
-		    (gbtDouble) terminal_nodes[n].GetOutcome().GetPayoff(player);
+		    (gbtDouble) terminal_nodes[n].GetOutcome()->GetPayoff(player);
 		  next_poly += node_prob;
 		}
 	      }
@@ -464,7 +464,7 @@ ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 					 (*player).GetId(),
 					 (*infoset).GetId(), j)) {
 		node_prob *= 
-		  (gbtDouble) terminal_nodes[n].GetOutcome().GetPayoff(*player);
+		  (gbtDouble) terminal_nodes[n].GetOutcome()->GetPayoff(*player);
 		next_poly += node_prob;
 	      }
 	    }

@@ -36,22 +36,34 @@
 //
 // Forward declarations
 //
-struct gbt_nfg_outcome_rep;
 struct gbt_nfg_player_rep;
 struct gbt_nfg_infoset_rep;
 struct gbt_nfg_strategy_rep;
 struct gbt_efg_game_rep;
 
-struct gbt_nfg_outcome_rep {
+class gbtNfgOutcomeBase : public gbtNfgOutcomeRep {
+public:
   int m_id;
   gbt_nfg_game_rep *m_nfg;
-  bool m_deleted;
   gbtText m_label;
   gbtBlock<gbtNumber> m_payoffs;
   gbtBlock<double> m_doublePayoffs;
-  int m_refCount;
 
-  gbt_nfg_outcome_rep(gbt_nfg_game_rep *, int);
+  gbtNfgOutcomeBase(gbt_nfg_game_rep *, int);
+
+  int GetId(void) const { return m_id; }
+  gbtText GetLabel(void) const { return m_label; }
+  void SetLabel(const gbtText &p_label) { m_label = p_label; }
+
+  gbtArray<gbtNumber> GetPayoff(void) const { return m_payoffs; }
+  gbtNumber GetPayoff(const gbtNfgPlayer &p_player) const
+  { return m_payoffs[p_player.GetId()]; }
+  double GetPayoffDouble(int p_playerId) const 
+  { return m_doublePayoffs[p_playerId]; }
+  void SetPayoff(const gbtNfgPlayer &p_player, const gbtNumber &p_value)
+  { m_payoffs[p_player.GetId()] = p_value; m_doublePayoffs[p_player.GetId()] = p_value; } 
+
+  void DeleteOutcome(void);
 };
 
 struct gbt_nfg_strategy_rep {
@@ -99,16 +111,16 @@ struct gbt_nfg_game_rep {
   gbtArray<int> m_dimensions;
 
   gbtBlock<gbt_nfg_player_rep *> m_players;
-  gbtBlock<gbt_nfg_outcome_rep *> m_outcomes;
+  gbtBlock<gbtNfgOutcomeBase *> m_outcomes;
 
-  gbtArray<gbt_nfg_outcome_rep *> m_results;
+  gbtArray<gbtNfgOutcomeBase *> m_results;
   gbt_efg_game_rep *m_efg;
 
   gbt_nfg_game_rep(gbt_efg_game_rep *);
   gbt_nfg_game_rep(const gbtArray<int> &);
   ~gbt_nfg_game_rep();
 
-  void DeleteOutcome(gbt_nfg_outcome_rep *);
+  void DeleteOutcome(gbtNfgOutcomeBase *);
 };
 
 #endif // NFGINT_H

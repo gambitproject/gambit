@@ -63,8 +63,6 @@ bool AllSubgamesMarked(const gbtEfgGame &efg);
 void ChildSubgames(const gbtEfgGame &, const gbtEfgNode &, 
 		   gbtList<gbtEfgNode> &);
 
-void RandomEfg(const gbtEfgGame &);
-
 gbtEfgGame CompressEfg(const gbtEfgGame &, const gbtEfgSupport &);
 // An "in-place" version of the above
 void CompressEfgInPlace(gbtEfgGame, const gbtEfgSupport &);

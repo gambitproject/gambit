@@ -32,20 +32,20 @@ template<>
 gbtNumber gbtMixedProfile<gbtNumber>::Payoff(const gbtNfgOutcome &o, 
 					     int pl) const
 { 
-  return o.GetPayoff(m_nfg.GetPlayer(pl));
+  return o->GetPayoff(m_nfg.GetPlayer(pl));
 }
 
 template<>
 gbtRational gbtMixedProfile<gbtRational>::Payoff(const gbtNfgOutcome &o, 
 						 int pl) const
 { 
-  return o.GetPayoff(m_nfg.GetPlayer(pl));
+  return o->GetPayoff(m_nfg.GetPlayer(pl));
 }
 
 template<>
 double gbtMixedProfile<double>::Payoff(const gbtNfgOutcome &o, int pl) const
 { 
-  return o.GetPayoffDouble(pl);
+  return o->GetPayoffDouble(pl);
 }
 
 #if GBT_WITH_MP_FLOAT
@@ -53,7 +53,7 @@ template<>
 gbtMPFloat gbtMixedProfile<gbtMPFloat>::Payoff(const gbtNfgOutcome &o,
 					       int pl) const
 {
-  return o.GetPayoffDouble(pl);
+  return o->GetPayoffDouble(pl);
 }
 #endif  // GBT_WITH_MP_FLOAT
 
@@ -88,13 +88,13 @@ template class gbtRectBlock<gbtRational>;
 #include "base/gblock.imp"
 
 template class gbtArray<gbt_nfg_strategy_rep *>;
-template class gbtArray<gbt_nfg_outcome_rep *>;
+template class gbtArray<gbtNfgOutcomeBase *>;
 template class gbtArray<gbt_nfg_infoset_rep *>;
 template class gbtArray<gbt_nfg_player_rep *>;
 template class gbtArray<gbtNfgAction>;
 
 template class gbtBlock<gbt_nfg_strategy_rep *>;
-template class gbtBlock<gbt_nfg_outcome_rep *>;
+template class gbtBlock<gbtNfgOutcomeBase *>;
 template class gbtBlock<gbt_nfg_infoset_rep *>;
 template class gbtBlock<gbt_nfg_player_rep *>;
 template class gbtBlock<gbtNfgAction>;

@@ -115,7 +115,7 @@ gbtText gbtGameDocument::UniqueEfgOutcomeName(void) const
   while (1) {
     int i;
     for (i = 1; i <= m_efg->NumOutcomes(); i++) {
-      if (m_efg->GetOutcome(i).GetLabel() == "Outcome" + ToText(number)) {
+      if (m_efg->GetOutcome(i)->GetLabel() == "Outcome" + ToText(number)) {
 	break;
       }
     }
@@ -134,7 +134,7 @@ gbtText gbtGameDocument::UniqueNfgOutcomeName(void) const
   while (1) {
     int i;
     for (i = 1; i <= m_nfg->NumOutcomes(); i++) {
-      if (m_nfg->GetOutcome(i).GetLabel() == "Outcome" + ToText(number)) {
+      if (m_nfg->GetOutcome(i)->GetLabel() == "Outcome" + ToText(number)) {
 	break;
       }
     }

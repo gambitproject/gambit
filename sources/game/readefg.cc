@@ -646,13 +646,13 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
     }
     else {
       gbtEfgOutcome outcome = p_efg.NewOutcome();
-      outcome.SetLabel((*p_nodeData)->m_outcomeData->m_name);
+      outcome->SetLabel((*p_nodeData)->m_outcomeData->m_name);
       p_treeData.m_outcomes.Append(new DefinedOutcomeData((*p_nodeData)->m_outcome,
 							  outcome));
       p_node.SetOutcome(outcome);
       for (int pl = 1; pl <= p_efg.NumPlayers(); pl++) {
-	outcome.SetPayoff(p_efg.GetPlayer(pl),
-			  (*p_nodeData)->m_outcomeData->m_payoffs[pl]);
+	outcome->SetPayoff(p_efg.GetPlayer(pl),
+			   (*p_nodeData)->m_outcomeData->m_payoffs[pl]);
       }
     }
   }

@@ -118,7 +118,7 @@ gbtSfgGame::MakeSequenceForm(const gbtEfgNode &n, gbtNumber prob,gbtArray<int>se
 
   if (!n.GetOutcome().IsNull()) {
     for(pl = 1;pl<=seq.Length();pl++)
-      (*(*SF)[seq])[pl] += prob * n.GetOutcome().GetPayoff(m_efg.GetPlayer(pl));
+      (*(*SF)[seq])[pl] += prob * n.GetOutcome()->GetPayoff(m_efg.GetPlayer(pl));
   }
   if (!n.GetInfoset().IsNull()) {
     if (n.GetPlayer().IsChance()) {

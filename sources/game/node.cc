@@ -48,7 +48,7 @@ gbt_efg_node_rep::~gbt_efg_node_rep()
   // for (int i = m_children.Length(); i; delete m_children[i--]);
 }
 
-void gbt_efg_node_rep::DeleteOutcome(gbt_efg_outcome_rep *p_outcome)
+void gbt_efg_node_rep::DeleteOutcome(gbtEfgOutcomeBase *p_outcome)
 {
   if (p_outcome == m_outcome) {
     m_outcome = 0;
@@ -304,9 +304,7 @@ gbtEfgOutcome gbtEfgNode::GetOutcome(void) const
 
 void gbtEfgNode::SetOutcome(const gbtEfgOutcome &p_outcome)
 {
-  if (rep) {
-    rep->m_outcome = p_outcome.rep;
-  }
+  rep->m_outcome = dynamic_cast<gbtEfgOutcomeBase *>(p_outcome.Get());
 }
 
 int gbtEfgNode::GetMemberId(void) const

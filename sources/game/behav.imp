@@ -153,8 +153,10 @@ void gbtPureBehavProfile<T>::Payoff(const gbtEfgNode &n, const T prob,
 {
   if (n.IsTerminal()) {
     // FIXME: vector version of this?
-    for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-      payoff[pl] += prob * n.GetOutcome().GetPayoff(m_efg.GetPlayer(pl));
+    if (!n.GetOutcome().IsNull()) {
+      for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+	payoff[pl] += prob * n.GetOutcome()->GetPayoff(m_efg.GetPlayer(pl));
+      }
     }
   }
   else {
@@ -206,7 +208,7 @@ const T gbtPureBehavProfile<T>::Payoff(const gbtEfgOutcome &p_outcome,
 				    const int &pl) const
 {
   if (!p_outcome.IsNull()) {
-    return p_outcome.GetPayoff(m_efg.GetPlayer(pl));
+    return p_outcome->GetPayoff(m_efg.GetPlayer(pl));
   }
   else {
     return (T) 0;

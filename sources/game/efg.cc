@@ -269,22 +269,13 @@ void gbt_efg_game_rep::DeleteInfoset(gbt_efg_infoset_rep *p_infoset)
 // Deletes the outcome from the extensive form.
 // Assumes outcome is not null.
 //
-void gbt_efg_game_rep::DeleteOutcome(gbt_efg_outcome_rep *p_outcome)
+void gbt_efg_game_rep::DeleteOutcome(gbtEfgOutcomeBase *p_outcome)
 {
   // Remove references to the outcome from the tree
   root->DeleteOutcome(p_outcome);
 
   // Remove the outcome from the list of defined outcomes
   outcomes.Remove(outcomes.Find(p_outcome));
-
-  // If no external references, deallocate the memory;
-  // otherwise, mark as "deleted"
-  if (p_outcome->m_refCount == 0) {
-    delete p_outcome;
-  }
-  else {
-    p_outcome->m_deleted = true;
-  }
 
   // Renumber the remaining outcomes
   for (int outc = 1; outc <= outcomes.Length(); outc++) {
@@ -525,7 +516,7 @@ gbtEfgGame gbtEfgGame::Copy(gbtEfgNode n /* = null */) const
   efg.rep->m_label = rep->m_label;
   efg.rep->comment = rep->comment;
   efg.rep->players = gbtBlock<gbt_efg_player_rep *>(rep->players.Length());
-  efg.rep->outcomes = gbtBlock<gbt_efg_outcome_rep *>(rep->outcomes.Length());
+  efg.rep->outcomes = gbtBlock<gbtEfgOutcomeBase *>(rep->outcomes.Length());
   
   for (int i = 1; i <= rep->players.Length(); i++)  {
     (efg.rep->players[i] = new gbt_efg_player_rep(efg.rep, i))->m_label = rep->players[i]->m_label;
@@ -553,7 +544,7 @@ gbtEfgGame gbtEfgGame::Copy(gbtEfgNode n /* = null */) const
   }
 
   for (int outc = 1; outc <= NumOutcomes(); outc++)  {
-    efg.rep->outcomes[outc] = new gbt_efg_outcome_rep(efg.rep, outc);
+    efg.rep->outcomes[outc] = new gbtEfgOutcomeBase(efg.rep, outc);
     efg.rep->outcomes[outc]->m_label = rep->outcomes[outc]->m_label;
     efg.rep->outcomes[outc]->m_payoffs = rep->outcomes[outc]->m_payoffs;
   }
@@ -965,7 +956,7 @@ gbtEfgNode gbtEfgGame::GetRoot(void) const
 gbtEfgOutcome gbtEfgGame::NewOutcome(int index)
 {
   rep->m_revision++;
-  rep->outcomes.Append(new gbt_efg_outcome_rep(rep, index));
+  rep->outcomes.Append(new gbtEfgOutcomeBase(rep, index));
   return rep->outcomes[rep->outcomes.Last()];
 } 
 

@@ -39,23 +39,35 @@
 // Forward declarations
 //
 class gbtEfgGame;
-struct gbt_efg_outcome_rep;
 struct gbt_efg_action_rep;
 struct gbt_efg_infoset_rep;
 struct gbt_efg_node_rep;
 struct gbt_efg_player_rep;
 struct gbt_efg_game_rep;
 
-struct gbt_efg_outcome_rep {
+class gbtEfgOutcomeBase : public gbtEfgOutcomeRep {
+public:
   int m_id;
   gbt_efg_game_rep *m_efg;
-  bool m_deleted;
   gbtText m_label;
   gbtBlock<gbtNumber> m_payoffs;
   gbtBlock<double> m_doublePayoffs;
-  int m_refCount;
 
-  gbt_efg_outcome_rep(gbt_efg_game_rep *, int);
+  gbtEfgOutcomeBase(gbt_efg_game_rep *, int);
+
+  int GetId(void) const { return m_id; }
+  gbtText GetLabel(void) const { return m_label; }
+  void SetLabel(const gbtText &p_label) { m_label = p_label; }
+
+  gbtArray<gbtNumber> GetPayoff(void) const { return m_payoffs; }
+  gbtNumber GetPayoff(const gbtEfgPlayer &p_player) const
+  { return m_payoffs[p_player.GetId()]; }
+  double GetPayoffDouble(int p_playerId) const 
+  { return m_doublePayoffs[p_playerId]; }
+  void SetPayoff(const gbtEfgPlayer &p_player, const gbtNumber &p_value)
+  { m_payoffs[p_player.GetId()] = p_value; m_doublePayoffs[p_player.GetId()] = p_value; } 
+
+  void DeleteOutcome(void);
 };
 
 struct gbt_efg_player_rep {
@@ -107,14 +119,14 @@ struct gbt_efg_node_rep {
   bool m_mark;
   gbt_efg_infoset_rep *m_infoset;
   gbt_efg_node_rep *m_parent;
-  gbt_efg_outcome_rep *m_outcome;
+  gbtEfgOutcomeBase *m_outcome;
   gbtBlock<gbt_efg_node_rep *> m_children;
   gbt_efg_node_rep *m_whichbranch, *m_ptr, *m_gameroot;
 
   gbt_efg_node_rep(gbt_efg_game_rep *, gbt_efg_node_rep *);
   ~gbt_efg_node_rep();
 
-  void DeleteOutcome(gbt_efg_outcome_rep *outc);
+  void DeleteOutcome(gbtEfgOutcomeBase *outc);
 
   gbt_efg_node_rep *GetPriorSibling(void);
   gbt_efg_node_rep *GetNextSibling(void);
@@ -133,7 +145,7 @@ struct gbt_efg_game_rep {
   mutable long m_outcome_revision;
   gbtText m_label, comment;
   gbtBlock<gbt_efg_player_rep *> players;
-  gbtBlock<gbt_efg_outcome_rep *> outcomes;
+  gbtBlock<gbtEfgOutcomeBase *> outcomes;
   gbt_efg_node_rep *root;
   gbt_efg_player_rep *chance;
   gbtNfgGame afg;
@@ -161,7 +173,7 @@ struct gbt_efg_game_rep {
 
   void DeleteAction(gbt_efg_infoset_rep *, gbt_efg_action_rep *);
 
-  void DeleteOutcome(gbt_efg_outcome_rep *p_outcome);
+  void DeleteOutcome(gbtEfgOutcomeBase *p_outcome);
 
   // Utility routines for subgames
   void MarkTree(gbt_efg_node_rep *, gbt_efg_node_rep *);

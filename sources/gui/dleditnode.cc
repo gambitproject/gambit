@@ -109,15 +109,15 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
   gbtEfgGame efg = p_node.GetGame();
   for (int outc = 1; outc <= efg.NumOutcomes(); outc++) {
     gbtEfgOutcome outcome = efg.GetOutcome(outc);
-    gbtText item = ToText(outc) + ": " + outcome.GetLabel();
+    gbtText item = ToText(outc) + ": " + outcome->GetLabel();
     if (item == "") {
       item = gbtText("Outcome") + ToText(outc);
     }
 
-    item += (" (" + ToText(outcome.GetPayoff(efg.GetPlayer(1))) + ", " +
-	     ToText(outcome.GetPayoff(efg.GetPlayer(2))));
+    item += (" (" + ToText(outcome->GetPayoff(efg.GetPlayer(1))) + ", " +
+	     ToText(outcome->GetPayoff(efg.GetPlayer(2))));
     if (efg.NumPlayers() > 2) {
-      item += ", " + ToText(outcome.GetPayoff(efg.GetPlayer(3)));
+      item += ", " + ToText(outcome->GetPayoff(efg.GetPlayer(3)));
       if (efg.NumPlayers() > 3) {
 	item += ",...)";
       }

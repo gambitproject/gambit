@@ -381,9 +381,9 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
     else {
       gbtNfgOutcome outcome = profile.GetOutcome();
       if (!outcome.IsNull()) {
-	wxString ret = wxString::Format(wxT("%s"), (char *) outcome.GetLabel());
+	wxString ret = wxString::Format(wxT("%s"), (char *) outcome->GetLabel());
 	if (ret == wxT("")) {
-	  ret = wxString::Format(wxT("Outcome%d"), outcome.GetId());
+	  ret = wxString::Format(wxT("Outcome%d"), outcome->GetId());
 	}
 	return ret;
       }

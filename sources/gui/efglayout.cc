@@ -47,7 +47,7 @@ static wxString OutcomeAsString(const gbtEfgNode &p_node, int p_numDecimals)
 {
   gbtEfgOutcome outcome = p_node.GetOutcome();
   if (!outcome.IsNull()) {
-    const gbtArray<gbtNumber> &payoffs = outcome.GetPayoff();
+    const gbtArray<gbtNumber> &payoffs = outcome->GetPayoff();
     wxString tmp = wxT("(");
 
     for (int pl = payoffs.First(); pl <= payoffs.Last(); pl++) {
@@ -416,7 +416,7 @@ wxString gbtEfgLayout::CreateOutcomeLabel(const gbtEfgLayoutNode *p_entry) const
     return OutcomeAsString(node, m_doc->GetPreferences().NumDecimals());
   case GBT_OUTCOME_LABEL_LABEL:
     return wxString::Format(wxT("%s"), 
-			    (const char *) node.GetOutcome().GetLabel());
+			    (const char *) node.GetOutcome()->GetLabel());
   default:
     return wxT("");
   }

@@ -174,7 +174,7 @@ gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
 
     for (int epl = 1, npl = 1; epl <= p_efg.NumPlayers(); epl++)
       for (int iset = 1; iset <= p_efg.GetPlayer(epl).NumInfosets(); iset++, npl++)
-	iter.GetOutcome().SetPayoff(afg.GetPlayer(npl), payoff[epl]);
+	iter.GetOutcome()->SetPayoff(afg.GetPlayer(npl), payoff[epl]);
 
     
     while (pl > 0)  {

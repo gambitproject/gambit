@@ -25,6 +25,7 @@
 //
 
 #include "efg.h"
+#include "efgint.h"
 
 class ChanceInfoset;
 
@@ -57,8 +58,8 @@ template class gbtArray<gbtArray<gbtEfgAction> *>;
 
 //template class gbtArray<gbtArray<Action *> *>;
 
-template class gbtArray<gbt_efg_outcome_rep *>;
-template class gbtBlock<gbt_efg_outcome_rep *>;
+template class gbtArray<gbtEfgOutcomeBase *>;
+template class gbtBlock<gbtEfgOutcomeBase *>;
 
 template class gbtArray<gbtBlock<bool> >;
 template class gbtBlock<gbtBlock<bool> >;
@@ -74,4 +75,4 @@ template class gbtList<gbtEfgNode>;
 template class gbtList<gbtEfgAction>;
 template class gbtList<gbtEfgInfoset>;
 
-template class gbtList<gbt_efg_outcome_rep *>;
+template class gbtList<gbtEfgOutcomeBase *>;

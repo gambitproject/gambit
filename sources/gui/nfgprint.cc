@@ -73,7 +73,7 @@ wxString gbtBuildHtml(const gbtNfgGame &p_nfg,
 	profile.SetStrategy(p_nfg.GetPlayer(p_colPlayer).GetStrategy(st2));
 	theHtml += wxT("<td align=center>");
 	for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
-	  theHtml += wxString::Format(wxT("%s"), (char *) ToText(profile.GetOutcome().GetPayoff(p_nfg.GetPlayer(pl))));
+	  theHtml += wxString::Format(wxT("%s"), (char *) ToText(profile.GetOutcome()->GetPayoff(p_nfg.GetPlayer(pl))));
 	  if (pl < p_nfg.NumPlayers()) {
 	    theHtml += wxT(",");
 	  }

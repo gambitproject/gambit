@@ -239,15 +239,3 @@ void CompressEfgInPlace(gbtEfgGame p_efg, const gbtEfgSupport &p_support)
   }
 }
 
-#include "math/rational.h"
-// prototype in efg.h
-
-void
-RandomEfg(gbtEfgGame & efg)
-{
-  for (int i = 1; i <= efg.NumPlayers(); i++) {
-    for (int j = 1; j <= efg.NumOutcomes(); j++) {
-      efg.GetOutcome(j).SetPayoff(efg.GetPlayer(i), gbtNumber(Uniform()));
-    }
-  }
-}

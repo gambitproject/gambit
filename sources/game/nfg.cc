@@ -205,7 +205,7 @@ gbt_nfg_game_rep::~gbt_nfg_game_rep()
 // Deletes the outcome from the normal form.
 // Assumes outcome is not null.
 //
-void gbt_nfg_game_rep::DeleteOutcome(gbt_nfg_outcome_rep *p_outcome)
+void gbt_nfg_game_rep::DeleteOutcome(gbtNfgOutcomeBase *p_outcome)
 {
   // Remove references to the outcome from the table
   for (int i = 1; i <= m_results.Length(); i++) {
@@ -216,15 +216,6 @@ void gbt_nfg_game_rep::DeleteOutcome(gbt_nfg_outcome_rep *p_outcome)
 
   // Remove the outcome from the list of defined outcomes
   m_outcomes.Remove(m_outcomes.Find(p_outcome));
-
-  // If no external references, deallocate the memory;
-  // otherwise, mark as "deleted"
-  if (p_outcome->m_refCount == 0) {
-    delete p_outcome;
-  }
-  else {
-    p_outcome->m_deleted = true;
-  }
 
   // Renumber the remaining outcomes
   for (int outc = 1; outc <= m_outcomes.Length(); outc++) {
@@ -251,7 +242,7 @@ gbtNfgGame::gbtNfgGame(const gbtArray<int> &dim)
   IndexStrategies();
 
   for (int cont = 1; cont <= rep->m_results.Length();
-       rep->m_results[cont++] = (gbt_nfg_outcome_rep *) 0);
+       rep->m_results[cont++] = (gbtNfgOutcomeBase *) 0);
 }
 
 gbtNfgGame::gbtNfgGame(const gbtNfgGame &p_nfg)
@@ -324,14 +315,14 @@ bool gbtNfgGame::IsConstSum(void) const
   if (NumOutcomes() == 0)  return true;
 
   for (pl = 1; pl <= NumPlayers(); pl++) {
-    cvalue += GetOutcome(1).GetPayoff(GetPlayer(pl));
+    cvalue += GetOutcome(1)->GetPayoff(GetPlayer(pl));
   }
 
   for (index = 2; index <= NumOutcomes(); index++)  {
     gbtNumber thisvalue = (gbtNumber) 0;
 
     for (pl = 1; pl <= NumPlayers(); pl++) {
-      thisvalue += GetOutcome(index).GetPayoff(GetPlayer(pl));
+      thisvalue += GetOutcome(index)->GetPayoff(GetPlayer(pl));
     }       
 
     if (thisvalue > cvalue || thisvalue < cvalue) {
@@ -423,8 +414,8 @@ void gbtNfgGame::WriteNfg(gbtOutput &p_file) const
 gbtNfgOutcome gbtNfgGame::NewOutcome(void)
 {
   rep->m_revision++;
-  gbt_nfg_outcome_rep *outcome = new gbt_nfg_outcome_rep(rep, 
-							 rep->m_outcomes.Length()+1);
+  gbtNfgOutcomeBase *outcome = new gbtNfgOutcomeBase(rep, 
+						     rep->m_outcomes.Length()+1);
   rep->m_outcomes.Append(outcome);
   return outcome;
 }
@@ -494,7 +485,7 @@ gbtNfgOutcome gbtNfgGame::GetOutcomeIndex(int p_index) const
 
 void gbtNfgGame::SetOutcomeIndex(int p_index, const gbtNfgOutcome &p_outcome)
 {
-  rep->m_results[p_index] = p_outcome.rep;
+  rep->m_results[p_index] = dynamic_cast<gbtNfgOutcomeBase *>(p_outcome.Get());
 }
 
 gbtNfgSupport gbtNfgGame::NewSupport(void) const

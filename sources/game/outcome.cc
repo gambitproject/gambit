@@ -39,14 +39,13 @@
 #include "nfgint.h"
 
 //----------------------------------------------------------------------
-//           struct gbt_efg_outcome_rep: Member functions
+//            class gbtEfgOutcomeBase: Member functions
 //----------------------------------------------------------------------
 
-gbt_efg_outcome_rep::gbt_efg_outcome_rep(gbt_efg_game_rep *p_efg, int p_id)
-  : m_id(p_id), m_efg(p_efg), m_deleted(false), 
+gbtEfgOutcomeBase::gbtEfgOutcomeBase(gbt_efg_game_rep *p_efg, int p_id)
+  : m_id(p_id), m_efg(p_efg),
     m_payoffs(p_efg->players.Length()),
-    m_doublePayoffs(p_efg->players.Length()),
-    m_refCount(0)
+    m_doublePayoffs(p_efg->players.Length())
 {
   for (int i = 1; i <= m_payoffs.Length(); i++) {
     m_payoffs[i] = 0;
@@ -54,183 +53,24 @@ gbt_efg_outcome_rep::gbt_efg_outcome_rep(gbt_efg_game_rep *p_efg, int p_id)
   }
 }
 
-//----------------------------------------------------------------------
-//               class gbtEfgOutcome: Member functions
-//----------------------------------------------------------------------
-
-gbtEfgOutcome::gbtEfgOutcome(void)
-  : rep(0)
-{ }
-
-gbtEfgOutcome::gbtEfgOutcome(gbt_efg_outcome_rep *p_rep)
-  : rep(p_rep)
+void gbtEfgOutcomeBase::DeleteOutcome(void)
 {
-  if (rep) {
-    rep->m_refCount++;
-    rep->m_efg->m_refCount++;
-  }
+  m_efg->DeleteOutcome(this);
 }
 
-gbtEfgOutcome::gbtEfgOutcome(const gbtEfgOutcome &p_outcome)
-  : rep(p_outcome.rep)
-{
-  if (rep) {
-    rep->m_refCount++;
-    rep->m_efg->m_refCount++;
-  }
-}
-
-gbtEfgOutcome::~gbtEfgOutcome()
-{
-  if (rep) {
-    if (--rep->m_refCount == 0 && rep->m_deleted) {
-      delete rep;
-    }
-    else if (--rep->m_efg->m_refCount == 0) {
-      delete rep->m_efg;
-    }
-  }
-}
-
-gbtEfgOutcome &gbtEfgOutcome::operator=(const gbtEfgOutcome &p_outcome)
-{
-  if (this == &p_outcome) {
-    return *this;
-  }
-
-  if (rep) {
-    if (--rep->m_refCount == 0 && rep->m_deleted) {
-      delete rep;
-    }
-    else if (--rep->m_efg->m_refCount == 0) {
-      delete rep->m_efg;
-    }
-  }
-
-  if ((rep = p_outcome.rep) != 0) {
-    rep->m_refCount++;
-    rep->m_efg->m_refCount++;
-  }
-  return *this;
-}
-
-bool gbtEfgOutcome::operator==(const gbtEfgOutcome &p_outcome) const
-{
-  return (rep == p_outcome.rep);
-} 
-
-bool gbtEfgOutcome::operator!=(const gbtEfgOutcome &p_outcome) const
-{
-  return (rep != p_outcome.rep);
-} 
-
-bool gbtEfgOutcome::IsNull(void) const
-{
-  return (rep == 0);
-}
-
-bool gbtEfgOutcome::IsDeleted(void) const
-{
-  return (rep && rep->m_deleted);
-}
-
-gbtEfgGame gbtEfgOutcome::GetGame(void) const
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else {
-    return (rep) ? rep->m_efg : 0;
-  }
-}
-
-gbtText gbtEfgOutcome::GetLabel(void) const
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else if (rep) {
-    return rep->m_label;
-  }
-  else {
-    return "";
-  }
-}
-
-void gbtEfgOutcome::SetLabel(const gbtText &p_label) 
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else if (rep) {
-    rep->m_label = p_label;
-  }
-}
-
-gbtArray<gbtNumber> gbtEfgOutcome::GetPayoff(void) const
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else if (!rep) {
-    return gbtArray<gbtNumber>();
-  }
-  else {
-    return rep->m_payoffs;
-  }
-}
-
-gbtNumber gbtEfgOutcome::GetPayoff(const gbtEfgPlayer &p_player) const
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else if (!rep || p_player.IsNull()) {
-    return gbtNumber(0);
-  }
-
-  return rep->m_payoffs[p_player.GetId()];
-}
-
-void gbtEfgOutcome::SetPayoff(const gbtEfgPlayer &p_player,
-			      const gbtNumber &p_value)
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else if (!rep || p_player.IsNull()) {
-    return;
-  }
-
-  rep->m_payoffs[p_player.GetId()] = p_value;
-  rep->m_doublePayoffs[p_player.GetId()] = p_value;
-  // FIXME: tell extensive form to update cached profile values!
-}
-
-void gbtEfgOutcome::DeleteOutcome(void)
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else if (rep) {
-    rep->m_efg->DeleteOutcome(rep);
-  }
-}
-
-gbtOutput &operator<<(gbtOutput &p_stream, const gbtEfgOutcome &)
+gbtOutput &operator<<(gbtOutput &p_stream, const gbtEfgOutcomeBase &)
 { 
   return p_stream;
 }
 
 //----------------------------------------------------------------------
-//                gbt_nfg_outcome_rep: Declaration
+//                 gbtNfgOutcomeBase: Member functions
 //----------------------------------------------------------------------
 
-gbt_nfg_outcome_rep::gbt_nfg_outcome_rep(gbt_nfg_game_rep *p_nfg, int p_id)
-  : m_id(p_id), m_nfg(p_nfg), m_deleted(false), 
+gbtNfgOutcomeBase::gbtNfgOutcomeBase(gbt_nfg_game_rep *p_nfg, int p_id)
+  : m_id(p_id), m_nfg(p_nfg),
     m_payoffs(p_nfg->m_players.Length()),
-    m_doublePayoffs(p_nfg->m_players.Length()),
-    m_refCount(0)
+    m_doublePayoffs(p_nfg->m_players.Length())
 {
   for (int i = 1; i <= m_payoffs.Length(); i++) {
     m_payoffs[i] = 0;
@@ -238,183 +78,12 @@ gbt_nfg_outcome_rep::gbt_nfg_outcome_rep(gbt_nfg_game_rep *p_nfg, int p_id)
   }
 }
 
-gbtNfgOutcome::gbtNfgOutcome(void)
-  : rep(0)
-{ }
-
-gbtNfgOutcome::gbtNfgOutcome(gbt_nfg_outcome_rep *p_rep)
-  : rep(p_rep)
+void gbtNfgOutcomeBase::DeleteOutcome(void)
 {
-  if (rep) {
-    rep->m_refCount++;
-    rep->m_nfg->m_refCount++;
-  }
+  m_nfg->DeleteOutcome(this);
 }
 
-gbtNfgOutcome::gbtNfgOutcome(const gbtNfgOutcome &p_outcome)
-  : rep(p_outcome.rep)
-{
-  if (rep) {
-    rep->m_refCount++;
-    rep->m_nfg->m_refCount++;
-  }
-}
-
-gbtNfgOutcome::~gbtNfgOutcome()
-{
-  if (rep) {
-    if (--rep->m_refCount == 0 && rep->m_deleted) {
-      delete rep;
-    }
-    else if (--rep->m_nfg->m_refCount == 0) {
-      delete rep->m_nfg;
-    }
-  }
-}
-
-gbtNfgOutcome &gbtNfgOutcome::operator=(const gbtNfgOutcome &p_outcome)
-{
-  if (this == &p_outcome) {
-    return *this;
-  }
-
-  if (rep) {
-    if (--rep->m_refCount == 0 && rep->m_deleted) {
-      delete rep;
-    }
-    else if (--rep->m_nfg->m_refCount == 0) {
-      delete rep->m_nfg;
-    }
-  }
-
-  if ((rep = p_outcome.rep) != 0) {
-    rep->m_refCount++;
-    rep->m_nfg->m_refCount++;
-  }
-  return *this;
-}
-
-bool gbtNfgOutcome::operator==(const gbtNfgOutcome &p_outcome) const
-{
-  return (rep == p_outcome.rep);
-} 
-
-bool gbtNfgOutcome::operator!=(const gbtNfgOutcome &p_outcome) const
-{
-  return (rep != p_outcome.rep);
-} 
-
-int gbtNfgOutcome::GetId(void) const
-{
-  return (rep) ? rep->m_id : 0;
-}
-
-bool gbtNfgOutcome::IsNull(void) const
-{
-  return (rep == 0);
-}
-
-bool gbtNfgOutcome::IsDeleted(void) const
-{
-  return (rep && rep->m_deleted);
-}
-
-gbtNfgGame gbtNfgOutcome::GetGame(void) const
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else {
-    return (rep) ? rep->m_nfg : 0;
-  }
-}
-
-gbtText gbtNfgOutcome::GetLabel(void) const
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else if (rep) {
-    return rep->m_label;
-  }
-  else {
-    return "";
-  }
-}
-
-void gbtNfgOutcome::SetLabel(const gbtText &p_label)
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else if (rep) {
-    rep->m_label = p_label;
-  }
-}
-
-gbtNumber gbtNfgOutcome::GetPayoff(const gbtNfgPlayer &p_player) const
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else if (rep && p_player.rep) {
-    return rep->m_payoffs[p_player.rep->m_id];
-  }
-  else {
-    return 0;
-  }
-}
-
-gbtArray<gbtNumber> gbtNfgOutcome::GetPayoff(void) const
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else if (rep) {
-    return rep->m_payoffs;
-  }
-  else {
-    return gbtArray<gbtNumber>();
-  }
-}
-
-double gbtNfgOutcome::GetPayoffDouble(int p_player) const
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else if (rep) {
-    return rep->m_payoffs[p_player];
-  }
-  else {
-    return 0;
-  }
-}
-
-void gbtNfgOutcome::SetPayoff(const gbtNfgPlayer &p_player,
-			      const gbtNumber &p_value)
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else if (rep && p_player.rep) {
-    rep->m_payoffs[p_player.rep->m_id] = p_value;
-    rep->m_doublePayoffs[p_player.rep->m_id] = (double) p_value;
-    // FIXME: tell game to update cached values
-  }
-}
-
-void gbtNfgOutcome::DeleteOutcome(void)
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else if (rep) {
-    rep->m_nfg->DeleteOutcome(rep);
-  }
-}
-
-gbtOutput &operator<<(gbtOutput &p_stream, const gbtNfgOutcome &)
+gbtOutput &operator<<(gbtOutput &p_stream, const gbtNfgOutcomeBase &)
 { 
   return p_stream;
 }
