@@ -32,10 +32,9 @@ NfgShow::NfgShow(Nfg &N, EfgNfgInterface *efg, wxFrame *pframe_)
   pl2 = 2;        // use the defaults
   cur_soln = 0;
   cur_sup = new NFSupport(nf);    // base support
-  disp_sup = cur_sup;
   supports.Append(cur_sup);
   
-  spread = new NormalSpread(disp_sup, pl1, pl2, this, pframe);
+  spread = new NormalSpread(cur_sup, pl1, pl2, this, pframe);
 
   support_dialog = 0;  // no support dialog yet
   soln_show      = 0;  // no solution inspect window yet.
@@ -52,8 +51,8 @@ NfgShow::NfgShow(Nfg &N, EfgNfgInterface *efg, wxFrame *pframe_)
 
 void NfgShow::UpdateVals(void)
 {
-  if (!(nf_iter.Support() == *disp_sup)) 
-    nf_iter = NfgIter(*disp_sup);
+  if (!(nf_iter.Support() == *cur_sup)) 
+    nf_iter = NfgIter(*cur_sup);
 
   for (int i = 1; i <= rows; i++) {
     for (int j = 1; j <= cols; j++) {
@@ -104,21 +103,21 @@ void NfgShow::UpdateSoln(void)
   // to the nonzero solution strategy.  However, for mixed equs, we set
   // the display strategy to the highest soluton strat.  (Note that
   // MixedSolution.Pure() is not yet implemented :( Add support for
-  // displaying solutions created for supports other than disp_sup
+  // displaying solutions created for supports other than cur_sup
 
   MixedSolution soln = solns[cur_soln];
   gNumber t_max;
   gArray<int> profile(nf.NumPlayers());
 
-  // Figure out the index in the disp_sup, then map it onto the full support
+  // Figure out the index in the cur_sup, then map it onto the full support
   for (int pl = 1; pl <= nf.NumPlayers(); pl++) {
     profile[pl] = 1;
     t_max = soln(nf.Players()[pl]->Strategies()[1]);
 
-    for (int st1 = 1; st1 <= disp_sup->NumStrats(pl); st1++) {
-      if (soln(disp_sup->Strategies(pl)[st1]) > t_max) {
+    for (int st1 = 1; st1 <= cur_sup->NumStrats(pl); st1++) {
+      if (soln(cur_sup->Strategies(pl)[st1]) > t_max) {
     profile[pl] = st1;
-    t_max = soln(disp_sup->Strategies(pl)[st1]);
+    t_max = soln(cur_sup->Strategies(pl)[st1]);
       }
     }
   }
@@ -134,8 +133,8 @@ void NfgShow::UpdateSoln(void)
  
   for (int st1 = 1; st1 <= rows; st1++) {
     for (int st2 = 1; st2 <= cols; st2++) {
-      if (soln(disp_sup->Strategies(pl1)[st1]) > eps
-      && soln(disp_sup->Strategies(pl2)[st2]) > eps)
+      if (soln(cur_sup->Strategies(pl1)[st1]) > eps
+      && soln(cur_sup->Strategies(pl2)[st2]) > eps)
     spread->HiLighted(st1, st2, 0, TRUE);
       else
     spread->HiLighted(st1, st2, 0, FALSE);
@@ -147,11 +146,11 @@ void NfgShow::UpdateSoln(void)
     // Print out the probability in the next column/row
     for (int i = 1; i <= rows; i++)
       spread->SetCell(i, cols+1,
-              ToText(soln(disp_sup->Strategies(pl1)[i])));
+              ToText(soln(cur_sup->Strategies(pl1)[i])));
 
     for (int i = 1; i <= cols; i++)
       spread->SetCell(rows+1, i, 
-              ToText(soln(disp_sup->Strategies(pl2)[i])));
+              ToText(soln(cur_sup->Strategies(pl2)[i])));
   }
 
   if (spread->HaveVal()) {
@@ -159,13 +158,13 @@ void NfgShow::UpdateSoln(void)
     for (int i = 1; i <= rows; i++) {
       spread->SetCell(i, cols+spread->HaveProbs()+spread->HaveDom()+1, 
               ToText(soln.Payoff(nf.Players()[pl1],
-                     disp_sup->Strategies(pl1)[i])));
+                     cur_sup->Strategies(pl1)[i])));
     }
     
     for (int j = 1; j <= cols; j++) {
       spread->SetCell(rows+spread->HaveProbs()+spread->HaveDom()+1, j, 
               ToText(soln.Payoff(nf.Players()[pl2],
-                     disp_sup->Strategies(pl2)[j])));
+                     cur_sup->Strategies(pl2)[j])));
     }
   }
 
@@ -351,7 +350,7 @@ void NfgShow::ChangeSolution(int sol)
   ClearSolutions();
 
   if (sol) {
-    if (solns[sol].Support().IsSubset(*disp_sup)) {
+    if (solns[sol].Support().IsSubset(*cur_sup)) {
       cur_soln = sol;
 
       if (cur_soln)
@@ -744,14 +743,14 @@ void NfgShow::SetPlayers(int _pl1, int _pl2, bool first_time)
   pl1 = _pl1;
   pl2 = _pl2;
   
-  rows = disp_sup->NumStrats(pl1);
-  cols = disp_sup->NumStrats(pl2);
+  rows = cur_sup->NumStrats(pl1);
+  cols = cur_sup->NumStrats(pl2);
 
   int features = spread->HaveDom() + spread->HaveProbs() + spread->HaveVal();
   spread->SetDimensions(rows + features, cols + features, 1);
 
   // Must set dimensionality in case it changed due to elim dom
-  spread->SetDimensionality(disp_sup);
+  spread->SetDimensionality(cur_sup);
 
   if (spread->HaveProbs()) 
     spread->MakeProbDisp();
@@ -771,7 +770,7 @@ void NfgShow::SetPlayers(int _pl1, int _pl2, bool first_time)
   gText label;
   
   for (int i = 1; i <= rows; i++) {
-    label = disp_sup->Strategies(pl1)[i]->Name();
+    label = cur_sup->Strategies(pl1)[i]->Name();
 
     if (label == "") 
       label = ToText(i);
@@ -780,7 +779,7 @@ void NfgShow::SetPlayers(int _pl1, int _pl2, bool first_time)
   }
 
   for (int i = 1; i <= cols; i++) {
-    label = disp_sup->Strategies(pl2)[i]->Name();
+    label = cur_sup->Strategies(pl2)[i]->Name();
 
     if (label == "") 
       label = ToText(i);
@@ -990,8 +989,8 @@ int NfgShow::SolveElimDom(void)
     }
     catch (gSignalBreak &) { }
 
-    if (dialog.Compress() && disp_sup != sup) {
-      disp_sup = supports[supports.Length()]; // displaying the last created support
+    if (dialog.Compress() && cur_sup != sup) {
+      cur_sup = supports[supports.Length()]; // displaying the last created support
       SetPlayers(pl1, pl2);
     }
     else {
@@ -1010,8 +1009,8 @@ int NfgShow::SolveElimDom(void)
 void NfgShow::ChangeSupport(int what)
 {
   if (what == CREATE_DIALOG && !support_dialog) {
-    int disp = supports.Find(disp_sup), cur = supports.Find(cur_sup);
-    support_dialog = new dialogNfgSupportInspect(supports, cur, disp,
+    int cur = supports.Find(cur_sup);
+    support_dialog = new dialogNfgSupportInspect(supports, cur,
 						 this, spread);
   }
   
@@ -1022,11 +1021,10 @@ void NfgShow::ChangeSupport(int what)
 
   if (what == UPDATE_DIALOG) {
     if (!support_dialog)  return;   // just ignore silently
-    cur_sup = supports[support_dialog->Current()];
 
-    if (supports[support_dialog->Displayed()] != disp_sup) {
+    if (supports[support_dialog->Current()] != cur_sup) {
       ChangeSolution(0);  // chances are, the current solution will not work.
-      disp_sup = supports[support_dialog->Displayed()];
+      cur_sup = supports[support_dialog->Current()];
       SetPlayers(pl1, pl2);
     }
   }
@@ -1070,7 +1068,7 @@ void NfgShow::SetStrategyLabels(void)
   dialogStrategies dialog(nf, pframe);
 
   if (dialog.GameChanged()) {
-    spread->SetStrategyLabels(disp_sup);
+    spread->SetStrategyLabels(cur_sup);
     UpdateVals();
   }
 }
@@ -1104,7 +1102,7 @@ void NfgShow::SetPlayerLabels(void)
 
   delete [] player_labels;
 
-  spread->SetPlayerLabels(disp_sup);
+  spread->SetPlayerLabels(cur_sup);
   UpdateVals();
 }
 
@@ -1700,7 +1698,7 @@ Bool NormalSpread::OnClose(void)
   }
 }
 
-void NormalSpread::SetStrategyLabels(const NFSupport *disp_sup)
+void NormalSpread::SetStrategyLabels(const NFSupport *cur_sup)
 {
   gArray<int> profile = GetProfile();
   // update the profile choiceboxes
@@ -1710,16 +1708,16 @@ void NormalSpread::SetStrategyLabels(const NFSupport *disp_sup)
     {
       strat_profile[i]->Clear();
       
-      for (int j = 1; j <= disp_sup->NumStrats(i); j++)
-	strat_profile[i]->Append(disp_sup->Strategies(i)[j]->Name());
+      for (int j = 1; j <= cur_sup->NumStrats(i); j++)
+	strat_profile[i]->Append(cur_sup->Strategies(i)[j]->Name());
     }
 
   // Update the row/col labels
-  for (i = 1; i <= disp_sup->NumStrats(pl1); i++)
-    SetLabelRow(i, disp_sup->Strategies(pl1)[i]->Name());
+  for (i = 1; i <= cur_sup->NumStrats(pl1); i++)
+    SetLabelRow(i, cur_sup->Strategies(pl1)[i]->Name());
   
-  for (i = 1; i <= disp_sup->NumStrats(pl2); i++)
-    SetLabelCol(i, disp_sup->Strategies(pl2)[i]->Name());
+  for (i = 1; i <= cur_sup->NumStrats(pl2); i++)
+    SetLabelCol(i, cur_sup->Strategies(pl2)[i]->Name());
   
   for (i = 1; i <= dimensionality.Length(); i++) 
     strat_profile[i]->SetSelection(profile[i] - 1);
@@ -1727,10 +1725,10 @@ void NormalSpread::SetStrategyLabels(const NFSupport *disp_sup)
   Redraw();
 }
 
-void NormalSpread::SetPlayerLabels(const NFSupport *disp_sup)
+void NormalSpread::SetPlayerLabels(const NFSupport *cur_sup)
 {
   // the row, col player choicebox
-  const Nfg &nf = disp_sup->Game();
+  const Nfg &nf = cur_sup->Game();
   row_choice->Clear();
   col_choice->Clear();
   

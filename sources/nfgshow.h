@@ -65,7 +65,7 @@ private:
   // we can display NF for one support, while working on a different support
   // disp_sup always corresponds to the support currently displayed.  cur_sup
   // corresponds to the support that will be operated upon by solution algs.
-  NFSupport *cur_sup, *disp_sup;
+  NFSupport *cur_sup;
   wxFrame     *pframe;
   NormalSpread    *spread;
   dialogNfgSupportInspect *support_dialog;

@@ -15,16 +15,14 @@ class dialogNfgSupportInspect : public wxDialogBox {
 private:
   NfgShow *bns;
   gList<NFSupport *> &sups;
-  int init_disp,init_cur;
-  wxText *cur_dim,*disp_dim;
-  wxChoice *disp_item,*cur_item;
-  char *cur_str,*disp_str;
+  int init_cur;
+  wxText *cur_dim;
+  wxChoice *cur_item;
+  char *cur_str;
   wxStringList *support_list;
 
   static void CallbackCurrent(wxChoice &ob, wxEvent &)
     {((dialogNfgSupportInspect *)ob.GetClientData())->OnCur(ob.GetSelection()+1);}
-  static void CallbackDisplayed(wxChoice &ob,wxEvent &)
-    {((dialogNfgSupportInspect *)ob.GetClientData())->OnDisp(ob.GetSelection()+1);}
   static void CallbackNew(wxButton &ob,wxEvent &)
     {((dialogNfgSupportInspect *)ob.GetClientData())->OnNewSupport();}
   static void CallbackChange(wxButton &ob,wxEvent &)
@@ -48,14 +46,13 @@ private:
 
 public:
   dialogNfgSupportInspect(gList<NFSupport *> &p_supports,
-			  int p_current, int p_displayed,
+			  int p_current,
 			  NfgShow *p_window, wxWindow *p_parent = 0);
 
   Bool OnClose(void);
 
   // Data Access members
   int Current(void) { return (cur_item->GetSelection() + 1); }
-  int Displayed(void) { return (disp_item->GetSelection() + 1); }
 };
 
 #endif  // DLNFGSUPPORT_H
