@@ -22,6 +22,9 @@ DECLARE_BINARY(gelfuncAddAction, EFSupport *, Action *, EFSupport *)
 
 EFSupport *gelfuncAddAction::EvalItem(EFSupport *S, Action *a) const
 {
+  if (!S || !a)  return 0;
+  if (&S->Game() != a->BelongsTo()->Game())
+    throw gelGameMismatchError("AddAction");
   EFSupport *T = new EFSupport(*S);
   T->AddAction(a);
   return T;
@@ -36,6 +39,9 @@ DECLARE_BINARY(gelfuncAddMove, Infoset *, Node *, Node *)
 
 Node *gelfuncAddMove::EvalItem(Infoset *s, Node *n) const
 {
+  if (!s || !n)  return 0;
+  if (s->Game() != n->Game())
+    throw gelGameMismatchError("AddMove");
   n->Game()->AppendNode(n, s);
   return n->GetChild(1);
 }
@@ -48,7 +54,7 @@ DECLARE_UNARY(gelfuncChance, Efg *, EFPlayer *)
 
 EFPlayer *gelfuncChance::EvalItem(Efg *E) const
 {
-  return E->GetChance();
+  return (E) ? E->GetChance() : 0;
 }
 
 //-------------
@@ -59,8 +65,10 @@ DECLARE_UNARY(gelfuncChanceProb, Action *, gNumber)
 
 gNumber gelfuncChanceProb::EvalItem(Action *a) const
 {
+  if (!a)   return 0;
   Infoset *infoset = a->BelongsTo();
-  if (!infoset->GetPlayer()->IsChance())  return 0;
+  if (!infoset->GetPlayer()->IsChance())
+    throw gelRuntimeError("Chance action required in call to ChanceProb[]");
   return infoset->Game()->GetChanceProb(infoset, a->GetNumber());
 }
 
@@ -72,6 +80,9 @@ DECLARE_BINARY(gelfuncCopyTree, Node *, Node *, Node *)
 
 Node *gelfuncCopyTree::EvalItem(Node *n1, Node *n2) const
 {
+  if (!n1 || !n2)   return 0;
+  if (n1->Game() != n2->Game())
+    throw gelGameMismatchError("CopyTree");
   return n1->Game()->CopyTree(n1, n2);
 }
 
@@ -83,9 +94,11 @@ DECLARE_UNARY(gelfuncDeleteAction, Action *, Infoset *)
 
 Infoset *gelfuncDeleteAction::EvalItem(Action *a) const
 {
+  if (!a)  return 0;
   Infoset *infoset = a->BelongsTo();
 
-  if (infoset->NumActions() == 1)   return infoset;
+  if (infoset->NumActions() == 1)
+    throw gelRuntimeError("Cannot delete only action at an information set");
   infoset->Game()->DeleteAction(infoset, a);
   return infoset;
 }
@@ -98,6 +111,7 @@ DECLARE_UNARY(gelfuncDeleteEmptyInfoset, Infoset *, gTriState)
 
 gTriState gelfuncDeleteEmptyInfoset::EvalItem(Infoset *s) const
 {
+  if (!s)  return triFALSE;
   return (s->Game()->DeleteEmptyInfoset(s)) ? triTRUE : triFALSE;
 }
 
@@ -109,7 +123,11 @@ DECLARE_BINARY(gelfuncDeleteMove, Node *, Node *, Node *)
 
 Node *gelfuncDeleteMove::EvalItem(Node *n, Node *keep) const
 {
-  if (keep->GetParent() != n)  return n;
+  if (!n || !keep)   return 0;
+  if (n->Game() != keep->Game())
+    throw gelGameMismatchError("DeleteMove");
+  if (keep->GetParent() != n)
+    throw gelRuntimeError("'keep' must be child of 'n' in DeleteMove");
 
   return n->Game()->DeleteNode(n, keep);
 }
@@ -122,6 +140,7 @@ DECLARE_UNARY(gelfuncDeleteTree, Node *, Node *)
 
 Node *gelfuncDeleteTree::EvalItem(Node *n) const
 {
+  if (!n)  return 0;
   n->Game()->DeleteTree(n);
   return n;
 }
@@ -134,28 +153,28 @@ DECLARE_UNARY(gelfuncGameInfoset, Infoset *, Efg *)
 
 Efg *gelfuncGameInfoset::EvalItem(Infoset *s) const
 {
-  return s->Game();
+  return (s) ? s->Game() : 0;
 }
 
 DECLARE_UNARY(gelfuncGameNode, Node *, Efg *)
 
 Efg *gelfuncGameNode::EvalItem(Node *n) const
 {
-  return n->Game();
+  return (n) ? n->Game() : 0;
 }
 
 DECLARE_UNARY(gelfuncGameEFPlayer, EFPlayer *, Efg *)
 
 Efg *gelfuncGameEFPlayer::EvalItem(EFPlayer *p) const
 {
-  return p->Game();
+  return (p) ? p->Game() : 0;
 }
 
 DECLARE_UNARY(gelfuncGameEFOutcome, EFOutcome *, Efg *)
 
 Efg *gelfuncGameEFOutcome::EvalItem(EFOutcome *c) const
 {
-  return c->BelongsTo();
+  return (c) ? c->BelongsTo() : 0;
 }
 
 //------------
@@ -166,14 +185,14 @@ DECLARE_UNARY(gelfuncInfosetAction, Action *, Infoset *)
 
 Infoset *gelfuncInfosetAction::EvalItem(Action *a) const
 {
-  return a->BelongsTo();
+  return (a) ? a->BelongsTo() : 0;
 }
 
 DECLARE_UNARY(gelfuncInfosetNode, Node *, Infoset *)
 
 Infoset *gelfuncInfosetNode::EvalItem(Node *n) const
 {
-  return n->GetInfoset();
+  return (n) ? n->GetInfoset() : 0;
 }
 
 //----------------
@@ -184,6 +203,7 @@ DECLARE_UNARY(gelfuncInsertAction, Infoset *, Action *)
 
 Action *gelfuncInsertAction::EvalItem(Infoset *s) const
 {
+  if (!s)  return 0;
   return s->Game()->InsertAction(s);
 }
 
@@ -191,6 +211,9 @@ DECLARE_BINARY(gelfuncInsertActionAt, Infoset *, Action *, Action *)
 
 Action *gelfuncInsertActionAt::EvalItem(Infoset *s, Action *a) const
 {
+  if (!s || !a)  return 0;
+  if (a->BelongsTo() != s)
+    throw gelRuntimeError("'action' must be member of 'infoset' in InsertAction");
   return s->Game()->InsertAction(s, a);
 }
 
@@ -202,6 +225,9 @@ DECLARE_BINARY(gelfuncInsertMove, Infoset *, Node *, Node *)
 
 Node *gelfuncInsertMove::EvalItem(Infoset *s, Node *n) const
 {
+  if (!s || !n)   return 0;
+  if (s->Game() != n->Game())
+    throw gelGameMismatchError("InsertMove");
   n->Game()->InsertNode(n, s);
   return n->GetParent();
 }
@@ -214,6 +240,7 @@ DECLARE_UNARY(gelfuncIsConstSumEfg, Efg *, gTriState)
 
 gTriState gelfuncIsConstSumEfg::EvalItem(Efg *E) const
 {
+  if (!E)   return triFALSE;
   return (E->IsConstSum()) ? triTRUE : triFALSE;
 }
 
@@ -225,6 +252,7 @@ DECLARE_UNARY(gelfuncIsPerfectRecall, Efg *, gTriState)
 
 gTriState gelfuncIsPerfectRecall::EvalItem(Efg *E) const
 {
+  if (!E)   return triFALSE;
   Infoset *s1, *s2;
   return (IsPerfectRecall(*E, s1, s2)) ? triTRUE : triFALSE;
 }
@@ -237,6 +265,7 @@ DECLARE_BINARY(gelfuncIsPredecessor, Node *, Node *, gTriState)
 
 gTriState gelfuncIsPredecessor::EvalItem(Node *n1, Node *n2) const
 {
+  if (!n1 || !n2)   return triFALSE;
   return (n1->Game()->IsPredecessor(n1, n2)) ? triTRUE : triFALSE;
 }
 
@@ -248,6 +277,7 @@ DECLARE_BINARY(gelfuncIsSuccessor, Node *, Node *, gTriState)
 
 gTriState gelfuncIsSuccessor::EvalItem(Node *n1, Node *n2) const
 {
+  if (!n1 || !n2)   return triFALSE;
   return (n1->Game()->IsSuccessor(n1, n2)) ? triTRUE : triFALSE;
 }
 
@@ -259,10 +289,18 @@ DECLARE_UNARY(gelfuncLoadEfg, gText, Efg *)
 
 Efg *gelfuncLoadEfg::EvalItem(gText filename) const
 {
-  gFileInput f(filename);
-  Efg *E = 0;
-  ReadEfgFile(f, E);
-  return E;
+  try   {
+    gFileInput f(filename);
+    Efg *E = 0;
+    ReadEfgFile(f, E);
+    if (E)
+      return E;
+    else
+      throw gelRuntimeError(filename + " not a valid .efg file in LoadEfg");
+  }
+  catch (gFileInput::OpenFailed &)   {
+    throw gelRuntimeError("Could not open " + filename + " in LoadEfg");
+  }
 }
 
 //-----------------
@@ -273,6 +311,7 @@ DECLARE_UNARY(gelfuncMarkSubgame, Node *, gTriState)
 
 gTriState gelfuncMarkSubgame::EvalItem(Node *n) const
 {
+  if (!n)  return triFALSE;
   return (n->Game()->DefineSubgame(n)) ? triTRUE : triFALSE;
 }
 
@@ -284,6 +323,7 @@ DECLARE_UNARY(gelfuncMarkedSubgame, Node *, gTriState)
 
 gTriState gelfuncMarkedSubgame::EvalItem(Node *n) const
 {
+  if (!n)  return triFALSE;
   return (n->GetSubgameRoot() == n) ? triTRUE : triFALSE;
 }
 
@@ -295,6 +335,9 @@ DECLARE_BINARY(gelfuncMergeInfosets, Infoset *, Infoset *, Infoset *)
 
 Infoset *gelfuncMergeInfosets::EvalItem(Infoset *s1, Infoset *s2) const
 {
+  if (!s1 || !s2)   return 0;
+  if (s1->Game() != s2->Game())
+    throw gelGameMismatchError("MergeInfosets");
   s1->Game()->MergeInfoset(s1, s2);
   return s1;
 }
@@ -307,6 +350,9 @@ DECLARE_BINARY(gelfuncMoveToInfoset, Node *, Infoset *, Infoset *)
 
 Infoset *gelfuncMoveToInfoset::EvalItem(Node *n, Infoset *s) const
 {
+  if (!n || !s)   return 0;
+  if (n->Game() != s->Game())
+    throw gelGameMismatchError("MoveToInfoset");
   s->Game()->JoinInfoset(s, n);
   return s;
 }
@@ -319,6 +365,9 @@ DECLARE_BINARY(gelfuncMoveTree, Node *, Node *, Node *)
 
 Node *gelfuncMoveTree::EvalItem(Node *n1, Node *n2) const
 {
+  if (!n1 || !n2)   return 0;
+  if (n1->Game() != n2->Game())
+    throw gelGameMismatchError("MoveTree");
   return n1->Game()->MoveTree(n1, n2);
 }
 
@@ -330,42 +379,60 @@ DECLARE_UNARY(gelfuncNameAction, Action *, gText)
 
 gText gelfuncNameAction::EvalItem(Action *a) const
 {
-  return a->GetName();
+  if (a)
+    return a->GetName();
+  else
+    return "";
 }
 
 DECLARE_UNARY(gelfuncNameInfoset, Infoset *, gText)
 
 gText gelfuncNameInfoset::EvalItem(Infoset *s) const
 {
-  return s->GetName();
+  if (s)
+    return s->GetName();
+  else
+    return "";
 }
 
 DECLARE_UNARY(gelfuncNameNode, Node *, gText)
 
 gText gelfuncNameNode::EvalItem(Node *n) const
 {
-  return n->GetName();
+  if (n)
+    return n->GetName();
+  else
+    return "";
 }
 
 DECLARE_UNARY(gelfuncNameEFOutcome, EFOutcome *, gText)
 
 gText gelfuncNameEFOutcome::EvalItem(EFOutcome *c) const
 {
-  return c->GetName();
+  if (c)
+    return c->GetName();
+  else
+    return "";
 }
 
 DECLARE_UNARY(gelfuncNameEFPlayer, EFPlayer *, gText)
 
 gText gelfuncNameEFPlayer::EvalItem(EFPlayer *p) const
 {
-  return p->GetName();
+  if (p)
+    return p->GetName();
+  else
+    return "";
 }
 
 DECLARE_UNARY(gelfuncNameEfg, Efg *, gText)
 
 gText gelfuncNameEfg::EvalItem(Efg *E) const
 {
-  return E->GetTitle();
+  if (E)
+    return E->GetTitle();
+  else
+    return "";
 }
 
 
@@ -392,6 +459,9 @@ DECLARE_BINARY(gelfuncNewInfoset, EFPlayer *, gNumber, Infoset *)
 
 Infoset *gelfuncNewInfoset::EvalItem(EFPlayer *p, gNumber n) const
 {
+  if (!p)   return 0;
+  if (!n.IsInteger())
+    throw gelRuntimeError("Expected integer for 'actions' in NewInfoset");
   return p->Game()->CreateInfoset(p, n);
 }
 
@@ -403,7 +473,7 @@ DECLARE_UNARY(gelfuncNewOutcomeEfg, Efg *, EFOutcome *)
 
 EFOutcome *gelfuncNewOutcomeEfg::EvalItem(Efg *E) const
 {
-  return E->NewOutcome();
+  return (E) ? E->NewOutcome() : 0;
 }
 
 //-------------
@@ -414,7 +484,7 @@ DECLARE_UNARY(gelfuncNewPlayer, Efg *, EFPlayer *)
 
 EFPlayer *gelfuncNewPlayer::EvalItem(Efg *E) const
 {
-  return E->NewPlayer();
+  return (E) ? E->NewPlayer() : 0;
 }
 
 //--------------
@@ -425,7 +495,7 @@ DECLARE_UNARY(gelfuncNextSibling, Node *, Node *)
 
 Node *gelfuncNextSibling::EvalItem(Node *n) const
 {
-  return n->NextSibling();
+  return (n) ? n->NextSibling() : 0;
 }
 
 //------------
@@ -436,6 +506,9 @@ DECLARE_BINARY(gelfuncNthChild, Node *, gNumber, Node *)
 
 Node *gelfuncNthChild::EvalItem(Node *n, gNumber i) const
 {
+  if (!n)   return 0;
+  if (!i.IsInteger())
+    throw gelRuntimeError("Expected integer for 'child' in NthChild");
   return n->GetChild(i);
 }
 
@@ -447,7 +520,7 @@ DECLARE_UNARY(gelfuncOutcome, Node *, EFOutcome *)
 
 EFOutcome *gelfuncOutcome::EvalItem(Node *n) const
 {
-  return n->GetOutcome();
+  return (n) ? n->GetOutcome() : 0;
 }
 
 //-----------
@@ -458,7 +531,7 @@ DECLARE_UNARY(gelfuncParent, Node *, Node *)
 
 Node *gelfuncParent::EvalItem(Node *n) const
 {
-  return n->GetParent();
+  return (n) ? n->GetParent() : 0;
 }
 
 //-----------
@@ -469,6 +542,9 @@ DECLARE_BINARY(gelfuncPayoffEFOutcome, EFOutcome *, EFPlayer *, gNumber)
 
 gNumber gelfuncPayoffEFOutcome::EvalItem(EFOutcome *c, EFPlayer *p) const
 {
+  if (!c || !p)   return 0;
+  if (c->BelongsTo() != p->Game())
+    throw gelGameMismatchError("Payoff");
   return p->Game()->Payoff(c, p->GetNumber());
 }
 
@@ -480,7 +556,7 @@ DECLARE_UNARY(gelfuncPlayer, Infoset *, EFPlayer *)
 
 EFPlayer *gelfuncPlayer::EvalItem(Infoset *s) const
 {
-  return s->GetPlayer();
+  return (s) ? s->GetPlayer() : 0;
 }
 
 //----------------
@@ -491,7 +567,7 @@ DECLARE_UNARY(gelfuncPriorSibling, Node *, Node *)
 
 Node *gelfuncPriorSibling::EvalItem(Node *n) const
 {
-  return n->PriorSibling();
+  return (n) ? n->PriorSibling() : 0;
 }
 
 //----------------
@@ -502,6 +578,9 @@ DECLARE_BINARY(gelfuncRemoveAction, EFSupport *, Action *, EFSupport *)
 
 EFSupport *gelfuncRemoveAction::EvalItem(EFSupport *S, Action *a) const
 {
+  if (!S || !a)   return 0;
+  if (&S->Game() != a->BelongsTo()->Game())
+    throw gelGameMismatchError("RemoveAction");
   EFSupport *T = new EFSupport(*S);
   T->RemoveAction(a);
   return T;
@@ -515,7 +594,7 @@ DECLARE_UNARY(gelfuncRootNode, Efg *, Node *)
 
 Node *gelfuncRootNode::EvalItem(Efg *E) const
 {
-  return E->RootNode();
+  return (E) ? E->RootNode() : 0;
 }
 
 //------------
@@ -526,9 +605,15 @@ DECLARE_BINARY(gelfuncSaveEfg, Efg *, gText, Efg *)
 
 Efg *gelfuncSaveEfg::EvalItem(Efg *E, gText filename) const
 {
-  gFileOutput f(filename);
-  E->WriteEfgFile(f);
-  return E;
+  if (!E)   return 0;
+  try   {
+    gFileOutput f(filename);
+    E->WriteEfgFile(f);
+    return E;
+  }
+  catch (gFileOutput::OpenFailed &)   {
+    throw gelRuntimeError("Cannot open " + filename + " for writing in SaveEfg");
+  }
 }
 
 //------------
@@ -539,6 +624,7 @@ DECLARE_BINARY(gelfuncSetNameAction, Action *, gText, Action *)
 
 Action *gelfuncSetNameAction::EvalItem(Action *a, gText name) const
 {
+  if (!a)  return 0;
   a->SetName(name);
   return a;
 }
@@ -547,6 +633,7 @@ DECLARE_BINARY(gelfuncSetNameInfoset, Infoset *, gText, Infoset *)
 
 Infoset *gelfuncSetNameInfoset::EvalItem(Infoset *s, gText name) const
 {
+  if (!s)  return 0;
   s->SetName(name);
   return s;
 }
@@ -555,6 +642,7 @@ DECLARE_BINARY(gelfuncSetNameNode, Node *, gText, Node *)
 
 Node *gelfuncSetNameNode::EvalItem(Node *n, gText name) const
 {
+  if (!n)  return 0;
   n->SetName(name);
   return n;
 }
@@ -563,6 +651,7 @@ DECLARE_BINARY(gelfuncSetNameEFOutcome, EFOutcome *, gText, EFOutcome *)
 
 EFOutcome *gelfuncSetNameEFOutcome::EvalItem(EFOutcome *c, gText name) const
 {
+  if (!c)  return 0;
   c->SetName(name);
   return c;
 }
@@ -571,6 +660,7 @@ DECLARE_BINARY(gelfuncSetNameEFPlayer, EFPlayer *, gText, EFPlayer *)
 
 EFPlayer *gelfuncSetNameEFPlayer::EvalItem(EFPlayer *p, gText name) const
 {
+  if (!p)  return 0;
   p->SetName(name);
   return p;
 }
@@ -579,6 +669,7 @@ DECLARE_BINARY(gelfuncSetNameEfg, Efg *, gText, Efg *)
 
 Efg *gelfuncSetNameEfg::EvalItem(Efg *E, gText name) const
 {
+  if (!E)  return 0;
   E->SetTitle(name);
   return E;
 }
@@ -591,6 +682,9 @@ DECLARE_BINARY(gelfuncSetOutcome, Node *, EFOutcome *, EFOutcome *)
 
 EFOutcome *gelfuncSetOutcome::EvalItem(Node *n, EFOutcome *c) const
 {
+  if (!n || !c)   return 0;
+  if (n->Game() != c->BelongsTo())
+    throw gelGameMismatchError("SetOutcome");
   n->SetOutcome(c);
   return c;
 }
@@ -603,7 +697,7 @@ DECLARE_UNARY(gelfuncSupportEfg, Efg *, EFSupport *)
 
 EFSupport *gelfuncSupportEfg::EvalItem(Efg *E) const
 {
-  return new EFSupport(*E);
+  return (E) ? new EFSupport(*E) : 0;
 }
 
 
@@ -615,6 +709,7 @@ DECLARE_UNARY(gelfuncUnmarkSubgame, Node *, Node *)
 
 Node *gelfuncUnmarkSubgame::EvalItem(Node *n) const
 {
+  if (!n)  return 0;
   n->Game()->RemoveSubgame(n);
   return n;
 }

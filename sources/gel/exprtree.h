@@ -59,15 +59,6 @@ class MixedSolution;
 
 
 
-class gDimMismatchException : public gException   
-{
-public:
-  virtual gText Description(void) const { return "Dimension mismatch"; }
-}; 
-
-
-
-
 
 class gelVariableTable;
 class gelSignature;
@@ -192,8 +183,6 @@ public:
 
 
 
-
-
 #define DECLARE_NOPARAM( funcclass, T )               \
 class funcclass : public gelExpression<T>             \
 {                                                     \
@@ -261,46 +250,20 @@ public:                                               \
              gelExpression<type2>* x2 )               \
     : op1(x1), op2(x2) {}                             \
   virtual ~funcclass() { delete op1; delete op2; }    \
-  gNestedList<T> Evaluate( gelVariableTable *vt ) const;           \
-};                                                                 \
-                                                                   \
+  gNestedList<T> Evaluate( gelVariableTable *vt ) const;     \
+};                                                    \
+                                                      \
 gNestedList<T> funcclass::Evaluate(gelVariableTable *vt) const     \
-{                                                                  \
-  gNestedList<type1> arg1 = op1->Evaluate( vt );                   \
-  gNestedList<type2> arg2 = op2->Evaluate( vt );                   \
-								       \
-  if( (arg1.Dim()[1] == 0) != (arg2.Dim()[1] == 0) )                   \
-  {                                                                    \
-    /* only one of the arguments is a scalar */                        \
-                                                                       \
-    if( arg1.Dim()[1] == 0 ) /* the first argument is a scalar */      \
-    {                                                                  \
-      gNestedList<T> ret( arg2.Dim() );                                \
-      for (int i = 1; i <= arg2.Data().Length(); i++)                  \
-	ret.Data().Append(EvalItem(arg1.Data()[1], arg2.Data()[i]));   \
-      return ret;                                                      \
-    }                                                                  \
-    else /* the second argument is a scalar */                         \
-    {                                                                  \
-      gNestedList<T> ret( arg1.Dim() );                                \
-      for (int i = 1; i <= arg1.Data().Length(); i++)                  \
-	ret.Data().Append(EvalItem(arg1.Data()[i], arg2.Data()[1]));   \
-      return ret;                                                      \
-    }                                                                  \
-                                                                       \
-  }                                                                    \
-  else                                                                 \
-  {                                                                    \
-    gNestedList<T> ret( arg1.Dim() );                                  \
-    if( arg1.Data().Length() != arg2.Data().Length() )                 \
-      throw gDimMismatchException();                                   \
-    if( arg1.Dim() != arg2.Dim() )                                     \
-      throw gDimMismatchException();                                   \
-    for (int i = 1; i <= arg1.Data().Length(); i++)                    \
-      ret.Data().Append(EvalItem(arg1.Data()[i], arg2.Data()[i]));     \
-    return ret;                                                        \
-  }                                                                    \
-}                                                                      \
+{                                                   \
+  gNestedList<type1> arg1 = op1->Evaluate( vt );    \
+  gNestedList<type2> arg2 = op2->Evaluate( vt );    \
+  gNestedList<T> ret( arg1.Dim() );                 \
+  assert( arg1.Data().Length() == arg2.Data().Length() );         \
+  assert( arg1.Dim() == arg2.Dim() );               \
+  for (int i = 1; i <= arg1.Data().Length(); i++)             \
+    ret.Data().Append(EvalItem(arg1.Data()[i], arg2.Data()[i]));     \
+  return ret;                                       \
+}                                                   \
 
 
 // This one is for non-listed functions
@@ -338,6 +301,24 @@ public:
   gNestedList<T> Evaluate(gelVariableTable *) const;
 };
 
+
+
+class gelRuntimeError : public gException   {
+private:
+  gText message;
+  
+public:
+  gelRuntimeError(const gText &m) : message(m)   { }
+  virtual ~gelRuntimeError()   { }
+  gText Description(void) const  { return message; }
+};
+
+class gelGameMismatchError : public gelRuntimeError   {
+public:
+  gelGameMismatchError(const gText &fn) :
+     gelRuntimeError("Game mismatch error in call to " + fn)   { }
+  virtual ~gelGameMismatchError()   { }
+};
 
 
 

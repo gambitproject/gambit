@@ -11,6 +11,7 @@
 #include "tristate.h"
 
 #include "efg.h"
+#include "behavsol.h"
 #include "nfg.h"
 
 //-------------
@@ -101,7 +102,7 @@ EFSupport *gelfuncPrintEFSupport::EvalItem(EFSupport *s) const
 
 BehavSolution *gelfuncPrintBehav::EvalItem(BehavSolution *b) const
 {
-  gout << b;
+  gout << *b;
   return b;
 }
 

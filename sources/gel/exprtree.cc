@@ -360,7 +360,8 @@ template class gList<Efg *>;
 template class gList<Action *>;
 template class gList<Infoset *>;
 template class gList<EFPlayer *>;
-template class gList<EFOutcome *>;
+// gList<EFOutcome *> provided by subsolve.cc currently
+//template class gList<EFOutcome *>;
 template class gList<EFSupport *>;
 template class gList<BehavSolution *>;
 template class gList<Nfg *>;

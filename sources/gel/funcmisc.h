@@ -18,6 +18,29 @@ class gelVariableTable;
 
 typedef gelExpr *gelAdapter(const gArray<gelExpr *> &); 
 
+
+class gelBadFunctionSig : public gException   {
+ private:
+  gText sig;
+
+ public:
+  gelBadFunctionSig(void)   { }
+  gelBadFunctionSig(const gText &);
+  virtual ~gelBadFunctionSig()   { }
+  gText Description(void) const;
+};
+
+class gelInternalError : public gException  {
+ private:
+  gText msg;
+
+ public:
+  gelInternalError(const gText &s) : msg(s)  { }
+  virtual ~gelInternalError()   { }
+  gText Description(void) const   { return msg; }
+};
+
+
 class gelParamInfo  {
 private:
   gText m_Name;
