@@ -35,12 +35,13 @@ extern GSM *_gsm;
 
 static Portion *GSM_AddStrategy(Portion **param)
 {
-  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  NFSupport *support = ((NfSupportPortion *) param[0])->Value();
   Strategy *s = ((StrategyPortion *) param[1])->Value();
 
+  NFSupport *S = new NFSupport(*support);
   S->AddStrategy(s);
 
-  return param[0]->RefCopy();
+  return new NfSupportPortion(S);
 }
 
 //---------------
@@ -62,7 +63,7 @@ static Portion *GSM_CompressNfg(Portion **param)
 // DeleteOutcome
 //-----------------
 
-static Portion *GSM_DeleteOutcome_Nfg(Portion **param)
+static Portion *GSM_DeleteOutcome(Portion **param)
 {
   NFOutcome *outc = ((NfOutcomePortion *) param[0])->Value();
 
@@ -136,7 +137,7 @@ static Portion *GSM_Game_Strategy(Portion **param)
   return new NfgPortion(&N);
 }
 
-static Portion *GSM_Game_Outcome(Portion **param)
+static Portion *GSM_Game_NfOutcome(Portion **param)
 {
   Nfg *N = ((NfOutcomePortion *) param[0])->Value()->Game();
 
@@ -148,7 +149,7 @@ static Portion *GSM_Game_Outcome(Portion **param)
 // IsConstSum
 //--------------
 
-static Portion *GSM_IsConstSum_Nfg(Portion **param)
+static Portion *GSM_IsConstSum(Portion **param)
 {
   Nfg *N = ((NfgPortion *) param[0])->Value();
   return new BoolPortion(IsConstSum(*N));
@@ -183,12 +184,10 @@ static Portion *GSM_LoadNfg(Portion **param)
 // Name
 //--------
 
-static Portion* GSM_Name_Nfg_Elements( Portion** param )
+static Portion* GSM_Name_NfgElements( Portion** param )
 {
   if( param[0]->Spec().Type == porNULL )
-  {
     return new TextPortion( "" );
-  }
 
   switch( param[0]->Spec().Type )
   {
@@ -197,10 +196,11 @@ static Portion* GSM_Name_Nfg_Elements( Portion** param )
   case porNFPLAYER:
     return new TextPortion(((NfPlayerPortion*) param[0])->Value()->
 			      GetName());
-    break;
   case porSTRATEGY:
     return new TextPortion(((StrategyPortion*) param[0])->Value()->name);
-    break;
+  case porNFOUTCOME:
+    return new TextPortion(((NfOutcomePortion*) param[0])->Value()->
+			   GetName());
   default:
     assert( 0 );
     return 0;
@@ -226,213 +226,24 @@ static Portion *GSM_NewNfg(Portion **param)
   return new NfgPortion(new Nfg(d, space, new term_order(space, ord)));
 }
 
-/*
- * I am arbitrarily making the decision to comment out this function
- * since it is going to be heavily modified at best when the
- * final game form - payoff function split takes place
- */
-
-#ifdef UNUSED
-Portion* GSM_NewNfg_Payoff(Portion** param, bool rational)
-{
-  int dim = param[0]->Spec().ListDepth - 1;
-  int players = 0;
-  gArray<int> dmax(dim);
-  Portion* list = param[0];
-
-  if(dim == 0)
-    return new ErrorPortion("Bad payoff dimensiontality");
-  while(dim > 0)
-  {
-    assert(list->Spec().ListDepth > 1);
-    dmax[dim] = ((ListPortion*) list)->Length();
-    list = (*((ListPortion*) list))[1];
-    dim--;
-  }
-  assert(list->Spec().ListDepth > 0);
-  players = dmax.Length();
-  // gout << "players: " << players << '\n';
-  // gout << "dmax: " << dmax << '\n';
-  
-
-  // create new Nfg and call SetPayoff()
-  BaseNfg* nfg;
-  if(!rational)
-    nfg = new Nfg<double>(dmax);
-  else
-    nfg = new Nfg<gRational>(dmax);
-
-  int length = dmax.Length();
-  gArray<int> d(length);
-  int ci;
-  int pl;
-
-  for(ci=1; ci<=length; ci++)
-    d[ci] = 1;
-  d[length] = 0;
-
-  while(d != dmax)
-  {
-    // increment indices
-    ci = length;
-    d[ci]++;
-    while(d[ci] > dmax[ci])
-    {
-      d[ci] = 1;
-      ci--;
-      if(ci == 0)
-	break;
-      d[ci]++;
-    }
-
-    // begin valid index region
-    // now extract the list with the payoffs at each position
-    list = param[0];
-    ci = length;
-    while(ci > 0)
-    {
-      assert(list->Spec().ListDepth > 1);
-      if(((ListPortion*) list)->Length() != dmax[ci])
-      {
-	delete nfg;
-	return new ErrorPortion("Bad payoff dimensionality");
-      }      
-      list = (*((ListPortion*) list))[d[ci]];
-      ci--;
-    }
-    assert(list->Spec().ListDepth == 1);
-    // gout << "SetPayoff[n, " << d << ", " << list << "]\n";
-
-    if(((ListPortion*) list)->Length() != players)
-    {
-      delete nfg;
-      return new ErrorPortion("Bad payoff dimensionality");
-    }
-    
-    // now we have the list; call SetPayoff() for each player
-    for(pl=1; pl<=players; pl++)
-      if(!rational)
-	((Nfg<double> *) nfg)->SetPayoff(nfg->GetOutcome(d), pl,
-             ((FloatPortion*) (*((ListPortion*) list))[pl])->Value());
-      else
-	((Nfg<gRational> *) nfg)->SetPayoff(nfg->GetOutcome(d), pl,
-             ((RationalPortion*) (*((ListPortion*) list))[pl])->Value());
-
-    // end valid index region
-  }
-  
-  return new NfgPortion(nfg);
-}
-
-
-Portion* GSM_NewNfg_Float(Portion** param)
-{
-  return GSM_NewNfg_Payoff(param, false);
-}
-
-Portion* GSM_NewNfg_Rational(Portion** param)
-{
-  return GSM_NewNfg_Payoff(param, true);
-}
-#endif    // UNUSED
-
 
 //--------------
 // NewOutcome
 //--------------
 
-static Portion *GSM_NewOutcome_Nfg(Portion **param)
+static Portion *GSM_NewOutcome(Portion **param)
 {
   return new NfOutcomePortion(((NfgPortion *) param[0])->Value()->NewOutcome());
 }
 
 
-//--------------
-// ListForm
-//--------------
-
-
-#ifdef UNUSED
-Portion* GSM_ListForm_Nfg(Portion** param, bool rational)
-{
-  BaseNfg* nfg = ((NfgPortion*) param[0])->Value();
-  gArray<int> dmax(nfg->NumStrats());
-  ListPortion* result = new ListValPortion();
-  ListPortion* list;
-  int ci;
-  int i;
-  int pl;
-  int length = dmax.Length();
-  int players = length;
-  gArray<int> d(length);
-  for(i=1; i<=length; i++)
-    d[i] = 1;
-  d[length] = 0;
-  // gout << "dmax: " << dmax << '\n';
-  while(d != dmax)
-  {
-    // increment indices
-    ci = length;
-    d[ci]++;
-    while(d[ci] > dmax[ci])
-    {
-      d[ci] = 1;
-      ci--;
-      if(ci == 0)
-	break;
-      d[ci]++;
-    }
-
-    // begin valid index region
-    // now extract the list with the payoffs at each position
-    list = result;
-    ci = length;
-    while(ci > 0)
-    {
-      //assert(list->Spec().ListDepth > 1);
-      if(((ListPortion*) list)->Length() != dmax[ci])
-	list->Append(new ListValPortion());
-      list = (ListPortion*) (*((ListPortion*) list))[d[ci]];
-      ci--;
-    }
-    assert(list->Spec().ListDepth == 1);
-
-    // now we have the list; call SetPayoff() for each player
-    for(pl=1; pl<=players; pl++)
-      if(!rational)
-	list->Append(new FloatPortion(((Nfg<double> *) nfg)->Payoff(nfg->GetOutcome(d), pl)));
-      else
-	list->Append(new RationalPortion(((Nfg<gRational> *) nfg)->Payoff(nfg->GetOutcome(d), pl)));
-
-    // gout << "Payoff[n, " << d << "] = " << list << '\n';
-    
-    // end valid index region
-  }
-
-  if(!rational)
-    result->SetDataType(porFLOAT);
-  else
-    result->SetDataType(porRATIONAL);
-  return result;
-}
-
-Portion* GSM_ListForm_NfgFloat(Portion** param)
-{
-  return GSM_ListForm_Nfg(param, false);
-}
-
-Portion* GSM_ListForm_NfgRational(Portion** param)
-{
-  return GSM_ListForm_Nfg(param, true);
-}
-#endif   // UNUSED
 
 
 //-----------
 // Outcome
 //-----------
 
-static Portion* GSM_Outcome_Nfg(Portion** param)
+static Portion* GSM_Outcome(Portion** param)
 {
   int i;
 
@@ -461,7 +272,7 @@ static Portion* GSM_Outcome_Nfg(Portion** param)
 // Outcomes
 //------------
 
-static Portion *GSM_Outcomes_Nfg(Portion **param)
+static Portion *GSM_Outcomes(Portion **param)
 {
   Nfg *N = ((NfgPortion *) param[0])->Value();
   
@@ -472,9 +283,9 @@ static Portion *GSM_Outcomes_Nfg(Portion **param)
 // Payoff
 //-----------
 
-static Portion* GSM_Payoff_NFOutcome(Portion** param)
+static Portion* GSM_Payoff(Portion** param)
 {
-  if (param[1]->Spec().Type == porNULL)
+  if (param[0]->Spec().Type == porNULL)
     return new NumberPortion(0);
 
   NFOutcome *outcome = ((NfOutcomePortion *) param[0])->Value();
@@ -506,7 +317,7 @@ static Portion *GSM_Player(Portion **param)
 // Players
 //------------
 
-static Portion *GSM_Players_Nfg(Portion **param)
+static Portion *GSM_Players(Portion **param)
 {
   Nfg *N = ((NfgPortion *) param[0])->Value();
 
@@ -520,12 +331,13 @@ static Portion *GSM_Players_Nfg(Portion **param)
 
 static Portion *GSM_RemoveStrategy(Portion **param)
 {
-  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  NFSupport *support = ((NfSupportPortion *) param[0])->Value();
   Strategy *s = ((StrategyPortion *) param[1])->Value();
   
+  NFSupport *S = new NFSupport(*support);
   S->RemoveStrategy(s);
 
-  return param[0]->RefCopy();
+  return new NfSupportPortion(S);
 }
 
 //------------
@@ -575,11 +387,19 @@ static Portion *GSM_SetName_Strategy(Portion **param)
   return param[0]->ValCopy();
 }
 
+static Portion *GSM_SetName_NfOutcome(Portion **param)
+{
+  NFOutcome *c = ((NfOutcomePortion *) param[0])->Value();
+  gString name = ((TextPortion *) param[1])->Value();
+  c->SetName(name);
+  return param[0]->ValCopy();
+}
+
 //------------
 // SetOutcome
 //------------
 
-static Portion* GSM_SetOutcome_Nfg(Portion** param)
+static Portion* GSM_SetOutcome(Portion** param)
 {
   Nfg &nfg = 
     ((StrategyPortion *) (*((ListPortion *) param[0]))[1])->Value()->nfp->Game();
@@ -609,7 +429,7 @@ static Portion* GSM_SetOutcome_Nfg(Portion** param)
 // SetPayoff
 //------------
 
-static Portion* GSM_SetPayoff_NFOutcome(Portion** param)
+static Portion* GSM_SetPayoff(Portion** param)
 {
   NFOutcome *outcome = ((NfOutcomePortion *) param[0])->Value();
   Nfg *nfg = outcome->Game();
@@ -641,7 +461,7 @@ static Portion *GSM_Strategies(Portion **param)
 // Support
 //--------------
 
-static Portion *GSM_Support_Nfg(Portion **param)
+static Portion *GSM_Support(Portion **param)
 {
   Nfg &N = * ((NfgPortion *) param[0])->Value();
   return new NfSupportPortion(new NFSupport(N));
@@ -653,25 +473,48 @@ void Init_nfgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
+  static struct { char *sig; Portion *(*func)(Portion **); } ftable[] =
+    { { "AddStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT",
+ 	GSM_AddStrategy },
+      { "CompressNfg[support->NFSUPPORT] =: NFG", GSM_CompressNfg },
+      { "DeleteOutcome[outcome->NFOUTCOME] =: BOOLEAN", GSM_DeleteOutcome },
+      { "Game[player->NFPLAYER] =: NFG", GSM_Game_NfPlayer },
+      { "Game[strategy->STRATEGY] =: NFG", GSM_Game_Strategy },
+      { "Game[outcome->NFOUTCOME] =: NFG", GSM_Game_NfOutcome }, 
+      { "IsConstSum[nfg->NFG] =: BOOLEAN", GSM_IsConstSum },
+      { "LoadNfg[file->TEXT] =: NFG", GSM_LoadNfg },
+      { "Name[x->NFG*] =: TEXT", GSM_Name_NfgElements },
+      { "Name[x->NFPLAYER*] =: TEXT", GSM_Name_NfgElements },
+      { "Name[x->STRATEGY*] =: TEXT", GSM_Name_NfgElements },
+      { "Name[x->NFOUTCOME*] =: TEXT", GSM_Name_NfgElements },
+      { "NewNfg[dim->LIST(INTEGER)] =: NFG", GSM_NewNfg },
+      { "NewOutcome[nfg->NFG] =: NFOUTCOME", GSM_NewOutcome },
+      { "Outcome[profile->LIST(STRATEGY)] =: NFOUTCOME", GSM_Outcome },
+      { "Outcomes[nfg->NFG] =: LIST(NFOUTCOME)", GSM_Outcomes },
+      { "Payoff[outcome->NFOUTCOME*, player->NFPLAYER] =: NUMBER",
+	GSM_Payoff },
+      { "Player[strategy->STRATEGY*] =: NFPLAYER", GSM_Player },
+      { "Players[nfg->NFG] =: LIST(NFPLAYER)", GSM_Players },
+      { "RemoveStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT",
+	GSM_RemoveStrategy },
+      { "SaveNfg[nfg->NFG, file->TEXT] =: NFG", GSM_SaveNfg },
+      { "SetName[x->NFG, name->TEXT] =: NFG", GSM_SetName_Nfg },
+      { "SetName[x->NFPLAYER, name->TEXT] =: NFPLAYER", GSM_SetName_NfPlayer },
+      { "SetName[x->STRATEGY, name->TEXT] =: STRATEGY", GSM_SetName_Strategy },
+      { "SetName[x->NFOUTCOME, name->TEXT] =: NFOUTCOME",
+	GSM_SetName_NfOutcome },
+      { "SetOutcome[profile->LIST(STRATEGY), outcome->NFOUTCOME] =: NFOUTCOME",
+	GSM_SetOutcome },
+      { "SetPayoff[outcome->NFOUTCOME, player->NFPLAYER, payoff->NUMBER] =: NFOUTCOME", GSM_SetPayoff },
+      { "Strategies[player->NFPLAYER, support->NFSUPPORT] =: LIST(STRATEGY)",
+	GSM_Strategies },
+      { "Support[nfg->NFG] =: NFSUPPORT", GSM_Support },
+      { 0, 0 }
+    };
 
-  FuncObj = new FuncDescObj("AddStrategy", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_AddStrategy, porNFSUPPORT, 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("strategy", porSTRATEGY));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("CompressNfg", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_CompressNfg, porNFG, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("DeleteOutcome", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_DeleteOutcome_Nfg, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("outcome", porNFOUTCOME));
-  gsm->AddFunction(FuncObj);
-
+  for (int i = 0; ftable[i].sig != 0; i++) 
+    gsm->AddFunction(new FuncDescObj(ftable[i].sig, ftable[i].func,
+				     funcLISTABLE | funcGAMEMATCH));
 
   FuncObj = new FuncDescObj("ElimDom", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ElimDom_Nfg,
@@ -688,178 +531,6 @@ void Init_nfgfunc(GSM *gsm)
 					    BYREF));
   FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("Game", 3);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_NfPlayer, porNFG, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porNFPLAYER));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_Strategy, porNFG, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy", porSTRATEGY));
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Game_Outcome, porNFG, 1));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("outcome", porNFOUTCOME));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("IsConstSum", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsConstSum_Nfg, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("LoadNfg", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LoadNfg, porNFG, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("file", porTEXT));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("Name", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Name_Nfg_Elements, porTEXT, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", 
-                              PortionSpec(porNFG | porNFPLAYER | porSTRATEGY, 
-                                          0, porNULLSPEC) ));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("NewNfg", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewNfg, porNFG, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("dim", PortionSpec(porINTEGER,1)));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("rational", porBOOL,
-					    new BoolPortion(false)));
-
-  /* commented out for now; don't forget to change
-     the # of functions back if these are reenabled!
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_NewNfg_Float, 
-				       porNFG_FLOAT, 1, 0, 
-				       funcNONLISTABLE));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("payoffs", 
-					    PortionSpec(porFLOAT,1)));
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_NewNfg_Rational, 
-				       porNFG_RATIONAL, 1, 0, 
-				       funcNONLISTABLE));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("payoffs", 
-					    PortionSpec(porRATIONAL,1)));
-  */
-
-  gsm->AddFunction(FuncObj);
-
-
-
-  /* commented out temporarily
-  FuncObj = new FuncDescObj("ListForm", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ListForm_NfgFloat, 
-				       PortionSpec(porFLOAT, NLIST), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG_FLOAT));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ListForm_NfgRational, 
-				       PortionSpec(porRATIONAL, NLIST), 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("nfg", porNFG_RATIONAL));
-  gsm->AddFunction(FuncObj);
-  */
-
-  FuncObj = new FuncDescObj("NewOutcome", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewOutcome_Nfg, porNFOUTCOME, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("Outcome", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Outcome_Nfg, porNFOUTCOME, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", 
-					    PortionSpec(porSTRATEGY, 1)));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("Outcomes", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Outcomes_Nfg,
-				       PortionSpec(porNFOUTCOME, 1), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("Payoff", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Payoff_NFOutcome,
-				       porNUMBER, 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-//  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("outcome", 
-					    PortionSpec(porNFOUTCOME,
-							0, porNULLSPEC)));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porNFPLAYER));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("Player", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Player, porNFPLAYER, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", 
-			      PortionSpec(porSTRATEGY, 0, porNULLSPEC) ));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("Players", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Players_Nfg, 
-				       PortionSpec(porNFPLAYER, 1), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
-  gsm->AddFunction(FuncObj);
-  
-
-  FuncObj = new FuncDescObj("RemoveStrategy", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RemoveStrategy, 
-				       porNFSUPPORT, 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("strategy", porSTRATEGY));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("SaveNfg", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SaveNfg, porNFG, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("file", porTEXT));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("SetName", 3);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetName_Nfg, porNFG, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNFG));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("name", porTEXT));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SetName_NfPlayer, 
-				       porNFPLAYER, 2));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porNFPLAYER));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("name", porTEXT));
-
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_SetName_Strategy, 
-				       porSTRATEGY, 2));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porSTRATEGY));
-  FuncObj->SetParamInfo(2, 1, ParamInfoType("name", porTEXT));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("SetOutcome", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetOutcome_Nfg, porNFOUTCOME, 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", 
-					    PortionSpec(porSTRATEGY, 1)));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("outcome", porNFOUTCOME));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("SetPayoff", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetPayoff_NFOutcome,
-				       porNFOUTCOME, 3,
-				       0, funcLISTABLE | funcGAMEMATCH));
-//  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("outcome", porNFOUTCOME));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porNFPLAYER));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("payoff", porNUMBER));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("Strategies", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Strategies, 
-				       PortionSpec(porSTRATEGY, 1), 2, 
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porNFPLAYER));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porNFSUPPORT));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("Support", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Support_Nfg, porNFSUPPORT, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
   gsm->AddFunction(FuncObj);
 }
 
