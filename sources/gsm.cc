@@ -26,6 +26,7 @@
 #include "extform.h"
 
 
+
 //--------------------------------------------------------------------
 //              global variables
 //--------------------------------------------------------------------
@@ -59,8 +60,8 @@ GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
     _OUTPUT = new OutputRefPortion( _StdOut );
     _NULL   = new OutputRefPortion( gnull );
 
-    _DefaultNfg = new NfgValPortion<double>( * new NormalForm<double> );
-    _DefaultEfg = new EfgValPortion<gRational>( * new ExtForm<gRational> );
+    _DefaultNfg = new NfgValPortion( new NormalForm<gRational> );
+    _DefaultEfg = new EfgValPortion( new ExtForm<double> );
   }
 
   _StackStack    = new gGrowableStack< gGrowableStack< Portion* >* >( 1 );
@@ -207,7 +208,8 @@ bool GSM::PushList( const int num_of_elements )
 
     if( p->Type() != porREFERENCE )
     {
-      insert_result = list->Insert( p, 1 );
+      insert_result = list->Insert( p->ValCopy(), 1 );
+      delete p;
       if( insert_result == 0 )
       {
 	_ErrorMessage( _StdErr, 35 );
@@ -266,16 +268,7 @@ bool GSM::_VarDefine( const gString& var_name, Portion* p )
     old_value = (*_RefTableStack->Peek())( var_name );
     if( old_value->Type() != p->Type() )
     {
-      if( 
-	 !( 
-	   ( ( old_value->Type() & porMIXED ) && ( p->Type() & porMIXED ) ) ||
-	   ( ( old_value->Type() & porBEHAV ) && ( p->Type() & porBEHAV ) ) ||
-	   ( ( old_value->Type() & porOUTCOME ) && 
-	    ( p->Type() & porOUTCOME ) ) ||
-	   ( ( old_value->Type() & porNFG   ) && ( p->Type() & porNFG   ) ) ||
-	   ( ( old_value->Type() & porEFG   ) && ( p->Type() & porEFG   ) ) 
-	   ) 
-	 )
+      if( !PortionTypeMatch( old_value->Type(), p->Type() ) )
 	type_match = false;
     }
     else if( p->Type() == porLIST )
@@ -387,6 +380,7 @@ Portion* GSM::_Pop( void )
 
 bool GSM::PushRef( const gString& ref )
 {
+  assert( ref != "" );
   _Push( new ReferencePortion( ref ) );
   return true;
 }
@@ -400,6 +394,7 @@ bool GSM::Assign( void )
   bool      result = true;
   PortionType p1_type;
   PortionType p2_type;
+
   
 #ifndef NDEBUG
   if( _Depth() < 2 )
@@ -427,36 +422,6 @@ bool GSM::Assign( void )
     return result;
   }
 
-  else if( p1_type == porREFERENCE )
-  { 
-    gString RefName = ( (ReferencePortion*) p1 )->Value();
-    if( _VarIsDefined( RefName ) )
-      p1_type = _VarValue( RefName )->Type();
-    
-    if( ( p1_type & porMIXED && p2_type & porMIXED ) ||
-       ( p1_type & porBEHAV && p2_type & porBEHAV ) ||
-       ( p1_type & porOUTCOME && p2_type & porOUTCOME ) ||
-       ( p1_type & porNFG && p2_type & porNFG ) ||
-       ( p1_type & porEFG && p2_type & porEFG ) )
-    {
-      p1 = _ResolveRef( p1 );
-      if( p1->Original() != p2->Original() )
-      {
-	delete _VarRemove( RefName );
-	_VarDefine( RefName, p2 );
-	delete p1;
-	_Push( p2->RefCopy() );
-      }
-      else
-      {
-	delete p2;
-	_Push( p1 );
-      }
-      return result;
-    }
-  }
-
-  
 
   p1 = _ResolveRef( p1 );
   
@@ -494,8 +459,8 @@ bool GSM::Assign( void )
 	  switch( p1->Type() )
 	  {
 	  case porLIST:
-	    if( ( ( (ListPortion*) p1 )->DataType() == 
-		 ( (ListPortion*) p2 )->DataType() ) ||
+	    if( PortionTypeMatch(( (ListPortion*) p1 )->DataType(),
+				 ( (ListPortion*) p2 )->DataType() ) ||
 	       ( (ListPortion*) p1 )->DataType() == porUNKNOWN )
 	    {
 	      p1->AssignFrom( p2 );
@@ -519,13 +484,6 @@ bool GSM::Assign( void )
 	    delete p1;
 	    break;
 	    
-	  case porNFG_FLOAT:
-	  case porNFG_RATIONAL:
-	  case porEFG_FLOAT:
-	  case porEFG_RATIONAL:
-	    assert( 0 );
-	    break;
-	    
 	  default:
 	    p1->AssignFrom( p2 );
 	    delete p2;
@@ -535,10 +493,19 @@ bool GSM::Assign( void )
       }
       else
       {
-	_ErrorMessage( _StdErr, 48 );
-	_Push( p2 );
-	result = false;
-	delete p1;
+	if( PortionTypeMatch( p1->Type(), p2->Type() ) )
+	{
+	  p1->AssignFrom( p2 );
+	  delete p2;
+	  _Push( p1 );
+	}
+	else
+	{
+	  _ErrorMessage( _StdErr, 48 );
+	  _Push( p2 );
+	  result = false;
+	  delete p1;
+	}
       }
     }
     else

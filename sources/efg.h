@@ -17,6 +17,11 @@ class Node;
 class Action;
 
 class BaseExtForm     {
+  
+  private:
+    // this is used to track memory leakage; #define MEMCHECK to use it
+    static int _NumObj;
+  
   friend class EfgFileReader;
   protected:
     gString title;

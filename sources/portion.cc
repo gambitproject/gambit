@@ -898,397 +898,513 @@ bool ActionRefPortion::IsReference( void ) const
 
 
 
+
+
+
 //---------------------------------------------------------------------
-//                          Mixed class
+//                            new Mixed class
 //---------------------------------------------------------------------
 
-#include "mixed.h"
 
-template <class T> MixedPortion<T>::MixedPortion( void )
+
+MixedPortion::MixedPortion( void )
 { }
 
-template <class T> MixedPortion<T>::~MixedPortion()
+MixedPortion::~MixedPortion()
 { }
 
-template <class T> bool MixedPortion<T>::IsValid( void ) const
-{ return _Value != 0; }
-
-template <class T> MixedProfile<T>& MixedPortion<T>::Value( void ) const
+BaseMixedProfile*& MixedPortion::Value( void ) const
 { return *_Value; }
 
-template <class T> PortionType MixedPortion<T>::Type( void ) const
-{ return porMIXED; }
-
-template <class T> void MixedPortion<T>::Output( gOutput& s ) const
-{ s << "(Mixed) " << *_Value; }
-
-template <class T> Portion* MixedPortion<T>::ValCopy( void ) const
-{
-  if( _Value != 0 )
+PortionType MixedPortion::Type( void ) const
+{ 
+  assert( (*_Value) != 0 );
+  switch( (*_Value)->Type() )
   {
-    return new MixedValPortion<T>
-      ( * new MixedProfile<T>( * (MixedProfile<T>*) _Value ) ); 
+  case DOUBLE:
+    return porMIXED_FLOAT;
+  case RATIONAL:
+    return porMIXED_RATIONAL;
+  default:
+    assert( 0 );
   }
-  else
-    return new MixedValPortion<T>;
+  return porUNKNOWN;
 }
 
-template <class T> Portion* MixedPortion<T>::RefCopy( void ) const
+void MixedPortion::Output( gOutput& s ) const
 {
-  Portion* p = new MixedRefPortion<T>( *_Value ); 
+  switch( (*_Value)->Type() )
+  {
+  case DOUBLE:
+    s << "(Mixed) " << * (MixedProfile<double>*) (*_Value); 
+    break;
+  case RATIONAL:
+    s << "(Mixed) " << * (MixedProfile<gRational>*) (*_Value); 
+    break;
+  default:
+    assert( 0 );
+  }
+}
+
+Portion* MixedPortion::ValCopy( void ) const
+{ 
+  switch( (*_Value)->Type() )
+  {
+  case DOUBLE:
+    return new MixedValPortion
+      ( new MixedProfile<double>( * (MixedProfile<double>*) (*_Value) ) ); 
+    break;
+  case RATIONAL:
+    return new MixedValPortion
+      ( new MixedProfile<gRational>( * (MixedProfile<gRational>*) (*_Value) ) ); 
+    break;
+  default:
+    assert( 0 );
+  }
+  return 0;
+}
+
+Portion* MixedPortion::RefCopy( void ) const
+{ 
+  Portion* p = new MixedRefPortion( *_Value ); 
+  p->SetOwner( _Owner );
   p->SetOriginal( Original() );
   return p;
 }
 
-template <class T> void MixedPortion<T>::AssignFrom( Portion* p )
+void MixedPortion::AssignFrom( Portion* p )
 {
-  assert( 0 );
-/*
-  assert( p->Type() == Type() );
-  *_Value = *( ( (MixedPortion<T>*) p )->_Value );
-*/
+  assert( p->Type() & porMIXED );
+
+  delete *_Value;
+
+  switch( ( (MixedPortion*) p )->Value()->Type() )
+  {
+  case DOUBLE:
+    *_Value = new MixedProfile<double>
+      ( * (MixedProfile<double>*) ( (MixedPortion*) p )->Value() ); 
+    break;
+  case RATIONAL:
+    *_Value =  new MixedProfile<gRational>
+      ( * (MixedProfile<gRational>*) ( (MixedPortion*) p )->Value() ); 
+    break;
+  default:
+    assert( 0 );
+  }
+
+  // *_Value = *( ( (MixedPortion*) p )->_Value );
+
+  Original()->SetOwner( p->Original()->Owner() );
 }
 
-template <class T> bool MixedPortion<T>::operator == ( Portion *p ) const
+bool MixedPortion::operator == ( Portion *p ) const
 {
   if( p->Type() == Type() )
-    return ( *_Value == *( (MixedPortion<T>*) p )->_Value );
+    return ( *_Value == *( (MixedPortion*) p )->_Value );
   else
     return false;
 }
 
 
-template <class T> MixedValPortion<T>::MixedValPortion( void )
-{ _Value = 0; }
+MixedValPortion::MixedValPortion( BaseMixedProfile* value )
+{ _Value = new BaseMixedProfile*( value ); }
 
-template <class T> MixedValPortion<T>::MixedValPortion( MixedProfile<T>& value)
-{ _Value = &value; }
+MixedValPortion::~MixedValPortion()
+{ 
+  delete *_Value;
+  delete _Value; 
+}
 
-template <class T> MixedValPortion<T>::~MixedValPortion()
-{ delete _Value; }
-
-template <class T> bool MixedValPortion<T>::IsReference( void ) const
+bool MixedValPortion::IsReference( void ) const
 { return false; }
 
 
-template <class T> MixedRefPortion<T>::MixedRefPortion( MixedProfile<T>& value)
+MixedRefPortion::MixedRefPortion( BaseMixedProfile*& value )
 { _Value = &value; }
 
-template <class T> MixedRefPortion<T>::~MixedRefPortion()
+MixedRefPortion::~MixedRefPortion()
 { }
 
-template <class T> bool MixedRefPortion<T>::IsReference( void ) const
+bool MixedRefPortion::IsReference( void ) const
 { return true; }
 
 
 
-TEMPLATE class MixedPortion< double >;
-TEMPLATE class MixedValPortion< double >;
-TEMPLATE class MixedRefPortion< double >;
-PortionType MixedPortion< double >::Type( void ) const
-{ return porMIXED_FLOAT; }
-
-TEMPLATE class MixedPortion< gRational >;
-TEMPLATE class MixedValPortion< gRational >;
-TEMPLATE class MixedRefPortion< gRational >;
-PortionType MixedPortion< gRational >::Type( void ) const
-{ return porMIXED_RATIONAL; }
-
 
 
 
 
 //---------------------------------------------------------------------
-//                          Behav class
+//                            new Behav class
 //---------------------------------------------------------------------
 
-#include "behav.h"
 
-template <class T> BehavPortion<T>::BehavPortion( void )
+
+BehavPortion::BehavPortion( void )
 { }
 
-template <class T> BehavPortion<T>::~BehavPortion()
+BehavPortion::~BehavPortion()
 { }
 
-template <class T> bool BehavPortion<T>::IsValid( void ) const
-{ return _Value != 0; }
-
-template <class T> BehavProfile<T>& BehavPortion<T>::Value( void ) const
+BaseBehavProfile*& BehavPortion::Value( void ) const
 { return *_Value; }
 
-template <class T> PortionType BehavPortion<T>::Type( void ) const
-{ return porBEHAV; }
-
-template <class T> void BehavPortion<T>::Output( gOutput& s ) const
-{ s << "(Behav) " << *_Value; }
-
-template <class T> Portion* BehavPortion<T>::ValCopy( void ) const
-{
-  if( _Value != 0 )
+PortionType BehavPortion::Type( void ) const
+{ 
+  assert( (*_Value) != 0 );
+  switch( (*_Value)->Type() )
   {
-    return new BehavValPortion<T>
-      ( * new BehavProfile<T>( * (BehavProfile<T>*) _Value ) ); 
+  case DOUBLE:
+    return porBEHAV_FLOAT;
+  case RATIONAL:
+    return porBEHAV_RATIONAL;
+  default:
+    assert( 0 );
   }
-  else
-    return new BehavValPortion<T>;
+  return porUNKNOWN;
 }
 
-template <class T> Portion* BehavPortion<T>::RefCopy( void ) const
+void BehavPortion::Output( gOutput& s ) const
 {
-  Portion* p = new BehavRefPortion<T>( *_Value ); 
+  switch( (*_Value)->Type() )
+  {
+  case DOUBLE:
+    s << "(Behav) " << * (BehavProfile<double>*) (*_Value); 
+    break;
+  case RATIONAL:
+    s << "(Behav) " << * (BehavProfile<gRational>*) (*_Value); 
+    break;
+  default:
+    assert( 0 );
+  }
+}
+
+Portion* BehavPortion::ValCopy( void ) const
+{ 
+  switch( (*_Value)->Type() )
+  {
+  case DOUBLE:
+    return new BehavValPortion
+      ( new BehavProfile<double>( * (BehavProfile<double>*) (*_Value) ) ); 
+    break;
+  case RATIONAL:
+    return new BehavValPortion
+      ( new BehavProfile<gRational>( * (BehavProfile<gRational>*) (*_Value) ) ); 
+    break;
+  default:
+    assert( 0 );
+  }
+  return 0;
+}
+
+Portion* BehavPortion::RefCopy( void ) const
+{ 
+  Portion* p = new BehavRefPortion( *_Value ); 
+  p->SetOwner( _Owner );
   p->SetOriginal( Original() );
   return p;
 }
 
-template <class T> void BehavPortion<T>::AssignFrom( Portion* p )
+void BehavPortion::AssignFrom( Portion* p )
 {
-  assert( 0 );
-/*
-  assert( p->Type() == Type() );
-  *_Value = *( ( (BehavPortion<T>*) p )->_Value );
-*/
+  assert( p->Type() & porBEHAV );
+
+  delete *_Value;
+
+  switch( ( (BehavPortion*) p )->Value()->Type() )
+  {
+  case DOUBLE:
+    *_Value = new BehavProfile<double>
+      ( * (BehavProfile<double>*) ( (BehavPortion*) p )->Value() ); 
+    break;
+  case RATIONAL:
+    *_Value =  new BehavProfile<gRational>
+      ( * (BehavProfile<gRational>*) ( (BehavPortion*) p )->Value() ); 
+    break;
+  default:
+    assert( 0 );
+  }
+
+  // *_Value = *( ( (BehavPortion*) p )->_Value );
+
+  Original()->SetOwner( p->Original()->Owner() );
 }
 
-template <class T> bool BehavPortion<T>::operator == ( Portion *p ) const
+bool BehavPortion::operator == ( Portion *p ) const
 {
   if( p->Type() == Type() )
-    return ( *_Value == *( (BehavPortion<T>*) p )->_Value );
+    return ( *_Value == *( (BehavPortion*) p )->_Value );
   else
     return false;
 }
 
 
-template <class T> BehavValPortion<T>::BehavValPortion( void )
-{ _Value = 0; }
+BehavValPortion::BehavValPortion( BaseBehavProfile* value )
+{ _Value = new BaseBehavProfile*( value ); }
 
-template <class T> BehavValPortion<T>::BehavValPortion( BehavProfile<T>& value)
-{ _Value = &value; }
+BehavValPortion::~BehavValPortion()
+{ 
+  delete *_Value;
+  delete _Value; 
+}
 
-template <class T> BehavValPortion<T>::~BehavValPortion()
-{ delete _Value; }
-
-template <class T> bool BehavValPortion<T>::IsReference( void ) const
+bool BehavValPortion::IsReference( void ) const
 { return false; }
 
 
-template <class T> BehavRefPortion<T>::BehavRefPortion( BehavProfile<T>& value)
+BehavRefPortion::BehavRefPortion( BaseBehavProfile*& value )
 { _Value = &value; }
 
-template <class T> BehavRefPortion<T>::~BehavRefPortion()
+BehavRefPortion::~BehavRefPortion()
 { }
 
-template <class T> bool BehavRefPortion<T>::IsReference( void ) const
+bool BehavRefPortion::IsReference( void ) const
 { return true; }
 
 
 
-TEMPLATE class BehavPortion< double >;
-TEMPLATE class BehavValPortion< double >;
-TEMPLATE class BehavRefPortion< double >;
-PortionType BehavPortion< double >::Type( void ) const
-{ return porBEHAV_FLOAT; }
 
-TEMPLATE class BehavPortion< gRational >;
-TEMPLATE class BehavValPortion< gRational >;
-TEMPLATE class BehavRefPortion< gRational >;
-PortionType BehavPortion< gRational >::Type( void ) const
-{ return porBEHAV_RATIONAL; }
 
 
 
 
 //---------------------------------------------------------------------
-//                          BaseNfg class
+//                            new Nfg class
 //---------------------------------------------------------------------
 
 
-BaseNfgPortion::BaseNfgPortion( void )
+
+NfgPortion::NfgPortion( void )
 { }
 
-BaseNfgPortion::~BaseNfgPortion()
+NfgPortion::~NfgPortion()
 { }
 
-BaseNormalForm& BaseNfgPortion::Value( void ) const
+BaseNormalForm*& NfgPortion::Value( void ) const
 { return *_Value; }
 
-void BaseNfgPortion::AssignFrom( Portion* p )
-{
-  assert( 0 );
-/*
-  assert( p->Type() == Type() );
-  *_Value = *( ( (BaseNfgPortion*) p )->_Value );
-*/
-}
-
-bool BaseNfgPortion::operator == ( Portion *p ) const
-{
-/*
-  assert( p->Type() == Type() );
-  return ( *_Value == *( (BaseNfgPortion*) p )->_Value );
-*/
-  return false;
-}
-
-
-//---------------------------------------------------------------------
-//                          Nfg class
-//---------------------------------------------------------------------
-
-
-template <class T> NormalForm<T>& NfgPortion<T>::Value( void ) const
-{ return * (NormalForm<T>*) _Value; }
-
-template <class T> void NfgPortion<T>::Output( gOutput& s ) const
-{ s << "(Nfg) \"" << _Value->GetTitle() << "\""; }
-
-template <class T> Portion* NfgPortion<T>::ValCopy( void ) const
-{
-  return new NfgValPortion<T>
-    ( * new NormalForm<T>( * (NormalForm<T>*) _Value ) ); 
-}
-
-template <class T> Portion* NfgPortion<T>::RefCopy( void ) const
+PortionType NfgPortion::Type( void ) const
 { 
-  Portion* p = new NfgRefPortion<T>( * (NormalForm<T>*) _Value ); 
+  assert( (*_Value) != 0 );
+  switch( (*_Value)->Type() )
+  {
+  case DOUBLE:
+    return porNFG_FLOAT;
+  case RATIONAL:
+    return porNFG_RATIONAL;
+  default:
+    assert( 0 );
+  }
+  return porUNKNOWN;
+}
+
+void NfgPortion::Output( gOutput& s ) const
+{ s << "(Nfg) \"" << (*_Value)->GetTitle() << "\""; }
+
+Portion* NfgPortion::ValCopy( void ) const
+{ 
+  switch( (*_Value)->Type() )
+  {
+  case DOUBLE:
+    return new NfgValPortion
+      ( new NormalForm<double>( * (NormalForm<double>*) (*_Value) ) ); 
+    break;
+  case RATIONAL:
+    return new NfgValPortion
+      ( new NormalForm<gRational>( * (NormalForm<gRational>*) (*_Value) ) ); 
+    break;
+  default:
+    assert( 0 );
+  }
+  return 0;
+}
+
+Portion* NfgPortion::RefCopy( void ) const
+{ 
+  Portion* p = new NfgRefPortion( *_Value ); 
+  p->SetOwner( _Owner );
   p->SetOriginal( Original() );
   return p;
 }
 
+void NfgPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() & porNFG );
+
+  delete *_Value;
+
+  switch( ( (NfgPortion*) p )->Value()->Type() )
+  {
+  case DOUBLE:
+    *_Value = new NormalForm<double>
+      ( * (NormalForm<double>*) ( (NfgPortion*) p )->Value() ); 
+    break;
+  case RATIONAL:
+    *_Value =  new NormalForm<gRational>
+      ( * (NormalForm<gRational>*) ( (NfgPortion*) p )->Value() ); 
+    break;
+  default:
+    assert( 0 );
+  }
+
+  // *_Value = *( ( (NfgPortion*) p )->_Value );
+
+  Original()->SetOwner( p->Original()->Owner() );
+}
+
+bool NfgPortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (NfgPortion*) p )->_Value );
+  else
+    return false;
+}
 
 
-template <class T> NfgValPortion<T>::NfgValPortion( NormalForm<T>& value )
-{ _Value = &value; }
+NfgValPortion::NfgValPortion( BaseNormalForm* value )
+{ _Value = new BaseNormalForm*( value ); }
 
-template <class T> NfgValPortion<T>::~NfgValPortion()
-{ delete _Value; }
+NfgValPortion::~NfgValPortion()
+{ 
+  delete *_Value;
+  delete _Value; 
+}
 
-template <class T> bool NfgValPortion<T>::IsReference( void ) const
+bool NfgValPortion::IsReference( void ) const
 { return false; }
 
 
-template <class T> NfgRefPortion<T>::NfgRefPortion( NormalForm<T>& value)
+NfgRefPortion::NfgRefPortion( BaseNormalForm*& value )
 { _Value = &value; }
 
-template <class T> NfgRefPortion<T>::~NfgRefPortion()
+NfgRefPortion::~NfgRefPortion()
 { }
 
-template <class T> bool NfgRefPortion<T>::IsReference( void ) const
+bool NfgRefPortion::IsReference( void ) const
 { return true; }
 
 
 
 
-TEMPLATE class NfgPortion< double >;
-TEMPLATE class NfgValPortion< double >;
-TEMPLATE class NfgRefPortion< double >;
-PortionType NfgPortion<double>::Type( void ) const
-{ return porNFG_FLOAT; }
-
-TEMPLATE class NfgPortion< gRational >;
-TEMPLATE class NfgValPortion< gRational >;
-TEMPLATE class NfgRefPortion< gRational >;
-PortionType NfgPortion<gRational>::Type( void ) const
-{ return porNFG_RATIONAL; }
-
 
 
 
 
 
 //---------------------------------------------------------------------
-//                          BaseEfg class
+//                            new Efg class
 //---------------------------------------------------------------------
 
 
-BaseEfgPortion::BaseEfgPortion( void )
+
+EfgPortion::EfgPortion( void )
 { }
 
-BaseEfgPortion::~BaseEfgPortion()
+EfgPortion::~EfgPortion()
 { }
 
-BaseExtForm& BaseEfgPortion::Value( void ) const
+BaseExtForm*& EfgPortion::Value( void ) const
 { return *_Value; }
 
-void BaseEfgPortion::AssignFrom( Portion* p )
-{
-  assert( 0 );
-/*
-  assert( p->Type() == Type() ); 
-  *_Value = *( ( (BaseEfgPortion*) p )->_Value );
-*/
-}
-
-bool BaseEfgPortion::operator == ( Portion *p ) const
-{
-/*
-  assert( p->Type() == Type() );
-  return ( *_Value == *( (BaseEfgPortion*) p )->_Value );
-*/
-  return false;
-}
-
-
-//---------------------------------------------------------------------
-//                          Efg class
-//---------------------------------------------------------------------
-
-
-template <class T> ExtForm<T>& EfgPortion<T>::Value( void ) const
-{ return * (ExtForm<T>*) _Value; }
-
-template <class T> void EfgPortion<T>::Output( gOutput& s ) const
-{ s << "(Efg) \"" << _Value->GetTitle() << "\""; }
-
-template <class T> Portion* EfgPortion<T>::ValCopy( void ) const
-{
-  return new EfgValPortion<T>
-    ( * new ExtForm<T>( * (ExtForm<T>*) _Value ) ); 
-}
-
-template <class T> Portion* EfgPortion<T>::RefCopy( void ) const
+PortionType EfgPortion::Type( void ) const
 { 
-  Portion* p = new EfgRefPortion<T>( * (ExtForm<T>*) _Value ); 
+  assert( (*_Value) != 0 );
+  switch( (*_Value)->Type() )
+  {
+  case DOUBLE:
+    return porEFG_FLOAT;
+  case RATIONAL:
+    return porEFG_RATIONAL;
+  default:
+    assert( 0 );
+  }
+  return porUNKNOWN;
+}
+
+void EfgPortion::Output( gOutput& s ) const
+{ s << "(Efg) \"" << (*_Value)->GetTitle() << "\""; }
+
+Portion* EfgPortion::ValCopy( void ) const
+{ 
+  switch( (*_Value)->Type() )
+  {
+  case DOUBLE:
+    return new EfgValPortion
+      ( new ExtForm<double>( * (ExtForm<double>*) (*_Value) ) ); 
+    break;
+  case RATIONAL:
+    return new EfgValPortion
+      ( new ExtForm<gRational>( * (ExtForm<gRational>*) (*_Value) ) ); 
+    break;
+  default:
+    assert( 0 );
+  }
+  return 0;
+}
+
+Portion* EfgPortion::RefCopy( void ) const
+{ 
+  Portion* p = new EfgRefPortion( *_Value ); 
+  p->SetOwner( _Owner );
   p->SetOriginal( Original() );
   return p;
 }
 
+void EfgPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() & porEFG );
+
+  delete *_Value;
+
+  switch( ( (EfgPortion*) p )->Value()->Type() )
+  {
+  case DOUBLE:
+    *_Value = new ExtForm<double>
+      ( * (ExtForm<double>*) ( (EfgPortion*) p )->Value() ); 
+    break;
+  case RATIONAL:
+    *_Value =  new ExtForm<gRational>
+      ( * (ExtForm<gRational>*) ( (EfgPortion*) p )->Value() ); 
+    break;
+  default:
+    assert( 0 );
+  }
+
+  // *_Value = *( ( (EfgPortion*) p )->_Value );
+
+  Original()->SetOwner( p->Original()->Owner() );
+}
+
+bool EfgPortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (EfgPortion*) p )->_Value );
+  else
+    return false;
+}
 
 
+EfgValPortion::EfgValPortion( BaseExtForm* value )
+{ _Value = new BaseExtForm*( value ); }
 
-template <class T> EfgValPortion<T>::EfgValPortion( ExtForm<T>& value )
-{ _Value = &value; }
+EfgValPortion::~EfgValPortion()
+{ 
+  delete *_Value;
+  delete _Value; 
+}
 
-template <class T> EfgValPortion<T>::~EfgValPortion()
-{ delete _Value; }
-
-template <class T> bool EfgValPortion<T>::IsReference( void ) const
+bool EfgValPortion::IsReference( void ) const
 { return false; }
 
 
-template <class T> EfgRefPortion<T>::EfgRefPortion( ExtForm<T>& value)
+EfgRefPortion::EfgRefPortion( BaseExtForm*& value )
 { _Value = &value; }
 
-template <class T> EfgRefPortion<T>::~EfgRefPortion()
+EfgRefPortion::~EfgRefPortion()
 { }
 
-template <class T> bool EfgRefPortion<T>::IsReference( void ) const
+bool EfgRefPortion::IsReference( void ) const
 { return true; }
-
-
-
-
-TEMPLATE class EfgPortion< double >;
-TEMPLATE class EfgValPortion< double >;
-TEMPLATE class EfgRefPortion< double >;
-PortionType EfgPortion<double>::Type( void ) const
-{ return porEFG_FLOAT; }
-
-TEMPLATE class EfgPortion< gRational >;
-TEMPLATE class EfgValPortion< gRational >;
-TEMPLATE class EfgRefPortion< gRational >;
-PortionType EfgPortion<gRational>::Type( void ) const
-{ return porEFG_RATIONAL; }
-
 
 
 
@@ -1504,8 +1620,8 @@ void ListPortion::AssignFrom( Portion* p )
   gBlock< Portion* >& value = *( ( (ListPortion*) p )->_Value );
 
   assert( p->Type() == Type() );
-  assert( ( (ListPortion*) p )->_DataType == _DataType || 
-	 _DataType == porUNKNOWN);
+  assert( PortionTypeMatch( ( (ListPortion*) p )->_DataType, _DataType ) || 
+	 _DataType == porUNKNOWN );
 
   Flush();
   for( i = 1, length = value.Length(); i <= length; i++ )
@@ -1606,28 +1722,20 @@ PortionType ListPortion::DataType( void ) const
 bool ListPortion::TypeCheck( Portion* item )
 {
   bool result = false;
+  PortionType new_type;
 
   if( item->Type() == _DataType )
   {
     result = true;
   }
-  else if( ( _DataType & porMIXED && item->Type() & porMIXED ) ||
-	  ( _DataType & porBEHAV && item->Type() & porBEHAV ) ||
-	  ( _DataType & porOUTCOME && item->Type() & porOUTCOME ) ||
-	  ( _DataType & porNFG && item->Type() & porNFG ) ||
-	  ( _DataType & porEFG && item->Type() & porEFG ) )
-    result = true;
-  else if( item->Type() == porLIST )
+  else
   {
-    PortionType& NewType = ( (ListPortion*) item )->_DataType;
-    if( NewType == _DataType )
-      result = true;
-    else if( ( _DataType & porMIXED && NewType & porMIXED ) ||
-	    ( _DataType & porBEHAV && NewType & porBEHAV ) ||
-	    ( _DataType & porOUTCOME && item->Type() & porOUTCOME ) ||
-	    ( _DataType & porNFG && NewType & porNFG ) ||
-	    ( _DataType & porEFG && NewType & porEFG ) )
-      result = true;
+    if( item->Type() == porLIST )
+      new_type = ( (ListPortion*) item )->_DataType;
+    else
+      new_type = item->Type();
+    
+    result = PortionTypeMatch( _DataType, new_type );
   }
   return result;
 }
@@ -1676,7 +1784,8 @@ int ListPortion::Insert( Portion* item, int index )
   
   if( _Value->Length() == 0 )  // creating a new list
   {
-    if( item->Type() == _DataType || _DataType == porUNKNOWN )
+    if( PortionTypeMatch( item->Type(), _DataType ) || 
+       _DataType == porUNKNOWN )
     {
       if( item->Type() == porLIST )
 	_DataType = ( (ListPortion*) item )->_DataType;
@@ -1774,6 +1883,25 @@ Portion* ListPortion::Subscript( int index ) const
 //--------------------------------------------------------------------
 
 
+
+bool PortionTypeMatch( const PortionType& t1, const PortionType& t2 )
+{
+  if( t1 == t2 )
+    return true;
+  else if(( ( t1 & porMIXED   ) && ( t2 & porMIXED   ) ) ||
+	  ( ( t1 & porBEHAV   ) && ( t2 & porBEHAV   ) ) ||
+	  ( ( t1 & porOUTCOME ) && ( t2 & porOUTCOME ) ) ||
+	  ( ( t1 & porNFG     ) && ( t2 & porNFG     ) ) ||
+	  ( ( t1 & porEFG     ) && ( t2 & porEFG     ) ))
+    return true;
+  else
+    return false;
+}
+
+
+
+
+
 struct PortionTypeTextType
 {
   PortionType Type;
@@ -1861,7 +1989,7 @@ gString PortionTypeToText( const PortionType& type )
     }
     else
     {
-      for( i = 0; i < NumPortionTypes; i++ )
+      for( i = 0; i < NumPortionTypes - 9; i++ )
       {
 	if( _PortionTypeText[ i ].Type & type )
 	{
@@ -1896,7 +2024,7 @@ PortionType TextToPortionType( const gString& text )
 	result = result | _PortionTypeText[ i ].Type;	
     }
   }
-  return result;;
+  return result;
 }
 
 
@@ -1933,8 +2061,6 @@ TEMPLATE class gArray<Portion *>;
 #include "gblock.imp"
 
 TEMPLATE class gBlock<Portion*>;
-
-
 
 
 

@@ -16,7 +16,9 @@
 
 #include "gambitio.h"
 
-
+#include "mixed.h"
+#include "normal.h"
+#include "extform.h"
 
 
 
@@ -531,24 +533,24 @@ public:
 
 
 
+
+
 //---------------------------------------------------------------------
-//                          Mixed class
+//                          new Mixed class
 //---------------------------------------------------------------------
 
-template <class T> class MixedProfile;
+class BaseMixedProfile;
 
-template <class T> class MixedPortion : public Portion
+class MixedPortion : public Portion
 {
 protected:
-  MixedProfile<T>* _Value;
+  BaseMixedProfile** _Value;
   MixedPortion( void );
 
 public:
   virtual ~MixedPortion();
 
-  bool IsValid( void ) const;
-
-  MixedProfile<T>& Value( void ) const;
+  BaseMixedProfile*& Value( void ) const;
   PortionType Type( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
@@ -557,19 +559,19 @@ public:
   bool operator == ( Portion* p ) const;
 };
 
-template <class T> class MixedValPortion : public MixedPortion<T>
+
+class MixedValPortion : public MixedPortion
 {
 public:
-  MixedValPortion( void );
-  MixedValPortion( MixedProfile<T>& value );
+  MixedValPortion( BaseMixedProfile* value );
   virtual ~MixedValPortion();
   bool IsReference( void ) const;
 };
 
-template <class T> class MixedRefPortion : public MixedPortion<T>
+class MixedRefPortion : public MixedPortion
 {
 public:
-  MixedRefPortion( MixedProfile<T>& value );
+  MixedRefPortion( BaseMixedProfile*& value );
   virtual ~MixedRefPortion();
   bool IsReference( void ) const;
 };
@@ -577,24 +579,23 @@ public:
 
 
 
+
 //---------------------------------------------------------------------
-//                          Behav class
+//                          new Behav class
 //---------------------------------------------------------------------
 
-template <class T> class BehavProfile;
+class BaseBehavProfile;
 
-template <class T> class BehavPortion : public Portion
+class BehavPortion : public Portion
 {
 protected:
-  BehavProfile<T>* _Value;
+  BaseBehavProfile** _Value;
   BehavPortion( void );
 
 public:
   virtual ~BehavPortion();
 
-  bool IsValid( void ) const;
-
-  BehavProfile<T>& Value( void ) const;
+  BaseBehavProfile*& Value( void ) const;
   PortionType Type( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
@@ -603,19 +604,19 @@ public:
   bool operator == ( Portion* p ) const;
 };
 
-template <class T> class BehavValPortion : public BehavPortion<T>
+
+class BehavValPortion : public BehavPortion
 {
 public:
-  BehavValPortion( void );
-  BehavValPortion( BehavProfile<T>& value );
+  BehavValPortion( BaseBehavProfile* value );
   virtual ~BehavValPortion();
   bool IsReference( void ) const;
 };
 
-template <class T> class BehavRefPortion : public BehavPortion<T>
+class BehavRefPortion : public BehavPortion
 {
 public:
-  BehavRefPortion( BehavProfile<T>& value );
+  BehavRefPortion( BaseBehavProfile*& value );
   virtual ~BehavRefPortion();
   bool IsReference( void ) const;
 };
@@ -624,126 +625,94 @@ public:
 
 
 
+
 //---------------------------------------------------------------------
-//                          BaseNfg class
+//                          new Nfg class
 //---------------------------------------------------------------------
 
 class BaseNormalForm;
 
-class BaseNfgPortion : public Portion
+class NfgPortion : public Portion
 {
 protected:
-  BaseNormalForm* _Value;
-  BaseNfgPortion( void );
+  BaseNormalForm** _Value;
+  NfgPortion( void );
 
 public:
-  virtual ~BaseNfgPortion();
+  virtual ~NfgPortion();
 
-  BaseNormalForm& Value( void ) const;
-  virtual PortionType Type( void ) const = 0;
-  virtual void Output( gOutput& s ) const = 0;
-  virtual Portion* ValCopy( void ) const = 0;
-  virtual Portion* RefCopy( void ) const = 0;
-  virtual void AssignFrom( Portion* p );
-  virtual bool operator == ( Portion* p ) const;
+  BaseNormalForm*& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+  bool operator == ( Portion* p ) const;
 };
 
 
-//---------------------------------------------------------------------
-//                          Nfg class
-//---------------------------------------------------------------------
-
-template <class T> class NormalForm;
-
-template <class T> class NfgPortion : public BaseNfgPortion
+class NfgValPortion : public NfgPortion
 {
 public:
-  NormalForm<T>& Value( void ) const;
-
-  virtual PortionType Type( void ) const;
-  virtual void Output( gOutput& s ) const;
-  virtual Portion* ValCopy( void ) const;
-  virtual Portion* RefCopy( void ) const;
-};
-
-template <class T> class NfgValPortion : public NfgPortion<T>
-{
-public:
-  NfgValPortion( NormalForm<T>& value );
-  ~NfgValPortion();
+  NfgValPortion( BaseNormalForm* value );
+  virtual ~NfgValPortion();
   bool IsReference( void ) const;
 };
 
-template <class T> class NfgRefPortion : public NfgPortion<T>
+class NfgRefPortion : public NfgPortion
 {
 public:
-  NfgRefPortion( NormalForm<T>& value );
-  ~NfgRefPortion();
+  NfgRefPortion( BaseNormalForm*& value );
+  virtual ~NfgRefPortion();
   bool IsReference( void ) const;
 };
 
 
 
 
-
-
 //---------------------------------------------------------------------
-//                          BaseEfg class
+//                          new Efg class
 //---------------------------------------------------------------------
 
 class BaseExtForm;
 
-class BaseEfgPortion : public Portion
+class EfgPortion : public Portion
 {
 protected:
-  BaseExtForm* _Value;
-  BaseEfgPortion( void );
+  BaseExtForm** _Value;
+  EfgPortion( void );
 
 public:
-  virtual ~BaseEfgPortion();
+  virtual ~EfgPortion();
 
-  BaseExtForm& Value( void ) const;
-  virtual PortionType Type( void ) const = 0;
-  virtual void Output( gOutput& s ) const = 0;
-  virtual Portion* ValCopy( void ) const = 0;
-  virtual Portion* RefCopy( void ) const = 0;
-  virtual void AssignFrom( Portion* p );
-  virtual bool operator == ( Portion* p ) const;
+  BaseExtForm*& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+  bool operator == ( Portion* p ) const;
 };
 
 
-//---------------------------------------------------------------------
-//                          Efg class
-//---------------------------------------------------------------------
-
-template <class T> class ExtForm;
-
-template <class T> class EfgPortion : public BaseEfgPortion
+class EfgValPortion : public EfgPortion
 {
 public:
-  ExtForm<T>& Value( void ) const;
-
-  virtual PortionType Type( void ) const;
-  virtual void Output( gOutput& s ) const;
-  virtual Portion* ValCopy( void ) const;
-  virtual Portion* RefCopy( void ) const;
-};
-
-template <class T> class EfgValPortion : public EfgPortion<T>
-{
-public:
-  EfgValPortion( ExtForm<T>& value );
-  ~EfgValPortion();
+  EfgValPortion( BaseExtForm* value );
+  virtual ~EfgValPortion();
   bool IsReference( void ) const;
 };
 
-template <class T> class EfgRefPortion : public EfgPortion<T>
+class EfgRefPortion : public EfgPortion
 {
 public:
-  EfgRefPortion( ExtForm<T>& value );
-  ~EfgRefPortion();
+  EfgRefPortion( BaseExtForm*& value );
+  virtual ~EfgRefPortion();
   bool IsReference( void ) const;
 };
+
+
+
 
 
 //---------------------------------------------------------------------
@@ -889,6 +858,13 @@ public:
 
 
 
+//-----------------------------------------------------------------
+//                 Miscellaneous Portion functions
+//-----------------------------------------------------------------
+
+
+
+bool PortionTypeMatch( const PortionType& t1, const PortionType& t2 );
 
 
 gString PortionTypeToText( const PortionType& type );
@@ -901,6 +877,9 @@ gOutput& operator << ( gOutput& s, Portion* p );
 
 
 #endif // PORTION_H
+
+
+
 
 
 

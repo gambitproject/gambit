@@ -37,7 +37,7 @@ Portion *GSM_ReadDefaultEfg(Portion **param)
 	if (E)
 	{
 	  delete _CurrentGSM->DefaultEfg();
-	  _CurrentGSM->DefaultEfg() = new EfgValPortion<double>(*E);
+	  _CurrentGSM->DefaultEfg() = new EfgValPortion(E);
 	  return new BoolValPortion( true );
 	}
 	else
@@ -50,7 +50,7 @@ Portion *GSM_ReadDefaultEfg(Portion **param)
 	if (E)
 	{
 	  delete _CurrentGSM->DefaultEfg();
-	  _CurrentGSM->DefaultEfg() = new EfgValPortion<gRational>(*E);
+	  _CurrentGSM->DefaultEfg() = new EfgValPortion(E);
 	  return new BoolValPortion( true );
 	}
 	else
@@ -229,14 +229,14 @@ Portion *GSM_NewEfg(Portion **param)
     ListPortion *players = (ListPortion *) param[1];
     for (int i = 1; i <= players->Length(); i++)
       E->NewPlayer()->SetName(((TextPortion *) players->Subscript(i))->Value());
-    return new EfgValPortion<gRational>(*E);
+    return new EfgValPortion(E);
   }
   else  {
     ExtForm<double> *E = new ExtForm<double>;
     ListPortion *players = (ListPortion *) param[1];
     for (int i = 1; i <= players->Length(); i++)
       E->NewPlayer()->SetName(((TextPortion *) players->Subscript(i))->Value());
-    return new EfgValPortion<double>(*E);
+    return new EfgValPortion(E);
   }
 }
 
@@ -274,7 +274,7 @@ Portion *GSM_NewInfoset2(Portion **param)
 
 Portion *GSM_NewOutcomeFloat(Portion **param)
 {
-  ExtForm<double> &E = ((EfgPortion<double> *) param[0])->Value();
+  ExtForm<double> &E = * (ExtForm<double>*) ((EfgPortion*) param[0])->Value();
   gString name = ((TextPortion *) param[1])->Value();
 
   Outcome *c = E.NewOutcome();
@@ -284,7 +284,7 @@ Portion *GSM_NewOutcomeFloat(Portion **param)
 
 Portion *GSM_NewOutcomeRational(Portion **param)
 {
-  ExtForm<gRational> &E = ((EfgPortion<gRational> *) param[0])->Value();
+  ExtForm<gRational> &E = * (ExtForm<gRational>*) ((EfgPortion*) param[0])->Value();
   gString name = ((TextPortion *) param[1])->Value();
 
   Outcome *c = E.NewOutcome();
@@ -294,7 +294,7 @@ Portion *GSM_NewOutcomeRational(Portion **param)
 
 Portion *GSM_NewPlayer(Portion **param)
 {
-  BaseExtForm &E = ((BaseEfgPortion *) param[0])->Value();
+  BaseExtForm &E = *((EfgPortion*) param[0])->Value();
   gString name = ((TextPortion *) param[1])->Value();
 
   Player *p = E.NewPlayer();
@@ -339,7 +339,7 @@ Portion *GSM_SetNameAction(Portion **param)
 
 Portion *GSM_SetNameEfg(Portion **param)
 {
-  BaseExtForm &E = ((BaseEfgPortion *) param[0])->Value();
+  BaseExtForm &E = *((EfgPortion*) param[0])->Value();
   gString name = ((TextPortion *) param[1])->Value();
   E.SetTitle(name);
   return param[0]->ValCopy();
@@ -417,16 +417,16 @@ Portion *GSM_Actions(Portion **param)
 
 Portion *GSM_CentroidEfgFloat(Portion **param)
 {
-  ExtForm<double> &E = ((EfgPortion<double> *) param[0])->Value();
+  ExtForm<double> &E = * (ExtForm<double>*) ((EfgPortion*) param[0])->Value();
   BehavProfile<double> *P = new BehavProfile<double>(E);
-  return new BehavValPortion<double>(*P);
+  return new BehavValPortion(P);
 }
 
 Portion *GSM_CentroidEfgRational(Portion **param)
 {
-  ExtForm<gRational> &E = ((EfgPortion<gRational> *) param[0])->Value();
+  ExtForm<gRational> &E = * (ExtForm<gRational>*) ((EfgPortion*) param[0])->Value();
   BehavProfile<gRational> *P = new BehavProfile<gRational>(E);
-  return new BehavValPortion<gRational>(*P);
+  return new BehavValPortion(P);
 }
 
 extern Portion *GSM_CentroidNfgFloat(Portion **);
@@ -434,7 +434,7 @@ extern Portion *GSM_CentroidNfgRational(Portion **);
 
 Portion *GSM_Chance(Portion **param)
 {
-  BaseExtForm &E = ((BaseEfgPortion *) param[0])->Value();
+  BaseExtForm &E = *((EfgPortion*) param[0])->Value();
   return new EfPlayerValPortion(E.GetChance());
 }
 
@@ -502,7 +502,7 @@ Portion *GSM_NameAction(Portion **param)
 
 Portion *GSM_NameEfg(Portion **param)
 {
-  BaseExtForm &E = ((BaseEfgPortion *) param[0])->Value();
+  BaseExtForm &E = *((EfgPortion*) param[0])->Value();
   return new TextValPortion(E.GetTitle());
 }
 
@@ -573,13 +573,13 @@ Portion *GSM_NumMembers(Portion **param)
 
 Portion *GSM_NumOutcomes(Portion **param)
 {
-  BaseExtForm &E = ((BaseEfgPortion *) param[0])->Value();
+  BaseExtForm &E = *((EfgPortion*) param[0])->Value();
   return new IntValPortion(E.NumOutcomes());
 }
 
 Portion *GSM_NumPlayersEfg(Portion **param)
 {
-  BaseExtForm &E = ((BaseEfgPortion *) param[0])->Value();
+  BaseExtForm &E = *((EfgPortion*) param[0])->Value();
   return new IntValPortion(E.NumPlayers());
 }
 
@@ -598,7 +598,7 @@ Portion *GSM_Outcome(Portion **param)
 
 Portion *GSM_Outcomes(Portion **param)
 {
-  BaseExtForm *E = &((BaseEfgPortion *) param[0])->Value();
+  BaseExtForm *E = ((EfgPortion*) param[0])->Value();
   return ArrayToList(E->OutcomeList());
 }
 
@@ -643,7 +643,7 @@ Portion *GSM_PlayerNode(Portion **param)
 Portion *GSM_Players(Portion **param)
 {
   Portion* result;
-  BaseExtForm &E = ((BaseEfgPortion *) param[0])->Value();
+  BaseExtForm &E = *((EfgPortion*) param[0])->Value();
   result = ArrayToList(E.PlayerList());
   result->SetOwner( param[ 0 ]->Original() );
   return result;
@@ -673,7 +673,7 @@ Portion *GSM_ReadEfg(Portion **param)
 	ReadEfgFile((gInput &) f, E);
 
 	if (E)
-	  return new EfgValPortion<double>(*E);
+	  return new EfgValPortion(E);
 	else
 	  return 0;
       }
@@ -682,7 +682,7 @@ Portion *GSM_ReadEfg(Portion **param)
 	ReadEfgFile((gInput &) f, E);
 	
 	if (E)
-	  return new EfgValPortion<gRational>(*E);
+	  return new EfgValPortion(E);
 	else
 	  return 0;
       }
@@ -696,7 +696,7 @@ Portion *GSM_ReadEfg(Portion **param)
 
 Portion *GSM_RootNode(Portion **param)
 {
-  BaseExtForm &E = ((BaseEfgPortion *) param[0])->Value();
+  BaseExtForm &E = *((EfgPortion*) param[0])->Value();
   return new NodeValPortion(E.RootNode());
 }
 
@@ -704,7 +704,7 @@ Portion *GSM_WriteEfg(Portion **param)
 {
   Portion* result;
   gOutput &f = ((OutputPortion *) param[0])->Value();
-  BaseExtForm *E = &((BaseEfgPortion *) param[1])->Value();
+  BaseExtForm *E = ((EfgPortion*) param[1])->Value();
   
   E->WriteEfgFile(f);
 

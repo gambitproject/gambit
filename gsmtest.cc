@@ -3556,6 +3556,13 @@ int main( void )
   gout << "\n";
   gout << PortionTypeToText( TextToPortionType( "LIST(EFG) NFG" ) ) << "\n";
   gout << PortionTypeToText( TextToPortionType( "LIST PLAYER(EFG) NFG" ) ) << "\n";
+  gout << PortionTypeToText( TextToPortionType( "NFG(FLOAT)" ) ) << "\n";
+  gout << PortionTypeToText( TextToPortionType( "EFG" ) ) << "\n";
+  gout << PortionTypeToText( TextToPortionType( "EFG(RATIONAL)" ) ) << "\n";
+  gout << PortionTypeToText( TextToPortionType( "NFG" ) ) << "\n";
+  gout << PortionTypeToText( TextToPortionType( "PLAYER(EFG)" ) ) << "\n";
+  gout << PortionTypeToText( TextToPortionType( "PLAYER" ) ) << "\n";
+  gout << "\n";
   gout << PortionTypeToText( TextToPortionType( "LIST" ) ) << "\n";
   gout << PortionTypeToText( TextToPortionType( "VALUE" ) ) << "\n";
   gout << PortionTypeToText( TextToPortionType( "NUMERICAL" ) ) << "\n";

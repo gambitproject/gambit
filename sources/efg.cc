@@ -70,8 +70,17 @@ Infoset *Player::GetInfoset(const gString &name) const
 //      BaseExtForm: Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 
+#ifdef MEMCHECK
+int BaseExtForm::_NumObj = 0;
+#endif // MEMCHECK
+
 BaseExtForm::BaseExtForm(void) : title("UNTITLED"), chance(new Player(this, 0))
-{ }
+{
+#ifdef MEMCHECK
+  _NumObj++;
+  gout << "--- BaseExtForm Ctor: " << _NumObj << "\n";
+#endif // MEMCHECK
+}
 
 BaseExtForm::BaseExtForm(const BaseExtForm &E)
   : title(E.title), players(E.players.Length()), chance(new Player(this, 0))
@@ -87,6 +96,11 @@ BaseExtForm::BaseExtForm(const BaseExtForm &E)
       players[i]->infosets.Append(s);
     }      
   }
+
+#ifdef MEMCHECK
+  _NumObj++;
+  gout << "--- BaseExtForm Ctor: " << _NumObj << "\n";
+#endif // MEMCHECK
 }
 
 BaseExtForm::~BaseExtForm()
@@ -101,6 +115,11 @@ BaseExtForm::~BaseExtForm()
   for (i = 1; i <= dead_nodes.Length(); delete dead_nodes[i++]);
   for (i = 1; i <= dead_infosets.Length(); delete dead_infosets[i++]);
   for (i = 1; i <= dead_outcomes.Length(); delete dead_outcomes[i++]);
+
+#ifdef MEMCHECK
+  _NumObj--;
+  gout << "--- BaseExtForm Dtor: " << _NumObj << "\n";
+#endif // MEMCHECK
 }
 
 //------------------------------------------------------------------------
