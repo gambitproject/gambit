@@ -656,10 +656,14 @@ PortionType OutcomePortion::Type( void ) const
 
 void OutcomePortion::Output( gOutput& s ) const
 {
-    Portion::Output( s );
-
-  s << "(Outcome) " << *_Value << " \"" << (*_Value)->GetName() << "\" ";
-  (*_Value)->PrintValues( s );
+  Portion::Output( s );
+  
+  s << "(Outcome) " << *_Value;
+  if(*_Value)
+  {
+    s << " \"" << (*_Value)->GetName() << "\" ";
+    (*_Value)->PrintValues( s );
+  }
 }
 
 Portion* OutcomePortion::ValCopy( void ) const
@@ -745,7 +749,9 @@ PortionType NfPlayerPortion::Type( void ) const
 void NfPlayerPortion::Output( gOutput& s ) const
 {
   Portion::Output( s );
-  s << "(NfPlayer) " << *_Value << " \"" << (*_Value)->GetName() << "\""; 
+  s << "(NfPlayer) " << *_Value;
+  if(*_Value)
+    s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
 Portion* NfPlayerPortion::ValCopy( void ) const
@@ -840,7 +846,9 @@ PortionType StrategyPortion::Type( void ) const
 void StrategyPortion::Output( gOutput& s ) const
 { 
   Portion::Output( s );
-  s << "(Strategy) " << *_Value << " \"" << (*_Value)->name << "\""; 
+  s << "(Strategy) " << *_Value;
+  if(*_Value)
+    s << " \"" << (*_Value)->name << "\""; 
 }
 
 Portion* StrategyPortion::ValCopy( void ) const
@@ -927,7 +935,9 @@ PortionType NfSupportPortion::Type( void ) const
 void NfSupportPortion::Output( gOutput& s ) const
 { 
   Portion::Output( s );
-  s << "(NfSupport) " << *_Value << ' ' << **_Value;  
+  s << "(NfSupport) " << *_Value;
+  if(*_Value) 
+    s << ' ' << **_Value;  
 }
 
 Portion* NfSupportPortion::ValCopy( void ) const
@@ -1016,8 +1026,9 @@ PortionType EfSupportPortion::Type( void ) const
 void EfSupportPortion::Output( gOutput& s ) const
 { 
   Portion::Output( s );
-  s << "(EfSupport) " << *_Value << ' ' << **_Value;
-
+  s << "(EfSupport) " << *_Value;
+  if(*_Value) 
+    s << ' ' << **_Value;
 }
 
 Portion* EfSupportPortion::ValCopy( void ) const
@@ -1107,7 +1118,9 @@ PortionType EfPlayerPortion::Type( void ) const
 void EfPlayerPortion::Output( gOutput& s ) const
 {
   Portion::Output( s );
-  s << "(EfPlayer) " << *_Value << " \"" << (*_Value)->GetName() << "\""; 
+  s << "(EfPlayer) " << *_Value;
+  if(*_Value)
+    s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
 Portion* EfPlayerPortion::ValCopy( void ) const
@@ -1192,7 +1205,9 @@ PortionType InfosetPortion::Type( void ) const
 void InfosetPortion::Output( gOutput& s ) const
 {
   Portion::Output( s );
-  s << "(Infoset) " << *_Value << " \"" << (*_Value)->GetName() << "\""; 
+  s << "(Infoset) " << *_Value;
+  if(*_Value)
+    s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
 Portion* InfosetPortion::ValCopy( void ) const
@@ -1277,7 +1292,9 @@ PortionType NodePortion::Type( void ) const
 void NodePortion::Output( gOutput& s ) const
 {
   Portion::Output( s );
-  s << "(Node) " << *_Value << " \"" << (*_Value)->GetName() << "\""; 
+  s << "(Node) " << *_Value;
+  if(*_Value)
+    s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
 Portion* NodePortion::ValCopy( void ) const
@@ -1364,7 +1381,9 @@ PortionType ActionPortion::Type( void ) const
 void ActionPortion::Output( gOutput& s ) const
 {
   Portion::Output( s );
-  s << "(Action) " << *_Value << " \"" << (*_Value)->GetName() << "\""; 
+  s << "(Action) " << *_Value;
+  if(*_Value)
+    s << " \"" << (*_Value)->GetName() << "\""; 
 }
 
 Portion* ActionPortion::ValCopy( void ) const
@@ -1822,6 +1841,7 @@ PortionType NfgPortion::Type( void ) const
 void NfgPortion::Output( gOutput& s ) const
 {
   Portion::Output( s );
+  assert(*_Value);
   s << "(Nfg) \"" << (*_Value)->GetTitle() << "\""; 
 }
 
@@ -1974,6 +1994,7 @@ PortionType EfgPortion::Type( void ) const
 void EfgPortion::Output( gOutput& s ) const
 {
   Portion::Output( s );
+  assert(*_Value);
   s << "(Efg) \"" << (*_Value)->GetTitle() << "\""; 
 }
 
@@ -2682,7 +2703,7 @@ struct PortionTypeTextType
 };  
 
 
-#define NumPortionTypes 37
+#define NumPortionTypes 38
 
 PortionTypeTextType _PortionTypeText[] =
 {
@@ -2712,6 +2733,7 @@ PortionTypeTextType _PortionTypeText[] =
   { porINFOSET,          "INFOSET" },
   { porNODE,             "NODE" },
   { porACTION,           "ACTION" },
+  { porSTRATEGY,         "STRATEGY" },
 
   { porREFERENCE,        "REFERENCE" },
 
@@ -2820,7 +2842,6 @@ void PrintPortionTypeSpec( gOutput& s, PortionType type )
 {
   s << PortionTypeToText( type );
 }
-
 
 
 

@@ -668,6 +668,7 @@ bool GSM::AddFunction( FuncDescObj* func )
 {
   FuncDescObj *old_func;
   bool result;
+  assert(func != 0);
   if( !_FuncTable->IsDefined( func->FuncName() ) )
   {
     _FuncTable->Define( func->FuncName(), func );
