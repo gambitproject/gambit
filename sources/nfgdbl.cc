@@ -27,8 +27,8 @@ class gListIter<gRational>;
 class Nfg<gRational>;
 template <class T> class NfgIter;
 class NfgIter<gRational>;
-template <class T> class ContIter;
-class ContIter<gRational>;
+template <class T> class NfgContIter;
+class NfgContIter<gRational>;
 
 template <class T> class MixedSolution;
 gOutput &operator<<(gOutput &, const MixedSolution<double> &);
