@@ -7,6 +7,7 @@
 
 #include "gpolylst.imp"
 #include "double.h"
+#include "gnumber.h"
 #include "glist.imp"
 #include "garray.imp"
 #include "grarray.imp"
