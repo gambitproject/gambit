@@ -1375,10 +1375,7 @@ Portion *GSM_PureNashSupport(Portion **param)
   return por;
 }
 
-
-
-template <class T>
-int FindPureNash(const Efg<T> &, gList<BehavSolution<T> > &);
+#include "efgpure.h"
 
 Portion *GSM_EnumPureEfgFloat(Portion **param)
 {
@@ -1392,9 +1389,10 @@ Portion *GSM_EnumPureEfgFloat(Portion **param)
     ((FloatPortion *) param[3])->Value() = M.Time();
   }
   else  {
-    gWatch watch;
-    FindPureNash(E, solns);
-    ((FloatPortion *) param[3])->Value() = watch.Elapsed();
+    EfgPSNEBySubgame<double> M(E);
+    M.Solve();
+    solns = M.GetSolutions();
+    ((FloatPortion *) param[3])->Value() = M.Time();
   }
 
   Portion* por = new Behav_ListPortion<double>(solns);
@@ -1415,9 +1413,10 @@ Portion *GSM_EnumPureEfgRational(Portion **param)
     ((FloatPortion *) param[3])->Value() = M.Time();
   }
   else  {
-    gWatch watch;
-    FindPureNash(E, solns);
-    ((FloatPortion *) param[3])->Value() = watch.Elapsed();
+    EfgPSNEBySubgame<gRational> M(E);
+    M.Solve();
+    solns = M.GetSolutions();
+    ((FloatPortion *) param[3])->Value() = M.Time();
   } 
  
   Portion* por = new Behav_ListPortion<gRational>(solns);
