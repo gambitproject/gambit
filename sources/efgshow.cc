@@ -164,7 +164,6 @@ EfgShow::EfgShow(Efg &p_efg, EfgNfgInterface *p_nfg, int, wxFrame *p_frame,
     
   node_inspect = new NodeSolnShow(ef.NumPlayers(), this);
   node_inspect->Set(tw->Cursor());
-  node_inspect->Show(FALSE);
   Show(TRUE);
 }
 

@@ -80,7 +80,7 @@ NodeSolnShow::NodeSolnShow(int num_players, const EfgShow *parent_)
   }
 
   Redraw();
-  Show(TRUE);
+  Show(FALSE);
 }
 
 
