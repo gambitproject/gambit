@@ -1,7 +1,9 @@
-Gambit Command Language
+\documentstyle[12pt,widetext]{manual}
+\begin{document}
 
+\title{Gambit Command Language}
 
-General Overview
+\section*{General Overview}
 
 The general purpose of the language is to allow the user to perform a series of
 operations and procedures on games in extensive or normal form through a set of
@@ -15,13 +17,16 @@ or carriage return.  A carriage return will not be interpreted as the end of a
 statement, however, if there are unmatched parentheses or brackets.  For
 example, the following two lines are interpreted as one statement:
 
-	Output[1,
-	2]
+\begin{verbatim}
+	Output[1, 2]
+\end{verbatim}
 
 If both lines are followed by a carriage return, the statement will generate
 the line of output: 
 
+\begin{verbatim}
 	1, 2
+\end{verbatim}
 
 The user has the option of creating a text file containing a series of commands
 which can then be run together, as a program, by the language.  The output of 
@@ -32,106 +37,112 @@ which enters the command language.  By using an output file command ">"
 followed by the name of a file, the user can direct the output of the command
 language to an external text file.  For example:
 
+\begin{verbatim}
 	> gcl_sun < input.gcl > output.out
+\end{verbatim}
 
-
-Output
+\subsection*{Output}
 
 Output can be produced by a program or command using the following command:
 
+\begin{verbatim}
 	Output[{expression1}, {expression2}, . . . ]
+\end{verbatim}
 
 The command produces a line of output containing the values or strings 
 specified by the expressions.  An expression can be a variable of any type or 
 can evaluate to any value or string which can be contained in a variable.  The 
-brackets "{ }" are not a part of the language and are used only to enclose
-expressions which are also not a part of the language.
+brackets \begin{verbatim} "{ }" \end{verbatim} are not a part of the
+language and are used only to enclose expressions which are also not a
+part of the language.
 
+\subsection*{Variables}
 
-Variables
-
-Variables can be defined and given a value using the ":=" symbol where the name
+Variables can be defined and given a value using the \begin{verbatim}
+":=" \end{verbatim} symbol where the name
 of the variable is to the left of the symbol and to the right there is an
 expression which evaluates to a value of the type desired for the variable.
 A variable can be of the following types:
 
-	BOOLEAN		Boolean (evaluates to constants:  True or False)
-	INTEGER		Evaluates to an integer of arbitrary size
-	RATIONAL	Evaluates to a rational number of arbitrary precision
-	TEXT		String of arbitrary length enclosed in quotation marks
-	EFG		Game in extensive form (created or read)
-	NFG		Game in normal form (created or read)
-	NODE		A node (may only be a subvariable of an extensive form
-			problem)
-	DATATYPE	Defines precision (constants:  Float or Rational)
-	MIXED		Profile of mixed strategies.  Can only be a subvariable
-			of a normal form problem.  That is, if n is a problem 
-			in normal form, a variable of type MIXED can only be
-			assigned to a subvariable of the form n.x.
-	BEHAV		Profile of behavioral strategies.  Can only be a 
-			subvariable of an extensive form problem.  That is, if 
-			e is a problem in extensive form, a variable of type 
-			BEHAV can only be assigned to a subvariable of the form
-			e.x.
+\medskip
 
+\begin{tabular}{lp{3\textwidth}}
+BOOLEAN & Boolean (evaluates to constants:  True or False)\\
+INTEGER & Evaluates to an integer of arbitrary size \\
+RATIONA & Evaluates to a rational number of arbitrary precision\\
+TEXT	& String of arbitrary length enclosed in quotation marks\\
+EFG	& Game in extensive form (created or read)\\
+NFG	& Game in normal form (created or read)\\
+NODE	& A node (may only be a subvariable of an extensive form
+problem) \\
+DATATYPE & Defines precision (constants:  Float or Rational) \\
+MIXED	& Profile of mixed strategies.  Can only be a subvariable of a
+normal form problem.  That is, if n is a problem in normal form, a
+variable of type MIXED can only be assigned to a subvariable of the
+form n.x.\\
+BEHAV	& Profile of behavioral strategies.  Can only be a subvariable
+of an extensive form problem.  That is, if e is a problem in extensive
+form, a variable of type BEHAV can only be assigned to a subvariable
+of the form e.x. \\
+\end{tabular}
+
+medskip
+
+\noindent
 Additionally, variables of type BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, and 
 TEXT can be contained in lists of arbitrary length.  Variables of type LIST are
 defined similarly to the above variables, except that the expression to the 
-right of the ":=" symbol contains a vector of variables of the same type 
-enclosed in brackets and separated by commas.  For example:
+right of the \begin{verbatim} ":=" \end{verbatim} symbol contains a
+vector of variables of the same type enclosed in brackets and
+separated by commas.  For example:
 
+\begin{verbatim}
 	LIST(BOOLEAN) := { BOOLEAN1, BOOLEAN2, . . . . , BOOLEANn }
-
+\end{verbatim}
 The elements of a list are indexed sequentially.  Therefore, the ith element of
 a list is defined as:
-
+\begin{verbatim}
 	LIST(BOOLEAN)[[i]]	which evaluates to a single variable of type 
 				BOOLEAN.
+\end{verbatim}
 
+\noindent
 In the same manner, list variables of type LIST(BEHAV), LIST(INTEGER), 
 LIST(MIXED), LIST(RATIONAL), and LIST(TEXT) can be created and accessed for 
 variables of type BEHAV, INTEGER, MIXED, RATIONAL, and TEXT, respectively.
 
-
-Flow Control
+\subsection*{Flow Control}
 
 Gambit Command Language also contains mechanisms which allow flow control 
 within a program in one of three manners.
 
-While[BOOLEAN, {series of commands}]	Evaluates the BOOLEAN expression or
-					variable.  As long as it evaluates to
-					TRUE, the series of commands are 
-					performed.  Each command must be 
-					followed by a semi-colon or carriage
-					return.  If the BOOLEAN evaluates to 
-					FALSE, the loop ends without performing
-					the commands.
+\medskip
 
-If[BOOLEAN, {series of commands}]	Evaluates the BOOLEAN expression once.
-					If it evaluates to TRUE, the series of
-					commands are performed.  Each command
-					must be followed by a semi-colon or
-					carriage return.  If the BOOLEAN 
-					evaluates to FALSE, none of the 
-					commands are performed.
+\begin{tabular}{lp{{3\textwidth}}
+While [BOOLEAN, \{series of commands\}] & Evaluates the BOOLEAN
+expression or variable.  As long as it evaluates to TRUE, the series
+of commands are performed.  Each command must be followed by a
+semi-colon or carriage return.  If the BOOLEAN evaluates to FALSE, the
+loop ends without performing the commands.\\
+If [BOOLEAN, \{series of commands\}] & Evaluates the BOOLEAN expression
+once. If it evaluates to TRUE, the series of commands are performed.
+Each command must be followed by a semi-colon or carriage return.  If
+the BOOLEAN evaluates to FALSE, none of the commands are performed.\\
+If [BOOLEAN, \{series of commands\}], & Evaluates the BOOLEAN expression
+once. If it evaluates to TRUE, the first series of commands are
+performed.  Each command must be followed by a semi-
+colon or carriage return.  If the BOOLEAN evaluates to FALSE, the second
+series of commands are performed. \\
+\end{tabular}	
 
-If{BOOLEAN, {series of commands},	Evaluates the BOOLEAN expression once.
-{series of commands}]			If it evaluates to TRUE, the first 
-					series of commands are performed.  Each
-					command must be followed by a semi-
-					colon or carriage return.  If the 
-					BOOLEAN evaluates to FALSE, the second
-					series of commands are performed.
-	
+\begin{tabular}{lp{3\textwidth}}
+NOTE: & The While command functions as a loop.  That is, it continues
+to perform the series of commands as long as the expression
+evaluates to TRUE.  The If statement, however, only performs the
+series of commands once if the expression evaluates to TRUE.\\
+\end{tabular}
 
-	NOTE:	The While command functions as a loop.  That is, it continues
-		to perform the series of commands as long as the expression
-		evaluates to TRUE.  The If statement, however, only performs
-		the series of commands once if the expression evaluates to
-		TRUE.
-
-
-Procedures
+\section*{Procedures}
 
 The following is a list of procedures with the operations that they perform
 in the Gambit Command Language:
@@ -145,40 +156,64 @@ value (if any exists) produced by the procedure.
 Paremeters enclosed in brackets "{ }" represent optional parameters which
 are not necessary for the procedure to function.
 
-----------
+\begin{itemize}
+\item
+\begin{verbatim}
 
 AppendNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
 
-   -	Description:  Appends the number of branches specified to the indicated
-	terminal node and places the node in a new information set for the
-	given player.
-   -	Return value:  Returns the node to which new branches have been 
-	appended.
-   -	Required parameters:
-	  *  n:  The terminal node to which branches are to be added.
-	  *  pl:  The player whose information set the node will now belong to.
-		If the player specified is not already defined in the game, the
-		player is created automatically. 
-	  *  br:  The number of branches to be appended to the node.
-   -	Optional parameters:  None.
+\end{verbatim}
 
-----------
+\begin{description}
+\item
+- Description:  Appends the number of branches specified to the
+indicated terminal node and places the node in a new information set
+for the given player.
+\item
+- Return value: Returns the node to which new branches have been appended.
+\item
+- Required parameters:
+\begin{description}
+\item
+*  n:  The terminal node to which branches are to be added.
+\item
+*  pl:  The player whose information set the node will now belong to.
+If the player specified is not already defined in the game, the player
+is created automatically. 
+\item
+*  br:  The number of branches to be appended to the node.
+\end{description}
+\item
+- Optional parameters:  None.
+\end{description}
 
+\item
+\begin{verbatim}
 AttachOutcome[n->NODE, outc->INTEGER] =: NODE
+\end{verbatim}
+\begin{description}
+\item
+- Description:  Attaches the indicated outcome to the specified node.
+\item
+- Return value:  Returns the node to which the outcome is attached.
+\item
+- Required parameters:
+\begin{description}
+\item
+*  n:  The node to which the outcome is to be attached.  Note that the
+node need not be terminal in order to have an outcome attached.
+\item
+*  outc:  The number of the outcome to be attached.  If no outcome
+with the indicated number exists, no action is taken.  
+\end{description}
+\item
+- Optional parameters:  None.
+\end{description}
 
-   -	Description:  Attaches the indicated outcome to the specified node.  
-   -	Return value:  Returns the node to which the outcome is attached.
-   -	Required parameters:
-	  *  n:  The node to which the outcome is to be attached.  Note that
-		the node need not be terminal in order to have an outcome 
-		attached.
-	  *  outc:  The number of the outcome to be attached.  If no outcome 
-		with the indicated number exists, no action is taken.  
-   -	Optional parameters:  None.
+\end{itemize}
 
-----------
+Car[l->LIST(T)] =: T	\\
 
-Car[l->LIST(T)] =: T	
 
 	For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
@@ -924,7 +959,7 @@ NthChild[n->NODE, child->INTEGER] =: NODE
 
    -	Description:  Finds the node which is the indicated child of the 
 	specified node.  The expression:  NthChild[n->node, child->i] is 
-	equivalent to:  node#i.
+	equivalent to:  node\#i.
    -	Return value:  Returns the node which is the indicated child of the
 	specified node.
    -	Required parameters:
@@ -1238,10 +1273,9 @@ SetNodeName[n->NODE, name->TEXT] =: NODE
 
 ----------
 
-SetOutcome[E->EFG, outc->INTEGER, value->LIST(INTEGER)] =: EFG
 SetOutcome[E->EFG, outc->INTEGER, value->LIST(RATIONAL)] =: EFG
 
-   -	Description:  Sets the value of the indicated outcome in the give 
+   -	Description:  Sets the value of the indicated outcome in the given 
 	problem in extensive form, to the values in the specified vector.
    -	Return value:  Returns the modified problem in extensive form. 
    -	Required parameters:
@@ -1250,14 +1284,12 @@ SetOutcome[E->EFG, outc->INTEGER, value->LIST(RATIONAL)] =: EFG
 	  *  outc:  The number corresponding to the outcome which is to be 
 		assigned values.  If no outcome with the given number exists,
 		then it is created.
-	  *  value:  The vector of payoffs (either as a list of rationals or of
-		integers) which are to be assigned to the outcome.  The length
-		of `value` must match the number of players defined in the 
-		problem.
+	  *  value:  The vector of payoffs (as a list of rationals) which are 
+		to be assigned to the outcome.  The length of `value` must 
+		match the number of players defined in the problem.
    -	Optional parameters:  None.
 
 
-SetOutcome[E->EFG, outc->INTEGER, pl->INTEGER, value->INTEGER] =: EFG
 SetOutcome[E->EFG, outc->INTEGER, pl->INTEGER, value->RATIONAL] =: EFG
 
    -	Description:  Sets the payoff to the player specified for the indicated
@@ -1271,8 +1303,8 @@ SetOutcome[E->EFG, outc->INTEGER, pl->INTEGER, value->RATIONAL] =: EFG
 		 the given number exists, no action is performed.
 	  *  pl:  The player for which the payoff of the given outcome is to be
 		set.
-	  *  value:  The value (either as an integer or rational) which is to
-		be assigned to the given outcome for the specified player.
+	  *  value:  The value (as a rational) which is to be assigned to the 
+		given outcome for the specified player.
 
 ----------
 
@@ -1404,7 +1436,7 @@ WriteNfgFile[N->NFG, file->TEXT] =: NFG
 		to be written.
 
 ----------
-
+\end{document}
 
 
 
