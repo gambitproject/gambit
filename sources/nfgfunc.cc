@@ -768,7 +768,7 @@ static Portion* GSM_SetOutcome_Nfg(Portion** param)
 
   _gsm->InvalidateGameProfile((NFGameForm *) &nfg, false);
  
-  return param[0]->ValCopy();
+  return param[1]->ValCopy();
 }
 
 //------------
@@ -1066,8 +1066,7 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("SetOutcome", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetOutcome_Nfg, 
-				       PortionSpec(porSTRATEGY, 1), 2,
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetOutcome_Nfg, porNFOUTCOME, 2,
 				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", 
 					    PortionSpec(porSTRATEGY, 1)));

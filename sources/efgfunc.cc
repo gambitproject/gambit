@@ -1181,9 +1181,7 @@ static Portion *GSM_SetPayoff_Float(Portion **param)
 
   _gsm->InvalidateGameProfile(c->BelongsTo(), true);
 
-  Portion* por = new EfOutcomeValPortion(c);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
+  return param[2]->ValCopy();
 }
 
 static Portion *GSM_SetPayoff_Rational(Portion **param)
@@ -1197,9 +1195,7 @@ static Portion *GSM_SetPayoff_Rational(Portion **param)
 
   _gsm->InvalidateGameProfile(c->BelongsTo(), true);
 
-  Portion* por = new EfOutcomeValPortion(c);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
+  return param[2]->ValCopy();
 }
 
 //----------------
@@ -1690,14 +1686,13 @@ void Init_efgfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("SetPayoff", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetPayoff_Float, porEFOUTCOME, 3,
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetPayoff_Float, porFLOAT, 3,
 				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("outcome", porEFOUTCOME_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porEFPLAYER));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("payoff", porFLOAT));
  
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SetPayoff_Rational, 
-				       porEFOUTCOME, 3,
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SetPayoff_Rational, porRATIONAL, 3,
 				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("outcome", porEFOUTCOME_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porEFPLAYER));
