@@ -235,8 +235,8 @@ TreeOfPartials<T>::MaximalNonconstantDifference(const TreeOfPartials<T>& other,
 template <class T> gOutput& operator << (gOutput& output, 
 					 const TreeOfPartials<T>& /* x */)
 {
-  output << "Error: you shouldn't be printing a TreeOfPartials.\n";
-  exit(0);
+  // Changed to just return silently.
+  return output;
 }
 
 template <class T> bool
@@ -463,6 +463,6 @@ ListOfPartialTrees<T>::MaximalNonconstantDifference(const int& i,
 template <class T> gOutput& operator << (gOutput& output, 
 					 const ListOfPartialTrees<T>& /* x */)
 {
-  output << "Error: you shouldn't be printing a ListOfPartialTrees.\n";
-  exit(0);
+  // Changed to just return silently.
+  return output;
 }

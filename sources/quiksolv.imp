@@ -388,9 +388,9 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
       if (TogDouble(r).Contains(rootlist[j])) roots += rootlist[j];
     Roots = roots;
   }
+  return true;
 */
 
-  return true;
 }
 
 

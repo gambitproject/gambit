@@ -86,16 +86,14 @@ template <class T> class ListOfPartialTrees {
 private:
   gList<TreeOfPartials<T> >     PartialTreeList;
 
+  // Disabling this operator -- we don't want it called
+  ListOfPartialTrees<T> &operator=(const ListOfPartialTrees<T> &);
+
 public:
    ListOfPartialTrees(const gList<gPoly<T> >&);  
    ListOfPartialTrees(const gPolyList<T>&);  
    ListOfPartialTrees(const ListOfPartialTrees<T> &);
    ~ListOfPartialTrees();
-
-  inline operator =  (const ListOfPartialTrees&) const { 
-    gout << "We have not yet defined operator = in ListOfPartialTrees\n";
-    exit(0);
-  }
 
   // operators
   bool operator == (const ListOfPartialTrees&) const;

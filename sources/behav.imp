@@ -23,8 +23,7 @@ template <class T> PureBehavProfile<T>::PureBehavProfile(const Efg &efg)
   : E(&efg), profile(efg.NumPlayers()),
     payoffs(new gRectArray<T>(efg.NumOutcomes(), efg.NumPlayers()))
 {
-  int pl = 0;
-  for ( pl = 1; pl <= efg.NumPlayers(); pl++)  {
+  for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
     EFPlayer *player = efg.Players()[pl];
     profile[pl] = new gArray<const Action *>(player->NumInfosets());
     for (int iset = 1; iset <= player->NumInfosets(); iset++)
@@ -32,16 +31,15 @@ template <class T> PureBehavProfile<T>::PureBehavProfile(const Efg &efg)
   }
 
   gArray<int> dim(efg.GetChance()->NumInfosets());
-  int iset = 0;
-  for ( iset = 1; iset <= dim.Length(); iset++)
+  for (int iset = 1; iset <= dim.Length(); iset++)
     dim[iset] = efg.GetChance()->Infosets()[iset]->NumActions();
   chanceprobs = new gPVector<T>(dim);
-  for ( iset = 1; iset <= dim.Length(); iset++)
+  for (int iset = 1; iset <= dim.Length(); iset++)
     for (int act = 1; act <= efg.GetChance()->Infosets()[iset]->NumActions(); act++)
        (*chanceprobs)(iset, act) = efg.GetChanceProb(efg.GetChance()->Infosets()[iset], act);
 
   for (int outc = 1; outc <= E->NumOutcomes(); outc++)
-    for ( pl = 1; pl <= E->NumPlayers(); pl++)
+    for (int pl = 1; pl <= E->NumPlayers(); pl++)
       (*payoffs)(outc, pl) = E->Payoff(E->Outcomes()[outc], pl);
 
 }
@@ -58,11 +56,10 @@ PureBehavProfile<T>::PureBehavProfile(const PureBehavProfile<T> &p)
   }
 
   gArray<int> dim(E->GetChance()->NumInfosets());
-  int iset = 0;
-  for ( iset = 1; iset <= dim.Length(); iset++)
+  for (int iset = 1; iset <= dim.Length(); iset++)
     dim[iset] = E->GetChance()->Infosets()[iset]->NumActions();
   chanceprobs = new gPVector<T>(dim);
-  for ( iset = 1; iset <= dim.Length(); iset++)
+  for (int iset = 1; iset <= dim.Length(); iset++)
     for (int act = 1; act <= E->GetChance()->Infosets()[iset]->NumActions(); act++)
        (*chanceprobs)(iset, act) = E->GetChanceProb(E->GetChance()->Infosets()[iset], act);
 }
@@ -822,7 +819,6 @@ void BehavAssessment<T>::CondPayoff(BehavNode<T> *p_node, T p_prob,
   for (int child = 1; child <= nc; child++)
     p_node->children[child]->scratch = p_node->scratch;
   
-  T newprob((T) 0);
   gVector<T> tmp(m_efg->NumPlayers());
   tmp = (T) 0;
   
@@ -850,6 +846,7 @@ void BehavAssessment<T>::CondPayoff(BehavNode<T> *p_node, T p_prob,
     // the (zero-probability) actions which do not appear in the support
     for (int child = 1; child <= p_node->node->NumChildren(); child++) {
       int act = m_support.Find(p_node->node->GetInfoset()->Actions()[child]);
+      T newprob;
       if (act)
 	newprob = (*this)(npl, iset, act);
       else
