@@ -14,7 +14,7 @@
 template <class T> class gArray  {
   friend bool operator==(const gArray<T> &, const gArray<T> &);
   protected:
-    int min, max;
+    int mindex, maxdex;
     T *data;
 
   public:

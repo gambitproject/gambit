@@ -10,29 +10,29 @@
 #include "gambitio.h"
 
 
-template <class T> gArray<T>::gArray(int len) : min(1), max(len)
+template <class T> gArray<T>::gArray(int len) : mindex(1), maxdex(len)
 {
   assert(len>=0);
   data = (len) ? new T[len] - 1 : 0;
 }
 
-template <class T> gArray<T>::gArray(int lo, int hi) : min(lo), max(hi)
+template <class T> gArray<T>::gArray(int lo, int hi) : mindex(lo), maxdex(hi)
 {
-  assert(max>=min);
-  data = (max>=min) ? new T[max-min+1] - min : 0;
+  assert(maxdex>=mindex);
+  data = (maxdex>=mindex) ? new T[maxdex-mindex+1] - mindex : 0;
 }
 
 template <class T> gArray<T>::gArray(const gArray<T> &a) 
-  : min(a.min), max(a.max)
+  : mindex(a.mindex), maxdex(a.maxdex)
 {
-  data = (max>=min) ? new T[max-min+1] - min : 0;
-  for (int i = min; i <= max; i++)
+  data = (maxdex>=mindex) ? new T[maxdex-mindex+1] - mindex : 0;
+  for (int i = mindex; i <= maxdex; i++)
     data[i] = a.data[i];
 }
 
 template <class T> gArray<T>::~gArray()
 {
-  if (max>=min)  delete [] (data + min);
+  if (maxdex>=mindex)  delete [] (data + mindex);
 }
 
 template <class T> gArray<T> & gArray<T>::operator=(const gArray<T> &a)
@@ -43,12 +43,12 @@ template <class T> gArray<T> & gArray<T>::operator=(const gArray<T> &a)
     // _essential_ for the correctness of the gPVector and gDPVector
     // assignment operator, since it assumes the value of data does
     // not change.
-    if (!data || (data && (min != a.min || max != a.max)))  {
-      if (data)   delete [] (data + min);
-      min = a.min;   max = a.max;
-      data = (max >= min) ? new T[max - min + 1] - min : 0;
+    if (!data || (data && (mindex != a.mindex || maxdex != a.maxdex)))  {
+      if (data)   delete [] (data + mindex);
+      mindex = a.mindex;   maxdex = a.maxdex;
+      data = (maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : 0;
     }
-    for (int i = min; i <= max; i++)
+    for (int i = mindex; i <= maxdex; i++)
       data[i] = a.data[i];
   }
   return *this;
@@ -56,43 +56,43 @@ template <class T> gArray<T> & gArray<T>::operator=(const gArray<T> &a)
 
 template <class T> int gArray<T>::Length(void) const
 {
-  return max - min + 1;
+  return maxdex - mindex + 1;
 }	
 
 template <class T> int gArray<T>::First(void) const
 {
-  return min;
+  return mindex;
 }	
 
 template <class T> int gArray<T>::Last(void) const
 {
-  return max;
+  return maxdex;
 }	
 
 template <class T> const T &gArray<T>::operator[](int index) const
 {
-  assert(index >= min && index <= max);
+  assert(index >= mindex && index <= maxdex);
   return data[index];
 }	
 
 template <class T> T &gArray<T>::operator[](int index)
 {
-  assert(index >= min && index <= max);
+  assert(index >= mindex && index <= maxdex);
   return data[index];
 }
 
 template <class T> void gArray<T>::Dump(gOutput &f) const
 {
   f << "{ ";
-  for (int i = min; i <= max; i++)
+  for (int i = mindex; i <= maxdex; i++)
     f << data[i] << ' ';
   f << '}';
 }
 
 template <class T> bool operator==(const gArray<T> &a, const gArray<T> &b)
 {
-  if (a.min != b.min || a.max != b.max)   return false;
-  for (int i = a.min; i <= a.max; i++)
+  if (a.mindex != b.mindex || a.maxdex != b.maxdex)   return false;
+  for (int i = a.mindex; i <= a.maxdex; i++)
     if (a[i] != b[i])   return false;
   return true;
 }

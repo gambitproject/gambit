@@ -30,7 +30,7 @@ template <class T> void gPVector<T>::setindex(void)
 
 template <class T> int gPVector<T>::Check(const gPVector<T> &v) const
 {
-  if (v.min == min && v.max == max)  {
+  if (v.mindex == mindex && v.maxdex == maxdex)  {
     for (int i = 1; i <= svlen.Length(); i++)
       if (svlen[i] != v.svlen[i])   return 0;
     return 1;
