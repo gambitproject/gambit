@@ -12,7 +12,8 @@ main()
 {
   NormalForm<double> N(gin);
   LemkeParams LP;
-  LP.plev=2;
+  LP.trace=2;
+//  LP.tracefile=&gout;
 //  LP.nequilib=1;
   LemkeModule<double> LM((NormalForm<double> &) N, LP);
   LM.Lemke();
