@@ -37,10 +37,10 @@
 #include "nash/nfglcp.h"
 #include "nash/nfglp.h"
 #include "nash/nfgliap.h"
-#include "nash/nfgalleq.h"
+#include "nash/nfgpoly.h"
 #include "nash/nfglogit.h"
-#include "nash/simpdiv.h"
-#include "nash/yamamoto.h"
+#include "nash/nfgsimpdiv.h"
+#include "nash/nfgyamamoto.h"
 
 const int idCHECKBOX_FINDALL = 2000;
 const int idSPINCTRL_STOPAFTER = 2001;
@@ -88,7 +88,7 @@ gList<MixedSolution> nfgOneNash::Solve(const gbtNfgSupport &p_support,
       }
     }
     else {
-      nfgSimpdiv<double> algorithm;
+      gbtNfgNashSimpdiv<double> algorithm;
       return algorithm.Solve(support, p_status);
     }
   }
@@ -180,7 +180,7 @@ gList<MixedSolution> nfgTwoNash::Solve(const gbtNfgSupport &p_support,
       return algorithm.Solve(support, p_status);
     }
     else {
-      nfgPolEnum algorithm;
+      gbtNfgNashEnumPoly algorithm;
       algorithm.SetStopAfter(2);
       return algorithm.Solve(support, p_status);
     }
@@ -273,7 +273,7 @@ gList<MixedSolution> nfgAllNash::Solve(const gbtNfgSupport &p_support,
       return algorithm.Solve(support, p_status);
     }
     else {
-      nfgPolEnum algorithm;
+      gbtNfgNashEnumPoly algorithm;
       algorithm.SetStopAfter(0);
       return algorithm.Solve(support, p_status);
     }
@@ -1108,7 +1108,7 @@ void panelNfgPolEnum::OnFindAll(wxCommandEvent &)
 
 gbtNfgNashAlgorithm *panelNfgPolEnum::GetAlgorithm(void) const
 {
-  nfgPolEnum *algorithm = new nfgPolEnum;
+  gbtNfgNashEnumPoly *algorithm = new gbtNfgNashEnumPoly;
   algorithm->SetStopAfter((m_findAll->GetValue()) ?
 			  0 : m_stopAfter->GetValue());
   return algorithm;
@@ -1254,14 +1254,14 @@ void panelNfgSimpdiv::OnUseLeash(wxCommandEvent &)
 gbtNfgNashAlgorithm *panelNfgSimpdiv::GetAlgorithm(void) const
 {
   if (m_precision->GetSelection() == 0) {
-    nfgSimpdiv<double> *algorithm = new nfgSimpdiv<double>;
+    gbtNfgNashSimpdiv<double> *algorithm = new gbtNfgNashSimpdiv<double>;
     algorithm->SetLeashLength((m_useLeash->GetValue()) ?
 			      m_leashLength->GetValue() : 0);
     algorithm->SetNumRestarts(m_numRestarts->GetValue());
     return algorithm;
   }
   else {
-    nfgSimpdiv<gRational> *algorithm = new nfgSimpdiv<gRational>;
+    gbtNfgNashSimpdiv<gRational> *algorithm = new gbtNfgNashSimpdiv<gRational>;
     algorithm->SetLeashLength((m_useLeash->GetValue()) ?
 			      m_leashLength->GetValue() : 0);
     algorithm->SetNumRestarts(m_numRestarts->GetValue());
@@ -1301,7 +1301,7 @@ panelNfgYamamoto::panelNfgYamamoto(wxWindow *p_parent)
 
 gbtNfgNashAlgorithm *panelNfgYamamoto::GetAlgorithm(void) const
 {
-  return new nfgYamamoto;
+  return new gbtNfgNashYamamoto;
 }
 
 //========================================================================

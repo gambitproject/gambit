@@ -36,8 +36,6 @@ libnash_a_SOURCES = \
 	mixedsol.cc \
 	mixedsol.h \
 	nfgalgorithm.h \
-	nfgalleq.cc \
-	nfgalleq.h \
 	nfglcp.cc \
 	nfglcp.h \
 	nfglcp.imp \
@@ -51,17 +49,17 @@ libnash_a_SOURCES = \
 	nfgmixed.cc \
 	nfgmixed.h \
 	nfgmixed.imp \
+	nfgpoly.cc \
+	nfgpoly.h \
 	nfgpure.cc \
 	nfgpure.h \
 	nfgqregrid.cc \
 	nfgqregrid.h \
-	polenum.cc \
-	polenum.h \
-	simpdiv.cc \
-	simpdiv.h \
-	simpdiv.imp \
-	yamamoto.cc \
-	yamamoto.h
+	nfgsimpdiv.cc \
+	nfgsimpdiv.h \
+	nfgsimpdiv.imp \
+	nfgyamamoto.cc \
+	nfgyamamoto.h 
 
 EXTRA_DIST = borland.mak
 

@@ -22,8 +22,8 @@
 //
 
 #include "math/rational.h"
-#include "simpdiv.imp"
+#include "nfgsimpdiv.imp"
 
-template class nfgSimpdiv<double>;
-template class nfgSimpdiv<gRational>;
+template class gbtNfgNashSimpdiv<double>;
+template class gbtNfgNashSimpdiv<gRational>;
 

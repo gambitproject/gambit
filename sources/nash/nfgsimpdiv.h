@@ -24,12 +24,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef SIMPDIV_H
-#define SIMPDIV_H
+#ifndef NFGSIMPDIV_H
+#define NFGSIMPDIV_H
 
 #include "nfgalgorithm.h"
 
-template <class T> class nfgSimpdiv : public gbtNfgNashAlgorithm {
+template <class T> class gbtNfgNashSimpdiv : public gbtNfgNashAlgorithm {
 private:
   int m_nRestarts, m_leashLength;
 
@@ -49,8 +49,8 @@ private:
   int get_b(int j, int h, int nstrats, const gPVector<int> &);
   
 public:
-  nfgSimpdiv(void);
-  virtual ~nfgSimpdiv();
+  gbtNfgNashSimpdiv(void);
+  virtual ~gbtNfgNashSimpdiv();
 
   int NumRestarts(void) const { return m_nRestarts; }
   void SetNumRestarts(int p_nRestarts) { m_nRestarts = p_nRestarts; }
@@ -62,7 +62,7 @@ public:
   gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
-#endif  // SIMPDIV_H
+#endif  // NFGSIMPDIV_H
 
 
 

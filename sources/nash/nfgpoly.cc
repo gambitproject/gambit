@@ -4,7 +4,8 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Compute Nash equilibria via solving polynomial equations
+// Enumerates all Nash equilibria in a normal form game, via solving
+// systems of polynomial equations
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,14 +25,17 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "base/base.h"
 #include "base/gnullstatus.h"
-#include "game/nfg.h"
-#include "game/nfgiter.h"
-#include "game/nfgciter.h"
-
-#include "polenum.h"
+#include "game/nfgensup.h"
 #include "poly/quiksolv.h"
+#include "nfgpoly.h"
+
+class PolEnumParams {
+public:
+  int stopAfter;
+
+  PolEnumParams(void);
+};
 
 class PolEnumModule  {
 private:
@@ -459,4 +463,61 @@ PolEnumModule::ReturnPolishedSolution(const gVector<gDouble> &root) const
   MixedSolution sol(profile, "Polish[NFG]");
   return sol;
 }
+
+//========================================================================
+//                      class gbtNfgNashEnumPoly
+//========================================================================
+
+gbtNfgNashEnumPoly::gbtNfgNashEnumPoly(void)
+  : m_stopAfter(0)
+{ }
+
+gList<MixedSolution> gbtNfgNashEnumPoly::Solve(const gbtNfgSupport &p_support,
+					       gStatus &p_status)
+{
+  p_status.SetProgress(0.0);
+  p_status << "Step 1 of 2: Enumerating supports";
+  gList<const gbtNfgSupport> supports = PossibleNashSubsupports(p_support,
+								p_status);
+
+  p_status.SetProgress(0.0);
+  p_status << "Step 2 of 2: Computing equilibria";
+
+  gList<const gbtNfgSupport> singularSupports;
+  gList<MixedSolution> solutions;
+
+  for (int i = 1; (i <= supports.Length() &&
+		   (m_stopAfter == 0 || m_stopAfter > solutions.Length())); 
+       i++) {
+    p_status.Get();
+    p_status.SetProgress((double) (i-1) / (double) supports.Length());
+    long newevals = 0;
+    double newtime = 0.0;
+    gList<MixedSolution> newsolns;
+    bool is_singular = false;
+    
+    PolEnumParams params;
+    params.stopAfter = 0;
+    PolEnum(supports[i], params, newsolns, p_status,
+	    newevals, newtime, is_singular);
+
+    for (int j = 1; j <= newsolns.Length(); j++) {
+      if (newsolns[j].IsNash()) {
+	solutions += newsolns[j];
+      }
+    }
+
+    if (is_singular) { 
+      singularSupports += supports[i];
+    }
+  }
+
+  return solutions;
+}
+
+
+
+
+
+
 

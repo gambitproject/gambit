@@ -28,16 +28,16 @@ libnash_a_SOURCES = \
 	efgsubsolve.cc \
 	lhtab.cc \
 	mixedsol.cc \
-	nfgalleq.cc \
 	nfglcp.cc \
 	nfgliap.cc \
 	nfglogit.cc \
 	nfglp.cc \
 	nfgmixed.cc \
+	nfgpoly.cc \
 	nfgpure.cc \
 	nfgqregrid.cc \
-	polenum.cc \
-	simpdiv.cc
+	nfgsimpdiv.cc \
+        nfgyamamoto.cc
 
 OBJECTS = $(libnash_a_SOURCES:.cc=.obj)
 

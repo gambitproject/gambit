@@ -45,9 +45,9 @@
 #include "nash/efgliap.h"
 #include "nash/nfgliap.h"
 #include "nash/efgpoly.h"
-#include "nash/nfgalleq.h"
+#include "nash/nfgpoly.h"
 #include "nash/efglogit.h"
-#include "nash/simpdiv.h"
+#include "nash/nfgsimpdiv.h"
 
 const int idCHECKBOX_FINDALL = 2000;
 const int idSPINCTRL_STOPAFTER = 2001;
@@ -98,7 +98,7 @@ gList<BehavSolution> efgOneNash::Solve(const EFSupport &p_support,
       }
     }
     else {
-      algorithm.SetAlgorithm(new nfgSimpdiv<double>);
+      algorithm.SetAlgorithm(new gbtNfgNashSimpdiv<double>);
     }
 
     return algorithm.Solve(p_support, p_status);
@@ -384,7 +384,7 @@ gList<BehavSolution> efgOnePerfect::Solve(const EFSupport &p_support,
       }
     }
     else {
-      algorithm.SetAlgorithm(new nfgSimpdiv<double>);
+      algorithm.SetAlgorithm(new gbtNfgNashSimpdiv<double>);
     }
 
     return algorithm.Solve(p_support, p_status);
@@ -1506,7 +1506,7 @@ gbtEfgNashAlgorithm *panelEfgPolEnum::GetAlgorithm(void) const
     algorithm->SetAlgorithm(subAlgorithm);
   }
   else {
-    nfgPolEnum *subAlgorithm = new nfgPolEnum;
+    gbtNfgNashEnumPoly *subAlgorithm = new gbtNfgNashEnumPoly;
     subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
 			       0 : m_stopAfter->GetValue());
     algorithm->SetAlgorithm(subAlgorithm);
@@ -1664,14 +1664,14 @@ gbtEfgNashAlgorithm *panelEfgSimpdiv::GetAlgorithm(void) const
   gbtEfgNashSubgames *algorithm = new gbtEfgNashSubgames;
 
   if (m_precision->GetSelection() == 0) {
-    nfgSimpdiv<double> *subAlgorithm = new nfgSimpdiv<double>;
+    gbtNfgNashSimpdiv<double> *subAlgorithm = new gbtNfgNashSimpdiv<double>;
     subAlgorithm->SetLeashLength((m_useLeash->GetValue()) ?
 				 m_leashLength->GetValue() : 0);
     subAlgorithm->SetNumRestarts(m_numRestarts->GetValue());
     algorithm->SetAlgorithm(subAlgorithm);
   }
   else {
-    nfgSimpdiv<gRational> *subAlgorithm = new nfgSimpdiv<gRational>;
+    gbtNfgNashSimpdiv<gRational> *subAlgorithm = new gbtNfgNashSimpdiv<gRational>;
     subAlgorithm->SetLeashLength((m_useLeash->GetValue()) ?
 				 m_leashLength->GetValue() : 0);
     subAlgorithm->SetNumRestarts(m_numRestarts->GetValue());

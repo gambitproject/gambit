@@ -27,7 +27,7 @@
 #include "math/gmath.h"
 #include "mixedsol.h"
 #include "game/nfdom.h"
-#include "nash/polenum.h"  
+#include "nfgpoly.h"
 
 //----------------------------------------------------
 // Constructors, Destructor, Constructive Operators

@@ -4,7 +4,8 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Compute Nash equilibria via solving polynomial equations
+// Enumerates all Nash equilibria in a normal form game, via solving
+// systems of polynomial equations
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,30 +25,31 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef POLENUM_H
-#define POLENUM_H
+#ifndef NFGPOLY_H
+#define NFGPOLY_H
 
-#include "base/base.h"
-#include "game/nfg.h"
-#include "game/mixed.h"
-#include "mixedsol.h"
+#include "nfgalgorithm.h"
 
-class PolEnumParams {
+class gbtNfgNashEnumPoly : public gbtNfgNashAlgorithm {
+private:
+  int m_stopAfter;
+
 public:
-  int stopAfter;
+  gbtNfgNashEnumPoly(void);
+  virtual ~gbtNfgNashEnumPoly() { }
 
-  PolEnumParams(void);
+  int StopAfter(void) const { return m_stopAfter; }
+  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
+
+  gText GetAlgorithm(void) const { return "PolEnum[NFG]"; }
+  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
-
-int PolEnum(const gbtNfgSupport &, const PolEnumParams &, 
-	    gList<MixedSolution> &, gStatus &,
-	    long &nevals, double &time, bool &is_singular);
-
-MixedSolution PolishEquilibrium(const gbtNfgSupport &, const MixedSolution &, 
+MixedSolution PolishEquilibrium(const gbtNfgSupport &support, 
+				const MixedSolution &sol, 
 				bool &is_singular);
 
-#endif    // POLENUM_H
+#endif // NFGPOLY_H
 
 
 

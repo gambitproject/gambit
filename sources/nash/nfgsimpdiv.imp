@@ -36,13 +36,13 @@
 // simplify things. (TLT, 6/2002)
 //
 
-#include "simpdiv.h"
+#include "nfgsimpdiv.h"
 
 //-------------------------------------------------------------------------
-//               nfgSimpdiv<T>: Constructor and destructor
+//               gbtNfgNashSimpdiv<T>: Constructor and destructor
 //-------------------------------------------------------------------------
 
-template <class T> nfgSimpdiv<T>::nfgSimpdiv(void)
+template <class T> gbtNfgNashSimpdiv<T>::gbtNfgNashSimpdiv(void)
   : m_nRestarts(20), m_leashLength(0)
 {
   t = 0;
@@ -50,15 +50,15 @@ template <class T> nfgSimpdiv<T>::nfgSimpdiv(void)
 }
 
 
-template <class T> nfgSimpdiv<T>::~nfgSimpdiv()
+template <class T> gbtNfgNashSimpdiv<T>::~gbtNfgNashSimpdiv()
 { }
 
 
 //-------------------------------------------------------------------------
-//               nfgSimpdiv<T>: Private member functions
+//               gbtNfgNashSimpdiv<T>: Private member functions
 //-------------------------------------------------------------------------
 
-template <class T> T nfgSimpdiv<T>::Simplex(MixedProfile<T> &y)
+template <class T> T gbtNfgNashSimpdiv<T>::Simplex(MixedProfile<T> &y)
 {
   gArray<int> ylabel(2);
   gRectArray<int> labels(y.Length(), 2), pi(y.Length(), 2);
@@ -246,7 +246,7 @@ template <class T> T nfgSimpdiv<T>::Simplex(MixedProfile<T> &y)
   return maxz;
 }
 
-template <class T> void nfgSimpdiv<T>::update(gRectArray<int> &pi,
+template <class T> void gbtNfgNashSimpdiv<T>::update(gRectArray<int> &pi,
 					      gRectArray<int> &labels,
 					      gPVector<T> &ab,
 					      const gPVector<int> &U,
@@ -293,7 +293,7 @@ template <class T> void nfgSimpdiv<T>::update(gRectArray<int> &pi,
   }
 }
 
-template <class T> void nfgSimpdiv<T>::getY(MixedProfile<T> &x,
+template <class T> void gbtNfgNashSimpdiv<T>::getY(MixedProfile<T> &x,
 					    gPVector<T> &v, 
 					    const gPVector<int> &U,
 					    const gPVector<int> &TT,
@@ -321,7 +321,7 @@ template <class T> void nfgSimpdiv<T>::getY(MixedProfile<T> &x,
   }
 }
 
-template <class T> void nfgSimpdiv<T>::getnexty(MixedProfile<T> &x,
+template <class T> void gbtNfgNashSimpdiv<T>::getnexty(MixedProfile<T> &x,
 						const gRectArray<int> &pi, 
 						const gPVector<int> &U,
 						int i)
@@ -336,7 +336,7 @@ template <class T> void nfgSimpdiv<T>::getnexty(MixedProfile<T> &x,
   x(j,hh)-=d;
 }
 
-template <class T> int nfgSimpdiv<T>::get_b(int j, int h, int nstrats,
+template <class T> int gbtNfgNashSimpdiv<T>::get_b(int j, int h, int nstrats,
 					    const gPVector<int> &U)
 {
   int hh;
@@ -350,7 +350,7 @@ template <class T> int nfgSimpdiv<T>::get_b(int j, int h, int nstrats,
   return hh;
 }
 
-template <class T> int nfgSimpdiv<T>::get_c(int j, int h, int nstrats,
+template <class T> int gbtNfgNashSimpdiv<T>::get_c(int j, int h, int nstrats,
 					    const gPVector<int> &U)
 {
   int hh;
@@ -361,7 +361,7 @@ template <class T> int nfgSimpdiv<T>::get_c(int j, int h, int nstrats,
   return hh;
 }
 
-template <class T> T nfgSimpdiv<T>::getlabel(MixedProfile<T> &yy,
+template <class T> T gbtNfgNashSimpdiv<T>::getlabel(MixedProfile<T> &yy,
 					     gArray<int> &ylabel,
 					     gPVector<T> &besty)
 {
@@ -403,12 +403,12 @@ template <class T> T nfgSimpdiv<T>::getlabel(MixedProfile<T> &yy,
 
 
 //-------------------------------------------------------------------------
-//               nfgSimpdiv<T>: Main solution algorithm
+//               gbtNfgNashSimpdiv<T>: Main solution algorithm
 //-------------------------------------------------------------------------
 
-template <class T> 
-gList<MixedSolution> nfgSimpdiv<T>::Solve(const gbtNfgSupport &p_support,
-					  gStatus &p_status)
+template <class T> gList<MixedSolution>
+gbtNfgNashSimpdiv<T>::Solve(const gbtNfgSupport &p_support,
+			    gStatus &p_status)
 {
   int qf,i,j,k,ii;
 

@@ -4,8 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Enumerates all Nash equilibria in a normal form game, via solving
-// systems of polynomial equations
+// Yamamoto's algorithm for computing one proper equilibrium
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -25,28 +24,18 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef NFGALLEQ_H
-#define NFGALLEQ_H
+#ifndef NFGYAMAMOTO_H
+#define NFGYAMAMOTO_H
 
 #include "nfgalgorithm.h"
 
-class nfgPolEnum : public gbtNfgNashAlgorithm {
-private:
-  int m_stopAfter;
-
+class gbtNfgNashYamamoto : public gbtNfgNashAlgorithm {
 public:
-  nfgPolEnum(void);
-  virtual ~nfgPolEnum() { }
+  gbtNfgNashYamamoto(void) { }
+  virtual ~gbtNfgNashYamamoto() { }
 
-  int StopAfter(void) const { return m_stopAfter; }
-  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
-
-  gText GetAlgorithm(void) const { return "PolEnum[NFG]"; }
+  gText GetAlgorithm(void) const { return "Yamamoto"; }
   gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
-#endif    // NFGALLEQ_H
-
-
-
-
+#endif  // NFGYAMAMOTO_H

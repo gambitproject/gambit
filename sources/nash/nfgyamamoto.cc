@@ -24,7 +24,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "yamamoto.h"
+#include "nfgyamamoto.h"
 #include "math/gsmatrix.h"
 
 static int NumPartitions(const gMatrix<int> &p_partition)
@@ -305,8 +305,8 @@ static double PDenom(double p_lambda, int p_m)
   return total;
 }
 
-gList<MixedSolution> nfgYamamoto::Solve(const gbtNfgSupport &p_support,
-					gStatus &p_status)
+gList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
+					       gStatus &p_status)
 {
   // In the notation of Yamamoto's paper, profile(i,j)=x_{ij}
   // and lambda=t

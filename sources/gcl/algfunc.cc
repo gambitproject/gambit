@@ -45,13 +45,13 @@
 #include "nash/efgliap.h"
 #include "nash/nfglp.h"
 #include "nash/efglp.h"
-#include "nash/nfgalleq.h"
+#include "nash/nfgpoly.h"
 #include "nash/efgpoly.h"
 #include "nash/nfgqregrid.h"
 #include "nash/nfglogit.h"
 #include "nash/efglogit.h"
-#include "nash/simpdiv.h"
-#include "nash/yamamoto.h"
+#include "nash/nfgsimpdiv.h"
+#include "nash/nfgyamamoto.h"
 
 #include "numerical/vertenum.h"
 #include "numerical/lpsolve.h"
@@ -746,7 +746,7 @@ static Portion *GSM_PolEnumSolve_Nfg(GSM &gsm, Portion **param)
 {
   const gbtNfgSupport &support = AsNfgSupport(param[0]);
   
-  nfgPolEnum algorithm;
+  gbtNfgNashEnumPoly algorithm;
   algorithm.SetStopAfter(AsNumber(param[1]));
   gList<MixedSolution> solutions;
 
@@ -776,7 +776,7 @@ static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
   gList<BehavSolution> solutions;
   gbtEfgNashSubgames algorithm;
   if (AsBool(param[1])) {
-    nfgPolEnum *nfgAlgorithm = new nfgPolEnum;
+    gbtNfgNashEnumPoly *nfgAlgorithm = new gbtNfgNashEnumPoly;
     nfgAlgorithm->SetStopAfter(AsNumber(param[2]));
     algorithm.SetAlgorithm(nfgAlgorithm);
   }
@@ -959,7 +959,7 @@ static gbtNfgNashAlgorithm *GSM_Simpdiv_Nfg_Double(int p_stopAfter,
 						int p_numRestarts,
 						int p_leashLength)
 {
-  nfgSimpdiv<double> *algorithm = new nfgSimpdiv<double>;
+  gbtNfgNashSimpdiv<double> *algorithm = new gbtNfgNashSimpdiv<double>;
   //  algorithm->SetStopAfter(p_stopAfter);
   algorithm->SetNumRestarts(p_numRestarts);
   algorithm->SetLeashLength(p_leashLength);
@@ -970,7 +970,7 @@ static gbtNfgNashAlgorithm *GSM_Simpdiv_Nfg_Rational(int p_stopAfter,
 						  int p_numRestarts,
 						  int p_leashLength)
 {
-  nfgSimpdiv<gRational> *algorithm = new nfgSimpdiv<gRational>;
+  gbtNfgNashSimpdiv<gRational> *algorithm = new gbtNfgNashSimpdiv<gRational>;
   //  algorithm->SetStopAfter(p_stopAfter);
   algorithm->SetNumRestarts(p_numRestarts);
   algorithm->SetLeashLength(p_leashLength);
@@ -1103,7 +1103,7 @@ static Portion *GSM_VertEnum(GSM &gsm, Portion** param)
 static Portion *GSM_Yamamoto_Nfg(GSM &gsm, Portion **param)
 {
   const gbtNfgSupport &support = AsNfgSupport(param[0]);
-  nfgYamamoto algorithm;
+  gbtNfgNashYamamoto algorithm;
   gsm.StartAlgorithmMonitor("YamamotoSolve Progress");
   gList<MixedSolution> solutions;
   try {
