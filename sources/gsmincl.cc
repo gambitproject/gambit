@@ -36,8 +36,8 @@ struct PortionSpecTextType
 };  
 
 
-#define NUM_PortionSpecs 42
-#define NUM_CompositePortionSpecs 9
+#define NUM_PortionSpecs 30
+#define NUM_CompositePortionSpecs 2
 
 PortionSpecTextType _PortionSpecText[] =
 {
@@ -49,23 +49,11 @@ PortionSpecTextType _PortionSpecText[] =
   { porRATIONAL,           "RATIONAL" },
   { porTEXT,               "TEXT" },
 
-  { porNFG_FLOAT,          "NFG(FLOAT)" },
-  { porNFG_RATIONAL,       "NFG(RATIONAL)" },
-  { porEFG_FLOAT,          "EFG(FLOAT)" },
-  { porEFG_RATIONAL,       "EFG(RATIONAL)" },
   { porMIXED_FLOAT,        "MIXED(FLOAT)" },
   { porMIXED_RATIONAL,     "MIXED(RATIONAL)" },
   { porBEHAV_FLOAT,        "BEHAV(FLOAT)" },
   { porBEHAV_RATIONAL,     "BEHAV(RATIONAL)" },
 
-  { porEFOUTCOME_FLOAT,    "EFOUTCOME(FLOAT)" },
-  { porEFOUTCOME_RATIONAL, "EFOUTCOME(RATIONAL)" },
-  { porINFOSET_FLOAT,      "INFOSET(FLOAT)" },
-  { porINFOSET_RATIONAL,   "INFOSET(RATIONAL)" },
-  { porNFSUPPORT_FLOAT,    "NFSUPPORT(FLOAT)" },
-  { porNFSUPPORT_RATIONAL, "NFSUPPORT(RATIONAL)" },
-  { porEFSUPPORT_FLOAT,    "EFSUPPORT(FLOAT)" },
-  { porEFSUPPORT_RATIONAL, "EFSUPPORT(RATIONAL)" },
   { porNFOUTCOME,          "NFOUTCOME" },
 
   { porNFPLAYER,           "NFPLAYER" },
@@ -85,12 +73,13 @@ PortionSpecTextType _PortionSpecText[] =
 
   { porNFG,                "NFG" },
   { porEFG,                "EFG" },
-  { porMIXED,              "MIXED" },
-  { porBEHAV,              "BEHAV" },
   { porEFOUTCOME,          "EFOUTCOME" },
   { porINFOSET,            "INFOSET" },
   { porNFSUPPORT,          "NFSUPPORT" },
   { porEFSUPPORT,          "EFSUPPORT" },
+
+  { porMIXED,              "MIXED" },
+  { porBEHAV,              "BEHAV" },
 
   { porANYTYPE,            "ANYTYPE" }
 };
@@ -134,7 +123,7 @@ PortionSpec TextToPortionSpec(const gString& text)
 {
   int i;
   gString t = text;
-  PortionSpec result;
+  PortionSpec result = porUNDEFINED;
 
   while(t.left(5) == "LIST(")
   {

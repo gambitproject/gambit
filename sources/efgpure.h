@@ -14,18 +14,18 @@
 #include "subsolve.h"
 
 
-template <class T> int FindPureNash(const Efg<T> &, const EFSupport &,
+template <class T> int FindPureNash(const Efg &, const EFSupport &,
 				    gList<BehavSolution<T> > &);
 
 
 template <class T> class EfgPSNEBySubgame : public SubgameSolver<T>  {
   private:
-    int SolveSubgame(const Efg<T> &, const EFSupport &,
+    int SolveSubgame(const Efg &, const EFSupport &,
 		     gList<BehavSolution<T> > &);
     EfgAlgType AlgorithmID() const { return EfgAlg_PURENASHSUB; }    
 
   public:
-    EfgPSNEBySubgame(const Efg<T> &E, const EFSupport &, int max = 0);
+    EfgPSNEBySubgame(const Efg &E, const EFSupport &, int max = 0);
     virtual ~EfgPSNEBySubgame();
 };
 

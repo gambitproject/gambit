@@ -28,7 +28,7 @@ class NFGobitParams  {
 };
 
 
-void Gobit(const Nfg<double> &, NFGobitParams &,
+void Gobit(const Nfg &, NFGobitParams &,
 	   const MixedProfile<double> &, gList<MixedSolution<double> > &,
 	   long &nevals, long &nits);
 

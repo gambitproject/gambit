@@ -26,8 +26,8 @@
 //                          base class
 //---------------------------------------------------------------------
 
-class BaseEfg;
-class NFPayoffs;
+class Efg;
+class Nfg;
 
 class Portion
 {
@@ -52,8 +52,8 @@ protected:
   static long _WriteListIndent;
   static long _WriteSolutionInfo;
 
-  void SetGame(const BaseEfg *game);
-  void SetGame(const NFPayoffs *game);
+  void SetGame(const Efg *game);
+  void SetGame(const Nfg *game);
 
 public:
   static void _SetWriteWidth(long);
@@ -73,7 +73,7 @@ public:
   Portion* Original(void) const;
 
   virtual PortionSpec Spec(void) const = 0;
-  virtual DataType SubType( void ) const { return DT_ERROR; }
+  virtual Precision SubType( void ) const { return precERROR; }
 
   virtual void Output(gOutput& s) const;
   virtual gString OutputString( void ) const = 0;
@@ -332,7 +332,6 @@ public:
   EFOutcome *Value(void) const;
   void SetValue(EFOutcome *);
   PortionSpec Spec(void) const;
-  DataType SubType(void) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -451,20 +450,16 @@ class NfSupportPortion : public Portion   {
 protected:
   NFSupport** _Value;
   bool _ref;
-  NFPayoffs *paytable;
 
-  NfSupportPortion(NFSupport *&, NFPayoffs *, bool);
+  NfSupportPortion(NFSupport *&, bool);
 
 public:
-  NfSupportPortion(NFSupport *, NFPayoffs *);
+  NfSupportPortion(NFSupport *);
   virtual ~NfSupportPortion();
 
   NFSupport *Value(void) const;
   void SetValue(NFSupport *);
   PortionSpec Spec(void) const;
-  DataType SubType(void) const;
-
-  NFPayoffs *PayoffTable(void) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -498,7 +493,6 @@ public:
   EFSupport *Value(void) const;
   void SetValue(EFSupport *);
   PortionSpec Spec(void) const;
-  DataType SubType( void ) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -564,7 +558,6 @@ public:
   Infoset *Value(void) const;
   void SetValue(Infoset *);
   PortionSpec Spec(void) const;
-  DataType SubType( void ) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -659,7 +652,7 @@ public:
   MixedProfile<T> *Value(void) const;
   void SetValue(MixedProfile<T> *);
   PortionSpec Spec(void) const;
-  DataType SubType(void) const;
+  Precision SubType(void) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -690,7 +683,7 @@ public:
   BehavProfile<T> *Value(void) const;
   void SetValue(BehavProfile<T> *);
   PortionSpec Spec(void) const;
-  DataType SubType(void) const;
+  Precision SubType(void) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -707,18 +700,17 @@ public:
 //                          new Nfg class
 //---------------------------------------------------------------------
 
-template <class T> class NfgPortion : public Portion   {
+class NfgPortion : public Portion   {
 protected:
-  Nfg<T> ** _Value;
+  Nfg ** _Value;
   NfgPortion(void);
 
 public:
   virtual ~NfgPortion();
 
-  Nfg<T> *Value(void) const;
-  void SetValue(Nfg<T> *);
+  Nfg *Value(void) const;
+  void SetValue(Nfg *);
   PortionSpec Spec(void) const;
-  DataType SubType(void) const;
 
   void Output(gOutput& s) const;
   gString OutputString(void) const;
@@ -728,16 +720,16 @@ public:
 };
 
 
-template <class T> class NfgValPortion : public NfgPortion<T>  {
+class NfgValPortion : public NfgPortion  {
 public:
-  NfgValPortion(Nfg<T> *value);
+  NfgValPortion(Nfg *value);
   virtual ~NfgValPortion();
   bool IsReference(void) const;
 };
 
-template <class T> class NfgRefPortion : public NfgPortion<T>  {
+class NfgRefPortion : public NfgPortion  {
 public:
-  NfgRefPortion(Nfg<T> *&value);
+  NfgRefPortion(Nfg *&value);
   virtual ~NfgRefPortion();
   bool IsReference(void) const;
 };
@@ -753,16 +745,15 @@ public:
 class EfgPortion : public Portion
 {
 protected:
-  BaseEfg** _Value;
+  Efg** _Value;
   EfgPortion(void);
 
 public:
   virtual ~EfgPortion();
 
-  BaseEfg *Value(void) const;
-  void SetValue(BaseEfg *);
+  Efg *Value(void) const;
+  void SetValue(Efg *);
   PortionSpec Spec(void) const;
-  DataType SubType( void ) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -775,7 +766,7 @@ public:
 class EfgValPortion : public EfgPortion
 {
 public:
-  EfgValPortion(BaseEfg* value);
+  EfgValPortion(Efg* value);
   virtual ~EfgValPortion();
   bool IsReference(void) const;
 };
@@ -783,7 +774,7 @@ public:
 class EfgRefPortion : public EfgPortion
 {
 public:
-  EfgRefPortion(BaseEfg*& value);
+  EfgRefPortion(Efg*& value);
   virtual ~EfgRefPortion();
   bool IsReference(void) const;
 };
@@ -910,7 +901,7 @@ public:
   gList< Portion* >& Value(void) const;
   void SetDataType(unsigned long type);
   PortionSpec Spec(void) const;
-  DataType SubType( void ) const;
+  Precision SubType( void ) const;
 
   void Output(gOutput& s) const;
   void Output(gOutput& s, long ListLF) const;

@@ -12,12 +12,12 @@
 
 template <class T> class PureNashBySubgame : public SubgameSolver<T>  {
   private:
-    int SolveSubgame(const Efg<T> &, const EFSupport &,
+    int SolveSubgame(const Efg &, const EFSupport &,
 		     gList<BehavSolution<T> > &);
     EfgAlgType AlgorithmID() const { return EfgAlg_PURENASHSUB; }    
 
   public:
-    PureNashBySubgame(const Efg<T> &E, const EFSupport &, int max = 0);
+    PureNashBySubgame(const Efg &E, const EFSupport &, int max = 0);
     virtual ~PureNashBySubgame();
 };
 

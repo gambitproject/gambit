@@ -24,7 +24,7 @@
 //               SimpdivModule<T>: Constructor and destructor
 //-------------------------------------------------------------------------
 
-template <class T> SimpdivModule<T>::SimpdivModule(const Nfg<T> &n,
+template <class T> SimpdivModule<T>::SimpdivModule(const Nfg &n,
 						   const SimpdivParams &p,
 						   const NFSupport &s)
   : N(n), params(p), support(s), 

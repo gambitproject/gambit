@@ -1,7 +1,7 @@
 //
 // FILE: listfunc.cc -- List and text oriented function implementations
 //
-// $Id$
+// @(#)listfunc.cc	2.3 4/28/97
 //
 
 #include <assert.h>
@@ -556,23 +556,10 @@ Portion* GSM_List_Nfg( Portion** param )
   p = new ListValPortion();
   p->SetDataType( param[0]->Spec().Type );
 
-  if( param[0]->Spec().Type == porNFG_FLOAT )
-  {
-    Nfg<double>& nfg = 
-      * (Nfg<double>*) (((NfgPortion<double> *) param[0])->Value());
+  Nfg& nfg =
+      * (((NfgPortion *) param[0])->Value());
     for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
-      p->Append( new NfgValPortion<double>( new Nfg<double>( nfg ) ) );  
-  }
-  else if( param[0]->Spec().Type == porNFG_RATIONAL )
-  {
-    Nfg<gRational>& nfg = 
-      * (Nfg<gRational>*) (((NfgPortion<gRational> *) param[0])->Value());
-    for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
-      p->Append( new NfgValPortion<gRational>( new Nfg<gRational>( nfg ) ) );  
-  }
-  else
-    assert( 0 );
-
+      p->Append(new NfgValPortion(new Nfg(nfg)));
   return p;
 }
 
@@ -590,22 +577,10 @@ Portion* GSM_List_Efg( Portion** param )
   p = new ListValPortion();
   p->SetDataType( param[0]->Spec().Type );
 
-  if( param[0]->Spec().Type == porEFG_FLOAT )
-  {
-    Efg<double>& efg = 
-      * (Efg<double>*) (((EfgPortion*) param[0])->Value());
+  Efg& efg =
+      *(((EfgPortion*) param[0])->Value());
     for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
-      p->Append( new EfgValPortion( new Efg<double>( efg ) ) );  
-  }
-  else if( param[0]->Spec().Type == porEFG_RATIONAL )
-  {
-    Efg<gRational>& efg = 
-      * (Efg<gRational>*) (((EfgPortion*) param[0])->Value());
-    for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
-      p->Append( new EfgValPortion( new Efg<gRational>( efg ) ) );  
-  }
-  else
-    assert( 0 );
+      p->Append( new EfgValPortion( new Efg( efg ) ) );  
 
   return p;
 }

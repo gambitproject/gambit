@@ -73,7 +73,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
     for (i = 1; i <= subroots.Length(); i++)
       subroots[i]->SetOutcome(subrootvalues[soln][i]);
     
-    Efg<T> foo(efg, n);
+    Efg foo(efg, n);
     // this prevents double-counting of outcomes at roots of subgames
     // by convention, we will just put the payoffs in the parent subgame
     foo.RootNode()->SetOutcome(0);
@@ -179,7 +179,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
       for (i = 1; i <= foo.NumPlayers(); i++)  {
 	subval[i] = sol[solno].Payoff(i);
 	if (n->GetOutcome())
-	  subval[i] += efg.Payoff(n->GetOutcome(), i);
+	  subval[i] += (T) ((Efg &) efg).Payoff(n->GetOutcome(), i);
       }
 
       EFOutcome *ov = efg.NewOutcome();
@@ -201,7 +201,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
 // isn't generally useful.
 
 template <class T>
-void SubgameSolver<T>::ViewSubgame(int, const Efg<T> &)
+void SubgameSolver<T>::ViewSubgame(int, const Efg &)
 { }
 
 // This is called in the normal-form solution modules after the normal
@@ -210,7 +210,7 @@ void SubgameSolver<T>::ViewSubgame(int, const Efg<T> &)
 // It is assumed that the NFSupport returned is "sensible"
 
 template <class T>
-void SubgameSolver<T>::ViewNormal(const Nfg<T> &, NFSupport *&)
+void SubgameSolver<T>::ViewNormal(const Nfg &, NFSupport *&)
 { }
 // This is called for each subgame after the solutions have been computed
 // The idea is for the called code to possibly allow for viewing or
@@ -220,12 +220,12 @@ void SubgameSolver<T>::ViewNormal(const Nfg<T> &, NFSupport *&)
 // Caveat utor!
 
 template <class T>
-void SubgameSolver<T>::SelectSolutions(int, const Efg<T> &,
+void SubgameSolver<T>::SelectSolutions(int, const Efg &,
 				       gList<BehavSolution<T> > &)
 { }
 
 template <class T> 
-SubgameSolver<T>::SubgameSolver(const Efg<T> &E, const EFSupport &S, int max)
+SubgameSolver<T>::SubgameSolver(const Efg &E, const EFSupport &S, int max)
   : max_solns(max), efg(E), support(efg), solution(E, S),
     infosets(E.NumPlayers())
 {

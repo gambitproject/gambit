@@ -26,10 +26,10 @@ template <class T> class EfgContIter    {
   friend class EfgIter<T>;
   private:
     int _frozen_pl, _frozen_iset;
-    Efg<T> *_efg;
+    Efg *_efg;
     EFSupport _support;
     gPVector<int> _efgidx, _supidx;
-    gVector<T> _payoff;
+    mutable gVector<gRational> _payoff;
 
   public:
     EfgContIter(const EFSupport &);
@@ -48,7 +48,7 @@ template <class T> class EfgContIter    {
 
     int NextContingency(void);
   
-    const T &Payoff(int pl) const;
+    T Payoff(int pl) const;
   
     void Dump(gOutput &) const;
 };

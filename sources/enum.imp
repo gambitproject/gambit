@@ -15,7 +15,7 @@
 //-------------------------------------------------------------------------
 
 template <class T>
-EnumModule<T>::EnumModule(const Nfg<T> &N, const EnumParams &p,
+EnumModule<T>::EnumModule(const Nfg &N, const EnumParams &p,
 			  const NFSupport &S)
   : NF(N), support(S), params(p), rows(S.NumStrats(1)), cols(S.NumStrats(2)), 
     level(0), count(0), npivots(0)
@@ -44,15 +44,15 @@ template <class T> int EnumModule<T>::Enum(void)
   gVector<T> b1(1,n1);
   gVector<T> b2(1,n2);
 
-  min = MinPayoff(NF) - (T)1; 
+  min = (T) MinPayoff(NF) - (T)1;
 
 
    // construct A1,A2,b1,b2  
   
   for (i=1; i<=n1; i++) {
     for (j=1; j<=n2; j++)  {
-      A1(i, j) = NF.Payoff(iter.GetOutcome(), 1) - min;
-      A2(j, i) = NF.Payoff(iter.GetOutcome(), 2) - min;
+      A1(i, j) = (T) NF.Payoff(iter.GetOutcome(), 1) - min;
+      A2(j, i) = (T) NF.Payoff(iter.GetOutcome(), 2) - min;
       iter.Next(2);
     }
     iter.Next(1);

@@ -15,13 +15,13 @@
 class gString;
 class gOutput;
 
-typedef enum 
+typedef enum
 { 
-  opERROR, 
+  opERROR,
 
   opNEG,
   opADD, opSUB, opMUL, opDIV, 
-  opINTDIV, opMOD, 
+  opINTDIV, opMOD,
 
   opEXP, opLOG,
   opPOW_INT, opPOW_FLOAT,
@@ -55,12 +55,8 @@ typedef enum
 
 #define  porNFOUTCOME          ( 0x00000020 )
 
-#define  porNFG_FLOAT          ( 0x00000040 )
-#define  porNFG_RATIONAL       ( 0x00000080 )
-#define  porNFG                ( porNFG_FLOAT | porNFG_RATIONAL )
-#define  porEFG_FLOAT          ( 0x00000100 )
-#define  porEFG_RATIONAL       ( 0x00000200 )
-#define  porEFG                ( porEFG_FLOAT | porEFG_RATIONAL )
+#define  porNFG                ( 0x00000040 )
+#define  porEFG                ( 0x00000100 )
 #define  porMIXED_FLOAT        ( 0x00000400 )
 #define  porMIXED_RATIONAL     ( 0x00000800 )
 #define  porMIXED              ( porMIXED_FLOAT | porMIXED_RATIONAL )
@@ -68,21 +64,13 @@ typedef enum
 #define  porBEHAV_RATIONAL     ( 0x00002000 )
 #define  porBEHAV              ( porBEHAV_FLOAT | porBEHAV_RATIONAL )
 
-#define  porEFOUTCOME_FLOAT      ( 0x00004000 )
-#define  porEFOUTCOME_RATIONAL   ( 0x00008000 )
-#define  porEFOUTCOME            ( porEFOUTCOME_FLOAT | porEFOUTCOME_RATIONAL )
+#define  porEFOUTCOME          ( 0x00004000 )
 
-#define  porINFOSET_FLOAT      ( 0x00010000 )
-#define  porINFOSET_RATIONAL   ( 0x00020000 )
-#define  porINFOSET            ( porINFOSET_FLOAT | porINFOSET_RATIONAL )
+#define  porINFOSET            ( 0x00010000 )
 
-#define  porNFSUPPORT_FLOAT    ( 0x00040000 )
-#define  porNFSUPPORT_RATIONAL ( 0x00080000 )
-#define  porNFSUPPORT          ( porNFSUPPORT_FLOAT | porNFSUPPORT_RATIONAL )
+#define  porNFSUPPORT          ( 0x00040000 )
 
-#define  porEFSUPPORT_FLOAT    ( 0x00100000 )
-#define  porEFSUPPORT_RATIONAL ( 0x00200000 )
-#define  porEFSUPPORT          ( porEFSUPPORT_FLOAT | porEFSUPPORT_RATIONAL )
+#define  porEFSUPPORT          ( 0x00100000 )
 
 #define  porNFPLAYER           ( 0x00400000 )
 #define  porEFPLAYER           ( 0x00800000 )
@@ -111,7 +99,7 @@ public:
   PortionSpec(const PortionSpec& spec)
     : Type(spec.Type), ListDepth(spec.ListDepth), Null(spec.Null)
     {}
-  PortionSpec(unsigned long type = porERROR, 
+  PortionSpec(unsigned long type = porERROR,
 	      signed short listdepth = 0,
 	      bool null = false )
     : Type(type), ListDepth(listdepth), Null(null)
@@ -121,7 +109,7 @@ public:
 
   bool operator==(const PortionSpec& spec) const
   {
-    return (Type==spec.Type && 
+    return (Type==spec.Type &&
 	    ListDepth==spec.ListDepth &&
 	    Null==spec.Null);
   }

@@ -1,7 +1,7 @@
 //
 // FILE: efgcsum.imp -- Constant Sum Extensive Form Game Solution Module
 //
-// $Id$
+// @(#)efgcsum.imp	2.5.1.1 7/15/97
 //
 
 #include "gwatch.h"
@@ -15,7 +15,7 @@
 //-------------------------------------------------------------------------
 
 template <class T>
-CSSeqFormModule<T>::CSSeqFormModule(const Efg<T> &E, const CSSeqFormParams &p,
+CSSeqFormModule<T>::CSSeqFormModule(const Efg &E, const CSSeqFormParams &p,
 				    const EFSupport &S)
   : EF(E), params(p), support(S), A(0), b(0), c(0), npivots(0), 
     ns1(S.NumSequences(1)), ns2(S.NumSequences(2)),
@@ -37,8 +37,8 @@ template <class T> void CSSeqFormModule<T>::Make_Abc()
   b = new gVector<T>(1,ns1+ni2);
   c = new gVector<T>(1,ns2+ni1);
 
-  maxpay = EF.MaxPayoff()+(T)1; 
-  minpay = EF.MinPayoff()-(T)1; 
+  maxpay = (T)EF.MaxPayoff()+(T)1;
+  minpay = (T)EF.MinPayoff()-(T)1;
 
   (*A) = (T)0;
   T prob = (T)1;
@@ -181,13 +181,13 @@ template <class T> void CSSeqFormModule<T>
 //    (*A)(s1,s2) = (*A)(s1,s2) -
 //       prob*(((OutcomeVector<T> &) *n->GetOutcome())[1]-minpay);
     (*A)(s1,s2) = (*A)(s1,s2) +
-       prob * EF.Payoff(n->GetOutcome(), 1) - minpay;
+       prob * (T) ((Efg &) EF).Payoff(n->GetOutcome(), 1) - minpay;
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
       for(i=1;i<=n->NumChildren();i++)
 	FillTableau(n->GetChild(i),
-		    prob*EF.GetChanceProb(n->GetInfoset(), i),
+		    prob*(T)EF.GetChanceProb(n->GetInfoset(), i),
 		    s1,s2,i1,i2);
     }
     int pl = n->GetPlayer()->GetNumber();
@@ -248,7 +248,7 @@ template <class T> double CSSeqFormModule<T>::Time(void) const
 //-----------------------------------
 
 template <class T>
-int CSSeqFormBySubgame<T>::SolveSubgame(const Efg<T> &E, const EFSupport &sup,
+int CSSeqFormBySubgame<T>::SolveSubgame(const Efg &E, const EFSupport &sup,
 					gList<BehavSolution<T> > &solns)
 {
   BehavProfile<T> bp(E, sup);
@@ -264,7 +264,7 @@ int CSSeqFormBySubgame<T>::SolveSubgame(const Efg<T> &E, const EFSupport &sup,
 }
 
 template <class T>
-CSSeqFormBySubgame<T>::CSSeqFormBySubgame(const Efg<T> &E, const EFSupport &S,
+CSSeqFormBySubgame<T>::CSSeqFormBySubgame(const Efg &E, const EFSupport &S,
 					  const CSSeqFormParams &p,
 					  int max)
   : SubgameSolver<T>(E, S, max), npivots(0), params(p)

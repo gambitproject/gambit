@@ -16,7 +16,7 @@ template <class T> class SubgameSolver   {
   private:
     int max_solns, subgame_number;
     double time;
-    Efg<T> efg;
+    Efg efg;
     EFSupport support;
     BehavProfile<T> solution;
     gList<BehavSolution<T> > solutions;
@@ -27,18 +27,18 @@ template <class T> class SubgameSolver   {
 		      gList<EFOutcome *> &);
 
   protected:
-    virtual int SolveSubgame(const Efg<T> &, const EFSupport &,
+    virtual int SolveSubgame(const Efg &, const EFSupport &,
 			     gList<BehavSolution<T> > &) = 0;
     // changed to return int = status.Get()
 
-    virtual void ViewSubgame(int, const Efg<T> &);
+    virtual void ViewSubgame(int, const Efg &);
 
-    virtual void ViewNormal(const Nfg<T> &, NFSupport *&);
-    virtual void SelectSolutions(int, const Efg<T> &, gList<BehavSolution<T> > &);
+    virtual void ViewNormal(const Nfg &, NFSupport *&);
+    virtual void SelectSolutions(int, const Efg &, gList<BehavSolution<T> > &);
     virtual EfgAlgType AlgorithmID() const = 0;
 
   public:
-    SubgameSolver(const Efg<T> &E, const EFSupport &, int maxsol = 0);
+    SubgameSolver(const Efg &E, const EFSupport &, int maxsol = 0);
     virtual ~SubgameSolver();
     
     void Solve(void);

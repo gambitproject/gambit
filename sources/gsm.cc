@@ -1,7 +1,7 @@
 //
 // FILE: gsm.cc  implementation of GSM (Stack machine)
 //
-// $Id$
+// @(#)gsm.cc	2.14 6/23/97
 //
 
 
@@ -498,23 +498,19 @@ bool GSM::Assign(void)
 	((BoolPortion*) p1)->Value() = ((BoolPortion*) p2)->Value();
 	break;
 
-      case porEFOUTCOME_FLOAT:
-      case porEFOUTCOME_RATIONAL:
+      case porEFOUTCOME:
 	((EfOutcomePortion *) p1)->SetValue(((EfOutcomePortion *) p2)->Value());
 	break;
 
-      case porNFSUPPORT_FLOAT:
-      case porNFSUPPORT_RATIONAL:
+      case porNFSUPPORT:
 	((NfSupportPortion *) p1)->SetValue(new NFSupport(*((NfSupportPortion *) p2)->Value()));
 	break;
 
-      case porEFSUPPORT_FLOAT:
-      case porEFSUPPORT_RATIONAL:
+      case porEFSUPPORT:
 	((EfSupportPortion *) p1)->SetValue(new EFSupport(*((EfSupportPortion *) p2)->Value()));
 	break;
 
-      case porINFOSET_FLOAT:
-      case porINFOSET_RATIONAL:
+      case porINFOSET:
 	((InfosetPortion *) p1)->SetValue(((InfosetPortion *) p2)->Value());
 	break;
 
@@ -534,51 +530,12 @@ bool GSM::Assign(void)
 	((ActionPortion *) p1)->SetValue(((ActionPortion *) p2)->Value());
 	break;
 
-
-
-      /* commented out for MIXED and BEHAV so that assignments
-         for these two types will be carried out by unassigning the
-         first argument first.
-         make sure that the if() condition is reflected if this is changed
-         -- gwu
-      case porMIXED_FLOAT:
-	(*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) = 
-	  (*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
-	break;
-      case porMIXED_RATIONAL:
-	(*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) = 
-	  (*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value()));
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
+      case porNFG:
+	((NfgPortion *) p1)->SetValue(((NfgPortion *) p2)->Value());
 	break;
 
-      case porBEHAV_FLOAT:
-	(*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) = 
-	  (*((BehavSolution<double>*) ((BehavPortion*) p2)->Value()));
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
-	break;
-      case porBEHAV_RATIONAL:
-	(*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) = 
-	  (*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
-	break;
-      */
-
-
-
-      case porNFG_FLOAT:
-	((NfgPortion<double> *) p1)->SetValue(((NfgPortion<double> *) p2)->Value());
-//	p1->Original()->SetGame(p2->Game(), false);
-	break;
-      case porNFG_RATIONAL:
-	((NfgPortion<gRational> *) p1)->SetValue(((NfgPortion<gRational> *) p2)->Value());
-//	p1->Original()->SetGame(p2->Game(), false);
-	break;
-
-      case porEFG_FLOAT:
-      case porEFG_RATIONAL:
+      case porEFG:
 	((EfgPortion *) p1)->SetValue(((EfgPortion *) p2)->Value());
-//	p1->Original()->SetGame(p2->Game(), true);
 	break;
 
       case porINPUT:
@@ -589,11 +546,11 @@ bool GSM::Assign(void)
 
       default:
 	_ErrorMessage(_StdErr, 67, 0, 0, PortionSpecToText(p1Spec));
-	assert(0);	  
+	assert(0);
       }
       if(result)
       {
-	_Push(p1); 
+	_Push(p1);
 	delete p2;
       }
     }
@@ -614,7 +571,7 @@ bool GSM::Assign(void)
       }
     }
     else // error: changing the type of a list
-    {      
+    {
       _ErrorMessage(_StdErr, 65);
       result = false;
     }
@@ -2492,13 +2449,13 @@ void GSM::InvalidateGameProfile( void* game, bool IsEfg )
 	}
 	else if( IsEfg && varslist[i]->Spec() == porBEHAV )
 	{
-	  switch( ((BaseEfg*) game)->Type() )
+	  switch(varslist[i]->Spec().Type)
 	  {
-	  case gDOUBLE:
+	  case porBEHAV_FLOAT:
 	    ((BehavSolution<double>*) ((BehavPortion<double> *)
 				       varslist[i])->Value())->Invalidate();
 	    break;
-	  case gRATIONAL:
+	  case porBEHAV_RATIONAL:
 	    ((BehavSolution<gRational>*) ((BehavPortion<gRational> *) 
 					  varslist[i])->Value())->Invalidate();
 	    break;
@@ -2587,7 +2544,7 @@ void GSM::UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec )
 // UnAssignEfgElement
 //---------------------
 
-void GSM::UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data )
+void GSM::UnAssignEfgElement( Efg* game, PortionSpec spec, void* data )
 {
   assert( spec.ListDepth == 0 );
 
@@ -2671,7 +2628,7 @@ void GSM::UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data )
 
 
 
-void GSM::UnAssignEfgInfoset( BaseEfg* game, Infoset* infoset )
+void GSM::UnAssignEfgInfoset( Efg* game, Infoset* infoset )
 {
   assert( game );
   assert( infoset );
@@ -2682,7 +2639,7 @@ void GSM::UnAssignEfgInfoset( BaseEfg* game, Infoset* infoset )
 }
 
 
-void GSM::UnAssignEfgSubTree( BaseEfg* game, Node* node )
+void GSM::UnAssignEfgSubTree( Efg* game, Node* node )
 {
   assert( game );
   assert( node );

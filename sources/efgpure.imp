@@ -1,7 +1,7 @@
 //
 // FILE: efgpure.cc -- Find all pure strategy Nash equilibria
 //
-// $Id$
+// @(#)efgpure.imp	2.3 4/2/97
 //
 
 #include "glist.h"
@@ -13,12 +13,12 @@
 
 #include "efgpure.h"
 
-template <class T> int FindPureNash(const Efg<T> &efg, const EFSupport &sup,
+template <class T> int FindPureNash(const Efg &efg, const EFSupport &sup,
 				    gList<BehavSolution<T> > &eqs)
 {
   int index;
   EfgContIter<T> citer(sup);
-  gPVector<T> probs(efg.NumInfosets());
+  gPVector<gRational> probs(efg.NumInfosets());
 
   do  {
     int flag = 1;
@@ -30,7 +30,7 @@ template <class T> int FindPureNash(const Efg<T> &efg, const EFSupport &sup,
       T current = citer.Payoff(pl);
       for (int iset = 1; flag && iset <= efg.Players()[pl]->NumInfosets();
 	   iset++)  {
-	if (probs(pl, iset) == (T) 0)   continue;
+	if ((T) probs(pl, iset) == (T) 0)   continue;
 	Infoset *s = efg.Players()[pl]->Infosets()[iset];
 	for (int act = 1; act <= s->NumActions(); act++)  {
 	  eiter.Next(pl, iset);
@@ -69,7 +69,7 @@ template <class T> int FindPureNash(const Efg<T> &efg, const EFSupport &sup,
 //-----------------------------------
 
 template <class T>
-int EfgPSNEBySubgame<T>::SolveSubgame(const Efg<T> &E, const EFSupport &sup,
+int EfgPSNEBySubgame<T>::SolveSubgame(const Efg &E, const EFSupport &sup,
 				      gList<BehavSolution<T> > &solns)
 {
   FindPureNash(E, sup, solns);
@@ -78,7 +78,7 @@ int EfgPSNEBySubgame<T>::SolveSubgame(const Efg<T> &E, const EFSupport &sup,
 }
 
 template <class T>
-EfgPSNEBySubgame<T>::EfgPSNEBySubgame(const Efg<T> &E, const EFSupport &S,
+EfgPSNEBySubgame<T>::EfgPSNEBySubgame(const Efg &E, const EFSupport &S,
 				      int max)
   : SubgameSolver<T>(E, S, max)
 { }
