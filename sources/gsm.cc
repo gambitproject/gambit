@@ -1802,6 +1802,7 @@ void GSM::Help(void)
   int j;
   int fk;
   int ck;
+  int cfk;
   bool match;
   int found = 0;
   gString curname;
@@ -1826,12 +1827,14 @@ void GSM::Help(void)
       curname = funclist[i]->FuncName().dncase();
       fk = 0; 
       ck = 0;
+      cfk = -1;
       while(match && (fk<funcname.length()) && (ck<curname.length()))
       {
 	if(funcname[fk]=='*')
 	{
 	  if(fk+1==funcname.length())
 	    break;
+	  cfk = fk;
 	  fk++;
 	  while(ck<curname.length() && funcname[fk]!=curname[ck])
 	    ck++;
@@ -1844,7 +1847,12 @@ void GSM::Help(void)
 	else if(funcname[fk]=='?')
 	{ fk++; ck++; }
 	else
-	  match = false;
+	{
+	  if(cfk<0)
+	    match = false;
+	  else
+	  { fk = cfk; }
+	}
       }
 
       if((fk>=funcname.length()) != (ck>=curname.length()))	
