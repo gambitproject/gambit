@@ -17,7 +17,6 @@ GUI       = none
 GMAKEFILE = Makefile2.generic
 #FTPDIR    = /home/mill/ftp/pub/gambit/ver96
 FTPDIR    = /home/ftp/pub/gambit/ver96
-#FTPDIR    = /home/mill/mvanier/ftp
 SRCDIR    = ./gambit/sources
 
 all:
@@ -120,8 +119,14 @@ wxwin:
 	rm -f wx_$(SYSNAME)_$(GUI).zip
 
 doc:
-	@# FIXME! put something here...
+	@echo
+	@echo ------------------------------------------------------
+	@echo Updating documentation on ftp server 
+	@echo ------------------------------------------------------
+	@echo
 
+	cd ../doc; tex2ps gclman; \
+	cp gclman.ps $(FTPDIR)
 
 
 
