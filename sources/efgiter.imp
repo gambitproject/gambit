@@ -9,7 +9,7 @@
 
 template <class T> EfgIter<T>::EfgIter(Efg &efg)
   : _efg(&efg), _support(efg),
-    _efgidx(_efg->NumInfosets()), _supidx(_efgidx),
+    _profile(efg), _current(_efg->NumInfosets()),
     _payoff(_efg->NumPlayers())
 {
   First();
@@ -17,7 +17,7 @@ template <class T> EfgIter<T>::EfgIter(Efg &efg)
 
 template <class T> EfgIter<T>::EfgIter(const EFSupport &s)
   : _efg((Efg *) &s.Game()), _support(s),
-    _efgidx(_efg->NumInfosets()), _supidx(_efgidx),
+    _profile(s.Game()), _current(_efg->NumInfosets()),
     _payoff(_efg->NumPlayers())
 {
   First();
@@ -25,13 +25,13 @@ template <class T> EfgIter<T>::EfgIter(const EFSupport &s)
 
 template <class T> EfgIter<T>::EfgIter(const EfgIter<T> &it)
   : _efg(it._efg), _support(it._support),
-    _efgidx(it._efgidx), _supidx(it._supidx),
+    _profile(it._profile), _current(it._current),
     _payoff(_efg->NumPlayers())
 { }
 
 template <class T> EfgIter<T>::EfgIter(const EfgContIter<T> &it)
   : _efg(it._efg), _support(it._support),
-    _efgidx(it._efgidx), _supidx(it._supidx),
+    _profile(it._profile), _current(it._current),
     _payoff(_efg->NumPlayers())
 { }
   
@@ -43,8 +43,8 @@ template <class T>
 EfgIter<T> &EfgIter<T>::operator=(const EfgIter<T> &it)
 {
   if (this != &it && _efg == it._efg)  {
-    _efgidx = it._efgidx;
-    _supidx = it._supidx;
+    _profile = it._profile;
+    _current = it._current;
   }
   return *this;
 }
@@ -52,11 +52,11 @@ EfgIter<T> &EfgIter<T>::operator=(const EfgIter<T> &it)
 
 template <class T> void EfgIter<T>::First(void)
 {
-  _supidx = 1;
+  _current = 1;
 
   for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
     for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++)
-      _efgidx(pl, iset) = _support.Actions(pl, iset)[1]->GetNumber();
+      _profile.Set(_support.Actions(pl, iset)[1]);
   }
 }
 
@@ -64,14 +64,14 @@ template <class T> int EfgIter<T>::Next(int pl, int iset)
 {
   const gArray<Action *> &actions = _support.Actions(pl, iset);
   
-  if (_supidx(pl, iset) == actions.Length())   {
-    _supidx(pl, iset) = 1;
-    _efgidx(pl, iset) = actions[1]->GetNumber();
+  if (_current(pl, iset) == actions.Length())   {
+    _current(pl, iset) = 1;
+    _profile.Set(actions[1]);
     return 0;
   }
 
-  _supidx(pl, iset)++;
-  _efgidx(pl, iset) = actions[_supidx(pl, iset)]->GetNumber();
+  _current(pl, iset)++;
+  _profile.Set(actions[_current(pl, iset)]);
   return 1;
 }
 
@@ -82,26 +82,26 @@ template <class T> int EfgIter<T>::Set(int pl, int iset, int act)
       act <= 0 || act > _support.NumActions(pl, iset))
     return 0;
 
-  _supidx(pl, iset) = act;
-  _efgidx(pl, iset) = _support.Actions(pl, iset)[act]->GetNumber();
+  _current(pl, iset) = act;
+  _profile.Set(_support.Actions(pl, iset)[act]);
   return 1;
 }
 
 template <class T> T EfgIter<T>::Payoff(int pl) const
 {
-  _efg->Payoff(_efgidx, _payoff);
+  _profile.Payoff(_payoff);
   return _payoff[pl];
 }
 
 template <class T> void EfgIter<T>::Payoff(gVector<T> &payoff) const
 {
-  _efg->Payoff(_efgidx, _payoff);
+  _profile.Payoff(payoff);
   for (int pl = 1; pl <= _efg->NumPlayers(); pl++)
     payoff[pl] = _payoff[pl];
 }
 
 template <class T> void EfgIter<T>::Dump(gOutput &f) const
 {
-  _efgidx.Dump(f);
+  _current.Dump(f);
 }
 

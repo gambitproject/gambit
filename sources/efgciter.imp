@@ -8,8 +8,8 @@
 
 template <class T> EfgContIter<T>::EfgContIter(const EFSupport &s)
   : _frozen_pl(0), _frozen_iset(0),
-    _efg((Efg *) &s.Game()), _support(s),
-    _efgidx(_efg->NumInfosets()), _supidx(_efgidx),
+    _efg(&s.Game()), _support(s),
+    _profile(s.Game()), _current(s.Game().NumInfosets()),
     _payoff(_efg->NumPlayers())
 {
   First();
@@ -24,8 +24,8 @@ template <class T> void EfgContIter<T>::First(void)
   for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
     for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++)
       if (pl != _frozen_pl && iset != _frozen_iset)   {
-	_supidx(pl, iset) = 1;
-	_efgidx(pl, iset) = _support.Actions(pl, iset)[1]->GetNumber();
+	      _current(pl, iset) = 1;
+      	_profile.Set(_support.Actions(pl, iset)[1]);
       }
   }
 }
@@ -34,8 +34,8 @@ template <class T> void EfgContIter<T>::Set(int pl, int iset, int act)
 {
   if (pl != _frozen_pl || iset != _frozen_iset)   return;
 
-  _supidx(pl, iset) = act;
-  _efgidx(pl, iset) = _support.Actions(pl, iset)[act]->GetNumber();
+  _current(pl, iset) = act;
+  _profile.Set(_support.Actions(pl, iset)[act]);
 }
 
 template <class T> int EfgContIter<T>::Next(int pl, int iset)
@@ -44,14 +44,14 @@ template <class T> int EfgContIter<T>::Next(int pl, int iset)
 
   const gArray<Action *> &actions = _support.Actions(pl, iset);
   
-  if (_supidx(pl, iset) == actions.Length())   {
-    _supidx(pl, iset) = 1;
-    _efgidx(pl, iset) = actions[1]->GetNumber();
+  if (_current(pl, iset) == actions.Length())   {
+    _current(pl, iset) = 1;
+    _profile.Set(actions[1]);
     return 0;
   }
 
-  _supidx(pl, iset)++;
-  _efgidx(pl, iset) = actions[_supidx(pl, iset)]->GetNumber();
+  _current(pl, iset)++;
+  _profile.Set(actions[_current(pl, iset)]);
   return 1;
 }
   
@@ -89,14 +89,14 @@ template <class T> int EfgContIter<T>::NextContingency(void)
 	iset--;
     }
 
-    if (_supidx(pl, iset) < _support.NumActions(pl, iset))  {
-      _supidx(pl, iset) += 1;
-      _efgidx(pl, iset) = _support.Actions(pl, iset)[_supidx(pl, iset)]->GetNumber();
+    if (_current(pl, iset) < _support.NumActions(pl, iset))  {
+      _current(pl, iset) += 1;
+      _profile.Set(_support.Actions(pl, iset)[_current(pl, iset)]);
       return 1;
     }
 
-    _supidx(pl, iset) = 1;
-    _efgidx(pl, iset) = _support.Actions(pl, iset)[1]->GetNumber();
+    _current(pl, iset) = 1;
+    _profile.Set(_support.Actions(pl, iset)[1]);
 
     iset--;
     if (iset == 0)  {
@@ -114,13 +114,13 @@ template <class T> int EfgContIter<T>::NextContingency(void)
 
 template <class T> T EfgContIter<T>::Payoff(int pl) const
 {
-  _efg->Payoff(_efgidx, _payoff);
+  _profile.Payoff(_payoff);
   return _payoff[pl];
 }
 
 template <class T> void EfgContIter<T>::Dump(gOutput &f) const
 {
-  _efgidx.Dump(f);
+  _current.Dump(f);
 }
 
 

@@ -13,10 +13,11 @@ template <class T> class EfgContIter;
 
 template <class T> class EfgIter    {
   private:
-    Efg *_efg;
+    const Efg *_efg;
     EFSupport _support;
-    gPVector<int> _efgidx, _supidx;
-    mutable gVector<gNumber> _payoff;
+    PureBehavProfile<T> _profile;
+    gPVector<int> _current;
+    mutable gVector<T> _payoff;
 
   public:
     EfgIter(Efg &);

@@ -1,7 +1,7 @@
 //
 // FILE: efgpure.cc -- Find all pure strategy Nash equilibria
 //
-// @(#)efgpure.imp	2.3 4/2/97
+// $Id$
 //
 
 #include "glist.h"
@@ -18,27 +18,27 @@ template <class T> int FindPureNash(const Efg &efg, const EFSupport &sup,
 {
   int index;
   EfgContIter<T> citer(sup);
-  gPVector<gNumber> probs(efg.NumInfosets());
+  gPVector<T> probs(efg.NumInfosets());
 
   do  {
     int flag = 1;
-    efg.InfosetProbs(citer.GetEfgNumbering(), probs);
+    citer.GetProfile().InfosetProbs(probs);
 
     EfgIter<T> eiter(citer);
 
     for (int pl = 1; flag && pl <= efg.NumPlayers(); pl++)  {
       T current = citer.Payoff(pl);
       for (int iset = 1; flag && iset <= efg.Players()[pl]->NumInfosets();
-	   iset++)  {
-	if ((T) probs(pl, iset) == (T) 0)   continue;
-	Infoset *s = efg.Players()[pl]->Infosets()[iset];
-	for (int act = 1; act <= s->NumActions(); act++)  {
-	  eiter.Next(pl, iset);
-	  if (eiter.Payoff(pl) > current)  {
-	    flag = 0;
-	    break;
-	  }
-	}
+	         iset++)  {
+      	if ((T) probs(pl, iset) == (T) 0)   continue;
+	      Infoset *s = efg.Players()[pl]->Infosets()[iset];
+       	for (int act = 1; act <= s->NumActions(); act++)  {
+	        eiter.Next(pl, iset);
+	        if (eiter.Payoff(pl) > current)  {
+	          flag = 0;
+	          break;
+	        }
+      	}
       }
     }
 
@@ -46,11 +46,11 @@ template <class T> int FindPureNash(const Efg &efg, const EFSupport &sup,
       BehavProfile<T> temp(efg);
       // zero out all the entries, since any equlibria are pure
       ((gVector<T> &) temp).operator=((T) 0);
-      gPVector<int> profile(citer.GetEfgNumbering());
+      const PureBehavProfile<T> &profile = citer.GetProfile();
       for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
-	for (int iset = 1; iset <= efg.Players()[pl]->NumInfosets();
-	     iset++)
-	  temp(pl, iset, profile(pl, iset)) = (T) 1;
+	      for (int iset = 1; iset <= efg.Players()[pl]->NumInfosets();
+	           iset++)
+	        temp(pl, iset, profile.Get(efg.Players()[pl]->Infosets()[iset])->GetNumber()) = (T) 1;
       }
 
       index = eqs.Append(BehavSolution<T>(temp, EfgAlg_PURENASH));

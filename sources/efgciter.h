@@ -26,10 +26,11 @@ template <class T> class EfgContIter    {
   friend class EfgIter<T>;
   private:
     int _frozen_pl, _frozen_iset;
-    Efg *_efg;
+    const Efg *_efg;
     EFSupport _support;
-    gPVector<int> _efgidx, _supidx;
-    mutable gVector<gNumber> _payoff;
+    PureBehavProfile<T> _profile;
+    gPVector<int> _current;
+    mutable gVector<T> _payoff;
 
   public:
     EfgContIter(const EFSupport &);
@@ -43,8 +44,7 @@ template <class T> class EfgContIter    {
     void Set(int pl, int iset, int act);
     int Next(int pl, int iset);
   
-    const gPVector<int> &GetEfgNumbering(void) const  { return _efgidx; }
-    const gPVector<int> &GetSupportNumbering(void) const { return _supidx; }
+    const PureBehavProfile<T> &GetProfile(void) const   { return _profile; }
 
     int NextContingency(void);
   
