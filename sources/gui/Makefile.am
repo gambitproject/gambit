@@ -89,8 +89,6 @@ gambit_SOURCES = \
 	treedraw.h \
 	treewin.cc \
 	treewin.h \
-	valinteger.cc \
-	valinteger.h \
 	valnumber.cc \
 	valnumber.h \
 	wxstatus.cc \

@@ -59,7 +59,6 @@ gambit_SOURCES = \
         numberedit.cc \
 	treedraw.cc \
 	treewin.cc \
-        valinteger.cc \
         valnumber.cc \
         wxstatus.cc 
 
