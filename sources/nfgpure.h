@@ -1,7 +1,7 @@
 //#
 //# FILE: purenash.h -- Interface to pure-strategy Nash equilibrium finder
 //#
-//# $Id$
+//# @(#)purenash.h	1.3 1/26/95
 //#
 
 #ifndef PURENASH_H
@@ -17,7 +17,7 @@
 #include "gtuple.h"
 
 template <class T> int FindPureNash(const NormalForm<T> &N,
-				    gList<gTuple<int> > &);
+				    gList<gPVector<T> > &);
 
 
 #endif    // PURENASH_H

@@ -1,7 +1,7 @@
 //#
 //# FILE: purenash.cc -- Find all pure strategy Nash equilibria
 //#
-//# $Id$
+//# @(#)purenash.cc	1.10 2/8/95
 //#
 
 #include "gambitio.h"
@@ -13,30 +13,36 @@
 #include "gtuple.h"
 
 template <class T> int FindPureNash(const NormalForm<T> &N,
-				    gList<gTuple<int> > &eqs)
+						gList<gPVector<T> > &eqs)
 {
-  ContIter<T> citer((NormalForm<T> &) N);
+	ContIter<T> citer((NormalForm<T> &) N);
 
-  do  {
-    int flag = 1;
-    NormalIter<T> niter(citer);
+	do  {
+		int flag = 1;
+		NormalIter<T> niter(citer);
 
-    for (int pl = 1; flag && pl <= N.NumPlayers(); pl++)  {
-      T current = citer.Payoff(pl);
-      for (int i = 1; i <= N.Dimensionality()[pl]; i++)  {
+		for (int pl = 1; flag && pl <= N.NumPlayers(); pl++)  {
+			T current = citer.Payoff(pl);
+			for (int i = 1; i <= N.Dimensionality()[pl]; i++)  {
 	niter.Next(pl);
 	if (niter.Payoff(pl) > current)  {
-	  flag = 0;
-	  break;
+		flag = 0;
+		break;
 	}
-      }
-    }
+			}
+		}
 
-    if (flag) 
-      eqs.Append(citer.Get());
-  }  while (citer.NextContingency());
+		if (flag)
+		{
+			gPVector<T> temp(N.Dimensionality());
+			temp=0;	// zero out all the entries, since any equlibria are pure
+			gTuple<int> profile=citer.Get();
+			for (int i=1;i<=profile.Length();i++) temp(i,profile[i])=(T) 1;
+			eqs.Append(temp);
+		}
+	}  while (citer.NextContingency());
 
-  return eqs.Length();
+	return eqs.Length();
 }
 
 
@@ -47,6 +53,6 @@ template <class T> int FindPureNash(const NormalForm<T> &N,
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE int FindPureNash(const NormalForm<double> &, gList<gTuple<int> > &);
-TEMPLATE int FindPureNash(const NormalForm<gRational> &,gList<gTuple<int> > &);
+TEMPLATE int FindPureNash(const NormalForm<double> &, gList<gPVector<double> > &);
+TEMPLATE int FindPureNash(const NormalForm<gRational> &,gList<gPVector<gRational> > &);
 
