@@ -47,37 +47,36 @@ void SigFPEHandler(int type)
 }
 
 
-class MathErrHandl : public wxDialogBox
-{
+class MathErrHandl : public wxDialogBox {
 private:
-    wxRadioBox *opt_box;
-    int opt;
-    static void ok_func(wxButton &ob, wxEvent &) 
+  wxRadioBox *opt_box;
+  int opt;
+  static void ok_func(wxButton &ob, wxEvent &) 
     { ((MathErrHandl *)ob.GetClientData())->OnOk(); }
-    void OnOk(void) { opt = opt_box->GetSelection(); Show(FALSE); }
+  void OnOk(void) { opt = opt_box->GetSelection(); Show(FALSE); }
     
 public:
-    MathErrHandl(const char *err):
-        wxDialogBox(0, "Numerical Error", TRUE)
-    {
-        char *options[3] = {"Continue", "Ignore", "Quit"};
-        (void) new wxMessage(this, (char *)err);
-        this->NewLine();
-        opt_box = new wxRadioBox(this, 0, "What now?", 
-                                 -1, -1, -1, -1, 3, 
-                                 options, 1, wxVERTICAL);
-        this->NewLine();
-        wxButton *ok = new wxButton(this, (wxFunction)ok_func, "OK");
-        ok->SetClientData((char *)this);
-        Fit();
-        ok->Centre(wxHORIZONTAL);
-        Show(TRUE);
-    }
-    
-    int Option(void) { return opt; }
+  MathErrHandl(const char *err);
+  int Option(void) { return opt; }
 };
 
-
+MathErrHandl::MathErrHandl(const char *err)
+  : wxDialogBox(0, "Numerical Error", TRUE)
+{
+  char *options[3] = {"Continue", "Ignore", "Quit"};
+  (void) new wxMessage(this, (char *)err);
+  this->NewLine();
+  opt_box = new wxRadioBox(this, 0, "What now?", 
+			   -1, -1, -1, -1, 3, 
+			   options, 1, wxVERTICAL);
+  this->NewLine();
+  wxButton *ok = new wxButton(this, (wxFunction)ok_func, "OK");
+  ok->SetClientData((char *)this);
+  Fit();
+  ok->Centre(wxHORIZONTAL);
+  Show(TRUE);
+}
+    
 char *wxStrLwr(char *s)
 {
     for (unsigned int i = 0; i < (unsigned int)strlen(s); i++) 

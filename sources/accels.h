@@ -80,7 +80,7 @@ typedef struct accelevent_struct
     { return !(name == a.name && id == a.id); }
 
     int operator==(long new_id)          { return (id == new_id);     }
-    int operator==(const gText new_name) { return (name == new_name); }
+    int operator==(const gText &new_name) { return (name == new_name); }
 } AccelEvent;
 
 gOutput &operator<<(gOutput &o, const AccelEvent &p);
