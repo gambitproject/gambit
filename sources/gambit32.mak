@@ -25,7 +25,7 @@ WXLIBDIR = $(WXDIR)\lib
 WXLIB = wx32 xpm tiff jpeg winpng zlib
 WXINC = -I$(WXDIR)\include
 
-.path.cc = .;base;math
+.path.cc = .;base;math;gui
 
 $(SOURCE_SUFFIX).obj:
 	bcc32 $(CPPFLAGS) -P -c {$< }
@@ -44,7 +44,7 @@ DEBUG_FLAGS=
 
 CPPFLAGS= $(WXINC) $(EXTRACPPFLAGS) $(OPT) @$(CFG)
 
-all: gambit gcl
+all: gambit wxgcl
 
 gambit:	$(ALLGUI_OBJECTS) gambit.res
   ilink32 $(LINKFLAGS) @&&!
@@ -58,14 +58,6 @@ gambit.res
 
 gambit.res :      ..\winsrc\res\gambit.rc 
     brc32 -r -fo.\gambit.res /i$(BCCDIR)\include /i$(WXDIR)\include ..\winsrc\res\gambit
-
-gcl:   $(MSWGCL_OBJECTS)
-  ilink32 $(LINKFLAGS) @&&!
-c0x32.obj $(MSWGCL_OBJECTS)
-gcl
-nul
-cw32mti import32
-!
 
 wxgcl:	$(WXGCL_OBJECTS)  wxgcl.res
   ilink32 $(LINKFLAGS) @&&!
