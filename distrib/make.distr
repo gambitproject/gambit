@@ -64,7 +64,6 @@ gambit:
 	mv gui_$(GUI)_$(SYSNAME) ../bin/gambit_$(GUI)_$(SYSNAME); \
 	strip ../bin/gambit_$(GUI)_$(SYSNAME); \
 	cp $(WXWINDIR)/bin/wxhelp2_$(SYSNAME)_$(GUI) ../bin/wxhelp2_$(GUI)_$(SYSNAME); \
-#	cp $(WXWINDIR)/bin/gambit.xlp ../bin/gambit.xlp; \
 	cd ../distrib
 
 	@# Copy the setup and initialization files to ../misc
@@ -87,7 +86,6 @@ gambit:
 	  ./bin/gcl.man \
 	  ./bin/gambit_$(GUI)_$(SYSNAME) \
 	  ./bin/wxhelp2_$(GUI)_$(SYSNAME) \
-	  ./bin/gambit.xlp \
 	  ./efg/*.efg \
 	  ./nfg/*.nfg \
 	  ./gcl/*.gcl \
