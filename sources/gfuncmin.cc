@@ -432,7 +432,7 @@ bool Powell(gVector<double> &p,
     }
 
     tracefile << "Approximate Hessian:\n\n";
-    tracefile << xi << '\n';
+    tracefile << ((gRectArray<double> &)xi) << '\n';
 
     tracefile << "location = " << p << " value = " << fret << "\n\n";
   }

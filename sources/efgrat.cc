@@ -29,6 +29,10 @@ class gList<gRational>;
 class gListIter<gRational>;
 class gList<Node *>;
 class gListIter<Node *>;
+
+template <class T> class BehavSolution;
+gOutput &operator<<(gOutput &, const BehavSolution<gRational> &);
+
 #define TEMPLATE
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__

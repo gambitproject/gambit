@@ -30,6 +30,9 @@ class NfgIter<double>;
 template <class T> class ContIter;
 class ContIter<double>;
 
+template <class T> class MixedSolution;
+gOutput &operator<<(gOutput &, const MixedSolution<gRational> &);
+
 #define TEMPLATE
 #pragma option -Jgd
 #endif // __GNUG__, __BORLANDC__
