@@ -35,12 +35,12 @@ public:
 
   gNumber &operator =  (const gNumber& y);
 
-  friend int       operator == (const gNumber& x, const gNumber& y);
-  friend int       operator != (const gNumber& x, const gNumber& y);
-  friend int       operator <  (const gNumber& x, const gNumber& y);
-  friend int       operator <= (const gNumber& x, const gNumber& y);
-  friend int       operator >  (const gNumber& x, const gNumber& y);
-  friend int       operator >= (const gNumber& x, const gNumber& y);
+  friend bool      operator == (const gNumber& x, const gNumber& y);
+  friend bool      operator != (const gNumber& x, const gNumber& y);
+  friend bool      operator <  (const gNumber& x, const gNumber& y);
+  friend bool      operator <= (const gNumber& x, const gNumber& y);
+  friend bool      operator >  (const gNumber& x, const gNumber& y);
+  friend bool      operator >= (const gNumber& x, const gNumber& y);
 
   friend gNumber   operator +  (const gNumber& x, const gNumber& y);
   friend gNumber   operator -  (const gNumber& x, const gNumber& y);
