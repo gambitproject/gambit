@@ -21,17 +21,17 @@ void gelVariableTable::Define(const gText &name, const gelType type)
     {
       case gelNUMBER:
         m_NumberNames.Append(name);
-        list_gNumber.Append( 0 );
+        list_gNumber.Data().Append( 0 );
         m_NumberValues.Append( list_gNumber );
 	break;
       case gelBOOLEAN:
 	m_BooleanNames.Append(name);
-        list_gTriState.Append( triMAYBE );
+        list_gTriState.Data().Append( triMAYBE );
 	m_BooleanValues.Append( list_gTriState );
 	break;
       case gelTEXT:
 	m_TextNames.Append(name);
-        list_gText.Append( "" );
+        list_gText.Data().Append( "" );
 	m_TextValues.Append( list_gText );
 	break;
       default:

@@ -3,6 +3,7 @@
 // $Id$
 
 #include <assert.h>
+#include <stdlib.h>
 
 #include "tristate.h"
 #include "gtext.h"
@@ -11,6 +12,97 @@
 
 #include "gnlist.h"
 #include "glist.imp"
+
+
+//---------------------------------------------------------------
+//                       CAUTION
+// 
+//  Be sure you read the description of the data structure
+//  in gnlist.h before changing these methods!
+//
+//---------------------------------------------------------------
+
+
+template <class T> 
+void gNestedList<T>::GetElementInfo( int el, 
+				     bool& islist, 
+				     int& k_start, int& k_end, 
+				     int& el_start, int& el_end ) const
+{
+  // el_* are for indices into the data list
+  el_start = 0;
+  el_end = 0;
+
+  // k_* are for indices into the dimention list
+  k_start = 0;
+  k_end = 0;
+
+  // whether the element requested is itself a list or not
+  islist = false;
+
+
+  assert( 0 < el );
+  assert( el <= NumElements() );
+  assert( m_Dim.Length() > 1 );
+  assert( m_Dim[1] == 1 );
+
+  
+
+  int index = 0;
+  int steps = 0;
+  int depth = 0;
+
+
+  k_end = 1;
+  depth = 1;
+  steps = abs( Dim()[2] ) - 1;
+
+  for( index = 1; index <= el; ++index )
+  {
+    k_start = k_end+1;
+    el_start = el_end+1;      
+
+    while( steps == 0 )
+    {
+      ++k_end;
+      if( Dim()[k_end] > 0 )
+	++depth;
+      else
+	--depth;
+      steps = abs( Dim()[k_end+1] ) - 1;
+    }
+
+    ++el_end;
+    --steps;
+
+    if( depth == 1 )
+    {
+      islist = false;
+    }
+    else
+    {
+      islist = true;
+
+      while( depth != 1 )
+      {
+	++k_end;
+	if( Dim()[k_end] > 0 )
+	  ++depth;
+	else
+	  --depth;
+	el_end += steps;
+	steps = abs( Dim()[k_end+1] ) - 1;
+      }
+    }
+  }
+
+
+
+
+  assert( index == el + 1 );
+  
+  gout << "islist: " << islist << " k_start: " << k_start << " k_end: " << k_end << " el_start: " << el_start << " el_end: " << el_end << '\n';
+}
 
 
 
@@ -30,9 +122,9 @@ void gNestedList<T>::Output( gOutput& out,
     assert( m_Dim.Length() == 1 );
 
     if( disp_func )
-      disp_func( out, operator[](1) );
+      disp_func( out, Data()[1] );
     else
-      out << operator[](1);    
+      out << Data()[1];    
   }
   else // is a list
   {
@@ -42,9 +134,9 @@ void gNestedList<T>::Output( gOutput& out,
       for( j = 0; j < abs( m_Dim[i] ) - 1; ++j )
       {
 	if( disp_func )
-	  disp_func( out, operator[](el) );
+	  disp_func( out, Data()[el] );
 	else
-	  out << operator[](el);
+	  out << Data()[el];
 
 	if( j != abs( m_Dim[i] ) - 2 || m_Dim[i] > 0 )
 	  out << ", ";
@@ -60,6 +152,128 @@ void gNestedList<T>::Output( gOutput& out,
       else
 	out << "}, ";
     }
+  }
+}
+
+
+
+template <class T> 
+gNestedList<T> gNestedList<T>::NthElement( int el ) const
+{
+  // el_* are for indices into the data list
+  int el_start = 0;
+  int el_end = 0;
+
+  // k_* are for indices into the dimention list
+  int k_start = 0;
+  int k_end = 0;
+  
+  // whether the element requested is itself a list or not
+  bool islist = false;
+
+  // get the index values for the given element number
+  GetElementInfo( el, islist, k_start, k_end, el_start, el_end );  
+
+
+  gList<int> dim;
+  if( !islist )
+    dim.Append( 0 );
+  else
+  {
+    for(int k = k_start; k <= k_end; ++k )
+      dim.Append( m_Dim[k] );
+    dim[1] = 1;
+  }
+
+  gNestedList<T> ret(dim);
+  for(int i = el_start; i <= el_end; ++i )
+    ret.Data().Append( Data()[ i ] );
+  return ret;
+}
+
+
+
+template <class T> 
+int gNestedList<T>::NumElements( void ) const
+{
+  int num = 0;
+  
+  // current depth
+  int depth = 0;
+
+  if( m_Dim.Length() <= 1 )
+    return 0;
+
+  assert( m_Dim.Length() > 1 );
+  assert( m_Dim[1] == 1 );
+  // k is for index into the dimention list
+  int k = 0;
+  for( k = 1; k <= m_Dim.Length(); ++k )
+  {
+    assert( m_Dim[k] != 0 );
+    if( depth == 1 )
+      num += abs( m_Dim[k] ) - 1;
+    else if( m_Dim[k] < 0 && depth == 2)
+      ++num;
+      
+    if( m_Dim[k] > 0 )
+      ++depth;
+    else
+      --depth;
+  }
+
+  assert( num > 0 );
+  return num;
+}
+
+
+
+
+template <class T> 
+bool gNestedList<T>::Contains( const gNestedList<T>& t ) const
+{
+  int i = 0;
+  for( i = 1; i <= NumElements(); ++i )
+    if( NthElement( i ) == t )
+      return true;
+  return false;
+}
+
+
+template <class T> 
+void gNestedList<T>::Remove( int el )
+{
+  // el_* are for indices into the data list
+  int el_start = 0;
+  int el_end = 0;
+
+  // k_* are for indices into the dimention list
+  int k_start = 0;
+  int k_end = 0;
+  
+  // whether the element requested is itself a list or not
+  bool islist = false;
+
+  // get the index values for the given element number
+  GetElementInfo( el, islist, k_start, k_end, el_start, el_end );  
+
+
+  if( !islist )
+  {
+    assert( el_start == el_end );
+    assert( k_end < Dim().Length() );
+    Data().Remove( el_start );
+    m_Dim[k_end+1] += (m_Dim[k_end+1]>0?1:-1) * -1;
+  }
+  else
+  {
+    assert( 1 < k_start );
+    assert( k_end < Dim().Length() );
+    for( int i = el_end; i >= el_start; --i )
+      Data().Remove( i );
+    m_Dim[k_end+1] += (m_Dim[k_end+1]>0?1:-1)*( abs( Dim()[k_start] ) - 1 );
+    for( int k = k_end; k >= k_start; --k )
+      m_Dim.Remove( k );
   }
 }
 

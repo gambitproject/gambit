@@ -262,7 +262,7 @@ gNestedList<gNumber> gelfuncStartWatch::Evaluate(gelVariableTable *) const
 {
   _gelStopwatch.Start();
   gNestedList<gNumber> ret;
-  ret += 0;
+  ret.Data().Append( 0 );
   return ret;
 }
 

@@ -28,22 +28,28 @@ template class gelConstant<gText>;
 
 
 
-gelConstant<gNumber>::gelConstant(const gNumber &v) { m_Value += v; }
-gelConstant<gNumber>::gelConstant(const gNestedList<gNumber> &v) : m_Value(v) { }
+gelConstant<gNumber>::gelConstant(const gNumber &v) 
+{ m_Value.Data().Append(v); }
+gelConstant<gNumber>::gelConstant(const gNestedList<gNumber> &v) 
+  : m_Value(v) { }
 gelConstant<gNumber>::~gelConstant()   { }
 gNestedList<gNumber> gelConstant<gNumber>::Evaluate(gelVariableTable *) const 
 { return m_Value; }
 
 
-gelConstant<gTriState>::gelConstant(const gTriState &v) { m_Value += v; }
-gelConstant<gTriState>::gelConstant(const gNestedList<gTriState>& v) : m_Value(v) { }
+gelConstant<gTriState>::gelConstant(const gTriState &v) 
+{ m_Value.Data().Append(v); }
+gelConstant<gTriState>::gelConstant(const gNestedList<gTriState>& v) 
+  : m_Value(v) { }
 gelConstant<gTriState>::~gelConstant() { }
 gNestedList<gTriState> gelConstant<gTriState>::Evaluate(gelVariableTable *) const 
 { return m_Value; }
 
 
-gelConstant<gText>::gelConstant(const gText &v) { m_Value += v; }
-gelConstant<gText>::gelConstant(const gNestedList<gText>& v) : m_Value(v) { }
+gelConstant<gText>::gelConstant(const gText &v) 
+{ m_Value.Data().Append(v); }
+gelConstant<gText>::gelConstant(const gNestedList<gText>& v) 
+  : m_Value(v) { }
 gelConstant<gText>::~gelConstant()   { }
 gNestedList<gText> gelConstant<gText>::Evaluate(gelVariableTable *) const 
 { return m_Value; }
@@ -119,7 +125,7 @@ gelConditional<T>::~gelConditional()
 template <class T> 
 gNestedList<T> gelConditional<T>::Evaluate(gelVariableTable *vt) const
 {
-  if (guard->Evaluate(vt)[1] == triTRUE)
+  if (guard->Evaluate(vt).Data()[1] == triTRUE)
     return truebr->Evaluate(vt);
   else
     return falsebr->Evaluate(vt);
@@ -143,12 +149,12 @@ template <class T> gelWhileLoop<T>::~gelWhileLoop()
 template <class T> 
 gNestedList<T> gelWhileLoop<T>::Evaluate(gelVariableTable *vt) const
 {
-  gTriState guardval = guard->Evaluate(vt)[1];
+  gTriState guardval = guard->Evaluate(vt).Data()[1];
   gNestedList<T> bodyval;
 
   while (guardval == triTRUE)  {
     bodyval = body->Evaluate(vt);
-    guardval = guard->Evaluate(vt)[1];
+    guardval = guard->Evaluate(vt).Data()[1];
   }
   return bodyval;
 }
@@ -177,14 +183,14 @@ template <class T>
 gNestedList<T> gelForLoop<T>::Evaluate(gelVariableTable *vt) const
 {
   init->Execute(vt);
-  gTriState guardval = guard->Evaluate(vt)[1];
+  gTriState guardval = guard->Evaluate(vt).Data()[1];
   gNestedList<T> bodyval;
 
   while (guardval == triTRUE)  
   {
     bodyval = body->Evaluate(vt);
     incr->Execute(vt);
-    guardval = guard->Evaluate(vt)[1];
+    guardval = guard->Evaluate(vt).Data()[1];
   }
   return bodyval;
 }
@@ -200,7 +206,7 @@ gNestedList<gTriState> gelQuitExpr::Evaluate(gelVariableTable *) const
   gCmdLineInput::RestoreTermAttr();
   exit(0);
   gNestedList<gTriState> ret;
-  ret += triTRUE;
+  ret.Data().Append( triTRUE );
   return ret;
 }
 

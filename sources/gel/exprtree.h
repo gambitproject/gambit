@@ -178,8 +178,8 @@ public:                                               \
     gNestedList<type1> arg1 = op1->Evaluate( vt );    \
     gNestedList<T> ret( arg1.Dim() );                 \
     int i = 0;                                        \
-    for( i = 1; i <= arg1.Length(); ++i )             \
-      ret += EvalItem( arg1[i] );                     \
+    for( i = 1; i <= arg1.Data().Length(); ++i )      \
+      ret.Data().Append( EvalItem( arg1.Data()[i] ) );       \
     return ret;                                       \
   }                                                   \
 };
@@ -221,11 +221,11 @@ public:                                               \
     gNestedList<type1> arg1 = op1->Evaluate( vt );    \
     gNestedList<type2> arg2 = op2->Evaluate( vt );    \
     gNestedList<T> ret( arg1.Dim() );                 \
-    assert( arg1.Length() == arg2.Length() );         \
+    assert( arg1.Data().Length() == arg2.Data().Length() );         \
     assert( arg1.Dim() == arg2.Dim() );               \
     int i = 0;                                        \
-    for( i = 1; i <= arg1.Length(); ++i )             \
-      ret += EvalItem( arg1[i], arg2[i] );            \
+    for( i = 1; i <= arg1.Data().Length(); ++i )             \
+      ret.Data().Append( EvalItem( arg1.Data()[i], arg2.Data()[i] ) );     \
     return ret;                                       \
   }                                                   \
 };
