@@ -19,10 +19,10 @@
 // members added to store whatever information is interesting, beyond just
 // the mixed strategy profile
 //
-class LemkeSolution : public MixedSolution   {
+template <class T> class LemkeSolution : public MixedSolution<T>   {
   public:
-    LemkeSolution(const MixedProfile &mp) : MixedSolution(mp)   { }
-    LemkeSolution(const LemkeSolution &s) : MixedSolution(s)   { }
+    LemkeSolution(const MixedProfile<T> &mp) : MixedSolution<T>(mp)   { }
+    LemkeSolution(const LemkeSolution<T> &s) : MixedSolution<T>(s)   { }
     virtual ~LemkeSolution()  { }
 
     SolutionType Type(void) const   { return sLEMKE; }
