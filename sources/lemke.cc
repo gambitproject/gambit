@@ -302,7 +302,7 @@ template <class T> int LemkeTableau<T>::All_Lemke(BFS_List &List, int j, long &n
       p2=(double)(len+1)/(double)(len+2);
       aa=(double)(i)/(double)num_strats;
       status.SetProgress(p1+aa*(p2-p1));
-      gout << "\n " << p1+aa*(p2-p1);
+//      gout << "\n " << p1+aa*(p2-p1);
 
       LemkeTableau<T> Tcopy(*this);
       Tcopy.NumPivots()= 0;
