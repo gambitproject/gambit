@@ -304,6 +304,7 @@ Infoset *BaseExtForm::InsertNode(Node *n, Player *p, int count)
   else
     root = m;
   m->children.Append(n);
+  n->parent = m;
   while (--count)
     m->children.Append(CreateNode(m));
 
@@ -322,6 +323,7 @@ Infoset *BaseExtForm::InsertNode(Node *n, Infoset *s)
   else
     root = m;
   m->children.Append(n);
+  n->parent = m;
   int count = s->actions.Length();
   while (--count)
     m->children.Append(CreateNode(m));
