@@ -85,7 +85,7 @@ EFSupportInspectDialog::EFSupportInspectDialog(gList<EFSupport *> &sups_,
 					       int cur_sup, int disp_sup,
 					       EfgShow *es_,
 					       wxWindow *parent /*=0*/)
-  : wxDialogBox(parent,"Supports"),es(es_),sups(sups_)
+  : wxDialogBox(parent,"Select Support"),es(es_),sups(sups_)
 {
   init_disp=disp_sup;init_cur=cur_sup;
   wxForm *f=new wxForm(0);

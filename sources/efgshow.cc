@@ -764,7 +764,7 @@ void EfgShow::MakeMenus(void)
   
   wxMenu *supports_menu = new wxMenu;
   supports_menu->Append(SUPPORTS_ELIMDOM,  "&ElimDom",  "Dominated strategies");
-  supports_menu->Append(SUPPORTS_SUPPORTS, "S&upports", "Create/view EF supports");
+  supports_menu->Append(SUPPORTS_SUPPORTS, "&Select", "Select/Create EF supports");
   
   wxMenu *solve_menu = new wxMenu;
   solve_menu->Append(SOLVE_STANDARD, "S&tandard...", "Standard solutions");

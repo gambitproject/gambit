@@ -249,7 +249,7 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
 
   wxMenu *supports_menu = new wxMenu;
   supports_menu->Append(NFG_SOLVE_COMPRESS_MENU, "&ElimDom",  "Dominated strategies");
-  supports_menu->Append(NFG_SOLVE_SUPPORTS_MENU, "&Supports", "Change support");
+  supports_menu->Append(NFG_SOLVE_SUPPORTS_MENU, "&Select", "Select/Create NF support");
 
   wxMenu *solve_menu = new wxMenu;
   solve_menu->Append(NFG_SOLVE_STANDARD_MENU,  "S&tandard...",

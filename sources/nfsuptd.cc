@@ -81,7 +81,7 @@ NFSupportInspectDialog::NFSupportInspectDialog(gList<NFSupport *> &sups_,
 					       int cur_sup, int disp_sup,
 					       NfgShow *bns_,
 					       wxWindow *parent /*=0*/)
-  : wxDialogBox(parent,"Supports"), bns(bns_), sups(sups_)
+  : wxDialogBox(parent,"Select Support"), bns(bns_), sups(sups_)
 {
   init_cur=cur_sup;init_disp=disp_sup;
   wxForm *f=new wxForm(0);
