@@ -747,7 +747,65 @@ MixedProfile<gNumber> NfgShow::CreateStartProfile(int how)
     return start;
 }
 
+void NfgShow::AttachOutcome(void)
+{
+  MyDialogBox *dialog = new MyDialogBox(spread, "Attach Outcome");
+    
+  wxStringList *outcome_list = new wxStringList;
+  char *outcome_name = new char[20];
+        
+  for (int outc = 1; outc <= nf.NumOutcomes(); outc++) {
+    outcome_list->Add(nf.Outcomes()[outc]->GetName());
+  }
 
+  dialog->Add(wxMakeFormString("Outcome", &outcome_name,
+			       wxFORM_CHOICE,
+			       new wxList(wxMakeConstraintStrings(outcome_list), 0)));
+  dialog->Go();
+  
+  if (dialog->Completed() == wxOK) {
+    for (int outc = 1; outc <= nf.NumOutcomes(); outc++) {
+      if (!strcmp(outcome_name, nf.Outcomes()[outc]->GetName())) {
+	nf.SetOutcome(spread->GetProfile(), nf.Outcomes()[outc]);
+	UpdateVals();
+	break;
+      }
+    }
+  }
+
+  delete dialog;
+  delete [] outcome_name;
+}
+
+void NfgShow::DetachOutcome(void)
+{
+  nf.SetOutcome(spread->GetProfile(), 0);
+  UpdateVals();
+}
+
+void NfgShow::RenameOutcome(void)
+{
+  gArray<int> profile(spread->GetProfile());
+  if (!nf.GetOutcome(profile))
+    return;
+
+  char *name = new char[40];
+  strncpy(name, nf.GetOutcome(profile)->GetName(), 40);
+
+  MyDialogBox *dialog = new MyDialogBox(spread, "Rename outcome");
+  dialog->Form()->Add(wxMakeFormString("New outcome name", &name, wxFORM_TEXT,
+				       0, 0, 0, 220));
+  dialog->Go();
+
+  if (dialog->Completed() == wxOK) {
+    nf.GetOutcome(profile)->SetName(name);
+  }
+  
+  delete dialog;
+  delete [] name;
+
+  UpdateVals();
+}
 
 //****************************************************************************
 //                           NORMAL SOLUTIONS
@@ -1476,7 +1534,7 @@ NFChangePayoffs::NFChangePayoffs(Nfg &nf_, const gArray<int> &profile_,
 				 wxWindow *parent)
   : MyDialogBox(parent, "Change Payoffs"), profile(profile_), nf(nf_)
 {
-  Add(wxMakeFormMessage("Change payoffs for profile:"));
+  Add(wxMakeFormMessage("Change payoffs for outcome of profile:"));
   gText profile_str = "(";
 
   for (int pl = 1; pl <= profile.Length(); pl++) {

@@ -246,6 +246,12 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
   edit_menu->Append(NFG_EDIT_STRATS,    "&Strats",    "Edit player strategies");
   edit_menu->Append(NFG_EDIT_PLAYERS,   "&Players",   "Edit players");
   edit_menu->Append(NFG_EDIT_OUTCOMES,  "&Outcomes",  "Set/Edit outcomes");
+  edit_menu->Append(NFG_EDIT_OUTCOMES_ATTACH, "Attach outcome",
+		    "Attach an outcome to the current contingency");
+  edit_menu->Append(NFG_EDIT_OUTCOMES_DETACH, "Detach outcome",
+		    "Set the outcome for the current contingency to null");
+  edit_menu->Append(NFG_EDIT_OUTCOMES_NAME, "Rename outcome",
+		    "Rename the outcome for the current contingency");
 
   wxMenu *supports_menu = new wxMenu;
   supports_menu->Append(NFG_SOLVE_COMPRESS_MENU, "&ElimDom",  "Dominated strategies");
@@ -558,17 +564,23 @@ void NormalSpread::OnMenuCommand(int id)
     case NFG_EDIT_GAME: 
       parent->SetLabels(0);
       break;
-
     case NFG_EDIT_STRATS: 
       parent->SetLabels(1);
       break;
-
     case NFG_EDIT_PLAYERS: 
       parent->SetLabels(2);
       break;
-
     case NFG_EDIT_OUTCOMES: 
       parent->ChangeOutcomes(CREATE_DIALOG);
+      break;
+    case NFG_EDIT_OUTCOMES_ATTACH:
+      parent->AttachOutcome();
+      break;
+    case NFG_EDIT_OUTCOMES_DETACH:
+      parent->DetachOutcome();
+      break;
+    case NFG_EDIT_OUTCOMES_NAME:
+      parent->RenameOutcome();
       break;
 
     case NFG_FILE_SAVE:

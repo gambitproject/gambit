@@ -129,6 +129,10 @@ public:
   // OnOK clean up
   void OnOk(void);
 
+  void AttachOutcome(void);
+  void DetachOutcome(void);
+  void RenameOutcome(void);
+
   // Now come the solution functions
   void Solve(int);
   void SolveStandard(void);
