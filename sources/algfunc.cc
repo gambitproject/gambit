@@ -58,6 +58,34 @@ Behav_ListPortion::Behav_ListPortion(const gList<BehavSolution> &list)
     Append(new BehavPortion(new BehavSolution(list[i])));
 }
 
+class NfSupport_ListPortion : public ListPortion   {
+  public:
+    NfSupport_ListPortion(const gList<const NFSupport> &);
+    NfSupport_ListPortion();
+    virtual ~NfSupport_ListPortion()   { }
+
+  void SetValue(const gList<const NFSupport> &);
+};
+
+NfSupport_ListPortion::NfSupport_ListPortion(const gList<const 
+					                 NFSupport> &list)
+{
+  rep->_DataType = porNFSUPPORT;
+  for (int i = 1; i <= list.Length(); i++)
+    Append(new NfSupportPortion(new NFSupport(list[i])));
+}
+
+NfSupport_ListPortion::NfSupport_ListPortion()
+{
+  rep->_DataType = porNFSUPPORT;
+}
+
+void NfSupport_ListPortion::SetValue(const gList<const NFSupport> &list)
+{
+  for (int i = 1; i <= list.Length(); i++)
+    Append(new NfSupportPortion(new NFSupport(list[i])));
+}
+
 
 //-------------
 // AgentForm
@@ -880,11 +908,12 @@ static Portion *GSM_PolEnum_Nfg(Portion **param)
   params.trace = ((NumberPortion *) param[6])->Value();
   
   gList<MixedSolution> solutions;
+  bool is_singular;
 
   try {
     long nevals;
     double time;
-    PolEnum(*S, params, solutions, nevals, time);
+    PolEnum(*S, params, solutions, nevals, time, is_singular);
 
     ((NumberPortion *) param[3])->SetValue(nevals);
     ((NumberPortion *) param[4])->SetValue(time);
@@ -897,7 +926,7 @@ static Portion *GSM_PolEnum_Nfg(Portion **param)
 }
 
 //------------------
-// AllNashSolveSolve
+//  AllNashSolve
 //------------------
 
 #include "nfgalleq.h"
@@ -906,27 +935,24 @@ static Portion *GSM_AllNashSolve_Nfg(Portion **param)
 {
   Nfg &N = *((NfgPortion*) param[0])->Value();
   NFSupport* S = new NFSupport(N);
-
-  //DEBUG
-  //  gout << "We did indeed get to this point.\n";
-  //  gout << "The game is:\n" << S->Game() << "\n";
-  //  exit(0);
-
   PolEnumParams params;
   params.stopAfter = ((NumberPortion *) param[1])->Value();
   params.precision = ((PrecisionPortion *) param[2])->Value();
   params.tracefile = &((OutputPortion *) param[5])->Value();
   params.trace = ((NumberPortion *) param[6])->Value();
-  
+
   gList<MixedSolution> solutions;
+  gList<const NFSupport> singular_supports;
 
   try {
     long nevals = 0;
     double time = 0.0;
-    AllNashSolve(S->Game(), params, solutions, nevals, time);
+    AllNashSolve(S->Game(), params, solutions, nevals, time, 
+		 singular_supports);
 
     ((NumberPortion *) param[3])->SetValue(nevals);
     ((NumberPortion *) param[4])->SetValue(time);
+    ((NfSupport_ListPortion *) param[7])->SetValue(singular_supports);
   }
   catch (gSignalBreak &) {
     params.status.Reset();
@@ -1604,7 +1630,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new gclFunction("AllNashSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_AllNashSolve_Nfg, 
-				       PortionSpec(porMIXED, 1), 7));
+				       PortionSpec(porMIXED, 1), 8));
   FuncObj->SetParamInfo(0, 0, gclParameter("nfg", porNFG));
   FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(0)));
@@ -1619,6 +1645,10 @@ void Init_algfunc(GSM *gsm)
 					    BYREF));
   FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
+  FuncObj->SetParamInfo(0, 7, gclParameter("singularsupps", 
+					   PortionSpec(porNFSUPPORT,1),
+					   new NfSupport_ListPortion(), 
+					   BYREF));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new gclFunction("SeqEquilibSolve", 1);
