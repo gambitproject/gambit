@@ -1,7 +1,7 @@
 //
 // FILE: monomial.imp -- Implementation of class gMono
 //
-// @(#)monomial.imp	1.3 10 Jun 1997
+// $Id$
 //
 
 #include "monomial.h"
@@ -51,8 +51,6 @@ template<class T> bool gMono<T>::operator != (const gMono<T>& y) const
   return !(*this == y);
 }
 
-#ifndef MINI_POLY
-
 template<class T> gMono<T> gMono<T>::operator * (const gMono<T> & y) const
 {
   return gMono<T>(coef * y.coef,exps + y.exps);
@@ -87,8 +85,6 @@ template<class T> gMono<T> gMono<T>::operator - () const
 {
   return gMono<T>(-coef,exps);
 }
-
-#endif   // MINI_POLY
 
 //--------------------------------------------------------------------------
 //                             gMono -- information

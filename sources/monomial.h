@@ -1,7 +1,7 @@
 //
 // FILE: monomial.h -- Multivariate monomial class
 //
-// @(#)monomial.h	1.4 10 Jun 1997
+// $Id$
 //
 
 
@@ -34,14 +34,12 @@ public:
 
           bool      operator == (const gMono<T>&) const;
           bool      operator != (const gMono<T>&) const;
-#ifndef MINI_POLY
           gMono<T>  operator *  (const gMono<T>&) const;
           gMono<T>  operator /  (const gMono<T>&) const;
           gMono<T>  operator +  (const gMono<T>&) const; // assert exps ==
           gMono<T>& operator += (const gMono<T>&);       // assert exps ==
           gMono<T>& operator *= (const T&);      
           gMono<T>  operator -  ()                const; 
-#endif   // MINI_POLY
 
     // information
     const T &       Coef()                      const;

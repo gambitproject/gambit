@@ -40,10 +40,10 @@ private:
   //----------------------
 
 #ifndef MINI_POLY
-
     // Information
   exp_vect  OrderMaxMonomialDivisibleBy(const term_order& order,
 					const exp_vect& expv);
+#endif   // MINI_POLY
 
     // Arithmetic
   gList<gMono<T> > Adder(const gList<gMono<T> >&, 
@@ -51,8 +51,6 @@ private:
   gList<gMono<T> > Mult(const gList<gMono<T> >&, 
 			const gList<gMono<T> >&)           const;
   gPoly<T>        DivideByPolynomial(const gPoly<T> &den) const; 
-
-#endif   // MINI_POLY
 
 
   //-----------------------------------------------
@@ -108,8 +106,6 @@ public:
   gPoly<T>& operator =  (const gString &);  
                         //Set polynomial equal to the SOP form in the string
 
-#ifndef MINI_POLY
-
   gPoly<T>  operator -  ()                  const;
   gPoly<T>  operator -  (const gPoly<T> &) const;
   void       operator -= (const gPoly<T> &);
@@ -121,8 +117,6 @@ public:
   gPoly<T>  operator /  (const T val)       const;// division by a constant
   gPoly<T>  operator /  (const gPoly<T> &) const;// division by a polynomial
 
-#endif   // MINI_POLY
-
   bool       operator == (const gPoly<T> &p)      const;
   bool       operator != (const gPoly<T> &p)      const;
 
@@ -133,7 +127,6 @@ public:
   const gSpace*       GetSpace(void)                       const; 
   const term_order*   GetOrder(void)                       const; 
   int                 Dmnsn()                              const;
-#ifndef MINI_POLY
   bool                IsZero()                             const;
   int                 DegreeOfVar(int var_no)              const;
   int                 Degree()                             const;
@@ -143,11 +136,10 @@ public:
   T                   NumLeadCoeff()                       const; // deg == 0
   int                 UniqueActiveVariable()               const;
                       // returns 0 if constant, -1 if truly multivariate
+#ifndef MINI_POLY
   polynomial<T>       UnivariateEquivalent(int activar)    const;
                       // assumes UniqueActiveVariable() is true
-
-#endif   // MINI_POLY
-
+#endif  // MINI_POLY
   T                   Evaluate(const gArray<T> &values)    const;
 
 #ifndef MINI_POLY
@@ -191,11 +183,9 @@ public:
 template <class T>  gPoly<gDouble>         TogDouble(const gPoly<T>&);
 #endif   // GDOUBLE
 
-#ifndef MINI_POLY
 // global multiply by scalar operators
 template <class T> gPoly<T> operator*(const T val, const gPoly<T> &poly);
 template <class T> gPoly<T> operator*(const gPoly<T> &poly, const T val);
-#endif   // MINI_POLY
 
 
 #endif //# GPOLY_H
