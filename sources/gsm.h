@@ -8,19 +8,20 @@
 #ifndef GSM_H
 #define GSM_H
 
-#include <assert.h>
 #include "rational.h"
 #include "gstack.h"
-#include "gambitio.h"
 
+#include "glist.h"
 #include "portion.h"
 #include "gsmfunc.h"
-
+#include "gsminstr.h"
 
 
 int FuncParamCheck( const PortionType stack_param_type, 
 		    const PortionType func_param_type );
 
+
+class Instruction;
 
 // These classes implemented in gsm.cc
 class FunctionHashTable;
@@ -93,11 +94,11 @@ class GSM
   bool Bind             ( const gString& param_name );
   bool CallFunction     ( void );
 
+  bool Execute( gList< Instruction* >& program );
      
   void Output ( void );
   void Dump   ( void );
   void Flush  ( void );
-
 };
 
 

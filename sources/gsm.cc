@@ -5,6 +5,8 @@
 //#
 
 
+#include <assert.h>
+#include "gambitio.h"
 
 #include "gsm.h"
 #include "hash.h"
@@ -709,6 +711,31 @@ bool GSM::CallFunction( void )
 }
 
 
+//----------------------------------------------------------------------------
+//                       Execute function
+//----------------------------------------------------------------------------
+
+bool GSM::Execute( gList< Instruction* >& program )
+{
+  bool result;
+  int count = 0;
+  Instruction *instruction;
+
+  while( program.Length() > 0 )
+  {
+    count++;
+    instruction = program.Remove( 1 );
+    result = instruction->Execute( *this );
+    delete instruction;
+    if( result == false )
+    {
+      gerr << "GSM Error: instruction #" << count << " was not executed\n";
+      gerr << "           successfully\n";
+      break;
+    }
+  }
+  return result;
+}
 
 
 //----------------------------------------------------------------------------

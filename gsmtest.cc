@@ -6,9 +6,9 @@
 #include "rational.h"
 #include "gstring.h"
 
-
 int main( void )
 {
+  bool result;
   char cont;
   int i;
   double d_1 = (double) 7.5;
@@ -549,6 +549,141 @@ int main( void )
   machine->Dump();
 
 */
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+  gout << "\n\nTesting the instruction memory\n";
+  gList< Instruction* > program;
+  program.Append( new Push<double>( (double) 1 ) );
+  program.Append( new Push<double>( (double) 2 ) );
+  program.Append( new Push<double>( (double) 3 ) );
+  program.Append( new Dump );
+  result = machine->Execute( program );
+  gout << "Program Status: " << result << "\n";
+
+  program.Append( new Push<double>( (double) 1 ) );
+  program.Append( new Push<double>( (double) 2 ) );
+  program.Append( new Push<double>( (double) 3 ) );
+  program.Append( new Add );
+  program.Append( new Dump );
+  result = machine->Execute( program );
+  gout << "Program Status: " << result << "\n";
+
+  program.Append( new Push<double>( (double) 1 ) );
+  program.Append( new Push<double>( (double) 2 ) );
+  program.Append( new InitCallFunction( (gString) "Angle" ) );
+  program.Append( new Bind );
+  program.Append( new Bind );
+  program.Append( new Push<double>( (double) 3 ) );
+  program.Append( new CallFunction );
+  program.Append( new Dump );
+  result = machine->Execute( program );
+  gout << "Program Status: " << result << "\n";
+
+  program.Append( new PushRef( x ) );
+  program.Append( new PushRef( y ) );
+  program.Append( new InitCallFunction( (gString) "Angle" ) );
+  program.Append( new Bind );
+  program.Append( new Bind );
+  program.Append( new Push<double>( (double) 3 ) );
+  program.Append( new CallFunction );
+  program.Append( new Dump );
+  result = machine->Execute( program );
+  gout << "Program Status: " << result << "\n";
+
+  program.Append( new Push<gString>( "hi!" ) );
+  program.Append( new Push<gString>( "how are you?" ) );
+  program.Append( new Push<gString>( "I'm fine!  you?!" ) );
+  program.Append( new Push<gString>( "I'm just great!" ) );
+  program.Append( new Push<gString>( "Cool!" ) );
+  program.Append( new PushList( 4 ) );
+  program.Append( new Dump );
+  result = machine->Execute( program );
+  gout << "Program Status: " << result << "\n";
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+  gout << "\n\nTesting the instruction memory\n";
+  gout << "Huge general test\n";
+
+  program.Append( new PushRef( "x" ) );
+  program.Append( new Push<gRational>( 17 ) );
+  program.Append( new Assign );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new Push<gRational>( 23 ) );
+  program.Append( new Assign );
+  program.Append( new PushRef( "x" ) );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new Dump );
+  program.Append( new PushRef( "x" ) );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new EqualTo );
+  program.Append( new PushRef( "x" ) );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new NotEqualTo );
+  program.Append( new PushRef( "x" ) );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new GreaterThan );
+  program.Append( new PushRef( "x" ) );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new LessThan );
+  program.Append( new PushRef( "x" ) );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new GreaterThanOrEqualTo );
+  program.Append( new PushRef( "x" ) );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new LessThanOrEqualTo );
+  program.Append( new Dump );
+
+  program.Append( new PushRef( "x" ) );
+  program.Append( new Push<gString>( "hi!" ) );
+  program.Append( new Assign );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new Push<gString>( "hello!" ) );
+  program.Append( new Assign );
+  program.Append( new PushRef( "x" ) );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new Dump );
+  program.Append( new Push<gString>( "hi!" ) );
+  program.Append( new Push<gString>( "hello!" ) );
+  program.Append( new Concatenate );
+  program.Append( new PushRef( "x" ) );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new EqualTo );
+  program.Append( new PushRef( "x" ) );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new NotEqualTo );
+  program.Append( new PushRef( "x" ) );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new GreaterThan );
+  program.Append( new PushRef( "x" ) );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new LessThan );
+  program.Append( new PushRef( "x" ) );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new GreaterThanOrEqualTo );
+  program.Append( new PushRef( "x" ) );
+  program.Append( new PushRef( "y" ) );
+  program.Append( new LessThanOrEqualTo );
+  program.Append( new Dump );
+
+  program.Append( new Push<bool>( false ) );
+  program.Append( new Push<bool>( true ) );
+  program.Append( new AND );
+  program.Append( new Push<bool>( false ) );
+  program.Append( new Push<bool>( true ) );
+  program.Append( new OR );
+  program.Append( new Push<bool>( false ) );
+  program.Append( new Push<bool>( true ) );
+  program.Append( new NOT );
+  program.Append( new Dump );
+
+  result = machine->Execute( program );
+  gout << "Program Status: " << result << "\n";
+
+
 
 
   delete machine;

@@ -49,9 +49,7 @@ class Portion
 {
  private:
   // variable used to detect memory leakage
-#ifdef MEMCHECK
   static int num_of_Portions;
-#endif
 
  public:
   Portion();

@@ -252,7 +252,7 @@ Portion* gString_Portion::Copy( void ) const
 
 bool gString_Portion::Operation( Portion* p, OperationMode mode )
 {
-  bool      result = 0;
+  bool      result = true;
   gString&  p_value = ( (gString_Portion*) p )->Value();
 
   if( p == 0 )      // unary operations
