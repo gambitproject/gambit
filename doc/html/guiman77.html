@@ -1,0 +1,92 @@
+<HTML>
+<head><title>Nash Equilibrium</title></head>
+
+<BODY BGCOLOR=#FFFFFF>
+<A NAME="nashsec"></A><CENTER>
+<A HREF="guiman_contents.html">Contents</A> <A HREF="guiman76.html#topic25">Up</A> <A HREF="guiman76.html#topic25">&lt;&lt;</A> <A HREF="guiman78.html#purenashsec">&gt;&gt;</A> </CENTER><HR>
+
+<H3>Nash Equilibrium</H3>
+
+Every finite game has at least one <A HREF="guiman105.html#nashequigloss">Nash 
+equilibrium</A> in either pure or mixed strategies
+([5]).<P>
+Gambit has a number of algorithms to find Nash equilibria.  The
+appropriate algorithm to use depends on a number of factors, most
+importantly, the number of players in the game, and the number of
+equilibria you want to find.  For a detailed discussion of these
+issues, see [6].<P>
+Before computing equilibria, you may wish to <A HREF="guiman34.html#UnDominated">eliminate
+dominated strategies</A> from the support.  The smaller the
+support, the faster any algorithm will run.  However, dominance
+elimination can itself be computationally intensive, especially if
+mixed domination is used, or if dominance elimination is done on the
+extensive form.<P>
+<UL>
+
+<LI> 
+If you want to find more than one, or all Nash equilibria of a game,
+then you may first successively eliminate strongly dominated
+strategies.  Any equilibrium of the original game will also be an
+equilibrium of the reduced game.
+<LI> 
+If you just want to find <EM>one</EM> Nash equilibrium, you can first
+successively eliminate <EM>weakly</EM> dominated strategies.  Elimination
+of weakly dominated strategies may eliminate some Nash equilibria of
+the original game (so it should not be used if you want to find
+multiple Nash equilibria,) but any Nash equilibrium to the reduced
+game will be an equilibrium to the original game, so it can be used if
+you only want to find one equilibrium .
+</UL>
+<P>
+
+<A HREF="guiman78.html#purenashsec"><B>Pure Equilibria</B></A><BR>
+
+The <A HREF="guiman85.html#EnumPure">EnumPure</A> algorithm can be used to enumerate
+all of the pure strategy equilibria for both extensive and normal form
+games.  select EnumPure, and check <EM>Use NF</EM>.  This will find all pure
+strategy Nash equilibria of the associated reduced normal form of the
+game, and convert them to behavior strategies.<P>
+
+<A HREF="guiman79.html#csumsec"><B>Two Person Constant Sum Games</B></A><BR>
+
+For two person constant sum normal form games, the minimax theorem
+applies.  The set of Nash equilibria is a convex set, and the problem
+of finding Nash equilibria can be formulated as a linear program.  The 
+<A HREF="guiman90.html#Lp">Lp algorithm</A> will solve a constant sum game using this
+approach.<P>
+
+<A HREF="guiman80.html#twopersec"><B>Two Person Games</B></A><BR>
+
+For two person nonzero sum games, the problem of finding Nash
+equilibria can be formulated as a linear complementarity problem, and
+exact solutions can be found as long as computations are done in
+rationals.  The <A HREF="guiman88.html#Lcp">Lcp algorithm</A> solves a two person game
+using this approach.  Note that the Lcp algorithm can also be used
+directly on an extensive form game, where it implements the Koller,
+Megiddo, von Stengel Sequence form [7].  To find <EM>
+one</EM> Nash equilibrium use Lcp with nEquilib set to 1.<P>
+For a two person game the <A HREF="guiman84.html#EnumMixed">EnumMixed algorithm</A> 
+will enumerate all of the extreme points of the components of the set
+of Nash equilibria, and hence can be used to find <EM>all</EM> Nash
+equilibria.  Using EnumMixed with nEquilib set to 0 will find all Nash
+equilibria.  To find if there is more than one Nash equilibrium use
+EnumMixed with nEquilib set to 2.<P>
+
+<A HREF="guiman81.html#npernashsec"><B>N Person Games</B></A><BR>
+
+For n-person normal form games, with n greater than two, the
+<A HREF="guiman91.html#PolEnum">PolEnum</A> algorithm will find all Nash
+equilibria. The PolEnum algorithm may be computationally infeasible on
+large games.  Thus other algorithms are also available for finding one
+or a sample of Nash equilibria.  Since Nash equilibria can be
+irrational, the algorithms to locate one equilibrium will only find
+approximations (to machine accuracy) of Nash equilibria.<P>
+The <A HREF="guiman92.html#SimpDiv">SimpDiv algorithm</A> is guaranteed to locate one
+equilibrium for an n-person normal form game.  This algorithm can be
+very slow on some games.  Hence two other algorithms are also
+supported, <A HREF="guiman86.html#QRE">QRE</A> and <A HREF="guiman89.html#Liap">Liap</A>.  These
+algorithms can also be used to search for multiple equilibria (with no
+guarantee that all have been found,) and to search for equilibria
+close to a given starting point.<P>
+
+</BODY></HTML>

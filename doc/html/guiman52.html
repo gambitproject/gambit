@@ -1,0 +1,114 @@
+<HTML>
+<head><title>NFG Standard Solutions</title></head>
+
+<BODY BGCOLOR=#FFFFFF>
+<A NAME="NFGStandardSolutions"></A><CENTER>
+<A HREF="guiman_contents.html">Contents</A> <A HREF="guiman51.html#NormalFormSolutions">Up</A> <A HREF="guiman51.html#NormalFormSolutions">&lt;&lt;</A> <A HREF="guiman53.html#NFGCustomSolutions">&gt;&gt;</A> </CENTER><HR>
+
+<H3>NFG Standard Solutions</H3>
+<P>
+The standard solutions dialog is accessed via the <B>Solve-&gt;Standard</B> 
+menu.  The particular settings are then picked in the dialog box.  You
+can select what kind of an equilibrium to compute (Nash or Perfect),
+and a maximum number of solutions to compute.  When you select a
+standard solution setting, it automatically sets various parameters
+that control the solution computation.  These parameters include
+whether and how to iteratively eliminate dominated strategies, which
+algorithm to use for the computation, and the maximum number of
+solutions to search for before finishing the computation.  The
+settings for each of the standard solutions are given in the following
+table:<P>
+<TABLE BORDER>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Type</TD><TD ALIGN=CENTER WIDTH=79>Number</TD><TD ALIGN=CENTER WIDTH=119>Game Type</TD><TD ALIGN=CENTER WIDTH=79>UnDominated</TD><TD ALIGN=CENTER WIDTH=119>Algorithm</TD>
+<TD ALIGN=LEFT>Notes</TD>
+</TR>
+
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Nash</TD><TD ALIGN=CENTER WIDTH=79>One</TD><TD ALIGN=CENTER WIDTH=119>2 person constant sum</TD><TD ALIGN=CENTER WIDTH=79>Weak</TD><TD ALIGN=CENTER WIDTH=119>LP-1</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119>2 person general  sum</TD><TD ALIGN=CENTER WIDTH=79>Weak</TD><TD ALIGN=CENTER WIDTH=119>LCP-1</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119>n person</TD><TD ALIGN=CENTER WIDTH=79>Weak</TD><TD ALIGN=CENTER WIDTH=119>SimpDiv-1</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Nash</TD><TD ALIGN=CENTER WIDTH=79>Two</TD><TD ALIGN=CENTER WIDTH=119>2 person</TD><TD ALIGN=CENTER WIDTH=79>Strong</TD><TD ALIGN=CENTER WIDTH=119>EnumMixed-2</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119>n person</TD><TD ALIGN=CENTER WIDTH=79>Strong</TD><TD ALIGN=CENTER WIDTH=119>Liap-2</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Nash</TD><TD ALIGN=CENTER WIDTH=79>All</TD><TD ALIGN=CENTER WIDTH=119>2 person</TD><TD ALIGN=CENTER WIDTH=79>Strong</TD><TD ALIGN=CENTER WIDTH=119>EnumMixed-0</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119>n person</TD><TD ALIGN=CENTER WIDTH=79>Strong</TD><TD ALIGN=CENTER WIDTH=119>PolEnum-0</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Perfect</TD><TD ALIGN=CENTER WIDTH=79>One</TD><TD ALIGN=CENTER WIDTH=119>2 person</TD><TD ALIGN=CENTER WIDTH=79>Weak</TD><TD ALIGN=CENTER WIDTH=119>LCP-1</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119>n person</TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119></TD>
+<TD ALIGN=LEFT>Not implemented  </TD>
+</TR>
+
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Perfect</TD><TD ALIGN=CENTER WIDTH=79>Two</TD><TD ALIGN=CENTER WIDTH=119>2 person</TD><TD ALIGN=CENTER WIDTH=79>Weak</TD><TD ALIGN=CENTER WIDTH=119>EnumMixed-2</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119>n person</TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119></TD>
+<TD ALIGN=LEFT>Not implemented </TD>
+</TR>
+
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79>Perfect</TD><TD ALIGN=CENTER WIDTH=79>All</TD><TD ALIGN=CENTER WIDTH=119>2 person</TD><TD ALIGN=CENTER WIDTH=79>Weak</TD><TD ALIGN=CENTER WIDTH=119>EnumMixed-0</TD>
+<TD ALIGN=LEFT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119>n person</TD><TD ALIGN=CENTER WIDTH=79></TD><TD ALIGN=CENTER WIDTH=119></TD>
+<TD ALIGN=LEFT>Not implemented</TD>
+</TR>
+
+
+</TABLE>
+<P>
+In the entry for the algorithm for the above table, after the algorithm name is 
+indicated the maximum number of solutions 
+to be found.  If this number is 0, the algorithm will only terminate when it has found 
+all solutions.  For algorithms which are not guaranteed to find all solutions (such 
+as Liap), the 
+algorithm will enter an infinite loop, and continue to search until the computation is 
+aborted by the user. 
+ 
+To have individual control over each any of the parameters mentioned above, see
+the <A HREF="guiman53.html#NFGCustomSolutions">Custom Solutions</A> section.<P>
+
+</BODY></HTML>

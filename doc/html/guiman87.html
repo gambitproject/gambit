@@ -1,0 +1,101 @@
+<HTML>
+<head><title>QRE Grid</title></head>
+
+<BODY BGCOLOR=#FFFFFF>
+<A NAME="QREAll"></A><CENTER>
+<A HREF="guiman_contents.html">Contents</A> <A HREF="guiman83.html#SolutionAlgorithms">Up</A> <A HREF="guiman86.html#QRE">&lt;&lt;</A> <A HREF="guiman88.html#Lcp">&gt;&gt;</A> </CENTER><HR>
+
+<H3>QRE Grid</H3>
+
+Performs a grid search to compute the complete logistic
+quantal response correspondence (as described in [9]
+for a <EM>small</EM> two-person normal form game.<P>
+The algorithm computes approximate fixed points of the correspondence
+for the correspondence for values of lambda between <TT>minLam</TT>
+and <TT>maxLam</TT>.  Starting at lambda = minLam, lambda is
+incremented according to the formula <CENTER></CENTER> lambda(t+1) = lambda(t)
++delLam lambda(t)^a.<CENTER></CENTER> where minLam, maxLam, delLam, and a
+are parameters described below. For each value of lambda, a grid
+search is done over all values of the probabilities for player 1,
+evaluated on a grid of mesh 'del p.'  Points are evaluated in terms of
+the value of an objective function that measures the distance between
+the original point, and the best response to the best response (under
+the logistic best response function.)  Points with a value of the
+objective function less than <TT>Tolerance</TT> are approximate fixed
+points, and are kept, others are discarded.  A two stage procedure is
+used, in which the entire space is searched on a course grid of mesh
+'delp1'.  Any points on the course grid for which the value of the
+objective function is less than 'tol1' are then searched on a finer
+grid of mesh 'delp2' around that point.  Points on the finer grid for
+which the value of the objective function is below 'tol2' = 'tol' are
+kept.<P>
+<B>Limitations:</B> This algorithm is <B>very</B> computationally
+intensive, and should only be attampted on small games.<P>
+The following parameters can be set for <B>QRE Grid</B>.<P>
+<DL>
+
+
+</TD>
+<DT> minLam:
+<DD> Sets the minimum value of lambda.
+Default is lambda = .01.
+
+</TD>
+<DT> maxLam:
+<DD>  Sets the maximum value of lambda.
+Default is lambda = 3. 
+
+</TD>
+<DT> delLam:
+<DD> Specifies the rate at which the value of Lambda changes.
+Has a default value of .1.
+
+</TD>
+<DT> Plot Type:
+<DD> Specifies whether to have geometric or linear incrementing.
+Default is 0, resulting in a = 1, or !geometric incrementing.
+
+</TD>
+<DT> Grid 1 Del:
+<DD> Grid size for search over course grid of probability space.
+
+</TD>
+<DT> Grid 1 Tol:
+<DD> Maximum value of objective function for which to accept
+solution on course grid.
+
+</TD>
+<DT> Use MultiGrid:
+<DD> Checking this box causes the two stage procedure
+to be used, in which case the next two parameters neet to also be
+specified.
+
+</TD>
+<DT> Grid 2 Del:
+<DD> Grid size for search over fine grid of probability space.  
+
+</TD>
+<DT> Grid 2 Tol:
+<DD> Maximum value of objective function for which to
+accept solution on fine grid.
+
+</TD>
+<DT> Run PXI:
+<DD> A checkbox to determine whether to launch the external
+PXI program to plot the QRE correspondence.  If this is checked, both
+of the following fields must also be specified.
+
+</TD>
+<DT> PXI File:
+<DD> Specifies a pathname to store the QRE correspondence
+in a format compatible for input to PXI, a program for graphical
+viewing and display of the output.
+
+</TD>
+<DT> PXI command:
+<DD> Specifies the location of the pxi program.  A full
+pathname should be specified.
+</DL>
+<P>
+
+</BODY></HTML>

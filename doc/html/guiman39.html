@@ -1,0 +1,36 @@
+<HTML>
+<head><title>Mathematical Errors</title></head>
+
+<BODY BGCOLOR=#FFFFFF>
+<A NAME="topic12"></A><CENTER>
+<A HREF="guiman_contents.html">Contents</A> <A HREF="guiman17.html#topic10">Up</A> <A HREF="guiman38.html#TableWindow">&lt;&lt;</A> <A HREF="guiman40.html#NFGUI">&gt;&gt;</A> </CENTER><HR>
+
+<H2>Mathematical Errors</H2>
+
+Under certain conditions some of the numerical algorithms may attempt to
+execute an invalid mathematical operation.  Possible examples include
+taking a logarithm of 0, attempting to exponentiate a very large number, and
+other overflow or domain violation errors.  When this condition is detected,
+the user is presented with an option to:<P>
+<DL>
+
+
+</TD>
+<DT> Continue
+<DD> This is the default option.  The user acknowledges the
+error and the algorithm continues.
+
+</TD>
+<DT> Ignore
+<DD> The user acknowledges the error and all future errors
+are ignored (no notification).
+
+</TD>
+<DT> Quit
+<DD> The user instructs the program to terminate.
+</DL>
+<P>
+Note that if either of the first two options is selected, the results 
+returned by the algorithm may be invalid.<P>
+
+</BODY></HTML>
