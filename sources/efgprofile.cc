@@ -53,10 +53,10 @@ void EfgProfileList::UpdateValues(void)
   for (int i = 1; i <= VisibleLength(); i++) {
     const BehavSolution &solution = (*this)[i];
     InsertItem(i - 1, (char *) solution.GetName());
-    SetItem(i - 1, 1, (char *) NameEfgAlgType(solution.Creator()));
-    SetItem(i - 1, 2, (char *) Name(solution.IsNash()));
-    SetItem(i - 1, 3, (char *) Name(solution.IsSubgamePerfect()));
-    SetItem(i - 1, 4, (char *) Name(solution.IsSequential()));
+    SetItem(i - 1, 1, (char *) ToText(solution.Creator()));
+    SetItem(i - 1, 2, (char *) ToText(solution.IsNash()));
+    SetItem(i - 1, 3, (char *) ToText(solution.IsSubgamePerfect()));
+    SetItem(i - 1, 4, (char *) ToText(solution.IsSequential()));
     SetItem(i - 1, 5, (char *) ToText(solution.LiapValue()));
     if (solution.Creator() == algorithmEfg_QRE_EFG ||
 	solution.Creator() == algorithmEfg_QRE_NFG) {

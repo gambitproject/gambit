@@ -19,7 +19,6 @@ typedef enum { triFALSE = 0, triTRUE = 1, triUNKNOWN = 2 } gTriState;
 
 class gText;
 class gOutput;
-gText Name(gTriState);
 gOutput &operator<<(gOutput &, gTriState);
 
 //
@@ -72,6 +71,7 @@ gText ToText(const gInteger &);
 gText ToText(const gRational &, bool approx = true);
 gText ToText(const gNumber &);
 gText ToText(const gNumber &p_number, int p_precision);
+gText ToText(gTriState);
 
 double FromText(const gText &, double &);
 gRational FromText(const gText &, gRational &);

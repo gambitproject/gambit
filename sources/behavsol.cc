@@ -29,7 +29,7 @@ public:
   gTriState IsSubgamePerfect(void) {return isSubgamePerfect;}
 };
 
-gText NameEfgAlgType(EfgAlgType p_algorithm)
+gText ToText(EfgAlgType p_algorithm)
 {
   switch (p_algorithm) {
   case algorithmEfg_USER:
@@ -69,9 +69,10 @@ gText NameEfgAlgType(EfgAlgType p_algorithm)
   }
 }
 
-void DisplayEfgAlgType(gOutput &p_file, EfgAlgType p_algorithm)
+gOutput &operator<<(gOutput &p_file, EfgAlgType p_algorithm)
 {
-  p_file << NameEfgAlgType(p_algorithm);
+  p_file << ToText(p_algorithm);
+  return p_file;
 }
 
 //----------------------------------------------------
@@ -1151,7 +1152,7 @@ void BehavSolution::Dump(gOutput &p_file) const
 
 void BehavSolution::DumpInfo(gOutput &p_file) const
 {
-  p_file << " Creator:"; DisplayEfgAlgType(p_file, Creator());
+  p_file << " Creator:" << Creator();
   p_file << " IsNash:" << IsNash();
   p_file << " IsSubgamePerfect:" << IsSubgamePerfect();
   p_file << " IsSequential:" << IsSequential();

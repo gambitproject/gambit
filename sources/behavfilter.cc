@@ -108,7 +108,7 @@ bool BehavListFilter::LessThan(const BehavSolution &a,
     return (a.GetName() < b.GetName());
 
   case BSORT_BY_CREATOR:
-    return (NameEfgAlgType(a.Creator()) < NameEfgAlgType(b.Creator()));
+    return (ToText(a.Creator()) < ToText(b.Creator()));
 
   case BSORT_BY_NASH:
     return (a.IsNash() < b.IsNash());

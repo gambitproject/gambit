@@ -24,8 +24,8 @@ typedef enum {
   algorithmNfg_QRE, algorithmNfg_QREALL
 } NfgAlgType;
 
-gText NameNfgAlgType(NfgAlgType i);
-void DisplayNfgAlgType(gOutput& o, NfgAlgType i);
+gText ToText(NfgAlgType);
+gOutput &operator<<(gOutput &, NfgAlgType);
 
 class MixedSolution   {
 protected:

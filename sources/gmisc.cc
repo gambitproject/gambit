@@ -371,7 +371,7 @@ gText EscapeQuotes(const gText &s)
 
 //------------------------ TriState functions -----------------//
 
-gText Name(gTriState b)
+gText ToText(gTriState b)
 {
   switch (b) {
   case triTRUE:
@@ -385,7 +385,7 @@ gText Name(gTriState b)
 
 gOutput &operator<<(gOutput &f, gTriState b)
 {
-  return (f << Name(b));
+  return (f << ToText(b));
 }
 
 //------------------------ Type dependent epsilon -----------------//

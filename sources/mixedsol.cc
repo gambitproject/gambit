@@ -8,7 +8,7 @@
 #include "mixedsol.h"
 #include "nfdom.h"
 
-gText NameNfgAlgType(NfgAlgType p_algorithm)
+gText ToText(NfgAlgType p_algorithm)
 {
   switch (p_algorithm) {
   case algorithmNfg_USER:
@@ -36,9 +36,10 @@ gText NameNfgAlgType(NfgAlgType p_algorithm)
   }
 }
 
-void DisplayNfgAlgType(gOutput &p_file, NfgAlgType p_algorithm)
+gOutput &operator<<(gOutput &p_file, NfgAlgType p_algorithm)
 {
-  p_file << NameNfgAlgType(p_algorithm);
+  p_file << ToText(p_algorithm);
+  return p_file;
 }
 
 
@@ -351,7 +352,7 @@ void MixedSolution::Dump(gOutput &p_file) const
 
 void MixedSolution::DumpInfo(gOutput &p_file) const
 {
-  p_file << " Creator:"; DisplayNfgAlgType(p_file, m_creator);
+  p_file << " Creator:" << Creator();
   p_file << " IsNash:" << IsNash();
   p_file << " IsPerfect:" << IsPerfect();
   p_file << " IsProper:" << IsProper();

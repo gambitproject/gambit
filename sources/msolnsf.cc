@@ -185,7 +185,7 @@ bool MSolnSorterFilter::LessThan(const MixedSolution &a,
         return (a.Id() < b.Id());
 
     case MSORT_BY_CREATOR:
-        return (NameNfgAlgType(a.Creator()) < NameNfgAlgType(b.Creator()));
+        return (ToText(a.Creator()) < ToText(b.Creator()));
 
     case MSORT_BY_NASH:
         return (a.IsNash() < b.IsNash());

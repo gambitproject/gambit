@@ -523,16 +523,16 @@ void NfgSolnShow::UpdateValues(void)
     SetCellValue((char *) ToText((int) solns[i].Id()),
 		 cur_pos, FeaturePos(MSOLN_ID));
 
-    SetCellValue((char *) NameNfgAlgType(solns[i].Creator()),
+    SetCellValue((char *) ToText(solns[i].Creator()),
 		 cur_pos, FeaturePos(MSOLN_CREATOR));
 
-    SetCellValue((char *) Name(solns[i].IsNash()),
+    SetCellValue((char *) ToText(solns[i].IsNash()),
 		 cur_pos, FeaturePos(MSOLN_ISNASH));
 
-    SetCellValue((char *) Name(solns[i].IsPerfect()),
+    SetCellValue((char *) ToText(solns[i].IsPerfect()),
 		 cur_pos, FeaturePos(MSOLN_ISPERF));
 
-    SetCellValue((char *) Name(solns[i].IsProper()),
+    SetCellValue((char *) ToText(solns[i].IsProper()),
 		 cur_pos, FeaturePos(MSOLN_ISPROP));
 
     if (solns[i].Creator() == algorithmNfg_QRE) {

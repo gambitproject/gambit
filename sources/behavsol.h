@@ -28,8 +28,8 @@ typedef enum {
   algorithmEfg_QREALL_NFG
 } EfgAlgType;
 
-gText NameEfgAlgType(EfgAlgType i);
-void DisplayEfgAlgType(gOutput& o, EfgAlgType i);
+gText ToText(EfgAlgType);
+gOutput &operator<<(gOutput &, EfgAlgType);
 
 class BehavSolution {
 protected:

@@ -130,13 +130,13 @@ static Portion* GSM_Game_EfgTypes(Portion** param)
 static Portion *GSM_Creator_Behav(Portion** param)
 {
   BehavSolution *bs = ((BehavPortion*) param[0])->Value();
-  return new TextPortion(NameEfgAlgType(bs->Creator()));
+  return new TextPortion(ToText(bs->Creator()));
 }
 
 static Portion *GSM_Creator_Mixed(Portion** param)
 {
   MixedSolution *ms = ((MixedPortion*) param[0])->Value();
-  return new TextPortion(NameNfgAlgType(ms->Creator()));
+  return new TextPortion(ToText(ms->Creator()));
 }
 
 //---------------
