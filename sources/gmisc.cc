@@ -109,11 +109,21 @@ gString ToString(const gRational &r, bool approx)
     // first check if this is just an integer (denominator==1)
     if (r.denominator() == gInteger(1))
       strncpy(gconvert_buffer, Itoa(r.numerator()), GCONVERT_BUFFER_LENGTH);
-    else   {
-      int den = (int) pow(10.0, (double) precision);
-      int num = (int) ((double) r * den + 0.50 * sign(r));
-      gRational R(num, den);
-      strncpy(gconvert_buffer, Itoa(R.numerator()),
+		else   {
+			// first check if the num,den are already reasonable #'s. i.e.
+			// less than precision digits long.
+			double den=r.denominator().as_double();
+			double num=r.numerator().as_double();
+			if (log(num)<=precision && log(den)<=precision)
+				return ToString(r,false);	// exact will do just fine.
+			// these are nasty, huge numbers.  Make num be precision digits long,
+			// and hope den will follow
+			double order=pow(10.0,ceil(log(num)));
+			double prec=pow(10.0,(double)precision);
+			den/=order;	// make a double 0-1
+			num/=order;
+			gRational R((int)(num*prec),(int)(den*prec)); // reduces automatically
+			strncpy(gconvert_buffer, Itoa(R.numerator()),
 	      GCONVERT_BUFFER_LENGTH / 2 - 1);
       strcat(gconvert_buffer, "/");
       strncat(gconvert_buffer, Itoa(R.denominator()),

@@ -1,7 +1,7 @@
 //#
 //# FILE: nfg.cc -- Implementation of normal form member functions
 //#              -- and Implementation of NFPlayer member functions
-//# $Date$ $Id$
+//# $Id$
 //#
 
 #include <assert.h>
@@ -22,25 +22,29 @@
 BaseNfg::BaseNfg( const gArray<int> &dim)
 :players(dim.Length()), dimensions(dim)
 {
-  for (int i = 1; i <= players.Length(); i++) 
-    players[i] = new NFPlayer(i, this, dim[i]);
-  IndexStrategies();
+	for (int i = 1; i <= players.Length(); i++){
+		players[i] = new NFPlayer(i, this, dim[i]);
+		players[i]->name = ToString(i);
+		for (int j = 1; j <= players[i]->NumStrats(); j++)
+			players[i]->strategies[j]->name=ToString(j);
+	}
+	IndexStrategies();
 }
 
 BaseNfg::BaseNfg (const BaseNfg &b)
 : title(b.title), players(b.players.Length()), dimensions(b.dimensions)
 {
-  for (int i = 1; i <= players.Length(); i++){
-    players[i] = new NFPlayer(i, this, dimensions[i]);
-    players[i]->name = b.players[i]->name;
-    for (int j = 1; j <= players[i]->NumStrats(); j++)
-      *(players[i]->strategies[j]) = *(b.players[i]->strategies[j]);
-  }
-  IndexStrategies();
+	for (int i = 1; i <= players.Length(); i++){
+		players[i] = new NFPlayer(i, this, dimensions[i]);
+		players[i]->name = b.players[i]->name;
+		for (int j = 1; j <= players[i]->NumStrats(); j++)
+			*(players[i]->strategies[j]) = *(b.players[i]->strategies[j]);
+	}
+	IndexStrategies();
 }
-BaseNfg::~BaseNfg() 
-{ 
-  for (int i = 1; i <= players.Length(); i++) 
+BaseNfg::~BaseNfg()
+{
+	for (int i = 1; i <= players.Length(); i++)
     delete players[i];
 }
 
