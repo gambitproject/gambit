@@ -426,7 +426,9 @@ public:
 	void Repaint(void) {sheet->OnPaint();}
 	// Forced focus.  Need this if focus gets lost to a button/menu.  That would
 	// disable the keyboard input to the canvas.  Call this to force focus.
-  void SetFocus(void) {sheet->SetFocus();}
+	void SetFocus(void) {sheet->SetFocus();}
+	// Direct access to the canvas -- sometimes necessary, but do not abuse.
+	SpreadSheetC	*Sheet(void) {return sheet;}
 	// Debugging
 	void Dump(gOutput &out) const;
 };
@@ -487,10 +489,11 @@ public:
 	virtual void OnCancel(void);
 	virtual void OnDoubleClick(int ,int ,int ,const gString &) { }
 	virtual void OnSelectedMoved(int row,int col,SpreadMoveDir how=SpreadMoveJump);
-        virtual void OnOptionsChanged(unsigned int /*opts*/=0) { }
+  virtual void OnOptionsChanged(unsigned int opts=0) { }
 	virtual void OnPrint(void);
 	virtual void OnHelp(int =0);
 	virtual Bool OnCharNew(wxKeyEvent &) {return FALSE;}
+	virtual Bool OnEventNew(wxMouseEvent &ev) {return FALSE;}
 	void CanvasFocus(void) {data[cur_level].SetFocus();}
 	// General data access
 	void		SetType(int row,int col,gSpreadValType t) {data[cur_level].SetType(row,col,t);}
@@ -511,6 +514,7 @@ public:
 	// Accesing different levels
 	void		SetLevel(int _l);
 	int			GetLevel(void)		{return cur_level;}
+  SpreadSheetC *GetSheet(void) {return data[cur_level].Sheet();}
 	// Accessing the currently hilighted cell
 	int			CurRow(int level=0) {if (level==0) level=cur_level;return data[level].CurRow();}
 	int			CurCol(int level=0) {if (level==0) level=cur_level;return data[level].CurCol();}

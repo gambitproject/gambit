@@ -1,6 +1,6 @@
 // File: spread.cc -- Defines a 3 dimensional spreadsheet/table control.  Used
 // extensively in gambit.
-// @(#)spread.cc	1.33 8/23/96
+// $Id$
 #include <stdio.h>
 #include "wx.h"
 #include "wx_mf.h"
@@ -336,6 +336,7 @@ void SpreadSheetC::OnPaint(void)
 // Mouse message handler
 void SpreadSheetC::OnEvent(wxMouseEvent &ev)
 {
+if (top_frame->OnEventNew(ev)) return;
 if (ev.LeftDown() || ev.ButtonDClick())
 {
 	float x,y;

@@ -1,7 +1,7 @@
 //
 // FILE: treewin.h -- Interface for TreeWindow class
 //
-// @(#)treewin.h	1.46 12/20/96
+// $Id$
 //
 
 #ifndef TREEWINDOW_H
@@ -177,7 +177,7 @@ public:
 	void node_delete(void);
 	void node_set_mark(void);
 	void node_goto_mark(void);
-	void node_outcome(int out);
+	void node_outcome(int out,int x=-1,int y=-1);
 
 	void action_label(void);
 	void action_insert(void);

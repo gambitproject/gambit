@@ -27,7 +27,7 @@ extern wxApp *wxTheApp=1;
 GambitApp gambitApp;
 
 typedef void ( *fptr)(int);
-void SigFPEHandler(int /*type*/)
+void SigFPEHandler(int type)
 {
 signal(SIGFPE, (fptr)SigFPEHandler);  //  reinstall signal handler
 wxMessageBox("A floating point error has occured!\nThe results returned may be invalid");
@@ -95,7 +95,7 @@ return 1;		// we did not really fix anything, but want no more warnings
 
 
 char *wxStrLwr(char *s)
-{for (unsigned int i=0;i<strlen(s);i++) s[i]=tolower(s[i]); return s;}
+{for (int i=0;i<strlen(s);i++) s[i]=tolower(s[i]); return s;}
 
 class GambitToolBar:	// no reason to have yet another .h file for just this
 #ifdef wx_msw
@@ -209,6 +209,10 @@ new GambitToolBar(gambit_frame);
 
 // Set up the help system
 wxInitHelp("gambit","Gambit -- Graphics User Interface, Version 0.94\n\nDeveloped by Richard D. McKelvey (rdm@hss.caltech.edu)\nMain Programmer:  Theodore Turocy (magyar@hss.caltech.edu)\nFront End: Eugene Grayver (egrayver@hss.caltech.edu)\nCalifornia Institute of Technology, 1996.\nFunding provided by the National Science Foundation");
+// Init the output (floating point) precision
+int num_prec;
+wxGetResource("Gambit","Output-Precision",&num_prec,"gambit.ini");
+ToStringPrecision(num_prec);
 
 gambit_frame->Show(TRUE);
 // Set up the error handling functions.
