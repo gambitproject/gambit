@@ -1103,6 +1103,10 @@ BranchDraggerDialog::BranchDraggerDialog(Efg &p_efg, wxWindow *p_parent)
     m_playerNameList->Append(m_efg.Players()[pl]->GetName());
   }
 
+  // Force a selection -- some implementations (e.g. Motif) do not
+  // automatically set any selection
+  m_playerNameList->SetSelection(0); 
+
   NewLine();
   wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
   okButton->SetClientData((char *) this);
