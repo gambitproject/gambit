@@ -677,7 +677,7 @@ bool Nfg_Portion::Operation( Portion* p, OperationMode mode )
 
 
 void Nfg_Portion::Output( gOutput& s ) const
-{ _Value->DisplayNfg(s); }
+{ s << "NormalForm[ "; _Value->GetTitle(); s << ']'; }
 
 
 
