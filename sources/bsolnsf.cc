@@ -171,8 +171,8 @@ TEMPLATE class gSortList<BehavSolution<double> >;
 TEMPLATE class gSortList<BehavSolution<gRational> >;
 TEMPLATE class gListSorter<BehavSolution<gRational> >;
 TEMPLATE class gListSorter<BehavSolution<double> >;
-TEMPLATE class  gListFilter<MixedSolution<gRational> >;
-TEMPLATE class  gListFilter<MixedSolution<double> >; 
+TEMPLATE class  gListFilter<BehavSolution<gRational> >;
+TEMPLATE class  gListFilter<BehavSolution<double> >; 
 TEMPLATE class BSolnSorterFilter<double>;
 TEMPLATE class BSolnSorterFilter<gRational>;
 
