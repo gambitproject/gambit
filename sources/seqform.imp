@@ -184,6 +184,7 @@ template <class T> int SeqFormModule<T>::Add_BFS(const LTableau<T> &tableau)
 template <class T> int 
 SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
 {
+  if(params.maxdepth!=0 && depth>params.maxdepth) return 1;
   int i,len,newsol,missing;
   T p1,p2,aa;
   T small_num = (T)1/(T)1000;

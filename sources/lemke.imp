@@ -39,7 +39,7 @@ public:
   virtual ~LemkeModule();
   
   int Lemke(int dup = 0);
-  int All_Lemke(int dup, LHTableau<T> &B, long &np);
+  int All_Lemke(int dup, LHTableau<T> &B, long &np, int depth);
   
   int Add_BFS(LHTableau<T> &B);
   long NumPivots(void) const;
@@ -81,7 +81,7 @@ template <class T> int LemkeModule<T>::Lemke(int dup)
     LHTableau<T> B(A1,A2,b1,b2);
     epsilon = B.Epsilon();
     if ( params.stopAfter!=1 || dup==0)
-      All_Lemke(0,B,npivots);
+      All_Lemke(0,B,npivots, params.maxdepth);
     else  {
       B.LemkePath(dup);
       Add_BFS(B);
@@ -130,8 +130,9 @@ template <class T> int LemkeModule<T>::Add_BFS(LHTableau<T> &B)
 // From each new accessible equilibrium, it follows
 // all possible paths, adding any new equilibria to the List.  
 //
-template <class T> int LemkeModule<T>::All_Lemke(int j, LHTableau<T> &B,long &np)
+template <class T> int LemkeModule<T>::All_Lemke(int j, LHTableau<T> &B,long &np, int depth)
 {
+  if(params.maxdepth!=0 && depth>params.maxdepth) return 1;
 //  BFS<T> cbfs((T) 0);
   int i;
   int len;
@@ -155,7 +156,7 @@ template <class T> int LemkeModule<T>::All_Lemke(int j, LHTableau<T> &B,long &np
       LHTableau<T> Bcopy(B);
 //      Bcopy.NumPivots();
       Bcopy.LemkePath(i);
-      All_Lemke(i,Bcopy,np);
+      All_Lemke(i,Bcopy,np, depth+1);
 //      gout << "\nend of AllLemke: " << i;
 //      delete Bcopy;
 

@@ -14,7 +14,7 @@
 
 class LemkeParams     {
   public:
-    int dup_strat, trace, stopAfter;
+    int dup_strat, trace, stopAfter,maxdepth;
     gPrecision precision;
     gOutput *tracefile;
     gStatus &status;
