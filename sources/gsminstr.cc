@@ -379,9 +379,8 @@ Portion *gclListConstant::Evaluate(void)
     for (int i = 1; i <= values.Length(); i++)  {
       Portion *v = values[i]->Evaluate();
       _gsm._ResolveRef(v);
-      // not clear what causes this condition...?
-      if (ret->Append(v) == 0)
-        throw gclRuntimeError("");
+      // v is deleted by ListPortion::Append if this call fails
+      ret->Append(v);
     }
 
     return ret;

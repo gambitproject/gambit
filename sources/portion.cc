@@ -1917,44 +1917,39 @@ int ListPortion::Append(Portion* item)
 int ListPortion::Insert(Portion* item, int index)
 {
   int result = 0;
-  PortionSpec item_type;
+  PortionSpec item_type = item->Spec();
 
-
-
-  item_type = item->Spec();
-  if(item->Spec().ListDepth == 0)
-  {
-    if(item_type.Type == porNULL)
+  if (item->Spec().ListDepth == 0) {
+    if (item_type.Type == porNULL)
       item_type = ((NullPortion*) item)->DataType();
     rep->_ContainsListsOnly = false;
   }
 
-
-  if(rep->_DataType == porUNDEFINED) // inserting into an empty list
-  {
+  if (rep->_DataType == porUNDEFINED) { // inserting into an empty list
     rep->_DataType = item_type.Type;
     ((ListPortion*) Original())->rep->_DataType = rep->_DataType;
     result = rep->value->Insert(item, index);
   }
-  else  // inserting into an existing list
-  {
-    if(PortionSpecMatch(item_type.Type, rep->_DataType))
-    {
+  else  {  // inserting into an existing list
+    if (PortionSpecMatch(item_type.Type, rep->_DataType)) {
       result = rep->value->Insert(item, index);
     }
-    else if(item_type.Type == porUNDEFINED) // inserting an empty list
-    {
+    else if (item_type.Type == porUNDEFINED) { // inserting an empty list
       result = rep->value->Insert(item, index);
       assert(item->Spec().ListDepth > 0);
       ((ListPortion*) item)->rep->_DataType = rep->_DataType;
     }
-    else
+    else {
       delete item;
+      throw gclRuntimeError("Type mismatch in list; list type = " +
+			    PortionSpecToText(rep->_DataType) +
+			    ", item type = " + 
+			    PortionSpecToText(item_type.Type));
+    }
   }
 
-  if( result > 0 )
-  {
-    if( item->Spec().ListDepth + 1 > rep->_ListDepth )
+  if (result > 0)  {
+    if (item->Spec().ListDepth + 1 > rep->_ListDepth)
       rep->_ListDepth = item->Spec().ListDepth + 1;
   }
 
