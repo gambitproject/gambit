@@ -1782,6 +1782,15 @@ Portion* GSM_LoadGlobalVar( Portion** param )
     return new ErrorPortion( "Variable not found" );
 }
 
+Portion* GSM_ExistsGlobalVar( Portion** param )
+{
+  gText& varname = ((TextPortion*) param[0])->Value();
+  if( _gsm->GlobalVarIsDefined( varname ) )
+    return new BoolPortion( true );
+  else
+    return new BoolPortion( false );
+}
+
 
 Portion* GSM_SaveLocalVar( Portion** param )
 {
@@ -1800,6 +1809,18 @@ Portion* GSM_LoadLocalVar( Portion** param )
     return _gsm->GlobalVarValue( varname )->RefCopy();
   else
     return new ErrorPortion( "Variable not found" );
+}
+
+
+Portion* GSM_ExistsLocalVar( Portion** param )
+{
+  gText varname =
+    _gsm->UserFuncName() + gText((char) 1) + ((TextPortion*) param[0])->Value();
+  if( _gsm->GlobalVarIsDefined( varname ) )
+    return new BoolPortion( true );
+
+  else
+    return new BoolPortion( false ); 
 }
 
 
@@ -2343,6 +2364,10 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT) );
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("ExistsGlobalVar", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ExistsGlobalVar, porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT) );
+  gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("SaveLocalVar", 2);
@@ -2364,6 +2389,11 @@ void Init_gsmoper(GSM* gsm)
 
   FuncObj = new FuncDescObj("LoadLocalVar", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LoadLocalVar, porANYTYPE, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT) );
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("ExistsLocalVar", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ExistsLocalVar, porBOOL, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT) );
   gsm->AddFunction(FuncObj);
 
