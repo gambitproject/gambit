@@ -10,6 +10,7 @@
 
 #include <assert.h>
 #include "glist.h"
+#include "gstack.h"
 
 #include "gsm.h"
 #include "portion.h"
@@ -492,6 +493,7 @@ bool FuncDescObj::Combine(FuncDescObj* newfunc)
   int j;
   int f_index;
   int index;
+  gStack<int> delete_stack;
 
   for(i = 0; i < newfunc->_NumFuncs; i++)
   {
@@ -558,13 +560,29 @@ bool FuncDescObj::Combine(FuncDescObj* newfunc)
 
       if(same_params)
       {
-	gerr << "New function ambiguous with " << FuncList()[f_index+1] <<'\n';
-	result = false;
+	if(!_FuncInfo[f_index].UserDefined)
+	{
+	  gerr << "Function ambiguous with " << FuncList()[f_index+1] <<'\n';
+	  result = false;
+	}
+	else
+	{
+	  delete_stack.Push(f_index);
+	}
       }
     }
 
     if(result)
     {
+      int delete_index = 0;
+      while(delete_stack.Depth() > 0)
+      {
+	delete_index = delete_stack.Pop();
+	gerr << "Replacing " << FuncList()[delete_index+1] << '\n';
+	Delete(delete_index);
+      }
+
+
       FuncInfoType* NewFuncInfo = new FuncInfoType[_NumFuncs+1];
       for(j=0; j<_NumFuncs; j++)
 	NewFuncInfo[j] = _FuncInfo[j];
@@ -638,22 +656,26 @@ bool FuncDescObj::Delete(FuncDescObj* newfunc)
     }
 
     if(result)
-    {
-      FuncInfoType* NewFuncInfo = new FuncInfoType[_NumFuncs-1];
-      for(j=0; j<delete_index; j++)
-	NewFuncInfo[j] = _FuncInfo[j];
-      for(j=delete_index+1; j<_NumFuncs; j++)
-	NewFuncInfo[j-1] = _FuncInfo[j];
-      delete[] _FuncInfo;
-      _FuncInfo = NewFuncInfo;
-      _NumFuncs--;
-    }
+      Delete(delete_index);
     finalresult = finalresult & result;
   }
   delete newfunc;
   return finalresult;
 }
 
+
+void FuncDescObj::Delete(int delete_index)
+{
+  FuncInfoType* NewFuncInfo = new FuncInfoType[_NumFuncs-1];  
+  int j;
+  for(j=0; j<delete_index; j++)
+    NewFuncInfo[j] = _FuncInfo[j];
+  for(j=delete_index+1; j<_NumFuncs; j++)
+    NewFuncInfo[j-1] = _FuncInfo[j];
+  delete[] _FuncInfo;
+  _FuncInfo = NewFuncInfo;
+  _NumFuncs--;
+}
 
 
 gString FuncDescObj::FuncName(void) const

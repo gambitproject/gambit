@@ -2511,7 +2511,7 @@ void GSM::_ErrorMessage
     s << "Cannot to pass an undefined reference to a function\n";
     break;
   case 60:
-    s << "New " << str1 << "[] parameters ambiguous with existing function\n";
+    s << "New " << str1 << "[] ambiguous with existing built-in function\n";
     break;
   case 61:
     s << "Cannot pass an undefined reference to a function\n";

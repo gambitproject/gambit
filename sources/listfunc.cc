@@ -744,6 +744,13 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("list", 
 					    PortionSpec(porANYTYPE, NLIST)));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("x", porANYTYPE));
+
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Contains, porBOOL, 2,
+				       0, NON_LISTABLE));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("list", 
+					    PortionSpec(porANYTYPE, NLIST)));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("x", 
+					    PortionSpec(porANYTYPE,1)));
   gsm->AddFunction(FuncObj);
 
 

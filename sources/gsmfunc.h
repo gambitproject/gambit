@@ -137,10 +137,11 @@ public:
   void SetParamInfo(int funcindex, int index, const ParamInfoType paraminfo);  
   void SetParamInfo(int funcindex, const ParamInfoType paraminfo[]);
   
-  bool Combine( FuncDescObj* newfunc );
-  bool Delete( FuncDescObj* newfunc );
+  bool Combine(FuncDescObj* newfunc);
+  bool Delete(FuncDescObj* newfunc);
+  void Delete(int delete_index);
 
-  gString FuncName ( void ) const;
+  gString FuncName(void) const;
 
   gList<gString> FuncList(void) const;
   void Dump(gOutput& f, int i) const;
