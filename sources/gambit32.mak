@@ -1,182 +1,77 @@
+#
+# FILE: gambit32.mak -- Makefile for Gambit under Borland C++ 32-bit
+#
+# $Id$
+#
 
 .AUTODEPEND
 
+# The following directories must be set or overriden for the target setup
 WXDIR = E:\WX2
 BCCDIR = C:\BC5
-SRCSUFF = .cc
-EXTRALIBS = # bin32\gambit
+
+SOURCE_SUFFIX = .cc
+OBJECT_SUFFIX = .obj
+
 EXTRACPPFLAGS = -v 
 EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
-TARGET = gambit
-OBJECTS =   dlnfg.obj\
-   dlefg.obj\
-   treedrag.obj\
-   treerender.obj\
-   dlsupport.obj\
-   nfgsolvd.obj\
-   efgsolvd.obj\
-   nfgshow.obj\
-   treedraw.obj\
-   nfgsoln.obj\
-   wxsignal.obj\
-   wxstatus.obj\
-   accels.obj\
-   algdlgs.obj\
-   gnullsts.obj\
-   msolnsf.obj\
-   bsolnsf.obj\
-   efgshow.obj\
-   efgsolng.obj\
-   efgsoln.obj\
-   nfgsolng.obj\
-   twflash.obj\
-   treewin.obj\
-   wxio.obj\
-   wxmisc.obj\
-   gambit.obj\
-   gambdraw.obj\
-   system.obj\
-   gpool.obj\
-   gstream.obj\
-   gtext.obj\
-   gsmatrix.obj\
-   gnumber.obj\
-   gmisc.obj\
-   garray.obj\
-   gblock.obj\
-   glist.obj\
-   grarray.obj\
-   grblock.obj\
-   gmatrix.obj\
-   gvector.obj\
-   gpvector.obj\
-   gdpvect.obj\
-   gwatch.obj\
-   gfunc.obj\
-   gnulib.obj\
-   integer.obj\
-   rational.obj\
-   sfstrat.obj\
-   sfg.obj\
-   efbasis.obj\
-   nfginst.obj\
-   efginst.obj\
-   behavinst.obj\
-   readnfg.obj\
-   readefg.obj\
-   nfgutils.obj\
-   nfg.obj\
-   nfstrat.obj\
-   nfgiter.obj\
-   efg.obj\
-   efgnfg.obj\
-   efstrat.obj\
-   efgiter.obj\
-   behavsol.obj\
-   mixedsol.obj\
-   efgutils.obj\
-   gpolylst.obj\
-   gpartltr.obj\
-   linrcomb.obj\
-   ideal.obj\
-   gtree.obj\
-   complex.obj\
-   quiksolv.obj\
-   odometer.obj\
-   poly.obj\
-   rectangl.obj\
-   interval.obj\
-   double.obj\
-   prepoly.obj\
-   monomial.obj\
-   gpoly.obj\
-   algutils.obj\
-   ineqsolv.obj\
-   efgalleq.obj\
-   nfgensup.obj\
-   efgensup.obj\
-   nfgalleq.obj\
-   btableau.obj\
-   lptab.obj\
-   polensub.obj\
-   seqeq.obj\
-   epolenum.obj\
-   polenum.obj\
-   clique.obj\
-   basis.obj\
-   nfgpure.obj\
-   nfgcsum.obj\
-   subsolve.obj\
-   nfdommix.obj\
-   simpdiv.obj\
-   efgcsum.obj\
-   efgpure.obj\
-   lemkesub.obj\
-   liapsub.obj\
-   simpsub.obj\
-   enumsub.obj\
-   psnesub.obj\
-   csumsub.obj\
-   enum.obj\
-   grid.obj\
-   lemketab.obj\
-   lemke.obj\
-   efdom.obj\
-   gfuncmin.obj\
-   vertenum.obj\
-   seqform.obj\
-   tableau.obj\
-   bfs.obj\
-   egobit.obj\
-   eliap.obj\
-   lhtab.obj\
-   lpsolve.obj\
-   ludecomp.obj\
-   nfdom.obj\
-   ngobit.obj\
-   nliap.obj
+!include make.filelist
 
 CFG = gambit32.cfg
 WXLIBDIR = $(WXDIR)\lib
 WXLIB = wx32
 WXINC = -I$(WXDIR)\include
-#WIN95FLAG = -D__WIN95__ -D__WINDOWS__
 
 OPT = -Od
 
-SRCSUFF = cc
-OBJSUFF = obj
-
-.$(SRCSUFF).obj:
+$(SOURCE_SUFFIX).obj:
 	bcc32 $(CPPFLAGS) -P -c {$< }
 
 .c.obj:
 	bcc32 $(CPPFLAGS) -P- -c {$< }
 
-LIBS=$(WXLIB) $(EXTRALIBS) cw32mti import32 ole2w32
+GUILIBS=$(WXLIB) cw32mti import32 ole2w32
+GCLLIBS=cw32mti import32 ole2w32 bfc40 bfcs40
+
 
 LINKFLAGS= /Tpe /L$(WXLIBDIR);$(BCCDIR)\lib $(EXTRALINKFLAGS)
 OPT = -Od
 DEBUG_FLAGS= -v
 
 
-CPPFLAGS= $(WXINC) $(EXTRACPPFLAGS) $(OPT) @$(CFG)
+CPPFLAGS= -D_AFXDLL $(WXINC) -I..\winsrc -I$(BCCDIR)\include\mfc $(EXTRACPPFLAGS) $(OPT) @$(CFG)
 
-all: $(TARGET).exe $(EXTRATARGETS)
+all: gambit gcl
 
-$(TARGET).exe:	$(OBJECTS) gambit.res
+gambit:	$(ALLGUI_OBJECTS) gambit.res
   ilink32 $(LINKFLAGS) @&&!
-c0w32.obj $(OBJECTS)
-$(TARGET)
+c0w32.obj $(ALLGUI_OBJECTS)
+gambit
 nul
-$(LIBS)
+$(GUILIBS)
 
-$(TARGET).res
+gambit.res
 !
 
 gambit.res :      ..\winsrc\res\gambit.rc 
     brc32 -r -fo.\gambit.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include ..\winsrc\res\gambit
+
+gcl:	$(ALLGCL_OBJECTS) ..\winsrc\stdafx.obj ..\winsrc\winedit.obj ..\winsrc\wineditdoc.obj ..\winsrc\wineditview.obj ..\winsrc\mainfrm.obj gwstream.obj gcl.res winedit.res
+  ilink32 $(LINKFLAGS) @&&!
+c0w32.obj $(ALLGCL_OBJECTS) ..\winsrc\stdafx.obj ..\winsrc\winedit.obj ..\winsrc\wineditdoc.obj ..\winsrc\wineditview.obj ..\winsrc\mainfrm.obj gwstream.obj
+gcl
+nul
+$(GCLLIBS)
+
+gcl.res winedit.res
+!
+
+gcl.res :      ..\winsrc\res\gcl.rc 
+    brc32 -r -fo.\gcl.res /i$(BCCDIR)\include /i$(BCCDIR)\include\mfc /i..\winsrc ..\winsrc\res\gcl
+
+winedit.res :      ..\winsrc\res\winedit.rc 
+    brc32 -r -fo.\winedit.res /i$(BCCDIR)\include /i$(BCCDIR)\include\mfc /i..\winsrc ..\winsrc\res\winedit
 
 clean:
         -erase *.obj
