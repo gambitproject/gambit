@@ -1345,45 +1345,61 @@ TreeWindow::~TreeWindow(void)
 
 void TreeWindow::MakeMenus(void)
 {
-    edit_menu = new wxMenu(NULL, (wxFunction)OnPopup);
-    wxMenu *node_menu = new wxMenu;
-    node_menu->Append(NODE_ADD, "&Add Move", "Add a move");
-    node_menu->Append(NODE_DELETE, "&Delete Move", "Remove move at cursor");
-    node_menu->Append(NODE_INSERT, "&Insert Move", "Insert move at cursor");
-    node_menu->Append(NODE_LABEL, "&Label", "Label cursor node");
-    node_menu->AppendSeparator();
-    node_menu->Append(NODE_SET_MARK, "Set &Mark", "Mark cursor node");
-    node_menu->Append(NODE_GOTO_MARK, "Go&to Mark", "Goto marked node");
+  edit_menu = new wxMenu(NULL, (wxFunction)OnPopup);
+
+  wxMenu *node_menu = new wxMenu;
+  node_menu->Append(NODE_ADD, "&Add Move", "Add a move");
+  node_menu->Append(NODE_DELETE, "&Delete Move", "Remove move at cursor");
+  node_menu->Append(NODE_INSERT, "&Insert Move", "Insert move at cursor");
+  node_menu->Append(NODE_LABEL, "&Label", "Label cursor node");
+  node_menu->AppendSeparator();
+  node_menu->Append(NODE_SET_MARK, "Set &Mark", "Mark cursor node");
+  node_menu->Append(NODE_GOTO_MARK, "Go&to Mark", "Goto marked node");
     
-    wxMenu *action_menu = new wxMenu;
-    action_menu->Append(ACTION_DELETE, "&Delete", "Delete an action from cursor iset");
-    action_menu->Append(ACTION_INSERT, "&Insert", "Delete an action to cursor iset");
-    action_menu->Append(ACTION_LABEL, "&Label");
-    action_menu->Append(ACTION_PROBS, "&Probs", "Set the chance player probs");
+  wxMenu *action_menu = new wxMenu;
+  action_menu->Append(ACTION_DELETE, "&Delete", "Delete an action from cursor iset");
+  action_menu->Append(ACTION_INSERT, "&Insert", "Delete an action to cursor iset");
+  action_menu->Append(ACTION_LABEL, "&Label");
+  action_menu->Append(ACTION_PROBS, "&Probs", "Set the chance player probs");
     
-    wxMenu *infoset_menu = new wxMenu;
-    infoset_menu->Append(INFOSET_MERGE, "&Merge", "Merge cursor iset w/ marked");
-    infoset_menu->Append(INFOSET_BREAK, "&Break", "Make cursor a new iset");
-    infoset_menu->Append(INFOSET_SPLIT, "&Split", "Split iset at cursor");
-    infoset_menu->Append(INFOSET_JOIN, "&Join", "Join cursor to marked iset");
-    infoset_menu->Append(INFOSET_LABEL, "&Label", "Label cursor iset & actions");
-    infoset_menu->Append(INFOSET_SWITCH_PLAYER, "&Player", "Change player of cursor iset");
-    infoset_menu->Append(INFOSET_REVEAL, "&Reveal", "Reveal infoset to players");
+  wxMenu *infoset_menu = new wxMenu;
+  infoset_menu->Append(INFOSET_MERGE, "&Merge", "Merge cursor iset w/ marked");
+  infoset_menu->Append(INFOSET_BREAK, "&Break", "Make cursor a new iset");
+  infoset_menu->Append(INFOSET_SPLIT, "&Split", "Split iset at cursor");
+  infoset_menu->Append(INFOSET_JOIN, "&Join", "Join cursor to marked iset");
+  infoset_menu->Append(INFOSET_LABEL, "&Label", "Label cursor iset & actions");
+  infoset_menu->Append(INFOSET_SWITCH_PLAYER, "&Player", "Change player of cursor iset");
+  infoset_menu->Append(INFOSET_REVEAL, "&Reveal", "Reveal infoset to players");
+
+  wxMenu *outcome_menu = new wxMenu;
+  outcome_menu->Append(TREE_OUTCOMES_NEW, "&New",
+		       "Create a new outcome");
+  outcome_menu->Append(TREE_OUTCOMES_DELETE, "Dele&te",
+		       "Delete an outcome");
+  outcome_menu->Append(TREE_OUTCOMES_ATTACH, "&Attach",
+		       "Attach an outcome to the node at cursor");
+  outcome_menu->Append(TREE_OUTCOMES_DETACH, "&Detach",
+		       "Detach the outcome from the node at cursor");
+  outcome_menu->Append(TREE_OUTCOMES_LABEL, "&Label",
+		       "Label the outcome at the node at cursor");
+  outcome_menu->Append(TREE_OUTCOMES_PAYOFFS, "&Payoffs",
+		       "Set the payoffs for the outcome at the cursor");
+  
+  wxMenu *tree_menu = new wxMenu;
+  tree_menu->Append(TREE_COPY, "&Copy", "Copy tree from marked node");
+  tree_menu->Append(TREE_MOVE, "&Move", "Move tree from marked node");
+  tree_menu->Append(TREE_DELETE, "&Delete", "Delete recursively from cursor");
+  tree_menu->Append(TREE_LABEL, "&Label", "Set the game label");
+  tree_menu->Append(TREE_PLAYERS, "&Players", "Edit/View player names");
+  tree_menu->Append(TREE_INFOSETS, "&Infosets", "Edit/View infosets");
     
-    wxMenu *tree_menu = new wxMenu;
-    tree_menu->Append(TREE_COPY, "&Copy", "Copy tree from marked node");
-    tree_menu->Append(TREE_MOVE, "&Move", "Move tree from marked node");
-    tree_menu->Append(TREE_DELETE, "&Delete", "Delete recursively from cursor");
-    tree_menu->Append(TREE_LABEL, "&Label", "Set the game label");
-    tree_menu->Append(TREE_PLAYERS, "&Players", "Edit/View player names");
-    tree_menu->Append(TREE_INFOSETS, "&Infosets", "Edit/View infosets");
-    
-    edit_menu->Append(EDIT_NODE, "&Node", node_menu, "Edit the node");
-    edit_menu->Append(EDIT_ACTIONS, "&Actions", action_menu, "Edit actions");
-    edit_menu->Append(EDIT_INFOSET, "&Infoset", infoset_menu, "Edit infosets");
-    edit_menu->Append(TREE_OUTCOMES, "&Outcomes", "Edit/View the payoffs");
-    edit_menu->Append(EDIT_TREE, "&Tree", tree_menu, "Edit the tree");
-    edit_menu->SetClientData((char *)frame); // call back to parent later
+  edit_menu->Append(EDIT_NODE, "&Node", node_menu, "Edit the node");
+  edit_menu->Append(EDIT_ACTIONS, "&Actions", action_menu, "Edit actions");
+  edit_menu->Append(EDIT_INFOSET, "&Infoset", infoset_menu, "Edit infosets");
+  edit_menu->Append(TREE_OUTCOMES, "&Outcomes", outcome_menu,
+		    "Edit outcomes and payoffs");
+  edit_menu->Append(EDIT_TREE, "&Tree", tree_menu, "Edit the tree");
+  edit_menu->SetClientData((char *)frame); // call back to parent later
 }
 
 
