@@ -46,6 +46,9 @@ template <class T> class gMatrix : public gRectArray<T>  {
     gMatrix<T> operator/(const T &) const;
     gMatrix<T> &operator/=(const T &);
 
+       // KRONECKER PRODUCT
+    gMatrix<T> operator&(const gMatrix<T> &) const;
+
        // COMPARISON OPERATORS
     bool operator==(const gMatrix<T> &) const;
     bool operator!=(const gMatrix<T> &) const;

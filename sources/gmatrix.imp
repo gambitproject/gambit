@@ -245,6 +245,27 @@ template <class T> gMatrix<T> &gMatrix<T>::operator/=(const T &s)
 }
 
 //-------------------------------------------------------------------------
+//                  gMatrix<T>: Kronecker Product
+//-------------------------------------------------------------------------
+
+template <class T> gMatrix<T> gMatrix<T>::operator&(const gMatrix<T> &M) const
+{
+  gMatrix<T> tmp(1, (maxrow - minrow + 1)*(M.maxrow - M.minrow + 1), 
+		 1, (maxcol - mincol + 1)*(M.maxcol - M.mincol + 1));
+ 
+  for (int i = 0; i <= maxrow - minrow; i++)
+    for (int j = 1; j <= M.maxrow - M.minrow + 1; j++)
+      for (int k = 0; k <= maxcol - mincol; k++)
+	for (int l = 1; l <= M.maxcol - M.mincol + 1; l++)
+
+   tmp((M.maxrow - M.minrow + 1)*i + j, (M.maxcol - M.mincol + 1)*k + l) = 
+           (*this)(i+minrow, k+mincol) * M(j+M.minrow-1,l+M.mincol-1);
+
+  return tmp;
+}
+
+
+//-------------------------------------------------------------------------
 //                    gMatrix<T>: Comparison operators
 //-------------------------------------------------------------------------
 
