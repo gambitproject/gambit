@@ -10,6 +10,9 @@
 
 #include "double.h"
 #include "gnulib.h"
+#include "gvector.imp"
+#include "garray.imp"
+#include "gblock.imp"
 #include <math.h>
 #include <values.h>
 #include <float.h>
@@ -214,7 +217,29 @@ gDouble pow(const gDouble& x, const gDouble& y)
   return gDouble(pow(x.dbl, y.dbl));
 }
 
-/*
+#include <stdio.h>
+#include "gstring.h"
+
+
+#define MYGCONVERT_BUFFER_LENGTH     64
+char mygconvert_buffer[MYGCONVERT_BUFFER_LENGTH];
+int myprecision = 2;
+
+gString ToString(gDouble d)
+{
+  sprintf(mygconvert_buffer, "%.*f", myprecision, d.ToDouble());
+  return gString(mygconvert_buffer);
+}
+
+// conversions from strings to numbers
+
+gDouble TOgDouble(const gString &s)
+{ 
+  double d = strtod(s, NULL);
+  gDouble answer(d);
+  return answer; 
+}
+
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
@@ -222,6 +247,12 @@ gDouble pow(const gDouble& x, const gDouble& y)
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
+TEMPLATE class gVector<gDouble>;
+TEMPLATE class gArray<gDouble>;
+TEMPLATE class gBlock<gDouble>;
+TEMPLATE gOutput & operator<< (gOutput&, const gVector<gDouble>&);
+
+/*
 #include "gmisc.cc"
 TEMPLATE gDouble gmin(const gDouble &a, const gDouble &b);
 TEMPLATE gDouble gmax(const gDouble &a, const gDouble &b);

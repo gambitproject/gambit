@@ -80,5 +80,12 @@ public:
   friend gDouble  pow(const gDouble& x, const gDouble& y);
 };
 
+// The following are facilities that are required of all arithmetic types.
+// For other types they are given in gmisc.h
+
+class gString;
+gString         ToString(gDouble);
+gDouble         TOgDouble(const gString &);
+
 #endif
 
