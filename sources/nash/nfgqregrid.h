@@ -31,7 +31,11 @@ private:
 
 protected:
   // could use norms other then the simple one
-  virtual double Distance(const gVector<double> &a,const gVector<double> &b) const;
+  virtual double Distance(const gVector<gNumber> &,
+			  const gVector<double> &) const;
+
+  virtual double Distance(const gVector<double> &,
+			  const gVector<double> &) const;
 
 public:
   // LIFECYCLE
@@ -69,10 +73,6 @@ public:
   void Solve(const NFSupport &, gOutput &p_pxifile, gStatus &p_status,
 	     gList<MixedSolution> &);
 };
-
-MixedProfile<double> LogitDynamics(const MixedProfile<double> &p_start,
-				   double p_lambda, double p_tmax,
-				   gOutput &);
 
 #endif  // NFGQREGRID_H
 

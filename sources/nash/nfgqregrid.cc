@@ -208,23 +208,6 @@ void QreNfgGrid::OutputHeader(const NFSupport &p_support, gOutput &out) const
   }
   out << '\n';
  
-#ifdef NOT_PORTED
-  if (N.NumPlayers()==2)		// output the matrix in case of a 2x2 square game
-    if (N.NumStrats(1)==N.NumStrats(2))  {
-      out<<"Game:\n";
-      out<<"3 2 1\n";
-      gArray<int> profile(2);
-      for (int i=1;i<=N.NumStrats(1);i++)  {
-	for (int j=1;j<=N.NumStrats(2);j++) {
-	  profile[1]=i;profile[2]=j;
-	  out << N.Payoff(N.GetOutcome(profile), 1) << ' ' <<
-	    N.Payoff(N.GetOutcome(profile), 2) << ' ';
-	}
-	out<<'\n';
-      }
-    }
-#endif  // NOT_PORTED
-
   out << "Settings:\n";
   out << m_minLam << '\n' << m_maxLam << '\n' << m_delLam << '\n';
   out << 0 << '\n' << 1 << '\n' << m_powLam << '\n';
@@ -242,13 +225,6 @@ void QreNfgGrid::OutputHeader(const NFSupport &p_support, gOutput &out) const
   out << "Data:\n";
 }
 
-void Eigenvalues(const gSquareMatrix<double> &p_matrix, 
-		 gArray<double> &p_realParts, gArray<double> &p_complexParts);
-
-void QreJacobian(const Nfg &p_nfg,
-		 const MixedProfile<double> &p_profile,
-		 const double &p_nu, gMatrix<double> &p_matrix);
-
 void QreNfgGrid::OutputResult(gOutput &p_file,
 			      const MixedProfile<double> &p_profile,
 			      double p_lambda, double p_objFunc) const
@@ -258,27 +234,18 @@ void QreNfgGrid::OutputResult(gOutput &p_file,
     p_file << p_profile[i] << ' ';
   }
   p_file << '\n';
+}
 
-#ifdef UNUSED
-  gMatrix<double> J(p_profile.Length(), p_profile.Length() + 1);
-  QreJacobian(p_profile.Game(), p_profile, 
-	      p_lambda / (1.0 + p_lambda), J);
-  gSquareMatrix<double> M(p_profile.Length());
-  for (int i = 1; i <= M.NumRows(); i++) {
-    for (int j = 1; j <= M.NumColumns(); j++) {
-      M(i, j) = J(i, j);
+double QreNfgGrid::Distance(const gVector<gNumber> &a,
+			    const gVector<double> &b) const
+{
+  double dist = 0.0;
+  for (int i = 1; i <= a.Length(); i++) {
+    if (abs((double) a[i] - b[i]) > dist) {
+      dist = abs((double) a[i] - b[i]);
     }
   }
-  
-  gArray<double> reals(M.NumRows()), imags(M.NumRows());
-  Eigenvalues(M, reals, imags);
-  for (int i = 1; i <= reals.Length(); i++) {
-    p_file << '(' << reals[i] << ',' << imags[i] << ")\n";
-    if (fabs(imags[i]) > .0001) {
-      p_file << "IMAGINARY\n";
-    }
-  }
-#endif  // UNUSED
+  return dist;
 }
 
 double QreNfgGrid::Distance(const gVector<double> &a,
@@ -480,13 +447,11 @@ void QreNfgGrid::Solve(const NFSupport &p_support, gOutput &p_pxifile,
 	    MixedProfile<double> candidate(iter2);
 	    if (Polish(candidate, lambda)) {
 	      bool newsoln = true;
-#ifdef UNUSED
 	      for (int j = 1; j <= cursolns.Length(); j++) {
-		if (Distance(MixedProfile<double>(*cursolns[j].Profile()), candidate) < .00001) {
+		if (Distance(*cursolns[j].Profile(), candidate) < .00001) {
 		  newsoln = false;
 		}
 	      }
-#endif  // UNUSED
 
 	      if (newsoln) {
 		OutputResult(p_pxifile, candidate, lambda, 0.0);
@@ -538,30 +503,3 @@ static gVector<double> UpdateFunc(const MixedProfile<double> &p_profile,
   return r;
 }
 
-
-MixedProfile<double> LogitDynamics(const MixedProfile<double> &p_start,
-				   double p_lambda, double p_tmax,
-				   gOutput &p_logfile)
-{
-  MixedProfile<double> profile(p_start);
-
-  const double tstep = 0.001;
-  int step = 0;
-
-  for (double time = 0.0; time <= p_tmax; time += tstep) {
-    MixedProfile<double> newProfile(profile);
-    for (int pl = 1; pl <= profile.Game().NumPlayers(); pl++) {
-      newProfile.SetRow(pl, UpdateFunc(profile, pl, p_lambda));
-    }
-
-    newProfile -= profile;
-    newProfile *= tstep;
-    profile += newProfile;
-
-    if (step++ % 100 == 0) {
-      p_logfile << profile << '\n';
-    }
-  }
-
-  return profile;
-}
