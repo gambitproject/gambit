@@ -858,7 +858,8 @@ levels=_levels;
 label=title;
 features=_features;
 // Create the levels,  must do in two steps since gList(int) is not defined
-for (int i=1;i<=levels;i++) data.Append((const SpreadSheet)SpreadSheet());
+int i;
+for (i=1;i<=levels;i++) data.Append((const SpreadSheet)SpreadSheet());
 for (i=1;i<=levels;i++) data[i].Init(rows,cols,i,0,this);
 // Turn on level #1
 cur_level=0;

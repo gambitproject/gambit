@@ -85,7 +85,8 @@ MyDialogBox *player_color_dialog=new MyDialogBox(0,"Edit Player Colors");
 // list of player names
 wxStringList *name_list=new wxStringList;
 name_list->Add("Chance");
-for (int i=1;i<=player_names.Length();i++) name_list->Add((char *)player_names[i]);
+int i;
+for (i=1;i<=player_names.Length();i++) name_list->Add((char *)player_names[i]);
 // list of color names
 wxStringList *color_list=new wxStringList;
 for (i=0;i<WX_COLOR_LIST_LENGTH;i++) color_list->Add(wx_color_list[i]);
