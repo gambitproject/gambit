@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.h  --  Declaration of gPoly data type
 // 
-// $Id$
+// @(#)gpoly.h	2.12 01/18/98
 //
 
 #ifndef GPOLY_H
@@ -174,8 +174,8 @@ public:
   //---------------
 
  // Print polynomial in SOP form
-  friend gOutput &operator<<(gOutput &f, const gPoly<T> &y);
-  friend gString &operator<<(gString &, const gPoly<T> &);
+  friend gOutput &operator<< (gOutput &f, const gPoly<T> &y);
+  friend gString &operator<< (gString &, const gPoly<T> &);
 };
 
   //-------------
