@@ -8,19 +8,24 @@
 #define EFGOUTCD_H
 
 class EfgOutcomeDialogC;
+
 class EfgOutcomeDialog
 {
 protected:
-	EfgOutcomeDialogC *d;
-	EfgShow *es;
+    EfgOutcomeDialogC *d;
+    EfgShow *es;
+
 public:
-	EfgOutcomeDialog(Efg &ef,EfgShow *es);
-	~EfgOutcomeDialog();
-	void SetOutcome(const gText &outc_name);
-   void UpdateVals(void);
-	void OnOk(void);
+    EfgOutcomeDialog(Efg &ef, EfgShow *es);
+    ~EfgOutcomeDialog();
+    void SetOutcome(const gText &outc_name);
+    void UpdateVals(void);
+    void OnOk(void);
 };
 
-#define SHORT_ENTRY_OUTCOMES	0
-#define LONG_ENTRY_OUTCOMES	1
-#endif
+#define SHORT_ENTRY_OUTCOMES    0
+#define  LONG_ENTRY_OUTCOMES    1
+
+#endif // EFGOUTCD_H
+
+
