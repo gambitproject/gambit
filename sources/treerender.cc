@@ -1,7 +1,7 @@
 //
 // FILE: treerender.cc -- Implementation of class TreeRender
 //
-//
+// $Id$
 //
 
 #include "wx.h"
@@ -450,6 +450,13 @@ void TreeRender::RenderSubtree(wxDC &dc)
 	(entry.infoset.y+dc.device_origin_y < y_start*PIXELS_PER_SCROLL+height/zoom)) {
       // draw the labels
       RenderLabels(dc, &child_entry, &entry);
+
+      // Draw a triangle to show subgame roots
+      if (entry.n->GetSubgameRoot() == entry.n) {
+	if (entry.expanded) 
+	  DrawSmallSubgameIcon(dc, entry);
+      }
+
       // Only draw the node line once for all children.
       if (child_entry.child_number == 1) {
 	// draw the 'node' line
@@ -464,49 +471,11 @@ void TreeRender::RenderSubtree(wxDC &dc)
 	// show the infoset lines, if required by draw settings
 	::DrawCircle(dc, entry.x + entry.num * INFOSET_SPACING, entry.y, 
 		     3, entry.color);
-
-	// FIXME! When infosets are shown, branch lines (and infoset
-	// lines) often disappear at different zoom levels and positions.
-	if (draw_settings.ShowInfosets()) {
-	  if (entry.infoset.y != -1) {
-	    ::DrawThinLine(dc, 
-			   entry.x + entry.num * INFOSET_SPACING, 
-			   entry.y, 
-			   entry.x + entry.num * INFOSET_SPACING, 
-			   entry.infoset.y, 
-			   entry.color);
-	  }
-	  
-	  if (entry.infoset.x != -1) {
-	    // Draw a little arrow in the direction of the iset.
-	    if (entry.infoset.x > entry.x) { // iset is to the right
-	      ::DrawLine(dc, 
-			 entry.x+entry.num*INFOSET_SPACING, 
-			 entry.infoset.y, 
-			 entry.x+(entry.num+1)*INFOSET_SPACING, 
-			 entry.infoset.y, entry.color);
-	    }
-	    else {  // iset is to the left
-	      ::DrawLine(dc, 
-			 entry.x + entry.num * INFOSET_SPACING, 
-			 entry.infoset.y, 
-			 entry.x + (entry.num - 1) * INFOSET_SPACING, 
-			 entry.infoset.y, 
-			 entry.color);
-	    }
-	  }
-	}
-	
-	// Draw a triangle to show sugame roots
-	if (entry.n->GetSubgameRoot() == entry.n) {
-	  if (entry.expanded) 
-	    DrawSmallSubgameIcon(dc, entry);
-	}
-                
       }
+      
       if (child_entry.n == subgame_node)
 	DrawSubgamePickIcon(dc, child_entry);
-
+    
       // draw the 'branches'
       if (child_entry.n->GetParent() && child_entry.in_sup) {
 	// no branches for root node
@@ -523,7 +492,7 @@ void TreeRender::RenderSubtree(wxDC &dc)
 	  ::DrawLine(dc, xs, ys, (xs + draw_settings.ForkLength() * prob), 
 		     (ys + (ye - ys) * prob), WX_COLOR_LIST_LENGTH - 1);
 	}
-
+	
 	xs = xe;
 	ys = ye;
 	xe = child_entry.x;
@@ -534,7 +503,7 @@ void TreeRender::RenderSubtree(wxDC &dc)
 	xe = entry.x;
 	ye = entry.y;
       }
-           
+      
       // Take care of terminal nodes
       // (either real terminal or collapsed subgames)
       if (!child_entry.has_children) { 
@@ -542,12 +511,12 @@ void TreeRender::RenderSubtree(wxDC &dc)
 		   xe + draw_settings.NodeLength() + 
 		   child_entry.nums * INFOSET_SPACING, 
 		   ye, draw_settings.GetPlayerColor(-1));
-	
+      
 	// Collapsed subgame: subgame icon is drawn at this terminal node.
 	if ((child_entry.n->GetSubgameRoot() == child_entry.n) && 
 	    !child_entry.expanded)
 	  DrawLargeSubgameIcon(dc, child_entry, draw_settings.NodeLength());
-
+      
 	// Marked Node: a circle is drawn at this terminal node
 	if (child_entry.n == mark_node) {
 	  ::DrawCircle(dc, 
@@ -563,6 +532,38 @@ void TreeRender::RenderSubtree(wxDC &dc)
 	::DrawCircle(dc, entry.x + entry.nums * INFOSET_SPACING + 
 		     draw_settings.NodeLength(), entry.y, 
 		     4, draw_settings.CursorColor());
+      }
+    }
+
+    if (child_entry.child_number == 1) {
+      if (draw_settings.ShowInfosets()) {
+	if (entry.infoset.y != -1) {
+	  ::DrawThinLine(dc, 
+			 entry.x + entry.num * INFOSET_SPACING, 
+			 entry.y, 
+			 entry.x + entry.num * INFOSET_SPACING, 
+			 entry.infoset.y, 
+			 entry.color);
+	}
+	  
+	if (entry.infoset.x != -1) {
+	  // Draw a little arrow in the direction of the iset.
+	  if (entry.infoset.x > entry.x) { // iset is to the right
+	    ::DrawLine(dc, 
+		       entry.x+entry.num*INFOSET_SPACING, 
+		       entry.infoset.y, 
+		       entry.x+(entry.num+1)*INFOSET_SPACING, 
+		       entry.infoset.y, entry.color);
+	  }
+	  else {  // iset is to the left
+	    ::DrawLine(dc, 
+		       entry.x + entry.num * INFOSET_SPACING, 
+		       entry.infoset.y, 
+		       entry.x + (entry.num - 1) * INFOSET_SPACING, 
+		       entry.infoset.y, 
+		       entry.color);
+	  }
+	}
       }
     }
   }
