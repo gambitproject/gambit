@@ -880,7 +880,7 @@ Portion* GSM_Output(Portion** param)
   try  {
     return new OutputPortion(*new gFileOutput(filename, append));
   }
-  catch (gFileInput::OpenFailed &) {
+  catch (gFileOutput::OpenFailed &) {
     throw gclRuntimeError((gText) "Error opening file \"" +
 			  ((TextPortion*) param[0])->Value() + "\"");
   }
