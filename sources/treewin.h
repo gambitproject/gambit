@@ -58,7 +58,6 @@ private:
     const Infoset * &hilight_infoset1;   // Hilight infoset by pressing control
     const Node  *&mark_node;             // Used in mark/goto node operations
     const Node *&subgame_node;
-    const Node   *&cursor;// Used to process cursor keys, stores current pos
     
     // Private Functions
     
@@ -77,8 +76,7 @@ public:
                const gList<NodeEntry *> &node_list,
                const Infoset * &hilight_infoset_,
                const Infoset * &hilight_infoset1_,
-               const Node *&mark_node_, const Node *&cursor, 
-               const Node *&subgame_node,
+               const Node *&mark_node_, const Node *&subgame_node,
                const TreeDrawSettings &draw_settings_);
     virtual ~TreeRender(void);
     
@@ -110,8 +108,7 @@ public:
 		 const gList<NodeEntry *> &node_list,
 		 const Infoset * &hilight_infoset_,
 		 const Infoset * &hilight_infoset1_,
-		 const Node *&mark_node_, const Node *&cursor,
-		 const Node *&subgame_node,
+		 const Node *&mark_node_, const Node *&subgame_node,
 		 const TreeDrawSettings &draw_settings_,
 		 const NodeEntry *cursor_entry);
   virtual void Render(wxDC &dc);
@@ -203,9 +200,12 @@ private:
     void MakeMenus(void);
     
 protected:
-    Node   *cursor;                  // Used to process cursor keys, stores current position.
+    Node *m_cursor;  // Used to process cursor keys, stores current position.
     Bool    outcomes_changed;
     TreeDrawSettings draw_settings;  // Stores drawing parameters
+
+  void SetCursorPosition(Node *p_cursor);
+  void UpdateMenus(void);
     
 public:
     // CONSTRUCTOR, DESTRUCTOR
@@ -298,7 +298,7 @@ public:
     TreeDrawSettings &DrawSettings(void) { return draw_settings; }
 
     // Gives access to the parent to the current cursor node
-    const Node *Cursor(void) const { return cursor; }
+    Node *Cursor(void) const { return m_cursor; }
 
     // Hilight the subgame root for the currently active subgame
     void  SetSubgamePickNode(const Node *n);

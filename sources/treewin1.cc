@@ -66,9 +66,6 @@ void TreeWindow::node_add(void)
   static Infoset *infoset = 0;
   static Efg *last_ef = 0; // need this to make sure player,infoset are valid
 
-  if (cursor->NumChildren() > 0)
-    return;
-
   if (last_ef != &ef)  {
     player = 0;
     infoset = 0;
@@ -87,11 +84,11 @@ void TreeWindow::node_add(void)
 
     try {
       if (mode == NodeAddNew) {
-	ef.AppendNode(cursor, player, branches);
+	ef.AppendNode(Cursor(), player, branches);
 	set_names = node_add_dialog.SetNames();
       }
       else
-	ef.AppendNode(cursor, infoset);
+	ef.AppendNode(Cursor(), infoset);
 
       if (set_names) {
 	node_label();
@@ -118,9 +115,6 @@ void TreeWindow::node_insert(void)
   static Infoset *infoset = 0;
   static Efg *last_ef = 0; // need this to make sure player,infoset are valid
 
-  if (cursor->NumChildren() == 0)
-    return;
-
   if (last_ef != &ef)  {
     player = 0;
     infoset = 0;
@@ -139,11 +133,11 @@ void TreeWindow::node_insert(void)
 
     try {
       if (mode == NodeAddNew) {
-	ef.InsertNode(cursor, player, branches);
+	ef.InsertNode(Cursor(), player, branches);
 	set_names = node_add_dialog.SetNames();
       }
       else
-	ef.InsertNode(cursor, infoset);
+	ef.InsertNode(Cursor(), infoset);
 
       if (set_names) {
 	node_label();
@@ -166,15 +160,6 @@ void TreeWindow::node_insert(void)
 
 void TreeWindow::node_delete(void)
 {
-  if (cursor == ef.RootNode() && cursor->NumChildren() == 0) {
-    wxMessageBox("Cannot delete root node!", "Error", wxOK | wxCENTRE, pframe);
-    return;
-  }
-    
-  // Check for terminal nodes -- just take no action (why bother with an error?)
-  if (cursor->NumChildren() == 0)  
-    return;
-    
   MyDialogBox *branch_num_dialog = 0;
   char *branch_name = 0;
   
@@ -183,8 +168,8 @@ void TreeWindow::node_delete(void)
     wxStringList *branch_list = new wxStringList;
     branch_name = new char[MAX_LABEL_LENGTH];
     
-    for (int i = 1; i <= cursor->NumChildren(); i++) {
-      gText tmp = cursor->GetChild(i)->GetName();
+    for (int i = 1; i <= Cursor()->NumChildren(); i++) {
+      gText tmp = Cursor()->GetChild(i)->GetName();
       if (tmp == "") tmp = ToText(i);
       branch_list->Add(tmp);
     }
@@ -197,9 +182,9 @@ void TreeWindow::node_delete(void)
 
     if (branch_num_dialog->Completed() == wxOK) {
       int keep_num = wxListFindString(branch_list, branch_name) + 1;
-      Node *keep = cursor->GetChild(keep_num);
+      Node *keep = Cursor()->GetChild(keep_num);
       nodes_changed = TRUE;
-      cursor = ef.DeleteNode(cursor, keep);
+      SetCursorPosition(ef.DeleteNode(Cursor(), keep));
     }
         
     delete [] branch_name;
@@ -227,7 +212,7 @@ void TreeWindow::node_label(void)
     
   try {
     label = new char[MAX_LABEL_LENGTH];
-    strcpy(label, cursor->GetName());
+    strcpy(label, Cursor()->GetName());
     label_dialog = new MyDialogBox(pframe, "Label Node", EFG_NODE_HELP);
     wxFormItem *label_item = 
       wxMakeFormString("Label", &label, wxFORM_DEFAULT,
@@ -237,7 +222,7 @@ void TreeWindow::node_label(void)
     ((wxText *) label_item->GetPanelItem())->SetFocus();
     label_dialog->Go1();
     if (label_dialog->Completed() == wxOK)
-      cursor->SetName(label);
+      Cursor()->SetName(label);
     delete label_dialog;
     delete [] label;
   }
@@ -350,16 +335,16 @@ gText EFChangePayoffs::Name(void)
 
 void TreeWindow::ChangePayoffs(void)
 {
-  EFChangePayoffs *dialog = new EFChangePayoffs(ef, cursor->GetOutcome(),
+  EFChangePayoffs *dialog = new EFChangePayoffs(ef, Cursor()->GetOutcome(),
 						pframe);
 
   if (dialog->Completed() == wxOK) {
-    EFOutcome *outc = cursor->GetOutcome();
+    EFOutcome *outc = Cursor()->GetOutcome();
     gArray<gNumber> payoffs(dialog->Payoffs());
 
     if (!outc) {
       outc = ef.NewOutcome();
-      cursor->SetOutcome(outc);
+      Cursor()->SetOutcome(outc);
     }
 
     for (int i = 1; i <= ef.NumPlayers(); i++)
@@ -374,9 +359,6 @@ void TreeWindow::ChangePayoffs(void)
 
 void TreeWindow::EditOutcomeAttach(void)
 {
-  if (ef.NumOutcomes() == 0)
-    return;
-
   MyDialogBox *dialog = new MyDialogBox(pframe, "Attach Outcome");
     
   wxStringList *outcome_list = new wxStringList;
@@ -414,7 +396,7 @@ void TreeWindow::EditOutcomeAttach(void)
     }
     
     int outc = (int) ToDouble(outcome_name);
-    cursor->SetOutcome(ef.Outcomes()[outc]);
+    Cursor()->SetOutcome(ef.Outcomes()[outc]);
     outcomes_changed = 1;
     OnPaint();
   }
@@ -425,18 +407,15 @@ void TreeWindow::EditOutcomeAttach(void)
 
 void TreeWindow::EditOutcomeDetach(void)
 {
-  cursor->SetOutcome(0);
+  Cursor()->SetOutcome(0);
   outcomes_changed = 1;
   OnPaint();
 }
 
 void TreeWindow::EditOutcomeLabel(void)
 {
-  if (!cursor->GetOutcome())
-    return;
-
   char *name = new char[40];
-  strncpy(name, cursor->GetOutcome()->GetName(), 40);
+  strncpy(name, Cursor()->GetOutcome()->GetName(), 40);
 
   MyDialogBox *dialog = new MyDialogBox(pframe, "Label outcome");
   dialog->Form()->Add(wxMakeFormString("New outcome label", &name, wxFORM_TEXT,
@@ -444,7 +423,7 @@ void TreeWindow::EditOutcomeLabel(void)
   dialog->Go();
 
   if (dialog->Completed() == wxOK) {
-    cursor->GetOutcome()->SetName(name);
+    Cursor()->GetOutcome()->SetName(name);
     outcomes_changed = 1;
   }
   
@@ -472,9 +451,6 @@ void TreeWindow::EditOutcomeNew(void)
 
 void TreeWindow::EditOutcomeDelete(void)
 {
-  if (ef.NumOutcomes() == 0)
-    return;
-
   MyDialogBox *dialog = new MyDialogBox(pframe, "Delete Outcome");
     
   wxStringList *outcome_list = new wxStringList;
@@ -535,16 +511,16 @@ void TreeWindow::node_outcome(int out, int x, int y)
       float xf = x, yf = y;
       Node *tmp = GotObject(xf, yf, DRAG_OUTCOME_END);
       if (tmp)
-	cursor = tmp;
+	SetCursorPosition(tmp);
       else
 	return;
     }
     
     if (out > 0)
-      cursor->SetOutcome(ef.Outcomes()[out]);
+      Cursor()->SetOutcome(ef.Outcomes()[out]);
 
     if (out == 0)
-      cursor->SetOutcome(0);
+      Cursor()->SetOutcome(0);
 
     // if (out == -1) just update all outcomes
     outcomes_changed = 1;
@@ -560,8 +536,8 @@ void TreeWindow::node_outcome(int out, int x, int y)
 void TreeWindow::node_set_mark(void)
 {
   old_mark_node = mark_node;
-  if (mark_node != cursor)
-    mark_node = cursor;
+  if (mark_node != Cursor())
+    mark_node = Cursor();
   else
     mark_node = 0;                                   
 }
@@ -573,11 +549,9 @@ void TreeWindow::node_set_mark(void)
 void TreeWindow::node_goto_mark(void)
 {
   if (mark_node) {
-    cursor = mark_node;
+    SetCursorPosition(mark_node);
     ProcessCursor();
   }
-  else
-    MyMessageBox("Mark not set!", "Error", EFG_NODE_HELP, pframe);
 }
 
 //-----------------------------------------------------------------------
@@ -590,37 +564,9 @@ void TreeWindow::node_goto_mark(void)
 
 void TreeWindow::infoset_merge(void)
 {
-  if (!mark_node) {
-    MyMessageBox("The mark is not set", "Error", EFG_INFOSET_HELP, pframe);
-    return;
-  }
-    
-  if (!mark_node->GetInfoset()) {
-    wxMessageBox("Marked node belongs to no infosets");
-    return;
-  }
-    
-  if (!cursor->GetInfoset()) {
-    wxMessageBox("Cursor belongs to no infosets");
-    return;
-  }
-    
-  if (mark_node->GetSubgameRoot() != cursor->GetSubgameRoot()) {
-    MyMessageBox("Can not merge infosets across subgames", "Error",
-		 EFG_INFOSET_HELP, pframe);
-    return;
-  }
-    
-  if (mark_node->GetPlayer() != cursor->GetPlayer()) {
-    MyMessageBox("Can not merge infosets with different players.\n"
-		 "Change player and retry",
-		 "Error", EFG_INFOSET_HELP, pframe); 
-    return;
-  }
-    
   char *iset_name = wxGetTextFromUser("Merged infoset name");
   try {
-    Infoset *new_iset = ef.MergeInfoset(cursor->GetInfoset(),
+    Infoset *new_iset = ef.MergeInfoset(Cursor()->GetInfoset(),
 					mark_node->GetInfoset());
     
     if (iset_name)
@@ -642,14 +588,9 @@ void TreeWindow::infoset_merge(void)
 
 void TreeWindow::infoset_break(void)
 {
-  if (!cursor->GetInfoset()) {
-    wxMessageBox("Cursor belongs to no infosets");
-    return;
-  }
-  
   try {
     char *iset_name = wxGetTextFromUser("New infoset name");
-    Infoset *new_iset = ef.LeaveInfoset(cursor);
+    Infoset *new_iset = ef.LeaveInfoset(Cursor());
     if (iset_name)
       new_iset->SetName(iset_name);
     else 
@@ -667,14 +608,9 @@ void TreeWindow::infoset_break(void)
 
 void TreeWindow::infoset_split(void)
 {
-  if (!cursor->GetInfoset()) {
-    wxMessageBox("Cursor belongs to no infosets");
-    return;
-  }
-  
   try {
     char *iset_name = wxGetTextFromUser("New infoset name");
-    Infoset *new_iset = ef.SplitInfoset(cursor);
+    Infoset *new_iset = ef.SplitInfoset(Cursor());
     if (iset_name)
       new_iset->SetName(iset_name);
     else
@@ -693,29 +629,8 @@ void TreeWindow::infoset_split(void)
 
 void TreeWindow::infoset_join(void)
 {
-  if (!mark_node) {
-    MyMessageBox("The mark is not set", "Error", EFG_INFOSET_HELP, pframe);
-    return;
-  }
-    
-  if (!mark_node->GetInfoset()) {
-    wxMessageBox("Marked node belongs to no infosets");
-    return;
-  }
-    
-  if (!cursor->GetInfoset()) {
-    wxMessageBox("Cursor belongs to no infosets");
-    return;
-  }
-    
-  if (mark_node->GetSubgameRoot() != cursor->GetSubgameRoot()) {
-    MyMessageBox("Can not join infosets across subgames", "Error",
-		 EFG_INFOSET_HELP, pframe);
-    return;
-  }
-  
   try {
-    ef.JoinInfoset(mark_node->GetInfoset(), cursor);
+    ef.JoinInfoset(mark_node->GetInfoset(), Cursor());
     infosets_changed = TRUE;
   }
   catch (gException &E) {
@@ -729,21 +644,16 @@ void TreeWindow::infoset_join(void)
 
 void TreeWindow::infoset_label(void)
 {
-  if (!cursor->GetInfoset()) {
-    wxMessageBox("This node belongs to no infosets");
-    return;
-  }
-    
   char *label = 0;
   MyDialogBox *label_dialog = 0;
     
   try {
     label = new char[MAX_LABEL_LENGTH];
     Bool label_actions = TRUE;
-    if (cursor->GetInfoset()->GetName() != "")
-      strcpy(label, cursor->GetInfoset()->GetName());
+    if (Cursor()->GetInfoset()->GetName() != "")
+      strcpy(label, Cursor()->GetInfoset()->GetName());
     else
-      strcpy(label, "Infoset"+ToText(cursor->GetPlayer()->NumInfosets()));
+      strcpy(label, "Infoset"+ToText(Cursor()->GetPlayer()->NumInfosets()));
     
     label_dialog = new MyDialogBox(pframe, "Label Infoset", EFG_INFOSET_HELP);
     label_dialog->Add(wxMakeFormString(
@@ -754,7 +664,7 @@ void TreeWindow::infoset_label(void)
     label_dialog->Go();
 
     if (label_dialog->Completed() == wxOK) {
-      cursor->GetInfoset()->SetName(label);
+      Cursor()->GetInfoset()->SetName(label);
       if (label_actions) action_label();
     }
     
@@ -779,11 +689,6 @@ void TreeWindow::infoset_label(void)
 
 void TreeWindow::infoset_switch_player(void)
 {
-  if (!cursor->GetInfoset()) {
-    wxMessageBox("This node belongs to no infosets");
-    return;
-  }
-    
   MyDialogBox *infoset_switch_dialog = 0;
   char *player_name = 0;
     
@@ -792,11 +697,11 @@ void TreeWindow::infoset_switch_player(void)
     wxStringList *player_list = new wxStringList;
     player_name = new char[20];
         
-    if (ef.GetChance() != cursor->GetPlayer())
+    if (ef.GetChance() != Cursor()->GetPlayer())
       player_list->Add(ef.GetChance()->GetName());
 
     for (int pl = 1; pl <= ef.NumPlayers(); pl++) {
-      if (ef.Players()[pl] != cursor->GetPlayer())
+      if (ef.Players()[pl] != Cursor()->GetPlayer())
 	player_list->Add(ef.Players()[pl]->GetName());
     }
 
@@ -808,12 +713,12 @@ void TreeWindow::infoset_switch_player(void)
         
     if (infoset_switch_dialog->Completed() == wxOK) {
       if (strcmp(player_name, ef.GetChance()->GetName())) {
-	ef.SwitchPlayer(cursor->GetInfoset(), EfgGetPlayer(ef, player_name));
+	ef.SwitchPlayer(Cursor()->GetInfoset(), EfgGetPlayer(ef, player_name));
 	infosets_changed = TRUE;
       }
       else {
-	Infoset *s = ef.CreateInfoset(ef.GetChance(), cursor->NumChildren());
-	ef.JoinInfoset(s, cursor);
+	Infoset *s = ef.CreateInfoset(ef.GetChance(), Cursor()->NumChildren());
+	ef.JoinInfoset(s, Cursor());
 	infosets_changed = TRUE;
       }
     }
@@ -838,11 +743,6 @@ void TreeWindow::infoset_switch_player(void)
 
 void TreeWindow::infoset_reveal(void)
 {
-  if (!cursor->GetInfoset()) {
-    wxMessageBox("This node belongs to no infosets");
-    return;
-  }
-   
   MyDialogBox *infoset_reveal_dialog = 0;
   char **player_names = 0;
     
@@ -870,7 +770,7 @@ void TreeWindow::infoset_reveal(void)
 	  players.Append(ef.Players()[i]);
       }
 
-      ef.Reveal(cursor->GetInfoset(), players);
+      ef.Reveal(Cursor()->GetInfoset(), players);
       infosets_changed = TRUE;
     }
         
@@ -917,17 +817,7 @@ void TreeWindow::infoset_reveal(void)
 
 void TreeWindow::action_label(void)
 {
-  if (!cursor->GetInfoset()) {
-    wxMessageBox("This node belongs to no infosets");
-    return;
-  }
-    
-  if (cursor->GetInfoset()->NumActions() < 1) {
-    wxMessageBox("No actions to label");
-    return;
-  }
-    
-  int num_actions = cursor->GetInfoset()->NumActions();
+  int num_actions = Cursor()->GetInfoset()->NumActions();
   int num_d = num_actions / ENTRIES_PER_DIALOG -
         ((num_actions % ENTRIES_PER_DIALOG) ? 0 : 1);
   char **action_names = 0;
@@ -944,7 +834,7 @@ void TreeWindow::action_label(void)
       for (i = 1; i <= actions_now; i++) {
 	action_names[i-1] = new char[MAX_LABEL_LENGTH];
 	strcpy(action_names[i-1], 
-	       cursor->GetInfoset()->GetActionName(i+d*ENTRIES_PER_DIALOG));
+	       Cursor()->GetInfoset()->GetActionName(i+d*ENTRIES_PER_DIALOG));
 	branch_label_dialog->Add(wxMakeFormString(
 		"Action " + ToText(i + d * ENTRIES_PER_DIALOG), 
                 &action_names[i-1], 
@@ -960,7 +850,7 @@ void TreeWindow::action_label(void)
 
       if (branch_label_dialog->Completed() == wxOK) {
 	for (i = 1; i <= actions_now; i++)
-	  cursor->GetInfoset()->SetActionName(i+d*ENTRIES_PER_DIALOG, 
+	  Cursor()->GetInfoset()->SetActionName(i+d*ENTRIES_PER_DIALOG, 
 					      action_names[i-1]);
       }
       
@@ -988,21 +878,14 @@ void TreeWindow::action_label(void)
 
 void TreeWindow::action_insert(void)
 {
-  int num_children = cursor->NumChildren();
-    
-  if (num_children == 0) {
-    MyMessageBox("Terminal node: cannot insert branch", "Error",
-		 EFG_ACTION_HELP, pframe);
-    return;
-  }
-   
+  int num_children = Cursor()->NumChildren();
   MyDialogBox *branch_insert_dialog = 0;
   char *action_str = 0;
 
   try {
     branch_insert_dialog = new MyDialogBox(pframe, "Insert Branch",
 					   EFG_ACTION_HELP);
-    Infoset *iset = cursor->GetInfoset();
+    Infoset *iset = Cursor()->GetInfoset();
     wxStringList *action_list = new wxStringList;
     action_str = new char[30];
 
@@ -1044,22 +927,14 @@ void TreeWindow::action_insert(void)
 
 void TreeWindow::action_delete(void)
 {
-  int num_children = cursor->NumChildren();
-    
-  if (num_children == 0) {
-    MyMessageBox("Terminal node: cannot delete branch", "Error",
-		 EFG_ACTION_HELP, pframe);
-    return;
-  }
-  
-
+  int num_children = Cursor()->NumChildren();
   MyDialogBox *branch_delete_dialog = 0;
   char *action_str = 0;
 
   try {
     branch_delete_dialog = 
       new MyDialogBox(pframe, "Delete Branch", EFG_ACTION_HELP);
-    Infoset *iset = cursor->GetInfoset();
+    Infoset *iset = Cursor()->GetInfoset();
     wxStringList *action_list = new wxStringList;
     action_str = new char[30];
 
@@ -1103,20 +978,14 @@ void TreeWindow::action_delete(void)
 
 void TreeWindow::action_probs(void)
 {
-  Node *n = cursor;
   int i;
     
-  if (!n->GetInfoset() || !n->GetPlayer()->IsChance()) {
-    wxMessageBox("Probabilities can only be set for the chance player", "Error",
-		 wxOK | wxCENTRE, pframe);
-    return;
-  }
-    
-  int num_actions = cursor->NumChildren();
+  int num_actions = Cursor()->NumChildren();
   int num_d = num_actions/ENTRIES_PER_DIALOG-((num_actions%ENTRIES_PER_DIALOG) ? 0 : 1);
 
   MyDialogBox *node_probs_dialog = 0;
   char **prob_vector = 0;
+  Node *n = Cursor();
 
   try {
     for (int d = 0; d <= num_d; d++) {
@@ -1228,11 +1097,6 @@ void TreeWindow::tree_label(void)
 
 void TreeWindow::tree_delete(void)
 {
-  if (cursor->NumChildren() == 0) {
-    //  Ignore this error silently
-    return;
-  }
-    
   MyMessageBox *tree_delete_dialog = 0;
     
   try {
@@ -1242,7 +1106,7 @@ void TreeWindow::tree_delete(void)
         
     if (tree_delete_dialog->Completed() == wxOK) {
       nodes_changed = true;
-      ef.DeleteTree(cursor);
+      ef.DeleteTree(Cursor());
     }
 
     delete tree_delete_dialog;
@@ -1261,20 +1125,9 @@ void TreeWindow::tree_delete(void)
 
 void TreeWindow::tree_copy(void)
 {
-  if (!mark_node) {
-    MyMessageBox("The mark is not set", "Error",
-		 EFG_TREE_HELP, pframe);
-    return;
-  }
-
-  if (cursor->GetSubgameRoot() != mark_node->GetSubgameRoot()) {
-    MyMessageBox("Can not copy across subgames", "Error", EFG_TREE_HELP, pframe);
-    return;
-  }
-
   nodes_changed = true; 
   try {
-    ef.CopyTree(mark_node, cursor);
+    ef.CopyTree(mark_node, Cursor());
   }
   catch (gException &E) {
     guiExceptionDialog(E.Description(), pframe);
@@ -1287,19 +1140,9 @@ void TreeWindow::tree_copy(void)
 
 void TreeWindow::tree_move(void)
 {
-  if (!mark_node) {
-    MyMessageBox("The mark is not set", "Error", EFG_TREE_HELP, pframe);
-    return;
-  }
-
-  if (cursor->GetSubgameRoot() != mark_node->GetSubgameRoot()) {
-    MyMessageBox("Can not copy across subgames", "Error", EFG_TREE_HELP, pframe);
-    return;
-  }
-
   nodes_changed = true;
   try {
-    ef.MoveTree(mark_node, cursor);
+    ef.MoveTree(mark_node, Cursor());
   }
   catch (gException &E) {
     guiExceptionDialog(E.Description(), pframe);
@@ -1356,37 +1199,37 @@ void TreeWindow::subgame_solve(void)
 
 void TreeWindow::subgame_set(void)
 {
-  if (cursor->GetSubgameRoot() == cursor) {
+  if (Cursor()->GetSubgameRoot() == Cursor()) {
     // ignore silently
     return;
   }
 
-  if (!ef.IsLegalSubgame(cursor)) {
+  if (!ef.IsLegalSubgame(Cursor())) {
     wxMessageBox("This node is not a root of a valid subgame"); 
     return;
   }
 
-  ef.DefineSubgame(cursor);
-  subgame_list.Append(SubgameEntry(cursor, true)); // collapse
+  ef.DefineSubgame(Cursor());
+  subgame_list.Append(SubgameEntry(Cursor(), true)); // collapse
   must_recalc = true;
 }
 
 void TreeWindow::subgame_clear_one(void)
 {
-  if (cursor->GetSubgameRoot() != cursor) {
+  if (Cursor()->GetSubgameRoot() != Cursor()) {
     wxMessageBox("This node is not a subgame root");
     return;
   }
   
-  if (cursor->GetSubgameRoot() == ef.RootNode()) {
+  if (Cursor()->GetSubgameRoot() == ef.RootNode()) {
     wxMessageBox("Root node is always a subgame root");
     return;
   }
     
-  ef.RemoveSubgame(cursor);
+  ef.RemoveSubgame(Cursor());
 
   for (int i = 1; i <= subgame_list.Length(); i++) {
-    if (subgame_list[i].root == cursor)
+    if (subgame_list[i].root == Cursor())
       subgame_list.Remove(i);
   }
 
@@ -1404,7 +1247,7 @@ void TreeWindow::subgame_clear_all(void)
 void TreeWindow::subgame_collapse_one(void)
 {
   for (int i = 1; i <= subgame_list.Length(); i++) {
-    if (subgame_list[i].root == cursor) {
+    if (subgame_list[i].root == Cursor()) {
       subgame_list[i].expanded = false;
       must_recalc = true;
       return;
@@ -1425,7 +1268,7 @@ void TreeWindow::subgame_collapse_all(void)
 void TreeWindow::subgame_expand_one(void)
 {
   for (int i = 1; i <= subgame_list.Length(); i++) {
-    if (subgame_list[i].root == cursor) {
+    if (subgame_list[i].root == Cursor()) {
       subgame_list[i].expanded = true;
       must_recalc = true;
       return;
@@ -1438,9 +1281,9 @@ void TreeWindow::subgame_expand_one(void)
 void TreeWindow::subgame_expand_branch(void)
 {
   for (int i = 1; i <= subgame_list.Length(); i++) {
-    if (subgame_list[i].root == cursor) {
+    if (subgame_list[i].root == Cursor()) {
       for (int j = 1; j <= subgame_list.Length(); j++) {
-	if (ef.IsSuccessor(subgame_list[j].root, cursor)) {
+	if (ef.IsSuccessor(subgame_list[j].root, Cursor())) {
 	  subgame_list[j].expanded = true;
 	  must_recalc = true;
 	}
@@ -1465,7 +1308,7 @@ void TreeWindow::subgame_expand_all(void)
 void TreeWindow::subgame_toggle(void)
 {
   for (int i = 1; i <= subgame_list.Length(); i++) {
-    if (subgame_list[i].root == cursor) {
+    if (subgame_list[i].root == Cursor()) {
       subgame_list[i].expanded = !subgame_list[i].expanded; 
       must_recalc = true;
       return;
@@ -1772,9 +1615,8 @@ void TreeWindow::display_zoom_win(void)
 				     (const Infoset *&) hilight_infoset,
 				     (const Infoset *&) hilight_infoset1, 
 				     (const Node *&) mark_node, 
-				     (const Node *&) cursor,
 				     (const Node *&) subgame_node, 
-				     draw_settings, GetNodeEntry(cursor));
+				     draw_settings, GetNodeEntry(Cursor()));
   }
 }
 

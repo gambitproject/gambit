@@ -160,6 +160,8 @@ public:
     // Currently used support
     const EFSupport *GetSupport(int which);
 
+  void UpdateMenus(Node *p_cursor, Node *p_markNode);
+
     // File name
     void         SetFileName(void);
     void         SetFileName(const gText &s);

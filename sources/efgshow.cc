@@ -713,14 +713,14 @@ void EfgShow::MakeMenus(void)
   file_menu->Append(FILE_CLOSE,  "&Close",   "Close this window");
 
   wxMenu *edit_menu = new wxMenu;
-  wxMenu *node_menu  = new wxMenu;
-  node_menu->Append(NODE_ADD, "&Add Move", "Add a move");
-  node_menu->Append(NODE_DELETE, "&Delete Move", "Remove move at cursor");
-  node_menu->Append(NODE_INSERT, "&Insert Move", "Insert move at cursor");
-  node_menu->Append(NODE_LABEL,     "&Label",     "Label cursor node");
-  node_menu->AppendSeparator();
-  node_menu->Append(NODE_SET_MARK,  "Set &Mark",  "Mark cursor node");
-  node_menu->Append(NODE_GOTO_MARK, "Go&to Mark", "Goto marked node");
+  wxMenu *nodeMenu  = new wxMenu;
+  nodeMenu->Append(NODE_ADD, "&Add Move", "Add a move");
+  nodeMenu->Append(NODE_DELETE, "&Delete Move", "Remove move at cursor");
+  nodeMenu->Append(NODE_INSERT, "&Insert Move", "Insert move at cursor");
+  nodeMenu->Append(NODE_LABEL,     "&Label",     "Label cursor node");
+  nodeMenu->AppendSeparator();
+  nodeMenu->Append(NODE_SET_MARK,  "Set &Mark",  "Mark cursor node");
+  nodeMenu->Append(NODE_GOTO_MARK, "Go&to Mark", "Goto marked node");
 
   wxMenu *action_menu = new wxMenu;
   action_menu->Append(ACTION_DELETE, "&Delete", "Delete an action from cursor iset");
@@ -758,7 +758,7 @@ void EfgShow::MakeMenus(void)
   tree_menu->Append(TREE_LABEL,     "&Label",    "Set the game label");
   tree_menu->Append(TREE_PLAYERS,   "&Players",  "Edit/View players");
   tree_menu->Append(TREE_INFOSETS,  "&Infosets", "Edit/View infosets");
-  edit_menu->Append(EDIT_NODE,    "&Node",     node_menu,    "Edit the node");
+  edit_menu->Append(EDIT_NODE,    "&Node",     nodeMenu,    "Edit the node");
   edit_menu->Append(EDIT_ACTIONS, "&Actions",  action_menu,  "Edit actions");
   edit_menu->Append(EDIT_INFOSET, "&Infoset",  infoset_menu, "Edit infosets");
   edit_menu->Append(TREE_OUTCOMES, "&Outcomes", outcome_menu,
@@ -1415,6 +1415,53 @@ const EFSupport *EfgShow::GetSupport(int which)
     return (which == 0) ? cur_sup : disp_sup;
 }
 
+
+void EfgShow::UpdateMenus(Node *p_cursor, Node *p_markNode)
+{
+  wxMenuBar *menuBar = GetMenuBar();
+  menuBar->Enable(NODE_ADD, (p_cursor->NumChildren() > 0) ? FALSE : TRUE);
+  menuBar->Enable(NODE_DELETE, (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  menuBar->Enable(NODE_GOTO_MARK, (p_markNode) ? TRUE : FALSE);
+  menuBar->Enable(INFOSET_MERGE, (p_markNode && p_markNode->GetInfoset() &&
+				  p_cursor->GetInfoset() &&
+				  p_markNode->GetSubgameRoot() == p_cursor->GetSubgameRoot() &&
+				  p_markNode->GetPlayer() == p_cursor->GetPlayer()) ? TRUE : FALSE);
+  menuBar->Enable(INFOSET_BREAK, (p_cursor->GetInfoset()) ? TRUE : FALSE);
+  menuBar->Enable(INFOSET_SPLIT, (p_cursor->GetInfoset()) ? TRUE : FALSE);
+  menuBar->Enable(INFOSET_JOIN, (p_markNode && p_markNode->GetInfoset() &&
+				 p_cursor->GetInfoset() &&
+				 p_markNode->GetSubgameRoot() == p_cursor->GetSubgameRoot()) ? TRUE : FALSE);
+  menuBar->Enable(INFOSET_LABEL, (p_cursor->GetInfoset()) ? TRUE : FALSE);
+  menuBar->Enable(INFOSET_SWITCH_PLAYER,
+		  (p_cursor->GetInfoset()) ? TRUE : FALSE);
+  menuBar->Enable(INFOSET_REVEAL, (p_cursor->GetInfoset()) ? TRUE : FALSE);
+
+  menuBar->Enable(ACTION_LABEL,
+		  (p_cursor->GetInfoset() &&
+		   p_cursor->GetInfoset()->NumActions() > 0) ? TRUE : FALSE);
+  menuBar->Enable(ACTION_INSERT, (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  menuBar->Enable(ACTION_DELETE, (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  menuBar->Enable(ACTION_PROBS,
+		  (p_cursor->GetInfoset() &&
+		   p_cursor->GetPlayer()->IsChance()) ? TRUE : FALSE);
+
+  menuBar->Enable(TREE_DELETE, (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  menuBar->Enable(TREE_COPY,
+		  (p_markNode &&
+		   p_cursor->GetSubgameRoot() == p_markNode->GetSubgameRoot()) ? TRUE : FALSE);
+  menuBar->Enable(TREE_MOVE,
+		  (p_markNode &&
+		   p_cursor->GetSubgameRoot() == p_markNode->GetSubgameRoot()) ? TRUE : FALSE);
+
+  menuBar->Enable(TREE_OUTCOMES_ATTACH,
+		  (ef.NumOutcomes() > 0) ? TRUE : FALSE);
+  menuBar->Enable(TREE_OUTCOMES_DETACH,
+		  (p_cursor->GetOutcome()) ? TRUE : FALSE);
+  menuBar->Enable(TREE_OUTCOMES_LABEL,
+		  (p_cursor->GetOutcome()) ? TRUE : FALSE);
+  menuBar->Enable(TREE_OUTCOMES_DELETE,
+		  (ef.NumOutcomes() > 0) ? TRUE : FALSE);
+}
 
 
 

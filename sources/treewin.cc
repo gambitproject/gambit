@@ -209,13 +209,12 @@ TreeRender::TreeRender(wxFrame *frame, TreeWindow *parent_,
                        const gList<NodeEntry *> &node_list_,
                        const Infoset * &hilight_infoset_,
                        const Infoset * &hilight_infoset1_,
-                       const Node *&mark_node_,
-                       const Node *&cursor_, const Node *&subgame_node_,
+                       const Node *&mark_node_, const Node *&subgame_node_,
                        const TreeDrawSettings &draw_settings_)
     : wxCanvas(frame, -1, -1, -1, -1, 0),
       node_list(node_list_),
       hilight_infoset(hilight_infoset_), hilight_infoset1(hilight_infoset1_),
-      mark_node(mark_node_), subgame_node(subgame_node_), cursor(cursor_),
+      mark_node(mark_node_), subgame_node(subgame_node_),
       parent(parent_), draw_settings(draw_settings_),
       flasher(0), painting(false)
 { }
@@ -742,13 +741,12 @@ TreeZoomWindow::TreeZoomWindow(wxFrame *frame, TreeWindow *parent,
                                const Infoset * &hilight_infoset_,
                                const Infoset * &hilight_infoset1_,
                                const Node *&mark_node_,
-                               const Node *&cursor_,
                                const Node *&subgame_node_,
                                const TreeDrawSettings &draw_settings_,
                                const NodeEntry *cursor_entry)
     : TreeRender(new TreeZoomFrame(frame, parent), parent,
                  node_list_, hilight_infoset_, hilight_infoset1_,
-                 mark_node_, cursor_, subgame_node_, draw_settings_),
+                 mark_node_, subgame_node_, draw_settings_),
       m_parent(parent)
 {
     MakeFlasher();
@@ -1349,11 +1347,11 @@ int TreeWindow::OutcomeDragger::Dragging(void) const
 
 TreeWindow::TreeWindow(Efg &ef_, EFSupport * &disp, EfgShow *frame_) 
     : TreeRender(frame_, this, node_list, hilight_infoset, hilight_infoset1,
-                 mark_node, cursor, subgame_node, draw_settings),
+                 mark_node, subgame_node, draw_settings),
       ef(ef_), disp_sup(disp), frame(frame_), pframe(frame_)
 {
     // Set the cursor to the root node
-    cursor = ef.RootNode();
+    m_cursor = ef.RootNode();
     // Make sure that Chance player has a name
     ef.GetChance()->SetName("Chance");
     // Add the first subgame -- root subgame
@@ -1407,6 +1405,8 @@ TreeWindow::TreeWindow(Efg &ef_, EFSupport * &disp, EfgShow *frame_)
     
     // Create a popup menu
     MakeMenus();
+    // Set up the menu enabling
+    UpdateMenus();
 }
 
 TreeWindow::~TreeWindow(void)
@@ -1591,82 +1591,72 @@ static Node *NextSameIset(const Node *n)
 //
 void TreeWindow::OnChar(wxKeyEvent& ch)
 {
-    //
-    // Accelerators:
-    // Note that accelerators are provided for in the wxwin code but only for the
-    // windows platform.  In order to make this more portable, accelerators for
-    // this program are coded in the header file and processed in OnChar
-    //
+  // Accelerators:
+  // Note that accelerators are provided for in the wxwin code but only for the
+  // windows platform.  In order to make this more portable, accelerators for
+  // this program are coded in the header file and processed in OnChar
+  //
     
-    frame->CheckAccelerators(ch);
+  frame->CheckAccelerators(ch);
     
-    if (ch.ShiftDown() == FALSE)
-    {
-        bool c = false;   // set to true if cursor position has changed
-        switch (ch.KeyCode())
-        {
-        case WXK_LEFT:
-            if (cursor->GetParent())
-            {
-                cursor = (Node *) GetValidParent(cursor)->n;
-                c = true;
-            }
-            break;
-        case WXK_RIGHT:
-            if (GetValidChild(cursor))
-            {
-                cursor = (Node *) GetValidChild(cursor)->n;
-                c = true;
-            }
-            break;
-        case WXK_UP:
-        {
-            Node *prior = (!ch.ControlDown()) ? 
-                PriorSameLevel(GetNodeEntry(cursor), node_list) : PriorSameIset(cursor);
-            if (prior)
-            {
-                cursor = prior;
-                c = true;
-            }
-            break;
-        }
-        case WXK_DOWN:
-        {
-            Node *next = (!ch.ControlDown()) ?
-                NextSameLevel(GetNodeEntry(cursor), node_list) : NextSameIset(cursor);
-            if (next)
-            {
-                cursor = next;
-                c = true;
-            }
-            break;
-        }
-        case WXK_SPACE:
-            c = true;
-            break;
-        }
-        
-        if (c) 
-            ProcessCursor(); // cursor moved
-
-        // Implement the behavior that when control+cursor key is pressed, the
-        // nodes belonging to the iset are hilighted.
-        if (c && ch.ControlDown())
-        {
-            if (hilight_infoset1 != cursor->GetInfoset())
-            {
-                hilight_infoset1 = cursor->GetInfoset();
-                OnPaint();
-            }
-        }
-        if (!ch.ControlDown() && hilight_infoset1)
-        {
-            hilight_infoset1 = 0;
-            OnPaint();
-        }
+  if (ch.ShiftDown() == FALSE) {
+    bool c = false;   // set to true if cursor position has changed
+    switch (ch.KeyCode()) {
+    case WXK_LEFT:
+      if (Cursor()->GetParent()) {
+	SetCursorPosition((Node *) GetValidParent(Cursor())->n);
+	c = true;
+      }
+      break;
+    case WXK_RIGHT:
+      if (GetValidChild(Cursor())) {
+	SetCursorPosition((Node *) GetValidChild(Cursor())->n);
+	c = true;
+      }
+      break;
+    case WXK_UP: {
+      Node *prior = ((!ch.ControlDown()) ? 
+		     PriorSameLevel(GetNodeEntry(Cursor()), node_list) :
+		     PriorSameIset(Cursor()));
+      if (prior) {
+	SetCursorPosition(prior);
+	c = true;
+      }
+      break;
     }
-    else
-        wxCanvas::OnChar(ch);
+    case WXK_DOWN: {
+      Node *next = ((!ch.ControlDown()) ?
+		    NextSameLevel(GetNodeEntry(Cursor()), node_list) :
+		    NextSameIset(Cursor()));
+      if (next) {
+	SetCursorPosition(next);
+	c = true;
+      }
+      break;
+    }
+    case WXK_SPACE:
+      c = true;
+      break;
+    }
+        
+    if (c) 
+      ProcessCursor(); // cursor moved
+
+    // Implement the behavior that when control+cursor key is pressed, the
+    // nodes belonging to the iset are hilighted.
+    if (c && ch.ControlDown()) {
+      if (hilight_infoset1 != Cursor()->GetInfoset()) {
+	hilight_infoset1 = Cursor()->GetInfoset();
+	OnPaint();
+      }
+    }
+    if (!ch.ControlDown() && hilight_infoset1) {
+      hilight_infoset1 = 0;
+      OnPaint();
+    }
+  }
+  else
+    wxCanvas::OnChar(ch);
 }
 
 //
@@ -1702,13 +1692,12 @@ void TreeWindow::OnEvent(wxMouseEvent& ev)
         ProcessDClick(ev);
     
     // Clicking on a node will move the cursor there
-    if (ev.LeftDown())
-    {
-        Node *old_cursor = cursor;
-        ProcessClick(ev);
-        if (cursor != old_cursor) 
-            ProcessCursor();
-        SetFocus(); // click on the canvas to restore keyboard focus
+    if (ev.LeftDown()) {
+      const Node *old_cursor = Cursor();
+      ProcessClick(ev);
+      if (Cursor() != old_cursor) 
+	ProcessCursor();
+      SetFocus(); // click on the canvas to restore keyboard focus
     }
     
     // Right click implements a popup menu (edit), legend display
@@ -2013,8 +2002,9 @@ void TreeWindow::UpdateTableParents(void)
 void TreeWindow::Render(wxDC &dc)
 {
     int width, height, x_start, y_start;
-    if (nodes_changed || infosets_changed || must_recalc)
-    {
+    if (nodes_changed || infosets_changed || must_recalc) {
+      UpdateMenus();
+
         // Recalculate only if needed.
         // Note that node_table is preserved until the next recalculation.
         node_list.Flush();
@@ -2063,19 +2053,17 @@ void TreeWindow::Render(wxDC &dc)
 
     char *dc_type = dc.GetClassInfo()->GetClassName();
     
-    if (strcmp(dc_type, "wxCanvasDC") == 0)  // if drawing to screen
-    {
-        if (cursor)
-        {
-            NodeEntry *entry = GetNodeEntry(cursor);
+    if (strcmp(dc_type, "wxCanvasDC") == 0) { // if drawing to screen
+      if (Cursor()) {
+	NodeEntry *entry = GetNodeEntry(Cursor());
 
-            if (!entry)
-            {
-                cursor = ef.RootNode(); entry = GetNodeEntry(cursor);
-            }
+	if (!entry) { 
+	  SetCursorPosition(ef.RootNode());
+	  entry = GetNodeEntry(Cursor());
+	}
 
-            UpdateCursor(entry);
-        }
+	UpdateCursor(entry);
+      }
         
         if (need_clear)
         {
@@ -2172,11 +2160,10 @@ void TreeWindow::ProcessCursor(void)
     y_steps = draw_settings.y_steps();
     
     // Make sure the cursor is visible.
-    NodeEntry *entry = GetNodeEntry(cursor);
-    if (!entry)
-    {
-        cursor = ef.RootNode();
-        entry = GetNodeEntry(cursor);
+    NodeEntry *entry = GetNodeEntry(Cursor()); 
+    if (!entry) {
+      SetCursorPosition(ef.RootNode());
+      entry = GetNodeEntry(Cursor());
     }
     
     // Check if the cursor is in the visible x-dimension.
@@ -2222,7 +2209,7 @@ void TreeWindow::ProcessCursor(void)
         draw_settings.set_y_scroll(y_start);
     }
 
-    frame->OnSelectedMoved(cursor);
+    frame->OnSelectedMoved(Cursor());
 }
 
 
@@ -2238,7 +2225,7 @@ void TreeWindow::ProcessClick(wxMouseEvent &ev)
         if(x > entry->x &&
            x < entry->x+draw_settings.NodeLength()+entry->nums*INFOSET_SPACING &&
            y > entry->y-DELTA && y < entry->y+DELTA)
-            cursor = (Node *)entry->n;
+             SetCursorPosition((Node *) entry->n);
     }
 }
 
@@ -2260,14 +2247,13 @@ void TreeWindow::ProcessDClick(wxMouseEvent &ev)
         if (x > entry->x+entry->nums*INFOSET_SPACING &&
             x < entry->x+entry->nums*INFOSET_SPACING+
             draw_settings.NodeLength()-SUBGAME_LARGE_ICON_SIZE &&
-            y > entry->y-DELTA && y < entry->y+DELTA)
-        {
-            cursor = (Node *)entry->n;
-            if (cursor->GetInfoset()) // implement iset hilighting
-                frame->HilightInfoset(cursor->GetPlayer()->GetNumber(),
-                                      cursor->GetInfoset()->GetNumber(), 1);
-            OnPaint();
-            return;
+            y > entry->y-DELTA && y < entry->y+DELTA) {
+	  SetCursorPosition((Node *) entry->n);
+	  if (Cursor()->GetInfoset()) // implement iset hilighting
+	    frame->HilightInfoset(Cursor()->GetPlayer()->GetNumber(),
+				  Cursor()->GetInfoset()->GetNumber(), 1);
+	  OnPaint();
+	  return;
         }
         // implement subgame toggle (different for collapsed and expanded)
         if (entry->n->GetSubgameRoot() == entry->n)
@@ -2275,12 +2261,11 @@ void TreeWindow::ProcessDClick(wxMouseEvent &ev)
             {
                 if(x > entry->x && x < entry->x+SUBGAME_SMALL_ICON_SIZE &&
                    y > entry->y-SUBGAME_SMALL_ICON_SIZE/2 &&
-                   y < entry->y+SUBGAME_SMALL_ICON_SIZE/2)
-                {
-                    cursor = (Node *)entry->n;
-                    subgame_toggle();
-                    OnPaint();
-                    return;
+                   y < entry->y+SUBGAME_SMALL_ICON_SIZE/2) {
+		  SetCursorPosition((Node *) entry->n);
+		  subgame_toggle();
+		  OnPaint();
+		  return;
                 }
             }
             else
@@ -2292,7 +2277,7 @@ void TreeWindow::ProcessDClick(wxMouseEvent &ev)
                     y > entry->y-SUBGAME_LARGE_ICON_SIZE/2 &&
                     y < entry->y+SUBGAME_LARGE_ICON_SIZE/2)
                 {
-                    cursor = (Node *)entry->n;
+                    SetCursorPosition((Node *) entry->n);
                     subgame_toggle();
                     OnPaint();
                     return;
@@ -2309,7 +2294,7 @@ void TreeWindow::ProcessDClick(wxMouseEvent &ev)
         }
         if (id != -1)
         {
-            cursor = (Node *)entry->n;
+            SetCursorPosition((Node *) entry->n);
             switch (id)
             {
             case NODE_ABOVE_NOTHING: break;
@@ -2340,7 +2325,7 @@ void TreeWindow::ProcessDClick(wxMouseEvent &ev)
         }
         if (id != -1)
         {
-            cursor = (Node *)entry->parent->n;
+            SetCursorPosition((Node *) entry->parent->n);
             switch (id)
             {
             case BRANCH_ABOVE_NOTHING: break;
@@ -2363,7 +2348,7 @@ void TreeWindow::ProcessDClick(wxMouseEvent &ev)
         }
         if (id != -1)
         {
-            cursor = (Node *)entry->n;
+            SetCursorPosition((Node *) entry->n);
             switch (id) {
             case NODE_RIGHT_NOTHING:
 	      break;
@@ -2661,30 +2646,30 @@ void TreeWindow::HilightInfoset(int pl, int iset)
 //
 void TreeWindow::SupportChanged(void)
 {
-    must_recalc = TRUE;
-    // Check if the cursor is still valid
-    NodeEntry *ne = GetNodeEntry(cursor);
-    if (ne->child_number)
-    {
-        if (!disp_sup->Find(cursor->GetInfoset()->Actions()[ne->child_number]))
-            cursor = ef.RootNode();
-    }
+  must_recalc = TRUE;
+  // Check if the cursor is still valid
+  NodeEntry *ne = GetNodeEntry(Cursor());
+  if (ne->child_number) {
+    if (!disp_sup->Find(Cursor()->GetInfoset()->Actions()[ne->child_number]))
+      SetCursorPosition(ef.RootNode());
+  }
 
-    OnPaint();
+  OnPaint();
 }
 
 void TreeWindow::SetSubgamePickNode(const Node *n)
 {
-    if (n)
-    {
-        Node *cur_cursor = cursor; // save the REAL cursor
-        cursor = (Node *)n;   // fake the cursor movement to ensure that the node is visible
-        ProcessCursor();
-        NodeEntry *ne = GetNodeEntry(n);
-        DrawSubgamePickIcon(*GetDC(), *ne);
-        cursor = cur_cursor;
-    }
-    subgame_node = n;
+  if (n) {
+    // save the actual cursor, and fake a cursor movement to ensure
+    // that the node is visible
+    Node *cur_cursor = Cursor();
+    SetCursorPosition((Node *) n);
+    ProcessCursor();
+    NodeEntry *ne = GetNodeEntry(n);
+    DrawSubgamePickIcon(*GetDC(), *ne);
+    SetCursorPosition(cur_cursor);
+  }
+  subgame_node = n;
 }
 
 void TreeWindow::OnPopup(wxMenu &ob, wxCommandEvent &ev)
@@ -2870,6 +2855,58 @@ void TreeWindow::file_save(void)
       delete E;
       frame->SetFileName(s);
     }
+}
+
+void TreeWindow::SetCursorPosition(Node *p_cursor)
+{
+  m_cursor = p_cursor;
+  UpdateMenus();
+}
+
+void TreeWindow::UpdateMenus(void)
+{
+  edit_menu->Enable(NODE_ADD, (m_cursor->NumChildren() > 0) ? FALSE : TRUE);
+  edit_menu->Enable(NODE_DELETE, (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  edit_menu->Enable(INFOSET_MERGE, (mark_node && mark_node->GetInfoset() &&
+				    m_cursor->GetInfoset() &&
+				    mark_node->GetSubgameRoot() == m_cursor->GetSubgameRoot() &&
+				    mark_node->GetPlayer() == m_cursor->GetPlayer()) ? TRUE : FALSE);
+  edit_menu->Enable(INFOSET_BREAK, (m_cursor->GetInfoset()) ? TRUE : FALSE);
+  edit_menu->Enable(INFOSET_SPLIT, (m_cursor->GetInfoset()) ? TRUE : FALSE);
+  edit_menu->Enable(INFOSET_JOIN, (mark_node && mark_node->GetInfoset() &&
+				   m_cursor->GetInfoset() &&
+				   mark_node->GetSubgameRoot() == m_cursor->GetSubgameRoot()) ? TRUE : FALSE);
+  edit_menu->Enable(INFOSET_LABEL, (m_cursor->GetInfoset()) ? TRUE : FALSE);
+  edit_menu->Enable(INFOSET_SWITCH_PLAYER,
+		    (m_cursor->GetInfoset()) ? TRUE : FALSE);
+  edit_menu->Enable(INFOSET_REVEAL, (m_cursor->GetInfoset()) ? TRUE : FALSE);
+
+  edit_menu->Enable(ACTION_LABEL,
+		    (m_cursor->GetInfoset() &&
+		     m_cursor->GetInfoset()->NumActions() > 0) ? TRUE : FALSE);
+  edit_menu->Enable(ACTION_INSERT, (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  edit_menu->Enable(ACTION_DELETE, (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  edit_menu->Enable(ACTION_PROBS,
+		    (m_cursor->GetInfoset() &&
+		     m_cursor->GetPlayer()->IsChance()) ? TRUE : FALSE);
+
+  edit_menu->Enable(TREE_DELETE, (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  edit_menu->Enable(TREE_COPY,
+		    (mark_node &&
+		     m_cursor->GetSubgameRoot() == mark_node->GetSubgameRoot()) ? TRUE : FALSE);
+  edit_menu->Enable(TREE_MOVE,
+		    (mark_node &&
+		     m_cursor->GetSubgameRoot() == mark_node->GetSubgameRoot()) ? TRUE : FALSE);
+
+  edit_menu->Enable(TREE_OUTCOMES_ATTACH,
+		    (ef.NumOutcomes() > 0) ? TRUE : FALSE);
+  edit_menu->Enable(TREE_OUTCOMES_DETACH,
+		    (m_cursor->GetOutcome()) ? TRUE : FALSE);
+  edit_menu->Enable(TREE_OUTCOMES_LABEL,
+		    (m_cursor->GetOutcome()) ? TRUE : FALSE);
+  edit_menu->Enable(TREE_OUTCOMES_DELETE,
+		    (ef.NumOutcomes() > 0) ? TRUE : FALSE);
+  frame->UpdateMenus(m_cursor, mark_node);
 }
 
 template class gList<NODEENTRY *>;
