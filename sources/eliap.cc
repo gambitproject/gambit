@@ -185,7 +185,7 @@ template <class T> EFLiapModule<T>::~EFLiapModule()
 { }
 
 template <class T>
-const gList<gPVector<T> > &EFLiapModule<T>::GetSolutions(void) const
+const gList<gDPVector<T> > &EFLiapModule<T>::GetSolutions(void) const
 {
   return solutions;
 }

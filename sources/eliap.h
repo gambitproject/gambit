@@ -20,7 +20,7 @@ public:
 template <class T> class EFLiapModule : public LiapModule<T>  {
   private:
     const ExtForm<T> &E;
-    gList<gPVector<T> > solutions;
+    gList<gDPVector<T> > solutions;
 
     LiapFunc<T> *CreateFunc(void);
     void AddSolution(const LiapFunc<T> *const);
@@ -29,7 +29,7 @@ template <class T> class EFLiapModule : public LiapModule<T>  {
     EFLiapModule(const ExtForm<T> &E, EFLiapParams<T> &p); 
     EFLiapModule(const ExtForm<T> &E, EFLiapParams<T> &p, gDPVector<T> &s); 
     virtual ~EFLiapModule();
-    const gList<gPVector<T> > &GetSolutions(void) const;
+    const gList<gDPVector<T> > &GetSolutions(void) const;
 };
 
 
