@@ -114,33 +114,29 @@ template<class T>  gPoly<T> gPolyList<T>::operator[](const int index) const
 //        Term Order and Grobner Basis Operations
 //-------------------------------------------------
 
-template<class T> int gPolyList<T>::SelfReduction(const int& target,
+template<class T> bool gPolyList<T>::SelfReduction(const int& target,
 					          const term_order& order)
 {  
-  gPoly<T> zero(Space,(T)0,&order);
-  assert (*List[target] != zero);
+  assert (!List[target]->IsZero());
 
   gPoly<T> tear_up(*List[target]);
-  gPoly<T> reduction(zero);
+  gPoly<T> reduction(Space,(T)0,&order);
   bool     target_was_reduced = false;
 
-  while (tear_up != zero)
+  while (!tear_up.IsZero())
     {
       int index = 1;
-      while (index <= List.Length() && tear_up != zero) {
-        if (index == target) index++;
-	if (index <= List.Length()) {
-	  if ( List[index]->LeadingPowerProduct(order) 
-			        <= tear_up.LeadingPowerProduct(order) ) {
-	    tear_up.ReduceByDivisionAtExpV(order,
-					   *List[index],
-					   tear_up.LeadingPowerProduct(order));
-	    target_was_reduced = true;
-	    index = 1;
-	  }
-	  else index++;
+      while (index <= List.Length() && !tear_up.IsZero()) {
+        if (index == target || List[index]->IsZero()) index++;
+	else if ( List[index]->LeadingPowerProduct(order) 
+	            <= tear_up.LeadingPowerProduct(order) ) {
+	  tear_up.ReduceByDivisionAtExpV(order,
+					 *List[index],
+					 tear_up.LeadingPowerProduct(order));
+	  target_was_reduced = true;
+	  index = 1;
 	}
-	if (tear_up != zero) {
+	if (!tear_up.IsZero()) {
 	  reduction+=tear_up.LeadingTerm(order);
 	  tear_up-=tear_up.LeadingTerm(order);
 	}
@@ -156,30 +152,30 @@ template<class T> gPoly<T> gPolyList<T>::ReductionOf(const gPoly<T>& f,
 {
   assert (Space == f.GetSpace());
 
-  gPoly<T> zero(Space,(T)0,f.GetOrder());
-  if (f == zero) return zero;
+  if (f.IsZero()) {
+    gPoly<T> zero(Space,(T)0,f.GetOrder());
+    return zero;
+  }
 
   gPoly<T> tear_up(f);
-  gPoly<T> reduction(zero);
+  gPoly<T> reduction(Space,(T)0,f.GetOrder());
 
-  while (tear_up != zero)
+  while (!tear_up.IsZero())
     {
       int index = 1;
-      while (index <= List.Length() && tear_up != zero) {
-	if ( List[index]->LeadingPowerProduct(order) 
-			        <= tear_up.LeadingPowerProduct(order) ) {
-
-//	  assert (*List[index] != zero); // Caused poorly understood bug
+      while (index <= List.Length() && !tear_up.IsZero()) {
+	if (List[index]->IsZero()) index++;
+	else if ( List[index]->LeadingPowerProduct(order) 
+	            <= tear_up.LeadingPowerProduct(order) ) {
 
 	  tear_up.ReduceByDivisionAtExpV(order,
 					 *List[index],
 					 tear_up.LeadingPowerProduct(order));
-
 	  index = 1;
 	}
 	else index++;
       }
-      if (tear_up != zero) {
+      if (!tear_up.IsZero()) {
 	reduction+=tear_up.LeadingTerm(order);
 	tear_up-=tear_up.LeadingTerm(order);
       }
@@ -195,50 +191,28 @@ template<class T> void gPolyList<T>::Sort(const term_order& order)
   if (List.Length() <= 1) return;
   int ii;
   for (ii = 1; ii < List.Length(); ii++)
-    for (int j = ii + 1; j <= List.Length(); j++)
-      if ( order.Less(List[j]->LeadingPowerProduct(order),
-		      List[ii]->LeadingPowerProduct(order)) ) {
-	gPoly<T>* temp = List[ii];
-	List[ii] = List[j];
-	List[j] = temp;
+    if (!List[ii]->IsZero()) {
+      for (int j = ii + 1; j <= List.Length(); j++) {
+	bool swap = false;
+	if (List[j]->IsZero())
+	  swap = true;
+	else if ( order.Less(List[j]->LeadingPowerProduct(order),
+			    List[ii]->LeadingPowerProduct(order)) ) 
+	  swap = true;
+	if (swap) {
+	  gPoly<T>* temp = List[ii];
+	  List[ii] = List[j];
+	  List[j] = temp;
+	}
       }
-}
-
-/*
-template<class T> void gPolyList<T>::OldGrobnerize(const term_order & order)
-{
-  if (Length() <= 1) return;
-
-  gPoly<T> zero(Space,(T)0,List[1]->GetOrder());
-
-  gList< gPoly<T> *> list1;
-  gList< gPoly<T> *> list2;
-  for (int p = 1; p <= Length() - 1; p++)
-    for (int q = p + 1; q <= Length(); q++)
-      { list1+=List[p]; list2+=List[q]; }
-
-  int pair_no = 1;
-  while (pair_no <= list1.Length()) {
-    const gPoly<T> f( *(list1[pair_no]) );
-    const gPoly<T> g( *(list2[pair_no]) );
-    pair_no++;
-
-    gPoly<T> h = ReductionOf(f.S_Polynomial(order,g),order);
-    if (h != zero) {
-      gPoly<T>* hptr = new gPoly<T>(h);
-      List+=hptr;
-      for (int k = 1; k <= List.Length(); k++)
-	{ list1+=List[k]; list2+=hptr; }
     }
-  }
 }
-*/
 
 template <class T> 
 void gPolyList<T>::CriterionTwo(      gList<index_pair>& uncomputed, 
 				const gList<index_pair>& computed, 
 				const int&               no_polys,
-				const term_order & order) const
+				const term_order & order)           const
 {
   for (int ell = 1; ell < no_polys; ell++) {
     int spot = uncomputed.Find(index_pair(ell,no_polys));
@@ -277,6 +251,12 @@ void gPolyList<T>::CriterionTwo(      gList<index_pair>& uncomputed,
 
 template<class T> void gPolyList<T>::Grobnerize(const term_order & order)
 {
+  int index = 1;                 // Remove all 0's from List
+  while (index <= List.Length())
+    if (List[index]->IsZero())
+      { delete List[index]; List.Remove(index); }
+    else index++;
+
   if (List.Length() <= 1) return;
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) List[ii]->ToMonic(order);
@@ -350,8 +330,6 @@ void gPolyList<T>::MinimalGrobnerToReducedGrobner(const term_order & order)
 {
   if (Length() <= 1) return;
 
-  gPoly<T> zero(Space,(T)0,&order);
-
   int i = 1;
   while (i <= List.Length()) {
 
@@ -375,19 +353,6 @@ gPolyList<T>& gPolyList<T>::ToSortedReducedGrobner(const term_order & order)
 
   return *this;
 }
-
-/*
-template<class T> 
-gPolyList<T>& gPolyList<T>::OldToSortedReducedGrobner(const term_order & order)
-{
-  OldGrobnerize(order);
-  GrobnerToMinimalGrobner(order);
-  MinimalGrobnerToReducedGrobner(order);
-  Sort(order);
-
-  return *this;
-}
-*/
 
 //----------------------------------
 //           Information

@@ -60,7 +60,7 @@ template <class T> class gPolyList
 
    // Residue of repeated reduction by members of the list
    gPoly<T>    ReductionOf(const gPoly<T> &, const term_order &) const;
-   int         SelfReduction(const int &, const term_order &);
+   bool        SelfReduction(const int &, const term_order &);
 
    // Transform to canonical basis for associated ideal
    gPolyList<T>&  ToSortedReducedGrobner(const term_order &);
