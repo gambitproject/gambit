@@ -26,7 +26,8 @@ template <class T> class SubgameSolver   {
     virtual void SolveSubgame(const Efg<T> &, gList<BehavProfile<T> > &) = 0;
 
     virtual void ViewSubgame(int, const Efg<T> &);
-    virtual void ViewNormal(const Nfg<T> &, NFSupport &);
+// the const is commented out to survive a (IMO) misfeature of BC++ 
+    virtual void ViewNormal(/*const*/ Nfg<T> &, NFSupport &);
     virtual void SelectSolutions(int, const Efg<T> &, gList<BehavProfile<T> > &);
 
   public:

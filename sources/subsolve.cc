@@ -196,7 +196,7 @@ void SubgameSolver<T>::ViewSubgame(int, const Efg<T> &)
 // It is assumed that the NFSupport returned is "sensible"
 
 template <class T>
-void SubgameSolver<T>::ViewNormal(const Nfg<T> &, NFSupport &)
+void SubgameSolver<T>::ViewNormal(/*const*/ Nfg<T> &, NFSupport &)
 { }
 
 // This is called for each subgame after the solutions have been computed
