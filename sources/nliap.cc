@@ -16,6 +16,8 @@
 class BaseLiap {
 public:
   virtual int Liap(int) = 0;  
+  virtual int Nevals(void) = 0;
+  virtual int Nits(void) = 0;
   virtual ~BaseLiap() {}
 };
 
@@ -25,12 +27,14 @@ private:
   const NFRep<T> &rep;
 public:
   LiapModule(const NFRep<T> &N,gOutput &ofile,gOutput &efile,int plev) 
-    :  SolutionModule(ofile,efile,plev),   rep(N),  
-  gBFunct_nDim<T>(N.ProfileLength()){ }
+    :  SolutionModule(ofile,efile,plev),rep(N),
+  gBFunct_nDim<T>(N.ProfileLength()){ SetPlev(plev);}
   int Liap(int) ;
   virtual ~LiapModule() {}
   T operator()(const gVector<T> &x) const;
   int Liap(MixedProfile<T> &p);
+  int Nevals(void) {return nevals;}
+  int Nits(void) {return nits;}
 };
 
 
@@ -67,7 +71,8 @@ template <class T> int LiapModule<T>::Liap(MixedProfile<T> &p)
 	k++;
       }
     }
-  gout << "\nv= " << v;
+  if(plev>=3)
+    gout << "\nv= " << v;
   MinPowell(v);
   gout << "\nv= " << v;
   return 1;
@@ -139,7 +144,8 @@ T NFRep<T>::LiapValue(const MixedProfile<T> &p) const
   return result;
 }
 
-int NormalForm::Liap(int number, int plev, gOutput &out, gOutput &err)
+int NormalForm::Liap(int number, int plev, gOutput &out, gOutput &err,
+		   int &nevals, int &nits)
 {
   BaseLiap *T;
 
@@ -154,6 +160,8 @@ int NormalForm::Liap(int number, int plev, gOutput &out, gOutput &err)
 */
   }
   T->Liap(number);
+  nits=T->Nits();
+  nevals= T->Nevals();
   return 1;
 
 }
