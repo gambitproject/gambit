@@ -1,8 +1,6 @@
 // test file for gpoly
 
 #include "gpoly.h"
-//#include "ufortify.hpp"  //Testing for Memory Leaks
-//#include "ZFortify.hpp"  //
 #include "rational.h"
 
 void ptest(void);
@@ -21,7 +19,8 @@ void ptest(void);
 int main()
 {
 
-  gPolyFamily<gRational> t(3);  // Declare a polynomial family of 3 variables
+//  gPolyFamily<gRational> t(3);  // Declare a polynomial family of 3 variables
+  gVariableList t(3);  // Declare a variable list of 3 variables
 
   // create an array of 4 polynomials belonging to the family above
   gArray< gPoly <gRational> *> test(4);  //
@@ -38,6 +37,8 @@ int main()
   gArray<gRational> eval(3);  //
   char c;
   gString inputstring;
+
+  ptest();        exit(0);
  
   while (cont) {
     out << "-----------------------------\n";
@@ -57,7 +58,7 @@ int main()
     out << "12) Mult by a constant \n";
     out << "13) Evaluate one Variable\n";
     out << "14) Divide by a constant \n";
-    out << "15) Check if two polys are equal\n";
+//    out << "15) Check if two polys are equal\n";
     out << "98> A Test\n";
     out << "99> Clear all polynomials\n";
     out << "-----------------------------\n";
@@ -260,10 +261,11 @@ void ptest()
   gout << "\n*******   BEGIN   **********\n";
   char continuing;
 
-  gPolyFamily<double> Fam(3);
-  gPoly<double> px(&Fam);
-  gPoly<double> py(&Fam);
-  gPoly<double> pz(&Fam);
+//  gPolyFamily<double> Fam(3);
+  gVariableList List(3);
+  gPoly<double> px(&List);
+  gPoly<double> py(&List);
+  gPoly<double> pz(&List);
 
   gString gx = "-1.0 + 6 n1 + 1.5 n1^2";
   gString gy = "2.0 + 3.0 n2 + 4.0 n2^2";
@@ -277,7 +279,7 @@ void ptest()
   gout << "py = " << py << "\n";
   gout << "pz = " << pz << "\n";
 
-  gPoly<double> pRes(&Fam);
+  gPoly<double> pRes(&List);
   
   gout << "\n Evaluating polynomials.\n";
   pRes = px.EvaluateOneVar(1,2);
@@ -326,8 +328,8 @@ void ptest()
   gout << "\n ****** Touch Me ***********                    (Press Return)\n";
   gin >> continuing;
 
-  gPoly<double> px2(&Fam);
-  gPoly<double> py2(&Fam);
+  gPoly<double> px2(&List);
+  gPoly<double> py2(&List);
 
   temp = "2 + 1 n2 + -1 n2^2";
   py2 = temp;
@@ -396,26 +398,26 @@ void ptest()
   gout << "        Set 3 |   1, 2  |   1, 2  |\n";
   gout << "\n";
   
-  gPolyFamily<gRational> Fam2(5);
-  Fam2.SetVariableName(1, "pp1s1");
-  Fam2.SetVariableName(2, "pp1s2");
-  Fam2.SetVariableName(3, "pp1s3");
-  Fam2.SetVariableName(4, "pp2s1");
-  Fam2.SetVariableName(5, "pp2s2");
+  gVariableList List2(5);
+  List2.SetVariableName(1, "pp1s1");
+  List2.SetVariableName(2, "pp1s2");
+  List2.SetVariableName(3, "pp1s3");
+  List2.SetVariableName(4, "pp2s1");
+  List2.SetVariableName(5, "pp2s2");
 
 
-  gPoly<gRational> pp1s1(&Fam2);
-  gPoly<gRational> pp1s2(&Fam2);
-  gPoly<gRational> pp1s3(&Fam2);
-  gPoly<gRational> pp2s1(&Fam2);
-  gPoly<gRational> pp2s2(&Fam2);
+  gPoly<gRational> pp1s1(&List2);
+  gPoly<gRational> pp1s2(&List2);
+  gPoly<gRational> pp1s3(&List2);
+  gPoly<gRational> pp2s1(&List2);
+  gPoly<gRational> pp2s2(&List2);
   
   gout << "\nThe sum of a player's probabilities should equal 1,\n";
   gout << "  so these should equal 0:\n";
  
   gPoly<gRational> *probsums;
-  probsums = new (gPoly<gRational>[num_players])(&Fam2);
-  gPoly<gRational> zeroPoly(&Fam2);
+  probsums = new (gPoly<gRational>[num_players])(&List2);
+  gPoly<gRational> zeroPoly(&List2);
   temp = "-1";
   probsums[0] = temp;
    temp = "1 pp1s1";
@@ -441,7 +443,7 @@ void ptest()
   gout << "Individual probabilities: (greater than or equal to 0)\n";
 
   gPoly<gRational> *probs;
-  probs = new gPoly<gRational>[tot_strat](&Fam2);
+  probs = new gPoly<gRational>[tot_strat](&List2);
   probs[0] = pp1s1;
   probs[1] = pp1s2;
   probs[2] = pp1s3;
@@ -454,7 +456,7 @@ void ptest()
   
   gout << "Expected payoffs for each strategy: \n";
   gPoly<gRational> *payoffs;
-  payoffs = new gPoly<gRational>[tot_strat](&Fam2);
+  payoffs = new gPoly<gRational>[tot_strat](&List2);
   payoffs[0] = (3 * pp2s1) + (2 * pp2s2);
   payoffs[1] = (2 * pp2s1) + (3 * pp2s2);
   payoffs[2] = (1 * pp2s1) + (1 * pp2s2);
