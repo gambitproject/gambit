@@ -402,6 +402,7 @@ bool GSM::Assign( void )
     _Push( new ErrorPortion );
     delete p1;
     delete p2;
+    return result;
   }
 
   else if( p1_type == porREFERENCE )
@@ -419,72 +420,95 @@ bool GSM::Assign( void )
       _VarDefine( RefName, p2 );
       delete p1;
       _Push( p2->RefCopy() );
+      
+      return result;
+    }
+  }
+
+  
+
+  p1 = _ResolveRef( p1 );
+  
+  if ( p1->Type() == porREFERENCE )
+  {
+    if( p2->IsReference() )
+    {
+      p2_copy = p2->ValCopy();
+      result = _VarDefine( ( (ReferencePortion*) p1 )->Value(), p2_copy );
+      delete p1;
+      delete p2;
+      _Push( p2_copy->RefCopy() );
     }
     else
     {
-      p1 = _ResolveRef( p1 );
-
-      if ( p1->Type() == porREFERENCE )
+      result = _VarDefine( ( (ReferencePortion*) p1 )->Value(), p2 );
+      delete p1;
+      _Push( p2->RefCopy() );
+    }
+  }
+  
+  else // ( p1->Type() != porREFERENCE )
+  {
+    if( p1->IsReference() )
+    {
+      if( p1->Type() == p2->Type() )
       {
-	result = _VarDefine( ( (ReferencePortion*) p1 )->Value(), p2 );
-	delete p1;
-	_Push( p2->RefCopy() );
-      }
-      
-      else // ( p1->Type() != porREFERENCE )
-      {
-	if( p1->Type() == p2->Type() )
+	switch( p1->Type() )
 	{
-	  switch( p1->Type() )
+	case porLIST:
+	  if( ( ( (ListPortion*) p1 )->DataType() == 
+	       ( (ListPortion*) p2 )->DataType() ) ||
+	     ( (ListPortion*) p1 )->DataType() == porUNKNOWN )
 	  {
-	  case porLIST:
-	    if( ( ( (ListPortion*) p1 )->DataType() == 
-		 ( (ListPortion*) p2 )->DataType() ) ||
-	       ( (ListPortion*) p1 )->DataType() == porUNKNOWN )
-	    {
-	      p1->AssignFrom( p2 );
-	      delete p2;
-	      _Push( p1 );
-	    }
-	    else
-	    {
-	      _ErrorMessage( _StdErr, 56 );
-	      _Push( p2 );
-	      result = false;
-	      delete p1;
-	    }
-	    break;
-	    
-	  case porOUTPUT:
-	  case porINPUT:	
-	    _ErrorMessage( _StdErr, 52 );
-	    _Push( p2 );
-	    result = false;
-	    delete p1;
-	    break;
-	    
-	  default:
 	    p1->AssignFrom( p2 );
 	    delete p2;
 	    _Push( p1 );
 	  }
-	}
-	else
-	{
-	  _ErrorMessage( _StdErr, 48 );
+	  else
+	  {
+	    _ErrorMessage( _StdErr, 56 );
+	    _Push( p2 );
+	    result = false;
+	    delete p1;
+	  }
+	  break;
+	  
+	case porOUTPUT:
+	case porINPUT:	
+	  _ErrorMessage( _StdErr, 52 );
 	  _Push( p2 );
 	  result = false;
 	  delete p1;
+	  break;
+	  
+	case porNFG_FLOAT:
+	case porNFG_RATIONAL:
+	case porEFG_FLOAT:
+	case porEFG_RATIONAL:
+	  assert( 0 );
+	  break;
+	  
+	default:
+	  p1->AssignFrom( p2 );
+	  delete p2;
+	  _Push( p1 );
 	}
       }
+      else
+      {
+	_ErrorMessage( _StdErr, 48 );
+	_Push( p2 );
+	result = false;
+	delete p1;
+      }
     }
-  }
-  else // ( p1_type != porREFERENCE )
-  {
-    _ErrorMessage( _StdErr, 57 );
-    delete p2;
-    _Push( p1 );
-    result = false;
+    else
+    {
+      _ErrorMessage( _StdErr, 57 );
+      _Push( p1 );
+      delete p2;
+      result = false;
+    }
   }
 
   return result;
