@@ -392,6 +392,17 @@ gPolyList<T>::SystemInNewCoordinates(const gSquareMatrix<T>& M) const
   return gPolyList<T>(AmbientSpace(),TermOrder(),new_polys);
 }
 
+//-----------------------------------
+//           Truncations
+//-----------------------------------
+
+template<class T> gPolyList<T> 
+gPolyList<T>::InteriorSegment(int first, int last) const
+{
+  return gPolyList<T>(AmbientSpace(), TermOrder(), 
+		      List.InteriorSegment(first,last));
+}
+
 
 //----------------------------------
 //           Information

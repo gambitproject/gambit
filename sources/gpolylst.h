@@ -68,13 +68,16 @@ template <class T> class gPolyList
    gPolyList<T> TranslateOfSystem(const gVector<T>&)            const;
    gPolyList<T> SystemInNewCoordinates(const gSquareMatrix<T>&) const;
 
+  // Truncations
+   gPolyList<T> InteriorSegment(int, int)                       const;
+
    // Information
    const gSpace*            AmbientSpace()                            const;
    const term_order*        TermOrder()                               const;
    const int                Length()                                  const;
    const int                Dmnsn()                                   const;
    const bool               IsMultiaffine()                           const;
-   gList<gPoly<T> >   UnderlyingList()                          const;
+   gList<gPoly<T> >         UnderlyingList()                          const;
    const gVector<T>         Evaluate(const gVector<T>&)               const;
    const bool               IsRoot(const gVector<T>&)                 const;
    const gRectArray<gPoly<T>*> DerivativeMatrix()                     const;
