@@ -23,6 +23,8 @@
 #include "treewin.h"
 #include "treezoom.h"
 #include "efgshow.h"
+#include "efgprofile.h"
+#include "efgcursor.h"
 #include "efgsoln.h"
 #include "efgnfgi.h"
 #include "nfgshow.h"
@@ -245,10 +247,14 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuPREFS_ACCELS, EfgShow::OnPrefsAccels)
   EVT_MENU(efgmenuHELP_ABOUT, EfgShow::OnHelpAbout)
   EVT_MENU(efgmenuHELP_CONTENTS, EfgShow::OnHelpContents)
+  EVT_MENU(efgmenuPROFILES_NEW, EfgShow::OnProfilesNew)
+  EVT_MENU(efgmenuPROFILES_EDIT, EfgShow::OnProfilesEdit)
+  EVT_MENU(efgmenuPROFILES_DELETE, EfgShow::OnProfilesDelete)
   EVT_SET_FOCUS(EfgShow::OnFocus)
   EVT_SIZE(EfgShow::OnSize)
   EVT_CLOSE(EfgShow::OnCloseWindow)
   EVT_SASH_DRAGGED_RANGE(idSOLUTIONWINDOW, idTREEWINDOW, EfgShow::OnSashDrag)
+  EVT_LIST_ITEM_SELECTED(idEFG_SOLUTION_LIST, EfgShow::OnSolutionSelected)
 END_EVENT_TABLE()
 
 //---------------------------------------------------------------------
@@ -261,7 +267,7 @@ EfgShow::EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent)
     parent(p_parent), m_efg(p_efg), m_treeWindow(0), 
     m_treeZoomWindow(0), cur_soln(0),
     m_solutionTable(0), m_toolbar(0),
-    m_solutionSashWindow(0), node_inspect(0)
+    m_solutionSashWindow(0), m_cursorWindow(0)
 {
   SetSizeHints(300, 300);
 
@@ -291,10 +297,19 @@ EfgShow::EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent)
   m_treeWindow = new TreeWindow(this, this);
   m_treeWindow->SetSize(200, 40, 200, 200);
 
-  node_inspect = new NodeSolnShow(this, m_nodeSashWindow);
-  node_inspect->Set(m_treeWindow->Cursor());
-  node_inspect->SetSize(200, 200);
-  node_inspect->Show(true);
+  m_cursorWindow = new EfgCursorWindow(this, m_nodeSashWindow);
+  m_cursorWindow->Set(m_treeWindow->Cursor());
+  m_cursorWindow->SetSize(200, 200);
+  m_cursorWindow->Show(true);
+
+  m_solutionSashWindow = new wxSashWindow(this, idSOLUTIONWINDOW,
+					  wxDefaultPosition,
+					  wxSize(600, 100));
+  m_solutionSashWindow->SetSashVisible(wxSASH_TOP, true);
+
+  m_solutionTable = new EfgProfileList(this, m_solutionSashWindow);
+  m_solutionTable->Show(true);
+  m_solutionSashWindow->Show(false);
 
   m_efg.SetIsDirty(false);
 
@@ -312,8 +327,8 @@ EfgShow::~EfgShow()
 void EfgShow::OnSelectedMoved(const Node *n)
 {
   // The only time the inspection window won't be around is on construction
-  if (node_inspect) {
-    node_inspect->Set(n);
+  if (m_cursorWindow) {
+    m_cursorWindow->Set(n);
   }
   m_treeZoomWindow->UpdateCursor();
   UpdateMenus();
@@ -323,17 +338,24 @@ void EfgShow::OnSelectedMoved(const Node *n)
 //                          SOLUTION ROUTINES                       *
 //*******************************************************************
 
+void EfgShow::OnSolutionSelected(wxListEvent &p_event)
+{
+  cur_soln = p_event.m_itemIndex + 1;
+  m_treeWindow->Render();
+  if (m_cursorWindow) {
+    m_cursorWindow->Set(m_treeWindow->Cursor());
+  }
+}
+
 void EfgShow::ChangeSolution(int sol)
 {
-  if (cur_soln != sol) {
-    cur_soln = sol;
-    m_treeWindow->Render();
-    if (node_inspect) {
-      node_inspect->Set(m_treeWindow->Cursor());
-    }
-    if (m_solutionTable) {
-      m_solutionTable->UpdateValues();
-    }
+  cur_soln = sol;
+  m_treeWindow->Render();
+  if (m_cursorWindow) {
+    m_cursorWindow->Set(m_treeWindow->Cursor());
+  }
+  if (m_solutionTable) {
+    m_solutionTable->UpdateValues();
   }
 }
 
@@ -345,24 +367,38 @@ void EfgShow::RemoveStartProfiles(void)
     starting_points = StartingPoints();
 }
 
-
-// Remove solutions.
-
 void EfgShow::RemoveSolutions(void)
 {
-  if (m_solutionTable) 
-    delete m_solutionTable; 
-  m_solutionTable = 0;
-
   cur_soln = 0;
-  solns.Flush();
+  m_solutionTable->Flush();
   OnSelectedMoved(0); // update the node inspect window if any
 }
-
 
 BehavSolution EfgShow::CreateSolution(void)
 {
   return BehavSolution(BehavProfile<gNumber>(*m_currentSupport));
+}
+
+void EfgShow::OnProfilesNew(wxCommandEvent &)
+{
+  m_solutionTable->Append(BehavSolution(BehavProfile<gNumber>(EFSupport(m_efg))));
+  ChangeSolution(m_solutionTable->Length());
+}
+
+void EfgShow::OnProfilesEdit(wxCommandEvent &)
+{
+  wxMessageDialog dialog(this, "Placeholder for profile editing dialog",
+			 (char *) ("Profile" +
+				   ToText((int) (*m_solutionTable)[cur_soln].Id())),
+			 wxOK | wxICON_HAND);
+  dialog.ShowModal();
+}
+
+void EfgShow::OnProfilesDelete(wxCommandEvent &)
+{
+  m_solutionTable->Remove(cur_soln);
+  cur_soln = (m_solutionTable->Length() > 0) ? 1 : 0;
+  ChangeSolution(cur_soln);
 }
 
 //************************************************************************
@@ -376,10 +412,10 @@ BehavSolution EfgShow::CreateSolution(void)
 void EfgShow::SolutionToEfg(const BehavProfile<gNumber> &s, bool set)
 {
   assert(Interface());    // we better have someone to get a solution from!
-  solns.Append(s);
+  m_solutionTable->Append(s);
 
   if (set) {
-    cur_soln = solns.VisibleLength();
+    cur_soln = m_solutionTable->VisibleLength();
     wxClientDC dc(m_treeWindow);
     m_treeWindow->Render(dc);
   }
@@ -398,7 +434,7 @@ gText EfgShow::AsString(TypedSolnValues what, const Node *n, int br) const
   
   if (!n || !cur_soln) return "N/A";
   
-  const BehavSolution &cur = solns[cur_soln];
+  const BehavSolution &cur = (*m_solutionTable)[cur_soln];
   
   switch (what) 
     {
@@ -454,7 +490,7 @@ gNumber EfgShow::ActionProb(const Node *p_node, int p_action)
   }
 
   if (cur_soln && p_node->GetInfoset()) {
-    return solns[cur_soln](p_node->GetInfoset()->Actions()[p_action]);
+    return (*m_solutionTable)[cur_soln](p_node->GetInfoset()->Actions()[p_action]);
   }
   return -1;
 }
@@ -800,8 +836,10 @@ void EfgShow::HilightInfoset(int pl, int iset, int who)
   if (!features.iset_hilight) 
     return;
 
+#ifdef NOT_PORTED_YET
   if (who == 1)
     m_solutionTable->HilightInfoset(pl, iset);
+#endif  // NOT_PORTED_YET
 
   if (who == 2) m_treeWindow->HilightInfoset(pl, iset);
 }
@@ -1636,7 +1674,7 @@ void EfgShow::OnSolveStandard(wxCommandEvent &)
     else
       m_treeWindow->SubgameUnmarkAll();
 
-    solns += solver->Solve();
+    *m_solutionTable += solver->Solve();
     wxEndBusyCursor();
   }
   catch (gException &E) {
@@ -1646,7 +1684,7 @@ void EfgShow::OnSolveStandard(wxCommandEvent &)
 
   delete solver;
 
-  ChangeSolution(solns.VisibleLength());
+  ChangeSolution(m_solutionTable->VisibleLength());
   UpdateMenus();
 }
 
@@ -1732,7 +1770,7 @@ void EfgShow::OnSolveCustom(wxCommandEvent &p_event)
       if (solver->MarkSubgames())
 	m_treeWindow->SubgameMarkAll();
       wxBeginBusyCursor();
-      solns += solver->Solve();
+      *m_solutionTable += solver->Solve();
       wxEndBusyCursor();
     }
   }
@@ -1743,7 +1781,7 @@ void EfgShow::OnSolveCustom(wxCommandEvent &p_event)
 
   delete solver;
  
-  ChangeSolution(solns.VisibleLength());
+  ChangeSolution(m_solutionTable->VisibleLength());
   UpdateMenus();
   Enable(true);
 }
@@ -1787,39 +1825,27 @@ void EfgShow::OnSolveNormalAgent(wxCommandEvent &)
 
 void EfgShow::OnInspectSolutions(wxCommandEvent &)
 {
-  if (solns.Length() == 0) {
-    wxMessageBox("Solution list currently empty"); 
-    return;
-  }
-
-  if (m_solutionTable) {
-    delete m_solutionTable;
-    m_solutionTable = 0;
-    delete m_solutionSashWindow;
-    m_solutionSashWindow = 0;
+  if (m_solutionSashWindow->IsShown()) {
+    m_solutionSashWindow->Show(false);
+    GetMenuBar()->Check(efgmenuINSPECT_SOLUTIONS, false);
   }
   else {
-    m_solutionSashWindow = new wxSashWindow(this, idSOLUTIONWINDOW,
-					    wxDefaultPosition,
-					    wxSize(600, 100));
-    m_solutionSashWindow->SetSashVisible(wxSASH_TOP, true);
-
-    m_solutionTable = new EfgSolnShow(this, m_solutionSashWindow,
-				      solns, sf_options);
-    m_solutionTable->Show(true);
+    m_solutionSashWindow->Show(true);
+    GetMenuBar()->Check(efgmenuINSPECT_SOLUTIONS, true);
   }
+
   AdjustSizes();
 }
 
 void EfgShow::OnInspectCursor(wxCommandEvent &)
 {
-  if (node_inspect->IsShown()) {
-    node_inspect->Show(false);
+  if (m_cursorWindow->IsShown()) {
+    m_cursorWindow->Show(false);
     GetMenuBar()->Check(efgmenuINSPECT_CURSOR, false);
   }
   else {
-    node_inspect->Set(m_treeWindow->Cursor());
-    node_inspect->Show(true);
+    m_cursorWindow->Set(m_treeWindow->Cursor());
+    m_cursorWindow->Show(true);
     GetMenuBar()->Check(efgmenuINSPECT_CURSOR, true);
   }
 
@@ -2044,10 +2070,6 @@ void EfgShow::OnCloseWindow(wxCloseEvent &p_event)
     }
   }
 
-  if (m_solutionTable)  {
-    delete m_solutionTable;
-  }
-
   Show(false);
   Destroy();
 }
@@ -2100,13 +2122,13 @@ void EfgShow::AdjustSizes(void)
   if (m_toolbar) {
     m_toolbar->SetSize(0, 0, width, toolbarHeight);
   }
-  if (m_solutionTable && m_solutionTable->IsShown()) {
+  if (m_solutionTable && m_solutionSashWindow->IsShown()) {
     m_solutionSashWindow->SetSize(0, height - m_solutionSashWindow->GetRect().height,
 				  width, m_solutionSashWindow->GetRect().height);
     height -= m_solutionSashWindow->GetRect().height;
   }
 
-  if ((node_inspect && node_inspect->IsShown()) ||
+  if ((m_cursorWindow && m_cursorWindow->IsShown()) ||
       (m_treeZoomWindow && m_treeZoomWindow->IsShown())) {
     if (m_treeWindow) {
       m_treeWindow->SetSize(250, toolbarHeight,
@@ -2117,7 +2139,7 @@ void EfgShow::AdjustSizes(void)
     m_treeWindow->SetSize(0, toolbarHeight, width, height - toolbarHeight);
   }
 
-  if (node_inspect && node_inspect->IsShown()) {
+  if (m_cursorWindow && m_cursorWindow->IsShown()) {
     if (m_treeZoomWindow && m_treeZoomWindow->IsShown()) {
       m_nodeSashWindow->SetSize(0, toolbarHeight,
 				250, height - toolbarHeight - 200);
@@ -2247,8 +2269,6 @@ void EfgShow::UpdateMenus(void)
 		  m_efg.NumPlayers() == 2 && m_efg.IsConstSum());
   menuBar->Enable(efgmenuSOLVE_CUSTOM_NFG_LCP, m_efg.NumPlayers() == 2);
   menuBar->Enable(efgmenuSOLVE_CUSTOM_NFG_ENUMMIXED, m_efg.NumPlayers() == 2);
-
-  menuBar->Enable(efgmenuINSPECT_SOLUTIONS, solns.Length() > 0);
 
   m_treeWindow->UpdateMenus();
 }

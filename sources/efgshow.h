@@ -7,6 +7,7 @@
 #ifndef EFGSHOW_H
 #define EFGSHOW_H
 
+#include "wx/listctrl.h"
 #include "wx/sashwin.h"
 
 #include "efgnfgi.h"
@@ -17,13 +18,15 @@
 #include "efgconst.h"
 #include "solnlist.h"
 
-class EfgSolnShow;
+class EfgProfileList;
 class EfgToolbar;
-class NodeSolnShow;
+class EfgCursorWindow;
 class TreeWindow;
 class TreeZoomWindow;
 
 typedef SolutionList<BehavSolution> BehavSolutionList;
+
+const int idEFG_SOLUTION_LIST = 900;
 
 class EfgShow : public wxFrame,
 		public EfgNfgInterface, public EfgShowInterface {
@@ -34,7 +37,6 @@ private:
   TreeZoomWindow *m_treeZoomWindow;
 
   // Solution routines
-  BehavSolutionList solns;
   struct StartingPoints {
     BehavSolutionList profiles;
     int last;
@@ -46,8 +48,7 @@ private:
   gList<EFSupport *> m_supports;
   EFSupport *m_currentSupport;
 
-  EfgSolnShow *m_solutionTable;
-  BSolnSortFilterOptions sf_options;
+  EfgProfileList *m_solutionTable;
   gList<Accel>    accelerators;
   gText   filename;
   EfgToolbar *m_toolbar;
@@ -56,7 +57,7 @@ private:
 
   // Private functions
   gArray<AccelEvent> MakeEventNames(void);
-  NodeSolnShow *node_inspect;
+  EfgCursorWindow *m_cursorWindow;
 
   void NodeInspect(bool insp);
 
@@ -73,6 +74,8 @@ private:
   void OnFocus(wxFocusEvent &);
   void OnSize(wxSizeEvent &);
   void OnSashDrag(wxSashEvent &);
+
+  void OnSolutionSelected(wxListEvent &);
 
   // Menu event handlers
   void OnFileOutput(wxCommandEvent &);
@@ -161,6 +164,10 @@ private:
   void OnHelpAbout(wxCommandEvent &);
   void OnHelpContents(wxCommandEvent &);
 
+  void OnProfilesNew(wxCommandEvent &);
+  void OnProfilesEdit(wxCommandEvent &);
+  void OnProfilesDelete(wxCommandEvent &);
+
 public:
   // CONSTRUCTOR AND DESTRUCTOR
   EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent);
@@ -169,8 +176,10 @@ public:
   // Solution routines
   void RemoveSolutions(void);
   void ChangeSolution(int soln);
-  void OnSelectedMoved(const Node *n);
   BehavSolution CreateSolution(void);
+  int CurrentSolution(void) const { return cur_soln; }
+
+  void OnSelectedMoved(const Node *n);
 
   // Solution interface to the algorithms
   void PickSolutions(const Efg &, Node *, gList<BehavSolution> &);
