@@ -186,8 +186,27 @@ bool GSM::_VarIsDefined( const gString& var_name ) const
 void GSM::_VarDefine( const gString& var_name, Portion* p )
 {
   RefHashTable* ref_table;
+  Portion* old_value;
 
+  if( _RefTableStack->Peek()->IsDefined( var_name ) )
+  {
+    old_value = (*_RefTableStack->Peek())( var_name );
+    if( old_value->Type() != p->Type() )
+    {
+      _ErrorMessage( _StdErr, 41, 0, 0, var_name );
+    }
+    else if( p->Type() == porLIST )
+    {
+      assert( old_value->Type() == porLIST );
+      if( ( (List_Portion*) old_value )->DataType() != 
+	 ( (List_Portion*) p )->DataType() )
+      {
+	_ErrorMessage( _StdErr, 41, 0, 0, var_name );
+      }
+    }
+  }
   _RefTableStack->Peek()->Define( var_name, p );
+
 /*
   assert( var_name != "::" );
   if( var_name.left(2) == "::" && _RefTableStack->Depth() > 1 )
@@ -590,66 +609,62 @@ bool GSM::Subscript ( void )
   if( p2->Type() == porREFERENCE )
     p2 = _ResolveRef( (Reference_Portion*) p2 );
 
+  if( p2->Type() == porINTEGER )
+  {
+    subscript = (int) ( (numerical_Portion<gInteger>*) p2 )->Value().as_long();
+    delete p2;
+  }
+  else
+  {
+    _ErrorMessage( _StdErr, 37 );
+    if( p1->Type() != porLIST )
+      delete p1;
+    delete p2;
+    _Stack->Push( new Error_Portion );
+    result = false;
+    return result;
+  }
+
+
   if( p1->Type() == porLIST )
   {
-    if( p2->Type() == porINTEGER )
+    if( p1->ShadowOf() == 0 )
     {
-      if( p1->ShadowOf() == 0 )
-      {
-	real_list = p1;
-      }
-      else
-      {
-	real_list = p1->ShadowOf();
-	delete p1;
-      }
-      element = ( (List_Portion* ) real_list )->
-	GetSubscript( ((numerical_Portion<gInteger>*)p2 )->Value().as_long() );
-      assert( element != 0 );
-      if( element->Type() != porERROR )
-      {
-	shadow = element->Copy();
-	shadow->ShadowOf() = element;
-	_Stack->Push( shadow );
-      }
-      else
-      {
-	element->Output( _StdErr );
-	delete element;
-	_Stack->Push( new Error_Portion );
-      }
+      real_list = p1;
     }
     else
     {
-      _ErrorMessage( _StdErr, 19 );
+      real_list = p1->ShadowOf();
+      delete p1;
+    }
+    element = ( (List_Portion* ) real_list )->GetSubscript( subscript );
+    assert( element != 0 );
+    if( element->Type() != porERROR )
+    {
+      shadow = element->Copy();
+      shadow->ShadowOf() = element;
+      _Stack->Push( shadow );
+    }
+    else
+    {
+      element->Output( _StdErr );
+      delete element;
       _Stack->Push( new Error_Portion );
-      result = false;
     }
   }
   else if( p1->Type() == porSTRING )
   {
-    if( p2->Type() == porINTEGER )
+    old_string = ( (gString_Portion*) p1 )->Value();
+    if( subscript >= 1 && subscript <= old_string.length() )
     {
-      subscript = ( (numerical_Portion<gInteger>*) p2 )->Value().as_long();
-      old_string = ( (gString_Portion*) p1 )->Value();
-      if( subscript >= 1 && subscript <= old_string.length() )
-      {
-	new_string = old_string[ subscript - 1 ];
-	delete p1;
-	p1 = new gString_Portion( new_string );
-	_Stack->Push( p1 );
-      }
-      else
-      {
-	_ErrorMessage( _StdErr, 36 );
-	delete p1;
-	_Stack->Push( new Error_Portion );
-	result = false;
-      }
+      new_string = old_string[ subscript - 1 ];
+      delete p1;
+      p1 = new gString_Portion( new_string );
+      _Stack->Push( p1 );
     }
     else
     {
-      _ErrorMessage( _StdErr, 37 );
+      _ErrorMessage( _StdErr, 36 );
       delete p1;
       _Stack->Push( new Error_Portion );
       result = false;
@@ -662,8 +677,7 @@ bool GSM::Subscript ( void )
     _Stack->Push( new Error_Portion );
     result = false;
   }
-
-  delete p2;
+  
   return result;
 }
 
@@ -1385,6 +1399,9 @@ void GSM::_ErrorMessage
   case 40:
     s << "  Node child number out of range\n";
     s << "  Only " << num1 << " child(ren) available\n";
+    break;
+  case 41:
+    s << "  Warning: variable \"" << str1 << "\" has changed type\n";
     break;
   default:
     s << "  General error\n";

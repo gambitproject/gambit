@@ -583,9 +583,7 @@ template <class T> void Behav_Portion<T>::Output( gOutput& s ) const
 //---------------------------------------------------------------------
 Reference_Portion::Reference_Portion( const gString& value )
      : _Value( value )
-{ 
-  _DataType = porERROR;
-}
+{ }
 
 
 gString& Reference_Portion::Value( void )
@@ -593,9 +591,6 @@ gString& Reference_Portion::Value( void )
 
 PortionType Reference_Portion::Type( void ) const
 { return porREFERENCE; }
-
-PortionType& Reference_Portion::DataType( void )
-{ return _DataType; }
 
 Portion* Reference_Portion::Copy( bool new_data ) const
 { return new Reference_Portion( _Value ); }
