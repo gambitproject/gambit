@@ -533,6 +533,85 @@ template <class T> T BehavProfile<T>::Payoff(int player) const
   return value;
 }
 
+//---------------
+// Derivatives
+//---------------
+
+//
+// The following routines compute the derivatives of quantities as
+// the probability of the action 'p_oppAction' is changed.
+// See Turocy (2001), "Computing the Quantal Response Equilibrium
+// Correspondence" for details.
+// These assume that the profile is interior (totally mixed),
+// and that the game is of perfect recall
+//
+
+template <class T>
+T BehavProfile<T>::DiffActionValue(const Action *p_action,
+				   const Action *p_oppAction) const
+{
+  T deriv = (T) 0;
+  Infoset *infoset = p_action->BelongsTo();
+  EFPlayer *player = p_action->BelongsTo()->GetPlayer();
+
+  for (int i = 1; i <= infoset->NumMembers(); i++) {
+    Node *member = infoset->GetMember(i);
+
+    deriv += DiffRealizProb(member, p_oppAction) *
+      (NodeValue(member->GetChild(p_action->number), player->GetNumber()) -
+       ActionValue(p_action));
+
+    deriv += RealizProb(member) *
+      DiffNodeValue(member->GetChild(p_action->number), player, p_oppAction);
+  }
+
+  return deriv;
+}
+
+template <class T>
+T BehavProfile<T>::DiffRealizProb(const Node *p_node,
+				  const Action *p_oppAction) const
+{
+  T deriv = (T) 1;
+  const Node *node = p_node;
+  while (node->GetParent()) {
+    Action *prevAction = node->GetAction();
+    if (prevAction != p_oppAction) {
+      deriv *= GetActionProb(prevAction);
+    }
+    node = node->GetParent();
+  }
+ 
+  return deriv;
+}
+
+template <class T>
+T BehavProfile<T>::DiffNodeValue(const Node *p_node, const EFPlayer *p_player,
+				 const Action *p_oppAction) const
+{
+  T deriv = (T) 0;
+
+  if (m_efg->NumChildren(p_node) > 0) {
+    Infoset *infoset = p_node->GetInfoset();
+
+    if (infoset == p_oppAction->BelongsTo()) {
+      deriv += m_nodeValues(p_node->GetChild(p_oppAction->GetNumber())->number,
+			    p_player->GetNumber());
+    }
+    else {
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	deriv += (DiffNodeValue(p_node->GetChild(act), p_player, p_oppAction) *
+		  ActionProb(infoset->Actions()[act]));
+      }
+    }
+  }
+  else {
+    return m_nodeValues(p_node->number, p_player->GetNumber());
+  }
+
+  return deriv;
+}
+
 // 
 // Computation of Cached solution data
 // 

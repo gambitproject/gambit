@@ -222,16 +222,20 @@ Node *Node::PriorSibling(void) const
 
 }
 
-const Action *Node::GetAction() const
+Action *Node::GetAction(void) const
 {
-  if (this == Game()->RootNode()) 
-    throw Efg::Game::Exception();
+  if (this == Game()->RootNode()) {
+    return 0;
+  }
   
   const gArray<Action *> &actions = GetParent()->GetInfoset()->Actions();
-  for (int i = 1; i <= actions.Length(); i++)
-    if (this == GetParent()->GetChild(actions[i]))
+  for (int i = 1; i <= actions.Length(); i++) {
+    if (this == GetParent()->GetChild(actions[i])) {
       return actions[i];
-  throw Efg::Game::Exception();
+    }
+  }
+
+  return 0;
 }
 
 void Node::DeleteOutcome(FullEfgNamespace::Outcome *outc)

@@ -88,7 +88,7 @@ class Infoset   {
     int NumActions(void) const   { return actions.Length(); }
 
     const gArray<Node *> &Members(void) const   { return members; }
-    const Node *GetMember(const int m) const { return members[m]; }
+    Node *GetMember(int m) const { return members[m]; }
     const gList<const Node *> ListOfMembers(void) const;
     int NumMembers(void) const   { return members.Length(); }
 

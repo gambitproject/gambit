@@ -56,7 +56,7 @@ class Node    {
     EFPlayer *GetPlayer(void) const
       { if (!infoset)   return 0;
 	else  return infoset->GetPlayer(); }
-    const Action *GetAction() const; // Error if called on Game()->RootNode()
+    Action *GetAction(void) const; // returns null if root node
     Node *GetChild(int i) const    { return children[i]; }
     Node *GetChild(const Action& a) const    
       { return children[a.GetNumber()]; }

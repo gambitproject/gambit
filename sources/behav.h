@@ -155,6 +155,11 @@ public:
   T QreValue(const gVector<T> &lambda, bool &);
   T MaxRegret(void);
 
+  T DiffActionValue(const Action *action, const Action *oppAction) const;
+  T DiffRealizProb(const Node *node, const Action *oppAction) const;
+  T DiffNodeValue(const Node *node, const EFPlayer *player,
+		  const Action *oppAction) const;
+
   void Dump(gOutput &) const;
 };
 
