@@ -163,12 +163,36 @@ CallListFunction(GSM* gsm, Portion** ParamIn)
 	  error_call = true;
       }
 
-      if(!error_call)
+      bool null_call = false;
+      for(j = 0; j < NumParams; j++)
+	if(CurrParam[j]->Spec().Type == porNULL)
+	{
+	  null_call = true;
+	  break;
+	}
+      if(_FuncInfo[_FuncIndex].NullArgs)
+	null_call = false;
+
+
+      if(!error_call && !null_call)
 	if(!_FuncInfo[_FuncIndex].UserDefined)
 	  result = _FuncInfo[_FuncIndex].FuncPtr(CurrParam);
 	else
 	  result = gsm->ExecuteUserFunc(*(_FuncInfo[_FuncIndex].FuncInstr), 
 					_FuncInfo[_FuncIndex], CurrParam);
+      else if(null_call)
+      {
+	if(_FuncInfo[_FuncIndex].ReturnSpec.ListDepth > 0)
+	{
+	  result = new ListValPortion();
+	  ((ListPortion*) result)->
+	    SetDataType(_FuncInfo[_FuncIndex].ReturnSpec.Type);
+	}
+	else
+	{
+	  result = new NullPortion(_FuncInfo[_FuncIndex].ReturnSpec.Type);
+	}
+      }
       else
 	result = new ErrorPortion("Error in arguments");
       
