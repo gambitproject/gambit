@@ -128,7 +128,12 @@ Nfg *gbtNfgOutcome::GetGame(void) const
 
 gText gbtNfgOutcome::GetLabel(void) const
 {
-  return (rep) ? rep->m_label : "";
+  if (rep) {
+    return rep->m_label;
+  }
+  else {
+    return "";
+  }
 }
 
 gOutput &operator<<(gOutput &p_stream, const gbtNfgOutcome &)

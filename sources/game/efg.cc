@@ -131,7 +131,12 @@ efgGame *gbtEfgOutcome::GetGame(void) const
 
 gText gbtEfgOutcome::GetLabel(void) const
 {
-  return (rep) ? rep->m_label : "";
+  if (rep) {
+    return rep->m_label;
+  }
+  else {
+    return "";
+  }
 }
 
 gOutput &operator<<(gOutput &p_stream, const gbtEfgOutcome &)
