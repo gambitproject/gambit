@@ -95,6 +95,28 @@ The empty string is returned if the action object is null.
 
 </sect2>
 
+<sect2 id="apiref.action.isdeleted">
+<title>IsDeleted</title>
+<indexterm><primary>IsDeleted</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+bool gbtGameAction::IsDeleted(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>IsDeleted</function> returns <literal>True</literal> (nonzero)
+if the action has been deleted from its game.  Any attempts to operate
+on a deleted object throw a <errorname>gbtGameDeletedException</errorname>
+(mapped to <errorname>RuntimeError</errorname> in Python).
+</para>
+
+</sect2>
+
 <sect2 id="apiref.action.precedes">
 <title>Precedes</title>
 <indexterm><primary>Precedes</primary></indexterm>

@@ -82,6 +82,7 @@
 
 %nodefault;
 class gbtGameNode {
+  ~gbtGameNode();
 };
 
 %extend gbtGameNode {
@@ -92,6 +93,7 @@ class gbtGameNode {
   int GetId(void) const { return (*self)->GetId(); }
   void SetLabel(const std::string &s) { (*self)->SetLabel(s); }
   std::string GetLabel(void) const { return (*self)->GetLabel(); }
+  bool IsDeleted(void) const { return (*self)->IsDeleted(); }
 
   //--------------------------------------------------------------------
   //                 Accessing relatives of the node

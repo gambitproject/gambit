@@ -417,6 +417,28 @@ information set does not belong to the same game as the node.
 
 </sect2>
 
+<sect2 id="apiref.node.isdeleted">
+<title>IsDeleted</title>
+<indexterm><primary>IsDeleted</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+bool gbtGameNode::IsDeleted(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>IsDeleted</function> returns <literal>True</literal> (nonzero)
+if the node has been deleted from its game.  Any attempts to operate
+on a deleted object throw a <errorname>gbtGameDeletedException</errorname>
+(mapped to <errorname>RuntimeError</errorname> in Python).
+</para>
+
+</sect2>
+
 <sect2 id="apiref.node.isnonterminal">
 <title>IsNonterminal</title>
 <indexterm><primary>IsNonterminal</primary></indexterm>

@@ -47,7 +47,7 @@ gbtTreeNodeRep::gbtTreeNodeRep(gbtTreeGameRep *p_efg,
 
 gbtTreeNodeRep::~gbtTreeNodeRep()
 {
-  // for (int i = m_children.Length(); i; delete m_children[i--]);
+  for (int i = m_children.Length(); i; m_children[i--]->Delete());
 }
 
 //----------------------------------------------------------------------
@@ -256,7 +256,7 @@ void gbtTreeNodeRep::DeleteMove(void)
     m_efg->m_root = this;
   }
 
-  m_parent->m_deleted = true;
+  m_parent->Delete();
 
   m_efg->OnStrategiesChanged();
   m_efg->m_sortInfosets = true;
@@ -272,7 +272,7 @@ void gbtTreeNodeRep::DeleteSubtree(void)
   while (m_children.Length() > 0)   {
     gbtTreeNodeRep *child = m_children.Remove(1);
     child->DeleteSubtree();
-    child->m_deleted = true;
+    child->Delete();
   }
 
   if (m_infoset)  {

@@ -68,6 +68,28 @@ returns the player to whom the strategy belongs.
 
 </sect2>
 
+<sect2 id="apiref.strategy.isdeleted">
+<title>IsDeleted</title>
+<indexterm><primary>IsDeleted</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+bool gbtGameStrategy::IsDeleted(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>IsDeleted</function> returns <literal>True</literal> (nonzero)
+if the strategy has been deleted from its game.  Any attempts to operate
+on a deleted object throw a <errorname>gbtGameDeletedException</errorname>
+(mapped to <errorname>RuntimeError</errorname> in Python).
+</para>
+
+</sect2>
+
 <sect2 id="apiref.strategy.setlabel">
 <title>SetLabel</title>
 <indexterm><primary>SetLabel</primary></indexterm>

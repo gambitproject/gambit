@@ -138,7 +138,7 @@ void gbtTreeActionRep::DeleteAction(void)
     m_infoset->m_members[i]->m_children[m_id]->DeleteTree();
     gbtTreeNodeRep *node = 
       m_infoset->m_members[i]->m_children.Remove(m_id);
-    node->m_deleted = true;
+    node->Delete();
   }
 
   m_deleted = true;
@@ -172,9 +172,7 @@ gbtTreeInfosetRep::gbtTreeInfosetRep(gbtTreePlayerRep *p_player,
 
 gbtTreeInfosetRep::~gbtTreeInfosetRep()
 {
-  for (int act = 1; act <= m_actions.Length(); act++) {
-    m_actions[act]->m_deleted = true;
-  }
+  for (int act = 1; act <= m_actions.Length(); m_actions[act++]->Delete());
 }
 
 //----------------------------------------------------------------------

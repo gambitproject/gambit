@@ -328,9 +328,7 @@ void gbtTableGameRep::DeleteOutcome(gbtTableOutcomeRep *p_outcome)
   // Remove the outcome from the list of defined outcomes
   m_outcomes.Remove(m_outcomes.Find(p_outcome));
 
-  // If no external references, deallocate the memory;
-  // otherwise, mark as "deleted"
-  p_outcome->m_deleted = true;
+  p_outcome->Delete();
  
   // Renumber the remaining outcomes
   for (int outc = 1; outc <= m_outcomes.Length(); outc++) {

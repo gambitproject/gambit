@@ -179,6 +179,28 @@ bool gbtGameInfoset::IsChanceInfoset(void) const
 
 </sect2>
 
+<sect2 id="apiref.infoset.isdeleted">
+<title>IsDeleted</title>
+<indexterm><primary>IsDeleted</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+bool gbtGameInfoset::IsDeleted(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>IsDeleted</function> returns <literal>True</literal> (nonzero)
+if the information set has been deleted from its game.  Any attempts to operate
+on a deleted object throw a <errorname>gbtGameDeletedException</errorname>
+(mapped to <errorname>RuntimeError</errorname> in Python).
+</para>
+
+</sect2>
+
 <sect2 id="apiref.infoset.mergeinfoset">
 <title>MergeInfoset</title>
 <indexterm><primary>MergeInfoset</primary></indexterm>

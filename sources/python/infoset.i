@@ -7,6 +7,7 @@
 
 %nodefault;
 class gbtGameAction {
+  ~gbtGameAction();
 };
 
 %extend gbtGameAction {
@@ -17,6 +18,7 @@ class gbtGameAction {
   int GetId(void) const { return (*self)->GetId(); }
   void SetLabel(const std::string &s) { (*self)->SetLabel(s); }
   std::string GetLabel(void) const  { return (*self)->GetLabel(); }
+  bool IsDeleted(void) const { return (*self)->IsDeleted(); }
   
   //--------------------------------------------------------------------
   //                  Information about the game tree
@@ -65,6 +67,7 @@ class gbtGameAction {
 
 %nodefault;
 class gbtGameInfoset {
+  ~gbtGameInfoset();
 };
 
 %extend gbtGameInfoset {
@@ -75,6 +78,7 @@ class gbtGameInfoset {
   int GetId(void) const { return (*self)->GetId(); }
   void SetLabel(const std::string &s) { (*self)->SetLabel(s); }
   std::string GetLabel(void) const  { return (*self)->GetLabel(); }
+  bool IsDeleted(void) const { return (*self)->IsDeleted(); }
 
   //--------------------------------------------------------------------
   //             Accessing information about the player

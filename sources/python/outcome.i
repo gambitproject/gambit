@@ -9,6 +9,7 @@ typedef gbtHandle<gbtGameOutcomeRep> gbtGameOutcome;
 
 %nodefault;
 class gbtGameOutcome {
+  ~gbtGameOutcome();
 };
 
 %extend gbtGameOutcome {

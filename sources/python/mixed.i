@@ -9,6 +9,7 @@
 %nodefault;
 class gbtMixedProfileDouble {
 public:
+  virtual ~gbtMixedProfileDouble();
 };
 
 %extend gbtMixedProfileDouble {
@@ -45,6 +46,7 @@ public:
 %nodefault;
 class gbtMixedProfileRational {
 public:
+  virtual ~gbtMixedProfileRational();
 };
 
 %extend gbtMixedProfileRational {

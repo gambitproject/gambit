@@ -130,24 +130,24 @@ if the player is a personal player.
 
 </sect2>
 
-
-<sect2 id="apiref.player.isnull">
-<title>IsNull</title>
-<indexterm><primary>IsNull</primary></indexterm>
+<sect2 id="apiref.player.isdeleted">
+<title>IsDeleted</title>
+<indexterm><primary>IsDeleted</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-bool gbtGamePlayer::IsNull(void) const
+bool gbtGamePlayer::IsDeleted(void) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>IsNull</function>
-returns <literal>True</literal> (nonzero) if the player object is
-null, and <literal>False</literal> (zero) if it is null.
+<function>IsDeleted</function> returns <literal>True</literal> (nonzero)
+if the player has been deleted from its game.  Any attempts to operate
+on a deleted object throw a <errorname>gbtGameDeletedException</errorname>
+(mapped to <errorname>RuntimeError</errorname> in Python).
 </para>
 
 </sect2>

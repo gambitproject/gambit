@@ -86,13 +86,9 @@ gbtTreePlayerRep::gbtTreePlayerRep(gbtTreeGameRep *p_efg, int p_id)
 
 gbtTreePlayerRep::~gbtTreePlayerRep()
 {
-  // Temporarily we will leak these information sets while API is in
-  // transition.
-  /*
-  while (m_infosets.Length()) {
-    delete m_infosets.Remove(1);
-  }
-  */
+  for (int iset = 1; iset <= m_infosets.Length(); 
+       m_infosets[iset++]->Delete());
+  for (int st = 1; st <= m_strategies.Length(); m_strategies[st++]->Delete());
 }
 
 //----------------------------------------------------------------------
