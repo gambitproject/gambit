@@ -74,18 +74,18 @@ gbtBehavProfileBase<T>::gbtBehavProfileBase(const gbtEfgSupportBase &p_support)
 
 template <class T>
 gbtBehavProfileBase<T>::gbtBehavProfileBase(const gbtMixedProfileTree<T> &p_profile)
-  : m_profile(p_profile.GetGame()->NumActions()), 
+  : m_profile(p_profile.m_efgSupport->NumActions()), 
     m_support(new gbtEfgSupportBase(*p_profile.m_efgSupport)),
     m_cached_data(false),
-    m_realizProbs(p_profile.GetGame()->NumNodes()),
-    m_beliefs(p_profile.GetGame()->NumNodes()),
-    m_nvals(p_profile.GetGame()->NumNodes()),
-    m_bvals(p_profile.GetGame()->NumNodes()),
-    m_nodeValues(p_profile.GetGame()->NumNodes(),
-		 p_profile.GetGame()->NumPlayers()),
-    m_infosetValues(p_profile.GetGame()->NumInfosets()),
-    m_actionValues(p_profile.GetGame()->NumActions()),
-    m_gripe(p_profile.GetGame()->NumActions())
+    m_realizProbs(p_profile.m_efgSupport->NumNodes()),
+    m_beliefs(p_profile.m_efgSupport->NumNodes()),
+    m_nvals(p_profile.m_efgSupport->NumNodes()),
+    m_bvals(p_profile.m_efgSupport->NumNodes()),
+    m_nodeValues(p_profile.m_efgSupport->NumNodes(),
+		 p_profile.m_efgSupport->NumPlayers()),
+    m_infosetValues(p_profile.m_efgSupport->NumInfosets()),
+    m_actionValues(p_profile.m_efgSupport->NumActions()),
+    m_gripe(p_profile.m_efgSupport->NumActions())
 {
   InitProfile();
 
@@ -93,9 +93,8 @@ gbtBehavProfileBase<T>::gbtBehavProfileBase(const gbtMixedProfileTree<T> &p_prof
 
   gbtGameNode n = m_support->GetTree()->GetRoot();
   const gbtNfgSupport &support = p_profile.GetSupport();
-  gbtGame nfg = p_profile.GetGame();
 
-  for (int pl = 1; pl <= nfg->NumPlayers(); pl++)   {
+  for (int pl = 1; pl <= support->NumPlayers(); pl++)   {
     m_nvals = (T) 0;
     m_bvals = (T) 0;
 

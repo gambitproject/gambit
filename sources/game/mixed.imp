@@ -306,27 +306,6 @@ void gbtMixedProfileTable<T>::PPayoff(int pl, int const_pl, int cur_pl, long ind
 }
 
 template <class T>
-gbtMixedProfileTable<T>::gbtMixedProfileTable(const gbtBehavProfile<T> &p_profile)
-  : m_profile(p_profile->GetGame()->NumStrategies()),
-    m_support(dynamic_cast<gbtNfgSupportBase *>(p_profile->GetGame()->NewNfgSupport().Get()))
-{
-  gbtGame efg = p_profile->GetGame();
-  for (int pl = 1; pl <= m_support->NumPlayers(); pl++)  {
-    gbtGamePlayer player = m_support->GetPlayer(pl);
-    for (int st = 1; st <= player->NumStrategies(); st++)  {
-      T prob = (T) 1;
-      const gbtArray<int> &behav = player->GetStrategy(st)->GetBehavior();
-
-      for (int iset = 1; iset <= efg->GetPlayer(pl)->NumInfosets(); iset++) {
-	if (behav[iset] > 0)
-	  prob *= p_profile(pl, iset, behav[iset]);
-      }
-      (*this)(pl, st) = prob;
-    }
-  }
-}
-
-template <class T>
 T gbtMixedProfileTable<T>::Payoff(const gbtGameOutcome &p_outcome,
 				int pl) const
 { 
@@ -462,18 +441,17 @@ bool gbtMixedProfileTree<T>::operator==(const gbtMixedProfileRep<T> &mp) const
 
 template <class T>
 gbtMixedProfileTree<T>::gbtMixedProfileTree(const gbtBehavProfileBase<T> &p_profile)
-  : m_profile(p_profile.GetGame()->NumStrategies()),
+  : m_profile(p_profile.m_support->m_efg->NumStrategies()),
     m_efgSupport(new gbtEfgSupportBase(*p_profile.m_support)),
     m_nfgSupport(new gbtNfgSupportBase(p_profile.m_support->m_efg))
 {
-  gbtGame efg = p_profile.GetGame();
   for (int pl = 1; pl <= m_nfgSupport->NumPlayers(); pl++)  {
     gbtGamePlayer player = m_nfgSupport->GetPlayer(pl);
     for (int st = 1; st <= player->NumStrategies(); st++)  {
       T prob = (T) 1;
       const gbtArray<int> &behav = player->GetStrategy(st)->GetBehavior();
 
-      for (int iset = 1; iset <= efg->GetPlayer(pl)->NumInfosets(); iset++) {
+      for (int iset = 1; iset <= player->NumInfosets(); iset++) {
 	if (behav[iset] > 0)
 	  prob *= p_profile(pl, iset, behav[iset]);
       }

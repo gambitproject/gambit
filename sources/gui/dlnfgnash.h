@@ -41,7 +41,7 @@ private:
   gbtOrdMap<wxTreeItemId, gbtPanelNfgNashAlgorithm *> m_algorithms;
 
   // Private auxiliary functions
-  int LoadAlgorithms(const gbtGame &);
+  int LoadAlgorithms(const gbtNfgGame &);
 
   // Event handlers
   void OnSelectionChanging(wxTreeEvent &);
@@ -49,7 +49,7 @@ private:
 
 public:
   // Lifecycle
-  dialogNfgNash(wxWindow *, const gbtNfgSupport &);
+  dialogNfgNash(wxWindow *, const gbtNfgGame &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   gbtNfgNashAlgorithm *GetAlgorithm(void) const;

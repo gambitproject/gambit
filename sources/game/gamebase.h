@@ -481,8 +481,6 @@ public:
   { return !(*this == p_support); }
 
   // DATA ACCESS: GENERAL
-  gbtGame GetGame(void) const { return m_nfg; }
-
   gbtText GetLabel(void) const { return m_label; }
   void SetLabel(const gbtText &p_label) { m_label = p_label; }
   
@@ -563,12 +561,9 @@ private:
 public:
   gbtMixedProfileTable(const gbtNfgSupportBase &p_support);
   gbtMixedProfileTable(const gbtMixedProfileTable<T> &);
-  gbtMixedProfileTable(const gbtBehavProfile<T> &);
   virtual ~gbtMixedProfileTable() { delete m_support; }
 
   gbtMixedProfileTable<T> *Copy(void) const;
-  
-  gbtGame GetGame(void) const  { return m_support->GetGame(); }
   
   void SetStrategyProb(const gbtGameStrategy &p_strategy,
 		       const T &p_prob);
@@ -655,8 +650,6 @@ public:
   virtual ~gbtMixedProfileTree() { }
 
   gbtMixedProfileTree<T> *Copy(void) const;
-  
-  gbtGame GetGame(void) const  { return m_nfgSupport->GetGame(); }
   
   void SetStrategyProb(const gbtGameStrategy &p_strategy,
 		       const T &p_prob);
@@ -980,8 +973,6 @@ public:
   void Centroid(void);
 
   // GENERAL DATA ACCESS
-
-  gbtGame GetGame(void) const   { return m_support->GetTree(); }
   gbtEfgSupport GetSupport(void) const   { return m_support; }
   
   const T &GetRealizProb(const gbtGameNode &node) const;

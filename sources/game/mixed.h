@@ -50,7 +50,6 @@ public:
    
   virtual bool operator==(const gbtMixedProfileRep<T> &) const = 0;
 
-  virtual gbtGame GetGame(void) const = 0;
   virtual gbtNfgSupport GetSupport(void) const = 0;
 
   virtual void SetStrategyProb(const gbtGameStrategy &p_strategy,

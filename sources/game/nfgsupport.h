@@ -40,8 +40,6 @@ private:
 		   gbtStatus &status) const;
 public:
   // DATA ACCESS: GENERAL
-  virtual gbtGame GetGame(void) const = 0;
-
   virtual gbtText GetLabel(void) const = 0;
   virtual void SetLabel(const gbtText &) = 0;
   

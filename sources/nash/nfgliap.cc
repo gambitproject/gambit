@@ -28,13 +28,12 @@
 #include "nfgliap.h"
 
 //---------------------------------------------------------------------
-//                        class NFLiapFunc
+//                        class gbtMixedLiapFunc
 //---------------------------------------------------------------------
 
-class NFLiapFunc : public gbtC1Function<double>  {
+class gbtMixedLiapFunc : public gbtC1Function<double>  {
 private:
   mutable long _nevals;
-  gbtGame m_nfg;
   mutable gbtMixedProfile<double> _p;
 
   double Value(const gbtVector<double> &) const;
@@ -44,31 +43,30 @@ private:
     
 
 public:
-  NFLiapFunc(const gbtGame &, const gbtMixedProfile<double> &);
-  virtual ~NFLiapFunc();
+  gbtMixedLiapFunc(const gbtMixedProfile<double> &);
+  virtual ~gbtMixedLiapFunc();
     
   long NumEvals(void) const  { return _nevals; }
 };
 
-NFLiapFunc::NFLiapFunc(const gbtGame &p_nfg,
-		       const gbtMixedProfile<double> &start)
-  : _nevals(0L), m_nfg(p_nfg), _p(start)
+gbtMixedLiapFunc::gbtMixedLiapFunc(const gbtMixedProfile<double> &start)
+  : _nevals(0L), _p(start)
 { }
 
-NFLiapFunc::~NFLiapFunc()
+gbtMixedLiapFunc::~gbtMixedLiapFunc()
 { }
 
-double NFLiapFunc::LiapDerivValue(int i1, int j1,
-				  const gbtMixedProfile<double> &p) const
+double gbtMixedLiapFunc::LiapDerivValue(int i1, int j1,
+					const gbtMixedProfile<double> &p) const
 {
   int i, j;
   double x, x1, psum;
   
-  gbtGamePlayer player1 = p->GetSupport()->GetPlayer(i1);
+  gbtGamePlayer player1 = p->GetPlayer(i1);
   x = 0.0;
-  for (i = 1; i <= m_nfg->NumPlayers(); i++)  {
+  for (i = 1; i <= p->NumPlayers(); i++)  {
     psum = 0.0;
-    gbtGamePlayer player = p->GetSupport()->GetPlayer(i);
+    gbtGamePlayer player = p->GetPlayer(i);
     for (j = 1; j <= player->NumStrategies(); j++)  {
       psum += p(i,j);
       x1 = p->Payoff(i, player->GetStrategy(j)) - p->Payoff(i);
@@ -126,13 +124,13 @@ static void Project(gbtVector<double> &grad, const gbtVector<double> &x,
   }
 }
 
-bool NFLiapFunc::Gradient(const gbtVector<double> &v, gbtVector<double> &d) const
+bool gbtMixedLiapFunc::Gradient(const gbtVector<double> &v, gbtVector<double> &d) const
 {
   ((gbtVector<double> &) _p).operator=(v);
   int i1, j1, ii;
   
-  for (i1 = 1, ii = 1; i1 <= m_nfg->NumPlayers(); i1++) {
-    gbtGamePlayer player = _p->GetSupport()->GetPlayer(i1);
+  for (i1 = 1, ii = 1; i1 <= _p->NumPlayers(); i1++) {
+    gbtGamePlayer player = _p->GetPlayer(i1);
     for (j1 = 1; j1 <= player->NumStrategies(); j1++) {
       d[ii++] = LiapDerivValue(i1, j1, _p);
     }
@@ -143,7 +141,7 @@ bool NFLiapFunc::Gradient(const gbtVector<double> &v, gbtVector<double> &d) cons
   return true;
 }
   
-double NFLiapFunc::Value(const gbtVector<double> &v) const
+double gbtMixedLiapFunc::Value(const gbtVector<double> &v) const
 {
   static const double BIG1 = 100.0;
   static const double BIG2 = 100.0;
@@ -158,7 +156,7 @@ double NFLiapFunc::Value(const gbtVector<double> &v) const
   double x, result = 0.0, avg, sum;
   payoff = 0.0;
   
-  for (int i = 1; i <= m_nfg->NumPlayers(); i++)  {
+  for (int i = 1; i <= _p->NumPlayers(); i++)  {
     tmp->CopyRow(i, payoff);
     avg = sum = 0.0;
 
@@ -195,11 +193,11 @@ static void PickRandomProfile(gbtMixedProfile<double> &p)
 {
   double sum, tmp;
 
-  for (int pl = 1; pl <= p->GetGame()->NumPlayers(); pl++)  {
+  for (int pl = 1; pl <= p->NumPlayers(); pl++)  {
     sum = 0.0;
     int st;
     
-    gbtGamePlayer player = p->GetSupport()->GetPlayer(pl);
+    gbtGamePlayer player = p->GetPlayer(pl);
     for (st = 1; st < player->NumStrategies(); st++)  {
       do
 	tmp = Uniform();
@@ -225,7 +223,7 @@ gbtMixedNashSet gbtNfgNashLiap::Solve(const gbtNfgGame &p_game,
 {
   static const double ALPHA = .00000001;
   gbtMixedProfile<double> p = p_game->NewMixedProfile(0.0);
-  NFLiapFunc F(p->GetGame(), p);
+  gbtMixedLiapFunc F(p);
 
   // if starting vector not interior, perturb it towards centroid
   int kk;

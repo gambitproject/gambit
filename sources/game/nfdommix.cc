@@ -82,7 +82,7 @@ bool IsMixedDominated(const gbtMixedProfile<gbtNumber> &sol,
 		 bool strong, gbtPrecision precision, gbtOutput &tracefile)
 {
   bool ret = false;
-  int n = sol->GetGame()->NumPlayers();
+  int n = sol->NumPlayers();
   int i=1;
 
   while (i<=n && !ret) {

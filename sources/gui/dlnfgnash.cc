@@ -1319,7 +1319,7 @@ BEGIN_EVENT_TABLE(dialogNfgNash, wxDialog)
 			   dialogNfgNash::OnItemCollapsing)
 END_EVENT_TABLE()
 
-dialogNfgNash::dialogNfgNash(wxWindow *p_parent, const gbtNfgSupport &p_support)
+dialogNfgNash::dialogNfgNash(wxWindow *p_parent, const gbtNfgGame &p_game)
   : wxDialog(p_parent, -1, _("Compute Nash equilibria"), wxDefaultPosition),
     m_algorithms(0)
 {
@@ -1332,7 +1332,7 @@ dialogNfgNash::dialogNfgNash(wxWindow *p_parent, const gbtNfgSupport &p_support)
 				   wxDefaultPosition, wxSize(200, 400),
 				   wxTR_NO_BUTTONS | wxTR_HIDE_ROOT |
 				   wxTR_NO_LINES | wxTR_ROW_LINES);
-  wxTreeItemId init = LoadAlgorithms(p_support->GetGame());
+  wxTreeItemId init = LoadAlgorithms(p_game);
   m_algPanelSizer->Add(m_algorithmTree, 1, wxALL, 5);
   m_currentPanel = m_algorithms(init);
   m_algPanelSizer->Add(m_currentPanel, 0, wxALL | wxCENTER, 5);
@@ -1355,7 +1355,7 @@ dialogNfgNash::dialogNfgNash(wxWindow *p_parent, const gbtNfgSupport &p_support)
   m_algorithmTree->SelectItem(init);
 }
 
-int dialogNfgNash::LoadAlgorithms(const gbtGame &p_nfg)
+int dialogNfgNash::LoadAlgorithms(const gbtNfgGame &p_nfg)
 {
   wxTreeItemId id;
 

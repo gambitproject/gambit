@@ -45,7 +45,7 @@ private:
   
 public:
   gbtNfgSupportPlayerRep(const gbtNfgSupportBase *p_support, int pl)
-    : m_player(p_support->GetGame()->GetPlayer(pl)),
+    : m_player(p_support->GetPlayer(pl)),
       m_support(p_support) { }
   virtual ~gbtNfgSupportPlayerRep() { }
 
