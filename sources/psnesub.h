@@ -12,13 +12,14 @@
 
 class efgEnumPureNfgSolve : public SubgameSolver  {
 private:
+  int m_stopAfter;
   gStatus &m_status;
 
   void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
   EfgAlgType AlgorithmID() const { return EfgAlg_PURENASHSUB; }    
   
 public:
-  efgEnumPureNfgSolve(const EFSupport &, gStatus &, int max = 0);
+  efgEnumPureNfgSolve(const EFSupport &, int p_stopAfter, gStatus &);
   virtual ~efgEnumPureNfgSolve();
 };
 

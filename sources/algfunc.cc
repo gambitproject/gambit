@@ -173,7 +173,6 @@ static Portion *GSM_EnumPure_Nfg(Portion **param)
   NFSupport* S = ((NfSupportPortion*) param[0])->Value();
 
   gWatch watch;
-
   gList<MixedSolution> solutions;
 
   try {
@@ -199,7 +198,9 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
     gList<BehavSolution> solutions;
 
     try {
-      efgEnumPureNfgSolve algorithm(support, gstatus);
+      efgEnumPureNfgSolve algorithm(support,
+				    ((NumberPortion *) param[2])->Value(),
+				    gstatus);
       algorithm.Solve(support);
       ((NumberPortion *) param[4])->SetValue(algorithm.Time());
     }
@@ -213,11 +214,12 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
 
     try {
       gWatch watch;
-      efgEnumPure algorithm;
+      efgEnumPure algorithm(((NumberPortion *) param[2])->Value(), gstatus);
       solutions = algorithm.Solve(support);
       ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
     }
     catch (gSignalBreak &) {
+      gstatus.Reset();
     }
     return new Behav_ListPortion(solutions);
   }

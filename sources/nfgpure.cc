@@ -13,14 +13,20 @@
 #include "glist.h"
 #include "mixed.h"
 
-void FindPureNash(const NFSupport &p_support, int p_max,
+void FindPureNash(const NFSupport &p_support, int p_stopAfter,
 		  gStatus &p_status, gList<MixedSolution> &p_solutions)
 {
   const Nfg &nfg = p_support.Game();
   NfgContIter citer(p_support);
 
+  int ncont = 1;
+  for (int pl = 1; pl <= nfg.NumPlayers(); pl++)
+    ncont *= p_support.NumStrats(pl);
+
+  int contNumber = 1;
   do  {
     p_status.Get();
+    p_status.SetProgress((double) contNumber / (double) ncont);
 
     bool flag = true;
     NfgIter niter(citer);
@@ -48,7 +54,11 @@ void FindPureNash(const NFSupport &p_support, int p_max,
 	p_solutions[index].SetIsNash(triTRUE);
       else
 	p_solutions[index].SetIsNash(triFALSE);
-      if (p_max > 0 && index == p_max)  break;
     }
-  }  while (citer.NextContingency());
+    contNumber++;
+  }  while ((p_stopAfter == 0 || p_solutions.Length() <= p_stopAfter) &&
+	    citer.NextContingency());
 }
+
+
+

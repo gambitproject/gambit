@@ -38,23 +38,25 @@ NfgSolutionG::NfgSolutionG(const Nfg &p_nfg, const NFSupport &p_support,
 #include "nfgpure.h"
 #include "dlenumpure.h"
 
-NfgEnumPureG::NfgEnumPureG(const Nfg &p_nfg, const NFSupport &p_support,
-			   NfgShowInterface *p_parent)
-  : NfgSolutionG(p_nfg, p_support, p_parent)
+guinfgEnumPure::guinfgEnumPure(const NFSupport &p_support,
+			       NfgShowInterface *p_parent)
+  : NfgSolutionG(p_support.Game(), p_support, p_parent)
 { }
 
-gList<MixedSolution> NfgEnumPureG::Solve(void) const
+gList<MixedSolution> guinfgEnumPure::Solve(void) const
 {
-  wxStatus status(parent->Frame(), "EnumPure Algorithm");
+  wxStatus status(parent->Frame(), "EnumPureSolve Progress");
+
+  gList<MixedSolution> solutions;
 
   try {
     FindPureNash(sup, m_stopAfter, status, solns);
   }
   catch (gSignalBreak &) { }
-  return solns;
+  return solutions;
 }
 
-bool NfgEnumPureG::SolveSetup(void)
+bool guinfgEnumPure::SolveSetup(void)
 {
   dialogEnumPure dialog(parent->Frame());
 

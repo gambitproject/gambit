@@ -16,12 +16,12 @@ void efgEnumPureNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
 
   ViewNormal(*N, S);
 
-  gList<MixedSolution> sol;
-  FindPureNash(*S, 0, m_status, sol);
+  gList<MixedSolution> solutions;
+  FindPureNash(*S, m_stopAfter, m_status, solutions);
 
-  for (int i = 1; i <= sol.Length(); i++)  {
+  for (int i = 1; i <= solutions.Length(); i++)  {
     BehavProfile<gNumber> bp(sup);
-    MixedToBehav(*N, MixedProfile<gNumber>(sol[i]), E, bp);
+    MixedToBehav(*N, MixedProfile<gNumber>(solutions[i]), E, bp);
     solns.Append(bp);
   }
 
@@ -30,8 +30,10 @@ void efgEnumPureNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
 }
 
 efgEnumPureNfgSolve::efgEnumPureNfgSolve(const EFSupport &p_support,
-					 gStatus &p_status, int p_max) 
-  : SubgameSolver(p_max), m_status(p_status)
+					 int p_stopAfter, gStatus &p_status)
+  : SubgameSolver(0), m_stopAfter(p_stopAfter), m_status(p_status)
 { }
 
 efgEnumPureNfgSolve::~efgEnumPureNfgSolve()   { }
+
+

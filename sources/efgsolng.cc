@@ -471,7 +471,8 @@ bool guiefgLcpNfg::SolveSetup(void)
 // EnumPure on nfg
 //---------------------
 
-class PureNashBySubgameG : public efgEnumPureNfgSolve, public BaseBySubgameG {
+class guiSubgameEnumPureNfg : public efgEnumPureNfgSolve,
+			      public BaseBySubgameG {
 protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
@@ -480,12 +481,14 @@ protected:
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
-  PureNashBySubgameG(const Efg &p_efg, const EFSupport &p_support,
-		     bool p_eliminate, bool p_iterative, bool p_strong,
-		     int p_max = 0, EfgShowInterface *p_parent = 0)
-    : efgEnumPureNfgSolve(p_support, gstatus, p_max),
+  guiSubgameEnumPureNfg(const Efg &p_efg, const EFSupport &p_support,
+			bool p_eliminate, bool p_iterative, bool p_strong,
+			int p_stopAfter, gStatus &p_status,
+			EfgShowInterface *p_parent = 0)
+    : efgEnumPureNfgSolve(p_support, p_stopAfter, p_status),
       BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
     { }
+  virtual ~guiSubgameEnumPureNfg() { }
 };
 
 guiefgEnumPureNfg::guiefgEnumPureNfg(const EFSupport &p_support, 
@@ -496,12 +499,11 @@ guiefgEnumPureNfg::guiefgEnumPureNfg(const EFSupport &p_support,
 gList<BehavSolution> guiefgEnumPureNfg::Solve(void) const
 {
   wxStatus status(m_parent->Frame(), "EnumPureSolve Progress");
-  status << "Progress not implemented\n" << "Cancel button disabled\n";
 
   try {
-    PureNashBySubgameG M(m_efg, m_support, Eliminate(), EliminateAll(),
-			 EliminateWeak(), 0, m_parent);
-    return M.Solve(m_support);
+    return guiSubgameEnumPureNfg(m_efg, m_support, Eliminate(), EliminateAll(),
+				 EliminateWeak(), m_stopAfter,
+				 status, m_parent).Solve(m_support);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -532,17 +534,19 @@ bool guiefgEnumPureNfg::SolveSetup(void)
 
 #include "efgpure.h"
 
-class EPureNashBySubgameG : public efgEnumPure, public BaseBySubgameG {
+class guiEnumPureEfgSubgame : public efgEnumPure, public BaseBySubgameG {
 protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
 
 public:
-  EPureNashBySubgameG(const Efg &p_efg, const EFSupport &p_support,
-		      int p_max = 0, EfgShowInterface *p_parent = 0)
-    : efgEnumPure(p_max), BaseBySubgameG(p_parent, p_efg)
+  guiEnumPureEfgSubgame(const Efg &p_efg, const EFSupport &p_support,
+			int p_stopAfter, gStatus &p_status,
+			EfgShowInterface *p_parent = 0)
+    : efgEnumPure(p_stopAfter, p_status), BaseBySubgameG(p_parent, p_efg)
     { }
+  virtual ~guiEnumPureEfgSubgame() { }
 };
 
 guiefgEnumPureEfg::guiefgEnumPureEfg(const EFSupport &p_support, 
@@ -553,11 +557,10 @@ guiefgEnumPureEfg::guiefgEnumPureEfg(const EFSupport &p_support,
 gList<BehavSolution> guiefgEnumPureEfg::Solve(void) const
 {
   wxStatus status(m_parent->Frame(), "EnumPureSolve Progress");
-  status << "Progress not implemented\n" << "Cancel button disabled\n";
 
   try {
-    EPureNashBySubgameG M(m_efg, m_support, 0, m_parent);
-    return M.Solve(m_support);
+    return guiEnumPureEfgSubgame(m_efg, m_support, m_stopAfter,
+				 status, m_parent).Solve(m_support);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -574,6 +577,8 @@ bool guiefgEnumPureEfg::SolveSetup(void)
     m_eliminateWeak = dialog.EliminateWeak();
     m_eliminateMixed = dialog.EliminateMixed();
     m_markSubgames = dialog.MarkSubgames();
+
+    m_stopAfter = dialog.StopAfter();
     return true;
   }
   else

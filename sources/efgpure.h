@@ -7,20 +7,23 @@
 #ifndef EFGPURE_H
 #define EFGPURE_H
 
+#include "glist.h"
+#include "gstatus.h"
 #include "efg.h"
 #include "behavsol.h"
-#include "glist.h"
-
 #include "subsolve.h"
 
 class efgEnumPure : public SubgameSolver  {
 private:
+  int m_stopAfter;
+  gStatus &m_status;
+
   void SolveSubgame(const Efg &, const EFSupport &,
 		    gList<BehavSolution> &);
   EfgAlgType AlgorithmID() const { return EfgAlg_PURENASHSUB; }    
 
 public:
-  efgEnumPure(int max = 0);
+  efgEnumPure(int p_stopAfter, gStatus &p_status);
   virtual ~efgEnumPure();
 };
 

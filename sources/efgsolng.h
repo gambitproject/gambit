@@ -52,6 +52,9 @@ public:
 //------------
 
 class guiefgEnumPureEfg : public guiEfgSolution {
+private:
+  int m_stopAfter;
+
 public:
   guiefgEnumPureEfg(const EFSupport &, EfgShowInterface *);
   virtual ~guiefgEnumPureEfg()  { }

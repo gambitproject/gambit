@@ -59,13 +59,14 @@ public:
   virtual bool SolveSetup(void);
 };
 
-class NfgEnumPureG : public NfgSolutionG  {
+class guinfgEnumPure : public NfgSolutionG  {
 private:
   int m_stopAfter;
 
 public:
-  NfgEnumPureG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
-  virtual ~NfgEnumPureG()   { }
+  guinfgEnumPure(const NFSupport &, NfgShowInterface *);
+  virtual ~guinfgEnumPure()   { }
+
   virtual gList<MixedSolution> Solve(void) const;
   virtual bool SolveSetup(void);
 };

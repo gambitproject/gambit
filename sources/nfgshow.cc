@@ -462,7 +462,7 @@ void NfgShow::Solve(int id)
 
   switch (id) {
   case NFG_SOLVE_CUSTOM_ENUMPURE:
-    solver = new NfgEnumPureG(nf, *sup, this);
+    solver = new guinfgEnumPure(*sup, this);
     break;
   case NFG_SOLVE_CUSTOM_ENUMMIXED:
     solver = new NfgEnumG(nf, *sup, this);
@@ -555,7 +555,7 @@ void NfgShow::SolveStandard(void)
 
   switch (NSD.GetAlgorithm()) {
   case NFG_ENUMPURE_SOLUTION:
-    solver = new NfgEnumPureG(nf, *sup, this);
+    solver = new guinfgEnumPure(*sup, this);
     break;
   case NFG_ENUMMIXED_SOLUTION:
     solver = new NfgEnumG(nf, *sup, this);
