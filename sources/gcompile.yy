@@ -759,7 +759,7 @@ int GCLCompiler::Execute(void)
 {
   Portion *result = gsm.Execute(exprtree); 
   if (result->Spec().Type == porERROR)
-    gout << result << '\n';
+    gout << "GCL: " << result << '\n';
 
   delete result;
   return rcSUCCESS;
