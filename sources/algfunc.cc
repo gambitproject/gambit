@@ -232,32 +232,30 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
   const Efg &E = support.Game();
 
   if (((BoolPortion *) param[1])->Value())   {
-    if (((PrecisionPortion *) param[2])->Value() == precDOUBLE)  {
+    if (((PrecisionPortion *) param[3])->Value() == precDOUBLE)  {
       PureNashBySubgame<double> M(E, support);
 	    M.Solve();
-	    ((NumberPortion *) param[3])->Value() = M.Time();
+	    ((NumberPortion *) param[4])->Value() = M.Time();
       return new Behav_ListPortion<double>(M.GetSolutions());
     }
     else  {
       PureNashBySubgame<gRational> M(E, support);
 	    M.Solve();
-	    ((NumberPortion *) param[3])->Value() = M.Time();
+	    ((NumberPortion *) param[4])->Value() = M.Time();
       return new Behav_ListPortion<gRational>(M.GetSolutions());
     }
   }
   else  {
-    if (((PrecisionPortion *) param[2])->Value() == precDOUBLE)  {
-      gout << "ok...\n";
+    if (((PrecisionPortion *) param[3])->Value() == precDOUBLE)  {
       EfgPSNEBySubgame<double> M(E, support);
 	    M.Solve();
-	    ((NumberPortion *) param[3])->Value() = M.Time();
-      gout << "hmmmm\n";
+	    ((NumberPortion *) param[4])->Value() = M.Time();
       return new Behav_ListPortion<double>(M.GetSolutions());
     }
     else  {
       EfgPSNEBySubgame<gRational> M(E, support);
 	    M.Solve();
-	    ((NumberPortion *) param[3])->Value() = M.Time();
+	    ((NumberPortion *) param[4])->Value() = M.Time();
       return new Behav_ListPortion<gRational>(M.GetSolutions());
     }
   }
