@@ -701,9 +701,9 @@ dialogQre::~dialogQre()
     wxWriteResource("Algorithm Params", "Qre-delLam",
 		    (float) m_delLam->GetNumber(), "gambit.ini");
     wxWriteResource("Algorithm Params", "Func-tolND",
-		    (float) m_tolN->GetNumber(), "gambit.ini");
+		    m_tolN->GetInteger(), "gambit.ini");
     wxWriteResource("Algorithm Params", "Func-tol1D",
-		    (float) m_tol1->GetNumber(), "gambit.ini");
+		    m_tol1->GetInteger(), "gambit.ini");
     wxWriteResource("Algorithm Params", "Func-maxitsND",
 		    m_maxitsN->GetInteger(), "gambit.ini");
     wxWriteResource("Algorithm Params", "Func-maxits1D",
@@ -718,8 +718,8 @@ void dialogQre::AlgorithmFields(void)
   (void) new wxMessage(this, "Algorithm parameters");
   NewLine();
 
-  float minLam, maxLam, delLam, tolN, tol1;
-  int maxitsN, maxits1;
+  float minLam, maxLam, delLam;
+  int tolN, tol1, maxitsN, maxits1;
   wxGetResource("Algorithm Params", "Qre-minLam", &minLam, "gambit.ini");
   wxGetResource("Algorithm Params", "Qre-maxLam", &maxLam, "gambit.ini");
   wxGetResource("Algorithm Params", "Qre-delLam", &delLam, "gambit.ini");
@@ -733,8 +733,8 @@ void dialogQre::AlgorithmFields(void)
   m_delLam = new wxNumberItem(this, "delLam", delLam);
   NewLine();
 
-  m_tolN = new wxNumberItem(this, "Tolerance n-D", tolN);
-  m_tol1 = new wxNumberItem(this, "Tolerance 1-D", tol1);
+  m_tolN = new wxIntegerItem(this, "Tol n-D digits", tolN);
+  m_tol1 = new wxIntegerItem(this, "Tol 1-D digits", tol1);
   NewLine();
 
   m_maxitsN = new wxIntegerItem(this, "Iterations n-D", maxitsN);

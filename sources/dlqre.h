@@ -11,8 +11,8 @@
 
 class dialogQre : public dialogPxi {
 private:
-  wxNumberItem *m_minLam, *m_maxLam, *m_delLam, *m_tol1, *m_tolN;
-  wxIntegerItem *m_maxits1, *m_maxitsN;
+  wxNumberItem *m_minLam, *m_maxLam, *m_delLam;
+  wxIntegerItem *m_tol1, *m_tolN, *m_maxits1, *m_maxitsN;
   wxRadioBox *m_startOption;
 
   void AlgorithmFields(void);
@@ -27,10 +27,10 @@ public:
     { return m_maxLam->GetNumber(); }
   double DelLam(void) const
     { return m_delLam->GetNumber(); }
-  double Tol1D(void) const
-    { return m_tol1->GetNumber(); }
-  double TolND(void) const
-    { return m_tolN->GetNumber(); }
+  int Tol1D(void) const
+    { return m_tol1->GetInteger(); }
+  int TolND(void) const
+    { return m_tolN->GetInteger(); }
   int Maxits1D(void) const
     { return m_maxits1->GetInteger(); }
   int MaxitsND(void) const
