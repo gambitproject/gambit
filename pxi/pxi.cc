@@ -199,6 +199,7 @@ PxiFrame::PxiFrame(wxFrame *p_parent, const wxString &p_title,
   SetToolBar(new PxiToolbar(this));
 }
 
+
 PxiFrame::~PxiFrame()
 {
   wxConfig config("PXI");
@@ -266,8 +267,8 @@ void PxiFrame::LoadFile(const wxString &p_filename)
 BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   //  EVT_MENU(PXI_LOAD_FILE, PxiChild::On)
   EVT_MENU(PXI_OUTPUT, PxiChild::OnFileOutput)
-  EVT_MENU(PXI_CHILD_QUIT, PxiChild::Close)
-  EVT_MENU(PXI_QUIT, PxiChild::Close)
+  EVT_MENU(PXI_CHILD_CLOSE, PxiChild::Close)
+  EVT_MENU(PXI_CHILD_QUIT, PxiChild::OnQuit)
   EVT_MENU(PXI_DATA_OVERLAY_DATA, PxiChild::OnOverlayData)
   EVT_MENU(PXI_DATA_OVERLAY_FILE, PxiChild::OnOverlayFile)
   EVT_MENU(PXI_FILE_DETAIL, PxiChild::OnFileDetail)
@@ -281,6 +282,11 @@ BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   EVT_SIZE(PxiChild::OnSize)
   EVT_CLOSE(PxiChild::OnCloseWindow)
 END_EVENT_TABLE()
+
+void PxiChild::OnQuit(wxCommandEvent &)
+{
+  GetParent()->Close();
+}
 
 void PxiChild::OnOverlayData(wxCommandEvent &)
 {
@@ -415,10 +421,10 @@ void PxiChild::MakeMenus(void)
 {
   wxMenu *file_menu = new wxMenu;
   file_menu->Append(PXI_LOAD_FILE, "&Load file", "Load new data file");
-  file_menu->Append(PXI_CHILD_QUIT, "&Close", "Close child window");
+  file_menu->Append(PXI_CHILD_CLOSE, "&Close", "Close child window");
   file_menu->Append(PXI_OUTPUT, "Output", "Output to file or printer");
   file_menu->AppendSeparator();
-  file_menu->Append(PXI_QUIT, "&Quit", "Quit Program");
+  file_menu->Append(PXI_CHILD_QUIT, "&Quit", "Quit Program");
   wxMenu *data_menu= new wxMenu;
   data_menu->Append(PXI_DATA_OVERLAY_DATA, "&Overlay Data", "Overlay experiment data on plot");
   data_menu->Append(PXI_DATA_OVERLAY_FILE, "&Overlay File", "Overlay another pxi file");

@@ -32,7 +32,8 @@
 #define PXI_HELP_CONTENTS     109
 #define PXI_LOAD_FILE         111
 #define	PXI_NEW_WINDOW	      117
-#define	PXI_CHILD_QUIT	      118
+#define	PXI_CHILD_CLOSE	      118
+#define	PXI_CHILD_QUIT	      134
 #define	PXI_JUST_REPAINT      115
 #define	PXI_NEW_FILE_REPAINT  116
 #define	PXI_UPDATE_SCREEN     119
@@ -310,7 +311,7 @@ private:
   PxiFrame *parent;
   PxiCanvas *canvas;
 
-  void OnGrid(wxCommandEvent &);
+  void OnQuit(wxCommandEvent &);
   void OnOverlayData(wxCommandEvent &);
   void OnOverlayFile(wxCommandEvent &);
   void OnFileDetail(wxCommandEvent &);

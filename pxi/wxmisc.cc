@@ -218,6 +218,10 @@ wxOutputDialogBox::wxOutputDialogBox(wxStringList *p_extraMedia,
 				     wxWindow *p_parent)
   : guiAutoDialog(p_parent, "Output Media")
 {
+  /*
+    // some sort of bug here with additional media -- causes crash in 
+    // wxRadioBox on motif  -- for now don't worry about extraMedia
+
   wxStringList mediaList("Printer", "PostScript", "Clipboard",
 			 "Metafile", "Print Preview", 0);
   
@@ -225,19 +229,25 @@ wxOutputDialogBox::wxOutputDialogBox(wxStringList *p_extraMedia,
     for (int i = 0; i < p_extraMedia->Number(); i++)
       mediaList.Add((const char *)(p_extraMedia->Nth(i)->Data()));
   }
+  */
+
+
+  wxString mediaList[] = { "Printer", "PostScript", "Clipboard", "Metafile", "Print Preview" };
+
   m_mediaBox = new wxRadioBox(this, 0, "Media", wxDefaultPosition, 
 #ifdef __WXMOTIF__ // bug in wxmotif
-			      wxSize(250,25),
+			      wxSize(250,125),
 #else
 			      
 			      wxDefaultSize,
 #endif
-			      mediaList.Number(), (const wxString *)mediaList.ListToArray(), 
-			      (int)(mediaList.Number()/2));
+			      // mediaList.Number(), (const wxString *)mediaList.ListToArray(),
+			      //(int)(mediaList.Number()/2));
+			      5, mediaList, 2);
   
   m_fitBox = new wxCheckBox(this, 0, "Fit to page");
   
-#ifdef __WXMSW__ // Printer, Clipboard, and MetaFiles are not yet supp'ed
+#ifndef __WXMSW__ // Printer, Clipboard, and MetaFiles are not yet supp'ed
   m_mediaBox->Enable(0, false);
   m_mediaBox->Enable(2, false);
   m_mediaBox->Enable(3, false);

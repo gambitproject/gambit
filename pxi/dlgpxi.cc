@@ -234,13 +234,11 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
   m_plotMode = new wxRadioBox(this, -1, "Plot Mode",
 			      wxDefaultPosition, 
 #ifdef __WXMOTIF__ // bug in wxmotif
-			      wxSize(250,25),
+			      wxSize(250,25), wxDefaultSize,3, plotModeChoices, 0, wxRA_SPECIFY_COLS
 #else
-			      
-			      wxDefaultSize,
+			      wxDefaultSize,3, plotModeChoices, 0, wxRA_SPECIFY_ROWS
 #endif
-			      3, plotModeChoices, 0, wxRA_SPECIFY_COLS);
-  
+			      );
   if (draw_settings.plot_mode == PXI_PLOT_X) 
     m_plotMode->SetSelection(0);
   else if (draw_settings.plot_mode == PXI_PLOT_2) 
@@ -252,13 +250,11 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
   m_colorMode = new wxRadioBox(this, -1, "Color Mode",
 			       wxDefaultPosition, 
 #ifdef __WXMOTIF__ // bug in wxmotif
-			       wxSize(250,25),
+			       wxSize(250,25),wxDefaultSize,3, colorModeChoices, 0, wxRA_SPECIFY_COLS
 #else
-			       
-			       wxDefaultSize,
+			       wxDefaultSize,3, colorModeChoices, 0, wxRA_SPECIFY_ROWS
 #endif
-			       3, colorModeChoices, 0, wxRA_SPECIFY_COLS);
-  
+			       );  
   if (draw_settings.color_mode == PXI_PLOT_X) 
     m_colorMode->SetSelection(0);
   else if (draw_settings.color_mode == PXI_PLOT_2) 
@@ -527,21 +523,23 @@ dialogOverlayOptions::dialogOverlayOptions(wxWindow *p_parent,
   wxString tokenChoices[] = { "Numbers", "Tokens"};
   m_token = new wxRadioBox(this, -1, "Draw Axis", wxDefaultPosition, 
 #ifdef __WXMOTIF__ // bug in wxmotif
-			   wxSize(200,25),
+			   wxSize(200,25),2, tokenChoices, 0, wxRA_SPECIFY_COLS
 #else
 
-			   wxDefaultSize,
+			   wxDefaultSize,2, tokenChoices, 0, wxRA_SPECIFY_ROWS
 #endif
-			   2, tokenChoices, 0, wxRA_SPECIFY_COLS);
+			   );
   m_connect = new wxCheckBox(this, -1, "Connect Points"); 
   m_size = new wxSlider(this, -1, 4,2,10, wxDefaultPosition, 
 #ifdef __WXMOTIF__ // bug in wxmotif
-			   wxSize(200,25),
+			wxSize(200,25),wxSL_HORIZONTAL | wxSL_LABELS
+#elseifdef __WXGTK__ // bug in wxgtk
+			wxSize(300,50), wxSL_HORIZONTAL | wxSL_LABELS
 #else
-
-			   wxDefaultSize,
+			wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS
 #endif
-			wxSL_HORIZONTAL | wxSL_LABELS);
+			);
+
   // set initial values
   m_token->SetSelection(0);
   if(s.GetOverlaySym()==OVERLAY_TOKEN)
@@ -554,9 +552,9 @@ dialogOverlayOptions::dialogOverlayOptions(wxWindow *p_parent,
   //  m_size.SetValue(s.GetTokenSize());
   
   wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);
-  allSizer->Add(m_token, 0, wxALL, 5);
-  allSizer->Add(m_connect, 0, wxALL, 5);
-  allSizer->Add(m_size, 0, wxALL, 5);
+  allSizer->Add(m_token, 0, wxCENTRE | wxALL, 5);
+  allSizer->Add(m_connect, 0, wxCENTRE | wxALL, 5);
+  allSizer->Add(m_size, 0, wxCENTRE | wxALL, 5);
   allSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
   
   SetAutoLayout(TRUE);
