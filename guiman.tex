@@ -19,7 +19,7 @@ Main Programmer: Theodore Turocy\\
 Front End: Eugene Grayver\\
  \\
 California Institute of Technology\\ \today.\\
-Version 0.9\\
+Version 0.91\\
  \\
 Part of the Gambit Project:\\
 Richard D. McKelvey and Andrew McLennan, PI's\\
@@ -49,9 +49,16 @@ documentation for any purpose is hereby granted without fee, provided that the
 above copyright notice and this permission notice appear in
 all copies of this software and related documentation.
 
-THE SOFTWARE IS PROVIDED ``AS-IS'' AND WITHOUT WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
-
-IN NO EVENT SHALL THE GAMBIT PROJECT, THE CALIFORNIA INSTITUTE OF TECHNOLOGY, THE UNIVERSITY OF MINNESOTA, OR ANYONE ASSOCIATED WITH THE DEVELOPMENT OF COMPUTER SOFTWARE UNDER THE GAMBIT PROJECT, BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+THE SOFTWARE IS PROVIDED ``AS-IS'' AND WITHOUT WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR 
+OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY OR FITNESS FOR A 
+PARTICULAR PURPOSE.
+ 
+IN NO EVENT SHALL THE GAMBIT PROJECT, THE CALIFORNIA INSTITUTE OF TECHNOLOGY, THE UNIVERSITY 
+OF MINNESOTA, OR ANYONE ASSOCIATED WITH THE DEVELOPMENT OF COMPUTER SOFTWARE UNDER THE GAMBIT 
+PROJECT, BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND, 
+OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER OR NOT ADVISED 
+OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION 
+WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
 \chapter*{Acknowledgements}%
@@ -139,7 +146,7 @@ shows how the extensive form of a simple
 \popref{two player poker game}{pokergloss} (from \cite{Mye:91} is represented
  in the Gambit GUI.  
 
-\begin{figure}
+\begin{figure}\label{fig:samp1}
 $$\image{1cm;0cm}{poker_ef}$$
 \caption{GAMBIT Display of Extensive Form of
 		a Simple Two Player Poker Game}\label{fig:samp1}
@@ -355,8 +362,19 @@ reloading it as double could lose information.  (For example, 1/3 wiould
 be converted to its nearest decimal representation.)
 
 \begin{description}
-\item[Double:]  If you select Double, the game will be represented in double precision floating point numbers, which on most machines results in about 15 digits of accuracy.  The benefit of floating point calculations is speed, since floating point numbers are designed to fit in a fixed amount of storage, and arithmetic operations are coded in hardware.  However,  in some games, floating point calculations can result in roundoff errors that will lead to either incorrect solutions, or failure to find solutions that exist.  
-\item[Rational:]  If you select Rational, the game will be represented in rational numbers, which are represented internally as the quotient of two arbitrary precision integers.  Doing calculations in rationals will guarantee that the answer is exact, at least for those algorithms that support rational calculations.  However calculations in rationals are slower than double calculations, by one or two orders of magnitude.  Currently the only algorithms supporting calculations in rationals are the following two person algorithms: LpSolve, LcpSolve, and EnumPure and EnumMixed.  
+\item[Double:]  If you select Double, the game will be represented in double precision floating
+ point numbers, which on most machines results in about 15 digits of accuracy.  The benefit of 
+floating point calculations is speed, since floating point numbers are designed to fit in a fixed 
+amount of storage, and arithmetic operations are coded in hardware.  However,  in some games, 
+floating point calculations can result in roundoff errors that will lead to either incorrect 
+solutions, or failure to find solutions that exist.  
+\item[Rational:]  If you select Rational, the game will be represented in rational numbers, 
+which are represented internally as the quotient of two arbitrary precision integers.  Doing 
+calculations in rationals will guarantee that the answer is exact, at least for those algorithms 
+that support rational calculations.  However calculations in rationals are slower than double 
+calculations, by one or two orders of magnitude.  Currently the only algorithms supporting 
+calculations in rationals are the following two person algorithms: LpSolve, LcpSolve, and 
+EnumPure and EnumMixed.  
 \end{description}
 
 \section{Normal Form GUI}
@@ -809,6 +827,47 @@ If the underlying EF was generated from an NF, and if the link between the two i
 valid, the {\em EF->NF} button will be enabled.  To project the solution to the NF and
 immediately display it there, press this button.  NOT IMPLEMENTED.
  
+\subsection{Extensive form supports}
+The concept of an exensive form support is very similar to that of a normal form support.
+Instead of considering the entire game tree, a subset of all the player actions is considered.
+That is, at each decision node the player may have a reduced number of choices from that of
+the original tree (full support).  However, at least one action must exist at each node.  Most 
+of the extensive form solution algorithms support, or will soon support the supports.
+
+\subsubsection{Creating EF Supports}
+A support can be generated in one of two ways--either by dominated strategy elimintion
+[NOT IMPLEMENTED] or by explicitly deselecting particular actions.  To access the 
+Supports dialog, select the Solve->Supports menu item, and press the {\em New} button.
+The new dialog box contains a set of list boxes equal to the total number of players in the
+game.  Each listbox lists all the infoset and strategy combination for a particular player.
+The format is: (infoset #,action #).  Initially all of the actions are selected corresponding
+to a full support.  Clicking on any (a,b) line will deselect that particular action in that
+infoset.  Note that at least one action must remain selected for each infoset.  If this 
+constraint is not satisfied, an error message will be issued and the invalid support discarded.
+Once all the desired actions have been deselected, pressing the {\em Ok} button will return
+to the previous dialog box.  For information on setting/using the newly created support, see
+the \helpref{Examining EF Supports}{efsuptexam} section.
+
+\subsubsection{Examining EF Supports}\label{efsuptexam}
+The main supports dialog is accessed my selecting the Solve->Supports menu item.  This dialog
+contains two choiceboxes with a list of all available supports (created manually or 
+by some solution algorithm).
+Two supports are defined for every EF window:
+\begin{enumerate}
+\item The displayed support determines the subset of the EF that is actually
+displayed in the window.
+\item The current support determines what support will be used for all the solution
+computation and elimination of dominated strategies. 
+\end{enumerate}
+By default, these supports are identical.  However, an advanced user may wish to
+display one support while working on another.  Solution display may become 
+confusing in this case, as strategy probabilities will no longer add to one.  
+
+The dimensionality of the supports is displayed in the text box above the selection
+choicebox.  Since the dimensionality of an extensive form tree is a two dimensional structure,
+the i'th element in the displayed vector corresponds to the {\em sum} of all the strategies
+for the i'th player.  Thus, two different supports may have the same dimensionality vector.
+
 
 \subsection{Default Accelerator Keys}\label{ExtFormDefAccl}
 
@@ -1377,7 +1436,8 @@ A decision node is a node which has at least one node that follows it.
 Decision nodes represent points at which either a player or chance must 
 make a decision.  The different choices are represented by branches.
 
-In Figure~\ref{fig:samp1}, there are a total of five decision nodes (including the chance node).  The number of the player who makes a choice at a node appears underneath the
+In Figure~\ref{fig:samp1}, there are a total of five decision nodes (including the chance node). 
+ The number of the player who makes a choice at a node appears underneath the
 node as the first number after the parenthesis.  On the graphics screen,
 decision nodes are color coded, with each player represented by a
 different color.
@@ -1427,7 +1487,8 @@ other players stay fixed.
 \gloss{Node}\label{nodegloss}
 A node is either decision node or a terminal node.  In the graphics 
 display, a node is any location to which you can navigate the graphics 
-cursor. In Figure~\ref{fig:samp1}, there are a total of eleven nodes -- namely five decision nodes (including the chance node), and six terminal nodes.  
+cursor. In Figure~\ref{fig:samp1}, there are a total of eleven nodes -- namely 
+five decision nodes (including the chance node), and six terminal nodes.  
 
 \gloss{Outcome}\label{outcomegloss}
 Outcomes are payoff vectors that associate with each player a payoff.  
