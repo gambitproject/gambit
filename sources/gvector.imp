@@ -12,6 +12,11 @@
 #include "gtext.h"
 
 template <class T>
+gVector<T>::BadDim::BadDim(int line, char *file)
+  : gException(line, file)
+{ }
+
+template <class T>
 gText gVector<T>::BadDim::Description(void) const
 {
   return "Mismatched vector lengths";
@@ -38,7 +43,7 @@ template <class T> gVector<T>::~gVector()   { }
 template <class T> gVector<T>& gVector<T>::operator=(const gVector<T>& V)
 {
 #ifdef USE_EXCEPTIONS
-  if (!Check(V))   throw BadDim();
+  if (!Check(V))   throw BadDim(__LINE__, __FILE__);
 #else
   assert(Check(V));
 #endif   // USE_EXCEPTIONS
@@ -82,7 +87,7 @@ template <class T> gVector<T>
 gVector<T>::operator+(const gVector<T>& V) const
 {
 #ifdef USE_EXCEPTIONS
-  if (!Check(V))   throw BadDim();
+  if (!Check(V))   throw BadDim(__LINE__, __FILE__);
 #else
   assert( Check(V) );
 #endif   // USE_EXCEPTIONS
@@ -97,7 +102,7 @@ template <class T> gVector<T>
 gVector<T>::operator-(const gVector<T>& V) const
 {
 #ifdef USE_EXCEPTIONS
-  if (!Check(V))   throw BadDim();
+  if (!Check(V))   throw BadDim(__LINE__, __FILE__);
 #else
   assert( Check(V) );
 #endif   // USE_EXCEPTIONS
@@ -112,7 +117,7 @@ template <class T> gVector<T>&
 gVector<T>::operator+=(const gVector<T>& V)
 {
 #ifdef USE_EXCEPTIONS
-  if (!Check(V))   throw BadDim();
+  if (!Check(V))   throw BadDim(__LINE__, __FILE__);
 #else
   assert( Check(V) );
 #endif    // USE_EXCEPTIONS
@@ -126,7 +131,7 @@ template <class T> gVector<T>&
 gVector<T>::operator-=(const gVector<T>& V)
 {
 #ifdef USE_EXCEPTIONS
-  if (!Check(V))    throw BadDim();
+  if (!Check(V))    throw BadDim(__LINE__, __FILE__);
 #else
   assert( Check(V) );
 #endif    // USE_EXCEPTIONS
@@ -162,7 +167,7 @@ template <class T> gVector<T> &gVector<T>::operator*=(T c)
 template <class T> T gVector<T>::operator*(const gVector<T>& V) const
 {
 #ifdef USE_EXCEPTIONS
-  if (!Check(V))   throw BadDim();
+  if (!Check(V))   throw BadDim(__LINE__, __FILE__);
 #else
   assert( Check(V) );
 #endif   // USE_EXCEPTIONS
@@ -186,7 +191,7 @@ template <class T> gVector<T> gVector<T>::operator/(T c) const
 template <class T> bool gVector<T>::operator==(const gVector<T>& V) const
 {
 #ifdef USE_EXCEPTIONS
-  if (!Check(V))   throw BadDim();
+  if (!Check(V))   throw BadDim(__LINE__, __FILE__);
 #else
   assert( Check(V) );
 #endif   // USE_EXCEPTIONS

@@ -92,7 +92,7 @@ template <class T> gDPVector<T>::~gDPVector()
 template <class T> gDPVector<T> &gDPVector<T>::operator=(const gDPVector<T> &v)
 {
 #ifdef USE_EXCEPTIONS
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
 #else
   assert(Check(v));
 #endif   // USE_EXCEPTIONS
@@ -165,7 +165,7 @@ template <class T>
 gDPVector<T> gDPVector<T>::operator+(const gDPVector<T> &v) const
 {
 #ifdef USE_EXCEPTIONS
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
 #else
   assert(Check(v));
 #endif   // USE_EXCEPTIONS
@@ -179,7 +179,7 @@ template <class T>
 gDPVector<T> &gDPVector<T>::operator+=(const gDPVector<T> &v)
 {
 #ifdef USE_EXCEPTIONS
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
 #else
   assert(Check(v));
 #endif   // USE_EXCEPTIONS
@@ -200,7 +200,7 @@ template <class T>
 gDPVector<T> gDPVector<T>::operator-(const gDPVector<T> &v) const
 {
 #ifdef USE_EXCEPTIONS
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
 #else
   assert(Check(v));
 #endif   // USE_EXCEPTIONS
@@ -214,7 +214,7 @@ template <class T>
 gDPVector<T> &gDPVector<T>::operator-=(const gDPVector<T> &v)
 {
 #ifdef USE_EXCEPTIONS
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
 #else
   assert(Check(v));
 #endif   // USE_EXCEPTIONS
@@ -226,7 +226,7 @@ gDPVector<T> &gDPVector<T>::operator-=(const gDPVector<T> &v)
 template <class T> T gDPVector<T>::operator*(const gDPVector<T> &v) const
 {
 #ifdef USE_EXCEPTIONS
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
 #else
   assert(Check(v));
 #endif   // USE_EXCEPTIONS
@@ -249,7 +249,7 @@ template <class T> gDPVector<T> gDPVector<T>::operator/(const T &c) const
 template <class T> bool gDPVector<T>::operator==(const gDPVector<T> &v) const
 {
 #ifdef USE_EXCEPTIONS
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
 #else
   assert(Check(v));
 #endif   // USE_EXCEPTIONS
@@ -270,7 +270,7 @@ template <class T>
 void gDPVector<T>::CopySubRow(int row, int col, const gDPVector<T> &v)
 {
 #ifdef USE_EXCEPTIONS
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
   if (dvlen.First() > row || row > dvlen.Last())
     throw BadIndex(__LINE__, __FILE__);
   if (1 > col || col > dvlen[row])   
