@@ -907,15 +907,15 @@ code, while flow control statements are executed in interpreted code.
 
 \subsection{Input and Output}
 
-Data can be read from an input stream by the Read[] function.  So if
-\verb+in+ is an input stream (i. e., of type INPUT) then a successful
-call of \verb+Read[in,x]+ will read the exposed data (see function
-reference for definition of ``exposed data'') from the input stream,
-\verb+in+, assign \verb+x+ to have that type and value, and position
-the file pointer at the end of the exposed data, to be ready for the
-next call of Read[].  \verb+Read[in,x]+ has the short form \verb+in >>
-x+.  Since the return value of \verb+Read[in,x]+ is \verb+in+, these
-commands can be chained.  In other words,
+Data can be read from an input stream by the \verb+Read[]+ function.
+So if \verb+in+ is an input stream (i. e., of type \verb+INPUT+) then a
+successful call of \verb+Read[in,x]+ will read the exposed data (see
+function reference for definition of ``exposed data'') from the input
+stream, \verb+in+, assign \verb+x+ to have that type and value, and
+position the file pointer at the end of the exposed data, to be ready
+for the next call of \verb+Read[]+.  \verb+Read[in,x]+ has the short form
+\verb+in >> x+.  Since the return value of \verb+Read[in,x]+ is
+\verb+in+, these commands can be chained.  In other words,
 
 \begin{verbatim}
 in >> x >> y
@@ -932,11 +932,11 @@ Read[in,y]
 \noindent
 In the statement \verb+Read[in,x]+, if \verb+x+ is undefined, then its
 data type is determined from the exposed data in the input stream.  On
-the other hand if \verb+x+ is previously defined, then the Read[]
+the other hand if \verb+x+ is previously defined, then the \verb+Read[]+
 function will expect to find the corresponding data type in the input
 stream, and a file read error will be generated if the exposed data is
 of the wrong data type.  If \verb+x+ is previously defined to be a
-LIST(T), then \verb+Read[in,x]+ will successively read elements into
+\verb+LIST(T)+, then \verb+Read[in,x]+ will successively read elements into
 each element of the list.  If the wrong data type is found for any
 element of the list, a file read error will be returned.  Thus, if the
 file \verb+"file.out"+ contains the following data
@@ -947,6 +947,7 @@ file \verb+"file.out"+ contains the following data
 1 2 3 4 5
 \end{verbatim}
 
+\noindent
 then the following GCL code
 
 \begin{verbatim}
@@ -959,15 +960,15 @@ in >> i >> r >> t >> b >> f >> l >> x
 opens an input stream, consisting of the file \verb+"file.dat"+, and
 then reads data from the input stream into the corresponding
 variables.  After the last statement, 
-\verb+i+ is an INTEGER with value \verb+25+, 
-\verb+r+ is a RATIONAL with value \verb+1/3+, 
-\verb+t+ is a TEXT with value \verb+"This is a text string!"+, 
-\verb+b+ is a BOOL with value \verb+False+, 
-\verb+f+ is a FLOAT with value \verb+3.14159+, 
-\verb+l+ is a LIST(LIST(INTEGER)) with value \verb+{{1,0},{0,1}}+, and 
-\verb+x+ is a LIST(INTEGER) with value \verb+{1,2,3,4,5}+.  
+\verb+i+ is an \verb+INTEGER+ with value \verb+25+, 
+\verb+r+ is a \verb+RATIONAL+ with value \verb+1/3+, 
+\verb+t+ is a \verb+TEXT+ with value \verb+"This is a text string!"+, 
+\verb+b+ is a \verb+BOOL+ with value \verb+False+, 
+\verb+f+ is a \verb+FLOAT+ with value \verb+3.14159+, 
+\verb+l+ is a \verb+LIST(LIST(INTEGER))+ with value \verb+{{1,0},{0,1}}+, and 
+\verb+x+ is a \verb+LIST(INTEGER)+ with value \verb+{1,2,3,4,5}+.  
 
-Data can be written to an output stream by the use of the Write[]
+Data can be written to an output stream by the use of the \verb+Write[]+
 function.  Thus, the following commands
 
 \begin{verbatim}
@@ -977,9 +978,10 @@ Write[out,x]
 Write[out,y]
 \end{verbatim}
 
-creates an output stream, \verb+out+, and then writes out a RATIONAL
-number, followed by a list of two FLOATs.  \verb+Write[out,x]+ has the
-short form \verb+out >> x+.  Since the return value of Write[] is
+\noindent
+creates an output stream, \verb+out+, and then writes out a \verb+RATIONAL+
+number, followed by a list of two \verb+FLOAT+s.  \verb+Write[out,x]+ has the
+short form \verb+out << x+.  Since the return value of \verb+Write[]+ is
 \verb+out+, these commands can be chained.  So the two lines writing out
 \verb+x+ and \verb+y+ in the above example could be written instead
 
@@ -987,14 +989,15 @@ short form \verb+out >> x+.  Since the return value of Write[] is
 out << x << y
 \end{verbatim}
  
-The SetFormat[] function can be used to control the formatting of data
-written to an output stream.  Note that the Read[] and Write[]
+The \verb+SetFormat[]+ function can be used to control the formatting of data
+written to an output stream.  Note that the \verb+Read[]+ and \verb+Write[]+
 functions are not listable.
 
-The Read[] and Write[] functions can only be used with certain data
-types (see function documentation).  Reading and writing of EFG and
-NFG from external files can be done with the LoadEfg[], SaveEfg[],
-LoadNfg[] and SaveNfg[] functions.  
+The \verb+Read[]+ and \verb+Write[]+ functions can only be used with
+certain data types (see function documentation).  Reading and writing
+of \verb+EFG+ and \verb+NFG+ from external files can be done with the
+\verb+LoadEfg[]+, \verb+SaveEfg[]+, \verb+LoadNfg[]+ and
+\verb+SaveNfg[]+ functions.
 
 \subsection{Extensive forms}
 
@@ -1089,7 +1092,7 @@ and \verb+UnmarkThisSubgame[]+.  The function \verb+SubgameRoots[]+
 returns a list of all currently marked subgame roots.  
 
 All of the solution algorithms (with the current exception of the 
-GobitSolve[] algorithms) make use of the marked subgames.  When non-trivial 
+\verb+GobitSolve[]+ algorithms) make use of the marked subgames.  When non-trivial 
 subgames are marked, then the solution algorithms will solve the 
 extensive form game by recursion through the marked subgames.  Thus, a 
 subgame is solved only when all subgames following it have been 
@@ -4607,16 +4610,15 @@ output stream \verb+output+.
 \newpage
 \section{Sample GCL Programs}
 
-
 \subsection{A GCL program to build and solve the holdout game}
 
 The following GCL program, in the file ``holdout.gcl'' defines a user
 defined function
 
-\protect \large \begin{verbatim}
+\begin{verbatim}
   CreateHoldout[ stages->INTEGER, prob1->FLOAT, prob2->FLOAT, 
                  disc->FLOAT, b->FLOAT] =: EFG
-\end{verbatim} \normalsize
+\end{verbatim}
 
 \noindent
 which can be used to create a finite horizon version of the
@@ -4659,84 +4661,86 @@ of the resulting seven stage game to check various theoretical predictions.
 This is the contents of the file "holdout.gcl" which defines the
 function ``CreateHoldout[]'' used in the above programs.
 
+{\scriptsize 
 \begin{verbatim}
-//
-// A gcl program to construct a multi stage holdout game
-//
+  //
+  // A gcl program to construct a multi stage holdout game
+  //
 
-NewFunction[MultiStageHoldout[ efg<->EFG, node->NODE, isets->LIST(ISET), \
-out->LIST(OUTCOME), stages->INTEGER, disc->FLOAT],
-  // build tree
-i1:=isets[[1]];
-i2:=isets[[2]];
-AppendNode[node, i1 ];
-AppendNode[node#1, i2 ];
-If[NumActions[i1]>1, AppendNode[node#2,i2] ];
-  // attach outcomes
-AttachOutcome[node#1#1, out[[1]] ]; 
-If[NumActions[i2]>1, AttachOutcome[node#1#2, out[[2]] ] ];
-If[NumActions[i1]>1, 
-  AttachOutcome[node#2#1, out[[3]] ];
-  If[NumActions[i2]>1, AttachOutcome[node#2#2, out[[4]] ] ];
-  ];
-  // recurse to next stage
-If[NumActions[i1]>1 || NumActions[i2]>1,
-  If[stages>1,
-    stages;
-    diset := NewInfoset[Chance[efg], {"",""} , "Discount"];
-    SetChanceProbs[diset,{1.0-disc,disc}];
-    AppendNode[node#1#1,diset];
-    MultiStageHoldout[efg,node#1#1#2,isets,out,stages-1,disc];
+  NewFunction[MultiStageHoldout[ efg<->EFG, node->NODE, isets->LIST(ISET), \
+  out->LIST(OUTCOME), stages->INTEGER, disc->FLOAT],
+    // build tree
+  i1:=isets[[1]];
+  i2:=isets[[2]];
+  AppendNode[node, i1 ];
+  AppendNode[node#1, i2 ];
+  If[NumActions[i1]>1, AppendNode[node#2,i2] ];
+    // attach outcomes
+  AttachOutcome[node#1#1, out[[1]] ]; 
+  If[NumActions[i2]>1, AttachOutcome[node#1#2, out[[2]] ] ];
+  If[NumActions[i1]>1, 
+    AttachOutcome[node#2#1, out[[3]] ];
+    If[NumActions[i2]>1, AttachOutcome[node#2#2, out[[4]] ] ];
     ];
-  ];
-]
+    // recurse to next stage
+  If[NumActions[i1]>1 || NumActions[i2]>1,
+    If[stages>1,
+      stages;
+      diset := NewInfoset[Chance[efg], {"",""} , "Discount"];
+      SetChanceProbs[diset,{1.0-disc,disc}];
+      AppendNode[node#1#1,diset];
+      MultiStageHoldout[efg,node#1#1#2,isets,out,stages-1,disc];
+      ];
+    ];
+  ]
 
-NewFunction[CreateHoldout[ stages->INTEGER,
-  prob1->FLOAT, prob2->FLOAT, disc->FLOAT, b->FLOAT],
-e := NewEfg[];
-n := RootNode[e];
-  // create chance moves
-ciset1 := NewInfoset[Chance[e], {"High", "Lo"} , "Choose 1's type"];
-ciset2 := NewInfoset[Chance[e], {"High", "Lo"} , "Choose 2's type"];
-SetChanceProbs[ciset1,{prob1,1.0-prob1}];
-SetChanceProbs[ciset2,{prob2,1.0-prob2}];
-AppendNode[n, ciset1 ];
-AppendNode[n#1, ciset2 ];
-AppendNode[n#2, ciset2 ];
-  // Define players, actions, and outcomes
-pl1 := NewPlayer[e,"Player 1"];
-pl2 := NewPlayer[e,"Player 2"];
-is1w := NewInfoset[ pl1 , {"H", "G"} ];
-is1s := NewInfoset[ pl1 , {"H"} ];
-is2w := NewInfoset[ pl2 , {"H", "G"} ];
-is2s := NewInfoset[ pl2 , {"H"} ];
-out1:= SetPayoff[NewOutcome[e],{0.0, 0.0}];
-out2:= SetPayoff[NewOutcome[e],{1.0, b}];
-out3:= SetPayoff[NewOutcome[e],{b, 1.0}];
-out4:= SetPayoff[NewOutcome[e],{b,b}];
-outs:={out1,out2,out3,out4};
+  NewFunction[CreateHoldout[ stages->INTEGER,
+    prob1->FLOAT, prob2->FLOAT, disc->FLOAT, b->FLOAT],
+  e := NewEfg[];
+  n := RootNode[e];
+    // create chance moves
+  ciset1 := NewInfoset[Chance[e], {"High", "Lo"} , "Choose 1's type"];
+  ciset2 := NewInfoset[Chance[e], {"High", "Lo"} , "Choose 2's type"];
+  SetChanceProbs[ciset1,{prob1,1.0-prob1}];
+  SetChanceProbs[ciset2,{prob2,1.0-prob2}];
+  AppendNode[n, ciset1 ];
+  AppendNode[n#1, ciset2 ];
+  AppendNode[n#2, ciset2 ];
+    // Define players, actions, and outcomes
+  pl1 := NewPlayer[e,"Player 1"];
+  pl2 := NewPlayer[e,"Player 2"];
+  is1w := NewInfoset[ pl1 , {"H", "G"} ];
+  is1s := NewInfoset[ pl1 , {"H"} ];
+  is2w := NewInfoset[ pl2 , {"H", "G"} ];
+  is2s := NewInfoset[ pl2 , {"H"} ];
+  out1:= SetPayoff[NewOutcome[e],{0.0, 0.0}];
+  out2:= SetPayoff[NewOutcome[e],{1.0, b}];
+  out3:= SetPayoff[NewOutcome[e],{b, 1.0}];
+  out4:= SetPayoff[NewOutcome[e],{b,b}];
+  outs:={out1,out2,out3,out4};
 
-  // Create multi stage games
-MultiStageHoldout[ e, n#1#1, {is1w,is2w}, outs, stages, disc];
-MultiStageHoldout[ e, n#1#2, {is1w,is2s}, outs, stages, disc];
-MultiStageHoldout[ e, n#2#1, {is1s,is2w}, outs, stages, disc];
-MultiStageHoldout[ e, n#2#2, {is1s,is2s}, outs, stages, disc];
-nonterm:=NonterminalNodes[e];
-  // Make perfect recall 
-For[i:=1,i<=Length[nonterm],i:=i+1,
-  p:=Player[nonterm[[i]] ];
-  If[p!=Chance[e],
-    Reveal[Infoset[nonterm[[i]] ],{p}]; ];
-  ];	
-e
-]
+    // Create multi stage games
+  MultiStageHoldout[ e, n#1#1, {is1w,is2w}, outs, stages, disc];
+  MultiStageHoldout[ e, n#1#2, {is1w,is2s}, outs, stages, disc];
+  MultiStageHoldout[ e, n#2#1, {is1s,is2w}, outs, stages, disc];
+  MultiStageHoldout[ e, n#2#2, {is1s,is2s}, outs, stages, disc];
+  nonterm:=NonterminalNodes[e];
+    // Make perfect recall 
+  For[i:=1,i<=Length[nonterm],i:=i+1,
+    p:=Player[nonterm[[i]] ];
+    If[p!=Chance[e],
+      Reveal[Infoset[nonterm[[i]] ],{p}]; ];
+    ];	 
+  e
+  ]
 \end{verbatim}
+}
 
-\newpage
 \noindent
 This program solves for all equilibria of the seven stage holdout game
 illustrated in Figure 2, using various parameters for the chance
 moves, to check various theoretical predictions. 
+{\scriptsize
 \begin{verbatim}
   //
   // A gcl program to check theoretical results from McKelvey Palfrey 
@@ -4809,64 +4813,66 @@ moves, to check various theoretical predictions.
     o << "\ns: " << s;
   ];
 \end{verbatim}
+}
 
-\newpage
 \noindent
 Following is the output from running the above program:
+{\scriptsize
 \begin{verbatim}
-b: 0.500 del: 0.900 R: 0.909 Q: 0.808
+  b: 0.500 del: 0.900 R: 0.909 Q: 0.808
 
-In these regions there should be just one equilibrium,
-with full alternating offers, lasting J innings:
+  In these regions there should be just one equilibrium,
+  with full alternating offers, lasting J innings:
  
-J: 2 r1: 0.731  r2: 0.367
-s: {
-(Behav) { { 1.000 0.000 }{ 0.288 0.712 }{ 1.000 0.000 }{ 0.000 1.000
-}{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
-{ { 0.138 0.862 }{ 1.000 0.000 }{ 0.000 1.000 }{ 0.500 0.500 
-}{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } } 
-}
-J: 3 r1: 0.590  r2: 0.270
-s: {
-(Behav) { { 1.000 0.000 }{ 0.532 0.468 }{ 1.000 0.000 }{ 0.288 0.712
-}{ 1.000 0.000 }{ 0.000 1.000 }{ 0.500 0.500 }{ 1.000 } }
-{ { 0.196 0.804 }{ 1.000 0.000 }{ 0.447 0.553 }{ 1.000 0.000 
-}{ 0.000 1.000 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } } 
-}
-J: 4 r1: 0.477  r2: 0.198
-s: {
-(Behav) { { 1.000 0.000 }{ 0.633 0.367 }{ 1.000 0.000 }{ 0.532 0.468
-}{ 1.000 0.000 }{ 0.288 0.712 }{ 1.000 0.000 }{ 1.000 } }
-{ { 0.605 0.395 }{ 1.000 0.000 }{ 0.730 0.270 }{ 1.000 0.000 
-}{ 0.701 0.299 }{ 1.000 0.000 }{ 0.000 1.000 }{ 1.000 } } 
-}
+  J: 2 r1: 0.731  r2: 0.367
+  s: {
+  (Behav) { { 1.000 0.000 }{ 0.288 0.712 }{ 1.000 0.000 }{ 0.000 1.000
+  }{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
+  { { 0.138 0.862 }{ 1.000 0.000 }{ 0.000 1.000 }{ 0.500 0.500 
+  }{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } } 
+  }
+  J: 3 r1: 0.590  r2: 0.270
+  s: {
+  (Behav) { { 1.000 0.000 }{ 0.532 0.468 }{ 1.000 0.000 }{ 0.288 0.712
+  }{ 1.000 0.000 }{ 0.000 1.000 }{ 0.500 0.500 }{ 1.000 } }
+  { { 0.196 0.804 }{ 1.000 0.000 }{ 0.447 0.553 }{ 1.000 0.000 
+  }{ 0.000 1.000 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } } 
+  }
+  J: 4 r1: 0.477  r2: 0.198
+  s: {
+  (Behav) { { 1.000 0.000 }{ 0.633 0.367 }{ 1.000 0.000 }{ 0.532 0.468
+  }{ 1.000 0.000 }{ 0.288 0.712 }{ 1.000 0.000 }{ 1.000 } }
+  { { 0.605 0.395 }{ 1.000 0.000 }{ 0.730 0.270 }{ 1.000 0.000 
+  }{ 0.701 0.299 }{ 1.000 0.000 }{ 0.000 1.000 }{ 1.000 } } 
+  }
 
-In these regions there may be multiple equilibria. At least 
-one should be full simultaneous offer, lasting M innings:
+  In these regions there may be multiple equilibria. At least 
+  one should be full simultaneous offer, lasting M innings:
 
-M: 3 r1: 0.717  r2: 0.717
-s: {
-(Behav) { { 1.000 0.000 }{ 0.321 0.679 }{ 1.000 0.000 }{ 0.000 1.000
-}{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
-{ { 0.602 0.398 }{ 1.000 0.000 }{ 0.000 1.000 }{ 0.500 0.500 
-}{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
-(Behav) { { 0.602 0.398 }{ 1.000 0.000 }{ 0.000 1.000 }{ 0.500 0.500
-}{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
-{ { 1.000 0.000 }{ 0.321 0.679 }{ 1.000 0.000 }{ 0.000 1.000 
-}{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
-(Behav) { { 0.679 0.321 }{ 0.569 0.431 }{ 0.313 0.687 }{ 0.000 1.000
-}{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
-{ { 0.679 0.321 }{ 0.569 0.431 }{ 0.313 0.687 }{ 0.000 1.000 
-}{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } } 
-}
-M: 4 r1: 0.652  r2: 0.652
-s: {
-(Behav) { { 0.739 0.261 }{ 0.679 0.321 }{ 0.569 0.431 }{ 0.312 0.688
-}{ 0.000 1.000 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
-{ { 0.739 0.261 }{ 0.679 0.321 }{ 0.569 0.431 }{ 0.312 0.688 
-}{ 0.000 1.000 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } } 
-}
+  M: 3 r1: 0.717  r2: 0.717
+  s: {
+  (Behav) { { 1.000 0.000 }{ 0.321 0.679 }{ 1.000 0.000 }{ 0.000 1.000
+  }{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
+  { { 0.602 0.398 }{ 1.000 0.000 }{ 0.000 1.000 }{ 0.500 0.500 
+  }{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
+  (Behav) { { 0.602 0.398 }{ 1.000 0.000 }{ 0.000 1.000 }{ 0.500 0.500
+  }{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
+  { { 1.000 0.000 }{ 0.321 0.679 }{ 1.000 0.000 }{ 0.000 1.000 
+  }{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
+  (Behav) { { 0.679 0.321 }{ 0.569 0.431 }{ 0.313 0.687 }{ 0.000 1.000
+  }{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
+  { { 0.679 0.321 }{ 0.569 0.431 }{ 0.313 0.687 }{ 0.000 1.000 
+  }{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } } 
+  }
+  M: 4 r1: 0.652  r2: 0.652
+  s: {
+  (Behav) { { 0.739 0.261 }{ 0.679 0.321 }{ 0.569 0.431 }{ 0.312 0.688
+  }{ 0.000 1.000 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
+  { { 0.739 0.261 }{ 0.679 0.321 }{ 0.569 0.431 }{ 0.312 0.688 
+  }{ 0.000 1.000 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } } 
+  }
 \end{verbatim}
+}
 
 \newpage
 \subsection{A GCL program for econometric estimation}  
@@ -4875,9 +4881,9 @@ This section gives a GCL program for doing maximum likelihood fits of
 experimental data to the quantal response equilibrium (QRE) and one
 sided error model (OSEM).  The following files define a GCL function 
 
-\protect \large \begin{verbatim}
+\begin{verbatim}
   EGobit[filename->TEXT] 
-\end{verbatim} \normalsize
+\end{verbatim}
 
 \noindent
 which takes as input an extensive form in the file ``filename.efg'',
@@ -4909,6 +4915,7 @@ The input data file ``bhg.agg'' follows:
   1
   32 1 18 21 48 2 0  4 18 0
 \end{verbatim}
+
 \noindent
 The program is run by typing 
 
@@ -4956,11 +4963,11 @@ Figure 4 displays the pxi file, and the following output is in
 \caption{BH (1993) Game 3. Sequential vs. Intuitive}
 \end{figure}
 
-\newpage
 \noindent
 The program is contained in three files, whose contents follow.  First
 is the contents of ``egobit.gcl'':
 
+{\scriptsize
 \begin{verbatim}
   //
   //  This gcl program estimates the principal branch of
@@ -5010,180 +5017,189 @@ is the contents of ``egobit.gcl'':
     EGobitML[e,dat,min,max,del,out,pxi,nash];
   ];
 \end{verbatim}
+}
 
-\newpage
 \noindent
 Following is the contents of ``egobitml.gcl'':
 
+{\scriptsize
 \begin{verbatim}
-//
-// A gcl program to estimate the principal branch of the 
-// QRE for an extensive form game, and find the maximum likelihood 
-// estimate of lambda for a list of aggregate experimental data
-// 
-// e is the normal form game
-// dat is a list of observations.  Each observation is in the form of  
-//      a LIST(LIST(LIST(INTEGER))), where the integers correspond to
-//	the number times the corresponding action (for that player in
-//	that information set) was chosen.  So for a 2 player game where
-//	each player has two information sets with two actions each, the 
-//      element in dat {{{43, 32}, {12, 20}}, {{15, 32}, {16, 28}}} is 
-//	used to indicate that player 1 chose the first action at the
-//	first information set 43 times, etc.  
-// min is the minimum value for Lambda used by GobitSolve[]
-// max is the maximum value for Lambda used by GobitSolve[]
-// del is the increment for Lambda used by GobitSolve[]
-// out is the name of a file in which the results will be written
-// pxi is the name of a file where the pxi file is written
-// nash is a Nash equilibrium selection that is passed for use
-//     in estimating the OSEM model 
+  //
+  // A gcl program to estimate the principal branch of the 
+  // QRE for an extensive form game, and find the maximum likelihood 
+  // estimate of lambda for a list of aggregate experimental data
+  // 
+  // e is the normal form game
+  // dat is a list of observations.  Each observation is in the form of  
+  //    a LIST(LIST(LIST(INTEGER))), where the integers correspond to
+  //    the number times the corresponding action (for that player in
+  //    that information set) was chosen.  So for a 2 player game where
+  //    each player has two information sets with two actions each, the 
+  //    element in dat {{{43, 32}, {12, 20}}, {{15, 32}, {16, 28}}} is 
+  //    used to indicate that player 1 chose the first action at the
+  //    first information set 43 times, etc.  
+  // min is the minimum value for Lambda used by GobitSolve[]
+  // max is the maximum value for Lambda used by GobitSolve[]
+  // del is the increment for Lambda used by GobitSolve[]
+  // out is the name of a file in which the results will be written
+  // pxi is the name of a file where the pxi file is written
+  // nash is a Nash equilibrium selection that is passed for use
+  //     in estimating the OSEM model 
 
-Include["loglike.gcl"];
+  Include["loglike.gcl"];
 
-NewFunction[EGobitML[e<->EFG,dat->LIST(LIST(LIST(LIST(INTEGER)))),min->FLOAT,max->FLOAT,\
-  del->FLOAT,out->TEXT,pxi->TEXT,nash->BEHAV],
-  o := Output[out];
-  gob := GobitSolve[e, minLam->min, maxLam->max, delLam->del,fullGraph->True, \
-    pxifile->pxi];
+  NewFunction[EGobitML[e<->EFG,dat->LIST(LIST(LIST(LIST(INTEGER)))),min->FLOAT,max->FLOAT,\
+    del->FLOAT,out->TEXT,pxi->TEXT,nash->BEHAV],
+    o := Output[out];
+    gob := GobitSolve[e, minLam->min, maxLam->max, delLam->del,fullGraph->True, \
+      pxifile->pxi];
 
-  size := Length[gob];
+    size := Length[gob];
 
-  eps:=0.0000000001;
-  For[i := size , i>=1 , i:=i-1,
-    If[GobitValue[gob[[i]]] > eps, 
-      o << "\nRemoved element: " << i << " lambda: " << GobitLambda[gob[[i]]];
-      gob:=Remove[gob,i]; 
-    ];
-  ];
-  lamlist:=GobitLambda[gob];
-  size := Length[gob];
-
-  goblist := ListForm[gob];
-  exdat := Float[dat];
-
-  numactions := Length[ListForm[nash]];
-  numisets := Length[numactions];
-  numplayers := Length[numisets];
-
-  o << "\nUsing Nash: " << nash << "\n";
-  o << "\nminLam: " << min << " maxLam: " << max << " delLam: " << del;
-
-  delgam := .001;
-  o << "\ndelGam: " << delgam << " eps: " << eps << "\n\n";
-
-  gamsize := Integer[1./delgam] - 1;
-  gamlist := List[delgam, gamsize, delgam];
-  
-  c := Centroid[e];
-  n := nash
-  osem := (1.0-gamlist)*c + gamlist*n;
-  osemlist := ListForm[osem];
-
-  // compute maximum likelihoods and pretty-print results to output file
-
-  SetFormat[quote->False];
-
-  ldat := Length[Length[Length[Length[dat]]]];
-
-  For[ii:=1, ii<=ldat, ii:=ii+1,
-    goblogl := LogLike[exdat[[ii]],gob];
-    osemlogl := LogLike[exdat[[ii]], osem];
-    header:="\n  Player  Infoset   n         f       QRE      OSEM\n";
-    o << header;
-
-    gobllmax := ArgMax[goblogl];
-    osemllmax := ArgMax[osemlogl];
-    For[i:=1, i<=numplayers, i:=i+1,
-      For[j:=1, j<=numisets[[i]], j:=j+1,
-        sum:=Sum[exdat[[ii]][[i]][[j]]];
-        For[k:=1,k<=numactions[[i]][[j]],k:=k+1,
-          nob:=exdat[[ii]][[i]][[j]][[k]];
-          SetFormat[precis->0,width->7];
-          o << "\n" << i << j << nob;
-          SetFormat[precis->4,width->10];
-          If[sum != 0.0, o << "  " << nob/sum, o << " " << 0.0];
-          o << goblist[[gobllmax]][[i]][[j]][[k]];
-          o << osemlist[[osemllmax]][[i]][[j]][[k]];
-        ];
+    eps:=0.0000000001;
+    For[i := size , i>=1 , i:=i-1,
+      If[GobitValue[gob[[i]]] > eps, 
+        o << "\nRemoved element: " << i << " lambda: " << GobitLambda[gob[[i]]];
+        gob:=Remove[gob,i]; 
       ];
     ];
-    LamCI := LamHiLo[goblogl, lamlist, 1.9205, gobllmax];
-    GamCI := LamHiLo[osemlogl, gamlist, 1.9205, osemllmax];
-    o << "\nLam\Gam                " << 0.0 <<  lamlist[[gobllmax]] << gamlist[[osemllmax]];
-    o << "\nLam\Gam_lo                       " << LamCI[[1]] << GamCI[[1]];
-    o << "\nLam\Gam_hi                       " << LamCI[[2]] << GamCI[[2]];
-    SetFormat[precis->3, width->10];
-    o << "\nLogLik                           " << goblogl[[gobllmax]] << osemlogl[[osemllmax]] << "\n";
+    lamlist:=GobitLambda[gob];
+    size := Length[gob];
+
+    goblist := ListForm[gob];
+    exdat := Float[dat];
+
+    numactions := Length[ListForm[nash]];
+    numisets := Length[numactions];
+    numplayers := Length[numisets];
+
+    o << "\nUsing Nash: " << nash << "\n";
+    o << "\nminLam: " << min << " maxLam: " << max << " delLam: " << del;
+
+    delgam := .001;
+    o << "\ndelGam: " << delgam << " eps: " << eps << "\n\n";
+
+    gamsize := Integer[1./delgam] - 1;
+    gamlist := List[delgam, gamsize, delgam];
+  
+    c := Centroid[e];
+    n := nash
+    osem := (1.0-gamlist)*c + gamlist*n;
+    osemlist := ListForm[osem];
+
+    // compute maximum likelihoods and pretty-print results to output file
+
+    SetFormat[quote->False];
+
+    ldat := Length[Length[Length[Length[dat]]]];
+
+    For[ii:=1, ii<=ldat, ii:=ii+1,
+      goblogl := LogLike[exdat[[ii]],gob];
+      osemlogl := LogLike[exdat[[ii]], osem];
+      header:="\n  Player  Infoset   n         f       QRE      OSEM\n";
+      o << header;
+
+      gobllmax := ArgMax[goblogl];
+      osemllmax := ArgMax[osemlogl];
+      For[i:=1, i<=numplayers, i:=i+1,
+        For[j:=1, j<=numisets[[i]], j:=j+1,
+          sum:=Sum[exdat[[ii]][[i]][[j]]];
+          For[k:=1,k<=numactions[[i]][[j]],k:=k+1,
+            nob:=exdat[[ii]][[i]][[j]][[k]];
+            SetFormat[precis->0,width->7];
+            o << "\n" << i << j << nob;
+            SetFormat[precis->4,width->10];
+            If[sum != 0.0, o << "  " << nob/sum, o << " " << 0.0];
+            o << goblist[[gobllmax]][[i]][[j]][[k]];
+            o << osemlist[[osemllmax]][[i]][[j]][[k]];
+          ];
+        ];
+      ];
+      LamCI := LamHiLo[goblogl, lamlist, 1.9205, gobllmax];
+      GamCI := LamHiLo[osemlogl, gamlist, 1.9205, osemllmax];
+      o << "\nLam\Gam                " << 0.0 <<  lamlist[[gobllmax]] << gamlist[[osemllmax]];
+      o << "\nLam\Gam_lo                       " << LamCI[[1]] << GamCI[[1]];
+      o << "\nLam\Gam_hi                       " << LamCI[[2]] << GamCI[[2]];
+      SetFormat[precis->3, width->10];
+      o << "\nLogLik                           " << goblogl[[gobllmax]] << osemlogl[[osemllmax]] << "\n";
+    ];
   ];
-];
 \end{verbatim}
+}
 
 \noindent
 Following is the contents of ``loglike.gcl'':
 
+{\scriptsize
 \begin{verbatim}
-//
-// Some user defined functions for maximum likelihood estimation
-// 
+  //
+  // Some user defined functions for maximum likelihood estimation
+  // 
 
-// sum of components of a vector
+  // sum of components of a vector
 
-NewFunction[ Sum[l->LIST(FLOAT)], Dot[l,List[1.0,Length[l] ]];];
+  NewFunction[ Sum[l->LIST(FLOAT)], Dot[l,List[1.0,Length[l] ]];];
 
-// log likelihood of the data for a given solution
-// note that the data must be of type MIXED
-// So if data is LIST(LIST(INTEGER)), then call function by  
-// LogLik[Mixed[n,Float[data]],sol]
+  // log likelihood of the data for a given solution
+  // note that the data must be of type MIXED
+  // So if data is LIST(LIST(INTEGER)), then call function by  
+  // LogLik[Mixed[n,Float[data]],sol]
 
-NewFunction[ LogLike[dat->LIST(LIST(FLOAT)), sol->MIXED], 
-  x:= dat * Log [ ListForm[sol]];
-  Sum[Sum[x]];
-];
-
-NewFunction[ LogLike[dat->MIXED, sol->MIXED], 
-  x:= ListForm[dat] * Log [ ListForm[sol]];
-  Sum[Sum[x]];
-];
-
-// log likelihood of the data for a given solution
-// note that the data must be of type BEHAV
-// So if data is LIST(LIST(LIST(INTEGER))), then call function by  
-// LogLik[Behav[n,Float[data]],sol]
-
-NewFunction[ LogLike[dat->BEHAV, sol->BEHAV], 
-  x:= ListForm[dat] * Log [ ListForm[sol]];
-  Sum[Sum[Sum[x]]];
-];
-
-NewFunction[ LogLike[dat->LIST(LIST(LIST(FLOAT))), sol->BEHAV], 
-  x:= dat * Log [ ListForm[sol]];
-  Sum[Sum[Sum[x]]];
-];
-
-// This function computes confidence intervals for a solution
-// Here list is the list of likelihood values, lam is the list of parameters
-// (assumed to have the same length as list, range is 1/2 of the chi^2 value
-// (use 1.9205 for a 95% confidence interval), and llmaxind is the location of the 
-// maximum (assumed correct) 
-
-NewFunction[LamHiLo[list->LIST(FLOAT),lam->LIST(FLOAT),range->FLOAT,llmaxind->INTEGER],
-  newlist := list -(list[[llmaxind]]-range);
-  t1:={};
-  t2:={};
-  llsize := Length[lam];
-  For[z:=2, z<=llsize, z:=z+1,
-    If[newlist[[z]]>=0.0, 
-    t1:=t1&{z}; 
-    t2:=t2&{lam[[z]]};];
+  NewFunction[ LogLike[dat->LIST(LIST(FLOAT)), sol->MIXED], 
+    x:= dat * Log [ ListForm[sol]];
+    Sum[Sum[x]];
   ];
-  flag := True;
-  t1:=t1-(t1[[1]]-1);
-  s1:=Length[t1];
-  If[s1 != t1[[s1]], flag:=False];
-  lhilo:={t2[[1]],t2[[s1]]};
-];
 
+  NewFunction[ LogLike[dat->MIXED, sol->MIXED], 
+    x:= ListForm[dat] * Log [ ListForm[sol]];
+    Sum[Sum[x]];
+  ];
+
+  // log likelihood of the data for a given solution
+  // note that the data must be of type BEHAV
+  // So if data is LIST(LIST(LIST(INTEGER))), then call function by  
+  // LogLik[Behav[n,Float[data]],sol]
+
+  NewFunction[ LogLike[dat->BEHAV, sol->BEHAV], 
+    x:= ListForm[dat] * Log [ ListForm[sol]];
+    Sum[Sum[Sum[x]]];
+  ];
+
+  NewFunction[ LogLike[dat->LIST(LIST(LIST(FLOAT))), sol->BEHAV], 
+    x:= dat * Log [ ListForm[sol]];
+    Sum[Sum[Sum[x]]];
+  ];
+
+  // This function computes confidence intervals for a solution
+  // Here list is the list of likelihood values, lam is the list of parameters
+  // (assumed to have the same length as list, range is 1/2 of the chi^2 value
+  // (use 1.9205 for a 95% confidence interval), and llmaxind is the location of the 
+  // maximum (assumed correct) 
+
+  NewFunction[LamHiLo[list->LIST(FLOAT),lam->LIST(FLOAT),range->FLOAT,llmaxind->INTEGER], 
+    newlist := list -(list[[llmaxind]]-range);
+    t1:={};
+    t2:={};
+    llsize := Length[lam];
+    For[z:=2, z<=llsize, z:=z+1,
+      If[newlist[[z]]>=0.0, 
+      t1:=t1&{z}; 
+      t2:=t2&{lam[[z]]};];
+    ];
+    flag := True;
+    t1:=t1-(t1[[1]]-1);
+    s1:=Length[t1];
+    If[s1 != t1[[s1]], flag:=False];
+    lhilo:={t2[[1]],t2[[s1]]};
+  ];
 \end{verbatim}
+}
+
+\newpage
+\bibliographystyle{chicagob}
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliography{gambit}
+\end{document}
 
 \newpage
 \subsection{A GCL program to build the chain store game}
@@ -5191,9 +5207,9 @@ NewFunction[LamHiLo[list->LIST(FLOAT),lam->LIST(FLOAT),range->FLOAT,llmaxind->IN
 The following GCL program, in the file ``cs.gcl'' defines a user
 defined function
 
-\protect \large \begin{verbatim}
+\begin{verbatim}
 CreateChainStore[num_stages->INTEGER,prob->FLOAT] =: EFG
-\end{verbatim} \normalsize
+\end{verbatim}
 
 \noindent
 which can be used to create a chain store game with any number of
@@ -5302,10 +5318,4 @@ e;
 \centerline{\psfig{figure=gclfig6.ps,height=6in}}
 \caption{Three stage chain store game}
 \end{figure}
-
-\newpage
-\bibliographystyle{chicagob}
-\addcontentsline{toc}{chapter}{Bibliography}
-\bibliography{gambit}
-\end{document}
 
