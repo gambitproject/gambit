@@ -201,6 +201,8 @@ bool GSM::_VarIsDefined( const gString& var_name ) const
   bool result;
   RefHashTable* ref_table;
 
+  result = _RefTableStack->Peek()->IsDefined( var_name );
+/*
   assert( var_name != "::" );
   if( var_name.left(2) == "::" && _RefTableStack->Depth() > 1 )
   {
@@ -212,6 +214,7 @@ bool GSM::_VarIsDefined( const gString& var_name ) const
   {
     result = _RefTableStack->Peek()->IsDefined( var_name );
   }
+*/
   return result;
 }
 
@@ -220,6 +223,8 @@ void GSM::_VarDefine( const gString& var_name, Portion* p )
 {
   RefHashTable* ref_table;
 
+  _RefTableStack->Peek()->Define( var_name, p );
+/*
   assert( var_name != "::" );
   if( var_name.left(2) == "::" && _RefTableStack->Depth() > 1 )
   {
@@ -231,6 +236,7 @@ void GSM::_VarDefine( const gString& var_name, Portion* p )
   {
     _RefTableStack->Peek()->Define( var_name, p );
   }
+*/
 }
 
 
@@ -239,6 +245,8 @@ Portion* GSM::_VarValue( const gString& var_name ) const
   Portion* result;
   RefHashTable* ref_table;
 
+  result = (*_RefTableStack->Peek())( var_name );
+/*
   assert( var_name != "::" );
   if( var_name.left(2) == "::" && _RefTableStack->Depth() > 1 )
   {
@@ -250,6 +258,7 @@ Portion* GSM::_VarValue( const gString& var_name ) const
   {
     result = (*_RefTableStack->Peek())( var_name );
   }
+*/
   return result;
 }
 
@@ -1567,6 +1576,5 @@ TEMPLATE class gGrowableStack< RefHashTable* >;
 
 gOutput& operator << ( class gOutput& s, class Portion* (*funcname)() )
 { return s << funcname; }
-
 
 

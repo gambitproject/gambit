@@ -16,7 +16,7 @@
 
 
 
-// #define CRASHTEST
+#define CRASHTEST
 // #define INTERACTIVE
 
 

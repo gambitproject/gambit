@@ -32,6 +32,7 @@ int Portion::_NumPortions = 0;
 
 Portion::Portion()
 {
+  _Static = false;
   _ShadowOf = 0;
 
   // The following two lines are for detecting memory leakage.
@@ -111,28 +112,54 @@ void Error_Portion::Output( gOutput& s ) const
 //                        numerical type 
 //-----------------------------------------------------------------------
 
+
+#ifdef MEMCHECK
+int numerical_Portion<double>::_NumObj = 0;
+int numerical_Portion<gInteger>::_NumObj = 0;
+int numerical_Portion<gRational>::_NumObj = 0;
+#endif // MEMCHECK
+
+
 template <class T> 
 numerical_Portion<T>::numerical_Portion( const T& value )
 {
-  _Static = true;
   _Value = new T( value );
+#ifdef MEMCHECK
+  _NumObj++;
+  gout << ">>> Numerical Dtor - " << _NumObj << "\n";
+#endif // MEMCHECK
 }
+
 
 template <class T> 
 numerical_Portion<T>::numerical_Portion( T& value, const bool var_static)
-:_Static( var_static )
 { 
+  _Static = var_static;
   if( !_Static )
+  {
     _Value = new T( value );
+#ifdef MEMCHECK
+    _NumObj++;
+    gout << ">>> Numerical Ctor - " << _NumObj << "\n";
+#endif // MEMCHECK
+  }
   else
+  {
     _Value = &value;
+  }
 }
 
 
 template <class T> numerical_Portion<T>::~numerical_Portion()
 { 
   if( !_Static )
+  {
     delete _Value;
+#ifdef MEMCHECK
+    _NumObj--;
+    gout << ">>> Numerical Dtor - " << _NumObj << "\n";
+#endif // MEMCHECK
+  }
 }
 
 
@@ -272,32 +299,51 @@ template <class T> void numerical_Portion<T>::Output( gOutput& s ) const
 //---------------------------------------------------------------------
 //                            bool type
 //---------------------------------------------------------------------
-bool_Portion::bool_Portion( const bool& value ) 
-     : _Value( value )
-{ }
+
+
+bool_Portion::bool_Portion( const bool& value )
+{
+  _Value = new bool( value );
+}
+
+
+bool_Portion::bool_Portion( bool& value, const bool var_static)
+{ 
+  _Static = var_static;
+  if( !_Static )
+    _Value = new bool( value );
+  else
+    _Value = &value;
+}
+
+
+bool_Portion::~bool_Portion()
+{ 
+  if( !_Static )
+    delete _Value;
+}
 
 
 bool& bool_Portion::Value( void )
-{ return _Value; }
+{ return *_Value; }
 
 PortionType bool_Portion::Type( void ) const
 { return porBOOL; }
 
 Portion* bool_Portion::Copy( bool new_data ) const
-{ return new bool_Portion( _Value ); }
+{ return new bool_Portion( *_Value ); }
 
 
 Portion* bool_Portion::Operation( Portion* p, OperationMode mode )
 {
   Portion* result = 0;
-  bool&  p_value = ( (bool_Portion*) p )->_Value;
 
   if( p == 0 )      // unary operations
   {
     switch( mode )
     {
     case opLOGICAL_NOT:
-      _Value = ! _Value;
+      *_Value = ! *_Value;
       break;
     default:
       result = Portion::Operation( p, mode );      
@@ -305,20 +351,22 @@ Portion* bool_Portion::Operation( Portion* p, OperationMode mode )
   }
   else               // binary operations
   {
+    bool& p_value = *( ( (bool_Portion*) p )->_Value );
+
     switch( mode )
     {
     case opEQUAL_TO:
-      result = new bool_Portion( _Value == p_value );
+      result = new bool_Portion( *_Value == p_value );
       break;
     case opNOT_EQUAL_TO:
-      result = new bool_Portion( _Value != p_value );
+      result = new bool_Portion( *_Value != p_value );
       break;
 
     case opLOGICAL_AND:
-      _Value = _Value && p_value;
+      *_Value = *_Value && p_value;
       break;
     case opLOGICAL_OR:
-      _Value = _Value || p_value;
+      *_Value = *_Value || p_value;
       break;
     default:
       result = Portion::Operation( p, mode );
@@ -331,7 +379,7 @@ Portion* bool_Portion::Operation( Portion* p, OperationMode mode )
 
 void bool_Portion::Output( gOutput& s ) const
 {
-  if( _Value == true )
+  if( *_Value == true )
     s << " true";
   else
     s << " false";

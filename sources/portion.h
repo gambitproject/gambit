@@ -50,6 +50,7 @@ class Portion
   Portion*       _ShadowOf;
   List_Portion*  _ParentList;
 
+  bool _Static;
   static gString _ErrorMessage( const int error_num, const gString& str = "" );
 
  public:
@@ -88,7 +89,7 @@ class Error_Portion : public Portion
 template <class T> class numerical_Portion : public Portion
 {
  private:
-  bool _Static;
+  static _NumObj;
   T* _Value;
 
  public:
@@ -107,10 +108,12 @@ template <class T> class numerical_Portion : public Portion
 class bool_Portion : public Portion
 {
  private:
-  bool _Value;
+  bool* _Value;
 
  public:
   bool_Portion( const bool& value );
+  bool_Portion( bool& value, bool var_static );
+  ~bool_Portion();
 
   bool&       Value     ( void );
   Portion*    Copy      ( bool new_data ) const;
