@@ -43,6 +43,8 @@ dialogNfgPayoffs::dialogNfgPayoffs(const Nfg &p_nfg, NFOutcome *p_outcome,
   m_outcomeName->GetConstraints()->height.AsIs();
 
   m_dataFields[0]->GetConstraints()->top.SameAs(m_outcomeName, wxBottom, 10);
+  m_dataFields[0]->SetFocus();
+  m_dataFields[0]->SetSelection(0, strlen(m_dataFields[0]->GetValue()));
 
   Go();
 }
