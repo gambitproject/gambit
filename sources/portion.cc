@@ -2227,10 +2227,13 @@ int ListPortion::Insert(Portion* item, int index)
   else
   {
     item_type = item->Spec();
+    if(item_type.Type == porNULL)
+      item_type = ((NullPortion*) item)->DataType();
     _ContainsListsOnly = false;
   }
 
 
+  /*
   if(item->Spec().Type == porNULL) // inserting a null object
   {
     if(_DataType == porUNDEFINED)
@@ -2241,12 +2244,14 @@ int ListPortion::Insert(Portion* item, int index)
     delete item;
     result = -1;
   }
-  else if(_DataType == porUNDEFINED) // inserting into an empty list
+  else 
+  */
+  if(_DataType == porUNDEFINED) // inserting into an empty list
   {
     if(_Value->Length() == 0)
       _Owner = item->Original()->Owner();
     _DataType = item_type.Type;
-    ((ListPortion*) Original())->_DataType = item_type.Type;
+    ((ListPortion*) Original())->_DataType = _DataType;
     result = _Value->Insert(item, index);
   }
   else  // inserting into an existing list
