@@ -1213,11 +1213,11 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 1, ParamInfoType("pxifile", porTEXT,
 					    new TextValPortion("")));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("minLam", porFLOAT,
-					    new FloatValPortion(0.01)));
+					    new FloatValPortion(0.001)));
   FuncObj->SetParamInfo(0, 3, ParamInfoType("maxLam", porFLOAT,
-					    new FloatValPortion(30.0)));
+					    new FloatValPortion(500.0)));
   FuncObj->SetParamInfo(0, 4, ParamInfoType("delLam", porFLOAT,
-					    new FloatValPortion(0.01)));
+					    new FloatValPortion(0.02)));
   FuncObj->SetParamInfo(0, 5, ParamInfoType("powLam", porINTEGER,
 					    new IntValPortion(1)));
   FuncObj->SetParamInfo(0, 6, ParamInfoType("delp1", porFLOAT,
@@ -1250,11 +1250,11 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 1, ParamInfoType("pxifile", porTEXT,
 					    new TextValPortion("")));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("minLam", porFLOAT,
-					    new FloatValPortion(0.01)));
+					    new FloatValPortion(0.001)));
   FuncObj->SetParamInfo(0, 3, ParamInfoType("maxLam", porFLOAT,
-					    new FloatValPortion(30.0)));
+					    new FloatValPortion(500.0)));
   FuncObj->SetParamInfo(0, 4, ParamInfoType("delLam", porFLOAT,
-					    new FloatValPortion(0.01)));
+					    new FloatValPortion(0.02)));
   FuncObj->SetParamInfo(0, 5, ParamInfoType("powLam", porINTEGER,
 					    new IntValPortion(1)));
   FuncObj->SetParamInfo(0, 6, ParamInfoType("fullGraph", porBOOL,
