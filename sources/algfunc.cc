@@ -719,21 +719,21 @@ static Portion *GSM_Lp_Efg(Portion **param)
   }
   else  {
    	CSSeqFormParams ZP;
-	  ZP.tracefile = &((OutputPortion *) param[4])->Value();
-	  ZP.trace = ((IntPortion *) param[5])->Value();
+	  ZP.tracefile = &((OutputPortion *) param[5])->Value();
+	  ZP.trace = ((IntPortion *) param[6])->Value();
 
     if (((PrecisionPortion *) param[2])->Value() == precDOUBLE)  {
       CSSeqFormBySubgame<double> ZM(E, support, ZP);
 	    ZM.Solve();
-      ((IntPortion *) param[2])->Value() = ZM.NumPivots();
-	    ((NumberPortion *) param[3])->Value() = ZM.Time();
+      ((IntPortion *) param[3])->Value() = ZM.NumPivots();
+	    ((NumberPortion *) param[4])->Value() = ZM.Time();
       return new Behav_ListPortion<double>(ZM.GetSolutions());
     }
     else  {
       CSSeqFormBySubgame<gRational> ZM(E, support, ZP);
 	    ZM.Solve();
-      ((IntPortion *) param[2])->Value() = ZM.NumPivots();
-	    ((NumberPortion *) param[3])->Value() = ZM.Time();
+      ((IntPortion *) param[3])->Value() = ZM.NumPivots();
+	    ((NumberPortion *) param[4])->Value() = ZM.Time();
       return new Behav_ListPortion<gRational>(ZM.GetSolutions());
     }
   }
