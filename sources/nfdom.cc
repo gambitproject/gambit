@@ -9,6 +9,7 @@
 #include "nfgciter.h"
 #include "rational.h"
 #include "gstatus.h"
+#include "nfplayer.h"
 
 gRectArray<gNumber> *paytable;
 
@@ -44,6 +45,24 @@ bool Dominates(const Nfg &,
   } while (B.NextContingency());
 
   return (!equal);
+}
+
+
+bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong,
+		     gStatus &status)
+{
+  return Dominates(S.Game(),S,s->Player()->GetNumber(),
+		   s->Number(),t->Number(),strong);
+}
+
+
+bool IsDominated(const NFSupport &S, Strategy *s, bool strong, gStatus &status)
+{
+  for (int i = 1; i <= s->Player()->NumStrats(); i++)
+    if (i != s->Number())
+      if (Dominates(S.Game(),S,s->Player()->GetNumber(),i,s->Number(),strong))
+	return true;
+  return false;
 }
 
 bool ComputeDominated(const Nfg &N, const NFSupport &S, NFSupport &newS,
