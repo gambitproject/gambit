@@ -12,6 +12,8 @@ bool PortionSpecMatch( const PortionSpec& t1, const PortionSpec& t2 )
 {
   if( t1 == t2 )
     return true;
+  else if(t1.Type & t2.Type)
+    return true;
   else if((t1.ListDepth == t2.ListDepth) &&
 	  (((t1.Type & porMIXED  ) && (t2.Type & porMIXED  )) ||
 	   ((t1.Type & porBEHAV  ) && (t2.Type & porBEHAV  )) ||

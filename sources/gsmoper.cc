@@ -2926,7 +2926,7 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj = new FuncDescObj("IsNull", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsNull, porBOOL, 1, 0, 
-				       NON_LISTABLE, NULL_ARGS));
+				       LISTABLE, NULL_ARGS));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE));
   gsm->AddFunction(FuncObj);
 

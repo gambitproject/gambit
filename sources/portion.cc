@@ -2222,11 +2222,10 @@ int ListPortion::Insert(Portion* item, int index)
   assert(item->Spec().Type != porREFERENCE);
 #endif
   
-  if(item->Spec().ListDepth > 0)
-    item_type.Type = ((ListPortion*) item)->_DataType;
-  else
+
+  item_type = item->Spec();
+  if(item->Spec().ListDepth == 0)
   {
-    item_type = item->Spec();
     if(item_type.Type == porNULL)
       item_type = ((NullPortion*) item)->DataType();
     _ContainsListsOnly = false;
@@ -2262,7 +2261,7 @@ int ListPortion::Insert(Portion* item, int index)
 	_Owner = item->Original()->Owner();
       result = _Value->Insert(item, index);
     }
-    else if(item_type.Type == porUNDEFINED)
+    else if(item_type.Type == porUNDEFINED) // inserting an empty list
     {
       if(_Value->Length() == 0)
 	_Owner = item->Original()->Owner();
