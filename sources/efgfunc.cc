@@ -139,6 +139,28 @@ Portion *GSM_SetActionProb(Portion **param)
 }
 
 
+//
+// These appear here only temporarily until I figure out the best place
+// for them
+//
+
+#include "gconvert.h"
+
+Portion *GSM_TextInt(Portion **param)
+{
+  return new gString_Portion(ToString(((numerical_Portion<gInteger> *) param[0])->Value()));
+}
+
+Portion *GSM_TextFloat(Portion **param)
+{
+  return new gString_Portion(ToString(((numerical_Portion<double> *) param[0])->Value()));
+}
+
+Portion *GSM_TextRat(Portion **param)
+{
+  return new gString_Portion(ToString(((numerical_Portion<gRational> *) param[0])->Value()));
+}
+
 void Init_efgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
@@ -200,6 +222,17 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_SetActionProb, 1, "iset", porINTEGER, NO_DEFAULT_VALUE);
   FuncObj->SetParamInfo(GSM_SetActionProb, 2, "act", porINTEGER, NO_DEFAULT_VALUE);
   FuncObj->SetParamInfo(GSM_SetActionProb, 3, "value", porDOUBLE, NO_DEFAULT_VALUE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Text");
+  FuncObj->SetFuncInfo(GSM_TextInt, 1);
+  FuncObj->SetParamInfo(GSM_TextInt, 0, "v", porINTEGER, NO_DEFAULT_VALUE);
+
+  FuncObj->SetFuncInfo(GSM_TextFloat, 1);
+  FuncObj->SetParamInfo(GSM_TextFloat, 0, "v", porDOUBLE, NO_DEFAULT_VALUE);
+
+  FuncObj->SetFuncInfo(GSM_TextRat, 1);
+  FuncObj->SetParamInfo(GSM_TextRat, 0, "v", porRATIONAL, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 }
 
