@@ -79,7 +79,7 @@ NEWGUI_SOURCES = $(GAME_SOURCES) $(EALG_SOURCES) $(GLIB_SOURCES) \
                  dialogalgorithm.cc dialogefgeditsupport.cc dialogefgsave.cc \
                  dialogelim.cc dialogenumpure.cc dialogenummixed.cc \
                  dialoglcp.cc dialogliap.cc dialoglp.cc \
-                 dialogsupportselect.cc \
+                 dialognfgeditsupport.cc dialogsupportselect.cc \
                  efgframe.cc efginfopanel.cc efgsolutions.cc efgsupports.cc \
                  efgtree.cc efgview.cc \
                  gameview.cc gclstats.cc guiapp.cc guistatus.cc \

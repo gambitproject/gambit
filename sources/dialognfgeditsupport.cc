@@ -87,7 +87,8 @@ dialogNfgEditSupport::dialogNfgEditSupport(wxWindow *p_parent,
   m_helpButton->GetConstraints()->height.AsIs();
   m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
 
-  OnPlayer(wxCommandEvent());
+  wxCommandEvent fakeEvent;
+  OnPlayer(fakeEvent);
   AutoSize();
 }
 

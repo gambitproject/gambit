@@ -96,7 +96,8 @@ dialogEfgEditSupport::dialogEfgEditSupport(wxWindow *p_parent,
   m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
 
   m_playerItem->SetSelection(0);
-  OnPlayer(wxCommandEvent());
+  wxCommandEvent fakeEvent;
+  OnPlayer(fakeEvent);
   AutoSize();
 }
 
