@@ -187,11 +187,3 @@ void NfgFileType(gInput &f, bool &valid, DataType &type)
 }
 
 
-
-#include "glist.imp"
-
-template class gList<gString>;
-template class gNode<gString>;
-
-template class gList<gRational>;
-template class gNode<gRational>;

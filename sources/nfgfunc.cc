@@ -9,7 +9,7 @@
 #include "portion.h"
 #include "gsmfunc.h"
 
-#include "normal.h"
+#include "nfg.h"
 
 #include "glist.h"
 #include "mixed.h"
@@ -24,7 +24,7 @@
 //
 Portion *GSM_CentroidNfgFloat(Portion **param)
 {
-  NormalForm<double> &N = * (NormalForm<double>*) ((NfgPortion*) param[0])->Value();
+  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
   MixedProfile<double> *P = new MixedProfile<double>(N);
 
   Portion* por = new MixedValPortion(P);
@@ -35,7 +35,7 @@ Portion *GSM_CentroidNfgFloat(Portion **param)
 
 Portion *GSM_CentroidNfgRational(Portion **param)
 {
-  NormalForm<gRational> &N = * (NormalForm<gRational>*) ((NfgPortion*) param[0])->Value();
+  Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
   MixedProfile<gRational> *P = new MixedProfile<gRational>(N);
 
   Portion* por = new MixedValPortion(P);
@@ -46,19 +46,19 @@ Portion *GSM_CentroidNfgRational(Portion **param)
 
 Portion *GSM_NumPlayersNfg(Portion **param)
 {
-  BaseNormalForm &N = * ((NfgPortion*) param[0])->Value();
+  BaseNfg &N = * ((NfgPortion*) param[0])->Value();
   return new IntValPortion(N.NumPlayers());
 }
 
 Portion *GSM_NameNfg(Portion **param)
 {
-  BaseNormalForm &N = * ((NfgPortion*) param[0])->Value();
+  BaseNfg &N = * ((NfgPortion*) param[0])->Value();
   return new TextValPortion(N.GetTitle());
 }
 
 Portion *GSM_SetNameNfg(Portion **param)
 {
-  BaseNormalForm &N = * ((NfgPortion*) param[0])->Value();
+  BaseNfg &N = * ((NfgPortion*) param[0])->Value();
   gString name = ((TextPortion *) param[1])->Value();
   N.SetTitle(name);
   return param[0]->ValCopy();
@@ -69,7 +69,8 @@ Portion *GSM_SetNameNfg(Portion **param)
 
 Portion *GSM_ElimAllDom(Portion **param)
 {
-  BaseNormalForm &N = * ((NfgPortion*) param[0])->Value();
+/*
+  BaseNfg &N = * ((NfgPortion*) param[0])->Value();
   bool strong = ((BoolPortion *) param[1])->Value();
 
   gWatch watch;
@@ -79,12 +80,15 @@ Portion *GSM_ElimAllDom(Portion **param)
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
 
   return new IntValPortion(N.NumStratSets());
+  */
+  return 0;
 }
 
 Portion *GSM_ElimNDom(Portion **param)
 {
+/*
   int maxiter = ((IntPortion *) param[0])->Value();
-  BaseNormalForm &N = * ((NfgPortion*) param[1])->Value();
+  BaseNfg &N = * ((NfgPortion*) param[1])->Value();
   bool strong = ((BoolPortion *) param[2])->Value();
   
   gWatch watch;
@@ -99,6 +103,8 @@ Portion *GSM_ElimNDom(Portion **param)
   ((FloatPortion *) param[3])->Value() = watch.Elapsed();
  
   return new IntValPortion(N.NumStratSets());
+  */
+  return 0;
 }
 
 
@@ -126,7 +132,7 @@ Mixed_ListPortion<gRational>::Mixed_ListPortion(const gList<MixedProfile<gRation
 
 Portion *GSM_ConstSumFloat(Portion **param)
 {
-  NormalForm<double> &N = * (NormalForm<double> *) ((NfgPortion *) param[0])->Value();
+  Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
 
   ZSumParams ZP;
   ZSumModule<double> ZM(N, ZP);
@@ -146,7 +152,7 @@ Portion *GSM_ConstSumFloat(Portion **param)
 
 Portion *GSM_ConstSumRational(Portion **param)
 {
-  NormalForm<gRational> &N = * (NormalForm<gRational> *) ((NfgPortion *) param[0])->Value();
+  Nfg<gRational> &N = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
 
   ZSumParams ZP;
   ZSumModule<gRational> ZM(N, ZP);
@@ -168,7 +174,7 @@ Portion *GSM_ConstSumRational(Portion **param)
 
 Portion *GSM_EnumFloat(Portion **param)
 {
-  NormalForm<double> &N = * (NormalForm<double>*) ((NfgPortion*) param[0])->Value();
+  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
 
   EnumParams EP;
 
@@ -188,7 +194,7 @@ Portion *GSM_EnumFloat(Portion **param)
 
 Portion *GSM_EnumRational(Portion **param)
 {
-  NormalForm<gRational> &N = * (NormalForm<gRational>*) ((NfgPortion*) param[0])->Value();
+  Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
 
   EnumParams EP;
 
@@ -210,7 +216,7 @@ Portion *GSM_EnumRational(Portion **param)
 
 Portion *GSM_GobitNfg(Portion **param)
 {
-  NormalForm<double> &N = *(NormalForm<double> *) ((NfgPortion *) param[0])->Value();
+  Nfg<double> &N = *(Nfg<double> *) ((NfgPortion *) param[0])->Value();
 
   NFGobitParams<double> NP;
 
@@ -241,7 +247,7 @@ Portion *GSM_GobitNfg(Portion **param)
 
 Portion *GSM_GridSolveFloat(Portion **param)
 {
-  NormalForm<double> &N = * (NormalForm<double>*) ((NfgPortion*) param[0])->Value();
+  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
   
   GridParams<double> GP;
   GP.pxifile = &((OutputPortion *) param[1])->Value();
@@ -268,7 +274,7 @@ Portion *GSM_GridSolveFloat(Portion **param)
 
 Portion *GSM_GridSolveRational(Portion **param)
 {
-  NormalForm<gRational> &N = * (NormalForm<gRational>*) ((NfgPortion*) param[0])->Value();
+  Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
   
   GridParams<gRational> GP;
   GP.pxifile = &((OutputPortion *) param[1])->Value();
@@ -297,7 +303,7 @@ Portion *GSM_GridSolveRational(Portion **param)
 
 Portion *GSM_LemkeNfgFloat(Portion **param)
 {
-  NormalForm<double> &N = * (NormalForm<double>*) ((NfgPortion*) param[0])->Value();
+  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
 
   LemkeParams LP;
   LP.stopAfter = ((IntPortion *) param[1])->Value();
@@ -316,7 +322,7 @@ Portion *GSM_LemkeNfgFloat(Portion **param)
 
 Portion *GSM_LemkeNfgRational(Portion **param)
 {
-  NormalForm<gRational> &N = * (NormalForm<gRational>*) ((NfgPortion*) param[0])->Value();
+  Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
 
   LemkeParams LP;
   LP.stopAfter = ((IntPortion *) param[1])->Value();
@@ -337,7 +343,7 @@ Portion *GSM_LemkeNfgRational(Portion **param)
 
 Portion *GSM_LiapNfg(Portion **param)
 {
-  NormalForm<double> &N = * (NormalForm<double>*) ((NfgPortion*) param[0])->Value();
+  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
 
   NFLiapParams<double> LP;
   LP.stopAfter = ((IntPortion *) param[3])->Value();
@@ -362,7 +368,7 @@ Portion *GSM_LiapNfg(Portion **param)
 
 Portion *GSM_SimpdivFloat(Portion **param)
 {
-  NormalForm<double> &N = * (NormalForm<double>*) ((NfgPortion*) param[0])->Value();
+  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
   
   SimpdivParams SP;
   SP.stopAfter = ((IntPortion *) param[1])->Value();
@@ -383,7 +389,7 @@ Portion *GSM_SimpdivFloat(Portion **param)
 
 Portion *GSM_SimpdivRational(Portion **param)
 {
-  NormalForm<gRational> &N = * (NormalForm<gRational>*) ((NfgPortion*) param[0])->Value();
+  Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
   
   SimpdivParams SP;
   SP.stopAfter = ((IntPortion *) param[1])->Value();
@@ -406,7 +412,7 @@ Portion *GSM_SimpdivRational(Portion **param)
 
 Portion *GSM_PureNashFloat(Portion **param)
 {
-  NormalForm<double> &N = * (NormalForm<double>*) ((NfgPortion*) param[0])->Value();
+  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
 
   gList<MixedProfile<double> > solns;
 
@@ -424,7 +430,7 @@ Portion *GSM_PureNashFloat(Portion **param)
 
 Portion *GSM_PureNashRational(Portion **param)
 {
-  NormalForm<gRational> &N = * (NormalForm<gRational>*) ((NfgPortion*) param[0])->Value();
+  Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
 
   gList<MixedProfile<gRational> > solns;
 
@@ -443,19 +449,47 @@ Portion *GSM_PureNashRational(Portion **param)
 Portion *GSM_ReadNfg(Portion **param)
 {
   gInput &f = ((InputPortion *) param[0])->Value();
-  
-  if (f.IsValid())  {
-    NormalForm<double> *N = new NormalForm<double>(f);
-    return new NfgValPortion(N);
+
+  if (f.IsValid())   {
+    DataType type;
+    bool valid;
+
+    NfgFileType(f, valid, type);
+    if (!valid)   return new ErrorPortion("Not a valid .nfg file\n");
+    
+    switch (type)   {
+      case DOUBLE:  {
+	Nfg<double> *N = 0;
+	ReadNfgFile((gInput &) f, N);
+
+	if (N)
+	  return new NfgValPortion(N);
+	else
+	  return new ErrorPortion("Not a valid .nfg file\n");
+      }
+      case RATIONAL:   {
+	Nfg<gRational> *N = 0;
+	ReadNfgFile((gInput &) f, N);
+	
+	if (N)
+	  return new NfgValPortion(N);
+	else
+	  return new ErrorPortion("Not a valid .nfg file\n");
+      }
+      default:
+	assert(0);
+	return 0;
+    }
   }
   else
-    return new ErrorPortion("ReadNfg: Couldn't open file for reading\n");
+    return new ErrorPortion("Unable to open file for reading\n");
+
 }
 
 Portion *GSM_CrunchNfg(Portion **param)
 {
-  NormalForm<double> &N = * (NormalForm<double> *) ((NfgPortion *) param[0])->Value();
-  NormalForm<double> *M = new NormalForm<double>(N);
+  Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
+  Nfg<double> *M = new Nfg<double>(N);
   return new NfgValPortion(M);
 }
 
@@ -467,10 +501,7 @@ Portion *GSM_NewNfg(Portion **param)
   for (int i = 1; i <= dim->Length(); i++)
     d[i] = ((IntPortion *) dim->Subscript(i))->Value();
 
-  bool random = ((BoolPortion *) param[1])->Value();
-  int seed = ((BoolPortion *) param[2])->Value();
-
-  NormalForm<double> *N = new NormalForm<double>(d, random, seed);
+  Nfg<double> *N = new Nfg<double>(d);
 
   return new NfgValPortion(N);
 }
@@ -478,10 +509,9 @@ Portion *GSM_NewNfg(Portion **param)
 Portion *GSM_WriteNfg(Portion **param)
 {
   gOutput &f = ((OutputPortion *) param[0])->Value();
-  BaseNormalForm &N = * ((NfgPortion*) param[1])->Value();
-  int sset = ((IntPortion *) param[2])->Value();
+  BaseNfg &N = * ((NfgPortion*) param[1])->Value();
 
-  N.WriteNfgFile(f, sset);
+  N.WriteNfgFile(f);
   return new OutputRefPortion(f);
 }
 
@@ -730,12 +760,10 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("WriteNfg");
-  FuncObj->SetFuncInfo(GSM_WriteNfg, 3);
+  FuncObj->SetFuncInfo(GSM_WriteNfg, 2);
   FuncObj->SetParamInfo(GSM_WriteNfg, 0, "output", porOUTPUT);
   FuncObj->SetParamInfo(GSM_WriteNfg, 1, "nfg", porNFG, NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo(GSM_WriteNfg, 2, "sset", porINTEGER,
-		        new IntValPortion(1));
   gsm->AddFunction(FuncObj);
 
 }

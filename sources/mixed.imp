@@ -101,7 +101,7 @@ template <class T> void Nfg<T>::Centroid(gPVector<T> &profile) const
 }
 
 
-#include "newmixed.h"
+#include "mixed.h"
 
 //---------------------------------------------------------------------------
 //                    MixedProfile<T> member functions

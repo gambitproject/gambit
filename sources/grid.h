@@ -31,7 +31,7 @@ template <class T> gOutput &operator<<(gOutput &, const PayoffClass<T> &);
 
 template <class T> class GridSolveModule  {
   private:
-    const NormalForm<T> &nf;
+    const Nfg<T> &nf;
     gVector<T> p, x, q_calc, y;
     const GridParams<T> &params;
     gRectArray<PayoffClass<T> > matrix;
@@ -41,7 +41,7 @@ template <class T> class GridSolveModule  {
     void OutputHeader(gOutput &out);
 
   public:
-    GridSolveModule(const NormalForm<T> &r,const GridParams<T> &param);
+    GridSolveModule(const Nfg<T> &r,const GridParams<T> &param);
     ~GridSolveModule();
     int GridSolve(void);
 };

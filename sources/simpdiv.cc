@@ -15,10 +15,8 @@
 #define MAXIT 10000
 
 #include "gambitio.h"
-#include "normal.h"
-#include "normiter.h"
+#include "nfg.h"
 #include "grarray.h"
-#include "gpvector.h"
 #include "gwatch.h"
 #include "simpdiv.h"
 
@@ -31,13 +29,13 @@ SimpdivParams::SimpdivParams(gStatus &status_)
 //               SimpdivModule<T>: Constructor and destructor
 //-------------------------------------------------------------------------
 
-template <class T> SimpdivModule<T>::SimpdivModule(const NormalForm<T> &n,
+template <class T> SimpdivModule<T>::SimpdivModule(const Nfg<T> &n,
 						   const SimpdivParams &p)
   : N(n), params(p), nevals(0), nits(0), nstrats(n.Dimensionality()),
     ylabel(2), labels(n.ProfileLength(), 2), pi(n.ProfileLength(), 2),
     U(n.Dimensionality()), TT(n.Dimensionality()),
-    ab(n.Dimensionality()), y(n.Dimensionality()),
-    besty(n.Dimensionality()), v(n.Dimensionality())
+    ab(n.Dimensionality()), besty(n.Dimensionality()), v(n.Dimensionality()),
+    y(n)
 { }
 
 template <class T> SimpdivModule<T>::~SimpdivModule()
@@ -295,7 +293,7 @@ template <class T> void SimpdivModule<T>::update(int j, int i)
   }
 }
 
-template <class T> void SimpdivModule<T>::getY(gPVector<T> &x,int k)
+template <class T> void SimpdivModule<T>::getY(MixedProfile<T> &x,int k)
 {
   int j, h, i,hh;
   
@@ -317,7 +315,7 @@ template <class T> void SimpdivModule<T>::getY(gPVector<T> &x,int k)
   }
 }
 
-template <class T> void SimpdivModule<T>::getnexty(gPVector<T> &x,int i)
+template <class T> void SimpdivModule<T>::getnexty(MixedProfile<T> &x,int i)
 {
   int j,h,hh;
   
@@ -352,7 +350,7 @@ template <class T> int SimpdivModule<T>::get_c(int j, int h)
   return hh;
 }
 
-template <class T> T SimpdivModule<T>::getlabel(gPVector<T> &yy)
+template <class T> T SimpdivModule<T>::getlabel(MixedProfile<T> &yy)
 {
   int i,j,jj;
   T maxz,payoff,maxval;
@@ -368,7 +366,7 @@ template <class T> T SimpdivModule<T>::getlabel(gPVector<T> &yy)
     payoff=(T)(0);
     maxval=((T)(-1000000));
     for(j=1;j<=N.NumStrats(i);j++) {
-      pay=N.Payoff(i,i,j,yy);
+      pay=yy.Payoff(i,i,j);
       payoff+=(yy(i,j)*pay);
       if(pay>maxval) {
 	maxval=pay;
@@ -379,7 +377,7 @@ template <class T> T SimpdivModule<T>::getlabel(gPVector<T> &yy)
       maxz=maxval-payoff;
       ylabel[1]=i;
       ylabel[2]=jj;
-		}
+    }
   }
   if(maxz<bestz) {
     bestz=maxz;
@@ -411,7 +409,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
   
   nplayers=N.NumPlayers();
   
-  y = (T)(0);
+  ((gVector<T> &) y).operator=((T) 0);
 //  *params.tracefile << "\nnplayers =" << nplayers;
 //  *params.tracefile << "\nnstrats = " << nstrats;
 //  *params.tracefile << "\ny = " << y;

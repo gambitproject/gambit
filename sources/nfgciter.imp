@@ -5,42 +5,22 @@
 //#
 
 #include "contiter.h"
-#include "normal.h"
-#include "strategy.h"
+#include "nfg.h"
+#include "nfstrat.h"
+#include "nfplayer.h"
 
-template <class T> ContIter<T>::ContIter(NormalForm<T> &nf, int set)
-  : sset(set), N(&nf), profile(new StrategyProfile(N->NumPlayers())),
-    thawed(N->NumPlayers())
+//-------------------------------------
+// ContIter<T>: Constructor, Destructor
+//-------------------------------------
+
+template <class T> ContIter<T>::ContIter(const NFSupport *s)
+  : current_strat((s->sups).Length()), N((Nfg<T> *) s->sups[1]->nfp->N), 
+    profile(new StrategyProfile(s->sups.Length())),
+    thawed(s->sups.Length())
 {
   for (int i = 1; i <= thawed.Length(); i++)
     thawed[i] = i;
-  First();
-}
-
-template <class T> ContIter<T>::ContIter(NormalForm<T> *nf, int set)
-  : sset(set), N(nf), profile(new StrategyProfile(N->NumPlayers())),
-    thawed(N->NumPlayers())
-{
-  for (int i = 1; i <= thawed.Length(); i++)
-    thawed[i] = i;
-  First();
-}
-
-template <class T> ContIter<T>::ContIter(NormalForm<T> &nf)
-  : sset(nf.NumStratSets()), N(&nf),
-    profile(new StrategyProfile(N->NumPlayers())), thawed(N->NumPlayers())
-{
-  for (int i = 1; i <= thawed.Length(); i++)
-    thawed[i] = i;
-  First();
-}
-
-template <class T> ContIter<T>::ContIter(NormalForm<T> *nf)
-  : sset(nf->NumStratSets()), N(nf),
-    profile(new StrategyProfile(N->NumPlayers())), thawed(N->NumPlayers())
-{
-  for (int i = 1; i <= thawed.Length(); i++)
-    thawed[i] = i;
+  stratset = s;
   First();
 }
 
@@ -49,17 +29,24 @@ template <class T> ContIter<T>::~ContIter()
   delete profile;
 }
 
+//------------------------------
+// ContIter<T>: Member Functions
+//------------------------------
+
 template <class T> void ContIter<T>::First(void)
 {
-  for (int i = 1; i <= thawed.Length(); i++)
-    profile->Set(thawed[i], N->GetStrategy(thawed[i], 1, sset));
+  for (int i = 1; i <= thawed.Length(); i++){
+    profile->Set(thawed[i], stratset->GetStrategy(thawed[i], 1));
+    current_strat[thawed[i]] = 1;
+  }	
 }
 
 template <class T> void ContIter<T>::Set(int pl, int num)
 {
   if (!frozen.Contains(pl))   return;
 
-  profile->Set(pl, N->GetStrategy(pl, num, sset));
+  profile->Set(pl, stratset->GetStrategy(pl, num));
+  
 }
 
 template <class T> void ContIter<T>::Freeze(const gBlock<int> &freeze)
@@ -92,15 +79,18 @@ template <class T> void ContIter<T>::Thaw(int pl)
 template <class T> int ContIter<T>::NextContingency(void)
 {
   int j = thawed.Length();
-  if (j == 0) return 0;    	// if these is only one contingency
+  if (j == 0) return 0;    	
+
+  Strategy *s;
   while (1)   {
     int pl = thawed[j];
-    Strategy *s = (*profile)[pl]->next[sset];
-    if (s)  {
+    if (current_strat[pl] < stratset->sups[pl]->NumStrats()) {
+      s = stratset->GetStrategy(pl, ++(current_strat[pl]));
       profile->Set(pl, s);
       return 1;
     }
-    profile->Set(pl, N->GetStrategy(pl, 1, sset));
+    profile->Set(pl, stratset->GetStrategy(pl, 1));
+    current_strat[pl] = 1;
     j--;
     if (j == 0)
       return 0;
@@ -128,18 +118,18 @@ template <class T> void ContIter<T>::Get(gArray<int> &t) const
 
 template <class T> const T &ContIter<T>::Payoff(int p) const
 {
-  return N->Payoff(p, *profile);
+  return N->Payoff(p, current_strat);
 }
 
-template <class T> T &ContIter<T>::Payoff(int p)
+template <class T> void ContIter<T>::SetPayoff(int p, const T &value)
 {
-  return N->Payoff(p, *profile);
+  N->SetPayoff(p, current_strat, value);
 }
 
-template <class T> void ContIter<T>::Payoff(gVector<T> &value) const
-{
-  N->Payoff(*profile, value);
-}
+//template <class T> void ContIter<T>::Payoff(gVector<T> &value) const
+//{
+//  N->Payoff(current_strat, value);
+//}
 
 template <class T> void ContIter<T>::Dump(void) const
 {

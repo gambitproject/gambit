@@ -10,11 +10,11 @@
 // includes
 #include "lemketab.h"
 
-template <class T> class NormalForm;
+template <class T> class Nfg;
 
 template <class T> class LHTableau : public LTableau<T> {
 public:
-  LHTableau(const NormalForm<T> &);
+  LHTableau(const Nfg<T> &);
   LHTableau(Tableau<T> &);
   virtual ~LHTableau();
 };

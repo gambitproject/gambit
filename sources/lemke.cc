@@ -8,8 +8,8 @@
 #include "gwatch.h"
 #include "gpvector.h"
 
-#include "normal.h"
-#include "normiter.h"
+#include "nfg.h"
+#include "nfgiter.h"
 
 #include "gtableau.h"
 
@@ -30,7 +30,7 @@ LemkeParams::LemkeParams(void)
 template <class T> class LemkeTableau : public gTableau<T> 
 {
   private:
-    const NormalForm<T> &N;
+    const Nfg<T> &N;
     int num_strats;
     gOutput &output;
     int printlevel;
@@ -44,7 +44,7 @@ template <class T> class LemkeTableau : public gTableau<T>
     void Pivot(int, int);
  
   public:
-    LemkeTableau(const NormalForm<T> &, gOutput &ofile, int trace);
+    LemkeTableau(const Nfg<T> &, gOutput &ofile, int trace);
     virtual ~LemkeTableau();
 
     int Lemke(int);
@@ -58,7 +58,7 @@ template <class T> class LemkeTableau : public gTableau<T>
 //-------------------------------------------------------------------------
 
 template <class T>
-LemkeTableau<T>::LemkeTableau(const NormalForm<T> &NF,
+LemkeTableau<T>::LemkeTableau(const Nfg<T> &NF,
 			      gOutput &ofile, int trace)
      : gTableau<T>(1, NF.NumStrats(1) + NF.NumStrats(2),
 		   NF.NumStrats(1) + NF.NumStrats(2),
@@ -68,7 +68,8 @@ LemkeTableau<T>::LemkeTableau(const NormalForm<T> &NF,
 		   output(ofile), printlevel(trace),
 		   npivots(0)
 {
-  NormalIter<T> iter(N);
+  NFSupport S(N);
+  NfgIter<T> iter(&S);
   T min = (T) 0, x;
   int n1 = N.NumStrats(1), n2 = N.NumStrats(2);
 
@@ -414,7 +415,7 @@ class LemkeTableau<gRational>;
 //-------------------------------------------------------------------------
 
 template <class T>
-LemkeModule<T>::LemkeModule(const NormalForm<T> &N, const LemkeParams &p)
+LemkeModule<T>::LemkeModule(const Nfg<T> &N, const LemkeParams &p)
   : nf(N), params(p), npivots(0)
 { }
 
@@ -469,7 +470,7 @@ class LemkeModule<gRational>;
 //-------------------------------------------------------------------------
 
 template <class T>
-int Lemke(const NormalForm<T> &N, const LemkeParams &p,
+int Lemke(const Nfg<T> &N, const LemkeParams &p,
 	  gList<MixedProfile<T> > &solutions,
 	  long &npivots, double &time)
 {
@@ -485,15 +486,15 @@ int Lemke(const NormalForm<T> &N, const LemkeParams &p,
 }
 
 #ifdef __GNUG__
-template int Lemke(const NormalForm<double> &, const LemkeParams &,
+template int Lemke(const Nfg<double> &, const LemkeParams &,
 		   gList<MixedProfile<double> > &, long &, double &);
-template int Lemke(const NormalForm<gRational> &, const LemkeParams &,
+template int Lemke(const Nfg<gRational> &, const LemkeParams &,
 		   gList<MixedProfile<gRational> > &, long &, double &);
 #elif defined __BORLANDC__
 #pragma option -Jgd
-int Lemke(const NormalForm<double> &, const LemkeParams &,
+int Lemke(const Nfg<double> &, const LemkeParams &,
 	  gList<MixedProfile<double> > &, long &, double &);
-int Lemke(const NormalForm<gRational> &, const LemkeParams &,
+int Lemke(const Nfg<gRational> &, const LemkeParams &,
 	  gList<MixedProfile<gRational> > &, long &, double &);
 #pragma option -Jgx
 #endif   // __GNUG__, __BORLANDC__

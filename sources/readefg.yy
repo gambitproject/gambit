@@ -315,13 +315,3 @@ void EfgFileType(gInput &f, bool &valid, DataType &type)
 TEMPLATE class gStack<Node *>;
 TEMPLATE class gGrowableStack<Node *>;
 
-
-#include "glist.imp"
-
-TEMPLATE class gList<gString>;
-TEMPLATE class gNode<gString>;
-
-TEMPLATE class gList<gRational>;
-TEMPLATE class gNode<gRational>;
-
-

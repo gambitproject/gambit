@@ -7,7 +7,7 @@
 #ifndef NLIAP_H
 #define NLIAP_H
 
-#include "normal.h"
+#include "nfg.h"
 #include "liap.h"
 #include "glist.h"
 #include "mixed.h"
@@ -19,15 +19,15 @@ template <class T> class NFLiapParams : public LiapParams<T>  {
 
 template <class T> class NFLiapModule : public LiapModule<T>  {
   private:
-    const NormalForm<T> &N;
+    const Nfg<T> &N;
     gList<MixedProfile<T> > solutions;
 
     LiapFunc<T> *CreateFunc(void);
     void AddSolution(const LiapFunc<T> *const);
 
   public:
-    NFLiapModule(const NormalForm<T> &N, NFLiapParams<T> &p); 
-    NFLiapModule(const NormalForm<T> &N, NFLiapParams<T> &p,gPVector<T> &s); 
+    NFLiapModule(const Nfg<T> &N, NFLiapParams<T> &p); 
+    NFLiapModule(const Nfg<T> &N, NFLiapParams<T> &p, MixedProfile<T> &s); 
     virtual ~NFLiapModule();
     const gList<MixedProfile<T> > &GetSolutions(void) const;
 };

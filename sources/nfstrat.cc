@@ -187,8 +187,11 @@ NFSupport::NFSupport(const BaseNfg &N) : sups(N.NumPlayers())
 }
 
 NFSupport::NFSupport(const NFSupport &s)
-: name(s.name), sups(s.sups)
-{ }
+: name(s.name), sups(s.sups.Length())
+{
+  for (int i = 1; i <= sups.Length(); i++)
+    sups[i] = new NFStrategySet(*s.sups[i]);
+}
 
 NFSupport::~NFSupport()
 { 

@@ -5,14 +5,19 @@
 //#
 
 #include "efg.h"
-#include "normal.h"
+#include "nfg.h"
+#include "nfplayer.h"
+#include "nfstrat.h"
+#include "mixed.h"
 #include "glist.h"
+#include "contiter.h"
+#include "nfgiter.h"
 
 typedef gArray<int> Correspondence;
 
 class Lexicon   {
   public:
-    BaseNormalForm *N;
+    BaseNfg *N;
     gArray<gList<Correspondence *> > strategies;
 
     Lexicon(const BaseEfg &);
@@ -98,9 +103,7 @@ void Lexicon::MakeReducedStrats(EFPlayer *p, Node *n, Node *nn)
 }
 
 
-#include "contiter.h"
-
-template <class T> NormalForm<T> *MakeReducedNfg(Efg<T> &E)
+template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E)
 {
   int i;
 
@@ -113,7 +116,7 @@ template <class T> NormalForm<T> *MakeReducedNfg(Efg<T> &E)
   for (i = 1; i <= E.NumPlayers(); i++)
     dim[i] = L->strategies[i].Length();
 
-  L->N = new NormalForm<T>(dim);
+  L->N = new Nfg<T>(dim);
   L->N->SetTitle(E.GetTitle());
   
   for (i = 1; i <= E.NumPlayers(); i++)   {
@@ -124,11 +127,12 @@ template <class T> NormalForm<T> *MakeReducedNfg(Efg<T> &E)
 	  name += ToString((*L->strategies[i][j])[k]);
         else
 	  name += "*";
-      L->N->SetStratName(i, j, name);
+      L->N->PlayerList()[i]->StrategyList()[j]->name = name;
     }
   }
   
-  ContIter<T> iter((NormalForm<T> *) L->N);
+  NFSupport S(*L->N);
+  ContIter<T> iter(&S);
   gArray<gArray<int> *> corr(E.NumPlayers());
   gArray<gListIter<Correspondence *> *> corrs(E.NumPlayers());
   for (i = 1; i <= E.NumPlayers(); i++)  {
@@ -142,7 +146,7 @@ template <class T> NormalForm<T> *MakeReducedNfg(Efg<T> &E)
   while (1)  {
     E.Payoff(corr, value);
     for (int j = 1; j <= E.NumPlayers(); j++)
-      iter.Payoff(j) = value[j];
+      iter.SetPayoff(j, value[j]);
     
     iter.NextContingency();
     while (pl > 0)   {
@@ -164,7 +168,7 @@ template <class T> NormalForm<T> *MakeReducedNfg(Efg<T> &E)
     delete corrs[i];
 
   E.lexicon = L;
-  return ((NormalForm<T> *) E.lexicon->N);
+  return ((Nfg<T> *) E.lexicon->N);
 }
 
 void BaseEfg::DeleteLexicon(void)
@@ -174,8 +178,8 @@ void BaseEfg::DeleteLexicon(void)
 }
 
 template <class T>
-void RealizationProbs(const NormalForm<T> &N, const gPVector<T> &mp,
-		      const Efg<T> &E, gDPVector<T> &bp,
+void RealizationProbs(const Nfg<T> &N, const MixedProfile<T> &mp,
+		      const Efg<T> &E, BehavProfile<T> &bp,
 		      int pl, const gArray<int> *const actions, Node *n)
 {
   static const T tremble = (T) 0.0;
@@ -206,7 +210,7 @@ void RealizationProbs(const NormalForm<T> &N, const gPVector<T> &mp,
 }
 
 template <class T>
-void BehaviorStrat(const Efg<T> &E, gDPVector<T> &bp, int pl, Node *n)
+void BehaviorStrat(const Efg<T> &E, BehavProfile<T> &bp, int pl, Node *n)
 {
   for (int i = 1; i <= n->NumChildren(); i++)   {
     Node *child = n->GetChild(i);
@@ -227,26 +231,19 @@ void ClearNodeProbs(Node *n)
 }
 
 template <class T>
-void MixedToBehav(const NormalForm<T> &N, const gPVector<T> &mp,
-		  const Efg<T> &E, gDPVector<T> &bp)
+void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
+		  const Efg<T> &E, BehavProfile<T> &bp)
 {
   if (!E.lexicon || E.lexicon->N != &N)   return;
-
-  int sset = N.NumStratSets();
-  while (N.Dimensionality(sset) != mp.Lengths())  {
-    sset--;
-    assert(sset > 0);
-  }
 
   Node *n = E.RootNode();
 
   for (int pl = 1; pl <= N.NumPlayers(); pl++)   {
     ClearNodeProbs(n);
 
-    for (int st = 1; st <= N.NumStrats(pl, sset); st++)  {
+    for (int st = 1; st <= N.NumStrats(pl); st++)  {
       if (mp(pl, st) > (T) 0.0)  {
-//	const gArray<int> *const actions = N.GetActions(pl, st, sset);
-	const gArray<int> *const actions = E.lexicon->strategies[pl][sset];
+	const gArray<int> *const actions = E.lexicon->strategies[pl][st];
 
 	n->bval = mp(pl, st);
 
@@ -269,27 +266,27 @@ void MixedToBehav(const NormalForm<T> &N, const gPVector<T> &mp,
 
 #include "rational.h"
 
-TEMPLATE void MixedToBehav(const NormalForm<double> &,const gPVector<double> &,
-			   const Efg<double> &, gDPVector<double> &);
-TEMPLATE void MixedToBehav(const NormalForm<gRational> &,
-			   const gPVector<gRational> &,
-			   const Efg<gRational> &, gDPVector<gRational> &);
+TEMPLATE void MixedToBehav(const Nfg<double> &,const MixedProfile<double> &,
+			   const Efg<double> &, BehavProfile<double> &);
+TEMPLATE void MixedToBehav(const Nfg<gRational> &,
+			   const MixedProfile<gRational> &,
+			   const Efg<gRational> &, BehavProfile<gRational> &);
 
-TEMPLATE void RealizationProbs(const NormalForm<double> &N, const gPVector<double> &mp,
-			       const Efg<double> &E, gDPVector<double> &bp,
+TEMPLATE void RealizationProbs(const Nfg<double> &N, const MixedProfile<double> &mp,
+			       const Efg<double> &E, BehavProfile<double> &bp,
 			       int pl, const gArray<int> *const actions, Node *);
-TEMPLATE void RealizationProbs(const NormalForm<gRational> &N, const gPVector<gRational> &mp,
-			       const Efg<gRational> &E, gDPVector<gRational> &bp,
+TEMPLATE void RealizationProbs(const Nfg<gRational> &N, const MixedProfile<gRational> &mp,
+			       const Efg<gRational> &E, BehavProfile<gRational> &bp,
 			       int pl, const gArray<int> *const actions, Node *);
 
 
-TEMPLATE void BehaviorStrat(const Efg<double> &E, gDPVector<double> &bp, int pl, Node *n);
-TEMPLATE void BehaviorStrat(const Efg<gRational> &E, gDPVector<gRational> &bp, int pl, Node *n);
+TEMPLATE void BehaviorStrat(const Efg<double> &E, BehavProfile<double> &bp, int pl, Node *n);
+TEMPLATE void BehaviorStrat(const Efg<gRational> &E, BehavProfile<gRational> &bp, int pl, Node *n);
 
 
 
-template NormalForm<double> *MakeReducedNfg(Efg<double> &);
-template NormalForm<gRational> *MakeReducedNfg(Efg<gRational> &);
+template Nfg<double> *MakeReducedNfg(Efg<double> &);
+template Nfg<gRational> *MakeReducedNfg(Efg<gRational> &);
 
 #include "glist.imp"
 #include "garray.imp"

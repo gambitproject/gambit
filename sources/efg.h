@@ -118,7 +118,8 @@ class BaseEfg     {
 
 template <class T> class OutcomeVector;
 #include "behav.h"
-template <class T> class NormalForm;
+template <class T> class Nfg;
+template <class T> class MixedProfile;
 
 template <class T> class Efg : public BaseEfg   {
   private:
@@ -165,9 +166,9 @@ template <class T> class Efg : public BaseEfg   {
     void CondPayoff(const BehavProfile<T> &profile, gDPVector<T> &value,
 		    gPVector<T> &probs) const;
 
-    friend NormalForm<T> *MakeReducedNfg(Efg<T> &);
-    friend void MixedToBehav(const NormalForm<T> &N, const gPVector<T> &mp,
-		             const Efg<T> &E, gDPVector<T> &bp);
+    friend Nfg<T> *MakeReducedNfg(Efg<T> &);
+    friend void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
+		             const Efg<T> &E, BehavProfile<T> &bp);
 };
 
 #include "efplayer.h"

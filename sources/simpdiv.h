@@ -7,7 +7,7 @@
 #ifndef SIMPDIV_H
 #define SIMPDIV_H
 
-#include "normal.h"
+#include "nfg.h"
 #include "glist.h"
 #include "grarray.h"
 #include "gstatus.h"
@@ -24,7 +24,7 @@ class SimpdivParams     {
 
 template <class T> class SimpdivModule  {
   private:
-    const NormalForm<T> &N;
+    const Nfg<T> &N;
     const SimpdivParams &params;
 
     long leash;
@@ -35,20 +35,21 @@ template <class T> class SimpdivModule  {
     gVector<T> M;
     gRectArray<int> labels,pi;
     gPVector<int> U,TT;
-    gPVector<T> ab,y,besty,v;
+    gPVector<T> ab,besty,v;
+    MixedProfile<T> y;
 
     gList<MixedProfile<T> > solutions;
 
     T simplex(void);
-    T getlabel(gPVector<T> &yy);
+    T getlabel(MixedProfile<T> &yy);
     void update(int j, int i);
-    void getY(gPVector<T> &x,int k);
-    void getnexty(gPVector<T> &x,int i);
+    void getY(MixedProfile<T> &x,int k);
+    void getnexty(MixedProfile<T> &x,int i);
     int get_c(int j, int h);
     int get_b(int j, int h);
   
   public:
-    SimpdivModule(const NormalForm<T> &N, const SimpdivParams &);
+    SimpdivModule(const Nfg<T> &N, const SimpdivParams &);
     virtual ~SimpdivModule();
 
     int NumEvals(void) const  { return nevals; }

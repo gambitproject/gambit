@@ -7,7 +7,7 @@
 #ifndef ENUM_H
 #define ENUM_H
 
-#include "normal.h"
+#include "nfg.h"
 #include "glist.h"
 #include "gstatus.h"
 #include "lhtab.h"
@@ -29,7 +29,7 @@ public:
 template <class T> class EnumModule  {
 private:
   BFS_List List;
-  const NormalForm<T> &NF;
+  const Nfg<T> &NF;
   EnumParams params;
   int rows,cols,level;
   long count,npivots;
@@ -39,7 +39,7 @@ private:
 //  void AddSolution(const gPVector<T> &s);
   
 public:
-  EnumModule(const NormalForm<T> &N, const EnumParams &p); 
+  EnumModule(const Nfg<T> &N, const EnumParams &p); 
   
   int Enum(void);
   void SubSolve(int pr, int pcl, LTableau<T> &B1, gBlock<int> &targ1);
@@ -55,7 +55,7 @@ public:
 //
 // Convenience functions for "one-shot" evaluations
 //
-template <class T> int Enum(const NormalForm<T> &N, const EnumParams &p,
+template <class T> int Enum(const Nfg<T> &N, const EnumParams &p,
 			    gList<MixedProfile<T> > &solutions,
 			    long &npivots, double &time);
 

@@ -5,13 +5,13 @@
 //#
 
 #include "gwatch.h"
-#include "normal.h"
-#include "normiter.h"
+#include "nfg.h"
+#include "nfgiter.h"
 
 #include "enum.h"
 
-template <class T> gMatrix<T> Make_A(const NormalForm<T> &);
-template <class T> gVector<T> Make_b(const NormalForm<T> &);
+template <class T> gMatrix<T> Make_A(const Nfg<T> &);
+template <class T> gVector<T> Make_b(const Nfg<T> &);
 
 //---------------------------------------------------------------------------
 //                        EnumParams: member functions
@@ -26,7 +26,7 @@ tracefile(&gnull),status(status_)
 //-------------------------------------------------------------------------
 
 template <class T>
-EnumModule<T>::EnumModule(const NormalForm<T> &N, const EnumParams &p)
+EnumModule<T>::EnumModule(const Nfg<T> &N, const EnumParams &p)
   : NF(N), params(p), rows(N.NumStrats(1)), cols(N.NumStrats(2)), 
     level(0), count(0), npivots(0)
 { }
@@ -226,7 +226,7 @@ class EnumModule<gRational>;
 //-------------------------------------------------------------------------
 
 template <class T>
-int Enum(const NormalForm<T> &N, const EnumParams &p,
+int Enum(const Nfg<T> &N, const EnumParams &p,
 	  gList<gPVector<T> > &solutions,
 	  long &npivots, gRational &time)
 {
@@ -242,15 +242,15 @@ int Enum(const NormalForm<T> &N, const EnumParams &p,
 }
 
 #ifdef __GNUG__
-template int Enum(const NormalForm<double> &, const EnumParams &,
+template int Enum(const Nfg<double> &, const EnumParams &,
 		   gList<gPVector<double> > &, int &, gRational &);
-template int Enum(const NormalForm<gRational> &, const EnumParams &,
+template int Enum(const Nfg<gRational> &, const EnumParams &,
 		   gList<gPVector<gRational> > &, int &, gRational &);
 #elif defined __BORLANDC__
 #pragma option -Jgd
-int Enum(const NormalForm<double> &, const EnumParams &,
+int Enum(const Nfg<double> &, const EnumParams &,
 	  gList<gPVector<double> > &, int &, gRational &);
-int Enum(const NormalForm<gRational> &, const EnumParams &,
+int Enum(const Nfg<gRational> &, const EnumParams &,
 	  gList<gPVector<gRational> > &, int &, gRational &);
 #pragma option -Jgx
 #endif   // __GNUG__, __BORLANDC__

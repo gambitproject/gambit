@@ -8,9 +8,9 @@
 #define CONTITER_H
 
 #include "gblock.h"
-#include "gvector.h"
+//#include "gvector.h"
 
-template <class T> class NormalForm;
+template <class T> class Nfg;
 class StrategyProfile;
 
 //
@@ -24,42 +24,40 @@ class StrategyProfile;
 // the total number of possible contingencies in increments of 1.
 //
 template <class T> class ContIter    {
-  friend class NormalIter<T>;
-  private:
-    int sset;
-    NormalForm<T> *N;
-    StrategyProfile *profile;
-    gBlock<int> frozen, thawed;
-
-  public:
-    ContIter(NormalForm<T> &n);
-    ContIter(NormalForm<T> &n, int sset);
-    ContIter(NormalForm<T> *n);
-    ContIter(NormalForm<T> *n, int sset);
-    ~ContIter();
-
-    void First(void);
-
-    void Freeze(const gBlock<int> &);
-    void Freeze(int);
-    void Thaw(int);
-
-// These next two only work on frozen strategies
-    void Set(int pl, int num);
-    int Next(int pl);
-
-    gArray<int> Get(void) const;
-    void Get(gArray<int> &t) const;
-
-    int NextContingency(void);
-
-    long GetIndex(void) const;
-
-    const T &Payoff(int pl) const;
-    T &Payoff(int pl);
-    void Payoff(gVector<T> &) const;
-
-    void Dump(void) const;
+friend class NfgIter<T>;
+private:
+  const NFSupport *stratset;
+  gArray<int> current_strat;
+  Nfg<T> *N;
+  StrategyProfile *profile;
+  gBlock<int> frozen, thawed;
+  
+public:
+  ContIter(const NFSupport *s);
+  ~ContIter();
+  
+  void First(void);
+  
+  void Freeze(const gBlock<int> &);
+  void Freeze(int);
+  void Thaw(int);
+  
+  // These next two only work on frozen strategies
+  void Set(int pl, int num);
+  int Next(int pl);
+  
+  gArray<int> Get(void) const;
+  void Get(gArray<int> &t) const;
+  
+  int NextContingency(void);
+  
+  long GetIndex(void) const;
+  
+  const T &Payoff(int pl) const;
+  void Payoff(gVector<T> &) const;
+  void SetPayoff(int pl, const T &value);
+  
+  void Dump(void) const;
 };
 
 #endif   // CONTITER_H

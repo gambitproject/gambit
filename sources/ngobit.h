@@ -7,7 +7,7 @@
 #ifndef NGOBIT_H
 #define NGOBIT_H
 
-#include "normal.h"
+#include "nfg.h"
 #include "gobit.h"
 #include "glist.h"
 #include "mixed.h"
@@ -22,14 +22,15 @@ template <class T> class NFGobitParams : public GobitParams<T>   {
 
 template <class T> class NFGobitModule : public GobitModule<T>   {
   protected:
-    const NormalForm<T> &N;
+    const Nfg<T> &N;
     gList<MixedProfile<T> > solutions;
 
     GobitFunc<T> *CreateFunc(void);
     void AddSolution(const GobitFunc<T> *const);
   public:
-    NFGobitModule(const NormalForm<T> &NF, NFGobitParams<T> &p);
-    NFGobitModule(const NormalForm<T> &NF, NFGobitParams<T> &p,gPVector<T> &s);
+    NFGobitModule(const Nfg<T> &NF, NFGobitParams<T> &p);
+    NFGobitModule(const Nfg<T> &NF, NFGobitParams<T> &p,
+		  MixedProfile<T> &s);
     virtual ~NFGobitModule();
     const gList<MixedProfile<T> > &GetSolutions(void) const;
 };

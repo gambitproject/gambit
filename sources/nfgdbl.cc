@@ -5,36 +5,38 @@
 //#
 
 #include "rational.h"
-#include "normal.h"
-#include "glist.h"
-#include "glistit.h"
-#include "gpset.h"
+#include "nfg.h"
 
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
-class MixedProfile<gRational>;
-class NormalForm<gRational>;
+
+class Nfg<gRational>;
 
 #define TEMPLATE
 #pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
+#endif // __GNUG__, __BORLANDC__
 
-#include "normal.imp"
-#include "normiter.imp"
+#include "nfg.imp"
+#include "nfgiter.imp"
 #include "contiter.imp"
-#include "gnarray.imp"
+#include "readnfg.imp"
 
-TEMPLATE class gNArray<double>;
+TEMPLATE class Nfg<double>;
+DataType Nfg<double>::Type(void) const { return DOUBLE; }
 
-TEMPLATE class NormalForm<double>;
-DataType NormalForm<double>::Type(void) const    { return DOUBLE; }
+TEMPLATE class NfgFile<double>;
+TEMPLATE int ReadNfgFile(gInput &, Nfg<double> *&);
 
-TEMPLATE class NormalIter<double>;
 TEMPLATE class ContIter<double>;
+TEMPLATE class NfgIter<double>;
 
 TEMPLATE class MixedProfile<double>;
 TEMPLATE gOutput &operator<<(gOutput &, const MixedProfile<double> &);
+
+#include "garray.imp"
+
+TEMPLATE class gArray<double *>;
 
 #include "glist.imp"
 

@@ -31,8 +31,8 @@ class NFGobitFunc : public GobitFunc<T>, public gBC2FunctMin<T>  {
 private:
   int niters, nevals;
   T Lambda;
-  gPVector<T> p, pp;
-  const NormalForm<T> &N;
+  MixedProfile<T> p, pp;
+  const Nfg<T> &N;
   gVector<T> **scratch1, **scratch2;
   
       // These three are inherited virtual functions from gBC2FunctMin<T>:
@@ -41,12 +41,12 @@ private:
   T Value(const gVector<T> &x);
 
       // Used in computation of Deriv() above
-  T GobitDerivValue(int i, int j, const gPVector<T> &v);
+  T GobitDerivValue(int i, int j, const MixedProfile<T> &v);
   
 public:
-  NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P);
-  NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P,
-	      const gPVector<T> &s);
+  NFGobitFunc(const Nfg<T> &NF, const GobitParams<T> &P);
+  NFGobitFunc(const Nfg<T> &NF, const GobitParams<T> &P,
+	      const MixedProfile<T> &s);
   virtual ~NFGobitFunc();
   
   void Init(void);
@@ -63,20 +63,20 @@ public:
 //               NFGobitFunc<T>: Constructor and destructor
 //-------------------------------------------------------------------------
 
-template <class T> NFGobitFunc<T>
-::NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P)
-  : gBC2FunctMin<T>(NF.ProfileLength()), p(NF.Dimensionality()),
-    niters(0), nevals(0), pp(NF.Dimensionality()), N(NF)
+template <class T>
+NFGobitFunc<T>::NFGobitFunc(const Nfg<T> &NF, const GobitParams<T> &P)
+  : gBC2FunctMin<T>(NF.ProfileLength()), 
+    niters(0), nevals(0), p(NF), pp(NF), N(NF)
 { 
   Init();
   N.Centroid(pp);
 }
 
-template <class T>NFGobitFunc<T>
-::NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P,
-	      const gPVector<T>& s)
+template <class T>
+NFGobitFunc<T>::NFGobitFunc(const Nfg<T> &NF, const GobitParams<T> &P,
+			    const MixedProfile<T> &s)
   : gBC2FunctMin<T>(NF.ProfileLength()), niters(0), nevals(0), 
-    p(NF.Dimensionality()), pp(NF.Dimensionality()), N(NF)
+    p(NF), pp(NF), N(NF)
 {
   Init();
   pp = s;
@@ -132,7 +132,7 @@ template <class T> int NFGobitFunc<T>::Hess(const gVector<T> &, gMatrix<T> &)
 template <class T>
 int NFGobitFunc<T>::Deriv(const gVector<T> &v, gVector<T> &d)
 {
-  p = v;
+  ((gVector<T> &) p).operator=(v);
   T avg;
   
   for (int pl = 1, index = 1; pl <= N.NumPlayers(); pl++)  {
@@ -148,23 +148,23 @@ int NFGobitFunc<T>::Deriv(const gVector<T> &v, gVector<T> &d)
 }
 
 template <class T>
-T NFGobitFunc<T>::GobitDerivValue(int i, int j, const gPVector<T> &v)
+T NFGobitFunc<T>::GobitDerivValue(int i, int j, const MixedProfile<T> &v)
 {
   T x((T) 0), dv;
   
   for (int pl = 1; pl <= N.NumPlayers(); pl++)  {
     gVector<T> &payoff = *scratch1[pl];
-    N.Payoff(pl, pl, v, payoff);
+    v.Payoff(pl, pl, payoff);
     for (int st = 2; st <= N.NumStrats(pl); st++)  {
-			dv =(T)log(v(pl, 1)) - (T)log(v(pl, st)) - Lambda * (payoff[1] - payoff[st]);
+      dv =(T)log(v(pl, 1)) - (T)log(v(pl, st)) - Lambda * (payoff[1] - payoff[st]);
 //      dv = log(v(pl, 1)/v(pl, st)) - Lambda * (payoff[1] - payoff[st]);
       if (pl == i)  {
 	if (j == 1)              x += dv / v(pl, 1);
 	else if (j == st)        x -= dv / v(pl, st);
       }
       else
-	x -= dv * Lambda * (N.Payoff(pl, pl, 1, i, j, v) -
-			    N.Payoff(pl, pl, st, i, j, v));
+	x -= dv * Lambda * (v.Payoff(pl, pl, 1, i, j) -
+			    v.Payoff(pl, pl, st, i, j));
     }
   }
 
@@ -174,14 +174,14 @@ T NFGobitFunc<T>::GobitDerivValue(int i, int j, const gPVector<T> &v)
 template <class T> T NFGobitFunc<T>::Value(const gVector<T> &v)
 {
   nevals++;
-  p = v;
+  ((gVector<T> &) p).operator=(v);
   T val((T) 0), z;
   
   for (int pl = 1; pl <= N.NumPlayers(); pl++)  {
     gVector<T> &payoff = *scratch1[pl];
-    N.Payoff(pl, pl, p, payoff);
+    p.Payoff(pl, pl, payoff);
     for (int st = 2; st <= N.NumStrats(pl); st++)  {
-			z = (T)log(p(pl, 1)) - (T)log(p(pl, st)) - Lambda * (payoff[1] - payoff[st]);
+      z = (T)log(p(pl, 1)) - (T)log(p(pl, st)) - Lambda * (payoff[1] - payoff[st]);
 //      z = log(p(pl, 1)/p(pl, st)) - Lambda * (payoff[1] - payoff[st]);
       val += z * z;
     }
@@ -231,12 +231,12 @@ template <class T> void NFGobitFunc<T>::Output(gOutput &f,int format) const
 //-------------------------------------------------------------------------
 
 template <class T>
-NFGobitModule<T>::NFGobitModule(const NormalForm<T> &NF, NFGobitParams<T> &p) 
+NFGobitModule<T>::NFGobitModule(const Nfg<T> &NF, NFGobitParams<T> &p) 
   : GobitModule<T>(p), N(NF)
 { }
 
 template <class T>NFGobitModule<T>
-::NFGobitModule(const NormalForm<T> &NF, NFGobitParams<T> &p, gPVector<T> &s)
+::NFGobitModule(const Nfg<T> &NF, NFGobitParams<T> &p, MixedProfile<T> &s)
   : GobitModule<T>(p,s), N(NF)
 { }
 
@@ -252,10 +252,8 @@ const gList<MixedProfile<T> > &NFGobitModule<T>::GetSolutions(void) const
 template <class T> GobitFunc<T> *NFGobitModule<T>::CreateFunc(void)
 {
 
-  if(start) {
-    gPVector<T> s(N.Dimensionality());
-    s=*start;
-    return new NFGobitFunc<T>(N, params, s); 
+  if (start) {
+    return new NFGobitFunc<T>(N, params, (MixedProfile<T> &) *start); 
   }
   return new NFGobitFunc<T>(N, params);
 

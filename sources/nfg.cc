@@ -154,14 +154,7 @@ const gArray<Strategy *> &NFPlayer::StrategyList(void) const
 
 
 
-//#include "garray.h"
-//#include "gblock.h"
-#include "newmixed.h"
-
-//template class gArray<Strategy *>;
-//template class gBlock<Strategy *>;
-//template class gArray<NFPlayer *>;
-//template class gArray<NFStrategySet *>;
+#include "mixed.h"
 
 //---------------------------------------------------------------------------
 //                    BaseMixedProfile member functions

@@ -13,7 +13,6 @@
 
 #include "rational.h"
 
-
 #include "gwatch.h"
 #include "mixed.h"
 
@@ -21,10 +20,10 @@ Portion *GSM_BehavFloat(Portion **param)
 {
   MixedProfile<double> &mp = * (MixedProfile<double>*) ((MixedPortion*) param[0])->Value();
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[1])->Value();
-  NormalForm<double> &N = *mp.BelongsTo(); 
+  Nfg<double> &N = *mp.BelongsTo(); 
 
   BehavProfile<double> *bp = new BehavProfile<double>(E);
-  MixedToBehav(N, (gPVector<double> &) mp, E, (gDPVector<double> &) *bp);
+  MixedToBehav(N, mp, E, *bp);
 
   Portion* por = new BehavValPortion(bp);
   por->SetOwner( param[ 1 ]->Original() );
@@ -45,7 +44,7 @@ Portion *GSM_NfgFloat(Portion **param)
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
   gWatch watch;
 
-  NormalForm<double> *N = MakeReducedNfg(E);
+  Nfg<double> *N = MakeReducedNfg(E);
   
   ((FloatPortion *) param[1])->Value() = watch.Elapsed();
   
@@ -60,7 +59,7 @@ Portion *GSM_NfgRational(Portion **param)
   Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
   gWatch watch;
 
-  NormalForm<gRational> *N = MakeReducedNfg(E);
+  Nfg<gRational> *N = MakeReducedNfg(E);
   
   ((FloatPortion *) param[1])->Value() = watch.Elapsed();
 

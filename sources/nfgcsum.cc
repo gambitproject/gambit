@@ -8,8 +8,8 @@
 #include "gwatch.h"
 #include "gpvector.h"
 
-#include "normal.h"
-#include "normiter.h"
+#include "nfg.h"
+#include "nfgiter.h"
 
 #include "csum.h"
 
@@ -27,7 +27,7 @@ ZSumParams::ZSumParams(void)
 //-------------------------------------------------------------------------
 
 template <class T>
-ZSumModule<T>::ZSumModule(const NormalForm<T> &N, const ZSumParams &p)
+ZSumModule<T>::ZSumModule(const Nfg<T> &N, const ZSumParams &p)
   : NF(N), params(p), A(0), b(0), c(0), npivots(0)
 { }
 
@@ -50,7 +50,8 @@ template <class T> void ZSumModule<T>::Make_Abc()
   A = new gMatrix<T>(1,k+1,1,m+1);
   b = new gVector<T>(1,k+1);
   c = new gVector<T>(1,m+1);
-  NormalIter<T> iter(NF);
+  NFSupport S(NF);
+  NfgIter<T> iter(&S);
 
       // Ted -- this should be in the normal form.  
   minpay = (T)0;
@@ -179,7 +180,7 @@ class ZSumModule<gRational>;
 //-------------------------------------------------------------------------
 
 template <class T>
-int ZSum(const NormalForm<T> &N, const ZSumParams &p,
+int ZSum(const Nfg<T> &N, const ZSumParams &p,
 	  gList<MixedProfile<T> > &solutions,
 	  long &npivots, gRational &time)
 {
@@ -195,15 +196,15 @@ int ZSum(const NormalForm<T> &N, const ZSumParams &p,
 }
 
 #ifdef __GNUG__
-template int ZSum(const NormalForm<double> &, const ZSumParams &,
+template int ZSum(const Nfg<double> &, const ZSumParams &,
 		   gList<MixedProfile<double> > &, long &, gRational &);
-template int ZSum(const NormalForm<gRational> &, const ZSumParams &,
+template int ZSum(const Nfg<gRational> &, const ZSumParams &,
 		   gList<MixedProfile<gRational> > &, long &, gRational &);
 #elif defined __BORLANDC__
 #pragma option -Jgd
-int ZSum(const NormalForm<double> &, const ZSumParams &,
+int ZSum(const Nfg<double> &, const ZSumParams &,
 	  gList<MixedProfile<double> > &, long &, gRational &);
-int ZSum(const NormalForm<gRational> &, const ZSumParams &,
+int ZSum(const Nfg<gRational> &, const ZSumParams &,
 	  gList<MixedProfile<gRational> > &, long &, gRational &);
 #pragma option -Jgx
 #endif   // __GNUG__, __BORLANDC__

@@ -17,7 +17,7 @@
 #include "gambitio.h"
 
 #include "mixed.h"
-#include "normal.h"
+#include "nfg.h"
 #include "efg.h"
 
 #include "glist.h"
@@ -640,19 +640,19 @@ public:
 //                          new Nfg class
 //---------------------------------------------------------------------
 
-class BaseNormalForm;
+class BaseNfg;
 
 class NfgPortion : public Portion
 {
 protected:
-  BaseNormalForm** _Value;
+  BaseNfg** _Value;
   gList< Portion* >* _Dependent;
   NfgPortion( void );
 
 public:
   virtual ~NfgPortion();
 
-  BaseNormalForm*& Value( void ) const;
+  BaseNfg*& Value( void ) const;
   PortionType Type( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
@@ -668,7 +668,7 @@ public:
 class NfgValPortion : public NfgPortion
 {
 public:
-  NfgValPortion( BaseNormalForm* value );
+  NfgValPortion( BaseNfg* value );
   virtual ~NfgValPortion();
   bool IsReference( void ) const;
 };
@@ -676,7 +676,7 @@ public:
 class NfgRefPortion : public NfgPortion
 {
 public:
-  NfgRefPortion( BaseNormalForm*& value );
+  NfgRefPortion( BaseNfg*& value );
   virtual ~NfgRefPortion();
   bool IsReference( void ) const;
 };

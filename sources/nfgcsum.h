@@ -7,7 +7,7 @@
 #ifndef CSUM_H
 #define CSUM_H
 
-#include "normal.h"
+#include "nfg.h"
 #include "rational.h"
 #include "glist.h"
 #include "gstatus.h"
@@ -29,7 +29,7 @@ class ZSumParams     {
 
 template <class T> class ZSumModule  {
 private:
-  const NormalForm<T> &NF;
+  const Nfg<T> &NF;
   const ZSumParams &params;
   gMatrix<T> *A;
   gVector<T> *b, *c;
@@ -39,7 +39,7 @@ private:
   BFS_List List;
 
 public:
-  ZSumModule(const NormalForm<T> &N, const ZSumParams &p);
+  ZSumModule(const Nfg<T> &N, const ZSumParams &p);
   virtual ~ZSumModule();
 
   bool IsConstSum();
@@ -60,7 +60,7 @@ public:
 //
 
 /*
-template <class T> int ZSum(const NormalForm<T> &N, const ZSumParams &p,
+template <class T> int ZSum(const Nfg<T> &N, const ZSumParams &p,
 			     gList<MixedProfile<T> > &solutions,
 			     long &npivots, gRational &time);
 */				   

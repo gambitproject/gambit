@@ -15,7 +15,7 @@
 
 #include "gambitio.h"
 
-#include "normal.h"
+#include "nfg.h"
 #include "efg.h"
 
 
@@ -1327,7 +1327,7 @@ NfgPortion::NfgPortion( void )
 NfgPortion::~NfgPortion()
 { }
 
-BaseNormalForm*& NfgPortion::Value( void ) const
+BaseNfg*& NfgPortion::Value( void ) const
 { return *_Value; }
 
 PortionType NfgPortion::Type( void ) const
@@ -1354,11 +1354,11 @@ Portion* NfgPortion::ValCopy( void ) const
   {
   case DOUBLE:
     return new NfgValPortion
-      ( new NormalForm<double>( * (NormalForm<double>*) (*_Value) ) ); 
+      ( new Nfg<double>( * (Nfg<double>*) (*_Value) ) ); 
     break;
   case RATIONAL:
     return new NfgValPortion
-      ( new NormalForm<gRational>( * (NormalForm<gRational>*) (*_Value) ) ); 
+      ( new Nfg<gRational>( * (Nfg<gRational>*) (*_Value) ) ); 
     break;
   default:
     assert( 0 );
@@ -1385,12 +1385,12 @@ void NfgPortion::AssignFrom( Portion* p )
   switch( ( (NfgPortion*) p )->Value()->Type() )
   {
   case DOUBLE:
-    *_Value = new NormalForm<double>
-      ( * (NormalForm<double>*) ( (NfgPortion*) p )->Value() ); 
+    *_Value = new Nfg<double>
+      ( * (Nfg<double>*) ( (NfgPortion*) p )->Value() ); 
     break;
   case RATIONAL:
-    *_Value =  new NormalForm<gRational>
-      ( * (NormalForm<gRational>*) ( (NfgPortion*) p )->Value() ); 
+    *_Value =  new Nfg<gRational>
+      ( * (Nfg<gRational>*) ( (NfgPortion*) p )->Value() ); 
     break;
   default:
     assert( 0 );
@@ -1426,9 +1426,9 @@ void NfgPortion::RemoveDependent( Portion* p )
 
 
 
-NfgValPortion::NfgValPortion( BaseNormalForm* value )
+NfgValPortion::NfgValPortion( BaseNfg* value )
 {
-  _Value = new BaseNormalForm*( value ); 
+  _Value = new BaseNfg*( value ); 
   _Dependent = new gList< Portion* >;
 }
 
@@ -1445,7 +1445,7 @@ bool NfgValPortion::IsReference( void ) const
 { return false; }
 
 
-NfgRefPortion::NfgRefPortion( BaseNormalForm*& value )
+NfgRefPortion::NfgRefPortion( BaseNfg*& value )
 { _Value = &value; }
 
 NfgRefPortion::~NfgRefPortion()

@@ -5,21 +5,22 @@
 //#
 
 #include "gambitio.h"
-#include "normal.h"
-#include "normiter.h"
+#include "nfg.h"
+#include "nfgiter.h"
 #include "contiter.h"
 #include "rational.h"
 #include "glist.h"
 #include "mixed.h"
 
-template <class T> int FindPureNash(const NormalForm<T> &N,
+template <class T> int FindPureNash(const Nfg<T> &N,
 				    gList<MixedProfile<T> > &eqs)
 {
-  ContIter<T> citer((NormalForm<T> &) N);
+  NFSupport S(N);
+  ContIter<T> citer(&S);
   
   do  {
     int flag = 1;
-    NormalIter<T> niter(citer);
+    NfgIter<T> niter(citer);
     
     for (int pl = 1; flag && pl <= N.NumPlayers(); pl++)  {
       T current = citer.Payoff(pl);
@@ -53,6 +54,6 @@ template <class T> int FindPureNash(const NormalForm<T> &N,
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE int FindPureNash(const NormalForm<double> &, gList<MixedProfile<double> > &);
-TEMPLATE int FindPureNash(const NormalForm<gRational> &,gList<MixedProfile<gRational> > &);
+TEMPLATE int FindPureNash(const Nfg<double> &, gList<MixedProfile<double> > &);
+TEMPLATE int FindPureNash(const Nfg<gRational> &,gList<MixedProfile<gRational> > &);
 

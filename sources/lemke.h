@@ -7,7 +7,7 @@
 #ifndef LEMKE_H
 #define LEMKE_H
 
-#include "normal.h"
+#include "nfg.h"
 #include "mixed.h"
 #include "glist.h"
 
@@ -24,14 +24,14 @@ class LemkeParams     {
 //
 template <class T> class LemkeModule  {
   private:
-    const NormalForm<T> &nf;
+    const Nfg<T> &nf;
     const LemkeParams &params;
     long npivots;
     double time;
     gList<MixedProfile<T> > solutions;
 
   public:
-    LemkeModule(const NormalForm<T> &N, const LemkeParams &p);
+    LemkeModule(const Nfg<T> &N, const LemkeParams &p);
     virtual ~LemkeModule();
 
     int Lemke(void);
@@ -45,7 +45,7 @@ template <class T> class LemkeModule  {
 //
 // Convenience functions for "one-shot" evaluations
 //
-template <class T> int Lemke(const NormalForm<T> &N, const LemkeParams &p,
+template <class T> int Lemke(const Nfg<T> &N, const LemkeParams &p,
 			     gList<MixedProfile<T> > &solutions,
 			     long &npivots, double &time);
 				   

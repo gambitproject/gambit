@@ -7,8 +7,9 @@
 #include "gmisc.h"
 #include "rational.h"
 #include "gmatrix.h"
-#include "normal.h"
-#include "normiter.h"
+#include "nfg.h"
+#include "nfgiter.h"
+#include "nfstrat.h"
 #include "probvect.h"
 #include "gwatch.h"
 #include "grid.h"
@@ -40,7 +41,7 @@ int GridParams<T>::Ok(void) const
 }
 
 template <class T>
-GridSolveModule<T>::GridSolveModule(const NormalForm<T> &r,
+GridSolveModule<T>::GridSolveModule(const Nfg<T> &r,
 				    const GridParams<T> &param)
   : nf(r), p(r.NumStrats(1)), x(r.NumStrats(1)), q_calc(r.NumStrats(2)),
     y(r.NumStrats(2)), params(param), matrix(r.NumStrats(1), r.NumStrats(2))
@@ -151,7 +152,8 @@ int i,j;
 if (!params.Ok()) { *params.tracefile << "Param Error\n"; return 0; }
 
 params.status<<"Grid Solve algorithm\n";
-NormalIter<T> iter(nf);
+NFSupport S(nf);
+NfgIter<T> iter(&S);
 int	st1=nf.NumStrats(1),st2=nf.NumStrats(2);
 // Build a game matrix--this speeds things up enormously
 

@@ -26,20 +26,20 @@ template <class T>
 class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
   private:
     int niters, nevals;
-    const NormalForm<T> &N;
-    gPVector<T> p, pp;
+    const Nfg<T> &N;
+    MixedProfile<T> p, pp;
 //    NFLiapParams<T> &params;
 
     T Value(const gVector<T> &x);
     int Deriv(const gVector<T> &p, gVector<T> &d);
     int Hess(const gVector<T> &p, gMatrix<T> &d);
 
-    T LiapDerivValue(int i, int j, const gPVector<T> &p) const;
+    T LiapDerivValue(int i, int j, const MixedProfile<T> &p) const;
 
   public:
-    NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P); 
-    NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P, 
-	     const gPVector<T> &s); 
+    NFLiapFunc(const Nfg<T> &NF, const LiapParams<T> &P); 
+    NFLiapFunc(const Nfg<T> &NF, const LiapParams<T> &P, 
+	       const MixedProfile<T> &s); 
     virtual ~NFLiapFunc();
 
     void Randomize(void);
@@ -49,7 +49,7 @@ class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
     long NumIters(void) const;
     long NumEvals(void) const;
 
-    const gPVector<T> &GetProfile(void) const;
+    const MixedProfile<T> &GetProfile(void) const;
 };
 
 //------------------------------------------------------------------------
@@ -59,19 +59,19 @@ class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
 
 
 template <class T>
-NFLiapFunc<T>::NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P)
+NFLiapFunc<T>::NFLiapFunc(const Nfg<T> &NF, const LiapParams<T> &P)
   : gBC2FunctMin<T>(NF.ProfileLength()), niters(0), nevals(0), N(NF),
-    p(NF.Dimensionality()), pp(NF.Dimensionality())
+    p(NF), pp(NF)
 {
   N.Centroid(pp);
 }
 
 
 template <class T>
-NFLiapFunc<T>::NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P,
-			  const gPVector<T>& s)
+NFLiapFunc<T>::NFLiapFunc(const Nfg<T> &NF, const LiapParams<T> &P,
+			  const MixedProfile<T>& s)
   : gBC2FunctMin<T>(NF.ProfileLength()), niters(0), nevals(0),
-    N(NF), p(NF.Dimensionality()), pp(NF.Dimensionality())
+    N(NF), p(NF), pp(NF)
 {
   pp = s;
 }
@@ -80,7 +80,7 @@ template <class T> NFLiapFunc<T>::~NFLiapFunc()
 { }
 
 
-template <class T> const gPVector<T> &NFLiapFunc<T>::GetProfile(void) const
+template <class T> const MixedProfile<T> &NFLiapFunc<T>::GetProfile(void) const
 {
   return pp;
 }
@@ -136,8 +136,9 @@ template <class T> T NFLiapFunc<T>::Value(const gVector<T> &v)
 
   nevals++;
 
-  p = v;
-  gPVector<T> tmp(p), payoff(p);
+  ((gVector<T> &) p).operator=(v);
+  MixedProfile<T> tmp(p);
+  gPVector<T> payoff(p);
   T x, result((T) 0), avg, sum;
   payoff = (T) 0;
 
@@ -149,7 +150,7 @@ template <class T> T NFLiapFunc<T>::Value(const gVector<T> &v)
     for (int j = 1; j <= N.NumStrats(i); j++) {
       tmp(i, j) = (T) 1;
       x = p(i, j);
-      payoff(i, j) = N.Payoff(i, tmp);
+      payoff(i, j) = tmp.Payoff(i);
       avg += x * payoff(i, j);
       sum += x;
 			if (x>(T)0) x=0;
@@ -170,7 +171,7 @@ template <class T> T NFLiapFunc<T>::Value(const gVector<T> &v)
 
 template <class T> int NFLiapFunc<T>::Deriv(const gVector<T> &v, gVector<T> &d)
 {
-  p=v;
+  ((gVector<T> &) p).operator=(v);
   int i1,j1,ii;
   T avg;
   
@@ -191,8 +192,8 @@ template <class T> int NFLiapFunc<T>::Deriv(const gVector<T> &v, gVector<T> &d)
   return 1;
 }
 
-template <class T> T NFLiapFunc<T>::
-LiapDerivValue(int i1, int j1, const gPVector<T> &p) const
+template <class T>
+T NFLiapFunc<T>::LiapDerivValue(int i1, int j1, const MixedProfile<T> &p) const
 {
   int i, j;
   T x, x1,psum;
@@ -202,12 +203,12 @@ LiapDerivValue(int i1, int j1, const gPVector<T> &p) const
     psum=(T)0.0;
     for(j=1;j<=N.NumStrats(i);j++) {
       psum+=p(i,j);
-      x1=N.Payoff(i,i,j,p)-N.Payoff(i,p);
+      x1=p.Payoff(i,i,j)-p.Payoff(i);
       if(i1==i) {
-	if(x1>(T)0)x-=x1*(N.Payoff(i,i1,j1,p));
-			}
-			else {
-	if(x1>(T)0)x+=x1*(N.Payoff(i,i,j,i1,j1,p)-N.Payoff(i,i1,j1,p));
+	if(x1>(T)0)x-=x1*(p.Payoff(i,i1,j1));
+      }
+      else {
+	if(x1>(T)0)x+=x1*(p.Payoff(i,i,j,i1,j1)-p.Payoff(i,i1,j1));
       }
     }
     if(i==i1)x+=psum-(T)1.0;
@@ -227,12 +228,13 @@ template <class T> int NFLiapFunc<T>::Hess(const gVector<T> &, gMatrix<T> &)
 //------------------------------------------------------------------------
 
 template <class T> 
-NFLiapModule<T>::NFLiapModule(const NormalForm<T> &N, NFLiapParams<T> &p)
+NFLiapModule<T>::NFLiapModule(const Nfg<T> &N, NFLiapParams<T> &p)
   : LiapModule<T>(p), N(N)
 { }
 
-template <class T>NFLiapModule<T>
-::NFLiapModule(const NormalForm<T> &N, NFLiapParams<T> &p, gPVector<T> &s)
+template <class T>
+NFLiapModule<T>::NFLiapModule(const Nfg<T> &N, NFLiapParams<T> &p,
+			      MixedProfile<T> &s)
   : LiapModule<T>(p,s), N(N)
 { }
 
@@ -249,8 +251,8 @@ template <class T> LiapFunc<T> *NFLiapModule<T>::CreateFunc(void)
 {
 //  return new NFLiapFunc<T>(nf, (NFLiapParams<T> &) params);
   if(start) {
-    gPVector<T> s(N.Dimensionality());
-    s=*start;
+    MixedProfile<T> s(N);
+    ((gVector<T> &) s).operator=(*start);
     return new NFLiapFunc<T>(N, params, s);
   }
   return new NFLiapFunc<T>(N, params);

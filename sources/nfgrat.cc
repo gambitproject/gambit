@@ -1,40 +1,42 @@
 //#
-//# FILE: nfgrat.cc -- Instantiation of rational normal forms
+//# FILE: nfgrat.cc -- Instantiation of rational-precision normal forms
 //#
 //# $Id$
 //#
 
 #include "rational.h"
-#include "normal.h"
-#include "glist.h"
-#include "glistit.h"
-#include "gpset.h"
+#include "nfg.h"
 
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
-class MixedProfile<double>;
-class NormalForm<double>;
+
+class Nfg<double>;
 
 #define TEMPLATE
 #pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
+#endif // __GNUG__, __BORLANDC__
 
-#include "normal.imp"
-#include "normiter.imp"
+#include "nfg.imp"
+#include "nfgiter.imp"
 #include "contiter.imp"
-#include "gnarray.imp"
+#include "readnfg.imp"
 
-TEMPLATE class gNArray<gRational>;
+TEMPLATE class Nfg<gRational>;
+DataType Nfg<gRational>::Type(void) const { return RATIONAL; }
 
-TEMPLATE class NormalForm<gRational>;
-DataType NormalForm<gRational>::Type(void) const   { return RATIONAL; }
+TEMPLATE class NfgFile<gRational>;
+TEMPLATE int ReadNfgFile(gInput &, Nfg<gRational> *&);
 
-TEMPLATE class NormalIter<gRational>;
+TEMPLATE class NfgIter<gRational>;
 TEMPLATE class ContIter<gRational>;
 
 TEMPLATE class MixedProfile<gRational>;
 TEMPLATE gOutput &operator<<(gOutput &, const MixedProfile<gRational> &);
+
+#include "garray.imp"
+
+TEMPLATE class gArray<gRational *>;
 
 #include "glist.imp"
 
