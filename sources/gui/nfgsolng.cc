@@ -544,22 +544,12 @@ guinfgQre::guinfgQre(NfgShow *p_parent)
 gList<MixedSolution> guinfgQre::Solve(const NFSupport &p_support)
 {
   wxStatus status(m_parent, "QreSolve Progress");
-  NFQreParams params;
-  params.minLam = m_minLam;
-  params.maxLam = m_maxLam;
-  params.delLam = m_delLam;
-  params.SetAccuracy(m_accuracy);
-  params.powLam = m_powLam;
-  params.trace = m_traceLevel;
-  params.tracefile = m_traceFile;
-
-  MixedProfile<gNumber> start(p_support);
-
-  long nevals, nits;
+  QreNfg qre;
+  qre.SetMaxLambda(m_maxLam);
   Correspondence<double, MixedSolution> qreCorresp;
+
   try {
-    Qre(p_support.Game(), params, *m_pxiFile,
-	start, qreCorresp, status, nevals, nits);
+    qre.Solve(p_support.Game(), *m_pxiFile, status, qreCorresp);
   }
   catch (gSignalBreak &) { }
 
@@ -579,6 +569,7 @@ gList<MixedSolution> guinfgQre::Solve(const NFSupport &p_support)
 
 bool guinfgQre::SolveSetup(void)
 {
+#ifdef UNUSED
   dialogQre dialog(m_parent, m_parent->Filename().c_str(), true);
 
   if (dialog.ShowModal() == wxID_OK) {
@@ -605,6 +596,8 @@ bool guinfgQre::SolveSetup(void)
   }
   else
     return false;
+#endif  // UNUSED
+  return false;
 }
 
 //-------------

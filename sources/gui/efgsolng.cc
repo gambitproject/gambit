@@ -1190,25 +1190,14 @@ gList<BehavSolution> guiefgQreNfg::Solve(const EFSupport &p_support) const
   wxStatus status(m_parent, "QreSolve Progress");
   BehavProfile<gNumber> startb(p_support);
 
-  NFQreParams params;
-  params.minLam = m_minLam;
-  params.maxLam = m_maxLam;
-  params.delLam = m_delLam;
-  params.SetAccuracy(m_accuracy);
-  params.powLam = m_powLam;
-  params.trace = m_traceLevel;
-  params.tracefile = m_traceFile;
+  QreNfg qre;
+  qre.SetMaxLambda(m_maxLam);
 
   Nfg *N = MakeReducedNfg(EFSupport(p_support.GetGame()));
 
-  MixedProfile<gNumber> startm(startb);
-  
-  long nevals, nits;
-
   Correspondence<double, MixedSolution> qreCorresp;
-
   try {
-    Qre(*N, params, *m_pxiFile, startm, qreCorresp, status, nevals, nits);
+    qre.Solve(*N, *m_pxiFile, status, qreCorresp);
   }
   catch (gSignalBreak &) { }
 
@@ -1238,6 +1227,7 @@ gList<BehavSolution> guiefgQreNfg::Solve(const EFSupport &p_support) const
 
 bool guiefgQreNfg::SolveSetup(void)
 {
+#ifdef UNUSED
   dialogQre dialog(m_parent, m_parent->Filename().c_str(), true);
 
   if (dialog.ShowModal() == wxID_OK) {
@@ -1265,6 +1255,8 @@ bool guiefgQreNfg::SolveSetup(void)
   }
   else
     return false;
+#endif  // UNUSED
+  return false;
 }
 
 //---------------------
@@ -1296,21 +1288,14 @@ guiefgQreEfg::guiefgQreEfg(EfgShow *p_parent, int p_stopAfter)
 gList<BehavSolution> guiefgQreEfg::Solve(const EFSupport &p_support) const
 {
   wxStatus status(m_parent, "QreSolve Progress");
-  BehavProfile<gNumber> start(p_support);
-  EFQreParams params;
-  params.minLam = m_minLam;
-  params.maxLam = m_maxLam;
-  params.delLam = m_delLam;
-  params.SetAccuracy(m_accuracy);
-  params.powLam = m_powLam;
-  params.trace = m_traceLevel;
 
-  long nevals, nits;
+  QreEfg qre;
+  qre.SetMaxLambda(m_maxLam);
+
   gList<BehavSolution> solns;
 
   try {
-    Qre(p_support.GetGame(), params, *m_pxiFile,
-	start, solns, status, nevals, nits);
+    qre.Solve(p_support.GetGame(), *m_pxiFile, status, solns);
   }
   catch (gSignalBreak &) { }
 
@@ -1331,6 +1316,7 @@ gList<BehavSolution> guiefgQreEfg::Solve(const EFSupport &p_support) const
 
 bool guiefgQreEfg::SolveSetup(void)
 { 
+#ifdef UNUSED
   dialogQre dialog(m_parent, m_parent->Filename().c_str()); 
 
   if (dialog.ShowModal() == wxID_OK) {
@@ -1358,6 +1344,8 @@ bool guiefgQreEfg::SolveSetup(void)
   }
   else
     return false;
+#endif  // UNUSED
+  return false;
 }
 
 //========================================================================

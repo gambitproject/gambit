@@ -1,46 +1,54 @@
 //
-// FILE: nfgqre.h -- Interface to computation of QRE correspondence
+// $Source$
+// $Date$
+// $Revision$
 //
-// $id$
+// DESCRIPTION:
+// Interface to computation of QRE correspondence for normal form games
 //
 
-#ifndef NQRE_H
-#define NQRE_H
+#ifndef NFGQRE_H
+#define NFGQRE_H
 
 #include "base/base.h"
-#include "algutils.h"
 #include "corresp.h"
 
 #include "nfg.h"
 #include "mixedsol.h"
 
-typedef enum {
-  qreOPTIMIZE = 0, qreHOMOTOPY = 1
-} qreAlgorithmType;  
+class QreNfg {
+private:
+  double m_maxLam, m_stepSize;
+  bool m_fullGraph;
 
-class NFQreParams : public FuncMinParams {
 public:
-  qreAlgorithmType m_method;
-  int powLam;
-  double minLam, maxLam, delLam;
-  bool fullGraph;
+  // LIFECYCLE
+  QreNfg(void);
 
-  NFQreParams(void);
-};
+  // ACCESSING AND SETTING ALGORITHM PARAMETERS
+  double GetMaxLambda(void) const { return m_maxLam; }
+  void SetMaxLambda(double p_maxLam) { m_maxLam = p_maxLam; }
 
+  double GetStepSize(void) const { return m_stepSize; }
+  void SetStepSize(double p_stepSize) { m_stepSize = p_stepSize; }
 
-void Qre(const Nfg &, NFQreParams &, gOutput &,
-	 const MixedProfile<gNumber> &,
-	 Correspondence<double, MixedSolution> &, gStatus &,
-	 long &nevals, long &nits);
+  bool GetFullGraph(void) const { return m_fullGraph; }
+  void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
 
+  // RUN THE ALGORITHM
+  void Solve(const Nfg &p_nfg, gOutput &p_pxifile,
+	     gStatus &p_status, 
+	     Correspondence<double, MixedSolution> &p_solutions);
+};  
 
+#ifdef WITH_KQRE
 void KQre(const Nfg &N, NFQreParams &params, gOutput &,
 	    const MixedProfile<gNumber> &start,
 	    gList<MixedSolution> &solutions, gStatus &,
 	    long &nevals, long &nits);
+#endif // WITH_KQRE
 
-#endif    // NQRE_H
+#endif  // NFGQRE_H
 
 
 

@@ -16,78 +16,7 @@
 #include "math/gsmatrix.h"
 #include "gnullstatus.h"
 
-EFQreParams::EFQreParams(void)
-  : m_homotopy(true), powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01),
-    m_stepSize(0.0001), fullGraph(false)
-{ }
-
-//=========================================================================
-//                  QRE version of Liapunov function
-//=========================================================================
-
-class EFQreFunc : public gFunction<double>   {
-  private:
-    long _nevals;
-    bool _domain_err;
-    const Efg::Game &_efg;
-    gVector<double> _Lambda;
-    gPVector<double> _probs;
-    BehavProfile<double> _p;
-    gVector<double> ***_scratch;
-
-    double Value(const gVector<double> &);
-
-  public:
-    EFQreFunc(const Efg::Game &, const BehavProfile<gNumber> &);
-    virtual ~EFQreFunc();
-    
-    gVector<double> GetLambda()   { return _Lambda; }
-    void SetLambda(double l)   { _Lambda = l; }
-    void SetLambda(const gVector<double> &l)   { _Lambda = l; }
-    long NumEvals(void) const   { return _nevals; }
-    bool DomainErr(void) const { return _domain_err;}
-};
-
-EFQreFunc::EFQreFunc(const Efg::Game &E,
-		     const BehavProfile<gNumber> &start)
-  : _nevals(0L), _domain_err(false), _efg(E), 
-    _Lambda(E.NumPlayers()),_probs(E.NumInfosets()),
-    _p(start.Support())
-{
-  for (int i = 1; i <= _p.Length(); i++)
-    _p[i] = start[i];
-
-  _scratch = new gVector<double> **[_efg.NumPlayers()] - 1;
-  for (int pl = 1; pl <= _efg.NumPlayers(); pl++)  {
-    int nisets = (_efg.Players()[pl])->NumInfosets();
-    _scratch[pl] = new gVector<double> *[nisets + 1] - 1;
-    for (int iset = 1; iset <= nisets; iset++)
-      _scratch[pl][iset] = new gVector<double>(_p.Support().NumActions(pl, iset));
-  }
-}
-
-EFQreFunc::~EFQreFunc()
-{
-  for (int pl = 1; pl <= _efg.NumPlayers(); pl++)  {
-    int nisets = (_efg.Players()[pl])->NumInfosets();
-    for (int iset = 1; iset <= nisets; iset++)
-      delete _scratch[pl][iset];
-    delete [] (_scratch[pl] + 1);
-  }
-  delete [] (_scratch + 1);
-}
-
-double EFQreFunc::Value(const gVector<double> &v)
-{
-  _nevals++;
-  _domain_err = false;
-  ((gVector<double> &) _p).operator=(v);
-  //  _p = v;
-  return _p.QreValue(_Lambda,_domain_err);
-}
-
-static void WritePXIHeader(gOutput &pxifile, const Efg::Game &E,
-			   const EFQreParams &params)
+static void WritePXIHeader(gOutput &pxifile, const Efg::Game &E)
 {
   int pl, iset, nisets = 0;
 
@@ -100,9 +29,9 @@ static void WritePXIHeader(gOutput &pxifile, const Efg::Game &E,
       pxifile << " " << E.Players()[pl]->Infosets()[iset]->NumActions();
   pxifile << "\n";
 
-	pxifile << "Settings:\n" << params.minLam;
-	pxifile << "\n" << params.maxLam << "\n" << params.delLam;
-	pxifile << "\n" << 0 << "\n" << 1 << "\n" << params.powLam << "\n";
+  pxifile << "Settings:\n" << 0.0;
+  pxifile << "\n" << 1000.0 << "\n" << 1.05;
+  pxifile << "\n" << 0 << "\n" << 1 << "\n" << 1 << "\n";
 
   int numcols = E.ProfileLength() + 2;
   pxifile << "DataFormat:";
@@ -112,218 +41,16 @@ static void WritePXIHeader(gOutput &pxifile, const Efg::Game &E,
   pxifile << "\nData:\n";
 }
 
-static void AddSolution(gList<BehavSolution> &solutions,
-			const BehavProfile<double> &profile,
-			double lambda,
-			double value, double epsilon)
-{
-  int i = solutions.Append(BehavSolution(profile, algorithmEfg_QRE_EFG));
-  solutions[i].SetQre(lambda, value);
-  solutions[i].SetEpsilon(epsilon);
-}
-
 extern void Project(gVector<double> &, const gArray<int> &);
 
-static void InitMatrix(gMatrix<double> &xi, const gArray<int> &dim)
-{
-  xi.MakeIdent();
-
-  gVector<double> foo(xi.NumColumns());
-  for (int i = 1; i <= xi.NumRows(); i++)   {
-    xi.GetRow(i, foo);
-    Project(foo, dim);
-    xi.SetRow(i, foo);
-  }
-}
-
-//=========================================================================
-//            QRE Correspondence Computation via Optimization
-//=========================================================================
-
-extern bool Powell(gPVector<double> &p, gMatrix<double> &xi,
-		   gFunction<double> &func, double &fret, int &iter,
-		   int maxits1, double tol1, int maxitsN, double tolN,
-		   gOutput &tracefile, int tracelevel,  bool interior,
-		   gStatus &status);
-
-
-
-void QreOptimization(const Efg::Game &E, EFQreParams &params, 
-		     gOutput &p_pxifile,
-		     const BehavProfile<gNumber> &start,
-		     gList<BehavSolution> &solutions, gStatus &p_status,
-		     long &nevals, long &nits)
-{
-  static const double ALPHA = .00000001;
-
-  EFQreFunc F(E, start);
-
-  int iter = 0;
-  double Lambda, LambdaOld, LambdaSave, LambdaStart, value = 0.0;
-
-  WritePXIHeader(p_pxifile, E, params);
-
-  LambdaStart = (params.delLam < 0.0) ? params.maxLam : params.minLam;
-  LambdaOld = LambdaSave = Lambda = LambdaStart;
-
-  double max_prog, prog;
-
-  if (params.powLam == 0)
-    max_prog = params.maxLam - params.minLam;
-  else
-    max_prog = log(params.maxLam / params.minLam);
-
-  BehavProfile<double> p(start.Support());
-  for (int i = 1; i <= p.Length(); i++)
-    p[i] = start[i];
-
-  // if starting vector not interior, perturb it towards centroid
-  int kk;
-  for(kk=1;kk <= p.Length() && p[kk]>ALPHA;kk++);
-  if(kk<=p.Length()) {
-    BehavProfile<double> c(start.Support());
-    for(int k=1;k<=p.Length();k++)
-      p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
-  }
-
-  BehavProfile<double> pold(p);
-  BehavProfile<double> psave(p);
-  BehavProfile<double> pdiff(p);
-  pdiff-= pold;
-  gMatrix<double> xi(p.Length(), p.Length());
-
-  InitMatrix(xi, p.Lengths());
-
-  bool FoundSolution = true;
-  double delta, mindelta;
-  delta = params.delLam;
-  mindelta = delta/10000.0;
-
-  try {
-    while (delta>mindelta &&
-		      Lambda <= params.maxLam && Lambda >= params.minLam)   {
-      p_status.Get();
-      F.SetLambda(Lambda);
-      
-      gPVector<double> pvect(p.GetPVector());
-      FoundSolution = Powell(pvect, xi, F, value, iter,
-		      params.maxits1, params.tol1, params.maxitsN, params.tolN,
-		      *params.tracefile, params.trace-1,true, p_status);
-      p = pvect;
-      bool derr = F.DomainErr();      
-      // dist = dist to last good point
-      // dsave = dist to last saved point
-      double dist = 0.0;
-      assert(LambdaSave>=1.0e-200);
-      double  dsave = params.powLam ? abs(Lambda/LambdaSave - 1.0) : abs(Lambda-LambdaSave);
-      for(int jj=p.First();jj<=p.Last();jj++) {
-	double xx = abs(p[jj]-pold[jj]);
-	if(xx>dist)dist=xx;
-	xx = abs(p[jj]-psave[jj]);
-	if(xx>dsave)dsave=xx;
-      }
-
-      if(FoundSolution && !derr && (Lambda == LambdaStart || dist < params.delLam)) {
-
-	if (params.trace>0)  {
-	  *params.tracefile << "\nLam: " << Lambda << " val: ";
-	  (*params.tracefile).SetExpMode() << value;
-	  (*params.tracefile).SetFloatMode() << " p: " << p;
-	} 
-	
-	if(dsave > params.delLam/4.0) {
-
-	  p_pxifile << "\n" << Lambda << " " << value << " ";
-	  for (int pl = 1; pl <= E.NumPlayers(); pl++)
-	    for (int iset = 1; iset <= E.Players()[pl]->NumInfosets();
-		 iset++)  {
-	      double prob = 0.0;
-	      for (int act = 1; act <= E.Players()[pl]->Infosets()[iset]->NumActions(); 
-		   prob += p(pl, iset, act++))
-		p_pxifile << p(pl, iset, act) << ' ';
-	    } 
-	
-	  if (params.fullGraph)
-	    AddSolution(solutions, p, Lambda, value, params.Accuracy());
-
-	  psave=p;
-	}
-
-	pdiff = p; pdiff-= pold;
-	pold=p;                              // pold is last good solution
-	if(delta < params.delLam && dist<params.delLam/2.0) {
-	  delta*=2.0;
-	  pdiff*=2.0;
-	}
-      }
-
-      else {
-	Lambda = LambdaOld;
-	InitMatrix(xi, p.Lengths());
-	if(delta>mindelta) { 
-	  delta/=2.0;
-	  pdiff*=0.5;
-	}
-	p = pold;
-      }
-
-      for(int jj = p.First();jj<=p.Last();jj++)
-	assert (p[jj] > 0.0);
-      
-      bool flag = false;
-      int jj = p.First();
-      while(jj<=p.Last() && !flag) {
-	if(p[jj]+pdiff[jj]<0.0)flag = true;
-	jj++;
-      }
-      if(flag) {
-	for(jj = pdiff.First();jj<=pdiff.Last();jj++)
-	  pdiff[jj] = 0.0;
-      }
-      p+=pdiff;
-
-      if (params.powLam == 0)
-	prog = abs(Lambda - LambdaStart);
-      else
-	prog = abs(log(Lambda/LambdaStart));
-      p_status.SetProgress(prog/max_prog);
-
-      LambdaOld = Lambda;
-      Lambda += delta * pow(Lambda, (long)params.powLam);
-    }
-
-    if (!params.fullGraph)
-      AddSolution(solutions, pold, Lambda, value, params.Accuracy());
-    
-    nevals = F.NumEvals();
-    nits = 0;
-  }
-  catch (gSignalBreak &E) {
-    if (!params.fullGraph) 
-      AddSolution(solutions, pold, Lambda, value, params.Accuracy());
-
-    nevals = F.NumEvals();
-    nits = 0;
-    throw;
-  }
-  catch (gFuncMinError &E) {
-    if (!params.fullGraph)
-      AddSolution(solutions, pold, Lambda, value, params.Accuracy());
-
-    nevals = F.NumEvals();
-    nits = 0;
-    // This should be re-thrown, but wait til we have better exception handling downstream
-    //    throw;  
-  }
-}
 
 //=========================================================================
 //             QRE Correspondence Computation via Homotopy
 //=========================================================================
 
-void QreJacobian(const Efg::Game &p_efg,
-		 const BehavProfile<double> &p_profile,
-		 const double &p_lambda, gMatrix<double> &p_matrix)
+static void QreJacobian(const Efg::Game &p_efg,
+			const BehavProfile<double> &p_profile,
+			const double &p_lambda, gMatrix<double> &p_matrix)
 {
   p_matrix = (double) 0;
 
@@ -370,18 +97,13 @@ void QreJacobian(const Efg::Game &p_efg,
       }
     }
   }
-  /*
-  gout << "lambda= " << p_lambda << '\n';
-  gout << "profile= " << p_profile << '\n';
-  gout << p_matrix << '\n';
-  */
 }
 
-void QreComputeStep(const Efg::Game &p_efg, 
-		    const BehavProfile<double> &p_profile,
-		    const gMatrix<double> &p_matrix,
-		    gDPVector<double> &p_delta, double &p_lambdainc,
-		    double p_initialsign, double p_stepsize)
+static void QreComputeStep(const Efg::Game &p_efg, 
+			   const BehavProfile<double> &p_profile,
+			   const gMatrix<double> &p_matrix,
+			   gDPVector<double> &p_delta, double &p_lambdainc,
+			   double p_initialsign, double p_stepsize)
 {
   double sign = p_initialsign;
   int rowno = 0; 
@@ -422,26 +144,27 @@ void QreComputeStep(const Efg::Game &p_efg,
   p_lambdainc /= sqrt(norm / p_stepsize);
 }
 
-void QreHomotopy(const Efg::Game &p_efg, EFQreParams &params, 
-		 gOutput &p_pxifile,
-		 const BehavProfile<gNumber> &p_start,
-		 gList<BehavSolution> &solutions, gStatus &p_status,
-		 long &nevals, long &nits)
+QreEfg::QreEfg(void)
+  : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
+{ }
+
+
+void QreEfg::Solve(const Efg::Game &p_efg, gOutput &p_pxifile,
+		   gStatus &p_status, gList<BehavSolution> &p_solutions)
 {
   gMatrix<double> H(p_efg.ProfileLength(), p_efg.ProfileLength() + 1);
-  BehavProfile<double> profile(p_start);
+  BehavProfile<double> profile(p_efg);
   double lambda = 0.0;
-  double stepsize = params.m_stepSize;
   int numSteps = 0;
 
-  WritePXIHeader(p_pxifile, p_efg, params);
+  WritePXIHeader(p_pxifile, p_efg);
 
   // Pick the direction to follow the path so that lambda starts out
   // increasing
   double initialsign = (p_efg.ProfileLength() % 2 == 0) ? 1.0 : -1.0;
 
   try {
-    while (lambda <= params.maxLam) {
+    while (lambda <= m_maxLam) {
       // Use a first-order Runge-Kutta style method
       gDPVector<double> delta1(profile.GetDPVector());
       gDPVector<double> delta2(profile.GetDPVector());
@@ -449,14 +172,14 @@ void QreHomotopy(const Efg::Game &p_efg, EFQreParams &params,
 
       QreJacobian(p_efg, profile, lambda, H);
       QreComputeStep(p_efg, profile, H,
-		     delta1, lambdainc1, initialsign, stepsize);
+		     delta1, lambdainc1, initialsign, m_stepSize);
 
       BehavProfile<double> profile2(profile);
       delta1 *= 0.5;
       profile2 += delta1;
       QreJacobian(p_efg, profile2, lambda + lambdainc1 * 0.5, H);
       QreComputeStep(p_efg, profile, H,
-		     delta2, lambdainc2, initialsign, stepsize);
+		     delta2, lambdainc2, initialsign, m_stepSize);
 
       profile += delta1;
       delta2 *= 0.5;
@@ -470,15 +193,15 @@ void QreHomotopy(const Efg::Game &p_efg, EFQreParams &params,
 	p_pxifile << profile[i] << " ";
       }
  
-      if (params.fullGraph) { 
-	solutions.Append(BehavSolution(profile, algorithmEfg_QRE_EFG));
-	solutions[solutions.Length()].SetQre(lambda, 0);
-	solutions[solutions.Length()].SetEpsilon(params.Accuracy());
+      if (m_fullGraph) { 
+	p_solutions.Append(BehavSolution(profile, algorithmEfg_QRE_EFG));
+	p_solutions[p_solutions.Length()].SetQre(lambda, 0);
+	//	solutions[solutions.Length()].SetEpsilon(params.Accuracy());
       }
 
       if (numSteps++ % 50 == 0) {
 	p_status.Get();
-	p_status.SetProgress(lambda / params.maxLam,
+	p_status.SetProgress(lambda / m_maxLam,
 			     gText("Current lambda: ") + ToText(lambda));
       }
     }
@@ -487,13 +210,15 @@ void QreHomotopy(const Efg::Game &p_efg, EFQreParams &params,
     return;
   }
 
-  if (!params.fullGraph) {
-    solutions.Append(BehavSolution(profile, algorithmEfg_QRE_EFG));
-    solutions[solutions.Length()].SetQre(lambda, 0);
+  if (!m_fullGraph) {
+    p_solutions.Append(BehavSolution(profile, algorithmEfg_QRE_EFG));
+    p_solutions[p_solutions.Length()].SetQre(lambda, 0);
     // This doesn't really apply, at least currently...
-    solutions[solutions.Length()].SetEpsilon(params.Accuracy());
+    //    solutions[solutions.Length()].SetEpsilon(params.Accuracy());
   }
 }
+
+#ifdef WITH_KQRE
 
 class EFKQreFunc : public gFunction<double>   {
 private:
@@ -775,21 +500,4 @@ void KQre(const Efg::Game &E, EFQreParams &params, gOutput &p_pxifile,
   nevals = F.NumEvals();
   nits = 0;
 }
-
-
-void Qre(const Efg::Game &E, EFQreParams &params, 
-	 gOutput &p_pxifile,
-	 const BehavProfile<gNumber> &start,
-	 gList<BehavSolution> &solutions, gStatus &p_status,
-	 long &nevals, long &nits)
-{
-  if (params.m_homotopy) {
-    QreHomotopy(E, params, p_pxifile, start, solutions, p_status,
-		nevals, nits);
-  }
-  else {
-    QreOptimization(E, params, p_pxifile, start, solutions, p_status,
-    		    nevals, nits);
-  }
-}
-
+#endif  // WITH_KQRE

@@ -743,126 +743,13 @@ gText dialogPxi::PxiCommand(void) const
 //                      dialogQre: Member functions
 //=======================================================================
 
-dialogQre::dialogQre(wxWindow *p_parent, const gText &p_filename,
-		     bool p_vianfg)
-  : dialogPxi("QreSolve Parameters", p_filename, p_parent)
-{
-  MakeCommonFields(true, false, p_vianfg);
-}
-
-dialogQre::~dialogQre()
-{
-  if (GetReturnCode() == wxID_OK) {
-    wxConfig config("Gambit");
-    config.Write("Solutions/Qre-minLam", m_minLam->GetValue());
-    config.Write("Solutions/Qre-maxLam", m_maxLam->GetValue());
-    config.Write("Solutions/Qre-delLam", m_delLam->GetValue());
-    config.Write("Solutions/Qre-accuracy", (long) Accuracy());
-    config.Write("Solutions/Qre-startOption",
-		 (long) m_startOption->GetSelection());
-  }
-}
-
-void dialogQre::AlgorithmFields(void)
-{
-  m_algorithmBox = new wxStaticBoxSizer
-    (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
-  m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
-
-  m_minLamValue = ".01";
-  m_maxLamValue = "30";
-  m_delLamValue = ".01";
-  long accuracy = 4;
-  wxConfig config("Gambit");
-  config.Read("Solutions/Qre-minLam", &m_minLamValue);
-  config.Read("Solutions/Qre-maxLam", &m_maxLamValue);
-  config.Read("Solutions/Qre-delLam", &m_delLamValue);
-  config.Read("Solutions/Qre-accuracy", &accuracy);
-  m_accuracyValue = (char *) ToText(accuracy);
-
-  wxBoxSizer *lambdaSizer = new wxBoxSizer(wxVERTICAL);
-
-  wxBoxSizer *minLamSizer = new wxBoxSizer(wxHORIZONTAL);
-  minLamSizer->Add(new wxStaticText(this, -1, "minLam"),
-		   0, wxALL | wxCENTER, 5);
-  m_minLam = new wxTextCtrl(this, -1, "",
-			    wxDefaultPosition, wxDefaultSize, 0,
-			    gNumberValidator(&m_minLamValue, 0), "minLam");
-  minLamSizer->Add(m_minLam, 0, wxALL, 5);
-  lambdaSizer->Add(minLamSizer, 0, wxALL, 5);
-
-  wxBoxSizer *maxLamSizer = new wxBoxSizer(wxHORIZONTAL);
-  maxLamSizer->Add(new wxStaticText(this, -1, "maxLam"),
-		   0, wxALL | wxCENTER, 5);
-  m_maxLam = new wxTextCtrl(this, -1, "",
-			    wxDefaultPosition, wxDefaultSize, 0,
-			    gNumberValidator(&m_maxLamValue, 0), "maxLam");
-  maxLamSizer->Add(m_maxLam, 0, wxALL, 5);
-  lambdaSizer->Add(maxLamSizer, 0, wxALL, 5);
-
-  wxBoxSizer *delLamSizer = new wxBoxSizer(wxHORIZONTAL);
-  delLamSizer->Add(new wxStaticText(this, -1, "delLam"),
-		   0, wxALL | wxCENTER, 5);
-  m_delLam = new wxTextCtrl(this, -1, "",
-			    wxDefaultPosition, wxDefaultSize, 0,
-			    gNumberValidator(&m_delLamValue, 0), "delLam");
-  delLamSizer->Add(m_delLam, 0, wxALL, 5);
-  lambdaSizer->Add(delLamSizer, 0, wxALL, 5);
-
-  wxBoxSizer *otherSizer = new wxBoxSizer(wxVERTICAL);
-
-  wxBoxSizer *accuracySizer = new wxBoxSizer(wxHORIZONTAL);
-  accuracySizer->Add(new wxStaticText(this, -1, "Accuracy: 1.0 e -"),
-		     0, wxALL | wxCENTER, 5);
-  m_accuracy = new wxTextCtrl(this, -1, "Accuracy: 1.0 e -",
-			      wxDefaultPosition, wxDefaultSize, 0,
-			      gIntegerValidator(&m_accuracyValue, 1),
-			      "Accuracy");
-  accuracySizer->Add(m_accuracy, 0, wxALL, 5);
-  otherSizer->Add(accuracySizer, 0, wxALL, 5);
-
-  long startOption = 0;
-  config.Read("Solutions/Qre-startOption", &startOption);
-  wxString startOptions[] = { "Default", "Selection" };
-  m_startOption = new wxRadioBox(this, -1, "Starting Point",
-				 wxDefaultPosition, wxDefaultSize,
-				 2, startOptions, 0, wxRA_SPECIFY_ROWS);
-  if (startOption >= 0 && startOption <= 1) {
-    m_startOption->SetSelection(startOption);
-  }
-  otherSizer->Add(m_startOption, 0, wxALL, 5);
-
-  long plotType = 0;
-  config.Read("Solutions/Pxi-Plot-Type", &plotType);
-  wxString plotTypeChoices[] = { "Log", "Linear" };
-  m_plotType = new wxRadioBox(this, -1, "Plot type",
-			      wxDefaultPosition, wxDefaultSize,
-			      2, plotTypeChoices, 0, wxRA_SPECIFY_ROWS);
-  if (plotType == 0 || plotType == 1) {
-    m_plotType->SetSelection(plotType);
-  }
-  otherSizer->Add(m_plotType, 0, wxALL, 5);
-
-  wxBoxSizer *parallelSizer = new wxBoxSizer(wxHORIZONTAL);
-  parallelSizer->Add(lambdaSizer, 0, wxALL, 5);
-  parallelSizer->Add(otherSizer, 0, wxALL, 5);
-
-  m_algorithmBox->Add(parallelSizer, 0, wxALL, 5);
-
-  PxiFields();
-}
-
-//=======================================================================
-//                   dialogQreHomotopy: Member functions
-//=======================================================================
-
 int idQRE_TO_INFINITY = 2000;
 
-BEGIN_EVENT_TABLE(dialogQreHomotopy, wxDialog)
-  EVT_RADIOBOX(idQRE_TO_INFINITY, dialogQreHomotopy::OnStoppingLambda)
+BEGIN_EVENT_TABLE(dialogQre, wxDialog)
+  EVT_RADIOBOX(idQRE_TO_INFINITY, dialogQre::OnStoppingLambda)
 END_EVENT_TABLE()
 
-dialogQreHomotopy::dialogQreHomotopy(wxWindow *p_parent)
+dialogQre::dialogQre(wxWindow *p_parent)
   : wxDialog(p_parent, -1, "QreSolve Parameters")
 {
   wxString lambdaStrings[2] = { "Finite", "Infinite" };
@@ -912,27 +799,27 @@ dialogQreHomotopy::dialogQreHomotopy(wxWindow *p_parent)
   Layout();
 }
 
-void dialogQreHomotopy::OnStoppingLambda(wxCommandEvent &)
+void dialogQre::OnStoppingLambda(wxCommandEvent &)
 {
   m_maxLambda->Enable(m_finiteLambda->GetSelection() == 0);
 }
 
-bool dialogQreHomotopy::FiniteLambda(void) const
+bool dialogQre::FiniteLambda(void) const
 {
   return (m_finiteLambda->GetSelection() == 0);
 }
 
-bool dialogQreHomotopy::GeneratePXIFile(void) const
+bool dialogQre::GeneratePXIFile(void) const
 {
   return m_pxiFile->GetValue();
 }
 
-double dialogQreHomotopy::MaxLambda(void) const
+double dialogQre::MaxLambda(void) const
 {
   return ToNumber(m_maxLambda->GetValue().c_str());
 }
 
-double dialogQreHomotopy::StepSize(void) const
+double dialogQre::StepSize(void) const
 {
   return ToNumber(m_stepSize->GetValue().c_str());
 }

@@ -18,14 +18,7 @@
 #include "math/gsmatrix.h"
 #include "gnullstatus.h"
 
-NFQreParams::NFQreParams(void)
-  : m_method(qreHOMOTOPY), 
-    powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
-    fullGraph(false)
-{ }
-
-static void WritePXIHeader(gOutput &pxifile, const Nfg &N,
-			   const NFQreParams &params)
+static void WritePXIHeader(gOutput &pxifile, const Nfg &N)
 {
   pxifile << "Dimensionality:\n";
   pxifile << N.NumPlayers() << " ";
@@ -34,9 +27,9 @@ static void WritePXIHeader(gOutput &pxifile, const Nfg &N,
   pxifile << "\n";
   N.WriteNfgFile(pxifile, 6);
 
-  pxifile << "Settings:\n" << params.minLam;
-  pxifile << "\n" << params.maxLam << "\n" << params.delLam;
-  pxifile << "\n" << 0 << "\n" << 1 << "\n" << params.powLam << "\n";
+  pxifile << "Settings:\n" << 0.0;
+  pxifile << "\n" << 1000.0 << "\n" << 1.05;
+  pxifile << "\n" << 0 << "\n" << 1 << "\n" << 1 << "\n";
   
   int numcols = N.ProfileLength() + 2;
 
@@ -49,135 +42,12 @@ static void WritePXIHeader(gOutput &pxifile, const Nfg &N,
 }
 
 //=========================================================================
-//                  QRE version of Liapunov function
-//=========================================================================
-
-// This modification of the Liapunov function is a non-negative-valued
-// C2 function that is zero only on the QRE correspondence.  
-// This is minimized in the optimization approach, and used as a 
-// diagnostic for the homotopy approach.
-
-class NFQreFunc : public gC2Function<double>  {
-  private:
-    long _nevals;
-    bool _domain_err;
-    const Nfg &_nfg;
-    gVector<double> _Lambda;
-    gVector<double> **_scratch;
-    MixedProfile<double> _p;
-
-    double QreDerivValue(int, int, const MixedProfile<double> &);
-
-    bool Deriv(const gVector<double> &, gVector<double> &);
-    bool Hessian(const gVector<double> &, gMatrix<double> &);
-
-  public:
-    NFQreFunc(const Nfg &, const MixedProfile<gNumber> &);
-    virtual ~NFQreFunc();
-    
-    gVector<double> GetLambda()   { return _Lambda; }
-    void SetLambda(double l)   { _Lambda = l; }
-    void SetLambda(const gVector<double> &l)   { _Lambda = l; }
-    long NumEvals(void) const  { return _nevals; }
-    bool DomainErr(void) const { return _domain_err;}
-
-    double Value(const gVector<double> &);
-};
-
-
-NFQreFunc::NFQreFunc(const Nfg &N,
-			 const MixedProfile<gNumber> &start)
-  : _nevals(0L), _domain_err(false), _nfg(N), 
-    _Lambda(N.NumPlayers()), _p(start.Support())
-{
-  for (int i = 1; i <= _p.Length(); i++)
-    _p[i] = start[i];
-
-  _scratch = new gVector<double> *[_nfg.NumPlayers()] - 1;
-  for (int i = 1; i <= _nfg.NumPlayers(); i++)
-    _scratch[i] = new gVector<double>(_p.Support().NumStrats(i));
-}
-
-NFQreFunc::~NFQreFunc()
-{
-  for (int i = 1; i <= _nfg.NumPlayers(); i++) 
-    delete _scratch[i];
-
-  delete [] (_scratch + 1);
-}
-
-bool NFQreFunc::Hessian(const gVector<double> &, gMatrix<double> &)
-{
-  return true;
-}
-
-double NFQreFunc::QreDerivValue(int i, int j,
-				    const MixedProfile<double> &v)
-{
-  double x = 0.0, dv;
-  
-  for (int pl = 1; pl <= _nfg.NumPlayers(); pl++)  {
-    gVector<double> &payoff = *_scratch[pl];
-    v.Payoff(pl, pl, payoff);
-    for (int st = 2; st <= _p.Support().NumStrats(pl); st++) {
-      dv = (double) log(v(pl, 1)) - (double) log(v(pl, st)) -
-	_Lambda[pl] * (payoff[1] - payoff[st]);
-      if (pl == i)  {
-	if (j == 1)          x += dv / v(pl, 1);
-	else if (j == st)    x -= dv / v(pl, st);
-      }
-      else
-	x -= dv * _Lambda[pl] * (v.Payoff(pl, pl, 1, i, j) -
-			     v.Payoff(pl, pl, st, i, j));
-    }
-  }
-
-  return 2.0 * x;
-}
-
-
-bool NFQreFunc::Deriv(const gVector<double> &v, gVector<double> &d)
-{
-  ((gVector<double> &) _p).operator=(v);
-  
-  for (int pl = 1, index = 1; pl <= _nfg.NumPlayers(); pl++)  {
-    int nstrats = _p.Support().NumStrats(pl);
-    int st;
-
-    for (st = 1; st <= nstrats;
-	 d[index++] = QreDerivValue(pl, st++, _p));
-  }
-
-  return true;
-}
-  
-double NFQreFunc::Value(const gVector<double> &v)
-{
-  _nevals++;
-  _domain_err = false;
-  ((gVector<double> &) _p).operator=(v);
-  double val = 0.0, z;
-  
-  for (int pl = 1; pl <= _nfg.NumPlayers(); pl++)  {
-    gVector<double> &payoff = *_scratch[pl];
-    _p.Payoff(pl, pl, payoff);
-    for (int st = 2; st <= _p.Support().NumStrats(pl); st++) {
-      z = log(_p(pl, 1)) - log(_p(pl, st)) -
-          _Lambda[pl] * (payoff[1] - payoff[st]);
-      val += z * z;
-    }
-  }
-
-  return val;
-}
-
-//=========================================================================
 //             QRE Correspondence Computation via Homotopy
 //=========================================================================
 
-void QreJacobian(const Nfg &p_nfg,
-		 const MixedProfile<double> &p_profile,
-		 const double &p_nu, gMatrix<double> &p_matrix)
+static void QreJacobian(const Nfg &p_nfg,
+			const MixedProfile<double> &p_profile,
+			const double &p_nu, gMatrix<double> &p_matrix)
 {
   p_matrix = (double) 0;
 
@@ -217,10 +87,11 @@ void QreJacobian(const Nfg &p_nfg,
   }
 }
 
-void QreComputeStep(const Nfg &p_nfg, const MixedProfile<double> &p_profile,
-		    const gMatrix<double> &p_matrix,
-		    gPVector<double> &p_delta, double &p_nuinc,
-		    double p_initialsign, double p_stepsize)
+static void QreComputeStep(const Nfg &p_nfg,
+			   const MixedProfile<double> &p_profile,
+			   const gMatrix<double> &p_matrix,
+			   gPVector<double> &p_delta, double &p_nuinc,
+			   double p_initialsign, double p_stepsize)
 {
   double sign = p_initialsign;
   int rowno = 0; 
@@ -267,24 +138,27 @@ void QreComputeStep(const Nfg &p_nfg, const MixedProfile<double> &p_profile,
   p_nuinc /= sqrt(norm / p_stepsize);
 }
 
-void QreHomotopy(const Nfg &p_nfg, NFQreParams &params, gOutput &p_pxiFile,
-		 const MixedProfile<gNumber> &p_start,
-		 Correspondence<double, MixedSolution> &p_corresp,
-		 gStatus &p_status, long &nevals, long &nits)
+QreNfg::QreNfg(void)
+  : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
+{ }
+
+void QreNfg::Solve(const Nfg &p_nfg, gOutput &p_pxiFile,
+		   gStatus &p_status,
+		   Correspondence<double, MixedSolution> &p_corresp)
 {
   gMatrix<double> H(p_nfg.ProfileLength(), p_nfg.ProfileLength() + 1);
-  MixedProfile<double> profile(p_start);
+  MixedProfile<double> profile(p_nfg);
   double nu = 0.0;
   double stepsize = 0.00001;
 
-  WritePXIHeader(p_pxiFile, p_nfg, params);
+  WritePXIHeader(p_pxiFile, p_nfg);
 
   // Pick the direction to follow the path so that nu starts out
   // increasing
   double initialsign = (p_nfg.ProfileLength() % 2 == 0) ? 1.0 : -1.0;
 
   try {
-    while (nu / (1.0-nu) <= params.maxLam) {
+    while (nu / (1.0-nu) <= m_maxLam) {
       // Use a first-order Runge-Kutta style method
       gPVector<double> delta1(profile), delta2(profile);
       double nuinc1, nuinc2;
@@ -318,13 +192,13 @@ void QreHomotopy(const Nfg &p_nfg, NFQreParams &params, gOutput &p_pxiFile,
 	}
       }
  
-      if (params.fullGraph) { 
+      if (m_fullGraph) { 
 	p_corresp.Append(1, nu / (1.0-nu),
 			 MixedSolution(profile, algorithmNfg_QRE));
       }
 
       p_status.Get();
-      p_status.SetProgress(nu * (1.0 + params.maxLam) / params.maxLam,
+      p_status.SetProgress(nu * (1.0 + m_maxLam) / m_maxLam,
 			   gText("Current lambda: ") + ToText(nu / (1.0-nu)));
     }
   }
@@ -333,14 +207,13 @@ void QreHomotopy(const Nfg &p_nfg, NFQreParams &params, gOutput &p_pxiFile,
     throw;
   }
   
-  if (!params.fullGraph) { 
+  if (!m_fullGraph) { 
     p_corresp.Append(1, nu / (1.0-nu), MixedSolution(profile, algorithmNfg_QRE));
   }
 }
 
-//=========================================================================
-//            QRE Correspondence Computation via Optimization
-//=========================================================================
+
+#ifdef WITH_KQRE
 
 // DFP routine from Numerical Recipies (with modifications)
 // p = starting vector
@@ -363,172 +236,6 @@ extern bool DFP(gPVector<double> &p, gC2Function<double> &func,
 		gOutput &tracefile, int tracelevel, bool interior,
 		gStatus &status);
 
-
-// This is the function with the main computational loop for tracing the QRE 
-// correspondence.  It proceeds by starting at a point (p, lambda) 
-// on the correspondence.  Then it increments lambda, and uses p 
-// as a starting point to find a new point on the correspondence.  The Davidon 
-// fletcher Powell method is used for minimization.  
-
-static void QreOptimization(const Nfg &N, NFQreParams &params,
-			    gOutput &p_pxiFile,
-			    const MixedProfile<gNumber> &start,
-			    Correspondence<double, MixedSolution> &p_corresp,
-			    gStatus &p_status, long &nevals, long &nits)
-{
-  static const double ALPHA = .00000001;
-
-  NFQreFunc F(N, start);
-
-  int iter = 0;
-  double Lambda, LambdaOld, LambdaSave, LambdaStart, value = 0.0;
-  
-  WritePXIHeader(p_pxiFile, N, params);
-
-  LambdaStart = (params.delLam < 0.0) ? params.maxLam : params.minLam;
-  LambdaOld = LambdaSave = Lambda = LambdaStart;
-
-  double max_prog, prog;
-
-  if (params.powLam == 0)
-    max_prog = params.maxLam - params.minLam;
-  else
-    max_prog = log(params.maxLam / params.minLam);
-
-  MixedProfile<double> p(start.Support());
-  for (int j = 1; j <= p.Length(); j++)
-    p[j] = start[j];
-
-  // if starting vector not interior, perturb it towards centroid
-  int kk;
-  for(kk=1;kk <= p.Length() && p[kk]>ALPHA;kk++);
-  if(kk<=p.Length()) {
-    MixedProfile<double> c(start.Support());
-    for(int k=1;k<=p.Length();k++)
-      p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
-  }
-
-  MixedProfile<double> pold(p);
-  MixedProfile<double> psave(p);
-  MixedProfile<double> pdiff(p);
-  pdiff-= pold;
-
-  bool FoundSolution = true;
-  double delta, mindelta;
-  delta = params.delLam;
-  mindelta = delta/1000000.0;
-  
-  try {
-    while (delta>mindelta && Lambda <= params.maxLam &&
-	   Lambda >= params.minLam)  {
-      p_status.Get();
-      F.SetLambda(Lambda);
-
-      // enter Davidon Fletcher Powell routine.  
-
-      FoundSolution = DFP(p, F, value, iter, 
-			  params.maxits1, params.tol1, params.maxitsN, params.tolN,
-			  *params.tracefile,params.trace-1,true,p_status);
-      
-      bool derr = F.DomainErr();
-      double dist = 0.0;
-      assert(LambdaSave>=1.0e-200);
-      double  dsave = params.powLam ? abs(Lambda/LambdaSave - 1.0) : abs(Lambda-LambdaSave);
-      for(int jj=p.First();jj<=p.Last();jj++) {
-	double xx = abs(p[jj]-pold[jj]);
-	if(xx>dist)dist=xx;
-	xx = abs(p[jj]-psave[jj]);
-	if(xx>dsave)dsave=xx;
-      }
-      
-      if(FoundSolution && !derr && (Lambda == LambdaStart || dist < params.delLam)) {
-
-	if (params.trace>0)  {
-	  *params.tracefile << "\nLam: " << Lambda << " val: ";
-	  (*params.tracefile).SetExpMode() << value;
-	  (*params.tracefile).SetFloatMode() << " p: " << p;
-	} 
-	
-	if (dsave > params.delLam/4.0) {
-	  p_pxiFile << "\n" << Lambda << " " << value << " ";
-	  for (int pl = 1; pl <= N.NumPlayers(); pl++) {
-	    for (int strat = 1;
-		 strat <= p.Support().NumStrats(pl);
-		 strat++) {
-	      p_pxiFile << p(pl, strat) << " ";
-	    }
-	  }
-	  
-	  if (params.fullGraph) {
-	    p_corresp.Append(1, Lambda, MixedSolution(p, algorithmNfg_QRE)); 
-	  }
-
-	  psave = p;
-	}
-	
-	pdiff = p; pdiff-= pold;
-	pold=p;                              // pold is last good solution
-	if(delta < params.delLam && dist<params.delLam/2.0) {
-	  delta*=2.0;
-	  pdiff*=2.0;
-	}
-      }
-      else {
-	Lambda = LambdaOld;
-	if(delta>mindelta) {
-	  delta/=2.0;
-	  pdiff*=0.5;
-	}
-	p = pold;
-      }
-      
-      for(int jj = p.First();jj<=p.Last();jj++)
-	assert (p[jj] > 0.0);
-
-      bool flag = false;
-      int jj = p.First();
-      while(jj<=p.Last() && !flag) {
-	if(p[jj]+pdiff[jj]<0.0)flag = true;
-	jj++;
-      }
-      if(flag) {
-	for(jj = pdiff.First();jj<=pdiff.Last();jj++)
-	  pdiff[jj] = 0.0;
-      }
-      
-      p+=pdiff;
-      
-      if (params.powLam == 0)
-	prog = abs(Lambda - LambdaStart);
-      else
-	prog = abs(log(Lambda/LambdaStart));
-      p_status.SetProgress(prog/max_prog);
-      
-      LambdaOld = Lambda;
-      Lambda += delta * pow(Lambda, (long)params.powLam);
-    }
-
-    if (!params.fullGraph) {
-      p_corresp.Append(1, Lambda, MixedSolution(pold, algorithmNfg_QRE));
-    }
-
-    nevals = F.NumEvals();
-    nits = 0;
-  }
-  catch (gSignalBreak &E) {
-    if (!params.fullGraph) {
-      p_corresp.Append(1, Lambda, MixedSolution(p, algorithmNfg_QRE));
-    }
-    throw;
-  }
-  catch (gFuncMinError &E) {
-    if (!params.fullGraph) {
-      p_corresp.Append(1, Lambda, MixedSolution(p, algorithmNfg_QRE));
-     }
-    // This should be re-thrown, but wait til we have better exception handling downstream
-    //    throw;
-  }
-}
 
 // all of the below is for KQRE computations
 
@@ -719,17 +426,4 @@ void KQre(const Nfg &N, NFQreParams &params, gOutput &p_pxiFile,
   nits = 0;
 }
 
-void Qre(const Nfg &p_nfg, NFQreParams &params, gOutput &p_pxiFile,
-	 const MixedProfile<gNumber> &start,
-	 Correspondence<double, MixedSolution> &p_corresp,
-	 gStatus &p_status, long &nevals, long &nits)
-{
-  if (params.m_method == qreOPTIMIZE) {
-    QreOptimization(p_nfg, params, p_pxiFile,
-		    start, p_corresp, p_status, nevals, nits);
-  }
-  else {
-    QreHomotopy(p_nfg, params, p_pxiFile,
-		start, p_corresp, p_status, nevals, nits);
-  }
-}
+#endif  // WITH_KQRE

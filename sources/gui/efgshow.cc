@@ -139,7 +139,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuSOLVE_CUSTOM_EFG_LP, EfgShow::OnSolveCustom)
   EVT_MENU(efgmenuSOLVE_CUSTOM_EFG_LIAP, EfgShow::OnSolveCustom)
   EVT_MENU(efgmenuSOLVE_CUSTOM_EFG_POLENUM, EfgShow::OnSolveCustom)
-  EVT_MENU(efgmenuSOLVE_CUSTOM_EFG_QRE, EfgShow::OnSolveCustom)
+  EVT_MENU(efgmenuSOLVE_CUSTOM_EFG_QRE, EfgShow::OnSolveQre)
   EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_ENUMPURE, EfgShow::OnSolveCustom)
   EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_ENUMMIXED, EfgShow::OnSolveCustom)
   EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_LCP, EfgShow::OnSolveCustom)
@@ -149,7 +149,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_POLENUM, EfgShow::OnSolveCustom)
   EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_QRE, EfgShow::OnSolveCustom)
   EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_QREGRID, EfgShow::OnSolveCustom)
-  EVT_MENU(efgmenuSOLVE_CUSTOM_EFG_QREHOMOTOPY, EfgShow::OnSolveQre)
   EVT_MENU(efgmenuSOLVE_NFG_REDUCED, EfgShow::OnSolveNormalReduced)
   EVT_MENU(efgmenuSOLVE_NFG_AGENT, EfgShow::OnSolveNormalAgent)
   EVT_MENU(efgmenuVIEW_PROFILES, EfgShow::OnViewProfiles)
@@ -640,10 +639,8 @@ void EfgShow::MakeMenus(void)
   solveCustomEfgMenu->Append(efgmenuSOLVE_CUSTOM_EFG_POLENUM, "PolEnum",
 			     "Enumeration by systems of polynomials");
   solveCustomEfgMenu->Append(efgmenuSOLVE_CUSTOM_EFG_QRE, "QRE",
-			     "Compute quantal response equilibria");
-  solveCustomEfgMenu->Append(efgmenuSOLVE_CUSTOM_EFG_QREHOMOTOPY,
-			     "QRE homotopy",
-			     "Compute QRE correspondence via homotopy");
+			     "Compute quantal response equilibrium"
+			     " correspondence");
   solveCustomMenu->Append(efgmenuSOLVE_CUSTOM_EFG, "Extensive form",
 			  solveCustomEfgMenu,
 			  "Solve using extensive form based algorithms");
@@ -1923,7 +1920,7 @@ void EfgShow::OnSolveCustom(wxCommandEvent &p_event)
 
 void EfgShow::OnSolveQre(wxCommandEvent &)
 {
-  dialogQreHomotopy dialog(this);
+  dialogQre dialog(this);
 
   if (dialog.ShowModal() == wxID_OK) {
     gOutput *pxifile = &gnull;
@@ -1950,17 +1947,13 @@ void EfgShow::OnSolveQre(wxCommandEvent &)
     gList<BehavSolution> solutions;
 
     try {
-      EFQreParams params;
-      params.m_homotopy = true;
-      params.maxLam = dialog.MaxLambda();
-      params.m_stepSize = dialog.StepSize();
+      QreEfg qre;
+      qre.SetMaxLambda(dialog.MaxLambda());
+      qre.SetStepSize(dialog.StepSize());
 
       wxStatus status(this, "QreSolve Progress");
-      long nevals, nits;
-      BehavProfile<gNumber> start(m_efg);
-
       wxBusyCursor cursor;
-      Qre(m_efg, params, *pxifile, start, solutions, status, nevals, nits);
+      qre.Solve(m_efg, *pxifile, status, solutions);
     }
     catch (gSignalBreak &) {
       guiExceptionDialog("Algorithm canceled by user", this);

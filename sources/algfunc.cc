@@ -395,31 +395,18 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
     MixedSolution &start = *((MixedPortion *) param[0])->Value();
     Nfg &N = start.Game();
 
-    NFQreParams NP;
-    NP.minLam = ((NumberPortion *) param[2])->Value();
-    NP.maxLam = ((NumberPortion *) param[3])->Value();
-    NP.delLam = ((NumberPortion *) param[4])->Value();
-    NP.powLam = ((NumberPortion *) param[5])->Value();
-    NP.fullGraph = ((BoolPortion *) param[6])->Value();
-    NP.m_method = (((NumberPortion *) param[13])->Value() == gNumber(0)) ? qreOPTIMIZE : qreHOMOTOPY;
-
-    NP.SetAccuracy( ((NumberPortion *) param[7])->Value());
-
-    NP.tracefile = &((OutputPortion *) param[11])->Value();
-    NP.trace = ((NumberPortion *) param[12])->Value();
+    QreNfg qre;
+    qre.SetMaxLambda(((NumberPortion *) param[3])->Value());
+    qre.SetFullGraph(((BoolPortion *) param[6])->Value());
 
     Correspondence<double, MixedSolution> qreCorresp;
     gsm.StartAlgorithmMonitor("QreSolve Progress");
     try {
-      long nevals, niters;
       gWatch watch;
-      Qre(N, NP, (pxiFile) ? *pxiFile : gnull,
-	  MixedProfile<gNumber>(start), qreCorresp,
-	  gsm.GetStatusMonitor(), nevals, niters);
+      qre.Solve(N, (pxiFile) ? *pxiFile : gnull,
+		gsm.GetStatusMonitor(), qreCorresp);
 
       ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
-      ((NumberPortion *) param[9])->SetValue(nevals);
-      ((NumberPortion *) param[10])->SetValue(niters);
     }
     catch (gSignalBreak &) { }
     catch (...) {
@@ -446,17 +433,9 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
       gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Qre; results not guaranteed\n";
     }
 
-    EFQreParams EP;
-    EP.minLam = ((NumberPortion *) param[2])->Value();
-    EP.maxLam = ((NumberPortion *) param[3])->Value();
-    EP.delLam = ((NumberPortion *) param[4])->Value();
-    EP.powLam = ((NumberPortion *) param[5])->Value();
-    EP.fullGraph = ((BoolPortion *) param[6])->Value();
-    
-    EP.SetAccuracy( ((NumberPortion *) param[7])->Value());
-
-    EP.tracefile = &((OutputPortion *) param[11])->Value();
-    EP.trace = ((NumberPortion *) param[12])->Value();
+    QreEfg qre;
+    qre.SetMaxLambda(((NumberPortion *) param[3])->Value());
+    qre.SetFullGraph(((NumberPortion *) param[6])->Value());
     
     gList<BehavSolution> solutions;
     gsm.StartAlgorithmMonitor("QreSolve Progress");
@@ -464,9 +443,8 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
       long nevals, niters;
       gWatch watch;
     
-      Qre(E, EP, (pxiFile) ? *pxiFile : gnull,
-	  BehavProfile<gNumber>(start), solutions, 
-	  gsm.GetStatusMonitor(), nevals, niters);
+      qre.Solve(E, (pxiFile) ? *pxiFile : gnull, 
+		gsm.GetStatusMonitor(), solutions);
 
       ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
       ((NumberPortion *) param[9])->SetValue(nevals);
@@ -483,108 +461,6 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
     gsm.EndAlgorithmMonitor();
 
     return new Behav_ListPortion(solutions);
-  }
-}
-
-//---------------
-// QreSolve
-//---------------
-
-#include "homotopy.h"
-
-static Portion *GSM_Hom_Start(GSM &gsm, Portion **param)
-{
-  if (param[0]->Spec().Type == porMIXED)  {
-    MixedSolution &start = *((MixedPortion *) param[0])->Value();
-    Nfg &N = start.Game();
-    HomQreParams NP;
-    if (((TextPortion *) param[1])->Value() != "")
-      NP.pxifile = new gFileOutput(((TextPortion *) param[1])->Value());
-    else
-      NP.pxifile = &gnull;
-    NP.minLam = ((NumberPortion *) param[2])->Value();
-    NP.maxLam = ((NumberPortion *) param[3])->Value();
-    NP.delLam = ((NumberPortion *) param[4])->Value();
-    NP.powLam = ((NumberPortion *) param[5])->Value();
-    NP.fullGraph = ((BoolPortion *) param[6])->Value();
-
-    NP.SetAccuracy( ((NumberPortion *) param[7])->Value());
-
-    NP.tracefile = &((OutputPortion *) param[11])->Value();
-    NP.trace = ((NumberPortion *) param[12])->Value();
-
-    gList<MixedSolution> solutions;
-    gsm.StartAlgorithmMonitor("QreSolve Progress");
-    try {
-      long nevals, niters;
-      gWatch watch;
-      HomQre(N, NP, MixedProfile<gNumber>(start), solutions,
-	     gsm.GetStatusMonitor(), nevals, niters);
-
-      ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
-      ((NumberPortion *) param[9])->SetValue(nevals);
-      ((NumberPortion *) param[10])->SetValue(niters);
-    }
-    catch (gSignalBreak &) { }
-    catch (...) {
-      if (NP.pxifile != &gnull)  delete NP.pxifile;
-      gsm.EndAlgorithmMonitor();
-      throw;
-    }
-
-    if (NP.pxifile != &gnull)  delete NP.pxifile;
-    gsm.EndAlgorithmMonitor();
-    return new Mixed_ListPortion(solutions);
-  }
-  else  {     // BEHAV 
-    throw gclRuntimeError("Not implemented for extensive form games");
-    /*
-    BehavSolution &start = *((BehavPortion *) param[0])->Value();
-    Efg &E = start.Game();
-  
-    if (!IsPerfectRecall(E)) {
-      gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Qre; results not guaranteed\n";
-    }
-
-    EFQreParams EP;
-    if(((TextPortion*) param[1])->Value() != "")
-      EP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
-    else
-      EP.pxifile = &gnull;
-    EP.minLam = ((NumberPortion *) param[2])->Value();
-    EP.maxLam = ((NumberPortion *) param[3])->Value();
-    EP.delLam = ((NumberPortion *) param[4])->Value();
-    EP.powLam = ((NumberPortion *) param[5])->Value();
-    EP.fullGraph = ((BoolPortion *) param[6])->Value();
-    
-    EP.SetAccuracy( ((NumberPortion *) param[7])->Value());
-
-    EP.tracefile = &((OutputPortion *) param[11])->Value();
-    EP.trace = ((NumberPortion *) param[12])->Value();
-    
-    gList<BehavSolution> solutions;
-    try {
-      long nevals, niters;
-      gWatch watch;
-    
-      Qre(E, EP, BehavProfile<gNumber>(start), solutions, nevals, niters);
-
-      ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
-      ((NumberPortion *) param[9])->SetValue(nevals);
-      ((NumberPortion *) param[10])->SetValue(niters);
-    }
-    catch (gSignalBreak &) {
-      EP.status.Reset();
-    }
-    catch (...) {
-      if (EP.pxifile != &gnull)  delete EP.pxifile;
-      throw;
-    }
-
-    if (EP.pxifile != &gnull)   delete EP.pxifile;
-
-    return new Behav_ListPortion(solutions);
-    */
   }
 }
 
@@ -1676,39 +1552,6 @@ void Init_algfunc(GSM *gsm)
 					     new NumberPortion(0)));
   FuncObj->SetParamInfo(0, 13, gclParameter("method", porINTEGER,
 					    new NumberPortion(0)));
-
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new gclFunction(*gsm, "HomSolve", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_Hom_Start, 
-				       PortionSpec(porMIXED | porBEHAV, 1), 13));
-  FuncObj->SetParamInfo(0, 0, gclParameter("start",
-					    porMIXED | porBEHAV));
-  FuncObj->SetParamInfo(0, 1, gclParameter("pxifile", porTEXT,
-					    new TextPortion("")));
-  FuncObj->SetParamInfo(0, 2, gclParameter("minLam", porNUMBER,
-					    new NumberPortion(0.001)));
-  FuncObj->SetParamInfo(0, 3, gclParameter("maxLam", porNUMBER,
-					    new NumberPortion(500.0)));
-  FuncObj->SetParamInfo(0, 4, gclParameter("delLam", porNUMBER,
-					    new NumberPortion(0.02)));
-  FuncObj->SetParamInfo(0, 5, gclParameter("powLam", porINTEGER,
-					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(0, 6, gclParameter("fullGraph", porBOOLEAN,
-					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(0, 7, gclParameter("accuracy", porNUMBER,
-					    new NumberPortion(1.0e-8)));
-  FuncObj->SetParamInfo(0, 8, gclParameter("time", porNUMBER,
-					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 9, gclParameter("nEvals", porINTEGER,
-					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 10, gclParameter("nIters", porINTEGER,
-					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 11, gclParameter("traceFile", porOUTPUT,
-					     new OutputPortion(gnull), 
-					     BYREF));
-  FuncObj->SetParamInfo(0, 12, gclParameter("traceLevel", porNUMBER,
-					     new NumberPortion(0)));
 
   gsm->AddFunction(FuncObj);
 

@@ -77,6 +77,7 @@ private:
 
   void OnSolveStandard(wxCommandEvent &);
   void OnSolveCustom(wxCommandEvent &);
+  void OnSolveCustomQre(wxCommandEvent &);
   void OnSolveCustomYamamoto(wxCommandEvent &);
 
   void OnViewSolutions(wxCommandEvent &);
