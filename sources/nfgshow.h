@@ -66,7 +66,9 @@ private:
 
   // Menu event handlers
   void OnFileSave(wxCommandEvent &);
-  void OnFileOutput(wxCommandEvent &);
+  void OnFilePageSetup(wxCommandEvent &);
+  void OnFilePrintPreview(wxCommandEvent &);
+  void OnFilePrint(wxCommandEvent &);
 
   void OnEditLabel(wxCommandEvent &);
   void OnEditPlayers(wxCommandEvent &);

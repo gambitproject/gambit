@@ -95,7 +95,7 @@ NfgToolbar::NfgToolbar(wxFrame *p_frame)
 #endif // __WXMSW__
 
   AddTool(NFG_FILE_SAVE, saveBitmap);
-  AddTool(NFG_FILE_OUTPUT, printBitmap);
+  AddTool(NFG_FILE_PRINT_PREVIEW, printBitmap);
   AddSeparator();
   AddTool(NFG_SOLVE_STANDARD, solveBitmap);
   AddTool(NFG_VIEW_SOLUTIONS, inspectBitmap);
@@ -124,7 +124,9 @@ void NfgToolbar::OnMouseEnter(wxCommandEvent &p_event)
 
 BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_FILE_SAVE, NfgShow::OnFileSave)
-  EVT_MENU(NFG_FILE_OUTPUT, NfgShow::OnFileOutput)
+  EVT_MENU(NFG_FILE_PAGE_SETUP, NfgShow::OnFilePageSetup)
+  EVT_MENU(NFG_FILE_PRINT_PREVIEW, NfgShow::OnFilePrintPreview)
+  EVT_MENU(NFG_FILE_PRINT, NfgShow::OnFilePrint)
   EVT_MENU(NFG_FILE_CLOSE, NfgShow::Close)
   EVT_MENU(NFG_EDIT_LABEL, NfgShow::OnEditLabel)
   EVT_MENU(NFG_EDIT_PLAYERS, NfgShow::OnEditPlayers)
@@ -241,7 +243,13 @@ void NfgShow::MakeMenus(void)
 {
   wxMenu *fileMenu = new wxMenu;
   fileMenu->Append(NFG_FILE_SAVE, "&Save", "Save the game");
-  fileMenu->Append(NFG_FILE_OUTPUT, "Out&put", "Output to any device");
+  fileMenu->AppendSeparator();
+  fileMenu->Append(NFG_FILE_PAGE_SETUP, "Page Se&tup",
+		   "Set up preferences for printing");
+  fileMenu->Append(NFG_FILE_PRINT_PREVIEW, "Print Pre&view",
+		   "View a preview of the game printout");
+  fileMenu->Append(NFG_FILE_PRINT, "&Print", "Print this game");
+  fileMenu->AppendSeparator();
   fileMenu->Append(NFG_FILE_CLOSE, "&Close", "Close the window");
   
   wxMenu *editMenu = new wxMenu;
@@ -496,15 +504,6 @@ void NfgShow::OnSashDrag(wxSashEvent &p_event)
 //                 class NfgShow: Menu event handlers
 //----------------------------------------------------------------------
 
-void NfgShow::OnFileOutput(wxCommandEvent &)
-{
-  wxOutputDialogBox dialog;
-
-  if (dialog.ShowModal() == wxID_OK) {
-    //m_table->Print(print_dialog.GetMedia(), print_dialog.GetOption());
-  }
-}
-
 void NfgShow::OnFileSave(wxCommandEvent &)
 {
   static int s_nDecimals = 6;
@@ -543,6 +542,18 @@ void NfgShow::OnFileSave(wxCommandEvent &)
       if (nfg)  delete nfg;
     }
   }
+}
+
+void NfgShow::OnFilePageSetup(wxCommandEvent &)
+{
+}
+
+void NfgShow::OnFilePrintPreview(wxCommandEvent &)
+{
+}
+
+void NfgShow::OnFilePrint(wxCommandEvent &)
+{
 }
 
 void NfgShow::OnEditLabel(wxCommandEvent &)

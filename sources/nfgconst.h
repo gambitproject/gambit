@@ -9,8 +9,10 @@
 
 // must make sure that none of the menus are a power of two
 #define NFG_FILE_SAVE                   250
-#define NFG_FILE_OUTPUT                 251
-#define NFG_FILE_CLOSE                  252
+#define NFG_FILE_PAGE_SETUP             251
+#define NFG_FILE_PRINT_PREVIEW          252
+#define NFG_FILE_PRINT                  253
+#define NFG_FILE_CLOSE                  254
 
 #define NFG_EDIT_LABEL                  300
 #define NFG_EDIT_STRATS                 301

@@ -14,7 +14,7 @@ const int NUM_EFG_EVENTS = 77;
 AccelEvent efg_events[NUM_EFG_EVENTS] = 
 {
   AccelEvent("FileSave", efgmenuFILE_SAVE),
-  AccelEvent("FilePrint", efgmenuFILE_OUTPUT),
+  AccelEvent("FilePrintPreview", efgmenuFILE_PRINT_PREVIEW),
   AccelEvent("FileClose", efgmenuFILE_CLOSE),
   AccelEvent("NodeAdd", efgmenuEDIT_NODE_ADD),
   AccelEvent("NodeDelete", efgmenuEDIT_NODE_DELETE),

@@ -7,6 +7,7 @@
 #include "wx/wx.h"
 #include "wx/fontdlg.h"
 #include "wx/colordlg.h"
+#include "wx/printdlg.h"
 #include "wxmisc.h"
 #include "wxstatus.h"
 
@@ -22,6 +23,7 @@
 #include "efgconst.h"
 #include "treewin.h"
 #include "treezoom.h"
+#include "efgprint.h"
 #include "efgshow.h"
 #include "efgprofile.h"
 #include "efgcursor.h"
@@ -122,7 +124,7 @@ EfgToolbar::EfgToolbar(wxFrame *p_frame, wxWindow *p_parent)
   SetToolBitmapSize(wxSize(33, 30));
 #endif // _WXMSW__
   AddTool(efgmenuFILE_SAVE, saveBitmap);
-  AddTool(efgmenuFILE_OUTPUT, printBitmap);
+  AddTool(efgmenuFILE_PRINT_PREVIEW, printBitmap);
   AddSeparator();
   AddTool(efgmenuEDIT_NODE_ADD, addBitmap);
   AddTool(efgmenuEDIT_NODE_DELETE, deleteBitmap);
@@ -160,8 +162,10 @@ const int idTOOLWINDOW = 997;
 const int idSOLUTIONWINDOW = 996;
 
 BEGIN_EVENT_TABLE(EfgShow, wxFrame)
-  EVT_MENU(efgmenuFILE_OUTPUT, EfgShow::OnFileOutput)
   EVT_MENU(efgmenuFILE_SAVE, EfgShow::OnFileSave)
+  EVT_MENU(efgmenuFILE_PAGE_SETUP, EfgShow::OnFilePageSetup)
+  EVT_MENU(efgmenuFILE_PRINT_PREVIEW, EfgShow::OnFilePrintPreview)
+  EVT_MENU(efgmenuFILE_PRINT, EfgShow::OnFilePrint)
   EVT_MENU(efgmenuFILE_CLOSE, EfgShow::Close)
   EVT_MENU(efgmenuEDIT_NODE_ADD, EfgShow::OnEditNodeAdd)
   EVT_MENU(efgmenuEDIT_NODE_DELETE, EfgShow::OnEditNodeDelete)
@@ -572,10 +576,16 @@ void EfgShow::PickSolutions(const Efg &p_efg, Node *p_rootnode,
 
 void EfgShow::MakeMenus(void)
 {
-  wxMenu *file_menu = new wxMenu;
-  file_menu->Append(efgmenuFILE_SAVE, "&Save", "Save the game");
-  file_menu->Append(efgmenuFILE_OUTPUT, "&Output", "Print or copy the game");
-  file_menu->Append(efgmenuFILE_CLOSE, "&Close", "Close this window");
+  wxMenu *fileMenu = new wxMenu;
+  fileMenu->Append(efgmenuFILE_SAVE, "&Save", "Save the game");
+  fileMenu->AppendSeparator();
+  fileMenu->Append(efgmenuFILE_PAGE_SETUP, "Page Se&tup",
+		   "Set up preferences for printing");
+  fileMenu->Append(efgmenuFILE_PRINT_PREVIEW, "Print Pre&view",
+		   "View a preview of the game printout");
+  fileMenu->Append(efgmenuFILE_PRINT, "&Print", "Print this game");
+  fileMenu->AppendSeparator();
+  fileMenu->Append(efgmenuFILE_CLOSE, "&Close", "Close this window");
 
   wxMenu *edit_menu = new wxMenu;
   wxMenu *nodeMenu  = new wxMenu;
@@ -793,7 +803,7 @@ void EfgShow::MakeMenus(void)
   help_menu->Append(efgmenuHELP_ABOUT, "&About", "About this program");
 
   wxMenuBar *menu_bar = new wxMenuBar;
-  menu_bar->Append(file_menu,     "&File");
+  menu_bar->Append(fileMenu, "&File");
   menu_bar->Append(edit_menu,     "&Edit");
   menu_bar->Append(subgame_menu,  "Sub&games");
   menu_bar->Append(supports_menu, "S&upports");
@@ -867,11 +877,6 @@ gText EfgShow::UniqueSupportName(void) const
   }
 }
 
-void EfgShow::OnFileOutput(wxCommandEvent &)
-{
-  m_treeWindow->output();
-}
-
 void EfgShow::OnFileSave(wxCommandEvent &)
 {
   static int s_nDecimals = 6;
@@ -912,6 +917,51 @@ void EfgShow::OnFileSave(wxCommandEvent &)
     }
   }
 }
+
+void EfgShow::OnFilePageSetup(wxCommandEvent &)
+{
+  wxPageSetupDialog dialog(this, &m_pageSetupData);
+  if (dialog.ShowModal() == wxID_OK) {
+    m_printData = dialog.GetPageSetupData().GetPrintData();
+    m_pageSetupData = dialog.GetPageSetupData();
+  }
+}
+
+void EfgShow::OnFilePrintPreview(wxCommandEvent &)
+{
+  wxPrintDialogData data(m_printData);
+  wxPrintPreview *preview = new wxPrintPreview(new EfgPrintout(m_treeWindow),
+					       new EfgPrintout(m_treeWindow),
+					       &data);
+
+  if (!preview->Ok()) {
+    delete preview;
+    return;
+  }
+
+  wxPreviewFrame *frame = new wxPreviewFrame(preview, this,
+					     "Print Preview",
+					     wxPoint(100, 100),
+					     wxSize(600, 650));
+  frame->Initialize();
+  frame->Show(true);
+}
+
+void EfgShow::OnFilePrint(wxCommandEvent &)
+{
+  wxPrintDialogData data(m_printData);
+  wxPrinter printer(&data);
+  EfgPrintout printout(m_treeWindow);
+
+  if (!printer.Print(this, &printout, true)) {
+    wxMessageBox("There was an error in printing", "Error", wxOK);
+    return;
+  }
+  else {
+    m_printData = printer.GetPrintDialogData().GetPrintData();
+  }
+}
+
 
 void EfgShow::OnEditNodeAdd(wxCommandEvent &)
 {

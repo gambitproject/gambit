@@ -9,6 +9,7 @@
 
 #include "wx/listctrl.h"
 #include "wx/sashwin.h"
+#include "wx/printdlg.h"
 
 #include "efgnfgi.h"
 #include "gambit.h"
@@ -50,6 +51,9 @@ private:
   gArray<AccelEvent> MakeEventNames(void);
   EfgCursorWindow *m_cursorWindow;
 
+  wxPageSetupData m_pageSetupData;
+  wxPrintData m_printData;
+
   void NodeInspect(bool insp);
 
   struct es_features {
@@ -69,9 +73,11 @@ private:
   void OnSolutionSelected(wxListEvent &);
 
   // Menu event handlers
-  void OnFileOutput(wxCommandEvent &);
   void OnFileSave(wxCommandEvent &);
-  
+  void OnFilePageSetup(wxCommandEvent &);
+  void OnFilePrintPreview(wxCommandEvent &);
+  void OnFilePrint(wxCommandEvent &);
+
   void OnEditNodeAdd(wxCommandEvent &);
   void OnEditNodeDelete(wxCommandEvent &);
   void OnEditNodeInsert(wxCommandEvent &);

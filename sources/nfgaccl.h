@@ -12,7 +12,7 @@ const int NUM_NFG_EVENTS = 33;
 AccelEvent nfg_events[NUM_NFG_EVENTS]=
 {
   AccelEvent("FileSave", NFG_FILE_SAVE),
-  AccelEvent("FilePrint", NFG_FILE_OUTPUT),
+  AccelEvent("FilePrintPreview", NFG_FILE_PRINT_PREVIEW),
   AccelEvent("FileClose", NFG_FILE_CLOSE),
   AccelEvent("EditLabel", NFG_EDIT_LABEL),
   AccelEvent("EditStrategies", NFG_EDIT_STRATS),

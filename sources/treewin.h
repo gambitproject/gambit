@@ -11,7 +11,7 @@
 #include "wxmisc.h"
 
 class TreeWindow : public TreeRender, public EfgClient {
-  friend class ExtensivePrintout;
+friend class EfgPrintout;
 
 private:
   FullEfg &ef;
@@ -89,12 +89,8 @@ public:
     
   void prefs_display_flashing(void);
 
-  void  output(void);
-  void  print_eps(wxOutputOption fit);                 // output to postscript file
-  void  print(wxOutputOption fit,bool preview=false);  // output to printer (WIN3.1 only)
-  
   // copy to clipboard (WIN3.1 only)
-  void  print_mf(wxOutputOption fit,bool save_mf=false);
+  //  void  print_mf(wxOutputOption fit,bool save_mf=false);
   
   EfgShow *Parent(void) const { return m_parent; }
   

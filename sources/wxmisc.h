@@ -66,35 +66,6 @@ public:
   int GetValue(void) const { return m_slider->GetValue(); }
 };
 
-typedef enum {
-  wxWYSIWYG, wxFITTOPAGE
-} wxOutputOption;
-
-typedef enum {
-  wxMEDIA_PRINTER = 0, wxMEDIA_PS, wxMEDIA_CLIPBOARD, 
-  wxMEDIA_METAFILE, wxMEDIA_PREVIEW, wxMEDIA_NUM
-} wxOutputMedia;
-
-class wxOutputDialogBox : public guiAutoDialog {
-private:
-  wxRadioBox *m_mediaBox;
-  wxCheckBox *m_fitBox;
-
-public:
-  wxOutputDialogBox(wxStringList *extra_media = 0, wxWindow *parent = 0);
-  virtual ~wxOutputDialogBox() { }
-
-  /** Returns one of the built-in media types */
-  wxOutputMedia GetMedia(void) const;
-  /** Returns the additional media type given in extra_media, if any */
-  int GetExtraMedia(void) const;
-  /** Returns true if the selection was an extra_media */
-  bool ExtraMedia(void) const;
-  /** Returns either wysiwyg or fit to page if appropriate */
-  wxOutputOption GetOption(void) const;
-};
-
-
 // Returns the position of s in the list l.  This is useful for finding
 // the selection # in a String form item w/ a list constraint
 int wxListFindString(wxList *l, char *s);

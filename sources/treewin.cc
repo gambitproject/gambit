@@ -1189,239 +1189,15 @@ void TreeWindow::subgame_toggle(void)
   }
 }
 
-
-//***********************************************************************
-//                      FILE-OUTPUT MENU HANDLER
-//***********************************************************************
-void TreeWindow::output(void)
-{
-  wxOutputDialogBox od;
-
-  if (od.ShowModal() == wxID_OK) {
-    switch (od.GetMedia()) {
-    case wxMEDIA_PRINTER: print(od.GetOption()); break;
-    case wxMEDIA_PS:print_eps(od.GetOption()); break;
-    case wxMEDIA_CLIPBOARD:print_mf(od.GetOption()); break;
-    case wxMEDIA_METAFILE: print_mf(od.GetOption(), true); break;
-    case wxMEDIA_PREVIEW: print(od.GetOption(), true); break;
-    default:
-      // We'll ignore this silently
-      break;
-    }
-  }
-}
-
-#ifdef wx_msw
-#include "wx_print.h"
-
-class ExtensivePrintout: public wxPrintout {
-private:
-  TreeWindow *tree;
-  wxOutputOption fit;
-  int num_pages;
-    
-public:
-  ExtensivePrintout(TreeWindow *s, wxOutputOption f,
-		    const char *title = "ExtensivePrintout");
-  Bool OnPrintPage(int page);
-  Bool HasPage(int page);
-  Bool OnBeginDocument(int startPage, int endPage);
-  void GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int *selPageTo);
-};
-
-
-Bool ExtensivePrintout::OnPrintPage(int)
-{
-  // this is funky--I am playing around w/ the
-  // different zoom settings.  So the zoom setting in draw_settings does not
-  // equal to the zoom setting in the printer!
-  wxDC *dc = GetDC();
-  if (!dc) return false;
-    
-  dc->SetBackgroundMode(wxTRANSPARENT);
-  dc->Colour = false;
-  Bool color_outcomes;
-  
-  if (!dc->Colour) {
-    color_outcomes = tree->draw_settings.ColorCodedOutcomes();
-    tree->draw_settings.SetOutcomeColor(false);
-  }
-    
-  int win_w, win_h;
-  tree->GetClientSize(&win_w, &win_h);    // that is the size of the window
-  float old_zoom = tree->draw_settings.Zoom();
-  // Now we have to check in case our real page size is reduced
-  // (e.g. because we're drawing to a print preview memory DC)
-  int pageWidth, pageHeight;
-  float w, h;
-  dc->GetSize(&w, &h);
-  GetPageSizePixels(&pageWidth, &pageHeight);
-  float pageScaleX = (float)w/pageWidth;
-  float pageScaleY = (float)h/pageHeight;
-  
-  if (fit) { // fit to page
-    int maxX = tree->node_list.MaxX(), maxY = tree->node_list.MaxY(); // size of tree
-    // Figure out the 'fake' window zoom
-    float zoom_x = (float)win_w/(float)maxX, zoom_y = (float)win_h/(float)maxY;
-    float real_zoom = gmin(zoom_x, zoom_y);
-    tree->draw_settings.SetZoom(real_zoom, true);
-    // Figure out the 'real' printer zoom
-    int ppiPrinterX, ppiPrinterY;
-    GetPPIPrinter(&ppiPrinterX, &ppiPrinterY);
-    // Make the margins.  They are just 1" on all sides now.
-    float marginX = 1*ppiPrinterX;
-    float marginY = 1*ppiPrinterY;
-        
-    zoom_x = (float)((pageWidth-2*marginX)/(float)maxX)*pageScaleX;
-    zoom_y = (float)((pageHeight-2*marginY)/(float)maxY)*pageScaleY;
-    real_zoom = gmin(zoom_x, zoom_y);
-        
-    dc->SetUserScale(real_zoom, real_zoom);
-    dc->SetDeviceOrigin(marginX*pageScaleX, marginY*pageScaleY);
-  }
-  else {  // WYSIWYG
-    int ppiScreenX, ppiScreenY;
-    GetPPIScreen(&ppiScreenX, &ppiScreenY);
-    int ppiPrinterX, ppiPrinterY;
-    GetPPIPrinter(&ppiPrinterX, &ppiPrinterY);
-        
-    // This scales the DC so that the printout roughly represents the
-    // the screen scaling. The text point size _should_ be the right size
-    // but in fact is too small for some reason. This is a detail that will
-    // need to be addressed at some point but can be fudged for the
-    // moment.
-    float scaleX = (float)((float)ppiPrinterX/(float)ppiScreenX);
-    float scaleY = (float)((float)ppiPrinterY/(float)ppiScreenY);
-    
-    // If printer pageWidth == current DC width, then this doesn't
-    // change. But w might be the preview bitmap width, so scale down.
-    float overallScaleX = scaleX * pageScaleX;
-    float overallScaleY = scaleY * pageScaleY;
-    dc->SetUserScale(overallScaleX, overallScaleY);
-    
-    // Make the margins.  They are just 1" on all sides now.
-    float marginX = 1*ppiPrinterX, marginY = 1*ppiPrinterY;
-    dc->SetDeviceOrigin(marginX*pageScaleX, marginY*pageScaleY);
-    // Figure out the 'fake' window zoom
-    float real_width = (pageWidth-2*marginX)/scaleX;
-    float real_height = (pageHeight-2*marginY)/scaleY;
-    float zoom_x = win_w/real_width, zoom_y = win_h/real_height;
-    float real_zoom = gmax(zoom_x, zoom_y);
-    tree->draw_settings.SetZoom(real_zoom, true);
-  }
-    
-  tree->Render(*dc);
-    
-  tree->draw_settings.SetZoom(old_zoom);
-  if (!dc->Colour)
-    tree->draw_settings.SetOutcomeColor(color_outcomes);
-    
-  return true;
-}
-
-Bool ExtensivePrintout::HasPage(int page)
-{
-  return (page <= 1);
-}
-
-ExtensivePrintout::ExtensivePrintout(TreeWindow *t, wxOutputOption f,
-                                     const char *title)
-  : tree(t), fit(f), wxPrintout((char *)title)
-{ }
-
-Bool ExtensivePrintout::OnBeginDocument(int startPage, int endPage)
-{
-  if (!wxPrintout::OnBeginDocument(startPage, endPage))
-    return false;
-    
-  return true;
-}
-
-// Since we can not get at the actual device context in this function, we
-// have no way to tell how many pages will be used in the wysiwyg mode. So,
-// we have no choice but to disable the From:To page selection mechanism.
-void ExtensivePrintout::GetPageInfo(int *minPage, int *maxPage,
-                                    int *selPageFrom, int *selPageTo)
-{
-  num_pages = 1;
-  *minPage = 0;
-  *maxPage = num_pages;
-  *selPageFrom = 0;
-  *selPageTo = 0;
-}
-#endif
-
-//***********************************************************************
-//                      TREE-PRINT MENU HANDLER
-//***********************************************************************
-
-#ifdef wx_msw
-void TreeWindow::print(wxOutputOption fit, bool preview)
-{
-  if (!preview) {
-    wxPrinter printer;
-    ExtensivePrintout printout(this, fit);
-    printer.Print(pframe, &printout, true);
-  }
-  else {
-    wxPrintPreview *preview = new wxPrintPreview(new ExtensivePrintout(this, fit), new ExtensivePrintout(this, fit));
-    wxPreviewFrame *ppframe = new wxPreviewFrame(preview, pframe, "Print Preview", 100, 100, 600, 650);
-    ppframe->Centre(wxBOTH);
-    ppframe->Initialize();
-    ppframe->Show(true);
-  }
-}
-#else
-void TreeWindow::print(wxOutputOption /*fit*/, bool preview)
-{
-  if (!preview)
-    wxMessageBox("Printing not supported under X");
-  else
-    wxMessageBox("Print Preview is not supported under X");
-}
-#endif
-
-
-//***********************************************************************
-//                      TREE-PRINT EPS MENU HANDLER
-//***********************************************************************
-
-void TreeWindow::print_eps(wxOutputOption fit)
-{
-#ifdef NOT_PORTED_YET
-  wxPostScriptDC dc(NULL, true);
-  if (dc.Ok()) {
-    float old_zoom = 1.0;
-
-    if (fit == wxFITTOPAGE) {
-      old_zoom = draw_settings.Zoom();
-      int w, h;
-      GetSize(&w, &h);
-      draw_settings.SetZoom(gmin((float)w/(float)node_list.MaxX(),
-				 (float)h/(float)node_list.MaxY()), true);
-    }
-
-    Bool color_outcomes = draw_settings.ColorCodedOutcomes();
-    draw_settings.SetOutcomeColor(false);
-    dc.StartDoc("Gambit printout");
-    dc.StartPage();
-    Render(dc);
-    dc.EndPage();
-    dc.EndDoc();
-    if (fit == wxFITTOPAGE)
-      draw_settings.SetZoom(old_zoom);
-    draw_settings.SetOutcomeColor(color_outcomes);
-  }
-#endif  // NOT_PORTED_YET
-}
-
 //***********************************************************************
 //                      TREE-PRINT MF MENU HANDLER
 //***********************************************************************
+
+#ifdef NOT_PORTED_YET
+
 #ifdef wx_msw
 void TreeWindow::print_mf(wxOutputOption fit, bool save_mf)
 {
-#ifdef NOT_PORTED_YET
   char *metafile_name = 0;
 
   if (save_mf)
@@ -1462,7 +1238,6 @@ void TreeWindow::print_mf(wxOutputOption fit, bool save_mf)
       wxMakeMetaFilePlaceable(
 	  metafile_name, 0, 0, (int)(dc_mf.MaxX()+10), (int)(dc_mf.MaxY()+10));
   }
-#endif  // NOT_PORTED_YET
 }
 #else
 void TreeWindow::print_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
@@ -1470,6 +1245,8 @@ void TreeWindow::print_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
   wxMessageBox("Metafiles are not supported under X");
 }
 #endif
+
+#endif // NOT_PORTED_YET
 
 //-----------------------------------------------------------------------
 //                     DISPLAY MENU HANDLER FUNCTIONS
