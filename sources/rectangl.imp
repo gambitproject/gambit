@@ -102,6 +102,19 @@ const gRectangle<T> gRectangle<T>::SameCenterDoubleSideLengths() const
   return gRectangle<T>(new_sides);
 }
 
+template<class T> 
+const gRectangle<T> 
+gRectangle<T>::Orthant(const gArray<int>& top_or_bot) const 
+{ 
+  gList<gInterval<T> > new_sides;
+  for (int i = 1; i <= Dmnsn(); i++)
+    if (top_or_bot[i] == 0)
+    new_sides += CartesianFactor(i).LeftHalf();
+  else
+    new_sides += CartesianFactor(i).RightHalf();
+  return gRectangle<T>(new_sides);
+}
+
 template<class T> const gVector<T> gRectangle<T>::SideLengths() const 
 { 
   gVector<T> answer(Dmnsn());

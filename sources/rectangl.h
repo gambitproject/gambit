@@ -38,6 +38,7 @@ public:
     const gVector<T>    UpperBound()                     const;
     const gInterval<T>  CartesianFactor(const int&)      const;
     const gRectangle<T> SameCenterDoubleSideLengths()    const;
+    const gRectangle<T> Orthant(const gArray<int>&)      const;
     const gVector<T>    SideLengths()                    const;
     bool                Contains(const gVector<T> &)     const;
     bool                Contains(const gRectangle<T> &)  const;
