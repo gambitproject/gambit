@@ -3,102 +3,68 @@
 //
 // $Id$
 //
+
 #ifndef EXTFORM_H
 #define EXTFORM_H
 
-#include "basic.h"
-#include "gstring.h"
-#include "gset.h"
-
-#include "outcome.h"
-#include "player.h"
 #include "node.h"
-#include "infoset.h"
-#include "display.h"
+#include "player.h"
 
-class ExtFormIter;
 
-class ExtForm   {
-
+class ExtForm    {
   private:
-    gString _title;
-    gSet<Outcome> _outcomes;
-    gSet<Infoset> _infosets;
-    bool _modified, _trivial;
-    ExtFormIter *_iterator;
-    Node _root;
-    // dummy player for terminal information sets
-    Player _dummy, _chance;
+    NodeSet nodes;
+    PlayerSet &players;
 
-    void AddOutcome(uint outcome_number);
-    void AddPlayer(uint player_number);
-    void MoveTree(Node &to, Node &from);
+    void AddPlayer(int);
+    int CreateInfoset(int, int);
 
   public:
-    gSet<Player> _players;
-    gSet<Node> _nodes;
-
 	// CONSTRUCTORS AND DESTRUCTOR
-	// initialize the trivial extensive form
-    ExtForm(void);
-	// destruct an extensive form, including substructures
-    ~ExtForm();
+    ExtForm(PlayerSet &p) : players(p)   { }
+    ExtForm(const ExtForm &ef) : nodes(ef.nodes), players(ef.players)  { }
+    ~ExtForm()  { }
 
-	// OPERATIONS ON NODES
-    int AddNode(Node &n, uint player, uint branch_count);
-    int LabelNode(Node &n, gString &label);
-    int InsertNode(Node &n, uint player, uint branch_count);
-    int SetOutcome(Node &n, uint outcome_number);
-    int GetOutcome(Node &n) const;
-    int DeleteNode(Node &n, Node &keep);
+	// OPERATOR OVERLOADING
+    ExtForm &operator=(const ExtForm &);
 
-	// OPERATIONS ON INFORMATION SETS
-    int JoinInfoset(Node &new_member, Node &to_iset);
-    int LeaveInfoset(Node &departer);
+	// HIGH-LEVEL OPERATIONS
+    Node AddNode(const Node &n, int player, int child_count);
+    void SetNodeLabel(const Node &n, const gString &s)
+      { if (nodes.IsMember(n))  nodes.SetNodeName(n, s); }
+    Node InsertNode(const Node &n, int player, int child_count);
+    Node DeleteNode(const Node &n);
 
-    int LabelBranch(Node &n, gString &label);
-    int InsertBranch(Node &n, uint branch_number);
-    int DeleteBranch(Node &n, Node &remove);
-//  gVector<double> BranchProbs(Node &n) const;
-//  int SetBranchProbs(Node &n, gVector<double> &v);
+    Node JoinInfoset(const Node &new_node, const Node &to_iset);
+    Node LeaveInfoset(const Node &n);
+    Node MergeInfoset(const Node &from, const Node &into);
+    void LabelInfoset(const Node &n, const gString &label)
+      { players.SetInfosetName(n[1], n[2], label); }
 
-	// OPERATIONS ON TREES
-    int DeleteTree(Node &n);
-    int CopyTree(Node &n, Node &to);
-    int LabelTree(const gString &label);
-    gString TreeLabel(void) const;
+    void InsertBranch(const Node &n, int where, int number);
+    void DeleteBranch(const Node &n, int which);
+    void LabelBranch(const Node &n, int br, const gString &label)  { }
 
-    Node RootNode(void);
+    void SetOutcome(const Node &n, int outcome)
+      { if (nodes.IsMember(n))  nodes.SetOutcome(n, outcome); }
 
-    bool IsTrivial(void) const;
-    bool IsModified(void) const;
-    
-    int NumNodes(void) const   { return _nodes.Length(); }
+    Node MoveTree(const Node &from, const Node &dest);
+    Node CopyTree(const Node &from, const Node &dest);
+    Node DeleteTree(const Node &n);
 
-    void RegisterIterator(ExtFormIter *iter);
-    void UnregisterIterator(ExtFormIter *iter);
+	// GENERAL INFORMATION
+    int NumNodes(void) const
+      { return nodes.NumNodes(); }
+    int NumNodes(int pl) const
+      { return nodes.NumNodes(pl); }
+    int NumNodes(int pl, int iset) const
+      { return nodes.NumNodes(pl, iset); }
 
-};
+    gString GetNodeLabel(const Node &n) const
+      { return nodes.GetNodeName(n); }
+    int GetOutcome(const Node &n) const
+      { return nodes.GetOutcome(n); }
 
-
-class ExtFormIter   {
-  private:
-    ExtForm *_extform;
-    Node _cursor;
-
-  public:
-    ExtFormIter(ExtForm *extform);
-    ~ExtFormIter();
-
-    Node Cursor(void);
-    void SetCursor(const Node &n);
-    void GoParent(void);
-    void GoFirstChild(void);
-
-    void GoPriorSibling(void);
-    void GoNextSibling(void);
-
-    void Invalidate(void);
 };
 
 

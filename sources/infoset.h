@@ -12,65 +12,49 @@
 #include "gset.h"
 
 #include "branch.h"
-#include "player.h"
 
 class Infoset   {
   private:
-    struct irep   {
-      gString _name;
-      gSet<Branch> _branches;
-      Player _player;
-
-      int count;
-
-      irep(void) : count(1)   { } 
-    };
-
-    irep *ip;
+    gString name;
+    gSet<Branch *> branches;
 
   public:
 	// CONSTRUCTORS AND DESTRUCTOR
-	// construct an information set with no branches and
-	// setting the player to the dummy player
-    Infoset(void)   { ip = new irep; }
-	// construct an information set belonging to player Player
-	// and having branches branches
-    Infoset(Player &p, int branches);
-	// destruct an information set
-    ~Infoset()  {
-      if (--ip->count == 0)
-	delete ip;
-      }
+	// create a new infoset with brs branches
+    Infoset(int brs = 0);
+	// copy constructor
+    Infoset(const Infoset &);
+	// clean up after an infoset
+    ~Infoset();
 
 	// OPERATOR OVERLOADING
-	// determine if two information sets are identical
-    int operator==(const Infoset &infoset) const { return (ip == infoset.ip); }
-    int operator!=(const Infoset &infoset) const { return (ip != infoset.ip); }
+	// assignment operator
+    Infoset &operator=(const Infoset &);
+    
+	// DATA ACCESS AND MANIPULATION
+	// return the infoset name
+    gString GetInfosetName(void) const    { return name; }
+	// set the infoset name
+    void SetInfosetName(const gString &s)   { name = s; }
 
-	// assign another information set to this one
-    Infoset &operator=(const Infoset &infoset)  {
-      infoset.ip->count++;
-      if (--ip->count == 0)
-	delete ip;
-      ip = infoset.ip;
-      return *this;
-    }
+	// return the number of branches in the infoset
+    int NumBranches(void) const   { return branches.Length(); }
 
-	// NAMING THE INFORMATION SET
-    void SetName(const gString &name)   { ip->_name = name; }
-    gString Name(void) const    { return ip->_name; }
+	// set a branch's name
+    void SetBranchName(int br, const gString &s)
+      { branches[br]->SetBranchName(s); }
 
-	// BRANCH MANIPULATION
-	// insert a new branch as branch number branch_number
-    void InsertBranch(uint branch_number);
-	// delete branch number branch_number
-    void DeleteBranch(uint branch_number);
+	// return a branch's name
+    gString GetBranchName(int br) const
+      { return branches[br]->GetBranchName(); }
 
-	// PLAYER MANIPULATION
-	// get the player who has the choice at this information set
-    Player GetPlayer(void) const  { return ip->_player; }
-	// set the player who has the choice at this information set
-    void SetPlayer(const Player& p) const   { ip->_player = p; }
+	// remove a branch from the infoset
+    void RemoveBranch(int br)
+      { delete branches.Remove(br); }
+
+	// add a branch to the infoset
+    void InsertBranch(int br)
+      { branches.Insert(new Branch, br); }
 };
 
 
