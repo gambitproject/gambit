@@ -250,7 +250,9 @@ template <class T> class PureBehavProfile   {
     gPVector<T> *chanceprobs;
     gRectArray<T> *payoffs;
 
-  //    void Payoff(const Node *n, const int &pl, const T, T &) const;
+    //    void IndPayoff(const Node *n, const int &pl, const T, T &) const;
+    // This aims at efficiency, but leads to a problem described in behav.imp
+
     void Payoff(const Node *n, const T, gArray<T> &) const;
     void InfosetProbs(Node *n, T, gPVector<T> &) const;
 

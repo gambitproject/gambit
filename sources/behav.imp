@@ -113,9 +113,14 @@ Action *PureBehavProfile<T>::Get(Infoset *infoset) const
   return (*profile[infoset->GetPlayer()->GetNumber()])[infoset->GetNumber()];
 }
 
-/*
+/* - The following is an attempt to eliminate all the extra work of
+computing a vector of payoffs when only one agent's payoff is of
+interest.  It runs into a problem that I don't know how to solve,
+namely that compilation leads to a request for a cast from gNumber to
+gRational. amm-8.98
+
 template <class T>
-void PureBehavProfile<T>::Payoff(const Node *n, 
+void PureBehavProfile<T>::IndPayoff(const Node *n, 
 				 const int &pl, 
 				 const T prob, 
 				       T &payoff) const
@@ -125,11 +130,11 @@ void PureBehavProfile<T>::Payoff(const Node *n,
   
   if (n->IsNonterminal() && n->GetPlayer()->IsChance())
     for (int i = 1; i <= n->NumChildren(); i++) {
-      Payoff(n->GetChild(i), pl,
+      IndPayoff(n->GetChild(i), pl,
 	     prob * (T) E->GetChanceProb(n->GetInfoset(), i), payoff);
     }
   else if (n->IsNonterminal())
-    Payoff(n->GetChild((*profile[n->GetPlayer()->GetNumber()])[n->GetInfoset()->GetNumber()]->GetNumber()), pl,
+    IndPayoff(n->GetChild((*profile[n->GetPlayer()->GetNumber()])[n->GetInfoset()->GetNumber()]->GetNumber()), pl,
 	   prob, payoff);
 }
 */
