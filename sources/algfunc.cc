@@ -385,6 +385,7 @@ static Portion *GSM_GobitGrid_Support(Portion **param)
 	// ((FloatPortion *) param[11])->Value() = GM.Time();
 	gList<MixedSolution<double> > solns;
 	por = new Mixed_ListPortion<double>(solns);
+	if (GP.pxifile != &gnull)  delete GP.pxifile;
       }
       break;
     case RATIONAL:
@@ -442,6 +443,8 @@ static Portion *GSM_Gobit_Start(Portion **param)
 
     Portion *por = new Mixed_ListPortion<double>(solutions);
     por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+
+    if (NP.pxifile != &gnull)  delete NP.pxifile;
     return por;
   }
   else  {     // BEHAV_FLOAT  
@@ -479,6 +482,8 @@ static Portion *GSM_Gobit_Start(Portion **param)
     
     Portion * por = new Behav_ListPortion<double>(solutions);
     por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+
+    if (EP.pxifile != &gnull)   delete EP.pxifile;
     return por;
   }
 }
