@@ -51,8 +51,9 @@
   int Parse(void); \
   void Execute(void);
 
-%define CONSTRUCTOR_INIT     : gsm(256), formalstack(4), labels(4), \
-                               listlen(4), matching(4), quit(false), function(0)
+%define CONSTRUCTOR_INIT     : function(0), formalstack(4), labels(4), \
+                               listlen(4), matching(4), \
+                               gsm(256), quit(false)
 
 %token LOR
 %token LAND
@@ -578,7 +579,7 @@ void GCLCompiler::DefineFunction(void)
 {
   FuncDescObj *func = new FuncDescObj(funcname);
   func->SetFuncInfo(function, formals.Length());
-  function->Dump(gout);
+//  function->Dump(gout);
 
   for (int i = 1; i <= formals.Length(); i++)   {
     PortionType type = TextToPortionType(types[i]);
