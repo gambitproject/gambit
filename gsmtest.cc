@@ -23,6 +23,7 @@ int main( void )
   gString x = "x";
   gString y = "y";
   gString z = "z";
+  gString *name;
 
 
   GSM *machine = new GSM( 32 );
@@ -310,6 +311,101 @@ int main( void )
   machine->CallFunction( (gString) "Angle" );
   machine->Dump();
 
+  gout << "Testing CallFunction3()\n";
+  machine->Flush();
+  machine->PushRef( x );
+  name = new gString[1];
+  name[0] = "x";
+  machine->CallFunction3( (gString) "Angle", name, 1 );
+  delete[] name;
+  machine->Dump();
+
+  machine->Flush();
+  machine->PushRef( y );
+  name = new gString[1];
+  name[0] = "y";
+  machine->CallFunction3( (gString) "Angle", name, 1 );
+  delete[] name;
+  machine->Dump();
+
+  machine->Flush();
+  name = new gString[0];
+  machine->CallFunction3( (gString) "Angle", name, 0 );
+  delete[] name;
+  machine->Dump();
+
+  gout << "Testing CallFunction4()\n";
+  machine->Flush();
+  name = new gString[0];
+  machine->CallFunction4( (gString) "Angle", 0,  name );
+  delete[] name;
+  machine->Dump();
+
+  machine->Flush();
+  machine->PushRef( x );
+  name = new gString[1];
+  name[0] = "";
+  machine->CallFunction4( (gString) "Angle", 1,  name );
+  delete[] name;
+  machine->Dump();
+
+  machine->Flush();
+  machine->PushRef( x );
+  name = new gString[1];
+  name[0] = "x";
+  machine->CallFunction4( (gString) "Angle", 1,  name );
+  delete[] name;
+  machine->Dump();
+
+  machine->Flush();
+  machine->PushRef( y );
+  name = new gString[1];
+  name[0] = "y";
+  machine->CallFunction4( (gString) "Angle", 1,  name );
+  delete[] name;
+  machine->Dump();
+
+  machine->Flush();
+  machine->PushRef( x );
+  machine->PushRef( y );
+  name = new gString[2];
+  name[0] = "";
+  name[1] = "";
+  machine->CallFunction4( (gString) "Angle", 2,  name );
+  delete[] name;
+  machine->Dump();
+
+  machine->Flush();
+  machine->PushRef( x );
+  machine->PushRef( y );
+  name = new gString[2];
+  name[0] = "x";
+  name[1] = "";
+  machine->CallFunction4( (gString) "Angle", 2,  name );
+  delete[] name;
+  machine->Dump();
+
+  machine->Flush();
+  machine->PushRef( x );
+  machine->PushRef( y );
+  name = new gString[2];
+  name[0] = "";
+  name[1] = "y";
+  machine->CallFunction4( (gString) "Angle", 2,  name );
+  delete[] name;
+  machine->Dump();
+
+  machine->Flush();
+  machine->PushRef( x );
+  machine->PushRef( y );
+  name = new gString[2];
+  name[0] = "x";
+  name[1] = "y";
+  machine->CallFunction4( (gString) "Angle", 2,  name );
+  delete[] name;
+  machine->Dump();
+
+
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
@@ -439,6 +535,7 @@ int main( void )
   machine->Dump();
 
 
+/*
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
@@ -503,6 +600,7 @@ int main( void )
   }
   machine->Dump();
 
+*/
 
 
   delete machine;

@@ -1,8 +1,9 @@
-//
-//  FILE:  gsmfunc.cc -- handles initialization of defined functions for GSM
-//                       companion to GSM  
-//
-
+//#
+//# FILE: gsmfunc.cc -- handles initialization of defined functions for GSM
+//#                     companion to GSM
+//#
+//# $Id$
+//#
 
 
 
@@ -36,9 +37,13 @@
 //   {
 //     FuncDescObj *FuncObj;
 //
+//     FuncObj = new FuncDescObj( GCL_Sqr, 1 );
+//     FuncObj->SetParamInfo( 0, "n", porNUMERICAL, NO_DEFAULT_VALUE );
+//     GSM::AddFunction( (gString) "Sqr",  FuncObj );
+//
 //     FuncObj = new FuncDescObj( GCL_Angle, 2 );
-//     FuncObj->ParamType( 0 ) = porNUMERICAL;
-//     FuncObj->ParamType( 1 ) = porNUMERICAL;
+//     FuncObj->SetParamInfo( 0, "x", porDOUBLE, new numerical_Portion<double>( 1 ) );
+//     FuncObj->SetParamInfo( 1, "y", porDOUBLE, new numerical_Portion<double>( 1 ) );
 //     GSM::AddFunction( (gString) "Angle",  FuncObj );
 //   }
 //
@@ -87,24 +92,22 @@ void GSM::InitFunctions( void )
 //------------------------------------------------------------------
 
 
-FuncDescObj::FuncDescObj(Portion *(*funcname)(Portion **), 
-			 const int& size )
-     :function(funcname), num_of_params( size )
+FuncDescObj::FuncDescObj( Portion* (*funcname)(Portion**), const int size )
+     :function(funcname),num_of_params( size )
 {
   assert( size >= 0 );
-  param_type = new PortionType[ num_of_params ];
-}
 
+  ParamInfo = new ParamInfoType[ num_of_params ];
+}
 
 
 FuncDescObj::~FuncDescObj()
 {
-  delete[] param_type;
+  delete[] ParamInfo;
 }
 
 
-
-Portion *FuncDescObj::CallFunction( Portion **param )
+Portion* FuncDescObj::CallFunction( Portion** param )
 {
   return function( param );
 }
@@ -115,15 +118,89 @@ int FuncDescObj::NumParams( void ) const
   return num_of_params;
 }
 
-PortionType FuncDescObj::ParamType ( const int& index ) const
+
+gString FuncDescObj::ParamName( const int index ) const
 {
   assert( index >= 0 && index < num_of_params );
-  return param_type[ index ];
+
+  return ParamInfo[ index ].Name;
 }
 
-PortionType& FuncDescObj::ParamType ( const int& index )
+
+PortionType FuncDescObj::ParamType( const int index ) const
 {
   assert( index >= 0 && index < num_of_params );
-  return param_type[ index ];
+
+  return ParamInfo[ index ].Type;
+}
+
+
+Portion* FuncDescObj::ParamDefaultValue( const int index ) const
+{
+  assert( index >= 0 && index < num_of_params );
+
+  if( ParamInfo[ index ].DefaultValue == NO_DEFAULT_VALUE )
+  {
+    return 0;
+  }
+  else
+  {
+    return ParamInfo[ index ].DefaultValue->Copy();
+  }
+}
+
+
+
+int FuncDescObj::FindParamName( const gString& name ) const
+{
+  int i;
+  int result = -1;
+
+  for( i = 0; i < num_of_params; i++ )
+  {
+    if( ParamInfo[ i ].Name == name )
+    {
+      result = i;
+      break;
+    }
+  }
+  return result;
+}
+
+
+
+void FuncDescObj::SetParamInfo
+  ( 
+   const int index, 
+   const gString& name, 
+   const PortionType type, 
+   Portion* default_value
+   )
+{
+  int i;
+  int repeated = false;
+
+  assert( index >= 0 && index < num_of_params );
+
+  for( i = 0; i < num_of_params; i++ )
+  {
+    if( ParamInfo[ i ].Name == name )
+    {
+      repeated = true;
+      break;
+    }
+  }
+
+  if( !repeated )
+  {
+    ParamInfo[ index ].Type = type;
+    ParamInfo[ index ].Name = name;
+    ParamInfo[ index ].DefaultValue = default_value;
+  }
+  else
+  {
+    gerr << "FuncDescObj Error: multiple variables declared with the same formal name\n";
+    assert(0);
+  }
 }
 

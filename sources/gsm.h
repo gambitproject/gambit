@@ -1,7 +1,8 @@
-//
-//  FILE: GSM.h  definition of GSM (stack machine) type
-//
-//
+//#
+//# FILE: gsm.h -- definition of GSM (stack machine) type
+//#
+//# $Id$
+//#
 
 
 #ifndef GSM_H
@@ -26,16 +27,16 @@ class RefHashTable;
 class GSM
 {
  private:
-  static int FunctionsInitialized;
-  static FunctionHashTable *FuncTable;
+  static int                 FunctionsInitialized;
+  static FunctionHashTable*  FuncTable;
 
-  gStack<Portion *> *stack;
-  RefHashTable *RefTable;
+  gStack<Portion*>*  stack;
+  RefHashTable*      RefTable;
 
-  Portion *resolve_ref( Reference_Portion *p );
+  Portion* resolve_ref( Reference_Portion* p );
 
-  void unary_operation( OperationMode mode );
-  void binary_operation( OperationMode mode );
+  void unary_operation  ( OperationMode mode );
+  void binary_operation ( OperationMode mode );
 
 
   // This function is located in gsmfunc.cc
@@ -46,21 +47,21 @@ class GSM
   GSM( int size );
   ~GSM();
 
-  int Depth( void ) const;
-  int MaxDepth( void ) const;
+  int Depth    ( void ) const;
+  int MaxDepth ( void ) const;
 
-  void Push( const bool&      data );
-  void Push( const double&    data );
-  void Push( const gInteger&  data );
-  void Push( const gRational& data );
-  void Push( const gString&   data );
+  void Push ( const bool&      data );
+  void Push ( const double&    data );
+  void Push ( const gInteger&  data );
+  void Push ( const gRational& data );
+  void Push ( const gString&   data );
 
-  void PushList( const int num_of_elements );
+  void PushList ( const int num_of_elements );
 
 
-  void PushRef( const gString& data );
-  void Assign( void );
-  void UnAssign( const gString& ref );
+  void PushRef  ( const gString& data );
+  void Assign   ( void );
+  void UnAssign ( const gString& ref );
 
 
 
@@ -81,19 +82,31 @@ class GSM
   void OR  ( void );
   void NOT ( void );
 
-  void Concatenate( void );
+  void Concatenate ( void );
 
   
-  static void AddFunction(const gString& funcname, FuncDescObj *func );
+  static void AddFunction(const gString& funcname, FuncDescObj* func );
   static int FunctionParamCheck(const PortionType stack_param_type, 
 				const PortionType func_param_type );
   void CallFunction( const gString& funcname );
 
+  void CallFunction3
+    ( 
+     const gString& funcname, 
+     const gString* name, 
+     const int      num_of_names 
+     );
 
-  void Output( void );
-  void Dump( void );
-
-  void Flush( void );
+  void CallFunction4
+    ( 
+     const gString&  funcname,
+     const int       num_of_params_passed,
+     const gString*  name
+     );
+     
+  void Output ( void );
+  void Dump   ( void );
+  void Flush  ( void );
 
 };
 
