@@ -92,7 +92,7 @@ gbtBehavProfileBase<T>::gbtBehavProfileBase(const gbtMixedProfileTree<T> &p_prof
   ((gbtVector<T> &) *this).operator=((T)0); 
 
   gbtGameNode n = m_support->GetRoot();
-  const gbtNfgSupport &support = p_profile.m_nfgSupport;
+  gbtNfgSupport support = p_profile.m_nfgSupport;
 
   for (int pl = 1; pl <= support->NumPlayers(); pl++)   {
     m_nvals = (T) 0;

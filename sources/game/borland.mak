@@ -16,25 +16,23 @@ EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
 libgame_a_SOURCES = \
         actiter.cc \
-	behavinst.cc \
-	efbasis.cc \
+	behav.cc \
 	efdom.cc \
-	efg.cc \
+	efgcont.cc \
 	efgensup.cc \
-	efginst.cc \
 	efgiter.cc \
-	efgnfg.cc \
+	efgsupport.cc \
 	efgutils.cc \
-	efstrat.cc \
+	game.cc \
+	gameinst.cc \
         infoset.cc \
+	mixed.cc \
 	nfdom.cc \
 	nfdommix.cc \
-	nfg.cc \
+	nfgcont.cc \
 	nfgensup.cc \
-	nfginst.cc \
 	nfgiter.cc \
-	nfgutils.cc \
-	nfstrat.cc \
+	nfgsupport.cc \
         node.cc \
         outcome.cc \
         player.cc \

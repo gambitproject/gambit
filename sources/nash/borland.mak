@@ -15,9 +15,7 @@ EXTRACPPFLAGS = -v -I$(BCCDIR)\include -I.. -D__BCC55__
 EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
 libnash_a_SOURCES = \
-	algutils.cc \
 	behavextend.cc \
-	behavsol.cc \
 	clique.cc \
 	efglcp.cc \
 	efgliap.cc \
@@ -27,7 +25,6 @@ libnash_a_SOURCES = \
 	efgpure.cc \
 	efgsubsolve.cc \
 	lhtab.cc \
-	mixedsol.cc \
         nfgch.cc \
 	nfglcp.cc \
 	nfgliap.cc \

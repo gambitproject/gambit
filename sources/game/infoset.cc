@@ -56,7 +56,7 @@ gbtGameActionBase::gbtGameActionBase(gbtGameInfosetBase *p_infoset,
 bool gbtGameActionBase::Precedes(gbtGameNode n) const
 {
   while (!n->IsRoot()) {
-    if (n->GetPriorAction().Get() == this) {
+    if (n->GetPriorAction().Get() == const_cast<gbtGameActionBase *>(this)) {
       return true;
     }
     else {
