@@ -126,7 +126,8 @@ sep:          SEMI    { semi = true; }
 funcdecl:     DEFFUNC LBRACK NAME
               { funcname = tval; function = new gList<Instruction *>; }
               LBRACK formallist RBRACK COMMA statements
-              RBRACK   { if (!DefineFunction())  YYERROR; } 
+              RBRACK   { if (!semi) emit(new Display);
+			 if (!DefineFunction())  YYERROR; } 
 		
 formallist:
           |   formalparams
@@ -228,6 +229,7 @@ forloop:      FOR LBRACK CRLFopt exprlist CRLFopt COMMA CRLFopt
 		  (*function)[labels.Pop()] = new IfGoto(ProgLength() + 1);
 		else
 		  program[labels.Pop()] = new IfGoto(ProgLength() + 1);
+		emit(new NOP);
 	      }
 
 exprlist:     expression  { emit(new Pop); }
