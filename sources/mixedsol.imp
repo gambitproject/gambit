@@ -16,7 +16,7 @@ MixedSolution::MixedSolution(const MixedProfile<double> &m, NfgAlgType creator)
 {
   gEpsilon(_Epsilon);
   for (int i = 1; i <= m.Length(); i++)
-    (*this)[i] = m[i]; 
+    ((gVector<gNumber> &) *this)[i] = m[i]; 
 }
 
 MixedSolution::MixedSolution(const MixedProfile<gRational> &m, NfgAlgType creator)
@@ -27,7 +27,7 @@ MixedSolution::MixedSolution(const MixedProfile<gRational> &m, NfgAlgType creato
 {
   gEpsilon(_Epsilon);
   for (int i = 1; i <= m.Length(); i++)
-    (*this)[i] = m[i]; 
+    ((gVector<gNumber> &) *this)[i] = m[i]; 
 }
 
 MixedSolution::MixedSolution(const MixedProfile<gNumber> &m, NfgAlgType creator)
@@ -38,7 +38,7 @@ MixedSolution::MixedSolution(const MixedProfile<gNumber> &m, NfgAlgType creator)
 {
   gEpsilon(_Epsilon);
   for (int i = 1; i <= m.Length(); i++)
-    (*this)[i] = m[i]; 
+    ((gVector<gNumber> &) *this)[i] = m[i]; 
 }
 
 MixedSolution::MixedSolution(const MixedSolution &m)

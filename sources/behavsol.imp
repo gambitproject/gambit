@@ -18,7 +18,7 @@ BehavSolution::BehavSolution(const BehavProfile<double>& b, EfgAlgType creator)
 {
   gEpsilon(_Epsilon);
   for (int i = 1; i <= b.Length(); i++)
-    (*this)[i] = b[i];
+    ((gVector<gNumber> &) *this)[i] = b[i];
 }
 
 BehavSolution::BehavSolution(const BehavProfile<gRational>& b, EfgAlgType creator)
@@ -29,7 +29,7 @@ BehavSolution::BehavSolution(const BehavProfile<gRational>& b, EfgAlgType creato
 {
   gEpsilon(_Epsilon);
   for (int i = 1; i <= b.Length(); i++)
-    (*this)[i] = b[i];
+    ((gVector<gNumber> &) *this)[i] = b[i];
 }
 
 BehavSolution::BehavSolution(const BehavProfile<gNumber>& b, EfgAlgType creator)
@@ -40,7 +40,7 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber>& b, EfgAlgType creator)
 {
   gEpsilon(_Epsilon);
   for (int i = 1; i <= b.Length(); i++)
-    (*this)[i] = b[i];
+    ((gVector<gNumber> &) *this)[i] = b[i];
 }
 
 BehavSolution::BehavSolution(const BehavSolution& b)
