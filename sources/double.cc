@@ -207,6 +207,11 @@ gDouble fabs(const gDouble& x)
   return gDouble(fabs(x.dbl));
 }
 
+gDouble abs(const gDouble& x) 
+{
+  return gDouble(fabs(x.dbl));
+}
+
 gDouble sqr(const gDouble& x)
 {
   return gDouble(sqr(x.dbl));

@@ -78,6 +78,7 @@ public:
 // friends outside the class
   friend int      sign(const gDouble& x);             // -1, 0, or +1
   friend gDouble  fabs(const gDouble& x);              
+  friend gDouble  abs(const gDouble& x);              
   friend gDouble  sqr(const gDouble& x);              
   friend gDouble  sqrt(const gDouble& x);              
   friend gDouble  pow(const gDouble& x, const long y);
