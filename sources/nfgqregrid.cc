@@ -49,6 +49,7 @@ that this technique is easily extended to n steps.
 #include <math.h>
 #include "base/base.h"
 #include "math/math.h"
+#include "math/gsmatrix.h"
 #include "mixed.h"
 #include "nfgqregrid.h"
 #include "nfg.h"
@@ -305,6 +306,100 @@ bool QreNfgGrid::CheckEqu(MixedProfile<double> &p_profile,
   return true;
 }
 
+//
+// Use Newton's method to attempt to "polish" the profile to be close
+// to an LQRE.
+//
+static void Jacobian(gVector<double> &p_vector, 
+		     gSquareMatrix<double> &p_matrix,
+		     const MixedProfile<double> &p_profile, double p_lambda)
+{
+  gPVector<double> logitterms(p_profile.Lengths());
+  for (int pl = 1; pl <= p_profile.Game().NumPlayers(); pl++) {
+    for (int st = 1; st <= p_profile.Support().NumStrats(pl); st++) {
+      logitterms(pl, st) = exp(p_lambda * p_profile.Payoff(pl, pl, st));
+    }
+  }
+
+  int rowno = 0;
+
+  for (int pl1 = 1; pl1 <= p_profile.Game().NumPlayers(); pl1++) {
+    double logitsum = 0.0;
+    for (int st = 1; st <= p_profile.Support().NumStrats(pl1); st++) {
+      logitsum += logitterms(pl1, st);
+    }
+
+    for (int st1 = 1; st1 <= p_profile.Support().NumStrats(pl1); st1++) {
+      rowno++;
+
+      p_vector[rowno] = p_profile(pl1, st1) * logitsum - logitterms(pl1, st1);
+
+      int colno = 0;
+      for (int pl2 = 1; pl2 <= p_profile.Game().NumPlayers(); pl2++) {
+	for (int st2 = 1; st2 <= p_profile.Support().NumStrats(pl2); st2++) {
+	  colno++;
+
+	  if (pl1 == pl2) {
+	    if (st1 == st2) {
+	      p_matrix(rowno, colno) = logitsum;
+	    }
+	    else {
+	      p_matrix(rowno, colno) = 0.0;
+	    }
+	  }
+	  else {
+	    p_matrix(rowno, colno) = 0.0;
+	    for (int st = 1; st <= p_profile.Support().NumStrats(pl1); st++) {
+	      p_matrix(rowno, colno) += p_profile.Payoff(pl1, pl1, st, pl2, st2) * logitterms(pl1, st);
+	    }
+	    p_matrix(rowno, colno) *= p_profile(pl1, st1);
+	    p_matrix(rowno, colno) -= p_profile.Payoff(pl1, pl1, st1, pl2, st2) * logitterms(pl1, st1);
+	    p_matrix(rowno, colno) *= p_lambda;
+	  }
+	}
+      }
+    }
+  }
+}
+
+static double Norm(const gVector<double> &p_vector)
+{
+  double norm = 0.0;
+
+  for (int i = 1; i <= p_vector.Length(); i++) {
+    norm += p_vector[i] * p_vector[i];
+  }
+
+  return sqrt(norm);
+}
+
+static bool Polish(MixedProfile<double> &p_profile, double p_lambda)
+{
+  gVector<double> f(p_profile.Length());
+  gSquareMatrix<double> J(p_profile.Length());
+
+  for (int iter = 1; iter <= 100; iter++) {
+    Jacobian(f, J, p_profile, p_lambda);
+
+    gVector<double> step = J.Inverse() * f;
+    for (int i = 1; i <= p_profile.Length(); i++) {
+      p_profile[i] -= step[i];
+    }
+
+    if (Norm(step) <= .0000001 * (1.0 + Norm(p_profile))) {
+      for (int i = 1; i <= p_profile.Length(); i++) {
+	if (p_profile[i] < 0.0) {
+	  return false;
+	}
+      }
+      return true;
+    }
+    
+  }
+
+  return false;
+}
+
 void QreNfgGrid::Solve(const NFSupport &p_support, gOutput &p_pxifile,
 		       gStatus &p_status, gList<MixedSolution> &p_solutions)
 {
@@ -332,6 +427,8 @@ void QreNfgGrid::Solve(const NFSupport &p_support, gOutput &p_pxifile,
   double lambda = m_minLam;
   while (lambda <= m_maxLam) {
     step++;
+    gList<MixedSolution> cursolns;
+
     p_status.Get();
     if (m_powLam == 0)  {
       lambda += m_delLam;
@@ -343,24 +440,39 @@ void QreNfgGrid::Solve(const NFSupport &p_support, gOutput &p_pxifile,
     MixedProfileIterator iter1(centroid, m_delp1, 1.0, staticPlayer);
 
     do {
+      p_status.Get();
       if (CheckEqu(iter1, lambda, staticPlayer, m_tol1)) {
 	MixedProfileIterator iter2(iter1, m_delp2, m_delp1 / 2.0,
 				   staticPlayer);
 	do {
+	  p_status.Get();
 	  if (CheckEqu(iter2, lambda, staticPlayer, m_tol2)) {
-	    OutputResult(p_pxifile, iter2, lambda, 0.0);
-	    if (!m_fullGraph)  {
-	      p_solutions.Flush();
+	    MixedProfile<double> candidate(iter2);
+	    if (Polish(candidate, lambda)) {
+	      bool newsoln = true;
+	      for (int j = 1; j <= cursolns.Length(); j++) {
+		if (Distance(MixedProfile<double>(cursolns[j]), candidate) < .00001) {
+		  newsoln = false;
+		}
+	      }
+
+	      if (newsoln) {
+		OutputResult(p_pxifile, candidate, lambda, 0.0);
+		int i = cursolns.Append(MixedSolution(candidate,
+						      algorithmNfg_QREALL));
+		cursolns[i].SetQre(lambda, 0.0);
+	      }
 	    }
-	    int i = p_solutions.Append(MixedSolution(iter2,
-						     algorithmNfg_QREALL));
-	    p_solutions[i].SetQre(lambda, 0.0);
 	  }
 	} while (iter2.Next());
       }
     } while (iter1.Next());
 
     p_status.SetProgress((double) step / (double) numSteps);
+
+    if (m_fullGraph || step == numSteps) {
+      p_solutions += cursolns;
+    }
   }
   
 }
