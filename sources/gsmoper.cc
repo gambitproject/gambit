@@ -1434,10 +1434,10 @@ Portion* GSM_SetFormat(Portion** param)
 
 Portion* GSM_SetListFormat(Portion** param)
 {
-  _WriteListBraces = ((BoolPortion*) param[4])->Value();
-  _WriteListCommas = ((BoolPortion*) param[5])->Value();
-  _WriteListLF = ((IntPortion*) param[6])->Value();
-  _WriteListIndent = ((IntPortion*) param[7])->Value();
+  _WriteListBraces = ((BoolPortion*) param[0])->Value();
+  _WriteListCommas = ((BoolPortion*) param[1])->Value();
+  _WriteListLF = ((IntPortion*) param[2])->Value();
+  _WriteListIndent = ((IntPortion*) param[3])->Value();
 
   GSM_SetWriteOptions();
 
@@ -1461,7 +1461,7 @@ Portion* GSM_SetNumericFormat(Portion** param)
 
 Portion* GSM_SetTextFormat(Portion** param)
 {
-  _WriteQuoted = ((BoolPortion*) param[3])->Value();
+  _WriteQuoted = ((BoolPortion*) param[0])->Value();
 
   GSM_SetWriteOptions();
 
@@ -1472,7 +1472,7 @@ Portion* GSM_SetTextFormat(Portion** param)
 
 Portion* GSM_SetSolutionFormat(Portion** param)
 {
-  _WriteSolutionInfo = ((IntPortion*) param[8])->Value();
+  _WriteSolutionInfo = ((IntPortion*) param[0])->Value();
 
   GSM_SetWriteOptions();
 
@@ -3709,7 +3709,7 @@ void Init_gsmoper(GSM* gsm)
 
 
   FuncObj = new FuncDescObj("SetListFormat", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetFormat, porBOOL, 4));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetListFormat, porBOOL, 4));
   FuncObj->SetParamInfo(0, 0, ParamInfoType
 			("braces", porBOOL,
 			 new BoolRefPortion(_WriteListBraces)));
@@ -3726,7 +3726,7 @@ void Init_gsmoper(GSM* gsm)
 
 
   FuncObj = new FuncDescObj("SetNumericFormat", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetFormat, porBOOL, 3));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetNumericFormat, porBOOL, 3));
   FuncObj->SetParamInfo(0, 0, ParamInfoType
 			("width", porINTEGER, 
 			 new IntRefPortion(_WriteWidth)));
@@ -3740,7 +3740,7 @@ void Init_gsmoper(GSM* gsm)
 
 
   FuncObj = new FuncDescObj("SetTextFormat", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetFormat, porBOOL, 1));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetTextFormat, porBOOL, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType
 			("quote", porBOOL,
 			 new BoolRefPortion(_WriteQuoted)));
@@ -3748,7 +3748,7 @@ void Init_gsmoper(GSM* gsm)
 
 
   FuncObj = new FuncDescObj("SetSolutionFormat", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetFormat, porBOOL, 1));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetSolutionFormat, porBOOL, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType
 			("info", porINTEGER,
 			 new IntRefPortion(_WriteSolutionInfo)));
