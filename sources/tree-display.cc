@@ -84,9 +84,21 @@ void gbtTreeToolbar::OnLeftDown(wxMouseEvent &p_event)
     m_doc->NewPlayer();
   }
   else if (pl >= 1 && pl <= m_doc->GetGame()->NumPlayers()) {
+    wxBitmap bitmap(16, 15);
+    wxMemoryDC dc;
+    dc.SelectObject(bitmap);
+    dc.SetPen(wxPen(*wxBLACK, 1, wxSOLID));
+    dc.SetBrush(wxBrush(m_doc->GetPlayerColor(pl), wxSOLID));
+    dc.SetFont(wxFont(8, wxSWISS, wxNORMAL, wxBOLD));
+    dc.DrawRectangle(0, 0, 16, 15);
+    dc.DrawText(wxString::Format(_("%d"), pl), 4, 0);
+
+    wxIcon icon;
+    icon.CopyFromBitmap(bitmap);
+
     wxTextDataObject textData(wxString::Format(wxT("P%d"), pl));
-    wxDropSource source(textData, this);
-    wxDragResult result = source.DoDragDrop(true);
+    wxDropSource source(textData, this, icon, icon, icon);
+    wxDragResult result = source.DoDragDrop(wxDrag_DefaultMove);
   }
 }
 
@@ -253,20 +265,38 @@ void gbtTreeDisplay::OnMouseMotion(wxMouseEvent &p_event)
     gbtGameNode node = m_layout.NodeHitTest(x, y);
     
     if (!node.IsNull()) {
+      wxBitmap bitmap(16, 15);
+      wxMemoryDC dc;
+      dc.SelectObject(bitmap);
+      dc.SetPen(wxPen(*wxBLACK, 1, wxSOLID));
+      dc.SetBrush(wxBrush(m_doc->GetPlayerColor(node->GetPlayer()->GetId()), 
+			  wxSOLID));
+      dc.SetFont(wxFont(8, wxSWISS, wxNORMAL, wxBOLD));
+      dc.DrawRectangle(0, 0, 16, 15);
+      if (p_event.ShiftDown()) {
+	dc.DrawText(wxT("i"), 4, 0);
+      }
+      else {
+	dc.DrawText(wxString::Format(_("%d"), node->GetPlayer()->GetId()), 4, 0);
+      }
+
+      wxIcon icon;
+      icon.CopyFromBitmap(bitmap);
+
       if (p_event.ControlDown()) {
 	wxTextDataObject textData(wxString::Format(wxT("C%d"), node->GetId()));
-	wxDropSource source(textData, this);
+	wxDropSource source(textData, this, icon, icon, icon);
 	wxDragResult result = source.DoDragDrop(true);
       }
       else if (p_event.ShiftDown()) {
 	wxTextDataObject textData(wxString::Format(wxT("I%d"), node->GetId()));
-	wxDropSource source(textData, this);
-	wxDragResult result = source.DoDragDrop(true);
+	wxDropSource source(textData, this, icon, icon, icon);
+	wxDragResult result = source.DoDragDrop(wxDrag_DefaultMove);
       }
       else {
 	wxTextDataObject textData(wxString::Format(wxT("M%d"), node->GetId()));
-	wxDropSource source(textData, this);
-	wxDragResult result = source.DoDragDrop(true);
+	wxDropSource source(textData, this, icon, icon, icon);
+	wxDragResult result = source.DoDragDrop(wxDrag_DefaultMove);
       }
     }
   }
