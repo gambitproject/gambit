@@ -1394,13 +1394,20 @@ Node *FullEfg::MoveTree(Node *src, Node *dest)
 
   m_revision++;
   m_dirty = true;
-  Node *parent = src->parent;    // cannot be null, saves us some problems
 
-  parent->children[parent->children.Find(src)] = dest;
-  dest->parent->children[dest->parent->children.Find(dest)] = src;
-
-  src->parent = dest->parent;
-  dest->parent = parent;
+  if (src->parent == dest->parent) {
+    int srcChild = src->parent->children.Find(src);
+    int destChild = src->parent->children.Find(dest);
+    src->parent->children[srcChild] = dest;
+    src->parent->children[destChild] = src;
+  }
+  else {
+    Node *parent = src->parent; 
+    parent->children[parent->children.Find(src)] = dest;
+    dest->parent->children[dest->parent->children.Find(dest)] = src;
+    src->parent = dest->parent;
+    dest->parent = parent;
+  }
 
   dest->name = "";
   dest->outcome = 0;
