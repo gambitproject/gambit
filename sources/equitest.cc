@@ -1,8 +1,6 @@
 // test file for the class polylist
 
-#include <time.h>
 #include "equisolv.h"
-#include "rational.h"
 #include "gwatch.h"
 
 // This program is a test program for class EquiSolv
@@ -11,12 +9,8 @@ int main()
 { 
   gSpace Space(4);
 
-  ORD_PTR ptr = &lex;
-  term_order Lex(&Space, ptr);
-  ptr = &reversedeglex;
+  ORD_PTR ptr = &reversedeglex;
   term_order ReverseDegLex(&Space, ptr);
-  ptr = &reverselex;
-  term_order ReverseLex(&Space, ptr);
 
   gPoly<gRational> pw(&Space,&ReverseDegLex);
   gPoly<gRational> px(&Space,&ReverseDegLex);
@@ -37,6 +31,7 @@ int main()
 
   ga = "2n3 - 1";         pa = ga;
   gb = "2n4 - 1";         pb = gb;
+
 /**/
 
   // Set up the rectangle of search
@@ -60,8 +55,8 @@ int main()
   list1 += pw;
   list1 += px;
   list1 += py;
+  list1 += pz;
 
-  list2 += pz;
   list2 += pa;
   list2 += pb;
 
@@ -73,18 +68,6 @@ int main()
   timer.Start();
 
   EquiSolv<gRational> quickie(input_list);
-
-/*
-  gout << "Starting computation ... \n";
-  if (quickie.FindRoots(Cube,100000))
-    gout << "\nThe first test system is\n" 
-	 << quickie.UnderlyingEquations() 
-	 << "It has the following roots in [-4,4]^4:\n"
-	 << quickie.RootList();
-  else
-    gout << "The system\n" << quickie.UnderlyingEquations()
-	 << " could not be resolved by FindRootsRec.\n";
-*/
 
   if (quickie.SystemHasNoEquilibriaIn(Cube))
     gout << "There are no equilibria in Cube.\n\n";
