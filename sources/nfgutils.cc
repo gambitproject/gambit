@@ -24,13 +24,22 @@ template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
       player->Strategies()[st]->name = S.Strategies(pl)[st]->name;
   }
 
+  for (int outc = 1; outc <= nfg.NumOutcomes(); outc++)  {
+    NFOutcome *outcome = 
+      (outc > 1) ? N->NewOutcome() : N->Outcomes()[1];
+
+    outcome->SetName(nfg.Outcomes()[outc]->GetName());
+
+    for (int pl = 1; pl <= N->NumPlayers(); pl++)
+      N->SetPayoff(outcome, pl, nfg.Payoff(nfg.Outcomes()[outc], pl));
+  }
+
   NfgContIter<T> oiter(S);
   NFSupport newS(*N);
   NfgContIter<T> niter(newS);
   
   do   {
-    for (int pl = 1; pl <= nfg.NumPlayers(); pl++)
-      (*niter.GetOutcome())[pl] = (*oiter.GetOutcome())[pl];
+    niter.SetOutcome(N->Outcomes()[oiter.GetOutcome()->GetNumber()]);
 
     oiter.NextContingency();
   }  while (niter.NextContingency());
@@ -50,9 +59,9 @@ template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
 
 template <class T> void RandomNfg(Nfg<T> &nfg)
 {
-  for (int i = 1; i <= nfg.NumPlayers(); i++)
-    for (int j = 1; j <= nfg.payoffs.Length(); j++)
-      (*nfg.payoffs[j])[i] = (T) Uniform();
+  for (int pl = 1; pl <= nfg.NumPlayers(); pl++)
+    for (int outc = 1; outc <= nfg.payoffs.NumRows(); outc++)
+      nfg.payoffs(outc, pl) = (T) Uniform();
 }  
 
 TEMPLATE void RandomNfg(Nfg<double> &nfg);

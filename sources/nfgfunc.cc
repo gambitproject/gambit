@@ -318,11 +318,11 @@ Portion* GSM_NewNfg_Payoff(Portion** param, bool rational)
     // now we have the list; call SetPayoff() for each player
     for(pl=1; pl<=players; pl++)
       if(!rational)
-	(*((Nfg<double>*) nfg)->GetOutcome(d))[pl] = ((FloatPortion*) 
-           (*((ListPortion*) list))[pl])->Value();
+	((Nfg<double> *) nfg)->SetPayoff(nfg->GetOutcome(d), pl,
+             ((FloatPortion*) (*((ListPortion*) list))[pl])->Value());
       else
-	(*((Nfg<gRational>*) nfg)->GetOutcome(d))[pl] = ((RationalPortion*) 
-           (*((ListPortion*) list))[pl])->Value();
+	((Nfg<gRational> *) nfg)->SetPayoff(nfg->GetOutcome(d), pl,
+             ((RationalPortion*) (*((ListPortion*) list))[pl])->Value());
 
     // end valid index region
   }
@@ -393,9 +393,9 @@ Portion* GSM_ListForm_Nfg(Portion** param, bool rational)
     // now we have the list; call SetPayoff() for each player
     for(pl=1; pl<=players; pl++)
       if(!rational)
-	list->Append(new FloatValPortion((*((Nfg<double>*) nfg)->GetOutcome(d))[pl]));
+	list->Append(new FloatValPortion(((Nfg<double> *) nfg)->Payoff(nfg->GetOutcome(d), pl)));
       else
-	list->Append(new RationalValPortion((*((Nfg<gRational>*) nfg)->GetOutcome(d))[pl]));
+	list->Append(new RationalValPortion(((Nfg<gRational> *) nfg)->Payoff(nfg->GetOutcome(d), pl)));
 
     // gout << "Payoff[n, " << d << "] = " << list << '\n';
     
@@ -447,9 +447,9 @@ Portion* GSM_Payoff_Nfg(Portion** param)
 
   switch (nfg.Type())  {
     case DOUBLE:
-      return new FloatValPortion((*((const Nfg<double> &) nfg).GetOutcome(&profile))[player->GetNumber()]);
+      return new FloatValPortion(((const Nfg<double> &) nfg).Payoff(nfg.GetOutcome(profile), player->GetNumber()));
     case RATIONAL:
-      return new RationalValPortion((*((const Nfg<gRational> &) nfg).GetOutcome(&profile))[player->GetNumber()]);
+      return new RationalValPortion(((const Nfg<gRational> &) nfg).Payoff(nfg.GetOutcome(profile), player->GetNumber()));
     default:
       assert(0);
     }
@@ -618,14 +618,16 @@ Portion* GSM_SetPayoff_Nfg(Portion** param)
     case DOUBLE:
       if (param[2]->Spec().Type != porFLOAT)
 	return new ErrorPortion("Type mismatch in payoff value");
-      (*((Nfg<double> &) nfg).GetOutcome(&profile))[player->GetNumber()] = 
-	((FloatPortion *) param[2])->Value();
+      ((Nfg<double> &) nfg).SetPayoff(nfg.GetOutcome(profile),
+				      player->GetNumber(),
+				      ((FloatPortion *) param[2])->Value());
       break;
     case RATIONAL:
       if (param[2]->Spec().Type != porRATIONAL)
 	return new ErrorPortion("Type mismatch in payoff value");
-      (*((Nfg<gRational> &) nfg).GetOutcome(&profile))[player->GetNumber()] = 
-	((RationalPortion *) param[2])->Value();
+      ((Nfg<gRational> &) nfg).SetPayoff(nfg.GetOutcome(profile),
+					 player->GetNumber(),
+					 ((RationalPortion *) param[2])->Value());
       break;
     default:
       assert(0);

@@ -28,11 +28,11 @@ Nfg<gRational> *ConvertNfg(const Nfg<double> &orig)
   }
   
   for (int outc = 1; outc <= orig.NumOutcomes(); outc++)  {
-    NFOutcome<gRational> *outcome = 
+    NFOutcome *outcome = 
       (outc > 1) ? N->NewOutcome() : N->Outcomes()[1];
 
     for (int pl = 1; pl <= N->NumPlayers(); pl++)
-      (*outcome)[pl] = gRational((*orig.Outcomes()[outc])[pl]);
+      N->SetPayoff(outcome, pl, gRational(orig.Payoff(orig.Outcomes()[outc], pl)));
   }
 		       
   NFSupport S1(orig);
@@ -69,13 +69,13 @@ Nfg<double> *ConvertNfg(const Nfg<gRational> &orig)
   }
 
   for (int outc = 1; outc <= orig.NumOutcomes(); outc++)  {
-    NFOutcome<double> *outcome = 
+    NFOutcome *outcome = 
       (outc > 1) ? N->NewOutcome() : N->Outcomes()[1];
 
     for (int pl = 1; pl <= N->NumPlayers(); pl++)
-      (*outcome)[pl] = (double) (*orig.Outcomes()[outc])[pl];
+      N->SetPayoff(outcome, pl, (double) orig.Payoff(orig.Outcomes()[outc], pl));
   }
-		       
+
   NFSupport S1(orig);
   NFSupport S2(*N);
 

@@ -13,39 +13,21 @@
 // NFG: Constructors, Destructor, Operators
 //---------------------------------------------------------------
 
-template <class T> int Nfg<T>::Product(const gArray<int> &dim)
-{
-  int accum = 1;
-  for (int i = 1; i <= dim.Length(); accum *= dim[i++]);
-  return accum;
-}
-  
 template <class T> Nfg<T>::Nfg(const gArray<int> &dim)
-  : BaseNfg(dim), payoffs(Product(dim))
+  : BaseNfg(dim), payoffs(1, dim.Length())
 {
   gVector<T> zeroes(dim.Length());
   zeroes = (T) 0;
-  outcomes.Append(new NFOutcome<T>(1, zeroes));
-  
-  for (int i = 1; i <= payoffs.Length(); i++)
-    payoffs[i] = outcomes[1];
+  payoffs.SetRow(1, zeroes);
 }
 
-template <class T> Nfg<T>::Nfg(const Nfg &n)
-  : BaseNfg(n), payoffs(n.payoffs.Length())
-{
-  for (int outc = 1; outc <= n.outcomes.Length(); outc++)
-    outcomes.Append(new NFOutcome<T>(outc, *n.outcomes[outc]));
-
-  for (int cont = 1; cont <= payoffs.Length(); cont++) 
-    payoffs[cont] = outcomes[n.payoffs[cont]->GetNumber()];
-}
+template <class T> Nfg<T>::Nfg(const Nfg<T> &N)
+  : BaseNfg(N), payoffs(N.payoffs)
+{ }
 
 template <class T> Nfg<T>::~Nfg()
-{
-  for (int i = 1; i <= outcomes.Length(); i++)
-    delete outcomes[i];
-}
+{ }
+
 
 //------------------------
 // Nfg: Member Functions
@@ -59,13 +41,13 @@ template <class T> bool Nfg<T>::IsConstSum(void) const
   gEpsilon(eps);
 
   for (pl = 1; pl <= players.Length(); pl++)
-    cvalue += (*payoffs[1])[pl];
+    cvalue += payoffs(1, pl);
   
-  for (index = 2; index <= payoffs.Length(); index++)  {
+  for (index = 2; index <= payoffs.NumRows(); index++)  {
     T thisvalue = (T) 0;
 
     for (pl = 1; pl <= players.Length(); pl++)
-      thisvalue += (*payoffs[index])[pl];
+      thisvalue += payoffs(index, pl);
 
     if (thisvalue > cvalue + eps || thisvalue < cvalue - eps)
       return false;
@@ -82,11 +64,11 @@ template <class T> T Nfg<T>::MinPayoff(int pl) const
   if(pl) { p1=p2=pl;}
   else {p1=1;p2=players.Length();}
 
-  minpay = (*payoffs[1])[p1];
-  for (index = 2; index <= payoffs.Length(); index++)  {
+  minpay = payoffs(1, p1);
+  for (index = 2; index <= payoffs.NumRows(); index++)  {
     for (p = p1; p <= p2; p++)
-      if ((*payoffs[index])[p] < minpay)
-	minpay = (*payoffs[index])[p];
+      if (payoffs(index, p) < minpay)
+	minpay = payoffs(index, p);
   }
   return minpay;
 }
@@ -99,62 +81,38 @@ template <class T> T Nfg<T>::MaxPayoff(int pl) const
   if(pl) { p1=p2=pl;}
   else {p1=1;p2=players.Length();}
 
-  maxpay = (*payoffs[1])[p1];
-  for (index = 2; index <= payoffs.Length(); index++)  {
+  maxpay = payoffs(1, p1);
+  for (index = 2; index <= payoffs.NumRows(); index++)  {
     for (p = p1; p <= p2; p++)
-      if ((*payoffs[index])[p] > maxpay)
-	maxpay = (*payoffs[index])[p];
+      if (payoffs(index, p) > maxpay)
+	maxpay = payoffs(index, p);
   }
   return maxpay;
 }
 
-template <class T> NFOutcome<T> *Nfg<T>::NewOutcome(void)
+template <class T> NFOutcome *Nfg<T>::NewOutcome(void)
 {
-  NFOutcome<T> *outcome = new NFOutcome<T>(outcomes.Length() + 1,
-					   gVector<T>(players.Length()));
+  NFOutcome *outcome = new NFOutcome(outcomes.Length() + 1);
   outcomes.Append(outcome);
+
+  gVector<T> zeroes(NumPlayers());
+  zeroes = (T) 0;
+  payoffs.AddRow(zeroes);
+
   return outcome;
 }
   
-
-//
-// Note that the link with the associated efg, if any, is broken
-// only on this end, and the Lexicon of the efg is not deleted
-// This shouldn't be a problem, so the code has not been changed 
-// to delete the Lexicon immediately
-//
-template <class T> void Nfg<T>::SetOutcome(const gArray<int> &profile,
-					   NFOutcome<T> *outcome)
+template <class T> void Nfg<T>::SetPayoff(NFOutcome *outcome,
+					  int pl, const T &value)
 {
-  int index = 1;
-  for (int i = 1; i <= profile.Length(); i++)
-    index += players[i]->strategies[profile[i]]->index;
-  payoffs[index] = outcome;
-  BreakLink();
+  payoffs(outcome->GetNumber(), pl) = value;
 }
 
-
-template <class T> void Nfg<T>::SetOutcome(const StrategyProfile *p, 
-					   NFOutcome<T> *outcome)
+template <class T> const T &Nfg<T>::Payoff(NFOutcome *outcome, int pl) const
 {
-  payoffs[p->index + 1] = outcome;
-  BreakLink();
+  return payoffs(outcome->GetNumber(), pl);
 }
 
-template <class T> 
-NFOutcome<T> *Nfg<T>::GetOutcome(const gArray<int> &profile) const 
-{
-  int index = 1;
-  for (int i = 1; i <= profile.Length(); i++)
-    index += players[i]->strategies[profile[i]]->index;
-  return payoffs[index];
-}
-
-template <class T>
-NFOutcome<T> *Nfg<T>::GetOutcome(const StrategyProfile *p) const
-{
-  return payoffs[p->index + 1];
-}
 
 #include "nfgiter.h"
 
@@ -187,7 +145,7 @@ void Nfg<T>::WriteNfgFile(gOutput &f) const
 
   for (i = 1; i <= ncont; i++)
     for (int j = 1; j <= players.Length(); j++)
-      f << (*payoffs[i])[j] << ' ';
+      f << payoffs(results[i]->GetNumber(), j) << ' ';
 
   f << '\n';
 }
@@ -393,7 +351,7 @@ T MixedProfile<T>::PPayoff(int pl, int index,
   int pindex = 0;
 
   if (i > N->NumPlayers())
-    return (*((Nfg<T> *) N)->payoffs[index])[pl];
+    return ((Nfg<T> *) N)->payoffs(N->GetOutcome(index)->GetNumber(), pl);
   T sum = (T) 0;
   for (int j = 1; j <= support.NumStrats(i); j++) {
     s = support.Strategies(i)[j];
@@ -417,7 +375,8 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl, int const_st,
     PPayoff(pl, const_pl, const_st, cur_pl + 1, index,
 	   prob, value);
   else if (cur_pl > N->NumPlayers())
-    value += prob * (*((Nfg<T> *) N)->payoffs[index])[pl];
+    value += prob *
+       ((Nfg<T> *) N)->payoffs(N->GetOutcome(index)->GetNumber(), pl); 
   else   {
     for (int j = 1; j <= support.NumStrats(cur_pl); j++)  {
       s = support.Strategies(cur_pl)[j];
@@ -440,7 +399,8 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
     PPayoff(pl, const_pl1, const_st1, const_pl2, const_st2,
 	   cur_pl + 1, index,prob, value);
   else if (cur_pl > N->NumPlayers())
-    value += prob * ((*((Nfg<T> *) N)->payoffs[index])[pl]);
+    value += prob * 
+       ((Nfg<T> *) N)->payoffs(N->GetOutcome(index)->GetNumber(), pl); 
   else   {
     for (int j = 1; j <= support.NumStrats(cur_pl); j++ ) {
       s = support.Strategies(cur_pl)[j];
@@ -464,7 +424,8 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
   else if (cur_pl > N->NumPlayers())  {
     for (int j = 1; j <= support.NumStrats(const_pl); j++ ){ 
       s = support.Strategies(const_pl)[j];
-      value[j] += prob * (*((Nfg<T> *) N)->payoffs[index + s->index])[pl];
+      value[j] += prob * 
+         ((Nfg<T> *) N)->payoffs(N->GetOutcome(index + s->index)->GetNumber(), pl); 
     }
   }
   else   {

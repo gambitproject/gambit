@@ -16,21 +16,32 @@
 // ---------------------------------------------
 
 
-BaseNfg::BaseNfg( const gArray<int> &dim)
-  : efg(0), players(dim.Length()), dimensions(dim)
+int BaseNfg::Product(const gArray<int> &dim)
 {
-  for (int i = 1; i <= players.Length(); i++){
-    players[i] = new NFPlayer(i, this, dim[i]);
-    players[i]->name = ToString(i);
-    for (int j = 1; j <= players[i]->NumStrats(); j++)
-      players[i]->strategies[j]->name=ToString(j);
+  int accum = 1;
+  for (int i = 1; i <= dim.Length(); accum *= dim[i++]);
+  return accum;
+}
+  
+BaseNfg::BaseNfg(const gArray<int> &dim)
+  : efg(0), dimensions(dim), players(dim.Length()), results(Product(dim))
+{
+  for (int pl = 1; pl <= players.Length(); pl++)  {
+    players[pl] = new NFPlayer(pl, this, dim[pl]);
+    players[pl]->name = ToString(pl);
+    for (int st = 1; st <= players[pl]->NumStrats(); st++)
+      players[pl]->strategies[st]->name = ToString(st);
   }
   IndexStrategies();
+
+  outcomes.Append(new NFOutcome(1));
+  for (int cont = 1; cont <= results.Length();
+       results[cont++] = outcomes[1]);
 }
 
 BaseNfg::BaseNfg (const BaseNfg &b)
-  : title(b.title), efg(0), players(b.players.Length()), 
-    dimensions(b.dimensions)
+  : title(b.title), efg(0), dimensions(b.dimensions),
+    players(b.players.Length())
 {
   for (int i = 1; i <= players.Length(); i++){
     players[i] = new NFPlayer(i, this, dimensions[i]);
@@ -108,6 +119,42 @@ int BaseNfg::ProfileLength(void) const
     nprof += players[i]->strategies.Length();
   return nprof;
 }
+
+//
+// Note that the link with the associated efg, if any, is broken
+// only on this end, and the Lexicon of the efg is not deleted
+// This shouldn't be a problem, so the code has not been changed 
+// to delete the Lexicon immediately
+//
+void BaseNfg::SetOutcome(const gArray<int> &profile, NFOutcome *outcome)
+{
+  int index = 1;
+  for (int i = 1; i <= profile.Length(); i++)
+    index += players[i]->strategies[profile[i]]->index;
+  results[index] = outcome;
+  BreakLink();
+}
+
+
+void BaseNfg::SetOutcome(const StrategyProfile &p, NFOutcome *outcome)
+{
+  results[p.index + 1] = outcome;
+  BreakLink();
+}
+
+NFOutcome *BaseNfg::GetOutcome(const gArray<int> &profile) const 
+{
+  int index = 1;
+  for (int i = 1; i <= profile.Length(); i++)
+    index += players[i]->strategies[profile[i]]->index;
+  return results[index];
+}
+
+NFOutcome *BaseNfg::GetOutcome(const StrategyProfile &p) const
+{
+  return results[p.index + 1];
+}
+
 
 // ---------------------------------------
 // BaseNfg: Private member functions
@@ -220,8 +267,14 @@ const NFSupport &BaseMixedProfile::Support(void) const
 
 #include "garray.imp"
 #include "gblock.imp"
+#include "glist.imp"
 
 TEMPLATE class gArray<NFStrategySet *>;
 TEMPLATE class gArray<Strategy *>;
+TEMPLATE class gArray<NFOutcome *>;
+
 TEMPLATE class gArray<NFPlayer *>;
 TEMPLATE class gBlock<Strategy *>;
+
+TEMPLATE class gList<NFOutcome *>;
+TEMPLATE class gNode<NFOutcome *>;

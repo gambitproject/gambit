@@ -25,8 +25,8 @@ bool Dominates(const NFSupport &S, int pl, int a, int b, bool strong)
   
       if (strong)  {
 	do  {
-	  double ap = (*A.GetOutcome())[pl];
-	  double bp = (*B.GetOutcome())[pl];
+	  double ap = ((Nfg<double> &) N).Payoff(A.GetOutcome(), pl);
+	  double bp = ((Nfg<double> &) N).Payoff(B.GetOutcome(), pl);
 	  if (ap <= bp)  return false;
 	  A.NextContingency();
 	} while (B.NextContingency());
@@ -37,8 +37,8 @@ bool Dominates(const NFSupport &S, int pl, int a, int b, bool strong)
       bool equal = true;
       
       do   {
-	double ap = (*A.GetOutcome())[pl];
-	double bp = (*B.GetOutcome())[pl];
+	double ap = ((Nfg<double> &) N).Payoff(A.GetOutcome(), pl);
+	double bp = ((Nfg<double> &) N).Payoff(B.GetOutcome(), pl);
 	if (ap < bp)   return false;
 	else if (ap > bp)  equal = false;
 	A.NextContingency();
@@ -57,8 +57,8 @@ bool Dominates(const NFSupport &S, int pl, int a, int b, bool strong)
   
       if (strong)  {
 	do  {
-	  gRational ap = (*A.GetOutcome())[pl];
-	  gRational bp = (*B.GetOutcome())[pl];
+	  gRational ap = ((Nfg<gRational> &) N).Payoff(A.GetOutcome(), pl);
+	  gRational bp = ((Nfg<gRational> &) N).Payoff(B.GetOutcome(), pl);
 	  if (ap <= bp)  return false;
 	  A.NextContingency();
 	} while (B.NextContingency());
@@ -69,8 +69,8 @@ bool Dominates(const NFSupport &S, int pl, int a, int b, bool strong)
       bool equal = true;
       
       do   {
-	gRational ap = (*A.GetOutcome())[pl];
-	gRational bp = (*B.GetOutcome())[pl];
+	gRational ap = ((Nfg<gRational> &) N).Payoff(A.GetOutcome(), pl);
+	gRational bp = ((Nfg<gRational> &) N).Payoff(B.GetOutcome(), pl);
 	if (ap < bp)   return false;
 	else if (ap > bp)  equal = false;
 	A.NextContingency();

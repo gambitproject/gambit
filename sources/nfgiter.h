@@ -23,7 +23,7 @@ private:
   NFSupport support;
   Nfg<T> *N;
   gArray<int> current_strat;
-  StrategyProfile *profile;
+  StrategyProfile profile;
   
 public:
   NfgIter(Nfg<T> &);
@@ -43,8 +43,8 @@ public:
   
   long GetIndex(void) const;
   
-  NFOutcome<T> *GetOutcome(void) const;
-  void SetOutcome(NFOutcome<T> *);
+  NFOutcome *GetOutcome(void) const;
+  void SetOutcome(NFOutcome *);
 
   const NFSupport &Support(void) const { return support; }
 };

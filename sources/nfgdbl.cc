@@ -45,17 +45,12 @@ TEMPLATE int ReadNfgFile(gInput &, Nfg<double> *&);
 
 TEMPLATE class NfgContIter<double>;
 TEMPLATE class NfgIter<double>;
-TEMPLATE class NFOutcome<double>;
 
 TEMPLATE class MixedProfile<double>;
 TEMPLATE gOutput &operator<<(gOutput &, const MixedProfile<double> &);
 
 TEMPLATE class MixedSolution<double>;
 TEMPLATE gOutput &operator<<(gOutput &, const MixedSolution<double> &);
-
-#include "garray.imp"
-
-TEMPLATE class gArray<NFOutcome<double> *>;
 
 #include "glist.imp"
 
@@ -65,6 +60,7 @@ TEMPLATE class gNode<MixedProfile<double> >;
 TEMPLATE class gList<MixedSolution<double> >;
 TEMPLATE class gNode<MixedSolution<double> >;
 
-TEMPLATE class gList<NFOutcome<double> *>;
-TEMPLATE class gNode<NFOutcome<double> *>;
+#include "grblock.imp"
+
+TEMPLATE class gRectBlock<double>;
 

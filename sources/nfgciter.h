@@ -28,7 +28,7 @@ private:
   NFSupport support;
   gArray<int> current_strat;
   Nfg<T> *N;
-  StrategyProfile *profile;
+  StrategyProfile profile;
   gBlock<int> frozen, thawed;
   
 public:
@@ -52,8 +52,8 @@ public:
   
   long GetIndex(void) const;
   
-  NFOutcome<T> *GetOutcome(void) const;
-  void SetOutcome(NFOutcome<T> *);
+  NFOutcome *GetOutcome(void) const;
+  void SetOutcome(NFOutcome *);
   
   void Dump(gOutput &) const;
 };

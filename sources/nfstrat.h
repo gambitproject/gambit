@@ -29,8 +29,7 @@ class BaseNfg;
 template <class T> class Nfg;
 
 class StrategyProfile   {
-  friend class Nfg<double>;
-  friend class Nfg<gRational>;
+  friend class BaseNfg;
 private:
   long index;
   gArray<Strategy *> profile;

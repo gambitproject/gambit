@@ -56,9 +56,8 @@ template <class T> void NfgFile<T>::SetPayoff(int cont, int pl,
 					      const gRational &value)
 {
   if (pl == 1)
-    ((Nfg<T> *) N)->payoffs[cont] =
-    ((Nfg<T> *) N)->outcomes[((Nfg<T> *) N)->outcomes.Length()];
-  (*((Nfg<T> *) N)->payoffs[cont])[pl] = (T) value;
+    N->SetOutcome(cont, N->Outcomes()[cont]);
+  ((Nfg<T> *) N)->payoffs(cont, pl) = (T) value;
 }
 
 template <class T> int NfgFile<T>::Parse(void)

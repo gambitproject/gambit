@@ -59,10 +59,10 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
   while (1)  {
     E.Payoff(corr, value);
     
-    if (iter.GetIndex() > 1)  
+    if (iter.GetIndex() > 0)  
       iter.SetOutcome(((Nfg<T> *) L->N)->NewOutcome());
     for (int j = 1; j <= E.NumPlayers(); j++)
-      (*iter.GetOutcome())[j] = value[j];
+      ((Nfg<T> *) L->N)->SetPayoff(iter.GetOutcome(), j, value[j]);
     
     iter.NextContingency();
     while (pl > 0)   {
@@ -244,7 +244,7 @@ template <class T> Nfg<T> *MakeAfg(Efg<T> &E)
 
     for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)
       for (int iset = 1; iset <= E.PlayerList()[epl]->NumInfosets(); iset++, npl++)
-	(*iter.GetOutcome())[npl] = payoff[epl];
+	afg->SetPayoff(iter.GetOutcome(), npl, payoff[epl]);
     
     while (pl > 0)  {
       if (iter.Next(pl))  {
