@@ -37,7 +37,7 @@ private:
   gVector<T> *b;
   LTableau<T> *tab;
   int ns1,ns2,ni1,ni2;
-  T maxpay;
+  T maxpay,eps;
   long npivots;
   double time;
   BFS_List List;

@@ -80,6 +80,7 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
 //  b->Dump(gout);
 
   tab = new LTableau<T>(*A,*b);
+  eps = tab->Epsilon();
 //  tab->Refactor();  // not necessary?
   tab->Pivot(ns1+ns2+ni1+1,0);
 //  tab->Dump(gout);
@@ -180,6 +181,7 @@ template <class T> void SeqFormModule<T>
 ::FillTableau(const Node *n, T prob,int s1,int s2, int i1,int i2)
 {
   T EPSILON;
+//  EPSILON = eps;
   Epsilon(EPSILON);
 
 //  gout << "\ns1,s2,i1,i2: " << s1 << " " << s2  << " " << i1  << " " << i2;
@@ -246,7 +248,8 @@ template <class T> void SeqFormModule<T>
 	       const Node *n, int s1,int s2)
 {
   int i,pl,inf,snew,ind,ind2;
-
+//  T eps;
+//  eps = tab->Epsilon();
 //  gout << "\nv = " << v;
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
@@ -262,13 +265,16 @@ template <class T> void SeqFormModule<T>
 	snew+=n->GetPlayer()->InfosetList()[i]->NumActions(); 
       for(i=1;i<=n->NumChildren();i++) {
 	v(pl,inf,i) = (T)0;
+//	gout << "\npl1 ";
 //	gout << "\n  v = " << v;
 	if(tab->Member(s1)) {
 	  ind = tab->Find(s1);
-	  if(sol[ind]!=(T)0) {
+//	  if(sol[ind]!=(T)0) {
+	  if(sol[ind]<-eps) {
 	    if(tab->Member(snew+i)) {
 	      ind2 = tab->Find(snew+i);
-	      v(pl,inf,i) = sol[ind2]/sol[ind];
+	      if(sol[ind2]<-eps)
+		v(pl,inf,i) = sol[ind2]/sol[ind];
 //	      gout << "\nind: " << ind << " " << sol[ind] << " ";
 //	      gout << "\nind2: " << ind2 << " " << sol[ind2] << " ";
 //	      gout << "\n  v = " << v;
@@ -284,13 +290,16 @@ template <class T> void SeqFormModule<T>
 	snew+=n->GetPlayer()->InfosetList()[i]->NumActions(); 
       for(i=1;i<=n->NumChildren();i++) {
 	v(pl,inf,i) = (T)0;
+//	gout << "\npl2 ";
 //	gout << "\n  v = " << v;
 	if(tab->Member(ns1+s2)) {
 	  ind = tab->Find(ns1+s2);
-	  if(sol[ind]!=(T)0) {
+//	  if(sol[ind]!=(T)0) {
+	  if(sol[ind]<-eps) {
 	    if(tab->Member(ns1+snew+i)) {
 	      ind2 = tab->Find(ns1+snew+i);
-	      v(pl,inf,i) = sol[ind2]/sol[ind];
+	      if(sol[ind2]<-eps)
+		v(pl,inf,i) = sol[ind2]/sol[ind];
 //	      gout << "\nind: " << ind << " " << sol[ind] << " ";
 //	      gout << "\nind2: " << ind2 << " " << sol[ind2] << " ";
 //	      gout << "\n  v = " << v;
