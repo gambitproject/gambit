@@ -9,7 +9,7 @@
 #include "infoset.h"
 #include "node.h"
 #include "outcome.h"
-
+#include "efgutils.h"
 
 template <class T> void OutcomeVector<T>::Resize(int pl)
 {
@@ -298,6 +298,87 @@ template <class T> void Efg<T>::CondPayoff(const BehavProfile<T> &profile,
       for (int k = 1; k <= players[i]->infosets[j]->actions.Length(); k++)
 	// Note that bad things happen if probs(i, j, k) == 0
 	payoff(i, j, k) /= probs(i, j);
+}
+
+template <class T> 
+gArray<T> Efg<T>::NodeRealizProbs(const BehavProfile<T> &bp)
+{
+  gArray<T> NRProbs(NumNodes(*bp.BelongsTo()));
+  NodeRealizProbs( root, (T) 1.0, bp, 1, NRProbs);
+  return NRProbs;
+}
+
+template <class T>
+void Efg<T>::NodeRealizProbs(Node *n, T prob, const BehavProfile<T> &profile,
+				   int index, gArray<T> &NRProbs)
+{
+
+  NRProbs[index] = prob;
+
+  int pl = (n->infoset) ? n->infoset->player->number : -1;
+  int iset = (n->infoset) ? n->infoset->number : 0;
+
+  T cumprob((T) 0), newprob((T) 0);
+  int i, nc = n->children.Length();
+
+  for (i = 1; i < nc; i++) {
+    newprob = ((pl) ? profile(pl, n->infoset->number, i) :
+	       ((ChanceInfoset<T> *) n->infoset)->probs[i]);
+    cumprob += newprob;
+    NodeRealizProbs(n->children[i], prob * newprob, profile, index + 1,
+		     NRProbs);
+  }
+  
+  if (nc > 0) {
+    if (profile.IsTruncated())
+      newprob = (T) 1.0 - cumprob;
+    else newprob = ((pl) ? profile(pl, n->infoset->number, i) :
+		    ((ChanceInfoset<T> *) n->infoset)->probs[i]);
+    
+    NodeRealizProbs(n->children[nc], prob * newprob, profile, index + 1,
+		     NRProbs);
+  }
+}
+
+template <class T> gArray<T> Efg<T>::Beliefs( const BehavProfile<T> &bp )
+{
+  gArray<T> BProbs(NumNodes(*bp.BelongsTo()));
+  gDPVector<T> payoff;
+  gPVector<T> probs;
+  CondPayoff( bp, payoff, probs);
+  Beliefs ( root, (T) 1.0, bp, 1, BProbs, probs);
+  return BProbs;
+}
+
+template <class T>
+void Efg<T>::Beliefs(Node *n, T prob, const BehavProfile<T> &profile,
+		     int index, gArray<T> BProbs, gPVector<T> &gpv)
+{
+
+  int pl = (n->infoset) ? n->infoset->player->number : -1;
+  int iset = (n->infoset) ? n->infoset->number : 0;
+  T cumprob((T) 0), newprob((T) 0);
+  int i, nc = n->children.Length();
+
+  BProbs[index] = (n->infoset) ? prob / gpv(pl,iset) : 1;
+  
+  for (i = 1; i < nc; i++) {
+    newprob = ((pl) ? profile(pl, n->infoset->number, i) :
+	       ((ChanceInfoset<T> *) n->infoset)->probs[i]);
+    cumprob += newprob;
+    Beliefs(n->children[i], prob * newprob, profile, index + 1,
+	    BProbs, gpv);
+  }
+  
+  if (nc > 0) {
+    if (profile.IsTruncated())
+      newprob = (T) 1.0 - cumprob;
+    else newprob = ((pl) ? profile(pl, n->infoset->number, i) :
+		    ((ChanceInfoset<T> *) n->infoset)->probs[i]);
+    
+    Beliefs(n->children[nc], prob * newprob, profile, index + 1,
+	    BProbs, gpv);
+  }
 }
 
 template <class T> int Efg<T>::ProfileLength(bool trunc) const

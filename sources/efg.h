@@ -136,6 +136,7 @@ template <class T> class Efg : public BaseEfg   {
     Node *CreateNode(Node *parent);
     Outcome *CreateOutcomeByIndex(int index);
 
+
     // this is for use with the copy constructor
     void CopySubtree(Node *, Node *);
 
@@ -155,6 +156,13 @@ template <class T> class Efg : public BaseEfg   {
 
         //# COMPUTING VALUES OF PROFILES
 //    gDPVector<T> *NewBehavProfile(void) const;
+
+    gArray<T> NodeRealizProbs(const BehavProfile<T> &);
+    void NodeRealizProbs(Node *n, T prob, const BehavProfile<T> &profile,
+			 int index, gArray<T> &NRProbs);
+    gArray<T> Beliefs(const BehavProfile<T> &);
+    void Beliefs(Node *n, T prob, const BehavProfile<T> &profile,
+		 int index, gArray<T> BProbs, gPVector<T> &gpv);
 
     int ProfileLength(bool trunc = false) const;
     gPVector<int> Dimensionality(bool trunc = false) const;
