@@ -526,7 +526,6 @@ SubgamePerfectChecker::SubgamePerfectChecker(const Efg &E, const BehavProfile<gN
     infoset_subgames(E.NumInfosets()), start(s)
 {
   MarkedSubgameRoots(E, oldroots);
-
   gList<Node *> subroots;
   LegalSubgameRoots(E,subroots);
   (start.Game()).MarkSubgames(subroots);
@@ -582,5 +581,6 @@ void SubgamePerfectChecker::SolveSubgame(const Efg &E, const EFSupport &sup,
 }
 
 SubgamePerfectChecker::~SubgamePerfectChecker() { 
+  (start.Game()).UnmarkSubgames((start.Game()).RootNode());
   (start.Game()).MarkSubgames(oldroots);
 }
