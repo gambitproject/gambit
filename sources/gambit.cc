@@ -1,7 +1,7 @@
 //
 // FILE: gambit.cc -- Main program for Gambit GUI
 //
-// $Id$
+// @(#)gambit.cc	1.24 12/26/95
 //
 #include <assert.h>
 #include <string.h>

@@ -53,7 +53,8 @@ private:
 	gString tmp='(';
 	for (int i=1;i<=a.Lengths().Length();i++)
 	{
-		for (int j=1,sum=0;j<=a.Lengths()[i];j++) sum+=a(i,j);
+	  sum=0;
+		for (int j=1;j<=a.Lengths()[i];j++) sum+=a(i,j);
 		tmp+=ToString(sum)+((i==a.Lengths().Length()) ? ")" : ",");
 	}
 	return tmp;

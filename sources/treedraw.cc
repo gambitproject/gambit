@@ -1,6 +1,6 @@
 // File: treedraw.cc -- contains the configuration class for the extensive
 // form
-// $Id$
+// @(#)treedraw.cc	1.13 11/7/95
 #include "wx.h"
 #include "wx_form.h"
 #pragma hdrstop
@@ -30,7 +30,7 @@ if (gamb_ver!=CURVER)
 	cursor_color=CURSOR_COLOR_DEFAULT;
 	show_infosets=SHOW_INFOSETS_DEFAULT;
 	node_above_label=NODE_ABOVE_LABEL;
-	node_below_label=NODE_BELOW_ISETLABEL;
+	node_below_label=NODE_BELOW_ISETID;
 	node_right_label=NODE_RIGHT_OUTCOME;
 	branch_above_label=BRANCH_ABOVE_LABEL;
 	branch_below_label=BRANCH_BELOW_PROBS;

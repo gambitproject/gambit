@@ -9,9 +9,9 @@
 #define	SD_ALGORITHM 	2
 #define SD_INSPECT 		3
 
-#ifndef NFG_SOLVE_HELP	// if this is included in efgsolvd.h, we do not need it
-#define NFG_SOLVE_HELP	""
-#endif
+//#ifndef NFG_SOLVE_HELP	// if this is included in efgsolvd.h, we do not need it
+//#define NFG_SOLVE_HELP	""
+//#endif
 // solution module constants.  Do not change the order.  Add new ones
 // just before NFG_NUM_SOLUTIONS.
 typedef enum {NFG_NO_SOLUTION=-1,NFG_ENUMPURE_SOLUTION,NFG_ENUMMIXED_SOLUTION,

@@ -279,10 +279,10 @@ draw_settings->SetRealWidth(_w);
 // Desired Size
 void	SpreadSheetC::DesiredSize(int *w,int *h)
 {
-*w=min(MaxX(),MAX_SHEET_WIDTH);
-*h=min(draw_settings->YStart()+(sheet->GetRows()+1)*draw_settings->GetRowHeight()+3,MAX_SHEET_HEIGHT);
-*w=max(*w,MIN_SHEET_WIDTH);
-*h=max(*h,MIN_SHEET_HEIGHT);
+*w=gmin(MaxX(),MAX_SHEET_WIDTH);
+*h=gmin(draw_settings->YStart()+(sheet->GetRows()+1)*draw_settings->GetRowHeight()+3,MAX_SHEET_HEIGHT);
+*w=gmax(*w,MIN_SHEET_WIDTH);
+*h=gmax(*h,MIN_SHEET_HEIGHT);
 }
 
 // Check Scrollbars
@@ -649,7 +649,7 @@ else	// FIT TO PAGE
 	float scaleY=(float)((pageHeight-2*marginY)/maxY)*pageScaleY;
 
 	// Use x or y scaling factor, whichever fits on the DC
-	float actualScale = min(scaleX,scaleY);
+	float actualScale = gmin(scaleX,scaleY);
 
 	// Set the scale and origin
 	dc->SetUserScale(actualScale, actualScale);
@@ -702,7 +702,7 @@ if (device==wxMEDIA_CLIPBOARD || device==wxMEDIA_METAFILE)
 	wxMetaFileDC dc_mf(metafile_name);
 	if (dc_mf.Ok())
 	{
-		float real_scale=min(640/MaxX(),480/MaxY());
+		float real_scale=gmin(640/MaxX(),480/MaxY());
 		dc_mf.SetUserScale(real_scale,real_scale);
 		draw_settings->SetRealWidth(MaxX());draw_settings->SetRealHeight(MaxY());
 		Update(dc_mf);
@@ -1132,8 +1132,8 @@ data[cur_level].GetSize(&w,&h);
 if (panel)
 {
 	Panel()->Fit();Panel()->GetSize(&w1,&h1);
-	w=max(w,w1);
-	h1=max(h1,MIN_BUTTON_SPACE);
+	w=gmax(w,w1);
+	h1=gmax(h1,MIN_BUTTON_SPACE);
 	Panel()->SetSize(0,h,w,h1);
 }
 DrawSettings()->SetPanelSize(h1);
