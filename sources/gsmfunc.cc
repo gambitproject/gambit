@@ -1199,7 +1199,7 @@ Portion *CallFuncObj::CallListFunction(GSM* gsm, Portion **ParamIn)
 }
 
 
-typedef enum { matchNONE = 0, matchSUBTYPE = 1, matchEXACT = 2 } gclMatchLevel;
+typedef enum { matchNONE = 0, matchSUPERTYPE = 1, matchEXACT = 2 } gclMatchLevel;
 
 gclMatchLevel TypeMatch(Portion* p, PortionSpec ExpectedSpec, 
 			bool Listable, bool return_type_check = false)
@@ -1220,8 +1220,12 @@ gclMatchLevel TypeMatch(Portion* p, PortionSpec ExpectedSpec,
   if (CalledSpec.Type == porNUMBER && ExpectedSpec.Type == porINTEGER) {
     if ((CalledSpec.ListDepth > 0 && ((ListPortion *) p)->IsInteger()) ||
 	(CalledSpec.ListDepth == 0 && ((NumberPortion *) p)->Value().IsInteger()))
-    CalledSpec.Type = porINTEGER;
-    matchtype = matchSUBTYPE;
+      CalledSpec.Type = porINTEGER;
+  }
+  else if (CalledSpec.Type == porNUMBER && ExpectedSpec.Type == porNUMBER) {
+    if ((CalledSpec.ListDepth > 0 && ((ListPortion *) p)->IsInteger()) ||
+	(CalledSpec.ListDepth == 0 && ((NumberPortion *) p)->Value().IsInteger()))
+      matchtype = matchSUPERTYPE;
   }
 
   if (CalledSpec.Type & ExpectedSpec.Type)  {
@@ -1422,7 +1426,7 @@ ReferencePortion* CallFuncObj::GetParamRef(int index) const
 // overloaded versions.
 void CallFuncObj::ComputeFuncIndex(GSM *gsm, Portion **param)
 {
-  int exact_index = 0, subtype_index = 0;
+  int exact_index = 0, supertype_index = 0;
 
   if (m_funcIndex == -1 && _NumFuncs == 1)
     m_funcIndex = 0;
@@ -1434,7 +1438,7 @@ void CallFuncObj::ComputeFuncIndex(GSM *gsm, Portion **param)
 	param_upper_bound = index;
     }
     
-    int exact_matches = 0, subtype_matches = 0;
+    int exact_matches = 0, supertype_matches = 0;
     for (int f_index = 0; f_index < _NumFuncs; f_index++)  {
       gclMatchLevel matchlevel = matchEXACT;
       if (param_upper_bound >= _FuncInfo[f_index].NumParams)
@@ -1452,8 +1456,8 @@ void CallFuncObj::ComputeFuncIndex(GSM *gsm, Portion **param)
 		      (_FuncInfo[f_index].Flag & funcLISTABLE));
 	  if (parammatch == matchNONE)
 	    matchlevel = matchNONE;
-	  else if (parammatch == matchSUBTYPE)
-	    matchlevel = matchSUBTYPE;
+	  else if (parammatch == matchSUPERTYPE)
+	    matchlevel = matchSUPERTYPE;
 	}
 	else {
 	  // parameter is undefined
@@ -1472,19 +1476,19 @@ void CallFuncObj::ComputeFuncIndex(GSM *gsm, Portion **param)
 	exact_index = f_index;
 	exact_matches++;
       }
-      else if (matchlevel == matchSUBTYPE) {
-	subtype_index = f_index;
-	subtype_matches++;
+      else if (matchlevel == matchSUPERTYPE) {
+	supertype_index = f_index;
+	supertype_matches++;
       }
     }
 
     if (exact_matches == 1) 
       m_funcIndex = exact_index;
     else if (exact_matches > 1 ||
-	     (exact_matches == 0 && subtype_matches > 1))
+	     (exact_matches == 0 && supertype_matches > 1))
       throw gclRuntimeError(_FuncName + "[] called with ambiguous parameter(s)");
-    else if (exact_matches == 0 && subtype_matches == 1)
-      m_funcIndex = subtype_index;
+    else if (exact_matches == 0 && supertype_matches == 1)
+      m_funcIndex = supertype_index;
     else
       throw gclRuntimeError("No matching parameter specifications found for " + _FuncName + "[]");
   }
