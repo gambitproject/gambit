@@ -263,16 +263,21 @@ gList<BehavSolution> guiEfgSolveLiap::Solve(void) const
   }
 }
 
-void guiEfgSolveLiap::SolveSetup(void) const
+bool guiEfgSolveLiap::SolveSetup(void) const
 { 
   LiapSolveParamsDialog LSPD(parent->Frame(), true);
 
-  eliminate = LSPD.Eliminate();
-  all = LSPD.EliminateAll();
-  domType = LSPD.DominanceType();
-  domMethod = LSPD.DominanceMethod();
+  if (LSPD.Completed() == wxOK) {
+    eliminate = LSPD.Eliminate();
+    all = LSPD.EliminateAll();
+    domType = LSPD.DominanceType();
+    domMethod = LSPD.DominanceMethod();
+    markSubgames = LSPD.MarkSubgames();
 
-  markSubgames = LSPD.MarkSubgames();
+    return true;
+  }
+  else
+    return false;
 }
 
 //---------------------
@@ -321,16 +326,21 @@ gList<BehavSolution> EfgNLiapG::Solve(void) const
   }
 }
 
-void EfgNLiapG::SolveSetup(void) const
+bool EfgNLiapG::SolveSetup(void) const
 {
   LiapSolveParamsDialog LSPD(parent->Frame(), true);
 
-  eliminate = LSPD.Eliminate();
-  all = LSPD.EliminateAll();
-  domType = LSPD.DominanceType();
-  domMethod = LSPD.DominanceMethod();
-
-  markSubgames = LSPD.MarkSubgames();
+  if (LSPD.Completed() == wxOK)  {
+    eliminate = LSPD.Eliminate();
+    all = LSPD.EliminateAll();
+    domType = LSPD.DominanceType();
+    domMethod = LSPD.DominanceMethod();
+    markSubgames = LSPD.MarkSubgames();
+    return true;
+  }
+  else
+    return false;
+    
 }
 
 //========================================================================
@@ -420,16 +430,20 @@ gList<BehavSolution> EfgSeqFormG::Solve(void) const
   }
 }
 
-void EfgSeqFormG::SolveSetup(void) const
+bool EfgSeqFormG::SolveSetup(void) const
 { 
   SeqFormParamsDialog SFPD(parent->Frame(), true);
 
-  eliminate = SFPD.Eliminate();
-  all = SFPD.EliminateAll();
-  domType = SFPD.DominanceType();
-  domMethod = SFPD.DominanceMethod();
-
-  markSubgames = SFPD.MarkSubgames();
+  if (SFPD.Completed() == wxOK)  {
+    eliminate = SFPD.Eliminate();
+    all = SFPD.EliminateAll();
+    domType = SFPD.DominanceType();
+    domMethod = SFPD.DominanceMethod();
+    markSubgames = SFPD.MarkSubgames();
+    return true;
+  }
+  else
+    return false;
 }
 
 
@@ -511,16 +525,20 @@ gList<BehavSolution> EfgLemkeG::Solve(void) const
   }
 }
 
-void EfgLemkeG::SolveSetup(void) const
+bool EfgLemkeG::SolveSetup(void) const
 {
   LemkeSolveParamsDialog LSPD(parent->Frame(), true); 
 
-  eliminate = LSPD.Eliminate();
-  all = LSPD.EliminateAll();
-  domType = LSPD.DominanceType();
-  domMethod = LSPD.DominanceMethod();
-
-  markSubgames = LSPD.MarkSubgames();
+  if (LSPD.Completed() == wxOK) {
+    eliminate = LSPD.Eliminate();
+    all = LSPD.EliminateAll();
+    domType = LSPD.DominanceType();
+    domMethod = LSPD.DominanceMethod();
+    markSubgames = LSPD.MarkSubgames();
+    return true;
+  }
+  else
+    return false;
 }
 
 
@@ -584,16 +602,20 @@ gList<BehavSolution> EfgPureNashG::Solve(void) const
   }
 }
 
-void EfgPureNashG::SolveSetup(void) const
+bool EfgPureNashG::SolveSetup(void) const
 {
   PureNashSolveParamsDialog PNPD(parent->Frame(), true); 
 
-  eliminate = PNPD.Eliminate();
-  all = PNPD.EliminateAll();
-  domType = PNPD.DominanceType();
-  domMethod = PNPD.DominanceMethod();
-
-  markSubgames = PNPD.MarkSubgames();
+  if (PNPD.Completed() == wxOK) {
+    eliminate = PNPD.Eliminate();
+    all = PNPD.EliminateAll();
+    domType = PNPD.DominanceType();
+    domMethod = PNPD.DominanceMethod();
+    markSubgames = PNPD.MarkSubgames();
+    return true;
+  }
+  else
+    return false;
 }
 
 
@@ -636,16 +658,20 @@ gList<BehavSolution> EfgEPureNashG::Solve(void) const
   }
 }
 
-void EfgEPureNashG::SolveSetup(void) const
+bool EfgEPureNashG::SolveSetup(void) const
 {
   PureNashSolveParamsDialog PNPD(parent->Frame(), true); 
 
-  eliminate = PNPD.Eliminate();
-  all = PNPD.EliminateAll();
-  domType = PNPD.DominanceType();
-  domMethod = PNPD.DominanceMethod();
-
-  markSubgames = PNPD.MarkSubgames();
+  if (PNPD.Completed() == wxOK) {
+    eliminate = PNPD.Eliminate();
+    all = PNPD.EliminateAll();
+    domType = PNPD.DominanceType();
+    domMethod = PNPD.DominanceMethod();
+    markSubgames = PNPD.MarkSubgames();
+    return true;
+  }
+  else
+    return false;
 }
 
 //========================================================================
@@ -742,16 +768,20 @@ gList<BehavSolution> EfgEnumG::Solve(void) const
   }
 }
 
-void EfgEnumG::SolveSetup(void) const
+bool EfgEnumG::SolveSetup(void) const
 {
   EnumSolveParamsDialog ESPD(parent->Frame(), true); 
 
-  eliminate = ESPD.Eliminate();
-  all = ESPD.EliminateAll();
-  domType = ESPD.DominanceType();
-  domMethod = ESPD.DominanceMethod();
-
-  markSubgames = ESPD.MarkSubgames();
+  if (ESPD.Completed() == wxOK) {
+    eliminate = ESPD.Eliminate();
+    all = ESPD.EliminateAll();
+    domType = ESPD.DominanceType();
+    domMethod = ESPD.DominanceMethod();
+    markSubgames = ESPD.MarkSubgames();
+    return true;
+  }
+  else
+    return false;
 }
 
 
@@ -845,16 +875,20 @@ gList<BehavSolution> EfgZSumG::Solve(void) const
   }
 }
 
-void EfgZSumG::SolveSetup(void) const
+bool EfgZSumG::SolveSetup(void) const
 {
   LPSolveParamsDialog ZSPD(parent->Frame(), true); 
 
-  eliminate = ZSPD.Eliminate();
-  all = ZSPD.EliminateAll();
-  domType = ZSPD.DominanceType();
-  domMethod = ZSPD.DominanceMethod();
-
-  markSubgames = ZSPD.MarkSubgames();
+  if (ZSPD.Completed() == wxOK) {
+    eliminate = ZSPD.Eliminate();
+    all = ZSPD.EliminateAll();
+    domType = ZSPD.DominanceType();
+    domMethod = ZSPD.DominanceMethod();
+    markSubgames = ZSPD.MarkSubgames();
+    return true;
+  }
+  else
+    return false;
 }
 
 //---------------------
@@ -903,16 +937,20 @@ gList<BehavSolution> EfgCSumG::Solve(void) const
   }
 }
 
-void EfgCSumG::SolveSetup(void) const
+bool EfgCSumG::SolveSetup(void) const
 {
   LPSolveParamsDialog ZSPD(parent->Frame(), true);
 
-  eliminate = ZSPD.Eliminate();
-  all = ZSPD.EliminateAll();
-  domType = ZSPD.DominanceType();
-  domMethod = ZSPD.DominanceMethod();
-
-  markSubgames = ZSPD.MarkSubgames();
+  if (ZSPD.Completed() == wxOK) {
+    eliminate = ZSPD.Eliminate();
+    all = ZSPD.EliminateAll();
+    domType = ZSPD.DominanceType();
+    domMethod = ZSPD.DominanceMethod();
+    markSubgames = ZSPD.MarkSubgames();
+    return true;
+  }
+  else
+    return false;
 }
 
 //========================================================================
@@ -1005,16 +1043,20 @@ gList<BehavSolution> EfgSimpdivG::Solve(void) const
   }
 }
 
-void EfgSimpdivG::SolveSetup(void) const
+bool EfgSimpdivG::SolveSetup(void) const
 {
   SimpdivSolveParamsDialog SDPD(parent->Frame(), true); 
 
-  eliminate = SDPD.Eliminate();
-  all = SDPD.EliminateAll();
-  domType = SDPD.DominanceType();
-  domMethod = SDPD.DominanceMethod();
-
-  markSubgames = SDPD.MarkSubgames();
+  if (SDPD.Completed() == wxOK) {
+    eliminate = SDPD.Eliminate();
+    all = SDPD.EliminateAll();
+    domType = SDPD.DominanceType();
+    domMethod = SDPD.DominanceMethod();
+    markSubgames = SDPD.MarkSubgames();
+    return true;
+  }
+  else
+    return false;
 }
 
 //========================================================================
@@ -1205,16 +1247,20 @@ gList<BehavSolution> EfgNGobitG::Solve(void) const
   return M.GetSolutions();
 }
 
-void EfgNGobitG::SolveSetup(void) const
+bool EfgNGobitG::SolveSetup(void) const
 {
   GobitSolveParamsDialog GSPD(parent->Frame(), parent->Filename());
 
-  eliminate = GSPD.Eliminate();
-  all = GSPD.EliminateAll();
-  domType = GSPD.DominanceType();
-  domMethod = GSPD.DominanceMethod();
-
-  markSubgames = GSPD.MarkSubgames();
+  if (GSPD.Completed() == wxOK) {
+    eliminate = GSPD.Eliminate();
+    all = GSPD.EliminateAll();
+    domType = GSPD.DominanceType();
+    domMethod = GSPD.DominanceMethod();
+    markSubgames = GSPD.MarkSubgames();
+    return true;
+  }
+  else
+    return false;
 }
 
 //---------------------
@@ -1250,16 +1296,20 @@ gList<BehavSolution> EfgEGobitG::Solve(void) const
   return solns;
 }
 
-void EfgEGobitG::SolveSetup(void) const
+bool EfgEGobitG::SolveSetup(void) const
 { 
   GobitSolveParamsDialog GSPD(parent->Frame(), parent->Filename()); 
 
-  eliminate = GSPD.Eliminate();
-  all = GSPD.EliminateAll();
-  domType = GSPD.DominanceType();
-  domMethod = GSPD.DominanceMethod();
-
-  markSubgames = GSPD.MarkSubgames();
+  if (GSPD.Completed() == wxOK) {
+    eliminate = GSPD.Eliminate();
+    all = GSPD.EliminateAll();
+    domType = GSPD.DominanceType();
+    domMethod = GSPD.DominanceMethod();
+    markSubgames = GSPD.MarkSubgames();
+    return true;
+  }
+  else
+    return false;
 }
 
 //========================================================================
@@ -1451,14 +1501,18 @@ gList<BehavSolution> EfgGobitAllG::Solve(void) const
   return solns;
 }
 
-void EfgGobitAllG::SolveSetup(void) const
+bool EfgGobitAllG::SolveSetup(void) const
 {
   GridSolveParamsDialog GSPD(parent->Frame(), parent->Filename()); 
 
-  eliminate = GSPD.Eliminate();
-  all = GSPD.EliminateAll();
-  domType = GSPD.DominanceType();
-  domMethod = GSPD.DominanceMethod();
-
-  markSubgames = GSPD.MarkSubgames();
+  if (GSPD.Completed() == wxOK) {
+    eliminate = GSPD.Eliminate();
+    all = GSPD.EliminateAll();
+    domType = GSPD.DominanceType();
+    domMethod = GSPD.DominanceMethod();
+    markSubgames = GSPD.MarkSubgames();
+    return true;
+  }
+  else
+    return false;
 }

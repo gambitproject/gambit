@@ -135,9 +135,12 @@ void EfgShow::SolveStandard(void)
 {
   EfgSolveStandardDialog ESS(ef, this);
 
+  if (ESS.Completed() != wxOK)  return;
+
   guiEfgSolution *solver;
 
   Enable(FALSE);
+  wxBeginBusyCursor();
 
   if (!ESS.ViaNfg()) {
     switch (ESS.GetEfgAlgorithm()) {
@@ -193,8 +196,10 @@ void EfgShow::SolveStandard(void)
 
   try {
     solns += solver->Solve();
+    wxEndBusyCursor();
   }
   catch (gException &E) {
+    wxEndBusyCursor();
     guiExceptionDialog(E.Description(), this);
   }
 
@@ -227,7 +232,6 @@ void EfgShow::Solve(int p_algorithm)
   //  EfgSolveSettings ESS(ef);
   // do not want users doing anything while solving
   Enable(FALSE);
-  wxBeginBusyCursor();
 
   guiEfgSolution *solver = 0;
 
@@ -277,12 +281,16 @@ void EfgShow::Solve(int p_algorithm)
     return;
   }
 
+  bool go = solver->SolveSetup();
+  
   try {
-    solver->SolveSetup();
-    if (solver->MarkSubgames())
-      tw->subgame_solve();
-    solns += solver->Solve();
-    wxEndBusyCursor();
+    if (go) {
+      if (solver->MarkSubgames())
+	tw->subgame_solve();
+      wxBeginBusyCursor();
+      solns += solver->Solve();
+      wxEndBusyCursor();
+    }
   }
   catch (gException &E) {
     wxEndBusyCursor();
@@ -293,7 +301,7 @@ void EfgShow::Solve(int p_algorithm)
  
   ChangeSolution(solns.VisibleLength());
   Enable(TRUE);
-  InspectSolutions(CREATE_DIALOG);
+  if (go)  InspectSolutions(CREATE_DIALOG);
 }
 
 
