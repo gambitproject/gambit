@@ -1,4 +1,8 @@
-// gNumber class for gambit project
+//
+// FILE: gnumber.h -- Number class for Gambit project. 
+//
+// $Id$
+//
 
 #ifndef _GNumber_h
 #define _GNumber_h 1
