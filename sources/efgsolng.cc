@@ -1,6 +1,6 @@
 // File: efgsolng.cc -- definition of the class dealing with the GUI part of the
 // extensive form solutions.
-// @(#)efgsolng.cc	1.8 8/6/96
+// $Id$
 
 #include "wx.h"
 #include "wx_form.h"
@@ -94,7 +94,7 @@ if (subg_num==subgame_roots.Length()) parent->SetPickSubgame(0);
 
 // Eliminated dominanted strats, if so requested
 NFSupport *ComputeDominated(NFSupport &S, bool strong,
-								const gArray<int> &players, gOutput &tracefile); // in nfdom.cc
+								const gArray<int> &players, gOutput &tracefile,gStatus &gstatus); // in nfdom.cc
 #include "elimdomd.h"
 template <class T>
 void BaseBySubgameG<T>::BaseViewNormal(const Nfg<T> &N, NFSupport *&sup)
@@ -107,13 +107,13 @@ for (int i=1;i<=N.NumPlayers();i++) players[i]=i;
 NFSupport *temp_sup=sup,*temp_sup1=0;
 if (DS.FindAll())
 {
-	while ((temp_sup=ComputeDominated(*temp_sup,DS.DomStrong(),players,gnull)))
+	while ((temp_sup=ComputeDominated(*temp_sup,DS.DomStrong(),players,gnull,gstatus)))
 		{if (temp_sup1) delete temp_sup1; temp_sup1=temp_sup;}
 	if (temp_sup1) sup=temp_sup1;
 }
 else
 {
-	if ((temp_sup=ComputeDominated(*temp_sup,DS.DomStrong(),players,gnull)))
+	if ((temp_sup=ComputeDominated(*temp_sup,DS.DomStrong(),players,gnull,gstatus)))
 	 sup=temp_sup;
 }
 }
