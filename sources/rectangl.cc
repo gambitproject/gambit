@@ -15,12 +15,6 @@ template class gNode< gRectangle<gRational> >;
 template gOutput& operator << (gOutput& output, const gRectangle<gRational>& x);
 template gRectangle<gDouble> TogDouble(const gRectangle<gRational>&);
 
-template class gRectangle<int>;
-template class gList< gRectangle<int> >;
-template class gNode< gRectangle<int> >;
-template gOutput& operator << (gOutput& output, const gRectangle<int>& x);
-template gRectangle<gDouble> TogDouble(const gRectangle<int>&);
-
 template class gRectangle<double>;
 template class gList< gRectangle<double> >;
 template class gNode< gRectangle<double> >;
