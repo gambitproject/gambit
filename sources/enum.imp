@@ -127,25 +127,25 @@ template <class T> int EnumModule<T>::DoubleEnum(void)
     for(k=1;k<=n1;k++) {
       profile(1,k) = (T)0;
       if(bfs1.IsDefined(k)) {
-	profile(1,k) =-bfs1(k);
-	sum+=profile(1,k);
+    profile(1,k) =-bfs1(k);
+    sum+=profile(1,k);
       }
     } 
     for(k=1;k<=n1;k++) {
       if(bfs1.IsDefined(k)) 
-	profile(1,k)/=sum;
+    profile(1,k)/=sum;
     }
     sum = (T)0;
     for(k=1;k<=n2;k++) {
       profile(2,k) = (T)0;
       if(bfs2.IsDefined(k)) {
-	profile(2,k) =-bfs2(k);
-	sum+=profile(2,k);
+    profile(2,k) =-bfs2(k);
+    sum+=profile(2,k);
       }
     } 
     for(k=1;k<=n2;k++) {
       if(bfs2.IsDefined(k)) 
-	profile(2,k)/=sum;
+    profile(2,k)/=sum;
     } 
   
     index = solutions.Append(MixedSolution(profile, NfgAlg_ENUM));
@@ -250,7 +250,10 @@ template <class T> int EnumModule<T>::Enum(void)
   i=0;
 
   int i1,i2,id1=0,id2=0;
-  (*params.tracefile) << "\n" << v2 << " " << v1 << "\n";
+
+  if(params.trace>=2) 
+    (*params.tracefile) << "\n" << v2 << " " << v1 << "\n";
+
   for( i2=2; 
        i2<=v2 &&
        (params.stopAfter==0 || solutions.Length()<params.stopAfter);
@@ -261,8 +264,8 @@ template <class T> int EnumModule<T>::Enum(void)
 //    gout << "\nProgress = " << (double)(i-2)/(double)v2;
     i++;
     for( i1=2; 
-	 i1<=v1 && (params.stopAfter==0 || solutions.Length()<params.stopAfter);
-	 i1++ ) {
+     i1<=v1 && (params.stopAfter==0 || solutions.Length()<params.stopAfter);
+     i1++ ) {
       bfs2 = verts1[i1];
       
       // check if solution is nash 
@@ -270,52 +273,53 @@ template <class T> int EnumModule<T>::Enum(void)
       
       nash=1;
       for(k=1;k<=n1 && nash==1;k++)
-	if(bfs1.IsDefined(k) && bfs2.IsDefined(-k))
-	  if(!EqZero(bfs1(k)*bfs2(-k)))
-	    nash=0;
+    if(bfs1.IsDefined(k) && bfs2.IsDefined(-k))
+      if(!EqZero(bfs1(k)*bfs2(-k)))
+        nash=0;
       for(k=1;k<=n2 && nash==1;k++)
-	if(bfs2.IsDefined(k) && bfs1.IsDefined(-k))
-	  if(!EqZero(bfs2(k)*bfs1(-k)))
-	    nash=0;
+    if(bfs2.IsDefined(k) && bfs1.IsDefined(-k))
+      if(!EqZero(bfs2(k)*bfs1(-k)))
+        nash=0;
 
       if(nash) {
-	sum = (T)0;
-	for(k=1;k<=n1;k++) {
-	  profile(1,k) = (T)0;
-	  if(bfs1.IsDefined(k)) {
-	    profile(1,k) =-bfs1(k);
-	    sum+=profile(1,k);
-	  }
-	} 
-	for(k=1;k<=n1;k++) {
-	  if(bfs1.IsDefined(k)) 
-	    profile(1,k)/=sum;
-	}
-	sum = (T)0;
-	for(k=1;k<=n2;k++) {
-	  profile(2,k) = (T)0;
-	  if(bfs2.IsDefined(k)) {
-	    profile(2,k) =-bfs2(k);
-	    sum+=profile(2,k);
-	  }
-	} 
-	for(k=1;k<=n2;k++) {
-	  if(bfs2.IsDefined(k)) 
-	    profile(2,k)/=sum;
-	} 
+    sum = (T)0;
+    for(k=1;k<=n1;k++) {
+      profile(1,k) = (T)0;
+      if(bfs1.IsDefined(k)) {
+        profile(1,k) =-bfs1(k);
+        sum+=profile(1,k);
+      }
+    } 
+    for(k=1;k<=n1;k++) {
+      if(bfs1.IsDefined(k)) 
+        profile(1,k)/=sum;
+    }
+    sum = (T)0;
+    for(k=1;k<=n2;k++) {
+      profile(2,k) = (T)0;
+      if(bfs2.IsDefined(k)) {
+        profile(2,k) =-bfs2(k);
+        sum+=profile(2,k);
+      }
+    } 
+    for(k=1;k<=n2;k++) {
+      if(bfs2.IsDefined(k)) 
+        profile(2,k)/=sum;
+    } 
       
-	(*params.tracefile) << "\n" << i2 << " " << i1;
+    if(params.trace>=2) 
+      (*params.tracefile) << "\n" << i2 << " " << i1;
 
-	index = solutions.Append(MixedSolution(profile, NfgAlg_ENUM));
-	solutions[index].SetEpsilon(eps);
-	solutions[index].SetIsNash(triTRUE);
-	
-	// note:  this is not really sufficient information -- we should also
-	//        keep the basis
-	if(vert1id[i1]==0){id1++;vert1id[i1]=id1;key2.Append(profile.GetRow(2));}
-	if(vert2id[i2]==0){id2++;vert2id[i2]=id2;key1.Append(profile.GetRow(1));}
-	node1.Append(vert2id[i2]);
-	node2.Append(vert1id[i1]);
+    index = solutions.Append(MixedSolution(profile, NfgAlg_ENUM));
+    solutions[index].SetEpsilon(eps);
+    solutions[index].SetIsNash(triTRUE);
+    
+    // note:  this is not really sufficient information -- we should also
+    //        keep the basis
+    if(vert1id[i1]==0){id1++;vert1id[i1]=id1;key2.Append(profile.GetRow(2));}
+    if(vert2id[i2]==0){id2++;vert2id[i2]=id2;key1.Append(profile.GetRow(1));}
+    node1.Append(vert2id[i2]);
+    node2.Append(vert1id[i1]);
       }
     }
 
