@@ -130,8 +130,7 @@ AllLemke[N->NORFORM] =: NORFORM
 
    -	Description:  Searches for all solutions of the specified normal form
 	problem using the Lemke-Howson algorithm.
-   -	Return value:  Returns the same problem in 
-	normal form.
+   -	Return value:  Returns the same problem in normal form.
    -	Required parameters:
 	  *  N:  The problem normal form for which solutions are to be found.
    -	Optional parameters:  None.
@@ -323,64 +322,120 @@ ElimDom[N->NORFORM, {pl->INTLIST}, {strong->BOOLEAN}, {time<->RATIONAL},
 
 EfgToNfg[E->EXTFORM, {time<->RATIONAL}] =: NORFORM
 
-	Converts a problem in extensive form to the same problem as a normal
-form game and returns the normal form game.  The optional parameter 'time'
-returns the elapsed time for the operation.
+   -	Description:  Converts a problem in extensive form to the same problem
+	as a normal form game.
+   -	Return value:  The new normal form game.  
+   -	Required parameters:
+	  *  E:  The problem in extensive form to be converted to extensive 
+	     form.
+   -	Optional parameters:
+	  *  time:  Returns the elapsed time for the operation.
 
 ----------
 
 GetActionName[n->NODE, br->INTEGER] =: TEXT
 
-	Returns the name assigned to the action corresponding to the branch
-indicated by 'br` of the node specified by 'n'.
+   -	Description:  Finds the name assigned to the action corresponding to 
+	the indicated branch of the specified node.
+   -	Return value:  The name of the action.
+   -	Required parameters:
+	  *  n:  The node at which the action to be found exists.
+	  *  br:  The branch which corresponds to the action to be found.
+   -	Optional parameters:  None.
 
 ----------
 
 GetInfosetName[n->NODE] =: TEXT
 
-	Returns the name of the information set to which the node specified by
-'n' belongs.
+   -	Description:  Finds the name of the information set to which the 
+	specified node belongs.
+   -	Return value:  The name of the information set.
+   -	Required parameters:
+	  *  n:  The node which belongs to the information set to be found.
+   -	Optional parameters:  None.
 
 ----------
 
 GetNextSibling[n->NODE] =: NODE
 
-	Returns the next sibling of the node specified by 'n'.
+   -	Description:  Finds the next sibling of the specified node.
+   -	Return value:  The node which is the next sibling of the specified 
+	node.
+   -	Required parameters:
+	  *  n:  The node for which the next sibling is to be found.
+   -	Optional parameters:  None.
 
 ----------
 
 GetOutcome[E->EXTFORM, outc->INTEGER] =: RATLIST
 
-	Returns the vector of payoffs to the players for the outcome whose
-number is indicated by 'outc' in the problem in extensive form given by 'E'.
-If the outcome is not defined, the procedure returns the empty list.
+   -	Description:  Finds the vector of payoffs to the players for the 
+	outcome with the indicated number in the specified problem in extensive
+	form.
+   -	Return value:  The vector of payoffs corresponding to the specified 
+	outcome.  If the outcome is not defined, the procedure returns the 
+	empty list.
+   -	Required parameters:
+	  *  E:  The problem in extensive form for which the outcome is to be
+	     found.
+	  *  outc:  The number assigned to the outcome for which the payoff 
+	     vector will be returned.
+   -	Optional paramteters:  None.
 
 ---------
 
 GetOutcomeName[E->EXTFORM, outc->INTEGER] =: TEXT
 
-	Returns the name of the outcome specified by 'outc' in the problem in
-extensive form indicated by 'E'.  If the outcome is not defined, an error is
-given.  By default, the name of an outcome is the empty string.
+   -	Description:  Finds the name of the specified outcome in the indicated
+	problem in extensive form.  If the outcome is not defined, an error is
+	given.
+   -	Return value:  The name assigned to the indicated outcome.  By default,
+	the name of an outcome is the empty string.
+   -	Required parameters:
+	  *  E:  The problem in extensive form for which the outcome name is to
+	     be found.
+	  *  outc:  The number assigned to the outcome whose name will be 
+	     returned.
+   -	Optional parameters:  None.
 
 ----------
 
 GetPlayerName[E->EXTFORM, pl->INTEGER] =: TEXT
 
-	Returns the name of the player indicated by 'pl' in the problem in 
-extensive form given by 'E'.
+   -	Description:  Finds the name of the indicated player in the given 
+	problem in extensive form.
+   -	Return value:  The name assigned to the indicated player.  If the 
+	indicated player has not been assigned a name or does not exist, the
+	procedure returns the empty string.
+   -	Required parameters:
+	  *  E:  The problem in extensive form for which the player name is to
+	     be found.
+	  *  pl:  The number assigned to the player whose name will be 
+	     returned.
+   -	Optional parameters:  None.
 
 ----------
 
 GetPriorSibling[n->NODE] =: NODE
 
-	Returns the prior sibling of the node specified by 'n'.
+   -	Description:  Finds the prior sibling of the specified node.
+   -	Return value:  The node which is the prior sibling of the specified 
+	node.
+   -	Required parameters:
+	  *  n:  The node for which the prior sibling is to be found.
+   -	Optional parameters:  None.
 
 ----------
 
 GetTitle[E->EXTFORM] =: TEXT
 
-	Returns the title of the problem in extensive form specified by 'E'.
+   -	Description:  Finds the title of the indicated problem in extensive 
+	form.
+   -	Return value:  The title of the indicated extensive form problem.  If
+	the title has not been assigned, the empty string is returned.
+   -	Required parameters:
+	  *  E:  The problem in extensive form whose title is to be found.
+   -	Optional parameters:  None.
 
 ----------
 
@@ -389,41 +444,68 @@ Gobit[N->NORFORM, {nequilib->INTEGER}, {type->INTEGER},
 	{maxLam->RATIONAL}, {delLam->RATIONAL}, {tolDFP->RATIONAL},
 	{tolBrent}->RATIONAL}, {time<->RATIONAL}, {output->TEXT}] =: INTEGER
 
-	Computes the Gobit solution for the specified normal form game.  The
-optional parameter `nequilib` sets the number of equilibria to find and has a
-default value of 1.  The optional parameter 'type'  XXXX.  The optional 
-parameter 'maxitsDFP' XXXX and has a default value of XXXX.  The optional
-parameter 'maxitsBrent` sets the maximum number of iterations in Brent and has
-a default value of XXXX.  The optional parameters `minLam` and `maxLam` set the
-minimum and maximum values of Lambda and have default values of .01 and 30,
-respectively.  The optional parameter `delLam` specifies the change in the 
-value of Lambda and has a default value of `1.01`.  The optional parameter
-`tolDFP` XXXX and has a default value of 1.0E-10.  The optional parameter
-`tolBrent` XXXX and has a default value of XXXX.  The optional parameter `time`
-returns the elapsed time for the operation.  The optional parameter `output`
-can be used to redirect the output of this procedure to a file.  Directing output to ``/dev/null'' under Unix turns output off.  By default, it
-directs output to the screen.
+   -	Description:  Computes the Gobit solution for the specified problem in
+	normal form.  
+   -	Return value:  XXXX.
+   -	Required parameters
+	  *  N:  The problem in normal form for which the Gobit solution is to
+	     be found.
+   -	Optional parameters:
+	  *  nequilib:  Sets the number of equilibria to find.  Has a default 
+	     value of 1.  
+	  *  type:   XXXX.  
+	  *  maxitsDFP:  XXXX.
+	  *  maxitsBrent:  Sets the maximum number of iterations in Brent and 
+	     has a default value of XXXX.  
+	  *  minLam:  Sets the minimum value of Lambda.  Has a default value of
+	     0.01.
+	  *  maxLam:  Sets the maximum value of Lambda.  Has a default value of
+	     30.
+	  *  delLam:  Specifies the rate at which the value of Lambda changes.
+	     Has a default value of 1.01.
+	  *  tolDFP:  XXXX .  Has a default value of 1.0E-10.  
+	  *  tolBrent:  XXXX .
+	  *  time:  Returns the elapsed time for the operation.
+	  *  output:  Can be used to redirect the output of this procedure to a
+	     file.  Directing output to ``/dev/null'' under Unix turns output 
+	     off.  By default, output is directed to the screen.
 
 ----------
 
 HasOutcome[E->EXTFORM, outc->INTEGER] =: BOOLEAN
 
-	Returns True exactly when the problem in extensive form specified by 
-'E' contains an outcome with the number given by 'outc'.  Returns false 
-otherwise.
+   -	Description:  Finds whether or not the specified problem in extensive 
+	form contains an outcome with the given number.  
+   -	Return value:  True only when there exists an outcome with the given 
+	number in the specified problem.  Returns False otherwise.
+   -	Required parameters:
+	  *  E:  The problem in extensive form which is to be searched for the
+	     outcome.
+	  *  outc:  The number of the outcome which is to be searched for.
+   -	Optional parameters:  None.
 
 ----------
 
 IsWatchRunning[] =: BOOLEAN
 
-	Returns "True" if the system stopwatch is currently running.
+   -	Description:  Finds whether or not the system stopwatch is currently
+	running.
+   -	Return value:  True only if the system stopwatch is currently running.
+	Returns False otherwise.
+   -	Required parameters:  None.
+   -	Optional parameters:  None.
 
 ----------
 
 Lemke[N->NORFORM] =: NORFORM
 
-	Searches for one solution of the normal form game specified using the
-Lemke-Howson algorithm.  Returns the same problem in normal form.	
+   -	Descprition:  Searches for one solution of the specified normal form 
+	game specified using the Lemke-Howson algorithm.  
+   -	Return value:  The same problem in normal form.	
+   -	Required parameters:
+	  *  N:  The problem in normal form for which the solution is to be 
+	     searched.
+   -	Optional parameters:  None.
 
 ----------
 
@@ -432,53 +514,87 @@ Length[l->INTLIST] =: INTEGER
 Length[l->RATLIST] =: INTEGER
 Length[l->TEXTLIST] =: INTEGER
 
-	Returns the number of elements in the specified list.
+   -	Description:  Finds the number of elements in the specified list.
+   -	Return value:  The number of elements found in the list.
+   -	Required parameters:
+	  *  l:  The list for which the number of elements is to be found.
+   -	Optional parameters:  None.
 
 ----------
 
 MergeInfosets[n->NODE, to->NODE] =: NODE
 
-	Moves all the nodes from the information set to which the node
-specified by 'n' belongs to the information to which the node indicated by 'to'
-belongs.
+   -	Description:  Moves all the nodes contained in the information set 
+	which contains the node first specified to the information to which the
+	second node indicated belongs.
+   -	Return value:  XXXX .
+   -	Required parameters:
+	  *  n:  The node which belongs to the information set whose nodes are
+	     to be moved to the second information set.
+	  *  to:  The node which belongs to the information set to which all
+	     the nodes from the first information set are to be moved.
+   -	Optional parameters:  None.
 
 ----------
 
 NewEfg[] =: EXTFORM
 
-	Allocates and returns a new extensive form game.
+   -	Description:  Allocates and returns a new extensive form game.
+   -	Return value:  The newly allocated problem in extensive form.
+   -	Required parameters:  None.
+   -	Optional parameters:  None.
 
 ----------
 
 NewOutcome[E->EXTFORM, {outc->INTEGER}] =: INTEGER
 
-	Creates and assigns a number to a new outcome within the specified 
-problem in extensive form.  Returns the number of the newly created outcome.
-The optional parameter 'outc' allows the user to specify the number given to 
-the new outcome created.  If `outc` is not specified, the new outcome is
-assigned the lowest positive number for which no game is defined.  If the 
-number specified by `outc` already exists as an outcome, no action is taken and
-the procedure returns a value of zero.
+   -	Description:  Creates and assigns a number to a new outcome within the
+	specified problem in extensive form.  
+   -	Return value:  The number of the newly created outcome.  The optional 
+	parameter 'outc' allows the user to specify the number given to the new
+	outcome created.  If 'outc' is not specified, the new outcome is 
+	assigned the lowest positive number for which no outcome is defined.  
+	If the number specified by 'outc' already exists as an outcome, no 
+	action is taken and the procedure returns a value of zero.
+   -	Required parameters:
+	  *  E:  The problem in extensive form for which a new outcome is to
+	     be created.
+   -	Optional parameters:
+	  *  outc:  Allows the user to specify the number given to the new 
+	     outcome created.  If not specified, the new outcome is assigned
+	     the lowest positive number for which no otcome is defined.  If the
+	     number specified already exists as an outcome, no action is taken
+	     and the procedure returns a value of zero.
 
 ----------
 
 PureNash[N->NORFORM, {num->INTEGER}, {time<->RATIONAL}, {output->TEXT}]
 	 =: INTEGER
 
-	Finds the weak pure strategy Nash equilibria in the specified normal 
-form game.  Returns the number of equilibria found.  The optional parameter 
-'num' allows the user to set the maximum number of Nash equilibria to find and 
-has a default value of 1.  The optional parameter 'time' returns the elapsed 
-time for the operation.  The optional parameter `output` can be used to
-redirect the output of this procedure to a file.  Directing output to ``/dev/
-null'' under Unix turns output off.  By default, it directs output to the
-screen.
+   -	Description:  Finds the weak pure strategy Nash equilibria in the 
+	specified normal form game.  
+   -	Return value:  The number of equilibria found.  The optional parameter 
+	'num' allows the user to set the maximum number of Nash equilibria to 
+	find and has a default value of 1.
+   -	Required parameters:
+	  *  N:  The problem in normal form for which the weak pure strategy
+	     Nash equilibria are to be found.
+   -	Optional parameters:
+	  *  num:  Allows the user to set the maximum number of Nash equilibria
+	     to find.  Has a default value of 1.
+	  *  time:  Returns the elapsed time for the operation.
+	  *  output:  Can be used to redirect the output of this procedure to a
+	     file.  Directing output to ``/dev/null'' under Unix turns output 
+	     off.  By default, output is directed to the screen.  
 
 ----------
 
 Quit
 
-	Exits the command language.
+   -	Description:  Exits the command language.
+   -	Return value:  None.
+   -	Required parameters:  None.
+   -	Optional parameters:  None.
 
 ----------
 
