@@ -11,7 +11,7 @@ main()
 
   GCLCompiler C;
   
-  while (1)   {
+  while (!C.quit)   {
     strcpy(buffer, "");
     gout << "GCL" << command++ << ": ";
     fgets(buffer, 255, stdin);

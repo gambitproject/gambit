@@ -24,8 +24,9 @@
   gString tval, formal;  \
   gList<Instruction *> program; \
   gGrowableStack<gString> formalstack; \
-  gGrowableStack<int> labels; \
+  gGrowableStack<int> labels, listlen; \
   GSM gsm; \
+  bool quit; \
   \
   char nextchar(void); \
   void ungetchar(char c); \
@@ -35,7 +36,8 @@
   int Parse(const gString &s); \
   void Execute(void);
 
-%define CONSTRUCTOR_INIT     : index(0), gsm(256), formalstack(4), labels(4)
+%define CONSTRUCTOR_INIT     : index(0), gsm(256), formalstack(4), labels(4), \
+                               listlen(4), quit(false)
 
 %token LOR
 %token LAND
@@ -54,6 +56,8 @@
 %token SEMI
 %token LBRACK
 %token RBRACK
+%token LBRACE
+%token RBRACE
 %token RARROW
 %token DBLARROW
 %token COMMA
@@ -70,6 +74,7 @@
 
 %token IF
 %token WHILE
+%token QUIT
 
 %token BOOLEAN
 %token INTEGER
@@ -80,20 +85,16 @@
 
 %%
 
-program:      statements   { emit(new Display); }
+program:      statements   { if (!quit)  emit(new Display); }
 
 statements:   statement
           |   statements SEMI statement
 
 statement:
          |    expression
-         |    assignment
          |    conditional
          |    whileloop
-
-assignment:   lvalue ASSIGN expression   { emit(new Assign); }
-
-lvalue:       NAME     { emit(new PushRef(tval)); }
+         |    QUIT     { quit = true; }
 
 conditional:  IF LBRACK expression COMMA 
               { emit(new NOT); emit(0);
@@ -118,10 +119,15 @@ whileloop:    WHILE LBRACK { labels.Push(program.Length() + 1); }
 		emit(new Goto(labels.Pop()));
 		emit(new NOP);
 	      }
- 
-expression:   E1
-          |   expression LOR E1  { emit(new OR); }
+
+expression:   E0
+          |   NAME ASSIGN  { emit(new PushRef(tval)); } expression { emit(new Assign()); }
           ;
+
+E0:           E1
+  |           E0 LOR E1  { emit(new OR); }
+  ;
+
 E1:           E2
   |           E1 LAND E2  { emit(new AND); } 
   ;
@@ -166,6 +172,7 @@ E8:           BOOLEAN       { emit(new Push<bool>(bval)); }
   |           LPAREN expression RPAREN
   |           NAME          { emit(new PushRef(tval)); }
   |           function      { emit(new CallFunction()); }
+  |           list          { emit(new PushList(listlen.Pop())); }
   ;
 
 function:     NAME LBRACK  { emit(new InitCallFunction(tval)); } arglist RBRACK
@@ -185,8 +192,17 @@ named_args:   named_arg
 
 named_arg:    NAME RARROW { formalstack.Push(tval); } expression
                            { emit(new Bind(formalstack.Pop())); }
-         |    NAME DBLARROW  { formalstack.Push(tval); } lvalue
-                           { emit(new Bind(formalstack.Pop())); }
+         |    NAME DBLARROW  { formalstack.Push(tval); } NAME
+                           { emit(new PushRef(tval));
+                             emit(new Bind(formalstack.Pop())); }
+
+list:         LBRACE  { listlen.Push(0); } listels RBRACE
+
+listels:      listel
+       |      listels COMMA listel
+
+listel:       expression   { listlen.Push(listlen.Pop() + 1); }
+
 %%
 
 
@@ -209,8 +225,29 @@ int GCLCompiler::yylex(void)
 {
   char c;
 
-  c = nextchar();
-  while (isspace(c))   c = nextchar();
+  while (1)  {
+    char d;
+    do  {
+      c = nextchar();
+    }  while (isspace(c));
+    if (c == '/')  {
+      if ((d = nextchar()) == '/')
+	while ((d = nextchar()) != '\n');
+      else if (d == '*')  {
+	int done = 0;
+	while (!done)  {
+	  while ((d = nextchar()) != '*');
+	  if ((d = nextchar()) == '/')  done = 1;
+	}
+      }
+      else  {
+	ungetchar(d);
+	return '/';
+      }
+    }
+    else
+      break;
+  }
 
   if (isalpha(c))  {
     gString s(c);
@@ -236,6 +273,7 @@ int GCLCompiler::yylex(void)
     else if (s == "MOD")    return PERCENT;
     else if (s == "If")     return IF;
     else if (s == "While")  return WHILE;
+    else if (s == "Quit")   return QUIT;
     else  { tval = s; return NAME; }
   }
 
@@ -281,6 +319,8 @@ int GCLCompiler::yylex(void)
     case ';':   return SEMI;
     case '(':   return LPAREN;
     case ')':   return RPAREN;
+    case '{':   return LBRACE;
+    case '}':   return RBRACE;
     case '+':   return PLUS;
     case '-':   c = nextchar();
                 if (c == '>')  return RARROW;
