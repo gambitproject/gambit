@@ -89,8 +89,14 @@ template class gBlock<Action const *>;
 template class gArray<Action *>;
 template class gBlock<Action *>;
 
+template class gArray<const Action *>;
+template class gBlock<const Action *>;
+
 template class gArray<gArray<Action const *> *>;
+
 template class gArray<gArray<Action *> *>;
+
+template class gArray<gArray<const Action *> *>;
 
 template class gArray<EFOutcome *>;
 template class gBlock<EFOutcome *>;

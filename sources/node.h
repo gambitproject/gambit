@@ -26,7 +26,7 @@ class Node    {
   
   protected:
     bool mark;
-    int number;
+    int number; // This is a unique identifier, not related to infoset memship
     Efg *E;
     gText name;
     Infoset *infoset;
@@ -42,6 +42,7 @@ class Node    {
     Efg *Game(void) const   { return E; }
 
     int NumChildren(void) const    { return children.Length(); }
+    int NumberInInfoset(void) const;
     const gArray<Node *> &Children(void) const { return children; }
     Infoset *GetInfoset(void) const   { return infoset; }
     bool IsTerminal(void) const { return (children.Length() == 0); }
@@ -50,8 +51,6 @@ class Node    {
       { if (!infoset)   return 0;
 	else  return infoset->GetPlayer(); }
     const Action *GetAction() const; // Error if called on Game()->RootNode()
-    int Node::NumberInInfoset(void) const;
-
     Node *GetChild(int i) const    { return children[i]; }
     Node *GetChild(const Action& a) const    
       { return children[a.GetNumber()]; }
