@@ -1,10 +1,8 @@
-//#
-//# FILE: mixedsol.h -- Mixed strategy solution classes
-//#
-//# $Id$
-//#
-
-
+//
+// FILE: mixedsol.h -- Mixed strategy solution classes
+//
+// $Id$
+//
 
 #ifndef MIXEDSOL_H
 #define MIXEDSOL_H
@@ -33,8 +31,7 @@ void DisplayNfgAlgType(gOutput& o, NfgAlgType i);
 
 
 
-template <class T> class MixedSolution : public MixedProfile<T>
-{
+template <class T> class MixedSolution : public MixedProfile<T>  {
 protected:
   NfgAlgType _Creator;
   TriState _IsNash;
@@ -44,31 +41,32 @@ protected:
   T _GobitValue;
   T _LiapValue;
   gArray<T> _Payoff;
+
   void EvalEquilibria();
 
 public:
-  MixedSolution(const Nfg<T> &, bool truncated = false);
+  MixedSolution(const Nfg<T> &);
   MixedSolution(const Nfg<T> &, const NFSupport &);
   MixedSolution(const Nfg<T> &, const gPVector<T> &);
   MixedSolution(const MixedProfile<T> &, NfgAlgType creator = NfgAlg_USER);
-
   MixedSolution(const MixedSolution<T> &);
-  ~MixedSolution();
+
+  virtual ~MixedSolution();
 
   void SetCreator(NfgAlgType);
-  NfgAlgType Creator() const; //Who created this object? (algorithm ID or user)
+  NfgAlgType Creator(void) const; //Who created this object? (algorithm ID or user)
   void SetIsNash(TriState);
-  TriState IsNash(); // Is it Nash? Y/N/DK
+  TriState IsNash(void) const; // Is it Nash? Y/N/DK
   void SetIsPerfect(TriState);
-  TriState IsPerfect(); //Is it Perfect? Y/N/DK
+  TriState IsPerfect(void) const; //Is it Perfect? Y/N/DK
   void SetIsProper(TriState);
-  TriState IsProper(); //Is it Proper? Y/N/DK
+  TriState IsProper(void) const; //Is it Proper? Y/N/DK
 
   void SetGobit(T lambda, T value);
-  T GobitLambda() const; // lambda from gobit alg
-  T GobitValue() const; // objective function from gobit alg
+  T GobitLambda(void) const; // lambda from gobit alg
+  T GobitValue(void) const; // objective function from gobit alg
   void SetLiap(T value);
-  T LiapValue(); // liaponuv function value (to test for Nash)
+  T LiapValue(void) const; // liapunov function value (to test for Nash)
 
   bool operator==(const MixedSolution<T> &) const;
   void Dump(gOutput& f) const;
@@ -77,18 +75,23 @@ public:
   void Invalidate();
 
   T& operator[](int);
-	const T& operator[](int) const;
-	T& operator()(int, int);
-	const T& operator()(int, int) const;
-	gPVector<T>& operator=(const gPVector<T>&);
-  gPVector<T>& operator=(const gVector<T>&);
-  gPVector<T>& operator=(T);
-  gPVector<T>& operator+=(const gPVector<T>&);
-  gVector<T>& operator+=(const gVector<T>&);
-  gPVector<T>& operator-=(const gPVector<T>&);
-  gVector<T>& operator-=(const gVector<T>&);
-  gPVector<T>& operator*=(T);
-  MixedProfile<T>& operator=(const MixedProfile<T>&);
+  const T& operator[](int) const;
+  T& operator()(int, int);
+  const T& operator()(int, int) const;
+
+// for now, we may safely use the predefined assignment operator
+// for MixedProfile.  This must be written if dynamically allocated
+// members are added!!!!!!
+
+  MixedSolution<T> &operator=(const MixedProfile<T>&);
+  MixedSolution<T> &operator=(const gPVector<T>&);
+  MixedSolution<T> &operator=(const gVector<T>&);
+  MixedSolution<T> &operator=(T);
+  MixedSolution<T> &operator+=(const gPVector<T>&);
+  MixedSolution<T> &operator+=(const gVector<T>&);
+  MixedSolution<T> &operator-=(const gPVector<T>&);
+  MixedSolution<T> &operator-=(const gVector<T>&);
+  MixedSolution<T> &operator*=(T);
 };
 
 

@@ -1,8 +1,8 @@
-//#
-//# FILE: behavsol.h -- Behav strategy solution classes
-//#
-//# $Id$
-//#
+//
+// FILE: behavsol.h -- Behav strategy solution classes
+//
+// $Id$
+//
 
 #ifndef BEHAVSOL_H
 #define BEHAVSOL_H
@@ -37,8 +37,7 @@ void DisplayEfgAlgType(gOutput& o, EfgAlgType i);
 
 
 
-template <class T> class BehavSolution : public BehavProfile<T>
-{
+template <class T> class BehavSolution : public BehavProfile<T>  {
 protected:
   EfgAlgType _Creator;
   TriState _IsNash;
@@ -50,56 +49,60 @@ protected:
   gDPVector<T> *_Beliefs;
   static unsigned long MaxId;
   unsigned long _Id;
-  void EvalEquilibria();
+
+  void EvalEquilibria(void);
 
 public:
-  BehavSolution(const Efg<T> &, bool truncated = false);
+  BehavSolution(const Efg<T> &);
   BehavSolution(const Efg<T> &, const gDPVector<T> &);
   BehavSolution(const EFSupport &);
   BehavSolution(const BehavProfile<T> &, EfgAlgType creator = EfgAlg_USER);
-
   BehavSolution(const BehavSolution<T> &);
-  ~BehavSolution();
+  virtual ~BehavSolution();
 
   int Id(void) const;
   void SetCreator(EfgAlgType);
-  EfgAlgType Creator() const; //Who created this object? (algorithm ID or user)
+
+  EfgAlgType Creator(void) const; //Who created this object? (algorithm ID or user)
   void SetIsNash(TriState);
-  TriState IsNash(); // Is it Nash? Y/N/DK
+  TriState IsNash(void) const; // Is it Nash? Y/N/DK
   void SetIsSubgamePerfect(TriState);
-  TriState IsSubgamePerfect(); // Is it Subgame Perfect? Y/N/DK
+  TriState IsSubgamePerfect(void) const; // Is it Subgame Perfect? Y/N/DK
   void SetIsSequential(TriState);
-  TriState IsSequential(); // Is it Sequential? Y/N/DK
+  TriState IsSequential(void) const; // Is it Sequential? Y/N/DK
 
   void SetGobit(T lambda, T value);
-  T GobitLambda() const; // lambda from gobit alg
-  T GobitValue() const; // objective function from gobit alg
+  T GobitLambda(void) const; // lambda from gobit alg
+  T GobitValue(void) const; // objective function from gobit alg
   void SetLiap(T value);
-  T LiapValue(); // liapnov function value (to test for Nash)
-  gDPVector<T> Beliefs(); // Belief vector, if a sequential equilibrium
+  T LiapValue(void) const; // liapunov function value (to test for Nash)
+  const gDPVector<T> &Beliefs(void) const;
+     // Belief vector, if a sequential equilibrium
 
   bool operator==(const BehavSolution<T> &) const;
   void Dump(gOutput& f) const;
 
+  void Invalidate(void);
 
-  void Invalidate();
+  T& operator[](int);
+  const T& operator[](int) const;
+  T& operator()(int, int, int);
+  const T& operator()(int, int, int) const;
 
-	T& operator[](int);
-	const T& operator[](int) const;
-	T& operator()(int, int, int);
-	const T& operator()(int, int, int) const;
-	gDPVector<T>& operator=(const gDPVector<T>&);
-  gDPVector<T>& operator=(const gPVector<T>&);
-  gDPVector<T>& operator=(const gVector<T>&);
-  gDPVector<T>& operator=(T);
-  gDPVector<T>& operator+=(const gDPVector<T>&);
-  gPVector<T>& operator+=(const gPVector<T>&);
-  gVector<T>& operator+=(const gVector<T>&);
-  gDPVector<T>& operator-=(const gDPVector<T>&);
-  gPVector<T>& operator-=(const gPVector<T>&);
-  gVector<T>& operator-=(const gVector<T>&);
-  gDPVector<T>& operator*=(T);
-  BehavProfile<T>& operator=(const BehavProfile<T>&);
+  BehavSolution<T>& operator=(const BehavSolution<T> &);
+  BehavSolution<T>& operator=(const BehavProfile<T>&);
+  BehavSolution<T>& operator=(const gDPVector<T>&);
+  BehavSolution<T>& operator=(const gPVector<T>&);
+  BehavSolution<T>& operator=(const gVector<T>&);
+  BehavSolution<T>& operator=(T);
+  
+  BehavSolution<T>& operator+=(const gDPVector<T>&);
+  BehavSolution<T>& operator+=(const gPVector<T>&);
+  BehavSolution<T>& operator+=(const gVector<T>&);
+  BehavSolution<T>& operator-=(const gDPVector<T>&);
+  BehavSolution<T>& operator-=(const gPVector<T>&);
+  BehavSolution<T>& operator-=(const gVector<T>&);
+  BehavSolution<T>& operator*=(T);
 };
 
 #ifndef __BORLANDC__

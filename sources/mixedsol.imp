@@ -1,17 +1,16 @@
-//#
-//# FILE: mixedsol.cc -- Mixed strategy profile classes
-//#
-//# $Id$
-//#
-
+//
+// FILE: mixedsol.imp -- Mixed strategy profile classes
+//
+// $Id$
+//
 
 #include "assert.h"
 #include "mixedsol.h"
 #include "gmisc.h"
 
 template <class T> 
-MixedSolution<T>::MixedSolution(const Nfg<T>& n, bool truncated)
-: MixedProfile<T>(n, truncated),
+MixedSolution<T>::MixedSolution(const Nfg<T>& n)
+: MixedProfile<T>(n, false),
   _Creator(NfgAlg_USER),
   _IsNash(T_DONTKNOW),
   _IsPerfect(T_DONTKNOW),
@@ -91,26 +90,26 @@ template <class T> void MixedSolution<T>::EvalEquilibria()
 template <class T> void MixedSolution<T>::SetCreator(NfgAlgType c)
 { _Creator = c; }
 
-template <class T> NfgAlgType MixedSolution<T>::Creator() const
+template <class T> NfgAlgType MixedSolution<T>::Creator(void) const
 { return _Creator; }
 
 template <class T> void MixedSolution<T>::SetIsNash(TriState i)
 { _IsNash = i; }
 
-template <class T> TriState MixedSolution<T>::IsNash()
-{ EvalEquilibria(); return _IsNash; }
+template <class T> TriState MixedSolution<T>::IsNash(void) const
+{ ((MixedSolution<T> &) *this).EvalEquilibria(); return _IsNash; }
 
 template <class T> void MixedSolution<T>::SetIsPerfect(TriState i)
 { _IsPerfect = i; }
 
-template <class T> TriState MixedSolution<T>::IsPerfect()
-{ EvalEquilibria(); return _IsPerfect; }
+template <class T> TriState MixedSolution<T>::IsPerfect(void) const
+{ ((MixedSolution<T> &) *this).EvalEquilibria(); return _IsPerfect; }
 
 template <class T> void MixedSolution<T>::SetIsProper(TriState i)
 { _IsProper = i; }
 
-template <class T> TriState MixedSolution<T>::IsProper()
-{ EvalEquilibria(); return _IsProper; }
+template <class T> TriState MixedSolution<T>::IsProper(void) const
+{ ((MixedSolution<T> &) *this).EvalEquilibria(); return _IsProper; }
 
 
 template <class T> void MixedSolution<T>::SetGobit(T lambda, T value)
@@ -119,19 +118,19 @@ template <class T> void MixedSolution<T>::SetGobit(T lambda, T value)
   _GobitValue = value;
 }
 
-template <class T> T MixedSolution<T>::GobitLambda() const
+template <class T> T MixedSolution<T>::GobitLambda(void) const
 { return _GobitLambda; }
 
-template <class T> T MixedSolution<T>::GobitValue() const
+template <class T> T MixedSolution<T>::GobitValue(void) const
 { return _GobitValue; }
 
 template <class T> void MixedSolution<T>::SetLiap(T value)
 { _LiapValue = value; }
 
-template <class T> T MixedSolution<T>::LiapValue() 
+template <class T> T MixedSolution<T>::LiapValue(void) const 
 { 
   if(_LiapValue < (T)0)
-    _LiapValue = MixedProfile<T>::LiapValue();
+    ((MixedSolution<T> &) *this)._LiapValue = MixedProfile<T>::LiapValue();
   return _LiapValue; 
 }
 
@@ -156,7 +155,7 @@ template <class T> gOutput &operator<<(gOutput &f, const MixedSolution<T> &s)
 { s.Dump(f); return f; }
 
 
-template <class T> void MixedSolution<T>::Invalidate()
+template <class T> void MixedSolution<T>::Invalidate(void)
 {
   _Creator = NfgAlg_USER;
   _IsNash = T_DONTKNOW;
@@ -179,36 +178,79 @@ template <class T> const T& MixedSolution<T>::operator()(int a, int b) const
 { return MixedProfile<T>::operator()(a, b); }
 
 template <class T> 
-gPVector<T>& MixedSolution<T>::operator=(const gPVector<T>& v)
-{ Invalidate(); return gPVector<T>::operator=(v); }
+MixedSolution<T>& MixedSolution<T>::operator=(const MixedProfile<T>& v)
+{
+  Invalidate();
+  MixedProfile<T>::operator=(v);
+  return *this;
+}
 
 template <class T> 
-gPVector<T>& MixedSolution<T>::operator=(const gVector<T>& v)
-{ assert(0); Invalidate(); return gPVector<T>::operator=(v); }
+MixedSolution<T> &MixedSolution<T>::operator=(const gPVector<T>& v)
+{
+  Invalidate();
+  gPVector<T>::operator=(v);
+  return *this;
+}
 
 template <class T> 
-gPVector<T>& MixedSolution<T>::operator=(T i)
-{ assert(0); Invalidate(); return gPVector<T>::operator=(i); }
+MixedSolution<T>& MixedSolution<T>::operator=(const gVector<T>& v)
+{
+  assert(0);
+  Invalidate();
+  gPVector<T>::operator=(v);
+  return *this;
+}
 
 template <class T> 
-gPVector<T>& MixedSolution<T>::operator+=(const gPVector<T>& v)
-{ Invalidate(); return gPVector<T>::operator+=(v); }
+MixedSolution<T>& MixedSolution<T>::operator=(T x)
+{ 
+  assert(0); 
+  Invalidate(); 
+  gPVector<T>::operator=(x);
+  return *this;
+}
 
 template <class T> 
-gVector<T>& MixedSolution<T>::operator+=(const gVector<T>& v)
-{ assert(0); Invalidate(); return gVector<T>::operator+=(v); }
+MixedSolution<T>& MixedSolution<T>::operator+=(const gPVector<T>& v)
+{ 
+  Invalidate(); 
+  gPVector<T>::operator+=(v);
+  return *this;
+}
 
 template <class T> 
-gPVector<T>& MixedSolution<T>::operator-=(const gPVector<T>& v)
-{ Invalidate(); return gPVector<T>::operator-=(v); }
+MixedSolution<T>& MixedSolution<T>::operator+=(const gVector<T>& v)
+{
+  assert(0);
+  Invalidate();
+  gVector<T>::operator+=(v);
+  return *this;
+}
 
 template <class T> 
-gVector<T>& MixedSolution<T>::operator-=(const gVector<T>& v)
-{ assert(0); Invalidate(); return gVector<T>::operator-=(v); }
-
-template <class T> gPVector<T>& MixedSolution<T>::operator*=(T i)
-{ Invalidate(); return gPVector<T>::operator*=(i); }
+MixedSolution<T>& MixedSolution<T>::operator-=(const gPVector<T>& v)
+{
+  Invalidate(); 
+  gPVector<T>::operator-=(v);
+  return *this;
+}
 
 template <class T> 
-MixedProfile<T>& MixedSolution<T>::operator=(const MixedProfile<T>& v)
-{ Invalidate(); return MixedProfile<T>::operator=(v); }
+MixedSolution<T>& MixedSolution<T>::operator-=(const gVector<T>& v)
+{ 
+  assert(0);
+  Invalidate(); 
+  gVector<T>::operator-=(v);
+  return *this;
+}
+
+template <class T> MixedSolution<T>& MixedSolution<T>::operator*=(T x)
+{
+  Invalidate();
+  gPVector<T>::operator*=(x);
+  return *this;
+}
+
+
+
