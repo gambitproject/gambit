@@ -328,7 +328,7 @@ template <class T> gPoly<T>
 SequentialEquilibModule<T>::RealizProb(Node *node) const
 {
   gPoly<T> equation(Space,(T)1,Lex);
-  Action *act;
+  const Action *act;
   Infoset *iset;
   while(node!=EF.RootNode()) {
     act = LastAction(node);

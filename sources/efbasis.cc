@@ -527,7 +527,7 @@ void EFBasis::AddEquation2(int row,Node *n) const
   if(Col(n))
     (*A)(row,Col(n)) = 1.0;
   if(n!=befg->RootNode()) {
-    Action *act = LastAction(n);
+    const Action *act = LastAction(n);
     if(Col(act))
       (*A)(row,Col(act)) = -1.0;
     while(n->GetParent() != befg->RootNode()) {
