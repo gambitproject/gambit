@@ -11,6 +11,7 @@
 #include "enum.h"
 #include "clique.h"
 
+
 template <class T> class EnumModule  {
 private:
   T eps;
