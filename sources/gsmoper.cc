@@ -1985,45 +1985,119 @@ Portion* GSM_Read_Undefined( Portion** param )
   /* will go through and try to read the input as different format until
      it succeeds */
 
-  assert( param[1] == 0 );
+  Portion* p;
+  Portion** sub_param;
+  ListPortion* list;
+  int i;
+  char c = ' ';  
+  gInput& input = ((InputPortion*) param[0])->Value();
+  long old_pos = input.getpos();
+
   Portion* result = 0;
 
-  param[1] = new BoolValPortion( false );
-  result = GSM_Read_Bool( param );
-  if( result->Type() == porERROR )
+  assert( param[1] == 0 );
+
+
+  while( !input.eof() && isspace(c) )
+    input.get(c);
+  if( input.eof() )
+    return new ErrorPortion( "End of file reached" );
+  if( c == '{' )
   {
-    delete param[1];
-    delete result;
-    param[1] = new IntValPortion( 0 );
-    result = GSM_Read_Integer( param );    
+    param[1] = new ListValPortion();
+
+    sub_param = new Portion*[2];
+    
+    do
+    {
+      sub_param[0] = param[0];
+      sub_param[1] = 0;
+      result = GSM_Read_Undefined( sub_param );
+      if( result->Type() != porERROR )
+	((ListPortion*) param[1])->Append( sub_param[1] );
+      else
+      {
+	delete result;
+	result = 0;
+      }
+
+      c = ' ';
+      while( !input.eof() && isspace(c) )
+	input.get(c);
+      if( !input.eof() && c != ',' )
+	input.unget(c);
+
+    } while( result != 0 && !input.eof() );
+
+    delete[] sub_param;
+
+    c = ' ';
+    while( !input.eof() && isspace(c) )
+      input.get(c);
+    if( input.eof() )
+    {
+      delete result;
+      delete param[1];
+      param[1] = 0;
+      result = new ErrorPortion( "End of file reached" );
+    }
+    else if( c != '}' )
+    {
+      delete result;
+      delete param[1];
+      param[1] = 0;
+      result = new ErrorPortion( "Mismatching braces" );
+    }
+    else
+    {
+      assert( result == 0 );
+      result = param[0]->RefCopy();
+    }
+
   }
-  if( result->Type() == porERROR )
+  else // not a list
   {
-    delete param[1];
-    delete result;
-    param[1] = new FloatValPortion( 0 );
-    result = GSM_Read_Float( param );    
-  }
-  if( result->Type() == porERROR )
-  {
-    delete param[1];
-    delete result;
-    param[1] = new RationalValPortion( 0 );
-    result = GSM_Read_Rational( param );    
-  }
-  if( result->Type() == porERROR )
-  {
-    delete param[1];
-    delete result;
-    param[1] = new TextValPortion( (gString) "" );
-    result = GSM_Read_Text( param );    
-  }
-  if( result->Type() == porERROR )
-  {
-    delete param[1];
-    delete result;
-    param[1] = 0;
-    result = new ErrorPortion( "Cannot determine data type" );
+    input.unget(c);
+    param[1] = new BoolValPortion( false );
+    result = GSM_Read_Bool( param );
+
+    if( result->Type() == porERROR )
+    {
+      delete param[1];
+      delete result;
+      param[1] = new IntValPortion( 0 );
+      result = GSM_Read_Integer( param );    
+    }
+    if( result->Type() == porERROR )
+    {
+      delete param[1];
+      delete result;
+      param[1] = new FloatValPortion( 0 );
+      result = GSM_Read_Float( param );    
+    }
+    if( result->Type() == porERROR )
+    {
+      delete param[1];
+      delete result;
+      param[1] = new RationalValPortion( 0 );
+      result = GSM_Read_Rational( param );    
+    }
+    if( result->Type() == porERROR )
+    {
+      delete param[1];
+      delete result;
+      param[1] = new TextValPortion( (gString) "" );
+      result = GSM_Read_Text( param );    
+    }
+    if( result->Type() == porERROR )
+    {
+      delete param[1];
+      delete result;
+      param[1] = 0;
+      result = new ErrorPortion( "Cannot determine data type" );
+      input.setpos( old_pos );
+    }
+
   }
 
   return result;
