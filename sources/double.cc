@@ -219,7 +219,7 @@ gDouble sqrt(const gDouble& x)
 
 gDouble pow(const gDouble& x, const long y)
 {
-  return gDouble(pow(x.dbl, y));
+  return gDouble(pow(x.dbl, (double)y));
 }
 
 gDouble pow(const gDouble& x, const gDouble& y)
