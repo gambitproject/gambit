@@ -180,6 +180,14 @@ int ExtForm::NumInfosets(int game, int pl) const
     return 0;
 }
 
+int ExtForm::NumActions(int game, int pl, int iset) const
+{
+  if (nodes.IsDefined(game))
+    return nodes(game)->NumActions(pl, iset);
+  else
+    return 0;
+}
+
 //
 // Returns the number of outcomes defined
 //
@@ -1123,4 +1131,49 @@ gString ExtForm::GetUniqueVariable(void) const
 
   sprintf(buffer, "_tmp%d", generator++);
   return buffer;
+}
+
+//----------------------------------------------------------------------------
+//                      ExtForm: Computing Payoffs
+//----------------------------------------------------------------------------
+
+#include "gdpvect.h"
+
+void ExtForm::ComputePayoff(Node n, double prob, int pl, double &value,
+			    const gDPVector<double> &strategy) const
+{
+  if (GetOutcome(n) != 0)
+    value += prob * (double) GetOutcomeValues(GetOutcome(n))[pl];  
+  for (int i = 1; i <= NumChildren(n); i++)   {
+    double newprob = prob;
+    if (n.GetPlayer() == 0)
+      newprob *= (double) GetActionProb(n, i);
+    else
+      newprob *= strategy(n.GetPlayer(), n.GetInfoset(), i);
+ 
+    ComputePayoff(GetChildNumber(n, i), newprob, pl, value, strategy);
+  }
+}
+
+double ExtForm::Payoff(int pl, const gDPVector<double> &strategy) const
+{
+  double value = 0.0;
+
+  ComputePayoff(RootNode(), 1.0, pl, value, strategy);
+
+  return value;
+}
+
+gPVector<int> ExtForm::Dimensionality(void) const
+{
+  gTuple<int> foo(NumPlayers());
+  for (int i = 1; i <= NumPlayers(); i++)
+    foo[i] = NumInfosets(1, i);
+  
+  gPVector<int> bar(foo);
+  for (i = 1; i <= NumPlayers(); i++)
+    for (int j = 1; j <= NumInfosets(1, i); j++)
+      bar(i, j) = NumActions(1, i, j);
+
+  return bar;
 }

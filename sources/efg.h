@@ -12,7 +12,9 @@
 #include "gtuple.h"
 #include "gmap.h"
 #include "noderep.h"
+#include "gpvector.h"
 
+template <class T> class gDPVector;
 class Outcome;
 class NodeSet;
 //
@@ -40,6 +42,8 @@ class ExtForm    {
     Node DeleteSubtree(Node);
     Node DeleteTerminalNode(const Node &);
 
+    void ComputePayoff(Node n, double prob, int pl, double &value,
+		       const gDPVector<double> &strategy) const;
 //
 // These are being defined privately for now so they are not accidentally
 // used.  They will be implemented later.
@@ -72,6 +76,7 @@ class ExtForm    {
     int NumNodes(int game, int pl, int iset) const;
     int NumPlayers(void) const;
     int NumInfosets(int game, int pl) const;
+    int NumActions(int game, int pl, int iset) const;
     int NumOutcomes(void) const;
 
 	//# DATA ACCESS -- NODES
@@ -153,6 +158,10 @@ class ExtForm    {
     Node GetNodeVariable(const gString &name) const;
     int SetNodeVariable(const gString &name, const Node &node);
     void RemoveNodeVariable(const gString &name);
+
+        //# PAYOFF INFORMATION
+    gPVector<int> Dimensionality(void) const;
+    double Payoff(int pl, const gDPVector<double> &) const;
 };
 
 
