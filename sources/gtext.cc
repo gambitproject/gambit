@@ -14,6 +14,10 @@
 #include "gambitio.h"
 #include "gtext.h"
 
+#ifdef USE_EXCEPTIONS
+gText gText::BadIndex::Description(void) const
+{ return "Bad index exception in gText"; }
+#endif   // USE_EXCEPTIONS
 
 gText::gText(void)
 {

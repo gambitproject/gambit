@@ -13,6 +13,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include "gmisc.h"
 
 class gInput;
 class gOutput;
@@ -27,10 +28,17 @@ class gText   {
     gText(int len);
 
   public:
+#ifdef USE_EXCEPTIONS
     // INDEX ERROR HANDLER CLASS
-    class BadIndex  { };
+    class BadIndex : public gException  {
+      public:
+        virtual ~BadIndex()  { }
+        gText Description(void) const;
+     };
+
     // ALLOCATION FAILURE HANDLER CLASS
     class AllocFail { };
+#endif   // USE_EXCEPTIONS
 
     // CONSTRUCTORS, DESTRUCTORS, AND CONSTRUCTIVE OPERATORS
     gText(void);
