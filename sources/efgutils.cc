@@ -206,6 +206,24 @@ bool IsPerfectRecall(const BaseEfg &efg, Infoset *&s1, Infoset *&s2)
   return true;
 }
 
+template <class T> Efg<T> *CompressEfg(const Efg<T> &efg, const EFSupport &S)
+{
+  Efg<T> *newefg = new Efg<T>(efg);
+
+  for (int pl = 1; pl <= newefg->NumPlayers(); pl++)   { 
+    EFPlayer *player = newefg->PlayerList()[pl];
+    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
+      Infoset *infoset = player->InfosetList()[iset];
+      for (int act = infoset->NumActions(); act >= 1; act--)  {
+	Action *oldact = efg.PlayerList()[pl]->InfosetList()[iset]->GetActionList()[act];
+	if (!S.Find(oldact))
+	  newefg->DeleteAction(infoset, infoset->GetActionList()[act]);
+      }
+    }
+  }
+
+  return newefg;
+}
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -227,5 +245,7 @@ template <class T> void RandomEfg(Efg<T> &efg)
 TEMPLATE void RandomEfg(Efg<double> &efg);
 TEMPLATE void RandomEfg(Efg<gRational> &efg);
 
+TEMPLATE Efg<double> *CompressEfg(const Efg<double> &, const EFSupport &);
+TEMPLATE Efg<gRational> *CompressEfg(const Efg<gRational> &, const EFSupport &);
 
 
