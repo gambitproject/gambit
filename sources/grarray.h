@@ -57,6 +57,8 @@ template <class T> class gRectArray    {
     void GetColumn(int, gArray<T> &) const;
     void SetColumn(int, const gArray<T> &);
 
+      // TRANSPOSE
+    gRectArray<T>       Transpose()         const;
 
 
     // originally protected functions, moved to permit compilation
