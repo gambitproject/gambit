@@ -338,14 +338,26 @@ DisplayNfg[N->NFG, {sset->INTEGER}]
 
 ----------
 
+EfgToAfg[E->EFG, {time<->RATIONAL}] =: NFG
+
+   -	Description:  Converts a problem in extensive form to the same problem
+	in the corresponding agent normal form.
+   -	Return value:  The new agent normal form game.  
+   -	Required parameters:
+	  *  E:  The problem in extensive form to be converted to agent normal
+		form.
+   -	Optional parameters:
+	  *  time:  Returns the elapsed time for the operation.
+
+----------
+
 EfgToNfg[E->EFG, {time<->RATIONAL}] =: NFG
 
    -	Description:  Converts a problem in extensive form to the same problem
 	as a reduced normal form game.
    -	Return value:  The new normal form game.  
    -	Required parameters:
-	  *  E:  The problem in extensive form to be converted to extensive 
-		form.
+	  *  E:  The problem in extensive form to be converted to normal form.
    -	Optional parameters:
 	  *  time:  Returns the elapsed time for the operation.
 
