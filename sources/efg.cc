@@ -495,6 +495,51 @@ void BaseEfg::CopySubtree(Node *src, Node *dest, Node *stop)
   dest->outcome = src->outcome;
 }
 
+void BaseEfg::MarkSubtree(Node *n)
+{
+  n->mark=true;
+  for(int i=1;i<=n->children.Length();i++)
+    MarkSubtree(n->children[i]);
+}
+
+void BaseEfg::UnmarkSubtree(Node *n)
+{
+  n->mark=false;
+  for(int i=1;i<=n->children.Length();i++)
+    UnmarkSubtree(n->children[i]);
+}
+
+void BaseEfg::Reveal(Infoset * inf, gBlock<EFPlayer *> who)
+{
+  int i,j,k,l,m;
+  bool flag;
+  Node *n;
+  Infoset *newiset;
+
+  UnmarkSubtree(root);
+  
+  for(i=1;i<=inf->actions.Length();i++) {
+    for(j=1;j<=inf->members.Length();j++) {
+      UnmarkSubtree(inf->members[j]);
+      MarkSubtree(inf->members[j]->children[i]);
+    }
+    for(j=who.First();j<=who.Last();j++)
+      for(k=1;k<=who[j]->infosets.Length();k++) {
+	flag=false;
+	for(m=1;m<=who[j]->infosets[k]->members.Length();m++) {
+	  n = who[j]->infosets[k]->members[m];
+	  if(n->mark)
+	   if(!flag) {
+	     newiset = LeaveInfoset(n);
+	     flag=true;
+	   }
+	   else 
+	     JoinInfoset(newiset,n);
+	}	    
+      }
+  }
+}
+
 Node *BaseEfg::CopyTree(Node *src, Node *dest)
 {
   assert(src && dest);

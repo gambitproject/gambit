@@ -17,7 +17,7 @@ class Node    {
   friend class Lexicon;
   
   protected:
-    bool valid;
+    bool valid, mark;
     BaseEfg *E;
     gString name;
     Infoset *infoset;
@@ -27,7 +27,7 @@ class Node    {
     Node *whichbranch, *ptr;
 
     Node(BaseEfg *e, Node *p)
-      : valid(true), E(e), infoset(0), parent(p), outcome(0)   { }
+      : valid(true), mark(false), E(e), infoset(0), parent(p), outcome(0)   { }
     virtual ~Node()
       { for (int i = children.Length(); i; delete children[i--]); }
 

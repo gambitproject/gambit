@@ -41,6 +41,9 @@ class BaseEfg     {
     BaseEfg(const BaseEfg &);
 
     void CopySubtree(Node *, Node *, Node *);
+    void MarkSubtree(Node *);
+    void UnmarkSubtree(Node *);
+    void Reveal(Infoset *, gBlock<EFPlayer *>);
 
     void DisplayTree(gOutput &, Node *) const;
     void WriteEfgFile(gOutput &, Node *) const;
