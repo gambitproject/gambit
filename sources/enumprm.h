@@ -1,4 +1,4 @@
-// @(#)enumprm.h	1.2 6/23/95
+// $Id$
 #ifndef ENUMPRM_H
 #define ENUMPRM_H
 
@@ -44,7 +44,7 @@ void EnumSolveParamsDialog::GetParams(EnumParams &P)
 {
 P.stopAfter=stopAfter;
 // Output stuff
-P.plev=TraceLevel();P.outfile=OutFile();P.errfile=ErrFile();
+P.trace=TraceLevel();P.tracefile=OutFile();
 }
 
 #endif
