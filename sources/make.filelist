@@ -95,10 +95,10 @@ GUI_SOURCES = gambit.cc treewin.cc twflash.cc treedraw.cc treedrag.cc \
               efgsolng.cc wxstatus.cc algdlgs.cc \
               behavfilter.cc efgsoln.cc nfgshow.cc \
               nfgsoln.cc nfgsolng.cc mixedfilter.cc \
-              gambdraw.cc wxio.cc dlsupport.cc \
+              wxio.cc dlsupport.cc \
               efgprofile.cc efgcursor.cc behavedit.cc efgprint.cc \
               nfgtable.cc nfgprofile.cc mixededit.cc nfgprint.cc \
-              valnumber.cc valinteger.cc
+              valnumber.cc valinteger.cc userprefs.cc
 
 GUI_OBJECTS = $(GUI_SOURCES:.cc=$(OBJECT_SUFFIX))
 
