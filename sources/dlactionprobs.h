@@ -17,7 +17,7 @@ public:
   dialogActionProbs(Infoset *, wxWindow *);
   virtual ~dialogActionProbs() { }
 
-  const gNumber &GetActionProb(int p_action) const
+  gNumber GetActionProb(int p_action) const
     { return ToNumber(GetValue(p_action)); }
 };
 
