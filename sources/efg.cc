@@ -297,22 +297,24 @@ void BaseEfg::SortInfosets(void)
 
   int pl;
 
-  for (pl = 1; pl <= players.Length(); pl++)  {
+  for (pl = 0; pl <= players.Length(); pl++)  {
     gList<Node *> nodes;
 
     Nodes(*this, nodes);
+
+    EFPlayer *player = (pl) ? players[pl] : chance;
 
     int i, isets = 0;
 
     // First, move all empty infosets to the back of the list so
     // we don't "lose" them
-    int foo = players[pl]->infosets.Length();
+    int foo = player->infosets.Length();
     i = 1;
     while (i < foo)   {
-      if (players[pl]->infosets[i]->members.Length() == 0)  {
-	Infoset *bar = players[pl]->infosets[i];
-	players[pl]->infosets[i] = players[pl]->infosets[foo];
-	players[pl]->infosets[foo--] = bar;
+      if (player->infosets[i]->members.Length() == 0)  {
+	Infoset *bar = player->infosets[i];
+	player->infosets[i] = player->infosets[foo];
+	player->infosets[foo--] = bar;
       }
       else
 	i++;
@@ -320,22 +322,23 @@ void BaseEfg::SortInfosets(void)
 
     // This will give empty infosets their proper number; the nonempty
     // ones will be renumbered by the next loop
-    for (i = 1; i <= players[pl]->infosets.Length(); i++)
-      if (players[pl]->infosets[i]->members.Length() == 0)
-	players[pl]->infosets[i]->number = i;
+    for (i = 1; i <= player->infosets.Length(); i++)
+      if (player->infosets[i]->members.Length() == 0)
+	player->infosets[i]->number = i;
       else
-	players[pl]->infosets[i]->number = 0;
+	player->infosets[i]->number = 0;
   
     for (i = 1; i <= nodes.Length(); i++)  {
       Node *n = nodes[i];
-      if (n->GetPlayer() == players[pl] && n->GetInfoset()->number == 0)  {
+      if (n->GetPlayer() == player && n->GetInfoset()->number == 0)  {
 	n->GetInfoset()->number = ++isets;
-	players[pl]->infosets[isets] = n->GetInfoset();
+	assert(n->GetInfoset()->number <= n->GetPlayer()->NumInfosets());
+	player->infosets[isets] = n->GetInfoset();
       }
     }  
 
-    assert(isets == players[pl]->infosets.Length() ||
-	   players[pl]->infosets[isets + 1]->members.Length() == 0);
+    assert(isets == player->infosets.Length() ||
+	   player->infosets[isets + 1]->members.Length() == 0);
   }
 
   // Now, we sort the nodes within the infosets
@@ -343,16 +346,17 @@ void BaseEfg::SortInfosets(void)
   gList<Node *> nodes;
   Nodes(*this, nodes);
 
-  for (pl = 1; pl <= players.Length(); pl++)  {
-    for (int iset = 1; iset <= players[pl]->infosets.Length(); iset++)  {
-      Infoset *s = players[pl]->infosets[iset];
+  for (pl = 0; pl <= players.Length(); pl++)  {
+    EFPlayer *player = (pl) ? players[pl] : chance;
+
+    for (int iset = 1; iset <= player->infosets.Length(); iset++)  {
+      Infoset *s = player->infosets[iset];
       for (int i = 1, j = 1; i <= nodes.Length(); i++)  {
 	if (nodes[i]->infoset == s)
 	  s->members[j++] = nodes[i];
       }
     }
   }
-
 }
   
 
