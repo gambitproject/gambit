@@ -282,6 +282,10 @@ bool GSM::Assign( void )
 	  ( (Nfg_Portion<gRational>*) primary_ref )->
 	    Assign( p1_subvalue, p2_copy );
 	  break;
+	case porLIST:
+	  ( (List_Portion*) primary_ref )->
+	    SetSubscript( atoi( p1_subvalue), p2_copy );
+	  break;
 	  
 	default:
 	  gerr << "GSM Error: unknown type supports subvariables\n";
@@ -422,7 +426,10 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
       case porNFG_RATIONAL:
 	result = ((Nfg_Portion<gRational>*) result )->operator()( subvalue );
 	break;
-	
+      case porLIST:
+	result = ((List_Portion*) result )->GetSubscript( atoi( subvalue ) );
+	break;
+
       default:
 	gerr << "GSM Error: attempted to resolve a subvariable of a type\n";
 	gerr << "           that does not support subvariables\n";
@@ -563,8 +570,41 @@ bool GSM::_BinaryOperation( OperationMode mode )
   
   if( p2->Type() == porREFERENCE )
     p2 = _ResolveRef( (Reference_Portion*) p2 );
+  
   if( p1->Type() == porREFERENCE )
+  {
+    if( mode == opSUBSCRIPT )
+    {
+      p = p1->Copy();
+    }
     p1 = _ResolveRef( (Reference_Portion*) p1 );
+
+    // SPECIAL CASE HANDLING - Subscript operator for Lists
+    if( p1->Type() == porLIST && mode == opSUBSCRIPT )
+    {
+      if( p2->Type() == porINTEGER )
+      {
+	delete p1;
+	p1 = p;
+	( (Reference_Portion*) p1 )->SubValue() = 
+	  Itoa( ( (numerical_Portion<gInteger>*) p2 )->Value() );
+	delete p2;
+	_Stack->Push( p1 );
+	return true;
+      }
+      else
+      {
+	gerr << "GSM Error: a non-integer list index specified\n";
+	gerr << "           for the Subscript() operator\n";
+	delete p;
+	delete p1;
+	delete p2;
+	p1 = new Error_Portion;
+	_Stack->Push( p1 );
+	return false;
+      }
+    }
+  }
 
   if( p1->Type() == p2->Type() )
   {
@@ -600,35 +640,20 @@ bool GSM::_BinaryOperation( OperationMode mode )
       p1 = new bool_Portion( result );
       result = true;
     }
-
-    _Stack->Push( p1 );
   }
 
   else // ( p1->Type() != p2->Type() )
   {
-
-    // SPECIAL CASE HANDLING - Subscript operator for Lists
-    if( p1->Type() == porLIST && mode == opSUBSCRIPT )
-    {
-      p = ( (List_Portion*) p1 )->Subscript( p2 );
-      delete p1;
-      p1 = p;
-      if( p1 == 0 )
-	result = false;
-    }
-    else
-    {
-      gerr << "GSM Error: attempted operating on different types\n";
-      gerr << "           Type of Operand 1: " << p1->Type() << "\n";
-      gerr << "           Type of Operand 2: " << p2->Type() << "\n";
-      delete p1;
-      delete p2;
-      p1 = new Error_Portion;
-      result = false;
-    }
-
-    _Stack->Push( p1 );
+    gerr << "GSM Error: attempted operating on different types\n";
+    gerr << "           Type of Operand 1: " << p1->Type() << "\n";
+    gerr << "           Type of Operand 2: " << p2->Type() << "\n";
+    delete p1;
+    delete p2;
+    p1 = new Error_Portion;
+    result = false;
   }
+
+  _Stack->Push( p1 );
 
   return result;
 }
@@ -1071,6 +1096,10 @@ bool GSM::CallFunction( void )
 	    case porNFG_RATIONAL:
 	      ( (Nfg_Portion<gRational>*) p )->
 		Assign( refp->SubValue(), param[ index ]->Copy() );
+	      break;
+	    case porLIST:
+	      ( (List_Portion*) p )->
+		SetSubscript( atoi( refp->SubValue() ), param[index]->Copy() );
 	      break;
 
 	    default:

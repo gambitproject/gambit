@@ -662,36 +662,39 @@ void List_Portion::Flush( void )
 }
 
 
-Portion* List_Portion::Subscript( Portion* p ) const
+bool List_Portion::SetSubscript( int index, Portion *p )
 {
-  long i;
-  Portion* result;
-
-  if( p->Type() == porINTEGER )
+  if( index >= 1 && index <= _Value.Length() )
   {
-    i = (int) ( (numerical_Portion<gInteger>*) p )->Value().as_long();
-    if( i >= 1 && i <= _Value.Length() )
-    {
-      result = _Value[ i ]->Copy();
-    }
-    else
-    {
-      gerr << "List_Portion Error: an out-of-range subscript specified\n";
-      gerr << "       Valid range: " << 1 << " to " << _Value.Length() << "\n";
-      gerr << "       Subscript specified: " << i << "\n";
-      result = new Error_Portion;
-    }
+    delete _Value[ index ];
+    _Value[ index ] = p;
+    return true;
   }
   else
   {
-    gerr << "List_Portion Error: a non-Integer subscript specified\n";
-    gerr << "       Type specified: ";
-    PrintPortionTypeSpec( gerr, p->Type() );
-    result = new Error_Portion;
+    gerr << "List_Portion Error: an out-of-range subscript specified\n";
+    gerr << "       Valid range: " << 1 << " to " << _Value.Length() << "\n";
+    gerr << "       Subscript specified: " << index << "\n";
+    return false;
   }
-  delete p;
-  return result;
 }
+
+
+Portion* List_Portion::GetSubscript( int index ) const
+{
+  if( index >= 1 && index <= _Value.Length() )
+  {
+    return _Value[ index ];
+  }
+  else
+  {
+    gerr << "List_Portion Error: an out-of-range subscript specified\n";
+    gerr << "       Valid range: " << 1 << " to " << _Value.Length() << "\n";
+    gerr << "       Subscript specified: " << index << "\n";
+    return 0;
+  }
+}
+
 
 //---------------------------------------------------------------------
 //                            Nfg type

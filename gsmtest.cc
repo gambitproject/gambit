@@ -37,8 +37,8 @@ int main( void )
 
   gList< Instruction* > program;
 
-
 /*
+
   gout << "\n";
   machine->Push( d_1 );
   machine->Push( d_2 );
@@ -396,6 +396,7 @@ int main( void )
   machine->EqualTo();
   machine->Assign();
   machine->Dump();
+
   machine->Flush();
   machine->PushRef( (gString) "y1" );
   machine->Push( (gInteger) 11 );
@@ -453,6 +454,7 @@ int main( void )
   machine->GreaterThan();
   machine->PushList( 10 );
   machine->Dump();
+
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
@@ -751,7 +753,6 @@ int main( void )
   gin >> cont;
 
 
-
   gout << "Testing Loops:\n";
   program.Append( new Push<double>( 101 ) );
   program.Append( new Push<double>( 100 ) );
@@ -871,7 +872,6 @@ int main( void )
   machine->Dump();
 
 
-
   machine->PushRef( "x" );
   machine->Push( (gInteger) 3 );
   machine->Subscript();
@@ -895,6 +895,9 @@ int main( void )
 
 
 #ifdef CRASHTEST
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
   machine->Push( (double) 10 );
   machine->Push( (double) 11 );
   machine->Assign();
@@ -905,6 +908,9 @@ int main( void )
   machine->Push( (double) 11 );
   machine->Assign();
   machine->Dump();
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
 
   machine->PushRef( "x" );
   machine->Push( (double) 10 );
@@ -921,6 +927,10 @@ int main( void )
   machine->Push( (double) 11 );
   machine->Assign();
   machine->Dump();
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
 
   machine->PushRef( "x" );
   machine->PushRef( "x1" );
@@ -952,6 +962,9 @@ int main( void )
 
 
 #ifdef CRASHTEST
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
   machine->PushRef( "x" );
   machine->Push( (double) 10 );
   for( i = 1; i <= 9; i++ )
@@ -1034,6 +1047,7 @@ int main( void )
   machine->Push( (gInteger) 0 );
   machine->Modulus();
   machine->Dump();
+
 
 
 #ifdef CRASHTEST
@@ -1126,7 +1140,7 @@ int main( void )
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
-
+*/
 
 
 
@@ -1138,37 +1152,41 @@ int main( void )
   machine->CallFunction();
 #endif
   machine->Push( (double) 0 );
-
   machine->Assign();
+  machine->Dump();
+
+  gout << "asssigned sub\n";
 
   machine->PushRef( "x", "a" );
   machine->Push( (double) 1 );
   machine->Assign();
   machine->Dump();
 
+
   machine->PushRef( "x" );
   machine->PushRef( "x", "a" );
   machine->Dump();
 
 
-
+/*
   machine->PushRef( "x" );
   machine->Push( (double) 10 );
   machine->Assign();
   machine->Dump();
 
+
   machine->PushRef( "x", "a" );
   machine->Push( (double) 1 );
   machine->Assign();
   machine->Dump();
-
+*/
+/*
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
 
 
-  machine->InitCallFunction( "Assign" );
   machine->PushRef( "x" );
   machine->Bind();
 #if 0
@@ -1234,7 +1252,6 @@ int main( void )
   gin >> cont;
 
 
-
   machine->InitCallFunction( "Test" );
   machine->CallFunction();
   machine->Dump();
@@ -1266,7 +1283,6 @@ int main( void )
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
-*/
 
   machine->PushRef( "x" );
   machine->Push( (double) 1 );
@@ -1283,7 +1299,8 @@ int main( void )
   machine->Push( (gInteger) 2 );
   machine->Subscript();
   machine->Dump();
-  
+
+
   machine->PushRef( "x" );
   machine->Push( (gInteger) 2 );
   machine->Subscript();
@@ -1293,7 +1310,9 @@ int main( void )
 
   machine->PushRef( "x" );
   machine->Dump();
-  
+
+*/
+
 
   gout << "Deleting machine\n";
   delete machine;

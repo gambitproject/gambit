@@ -54,7 +54,7 @@ typedef unsigned int PortionType;
 
 #define  porREFERENCE  ( 0x1000 )
 
-#define  porALLOWS_SUBVARIABLES ( porNFG | porEFG )
+#define  porALLOWS_SUBVARIABLES ( porNFG | porEFG | porLIST )
 				  
 #define  porNUMERICAL  ( porDOUBLE | porINTEGER | porRATIONAL )
 #define  porVALUE      ( 0x0FFF )
@@ -200,7 +200,8 @@ class List_Portion : public Portion
   int      Length     ( void ) const;
   void     Flush      ( void );
 
-  Portion* Subscript ( Portion* p ) const;
+  Portion* GetSubscript( int index ) const;
+  bool     SetSubscript( int index, Portion* p );
 };
 
 
