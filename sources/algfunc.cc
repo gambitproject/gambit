@@ -1106,7 +1106,7 @@ Portion* GSM_VertEnum_Float( Portion** param )
   gVector<double>* start = ListToVector_Float((ListPortion*) param[2]);
 
   VertEnum< double >* vertenum = NULL;
-  if( ( (ListPortion*) start )->Length() == 0 )
+  if( start->Length() == 0 )
     vertenum = new VertEnum< double >( *A, *b );
   else 
     vertenum = new VertEnum< double >( *A, *b, *start );
@@ -1121,7 +1121,7 @@ Portion* GSM_VertEnum_Float( Portion** param )
 
   ListPortion* list = new ListValPortion();
   int i = 0;
-  for( i = 1; i < list->Length(); ++i )
+  for( i = 1; i < verts.Length(); ++i )
   {
     list->Append( ArrayToList( verts[i] ) );
   }
@@ -1137,7 +1137,7 @@ Portion* GSM_VertEnum_Rational( Portion** param )
   gVector<gRational>* start = ListToVector_Rational((ListPortion*) param[2]);
 
   VertEnum< gRational >* vertenum = NULL;
-  if( ( (ListPortion*) start )->Length() == 0 )
+  if( start->Length() == 0 )
     vertenum = new VertEnum< gRational >( *A, *b );
   else 
     vertenum = new VertEnum< gRational >( *A, *b, *start );
@@ -1152,7 +1152,7 @@ Portion* GSM_VertEnum_Rational( Portion** param )
 
   ListPortion* list = new ListValPortion();
   int i = 0;
-  for( i = 1; i < list->Length(); ++i )
+  for( i = 1; i < verts.Length(); ++i )
   {
     list->Append( ArrayToList( verts[i] ) );
   }
