@@ -220,7 +220,7 @@ int Sfg::ActionNumber(int pl, int j) const
 {
   if(j==1) return 0;
   int isetnum = (*sequences)[pl]->Find(j)->GetInfoset()->GetNumber();
-  return efsupp.Find(pl,isetnum,GetAction(pl,j));
+  return efsupp.Find(pl,isetnum,(Action *)GetAction(pl,j));
 }
 
 const Infoset*  Sfg::GetInfoset(int pl, int j) const 
