@@ -631,6 +631,24 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
           reqList.Append((Portion*)tmp);
           word = "BOOLEAN";
         }
+        else if (word == "StdOut")
+        {
+          OutputPortion* tmp = new OutputPortion(gout);
+          reqList.Append((Portion*)tmp);
+          word = "OUTPUT";
+        }
+        else if (word == "NullOut")
+        {
+          OutputPortion* tmp = new OutputPortion(gnull);
+          reqList.Append((Portion*)tmp);
+          word = "OUTPUT";
+        }
+        else if (word == "StdIn")
+        {
+          InputPortion* tmp = new InputPortion(gin);
+          reqList.Append((Portion*)tmp);
+          word = "INPUT";
+        }
           // If it is a text string (for now just assume it is if it begins '"')
         else if (word[0] == '"')
         {
@@ -693,6 +711,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
 
         else
         {
+          gout << "Unknown optional type!!\n\n";
           int* silly = new int;
           reqList.Append( (Portion *)silly);
           word = "MIXED";    // TEMPORARY ONLY SO THAT IT WORKS -- REMOVE!!
@@ -713,13 +732,28 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
     
             // Word gets the word, which is the type of variable.
           word = ch;
-          /*int     listNum = 0;*/
           ch=s[index++];
           while (isalpha(ch)) { word += ch; ch = s[index++]; }
     
         }
       }
  
+  
+        // Check to see if it is a list  (should prolly only do if req.)
+      if (word == "NLIST")
+      {
+          // set listnum to be NLIST
+        listNum = NLIST;
+        ch=s[index++];  // move ch past left parenthesis
+   
+          // Word gets the word, which is the type of variable.
+        word = ch;
+        ch=s[index++];
+        while (isalpha(ch)) { word += ch; ch = s[index++]; }
+    
+      }
+ 
+
         // See if it is modified by a star
       if (ch == '*')
       {  
@@ -762,7 +796,6 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
     // Check to see if it is a list
   if (word == "LIST")
   {
-    /*numArgs++;*/
     while (word == "LIST")
     {
         // increment counter, and while it is a list, keep incrementing.
@@ -773,9 +806,22 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
       word = ch;
       ch=s[index++];
       while (isalpha(ch)) { word += ch; ch = s[index++]; }
-
     }
   }
+  
+    // Check to see if it is a list  (should prolly only do if req.)
+  if (word == "NLIST")
+  {
+      // set listnum to be NLIST
+    listNum = NLIST;
+    ch=s[index++];  // move ch past left parenthesis
+ 
+      // Word gets the word, which is the type of variable.
+    word = ch;
+    ch=s[index++];
+    while (isalpha(ch)) { word += ch; ch = s[index++]; }
+  }
+ 
 
     // Bunch of prints for debugging purposes.
   /*gout << "\nReturn Type: " << word << "\n";*/
