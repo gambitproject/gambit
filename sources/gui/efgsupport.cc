@@ -167,7 +167,7 @@ void EfgSupportWindow::UpdateValues(void)
       wxTreeItemId isetID = m_actionTree->AppendItem(id, 
 						     (char *) infoset->GetName());
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	Action *action = infoset->Actions()[act];
+	Action *action = infoset->GetAction(act);
 	wxTreeItemId actID = m_actionTree->AppendItem(isetID,
 						      (char *) action->GetName());
 	if (m_parent->GetSupport()->Contains(action)) {
@@ -176,7 +176,7 @@ void EfgSupportWindow::UpdateValues(void)
 	else {
 	  m_actionTree->SetItemTextColour(actID, *wxLIGHT_GREY);
 	}
-	m_map.Define(actID, infoset->Actions()[act]);
+	m_map.Define(actID, infoset->GetAction(act));
       }
 
       m_actionTree->Expand(isetID);

@@ -142,17 +142,12 @@ public:
 				    const EFSupport&) const;
   gList<Node *> TerminalNodes(void) const;
   gList<Infoset*> DescendantInfosets(const Node&, const EFSupport&) const;
-  const gArray<Node *> &Children(const Node *n) const;
-  int NumChildren(const Node *n) const;
 
   // DATA ACCESS -- PLAYERS
   int NumPlayers(void) const;
   gbtEfgPlayer GetChance(void) const;
   gbtEfgPlayer NewPlayer(void);
   gbtEfgPlayer GetPlayer(int index) const;
-
-  // DATA ACCESS -- INFOSETS
-  gBlock<Infoset *> Infosets(void) const;
 
   // DATA ACCESS -- OUTCOMES
   int NumOutcomes(void) const;
@@ -245,7 +240,6 @@ public:
 
 //#include "behav.h"
 
-#include "efplayer.h"
 #include "infoset.h"
 #include "node.h"
 

@@ -112,28 +112,28 @@ void TreeWindow::MakeMenus(void)
 
 static Node *PriorSameIset(const Node *n)
 {
-    Infoset *iset = n->GetInfoset();
-    if (!iset) return 0;
-    for (int i = 1; i <= iset->NumMembers(); i++)
-        if (iset->Members()[i] == n)
-            if (i > 1)
-                return iset->Members()[i-1];
-            else 
-                return 0;
-    return 0;
+  Infoset *iset = n->GetInfoset();
+  if (!iset) return 0;
+  for (int i = 1; i <= iset->NumMembers(); i++)
+    if (iset->GetMember(i) == n)
+      if (i > 1)
+	return iset->GetMember(i-1);
+      else 
+	return 0;
+  return 0;
 }
 
 static Node *NextSameIset(const Node *n)
 {
-    Infoset *iset = n->GetInfoset();
-    if (!iset) return 0;
-    for (int i = 1; i <= iset->NumMembers(); i++)
-        if (iset->Members()[i] == n)
-            if (i < iset->NumMembers()) 
-                return iset->Members()[i+1]; 
-            else
-                return 0;
-    return 0;
+  Infoset *iset = n->GetInfoset();
+  if (!iset) return 0;
+  for (int i = 1; i <= iset->NumMembers(); i++)
+    if (iset->GetMember(i) == n)
+      if (i < iset->NumMembers()) 
+	return iset->GetMember(i+1); 
+      else
+	return 0;
+  return 0;
 }
 
 //
@@ -409,7 +409,7 @@ void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
 
       Node *node = m_layout.NodeHitTest(x, y);
     
-      if (node && m_efg.NumChildren(node) > 0) {
+      if (node && node->NumChildren() > 0) {
 	m_dragSource = node;
 	if (p_event.ControlDown()) {
 	  m_dragImage = new wxDragImage("Copy subtree",

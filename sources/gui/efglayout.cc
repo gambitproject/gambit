@@ -473,7 +473,7 @@ NodeEntry *efgTreeLayout::GetValidParent(Node *e)
 
 NodeEntry *efgTreeLayout::GetValidChild(Node *e)
 {
-  for (int i = 1; i <= e->Game()->NumChildren(e); i++)  {
+  for (int i = 1; i <= e->NumChildren(); i++)  {
     NodeEntry *n = GetNodeEntry(e->GetChild(i));
     if (n) {
       return n;
@@ -538,7 +538,7 @@ int efgTreeLayout::LayoutSubtree(Node *p_node, const EFSupport &p_support,
       }
 
       if (!p_node->GetPlayer().IsChance() &&
-	  !p_support.Contains(p_node->GetInfoset()->Actions()[i])) {
+	  !p_support.Contains(p_node->GetInfoset()->GetAction(i))) {
 	m_nodeList[p_node->GetChild(i)->GetNumber()]->SetInSupport(false);
       }
     }
@@ -664,11 +664,11 @@ void efgTreeLayout::FillInfosetTable(Node *n, const EFSupport &cur_sup)
 {
   const TreeDrawSettings &draw_settings = m_parent->DrawSettings();
   NodeEntry *entry = GetNodeEntry(n);
-  if (n->Game()->NumChildren(n)>0) {
-    for (int i = 1; i <= n->Game()->NumChildren(n); i++) {
+  if (n->NumChildren() > 0) {
+    for (int i = 1; i <= n->NumChildren(); i++) {
       bool in_sup = true;
       if (n->GetPlayer().GetId()) {
-	in_sup = cur_sup.Contains(n->GetInfoset()->Actions()[i]);
+	in_sup = cur_sup.Contains(n->GetInfoset()->GetAction(i));
       }
             
       if (in_sup || !draw_settings.RootReachable()) {

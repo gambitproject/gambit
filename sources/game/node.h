@@ -70,7 +70,6 @@ class Node    {
     int NumChildren(void) const    { return children.Length(); }
     int GetNumber(void) const { return number; }
     int NumberInInfoset(void) const;
-    const gArray<Node *> &Children(void) const { return children; }
     Infoset *GetInfoset(void) const   { return infoset; }
     bool IsTerminal(void) const { return (children.Length() == 0); }
     bool IsNonterminal(void) const { return !IsTerminal(); }

@@ -55,17 +55,19 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Node *p_node)
   m_infoset = new wxChoice(this, -1);
   if (p_node->NumChildren() > 0) {
     m_infoset->Append("New information set");
-    gBlock<Infoset *> infosets = p_node->Game()->Infosets();
     int selection = 0;
-    for (int iset = 1; iset <= infosets.Length(); iset++) {
-      if (!infosets[iset]->IsChanceInfoset() &&
-	  infosets[iset]->NumActions() == p_node->NumChildren()) {
-	m_infosetList.Append(infosets[iset]);
-	m_infoset->Append(wxString::Format("Player %d, Infoset %d",
-			  infosets[iset]->GetPlayer().GetId(),
-			  infosets[iset]->GetNumber()));
-	if (infosets[iset] == p_node->GetInfoset()) {
-	  selection = m_infosetList.Length();
+    for (int pl = 1; pl <= p_node->Game()->NumPlayers(); pl++) {
+      for (gbtEfgInfosetIterator infoset(p_node->Game()->GetPlayer(pl));
+	   !infoset.End(); infoset++) {
+	if (!(*infoset)->IsChanceInfoset() &&
+	    (*infoset)->NumActions() == p_node->NumChildren()) {
+	  m_infosetList.Append(*infoset);
+	  m_infoset->Append(wxString::Format("Player %d, Infoset %d",
+					     (*infoset)->GetPlayer().GetId(),
+					     (*infoset)->GetNumber()));
+	  if (*infoset == p_node->GetInfoset()) {
+	    selection = m_infoset->GetCount() - 1;
+	  }
 	}
       }
     }

@@ -29,19 +29,19 @@
 
 #include "efstrat.h"
 
-class gbtActionIterator {
+class gbtAllActionIterator {
 protected:
   EFSupport m_support;
   int pl, iset, act;
 
 public:
   // LIFECYCLE
-  gbtActionIterator(const EFSupport &);
-  ~gbtActionIterator() { }
+  gbtAllActionIterator(const EFSupport &);
+  ~gbtAllActionIterator() { }
 
   // OPERATORS
-  bool operator==(const gbtActionIterator &) const;
-  bool operator!=(const gbtActionIterator &p_iter) const 
+  bool operator==(const gbtAllActionIterator &) const;
+  bool operator!=(const gbtAllActionIterator &p_iter) const 
   { return !(*this == p_iter); }
 
   // ITERATION
@@ -59,4 +59,22 @@ public:
   bool IsSubsequentTo(const Action *) const;
 };
 
+class gbtActionIterator {
+protected:
+  const EFSupport &m_support;
+  int pl, iset, act;
+
+public:
+  gbtActionIterator(const EFSupport &, Infoset *);
+  gbtActionIterator(const EFSupport &, int pl, int iset);
+
+  Action *operator*(void) const;
+  gbtActionIterator &operator++(int);
+  
+  bool Begin(void);
+  bool End(void) const;
+};
+
 #endif  // ACTITER_H
+
+

@@ -68,10 +68,8 @@ public:
   bool Contains(const Action *) const;
   bool Contains(int pl, int iset, int act) const;
   int GetIndex(const Action *) const;
-
-  // Find the active actions at an infoset
-  const gArray<Action *> &Actions(int pl, int iset) const;
-  const gArray<Action *> &Actions(const Infoset *) const;
+  Action *GetAction(Infoset *, int index) const;
+  Action *GetAction(int pl, int iset, int index) const;
 
   // Action editing functions
   virtual void AddAction(const Action *);

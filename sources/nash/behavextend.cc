@@ -60,9 +60,8 @@ static void DeviationInfosets(gList<Infoset *> &answer,
       }
       answer.Insert(iset,insert);
     }
-    const gArray<Action *> &actions = iset->Actions();
-    for (int j = 1; j <= actions.Length(); j++) {
-      DeviationInfosets(answer,big_supp,pl,child,actions[j]);
+    for (int j = 1; j <= iset->NumActions(); j++) {
+      DeviationInfosets(answer,big_supp,pl,child, iset->GetAction(j));
     }
   }
 }
@@ -74,9 +73,8 @@ static gList<Infoset *> DeviationInfosets(const EFSupport &big_supp,
 {
   gList<Infoset *> answer;
   
-  const gArray<Node *> &nodes = iset->Members();
-  for (int i = 1; i <= nodes.Length(); i++) {
-    DeviationInfosets(answer,big_supp,pl,nodes[i],act);
+  for (int i = 1; i <= iset->NumMembers(); i++) {
+    DeviationInfosets(answer, big_supp, pl, iset->GetMember(i), act);
   }
 
   return answer;
@@ -251,18 +249,17 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
     gbtEfgPlayer player = p_solution.GetGame().GetPlayer(pl);
     for (gbtEfgInfosetIterator infoset(player); !infoset.End(); infoset++) {
       if (little_supp.MayReach(*infoset)) {
-	const gArray<Action *> &acts_for_iset = (*infoset)->Actions();
-	for (int j = 1; j <= acts_for_iset.Length(); j++)
-	  if ( !little_supp.Contains(acts_for_iset[j]) ) {
+	for (int j = 1; j <= (*infoset)->NumActions(); j++)
+	  if ( !little_supp.Contains((*infoset)->GetAction(j))) {
 	    gList<Infoset *> isetlist = DeviationInfosets(big_supp, 
 							  player,
 							  *infoset,
-							  acts_for_iset[j]);
+							  (*infoset)->GetAction(j));
 	    gList<EFSupport> dsupps = DeviationSupports(big_supp, 
 							isetlist, 
 							player,
 							*infoset,
-							acts_for_iset[j]);
+							(*infoset)->GetAction(j));
 	    for (int k = 1; k <= dsupps.Length(); k++) {
 
 	    // This will be the utility difference between the
@@ -281,7 +278,7 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 					    terminal_nodes[n],
 					    player,
 					    *infoset,
-					    acts_for_iset[j])) {
+					    (*infoset)->GetAction(j))) {
 		  node_prob *= 
 		    (gDouble) p_solution.GetGame().Payoff(terminal_nodes[n],
 							  player);

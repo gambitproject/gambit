@@ -35,6 +35,7 @@
 #include "game/efgutils.h"
 #include "game/efbasis.h"
 #include "game/sfg.h"
+#include "game/actiter.h"
 
 //
 // Implementations of these are provided as necessary in gsmutils.cc
@@ -79,7 +80,12 @@ static Portion *GSM_Actions(GSM &, Portion **param)
 
   Infoset *infoset = ((InfosetPortion *) param[0])->Value();
   EFSupport *support = ((EfSupportPortion *) param[1])->Value();
-  return ArrayToList(support->Actions(infoset));
+
+  ListPortion *ret = new ListPortion;
+  for (gbtActionIterator action(*support, infoset); !action.End(); action++) {
+    ret->Append(new ActionPortion(*action));
+  }
+  return ret;
 }
 
 static Portion *GSM_BasisActions(GSM &, Portion **param)
@@ -90,10 +96,18 @@ static Portion *GSM_BasisActions(GSM &, Portion **param)
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   EFBasis* sup = ((EfBasisPortion*) param[1])->Value();
 
-  Portion *por = ((s->IsChanceInfoset()) ? ArrayToList(s->Actions()) :
-		  ArrayToList(sup->Actions(s->GetPlayer().GetId(),
-					   s->GetNumber())));
-  return por;
+  ListPortion *ret = new ListPortion;
+  if (s->IsChanceInfoset()) {
+    for (int act = 1; act <= s->NumActions(); act++) {
+      ret->Append(new ActionPortion(s->GetAction(act)));
+    }
+  }
+  else {
+    for (int act = 1; act <= sup->NumActions(s); act++) {
+      ret->Append(new ActionPortion(sup->GetAction(s, act)));
+    }
+  }
+  return ret;
 }
 
 //--------------
@@ -142,10 +156,19 @@ static Portion *GSM_BasisNodes(GSM &, Portion **param)
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   EFBasis* sup = ((EfBasisPortion*) param[1])->Value();
 
-  Portion *por = ((s->IsChanceInfoset()) ? ArrayToList(s->Members()) :
-		  ArrayToList(sup->Nodes(s->GetPlayer().GetId(),
-					 s->GetNumber())));
-  return por;
+  ListPortion *ret = new ListPortion;
+  if (s->IsChanceInfoset()) {
+    for (int i = 1; i <= s->NumMembers(); i++) {
+      ret->Append(new NodePortion(s->GetMember(i)));
+    }
+  }
+  else {
+    for (int i = 1; i <= sup->NumNodes(s); i++) {
+      ret->Append(new NodePortion(sup->GetNode(s, i)));
+    }
+  }
+
+  return ret;
 }
 
 static Portion *GSM_AddBasisNode(GSM &, Portion **param)
@@ -208,9 +231,13 @@ static Portion *GSM_ChanceProb(GSM &, Portion **param)
 
 static Portion *GSM_Children(GSM &, Portion **param)
 {
-  const Node *n = ((NodePortion *) param[0])->Value();
-  efgGame *e = ((efgGame*) param[0]->Game());
-  return ArrayToList(e->Children(n));
+  Node *node = ((NodePortion *) param[0])->Value();
+
+  ListPortion *ret = new ListPortion;
+  for (int i = 1; i <= node->NumChildren(); i++) {
+    ret->Append(new NodePortion(node->GetChild(i)));
+  }
+  return ret;
 }
 
 //------------
@@ -289,14 +316,13 @@ static Portion *GSM_DeleteEmptyInfoset(GSM &gsm, Portion **param)
 static Portion *GSM_DeleteMove(GSM &gsm, Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  efgGame *e = ((efgGame*) param[0]->Game());
   Node *keep = ((NodePortion *) param[1])->Value();
 
   if (keep->GetParent() != n)
     throw gclRuntimeError("keep is not a child of node");
 
   gsm.UnAssignGameElement(n->Game(), true, porBEHAV | porEFSUPPORT);
-  for (int i = 1; i <= e->NumChildren(n); i++) 
+  for (int i = 1; i <= n->NumChildren(); i++) 
     if (n->GetChild(i) != keep)
       gsm.UnAssignEfgSubTree(n->Game(), n->GetChild(i));
   gsm.UnAssignEfgElement(n->Game(), porNODE, n);
@@ -579,10 +605,13 @@ static Portion *GSM_Members(GSM &, Portion **param)
   if (param[0]->Spec().Type == porNULL)
     return new ListPortion();
 
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  Infoset *infoset = ((InfosetPortion *) param[0])->Value();
 
-  Portion* por = ArrayToList(s->Members());
-  return por;
+  ListPortion *ret = new ListPortion;
+  for (int i = 1; i <= infoset->NumMembers(); i++) {
+    ret->Append(new NodePortion(infoset->GetMember(i)));
+  }
+  return ret;
 }
 
 //----------------
@@ -759,10 +788,9 @@ static Portion *GSM_Nodes(GSM &, Portion **param)
 static Portion *GSM_NthChild(GSM &, Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  efgGame *e = ((efgGame*) param[0]->Game());
 
   int child = ((NumberPortion *) param[1])->Value();
-  if (child < 1 || child > e->NumChildren(n))  
+  if (child < 1 || child > n->NumChildren())  
     return new NullPortion(porNODE);
 
   return new NodePortion(n->GetChild(child));

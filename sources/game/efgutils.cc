@@ -32,20 +32,20 @@
 static void NDoChild(const efgGame &e, Node *n, gList <Node *> &list)
 { 
   list.Append(n);
-  for (int i = 1; i <= e.NumChildren(n); i++)
+  for (int i = 1; i <= n->NumChildren(); i++)
     NDoChild (e, n->GetChild(i), list);
 }
 
 static void MSRDoChild(const efgGame &e, Node *n, gList<Node *> &list)
 {
-  for (int i = 1; i <= e.NumChildren(n); i++)
+  for (int i = 1; i <= n->NumChildren(); i++)
     MSRDoChild(e, n->GetChild(i), list);
   if (n->GetSubgameRoot() == n)  list.Append(n);
 }
 
 static void LSRDoChild(const efgGame &e, Node *n, gList<Node *> &list)
 {
-  for (int i = 1; i <= e.NumChildren(n); i++)
+  for (int i = 1; i <= n->NumChildren(); i++)
     LSRDoChild(e, n->GetChild(i), list);
   if (n->Game()->IsLegalSubgame(n))   list.Append(n);
 }
@@ -55,7 +55,7 @@ static void CSDoChild(const efgGame &e, Node *n, gList<Node *> &list)
   if (n->GetSubgameRoot() == n)
     list.Append(n);
   else
-    for (int i = 1; i <= e.NumChildren(n); i++)
+    for (int i = 1; i <= n->NumChildren(); i++)
       CSDoChild(e, n->GetChild(i), list);
 }
 
@@ -64,7 +64,7 @@ static void CSDoChild(const efgGame &e, Node *n, gList<Node *> &list)
 int CountNodes (const efgGame &e, Node *n)
 {
   int num = 1;
-  for (int i = 1; i <= e.NumChildren(n); i++)
+  for (int i = 1; i <= n->NumChildren(); i++)
     num += CountNodes (e, n->GetChild(i));
   return num;
 }
@@ -129,7 +129,7 @@ bool AllSubgamesMarked(const efgGame &efg)
 void ChildSubgames(const efgGame &efg, Node *n, gList<Node *> &list)
 {
   list.Flush();
-  for (int i = 1; i <= efg.NumChildren(n); i++)
+  for (int i = 1; i <= n->NumChildren(); i++)
     CSDoChild(efg, n->GetChild(i), list);
 }
 
@@ -142,9 +142,9 @@ Action *LastAction(const efgGame &e, Node *node)
 {
   Node *parent = node->GetParent();
   if (parent == 0)  return 0;
-  for (int i = 1; i <= e.NumChildren(parent); i++) 
+  for (int i = 1; i <= node->NumChildren(); i++) 
     if (parent->GetChild(i) == node)  
-      return parent->GetInfoset()->Actions()[i];
+      return parent->GetInfoset()->GetAction(i);
   return 0;
 }
 
@@ -170,13 +170,13 @@ bool IsPerfectRecall(const efgGame &efg, Infoset *&s1, Infoset *&s2)
 	for (int m = 1; m <= iset2->NumMembers(); m++)  {
 	  int n;
 	  for (n = 1; n <= iset1->NumMembers(); n++)  {
-	    if (efg.IsPredecessor(iset1->Members()[n],
-				  iset2->Members()[m]) &&
-	        iset1->Members()[n] != iset2->Members()[m])  {
+	    if (efg.IsPredecessor(iset1->GetMember(n),
+				  iset2->GetMember(m)) &&
+	        iset1->GetMember(n) != iset2->GetMember(m))  {
 	      precedes = true;
 	      for (int act = 1; act <= iset1->NumActions(); act++)  {
-		if (efg.IsPredecessor(iset1->Members()[n]->GetChild(act),
-				      iset2->Members()[m]))  {
+		if (efg.IsPredecessor(iset1->GetMember(n)->GetChild(act),
+				      iset2->GetMember(m)))  {
 		  if (action != 0 && action != act)  {
 		    s1 = iset1;
 		    s2 = iset2;
@@ -219,9 +219,9 @@ efgGame *CompressEfg(const efgGame &efg, const EFSupport &S)
     for (int iset = 1; iset <= player.NumInfosets(); iset++)  {
       Infoset *infoset = player.GetInfoset(iset);
       for (int act = infoset->NumActions(); act >= 1; act--)  {
-	Action *oldact = efg.GetPlayer(pl).GetInfoset(iset)->Actions()[act];
+	Action *oldact = efg.GetPlayer(pl).GetInfoset(iset)->GetAction(act);
 	if (!S.Contains(oldact)) {
-	  newefg->DeleteAction(infoset, infoset->Actions()[act]);
+	  newefg->DeleteAction(infoset, infoset->GetAction(act));
 	}
       }
     }

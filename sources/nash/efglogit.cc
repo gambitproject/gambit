@@ -139,8 +139,8 @@ static void QreLHS(const EFSupport &p_support, const gVector<double> &p_point,
       for (int act = 2; act <= p_support.NumActions(pl, iset); act++) {
 	p_lhs[++rowno] = log(profile(pl, iset, act) / profile(pl, iset, 1));
 	p_lhs[rowno] -= (lambda *
-			 (profile.GetActionValue(p_support.Actions(pl, iset)[act]) -
-			  profile.GetActionValue(p_support.Actions(pl, iset)[1])));
+			 (profile.GetActionValue(p_support.GetAction(pl, iset, act)) -
+			  profile.GetActionValue(p_support.GetAction(pl, iset, 1))));
 	p_lhs[rowno] *= profile(pl, iset, 1) * profile(pl, iset, act);
       }
     }
@@ -209,14 +209,14 @@ static void QreJacobian(const EFSupport &p_support,
 		  p_matrix(colno, rowno) = 0;
 		}
 		else {
-		  p_matrix(colno, rowno) = -lambda * profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile.DiffActionValue(p_support.Actions(pl1, iset1)[act1], p_support.Actions(pl2, iset2)[act2]) - profile.DiffActionValue(p_support.Actions(pl1, iset1)[1], p_support.Actions(pl2, iset2)[act2]));
+		  p_matrix(colno, rowno) = -lambda * profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile.DiffActionValue(p_support.GetAction(pl1, iset1, act1), p_support.GetAction(pl2, iset2, act2)) - profile.DiffActionValue(p_support.GetAction(pl1, iset1, 1), p_support.GetAction(pl2, iset2, act2)));
 		}
 	      }
 	    }
 	  }
 	}
 
-	p_matrix(p_matrix.NumRows(), rowno) = -profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile.GetActionValue(p_support.Actions(pl1, iset1)[act1]) - profile.GetActionValue(p_support.Actions(pl1, iset1)[1]));
+	p_matrix(p_matrix.NumRows(), rowno) = -profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile.GetActionValue(p_support.GetAction(pl1, iset1, act1)) - profile.GetActionValue(p_support.GetAction(pl1, iset1, 1)));
       }
     }
   }
@@ -263,7 +263,7 @@ static void TracePath(const BehavProfile<double> &p_start,
 	for (int iset = 1; iset <= player.NumInfosets(); iset++) {
 	  for (int act = 1; act <= newSupport.NumActions(pl, iset); act++) {
 	    if (index++ == i) {
-	      newSupport.RemoveAction(newSupport.Actions(pl, iset)[act]);
+	      newSupport.RemoveAction(newSupport.GetAction(pl, iset, act));
 	    }
 	  }
 	}
@@ -383,7 +383,7 @@ static void TracePath(const BehavProfile<double> &p_start,
 	  for (int iset = 1; iset <= player.NumInfosets(); iset++) {
 	    for (int act = 1; act <= newSupport.NumActions(pl, iset); act++) {
 	      if (index++ == i) {
-		newSupport.RemoveAction(newSupport.Actions(pl, iset)[act]);
+		newSupport.RemoveAction(newSupport.GetAction(pl, iset, act));
 	      }
 	    }
 	  }

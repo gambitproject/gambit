@@ -100,11 +100,9 @@ class Infoset   {
       { actions[i]->name = s; }
     const gText &GetActionName(int i) const  { return actions[i]->name; }
 
-    const gArray<Action *> &Actions(void) const { return actions; }
     Action *GetAction(int act) const { return actions[act]; }
     int NumActions(void) const   { return actions.Length(); }
 
-    const gArray<Node *> &Members(void) const   { return members; }
     Node *GetMember(int m) const { return members[m]; }
     int NumMembers(void) const   { return members.Length(); }
 

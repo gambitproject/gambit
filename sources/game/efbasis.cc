@@ -31,7 +31,8 @@
 #include "math/gdpvect.imp"
 #include "math/gmatrix.h"
 #include "base/gnullstatus.h"
-#include "game/efgutils.h"
+#include "efgutils.h"
+#include "actiter.h"
 #include "numerical/lpsolve.h"   
 
 class EFNodeArrays   {
@@ -154,8 +155,12 @@ public:
 EFNodeSet::EFNodeSet(const gbtEfgPlayer &p)
   : efp(p), infosets(p.NumInfosets())
 {
-  for (int i = 1; i <= p.NumInfosets(); i++){
-    infosets[i] = new EFNodeArrays(p.GetInfoset(i)->Members());
+  for (int i = 1; i <= p.NumInfosets(); i++) {
+    gArray<Node *> members(p.GetInfoset(i)->NumMembers());
+    for (int j = 1; j <= members.Length(); j++) {
+      members[j] = p.GetInfoset(i)->GetMember(j);
+    }
+    infosets[i] = new EFNodeArrays(members);
   }
 }
 
@@ -313,6 +318,11 @@ bool EFBasis::operator!=(const EFBasis &b) const
 // EFBasis: Member Functions 
 //-----------------------------
 
+int EFBasis::NumNodes(Infoset *infoset) const
+{
+  return nodes[infoset->GetPlayer().GetId()]->NumNodes(infoset->GetNumber());
+}
+
 int EFBasis::NumNodes(int pl, int iset) const
 {
   return nodes[pl]->NumNodes(iset);
@@ -321,6 +331,12 @@ int EFBasis::NumNodes(int pl, int iset) const
 const gArray<Node *> &EFBasis::Nodes(int pl, int iset) const
 {
   return nodes[pl]->NodeList(iset);
+}
+
+Node *EFBasis::GetNode(Infoset *infoset, int index) const
+{
+  return nodes[infoset->GetPlayer().GetId()]->GetNode(infoset->GetNumber(),
+						      index);
 }
 
 int EFBasis::Find(Node *n) const
@@ -446,20 +462,26 @@ bool EFBasis::IsConsistent()
 
 void EFBasis::MakeIndices()
 {
-  int i,j,k;
+  int i,j;
   int ind = 1;
 
   for(i=1;i<=m_efg->NumPlayers();i++)
-    for(j=1;j<=(m_efg->NumInfosets())[i];j++) 
-      for(k=1;k<=bigbasis->NumActions(i,j);k++)
-	if(EFSupport::Contains(bigbasis->Actions(i,j)[k]))
+    for(j=1;j<=(m_efg->NumInfosets())[i];j++) {
+      int k = 1;
+      for (gbtActionIterator action(*bigbasis, i, j);
+	   !action.End(); action++, k++)  {
+	if (Contains(*action)) {
 	  (*actIndex)(i,j,k)=0;
-	else 
+	}
+	else {
 	  (*actIndex)(i,j,k) = ind++;
+	}
+      }
+    }
   num_act_vars=ind-1;
   for(i=1;i<=m_efg->NumPlayers();i++)
     for(j=1;j<=(m_efg->NumInfosets())[i];j++) 
-      for(k=1;k<=bigbasis->NumNodes(i,j);k++) {
+      for(int k=1;k<=bigbasis->NumNodes(i,j);k++) {
 	if(IsReachable(bigbasis->Nodes(i,j)[k]))
 	  (*nodeIndex)(i,j,k)=0;
 	else 
@@ -506,9 +528,9 @@ void EFBasis::MakeAb()
 
   for(i=1;i<=m_efg->NumPlayers();i++)
     for(j=1;j<=(m_efg->NumInfosets())[i];j++) {
-      for(k=1;k<=bigbasis->NumActions(i,j);k++)
+      for (k=1;k<=bigbasis->NumActions(i,j);k++)
 	if((*actIndex)(i,j,k))
-	  AddEquation1(ineq++,bigbasis->Actions(i,j)[k]);
+	  AddEquation1(ineq++,bigbasis->GetAction(i,j,k));
       for(k=1;k<=bigbasis->NumNodes(i,j);k++)
 	if((*nodeIndex)(i,j,k))
 	  AddEquation2(eq++,bigbasis->Nodes(i,j)[k]);

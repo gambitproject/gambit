@@ -106,7 +106,7 @@ void EfgProfileList::UpdateValues(void)
 	Infoset *infoset = player.GetInfoset(iset);
 	for (int act = 1; act <= infoset->NumActions(); act++) {
 	  SetItem(i - 1, ++column,
-		  (char *) ToText(profile(infoset->Actions()[act])));
+		  (char *) ToText(profile(infoset->GetAction(act))));
 	}
       }
     }
@@ -198,7 +198,7 @@ wxString EfgProfileList::GetReport(void) const
 
 	for (int act = 1; act <= infoset->NumActions(); act++) {
 	  report += wxString::Format("%2d: %-6s", act,
-				     (const char *) infoset->Actions()[act]->GetName());
+				     (const char *) infoset->GetAction(act)->GetName());
 
 	  for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
 	    report += wxString::Format("%-15s ", 

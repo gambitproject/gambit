@@ -66,6 +66,7 @@ public:
   bool operator!=(const EFBasis &b) const;
 
   int NumNodes(int pl, int iset) const;
+  int NumNodes(Infoset *) const;
   gPVector<int> NumNodes(void) const;
 
   bool RemoveNode(Node *);
@@ -77,6 +78,7 @@ public:
   int Find(Node *) const;
 
   const gArray<Node *> &Nodes(int pl, int iset) const;
+  Node *GetNode(Infoset *, int index) const;
 
   bool IsValid(void) const;
   bool IsConsistent();

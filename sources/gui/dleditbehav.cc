@@ -66,7 +66,12 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
 				 wxDefaultPosition, wxSize(200, 200));
   m_infosetTree->AddRoot((char *) p_profile.GetName());
 
-  m_lastInfoset = p_profile.GetGame().Infosets()[1];
+  for (int pl = 1; ; pl++) {
+    if (p_profile.GetGame().GetPlayer(pl).NumInfosets() > 0) {
+      m_lastInfoset = p_profile.GetGame().GetPlayer(pl).GetInfoset(1);
+      break;
+    }
+  }
   wxTreeItemId firstID;
 
   for (int pl = 1; pl <= p_profile.GetGame().NumPlayers(); pl++) {
@@ -109,9 +114,9 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
   m_probGrid->SetDefaultCellAlignment(wxRIGHT, wxCENTER);
   for (int act = 1; act <= m_lastInfoset->NumActions(); act++) {
     m_probGrid->SetLabelValue(wxVERTICAL,
-			      (char *) m_lastInfoset->Actions()[act]->GetName(),
+			      (char *) m_lastInfoset->GetAction(act)->GetName(),
 			      act - 1);
-    m_probGrid->SetCellValue((char *) ToText(p_profile(m_lastInfoset->Actions()[act])),
+    m_probGrid->SetCellValue((char *) ToText(p_profile(m_lastInfoset->GetAction(act))),
 			     act - 1, 0);
     m_probGrid->SetCellEditor(act - 1, 0, new NumberEditor);
   }
@@ -168,7 +173,7 @@ void dialogEditBehav::OnSelChanged(wxTreeEvent &p_event)
 
   if (m_lastInfoset) {
     for (int act = 1; act <= m_lastInfoset->NumActions(); act++) {
-      m_profile.Set(m_lastInfoset->Actions()[act],
+      m_profile.Set(m_lastInfoset->GetAction(act),
 		    ToNumber(m_probGrid->GetCellValue(act - 1, 0).c_str()));
     }
   }
@@ -187,9 +192,9 @@ void dialogEditBehav::OnSelChanged(wxTreeEvent &p_event)
 
     for (int act = 1; act <= m_lastInfoset->NumActions(); act++) {
       m_probGrid->SetLabelValue(wxVERTICAL,
-				(char *) m_lastInfoset->Actions()[act]->GetName(),
+				(char *) m_lastInfoset->GetAction(act)->GetName(),
 				act - 1);
-      m_probGrid->SetCellValue((char *) ToText(m_profile(m_lastInfoset->Actions()[act])),
+      m_probGrid->SetCellValue((char *) ToText(m_profile(m_lastInfoset->GetAction(act))),
 			       act - 1, 0);
       m_probGrid->SetCellEditor(act - 1, 0, new NumberEditor);
     }
@@ -209,11 +214,16 @@ void dialogEditBehav::OnOK(wxCommandEvent &p_event)
   Infoset *infoset = m_map.Lookup(m_infosetTree->GetSelection());
 
   if (!infoset) {
-    infoset = m_profile.GetGame().Infosets()[1];
+    for (int pl = 1; ; pl++) {
+      if (m_profile.GetGame().GetPlayer(pl).NumInfosets() > 0) {
+	m_lastInfoset = m_profile.GetGame().GetPlayer(pl).GetInfoset(1);
+	break;
+      }
+    }
   }
 
   for (int act = 1; act <= infoset->NumActions(); act++) {
-    m_profile.Set(infoset->Actions()[act],
+    m_profile.Set(infoset->GetAction(act),
 		  ToNumber(m_probGrid->GetCellValue(act - 1, 0).c_str()));
   }
 

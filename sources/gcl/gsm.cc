@@ -1082,19 +1082,19 @@ void GSM::UnAssignEfgOutcome(efgGame *game, const gbtEfgOutcome &data)
 void GSM::UnAssignEfgInfoset(efgGame * game, Infoset* infoset )
 {
   for (int i = 1; i <= infoset->NumActions(); i++ )
-    UnAssignEfgElement( game, porACTION, (Action *)infoset->Actions()[i] );
+    UnAssignEfgElement( game, porACTION, (Action *)infoset->GetAction(i));
   UnAssignEfgElement( game, porINFOSET, infoset );  
 }
 
 
 void GSM::UnAssignEfgSubTree( efgGame * game, Node* node )
 {
-  for (int i = 1; i <= game->NumChildren(node); i++)  {
+  for (int i = 1; i <= node->NumChildren(); i++)  {
     Infoset* infoset = node->GetInfoset();
     if (infoset) {
-      const gArray<Action *>& actions = infoset->Actions();
-      for (int j = actions.First(); j <= actions.Last(); j++ )
-	UnAssignEfgElement( game, porACTION, (Action *)actions[j] );
+      for (int j = 1; j <= infoset->NumActions(); j++) {
+	UnAssignEfgElement(game, porACTION, infoset->GetAction(j));
+      }
       UnAssignEfgElement( game, porINFOSET, infoset );
     }
     UnAssignEfgSubTree( game, node->GetChild( i ) );

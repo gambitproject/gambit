@@ -61,9 +61,9 @@ dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, Node *p_node)
   actionSizer->Add(new wxStaticText(this, -1, "Keep subtree after action"),
 		   0, wxCENTER | wxALL, 5);
   m_branchList = new wxListBox(this, -1);
-  for (int act = 1; act <= m_node->Game()->NumChildren(m_node); act++) {
+  for (int act = 1; act <= m_node->NumChildren(); act++) {
     m_branchList->Append((char *) (ToText(act) + ": " + 
-				   m_node->GetInfoset()->Actions()[act]->GetName()));
+				   m_node->GetInfoset()->GetAction(act)->GetName()));
   }
   m_branchList->SetSelection(0);
   m_branchList->Enable(false);

@@ -1496,13 +1496,13 @@ void BehavPortion::Output(gOutput& s) const
       s << "{ ";
       for (int act = 1; act <= (*infoset)->NumActions(); act++) {
 	if (_WriteSolutionLabels == triTRUE) {
-	  if ((*rep->value)((*infoset)->Actions()[act]) > gNumber(0)) {
-	    s << (*infoset)->Actions()[act]->GetName() << '=';
-	    s << (*rep->value)((*infoset)->Actions()[act]) << ' ';
+	  if ((*rep->value)((*infoset)->GetAction(act)) > gNumber(0)) {
+	    s << (*infoset)->GetAction(act)->GetName() << '=';
+	    s << (*rep->value)((*infoset)->GetAction(act)) << ' ';
 	  }
 	}
 	else
-	  s << (*rep->value)((*infoset)->Actions()[act]) << ' ';
+	  s << (*rep->value)((*infoset)->GetAction(act)) << ' ';
       }
       s << "}";
     }

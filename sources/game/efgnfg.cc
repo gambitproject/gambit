@@ -79,13 +79,13 @@ void Lexicon::MakeReducedStrats(const EFSupport &S,
 
   if (!n->parent)  n->ptr = 0;
 
-  if (S.GetGame().NumChildren(n) > 0)  {
+  if (n->NumChildren() > 0)  {
     if (gbtEfgPlayer(n->infoset->player) == p)  {
       if (n->infoset->flag == 0)  {
 	// we haven't visited this infoset before
 	n->infoset->flag = 1;
-	for (i = 1; i <= S.GetGame().NumChildren(n); i++)   {
-	  if (S.Contains(n->infoset->Actions()[i]))  {
+	for (i = 1; i <= n->NumChildren(); i++)   {
+	  if (S.Contains(n->infoset->GetAction(i)))  {
 	    Node *m = n->GetChild(i);
 	    n->whichbranch = m;
 	    n->infoset->whichbranch = i;

@@ -36,6 +36,7 @@
 #include "efg.h"
 #include "efgutils.h"
 #include "efstrat.h"
+#include "actiter.h"
 
 //----------------------------------------------------------------------
 //                gbt_efg_outcome_rep: Declaration
@@ -492,10 +493,10 @@ Action *Node::GetAction(void) const
     return 0;
   }
   
-  const gArray<Action *> &actions = GetParent()->GetInfoset()->Actions();
-  for (int i = 1; i <= actions.Length(); i++) {
-    if (this == GetParent()->GetChild(actions[i])) {
-      return actions[i];
+  Infoset *infoset = GetParent()->GetInfoset();
+  for (int i = 1; i <= infoset->NumActions(); i++) {
+    if (this == GetParent()->GetChild(infoset->GetAction(i))) {
+      return infoset->GetAction(i);
     }
   }
 
@@ -931,22 +932,6 @@ gbtEfgPlayer efgGame::GetPlayer(int p_player) const
   }
 }
 
-gBlock<Infoset *> efgGame::Infosets(void) const
-{
-  gBlock<Infoset *> answer;
-
-  int i;
-  for (i = 1; i <= NumPlayers(); i++) {
-    const gArray<Infoset *> &infosets_for_player = players[i]->m_infosets;
-    int j;
-    for (j = 1; j <= infosets_for_player.Length(); j++) {
-      answer += infosets_for_player[j];
-    }
-  }
-
-  return answer;
-}
-
 int efgGame::NumOutcomes(void) const
 { return outcomes.Last(); }
 
@@ -1114,24 +1099,22 @@ void efgGame::DescendantNodes(const Node* n,
 {
   current += const_cast<Node *>(n);
   if (n->IsNonterminal()) {
-    const gArray<Action *> actions = supp.Actions(n->GetInfoset());
-    for (int i = 1; i <= actions.Length(); i++) {
-      const Node* newn = n->GetChild(actions[i]);
-      DescendantNodes(newn,supp,current);
+    for (gbtActionIterator action(supp, n->GetInfoset());
+	 !action.End(); action++) {
+      DescendantNodes(n->GetChild(*action), supp, current);
     }
   }
 }
 
 void efgGame::NonterminalDescendants(const Node* n, 
-					  const EFSupport& supp,
-					  gList<const Node*>& current) const
+				     const EFSupport& supp,
+				     gList<const Node*>& current) const
 {
   if (n->IsNonterminal()) {
     current += n;
-    const gArray<Action *> actions = supp.Actions(n->GetInfoset());
-    for (int i = 1; i <= actions.Length(); i++) {
-      const Node* newn = n->GetChild(actions[i]);
-      NonterminalDescendants(newn,supp,current);
+    for (gbtActionIterator action(supp, n->GetInfoset());
+	 !action.End(); action++) {
+      NonterminalDescendants(n->GetChild(*action), supp, current);
     }
   }
 }
@@ -1145,10 +1128,9 @@ void efgGame::TerminalDescendants(const Node* n,
     current += (Node *) n;
   }
   else {
-    const gArray<Action *> actions = supp.Actions(n->GetInfoset());
-    for (int i = 1; i <= actions.Length(); i++) {
-      const Node* newn = n->GetChild(actions[i]);
-      TerminalDescendants(newn,supp,current);
+    for (gbtActionIterator action(supp, n->GetInfoset());
+	 !action.End(); action++) {
+      TerminalDescendants(n->GetChild(*action), supp, current);
     }
   }
 }
@@ -1195,12 +1177,6 @@ gList<Infoset*> efgGame::DescendantInfosets(const Node& n,
   }
   return answer;
 }
-
-const gArray<Node *> &efgGame::Children(const Node *n) const
-{ return n->children; }
-
-int efgGame::NumChildren(const Node *n) const
-{ return n->children.Length(); }
 
 gbtEfgOutcome efgGame::NewOutcome(int index)
 {
@@ -1656,7 +1632,7 @@ Node *efgGame::DeleteTree(Node *n)
   m_revision++;
   m_dirty = true;
 
-  while (NumChildren(n) > 0)   {
+  while (n->NumChildren() > 0)   {
     DeleteTree(n->children[1]);
     delete n->children.Remove(1);
   }
@@ -1765,7 +1741,7 @@ gArray<gNumber> efgGame::GetChanceProbs(Infoset *infoset) const
 void efgGame::MarkTree(Node *n, Node *base)
 {
   n->ptr = base;
-  for (int i = 1; i <= NumChildren(n); i++)
+  for (int i = 1; i <= n->NumChildren(); i++)
     MarkTree(n->GetChild(i), base);
 }
 
@@ -1773,15 +1749,15 @@ bool efgGame::CheckTree(Node *n, Node *base)
 {
   int i;
 
-  if (NumChildren(n) == 0)   return true;
+  if (n->NumChildren() == 0)   return true;
 
-  for (i = 1; i <= NumChildren(n); i++)
+  for (i = 1; i <= n->NumChildren(); i++)
     if (!CheckTree(n->GetChild(i), base))  return false;
 
   if (n->GetPlayer().IsChance())   return true;
 
   for (i = 1; i <= n->GetInfoset()->NumMembers(); i++)
-    if (n->GetInfoset()->Members()[i]->ptr != base)
+    if (n->GetInfoset()->GetMember(i)->ptr != base)
       return false;
 
   return true;
@@ -1789,7 +1765,7 @@ bool efgGame::CheckTree(Node *n, Node *base)
 
 bool efgGame::IsLegalSubgame(Node *n)
 {
-  if (NumChildren(n) == 0)  
+  if (n->NumChildren() == 0)  
     return false;
 
   MarkTree(n, n);
@@ -1822,7 +1798,7 @@ void efgGame::MarkSubgame(Node *n, Node *base)
 {
   if (n->gameroot == n)  return;
   n->gameroot = base;
-  for (int i = 1; i <= NumChildren(n); i++)
+  for (int i = 1; i <= n->NumChildren(); i++)
     MarkSubgame(n->GetChild(i), base);
 }
 
@@ -1849,9 +1825,9 @@ void efgGame::MarkSubgames(void)
 
 void efgGame::UnmarkSubgames(Node *n)
 {
-  if (NumChildren(n) == 0)   return;
+  if (n->NumChildren() == 0)   return;
 
-  for (int i = 1; i <= NumChildren(n); i++)
+  for (int i = 1; i <= n->NumChildren(); i++)
     UnmarkSubgames(n->GetChild(i));
   
   if (n->gameroot == n && n->parent)  {

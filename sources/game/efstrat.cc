@@ -39,10 +39,12 @@ public:
   virtual ~EFActionArray();
   EFActionArray &operator=( const EFActionArray &a);
   bool operator==( const EFActionArray &a) const;
-  inline const Action *operator[](const int &i) const { return acts[i]; }
+  const Action *operator[](const int &i) const { return acts[i]; }
+  Action *operator[](int i) { return acts[i]; }
+  void Set(int i, Action *action) { acts[i] = action; }
 
   // Information
-  inline const int Length() const { return acts.Length(); }
+  int Length() const { return acts.Length(); }
 };
 
 //----------------------------------------------------
@@ -137,7 +139,7 @@ public:
      { return infosets[i->GetNumber()]; }
   
   // Get an Action
-  const Action *GetAction(int iset, int index);
+  Action *GetAction(int iset, int index);
 
   // returns the index of the action if it is in the ActionSet
   int Find(const Action *) const;
@@ -163,7 +165,10 @@ EFActionSet::EFActionSet(const gbtEfgPlayer &p)
   : efp(p), infosets(p.NumInfosets())
 {
   for (int i = 1; i <= p.NumInfosets(); i++) {
-    infosets[i] = new EFActionArray(p.GetInfoset(i)->Actions());
+    infosets[i] = new EFActionArray(p.GetInfoset(i)->NumActions());
+    for (int j = 1; j <= p.GetInfoset(i)->NumActions(); j++) {
+      infosets[i]->Set(j, p.GetInfoset(i)->GetAction(j));
+    }
   }
 }
 
@@ -251,7 +256,7 @@ bool EFActionSet::RemoveAction(int  iset, Action *s )
 } 
 
 // Get an action
-const Action *EFActionSet::GetAction(int iset, int index)
+Action *EFActionSet::GetAction(int iset, int index)
 {
   return (infosets[iset]->acts)[index];
 }
@@ -360,31 +365,21 @@ bool EFSupport::operator!=(const EFSupport &p_support) const
 
 int EFSupport::NumActions(int pl, int iset) const
 {
-  return m_players[pl]->NumActions(iset);
+  if (pl == 0) {
+    return m_efg->GetChance().GetInfoset(iset)->NumActions();
+  }
+  else {
+    return m_players[pl]->NumActions(iset);
+  }
 }
 
 int EFSupport::NumActions(const Infoset *i) const
 {
   if (i->GetPlayer().IsChance()) {
-    return i->Actions().Length();
+    return i->NumActions();
   }
   else {
     return m_players[i->GetPlayer().GetId()]->NumActions(i->GetNumber());
-  }
-}
-
-const gArray<Action *> &EFSupport::Actions(int pl, int iset) const
-{
-  return m_players[pl]->ActionList(iset);
-}
-
-const gArray<Action *> &EFSupport::Actions(const Infoset *i) const
-{
-  if (i->GetPlayer().IsChance()) {
-    return i->Actions();
-  }
-  else {
-    return m_players[i->GetPlayer().GetId()]->ActionList(i->GetNumber());
   }
 }
 
@@ -416,6 +411,26 @@ bool EFSupport::Contains(const Action *a) const
 bool EFSupport::Contains(int pl, int iset, int act) const
 {
   return Contains(GetGame().GetPlayer(pl).GetInfoset(iset)->GetAction(act));
+}
+
+Action *EFSupport::GetAction(int pl, int iset, int act) const
+{
+  if (pl == 0) {
+    return m_efg->GetChance().GetInfoset(iset)->GetAction(act);
+  }
+  else {
+    return m_players[pl]->GetAction(iset, act);
+  }
+}
+
+Action *EFSupport::GetAction(Infoset *infoset, int act) const
+{
+  if (infoset->GetPlayer().IsChance()) {
+    return infoset->GetAction(act);
+  }
+  else {
+    return m_players[infoset->GetPlayer().GetId()]->GetAction(infoset->GetNumber(), act);
+  }
 }
 
 bool EFSupport::HasActiveActionAt(const Infoset *infoset) const
@@ -501,9 +516,8 @@ gList<Node *> EFSupport::ReachableNonterminalNodes(const Node *n) const
 {
   gList<Node *> answer;
   if (n->IsNonterminal()) {
-    const gArray<Action *> &actions = Actions(n->GetInfoset());
-    for (int i = 1; i <= actions.Length(); i++) {
-      Node *nn = n->GetChild(actions[i]);
+    for (int i = 1; i <= NumActions(n->GetInfoset()); i++) {
+      Node *nn = n->GetChild(GetAction(n->GetInfoset(), i));
       if (nn->IsNonterminal()) {
 	answer += nn;
 	answer += ReachableNonterminalNodes(nn);
@@ -566,23 +580,26 @@ bool EFSupport::AlwaysReaches(const Infoset *i) const
 bool EFSupport::AlwaysReachesFrom(const Infoset *i, const Node *n) const
 {
   if (n->IsTerminal()) return false;
-  else
+  else {
     if (n->GetInfoset() == i) return true;
     else {
-      gArray<Action *> actions = Actions(n->GetInfoset());
-      for (int j = 1; j <= actions.Length(); j++)
-	if (!AlwaysReachesFrom(i,n->GetChild(actions[j]))) 
+      for (int j = 1; j <= NumActions(n->GetInfoset()); j++) {
+	if (!AlwaysReachesFrom(i, n->GetChild(GetAction(n->GetInfoset(), j)))){
 	  return false;
+	}
+      }
     }
+  }
   return true;
 }
 
-bool EFSupport::MayReach(const Infoset *i) const
+bool EFSupport::MayReach(const Infoset *infoset) const
 {
-  gArray<Node *> members = i->Members();
-  for (int j = 1; j <= members.Length(); j++)
-    if (MayReach(members[j]))
+  for (int j = 1; j <= infoset->NumMembers(); j++) {
+    if (MayReach(infoset->GetMember(j))) {
       return true;
+    }
+  }
   return false;
 }
 
@@ -696,9 +713,8 @@ void EFSupportWithActiveInfo::activate_this_and_lower_nodes(const Node *n)
   if (n->IsNonterminal()) {
     activate(n); 
     activate(n->GetInfoset());
-    gArray<Action *> actions(Actions(n->GetInfoset()));
-    for (int i = 1; i <= actions.Length(); i++) 
-      activate_this_and_lower_nodes(n->GetChild(actions[i]));    
+    for (int i = 1; i <= NumActions(n->GetInfoset()); i++) 
+      activate_this_and_lower_nodes(n->GetChild(GetAction(n->GetInfoset(), i)));
   }
 }
 
@@ -708,9 +724,9 @@ void EFSupportWithActiveInfo::deactivate_this_and_lower_nodes(const Node *n)
     deactivate(n); 
     if ( !infoset_has_active_nodes(n->GetInfoset()) )
       deactivate(n->GetInfoset());
-    gArray<Action *> actions(Actions(n->GetInfoset()));
-      for (int i = 1; i <= actions.Length(); i++) 
-	deactivate_this_and_lower_nodes(n->GetChild(actions[i]));    
+    for (int i = 1; i <= NumActions(n->GetInfoset()); i++) {
+      deactivate_this_and_lower_nodes(n->GetChild(GetAction(n->GetInfoset(), i)));
+    }
   }
 }
 
@@ -731,10 +747,8 @@ deactivate_this_and_lower_nodes_returning_deactivated_infosets(const Node *n,
       (*list) += n->GetInfoset(); 
       deactivate(n->GetInfoset());
     }
-    gArray<Action *> actions(Actions(n->GetInfoset()));
-      for (int i = 1; i <= actions.Length(); i++) 
-	deactivate_this_and_lower_nodes_returning_deactivated_infosets(
-			     n->GetChild(actions[i]),list);    
+    for (int i = 1; i <= NumActions(n->GetInfoset()); i++) 
+      deactivate_this_and_lower_nodes_returning_deactivated_infosets(n->GetChild(GetAction(n->GetInfoset(), i)), list);    
   }
 }
 

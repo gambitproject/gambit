@@ -76,23 +76,21 @@ void EfgIter::First(void)
 
   for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
     for (int iset = 1; iset <= _efg->GetPlayer(pl).NumInfosets(); iset++) {
-      _profile.Set(_support.Actions(pl, iset)[1]);
+      _profile.Set(_support.GetAction(pl, iset, 1));
     }
   }
 }
 
 int EfgIter::Next(int pl, int iset)
-{
-  const gArray<Action *> &actions = _support.Actions(pl, iset);
-  
-  if (_current(pl, iset) == actions.Length())   {
+{  
+  if (_current(pl, iset) == _support.NumActions(pl, iset)) {
     _current(pl, iset) = 1;
-    _profile.Set(actions[1]);
+    _profile.Set(_support.GetAction(pl, iset, 1));
     return 0;
   }
 
   _current(pl, iset)++;
-  _profile.Set(actions[_current(pl, iset)]);
+  _profile.Set(_support.GetAction(pl, iset, _current(pl, iset)));
   return 1;
 }
 
@@ -104,7 +102,7 @@ int EfgIter::Set(int pl, int iset, int act)
     return 0;
 
   _current(pl, iset) = act;
-  _profile.Set(_support.Actions(pl, iset)[act]);
+  _profile.Set(_support.GetAction(pl, iset, act));
   return 1;
 }
 
@@ -181,7 +179,7 @@ void EfgContIter::First(void)
       if (pl != _frozen_pl && iset != _frozen_iset)   {
 	_current(pl, iset) = 1;
 	if (_is_active[pl][iset])      
-	  _profile.Set(_support.Actions(pl, iset)[1]);
+	  _profile.Set(_support.GetAction(pl, iset, 1));
       }
   }
 }
@@ -191,7 +189,7 @@ void EfgContIter::Set(int pl, int iset, int act)
   if (pl != _frozen_pl || iset != _frozen_iset)   return;
 
   _current(pl, iset) = act;
-  _profile.Set(_support.Actions(pl, iset)[act]);
+  _profile.Set(_support.GetAction(pl, iset, act));
 }
 
 
@@ -205,17 +203,15 @@ void EfgContIter::Set(const Action *a)
 int EfgContIter::Next(int pl, int iset)
 {
   if (pl != _frozen_pl || iset != _frozen_iset)   return 1;
-
-  const gArray<Action *> &actions = _support.Actions(pl, iset);
   
-  if (_current(pl, iset) == actions.Length())   {
+  if (_current(pl, iset) == _support.NumActions(pl, iset)) {
     _current(pl, iset) = 1;
-    _profile.Set(actions[1]);
+    _profile.Set(_support.GetAction(pl, iset, 1));
     return 0;
   }
 
   _current(pl, iset)++;
-  _profile.Set(actions[_current(pl, iset)]);
+  _profile.Set(_support.GetAction(pl, iset, _current(pl, iset)));
   return 1;
 }
   
@@ -239,12 +235,12 @@ int EfgContIter::NextContingency(void)
     if (_is_active[pl][iset] && (pl != _frozen_pl || iset != _frozen_iset))
       if (_current(pl, iset) < _support.NumActions(pl, iset))  {
 	_current(pl, iset) += 1;
-	_profile.Set(_support.Actions(pl, iset)[_current(pl, iset)]);
+	_profile.Set(_support.GetAction(pl, iset, _current(pl, iset)));
 	return 1;
       }
       else {
 	_current(pl, iset) = 1;
-	_profile.Set(_support.Actions(pl, iset)[1]);
+	_profile.Set(_support.GetAction(pl, iset, 1));
       }
     
     iset--;
@@ -326,7 +322,7 @@ void EfgConditionalContIter::First(void)
     for (int iset = 1; iset <= _efg->GetPlayer(pl).NumInfosets(); iset++) {
       _current(pl, iset) = 1;
       if (_is_active[pl][iset])
-	_profile.Set(_support.Actions(pl, iset)[1]);
+	_profile.Set(_support.GetAction(pl, iset, 1));
     }
   }
 }
@@ -334,7 +330,7 @@ void EfgConditionalContIter::First(void)
 void EfgConditionalContIter::Set(int pl, int iset, int act)
 {
   _current(pl, iset) = act;
-  _profile.Set(_support.Actions(pl, iset)[act]);
+  _profile.Set(_support.GetAction(pl, iset, act));
 }
 
 void EfgConditionalContIter::Set(const Action *a) 
@@ -344,16 +340,14 @@ void EfgConditionalContIter::Set(const Action *a)
 
 int EfgConditionalContIter::Next(int pl, int iset)
 {
-  const gArray<Action *> &actions = _support.Actions(pl, iset);
-  
-  if (_current(pl, iset) == actions.Length())   {
+  if (_current(pl, iset) == _support.NumActions(pl, iset)) {
     _current(pl, iset) = 1;
-    _profile.Set(actions[1]);
+    _profile.Set(_support.GetAction(pl, iset, 1));
     return 0;
   }
 
   _current(pl, iset)++;
-  _profile.Set(actions[_current(pl, iset)]);
+  _profile.Set(_support.GetAction(pl, iset, _current(pl, iset)));
   return 1;
 }
 
@@ -370,12 +364,12 @@ int EfgConditionalContIter::NextContingency(void)
     if (_is_active[pl][iset]) 
       if (_current(pl, iset) < _support.NumActions(pl, iset))  {
 	_current(pl, iset) += 1;
-	_profile.Set(_support.Actions(pl, iset)[_current(pl, iset)]);
+	_profile.Set(_support.GetAction(pl, iset, _current(pl, iset)));
 	return 1;
       }
       else {
 	_current(pl, iset) = 1;
-	_profile.Set(_support.Actions(pl, iset)[1]);
+	_profile.Set(_support.GetAction(pl, iset, 1));
       }
     
     iset--;

@@ -28,14 +28,14 @@
 #include "actiter.h"
 
 //========================================================================
-//                     class gbtActionIterator
+//                     class gbtAllActionIterator
 //========================================================================
 
 //------------------------------------------------------------------------
-//                  gbtActionIterator: Lifecycle
+//                  gbtAllActionIterator: Lifecycle
 //------------------------------------------------------------------------
 
-gbtActionIterator::gbtActionIterator(const EFSupport &p_support)
+gbtAllActionIterator::gbtAllActionIterator(const EFSupport &p_support)
   : m_support(p_support), pl(1), iset(1), act(0)
 {
   // The idea behind this initialization is to guard against the
@@ -45,20 +45,20 @@ gbtActionIterator::gbtActionIterator(const EFSupport &p_support)
 }
 
 //------------------------------------------------------------------------
-//                  gbtActionIterator: Operators
+//                  gbtAllActionIterator: Operators
 //------------------------------------------------------------------------
 
-bool gbtActionIterator::operator==(const gbtActionIterator &p_iter) const
+bool gbtAllActionIterator::operator==(const gbtAllActionIterator &p_iter) const
 {
   return (m_support == p_iter.m_support && pl == p_iter.pl &&
 	  iset == p_iter.iset && act == p_iter.act);
 }
 
 //------------------------------------------------------------------------
-//                  gbtActionIterator: Iteration
+//                   gbtAllActionIterator: Iteration
 //------------------------------------------------------------------------
 
-bool gbtActionIterator::GoToNext(void)
+bool gbtAllActionIterator::GoToNext(void)
 {
   if (act != m_support.NumActions(pl,iset)) {
     act++; 
@@ -87,32 +87,32 @@ bool gbtActionIterator::GoToNext(void)
 }
 
 //------------------------------------------------------------------------
-//              gbtActionIterator: Access to current state
+//              gbtAllActionIterator: Access to current state
 //------------------------------------------------------------------------
 
-Action *gbtActionIterator::GetAction(void) const
+Action *gbtAllActionIterator::GetAction(void) const
 {
-  return m_support.Actions(pl, iset)[act];
+  return m_support.GetAction(pl, iset, act);
 }
 
-Infoset *gbtActionIterator::GetInfoset(void) const
+Infoset *gbtAllActionIterator::GetInfoset(void) const
 {
   return m_support.GetGame().GetPlayer(pl).GetInfoset(iset);
 }
 
-gbtEfgPlayer gbtActionIterator::GetPlayer(void) const
+gbtEfgPlayer gbtAllActionIterator::GetPlayer(void) const
 {
   return m_support.GetGame().GetPlayer(pl);
 }
 
-bool gbtActionIterator::IsLast(void) const
+bool gbtAllActionIterator::IsLast(void) const
 {
   return (pl == m_support.GetGame().NumPlayers() &&
 	  iset == m_support.GetGame().GetPlayer(pl).NumInfosets() &&
 	  act == m_support.NumActions(pl, iset));
 }
 
-bool gbtActionIterator::IsSubsequentTo(const Action *p_action) const
+bool gbtAllActionIterator::IsSubsequentTo(const Action *p_action) const
 {
   if (pl > p_action->BelongsTo()->GetPlayer().GetId()) {
     return true; 
@@ -133,3 +133,29 @@ bool gbtActionIterator::IsSubsequentTo(const Action *p_action) const
   }
 }
 
+//========================================================================
+//                     class gbtAllActionIterator
+//========================================================================
+
+gbtActionIterator::gbtActionIterator(const EFSupport &p_support,
+				     Infoset *p_infoset)
+  : m_support(p_support), pl(p_infoset->GetPlayer().GetId()),
+    iset(p_infoset->GetNumber()), act(1)
+{ }
+
+gbtActionIterator::gbtActionIterator(const EFSupport &p_support,
+				     int p_player, int p_infoset)
+  : m_support(p_support), pl(p_player), iset(p_infoset), act(1)
+{ }
+
+Action *gbtActionIterator::operator*(void) const
+{ return m_support.GetAction(pl, iset, act); }
+
+gbtActionIterator &gbtActionIterator::operator++(int)
+{ act++; return *this; }
+
+bool gbtActionIterator::Begin(void)
+{ act = 1; return true; }
+
+bool gbtActionIterator::End(void) const
+{ return act > m_support.NumActions(pl, iset); }    

@@ -36,7 +36,7 @@
 
 void AllSubsupportsRECURSIVE(const EFSupport *s,
 			     EFSupportWithActiveInfo *sact,
-			     gbtActionIterator *c,
+			     gbtAllActionIterator *c,
 			     gList<const EFSupport> *list);
 
 gList<const EFSupport> AllSubsupports(const EFSupport &S);
@@ -50,7 +50,7 @@ gList<const EFSupport> AllSubsupports(const EFSupport &S);
 
 void AllInequivalentSubsupportsRECURSIVE(const EFSupport *s,
 					 EFSupportWithActiveInfo *sact,
-					 gbtActionIterator *c,
+					 gbtAllActionIterator *c,
 					 gList<const EFSupport> *list);
 
 gList<const EFSupport> AllInequivalentSubsupports(const EFSupport &S);
@@ -66,7 +66,7 @@ gList<const EFSupport> AllInequivalentSubsupports(const EFSupport &S);
 
 void AllUndominatedSubsupportsRECURSIVE(const EFSupport *s,
 					 EFSupportWithActiveInfo *sact,
-					 gbtActionIterator *c,
+					 gbtAllActionIterator *c,
 					const bool strong,
 					const bool conditional,
 					 gList<const EFSupport> *list,
@@ -90,7 +90,7 @@ gList<const EFSupport> AllUndominatedSubsupports(const EFSupport &S,
 
 void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
 					    EFSupportWithActiveInfo *sact,
-				            gbtActionIterator *c,
+				            gbtAllActionIterator *c,
 					    gList<const EFSupport> *list,
 				      const gStatus &status);
 

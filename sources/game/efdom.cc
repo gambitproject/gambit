@@ -78,7 +78,7 @@ bool EFSupport::Dominates(const Action *a, const Action *b,
       // This may not be a good idea; I suggest checking for this 
       // prior to entry
       for (int i = 1; i <= infoset->NumMembers(); i++) {
-	nodelist.Append(infoset->Members()[i]);
+	nodelist.Append(infoset->GetMember(i));
       }
     }
     
@@ -132,18 +132,24 @@ bool SomeElementDominates(const EFSupport &S,
 bool EFSupport::IsDominated(const Action *a, 
 			    bool strong, bool conditional) const
 {
-  gArray<Action *> array(Actions(a->BelongsTo()));
+  gArray<Action *> array(NumActions(a->BelongsTo()));
+  for (int act = 1; act <= array.Length(); act++) {
+    array[act] = GetAction(a->BelongsTo(), act);
+  }
   return SomeElementDominates(*this,array,a,strong,conditional);
 }
 
 bool InfosetHasDominatedElement(const EFSupport &S, 
-				const Infoset *i,
+				Infoset *infoset,
 				const bool strong,
 				const bool conditional,
 				const gStatus &/*status*/)
 {
-  gArray<Action *> actions = S.Actions(i);
-  for (int i = 1; i <= actions.Length(); i++)
+  gArray<Action *> actions(S.NumActions(infoset));
+  for (int i = 1; i <= actions.Length(); i++) {
+    actions[i] = S.GetAction(infoset, i);
+  }
+  for (int i = 1; i <= S.NumActions(infoset); i++)
     if (SomeElementDominates(S,actions,actions[i],
 			     strong,conditional))
       return true;
@@ -158,27 +164,32 @@ bool ElimDominatedInInfoset(const EFSupport &S, EFSupport &T,
 			     const bool conditional,
 		                   gStatus &status)
 {
-  const gArray<Action *> &actions = S.Actions(pl, iset);
+  gArray<bool> is_dominated(S.NumActions(pl, iset));
+  for (int k = 1; k <= S.NumActions(pl, iset); is_dominated[k++] = false);
 
-  gArray<bool> is_dominated(actions.Length());
-  for (int k = 1; k <= actions.Length(); k++)
-    is_dominated[k] = false;
-
-  for (int i = 1; i <= actions.Length(); i++)
-    for (int j = 1; j <= actions.Length(); j++)
-      if (i != j && !is_dominated[i] && !is_dominated[j]) 
-	if (S.Dominates(actions[i], actions[j], strong, conditional)) {
+  for (int i = 1; i <= S.NumActions(pl, iset); i++) {
+    for (int j = 1; j <= S.NumActions(pl, iset); j++) {
+      if (i != j && !is_dominated[i] && !is_dominated[j]) { 
+	if (S.Dominates(S.GetAction(pl, iset, i), S.GetAction(pl, iset, j),
+			strong, conditional)) {
 	  is_dominated[j] = true;
 	  status.Get();
 	}
+      }
+    }
+  }
       
   bool action_was_eliminated = false;
   int k = 1;
-  while (k <= actions.Length() && !action_was_eliminated) {
+  while (k <= S.NumActions(pl, iset) && !action_was_eliminated) {
     if (is_dominated[k]) action_was_eliminated = true;
     else k++;
   }
-  while (k <= actions.Length()) {
+  gArray<Action *> actions(S.NumActions(pl, iset));
+  for (int act = 1; act <= actions.Length(); act++) {
+    actions[act] = S.GetAction(pl, iset, act);
+  }
+  while (k <= S.NumActions(pl, iset)) {
     if (is_dominated[k]) 
       T.RemoveAction(actions[k]);
     k++;

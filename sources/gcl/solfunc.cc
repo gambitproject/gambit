@@ -491,7 +491,7 @@ static Portion *GSM_SetActionProbs(GSM &, Portion **param)
     }
 
     assert(p3->Spec().Type == porNUMBER);
-    P->Set((E.GetPlayer(PlayerNum).GetInfoset(InfosetNum)->Actions()[k]),
+    P->Set((E.GetPlayer(PlayerNum).GetInfoset(InfosetNum)->GetAction(k)),
 	   ((NumberPortion*) p3)->Value());
 
     delete p3;

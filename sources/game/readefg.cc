@@ -680,7 +680,7 @@ static void BuildSubtree(efgGame *p_efg, Node *p_node,
     }
 
     *(p_nodeData) = (*(p_nodeData))->m_next;
-    for (int i = 1; i <= p_efg->NumChildren(p_node); i++) {
+    for (int i = 1; i <= p_node->NumChildren(); i++) {
       BuildSubtree(p_efg, p_node->GetChild(i), p_treeData, p_nodeData);
     }
   }
@@ -705,7 +705,7 @@ static void BuildSubtree(efgGame *p_efg, Node *p_node,
     }
 
     *(p_nodeData) = (*(p_nodeData))->m_next;
-    for (int i = 1; i <= p_efg->NumChildren(p_node); i++) {
+    for (int i = 1; i <= p_node->NumChildren(); i++) {
       BuildSubtree(p_efg, p_node->GetChild(i), p_treeData, p_nodeData);
     }
   }

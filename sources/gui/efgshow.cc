@@ -409,7 +409,7 @@ gText EfgShow::GetActionProb(const Node *p_node, int p_act) const
     return "";
   }
 
-  return ToText(GetCurrentProfile().ActionProb(p_node->GetInfoset()->Actions()[p_act]),
+  return ToText(GetCurrentProfile().ActionProb(p_node->GetInfoset()->GetAction(p_act)),
 		NumDecimals());
 }
 
@@ -421,7 +421,7 @@ gText EfgShow::GetActionValue(const Node *p_node, int p_act) const
   }
 
   if (GetCurrentProfile().IsetProb(p_node->GetInfoset()) > gNumber(0)) {
-    return ToText(GetCurrentProfile().ActionValue(p_node->GetInfoset()->Actions()[p_act]),
+    return ToText(GetCurrentProfile().ActionValue(p_node->GetInfoset()->GetAction(p_act)),
 		  NumDecimals());
   }
   else  {
@@ -437,7 +437,7 @@ gNumber EfgShow::ActionProb(const Node *p_node, int p_action) const
   }
 
   if (m_currentProfile && p_node->GetInfoset()) {
-    return m_profiles[m_currentProfile](p_node->GetInfoset()->Actions()[p_action]);
+    return m_profiles[m_currentProfile](p_node->GetInfoset()->GetAction(p_action));
   }
   return -1;
 }
@@ -730,7 +730,7 @@ void EfgShow::UpdateMenus(void)
 
   menuBar->Enable(GBT_EFG_MENU_EDIT_INSERT, (cursor) ? true : false);
   menuBar->Enable(GBT_EFG_MENU_EDIT_DELETE,
-		  (cursor && m_efg.NumChildren(cursor) > 0) ? true : false);
+		  (cursor && cursor->NumChildren() > 0) ? true : false);
   menuBar->Enable(GBT_EFG_MENU_EDIT_REVEAL, 
 		  (cursor && cursor->GetInfoset()) ? true : false);
 
@@ -1230,8 +1230,8 @@ void EfgShow::OnEditMove(wxCommandEvent &)
     }
 
     for (int act = 1; act <= infoset->NumActions(); act++) {
-      if (!dialog.GetActions().Find(infoset->Actions()[act])) {
-	m_efg.DeleteAction(infoset, infoset->Actions()[act]);
+      if (!dialog.GetActions().Find(infoset->GetAction(act))) {
+	m_efg.DeleteAction(infoset, infoset->GetAction(act));
 	act--;
       }
     }
