@@ -739,7 +739,7 @@ template <class T> gString &operator<<(gString &t, const gPoly<T> &p)
   else {
     for (int j = 1; j <= p.Terms.Length(); j++)
       {
-	if (p.Terms[j].Coef() < (T)0) s += "- ";
+	if (p.Terms[j].Coef() < (T)0) s += "-";
 	else if (j > 1) s += "+ ";
 	
 	if ( (p.Terms[j].Coef() != (T)1 && -p.Terms[j].Coef() != (T)1) ||
