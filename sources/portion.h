@@ -108,6 +108,7 @@ template <class T> class numerical_Portion : public Portion
 class bool_Portion : public Portion
 {
  private:
+  static _NumObj;
   bool* _Value;
 
  public:
@@ -126,10 +127,13 @@ class bool_Portion : public Portion
 class gString_Portion : public Portion
 {
  private:
-  gString _Value;
+  static _NumObj;
+  gString *_Value;
 
  public:
   gString_Portion( const gString& value );
+  gString_Portion( gString& value, bool var_static );
+  ~gString_Portion();
 
   gString&    Value     ( void );
   Portion*    Copy      ( bool new_data ) const;

@@ -300,10 +300,18 @@ template <class T> void numerical_Portion<T>::Output( gOutput& s ) const
 //                            bool type
 //---------------------------------------------------------------------
 
+#ifdef MEMCHECK
+int bool_Portion::_NumObj = 0;
+#endif // MEMCHECK
+
 
 bool_Portion::bool_Portion( const bool& value )
 {
   _Value = new bool( value );
+#ifdef MEMCHECK
+  _NumObj++;
+  gout << ">>> bool Ctor - " << _NumObj << "\n";
+#endif // MEMCHECK
 }
 
 
@@ -311,16 +319,30 @@ bool_Portion::bool_Portion( bool& value, const bool var_static)
 { 
   _Static = var_static;
   if( !_Static )
+  {
     _Value = new bool( value );
+#ifdef MEMCHECK
+    _NumObj++;
+    gout << ">>> bool Ctor - " << _NumObj << "\n";
+#endif // MEMCHECK
+  }
   else
+  {
     _Value = &value;
+  }
 }
 
 
 bool_Portion::~bool_Portion()
 { 
   if( !_Static )
+  {
     delete _Value;
+#ifdef MEMCHECK
+    _NumObj--;
+    gout << ">>> bool Dtor - " << _NumObj << "\n";
+#endif // MEMCHECK
+  }
 }
 
 
@@ -390,25 +412,66 @@ void bool_Portion::Output( gOutput& s ) const
 //---------------------------------------------------------------------
 //                          gString type
 //---------------------------------------------------------------------
+
+
+#ifdef MEMCHECK
+int gString_Portion::_NumObj = 0;
+#endif // MEMCHECK
+
 gString_Portion::gString_Portion( const gString& value )
-     : _Value( value )
-{ }
+{
+  _Value = new gString( value );
+#ifdef MEMCHECK
+  _NumObj++;
+  gout << ">>> gString Ctor - " << _NumObj << "\n";
+#endif // MEMCHECK
+}
+
+
+gString_Portion::gString_Portion( gString& value, const bool var_static)
+{ 
+  _Static = var_static;
+  if( !_Static )
+  {
+    _Value = new gString( value );
+#ifdef MEMCHECK
+    _NumObj++;
+    gout << ">>> gString Ctor - " << _NumObj << "\n";
+#endif // MEMCHECK
+  }
+  else
+  {
+    _Value = &value;
+  }
+}
+
+
+gString_Portion::~gString_Portion()
+{ 
+  if( !_Static )
+  {
+    delete _Value;
+#ifdef MEMCHECK
+    _NumObj--;
+    gout << ">>> gString Dtor - " << _NumObj << "\n";
+#endif // MEMCHECK
+  }
+}
 
 
 gString& gString_Portion::Value( void )
-{ return _Value; }
+{ return *_Value; }
 
 PortionType gString_Portion::Type( void ) const
 { return porSTRING; }
 
 Portion* gString_Portion::Copy( bool new_data ) const
-{ return new gString_Portion( _Value ); }
+{ return new gString_Portion( *_Value ); }
 
 
 Portion* gString_Portion::Operation( Portion* p, OperationMode mode )
 {
   Portion*  result = 0;
-  gString&  p_value = ( (gString_Portion*) p )->_Value;
 
   if( p == 0 )      // unary operations
   {
@@ -420,28 +483,29 @@ Portion* gString_Portion::Operation( Portion* p, OperationMode mode )
   }
   else               // binary operations
   {
+    gString&  p_value = *( ( (gString_Portion*) p )->_Value );
     switch( mode )
     {
     case opADD:
-      _Value += p_value;
+      *_Value += p_value;
       break;
     case opEQUAL_TO:
-      result = new bool_Portion( _Value == p_value );
+      result = new bool_Portion( *_Value == p_value );
       break;
     case opNOT_EQUAL_TO:
-      result = new bool_Portion( _Value != p_value );
+      result = new bool_Portion( *_Value != p_value );
       break;
     case opGREATER_THAN:
-      result = new bool_Portion( _Value > p_value );
+      result = new bool_Portion( *_Value > p_value );
       break;
     case opLESS_THAN:
-      result = new bool_Portion( _Value < p_value );
+      result = new bool_Portion( *_Value < p_value );
       break;
     case opGREATER_THAN_OR_EQUAL_TO:
-      result = new bool_Portion( _Value >= p_value );
+      result = new bool_Portion( *_Value >= p_value );
       break;
     case opLESS_THAN_OR_EQUAL_TO:
-      result = new bool_Portion( _Value <= p_value );
+      result = new bool_Portion( *_Value <= p_value );
       break;
     default:
       result = Portion::Operation( p, mode );
@@ -454,7 +518,7 @@ Portion* gString_Portion::Operation( Portion* p, OperationMode mode )
 
 void gString_Portion::Output( gOutput& s ) const
 {
-  s << " \"" << _Value << "\"";
+  s << " \"" << *_Value << "\"";
 }
 
 
