@@ -50,6 +50,27 @@ gbtTreeStrategyRep::GetBehavior(const gbtGameInfoset &p_infoset) const
   return infoset->m_actions[m_behav[infoset->m_id]];
 }
 
+//----------------------------------------------------------------------
+//     class gbtTreeStrategyRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTreeStrategyRep::Reference(void)
+{
+  m_refCount++;
+  if (!m_deleted) m_player->m_efg->m_refCount++;
+}
+
+bool gbtTreeStrategyRep::Dereference(void)
+{
+  if (!m_deleted && --m_player->m_efg->m_refCount == 0) {
+    // Note that as a side effect, deleting the game will cause
+    // the strategy to be marked as deleted (since by definition,
+    // at this point the reference count must be at least one)
+    delete m_player->m_efg;
+  }
+  return (--m_refCount == 0 && m_deleted); 
+}
+
 //======================================================================
 //             Implementation of class gbtTreePlayerRep
 //======================================================================
@@ -59,7 +80,7 @@ gbtTreeStrategyRep::GetBehavior(const gbtGameInfoset &p_infoset) const
 //----------------------------------------------------------------------
 
 gbtTreePlayerRep::gbtTreePlayerRep(gbtTreeGameRep *p_efg, int p_id)
-  : m_id(p_id), m_efg(p_efg), m_deleted(false)
+  : m_refCount(0), m_id(p_id), m_efg(p_efg), m_deleted(false)
 { }
 
 
@@ -72,6 +93,27 @@ gbtTreePlayerRep::~gbtTreePlayerRep()
     delete m_infosets.Remove(1);
   }
   */
+}
+
+//----------------------------------------------------------------------
+//     class gbtTreePlayerRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTreePlayerRep::Reference(void)
+{
+  m_refCount++;
+  if (!m_deleted) m_efg->m_refCount++;
+}
+
+bool gbtTreePlayerRep::Dereference(void)
+{
+  if (!m_deleted && --m_efg->m_refCount == 0) {
+    // Note that as a side effect, deleting the game will cause
+    // the player to be marked as deleted (since by definition,
+    // at this point the reference count must be at least one)
+    delete m_efg;
+  }
+  return (--m_refCount == 0 && m_deleted); 
 }
 
 //----------------------------------------------------------------------

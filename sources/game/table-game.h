@@ -44,6 +44,7 @@ class gbtTableGameRep;
 //!
 class gbtTableGameRep : public gbtGameRep {
 public:
+  int m_refCount;
   std::string m_label, m_comment;
   gbtArray<int> m_dimensions;
 
@@ -51,14 +52,19 @@ public:
   gbtBlock<gbtTableOutcomeRep *> m_outcomes;
 
   gbtArray<gbtTableOutcomeRep *> m_results;
-  gbtTreeGameRep *m_efg;
 
   /// @name Constructors and destructor
   //@{
   /// Constructor, creating a table game with the given shape
   gbtTableGameRep(const gbtArray<int> &);
   /// Destructor
-  ~gbtTableGameRep();
+  virtual ~gbtTableGameRep();
+  //@}
+
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
   //@}
 
   /// @name Manipulation of titles and comments
@@ -75,6 +81,7 @@ public:
   bool IsPerfectRecall(void) const { return true; }
   gbtRational GetMinPayoff(void) const;
   gbtRational GetMaxPayoff(void) const;
+  bool IsDeleted(void) const { return false; }
   //@}
 
   /// @name Information about the game tree

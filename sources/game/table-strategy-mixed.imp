@@ -39,7 +39,9 @@
 
 template <class T> 
 gbtTableMixedProfileRep<T>::gbtTableMixedProfileRep(const gbtTableGameRep *p_game)
-  : m_game(p_game), m_profile(p_game->NumStrategies())
+  : m_refCount(0), 
+    m_game(const_cast<gbtTableGameRep *>(p_game)),
+    m_profile(p_game->NumStrategies())
 {
   SetCentroid();
 }
@@ -53,6 +55,27 @@ gbtMixedProfileRep<T> *gbtTableMixedProfileRep<T>::Copy(void) const
   gbtTableMixedProfileRep<T> *ret = new gbtTableMixedProfileRep<T>(m_game);
   ret->m_profile = m_profile;
   return ret;
+}
+
+//----------------------------------------------------------------------
+//  class gbtTableMixedProfileRep<T>: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+template <class T> void gbtTableMixedProfileRep<T>::Reference(void)
+{
+  m_refCount++;
+  m_game->m_refCount++;
+}
+
+template <class T> bool gbtTableMixedProfileRep<T>::Dereference(void)
+{
+  if (--m_game->m_refCount == 0) {
+    // Note that if this condition is true, this profile must be the
+    // last reference to the game, so m_refCount will also be one
+    // (and this function will return true)
+    delete m_game;
+  }
+  return (--m_refCount == 0);
 }
 
 //----------------------------------------------------------------------

@@ -34,7 +34,8 @@
 template <class T> 
 class gbtTreeBehavProfileRep : public gbtBehavProfileRep<T> {
 public:
-  const gbtTreeGameRep *m_efg;
+  int m_refCount;
+  gbtTreeGameRep *m_efg;
   gbtDPVector<T> m_profile;
   mutable bool m_cachedData;
 
@@ -59,10 +60,17 @@ public:
   gbtBehavProfileRep<T> *Copy(void) const;
   //@}
 
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
+  //@}
+
   /// @name General information about the profile
   //@{
   gbtGame GetGame(void) const;
   int BehaviorProfileLength(void) const  { return m_profile.Length(); }
+  bool IsDeleted(void) const { return false; }
 
   bool operator==(const gbtBehavProfileRep<T> &) const;
   //@}

@@ -36,10 +36,31 @@
 //----------------------------------------------------------------------
 
 gbtTreeOutcomeRep::gbtTreeOutcomeRep(gbtTreeGameRep *p_efg, int p_id)
-  : m_id(p_id), m_efg(p_efg), m_deleted(false), 
+  : m_refCount(0), m_id(p_id), m_efg(p_efg), m_deleted(false), 
     m_payoffs(p_efg->m_players.Length())
 {
   for (int i = 1; i <= m_payoffs.Length(); m_payoffs[i++] = 0);
+}
+
+//----------------------------------------------------------------------
+//     class gbtTreeOutcomeRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTreeOutcomeRep::Reference(void)
+{
+  m_refCount++;
+  if (!m_deleted) m_efg->m_refCount++;
+}
+
+bool gbtTreeOutcomeRep::Dereference(void)
+{
+  if (!m_deleted && --m_efg->m_refCount == 0) {
+    // Note that as a side effect, deleting the game will cause
+    // the outcome to be marked as deleted (since by definition,
+    // at this point the reference count must be at least one)
+    delete m_efg;
+  }
+  return (--m_refCount == 0 && m_deleted); 
 }
 
 //----------------------------------------------------------------------
@@ -54,6 +75,9 @@ void gbtTreeOutcomeRep::SetLabel(const std::string &p_label)
 
 std::string gbtTreeOutcomeRep::GetLabel(void) const
 { return m_label; }
+
+bool gbtTreeOutcomeRep::IsDeleted(void) const
+{ return m_deleted; }
 
 //----------------------------------------------------------------------
 //   class gbtTreeOutcomeRep: Accessing payoff info about the outcome
@@ -92,3 +116,4 @@ void gbtTreeOutcomeRep::DeleteOutcome(void)
     m_efg->m_outcomes[outc]->m_id = outc;
   }
 }
+

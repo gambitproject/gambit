@@ -98,9 +98,13 @@ public:
   { return (m_rep != p_handle.m_rep); }
 
   T *operator->(void) 
-  { if (!m_rep) throw gbtGameNullException(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullException(); 
+    if (m_rep->IsDeleted()) throw gbtGameDeletedException();
+    return m_rep; }
   const T *operator->(void) const 
-  { if (!m_rep) throw gbtGameNullException(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullException(); 
+    if (m_rep->IsDeleted()) throw gbtGameDeletedException();
+    return m_rep; }
   
   T *Get(void) const { return m_rep; }
 
@@ -137,20 +141,26 @@ public:
 };
 
 
-//
-// A base class for all game object types, providing interfaces common
-// to all.
-//
+//!
+//! A base class for all game object types, providing the basic
+//! reference-counting interface.
+//!
 class gbtGameObject {
 protected:
-  int m_refCount;
-
-  void Reference(void) { m_refCount++; }
-  bool Dereference(void) { return (--m_refCount == 0); }
+  //!
+  //! @name Mechanism for reference counting
+  //!
+  //@{
+  /// Increment the reference count of the object (and its game)
+  virtual void Reference(void) = 0;
+  /// Decrement the reference count of the object (and its game)
+  virtual bool Dereference(void) = 0;
+  //@}
 
 public:
-  gbtGameObject(void) : m_refCount(1) { }
   virtual ~gbtGameObject() { }
+
+  virtual bool IsDeleted(void) const = 0;
 };
 
 class gbtGamePlayerRep;
@@ -178,7 +188,6 @@ class gbtPureBehavProfile;
 //!
 class gbtGameRep : public gbtGameObject {
   friend class gbtGameObjectHandle<gbtGameRep>;
-
 public:
   //!
   //! @name Manipulation of titles and comments
@@ -193,6 +202,9 @@ public:
   virtual void SetComment(const std::string &) = 0;
   /// Get the comment (a longer text string) associated with the game.
   virtual std::string GetComment(void) const = 0;
+
+  /// Returns true if the object has been deleted from its game
+  bool IsDeleted(void) const { return false; }
   //@}
 
   //!

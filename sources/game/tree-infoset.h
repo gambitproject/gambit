@@ -29,7 +29,7 @@
 
 class gbtTreeActionRep : public gbtGameActionRep {
 public:
-  int m_id;
+  int m_refCount, m_id;
   gbtTreeInfosetRep *m_infoset;
   bool m_deleted;
   std::string m_label;
@@ -40,11 +40,20 @@ public:
   virtual ~gbtTreeActionRep() { }
   //@}
 
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
+  void Delete(void)
+    { if (m_refCount == 0) delete this; else m_deleted = true; }
+  //@}
+
   /// @name General information about the action
   //@{
   int GetId(void) const;
   void SetLabel(const std::string &);
   std::string GetLabel(void) const;
+  bool IsDeleted(void) const { return m_deleted; }
   //@}
 
   /// @name Information about the game tree
@@ -67,7 +76,7 @@ public:
 
 class gbtTreeInfosetRep : public gbtGameInfosetRep {
 public:
-  int m_id;
+  int m_refCount, m_id;
   gbtTreePlayerRep *m_player;
   bool m_deleted;
   std::string m_label;
@@ -82,11 +91,20 @@ public:
   virtual ~gbtTreeInfosetRep();
   //@}
 
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
+  void Delete(void)
+    { if (m_refCount == 0) delete this; else m_deleted = true; }
+  //@}
+
   /// @name General information about the information set
   //@{
   int GetId(void) const;
   void SetLabel(const std::string &);
   std::string GetLabel(void) const;
+  bool IsDeleted(void) const { return m_deleted; }
   //@}
 
   /// @name Accessing information about the player

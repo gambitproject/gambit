@@ -36,10 +36,31 @@
 //----------------------------------------------------------------------
 
 gbtTableOutcomeRep::gbtTableOutcomeRep(gbtTableGameRep *p_nfg, int p_id)
-  : m_id(p_id), m_nfg(p_nfg), m_deleted(false), 
+  : m_refCount(0), m_id(p_id), m_nfg(p_nfg), m_deleted(false), 
     m_payoffs(p_nfg->m_players.Length())
 {
   for (int i = 1; i <= m_payoffs.Length(); m_payoffs[i++] = 0);
+}
+
+//----------------------------------------------------------------------
+//     class gbtTableOutcomeRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTableOutcomeRep::Reference(void)
+{
+  m_refCount++;
+  if (!m_deleted) m_nfg->m_refCount++;
+}
+
+bool gbtTableOutcomeRep::Dereference(void)
+{
+  if (!m_deleted && --m_nfg->m_refCount == 0) {
+    // Note that as a side effect, deleting the game will cause
+    // the outcome to be marked as deleted (since by definition,
+    // at this point the reference count must be at least one)
+    delete m_nfg;
+  }
+  return (--m_refCount == 0 && m_deleted); 
 }
 
 //----------------------------------------------------------------------
@@ -54,6 +75,9 @@ void gbtTableOutcomeRep::SetLabel(const std::string &p_label)
 
 std::string gbtTableOutcomeRep::GetLabel(void) const
 { return m_label; }
+
+bool gbtTableOutcomeRep::IsDeleted(void) const
+{ return m_deleted; }
 
 //----------------------------------------------------------------------
 //  class gbtTableOutcomeRep: Accessing payoff info about the outcome

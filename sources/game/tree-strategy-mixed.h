@@ -30,7 +30,8 @@
 template <class T> 
 class gbtTreeMixedProfileRep : public gbtMixedProfileRep<T> {
 public:
-  const gbtTreeGameRep *m_game;
+  int m_refCount;
+  gbtTreeGameRep *m_game;
   gbtPVector<T> m_profile;
 
   /// @name Constructors and destructor
@@ -43,10 +44,17 @@ public:
   gbtMixedProfileRep<T> *Copy(void) const;
   //@}
   
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
+  //@}
+
   /// @name General information about the profile
   //@{
   gbtGame GetGame(void) const  { return const_cast<gbtTreeGameRep *>(m_game); }
   int StrategyProfileLength(void) const { return m_profile.Length(); }
+  bool IsDeleted(void) const { return false; }
 
   bool operator==(const gbtMixedProfileRep<T> &) const;
   //@}

@@ -41,7 +41,8 @@
 //----------------------------------------------------------------------
 
 template <class T> gbtTreeBehavProfileRep<T>::gbtTreeBehavProfileRep(const gbtTreeGameRep *p_game) 
-  : m_efg(p_game),
+  : m_refCount(0), 
+    m_efg(const_cast<gbtTreeGameRep *>(p_game)),
     m_profile(p_game->NumActions()), m_cachedData(false),
     m_realizProbs(NumNodes(const_cast<gbtTreeGameRep *>(m_efg))),
     m_beliefs(NumNodes(const_cast<gbtTreeGameRep *>(m_efg))),
@@ -58,7 +59,7 @@ template <class T> gbtTreeBehavProfileRep<T>::gbtTreeBehavProfileRep(const gbtTr
 
 template <class T>
 gbtTreeBehavProfileRep<T>::gbtTreeBehavProfileRep(const gbtTreeBehavProfileRep<T> &p_profile)
-  : m_efg(p_profile.m_efg), m_profile(p_profile.m_profile),
+  : m_refCount(0), m_efg(p_profile.m_efg), m_profile(p_profile.m_profile),
     m_cachedData(false),
     m_realizProbs(p_profile.m_realizProbs), m_beliefs(p_profile.m_beliefs),
     m_nvals(p_profile.m_nvals), m_bvals(p_profile.m_bvals),
@@ -69,7 +70,7 @@ gbtTreeBehavProfileRep<T>::gbtTreeBehavProfileRep(const gbtTreeBehavProfileRep<T
 
 template <class T>
 gbtTreeBehavProfileRep<T>::gbtTreeBehavProfileRep(const gbtTreeMixedProfileRep<T> &p_profile)
-  : m_efg(p_profile.m_game),
+  : m_refCount(0), m_efg(p_profile.m_game),
     m_profile(m_efg->NumActions()),
     m_cachedData(false),
     m_realizProbs(NumNodes(const_cast<gbtTreeGameRep *>(m_efg))),
@@ -111,6 +112,27 @@ template <class T>
 gbtBehavProfileRep<T> *gbtTreeBehavProfileRep<T>::Copy(void) const
 {
   return new gbtTreeBehavProfileRep(*this);
+}
+
+//----------------------------------------------------------------------
+//  class gbtTreeBehavProfileRep<T>: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+template <class T> void gbtTreeBehavProfileRep<T>::Reference(void)
+{
+  m_refCount++;
+  m_efg->m_refCount++;
+}
+
+template <class T> bool gbtTreeBehavProfileRep<T>::Dereference(void)
+{
+  if (--m_efg->m_refCount == 0) {
+    // Note that if this condition is true, this profile must be the
+    // last reference to the game, so m_refCount will also be one
+    // (and this function will return true)
+    delete m_efg;
+  }
+  return (--m_refCount == 0);
 }
 
 //----------------------------------------------------------------------

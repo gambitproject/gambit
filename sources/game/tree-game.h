@@ -48,6 +48,7 @@ class gbtTreePlayerRep;
 //!
 class gbtTreeGameRep : public gbtGameRep {
 public:
+  int m_refCount;
   bool m_sortInfosets;
   mutable bool m_hasStrategies;
   std::string m_label, m_comment;
@@ -61,7 +62,13 @@ public:
   /// Constructor, creating a trivial game (one node, no players).
   gbtTreeGameRep(void);
   /// Destructor
-  ~gbtTreeGameRep();
+  virtual ~gbtTreeGameRep();
+  //@}
+
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
   //@}
 
   /// @name Manipulation of titles and comments
@@ -78,6 +85,7 @@ public:
   bool IsPerfectRecall(void) const;
   gbtRational GetMinPayoff(void) const;
   gbtRational GetMaxPayoff(void) const;
+  bool IsDeleted(void) const { return false; }
   //@}
 
   /// @name Information about the game tree

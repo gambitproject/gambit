@@ -45,11 +45,12 @@
 //----------------------------------------------------------------------
 
 gbtTreeGameRep::gbtTreeGameRep(void)
-  : m_sortInfosets(true), m_hasStrategies(false), m_label("UNTITLED"),
+  : m_refCount(0), m_sortInfosets(true), 
+    m_hasStrategies(false), m_label("UNTITLED"),
     m_chance(new gbtTreePlayerRep(this, 0))
 {
   m_root = new gbtTreeNodeRep(this, 0);
-  SortInfosets();
+  m_root->m_id = 1;
 }
 
 gbtTreeGameRep::~gbtTreeGameRep()
@@ -58,7 +59,21 @@ gbtTreeGameRep::~gbtTreeGameRep()
   delete m_chance;
 
   for (int i = 1; i <= m_players.Length(); delete m_players[i++]);
-  for (int i = 1; i <= m_outcomes.Last(); delete m_outcomes[i++]);
+  for (int i = 1; i <= m_outcomes.Length(); delete m_outcomes[i++]);
+}
+
+//----------------------------------------------------------------------
+//      class gbtTreeGameRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTreeGameRep::Reference(void)
+{
+  m_refCount++;
+}
+
+bool gbtTreeGameRep::Dereference(void)
+{
+  return (--m_refCount == 0);
 }
 
 //----------------------------------------------------------------------
@@ -480,7 +495,7 @@ void gbtTreeGameRep::OnStrategiesChanged(void)
 {
   for (int pl = 1; pl <= m_players.Length(); pl++) {
     for (int st = 1; st <= m_players[pl]->m_strategies.Length(); st++) {
-      m_players[pl]->m_strategies[st]->m_deleted = true;
+      m_players[pl]->m_strategies[st]->Delete();
     }
     m_players[pl]->m_strategies.Flush();
   }
@@ -637,7 +652,6 @@ void gbtTreeGameRep::SortInfosets(void)
   }
 
   // Now, we sort the nodes within the infosets
-  
   gbtList<gbtGameNode> nodes;
   Nodes(gbtGame(this), nodes);
 

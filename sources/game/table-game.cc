@@ -50,8 +50,8 @@ static int Product(const gbtArray<int> &p_dim)
 }
 
 gbtTableGameRep::gbtTableGameRep(const gbtArray<int> &p_dim)
-  : m_label("UNTITLED"), m_dimensions(p_dim), m_players(p_dim.Length()),
-    m_results(Product(p_dim)), m_efg(0)
+  : m_refCount(0), m_label("UNTITLED"), m_dimensions(p_dim), 
+    m_players(p_dim.Length()), m_results(Product(p_dim))
 {
   for (int pl = 1; pl <= m_players.Length(); pl++)  {
     m_players[pl] = new gbtTablePlayerRep(this, pl, p_dim[pl]);
@@ -69,7 +69,21 @@ gbtTableGameRep::gbtTableGameRep(const gbtArray<int> &p_dim)
 gbtTableGameRep::~gbtTableGameRep()
 {
   for (int pl = 1; pl <= m_players.Length(); delete m_players[pl++]);
-  for (int outc = 1; outc <= m_outcomes.Length(); delete m_outcomes[outc++]);
+  for (int outc = 1; outc <= m_outcomes.Length(); delete m_outcomes[outc++]); 
+}
+
+//----------------------------------------------------------------------
+//      class gbtTableGameRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTableGameRep::Reference(void)
+{
+  m_refCount++;
+}
+
+bool gbtTableGameRep::Dereference(void)
+{
+  return (--m_refCount == 0);
 }
 
 //----------------------------------------------------------------------
@@ -182,7 +196,7 @@ gbtGameOutcome gbtTableGameRep::NewOutcome(void)
   gbtTableOutcomeRep *outcome = 
     new gbtTableOutcomeRep(this, m_outcomes.Length() + 1);
   m_outcomes.Append(outcome);
-  return outcome;
+  return gbtGameOutcome(outcome);
 }
 
 //----------------------------------------------------------------------
@@ -329,9 +343,9 @@ void gbtTableGameRep::IndexStrategies(void)
 {
   long offset = 1L;
 
-  for (int i = 1; i <= NumPlayers(); i++)  {
+  for (int i = 1; i <= m_players.Length(); i++)  {
     int j;
-    for (j = 1; j <= GetPlayer(i)->NumStrategies(); j++)  {
+    for (j = 1; j <= m_players[i]->NumStrategies(); j++)  {
       gbtTableStrategyRep *s = m_players[i]->m_infosets[1]->m_actions[j];
       s->m_id = j;
       s->m_index = (j - 1) * offset;

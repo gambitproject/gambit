@@ -29,7 +29,7 @@
 
 class gbtTreeStrategyRep : public gbtGameStrategyRep {
 public:
-  int m_id;
+  int m_refCount, m_id;
   gbtTreePlayerRep *m_player;
   gbtArray<int> m_behav;
   std::string m_label;
@@ -38,8 +38,16 @@ public:
   /// @name Constructor and destructor
   //@{
   gbtTreeStrategyRep(gbtTreePlayerRep *p_player, int p_id)
-    : m_id(p_id), m_player(p_player), m_deleted(false) { }
+    : m_refCount(0), m_id(p_id), m_player(p_player), m_deleted(false) { }
   virtual ~gbtTreeStrategyRep() { }
+  //@}
+
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
+  void Delete(void)
+    { if (m_refCount == 0) delete this; else m_deleted = true; }
   //@}
 
   /// @name General information about the strategy
@@ -47,6 +55,8 @@ public:
   int GetId(void) const { return m_id; }
   std::string GetLabel(void) const { return m_label; }
   void SetLabel(const std::string &s) { m_label = s; }
+  bool IsDeleted(void) const { return m_deleted; }
+  //@}
 
   /// @name Accessing information about the player
   //@{
@@ -57,7 +67,7 @@ public:
 
 class gbtTreePlayerRep : public gbtGamePlayerRep {
 public:
-  int m_id;
+  int m_refCount, m_id;
   gbtTreeGameRep *m_efg;
   bool m_deleted;
   std::string m_label;
@@ -68,6 +78,14 @@ public:
   //@{
   gbtTreePlayerRep(gbtTreeGameRep *, int);
   virtual ~gbtTreePlayerRep();
+  //@}
+
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
+  void Delete(void)
+    { if (m_refCount == 0) delete this; else m_deleted = true; }
   //@}
 
   /// @name General information about the player

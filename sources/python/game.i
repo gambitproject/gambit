@@ -132,6 +132,9 @@ public:
   catch (gbtGameNullException) {
     SWIG_exception(SWIG_RuntimeError, "Attempting to operate on null object");
   }
+  catch (gbtGameDeletedException) {
+    SWIG_exception(SWIG_RuntimeError, "Attempting to operate on deleted object");
+  }
   catch (gbtException &) {
     SWIG_exception(SWIG_RuntimeError, "An internal error occurred");
   } 	

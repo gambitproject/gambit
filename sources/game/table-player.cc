@@ -37,11 +37,33 @@
 
 gbtTableStrategyRep::gbtTableStrategyRep(gbtTableInfosetRep *p_infoset,
 					 int p_id)
-  : m_id(p_id), m_infoset(p_infoset), m_deleted(false), m_index(0L)
+  : m_refCount(0), m_id(p_id), 
+    m_infoset(p_infoset), m_deleted(false), m_index(0L)
 { }
 
 gbtTableStrategyRep::~gbtTableStrategyRep()
 { }
+
+//----------------------------------------------------------------------
+//     class gbtTableStrategyRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTableStrategyRep::Reference(void)
+{
+  m_refCount++;
+  if (!m_deleted) m_infoset->m_player->m_nfg->m_refCount++;
+}
+
+bool gbtTableStrategyRep::Dereference(void)
+{
+  if (!m_deleted && --m_infoset->m_player->m_nfg->m_refCount == 0) {
+    // Note that as a side effect, deleting the game will cause
+    // the strategy to be marked as deleted (since by definition,
+    // at this point the reference count must be at least one)
+    delete m_infoset->m_player->m_nfg;
+  }
+  return (--m_refCount == 0 && m_deleted); 
+}
 
 //----------------------------------------------------------------------
 //  class gbtTableStrategyRep: General information about the strategy
@@ -87,6 +109,27 @@ gbtTableInfosetRep::~gbtTableInfosetRep()
 }
 
 //----------------------------------------------------------------------
+//     class gbtTableInfosetRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTableInfosetRep::Reference(void)
+{
+  m_refCount++;
+  if (!m_deleted) m_player->m_nfg->m_refCount++;
+}
+
+bool gbtTableInfosetRep::Dereference(void)
+{
+  if (!m_deleted && --m_player->m_nfg->m_refCount == 0) {
+    // Note that as a side effect, deleting the game will cause
+    // the infoset to be marked as deleted (since by definition,
+    // at this point the reference count must be at least one)
+    delete m_player->m_nfg;
+  }
+  return (--m_refCount == 0 && m_deleted); 
+}
+
+//----------------------------------------------------------------------
 //   class gbtTableInfosetRep: Accessing information about the player
 //----------------------------------------------------------------------
 
@@ -103,9 +146,30 @@ gbtGamePlayer gbtTableInfosetRep::GetPlayer(void) const
 
 gbtTablePlayerRep::gbtTablePlayerRep(gbtTableGameRep *p_nfg,
 				     int p_id, int p_strats)
-  : m_id(p_id), m_nfg(p_nfg), m_deleted(false)
+  : m_refCount(0), m_id(p_id), m_nfg(p_nfg), m_deleted(false)
 {
   m_infosets.Append(new gbtTableInfosetRep(this, 1, p_strats));
+}
+
+//----------------------------------------------------------------------
+//     class gbtTablePlayerRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTablePlayerRep::Reference(void)
+{
+  m_refCount++;
+  if (!m_deleted) m_nfg->m_refCount++;
+}
+
+bool gbtTablePlayerRep::Dereference(void)
+{
+  if (!m_deleted && --m_nfg->m_refCount == 0) {
+    // Note that as a side effect, deleting the game will cause
+    // the player to be marked as deleted (since by definition,
+    // at this point the reference count must be at least one)
+    delete m_nfg;
+  }
+  return (--m_refCount == 0 && m_deleted); 
 }
 
 //----------------------------------------------------------------------

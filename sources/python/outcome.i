@@ -19,6 +19,7 @@ class gbtGameOutcome {
   int GetId(void) const { return (*self)->GetId(); }
   void SetLabel(const std::string &label)  { (*self)->SetLabel(label); }
   std::string GetLabel(void) const { return (*self)->GetLabel(); }
+  bool IsDeleted(void) const { return (*self)->IsDeleted(); }
 
   //--------------------------------------------------------------------
   //           Accessing payoff information about the outcome

@@ -29,7 +29,7 @@
 
 class gbtTableOutcomeRep : public gbtGameOutcomeRep {
 public:
-  int m_id;
+  int m_refCount, m_id;
   gbtTableGameRep *m_nfg;
   bool m_deleted;
   std::string m_label;
@@ -41,11 +41,20 @@ public:
   virtual ~gbtTableOutcomeRep() { }
   //@}
 
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
+  void Delete(void)
+    { if (m_refCount == 0) delete this; else m_deleted = true; }
+  //@}
+
   /// @name General information about the outcome
   //@{
   int GetId(void) const;
   void SetLabel(const std::string &);
   std::string GetLabel(void) const;
+  bool IsDeleted(void) const;
   //@}
 
   /// @name Accessing payoff information about the outcome

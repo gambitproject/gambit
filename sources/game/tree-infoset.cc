@@ -40,8 +40,29 @@
 //----------------------------------------------------------------------
 
 gbtTreeActionRep::gbtTreeActionRep(gbtTreeInfosetRep *p_infoset, int p_id)
-  : m_id(p_id), m_infoset(p_infoset), m_deleted(false)
+  : m_refCount(0), m_id(p_id), m_infoset(p_infoset), m_deleted(false)
 { }
+
+//----------------------------------------------------------------------
+//     class gbtTreeActionRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTreeActionRep::Reference(void)
+{
+  m_refCount++;
+  if (!m_deleted) m_infoset->m_player->m_efg->m_refCount++;
+}
+
+bool gbtTreeActionRep::Dereference(void)
+{
+  if (!m_deleted && --m_infoset->m_player->m_efg->m_refCount == 0) {
+    // Note that as a side effect, deleting the game will cause
+    // the player to be marked as deleted (since by definition,
+    // at this point the reference count must be at least one)
+    delete m_infoset->m_player->m_efg;
+  }
+  return (--m_refCount == 0 && m_deleted); 
+}
 
 //----------------------------------------------------------------------
 //    class gbtTreeActionRep: General information about the action
@@ -136,7 +157,8 @@ void gbtTreeActionRep::DeleteAction(void)
 
 gbtTreeInfosetRep::gbtTreeInfosetRep(gbtTreePlayerRep *p_player,
 				     int p_id, int p_br)
-  : m_id(p_id), m_player(p_player), m_deleted(false), m_actions(p_br),
+  : m_refCount(0), m_id(p_id), m_player(p_player), 
+    m_deleted(false), m_actions(p_br),
     m_chanceProbs((p_player->m_id == 0) ? p_br : 0),
     m_flag(0), m_whichbranch(0)
 {
@@ -153,6 +175,27 @@ gbtTreeInfosetRep::~gbtTreeInfosetRep()
   for (int act = 1; act <= m_actions.Length(); act++) {
     m_actions[act]->m_deleted = true;
   }
+}
+
+//----------------------------------------------------------------------
+//     class gbtTreeInfosetRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTreeInfosetRep::Reference(void)
+{
+  m_refCount++;
+  if (!m_deleted) m_player->m_efg->m_refCount++;
+}
+
+bool gbtTreeInfosetRep::Dereference(void)
+{
+  if (!m_deleted && --m_player->m_efg->m_refCount == 0) {
+    // Note that as a side effect, deleting the game will cause
+    // the player to be marked as deleted (since by definition,
+    // at this point the reference count must be at least one)
+    delete m_player->m_efg;
+  }
+  return (--m_refCount == 0 && m_deleted); 
 }
 
 //----------------------------------------------------------------------

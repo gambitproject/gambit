@@ -29,7 +29,7 @@
 
 class gbtTableStrategyRep : public gbtGameStrategyRep {
 public:
-  int m_id;
+  int m_refCount, m_id;
   gbtTableInfosetRep *m_infoset;
   bool m_deleted;
   std::string m_label;
@@ -41,11 +41,18 @@ public:
   virtual ~gbtTableStrategyRep();
   //@}
   
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
+  //@}
+
   /// @name General information about the strategy
   //@{
   int GetId(void) const;
   std::string GetLabel(void) const;
   void SetLabel(const std::string &);
+  bool IsDeleted(void) const { return m_deleted; }
   //@}
 
   /// @name Accessing information about the player
@@ -59,7 +66,7 @@ public:
 
 class gbtTableInfosetRep : public gbtGameInfosetRep {
 public:
-  int m_id;
+  int m_refCount, m_id;
   gbtTablePlayerRep *m_player;
   bool m_deleted;
   std::string m_label;
@@ -71,11 +78,20 @@ public:
   virtual ~gbtTableInfosetRep();
   //@}
 
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
+  void Delete(void)
+    { if (m_refCount == 0) delete this; else m_deleted = true; }
+  //@}
+
   /// @name General information about the information set
   //@{
   int GetId(void) const { return 1; }
   void SetLabel(const std::string &p_label) { m_label = p_label; }
   std::string GetLabel(void) const { return m_label; }
+  bool IsDeleted(void) const { return m_deleted; }
   //@}
 
   /// @name Accessing information about the player
@@ -111,7 +127,7 @@ public:
 
 class gbtTablePlayerRep : public gbtGamePlayerRep {
 public:
-  int m_id;
+  int m_refCount, m_id;
   gbtTableGameRep *m_nfg;
   bool m_deleted;
   std::string m_label;
@@ -121,6 +137,14 @@ public:
   //@{
   gbtTablePlayerRep(gbtTableGameRep *, int, int);
   virtual ~gbtTablePlayerRep() { }
+  //@}
+
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
+  void Delete(void)
+    { if (m_refCount == 0) delete this; else m_deleted = true; }
   //@}
 
   /// @name General information about the player

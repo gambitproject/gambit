@@ -40,7 +40,7 @@
 
 gbtTreeNodeRep::gbtTreeNodeRep(gbtTreeGameRep *p_efg,
 			       gbtTreeNodeRep *p_parent)
-  : m_id(0), m_efg(p_efg), m_deleted(false),
+  : m_refCount(0), m_id(0), m_efg(p_efg), m_deleted(false),
     m_infoset(0), m_parent(p_parent), m_outcome(0),
     m_whichbranch(0), m_ptr(0)
 { }
@@ -48,6 +48,27 @@ gbtTreeNodeRep::gbtTreeNodeRep(gbtTreeGameRep *p_efg,
 gbtTreeNodeRep::~gbtTreeNodeRep()
 {
   // for (int i = m_children.Length(); i; delete m_children[i--]);
+}
+
+//----------------------------------------------------------------------
+//      class gbtTreeNodeRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTreeNodeRep::Reference(void)
+{
+  m_refCount++;
+  if (!m_deleted) m_efg->m_refCount++;
+}
+
+bool gbtTreeNodeRep::Dereference(void)
+{
+  if (!m_deleted && --m_efg->m_refCount == 0) {
+    // Note that as a side effect, deleting the game will cause
+    // the player to be marked as deleted (since by definition,
+    // at this point the reference count must be at least one)
+    delete m_efg;
+  }
+  return (--m_refCount == 0 && m_deleted); 
 }
 
 //----------------------------------------------------------------------

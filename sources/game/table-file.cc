@@ -389,6 +389,10 @@ static gbtGame BuildNfg(gbtGameParserState &p_parser, gbtTableFileGame &p_data)
     dim[pl] = p_data.NumStrategies(pl);
   }
   gbtTableGameRep *nfg = new gbtTableGameRep(dim);
+  // Putting this in the handle here ensures a reference to the game
+  // is counted while the game is being built.
+  gbtGame nfgHandle(nfg);
+
   nfg->SetLabel(p_data.m_title);
   nfg->SetComment(p_data.m_comment);
   
@@ -411,7 +415,7 @@ static gbtGame BuildNfg(gbtGameParserState &p_parser, gbtTableFileGame &p_data)
     throw gbtNfgParserException();
   }
 
-  return nfg;
+  return nfgHandle;
 }
 
 //=========================================================================

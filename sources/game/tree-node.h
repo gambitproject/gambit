@@ -29,7 +29,7 @@
 
 class gbtTreeNodeRep : public gbtGameNodeRep {
 public:
-  int m_id;
+  int m_refCount, m_id;
   gbtTreeGameRep *m_efg;
   bool m_deleted;
   std::string m_label;
@@ -47,11 +47,20 @@ public:
   virtual ~gbtTreeNodeRep();
   //@}
 
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
+  void Delete(void)
+    { if (m_refCount == 0) delete this; else m_deleted = true; }
+  //@}
+
   /// @name General information about the node
   //@{
   int GetId(void) const;
   void SetLabel(const std::string &);
   std::string GetLabel(void) const;
+  bool IsDeleted(void) const { return m_deleted; }
   //@}
 
   /// @name Accessing relatives of the node

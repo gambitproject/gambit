@@ -48,6 +48,9 @@ public:
   virtual void SetLabel(const std::string &) = 0;
   /// Get the text label associated with the player
   virtual std::string GetLabel(void) const = 0;
+
+  /// Returns true if the outcome has been deleted from its game
+  virtual bool IsDeleted(void) const = 0;
   //@}
 
   //!
