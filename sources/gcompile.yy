@@ -446,6 +446,9 @@ void GCLCompiler::emit(Instruction *op)
 
 void GCLCompiler::Execute(void)
 {
+#ifdef ASSEMBLY
+  program.Dump(gout);   gout << '\n';
+#endif   // ASSEMBLY
   gsm.Execute(program);
   gsm.Flush();
 }
