@@ -4,7 +4,7 @@
 
 # Usage: 
 #update TARGET=[gui,gcl,src,guidoc,gcldoc] HOST=[sun4,aix,hp] GUI=[motif,xview]
-
+#       SCCS=[true,false]
 # This can be started on any of the hss machines and it will update the files
 # on the appropriate platform using rsh.
 
@@ -12,27 +12,36 @@
 # called make.site_$(GUI)_$(HOST) where GUI and HOST are appropriate to the
 # machine.  If a nongui target is being built, _$(GUI) is set to 'none'. 
 
+#Default machines for each platform 
 MACHINE_sun4=dosh.hum.caltech.edu
 MACHINE_solaris=minimax.caltech.edu
 MACHINE_rs6000=ironbark.hum.caltech.edu
 MACHINE_hp=jilt.hum.caltech.edu
 MACHINE_latex=hss.caltech.edu
-
+#Default values--these must be specified on commandline
 HOST=none
 GUI=none
 TARGET=none
+SCCS=none
+#Values controlling SCCS updates.  
+GET_false=/home/ironbark/gambit/distrib/fake_get # used to avoid SCCS updates
+GET_true=get
 
 all:
 #Check which targets we are building, if all, build all
+ifeq ($(SCCS),none)
+	@$(MAKE) -f make.update error \
+		ERRORNAME='Must specify SCCS state [true,false]'
+endif
 ifeq ($(TARGET),none)
 	@$(MAKE) -f make.update error \
 		ERRORNAME='Must specify a TARGET [gui,gcl,src,guidoc,gcldoc]'
 endif
 ifeq ($(TARGET),all)
-	@$(MAKE)  -f make.update TARGET=gui HOST=$(HOST) GUI=$(GUI)
-	@$(MAKE)  -f make.update TARGET=gcl HOST=$(HOST) GUI=$(GUI)
-	@$(MAKE)  -f make.update TARGET=src HOST=$(HOST) GUI=$(GUI)
-	@$(MAKE)  -f make.update TARGET=gcldoc HOST=$(HOST) GUI=$(GUI)
+	@$(MAKE)  -f make.update TARGET=gui HOST=$(HOST) GUI=$(GUI) SCCS=$(SCCS)
+	@$(MAKE)  -f make.update TARGET=gcl HOST=$(HOST) GUI=$(GUI) SCCS=$(SCCS)
+	@$(MAKE)  -f make.update TARGET=src HOST=$(HOST) GUI=$(GUI) SCCS=$(SCCS)
+	@$(MAKE)  -f make.update TARGET=gcldoc HOST=$(HOST) GUI=$(GUI) SCCS=$(SCCS)
 endif	
 #Check GUI target options
 ifeq ($(TARGET),gui)
@@ -43,8 +52,8 @@ ifeq ($(GUI),none)
 endif
 #Check which gui platforms to build
 ifeq ($(GUI),all)
-	@$(MAKE) -f make.update TARGET=gui HOST=$(HOST) GUI=motif
-	@$(MAKE) -f make.update TARGET=gui HOST=$(HOST) GUI=xview	
+	@$(MAKE) -f make.update TARGET=gui HOST=$(HOST) GUI=motif SCCS=$(SCCS)
+	@$(MAKE) -f make.update TARGET=gui HOST=$(HOST) GUI=xview SCCS=$(SCCS)	
 endif
 endif
 #Check which hosts to build on
@@ -53,20 +62,21 @@ ifeq ($(HOST),none)
 		ERRORNAME='Must specify a HOST type [sun4,solaris,rs6000]'
 endif
 ifeq ($(HOST),all)
-	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=sun4 GUI=$(GUI)
-	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=solaris GUI=$(GUI)
-	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=rs6000 GUI=$(GUI)
+	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=sun4 GUI=$(GUI) SCCS=$(SCCS)
+	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=solaris GUI=$(GUI) SCCS=$(SCCS)
+	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=rs6000 GUI=$(GUI) SCCS=$(SCCS)
+	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=hp GUI=$(GUI) SCCS=$(SCCS)
 endif
 
 #Do the actual building
 ifneq ($(HOST),all)
 ifeq ($(TARGET),gui)
 	rsh $(MACHINE_$(HOST)) "cd ~/distrib; \
-		make -f make.distr gui HOST=$(HOST) GUI=$(GUI)"
+	make -f make.distr gui HOST=$(HOST) GUI=$(GUI) GET=$(GET_$(SCCS))"
 endif
 ifeq ($(TARGET),gcl)
 	rsh $(MACHINE_$(HOST)) "cd ~/distrib; \
-		make -f make.distr gcl HOST=$(HOST) GUI=$(GUI)"
+	make -f make.distr gcl HOST=$(HOST) GUI=$(GUI) GET=$(GET_$(SCCS))"
 endif
 endif
 

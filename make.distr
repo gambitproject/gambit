@@ -9,7 +9,7 @@ all:
 	@echo If specifying gui, make sure to add GUI=ol/motif
 gui:
 	@echo Updating gambit_$(GUI)_$(HOST) on hss
-	$(MAKE) -f Makefile gui GUI=$(GUI) HOST=$(HOST)
+	$(MAKE) -f Makefile gui GUI=$(GUI) HOST=$(HOST) GET=$(GET)
 	strip gui_$(GUI)_$(HOST)
 	cp $(WXDIR)/utils/wxhelp/src/wxhelp_$(GUI)_$(HOST) ./wxhelp
 	strip wxhelp
@@ -19,7 +19,7 @@ gui:
 	rm gambit_$(GUI)_$(HOST).zip
 gcl:	
 	@echo Updating gcl_$(HOST) on hss
-	$(MAKE) -f Makefile gcl GUI=$(GUI) HOST=$(HOST)
+	$(MAKE) -f Makefile gcl GUI=$(GUI) HOST=$(HOST) GET=$(GET)
 	strip gcl_$(HOST)
 	zip gcl_$(HOST) gcl_$(HOST) ./efg/*.efg ./nfg/*.nfg ./gclsamp/*.gcl
 	ftp_put gcl_$(HOST).zip
