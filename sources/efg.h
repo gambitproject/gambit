@@ -193,6 +193,7 @@ template <class T> class Efg : public BaseEfg   {
 
     int ProfileLength(bool trunc = false) const;
     gPVector<int> Dimensionality(bool trunc = false) const;
+    gPVector<int> BeliefDimensionality(bool trunc = false) const;
 
     void Payoff(const gPVector<int> &profile, gVector<T> &payoff) const;
     void Payoff(const gArray<gArray<int> *> &profile, 

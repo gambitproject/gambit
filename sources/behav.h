@@ -51,7 +51,7 @@ template <class T> class BehavProfile
 		    int &index) const;
     void CondPayoff(Node *n, T prob, gPVector<T> &, gDPVector<T> &) const;
     void NodeRealizProbs(Node *n, T prob, int &index, gArray<T> &NRProbs);
-    void Beliefs(Node *n, T prob, int &index, gArray<T> &BProbs, 
+    void Beliefs(Node *n, T prob, gDPVector<T> &BProbs, 
 		 gPVector<T> &gpv);
 
   public:
@@ -74,7 +74,7 @@ template <class T> class BehavProfile
     gArray<T> NodeValues(int pl) const;
     void CondPayoff(gDPVector<T> &value, gPVector<T> &probs) const;
     gArray<T> NodeRealizProbs(void);
-    gArray<T> Beliefs(void);
+    gDPVector<T> Beliefs(void);
 
     T LiapValue(void) const;
     bool IsNash(void) const;

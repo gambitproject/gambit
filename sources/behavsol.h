@@ -22,7 +22,7 @@ protected:
   T _GobitLambda;
   T _GobitValue;
   T _LiapValue;
-  gDPVector<T> _Beliefs;
+  gDPVector<T> *_Beliefs;
   void EvalEquilibria();
 
 public:

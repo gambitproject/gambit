@@ -297,6 +297,21 @@ template <class T> gPVector<int> Efg<T>::Dimensionality(bool trunc) const
   return bar;
 }  
 
+template <class T> gPVector<int> Efg<T>::BeliefDimensionality(bool trunc) const
+{
+  gArray<int> foo(players.Length());
+  int i;
+  for (i = 1; i <= players.Length(); i++)
+    foo[i] = players[i]->infosets.Length();
+
+  gPVector<int> bar(foo);
+  for (i = 1; i <= players.Length(); i++)
+    for (int j = 1; j <= players[i]->infosets.Length(); j++)
+      bar(i, j) = players[i]->infosets[j]->members.Length() -((trunc) ? 1 : 0);
+
+  return bar;
+}  
+
 
 //-------------------------------------------------------------------------
 //                    BehavProfile<T> member functions
@@ -620,43 +635,45 @@ void BehavProfile<T>::NodeRealizProbs(Node *n, T prob, int &index,
     else index += CountNodes(n->children[i]);     
 }
 
-template <class T> gArray<T> BehavProfile<T>::Beliefs(void)
+template <class T> gDPVector<T> BehavProfile<T>::Beliefs(void)
 {
-  int index = 1, maxindex = (NumNodes(*BelongsTo()));
-
   behavsupport.ValidSupport();  
-  gArray<T> BProbs(maxindex);
-  for (int ii = 1; ii <= maxindex; ii++) BProbs[ii] = 0;
+  gDPVector<T> BProbs(((Efg<T> *)E)->BeliefDimensionality());
+  BProbs = (T)0;
   gDPVector<T> payoff(((Efg<T> *)E)->Dimensionality());
   gPVector<T> probs(((Efg<T> *)E)->Dimensionality().Lengths());
   CondPayoff( payoff, probs);
-//  probs.Dump(gout);  gout << '\n';
-  Beliefs ( E->RootNode(), (T) 1.0, index, BProbs, probs);
-//  BProbs.Dump(gout);  gout << '\n';
+  Beliefs ( E->RootNode(), (T)1, BProbs, probs);
+//  gout << "\nBProbs: " << BProbs; 
   return BProbs;
 }
 
 template <class T>
 void BehavProfile<T>::Beliefs(Node *n, T prob,
-		     int &index, gArray<T> &BProbs, gPVector<T> &gpv)
+		     gDPVector<T> &BProbs, gPVector<T> &gpv)
 {
   int anum;
   int pl = (n->infoset) ? n->infoset->player->number : -1;
   int iset = (n->infoset) ? n->infoset->number : 0;
   T cumprob((T) 0), newprob((T) 0);
   int i, nc = n->children.Length();
-
-//  gout << prob << '\n';
-
-  if (pl == 0 || pl == -1)
-    BProbs[index] = (T) 1.0;
-  else if (gpv(pl, iset) != (T) 0.0)
-    BProbs[index] = prob / gpv(pl, iset);
+  int mnum=1;
   
+  if(n->infoset) {
+    while(mnum <= n->infoset->NumMembers() &&
+	  n->infoset->GetMemberList()[mnum]!=n) 
+      mnum++;
+    assert(mnum<=n->infoset->NumMembers());
+  }
+
+  if (pl>0) {
+    if(gpv(pl, iset) != (T)0)
+      BProbs(pl,iset,mnum) = prob / gpv(pl, iset);
+  }  
   for (i = 1; i < nc; i++) {
     if ( pl == 0 || pl == -1 ||
-	behavsupport.IsActionInSupport(pl, n->infoset->number
-				       , n->infoset->actions[i])) {
+	 behavsupport.IsActionInSupport(pl, n->infoset->number
+					, n->infoset->actions[i])) {
       if (pl !=0 && pl != -1)
 	anum = behavsupport.OriNumber(pl, n->infoset->number
 				      , n->infoset->actions[i]);
@@ -664,10 +681,8 @@ void BehavProfile<T>::Beliefs(Node *n, T prob,
       newprob = ((pl) ? (*this)(pl, n->infoset->number, anum) :
 		 ((ChanceInfoset<T> *) n->infoset)->probs[i]);
       cumprob += newprob;
-      Beliefs(n->children[i], prob * newprob, ++index,
-	      BProbs, gpv);
+      Beliefs(n->children[i], prob * newprob, BProbs, gpv);
     }
-    else index += CountNodes(n->children[i]); 
   }
   if (nc > 0)
     if ( pl == 0 || pl == -1 ||  
@@ -680,11 +695,8 @@ void BehavProfile<T>::Beliefs(Node *n, T prob,
 	newprob = (T) 1.0 - cumprob;
       else newprob = ((pl) ? (*this)(pl, n->infoset->number, anum) :
 		      ((ChanceInfoset<T> *) n->infoset)->probs[i]);
-      
-      Beliefs(n->children[nc], prob * newprob, ++index,
-	      BProbs, gpv);
+      Beliefs(n->children[nc], prob * newprob, BProbs, gpv);
     }
-    else index += CountNodes(n->children[i]); 
 }
 
 template <class T>
