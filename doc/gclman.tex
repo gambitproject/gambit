@@ -683,6 +683,7 @@ string of alphanumeric characters (\verb+a-z+, \verb+A-Z+, or
 \verb+0-9+) beginning with a letter.  So, to create a variable with
 name \verb+x+ which returns the \verb+NUMBER+ \verb+1+, we can use
 \verb+Assign+ as follows:
+\marginpar{Assign BIF is not defined.  Fix this section}
 
 \begin{verbatim}
 GCL1:= << Assign["x",1]
@@ -1394,7 +1395,7 @@ list of statements is executed.  If it evaluates to \verb+False+, and
 the second (optional) list of statements is present, that list is
 executed; if it is not present, execution falls through to the next
 statement.
-
+\marginpar{What data type does If[] return?}
 For example, the statement
 
 \begin{verbatim}
@@ -1864,6 +1865,7 @@ For example to create a random two person $2\times 2$ normal form
 game, with a seed of \verb+34+ for the random number generator, you can
 use the function \tindex{Randomize} to randomize the payoffs of the
 original game.
+\marginpar{Change Randomize[] to generate uniform (0,1) rv}
 
 \begin{verbatim}
 GCL2:= Randomize[NewNfg[{2,2},True],34]
@@ -1978,10 +1980,10 @@ GCL1:= << strat:=List[1,3,1]
 GCL2:= << stratSets:=List[strat,2]
 { { 1, 2, 3 },
   { 1, 2, 3 } }
-GCL3:= << effort:=Number[CartesianProd[stratSets]] 
-{ { { 1.000, 1.000 }, { 1.000, 2.000 }, { 1.000, 3.000 } },
-  { { 2.000, 1.000 }, { 2.000, 2.000 }, { 2.000, 3.000 } },
-  { { 3.000, 1.000 }, { 3.000, 2.000 }, { 3.000, 3.000 } } }
+GCL3:= << effort:=CartesianProd[stratSets] 
+{ { { 1, 1 }, { 1, 2 }, { 1, 3 } },
+  { { 2, 1 }, { 2, 2 }, { 2, 3 } },
+  { { 3, 1 }, { 3, 2 }, { 3, 3 } } }
 GCL4:= << pay:=Min[effort]-.5*effort
 { { { 0.500, 0.500 }, { 0.500, 0.000 }, { 0.500, -0.500 } },
   { { 0.000, 0.500 }, { 1.000, 1.000 }, { 1.000, 0.500 } },
@@ -2018,9 +2020,9 @@ of which contains the minimum of the vector in that cell.  Thus:
 
 \begin{verbatim}
 GCL6:= << Min[effort]
-{ { 1.000, 1.000, 1.000 },
-  { 1.000, 2.000, 2.000 },
-  { 1.000, 2.000, 3.000 } }
+{ { 1, 1, 1 },
+  { 1, 2, 2 },
+  { 1, 2, 3 } }
 \end{verbatim}
 
 \noindent
@@ -2629,10 +2631,10 @@ as well.  So you can take linear combinations of mixed profiles to
 create new mixed profiles, as illustrated in this example:
 
 \begin{verbatim}  
-GCL1:= n:=Nfg[Number[{{{3,1},{0,0}},{{0,1},{3,0}},{{1,0},{1,3}}}]];
+GCL1:= n:=Nfg[{{{3,1},{0,0}},{{0,1},{3,0}},{{1,0},{1,3}}}];
 GCL2:= << c:=Centroid[n]
 (Mixed) { 1/3 1/3 1/3 }{ 1/2 1/2 }
-GCL3:= << cc:=Mixed[n,Number[{{1,0,0},{1,0}}]]
+GCL3:= << cc:=Mixed[n,{{1,0,0},{1,0}}]
 (Mixed) { 1 0 0 }{ 1 0 }
 GCL4:= << m:=1/2*c+1/2*cc
 (Mixed) { 2/3 1/6 1/6 }{ 3/4 1/4 }
@@ -8145,7 +8147,9 @@ Length[Actions[infoset,support]]
 NumActions[infoset->INFOSET] =: INTEGER 
 \end{verbatim}\normalsize
 
-\bd \begin{verbatim}
+\bd 
+The number of actions in  \verb+infoset+.
+\begin{verbatim}
 Length[Actions[infoset,Support[Game[infoset]]]] 
 \end{verbatim} 
 \ed
