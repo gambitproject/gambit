@@ -13,6 +13,15 @@
 #include "gwatch.h"
 #include "mixed.h"
 
+
+extern Portion *ArrayToList(const gArray<double> &A);
+extern Portion *ArrayToList(const gArray<gRational> &A);
+extern gVector<double>* ListToVector_Float(ListPortion* list);
+extern gVector<gRational>* ListToVector_Rational(ListPortion* list);
+extern gMatrix<double>* ListToMatrix_Float(ListPortion* list);
+extern gMatrix<gRational>* ListToMatrix_Rational(ListPortion* list);
+
+
 //
 // Useful utilities for creation of lists of profiles
 //
@@ -771,6 +780,44 @@ Portion *GSM_Lcp_Support(Portion **param)
 }
 
 
+#include "lemketab.h"
+
+Portion* GSM_Lcp_ListFloat(Portion** param)
+{
+  gMatrix<double>* a = ListToMatrix_Float((ListPortion*) param[0]);
+  gVector<double>* b = ListToVector_Float((ListPortion*) param[1]);
+  
+  LTableau<double>* tab = new LTableau<double>(*a, *b);
+  tab->LemkePath(0);
+  gVector<double> vector;
+  tab->BasisVector(vector);
+  Portion* result = ArrayToList(vector);
+  delete tab;
+  delete a;
+  delete b;
+  
+  return result;
+}
+
+Portion* GSM_Lcp_ListRational(Portion** param)
+{
+  gMatrix<gRational>* a = ListToMatrix_Rational((ListPortion*) param[0]);
+  gVector<gRational>* b = ListToVector_Rational((ListPortion*) param[1]);
+  
+  LTableau<gRational>* tab = new LTableau<gRational>(*a, *b);
+  tab->LemkePath(0);
+  gVector<gRational> vector;
+  tab->BasisVector(vector);
+  Portion* result = ArrayToList(vector);
+  delete tab;
+  delete a;
+  delete b;
+  
+  return result;
+}
+
+
+
 #include "seqform.h"
 #include "lemkesub.h"
 
@@ -1141,6 +1188,62 @@ Portion *GSM_Lp_Support(Portion **param)
   por->AddDependency();
   return por;
 }
+
+
+#include "lpsolve.h"
+
+Portion* GSM_Lp_ListFloat(Portion** param)
+{
+  gMatrix<double>* a = ListToMatrix_Float((ListPortion*) param[0]);
+  gVector<double>* b = ListToVector_Float((ListPortion*) param[1]);
+  gVector<double>* c = ListToVector_Float((ListPortion*) param[2]);
+  if(!a || !b || !c)
+    return 0;
+  int nequals = ((IntPortion*) param[3])->Value();
+  bool isFeasible;
+  bool isBounded;
+  
+  LPSolve<double>* s = new LPSolve<double>(*a, *b, *c, nequals);
+  Portion* result = ArrayToList(s->OptimumVector());
+  isFeasible = s->IsFeasible();
+  isBounded = s->IsBounded();
+  delete s;
+  delete a;
+  delete b;
+  delete c;
+  
+  ((BoolPortion*) param[3])->Value() = isFeasible;
+  ((BoolPortion*) param[4])->Value() = isBounded;
+  return result;
+}
+
+Portion* GSM_Lp_ListRational(Portion** param)
+{
+  gMatrix<gRational>* a = ListToMatrix_Rational((ListPortion*) param[0]);
+  gVector<gRational>* b = ListToVector_Rational((ListPortion*) param[1]);
+  gVector<gRational>* c = ListToVector_Rational((ListPortion*) param[2]);
+  if(!a || !b || !c)
+    return 0;
+  int nequals = ((IntPortion*) param[3])->Value();
+  bool isFeasible;
+  bool isBounded;
+  
+  LPSolve<gRational>* s = new LPSolve<gRational>(*a, *b, *c, nequals);
+  Portion* result = ArrayToList(s->OptimumVector());
+  isFeasible = s->IsFeasible();
+  isBounded = s->IsBounded();
+  delete s;
+  delete a;
+  delete b;
+  delete c;
+  
+  ((BoolPortion*) param[3])->Value() = isFeasible;
+  ((BoolPortion*) param[4])->Value() = isBounded;
+  return result;
+}
+
+
+
 
 #include "csumsub.h"
 #include "efgcsum.h"
@@ -1986,7 +2089,23 @@ void Init_algfunc(GSM *gsm)
 			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_Lcp_Support, 5, "traceLevel", porINTEGER,
 			new IntValPortion(0));
+
+  FuncObj->SetFuncInfo(GSM_Lcp_ListFloat, 2);
+  FuncObj->SetParamInfo(GSM_Lcp_ListFloat, 0, "a", porLIST | porFLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2);
+  FuncObj->SetParamInfo(GSM_Lcp_ListFloat, 1, "b", porLIST | porFLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 1);
+
+  FuncObj->SetFuncInfo(GSM_Lcp_ListRational, 2);
+  FuncObj->SetParamInfo(GSM_Lcp_ListRational, 0, "a", porLIST | porRATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2);
+  FuncObj->SetParamInfo(GSM_Lcp_ListRational, 1, "b", porLIST | porRATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 1);
+
   gsm->AddFunction(FuncObj);
+
+
+
 
   FuncObj = new FuncDescObj("LiapSolve");
   FuncObj->SetFuncInfo(GSM_Liap_EfgFloat, 12);
@@ -2152,7 +2271,36 @@ void Init_algfunc(GSM *gsm)
 			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_Lp_EfgRational, 5, "traceLevel", porINTEGER,
 			new IntValPortion(0));
+
+  FuncObj->SetFuncInfo(GSM_Lp_ListFloat, 6);
+  FuncObj->SetParamInfo(GSM_Lp_ListFloat, 0, "a", porLIST | porFLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2);
+  FuncObj->SetParamInfo(GSM_Lp_ListFloat, 1, "b", porLIST | porFLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 1);
+  FuncObj->SetParamInfo(GSM_Lp_ListFloat, 2, "c", porLIST | porFLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 1);
+  FuncObj->SetParamInfo(GSM_Lp_ListFloat, 3, "nEqualities", porINTEGER);
+  FuncObj->SetParamInfo(GSM_Lp_ListFloat, 4, "isFeasible", porBOOL,
+			new BoolValPortion(false), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_Lp_ListFloat, 5, "isBounded", porBOOL,
+			new BoolValPortion(false), PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_Lp_ListRational, 6);
+  FuncObj->SetParamInfo(GSM_Lp_ListRational, 0, "a", porLIST | porRATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2);
+  FuncObj->SetParamInfo(GSM_Lp_ListRational, 1, "b", porLIST | porRATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 1);
+  FuncObj->SetParamInfo(GSM_Lp_ListRational, 2, "c", porLIST | porRATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 1);
+  FuncObj->SetParamInfo(GSM_Lp_ListRational, 3, "nEqualities", porINTEGER);
+  FuncObj->SetParamInfo(GSM_Lp_ListRational, 4, "isFeasible", porBOOL,
+			new BoolValPortion(false), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_Lp_ListRational, 5, "isBounded", porBOOL,
+			new BoolValPortion(false), PASS_BY_REFERENCE);
+
   gsm->AddFunction(FuncObj);
+
+
 
   FuncObj = new FuncDescObj("Nfg");
   FuncObj->SetFuncInfo(GSM_Nfg_Float, 2);

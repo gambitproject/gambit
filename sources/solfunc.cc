@@ -924,6 +924,160 @@ Portion *GSM_ListForm_MixedRational(Portion **param)
   return por;
 }
 
+
+
+//---------------------------- Gripe ------------------------------//
+
+Portion *GSM_Gripe_MixedFloat(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p1;
+  Portion* p2;
+  Portion* por;
+
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+
+  gPVector<double> v(*P);
+
+  P->Gripe(v);
+
+  por = new ListValPortion();
+
+  for(i=1; i <= P->Lengths().Length(); i++)
+  {
+    p1 = new ListValPortion();
+
+    for(j=1; j <= P->Lengths()[i]; j++)
+    {
+      p2 = new FloatValPortion(v(i, j));
+      ((ListValPortion*) p1)->Append(p2);
+    }
+
+    ((ListValPortion*) por)->Append( p1 );
+  }
+
+  return por;
+}
+
+
+Portion *GSM_Gripe_MixedRational(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p1;
+  Portion* p2;
+  Portion* por;
+
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
+
+  gPVector<gRational> v(*P);
+
+  P->Gripe(v);
+
+  por = new ListValPortion();
+
+  for( i = 1; i <= P->Lengths().Length(); i++ )
+  {
+    p1 = new ListValPortion();
+
+    for( j = 1; j <= P->Lengths()[i]; j++ )
+    {
+      p2 = new RationalValPortion( v( i, j ) );
+      ((ListValPortion*) p1)->Append( p2 );
+    }
+
+    ((ListValPortion*) por)->Append( p1 );
+  }
+
+  return por;
+}
+
+Portion *GSM_Gripe_BehavFloat(Portion **param)
+{
+  int i;
+  int j;
+  int k;
+  Portion* p1;
+  Portion* p2;
+  Portion* p3;
+  Portion* por;
+
+  BehavSolution<double> *P = 
+    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+
+  gDPVector<double> v(*P);
+
+  P->Gripe(v);
+
+  por = new ListValPortion();
+
+  for( i = 1; i <= P->DPLengths().Length(); i++ )
+  {
+    p1 = new ListValPortion();
+
+    for( j = 1; j <= P->DPLengths()[i]; j++ )
+    {
+      p2 = new ListValPortion();
+
+      for( k = 1; k <= P->Lengths()[j]; k++ )
+      {
+	p3 = new FloatValPortion( v( i, j, k ) );
+	((ListPortion*) p2)->Append( p3 );
+      }
+      ((ListPortion*) p1)->Append( p2 );
+    }
+    ((ListPortion*) por)->Append( p1 );
+  }
+
+  return por;
+
+}
+
+
+Portion *GSM_Gripe_BehavRational(Portion **param)
+{
+  int i;
+  int j;
+  int k;
+  Portion* p1;
+  Portion* p2;
+  Portion* p3;
+  Portion* por;
+
+  BehavSolution<gRational> *P = 
+    (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
+
+  gDPVector<gRational> v(*P);
+
+  P->Gripe(v);
+
+  por = new ListValPortion();
+
+  for( i = 1; i <= P->DPLengths().Length(); i++ )  {
+    p1 = new ListValPortion();
+
+    for( j = 1; j <= P->DPLengths()[i]; j++ )
+    {
+      p2 = new ListValPortion();
+
+      for( k = 1; k <= P->Lengths()[j]; k++ )
+      {
+	p3 = new RationalValPortion( v( i, j, k ) );
+	((ListPortion*) p2)->Append( p3 );
+      }
+      ((ListPortion*) p1)->Append( p2 );
+    }
+    ((ListPortion*) por)->Append( p1 );
+  }
+
+  return por;
+
+}
+
+
 //----------
 // Mixed
 //----------
@@ -1627,6 +1781,24 @@ void Init_solfunc(GSM *gsm)
 			0, "mixed", porMIXED_FLOAT );
   FuncObj->SetFuncInfo( GSM_ListForm_MixedRational, 1 );
   FuncObj->SetParamInfo(GSM_ListForm_MixedRational, 
+			0, "mixed", porMIXED_RATIONAL );
+  gsm->AddFunction(FuncObj);
+
+
+
+  FuncObj = new FuncDescObj("Gripe");
+  FuncObj->SetFuncInfo( GSM_Gripe_BehavFloat, 1 );
+  FuncObj->SetParamInfo(GSM_Gripe_BehavFloat, 
+			0, "behav", porBEHAV_FLOAT );
+  FuncObj->SetFuncInfo( GSM_Gripe_BehavRational, 1 );
+  FuncObj->SetParamInfo(GSM_Gripe_BehavRational, 
+			0, "behav", porBEHAV_RATIONAL );
+
+  FuncObj->SetFuncInfo( GSM_Gripe_MixedFloat, 1 );
+  FuncObj->SetParamInfo(GSM_Gripe_MixedFloat, 
+			0, "mixed", porMIXED_FLOAT );
+  FuncObj->SetFuncInfo( GSM_Gripe_MixedRational, 1 );
+  FuncObj->SetParamInfo(GSM_Gripe_MixedRational, 
 			0, "mixed", porMIXED_RATIONAL );
   gsm->AddFunction(FuncObj);
 

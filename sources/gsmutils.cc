@@ -5,6 +5,8 @@
 //
 
 #include "portion.h"
+#include "gvector.h"
+#include "gmatrix.h"
 
 Portion *ArrayToList(const gArray<double> &A)
 {
@@ -129,3 +131,114 @@ Portion* gDPVectorToList(const gDPVector<gRational> &A)
 }
 
 
+
+gVector<double>* ListToVector_Float(ListPortion* list)
+{
+  int length = list->Length();
+  int i;
+  gVector<double>* vector = 0;
+  bool flat = true;
+  for(i=1; i<=length; i++)
+  {
+    if((*list)[i]->Type() != porFLOAT)
+      flat = false;
+  }
+  if(flat)
+  {
+    vector = new gVector<double>(length);
+    for(i=1; i<=length; i++)
+      (*vector)[i] = ((FloatPortion*)(*list)[i])->Value();
+  }
+  return vector;      
+}
+
+gVector<gRational>* ListToVector_Rational(ListPortion* list)
+{
+  int length = list->Length();
+  int i;
+  gVector<gRational>* vector = 0;
+  bool flat = true;
+  for(i=1; i<=length; i++)
+  {
+    if((*list)[i]->Type() != porRATIONAL)
+      flat = false;
+  }
+  if(flat)
+  {
+    vector = new gVector<gRational>(length);
+    for(i=1; i<=length; i++)
+      (*vector)[i] = ((RationalPortion*)(*list)[i])->Value();
+  }
+  return vector;      
+}
+
+
+
+
+
+gMatrix<double>* ListToMatrix_Float(ListPortion* list)
+{
+  int rows = list->Length();
+  int cols = 0;
+  int i;
+  int j;
+  gMatrix<double>* matrix = 0;
+  bool rect = true;
+  for(i=1; i<=rows; i++)
+  {
+    if((*list)[i]->Type() != porLIST)
+      rect = false;
+    else if(cols==0)
+      cols = ((ListPortion*) (*list)[i])->Length();
+    else if(cols != ((ListPortion*) (*list)[i])->Length())
+      rect = false;
+    if(rect)
+      for(j=1; j<=cols; j++)
+	if((*((ListPortion*) (*list)[i]))[j]->Type() != porFLOAT)
+	  rect = false;
+  }
+
+  if(rect)
+  {
+    matrix = new gMatrix<double>(rows, cols);
+    for(i=1; i<=rows; i++)
+      for(j=1; j<=cols; j++)
+	(*matrix)(i,j) = 
+	  ((FloatPortion*)(*((ListPortion*)(*list)[i]))[j])->Value();
+  }
+  return matrix;
+}
+
+
+gMatrix<gRational>* ListToMatrix_Rational(ListPortion* list)
+{
+  int rows = list->Length();
+  int cols = 0;
+  int i;
+  int j;
+  gMatrix<gRational>* matrix = 0;
+  bool rect = true;
+  for(i=1; i<=rows; i++)
+  {
+    if((*list)[i]->Type() != porLIST)
+      rect = false;
+    else if(cols==0)
+      cols = ((ListPortion*) (*list)[i])->Length();
+    else if(cols != ((ListPortion*) (*list)[i])->Length())
+      rect = false;
+    if(rect)
+      for(j=1; j<=cols; j++)
+	if((*((ListPortion*) (*list)[i]))[j]->Type() != porRATIONAL)
+	  rect = false;
+  }
+
+  if(rect)
+  {
+    matrix = new gMatrix<gRational>(rows, cols);
+    for(i=1; i<=rows; i++)
+      for(j=1; j<=cols; j++)
+	(*matrix)(i,j) = 
+	  ((RationalPortion*)(*((ListPortion*)(*list)[i]))[j])->Value();
+  }
+  return matrix;
+}
