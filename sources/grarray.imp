@@ -42,8 +42,8 @@ template <class T> gRectArray<T>::gRectArray(const gRectArray<T> &a)
 
 template <class T> gRectArray<T>::~gRectArray()
 {
-  for (int i = 1; i <= nrows; delete [] data[i++]);
-  delete [] data;
+  for (int i = 1; i <= nrows; delete [] (data[i++] + 1));
+  delete [] (data + 1);
 }
 
 template <class T>
@@ -52,7 +52,7 @@ gRectArray<T> &gRectArray<T>::operator=(const gRectArray<T> &a)
   assert(nrows == a.nrows && ncols == a.ncols);
 
   for (int i = 1; i <= nrows; i++)
-    for (int j = 1; j <= nrows; j++)
+    for (int j = 1; j <= ncols; j++)
       data[i][j] = a.data[i][j];
 
   return *this;
@@ -93,5 +93,35 @@ template <class T> void gRectArray<T>::Dump(gOutput &f) const
 template <class T> gOutput &operator<<(gOutput &f, const gRectArray<T> &a)
 {
   a.Dump(f);   return f;
+}
+
+//------------------------------------------------------------------------
+//                       Row rotation and swapping
+//------------------------------------------------------------------------
+
+template <class T> void gRectArray<T>::RotateUp(int lo, int hi)
+{
+  assert(lo >= 1 && hi >= lo && nrows >= hi);
+  T *temp = data[lo];
+  for (int k = lo; k < hi; k++)
+    data[k] = data[k + 1];
+  data[hi] = temp;
+}
+
+template <class T> void gRectArray<T>::RotateDown(int lo, int hi)
+{
+  assert(lo >= 1 && hi >= lo && nrows >= hi);
+  T *temp = data[hi];
+  for (int k = hi; k > lo; k--)
+    data[k] = data[k - 1];
+  data[lo] = temp;
+}
+
+template <class T> void gRectArray<T>::SwitchRows(int i, int j)
+{
+  assert(i >= 1 && i <= nrows && j >= 1 && j <= nrows);
+  T *temp = data[j];
+  data[j] = data[i];
+  data[i] = temp;
 }
 

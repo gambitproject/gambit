@@ -29,6 +29,11 @@ template <class T> class gRectArray    {
     T &operator()(int r, int c);
     const T &operator()(int r, int c) const;
 
+    void RotateUp(int lo, int hi);
+    void RotateDown(int lo, int hi);
+
+    void SwitchRows(int, int);
+
     virtual void Dump(gOutput &) const;
 };
 
