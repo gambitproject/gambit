@@ -10,82 +10,43 @@
 #include "rational.h"
 #include "gstatus.h"
 
-bool Dominates(const NFSupport &S, int pl, int a, int b, bool strong)
+template <class T>
+bool Dominates(const Nfg<T> &N,
+	       const NFSupport &S, int pl, int a, int b, bool strong)
 {
-  const BaseNfg &N = S.BelongsTo();
+  NfgContIter A(S), B(S);
 
-  switch (N.Type())   {
-    case DOUBLE:  {
-      NfgContIter A(S), B(S);
-
-      A.Freeze(pl);
-      A.Set(pl, a);
-      B.Freeze(pl);
-      B.Set(pl, b);
+  A.Freeze(pl);
+  A.Set(pl, a);
+  B.Freeze(pl);
+  B.Set(pl, b);
   
-      if (strong)  {
-	do  {
-	  double ap = ((Nfg<double> &) N).Payoff(A.GetOutcome(), pl);
-	  double bp = ((Nfg<double> &) N).Payoff(B.GetOutcome(), pl);
-	  if (ap <= bp)  return false;
-	  A.NextContingency();
-	} while (B.NextContingency());
+  if (strong)  {
+    do  {
+      T ap = N.Payoff(A.GetOutcome(), pl);
+      T bp = N.Payoff(B.GetOutcome(), pl);
+      if (ap <= bp)  return false;
+      A.NextContingency();
+    } while (B.NextContingency());
 	
-	return true;
-      }
-
-      bool equal = true;
-      
-      do   {
-	double ap = ((Nfg<double> &) N).Payoff(A.GetOutcome(), pl);
-	double bp = ((Nfg<double> &) N).Payoff(B.GetOutcome(), pl);
-	if (ap < bp)   return false;
-	else if (ap > bp)  equal = false;
-	A.NextContingency();
-      } while (B.NextContingency());
-
-      return (!equal);
-    }
-
-    case RATIONAL:  {
-      NfgContIter A(S), B(S);
-
-      A.Freeze(pl);
-      A.Set(pl, a);
-      B.Freeze(pl);
-      B.Set(pl, b);
-  
-      if (strong)  {
-	do  {
-	  gRational ap = ((Nfg<gRational> &) N).Payoff(A.GetOutcome(), pl);
-	  gRational bp = ((Nfg<gRational> &) N).Payoff(B.GetOutcome(), pl);
-	  if (ap <= bp)  return false;
-	  A.NextContingency();
-	} while (B.NextContingency());
-	
-	return true;
-      }
-
-      bool equal = true;
-      
-      do   {
-	gRational ap = ((Nfg<gRational> &) N).Payoff(A.GetOutcome(), pl);
-	gRational bp = ((Nfg<gRational> &) N).Payoff(B.GetOutcome(), pl);
-	if (ap < bp)   return false;
-	else if (ap > bp)  equal = false;
-	A.NextContingency();
-      } while (B.NextContingency());
-      
-      return (!equal);
-    }
-    default:
-		assert(0);
-      return false;
+    return true;
   }
+
+  bool equal = true;
+  
+  do   {
+    T ap = N.Payoff(A.GetOutcome(), pl);
+    T bp = N.Payoff(B.GetOutcome(), pl);
+    if (ap < bp)   return false;
+    else if (ap > bp)  equal = false;
+    A.NextContingency();
+  } while (B.NextContingency());
+
+  return (!equal);
 }
 
-
-bool ComputeDominated(const NFSupport &S, NFSupport &T,
+template <class T>
+bool ComputeDominated(const Nfg<T> &N, const NFSupport &S, NFSupport &newS,
 		      int pl, bool strong,
 		      gOutput &tracefile, gStatus &status)
 {
@@ -103,7 +64,7 @@ bool ComputeDominated(const NFSupport &S, NFSupport &T,
     double s1 = (double)min/(double)(dis+1);
     status.SetProgress((1.0-s1)*d1 + s1*d2);
     for (pp = 0;
-	 pp < min && !Dominates(S, pl, set[pp+1], set[dis+1], strong);
+	 pp < min && !Dominates(N, S, pl, set[pp+1], set[dis+1], strong);
 	 pp++);
     if (pp < min)
       dis--;
@@ -113,11 +74,11 @@ bool ComputeDominated(const NFSupport &S, NFSupport &T,
       set[min+1] = foo;
 
       for (int inc = min + 1; inc <= dis; )  {
-	if (Dominates(S, pl, set[min+1], set[dis+1], strong))  {
+	if (Dominates(N, S, pl, set[min+1], set[dis+1], strong))  {
 	  tracefile << S.Strategies(pl)[set[dis+1]]->number << " dominated by " << S.Strategies(pl)[set[min+1]]->number << '\n';
 	  dis--;
 	}
-	else if (Dominates(S, pl, set[dis+1], set[min+1], strong))  {
+	else if (Dominates(N, S, pl, set[dis+1], set[min+1], strong))  {
 	  tracefile << S.Strategies(pl)[set[min+1]]->number << " dominated by " << S.Strategies(pl)[set[dis+1]]->number << '\n';
 	  foo = set[dis+1];
 	  set[dis+1] = set[min+1];
@@ -138,7 +99,7 @@ bool ComputeDominated(const NFSupport &S, NFSupport &T,
   
   if (min + 1 <= S.NumStrats(pl))   {
     for (i = min + 1; i <= S.NumStrats(pl); i++)
-      T.RemoveStrategy(S.Strategies(pl)[set[i]]);
+      newS.RemoveStrategy(S.Strategies(pl)[set[i]]);
     
     return true;
   }
@@ -147,23 +108,60 @@ bool ComputeDominated(const NFSupport &S, NFSupport &T,
 }
 
 
-NFSupport *ComputeDominated(NFSupport &S, bool strong,
-				 const gArray<int> &players,
-				 gOutput &tracefile, gStatus &status=gstatus)
+template <class T> 
+NFSupport *ComputeDominated(const Nfg<T> &N, NFSupport &S, bool strong,
+			    const gArray<int> &players,
+			    gOutput &tracefile, gStatus &status)
 {
-  NFSupport *T = new NFSupport(S);
+  NFSupport *newS = new NFSupport(S);
   bool any = false;
 
   for (int i = 1; i <= players.Length() && !status.Get(); i++)   {
     int pl = players[i];
     tracefile << "Dominated strategies for player " << pl << ":\n";
-    any |= ComputeDominated(S, *T, pl, strong, tracefile, status);
+    any |= ComputeDominated(N, S, *newS, pl, strong, tracefile, status);
 // status.SetProgress((double)i/players.Length());
   }
 
   if (!any || status.Get())  {
-    delete T;
+    delete newS;
     return 0;
   }
-  return T;
+  return newS;
 }
+
+
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#pragma option -Jgd
+#define TEMPLATE
+#endif   // __GNUG__, __BORLANDC__
+
+TEMPLATE
+bool Dominates(const Nfg<double> &N,
+	       const NFSupport &S, int pl, int a, int b, bool strong);
+TEMPLATE
+bool Dominates(const Nfg<gRational> &N,
+	       const NFSupport &S, int pl, int a, int b, bool strong);
+
+TEMPLATE
+bool ComputeDominated(const Nfg<double> &N, const NFSupport &S, NFSupport &newS,
+		      int pl, bool strong,
+		      gOutput &tracefile, gStatus &status);
+TEMPLATE
+bool ComputeDominated(const Nfg<gRational> &N, const NFSupport &S, NFSupport &newS,
+		      int pl, bool strong,
+		      gOutput &tracefile, gStatus &status);
+
+
+TEMPLATE
+NFSupport *ComputeDominated(const Nfg<double> &N, NFSupport &S, bool strong,
+			    const gArray<int> &players,
+			    gOutput &tracefile, gStatus &status);
+TEMPLATE
+NFSupport *ComputeDominated(const Nfg<gRational> &N, NFSupport &S, bool strong,
+			    const gArray<int> &players,
+			    gOutput &tracefile, gStatus &status);
+
+
