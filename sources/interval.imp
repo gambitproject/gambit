@@ -99,7 +99,7 @@ template<class T> const T gInterval<T>::Length() const
 
 template<class T> const T gInterval<T>::Midpoint() const 
 { 
-  return (upper_bd + lower_bd)/2; 
+  return (upper_bd + lower_bd)/(T)2; 
 }
 
 template<class T> const gInterval<T> gInterval<T>::LeftHalf() const 
