@@ -421,15 +421,15 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
       A(n, strats+1) = (T) 1;
       s.NextContingency();
     }
-    tracefile << '\n' << (gRectArray<T> &)A << '\n';
-    tracefile << B << '\n';
-    tracefile << C << '\n';
+    // tracefile << '\n' << (gRectArray<T> &)A << '\n';
+    // tracefile << B << '\n';
+    // tracefile << C << '\n';
     LPSolve<T> Tab(A, B, C, 1);
     COpt = Tab.OptimumCost();
-    tracefile << "\nPlayer = " << pl;
-    tracefile << " F = " << Tab.IsFeasible();
-    tracefile << " x = " << Tab.OptimumVector();
-    tracefile << " Obj = " << COpt;
+    tracefile << "\nPlayer = " << pl << " Strat: " << prob;
+    // tracefile << " F = " << Tab.IsFeasible();
+    // tracefile << " x = " << Tab.OptimumVector();
+    // tracefile << " Obj = " << COpt;
     
     dom = false;
     
@@ -486,22 +486,23 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
       s.NextContingency();
     }
     
-    tracefile << '\n' << (gRectArray<T> &)A << '\n';
-    tracefile << B << '\n';
-    tracefile << C << '\n';
+    // tracefile << '\n' << (gRectArray<T> &)A << '\n';
+    // tracefile << B << '\n';
+    // tracefile << C << '\n';
     LPSolve<T> Tab(A, B, C, 1);
     
     COpt = Tab.OptimumCost();
-    tracefile << "\nPlayer = " << pl;
-    tracefile << " F = " << Tab.IsFeasible();
-    tracefile << " x = " << Tab.OptimumVector();
-    tracefile << " Obj = " << COpt;
+    tracefile << "\nPlayer = " << pl << " Strat: " << prob;
+    // tracefile << " F = " << Tab.IsFeasible();
+    // tracefile << " x = " << Tab.OptimumVector();
+    // tracefile << " Obj = " << COpt;
     
     dom = false;
     
-    if (Tab.IsFeasible() && (COpt >= C0-eps && COpt <=C0+eps))
-      tracefile << " Duplicated strategy? ";
-    else if (Tab.IsFeasible() && COpt > C0+eps) {
+    //if (Tab.IsFeasible() && (COpt >= C0-eps && COpt <=C0+eps))
+    //  tracefile << " Duplicated strategy? ";
+    // else 
+    if (Tab.IsFeasible() && COpt > C0+eps) {
       tracefile << " Weakly Dominated by ";
       gVector<T> xx(Tab.OptimumVector());
       for(i=1,st=1;st<=strats;st++) {
@@ -513,7 +514,7 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
       dom = true;
     }
     // else  tracefile << "\n\n";
-    tracefile << "\n";
+    // tracefile << "\n";
     
     if (!ret) 
       return false;
