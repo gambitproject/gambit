@@ -2,8 +2,8 @@
 #include "normal.h"
 #include "gtableau.h"
 #include "gambitio.h" 
-//#include "rational.h"
-#define Rational double
+#include "rational.h"
+//#define Rational double
 
 NormalForm::Lemke(int dup_strat)
 {
