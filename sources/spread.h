@@ -625,7 +625,7 @@ public:
     void SetFocus(void) { sheet->SetFocus(); }
 
     // Debugging
-    void Dump(gOutput &out) const;
+    void Output(gOutput &out) const;
 };
 
 
@@ -923,7 +923,7 @@ public:
     //  void        AddMenu(wxMenu *submenu, const char *label);
 
     // Debugging
-    void  Dump(void);
+    void Output(void);
 
     // Gui playback:
     void ExecuteLoggedCommand(const class gText &, const class gList<gText> &);

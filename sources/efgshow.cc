@@ -1319,41 +1319,37 @@ void EfgShow::ChangeSupport(int what)
 
 void EfgShow::SolveElimDom(void)
 {
-    ElimDomParamsDialog EDPD(ef.NumPlayers(), this);
+  ElimDomParamsDialog EDPD(ef.NumPlayers(), this);
 
-    if (EDPD.Completed() == wxOK) {
-      EFSupport *sup = cur_sup;
-      wxStatus status(this, "Dominance Elimination");
+  if (EDPD.Completed() == wxOK) {
+    EFSupport *sup = cur_sup;
+    wxStatus status(this, "Dominance Elimination");
 
-      if (!EDPD.DomMixed()) {
-	if (EDPD.FindAll()) {
-	  while ((sup = SupportWithoutDominatedOfPlayerList(*sup, EDPD.DomStrong(), false,
-						  EDPD.Players(), gnull, status)))
-	    {
-                    supports.Append(sup);
-                }
-            }
-            else
-            {
-                if ((sup = SupportWithoutDominatedOfPlayerList(*sup, EDPD.DomStrong(), false, 
-                                            EDPD.Players(), gnull, status)))
-                {
-                    supports.Append(sup);
-                }
-            }
-        }
-        else
-        {
-            wxMessageBox("Mixed Dominance is not implemented for\nExtensive Form Games");
-        }
-
-        if (EDPD.Compress() && disp_sup != sup)
-        {
-            cur_sup = supports[supports.Length()]; // displaying the last created support
-            disp_sup = cur_sup;
-            tw->SupportChanged();
-        }
+    if (!EDPD.DomMixed()) {
+      if (EDPD.FindAll()) {
+	while ((sup = SupportWithoutDominatedOfPlayerList(*sup, EDPD.DomStrong(), false,
+							  EDPD.Players(), gnull, status)) != 0) {
+	  supports.Append(sup);
+	}
+      }
+      else {
+	if ((sup = SupportWithoutDominatedOfPlayerList(*sup, EDPD.DomStrong(), false, 
+						       EDPD.Players(), gnull, status)) != 0) {
+	  supports.Append(sup);
+	}
+      }
     }
+    else {
+      wxMessageBox("Mixed dominance is not implemented for\n"
+		   "Extensive form games");
+      }
+    
+    if (EDPD.Compress() && disp_sup != sup) {
+      cur_sup = supports[supports.Length()]; // displaying the last created support
+      disp_sup = cur_sup;
+      tw->SupportChanged();
+    }
+  }
 }
 
 
@@ -1584,7 +1580,11 @@ template class SolutionList<BehavSolution>;
 // Gui playback code:
 
 void EfgShow::ExecuteLoggedCommand(const gText& command,
+#ifdef GUIPB_DEBUG
                                    const gList<gText>& arglist)
+#else
+                                   const gList<gText>& /*arglist*/)
+#endif  // GUIPB_DEBUG
 {
 #ifdef GUIPB_DEBUG
     printf("in EfgShow::ExecuteLoggedCommand...\n");
@@ -1592,7 +1592,7 @@ void EfgShow::ExecuteLoggedCommand(const gText& command,
     
     for (int i = 1; i <= arglist.Length(); i++)
         printf("arglist[%d] = %s\n", i, (char *)arglist[i]);
-#endif
+#endif  // GUIPB_DEBUG
     
     // FIXME! add commands.
     // FIXME! this has been changed since solve menu was rearranged!

@@ -1,6 +1,5 @@
 //
-// FILE: spread.cc -- Defines a 3 dimensional spreadsheet/table control.  Used
-// extensively in gambit.
+// FILE: spread.cc -- Defines a 3 dimensional spreadsheet/table control.
 //
 // $Id$
 //
@@ -36,7 +35,7 @@ gOutput &operator<<(gOutput &op, const SpreadSheet3D &)
 
 gOutput &operator<<(gOutput &op, const SpreadSheet &s)
 {
-    s.Dump(op);
+    s.Output(op);
     return op;
 }
 
@@ -622,7 +621,7 @@ void SpreadSheetC::OnChar(wxKeyEvent &ev)
                     }
                 } // this implements 'overwrite'
 
-                cell.str += ch;
+                cell.str += (char) ch;
             }
             
             if (IsDelete(ev))
@@ -1039,7 +1038,7 @@ Bool SpreadSheetPrintout::HasPage(int pageNum)
 }
 
 
-Bool SpreadSheetPrintout::OnPrintPage(int page)
+Bool SpreadSheetPrintout::OnPrintPage(int /*page*/)
 {
     wxDC *dc = GetDC();
     
@@ -1330,7 +1329,7 @@ void SpreadSheet::SetSize(int xs, int ys, int xe, int ye)
     sheet->SetSize(xs, ys, xe, ye);
 }
 
-void SpreadSheet::Dump(gOutput &o) const
+void SpreadSheet::Output(gOutput &o) const
 {
     for (int i = 1; i <= rows; i++)
     {
@@ -1630,10 +1629,9 @@ void SpreadSheet3D::OnPrint(void)
             arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 2);
             char *s = copystring(arg);
 
-            if (s)
-            {
-                gFileOutput out(s);
-                data[cur_level].Dump(out);
+            if (s) {
+	      gFileOutput out(s);
+	      data[cur_level].Output(out);
             }
         }
     }
@@ -1660,10 +1658,9 @@ void SpreadSheet3D::OnPrint(void)
                 char *s = wxFileSelector("Save", NULL, NULL, NULL, "*.asc", wxSAVE);
                 GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 2, gText(s));
                 
-                if (s)
-                {
-                    gFileOutput out(s);
-                    data[cur_level].Dump(out);
+                if (s) {
+		  gFileOutput out(s);
+		  data[cur_level].Output(out);
                 }
             }
         }
@@ -1813,16 +1810,15 @@ void SpreadSheet3D::AddLevel(int level)
 }
 
 
-void SpreadSheet3D::Dump(void)
+void SpreadSheet3D::Output(void)
 {
-    gFileOutput out("spread.out");
-    out << levels << "\n";
+  gFileOutput out("spread.out");
+  out << levels << "\n";
 
-    for (int i = 1; i <= levels; i++)
-    {
-        data[i].Dump(out);
-        out << "\n\n";
-    }
+  for (int i = 1; i <= levels; i++) {
+    data[i].Output(out);
+    out << "\n\n";
+  }
 }
 
 
@@ -2075,26 +2071,28 @@ void SpreadSheet3D::OnSelectedMoved(int , int , SpreadMoveDir )
 // Gui playback code:
 
 void SpreadSheet3D::ExecuteLoggedCommand(const gText& command,
+#ifdef GUIPB_DEBUG
                                          const gList<gText>& arglist)
+#else
+                                         const gList<gText>& /*arglist*/)
+#endif  // GUIPB_DEBUG
 {
 #ifdef GUIPB_DEBUG
-    printf("in SpreadSheet3D::ExecuteLoggedCommand...\n");
-    printf("command: %s\n", (char *)command);
+  printf("in SpreadSheet3D::ExecuteLoggedCommand...\n");
+  printf("command: %s\n", (char *)command);
     
-    for (int i = 1; i <= arglist.Length(); i++)
-        printf("arglist[%d] = %s\n", i, (char *)arglist[i]);
-#endif
+  for (int i = 1; i <= arglist.Length(); i++)
+    printf("arglist[%d] = %s\n", i, (char *)arglist[i]);
+#endif  // GUIPB_DEBUG
     
-    // FIXME! add commands.
+  // FIXME! add commands.
     
-    if (command == "PRINT")
-    {
-        OnPrint();
-    }
-    else
-    {
-        throw InvalidCommand();
-    }
+  if (command == "PRINT") {
+    OnPrint();
+  }
+  else {
+    throw InvalidCommand();
+  }
 }
 
 void SpreadSheet3D::AddRow(int p_row /*= 0*/)

@@ -879,7 +879,6 @@ void TreeWindow::action_label(void)
 
 void TreeWindow::action_insert(void)
 {
-  int num_children = Cursor()->NumChildren();
   MyDialogBox *branch_insert_dialog = 0;
   char *action_str = 0;
 
@@ -928,7 +927,6 @@ void TreeWindow::action_insert(void)
 
 void TreeWindow::action_delete(void)
 {
-  int num_children = Cursor()->NumChildren();
   MyDialogBox *branch_delete_dialog = 0;
   char *action_str = 0;
 
