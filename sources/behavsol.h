@@ -82,10 +82,10 @@ public:
   T GobitValue(void) const; // objective function from gobit alg
   void SetLiap(T value);
   T LiapValue(void) const; // liapunov function value (to test for Nash)
-  const gDPVector<T> &Beliefs(void) const;
+  const gDPVector<T> &Beliefs(void);
      // Belief vector, if a sequential equilibrium
 
-  const gDPVector<T> &Regret(void) const;
+  const gDPVector<T> &Regret(void);
 	 
   bool operator==(const BehavSolution<T> &) const;
   void Dump(gOutput& f) const;

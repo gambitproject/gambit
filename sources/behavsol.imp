@@ -199,21 +199,19 @@ template <class T> T BehavSolution<T>::LiapValue(void) const
   return _LiapValue; 
 }
 
-template <class T> const gDPVector<T> &BehavSolution<T>::Beliefs(void) const
+template <class T> const gDPVector<T> &BehavSolution<T>::Beliefs(void)
 { 
-  if (! _Beliefs)
-    ((BehavSolution<T> &) *this)._Beliefs =
-      new gDPVector<T>(BehavProfile<T>::Beliefs());
+  if (! _Beliefs) 
+    _Beliefs = new gDPVector<T>(BehavProfile<T>::Beliefs());
 
   return *_Beliefs; 
 }
 
-template <class T> const gDPVector<T> &BehavSolution<T>::Regret(void) const
+template <class T> const gDPVector<T> &BehavSolution<T>::Regret(void)
 {
   if (!_Regret)  {
-    ((BehavSolution<T> &) *this)._Regret =
-      new gDPVector<T>(E->Dimensionality());
-    Gripe(*((BehavSolution<T> &) *this)._Regret);
+    _Regret = new gDPVector<T>(E->Dimensionality());
+    Gripe(*_Regret);
   }
 
   return *_Regret;
