@@ -486,6 +486,9 @@ template <class T> T BehavProfile<T>::LiapValue(void) const
     
 template <class T> void BehavProfile<T>::Gripe(gDPVector<T> &value) const
 {
+  // Currently this is very inefficient.  But we need some functions 
+  // to evaluate the effect on payoff from a change in a profile 
+  // to make this better (rdm) 
   int i, j, k;
   T pay;
   BehavProfile<T> scratch(*this);
@@ -913,12 +916,5 @@ gArray<T> BehavProfile<T>::NodeValues(int pl) const
   NodeValues(E->RootNode(), pl, valarray, index);
   return valarray;
 }
-
-
-
-
-
-
-
 
 
