@@ -11,6 +11,7 @@
 #include "basic.h"
 #include "gtuple.h"
 #include "gambitio.h"
+#include "garray.h"
 
 //
 // <category lib=glib sect=Math>
@@ -21,12 +22,10 @@
 
 template <class T> class gMatrix;
 
-template <class T> class gVector {
+template <class T> class gVector : public gArray<T> {
   friend class gMatrix<T>;
 private:
 protected:
-  int min, max;
-  T *data;
 
   T* Allocate(void);
   void Delete(T* p);
@@ -36,10 +35,8 @@ protected:
 
 public:
 	//# CONSTRUCTORS
-// Create a zero-length vector
-  gVector(void);
 // Create a vector of length len, starting at 1
-  gVector(int len);
+  gVector(int len = 0);
 // Create a vector indexed from low to high
   gVector(int low, int high);
 // Copy constructor
@@ -48,10 +45,6 @@ public:
   virtual ~gVector();
 
 	//# OPERATORS
-
-// access a vector element
-  T& operator[] (int n);
-  const T& operator[] (int n) const;
 
 // = operators
   gVector<T>& operator=(const gVector<T>& V);
@@ -91,11 +84,7 @@ public:
   int Check(const gVector<T> &v) const;
 
 // parameter access functions
-  int First(void) const;
-  int Last(void) const;
-  int Length(void) const;
-
-  virtual void Dump(gOutput &) const;
+//  virtual void Dump(gOutput &) const;
 };
 
 #ifdef __GNUG__

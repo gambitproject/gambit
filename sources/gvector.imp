@@ -6,55 +6,25 @@
 
 #include "gvector.h"
 
-template <class T> int gVector<T>::Length(void) const
-{
-  return max - min + 1;
-}
-
 //------------------------------------------------------------------------
 // inline ctors
 //------------------------------------------------------------------------
 
-template <class T> gVector<T>::gVector(void) {
-    min=1; max=0;
-    data= NULL;
-  }
+template <class T> gVector<T>::gVector(int len) : gArray<T>(len) 
+{ }
 
-template <class T> gVector<T>::gVector(int len) {
-    assert( len >= 0 );
-    min=1; max=len;
-    AllocateData();
-  }
+template <class T> gVector<T>::gVector(int low, int high) 
+  : gArray<T>(low,high)
+{ }
 
-template <class T> gVector<T>::gVector(int low, int high) {
-    assert( high >= low-1 );
-    min=low; max=high;
-    AllocateData();
-  }
-
-template <class T> gVector<T>::gVector(const gVector<T>& V) {
-    CopyData(V);
-  }
+template <class T> gVector<T>::gVector(const gVector<T>& V) 
+  : gArray<T>(V) 
+{ }
 
 
 //------------------------------------------------------------------------
 // inline access functions
 //------------------------------------------------------------------------
-
-template <class T> int gVector<T>::First(void) const
-{ return min; }
-template <class T> int gVector<T>::Last(void) const
-{ return max; }
-
-template <class T> T& gVector<T>::operator[] (int n) {
-    assert(Check(n));
-	 return data[n];
-  }
-
-template <class T> const T& gVector<T>::operator[] (int n) const {
-    assert(Check(n));
-    return data[n];
- }
 
 
 //------------------------------------------------------------------------
@@ -281,10 +251,7 @@ template <class T> gVector<T>& gVector<T>::operator=(const gVector<T>& V)
 //	gVector: access functions
 //------------------------------------------------------------------------
 
-// index operators are inline functions
-
-// First(), Last(), and Length() are inline functions
-
+/*
 template <class T> void
 gVector<T>::Dump(gOutput &to) const
 {
@@ -294,7 +261,7 @@ gVector<T>::Dump(gOutput &to) const
     to<<(*this)[i]<<" ";
   to<<"}";
 }
-
+*/
 
 //------------------------------------------------------------------------
 //	gVector: output operator (gOutput operator<<)
