@@ -66,8 +66,8 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON    DISCARDABLE     "res\\WinEdit.ico"
-IDR_WINEDITYPE          ICON    DISCARDABLE     "res\\WinEditDoc.ico"
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\Gambit.ico"
+IDR_WINEDITYPE          ICON    DISCARDABLE     "res\\Tree.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -126,7 +126,7 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&About WinEdit...",           ID_APP_ABOUT
+        MENUITEM "&About GCL...",           ID_APP_ABOUT
     END
 END
 
@@ -156,11 +156,11 @@ END
 
 IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 217, 55
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About WinEdit"
+CAPTION "About GCL"
 FONT 8, "MS Sans Serif"
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
-    LTEXT           "WinEdit Version 1.0",IDC_STATIC,40,10,119,8,SS_NOPREFIX
+    LTEXT           "GCL Version 0.x",IDC_STATIC,40,10,119,8,SS_NOPREFIX
     LTEXT           "Copyright (C) 1998",IDC_STATIC,40,25,119,8
     DEFPUSHBUTTON   "OK",IDOK,178,7,32,14,WS_GROUP
 END
@@ -190,13 +190,13 @@ BEGIN
         BLOCK "040904B0"
         BEGIN
             VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "WinEdit MFC Application\0"
+            VALUE "FileDescription", "GCL MFC Application\0"
             VALUE "FileVersion", "1, 0, 0, 1\0"
-            VALUE "InternalName", "WinEdit\0"
+            VALUE "InternalName", "GCL\0"
             VALUE "LegalCopyright", "Copyright (C) 1998\0"
             VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "WinEdit.EXE\0"
-            VALUE "ProductName", "WinEdit Application\0"
+            VALUE "OriginalFilename", "GCL.EXE\0"
+            VALUE "ProductName", "GCL Application\0"
             VALUE "ProductVersion", "1, 0, 0, 1\0"
         END
     END
@@ -235,12 +235,12 @@ END
 
 STRINGTABLE PRELOAD DISCARDABLE 
 BEGIN
-    IDR_MAINFRAME           "WinEdit\n\nWinEdit\nText Files (*.txt)\n*.txt\nWinEdit.Document\nWinEdit Document"
+    IDR_MAINFRAME           "GCL\n\nGCL\nText Files *.txt)\n*.txt\nGCL.Document\nGCL Document"
 END
 
 STRINGTABLE PRELOAD DISCARDABLE 
 BEGIN
-    AFX_IDS_APP_TITLE       "WinEdit"
+    AFX_IDS_APP_TITLE       "GCL"
     AFX_IDS_IDLEMESSAGE     "Ready"
 END
 
