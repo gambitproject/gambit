@@ -7,8 +7,8 @@
 #ifndef NLIAP_H
 #define NLIAP_H
 
-#include "liap.h"
 #include "normal.h"
+#include "liap.h"
 #include "glist.h"
 
 template <class T> class NFLiapParams : public LiapParams<T>  {
@@ -26,7 +26,7 @@ template <class T> class NFLiapModule : public LiapModule<T>  {
 
   public:
     NFLiapModule(const NormalForm<T> &N, NFLiapParams<T> &p); 
-
+    virtual ~NFLiapModule();
     const gList<gPVector<T> > &GetSolutions(void) const;
 };
 

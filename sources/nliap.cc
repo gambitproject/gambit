@@ -1,5 +1,5 @@
 //#
-//# FILE: liap.cc -- Liapunov module
+//# FILE: nliap.cc -- Normal form Liapunov module
 //#
 //# $Id$
 //#
@@ -7,16 +7,11 @@
 #define MAXIT 10
 #define TOL (T)(.00000001)
 
-#include <stdlib.h>
-#include "gambitio.h"
-#include "normal.h"
-#include "normiter.h"
-#include "rational.h"
-#include "gpvector.h"
-#include "gfunct.h"
-#include "gwatch.h"
-#include "grandom.h"
+#include <math.h>
 #include "nliap.h"
+#include "gfunct.h"
+#include "rational.h"
+#include "grandom.h"
 
 //-------------------------------------------------------------------------
 //                     NFLiapParams<T>: Member functions
@@ -24,16 +19,6 @@
 
 template <class T> NFLiapParams<T>::NFLiapParams(void)
 { }
-
-#ifdef __GNUG__
-template class NFLiapParams<double>;
-template class NFLiapParams<gRational>;
-#elif defined __BORLANDC__
-#pragma option -Jgd
-class LiapParams<double>;
-class LiapParams<gRational>;
-#pragma option -Jgx
-#endif   // __GNUG__, __BORLANDC__
 
 //-------------------------------------------------------------------------
 //                      NFLiapFunc<T>: Class definition
@@ -45,7 +30,7 @@ class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
     int niters, nevals;
     const NormalForm<T> &N;
     gPVector<T> p, pp;
-    NFLiapParams<T> &params;
+//    NFLiapParams<T> &params;
 
     T Value(const gVector<T> &x);
     int Deriv(const gVector<T> &p, gVector<T> &d);
@@ -54,12 +39,12 @@ class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
     T LiapDerivValue(int i, int j, const gPVector<T> &p) const;
 
   public:
-    NFLiapFunc(const NormalForm<T> &NF, NFLiapParams<T> &p); 
+    NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P); 
     virtual ~NFLiapFunc();
 
     void Randomize(void);
-    int Optimize(void);
-    void Output(gOutput &) const;
+    int Optimize(int &iter, T &value);
+    void Output(gOutput &f) const;
 
     int NumIters(void) const;
     int NumEvals(void) const;
@@ -67,12 +52,13 @@ class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
     const gPVector<T> &GetProfile(void) const;
 };
 
-template <class T>
-NFLiapFunc<T>::NFLiapFunc(const NormalForm<T> &NF, NFLiapParams<T> &pr)
-  : gBC2FunctMin<T>(NF.ProfileLength()), N(NF), p(NF.Dimensionality()),
-    pp(NF.Dimensionality()), params(pr), niters(0), nevals(0)
+template <class T>NFLiapFunc<T>
+::NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P)
+  : gBC2FunctMin<T>(NF.ProfileLength(),P.tolOpt,P.maxitsOpt,
+		    P.tolBrent,P.maxitsBrent), N(NF), p(NF.Dimensionality()),
+		    pp(NF.Dimensionality()),  niters(0), nevals(0)
 {
-  SetPlev(params.plev);
+  SetPlev(P.plev);
   N.Centroid(pp);
 }
 
@@ -85,8 +71,10 @@ template <class T> const gPVector<T> &NFLiapFunc<T>::GetProfile(void) const
   return pp;
 }
 
-template <class T> void NFLiapFunc<T>::Output(gOutput &) const
-{ }
+template <class T> void NFLiapFunc<T>::Output(gOutput &f) const
+{
+  f << "\np = " << pp;
+ }
 
 template <class T> int NFLiapFunc<T>::NumIters(void) const
 {
@@ -98,16 +86,16 @@ template <class T> int NFLiapFunc<T>::NumEvals(void) const
   return nevals;
 }
 
-template <class T> int NFLiapFunc<T>::Optimize(void)
+template <class T> int NFLiapFunc<T>::Optimize(int &iter, T &value)
 {
-  if (params.plev >= 3 && params.outfile)
-    *params.outfile << "\np= " << pp;
-  T val = (T) 0;
-  int iter = 0;
-  DFP(pp, params.tolDFP, iter, val);
-  if (params.plev > 0 && params.outfile)
-    *params.outfile << "\np= " << pp << " f = " << val;
-  return (val < (T) ((T) 1 / (T) 100000));
+//  if (params.plev >= 3 && params.outfile)
+//    *params.outfile << "\np= " << pp;
+//  T val = (T) 0;
+//  int iter = 0;
+  return   DFP(pp, iter, value);
+//  if (params.plev > 0 && params.outfile)
+//    *params.outfile << "\np= " << pp << " f = " << val;
+//  return (val < (T) ((T) 1 / (T) 100000));
 }
 
 template <class T> void NFLiapFunc<T>::Randomize(void)
@@ -219,23 +207,16 @@ template <class T> int NFLiapFunc<T>::Hess(const gVector<T> &, gMatrix<T> &)
 }
 
 
-#ifdef __GNUG__
-template class NFLiapFunc<double>;
-template class NFLiapFunc<gRational>;
-#elif defined __BORLANDC__
-#pragma option -Jgd
-class LiapModule<double>;
-class LiapModule<gRational>;
-#pragma option -Jgx
-#endif   // __GNUG__, __BORLANDC__
-
 //------------------------------------------------------------------------
 //                    NFLiapModule<T>: Member functions
 //------------------------------------------------------------------------
 
-template <class T> NFLiapModule<T>::NFLiapModule(const NormalForm<T> &N,
-						 NFLiapParams<T> &p)
+template <class T> 
+NFLiapModule<T>::NFLiapModule(const NormalForm<T> &N, NFLiapParams<T> &p)
   : LiapModule<T>(p), nf(N)
+{ }
+
+template <class T> NFLiapModule<T>::~NFLiapModule()
 { }
 
 template <class T>
@@ -246,7 +227,8 @@ const gList<gPVector<T> > &NFLiapModule<T>::GetSolutions(void) const
 
 template <class T> LiapFunc<T> *NFLiapModule<T>::CreateFunc(void)
 {
-  return new NFLiapFunc<T>(nf, (NFLiapParams<T> &) params);
+//  return new NFLiapFunc<T>(nf, (NFLiapParams<T> &) params);
+  return new NFLiapFunc<T>(nf, params);
 }
 
 template <class T>
@@ -257,11 +239,17 @@ void NFLiapModule<T>::AddSolution(const LiapFunc<T> *const F)
 
 
 #ifdef __GNUG__
-template class NFLiapModule<double>;
-template class NFLiapModule<gRational>;
+#define TEMPLATE template
 #elif defined __BORLANDC__
+#define TEMPLATE
 #pragma option -Jgd
-class NFLiapModule<double>;
-class NFLiapModule<gRational>;
-#pragma option -Jgx
 #endif   // __GNUG__, __BORLANDC__
+
+TEMPLATE class NFLiapParams<double>;
+TEMPLATE class NFLiapParams<gRational>;
+TEMPLATE class NFLiapModule<double>;
+TEMPLATE class NFLiapModule<gRational>;
+TEMPLATE class NFLiapFunc<double>;
+TEMPLATE class NFLiapFunc<gRational>;
+
+
