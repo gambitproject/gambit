@@ -858,32 +858,32 @@ BFS<T> LPTableau<T>::DualBFS() const
 }
 
 template <class T>
-int InsertArtificial( int art, int col )
+int LPTableau<T>::InsertArtificial( int art, int col )
 {
   return basis.InsertArtificial( art, col );
 }
 
 template <class T>
-int AppendArtificial( int art )
+int LPTableau<T>::AppendArtificial( int art )
 {
   return basis.AppendArtificial( art );
 }
 
 template <class T>
-int RemoveArtificial( int col )
+int LPTableau<T>::RemoveArtificial( int col )
 {
   return basis.RemoveArtificial( col );
 }
 
 template <class T>
-int LastArtificial( void )
+int LPTableau<T>::LastArtificial( void )
 {
   return basis.LastArtificial();
 }
 
 template <class T>
-int FlushArtificial( void )
+void LPTableau<T>::FlushArtificial( void )
 {
-  return basis.FlushArtificial();
+  basis.FlushArtificial();
 }
   

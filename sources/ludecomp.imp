@@ -22,10 +22,11 @@ Basis<T>::Basis(const gMatrix<T> &mat)
   arts(), artificial()
 {
 
-  for(int i = mat.MinCol(); i <= mat.MaxCol(); i++) 
+  int i;
+  for(i = mat.MinCol(); i <= mat.MaxCol(); i++) 
     cols[i] = 0;
 
-  for(int i = label.First(); i <= label.Last(); i++) {
+  for(i = label.First(); i <= label.Last(); i++) {
     label[i]= - i;
     rows[i] = i;
   }
@@ -192,35 +193,35 @@ void Basis<T>::GetColumn( int col, gVector<T> &ret )
 
 
 template <class T>
-int InsertArtificial( int art, int col )
+int Basis<T>::InsertArtificial( int art, int col )
 {
   arts[ arts.Insert( art, col - A->MaxCol() ) ] = 0;
   return ( artificial.Insert( art, col - A->MaxCol() ) + A->MaxCol() );
 }
 
 template <class T>
-int AppendArtificial( int art )
+int Basis<T>::AppendArtificial( int art )
 {
   arts[ arts.Append(art) ] = 0;
   return ( artificial.Append( art ) + A->MaxCol() );
 }
 
 template <class T>
-int RemoveArtificial( int col )
+int Basis<T>::RemoveArtificial( int col )
 {
   arts.Remove(col);
   return artificial.Remove( col - A->MaxCol() );
 }
 
 template <class T>
-void FlushArtificial()
+void Basis<T>::FlushArtificial()
 {
   arts.Flush();
   artificial.Flush();
 }
 
 template <class T>
-int LastARtificial()
+int Basis<T>::LastArtificial()
 {
   return ( artificial.Last() + A->MaxCol() );
 }
