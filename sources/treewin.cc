@@ -90,7 +90,12 @@ template <class T>
 gString TreeWindow<T>::OutcomeAsString(const Node *n)
 {
 if (n->GetOutcome())
-	return OutcomeToString(*((OutcomeVector<T> *)n->GetOutcome()),draw_settings);
+  {
+    Outcome *t=n->GetOutcome();
+    OutcomeVector<T> *tv=(OutcomeVector<T> *)t;
+    gVector<T> *ttv=(gVector<T> *)tv;
+    return OutcomeToString(*ttv,draw_settings);
+  }
 return "";
 }
 
