@@ -54,6 +54,13 @@ template <class T> void Nfg<T>::SetPayoff(int pl, const gArray<int> &profile,
   payoffs[pl][index] = value;
 }
 
+
+template <class T> void Nfg<T>::SetPayoff(int pl, const StrategyProfile *p, 
+					   const T &value)
+{
+  payoffs[pl][p->index] = value;
+}
+
 template <class T> 
 const T &Nfg<T>::Payoff(int pl, const gArray<int> &profile) const 
 {
@@ -61,6 +68,12 @@ const T &Nfg<T>::Payoff(int pl, const gArray<int> &profile) const
   for (int i = 1; i <= profile.Length(); i++)
     index += players[i]->strategies[profile[i]]->index;
   return (payoffs[pl][index]);
+}
+
+template <class T>
+const T &Nfg<T>::Payoff(int pl, const StrategyProfile *p) const
+{
+  return (payoffs[pl][p->index]);
 }
 
 #include "nfgiter.h"

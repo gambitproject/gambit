@@ -24,8 +24,11 @@ struct Strategy   {
   ~Strategy();
 };
 
+template <class T> class Nfg;
 
 class StrategyProfile   {
+  friend class Nfg<double>;
+  friend class Nfg<gRational>;
 private:
   long index;
   gArray<Strategy *> profile;

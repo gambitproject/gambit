@@ -118,18 +118,14 @@ template <class T> void ContIter<T>::Get(gArray<int> &t) const
 
 template <class T> const T &ContIter<T>::Payoff(int p) const
 {
-  return N->Payoff(p, current_strat);
+  return N->Payoff(p, profile);
 }
 
 template <class T> void ContIter<T>::SetPayoff(int p, const T &value)
 {
-  N->SetPayoff(p, current_strat, value);
+  N->SetPayoff(p, profile, value);
 }
 
-//template <class T> void ContIter<T>::Payoff(gVector<T> &value) const
-//{
-//  N->Payoff(current_strat, value);
-//}
 
 template <class T> void ContIter<T>::Dump(void) const
 {

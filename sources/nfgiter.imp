@@ -118,24 +118,14 @@ template <class T> long NfgIter<T>::GetIndex(void) const
 
 template <class T> const T &NfgIter<T>::Payoff(int p) const
 {
-  return N->Payoff(p, current_strat);
+  return N->Payoff(p, profile);
 }
 
 template <class T> void NfgIter<T>::SetPayoff(int p, const T &value)
 {
-  N->SetPayoff(p, current_strat, value);
+  N->SetPayoff(p, profile, value);
 }
 
-//template <class T> void NfgIter<T>::Payoff(gVector<T> &value) const
-//{
-//  N->Payoff(*profile, value);
-//}
-
-//template <class T> 
-//const gArray<int> *const NfgIter<T>::GetActions(int i) const
-//{
-//  return (*profile)[i]->actions;
-//}
 
 
 

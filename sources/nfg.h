@@ -83,6 +83,8 @@ public:
 
   void SetPayoff(int pl, const gArray<int> &profile, const T &value);
   const T &Payoff(int pl, const gArray<int> &profile) const;
+  void SetPayoff(int pl, const StrategyProfile *p, const T &value);
+  const T &Payoff(int pl, const StrategyProfile *p) const;
 
 };
 
