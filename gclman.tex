@@ -64,9 +64,30 @@ Escobar, Eugene Grayver, Todd Kaplan, Brian Trotter, and Gary Wu.  We
 are particularly grateful to Gary Wu for his work on the stack machine
 used by the command language, to Bruce Bell and Nelson Escobar for
 work on data structures, and to Rob Weber for help in compiling this
-manual and testing parts of the language.
+manual and testing parts of the language.  We are also grateful to
+Eugene Grayver for his extensive work on the related GUI, and for
+setting up our Web site.
 
 \section{Installation}
+
+All of the gambit files can be found at the Gambit World Wide Web site
+at 
+
+\begin{verbatim}
+http://hss.caltech.edu/~gambit/Gambit.html
+\end{verbatim} 
+
+\noindent Instructions on downoading and installation as well as a
+list of platforms supported can be obtained there.  Source code is
+also available at the same location. 
+
+Once the program is installed, the gcl can be run by typing \verb+gcl+
+at the command line prompt.  You will then receive the GCL prompt 
+
+\begin{verbatim}
+GCL1:
+\end{verbatim}
+
 
 \section{Basic concepts}
 
@@ -262,9 +283,10 @@ number is given for run time errors.
 
 A GCL program consists of a series of statements.  A statement is
 typically an expression built up out of function calls.  A statement
-is trminated by a linefeed or by a semicolon.  The GCL interpreter,
+is terminated by a linefeed or by a semicolon.  The GCL interpreter,
 reports the value of each expression evaluated unless the semicolon is
-present.  
+present. Statements can be continued for more than one line by using
+the continuation character, \verb+\+.   
 
 \subsection{Function calls}
 
@@ -1669,7 +1691,9 @@ only strongly dominated strategies are eliminated.  Returns a new support
 containing only the undominated strategies.  If the returned support
 is equal to the input support \verb+support+, no dominated strategies were
 found.  The optional parameter \verb+time+, if specified, upon completion
-contains the amount of time consumed by the elimination.
+contains the amount of time consumed by the elimination.  (Note that in
+the current implementation, only strategies that are dominated by
+other {\em pure} strategies are eliminated.)  
 \ed
 
 \item
