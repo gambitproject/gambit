@@ -14,13 +14,6 @@
 #include "efgsolng.h"
 #include "efgconst.h"
 
-// For gui logging ------------
-#include "guiobj.h"
-#include "guirec.h"
-#include "guirecdb.h"
-#include "guipb.h"
-// ----------------------------
-
 class EfgSolnShow;
 class guiEfgShowToolBar;
 class EFSupportInspectDialog;
@@ -41,8 +34,7 @@ public:
 
 typedef SolutionList<BehavSolution> BehavSolutionList;
 
-class EfgShow: public wxFrame, public EfgNfgInterface, public EfgShowInterface, public GuiObject
-{
+class EfgShow: public wxFrame, public EfgNfgInterface, public EfgShowInterface {
 private:
     wxFrame *parent;
     Efg &ef;

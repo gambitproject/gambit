@@ -10,13 +10,6 @@
 #include "gtext.h"
 #include "wx.h"
 
-// For gui logging ------------
-#include "guiobj.h"
-#include "guirec.h"
-#include "guirecdb.h"
-#include "guipb.h"
-// ----------------------------
-
 class GambitFrame;
 extern GambitFrame *main_gambit_frame;
 extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
@@ -41,16 +34,12 @@ public:
 extern GambitApp gambitApp;
 
 
-class GambitFrame : public wxFrame, public GuiObject
-{
+class GambitFrame : public wxFrame {
 public:
     GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int type);
     Bool OnClose(void);
     void OnMenuCommand(int id);
     void LoadFile(char *s = 0);
-
-    // Gui playback:
-    void ExecuteLoggedCommand(const class gText &, const class gList<gText> &);
 };
 
 

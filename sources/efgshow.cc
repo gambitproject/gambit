@@ -128,7 +128,6 @@ EfgShow::EfgShow(Efg &p_efg, EfgNfgInterface *p_nfg, int, wxFrame *p_frame,
                  char *p_title, int p_x, int p_y, int p_w, int p_h, int p_type)
   : wxFrame(p_frame, p_title, p_x, p_y, p_w, p_h, p_type), 
     EfgNfgInterface(gEFG, p_nfg), 
-    GuiObject(gText("EfgShow")),
     parent(p_frame), ef(p_efg), cur_soln(0),
     support_dialog(0), soln_show(0), node_inspect(0), tw(0)
 {
@@ -960,7 +959,6 @@ void EfgShow::OnMenuCommand(int id)
       tw->file_save();
       break;
     case efgmenuFILE_CLOSE:
-      GUI_RECORD("FILE:CLOSE");
       Close();
       break;
 
@@ -1132,7 +1130,6 @@ void EfgShow::OnMenuCommand(int id)
     case efgmenuSOLVE_CUSTOM_NFG_POLENUM:
     case efgmenuSOLVE_CUSTOM_NFG_QRE:
     case efgmenuSOLVE_CUSTOM_NFG_QREGRID:
-      GUI_RECORD("SOLVE:SOLVE");
       Solve(id);
       break;
     case efgmenuSOLVE_NFG_REDUCED: 
@@ -1597,36 +1594,4 @@ int EfgGUI::GetEfgParams(wxFrame *parent)
 template class SolutionList<BehavSolution>;
 
 
-
-// Gui playback code:
-
-void EfgShow::ExecuteLoggedCommand(const gText& command,
-#ifdef GUIPB_DEBUG
-                                   const gList<gText>& arglist)
-#else
-                                   const gList<gText>& /*arglist*/)
-#endif  // GUIPB_DEBUG
-{
-#ifdef GUIPB_DEBUG
-    printf("in EfgShow::ExecuteLoggedCommand...\n");
-    printf("command: %s\n", (char *)command);
-    
-    for (int i = 1; i <= arglist.Length(); i++)
-        printf("arglist[%d] = %s\n", i, (char *)arglist[i]);
-#endif  // GUIPB_DEBUG
-    
-    // FIXME! add commands.
-    // FIXME! this has been changed since solve menu was rearranged!
-    if (command == "SOLVE:SOLVE") {
-      Solve(efgmenuSOLVE_CUSTOM_EFG_LIAP);
-    }
-    else if (command == "FILE:CLOSE")
-    {
-        Close();
-    }
-    else
-    {
-        throw InvalidCommand();
-    }
-}
 

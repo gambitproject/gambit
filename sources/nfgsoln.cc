@@ -6,6 +6,8 @@
 //
 
 #include "wx.h"
+
+#include "gambit.h"
 #include "nfgconst.h"
 #include "nfgshow.h"
 #include "nfgsoln.h"

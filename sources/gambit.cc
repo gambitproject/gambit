@@ -229,95 +229,6 @@ wxFrame *GambitApp::OnInit(void)
         return NULL;
     }
 
-	//
-	// Initialize GUI record/playback globals.
-	//
-
-	gui_recorder    = new GuiRecorder;
-	gui_recorder_db = new GuiRecorderDatabase;
-	gui_playback    = new GuiPlayback;
-
-    // ----------------------------------------------------------------------
-    // Check command-line options.  These are used in the GUI record/playback
-    // system.  If relevant options are found, they are removed from the 
-    // argc/argv list.
-    // ----------------------------------------------------------------------
-
-    char usage[256];
-    sprintf(usage, "Usage: %s [-record <log-file>] [-playback <log-file>]\n" 
-            "(only one of -record or -playback may be selected)", wxApp::argv[0]);
-
-    gText playback_filename;
-    bool  playback_requested = false;
-    bool  record_requested   = false;
-    bool  options_found      = false;
-
-    int rpindex=0;  // index into argc/argv list for record/playback options.
-
-    for (int i = 0; i < wxApp::argc; i++)
-    {
-        if (strcmp(argv[i], "-record") == 0)
-        {
-            if (i == (wxApp::argc - 1)) // No log file in argument list.
-            {
-                wxMessageBox(usage);
-                return NULL;
-            }
-
-            rpindex = i;
-            i++;
-
-            gui_recorder->openFile(argv[i]);
-
-            record_requested = true;
-            options_found = true;
-        }
-        else if (strcmp(argv[i], "-playback") == 0)
-        {
-            if (i == (wxApp::argc - 1)) // No log file in argument list.
-            {
-                wxMessageBox(usage);
-                return NULL;
-            }
-
-            rpindex = i;
-            i++;
-
-            playback_filename  = wxApp::argv[i];
-            playback_requested = true;
-            options_found = true;
-        }
-
-        // Ignore other command-line options here.
-    }
-
-    // Signal an error if both playback and record were requested.
-
-    if (playback_requested && record_requested)
-    {
-        wxMessageBox("Error! Record and playback options cannot both be selected!");
-        return NULL;
-    }
-
-    // If options have been found they have to be removed from the 
-    // argc/argv list.
-
-    if (options_found)
-    {
-        assert(rpindex >= 1);
-
-        for (int j = rpindex; j < wxApp::argc - 2; j++)
-        {
-            wxApp::argv[j] = wxApp::argv[j + 2];
-        }
-
-        wxApp::argc -= 2;
-    }
-
-    // ----------------------------------------------------------------------
-    // End of command-line options-handling code.
-    // ----------------------------------------------------------------------
-
     // Create the main frame window.
     GambitFrame *gambit_frame = new GambitFrame(NULL, "Gambit", 
                                                 0, 0, 200, 150, wxDEFAULT_FRAME);
@@ -385,21 +296,6 @@ wxFrame *GambitApp::OnInit(void)
 
     gambitApp.SetCurrentDir(gText(wxGetWorkingDirectory()));
 
-    // If playing back a log file, read in the log file and
-    // execute the log file commands one by one.
-
-    if (playback_requested)
-    {
-        try
-        {
-            gui_playback->Playback(playback_filename);
-        }
-        catch (gException &e)
-        {
-            gout << "EXCEPTION: " << e.Description() << '\n';
-        }
-    }
-
     // Return the main frame window.
     main_gambit_frame = gambit_frame;
     return gambit_frame;
@@ -418,7 +314,7 @@ int GambitApp::OnExit(void)
 
 // Define my frame constructor.
 GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int )
-    : wxFrame(frame, title, x, y, w, h), GuiObject(gText("GambitFrame"))
+    : wxFrame(frame, title, x, y, w, h)
 { }
 
 
@@ -433,21 +329,16 @@ GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h
 void GambitFrame::LoadFile(char *s)
 {    
   if (!s) {
-    if (GUI_PLAYBACK) {
-      gText arg = GUI_READ_ARG("GambitFrame::LoadFile", 1);
-      s = copystring((char *) arg);
-    }
-    else {
       Enable(FALSE); // Don't allow anything while the dialog is up.
 
-      s = wxFileSelector("Load data file", gambitApp.CurrentDir(), 
+      s = wxFileSelector("Load data file", gambitApp.CurrentDir(),
 			 NULL, NULL, "*.?fg");
 
       Enable(TRUE);
 
-      if (!s) 
+      if (!s)
 	return;
-      
+
       // Save the current directory.
       // WARNING: since wxFileSelector returns the address of
       // a global buffer in wxxt, we have to copy s to a new
@@ -456,9 +347,6 @@ void GambitFrame::LoadFile(char *s)
       gText path(gPathOnly(s));
       gambitApp.SetCurrentDir(path);
       s = new_s;
-      
-      GUI_RECORD_ARG("GambitFrame::LoadFile", 1, s);
-    }
   }
     
   if (strcmp(s, "") != 0) {
@@ -493,28 +381,22 @@ void GambitFrame::OnMenuCommand(int id)
     switch (id)
     {
     case FILE_QUIT:
-        GUI_RECORD("FILE:QUIT");
-        GUI_RECORDER_CLOSE
-        Close();    
+        Close();
         break;
         
     case FILE_LOAD:
-        GUI_RECORD("FILE:LOAD");
-        LoadFile(); 
+        LoadFile();
         break;
         
     case FILE_NEW_NFG: 
-        GUI_RECORD("FILE:NEW_NFG");
-        NfgGUI(0, gText(), 0, this);   
+        NfgGUI(0, gText(), 0, this);
         break;
 
     case FILE_NEW_EFG: 
-        GUI_RECORD("FILE:NEW_EFG");
-        EfgGUI(0, gText(), 0, this); 
+        EfgGUI(0, gText(), 0, this);
         break;
         
     case GAMBIT_HELP_ABOUT:
-        // No logging for help system.
         wxHelpAbout(); 
         break;
         
@@ -545,35 +427,6 @@ Bool GambitFrame::OnClose()
     return TRUE;
 }
 
-
-// Gui playback code:
-
-void GambitFrame::ExecuteLoggedCommand(const gText& command,
-                                       const gList<gText>& arglist)
-{
-#ifdef GUIPB_DEBUG
-    printf("in GambitFrame::ExecuteLoggedCommand...\n");
-    printf("command: %s\n", (char *)command);
-
-    for (int i = 1; i <= arglist.Length(); i++)
-        printf("arglist[%d] = %s\n", i, (char *)arglist[i]);
-#endif
-
-    // FIXME! add more commands.
-
-    if (command == "FILE:QUIT")
-    {
-        Close();
-    }
-    else if (command == "FILE:LOAD")
-    {
-        LoadFile();
-    }
-    else
-    {
-        throw InvalidCommand();
-    }
-}
 
 //
 // A general-purpose dialog box to display the description of the exception

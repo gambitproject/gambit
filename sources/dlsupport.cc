@@ -8,6 +8,7 @@
 #include "wxmisc.h"
 
 #include "garray.h"
+#include "gambit.h"
 #include "dlelim.h"
 #include "dlnfgsupport.h"
 

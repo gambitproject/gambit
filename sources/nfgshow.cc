@@ -11,6 +11,7 @@
 #include "nfplayer.h"
 #include "nfdom.h"
 
+#include "gambit.h"
 #include "dlnfgpayoff.h"
 #include "dlnfgoutcome.h"
 #include "dlnfgnewsupport.h"

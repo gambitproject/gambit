@@ -16,6 +16,7 @@
 #pragma hdr_stop
 #endif // __BORLANDC__
 #include    "wxmisc.h"
+#include "gambit.h"
 #include    "spread.h"
 #include    "gmisc.h"
 
@@ -1367,7 +1368,7 @@ SpreadSheet3D::SpreadSheet3D(int rows, int cols, int _levels, char *title,
                              wxFrame *parent, unsigned int _features, 
                              SpreadSheetDrawSettings *drs,
                              SpreadSheetDataSettings *dts)
-    : wxFrame(parent, title), GuiObject(gText("SpreadSheet3D"))
+    : wxFrame(parent, title)
 {
     assert(rows > 0 && cols > 0 && _levels > 0 && "SpreadSheet3D::Bad Dimensions");
 
@@ -1626,64 +1627,26 @@ void SpreadSheet3D::OnPrint1(void)
 
 void SpreadSheet3D::OnPrint(void)
 {
-#ifdef GUIREC_DEBUG
-    printf("SpreadSheet3D::OnPrint: Printing contents of spreadsheet...\n");
-#endif
-
-    if (GUI_PLAYBACK)
-    {
-        gText arg;
-        arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 1);
-
-        if (arg == "NoExtraMedia")
-        {
-            arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 2);
-            wxOutputMedia media = (wxOutputMedia)(atoi((char *)arg));
-            arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 3);
-            wxOutputOption option = (wxOutputOption)(atoi((char *)arg));
-            Print(media, option);
-        }
-        else // ExtraMedia
-        {
-            arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 2);
-            char *s = copystring(arg);
-
-            if (s) {
-	      gFileOutput out(s);
-	      data[cur_level].Output(out);
-            }
-        }
-    }
-    else
-    {
         wxStringList extras("ASCII", NULL);
         wxOutputDialogBox od(&extras);
-        
+
         if (od.Completed() == wxOK)
         {
-            GUI_RECORD("PRINT");
 
             if (!od.ExtraMedia())
             {
-                GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 1, "NoExtraMedia");
-                GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 2, ToText(od.GetMedia()));
-                GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 3, ToText(od.GetOption()));
                 Print(od.GetMedia(), od.GetOption());
             }
             else    // only one extra exists--must be ascii.
             {
-                GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 1, "ExtraMedia");
-
                 char *s = wxFileSelector("Save", NULL, NULL, NULL, "*.asc", wxSAVE);
-                GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 2, gText(s));
-                
+
                 if (s) {
 		  gFileOutput out(s);
 		  data[cur_level].Output(out);
                 }
             }
         }
-    }
 }
 
 
@@ -2088,31 +2051,6 @@ void SpreadSheet3D::OnSelectedMoved(int , int , SpreadMoveDir )
 
 
 // Gui playback code:
-
-void SpreadSheet3D::ExecuteLoggedCommand(const gText& command,
-#ifdef GUIPB_DEBUG
-                                         const gList<gText>& arglist)
-#else
-                                         const gList<gText>& /*arglist*/)
-#endif  // GUIPB_DEBUG
-{
-#ifdef GUIPB_DEBUG
-  printf("in SpreadSheet3D::ExecuteLoggedCommand...\n");
-  printf("command: %s\n", (char *)command);
-    
-  for (int i = 1; i <= arglist.Length(); i++)
-    printf("arglist[%d] = %s\n", i, (char *)arglist[i]);
-#endif  // GUIPB_DEBUG
-    
-  // FIXME! add commands.
-    
-  if (command == "PRINT") {
-    OnPrint();
-  }
-  else {
-    throw InvalidCommand();
-  }
-}
 
 void SpreadSheet3D::AddRow(int p_row /*= 0*/)
 {

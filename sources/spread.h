@@ -78,13 +78,6 @@
 #include "grblock.h"
 #include "gtext.h"
 
-// For gui logging ------------
-#include "guiobj.h"
-#include "guirec.h"
-#include "guirecdb.h"
-#include "guipb.h"
-// ----------------------------
-
 #define XSTEPS                  20      // Scroll steps horizontally
 #define YSTEPS                  20      // Scroll steps vertically
 
@@ -644,8 +637,7 @@ public:
 
 class wxToolBar;
 
-class SpreadSheet3D: public wxFrame, public GuiObject
-{
+class SpreadSheet3D: public wxFrame {
     friend gOutput &operator<<(gOutput &op, const SpreadSheet3D &s);
 
 private:
