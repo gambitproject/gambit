@@ -91,7 +91,7 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
       // a similar ratio, until only one candidate remains.
   c = 0;
   BasisVector(col);
-//  gout << "\n    b = " << col;
+//  gout << "\nLength = " <<  BestSet.Length() << "\n b = " << col;
   while (BestSet.Length() > 1)   {
     assert(c <= MaxRow());
     if(c!=0) {
@@ -100,17 +100,17 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
     }
 	// Initialize tempmax.
     tempmax = col[BestSet[1]] / incol[BestSet[1]];
-    
 	// Find the maximum ratio. 
     for (i = 2; i <= BestSet.Length(); i++)  {
       ratio = col[BestSet[i]] / incol[BestSet[i]];
       if (ratio > tempmax)  tempmax = ratio;
     }
+//    assert(tempmax > (T 2)*eps1);
     
 	// Remove nonmaximizers from the list of candidate columns.
     for (i = BestSet.Length(); i >= 1; i--)  {
       ratio = col[BestSet[i]] / incol[BestSet[i]];
-      if (ratio < tempmax)
+      if (ratio < tempmax -eps1)
 	BestSet.Remove(i);
     }
 //    else  {
