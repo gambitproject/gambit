@@ -14,7 +14,7 @@ public:
   WxSignal(void): sig(false) { }
   virtual ~WxSignal() { }
 
-  void Get(void) { if (sig)  throw gSignalBreak(); } 
+  void Get(void) const { if (sig)  throw gSignalBreak(); } 
   void Reset(void) { sig = false; }
 };
 
