@@ -35,7 +35,7 @@ PxiDrawSettings::PxiDrawSettings(const FileHeader &p_header, int p_index)
 // the third is calculated from 1-(first+second).  You can also plot more than
 // one infoset per triangle now.
 
-Bool PxiDrawSettings::CheckPlot3Mode(void)
+bool PxiDrawSettings::CheckPlot3Mode(void)
 {
 #ifdef NOT_IMPLEMENTED
   int i;
@@ -76,7 +76,7 @@ Bool PxiDrawSettings::CheckPlot3Mode(void)
 // can be plotted at any one time.  Thus, only two of the checkboxes in the
 // strategy selection section can be turned on.
 
-Bool PxiDrawSettings::CheckPlot2Mode(void)
+bool PxiDrawSettings::CheckPlot2Mode(void)
 {
 #ifdef NOT_IMPLEMENTED
   int i,j,num_strategies=0;

@@ -1,7 +1,8 @@
 #include "equtrac.h"
 
 /**************************** DISTANCE ************************************/
-double EquTracker::Distance(const PointNd &first,const PointNd &second)
+double EquTracker::Distance(const gArray<double> &first,
+			    const gArray<double> &second)
   /*
    * Note, this calculates the distance between two n-dimentional points
    * X=(x1,x2,...xn) and Y=(y1,y2,...yn) using the formula:
@@ -49,11 +50,11 @@ int EquTracker::Check_Equ(const DataLine &dl,int *new_equ,DataLine *prev_point)
   /*-------------------find closest curve---------------*/
   int equ_num=0;
   int found_new=0;
-  if (new_equ)	(*new_equ)=FALSE;
+  if (new_equ)	(*new_equ) = false;
   if ((equ_num=Closest(dl))==0) {
     equs.Append(dl);
     equ_num=equs.Length();
-    if (new_equ) (*new_equ)=TRUE;
+    if (new_equ) (*new_equ) = true;
     found_new=1;
   }
   // If we just found a new equilibrium, return this point as the previous point 

@@ -9,17 +9,16 @@
 
 #include "base/gstream.h"
 #include "base/gblock.h"
-#include "equdata.h"
+#include "pxifile.h"
 
 #define	LARGE_NUMBER	100.00
 #define RECT_SIZE 		0.1
 
-class EquTracker
-{
+class EquTracker {
 private:
   gBlock<DataLine> equs;
   double merror; // margin of error (i.e. how close is close enough)
-  double Distance(const PointNd &first,const PointNd &second);
+  double Distance(const gArray<double> &first, const gArray<double> &second);
   int Closest(const DataLine &this_line);
 public:
   EquTracker(void);

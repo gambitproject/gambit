@@ -18,19 +18,19 @@ private:
   wxBrush       clear_brush, exp_data_brush;
   
   int		overlay_symbol;      // one of : OVERLAY_TOKEN | OVERLAY_NUMBER
-  Bool		overlay_lines;       // connect overlay points?
+  bool		overlay_lines;       // connect overlay points?
   int		overlay_token_size;  
   
   int		color_mode;   // COLOR_EQU, COLOR_PROB, or COLOR_NONE
-  Bool		connect_dots;   // connect dots on plot.  
-  Bool          restart_overlay_colors; // new set of colors for each overlay 
+  bool		connect_dots;   // connect dots on plot.  
+  bool          restart_overlay_colors; // new set of colors for each overlay 
   
   double	l_start,l_stop,l_step;           // data limits on X (lambda)
   
   PlotInfo thisplot;
   
-  Bool CheckPlot3Mode(void);
-  Bool CheckPlot2Mode(void);
+  bool CheckPlot3Mode(void);
+  bool CheckPlot2Mode(void);
 
 public:
   PxiDrawSettings(const FileHeader &p_header, int p_index);
@@ -89,7 +89,7 @@ public:
   */  
 
   void SetOverlaySym(int s) {overlay_symbol=s;}
-  void SetOverlayLines(Bool l)	{overlay_lines=l;}
+  void SetOverlayLines(bool l)	{overlay_lines=l;}
   void SetTokenSize(int s) {overlay_token_size=s;}
   void SetLabelFont(const wxFont &f) {label_font=f;}
   void SetOverlayFont(const wxFont &f) {overlay_font=f;}

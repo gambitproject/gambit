@@ -67,8 +67,14 @@ END_EVENT_TABLE()
 
 PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
   wxFrame(p_parent, -1, p_filename, wxPoint(0,0), wxSize(480,480)),
-  m_parent(p_parent), m_fileHeader(p_filename)
+  m_parent(p_parent)
 {
+  try {
+    gFileInput file(p_filename);
+    m_fileHeader.ReadFile(file);
+  }
+  catch (...) { }
+
   SetSizeHints(300, 300);
 
   // Give the frame an icon
@@ -92,7 +98,7 @@ PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
   for (int i = 1; i <= m_fileHeader.NumInfosets(); i++) {
     PxiPlot *plot = new PxiPlotN(m_plotBook,
 				   wxPoint(0, 0), wxSize(width, height),
-				   m_fileHeader, i);
+				   m_fileHeader, i, m_expData);
     m_plotBook->AddPage(plot, wxString::Format("Plot %d", i));
     plot->Render();
   }
@@ -275,10 +281,11 @@ void PxiChild::OnFileExit(wxCommandEvent &)
 void PxiChild::OnViewDetail(wxCommandEvent &)
 {
   wxString message;
-
+  /*
   message += "Detail for: ";
   message += m_fileHeader.FileName();
   message += "\n";
+  */
 
   message += wxString::Format("Error (lambda) step: %4.4f\n",
 			      m_fileHeader.EStep());
@@ -290,8 +297,10 @@ void PxiChild::OnViewDetail(wxCommandEvent &)
 			      m_fileHeader.DataMin());
   message += wxString::Format("Maximum data value: %4.4f\n",
 			      m_fileHeader.DataMax());
+  /*
   message += wxString::Format("Data type: %s\n",
 			      (m_fileHeader.DataType() == DATA_TYPE_ARITH) ? "Arithmetic" : "Logarithmic");
+  */
   message += "\n";
 
   if (m_fileHeader.MError() > -.99) {
@@ -399,10 +408,24 @@ void PxiChild::OnViewOptions(wxCommandEvent &)
 
 void PxiChild::OnDataOverlayData(wxCommandEvent &)
 {
-  //  dialogOverlayData dialog(this, plot);
-  //  plot->Render();
-  //  wxClientDC dc(this);
-  //  plot->Update(dc,PXI_UPDATE_SCREEN);
+  wxFileDialog dialog(this, "Choose data file", "", m_expDatafile, "*.agg");
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    m_expDatafile = dialog.GetPath();
+    try {
+      gFileInput file(m_expDatafile);
+      m_expData.LoadData(file);
+      m_expData.ComputeMLEs(m_fileHeader, gnull);
+    }
+    catch (...) {
+      return;
+    }
+
+    for (int i = 0; i < m_plotBook->GetPageCount(); i++) {
+      ((PxiPlot *) m_plotBook->GetPage(i))->Render();
+    }
+  }
+
 }
 
 void PxiChild::OnDataOverlayFile(wxCommandEvent &)

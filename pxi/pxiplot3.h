@@ -40,7 +40,8 @@ private:
 
 public:
   PxiPlot3(wxWindow *p_parent, const wxPoint &p_position,
-	   const wxSize &p_size, const FileHeader &, int p_page);
+	   const wxSize &p_size, const FileHeader &, int p_page,
+	   const ExpData &p_expData);
   virtual ~PxiPlot3();
 
   DECLARE_EVENT_TABLE()

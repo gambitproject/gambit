@@ -79,9 +79,9 @@ void PxiPlot3::DrawExpPoint_3(wxDC &dc,const PlotInfo &thisplot,double cur_e,int
   double x,y;
   gBlock<int> point_nums;
   
-  point_nums=exp_data->HaveL(cur_e);
+  point_nums = m_expData.HaveL(cur_e);
   for (int i=1;i<=point_nums.Length();i++) {
-    s=(*exp_data)[point_nums[i]];
+    s = m_expData[point_nums[i]];
     
     y=CalcY_3((*s).probs[iset][st1],x0,y0,cw,ch);
     x=CalcX_3((*s).probs[iset][st1],(*s).probs[iset][st2],x0,y0,ch,cw,thisplot);
@@ -119,17 +119,6 @@ void PxiPlot3::PlotData_3(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int 
 
   EquTracker equs;                // init the EquTracker class
   
-  gFileInput f(f_header.FileName());
-  DataLine *prev_point=(m_drawSettings.ConnectDots()) ? new DataLine : NULL;
-  if (!FindStringInFile(f, "Data:")) {
-    return;
-  }
-  DataLine probs(f_header.FileName());
-  f>>probs;
-
-  if (m_drawSettings.GetColorMode()!=COLOR_EQU && prev_point) 
-    (*prev_point)=probs;
-  
   if (true) {
     wxString title;
     title.Printf("Plot %d",thisplot.GetPlotNumber());
@@ -138,11 +127,14 @@ void PxiPlot3::PlotData_3(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int 
     dc.DrawText(title, x0+cw/2-tw/2, y0-ch-th);
   }
 
-  while (!probs.Done() && !f.eof()) {
+  for (int i = 1; i <= f_header.GetData().Length(); i++) {
+    const DataLine &probs = *f_header.GetData()[i];
+
     //------------------- if the cur_e is in range, display it -----------
-    if (probs.E() >= m_lambdaAxisProp.m_scale.GetMinimum() &&
-	probs.E() <= m_lambdaAxisProp.m_scale.GetMaximum()) {
-      point_color=(m_drawSettings.GetColorMode()==COLOR_EQU) ? equs.Check_Equ(probs,&new_equ,prev_point) : 2;
+    if (probs.Lambda() >= m_lambdaAxisProp.m_scale.GetMinimum() &&
+	probs.Lambda() <= m_lambdaAxisProp.m_scale.GetMaximum()) {
+      //      point_color=(m_drawSettings.GetColorMode()==COLOR_EQU) ? equs.Check_Equ(probs,&new_equ,prev_point) : 2;
+      point_color = 2;
       if (point_color>max_equ) max_equ=point_color;
       wxPen *cpen=wxThePenList->FindOrCreatePen(equ_colors[(point_color+color_start)%NUM_COLORS+1],3,wxSOLID);
       //      if (dc.current_pen!=cpen) dc.SetPen(cpen);
@@ -165,24 +157,25 @@ void PxiPlot3::PlotData_3(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int 
       x=CalcX_3(probs[m_page][st1],probs[m_page][st2],x0,y0,cw,ch,thisplot);
       y=CalcY_3(probs[m_page][st1],x0,y0,cw,ch);
 
+#ifdef NOT_PORTED_YET
       if (m_drawSettings.ConnectDots() && !new_equ) {
 	double prev_x=CalcX_3((*prev_point)[iset][st1],(*prev_point)[iset][st2],x0,y0,cw,ch,thisplot);
 	double prev_y=CalcY_3((*prev_point)[iset][st1],x0,y0,ch,cw);
 	dc.DrawLine((int) prev_x, (int) prev_y, (int) x, (int) y);
       }
       else {
+#endif  // NOT_PORTED_YET
 	dc.DrawPoint((int) x, (int) y);
+#ifdef NOT_PORTED_YET
       }
+#endif  
       // if there is an experimental data point for this cur_e, plot it
-      if (exp_data) {
-	DrawExpPoint_3(dc,thisplot,probs.E(),iset,st1,st2,x0,y0,cw,ch);
-      }
+      //     if (exp_data) {
+	DrawExpPoint_3(dc,thisplot,probs.Lambda(),iset,st1,st2,x0,y0,cw,ch);
+	//      }
     }
-
-    if (m_drawSettings.GetColorMode()!=COLOR_EQU && prev_point) (*prev_point)=probs;
-    f>>probs;
   }
-  if (prev_point) delete prev_point;
+
   if (!m_drawSettings.RestartOverlayColors()) color_start+=max_equ;
   PlotLabels(dc,ch,cw);
 }
@@ -286,9 +279,10 @@ BEGIN_EVENT_TABLE(PxiPlot3, wxScrolledWindow)
 END_EVENT_TABLE()
 
 PxiPlot3::PxiPlot3(wxWindow *p_parent, const wxPoint &p_position,
-		     const wxSize &p_size,
-		     const FileHeader &p_header, int p_page)
-  : PxiPlot(p_parent, p_position, p_size, p_header, p_page)
+		   const wxSize &p_size,
+		   const FileHeader &p_header, int p_page,
+		   const ExpData &p_expData)
+  : PxiPlot(p_parent, p_position, p_size, p_header, p_page, p_expData)
 { }
 
 PxiPlot3::~PxiPlot3()

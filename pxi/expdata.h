@@ -1,6 +1,9 @@
 //
-// File: expdata.h, header file for expdata.cc
+// $Source$
+// $Date$
+// $Revision$
 //
+// DESCRIPTION:
 // The class will read in a file with experimental data, in the following
 // format:
 // 	#_of_players  #_of_strategies_for_player_1 #_of_strategies_for_player_2
@@ -24,7 +27,7 @@
 // processed, but only for each UNIQUE value of lambda.  If the calcfile
 // contains more than one set of probs for the same lambda, only the max values
 // of like are saved for each data point for this lambda.
-
+//
 
 #ifndef	EXPDATA_H
 #define	EXPDATA_H
@@ -33,20 +36,13 @@
 #include <stdio.h>
 #include "base/gstream.h"
 #include "base/grarray.h"
-#include "equdata.h"
-
-#ifndef	BOOL_DEFINED
-#define Bool int
-#endif
-#define	TRUE 1
-#define	FALSE 0
-
+#include "pxifile.h"
 
 typedef struct EXPDATASTRUCT
 {
-  gBlock<PointNd> probs;
+  gBlock<gBlock<double> > probs;
   double e;
-  EXPDATASTRUCT(const gBlock<PointNd> &_probs,double _e)
+  EXPDATASTRUCT(const gBlock<gBlock<double> > &_probs,double _e)
     {probs=_probs;e=_e;}
   EXPDATASTRUCT(void) {;}
   EXPDATASTRUCT(const EXPDATASTRUCT &A):probs(A.probs),e(A.e)	{;}
@@ -60,16 +56,7 @@ typedef struct EXPDATASTRUCT
 gOutput &operator<<(gOutput &op,const EXPDATASTRUCT &e);
 gOutput &operator<<(gOutput &op,const gBlock<double> &d);
 
-class ExpDataParams
-{
-public:
-  gOutput *likefile;
-  gInput *pxifile,*expfile;
-  ExpDataParams(void) : likefile(0),pxifile(0),expfile(0) {}
-};
-
-class ExpData
-{
+class ExpData {
 public:
   typedef struct BEST_POINT {
     friend gOutput &operator<<(gOutput &op,const BEST_POINT &e);
@@ -82,33 +69,40 @@ public:
     int operator==(const BEST_POINT &p) {return (e==p.e && like==p.like);}
     int operator!=(const BEST_POINT &p) {return !(*this==p);}
   } best_point_struct;
+
 private:
-  // variables
-  Bool	solved;
+  bool m_solved;
   int num_points;
   gBlock<best_point_struct> points;
-  gRectArray<PointNd> probs;
-  ExpDataParams &P;
+  gRectArray<gBlock<double> > probs;
+
   // functions
-  void Go(void);
-  void OutputLikeHeader(void);
-  void OutputLikeData(gBlock<double> &like_m,double cur_e,double &like_min,double &like_max);
+  void OutputLikeHeader(gOutput &);
+  void OutputLikeData(gOutput &, gBlock<double> &like_m,
+		      double cur_e,double &like_min,double &like_max);
+
 public:
-  // Constructor, Calculate the closes values of lambda based on data in file_name
-  ExpData(ExpDataParams &P);
-  // Destructor
-  ~ExpData(void) { ;}
-  // Data access functions
+  ExpData(void);
+  ~ExpData() { }
+
   int NumPoints(void) {return num_points;}
-  gBlock<int> HaveL(double l);
+  gBlock<int> HaveL(double l) const;
   // Accessing the calculated results
   exp_data_struct *operator[](int i) const
     {
       assert(i>0 && i<=num_points);
-      assert(solved);
-      gBlock<PointNd> row(probs.NumColumns());
+      assert(m_solved);
+      gBlock<gBlock<double> > row(probs.NumColumns());
       probs.GetRow(i, row);
       return (new exp_data_struct(row,points[i].e));
     }
+
+  bool HaveMLEs(void) const { return m_solved; }
+  void ComputeMLEs(FileHeader &, gOutput &p_likeFile);
+
+  bool LoadData(gInput &);
 };
+
 #endif
+
+

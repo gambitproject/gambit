@@ -66,7 +66,8 @@ GUISOURCES = pxi.cc wxmisc.cc dlabout.cc pxichild.cc \
              pxiconf.cc valinteger.cc valnumber.cc \
              dlformataxis.cc dlformattitle.cc dlformatlegend.cc
 
-DATASOURCES = equtrac.cc equdata.cc probvect.cc expdata.cc dlgpxi.cc
+DATASOURCES = equtrac.cc probvect.cc expdata.cc dlgpxi.cc \
+              pxifile.cc
 
 GENSOURCES = gmisc.cc gtext.cc garray.cc gblock.cc gstream.cc glist.cc \
              integer.cc rational.cc gnulib.cc gnumber.cc double.cc misc.cc

@@ -159,23 +159,29 @@ void PxiPlot::Update(wxDC& dc,int device)
   wxEndBusyCursor();
 }
 
-void PxiPlot::NewExpData(ExpDataParams &P) 
+#ifdef UNUSED
+void PxiPlot::SetExpDatafile(const wxString &p_expDatafile)
 { 
+  m_expDatafile = p_expDatafile;
+  /*
   if(exp_data) delete exp_data;
   exp_data = NULL;
   exp_data = new ExpData(P); 
+  */
 }
+#endif  // UNUSED
 
 BEGIN_EVENT_TABLE(PxiPlot, wxScrolledWindow)
   EVT_PAINT(PxiPlot::OnPaint)
 END_EVENT_TABLE()
 
 PxiPlot::PxiPlot(wxWindow *p_parent, const wxPoint &p_position,
-		     const wxSize &p_size,
-		     const FileHeader &p_header, int p_page)
+		 const wxSize &p_size,
+		 const FileHeader &p_header, int p_page,
+		 const ExpData &p_expData)
   : wxScrolledWindow(p_parent, -1, p_position, p_size),
-    m_header(p_header), m_drawSettings(m_header, p_page),
-    exp_data(NULL),
+    m_header(p_header), m_expData(p_expData),
+    m_drawSettings(m_header, p_page),
     m_landscape(false), m_width(850/2), m_height(1100/2), m_scale(1.0), 
     m_dc(new wxMemoryDC), m_page(p_page)
 {

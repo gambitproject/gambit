@@ -53,9 +53,9 @@ void PxiPlot2::DrawExpPoint_2(wxDC &dc, const PlotInfo &thisplot, double cur_e,
   double x,y;
   gBlock<int> point_nums;
   
-  point_nums=exp_data->HaveL(cur_e);
+  point_nums = m_expData.HaveL(cur_e);
   for (int i=1;i<=point_nums.Length();i++) {
-    s=(*exp_data)[point_nums[i]];
+    s= m_expData[point_nums[i]];
     
     x=x0+(*s).probs[pl1][st1]*cw;
     y=y0-(*s).probs[pl2][st2]*ch;
@@ -90,48 +90,48 @@ void PxiPlot2::PlotData_2(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int 
   int new_equ=0;
   if (level==1) color_start=0;
   
-  // where the actual data gets read in
-  gFileInput f(f_header.FileName());
-  DataLine *prev_point=(m_drawSettings.ConnectDots()) ? new DataLine : NULL;
-  if (!FindStringInFile(f, "Data:")) {
-    return;
-  }
-
   EquTracker equs;		// init the EquTracker class
-  DataLine probs(f_header.FileName());
-  f>>probs;
+
   // Figure out what strategies I am plotting.
   int pl1=0,st1=0,pl2=0,st2=0;
   for (int j=1;j<=f_header.NumInfosets();j++)
     for (int i=1;i<=f_header.NumStrategies(j);i++)
       if (thisplot.GetStrategyShow(j,i))
 	if (pl1==0) {pl1=j;st1=i;} else {pl2=j;st2=i;}
-  
-  while (!probs.Done() && !f.eof()) {
-    if (probs.E() < m_probAxisProp.m_scale.GetMaximum() && 
-	probs.E() > m_probAxisProp.m_scale.GetMinimum()) {
+
+  for (int i = 1; i <= f_header.GetData().Length(); i++) {
+    DataLine probs = *f_header.GetData()[i];
+
+    if (probs.Lambda() < m_probAxisProp.m_scale.GetMaximum() && 
+	probs.Lambda() > m_probAxisProp.m_scale.GetMinimum()) {
+#ifdef NOT_PORTED_YET
       point_color=equs.Check_Equ(probs,&new_equ,prev_point);
+#endif  
+      point_color = 2;
       dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[point_color%NUM_COLORS+1],3,wxSOLID)));
 
       x=x0+probs[pl1][st1]*cw;
       y=y0-probs[pl2][st2]*ch;
+#ifdef NOT_PORTED_YET
       if (m_drawSettings.ConnectDots() && !new_equ) {
 	double prev_x=x0+(*prev_point)[pl1][st1]*cw;
 	double prev_y=y0-(*prev_point)[pl2][st2]*ch;
 	dc.DrawLine((int) prev_x, (int) prev_y, (int) x, (int) y);
       }
       else {
+#endif  // NOT_PORTED_YET
 	dc.DrawPoint((int) x, (int) y);
+#ifdef NOT_PORTED_YET
       }
+#endif  // NOT_PORTED_YET
       dc.DrawPoint((int) x, (int) y);
       // if there is an experimental data point for this cur_e, plot it
-      if (exp_data) {
-	DrawExpPoint_2(dc,thisplot,probs.E(),pl1,st1,pl2,st2, x0,y0,cw,ch);
-      }
+      //      if (exp_data) {
+	DrawExpPoint_2(dc,thisplot,probs.Lambda(),pl1,st1,pl2,st2, x0,y0,cw,ch);
+	//    }
     }
-    f>>probs;
   }
-  if (prev_point) delete prev_point;
+
   PlotLabels(dc,ch,cw);
 }
 
@@ -242,9 +242,10 @@ BEGIN_EVENT_TABLE(PxiPlot2, wxScrolledWindow)
 END_EVENT_TABLE()
 
 PxiPlot2::PxiPlot2(wxWindow *p_parent, const wxPoint &p_position,
-		     const wxSize &p_size,
-		     const FileHeader &p_header, int p_page)
-  : PxiPlot(p_parent, p_position, p_size, p_header, p_page)
+		   const wxSize &p_size,
+		   const FileHeader &p_header, int p_page,
+		   const ExpData &p_expData)
+  : PxiPlot(p_parent, p_position, p_size, p_header, p_page, p_expData)
 { }
 
 PxiPlot2::~PxiPlot2()

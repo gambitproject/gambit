@@ -157,12 +157,13 @@ double PxiPlotN::CalcX_X(double x,int x0, int cw, const PlotInfo &thisplot)
 // data overlay
 void PxiPlotN::DrawExpPoint_X(wxDC &dc,const PlotInfo &thisplot,double cur_e,int iset,int st,int x0, int y0, int cw,int ch)
 {
+  try {
   exp_data_struct	*s=0;
   double x,y;
   gBlock<int> point_nums;  
-  point_nums=exp_data->HaveL(cur_e);
+  point_nums = m_expData.HaveL(cur_e);
   for (int i=1;i<=point_nums.Length();i++) {
-    s=(*exp_data)[point_nums[i]];
+    s= m_expData[point_nums[i]];
     
     y=CalcY_X((*s).probs[iset][st],y0,ch,thisplot);
     x=CalcX_X(s->e,x0,cw,thisplot);
@@ -187,6 +188,8 @@ void PxiPlotN::DrawExpPoint_X(wxDC &dc,const PlotInfo &thisplot,double cur_e,int
     }
     delete s;
   }
+  }
+  catch (...) { }
 }
 
 void PxiPlotN::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, 
@@ -203,18 +206,6 @@ void PxiPlotN::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0,
   int new_equ=0;
 
   EquTracker equs;		// init the EquTracker class
-  
-  gFileInput f(f_header.FileName());
-  DataLine *prev_point=(m_drawSettings.ConnectDots()) ? new DataLine : 0;
-  if (!FindStringInFile(f, "Data:")) {
-    return;
-  }
-
-  DataLine probs(f_header.FileName());
-  f>>probs;
-
-  if (m_drawSettings.GetColorMode()!=COLOR_EQU && prev_point) 
-    (*prev_point)=probs;
   
   if (true) {
     wxCoord tw,th;
@@ -243,48 +234,53 @@ void PxiPlotN::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0,
       }
     }
   }
-  
-  while (!probs.Done() && !f.eof()) {
+
+  for (int i = 1; i <= f_header.GetData().Length(); i++) {
+    const DataLine &probs = *f_header.GetData()[i];
+
     //---------------------------if cur_e is in active range ------------
-    if (probs.E() >= m_lambdaAxisProp.m_scale.GetMinimum() &&
-	probs.E() <= m_lambdaAxisProp.m_scale.GetMaximum()) {
-      x=CalcX_X(probs.E(),x0,cw,thisplot);
+    if (probs.Lambda() >= m_lambdaAxisProp.m_scale.GetMinimum() &&
+	probs.Lambda() <= m_lambdaAxisProp.m_scale.GetMaximum()) {
+      x=CalcX_X(probs.Lambda(),x0,cw,thisplot);
       // plot the infosets that are selected for the top graph
       // if we have experimental data, get it
+#ifdef NOT_PORTED_YET
       if (m_drawSettings.GetColorMode()==COLOR_EQU)
 	point_color=equs.Check_Equ(probs,&new_equ,prev_point);
+#endif
       if (m_drawSettings.GetColorMode()==COLOR_NONE)
 	point_color=2;
       if (point_color>max_equ) max_equ=point_color;
       // next line sets the correct color
       dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(point_color+color_start)%NUM_COLORS+1],1,wxSOLID)));
-
+      
       for (int st = 1; st <= f_header.NumStrategies(m_page); st++) {
 	// plot the data point
 	y = CalcY_X(probs[m_page][st],y0, ch,thisplot);
 	if (thisplot.GetStrategyShow(m_page,st)) {
 	  if (m_drawSettings.GetColorMode()==COLOR_PROB) 
 	    dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
+#ifdef NOT_PORTED_YET
 	  if (m_drawSettings.ConnectDots() && !new_equ) {
 	    dc.DrawLine((int) CalcX_X(prev_point->E(),x0, cw,thisplot),
 			(int) CalcY_X((*prev_point)[m_page][st],y0,ch,thisplot),
 			(int) x, (int) y);
 	  }
 	  else {
+#endif
 	    dc.DrawPoint((int) x, (int) y);
+#ifdef NOT_PORTED_YET
 	  }
+#endif  
 	  // if there is an experimental data point for this cur_e, plot it
-	  if (exp_data) {
-	    DrawExpPoint_X(dc,thisplot,probs.E(),m_page,st,x0,y0,ch,cw);
-	  }
+	  //	  if (exp_data) {
+	  DrawExpPoint_X(dc,thisplot,probs.Lambda(),m_page,st,x0,y0,ch,cw);
+	  //	  }
 	}
       }
     }
-    // read in a line of strategies (for all infosets)
-    if (m_drawSettings.GetColorMode()!=COLOR_EQU && prev_point) (*prev_point)=probs;
-    f>>probs;
   }
-  if (prev_point) delete prev_point;
+
   if (!m_drawSettings.RestartOverlayColors()) color_start+=max_equ;
 }
 
@@ -331,9 +327,10 @@ BEGIN_EVENT_TABLE(PxiPlotN, PxiPlot)
 END_EVENT_TABLE()
 
 PxiPlotN::PxiPlotN(wxWindow *p_parent, const wxPoint &p_position,
-		     const wxSize &p_size,
-		     const FileHeader &p_header, int p_page)
-  : PxiPlot(p_parent, p_position, p_size, p_header, p_page)
+		   const wxSize &p_size,
+		   const FileHeader &p_header, int p_page,
+		   const ExpData &p_expData)
+  : PxiPlot(p_parent, p_position, p_size, p_header, p_page, p_expData)
 { }
 
 

@@ -41,7 +41,8 @@ private:
 
 public:
   PxiPlotN(wxWindow *p_parent, const wxPoint &p_position,
-	    const wxSize &p_size, const FileHeader &, int p_page);
+	   const wxSize &p_size, const FileHeader &, int p_page,
+	   const ExpData &p_expData);
   virtual ~PxiPlotN();
 
   DECLARE_EVENT_TABLE()

@@ -20,41 +20,6 @@
 
 // ----------------------------------------------------------------------
 //
-//     dialogOverlayData
-//
-// ----------------------------------------------------------------------
-
-class dialogOverlayData: public guiAutoDialog {
-private:
-  PxiPlot *canvas;
-  PxiChild *frame;
-  
-  wxString likename, pxiname, expname;
-  gOutput *likefile;
-  gInput *pxifile,*expfile;
-  int save_like,load_now;
-  //PxiFrame *frame;
-  wxTextCtrl *m_pxiName, *m_expName, *m_likeName;
-  wxCheckBox *m_saveLike, *m_loadNow;
-  
-  void OnBrowsePxi(wxCommandEvent &);
-  void OnBrowseExp(wxCommandEvent &);
-  
-  void Run(void);
-public:
-  // Constructor
-  dialogOverlayData(PxiChild *, PxiPlot *);
-  ~dialogOverlayData(void);
-  
-  // Data access
-  void	GetParams(ExpDataParams &P);
-  void	LoadNow(void);
-  
-  DECLARE_EVENT_TABLE()
-};
-
-// ----------------------------------------------------------------------
-//
 //     dialogPlotOptions
 //
 // ----------------------------------------------------------------------

@@ -546,7 +546,7 @@ int FindStringInFile(gInput &in,const char *s)
     try {
       in >> fsif_str;
     }
-    catch (gFileInput::ReadFailed &) {
+    catch (...) {
       return 0;
     }
   } while (strcmp(fsif_str,s)!=0 && !in.eof() /* && in.IsValid() */);
@@ -560,6 +560,7 @@ int FindStringInFile(gInput &in,const char *s)
 #include "base/garray.imp"
 #include "base/gblock.imp"
 #include "base/grarray.imp"
+#include "base/glist.imp"
 
 template class gArray<PlotInfo>;
 
@@ -574,6 +575,14 @@ template class gBlock<PxiPlot::LABELSTRUCT>;
 
 template class gArray<DataLine>;
 template class gBlock<DataLine>;
+
+template class gArray<DataLine *>;
+template class gBlock<DataLine *>;
+
+template class gList<DataLine *>;
+
+gOutput &operator<<(gOutput &p_file, const gBlock<bool> &)
+{ return p_file; }
 
 gOutput &operator<<(gOutput &p_file, const gBlock<double> &)
 { return p_file; }

@@ -77,8 +77,8 @@ public:
 protected:
   const FileHeader &m_header;
   PxiDrawSettings m_drawSettings;
-  ExpData *exp_data;                    // experimental data overlay
   gBlock<label_struct> labels;          // labels for generic text
+  const ExpData &m_expData;             // reference to experimental data
   bool m_landscape;                     // landscap mode if true
   int m_width, m_height;                // width, height of page
   double m_scale;                        // scaling factor
@@ -110,15 +110,15 @@ protected:
 
 public:
   PxiPlot(wxWindow *p_parent, const wxPoint &p_position,
-	    const wxSize &p_size, const FileHeader &, int p_page);
+	  const wxSize &p_size, const FileHeader &, int p_page,
+	  const ExpData &p_expData);
   virtual ~PxiPlot();
 
   void Update(wxDC& dc,int device);
 
   void Render(void);
 
-  void NewExpData(ExpDataParams &P);
-  wxString PxiName(void) const { return m_header.FileName(); }
+  //  wxString PxiName(void) const { return m_header.FileName(); }
   const FileHeader &Header(void) { return m_header; }
 
   // Interface to property classes

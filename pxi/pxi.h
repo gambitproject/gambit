@@ -136,7 +136,7 @@ private:
   int number;                         // plot number
 
   // Bool instead of bool needeed here for template ambiguity in gBlock for BC
-  typedef gBlock<Bool> show_actions;
+  typedef gBlock<bool> show_actions;
   friend gOutput &operator<<(gOutput &op,const show_actions &p);
   friend gOutput &operator<<(gOutput &op,const PlotInfo &p);
   gBlock< show_actions > strategies;  // strategies to plot for each infoset

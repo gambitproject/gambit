@@ -19,6 +19,9 @@ private:
   FileHeader m_fileHeader;
   wxNotebook *m_plotBook;
 
+  wxString m_expDatafile;
+  ExpData m_expData;
+
   wxPrintData m_printData;
   wxPageSetupData m_pageSetupData;
 
@@ -57,8 +60,10 @@ private:
   PxiPlot *GetShownPlot(void) const;
 
 public:
-  PxiChild(PxiFrame *p_parent, const wxString &p_title);
+  PxiChild(PxiFrame *p_parent, const wxString &);
   ~PxiChild(void);
+
+  const ExpData &GetExpData(void) const { return m_expData; }
 
   DECLARE_EVENT_TABLE()
 };
