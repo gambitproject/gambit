@@ -660,23 +660,23 @@ bool BoolRefPortion::IsReference(void) const
 
 
 
-OutcomePortion::OutcomePortion(void)
+EfOutcomePortion::EfOutcomePortion(void)
 { }
 
-OutcomePortion::~OutcomePortion()
+EfOutcomePortion::~EfOutcomePortion()
 { }
 
-EFOutcome*& OutcomePortion::Value(void) const
+EFOutcome*& EfOutcomePortion::Value(void) const
 { return *_Value; }
 
-PortionSpec OutcomePortion::Spec(void) const
+PortionSpec EfOutcomePortion::Spec(void) const
 { 
   switch( SubType() )
   {
   case DOUBLE:
-    return PortionSpec(porOUTCOME_FLOAT);
+    return PortionSpec(porEFOUTCOME_FLOAT);
   case RATIONAL:
-    return PortionSpec(porOUTCOME_RATIONAL);
+    return PortionSpec(porEFOUTCOME_RATIONAL);
   default:
     assert(0);
   }
@@ -684,7 +684,7 @@ PortionSpec OutcomePortion::Spec(void) const
 }
 
 
-DataType OutcomePortion::SubType( void ) const
+DataType EfOutcomePortion::SubType( void ) const
 {
   assert( Value() );
   assert( Value()->BelongsTo() );
@@ -692,11 +692,11 @@ DataType OutcomePortion::SubType( void ) const
 }
 
 
-void OutcomePortion::Output(gOutput& s) const
+void EfOutcomePortion::Output(gOutput& s) const
 {
   Portion::Output(s);
   
-  s << "(Outcome) " << *_Value;
+  s << "(EFOutcome) " << *_Value;
   if(*_Value)
   {
     s << " \"" << (*_Value)->GetName() << "\" ";
@@ -704,46 +704,46 @@ void OutcomePortion::Output(gOutput& s) const
   }
 }
 
-gString OutcomePortion::OutputString( void ) const
+gString EfOutcomePortion::OutputString( void ) const
 {
-  return "(Outcome)";
+  return "(EFOutcome)";
 }
 
-Portion* OutcomePortion::ValCopy(void) const
+Portion* EfOutcomePortion::ValCopy(void) const
 { 
-  Portion* p = new OutcomeValPortion(*_Value);
+  Portion* p = new EfOutcomeValPortion(*_Value);
   p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
-Portion* OutcomePortion::RefCopy(void) const
+Portion* EfOutcomePortion::RefCopy(void) const
 { 
-  Portion* p = new OutcomeRefPortion(*_Value); 
+  Portion* p = new EfOutcomeRefPortion(*_Value); 
   p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
-OutcomeValPortion::OutcomeValPortion(EFOutcome* value)
+EfOutcomeValPortion::EfOutcomeValPortion(EFOutcome* value)
 { _Value = new EFOutcome*(value); }
 
-OutcomeValPortion::~OutcomeValPortion()
+EfOutcomeValPortion::~EfOutcomeValPortion()
 {
   delete _Value; 
 }
 
-bool OutcomeValPortion::IsReference(void) const
+bool EfOutcomeValPortion::IsReference(void) const
 { return false; }
 
 
-OutcomeRefPortion::OutcomeRefPortion(EFOutcome*& value)
+EfOutcomeRefPortion::EfOutcomeRefPortion(EFOutcome*& value)
 { _Value = &value; }
 
-OutcomeRefPortion::~OutcomeRefPortion()
+EfOutcomeRefPortion::~EfOutcomeRefPortion()
 { }
 
-bool OutcomeRefPortion::IsReference(void) const
+bool EfOutcomeRefPortion::IsReference(void) const
 { return true; }
 
 
@@ -2843,8 +2843,8 @@ bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
       b = (((ActionPortion*) p1)->Value() == ((ActionPortion*) p2)->Value());
   else if(p1->Spec().Type & porINFOSET)
     b = (((InfosetPortion*) p1)->Value() == ((InfosetPortion*) p2)->Value());
-  else if(p1->Spec().Type & porOUTCOME)
-    b = (((OutcomePortion*) p1)->Value() == ((OutcomePortion*) p2)->Value());
+  else if(p1->Spec().Type & porEFOUTCOME)
+    b = (((EfOutcomePortion*) p1)->Value() == ((EfOutcomePortion*) p2)->Value());
   else if(p1->Spec().Type & porNFPLAYER)
     b = (((NfPlayerPortion*) p1)->Value() == ((NfPlayerPortion*) p2)->Value());
   else if(p1->Spec().Type & porEFPLAYER)

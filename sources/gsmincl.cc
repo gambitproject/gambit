@@ -17,7 +17,7 @@ bool PortionSpecMatch( const PortionSpec& t1, const PortionSpec& t2 )
   else if(((t1.ListDepth>0) == (t2.ListDepth>0)) &&
 	  (((t1.Type & porMIXED  ) && (t2.Type & porMIXED  )) ||
 	   ((t1.Type & porBEHAV  ) && (t2.Type & porBEHAV  )) ||
-	   ((t1.Type & porOUTCOME) && (t2.Type & porOUTCOME)) ||
+	   ((t1.Type & porEFOUTCOME) && (t2.Type & porEFOUTCOME)) ||
 	   ((t1.Type & porNFG    ) && (t2.Type & porNFG    )) ||
 	   ((t1.Type & porEFG    ) && (t2.Type & porEFG    ))))
     return true;
@@ -58,8 +58,8 @@ PortionSpecTextType _PortionSpecText[] =
   { porBEHAV_FLOAT,        "BEHAV(FLOAT)" },
   { porBEHAV_RATIONAL,     "BEHAV(RATIONAL)" },
 
-  { porOUTCOME_FLOAT,      "OUTCOME(FLOAT)" },
-  { porOUTCOME_RATIONAL,   "OUTCOME(RATIONAL)" },
+  { porEFOUTCOME_FLOAT,    "EFOUTCOME(FLOAT)" },
+  { porEFOUTCOME_RATIONAL, "EFOUTCOME(RATIONAL)" },
   { porINFOSET_FLOAT,      "INFOSET(FLOAT)" },
   { porINFOSET_RATIONAL,   "INFOSET(RATIONAL)" },
   { porNFSUPPORT_FLOAT,    "NFSUPPORT(FLOAT)" },
@@ -87,7 +87,7 @@ PortionSpecTextType _PortionSpecText[] =
   { porEFG,                "EFG" },
   { porMIXED,              "MIXED" },
   { porBEHAV,              "BEHAV" },
-  { porOUTCOME,            "OUTCOME" },
+  { porEFOUTCOME,          "EFOUTCOME" },
   { porINFOSET,            "INFOSET" },
   { porNFSUPPORT,          "NFSUPPORT" },
   { porEFSUPPORT,          "EFSUPPORT" },

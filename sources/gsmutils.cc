@@ -62,7 +62,7 @@ Portion *ArrayToList(const gArray<EFOutcome *> &A)
 {
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new OutcomeValPortion(A[i]));
+    ret->Append(new EfOutcomeValPortion(A[i]));
   return ret;
 }
 

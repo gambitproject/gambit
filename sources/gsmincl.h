@@ -1,8 +1,8 @@
-//#
-//# FILE: gsmincl.h   header file for GSM components
-//#
-//# $Id$
-//#
+//
+// FILE: gsmincl.h   header file for GSM components
+//
+// $Id$
+//
 
 
 
@@ -68,9 +68,9 @@ typedef enum
 #define  porBEHAV_RATIONAL     ( 0x00002000 )
 #define  porBEHAV              ( porBEHAV_FLOAT | porBEHAV_RATIONAL )
 
-#define  porOUTCOME_FLOAT      ( 0x00004000 )
-#define  porOUTCOME_RATIONAL   ( 0x00008000 )
-#define  porOUTCOME            ( porOUTCOME_FLOAT | porOUTCOME_RATIONAL )
+#define  porEFOUTCOME_FLOAT      ( 0x00004000 )
+#define  porEFOUTCOME_RATIONAL   ( 0x00008000 )
+#define  porEFOUTCOME            ( porEFOUTCOME_FLOAT | porEFOUTCOME_RATIONAL )
 
 #define  porINFOSET_FLOAT      ( 0x00010000 )
 #define  porINFOSET_RATIONAL   ( 0x00020000 )

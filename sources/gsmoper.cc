@@ -817,8 +817,8 @@ Portion* GSM_Equal_Outcome(Portion** param)
     return new BoolValPortion( param[0]->Spec().Type == 
  			       param[1]->Spec().Type );
   }
-  return new BoolValPortion(((OutcomePortion *) param[0])->Value() ==
-			    ((OutcomePortion *) param[1])->Value());
+  return new BoolValPortion(((EfOutcomePortion *) param[0])->Value() ==
+			    ((EfOutcomePortion *) param[1])->Value());
 }
 
 Portion* GSM_Equal_Action(Portion** param)
@@ -1015,8 +1015,8 @@ Portion* GSM_NotEqual_Infoset(Portion** param)
 
 Portion* GSM_NotEqual_Outcome(Portion** param)
 {
-  return new BoolValPortion(((OutcomePortion *) param[0])->Value() !=
-			    ((OutcomePortion *) param[1])->Value());
+  return new BoolValPortion(((EfOutcomePortion *) param[0])->Value() !=
+			    ((EfOutcomePortion *) param[1])->Value());
 }
 
 Portion* GSM_NotEqual_Action(Portion** param)
@@ -3306,8 +3306,8 @@ void Init_gsmoper(GSM* gsm)
 
   ParamInfoType xy_Outcome[] =
   {
-    ParamInfoType("x", porOUTCOME),
-    ParamInfoType("y", porOUTCOME)
+    ParamInfoType("x", porEFOUTCOME),
+    ParamInfoType("y", porEFOUTCOME)
   };
 
   ParamInfoType xy_Action[] =
@@ -3572,9 +3572,9 @@ void Init_gsmoper(GSM* gsm)
 
   FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Equal_Outcome, porBOOL, 2));
   FuncObj->SetParamInfo(9, 0, ParamInfoType( "x", 
-                              PortionSpec(porOUTCOME, 0, porNULLSPEC)) );
+                              PortionSpec(porEFOUTCOME, 0, porNULLSPEC)) );
   FuncObj->SetParamInfo(9, 1, ParamInfoType( "y", 
-                              PortionSpec(porOUTCOME, 0, porNULLSPEC)) );
+                              PortionSpec(porEFOUTCOME, 0, porNULLSPEC)) );
 
   FuncObj->SetFuncInfo(10, FuncInfoType(GSM_Equal_Action, porBOOL, 2));
   FuncObj->SetParamInfo(10, 0, ParamInfoType( "x", 

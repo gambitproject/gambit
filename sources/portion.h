@@ -384,14 +384,14 @@ public:
 
 class EFOutcome;
 
-class OutcomePortion : public Portion
+class EfOutcomePortion : public Portion
 {
 protected:
   EFOutcome** _Value;
-  OutcomePortion(void);
+  EfOutcomePortion(void);
 
 public:
-  virtual ~OutcomePortion();
+  virtual ~EfOutcomePortion();
 
   EFOutcome*& Value(void) const;
   PortionSpec Spec(void) const;
@@ -404,19 +404,19 @@ public:
   Portion* RefCopy(void) const;
 };
 
-class OutcomeValPortion : public OutcomePortion
+class EfOutcomeValPortion : public EfOutcomePortion
 {
 public:
-  OutcomeValPortion(EFOutcome* value);
-  virtual ~OutcomeValPortion();
+  EfOutcomeValPortion(EFOutcome* value);
+  virtual ~EfOutcomeValPortion();
   bool IsReference(void) const;
 };
 
-class OutcomeRefPortion : public OutcomePortion
+class EfOutcomeRefPortion : public EfOutcomePortion
 {
 public:
-  OutcomeRefPortion(EFOutcome*& value);
-  virtual ~OutcomeRefPortion();
+  EfOutcomeRefPortion(EFOutcome*& value);
+  virtual ~EfOutcomeRefPortion();
   bool IsReference(void) const;
 };
 

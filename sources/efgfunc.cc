@@ -236,7 +236,7 @@ static Portion *GSM_DeleteMove(Portion **param)
 
 static Portion *GSM_DeleteOutcome(Portion **param)
 {
-  EFOutcome *outc = ((OutcomePortion *) param[0])->Value();
+  EFOutcome *outc = ((EfOutcomePortion *) param[0])->Value();
 
   gList<Node *> nodes;
   Nodes(*outc->BelongsTo(), nodes);
@@ -247,7 +247,7 @@ static Portion *GSM_DeleteOutcome(Portion **param)
       i++;
     
   _gsm->InvalidateGameProfile(outc->BelongsTo(), true);
-  _gsm->UnAssignEfgElement(outc->BelongsTo(), porOUTCOME, outc);
+  _gsm->UnAssignEfgElement(outc->BelongsTo(), porEFOUTCOME, outc);
 
   outc->BelongsTo()->DeleteOutcome(outc);
 
@@ -641,10 +641,10 @@ static Portion *GSM_Name_EfgElements(Portion **param)
     case porNODE:
       return new TextValPortion(((NodePortion *) param[0])->Value()->
 				GetName());
-    case porOUTCOME:
-    case porOUTCOME_FLOAT:
-    case porOUTCOME_RATIONAL:
-      return new TextValPortion(((OutcomePortion *) param[0])->Value()->
+    case porEFOUTCOME:
+    case porEFOUTCOME_FLOAT:
+    case porEFOUTCOME_RATIONAL:
+      return new TextValPortion(((EfOutcomePortion *) param[0])->Value()->
 				GetName());
     case porEFPLAYER:
       return new TextValPortion(((EfPlayerPortion *) param[0])->Value()->
@@ -719,7 +719,7 @@ static Portion *GSM_NewOutcome(Portion **param)
   else
     c = ((Efg<gRational> *) ((EfgPortion *) param[0])->Value())->NewOutcome();
 
-  Portion *por = new OutcomeValPortion(c);
+  Portion *por = new EfOutcomeValPortion(c);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -795,7 +795,7 @@ static Portion *GSM_Outcome(Portion **param)
 {
   if( param[0]->Spec().Type == porNULL )
   {
-    return new NullPortion(porOUTCOME);
+    return new NullPortion(porEFOUTCOME);
   }
 
   Node *n = ((NodePortion *) param[0])->Value();
@@ -803,14 +803,14 @@ static Portion *GSM_Outcome(Portion **param)
     switch(n->BelongsTo()->Type())
     {
     case DOUBLE:
-      return new NullPortion(porOUTCOME_FLOAT);
+      return new NullPortion(porEFOUTCOME_FLOAT);
     case RATIONAL:
-      return new NullPortion(porOUTCOME_RATIONAL);
+      return new NullPortion(porEFOUTCOME_RATIONAL);
     default:
       assert(0);
     }
 
-  Portion* por = new OutcomeValPortion(n->GetOutcome());
+  Portion* por = new EfOutcomeValPortion(n->GetOutcome());
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -854,7 +854,7 @@ static Portion *GSM_Parent(Portion **param)
 
 static Portion *GSM_Payoff_Float(Portion **param)
 {
-  EFOutcome *c = ((OutcomePortion *) param[0])->Value();
+  EFOutcome *c = ((EfOutcomePortion *) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
   Efg<double> *efg = (Efg<double> *) player->BelongsTo();
 
@@ -864,7 +864,7 @@ static Portion *GSM_Payoff_Float(Portion **param)
 
 static Portion *GSM_Payoff_Rational(Portion **param)
 {
-  EFOutcome *c = ((OutcomePortion *) param[0])->Value();
+  EFOutcome *c = ((EfOutcomePortion *) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
   Efg<gRational> *efg = (Efg<gRational> *) player->BelongsTo();
 
@@ -1121,10 +1121,10 @@ static Portion *GSM_SetName_EfgElements(Portion **param)
     case porNODE:
       ((NodePortion *) param[0])->Value()->SetName(name);
       break;
-    case porOUTCOME:
-    case porOUTCOME_FLOAT:
-    case porOUTCOME_RATIONAL:
-      ((OutcomePortion *) param[0])->Value()->SetName(name);
+    case porEFOUTCOME:
+    case porEFOUTCOME_FLOAT:
+    case porEFOUTCOME_RATIONAL:
+      ((EfOutcomePortion *) param[0])->Value()->SetName(name);
       break;
     case porEFPLAYER:
       ((EfPlayerPortion *) param[0])->Value()->SetName(name);
@@ -1148,19 +1148,19 @@ static Portion *GSM_SetName_EfgElements(Portion **param)
 static Portion *GSM_SetOutcome(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  EFOutcome *c = ((OutcomePortion *) param[1])->Value();
+  EFOutcome *c = ((EfOutcomePortion *) param[1])->Value();
 
   n->SetOutcome(c);
 
   _gsm->InvalidateGameProfile(n->BelongsTo(), true);
   
   if (c)  {
-    Portion* por = new OutcomeValPortion(c);
+    Portion* por = new EfOutcomeValPortion(c);
     por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;
   }
   else 
-    return new NullPortion(porOUTCOME);
+    return new NullPortion(porEFOUTCOME);
 }
 
 //----------------
@@ -1169,7 +1169,7 @@ static Portion *GSM_SetOutcome(Portion **param)
 
 static Portion *GSM_SetPayoff_Float(Portion **param)
 {
-  EFOutcome *c = ((OutcomePortion *) param[0])->Value();
+  EFOutcome *c = ((EfOutcomePortion *) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
   Efg<double> *efg = (Efg<double> *) player->BelongsTo();
   double value = ((FloatPortion *) param[2])->Value();
@@ -1178,14 +1178,14 @@ static Portion *GSM_SetPayoff_Float(Portion **param)
 
   _gsm->InvalidateGameProfile(c->BelongsTo(), true);
 
-  Portion* por = new OutcomeValPortion(c);
+  Portion* por = new EfOutcomeValPortion(c);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
 static Portion *GSM_SetPayoff_Rational(Portion **param)
 {
-  EFOutcome *c = ((OutcomePortion *) param[0])->Value();
+  EFOutcome *c = ((EfOutcomePortion *) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
   Efg<gRational> *efg = (Efg<gRational> *) player->BelongsTo();
   gRational value = ((RationalPortion *) param[2])->Value();
@@ -1194,7 +1194,7 @@ static Portion *GSM_SetPayoff_Rational(Portion **param)
 
   _gsm->InvalidateGameProfile(c->BelongsTo(), true);
 
-  Portion* por = new OutcomeValPortion(c);
+  Portion* por = new EfOutcomeValPortion(c);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -1332,7 +1332,7 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("DeleteOutcome", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_DeleteOutcome,
 				       PortionSpec(porNODE, 1), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("outcome", porOUTCOME));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("outcome", porEFOUTCOME));
   gsm->AddFunction(FuncObj);
 
 
@@ -1370,7 +1370,7 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_EfgElements, porEFG, 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("node", porNODE));
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Game_EfgElements, porEFG, 1));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("outcome", porOUTCOME));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("outcome", porEFOUTCOME));
   FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Game_EfgElements, porEFG, 1));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("infoset", porINFOSET));
   gsm->AddFunction(FuncObj);
@@ -1490,7 +1490,7 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Name_EfgElements, porTEXT, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", 
                               PortionSpec(porACTION | porINFOSET | 
-					  porNODE | porOUTCOME | 
+					  porNODE | porEFOUTCOME | 
 					  porEFPLAYER | porEFG, 
                                           0, 
                                           porNULLSPEC) ));
@@ -1514,7 +1514,7 @@ void Init_efgfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("NewOutcome", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewOutcome, porOUTCOME, 1));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewOutcome, porEFOUTCOME, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
   gsm->AddFunction(FuncObj);
 
@@ -1546,7 +1546,7 @@ void Init_efgfunc(GSM *gsm)
   
   
   FuncObj = new FuncDescObj("Outcome", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Outcome, porOUTCOME, 1));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Outcome, porEFOUTCOME, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("node", 
                               PortionSpec(porNODE, 0, porNULLSPEC) ));
   gsm->AddFunction(FuncObj);
@@ -1554,7 +1554,7 @@ void Init_efgfunc(GSM *gsm)
   
   FuncObj = new FuncDescObj("Outcomes", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Outcomes, 
-				       PortionSpec(porOUTCOME, 1), 1));
+				       PortionSpec(porEFOUTCOME, 1), 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
   gsm->AddFunction(FuncObj);
   
@@ -1569,13 +1569,13 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Payoff", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Payoff_Float, porFLOAT, 2,
 				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("outcome", porOUTCOME_FLOAT));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("outcome", porEFOUTCOME_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porEFPLAYER));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Payoff_Rational, 
 				       porRATIONAL, 2,
 				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("outcome", porOUTCOME_RATIONAL));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("outcome", porEFOUTCOME_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porEFPLAYER));
   gsm->AddFunction(FuncObj);
   
@@ -1669,34 +1669,34 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("SetName", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetName_EfgElements, 
 				       porACTION | porINFOSET | porNODE | 
-				       porOUTCOME | porEFPLAYER |
+				       porEFOUTCOME | porEFPLAYER |
 				       porEFG, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porACTION | porINFOSET | 
-					    porNODE | porOUTCOME | 
+					    porNODE | porEFOUTCOME | 
 					    porEFPLAYER | porEFG));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("name", porTEXT));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("SetOutcome", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetOutcome, porOUTCOME, 2,
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetOutcome, porEFOUTCOME, 2,
 				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("outcome", 
-			      PortionSpec(porOUTCOME, 0, porNULLSPEC) ));
+			      PortionSpec(porEFOUTCOME, 0, porNULLSPEC) ));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("SetPayoff", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetPayoff_Float, porOUTCOME, 3,
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetPayoff_Float, porEFOUTCOME, 3,
 				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("outcome", porOUTCOME_FLOAT));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("outcome", porEFOUTCOME_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porEFPLAYER));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("payoff", porFLOAT));
  
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SetPayoff_Rational, 
-				       porOUTCOME, 3,
+				       porEFOUTCOME, 3,
 				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("outcome", porOUTCOME_RATIONAL));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("outcome", porEFOUTCOME_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porEFPLAYER));
   FuncObj->SetParamInfo(1, 2, ParamInfoType("payoff", porRATIONAL));
   gsm->AddFunction(FuncObj);

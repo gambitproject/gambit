@@ -505,9 +505,9 @@ bool GSM::Assign(void)
 	((BoolPortion*) p1)->Value() = ((BoolPortion*) p2)->Value();
 	break;
 
-      case porOUTCOME_FLOAT:
-      case porOUTCOME_RATIONAL:
-	((OutcomePortion*) p1)->Value() = ((OutcomePortion*) p2)->Value();
+      case porEFOUTCOME_FLOAT:
+      case porEFOUTCOME_RATIONAL:
+	((EfOutcomePortion*) p1)->Value() = ((EfOutcomePortion*) p2)->Value();
 	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
 
@@ -2627,7 +2627,7 @@ void GSM::UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data )
 	   ( spec.Type & porINFOSET ) ||
 	   ( spec.Type & porNODE ) ||
 	   ( spec.Type & porACTION ) ||
-	   ( spec.Type & porOUTCOME ) );
+	   ( spec.Type & porEFOUTCOME ) );
     
     for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
       for(j=1; j<=vars[i].Length(); j++)
