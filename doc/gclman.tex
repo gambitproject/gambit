@@ -291,14 +291,14 @@ are used to represent elements of normal and extensive form games,
 respectively.  The last section contains only one type, lists, which
 play an important role in the GCL. 
 
-\marginpar{{\tt ASSESSMENT} is not yet installed} Three of the data
-types ({\tt INTEGER}, {\tt EFBASIS}, and {\tt ASSESSMENT}) are not
-true data types, but are {\bindex subtypes} of another, parent type.
-They are indicated in the table as the indented entries following
-their parent type.  A subtype is a data type which has all of the
-properties of its parent type, plus some additional characteristics.
-For example, an integer is a rational number, with the additional
-restriction that it's denominator is one.
+The data types ({\tt INTEGER}, 
+%{\tt ASSESSMENT}),  
+and {\tt EFBASIS} are not true data types, but are {\bindex subtypes}
+of another, parent type.  They are indicated in the table as the
+indented entries following their parent type.  A subtype is a data
+type which has all of the properties of its parent type, plus some
+additional characteristics.  For example, an integer is a rational
+number, with the additional restriction that it's denominator is one.
 \marginpar{Do we need to say more about subtypes?}
 \begin{table}[htp]
 \begin{center}
@@ -328,7 +328,7 @@ Type name	& Description \\ \hline
 \tindex{  EFBASIS}	& an \verb+EFSUPPORT+ that is a basis for an assessment \\
 \tindex{BEHAV}	& a behavior strategy profile for an extensive form
 game \\ 
-\tindex{  ASSESSMENT}	& a \verb+BEHAV+ that is an assessment \\
+%\tindex{  ASSESSMENT}	& a \verb+BEHAV+ that is an assessment \\
 \hline
 \tindex{LIST(T)}	& a list of objects of type T (T is any data type)\\ 
 \hline
@@ -466,18 +466,20 @@ belongs.  The \tindex{EFPLAYER} represents a player in an extensive
 form game.  The types \tindex{NODE}, \tindex{ACTION},
 \tindex{INFOSET}, \tindex{EFOUTCOME} represent the corresponding parts
 of the extensive form representation of the game.  A \tindex{BEHAV} is
-a behavior strategy profile and a \tindex{ASSESSMENT} is an assessment
-for an extensive form game. An \verb+ASSESSMENT+ is a subtype of
-\verb+BEHAV+, which in addition to specifying a behavior strategy,
-specifies non null beliefs for all information sets in the game.  An
-\tindex{EFSUPPORT} represents a support for a behavior strategy in an
-extensive form game, which is a collection of sets of admissible
-actions (at least one for each information set of each player).  An
-\verb+EFBASIS+ is a subtype of \verb+EFSUPPORT+, representing a
-support for an assessment in an extensive form game. This is a
-collection of sets of admissible actions together with a collection of
-sets of admissible members of information sets (at least one member
-for each information set).
+a behavior strategy profile 
+%and a \tindex{ASSESSMENT} is an assessment
+for an extensive form game. 
+%An \verb+ASSESSMENT+ is a subtype of \verb+BEHAV+, which in addition
+%to specifying a behavior strategy, specifies non null beliefs for all
+%information sets in the game.  
+An \tindex{EFSUPPORT} represents a
+support for a behavior strategy in an extensive form game, which is a
+collection of sets of admissible actions (at least one for each
+information set of each player).  An \verb+EFBASIS+ is a subtype of
+\verb+EFSUPPORT+, representing a support for an assessment in an
+extensive form game. This is a collection of sets of admissible
+actions together with a collection of sets of admissible members of
+information sets (at least one member for each information set).
 
 As with normal form games, there are no constants of any extensive form
 data type.  Objects that are of any of extensive form data types must
@@ -4876,7 +4878,7 @@ IsConsistent[basis->EFBASIS] =: BOOLEAN
 \end{verbatim} \normalsize
 
 \bd
-Returns true if \verb+basis+ is a ``consistent'' basis -- i. e., if it
+Returns true if \verb+basis+ is a consistent basis -- i. e., if it
 is a basis which could be a support for a sequential
 equilibrium.\marginpar{give cite here.}  
 \ed
@@ -6545,7 +6547,20 @@ error if \verb+file+ cannot be opened for writing.  Returns \verb+nfg+.
 \ed
 
 \marginpar{Put in {\tt SeqEquilibSolve}}
-\marginpar{Put in {\tt SetActionProb}}
+
+\item\lex{SetActionProb}
+\protect \large \begin{verbatim} 
+SetActionProb[profile<->BEHAV, action->ACTION, 
+               value->NUMBER] =: BEHAV 
+\end{verbatim}\normalsize
+
+\bd
+Sets the component of \verb+profile+ for
+\verb+action+ to be equal to \verb+value+, and 
+returns \verb+profile+.  It is an error if \verb+profile+ and \verb+action+
+are not from the same extensive form game. 
+\item [See also:] \verb+ActionProb+, \verb+SetActionProbs+.
+\ed
 
 \item\lex{SetActionProbs}
 \protect \large \begin{verbatim} 
@@ -6561,20 +6576,6 @@ are not from the same extensive form game, or if the length of
 \verb+value+ is not the same as the number of actions in \verb+profile+'s
 support at \verb+infoset+.
 \item [See also:] \verb+ActionProb+.
-\ed
-
-\item\lex{SetActionProb}
-\protect \large \begin{verbatim} 
-SetActionProb[profile<->BEHAV, action->ACTION, 
-               value->NUMBER] =: BEHAV 
-\end{verbatim}\normalsize
-
-\bd
-Sets the component of \verb+profile+ for
-\verb+action+ to be equal to \verb+value+, and 
-returns \verb+profile+.  It is an error if \verb+profile+ and \verb+action+
-are not from the same extensive form game. 
-\item [See also:] \verb+ActionProb+, \verb+SetActionProbs+.
 \ed
 
 \item\lex{SetChanceProbs}
