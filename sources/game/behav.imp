@@ -275,17 +275,39 @@ gbtVector<T> gbtBehavProfileBase<T>::GetNodeValue(const gbtGameNode &node) const
 }
 
 template <class T>
-T gbtBehavProfileBase<T>::GetIsetProb(const gbtGameInfoset &iset) const
+T gbtBehavProfileBase<T>::GetInfosetProb(const gbtGameInfoset &iset) const
 { 
   ComputeSolutionData();
   return IsetProb(iset);
 }
 
-template <class T>
-const T &gbtBehavProfileBase<T>::GetIsetValue(const gbtGameInfoset &iset) const
+template <class T> const T &
+gbtBehavProfileBase<T>::GetInfosetValue(const gbtGameInfoset &iset) const
 { 
   ComputeSolutionData();
   return IsetValue(iset);
+}
+
+template <class T>
+T &gbtBehavProfileBase<T>::operator()(const gbtGameAction &p_action)
+{
+  return m_profile(p_action->GetInfoset()->GetPlayer()->GetId(),
+		   p_action->GetInfoset()->GetId(),
+		   p_action->GetId());
+}
+
+template <class T>
+void gbtBehavProfileBase<T>::Set(int i, int j, int k, const gbtNumber &p_value)
+{
+  m_profile(i, j, k) = p_value;
+}
+
+template <class T>
+const T &gbtBehavProfileBase<T>::operator()(const gbtGameAction &p_action) const
+{
+  return m_profile(p_action->GetInfoset()->GetPlayer()->GetId(),
+		   p_action->GetInfoset()->GetId(),
+		   p_action->GetId());
 }
 
 template <class T>
@@ -618,7 +640,7 @@ template <class T> gbtDPVector<T> gbtBehavProfileBase<T>::Beliefs(void) const
   return bprobs;
 }
 
-template <class T> T gbtBehavProfileBase<T>::LiapValue(bool p_penalty) const
+template <class T> T gbtBehavProfileBase<T>::GetLiapValue(bool p_penalty) const
 {
   static const T BIG1 = (T) 10000;
   static const T BIG2 = (T) 100;

@@ -42,7 +42,7 @@ EfgPolEnumParams::EfgPolEnumParams(void)
 template class EfgPolEnumModule<gbtDouble>;
 
 int EfgPolEnum(const gbtEfgSupport &support, const EfgPolEnumParams &params,
-	       gbtList<BehavSolution> &solutions, gbtStatus &p_status,
+	       gbtBehavNashSet &solutions, gbtStatus &p_status,
 	       long &nevals, double &time, bool &is_singular)
 {
   EfgPolEnumModule<gbtDouble> module(support, params);
@@ -55,13 +55,14 @@ int EfgPolEnum(const gbtEfgSupport &support, const EfgPolEnumParams &params,
   return 1;
 }
 
-BehavSolution PolishEquilibrium(const gbtEfgSupport &support, 
-				const BehavSolution &sol, 
-				bool &is_singular)
+gbtBehavProfile<gbtNumber>
+PolishEquilibrium(const gbtEfgSupport &support, 
+		  const gbtBehavProfile<gbtNumber> &sol, 
+		  bool &is_singular)
 {
   EfgPolEnumParams params;
   EfgPolEnumModule<gbtDouble> module(support, params);
-  gbtVector<gbtDouble> vec = module.SolVarsFromBehavProfile(sol.Profile());
+  gbtVector<gbtDouble> vec = module.SolVarsFromBehavProfile(sol);
   module.PolishKnownRoot(vec);
   return module.ReturnPolishedSolution(vec);
 }
@@ -74,8 +75,8 @@ gbtEfgNashEnumPoly::gbtEfgNashEnumPoly(void)
   : m_stopAfter(0)
 { }
 
-gbtList<BehavSolution> gbtEfgNashEnumPoly::Solve(const gbtEfgSupport &p_support,
-					       gbtStatus &p_status)
+gbtBehavNashSet gbtEfgNashEnumPoly::Solve(const gbtEfgSupport &p_support,
+					  gbtStatus &p_status)
 {
   p_status.SetProgress(0.0);
   p_status << "Step 1 of 2: Enumerating supports";
@@ -86,7 +87,7 @@ gbtList<BehavSolution> gbtEfgNashEnumPoly::Solve(const gbtEfgSupport &p_support,
   p_status << "Step 2 of 2: Computing equilibria";
 
   gbtList<gbtEfgSupport> singularSupports;
-  gbtList<BehavSolution> solutions;
+  gbtBehavNashSet solutions;
 
   try {
     for (int i = 1; (i <= supports.Length() &&
@@ -96,7 +97,7 @@ gbtList<BehavSolution> gbtEfgNashEnumPoly::Solve(const gbtEfgSupport &p_support,
       p_status.SetProgress((double) (i-1) / (double) supports.Length());
       long newevals = 0;
       double newtime = 0.0;
-      gbtList<BehavSolution> newsolns;
+      gbtBehavNashSet newsolns;
       bool is_singular = false;
 
       EfgPolEnumParams params;
@@ -104,9 +105,10 @@ gbtList<BehavSolution> gbtEfgNashEnumPoly::Solve(const gbtEfgSupport &p_support,
       EfgPolEnum(supports[i], params, newsolns, p_status, 
 		 newevals, newtime, is_singular);
       for (int j = 1; j <= newsolns.Length(); j++) {
-	if (newsolns[j].IsANFNash()) {
+	// FIXME: This needs filtered!
+	//	if (newsolns[j].IsANFNash()) {
 	  solutions += newsolns[j];
-	}
+	  //	}
       }
 
       if (is_singular) { 

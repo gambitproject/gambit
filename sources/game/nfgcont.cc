@@ -106,7 +106,6 @@ void gbtNfgContingencyTable::SetStrategy(gbtGameStrategy p_strategy)
 void gbtNfgContingencyTable::SetOutcome(const gbtGameOutcome &p_outcome) const
 {
   m_nfg->m_results[m_index + 1] = dynamic_cast<gbtGameOutcomeBase *>(p_outcome.Get());
-  m_nfg->m_revision++;
 }
 
 gbtGameOutcome gbtNfgContingencyTable::GetOutcome(void) const

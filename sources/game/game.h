@@ -213,9 +213,6 @@ public:
   virtual void WriteEfg(gbtOutput &p_file) const = 0;
   virtual void WriteNfg(gbtOutput &p_file) const = 0;
 
-  // DATA ACCESS -- GENERAL INFORMATION
-  virtual long RevisionNumber(void) const = 0;
- 
   // DATA ACCESS -- PLAYERS
   virtual gbtGamePlayer NewPlayer(void) = 0;
 

@@ -40,13 +40,13 @@ template <class T> gbtVector<T> Make_b2(const gbtNfgGame &, const T &);
 //---------------------------------------------------------------------------
 
 template <class T> 
-gbtList<MixedSolution> gbtNfgNashLcp<T>::Solve(const gbtNfgGame &p_game,
-					       gbtStatus &p_status)
+gbtMixedNashSet gbtNfgNashLcp<T>::Solve(const gbtNfgGame &p_game,
+					gbtStatus &p_status)
 {
   gbtBasicFeasibleSolution<T> cbfs((T) 0);
 
   if (p_game->NumPlayers() != 2) {
-    return gbtList<MixedSolution>();
+    return gbtMixedNashSet();
   }
 
   gbtList<gbtBasicFeasibleSolution<T> > bfsList;
@@ -129,7 +129,7 @@ void gbtNfgNashLcp<T>::AllLemke(const gbtNfgGame &p_game,
   return;
 }
 
-template <class T> gbtList<MixedSolution>
+template <class T> gbtMixedNashSet
 gbtNfgNashLcp<T>::AddSolutions(const gbtNfgGame &p_game,
 			       const gbtList<gbtBasicFeasibleSolution<T> > &p_list,
 			       const T &epsilon)
@@ -137,7 +137,7 @@ gbtNfgNashLcp<T>::AddSolutions(const gbtNfgGame &p_game,
   int i,j;
   int n1 = p_game->GetPlayer(1)->NumStrategies();
   int n2 = p_game->GetPlayer(2)->NumStrategies();
-  gbtList<MixedSolution> solutions;
+  gbtMixedNashSet solutions;
 
   for (i = 1; i <= p_list.Length(); i++)    {
     gbtMixedProfile<T> profile = p_game->NewMixedProfile((T) 0);
@@ -166,8 +166,7 @@ gbtNfgNashLcp<T>::AddSolutions(const gbtNfgGame &p_game,
       else
 	profile(2, j) = (T) 0;
 
-    int index = solutions.Append(MixedSolution(profile, "Lcp[NFG]"));
-    solutions[index].SetEpsilon(epsilon);
+    solutions.Append(profile->NewMixedProfile(gbtNumber(0)));
   }
 
   return solutions;

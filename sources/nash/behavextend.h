@@ -27,11 +27,11 @@
 #ifndef BEHAVEXTEND_H
 #define BEHAVEXTEND_H
 
-#include "behavsol.h"
+#include "game/behav.h"
 
 class algExtendsToNash {
 public:
-  bool ExtendsToNash(const BehavSolution &p_solution,
+  bool ExtendsToNash(const gbtBehavProfile<gbtNumber> &p_solution,
 		     const gbtEfgSupport &p_littleSupport,
 		     const gbtEfgSupport &p_bigSupport,
 		     gbtStatus &p_status);
@@ -39,7 +39,7 @@ public:
 
 class algExtendsToAgentNash {
 public:
-  bool ExtendsToAgentNash(const BehavSolution &p_solution,
+  bool ExtendsToAgentNash(const gbtBehavProfile<gbtNumber> &p_solution,
 			  const gbtEfgSupport &p_littleSupport,
 			  const gbtEfgSupport &p_bigSupport,
 			  gbtStatus &p_status);

@@ -62,7 +62,7 @@ double EFLiapFunc::Value(const gbtVector<double> &v) const
   // Don't impose penalties in Lyapunov function; avoid this as
   // we go out of the feasible set in numerically computing the
   // derivative of the function.
-  return _p->LiapValue(false);
+  return _p->GetLiapValue(false);
 }
 
 //
@@ -152,8 +152,8 @@ gbtEfgNashLiap::gbtEfgNashLiap(void)
     m_tol1(2.0e-10), m_tolN(1.0e-10)
 { }
 
-gbtList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
-					   gbtStatus &p_status)
+gbtBehavNashSet gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
+				      gbtStatus &p_status)
 {
   static const double ALPHA = .00000001;
 
@@ -172,7 +172,7 @@ gbtList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
 
   gbtMatrix<double> xi(p->BehavProfileLength(), p->BehavProfileLength());
 
-  gbtList<BehavSolution> solutions;
+  gbtBehavNashSet solutions;
   
   try {
     for (int i = 1; (m_numTries == 0 || i <= m_numTries) &&
@@ -201,7 +201,7 @@ gbtList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
 
 	  if (sqrt(gradient.NormSquared()) < .001 &&
 	      fval < 1.0e-8) {
-	    solutions.Append(BehavSolution(p, "Liap[EFG]"));
+	    solutions.Append(p->NewBehavProfile(gbtNumber(0)));
 	    break;
 	  }
 	}

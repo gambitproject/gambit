@@ -43,7 +43,7 @@ public:
   void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
 
   gbtText GetAlgorithm(void) const { return "EnumPure[EFG]"; }
-  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
+  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
 #endif    // EFGPURE_H

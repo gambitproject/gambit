@@ -34,15 +34,14 @@ private:
 	      gbtList<gbtBasicFeasibleSolution<T> > &);
   void GetSolutions(const gbtNfgGame &,
 		    const gbtList<gbtBasicFeasibleSolution<T> > &,
-		    gbtList<MixedSolution > &,
-		    const T &) const;
+		    gbtMixedNashSet &, const T &) const;
 
 public:
   gbtNfgNashLp(void);
   virtual ~gbtNfgNashLp() { }
 
   gbtText GetAlgorithm(void) const { return "Lp[NFG]"; }
-  gbtList<MixedSolution> Solve(const gbtNfgGame &, gbtStatus &);
+  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
 };
 
 #endif  // NFGLP_H

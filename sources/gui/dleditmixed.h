@@ -27,11 +27,12 @@
 #ifndef DLEDITMIXED_H
 #define DLEDITMIXED_H
 
-#include "wx/grid.h"
+#include <wx/grid.h>
+#include "game/mixed.h"
 
 class dialogEditMixed : public wxDialog {
 private:
-  mutable MixedSolution m_profile;
+  mutable gbtMixedProfile<gbtNumber> m_profile;
   wxTextCtrl *m_profileName;
   wxListBox *m_playerList;
   wxGrid *m_probGrid;
@@ -42,10 +43,11 @@ private:
   void OnOK(wxCommandEvent &);
 
 public:
-  dialogEditMixed(wxWindow *p_parent, const MixedSolution &p_profile);
+  dialogEditMixed(wxWindow *p_parent, 
+		  const gbtMixedProfile<gbtNumber> &p_profile);
   virtual ~dialogEditMixed();
 
-  const MixedSolution &GetProfile(void) const;
+  const gbtMixedProfile<gbtNumber> &GetProfile(void) const;
 
   DECLARE_EVENT_TABLE()
 };

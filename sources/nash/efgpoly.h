@@ -41,7 +41,7 @@ public:
   void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
 
   gbtText GetAlgorithm(void) const { return "PolEnum[EFG]"; }
-  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
+  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
 };
   
 #endif  // EFGPOLY_H

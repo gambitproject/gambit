@@ -205,7 +205,7 @@ static void QreJacobian(const gbtEfgSupport &p_support,
 		}
 	      }
 	      else {   // infoset1 != infoset2
-		if (profile->GetIsetProb(infoset1) < 1.0e-10) {
+		if (profile->GetInfosetProb(infoset1) < 1.0e-10) {
 		  p_matrix(colno, rowno) = 0;
 		}
 		else {
@@ -225,7 +225,7 @@ static void QreJacobian(const gbtEfgSupport &p_support,
 static void TracePath(const gbtBehavProfile<double> &p_start,
 		      double p_startLambda, double p_maxLambda, double p_omega,
 		      gbtStatus &p_status,
-		      gbtList<BehavSolution> &p_solutions)
+		      gbtBehavNashSet &p_solutions)
 {
   const int c_maxIters = 5000;     // maximum number of iterations
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
@@ -422,8 +422,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     for (int i = 1; i <= foo->BehavProfileLength(); i++) {
       foo[i] = x[i];
     }
-    p_solutions.Append(BehavSolution(foo, "Qre[EFG]"));
-    p_solutions[p_solutions.Length()].SetQre(x[x.Last()], 0);
+    p_solutions.Append(foo->NewBehavProfile(gbtNumber(0)));
     
     gbtVector<double> newT(t);
     q.GetRow(q.NumRows(), newT);  // new tangent
@@ -441,10 +440,10 @@ gbtEfgNashLogit::gbtEfgNashLogit(void)
   : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
 { }
 
-gbtList<BehavSolution> gbtEfgNashLogit::Solve(const gbtEfgSupport &p_support,
-					    gbtStatus &p_status)
+gbtBehavNashSet gbtEfgNashLogit::Solve(const gbtEfgSupport &p_support,
+				       gbtStatus &p_status)
 {
-  gbtList<BehavSolution> solutions;
+  gbtBehavNashSet solutions;
   gbtBehavProfile<double> start = p_support->NewBehavProfile(0.0);
 
   try {

@@ -66,10 +66,10 @@ public:
 class gbtEfgNashOneNash : public gbtEfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "OneNash"; }
-  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
+  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gbtList<BehavSolution> gbtEfgNashOneNash::Solve(const gbtEfgSupport &p_support,
+gbtBehavNashSet gbtEfgNashOneNash::Solve(const gbtEfgSupport &p_support,
 				       gbtStatus &p_status)
 {
   gbtArray<int> players(p_support->NumPlayers());
@@ -104,7 +104,7 @@ gbtList<BehavSolution> gbtEfgNashOneNash::Solve(const gbtEfgSupport &p_support,
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gbtList<BehavSolution>();
+    return gbtBehavNashSet();
   }
 }
 
@@ -158,10 +158,10 @@ gbtEfgNashAlgorithm *gbtPanelEfgOneNash::GetAlgorithm(void) const
 class gbtEfgNashTwoNash : public gbtEfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "TwoNash"; }
-  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
+  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gbtList<BehavSolution> gbtEfgNashTwoNash::Solve(const gbtEfgSupport &p_support,
+gbtBehavNashSet gbtEfgNashTwoNash::Solve(const gbtEfgSupport &p_support,
 				       gbtStatus &p_status)
 {
   gbtArray<int> players(p_support->NumPlayers());
@@ -203,7 +203,7 @@ gbtList<BehavSolution> gbtEfgNashTwoNash::Solve(const gbtEfgSupport &p_support,
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gbtList<BehavSolution>();
+    return gbtBehavNashSet();
   }
 }
 
@@ -257,10 +257,10 @@ gbtEfgNashAlgorithm *gbtPanelEfgTwoNash::GetAlgorithm(void) const
 class gbtEfgNashAllNash : public gbtEfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "AllNash"; }
-  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
+  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gbtList<BehavSolution> gbtEfgNashAllNash::Solve(const gbtEfgSupport &p_support,
+gbtBehavNashSet gbtEfgNashAllNash::Solve(const gbtEfgSupport &p_support,
 				       gbtStatus &p_status)
 {
   gbtArray<int> players(p_support->NumPlayers());
@@ -302,7 +302,7 @@ gbtList<BehavSolution> gbtEfgNashAllNash::Solve(const gbtEfgSupport &p_support,
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gbtList<BehavSolution>();
+    return gbtBehavNashSet();
   }
 }
 
@@ -355,10 +355,10 @@ gbtEfgNashAlgorithm *gbtPanelEfgAllNash::GetAlgorithm(void) const
 class gbtEfgNashOnePerfect : public gbtEfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "OnePerfect"; }
-  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
+  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gbtList<BehavSolution> gbtEfgNashOnePerfect::Solve(const gbtEfgSupport &p_support,
+gbtBehavNashSet gbtEfgNashOnePerfect::Solve(const gbtEfgSupport &p_support,
 					  gbtStatus &p_status)
 {
   gbtArray<int> players(p_support->NumPlayers());
@@ -393,7 +393,7 @@ gbtList<BehavSolution> gbtEfgNashOnePerfect::Solve(const gbtEfgSupport &p_suppor
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gbtList<BehavSolution>();
+    return gbtBehavNashSet();
   }
 }
 
@@ -446,10 +446,10 @@ gbtEfgNashAlgorithm *gbtPanelEfgOnePerfect::GetAlgorithm(void) const
 class gbtEfgNashTwoPerfect : public gbtEfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "TwoPerfect"; }
-  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
+  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gbtList<BehavSolution> gbtEfgNashTwoPerfect::Solve(const gbtEfgSupport &p_support,
+gbtBehavNashSet gbtEfgNashTwoPerfect::Solve(const gbtEfgSupport &p_support,
 					  gbtStatus &p_status)
 {
   gbtArray<int> players(p_support->NumPlayers());
@@ -491,7 +491,7 @@ gbtList<BehavSolution> gbtEfgNashTwoPerfect::Solve(const gbtEfgSupport &p_suppor
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gbtList<BehavSolution>();
+    return gbtBehavNashSet();
   }
 }
 
@@ -544,10 +544,10 @@ gbtEfgNashAlgorithm *gbtPanelEfgTwoPerfect::GetAlgorithm(void) const
 class gbtEfgNashAllPerfect : public gbtEfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "AllPerfect"; }
-  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
+  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gbtList<BehavSolution> gbtEfgNashAllPerfect::Solve(const gbtEfgSupport &p_support,
+gbtBehavNashSet gbtEfgNashAllPerfect::Solve(const gbtEfgSupport &p_support,
 					  gbtStatus &p_status)
 {
   gbtArray<int> players(p_support->NumPlayers());
@@ -589,7 +589,7 @@ gbtList<BehavSolution> gbtEfgNashAllPerfect::Solve(const gbtEfgSupport &p_suppor
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gbtList<BehavSolution>();
+    return gbtBehavNashSet();
   }
 }
 
@@ -642,10 +642,10 @@ gbtEfgNashAlgorithm *gbtPanelEfgAllPerfect::GetAlgorithm(void) const
 class gbtEfgNashOneSequential : public gbtEfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "OneSequential"; }
-  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
+  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gbtList<BehavSolution> gbtEfgNashOneSequential::Solve(const gbtEfgSupport &p_support,
+gbtBehavNashSet gbtEfgNashOneSequential::Solve(const gbtEfgSupport &p_support,
 					     gbtStatus &p_status)
 {
   try {
@@ -653,7 +653,7 @@ gbtList<BehavSolution> gbtEfgNashOneSequential::Solve(const gbtEfgSupport &p_sup
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gbtList<BehavSolution>();
+    return gbtBehavNashSet();
   }
 }
 
@@ -706,10 +706,10 @@ gbtEfgNashAlgorithm *gbtPanelEfgOneSequential::GetAlgorithm(void) const
 class gbtEfgNashTwoSequential : public gbtEfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "TwoSequential"; }
-  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
+  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gbtList<BehavSolution> gbtEfgNashTwoSequential::Solve(const gbtEfgSupport &p_support,
+gbtBehavNashSet gbtEfgNashTwoSequential::Solve(const gbtEfgSupport &p_support,
 					     gbtStatus &p_status)
 {
   try {
@@ -721,7 +721,7 @@ gbtList<BehavSolution> gbtEfgNashTwoSequential::Solve(const gbtEfgSupport &p_sup
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gbtList<BehavSolution>();
+    return gbtBehavNashSet();
   }
 }
 
@@ -774,10 +774,10 @@ gbtEfgNashAlgorithm *gbtPanelEfgTwoSequential::GetAlgorithm(void) const
 class gbtEfgNashAllSequential : public gbtEfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "AllSequential"; }
-  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
+  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gbtList<BehavSolution> gbtEfgNashAllSequential::Solve(const gbtEfgSupport &p_support,
+gbtBehavNashSet gbtEfgNashAllSequential::Solve(const gbtEfgSupport &p_support,
 					     gbtStatus &p_status)
 {
   try {
@@ -789,7 +789,7 @@ gbtList<BehavSolution> gbtEfgNashAllSequential::Solve(const gbtEfgSupport &p_sup
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gbtList<BehavSolution>();
+    return gbtBehavNashSet();
   }
 }
 

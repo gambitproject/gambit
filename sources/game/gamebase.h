@@ -263,8 +263,6 @@ public:
 class gbtGameBase : public gbtConstGameBase, public gbtGameRep {
 public:
   bool sortisets;
-  mutable long m_revision;
-  mutable long m_outcomeRevision;
   gbtBlock<gbtGameOutcomeBase *> m_results;
   gbtGameNodeBase *root;
   gbtGamePlayerBase *chance;
@@ -572,6 +570,12 @@ public:
   
   gbtGame GetGame(void) const  { return m_support->GetGame(); }
   
+  void SetStrategyProb(const gbtGameStrategy &p_strategy,
+		       const T &p_prob);
+  T GetStrategyValue(const gbtGameStrategy &p_strategy) const;
+  T &operator()(const gbtGameStrategy &p_strategy);
+  const T &operator()(const gbtGameStrategy &p_strategy) const;
+
   T Payoff(int pl) const;
   T Payoff(int pl, gbtGameStrategy) const;
   T Payoff(int pl, int player1, int strat1, int player2, int strat2) const;
@@ -654,6 +658,12 @@ public:
   
   gbtGame GetGame(void) const  { return m_nfgSupport->GetGame(); }
   
+  void SetStrategyProb(const gbtGameStrategy &p_strategy,
+		       const T &p_prob);
+  T GetStrategyValue(const gbtGameStrategy &p_strategy) const;
+  T &operator()(const gbtGameStrategy &p_strategy);
+  const T &operator()(const gbtGameStrategy &p_strategy) const;
+
   T Payoff(int pl) const;
   T Payoff(int pl, gbtGameStrategy) const;
   T Payoff(int pl, int player1, int strat1, int player2, int strat2) const;
@@ -983,8 +993,8 @@ public:
   const T &GetRealizProb(const gbtGameNode &node) const;
   const T &GetBeliefProb(const gbtGameNode &node) const;
   gbtVector<T> GetNodeValue(const gbtGameNode &node) const;
-  T GetIsetProb(const gbtGameInfoset &iset) const;
-  const T &GetIsetValue(const gbtGameInfoset &iset) const;
+  T GetInfosetProb(const gbtGameInfoset &iset) const;
+  const T &GetInfosetValue(const gbtGameInfoset &iset) const;
   T GetActionProb(const gbtGameAction &act) const;
   const T &GetActionValue(const gbtGameAction &act) const;
   const T &GetRegret(const gbtGameAction &act) const;
@@ -993,7 +1003,7 @@ public:
 
   T Payoff(int p_player) const;
   gbtDPVector<T> Beliefs(void) const;
-  T LiapValue(bool p_penalty = true) const;
+  T GetLiapValue(bool p_penalty = true) const;
   T QreValue(const gbtVector<T> &lambda, bool &) const;
   T MaxRegret(void) const;
 
@@ -1003,6 +1013,10 @@ public:
 		   const gbtGameAction &oppAction) const;
   T DiffNodeValue(const gbtGameNode &node, const gbtGamePlayer &player,
 		  const gbtGameAction &oppAction) const;
+
+  const T &operator()(const gbtGameAction &) const;
+  T &operator()(const gbtGameAction &);
+  void Set(int, int, int, const gbtNumber &);
 
   void Dump(gbtOutput &) const;
 

@@ -40,7 +40,6 @@
 #include "math/gmath.h"
 #include "game/game.h"
 #include "game/efgutils.h"
-#include "nash/behavsol.h"
 #include "nash/efglogit.h"
 
 #include "id.h"
@@ -1284,7 +1283,7 @@ void gbtEfgFrame::OnToolsEquilibrium(wxCommandEvent &)
     try {
       gbtProgressDialog status(this, 
 			       algorithm->GetAlgorithm() + "Solve Progress");
-      gbtList<BehavSolution> solutions;
+      gbtBehavNashSet solutions;
       solutions = algorithm->Solve(m_doc->GetEfgSupportList().GetCurrent(),
 				   status);
 
@@ -1320,7 +1319,7 @@ void gbtEfgFrame::OnToolsQre(wxCommandEvent &)
     algorithm.SetMaxLambda(10000000);
 
     gbtProgressDialog status(this, "QreSolve Progress");
-    gbtList<BehavSolution> solutions =
+    gbtBehavNashSet solutions =
       algorithm.Solve(m_doc->GetEfgSupportList().GetCurrent(), status);
 
     if (solutions.Length() > 0) {
@@ -1390,7 +1389,7 @@ void gbtEfgFrame::OnSupportDelete(wxCommandEvent &)
 
 void gbtEfgFrame::OnProfilesNew(wxCommandEvent &)
 {
-  BehavSolution profile = m_doc->GetGame()->NewBehavProfile(gbtNumber(0));
+  gbtBehavProfile<gbtNumber> profile = m_doc->GetGame()->NewBehavProfile(gbtNumber(0));
 
   dialogEditBehav dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
@@ -1401,7 +1400,7 @@ void gbtEfgFrame::OnProfilesNew(wxCommandEvent &)
 
 void gbtEfgFrame::OnProfilesDuplicate(wxCommandEvent &)
 {
-  BehavSolution profile(m_doc->GetBehavProfile());
+  gbtBehavProfile<gbtNumber> profile(m_doc->GetBehavProfile());
 
   dialogEditBehav dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {

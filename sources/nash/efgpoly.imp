@@ -52,7 +52,7 @@ private:
   int num_vars;
   long count,nevals;
   double time;
-  gbtList<BehavSolution> solutions;
+  gbtBehavNashSet solutions;
   const gbtSfgGame SF;
   bool is_singular;
   gbtArray<gbtArray<int> * > var;
@@ -78,9 +78,9 @@ private:
   gbtPVector<double> SeqFormVectorFromSolFormVector(const gbtVector<gbtDouble> &x)
                                                                       const;
 
-  bool ExtendsToANFNash(const BehavSolution &, gbtStatus &)             const;
+  bool ExtendsToANFNash(const gbtBehavProfile<gbtNumber> &, gbtStatus &) const;
   int SaveANFNashSolutions(const gbtList<gbtVector<gbtDouble> > &list, gbtStatus &);
-  bool ExtendsToNash(const BehavSolution &, gbtStatus &)                const;
+  bool ExtendsToNash(const gbtBehavProfile<gbtNumber> &, gbtStatus &) const;
   int SaveNashSolutions(const gbtList<gbtVector<gbtDouble> > &list, gbtStatus &);
 
 public:
@@ -94,7 +94,7 @@ public:
   double           Time(void)       const;
   bool             IsSingular(void) const;
 
-  const gbtList<BehavSolution> &GetSolutions(void) const;
+  const gbtBehavNashSet &GetSolutions(void) const;
 
   // Passing between variables of polynomials and sequence form probs
   gbtPVector<double> SeqFormProbsFromSolVars(const gbtVector<gbtDouble> &) const;
@@ -104,7 +104,7 @@ public:
 
   const int PolishKnownRoot(gbtVector<gbtDouble> &) const;
 
-  BehavSolution ReturnPolishedSolution(const gbtVector<gbtDouble> &) const;
+  gbtBehavProfile<gbtNumber> ReturnPolishedSolution(const gbtVector<gbtDouble> &) const;
 };
 
 //-------------------------------------------------------------------------
@@ -307,11 +307,11 @@ EfgPolEnumModule<T>::SeqFormVectorFromSolFormVector(const gbtVector<gbtDouble> &
 }
 
 template <class T> bool 
-EfgPolEnumModule<T>::ExtendsToANFNash(const BehavSolution &bs, 
-				            gbtStatus &m_status) const
+EfgPolEnumModule<T>::ExtendsToANFNash(const gbtBehavProfile<gbtNumber> &bs, 
+				      gbtStatus &m_status) const
 {
   algExtendsToAgentNash algorithm;
-  return algorithm.ExtendsToAgentNash(bs, bs.Support(), bs.Support(),
+  return algorithm.ExtendsToAgentNash(bs, bs->GetSupport(), bs->GetSupport(),
 				      m_status);
 }
 
@@ -323,23 +323,22 @@ EfgPolEnumModule<T>::SaveANFNashSolutions(const gbtList<gbtVector<gbtDouble> > &
   for (int k = 1; k <= list.Length(); k++) {
     gbtPVector<double> y = SeqFormVectorFromSolFormVector(list[k]);
 
-    BehavSolution sol(SF.ToBehav(y), "PolEnum[EFG]");
+    gbtBehavProfile<gbtNumber> sol = SF.ToBehav(y);
 
     if (ExtendsToNash(sol,p_status)) { 
-      index = solutions.Append(sol);
-      solutions[index].SetEpsilon(0);
-      //    solutions[index].SetIsNash(GBT_TRISTATE_TRUE);
+      solutions.Append(sol);
     }
   }
   return index;
 }
 
 template <class T> bool 
-EfgPolEnumModule<T>::ExtendsToNash(const BehavSolution &bs, 
-				            gbtStatus &m_status) const
+EfgPolEnumModule<T>::ExtendsToNash(const gbtBehavProfile<gbtNumber> &bs, 
+				   gbtStatus &m_status) const
 {
   algExtendsToNash algorithm;
-  return algorithm.ExtendsToNash(bs, bs.Support(), bs.Support(), m_status);
+  return algorithm.ExtendsToNash(bs, bs->GetSupport(), bs->GetSupport(),
+				 m_status);
 }
 
 template <class T> int 
@@ -350,11 +349,10 @@ EfgPolEnumModule<T>::SaveNashSolutions(const gbtList<gbtVector<gbtDouble> > &lis
   for (int k = 1; k <= list.Length(); k++) {
     gbtPVector<double> y = SeqFormVectorFromSolFormVector(list[k]);
 
-    BehavSolution sol(SF.ToBehav(y), "PolEnum[EFG]");
+    gbtBehavProfile<gbtNumber> sol = SF.ToBehav(y);
 
-    if(ExtendsToNash(sol,p_status)) { 
-      index = solutions.Append(sol);
-      solutions[index].SetEpsilon(0);
+    if (ExtendsToNash(sol,p_status)) { 
+      solutions.Append(sol);
     }
   }
   return index;
@@ -382,7 +380,7 @@ template <class T> EfgPolEnumParams &EfgPolEnumModule<T>::Parameters(void)
 }
 
 template <class T>
-const gbtList<BehavSolution> &EfgPolEnumModule<T>::GetSolutions(void) const
+const gbtBehavNashSet &EfgPolEnumModule<T>::GetSolutions(void) const
 {
   return solutions;
 }
@@ -537,7 +535,7 @@ const int EfgPolEnumModule<T>::PolishKnownRoot(gbtVector<gbtDouble> &point) cons
   return 1;	 
 }
 
-template <class T> BehavSolution 
+template <class T> gbtBehavProfile<gbtNumber>
 EfgPolEnumModule<T>::ReturnPolishedSolution(const gbtVector<gbtDouble> &root) const
 {
   gbtPVector<double> x(SF.NumSequences());
@@ -546,6 +544,5 @@ EfgPolEnumModule<T>::ReturnPolishedSolution(const gbtVector<gbtDouble> &root) co
     for(int j=1;j<=SF.NumSequences()[i];j++) 
       x(i,j) = NumProbOfSequence(i,j,root);
 
-  BehavSolution sol(SF.ToBehav(x), "Polish");
-  return sol;
+  return SF.ToBehav(x);
 }

@@ -53,6 +53,12 @@ public:
   virtual gbtGame GetGame(void) const = 0;
   virtual gbtNfgSupport GetSupport(void) const = 0;
 
+  virtual void SetStrategyProb(const gbtGameStrategy &p_strategy,
+			       const T &p_prob) = 0;
+  virtual T GetStrategyValue(const gbtGameStrategy &p_strategy) const = 0;
+  virtual T &operator()(const gbtGameStrategy &p_strategy) = 0;
+  virtual const T &operator()(const gbtGameStrategy &p_strategy) const = 0;
+
   virtual T Payoff(int pl) const = 0;
   virtual T Payoff(int pl, gbtGameStrategy) const = 0;
 
@@ -108,6 +114,11 @@ public:
   // Direct access so that the traditional operators work without dereferencing
   const T &operator()(int pl, int st) const { return (*m_rep)(pl, st); }
   T &operator()(int pl, int st) { return (*m_rep)(pl, st); }
+
+  const T &operator()(const gbtGameStrategy &p_strategy) const 
+  { return (*m_rep)(p_strategy); }
+  T &operator()(const gbtGameStrategy &p_strategy)
+  { return (*m_rep)(p_strategy); }
 
   // These almost certainly should be obsolete
   const T &operator[](int i) const { return (*m_rep)[i]; }

@@ -28,14 +28,23 @@
 #define NFGALGORITHM_H
 
 #include "game/game.h"
-#include "mixedsol.h"
+#include "game/mixed.h"
+
+//
+// This class is intended to replace MixedSolution and the usage of
+// gbtList<MixedSolution> throughout Gambit.
+// Currently simply a glorified list of profiles, it should evolve
+// to permit representation of equilibrium components, etc., as appropriate
+//
+class gbtMixedNashSet : public gbtList<gbtMixedProfile<gbtNumber> > {
+};
 
 class gbtNfgNashAlgorithm {
 public:
   virtual ~gbtNfgNashAlgorithm() { }
 
   virtual gbtText GetAlgorithm(void) const = 0;
-  virtual gbtList<MixedSolution> Solve(const gbtNfgGame &, gbtStatus &) = 0;
+  virtual gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &) = 0;
 };
 
 #endif  // NFGALGORITHM_H

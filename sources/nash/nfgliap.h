@@ -57,7 +57,7 @@ public:
   void SetTolN(double p_tolN) { m_tolN = p_tolN; }
 
   gbtText GetAlgorithm(void) const { return "Liap[NFG]"; }
-  gbtList<MixedSolution> Solve(const gbtNfgGame &, gbtStatus &);
+  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
 };
 
 #endif // NFGLIAP_H

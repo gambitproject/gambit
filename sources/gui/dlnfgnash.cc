@@ -59,10 +59,10 @@ public:
 class gbtNfgNashOneNash : public gbtNfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "OneNash"; }
-  gbtList<MixedSolution> Solve(const gbtNfgGame &, gbtStatus &);
+  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
 };
 
-gbtList<MixedSolution> gbtNfgNashOneNash::Solve(const gbtNfgGame &p_nfg,
+gbtMixedNashSet gbtNfgNashOneNash::Solve(const gbtNfgGame &p_nfg,
 						gbtStatus &p_status)
 {
   gbtArray<int> players(p_nfg->NumPlayers());
@@ -93,7 +93,7 @@ gbtList<MixedSolution> gbtNfgNashOneNash::Solve(const gbtNfgGame &p_nfg,
     }
   }
   catch (...) {
-    return gbtList<MixedSolution>();
+    return gbtMixedNashSet();
   }
 }
 
@@ -147,10 +147,10 @@ gbtNfgNashAlgorithm *gbtPanelNfgOneNash::GetAlgorithm(void) const
 class gbtNfgNashTwoNash : public gbtNfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "TwoNash"; }
-  gbtList<MixedSolution> Solve(const gbtNfgGame &, gbtStatus &);
+  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
 };
 
-gbtList<MixedSolution> gbtNfgNashTwoNash::Solve(const gbtNfgGame &p_game,
+gbtMixedNashSet gbtNfgNashTwoNash::Solve(const gbtNfgGame &p_game,
 						gbtStatus &p_status)
 {
   gbtArray<int> players(p_game->NumPlayers());
@@ -187,7 +187,7 @@ gbtList<MixedSolution> gbtNfgNashTwoNash::Solve(const gbtNfgGame &p_game,
     }
   }
   catch (...) {
-    return gbtList<MixedSolution>();
+    return gbtMixedNashSet();
   }
 }
 
@@ -241,10 +241,10 @@ gbtNfgNashAlgorithm *gbtPanelNfgTwoNash::GetAlgorithm(void) const
 class gbtNfgNashAllNash : public gbtNfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "AllNash"; }
-  gbtList<MixedSolution> Solve(const gbtNfgGame &, gbtStatus &);
+  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
 };
 
-gbtList<MixedSolution> gbtNfgNashAllNash::Solve(const gbtNfgGame &p_game,
+gbtMixedNashSet gbtNfgNashAllNash::Solve(const gbtNfgGame &p_game,
 						gbtStatus &p_status)
 {
   gbtArray<int> players(p_game->NumPlayers());
@@ -281,7 +281,7 @@ gbtList<MixedSolution> gbtNfgNashAllNash::Solve(const gbtNfgGame &p_game,
     }
   }
   catch (...) {
-    return gbtList<MixedSolution>();
+    return gbtMixedNashSet();
   }
 }
 
@@ -334,10 +334,10 @@ gbtNfgNashAlgorithm *gbtPanelNfgAllNash::GetAlgorithm(void) const
 class gbtNfgNashOnePerfect : public gbtNfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "OnePerfect"; }
-  gbtList<MixedSolution> Solve(const gbtNfgGame &, gbtStatus &);
+  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
 };
 
-gbtList<MixedSolution> gbtNfgNashOnePerfect::Solve(const gbtNfgGame &p_game,
+gbtMixedNashSet gbtNfgNashOnePerfect::Solve(const gbtNfgGame &p_game,
 						   gbtStatus &p_status)
 {
   gbtArray<int> players(p_game->NumPlayers());
@@ -356,7 +356,7 @@ gbtList<MixedSolution> gbtNfgNashOnePerfect::Solve(const gbtNfgGame &p_game,
     return algorithm.Solve(support, p_status);
   }
   catch (...) {
-    return gbtList<MixedSolution>();
+    return gbtMixedNashSet();
   }
 }
 
@@ -409,10 +409,10 @@ gbtNfgNashAlgorithm *gbtPanelNfgOnePerfect::GetAlgorithm(void) const
 class gbtNfgNashTwoPerfect : public gbtNfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "TwoPerfect"; }
-  gbtList<MixedSolution> Solve(const gbtNfgGame &, gbtStatus &);
+  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
 };
 
-gbtList<MixedSolution> gbtNfgNashTwoPerfect::Solve(const gbtNfgGame &p_game,
+gbtMixedNashSet gbtNfgNashTwoPerfect::Solve(const gbtNfgGame &p_game,
 						   gbtStatus &p_status)
 {
   gbtArray<int> players(p_game->NumPlayers());
@@ -431,7 +431,7 @@ gbtList<MixedSolution> gbtNfgNashTwoPerfect::Solve(const gbtNfgGame &p_game,
     return algorithm.Solve(support, p_status);
   }
   catch (...) {
-    return gbtList<MixedSolution>();
+    return gbtMixedNashSet();
   }
 }
 
@@ -484,10 +484,10 @@ gbtNfgNashAlgorithm *gbtPanelNfgTwoPerfect::GetAlgorithm(void) const
 class gbtNfgNashAllPerfect : public gbtNfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "AllPerfect"; }
-  gbtList<MixedSolution> Solve(const gbtNfgGame &, gbtStatus &);
+  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
 };
 
-gbtList<MixedSolution> gbtNfgNashAllPerfect::Solve(const gbtNfgGame &p_game,
+gbtMixedNashSet gbtNfgNashAllPerfect::Solve(const gbtNfgGame &p_game,
 						   gbtStatus &p_status)
 {
   gbtArray<int> players(p_game->NumPlayers());
@@ -506,7 +506,7 @@ gbtList<MixedSolution> gbtNfgNashAllPerfect::Solve(const gbtNfgGame &p_game,
     return algorithm.Solve(support, p_status);
   }
   catch (...) {
-    return gbtList<MixedSolution>();
+    return gbtMixedNashSet();
   }
 }
 

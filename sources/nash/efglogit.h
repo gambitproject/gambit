@@ -57,7 +57,7 @@ public:
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
 
   gbtText GetAlgorithm(void) const { return "Qre"; }
-  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
+  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
 #endif  // EFGLOGIT_H

@@ -32,9 +32,8 @@
 
 #include <wx/treectrl.h>
 
-// For MixedSolution; when gbtCorBranch goes abstract, should be removed
-#include "nash/mixedsol.h"
-#include "nash/behavsol.h"
+#include "nash/efgalgorithm.h"
+#include "nash/nfgalgorithm.h"
 
 //
 // gbtCorBranch is meant to encapsulate the idea of a branch of a
@@ -68,13 +67,13 @@ public:
 
 class gbtCorBranchMixed : public gbtCorBranch {
 private:
-  gbtList<MixedSolution> m_data;
+  gbtMixedNashSet m_data;
   gbtArray<bool> m_shown;
 
 public:
   // Constructors
   gbtCorBranchMixed(void);
-  gbtCorBranchMixed(const gbtList<MixedSolution> &);
+  gbtCorBranchMixed(const gbtMixedNashSet &);
   virtual ~gbtCorBranchMixed() { }
 
   // Returns the number of dimensions of the product of simplices
@@ -102,13 +101,13 @@ public:
 
 class gbtCorBranchBehav : public gbtCorBranch {
 private:
-  gbtList<BehavSolution> m_data;
+  gbtBehavNashSet m_data;
   gbtArray<bool> m_shown;
 
 public:
   // Constructors
   gbtCorBranchBehav(void);
-  gbtCorBranchBehav(const gbtList<BehavSolution> &);
+  gbtCorBranchBehav(const gbtBehavNashSet &);
   virtual ~gbtCorBranchBehav() { }
 
   // Returns the number of dimensions of the product of simplices

@@ -45,7 +45,6 @@
 
 #include "game/game.h"
 #include "game/efgutils.h"
-#include "nash/behavsol.h"
 #include "game/nfgciter.h"
 
 #include "gambit.h"
@@ -805,7 +804,7 @@ void gbtNfgFrame::OnToolsEquilibrium(wxCommandEvent &)
     try {
       gbtProgressDialog status(this,
 			       algorithm->GetAlgorithm() + "Solve Progress");
-      gbtList<MixedSolution> solutions;
+      gbtMixedNashSet solutions;
       solutions = algorithm->Solve(m_doc->GetNfgSupportList().GetCurrent(),
 				   status);
 
@@ -831,7 +830,7 @@ void gbtNfgFrame::OnToolsQre(wxCommandEvent &)
   dialogNfgQre dialog(this, m_doc->GetNfgSupportList().GetCurrent());
 
   if (dialog.ShowModal() == wxID_OK) {
-    gbtList<MixedSolution> solutions;
+    gbtMixedNashSet solutions;
 
     try {
       if (dialog.UseGridSearch()) {
@@ -947,7 +946,7 @@ void gbtNfgFrame::OnSupportDelete(wxCommandEvent &)
 
 void gbtNfgFrame::OnProfilesNew(wxCommandEvent &)
 {
-  MixedSolution profile = m_doc->GetGame()->NewNfgSupport()->NewMixedProfile(gbtNumber(0));
+  gbtMixedProfile<gbtNumber> profile = m_doc->GetGame()->NewNfgSupport()->NewMixedProfile(gbtNumber(0));
 
   dialogEditMixed dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
@@ -958,7 +957,7 @@ void gbtNfgFrame::OnProfilesNew(wxCommandEvent &)
 
 void gbtNfgFrame::OnProfilesDuplicate(wxCommandEvent &)
 {
-  MixedSolution profile(m_doc->GetMixedProfile());
+  gbtMixedProfile<gbtNumber> profile(m_doc->GetMixedProfile());
   
   dialogEditMixed dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {

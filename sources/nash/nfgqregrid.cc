@@ -445,7 +445,7 @@ static bool Polish(gbtMixedProfile<double> &p_profile, double p_lambda)
 }
 
 void QreNfgGrid::Solve(const gbtNfgSupport &p_support, gbtOutput &p_pxifile,
-		       gbtStatus &p_status, gbtList<MixedSolution> &p_solutions)
+		       gbtStatus &p_status, gbtMixedNashSet &p_solutions)
 {
   p_solutions.Flush();
 
@@ -471,7 +471,7 @@ void QreNfgGrid::Solve(const gbtNfgSupport &p_support, gbtOutput &p_pxifile,
   double lambda = m_minLam;
   while (lambda <= m_maxLam) {
     step++;
-    gbtList<MixedSolution> cursolns;
+    gbtMixedNashSet cursolns;
 
     p_status.Get();
     MixedProfileIterator iter1(centroid, m_delp1, 1.0, staticPlayer);
@@ -488,15 +488,14 @@ void QreNfgGrid::Solve(const gbtNfgSupport &p_support, gbtOutput &p_pxifile,
 	    if (Polish(candidate, lambda)) {
 	      bool newsoln = true;
 	      for (int j = 1; j <= cursolns.Length(); j++) {
-		if (Distance(cursolns[j].Profile(), candidate) < .00001) {
+		if (Distance(cursolns[j], candidate) < .00001) {
 		  newsoln = false;
 		}
 	      }
 
 	      if (newsoln) {
 		OutputResult(p_pxifile, candidate, lambda, 0.0);
-		int i = cursolns.Append(MixedSolution(candidate, "QreGrid[NFG]"));
-		cursolns[i].SetQre(lambda, 0.0);
+		cursolns.Append(candidate->NewMixedProfile(gbtNumber(0)));
 	      }
 	    }
 	  }

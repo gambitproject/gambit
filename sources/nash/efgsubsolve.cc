@@ -32,7 +32,7 @@
 void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 				      gbtStatus &p_status,
 				      gbtGameNode n,
-				      gbtList<BehavSolution> &solns,
+				      gbtBehavNashSet &solns,
 				      gbtList<gbtGameOutcome> &values)
 {
   int i;
@@ -48,7 +48,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
   subrootvalues.Append(gbtArray<gbtGameOutcome>(subroots.Length()));
   
   for (i = 1; i <= subroots.Length(); i++)  {
-    gbtList<BehavSolution> subsolns;
+    gbtBehavNashSet subsolns;
     gbtList<gbtGameOutcome> subvalues;
     
     FindSubgames(p_support, p_status, subroots[i], subsolns, subvalues);
@@ -66,7 +66,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
     for (int soln = 1; soln <= thissolns.Length(); soln++) {
       for (int subsoln = 1; subsoln <= subsolns.Length(); subsoln++) {
 	gbtBehavProfile<gbtNumber> bp(thissolns[soln]);
-	gbtBehavProfile<gbtNumber> tmp(subsolns[subsoln].Profile());
+	gbtBehavProfile<gbtNumber> tmp(subsolns[subsoln]);
 	for (int j = 1; j <= bp->BehavProfileLength(); j++) {
 	  bp[j] += tmp[j];
 	}
@@ -128,7 +128,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
       }
     }
 
-    gbtList<BehavSolution> sol;
+    gbtBehavNashSet sol;
 
     bool interrupted = false;
 
@@ -142,7 +142,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 	gbtGame nfg = foo;
 	gbtNfgSupport support(nfg->NewNfgSupport());
 
-	gbtList<MixedSolution> nfgSolutions;
+	gbtMixedNashSet nfgSolutions;
 
 	try {
 	  nfgSolutions = m_nfgAlgorithm->Solve(support, p_status);
@@ -152,7 +152,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 	}
 
 	for (int soln = 1; soln <= nfgSolutions.Length(); soln++) {
-	  gbtMixedProfile<gbtNumber> profile(nfgSolutions[soln].Profile());
+	  gbtMixedProfile<gbtNumber> profile(nfgSolutions[soln]);
 	  sol.Append((gbtBehavProfile<gbtNumber>) profile);
 	}
       }
@@ -168,8 +168,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
     }
     
     for (int solno = 1; solno <= sol.Length(); solno++)  {
-      int ii = solns.Append(thissolns[soln]);
-      solns[ii].SetEpsilon(sol[solno].Epsilon());
+      solns.Append(thissolns[soln]);
       
       for (int pl = 1; pl <= foo->NumPlayers(); pl++)  {
 	gbtGamePlayer p = foo->GetPlayer(pl);
@@ -197,23 +196,15 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 	  
 	  for (int act = 1; act <= subsupport->NumActions(pl, iset); act++) {
 	    int actno = subsupport->GetAction(pl, iset, act)->GetId();
-	    solns[solns.Length()].Set(pl, index, actno,
-				      sol[solno](subsupport->GetAction(pl, iset, act)));
+	    solns[solns.Length()]->Set(pl, index, actno,
+				       sol[solno](subsupport->GetAction(pl, iset, act)));
 	  }
 	}
       }
       
-      int j = solns.Length();
-      if (m_efgAlgorithm) {
-	solns[j].SetCreator(m_efgAlgorithm->GetAlgorithm());
-      }
-      else {
-	solns[j].SetCreator(m_nfgAlgorithm->GetAlgorithm());
-      }
-
       gbtVector<gbtNumber> subval(foo->NumPlayers());
       for (i = 1; i <= foo->NumPlayers(); i++)  {
-	subval[i] = sol[solno].Payoff(i);
+	subval[i] = sol[solno]->Payoff(i);
 	if (!n->GetOutcome().IsNull())  {
 	  subval[i] += n->GetOutcome()->GetPayoff(p_support->GetPlayer(i));
         }
@@ -253,7 +244,7 @@ gbtEfgNashSubgames::~gbtEfgNashSubgames()
 //               gbtEfgNashSubgames: Public member functions
 //-----------------------------------------------------------------------
 
-gbtList<BehavSolution> gbtEfgNashSubgames::Solve(const gbtEfgSupport &p_support,
+gbtBehavNashSet gbtEfgNashSubgames::Solve(const gbtEfgSupport &p_support,
 					  gbtStatus &p_status)
 {
   solutions.Flush();

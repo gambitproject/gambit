@@ -164,6 +164,31 @@ void gbtMixedProfileTable<T>::Payoff(int pl, int player1, gbtVector<T> &value) c
   PPayoff(pl, player1, 1, 1, (T) 1, value);
 }
 
+template <class T> void
+gbtMixedProfileTable<T>::SetStrategyProb(const gbtGameStrategy &p_strategy,
+					 const T &p_prob)
+{
+  m_profile(p_strategy->GetPlayer()->GetId(), p_strategy->GetId()) = p_prob;
+}
+
+template <class T> T
+gbtMixedProfileTable<T>::GetStrategyValue(const gbtGameStrategy &p_strategy) const
+{
+  return Payoff(p_strategy->GetPlayer()->GetId(), p_strategy);
+}
+
+template <class T> T &
+gbtMixedProfileTable<T>::operator()(const gbtGameStrategy &p_strategy)
+{
+  return m_profile(p_strategy->GetPlayer()->GetId(), p_strategy->GetId());
+}
+
+template <class T> const T &
+gbtMixedProfileTable<T>::operator()(const gbtGameStrategy &p_strategy) const
+{
+  return m_profile(p_strategy->GetPlayer()->GetId(), p_strategy->GetId());
+}
+
 template <class T>
 bool gbtMixedProfileTable<T>::operator==(const gbtMixedProfileRep<T> &mp) const
 {
@@ -453,6 +478,30 @@ gbtMixedProfileTree<T> *gbtMixedProfileTree<T>::Copy(void) const
   return new gbtMixedProfileTree<T>(*this);
 }
 
+template <class T> void
+gbtMixedProfileTree<T>::SetStrategyProb(const gbtGameStrategy &p_strategy,
+					 const T &p_prob)
+{
+  m_profile(p_strategy->GetPlayer()->GetId(), p_strategy->GetId()) = p_prob;
+}
+
+template <class T> T
+gbtMixedProfileTree<T>::GetStrategyValue(const gbtGameStrategy &p_strategy) const
+{
+  return Payoff(p_strategy->GetPlayer()->GetId(), p_strategy);
+}
+
+template <class T> T &
+gbtMixedProfileTree<T>::operator()(const gbtGameStrategy &p_strategy)
+{
+  return m_profile(p_strategy->GetPlayer()->GetId(), p_strategy->GetId());
+}
+
+template <class T> const T &
+gbtMixedProfileTree<T>::operator()(const gbtGameStrategy &p_strategy) const
+{
+  return m_profile(p_strategy->GetPlayer()->GetId(), p_strategy->GetId());
+}
 
 // FIXME: Semantics of these should be "copy-like", in that the returned
 // profile should be the same, up to the precision change

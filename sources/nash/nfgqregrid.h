@@ -28,8 +28,8 @@
 #define NFGQREGRID_H
 
 #include "base/base.h"
-#include "mixedsol.h"
-#include "nash/algutils.h"
+#include "nash/nfgalgorithm.h"
+
 
 class QreNfgGrid {
 private:
@@ -91,7 +91,7 @@ public:
 
   // RUN THE ALGORITHM
   void Solve(const gbtNfgSupport &, gbtOutput &p_pxifile, gbtStatus &p_status,
-	     gbtList<MixedSolution> &);
+	     gbtMixedNashSet &);
 };
 
 #endif  // NFGQREGRID_H

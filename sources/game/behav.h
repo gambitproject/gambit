@@ -62,11 +62,15 @@ public:
   virtual gbtGame GetGame(void) const = 0;
   virtual gbtEfgSupport GetSupport(void) const = 0;
   
+  virtual const T &operator()(const gbtGameAction &) const = 0;
+  virtual T &operator()(const gbtGameAction &) = 0;
+  virtual void Set(int, int, int, const gbtNumber &) = 0;
+
   virtual const T &GetRealizProb(const gbtGameNode &node) const = 0;
   virtual const T &GetBeliefProb(const gbtGameNode &node) const = 0;
   virtual gbtVector<T> GetNodeValue(const gbtGameNode &node) const = 0;
-  virtual T GetIsetProb(const gbtGameInfoset &iset) const = 0;
-  virtual const T &GetIsetValue(const gbtGameInfoset &iset) const = 0;
+  virtual T GetInfosetProb(const gbtGameInfoset &iset) const = 0;
+  virtual const T &GetInfosetValue(const gbtGameInfoset &iset) const = 0;
   virtual T GetActionProb(const gbtGameAction &act) const = 0;
   virtual const T &GetActionValue(const gbtGameAction &act) const = 0;
   virtual const T &GetRegret(const gbtGameAction &act) const = 0;
@@ -74,7 +78,7 @@ public:
   // COMPUTATION OF INTERESTING QUANTITIES
   virtual T Payoff(int p_player) const = 0;
   virtual gbtDPVector<T> Beliefs(void) const = 0;
-  virtual T LiapValue(bool p_penalty = true) const = 0;
+  virtual T GetLiapValue(bool p_penalty = true) const = 0;
   virtual T QreValue(const gbtVector<T> &lambda, bool &) const = 0;
   virtual T MaxRegret(void) const = 0;
 
@@ -139,6 +143,10 @@ public:
   const T &operator()(int pl, int iset, int act) const
   { return (*m_rep)(pl, iset, act); }
   T &operator()(int pl, int iset, int act) { return (*m_rep)(pl, iset, act); }
+
+  const T &operator()(const gbtGameAction &p_action) const
+  { return (*m_rep)(p_action); }
+  T &operator()(const gbtGameAction &p_action) { return (*m_rep)(p_action); }
 
   // These almost certainly should be obsolete
   const T &operator[](int i) const { return (*m_rep)[i]; }

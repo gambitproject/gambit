@@ -30,8 +30,6 @@
 #endif  // WX_PRECOMP
 
 #include "game/game.h"
-#include "nash/behavsol.h"
-#include "nash/mixedsol.h"
 
 #include "id.h"
 #include "dlqrefile.h"
@@ -44,7 +42,7 @@ BEGIN_EVENT_TABLE(dialogQreFile, wxFrame)
 END_EVENT_TABLE()
 
 dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
-			     const gbtList<MixedSolution> &p_profiles)
+			     const gbtMixedNashSet &p_profiles)
   : wxFrame(p_parent, -1, _("Quantal response equilibria"),
 	    wxDefaultPosition),
     gbtGameView(p_doc), m_mixedProfiles(p_profiles)
@@ -57,7 +55,7 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
   m_qreList->InsertColumn(0, _("Lambda"));
 
   int maxColumn = 0;
-  const gbtNfgSupport &support = p_profiles[1].Support();
+  const gbtNfgSupport &support = p_profiles[1]->GetSupport();
   for (int pl = 1; pl <= support->NumPlayers(); pl++) {
     for (int st = 1; st <= support->GetPlayer(pl)->NumStrategies(); st++) {
       m_qreList->InsertColumn(++maxColumn,
@@ -66,10 +64,12 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
   }
 
   for (int i = 1; i <= p_profiles.Length(); i++) {
-    m_qreList->InsertItem(i - 1, 
-			  wxString::Format(wxT("%s"),
-					   (char *) ToText(p_profiles[i].QreLambda())));
-    const gbtMixedProfile<gbtNumber> &profile = p_profiles[i].Profile();
+    //    m_qreList->InsertItem(i - 1, 
+    //			  wxString::Format(wxT("%s"),
+    //				   (char *) ToText(p_profiles[i]->QreLambda())));
+    // FIXME: QRE needs to return its own correspondence now
+    m_qreList->InsertItem(i - 1, wxT("???"));
+    const gbtMixedProfile<gbtNumber> &profile = p_profiles[i];
     for (int j = 1; j <= profile->MixedProfileLength(); j++) {
       m_qreList->SetItem(i - 1, j, 
 			 wxString::Format(wxT("%s"),
@@ -101,7 +101,7 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
 }
 
 dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
-			     const gbtList<BehavSolution> &p_profiles)
+			     const gbtBehavNashSet &p_profiles)
   : wxFrame(p_parent, -1, _("Quantal response equilibria"),
 	    wxDefaultPosition),
     gbtGameView(p_doc), m_behavProfiles(p_profiles)
@@ -114,7 +114,7 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
   m_qreList->InsertColumn(0, _("Lambda"));
 
   int maxColumn = 0;
-  const gbtEfgSupport &support = p_profiles[1].Support();
+  const gbtEfgSupport &support = p_profiles[1]->GetSupport();
   for (int pl = 1; pl <= support->NumPlayers(); pl++) {
     for (int iset = 1; iset <= support->GetPlayer(pl)->NumInfosets(); iset++) {
       for (int act = 1; act <= support->NumActions(pl, iset); act++) {
@@ -127,9 +127,9 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
 
   for (int i = 1; i <= p_profiles.Length(); i++) {
     m_qreList->InsertItem(i - 1, 
-			  wxString::Format(wxT("%s"),
-					   (char *) ToText(p_profiles[i].QreLambda())));
-    const gbtPVector<gbtNumber> &profile = p_profiles[i].Profile()->GetPVector();
+			  wxString::Format(wxT("%s"), "???"));
+			  //					   (char *) ToText(p_profiles[i].QreLambda())));
+    const gbtPVector<gbtNumber> &profile = p_profiles[i]->GetPVector();
     for (int j = 1; j <= profile.Length(); j++) {
       m_qreList->SetItem(i - 1, j, 
 			 wxString::Format(wxT("%s"),
@@ -180,20 +180,23 @@ void dialogQreFile::OnFileExportPxi(wxCommandEvent &)
 
       if (m_mixedProfiles.Length() > 0) {
 	file << "Dimensionality:\n";
-	file << m_mixedProfiles[1].GetGame()->NumPlayers() << ' ';
-	for (int pl = 1; pl <= m_mixedProfiles[1].GetGame()->NumPlayers(); pl++) {
-	  file << m_mixedProfiles[1].Support()->GetPlayer(pl)->NumStrategies() << ' ';
+	file << m_mixedProfiles[1]->NumPlayers() << ' ';
+	for (int pl = 1; pl <= m_mixedProfiles[1]->NumPlayers(); pl++) {
+	  file << m_mixedProfiles[1]->GetPlayer(pl)->NumStrategies() << ' ';
 	}
 	file << "\n";
 	
 	file << "Settings:\n";
-	file << ((double) m_mixedProfiles[1].QreLambda()) << '\n';
-	file << ((double) m_mixedProfiles[m_mixedProfiles.Length()].QreLambda()) << '\n';
+	// FIXME: Should be gotten from the QRE correspondence
+	//	file << ((double) m_mixedProfiles[1].QreLambda()) << '\n';
+	file << ((double) 0);
+	//file << ((double) m_mixedProfiles[m_mixedProfiles.Length()].QreLambda()) << '\n';
+	file << ((double) 0);
 	file << 0.1 << '\n';
 	file << 0 << '\n' << 1 << '\n' << 1 << '\n';
 
 	file << "DataFormat:\n";
-	int numcols = m_mixedProfiles[1].Support()->MixedProfileLength() + 2;
+	int numcols = m_mixedProfiles[1]->MixedProfileLength() + 2;
 	file << numcols << ' ';
 	for (int i = 1; i <= numcols; i++) {
 	  file << i << ' ';
@@ -203,8 +206,9 @@ void dialogQreFile::OnFileExportPxi(wxCommandEvent &)
 	file << "Data:\n";
 
 	for (int i = 1; i <= m_mixedProfiles.Length(); i++) {
-	  const gbtMixedProfile<gbtNumber> &profile = m_mixedProfiles[i].Profile();
-	  file << ((double) m_mixedProfiles[i].QreLambda()) << " 0.000000 ";
+	  const gbtMixedProfile<gbtNumber> &profile = m_mixedProfiles[i];
+	  //file << ((double) m_mixedProfiles[i].QreLambda()) << " 0.000000 ";
+	  file << ((double) 0);
 	  
 	  for (int j = 1; j <= profile->MixedProfileLength(); j++) {
 	    file << ((double) profile[j]) << ' ';
@@ -216,23 +220,25 @@ void dialogQreFile::OnFileExportPxi(wxCommandEvent &)
       else {
 	// Export behavior profiles
 	file << "Dimensionality:\n";
-	file << m_behavProfiles[1].GetGame()->NumPlayers() << ' ';
-	for (int pl = 1; pl <= m_behavProfiles[1].GetGame()->NumPlayers(); pl++) {
-	  gbtGamePlayer player = m_behavProfiles[1].GetGame()->GetPlayer(pl);
+	file << m_behavProfiles[1]->NumPlayers() << ' ';
+	for (int pl = 1; pl <= m_behavProfiles[1]->NumPlayers(); pl++) {
+	  gbtGamePlayer player = m_behavProfiles[1]->GetPlayer(pl);
 	  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	    file << m_behavProfiles[1].Support()->NumActions(pl, iset) << ' ';
+	    file << m_behavProfiles[1]->GetSupport()->NumActions(pl, iset) << ' ';
 	  }
 	}
 	file << "\n";
 	
 	file << "Settings:\n";
-	file << ((double) m_behavProfiles[1].QreLambda()) << '\n';
-	file << ((double) m_behavProfiles[m_behavProfiles.Length()].QreLambda()) << '\n';
+	//	file << ((double) m_behavProfiles[pf1].QreLambda()) << '\n';
+	file << 0.0 << '\n';
+	//	file << ((double) m_behavProfiles[m_behavProfiles.Length()].QreLambda()) << '\n';
+	file << 1.0 << '\n';
 	file << 0.1 << '\n';
 	file << 0 << '\n' << 1 << '\n' << 1 << '\n';
 
 	file << "DataFormat:\n";
-	int numcols = m_behavProfiles[1].Profile()->BehavProfileLength() + 2;
+	int numcols = m_behavProfiles[1]->BehavProfileLength() + 2;
 	file << numcols << ' ';
 	for (int i = 1; i <= numcols; i++) {
 	  file << i << ' ';
@@ -242,8 +248,9 @@ void dialogQreFile::OnFileExportPxi(wxCommandEvent &)
 	file << "Data:\n";
 
 	for (int i = 1; i <= m_behavProfiles.Length(); i++) {
-	  const gbtBehavProfile<gbtNumber> &profile = m_behavProfiles[i].Profile();
-	  file << ((double) m_behavProfiles[i].QreLambda()) << " 0.000000 ";
+	  const gbtBehavProfile<gbtNumber> &profile = m_behavProfiles[i];
+	  //	  file << ((double) m_behavProfiles[i].QreLambda()) << " 0.000000 ";
+	  file << 0.0 << " 0.000000 ";
 	  
 	  for (int j = 1; j <= profile->BehavProfileLength(); j++) {
 	    file << ((double) profile[j]) << ' ';
@@ -260,7 +267,7 @@ void dialogQreFile::OnFileExportPxi(wxCommandEvent &)
 void dialogQreFile::OnToolsPlot(wxCommandEvent &)
 {
   if (m_mixedProfiles.Length() > 0) {
-    gbtNfgSupport support(m_mixedProfiles[1].GetGame()->NewNfgSupport());
+    gbtNfgSupport support(m_mixedProfiles[1]->NewNfgSupport());
     support->SetLabel("Displayed support");
     gbtNfgCorPlotFrame *plotFrame = 
       new gbtNfgCorPlotFrame(support, this, wxDefaultPosition,
@@ -268,7 +275,7 @@ void dialogQreFile::OnToolsPlot(wxCommandEvent &)
     plotFrame->SetCorrespondence(new gbtCorBranchMixed(m_mixedProfiles));
   }
   else {
-    gbtEfgSupport support = m_behavProfiles[1].GetGame()->NewEfgSupport();
+    gbtEfgSupport support = m_behavProfiles[1]->NewEfgSupport();
     support->SetLabel("Displayed support");
     gbtEfgCorPlotFrame *plotFrame = 
       new gbtEfgCorPlotFrame(support, this, wxDefaultPosition,

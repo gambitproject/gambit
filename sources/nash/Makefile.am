@@ -5,12 +5,8 @@ noinst_LIBRARIES = libnash.a
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
 libnash_a_SOURCES = \
-	algutils.cc \
-	algutils.h \
 	behavextend.cc \
 	behavextend.h \
-	behavsol.cc \
-	behavsol.h \
 	clique.cc \
 	clique.h \
 	efgalgorithm.h \
@@ -34,8 +30,6 @@ libnash_a_SOURCES = \
 	lhtab.cc \
 	lhtab.h \
 	lhtab.imp \
-	mixedsol.cc \
-	mixedsol.h \
 	nfgalgorithm.h \
 	nfgch.cc \
 	nfgch.h \

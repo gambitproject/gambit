@@ -84,10 +84,10 @@
 gbtCorBranchMixed::gbtCorBranchMixed(void)
 { }
 
-gbtCorBranchMixed::gbtCorBranchMixed(const gbtList<MixedSolution> &p_data)
+gbtCorBranchMixed::gbtCorBranchMixed(const gbtMixedNashSet &p_data)
   : m_data(p_data)
 {
-  m_shown = gbtArray<bool>(m_data[1].GetGame()->MixedProfileLength());
+  m_shown = gbtArray<bool>(m_data[1]->MixedProfileLength());
   for (int i = 1; i <= m_shown.Length(); m_shown[i++] = true);
 }
 
@@ -96,19 +96,23 @@ gbtCorBranchMixed::gbtCorBranchMixed(const gbtList<MixedSolution> &p_data)
 //------------------------------------------------------------------------
 
 int gbtCorBranchMixed::NumDimensions(void) const
-{ return m_data[1].Profile()->MixedProfileLength(); }
+{ return m_data[1]->MixedProfileLength(); }
 
 int gbtCorBranchMixed::NumData(void) const
 { return m_data.Length(); }
 
 double gbtCorBranchMixed::GetValue(int p_index, int p_dim) const
-{ return m_data[p_index].Profile()[p_dim]; }
+{ return m_data[p_index][p_dim]; }
 
 double gbtCorBranchMixed::GetParameter(int p_index) const
-{ return m_data[p_index].QreLambda(); }
+  // FIXME!
+  //{ return m_data[p_index].QreLambda(); }
+{ return 1.0; }
 
 double gbtCorBranchMixed::GetMaxParameter(void) const
-{ return m_data[m_data.Length()].QreLambda(); }
+  // FIXME!
+  //{ return m_data[m_data.Length()].QreLambda(); }
+{ return 1.0; }
 
 double gbtCorBranchMixed::GetMinParameter(void) const
 { return 0.0; }
@@ -117,8 +121,8 @@ gbtText gbtCorBranchMixed::GetLabel(int p_dim) const
 {
   int index = 1;
 
-  for (int pl = 1; pl <= m_data[1].GetGame()->NumPlayers(); pl++) {
-    gbtGamePlayer player = m_data[1].GetGame()->GetPlayer(pl);
+  for (int pl = 1; pl <= m_data[1]->NumPlayers(); pl++) {
+    gbtGamePlayer player = m_data[1]->GetPlayer(pl);
 
     for (int st = 1; st <= player->NumStrategies(); st++) {
       if (index++ == p_dim) {
@@ -142,10 +146,10 @@ gbtText gbtCorBranchMixed::GetLabel(int p_dim) const
 gbtCorBranchBehav::gbtCorBranchBehav(void)
 { }
 
-gbtCorBranchBehav::gbtCorBranchBehav(const gbtList<BehavSolution> &p_data)
+gbtCorBranchBehav::gbtCorBranchBehav(const gbtBehavNashSet &p_data)
   : m_data(p_data)
 {
-  m_shown = gbtArray<bool>(m_data[1].GetGame()->BehavProfileLength());
+  m_shown = gbtArray<bool>(m_data[1]->BehavProfileLength());
   for (int i = 1; i <= m_shown.Length(); m_shown[i++] = true);
 }
 
@@ -154,19 +158,23 @@ gbtCorBranchBehav::gbtCorBranchBehav(const gbtList<BehavSolution> &p_data)
 //------------------------------------------------------------------------
 
 int gbtCorBranchBehav::NumDimensions(void) const
-{ return m_data[1].Profile()->BehavProfileLength(); }
+{ return m_data[1]->BehavProfileLength(); }
 
 int gbtCorBranchBehav::NumData(void) const
 { return m_data.Length(); }
 
 double gbtCorBranchBehav::GetValue(int p_index, int p_dim) const
-{ return m_data[p_index].Profile()[p_dim]; }
+{ return m_data[p_index][p_dim]; }
 
 double gbtCorBranchBehav::GetParameter(int p_index) const
-{ return m_data[p_index].QreLambda(); }
+  // FIXME
+  //{ return m_data[p_index].QreLambda(); }
+{ return 1.0; }
 
 double gbtCorBranchBehav::GetMaxParameter(void) const
-{ return m_data[m_data.Length()].QreLambda(); }
+  // FIXME
+  // { return m_data[m_data.Length()].QreLambda(); }
+{ return 1.0; }
 
 double gbtCorBranchBehav::GetMinParameter(void) const
 { return 0.0; }

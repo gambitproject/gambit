@@ -31,10 +31,10 @@
 #include "game/nfgiter.h"
 #include "game/nfgciter.h"
 
-gbtList<MixedSolution> 
+gbtMixedNashSet
 gbtNfgNashEnumPure::Solve(const gbtNfgGame &p_game, gbtStatus &p_status)
 {
-  gbtList<MixedSolution> solutions;
+  gbtMixedNashSet solutions;
   gbtNfgContIterator citer(p_game);
 
   int ncont = 1;
@@ -65,11 +65,10 @@ gbtNfgNashEnumPure::Solve(const gbtNfgGame &p_game, gbtStatus &p_status)
       if (flag)  {
 	gbtMixedProfile<gbtNumber> temp = p_game->NewMixedProfile(gbtNumber(0));
 	((gbtVector<gbtNumber> &) temp).operator=(gbtNumber(0));
-	MixedSolution soln(temp, "EnumPure[NFG]");
 	for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-	  soln.SetStrategyProb(citer.GetContingency()->GetStrategy(p_game->GetPlayer(pl)), 1);
+	  temp[citer.GetContingency()->GetStrategy(p_game->GetPlayer(pl))->GetId()] = 1;
 	}
-	solutions.Append(soln);
+	solutions.Append(temp);
       }
       contNumber++;
     }  while ((m_stopAfter == 0 || solutions.Length() < m_stopAfter) &&

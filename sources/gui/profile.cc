@@ -226,8 +226,8 @@ wxString gbtProfileTable::GetColLabelValue(int p_col)
 
 wxString gbtProfileTable::GetValue(int p_row, int p_col) 
 {
-  const MixedSolution *mixed = &m_doc->AllMixedProfiles()[p_row + 1];
-  const BehavSolution *behav = 0;
+  const gbtMixedProfile<gbtNumber> *mixed = &m_doc->AllMixedProfiles()[p_row + 1];
+  const gbtBehavProfile<gbtNumber> *behav = 0;
   if (m_doc->HasEfg()) {
     behav = &m_doc->AllBehavProfiles()[p_row + 1];
   }
@@ -235,23 +235,29 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
   if (p_col < GetInfoColumns()) {
     switch (p_col) {
     case 0:
-      return wxString::Format(wxT("%s"), (char *) mixed->GetLabel());
+      //      return wxString::Format(wxT("%s"), (char *) mixed->GetLabel());
+      return wxT("???");
     case 1:
-      return wxString::Format(wxT("%s"), (char *) mixed->GetCreator());
+      //      return wxString::Format(wxT("%s"), (char *) mixed->GetCreator());
+      return wxT("???");
     case 2:
       if (behav) {
-	return wxString::Format(wxT("%s"), (char *) ToText(behav->IsNash()));
+	//	return wxString::Format(wxT("%s"), (char *) ToText(behav->IsNash()));
+	return wxT("???");
       }
       else {
-	return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsNash()));
+	//	return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsNash()));
+	return wxT("???");
       }
     case 3:
       if (behav) {
-	return wxString::Format(wxT("%s"), (char *) ToText(behav->IsSubgamePerfect()));
+	//	return wxString::Format(wxT("%s"), (char *) ToText(behav->IsSubgamePerfect()));
+	return wxT("???");
       }
       else {
 	try {
-	  return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsPerfect()));
+	  //	  return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsPerfect()));
+	  return wxT("???");
 	}
 	catch (...) {
 	  return wxT("DK");
@@ -259,26 +265,29 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
       }
     case 4:
       if (behav) {
-	return wxString::Format(wxT("%s"), (char *) ToText(behav->IsSequential()));
+	//	return wxString::Format(wxT("%s"), (char *) ToText(behav->IsSequential()));
+	return wxT("???");
       }
       else {
-	return wxString::Format(wxT("%s"), (char *) ToText(mixed->GetLiapValue(),
+	return wxString::Format(wxT("%s"), (char *) ToText(mixed->Get()->GetLiapValue(),
 							 m_doc->GetPreferences().NumDecimals()));
       }
     case 5:
       if (behav) {
-	return wxString::Format(wxT("%s"), (char *) ToText(behav->GetLiapValue(),
+	return wxString::Format(wxT("%s"), (char *) ToText(behav->Get()->GetLiapValue(),
 							   m_doc->GetPreferences().NumDecimals()));
       }
       else {
 	return wxT("");
       }
     case 6:
-      return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsNash()));
+      //      return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsNash()));
+      return wxT("???");
     case 7:
-      return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsPerfect()));
+      //      return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsPerfect()));
+      return wxT("???");
     case 8:
-      return wxString::Format(wxT("%s"), (char *) ToText(mixed->GetLiapValue(),
+      return wxString::Format(wxT("%s"), (char *) ToText(mixed->Get()->GetLiapValue(),
 							 m_doc->GetPreferences().NumDecimals()));
     }
   }
@@ -286,11 +295,13 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
     if (p_col < GetInfoColumns() + GetBehavColumns()) {
       int offset = GetInfoColumns() - 1;
       if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
-	return wxString::Format(wxT("%s"), (char *) ToText(behav->Profile()[p_col - offset],
+	return wxString::Format(wxT("%s"), (char *) ToText((*behav)[p_col - offset],
 							   m_doc->GetPreferences().NumDecimals()));
       }
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_VECTOR) {
-	const gbtPVector<gbtNumber> &profile = behav->Profile()->GetPVector();
+	// FIXME
+	/*
+	const gbtPVector<gbtNumber> &profile = behav->GetPVector();
 	wxString ret = wxT("("); 
 	for (int i = 1; i <= profile.Lengths()[p_col - offset]; i++) {
 	  if (i > 1) {
@@ -301,6 +312,8 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 						  m_doc->GetPreferences().NumDecimals()));
 	}
 	return ret + wxT(")");
+	*/
+	return wxT("");
       }
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_MYERSON) {
 	for (int pl = 1, col = GetInfoColumns();
@@ -339,7 +352,7 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
       int offset = GetInfoColumns() + GetBehavColumns() - 1;
       if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
 	return wxString::Format(wxT("%s"),
-				(char *) ToText((mixed->Profile())[p_col - offset],
+				(char *) ToText((*mixed->Get())[p_col - offset],
 						m_doc->GetPreferences().NumDecimals()));
       }
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_VECTOR) {
@@ -618,7 +631,7 @@ wxSize gbtProfileGrid::GetBestSize(void) const
 wxString gbtProfileGrid::GetReport(void) const
 {
   wxString report;
-  const gbtList<MixedSolution> &profiles = m_doc->AllMixedProfiles();
+  const gbtMixedNashSet &profiles = m_doc->AllMixedProfiles();
   gbtGame nfg = m_doc->GetGame();
 
   report += wxString::Format(_("Mixed strategy profiles on game '%s' [%s]\n\n"),
@@ -633,7 +646,7 @@ wxString gbtProfileGrid::GetReport(void) const
     report += wxT("          ");
     for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
       report += wxString::Format(wxT("%-15s "), 
-				 (const char *) profiles[i+j].GetLabel());
+				 (const char *) profiles[i+j]->GetLabel());
     }
     report += wxT("\n");
 
@@ -645,29 +658,30 @@ wxString gbtProfileGrid::GetReport(void) const
 
     report += wxT("Creator:  ");
     for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
-      report += wxString::Format(wxT("%-15s "),
-				 (const char *) profiles[i+j].GetCreator());
+      report += wxString::Format(wxT("%-15s "), "???");
+				 //				 (const char *) profiles[i+j].GetCreator());
+				 
     }
     report += wxT("\n");
 
     report += wxT("Nash?     ");
     for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
-      report += wxString::Format(wxT("%-15s "),
-				 (const char *) ToText(profiles[i+j].IsNash()));
+      report += wxString::Format(wxT("%-15s "), "???");
+      //				 (const char *) ToText(profiles[i+j].IsNash()));
     }
     report += wxT("\n");
 
     report += wxT("Perfect?  ");
     for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
-      report += wxString::Format(wxT("%-15s "),
-				 (const char *) ToText(profiles[i+j].IsPerfect()));
+      report += wxString::Format(wxT("%-15s "), "???");
+      //				 (const char *) ToText(profiles[i+j].IsPerfect()));
     }
     report += wxT("\n");
 
     report += wxT("Liap:     ");
     for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
-      report += wxString::Format(wxT("%-15s "),
-				 (const char *) ToText(profiles[i+j].GetLiapValue()));
+      report += wxString::Format(wxT("%-15s "), "???");
+      //				 (const char *) ToText(profiles[i+j].GetLiapValue()));
     }
     report += wxT("\n\n");
 
@@ -681,7 +695,7 @@ wxString gbtProfileGrid::GetReport(void) const
 
 	for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
 	  report += wxString::Format(wxT("%-15s "), 
-				     (const char *) ToText((profiles[i+j].Profile())(pl, st)));
+				     (const char *) ToText(profiles[i+j](pl, st)));
 	}
 	report += wxT("\n");
       }

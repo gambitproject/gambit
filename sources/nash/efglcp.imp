@@ -48,14 +48,14 @@ template <class T> gbtEfgNashLcp<T>::~gbtEfgNashLcp()
 //
 
 template <class T> 
-gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
-					     gbtStatus &p_status)
+gbtBehavNashSet gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
+					gbtStatus &p_status)
 {
   gbtBasicFeasibleSolution<T> cbfs((T) 0);
   int i, j;
   
   if (p_support->NumPlayers() != 2) {
-    return gbtList<BehavSolution>();
+    return gbtBehavNashSet();
   }
   
   isets1 = p_support->ReachableInfosets(p_support->GetPlayer(1));
@@ -101,7 +101,7 @@ gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
   gbtBehavProfile<T> profile = p_support->NewBehavProfile((T) 0);
   gbtVector<T> sol(tab.MinRow(),tab.MaxRow());
     
-  gbtList<BehavSolution> solutions;
+  gbtBehavNashSet solutions;
 
   try {
     if (m_stopAfter != 1) {
@@ -115,7 +115,7 @@ gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
       tab.BasisVector(sol);
       GetProfile(p_support, tab, profile->GetDPVector(), sol,
 		 p_support->GetRoot(), 1, 1);
-      solutions.Append(BehavSolution(profile, "Lcp[EFG]"));
+      solutions.Append(profile->NewBehavProfile(gbtNumber(0)));
     }
   }
   catch (gbtSignalBreak &) {
@@ -151,7 +151,7 @@ template <class T> int gbtEfgNashLcp<T>::Add_BFS(const gbtLemkeTableau<T> &table
 template <class T> int 
 gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
 			    int j, gbtLemkeTableau<T> &B, int depth,
-			    gbtMatrix<T> &A, gbtList<BehavSolution> &p_solutions,
+			    gbtMatrix<T> &A, gbtBehavNashSet &p_solutions,
 			    gbtStatus &p_status)
 {
   if (m_maxDepth != 0 && depth > m_maxDepth) {
@@ -200,7 +200,7 @@ gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
 	GetProfile(p_support, BCopy, profile->GetDPVector(),
 		   sol, p_support->GetRoot(), 1, 1);
 	if(newsol) {
-	  p_solutions.Append(BehavSolution(profile, "Lcp[EFG]")); 
+	  p_solutions.Append(profile->NewBehavProfile(gbtNumber(0)));
 	}
       }
       else {

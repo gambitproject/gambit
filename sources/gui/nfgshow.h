@@ -35,7 +35,6 @@
 
 #include "game/game.h"
 #include "game/nfgiter.h"
-#include "nash/mixedsol.h"
 
 #include "gambit.h"
 

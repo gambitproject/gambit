@@ -49,7 +49,7 @@ public:
   void SetStepTau(double p_stepTau) { m_stepTau = p_stepTau; }
 
   gbtText GetAlgorithm(void) const { return "CH"; }
-  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
+  gbtMixedNashSet Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
 #endif // NFGCH_H

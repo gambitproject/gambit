@@ -37,7 +37,7 @@ template <class T> gbtNfgNashEnumMixed<T>::gbtNfgNashEnumMixed(void)
   : m_stopAfter(0), m_cliques(false)
 { }
 
-template <class T> gbtList<MixedSolution> 
+template <class T> gbtMixedNashSet
 gbtNfgNashEnumMixed<T>::Solve(const gbtNfgGame &p_game,
 			      gbtStatus &p_status)
 {
@@ -45,10 +45,10 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtNfgGame &p_game,
   gbtList<int> node1, node2;   // IDs of each component of the extreme equilibria
 
   if (p_game->NumPlayers() != 2) {
-    return gbtList<MixedSolution>();
+    return gbtMixedNashSet();
   }
   
-  gbtList<MixedSolution> solutions;
+  gbtMixedNashSet solutions;
 
   gbtNfgIterator iter(p_game); 
 
@@ -168,7 +168,7 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtNfgGame &p_game,
 	    }
 	  }
 
-	  solutions.Append(MixedSolution(profile, "EnumMixed[NFG]")); 
+	  solutions.Append(profile->NewMixedProfile(gbtNumber(0)));
     
 	  // note: The keys give the mixed strategy associated with each node. 
 	  //       The keys should also keep track of the basis

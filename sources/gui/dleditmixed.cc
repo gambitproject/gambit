@@ -24,11 +24,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
-#include "nash/mixedsol.h"
 #include "dleditmixed.h"
 #include "numberedit.h"
 
@@ -45,7 +44,7 @@ BEGIN_EVENT_TABLE(dialogEditMixed, wxDialog)
 END_EVENT_TABLE()
 
 dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
-				 const MixedSolution &p_profile)
+				 const gbtMixedProfile<gbtNumber> &p_profile)
   : wxDialog(p_parent, -1, _("Mixed profile properties"),
 	     wxDefaultPosition),
     m_profile(p_profile), m_selection(1)
@@ -58,21 +57,21 @@ dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
 		 0, wxALL, 5);
   m_profileName = new wxTextCtrl(this, -1,
 				 wxString::Format(wxT("%s"),
-						  (char *) p_profile.GetLabel()));
+						  (char *) p_profile->GetLabel()));
   nameSizer->Add(m_profileName, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(nameSizer, 1, wxALL | wxEXPAND, 5);
 
   wxBoxSizer *editSizer = new wxBoxSizer(wxHORIZONTAL);
   m_playerList = new wxListBox(this, idPLAYER_LIST);
-  for (int pl = 1; pl <= m_profile.GetGame()->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_profile->NumPlayers(); pl++) {
     m_playerList->Append(wxString::Format(wxT("%s"),
 					  (char *) (ToText(pl) + ": " +
-						    m_profile.GetGame()->GetPlayer(pl)->GetLabel())));
+						    m_profile->GetPlayer(pl)->GetLabel())));
   }
   m_playerList->SetSelection(0);
   editSizer->Add(m_playerList, 0, wxALL, 5);
 
-  gbtGamePlayer firstPlayer = m_profile.GetGame()->GetPlayer(1);
+  gbtGamePlayer firstPlayer = m_profile->GetPlayer(1);
   m_probGrid = new wxGrid(this, idPROB_GRID,
 			  wxDefaultPosition, wxDefaultSize);
   m_probGrid->CreateGrid(firstPlayer->NumStrategies(), 1);
@@ -85,7 +84,7 @@ dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
 					       (char *) firstPlayer->GetStrategy(st)->GetLabel()),
 			      st - 1);
     m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
-					      (char *) ToText(p_profile(firstPlayer->GetStrategy(st)))),
+					      (char *) ToText(p_profile(1, firstPlayer->GetStrategy(st)->GetId()))),
 			     st - 1, 0);
     if (st % 2 == 0) {
       m_probGrid->SetCellBackgroundColour(st - 1, 0, wxColour(200, 200, 200));
@@ -125,14 +124,14 @@ void dialogEditMixed::OnSelChanged(wxCommandEvent &p_event)
     m_probGrid->HideCellEditControl();
   }
 
-  gbtGamePlayer oldPlayer = m_profile.GetGame()->GetPlayer(m_selection);
+  gbtGamePlayer oldPlayer = m_profile->GetPlayer(m_selection);
 
   for (int st = 1; st <= oldPlayer->NumStrategies(); st++) {
-    m_profile.SetStrategyProb(oldPlayer->GetStrategy(st),
-			      ToNumber(gbtText(m_probGrid->GetCellValue(st - 1, 0).mb_str())));
+    m_profile->SetStrategyProb(oldPlayer->GetStrategy(st),
+			       ToNumber(gbtText(m_probGrid->GetCellValue(st - 1, 0).mb_str())));
   }
 
-  gbtGamePlayer player = m_profile.GetGame()->GetPlayer(p_event.GetSelection() + 1);
+  gbtGamePlayer player = m_profile->GetPlayer(p_event.GetSelection() + 1);
 
   if (oldPlayer->NumStrategies() > player->NumStrategies()) {
     m_probGrid->DeleteRows(0,
@@ -169,18 +168,18 @@ void dialogEditMixed::OnOK(wxCommandEvent &p_event)
     m_probGrid->HideCellEditControl();
   }
 
-  gbtGamePlayer player = m_profile.GetGame()->GetPlayer(m_selection);
+  gbtGamePlayer player = m_profile->GetPlayer(m_selection);
 
   for (int st = 1; st <= player->NumStrategies(); st++) {
-    m_profile.SetStrategyProb(player->GetStrategy(st),
-			      ToNumber(gbtText(m_probGrid->GetCellValue(st - 1, 0).mb_str())));
+    m_profile->SetStrategyProb(player->GetStrategy(st),
+			       ToNumber(gbtText(m_probGrid->GetCellValue(st - 1, 0).mb_str())));
   }
 
   p_event.Skip();
 }
 
-const MixedSolution &dialogEditMixed::GetProfile(void) const
+const gbtMixedProfile<gbtNumber> &dialogEditMixed::GetProfile(void) const
 {
-  m_profile.SetLabel(gbtText(m_profileName->GetLabel().mb_str()));
+  //  m_profile->SetLabel(gbtText(m_profileName->GetLabel().mb_str()));
   return m_profile;
 }

@@ -48,7 +48,7 @@ private:
   int num_vars;
   long count,nevals;
   double time;
-  gbtList<MixedSolution> solutions;
+  gbtMixedNashSet solutions;
   bool is_singular;
 
   bool EqZero(gbtDouble x) const;
@@ -78,13 +78,13 @@ public:
   
   PolEnumParams &Parameters(void);
 
-  const gbtList<MixedSolution> &GetSolutions(void) const;
+  const gbtMixedNashSet &GetSolutions(void) const;
   gbtVector<gbtDouble> SolVarsFromMixedProfile(const gbtMixedProfile<gbtNumber> &) 
                                                                      const;
 
   const int PolishKnownRoot(gbtVector<gbtDouble> &) const;
 
-  MixedSolution ReturnPolishedSolution(const gbtVector<gbtDouble> &) const;
+  gbtMixedProfile<gbtNumber> ReturnPolishedSolution(const gbtVector<gbtDouble> &) const;
 
   bool IsSingular() const;
 };
@@ -152,10 +152,7 @@ int PolEnumModule::SaveSolutions(const gbtList<gbtVector<gbtDouble> > &list)
       profile(i,j) = (double)1.0 - sum;
       kk+=(support->GetPlayer(i)->NumStrategies()-1);
     }
-    index = solutions.Append(MixedSolution(profile, "PolEnum[m_nfgG]"));
-    gbtNumber eps = (gbtNumber)0.0;
-    gEpsilon(eps);
-    solutions[index].SetEpsilon(eps);
+    solutions.Append(profile->NewMixedProfile(gbtNumber(0)));
   }
   return index;
 }
@@ -181,7 +178,7 @@ PolEnumParams &PolEnumModule::Parameters(void)
   return params;
 }
 
-const gbtList<MixedSolution> &PolEnumModule::GetSolutions(void) const
+const gbtMixedNashSet &PolEnumModule::GetSolutions(void) const
 {
   return solutions;
 }
@@ -316,7 +313,7 @@ PolEnumParams::PolEnumParams(void)
 { }
 
 int PolEnum(const gbtNfgSupport &support, const PolEnumParams &params,
-	    gbtList<MixedSolution> &solutions, gbtStatus &p_status,
+	    gbtMixedNashSet &solutions, gbtStatus &p_status,
 	    long &nevals, double &time, bool &is_singular)
 {
   PolEnumModule module(support, params);
@@ -336,13 +333,14 @@ int PolEnum(const gbtNfgSupport &support, const PolEnumParams &params,
 //                        Polish Equilibrum for Nfg
 //---------------------------------------------------------------------------
 
-MixedSolution PolishEquilibrium(const gbtNfgSupport &support, 
-				const MixedSolution &sol, 
-				bool &is_singular)
+gbtMixedProfile<gbtNumber>
+PolishEquilibrium(const gbtNfgSupport &support, 
+		  const gbtMixedProfile<gbtNumber> &sol, 
+		  bool &is_singular)
 {
   PolEnumParams params;
   PolEnumModule module(support, params);
-  gbtVector<gbtDouble> vec = module.SolVarsFromMixedProfile(sol.Profile());
+  gbtVector<gbtDouble> vec = module.SolVarsFromMixedProfile(sol);
 
   /* //DEBUG
   gbtPVector<double> xx = module.SeqFormProbsFromSolVars(vec);
@@ -430,7 +428,7 @@ const int PolEnumModule::PolishKnownRoot(gbtVector<gbtDouble> &point) const
   return 1;	 
 }
 
-MixedSolution 
+gbtMixedProfile<gbtNumber>
 PolEnumModule::ReturnPolishedSolution(const gbtVector<gbtDouble> &root) const
 {
   gbtMixedProfile<double> profile = support->NewMixedProfile(0.0);
@@ -447,8 +445,7 @@ PolEnumModule::ReturnPolishedSolution(const gbtVector<gbtDouble> &root) const
     kk+=(support->GetPlayer(pl)->NumStrategies()-1);
   }
        
-  MixedSolution sol(profile, "Polish[NFG]");
-  return sol;
+  return profile->NewMixedProfile(gbtNumber(0));
 }
 
 //========================================================================
@@ -459,7 +456,7 @@ gbtNfgNashEnumPoly::gbtNfgNashEnumPoly(void)
   : m_stopAfter(0)
 { }
 
-gbtList<MixedSolution> 
+gbtMixedNashSet
 gbtNfgNashEnumPoly::Solve(const gbtNfgGame &p_game, gbtStatus &p_status)
 {
   p_status.SetProgress(0.0);
@@ -471,7 +468,7 @@ gbtNfgNashEnumPoly::Solve(const gbtNfgGame &p_game, gbtStatus &p_status)
   p_status << "Step 2 of 2: Computing equilibria";
 
   gbtList<gbtNfgSupport> singularSupports;
-  gbtList<MixedSolution> solutions;
+  gbtMixedNashSet solutions;
 
   try { 
     for (int i = 1; (i <= supports.Length() &&
@@ -481,7 +478,7 @@ gbtNfgNashEnumPoly::Solve(const gbtNfgGame &p_game, gbtStatus &p_status)
       p_status.SetProgress((double) (i-1) / (double) supports.Length());
       long newevals = 0;
       double newtime = 0.0;
-      gbtList<MixedSolution> newsolns;
+      gbtMixedNashSet newsolns;
       bool is_singular = false;
       
       PolEnumParams params;
@@ -490,7 +487,7 @@ gbtNfgNashEnumPoly::Solve(const gbtNfgGame &p_game, gbtStatus &p_status)
 	      newevals, newtime, is_singular);
       
       for (int j = 1; j <= newsolns.Length(); j++) {
-	if (newsolns[j].IsNash()) {
+	if (newsolns[j]->GetLiapValue() < gbtNumber(1.0e-5)) {
 	  solutions += newsolns[j];
 	}
       }

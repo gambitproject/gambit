@@ -42,8 +42,8 @@ class dialogQreFile : public wxFrame, public gbtGameView {
 private:
   wxNotebook *m_notebook;
   wxListCtrl *m_qreList;
-  gbtList<MixedSolution> m_mixedProfiles;
-  gbtList<BehavSolution> m_behavProfiles;
+  gbtMixedNashSet m_mixedProfiles;
+  gbtBehavNashSet m_behavProfiles;
 
   // Event handlers
   void OnFileExportPxi(wxCommandEvent &);
@@ -55,8 +55,8 @@ private:
   void OnUpdate(gbtGameView *);
 
 public:
-  dialogQreFile(wxWindow *, gbtGameDocument *, const gbtList<MixedSolution> &);
-  dialogQreFile(wxWindow *, gbtGameDocument *, const gbtList<BehavSolution> &);
+  dialogQreFile(wxWindow *, gbtGameDocument *, const gbtMixedNashSet &);
+  dialogQreFile(wxWindow *, gbtGameDocument *, const gbtBehavNashSet &);
 
   DECLARE_EVENT_TABLE()
 };

@@ -42,11 +42,11 @@ public:
   void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
 
   gbtText GetAlgorithm(void) const { return "PolEnum[NFG]"; }
-  gbtList<MixedSolution> Solve(const gbtNfgGame &, gbtStatus &);
+  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
 };
 
-MixedSolution PolishEquilibrium(const gbtNfgSupport &support, 
-				const MixedSolution &sol, 
-				bool &is_singular);
+gbtMixedProfile<gbtNumber> PolishEquilibrium(const gbtNfgSupport &support, 
+					     const gbtMixedProfile<gbtNumber> &sol, 
+					     bool &is_singular);
 
 #endif // NFGPOLY_H

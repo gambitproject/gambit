@@ -35,8 +35,8 @@ gbtEfgNashLp<T>::gbtEfgNashLp(void)
 { }
 
 template <class T> 
-gbtList<BehavSolution> gbtEfgNashLp<T>::Solve(const gbtEfgSupport &p_support,
-					    gbtStatus &p_status)
+gbtBehavNashSet gbtEfgNashLp<T>::Solve(const gbtEfgSupport &p_support,
+				       gbtStatus &p_status)
 {
   gbtBasicFeasibleSolution<T> cbfs((T) 0);
   
@@ -50,7 +50,7 @@ gbtList<BehavSolution> gbtEfgNashLp<T>::Solve(const gbtEfgSupport &p_support,
   if (p_support->NumPlayers() != 2 ||
       !p_support->IsConstSum() ||
       !p_support->IsPerfectRecall()) {
-    return gbtList<BehavSolution>();
+    return gbtBehavNashSet();
   }
   
   List.Flush();
@@ -79,7 +79,7 @@ gbtList<BehavSolution> gbtEfgNashLp<T>::Solve(const gbtEfgSupport &p_support,
     Add_BFS(LP); 
   }
 
-  gbtList<BehavSolution> solutions;
+  gbtBehavNashSet solutions;
   GetSolutions(p_support, solutions);
   return solutions;
 }
@@ -200,13 +200,13 @@ void gbtEfgNashLp<T>::FillTableau(const gbtEfgSupport &p_support,
 
 template <class T>
 void gbtEfgNashLp<T>::GetSolutions(const gbtEfgSupport &p_support,
-				   gbtList<BehavSolution> &solutions) const
+				   gbtBehavNashSet &solutions) const
 {
   for (int i = 1; i <= List.Length(); i++)    {
     gbtBehavProfile<T> profile = p_support->NewBehavProfile((T) 0);
     GetProfile(p_support, profile->GetDPVector(), List[i],
 	       p_support->GetRoot(), 1, 1);
-    solutions.Append(BehavSolution(profile, "Lp[EFG]"));
+    solutions.Append(profile->NewBehavProfile(gbtNumber(0)));
   }
 
 }

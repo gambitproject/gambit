@@ -28,8 +28,8 @@
 #define GAMEDOC_H
 
 #include "game/game.h"
-#include "nash/behavsol.h"
-#include "nash/mixedsol.h"
+#include "nash/efgalgorithm.h"
+#include "nash/nfgalgorithm.h"
 #include "prefs.h"
 #include "support.h"
 
@@ -64,8 +64,8 @@ private:
 
   // The list of computed profiles (refactor into own class?)
   int m_curProfile;
-  gbtList<BehavSolution> m_behavProfiles;
-  gbtList<MixedSolution> m_mixedProfiles;
+  gbtList<gbtBehavNashSet> m_behavProfiles;
+  gbtList<gbtMixedNashSet> m_mixedProfiles;
 
   // Preferences for colors, layout, and so forth
   gbtPreferences m_prefs;
@@ -136,22 +136,22 @@ public:
   gbtText UniqueBehavProfileName(void) const;
   gbtText UniqueMixedProfileName(void) const;
 
-  void AddProfile(const BehavSolution &);
-  void AddProfile(const MixedSolution &);
-  const gbtList<BehavSolution> &AllBehavProfiles(void) const
-    { return m_behavProfiles; }
-  const BehavSolution &GetBehavProfile(void) const
-    { return m_behavProfiles[m_curProfile]; }
+  void AddProfile(const gbtBehavProfile<gbtNumber> &);
+  void AddProfile(const gbtMixedProfile<gbtNumber> &);
+  const gbtBehavNashSet &AllBehavProfiles(void) const
+    { return m_behavProfiles[1]; }
+  const gbtBehavProfile<gbtNumber> &GetBehavProfile(void) const
+    { return m_behavProfiles[1][m_curProfile]; }
 
-  const gbtList<MixedSolution> &AllMixedProfiles(void) const
-    { return m_mixedProfiles; }
-  const MixedSolution &GetMixedProfile(void) const
-    { return m_mixedProfiles[m_curProfile]; }
+  const gbtMixedNashSet &AllMixedProfiles(void) const
+    { return m_mixedProfiles[1]; }
+  const gbtMixedProfile<gbtNumber> &GetMixedProfile(void) const
+    { return m_mixedProfiles[1][m_curProfile]; }
 
   bool IsProfileSelected(void) const { return (m_curProfile > 0); }
   void SetCurrentProfile(int p_index);
-  void SetCurrentProfile(const BehavSolution &);
-  void SetCurrentProfile(const MixedSolution &);
+  void SetCurrentProfile(const gbtBehavProfile<gbtNumber> &);
+  void SetCurrentProfile(const gbtMixedProfile<gbtNumber> &);
   void RemoveProfile(int p_index);
 
   // LABELS

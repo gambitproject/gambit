@@ -36,21 +36,21 @@ private:
   bool m_isPerfectRecall;
   double time;
   gbtBehavProfile<gbtNumber> solution;
-  gbtList<BehavSolution> solutions;
+  gbtBehavNashSet solutions;
   gbtEfgNashAlgorithm *m_efgAlgorithm;
   gbtNfgNashAlgorithm *m_nfgAlgorithm;
 
   gbtArray<gbtArray<gbtGameInfoset> *> infosets;
 
   void FindSubgames(const gbtEfgSupport &, gbtStatus &, 
-		    gbtGameNode, gbtList<BehavSolution> &, gbtList<gbtGameOutcome> &);
+		    gbtGameNode, gbtBehavNashSet &, gbtList<gbtGameOutcome> &);
   
 public:
   gbtEfgNashSubgames(void) : m_efgAlgorithm(0), m_nfgAlgorithm(0) { }
   virtual ~gbtEfgNashSubgames();
     
   gbtText GetAlgorithm(void) const;
-  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
+  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
 
   void SetAlgorithm(gbtEfgNashAlgorithm *p_algorithm)
     { m_efgAlgorithm = p_algorithm; m_nfgAlgorithm = 0; }

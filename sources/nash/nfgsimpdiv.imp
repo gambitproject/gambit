@@ -409,7 +409,7 @@ template <class T> T gbtNfgNashSimpdiv<T>::getlabel(gbtMixedProfile<T> &yy,
 //               gbtNfgNashSimpdiv<T>: Main solution algorithm
 //-------------------------------------------------------------------------
 
-template <class T> gbtList<MixedSolution>
+template <class T> gbtMixedNashSet
 gbtNfgNashSimpdiv<T>::Solve(const gbtNfgGame &p_game,
 			    gbtStatus &p_status)
 {
@@ -436,7 +436,7 @@ gbtNfgNashSimpdiv<T>::Solve(const gbtNfgGame &p_game,
   // In principle, this algorithm can be started from any point
   // in the simplex.  Currently, it starts at a predefined point;
   // therefore, it is set up to compute one and only one equilibrium.
-  gbtList<MixedSolution> solutions;
+  gbtMixedNashSet solutions;
   k=1;
   d=(T) 1.0 / (T) k;
   for(i=1;i<=p_game->NumPlayers();i++) {
@@ -456,7 +456,7 @@ gbtNfgNashSimpdiv<T>::Solve(const gbtNfgGame &p_game,
   }
     
   gbtMixedProfile<T> profile(y);
-  solutions.Append(MixedSolution(profile, "Simpdiv[NFG]"));
+  solutions.Append(y->NewMixedProfile(gbtNumber(0)));
 
   return solutions;
 }

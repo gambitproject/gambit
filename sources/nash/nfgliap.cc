@@ -220,8 +220,8 @@ gbtNfgNashLiap::gbtNfgNashLiap(void)
     m_tol1(2.0e-10), m_tolN(1.0e-10)
 { }
 
-gbtList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgGame &p_game,
-					     gbtStatus &p_status)
+gbtMixedNashSet gbtNfgNashLiap::Solve(const gbtNfgGame &p_game,
+				      gbtStatus &p_status)
 {
   static const double ALPHA = .00000001;
   gbtMixedProfile<double> p = p_game->NewMixedProfile(0.0);
@@ -237,7 +237,7 @@ gbtList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgGame &p_game,
     }
   }
 
-  gbtList<MixedSolution> solutions;
+  gbtMixedNashSet solutions;
 
   try {
     for (int i = 1; ((m_numTries == 0 || i <= m_numTries) &&
@@ -281,7 +281,7 @@ gbtList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgGame &p_game,
 
 	  if (sqrt(gradient.NormSquared()) < .001 &&
 	      fval < 1.0e-8) {
-	    solutions.Append(MixedSolution(p, "Liap[NFG]"));
+	    solutions.Append(p->NewMixedProfile(gbtNumber(0)));
 	    break;
 	  }
 	}

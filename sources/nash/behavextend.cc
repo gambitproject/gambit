@@ -81,7 +81,7 @@ static gbtList<gbtGameInfoset> DeviationInfosets(const gbtEfgSupport &big_supp,
 }
 
 static gbtPolyMultiList<gbtDouble> 
-ActionProbsSumToOneIneqs(const BehavSolution &p_solution,
+ActionProbsSumToOneIneqs(const gbtBehavProfile<gbtNumber> &p_solution,
 			 const gbtPolySpace &BehavStratSpace, 
 			 const gbtPolyTermOrder &Lex,
 			 const gbtEfgSupport &big_supp,
@@ -89,8 +89,8 @@ ActionProbsSumToOneIneqs(const BehavSolution &p_solution,
 {
   gbtPolyMultiList<gbtDouble> answer(&BehavStratSpace, &Lex);
 
-  for (int pl = 1; pl <= p_solution.GetGame()->NumPlayers(); pl++) 
-    for (gbtGameInfosetIterator infoset(p_solution.GetGame()->GetPlayer(pl)); 
+  for (int pl = 1; pl <= p_solution->NumPlayers(); pl++) 
+    for (gbtGameInfosetIterator infoset(p_solution->GetPlayer(pl)); 
 	 !infoset.End(); infoset++) {
       if (!big_supp->HasActiveActionAt(*infoset)) {
 	int index_base = var_index[pl][(*infoset)->GetId()];
@@ -174,7 +174,7 @@ DeviationSupports(const gbtEfgSupport & big_supp,
 }
 
 static bool 
-NashNodeProbabilityPoly(const BehavSolution &p_solution,
+NashNodeProbabilityPoly(const gbtBehavProfile<gbtNumber> &p_solution,
 			gbtPolyMulti<gbtDouble> & node_prob,
 			const gbtPolySpace &BehavStratSpace, 
 			const gbtPolyTermOrder &Lex,
@@ -185,7 +185,7 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
 			const gbtGameInfoset &iset,
 			const gbtGameAction &act)
 {
-  while (tempnode != p_solution.GetGame()->GetRoot()) {
+  while (tempnode != p_solution->GetGame()->GetRoot()) {
     gbtGameAction last_action = tempnode->GetPriorAction();
     gbtGameInfoset last_infoset = last_action->GetInfoset();
     
@@ -203,7 +203,7 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
 	    if (last_action->GetInfoset()->GetPlayer() !=
 		act->GetInfoset()->GetPlayer() ||
 		!act->Precedes(tempnode) )
-	    node_prob *= (gbtDouble) p_solution.GetActionProb(last_action);
+	    node_prob *= (gbtDouble) p_solution->GetActionProb(last_action);
 	  }
 	  else {
 	    return false;
@@ -231,7 +231,7 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
 }
 
 static gbtPolyMultiList<gbtDouble> 
-NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
+NashExpectedPayoffDiffPolys(const gbtBehavProfile<gbtNumber> &p_solution,
 			    const gbtPolySpace &BehavStratSpace, 
 			    const gbtPolyTermOrder &Lex,
 			    const gbtEfgSupport &little_supp,
@@ -241,10 +241,10 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
   gbtPolyMultiList<gbtDouble> answer(&BehavStratSpace, &Lex);
 
   gbtList<gbtGameNode> terminal_nodes;
-  TerminalNodes(p_solution.GetGame()->GetRoot(), terminal_nodes);
+  TerminalNodes(p_solution->GetGame()->GetRoot(), terminal_nodes);
 
-  for (int pl = 1; pl <= p_solution.GetGame()->NumPlayers(); pl++) {
-    gbtGamePlayer player = p_solution.GetGame()->GetPlayer(pl);
+  for (int pl = 1; pl <= p_solution->NumPlayers(); pl++) {
+    gbtGamePlayer player = p_solution->GetPlayer(pl);
     for (gbtGameInfosetIterator infoset(player); !infoset.End(); infoset++) {
       if (little_supp->MayReach(*infoset)) {
 	for (int j = 1; j <= (*infoset)->NumActions(); j++)
@@ -282,7 +282,7 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 		  next_poly += node_prob;
 		}
 	      }
-	      answer += -next_poly + (gbtDouble) p_solution.Payoff(pl);
+	      answer += -next_poly + (gbtDouble) p_solution->Payoff(pl);
 	    }
 	  }
       }
@@ -292,7 +292,7 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 }
 
 static gbtPolyMultiList<gbtDouble> 
-ExtendsToNashIneqs(const BehavSolution &p_solution,
+ExtendsToNashIneqs(const gbtBehavProfile<gbtNumber> &p_solution,
 		   const gbtPolySpace &BehavStratSpace, 
 		   const gbtPolyTermOrder &Lex,
 		   const gbtEfgSupport &little_supp,
@@ -313,7 +313,7 @@ ExtendsToNashIneqs(const BehavSolution &p_solution,
   return answer;
 }
 
-bool algExtendsToNash::ExtendsToNash(const BehavSolution &p_solution,
+bool algExtendsToNash::ExtendsToNash(const gbtBehavProfile<gbtNumber> &p_solution,
 				     const gbtEfgSupport &little_supp,
 				     const gbtEfgSupport &big_supp,
 				     gbtStatus &m_status)
@@ -330,7 +330,7 @@ bool algExtendsToNash::ExtendsToNash(const BehavSolution &p_solution,
   int num_vars(0);
   gbtList<gbtList<int> > var_index;
 
-  for (gbtGamePlayerIterator player(p_solution.GetGame()); 
+  for (gbtGamePlayerIterator player(p_solution->GetGame()); 
        !player.End(); player++) {
     gbtList<int> list_for_pl;
 
@@ -377,7 +377,7 @@ bool algExtendsToNash::ExtendsToNash(const BehavSolution &p_solution,
 //                   class algExtendsToAgentNash
 //=========================================================================
 
-static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
+static bool ANFNodeProbabilityPoly(const gbtBehavProfile<gbtNumber> &p_solution,
 				   gbtPolyMulti<gbtDouble> & node_prob,
 				   const gbtPolySpace &BehavStratSpace, 
 				   const gbtPolyTermOrder &Lex,
@@ -388,7 +388,7 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
 				   const int &i,
 				   const int &j)
 {
-  while (tempnode != p_solution.GetGame()->GetRoot()) {
+  while (tempnode != p_solution->GetGame()->GetRoot()) {
     gbtGameAction last_action = tempnode->GetPriorAction();
     gbtGameInfoset last_infoset = last_action->GetInfoset();
     
@@ -396,13 +396,13 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
       node_prob *= (gbtDouble) last_action->GetChanceProb();
     else 
       if (big_supp->HasActiveActionAt(last_infoset)) {
-	if (last_infoset == p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i)) {
+	if (last_infoset == p_solution->GetPlayer(pl)->GetInfoset(i)) {
 	  if (j != last_action->GetId()) 
 	    return false;
 	}
 	else
 	  if (big_supp->Contains(last_action))
-	    node_prob *= (gbtDouble) p_solution.GetActionProb(last_action);
+	    node_prob *= (gbtDouble) p_solution->GetActionProb(last_action);
 	  else 
 	    return false;
       }
@@ -428,7 +428,7 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
 }
 
 static gbtPolyMultiList<gbtDouble> 
-ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
+ANFExpectedPayoffDiffPolys(const gbtBehavProfile<gbtNumber> &p_solution,
 			   const gbtPolySpace &BehavStratSpace, 
 			   const gbtPolyTermOrder &Lex,
 			   const gbtEfgSupport &little_supp,
@@ -438,9 +438,9 @@ ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
   gbtPolyMultiList<gbtDouble> answer(&BehavStratSpace, &Lex);
 
   gbtList<gbtGameNode> terminal_nodes;
-  TerminalNodes(p_solution.GetGame()->GetRoot(), terminal_nodes);
+  TerminalNodes(p_solution->GetGame()->GetRoot(), terminal_nodes);
 
-  for (gbtGamePlayerIterator player(p_solution.GetGame());
+  for (gbtGamePlayerIterator player(p_solution->GetGame());
        !player.End(); player++) { 
     for (gbtGameInfosetIterator infoset(*player); !infoset.End(); infoset++) {
       if (little_supp->MayReach(*infoset)) 
@@ -468,7 +468,7 @@ ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 		next_poly += node_prob;
 	      }
 	    }
-	    answer += -next_poly + (gbtDouble) p_solution.Payoff((*player)->GetId());
+	    answer += -next_poly + (gbtDouble) p_solution->Payoff((*player)->GetId());
 	  }
     }
   }
@@ -476,7 +476,7 @@ ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 }
 
 static gbtPolyMultiList<gbtDouble> 
-ExtendsToANFNashIneqs(const BehavSolution &p_solution,
+ExtendsToANFNashIneqs(const gbtBehavProfile<gbtNumber> &p_solution,
 		      const gbtPolySpace &BehavStratSpace, 
 		      const gbtPolyTermOrder &Lex,
 		      const gbtEfgSupport &little_supp,
@@ -496,10 +496,11 @@ ExtendsToANFNashIneqs(const BehavSolution &p_solution,
   return answer;
 }
 
-bool algExtendsToAgentNash::ExtendsToAgentNash(const BehavSolution &p_solution,
-					       const gbtEfgSupport &little_supp,
-					       const gbtEfgSupport &big_supp,
-					       gbtStatus &p_status)
+bool
+algExtendsToAgentNash::ExtendsToAgentNash(const gbtBehavProfile<gbtNumber> &p_solution,
+					  const gbtEfgSupport &little_supp,
+					  const gbtEfgSupport &big_supp,
+					  gbtStatus &p_status)
 {
   // This asks whether there is an ANF Nash extension of the BehavSolution to 
   // all information sets at which the behavioral probabilities are not
@@ -511,7 +512,7 @@ bool algExtendsToAgentNash::ExtendsToAgentNash(const BehavSolution &p_solution,
   int num_vars(0);
   gbtList<gbtList<int> > var_index;
 
-  for (gbtGamePlayerIterator player(p_solution.GetGame());
+  for (gbtGamePlayerIterator player(p_solution->GetGame());
        !player.End(); player++) {
     gbtList<int> list_for_pl;
 

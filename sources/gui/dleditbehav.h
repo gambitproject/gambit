@@ -27,14 +27,15 @@
 #ifndef DLEDITBEHAV_H
 #define DLEDITBEHAV_H
 
-#include "wx/treectrl.h"
-#include "wx/grid.h"
+#include <wx/treectrl.h>
+#include <wx/grid.h>
 
 #include "base/base.h"
+#include "game/behav.h"
 
 class dialogEditBehav : public wxDialog {
 private:
-  mutable BehavSolution m_profile;
+  mutable gbtBehavProfile<gbtNumber> m_profile;
   gbtGameInfoset m_lastInfoset;
   wxTextCtrl *m_profileName;
   wxTreeCtrl *m_infosetTree;
@@ -48,10 +49,11 @@ private:
   void OnOK(wxCommandEvent &);
 
 public:
-  dialogEditBehav(wxWindow *p_parent, const BehavSolution &p_profile);
+  dialogEditBehav(wxWindow *p_parent, 
+		  const gbtBehavProfile<gbtNumber> &p_profile);
   virtual ~dialogEditBehav();
 
-  const BehavSolution &GetProfile(void) const;
+  const gbtBehavProfile<gbtNumber> &GetProfile(void) const;
 
   DECLARE_EVENT_TABLE()
 };

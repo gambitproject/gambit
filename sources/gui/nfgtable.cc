@@ -436,14 +436,14 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
 	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1) {
     gbtGameStrategy strategy = support->GetPlayer(rowPlayer)->GetStrategy(row + 1);
     return wxString::Format(wxT("%s"),
-			    (char *) ToText(m_doc->GetMixedProfile().GetStrategyValue(strategy),
+			    (char *) ToText(m_doc->GetMixedProfile()->GetStrategyValue(strategy),
 					    m_doc->GetPreferences().NumDecimals()));
   }
   else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1 && 
 	   col < numColStrats) {
     gbtGameStrategy strategy = support->GetPlayer(colPlayer)->GetStrategy(col + 1);
     return wxString::Format(wxT("%s"),
-			    (char *) ToText(m_doc->GetMixedProfile().GetStrategyValue(strategy),
+			    (char *) ToText(m_doc->GetMixedProfile()->GetStrategyValue(strategy),
 					    m_doc->GetPreferences().NumDecimals()));
   }
 

@@ -28,14 +28,23 @@
 #define EFGALGORITHM_H
 
 #include "game/game.h"
-#include "behavsol.h"
+#include "game/behav.h"
+
+//
+// This class is intended to replace BehavSolution and the usage of
+// gbtList<BehavSolution> throughout Gambit.
+// Currently simply a glorified list of profiles, it should evolve
+// to permit representation of equilibrium components, etc., as appropriate
+//
+class gbtBehavNashSet : public gbtList<gbtBehavProfile<gbtNumber> > {
+};
 
 class gbtEfgNashAlgorithm {
 public:
   virtual ~gbtEfgNashAlgorithm() { }
 
   virtual gbtText GetAlgorithm(void) const = 0;
-  virtual gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &) = 0;
+  virtual gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &) = 0;
 };
 
 #endif  // EFGALGORITHM_H

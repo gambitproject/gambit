@@ -298,7 +298,7 @@ template <class T>
 static void TracePath(const gbtMixedProfile<T> &p_start,
 		      T p_startLambda, T p_maxLambda, T p_omega,
 		      gbtStatus &p_status,
-		      gbtList<MixedSolution> &p_solutions)
+		      gbtMixedNashSet &p_solutions)
 {
   const int c_maxIters = 5000;     // maximum number of iterations
   const T c_tol = 1.0e-4;     // tolerance for corrector iteration
@@ -457,8 +457,7 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
     for (int i = 1; i <= foo->MixedProfileLength(); i++) {
       foo[i] = x[i];
     }
-    p_solutions.Append(MixedSolution(foo, "Qre[NFG]"));
-    p_solutions[p_solutions.Length()].SetQre((double) x[x.Last()], 0);
+    p_solutions.Append(foo->NewMixedProfile(gbtNumber(0)));
     
     gbtVector<T> newT(t);
     q.GetRow(q.NumRows(), newT);  // new tangent
@@ -476,24 +475,24 @@ template static void TracePath(const gbtMixedProfile<double> &p_start,
 			       double p_startLambda, double p_maxLambda, 
 			       double p_omega,
 			       gbtStatus &p_status,
-			       gbtList<MixedSolution> &p_solutions);
+			       gbtMixedNashSet &p_solutions);
 #if GBT_WITH_MP_FLOAT
 template static void TracePath(const gbtMixedProfile<gbtMPFloat> &p_start,
 			       gbtMPFloat p_startLambda,
 			       gbtMPFloat p_maxLambda, 
 			       gbtMPFloat p_omega,
 			       gbtStatus &p_status,
-			       gbtList<MixedSolution> &p_solutions);
+			       gbtMixedNashSet &p_solutions);
 #endif // GBT_WITH_MP_FLOAT
 
 gbtNfgNashLogit::gbtNfgNashLogit(void)
   : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
 { }
 
-gbtList<MixedSolution> gbtNfgNashLogit::Solve(const gbtNfgGame &p_game,
-					      gbtStatus &p_status)
+gbtMixedNashSet gbtNfgNashLogit::Solve(const gbtNfgGame &p_game,
+				       gbtStatus &p_status)
 {
-  gbtList<MixedSolution> solutions;
+  gbtMixedNashSet solutions;
 
 #if GBT_WITH_MP_FLOAT
   gbtMixedProfile<gbtMPFloat> start(p_support);

@@ -28,7 +28,6 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
-#include "nash/behavsol.h"
 #include "dleditbehav.h"
 #include "numberedit.h"
 
@@ -47,7 +46,7 @@ BEGIN_EVENT_TABLE(dialogEditBehav, wxDialog)
 END_EVENT_TABLE()
 
 dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
-				 const BehavSolution &p_profile)
+				 const gbtBehavProfile<gbtNumber> &p_profile)
   : wxDialog(p_parent, -1, _("Behavior profile properties"),
 	     wxDefaultPosition),
     m_profile(p_profile), m_lastInfoset(0), m_map(gbtGameInfoset())
@@ -60,7 +59,7 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
 		 0, wxALL, 5);
   m_profileName = new wxTextCtrl(this, -1, 
 				 wxString::Format(wxT("%s"),
-						  (char *) p_profile.GetLabel()));
+						  (char *) p_profile->GetLabel()));
   nameSizer->Add(m_profileName, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(nameSizer, 0, wxALL | wxEXPAND, 5);
 
@@ -68,18 +67,18 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
   m_infosetTree = new wxTreeCtrl(this, GBT_INFOSET_TREE,
 				 wxDefaultPosition, wxSize(200, 200));
   m_infosetTree->AddRoot(wxString::Format(wxT("%s"),
-					  (char *) p_profile.GetLabel()));
+					  (char *) p_profile->GetLabel()));
 
   for (int pl = 1; ; pl++) {
-    if (p_profile.GetGame()->GetPlayer(pl)->NumInfosets() > 0) {
-      m_lastInfoset = p_profile.GetGame()->GetPlayer(pl)->GetInfoset(1);
+    if (p_profile->GetPlayer(pl)->NumInfosets() > 0) {
+      m_lastInfoset = p_profile->GetPlayer(pl)->GetInfoset(1);
       break;
     }
   }
   wxTreeItemId firstID;
 
-  for (int pl = 1; pl <= p_profile.GetGame()->NumPlayers(); pl++) {
-    gbtGamePlayer player = p_profile.GetGame()->GetPlayer(pl);
+  for (int pl = 1; pl <= p_profile->NumPlayers(); pl++) {
+    gbtGamePlayer player = p_profile->GetPlayer(pl);
     wxTreeItemId id;
     if (player->GetLabel() != "") {
       id = m_infosetTree->AppendItem(m_infosetTree->GetRootItem(),
@@ -188,8 +187,8 @@ void dialogEditBehav::OnSelChanged(wxTreeEvent &p_event)
 
   if (!m_lastInfoset.IsNull()) {
     for (int act = 1; act <= m_lastInfoset->NumActions(); act++) {
-      m_profile.SetActionProb(m_lastInfoset->GetAction(act),
-			      ToNumber(gbtText(m_probGrid->GetCellValue(act - 1, 0).mb_str())));
+      m_profile(m_lastInfoset->GetAction(act)) = 
+	ToNumber(gbtText(m_probGrid->GetCellValue(act - 1, 0).mb_str()));
     }
   }
 
@@ -237,24 +236,24 @@ void dialogEditBehav::OnOK(wxCommandEvent &p_event)
 
   if (infoset.IsNull()) {
     for (int pl = 1; ; pl++) {
-      if (m_profile.GetGame()->GetPlayer(pl)->NumInfosets() > 0) {
-	m_lastInfoset = m_profile.GetGame()->GetPlayer(pl)->GetInfoset(1);
+      if (m_profile->GetPlayer(pl)->NumInfosets() > 0) {
+	m_lastInfoset = m_profile->GetPlayer(pl)->GetInfoset(1);
 	break;
       }
     }
   }
 
   for (int act = 1; act <= infoset->NumActions(); act++) {
-    m_profile.SetActionProb(infoset->GetAction(act),
-			    ToNumber(gbtText(m_probGrid->GetCellValue(act - 1, 0).mb_str())));
+    m_profile(infoset->GetAction(act)) =
+      ToNumber(gbtText(m_probGrid->GetCellValue(act - 1, 0).mb_str()));
   }
 
   p_event.Skip();
 }
 
-const BehavSolution &dialogEditBehav::GetProfile(void) const
+const gbtBehavProfile<gbtNumber> &dialogEditBehav::GetProfile(void) const
 {
-  m_profile.SetLabel(gbtText(m_profileName->GetValue().mb_str()));
+  //  m_profile.SetLabel(gbtText(m_profileName->GetValue().mb_str()));
   return m_profile;
 }
 

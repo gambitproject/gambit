@@ -36,8 +36,9 @@ private:
 
   int AddBfs(gbtLemkeHowsonTableau<T> &,
 	     gbtList<gbtBasicFeasibleSolution<T> > &);
-  gbtList<MixedSolution> AddSolutions(const gbtNfgGame &,
-				      const gbtList<gbtBasicFeasibleSolution<T> > &, const T &);
+  gbtMixedNashSet AddSolutions(const gbtNfgGame &,
+			       const gbtList<gbtBasicFeasibleSolution<T> > &,
+			       const T &);
   void AllLemke(const gbtNfgGame &, int, 
 		gbtLemkeHowsonTableau<T> &B, 
 		gbtList<gbtBasicFeasibleSolution<T> > &,
@@ -54,7 +55,7 @@ public:
   void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
 
   gbtText GetAlgorithm(void) const { return "Lcp[NFG]"; }
-  gbtList<MixedSolution> Solve(const gbtNfgGame &, gbtStatus &);
+  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
 };
 
 #endif  // NFGLCP_H

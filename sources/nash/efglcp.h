@@ -44,7 +44,7 @@ private:
 		   int, int, int, int);
   int Add_BFS(const gbtLemkeTableau<T> &tab);
   int All_Lemke(const gbtEfgSupport &, int dup, gbtLemkeTableau<T> &B,
-		int depth, gbtMatrix<T> &, gbtList<BehavSolution> &, gbtStatus &);
+		int depth, gbtMatrix<T> &, gbtBehavNashSet &, gbtStatus &);
   
   void GetProfile(const gbtEfgSupport &, const gbtLemkeTableau<T> &tab, 
 		  gbtDPVector<T> &, const gbtVector<T> &, 
@@ -61,7 +61,7 @@ public:
   void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
 
   gbtText GetAlgorithm(void) const { return "Lcp[EFG]"; }
-  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
+  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
 #endif  // EFGLCP_H

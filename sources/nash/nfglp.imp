@@ -33,14 +33,14 @@ template <class T> gbtNfgNashLp<T>::gbtNfgNashLp(void)
 { }
 
 template <class T> 
-gbtList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgGame &p_game,
-					      gbtStatus &p_status)
+gbtMixedNashSet gbtNfgNashLp<T>::Solve(const gbtNfgGame &p_game,
+				       gbtStatus &p_status)
 {
   gbtBasicFeasibleSolution<T> cbfs((T) 0);
   
   if (p_game->NumPlayers() != 2 ||
       !p_game->IsConstSum()) {
-    return gbtList<MixedSolution>();
+    return gbtMixedNashSet();
   }
   
   gbtList<gbtBasicFeasibleSolution<T> > bfsList;
@@ -80,7 +80,7 @@ gbtList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgGame &p_game,
     Add_BFS(p_game, LP, bfsList); 
   }
 
-  gbtList<MixedSolution> solutions;
+  gbtMixedNashSet solutions;
   GetSolutions(p_game, bfsList, solutions, LP.Epsilon());
   return solutions;
 }
@@ -104,10 +104,9 @@ template <class T> int gbtNfgNashLp<T>::Add_BFS(const gbtNfgGame &p_game,
 template <class T>
 void gbtNfgNashLp<T>::GetSolutions(const gbtNfgGame &p_game,
 				   const gbtList<gbtBasicFeasibleSolution<T> > &p_list,
-				   gbtList<MixedSolution > &solutions,
+				   gbtMixedNashSet &solutions,
 				   const T &p_epsilon) const
 {
-  int index;
   int n1 = p_game->GetPlayer(1)->NumStrategies();
   int n2 = p_game->GetPlayer(2)->NumStrategies();
   solutions.Flush();
@@ -126,7 +125,6 @@ void gbtNfgNashLp<T>::GetSolutions(const gbtNfgGame &p_game,
       else
 	profile(2, j) = (T) 0;
 
-    index = solutions.Append(MixedSolution(profile, "Lp[NFG]"));
-    solutions[index].SetEpsilon(p_epsilon);
+    solutions.Append(profile->NewMixedProfile(gbtNumber(0)));
   }
 }

@@ -289,8 +289,8 @@ static double PDenom(double p_lambda, int p_m)
   return total;
 }
 
-gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgGame &p_game,
-						 gbtStatus &p_status)
+gbtMixedNashSet gbtNfgNashYamamoto::Solve(const gbtNfgGame &p_game,
+					  gbtStatus &p_status)
 {
   // In the notation of Yamamoto's paper, profile(i,j)=x_{ij}
   // and lambda=t
@@ -305,7 +305,7 @@ gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgGame &p_game,
     partitions.Append(RankStrategies(profile, pl));
   }
 
-  gbtList<MixedSolution> solutions;
+  gbtMixedNashSet solutions;
 
   for (int step = 1; step <= 50000 && lambda > 0.01; step++) { 
     if (step % 25 == 0) {
@@ -383,7 +383,7 @@ gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgGame &p_game,
     } 
   }
 
-  solutions.Append(MixedSolution(profile, "Yamamoto[NFG]"));
+  solutions.Append(profile->NewMixedProfile(gbtNumber(0)));
 
   return solutions;
 }

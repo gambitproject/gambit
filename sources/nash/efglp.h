@@ -40,7 +40,7 @@ private:
 
   void FillTableau(const gbtEfgSupport &,
 		   gbtMatrix<T> &, const gbtGameNode &, T ,int ,int , int ,int );
-  void GetSolutions(const gbtEfgSupport &, gbtList<BehavSolution> &) const;
+  void GetSolutions(const gbtEfgSupport &, gbtBehavNashSet &) const;
   int Add_BFS(/*const*/ gbtLPSolver<T> &B);
   
   void GetProfile(const gbtEfgSupport &, gbtDPVector<T> &v, const gbtBasicFeasibleSolution<T> &sol,
@@ -51,7 +51,7 @@ public:
   virtual ~gbtEfgNashLp() { }
 
   gbtText GetAlgorithm(void) const { return "Lp[EFG]"; }
-  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
+  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
 

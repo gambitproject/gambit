@@ -44,8 +44,7 @@
 //----------------------------------------------------------------------
 
 gbtGameBase::gbtGameBase(void)
-  : sortisets(true), m_revision(0), 
-    m_outcomeRevision(-1), chance(new gbtGamePlayerBase(this, 0))
+  : sortisets(true), chance(new gbtGamePlayerBase(this, 0))
 {
   root = new gbtGameNodeBase(this, 0);
   SortInfosets();
@@ -161,7 +160,6 @@ void gbtGameBase::InsertMove(gbtGameNodeBase *p_node,
     node->m_children.Append(new gbtGameNodeBase(this, node));
   }
 
-  m_revision++;
   ComputeReducedStrategies();
   SortInfosets();
 }
@@ -195,7 +193,6 @@ void gbtGameBase::DeleteMove(gbtGameNodeBase *p_node)
     parent->m_deleted = true;
   }
 
-  m_revision++;
   ComputeReducedStrategies();
   sortisets = true;
   SortInfosets();
@@ -224,7 +221,6 @@ void gbtGameBase::DeleteTree(gbtGameNodeBase *p_node)
   p_node->m_outcome = 0;
   p_node->m_label = "";
 
-  m_revision++;
   ComputeReducedStrategies();
   SortInfosets();
 }
@@ -239,7 +235,6 @@ gbtGameInfosetBase *gbtGameBase::NewInfoset(gbtGamePlayerBase *p_player,
 {
   gbtGameInfosetBase *s = new gbtGameInfosetBase(p_player, p_id, p_actions);
   p_player->m_infosets.Append(s);
-  m_revision++;
   return s;
 }
 
@@ -254,7 +249,6 @@ void gbtGameBase::DeleteInfoset(gbtGameInfosetBase *p_infoset)
     p_infoset->m_deleted = true;
   }
 
-  m_revision++;
   ComputeReducedStrategies();
 }
 
@@ -282,8 +276,6 @@ void gbtGameBase::DeleteOutcome(gbtGameOutcomeBase *p_outcome)
   for (int outc = 1; outc <= m_outcomes.Length(); outc++) {
     m_outcomes[outc]->m_id = outc;
   }
-
-  m_revision++;
 }
 
 //
@@ -305,7 +297,6 @@ void gbtGameBase::JoinInfoset(gbtGameInfosetBase *p_infoset,
   p_infoset->m_members.Append(p_node);
   p_node->m_infoset = p_infoset;
 
-  m_revision++;
   ComputeReducedStrategies();
   SortInfosets();
 }
@@ -335,7 +326,6 @@ gbtGameInfosetBase *gbtGameBase::LeaveInfoset(gbtGameNodeBase *p_node)
     p_node->m_infoset->m_actions[i]->m_label = infoset->m_actions[i]->m_label;
   }
 
-  m_revision++;
   ComputeReducedStrategies();
   SortInfosets();
   return p_node->m_infoset;
@@ -355,7 +345,6 @@ void gbtGameBase::MergeInfoset(gbtGameInfosetBase *p_to,
 
   p_from->m_members.Flush();
 
-  m_revision++;
   ComputeReducedStrategies();
   SortInfosets();
 }
@@ -402,7 +391,6 @@ void gbtGameBase::Reveal(gbtGameInfosetBase *p_where,
     }
   }
 
-  m_revision++;
   ComputeReducedStrategies();
   SortInfosets();
 }
@@ -415,7 +403,6 @@ void gbtGameBase::SetPlayer(gbtGameInfosetBase *p_infoset,
   p_infoset->m_player = p_player;
   p_player->m_infosets.Append(p_infoset);
 
-  m_revision++;
   ComputeReducedStrategies();
   SortInfosets();
 }
@@ -443,7 +430,6 @@ void gbtGameBase::DeleteAction(gbtGameInfosetBase *p_infoset,
     }
   }
 
-  m_revision++;
   ComputeReducedStrategies();
   SortInfosets();
 }
@@ -615,7 +601,6 @@ void gbtGameBase::CopySubtree(gbtGameBase *p_newEfg,
 void gbtGameBase::SetLabel(const gbtText &p_label)
 {
   m_label = p_label; 
-  m_revision++;
 }
 
 gbtText gbtGameBase::GetLabel(void) const
@@ -624,7 +609,6 @@ gbtText gbtGameBase::GetLabel(void) const
 void gbtGameBase::SetComment(const gbtText &s)
 {
   m_comment = s;
-  m_revision++;
 }
 
 gbtText gbtGameBase::GetComment(void) const
@@ -723,16 +707,11 @@ void gbtGameBase::WriteEfg(gbtOutput &p_file) const
 //                    Efg: General data access
 //------------------------------------------------------------------------
 
-long gbtGameBase::RevisionNumber(void) const
-{ return m_revision; }
-
 int gbtGameBase::NumPlayers(void) const
 { return m_players.Length(); }
 
 gbtGamePlayer gbtGameBase::NewPlayer(void)
 {
-  m_revision++;
-
   gbtGamePlayerBase *ret = new gbtGamePlayerBase(this, m_players.Length() + 1);
   m_players.Append(ret);
 
@@ -757,7 +736,6 @@ int gbtGameBase::NumOutcomes(void) const
 
 gbtGameOutcome gbtGameBase::NewOutcome(void)
 {
-  m_revision++;
   return NewOutcome(m_outcomes.Length() + 1);
 }
 
@@ -892,7 +870,6 @@ int gbtGameBase::NumNodes(void) const
 
 gbtGameOutcome gbtGameBase::NewOutcome(int index)
 {
-  m_revision++;
   m_outcomes.Append(new gbtGameOutcomeBase(this, index));
   return m_outcomes[m_outcomes.Last()];
 } 
@@ -950,8 +927,6 @@ gbtGameNode gbtGameBase::CopyTree(gbtGameNode p_src, gbtGameNode p_dest)
   if (src->m_gameroot != dest->m_gameroot)  return src;
 
   if (src->m_children.Length())  {
-    m_revision++;
-
     InsertMove(dest, src->m_infoset);
     for (int i = 1; i <= src->m_children.Length(); i++) {
       CopySubtree(src->m_children[i], dest->m_parent->m_children[i],
@@ -977,8 +952,6 @@ gbtGameNode gbtGameBase::MoveTree(gbtGameNode p_src, gbtGameNode p_dest)
       src->IsPredecessorOf(dest))
     return src;
   if (src->m_gameroot != dest->m_gameroot)  return src;
-
-  m_revision++;
 
   if (src->m_parent == dest->m_parent) {
     int srcChild = src->m_parent->m_children.Find(src);
@@ -1008,7 +981,6 @@ gbtGameAction gbtGameBase::InsertAction(gbtGameInfoset s)
     throw gbtGameException();
   }
 
-  m_revision++;
   gbtGameAction action = s->InsertAction(s->NumActions() + 1);
   gbtGameInfosetBase *infoset = dynamic_cast<gbtGameInfosetBase *>(s.Get());
   for (int i = 1; i <= s->NumMembers(); i++) {
@@ -1026,8 +998,6 @@ gbtGameAction gbtGameBase::InsertAction(gbtGameInfoset s,
   if (a.IsNull() || s.IsNull()) {
     throw gbtGameException();
   }
-
-  m_revision++;
 
   gbtGameInfosetBase *infoset = dynamic_cast<gbtGameInfosetBase *>(s.Get());
   gbtGameActionBase *action = dynamic_cast<gbtGameActionBase *>(a.Get());
@@ -1049,7 +1019,6 @@ void gbtGameBase::SetChanceProb(gbtGameInfoset infoset,
 			       int act, const gbtNumber &value)
 {
   if (infoset->IsChanceInfoset()) {
-    m_revision++;
     infoset->SetChanceProb(act, value);
   }
 }
@@ -1301,8 +1270,7 @@ static int Product(const gbtArray<int> &p_dim)
 //----------------------------------------------------
 
 gbtGameBase::gbtGameBase(const gbtArray<int> &p_dim)
-  : sortisets(false), m_revision(0), m_outcomeRevision(-1),
-    m_results(Product(p_dim)), root(0), chance(0)
+  : sortisets(false), m_results(Product(p_dim)), root(0), chance(0)
 {
   for (int pl = 1; pl <= m_players.Length(); pl++)  {
     m_players.Append(new gbtGamePlayerBase(this, pl));
