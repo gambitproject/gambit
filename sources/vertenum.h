@@ -41,8 +41,7 @@ private:
   void Search(LPTableau<T> &tab);
   void DualSearch(LPTableau<T> &tab);
 public:
-  VertEnum(const gMatrix<T> &A, const gVector<T> &b);
-  VertEnum(const gMatrix<T> &A, const gVector<T> &b, gStatus &status);
+  VertEnum(const gMatrix<T> &A, const gVector<T> &b, gStatus &status_ = gstatus);
   ~VertEnum();
 
   const gList<BFS<T> > &VertexList() const;

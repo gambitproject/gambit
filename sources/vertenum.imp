@@ -7,19 +7,10 @@
 #include "vertenum.h"
 
 template <class T>
-VertEnum<T>::VertEnum(const gMatrix<T> &A, const gVector<T> &b) 
-  : mult_opt(0), depth(0), A(A), b(b), btemp(b), c(A.MinCol(),A.MaxCol()), 
-    npivots(0), nodes(0), status(gstatus)
-{
-  Enum();
-}	
-
-
-template <class T>
 VertEnum<T>::VertEnum(const gMatrix<T> &A, const gVector<T> &b, 
-		      gStatus &status)
+		      gStatus &status_)
   : mult_opt(0), depth(0), A(A), b(b), btemp(b), c(A.MinCol(),A.MaxCol()), 
-    npivots(0), nodes(0), status(status) 
+    npivots(0), nodes(0), status(status_) 
 {
   Enum();
 }
