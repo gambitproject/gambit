@@ -1,7 +1,10 @@
 //
-// FILE: complex.cc -- Implementation of gComplex
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of a complex number class
 //
 
 #ifdef __GNUG__

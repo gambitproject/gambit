@@ -1,7 +1,10 @@
 //
-// FILE: gdpvect.imp -- Implementation of doubly-partitioned vector class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of doubly-partitioned vector class
 //
 
 #include "math/gdpvect.h"

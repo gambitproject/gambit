@@ -1,5 +1,10 @@
+//
+// $Source$
+// $Date$
+// $Revision$
+//
+
 // This may look like C code, but it is really -*- C++ -*-
-// $Id$
 
 /* 
 Copyright (C) 1988 Free Software Foundation

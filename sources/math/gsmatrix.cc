@@ -1,16 +1,17 @@
 //
-// FILE: gsmatrix.cc -- Instantiation of common squarematrix types
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Instantiation of common square matrix types
 //
 
 #include "gsmatrix.imp"
 #include "rational.h"
 #include "double.h"
 
-
 template class gSquareMatrix<double>;
-template class gSquareMatrix<long double>;
 template class gSquareMatrix<gDouble>;
 template class gSquareMatrix<gRational>;
 

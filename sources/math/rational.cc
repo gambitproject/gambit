@@ -1,7 +1,7 @@
 //
-// FILE: rational.cc
-//
-// $Id$
+// $Source$
+// $Date$
+// $Revision$
 //
 
 /* 

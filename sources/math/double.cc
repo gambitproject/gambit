@@ -1,8 +1,11 @@
 //
-// FILE: double.cc -- Implementation of gDouble: double with generous ==
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
-// 
+// DESCRIPTION:
+// Implementation of gDouble: double with generous ==
+//
 
 #ifdef __GNUG__
 #pragma implementation

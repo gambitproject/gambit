@@ -1,13 +1,16 @@
 //
-// FILE: include/math/math.h -- General include file for math library
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// General include file for math library
 //
 
-#ifndef MATH_H
-#define MATH_H
+#ifndef GMATH_H
+#define GMATH_H
 
-#include "math/gnumber.h"
+#include "gnumber.h"
 
 template <class T> class gArray;
 
@@ -23,5 +26,5 @@ int sign(const double &a);
 
 double FromText(const gText &, double &);
 
-#endif  // MATH_H
+#endif  // GMATH_H
 

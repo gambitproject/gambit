@@ -1,10 +1,13 @@
 //
-// FILE: gpvector.imp -- Implementation of profile vector members
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of partitioned vector members
 //
 
-#include "math/gpvector.h"
+#include "gpvector.h"
 
 //-------------------------------------------------------------------------
 //          gPVector<T>: Private and protected member functions

@@ -1,7 +1,10 @@
 //
-// FILE: sources/math/misc.cc -- Miscellaneous mathematical functions
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Miscellaneous mathematical functions
 //
 
 #include "gmath.h"

@@ -1,13 +1,16 @@
 //
-// FILE: gsmatrix.h -- Implementation of square matrices
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of square matrices
 //
 
 #ifndef GSMATRIX_H
 #define GSMATRIX_H
 
-#include "math/gmatrix.h"
+#include "gmatrix.h"
 
 template <class T> class gSquareMatrix : public gMatrix<T>   {
 public:

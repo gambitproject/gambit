@@ -1,7 +1,10 @@
 //
-// FILE: double.h -- Declaration of class gDouble: double with tolerant ==
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Declaration of class gDouble: double with tolerant ==
 //
 
 /*

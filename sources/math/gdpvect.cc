@@ -1,7 +1,10 @@
 //
-// FILE: gdpvect.cc -- Instantiation of doubly partitioned vector types
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Instantiation of doubly partitioned vector types
 //
 
 #include "base/base.h"

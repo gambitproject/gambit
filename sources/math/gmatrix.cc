@@ -1,15 +1,17 @@
 //
-// FILE: gmatrix.cc -- Instantiation of common matrix types
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Instantiation of common matrix types
 //
 
-#include "math/gmatrix.imp"
-#include "math/rational.h"
-#include "math/gnumber.h"
+#include "gmatrix.imp"
+#include "rational.h"
+#include "gnumber.h"
 
 template class gMatrix<double>;
-template class gMatrix<long double>;
 template class gMatrix<gRational>;
 template class gMatrix<gInteger>;
 template class gMatrix<int>;
@@ -27,7 +29,6 @@ template gVector<gNumber> operator*(const gVector<gNumber> &,
 				    const gMatrix<gNumber> &);
 
 template gOutput &operator<<(gOutput &, const gMatrix<double> &);
-template gOutput &operator<<(gOutput &, const gMatrix<long double> &);
 template gOutput &operator<<(gOutput &, const gMatrix<gRational> &);
 template gOutput &operator<<(gOutput &, const gMatrix<gInteger> &);
 template gOutput &operator<<(gOutput &, const gMatrix<gDouble> &);

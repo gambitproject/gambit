@@ -1,7 +1,10 @@
 //
-// FILE: complex.h -- Declaration of class gComplex
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Declaration of a complex number class
 //
 
 #ifndef _Complex_h

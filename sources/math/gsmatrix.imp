@@ -1,12 +1,15 @@
 //
-// FILE: gsmatrix.imp -- Implementation of square matrices
+// $Source$
+// $Date$
+// $Revision$
 //
-//  $Id$
+// DESCRIPTION:
+// Implementation of square matrices
 //
 
 #include "base/base.h"
 #include "gsmatrix.h"
-#include "math.h"   // for abs(double)
+#include "gmath.h"   // for abs(double)
 
 //-----------------------------------------------------------------------------
 //     gSquareMatrix<T>: Constructors, destructor, constructive operators

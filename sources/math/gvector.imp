@@ -1,11 +1,14 @@
 //
-// FILE: gvector.imp -- Implementation of vector class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of vector class
 //
 
-#include "math/gvector.h"
 #include "base/base.h"
+#include "gvector.h"
 
 template <class T> gText gVector<T>::BadDim::Description(void) const
 {

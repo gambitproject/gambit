@@ -1,14 +1,17 @@
 //
-// FILE: gnumber.h -- Number class for Gambit project. 
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// General number class
 //
 
 #ifndef GNUMBER_H
 #define GNUMBER_H
 
 #include "base/base.h"
-#include "math/rational.h"
+#include "rational.h"
 
 class gOutput;
 

@@ -1,7 +1,10 @@
 //
-// FILE: sources/math/mathinst.cc -- Instantiation of math container types
-//
-// $Id$
+// $Source$
+// $Date$
+// $Revision$
+// 
+// DESCRIPTION:
+// Instantiation of math container types
 //
 
 #include "base/garray.imp"
@@ -9,8 +12,8 @@
 #include "base/glist.imp"
 #include "base/grarray.imp"
 #include "base/grblock.imp"
-#include "math/gnumber.h"
-#include "math/complex.h"
+#include "gnumber.h"
+#include "complex.h"
 
 template class gArray<gInteger>;
 template class gArray<gRational>;

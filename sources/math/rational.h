@@ -1,7 +1,7 @@
 //
-// FILE: rational.h
-//
-// $Id$
+// $Source$
+// $Date$
+// $Revision$
 //
 
 // This may look like C code, but it is really -*- C++ -*-

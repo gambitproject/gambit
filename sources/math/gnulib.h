@@ -1,8 +1,11 @@
-//#
-//# FILE: gnulib.h -- Utilities from the g++ library
-//#
-//# $Id$
-//#
+//
+// $Source$
+// $Date$
+// $Revision$
+//
+// DESCRIPTION:
+// Utilities from the g++ library
+//
 
 #ifndef GNULIB_H
 #define GNULIB_H

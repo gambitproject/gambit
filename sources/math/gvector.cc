@@ -1,7 +1,10 @@
 //
-// FILE: gvector.cc -- Instantiation of vector types
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Instantiation of vector types
 //
 
 #include "gvector.imp"
@@ -11,7 +14,6 @@
 template class gVector<int>;
 template class gVector<long>;
 template class gVector<double>;
-template class gVector<long double>;
 template class gVector<gInteger>;
 template class gVector<gRational>;
 template class gVector<gComplex>;

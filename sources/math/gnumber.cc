@@ -1,7 +1,10 @@
 //
-// FILE: gnumber.cc -- Number class for Gambit project. 
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// General number class
 //
 
 #ifdef __GNUG__

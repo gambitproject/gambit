@@ -1,9 +1,11 @@
 //
-// FILE: gnulib.cc -- Utilities from the g++ library
+// $Source$
+// $Date$
+// $Revision$
+// 
+// DESCRIPTION:
+// Utilities from the g++ library
 //
-// $Id$
-//
-
 
 #include <values.h>
 #include "gnulib.h"

@@ -1,4 +1,8 @@
-// $Id$
+//
+// $Source$
+// $Date$
+// $Revision$
+//
 
 /* 
 Copyright (C) 1988 Free Software Foundation

@@ -1,7 +1,10 @@
 //
-// FILE: gdpvect.h -- Doubly-partitioned vector class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Doubly-partitioned vector class
 //
 
 #ifndef GDPVECT_H

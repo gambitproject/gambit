@@ -1,7 +1,10 @@
 //
-// FILE: gpvector.h -- profile vector class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Partitioned vector class
 //
 
 #ifndef GPVECTOR_H

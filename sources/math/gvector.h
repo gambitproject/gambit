@@ -1,7 +1,10 @@
 //
-// FILE: gvector.h -- Implementation of vector class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// A vector class
 //
 
 #ifndef GVECTOR_H
@@ -17,11 +20,6 @@ template <class T> class gMatrix;
  * This is a general vector class.  In order to instantiate this for a
  * type, the operators binary +, binary -, binary *, /, ==, and = must
  * be defined for the type.
- *
- * @author The Gambit Project
- * @version $Id$
- * @see gArray
- * @see gMatrix
  */
 template <class T> class gVector : public gArray<T>   {
   friend class gMatrix<T>;

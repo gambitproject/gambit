@@ -1,11 +1,14 @@
 //
-// FILE: gmatrix.imp -- Implementation of gMatrix method functions
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of gMatrix method functions
 //
 
-#include "math/gmatrix.h"
 #include "base/base.h"
+#include "gmatrix.h"
 
 template <class T> gText gMatrix<T>::DivideByZero::Description(void) const
 {

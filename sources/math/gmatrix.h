@@ -1,14 +1,17 @@
 //
-// FILE: gmatrix.h -- Implementation of matrix classes
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Interface to a matrix class
 //
 
 #ifndef GMATRIX_H
 #define GMATRIX_H
 
 #include "base/grarray.h"
-#include "math/gvector.h"
+#include "gvector.h"
 
 template <class T> class gMatrix : public gRectArray<T>  {
   public:

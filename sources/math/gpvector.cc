@@ -1,12 +1,15 @@
 //
-// FILE: gpvector.cc -- Instantiation of partitioned vector types
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Instantiation of partitioned vector types
 //
 
 #include "base/base.h"
-#include "math/gpvector.imp"
-#include "math/gnumber.h"
+#include "gpvector.imp"
+#include "gnumber.h"
 
 template class gPVector<int>;
 template class gPVector<double>;
