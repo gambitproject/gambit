@@ -36,8 +36,15 @@ bool MinBracket(double tmin, double tmax,
   a = (tmin < 0.0) ? 0.0 : (3.0 * tmin + tmax) / 4.0;
   b = a + ((tmax - a > 4.0) ? 1.0 : (tmax - a) / 4.0);
 
-  if (tmin >= a || a >= b || b >= tmax)
+  if (tmin >= a || a >= b || b >= tmax) {
+    /*
+      gout << "\ntmin: " << tmin;
+      gout << "\ntmin: " << tmax;
+      gout << "\na: " << a;
+      gout << "\nb: " << b;
+    */
     throw gFuncMinError();
+  }
 
   gVector<double> scratch(direction);
   scratch *= a;
@@ -151,6 +158,7 @@ double Brent(double ax, double bx, double cx,
 	     int maxits, double tol)
 {
   static const double EPSBRENT = 1.0e-10;
+  static const double SMALLNUM = 1.0e-200;
 
   gVector<double> scratch(direction);
 
@@ -196,7 +204,7 @@ double Brent(double ax, double bx, double cx,
 	d = CGOLD * e;
       }
       else {
-	if (q == 0.0)  {
+	if (q <= SMALLNUM && q >= -SMALLNUM)  {
 #ifdef DEBUG_WITH_GOUT
 	  gout << "\nq=0";
 #endif  // DEBUG_WITH_GOUT
@@ -302,6 +310,7 @@ void RayMin(gFunction<double> &func,
 	    gOutput &tracefile,int tracelevel = 0,bool interior = false)
 {
   static const double BIGNUM = 1.0e20;
+  static const double SMALLNUM = 1.0e-200;
 
   double tjmin = -BIGNUM, tjmax = BIGNUM;
   double xmin;
@@ -313,7 +322,7 @@ void RayMin(gFunction<double> &func,
 // some algorithms.  
 
   for (int j = 1; j <= xi.Length(); j++)
-    if (xi[j] != 0.0)  {
+    if (xi[j] >= SMALLNUM || xi[j] <= -SMALLNUM)  {
       double tt = -v[j] / xi[j];
       if (tt < 0.0 && tt > tjmin)  tjmin = tt;
       if (tt > 0.0 && tt < tjmax)  tjmax = tt;

@@ -140,7 +140,6 @@ class gFileOutput : public gOutput  {
 
     gFileOutput(const gFileOutput &);
     gFileOutput &operator=(const gFileOutput &);
-
   public:
     class OpenFailed : public gException   {
     public:
@@ -157,6 +156,55 @@ class gFileOutput : public gOutput  {
     gFileOutput(const char *, bool append = false);
     gFileOutput(FILE *);
     virtual ~gFileOutput();
+
+    int GetWidth(void) const;
+    gOutput &SetWidth(int w);
+    int GetPrec(void) const;
+    gOutput &SetPrec(int p);
+    gOutput &SetExpMode(void);
+    gOutput &SetFloatMode(void);
+    char GetRepMode(void) const;
+
+    gOutput &operator<<(int x);
+    gOutput &operator<<(unsigned int x);
+    gOutput &operator<<(bool x);
+    gOutput &operator<<(long x);
+    gOutput &operator<<(char x);
+    gOutput &operator<<(double x);
+    gOutput &operator<<(float x);
+    gOutput &operator<<(const char *x);
+    gOutput &operator<<(const void *x);
+};
+
+#include "gtext.h"
+
+class gDebugOutput : public gOutput  {
+  private:
+    FILE *f;
+    const gText filename; 
+    int Width, Prec;
+    char Represent;
+
+    gDebugOutput(const gDebugOutput &);
+    gDebugOutput &operator=(const gDebugOutput &);
+    void Open(void);
+    void Close(void);
+
+  public:
+    class OpenFailed : public gException   {
+    public:
+      virtual ~OpenFailed()   { }
+      gText Description(void) const;
+    };
+
+    class WriteFailed : public gException   {
+    public:
+      virtual ~WriteFailed()   { }
+      gText Description(void) const;
+    };
+
+    gDebugOutput(const char *, bool append = false);
+    virtual ~gDebugOutput();
 
     int GetWidth(void) const;
     gOutput &SetWidth(int w);

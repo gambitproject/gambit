@@ -77,6 +77,43 @@ MathErrHandl::MathErrHandl(const char *err)
   Show(TRUE);
 }
     
+#ifdef wx_msw // this handler is defined differently under win/unix
+#define MATH_CONTINUE	0
+#define	MATH_IGNORE		1
+#define	MATH_QUIT			2
+int _RTLENTRY _matherr (struct exception *e)
+  /*
+#else
+#ifdef _LINUX
+struct exception {char *name;double arg1,arg2;int type;};
+#endif
+int matherr(struct exception *e)
+#endif
+  */
+{
+static char *whyS [] =
+{
+		"argument domain error",
+		"argument singularity ",
+		"overflow range error ",
+		"underflow range error",
+		"total loss of significance",
+		"partial loss of significance"
+};
+static option=MATH_CONTINUE;
+char errMsg[ 80 ];
+if (option!=MATH_IGNORE)
+{
+sprintf (errMsg,
+			"%s (%8g,%8g): %s\n", e->name, e->arg1, e->arg2, whyS [e->type - 1]);
+MathErrHandl E(errMsg);
+option=E.Option();
+if (option==MATH_QUIT) wxExit();
+}
+return 1;		// we did not really fix anything, but want no more warnings
+}
+#endif
+
 char *wxStrLwr(char *s)
 {
     for (unsigned int i = 0; i < (unsigned int)strlen(s); i++) 
@@ -264,8 +301,11 @@ wxFrame *GambitApp::OnInit(void)
 		   gambitApp.ResourceFile());
 
   wxInitHelp(helpDir + "/gambit", "Gambit Graphics User Interface, Version 0.96\n\n"
-	     "Developed by the Gambit Project (gambit@hss.caltech.edu)\n"
-	     "California Institute of Technology, 1996-9.\n"
+	     "Part of the Gambit Project\n\n"
+	     "www.hss.caltech.edu/~gambit/Gambit.html\n"
+	     "gambit@hss.caltech.edu\n\n"
+	     "Copyright (C) 1999-2000\n"
+	     "California Institute of Technology\n"
 	     "Funding provided by the National Science Foundation");
   
   // Initialize the output (floating point) precision.

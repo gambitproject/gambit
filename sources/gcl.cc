@@ -43,15 +43,14 @@ void SigSegFaultHandler(int)
   exit(1);
 }
 
-/*
+#ifdef __BORLANDC__ // this handler is defined differently windows
 #define MATH_CONTINUE    0
 #define	MATH_IGNORE	 1
 #define	MATH_QUIT	 2
-
-#ifdef __BORLANDC__ // this handler is defined differently windows
 extern "C" int winio_ari(const char *msg);
 extern "C" void winio_closeall(void);
 int _RTLENTRY _matherr (struct exception *e)
+  /*
 #else
 #ifdef __linux__ // kludge to make it compile.  Seems linux does not support.
   struct exception {int type;char *name;double arg1,arg2,retval; }; 
@@ -60,6 +59,7 @@ int _RTLENTRY _matherr (struct exception *e)
 #endif
 int matherr(struct exception *e)
 #endif
+  */
 {
   char *whyS [] = { "argument domain error",
 		    "argument singularity ",
@@ -93,7 +93,7 @@ int matherr(struct exception *e)
 
   return 1;	// we did not really fix anything, but want no more warnings
 }
-*/
+#endif
 
 
 GSM* _gsm;
