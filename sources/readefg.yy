@@ -25,7 +25,6 @@
                    int i;  gString iset_name, outc_name; \
                    virtual ~EfgFileReader(); \
                    virtual Outcome *NewOutcome(void) = 0; \
-                   virtual Outcome *GetOutcome(const gString &) = 0; \
                    virtual void SetOutcome(Outcome *, \
 					   const gList<gRational> &) = 0; \
                    virtual void SetActionProbs(Infoset *, \

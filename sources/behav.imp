@@ -147,16 +147,6 @@ template <class T> OutcomeVector<T> *ExtForm<T>::NewOutcome(void)
   return ret;
 }
 
-template <class T>
-OutcomeVector<T> *ExtForm<T>::GetOutcome(const gString &s) const
-{
-  if (s == "")   return 0;
-  for (int i = 1; i <= outcomes.Length(); i++)
-    if (outcomes[i]->GetName() == s)   return (OutcomeVector<T> *) outcomes[i];
-
-  return 0;
-}
-
 //------------------------------------------------------------------------
 //                   ExtForm<T>: Payoff computation
 //------------------------------------------------------------------------

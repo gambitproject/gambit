@@ -138,7 +138,6 @@ template <class T> class ExtForm : public BaseExtForm   {
 
         //# DATA ACCESS -- OUTCOMES
     OutcomeVector<T> *NewOutcome(void);
-    OutcomeVector<T> *GetOutcome(const gString &) const;
 
     Infoset *CreateInfoset(Player *pl, int br);
 

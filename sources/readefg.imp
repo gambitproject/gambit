@@ -16,7 +16,6 @@ template <class T> class EfgFile : public EfgFileReader    {
     int Parse(void);
 
     Outcome *NewOutcome(void);
-    Outcome *GetOutcome(const gString &);
     void SetOutcome(Outcome *, const gList<gRational> &);
     void SetActionProbs(Infoset *, const gList<gRational> &);
     bool CheckActionProbs(Infoset *, const gList<gRational> &);
@@ -33,11 +32,6 @@ template <class T> EfgFile<T>::~EfgFile()
 template <class T> Outcome *EfgFile<T>::NewOutcome(void)
 {
   return ((ExtForm<T> &) *E).NewOutcome();
-}
-
-template <class T> Outcome *EfgFile<T>::GetOutcome(const gString &s)
-{
-  return ((ExtForm<T> &) *E).GetOutcome(s);
 }
 
 template <class T> void EfgFile<T>::SetOutcome(Outcome *c,
