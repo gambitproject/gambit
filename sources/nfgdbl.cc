@@ -32,6 +32,7 @@ class Nfg<gRational>;
 
 TEMPLATE class Nfg<double>;
 DataType Nfg<double>::Type(void) const { return DOUBLE; }
+double Nfg<double>::NullPayoff(void) const  { return 0.0; }
 
 TEMPLATE class NfgFile<double>;
 

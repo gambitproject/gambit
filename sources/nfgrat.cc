@@ -33,6 +33,7 @@ class gNode<gRational>;
 
 TEMPLATE class Nfg<gRational>;
 DataType Nfg<gRational>::Type(void) const { return RATIONAL; }
+gRational Nfg<gRational>::NullPayoff(void) const  { return gRational(0); }
 
 TEMPLATE class NfgFile<gRational>;
 

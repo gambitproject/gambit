@@ -137,6 +137,8 @@ private:
   void NewOutcome(void);
   void DeleteOutcome(int);
 
+  T NullPayoff(void) const;
+
 public:
   Nfg(const gArray<int> &dim);
   Nfg(const Nfg<T> &n);

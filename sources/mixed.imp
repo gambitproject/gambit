@@ -58,7 +58,7 @@ template <class T> Nfg<T>::~Nfg()
 template <class T> void Nfg<T>::NewOutcome(void)
 {
   gVector<T> zeroes(NumPlayers());
-  zeroes = (T) 0;
+  zeroes = NullPayoff();
   payoffs.AddRow(zeroes);
 }
 
@@ -75,7 +75,7 @@ template <class T> void Nfg<T>::SetPayoff(NFOutcome *outcome,
 
 template <class T> const T &Nfg<T>::Payoff(NFOutcome *outcome, int pl) const
 {
-  return ((outcome) ? payoffs(outcome->GetNumber(), pl) : (T) 0);
+  return ((outcome) ? payoffs(outcome->GetNumber(), pl) : NullPayoff());
 }
 
 
@@ -114,7 +114,7 @@ void Nfg<T>::WriteNfgFile(gOutput &f) const
       if (gameform->GetOutcome(i)) 
 	f << payoffs(gameform->GetOutcome(i)->GetNumber(), j) << ' ';
       else
-	f << ((T) 0) << ' ';
+	f << NullPayoff() << ' ';
 
   f << '\n';
 }
