@@ -136,6 +136,12 @@ void Nfg::WriteNfgFile(gOutput &f) const
   
   f << "}\n";
 
+  if (parameters->Dmnsn() > 0)   {
+    f << "{ ";
+    for (int var = 1; var <= parameters->Dmnsn(); var++)
+      f << '"' << EscapeQuotes(parameters->GetVariableName(var)) << "\" ";
+    f << "}\n";
+  }
   f << "\"" << EscapeQuotes(comment) << "\"\n\n";
 
   int ncont = 1;
