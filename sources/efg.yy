@@ -156,7 +156,7 @@ int yylex(void)
 
   
   if (isalpha(c) || c == '"')  {
-    input_stream->ungetc(c);
+    input_stream->unget(c);
     *input_stream >> last_name;
 
     return NAME;
@@ -166,7 +166,7 @@ int yylex(void)
 
     *input_stream >> c;
 
-    if (!isdigit(c) && s == "-")  { input_stream->ungetc(c);  return '-';  }
+    if (!isdigit(c) && s == "-")  { input_stream->unget(c);  return '-';  }
 
     while (isdigit(c))   {
       s += c;
@@ -182,12 +182,12 @@ int yylex(void)
 	s += c;
 	*input_stream >> c;
       }
-      input_stream->ungetc(c);
+      input_stream->unget(c);
       last_double = atof((char *) s);
       return FLOAT;
     }
     else   {   // integer number
-      input_stream->ungetc(c);
+      input_stream->unget(c);
       last_int = atoi((char *) s);
       return INTEGER;
     }
