@@ -24,8 +24,8 @@ bool Dominates(const Nfg &,
 
   if (strong)  {
     do  {
-      gNumber ap = (*paytable)(A.GetOutcome()->GetNumber(), pl);
-      gNumber bp = (*paytable)(B.GetOutcome()->GetNumber(), pl);
+      gNumber ap = (A.GetOutcome()) ? (*paytable)(A.GetOutcome()->GetNumber(), pl) : gNumber(0);
+      gNumber bp = (B.GetOutcome()) ? (*paytable)(B.GetOutcome()->GetNumber(), pl) : gNumber(0);
       if (ap <= bp)  return false;
       A.NextContingency();
     } while (B.NextContingency());
@@ -36,8 +36,8 @@ bool Dominates(const Nfg &,
   bool equal = true;
   
   do   {
-    gNumber ap = (*paytable)(A.GetOutcome()->GetNumber(), pl);
-    gNumber bp = (*paytable)(B.GetOutcome()->GetNumber(), pl);
+    gNumber ap = (A.GetOutcome()) ? (*paytable)(A.GetOutcome()->GetNumber(), pl) : gNumber(0);
+    gNumber bp = (B.GetOutcome()) ? (*paytable)(B.GetOutcome()->GetNumber(), pl) : gNumber(0);
     if (ap < bp)   return false;
     else if (ap > bp)  equal = false;
     A.NextContingency();

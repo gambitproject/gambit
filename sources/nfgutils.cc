@@ -38,7 +38,10 @@ Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S)
   NfgContIter niter(newS);
   
   do   {
-    niter.SetOutcome(N->Outcomes()[oiter.GetOutcome()->GetNumber()]);
+    if (oiter.GetOutcome())
+      niter.SetOutcome(N->Outcomes()[oiter.GetOutcome()->GetNumber()]);
+    else
+      niter.SetOutcome(0);
 
     oiter.NextContingency();
   }  while (niter.NextContingency());

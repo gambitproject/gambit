@@ -162,17 +162,6 @@ cursor, but this may be harder to achieve.
 //------------------------------
 
 Bug D19: Problems with Standard Solution output.  
-<<<<<<< bugs_gui
-
-There are numerous problems with the GUI Standard Solutions output:
- 
-  All Sequential finds none on coord3.efg (Same bug as D8)
-
-  AllNash finds none on 2x2x2.efg (Same as bug D8)
-
-  AllNash crashes the GUI on 2x2x2.nfg  (fixed, RDM 12/27/98)
-=======
->>>>>>> 2.31
 
 (magyar 1/8/98): I've removed the earlier list of problems for this
 bug since they have been rectified.  However, what still needs done
@@ -285,6 +274,16 @@ The following sequence from the opening GUI window causes a crash:
 
 Also, most other operations done on the default normal form game (like
 trying to save it) cause a crash.
+
+COMMENT (1/17/98, magyar): These specific ones have been fixed -- they
+turned out to be problems with nfdom.cc and CompressNfg, respectively,
+where NFOutcome::GetNumber() was called without checking to see if a
+NFOutcome * was null.  I'm leaving the report here to make sure we
+remember to check more thoroughly.  However, all the problems I tracked
+down would also appear in the GCL, so this is more of a GCL bug than
+a GUI bug, apparently.  (It is possible similar problems could occur
+in the GUI as well though.)
+
 
 -------------  older bugs that still remain ---------------
 
