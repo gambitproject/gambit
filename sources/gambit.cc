@@ -269,9 +269,11 @@ wxFrame *GambitApp::OnInit(void)
   (void) new GambitToolBar(gambit_frame);
   
   // Set up the help system.
-  gText workingDir = wxGetWorkingDirectory();
+  gText helpDir = wxGetWorkingDirectory();
+  wxGetResourceStr("Gambit", "Help-Directory", helpDir,
+		   gambitApp.ResourceFile());
 
-  wxInitHelp(workingDir + "/gambit", "Gambit Graphics User Interface, Version 0.96\n\n"
+  wxInitHelp(helpDir + "/gambit", "Gambit Graphics User Interface, Version 0.96\n\n"
 	     "Developed by the Gambit Project (gambit@hss.caltech.edu)\n"
 	     "California Institute of Technology, 1996-9.\n"
 	     "Funding provided by the National Science Foundation");

@@ -58,7 +58,7 @@ public:
 #define GAMBIT_HELP_CONTENTS                1700
 #define GAMBIT_HELP_ABOUT                   1701
 
-#define GAMBIT_GUI_HELP "Using Gambit GUI"
+#define GAMBIT_GUI_HELP "GAMBIT GUI"
 
 const int GAMBIT_VERSION = 96;
 

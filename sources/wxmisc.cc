@@ -99,51 +99,55 @@ char *wxFindFile(const char *name)
     return  (file_name) ? copystring(file_name) : 0;
 }
 
+//------------------------
+// Help system functions
+//------------------------
 
-// Help system functions.
-wxHelpInstance *help_instance = 0;
+wxHelpInstance *s_helpInstance = 0;
+
 void wxInitHelp(const char *name, const char *help_about_str)
 {
-    if (!help_instance)
-    {
-        help_instance = new wxHelpInstance(TRUE);
-        help_instance->Initialize((char *)name);
-    }
+  if (!s_helpInstance) {
+    s_helpInstance = new wxHelpInstance(TRUE);
+    s_helpInstance->Initialize((char *) name);
+  }
     
-    if (help_about_str) 
-        wxHelpAbout(help_about_str);
+  if (help_about_str) {
+    wxHelpAbout(help_about_str);
+  }
 }
-
 
 void wxHelpContents(const char *section)
 {
-    help_instance->LoadFile();
+  s_helpInstance->LoadFile();
     
-    if (!section)
-        help_instance->DisplayContents();
-    else
-        help_instance->KeywordSearch((char *)section);
+  if (!section) {
+    s_helpInstance->DisplayContents();
+  }
+  else {
+    s_helpInstance->KeywordSearch((char *) section);
+  }
 }
-
 
 void wxHelpAbout(const char *helpstr)
 {
-    static char *help_str = "Product based on wxWin";
+  static char *help_str = "Product based on wxWin";
     
-    if (helpstr)    // init with a new string
-        help_str = strdup(helpstr);
-    else
-        wxMessageBox(help_str, "Help About");
+  if (helpstr) {    // init with a new string
+    help_str = strdup(helpstr);
+  }
+  else {
+    wxMessageBox(help_str, "Help About");
+  }
 }
-
 
 void wxKillHelp(void)
 {
-    if (help_instance)
-    {
-        help_instance->Quit();
-        delete help_instance;
-    }
+  if (s_helpInstance) {
+    s_helpInstance->Quit();
+    delete s_helpInstance;
+    s_helpInstance = 0;
+  }
 }
 
 // Need this function since the default wxGeResource takes a char **value,
