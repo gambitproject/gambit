@@ -1,8 +1,8 @@
-//
-// FILE: gnarray.h -- Implementation of an N-dimensional array
-//
-// $Id$
-//
+//#
+//# FILE: gnarray.h -- Implementation of an N-dimensional array
+//#
+//# $Id$
+//#
 
 #ifndef GNARRAY_H
 #define GNARRAY_H
@@ -32,16 +32,6 @@ template <class T> class gNArray   {
     void DumpFrom(gOutput &, int, gVector<int> &) const;
     void ReadFrom(gInput &, const gVector<int> &, gVector<int> &, int);
 
-    T operator[](long l) const
-      { assert(l >= 0 && l < storage_size);
-	return storage[l];
-      }
-
-    T &operator[](long l)
-      { assert(l >= 0 && l < storage_size);
-	return storage[l];
-      }
-
   public:
     gNArray(void) : storage_size(0), storage(0)    { }
     gNArray(const gVector<int> &d);
@@ -52,6 +42,16 @@ template <class T> class gNArray   {
 
     T operator[](const gVector<int> &) const;
     T &operator[](const gVector<int> &);
+
+    T operator[](long l) const
+      { assert(l >= 0 && l < storage_size);
+	return storage[l];
+      }
+
+    T &operator[](long l)
+      { assert(l >= 0 && l < storage_size);
+	return storage[l];
+      }
 
     const gVector<int> &Dimensionality(void) const   { return dim; }
 
