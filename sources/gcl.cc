@@ -12,9 +12,9 @@
 
 #include "base/base.h"
 #include "math/rational.h"
-#include "gsmconsole.h"
-#include "gcmdline.h"
-#include "gpreproc.h"
+#include "gcl/gsmconsole.h"
+#include "gcl/gcmdline.h"
+#include "gcl/gpreproc.h"
 
 extern int GCLParse(GSM *p_gsm,
 		    const gText& line, const gText &file, int lineno,

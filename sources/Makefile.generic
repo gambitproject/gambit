@@ -162,8 +162,8 @@ pxi:	$(OBJDIR) $(ALLPXI_OBJECTS)
 readnfg.cc:  readnfg.yy
 	bison -p nfg_yy -o readnfg.cc readnfg.yy
 
-gcompile.cc: gcompile.yy
-	bison -p gcl_yy -o gcompile.cc gcompile.yy
+gcl/gcompile.cc: gcl/gcompile.yy
+	bison -p gcl_yy -o gcl/gcompile.cc gcl/gcompile.yy
 
 clean:	
 	rm -f $(OBJDIR)/*.o $(GCLBINARY) $(WXGCLBINARY) $(GUIBINARY)
