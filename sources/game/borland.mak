@@ -37,7 +37,8 @@ libgame_a_SOURCES = \
 	readefg.cc \
 	readnfg.cc \
 	sfg.cc \
-	sfstrat.cc
+	sfstrat.cc \
+        striter.cc
 
 OBJECTS = $(libgame_a_SOURCES:.cc=.obj)
 

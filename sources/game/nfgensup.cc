@@ -33,12 +33,12 @@
 
 void AllSubsupportsRECURSIVE(const gbtNfgSupport *s,
 			           gbtNfgSupport *sact,
-			           StrategyCursorForSupport *c,
+			           gbtStrategyIterator *c,
 			           gList<const gbtNfgSupport> *list)
 { 
   (*list) += *sact;
 
-  StrategyCursorForSupport c_copy(*c);
+  gbtStrategyIterator c_copy(*c);
 
   do {
     Strategy *str_ptr = (Strategy *)c_copy.GetStrategy();
@@ -54,7 +54,7 @@ gList<const gbtNfgSupport> AllSubsupports(const gbtNfgSupport &S)
 {
   gList<const gbtNfgSupport> answer;
   gbtNfgSupport SAct(S);
-  StrategyCursorForSupport cursor(S);
+  gbtStrategyIterator cursor(S);
 
   AllSubsupportsRECURSIVE(&S,&SAct,&cursor,&answer);
 
@@ -66,15 +66,15 @@ gList<const gbtNfgSupport> AllSubsupports(const gbtNfgSupport &S)
 
 void AllValidSubsupportsRECURSIVE(const gbtNfgSupport *s,
                                          gbtNfgSupport *sact,
-					 StrategyCursorForSupport *c,
+					 gbtStrategyIterator *c,
 					 gList<const gbtNfgSupport> *list)
 { 
   (*list) += *sact;
 
-  StrategyCursorForSupport c_copy(*c);
+  gbtStrategyIterator c_copy(*c);
 
   do {
-    if ( sact->NumStrats(c_copy.PlayerIndex()) > 1 ) {
+    if ( sact->NumStrats(c_copy.GetPlayerId()) > 1 ) {
       Strategy *str_ptr = (Strategy *)c_copy.GetStrategy();
       sact->RemoveStrategy(str_ptr); 
       AllValidSubsupportsRECURSIVE(s,sact,&c_copy,list);
@@ -87,7 +87,7 @@ gList<const gbtNfgSupport> AllValidSubsupports(const gbtNfgSupport &S)
 {
   gList<const gbtNfgSupport> answer;
   gbtNfgSupport SAct(S);
-  StrategyCursorForSupport cursor(S);
+  gbtStrategyIterator cursor(S);
 
   AllValidSubsupportsRECURSIVE(&S,&SAct,&cursor,&answer);
 
@@ -96,7 +96,7 @@ gList<const gbtNfgSupport> AllValidSubsupports(const gbtNfgSupport &S)
 
 void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport *s,
 					      gbtNfgSupport *sact,
-					      StrategyCursorForSupport *c,
+					      gbtStrategyIterator *c,
 					const bool strong,
 					const bool conditional,
 					      gList<const gbtNfgSupport> *list,
@@ -107,7 +107,7 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport *s,
 
 
   gList<Strategy *> deletion_list;
-  StrategyCursorForSupport scanner(*s);
+  gbtStrategyIterator scanner(*s);
 
   // First we collect all the strategies that can be deleted.
   do {
@@ -152,11 +152,11 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport *s,
   if (!abort && no_deletions) {
     (*list) += *sact;
     
-    StrategyCursorForSupport c_copy(*c);
+    gbtStrategyIterator c_copy(*c);
     
     do {
       if ( sact->Contains((Strategy *)c_copy.GetStrategy()) &&
-	   sact->NumStrats(c_copy.PlayerIndex()) > 1 ) {
+	   sact->NumStrats(c_copy.GetPlayerId()) > 1 ) {
 
 	Strategy *str_ptr = (Strategy *)c_copy.GetStrategy();
 	sact->RemoveStrategy(str_ptr); 
@@ -181,7 +181,7 @@ gList<const gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
 {
   gList<const gbtNfgSupport> answer;
   gbtNfgSupport sact(S);
-  StrategyCursorForSupport cursor(S);
+  gbtStrategyIterator cursor(S);
 
   AllUndominatedSubsupportsRECURSIVE(&S,
 				     &sact,
@@ -197,7 +197,7 @@ gList<const gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
 
 void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
 					    gbtNfgSupport *sact,
-				            StrategyCursorForSupport *c,
+				            gbtStrategyIterator *c,
 				            gList<const gbtNfgSupport> *list,
 				      gStatus &status)
 { 
@@ -207,7 +207,7 @@ void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
   bool no_deletions = true;
 
   gList<Strategy *> deletion_list;
-  StrategyCursorForSupport scanner(*s);
+  gbtStrategyIterator scanner(*s);
 
   do {
     Strategy *this_strategy = (Strategy *)scanner.GetStrategy();
@@ -241,7 +241,7 @@ void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
   if (!abort && no_deletions) {
     (*list) += *sact;
     
-    StrategyCursorForSupport c_copy(*c);
+    gbtStrategyIterator c_copy(*c);
     do {
       Strategy *str_ptr = (Strategy *)c_copy.GetStrategy();
       if (sact->Contains(str_ptr) &&
@@ -304,7 +304,7 @@ gList<const gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
 {
   gList<const gbtNfgSupport> answer;
   gbtNfgSupport sact(S);
-  StrategyCursorForSupport cursor(S);
+  gbtStrategyIterator cursor(S);
   status.SetProgress(0);
   PossibleNashSubsupportsRECURSIVE(&S,&sact,&cursor,&answer,status);
   status.SetProgress(.5);
@@ -318,7 +318,7 @@ gList<const gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
     status.SetProgress((2.0-((double)i/(double)answer.Length()))/2.0);
     status.Get();
     gbtNfgSupport current(answer[i]);
-    StrategyCursorForSupport crsr(S);
+    gbtStrategyIterator crsr(S);
     bool remove = false;
     do {
       Strategy *strat = (Strategy *)crsr.GetStrategy();
@@ -348,103 +348,3 @@ gList<const gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
 }
 
 
-//----------------------------------------------------
-//                StrategyCursorForSupport
-// ---------------------------------------------------
-
-StrategyCursorForSupport::StrategyCursorForSupport(const gbtNfgSupport &S)
-  : support(&S), pl(1), strat(1)
-{}
-
-StrategyCursorForSupport::StrategyCursorForSupport(
-                  const StrategyCursorForSupport &sc)
-  : support(sc.support), pl(sc.pl), strat(sc.strat)
-{}
-
-StrategyCursorForSupport::~StrategyCursorForSupport()
-{}
-
-StrategyCursorForSupport& 
-StrategyCursorForSupport::operator=(const StrategyCursorForSupport &rhs)
-{
-  if (this != &rhs) {
-    support = rhs.support;
-    pl = rhs.pl;
-    strat = rhs.strat;
-  }
-  return *this;
-}
-
-bool 
-StrategyCursorForSupport::operator==(const StrategyCursorForSupport &rhs) const
-{
-  if (support != rhs.support ||
-      pl      != rhs.pl      ||
-      strat   != rhs.strat)
-    return false;
-  return true;
-}
-
-bool 
-StrategyCursorForSupport::operator!=(const StrategyCursorForSupport &rhs) const
-{
- return (!(*this==rhs));
-}
-
-bool
-StrategyCursorForSupport::GoToNext()
-{
-  if (strat != support->NumStrats(pl))
-    { strat++; return true; }
-  else if (pl    != support->Game().NumPlayers())
-    { pl++; strat = 1; return true; }
-  else return false;
-}
-
-const Strategy *StrategyCursorForSupport::GetStrategy() const
-{
-  return support->Strategies(pl)[strat];
-}
-
-int StrategyCursorForSupport::StrategyIndex() const
-{
-  return strat;
-}
-
-gbtNfgPlayer StrategyCursorForSupport::GetPlayer() const
-{
-  return support->Game().GetPlayer(pl);
-}
-
-int StrategyCursorForSupport::PlayerIndex() const
-{
-  return pl;
-}
-
-bool 
-StrategyCursorForSupport::IsLast() const
-{
-  if (pl == support->Game().NumPlayers())
-    if (strat == support->NumStrats(pl))
-      return true;
-  return false;
-}
-
-bool 
-StrategyCursorForSupport::IsSubsequentTo(const Strategy *s) const
-{
-  if (pl > s->GetPlayer().GetId()) {
-    return true; 
-  }
-  else if (pl < s->GetPlayer().GetId()) {
-    return false;
-  }
-  else {
-    if (strat > s->Number()) {
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-}

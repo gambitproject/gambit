@@ -56,6 +56,8 @@ libgame_a_SOURCES = \
 	sfg.cc \
 	sfg.h \
 	sfstrat.cc \
-	sfstrat.h
+	sfstrat.h \
+        striter.cc \
+        striter.h
 
 EXTRA_DIST = borland.mak 

@@ -27,10 +27,9 @@
 #include "base/base.h"
 #include "base/gstatus.h"
 #include "math/rational.h"
-#include "game/nfg.h"
-#include "game/nfgciter.h"
-
-class StrategyCursorForSupport;
+#include "nfg.h"
+#include "nfgciter.h"
+#include "striter.h"
 
 // We build a series of functions of increasing complexity.  The
 // final one, which is our goal, is the undominated support function.
@@ -38,7 +37,7 @@ class StrategyCursorForSupport;
 
 void AllSubsupportsRECURSIVE(const gbtNfgSupport *s,
 			     gbtNfgSupport *sact,
-			     StrategyCursorForSupport *c,
+			     gbtStrategyIterator *c,
 			     gList<const gbtNfgSupport> *list);
 
 gList<const gbtNfgSupport> AllSubsupports(const gbtNfgSupport &S);
@@ -47,7 +46,7 @@ gList<const gbtNfgSupport> AllSubsupports(const gbtNfgSupport &S);
 
 void AllValidSubsupportsRECURSIVE(const gbtNfgSupport *s,
 					 gbtNfgSupport *sact,
-					 StrategyCursorForSupport *c,
+					 gbtStrategyIterator *c,
 					 gList<const gbtNfgSupport> *list);
 
 gList<const gbtNfgSupport> AllValidSubsupports(const gbtNfgSupport &S);
@@ -63,7 +62,7 @@ gList<const gbtNfgSupport> AllValidSubsupports(const gbtNfgSupport &S);
 
 void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport *s,
 					      gbtNfgSupport *sact,
-					      StrategyCursorForSupport *c,
+					      gbtStrategyIterator *c,
 					const bool strong,
 					      gList<const gbtNfgSupport> *list,
 					gStatus &status);
@@ -86,7 +85,7 @@ gList<const gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
 
 void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
 					    gbtNfgSupport *sact,
-				            StrategyCursorForSupport *c,
+				            gbtStrategyIterator *c,
 					    gList<const gbtNfgSupport> *list,
 				      gStatus &status);
 
@@ -95,36 +94,11 @@ gList<const gbtNfgSupport> SortSupportsBySize(gList<const gbtNfgSupport> &);
 gList<const gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
 					       gStatus &status);
 
-///////////////// Utility Cursor Class /////////////////////
 
-class StrategyCursorForSupport {
-protected:
-  const gbtNfgSupport *support;
-  int pl;
-  int strat;
 
-public:
-  //Constructors and dtor
-  StrategyCursorForSupport(const gbtNfgSupport &S);
-  StrategyCursorForSupport(const StrategyCursorForSupport &s);
-  ~StrategyCursorForSupport();
 
-  // Operators
-  StrategyCursorForSupport &operator =(const StrategyCursorForSupport &);
-  bool                    operator==(const StrategyCursorForSupport &) const;
-  bool                    operator!=(const StrategyCursorForSupport &) const;
 
-  // Manipulation
-  bool GoToNext();
 
-  // Information
-  const Strategy *GetStrategy() const;
-  int StrategyIndex() const;
-  gbtNfgPlayer GetPlayer(void) const;
-  int PlayerIndex() const;
 
-  bool IsLast() const;
-  bool IsSubsequentTo(const Strategy *) const;
-};
 
 
