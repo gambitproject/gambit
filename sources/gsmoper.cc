@@ -1511,7 +1511,10 @@ Portion* GSM_Write_numerical(Portion** param)
   assert(param[1]->Spec().Type & (porINTEGER|porFLOAT|porRATIONAL));
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
-  return param[0]->RefCopy();
+
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
 }
 
 
@@ -1520,7 +1523,10 @@ Portion* GSM_Write_gString(Portion** param)
   assert(param[1]->Spec().Type == porTEXT);
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
-  return param[0]->RefCopy();
+
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
 }
 
 
@@ -1529,7 +1535,10 @@ Portion* GSM_Write_Mixed(Portion** param)
   assert(param[1]->Spec().Type & porMIXED);
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
-  return param[0]->RefCopy();
+
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
 }
 
 
@@ -1538,7 +1547,10 @@ Portion* GSM_Write_Behav(Portion** param)
   assert(param[1]->Spec().Type & porBEHAV);
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
-  return param[0]->RefCopy();
+
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
 }
 
 
@@ -1547,7 +1559,10 @@ Portion* GSM_Write_NfSupport(Portion** param)
   assert(param[1]->Spec().Type & porNFSUPPORT);
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
-  return param[0]->RefCopy();
+
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
 }
 
 Portion* GSM_Write_EfSupport(Portion** param)
@@ -1555,7 +1570,10 @@ Portion* GSM_Write_EfSupport(Portion** param)
   assert(param[1]->Spec().Type & porEFSUPPORT);
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
-  return param[0]->RefCopy();
+
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
 }
 
 Portion* GSM_Write_Strategy(Portion** param)
@@ -1563,7 +1581,10 @@ Portion* GSM_Write_Strategy(Portion** param)
   assert(param[1]->Spec().Type & porSTRATEGY);
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
-  return param[0]->RefCopy();
+
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
 }
 
 
@@ -1577,7 +1598,10 @@ Portion* GSM_Write_Nfg(Portion** param)
 
   nfg->WriteNfgFile(s);
 
-  return param[0]->RefCopy();
+
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
 }
 
 
@@ -1591,7 +1615,10 @@ Portion* GSM_Write_Efg(Portion** param)
 
   efg->WriteEfgFile(s);
 
-  return param[0]->RefCopy();
+
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
 }
 
 
@@ -1602,7 +1629,10 @@ Portion* GSM_Write_list(Portion** param)
   assert(param[1]->Spec().ListDepth > 0);
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
-  return param[0]->RefCopy();
+
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
 }
 
 
@@ -1653,7 +1683,10 @@ Portion* GSM_Read_Bool(Portion** param)
   }
 
   ((BoolPortion*) param[1])->Value() = value;
-  return param[0]->RefCopy();
+
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
 }
 
 
@@ -1694,7 +1727,10 @@ Portion* GSM_Read_Integer(Portion** param)
 
   ((IntPortion*) param[1])->Value() = value;
 
-  return param[0]->RefCopy();
+
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
 }
 
 Portion* GSM_Read_Float(Portion** param)
@@ -1729,7 +1765,10 @@ Portion* GSM_Read_Float(Portion** param)
 
   ((FloatPortion*) param[1])->Value() = value;
 
-  return param[0]->RefCopy();
+
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
 }
 
 Portion* GSM_Read_Rational(Portion** param)
@@ -1787,7 +1826,10 @@ Portion* GSM_Read_Rational(Portion** param)
   ((RationalPortion*) param[1])->Value() = numerator;
   ((RationalPortion*) param[1])->Value() /= denominator;
  
-  return param[0]->RefCopy();
+
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
 }
 
 Portion* GSM_Read_Text(Portion** param)
@@ -1824,7 +1866,10 @@ Portion* GSM_Read_Text(Portion** param)
   
   ((TextPortion*) param[1])->Value() = t;
  
-  return param[0]->RefCopy();
+
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
 }
 
 
@@ -1922,7 +1967,10 @@ Portion* GSM_Read_List(Portion** param, PortionSpec spec,
     }
   }
 
-  return param[0]->RefCopy();
+
+  Portion* result = param[0];
+  param[0] = result->RefCopy();
+  return result;
 }
 
 
