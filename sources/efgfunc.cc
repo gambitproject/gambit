@@ -676,12 +676,16 @@ static Portion *GSM_Name_EfgElements(Portion **param)
       return new TextValPortion(((ActionPortion *) param[0])->Value()->
 				GetName());
     case porINFOSET:
+    case porINFOSET_FLOAT:
+    case porINFOSET_RATIONAL:
       return new TextValPortion(((InfosetPortion *) param[0])->Value()->
 				GetName());
     case porNODE:
       return new TextValPortion(((NodePortion *) param[0])->Value()->
 				GetName());
     case porOUTCOME:
+    case porOUTCOME_FLOAT:
+    case porOUTCOME_RATIONAL:
       return new TextValPortion(((OutcomePortion *) param[0])->Value()->
 				GetName());
     case porEFPLAYER:
@@ -1154,12 +1158,16 @@ static Portion *GSM_SetName_EfgElements(Portion **param)
       ((ActionPortion *) param[0])->Value()->SetName(name);
       break;
     case porINFOSET:
+    case porINFOSET_FLOAT:
+    case porINFOSET_RATIONAL:
       ((InfosetPortion *) param[0])->Value()->SetName(name);
       break;
     case porNODE:
       ((NodePortion *) param[0])->Value()->SetName(name);
       break;
     case porOUTCOME:
+    case porOUTCOME_FLOAT:
+    case porOUTCOME_RATIONAL:
       ((OutcomePortion *) param[0])->Value()->SetName(name);
       break;
     case porEFPLAYER:
