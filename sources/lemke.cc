@@ -12,6 +12,7 @@
 #include "rational.h"
 #include "mixed.h"
 #include "solution.h"
+#include "lemke.h"
 
 
 //
@@ -388,31 +389,51 @@ LemkeTableau<T>::LemkeTableau(const NFRep<T> &r,
   for (i = 1; i <= n1 + n2; Tableau(i++, n1 + n2 + 1) = 0.0);
 }
 
-int NormalForm::Lemke(int dup_strat, int plev, gOutput &out, gOutput &err,
-		      int &npivots)
+int LemkeSolver::Lemke(void)
 {
-  if (NumPlayers() != 2)   return 0;
+  if (nf.NumPlayers() != 2)   return 0;
 
-  if (dup_strat < 0 || dup_strat > data->NumStrats(1)+data->NumStrats(2))
-    dup_strat = 0;
+  if (params.dup_strat < 0 ||
+      params.dup_strat > nf.NumStrats(1) + nf.NumStrats(2))
+    params.dup_strat = 0;
 
   BaseLemke *T;
+  gOutput *outfile = &gout, *errfile = &gerr;
 
-  switch (type)   {
+  if (params.outfile != "")
+    outfile = new gFileOutput((char *) params.outfile);
+  if (params.errfile != "" && params.errfile != params.outfile)
+    errfile = new gFileOutput((char *) params.errfile);
+  if (params.errfile != "" && params.errfile == params.outfile)
+    errfile = outfile;
+ 
+  switch (Type())   {
     case DOUBLE:
-      T = new LemkeTableau<double>((NFRep<double> &) *data, out, err, plev);
+      T = new LemkeTableau<double>((NFRep<double> &) *GetRep(),
+				   *outfile, *errfile, params.plev);
       break;
 
     case RATIONAL:
-      T = new LemkeTableau<gRational>((NFRep<gRational> &) *data,
-				      out, err, plev);
+      T = new LemkeTableau<gRational>((NFRep<gRational> &) *GetRep(),
+				      *outfile, *errfile, params.plev);
       break;
   }
 
-  T->Lemke(dup_strat);
+  T->Lemke(params.dup_strat);
   npivots = T->NumPivots();
 
-  solutions += T->GetSolutions();
+  if (params.outfile != "")
+    delete outfile;
+  if (params.errfile != "" && params.errfile != params.outfile)
+    delete errfile;
 
-  PrintSolutions(gout);
+  gBlock<Solution *> solutions(T->GetSolutions());
+
+  for (int i = 1; i <= solutions.Length(); i++)
+    gout << *solutions[i] << '\n';
+
+  delete T;
+  return 1;
 }
+
+

@@ -12,6 +12,7 @@
 #include "mixed.h"
 #include "solution.h"
 #include "gfunct.h"
+#include "liap.h"
 
 class BaseLiap {
 public:
@@ -144,26 +145,40 @@ T NFRep<T>::LiapValue(const MixedProfile<T> &p) const
   return result;
 }
 
-int NormalForm::Liap(int number, int plev, gOutput &out, gOutput &err,
-		   int &nevals, int &nits)
+int LiapSolver::Liap(void)
 {
   BaseLiap *T;
+  gOutput *outfile = &gout, *errfile = &gerr;
 
-  switch (type)  {
+  if (params.outfile != "")
+    outfile = new gFileOutput((char *) params.outfile);
+  if (params.errfile != "" && params.errfile != params.outfile)
+    errfile = new gFileOutput((char *) params.errfile);
+  if (params.errfile != "" && params.errfile == params.outfile)
+    errfile = outfile;
+
+  switch (Type())  {
     case DOUBLE:   
-      T = new LiapModule<double>((NFRep<double> &) *data, out, err, plev);
+      T = new LiapModule<double>((NFRep<double> &) *GetRep(), *outfile,
+			         *errfile, params.plev);
       break;
 /*
     case RATIONAL:  
-      T = new LiapModule<Rational>((NFRep<Rational> &) *data, out, err, plev);
+      T = new LiapModule<Rational>((NFRep<Rational> &) *GetRep(),
+				   *outfile, *errfile, params.plev);
       break; 
 */
   }
-  T->Liap(number);
-  nits=T->Nits();
-  nevals= T->Nevals();
-  return 1;
+  T->Liap(params.number);
+  nits = T->Nits();
+  nevals = T->Nevals();
 
+  if (params.outfile != "")
+    delete outfile;
+  if (params.errfile != "" && params.errfile != params.outfile)
+    delete errfile;
+  
+  return 1;
 }
 
 
