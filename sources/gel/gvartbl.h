@@ -44,6 +44,12 @@ private:
   gList<gText> m_EFOutcomeNames;
   gList<gNestedList<EFOutcome *> > m_EFOutcomeValues;
 
+  gList<gText> m_EFSupportNames;
+  gList<gNestedList<EFSupport *> > m_EFSupportValues;
+
+  gList<gText> m_BehavNames;
+  gList<gNestedList<BehavSolution *> > m_BehavValues;
+
   gList<gText> m_NfgNames;
   gList<gNestedList<Nfg *> > m_NfgValues;
 
@@ -55,6 +61,12 @@ private:
 
   gList<gText> m_StrategyNames;
   gList<gNestedList<Strategy *> > m_StrategyValues;
+
+  gList<gText> m_NFSupportNames;
+  gList<gNestedList<NFSupport *> > m_NFSupportValues;
+
+  gList<gText> m_MixedNames;
+  gList<gNestedList<MixedSolution *> > m_MixedValues;
 
 public:
   gelVariableTable(void);
@@ -72,10 +84,14 @@ public:
   void Value(const gText &name, gNestedList<Infoset *> &) const;
   void Value(const gText &name, gNestedList<EFPlayer *> &) const;
   void Value(const gText &name, gNestedList<EFOutcome *> &) const;
+  void Value(const gText &name, gNestedList<EFSupport *> &) const;
+  void Value(const gText &name, gNestedList<BehavSolution *> &) const;
   void Value(const gText &name, gNestedList<Nfg *> &) const;
   void Value(const gText &name, gNestedList<Strategy *> &) const;
   void Value(const gText &name, gNestedList<NFPlayer *> &) const;
   void Value(const gText &name, gNestedList<NFOutcome *> &) const;
+  void Value(const gText &name, gNestedList<NFSupport *> &) const;
+  void Value(const gText &name, gNestedList<MixedSolution *> &) const;
 
   void SetValue(const gText &name, const gNestedList<gNumber> &value);
   void SetValue(const gText &name, const gNestedList<gTriState> &value);
@@ -86,10 +102,14 @@ public:
   void SetValue(const gText &name, const gNestedList<Infoset *> &value);
   void SetValue(const gText &name, const gNestedList<EFPlayer *> &value);
   void SetValue(const gText &name, const gNestedList<EFOutcome *> &value);
+  void SetValue(const gText &name, const gNestedList<EFSupport *> &value);
+  void SetValue(const gText &name, const gNestedList<BehavSolution *> &value);
   void SetValue(const gText &name, const gNestedList<Nfg *> &value);
   void SetValue(const gText &name, const gNestedList<Strategy *> &value);
   void SetValue(const gText &name, const gNestedList<NFPlayer *> &value);
   void SetValue(const gText &name, const gNestedList<NFOutcome *> &value);
+  void SetValue(const gText &name, const gNestedList<NFSupport *> &value);
+  void SetValue(const gText &name, const gNestedList<MixedSolution *> &value);
 };
 
 

@@ -695,6 +695,14 @@ gelExpr *GELCompiler::MatchAssignment(gelExpr *lhs, gelExpr *rhs)
       vartable->Define(((gelVariable<EFOutcome *> *) lhs)->Name(), gelEFOUTCOME);
       return new gelAssignment<EFOutcome *>(((gelVariable<EFOutcome *> *) lhs)->Name(),
 				      ((gelExpression<EFOutcome *> *) rhs));
+    case gelEFSUPPORT:
+      vartable->Define(((gelVariable<EFSupport *> *) lhs)->Name(), gelEFSUPPORT);
+      return new gelAssignment<EFSupport *>(((gelVariable<EFSupport *> *) lhs)->Name(),
+				      ((gelExpression<EFSupport *> *) rhs));
+    case gelBEHAV:
+      vartable->Define(((gelVariable<BehavSolution *> *) lhs)->Name(), gelBEHAV);
+      return new gelAssignment<BehavSolution *>(((gelVariable<BehavSolution *> *) lhs)->Name(),
+				      ((gelExpression<BehavSolution *> *) rhs));
     case gelNFG:
       vartable->Define(((gelVariable<Nfg *> *) lhs)->Name(), gelNFG);
       return new gelAssignment<Nfg *>(((gelVariable<Nfg *> *) lhs)->Name(),
@@ -711,6 +719,14 @@ gelExpr *GELCompiler::MatchAssignment(gelExpr *lhs, gelExpr *rhs)
       vartable->Define(((gelVariable<NFOutcome *> *) lhs)->Name(), gelNFOUTCOME);
       return new gelAssignment<NFOutcome *>(((gelVariable<NFOutcome *> *) lhs)->Name(),
 				      ((gelExpression<NFOutcome *> *) rhs));
+    case gelNFSUPPORT:
+      vartable->Define(((gelVariable<NFSupport *> *) lhs)->Name(), gelNFSUPPORT);
+      return new gelAssignment<NFSupport *>(((gelVariable<NFSupport *> *) lhs)->Name(),
+				      ((gelExpression<NFSupport *> *) rhs));
+    case gelMIXED:
+      vartable->Define(((gelVariable<MixedSolution *> *) lhs)->Name(), gelMIXED);
+      return new gelAssignment<MixedSolution *>(((gelVariable<MixedSolution *> *) lhs)->Name(),
+				      ((gelExpression<MixedSolution *> *) rhs));
     default:
       delete lhs;
       delete rhs;
@@ -759,6 +775,12 @@ gelExpr *GELCompiler::MatchWhile(gelExpr *guard, gelExpr *body)
     case gelEFOUTCOME:
       return new gelWhileLoop<EFOutcome *>(((gelExpression<gTriState> *) guard),
 				     ((gelExpression<EFOutcome *> *) body));
+    case gelEFSUPPORT:
+      return new gelWhileLoop<EFSupport *>(((gelExpression<gTriState> *) guard),
+					   ((gelExpression<EFSupport *> *) body));
+    case gelBEHAV:
+      return new gelWhileLoop<BehavSolution *>(((gelExpression<gTriState> *) guard),
+					       ((gelExpression<BehavSolution *> *) body));
     case gelNFG:
       return new gelWhileLoop<Nfg *>(((gelExpression<gTriState> *) guard),
 				     ((gelExpression<Nfg *> *) body));
@@ -771,6 +793,13 @@ gelExpr *GELCompiler::MatchWhile(gelExpr *guard, gelExpr *body)
     case gelNFOUTCOME:
       return new gelWhileLoop<NFOutcome *>(((gelExpression<gTriState> *) guard),
 				     ((gelExpression<NFOutcome *> *) body));
+    case gelNFSUPPORT:
+      return new gelWhileLoop<NFSupport *>(((gelExpression<gTriState> *) guard),
+				     ((gelExpression<NFSupport *> *) body));
+    case gelMIXED:
+      return new gelWhileLoop<MixedSolution *>(((gelExpression<gTriState> *) guard),
+				     ((gelExpression<MixedSolution *> *) body));
+
     default:
       delete guard;
       delete body;
@@ -838,11 +867,16 @@ gelExpr *GELCompiler::MatchFor(gelExpr *init, gelExpr *guard,
 				   (gelExpression<gTriState> *) guard,
 				   incr,
 				   (gelExpression<EFPlayer *> *) body);
-    case gelEFOUTCOME:
-      return new gelForLoop<EFOutcome *>(init,
+    case gelEFSUPPORT:
+      return new gelForLoop<EFSupport *>(init,
 				   (gelExpression<gTriState> *) guard,
 				   incr,
-				   (gelExpression<EFOutcome *> *) body);
+				   (gelExpression<EFSupport *> *) body);
+    case gelBEHAV:
+      return new gelForLoop<BehavSolution *>(init,
+				   (gelExpression<gTriState> *) guard,
+				   incr,
+				   (gelExpression<BehavSolution *> *) body);
     case gelNFG:
       return new gelForLoop<Nfg *>(init,
 				   (gelExpression<gTriState> *) guard,
@@ -863,6 +897,16 @@ gelExpr *GELCompiler::MatchFor(gelExpr *init, gelExpr *guard,
 				   (gelExpression<gTriState> *) guard,
 				   incr,
 				   (gelExpression<NFOutcome *> *) body);
+    case gelNFSUPPORT:
+      return new gelForLoop<NFSupport *>(init,
+				   (gelExpression<gTriState> *) guard,
+				   incr,
+				   (gelExpression<NFSupport *> *) body);
+    case gelMIXED:
+      return new gelForLoop<MixedSolution *>(init,
+				   (gelExpression<gTriState> *) guard,
+				   incr,
+				   (gelExpression<MixedSolution *> *) body);
     default:
       delete init;
       delete guard;
@@ -926,6 +970,14 @@ gelExpr *GELCompiler::MatchConditional(gelExpr *guard,
       return new gelConditional<EFOutcome *>((gelExpression<gTriState> *) guard, 
 	    	   		       (gelExpression<EFOutcome *> *) iftrue,
 				       (gelExpression<EFOutcome *> *) iffalse);
+    case gelEFSUPPORT:
+      return new gelConditional<EFSupport *>((gelExpression<gTriState> *) guard, 
+	    	   		       (gelExpression<EFSupport *> *) iftrue,
+				       (gelExpression<EFSupport *> *) iffalse);
+    case gelBEHAV:
+      return new gelConditional<BehavSolution *>((gelExpression<gTriState> *) guard, 
+	    	   		       (gelExpression<BehavSolution *> *) iftrue,
+				       (gelExpression<BehavSolution *> *) iffalse);
     case gelNFG:
       return new gelConditional<Nfg *>((gelExpression<gTriState> *) guard, 
 	    	   		       (gelExpression<Nfg *> *) iftrue,
@@ -942,6 +994,14 @@ gelExpr *GELCompiler::MatchConditional(gelExpr *guard,
       return new gelConditional<NFOutcome *>((gelExpression<gTriState> *) guard, 
 	    	   		       (gelExpression<NFOutcome *> *) iftrue,
 				       (gelExpression<NFOutcome *> *) iffalse);
+    case gelNFSUPPORT:
+      return new gelConditional<NFSupport *>((gelExpression<gTriState> *) guard, 
+	    	   		       (gelExpression<NFSupport *> *) iftrue,
+				       (gelExpression<NFSupport *> *) iffalse);
+    case gelMIXED:
+      return new gelConditional<MixedSolution *>((gelExpression<gTriState> *) guard, 
+	    	   		       (gelExpression<MixedSolution *> *) iftrue,
+				       (gelExpression<MixedSolution *> *) iffalse);
       
     default:
       delete guard;
@@ -1025,6 +1085,10 @@ gelExpr *GELCompiler::LookupVar(const gText &name)
       return new gelVariable<EFPlayer *>(name); 
     case gelEFOUTCOME:
       return new gelVariable<EFOutcome *>(name); 
+    case gelEFSUPPORT:
+      return new gelVariable<EFSupport *>(name);
+    case gelBEHAV:
+      return new gelVariable<BehavSolution *>(name); 
     case gelNFG:
       return new gelVariable<Nfg *>(name); 
     case gelSTRATEGY:
@@ -1033,6 +1097,10 @@ gelExpr *GELCompiler::LookupVar(const gText &name)
       return new gelVariable<NFPlayer *>(name); 
     case gelNFOUTCOME:
       return new gelVariable<NFOutcome *>(name); 
+    case gelNFSUPPORT:
+      return new gelVariable<NFSupport *>(name);
+    case gelMIXED:
+      return new gelVariable<MixedSolution *>(name);
     default:
       return 0;
   }

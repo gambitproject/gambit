@@ -34,6 +34,10 @@ static gelType NameToType(const gText &name)
     return gelEFPLAYER;
   else if (name == "EFOUTCOME")
     return gelEFOUTCOME;
+  else if (name == "EFSUPPORT")
+    return gelEFSUPPORT;
+  else if (name == "BEHAV")
+    return gelBEHAV;
   else if (name == "NFG")
     return gelNFG;
   else if (name == "STRATEGY")
@@ -42,6 +46,10 @@ static gelType NameToType(const gText &name)
     return gelNFPLAYER;
   else if (name == "NFOUTCOME")
     return gelNFOUTCOME;
+  else if (name == "NFSUPPORT")
+    return gelNFSUPPORT;
+  else if (name == "MIXED")
+    return gelMIXED;
   else if (name == "ANYTYPE")
     return gelANYTYPE;
   else
@@ -337,10 +345,14 @@ void gelSignature::DefineParams( gelVariableTable* subvt ) const
     case gelINFOSET:
     case gelEFPLAYER:
     case gelEFOUTCOME:
+    case gelEFSUPPORT:
+    case gelBEHAV:
     case gelNFG:
     case gelSTRATEGY:
     case gelNFOUTCOME:
     case gelNFPLAYER:
+    case gelNFSUPPORT:
+    case gelMIXED:
       subvt->Define(name, m_Parameters[i]->Type());
       break;
     case gelINPUT:
@@ -413,6 +425,14 @@ void gelSignature::AssignParams( gelVariableTable* subvt, gelVariableTable* vt,
       subvt->SetValue(name,
 		      ((gelExpression<EFOutcome *> *) params[i])->Evaluate(vt));
       break;
+    case gelEFSUPPORT:
+      subvt->SetValue(name,
+		      ((gelExpression<EFSupport *> *) params[i])->Evaluate(vt));
+      break;
+    case gelBEHAV:
+      subvt->SetValue(name,
+		      ((gelExpression<BehavSolution *> *) params[i])->Evaluate(vt));
+      break;
     case gelNFG:
       subvt->SetValue(name,
 		      ((gelExpression<Nfg *> *) params[i])->Evaluate(vt));
@@ -428,6 +448,14 @@ void gelSignature::AssignParams( gelVariableTable* subvt, gelVariableTable* vt,
     case gelNFOUTCOME:
       subvt->SetValue(name,
 		      ((gelExpression<NFOutcome *> *) params[i])->Evaluate(vt));
+      break;
+    case gelNFSUPPORT:
+      subvt->SetValue(name,
+		      ((gelExpression<NFSupport *> *) params[i])->Evaluate(vt));
+      break;
+    case gelMIXED:
+      subvt->SetValue(name,
+		      ((gelExpression<MixedSolution *> *) params[i])->Evaluate(vt));
       break;
     case gelINPUT:
     case gelOUTPUT:

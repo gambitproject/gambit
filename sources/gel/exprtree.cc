@@ -33,6 +33,11 @@ template class gelExpression<EFOutcome *>;
 gelType gelExpression<EFOutcome *>::Type(void) const  { return gelEFOUTCOME; }
 template class gelExpression<EFPlayer *>;
 gelType gelExpression<EFPlayer *>::Type(void) const   { return gelEFPLAYER; }
+template class gelExpression<EFSupport *>;
+gelType gelExpression<EFSupport *>::Type(void) const  { return gelEFSUPPORT; }
+template class gelExpression<BehavSolution *>;
+gelType gelExpression<BehavSolution *>::Type(void) const  { return gelBEHAV; } 
+
 template class gelExpression<Nfg *>;
 gelType gelExpression<Nfg *>::Type(void) const   { return gelNFG; }
 template class gelExpression<Strategy *>;
@@ -41,6 +46,11 @@ template class gelExpression<NFOutcome *>;
 gelType gelExpression<NFOutcome *>::Type(void) const   { return gelNFOUTCOME; }
 template class gelExpression<NFPlayer *>;
 gelType gelExpression<NFPlayer *>::Type(void) const   { return gelNFPLAYER; }
+template class gelExpression<NFSupport *>;
+gelType gelExpression<NFSupport *>::Type(void) const  { return gelNFSUPPORT; }
+template class gelExpression<MixedSolution *>;
+gelType gelExpression<MixedSolution *>::Type(void) const  { return gelMIXED; }
+
 
 template class gelConstant<gNumber>;
 template class gelConstant<gTriState>;
@@ -54,7 +64,6 @@ gelConstant<gNumber>::~gelConstant()   { }
 gNestedList<gNumber> gelConstant<gNumber>::Evaluate(gelVariableTable *) const
 { return m_Value; }
 
-
 gelConstant<gTriState>::gelConstant(const gTriState &v)
 { m_Value.Data().Append(v); }
 gelConstant<gTriState>::gelConstant(const gNestedList<gTriState>& v)
@@ -62,7 +71,6 @@ gelConstant<gTriState>::gelConstant(const gNestedList<gTriState>& v)
 gelConstant<gTriState>::~gelConstant() { }
 gNestedList<gTriState> gelConstant<gTriState>::Evaluate(gelVariableTable *) const
 { return m_Value; }
-
 
 gelConstant<gText>::gelConstant(const gText &v) 
 { m_Value.Data().Append(v); }
@@ -97,10 +105,14 @@ template class gelVariable<Infoset *>;
 template class gelVariable<Action *>;
 template class gelVariable<EFOutcome *>;
 template class gelVariable<EFPlayer *>;
+template class gelVariable<EFSupport *>;
+template class gelVariable<BehavSolution *>;
 template class gelVariable<Nfg *>;
 template class gelVariable<Strategy *>;
 template class gelVariable<NFOutcome *>;
 template class gelVariable<NFPlayer *>;
+template class gelVariable<NFSupport *>;
+template class gelVariable<MixedSolution *>;
 
 
 
@@ -133,10 +145,14 @@ template class gelAssignment<Action *>;
 template class gelAssignment<Infoset *>;
 template class gelAssignment<EFPlayer *>;
 template class gelAssignment<EFOutcome *>;
+template class gelAssignment<EFSupport *>;
+template class gelAssignment<BehavSolution *>;
 template class gelAssignment<Nfg *>;
 template class gelAssignment<Strategy *>;
 template class gelAssignment<NFPlayer *>;
 template class gelAssignment<NFOutcome *>;
+template class gelAssignment<NFSupport *>;
+template class gelAssignment<MixedSolution *>;
 
 template <class T>
 gelConditional<T>::gelConditional(gelExpression<gTriState> *g,
@@ -177,10 +193,14 @@ template class gelConditional<Action *>;
 template class gelConditional<Infoset *>;
 template class gelConditional<EFPlayer *>;
 template class gelConditional<EFOutcome *>;
+template class gelConditional<EFSupport *>;
+template class gelConditional<BehavSolution *>;
 template class gelConditional<Nfg *>;
 template class gelConditional<Strategy *>;
 template class gelConditional<NFPlayer *>;
 template class gelConditional<NFOutcome *>;
+template class gelConditional<NFSupport *>;
+template class gelConditional<MixedSolution *>;
 
 
 template <class T> gelWhileLoop<T>::gelWhileLoop(gelExpression<gTriState> *g,
@@ -216,10 +236,14 @@ template class gelWhileLoop<Action *>;
 template class gelWhileLoop<Infoset *>;
 template class gelWhileLoop<EFPlayer *>;
 template class gelWhileLoop<EFOutcome *>;
+template class gelWhileLoop<EFSupport *>;
+template class gelWhileLoop<BehavSolution *>;
 template class gelWhileLoop<Nfg *>;
 template class gelWhileLoop<Strategy *>;
 template class gelWhileLoop<NFPlayer *>;
 template class gelWhileLoop<NFOutcome *>;
+template class gelWhileLoop<NFSupport *>;
+template class gelWhileLoop<MixedSolution *>;
 
 
 template <class T> gelForLoop<T>::gelForLoop(gelExpr *ini,
@@ -262,10 +286,15 @@ template class gelForLoop<Action *>;
 template class gelForLoop<Infoset *>;
 template class gelForLoop<EFPlayer *>;
 template class gelForLoop<EFOutcome *>;
+template class gelForLoop<EFSupport *>;
+template class gelForLoop<BehavSolution *>;
 template class gelForLoop<Nfg *>;
 template class gelForLoop<Strategy *>;
 template class gelForLoop<NFPlayer *>;
 template class gelForLoop<NFOutcome *>;
+template class gelForLoop<NFSupport *>;
+template class gelForLoop<MixedSolution *>;
+
 
 #include "gcmdline.h"
 
@@ -314,10 +343,14 @@ template class gelUDF<Action *>;
 template class gelUDF<Infoset *>;
 template class gelUDF<EFPlayer *>;
 template class gelUDF<EFOutcome *>;
+template class gelUDF<EFSupport *>;
+template class gelUDF<BehavSolution *>;
 template class gelUDF<Nfg *>;
 template class gelUDF<Strategy *>;
 template class gelUDF<NFPlayer *>;
 template class gelUDF<NFOutcome *>;
+template class gelUDF<NFSupport *>;
+template class gelUDF<MixedSolution *>;
 
 
 
@@ -325,11 +358,15 @@ template class gelUDF<NFOutcome *>;
 
 template class gList<Efg *>;
 template class gList<Action *>;
+template class gList<Infoset *>;
 template class gList<EFPlayer *>;
 template class gList<EFOutcome *>;
-template class gList<Infoset *>;
+template class gList<EFSupport *>;
+template class gList<BehavSolution *>;
 template class gList<Nfg *>;
+template class gList<Strategy *>;
 template class gList<NFPlayer *>;
 template class gList<NFOutcome *>;
-template class gList<Strategy *>;
+template class gList<NFSupport *>;
+template class gList<MixedSolution *>;
 
