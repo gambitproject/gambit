@@ -147,15 +147,17 @@ class gString_Portion : public Portion
 class Reference_Portion : public Portion
 {
  private:
-  gString _Value;
+  gString     _Value;
+  PortionType _DataType;
 
  public:
   Reference_Portion( const gString& value );
 
-  gString&    Value    ( void );
-  Portion*    Copy     ( bool new_data ) const;
-  PortionType Type     ( void ) const;
-  void        Output   ( gOutput& s ) const;
+  gString&     Value    ( void );
+  Portion*     Copy     ( bool new_data ) const;
+  PortionType  Type     ( void ) const;
+  PortionType& DataType ( void );
+  void         Output   ( gOutput& s ) const;
 };
 
 

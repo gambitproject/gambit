@@ -139,22 +139,20 @@ void Assign::Output( gOutput& s ) const
 { s << "Assign"; }
 
 
-#if 0
-Opcode UnAssign::Type( void ) const
-{ return iUNASSIGN; }
-bool UnAssign::Execute( GSM& gsm ) const
-{ return gsm.UnAssign(); }
-void UnAssign::Output( gOutput& s ) const
-{ s << "UnAssign"; }
-#endif
-
-
 Opcode Subscript::Type( void ) const
 { return iSUBSCRIPT; }
 bool Subscript::Execute( GSM& gsm ) const
 { return gsm.Subscript(); }
 void Subscript::Output( gOutput& s ) const
 { s << "Subscript"; }
+
+
+Opcode Child::Type( void ) const
+{ return iCHILD; }
+bool Child::Execute( GSM& gsm ) const
+{ return gsm.Child(); }
+void Child::Output( gOutput& s ) const
+{ s << "Child"; }
 
 
 //--------------------------- math operations ---------------------------

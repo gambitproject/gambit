@@ -114,7 +114,7 @@ public:
   bool NOT ( void );
   
   bool Subscript ( void );
-
+  bool Child ( void );
   
   void AddFunction( FuncDescObj* func );
 

@@ -17,6 +17,8 @@
 #include "gsminstr.h"
 #include "gsmhash.h"
 
+#include "infoset.h"
+#include "node.h"
 
 
 //--------------------------------------------------------------------
@@ -656,6 +658,57 @@ bool GSM::Subscript ( void )
   else
   {
     _ErrorMessage( _StdErr, 20 );
+    delete p1;
+    _Stack->Push( new Error_Portion );
+    result = false;
+  }
+
+  delete p2;
+  return result;
+}
+
+
+bool GSM::Child ( void )
+{
+  Portion* p2;
+  Portion* p1;
+
+  Node* new_node;
+  
+  int      subscript;
+  bool     result = true;
+
+  assert( _Stack->Depth() >= 2 );
+  p2 = _Stack->Pop();
+  p1 = _Stack->Pop();
+
+  if( p2->Type() == porREFERENCE )
+    p2 = _ResolveRef( (Reference_Portion*) p2 );
+
+  if( p1->Type() == porREFERENCE )
+    p1 = _ResolveRef( (Reference_Portion*) p1 );
+
+  if( p1->Type() == porNODE )
+  {
+    if( p2->Type() == porINTEGER )
+    {
+      subscript = (int) ((numerical_Portion<gInteger>*)p2 )->Value().as_long();
+      new_node = ( (Node_Portion*) p1 )->Value()->GetChild( subscript );
+      delete p1;
+      p1 = new Node_Portion( new_node );
+      _Stack->Push( p1 );
+    }
+    else
+    {
+      _ErrorMessage( _StdErr, 38 );
+      delete p1;
+      _Stack->Push( new Error_Portion );
+      result = false;
+    }
+  }
+  else
+  {
+    _ErrorMessage( _StdErr, 39 );
     delete p1;
     _Stack->Push( new Error_Portion );
     result = false;
@@ -1310,6 +1363,13 @@ void GSM::_ErrorMessage
     break;
   case 37:
     s << "  A non-integer index specified\n";
+    break;
+  case 38:
+    s << "  A non-integer child number passed to a Node\n";
+    break;
+  case 39:
+    s << "  Attempted to find the child of a non-Node\n";
+    s << "  Portion type\n";
     break;
   default:
     s << "  General error\n";
