@@ -52,6 +52,7 @@ gText ToText(int);
 gText ToText(long);
 gText ToText(double);
 gText ToText(double p_number, int p_precision);
+gText ToText(long double);
 gText ToText(gTriState);
 
 double ToDouble(const gText &);

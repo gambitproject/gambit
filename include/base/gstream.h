@@ -119,6 +119,7 @@ class gOutput  {
     virtual gOutput &operator<<(long x) = 0;
     virtual gOutput &operator<<(char x) = 0;
     virtual gOutput &operator<<(double x) = 0;
+    virtual gOutput &operator<<(long double x) = 0;
     virtual gOutput &operator<<(float x) = 0;
     virtual gOutput &operator<<(const char *x) = 0;
     virtual gOutput &operator<<(const void *x) = 0;
@@ -170,6 +171,7 @@ class gStandardOutput : public gOutput  {
     gOutput &operator<<(long x);
     gOutput &operator<<(char x);
     gOutput &operator<<(double x);
+    gOutput &operator<<(long double x);
     gOutput &operator<<(float x);
     gOutput &operator<<(const char *x);
     gOutput &operator<<(const void *x);
@@ -220,6 +222,7 @@ class gFileOutput : public gOutput  {
     gOutput &operator<<(long x);
     gOutput &operator<<(char x);
     gOutput &operator<<(double x);
+    gOutput &operator<<(long double x);
     gOutput &operator<<(float x);
     gOutput &operator<<(const char *x);
     gOutput &operator<<(const void *x);
@@ -248,6 +251,7 @@ class gNullOutput : public gOutput  {
     gOutput &operator<<(long x);
     gOutput &operator<<(char x);
     gOutput &operator<<(double x);
+    gOutput &operator<<(long double x);
     gOutput &operator<<(float x);
     gOutput &operator<<(const char *x);
     gOutput &operator<<(const void *x);
