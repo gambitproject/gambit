@@ -6,6 +6,8 @@
 
 #include "lpsolve.h"
 
+    // These are the values recommended by Murtagh (1981) for 15 digit 
+    // accuracy in LP problems 
 void Epsilon(double &v, int i) 
 {
   if(i==1)v=(double)1.0e-5;
