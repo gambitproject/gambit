@@ -60,24 +60,22 @@ class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
 //               EFLiapFunct<T>: Constructor and destructor
 //----------------------------------------------------------------------
 
-template <class T>EFLiapFunc<T>
-::EFLiapFunc(const ExtForm<T> &EF, const LiapParams<T> &P)
-  : gBFunctMin<T>(EF.ProfileLength()), E(EF), p(EF, false),
-		  pp(EF, false), cpay(EF.Dimensionality()),
-		  xi(p.Length(),p.Length()),
-		  niters(0), nevals(0)
+template <class T>
+EFLiapFunc<T>::EFLiapFunc(const ExtForm<T> &EF, const LiapParams<T> &P)
+  : gBFunctMin<T>(EF.ProfileLength()), niters(0), nevals(0), E(EF),
+    p(EF, false), pp(EF, false), cpay(EF.Dimensionality()),
+    xi(p.Length(), p.Length())
 {
   xi.MakeIdent();
   E.Centroid(pp);
 }
 
-template <class T>EFLiapFunc<T>
-::EFLiapFunc(const ExtForm<T> &EF, const LiapParams<T> &P,
+template <class T>
+EFLiapFunc<T>::EFLiapFunc(const ExtForm<T> &EF, const LiapParams<T> &P,
 			  const BehavProfile<T> &s)
-  : gBFunctMin<T>(EF.ProfileLength()), E(EF), p(EF, false),
-		  pp(EF,false), cpay(EF.Dimensionality()),
-		  xi(p.Length(),p.Length()),
-		  niters(0), nevals(0)
+  : gBFunctMin<T>(EF.ProfileLength()), niters(0), nevals(0), E(EF),
+    p(EF, false), pp(EF,false), cpay(EF.Dimensionality()),
+    xi(p.Length(),p.Length())
 {
   xi.MakeIdent();
   pp = s;
