@@ -1,5 +1,5 @@
 //
-// FILE: hash.imp -- Implementation of hash table member functions
+// FILE: ghash.imp -- Implementation of hash table member functions
 //
 // $Id$
 //
@@ -88,23 +88,19 @@ template <class K, class T> T HashTable<K, T>::Remove(K p_key)
 }
 
 
-template <class K, class T> void HashTable<K, T>::Remove( T value )
+template <class K, class T> void HashTable<K, T>::Remove(T value)
 {
-  int i = 0;
-  int j = 0;
-  for( i = 0; i < m_numBuckets; i++ )
-    for( j = 1; j <= m_keyBucket[i].Length(); j++ )
-    {
-      if( operator()( m_keyBucket[i][j] ) == value )
-      {
+  for (int i = 0; i < m_numBuckets; i++) {
+    for (int j = 1; j <= m_keyBucket[i].Length(); j++) {
+      if (operator()( m_keyBucket[i][j] ) == value) {
 	T removed_value = Remove( m_keyBucket[i][j] );
 	assert( removed_value == value );
 	DeleteAction( removed_value );
 	break;
       }
     }
+  }
 }
-
   
 template <class K, class T> T HashTable<K, T>::operator()( K key ) const
 {
