@@ -7,6 +7,26 @@
 #include "behav.imp"
 #include "rational.h"
 
+class ChanceInfoset;
+
+const gNumber BehavProfile<gNumber>::ChanceProb(const Infoset *iset, int act) const
+{ 
+  ChanceInfoset *t = (ChanceInfoset *) iset;
+  return t->probs[act];
+}
+
+const gRational BehavProfile<gRational>::ChanceProb(const Infoset *iset, int act) const
+{ 
+  ChanceInfoset *t = (ChanceInfoset *) iset;
+  return t->probs[act];
+}
+
+const double BehavProfile<double>::ChanceProb(const Infoset *iset, int act) const
+{ 
+  ChanceInfoset *t = (ChanceInfoset *) iset;
+  return t->double_probs[act];
+}
+
 const gNumber BehavProfile<gNumber>::Payoff(const EFOutcome *o, int pl) const
 { 
   return o->payoffs[pl];
@@ -30,6 +50,13 @@ const gNumber PureBehavProfile<gNumber>::Payoff(const EFOutcome *o, const int &p
     return o->payoffs[pl];
   else
     return (gNumber) 0;
+}
+
+const gNumber PureBehavProfile<gNumber>
+::ChanceProb(const Infoset *iset , const int &act) const
+{
+  ChanceInfoset *t = (ChanceInfoset *) iset;
+  return t->probs[act];
 }
 
 template class BehavNode<double>;

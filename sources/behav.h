@@ -31,7 +31,6 @@ protected:
   BehavNode<T> *m_root;
   gArray<BehavNode<T> *> m_nodes;
   EFSupport m_support;
-  gPVector<T> *m_chanceprobs;
   
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
   void InitPayoffs(void) const;
@@ -41,6 +40,7 @@ protected:
   void NodeRealizProbs(BehavNode<T> *, T, int &, gArray<T> &) const;
   void Beliefs(Node *, T, gDPVector<T> &, gPVector<T> &) const;
   const T Payoff(const EFOutcome *o, int pl) const;
+  const T ChanceProb(const Infoset *iset, int act) const;
   
   // USED IN TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO ANF NASH
   

@@ -117,29 +117,8 @@ const gList<const Node *> Infoset::ListOfMembers(void) const
 //           ChanceInfoset: Member function definitions
 //------------------------------------------------------------------------
 
-class ChanceInfoset : public Infoset  {
-  friend class Efg;
-
-  private:
-    gBlock<gNumber> probs;
-
-    ChanceInfoset(Efg *E, int n, EFPlayer *p, int br);
-    virtual ~ChanceInfoset()    { }
-
-    void PrintActions(gOutput &f) const;
-
-  public:
-    Action *InsertAction(int where);
-    void RemoveAction(int which);
-
-    void SetActionProb(int i, const gNumber &value)  { probs[i] = value; }
-    const gNumber &GetActionProb(int i) const   { return probs[i]; }
-    const gArray<gNumber> &GetActionProbs(void) const  { return probs; }
-};
-
-
 ChanceInfoset::ChanceInfoset(Efg *E, int n, EFPlayer *p, int br)
-  : Infoset(E, n, p, br), probs(br)
+  : Infoset(E, n, p, br), probs(br), double_probs(br)
 {
   for (int i = 1; i <= br; probs[i++] = gRational(1, br));
 }
@@ -148,6 +127,7 @@ Action *ChanceInfoset::InsertAction(int where)
 { 
   Action *action = Infoset::InsertAction(where);
   probs.Insert((gNumber) 0, where);
+  double_probs.Insert((double) 0, where);
   return action;
 }
 
@@ -155,6 +135,7 @@ void ChanceInfoset::RemoveAction(int which)
 {
   Infoset::RemoveAction(which);
   probs.Remove(which);
+  double_probs.Remove(which);
 }
 
 void ChanceInfoset::PrintActions(gOutput &f) const
@@ -1667,6 +1648,11 @@ void Efg::InitPayoffs(void) const
     for (int pl = 1; pl <= NumPlayers(); pl++)
       outcomes[outc]->double_payoffs[pl] = outcomes[outc]->payoffs[pl];
 
+  for (int iset = 1; iset <= NumChanceInfosets(); iset++) {
+    ChanceInfoset * infoset = (ChanceInfoset *) GetChance()->Infosets()[iset]; 
+    for (int act = 1; act <= infoset->NumActions(); act++)
+      infoset->double_probs[act] = infoset->probs[act];
+  }
   m_outcome_revision = RevisionNumber();
 }
 

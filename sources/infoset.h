@@ -96,6 +96,31 @@ class Infoset   {
     bool Precedes(const Node *) const;
 };
 
+class ChanceInfoset : public Infoset  {
+  friend class Efg;
+  friend class BehavProfile<double>;
+  friend class BehavProfile<gRational>;
+  friend class BehavProfile<gNumber>;
+  friend class PureBehavProfile<double>;
+  friend class PureBehavProfile<gRational>;
+  friend class PureBehavProfile<gNumber>;
 
+  private:
+    gBlock<gNumber> probs;
+    gBlock<double> double_probs;
+
+    ChanceInfoset(Efg *E, int n, EFPlayer *p, int br);
+    virtual ~ChanceInfoset()    { }
+
+    void PrintActions(gOutput &f) const;
+
+  public:
+    Action *InsertAction(int where);
+    void RemoveAction(int which);
+
+    void SetActionProb(int i, const gNumber &value)  { probs[i] = value; }
+    const gNumber &GetActionProb(int i) const   { return probs[i]; }
+    const gArray<gNumber> &GetActionProbs(void) const  { return probs; }
+};
 
 #endif   //# INFOSET_H

@@ -261,7 +261,6 @@ template <class T> class PureBehavProfile   {
   protected:
     const Efg *E;
     gArray<gArray<const Action *> *> profile;
-    gPVector<T> *chanceprobs;
 
     //    void IndPayoff(const Node *n, const int &pl, const T, T &) const;
     // This aims at efficiency, but leads to a problem described in behav.imp
@@ -286,6 +285,7 @@ template <class T> class PureBehavProfile   {
     const Action *GetAction(const Infoset *) const;
     
     const T Payoff(const EFOutcome *, const int &pl) const;
+    const T ChanceProb(const Infoset *, const int &act) const;
     
     const T Payoff(const Node *, const int &pl) const;
   //    T    Payoff(const int &pl) const;
