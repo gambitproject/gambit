@@ -137,7 +137,8 @@ gRational::gRational(double x)
 #if USE_GNU_MP
 gRational::gRational(const gInteger &n)
 {
-#warning Unimplemented function!
+  mpq_init(m_value);
+  mpq_set_str(m_value, ToText(n), 10);
 }
 #else
 gRational::gRational(const gInteger &n) 
@@ -148,7 +149,9 @@ gRational::gRational(const gInteger &n)
 #if USE_GNU_MP
 gRational::gRational(const gInteger &n, const gInteger &d) 
 {
-#warning Unimplemented function!
+  mpq_init(m_value);
+  mpq_set_str(m_value, ToText(n) + "/" + ToText(d), 10);
+  mpq_canonicalize(m_value);
 }
 #else
 gRational::gRational(const gInteger &n, const gInteger &d) 
@@ -161,6 +164,7 @@ gRational::gRational(const gInteger &n, const gInteger &d)
 #if USE_GNU_MP
 gRational::gRational(const gRational &y)
 {
+  mpq_init(m_value);
   mpq_set(m_value, y.m_value);
 }
 #else
@@ -205,8 +209,9 @@ int sign(const gRational &x)
 gInteger gRational::GetNumerator(void) const 
 {
 #if USE_GNU_MP
-#warning Unimplemented function!
-  return gInteger(0);
+  char buffer[mpz_sizeinbase(mpq_numref(m_value), 10) + 2];
+  mpz_get_str(buffer, 10, mpq_numref(m_value));
+  return atoI(buffer);
 #else
   return num;
 #endif  // USE_GNU_MP
@@ -215,8 +220,9 @@ gInteger gRational::GetNumerator(void) const
 gInteger gRational::GetDenominator(void) const 
 {
 #if USE_GNU_MP
-#warning Unimplemented function!
-  return gInteger(0);
+  char buffer[mpz_sizeinbase(mpq_denref(m_value), 10) + 2];
+  mpz_get_str(buffer, 10, mpq_denref(m_value));
+  return atoI(buffer);
 #else
   return den;
 #endif  // USE_GNU_MP
@@ -225,8 +231,7 @@ gInteger gRational::GetDenominator(void) const
 gRational::operator double() const 
 {
 #if USE_GNU_MP
-#warning Unimplemented function!
-  return 0.0;
+  return mpq_get_d(m_value);
 #else
   return ratio(num, den); 
 #endif  // USE_GNU_MP
@@ -488,8 +493,22 @@ gRational sqr(const gRational &x)
 gRational pow(const gRational& x, long y)
 {
 #if USE_GNU_MP
-#warning Unimplemented function!
-  return 0;
+  if (y >= 0) {
+    gRational r = 1;
+    for (long i = 1; i <= y; i++) {
+      r *= r;
+    }
+    return r;
+  }
+  else {
+    y = -y;
+    gRational r = 1;
+    for (long i = 1; i <= y; i++) {
+      r *= r;
+    }
+    r.invert();
+    return r;
+  }
 #else
   gRational r;
   if (y >= 0) {
@@ -521,10 +540,6 @@ gOutput &operator<<(gOutput &s, const gRational &y)
 
 gInput &operator>>(gInput &f, gRational &y)
 {
-#if USE_GNU_MP
-#warning Unimplemented function!
-  return f;
-#else
   char ch = ' ';
   int sign = 1;
   gInteger num = 0, denom = 1;
@@ -565,10 +580,7 @@ gInput &operator>>(gInput &f, gRational &y)
   f.unget(ch);
 
   y = gRational(sign * num, denom);
-  y.normalize();
-
   return f;
-#endif  // USE_GNU_MP
 }
 
 gText ToText(const gRational &r)
