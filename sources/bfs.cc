@@ -37,8 +37,9 @@ template <class T> int BFS<T>::operator!=(const BFS<T> &M) const
   return !(*this == M);
 }
 
-template <class T> gOutput &operator<<(gOutput &f, const BFS<T> &)
+template <class T> gOutput &operator<<(gOutput &f, const BFS<T> &b)
 {
+  b.Dump(f);
   return f;
 }
 
