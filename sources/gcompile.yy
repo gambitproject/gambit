@@ -117,8 +117,8 @@
 %token INTEGER
 %token FLOAT
 %token TEXT
-%token gINPUT
-%token gOUTPUT
+%token STDIN
+%token STDOUT
 %token gNULL
 
 
@@ -170,8 +170,6 @@ formalparam:  NAME { formals.Append(tval); } binding
               RBRACE
 
 typename:     NAME { paramtype += tval; } optparen
-        |     gINPUT { paramtype += "INPUT"; }
-        |     gOUTPUT { paramtype += "OUTPUT"; }
 
 optparen:
         |     LPAREN { paramtype += '('; }  typename
@@ -355,9 +353,9 @@ E9:           BOOLEAN  { emit(new Push<bool>(bval));
                          por = new FloatValPortion(dval); }
   |           TEXT     { emit(new Push<gString>(tval));
                          por = new TextValPortion(tval); }
-  |           gINPUT   { emit(new PushInput(gin));
+  |           STDIN    { emit(new PushInput(gin));
                          por = new InputRefPortion(gin); }
-  |           gOUTPUT  { emit(new PushOutput(gout));
+  |           STDOUT   { emit(new PushOutput(gout));
                          por = new OutputRefPortion(gout); }
   |           gNULL    { emit(new PushOutput(gnull));
                          por = new OutputRefPortion(gnull); }
@@ -475,14 +473,14 @@ static struct tokens toktable[] =
     case TEXT:
       gerr << "text string " << tval << '\n';
       break;
-    case gINPUT:
-      gerr << "INPUT\n";
+    case STDIN:
+      gerr << "StdIn\n";
       break;
-    case gOUTPUT:
-      gerr << "OUTPUT\n";
+    case STDOUT:
+      gerr << "StdOut\n";
       break;
     case gNULL:
-      gerr << "NULL\n";
+      gerr << "Null\n";
       break;
     default:
       gerr << yychar << '\n';
@@ -552,9 +550,9 @@ I_dont_believe_Im_doing_this:
       bval = false;
       return BOOLEAN;
     }
-    else if (s == "INPUT")  return gINPUT;
-    else if (s == "OUTPUT") return gOUTPUT;
-    else if (s == "NULL")   return gNULL;
+    else if (s == "StdIn")  return STDIN;
+    else if (s == "StdOut") return STDOUT;
+    else if (s == "Null")   return gNULL;
     else if (s == "AND")    return LAND;
     else if (s == "OR")     return LOR;
     else if (s == "NOT")    return LNOT;
@@ -755,7 +753,11 @@ bool GCLCompiler::DefineFunction(void)
 
   bool error = false;
   for (int i = 1; i <= formals.Length(); i++)   {
-    PortionType type = TextToPortionType(types[i]);
+    PortionType type;
+    if(portions[i])
+      type = portions[i]->Type();
+    else
+      type = TextToPortionType(types[i]);
     int listdepth = TextToPortionListDepth(types[i]);
 
     if (type != porERROR)   {
@@ -768,7 +770,7 @@ bool GCLCompiler::DefineFunction(void)
     }
     else   {
       error = true;
-      gerr << "Error: Unknown type " << types[i] << " for parameter " << formals[i] << " in declaration of " << funcname << '\n';
+      gerr << "Error: Unknown type " << types[i] << " for parameter " << formals[i] << " in declaration of " << funcname << "[]\n";
       break;
     }
   }

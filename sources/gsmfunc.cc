@@ -777,7 +777,11 @@ void FuncDescObj::Dump(gOutput& f) const
       if(_FuncInfo[i].ParamInfo[j].DefaultValue) f << '{';
       f << _FuncInfo[i].ParamInfo[j].Name;
       if(_FuncInfo[i].ParamInfo[j].PassByReference) f << '<';
-      f << "->" << PortionTypeToText(_FuncInfo[i].ParamInfo[j].Type);
+      f << "->";
+      if(_FuncInfo[i].ParamInfo[j].DefaultValue)
+	f << _FuncInfo[i].ParamInfo[j].DefaultValue;
+      else
+	f << PortionTypeToText(_FuncInfo[i].ParamInfo[j].Type);
       if(_FuncInfo[i].ParamInfo[j].DefaultValue) f << '}';
     }
     f << "]\n";
