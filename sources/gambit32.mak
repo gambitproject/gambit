@@ -44,7 +44,7 @@ DEBUG_FLAGS=
 
 CPPFLAGS= $(WXINC) $(EXTRACPPFLAGS) $(OPT) @$(CFG)
 
-all: gambit wxgcl
+all: gambit wxgcl pxi
 
 gambit:	$(ALLGUI_OBJECTS) gambit.res
   ilink32 $(LINKFLAGS) @&&!
@@ -71,6 +71,20 @@ wxgcl.res
 
 wxgcl.res :      ..\winsrc\res\wxgcl.rc 
     brc32 -r -fo.\wxgcl.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include ..\winsrc\res\wxgcl
+
+pxi:  $(ALLPXI_OBJECTS) pxi.res
+  ilink32 $(LINKFLAGS) @&&!
+c0w32.obj $(ALLPXI_OBJECTS)
+pxi
+nul
+$(GUILIBS)
+
+pxi.res
+!
+
+pxi.res :      pxi.rc
+   brc32 -r -fo.\pxi.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include pxi
+
 
 #
 # Notes on building bison parsers on DOS
