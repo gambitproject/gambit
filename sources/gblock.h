@@ -56,6 +56,15 @@ template <class T> class gBlock    {
     gBlock<T> &operator=(const gBlock<T> &);
 
 //
+// Tests for equality of two blocks.  Blocks are equal if they have the
+// same length, and the contents of all components are equal.
+//+grp
+    int operator==(const gBlock<T> &b) const;
+    int operator!=(const gBlock<T> &b) const
+      { return !(*this == b); }
+//-grp
+
+//
 // Return an element from the block by index into the block.
 // <note> If an out-of-range index is given, the program will terminate in a
 //        failed assertion.
@@ -140,6 +149,14 @@ template <class T> INLINE gBlock<T> &gBlock<T>::operator=(const gBlock<T> &b)
       data = 0;
   }
   return *this;
+}
+
+template <class T> INLINE int gBlock<T>::operator==(const gBlock<T> &b) const
+{
+  if (length != b.length) return 0;
+  for (int i = 0; i < length; i++) 
+    if (data[i] != b.data[i]) return 0;
+  return 1;
 }
 
 template <class T> inline const T &gBlock<T>::operator[](int n) const
