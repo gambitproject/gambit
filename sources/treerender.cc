@@ -904,6 +904,7 @@ void TreeRender::UpdateCursor(void)
 
 void TreeRender::Render(wxDC &dc)
 { 
+  dc.SetBackground(*wxWHITE_BRUSH);
   dc.Clear();
   RenderSubtree(dc);
 }

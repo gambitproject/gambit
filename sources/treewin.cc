@@ -361,35 +361,22 @@ void TreeWindow::Render(wxDC &dc)
     FitZoom();
   }
   dc.SetUserScale(m_zoom, m_zoom);
-  char *dc_type = dc.GetClassInfo()->GetClassName();
     
-  if (strcmp(dc_type, "wxCanvasDC") == 0) { // if drawing to screen
-    if (Cursor()) {
-      if (!NodeList().GetNodeEntry(Cursor())) {
-	SetCursorPosition(ef.RootNode());
-      }
-      
-      UpdateCursor();
+  if (Cursor()) {
+    if (!NodeList().GetNodeEntry(Cursor())) {
+      SetCursorPosition(ef.RootNode());
     }
     
-    dc.SetBrush(*wxWHITE_BRUSH);
-    dc.Clear();
-
-    dc.BeginDrawing();
-  }
-  else {
-    flasher->SetFlashing(false);
+    UpdateCursor();
   }
     
+  dc.SetBrush(*wxWHITE_BRUSH);
+  dc.SetBackground(*wxWHITE_BRUSH);
+  dc.Clear();
+
+  dc.BeginDrawing();
   TreeRender::Render(dc);
-
-  if (strcmp(dc_type, "wxCanvasDC") != 0) {
-    flasher->SetFlashing(true); 
-
-  }
-  else {
-    dc.EndDrawing();
-  }
+  dc.EndDrawing();
 
   flasher->Flash();
 }
