@@ -1,21 +1,23 @@
 //#
 //# FILE: enumtest.cc -- Enum test program
 //#
-//# $Id$
+//# $Id$ 
 //#
 
-#include "normiter.h"
-#include "normal.h"
+#include "nfg.h"
+#include "mixed.h"
 #include "enum.h"
 
 main()
 {
-  NormalForm<double> N(gin);
+  Nfg<double> *N = 0;
+  ReadNfgFile(gin, N);
   EnumParams EP;
 //  EP.stopAfter=8;
-//  EP.trace=2;
+//  EP.trace=3;
   EP.tracefile=&gout;
-  EnumModule<double> LM((NormalForm<double> &) N, EP);
+  NFSupport S(*N);
+  EnumModule<double> LM( *N, EP,S);
   LM.Enum();
   LM.GetSolutions().Dump(gout);
   gout << "\nNum Pivots =" <<  LM.NumPivots();
