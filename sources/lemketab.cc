@@ -142,7 +142,7 @@ template <class T> int LTableau<T>::LemkePath(int dup)
 //    Dump(*params.output); 
 //  }
     //   gout << "\nbegin path " << dup << "\n";
-    Dump(gout); 
+    //   Dump(gout); 
   enter = dup;
   if (Member(dup))
     enter = -dup;
