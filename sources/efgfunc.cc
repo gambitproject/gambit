@@ -1403,7 +1403,7 @@ Portion *GSM_List_BehavRational(Portion **param)
 
       for( k = 1; k <= P->Lengths()[j]; k++ )
       {
-	p3 = new FloatValPortion( (*P)( i, j, k ) );
+	p3 = new RationalValPortion( (*P)( i, j, k ) );
 	((ListPortion*) p2)->Append( p3 );
       }
       ((ListPortion*) p1)->Append( p2 );
