@@ -20,6 +20,7 @@
 #include "nfgprint.h"
 #include "nfgprofile.h"
 #include "nfgnavigate.h"
+#include "nfgoutcome.h"
 #include "mixededit.h"
 #include "nfgconst.h"
 
@@ -71,11 +72,13 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_EDIT_OUTCOMES_ATTACH, NfgShow::OnEditOutcomeAttach)
   EVT_MENU(NFG_EDIT_OUTCOMES_DETACH, NfgShow::OnEditOutcomeDetach)
   EVT_MENU(NFG_EDIT_OUTCOMES_PAYOFFS, NfgShow::OnEditOutcomePayoffs)
-  EVT_MENU(NFG_VIEW_SOLUTIONS, NfgShow::OnViewSolutions)
+  EVT_MENU(NFG_VIEW_PROFILES, NfgShow::OnViewProfiles)
+  EVT_MENU(NFG_VIEW_NAVIGATION, NfgShow::OnViewNavigation)
+  EVT_MENU(NFG_VIEW_OUTCOMES, NfgShow::OnViewOutcomes)
   EVT_MENU(NFG_VIEW_DOMINANCE, NfgShow::OnViewDominance)
   EVT_MENU(NFG_VIEW_PROBABILITIES, NfgShow::OnViewProbabilities)
   EVT_MENU(NFG_VIEW_VALUES, NfgShow::OnViewValues)
-  EVT_MENU(NFG_VIEW_OUTCOMES, NfgShow::OnViewOutcomes)
+  EVT_MENU(NFG_VIEW_OUTCOME_LABELS, NfgShow::OnViewOutcomeLabels)
   EVT_MENU(NFG_VIEW_GAMEINFO, NfgShow::OnViewGameInfo)
   EVT_MENU(NFG_FORMAT_DISPLAY_COLUMNS, NfgShow::OnFormatDisplayColumns)
   EVT_MENU(NFG_FORMAT_DISPLAY_DECIMALS, NfgShow::OnFormatDisplayDecimals)
@@ -113,6 +116,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_SET_FOCUS(NfgShow::OnSetFocus)
   EVT_ACTIVATE(NfgShow::OnActivate)
   EVT_LIST_ITEM_SELECTED(idNFG_SOLUTION_LIST, NfgShow::OnSolutionSelected)
+  EVT_NOTEBOOK_PAGE_CHANGED(idINFONOTEBOOK, NfgShow::OnInfoNotebookPage)
 END_EVENT_TABLE()
 
 //----------------------------------------------------------------------
@@ -123,7 +127,8 @@ NfgShow::NfgShow(Nfg &p_nfg, GambitFrame *p_parent)
   : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(500, 500)),
     m_parent(p_parent), m_nfg(p_nfg),
     m_table(0), m_solutionTable(0),
-    m_solutionSashWindow(0), m_infoSashWindow(0), m_navigateWindow(0)
+    m_solutionSashWindow(0), m_infoSashWindow(0),
+    m_navigateWindow(0), m_outcomeWindow(0)
 {
 #ifdef __WXMSW__
   SetIcon(wxIcon("nfg_icn"));
@@ -174,6 +179,11 @@ NfgShow::NfgShow(Nfg &p_nfg, GambitFrame *p_parent)
   m_navigateWindow = new NfgNavigateWindow(this, m_infoNotebook);
   m_navigateWindow->SetSize(200, 200);
   m_infoNotebook->AddPage(m_navigateWindow, "Navigation");
+
+  m_outcomeWindow = new NfgOutcomeWindow(this, m_infoNotebook);
+  m_outcomeWindow->UpdateValues();
+  m_outcomeWindow->SetSize(200, 200);
+  m_infoNotebook->AddPage(m_outcomeWindow, "Outcomes");
 
   m_table = new NfgTable(m_nfg, this);
   m_table->SetSize(0, 0, 200, 200);
@@ -234,16 +244,26 @@ void NfgShow::MakeMenus(void)
 		    "Set/Edit outcomes");
 
   wxMenu *viewMenu = new wxMenu;
-  viewMenu->Append(NFG_VIEW_SOLUTIONS, "&Solutions",
-		   "Display solutions", true);
+  viewMenu->Append(NFG_VIEW_PROFILES, "&Profiles",
+		   "Display/hide profiles window", true);
+  viewMenu->AppendSeparator();
+  viewMenu->Append(NFG_VIEW_NAVIGATION, "&Navigation",
+		   "Display navigation window", true);
+  viewMenu->Check(NFG_VIEW_NAVIGATION, true);
+  viewMenu->Append(NFG_VIEW_OUTCOMES, "&Outcomes", 
+		   "Display and edit outcomes", true);
+  viewMenu->Check(NFG_VIEW_OUTCOMES, false);
+  viewMenu->AppendSeparator();
   viewMenu->Append(NFG_VIEW_DOMINANCE, "&Dominance",
 		   "Display dominance information", TRUE);
   viewMenu->Append(NFG_VIEW_PROBABILITIES, "&Probabilities",
 		   "Display solution probabilities", TRUE);
   viewMenu->Append(NFG_VIEW_VALUES, "&Values",
 		   "Display strategy values", TRUE);
-  viewMenu->Append(NFG_VIEW_OUTCOMES, "&Outcomes",
-		   "Display outcome names", TRUE);
+  viewMenu->AppendSeparator();
+  // This probably belongs in formatting instead
+  viewMenu->Append(NFG_VIEW_OUTCOME_LABELS, "Outcome &Labels",
+		   "Display outcome labels", TRUE);
   viewMenu->Append(NFG_VIEW_GAMEINFO, "Game&Info",
 		   "Display information about the game");
   
@@ -516,6 +536,13 @@ void NfgShow::OnActivate(wxActivateEvent &p_event)
   if (p_event.GetActive()) {
     m_parent->SetActiveWindow(this);
   }
+}
+
+void NfgShow::OnInfoNotebookPage(wxNotebookEvent &p_event)
+{
+  GetMenuBar()->Check(NFG_VIEW_NAVIGATION, p_event.GetSelection() == 0);
+  GetMenuBar()->Check(NFG_VIEW_OUTCOMES, p_event.GetSelection() == 1);
+  GetMenuBar()->Check(NFG_VIEW_SUPPORTS, p_event.GetSelection() == 2);
 }
 
 //----------------------------------------------------------------------
@@ -1182,7 +1209,7 @@ void NfgShow::OnToolsEquilibriumCustomYamamoto(wxCommandEvent &)
 	if (!m_solutionSashWindow->IsShown()) {
 	  m_solutionTable->Show(true);
 	  m_solutionSashWindow->Show(true);
-	  GetMenuBar()->Check(NFG_VIEW_SOLUTIONS, true);
+	  GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
 	  AdjustSizes();
 	}
       }
@@ -1198,17 +1225,61 @@ void NfgShow::OnToolsEquilibriumCustomYamamoto(wxCommandEvent &)
 }
 
 
-void NfgShow::OnViewSolutions(wxCommandEvent &)
+void NfgShow::OnViewProfiles(wxCommandEvent &)
 {
   if (m_solutionSashWindow->IsShown()) {
     m_solutionTable->Show(false);
     m_solutionSashWindow->Show(false);
-    GetMenuBar()->Check(NFG_VIEW_SOLUTIONS, false);
+    GetMenuBar()->Check(NFG_VIEW_PROFILES, false);
   }
   else {
     m_solutionTable->Show(true);
     m_solutionSashWindow->Show(true);
-    GetMenuBar()->Check(NFG_VIEW_SOLUTIONS, true);
+    GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
+  }
+
+  AdjustSizes();
+}
+
+void NfgShow::OnViewNavigation(wxCommandEvent &)
+{
+  if (m_infoSashWindow->IsShown() && m_infoNotebook->GetSelection() != 0) {
+    m_infoNotebook->SetSelection(0);
+    m_navigateWindow->Show(true);
+    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, true);
+    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, false);
+    GetMenuBar()->Check(NFG_VIEW_SUPPORTS, false);
+  }
+  else if (m_infoSashWindow->IsShown()) {
+    m_infoSashWindow->Show(false);
+    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, false);
+  }
+  else {
+    m_infoSashWindow->Show(true);
+    m_infoNotebook->SetSelection(0);
+    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, true);
+  }
+
+  AdjustSizes();
+}
+
+void NfgShow::OnViewOutcomes(wxCommandEvent &)
+{
+  if (m_infoSashWindow->IsShown() && m_infoNotebook->GetSelection() != 1) {
+    m_infoNotebook->SetSelection(1);
+    m_navigateWindow->Show(true);
+    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, true);
+    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, false);
+    GetMenuBar()->Check(NFG_VIEW_SUPPORTS, false);
+  }
+  else if (m_infoSashWindow->IsShown()) {
+    m_infoSashWindow->Show(false);
+    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, false);
+  }
+  else {
+    m_infoSashWindow->Show(true);
+    m_infoNotebook->SetSelection(1);
+    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, true);
   }
 
   AdjustSizes();
@@ -1229,7 +1300,7 @@ void NfgShow::OnViewValues(wxCommandEvent &)
   m_table->ToggleValues();
 }
 
-void NfgShow::OnViewOutcomes(wxCommandEvent &)
+void NfgShow::OnViewOutcomeLabels(wxCommandEvent &)
 {
   m_table->SetOutcomeValues(1 - m_table->OutcomeValues());
   m_table->Refresh();
@@ -1489,6 +1560,11 @@ void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
 
     m_table->Refresh();
   }
+}
+
+void NfgShow::OnOutcomesEdited(void)
+{
+  m_table->Refresh();
 }
 
 const gList<MixedSolution> &NfgShow::Solutions(void) const

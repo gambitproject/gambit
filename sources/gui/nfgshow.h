@@ -24,6 +24,7 @@
 const int idNFG_SOLUTION_LIST = 1900;
 
 class NfgNavigateWindow;
+class NfgOutcomeWindow;
 class NfgProfileList;
 class NfgTable;
 class dialogNfgSupportInspect;
@@ -39,6 +40,7 @@ private:
 
   wxSashWindow *m_solutionSashWindow, *m_infoSashWindow;
   NfgNavigateWindow *m_navigateWindow;
+  NfgOutcomeWindow *m_outcomeWindow;
 
   gList<NFSupport *> m_supports;
   NFSupport *m_currentSupport;
@@ -70,11 +72,13 @@ private:
   void OnEditOutcomeDetach(wxCommandEvent &);
   void OnEditOutcomePayoffs(wxCommandEvent &);
 
-  void OnViewSolutions(wxCommandEvent &);
+  void OnViewProfiles(wxCommandEvent &);
+  void OnViewNavigation(wxCommandEvent &);
+  void OnViewOutcomes(wxCommandEvent &);
   void OnViewDominance(wxCommandEvent &);
   void OnViewProbabilities(wxCommandEvent &);
   void OnViewValues(wxCommandEvent &);
-  void OnViewOutcomes(wxCommandEvent &);
+  void OnViewOutcomeLabels(wxCommandEvent &);
   void OnViewGameInfo(wxCommandEvent &);
 
   void OnFormatDisplayColumns(wxCommandEvent &);
@@ -103,6 +107,8 @@ private:
   void OnProfilesRename(wxCommandEvent &);
   void OnProfilesEdit(wxCommandEvent &);
   void OnProfilesDelete(wxCommandEvent &);
+
+  void OnInfoNotebookPage(wxNotebookEvent &);
 
   // Other event handlers
   void OnCloseWindow(wxCloseEvent &);
@@ -135,12 +141,15 @@ public:
   const wxString &Filename(void) const { return m_filename; }
 
   const Nfg &Game(void) const { return m_nfg; }  
+  Nfg &Game(void) { return m_nfg; }
 
   bool GameIsDirty(void) const { return m_nfg.IsDirty(); }
 
   void SetPlayers(int, int);
   void SetProfile(const gArray<int> &);
   gArray<int> GetProfile(void) const;
+
+  void OnOutcomesEdited(void);
 
   DECLARE_EVENT_TABLE()
 };

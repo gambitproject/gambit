@@ -89,7 +89,8 @@ WXGCL_OBJECTS = $(WXGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
 
 # These are GUI components common to the various binaries, and
 # are found in subdirectory guishare/
-GUISHARE_SOURCES = dlabout.cc fontpanel.cc valinteger.cc valnumber.cc \
+GUISHARE_SOURCES = dlabout.cc fontpanel.cc numberedit.cc \
+                   valinteger.cc valnumber.cc \
                    wxmisc.cc wxstatus.cc
 
 GUISHARE_OBJECTS = $(GUISHARE_SOURCES:.cc=.o)
@@ -105,7 +106,7 @@ GUI_SOURCES = gambit.cc treewin.cc twflash.cc treedraw.cc treedrag.cc \
               wxio.cc dlsupport.cc \
               efgprofile.cc efgnavigate.cc behavedit.cc efgprint.cc \
               nfgtable.cc nfgnavigate.cc nfgprofile.cc mixededit.cc \
-              nfgprint.cc \
+              nfgprint.cc nfgoutcome.cc \
               userprefs.cc
 
 GUI_OBJECTS = $(GUI_SOURCES:.cc=$(OBJECT_SUFFIX))

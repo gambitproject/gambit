@@ -21,12 +21,15 @@
 #define NFG_EDIT_OUTCOMES_NEW           308
 #define NFG_EDIT_OUTCOMES_DELETE        309
 
-#define NFG_VIEW_SOLUTIONS              101
-#define NFG_VIEW_DOMINANCE              103
-#define NFG_VIEW_PROBABILITIES          104
-#define NFG_VIEW_VALUES                 105
-#define NFG_VIEW_OUTCOMES               350
-#define NFG_VIEW_GAMEINFO               155
+const int NFG_VIEW_PROFILES = 101;
+const int NFG_VIEW_NAVIGATION = 102;
+const int NFG_VIEW_OUTCOMES = 103;
+const int NFG_VIEW_SUPPORTS = 104;
+const int NFG_VIEW_DOMINANCE = 110;
+const int NFG_VIEW_PROBABILITIES = 111;
+const int NFG_VIEW_VALUES = 112;
+const int NFG_VIEW_OUTCOME_LABELS = 120;
+const int NFG_VIEW_GAMEINFO = 121;
 
 #define NFG_FORMAT_DISPLAY               204
 #define NFG_FORMAT_DISPLAY_COLUMNS       205
