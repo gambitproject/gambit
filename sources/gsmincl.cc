@@ -36,53 +36,63 @@ struct PortionSpecTextType
 };  
 
 
-#define NumPortionSpecs 35
+#define NUM_PortionSpecs 41
+#define NUM_CompositePortionSpecs 9
 
 PortionSpecTextType _PortionSpecText[] =
 {
-  { porERROR,            "ERROR" },
+  { porERROR,              "ERROR" },
   
-  { porBOOL,             "BOOLEAN" },
-  { porFLOAT,            "FLOAT" },
-  { porINTEGER,          "INTEGER" },
-  { porRATIONAL,         "RATIONAL" },
-  { porTEXT,             "TEXT" },
-  { porNFG_FLOAT,        "NFG(FLOAT)" },
-  { porNFG_RATIONAL,     "NFG(RATIONAL)" },
-  { porEFG_FLOAT,        "EFG(FLOAT)" },
-  { porEFG_RATIONAL,     "EFG(RATIONAL)" },
-  { porMIXED_FLOAT,      "MIXED(FLOAT)" },
-  { porMIXED_RATIONAL,   "MIXED(RATIONAL)" },
-  { porBEHAV_FLOAT,      "BEHAV(FLOAT)" },
-  { porBEHAV_RATIONAL,   "BEHAV(RATIONAL)" },
+  { porBOOL,               "BOOLEAN" },
+  { porFLOAT,              "FLOAT" },
+  { porINTEGER,            "INTEGER" },
+  { porRATIONAL,           "RATIONAL" },
+  { porTEXT,               "TEXT" },
 
-  { porOUTCOME_FLOAT,    "OUTCOME(FLOAT)" },
-  { porOUTCOME_RATIONAL, "OUTCOME(RATIONAL)" },
-  { porPLAYER_NFG,       "NFPLAYER" },
-  { porPLAYER_EFG,       "EFPLAYER" },
-  { porNF_SUPPORT,       "NFSUPPORT" },
-  { porEF_SUPPORT,       "EFSUPPORT" },
-  { porINFOSET,          "INFOSET" },
-  { porNODE,             "NODE" },
-  { porACTION,           "ACTION" },
-  { porSTRATEGY,         "STRATEGY" },
+  { porNFG_FLOAT,          "NFG(FLOAT)" },
+  { porNFG_RATIONAL,       "NFG(RATIONAL)" },
+  { porEFG_FLOAT,          "EFG(FLOAT)" },
+  { porEFG_RATIONAL,       "EFG(RATIONAL)" },
+  { porMIXED_FLOAT,        "MIXED(FLOAT)" },
+  { porMIXED_RATIONAL,     "MIXED(RATIONAL)" },
+  { porBEHAV_FLOAT,        "BEHAV(FLOAT)" },
+  { porBEHAV_RATIONAL,     "BEHAV(RATIONAL)" },
 
-  { porREFERENCE,        "REFERENCE" },
+  { porOUTCOME_FLOAT,      "OUTCOME(FLOAT)" },
+  { porOUTCOME_RATIONAL,   "OUTCOME(RATIONAL)" },
+  { porINFOSET_FLOAT,      "INFOSET(FLOAT)" },
+  { porINFOSET_RATIONAL,   "INFOSET(RATIONAL)" },
+  { porNFSUPPORT_FLOAT,    "NFSUPPORT(FLOAT)" },
+  { porNFSUPPORT_RATIONAL, "NFSUPPORT(RATIONAL)" },
+  { porEFSUPPORT_FLOAT,    "EFSUPPORT(FLOAT)" },
+  { porEFSUPPORT_RATIONAL, "EFSUPPORT(RATIONAL)" },
 
-  { porOUTPUT,           "OUTPUT" },
-  { porINPUT,            "INPUT" },
 
-  { porNULL,             "NULL" },
+  { porNFPLAYER,           "NFPLAYER" },
+  { porEFPLAYER,           "EFPLAYER" },
+  { porNODE,               "NODE" },
+  { porACTION,             "ACTION" },
+  { porSTRATEGY,           "STRATEGY" },
 
-  { porUNDEFINED,        "UNDEFINED" },
+  { porREFERENCE,          "REFERENCE" },
 
-  { porNFG,              "NFG" },
-  { porEFG,              "EFG" },
-  { porMIXED,            "MIXED" },
-  { porBEHAV,            "BEHAV" },
-  { porOUTCOME,          "OUTCOME" },
+  { porOUTPUT,             "OUTPUT" },
+  { porINPUT,              "INPUT" },
 
-  { porANYTYPE,          "ANYTYPE" }
+  { porNULL,               "NULL" },
+
+  { porUNDEFINED,          "UNDEFINED" },
+
+  { porNFG,                "NFG" },
+  { porEFG,                "EFG" },
+  { porMIXED,              "MIXED" },
+  { porBEHAV,              "BEHAV" },
+  { porOUTCOME,            "OUTCOME" },
+  { porINFOSET,            "INFOSET" },
+  { porNFSUPPORT,          "NFSUPPORT" },
+  { porEFSUPPORT,          "EFSUPPORT" },
+
+  { porANYTYPE,            "ANYTYPE" }
 };
 
 
@@ -90,7 +100,7 @@ gString PortionSpecToText(const PortionSpec& spec)
 {
   int i;
   gString result;
-  for(i=0; i<NumPortionSpecs; i++)
+  for(i=0; i<NUM_PortionSpecs; i++)
     if(spec.Type == _PortionSpecText[i].Type)
     {
       if(result == "")
@@ -102,7 +112,7 @@ gString PortionSpecToText(const PortionSpec& spec)
     }
 
   if(result == "")
-    for(i=0; i<NumPortionSpecs-6; i++)
+    for(i=0; i<NUM_PortionSpecs-NUM_CompositePortionSpecs; i++)
       if(spec.Type & _PortionSpecText[i].Type)
 	if(result == "")
 	  result = _PortionSpecText[i].Text;
@@ -136,7 +146,7 @@ PortionSpec TextToPortionSpec(const gString& text)
     result.ListDepth = NLIST;
     t = t.mid(t.length()-7, 7);
   }
-  for(i=0; i<NumPortionSpecs; i++)
+  for(i=0; i<NUM_PortionSpecs; i++)
     if(t.left(strlen(_PortionSpecText[i].Text)) == _PortionSpecText[i].Text)
     {
       result.Type = result.Type | _PortionSpecText[i].Type;

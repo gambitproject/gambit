@@ -255,7 +255,7 @@ ParamInfoType::ParamInfoType(void)
 :
  Name(""), 
  Spec(PortionSpec(porERROR)), 
- DefaultValue(NO_DEFAULT_VALUE), 
+ DefaultValue(REQUIRED), 
  PassByReference(BYVAL)
 {}
 
@@ -293,8 +293,7 @@ FuncInfoType::FuncInfoType(void)
  UserDefined(false),
  FuncPtr(0),
  ReturnSpec(PortionSpec(porERROR)),
- Listable(LISTABLE),
- GameMatch( false ),
+ Flag( funcLISTABLE ),
  NumParams(0),
  ParamInfo(0)
 {}
@@ -303,8 +302,7 @@ FuncInfoType::FuncInfoType(const FuncInfoType& funcinfo)
 :
  UserDefined(funcinfo.UserDefined),
  ReturnSpec(funcinfo.ReturnSpec),
- Listable(funcinfo.Listable),
- GameMatch(funcinfo.GameMatch),
+ Flag(funcinfo.Flag),
  NumParams(funcinfo.NumParams),
  Desc( funcinfo.Desc )
 {
@@ -325,15 +323,13 @@ FuncInfoType::FuncInfoType
  PortionSpec returnspec,
  int numparams,
  ParamInfoType* paraminfo,
- bool listable,
- bool gamematch
+ FuncFlagType flag
 )
 :
  UserDefined(false),
  FuncPtr(funcptr),
  ReturnSpec(returnspec),
- Listable(listable),
- GameMatch(gamematch), 
+ Flag(flag),
  NumParams(numparams)
 {
   int i;
@@ -349,15 +345,13 @@ FuncInfoType::FuncInfoType
  PortionSpec returnspec,
  int numparams,
  ParamInfoType* paraminfo,
- bool listable,
- bool gamematch
+ FuncFlagType flag
 )
 :
  UserDefined(true),
  FuncInstr(funcinstr),
  ReturnSpec(returnspec),
- Listable(listable),
- GameMatch(gamematch),
+ Flag(flag),
  NumParams(numparams)
 {
   int i;
@@ -389,9 +383,9 @@ FuncDescObj::FuncDescObj(FuncDescObj& func)
   for(f_index = 0; f_index < _NumFuncs; f_index++)
   {
     _FuncInfo[f_index].UserDefined = func._FuncInfo[f_index].UserDefined;
-    _FuncInfo[f_index].Listable    = func._FuncInfo[f_index].Listable;
-    _FuncInfo[f_index].GameMatch   = func._FuncInfo[f_index].GameMatch;
+    
     _FuncInfo[f_index].ReturnSpec  = func._FuncInfo[f_index].ReturnSpec;
+    _FuncInfo[f_index].Flag    = func._FuncInfo[f_index].Flag;
 
     if(!_FuncInfo[f_index].UserDefined)
       _FuncInfo[f_index].FuncPtr     = func._FuncInfo[f_index].FuncPtr;
@@ -516,14 +510,6 @@ bool FuncDescObj::Combine(FuncDescObj* newfunc)
 	  (index < newfunc->_FuncInfo[i].NumParams); 
 	  index++)
       {
-	/*
-	if((_FuncInfo[f_index].ParamInfo[index].DefaultValue == 0 && 
-	    newfunc->_FuncInfo[i].ParamInfo[index].DefaultValue == 0) &&
-	   (_FuncInfo[f_index].ParamInfo[index].Name ==
-	    newfunc->_FuncInfo[i].ParamInfo[index].Name) &&
-	   (_FuncInfo[f_index].ParamInfo[index].Spec ==
-	    newfunc->_FuncInfo[i].ParamInfo[index].Spec))
-	    */
 	if((_FuncInfo[f_index].ParamInfo[index].Name ==
 	    newfunc->_FuncInfo[i].ParamInfo[index].Name) &&
 	   (_FuncInfo[f_index].ParamInfo[index].Spec.Type ==
@@ -812,7 +798,7 @@ CallFuncObj::CallFuncObj(FuncDescObj* func, gOutput& s_out, gOutput& s_err)
     _FuncMatch[f_index] = true;
   for(index = 0; index < _NumParams; index++)
   {
-    _Param[index] = NO_DEFAULT_VALUE;
+    _Param[index] = REQUIRED;
     _RunTimeParamInfo[index].Ref = 0;
     _RunTimeParamInfo[index].Defined = false;
     _RunTimeParamInfo[index].AutoValOrRef = false;
@@ -1075,7 +1061,7 @@ bool CallFuncObj::SetCurrParam(Portion *param, bool auto_val_or_ref)
 	  if(!_TypeMatch
 	     (param, 
 	      _FuncInfo[f_index].ParamInfo[_CurrParamIndex].Spec,
-	      _FuncInfo[f_index].Listable))
+	      (_FuncInfo[f_index].Flag & funcLISTABLE) ))
 	  {
 	    _FuncMatch[f_index] = false;
 	  }
@@ -1093,7 +1079,7 @@ bool CallFuncObj::SetCurrParam(Portion *param, bool auto_val_or_ref)
 	if(!_TypeMatch
 	   (param, 
 	    _FuncInfo[_FuncIndex].ParamInfo[_CurrParamIndex].Spec,
-	    _FuncInfo[_FuncIndex].Listable))
+	    (_FuncInfo[_FuncIndex].Flag & funcLISTABLE) ))
 	{
 	  _ErrorMessage(_StdErr, 26, _CurrParamIndex + 1, _FuncName,
 			_FuncInfo[_FuncIndex].ParamInfo[_CurrParamIndex].Name,
@@ -1182,7 +1168,7 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 	  if(!_TypeMatch
 	     (_Param[index],
 	      _FuncInfo[f_index].ParamInfo[index].Spec,
-	      _FuncInfo[f_index].Listable))
+	      (_FuncInfo[f_index].Flag & funcLISTABLE) ))
 	    match_ok = false;
 	}
 	else
@@ -1241,7 +1227,7 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 	else if(!_TypeMatch
 		(_Param[index], 
 		 _FuncInfo[_FuncIndex].ParamInfo[index].Spec,
-		 _FuncInfo[_FuncIndex].Listable))
+		 (_FuncInfo[_FuncIndex].Flag & funcLISTABLE) ))
 	{
 	  _ErrorMessage(_StdErr, 7, index + 1, _FuncName, 
 			_FuncInfo[_FuncIndex].ParamInfo[index].Name);
@@ -1373,16 +1359,6 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 	    _ErrorOccurred = true;
 	  }
 	}
-	/*
-	else if(_FuncInfo[_FuncIndex].ParamInfo[index].PassByReference &&
-		!_Param[index]->IsReference() && 
-		_RunTimeParamInfo[index].Ref == 0)
-	{
-	  _ErrorMessage(_StdErr, 13, index + 1, _FuncName, 
-			_FuncInfo[_FuncIndex].ParamInfo[index].Name);
-	  _ErrorOccurred = true;
-	}
-	*/
       }
     }
   }
@@ -1390,7 +1366,7 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
   // now check to see that all parameters belong to the same game,
   //   if so specified
 
-  if( !_ErrorOccurred && _FuncInfo[_FuncIndex].GameMatch )
+  if( !_ErrorOccurred && (_FuncInfo[_FuncIndex].Flag & funcGAMEMATCH) )
   {
     void* game = NULL; 
     for(index = 0; index < _FuncInfo[_FuncIndex].NumParams; index++)
@@ -1414,35 +1390,6 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
   }
 
 
-  // now check that all parameters have the same subtype
-  if( !_ErrorOccurred )
-  {
-    DataType subtype = DT_ERROR;
-    for(index = 0; index < _FuncInfo[_FuncIndex].NumParams; index++)
-    {      
-      if(_Param[index] != 0 &&
-	 _RunTimeParamInfo[index].Defined)
-      {
-	if( _Param[index]->SubType() == DT_MIXED )
-	{
-	  _ErrorMessage( _StdErr, 31, index + 1, _FuncName );
-	  _ErrorOccurred = true;	  
-	}
-	if( _Param[index]->SubType() != DT_ERROR )
-	{
-	  if( subtype == DT_ERROR )
-	    subtype = _Param[index]->SubType();
-	  else if( subtype != _Param[index]->SubType() )
-	  {
-	    _ErrorMessage( _StdErr, 30, index + 1, _FuncName );
-	    _ErrorOccurred = true;
-	  }
-	}
-      }
-    }
-  }
- 
-  
 
   // This section makes the actual function call
 
@@ -1479,8 +1426,9 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
     {
       result = new ErrorPortion("Null argument encountered");
     }
-    else if(!list_op || !_FuncInfo[_FuncIndex].Listable) // normal func call
+    else if(!list_op || !(_FuncInfo[_FuncIndex].Flag & funcLISTABLE))
     {
+      // normal func call
       result = CallNormalFunction( gsm, _Param );
     }
     else // listed function call
@@ -1514,7 +1462,8 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 	SetDataType(_FuncInfo[_FuncIndex].ReturnSpec.Type);      
     }
     else if(!_TypeMatch(result, _FuncInfo[_FuncIndex].ReturnSpec, 
-			list_op && _FuncInfo[_FuncIndex].Listable, true))
+			list_op && (_FuncInfo[_FuncIndex].Flag & funcLISTABLE),
+			true))
     {
       _ErrorMessage(_StdErr, 28, 0, _FuncName, 
 		    PortionSpecToText(_FuncInfo[_FuncIndex].ReturnSpec),

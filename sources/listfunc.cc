@@ -740,13 +740,13 @@ void Init_listfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Contains", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Contains, porBOOL, 2,
-				       0, NON_LISTABLE));
+				       0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("list", 
 					    PortionSpec(porANYTYPE, NLIST)));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("x", porANYTYPE));
 
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Contains, porBOOL, 2,
-				       0, NON_LISTABLE));
+				       0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("list", 
 					    PortionSpec(porANYTYPE, NLIST)));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("x", 
@@ -841,7 +841,7 @@ void Init_listfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("List", 5);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_List, PortionSpec(porANYTYPE, 1), 
-				       2, 0, NON_LISTABLE));
+				       2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE & 
 					    ~(porINTEGER | porFLOAT | 
 					      porRATIONAL)));
@@ -850,14 +850,14 @@ void Init_listfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_List_List, 
 				       PortionSpec(porANYTYPE, 2), 
-				       2, 0, NON_LISTABLE));
+				       2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("x", PortionSpec(porANYTYPE,1)));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("length", porINTEGER, 
 					    new IntValPortion(1)));
 
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_List_Integer, 
 				       PortionSpec(porINTEGER, 1), 
-				       3, 0, NON_LISTABLE));
+				       3, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porINTEGER));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("length", porINTEGER, 
 					    new IntValPortion(1)));
@@ -866,7 +866,7 @@ void Init_listfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(3, FuncInfoType(GSM_List_Float, 
 				       PortionSpec(porFLOAT, 1), 
-				       3, 0, NON_LISTABLE));
+				       3, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porFLOAT));
   FuncObj->SetParamInfo(3, 1, ParamInfoType("length", porINTEGER, 
 					    new IntValPortion(1)));
@@ -875,7 +875,7 @@ void Init_listfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(4, FuncInfoType(GSM_List_Rational, 
 				       PortionSpec(porRATIONAL, 1), 
-				       3, 0, NON_LISTABLE));
+				       3, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(4, 0, ParamInfoType("x", porRATIONAL));
   FuncObj->SetParamInfo(4, 1, ParamInfoType("length", porINTEGER, 
 					    new IntValPortion(1)));

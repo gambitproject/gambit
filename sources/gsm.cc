@@ -499,33 +499,41 @@ bool GSM::Assign(void)
       case porBOOL:
 	((BoolPortion*) p1)->Value() = ((BoolPortion*) p2)->Value();
 	break;
+
       case porOUTCOME_FLOAT:
       case porOUTCOME_RATIONAL:
 	((OutcomePortion*) p1)->Value() = ((OutcomePortion*) p2)->Value();
 	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
-      case porPLAYER_NFG:
+
+      case porNFSUPPORT_FLOAT:
+      case porNFSUPPORT_RATIONAL:
+	((NfSupportPortion*) p1)->Value()=((NfSupportPortion*)p2)->Value();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
+	break;
+
+      case porEFSUPPORT_FLOAT:
+      case porEFSUPPORT_RATIONAL:
+	((EfSupportPortion*) p1)->Value()=((EfSupportPortion*)p2)->Value();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
+	break;
+
+      case porINFOSET_FLOAT:
+      case porINFOSET_RATIONAL:
+	((InfosetPortion*) p1)->Value() = ((InfosetPortion*) p2)->Value();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
+	break;
+
+      case porNFPLAYER:
 	((NfPlayerPortion*) p1)->Value()=((NfPlayerPortion*) p2)->Value();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
+	break;
+      case porEFPLAYER:
+	((EfPlayerPortion*) p1)->Value()=((EfPlayerPortion*) p2)->Value();
 	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
       case porSTRATEGY:
 	((StrategyPortion*) p1)->Value()=((StrategyPortion*) p2)->Value();
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
-	break;
-      case porNF_SUPPORT:
-	((NfSupportPortion*) p1)->Value()=((NfSupportPortion*)p2)->Value();
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
-	break;
-      case porEF_SUPPORT:
-	((EfSupportPortion*) p1)->Value()=((EfSupportPortion*)p2)->Value();
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
-	break;
-      case porPLAYER_EFG:
-	((EfPlayerPortion*) p1)->Value()=((EfPlayerPortion*) p2)->Value();
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
-	break;
-      case porINFOSET:
-	((InfosetPortion*) p1)->Value() = ((InfosetPortion*) p2)->Value();
 	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
       case porNODE:
@@ -536,6 +544,7 @@ bool GSM::Assign(void)
 	((ActionPortion*) p1)->Value() = ((ActionPortion*) p2)->Value();
 	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
+
       case porMIXED_FLOAT:
 	(*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) = 
 	  (*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
@@ -546,6 +555,7 @@ bool GSM::Assign(void)
 	  (*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value()));
 	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
+
       case porBEHAV_FLOAT:
 	(*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) = 
 	  (*((BehavSolution<double>*) ((BehavPortion*) p2)->Value()));
@@ -557,35 +567,13 @@ bool GSM::Assign(void)
 	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
 
-	/*
-      case porNFG_FLOAT:
-	delete ((NfgPortion*) p1)->Value();
-	((NfgPortion*) p1)->Value() = new Nfg<double>
-	  (*((Nfg<double>*) ((NfgPortion*) p2)->Value())); 
-	break;
-      case porNFG_RATIONAL:
-	delete ((NfgPortion*) p1)->Value();
-	((NfgPortion*) p1)->Value() =  new Nfg<gRational>
-	  (*((Nfg<gRational>*) ((NfgPortion*) p2)->Value())); 
-	break;
-      case porEFG_FLOAT:
-	delete ((EfgPortion*) p1)->Value();
-	((EfgPortion*) p1)->Value() = new Efg<double>
-	  (*(Efg<double>*) ((EfgPortion*) p2)->Value()); 
-	break;
-      case porEFG_RATIONAL:
-	delete ((EfgPortion*) p1)->Value();
-	((EfgPortion*) p1)->Value() =  new Efg<gRational>
-	  (*(Efg<gRational>*) ((EfgPortion*) p2)->Value()); 
-	break;
-	*/
-
       case porNFG_FLOAT:
       case porNFG_RATIONAL:
 	((NfgPortion*) p1)->Value() = ((NfgPortion*) p2)->Value();
 	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	p1->Original()->SetGame(p2->Game(), false);
 	break;
+
       case porEFG_FLOAT:
       case porEFG_RATIONAL:
 	((EfgPortion*) p1)->Value() = ((EfgPortion*) p2)->Value();
@@ -2536,8 +2524,8 @@ void GSM::UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data )
   int i = 0;
   int j = 0;
   
-  assert( ( spec.Type & porEF_SUPPORT) ||
-	  ( spec.Type & porPLAYER_EFG ) ||
+  assert( ( spec.Type & porEFSUPPORT) ||
+	  ( spec.Type & porEFPLAYER ) ||
 	  ( spec.Type & porINFOSET ) ||
 	  ( spec.Type & porNODE ) ||
 	  ( spec.Type & porACTION ) );
@@ -2554,12 +2542,12 @@ void GSM::UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data )
       if( ( varslist[i]->Spec().Type & spec.Type ) && spec.ListDepth == 0 )
       {
 	assert( spec.ListDepth == 0 );
-	if( spec.Type & porEF_SUPPORT )
+	if( spec.Type & porEFSUPPORT )
 	{
 	  if( ((EfSupportPortion*) varslist[i])->Value() == data )
 	    _RefTableStack->Peek()->Remove( varslist[i] );
 	}
-	if( spec.Type & porPLAYER_EFG )
+	if( spec.Type & porEFPLAYER )
 	{
 	  if( ((EfPlayerPortion*) varslist[i])->Value() == data )
 	    _RefTableStack->Peek()->Remove( varslist[i] );

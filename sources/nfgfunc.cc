@@ -744,21 +744,21 @@ void Init_nfgfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("AddStrategy", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_AddStrategy, porNF_SUPPORT, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT,
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_AddStrategy, porNFSUPPORT, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("strategy", porSTRATEGY));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("CompressNfg", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_CompressNfg, porNFG, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("ElimDom", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ElimDom_Nfg,
-				       porNF_SUPPORT, 6));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
+				       porNFSUPPORT, 6));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("strong", porBOOL,
 					    new BoolValPortion(false)));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("mixed", porBOOL,
@@ -780,7 +780,7 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Game", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_NfgElements, porNFG, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porPLAYER_NFG));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porNFPLAYER));
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_NfgElements, porNFG, 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy", porSTRATEGY));
   gsm->AddFunction(FuncObj);
@@ -799,7 +799,7 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Name_Nfg, porTEXT, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNFG));
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Name_NfPlayer, porTEXT, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porPLAYER_NFG));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porNFPLAYER));
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Name_Strategy, porTEXT, 1));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porSTRATEGY));
   gsm->AddFunction(FuncObj);
@@ -812,12 +812,12 @@ void Init_nfgfunc(GSM *gsm)
 					    new BoolValPortion(false)));
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_NewNfg_Float, 
 				       porNFG_FLOAT, 1, 0, 
-				       NON_LISTABLE));
+				       funcNONLISTABLE));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("payoffs", 
 					    PortionSpec(porFLOAT,1)));
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_NewNfg_Rational, 
 				       porNFG_RATIONAL, 1, 0, 
-				       NON_LISTABLE));
+				       funcNONLISTABLE));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("payoffs", 
 					    PortionSpec(porRATIONAL,1)));
   gsm->AddFunction(FuncObj);
@@ -838,7 +838,7 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Players", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Players_Nfg, 
-				       PortionSpec(porPLAYER_NFG, 1), 1));
+				       PortionSpec(porNFPLAYER, 1), 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
   gsm->AddFunction(FuncObj);
   
@@ -875,8 +875,8 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("RemoveStrategy", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RemoveStrategy, 
-				       porNF_SUPPORT, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
+				       porNFSUPPORT, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("strategy", porSTRATEGY));
   gsm->AddFunction(FuncObj);
 
@@ -893,8 +893,8 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 1, ParamInfoType("name", porTEXT));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SetName_NfPlayer, 
-				       porPLAYER_NFG, 2));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porPLAYER_NFG));
+				       porNFPLAYER, 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porNFPLAYER));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("name", porTEXT));
 
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_SetName_Strategy, 
@@ -924,7 +924,7 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_SetPayoff_List_Float, 
 				       PortionSpec(porINTEGER, 1), 2, 0,
-				       NON_LISTABLE));
+				       funcNONLISTABLE));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("nfg", porNFG_FLOAT, 
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("payoff", 
@@ -932,7 +932,7 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(3, FuncInfoType(GSM_SetPayoff_List_Rational, 
 				       PortionSpec(porINTEGER, 1), 2, 0,
-				       NON_LISTABLE));
+				       funcNONLISTABLE));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("nfg", porNFG_RATIONAL, 
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(3, 1, ParamInfoType("payoff", 
@@ -942,13 +942,13 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Strategies", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Strategies, 
 				       PortionSpec(porSTRATEGY, 1), 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porPLAYER_NFG));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porNFPLAYER));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porNFSUPPORT));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("Support", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Support_Nfg, porNF_SUPPORT, 1));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Support_Nfg, porNFSUPPORT, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
   gsm->AddFunction(FuncObj);
 

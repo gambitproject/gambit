@@ -1317,7 +1317,7 @@ void Init_solfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Behav", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Behav_EFSupport, 
 				       porBEHAV, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porEF_SUPPORT));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porEFSUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("value", 
 					    PortionSpec(porFLOAT | 
 							porRATIONAL, 3)));
@@ -1340,11 +1340,11 @@ void Init_solfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Centroid", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_CentroidEFSupport, 
 				       porBEHAV, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porEF_SUPPORT));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porEFSUPPORT));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_CentroidNFSupport,
 				       porMIXED, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porNFSUPPORT));
   gsm->AddFunction(FuncObj);
 
 
@@ -1355,9 +1355,9 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV));
 
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Game_NfgTypes, porNFG, 1));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("support", porNFSUPPORT));
   FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Game_EfgTypes, porEFG, 1));
-  FuncObj->SetParamInfo(3, 0, ParamInfoType("support", porEF_SUPPORT));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("support", porEFSUPPORT));
   gsm->AddFunction(FuncObj);
 
 
@@ -1509,7 +1509,7 @@ void Init_solfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Mixed", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Mixed_NFSupport, 
 				       porMIXED, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("value", 
 					    PortionSpec(porFLOAT | 
 							porRATIONAL, 2)));
@@ -1519,13 +1519,13 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NodeValue_Float, 
 				       porFLOAT, 3));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV_FLOAT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porPLAYER_EFG));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porEFPLAYER));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("node", porNODE));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_NodeValue_Rational, 
 				       porRATIONAL, 2));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV_RATIONAL));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porPLAYER_EFG));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porEFPLAYER));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("node", porNODE));
   gsm->AddFunction(FuncObj);
 
@@ -1586,14 +1586,14 @@ void Init_solfunc(GSM *gsm)
 				       porMIXED_FLOAT, 3));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED_FLOAT, 
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porPLAYER_NFG));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porNFPLAYER));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("value", PortionSpec(porFLOAT,1)));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SetStrategyProbs_Rational,
 				       porMIXED_RATIONAL, 3));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED_RATIONAL, 
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porPLAYER_NFG));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porNFPLAYER));
   FuncObj->SetParamInfo(1, 2, ParamInfoType("value", 
 					    PortionSpec(porRATIONAL,1)));
 
@@ -1612,10 +1612,10 @@ void Init_solfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Support", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Support_Behav, porEF_SUPPORT, 1));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Support_Behav, porEFSUPPORT, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV)); 
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Support_Mixed, porNF_SUPPORT, 1));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Support_Mixed, porNFSUPPORT, 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED)); 
   gsm->AddFunction(FuncObj);
 }

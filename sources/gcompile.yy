@@ -205,7 +205,7 @@ formalparams: formalparam
 
 formalparam:  NAME { formals.Append(tval); } binding 
               { paramtype = ""; } typename 
-              { types.Append(paramtype); portions.Append(NO_DEFAULT_VALUE); } 
+              { types.Append(paramtype); portions.Append(REQUIRED); } 
             | LBRACE NAME { formals.Append(tval); } binding
               { paramtype = ""; types.Append(paramtype); }
               optparam RBRACE
@@ -221,10 +221,10 @@ optparam:     { assert( optparam == 0 );
                   if( _p_->Spec().Type != porREFERENCE )
                     portions.Append( _p_ );
                   else
-                    portions.Append( NO_DEFAULT_VALUE );
+                    portions.Append( REQUIRED );
                 }
                 else
-                  portions.Append( NO_DEFAULT_VALUE );
+                  portions.Append( REQUIRED );
                 delete optparam;
                 optparam = 0;
               }

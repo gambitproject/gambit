@@ -1333,7 +1333,7 @@ Portion* GSM_Write_Behav(Portion** param)
 
 Portion* GSM_Write_NfSupport(Portion** param)
 {
-  assert(param[1]->Spec().Type & porNF_SUPPORT);
+  assert(param[1]->Spec().Type & porNFSUPPORT);
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
   return param[0]->RefCopy();
@@ -1341,7 +1341,7 @@ Portion* GSM_Write_NfSupport(Portion** param)
 
 Portion* GSM_Write_EfSupport(Portion** param)
 {
-  assert(param[1]->Spec().Type & porEF_SUPPORT);
+  assert(param[1]->Spec().Type & porEFSUPPORT);
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
   return param[0]->RefCopy();
@@ -2644,8 +2644,8 @@ void Init_gsmoper(GSM* gsm)
 
   ParamInfoType xy_NfSupport[] =
   {
-    ParamInfoType("x", porNF_SUPPORT),
-    ParamInfoType("y", porNF_SUPPORT)
+    ParamInfoType("x", porNFSUPPORT),
+    ParamInfoType("y", porNFSUPPORT)
   };
 
   ParamInfoType xy_MixedFloat[] =
@@ -2662,8 +2662,8 @@ void Init_gsmoper(GSM* gsm)
 
   ParamInfoType xy_EfSupport[] =
   {
-    ParamInfoType("x", porEF_SUPPORT),
-    ParamInfoType("y", porEF_SUPPORT)
+    ParamInfoType("x", porEFSUPPORT),
+    ParamInfoType("y", porEFSUPPORT)
   };
 
   ParamInfoType xy_BehavFloat[] =
@@ -2686,14 +2686,14 @@ void Init_gsmoper(GSM* gsm)
 
   ParamInfoType xy_EfPlayer[] =
   {
-    ParamInfoType("x", porPLAYER_EFG),
-    ParamInfoType("y", porPLAYER_EFG)
+    ParamInfoType("x", porEFPLAYER),
+    ParamInfoType("y", porEFPLAYER)
   };
 
   ParamInfoType xy_NfPlayer[] =
   {
-    ParamInfoType("x", porPLAYER_NFG),
-    ParamInfoType("y", porPLAYER_NFG),
+    ParamInfoType("x", porNFPLAYER),
+    ParamInfoType("y", porNFPLAYER),
   };
 
   ParamInfoType xy_Node[] =
@@ -3132,46 +3132,46 @@ void Init_gsmoper(GSM* gsm)
 
   FuncObj = new FuncDescObj("Write", 10);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Write_numerical, 
-				       porOUTPUT, 2, 0, NON_LISTABLE));
+				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(0, 1, ParamInfoType
 			("x", porBOOL | porINTEGER | porFLOAT | porRATIONAL));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Write_gString, 
-				       porOUTPUT, 2, 0, NON_LISTABLE));
+				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("x", porTEXT));
 
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Write_Mixed, 
-				       porOUTPUT, 2, 0, NON_LISTABLE));
+				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("x", porMIXED));
 
   FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Write_Behav, 
-				       porOUTPUT, 2, 0, NON_LISTABLE));
+				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(3, 1, ParamInfoType("x", porBEHAV));
   
   FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Write_Nfg, 
-				       porOUTPUT, 2, 0, NON_LISTABLE));
+				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(4, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(4, 1, ParamInfoType("x", porNFG,
 					    REQUIRED, BYREF));
   
   FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Write_Efg, 
-				       porOUTPUT, 2, 0, NON_LISTABLE));
+				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(5, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(5, 1, ParamInfoType("x", porEFG,
 					    REQUIRED, BYREF));
   
   FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Write_list, 
-				       porOUTPUT, 2, 0, NON_LISTABLE));
+				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(6, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(6, 1, ParamInfoType
@@ -3180,19 +3180,19 @@ void Init_gsmoper(GSM* gsm)
 					  porBEHAV, 1)));
 
   FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Write_NfSupport, 
-				       porOUTPUT, 2, 0, NON_LISTABLE));
+				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(7, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(7, 1, ParamInfoType("x", porNF_SUPPORT));
+  FuncObj->SetParamInfo(7, 1, ParamInfoType("x", porNFSUPPORT));
 
   FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Write_EfSupport, 
-				       porOUTPUT, 2, 0, NON_LISTABLE));
+				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(8, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(8, 1, ParamInfoType("x", porEF_SUPPORT));
+  FuncObj->SetParamInfo(8, 1, ParamInfoType("x", porEFSUPPORT));
 
   FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Write_Strategy, 
-				       porOUTPUT, 2, 0, NON_LISTABLE));
+				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(9, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(9, 1, ParamInfoType("x", porSTRATEGY));
@@ -3238,14 +3238,14 @@ void Init_gsmoper(GSM* gsm)
   FuncObj = new FuncDescObj("Read", 15);
 
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Read_Bool, 
-				       porINPUT, 2, 0, NON_LISTABLE));
+				       porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("input", porINPUT, 
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("x", porBOOL, 
 					    REQUIRED, BYREF));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Read_List_Bool, 
-				       porINPUT, 2, 0, NON_LISTABLE));
+				       porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("input", porINPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("x", PortionSpec(porBOOL,1), 
@@ -3253,14 +3253,14 @@ void Init_gsmoper(GSM* gsm)
 
 
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Read_Integer, 
-				       porINPUT, 2, 0, NON_LISTABLE));
+				       porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("input", porINPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("x", porINTEGER, 
 					    REQUIRED, BYREF));
   
   FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Read_List_Integer, 
-				       porINPUT, 2, 0, NON_LISTABLE));
+				       porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("input", porINPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(3, 1, ParamInfoType("x", PortionSpec(porINTEGER,1), 
@@ -3268,14 +3268,14 @@ void Init_gsmoper(GSM* gsm)
   
   
   FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Read_Float, 
-				       porINPUT, 2, 0, NON_LISTABLE));
+				       porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(4, 0, ParamInfoType("input", porINPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(4, 1, ParamInfoType("x", porFLOAT,  
 					    REQUIRED, BYREF));
   
   FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Read_List_Float, 
-				       porINPUT, 2, 0, NON_LISTABLE));
+				       porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(5, 0, ParamInfoType("input", porINPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(5, 1, ParamInfoType("x", PortionSpec(porFLOAT,1), 
@@ -3283,14 +3283,14 @@ void Init_gsmoper(GSM* gsm)
   
   
   FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Read_Rational, 
-				       porINPUT, 2, 0, NON_LISTABLE));
+				       porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(6, 0, ParamInfoType("input", porINPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(6, 1, ParamInfoType("x", porRATIONAL, 
 					    REQUIRED, BYREF));
   
   FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Read_List_Rational, 
-				       porINPUT, 2, 0, NON_LISTABLE));
+				       porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(7, 0, ParamInfoType("input", porINPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(7, 1, ParamInfoType("x", PortionSpec(porRATIONAL,1), 
@@ -3298,14 +3298,14 @@ void Init_gsmoper(GSM* gsm)
   
   
   FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Read_Text, 
-				       porINPUT, 2, 0, NON_LISTABLE));
+				       porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(8, 0, ParamInfoType("input", porINPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(8, 1, ParamInfoType("x", porTEXT, 
 					    REQUIRED, BYREF));
   
   FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Read_List_Text, 
-				       porINPUT, 2, 0, NON_LISTABLE));
+				       porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(9, 0, ParamInfoType("input", porINPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(9, 1, ParamInfoType("x", PortionSpec(porTEXT,1), 
@@ -3313,14 +3313,14 @@ void Init_gsmoper(GSM* gsm)
 
 
   FuncObj->SetFuncInfo(10, FuncInfoType(GSM_Read_MixedFloat, 
-					porINPUT, 2, 0, NON_LISTABLE));
+					porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(10, 0, ParamInfoType("input", porINPUT,
 					     REQUIRED, BYREF));
   FuncObj->SetParamInfo(10, 1, ParamInfoType("x", porMIXED_FLOAT, 
 					     REQUIRED, BYREF));
 
   FuncObj->SetFuncInfo(11, FuncInfoType(GSM_Read_MixedRational, 
-					porINPUT, 2, 0, NON_LISTABLE));
+					porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(11, 0, ParamInfoType("input", porINPUT,
 					     REQUIRED, BYREF));
   FuncObj->SetParamInfo(11, 1, ParamInfoType("x", porMIXED_RATIONAL, 
@@ -3328,14 +3328,14 @@ void Init_gsmoper(GSM* gsm)
 
 
   FuncObj->SetFuncInfo(12, FuncInfoType(GSM_Read_BehavFloat, 
-					porINPUT, 2, 0, NON_LISTABLE));
+					porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(12, 0, ParamInfoType("input", porINPUT,
 					     REQUIRED, BYREF));
   FuncObj->SetParamInfo(12, 1, ParamInfoType("x", porBEHAV_FLOAT, 
 					     REQUIRED, BYREF));
 
   FuncObj->SetFuncInfo(13, FuncInfoType(GSM_Read_BehavRational,
-					porINPUT, 2, 0, NON_LISTABLE));
+					porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(13, 0, ParamInfoType("input", porINPUT,
 					     REQUIRED, BYREF));
   FuncObj->SetParamInfo(13, 1, ParamInfoType("x", porBEHAV_RATIONAL, 
@@ -3343,7 +3343,7 @@ void Init_gsmoper(GSM* gsm)
 
 
   FuncObj->SetFuncInfo(14, FuncInfoType(GSM_Read_Undefined, 
-					porINPUT, 2, 0, NON_LISTABLE));
+					porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(14, 0, ParamInfoType("input", porINPUT,
 					     REQUIRED, BYREF));
   FuncObj->SetParamInfo(14, 1, ParamInfoType("x", porUNDEFINED, 
@@ -3421,7 +3421,8 @@ void Init_gsmoper(GSM* gsm)
 
 
   FuncObj = new FuncDescObj("IsNull", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsNull, porBOOL, 1, 0, LISTABLE));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsNull, porBOOL, 1, 0, 
+				       funcLISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", 
 					    PortionSpec(porANYTYPE, 0, true)));
   gsm->AddFunction(FuncObj);
@@ -3430,7 +3431,7 @@ void Init_gsmoper(GSM* gsm)
   FuncObj = new FuncDescObj("Null", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Null, 
 				       PortionSpec(porANYTYPE, 0, true),
-				       1, 0, LISTABLE));
+				       1, 0, funcLISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE));
   gsm->AddFunction(FuncObj);
 

@@ -194,8 +194,9 @@ void Portion::SetGame(void* game, bool efg)
     if(_Game)
     {
       _gsm->GameRefCount(_Game)--;
-      //gout<<"Game "<<_Game<<" ref count-: "<<_gsm->GameRefCount(_Game)<<'\n';
-      /*
+#ifdef MEMCHECK
+      gout<<"Game "<<_Game<<" ref count-: "<<_gsm->GameRefCount(_Game)<<'\n';
+#endif
       if(_gsm->GameRefCount(_Game) == 0)
       {
 	if(!_GameIsEfg)
@@ -204,7 +205,6 @@ void Portion::SetGame(void* game, bool efg)
 	  delete (BaseEfg*) _Game;
 	_Game = 0;
       }
-      */
     }
     
     _Game = game;
@@ -213,7 +213,9 @@ void Portion::SetGame(void* game, bool efg)
     if(_Game)
     {
       _gsm->GameRefCount(_Game)++;
-      //gout<<"Game "<<_Game<<" ref count+: "<<_gsm->GameRefCount(_Game)<<'\n';
+#ifdef MEMCHECK
+      gout<<"Game "<<_Game<<" ref count+: "<<_gsm->GameRefCount(_Game)<<'\n';
+#endif
     }
   }
 }
@@ -766,7 +768,7 @@ NFPlayer*& NfPlayerPortion::Value(void) const
 { return *_Value; }
 
 PortionSpec NfPlayerPortion::Spec(void) const
-{ return PortionSpec(porPLAYER_NFG); }
+{ return PortionSpec(porNFPLAYER); }
 
 void NfPlayerPortion::Output(gOutput& s) const
 {
@@ -920,7 +922,18 @@ NFSupport*& NfSupportPortion::Value(void) const
 { return *_Value; }
 
 PortionSpec NfSupportPortion::Spec(void) const
-{ return PortionSpec(porNF_SUPPORT); }
+{
+  switch( SubType() )
+  {
+  case DOUBLE:
+    return PortionSpec(porNFSUPPORT_FLOAT);
+  case RATIONAL:
+    return PortionSpec(porNFSUPPORT_RATIONAL);
+  default:
+    assert(0);
+  }
+  return porUNDEFINED; 
+}
 
 DataType NfSupportPortion::SubType( void ) const
 {
@@ -997,7 +1010,18 @@ EFSupport*& EfSupportPortion::Value(void) const
 { return *_Value; }
 
 PortionSpec EfSupportPortion::Spec(void) const
-{ return PortionSpec(porEF_SUPPORT); }
+{
+  switch( SubType() )
+  {
+  case DOUBLE:
+    return PortionSpec(porEFSUPPORT_FLOAT);
+  case RATIONAL:
+    return PortionSpec(porEFSUPPORT_RATIONAL);
+  default:
+    assert(0);
+  }
+  return porUNDEFINED; 
+}
 
 DataType EfSupportPortion::SubType( void ) const
 {
@@ -1076,7 +1100,7 @@ EFPlayer*& EfPlayerPortion::Value(void) const
 { return *_Value; }
 
 PortionSpec EfPlayerPortion::Spec(void) const
-{ return PortionSpec(porPLAYER_EFG); }
+{ return PortionSpec(porEFPLAYER); }
 
 void EfPlayerPortion::Output(gOutput& s) const
 {
@@ -2496,14 +2520,14 @@ bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
     b = (((InfosetPortion*) p1)->Value() == ((InfosetPortion*) p2)->Value());
   else if(p1->Spec().Type==porOUTCOME)
     b = (((OutcomePortion*) p1)->Value() == ((OutcomePortion*) p2)->Value());
-  else if(p1->Spec().Type==porPLAYER_NFG)
+  else if(p1->Spec().Type==porNFPLAYER)
     b = (((NfPlayerPortion*) p1)->Value() == ((NfPlayerPortion*) p2)->Value());
   else if(p1->Spec().Type==porSTRATEGY)
     b = (((StrategyPortion*) p1)->Value() == ((StrategyPortion*) p2)->Value());
-  else if(p1->Spec().Type==porNF_SUPPORT)
+  else if(p1->Spec().Type==porNFSUPPORT)
     b = (*(((NfSupportPortion*) p1)->Value()) ==
 	 *(((NfSupportPortion*) p2)->Value()));
-  else if(p1->Spec().Type==porEF_SUPPORT)
+  else if(p1->Spec().Type==porEFSUPPORT)
     b = (*(((EfSupportPortion*) p1)->Value()) ==
 	 *(((EfSupportPortion*) p2)->Value()));
   

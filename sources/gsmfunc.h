@@ -19,21 +19,27 @@
 
 class gOutput;
 
-#define NO_DEFAULT_VALUE  ( (Portion*)  0 )
-#define REQUIRED          NO_DEFAULT_VALUE
-#define PARAM_NOT_FOUND   ( (int)      -1 )
-#define PARAM_AMBIGUOUS   ( (int)      -2 )
+typedef unsigned int    FuncFlagType;
+#define funcNULL        ( (FuncFlagType) 0x0000 )
+#define funcNONLISTABLE funcNULL
+#define funcLISTABLE    ( (FuncFlagType) 0x0001 )
+#define funcGAMEMATCH   ( (FuncFlagType) 0x0002 )
 
+
+#define REQUIRED          ( (Portion*)  0 )
 
 #define BYREF                true
 #define BYVAL                false
 
+#define NO_PREDEFINED_PARAMS ( (ParamInfoType*) 0 )
+
+
 #define AUTO_VAL_OR_REF      true
 
-#define NON_LISTABLE         false
-#define LISTABLE             true
 
-#define NO_PREDEFINED_PARAMS ( (ParamInfoType*) 0 )
+#define PARAM_NOT_FOUND   ( (int)      -1 )
+#define PARAM_AMBIGUOUS   ( (int)      -2 )
+
 
 
 
@@ -66,7 +72,7 @@ public:
     ( 
      const gString& name, 
      const PortionSpec& spec,
-     Portion* default_value = NO_DEFAULT_VALUE, 
+     Portion* default_value = REQUIRED, 
      const bool pass_by_ref = false
      );
   ~ParamInfoType();
@@ -76,6 +82,8 @@ public:
 
 class FuncInfoType
 {
+private:
+
 public:
   bool                 UserDefined;
   union
@@ -84,8 +92,7 @@ public:
     gList<NewInstr*>*    FuncInstr;
   };
   PortionSpec          ReturnSpec;
-  bool                 Listable;
-  bool                 GameMatch;
+  FuncFlagType         Flag;
   int                  NumParams;
   ParamInfoType*       ParamInfo;
   gString              Desc;
@@ -98,8 +105,7 @@ public:
      PortionSpec returnspec,
      int numparams,
      ParamInfoType* paraminfo = 0,
-     bool listable = LISTABLE,
-     bool gamematch = false
+     FuncFlagType = funcLISTABLE
      );
   FuncInfoType
     (
@@ -107,8 +113,7 @@ public:
      PortionSpec returnspec,
      int numparams,
      ParamInfoType* paraminfo = 0,
-     bool listable = LISTABLE,
-     bool gamematch = false
+     FuncFlagType = funcLISTABLE
      );
   ~FuncInfoType();
 };

@@ -1212,7 +1212,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj = new FuncDescObj("EnumMixedSolve", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_EnumMixed_Nfg, 
 				       PortionSpec(porMIXED, 1), 6));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("stopAfter", porINTEGER,
 					    new IntValPortion(0)));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("nPivots", porINTEGER,
@@ -1227,7 +1227,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_EnumMixed_Efg, 
 				       PortionSpec(porBEHAV, 1), 7));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEF_SUPPORT));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEFSUPPORT));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("asNfg", porBOOL,
 					    new BoolValPortion(false)));
   FuncObj->SetParamInfo(1, 2, ParamInfoType("stopAfter", porINTEGER,
@@ -1247,7 +1247,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj = new FuncDescObj("EnumPureSolve", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_EnumPure_Nfg, 
 				       PortionSpec(porMIXED, 1), 5));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("stopAfter", porINTEGER,
 					    new IntValPortion(0)));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("time", porFLOAT,
@@ -1260,7 +1260,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_EnumPure_Efg, 
 				       PortionSpec(porBEHAV, 1), 6));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEF_SUPPORT));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEFSUPPORT));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("asNfg", porBOOL,
 					    new BoolValPortion(false)));
   FuncObj->SetParamInfo(1, 2, ParamInfoType("stopAfter", porINTEGER,
@@ -1278,7 +1278,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj = new FuncDescObj("GobitGridSolve", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GobitGrid_Support, 
 				       PortionSpec(porMIXED, 1), 12));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("pxifile", porTEXT,
 					    new TextValPortion("")));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("minLam", porFLOAT,
@@ -1350,7 +1350,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj = new FuncDescObj("LcpSolve", 4);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Lcp_Nfg, 
 				       PortionSpec(porMIXED, 1), 6));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("stopAfter", porINTEGER, 
 					    new IntValPortion(0)));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("nPivots", porINTEGER, 
@@ -1379,7 +1379,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Lcp_Efg, 
 				       PortionSpec(porBEHAV, 1), 7));
-  FuncObj->SetParamInfo(3, 0, ParamInfoType("support", porEF_SUPPORT));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("support", porEFSUPPORT));
   FuncObj->SetParamInfo(3, 1, ParamInfoType("asNfg", porBOOL,
 					    new BoolValPortion(false)));
   FuncObj->SetParamInfo(3, 2, ParamInfoType("stopAfter", porINTEGER,
@@ -1456,7 +1456,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj = new FuncDescObj("LpSolve", 4);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Lp_Nfg, 
 				       PortionSpec(porMIXED, 1), 5));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("nPivots", porINTEGER,
 					    new IntValPortion(0), BYREF));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("time", porFLOAT,
@@ -1469,7 +1469,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Lp_Efg, 
 				       PortionSpec(porBEHAV, 1), 6));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEF_SUPPORT));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEFSUPPORT));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("asNfg", porBOOL,
 					    new BoolValPortion(false)));
   FuncObj->SetParamInfo(1, 2, ParamInfoType("nPivots", porINTEGER,
@@ -1562,7 +1562,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj = new FuncDescObj("SimpDivSolve", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Simpdiv_Nfg, 
 				       PortionSpec(porMIXED, 1), 8));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("stopAfter", porINTEGER,
 					    new IntValPortion(1)));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("nRestarts", porINTEGER,
@@ -1581,7 +1581,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Simpdiv_Efg, 
 				       PortionSpec(porBEHAV, 1), 9));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEF_SUPPORT));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEFSUPPORT));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("asNfg", porBOOL,
 					    new BoolValPortion(false)));
   FuncObj->SetParamInfo(1, 2, ParamInfoType("stopAfter", porINTEGER,
