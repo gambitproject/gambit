@@ -989,9 +989,9 @@ void TreeWindow::tree_delete(void)
     try
     {
 #endif   // USE_EXCEPTIONS
-        MyMessageBox *tree_delete_dialog = new MyMessageBox("Are you sure?",
-                                                            "Delete Tree",
-                                                            EFG_TREE_HELP, pframe);
+        tree_delete_dialog = new MyMessageBox("Are you sure?",
+                                              "Delete Tree",
+                                              EFG_TREE_HELP, pframe);
         
         if (tree_delete_dialog->Completed() == wxOK)
         {
@@ -1015,7 +1015,8 @@ void TreeWindow::tree_delete(void)
     }
     catch (...)
     {
-        if (tree_delete_dialog)  delete tree_delete_dialog;
+        if (tree_delete_dialog)  
+            delete tree_delete_dialog;
     }
 #endif   // USE_EXCEPTIONS
 }
