@@ -57,7 +57,7 @@ Portion *GSM_ActionProb_Float(Portion **param)
   return por;
 }
 
-Portion *GSM_ActionProb_Rational(Portion **param)
+static Portion *GSM_ActionProb_Rational(Portion **param)
 {
   Portion *por;
   BehavSolution<gRational>* profile = 
@@ -85,19 +85,15 @@ Portion *GSM_ActionProb_Rational(Portion **param)
 // ActionValue
 //------------------
 
-Portion *GSM_ActionValue_Float(Portion **param)
+static Portion *GSM_ActionValue_Float(Portion **param)
 {
   BehavSolution<double> *profile =
     (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
   Action* action = ((ActionPortion*) param[1])->Value();
   Infoset *infoset = action->BelongsTo();
 
-  if (infoset->BelongsTo() != profile->BelongsTo())
-    return new ErrorPortion("Profile and infoset must belong to same game");
-
   if (infoset->GetPlayer()->IsChance())
     return new NullPortion(porFLOAT);
-  //return new ErrorPortion("Infoset must belong to personal player");
   else if (profile->GetEFSupport().Find(action))  {
     Efg<double> *efg = profile->BelongsTo();
 
@@ -114,19 +110,15 @@ Portion *GSM_ActionValue_Float(Portion **param)
     return new ErrorPortion("Not implemented yet for non-support actions");
 }
 
-Portion *GSM_ActionValue_Rational(Portion **param)
+static Portion *GSM_ActionValue_Rational(Portion **param)
 {
   BehavSolution<gRational> *profile =
     (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
   Action* action = ((ActionPortion*) param[1])->Value();
   Infoset *infoset = action->BelongsTo();
 
-  if (infoset->BelongsTo() != profile->BelongsTo())
-    return new ErrorPortion("Profile and infoset must belong to same game");
-
   if (infoset->GetPlayer()->IsChance())
     return new NullPortion(porRATIONAL);
-  //return new ErrorPortion("Infoset must belong to personal player");
   else if (profile->GetEFSupport().Find(action))  {
     Efg<gRational> *efg = profile->BelongsTo();
 
@@ -147,7 +139,7 @@ Portion *GSM_ActionValue_Rational(Portion **param)
 // Behav
 //--------------
 
-Portion *GSM_Behav_EFSupport(Portion **param)
+static Portion *GSM_Behav_EFSupport(Portion **param)
 {
   int i;
   int j;
@@ -348,7 +340,7 @@ Portion* GSM_Belief_Rational(Portion **param)
 // Centroid
 //--------------
  
-Portion *GSM_CentroidEFSupport(Portion **param)
+static Portion *GSM_CentroidEFSupport(Portion **param)
 {
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
   BaseBehavProfile *P;
@@ -363,7 +355,7 @@ Portion *GSM_CentroidEFSupport(Portion **param)
   return por;
 }
 
-Portion *GSM_CentroidNFSupport(Portion **param)
+static Portion *GSM_CentroidNFSupport(Portion **param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   BaseMixedProfile *P;
@@ -454,7 +446,7 @@ Portion* GSM_GobitValue_MixedFloat(Portion** param)
 // InfosetProb
 //----------------
 
-Portion *GSM_InfosetProb_Float(Portion **param)
+static Portion *GSM_InfosetProb_Float(Portion **param)
 {
   if( param[1]->Spec().Type == porNULL )
   {
@@ -478,7 +470,7 @@ Portion *GSM_InfosetProb_Float(Portion **param)
 				   s->GetNumber()));
 }
 
-Portion *GSM_InfosetProb_Rational(Portion **param)
+static Portion *GSM_InfosetProb_Rational(Portion **param)
 {
   if( param[1]->Spec().Type == porNULL )
   {
@@ -506,28 +498,28 @@ Portion *GSM_InfosetProb_Rational(Portion **param)
 // IsKnownNash
 //----------------
 
-Portion *GSM_IsKnownNash_BehavFloat(Portion **param)
+static Portion *GSM_IsKnownNash_BehavFloat(Portion **param)
 {
   BehavSolution<double> *P = 
     (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
   return new BoolValPortion(P->IsNash() == T_YES);
 }
 
-Portion *GSM_IsKnownNash_BehavRational(Portion **param)
+static Portion *GSM_IsKnownNash_BehavRational(Portion **param)
 {
   BehavSolution<gRational> *P = 
     (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
   return new BoolValPortion(P->IsNash() == T_YES);
 }
 
-Portion *GSM_IsKnownNash_MixedFloat(Portion **param)
+static Portion *GSM_IsKnownNash_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
     (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
   return new BoolValPortion(P->IsNash() == T_YES);
 }
 
-Portion *GSM_IsKnownNash_MixedRational(Portion **param)
+static Portion *GSM_IsKnownNash_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
     (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
@@ -539,28 +531,28 @@ Portion *GSM_IsKnownNash_MixedRational(Portion **param)
 // IsKnownNotNash
 //-----------------
 
-Portion *GSM_IsKnownNotNash_BehavFloat(Portion **param)
+static Portion *GSM_IsKnownNotNash_BehavFloat(Portion **param)
 {
   BehavSolution<double> *P = 
     (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
   return new BoolValPortion(P->IsNash() == T_NO);
 }
 
-Portion *GSM_IsKnownNotNash_BehavRational(Portion **param)
+static Portion *GSM_IsKnownNotNash_BehavRational(Portion **param)
 {
   BehavSolution<gRational> *P = 
     (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
   return new BoolValPortion(P->IsNash() == T_NO);
 }
 
-Portion *GSM_IsKnownNotNash_MixedFloat(Portion **param)
+static Portion *GSM_IsKnownNotNash_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
     (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
   return new BoolValPortion(P->IsNash() == T_NO);
 }
 
-Portion *GSM_IsKnownNotNash_MixedRational(Portion **param)
+static Portion *GSM_IsKnownNotNash_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
     (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
@@ -571,14 +563,14 @@ Portion *GSM_IsKnownNotNash_MixedRational(Portion **param)
 // IsKnownNotPerfect
 //--------------------
 
-Portion *GSM_IsKnownNotPerfect_MixedFloat(Portion **param)
+static Portion *GSM_IsKnownNotPerfect_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
     (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
   return new BoolValPortion(P->IsPerfect() == T_NO);
 }
 
-Portion *GSM_IsKnownNotPerfect_MixedRational(Portion **param)
+static Portion *GSM_IsKnownNotPerfect_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
     (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
@@ -589,14 +581,14 @@ Portion *GSM_IsKnownNotPerfect_MixedRational(Portion **param)
 // IsKnownNotSequential
 //-----------------------
 
-Portion *GSM_IsKnownNotSequential_BehavFloat(Portion **param)
+static Portion *GSM_IsKnownNotSequential_BehavFloat(Portion **param)
 {
   BehavSolution<double> *P = 
     (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
   return new BoolValPortion(P->IsSequential() == T_NO);
 }
 
-Portion *GSM_IsKnownNotSequential_BehavRational(Portion **param)
+static Portion *GSM_IsKnownNotSequential_BehavRational(Portion **param)
 {
   BehavSolution<gRational> *P = 
     (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
@@ -607,14 +599,14 @@ Portion *GSM_IsKnownNotSequential_BehavRational(Portion **param)
 // IsKnownNotSubgamePerfect
 //---------------------------
 
-Portion *GSM_IsKnownNotSubgamePerfect_BehavFloat(Portion **param)
+static Portion *GSM_IsKnownNotSubgamePerfect_BehavFloat(Portion **param)
 {
   BehavSolution<double> *P = 
     (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
   return new BoolValPortion(P->IsSubgamePerfect() == T_NO);
 }
 
-Portion *GSM_IsKnownNotSubgamePerfect_BehavRational(Portion **param)
+static Portion *GSM_IsKnownNotSubgamePerfect_BehavRational(Portion **param)
 {
   BehavSolution<gRational> *P = 
     (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
@@ -625,14 +617,14 @@ Portion *GSM_IsKnownNotSubgamePerfect_BehavRational(Portion **param)
 // IsKnownPerfect
 //-------------------
 
-Portion *GSM_IsKnownPerfect_MixedFloat(Portion **param)
+static Portion *GSM_IsKnownPerfect_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
     (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
   return new BoolValPortion(P->IsPerfect() == T_YES);
 }
 
-Portion *GSM_IsKnownPerfect_MixedRational(Portion **param)
+static Portion *GSM_IsKnownPerfect_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
     (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
@@ -643,14 +635,14 @@ Portion *GSM_IsKnownPerfect_MixedRational(Portion **param)
 // IsKnownSequential
 //--------------------
 
-Portion *GSM_IsKnownSequential_BehavFloat(Portion **param)
+static Portion *GSM_IsKnownSequential_BehavFloat(Portion **param)
 {
   BehavSolution<double> *P = 
     (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
   return new BoolValPortion(P->IsSequential() == T_YES);
 }
 
-Portion *GSM_IsKnownSequential_BehavRational(Portion **param)
+static Portion *GSM_IsKnownSequential_BehavRational(Portion **param)
 {
   BehavSolution<gRational> *P = 
     (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
@@ -661,14 +653,14 @@ Portion *GSM_IsKnownSequential_BehavRational(Portion **param)
 // IsKnownSubgamePerfect
 //------------------------
 
-Portion *GSM_IsKnownSubgamePerfect_BehavFloat(Portion **param)
+static Portion *GSM_IsKnownSubgamePerfect_BehavFloat(Portion **param)
 {
   BehavSolution<double> *P = 
     (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
   return new BoolValPortion(P->IsSubgamePerfect() == T_YES);
 }
 
-Portion *GSM_IsKnownSubgamePerfect_BehavRational(Portion **param)
+static Portion *GSM_IsKnownSubgamePerfect_BehavRational(Portion **param)
 {
   BehavSolution<gRational> *P = 
     (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
@@ -679,14 +671,14 @@ Portion *GSM_IsKnownSubgamePerfect_BehavRational(Portion **param)
 // LiapValue
 //----------------
 
-Portion *GSM_LiapValue_BehavFloat(Portion **param)
+static Portion *GSM_LiapValue_BehavFloat(Portion **param)
 {
   BehavSolution<double> *P = 
     (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
   return new FloatValPortion(P->LiapValue());
 }
 
-Portion *GSM_LiapValue_BehavRational(Portion **param)
+static Portion *GSM_LiapValue_BehavRational(Portion **param)
 {
   BehavSolution<gRational> *P = 
     (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
@@ -694,14 +686,14 @@ Portion *GSM_LiapValue_BehavRational(Portion **param)
 }
 
 
-Portion *GSM_LiapValue_MixedFloat(Portion **param)
+static Portion *GSM_LiapValue_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
     (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
   return new FloatValPortion(P->LiapValue());
 }
 
-Portion *GSM_LiapValue_MixedRational(Portion **param)
+static Portion *GSM_LiapValue_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
     (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
@@ -800,14 +792,11 @@ Portion* GSM_Mixed_NFSupport(Portion** param)
 // NodeValue
 //----------------
 
-Portion *GSM_NodeValue_Float(Portion **param)
+static Portion *GSM_NodeValue_Float(Portion **param)
 {
   BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
   EFPlayer *p = ((EfPlayerPortion *) param[1])->Value();
   Node* n = ((NodePortion*) param[2])->Value();
-
-  if (bp->BelongsTo() != p->BelongsTo())
-    return new ErrorPortion("Solution and player are from different games");
 
   BaseEfg* E = bp->BelongsTo();
   gList<Node *> list;
@@ -822,14 +811,11 @@ Portion *GSM_NodeValue_Float(Portion **param)
   return new FloatValPortion(bp->NodeValues(p->GetNumber())[found]);
 }
 
-Portion *GSM_NodeValue_Rational(Portion **param)
+static Portion *GSM_NodeValue_Rational(Portion **param)
 {
   BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
   EFPlayer *p = ((EfPlayerPortion *) param[1])->Value();
   Node* n = ((NodePortion*) param[2])->Value();
-
-  if (bp->BelongsTo() != p->BelongsTo())
-    return new ErrorPortion("Solution and player are from different games");
 
   BaseEfg* E = bp->BelongsTo();
   gList<Node *> list;
@@ -849,7 +835,7 @@ Portion *GSM_NodeValue_Rational(Portion **param)
 // RealizProb
 //----------------
 
-Portion *GSM_RealizProb_Float(Portion **param)
+static Portion *GSM_RealizProb_Float(Portion **param)
 {
   BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
   Node* n = ((NodePortion*) param[1])->Value();
@@ -867,7 +853,7 @@ Portion *GSM_RealizProb_Float(Portion **param)
   return new FloatValPortion(bp->NodeRealizProbs()[found]);
 }  
 
-Portion *GSM_RealizProb_Rational(Portion **param)
+static Portion *GSM_RealizProb_Rational(Portion **param)
 {
   BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
   Node* n = ((NodePortion*) param[1])->Value();
@@ -889,7 +875,7 @@ Portion *GSM_RealizProb_Rational(Portion **param)
 // Regret
 //-----------
 
-Portion *GSM_Regret_MixedFloat(Portion **param)
+static Portion *GSM_Regret_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
     (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
@@ -903,7 +889,7 @@ Portion *GSM_Regret_MixedFloat(Portion **param)
   return new FloatValPortion(v(p->GetNumber(), s->number));
 }
 
-Portion *GSM_Regret_MixedRational(Portion **param)
+static Portion *GSM_Regret_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
     (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
@@ -919,7 +905,7 @@ Portion *GSM_Regret_MixedRational(Portion **param)
 
 
 
-Portion *GSM_Regret_BehavFloat(Portion **param)
+static Portion *GSM_Regret_BehavFloat(Portion **param)
 {
   BehavSolution<double> *P = 
     (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
@@ -936,7 +922,7 @@ Portion *GSM_Regret_BehavFloat(Portion **param)
 }
 
 
-Portion *GSM_Regret_BehavRational(Portion **param)
+static Portion *GSM_Regret_BehavRational(Portion **param)
 {
   BehavSolution<gRational> *P = 
     (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
@@ -956,7 +942,7 @@ Portion *GSM_Regret_BehavRational(Portion **param)
 // SetActionProbs
 //-----------------
 
-Portion *GSM_SetActionProbs_Float(Portion **param)
+static Portion *GSM_SetActionProbs_Float(Portion **param)
 {
   int i;
   int j;
@@ -984,9 +970,6 @@ Portion *GSM_SetActionProbs_Float(Portion **param)
     }
   }
   
-  if(!InfosetNum)
-    return new ErrorPortion("No such infoset found");
-
   if(((ListPortion*) param[2])->Length() != 
      E.PlayerList()[PlayerNum]->InfosetList()[InfosetNum]->NumActions())
     return new ErrorPortion("Mismatching number of actions");
@@ -1012,7 +995,7 @@ Portion *GSM_SetActionProbs_Float(Portion **param)
 }
 
 
-Portion *GSM_SetActionProbs_Rational(Portion **param)
+static Portion *GSM_SetActionProbs_Rational(Portion **param)
 {
   int i;
   int j;
@@ -1040,9 +1023,6 @@ Portion *GSM_SetActionProbs_Rational(Portion **param)
     }
   }
   
-  if(!InfosetNum)
-    return new ErrorPortion("No such infoset found");
-
   if(((ListPortion*) param[2])->Length() != 
      E.PlayerList()[PlayerNum]->InfosetList()[InfosetNum]->NumActions())
     return new ErrorPortion("Mismatching number of actions");
@@ -1071,7 +1051,7 @@ Portion *GSM_SetActionProbs_Rational(Portion **param)
 // SetStrategyProbs
 //-------------------
 
-Portion *GSM_SetStrategyProbs_Float(Portion **param)
+static Portion *GSM_SetStrategyProbs_Float(Portion **param)
 {
   int i;
   int j;
@@ -1092,9 +1072,6 @@ Portion *GSM_SetStrategyProbs_Float(Portion **param)
     }
   }
   
-  if(!PlayerNum)
-    return new ErrorPortion("No such player found");
-
   if(((ListPortion*) param[2])->Length() != N.NumStrats(PlayerNum))
     return new ErrorPortion("Mismatching number of strategies");
 
@@ -1117,7 +1094,7 @@ Portion *GSM_SetStrategyProbs_Float(Portion **param)
 }
 
 
-Portion *GSM_SetStrategyProbs_Rational(Portion **param)
+static Portion *GSM_SetStrategyProbs_Rational(Portion **param)
 {
   int i;
   int j;
@@ -1138,9 +1115,6 @@ Portion *GSM_SetStrategyProbs_Rational(Portion **param)
     }
   }
   
-  if(!PlayerNum)
-    return new ErrorPortion("No such player found");
-
   if(((ListPortion*) param[2])->Length() != N.NumStrats(PlayerNum))
     return new ErrorPortion("Mismatching number of strategies");
 
@@ -1166,7 +1140,7 @@ Portion *GSM_SetStrategyProbs_Rational(Portion **param)
 // StrategyProb
 //----------------
 
-Portion *GSM_StrategyProb_Float(Portion **param)
+static Portion *GSM_StrategyProb_Float(Portion **param)
 {
   Portion *por;
   MixedSolution<double>* profile = 
@@ -1185,7 +1159,7 @@ Portion *GSM_StrategyProb_Float(Portion **param)
   return por;
 }
 
-Portion *GSM_StrategyProb_Rational(Portion **param)
+static Portion *GSM_StrategyProb_Rational(Portion **param)
 {
   Portion *por;
   MixedSolution<gRational>* profile = 
@@ -1210,13 +1184,13 @@ Portion *GSM_StrategyProb_Rational(Portion **param)
 // Support
 //---------------
 
-Portion* GSM_Support_Behav(Portion** param)
+static Portion *GSM_Support_Behav(Portion** param)
 {
   BaseBehavProfile *P = ((BehavPortion*) param[0])->Value();
   return new EfSupportValPortion(new EFSupport(P->GetEFSupport()));
 }
 
-Portion* GSM_Support_Mixed(Portion** param)
+static Portion *GSM_Support_Mixed(Portion** param)
 {
   BaseMixedProfile *P = ((MixedPortion *) param[0])->Value();
   return new NfSupportValPortion(new NFSupport(P->GetNFSupport()));
@@ -1231,24 +1205,28 @@ void Init_solfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("ActionProb", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ActionProb_Float, 
-				       porFLOAT, 2));
+				       porFLOAT, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("action", porACTION));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ActionProb_Rational, 
-				       porRATIONAL, 2));
+				       porRATIONAL, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("action", porACTION));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("ActionValue", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ActionValue_Float, 
-				       porFLOAT, 2));
+				       porFLOAT, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("action", porACTION));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ActionValue_Rational, 
-				       porRATIONAL, 2));
+				       porRATIONAL, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("action", porACTION));
   gsm->AddFunction(FuncObj);
@@ -1265,13 +1243,13 @@ void Init_solfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("Belief", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Belief_Float, 
-				       porFLOAT, 2));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Belief_Float, porFLOAT, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("node", porNODE));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Belief_Rational, 
-				       porRATIONAL, 2));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Belief_Rational, porRATIONAL, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV_RATIONAL)); 
   FuncObj->SetParamInfo(1, 1, ParamInfoType("node", porNODE));
   gsm->AddFunction(FuncObj);
@@ -1325,13 +1303,15 @@ void Init_solfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("InfosetProb", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_InfosetProb_Float, 
-				       porFLOAT, 2));
+				       porFLOAT, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", 
                               PortionSpec(porINFOSET, 0, porNULLSPEC) ));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_InfosetProb_Rational, 
-				       porRATIONAL, 2));
+				       porRATIONAL, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("infoset", 
                               PortionSpec(porINFOSET, 0, porNULLSPEC) ));
@@ -1459,46 +1439,53 @@ void Init_solfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("NodeValue", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NodeValue_Float, 
-				       porFLOAT, 3));
+				       porFLOAT, 3,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porEFPLAYER));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("node", porNODE));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_NodeValue_Rational, 
-				       porRATIONAL, 2));
+				       porRATIONAL, 3,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porEFPLAYER));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("node", porNODE));
+  FuncObj->SetParamInfo(1, 2, ParamInfoType("node", porNODE));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("RealizProb", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RealizProb_Float, 
-				       porFLOAT, 2));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RealizProb_Float, porFLOAT, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("node", porNODE));
   
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_RealizProb_Rational, 
-				       porRATIONAL, 2));
+				       porRATIONAL, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("node", porNODE));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("Regret", 4);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Regret_BehavFloat, porFLOAT, 2));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Regret_BehavFloat, porFLOAT, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("action", porACTION));
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Regret_BehavRational, 
-				       porRATIONAL, 2));
+				       porRATIONAL, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("action", porACTION));
 
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Regret_MixedFloat, porFLOAT, 2));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Regret_MixedFloat, porFLOAT, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("profile", porMIXED_FLOAT));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("strategy", porSTRATEGY));
   FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Regret_MixedRational, 
-				       porRATIONAL, 2));
+				       porRATIONAL, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("profile", porMIXED_RATIONAL));
   FuncObj->SetParamInfo(3, 1, ParamInfoType("strategy", porSTRATEGY));
 
@@ -1507,14 +1494,16 @@ void Init_solfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("SetActionProbs", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetActionProbs_Float, 
-				       porBEHAV_FLOAT, 3));
+				       porBEHAV_FLOAT, 3,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV_FLOAT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", porINFOSET));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("value", PortionSpec(porFLOAT, 1)));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SetActionProbs_Rational,
-				       porBEHAV_RATIONAL, 3));
+				       porBEHAV_RATIONAL, 3,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV_RATIONAL,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("infoset", porINFOSET));
@@ -1525,14 +1514,16 @@ void Init_solfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("SetStrategyProbs", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetStrategyProbs_Float,
-				       porMIXED_FLOAT, 3));
+				       porMIXED_FLOAT, 3,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED_FLOAT, 
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porNFPLAYER));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("value", PortionSpec(porFLOAT,1)));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SetStrategyProbs_Rational,
-				       porMIXED_RATIONAL, 3));
+				       porMIXED_RATIONAL, 3,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED_RATIONAL, 
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porNFPLAYER));
@@ -1543,12 +1534,14 @@ void Init_solfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("StrategyProb", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_StrategyProb_Float, 
-				       porFLOAT, 2));
+				       porFLOAT, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("strategy", porSTRATEGY));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_StrategyProb_Rational, 
-				       porRATIONAL, 2));
+				       porRATIONAL, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("strategy", porSTRATEGY));
   gsm->AddFunction(FuncObj);
