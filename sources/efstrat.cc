@@ -434,6 +434,17 @@ bool EFSupport::HasActiveActionAt(const Infoset *infoset) const
   return true;
 }
 
+int EFSupport::NumDegreesOfFreedom(void) const
+{
+  int answer(0);
+
+  gList<Infoset *> active_infosets = ReachableInfosets(Game().RootNode());
+  for (int i = 1; i <= active_infosets.Length(); i++)
+    answer += NumActions(active_infosets[i]) - 1;
+
+  return answer;  
+}
+
 bool EFSupport::HasActiveActionsAtAllInfosets(void) const
 {
   if (m_players.Length() != m_efg->NumPlayers())   return false;
