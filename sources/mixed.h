@@ -33,7 +33,6 @@ template <class T> class MixedProfile : public gPVector<T>  {
 		int const_st2, int cur_pl, long index, T prob, T &value) const;
     void PPayoff(int pl, int const_pl, int cur_pl, long index, T prob,
 		gVector<T> &value) const;
-    
   public:
     MixedProfile(const NFSupport &);
     MixedProfile(const MixedProfile<T> &);
@@ -50,6 +49,7 @@ template <class T> class MixedProfile : public gPVector<T>  {
     bool IsPure(void) const;
     bool IsPure(int pl) const;
     void Centroid(void);
+    void SetPayoffs(void);    
 
     T Payoff(int pl) const;
     T Payoff(int pl, int player1, int strat1) const;

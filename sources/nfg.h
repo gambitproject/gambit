@@ -49,6 +49,7 @@ friend class NfgFileReader;
 friend void SetEfg(Nfg *, const Efg *);
 protected:
   mutable bool m_dirty;
+  mutable long m_revision;
   gText title, comment;
   gArray<int> dimensions;
 
@@ -79,6 +80,7 @@ public:
   void SetComment(const gText &);
   const gText &GetComment(void) const;
 
+  long RevisionNumber(void) const { return m_revision; }
   bool IsDirty(void) const { return m_dirty; }
   void SetIsDirty(bool p_dirty) { m_dirty = p_dirty; }
 

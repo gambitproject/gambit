@@ -39,6 +39,7 @@ protected:
   mutable gNumber m_epsilon, m_qreLambda, m_qreValue, m_liapValue;
   gArray<gNumber> m_payoff;
   unsigned int m_id;
+  mutable long m_revision;
   
   void CheckIsNash(void) const;
   void LevelPrecision(void);
@@ -92,8 +93,7 @@ public:
   
   // Force the invalidation of cached quantities
   void Invalidate(void) const;
-  
-
+  bool IsValid(void) const {return (m_revision == Game().RevisionNumber());}
   // FUNCTIONS FOR COMPATIBILITY WITH GUI
   // these are all obsolescent :)
   gNumber Payoff(int p_player) const { return m_profile.Payoff(p_player); }

@@ -44,7 +44,8 @@ int Nfg::Product(const gArray<int> &dim)
 }
   
 Nfg::Nfg(const gArray<int> &dim)
-  : m_dirty(false), title("UNTITLED"), dimensions(dim), players(dim.Length()),
+  : m_dirty(false), m_revision(0), title("UNTITLED"), 
+    dimensions(dim), players(dim.Length()),
     results(Product(dim)), efg(0)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
@@ -60,7 +61,7 @@ Nfg::Nfg(const gArray<int> &dim)
 }
 
 Nfg::Nfg(const Nfg &b)
-  : m_dirty(false), title(b.title), comment(b.comment), 
+  : m_dirty(false), m_revision(0), title(b.title), comment(b.comment), 
     dimensions(b.dimensions),
     players(b.players.Length()), outcomes(b.outcomes.Length()),
     results(b.results.Length()), efg(0)
@@ -187,6 +188,7 @@ void Nfg::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
 NFOutcome *Nfg::NewOutcome(void)
 {
   m_dirty = true;
+  m_revision++;
   NFOutcome *outcome = new NFOutcome(outcomes.Length() + 1, this);
   outcomes.Append(outcome);
   return outcome;
@@ -195,6 +197,7 @@ NFOutcome *Nfg::NewOutcome(void)
 void Nfg::DeleteOutcome(NFOutcome *outcome)
 {
   m_dirty = true;
+  m_revision++;
 
   for (int i = 1; i <= results.Length(); i++) {
     if (results[i] == outcome)
@@ -216,6 +219,7 @@ void Nfg::SetTitle(const gText &s)
 {
   title = s; 
   m_dirty = true;
+  m_revision++;
 }
 
 const gText &Nfg::GetTitle(void) const 
@@ -225,6 +229,7 @@ void Nfg::SetComment(const gText &s)
 {
   comment = s; 
   m_dirty = true;
+  m_revision++;
 }
 
 const gText &Nfg::GetComment(void) const
@@ -262,6 +267,7 @@ void Nfg::SetOutcome(const gArray<int> &profile, NFOutcome *outcome)
     index += players[i]->strategies[profile[i]]->m_index;
   results[index] = outcome;
   m_dirty = true;
+  m_revision++;
   BreakLink();
 }
 
@@ -270,6 +276,7 @@ void Nfg::SetOutcome(const StrategyProfile &p, NFOutcome *outcome)
 {
   results[p.index + 1] = outcome;
   m_dirty = true;
+  m_revision++;
   BreakLink();
 }
 
@@ -291,6 +298,7 @@ void Nfg::SetPayoff(NFOutcome *outcome, int pl, const gNumber &value)
   if (outcome) {
     outcome->payoffs[pl] = value;
     m_dirty = true;
+    m_revision++;
   }
 }
 
