@@ -2472,53 +2472,70 @@ Portion* GSM::HelpVars(gString varname)
 
 void GSM::InvalidateGameProfile( void* game, bool IsEfg )
 {
-  const gList<Portion*>* vars = _RefTableStack->Peek()->Value();
-  gList<Portion*> varslist;
-  int i = 0;
-  int j = 0;
-  
-  for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
-    for(j=1; j<=vars[i].Length(); j++)
-      varslist.Append(vars[i][j]);
+  gStack< RefHashTable* > tempRefTableStack;
 
-  for( i = 1; i <= varslist.Length(); i++ )
+  while( _RefTableStack->Depth() > 0 )
   {
-    if( varslist[i]->Game() == game && varslist[i]->GameIsEfg() == IsEfg )
+    const gList<Portion*>* vars = _RefTableStack->Peek()->Value();
+
+
+    gList<Portion*> varslist;
+    int i = 0;
+    int j = 0;
+    
+    for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
+      for(j=1; j<=vars[i].Length(); j++)
+	varslist.Append(vars[i][j]);
+
+    for( i = 1; i <= varslist.Length(); i++ )
     {
-      if( !IsEfg && varslist[i]->Spec() == porMIXED )
+      if( varslist[i]->Game() == game && varslist[i]->GameIsEfg() == IsEfg )
       {
-	switch( ((BaseNfg*) game)->Type() )
+	if( !IsEfg && varslist[i]->Spec() == porMIXED )
 	{
-	case DOUBLE:
-	  ((MixedSolution<double>*) ((MixedPortion*) 
-				     varslist[i])->Value())->Invalidate();
-	  break;
-	case RATIONAL:
-	  ((MixedSolution<gRational>*) ((MixedPortion*) 
-					varslist[i])->Value())->Invalidate();
-	  break;
-	default:
-	  assert( 0 );
+	  switch( ((BaseNfg*) game)->Type() )
+	  {
+	  case DOUBLE:
+	    ((MixedSolution<double>*) ((MixedPortion*) 
+				       varslist[i])->Value())->Invalidate();
+	    break;
+	  case RATIONAL:
+	    ((MixedSolution<gRational>*) ((MixedPortion*) 
+					  varslist[i])->Value())->Invalidate();
+	    break;
+	  default:
+	    assert( 0 );
+	  }
 	}
-      }
-      else if( IsEfg && varslist[i]->Spec() == porBEHAV )
-      {
-	switch( ((BaseEfg*) game)->Type() )
+	else if( IsEfg && varslist[i]->Spec() == porBEHAV )
 	{
-	case DOUBLE:
-	  ((BehavSolution<double>*) ((BehavPortion*) 
-				     varslist[i])->Value())->Invalidate();
-	  break;
-	case RATIONAL:
-	  ((BehavSolution<gRational>*) ((BehavPortion*) 
-					varslist[i])->Value())->Invalidate();
-	  break;
-	default:
-	  assert( 0 );
+	  switch( ((BaseEfg*) game)->Type() )
+	  {
+	  case DOUBLE:
+	    ((BehavSolution<double>*) ((BehavPortion*) 
+				       varslist[i])->Value())->Invalidate();
+	    break;
+	  case RATIONAL:
+	    ((BehavSolution<gRational>*) ((BehavPortion*) 
+					  varslist[i])->Value())->Invalidate();
+	    break;
+	  default:
+	    assert( 0 );
+	  }
 	}
       }
     }
+
+    // go through all scopes on the stack; restore later
+    tempRefTableStack.Push( _RefTableStack->Pop() );
   }
+  
+  while( tempRefTableStack.Depth() > 0 )
+  {
+    // restore the original variable stack
+    _RefTableStack->Push( tempRefTableStack.Pop() );    
+  }
+
 }
 
 
@@ -2531,38 +2548,54 @@ void GSM::UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec )
 {
   assert( spec.ListDepth == 0 );
 
-  const gList<Portion*>* vars = _RefTableStack->Peek()->Value();
-  gList<Portion*> varslist;
-  int i = 0;
-  int j = 0;
-  
-  for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
-    for(j=1; j<=vars[i].Length(); j++)
-      varslist.Append(vars[i][j]);
 
-  for( i = 1; i <= varslist.Length(); i++ )
+  gStack< RefHashTable* > tempRefTableStack;
+
+  while( _RefTableStack->Depth() > 0 )
   {
-    if( varslist[i]->Spec().ListDepth == 0 )
+
+    const gList<Portion*>* vars = _RefTableStack->Peek()->Value();
+    gList<Portion*> varslist;
+    int i = 0;
+    int j = 0;
+    
+    for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
+      for(j=1; j<=vars[i].Length(); j++)
+	varslist.Append(vars[i][j]);
+
+    for( i = 1; i <= varslist.Length(); i++ )
     {
-      if( varslist[i]->Game() == game )
+      if( varslist[i]->Spec().ListDepth == 0 )
       {
-	assert( varslist[i]->GameIsEfg() == IsEfg );
-	if( varslist[i]->Spec().Type & spec.Type )
+	if( varslist[i]->Game() == game )
 	{
-	  _RefTableStack->Peek()->Remove( varslist[i] );
+	  assert( varslist[i]->GameIsEfg() == IsEfg );
+	  if( varslist[i]->Spec().Type & spec.Type )
+	  {
+	    _RefTableStack->Peek()->Remove( varslist[i] );
+	  }
+	}
+      }
+      else
+      {
+	if( ((ListPortion*) varslist[i])->BelongsToGame( game ) )
+	{
+	  if( varslist[i]->Spec().Type & spec.Type )
+	  {
+	    _RefTableStack->Peek()->Remove( varslist[i] );
+	  }
 	}
       }
     }
-    else
-    {
-      if( ((ListPortion*) varslist[i])->BelongsToGame( game ) )
-      {
-	if( varslist[i]->Spec().Type & spec.Type )
-	{
-	  _RefTableStack->Peek()->Remove( varslist[i] );
-	}
-      }
-    }
+
+    // go through all scopes on the stack; restore later
+    tempRefTableStack.Push( _RefTableStack->Pop() );
+  }
+  
+  while( tempRefTableStack.Depth() > 0 )
+  {
+    // restore the original variable stack
+    _RefTableStack->Push( tempRefTableStack.Pop() );    
   }
 }
 
@@ -2575,66 +2608,81 @@ void GSM::UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data )
 {
   assert( spec.ListDepth == 0 );
 
-  const gList<Portion*>* vars = _RefTableStack->Peek()->Value();
-  gList<Portion*> varslist;
-  int i = 0;
-  int j = 0;
-  
-  assert( ( spec.Type & porEFSUPPORT) ||
-	  ( spec.Type & porEFPLAYER ) ||
-	  ( spec.Type & porINFOSET ) ||
-	  ( spec.Type & porNODE ) ||
-	  ( spec.Type & porACTION ) ||
-	  ( spec.Type & porOUTCOME ) );
-  
-  for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
-    for(j=1; j<=vars[i].Length(); j++)
-      varslist.Append(vars[i][j]);
+  gStack< RefHashTable* > tempRefTableStack;
 
-  for( i = 1; i <= varslist.Length(); i++ )
+  while( _RefTableStack->Depth() > 0 )
   {
-    if( varslist[i]->Spec().ListDepth == 0 )
+
+    const gList<Portion*>* vars = _RefTableStack->Peek()->Value();
+    gList<Portion*> varslist;
+    int i = 0;
+    int j = 0;
+    
+    assert( ( spec.Type & porEFSUPPORT) ||
+	   ( spec.Type & porEFPLAYER ) ||
+	   ( spec.Type & porINFOSET ) ||
+	   ( spec.Type & porNODE ) ||
+	   ( spec.Type & porACTION ) ||
+	   ( spec.Type & porOUTCOME ) );
+    
+    for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
+      for(j=1; j<=vars[i].Length(); j++)
+	varslist.Append(vars[i][j]);
+
+    for( i = 1; i <= varslist.Length(); i++ )
     {
-      if( varslist[i]->Game() == game )
+      if( varslist[i]->Spec().ListDepth == 0 )
       {
-	assert( varslist[i]->GameIsEfg() );
-	if( spec.Type & porEFSUPPORT )
+	if( varslist[i]->Game() == game )
 	{
-	  if( ((EfSupportPortion*) varslist[i])->Value() == data )
-	    _RefTableStack->Peek()->Remove( varslist[i] );
+	  assert( varslist[i]->GameIsEfg() );
+	  if( spec.Type & porEFSUPPORT )
+	  {
+	    if( ((EfSupportPortion*) varslist[i])->Value() == data )
+	      _RefTableStack->Peek()->Remove( varslist[i] );
+	  }
+	  if( spec.Type & porEFPLAYER )
+	  {
+	    if( ((EfPlayerPortion*) varslist[i])->Value() == data )
+	      _RefTableStack->Peek()->Remove( varslist[i] );
+	  }
+	  if( spec.Type & porINFOSET )
+	  {
+	    if( ((InfosetPortion*) varslist[i])->Value() == data )
+	      _RefTableStack->Peek()->Remove( varslist[i] );
+	  }
+	  if( spec.Type & porNODE )
+	  {
+	    if( ((NodePortion*) varslist[i])->Value() == data )
+	      _RefTableStack->Peek()->Remove( varslist[i] );
+	  }
+	  if( spec.Type & porACTION )
+	  {
+	    if( ((ActionPortion*) varslist[i])->Value() == data )
+	      _RefTableStack->Peek()->Remove( varslist[i] );
+	  }
 	}
-	if( spec.Type & porEFPLAYER )
+      }
+      else // varslist[i] is a list
+      {
+	if( spec.Type & varslist[i]->Spec().Type )
 	{
-	  if( ((EfPlayerPortion*) varslist[i])->Value() == data )
-	    _RefTableStack->Peek()->Remove( varslist[i] );
-	}
-	if( spec.Type & porINFOSET )
-	{
-	  if( ((InfosetPortion*) varslist[i])->Value() == data )
-	    _RefTableStack->Peek()->Remove( varslist[i] );
-	}
-	if( spec.Type & porNODE )
-	{
-	  if( ((NodePortion*) varslist[i])->Value() == data )
-	    _RefTableStack->Peek()->Remove( varslist[i] );
-	}
-	if( spec.Type & porACTION )
-	{
-	  if( ((ActionPortion*) varslist[i])->Value() == data )
-	    _RefTableStack->Peek()->Remove( varslist[i] );
+	  if( ((ListPortion*) varslist[i])->MatchGameData( game, data ) )
+	  {
+	    _RefTableStack->Peek()->Remove( varslist[i] );	
+	  }
 	}
       }
     }
-    else // varslist[i] is a list
-    {
-      if( spec.Type & varslist[i]->Spec().Type )
-      {
-	if( ((ListPortion*) varslist[i])->MatchGameData( game, data ) )
-	{
-	  _RefTableStack->Peek()->Remove( varslist[i] );	
-	}
-      }
-    }
+
+    // go through all scopes on the stack; restore later
+    tempRefTableStack.Push( _RefTableStack->Pop() );
+  }
+  
+  while( tempRefTableStack.Depth() > 0 )
+  {
+    // restore the original variable stack
+    _RefTableStack->Push( tempRefTableStack.Pop() );    
   }
 }
 
