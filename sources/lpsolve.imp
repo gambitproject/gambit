@@ -153,7 +153,7 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   // gout << "\n--- End Phase I ---\n";
   
   if(!bounded) {
-    // gout << "\nPhase 1 Unbounded\n";
+     gout << "\nPhase 1 Unbounded\n";
   }
   if(total_cost < (T)0) {
     feasible = 0;
@@ -193,7 +193,7 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   // gout << "\n--- End Phase II ---\n";
 
   if(!bounded) {
-    // gout << "\nPhase II Unbounded\n";
+     gout << "\nPhase II Unbounded\n";
   }
   // gout << "\nFinal basis: ";
   // tab->Dump(gout);   gout << '\n';
@@ -256,6 +256,14 @@ template <class T> void LPSolve<T>::Solve(int phase)
 	if(out==0) {
 	  bounded=0;
 	  //  gout << "\nProblem unbounded;
+	  gout << "\nPivot in: " << in << " out: " << out;
+	  gout << "\ny: " << y;
+	  gout << "\na: " << a;
+	  gout << "\nd: " << d;
+	  gout << "\n tab = ";
+	  tab->Dump(gout);
+	  gout << "\nxx: " << (*xx);
+	  gout << ", Cost = " << tab->TotalCost() << "\n";
 	  return;
 	}
 	//  gout << "\nstep 4, in: " << in << " out: " << out;
@@ -343,7 +351,7 @@ template <class T> int LPSolve<T>::Exit(int /*in*/)
       if (d[j] > eps2 && (*LB)[col]==1) {
 	t = ((*xx)[col]-(*lb)[col])/d[j];
       }
-      if (d[j] < eps2 && (*UB)[col]==1) { 
+      if (d[j] < -eps2 && (*UB)[col]==1) { 
 	t = ((*xx)[col]-(*ub)[col])/d[j];
       }
       if(t>=(T)0 && t < tmin) {
@@ -356,7 +364,7 @@ template <class T> int LPSolve<T>::Exit(int /*in*/)
       if (d[j] > eps2 && (*UB)[col]==1) { 
 	t = ((*ub)[col]-(*xx)[col])/d[j];
       }
-      if (d[j] < eps2 && (*LB)[col]==1) { 
+      if (d[j] < -eps2 && (*LB)[col]==1) { 
 	t = ((*lb)[col]-(*xx)[col])/d[j];
       }
       if(t >= (T)0 && t < tmin) {

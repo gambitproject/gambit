@@ -66,6 +66,7 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
       COpt = Tab.OptimumCost();
       tracefile << "\nPlayer = " << pl << " Strat = "<< k;
       tracefile << " F = " << Tab.IsFeasible();
+      tracefile << " x = " << Tab.OptimumVector();
       tracefile << " Obj = " << COpt;
 
       dom[k] = false;
@@ -120,22 +121,28 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
       for(k=2;k<=strats;k++) {
 	s.Set(pl,k);
 	A(n,k-1)=-s.Payoff(pl);
-	C[k-1]+=A(n,k-1);
-			}
+	C[k-1]-=A(n,k-1);
+      }
       s.NextContingency();
     }
-
+    
     for (k = 1; k <= strats; k++)	{
       LPSolve<T> Tab(A, B, C, 1);
+      tracefile << '\n' << (gRectArray<T> &)A << '\n';
+      tracefile << B << '\n';
+      tracefile << C << '\n';
+      
+      COpt = Tab.OptimumCost();
       tracefile << "\nPlayer = " << pl << " Strat = "<< k;
       tracefile << " F = " << Tab.IsFeasible();
       tracefile << " x = " << Tab.OptimumVector();
-      COpt = Tab.OptimumCost();
       tracefile << " Obj = " << COpt;
+
       dom[k] = false;
+
       if (Tab.IsFeasible() && COpt == C0)
 	tracefile << " Duplicated strategy?\n\n";
-      else if (Tab.IsFeasible() && COpt < -C0) { 
+      else if (Tab.IsFeasible() && COpt > C0) { 
 	tracefile << " Weakly Dominated\n\n";
 	ret = true;
 	dom[k] = true;
@@ -143,10 +150,11 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
       else  tracefile << "\n\n";
       if(k<strats) {
 	A.SwitchColumn(k,B);
-	TmpC=C0; C0=-C[k]; C[k]=-TmpC;
+	TmpC=C0; C0=C[k]; C[k]=TmpC;
       }
     
     }
+    tracefile << "\n";
     
     if (!ret)  {
       delete newS;
