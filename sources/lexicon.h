@@ -18,8 +18,8 @@ template <class T> class Lexicon   {
     Lexicon(const Efg<T> &);
     ~Lexicon();
 
-    void MakeStrategy(EFPlayer *p);
-    void MakeReducedStrats(const EFSupport &, EFPlayer *, Node *, Node *);
+    void MakeStrategy(class EFPlayer *p);
+    void MakeReducedStrats(const class EFSupport &, class EFPlayer *, class Node *, class Node *);
     void MakeLink(Efg<T> *, Nfg<T> *);
 };
 
