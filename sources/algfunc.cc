@@ -806,10 +806,10 @@ static Portion *GSM_Lp_Nfg(Portion **param)
   const Nfg *N = &S.Game();
 
   ZSumParams params;
-  params.stopAfter = ((NumberPortion *) param[1])->Value();
-  params.precision = ((PrecisionPortion *) param[2])->Value();
-  params.tracefile = &((OutputPortion *) param[5])->Value();
-  params.trace = ((NumberPortion *) param[6])->Value();
+  params.stopAfter = 1;
+  params.precision = ((PrecisionPortion *) param[1])->Value();
+  params.tracefile = &((OutputPortion *) param[4])->Value();
+  params.trace = ((NumberPortion *) param[5])->Value();
 
   if (N->NumPlayers() > 2 || !IsConstSum(*N))
     throw gclRuntimeError("Only valid for two-person zero-sum games");
@@ -820,8 +820,8 @@ static Portion *GSM_Lp_Nfg(Portion **param)
     double time;
     int npivots;
     ZSum(S, params, solutions, npivots, time);
-    ((NumberPortion *) param[3])->SetValue(npivots);
-    ((NumberPortion *) param[4])->SetValue(time);
+    ((NumberPortion *) param[2])->SetValue(npivots);
+    ((NumberPortion *) param[3])->SetValue(time);
   }
   catch (gSignalBreak &) {
     params.status.Reset();
@@ -905,17 +905,17 @@ static Portion *GSM_Lp_Efg(Portion **param)
 
   if (((BoolPortion *) param[1])->Value())   {
     ZSumParams params;
-    params.stopAfter = ((NumberPortion *) param[2])->Value();
-    params.precision = ((PrecisionPortion *) param[3])->Value();
-    params.tracefile = &((OutputPortion *) param[6])->Value();
-    params.trace = ((NumberPortion *) param[7])->Value();
+    params.stopAfter = 1;
+    params.precision = ((PrecisionPortion *) param[2])->Value();
+    params.tracefile = &((OutputPortion *) param[5])->Value();
+    params.trace = ((NumberPortion *) param[6])->Value();
 
     gList<BehavSolution> solutions;
     try {
       efgLpNfgSolve algorithm(support, params);
       solutions = algorithm.Solve(support);
-      ((NumberPortion *) param[4])->SetValue(algorithm.NumPivots());
-      ((NumberPortion *) param[5])->SetValue(algorithm.Time());
+      ((NumberPortion *) param[3])->SetValue(algorithm.NumPivots());
+      ((NumberPortion *) param[4])->SetValue(algorithm.Time());
     }
     catch (gSignalBreak &) {
       params.status.Reset();
@@ -925,18 +925,18 @@ static Portion *GSM_Lp_Efg(Portion **param)
   }
   else  {
     CSSeqFormParams params;
-    params.stopAfter = ((NumberPortion *) param[2])->Value();
-    params.precision = ((PrecisionPortion *) param[3])->Value();
-    params.tracefile = &((OutputPortion *) param[6])->Value();
-    params.trace = ((NumberPortion *) param[7])->Value();
+    params.stopAfter = 1;
+    params.precision = ((PrecisionPortion *) param[2])->Value();
+    params.tracefile = &((OutputPortion *) param[5])->Value();
+    params.trace = ((NumberPortion *) param[6])->Value();
 
     gList<BehavSolution> solutions;
 
     try {
       efgLpSolve algorithm(support, params);
       solutions = algorithm.Solve(support);
-      ((NumberPortion *) param[4])->SetValue(algorithm.NumPivots());
-      ((NumberPortion *) param[5])->SetValue(algorithm.Time());
+      ((NumberPortion *) param[3])->SetValue(algorithm.NumPivots());
+      ((NumberPortion *) param[4])->SetValue(algorithm.Time());
     }
     catch (gSignalBreak &) {
       params.status.Reset();
@@ -1034,6 +1034,58 @@ static Portion *GSM_AllNashSolve_Nfg(Portion **param)
   return new Mixed_ListPortion(solutions);
 }
 
+#include "efgalleq.h"
+
+static Portion *GSM_AllNashSolve_Efg(Portion **param)
+{
+  const EFSupport &S = *((EfSupportPortion*) param[0])->Value();
+  EfgPolEnumParams params;
+  //  bool asNfg = ((BoolPortion *) param[1])->Value();
+  params.stopAfter = ((NumberPortion *) param[2])->Value();
+  params.tracefile = &((OutputPortion *) param[5])->Value();
+  params.trace = ((NumberPortion *) param[6])->Value();
+  bool recurse = ((BoolPortion *) param[8])->Value();
+  gList<BehavSolution> solutions;
+  gList<const EFSupport> singular_supports;
+
+  if (!IsPerfectRecall(S.Game())) {
+    gout << "WARNING: Solving game of imperfect recall with AllNash; results not guaranteed\n";
+  }
+
+  if(recurse) {
+    try {
+      long nevals = 0;
+      double time = 0.0;
+      AllEFNashSolve(S, params, solutions, nevals, time, singular_supports);
+      
+      ((NumberPortion *) param[3])->SetValue(nevals);
+      ((NumberPortion *) param[4])->SetValue(time);
+      ((EfSupport_ListPortion *) param[7])->SetValue(singular_supports);
+    }
+    catch (gSignalBreak &) {
+      params.status.Reset();
+    }
+  }
+  else {
+    bool is_singular = false;
+    try {
+      long nevals;
+      double time;
+      EfgPolEnum(S, params, solutions, nevals, time, is_singular);
+      //      EfgPolEnum(S, params, solutions, nevals, time);
+      ((NumberPortion *) param[3])->SetValue(nevals);
+      ((NumberPortion *) param[4])->SetValue(time);
+      if(is_singular)
+	singular_supports.Append(S);
+      ((EfSupport_ListPortion *) param[7])->SetValue(singular_supports);
+    }
+    catch (gSignalBreak &) {
+      params.status.Reset();
+    }
+  }
+  return new Behav_ListPortion(solutions);
+}
+
 #include "epolenum.h"
 #include "polensub.h"
 
@@ -1088,8 +1140,6 @@ static Portion *GSM_PolEnum_Efg(Portion **param)
 //------------------
 //  AllEFNashSolve
 //------------------
-
-#include "efgalleq.h"
 
 static Portion *GSM_AllEFNashSolve_Efg(Portion **param)
 {
@@ -1667,39 +1717,35 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new gclFunction("LpSolve", 3);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Lp_Nfg, 
-				       PortionSpec(porMIXED, 1), 7));
+				       PortionSpec(porMIXED, 1), 6));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
-  FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porINTEGER,
-					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(0, 2, gclParameter("precision", porPRECISION,
+  FuncObj->SetParamInfo(0, 1, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(0, 3, gclParameter("nPivots", porINTEGER,
+  FuncObj->SetParamInfo(0, 2, gclParameter("nPivots", porINTEGER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 4, gclParameter("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 5, gclParameter("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 4, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull),
 					    BYREF));
-  FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 5, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
 
   FuncObj->SetFuncInfo(1, gclSignature(GSM_Lp_Efg, 
-				       PortionSpec(porBEHAV, 1), 8));
+				       PortionSpec(porBEHAV, 1), 7));
   FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
   FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOLEAN,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porINTEGER,
-					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(1, 3, gclParameter("precision", porPRECISION,
+  FuncObj->SetParamInfo(1, 2, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(1, 4, gclParameter("nPivots", porINTEGER,
+  FuncObj->SetParamInfo(1, 3, gclParameter("nPivots", porINTEGER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(1, 5, gclParameter("time", porNUMBER,
+  FuncObj->SetParamInfo(1, 4, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(1, 6, gclParameter("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(1, 5, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(1, 7, gclParameter("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(1, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
 
   FuncObj->SetFuncInfo(2, gclSignature(GSM_Lp_List, 
@@ -1765,10 +1811,10 @@ void Init_algfunc(GSM *gsm)
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new gclFunction("AllNashSolve", 1);
+  FuncObj = new gclFunction("AllNashSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_AllNashSolve_Nfg, 
 				       PortionSpec(porMIXED, 1), 8));
-  FuncObj->SetParamInfo(0, 0, gclParameter("supersupport", porNFSUPPORT));
+  FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(0)));
   FuncObj->SetParamInfo(0, 2, gclParameter("nEvals", porINTEGER,
@@ -1780,11 +1826,33 @@ void Init_algfunc(GSM *gsm)
 					    BYREF));
   FuncObj->SetParamInfo(0, 5, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 6, gclParameter("singularsubsupps", 
+  FuncObj->SetParamInfo(0, 6, gclParameter("singularSupps", 
 					   PortionSpec(porNFSUPPORT,1),
 					   new NfSupport_ListPortion(), 
 					   BYREF));
   FuncObj->SetParamInfo(0, 7, gclParameter("recurse",porBOOLEAN, 
+					   new BoolPortion(true)));
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_AllNashSolve_Efg, 
+				       PortionSpec(porBEHAV, 1), 9));
+  FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOLEAN,
+					    new BoolPortion(false)));
+  FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porINTEGER,
+					    new NumberPortion(0)));
+  FuncObj->SetParamInfo(1, 3, gclParameter("nEvals", porINTEGER,
+					    new NumberPortion(0), BYREF));
+  FuncObj->SetParamInfo(1, 4, gclParameter("time", porNUMBER,
+					    new NumberPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(1, 5, gclParameter("traceFile", porOUTPUT,
+					    new OutputPortion(gnull), 
+					   BYREF));
+  FuncObj->SetParamInfo(1, 6, gclParameter("traceLevel", porNUMBER,
+					    new NumberPortion(0)));
+  FuncObj->SetParamInfo(1, 7, gclParameter("singularSupps", 
+					   PortionSpec(porEFSUPPORT,1),
+					   new EfSupport_ListPortion(), 
+					   BYREF));
+  FuncObj->SetParamInfo(1, 8, gclParameter("recurse",porBOOLEAN, 
 					   new BoolPortion(true)));
   gsm->AddFunction(FuncObj);
 
@@ -1906,5 +1974,3 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 }
-
-
