@@ -4,10 +4,8 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Compute Nash equilibria via Mangasarian's algorithm
-//
-// This file is part of Gambit
-// Copyright (c) 2002, The Gambit Project
+// Interface of algorithm to compute mixed strategy equilibria
+// of constant sum normal form games via linear programming
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,19 +22,29 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "math/rational.h"
-#include "enum.imp"
+#ifndef NFGLP_H
+#define NFGLP_H
 
-template class nfgEnumMixed<double>;
-template class nfgEnumMixed<gRational>;
+#include "nfgalgorithm.h"
+#include "numerical/lpsolve.h"
 
+template <class T> class gbtNfgNashLp : public gbtNfgNashAlgorithm {
+private:
+  int Add_BFS(const gbtNfgSupport &, /*const*/ LPSolve<T> &B,
+	      gList<BFS<T> > &);
+  void GetSolutions(const gbtNfgSupport &, const gList<BFS<T> > &,
+		    gList<MixedSolution > &,
+		    const T &) const;
 
+public:
+  gbtNfgNashLp(void);
+  virtual ~gbtNfgNashLp() { }
 
+  gText GetAlgorithm(void) const { return "Lp[NFG]"; }
+  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
+};
 
-
-
-
-
+#endif  // NFGLP_H
 
 
 

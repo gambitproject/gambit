@@ -24,19 +24,19 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef NLIAP_H
-#define NLIAP_H
+#ifndef NFGLIAP_H
+#define NFGLIAP_H
 
 #include "nfgalgorithm.h"
 
-class nfgLiap : public nfgNashAlgorithm {
+class gbtNfgNashLiap : public gbtNfgNashAlgorithm {
 private:
   int m_stopAfter, m_numTries, m_maxits1, m_maxitsN;
   double m_tol1, m_tolN;
 
 public:
-  nfgLiap(void);
-  virtual ~nfgLiap() { }
+  gbtNfgNashLiap(void);
+  virtual ~gbtNfgNashLiap() { }
 
   int StopAfter(void) const { return m_stopAfter; }
   void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
@@ -60,5 +60,5 @@ public:
   gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
-#endif   // NLIAP_H
+#endif // NFGLIAP_H
 

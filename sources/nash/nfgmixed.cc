@@ -4,8 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Instantiation of algorithm to compute mixed strategy equilibria
-// of constant sum normal form games via linear programming
+// Compute Nash equilibria via Mangasarian's algorithm
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -25,9 +24,19 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "nfgcsum.imp"
 #include "math/rational.h"
+#include "nfgmixed.imp"
 
-template class nfgLp<double>;
-template class nfgLp<gRational>;
+template class gbtNfgNashEnumMixed<double>;
+template class gbtNfgNashEnumMixed<gRational>;
+
+
+
+
+
+
+
+
+
+
 

@@ -26,10 +26,9 @@
 
 #include "base/base.h"
 #include "math/gpvector.h"
-
 #include "game/nfg.h"
+#include "nfglcp.h"
 
-#include "lemke.h"
 template <class T> gMatrix<T> Make_A1(const Nfg &, const gbtNfgSupport &, 
 				      const T &);
 template <class T> gVector<T> Make_b1(const Nfg &, const gbtNfgSupport &, 
@@ -41,12 +40,12 @@ template <class T> gVector<T> Make_b2(const Nfg &, const gbtNfgSupport &,
 
 
 //---------------------------------------------------------------------------
-//                        nfgLcp: member functions
+//                      gbtNfgNashLcp: member functions
 //---------------------------------------------------------------------------
 
 template <class T> 
-gList<MixedSolution> nfgLcp<T>::Solve(const gbtNfgSupport &p_support,
-				      gStatus &p_status)
+gList<MixedSolution> gbtNfgNashLcp<T>::Solve(const gbtNfgSupport &p_support,
+					     gStatus &p_status)
 {
   BFS<T> cbfs((T) 0);
 
@@ -80,7 +79,7 @@ gList<MixedSolution> nfgLcp<T>::Solve(const gbtNfgSupport &p_support,
   // any other exceptions will propagate out.
 }
 
-template <class T> int nfgLcp<T>::AddBfs(LHTableau<T> &p_tableau,
+template <class T> int gbtNfgNashLcp<T>::AddBfs(LHTableau<T> &p_tableau,
 					      gList<BFS<T> > &p_list)
 {
   BFS<T> cbfs((T) 0);
@@ -100,7 +99,7 @@ template <class T> int nfgLcp<T>::AddBfs(LHTableau<T> &p_tableau,
 // From each new accessible equilibrium, it follows
 // all possible paths, adding any new equilibria to the List.  
 //
-template <class T> void nfgLcp<T>::AllLemke(const gbtNfgSupport &p_support,
+template <class T> void gbtNfgNashLcp<T>::AllLemke(const gbtNfgSupport &p_support,
 					    int j, LHTableau<T> &B,
 					    gList<BFS<T> > &p_list,
 					    int depth,
@@ -134,7 +133,7 @@ template <class T> void nfgLcp<T>::AllLemke(const gbtNfgSupport &p_support,
 }
 
 template <class T>
-gList<MixedSolution> nfgLcp<T>::AddSolutions(const gbtNfgSupport &p_support,
+gList<MixedSolution> gbtNfgNashLcp<T>::AddSolutions(const gbtNfgSupport &p_support,
 					     const gList<BFS<T> > &p_list,
 					     const T &epsilon)
 {
@@ -178,11 +177,11 @@ gList<MixedSolution> nfgLcp<T>::AddSolutions(const gbtNfgSupport &p_support,
 }
 
 //-------------------------------------------------------------------------
-//                    nfgLcp<T>: Member functions
+//                    gbtNfgNashLcp<T>: Member functions
 //-------------------------------------------------------------------------
 
 template <class T>
-nfgLcp<T>::nfgLcp(void)
+gbtNfgNashLcp<T>::gbtNfgNashLcp(void)
   : m_stopAfter(1), m_maxDepth(0)
 { }
 

@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Declaration of specialized containers for polynomials
+// Approximation of Nash equilibria via logit equilibria
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,8 +24,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef NFGQRE_H
-#define NFGQRE_H
+#ifndef NFGLOGIT_H
+#define NFGLOGIT_H
 
 #include "nfgalgorithm.h"
 
@@ -36,14 +36,14 @@ void QreJacobian(const Nfg &p_nfg,
 		 const MixedProfile<double> &p_profile,
 		 const double &p_nu, gMatrix<double> &p_matrix);
 
-class nfgQre : public nfgNashAlgorithm {
+class gbtNfgNashLogit : public gbtNfgNashAlgorithm {
 private:
   double m_maxLam, m_stepSize;
   bool m_fullGraph;
 
 public:
-  nfgQre(void);
-  virtual ~nfgQre() { }
+  gbtNfgNashLogit(void);
+  virtual ~gbtNfgNashLogit() { }
 
   double GetMaxLambda(void) const { return m_maxLam; }
   void SetMaxLambda(double p_maxLam) { m_maxLam = p_maxLam; }
@@ -58,7 +58,7 @@ public:
   gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };  
 
-#endif  // NFGQRE_H
+#endif  // NFGLOGIT_H
 
 
 

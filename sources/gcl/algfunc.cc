@@ -38,17 +38,17 @@
 #include "nash/efgsubsolve.h"
 #include "nash/nfgpure.h"
 #include "nash/efgpure.h"
-#include "nash/enum.h"
-#include "nash/lemke.h"
+#include "nash/nfgmixed.h"
+#include "nash/nfglcp.h"
 #include "nash/efglcp.h"
-#include "nash/nliap.h"
+#include "nash/nfgliap.h"
 #include "nash/efgliap.h"
-#include "nash/nfgcsum.h"
+#include "nash/nfglp.h"
 #include "nash/efglp.h"
 #include "nash/nfgalleq.h"
 #include "nash/efgpoly.h"
 #include "nash/nfgqregrid.h"
-#include "nash/nfgqre.h"
+#include "nash/nfglogit.h"
 #include "nash/efglogit.h"
 #include "nash/simpdiv.h"
 #include "nash/yamamoto.h"
@@ -191,19 +191,19 @@ static Portion *GSM_Behav(GSM &, Portion **param)
 // EnumMixedSolve
 //------------------
 
-static nfgNashAlgorithm *GSM_EnumMixed_Nfg_Double(int p_stopAfter,
+static gbtNfgNashAlgorithm *GSM_EnumMixed_Nfg_Double(int p_stopAfter,
 						  bool p_cliques)
 {
-  nfgEnumMixed<double> *algorithm = new nfgEnumMixed<double>;
+  gbtNfgNashEnumMixed<double> *algorithm = new gbtNfgNashEnumMixed<double>;
   algorithm->SetStopAfter(p_stopAfter);
   algorithm->SetCliques(p_cliques);
   return algorithm;
 }
 
-static nfgNashAlgorithm *GSM_EnumMixed_Nfg_Rational(int p_stopAfter,
+static gbtNfgNashAlgorithm *GSM_EnumMixed_Nfg_Rational(int p_stopAfter,
 						    bool p_cliques)
 {
-  nfgEnumMixed<gRational> *algorithm = new nfgEnumMixed<gRational>;
+  gbtNfgNashEnumMixed<gRational> *algorithm = new gbtNfgNashEnumMixed<gRational>;
   algorithm->SetStopAfter(p_stopAfter);
   algorithm->SetCliques(p_cliques);
   return algorithm;
@@ -212,7 +212,7 @@ static nfgNashAlgorithm *GSM_EnumMixed_Nfg_Rational(int p_stopAfter,
 static Portion *GSM_EnumMixed_Nfg(GSM &gsm, Portion **param)
 {
   const gbtNfgSupport &support = AsNfgSupport(param[0]);
-  nfgNashAlgorithm *algorithm = 0;
+  gbtNfgNashAlgorithm *algorithm = 0;
 
   if (((PrecisionPortion *) param[2])->Value() == precDOUBLE) {
     algorithm = GSM_EnumMixed_Nfg_Double(AsNumber(param[1]), AsBool(param[7]));
@@ -248,7 +248,7 @@ static Portion *GSM_EnumMixed_Efg(GSM &gsm, Portion **param)
     throw gclRuntimeError("algorithm not implemented for extensive forms");
   }
 
-  nfgNashAlgorithm *nfgAlgorithm = 0;
+  gbtNfgNashAlgorithm *nfgAlgorithm = 0;
 
   if (((PrecisionPortion *) param[3])->Value() == precDOUBLE) {
     nfgAlgorithm = GSM_EnumMixed_Nfg_Double(AsNumber(param[2]),
@@ -296,7 +296,7 @@ static Portion *GSM_EnumPure_Nfg(GSM &gsm, Portion **param)
 
   gsm.StartAlgorithmMonitor("EnumPureSolve Progress");
   try {
-    nfgEnumPure solver;
+    gbtNfgNashEnumPure solver;
     solver.SetStopAfter(((NumberPortion *) param[1])->Value());
     solutions = solver.Solve(*support, gsm.GetStatusMonitor());
     ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
@@ -324,7 +324,7 @@ static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
   gList<BehavSolution> solutions;
   if (AsBool(param[1])) {
     try {
-      nfgEnumPure *nfgAlgorithm = new nfgEnumPure;
+      gbtNfgNashEnumPure *nfgAlgorithm = new gbtNfgNashEnumPure;
       nfgAlgorithm->SetStopAfter(AsNumber(param[2]));
       gbtEfgNashSubgames algorithm;
       algorithm.SetAlgorithm(nfgAlgorithm);
@@ -356,16 +356,16 @@ static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
 // LcpSolve
 //------------
 
-static nfgNashAlgorithm *GSM_Lcp_Nfg_Double(int p_stopAfter)
+static gbtNfgNashAlgorithm *GSM_Lcp_Nfg_Double(int p_stopAfter)
 {
-  nfgLcp<double> *algorithm = new nfgLcp<double>;
+  gbtNfgNashLcp<double> *algorithm = new gbtNfgNashLcp<double>;
   algorithm->SetStopAfter(p_stopAfter);
   return algorithm;
 }
 
-static nfgNashAlgorithm *GSM_Lcp_Nfg_Rational(int p_stopAfter)
+static gbtNfgNashAlgorithm *GSM_Lcp_Nfg_Rational(int p_stopAfter)
 {
-  nfgLcp<gRational> *algorithm = new nfgLcp<gRational>;
+  gbtNfgNashLcp<gRational> *algorithm = new gbtNfgNashLcp<gRational>;
   algorithm->SetStopAfter(p_stopAfter);
   return algorithm;
 }
@@ -379,7 +379,7 @@ static Portion *GSM_Lcp_Nfg(GSM &gsm, Portion **param)
     throw gclRuntimeError("Only valid for two-person games");
   }
 
-  nfgNashAlgorithm *algorithm = 0;
+  gbtNfgNashAlgorithm *algorithm = 0;
 
   if (AsPrecision(param[2]) == precDOUBLE) {
     algorithm = GSM_Lcp_Nfg_Double(AsNumber(param[1]));
@@ -523,7 +523,7 @@ static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
   gbtEfgNashSubgames algorithm;
 
   if (AsBool(param[1])) {
-    nfgLiap *nfgAlgorithm = new nfgLiap;
+    gbtNfgNashLiap *nfgAlgorithm = new gbtNfgNashLiap;
     nfgAlgorithm->SetStopAfter(AsNumber(param[2]));
     nfgAlgorithm->SetNumTries(AsNumber(param[3]));
     algorithm.SetAlgorithm(nfgAlgorithm);
@@ -555,7 +555,7 @@ static Portion *GSM_Liap_Mixed(GSM &gsm, Portion **param)
   const MixedProfile<gNumber> &start = *AsMixed(param[0]).Profile();
   const Nfg &nfg = start.Game();
 
-  nfgLiap algorithm;
+  gbtNfgNashLiap algorithm;
   algorithm.SetStopAfter(AsNumber(param[1]));
   algorithm.SetNumTries(AsNumber(param[2]));
 
@@ -578,16 +578,16 @@ static Portion *GSM_Liap_Mixed(GSM &gsm, Portion **param)
 // LpSolve
 //------------
 
-static nfgNashAlgorithm *GSM_Lp_Nfg_Double(void)
+static gbtNfgNashAlgorithm *GSM_Lp_Nfg_Double(void)
 {
-  nfgLcp<double> *algorithm = new nfgLcp<double>;
+  gbtNfgNashLcp<double> *algorithm = new gbtNfgNashLcp<double>;
   algorithm->SetStopAfter(1);
   return algorithm;
 }
 
-static nfgNashAlgorithm *GSM_Lp_Nfg_Rational(void)
+static gbtNfgNashAlgorithm *GSM_Lp_Nfg_Rational(void)
 {
-  nfgLcp<gRational> *algorithm = new nfgLcp<gRational>;
+  gbtNfgNashLcp<gRational> *algorithm = new gbtNfgNashLcp<gRational>;
   algorithm->SetStopAfter(1);
   return algorithm;
 }
@@ -601,7 +601,7 @@ static Portion *GSM_Lp_Nfg(GSM &gsm, Portion **param)
     throw gclRuntimeError("Only valid for two-person zero-sum games");
   }
 
-  nfgNashAlgorithm *algorithm =
+  gbtNfgNashAlgorithm *algorithm =
     (AsBool(param[1])) ? GSM_Lp_Nfg_Double() : GSM_Lp_Nfg_Rational();
 
   gList<MixedSolution> solutions;
@@ -899,7 +899,7 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
 
   if (param[0]->Spec().Type == porMIXED)  {
     const MixedSolution &start = AsMixed(param[0]);
-    nfgQre algorithm;
+    gbtNfgNashLogit algorithm;
     algorithm.SetMaxLambda(AsNumber(param[3]));
     algorithm.SetFullGraph(AsBool(param[6]));
 
@@ -955,7 +955,7 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
 // SimpDivSolve
 //----------------
 
-static nfgNashAlgorithm *GSM_Simpdiv_Nfg_Double(int p_stopAfter,
+static gbtNfgNashAlgorithm *GSM_Simpdiv_Nfg_Double(int p_stopAfter,
 						int p_numRestarts,
 						int p_leashLength)
 {
@@ -966,7 +966,7 @@ static nfgNashAlgorithm *GSM_Simpdiv_Nfg_Double(int p_stopAfter,
   return algorithm;
 }
 
-static nfgNashAlgorithm *GSM_Simpdiv_Nfg_Rational(int p_stopAfter,
+static gbtNfgNashAlgorithm *GSM_Simpdiv_Nfg_Rational(int p_stopAfter,
 						  int p_numRestarts,
 						  int p_leashLength)
 {
@@ -980,7 +980,7 @@ static nfgNashAlgorithm *GSM_Simpdiv_Nfg_Rational(int p_stopAfter,
 static Portion *GSM_Simpdiv_Nfg(GSM &gsm, Portion **param)
 {
   const gbtNfgSupport &support = AsNfgSupport(param[0]);
-  nfgNashAlgorithm *algorithm;
+  gbtNfgNashAlgorithm *algorithm;
   if (AsPrecision(param[4]) == precDOUBLE) {
     algorithm = GSM_Simpdiv_Nfg_Double(AsNumber(param[1]),
 				       AsNumber(param[2]),
@@ -1022,7 +1022,7 @@ static Portion *GSM_Simpdiv_Efg(GSM &gsm, Portion **param)
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Simpdiv; results not guaranteed\n";
   }
 
-  nfgNashAlgorithm *nfgAlgorithm = 0;
+  gbtNfgNashAlgorithm *nfgAlgorithm = 0;
 
   if (((PrecisionPortion *) param[5])->Value() == precDOUBLE) {
     nfgAlgorithm = GSM_Simpdiv_Nfg_Double(AsNumber(param[2]),

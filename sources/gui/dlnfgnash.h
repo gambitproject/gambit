@@ -52,7 +52,7 @@ public:
   dialogNfgNash(wxWindow *, const gbtNfgSupport &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };

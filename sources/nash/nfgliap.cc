@@ -25,7 +25,7 @@
 //
 
 #include "numerical/gfuncmin.h"
-#include "nliap.h"
+#include "nfgliap.h"
 
 //---------------------------------------------------------------------
 //                        class NFLiapFunc
@@ -190,16 +190,16 @@ static void PickRandomProfile(MixedProfile<double> &p)
 }
 
 //---------------------------------------------------------------------
-//                  class nfgLiap: Member functions
+//                  class gbtNfgNashLiap: Member functions
 //---------------------------------------------------------------------
 
-nfgLiap::nfgLiap(void)
+gbtNfgNashLiap::gbtNfgNashLiap(void)
   : m_stopAfter(1), m_numTries(10), m_maxits1(100), m_maxitsN(20),
     m_tol1(2.0e-10), m_tolN(1.0e-10)
 { }
 
-gList<MixedSolution> nfgLiap::Solve(const gbtNfgSupport &p_support,
-				    gStatus &p_status)
+gList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
+					   gStatus &p_status)
 {
   static const double ALPHA = .00000001;
   MixedProfile<double> p(p_support);

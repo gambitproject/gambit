@@ -59,7 +59,7 @@
 #include "dlnfgqre.h"
 #include "dlqrefile.h"
 #include "dlreport.h"
-#include "nash/nfgqre.h"
+#include "nash/nfglogit.h"
 #include "nash/nfgqregrid.h"
 
 //=====================================================================
@@ -931,7 +931,7 @@ void NfgShow::OnToolsEquilibrium(wxCommandEvent &)
   dialogNfgNash dialog(this, *m_currentSupport);
 
   if (dialog.ShowModal() == wxID_OK) {
-    nfgNashAlgorithm *algorithm = dialog.GetAlgorithm();
+    gbtNfgNashAlgorithm *algorithm = dialog.GetAlgorithm();
 
     if (!algorithm) {
       return;
@@ -991,7 +991,7 @@ void NfgShow::OnToolsQre(wxCommandEvent &)
 	algorithm.Solve(*m_currentSupport, gnull, status, solutions);
       }
       else {
-	nfgQre algorithm;
+	gbtNfgNashLogit algorithm;
 	algorithm.SetFullGraph(true);
 	algorithm.SetMaxLambda(10000000);
 

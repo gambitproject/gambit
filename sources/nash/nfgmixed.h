@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Compute Nash equilibria via Lemke-Howson algorithm
+// Compute Nash equilibria via Mangasarian's algorithm
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,39 +24,41 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LEMKE_H
-#define LEMKE_H
+//
+// Enum implements the procedure described in 
+// Mangasarian, O. L., "Equilibrium points of bimatrix games", 
+// SIAM 12 (1964): 778-780 for finding all extreme points of 
+// the Nash equilibrium components of a two person game. 
+// 
 
-#include "lhtab.h"
+#ifndef NFGMIXED_H
+#define NFGMIXED_H
+
 #include "nfgalgorithm.h"
 
-template <class T> class nfgLcp : public nfgNashAlgorithm  {
+template <class T> class gbtNfgNashEnumMixed : public gbtNfgNashAlgorithm {
 private:
-  int m_stopAfter, m_maxDepth;
+  int m_stopAfter;
+  bool m_cliques;
 
-  int AddBfs(LHTableau<T> &, gList<BFS<T> > &);
-  gList<MixedSolution> AddSolutions(const gbtNfgSupport &,
-				    const gList<BFS<T> > &, const T &);
-  void AllLemke(const gbtNfgSupport &, int, LHTableau<T> &B, gList<BFS<T> > &,
-		int depth, gStatus &);
-  
+  // Private auxiliary functions
+  bool EqZero(const T &) const;
+
 public:
-  nfgLcp(void);
-  virtual ~nfgLcp() { }
+  gbtNfgNashEnumMixed(void);
+  virtual ~gbtNfgNashEnumMixed() { }
   
   int StopAfter(void) const { return m_stopAfter; }
   void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
 
-  int MaxDepth(void) const { return m_maxDepth; }
-  void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
+  bool Cliques(void) const { return m_cliques; }
+  void SetCliques(bool p_cliques) { m_cliques = p_cliques; }
 
-  gText GetAlgorithm(void) const { return "Lcp[NFG]"; }
+  gText GetAlgorithm(void) const { return "EnumMixed[NFG]"; }
   gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
-
-#endif    // LEMKE_H
-
+#endif  // NFGMIXED_H
 
 
 

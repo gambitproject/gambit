@@ -29,7 +29,7 @@
 
 #include "nfgalgorithm.h"
 
-template <class T> class nfgSimpdiv : public nfgNashAlgorithm {
+template <class T> class nfgSimpdiv : public gbtNfgNashAlgorithm {
 private:
   int m_nRestarts, m_leashLength;
 

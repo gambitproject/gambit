@@ -22,19 +22,19 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "nfgcsum.h"
+#include "nfglp.h"
 #include "game/nfgiter.h"
 
 //-------------------------------------------------------------------------
-//                      nfgLp<T>: Member functions
+//                   gbtNfgNashLp<T>: Member functions
 //-------------------------------------------------------------------------
 
-template <class T> nfgLp<T>::nfgLp(void)
+template <class T> gbtNfgNashLp<T>::gbtNfgNashLp(void)
 { }
 
 template <class T> 
-gList<MixedSolution> nfgLp<T>::Solve(const gbtNfgSupport &p_support,
-				     gStatus &p_status)
+gList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgSupport &p_support,
+					    gStatus &p_status)
 {
   BFS<T> cbfs((T) 0);
   
@@ -84,9 +84,9 @@ gList<MixedSolution> nfgLp<T>::Solve(const gbtNfgSupport &p_support,
   return solutions;
 }
 
-template <class T> int nfgLp<T>::Add_BFS(const gbtNfgSupport &p_support,
-					 /*const*/ LPSolve<T> &lp,
-					 gList<BFS<T> > &p_list)
+template <class T> int gbtNfgNashLp<T>::Add_BFS(const gbtNfgSupport &p_support,
+						/*const*/ LPSolve<T> &lp,
+						gList<BFS<T> > &p_list)
 {
   BFS<T> cbfs((T) 0);
 
@@ -101,10 +101,10 @@ template <class T> int nfgLp<T>::Add_BFS(const gbtNfgSupport &p_support,
 }
 
 template <class T>
-void nfgLp<T>::GetSolutions(const gbtNfgSupport &p_support,
-			    const gList<BFS<T> > &p_list,
-			    gList<MixedSolution > &solutions,
-			    const T &p_epsilon) const
+void gbtNfgNashLp<T>::GetSolutions(const gbtNfgSupport &p_support,
+				   const gList<BFS<T> > &p_list,
+				   gList<MixedSolution > &solutions,
+				   const T &p_epsilon) const
 {
   int index;
   int n1 = p_support.NumStrats(1);

@@ -37,13 +37,13 @@
 
 #include "nash/efgpure.h"
 #include "nash/nfgpure.h"
-#include "nash/enum.h"
+#include "nash/nfgmixed.h"
 #include "nash/efglcp.h"
-#include "nash/lemke.h"
+#include "nash/nfglcp.h"
 #include "nash/efglp.h"
-#include "nash/nfgcsum.h"
+#include "nash/nfglp.h"
 #include "nash/efgliap.h"
-#include "nash/nliap.h"
+#include "nash/nfgliap.h"
 #include "nash/efgpoly.h"
 #include "nash/nfgalleq.h"
 #include "nash/efglogit.h"
@@ -189,7 +189,7 @@ gList<BehavSolution> efgTwoNash::Solve(const EFSupport &p_support,
     p_support.GetGame().UnmarkSubgames(p_support.GetGame().RootNode());
 
     if (p_support.GetGame().NumPlayers() == 2) {
-      nfgEnumMixed<double> *subAlgorithm = new nfgEnumMixed<double>;
+      gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
       subAlgorithm->SetStopAfter(2);
       algorithm.SetAlgorithm(subAlgorithm);
     }
@@ -287,7 +287,7 @@ gList<BehavSolution> efgAllNash::Solve(const EFSupport &p_support,
     p_support.GetGame().UnmarkSubgames(p_support.GetGame().RootNode());
 
     if (p_support.GetGame().NumPlayers() == 2) {
-      nfgEnumMixed<double> *subAlgorithm = new nfgEnumMixed<double>;
+      gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
       subAlgorithm->SetStopAfter(0);
       algorithm.SetAlgorithm(subAlgorithm);
     }
@@ -476,7 +476,7 @@ gList<BehavSolution> efgTwoPerfect::Solve(const EFSupport &p_support,
     p_support.GetGame().MarkSubgames();
 
     if (p_support.GetGame().NumPlayers() == 2) {
-      nfgEnumMixed<double> *subAlgorithm = new nfgEnumMixed<double>;
+      gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
       subAlgorithm->SetStopAfter(2);
       algorithm.SetAlgorithm(subAlgorithm);
     }
@@ -575,7 +575,7 @@ gList<BehavSolution> efgAllPerfect::Solve(const EFSupport &p_support,
     p_support.GetGame().MarkSubgames();
 
     if (p_support.GetGame().NumPlayers() == 2) {
-      nfgEnumMixed<double> *subAlgorithm = new nfgEnumMixed<double>;
+      gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
       subAlgorithm->SetStopAfter(0);
       algorithm.SetAlgorithm(subAlgorithm);
     }
@@ -920,7 +920,7 @@ gbtEfgNashAlgorithm *panelEfgEnumPure::GetAlgorithm(void) const
     algorithm->SetAlgorithm(subAlgorithm);
   }
   else {
-    nfgEnumPure *subAlgorithm = new nfgEnumPure;
+    gbtNfgNashEnumPure *subAlgorithm = new gbtNfgNashEnumPure;
     subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
 			       0 : m_stopAfter->GetValue());
     algorithm->SetAlgorithm(subAlgorithm);
@@ -1016,13 +1016,13 @@ gbtEfgNashAlgorithm *panelEfgEnumMixed::GetAlgorithm(void) const
   gbtEfgNashSubgames *algorithm = new gbtEfgNashSubgames;
 
   if (m_precision->GetSelection() == 0) {
-    nfgEnumMixed<double> *subAlgorithm = new nfgEnumMixed<double>;
+    gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
     subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
 			       0 : m_stopAfter->GetValue());
     algorithm->SetAlgorithm(subAlgorithm);
   }
   else {
-    nfgEnumMixed<gRational> *subAlgorithm = new nfgEnumMixed<gRational>;
+    gbtNfgNashEnumMixed<gRational> *subAlgorithm = new gbtNfgNashEnumMixed<gRational>;
     subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
 			       0 : m_stopAfter->GetValue());
     algorithm->SetAlgorithm(subAlgorithm);
@@ -1172,7 +1172,7 @@ gbtEfgNashAlgorithm *panelEfgLcp::GetAlgorithm(void) const
   }
   else {
     if (m_precision->GetSelection() == 0) {
-      nfgLcp<double> *subAlgorithm = new nfgLcp<double>;
+      gbtNfgNashLcp<double> *subAlgorithm = new gbtNfgNashLcp<double>;
       subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
 				 0 : m_stopAfter->GetValue());
       subAlgorithm->SetMaxDepth((m_limitDepth->GetValue()) ?
@@ -1180,7 +1180,7 @@ gbtEfgNashAlgorithm *panelEfgLcp::GetAlgorithm(void) const
       algorithm->SetAlgorithm(subAlgorithm);
     }
     else {
-      nfgLcp<gRational> *subAlgorithm = new nfgLcp<gRational>;
+      gbtNfgNashLcp<gRational> *subAlgorithm = new gbtNfgNashLcp<gRational>;
       subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
 				 0 : m_stopAfter->GetValue());
       subAlgorithm->SetMaxDepth((m_limitDepth->GetValue()) ?
@@ -1290,10 +1290,10 @@ gbtEfgNashAlgorithm *panelEfgLp::GetAlgorithm(void) const
   }
   else {
     if (m_precision->GetSelection() == 0) {
-      algorithm->SetAlgorithm(new nfgLp<double>);
+      algorithm->SetAlgorithm(new gbtNfgNashLp<double>);
     }
     else {
-      algorithm->SetAlgorithm(new nfgLp<gRational>);
+      algorithm->SetAlgorithm(new gbtNfgNashLp<gRational>);
     }
   }
   return algorithm;
@@ -1411,7 +1411,7 @@ gbtEfgNashAlgorithm *panelEfgLiap::GetAlgorithm(void) const
 
   }
   else {
-    nfgLiap *subAlgorithm = new nfgLiap;
+    gbtNfgNashLiap *subAlgorithm = new gbtNfgNashLiap;
     subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
 			       0 : m_stopAfter->GetValue());
     subAlgorithm->SetNumTries(m_numTries->GetValue());

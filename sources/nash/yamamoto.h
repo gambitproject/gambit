@@ -29,7 +29,7 @@
 
 #include "nfgalgorithm.h"
 
-class nfgYamamoto : public nfgNashAlgorithm {
+class nfgYamamoto : public gbtNfgNashAlgorithm {
 public:
   nfgYamamoto(void) { }
   virtual ~nfgYamamoto() { }

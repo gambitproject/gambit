@@ -28,7 +28,6 @@
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
-#include "nash/nfgqre.h"
 #include "dlnfgqre.h"
 
 const int idRADIOBOX_SOLVEUSING = 2000;

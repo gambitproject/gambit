@@ -30,9 +30,9 @@
 #include "game/nfg.h"
 #include "mixedsol.h"
 
-class nfgNashAlgorithm {
+class gbtNfgNashAlgorithm {
 public:
-  virtual ~nfgNashAlgorithm() { }
+  virtual ~gbtNfgNashAlgorithm() { }
 
   virtual gText GetAlgorithm(void) const = 0;
   virtual gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &) = 0;

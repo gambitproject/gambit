@@ -30,12 +30,6 @@ libnash_a_SOURCES = \
 	efgpure.h \
 	efgsubsolve.cc \
 	efgsubsolve.h \
-	enum.cc \
-	enum.h \
-	enum.imp \
-	lemke.cc \
-	lemke.h \
-	lemke.imp \
 	lhtab.cc \
 	lhtab.h \
 	lhtab.imp \
@@ -44,17 +38,23 @@ libnash_a_SOURCES = \
 	nfgalgorithm.h \
 	nfgalleq.cc \
 	nfgalleq.h \
-	nfgcsum.cc \
-	nfgcsum.h \
-	nfgcsum.imp \
+	nfglcp.cc \
+	nfglcp.h \
+	nfglcp.imp \
+	nfgliap.cc \
+	nfgliap.h \
+	nfglogit.cc \
+	nfglogit.h \
+	nfglp.cc \
+	nfglp.h \
+	nfglp.imp \
+	nfgmixed.cc \
+	nfgmixed.h \
+	nfgmixed.imp \
 	nfgpure.cc \
 	nfgpure.h \
-	nfgqre.cc \
-	nfgqre.h \
 	nfgqregrid.cc \
 	nfgqregrid.h \
-	nliap.cc \
-	nliap.h \
 	polenum.cc \
 	polenum.h \
 	simpdiv.cc \

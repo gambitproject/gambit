@@ -29,16 +29,16 @@
 #include "game/nfgiter.h"
 #include "numerical/vertenum.h"
 
-#include "enum.h"
+#include "nfgmixed.h"
 #include "clique.h"
 
 
-template <class T> nfgEnumMixed<T>::nfgEnumMixed(void)
+template <class T> gbtNfgNashEnumMixed<T>::gbtNfgNashEnumMixed(void)
   : m_stopAfter(0), m_cliques(false)
 { }
 
 template <class T> 
-gList<MixedSolution> nfgEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
+gList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
 					    gStatus &p_status)
 {
   const Nfg &nfg = p_support.Game();
@@ -191,7 +191,7 @@ gList<MixedSolution> nfgEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
   return solutions;
 }
 
-template <class T> bool nfgEnumMixed<T>::EqZero(const T &x) const
+template <class T> bool gbtNfgNashEnumMixed<T>::EqZero(const T &x) const
 {
   T eps;
   gEpsilon(eps, 12);

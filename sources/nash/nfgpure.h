@@ -31,13 +31,13 @@
 #include "base/gstatus.h"
 #include "nfgalgorithm.h"
 
-class nfgEnumPure : public nfgNashAlgorithm {
+class gbtNfgNashEnumPure : public gbtNfgNashAlgorithm {
 private:
   int m_stopAfter;
 
 public:
-  nfgEnumPure(void) : m_stopAfter(0) { }
-  virtual ~nfgEnumPure() { }
+  gbtNfgNashEnumPure(void) : m_stopAfter(0) { }
+  virtual ~gbtNfgNashEnumPure() { }
 
   int StopAfter(void) const { return m_stopAfter; }
   void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }

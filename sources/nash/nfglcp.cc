@@ -24,8 +24,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "lemke.imp"
+#include "nfglcp.imp"
 #include "math/rational.h"
 
-template class nfgLcp<double>;
-template class nfgLcp<gRational>;
+template class gbtNfgNashLcp<double>;
+template class gbtNfgNashLcp<gRational>;

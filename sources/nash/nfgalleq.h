@@ -30,7 +30,7 @@
 
 #include "nfgalgorithm.h"
 
-class nfgPolEnum : public nfgNashAlgorithm {
+class nfgPolEnum : public gbtNfgNashAlgorithm {
 private:
   int m_stopAfter;
 

@@ -27,8 +27,7 @@
 
 #include <math.h>
 
-#include "nfgqre.h"
-
+#include "nfglogit.h"
 #include "base/gnullstatus.h"
 #include "math/gmath.h"
 #include "math/gmatrix.h"
@@ -409,12 +408,12 @@ static void TracePath(const MixedProfile<double> &p_start,
   }
 }
 
-nfgQre::nfgQre(void)
+gbtNfgNashLogit::gbtNfgNashLogit(void)
   : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
 { }
 
-gList<MixedSolution> nfgQre::Solve(const gbtNfgSupport &p_support,
-				   gStatus &p_status)
+gList<MixedSolution> gbtNfgNashLogit::Solve(const gbtNfgSupport &p_support,
+					    gStatus &p_status)
 {
   gList<MixedSolution> solutions;
   MixedProfile<double> start(p_support);

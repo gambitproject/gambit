@@ -38,7 +38,7 @@ private:
   BehavProfile<gNumber> *solution;
   gList<BehavSolution> solutions;
   gbtEfgNashAlgorithm *m_efgAlgorithm;
-  nfgNashAlgorithm *m_nfgAlgorithm;
+  gbtNfgNashAlgorithm *m_nfgAlgorithm;
 
   gArray<gArray<Infoset *> *> infosets;
 
@@ -54,7 +54,7 @@ public:
 
   void SetAlgorithm(gbtEfgNashAlgorithm *p_algorithm)
     { m_efgAlgorithm = p_algorithm; m_nfgAlgorithm = 0; }
-  void SetAlgorithm(nfgNashAlgorithm *p_algorithm)
+  void SetAlgorithm(gbtNfgNashAlgorithm *p_algorithm)
     { m_nfgAlgorithm = p_algorithm; m_efgAlgorithm = 0; }
   
   double Time(void) const   { return time; }

@@ -31,8 +31,8 @@
 #include "game/nfgiter.h"
 #include "game/nfgciter.h"
 
-gList<MixedSolution> nfgEnumPure::Solve(const gbtNfgSupport &p_support,
-					gStatus &p_status)
+gList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
+					       gStatus &p_status)
 {
   const Nfg &nfg = p_support.Game();
   gList<MixedSolution> solutions;

@@ -27,6 +27,8 @@
 #ifndef DLNFGQRE_H
 #define DLNFGQRE_H
 
+#include "game/nfstrat.h"
+
 class dialogNfgQre : public wxDialog {
 private:
   wxRadioBox *m_solveUsing;

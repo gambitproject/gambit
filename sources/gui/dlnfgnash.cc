@@ -33,12 +33,12 @@
 
 #include "base/gnullstatus.h"
 #include "nash/nfgpure.h"
-#include "nash/enum.h"
-#include "nash/lemke.h"
-#include "nash/nfgcsum.h"
-#include "nash/nliap.h"
+#include "nash/nfgmixed.h"
+#include "nash/nfglcp.h"
+#include "nash/nfglp.h"
+#include "nash/nfgliap.h"
 #include "nash/nfgalleq.h"
-#include "nash/nfgqre.h"
+#include "nash/nfglogit.h"
 #include "nash/simpdiv.h"
 #include "nash/yamamoto.h"
 
@@ -49,14 +49,14 @@ class panelNfgNashAlgorithm : public wxPanel {
 public:
   panelNfgNashAlgorithm(wxWindow *p_parent) : wxPanel(p_parent, -1) { }
 
-  virtual nfgNashAlgorithm *GetAlgorithm(void) const = 0;
+  virtual gbtNfgNashAlgorithm *GetAlgorithm(void) const = 0;
 };
 
 //========================================================================
 //                         class nfgOneNash
 //========================================================================
 
-class nfgOneNash : public nfgNashAlgorithm {
+class nfgOneNash : public gbtNfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "OneNash"; }
   gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
@@ -78,11 +78,11 @@ gList<MixedSolution> nfgOneNash::Solve(const gbtNfgSupport &p_support,
 
     if (p_support.Game().NumPlayers() == 2) {
       if (IsConstSum(p_support.Game())) {
-	nfgLp<double> algorithm;
+	gbtNfgNashLp<double> algorithm;
 	return algorithm.Solve(support, p_status);
       }
       else {
-	nfgLcp<double> algorithm;
+	gbtNfgNashLcp<double> algorithm;
 	algorithm.SetStopAfter(1);
 	return algorithm.Solve(support, p_status);
       }
@@ -105,7 +105,7 @@ class panelNfgOneNash : public panelNfgNashAlgorithm {
 public:
   panelNfgOneNash(wxWindow *);
 
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelNfgOneNash::panelNfgOneNash(wxWindow *p_parent)
@@ -134,7 +134,7 @@ panelNfgOneNash::panelNfgOneNash(wxWindow *p_parent)
   Show(false);
 }
 
-nfgNashAlgorithm *panelNfgOneNash::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *panelNfgOneNash::GetAlgorithm(void) const
 {
   return new nfgOneNash;
 }
@@ -143,7 +143,7 @@ nfgNashAlgorithm *panelNfgOneNash::GetAlgorithm(void) const
 //                         class nfgTwoNash
 //========================================================================
 
-class nfgTwoNash : public nfgNashAlgorithm {
+class nfgTwoNash : public gbtNfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "TwoNash"; }
   gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
@@ -175,7 +175,7 @@ gList<MixedSolution> nfgTwoNash::Solve(const gbtNfgSupport &p_support,
     }
 
     if (p_support.Game().NumPlayers() == 2) {
-      nfgEnumMixed<double> algorithm;
+      gbtNfgNashEnumMixed<double> algorithm;
       algorithm.SetStopAfter(2);
       return algorithm.Solve(support, p_status);
     }
@@ -198,7 +198,7 @@ class panelNfgTwoNash : public panelNfgNashAlgorithm {
 public:
   panelNfgTwoNash(wxWindow *);
 
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelNfgTwoNash::panelNfgTwoNash(wxWindow *p_parent)
@@ -227,7 +227,7 @@ panelNfgTwoNash::panelNfgTwoNash(wxWindow *p_parent)
   Show(false);
 }
 
-nfgNashAlgorithm *panelNfgTwoNash::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *panelNfgTwoNash::GetAlgorithm(void) const
 {
   return new nfgTwoNash;
 }
@@ -236,7 +236,7 @@ nfgNashAlgorithm *panelNfgTwoNash::GetAlgorithm(void) const
 //                         class nfgAllNash
 //========================================================================
 
-class nfgAllNash : public nfgNashAlgorithm {
+class nfgAllNash : public gbtNfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "AllNash"; }
   gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
@@ -268,7 +268,7 @@ gList<MixedSolution> nfgAllNash::Solve(const gbtNfgSupport &p_support,
     }
 
     if (p_support.Game().NumPlayers() == 2) {
-      nfgEnumMixed<double> algorithm;
+      gbtNfgNashEnumMixed<double> algorithm;
       algorithm.SetStopAfter(0);
       return algorithm.Solve(support, p_status);
     }
@@ -291,7 +291,7 @@ class panelNfgAllNash : public panelNfgNashAlgorithm {
 public:
   panelNfgAllNash(wxWindow *);
 
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelNfgAllNash::panelNfgAllNash(wxWindow *p_parent)
@@ -319,7 +319,7 @@ panelNfgAllNash::panelNfgAllNash(wxWindow *p_parent)
   Show(false);
 }
 
-nfgNashAlgorithm *panelNfgAllNash::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *panelNfgAllNash::GetAlgorithm(void) const
 {
   return new nfgAllNash;
 }
@@ -328,7 +328,7 @@ nfgNashAlgorithm *panelNfgAllNash::GetAlgorithm(void) const
 //                         class nfgOnePerfect
 //========================================================================
 
-class nfgOnePerfect : public nfgNashAlgorithm {
+class nfgOnePerfect : public gbtNfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "OnePerfect"; }
   gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
@@ -348,7 +348,7 @@ gList<MixedSolution> nfgOnePerfect::Solve(const gbtNfgSupport &p_support,
     /* one round of elimination of weakly dominated strategies */
     gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
 
-    nfgLcp<double> algorithm;
+    gbtNfgNashLcp<double> algorithm;
     algorithm.SetStopAfter(1);
     return algorithm.Solve(support, p_status);
   }
@@ -365,7 +365,7 @@ class panelNfgOnePerfect : public panelNfgNashAlgorithm {
 public:
   panelNfgOnePerfect(wxWindow *);
 
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelNfgOnePerfect::panelNfgOnePerfect(wxWindow *p_parent)
@@ -394,7 +394,7 @@ panelNfgOnePerfect::panelNfgOnePerfect(wxWindow *p_parent)
   Show(false);
 }
 
-nfgNashAlgorithm *panelNfgOnePerfect::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *panelNfgOnePerfect::GetAlgorithm(void) const
 {
   return new nfgOnePerfect;
 }
@@ -403,7 +403,7 @@ nfgNashAlgorithm *panelNfgOnePerfect::GetAlgorithm(void) const
 //                         class nfgTwoPerfect
 //========================================================================
 
-class nfgTwoPerfect : public nfgNashAlgorithm {
+class nfgTwoPerfect : public gbtNfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "TwoPerfect"; }
   gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
@@ -423,7 +423,7 @@ gList<MixedSolution> nfgTwoPerfect::Solve(const gbtNfgSupport &p_support,
     /* one round of elimination of weakly dominated strategies */
     gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
 
-    nfgEnumMixed<double> algorithm;
+    gbtNfgNashEnumMixed<double> algorithm;
     algorithm.SetStopAfter(2);
     return algorithm.Solve(support, p_status);
   }
@@ -440,7 +440,7 @@ class panelNfgTwoPerfect : public panelNfgNashAlgorithm {
 public:
   panelNfgTwoPerfect(wxWindow *);
 
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelNfgTwoPerfect::panelNfgTwoPerfect(wxWindow *p_parent)
@@ -469,7 +469,7 @@ panelNfgTwoPerfect::panelNfgTwoPerfect(wxWindow *p_parent)
   Show(false);
 }
 
-nfgNashAlgorithm *panelNfgTwoPerfect::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *panelNfgTwoPerfect::GetAlgorithm(void) const
 {
   return new nfgTwoPerfect;
 }
@@ -478,7 +478,7 @@ nfgNashAlgorithm *panelNfgTwoPerfect::GetAlgorithm(void) const
 //                         class nfgAllPerfect
 //========================================================================
 
-class nfgAllPerfect : public nfgNashAlgorithm {
+class nfgAllPerfect : public gbtNfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "AllPerfect"; }
   gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
@@ -498,7 +498,7 @@ gList<MixedSolution> nfgAllPerfect::Solve(const gbtNfgSupport &p_support,
     /* one round of elimination of weakly dominated strategies */
     gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
 
-    nfgEnumMixed<double> algorithm;
+    gbtNfgNashEnumMixed<double> algorithm;
     algorithm.SetStopAfter(0);
     return algorithm.Solve(support, p_status);
   }
@@ -515,7 +515,7 @@ class panelNfgAllPerfect : public panelNfgNashAlgorithm {
 public:
   panelNfgAllPerfect(wxWindow *);
 
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelNfgAllPerfect::panelNfgAllPerfect(wxWindow *p_parent)
@@ -544,7 +544,7 @@ panelNfgAllPerfect::panelNfgAllPerfect(wxWindow *p_parent)
   Show(false);
 }
 
-nfgNashAlgorithm *panelNfgAllPerfect::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *panelNfgAllPerfect::GetAlgorithm(void) const
 {
   return new nfgAllPerfect;
 }
@@ -564,7 +564,7 @@ private:
 public:
   panelNfgEnumPure(wxWindow *);
 
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
@@ -616,9 +616,9 @@ void panelNfgEnumPure::OnFindAll(wxCommandEvent &)
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
-nfgNashAlgorithm *panelNfgEnumPure::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *panelNfgEnumPure::GetAlgorithm(void) const
 {
-  nfgEnumPure *algorithm = new nfgEnumPure;
+  gbtNfgNashEnumPure *algorithm = new gbtNfgNashEnumPure;
   algorithm->SetStopAfter((m_findAll->GetValue()) ?
 			  0 : m_stopAfter->GetValue());
   return algorithm;
@@ -640,7 +640,7 @@ private:
 public:
   panelNfgEnumMixed(wxWindow *);
 
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
@@ -699,16 +699,16 @@ void panelNfgEnumMixed::OnFindAll(wxCommandEvent &)
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
-nfgNashAlgorithm *panelNfgEnumMixed::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *panelNfgEnumMixed::GetAlgorithm(void) const
 {
   if (m_precision->GetSelection() == 0) {
-    nfgEnumMixed<double> *algorithm = new nfgEnumMixed<double>;
+    gbtNfgNashEnumMixed<double> *algorithm = new gbtNfgNashEnumMixed<double>;
     algorithm->SetStopAfter((m_findAll->GetValue()) ?
 			    0 : m_stopAfter->GetValue());
     return algorithm;
   }
   else {
-    nfgEnumMixed<gRational> *algorithm = new nfgEnumMixed<gRational>;
+    gbtNfgNashEnumMixed<gRational> *algorithm = new gbtNfgNashEnumMixed<gRational>;
     algorithm->SetStopAfter((m_findAll->GetValue()) ?
 			    0 : m_stopAfter->GetValue());
     return algorithm;
@@ -735,7 +735,7 @@ private:
 public:
   panelNfgLcp(wxWindow *);
 
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
@@ -827,10 +827,10 @@ void panelNfgLcp::OnLimitDepth(wxCommandEvent &)
   m_maxDepth->Enable(m_limitDepth->GetValue());
 }
 
-nfgNashAlgorithm *panelNfgLcp::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *panelNfgLcp::GetAlgorithm(void) const
 {
   if (m_precision->GetSelection() == 0) {
-    nfgLcp<double> *algorithm = new nfgLcp<double>;
+    gbtNfgNashLcp<double> *algorithm = new gbtNfgNashLcp<double>;
     algorithm->SetStopAfter((m_findAll->GetValue()) ?
 			    0 : m_stopAfter->GetValue());
     algorithm->SetMaxDepth((m_limitDepth->GetValue()) ?
@@ -838,7 +838,7 @@ nfgNashAlgorithm *panelNfgLcp::GetAlgorithm(void) const
     return algorithm;
   }
   else {
-    nfgLcp<gRational> *algorithm = new nfgLcp<gRational>;
+    gbtNfgNashLcp<gRational> *algorithm = new gbtNfgNashLcp<gRational>;
     algorithm->SetStopAfter((m_findAll->GetValue()) ?
 			    0 : m_stopAfter->GetValue());
     algorithm->SetMaxDepth((m_limitDepth->GetValue()) ?
@@ -863,7 +863,7 @@ private:
 public:
   panelNfgLp(wxWindow *);
 
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
@@ -925,14 +925,14 @@ void panelNfgLp::OnFindAll(wxCommandEvent &)
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
-nfgNashAlgorithm *panelNfgLp::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *panelNfgLp::GetAlgorithm(void) const
 {
   if (m_precision->GetSelection() == 0) {
-    nfgLp<double> *algorithm = new nfgLp<double>;
+    gbtNfgNashLp<double> *algorithm = new gbtNfgNashLp<double>;
     return algorithm;
   }
   else {
-    nfgLp<gRational> *algorithm = new nfgLp<gRational>;
+    gbtNfgNashLp<gRational> *algorithm = new gbtNfgNashLp<gRational>;
     return algorithm;
   }
 }
@@ -953,7 +953,7 @@ private:
 public:
   panelNfgLiap(wxWindow *);
 
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
@@ -1029,9 +1029,9 @@ void panelNfgLiap::OnFindAll(wxCommandEvent &)
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
-nfgNashAlgorithm *panelNfgLiap::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *panelNfgLiap::GetAlgorithm(void) const
 {
-  nfgLiap *algorithm = new nfgLiap;
+  gbtNfgNashLiap *algorithm = new gbtNfgNashLiap;
   algorithm->SetStopAfter((m_findAll->GetValue()) ?
 			  0 : m_stopAfter->GetValue());
   algorithm->SetNumTries(m_numTries->GetValue());
@@ -1054,7 +1054,7 @@ private:
 public:
   panelNfgPolEnum(wxWindow *);
 
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
@@ -1106,7 +1106,7 @@ void panelNfgPolEnum::OnFindAll(wxCommandEvent &)
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
-nfgNashAlgorithm *panelNfgPolEnum::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *panelNfgPolEnum::GetAlgorithm(void) const
 {
   nfgPolEnum *algorithm = new nfgPolEnum;
   algorithm->SetStopAfter((m_findAll->GetValue()) ?
@@ -1122,7 +1122,7 @@ class panelNfgQre : public panelNfgNashAlgorithm {
 public:
   panelNfgQre(wxWindow *);
 
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelNfgQre::panelNfgQre(wxWindow *p_parent)
@@ -1152,9 +1152,9 @@ panelNfgQre::panelNfgQre(wxWindow *p_parent)
   Show(false);
 }
 
-nfgNashAlgorithm *panelNfgQre::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *panelNfgQre::GetAlgorithm(void) const
 {
-  nfgQre *algorithm = new nfgQre;
+  gbtNfgNashLogit *algorithm = new gbtNfgNashLogit;
   algorithm->SetFullGraph(false);
   algorithm->SetMaxLambda(1000000000);
   return algorithm;
@@ -1179,7 +1179,7 @@ private:
 public:
   panelNfgSimpdiv(wxWindow *);
 
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
@@ -1251,7 +1251,7 @@ void panelNfgSimpdiv::OnUseLeash(wxCommandEvent &)
   m_leashLength->Enable(m_useLeash->GetValue());
 }
 
-nfgNashAlgorithm *panelNfgSimpdiv::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *panelNfgSimpdiv::GetAlgorithm(void) const
 {
   if (m_precision->GetSelection() == 0) {
     nfgSimpdiv<double> *algorithm = new nfgSimpdiv<double>;
@@ -1277,7 +1277,7 @@ class panelNfgYamamoto : public panelNfgNashAlgorithm {
 public:
   panelNfgYamamoto(wxWindow *);
 
-  nfgNashAlgorithm *GetAlgorithm(void) const;
+  gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelNfgYamamoto::panelNfgYamamoto(wxWindow *p_parent)
@@ -1299,7 +1299,7 @@ panelNfgYamamoto::panelNfgYamamoto(wxWindow *p_parent)
   Show(false);
 }
 
-nfgNashAlgorithm *panelNfgYamamoto::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *panelNfgYamamoto::GetAlgorithm(void) const
 {
   return new nfgYamamoto;
 }
@@ -1454,7 +1454,7 @@ void dialogNfgNash::OnItemCollapsing(wxTreeEvent &p_event)
   p_event.Veto();
 }
 
-nfgNashAlgorithm *dialogNfgNash::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *dialogNfgNash::GetAlgorithm(void) const
 {
   if (m_algorithms(m_algorithmTree->GetSelection())) {
     return m_algorithms(m_algorithmTree->GetSelection())->GetAlgorithm();

@@ -26,16 +26,16 @@ libnash_a_SOURCES = \
 	efgpoly.cc \
 	efgpure.cc \
 	efgsubsolve.cc \
-	enum.cc \
-	lemke.cc \
 	lhtab.cc \
 	mixedsol.cc \
 	nfgalleq.cc \
-	nfgcsum.cc \
+	nfglcp.cc \
+	nfgliap.cc \
+	nfglogit.cc \
+	nfglp.cc \
+	nfgmixed.cc \
 	nfgpure.cc \
-	nfgqre.cc \
 	nfgqregrid.cc \
-	nliap.cc \
 	polenum.cc \
 	simpdiv.cc
 
