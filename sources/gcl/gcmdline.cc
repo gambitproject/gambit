@@ -155,7 +155,7 @@ void gCmdLineInput::GetCmdExec( void )
   int historyPos = m_History.Length() + 1;
 
   gStandardOutput gout;
-  gout << cmdBuf;
+  gout << (const char *) cmdBuf;
 
   for( ; ; ) { // infinite loop
     c = GetNextChar();
@@ -221,7 +221,7 @@ void gCmdLineInput::GetCmdExec( void )
 #ifdef USE_CR
 	  gout << '\r';
 #endif
-	  gout << cmdBuf;
+	  gout << (const char *) cmdBuf;
 	}
 	else // can't go up, beep
 	  gout << '\a';
@@ -260,7 +260,7 @@ void gCmdLineInput::GetCmdExec( void )
 #ifdef USE_CR
 	  gout << '\r';
 #endif
-	  gout << cmdBuf;
+	  gout << (const char *) cmdBuf;
 	}
 	else // can't go up, beep
 	  gout << '\a';
@@ -272,7 +272,7 @@ void gCmdLineInput::GetCmdExec( void )
 	  cmdBuf.Remove( curPos );
 
 	  // print the entire string after the current cursor position
-	  gout << cmdBuf.Right( cmdBuf.Length() - curPos );
+	  gout << (const char *) cmdBuf.Right(cmdBuf.Length() - curPos);
 	  gout << ' '; // this to erase the last character
 
 	  // reposition the cursor
@@ -290,7 +290,7 @@ void gCmdLineInput::GetCmdExec( void )
     else if( c == 'R' - 'A' + 1 ) // ^R, refreshes the line
     {
       gout << "^R\n";
-      gout << cmdBuf;
+      gout << (const char *) cmdBuf;
       curPos = cmdBuf.Length();
     }
     else if( c == '\b' || c == 127 ) // backspace
@@ -302,7 +302,7 @@ void gCmdLineInput::GetCmdExec( void )
 
 	// print the entire string after the current cursor position
 	gout << '\b';
-	gout << cmdBuf.Right( cmdBuf.Length() - curPos );
+	gout << (const char *) cmdBuf.Right( cmdBuf.Length() - curPos );
 	gout << ' '; // this to erase the last character
 
 	// reposition the cursor
@@ -316,7 +316,7 @@ void gCmdLineInput::GetCmdExec( void )
       ++curPos;
       
       // print the entire string after the current cursor position
-      gout << cmdBuf.Right( cmdBuf.Length() - curPos + 1 );
+      gout << (const char *) cmdBuf.Right(cmdBuf.Length() - curPos + 1);
       
       // reposition the cursor
       for( i = 0; i < cmdBuf.Length() - curPos; ++i )
