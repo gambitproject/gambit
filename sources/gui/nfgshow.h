@@ -25,6 +25,7 @@ const int idNFG_SOLUTION_LIST = 1900;
 
 class NfgNavigateWindow;
 class NfgOutcomeWindow;
+class NfgSupportWindow;
 class NfgProfileList;
 class NfgTable;
 class dialogNfgSupportInspect;
@@ -41,6 +42,7 @@ private:
   wxSashWindow *m_solutionSashWindow, *m_infoSashWindow;
   NfgNavigateWindow *m_navigateWindow;
   NfgOutcomeWindow *m_outcomeWindow;
+  NfgSupportWindow *m_supportWindow;
 
   gList<NFSupport *> m_supports;
   NFSupport *m_currentSupport;
@@ -75,6 +77,7 @@ private:
   void OnViewProfiles(wxCommandEvent &);
   void OnViewNavigation(wxCommandEvent &);
   void OnViewOutcomes(wxCommandEvent &);
+  void OnViewSupports(wxCommandEvent &);
   void OnViewDominance(wxCommandEvent &);
   void OnViewProbabilities(wxCommandEvent &);
   void OnViewValues(wxCommandEvent &);
@@ -149,6 +152,12 @@ public:
   gArray<int> GetProfile(void) const;
 
   void OnOutcomesEdited(void);
+
+  // Currently used support
+  NFSupport *GetSupport(void) { return m_currentSupport; }
+  const gList<NFSupport *> &Supports(void) const { return m_supports; }
+  void SetSupportNumber(int p_number);
+  void OnSupportsEdited(void);
 
   DECLARE_EVENT_TABLE()
 };

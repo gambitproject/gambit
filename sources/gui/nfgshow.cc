@@ -21,6 +21,7 @@
 #include "nfgprofile.h"
 #include "nfgnavigate.h"
 #include "nfgoutcome.h"
+#include "nfgsupport.h"
 #include "mixededit.h"
 #include "nfgconst.h"
 
@@ -75,6 +76,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_VIEW_PROFILES, NfgShow::OnViewProfiles)
   EVT_MENU(NFG_VIEW_NAVIGATION, NfgShow::OnViewNavigation)
   EVT_MENU(NFG_VIEW_OUTCOMES, NfgShow::OnViewOutcomes)
+  EVT_MENU(NFG_VIEW_SUPPORTS, NfgShow::OnViewSupports)
   EVT_MENU(NFG_VIEW_DOMINANCE, NfgShow::OnViewDominance)
   EVT_MENU(NFG_VIEW_PROBABILITIES, NfgShow::OnViewProbabilities)
   EVT_MENU(NFG_VIEW_VALUES, NfgShow::OnViewValues)
@@ -128,7 +130,7 @@ NfgShow::NfgShow(Nfg &p_nfg, GambitFrame *p_parent)
     m_parent(p_parent), m_nfg(p_nfg),
     m_table(0), m_solutionTable(0),
     m_solutionSashWindow(0), m_infoSashWindow(0),
-    m_navigateWindow(0), m_outcomeWindow(0)
+    m_navigateWindow(0), m_outcomeWindow(0), m_supportWindow(0)
 {
 #ifdef __WXMSW__
   SetIcon(wxIcon("nfg_icn"));
@@ -185,6 +187,11 @@ NfgShow::NfgShow(Nfg &p_nfg, GambitFrame *p_parent)
   m_outcomeWindow->SetSize(200, 200);
   m_infoNotebook->AddPage(m_outcomeWindow, "Outcomes");
 
+  m_supportWindow = new NfgSupportWindow(this, m_infoNotebook);
+  m_supportWindow->SetSize(200, 200);
+  m_infoNotebook->AddPage(m_supportWindow, "Supports");
+  m_infoNotebook->SetSelection(0);
+
   m_table = new NfgTable(m_nfg, this);
   m_table->SetSize(0, 0, 200, 200);
 
@@ -219,8 +226,10 @@ void NfgShow::AddSolution(const MixedSolution &p_profile, bool p_map)
 void NfgShow::ChangeSolution(int sol)
 {
   m_currentSolution = sol;
-    
-  m_table->SetSolution((*m_solutionTable)[m_currentSolution]);
+
+  if (sol > 0) {
+    m_table->SetSolution((*m_solutionTable)[m_currentSolution]);
+  }
   if (m_solutionTable) {
     m_solutionTable->UpdateValues();
   }
@@ -737,6 +746,29 @@ void NfgShow::OnViewOutcomes(wxCommandEvent &)
   AdjustSizes();
 }
 
+void NfgShow::OnViewSupports(wxCommandEvent &)
+{
+  if (m_infoSashWindow->IsShown() && m_infoNotebook->GetSelection() != 2) {
+    m_infoNotebook->SetSelection(2);
+    m_navigateWindow->Show(true);
+    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, false);
+    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, false);
+    GetMenuBar()->Check(NFG_VIEW_SUPPORTS, true);
+  }
+  else if (m_infoSashWindow->IsShown()) {
+    m_infoSashWindow->Show(false);
+    GetMenuBar()->Check(NFG_VIEW_SUPPORTS, false);
+  }
+  else {
+    m_infoSashWindow->Show(true);
+    m_infoNotebook->SetSelection(2);
+    GetMenuBar()->Check(NFG_VIEW_SUPPORTS, true);
+  }
+
+  AdjustSizes();
+}
+
+
 void NfgShow::OnViewDominance(wxCommandEvent &)
 {
   m_table->ToggleDominance();
@@ -890,10 +922,12 @@ void NfgShow::OnToolsSupportUndominated(wxCommandEvent &)
 
     if (m_currentSupport != sup) {
       m_currentSupport = m_supports[m_supports.Length()];
-    }
-    else if (!m_table->ShowDominance()) {
-      m_table->ToggleDominance();
-      GetMenuBar()->Check(NFG_VIEW_DOMINANCE, true);
+      if (!m_table->ShowDominance()) {
+	m_table->ToggleDominance();
+	GetMenuBar()->Check(NFG_VIEW_DOMINANCE, true);
+      }
+      OnSupportsEdited();
+      UpdateMenus();
     }
   }
 }
@@ -910,8 +944,8 @@ void NfgShow::OnToolsSupportNew(wxCommandEvent &)
       support->SetName(dialog.Name());
       m_supports.Append(support);
 
-      ChangeSolution(0);
       m_currentSupport = support;
+      OnSupportsEdited();
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), this);
@@ -927,7 +961,7 @@ void NfgShow::OnToolsSupportEdit(wxCommandEvent &)
     try {
       *m_currentSupport = dialog.Support();
       m_currentSupport->SetName(dialog.Name());
-      ChangeSolution(0);
+      OnSupportsEdited();
       m_table->Refresh();
     }
     catch (gException &E) {
@@ -948,8 +982,8 @@ void NfgShow::OnToolsSupportDelete(wxCommandEvent &)
       delete m_supports.Remove(dialog.Selected());
       if (!m_supports.Find(m_currentSupport)) {
 	m_currentSupport = m_supports[1];
-	ChangeSolution(0);
       }
+      OnSupportsEdited();
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), this);
@@ -965,6 +999,7 @@ void NfgShow::OnToolsSupportSelectFromList(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     try {
       m_currentSupport = m_supports[dialog.Selected()];
+      OnSupportsEdited();
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), this);
@@ -981,6 +1016,7 @@ void NfgShow::OnToolsSupportSelectPrevious(wxCommandEvent &)
   else {
     m_currentSupport = m_supports[index - 1];
   }
+  OnSupportsEdited();
 }
 
 void NfgShow::OnToolsSupportSelectNext(wxCommandEvent &)
@@ -992,6 +1028,7 @@ void NfgShow::OnToolsSupportSelectNext(wxCommandEvent &)
   else {
     m_currentSupport = m_supports[index + 1];
   }
+  OnSupportsEdited();
 }
 
 //----------------------------------------------------------------------
@@ -1578,6 +1615,20 @@ void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
 const gList<MixedSolution> &NfgShow::Solutions(void) const
 {
   return *m_solutionTable;
+}
+
+void NfgShow::SetSupportNumber(int p_number)
+{
+  if (p_number >= 1 && p_number <= m_supports.Length()) {
+    m_currentSupport = m_supports[p_number];
+    OnSupportsEdited();
+  }
+}
+
+void NfgShow::OnSupportsEdited(void)
+{
+  m_table->SetSupport(*m_currentSupport);
+  m_supportWindow->UpdateValues();
 }
 
 #include "base/glist.imp"
