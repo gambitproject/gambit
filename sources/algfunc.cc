@@ -739,6 +739,61 @@ static Portion *GSM_Lp_Efg(Portion **param)
   }
 }
 
+#ifndef MINI_POLY
+
+//------------------
+// PolEnumSolve
+//------------------
+
+#include "polenum.h"
+
+static Portion *GSM_PolEnum_Nfg(Portion **param)
+{
+  NFSupport* S = ((NfSupportPortion*) param[0])->Value();
+
+  PolEnumParams params;
+  params.stopAfter = ((IntPortion *) param[1])->Value();
+  params.precision = ((PrecisionPortion *) param[2])->Value();
+  params.tracefile = &((OutputPortion *) param[5])->Value();
+  params.trace = ((IntPortion *) param[6])->Value();
+  
+  gArray<gNumber> values(S->Game().Parameters()->Dmnsn());
+  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+  gList<MixedSolution> solutions;
+  double time; 
+  PolEnum(*S, params, values, solutions,
+       ((IntPortion *) param[3])->Value(), time);
+  ((NumberPortion *) param[4])->Value() = time;
+  return new Mixed_ListPortion(solutions);
+}
+
+#include "polensub.h"
+
+static Portion *GSM_PolEnum_Efg(Portion **param)
+{
+  EFSupport &support = *((EfSupportPortion *) param[0])->Value();
+
+  if (!((BoolPortion *) param[1])->Value())
+    return new ErrorPortion("algorithm not implemented for extensive forms");
+
+  PolEnumParams params;
+  params.stopAfter = ((IntPortion *) param[2])->Value();
+  params.precision = ((PrecisionPortion *) param[3])->Value();
+  params.tracefile = &((OutputPortion *) param[6])->Value();
+  params.trace = ((IntPortion *) param[7])->Value();
+
+  gArray<gNumber> values(support.Game().Parameters()->Dmnsn());
+  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+  double time;
+  gList<BehavSolution> solutions;
+  PolEnum(support, params, values, solutions,
+       ((IntPortion *) param[4])->Value(), time);
+  ((NumberPortion *) param[5])->Value() = time;
+
+  return new Behav_ListPortion(solutions);
+}
+
+#endif // ! MINI_POLY
 
 //---------
 // Nfg
@@ -1256,7 +1311,47 @@ void Init_algfunc(GSM *gsm)
 					    new NumberPortion(0), BYREF));
   gsm->AddFunction(FuncObj);
 
+#ifndef MINI_POLY
 
+  FuncObj = new FuncDescObj("PolEnumSolve", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_PolEnum_Nfg, 
+				       PortionSpec(porMIXED, 1), 7));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("stopAfter", porINTEGER,
+					    new IntPortion(0)));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("precision", porPRECISION,
+              new PrecisionPortion(precDOUBLE)));
+  FuncObj->SetParamInfo(0, 3, ParamInfoType("nEvals", porINTEGER,
+					    new IntPortion(0), BYREF));
+  FuncObj->SetParamInfo(0, 4, ParamInfoType("time", porNUMBER,
+					    new NumberPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(0, 5, ParamInfoType("traceFile", porOUTPUT,
+					    new OutputPortion(gnull), 
+					    BYREF));
+  FuncObj->SetParamInfo(0, 6, ParamInfoType("traceLevel", porINTEGER,
+					    new IntPortion(0)));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_PolEnum_Efg, 
+				       PortionSpec(porBEHAV, 1), 8));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("asNfg", porBOOL,
+					    new BoolPortion(false)));
+  FuncObj->SetParamInfo(1, 2, ParamInfoType("stopAfter", porINTEGER,
+					    new IntPortion(0)));
+  FuncObj->SetParamInfo(1, 3, ParamInfoType("precision", porPRECISION,
+              new PrecisionPortion(precDOUBLE)));
+  FuncObj->SetParamInfo(1, 4, ParamInfoType("nEvalss", porINTEGER,
+					    new IntPortion(0), BYREF));
+  FuncObj->SetParamInfo(1, 5, ParamInfoType("time", porNUMBER,
+					    new NumberPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(1, 6, ParamInfoType("traceFile", porOUTPUT,
+					    new OutputPortion(gnull), 
+					    BYREF));
+  FuncObj->SetParamInfo(1, 7, ParamInfoType("traceLevel", porINTEGER,
+					    new IntPortion(0)));
+  gsm->AddFunction(FuncObj);
+
+#endif // ! MINI_POLY
 
 
   FuncObj = new FuncDescObj("Payoff", 2);
