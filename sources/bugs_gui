@@ -272,21 +272,6 @@ in the GUI as well though.)
 
 //------------------------------
 
-Bug D32: Sort/Filter does not work for Normal form solutions.  
-
-None of the Sort/Filter functionality seems to work on the normal form
-solution window.  All of the sort/Filter capabilities works
-correctly on the Extensive form solution window.  The Normal form
-functionality should match this.
-
-Also, double clicking on the column heading in the solution window
-does not sort the solutions by that column.  Also, the default
-ordering of solution IDs is opposite of numbering in Extensive form
-solution window.  The numbering in Extensive form solution window is
-preferred ordering, since newly computed solutions are visible.
-
-//------------------------------
-
 Bug D33: Incorrect handling of games of imperfect recall.  
 
 On Myerson.efg, EnumPure finds 2 solutions that it claims are Nash.
