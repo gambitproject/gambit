@@ -1259,7 +1259,7 @@ bool GSM::LessThan (void)
   if(result)
   { delete p2; delete p1; _Push(new BoolValPortion(b)); }
   else
-  { _Push(p1); _Push(p2); result = _BinaryOperation("LessEqual"); }
+  { _Push(p1); _Push(p2); result = _BinaryOperation("Less"); }
   return result;
 }
 
