@@ -374,7 +374,7 @@ Portion *GSM_SetChanceProbs(Portion **param)
   if ((s->BelongsTo()->Type() == DOUBLE && p->DataType() != porFLOAT) ||
       (s->BelongsTo()->Type() == RATIONAL && p->DataType() != porRATIONAL))
     return new ErrorPortion("Probability list does not match game type\n");
-  if (p->Length() != s->BelongsTo()->NumPlayers())  
+  if (p->Length() != s->NumActions())  
     return new ErrorPortion("Wrong number of probabilities\n");
 
   int i;
