@@ -118,6 +118,13 @@ template <class T> Infoset *ExtForm<T>::CreateInfoset(Player *p, int br)
   return CreateInfoset(p->infosets.Length() + 1, p, br);
 }
 
+template <class T> Outcome *ExtForm<T>::CreateOutcomeByIndex(int index)
+{
+  OutcomeVector<T> *ret = NewOutcome();
+  ret->number = index;
+  return ret;
+}
+
 //------------------------------------------------------------------------
 //                 ExtForm<T>: Operations on outcomes
 //------------------------------------------------------------------------

@@ -17,6 +17,7 @@ class Node;
 class Action;
 
 class BaseExtForm     {
+  friend class EfgFileReader;
   protected:
     gString title;
     gBlock<Player *> players;
@@ -43,6 +44,13 @@ class BaseExtForm     {
     void ScrapNode(Node *);
     void ScrapInfoset(Infoset *);
     void ScrapOutcome(Outcome *);
+
+// These are auxiliary functions used by the .efg file reader code
+    Infoset *GetInfosetByIndex(Player *p, int index) const;
+    Infoset *CreateInfosetByIndex(Player *p, int index, int br);
+    Outcome *GetOutcomeByIndex(int index) const;
+    virtual Outcome *CreateOutcomeByIndex(int index) = 0;
+    void Reindex(void);
 
   public:
        //# DESTRUCTOR
@@ -115,6 +123,7 @@ template <class T> class ExtForm : public BaseExtForm   {
 
     Infoset *CreateInfoset(int n, Player *pl, int br);
     Node *CreateNode(Node *parent);
+    Outcome *CreateOutcomeByIndex(int index);
 
     // this is for use with the copy constructor
     void CopySubtree(Node *, Node *);

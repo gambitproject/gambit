@@ -21,11 +21,6 @@ class gArray<gRational>;
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-#include "glist.imp"
-
-TEMPLATE class gList<Node *>;
-TEMPLATE class gNode<Node *>;
-
 #include "garray.imp"
 #include "gblock.imp"
 
@@ -47,7 +42,6 @@ TEMPLATE class gBlock<Outcome *>;
 #pragma -Jgx
 
 #include "extform.h"
-#include "gconvert.h"
 #include <assert.h>
 
 Player::~Player()
@@ -77,7 +71,7 @@ BaseExtForm::BaseExtForm(void) : title("UNTITLED"), chance(new Player(this, 0))
 { }
 
 BaseExtForm::BaseExtForm(const BaseExtForm &E)
-  : title(E.title), chance(new Player(this, 0)), players(E.players.Length())
+  : title(E.title), players(E.players.Length()), chance(new Player(this, 0))
 {
   for (int i = 1; i <= players.Length(); i++)  {
     (players[i] = new Player(this, i))->name = E.players[i]->name;
@@ -129,6 +123,34 @@ void BaseExtForm::ScrapOutcome(Outcome *c)
   dead_outcomes.Append(c);
 }
 
+Infoset *BaseExtForm::GetInfosetByIndex(Player *p, int index) const
+{
+  for (int i = 1; i <= p->infosets.Length(); i++)
+    if (p->infosets[i]->number == index)   return p->infosets[i];
+  return 0;
+}
+
+Outcome *BaseExtForm::GetOutcomeByIndex(int index) const
+{
+  for (int i = 1; i <= outcomes.Length(); i++)
+    if (outcomes[i]->number == index)   return outcomes[i];
+  return 0;
+}
+
+void BaseExtForm::Reindex(void)
+{
+  int i;
+
+  for (i = 1; i <= players.Length(); i++)  {
+    Player *p = players[i];
+    for (int j = 1; j <= p->infosets.Length(); j++)
+      p->infosets[j]->number = j;
+  }
+
+  for (i = 1; i <= outcomes.Length(); i++)
+    outcomes[i]->number = i;
+}
+
 //------------------------------------------------------------------------
 //               BaseExtForm: Title access and manipulation
 //------------------------------------------------------------------------
@@ -158,42 +180,42 @@ void BaseExtForm::DisplayTree(gOutput &f) const
 void BaseExtForm::WriteEfgFile(gOutput &f, Node *n) const
 {
   if (n->children.Length() == 0)   {
-    f << "t \"" << n->name << "\" \"";
+    f << "t \"" << n->name << "\" ";
     if (n->outcome)  {
-      f << n->outcome->name << "\" ";
+      f << n->outcome->number << " \"" << n->outcome->name << "\" ";
       n->outcome->PrintValues(f);
       f << '\n';
     }
     else
-      f << "\"\n";
+      f << "0\n";
   }
   
   else if (n->infoset->player->number)   {
-    f << "p \"" << n->name << "\" \"" << n->infoset->player->name << "\" ";
-    f << '"' << n->infoset->name << "\" ";
+    f << "p \"" << n->name << "\" " << n->infoset->player->number << ' ';
+    f << n->infoset->number << " \"" << n->infoset->name << "\" ";
     n->infoset->PrintActions(f);
-    f << " \"";
+    f << " ";
     if (n->outcome)  {
-      f << n->outcome->name << "\" ";
+      f << n->outcome->number << " \"" << n->outcome->name << "\" ";
       n->outcome->PrintValues(f);
       f << '\n';
     }
     else
-      f << "\"\n";
+      f << "0\n";
   }
   
   else   {    // chance node
     f << "c \"" << n->name << "\" ";
-    f << '"' << n->infoset->name << "\" ";
+    f << n->infoset->number << " \"" << n->infoset->name << "\" ";
     n->infoset->PrintActions(f);
-    f << " \"";
+    f << " ";
     if (n->outcome)  {
-      f << n->outcome->name << "\" ";
+      f << n->outcome->number << " \"" << n->outcome->name << "\" ";
       n->outcome->PrintValues(f);
       f << '\n';
     }
     else
-      f << "\"\n";
+      f << "0\n";
   }
 
   for (int i = 1; i <= n->children.Length(); i++)
@@ -202,7 +224,7 @@ void BaseExtForm::WriteEfgFile(gOutput &f, Node *n) const
 
 void BaseExtForm::WriteEfgFile(gOutput &f) const
 {
-  f << "EFG 1 " << ((Type() == DOUBLE) ? 'D' : 'R');
+  f << "EFG 2 " << ((Type() == DOUBLE) ? 'D' : 'R');
   f << " \"" << title << "\" { ";
   for (int i = 1; i <= players.Length(); i++)
     f << '"' << players[i]->name << "\" ";

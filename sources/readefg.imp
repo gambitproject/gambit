@@ -20,6 +20,7 @@ template <class T> class EfgFile : public EfgFileReader    {
     void SetOutcome(Outcome *, const gList<gRational> &);
     void SetActionProbs(Infoset *, const gList<gRational> &);
     bool CheckActionProbs(Infoset *, const gList<gRational> &);
+    bool CheckOutcome(Outcome *, const gList<gRational> &);
 };
 
 template <class T> EfgFile<T>::EfgFile(gInput &f, ExtForm<T> *& E)
@@ -61,10 +62,18 @@ template <class T> bool EfgFile<T>::CheckActionProbs(Infoset *s,
   return true;
 }
 
+template <class T> bool EfgFile<T>::CheckOutcome(Outcome *c,
+						 const gList<gRational> &p)
+{
+  for (int i = 1; i <= p.Length(); i++)
+    if (((OutcomeVector<T> &) *c)[i] != p[i])   return false;
+  return true;
+}
+
 template <class T> int EfgFile<T>::Parse(void)
 {
   infile.seekp(0);
-  static char *prologue = { "EFG 1 " };
+  static char *prologue = { "EFG 2 " };
   char c;
   for (int i = 0; i < strlen(prologue); i++)   {
     infile.get(c);
