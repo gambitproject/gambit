@@ -102,11 +102,9 @@ NGUI_OBJECTS = nfgshow.o nfgshow1.o nfgsoln.o msolnsf.o nfgoutcd.o
 
 # Gui stuff used in both the normal and extensive forms
 BGUI_SOURCES = wxmisc.cc gambdraw.cc wxio.cc spread.cc spreadim.cc \
-               gambit.cc accels.cc algdlgs.cc wxstatus.cc efgnfgi.cc \
-               paramsd.cc 
+               gambit.cc accels.cc algdlgs.cc wxstatus.cc paramsd.cc 
 BGUI_OBJECTS = wxmisc.o gambdraw.o wxio.o spread.o spreadim.o \
-               gambit.o accels.o algdlgs.o wxstatus.o efgnfgi.o \
-               paramsd.o 
+               gambit.o accels.o algdlgs.o wxstatus.o paramsd.o
 
 # All the code used in the GCL target
 GCL_SOURCES = $(GLIB_SOURCES) $(GAME_SOURCES) $(EALG_SOURCES) $(NALG_SOURCES)\

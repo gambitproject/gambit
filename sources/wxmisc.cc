@@ -405,7 +405,7 @@ dc.SetTextForeground(wxTheColourDatabase->FindColour(old_foreground));
 if (old_font) dc.SetFont(old_font);
 }
 
-gGetTextExtent(wxDC &dc,const gString &s0, float *x, float *y)
+int gGetTextExtent(wxDC &dc,const gString &s0, float *x, float *y)
 {
 int i=0,c;
 float dx,dy;
@@ -537,7 +537,7 @@ public:
 
 gGetTextFrame::gGetTextFrame(const gString s0, wxFrame *frame,int x, int y,
                              const char *title,bool titlebar):
-	wxFrame(frame, title,x,y,GETTEXT_FRAME_WIDTH,GETTEXT_FRAME_HEIGHT,
+	wxFrame(frame,(char *) title,x,y,GETTEXT_FRAME_WIDTH,GETTEXT_FRAME_HEIGHT,
     (titlebar) ? wxDEFAULT_FRAME : wxRESIZE_BORDER)
 {
 d=new gGetTextCanvas(this,s0);
@@ -558,7 +558,7 @@ gString gGetTextFrame::GetString(void) const
 {return d->GetString();}
 
 gGetTextCanvas::gGetTextCanvas(gGetTextFrame *parent_,const gString s0):
-			wxCanvas(parent_),s(s0),parent(parent_)
+			wxCanvas(parent_), parent(parent_), s(s0)
 {
 SetBackground(wxTheBrushList->FindOrCreateBrush("YELLOW",wxSOLID));
 SetFont(wxTheFontList->FindOrCreateFont(12,wxSWISS,wxNORMAL,wxNORMAL));
@@ -566,7 +566,7 @@ GetDC()->SetBackgroundMode(wxTRANSPARENT);
 pos=s.length();
 float h;
 gGetTextExtent(*GetDC(),s,&w,&h);
-parent->SetSize(-1,-1,w*3/2,-1,wxSIZE_USE_EXISTING);
+parent->SetSize(-1,-1,(int)w*3/2,-1,wxSIZE_USE_EXISTING);
 completed=wxRUNNING;
 }
 
@@ -603,7 +603,7 @@ case WXK_BACK:
 	GetSize(&cur_w,&cur_h);
    if (w<cur_w*2/3 && w>GETTEXT_FRAME_WIDTH)
    {
-   	cur_w=w+3*TEXT_OFF;
+   	cur_w=(int)(w+3*TEXT_OFF);
       parent->SetSize(-1,-1,cur_w,-1,wxSIZE_USE_EXISTING);
    }
    else
@@ -620,7 +620,7 @@ default:
 	GetSize(&cur_w,&cur_h);
    if (w>cur_w && cur_w<GETTEXT_FRAME_WIDTH_M)
    {
-   	cur_w=w*3/2+3*TEXT_OFF;
+   	cur_w=(int)(w*3/2+3*TEXT_OFF);
       parent->SetSize(-1,-1,cur_w,-1,wxSIZE_USE_EXISTING);
    }
    else

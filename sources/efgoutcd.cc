@@ -117,8 +117,9 @@ return ret;
 // Constructor
 EfgOutcomeDialogC::EfgOutcomeDialogC(int rows,int cols,Efg &ef_,
            ParameterSetList &params_, TreeWindow *tw_,EfgOutcomeDialog *parent_)
-	  			:SpreadSheet3D(rows,cols,1,"Outcomes [S]",(wxFrame *)tw_->GetParent(),ANY_BUTTON),parent(parent_),ef(ef_),
-				 tw(tw_),params(params_),polyval(params_.PolyVal())
+	  	   :SpreadSheet3D(rows,cols,1,"Outcomes [S]",(wxFrame *)tw_->GetParent(),ANY_BUTTON),
+                    parent(parent_), ef(ef_), params(params_), tw(tw_),
+		    polyval(params_.PolyVal())
 {
 MakeButtons(OK_BUTTON|PRINT_BUTTON|OPTIONS_BUTTON|HELP_BUTTON);
 AddButton("Opt",(wxFunction)settings_func);
@@ -326,7 +327,7 @@ if (outcomes_changed) tw->node_outcome(-1);
 }
 
 
-void EfgOutcomeDialogC::OnDoubleClick(int row,int col,int level,const gString &)
+void EfgOutcomeDialogC::OnDoubleClick(int row,int col,int /*level*/,const gString &)
 {
 static bool busy=false;
 if (busy) return;

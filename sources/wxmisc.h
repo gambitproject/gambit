@@ -152,7 +152,7 @@ Bool	IsDelete(wxKeyEvent &ev);
 #include "gstring.h"
 void gDrawText(wxDC &dc,const gString &s,float x,float y);
 // Calculates the size of the string when parsed as gDrawText
-gGetTextExtent(wxDC &dc,const gString &s0, float *x, float *y);
+void gGetTextExtent(wxDC &dc,const gString &s0, float *x, float *y);
 // Returns just the text portion of a gDrawText formated string
 gString gPlainText(const gString &s);
 gString gGetTextLine(const gString &s0="",wxFrame *parent=0,int x=-1,int y=-1,
