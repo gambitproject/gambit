@@ -55,8 +55,8 @@ template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
 static Portion *GSM_ActionProb(GSM &, Portion **param)
 {
   const BehavSolution *profile = ((BehavPortion *) param[0])->Value();
-  Action* action = ((ActionPortion*) param[1])->Value();
-  Infoset* infoset = action->BelongsTo();
+  gbtEfgAction action = AsEfgAction(param[1]);
+  Infoset* infoset = action.GetInfoset();
   gbtEfgPlayer player = infoset->GetPlayer();
   
   if (player.IsChance()) {
@@ -77,8 +77,8 @@ static Portion *GSM_ActionProb(GSM &, Portion **param)
 static Portion *GSM_ActionValue(GSM &, Portion **param)
 {
   BehavSolution *profile = ((BehavPortion *) param[0])->Value();
-  Action* action = ((ActionPortion*) param[1])->Value();
-  Infoset *infoset = action->BelongsTo();
+  gbtEfgAction action = AsEfgAction(param[1]);
+  Infoset *infoset = action.GetInfoset();
 
   if (infoset->GetPlayer().IsChance())
     return new NullPortion(porNUMBER);
@@ -376,13 +376,13 @@ static Portion *GSM_Regret_Mixed(GSM &, Portion **param)
 static Portion *GSM_Regret_Behav(GSM &, Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
+  gbtEfgAction action = AsEfgAction(param[1]);
 
-  const Action* a = ((ActionPortion*) param[1])->Value();
-
-  if (a->BelongsTo()->IsChanceInfoset())
+  if (action.GetInfoset()->IsChanceInfoset()) {
     return new NullPortion(porNUMBER);
-  
-  return new NumberPortion(P->Regret(a));
+  }
+    
+  return new NumberPortion(P->Regret(action));
 }
 
 //------------
@@ -437,7 +437,7 @@ static Portion *GSM_NfgRegrets_Behav(GSM &, Portion **param)
 static Portion *GSM_SetActionProb(GSM &, Portion **param)
 {
   BehavSolution *P = new BehavSolution(*((BehavPortion *) param[0])->Value());
-  Action *action = ((ActionPortion *) param[1])->Value();
+  gbtEfgAction action = AsEfgAction(param[1]);
   gNumber value = ((NumberPortion *) param[2])->Value();
   
   //  P->Set(action, value);

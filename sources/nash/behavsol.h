@@ -71,11 +71,11 @@ public:
   bool operator!=(const BehavSolution &p_solution) const
     { return !(*this == p_solution); }
 
-  void Set(Action *, const gNumber &);
+  void Set(const gbtEfgAction &, const gNumber &);
   void Set(int, int, int, const gNumber &);
-  const gNumber &operator()(Action *) const;
-  gNumber operator[](Action *) const;
-  gNumber &operator[](Action *);
+  const gNumber &operator()(const gbtEfgAction &) const;
+  gNumber operator[](const gbtEfgAction &) const;
+  gNumber &operator[](const gbtEfgAction &);
 
   BehavSolution &operator+=(const BehavSolution &);
   BehavSolution &operator-=(const BehavSolution &);
@@ -130,11 +130,11 @@ public:
     { return m_profile->GetIsetProb(iset); }
   gNumber IsetValue(const Infoset *iset) const
     { return m_profile->GetIsetValue(iset); }
-  gNumber ActionProb(const Action *act) const
+  gNumber ActionProb(const gbtEfgAction &act) const
     { return m_profile->GetActionProb(act); }
-  gNumber ActionValue(const Action *act) const
+  gNumber ActionValue(const gbtEfgAction &act) const
     { return m_profile->GetActionValue(act); }
-  gNumber Regret(const Action *act) const
+  gNumber Regret(const gbtEfgAction &act) const
     { return m_profile->GetRegret(act); }
 
   // OUTPUT

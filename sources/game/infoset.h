@@ -36,9 +36,38 @@
 #include "efplayer.h"
 
 class Node;
-
 class Lexicon;
 
+struct gbt_efg_action_rep;
+
+class gbtEfgAction {
+friend class efgGame;
+protected:
+  struct gbt_efg_action_rep *rep;
+
+public:
+  gbtEfgAction(void);
+  gbtEfgAction(gbt_efg_action_rep *);
+  gbtEfgAction(const gbtEfgAction &);
+  ~gbtEfgAction();
+
+  gbtEfgAction &operator=(const gbtEfgAction &);
+
+  bool operator==(const gbtEfgAction &) const;
+  bool operator!=(const gbtEfgAction &) const;
+
+  bool IsNull(void) const;
+  int GetId(void) const;
+  Infoset *GetInfoset(void) const;
+  gText GetLabel(void) const;
+  void SetLabel(const gText &);
+
+  bool Precedes(const Node *) const;
+};
+
+gOutput &operator<<(gOutput &, const gbtEfgAction &);
+
+#ifdef UNUSED
 class Action   {
   friend class efgGame;
   friend class BehavProfile<double>;
@@ -55,13 +84,14 @@ class Action   {
     ~Action()   { }
 
   public:
-    const gText &GetName(void) const   { return name; }
-    void SetName(const gText &s)       { name = s; }
+    const gText &GetLabel(void) const   { return name; }
+    void SetLabel(const gText &s)       { name = s; }
 
-    int GetNumber(void) const        { return number; }
-    Infoset *BelongsTo(void) const   { return owner; }
+    int GetId(void) const        { return number; }
+    Infoset *GetInfoset(void) const   { return owner; }
     bool Precedes(const Node *) const;
 };
+#endif  // UNUSED
 
 class Infoset   {
   friend class efgGame;
@@ -75,7 +105,7 @@ class Infoset   {
     int number;
     gText name;
     gbt_efg_player_rep *player;
-    gBlock<Action *> actions;
+    gBlock<gbt_efg_action_rep *> actions;
     gBlock<Node *> members;
     int flag, whichbranch;
     
@@ -93,14 +123,10 @@ class Infoset   {
     void SetName(const gText &s)    { name = s; }
     const gText &GetName(void) const   { return name; }
 
-    virtual Action *InsertAction(int where);
+    virtual gbtEfgAction InsertAction(int where);
     virtual void RemoveAction(int which);
 
-    void SetActionName(int i, const gText &s)
-      { actions[i]->name = s; }
-    const gText &GetActionName(int i) const  { return actions[i]->name; }
-
-    Action *GetAction(int act) const { return actions[act]; }
+    gbtEfgAction GetAction(int act) const;
     int NumActions(void) const   { return actions.Length(); }
 
     Node *GetMember(int m) const { return members[m]; }
@@ -131,7 +157,7 @@ class ChanceInfoset : public Infoset  {
   public:
     bool IsChanceInfoset(void) const { return true; }
 
-    Action *InsertAction(int where);
+    gbtEfgAction InsertAction(int where);
     void RemoveAction(int which);
 
     void SetActionProb(int i, const gNumber &value)  { probs[i] = value; }

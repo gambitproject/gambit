@@ -40,11 +40,11 @@ gText efgDominanceException::Description(void) const
 }
 
 
-bool EFSupport::Dominates(const Action *a, const Action *b,
+bool EFSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
 			  bool strong, const bool conditional) const
 {
-  const Infoset *infoset = a->BelongsTo();
-  if (infoset != b->BelongsTo())
+  const Infoset *infoset = a.GetInfoset();
+  if (infoset != b.GetInfoset())
     throw efgDominanceException
       ("Dominates(..) needs actions in same infoset.\n");
 
@@ -116,10 +116,9 @@ bool EFSupport::Dominates(const Action *a, const Action *b,
 }
 
 bool SomeElementDominates(const EFSupport &S, 
-			  const gArray<Action *> &array,
-			  const Action *a, 
-			  const bool strong,
-			  const bool conditional)
+			  const gArray<gbtEfgAction> &array,
+			  const gbtEfgAction &a,
+			  bool strong, bool conditional)
 {
   for (int i = 1; i <= array.Length(); i++)
     if (array[i] != a)
@@ -129,12 +128,12 @@ bool SomeElementDominates(const EFSupport &S,
   return false;
 }
 
-bool EFSupport::IsDominated(const Action *a, 
+bool EFSupport::IsDominated(const gbtEfgAction &a, 
 			    bool strong, bool conditional) const
 {
-  gArray<Action *> array(NumActions(a->BelongsTo()));
+  gArray<gbtEfgAction> array(NumActions(a.GetInfoset()));
   for (int act = 1; act <= array.Length(); act++) {
-    array[act] = GetAction(a->BelongsTo(), act);
+    array[act] = GetAction(a.GetInfoset(), act);
   }
   return SomeElementDominates(*this,array,a,strong,conditional);
 }
@@ -145,7 +144,7 @@ bool InfosetHasDominatedElement(const EFSupport &S,
 				const bool conditional,
 				const gStatus &/*status*/)
 {
-  gArray<Action *> actions(S.NumActions(infoset));
+  gArray<gbtEfgAction> actions(S.NumActions(infoset));
   for (int i = 1; i <= actions.Length(); i++) {
     actions[i] = S.GetAction(infoset, i);
   }
@@ -185,7 +184,7 @@ bool ElimDominatedInInfoset(const EFSupport &S, EFSupport &T,
     if (is_dominated[k]) action_was_eliminated = true;
     else k++;
   }
-  gArray<Action *> actions(S.NumActions(pl, iset));
+  gArray<gbtEfgAction> actions(S.NumActions(pl, iset));
   for (int act = 1; act <= actions.Length(); act++) {
     actions[act] = S.GetAction(pl, iset, act);
   }

@@ -193,10 +193,10 @@ void EfgContIter::Set(int pl, int iset, int act)
 }
 
 
-void EfgContIter::Set(const Action *a) 
+void EfgContIter::Set(const gbtEfgAction &a)
 {
-  if (a->BelongsTo()->GetPlayer().GetId() != _frozen_pl ||
-      a->BelongsTo()->GetNumber() != _frozen_iset) return;
+  if (a.GetInfoset()->GetPlayer().GetId() != _frozen_pl ||
+      a.GetInfoset()->GetNumber() != _frozen_iset) return;
   _profile.Set(a);
 }
 
@@ -333,7 +333,7 @@ void EfgConditionalContIter::Set(int pl, int iset, int act)
   _profile.Set(_support.GetAction(pl, iset, act));
 }
 
-void EfgConditionalContIter::Set(const Action *a) 
+void EfgConditionalContIter::Set(const gbtEfgAction &a)
 {
   _profile.Set(a);
 }

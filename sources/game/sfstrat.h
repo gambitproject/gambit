@@ -45,20 +45,22 @@ private:
   int number;
   gText name;
   gbtEfgPlayer player;
-  Action *action;
+  gbtEfgAction action;
   const Sequence *parent;
   
-  Sequence(const gbtEfgPlayer &pl, Action *a, const Sequence *p, int n) 
+  Sequence(const gbtEfgPlayer &pl, const gbtEfgAction &a,
+	   const Sequence *p, int n) 
     : number(n), player(pl), action(a), parent(p) { }
   ~Sequence() { }
 public:
   const gText &GetName(void) const   { return name; }
   void SetName(const gText &s)       { name = s; }
   
-  gList<Action *> History(void) const;
+  gList<gbtEfgAction> History(void) const;
   int GetNumber(void) const        { return number; }
-  Action *GetAction(void) const  {return action; }
-  const Infoset *GetInfoset(void) const   { if(action) return action->BelongsTo();return 0; }
+  gbtEfgAction GetAction(void) const  {return action; }
+  const Infoset *GetInfoset(void) const 
+  { if (!action.IsNull()) return action.GetInfoset(); else return 0; }
   gbtEfgPlayer Player(void) const  { return player; }
   const Sequence *Parent(void) const   { return parent; }
   void Dump(gOutput &) const;

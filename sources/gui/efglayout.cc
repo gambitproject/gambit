@@ -54,7 +54,7 @@ NodeEntry::NodeEntry(Node *p_node)
 int NodeEntry::GetChildNumber(void) const
 {
   if (m_node->GetParent()) {
-    return m_node->GetAction()->GetNumber();
+    return m_node->GetAction().GetId();
   }
   else {
     return 0;
@@ -428,7 +428,7 @@ wxString efgTreeLayout::CreateBranchAboveLabel(const NodeEntry *p_entry) const
   case BRANCH_ABOVE_NOTHING:
     return "";
   case BRANCH_ABOVE_LABEL:
-    return (const char *) parent->GetInfoset()->GetActionName(p_entry->GetChildNumber());
+    return (const char *) parent->GetInfoset()->GetAction(p_entry->GetChildNumber()).GetLabel();
   case BRANCH_ABOVE_PROBS:
     return (const char *) m_parent->Parent()->GetActionProb(parent,
 							    p_entry->GetChildNumber());
@@ -448,7 +448,7 @@ wxString efgTreeLayout::CreateBranchBelowLabel(const NodeEntry *p_entry) const
   case BRANCH_BELOW_NOTHING:
     return "";
   case BRANCH_BELOW_LABEL:
-    return (const char *) parent->GetInfoset()->GetActionName(p_entry->GetChildNumber());
+    return (const char *) parent->GetInfoset()->GetAction(p_entry->GetChildNumber()).GetLabel();
   case BRANCH_BELOW_PROBS:
     return (const char *) m_parent->Parent()->GetActionProb(parent,
 							    p_entry->GetChildNumber());

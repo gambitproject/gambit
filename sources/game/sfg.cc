@@ -239,7 +239,7 @@ int Sfg::InfosetRowNumber(int pl, int j) const
 int Sfg::ActionNumber(int pl, int j) const
 {
   if(j==1) return 0;
-  return efsupp.GetIndex((Action *)GetAction(pl,j));
+  return efsupp.GetIndex(GetAction(pl,j));
 }
 
 const Infoset*  Sfg::GetInfoset(int pl, int j) const 
@@ -248,7 +248,7 @@ const Infoset*  Sfg::GetInfoset(int pl, int j) const
   return (*sequences)[pl]->Find(j)->GetInfoset();
 }
 
-const Action* Sfg::GetAction(int pl, int j) const
+gbtEfgAction Sfg::GetAction(int pl, int j) const
 {
   if(j==1) return 0;
   return (*sequences)[pl]->Find(j)->GetAction();

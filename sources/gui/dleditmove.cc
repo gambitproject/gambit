@@ -97,8 +97,8 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, Infoset *p_infoset)
   for (int act = 1; act <= p_infoset->NumActions(); act++) {
     m_actionList->Append((const char *)
 			 (ToText(act) + ": " + 
-			  p_infoset->GetAction(act)->GetName()));
-    m_actionNames.Append(p_infoset->GetAction(act)->GetName());
+			  p_infoset->GetAction(act).GetLabel()));
+    m_actionNames.Append(p_infoset->GetAction(act).GetLabel());
     if (p_infoset->IsChanceInfoset()) {
       m_actionProbs.Append(p_infoset->Game()->GetChanceProbs(p_infoset)[act]);
     }
@@ -172,11 +172,11 @@ void dialogEditMove::OnActionChanged(wxCommandEvent &)
   if (m_infoset->IsChanceInfoset()) {
     m_actionProbs[m_lastSelection+1] = ToNumber(m_actionProb->GetValue().c_str());
   }
-  Action *action = m_actions[m_lastSelection+1];
-  if (action) {
+  gbtEfgAction action = m_actions[m_lastSelection+1];
+  if (!action.IsNull()) {
     m_actionList->SetString(m_lastSelection,
 			    (const char *) 
-			    ((ToText(action->GetNumber()) + ": " +
+			    ((ToText(action.GetId()) + ": " +
 			      m_actionName->GetValue().c_str())));
   }
   else {
@@ -198,10 +198,10 @@ void dialogEditMove::OnAddActionBefore(wxCommandEvent &)
     m_actionProbs[m_lastSelection+1] = 
       ToNumber(m_actionProb->GetValue().c_str());
   }
-  Action *action = m_actions[m_lastSelection+1];
-  if (action) {
+  gbtEfgAction action = m_actions[m_lastSelection+1];
+  if (!action.IsNull()) {
     m_actionList->SetString(m_lastSelection,
-			    (const char *) ((ToText(action->GetNumber()) + ": " +
+			    (const char *) ((ToText(action.GetId()) + ": " +
 					     m_actionName->GetValue().c_str())));
   }
   else {
@@ -235,10 +235,10 @@ void dialogEditMove::OnAddActionAfter(wxCommandEvent &)
     m_actionProbs[m_lastSelection+1] = 
       ToNumber(m_actionProb->GetValue().c_str());
   }
-  Action *action = m_actions[m_lastSelection+1];
-  if (action) {
+  gbtEfgAction action = m_actions[m_lastSelection+1];
+  if (!action.IsNull()) {
     m_actionList->SetString(m_lastSelection,
-			    (const char *) ((ToText(action->GetNumber()) + ": " +
+			    (const char *) ((ToText(action.GetId()) + ": " +
 					     m_actionName->GetValue().c_str())));
   }
   else {

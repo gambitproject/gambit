@@ -37,7 +37,7 @@ private:
   wxChoice *m_supportList;
   wxButton *m_prevButton, *m_nextButton;
   wxTreeCtrl *m_actionTree;
-  gOrdMap<wxTreeItemId, Action *> m_map;
+  gOrdMap<wxTreeItemId, gbtEfgAction> m_map;
   wxMenu *m_menu;
 
   void OnSupportList(wxCommandEvent &);

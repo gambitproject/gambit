@@ -62,15 +62,6 @@ Portion *ArrayToList(const gArray<gNumber> &A)
 }
 
 template<>
-Portion *ArrayToList(const gArray<Action *> &A)
-{
-  ListPortion *ret = new ListPortion;
-  for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new ActionPortion(A[i]));
-  return ret;
-}
-
-template<>
 Portion *ArrayToList(const gArray<Infoset *> &A)
 {
   ListPortion *ret = new ListPortion;

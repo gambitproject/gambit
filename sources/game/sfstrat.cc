@@ -35,12 +35,12 @@
 #include "base/garray.imp"
 #include "base/gblock.imp"
 
-gList<Action *> Sequence::History(void) const 
+gList<gbtEfgAction> Sequence::History(void) const 
 { 
-  gList<Action *> h;
-  Action *a = action;
+  gList<gbtEfgAction> h;
+  gbtEfgAction a = action;
   const Sequence *s = this;
-  while(a) {
+  while (!a.IsNull()) {
     h.Append(a);
     s = s->parent;
     a = s->GetAction();
@@ -51,7 +51,7 @@ gList<Action *> Sequence::History(void) const
 void Sequence::Dump(gOutput &out) const
 {
   int a = 0, p = 0;
-  if(action) a = action->GetNumber();
+  if (!action.IsNull()) a = action.GetId();
   if(parent) p = parent->GetNumber();
   out << "\nPl#: " << player.GetId() << " Seq# " << number << " act# " << a << " parent: " << p;
 }

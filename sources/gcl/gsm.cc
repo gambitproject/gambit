@@ -361,7 +361,7 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
 	((NodePortion *) p1)->SetValue(((NodePortion *) p2)->Value());
 	break;
       case porACTION:
-	((ActionPortion *) p1)->SetValue((Action *)((ActionPortion *) p2)->Value());
+	((ActionPortion *) p1)->SetValue(((ActionPortion *) p2)->Value());
 	break;
       case porNFG:
 	((NfgPortion *) p1)->SetValue(((NfgPortion *) p2)->Value());
@@ -1004,11 +1004,6 @@ void GSM::UnAssignEfgElement( efgGame *game, PortionSpec spec, void* data )
 	    if( ((NodePortion*) varslist[i])->Value() == data )
 	      _RefTableStack->Peek()->Remove( varslist[i] );
 	  }
-	  if( spec.Type & porACTION )
-	  {
-	    if( ((ActionPortion*) varslist[i])->Value() == data )
-	      _RefTableStack->Peek()->Remove( varslist[i] );
-	  }
 	}
       }
       else // varslist[i] is a list
@@ -1081,8 +1076,6 @@ void GSM::UnAssignEfgOutcome(efgGame *game, const gbtEfgOutcome &data)
 
 void GSM::UnAssignEfgInfoset(efgGame * game, Infoset* infoset )
 {
-  for (int i = 1; i <= infoset->NumActions(); i++ )
-    UnAssignEfgElement( game, porACTION, (Action *)infoset->GetAction(i));
   UnAssignEfgElement( game, porINFOSET, infoset );  
 }
 
@@ -1092,9 +1085,6 @@ void GSM::UnAssignEfgSubTree( efgGame * game, Node* node )
   for (int i = 1; i <= node->NumChildren(); i++)  {
     Infoset* infoset = node->GetInfoset();
     if (infoset) {
-      for (int j = 1; j <= infoset->NumActions(); j++) {
-	UnAssignEfgElement(game, porACTION, infoset->GetAction(j));
-      }
       UnAssignEfgElement( game, porINFOSET, infoset );
     }
     UnAssignEfgSubTree( game, node->GetChild( i ) );

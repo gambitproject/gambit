@@ -74,10 +74,9 @@ class Node    {
     bool IsTerminal(void) const { return (children.Length() == 0); }
     bool IsNonterminal(void) const { return !IsTerminal(); }
     gbtEfgPlayer GetPlayer(void) const;
-    Action *GetAction(void) const; // returns null if root node
+    gbtEfgAction GetAction(void) const; // returns null if root node
     Node *GetChild(int i) const    { return children[i]; }
-    Node *GetChild(const Action* a) const    
-    { return children[a->GetNumber()]; }
+    Node *GetChild(const gbtEfgAction &) const; 
     Node *GetParent(void) const    { return parent; }
     Node *GetSubgameRoot(void) const  { return gameroot; }
     Node *NextSibling(void) const;

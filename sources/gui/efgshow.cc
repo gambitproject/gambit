@@ -1238,30 +1238,30 @@ void EfgShow::OnEditMove(wxCommandEvent &)
 
     int insertAt = 1;
     for (int act = 1; act <= dialog.NumActions(); act++) {
-      Action *action = dialog.GetActions()[act];
-      if (action) {
-	action->SetName(dialog.GetActionName(act));
+      gbtEfgAction action = dialog.GetActions()[act];
+      if (!action.IsNull()) {
+	action.SetLabel(dialog.GetActionName(act));
 	if (infoset->IsChanceInfoset()) {
-	  m_efg.SetChanceProb(infoset, action->GetNumber(),
+	  m_efg.SetChanceProb(infoset, action.GetId(),
 			      dialog.GetActionProb(act));
 	}
-	insertAt = dialog.GetActions()[act]->GetNumber() + 1;
+	insertAt = dialog.GetActions()[act].GetId() + 1;
       }
       else if (insertAt > infoset->NumActions()) {
-	Action *newAction = m_efg.InsertAction(infoset);
+	gbtEfgAction newAction = m_efg.InsertAction(infoset);
 	insertAt++;
-	newAction->SetName(dialog.GetActionName(act));
+	newAction.SetLabel(dialog.GetActionName(act));
 	if (infoset->IsChanceInfoset()) {
-	  m_efg.SetChanceProb(infoset, newAction->GetNumber(), 
+	  m_efg.SetChanceProb(infoset, newAction.GetId(), 
 			      dialog.GetActionProb(act));
 	}
       }
       else {
-	Action *newAction = m_efg.InsertAction(infoset,
-					       infoset->GetAction(insertAt++));
-	newAction->SetName(dialog.GetActionName(act));
+	gbtEfgAction newAction =
+	  m_efg.InsertAction(infoset, infoset->GetAction(insertAt++));
+	newAction.SetLabel(dialog.GetActionName(act));
 	if (infoset->IsChanceInfoset()) {
-	  m_efg.SetChanceProb(infoset, newAction->GetNumber(), 
+	  m_efg.SetChanceProb(infoset, newAction.GetId(), 
 			      dialog.GetActionProb(act));
 	}
       }

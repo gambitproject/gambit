@@ -675,28 +675,25 @@ public:
 };
 
 
-
-//----------
+//------------
 // Action
-//----------
-
-class Action;
+//------------
 
 class ActionPortion : public Portion  {
 protected:
-  Action** _Value;
-  bool _ref;
+  gbtEfgAction *m_value;
+  bool m_ref;
 
   static gPool pool;
 
-  ActionPortion(Action *&, bool); 
+  ActionPortion(gbtEfgAction *&, bool);
 
 public:
-  ActionPortion(Action *);
+  ActionPortion(gbtEfgAction);
   virtual ~ActionPortion();
 
-  Action *Value(void) const;
-  void SetValue(Action *);
+  gbtEfgAction Value(void) const;
+  void SetValue(gbtEfgAction);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -710,6 +707,10 @@ public:
   void *operator new(size_t) { return pool.Alloc(); }
   void operator delete(void *p) { pool.Free(p); }
 };
+
+inline gbtEfgAction AsEfgAction(Portion *portion) 
+{ return (dynamic_cast<ActionPortion *>(portion))->Value(); }
+
 
 //---------
 // Mixed

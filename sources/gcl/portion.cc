@@ -1266,54 +1266,55 @@ bool NodePortion::IsReference(void) const
   return _ref;
 }
 
-//----------
+//-----------
 // Action
-//----------
+//-----------
 
 gPool ActionPortion::pool(sizeof(ActionPortion));
 
-ActionPortion::ActionPortion(Action *value)
-  : _Value(new Action *(value)), _ref(false)
+ActionPortion::ActionPortion(gbtEfgAction p_value)
+  : m_value(new gbtEfgAction(p_value)), m_ref(false)
 {
-  SetGame(value->BelongsTo()->Game());
+  SetGame(p_value.GetInfoset()->Game());
 }
 
-ActionPortion::ActionPortion(Action *& value, bool ref)
-  : _Value(&value), _ref(ref)
+ActionPortion::ActionPortion(gbtEfgAction *&p_value, bool p_ref)
+  : m_value(p_value), m_ref(p_ref)
 {
-  if (!_ref) {
-    SetGame(value->BelongsTo()->Game());
+  if (!p_ref) {
+    SetGame(p_value->GetInfoset()->Game());
   }
 }
 
 ActionPortion::~ActionPortion()
 {
-  if (!_ref)   delete _Value;
+  if (!m_ref) {
+    delete m_value;
+  }
 }
 
-Action *ActionPortion::Value(void) const
-{ return *_Value; }
+gbtEfgAction ActionPortion::Value(void) const
+{ return *m_value; }
 
-void ActionPortion::SetValue(Action *value)
+void ActionPortion::SetValue(gbtEfgAction p_value)
 {
-  if (_ref) {
-    ((ActionPortion *) Original())->SetValue(value);
+  if (m_ref) {
+    ((ActionPortion *) Original())->SetValue(p_value);
   }
   else {
-    SetGame(value->BelongsTo()->Game());
-    *_Value = value;
+    SetGame(p_value.GetInfoset()->Game());
+    *m_value = p_value;
   }
 }
 
 PortionSpec ActionPortion::Spec(void) const
-{ return PortionSpec(porACTION); }
+{ return porNFPLAYER; }
 
 void ActionPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
-  s << "(Action) " << *_Value;
-  if(*_Value)
-    s << " \"" << (*_Value)->GetName() << "\""; 
+  s << "(Action) ";
+  s << " \"" << (*m_value).GetLabel() << "\""; 
 }
 
 gText ActionPortion::OutputString(void) const
@@ -1323,20 +1324,18 @@ gText ActionPortion::OutputString(void) const
 
 Portion* ActionPortion::ValCopy(void) const
 {
-  return new ActionPortion(*_Value); 
+  return new ActionPortion(*m_value); 
 }
 
 Portion* ActionPortion::RefCopy(void) const
 {
-  Portion* p = new ActionPortion(*_Value, true); 
+  Portion *p = new ActionPortion((gbtEfgAction *) m_value, true); 
   p->SetOriginal(Original());
   return p;
 }
 
 bool ActionPortion::IsReference(void) const
-{
-  return _ref;
-}
+{ return m_ref; }
 
 //---------
 // Mixed
@@ -1497,7 +1496,7 @@ void BehavPortion::Output(gOutput& s) const
       for (int act = 1; act <= (*infoset)->NumActions(); act++) {
 	if (_WriteSolutionLabels == triTRUE) {
 	  if ((*rep->value)((*infoset)->GetAction(act)) > gNumber(0)) {
-	    s << (*infoset)->GetAction(act)->GetName() << '=';
+	    s << (*infoset)->GetAction(act).GetLabel() << '=';
 	    s << (*rep->value)((*infoset)->GetAction(act)) << ' ';
 	  }
 	}
@@ -1862,10 +1861,6 @@ bool ListPortion::MatchGameData( void* game, void* data ) const
       }
       if (spec.Type & porNODE)  {
 	if (((NodePortion*) (*rep->value)[i])->Value() == data)
-	  return true;
-      }
-      if (spec.Type & porACTION)  {
-	if (((ActionPortion*) (*rep->value)[i])->Value() == data)
 	  return true;
       }
     }

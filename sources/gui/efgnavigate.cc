@@ -96,7 +96,7 @@ void EfgNavigateWindow::Set(const Node *p_cursor)
       int branch = 0;
       for (branch = 1; p->GetChild(branch) != m_cursor; branch++);
 
-      SetCellValue((char *) m_cursor->GetAction()->GetName(), 7, 0);
+      SetCellValue((char *) m_cursor->GetAction().GetLabel(), 7, 0);
       SetCellValue((char *) m_parent->GetActionProb(p, branch), 8, 0);
       SetCellValue((char *) m_parent->GetActionValue(p, branch), 9, 0);
     }

@@ -90,7 +90,7 @@ bool gbtAllActionIterator::GoToNext(void)
 //              gbtAllActionIterator: Access to current state
 //------------------------------------------------------------------------
 
-Action *gbtAllActionIterator::GetAction(void) const
+gbtEfgAction gbtAllActionIterator::GetAction(void) const
 {
   return m_support.GetAction(pl, iset, act);
 }
@@ -112,23 +112,23 @@ bool gbtAllActionIterator::IsLast(void) const
 	  act == m_support.NumActions(pl, iset));
 }
 
-bool gbtAllActionIterator::IsSubsequentTo(const Action *p_action) const
+bool gbtAllActionIterator::IsSubsequentTo(const gbtEfgAction &p_action) const
 {
-  if (pl > p_action->BelongsTo()->GetPlayer().GetId()) {
+  if (pl > p_action.GetInfoset()->GetPlayer().GetId()) {
     return true; 
   }
-  else if (pl < p_action->BelongsTo()->GetPlayer().GetId()) {
+  else if (pl < p_action.GetInfoset()->GetPlayer().GetId()) {
     return false;
   }
   else {
-    if (iset > p_action->BelongsTo()->GetNumber()) {
+    if (iset > p_action.GetInfoset()->GetNumber()) {
       return true; 
     }
-    else if (iset < p_action->BelongsTo()->GetNumber()) {
+    else if (iset < p_action.GetInfoset()->GetNumber()) {
       return false;
     }
     else {
-      return (act > p_action->GetNumber());
+      return (act > p_action.GetId());
     }
   }
 }
@@ -148,7 +148,7 @@ gbtActionIterator::gbtActionIterator(const EFSupport &p_support,
   : m_support(p_support), pl(p_player), iset(p_infoset), act(1)
 { }
 
-Action *gbtActionIterator::operator*(void) const
+gbtEfgAction gbtActionIterator::operator*(void) const
 { return m_support.GetAction(pl, iset, act); }
 
 gbtActionIterator &gbtActionIterator::operator++(int)

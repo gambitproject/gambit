@@ -374,14 +374,14 @@ bool BehavSolution::Equals(const BehavProfile<double> &p_profile) const
 bool BehavSolution::operator==(const BehavSolution &p_solution) const
 { return (*m_profile == *p_solution.m_profile); }
 
-void BehavSolution::Set(Action *p_action, const gNumber &p_prob)
+void BehavSolution::Set(const gbtEfgAction &p_action, const gNumber &p_prob)
 {
   Invalidate();
 
-  Infoset *infoset = p_action->BelongsTo();
+  Infoset *infoset = p_action.GetInfoset();
   gbtEfgPlayer player = infoset->GetPlayer();
   (*m_profile)(player.GetId(), infoset->GetNumber(),
-	       p_action->GetNumber()) = p_prob;
+	       p_action.GetId()) = p_prob;
   if (m_precision != p_prob.Precision())
     LevelPrecision();
 }
@@ -396,24 +396,24 @@ void BehavSolution::Set(int p_player, int p_infoset, int p_action,
     LevelPrecision();
 }
 
-const gNumber &BehavSolution::operator()(Action *p_action) const
+const gNumber &BehavSolution::operator()(const gbtEfgAction &p_action) const
 {
-  Infoset *infoset = p_action->BelongsTo();
+  Infoset *infoset = p_action.GetInfoset();
   gbtEfgPlayer player = infoset->GetPlayer();
   return (*m_profile)(player.GetId(), infoset->GetNumber(),
-		      p_action->GetNumber());
+		      p_action.GetId());
 }
 
-gNumber BehavSolution::operator[](Action *p_action) const
+gNumber BehavSolution::operator[](const gbtEfgAction &p_action) const
 {
   return m_profile->GetActionProb(p_action);
 }
 
-gNumber &BehavSolution::operator[](Action *p_action)
+gNumber &BehavSolution::operator[](const gbtEfgAction &p_action)
 {
-  return (*m_profile)(p_action->BelongsTo()->GetPlayer().GetId(),
-		      p_action->BelongsTo()->GetNumber(),
-		      p_action->GetNumber());
+  return (*m_profile)(p_action.GetInfoset()->GetPlayer().GetId(),
+		      p_action.GetInfoset()->GetNumber(),
+		      p_action.GetId());
 }
 
 BehavSolution &BehavSolution::operator+=(const BehavSolution &p_solution)

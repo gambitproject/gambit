@@ -94,19 +94,19 @@ protected:
   const T &IsetValue(const Infoset *iset) const;
   T &IsetValue(const Infoset *iset);
 
-  const T &ActionValue(const Action *act) const 
-    { return m_actionValues(act->BelongsTo()->GetPlayer().GetId(),
-			    act->BelongsTo()->GetNumber(),
-			    act->number); }
-  T &ActionValue(const Action *act)
-    { return m_actionValues(act->BelongsTo()->GetPlayer().GetId(),
-			    act->BelongsTo()->GetNumber(),
-			    act->number); }
+  const T &ActionValue(const gbtEfgAction &act) const 
+    { return m_actionValues(act.GetInfoset()->GetPlayer().GetId(),
+			    act.GetInfoset()->GetNumber(),
+			    act.GetId()); }
+  T &ActionValue(const gbtEfgAction &act)
+    { return m_actionValues(act.GetInfoset()->GetPlayer().GetId(),
+			    act.GetInfoset()->GetNumber(),
+			    act.GetId()); }
   
-  T ActionProb(const Action *act) const;
+  T ActionProb(const gbtEfgAction &act) const;
 
-  const T &Regret(const Action * act) const;
-  T &Regret(const Action *);
+  const T &Regret(const gbtEfgAction &act) const;
+  T &Regret(const gbtEfgAction &);
 
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
 
@@ -160,9 +160,9 @@ public:
   gVector<T> GetNodeValue(const Node *node);
   T GetIsetProb(const Infoset *iset);
   const T &GetIsetValue(const Infoset *iset);
-  T GetActionProb(const Action *act) const;
-  const T &GetActionValue(const Action *act) const;
-  const T &GetRegret(const Action *act);
+  T GetActionProb(const gbtEfgAction &act) const;
+  const T &GetActionValue(const gbtEfgAction &act) const;
+  const T &GetRegret(const gbtEfgAction &act);
 
   // COMPUTATION OF INTERESTING QUANTITIES
 
@@ -172,10 +172,11 @@ public:
   T QreValue(const gVector<T> &lambda, bool &);
   T MaxRegret(void);
 
-  T DiffActionValue(const Action *action, const Action *oppAction) const;
-  T DiffRealizProb(const Node *node, const Action *oppAction) const;
+  T DiffActionValue(const gbtEfgAction &action, 
+		    const gbtEfgAction &oppAction) const;
+  T DiffRealizProb(const Node *node, const gbtEfgAction &oppAction) const;
   T DiffNodeValue(const Node *node, const gbtEfgPlayer &player,
-		  const Action *oppAction) const;
+		  const gbtEfgAction &oppAction) const;
 
   void Dump(gOutput &) const;
 

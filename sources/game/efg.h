@@ -31,9 +31,7 @@
 #include "math/gnumber.h"
 #include "math/gpvector.h"
 
-class Infoset;
 class Node;
-class Action;
 class EFSupport;
 class Lexicon;
 class Nfg;
@@ -42,6 +40,7 @@ template <class T> class MixedProfile;
 template <class T> class PureBehavProfile;
 
 #include "outcome.h"
+#include "infoset.h"
 #include "efplayer.h"
 
 class efgGame {
@@ -180,15 +179,15 @@ public:
   Node *MoveTree(Node *src, Node *dest);
   Node *DeleteTree(Node *n);
 
-  Action *InsertAction(Infoset *s);
-  Action *InsertAction(Infoset *s, const Action *at);
-  Infoset *DeleteAction(Infoset *s, const Action *a);
+  gbtEfgAction InsertAction(Infoset *s);
+  gbtEfgAction InsertAction(Infoset *s, const gbtEfgAction &at);
+  Infoset *DeleteAction(Infoset *s, const gbtEfgAction &a);
 
   void Reveal(Infoset *, gbtEfgPlayer);
 
   void SetChanceProb(Infoset *, int, const gNumber &);
   gNumber GetChanceProb(Infoset *, int) const;
-  gNumber GetChanceProb(const Action *) const;
+  gNumber GetChanceProb(const gbtEfgAction &) const;
   gArray<gNumber> GetChanceProbs(Infoset *) const;
 
   void SetPayoff(gbtEfgOutcome, int pl, const gNumber &value);
@@ -248,7 +247,7 @@ efgGame *ReadEfgFile(gInput &);
 template <class T> class PureBehavProfile   {
   protected:
     const efgGame *E;
-    gArray<gArray<const Action *> *> profile;
+    gArray<gArray<gbtEfgAction> *> profile;
 
     //    void IndPayoff(const Node *n, const int &pl, const T, T &) const;
     // This aims at efficiency, but leads to a problem described in behav.imp
@@ -263,14 +262,14 @@ template <class T> class PureBehavProfile   {
 
     // Operators
     PureBehavProfile<T> &operator=(const PureBehavProfile<T> &);
-    T operator()(Action *) const;
+    T operator()(const gbtEfgAction &) const;
 
     // Manipulation
-    void Set(const Action *);
-    void Set(const gbtEfgPlayer &, const gArray<const Action *> &);
+    void Set(const gbtEfgAction &);
+    //    void Set(const gbtEfgPlayer &, const gArray<const Action *> &);
 
     // Information
-    const Action *GetAction(const Infoset *) const;
+    gbtEfgAction GetAction(const Infoset *) const;
     
     const T Payoff(const gbtEfgOutcome &, const int &pl) const;
     const T ChanceProb(const Infoset *, const int &act) const;

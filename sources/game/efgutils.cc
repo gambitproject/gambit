@@ -138,7 +138,7 @@ int NumNodes (const efgGame &befg)
   return (CountNodes(befg, befg.RootNode()));
 }
 
-Action *LastAction(const efgGame &e, Node *node)
+gbtEfgAction LastAction(const efgGame &e, Node *node)
 {
   Node *parent = node->GetParent();
   if (parent == 0)  return 0;
@@ -219,7 +219,7 @@ efgGame *CompressEfg(const efgGame &efg, const EFSupport &S)
     for (int iset = 1; iset <= player.NumInfosets(); iset++)  {
       Infoset *infoset = player.GetInfoset(iset);
       for (int act = infoset->NumActions(); act >= 1; act--)  {
-	Action *oldact = efg.GetPlayer(pl).GetInfoset(iset)->GetAction(act);
+	gbtEfgAction oldact = efg.GetPlayer(pl).GetInfoset(iset)->GetAction(act);
 	if (!S.Contains(oldact)) {
 	  newefg->DeleteAction(infoset, infoset->GetAction(act));
 	}

@@ -48,7 +48,7 @@ public:
   bool GoToNext(void);
 
   // ACCESS TO CURRENT STATE
-  Action *GetAction(void) const;
+  gbtEfgAction GetAction(void) const;
   int GetActionId(void) const { return act; }
   Infoset *GetInfoset(void) const;
   int GetInfosetId(void) const { return iset; }
@@ -56,7 +56,7 @@ public:
   int GetPlayerId(void) const { return pl; }
 
   bool IsLast(void) const;
-  bool IsSubsequentTo(const Action *) const;
+  bool IsSubsequentTo(const gbtEfgAction &) const;
 };
 
 class gbtActionIterator {
@@ -68,7 +68,7 @@ public:
   gbtActionIterator(const EFSupport &, Infoset *);
   gbtActionIterator(const EFSupport &, int pl, int iset);
 
-  Action *operator*(void) const;
+  gbtEfgAction operator*(void) const;
   gbtActionIterator &operator++(int);
   
   bool Begin(void);

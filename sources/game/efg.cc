@@ -341,15 +341,133 @@ bool gbtEfgInfosetIterator::End(void) const
 //                 Action: Member function definitions
 //----------------------------------------------------------------------
 
-bool Action::Precedes(const Node * n) const
+struct gbt_efg_action_rep {
+  int m_id;
+  Infoset *m_infoset;
+  bool m_deleted;
+  gText m_label;
+  int m_refCount;
+
+  gbt_efg_action_rep(Infoset *, int);
+};
+
+gbt_efg_action_rep::gbt_efg_action_rep(Infoset *p_infoset, int p_id)
+  : m_id(p_id), m_infoset(p_infoset), m_deleted(false), 
+    m_refCount(1)
+{ }
+
+gbtEfgAction::gbtEfgAction(void)
+  : rep(0)
+{ }
+
+gbtEfgAction::gbtEfgAction(gbt_efg_action_rep *p_rep)
+  : rep(p_rep)
 {
-  while ( n != n->Game()->RootNode() ) {
-    if ( n->GetAction() == this )
+  if (rep) {
+    rep->m_refCount++;
+  }
+}
+
+gbtEfgAction::gbtEfgAction(const gbtEfgAction &p_action)
+  : rep(p_action.rep)
+{
+  if (rep) {
+    rep->m_refCount++;
+  }
+}
+
+gbtEfgAction::~gbtEfgAction()
+{
+  if (rep) {
+    if (--rep->m_refCount == 0) {
+      delete rep;
+    }
+  }
+}
+
+gbtEfgAction &gbtEfgAction::operator=(const gbtEfgAction &p_action)
+{
+  if (this == &p_action) {
+    return *this;
+  }
+
+  if (rep && --rep->m_refCount == 0) {
+    delete rep;
+  }
+
+  if ((rep = p_action.rep) != 0) {
+    rep->m_refCount++;
+  }
+  return *this;
+}
+
+bool gbtEfgAction::operator==(const gbtEfgAction &p_action) const
+{
+  return (rep == p_action.rep);
+} 
+
+bool gbtEfgAction::operator!=(const gbtEfgAction &p_action) const
+{
+  return (rep != p_action.rep);
+} 
+
+bool gbtEfgAction::IsNull(void) const
+{
+  return (rep == 0);
+}
+
+int gbtEfgAction::GetId(void) const
+{
+  return (rep) ? rep->m_id : -1;
+}
+
+gText gbtEfgAction::GetLabel(void) const
+{
+  if (rep) {
+    return rep->m_label;
+  }
+  else {
+    return "";
+  }
+}
+
+void gbtEfgAction::SetLabel(const gText &p_label)
+{
+  if (rep) {
+    rep->m_label = p_label;
+  }
+}
+
+Infoset *gbtEfgAction::GetInfoset(void) const
+{
+  if (rep) {
+    return rep->m_infoset;
+  }
+  else {
+    return 0;
+  }
+}
+
+bool gbtEfgAction::Precedes(const Node *n) const
+{
+  if (!rep) {
+    return false;
+  }
+
+  while (n != n->Game()->RootNode() ) {
+    if (n->GetAction().rep == rep) {
       return true;
-    else
+    }
+    else {
       n = n->GetParent();
+    }
   }
   return false;
+}
+
+gOutput &operator<<(gOutput &p_stream, const gbtEfgAction &)
+{ 
+  return p_stream;
 }
 
 //----------------------------------------------------------------------
@@ -371,7 +489,7 @@ Infoset::Infoset(efgGame *e, int n, gbt_efg_player_rep *p, int br)
   : E(e), number(n), player(p), actions(br), flag(0) 
 {
   while (br)   {
-    actions[br] = new Action(br, "", this);
+    actions[br] = new gbt_efg_action_rep(this, br);
     br--; 
   }
 }
@@ -385,16 +503,16 @@ void Infoset::PrintActions(gOutput &f) const
 { 
   f << "{ ";
   for (int i = 1; i <= actions.Length(); i++)
-    f << '"' << EscapeQuotes(actions[i]->name) << "\" ";
+    f << '"' << EscapeQuotes(actions[i]->m_label) << "\" ";
   f << "}";
 }
 
-Action *Infoset::InsertAction(int where)
+gbtEfgAction Infoset::InsertAction(int where)
 {
-  Action *action = new Action(where, "", this);
+  gbt_efg_action_rep *action = new gbt_efg_action_rep(this, where);
   actions.Insert(action, where);
   for (; where <= actions.Length(); where++)
-    actions[where]->number = where;
+    actions[where]->m_id = where;
   return action;
 }
 
@@ -402,12 +520,17 @@ void Infoset::RemoveAction(int which)
 {
   delete actions.Remove(which);
   for (; which <= actions.Length(); which++)
-    actions[which]->number = which;
+    actions[which]->m_id = which;
 }
 
 gbtEfgPlayer Infoset::GetPlayer(void) const
 {
   return player;
+}
+
+gbtEfgAction Infoset::GetAction(int p_index) const
+{
+  return actions[p_index];
 }
 
 //------------------------------------------------------------------------
@@ -420,9 +543,9 @@ ChanceInfoset::ChanceInfoset(efgGame *E, int n, gbt_efg_player_rep *p, int br)
   for (int i = 1; i <= br; probs[i++] = gRational(1, br));
 }
 
-Action *ChanceInfoset::InsertAction(int where)
+gbtEfgAction ChanceInfoset::InsertAction(int where)
 { 
-  Action *action = Infoset::InsertAction(where);
+  gbtEfgAction action = Infoset::InsertAction(where);
   probs.Insert((gNumber) 0, where);
   return action;
 }
@@ -437,7 +560,7 @@ void ChanceInfoset::PrintActions(gOutput &f) const
 { 
   f << "{ ";
   for (int i = 1; i <= actions.Length(); i++) {
-    f << '"' << EscapeQuotes(actions[i]->GetName()) << "\" ";
+    f << '"' << EscapeQuotes(actions[i]->m_label) << "\" ";
     f << probs[i] << ' ';
   }
   f << "}";
@@ -487,10 +610,10 @@ Node *Node::PriorSibling(void) const
 
 }
 
-Action *Node::GetAction(void) const
+gbtEfgAction Node::GetAction(void) const
 {
   if (this == Game()->RootNode()) {
-    return 0;
+    return gbtEfgAction();
   }
   
   Infoset *infoset = GetParent()->GetInfoset();
@@ -520,6 +643,16 @@ gbtEfgPlayer Node::GetPlayer(void) const
   }
   else {
     return infoset->GetPlayer();
+  }
+}
+
+Node *Node::GetChild(const gbtEfgAction &p_action) const
+{
+  if (p_action.GetInfoset() != infoset) {
+    return 0;
+  }
+  else {
+    return children[p_action.GetId()];
   }
 }
 
@@ -558,8 +691,9 @@ efgGame::efgGame(const efgGame &E, Node *n /* = 0 */)
       Infoset *s = new Infoset(this, j, players[i],
 			       E.players[i]->m_infosets[j]->actions.Length());
       s->name = E.players[i]->m_infosets[j]->name;
-      for (int k = 1; k <= s->actions.Length(); k++)
-	s->actions[k]->name = E.players[i]->m_infosets[j]->actions[k]->name;
+      for (int k = 1; k <= s->actions.Length(); k++) {
+	s->actions[k]->m_label = E.players[i]->m_infosets[j]->actions[k]->m_label;
+      }
       players[i]->m_infosets.Append(s);
     }
   }
@@ -570,7 +704,7 @@ efgGame::efgGame(const efgGame &E, Node *n /* = 0 */)
     s->name = t->GetName();
     for (int act = 1; act <= s->probs.Length(); act++) {
       s->probs[act] = t->probs[act];
-      s->actions[act]->name = t->actions[act]->name;
+      s->actions[act]->m_label = t->actions[act]->m_label;
     }
     chance->m_infosets.Append(s);
   }
@@ -1378,8 +1512,9 @@ Infoset *efgGame::LeaveInfoset(Node *n)
 			     n->children.Length());
   n->infoset->name = s->name;
   n->infoset->members.Append(n);
-  for (int i = 1; i <= s->actions.Length(); i++)
-    n->infoset->actions[i]->name = s->actions[i]->name;
+  for (int i = 1; i <= s->actions.Length(); i++) {
+    n->infoset->actions[i]->m_label = s->actions[i]->m_label;
+  }
 
   DeleteLexicon();
   SortInfosets();
@@ -1409,7 +1544,7 @@ Infoset *efgGame::SplitInfoset(Node *n)
     nn->infoset = ns;
   }
   for (i = 1; i <= s->actions.Length(); i++) {
-    ns->actions[i]->name = s->actions[i]->name;
+    ns->actions[i]->m_label = s->actions[i]->m_label;
     if (p == chance) {
       SetChanceProb(ns, i, GetChanceProb(s, i));
     }
@@ -1649,13 +1784,13 @@ Node *efgGame::DeleteTree(Node *n)
   return n;
 }
 
-Action *efgGame::InsertAction(Infoset *s)
+gbtEfgAction efgGame::InsertAction(Infoset *s)
 {
   if (!s)  throw Exception();
 
   m_revision++;
   m_dirty = true;
-  Action *action = s->InsertAction(s->NumActions() + 1);
+  gbtEfgAction action = s->InsertAction(s->NumActions() + 1);
   for (int i = 1; i <= s->members.Length(); i++) {
     s->members[i]->children.Append(new Node(this, s->members[i]));
   }
@@ -1664,18 +1799,18 @@ Action *efgGame::InsertAction(Infoset *s)
   return action;
 }
 
-Action *efgGame::InsertAction(Infoset *s, const Action *a)
+gbtEfgAction efgGame::InsertAction(Infoset *s, const gbtEfgAction &a)
 {
-  if (!a || !s)  throw Exception();
+  if (a.IsNull() || !s)  throw Exception();
 
   m_revision++;
   m_dirty = true;
 
   int where;
-  for (where = 1; where <= s->actions.Length() && s->actions[where] != a;
+  for (where = 1; where <= s->actions.Length() && s->actions[where] != a.rep;
        where++);
   if (where > s->actions.Length())   return 0;
-  Action *action = s->InsertAction(where);
+  gbtEfgAction action = s->InsertAction(where);
   for (int i = 1; i <= s->members.Length(); i++)
     s->members[i]->children.Insert(new Node(this, s->members[i]), where);
 
@@ -1684,14 +1819,14 @@ Action *efgGame::InsertAction(Infoset *s, const Action *a)
   return action;
 }
 
-Infoset *efgGame::DeleteAction(Infoset *s, const Action *a)
+Infoset *efgGame::DeleteAction(Infoset *s, const gbtEfgAction &a)
 {
-  if (!a || !s)  throw Exception();
+  if (a.IsNull() || !s)  throw Exception();
 
   m_revision++;
   m_dirty = true;
   int where;
-  for (where = 1; where <= s->actions.Length() && s->actions[where] != a;
+  for (where = 1; where <= s->actions.Length() && s->actions[where] != a.rep;
        where++);
   if (where > s->actions.Length() || s->actions.Length() == 1)   return s;
   s->RemoveAction(where);
@@ -1721,9 +1856,9 @@ gNumber efgGame::GetChanceProb(Infoset *infoset, int act) const
     return (gNumber) 0;
 }
 
-gNumber efgGame::GetChanceProb(const Action *a) const
+gNumber efgGame::GetChanceProb(const gbtEfgAction &a) const
 {
-  return GetChanceProbs(a->BelongsTo())[a->GetNumber()];
+  return GetChanceProbs(a.GetInfoset())[a.GetId()];
 }
 
 gArray<gNumber> efgGame::GetChanceProbs(Infoset *infoset) const

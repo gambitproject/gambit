@@ -66,7 +66,7 @@ class EfgContIter    {
   
   // These next two only work on frozen infosets
     void Set(int pl, int iset, int act);
-    void Set(const Action *a);
+    void Set(const gbtEfgAction &);
     int Next(int pl, int iset);
   
     const PureBehavProfile<gNumber> &GetProfile(void) const   
@@ -101,7 +101,7 @@ class EfgConditionalContIter    {
     void First(void); // Sets each infoset's action to the first in the support
   
     void Set(int pl, int iset, int act);
-    void Set(const Action *a);
+    void Set(const gbtEfgAction &);
     int Next(int pl, int iset); 
   
     const PureBehavProfile<gNumber> &GetProfile(void) const   

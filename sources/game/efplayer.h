@@ -33,6 +33,7 @@
 
 struct gbt_efg_player_rep;
 class efgGame;
+class Infoset;
 
 class gbtEfgPlayer {
 friend class efgGame;

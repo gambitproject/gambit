@@ -41,14 +41,15 @@ template class gBlock<Infoset *>;
 template class gArray<Node *>;
 template class gBlock<Node *>;
 
-template class gArray<Action const *>;
-template class gBlock<Action const *>;
-template class gArray<Action *>;
-template class gBlock<Action *>;
+template class gArray<gbt_efg_action_rep *>;
+template class gBlock<gbt_efg_action_rep *>;
 
-template class gArray<gArray<Action const *> *>;
+template class gArray<gbtEfgAction>;
+template class gBlock<gbtEfgAction>;
 
-template class gArray<gArray<Action *> *>;
+template class gArray<gArray<gbtEfgAction> *>;
+
+//template class gArray<gArray<Action *> *>;
 
 template class gArray<gbt_efg_outcome_rep *>;
 template class gBlock<gbt_efg_outcome_rep *>;
@@ -59,12 +60,12 @@ template class gBlock<gBlock<bool> >;
 class EFActionSet;
 class EFActionArray;
 
-template bool operator==(const gArray<Action *> &, const gArray<Action *> &);
+//template bool operator==(const gArray<Action *> &, const gArray<Action *> &);
 template class gArray<EFActionSet *>;
 template class gArray<EFActionArray *>;
 
 template class gList<Node *>;
-template class gList<Action *>;
+template class gList<gbtEfgAction>;
 template class gList<Infoset *>;
 
 template class gList<gbt_efg_outcome_rep *>;

@@ -42,7 +42,7 @@ int NumNodes (const efgGame &befg);
 int CountNodes (const efgGame &e, Node *n);
 
 // returns the action leading up to the node
-Action* LastAction(const efgGame &e, Node *node);
+gbtEfgAction LastAction(const efgGame &e, Node *node);
 
 // returns the list of nodes which are marked as the roots of subgames
 void MarkedSubgameRoots(const efgGame &efg, gList<Node *> &list);

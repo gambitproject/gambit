@@ -198,7 +198,7 @@ wxString EfgProfileList::GetReport(void) const
 
 	for (int act = 1; act <= infoset->NumActions(); act++) {
 	  report += wxString::Format("%2d: %-6s", act,
-				     (const char *) infoset->GetAction(act)->GetName());
+				     (const char *) infoset->GetAction(act).GetLabel());
 
 	  for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
 	    report += wxString::Format("%-15s ", 

@@ -105,7 +105,7 @@ END_EVENT_TABLE()
 
 EfgSupportWindow::EfgSupportWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   : wxPanel(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    m_parent(p_efgShow), m_map((Action *) 0)
+    m_parent(p_efgShow), m_map(gbtEfgAction())
 {
   SetAutoLayout(true);
 
@@ -167,9 +167,9 @@ void EfgSupportWindow::UpdateValues(void)
       wxTreeItemId isetID = m_actionTree->AppendItem(id, 
 						     (char *) infoset->GetName());
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	Action *action = infoset->GetAction(act);
+	gbtEfgAction action = infoset->GetAction(act);
 	wxTreeItemId actID = m_actionTree->AppendItem(isetID,
-						      (char *) action->GetName());
+						      (char *) action.GetLabel());
 	if (m_parent->GetSupport()->Contains(action)) {
 	  m_actionTree->SetItemTextColour(actID, *wxBLACK);
 	}
@@ -212,13 +212,13 @@ void EfgSupportWindow::OnTreeItemCollapse(wxTreeEvent &p_event)
 
 void EfgSupportWindow::ToggleItem(wxTreeItemId p_id)
 {
-  Action *action = m_map(p_id);
-  if (!action) {
+  gbtEfgAction action = m_map(p_id);
+  if (action.IsNull()) {
     return;
   }
 
   if (m_parent->GetSupport()->Contains(action) &&
-      m_parent->GetSupport()->NumActions(action->BelongsTo()) > 1) {
+      m_parent->GetSupport()->NumActions(action.GetInfoset()) > 1) {
     m_parent->GetSupport()->RemoveAction(action);
     m_actionTree->SetItemTextColour(p_id, *wxLIGHT_GREY);
   }
@@ -236,5 +236,5 @@ void EfgSupportWindow::ToggleItem(wxTreeItemId p_id)
 static gOutput &operator<<(gOutput &p_output, wxTreeItemId)
 { return p_output; }
 
-template class gBaseMap<wxTreeItemId, Action *>;
-template class gOrdMap<wxTreeItemId, Action *>;
+template class gBaseMap<wxTreeItemId, gbtEfgAction>;
+template class gOrdMap<wxTreeItemId, gbtEfgAction>;

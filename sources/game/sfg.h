@@ -66,7 +66,7 @@ public:
   int InfosetRowNumber(int pl, int sequence) const;
   int ActionNumber(int pl, int sequence) const;
   const Infoset* GetInfoset(int pl, int sequence) const;
-  const Action*  GetAction(int pl, int sequence) const;
+  gbtEfgAction GetAction(int pl, int sequence) const;
   const efgGame &GetEfg(void) const {return EF;}
   BehavProfile<gNumber> ToBehav(const gPVector<double> &x) const;
   const Sequence* GetSequence(int pl, int seq) const {return ((*sequences)[pl])->Find(seq);}

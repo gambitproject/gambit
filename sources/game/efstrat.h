@@ -32,7 +32,6 @@
 #include "math/gpvector.h"
 #include "efg.h"
 
-class Action;
 class EFActionSet;
 
 class EFSupport {
@@ -65,15 +64,15 @@ public:
   bool HasActiveActionAt(const Infoset *) const;
   bool HasActiveActionsAtAllInfosets(void) const;
 
-  bool Contains(const Action *) const;
+  bool Contains(const gbtEfgAction &) const;
   bool Contains(int pl, int iset, int act) const;
-  int GetIndex(const Action *) const;
-  Action *GetAction(Infoset *, int index) const;
-  Action *GetAction(int pl, int iset, int index) const;
+  int GetIndex(const gbtEfgAction &) const;
+  gbtEfgAction GetAction(Infoset *, int index) const;
+  gbtEfgAction GetAction(int pl, int iset, int index) const;
 
   // Action editing functions
-  virtual void AddAction(const Action *);
-  virtual bool RemoveAction(const Action *);
+  virtual void AddAction(const gbtEfgAction &);
+  virtual bool RemoveAction(const gbtEfgAction &);
 
   // Number of Sequences for the player
   int NumSequences(int pl) const;
@@ -81,9 +80,9 @@ public:
 
   // Reachable Nodes and Information Sets
   gList<Node *> ReachableNonterminalNodes(const Node *) const;
-  gList<Node *> ReachableNonterminalNodes(const Node *, const Action *) const;
+  gList<Node *> ReachableNonterminalNodes(const Node *, const gbtEfgAction &) const;
   gList<Infoset *> ReachableInfosets(const Node *) const;
-  gList<Infoset *> ReachableInfosets(const Node *, const Action *) const;
+  gList<Infoset *> ReachableInfosets(const Node *, const gbtEfgAction &) const;
   gList<Infoset *> ReachableInfosets(const gbtEfgPlayer &) const;
 
   bool AlwaysReaches(const Infoset *) const;
@@ -91,9 +90,9 @@ public:
   bool MayReach(const Node *) const;
   bool MayReach(const Infoset *) const;
 
-  bool Dominates(const Action *a, const Action *b,
+  bool Dominates(const gbtEfgAction &, const gbtEfgAction &,
 		 bool strong, bool conditional) const;
-  bool IsDominated(const Action *a, 
+  bool IsDominated(const gbtEfgAction &,
 		   bool strong, bool conditional) const;
   EFSupport Undominated(bool strong, bool conditional,
 			 const gArray<int> &players,
@@ -150,9 +149,9 @@ public:
   const gList<const Node *> ReachableNonterminalNodes() const;
 
   // Action editing functions
-  void AddAction(const Action *);
-  bool RemoveAction(const Action *);
-  bool RemoveActionReturningDeletedInfosets(const Action *, 
+  void AddAction(const gbtEfgAction &);
+  bool RemoveAction(const gbtEfgAction &);
+  bool RemoveActionReturningDeletedInfosets(const gbtEfgAction &,
 					    gList<Infoset *> *);
   //  void GoToNextSubsupportOf(const EFSupport &);
 

@@ -673,8 +673,7 @@ static void BuildSubtree(efgGame *p_efg, Node *p_node,
 
       infoset->SetName((*p_nodeData)->m_infosetData->m_name);
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	infoset->SetActionName(act,
-			       (*p_nodeData)->m_infosetData->m_actions[act]);
+	infoset->GetAction(act).SetLabel((*p_nodeData)->m_infosetData->m_actions[act]);
       }
       player->AddInfoset((*p_nodeData)->m_infoset, infoset);
     }
@@ -697,8 +696,7 @@ static void BuildSubtree(efgGame *p_efg, Node *p_node,
 
       infoset->SetName((*p_nodeData)->m_infosetData->m_name);
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	infoset->SetActionName(act,
-			       (*p_nodeData)->m_infosetData->m_actions[act]);
+	infoset->GetAction(act).SetLabel((*p_nodeData)->m_infosetData->m_actions[act]);
 	p_efg->SetChanceProb(infoset, act, 
 			     (*p_nodeData)->m_infosetData->m_probs[act]);
       }
