@@ -230,20 +230,23 @@ gList<MixedSolution> nfgLiap::Solve(const NFSupport &p_support,
     double fval;
     minimizer.Set(F, p, fval, gradient, .01, .0001);
 
-    for (int iter = 1; iter <= m_maxitsN; iter++) {
-      if (iter % 20 == 0) {
-	p_status.Get();
-      }
+    try {
+      for (int iter = 1; iter <= m_maxitsN; iter++) {
+	if (iter % 20 == 0) {
+	  p_status.Get();
+	}
 
-      if (!minimizer.Iterate(F, p, fval, gradient, dx)) {
-	break;
-      }
+	if (!minimizer.Iterate(F, p, fval, gradient, dx)) {
+	  break;
+	}
 
-      if (sqrt(gradient.NormSquared()) < .001) {
-	solutions.Append(MixedSolution(p, algorithmNfg_LIAP));
-	break;
+	if (sqrt(gradient.NormSquared()) < .001) {
+	  solutions.Append(MixedSolution(p, algorithmNfg_LIAP));
+	  break;
+	}
       }
     }
+    catch (gFuncMinException &) { }
 
     PickRandomProfile(p);
   }

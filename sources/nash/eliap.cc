@@ -171,20 +171,23 @@ gList<BehavSolution> efgLiap::Solve(const EFSupport &p_support,
     double fval;
     minimizer.Set(F, p.GetDPVector(), fval, gradient, .01, .0001);
 
-    for (int iter = 1; iter <= m_maxitsN; iter++) {
-      if (iter % 20 == 0) {
-	p_status.Get();
-      }
+    try {
+      for (int iter = 1; iter <= m_maxitsN; iter++) {
+	if (iter % 20 == 0) {
+	  p_status.Get();
+	}
 
-      if (!minimizer.Iterate(F, p.GetDPVector(), fval, gradient, dx)) {
-	break;
-      }
+	if (!minimizer.Iterate(F, p.GetDPVector(), fval, gradient, dx)) {
+	  break;
+	}
 
-      if (sqrt(gradient.NormSquared()) < .001) {
-	solutions.Append(BehavSolution(p, algorithmEfg_LIAP_EFG));
-	break;
+	if (sqrt(gradient.NormSquared()) < .001) {
+	  solutions.Append(BehavSolution(p, algorithmEfg_LIAP_EFG));
+	  break;
+	}
       }
     }
+    catch (gFuncMinException &) { }
 
     PickRandomProfile(p);
   }

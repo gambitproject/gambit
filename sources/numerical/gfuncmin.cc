@@ -78,6 +78,11 @@ IntermediatePoint(const gC1Function<double> &fdf,
 
 trial:
   double u = fabs (pg * lambda * stepc);
+  if ((fc - fa) + u == 0) {
+    // TLT: Added this check 2002/08/31 due to floating point exceptions
+    // under MSW.  Not really sure how to handle this correctly.
+    throw gFuncMinException;
+  }
   stepb = 0.5 * stepc * u / ((fc - fa) + u);
 
   TakeStep(x, p, stepb, lambda, x1, dx);
@@ -208,6 +213,10 @@ mid_trial:
     f = fm;
     step = stepm;
     gnorm = gnorm1;
+
+    if (gnorm1 == 0.0) {
+      return;
+    }
 
     if (fabs (pg * lambda / gnorm1) < tol) {
       return; /* SUCCESS */

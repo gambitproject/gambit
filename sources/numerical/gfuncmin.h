@@ -80,4 +80,6 @@ public:
 	       gVector<double> &gradient, gVector<double> &dx);
 };
 
+class gFuncMinException { };
+
 #endif  // GFUNCMIN_H
