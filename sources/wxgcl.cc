@@ -263,13 +263,15 @@ public:
 
 bool GclApp::OnInit(void)
 {
+  // Long run feature: remember frame size from previous invocations
   GclFrame *frame = new GclFrame(0, "Gambit Command Language",
-				 wxPoint(0, 0), wxSize(400, 400));
+				 wxPoint(0, 0), wxSize(640, 480));
 
   // Set up the help system.
+  // Long run feature: use wxConfig to remember where helpfile is stored
   wxInitAllImageHandlers();
   m_help.SetTempDir(".");
-  m_help.AddBook("help/gclman.hhp");
+  m_help.AddBook("../sources/help/gclman.hhp");
 
   frame->Show(true);
   
@@ -349,6 +351,12 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
 				 wxDefaultPosition, wxDefaultSize,
 				 wxTE_MULTILINE | wxTE_PROCESS_ENTER);
 #endif  // __WXMSW__
+
+  // For the moment, default to a fixed-width font.
+  // In the long run, this will be read from wxConfig
+  m_inputWindow->SetFont(wxFont(8, wxMODERN, wxNORMAL, wxNORMAL));
+  m_outputWindow->SetFont(wxFont(8, wxMODERN, wxNORMAL, wxNORMAL));
+
   m_cancelButton = new wxCancelButton(m_inputSashWindow);
   m_cancelButton->Enable(false);
 
