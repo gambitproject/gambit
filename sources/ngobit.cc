@@ -99,17 +99,13 @@ double NFGobitFunc::GobitDerivValue(int i, int j,
 bool NFGobitFunc::Deriv(const gVector<double> &v, gVector<double> &d)
 {
   ((gVector<double> &) _p).operator=(v);
-  double avg;
   
   for (int pl = 1, index = 1; pl <= _nfg.NumPlayers(); pl++)  {
-    avg = 0.0;
     int nstrats = _p.GetNFSupport().GetStrategy(pl).Length();
     int st;
 
     for (st = 1; st <= nstrats;
-	 avg += (d[index++] = GobitDerivValue(pl, st++, _p)));
-    avg /= (double) nstrats;
-    for (st = 1, index -= nstrats; st <= nstrats; st++, d[index++] -= avg);
+	 d[index++] = GobitDerivValue(pl, st++, _p));
   }
 
   return true;
@@ -160,7 +156,7 @@ static void WritePXIHeader(gOutput &pxifile, const Nfg<double> &N,
   pxifile << "\nData:\n";
 }
 
-extern bool DFP(gVector<double> &p, gC2Function<double> &func,
+extern bool DFP(gPVector<double> &p, gC2Function<double> &func,
 		double &fret, int &iter,
 	        int maxits1, double tol1, int maxitsN, double tolN);
 

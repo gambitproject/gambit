@@ -80,21 +80,10 @@ bool NFLiapFunc::Deriv(const gVector<double> &v, gVector<double> &d)
 {
   ((gVector<double> &) _p).operator=(v);
   int i1, j1, ii;
-  double avg;
   
-  for (i1 = 1, ii = 1; i1 <= _nfg.NumPlayers(); i1++) {
-    avg = 0.0;
+  for (i1 = 1, ii = 1; i1 <= _nfg.NumPlayers(); i1++) {//
     for (j1 = 1; j1 <= _p.GetNFSupport().NumStrats(i1); j1++) {
-      d[ii] = LiapDerivValue(i1, j1, _p);
-      avg += d[ii];
-      ii++;
-    }
-
-    avg /= _p.GetNFSupport().NumStrats(i1);
-    ii -= _p.GetNFSupport().NumStrats(i1);
-    for (j1 = 1; j1 <= _p.GetNFSupport().NumStrats(i1); j1++) {
-      d[ii] -= avg;
-      ii++;
+      d[ii++] = LiapDerivValue(i1, j1, _p);
     }
   }
 
@@ -169,7 +158,7 @@ static void PickRandomProfile(MixedProfile<double> &p)
   }
 }
 
-extern bool DFP(gVector<double> &p,
+extern bool DFP(gPVector<double> &p,
 		gC2Function<double> &func,
 		double &fret, int &iter,
 		int maxits1, double tol1, int maxitsN, double tolN);

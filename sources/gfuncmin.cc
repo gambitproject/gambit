@@ -302,9 +302,29 @@ void RayMin(gFunction<double> &func,
 }
 
 
+#include "gpvector.h"
+
+void Project(gVector<double> &x,
+	     const gArray<int> &lengths)
+{
+  int index = 1;
+  for (int part = 1; part <= lengths.Length(); part++)  {
+    double avg = 0.0;
+    int j;
+    for (j = 1; j <= lengths[part]; j++, index++)  {
+      avg += x[index];
+    }
+    avg /= (double) lengths[part];
+    index -= lengths[part];
+    for (j = 1; j <= lengths[part]; j++, index++)  {
+      x[index] -= avg;
+    }
+  }
+}
+
 #include "gmatrix.h"
 
-bool DFP(gVector<double> &p,
+bool DFP(gPVector<double> &p,
 	 gC2Function<double> &func,
 	 double &fret, int &iter,
          int maxits1, double tol1, int maxitsN, double tolN)
@@ -327,6 +347,7 @@ bool DFP(gVector<double> &p,
   for (its = 1; its <= maxitsN; its++)  {
     iter = its;
 
+    Project(xi, p.Lengths());
     RayMin(func, p, xi, fret, maxits1, tol1, gnull);
     
     if (fret <= tolN || fret >= fp || its >= maxitsN)  {
@@ -338,6 +359,7 @@ bool DFP(gVector<double> &p,
     dg = g;
     fret = func.Value(p);
     func.Deriv(p, g);
+    Project(g, p.Lengths());
     dg = g - dg;
     hdg = hessin * dg;
 
@@ -368,97 +390,6 @@ bool DFP(gVector<double> &p,
   return false;
 }
 
-#ifdef UNUSED
-bool Powell(gVector<double> &p,
-	    gMatrix<double> &xi,
-	    gFunction<double> &func,
-	    double &fret, int &iter,
-	    int maxits1, double tol1, int maxitsN, double tolN,
-	    gOutput &tracefile)
-{
-  int i,ibig,n;
-  double t,fptt,fp,del;
-  
-  n=p.Length();
-  gVector<double> pt(1,n);
-  gVector<double> ptt(1,n);
-  gVector<double> xit(1,n);
-  fret=func.Value(p);
-
-  tracefile << "Initializing Powell, location = " << p
-            << "  value = " << fret << "\n\n";
-  
-  pt=p;
-  for (iter=1;;iter++) {
-
-    tracefile << "Powell iteration " << iter << '\n';
-
-    fp=fret;
-    ibig=0;
-    del=0.0;
-    for (i=1;i<=n;i++) {
-      xi.GetRow(i, xit);
-      fptt=fret;
-      
-      RayMin(func, p, xit, fret, maxits1, tol1, tracefile);
-      
-      if (fptt-fret > del) {
-	del=fptt-fret;
-	ibig=i;
-      }
-    }
-    
-    if (fret <= tolN) return true;
-
-    if (iter == maxitsN)   {
-      tracefile << "location = " << p << " value = " << fret << "\n\n";
-      tracefile << "Powell failed to converge in " << iter << " iterations\n\n";
-      return false;
-    }
-    
-    ptt=p*2.0-pt;
-    xit=p-pt;
-
-    
-    pt=p;
-    
-    fptt=func.Value(ptt);
-    if (fptt < fp) {
-      t=2.0*(fp-2.0*fret+fptt)*pow(fp-fret-del,2)-del*pow(fp-fptt,2);
-      if (t < 0.0) {
-	RayMin(func, p, xit, fret, maxits1, tol1, tracefile);
-	xi.SetRow(ibig, xit);
-      }
-    }
-
-    tracefile << "Approximate Hessian:\n\n";
-    tracefile << ((gRectArray<double> &)xi) << '\n';
-
-    tracefile << "location = " << p << " value = " << fret << "\n\n";
-  }
-  return false;
-}
-#endif   // UNUSED
-
-#include "gpvector.h"
-
-void Project(gVector<double> &x,
-	     const gArray<int> &lengths)
-{
-  int index = 1;
-  for (int part = 1; part <= lengths.Length(); part++)  {
-    double avg = 0.0;
-    int j;
-    for (j = 1; j <= lengths[part]; j++, index++)  {
-      avg += x[index];
-    }
-    avg /= (double) lengths[part];
-    index -= lengths[part];
-    for (j = 1; j <= lengths[part]; j++, index++)  {
-      x[index] -= avg;
-    }
-  }
-}
 
 //
 // New version of Powell that keeps on the hyperplane of the simplices
