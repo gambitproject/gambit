@@ -37,6 +37,29 @@ template <class T> class gList;
 template <class T> class RefCountHashTable;
 
 
+struct ParamInfoType
+{
+  gString      Name;
+  PortionType  Type;
+  Portion*     DefaultValue;
+  bool         PassByReference;
+
+  ParamInfoType( const gString& name, const PortionType& type,
+		Portion* default_value, const bool pass_by_ref )
+    :Name(name), Type(type), DefaultValue(default_value), 
+  PassByReference(pass_by_ref)
+  { }
+
+  ParamInfoType( void )
+  {
+    Name = "";
+    Type = porERROR;
+    DefaultValue = 0;
+    PassByReference = 0;
+  }
+};
+
+
 class FuncDescObj
 {
 private:
@@ -60,14 +83,6 @@ private:
      );
 
 protected:
-  struct ParamInfoType
-  {
-    gString      Name;
-    PortionType  Type;
-    Portion*     DefaultValue;
-    bool         PassByReference;
-  };
-
   struct FuncInfoType
   {
     bool                 UserDefined;
@@ -117,6 +132,12 @@ protected:
      const PortionType type,
      Portion*          default_value,
      const bool        pass_by_reference = false
+     );
+
+  void SetParamInfo
+    ( 
+     Portion*          (*func_ptr)(Portion**),
+     const ParamInfoType     param_info[]
      );
 
   gString FuncName ( void ) const;

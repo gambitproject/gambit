@@ -375,11 +375,10 @@ void FuncDescObj::_SetParamInfo
 void FuncDescObj::SetParamInfo
 ( 
  Portion*          (*func_ptr)(Portion**),
- const int         index, 
  const ParamInfoType     param_info[]
  )
 {
- int i;
+  int i;
   int f_index = -1;
   
   for( i = 0; i < _NumFuncs; i++ )
