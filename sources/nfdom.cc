@@ -10,6 +10,8 @@
 #include "rational.h"
 #include "gstatus.h"
 
+gRectArray<gNumber> *paytable;
+
 bool Dominates(const Nfg &N,
 	       const NFSupport &S, int pl, int a, int b, bool strong)
 {
@@ -20,12 +22,10 @@ bool Dominates(const Nfg &N,
   B.Freeze(pl);
   B.Set(pl, b);
 
-  gArray<gNumber> values(N.Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
   if (strong)  {
     do  {
-      gNumber ap = N.Payoff(A.GetOutcome(), pl).Evaluate(values);
-      gNumber bp = N.Payoff(B.GetOutcome(), pl).Evaluate(values);
+      gNumber ap = (*paytable)(A.GetOutcome()->GetNumber(), pl);
+      gNumber bp = (*paytable)(B.GetOutcome()->GetNumber(), pl);
       if (ap <= bp)  return false;
       A.NextContingency();
     } while (B.NextContingency());
@@ -36,8 +36,8 @@ bool Dominates(const Nfg &N,
   bool equal = true;
   
   do   {
-    gNumber ap = N.Payoff(A.GetOutcome(), pl).Evaluate(values);
-    gNumber bp = N.Payoff(B.GetOutcome(), pl).Evaluate(values);
+    gNumber ap = (*paytable)(A.GetOutcome()->GetNumber(), pl);
+    gNumber bp = (*paytable)(B.GetOutcome()->GetNumber(), pl);
     if (ap < bp)   return false;
     else if (ap > bp)  equal = false;
     A.NextContingency();
@@ -108,12 +108,19 @@ bool ComputeDominated(const Nfg &N, const NFSupport &S, NFSupport &newS,
 }
 
 
-NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, bool strong,
+NFSupport *ComputeDominated(const Nfg &N, NFSupport &S,
+                            const gArray<gNumber> &params, bool strong,
 			    const gArray<int> &players,
 			    gOutput &tracefile, gStatus &status)
 {
   NFSupport *newS = new NFSupport(S);
   bool any = false;
+
+  paytable = new gRectArray<gNumber>(N.NumOutcomes(), N.NumPlayers());
+  for (int outc = 1; outc <= N.NumOutcomes(); outc++)  {
+    for (int pl = 1; pl <= N.NumPlayers(); pl++)
+      (*paytable)(outc, pl) = N.Payoff(N.Outcomes()[outc], pl).Evaluate(params);
+  }
 
   for (int i = 1; i <= players.Length() && !status.Get(); i++)   {
     int pl = players[i];
@@ -121,6 +128,8 @@ NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, bool strong,
     any |= ComputeDominated(N, S, *newS, pl, strong, tracefile, status);
 // status.SetProgress((double)i/players.Length());
   }
+
+  delete paytable;
 
   if (!any || status.Get())  {
     delete newS;

@@ -76,7 +76,8 @@ static Portion *GSM_DeleteOutcome(Portion **param)
 }
 
 
-NFSupport *ComputeDominated(const Nfg &, NFSupport &S, bool strong,
+NFSupport *ComputeDominated(const Nfg &, NFSupport &S,
+                            const gArray<gNumber> &params, bool strong,
 			    const gArray<int> &players,
 			    gOutput &tracefile, gStatus &status);
 NFSupport *ComputeMixedDominated(const Nfg &, NFSupport &S, bool strong,
@@ -96,8 +97,7 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
   
   gWatch watch;
   gBlock<int> players(S->Game().NumPlayers());
-  int i;
-  for (i = 1; i <= players.Length(); i++)   players[i] = i;
+  for (int i = 1; i <= players.Length(); i++)   players[i] = i;
 
   NFSupport *T;
   Portion *por;
@@ -105,10 +105,13 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
   Nfg *N = (Nfg *) &S->Game();
   if (mixed)
     T = ComputeMixedDominated(*N, *S, strong, players,
-				((OutputPortion *) param[4])->Value(), gstatus);
-  else
-    T = ComputeDominated(*N, *S, strong, players,
+			      ((OutputPortion *) param[4])->Value(), gstatus);
+  else   {
+    gArray<gNumber> values(N->Parameters()->Dmnsn());
+    for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+    T = ComputeDominated(*N, *S, values, strong, players,
 			   ((OutputPortion *) param[4])->Value(), gstatus);
+  }
 
   por = (T) ? new NfSupportPortion(T) :
                 new NfSupportPortion(new NFSupport(*S));
