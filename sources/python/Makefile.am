@@ -15,6 +15,7 @@ SWIGFILES = \
 	typemaps.i
 
 EXTRA_DIST = \
+	borland.mak \
 	gambit.py \
 	gbt.py \
 	gbt_wrap_python.cc \
