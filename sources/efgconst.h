@@ -136,38 +136,13 @@ typedef enum {
 
 } guiEfgMenuItems;
 
-// Help system
-#define EFG_GUI_HELP                    "Extensive Form GUI"
-#define EFG_OUTCOME_HELP                "Outcomes GUI"
-#define EFG_ACTION_HELP                 "Action Menu"
-#define EFG_NODE_HELP                   "Node Menu"
-#define EFG_INFOSET_HELP                "Infoset Menu"
-#define EFG_TREE_HELP                   "Tree Menu"
-#define EFG_INSPECT_HELP                "Extensive Solutions Inspect"
-#define EFG_SOLVE_INSPECT_OPTIONS_HELP  "Extensive Form Inspect Options"
-#define EFG_SOLVE_OPTIONS_HELP          "Extensive Form Solution Options"
-#define EFG_MAKE_SUPPORT_HELP           "Creating EF Supports"
-#define EFG_SUPPORTS_HELP               "Examining EF Supports"
-#define EFG_STANDARD_HELP               "EFG Standard Solutions"
-#define EFG_CUSTOM_HELP                 "EFG Custom Solutions"
-#define EFG_SUBGAMESOLN_HELP            "EFG Solutions and Subgames"
-#define EFG_SOLN_SORT_HELP              "Sorting and Filtering Solutions"
-#define EFG_SOLNSTART_HELP              "EFG Custom Solutions"
-#define EFG_DATATYPE_HELP               "Data Types"
-#define EFG_GAMEINFO_HELP               "EFG Information"
-
-// sections in the defaults file(s)
-#define     SOLN_SECT                   "Soln-Defaults"
-#define     BSOLN_SHOW_SECT             "Behav-Soln-Show"
 
 // Different type-dependent values that need to be displayable in the
-// tree window.  These are accessed through the BaseTreeWindow->
-// TreeWindow->ExtensiveShow.  Also used in NodeInspect window.
+// tree window.
 
-typedef enum 
-{
-    tRealizProb, tIsetProb, tBeliefProb, tNodeValue,
-    tIsetValue, tBranchProb, tBranchVal
+typedef enum {
+  tRealizProb, tIsetProb, tBeliefProb, tNodeValue,
+  tIsetValue, tBranchProb, tBranchVal
 } TypedSolnValues;
 
 

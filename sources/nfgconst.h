@@ -74,36 +74,5 @@
 #define NFG_PROFILES_EDIT               704
 #define NFG_PROFILES_DELETE             705
 
-
-// Help system
-#define NFG_GUI_HELP                    "Normal Form GUI"
-#define NFG_OUTCOME_HELP                "Outcomes GUI"
-#define NFG_FEATURES_HELP               "Normal Form Features"
-#define NFG_SOLVE_HELP                  "Normal Form Solutions"
-#define NFG_INSPECT_HELP                "Normal Form Solution Inspect"
-#define NFG_ELIMDOM_INSPECT_HELP        "Elimdom Solutions Inspect"
-#define NFG_SOLVE_INSPECT_HELP          "Elimdom Solutions"
-#define NFG_SOLVE_INSPECT_OPTIONS_HELP  "Normal Form Inspect Options"
-#define NFG_EDIT_HELP                   "Normal Form Edit"
-#define NFG_SUPPORTS_HELP               "Examining NF Supports"
-#define NFG_MAKE_SUPPORT_HELP           "Creating NF Supports"
-#define NFG_STANDARD_HELP               "NFG Standard Solutions"
-#define NFG_CUSTOM_HELP                 "NFG Custom Solutions"
-#define NFG_SOLN_SORT_HELP              "Sorting and Filtering Solutions"
-#define NFG_SOLNSTART_HELP              "NFG Custom Solutions"
-#define NFG_DATATYPE_HELP               "Data Types"
-
-// help names for actual solution algorithms
-#define ENUMPURE_HELP                   "EnumPure"
-#define ENUMMIXED_HELP                  "EnumMixed"
-#define LP_HELP                         "LP"
-#define LCP_HELP                        "LCP"
-#define SIMPDIV_HELP                    "SimpDiv"
-#define LIAP_HELP                       "Liap"
-#define QRE_HELP                      "Qre"
-
-// Section names for the defaults file
-#define MSOLN_SHOW_SECT                 "Mixed-Soln-Show"
-
 #endif // NFGCONST_H
 

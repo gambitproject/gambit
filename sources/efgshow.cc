@@ -2100,7 +2100,7 @@ void EfgShow::OnHelpAbout(wxCommandEvent &)
 
 void EfgShow::OnHelpContents(wxCommandEvent &)
 {
-  wxHelpContents(EFG_GUI_HELP);
+  wxHelpContents("");
 }
 
 void EfgShow::OnCloseWindow(wxCloseEvent &p_event)
