@@ -275,8 +275,8 @@ PrecisionPortion::PrecisionPortion(gPrecision &value, bool ref)
 
 PrecisionPortion::~PrecisionPortion()
 {
-  if (!_ref)
-    delete _Value;
+  //  if (!_ref)
+  //  delete _Value;
 }
 
 gPrecision PrecisionPortion::Value(void) const
@@ -330,8 +330,8 @@ NumberPortion::NumberPortion(gNumber &value, bool ref)
 
 NumberPortion::~NumberPortion()
 {
-  if (!_ref)
-    delete _Value;
+  //  if (!_ref)
+  //  delete _Value;
 }
 
 const gNumber &NumberPortion::Value(void) const
@@ -384,8 +384,8 @@ TextPortion::TextPortion(gText &value, bool ref)
 
 TextPortion::~TextPortion()
 {
-  if (!_ref)
-    delete _Value;
+  //  if (!_ref)
+  //  delete _Value;
 }
 
 const gText &TextPortion::Value(void) const
@@ -445,8 +445,8 @@ BoolPortion::BoolPortion(gTriState &value, bool ref)
 
 BoolPortion::~BoolPortion()
 {
-  if (!_ref)  
-    delete _Value;
+  //  if (!_ref)  
+  //  delete _Value;
 }
 
 gTriState BoolPortion::Value(void) const
