@@ -240,6 +240,7 @@ void Qre(const Nfg &N, NFQreParams &params,
       if (params.fullGraph) {
 	int index = solutions.Append(MixedSolution(p, algorithmNfg_QRE));      
 	solutions[index].SetQre(Lambda, value);
+	solutions[index].SetEpsilon(params.Accuracy());
       }
 
       Lambda += params.delLam * pow(Lambda, (long)params.powLam);
@@ -250,6 +251,7 @@ void Qre(const Nfg &N, NFQreParams &params,
     if (!params.fullGraph) {
       int index = solutions.Append(MixedSolution(p, algorithmNfg_QRE));
       solutions[index].SetQre(Lambda, value);
+      solutions[index].SetEpsilon(params.Accuracy());
     }
 
     nevals = F.NumEvals();
@@ -259,6 +261,7 @@ void Qre(const Nfg &N, NFQreParams &params,
     if (!params.fullGraph) {
       int index = solutions.Append(MixedSolution(p, algorithmNfg_QRE));
       solutions[index].SetQre(Lambda, value);
+      solutions[index].SetEpsilon(params.Accuracy());
     }
     throw;
   }
@@ -446,6 +449,7 @@ void KQre(const Nfg &N, NFQreParams &params,
       if (params.fullGraph) {
 	i = solutions.Append(MixedSolution(p, algorithmNfg_QRE));      
 	solutions[i].SetQre(K, value);
+	solutions[i].SetEpsilon(params.Accuracy());
       }
       K_old=K;                              // keep last good solution
       lam_old=lambda;                            
@@ -460,6 +464,7 @@ void KQre(const Nfg &N, NFQreParams &params,
   {
     i = solutions.Append(MixedSolution(p, algorithmNfg_QRE));
     solutions[i].SetQre(K_old, value);
+    solutions[i].SetEpsilon(params.Accuracy());
   }
 
   nevals = F.NumEvals();

@@ -154,14 +154,11 @@ static void WritePXIHeader(gOutput &pxifile, const Efg &E,
 static void AddSolution(gList<BehavSolution> &solutions,
 			const BehavProfile<double> &profile,
 			double lambda,
-			double value)
+			double value, double epsilon)
 {
   int i = solutions.Append(BehavSolution(profile, algorithmEfg_QRE_EFG));
   solutions[i].SetQre(lambda, value);
-  solutions[i].SetEpsilon(0.0001);
-  //  if(solutions[i].IsNash() == triTRUE) {
-  //    solutions[i].SetIsSequential(triTRUE);
-  //  }
+  solutions[i].SetEpsilon(epsilon);
 }
 
 extern void Project(gVector<double> &, const gArray<int> &);
@@ -251,7 +248,7 @@ void Qre(const Efg &E, EFQreParams &params,
 	} 
 	
 	if (params.fullGraph)
-	  AddSolution(solutions, p, Lambda, value);
+	  AddSolution(solutions, p, Lambda, value, params.Accuracy());
 	pold=p;                              // pold is last good solution
       }
 
@@ -261,14 +258,14 @@ void Qre(const Efg &E, EFQreParams &params,
     }
 
     if (!params.fullGraph)
-      AddSolution(solutions, pold, Lambda, value);
+      AddSolution(solutions, pold, Lambda, value, params.Accuracy());
     
     nevals = F.NumEvals();
     nits = 0;
   }
   catch (gSignalBreak &E) {
     if (!params.fullGraph)
-      AddSolution(solutions, pold, Lambda, value);
+      AddSolution(solutions, pold, Lambda, value, params.Accuracy());
 
     nevals = F.NumEvals();
     nits = 0;
