@@ -2055,8 +2055,6 @@ ListPortion::~ListPortion()
 
 void ListPortion::SetGame(void* game, bool efg)
 {
-  _Game = game;
-  _GameIsEfg = efg;
   int i;
   for(i=1; i<=_Value->Length(); i++)
     (*_Value)[i]->SetGame(game, efg);
@@ -2421,11 +2419,6 @@ int ListPortion::Insert(Portion* item, int index)
   assert(item->Spec().Type != porREFERENCE);
 #endif
 
-  if( item->Game() != Game() || item->GameIsEfg() != GameIsEfg() )
-  {
-    _Game = NULL;
-  }
-  
 
   item_type = item->Spec();
   if(item->Spec().ListDepth == 0)
@@ -2454,8 +2447,6 @@ int ListPortion::Insert(Portion* item, int index)
     _DataType = item_type.Type;
     ((ListPortion*) Original())->_DataType = _DataType;
     result = _Value->Insert(item, index);
-    _Game = item->Game();
-    _GameIsEfg = item->GameIsEfg();
   }
   else  // inserting into an existing list
   {

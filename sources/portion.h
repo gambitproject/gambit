@@ -31,11 +31,12 @@ class Portion
 private:
   static int _NumObj;
 
-protected:
   Portion* _Original;
   void* _Game;
   bool _GameIsEfg;
 
+
+protected:
   Portion(void);
 
   static long _WriteWidth;
