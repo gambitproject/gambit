@@ -65,7 +65,7 @@ public:
     ( 
      const gString& name, 
      const PortionType& type,
-     Portion* default_value, 
+     Portion* default_value = NO_DEFAULT_VALUE, 
      const bool pass_by_ref = false,
      const int option = 0
      );
@@ -126,7 +126,8 @@ public:
   void SetFuncInfo
     (
      Portion*        (*func_ptr)(Portion**),
-     const int       num_params = 0 
+     const int       num_params = 0, 
+     const ParamInfoType param_info[] = 0
      );
 
   void SetFuncInfo

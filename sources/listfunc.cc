@@ -130,6 +130,21 @@ void Init_listfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
+
+  ParamInfoType x_Float[] =
+  {
+    ParamInfoType( "x", porFLOAT )
+  };
+  ParamInfoType x_Int[] =
+  {
+    ParamInfoType( "x", porINTEGER )
+  };
+  ParamInfoType x_Rational[] =
+  {
+    ParamInfoType( "x", porRATIONAL )
+  };
+
+
   FuncObj = new FuncDescObj("Length");
   FuncObj->SetFuncInfo(GSM_LengthList, 1);
   FuncObj->SetParamInfo(GSM_LengthList, 0, "list", porALL | porLIST,
@@ -165,39 +180,39 @@ void Init_listfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Text");
-  FuncObj->SetFuncInfo(GSM_TextInt, 1);
-  FuncObj->SetParamInfo(GSM_TextInt, 0, "x", porINTEGER);
+  FuncObj->SetFuncInfo(GSM_TextInt, 1, x_Int);
+  // FuncObj->SetParamInfo(GSM_TextInt, 0, "x", porINTEGER);
 
-  FuncObj->SetFuncInfo(GSM_TextFloat, 1);
-  FuncObj->SetParamInfo(GSM_TextFloat, 0, "x", porFLOAT);
+  FuncObj->SetFuncInfo(GSM_TextFloat, 1, x_Float);
+  // FuncObj->SetParamInfo(GSM_TextFloat, 0, "x", porFLOAT);
 
-  FuncObj->SetFuncInfo(GSM_TextRat, 1);
-  FuncObj->SetParamInfo(GSM_TextRat, 0, "x", porRATIONAL);
+  FuncObj->SetFuncInfo(GSM_TextRat, 1, x_Rational);
+  // FuncObj->SetParamInfo(GSM_TextRat, 0, "x", porRATIONAL);
 
   FuncObj->SetFuncInfo(GSM_TextText, 1);
   FuncObj->SetParamInfo(GSM_TextText, 0, "x", porTEXT);
   gsm->AddFunction(FuncObj);
   
   FuncObj = new FuncDescObj("Float");
-  FuncObj->SetFuncInfo(GSM_FloatRational, 1);
-  FuncObj->SetParamInfo(GSM_FloatRational, 0, "x", porRATIONAL);
+  FuncObj->SetFuncInfo(GSM_FloatRational, 1, x_Rational);
+  // FuncObj->SetParamInfo(GSM_FloatRational, 0, "x", porRATIONAL);
 
-  FuncObj->SetFuncInfo(GSM_FloatInteger, 1);
-  FuncObj->SetParamInfo(GSM_FloatInteger, 0, "x", porINTEGER);
+  FuncObj->SetFuncInfo(GSM_FloatInteger, 1, x_Int);
+  // FuncObj->SetParamInfo(GSM_FloatInteger, 0, "x", porINTEGER);
 
-  FuncObj->SetFuncInfo(GSM_FloatFloat, 1);
-  FuncObj->SetParamInfo(GSM_FloatFloat, 0, "x", porFLOAT);
+  FuncObj->SetFuncInfo(GSM_FloatFloat, 1, x_Float);
+  // FuncObj->SetParamInfo(GSM_FloatFloat, 0, "x", porFLOAT);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Rational");
-  FuncObj->SetFuncInfo(GSM_RationalFloat, 1);
-  FuncObj->SetParamInfo(GSM_RationalFloat, 0, "x", porFLOAT);
+  FuncObj->SetFuncInfo(GSM_RationalFloat, 1, x_Float);
+  // FuncObj->SetParamInfo(GSM_RationalFloat, 0, "x", porFLOAT);
   
-  FuncObj->SetFuncInfo(GSM_RationalInteger, 1);
-  FuncObj->SetParamInfo(GSM_RationalInteger, 0, "x", porINTEGER);
+  FuncObj->SetFuncInfo(GSM_RationalInteger, 1, x_Int);
+  // FuncObj->SetParamInfo(GSM_RationalInteger, 0, "x", porINTEGER);
 
-  FuncObj->SetFuncInfo(GSM_RationalRational, 1);
-  FuncObj->SetParamInfo(GSM_RationalRational, 0, "x", porRATIONAL);
+  FuncObj->SetFuncInfo(GSM_RationalRational, 1, x_Rational);
+  // FuncObj->SetParamInfo(GSM_RationalRational, 0, "x", porRATIONAL);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("StartWatch");

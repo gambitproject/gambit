@@ -226,7 +226,8 @@ FuncDescObj::~FuncDescObj()
 void FuncDescObj::SetFuncInfo
 (
  Portion*  (*func_ptr)(Portion**),
- const int  num_params
+ const int  num_params,
+ const ParamInfoType param_info[]
  )
 {
   int i;
@@ -245,6 +246,9 @@ void FuncDescObj::SetFuncInfo
   
   _FuncInfo[ _NumFuncs - 1 ].UserDefined = false;
   _FuncInfo[ _NumFuncs - 1 ].FuncPtr = func_ptr;
+
+  if( param_info != 0 )
+    SetParamInfo( func_ptr, param_info );
 }
 
 
@@ -477,7 +481,7 @@ void FuncDescObj::SetParamInfo
 {
   int i;
   int f_index = -1;
-  
+
   for( i = 0; i < _NumFuncs; i++ )
   {
     if( !_FuncInfo[ i ].UserDefined && ( _FuncInfo[ i ].FuncPtr == func_ptr ) )
