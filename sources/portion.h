@@ -956,6 +956,8 @@ public:
   bool BelongsToGame( void* game ) const;  
   bool MatchGameData( void* game, void* data ) const;  
 
+  bool IsInteger(void) const;
+
   bool ContainsListsOnly(void) const;
 
   const gList<Portion *> &Value(void) const;

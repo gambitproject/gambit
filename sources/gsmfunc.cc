@@ -1200,7 +1200,7 @@ Portion *CallFuncObj::CallListFunction(GSM* gsm, Portion **ParamIn)
 
 
 bool TypeMatch(Portion* p, PortionSpec ExpectedSpec, 
-		      bool Listable, bool return_type_check = false)
+	       bool Listable, bool return_type_check = false)
 {
   if (p == 0 && ExpectedSpec.Type == porUNDEFINED)
     return true;
@@ -1213,10 +1213,11 @@ bool TypeMatch(Portion* p, PortionSpec ExpectedSpec,
   if (p->Spec().Type == porNULL)
     CalledSpec = ((NullPortion*) p)->DataType();
 
-  // here's a guess at something that will work for matching int  
-  if (CalledSpec.Type == porNUMBER && ExpectedSpec.Type == porINTEGER &&
-      ((NumberPortion *) p)->Value().IsInteger())
+  if (CalledSpec.Type == porNUMBER && ExpectedSpec.Type == porINTEGER) {
+    if ((CalledSpec.ListDepth > 0 && ((ListPortion *) p)->IsInteger()) ||
+	(CalledSpec.ListDepth == 0 && ((NumberPortion *) p)->Value().IsInteger()))
     CalledSpec.Type = porINTEGER;
+  }
 
   if (CalledSpec.Type & ExpectedSpec.Type)  {
     if(CalledSpec.ListDepth == ExpectedSpec.ListDepth)

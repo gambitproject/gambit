@@ -1732,12 +1732,24 @@ bool ListPortion::MatchGameData( void* game, void* data ) const
   return false;
 }
 
-
-
 const gList<Portion *> &ListPortion::Value(void) const
 { return *rep->value; }
 
+bool ListPortion::IsInteger(void) const
+{
+  if (rep->_DataType != porNUMBER)  return false;
 
+  bool result = true;
+
+  for (int i = 1; result && i <= rep->value->Length(); i++) { 
+    Portion *p = (*rep->value)[i];
+    if (p->Spec().ListDepth > 0)
+      result = result && ((ListPortion *) p)->IsInteger();
+    else
+      result = result && ((NumberPortion *) p)->Value().IsInteger();
+  }
+  return result;
+}
 
 PortionSpec ListPortion::Spec(void) const
 { 
