@@ -39,7 +39,7 @@
 #include "efgsolvd.h"
 
 #include "dlefgplayer.h"
-#include "dlmoveadd.h"
+#include "dlinsertmove.h"
 #include "dlefgdelete.h"
 #include "dlefgoutcome.h"
 #include "dlefgpayoff.h"
@@ -93,8 +93,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, EfgShow::OnFileMRUFile)
   EVT_MENU(efgmenuEDIT_INSERT, EfgShow::OnEditInsert)
   EVT_MENU(efgmenuEDIT_DELETE, EfgShow::OnEditDelete)
-  EVT_MENU(efgmenuEDIT_NODE_ADD, EfgShow::OnEditNodeAdd)
-  EVT_MENU(efgmenuEDIT_NODE_INSERT, EfgShow::OnEditNodeInsert)
   EVT_MENU(efgmenuEDIT_ACTION_DELETE, EfgShow::OnEditActionDelete)
   EVT_MENU(efgmenuEDIT_ACTION_INSERT, EfgShow::OnEditActionInsert)
   EVT_MENU(efgmenuEDIT_ACTION_APPEND, EfgShow::OnEditActionAppend)
@@ -574,11 +572,6 @@ void EfgShow::MakeMenus(void)
   editMenu->Append(efgmenuEDIT_DELETE, "&Delete...", "Delete an object");
   editMenu->AppendSeparator();
 
-  wxMenu *nodeMenu = new wxMenu;
-  nodeMenu->Append(efgmenuEDIT_NODE_ADD, "&Add Move", "Add a move");
-  nodeMenu->Append(efgmenuEDIT_NODE_INSERT, "&Insert Move",
-		   "Insert move at cursor");
-
   wxMenu *actionMenu = new wxMenu;
   actionMenu->Append(efgmenuEDIT_ACTION_DELETE, "&Delete",
 		     "Delete an action from cursor information set");
@@ -613,7 +606,6 @@ void EfgShow::MakeMenus(void)
   treeMenu->Append(efgmenuEDIT_TREE_INFOSETS, "&Infosets",
 		   "Edit/View infosets");
 
-  editMenu->Append(efgmenuEDIT_NODE, "&Node", nodeMenu, "Edit the node");
   editMenu->Append(efgmenuEDIT_ACTIONS, "&Actions", actionMenu, 
 		   "Edit actions");
   editMenu->Append(efgmenuEDIT_INFOSET, "&Infoset", infosetMenu,
@@ -813,12 +805,9 @@ void EfgShow::UpdateMenus(void)
   Node *cursor = Cursor();
   wxMenuBar *menuBar = GetMenuBar();
 
+  menuBar->Enable(efgmenuEDIT_INSERT, (cursor) ? true : false);
   menuBar->Enable(efgmenuEDIT_DELETE,
 		  (cursor && m_efg.NumChildren(cursor) > 0) ? true : false);
-
-  menuBar->Enable(efgmenuEDIT_NODE_ADD,
-		  (!cursor || m_efg.NumChildren(cursor) > 0) ? false : true);
-  menuBar->Enable(efgmenuEDIT_NODE_INSERT, (cursor) ? true : false);
 
   menuBar->Enable(efgmenuEDIT_INFOSET_MERGE, false);
   menuBar->Enable(efgmenuEDIT_INFOSET_BREAK, 
@@ -1035,8 +1024,24 @@ void EfgShow::OnFileMRUFile(wxCommandEvent &p_event)
 //----------------------------------------------------------------------
 
 void EfgShow::OnEditInsert(wxCommandEvent &)
-{
+{ 
+  dialogInsertMove dialog(this, m_efg);
 
+  if (dialog.ShowModal() == wxID_OK)  {
+    try {
+      if (!dialog.GetInfoset()) {
+	m_efg.InsertNode(Cursor(), dialog.GetPlayer(), dialog.GetActions());
+	OnTreeChanged(true, true);
+      }
+      else {
+	m_efg.InsertNode(Cursor(), dialog.GetInfoset());
+	OnTreeChanged(true, false);
+      }
+    }
+    catch (gException &ex) {
+      guiExceptionDialog(ex.Description(), this);
+    }
+  }
 }
 
 void EfgShow::OnEditDelete(wxCommandEvent &)
@@ -1058,81 +1063,6 @@ void EfgShow::OnEditDelete(wxCommandEvent &)
   }
   catch (gException &ex) {
     guiExceptionDialog(ex.Description(), this);
-  }
-}
-
-//----------------------------------------------------------------------
-//             EfgShow: Menu handlers - Edit->Node menu
-//----------------------------------------------------------------------
-
-void EfgShow::OnEditNodeAdd(wxCommandEvent &)
-{
-  static int branches = 2; // make this static so it remembers the last entry
-  static EFPlayer *player = 0;
-  static Infoset *infoset = 0;
-  static Efg::Game *last_ef = 0; // need this to make sure player,infoset are valid
-
-  if (last_ef != &m_efg)  {
-    player = 0;
-    infoset = 0;
-    last_ef = &m_efg;
-  }
-    
-  dialogMoveAdd dialog(this, m_efg, "Add Move", player, infoset, branches);
-
-  if (dialog.ShowModal() == wxID_OK)  {
-    NodeAddMode mode = dialog.GetAddMode();
-    player = dialog.GetPlayer();
-    infoset = dialog.GetInfoset();
-    branches = dialog.GetActions();
-    try {
-      if (mode == NodeAddNew) { 
-	m_efg.AppendNode(Cursor(), player, branches);
-      }
-      else {
-	m_efg.AppendNode(Cursor(), infoset);
-      }
-    }
-    catch (gException &ex) {
-      guiExceptionDialog(ex.Description(), this);
-    }
-  }
-}
-
-void EfgShow::OnEditNodeInsert(wxCommandEvent &)
-{
-  static int branches = 2; // make this static so it remembers the last entry
-  static EFPlayer *player = 0;
-  static Infoset *infoset = 0;
-  static Efg::Game *last_ef = 0; // need this to make sure player,infoset are valid
-
-  if (last_ef != &m_efg)  {
-    player = 0;
-    infoset = 0;
-    last_ef = &m_efg;
-  }
-    
-  dialogMoveAdd dialog(this, m_efg, "Insert Move", player, infoset, branches);
-
-  if (dialog.ShowModal() == wxID_OK)  {
-    NodeAddMode mode = dialog.GetAddMode();
-    player = dialog.GetPlayer();
-    infoset = dialog.GetInfoset();
-    branches = dialog.GetActions();
-
-    try {
-      if (mode == NodeAddNew) {
-	m_efg.InsertNode(Cursor(), player, branches);
-      }
-      else {
-	m_efg.InsertNode(Cursor(), infoset);
-      }
-
-      m_treeWindow->SetCursorPosition(Cursor()->GetParent());
-    }
-    catch (gException &ex) {
-      guiExceptionDialog(ex.Description(), this);
-    }
   }
 }
 

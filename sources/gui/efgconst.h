@@ -14,10 +14,6 @@ typedef enum {
   efgmenuEDIT_INSERT = 1100,
   efgmenuEDIT_DELETE = 1101,
 
-  efgmenuEDIT_NODE = 900,
-  efgmenuEDIT_NODE_ADD = 1105,
-  efgmenuEDIT_NODE_INSERT = 1109,
-
   efgmenuEDIT_ACTIONS = 910,
   efgmenuEDIT_ACTION_DELETE = 1205,
   efgmenuEDIT_ACTION_INSERT = 1206,

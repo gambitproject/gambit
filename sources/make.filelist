@@ -100,7 +100,8 @@ GUI_SOURCES = gambit.cc treewin.cc treedraw.cc \
 	      efgsolvd.cc efgoutcome.cc efgsupport.cc \
               nfgsolvd.cc dlefg.cc dlnfg.cc \
               behavfilter.cc nfgshow.cc mixedfilter.cc \
-              wxio.cc dlsupport.cc dlefgproperties.cc dlnodeproperties.cc \
+              wxio.cc dlsupport.cc \
+	      dlefgproperties.cc dlnodeproperties.cc dlinsertmove.cc \
               efgprofile.cc efgnavigate.cc behavedit.cc efgprint.cc \
               nfgtable.cc nfgnavigate.cc nfgprofile.cc mixededit.cc \
               nfgprint.cc nfgoutcome.cc nfgsupport.cc \

@@ -84,8 +84,6 @@ const int idTYPE_RADIOBOX = 501;
 const int idNUM_RADIOBOX = 502;
 
 // in dlefg.cc
-const int idMOVE_PLAYER_LISTBOX = 1011;
-const int idMOVE_INFOSET_LISTBOX = 1012;
 const int idMOVE_ANCESTOR_LISTBOX = 1013;
 const int idINFOSET_EDIT_BUTTON = 1021;
 const int idINFOSET_PLAYER_LISTBOX = 1022;

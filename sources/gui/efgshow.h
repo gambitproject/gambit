@@ -72,9 +72,6 @@ private:
   void OnEditInsert(wxCommandEvent &);
   void OnEditDelete(wxCommandEvent &);
 
-  void OnEditNodeAdd(wxCommandEvent &);
-  void OnEditNodeInsert(wxCommandEvent &);
-
   void OnEditActionDelete(wxCommandEvent &);
   void OnEditActionInsert(wxCommandEvent &);
   void OnEditActionAppend(wxCommandEvent &);
