@@ -77,6 +77,7 @@ EditAccelDialog::EditAccelDialog(gList<Accel> &acc_,const gArray<AccelEvent> &ev
 	wxDialogBox(parent, title, TRUE),acc(acc_),events(events_)
 {
 // Create panel items
+new wxGroupBox(this, "Key", 4, 2, 212, 218, 0, "key_box"); // does htis have to be first?
 key_text = new wxText(this, (wxFunction)key_text_func, NULL, "", 21, 36, 28, 30, 0, "key_text");
 key_choice = new wxChoice(this, (wxFunction)key_choice_func, NULL, 68, 36, 105, -1,NUM_KEYS, key_names, 0, "key_choice");
 
@@ -90,7 +91,7 @@ wxButton *delete_button = new wxButton(this, (wxFunction)delete_func, "Delete", 
 wxButton *close_button = new wxButton(this, (wxFunction)close_func, "Close", 234, 244, -1, -1, 0, "close_button");
 key_ctrl = new wxRadioBox(this, NULL, "Ctrl", 23, 78, -1, -1, 3, accel_state_str, 3, 0, "ctrl_state");
 key_shift = new wxRadioBox(this, NULL, "Shift", 22, 143, -1, -1, 3,accel_state_str, 3, 0, "shift_state");
-new wxGroupBox(this, "Key", 4, 2, 212, 218, 0, "key_box");
+
 
 add_button->SetClientData((char *)this);
 delete_button->SetClientData((char *)this);
