@@ -133,6 +133,7 @@ int main()
 
   gRectangle<gDouble> Cube(bottoms, tops); 
 
+/*
   // First System
   gPolyList<gRational> test_bss1(&Space,&ReverseDegLex);
   test_bss1 += pw;
@@ -141,12 +142,26 @@ int main()
   test_bss1 += pz;
   test_bss1 += pa;
   test_bss1 += pb;
+*/
+
+
+  gList<gPolyList<gRational> > input_list;
+  gPolyList<gRational> list1(&Space,&ReverseDegLex);
+  gPolyList<gRational> list2(&Space,&ReverseDegLex);
+  list1 += pw;
+  list1 += px;
+  list1 += py;
+  list2 += pz;
+  list2 += pa;
+  list2 += pb;
+  input_list += list1;
+  input_list += list2;
 
   gWatch timer;
 
   timer.Start();
 
-  EquiSolv<gRational> quickie(test_bss1);
+  EquiSolv<gRational> quickie(input_list);
 
 /*
   gTree<gPoly<gRational> > partials = quickie.TreeOfPartials(test_bss1[4]);
@@ -201,131 +216,4 @@ int main()
 
 exit(0);
 
-  // Second System
-
-/* 2x2x2x2 game form with no cubic terms */
-  gw = "3 - 2n2 + 5n3 - 4n4 + 7n2 * n3 - 4n2 * n4 + 25n3 * n4";    pw = gw;
-  gx = "4 + n1 - 3n3 - 7n4 + 5n1 * n3 - 6n1 * n4 - 10n3 * n4";     px = gx;
-  gy = "7 - 2n1 + 4n2 + 37n4 + 7n1 * n2 - 3n1 * n4 - 5n2 * n4";    py = gy;
-  gz = "25 + 4n1 - -2n2 - 3n3 + 5n1 * n2 - 6n1 * n3 - 2n2 * n3";   pz = gz;
-/**/
-  
-  gPolyList<gRational> test_bss2(&Space,&ReverseDegLex);
-  test_bss2 += pw;
-  test_bss2 += px;
-  test_bss2 += py;
-  test_bss2 += pz;
-
-  timer.Start();
-
-  EquiSolv<gRational> quickie2(test_bss2);
-
-/*
-  if (quickie2.MightHaveSingularRoots())
-    gout << "The system is potentially singular.\n";
-  else
-    gout << "The system is guaranteed to have only regular roots.\n";
-
-  timer.Stop();
-  gout << "The EquiSolv computation of potential singularity took " 
-    << (int)timer.Elapsed() << " seconds.\n\n";
-*/
-
-  if (quickie2.FindRoots(Cube,1000000))
-    gout << "The system, for totally mixed equilibrium of a 2x2x2x2 game\n"
-	 << "without cubic terms, is\n" 
-	 << quickie2.UnderlyingEquations() 
-	 << "It has the following roots in [-4,4]^4:\n"
-	 << quickie2.RootList();
-  else
-    gout << "The system\n" << quickie2.UnderlyingEquations()
-	 << " could not be resolved by FindRootsRec.\n";
-
-  timer.Stop();
-  gout << "The EquiSolv computation of roots using FindRootsRec took " 
-    << (int)timer.Elapsed() << " seconds.\n\n";
-
-
-  timer.Start();
-
-
-  if (quickie2.FindRoots(Cube,100000))
-    gout << "The system, for totally mixed equilibrium of a 2x2x2x2 game\n"
-	 << "without cubic terms, is\n" 
-	 << quickie2.UnderlyingEquations() 
-	 << "It has the following roots in [-4,4]^4:\n"
-	 << quickie2.RootList();
-  else
-    gout << "The system\n" << quickie2.UnderlyingEquations()
-	 << " could not be resolved by FindRootsRec.\n";
-
-  timer.Stop();
-  gout << "The EquiSolv computation of roots using FindRoots took " 
-    << (int)timer.Elapsed() << " seconds.\n\n";
-
-  // Third System
-
-/* 2x2x2x2 game form */
-  gw = "3 - 2n2 + 5n3 - 4n4 + 7n2 * n3 - 4n2 * n4 + 5n3 * n4 + n2 * n3 * n4";  
-  pw = gw;
-  gx = "4 + n1 - 3n3 - 7n4 + 5n1 * n3 - 6n1 * n4 - 10n3 * n4 + n1 * n3 * n4";
-  px = gx;
-  gy = "7 - 2n1 + 4n2 + 37n4 + 7n1 * n2 - 3n1 * n4 - 5n2 * n4 + n1 * n2 * n4";
-  py = gy;
-  gz = "7 + 4n1 - -2n2 - 3n3 + 5n1 * n2 - 6n1 * n3 - 2n2 * n3 + n1 * n2 * n3";
-  pz = gz;
-/**/
-  
-  gPolyList<gRational> test_bss3(&Space,&ReverseDegLex);
-  test_bss3 += pw;
-  test_bss3 += px;
-  test_bss3 += py;
-  test_bss3 += pz;
-
-  timer.Start();
-
-  EquiSolv<gRational> quickie3(test_bss3);
-
-/*
-  if (quickie3.MightHaveSingularRoots())
-    gout << "The system is potentially singular.\n";
-  else
-    gout << "The system is guaranteed to have only regular roots.\n";
-
-  timer.Stop();
-  gout << "The EquiSolv computation of potential singularity took " 
-    << (int)timer.Elapsed() << " seconds.\n\n";
-*/
-
-  if (quickie3.FindRoots(Cube,100000))
-    gout << "The system, for totally mixed equilibrium of a 2x2x2x2 game "
-	 << "is\n" 
-	 << quickie3.UnderlyingEquations() 
-	 << "It has the following roots in [-4,4]^4:\n"
-	 << quickie3.RootList();
-  else
-    gout << "The system\n" << quickie3.UnderlyingEquations()
-	 << " could not be resolved by FindRootsRec.\n\n";
-
-  timer.Stop();
-  gout << "The EquiSolv computation of roots took " 
-    << (int)timer.Elapsed() << " seconds.\n";
-
-  timer.Start();
-
-  if (quickie3.FindRoots(Cube,100000))
-    gout << "The system, for totally mixed equilibrium of a 2x2x2x2 game "
-	 << "is\n" 
-	 << quickie3.UnderlyingEquations() 
-	 << "It has the following roots in [-4,4]^4:\n"
-	 << quickie3.RootList();
-  else
-    gout << "The system\n" << quickie3.UnderlyingEquations()
-	 << " could not be resolved by FindRootsRec.\n\n";
-
-  timer.Stop();
-  gout << "The EquiSolv computation of roots took " 
-    << (int)timer.Elapsed() << " seconds.\n";
-
-  exit(0);
 }
