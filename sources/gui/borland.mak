@@ -59,6 +59,7 @@ gambit_SOURCES = \
 	outcomes.cc \
         prefs.cc \
 	profile.cc \
+	support.cc \
 	treewin.cc \
         valnumber.cc \
         wxstatus.cc 

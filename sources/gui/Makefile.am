@@ -88,6 +88,8 @@ gambit_SOURCES = \
 	prefs.h \
 	profile.cc \
 	profile.h \
+	support.cc \
+	support.h \
 	treewin.cc \
 	treewin.h \
 	valnumber.cc \

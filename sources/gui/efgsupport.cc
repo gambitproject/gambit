@@ -31,6 +31,93 @@
 #include "efgsupport.h"
 #include "id.h"
 
+//==========================================================================
+//                     class gbtCmdAddAction
+//==========================================================================
+
+//
+// Add an action to the current support
+//
+class gbtCmdAddAction : public gbtGameCommand {
+private:
+  gbtEfgAction m_action;
+
+public:
+  gbtCmdAddAction(gbtEfgAction p_action) : m_action(p_action) { }
+  virtual ~gbtCmdAddAction() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdAddAction::Do(gbtGameDocument *p_doc)
+{
+  p_doc->GetEfgSupportList().GetCurrent().AddAction(m_action);
+}
+
+//==========================================================================
+//                    class gbtCmdRemoveAction
+//==========================================================================
+
+//
+// Remove an action from the current support
+//
+class gbtCmdRemoveAction : public gbtGameCommand {
+private:
+  gbtEfgAction m_action;
+
+public:
+  gbtCmdRemoveAction(gbtEfgAction p_action) : m_action(p_action) { }
+  virtual ~gbtCmdRemoveAction() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdRemoveAction::Do(gbtGameDocument *p_doc)
+{
+  p_doc->GetEfgSupportList().GetCurrent().RemoveAction(m_action);
+}
+
+//==========================================================================
+//                    class gbtCmdSetEfgSupport
+//==========================================================================
+
+//
+// Make a support the currently-selected support
+//
+class gbtCmdSetEfgSupport : public gbtGameCommand {
+private:
+  int m_index;
+
+public:
+  gbtCmdSetEfgSupport(int p_index) : m_index(p_index) { }
+  virtual ~gbtCmdSetEfgSupport() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdSetEfgSupport::Do(gbtGameDocument *p_doc)
+{
+  p_doc->GetEfgSupportList().SetCurrentIndex(m_index);
+}
+
+//==========================================================================
+//                     class gbtEfgSupportWindow
+//==========================================================================
+
+const int GBT_CONTROL_ACTION_TREE = 8000;
+const int GBT_CONTROL_SUPPORT_LIST = 8001;
+const int GBT_CONTROL_SUPPORT_PREV = 8002;
+const int GBT_CONTROL_SUPPORT_NEXT = 8003;
+
 class gbtEfgSupportWindow : public wxPanel, public gbtGameView {
 private:
   wxChoice *m_supportList;
@@ -62,9 +149,7 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
-const int idACTIONTREE = 8003;
-
-class widgetActionTree : public wxTreeCtrl {
+class gbtActionTreeCtrl : public wxTreeCtrl {
 private:
   gbtEfgSupportWindow *m_parent;
   wxMenu *m_menu;
@@ -74,19 +159,21 @@ private:
   void OnKeypress(wxTreeEvent &);
 
 public:
-  widgetActionTree(gbtEfgSupportWindow *p_parent);
+  gbtActionTreeCtrl(gbtEfgSupportWindow *p_parent);
 
   DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(widgetActionTree, wxTreeCtrl)
-  EVT_TREE_KEY_DOWN(idACTIONTREE, widgetActionTree::OnKeypress)
-  EVT_TREE_ITEM_MIDDLE_CLICK(idACTIONTREE, widgetActionTree::OnMiddleClick)
-  EVT_TREE_ITEM_RIGHT_CLICK(idACTIONTREE, widgetActionTree::OnRightClick)
+BEGIN_EVENT_TABLE(gbtActionTreeCtrl, wxTreeCtrl)
+  EVT_TREE_KEY_DOWN(GBT_CONTROL_ACTION_TREE, gbtActionTreeCtrl::OnKeypress)
+  EVT_TREE_ITEM_MIDDLE_CLICK(GBT_CONTROL_ACTION_TREE, 
+			     gbtActionTreeCtrl::OnMiddleClick)
+  EVT_TREE_ITEM_RIGHT_CLICK(GBT_CONTROL_ACTION_TREE,
+			    gbtActionTreeCtrl::OnRightClick)
 END_EVENT_TABLE()
 
-widgetActionTree::widgetActionTree(gbtEfgSupportWindow *p_parent)
-  : wxTreeCtrl(p_parent, idACTIONTREE), m_parent(p_parent)
+gbtActionTreeCtrl::gbtActionTreeCtrl(gbtEfgSupportWindow *p_parent)
+  : wxTreeCtrl(p_parent, GBT_CONTROL_ACTION_TREE), m_parent(p_parent)
 { 
   m_menu = new wxMenu;
   m_menu->Append(GBT_MENU_SUPPORTS_DUPLICATE, _("Duplicate support"),
@@ -95,14 +182,14 @@ widgetActionTree::widgetActionTree(gbtEfgSupportWindow *p_parent)
 		 _("Delete this support"));
 }
 
-void widgetActionTree::OnRightClick(wxTreeEvent &p_event)
+void gbtActionTreeCtrl::OnRightClick(wxTreeEvent &p_event)
 {
   // Cannot delete the "full support"
   m_menu->Enable(GBT_MENU_SUPPORTS_DELETE, (m_parent->GetSupport() > 0));
   PopupMenu(m_menu, p_event.GetPoint());
 }
 
-void widgetActionTree::OnKeypress(wxTreeEvent &p_event)
+void gbtActionTreeCtrl::OnKeypress(wxTreeEvent &p_event)
 {
   if (m_parent->GetSupport() == 0) {
     return;
@@ -112,7 +199,7 @@ void widgetActionTree::OnKeypress(wxTreeEvent &p_event)
   }
 }
 
-void widgetActionTree::OnMiddleClick(wxTreeEvent &p_event)
+void gbtActionTreeCtrl::OnMiddleClick(wxTreeEvent &p_event)
 {
   if (m_parent->GetSupport() == 0) {
     return;
@@ -124,15 +211,12 @@ void widgetActionTree::OnMiddleClick(wxTreeEvent &p_event)
 //                       class gbtEfgSupportWindow 
 //===========================================================================
 
-const int idSUPPORTLISTCHOICE = 8000;
-const int idSUPPORTPREVBUTTON = 8001;
-const int idSUPPORTNEXTBUTTON = 8002;
-
 BEGIN_EVENT_TABLE(gbtEfgSupportWindow, wxPanel)
-  EVT_CHOICE(idSUPPORTLISTCHOICE, gbtEfgSupportWindow::OnSupportList)
-  EVT_BUTTON(idSUPPORTPREVBUTTON, gbtEfgSupportWindow::OnSupportPrev)
-  EVT_BUTTON(idSUPPORTNEXTBUTTON, gbtEfgSupportWindow::OnSupportNext)
-  EVT_TREE_ITEM_COLLAPSING(idACTIONTREE, gbtEfgSupportWindow::OnTreeItemCollapse)
+  EVT_CHOICE(GBT_CONTROL_SUPPORT_LIST, gbtEfgSupportWindow::OnSupportList)
+  EVT_BUTTON(GBT_CONTROL_SUPPORT_PREV, gbtEfgSupportWindow::OnSupportPrev)
+  EVT_BUTTON(GBT_CONTROL_SUPPORT_NEXT, gbtEfgSupportWindow::OnSupportNext)
+  EVT_TREE_ITEM_COLLAPSING(GBT_CONTROL_ACTION_TREE, 
+			   gbtEfgSupportWindow::OnTreeItemCollapse)
 END_EVENT_TABLE()
 
 gbtEfgSupportWindow::gbtEfgSupportWindow(gbtGameDocument *p_doc,
@@ -142,14 +226,14 @@ gbtEfgSupportWindow::gbtEfgSupportWindow(gbtGameDocument *p_doc,
 {
   SetAutoLayout(true);
 
-  m_supportList = new wxChoice(this, idSUPPORTLISTCHOICE,
+  m_supportList = new wxChoice(this, GBT_CONTROL_SUPPORT_LIST,
 			       wxDefaultPosition, wxDefaultSize,
 			       0, 0);
-  m_prevButton = new wxButton(this, idSUPPORTPREVBUTTON, wxT("<-"),
+  m_prevButton = new wxButton(this, GBT_CONTROL_SUPPORT_PREV, wxT("<-"),
 			      wxDefaultPosition, wxSize(30, 30));
-  m_nextButton = new wxButton(this, idSUPPORTNEXTBUTTON, wxT("->"),
+  m_nextButton = new wxButton(this, GBT_CONTROL_SUPPORT_NEXT, wxT("->"),
 			      wxDefaultPosition, wxSize(30, 30));
-  m_actionTree = new widgetActionTree(this);
+  m_actionTree = new gbtActionTreeCtrl(this);
 
   wxBoxSizer *selectSizer = new wxBoxSizer(wxHORIZONTAL);
   selectSizer->Add(m_prevButton, 0, wxALL, 5);
@@ -173,15 +257,17 @@ void gbtEfgSupportWindow::OnUpdate(void)
 {
   m_supportList->Clear();
 
-  const gbtList<gbtEfgSupport *> &supports = m_doc->AllEfgSupports();
+  const gbtEfgSupportList &supports = m_doc->GetEfgSupportList();
 
   for (int i = 1; i <= supports.Length(); i++) {
+    const gbtEfgSupport &support = supports.Get(i);
     m_supportList->Append(wxString::Format(wxT("%s"),
 					   (char *)
-					   (ToText(i) + ": " + supports[i]->GetLabel())));
+					   (ToText(i) + ": " + support.GetLabel())));
   }
 
-  int supportIndex = m_doc->GetEfgSupportIndex();
+  int supportIndex = supports.GetCurrentIndex();
+  const gbtEfgSupport &support = supports.GetCurrent();
   m_supportList->SetSelection(supportIndex - 1);
   m_prevButton->Enable((supportIndex > 1) ? true : false);
   m_nextButton->Enable((supportIndex < supports.Length()) ? true : false);
@@ -189,7 +275,7 @@ void gbtEfgSupportWindow::OnUpdate(void)
   m_actionTree->DeleteAllItems();
 
   m_actionTree->AddRoot(wxString::Format(wxT("%s"),
-					 (char *) m_doc->GetEfgSupport().GetLabel()));
+					 (char *) support.GetLabel()));
   for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
     gbtEfgPlayer player = m_doc->GetEfg().GetPlayer(pl);
 
@@ -205,7 +291,7 @@ void gbtEfgSupportWindow::OnUpdate(void)
 	gbtEfgAction action = infoset.GetAction(act);
 	wxTreeItemId actID = m_actionTree->AppendItem(isetID,
 						      wxString::Format(wxT("%s"), (char *) action.GetLabel()));
-	if (m_doc->GetEfgSupport().Contains(action)) {
+	if (support.Contains(action)) {
 	  m_actionTree->SetItemTextColour(actID, *wxBLACK);
 	}
 	else {
@@ -224,17 +310,17 @@ void gbtEfgSupportWindow::OnUpdate(void)
 
 void gbtEfgSupportWindow::OnSupportList(wxCommandEvent &p_event)
 {
-  m_doc->SetEfgSupport(p_event.GetSelection() + 1);
+  m_doc->Submit(new gbtCmdSetEfgSupport(p_event.GetSelection() + 1));
 }
 
 void gbtEfgSupportWindow::OnSupportPrev(wxCommandEvent &)
 {
-  m_doc->SetEfgSupport(m_supportList->GetSelection());
+  m_doc->Submit(new gbtCmdSetEfgSupport(m_supportList->GetSelection()));
 }
 
 void gbtEfgSupportWindow::OnSupportNext(wxCommandEvent &)
 {
-  m_doc->SetEfgSupport(m_supportList->GetSelection() + 2);
+  m_doc->Submit(new gbtCmdSetEfgSupport(m_supportList->GetSelection() + 2));
 
 }
 
@@ -252,17 +338,15 @@ void gbtEfgSupportWindow::ToggleItem(wxTreeItemId p_id)
     return;
   }
 
-  if (m_doc->GetEfgSupport().Contains(action) &&
-      m_doc->GetEfgSupport().NumActions(action.GetInfoset()) > 1) {
-    m_doc->RemoveAction(action);
-    m_actionTree->SetItemTextColour(p_id, *wxLIGHT_GREY);
+  const gbtEfgSupport &support = m_doc->GetEfgSupportList().GetCurrent();
+  if (support.Contains(action)) {
+    if (support.NumActions(action.GetInfoset()) > 1) {
+      m_doc->Submit(new gbtCmdRemoveAction(action));
+    }
   }
   else {
-    m_doc->AddAction(action);
-    m_actionTree->SetItemTextColour(p_id, *wxBLACK);
+    m_doc->Submit(new gbtCmdAddAction(action));
   }
-
-  m_doc->SetEfgSupport(m_supportList->GetSelection() + 1);
 }
 
 //-------------------------------------------------------------------------

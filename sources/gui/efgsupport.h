@@ -37,6 +37,7 @@ class gbtEfgSupportWindow;
 class gbtEfgSupportFrame : public wxFrame, public gbtGameView {
 private:
   gbtEfgSupportWindow *m_panel;
+  
 
   // Event handlers
   void OnClose(wxCloseEvent &);

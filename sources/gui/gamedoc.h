@@ -32,6 +32,7 @@
 #include "game/nfg.h"
 #include "nash/mixedsol.h"
 #include "prefs.h"
+#include "support.h"
 
 // Forward declarations; classes declared at bottom
 class gbtGameView;
@@ -55,15 +56,13 @@ private:
   // Extensive-form related state information
   gbtEfgGame *m_efg;
   gbtEfgNode m_cursor, m_copyNode, m_cutNode;
-  gbtEfgSupport *m_curEfgSupport;
-  gbtList<gbtEfgSupport *> m_efgSupports;
+  gbtEfgSupportList m_efgSupports;
 
   // Normal-form related state information
   gbtNfgGame *m_nfg;
   int m_rowPlayer, m_colPlayer;
   gbtArray<int> m_contingency;
-  gbtNfgSupport *m_curNfgSupport;
-  gbtList<gbtNfgSupport *> m_nfgSupports;
+  gbtNfgSupportList m_nfgSupports;
 
   // The list of computed profiles (refactor into own class?)
   int m_curProfile;
@@ -128,30 +127,13 @@ public:
   gbtText UniqueNfgOutcomeName(void) const;
    
   // SUPPORTS
-  gbtText UniqueEfgSupportName(void) const;
-  gbtText UniqueNfgSupportName(void) const;
-
-  const gbtEfgSupport &GetEfgSupport(void) const { return *m_curEfgSupport; }
-  int GetEfgSupportIndex(void) const
-    { return m_efgSupports.Find(m_curEfgSupport); }
-  const gbtList<gbtEfgSupport *> &AllEfgSupports(void) const
+  const gbtEfgSupportList &GetEfgSupportList(void) const
     { return m_efgSupports; }
-  void SetEfgSupport(int p_index);
-  void AddEfgSupport(gbtEfgSupport *);
-  void DeleteEfgSupport(void);
-  void AddAction(gbtEfgAction);
-  void RemoveAction(gbtEfgAction);
+  gbtEfgSupportList &GetEfgSupportList(void) { return m_efgSupports; }
 
-  const gbtNfgSupport &GetNfgSupport(void) const { return *m_curNfgSupport; }
-  int GetNfgSupportIndex(void) const
-    { return m_nfgSupports.Find(m_curNfgSupport); }
-  const gbtList<gbtNfgSupport *> &AllNfgSupports(void) const
+  const gbtNfgSupportList &GetNfgSupportList(void) const
     { return m_nfgSupports; }
-  void SetNfgSupport(int p_index);
-  void AddNfgSupport(gbtNfgSupport *);
-  void DeleteNfgSupport(void);
-  void AddStrategy(gbtNfgStrategy);
-  void RemoveStrategy(gbtNfgStrategy);
+  gbtNfgSupportList &GetNfgSupportList(void) { return m_nfgSupports; }
 
   // PROFILES
   gbtText UniqueBehavProfileName(void) const;

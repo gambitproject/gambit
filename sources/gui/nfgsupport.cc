@@ -31,6 +31,86 @@
 #include "nfgsupport.h"
 #include "id.h"
 
+//==========================================================================
+//                     class gbtCmdAddStrategy
+//==========================================================================
+
+//
+// Add a strategy to the current support
+//
+class gbtCmdAddStrategy : public gbtGameCommand {
+private:
+  gbtNfgStrategy m_strategy;
+
+public:
+  gbtCmdAddStrategy(gbtNfgStrategy p_strategy) : m_strategy(p_strategy) { }
+  virtual ~gbtCmdAddStrategy() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdAddStrategy::Do(gbtGameDocument *p_doc)
+{
+  p_doc->GetNfgSupportList().GetCurrent().AddStrategy(m_strategy);
+}
+
+//==========================================================================
+//                    class gbtCmdRemoveStrategy
+//==========================================================================
+
+//
+// Remove a strategy from the current support
+//
+class gbtCmdRemoveStrategy : public gbtGameCommand {
+private:
+  gbtNfgStrategy m_strategy;
+
+public:
+  gbtCmdRemoveStrategy(gbtNfgStrategy p_strategy) : m_strategy(p_strategy) { }
+  virtual ~gbtCmdRemoveStrategy() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdRemoveStrategy::Do(gbtGameDocument *p_doc)
+{
+  p_doc->GetNfgSupportList().GetCurrent().RemoveStrategy(m_strategy);
+}
+
+//==========================================================================
+//                    class gbtCmdSetNfgSupport
+//==========================================================================
+
+//
+// Make a support the currently-selected support
+//
+class gbtCmdSetNfgSupport : public gbtGameCommand {
+private:
+  int m_index;
+
+public:
+  gbtCmdSetNfgSupport(int p_index) : m_index(p_index) { }
+  virtual ~gbtCmdSetNfgSupport() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdSetNfgSupport::Do(gbtGameDocument *p_doc)
+{
+  p_doc->GetNfgSupportList().SetCurrentIndex(m_index);
+}
+
+
+
 const int idSTRATEGYTREE = 8003;
 
 class widgetStrategyTree : public wxTreeCtrl {
@@ -139,14 +219,15 @@ void gbtNfgSupportWindow::OnUpdate(gbtGameView *)
 {
   m_supportList->Clear();
 
-  const gbtList<gbtNfgSupport *> &supports = m_doc->AllNfgSupports();
+  const gbtNfgSupportList &supports = m_doc->GetNfgSupportList();
 
   for (int i = 1; i <= supports.Length(); i++) {
     m_supportList->Append(wxString::Format(wxT("%d: %s"), i,
-					   (char *) supports[i]->GetLabel()));
+					   (char *) supports.Get(i).GetLabel()));
   }
 
-  int supportIndex = m_doc->GetNfgSupportIndex();
+  int supportIndex = m_doc->GetNfgSupportList().GetCurrentIndex();
+  const gbtNfgSupport &support = m_doc->GetNfgSupportList().GetCurrent();
   m_supportList->SetSelection(supportIndex - 1);
   m_prevButton->Enable((supportIndex > 1) ? true : false);
   m_nextButton->Enable((supportIndex < supports.Length()) ? true : false);
@@ -154,7 +235,7 @@ void gbtNfgSupportWindow::OnUpdate(gbtGameView *)
   m_strategyTree->DeleteAllItems();
 
   m_strategyTree->AddRoot(wxString::Format(wxT("%s"),
-					   (char *) m_doc->GetNfgSupport().GetLabel()));
+					   (char *) support.GetLabel()));
   for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
     gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(pl);
 
@@ -167,7 +248,7 @@ void gbtNfgSupportWindow::OnUpdate(gbtGameView *)
 
       wxTreeItemId stratID = m_strategyTree->AppendItem(id, 
 							wxString::Format(wxT("%s"), (char *) strategy.GetLabel()));
-      if (m_doc->GetNfgSupport().Contains(strategy)) {
+      if (support.Contains(strategy)) {
 	m_strategyTree->SetItemTextColour(stratID, *wxBLACK);
       }
       else {
@@ -183,17 +264,17 @@ void gbtNfgSupportWindow::OnUpdate(gbtGameView *)
 
 void gbtNfgSupportWindow::OnSupportList(wxCommandEvent &p_event)
 {
-  m_doc->SetNfgSupport(p_event.GetSelection() + 1);
+  m_doc->Submit(new gbtCmdSetNfgSupport(p_event.GetSelection() + 1));
 }
 
 void gbtNfgSupportWindow::OnSupportPrev(wxCommandEvent &)
 {
-  m_doc->SetNfgSupport(m_supportList->GetSelection());
+  m_doc->Submit(new gbtCmdSetNfgSupport(m_supportList->GetSelection()));
 }
 
 void gbtNfgSupportWindow::OnSupportNext(wxCommandEvent &)
 {
-  m_doc->SetNfgSupport(m_supportList->GetSelection() + 2);
+  m_doc->Submit(new gbtCmdSetNfgSupport(m_supportList->GetSelection() + 2));
 }
 
 void gbtNfgSupportWindow::OnTreeItemCollapse(wxTreeEvent &p_event)
@@ -210,17 +291,14 @@ void gbtNfgSupportWindow::ToggleItem(wxTreeItemId p_id)
     return;
   }
 
-  if (m_doc->GetNfgSupport().Contains(strategy) &&
-      m_doc->GetNfgSupport().NumStrats(strategy.GetPlayer()) > 1) {
-    m_doc->RemoveStrategy(strategy);
-    m_strategyTree->SetItemTextColour(p_id, *wxLIGHT_GREY);
+  const gbtNfgSupport &support = m_doc->GetNfgSupportList().GetCurrent();
+  if (support.Contains(strategy) &&
+      support.NumStrats(strategy.GetPlayer()) > 1) {
+    m_doc->Submit(new gbtCmdRemoveStrategy(strategy));
   }
   else {
-    m_doc->AddStrategy(strategy);
-    m_strategyTree->SetItemTextColour(p_id, *wxBLACK);
+    m_doc->Submit(new gbtCmdAddStrategy(strategy));
   }
-
-  m_doc->SetNfgSupport(m_supportList->GetSelection() + 1);
 }
 
 //-------------------------------------------------------------------------

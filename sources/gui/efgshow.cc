@@ -249,6 +249,56 @@ void gbtCmdMarkSubgame::Do(gbtGameDocument *p_doc)
   }
 }
 
+//---------------------------------------------------------------------
+//                   class gbtCmdAddEfgSupport
+//---------------------------------------------------------------------
+
+//
+// Adds a support to the current support list
+//
+class gbtCmdAddEfgSupport : public gbtGameCommand {
+private:
+  gbtEfgSupport m_support;
+
+public:
+  gbtCmdAddEfgSupport(const gbtEfgSupport &p_support) 
+    : m_support(p_support) { }
+  virtual ~gbtCmdAddEfgSupport() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdAddEfgSupport::Do(gbtGameDocument *p_doc)
+{
+  p_doc->GetEfgSupportList().Append(m_support);
+}
+
+//---------------------------------------------------------------------
+//                   class gbtCmdRemoveEfgSupport
+//---------------------------------------------------------------------
+
+//
+// Removes the current support from the support list
+//
+class gbtCmdRemoveEfgSupport : public gbtGameCommand {
+public:
+  gbtCmdRemoveEfgSupport(void) { }
+  virtual ~gbtCmdRemoveEfgSupport() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdRemoveEfgSupport::Do(gbtGameDocument *p_doc)
+{
+  p_doc->GetEfgSupportList().Remove();
+}
+
 //=====================================================================
 //                 Implementation of class gbtEfgFrame
 //=====================================================================
@@ -643,7 +693,8 @@ void gbtEfgFrame::OnFileSave(wxCommandEvent &p_event)
 
   try {
     gbtFileOutput file(m_doc->GetFilename().mb_str());
-    gbtEfgGame efg = CompressEfg(m_doc->GetEfg(), m_doc->GetEfgSupport());
+    gbtEfgGame efg = CompressEfg(m_doc->GetEfg(), 
+				 m_doc->GetEfgSupportList().GetCurrent());
     efg.WriteEfg(file);
     m_doc->SetIsModified(false);
   }
@@ -1186,7 +1237,7 @@ void gbtEfgFrame::OnToolsDominance(wxCommandEvent &)
   dialogElimBehav dialog(this, playerNames);
 
   if (dialog.ShowModal() == wxID_OK) {
-    gbtEfgSupport support(m_doc->GetEfgSupport());
+    gbtEfgSupport support(m_doc->GetEfgSupportList().GetCurrent());
     gbtProgressDialog status(this, "Dominance Elimination");
 
     try {
@@ -1202,8 +1253,8 @@ void gbtEfgFrame::OnToolsDominance(wxCommandEvent &)
 	  break;
 	}
 	else {
-	  newSupport.SetLabel(m_doc->UniqueEfgSupportName());
-	  m_doc->AddEfgSupport(new gbtEfgSupport(newSupport));
+	  newSupport.SetLabel(m_doc->GetEfgSupportList().GenerateUniqueLabel());
+	  m_doc->Submit(new gbtCmdAddEfgSupport(newSupport));
 	  support = newSupport;
 	}
 
@@ -1214,10 +1265,6 @@ void gbtEfgFrame::OnToolsDominance(wxCommandEvent &)
       }
     }
     catch (gbtSignalBreak &) { }
-    
-    if (m_doc->GetEfgSupport() != support) {
-      m_doc->SetEfgSupport(m_doc->AllEfgSupports().Length());
-    }
   }
 }
 
@@ -1227,7 +1274,7 @@ void gbtEfgFrame::OnToolsDominance(wxCommandEvent &)
 
 void gbtEfgFrame::OnToolsEquilibrium(wxCommandEvent &)
 {
-  dialogEfgNash dialog(this, m_doc->GetEfgSupport());
+  dialogEfgNash dialog(this, m_doc->GetEfgSupportList().GetCurrent());
 
   if (dialog.ShowModal() == wxID_OK) {
     gbtEfgNashAlgorithm *algorithm = dialog.GetAlgorithm();
@@ -1240,7 +1287,8 @@ void gbtEfgFrame::OnToolsEquilibrium(wxCommandEvent &)
       gbtProgressDialog status(this, 
 			       algorithm->GetAlgorithm() + "Solve Progress");
       gbtList<BehavSolution> solutions;
-      solutions = algorithm->Solve(m_doc->GetEfgSupport(), status);
+      solutions = algorithm->Solve(m_doc->GetEfgSupportList().GetCurrent(),
+				   status);
 
       for (int soln = 1; soln <= solutions.Length(); soln++) {
 	m_doc->AddProfile(solutions[soln]);
@@ -1274,8 +1322,8 @@ void gbtEfgFrame::OnToolsQre(wxCommandEvent &)
     algorithm.SetMaxLambda(10000000);
 
     gbtProgressDialog status(this, "QreSolve Progress");
-    gbtList<BehavSolution> solutions = algorithm.Solve(m_doc->GetEfgSupport(),
-						       status);
+    gbtList<BehavSolution> solutions =
+      algorithm.Solve(m_doc->GetEfgSupportList().GetCurrent(), status);
 
     if (solutions.Length() > 0) {
       (void) new dialogQreFile(this, m_doc, solutions);
@@ -1328,15 +1376,14 @@ void gbtEfgFrame::OnHelpAbout(wxCommandEvent &)
 
 void gbtEfgFrame::OnSupportDuplicate(wxCommandEvent &)
 {
-  gbtEfgSupport *newSupport = new gbtEfgSupport(m_doc->GetEfgSupport());
-  newSupport->SetLabel(m_doc->UniqueEfgSupportName());
-  m_doc->AddEfgSupport(newSupport);
-  m_doc->SetEfgSupport(m_doc->AllEfgSupports().Length());
+  gbtEfgSupport newSupport(m_doc->GetEfgSupportList().GetCurrent());
+  newSupport.SetLabel(m_doc->GetEfgSupportList().GenerateUniqueLabel());
+  m_doc->Submit(new gbtCmdAddEfgSupport(newSupport));
 }
 
 void gbtEfgFrame::OnSupportDelete(wxCommandEvent &)
 {
-  m_doc->DeleteEfgSupport();
+  m_doc->Submit(new gbtCmdRemoveEfgSupport());
 }
 
 //----------------------------------------------------------------------

@@ -65,6 +65,56 @@
 #include "nash/nfgqregrid.h"
 #include "nash/nfgch.h"
 
+//---------------------------------------------------------------------
+//                   class gbtCmdAddNfgSupport
+//---------------------------------------------------------------------
+
+//
+// Adds a support to the current support list
+//
+class gbtCmdAddNfgSupport : public gbtGameCommand {
+private:
+  gbtNfgSupport m_support;
+
+public:
+  gbtCmdAddNfgSupport(const gbtNfgSupport &p_support) 
+    : m_support(p_support) { }
+  virtual ~gbtCmdAddNfgSupport() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdAddNfgSupport::Do(gbtGameDocument *p_doc)
+{
+  p_doc->GetNfgSupportList().Append(m_support);
+}
+
+//---------------------------------------------------------------------
+//                   class gbtCmdRemoveNfgSupport
+//---------------------------------------------------------------------
+
+//
+// Removes the current support from the support list
+//
+class gbtCmdRemoveNfgSupport : public gbtGameCommand {
+public:
+  gbtCmdRemoveNfgSupport(void) { }
+  virtual ~gbtCmdRemoveNfgSupport() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdRemoveNfgSupport::Do(gbtGameDocument *p_doc)
+{
+  p_doc->GetNfgSupportList().Remove();
+}
+
 //=====================================================================
 //                 Implementation of class gbtNfgFrame
 //=====================================================================
@@ -395,7 +445,8 @@ void gbtNfgFrame::OnFileSave(wxCommandEvent &p_event)
 
   try {
     gbtFileOutput file(m_doc->GetFilename().mb_str());
-    gbtNfgGame nfg = CompressNfg(m_doc->GetNfg(), m_doc->GetNfgSupport());
+    gbtNfgGame nfg = CompressNfg(m_doc->GetNfg(),
+				 m_doc->GetNfgSupportList().GetCurrent());
     nfg.WriteNfg(file);
     m_doc->SetIsModified(false);
   }
@@ -669,12 +720,13 @@ void gbtNfgFrame::OnFormatAutosize(wxCommandEvent &)
   // Set all strategy columns to be the same width, which is
   // the narrowest width which fits all the entries
   int max = 0, colPlayer = m_doc->GetColPlayer();
-  for (int col = 0; col < m_doc->GetNfgSupport().NumStrats(colPlayer); col++) {
+  const gbtNfgSupport &support = m_doc->GetNfgSupportList().GetCurrent();
+  for (int col = 0; col < support.NumStrats(colPlayer); col++) {
     if (m_table->GetColSize(col) > max) {
       max = m_table->GetColSize(col);
     }
   }
-  for (int col = 0; col < m_doc->GetNfgSupport().NumStrats(colPlayer); col++) {
+  for (int col = 0; col < support.NumStrats(colPlayer); col++) {
     m_table->SetColSize(col, max);
   }
 }
@@ -692,7 +744,7 @@ void gbtNfgFrame::OnToolsDominance(wxCommandEvent &)
   dialogElimMixed dialog(this, playerNames);
 
   if (dialog.ShowModal() == wxID_OK) {
-    gbtNfgSupport support(m_doc->GetNfgSupport());
+    gbtNfgSupport support(m_doc->GetNfgSupportList().GetCurrent());
     gbtProgressDialog status(this, "Dominance Elimination");
 
     try {
@@ -716,8 +768,8 @@ void gbtNfgFrame::OnToolsDominance(wxCommandEvent &)
 	  break;
 	}
 	else {
-	  newSupport.SetLabel(m_doc->UniqueNfgSupportName());
-	  m_doc->AddNfgSupport(new gbtNfgSupport(newSupport));
+	  newSupport.SetLabel(m_doc->GetNfgSupportList().GenerateUniqueLabel());
+	  m_doc->Submit(new gbtCmdAddNfgSupport(newSupport));
 	  support = newSupport;
 	}
 
@@ -729,19 +781,16 @@ void gbtNfgFrame::OnToolsDominance(wxCommandEvent &)
     }
     catch (gbtSignalBreak &) { }
 
-    if (m_doc->GetNfgSupport() != support) {
-      m_doc->SetNfgSupport(m_doc->AllNfgSupports().Length());
-      if (!m_table->ShowDominance()) {
-	m_table->ToggleDominance();
-	GetMenuBar()->Check(GBT_MENU_VIEW_DOMINANCE, true);
-      }
+    if (!m_table->ShowDominance()) {
+      m_table->ToggleDominance();
+      GetMenuBar()->Check(GBT_MENU_VIEW_DOMINANCE, true);
     }
   }
 }
 
 void gbtNfgFrame::OnToolsEquilibrium(wxCommandEvent &)
 { 
-  dialogNfgNash dialog(this, m_doc->GetNfgSupport());
+  dialogNfgNash dialog(this, m_doc->GetNfgSupportList().GetCurrent());
 
   if (dialog.ShowModal() == wxID_OK) {
     gbtNfgNashAlgorithm *algorithm = dialog.GetAlgorithm();
@@ -754,7 +803,8 @@ void gbtNfgFrame::OnToolsEquilibrium(wxCommandEvent &)
       gbtProgressDialog status(this,
 			       algorithm->GetAlgorithm() + "Solve Progress");
       gbtList<MixedSolution> solutions;
-      solutions = algorithm->Solve(m_doc->GetNfgSupport(), status);
+      solutions = algorithm->Solve(m_doc->GetNfgSupportList().GetCurrent(),
+				   status);
 
       for (int soln = 1; soln <= solutions.Length(); soln++) {
 	m_doc->AddProfile(solutions[soln]);
@@ -775,7 +825,7 @@ void gbtNfgFrame::OnToolsEquilibrium(wxCommandEvent &)
 
 void gbtNfgFrame::OnToolsQre(wxCommandEvent &)
 {
-  dialogNfgQre dialog(this, m_doc->GetNfgSupport());
+  dialogNfgQre dialog(this, m_doc->GetNfgSupportList().GetCurrent());
 
   if (dialog.ShowModal() == wxID_OK) {
     gbtList<MixedSolution> solutions;
@@ -795,7 +845,8 @@ void gbtNfgFrame::OnToolsQre(wxCommandEvent &)
 
 	gbtProgressDialog status(this, "QreGridSolve Progress");
 	gbtNullOutput gnull;
-	algorithm.Solve(m_doc->GetNfgSupport(), gnull, status, solutions);
+	algorithm.Solve(m_doc->GetNfgSupportList().GetCurrent(),
+			gnull, status, solutions);
       }
       else {
 	gbtNfgNashLogit algorithm;
@@ -803,7 +854,8 @@ void gbtNfgFrame::OnToolsQre(wxCommandEvent &)
 	algorithm.SetMaxLambda(10000000);
 
 	gbtProgressDialog status(this, "QreSolve Progress");
-	solutions = algorithm.Solve(m_doc->GetNfgSupport(), status);
+	solutions = algorithm.Solve(m_doc->GetNfgSupportList().GetCurrent(),
+				    status);
       }
     }
     catch (gbtSignalBreak &) { }
@@ -876,15 +928,14 @@ void gbtNfgFrame::OnHelpAbout(wxCommandEvent &)
 
 void gbtNfgFrame::OnSupportDuplicate(wxCommandEvent &)
 {
-  gbtNfgSupport *newSupport = new gbtNfgSupport(m_doc->GetNfgSupport());
-  newSupport->SetLabel(m_doc->UniqueNfgSupportName());
-  m_doc->AddNfgSupport(newSupport);
-  m_doc->SetNfgSupport(m_doc->AllNfgSupports().Length());
+  gbtNfgSupport newSupport(m_doc->GetNfgSupportList().GetCurrent());
+  newSupport.SetLabel(m_doc->GetNfgSupportList().GenerateUniqueLabel());
+  m_doc->Submit(new gbtCmdAddNfgSupport(newSupport));
 }
 
 void gbtNfgFrame::OnSupportDelete(wxCommandEvent &)
 {
-  m_doc->DeleteNfgSupport();
+  m_doc->Submit(new gbtCmdRemoveNfgSupport());
 }
 
 //----------------------------------------------------------------------

@@ -75,7 +75,7 @@ void gbtNfgNavigate::OnUpdate(gbtGameView *)
     DeleteRows(0, GetNumberRows() - m_doc->GetNfg().NumPlayers());
   }
 
-  const gbtNfgSupport &support = m_doc->GetNfgSupport();
+  const gbtNfgSupport &support = m_doc->GetNfgSupportList().GetCurrent();
 
   for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
     for (int col = 0; col < GetNumberCols(); col++) {
@@ -135,7 +135,7 @@ void gbtNfgNavigate::OnLeftClick(wxGridEvent &p_event)
   }
   else if (p_event.GetCol() == 4) {
     gbtArray<int> cont = m_doc->GetContingency();
-    if (cont[player] < m_doc->GetNfgSupport().NumStrats(player)) {
+    if (cont[player] < m_doc->GetNfgSupportList().GetCurrent().NumStrats(player)) {
       cont[player]++;
     }
     m_doc->SetContingency(cont);
