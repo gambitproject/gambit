@@ -69,8 +69,6 @@ private:
   void OnSashDrag(wxSashEvent &);
   void OnActivate(wxActivateEvent &);
 
-  void OnSetZoom(wxCommandEvent &);
-
   // Menu event handlers
   void OnFileSave(wxCommandEvent &);
   void OnFilePageSetup(wxCommandEvent &);

@@ -758,6 +758,8 @@ void EfgShow::MakeMenus(void)
 #include "bitmaps/save.xpm"
 #include "bitmaps/preview.xpm"
 #include "bitmaps/print.xpm"
+#include "bitmaps/zoomin.xpm"
+#include "bitmaps/zoomout.xpm"
 #include "bitmaps/table.xpm"
 #include "bitmaps/help.xpm"
 
@@ -780,6 +782,12 @@ void EfgShow::MakeToolbar(void)
 		   "View a preview of the game printout");
   toolBar->AddTool(efgmenuFILE_PRINT, wxBITMAP(print), wxNullBitmap, false,
 		   -1, -1, 0, "Print", "Print this game");
+  toolBar->AddSeparator();
+
+  toolBar->AddTool(efgmenuPREFS_ZOOMIN, wxBITMAP(zoomin), wxNullBitmap,
+		   false, -1, -1, 0, "Zoom in", "Increase magnification");
+  toolBar->AddTool(efgmenuPREFS_ZOOMOUT, wxBITMAP(zoomout), wxNullBitmap,
+		   false, -1, -1, 0, "Zoom out", "Decrease magnification");
   toolBar->AddSeparator();
 
   toolBar->AddTool(efgmenuSOLVE_NFG_REDUCED, wxBITMAP(table), wxNullBitmap,
@@ -2187,14 +2195,6 @@ void EfgShow::OnViewScript(wxCommandEvent &)
 const float ZOOM_DELTA = .1;
 const float ZOOM_MAX = 1;
 const float ZOOM_MIN = .2;
-
-void EfgShow::OnSetZoom(wxCommandEvent &p_event)
-{
-  double zoom = (double) ToNumber(p_event.GetString().c_str()) / 100.0;
-
-  m_treeWindow->SetZoom(zoom);
-  m_treeWindow->Refresh();
-}
 
 void EfgShow::OnPrefsZoomIn(wxCommandEvent &)
 {
