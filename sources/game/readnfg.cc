@@ -551,14 +551,20 @@ static gbtNfgGame BuildNfg(gbtNfgParserState &p_parser, gbtNfgFileData &p_data)
 }
 
 //=========================================================================
-//  ReadNfgFile: Global visible function to read a normal form savefile
+//  ReadNfg: Global visible function to read a normal form savefile
 //=========================================================================
 
-gbtNfgGame ReadNfgFile(gbtInput &p_file)
+gbtNfgGame ReadNfg(gbtInput &p_file)
 {
   gbtNfgParserState parser(p_file);
   gbtNfgFileData data;
 
-  ParseHeader(parser, data);
-  return BuildNfg(parser, data);
+  try {
+    ParseHeader(parser, data);
+    return BuildNfg(parser, data);
+  }
+  catch (...) {
+    // We'll just lump anything that goes wrong in here as a "parse error"
+    throw gbtNfgParserError();
+  }
 }

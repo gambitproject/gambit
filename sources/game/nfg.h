@@ -111,9 +111,9 @@ public:
   bool HasAssociatedEfg(void) const;
 };
 
-// Exception thrown by ReadNfgFile if not valid .nfg file
+// Exception thrown by ReadNfg if not valid .nfg file
 class gbtNfgParserError { };
-gbtNfgGame ReadNfgFile(gbtInput &);
+gbtNfgGame ReadNfg(gbtInput &);
 
 #include "nfstrat.h"
 #include "mixed.h"

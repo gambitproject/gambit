@@ -169,7 +169,7 @@ void gbtApplication::LoadFile(const wxString &p_filename)
 {    
   try {
     gbtFileInput infile(p_filename.mb_str());
-    gbtNfgGame nfg = ReadNfgFile(infile);
+    gbtNfgGame nfg = ReadNfg(infile);
     m_fileHistory.AddFileToHistory(p_filename);
     (void) new gbtNfgFrame(new gbtGameDocument(nfg, p_filename), 0);
     return;

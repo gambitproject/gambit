@@ -301,8 +301,6 @@ public:
   gbtText GetLastText(void) const { return m_lastText; }
 };  
 
-class ParserError { };
-
 SymbolSet ParserState::GetNextSymbol(void)
 {
   char c = ' '; 
@@ -330,14 +328,14 @@ SymbolSet ParserState::GetNextSymbol(void)
       if (c == 'G') {
 	m_file.get(c);
 	if (!isspace(c)) {
-	  throw ParserError();
+	  throw gbtEfgParserError();
 	}
 	else {
 	  return (m_lastSymbol = symEFG);
 	}
       }
     }
-    throw ParserError(); 
+    throw gbtEfgParserError(); 
   }
   else if (c == 'p') {
     return (m_lastSymbol = symP);
@@ -404,13 +402,13 @@ SymbolSet ParserState::GetNextSymbol(void)
     return (m_lastSymbol = symTEXT);
   }
 
-  throw ParserError();
+  throw gbtEfgParserError();
 }
 
 static void ReadPlayers(ParserState &p_state, TreeData &p_treeData)
 {
   if (p_state.GetNextSymbol() != symLBRACE) {
-    throw ParserError();
+    throw gbtEfgParserError();
   }
 
   while (p_state.GetNextSymbol() == symTEXT) {
@@ -418,7 +416,7 @@ static void ReadPlayers(ParserState &p_state, TreeData &p_treeData)
   }
 
   if (p_state.GetCurrentSymbol() != symRBRACE) {
-    throw ParserError();
+    throw gbtEfgParserError();
   }
 }
 
@@ -429,7 +427,7 @@ static void ParseOutcome(ParserState &p_state, TreeData &p_treeData,
     p_node->m_outcomeData = new OutcomeData(p_state.GetLastText());
 
     if (p_state.GetNextSymbol() != symLBRACE) {
-      throw ParserError();
+      throw gbtEfgParserError();
     }
     p_state.GetNextSymbol();
     do {
@@ -443,7 +441,7 @@ static void ParseOutcome(ParserState &p_state, TreeData &p_treeData,
 	p_node->m_outcomeData->m_payoffs.Append(p_state.GetLastRational());
       }
       else {
-	throw ParserError();
+	throw gbtEfgParserError();
       }
 
       if (p_state.GetNextSymbol() == symCOMMA) {
@@ -457,12 +455,12 @@ static void ParseOutcome(ParserState &p_state, TreeData &p_treeData,
 static void ParseChanceNode(ParserState &p_state, TreeData &p_treeData)
 {
   if (p_state.GetNextSymbol() != symTEXT) {
-    throw ParserError();
+    throw gbtEfgParserError();
   }
   gbtText nodeName = p_state.GetLastText();
 
   if (p_state.GetNextSymbol() != symINTEGER) {
-    throw ParserError();
+    throw gbtEfgParserError();
   }
   int nodeInfoset = p_state.GetLastInteger().as_long();
 
@@ -475,12 +473,12 @@ static void ParseChanceNode(ParserState &p_state, TreeData &p_treeData)
     InfosetData *infoset = node->AddInfosetData(p_state.GetLastText());
 
     if (p_state.GetNextSymbol() != symLBRACE) {
-      throw ParserError();
+      throw gbtEfgParserError();
     }
     p_state.GetNextSymbol();
     do {
       if (p_state.GetCurrentSymbol() != symTEXT) {
-	throw ParserError();
+	throw gbtEfgParserError();
       }
       infoset->AddAction(p_state.GetLastText());
 
@@ -496,7 +494,7 @@ static void ParseChanceNode(ParserState &p_state, TreeData &p_treeData)
 	infoset->AddProb(p_state.GetLastRational());
       }
       else {
-	throw ParserError();
+	throw gbtEfgParserError();
       }
 
       p_state.GetNextSymbol();
@@ -505,7 +503,7 @@ static void ParseChanceNode(ParserState &p_state, TreeData &p_treeData)
   }
 
   if (p_state.GetCurrentSymbol() != symINTEGER) {
-    throw ParserError();
+    throw gbtEfgParserError();
   }
   node->m_outcome = p_state.GetLastInteger().as_long();
 
@@ -516,17 +514,17 @@ static void ParseChanceNode(ParserState &p_state, TreeData &p_treeData)
 static void ParsePersonalNode(ParserState &p_state, TreeData &p_treeData)
 {
   if (p_state.GetNextSymbol() != symTEXT) {
-    throw ParserError();
+    throw gbtEfgParserError();
   }
   gbtText nodeName = p_state.GetLastText();
 
   if (p_state.GetNextSymbol() != symINTEGER) {
-    throw ParserError();
+    throw gbtEfgParserError();
   }
   int nodePlayer = p_state.GetLastInteger().as_long();
 
   if (p_state.GetNextSymbol() != symINTEGER) {
-    throw ParserError();
+    throw gbtEfgParserError();
   }
   int nodeInfoset = p_state.GetLastInteger().as_long();
 
@@ -538,12 +536,12 @@ static void ParsePersonalNode(ParserState &p_state, TreeData &p_treeData)
     InfosetData *infoset = node->AddInfosetData(p_state.GetLastText());
 
     if (p_state.GetNextSymbol() != symLBRACE) {
-      throw ParserError();
+      throw gbtEfgParserError();
     }
     p_state.GetNextSymbol();
     do {
       if (p_state.GetCurrentSymbol() != symTEXT) {
-	throw ParserError();
+	throw gbtEfgParserError();
       }
       infoset->AddAction(p_state.GetLastText());
 
@@ -553,7 +551,7 @@ static void ParsePersonalNode(ParserState &p_state, TreeData &p_treeData)
   }
 
   if (p_state.GetCurrentSymbol() != symINTEGER) {
-    throw ParserError();
+    throw gbtEfgParserError();
   }
   node->m_outcome = p_state.GetLastInteger().as_long();
 
@@ -564,13 +562,13 @@ static void ParsePersonalNode(ParserState &p_state, TreeData &p_treeData)
 static void ParseTerminalNode(ParserState &p_state, TreeData &p_treeData)
 {
   if (p_state.GetNextSymbol() != symTEXT) {
-    throw ParserError();
+    throw gbtEfgParserError();
   }
   
   NodeData *node = p_treeData.AddNode(p_state.GetLastText(), -1, -1);
 
   if (p_state.GetNextSymbol() != symINTEGER) {
-    throw ParserError();
+    throw gbtEfgParserError();
   }
   node->m_outcome = p_state.GetLastInteger().as_long();
 
@@ -583,21 +581,21 @@ static void Parse(ParserState &p_state, TreeData &p_treeData)
   SymbolSet symbol;
 
   if (p_state.GetNextSymbol() != symEFG) {
-    throw ParserError();
+    throw gbtEfgParserError();
   }
   if (p_state.GetNextSymbol() != symINTEGER) {
-    throw ParserError();
+    throw gbtEfgParserError();
   }
   if (p_state.GetLastInteger() != 2) {
-    throw ParserError();
+    throw gbtEfgParserError();
   }
 
   symbol = p_state.GetNextSymbol();
   if (symbol != symD && symbol != symR) {
-    throw ParserError();
+    throw gbtEfgParserError();
   }
   if (p_state.GetNextSymbol() != symTEXT) {
-    throw ParserError();
+    throw gbtEfgParserError();
   }
   p_treeData.m_title = p_state.GetLastText();
   
@@ -621,7 +619,7 @@ static void Parse(ParserState &p_state, TreeData &p_treeData)
       ParseTerminalNode(p_state, p_treeData);
       break;
     default:
-      throw ParserError();
+      throw gbtEfgParserError();
       break;
     }
   }
@@ -748,11 +746,9 @@ gbtEfgGame ReadEfg(gbtInput &p_file)
     BuildEfg(efg, treeData);
     return efg;
   }
-  catch (ParserError &) {
-    return 0;
-  }
   catch (...) {
-    return 0;
+    // We'll just lump anything that goes wrong in here as a "parse error"
+    throw gbtEfgParserError();
   }
 }
 

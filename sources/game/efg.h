@@ -189,6 +189,9 @@ public:
 };
 
 gbtEfgGame NewEfg(void);
+
+// Exception thrown by ReadEfg if not valid .efg file
+class gbtEfgParserError { };
 gbtEfgGame ReadEfg(gbtInput &);
 
 template <class T> class gbtPureBehavProfile   {
