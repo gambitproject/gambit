@@ -38,7 +38,6 @@
 #include "nfgshow.h"
 #include "efgsolvd.h"
 
-#include "dlefgplayer.h"
 #include "dlinsertmove.h"
 #include "dlefgdelete.h"
 #include "dlefgreveal.h"
@@ -88,12 +87,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, EfgShow::OnFileMRUFile)
   EVT_MENU(efgmenuEDIT_INSERT, EfgShow::OnEditInsert)
   EVT_MENU(efgmenuEDIT_DELETE, EfgShow::OnEditDelete)
-  EVT_MENU(efgmenuEDIT_INFOSET_MERGE, EfgShow::OnEditInfosetMerge)
-  EVT_MENU(efgmenuEDIT_INFOSET_BREAK, EfgShow::OnEditInfosetBreak)
-  EVT_MENU(efgmenuEDIT_INFOSET_SPLIT, EfgShow::OnEditInfosetSplit)
-  EVT_MENU(efgmenuEDIT_INFOSET_JOIN, EfgShow::OnEditInfosetJoin)
-  EVT_MENU(efgmenuEDIT_INFOSET_PLAYER, EfgShow::OnEditInfosetPlayer)
-  EVT_MENU(efgmenuEDIT_INFOSET_REVEAL, EfgShow::OnEditInfosetReveal)
+  EVT_MENU(efgmenuEDIT_REVEAL, EfgShow::OnEditReveal)
   EVT_MENU(efgmenuEDIT_NODE, EfgShow::OnEditNode)
   EVT_MENU(efgmenuEDIT_MOVE, EfgShow::OnEditMove)
   EVT_MENU(efgmenuEDIT_GAME, EfgShow::OnEditGame)
@@ -558,24 +552,8 @@ void EfgShow::MakeMenus(void)
   editMenu->AppendSeparator();
   editMenu->Append(efgmenuEDIT_INSERT, "&Insert", "Insert a move");
   editMenu->Append(efgmenuEDIT_DELETE, "&Delete...", "Delete an object");
-  editMenu->AppendSeparator();
-
-  wxMenu *infosetMenu = new wxMenu;
-  infosetMenu->Append(efgmenuEDIT_INFOSET_MERGE, "&Merge", 
-		      "Merge cursor information set w/ marked");
-  infosetMenu->Append(efgmenuEDIT_INFOSET_BREAK, "&Break", 
-		      "Make cursor a new information set");
-  infosetMenu->Append(efgmenuEDIT_INFOSET_SPLIT, "&Split", 
-		      "Split information set at cursor");
-  infosetMenu->Append(efgmenuEDIT_INFOSET_JOIN, "&Join",
-		      "Join cursor to marked information set");
-  infosetMenu->Append(efgmenuEDIT_INFOSET_PLAYER, "&Player",
-		      "Change player at cursor information set");
-  infosetMenu->Append(efgmenuEDIT_INFOSET_REVEAL, "&Reveal", 
-		      "Reveal choice at information set to players");
-
-  editMenu->Append(efgmenuEDIT_INFOSET, "&Infoset", infosetMenu,
-		   "Edit infosets");
+  editMenu->Append(efgmenuEDIT_REVEAL, "&Reveal", 
+		   "Reveal choice at node");
   editMenu->AppendSeparator();
   editMenu->Append(efgmenuEDIT_NODE, "&Node",
 		   "Edit properties of the node");
@@ -768,18 +746,7 @@ void EfgShow::UpdateMenus(void)
   menuBar->Enable(efgmenuEDIT_INSERT, (cursor) ? true : false);
   menuBar->Enable(efgmenuEDIT_DELETE,
 		  (cursor && m_efg.NumChildren(cursor) > 0) ? true : false);
-
-  menuBar->Enable(efgmenuEDIT_INFOSET_MERGE, false);
-  menuBar->Enable(efgmenuEDIT_INFOSET_BREAK, 
-		  (cursor && cursor->GetInfoset()) ? true : false);
-  menuBar->Enable(efgmenuEDIT_INFOSET_SPLIT,
-		  (cursor && cursor->GetInfoset()) ? true : false);
-  menuBar->Enable(efgmenuEDIT_INFOSET_JOIN, false);
-
-  menuBar->Enable(efgmenuEDIT_INFOSET_PLAYER,
-		  (cursor && cursor->GetInfoset() &&
-		   !cursor->GetPlayer()->IsChance()) ? true : false);
-  menuBar->Enable(efgmenuEDIT_INFOSET_REVEAL, 
+  menuBar->Enable(efgmenuEDIT_REVEAL, 
 		  (cursor && cursor->GetInfoset()) ? true : false);
 
   menuBar->Enable(efgmenuEDIT_NODE, (cursor) ? true : false);
@@ -1015,74 +982,14 @@ void EfgShow::OnEditDelete(wxCommandEvent &)
   }
 }
 
-//----------------------------------------------------------------------
-//           EfgShow: Menu handlers - Edit->Infoset menu
-//----------------------------------------------------------------------
-
-void EfgShow::OnEditInfosetMerge(wxCommandEvent &)
-{
-  try {
-    //    m_efg.MergeInfoset(m_treeWindow->MarkNode()->GetInfoset(),
-    //		       Cursor()->GetInfoset());
-  }
-  catch (gException &ex) {
-    guiExceptionDialog(ex.Description(), this);
-  }
-}
-
-void EfgShow::OnEditInfosetBreak(wxCommandEvent &)
-{
-  try {
-    m_efg.LeaveInfoset(Cursor());
-  }
-  catch (gException &ex) {
-    guiExceptionDialog(ex.Description(), this);
-  }
-}
-
-void EfgShow::OnEditInfosetSplit(wxCommandEvent &)
-{
-  try {
-    m_efg.SplitInfoset(Cursor());
-  }
-  catch (gException &ex) {
-    guiExceptionDialog(ex.Description(), this);
-  }
-}
-
-void EfgShow::OnEditInfosetJoin(wxCommandEvent &)
-{
-  try {
-    //    m_efg.JoinInfoset(m_treeWindow->MarkNode()->GetInfoset(), Cursor());
-  }
-  catch (gException &ex) {
-    guiExceptionDialog(ex.Description(), this);
-  }
-}
-
-void EfgShow::OnEditInfosetPlayer(wxCommandEvent &)
-{
-  try {
-    dialogEfgSelectPlayer dialog(m_efg, false, this);
-        
-    if (dialog.ShowModal() == wxID_OK) {
-      if (dialog.GetPlayer() != Cursor()->GetInfoset()->GetPlayer()) {
-	m_efg.SwitchPlayer(Cursor()->GetInfoset(), dialog.GetPlayer());
-      }
-    }
-  }
-  catch (gException &ex) {
-    guiExceptionDialog(ex.Description(), this);
-  }
-}
-
-void EfgShow::OnEditInfosetReveal(wxCommandEvent &)
+void EfgShow::OnEditReveal(wxCommandEvent &)
 {
   dialogInfosetReveal dialog(m_efg, this);
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
       m_efg.Reveal(Cursor()->GetInfoset(), dialog.GetPlayers());
+      OnTreeChanged(true, true);
     }
     catch (gException &ex) {
       guiExceptionDialog(ex.Description(), this);
@@ -1100,6 +1007,17 @@ void EfgShow::OnEditNode(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     Cursor()->SetName(dialog.GetNodeName().c_str());
     m_efg.SetOutcome(Cursor(), m_efg.GetOutcome(dialog.GetOutcome()));
+
+    if (Cursor()->NumChildren() > 0 &&
+	dialog.GetInfoset() != Cursor()->GetInfoset()) {
+      if (dialog.GetInfoset() == 0) {
+	m_efg.LeaveInfoset(Cursor());
+      }
+      else {
+	m_efg.JoinInfoset(dialog.GetInfoset(), Cursor());
+      }
+      OnTreeChanged(true, true);
+    }
     m_treeWindow->RefreshTree();
     m_treeWindow->Refresh();
     UpdateMenus();
@@ -1113,6 +1031,12 @@ void EfgShow::OnEditMove(wxCommandEvent &)
   dialogEditMove dialog(this, infoset);
   if (dialog.ShowModal() == wxID_OK) {
     infoset->SetName(dialog.GetInfosetName().c_str());
+    
+    if (!infoset->IsChanceInfoset() && 
+	dialog.GetPlayer() != infoset->GetPlayer()->GetNumber()) {
+      m_efg.SwitchPlayer(infoset, m_efg.Players()[dialog.GetPlayer()]);
+    }
+
     for (int act = 1; act <= infoset->NumActions(); act++) {
       if (!dialog.GetActions().Find(infoset->Actions()[act])) {
 	m_efg.DeleteAction(infoset, infoset->Actions()[act]);

@@ -13,6 +13,7 @@
 class dialogEditMove : public wxDialog {
 private:
   Infoset *m_infoset;
+  wxChoice *m_player;
   wxTextCtrl *m_infosetName, *m_actionName, *m_actionProb;
   wxString m_actionProbValue;
   wxListBox *m_actionList;
@@ -35,6 +36,8 @@ public:
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetInfosetName(void) const { return m_infosetName->GetValue(); }
+  int GetPlayer(void) const { return (m_player->GetSelection() + 1); }
+
   int NumActions(void) const { return m_actions.Length(); }
   const gBlock<Action *> &GetActions(void) const { return m_actions; }
   gText GetActionName(int p_act) const { return m_actionNames[p_act]; }

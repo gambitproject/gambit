@@ -71,13 +71,7 @@ private:
 
   void OnEditInsert(wxCommandEvent &);
   void OnEditDelete(wxCommandEvent &);
-
-  void OnEditInfosetMerge(wxCommandEvent &);
-  void OnEditInfosetBreak(wxCommandEvent &);
-  void OnEditInfosetSplit(wxCommandEvent &);
-  void OnEditInfosetJoin(wxCommandEvent &);
-  void OnEditInfosetPlayer(wxCommandEvent &);
-  void OnEditInfosetReveal(wxCommandEvent &);
+  void OnEditReveal(wxCommandEvent &);
 
   void OnEditMove(wxCommandEvent &);
   void OnEditGame(wxCommandEvent &);

@@ -32,6 +32,36 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Node *p_node)
   labelSizer->Add(m_nodeName, 1, wxALL | wxCENTER | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 5);
 
+  wxBoxSizer *infosetSizer = new wxBoxSizer(wxHORIZONTAL);
+  infosetSizer->Add(new wxStaticText(this, wxID_STATIC, "Information set"),
+		    0, wxALL | wxCENTER, 5);
+  m_infoset = new wxChoice(this, -1);
+  if (p_node->NumChildren() > 0) {
+    m_infoset->Append("New information set");
+    gBlock<Infoset *> infosets = p_node->Game()->Infosets();
+    int selection = 0;
+    for (int iset = 1; iset <= infosets.Length(); iset++) {
+      if (!infosets[iset]->IsChanceInfoset() &&
+	  infosets[iset]->NumActions() == p_node->NumChildren()) {
+	m_infosetList.Append(infosets[iset]);
+	m_infoset->Append(wxString::Format("Player %d, Infoset %d",
+			  infosets[iset]->GetPlayer()->GetNumber(),
+			  infosets[iset]->GetNumber()));
+	if (infosets[iset] == p_node->GetInfoset()) {
+	  selection = m_infosetList.Length();
+	}
+      }
+    }
+    m_infoset->SetSelection(selection);
+  }
+  else {
+    m_infoset->Append("(none)");
+    m_infoset->SetSelection(0);
+    m_infoset->Enable(false);
+  }
+  infosetSizer->Add(m_infoset, 1, wxALL | wxEXPAND, 5);
+  topSizer->Add(infosetSizer, 0, wxALL | wxEXPAND, 5);
+
   wxBoxSizer *outcomeSizer = new wxBoxSizer(wxHORIZONTAL);
   outcomeSizer->Add(new wxStaticText(this, wxID_STATIC, "Outcome"),
 		    0, wxALL | wxCENTER, 5);
@@ -84,3 +114,12 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Node *p_node)
   Layout();
 }
 
+Infoset *dialogEditNode::GetInfoset(void) const
+{
+  if (m_infoset->GetSelection() == 0) {
+    return 0;
+  }
+  else {
+    return m_infosetList[m_infoset->GetSelection()];
+  }
+}

@@ -19,52 +19,10 @@
 #include "game/efg.h"
 #include "game/efstrat.h"
 
-#include "dlefgplayer.h"
 #include "dlefgdelete.h"
 #include "dlefgreveal.h"
 #include "dlefgeditsupport.h"
 
-//=========================================================================
-//                  dialogEfgSelectPlayer: Member functions
-//=========================================================================
-
-dialogEfgSelectPlayer::dialogEfgSelectPlayer(const Efg::Game &p_efg, bool p_chance,
-					     wxWindow *p_parent)
-  : guiAutoDialog(p_parent, "Select Player"),
-    m_efg(p_efg), m_chance(p_chance)
-{
-  m_playerNameList = new wxListBox(this, -1);
-  if (m_chance)
-    m_playerNameList->Append("Chance");
-
-  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-    m_playerNameList->Append((char *) (ToText(pl) + ": " + m_efg.Players()[pl]->GetName()));
-  }
-  m_playerNameList->SetSelection(0);
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(m_playerNameList, 0, wxALL, 5);
-  topSizer->Add(m_buttonSizer, 0, wxALL, 5);
-
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-
-  Layout();
-}
-
-EFPlayer *dialogEfgSelectPlayer::GetPlayer(void)
-{
-  int playerSelected = m_playerNameList->GetSelection();
-  if (m_chance) {
-    if (playerSelected == 0)
-      return m_efg.GetChance();
-    else
-      return m_efg.Players()[playerSelected];
-  }
-  else
-    return m_efg.Players()[playerSelected + 1];
-}
 
 //=========================================================================
 //                   dialogEfgDelete: Member functions

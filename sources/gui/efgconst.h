@@ -13,14 +13,7 @@
 typedef enum {
   efgmenuEDIT_INSERT = 1100,
   efgmenuEDIT_DELETE = 1101,
-
-  efgmenuEDIT_INFOSET = 920,
-  efgmenuEDIT_INFOSET_MERGE = 1400,
-  efgmenuEDIT_INFOSET_BREAK = 1401,
-  efgmenuEDIT_INFOSET_JOIN = 1402,
-  efgmenuEDIT_INFOSET_PLAYER = 1405,
-  efgmenuEDIT_INFOSET_REVEAL = 1407,
-  efgmenuEDIT_INFOSET_SPLIT = 1410,
+  efgmenuEDIT_REVEAL = 1407,
 
   efgmenuEDIT_GAME = 1419,
   efgmenuEDIT_NODE = 1420,

@@ -63,6 +63,9 @@ void TreeWindow::MakeMenus(void)
   m_nodeMenu = new wxMenu;
 
   m_nodeMenu->Append(efgmenuEDIT_INSERT, "Insert move", "Insert a move");
+  m_nodeMenu->Append(efgmenuEDIT_REVEAL, "Reveal move",
+		     "Reveal the move");
+  m_nodeMenu->AppendSeparator();
   m_nodeMenu->Append(efgmenuEDIT_NODE, "Edit node",
 		     "View and change node properties");
   m_nodeMenu->Append(efgmenuEDIT_MOVE, "Edit move",
@@ -507,6 +510,8 @@ void TreeWindow::SetCursorPosition(Node *p_cursor)
 void TreeWindow::UpdateMenus(void)
 {
   m_nodeMenu->Enable(efgmenuEDIT_INSERT, (m_parent->Cursor()) ? true : false);
+  m_nodeMenu->Enable(efgmenuEDIT_REVEAL,
+		     (m_parent->Cursor() && m_parent->Cursor()->GetInfoset()));
   m_nodeMenu->Enable(efgmenuEDIT_MOVE, 
 		     (m_parent->Cursor() && m_parent->Cursor()->GetInfoset()));
 }

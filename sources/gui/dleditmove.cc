@@ -51,13 +51,25 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, Infoset *p_infoset)
 				 wxString::Format("Number of members: %d",
 						  p_infoset->NumMembers())),
 		0, wxALL, 5);
-  topSizer->Add(new wxStaticText(this, wxID_STATIC,
-				 wxString::Format("Belongs to player %d: "
-						  "'%s'",
-				 p_infoset->GetPlayer()->GetNumber(),
-				 (char *) p_infoset->GetPlayer()->GetName())),
-		0, wxALL, 5);
-  
+
+  wxBoxSizer *playerSizer = new wxBoxSizer(wxHORIZONTAL);
+  playerSizer->Add(new wxStaticText(this, wxID_STATIC, "Belongs to player"),
+		   0, wxALL, 5);
+  m_player = new wxChoice(this, -1);
+  if (p_infoset->IsChanceInfoset()) {
+    m_player->Append("Chance");
+    m_player->SetSelection(0);
+  }
+  else {
+    for (int pl = 1; pl <= p_infoset->Game()->NumPlayers(); pl++) {
+      m_player->Append(wxString::Format("%d: %s", pl,
+					(char *) 
+					p_infoset->Game()->Players()[pl]->GetName()));
+    } 
+    m_player->SetSelection(p_infoset->GetPlayer()->GetNumber() - 1);
+  }
+  playerSizer->Add(m_player, 1, wxALL | wxEXPAND, 5);
+  topSizer->Add(playerSizer, 0, wxALL | wxEXPAND, 0);
 
   wxStaticBoxSizer *actionBoxSizer =
     new wxStaticBoxSizer(new wxStaticBox(this, -1, "Actions"), wxHORIZONTAL);

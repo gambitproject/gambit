@@ -14,7 +14,8 @@ class dialogEditNode : public wxDialog {
 private:
   Node *m_node;
   wxTextCtrl *m_nodeName;
-  wxChoice *m_outcome;
+  wxChoice *m_outcome, *m_infoset;
+  gBlock<Infoset *> m_infosetList;
 
 public:
   // Lifecycle
@@ -23,6 +24,7 @@ public:
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetNodeName(void) const { return m_nodeName->GetValue(); }
   int GetOutcome(void) const { return m_outcome->GetSelection(); }
+  Infoset *GetInfoset(void) const;
 };
 
 #endif   // DLEDITNODE_H
