@@ -663,7 +663,7 @@ BehavSolution::ExpectedPayoffDiffPolys(const gSpace &BehavStratSpace,
 }
 
 gPolyList<gDouble> 
-BehavSolution::ExtendsToNashIneqs(const gSpace &BehavStratSpace, 
+BehavSolution::ExtendsToANFNashIneqs(const gSpace &BehavStratSpace, 
 				  const term_order &Lex,
 				  const gList<gList<int> > &var_index) const
 {
@@ -673,7 +673,7 @@ BehavSolution::ExtendsToNashIneqs(const gSpace &BehavStratSpace,
   return answer;
 }
 
-bool BehavSolution::ExtendsToNash(gStatus &m_status) const
+bool BehavSolution::ExtendsToANFNash(gStatus &m_status) const
 {
   // First we compute the number of variables, and indexing information
   int num_vars(0);
@@ -697,9 +697,9 @@ bool BehavSolution::ExtendsToNash(gStatus &m_status) const
   ORD_PTR ptr = &lex;
   term_order Lex(&BehavStratSpace, ptr);
 
-  gPolyList<gDouble> inequalities = ExtendsToNashIneqs(BehavStratSpace,
-						       Lex,
-						       var_index);
+  gPolyList<gDouble> inequalities = ExtendsToANFNashIneqs(BehavStratSpace,
+							  Lex,
+							  var_index);
   num_vars = inequalities.Dmnsn();
 
   /*
