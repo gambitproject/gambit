@@ -35,11 +35,6 @@ BaseNfg::~BaseNfg()
     delete players[i];
 }
 
-const Strategy *BaseNfg::operator()(int p, int s) const
-{
-  return ((players[p]->StrategyList())[s]);
-}
-
 
 const gArray<Strategy *> &BaseNfg::operator()(int p) const
 {
@@ -54,6 +49,11 @@ const gArray<Strategy *> &BaseNfg::operator()(int p) const
 Strategy *BaseNfg::GetStrategy(int p, int s) const
 {
   return ((players[p]->StrategyList())[s]);
+}
+
+const gArray<Strategy *> &BaseNfg::GetStrategy(int p) const
+{
+  return (players[p]->StrategyList());
 }
 
 void BaseNfg::SetTitle(const gString &s) 
@@ -161,7 +161,7 @@ const gArray<Strategy *> &NFPlayer::StrategyList(void) const
 //template class gArray<Strategy *>;
 //template class gBlock<Strategy *>;
 //template class gArray<NFPlayer *>;
-//template class gArray<StrategySet *>;
+//template class gArray<NFStrategySet *>;
 
 //---------------------------------------------------------------------------
 //                    BaseMixedProfile member functions
@@ -171,7 +171,7 @@ BaseMixedProfile::BaseMixedProfile(const BaseNfg &NF, bool trunc)
 : N(&NF), truncated(trunc), stratset(NF)   { }
 
 BaseMixedProfile::BaseMixedProfile(const BaseNfg &NF, bool trunc,
-				   Support &s)
+				   NFSupport &s)
 : N(&NF), truncated(trunc), stratset(s)   { }
 
 BaseMixedProfile::BaseMixedProfile(const BaseMixedProfile &p)
@@ -202,7 +202,7 @@ DataType BaseMixedProfile::Type(void) const
 #include "garray.imp"
 #include "gblock.imp"
 
-TEMPLATE class gArray<StrategySet *>;
+TEMPLATE class gArray<NFStrategySet *>;
 TEMPLATE class gArray<Strategy *>;
 TEMPLATE class gArray<NFPlayer *>;
 TEMPLATE class gBlock<Strategy *>;

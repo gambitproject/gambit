@@ -53,7 +53,7 @@ class Strategy;
 template <class T> class NfgIter;
 template <class T> class CIter;
 
-class StrategySet {
+class NFStrategySet {
   friend class NfgIter<double>;
   friend class NfgIter<gRational>;
   friend class CIter<double>;
@@ -68,22 +68,22 @@ public:
   // Constructors, Destructor, operators
   //
 
-  StrategySet();
+  NFStrategySet();
 
-  StrategySet(const StrategySet &s); 
+  NFStrategySet(const NFStrategySet &s); 
   
-  StrategySet(const NFPlayer &p);
+  NFStrategySet(const NFPlayer &p);
   
-  StrategySet &operator=(const StrategySet &s); 
-  bool operator==(const StrategySet &s);
+  NFStrategySet &operator=(const NFStrategySet &s); 
+  bool operator==(const NFStrategySet &s);
 
-  virtual ~StrategySet();
+  virtual ~NFStrategySet();
 
   //
   // Member Functions
   //
 
-  // Append a strategies to the StrategySet
+  // Append a strategies to the NFStrategySet
   void AddStrategy(Strategy *s);
 
   // Insert a strategy to a particular place in the gBlock;
@@ -99,15 +99,16 @@ public:
   // Get a Strategy
   Strategy* GetStrategy(int num) const;
 
-  // Number of Strategies in the StrategySet
+  // Number of Strategies in the NFStrategySet
   int NumStrats(void);
 
-
+  //  return the entire strategy set in a const gArray
+  const gArray<Strategy *> &GetNFStrategySet(void);
 };
 
 class BaseNfg;
 
-class Support {
+class NFSupport {
 
   friend class NfgIter<double>;
   friend class NfgIter<gRational>;
@@ -116,7 +117,7 @@ class Support {
 
 protected:
   gString name;
-  gArray <StrategySet *> sups;
+  gArray <NFStrategySet *> sups;
   
 public:
 
@@ -124,18 +125,21 @@ public:
   // Constructors, Destructors, operators
   //
 
-  Support(const BaseNfg &);
-  Support(const Support &s); 
-  virtual ~Support();
-  Support &operator=(const Support &s);
-  bool operator==(const Support &s);
-  void SetStrategySet(int pl, StrategySet *s)   { sups[pl] = s; }
-  StrategySet *GetStrategySet(int pl)     { return sups[pl]; }
+  NFSupport(const BaseNfg &);
+  NFSupport(const NFSupport &s); 
+  virtual ~NFSupport();
+  NFSupport &operator=(const NFSupport &s);
+  bool operator==(const NFSupport &s);
 
   //---------
   // Members
   //---------
+
+  void SetNFStrategySet(int pl, NFStrategySet *s)   { sups[pl] = s; }
+  NFStrategySet *GetNFStrategySet(int pl)     { return sups[pl]; }
+
   Strategy *GetStrategy(int pl, int num) const;
+  const gArray<Strategy *> &GetStrategy(int pl) const;
 
 };
 

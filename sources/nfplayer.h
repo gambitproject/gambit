@@ -16,7 +16,7 @@ template <class T> class CIter;
 class NFPlayer {
 
   friend class BaseNfg;
-  friend class StrategySet;
+  friend class NFStrategySet;
   friend class Nfg<double>;
   friend class Nfg<gRational>;
   friend class NfgIter<double>;

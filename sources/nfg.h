@@ -47,12 +47,10 @@ public:
   const gArray<NFPlayer *> &PlayerList(void) const;
 
 // operator to get strategy s of player p
-  const Strategy * operator()(int p, int s) const;
-
 
   Strategy * GetStrategy(int p, int s) const;
 
-// operator to get the array strategies
+  const gArray <Strategy *> &GetStrategy(int p) const;
   const gArray <Strategy *> &operator()(int p) const;
 
   virtual void WriteNfgFile(gOutput &) const = 0;

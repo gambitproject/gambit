@@ -11,7 +11,7 @@ template <class T> class gArray;
 template <class T> class Nfg;
 template <class T> class ContIter;
 class StrategyProfile;
-class Support;
+class NFSupport;
 
 //
 // This class is useful for iterating around the normal form.
@@ -19,13 +19,13 @@ class Support;
 
 template <class T> class NfgIter    {
 private:
-  const Support *stratset;
+  const NFSupport *stratset;
   Nfg<T> *N;
   gArray<int> current_strat;
   StrategyProfile *profile;
   
 public:
-  NfgIter(const Support *s);
+  NfgIter(const NFSupport *s);
   NfgIter(const NfgIter<T> &);
 //  NfgIter(const ContIter<T> &);
   ~NfgIter();
