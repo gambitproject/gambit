@@ -77,18 +77,18 @@ class EfgConditionalContIter    {
     EfgConditionalContIter(const EFSupport &, const gList<const Infoset *> &);
     ~EfgConditionalContIter();
   
-    void First(void);
+    void First(void); // Sets each infoset's action to the first in the support
   
     void Freeze(int pl, int iset);
   
   // These next two only work on frozen infosets
     void Set(int pl, int iset, int act);
-    int Next(int pl, int iset);
+    int Next(int pl, int iset); 
   
     const PureBehavProfile<gNumber> &GetProfile(void) const   
       { return _profile; }
 
-    int NextContingency(void);
+    int NextContingency(void);   // Needs rewriting
   
     gNumber Payoff(int pl) const;
   
