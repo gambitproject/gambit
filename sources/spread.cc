@@ -697,7 +697,7 @@ void SpreadSheetC::ProcessCursor(int ch)
     // bottommost cell after scrolling (it jumps the view
     // back to the top and adds an extra row to the SS).
 
-    //top_frame->OnSelectedMoved(cell.row, cell.col, how);
+    top_frame->OnSelectedMoved(cell.row, cell.col, how);
     top_frame->SetStatusText(gPlainText(cell.str));
 
     // Make sure the cursor is visible by adjusting the scrollbar
