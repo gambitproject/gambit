@@ -22,9 +22,11 @@ protected:
 public:
 #ifdef USE_EXCEPTIONS
   class DivideByZero : public gException  {
-    public:
-      virtual ~DivideByZero()  { }
-      gText Description(void) const;
+  public:
+    DivideByZero(int, char *);
+
+    virtual ~DivideByZero()  { }
+    gText Description(void) const;
   };
 #endif   // USE_EXCEPTIONS
 

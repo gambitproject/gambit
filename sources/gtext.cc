@@ -15,6 +15,10 @@
 #include "gtext.h"
 
 #ifdef USE_EXCEPTIONS
+gText::BadIndex::BadIndex(int line, char *file)
+  :gException(line,file)
+{ }
+
 gText gText::BadIndex::Description(void) const
 { return "Bad index exception in gText"; }
 #endif   // USE_EXCEPTIONS
@@ -146,7 +150,7 @@ gText gText::Dncase(void) const
 void gText::Insert(char c, unsigned int n)
 {
 #ifdef USE_EXCEPTIONS
-  if (n > strlen(storage))  throw BadIndex();
+  if (n > strlen(storage))  throw BadIndex(__LINE__, __FILE__);
 #else
   if (n > strlen(storage)) return;    // out of bounds
 #endif   // USE_EXCEPTIONS
@@ -163,7 +167,7 @@ void gText::Insert(char c, unsigned int n)
 void gText::Remove(unsigned int n)
 {
 #ifdef USE_EXCEPTIONS
-  if (n > strlen(storage) - 1)  throw BadIndex();
+  if (n > strlen(storage) - 1)  throw BadIndex(__LINE__, __FILE__);
 #else
   if (n > strlen(storage) - 1)  return;
 #endif  // USE_EXCEPTIONS

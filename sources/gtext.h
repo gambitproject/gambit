@@ -32,8 +32,10 @@ class gText   {
     // INDEX ERROR HANDLER CLASS
     class BadIndex : public gException  {
       public:
-        virtual ~BadIndex()  { }
-        gText Description(void) const;
+      BadIndex(int, char *);
+
+      virtual ~BadIndex()  { }
+      gText Description(void) const;
      };
 #endif   // USE_EXCEPTIONS
 
@@ -89,7 +91,7 @@ class gText   {
 	  // SUBSCRIPTORS
 #ifdef USE_EXCEPTIONS
     char &operator[](unsigned int n)
-      { if (n > strlen(storage))   throw BadIndex();
+      { if (n > strlen(storage))   throw BadIndex(__LINE__, __FILE__);
         return *(storage + n);
       }
 #else
@@ -101,7 +103,7 @@ class gText   {
 
 #ifdef USE_EXCEPTIONS
     char &operator[](unsigned int n) const
-      { if (n > strlen(storage))   throw BadIndex();
+      { if (n > strlen(storage))   throw BadIndex(__LINE__, __FILE__);
         return *(storage + n);
       }
 #else

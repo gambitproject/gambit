@@ -55,12 +55,16 @@ class gFileInput : public gInput  {
 #ifdef USE_EXCEPTIONS
     class OpenFailed : public gException   {
      public:
+      OpenFailed(int, char *);
+
       virtual ~OpenFailed()   { }
       gText Description(void) const;
     };
 
     class ReadFailed : public gException   {
      public:
+      ReadFailed(int, char *);
+
       virtual ~ReadFailed()   { }
       gText Description(void) const;
     };
@@ -165,12 +169,16 @@ class gFileOutput : public gOutput  {
 #ifdef USE_EXCEPTIONS
     class OpenFailed : public gException   {
      public:
+      OpenFailed(int, char *);
+
       virtual ~OpenFailed()   { }
       gText Description(void) const;
     };
 
     class WriteFailed : public gException   {
      public:
+      WriteFailed(int, char *);
+
       virtual ~WriteFailed()   { }
       gText Description(void) const;
     };
