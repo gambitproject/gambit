@@ -328,7 +328,7 @@ Portion* GSM_ArgMax_Rational( Portion** param )
 
 //--------------------------- Transpose -------------------------
 
-Portion* GSM_Transpose_Integer( Portion** param )
+Portion* GSM_Transpose( Portion** param )
 {
   int i;
   int j;
@@ -356,6 +356,7 @@ Portion* GSM_Transpose_Integer( Portion** param )
   }
   return p;
 }
+
 
 
 
@@ -504,9 +505,9 @@ void Init_listfunc(GSM *gsm)
 
   //------------------ Transpose -----------------------
   FuncObj = new FuncDescObj( "Transpose" );
-  FuncObj->SetFuncInfo(GSM_Transpose_Integer, 1);
-  FuncObj->SetParamInfo(GSM_Transpose_Integer,
-			0, "x", porLIST | porINTEGER, 
+  FuncObj->SetFuncInfo(GSM_Transpose, 1);
+  FuncObj->SetParamInfo(GSM_Transpose,
+			0, "x", porLIST, 
 			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2 );
   gsm->AddFunction(FuncObj);
 
