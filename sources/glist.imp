@@ -17,13 +17,6 @@ gNode<T>::gNode(const T &_data, gNode<T> *_prev, gNode<T> *_next)
   : data(_data), prev(_prev), next(_next)
 { }
 
-template <class T> gNode<T>::gNode(const gNode<T> &n)
-  : data(n.data), prev(n.prev), next(n.next)
-{ }
-
-template <class T> gNode<T>::~gNode()
-{ }
-
 //--------------------------------------------------------------------------
 //                 gList<T>: Member function implementations
 //--------------------------------------------------------------------------
@@ -38,7 +31,7 @@ template <class T> gList<T>::gList(const gList<T> &b)
   if (length)   
   {
     gNode<T> *n = b.head;
-		head = new gNode<T>(n->data, 0, 0);
+    head = new gNode<T>(n->data, 0, 0);
     n = n->next;
     tail = head;
     while (n)  
@@ -136,15 +129,15 @@ template <class T> gList<T> &gList<T>::operator=(const gList<T> &b)
   return *this;
 }
 
-template <class T> int gList<T>::operator==(const gList<T> &b) const
+template <class T> bool gList<T>::operator==(const gList<T> &b) const
 {
-  if (length != b.length) return 0;
+  if (length != b.length) return false;
   for (gNode<T> *m = head, *n = b.head; m; m = m->next, n = n->next)
-    if (m->data != n->data)  return 0;
-  return 1;
+    if (m->data != n->data)  return false;
+  return true;
 }
 
-template <class T> int gList<T>::operator!=(const gList<T> &b) const
+template <class T> bool gList<T>::operator!=(const gList<T> &b) const
 {
   return !(*this == b);
 }
@@ -295,9 +288,9 @@ template <class T> int gList<T>::Find(const T &t) const
   return 0;
 }
 
-template <class T> int gList<T>::Contains(const T &t) const
+template <class T> bool gList<T>::Contains(const T &t) const
 {
-  return Find(t);
+  return (Find(t) != 0);
 }
 
 template <class T> int gList<T>::Length(void) const
