@@ -77,7 +77,11 @@ gString gPreprocessor::GetLine( void )
 	else
 	{ 
 	  if( bracket > 0 )
+	  {
+	    if( line.right( 1 ) == '\\' )
+	      line = line.left( line.length() - 1 );
 	    line += ' ';
+	  }
 	  else
 	    break;
 	}

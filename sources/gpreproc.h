@@ -31,7 +31,7 @@ private:
   gString           m_PrevFileName;
   int               m_PrevLineNumber;
 
-
+  gString           m_StartupString;
 
   
   bool EOL( char c ) const { return ( c == '\n' || c == '\r' ); }
@@ -44,22 +44,34 @@ private:
 
   void GetChar( char& c )
   {
-    assert( !eof() );
-    m_InputStack.Peek()->get( c );
-    if( EOL( c ) )
-      ++m_LineNumberStack.Peek();
+    if( m_StartupString.length() > 0 )
+    {
+      c = m_StartupString[0];
+      m_StartupString = m_StartupString.right( m_StartupString.length() - 1 );
+    }
+    else
+    {
+      assert( !eof() );
+      m_InputStack.Peek()->get( c );
+      if( EOL( c ) )
+	++m_LineNumberStack.Peek();
+    }
   }
 
 
 public:
 
-  gPreprocessor( gCmdLineInput* cmdline ) 
-    : m_CmdLine( cmdline ), m_PrevFileName( "console" ), m_PrevLineNumber( 1 )
+  gPreprocessor( gCmdLineInput* cmdline, const char* cmd = NULL ) 
+    : m_CmdLine( cmdline ), m_PrevFileName( "console" ), m_PrevLineNumber( 1 ),
+      m_StartupString( cmd )
   {
     assert( m_CmdLine );
     m_InputStack.Push( m_CmdLine );
     m_FileNameStack.Push( m_PrevFileName );
     m_LineNumberStack.Push( m_PrevLineNumber );
+
+    if( !EOL( m_StartupString[ m_StartupString.length() - 1 ] ) )
+      m_StartupString += '\n';
   }
 
   ~gPreprocessor()
@@ -102,7 +114,9 @@ public:
   //---------------------------------------------
   int GetLineNumber( void ) const 
   { return m_PrevLineNumber; }
-  
+
+
+
 
 };
 
