@@ -1,8 +1,8 @@
-#!/usr/bin/perl -Tw
+#!/software/bin/perl -Tw
 
 # register.pl -- Gambit registration/download program
 
-$data_file = '/home/arbiter/gambit_www/register.log';
+$data_file = '/home/gambit/public_html/logs/register.log';
 
 use CGI;
 use Fcntl;
@@ -20,6 +20,9 @@ Content-type: text/html
 
 <p>Thank you for registering.  Click on each link to begin downloading
 your selections.</p>
+<p>When installing executables, refer to the <tt>README.1ST</tt> file for
+platform-specific instructions and hints.  (It is <b>HIGHLY RECOMMENDED</b>
+that you do this!)</p>
 <HR>
 <UL>
 EndOfText
@@ -27,6 +30,14 @@ EndOfText
 $name = $query->param('name');
 $email = $query->param('email');
 $learn = $query->param('learn');
+$site = $query->param('site');
+
+if ($site eq 'CH')  {
+    $basepath = 'http://www.inf.ethz.ch/personal/stengel/gambit/ver96';
+}
+else  {
+    $basepath = 'ftp://ftp.hss.caltech.edu/pub/gambit/ver96';
+}
 
 unless ($name) {
     $name = 'Anonymous';
@@ -90,7 +101,7 @@ $notify = $1;
 if ($binmsw = $query->param('binmsw'))  {
     $binmsw = ',binmsw';
     print <<"EndOfText";
-<LI><a href="ftp://ftp.hss.caltech.edu/pub/gambit/ver96/setup.exe">
+<LI><a href="$basepath/setup.exe">
 Microsoft Windows 95/98/NT Executables</a>
 EndOfText
 }
@@ -101,7 +112,7 @@ else  {
 if ($binlnx = $query->param('binlnx'))  {
     $binlnx = ',binlnx';
     print <<"EndOfText";
-<LI>Linux (RedHat 6.x) Executables
+<LI><a href="$basepath/gambit_motif_Linux.zip">Linux (RedHat 5.1) Executables</a>
 EndOfText
 }
 else  {
@@ -111,31 +122,101 @@ else  {
 if ($binsol = $query->param('binsol'))  {
     $binsol = ',binsol';
     print <<"EndOfText";
-<LI>Solaris Executables
+<LI><a href="$basepath/gambit_motif_SunOS_5.6.zip">Solaris Executables</a>
 EndOfText
 }
 else  {
     $binsol = '';
 }
 
-if ($dochtml = $query->param('dochtml'))  {
-    $dochtml = ',dochtml';
+if ($guidochtml = $query->param('guidochtml'))  {
+    $guidochtml = ',guidochtml';
     print <<"EndOfText";
-<LI>Documentation (HTML Format)
+<LI><a href="$basepath/guiman.html.zip">GUI Documentation (HTML Format)</a>
 EndOfText
 }
 else  {
-    $dochtml = '';
+    $guidochtml = '';
 }
 
-if ($src = $query->param('src'))  {
-    $src = ',src';
+if ($guidocpdf = $query->param('guidocpdf'))  {
+    $guidocpdf = ',guidocpdf';
     print <<"EndOfText";
-<LI>Complete Gambit source code
+<LI><a href="$basepath/guiman.pdf">GUI Documentation (PDF Format)</a>
 EndOfText
 }
 else  {
-    $src = '';
+    $guidocpdf = '';
+}
+
+if ($guidocps = $query->param('guidocps'))  {
+    $guidocps = ',guidocps';
+    print <<"EndOfText";
+<LI><a href="$basepath/guiman.ps">GUI Documentation (PostScript Format)</a>
+EndOfText
+}
+else  {
+    $guidocps = '';
+}
+
+if ($gcldocps = $query->param('gcldocps'))  {
+    $gcldocps = ',gcldocps';
+    print <<"EndOfText";
+<LI><a href="$basepath/gclman.ps">GCL Documentation (PostScript Format)</a>
+EndOfText
+}
+else  {
+    $gcldocps = '';
+}
+
+if ($srcunx = $query->param('srcunx'))  {
+    $srcunx = ',srcunx';
+    print <<"EndOfText";
+<LI><a href="$basepath/gunixsrc.zip">Complete Gambit source code (Unix)</a>
+EndOfText
+}
+else  {
+    $srcunx = '';
+}
+
+if ($srcmsw = $query->param('srcmsw'))  {
+    $srcmsw = ',srcmsw';
+    print <<"EndOfText";
+<LI><a href="$basepath/gwinsrc.zip">Complete Gambit source code (Microsoft Windows)</a>
+EndOfText
+}
+else  {
+    $srcmsw = '';
+}
+
+if ($wxmsw = $query->param('wxmsw'))  {
+    $wxmsw = ',wxmsw';
+    print <<"EndOfText";
+<LI><a href="$basepath/wx168.zip">wxWindows 1.68 libraries for Microsoft Windows</a>
+EndOfText
+}
+else {
+    $wxmsw = '';
+}
+
+if ($wxlnx = $query->param('wxlnx'))  {
+    $wxlnx = ',wxlnx';
+    print <<"EndOfText";
+<LI><a href="$basepath/wx_motif_Linux.zip">wxWindows 1.68 libraries for RedHat Linux 5.1</a>
+EndOfText
+}
+else {
+    $wxlnx = '';
+}
+
+if ($wxsol = $query->param('wxsol'))  {
+    $wxsol = ',wxsol';
+    print <<"EndOfText";
+<LI><a href="$basepath/wx_motif_SunOS_5.6.zip">wxWindows 1.68 libraries for Solaris</a>
+EndOfText
+}
+else {
+    $wxsol = '';
 }
 
 $current_time = localtime;
@@ -146,7 +227,7 @@ unless ($hostname = $query->remote_host())  {
 # assemble finished log entry
 
 $entry = <<"EndOfText";
-$current_time,$hostname,$name,$email,$learn,$notify$binmsw$binlnx$binsol$dochtml$src
+$current_time,$hostname,$name,$email,$learn,$site,$notify$binmsw$binlnx$binsol$guidochtml$guidocpdf$guidocps$gcldocps$srcmsw$srcunx$wxmsw$wxlnx$wxsol
 EndOfText
 
 # open non-destructively, read old entries, write out new

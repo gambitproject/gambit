@@ -51,8 +51,8 @@
 </td>
 
 <td ALIGN=LEFT VALIGN=TOP>Gambit is available for free download and
-use.&nbsp; Please see our <a href="ver96/guiman/guiman1.html#topic0
-target="_new"> copyright notice</a> if you are interested in using
+use.&nbsp; Please see our <a href="ver96/guiman/guiman1.html#topic0"
+target="_new">copyright notice</a> if you are interested in using
 Gambit as part of your own free or commercial application.
 
 <h4>
@@ -60,19 +60,18 @@ System Requirements</h4>
 Gambit is designed to be functional on a wide range of Unix and Microsoft
 Windows (Windows 95 or newer) systems.&nbsp; To use the graphical user
 interface under Unix (X Windows), you will need to have a sufficiently
-new version of either the GTK or Lesstif window interface libraries (available
-for free from their respective sites).
+new version of either the Motif or Lesstif window interface libraries
+(Lesstif is available for free from
+<a href="http://www.lesstif.org">www.lesstif.org</a>.)
 
 <p>If you wish to compile Gambit on your own, you will need a
-sufficiently new C++ compiler <br>that supports templates and
+sufficiently new C++ compiler that supports templates and
 exceptions.&nbsp; For Unix users, we write code that compiles and
 works under the latest version of <a
 href="http://www.gnu.org/software/gcc/gcc.html">GCC</a>.&nbsp; For
-Windows users, our code has been tested under Borland C++ 5.02, and
-the free command-line tools (Borland C++ 5.5) available on <a
-href="http://www.borland.com">Borland</a>'s website.&nbsp; We would be
-grateful to hear of experiences (or better yet, makefiles and/or
-patches!) using other compilers.
+Windows users, our code has been tested under Borland C++ 5.02.
+We would be grateful to hear of experiences, or better yet, to receive
+makefiles and/or patches for using other compilers or systems.
 
 <h4>
 Binary (Executable) Distributions</h4>
@@ -84,10 +83,7 @@ for several common platforms.&nbsp;
 Graphical user interface</li>
 
 <li>
-Graphical interface to command language interpreter</li>
-
-<li>
-Text (console)-based interface to command language interpreter</li>
+Command language interpreter</li>
 
 <li>
 PXI, an auxiliary plotting application</li>
@@ -98,19 +94,12 @@ Executable distributions are available for the following platforms:
 Executables for Microsoft Windows (95/98/2k/NT) (.zip file)</li>
 
 <li>
-Executables for RedHat Linux:</li>
-
-<ul>
-<li>
-Compiled for GTK (requires GTK version ???) (tar'ed, gzip'ed file)</li>
+Executables for Linux (RedHat Linux 5.1, with g++ 2.8.1 and Motif 2.1)
+</li>
 
 <li>
-Compiled for Lesstif (requires Lesstif version ???) (tar'ed, gzip'ed file)</li>
-</ul>
-
-<li>
-Executables for Solaris (requires Lesstif version ???) (tar'ed, gzip'ed
-file)</li>
+Executables for Solaris (SunOS 5.6, with g++ 2.8.1 and Motif 2.1)
+</li>
 </ul>
 
 <h4>
@@ -118,12 +107,34 @@ Source Code Distributions</h4>
 The complete source code for Gambit is also available:
 <ul>
 <li>
-Gambit source code, as a tar'ed, gziped (.tar.gz) file</li>
+Gambit source code for MS Windows (.zip file)
+</li>
 
 <li>
-Gambit source code, as a .zip file</li>
+Gambit source code for Unix (.zip file)
+</li>
 </ul>
-&nbsp;
+
+<h4>Documentation</h4>
+
+Gambit documentation is available in the following formats:
+<ul>
+<li>Graphical user interface documentation
+
+<ul>
+<li>PDF format (requires Adobe's free Acrobat reader)
+<li>PostScript format
+<li>HTML format
+</ul>
+
+<li>Command language documentation
+
+<ul>
+<li>PostScript format
+</ul>
+
+</ul>
+
 
 <h4>Tell us about yourself</h4>
 
@@ -151,16 +162,31 @@ Gambit?
 <input type="radio" name="notify" value="no">No
 </p>
 
+<p>Download from site
+<input type="radio" name="site" value="US" checked>California, USA
+<input type="radio" name="site" value="CH">Switzerland
+</p>
+
 <p><b>Binaries</b></p>
 <input type="checkbox" name="binmsw">&nbsp;&nbsp;Microsoft Windows 95/98/NT<br>
-<input type="checkbox" name="binlnx">&nbsp;&nbsp;Linux (RedHat 6.x, GTK toolkit)<br>
-<input type="checkbox" name="binsol">&nbsp;&nbsp;Solaris (Lesstif)<br>
+<input type="checkbox" name="binlnx">&nbsp;&nbsp;Linux<br>
+<input type="checkbox" name="binsol">&nbsp;&nbsp;Solaris<br>
 
 <p><b>Documentation</b></p>
-<p><input type="checkbox" name="dochtml">&nbsp;&nbsp;HTML format
+<input type="checkbox" name="guidochtml">&nbsp;&nbsp;GUI documentation in HTML format<br>
+<input type="checkbox" name="guidocpdf">&nbsp;&nbsp;GUI documentation in PDF format<br>
+<input type="checkbox" name="guidocps">&nbsp;&nbsp;GUI documentation in PostScript format<br>
+<input type="checkbox" name="gcldocps">&nbsp;&nbsp;GCL documentation in PostScript format<br>
 
 <p><b>Source code</b></p>
-<p><input type="checkbox" name="src">&nbsp;&nbsp;Complete Gambit source code
+<input type="checkbox" name="srcmsw">&nbsp;&nbsp;Complete Gambit source code
+ (MS Windows version)<br>
+<input type="checkbox" name="srcunx">&nbsp;&nbsp;Complete Gambit source code (Unix version)<br>
+
+<p><b>Precompiled wxWindows 1.68 libraries</b></p>
+<input type="checkbox" name="wxmsw">&nbsp;&nbsp;wxWindows libraries for Microsoft Windows<br>
+<input type="checkbox" name="wxlnx">&nbsp;&nbsp;wxWindows libraries for Linux<br>
+<input type="checkbox" name="wxsol">&nbsp;&nbsp;wxWindows libraries for Solaris<br>
 
 <br>
 <input type="submit" name="submit" value="Submit">
