@@ -17,42 +17,6 @@ Portion *GSM_NewEfg(Portion **param)
   return new Efg_Portion<double>(*E);
 }
 
-Portion *GSM_ReadEfg(Portion **param)
-{
-  gFileInput f(((gString_Portion *) param[0])->Value());
-  
-  if (f.IsValid())   {
-    DataType type;
-    bool valid;
-
-    EfgFileType(f, valid, type);
-    if (!valid)   return 0;
-    
-    switch (type)   {
-      case DOUBLE:  {
-	ExtForm<double> *E = 0;
-	ReadEfgFile((gInput &) f, E);
-
-	if (E)
-	  return new Efg_Portion<double>(*E);
-	else
-	  return 0;
-      }
-      case RATIONAL:   {
-	ExtForm<gRational> *E = 0;
-	ReadEfgFile((gInput &) f, E);
-	
-	if (E)
-	  return new Efg_Portion<gRational>(*E);
-	else
-	  return 0;
-      }
-    }
-  }
-  else
-    return 0;
-}
-
 //
 // Utility functions for converting gArrays to List_Portions
 // (perhaps these are more generally useful and should appear elsewhere?
@@ -119,7 +83,7 @@ Portion *GSM_IsSuccessor(Portion **param)
 
 Portion *GSM_NameEfg(Portion **param)
 {
-  ExtForm<double> &E = ((Efg_Portion<double> *) param[0])->Value();
+  BaseExtForm &E = ((BaseEfg_Portion *) param[0])->Value();
   return new gString_Portion(E.GetTitle());
 }
 
@@ -188,13 +152,13 @@ Portion *GSM_NumMembers(Portion **param)
 
 Portion *GSM_NumOutcomes(Portion **param)
 {
-  ExtForm<double> &E = ((Efg_Portion<double> *) param[0])->Value();
+  BaseExtForm &E = ((BaseEfg_Portion *) param[0])->Value();
   return new numerical_Portion<gInteger>(E.NumOutcomes());
 }
 
 Portion *GSM_NumPlayersEfg(Portion **param)
 {
-  ExtForm<double> &E = ((Efg_Portion<double> *) param[0])->Value();
+  BaseExtForm &E = ((BaseEfg_Portion *) param[0])->Value();
   return new numerical_Portion<gInteger>(E.NumPlayers());
 }
 
@@ -209,7 +173,7 @@ Portion *GSM_Outcome(Portion **param)
 
 Portion *GSM_Outcomes(Portion **param)
 {
-  ExtForm<double> *E = &((Efg_Portion<double> *) param[0])->Value();
+  BaseExtForm *E = &((BaseEfg_Portion *) param[0])->Value();
   return ArrayToList(E->OutcomeList());
 }
 
@@ -234,8 +198,8 @@ Portion *GSM_Parent(Portion **param)
 
 Portion *GSM_Players(Portion **param)
 {
-  ExtForm<double> *E = &((Efg_Portion<double> *) param[0])->Value();
-  return ArrayToList(E->PlayerList());
+  BaseExtForm &E = ((BaseEfg_Portion *) param[0])->Value();
+  return ArrayToList(E.PlayerList());
 }
 
 Portion *GSM_PriorSibling(Portion **param)
@@ -245,9 +209,45 @@ Portion *GSM_PriorSibling(Portion **param)
   else   return 0;
 }
 
+Portion *GSM_ReadEfg(Portion **param)
+{
+  gInput &f = ((Input_Portion *) param[0])->Value();
+
+  if (f.IsValid())   {
+    DataType type;
+    bool valid;
+
+    EfgFileType(f, valid, type);
+    if (!valid)   return 0;
+    
+    switch (type)   {
+      case DOUBLE:  {
+	ExtForm<double> *E = 0;
+	ReadEfgFile((gInput &) f, E);
+
+	if (E)
+	  return new Efg_Portion<double>(*E);
+	else
+	  return 0;
+      }
+      case RATIONAL:   {
+	ExtForm<gRational> *E = 0;
+	ReadEfgFile((gInput &) f, E);
+	
+	if (E)
+	  return new Efg_Portion<gRational>(*E);
+	else
+	  return 0;
+      }
+    }
+  }
+  else
+    return 0;
+}
+
 Portion *GSM_RootNode(Portion **param)
 {
-  ExtForm<double> &E = ((Efg_Portion<double> *) param[0])->Value();
+  BaseExtForm &E = ((BaseEfg_Portion *) param[0])->Value();
   return new Node_Portion(E.RootNode());
 }
 
@@ -266,11 +266,6 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("NewEfg");
   FuncObj->SetFuncInfo(GSM_NewEfg, 0);
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("ReadEfg");
-  FuncObj->SetFuncInfo(GSM_ReadEfg, 1);
-  FuncObj->SetParamInfo(GSM_ReadEfg, 0, "f", porSTRING);
   gsm->AddFunction(FuncObj);
 
 //-----------------------------------------------------------
@@ -299,7 +294,7 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Name");
   FuncObj->SetFuncInfo(GSM_NameEfg, 1);
-  FuncObj->SetParamInfo(GSM_NameEfg, 0, "efg", porEFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_NameEfg, 0, "efg", porEFG);
 
   FuncObj->SetFuncInfo(GSM_NamePlayer, 1);
   FuncObj->SetParamInfo(GSM_NamePlayer, 0, "x", porPLAYER);
@@ -347,12 +342,12 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("NumOutcomes");
   FuncObj->SetFuncInfo(GSM_NumOutcomes, 1);
-  FuncObj->SetParamInfo(GSM_NumOutcomes, 0, "efg", porEFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_NumOutcomes, 0, "efg", porEFG);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NumPlayers");
   FuncObj->SetFuncInfo(GSM_NumPlayersEfg, 1);
-  FuncObj->SetParamInfo(GSM_NumPlayersEfg, 0, "efg", porEFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_NumPlayersEfg, 0, "efg", porEFG);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Outcome");
@@ -362,7 +357,7 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Outcomes");
   FuncObj->SetFuncInfo(GSM_Outcomes, 1);
-  FuncObj->SetParamInfo(GSM_Outcomes, 0, "efg", porEFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_Outcomes, 0, "efg", porEFG);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("OutcomeVector");
@@ -377,7 +372,7 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Players");
   FuncObj->SetFuncInfo(GSM_Players, 1);
-  FuncObj->SetParamInfo(GSM_Players, 0, "efg", porEFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_Players, 0, "efg", porEFG);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("PriorSibling");
@@ -385,9 +380,14 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_PriorSibling, 0, "node", porNODE);
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("ReadEfg");
+  FuncObj->SetFuncInfo(GSM_ReadEfg, 1);
+  FuncObj->SetParamInfo(GSM_ReadEfg, 0, "file", porINPUT);
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("RootNode");
   FuncObj->SetFuncInfo(GSM_RootNode, 1);
-  FuncObj->SetParamInfo(GSM_RootNode, 0, "efg", porEFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_RootNode, 0, "efg", porEFG);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("WriteEfg");
