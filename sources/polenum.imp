@@ -98,7 +98,7 @@ template <class T> int PolEnumModule<T>::PolEnum(void)
     (*params.tracefile) << "\nThe equilibrium equations are \n" 
       << quickie.UnderlyingEquations() ;
   }  
-  if(quickie.FindCertainNumberOfRoots(Cube,20000,params.stopAfter)) {
+  if(quickie.FindCertainNumberOfRoots(Cube,2147483647,params.stopAfter)) {
     if(params.trace>0) {
       (*params.tracefile) << "\nThe system has the following roots in [0,1]^"
 	<< num_vars << " :\n" << quickie.RootList();

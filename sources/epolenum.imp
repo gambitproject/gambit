@@ -94,13 +94,10 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
     kk+=num_vars;
   }
 
-  /*
   for( i=1;i<=EF.NumPlayers();i++) 
-    for(j=1;j<=support.NumSequences(i);j++)
+    for(j=2;j<=support.NumSequences(i);j++) 
       if(SF.ActionNumber(i,j)==support.NumActions(i,SF.InfosetNumber(i,j)))
 	equations+=Prob(i,j);
-  */
-
   // set up the rectangle of search
   gVector<T> bottoms(num_vars), tops(num_vars);
   bottoms = (T)0;
@@ -118,8 +115,9 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
       << quickie.UnderlyingEquations() ;
   }  
 
+  // 2147483647 = 2^31-1 = MaxInt
 
-  if(quickie.FindCertainNumberOfRoots(Cube,20000,params.stopAfter)) {
+  if(quickie.FindCertainNumberOfRoots(Cube,2147483647,params.stopAfter)) {
     if(params.trace>0) {
       (*params.tracefile) << "\nThe system has the following roots in [0,1]^"
 	<< num_vars << " :\n" << quickie.RootList();

@@ -7,7 +7,7 @@
 #ifndef SFSTRAT_H
 #define SFSTRAT_H
 
-#include "gstring.h"
+#include "gtext.h"
 #include "gblock.h"
 #include "gambitio.h"
 #include "glist.h"
@@ -27,7 +27,7 @@ friend class Efg;
 friend class SFSequenceSet;
 private:
   int number;
-  gString name;
+  gText name;
   const EFPlayer *player;
   Action *action;
   const Sequence *parent;
@@ -36,8 +36,8 @@ private:
     : number(n), player(pl), action(a), parent(p) { }
   ~Sequence() { }
 public:
-  const gString &GetName(void) const   { return name; }
-  void SetName(const gString &s)       { name = s; }
+  const gText &GetName(void) const   { return name; }
+  void SetName(const gText &s)       { name = s; }
   
   gList<Action *> History(void) const;
   int GetNumber(void) const        { return number; }
@@ -68,6 +68,7 @@ public:
   // Removes a sequence pointer. Returns true if the sequence was successfully
   // removed, false otherwise.
   bool RemoveSequence( Sequence *s ); 
+  Sequence * Find(int j);
 
   // Number of sequences in the SFSequenceSet
   int NumSequences(void) const;

@@ -112,6 +112,18 @@ bool SFSequenceSet::RemoveSequence( Sequence *s )
   return (t>0); 
 } 
 
+// Finds the sequence pointer of sequence number j. Returns 0 if there 
+// is no sequence with that number.  
+Sequence *SFSequenceSet::Find( int j ) 
+{ 
+  int t=1;
+  while(t <= sequences.Length()) {
+    if(sequences[t]->GetNumber() == j) return sequences[t];
+    t++;
+  }
+  return 0;
+}
+
 // Number of Sequences in a SFSequenceSet
 int SFSequenceSet::NumSequences(void) const
 {

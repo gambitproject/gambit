@@ -5,7 +5,7 @@
 //
 
 #include "gmisc.h"
-#include "gstring.h"
+#include "gtext.h"
 #include "rational.h"
 #include "double.h"
 #include "complex.h"

@@ -136,24 +136,16 @@ void Sfg::Dump(gOutput& out) const
     out << "\nPlayer " << i << ":\n " << (*(*E)[i]);
 }
 
-int Sfg::InfosetNumber(int pl, int sequence) const 
+int Sfg::InfosetNumber(int pl, int j) const 
 {
-  int i=1;
-  while (Constraints(pl)(i,sequence) == 0) i++;
-  return i-1;
+  if(j==1) return 0;
+  return (*sequences)[pl]->Find(j)->GetInfoset()->GetNumber();
 }
 
-int Sfg::ActionNumber(int pl, int sequence) const
+int Sfg::ActionNumber(int pl, int j) const
 {
-  int j,s=1,act=0;
-
-  j=InfosetNumber(pl,sequence);
-  while (s<=sequence) { 
-    if(Constraints(pl)(j+1,s) ==(gNumber)(-1))
-      act++;
-    s++;
-  }
-  return act;
+  if(j==1) return 0;
+  return (*sequences)[pl]->Find(j)->GetAction()->GetNumber();
 }
 
 BehavProfile<gNumber> Sfg::ToBehav(const gPVector<double> &x) const
@@ -179,3 +171,4 @@ BehavProfile<gNumber> Sfg::ToBehav(const gPVector<double> &x) const
 template class gNArray<gArray<gNumber> *>;
 template class gArray<gRectArray<gNumber> *>;
 template gOutput &operator<<(gOutput &, const gArray<gNumber> &);
+template gOutput &operator<<(gOutput &, const gRectArray<gNumber> &);
