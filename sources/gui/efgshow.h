@@ -52,11 +52,6 @@ private:
   
   void NodeInspect(bool insp);
 
-  struct es_features {
-    bool iset_hilight;
-    es_features(void) : iset_hilight(FALSE) { }
-  } features;
-
   void MakeMenus(void);
   void MakeToolbar(void);
   void AdjustSizes(void);
@@ -116,7 +111,6 @@ private:
   void OnViewCursor(wxCommandEvent &);
   void OnViewOutcomes(wxCommandEvent &);
   void OnViewSupports(wxCommandEvent &);
-  void OnViewInfosets(wxCommandEvent &);
   void OnViewZoomIn(wxCommandEvent &);
   void OnViewZoomOut(wxCommandEvent &);
 
@@ -206,10 +200,6 @@ public:
   // Solution interface to normal form
   void AddProfile(const BehavSolution &, bool map);
   FullEfg *Game(void) { return &m_efg; }
-
-
-  // Interface for infoset hilighting between the tree and solution display
-  void HilightInfoset(int pl, int iset, int who);
 
   gText UniqueSupportName(void) const;
 

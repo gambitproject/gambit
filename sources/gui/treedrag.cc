@@ -30,14 +30,14 @@
 // IsetDragger
 //--------------------
 
-TreeWindow::IsetDragger::IsetDragger(TreeWindow *parent_, FullEfg &ef_)
+IsetDragger::IsetDragger(TreeWindow *parent_, FullEfg &ef_)
   : ef(ef_), parent(parent_), drag_now(0), start_node(0), end_node(0)
 { }
 
-TreeWindow::IsetDragger::~IsetDragger()
+IsetDragger::~IsetDragger()
 { }
 
-void TreeWindow::IsetDragger::RedrawObject(void)
+void IsetDragger::RedrawObject(void)
 {
   wxClientDC dc(parent);
   dc.SetLogicalFunction(wxXOR);
@@ -48,7 +48,7 @@ void TreeWindow::IsetDragger::RedrawObject(void)
   dc.SetLogicalFunction(wxCOPY);
 }
 
-int TreeWindow::IsetDragger::OnEvent(wxMouseEvent &ev)
+int IsetDragger::OnEvent(wxMouseEvent &ev)
 {
   int ret = (drag_now) ? DRAG_CONTINUE : DRAG_NONE;
   if (ev.Dragging()) {
@@ -94,14 +94,14 @@ int TreeWindow::IsetDragger::OnEvent(wxMouseEvent &ev)
 // BranchDragger
 //--------------------
 
-TreeWindow::BranchDragger::BranchDragger(TreeWindow *parent_, FullEfg &ef_)
+BranchDragger::BranchDragger(TreeWindow *parent_, FullEfg &ef_)
   : ef(ef_), parent(parent_), drag_now(0), br(0), start_node(0)
 { }
 
-TreeWindow::BranchDragger::~BranchDragger()
+BranchDragger::~BranchDragger()
 { }
 
-void TreeWindow::BranchDragger::RedrawObject(void)
+void BranchDragger::RedrawObject(void)
 {
   wxClientDC dc(parent);
   dc.SetLogicalFunction(wxINVERT);
@@ -113,7 +113,7 @@ void TreeWindow::BranchDragger::RedrawObject(void)
 }
 
 
-int TreeWindow::BranchDragger::OnEvent(wxMouseEvent &ev)
+int BranchDragger::OnEvent(wxMouseEvent &ev)
 {
   int ret = (drag_now) ? DRAG_CONTINUE : DRAG_NONE;
   if (ev.Dragging()) {

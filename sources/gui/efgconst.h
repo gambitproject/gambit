@@ -54,7 +54,6 @@ typedef enum {
   efgmenuVIEW_NAVIGATION = 1860,
   efgmenuVIEW_OUTCOMES = 1861,
   efgmenuVIEW_SUPPORTS = 1862,
-  efgmenuVIEW_INFOSETS = 1865,
   efgmenuVIEW_ZOOMIN = 1601,
   efgmenuVIEW_ZOOMOUT = 1602,
 

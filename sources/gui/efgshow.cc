@@ -35,7 +35,6 @@
 #include "efgnavigate.h"
 #include "efgoutcome.h"
 #include "efgsupport.h"
-#include "efgsoln.h"
 #include "nfgshow.h"
 #include "efgsolvd.h"
 
@@ -125,7 +124,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuVIEW_NAVIGATION, EfgShow::OnViewCursor)
   EVT_MENU(efgmenuVIEW_OUTCOMES, EfgShow::OnViewOutcomes)
   EVT_MENU(efgmenuVIEW_SUPPORTS, EfgShow::OnViewSupports)
-  EVT_MENU(efgmenuVIEW_INFOSETS, EfgShow::OnViewInfosets)
   EVT_MENU(efgmenuVIEW_ZOOMIN, EfgShow::OnViewZoomIn)
   EVT_MENU(efgmenuVIEW_ZOOMOUT, EfgShow::OnViewZoomOut)
   EVT_MENU(efgmenuFORMAT_LEGEND, EfgShow::OnFormatLegend)
@@ -241,13 +239,12 @@ EfgShow::EfgShow(FullEfg &p_efg, wxWindow *p_parent)
   SetAcceleratorTable(accel);
 
   MakeMenus();
-    
+  MakeToolbar();
+  
   m_currentSupport = new EFSupport(m_efg);
   m_currentSupport->SetName("Full Support");
   m_supports.Append(m_currentSupport);
 
-  MakeToolbar();
-  
   m_nodeSashWindow = new wxSashWindow(this, idNODEWINDOW,
 				      wxPoint(0, 40), wxSize(200, 200),
 				      wxNO_BORDER | wxSW_3D);
@@ -293,6 +290,9 @@ EfgShow::EfgShow(FullEfg &p_efg, wxWindow *p_parent)
   m_treeWindow->FitZoom();
 
   Show(true);
+  // Force this at end to make sure item is unchecked; under MSW,
+  // the ordering of events in creating the window leaves this checked
+  GetMenuBar()->Check(efgmenuVIEW_NAVIGATION, false);
 }
 
 EfgShow::~EfgShow()
@@ -455,7 +455,6 @@ gNumber EfgShow::ActionProb(const Node *p_node, int p_action) const
 
 void EfgShow::OnOutcomesEdited(void)
 {
-  m_treeWindow->OutcomeChange();
   m_treeWindow->Refresh();
   m_outcomeWindow->UpdateValues();
 }
@@ -464,22 +463,6 @@ void EfgShow::OnSupportsEdited(void)
 {
   m_treeWindow->SupportChanged();
   m_supportWindow->UpdateValues();
-}
-
-
-// if who == 2, hilight in the tree display
-// if who == 1, hilight in the solution window display
-void EfgShow::HilightInfoset(int pl, int iset, int who)
-{
-  if (!features.iset_hilight) 
-    return;
-
-#ifdef NOT_PORTED_YET
-  if (who == 1)
-    m_profileTable->HilightInfoset(pl, iset);
-#endif  // NOT_PORTED_YET
-
-  if (who == 2) m_treeWindow->HilightInfoset(pl, iset);
 }
 
 gText EfgShow::UniqueSupportName(void) const
@@ -802,9 +785,6 @@ void EfgShow::MakeMenus(void)
   viewMenu->Append(efgmenuVIEW_SUPPORTS, "&Supports",
 		   "Display and edit supports", true);
   viewMenu->Check(efgmenuVIEW_SUPPORTS, false);
-  viewMenu->Append(efgmenuVIEW_INFOSETS, "&Infosets",
-		   "Toggle information set highlighting", true);
-  viewMenu->Check(efgmenuVIEW_INFOSETS, false);
   viewMenu->AppendSeparator();
   viewMenu->Append(efgmenuVIEW_ZOOMIN, "Zoom &in\t+",
 		   "Increase display magnification");
@@ -1310,7 +1290,6 @@ void EfgShow::OnEditOutcomesAttach(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_efg.SetOutcome(Cursor(), dialog.GetOutcome());
-    m_treeWindow->OutcomeChange();
     m_treeWindow->Refresh();
     UpdateMenus();
   }
@@ -1319,7 +1298,6 @@ void EfgShow::OnEditOutcomesAttach(wxCommandEvent &)
 void EfgShow::OnEditOutcomesDetach(wxCommandEvent &)
 {
   m_efg.SetOutcome(Cursor(), m_efg.GetNullOutcome());
-  m_treeWindow->OutcomeChange();
   m_treeWindow->Refresh();
   UpdateMenus();
 }
@@ -1355,7 +1333,6 @@ void EfgShow::OnEditOutcomesPayoffs(wxCommandEvent &)
     }
     m_efg.SetOutcomeName(outcome, dialog.Name());
 
-    m_treeWindow->OutcomeChange();
     m_treeWindow->Refresh();
     m_outcomeWindow->UpdateValues();
     UpdateMenus();
@@ -1376,7 +1353,6 @@ void EfgShow::OnEditOutcomesNew(wxCommandEvent &)
       }
       m_efg.SetOutcomeName(outcome, dialog.Name());
       
-      m_treeWindow->OutcomeChange();
       m_treeWindow->Refresh();
       m_outcomeWindow->UpdateValues();
       UpdateMenus();
@@ -1394,7 +1370,6 @@ void EfgShow::OnEditOutcomesDelete(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     try {
       m_efg.DeleteOutcome(dialog.GetOutcome());
-      m_treeWindow->OutcomeChange();
       m_treeWindow->Refresh();
       UpdateMenus();
     }
@@ -1638,16 +1613,6 @@ void EfgShow::OnViewSupports(wxCommandEvent &)
   }
 
   AdjustSizes();
-}
-
-void EfgShow::OnViewInfosets(wxCommandEvent &)
-{
-  features.iset_hilight = !features.iset_hilight;
-  if (!features.iset_hilight) {
-    HilightInfoset(0, 0, 1);
-    HilightInfoset(0, 0, 2);
-  }
-  GetMenuBar()->Check(efgmenuVIEW_INFOSETS, features.iset_hilight);
 }
 
 const float ZOOM_DELTA = .1;

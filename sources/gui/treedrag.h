@@ -19,7 +19,7 @@ typedef enum { DRAG_NONE = 0, DRAG_START = 1, DRAG_CONTINUE = 2,
 // This class enables the user to merge infosets by dragging a line from the
 // first infoset's maker to the second one's.
 //
-class TreeWindow::IsetDragger {
+class IsetDragger {
 private:
   FullEfg &ef;
   TreeWindow *parent;
@@ -46,7 +46,7 @@ public:
 // occupy.  If the node was terminal, a player dialog is opened to 
 // choose a player.
 //
-class TreeWindow::BranchDragger {
+class BranchDragger {
 private:
   FullEfg &ef;
   TreeWindow *parent;

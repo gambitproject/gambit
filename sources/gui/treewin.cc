@@ -44,11 +44,11 @@ END_EVENT_TABLE()
 TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   : wxScrolledWindow(p_parent),
     m_efg(*p_efgShow->Game()), m_parent(p_efgShow),
-    mark_node(0), m_layout(m_efg, this),
-    hilight_infoset(0), hilight_infoset1(0), m_dragImage(0), m_dragSource(0),
-    iset_drag(new IsetDragger(this, m_efg)),
-    branch_drag(new BranchDragger(this, m_efg)),
-    m_zoom(1.0), m_cursor(m_efg.RootNode()), outcomes_changed(false)
+    m_markNode(0), m_layout(m_efg, this),
+    m_dragImage(0), m_dragSource(0),
+    m_infosetDragger(new IsetDragger(this, m_efg)),
+    m_branchDragger(new BranchDragger(this, m_efg)),
+    m_zoom(1.0), m_cursor(m_efg.RootNode())
 {
   // Make sure that Chance player has a name
   m_efg.GetChance()->SetName("Chance");
@@ -59,8 +59,8 @@ TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
 
 TreeWindow::~TreeWindow()
 {
-  delete iset_drag;
-  delete branch_drag;
+  delete m_infosetDragger;
+  delete m_branchDragger;
   Show(false);
 }
 
@@ -124,7 +124,7 @@ static Node *NextSameIset(const Node *n)
 //
 void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
 {
-  if (!p_event.ShiftDown()) {
+  if (Cursor() && !p_event.ShiftDown()) {
     bool c = false;   // set to true if cursor position has changed
     switch (p_event.KeyCode()) {
     case WXK_LEFT:
@@ -160,25 +160,13 @@ void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
       break;
     }
     case WXK_SPACE:
+      // Force a scroll to be sure selected node is visible
       c = true;
       break;
     }
         
     if (c) { 
       ProcessCursor(); // cursor moved
-    }
-
-    // Implement the behavior that when control+cursor key is pressed, the
-    // nodes belonging to the iset are hilighted.
-    if (c && p_event.ControlDown()) {
-      if (hilight_infoset1 != Cursor()->GetInfoset()) {
-	hilight_infoset1 = Cursor()->GetInfoset();
-	Refresh();
-      }
-    }
-    if (!p_event.ControlDown() && hilight_infoset1) {
-      hilight_infoset1 = 0;
-      Refresh();
     }
   }
   else {
@@ -220,7 +208,7 @@ void TreeWindow::AdjustScrollbarSteps(void)
   const int OUTCOME_LENGTH = 60;
 
   SetScrollbars(50, 50,
-		(int) ((m_layout.MaxX() + draw_settings.NodeSize() + 
+		(int) ((m_layout.MaxX() + m_drawSettings.NodeSize() + 
 			OUTCOME_LENGTH) * m_zoom / 50 + 1),
 		(int) (m_layout.MaxY() * m_zoom / 50 + 1),
 		scrollX, scrollY);
@@ -281,7 +269,7 @@ void TreeWindow::EnsureCursorVisible(void)
     xScroll -= -xx / 50 + 1;
   }
   const int OUTCOME_LENGTH = 60;
-  CalcScrolledPosition((int) (entry->X() * m_zoom + draw_settings.NodeSize() +
+  CalcScrolledPosition((int) (entry->X() * m_zoom + m_drawSettings.NodeSize() +
 			      OUTCOME_LENGTH),
 		       (int) (entry->Y() * m_zoom), &xx, &yy);
   if (xx > width) {
@@ -476,12 +464,12 @@ void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
   }
 
   // Check all the draggers.  Note that they are mutually exclusive
-  if (!branch_drag->Dragging()) {
-    if (iset_drag->OnEvent(p_event) != DRAG_NONE) return;
+  if (!m_branchDragger->Dragging()) {
+    if (m_infosetDragger->OnEvent(p_event) != DRAG_NONE) return;
   }
 
-  if (!iset_drag->Dragging()) {
-    if (branch_drag->OnEvent(p_event) != DRAG_NONE) return;
+  if (!m_infosetDragger->Dragging()) {
+    if (m_branchDragger->OnEvent(p_event) != DRAG_NONE) return;
   }
 }    
 
@@ -492,12 +480,12 @@ void TreeWindow::OnLeftClick(wxMouseEvent &p_event)
   }   
  
   // Check all the draggers.  Note that they are mutually exclusive
-  if (!branch_drag->Dragging()) {
-    if (iset_drag->OnEvent(p_event) != DRAG_NONE) return;
+  if (!m_branchDragger->Dragging()) {
+    if (m_infosetDragger->OnEvent(p_event) != DRAG_NONE) return;
   }
 
-  if (!iset_drag->Dragging()) {
-    if (branch_drag->OnEvent(p_event) != DRAG_NONE) return;
+  if (!m_infosetDragger->Dragging()) {
+    if (m_branchDragger->OnEvent(p_event) != DRAG_NONE) return;
   }
     
   int x, y;
@@ -521,10 +509,6 @@ void TreeWindow::OnLeftDoubleClick(wxMouseEvent &p_event)
   Node *node = m_layout.NodeHitTest(x, y);
   if (node) {
     SetCursorPosition(node);
-    if (Cursor()->GetInfoset()) {
-      m_parent->HilightInfoset(Cursor()->GetPlayer()->GetNumber(),
-			       Cursor()->GetInfoset()->GetNumber(), 1);
-    }
     Refresh();
     return;
   }
@@ -589,19 +573,6 @@ bool TreeWindow::ProcessShift(wxMouseEvent &ev)
   }
 
   return false;
-}
-
-void TreeWindow::HilightInfoset(int pl, int iset)
-{
-  hilight_infoset = 0;
-
-  if (pl >= 1 && pl <= m_efg.NumPlayers()) {
-    EFPlayer *p = m_efg.Players()[pl];
-    if (iset >= 1 && iset <= p->NumInfosets())
-      hilight_infoset = p->Infosets()[iset];
-  }
-
-  Refresh();
 }
 
 //
@@ -681,7 +652,7 @@ Node *TreeWindow::GotObject(long &x, long &y, int what)
         
     if (what == DRAG_BRANCH_END) {
       // check if released in a valid position
-      NodeEntry *start_entry = m_layout.GetNodeEntry(branch_drag->StartNode());
+      NodeEntry *start_entry = m_layout.GetNodeEntry(m_branchDragger->StartNode());
       int xs = start_entry->x+draw_settings.NodeLength()+
 	draw_settings.ForkLength()+start_entry->nums*INFOSET_SPACING;
       if (x > xs && x < xs+draw_settings.BranchLength() &&
@@ -744,10 +715,10 @@ void TreeWindow::UpdateMenus(void)
 
 void TreeWindow::node_set_mark(void)
 {
-  if (mark_node != Cursor())
-    mark_node = Cursor();
+  if (m_markNode != Cursor())
+    m_markNode = Cursor();
   else
-    mark_node = 0;
+    m_markNode = 0;
   m_parent->UpdateMenus();
 }
 
@@ -757,8 +728,8 @@ void TreeWindow::node_set_mark(void)
 
 void TreeWindow::node_goto_mark(void)
 {
-  if (mark_node) {
-    SetCursorPosition(mark_node);
+  if (m_markNode) {
+    SetCursorPosition(m_markNode);
     ProcessCursor();
   }
 }

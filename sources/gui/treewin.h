@@ -1,7 +1,10 @@
 //
-// FILE: treewin.h -- Interface for TreeWindow class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Declaration of window class to display extensive form tree
 //
 
 #ifndef TREEWIN_H
@@ -16,31 +19,22 @@ class EfgShow;
 
 class TreeWindow : public wxScrolledWindow {
 friend class EfgPrintout;
-
 private:
   FullEfg &m_efg;
   EfgShow *m_parent;
-  
-  Node  *mark_node;                 // Used in mark/goto node operations
   efgTreeLayout m_layout;
+  TreeDrawSettings m_drawSettings;
 
-  Infoset *hilight_infoset;       // Hilight infoset from the solution disp
-  Infoset *hilight_infoset1;      // Hilight infoset by pressing control
-
-  // Context-sensitive popup menus, displayed on right-click
+  double m_zoom;
   wxMenu *m_nodeMenu, *m_gameMenu;
+  Node *m_markNode;
+  Node *m_cursor; 
 
   wxDragImage *m_dragImage;
   Node *m_dragSource;
   enum { dragCOPY, dragMOVE, dragOUTCOME } m_dragMode;
-
-  class IsetDragger;              // Class to take care of iset join by
-  IsetDragger *iset_drag;         // drag and dropping.
-
-  class BranchDragger;            // Class to take care of branch addition by
-  BranchDragger *branch_drag;     // drag and dropping
-
-  float m_zoom;
+  class IsetDragger *m_infosetDragger;
+  class BranchDragger *m_branchDragger;
 
   // Private Functions
   void MakeFlasher(void);
@@ -60,11 +54,6 @@ private:
   void OnLeftDoubleClick(wxMouseEvent &);
   void OnKeyEvent(wxKeyEvent &);
     
-protected:
-  Node *m_cursor;  // Used to process cursor keys, stores current position.
-  bool    outcomes_changed;
-  TreeDrawSettings draw_settings;  // Stores drawing parameters
-
 public:
   TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent);
   virtual ~TreeWindow();
@@ -81,29 +70,24 @@ public:
   EfgShow *Parent(void) const { return m_parent; }
   
   virtual void OnDraw(wxDC &dc);
-  void HilightInfoset(int pl,int iset);
 
   void RefreshTree(void);
   void RefreshLayout(void);
   void RefreshLabels(void);
-  void OutcomeChange(void) { outcomes_changed = true; }
   
   // Used by parent EfgShow when cur_sup changes
   void SupportChanged(void);
   
   // Gives access to the parent to the private draw_settings. Used for SolnShow
-  TreeDrawSettings &DrawSettings(void) { return draw_settings; }
-  int NumDecimals(void) const { return draw_settings.NumDecimals(); }
+  TreeDrawSettings &DrawSettings(void) { return m_drawSettings; }
+  int NumDecimals(void) const { return m_drawSettings.NumDecimals(); }
   
   // Gives access to the parent to the current cursor node
   Node *Cursor(void) const { return m_cursor; }
   void SetCursorPosition(Node *p_cursor);
-  Node *MarkNode(void) const { return mark_node; }
+  Node *MarkNode(void) const { return m_markNode; }
     
-  Infoset *HighlightInfoset(void) const { return hilight_infoset; }
-  Infoset *HighlightInfoset1(void) const { return hilight_infoset1; }
-
-  const TreeDrawSettings &DrawSettings(void) const { return draw_settings; }
+  const TreeDrawSettings &DrawSettings(void) const { return m_drawSettings; }
 
   void UpdateMenus(void);
   
