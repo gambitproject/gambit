@@ -1048,8 +1048,8 @@ if (gs->Completed()==wxOK)
 delete gs;
 }
 
-#pragma argsused		// turn off the ev not used message
-void	SpreadSheet3D::spread_options_func(wxButton	&ob,wxEvent &ev)
+
+void	SpreadSheet3D::spread_options_func(wxButton	&ob,wxEvent &)
 {
 	SpreadSheet3D *parent=(SpreadSheet3D *)ob.GetClientData();
 	parent->DrawSettings()->SetOptions();
