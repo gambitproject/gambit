@@ -190,7 +190,6 @@ static Portion *GSM_EnumMixed_Nfg(Portion **param)
 
 #include "enumsub.h"
 
-
 static Portion *GSM_EnumMixed_Efg(Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
@@ -204,6 +203,10 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
   params.tracefile = &((OutputPortion *) param[6])->Value();
   params.trace = ((NumberPortion *) param[7])->Value();
   params.cliques = ((BoolPortion *) param[8])->Value();
+
+  if (!IsPerfectRecall(support.Game())) {
+    gout << "WARNING: Solving game of imperfect recall with EnumMixed; results not guaranteed\n";
+  }
 
   gList<BehavSolution> solutions;
   try {
@@ -251,6 +254,10 @@ static Portion *GSM_EnumPure_Nfg(Portion **param)
 static Portion *GSM_EnumPure_Efg(Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
+
+  if (!IsPerfectRecall(support.Game())) {
+    gout << "WARNING: Solving game of imperfect recall with EnumPure; results not guaranteed\n";
+  }
 
   if (((BoolPortion *) param[1])->Value())   {
     gList<BehavSolution> solutions;
@@ -388,6 +395,10 @@ static Portion *GSM_Qre_Start(Portion **param)
     BehavSolution &start = *((BehavPortion *) param[0])->Value();
     Efg &E = start.Game();
   
+    if (!IsPerfectRecall(E)) {
+      gout << "WARNING: Solving game of imperfect recall with Qre; results not guaranteed\n";
+    }
+
     EFQreParams EP;
     if(((TextPortion*) param[1])->Value() != "")
       EP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
@@ -487,6 +498,10 @@ static Portion *GSM_KQre_Start(Portion **param)
     BehavSolution &start = *((BehavPortion *) param[0])->Value();
     Efg &E = start.Game();
   
+    if (!IsPerfectRecall(E)) {
+      gout << "WARNING: Solving game of imperfect recall with KQre; results not guaranteed\n";
+    }
+
     EFQreParams EP;
     if(((TextPortion*) param[1])->Value() != "")
       EP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
@@ -568,6 +583,10 @@ static Portion *GSM_Lcp_Nfg(Portion **param)
 static Portion *GSM_Lcp_Efg(Portion **param)
 {
   EFSupport &support = *((EfSupportPortion*) param[0])->Value();
+
+  if (!IsPerfectRecall(support.Game())) {
+    gout << "WARNING: Solving game of imperfect recall with Lcp; results not guaranteed\n";
+  }
 
   if (((BoolPortion *) param[1])->Value())   {
     LemkeParams params;
@@ -703,6 +722,10 @@ static Portion *GSM_Liap_Behav(Portion **param)
   }
   else  {
     EFLiapParams LP;
+
+    if (!IsPerfectRecall(E)) {
+      gout << "WARNING: Solving game of imperfect recall with Liap; results not guaranteed\n";
+    }
 
     LP.stopAfter = ((NumberPortion *) param[2])->Value();
     LP.nTries = ((NumberPortion *) param[3])->Value();
@@ -876,6 +899,10 @@ static Portion *GSM_Lp_Efg(Portion **param)
   if (E.NumPlayers() > 2 || !E.IsConstSum())
     throw gclRuntimeError("Only valid for two-person zero-sum games");
 
+  if (!IsPerfectRecall(E)) {
+    gout << "WARNING: Solving game of imperfect recall with Lp; results not guaranteed\n";
+  }
+
   if (((BoolPortion *) param[1])->Value())   {
     ZSumParams params;
     params.stopAfter = ((NumberPortion *) param[2])->Value();
@@ -1014,6 +1041,10 @@ static Portion *GSM_PolEnum_Efg(Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
   
+  if (!IsPerfectRecall(support.Game())) {
+    gout << "WARNING: Solving game of imperfect recall with PolEnum; results not guaranteed\n";
+  }
+
   double time;
   gList<BehavSolution> solutions;
   bool is_singular(false);
@@ -1071,6 +1102,10 @@ static Portion *GSM_AllEFNashSolve_Efg(Portion **param)
   gList<BehavSolution> solutions;
   gList<const EFSupport> singular_supports;
 
+  if (!IsPerfectRecall(S.Game())) {
+    gout << "WARNING: Solving game of imperfect recall with AllNash; results not guaranteed\n";
+  }
+
   if(recurse) {
     try {
       long nevals = 0;
@@ -1112,6 +1147,10 @@ static Portion *GSM_SequentialEquilib(Portion **param)
   EFBasis &basis = *((EfBasisPortion *) param[0])->Value();
   EFSupport &support = *((EfSupportPortion *) param[1])->Value();
   
+  if (!IsPerfectRecall(support.Game())) {
+    gout << "WARNING: Solving game of imperfect recall with SequentialEquilib; results not guaranteed\n";
+  }
+
   double time;
   gList<BehavSolution> solutions;
   
@@ -1238,6 +1277,10 @@ static Portion *GSM_Simpdiv_Efg(Portion **param)
 
   if (!((BoolPortion *) param[1])->Value())
     throw gclRuntimeError("algorithm not implemented for extensive forms");
+
+  if (!IsPerfectRecall(support.Game())) {
+    gout << "WARNING: Solving game of imperfect recall with Simpdiv; results not guaranteed\n";
+  }
 
   SimpdivParams params;
   params.stopAfter = ((NumberPortion *) param[2])->Value();
