@@ -72,8 +72,6 @@ private:
     BSolnSortFilterOptions sf_options;
     gList<Accel>    accelerators;
     gText   filename;
-    // checkable menu items 
-    int m_inspectInfosetsItem;
     guiEfgShowToolBar *toolbar;
 
     // Private functions

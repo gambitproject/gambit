@@ -133,59 +133,69 @@ void TreeWindow::MakeMenus(void)
 {
   edit_menu = new wxMenu(NULL, (wxFunction)OnPopup);
 
-  wxMenu *node_menu = new wxMenu;
-  node_menu->Append(NODE_ADD, "&Add Move", "Add a move");
-  node_menu->Append(NODE_DELETE, "&Delete Move", "Remove move at cursor");
-  node_menu->Append(NODE_INSERT, "&Insert Move", "Insert move at cursor");
-  node_menu->Append(NODE_LABEL, "&Label", "Label cursor node");
-  node_menu->AppendSeparator();
-  node_menu->Append(NODE_SET_MARK, "Set &Mark", "Mark cursor node");
-  node_menu->Append(NODE_GOTO_MARK, "Go&to Mark", "Goto marked node");
-    
+  wxMenu *nodeMenu  = new wxMenu;
+  nodeMenu->Append(efgmenuEDIT_NODE_ADD, "&Add Move", "Add a move");
+  nodeMenu->Append(efgmenuEDIT_NODE_DELETE, "&Delete Move", "Remove move at cursor");
+  nodeMenu->Append(efgmenuEDIT_NODE_INSERT, "&Insert Move", "Insert move at cursor");
+  nodeMenu->Append(efgmenuEDIT_NODE_LABEL,     "&Label",     "Label cursor node");
+  nodeMenu->AppendSeparator();
+  nodeMenu->Append(efgmenuEDIT_NODE_SET_MARK,  "Set &Mark",  "Mark cursor node");
+  nodeMenu->Append(efgmenuEDIT_NODE_GOTO_MARK, "Go&to Mark", "Goto marked node");
+
   wxMenu *action_menu = new wxMenu;
-  action_menu->Append(ACTION_DELETE, "&Delete", "Delete an action from cursor information set");
-  action_menu->Append(ACTION_INSERT, "&Insert", "Insert an action in the cursor's information set");
-  action_menu->Append(ACTION_APPEND, "&Append", "Append an action to the cursor's information set");
-  action_menu->Append(ACTION_LABEL, "&Label", "Label the actions of the cursor's information set");
-  action_menu->Append(ACTION_PROBS, "&Probabilities", "Set chance probabilities for the cursor's information set");
-    
+  action_menu->Append(efgmenuEDIT_ACTION_DELETE, "&Delete", "Delete an action from cursor information set");
+  action_menu->Append(efgmenuEDIT_ACTION_INSERT, "&Insert", "Insert an action in the cursor's information set");
+  action_menu->Append(efgmenuEDIT_ACTION_APPEND, "&Append", "Append an action to the cursor's information set");
+  action_menu->Append(efgmenuEDIT_ACTION_LABEL, "&Label", "Label the actions of the cursor's information set");
+  action_menu->Append(efgmenuEDIT_ACTION_PROBS, "&Probabilities", "Set chance probabilities for the cursor's information set");
+
   wxMenu *infoset_menu = new wxMenu;
-  infoset_menu->Append(INFOSET_MERGE, "&Merge", "Merge cursor iset w/ marked");
-  infoset_menu->Append(INFOSET_BREAK, "&Break", "Make cursor a new iset");
-  infoset_menu->Append(INFOSET_SPLIT, "&Split", "Split iset at cursor");
-  infoset_menu->Append(INFOSET_JOIN, "&Join", "Join cursor to marked iset");
-  infoset_menu->Append(INFOSET_LABEL, "&Label", "Label cursor iset & actions");
-  infoset_menu->Append(INFOSET_SWITCH_PLAYER, "&Player", "Change player of cursor iset");
-  infoset_menu->Append(INFOSET_REVEAL, "&Reveal", "Reveal infoset to players");
+  infoset_menu->Append(efgmenuEDIT_INFOSET_MERGE,  "&Merge",  "Merge cursor iset w/ marked");
+  infoset_menu->Append(efgmenuEDIT_INFOSET_BREAK,  "&Break",  "Make cursor a new iset");
+  infoset_menu->Append(efgmenuEDIT_INFOSET_SPLIT,  "&Split",  "Split iset at cursor");
+  infoset_menu->Append(efgmenuEDIT_INFOSET_JOIN,   "&Join",   "Join cursor to marked iset");
+  infoset_menu->Append(efgmenuEDIT_INFOSET_LABEL,  "&Label",  "Label cursor iset & actions");
+  infoset_menu->Append(efgmenuEDIT_INFOSET_PLAYER, "&Player", "Change player of cursor iset");
+  infoset_menu->Append(efgmenuEDIT_INFOSET_REVEAL, "&Reveal", "Reveal infoset to players");
 
   wxMenu *outcome_menu = new wxMenu;
-  outcome_menu->Append(TREE_OUTCOMES_NEW, "&New",
+  outcome_menu->Append(efgmenuEDIT_OUTCOMES_NEW, "&New",
 		       "Create a new outcome");
-  outcome_menu->Append(TREE_OUTCOMES_DELETE, "Dele&te",
+  outcome_menu->Append(efgmenuEDIT_OUTCOMES_DELETE, "Dele&te",
 		       "Delete an outcome");
-  outcome_menu->Append(TREE_OUTCOMES_ATTACH, "&Attach",
+  outcome_menu->Append(efgmenuEDIT_OUTCOMES_ATTACH, "&Attach",
 		       "Attach an outcome to the node at cursor");
-  outcome_menu->Append(TREE_OUTCOMES_DETACH, "&Detach",
+  outcome_menu->Append(efgmenuEDIT_OUTCOMES_DETACH, "&Detach",
 		       "Detach the outcome from the node at cursor");
-  outcome_menu->Append(TREE_OUTCOMES_LABEL, "&Label",
+  outcome_menu->Append(efgmenuEDIT_OUTCOMES_LABEL, "&Label",
 		       "Label the outcome at the node at cursor");
-  outcome_menu->Append(TREE_OUTCOMES_PAYOFFS, "&Payoffs",
+  outcome_menu->Append(efgmenuEDIT_OUTCOMES_PAYOFFS, "&Payoffs",
 		       "Set the payoffs for the outcome at the cursor");
-  
+
   wxMenu *tree_menu = new wxMenu;
-  tree_menu->Append(TREE_COPY, "&Copy", "Copy tree from marked node");
-  tree_menu->Append(TREE_MOVE, "&Move", "Move tree from marked node");
-  tree_menu->Append(TREE_DELETE, "&Delete", "Delete recursively from cursor");
-  tree_menu->Append(TREE_LABEL, "&Label", "Set the game label");
-  tree_menu->Append(TREE_PLAYERS, "&Players", "Edit/View player names");
-  tree_menu->Append(TREE_INFOSETS, "&Infosets", "Edit/View infosets");
-    
-  edit_menu->Append(EDIT_NODE, "&Node", node_menu, "Edit the node");
-  edit_menu->Append(EDIT_ACTIONS, "&Actions", action_menu, "Edit actions");
-  edit_menu->Append(EDIT_INFOSET, "&Infoset", infoset_menu, "Edit infosets");
-  edit_menu->Append(TREE_OUTCOMES, "&Outcomes", outcome_menu,
+  tree_menu->Append(efgmenuEDIT_TREE_COPY, "&Copy",
+		    "Copy tree from marked node");
+  tree_menu->Append(efgmenuEDIT_TREE_MOVE, "&Move",
+		    "Move tree from marked node");
+  tree_menu->Append(efgmenuEDIT_TREE_DELETE, "&Delete",
+		    "Delete recursively from cursor");
+  tree_menu->Append(efgmenuEDIT_TREE_LABEL, "&Label",
+		    "Set the game label");
+  tree_menu->Append(efgmenuEDIT_TREE_PLAYERS, "&Players",
+		    "Edit/View players");
+  tree_menu->Append(efgmenuEDIT_TREE_INFOSETS, "&Infosets",
+		    "Edit/View infosets");
+
+  edit_menu->Append(efgmenuEDIT_NODE, "&Node", nodeMenu, "Edit the node");
+  edit_menu->Append(efgmenuEDIT_ACTIONS, "&Actions", action_menu, 
+		    "Edit actions");
+  edit_menu->Append(efgmenuEDIT_INFOSET, "&Infoset", infoset_menu,
+		    "Edit infosets");
+  edit_menu->Append(efgmenuEDIT_OUTCOMES, "&Outcomes", outcome_menu,
 		    "Edit outcomes and payoffs");
-  edit_menu->Append(EDIT_TREE, "&Tree", tree_menu, "Edit the tree");
+  edit_menu->Append(efgmenuEDIT_TREE, "&Tree", tree_menu,
+		    "Edit the tree");
+
   edit_menu->SetClientData((char *)frame); // call back to parent later
 }
 
@@ -1478,67 +1488,62 @@ void TreeWindow::SetCursorPosition(Node *p_cursor)
 
 void TreeWindow::UpdateMenus(void)
 {
-  edit_menu->Enable(NODE_ADD, (m_cursor->NumChildren() > 0) ? FALSE : TRUE);
-  edit_menu->Enable(NODE_DELETE, (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
-  edit_menu->Enable(INFOSET_MERGE, (mark_node && mark_node->GetInfoset() &&
-				    m_cursor->GetInfoset() &&
-				    mark_node->GetSubgameRoot() == m_cursor->GetSubgameRoot() &&
-				    mark_node->GetPlayer() == m_cursor->GetPlayer()) ? TRUE : FALSE);
-  edit_menu->Enable(INFOSET_BREAK, (m_cursor->GetInfoset()) ? TRUE : FALSE);
-  edit_menu->Enable(INFOSET_SPLIT, (m_cursor->GetInfoset()) ? TRUE : FALSE);
-  edit_menu->Enable(INFOSET_JOIN, (mark_node && mark_node->GetInfoset() &&
-				   m_cursor->GetInfoset() &&
-				   mark_node->GetSubgameRoot() == m_cursor->GetSubgameRoot()) ? TRUE : FALSE);
-  edit_menu->Enable(INFOSET_LABEL, (m_cursor->GetInfoset()) ? TRUE : FALSE);
-  edit_menu->Enable(INFOSET_SWITCH_PLAYER,
+  edit_menu->Enable(efgmenuEDIT_NODE_ADD,
+		    (m_cursor->NumChildren() > 0) ? FALSE : TRUE);
+  edit_menu->Enable(efgmenuEDIT_NODE_DELETE,
+		    (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  edit_menu->Enable(efgmenuEDIT_INFOSET_MERGE,
+		    (mark_node && mark_node->GetInfoset() &&
+		     m_cursor->GetInfoset() &&
+		     mark_node->GetSubgameRoot() == m_cursor->GetSubgameRoot() &&
+		     mark_node->GetPlayer() == m_cursor->GetPlayer()) ? TRUE : FALSE);
+  edit_menu->Enable(efgmenuEDIT_INFOSET_BREAK,
 		    (m_cursor->GetInfoset()) ? TRUE : FALSE);
-  edit_menu->Enable(INFOSET_REVEAL, (m_cursor->GetInfoset()) ? TRUE : FALSE);
+  edit_menu->Enable(efgmenuEDIT_INFOSET_SPLIT,
+		    (m_cursor->GetInfoset()) ? TRUE : FALSE);
+  edit_menu->Enable(efgmenuEDIT_INFOSET_JOIN,
+		    (mark_node && mark_node->GetInfoset() &&
+		     m_cursor->GetInfoset() &&
+		     mark_node->GetSubgameRoot() == m_cursor->GetSubgameRoot()) ? TRUE : FALSE);
+  edit_menu->Enable(efgmenuEDIT_INFOSET_LABEL,
+		    (m_cursor->GetInfoset()) ? TRUE : FALSE);
+  edit_menu->Enable(efgmenuEDIT_INFOSET_PLAYER,
+		    (m_cursor->GetInfoset()) ? TRUE : FALSE);
+  edit_menu->Enable(efgmenuEDIT_INFOSET_REVEAL,
+		    (m_cursor->GetInfoset()) ? TRUE : FALSE);
 
-  edit_menu->Enable(ACTION_LABEL,
+  edit_menu->Enable(efgmenuEDIT_ACTION_LABEL,
 		    (m_cursor->GetInfoset() &&
 		     m_cursor->GetInfoset()->NumActions() > 0) ? TRUE : FALSE);
-  edit_menu->Enable(ACTION_INSERT, (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
-  edit_menu->Enable(ACTION_APPEND, (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
-  edit_menu->Enable(ACTION_DELETE, (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
-  edit_menu->Enable(ACTION_PROBS,
+  edit_menu->Enable(efgmenuEDIT_ACTION_INSERT,
+		    (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  edit_menu->Enable(efgmenuEDIT_ACTION_APPEND,
+		    (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  edit_menu->Enable(efgmenuEDIT_ACTION_DELETE,
+		    (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  edit_menu->Enable(efgmenuEDIT_ACTION_PROBS,
 		    (m_cursor->GetInfoset() &&
 		     m_cursor->GetPlayer()->IsChance()) ? TRUE : FALSE);
 
-  edit_menu->Enable(TREE_DELETE, (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
-  edit_menu->Enable(TREE_COPY,
+  edit_menu->Enable(efgmenuEDIT_TREE_DELETE,
+		    (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  edit_menu->Enable(efgmenuEDIT_TREE_COPY,
 		    (mark_node &&
 		     m_cursor->GetSubgameRoot() == mark_node->GetSubgameRoot()) ? TRUE : FALSE);
-  edit_menu->Enable(TREE_MOVE,
+  edit_menu->Enable(efgmenuEDIT_TREE_MOVE,
 		    (mark_node &&
 		     m_cursor->GetSubgameRoot() == mark_node->GetSubgameRoot()) ? TRUE : FALSE);
 
-  edit_menu->Enable(TREE_OUTCOMES_ATTACH,
+  edit_menu->Enable(efgmenuEDIT_OUTCOMES_ATTACH,
 		    (ef.NumOutcomes() > 0) ? TRUE : FALSE);
-  edit_menu->Enable(TREE_OUTCOMES_DETACH,
+  edit_menu->Enable(efgmenuEDIT_OUTCOMES_DETACH,
 		    (m_cursor->GetOutcome()) ? TRUE : FALSE);
-  edit_menu->Enable(TREE_OUTCOMES_LABEL,
+  edit_menu->Enable(efgmenuEDIT_OUTCOMES_LABEL,
 		    (m_cursor->GetOutcome()) ? TRUE : FALSE);
-  edit_menu->Enable(TREE_OUTCOMES_DELETE,
+  edit_menu->Enable(efgmenuEDIT_OUTCOMES_DELETE,
 		    (ef.NumOutcomes() > 0) ? TRUE : FALSE);
   frame->UpdateMenus(m_cursor, mark_node);
 }
-
-#define MAX_LABEL_LENGTH    25
-
-// Validation function for string dialogs
-
-Bool StringConstraint(int type, char *value, char *label, char *msg_buffer)
-{
-    if (value && (strlen(value) >= MAX_LABEL_LENGTH) && (type == wxFORM_STRING))
-    {
-        sprintf(msg_buffer, "Value for %s should be %d characters or less\n",
-                label, MAX_LABEL_LENGTH-1);
-        return FALSE;
-    }
-    else
-        return TRUE;
-}
-
 
 // This function used to be in the ef and is used frequently
 EFPlayer *EfgGetPlayer(const Efg &ef, const gText &name)

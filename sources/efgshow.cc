@@ -64,7 +64,6 @@ guiEfgShowToolBar::guiEfgShowToolBar(wxFrame *p_frame)
 #include "bitmaps/options.xpm"
 #include "bitmaps/makenf.xpm"
 #include "bitmaps/inspect.xpm"
-  //#include "bitmaps/payoff.xpm"
   wxBitmap *ToolbarSaveBitmap = new wxBitmap(save_xpm);
   wxBitmap *ToolbarPrintBitmap = new wxBitmap(print_xpm);
   wxBitmap *ToolbarDeleteBitmap = new wxBitmap(delete_xpm);
@@ -76,7 +75,6 @@ guiEfgShowToolBar::guiEfgShowToolBar(wxFrame *p_frame)
   wxBitmap *ToolbarOptionsBitmap = new wxBitmap(options_xpm);
   wxBitmap *ToolbarMakenfBitmap = new wxBitmap(makenf_xpm);
   wxBitmap *ToolbarInspectBitmap = new wxBitmap(inspect_xpm);
-  //wxBitmap *ToolbarPayoffBitmap = new wxBitmap(payoff_xpm);
     
   // Save, Print | Add, Delete, Outcomes | Solve, Inspect, MakeNF |
   // ZoomIn, ZoomOut, Options | Help
@@ -87,22 +85,21 @@ guiEfgShowToolBar::guiEfgShowToolBar(wxFrame *p_frame)
 #endif  // wx_msw
   GetDC()->SetBackground(wxLIGHT_GREY_BRUSH);
     
-  AddTool(FILE_SAVE, ToolbarSaveBitmap);
-  AddTool(FILE_OUTPUT, ToolbarPrintBitmap);
+  AddTool(efgmenuFILE_SAVE, ToolbarSaveBitmap);
+  AddTool(efgmenuFILE_OUTPUT, ToolbarPrintBitmap);
   AddSeparator();
-  AddTool(NODE_ADD, ToolbarAddBitmap);
-  AddTool(NODE_DELETE, ToolbarDeleteBitmap);
-  // AddTool(TREE_OUTCOMES, ToolbarPayoffBitmap);
+  AddTool(efgmenuEDIT_NODE_ADD, ToolbarAddBitmap);
+  AddTool(efgmenuEDIT_NODE_DELETE, ToolbarDeleteBitmap);
   AddSeparator();
-  AddTool(SOLVE_STANDARD, ToolbarSolveBitmap);
-  AddTool(INSPECT_SOLUTIONS, ToolbarInspectBitmap);
-  AddTool(SOLVE_NFG_REDUCED, ToolbarMakenfBitmap);
+  AddTool(efgmenuSOLVE_STANDARD, ToolbarSolveBitmap);
+  AddTool(efgmenuINSPECT_SOLUTIONS, ToolbarInspectBitmap);
+  AddTool(efgmenuSOLVE_NFG_REDUCED, ToolbarMakenfBitmap);
   AddSeparator();
-  AddTool(DISPLAY_INC_ZOOM, ToolbarZoominBitmap);
-  AddTool(DISPLAY_DEC_ZOOM, ToolbarZoomoutBitmap);
-  AddTool(DISPLAY_SET_OPTIONS, ToolbarOptionsBitmap);
+  AddTool(efgmenuPREFS_INC_ZOOM, ToolbarZoominBitmap);
+  AddTool(efgmenuPREFS_DEC_ZOOM, ToolbarZoomoutBitmap);
+  AddTool(efgmenuPREFS_DISPLAY, ToolbarOptionsBitmap);
   AddSeparator();
-  AddTool(GAMBIT_HELP_CONTENTS, ToolbarHelpBitmap);
+  AddTool(efgmenuHELP_CONTENTS, ToolbarHelpBitmap);
   Layout();
 }
 
@@ -322,50 +319,50 @@ void EfgShow::Solve(int p_algorithm)
   guiEfgSolution *solver = 0;
 
   switch (p_algorithm) {
-  case SOLVE_CUSTOM_EFG_ENUMPURE:
+  case efgmenuSOLVE_CUSTOM_EFG_ENUMPURE:
     solver = new EfgEPureNashG(ef, *cur_sup, this);
     break;
-  case SOLVE_CUSTOM_EFG_LCP:
+  case efgmenuSOLVE_CUSTOM_EFG_LCP:
     solver = new EfgSeqFormG(ef, *cur_sup, this);
     break;
-  case SOLVE_CUSTOM_EFG_LP:
+  case efgmenuSOLVE_CUSTOM_EFG_LP:
     solver = new EfgCSumG(ef, *cur_sup, this);
     break;
-  case SOLVE_CUSTOM_EFG_LIAP:
+  case efgmenuSOLVE_CUSTOM_EFG_LIAP:
     solver = new guiEfgSolveLiap(ef, *cur_sup, this);
     break;
-  case SOLVE_CUSTOM_EFG_POLENUM:
+  case efgmenuSOLVE_CUSTOM_EFG_POLENUM:
     solver = new guiPolEnumEfg(*cur_sup, this);
     break;
-  case SOLVE_CUSTOM_EFG_QRE:
+  case efgmenuSOLVE_CUSTOM_EFG_QRE:
     solver = new EfgEQreG(ef, *cur_sup, this);
     break;
 
-  case SOLVE_CUSTOM_NFG_ENUMPURE: 
+  case efgmenuSOLVE_CUSTOM_NFG_ENUMPURE: 
     solver = new EfgPureNashG(ef, *cur_sup, this);
     break;
-  case SOLVE_CUSTOM_NFG_ENUMMIXED:
+  case efgmenuSOLVE_CUSTOM_NFG_ENUMMIXED:
     solver = new EfgEnumG(ef, *cur_sup, this);
     break;
-  case SOLVE_CUSTOM_NFG_LCP: 
+  case efgmenuSOLVE_CUSTOM_NFG_LCP: 
     solver = new EfgLemkeG(ef, *cur_sup, this);
     break;
-  case SOLVE_CUSTOM_NFG_LP:
+  case efgmenuSOLVE_CUSTOM_NFG_LP:
     solver = new EfgZSumG(ef, *cur_sup, this);
     break;
-  case SOLVE_CUSTOM_NFG_LIAP: 
+  case efgmenuSOLVE_CUSTOM_NFG_LIAP: 
     solver = new EfgNLiapG(ef, *cur_sup, this);
     break;
-  case SOLVE_CUSTOM_NFG_SIMPDIV:
+  case efgmenuSOLVE_CUSTOM_NFG_SIMPDIV:
     solver = new EfgSimpdivG(ef, *cur_sup, this);
     break;
-  case SOLVE_CUSTOM_NFG_POLENUM:
+  case efgmenuSOLVE_CUSTOM_NFG_POLENUM:
     solver = new guiPolEnumEfgNfg(*cur_sup, this);
     break;
-  case SOLVE_CUSTOM_NFG_QRE:
+  case efgmenuSOLVE_CUSTOM_NFG_QRE:
     solver = new EfgNQreG(ef, *cur_sup, this);
     break;
-  case SOLVE_CUSTOM_NFG_QREGRID: 
+  case efgmenuSOLVE_CUSTOM_NFG_QREGRID: 
     solver = new EfgQreAllG(ef, *cur_sup, this);
     break;
   default:
@@ -690,178 +687,191 @@ void EfgShow::OnSize(int , int )
 
 void EfgShow::MakeMenus(void)
 {
-  // To insure greatest possible portability we will avoid using
-  // resource files which are inherently non-portable.
-
   wxMenu *file_menu = new wxMenu;
-  file_menu->Append(FILE_SAVE,   "&Save",    "Save the game");
-  file_menu->Append(FILE_OUTPUT, "&Output",  "Print or copy the game");
-  file_menu->Append(FILE_CLOSE,  "&Close",   "Close this window");
+  file_menu->Append(efgmenuFILE_SAVE, "&Save", "Save the game");
+  file_menu->Append(efgmenuFILE_OUTPUT, "&Output", "Print or copy the game");
+  file_menu->Append(efgmenuFILE_CLOSE, "&Close", "Close this window");
 
   wxMenu *edit_menu = new wxMenu;
   wxMenu *nodeMenu  = new wxMenu;
-  nodeMenu->Append(NODE_ADD, "&Add Move", "Add a move");
-  nodeMenu->Append(NODE_DELETE, "&Delete Move", "Remove move at cursor");
-  nodeMenu->Append(NODE_INSERT, "&Insert Move", "Insert move at cursor");
-  nodeMenu->Append(NODE_LABEL,     "&Label",     "Label cursor node");
+  nodeMenu->Append(efgmenuEDIT_NODE_ADD, "&Add Move", "Add a move");
+  nodeMenu->Append(efgmenuEDIT_NODE_DELETE, "&Delete Move", "Remove move at cursor");
+  nodeMenu->Append(efgmenuEDIT_NODE_INSERT, "&Insert Move", "Insert move at cursor");
+  nodeMenu->Append(efgmenuEDIT_NODE_LABEL,     "&Label",     "Label cursor node");
   nodeMenu->AppendSeparator();
-  nodeMenu->Append(NODE_SET_MARK,  "Set &Mark",  "Mark cursor node");
-  nodeMenu->Append(NODE_GOTO_MARK, "Go&to Mark", "Goto marked node");
+  nodeMenu->Append(efgmenuEDIT_NODE_SET_MARK,  "Set &Mark",  "Mark cursor node");
+  nodeMenu->Append(efgmenuEDIT_NODE_GOTO_MARK, "Go&to Mark", "Goto marked node");
 
   wxMenu *action_menu = new wxMenu;
-  action_menu->Append(ACTION_DELETE, "&Delete", "Delete an action from cursor information set");
-  action_menu->Append(ACTION_INSERT, "&Insert", "Insert an action in the cursor's information set");
-  action_menu->Append(ACTION_APPEND, "&Append", "Append an action to the cursor's information set");
-  action_menu->Append(ACTION_LABEL, "&Label", "Label the actions of the cursor's information set");
-  action_menu->Append(ACTION_PROBS, "&Probabilities", "Set chance probabilities for the cursor's information set");
+  action_menu->Append(efgmenuEDIT_ACTION_DELETE, "&Delete", "Delete an action from cursor information set");
+  action_menu->Append(efgmenuEDIT_ACTION_INSERT, "&Insert", "Insert an action in the cursor's information set");
+  action_menu->Append(efgmenuEDIT_ACTION_APPEND, "&Append", "Append an action to the cursor's information set");
+  action_menu->Append(efgmenuEDIT_ACTION_LABEL, "&Label", "Label the actions of the cursor's information set");
+  action_menu->Append(efgmenuEDIT_ACTION_PROBS, "&Probabilities", "Set chance probabilities for the cursor's information set");
 
   wxMenu *infoset_menu = new wxMenu;
-  infoset_menu->Append(INFOSET_MERGE,  "&Merge",  "Merge cursor iset w/ marked");
-  infoset_menu->Append(INFOSET_BREAK,  "&Break",  "Make cursor a new iset");
-  infoset_menu->Append(INFOSET_SPLIT,  "&Split",  "Split iset at cursor");
-  infoset_menu->Append(INFOSET_JOIN,   "&Join",   "Join cursor to marked iset");
-  infoset_menu->Append(INFOSET_LABEL,  "&Label",  "Label cursor iset & actions");
-  infoset_menu->Append(INFOSET_SWITCH_PLAYER, "&Player", "Change player of cursor iset");
-  infoset_menu->Append(INFOSET_REVEAL, "&Reveal", "Reveal infoset to players");
+  infoset_menu->Append(efgmenuEDIT_INFOSET_MERGE,  "&Merge",  "Merge cursor iset w/ marked");
+  infoset_menu->Append(efgmenuEDIT_INFOSET_BREAK,  "&Break",  "Make cursor a new iset");
+  infoset_menu->Append(efgmenuEDIT_INFOSET_SPLIT,  "&Split",  "Split iset at cursor");
+  infoset_menu->Append(efgmenuEDIT_INFOSET_JOIN,   "&Join",   "Join cursor to marked iset");
+  infoset_menu->Append(efgmenuEDIT_INFOSET_LABEL,  "&Label",  "Label cursor iset & actions");
+  infoset_menu->Append(efgmenuEDIT_INFOSET_PLAYER, "&Player", "Change player of cursor iset");
+  infoset_menu->Append(efgmenuEDIT_INFOSET_REVEAL, "&Reveal", "Reveal infoset to players");
 
   wxMenu *outcome_menu = new wxMenu;
-  outcome_menu->Append(TREE_OUTCOMES_NEW, "&New",
+  outcome_menu->Append(efgmenuEDIT_OUTCOMES_NEW, "&New",
 		       "Create a new outcome");
-  outcome_menu->Append(TREE_OUTCOMES_DELETE, "Dele&te",
+  outcome_menu->Append(efgmenuEDIT_OUTCOMES_DELETE, "Dele&te",
 		       "Delete an outcome");
-  outcome_menu->Append(TREE_OUTCOMES_ATTACH, "&Attach",
+  outcome_menu->Append(efgmenuEDIT_OUTCOMES_ATTACH, "&Attach",
 		       "Attach an outcome to the node at cursor");
-  outcome_menu->Append(TREE_OUTCOMES_DETACH, "&Detach",
+  outcome_menu->Append(efgmenuEDIT_OUTCOMES_DETACH, "&Detach",
 		       "Detach the outcome from the node at cursor");
-  outcome_menu->Append(TREE_OUTCOMES_LABEL, "&Label",
+  outcome_menu->Append(efgmenuEDIT_OUTCOMES_LABEL, "&Label",
 		       "Label the outcome at the node at cursor");
-  outcome_menu->Append(TREE_OUTCOMES_PAYOFFS, "&Payoffs",
+  outcome_menu->Append(efgmenuEDIT_OUTCOMES_PAYOFFS, "&Payoffs",
 		       "Set the payoffs for the outcome at the cursor");
 
   wxMenu *tree_menu = new wxMenu;
-  tree_menu->Append(TREE_COPY,      "&Copy",     "Copy tree from marked node");
-  tree_menu->Append(TREE_MOVE,      "&Move",     "Move tree from marked node");
-  tree_menu->Append(TREE_DELETE,    "&Delete",   "Delete recursively from cursor");
-  tree_menu->Append(TREE_LABEL,     "&Label",    "Set the game label");
-  tree_menu->Append(TREE_PLAYERS,   "&Players",  "Edit/View players");
-  tree_menu->Append(TREE_INFOSETS,  "&Infosets", "Edit/View infosets");
-  edit_menu->Append(EDIT_NODE,    "&Node",     nodeMenu,    "Edit the node");
-  edit_menu->Append(EDIT_ACTIONS, "&Actions",  action_menu,  "Edit actions");
-  edit_menu->Append(EDIT_INFOSET, "&Infoset",  infoset_menu, "Edit infosets");
-  edit_menu->Append(TREE_OUTCOMES, "&Outcomes", outcome_menu,
+  tree_menu->Append(efgmenuEDIT_TREE_COPY, "&Copy",
+		    "Copy tree from marked node");
+  tree_menu->Append(efgmenuEDIT_TREE_MOVE, "&Move",
+		    "Move tree from marked node");
+  tree_menu->Append(efgmenuEDIT_TREE_DELETE, "&Delete",
+		    "Delete recursively from cursor");
+  tree_menu->Append(efgmenuEDIT_TREE_LABEL, "&Label",
+		    "Set the game label");
+  tree_menu->Append(efgmenuEDIT_TREE_PLAYERS, "&Players",
+		    "Edit/View players");
+  tree_menu->Append(efgmenuEDIT_TREE_INFOSETS, "&Infosets",
+		    "Edit/View infosets");
+
+  edit_menu->Append(efgmenuEDIT_NODE, "&Node", nodeMenu, "Edit the node");
+  edit_menu->Append(efgmenuEDIT_ACTIONS, "&Actions", action_menu, 
+		    "Edit actions");
+  edit_menu->Append(efgmenuEDIT_INFOSET, "&Infoset", infoset_menu,
+		    "Edit infosets");
+  edit_menu->Append(efgmenuEDIT_OUTCOMES, "&Outcomes", outcome_menu,
 		    "Edit outcomes and payoffs");
-  edit_menu->Append(EDIT_TREE,    "&Tree",     tree_menu,    "Edit the tree");
+  edit_menu->Append(efgmenuEDIT_TREE, "&Tree", tree_menu,
+		    "Edit the tree");
 
   wxMenu *subgame_menu = new wxMenu;
-  subgame_menu->Append(SUBGAME_MARKALL, "Mark &All",
+  subgame_menu->Append(efgmenuSUBGAME_MARKALL, "Mark &All",
 		       "Scan tree for subgames");
-  subgame_menu->Append(SUBGAME_MARK, "&Mark",
+  subgame_menu->Append(efgmenuSUBGAME_MARK, "&Mark",
 		       "Set node subgame root");
-  subgame_menu->Append(SUBGAME_UNMARKALL, "Unmark &All",
+  subgame_menu->Append(efgmenuSUBGAME_UNMARKALL, "Unmark &All",
 		       "Clear all subgame info");
-  subgame_menu->Append(SUBGAME_UNMARK, "&Unmark",
+  subgame_menu->Append(efgmenuSUBGAME_UNMARK, "&Unmark",
 		       "Unmark node subgame");
-  subgame_menu->Append(SUBGAME_COLLAPSE, "Collapse &Level",
+  subgame_menu->Append(efgmenuSUBGAME_COLLAPSE, "Collapse &Level",
 		       "Collapse node subgame");
-  subgame_menu->Append(SUBGAME_COLLAPSEALL, "&Collapse All", 
+  subgame_menu->Append(efgmenuSUBGAME_COLLAPSEALL, "&Collapse All", 
 		       "Collapse all subgames");
-  subgame_menu->Append(SUBGAME_EXPAND, "&Expand Level",
+  subgame_menu->Append(efgmenuSUBGAME_EXPAND, "&Expand Level",
 		       "Expand node subgame");
-  subgame_menu->Append(SUBGAME_EXPANDBRANCH, "&Expand Branch", 
+  subgame_menu->Append(efgmenuSUBGAME_EXPANDBRANCH, "&Expand Branch", 
 		       "Expand entire branch");
-  subgame_menu->Append(SUBGAME_EXPANDALL, "&Expand All",
+  subgame_menu->Append(efgmenuSUBGAME_EXPANDALL, "&Expand All",
 		       "Expand all subgames");
   
   wxMenu *supports_menu = new wxMenu;
-  supports_menu->Append(SUPPORTS_ELIMDOM,  "&ElimDom",  "Dominated strategies");
-  supports_menu->Append(SUPPORTS_SUPPORTS, "&Select", "Select/Create EF supports");
+  supports_menu->Append(efgmenuSUPPORTS_ELIMDOM, "&ElimDom",
+			"Compute dominated strategies");
+  supports_menu->Append(efgmenuSUPPORTS_SELECT, "&Select",
+			"Select and create supports");
   
   wxMenu *solve_menu = new wxMenu;
-  solve_menu->Append(SOLVE_STANDARD, "S&tandard...", "Standard solutions");
+  solve_menu->Append(efgmenuSOLVE_STANDARD, "S&tandard...", "Standard solutions");
 
   wxMenu *solveCustomMenu = new wxMenu;
   wxMenu *solveCustomEfgMenu = new wxMenu;
-  solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_ENUMPURE, "EnumPure",
+  solveCustomEfgMenu->Append(efgmenuSOLVE_CUSTOM_EFG_ENUMPURE, "EnumPure",
 			     "Enumerate pure strategy equilibria");
-  solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_LCP, "LCP",
+  solveCustomEfgMenu->Append(efgmenuSOLVE_CUSTOM_EFG_LCP, "LCP",
 			     "Solve by linear complementarity program");
-  solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_LP, "LP",
+  solveCustomEfgMenu->Append(efgmenuSOLVE_CUSTOM_EFG_LP, "LP",
 			     "Solve by linear program");
-  solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_LIAP, "Liapunov",
+  solveCustomEfgMenu->Append(efgmenuSOLVE_CUSTOM_EFG_LIAP, "Liapunov",
 			     "Liapunov function minimization");
-  solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_POLENUM, "PolEnum",
+  solveCustomEfgMenu->Append(efgmenuSOLVE_CUSTOM_EFG_POLENUM, "PolEnum",
 			     "Enumeration by systems of polynomials");
   // FIXME: This item currently disabled since algorithm not implemented yet
-  solveCustomEfgMenu->Enable(SOLVE_CUSTOM_EFG_POLENUM, FALSE);
-  solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_QRE, "QRE",
+  solveCustomEfgMenu->Enable(efgmenuSOLVE_CUSTOM_EFG_POLENUM, FALSE);
+  solveCustomEfgMenu->Append(efgmenuSOLVE_CUSTOM_EFG_QRE, "QRE",
 			     "Compute quantal response equilibria");
-  solveCustomMenu->Append(SOLVE_CUSTOM_EFG, "Extensive form",
+  solveCustomMenu->Append(efgmenuSOLVE_CUSTOM_EFG, "Extensive form",
 			  solveCustomEfgMenu,
 			  "Solve using extensive form based algorithms");
 
   wxMenu *solveCustomNfgMenu = new wxMenu;
-  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_ENUMPURE, "EnumPure",
+  solveCustomNfgMenu->Append(efgmenuSOLVE_CUSTOM_NFG_ENUMPURE, "EnumPure",
 			     "Enumerate pure strategy equilibria");
-  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_ENUMMIXED, "EnumMixed",
+  solveCustomNfgMenu->Append(efgmenuSOLVE_CUSTOM_NFG_ENUMMIXED, "EnumMixed",
 			     "Enumerate all equilibria");
-  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_LCP, "LCP",
+  solveCustomNfgMenu->Append(efgmenuSOLVE_CUSTOM_NFG_LCP, "LCP",
 			     "Solve by linear complementarity program");
-  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_LP, "LP",
+  solveCustomNfgMenu->Append(efgmenuSOLVE_CUSTOM_NFG_LP, "LP",
 			     "Solve by linear program");
-  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_LIAP, "Liapunov",
+  solveCustomNfgMenu->Append(efgmenuSOLVE_CUSTOM_NFG_LIAP, "Liapunov",
 			     "Liapunov function minimization");
-  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_SIMPDIV, "Simpdiv",
+  solveCustomNfgMenu->Append(efgmenuSOLVE_CUSTOM_NFG_SIMPDIV, "Simpdiv",
 			     "Simplicial subdivision");
-  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_POLENUM, "PolEnum",
+  solveCustomNfgMenu->Append(efgmenuSOLVE_CUSTOM_NFG_POLENUM, "PolEnum",
 			     "Enumeration by systems of polynomials");
-  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_QRE, "QRE",
+  solveCustomNfgMenu->Append(efgmenuSOLVE_CUSTOM_NFG_QRE, "QRE",
 			     "Compute quantal response equilibria");
-  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_QREGRID, "QRE Grid",
+  solveCustomNfgMenu->Append(efgmenuSOLVE_CUSTOM_NFG_QREGRID, "QRE Grid",
 			     "Compute quantal response equilibria");
-  solveCustomMenu->Append(SOLVE_CUSTOM_NFG, "Normal form",
+  solveCustomMenu->Append(efgmenuSOLVE_CUSTOM_NFG, "Normal form",
               solveCustomNfgMenu,
               "Solve using normal form based algorithms");
 
-  solve_menu->Append(SOLVE_CUSTOM, "Custom", solveCustomMenu,
+  solve_menu->Append(efgmenuSOLVE_CUSTOM, "Custom", solveCustomMenu,
              "Select a specific algorithm");
 
   wxMenu *solveNfgMenu = new wxMenu;
-  solveNfgMenu->Append(SOLVE_NFG_REDUCED, "Reduced",
+  solveNfgMenu->Append(efgmenuSOLVE_NFG_REDUCED, "Reduced",
                "Generate reduced normal form");
-  solveNfgMenu->Append(SOLVE_NFG_AGENT, "Agent",
+  solveNfgMenu->Append(efgmenuSOLVE_NFG_AGENT, "Agent",
                "Generate agent normal form");
-  solve_menu->Append(SOLVE_NFG, "Normal form", solveNfgMenu,
+  solve_menu->Append(efgmenuSOLVE_NFG, "Normal form", solveNfgMenu,
              "Create a normal form representation of this game");
   
   wxMenu *inspect_menu = new wxMenu;
-  inspect_menu->Append(INSPECT_SOLUTIONS, "&Solutions",
+  inspect_menu->Append(efgmenuINSPECT_SOLUTIONS, "&Solutions",
 		       "Inspect existing solutions");
-  inspect_menu->Append(INSPECT_CURSOR, "&Cursor",
+  inspect_menu->Append(efgmenuINSPECT_CURSOR, "&Cursor",
 		       "Information about the node at cursor");
-  inspect_menu->Append(INSPECT_INFOSETS, "&Infosets",
+  inspect_menu->Append(efgmenuINSPECT_INFOSETS, "&Infosets",
 		       "Inspect information sets", TRUE);
-  inspect_menu->Append(INSPECT_ZOOM_WIN, "Zoom &Window",
+  inspect_menu->Append(efgmenuINSPECT_ZOOM_WIN, "Zoom &Window",
 		       "Open zoom-in window");
   inspect_menu->AppendSeparator();
-  inspect_menu->Append(INSPECT_GAMEINFO, "Game&Info",
-               "Information about this game");
-  m_inspectInfosetsItem = inspect_menu->FindItem("&Infosets");
+  inspect_menu->Append(efgmenuINSPECT_GAMEINFO, "Game&Info",
+		       "Information about this game");
   
   wxMenu *prefs_menu = new wxMenu;
-  prefs_menu->Append(DISPLAY_SET_ZOOM,    "&Zoom",        "Specify zoom level");
-  prefs_menu->Append(DISPLAY_SET_OPTIONS, "&Display",     "Set display options");
-  prefs_menu->Append(DISPLAY_LEGENDS,     "&Legend",      "Set legends");
-  prefs_menu->Append(DISPLAY_COLORS,      "&Colors",      "Set player colors");
-  prefs_menu->Append(DISPLAY_ACCELS,      "&Accels",      "Edit accelerator keys");
+  prefs_menu->Append(efgmenuPREFS_SET_ZOOM, "&Zoom",
+		     "Specify zoom level");
+  prefs_menu->Append(efgmenuPREFS_DISPLAY, "&Display",
+		     "Set display options");
+  prefs_menu->Append(efgmenuPREFS_LEGEND, "&Legend",
+		     "Set legends");
+  prefs_menu->Append(efgmenuPREFS_COLORS, "&Colors",
+		     "Set player colors");
+  prefs_menu->Append(efgmenuPREFS_ACCELS, "&Accels",
+		     "Edit accelerator keys");
   prefs_menu->AppendSeparator();
-  prefs_menu->Append(DISPLAY_SAVE_DEFAULT, "Save Default");
-  prefs_menu->Append(DISPLAY_LOAD_DEFAULT, "Load Default");
-  prefs_menu->Append(DISPLAY_SAVE_CUSTOM,  "Save Custom");
-  prefs_menu->Append(DISPLAY_LOAD_CUSTOM,  "Load Custom");
+  prefs_menu->Append(efgmenuPREFS_SAVE_DEFAULT, "Save Default");
+  prefs_menu->Append(efgmenuPREFS_LOAD_DEFAULT, "Load Default");
+  prefs_menu->Append(efgmenuPREFS_SAVE_CUSTOM,  "Save Custom");
+  prefs_menu->Append(efgmenuPREFS_LOAD_CUSTOM,  "Load Custom");
   
   wxMenu *help_menu = new wxMenu;
-  help_menu->Append(GAMBIT_HELP_CONTENTS, "&Contents", "Table of contents");
-  help_menu->Append(GAMBIT_HELP_ABOUT,    "&About",    "About this program");
+  help_menu->Append(efgmenuHELP_CONTENTS, "&Contents", "Table of contents");
+  help_menu->Append(efgmenuHELP_ABOUT, "&About", "About this program");
 
   wxMenuBar *menu_bar = new wxMenuBar;
   menu_bar->Append(file_menu,     "&File");
@@ -903,248 +913,246 @@ void EfgShow::OnSetFocus(void)
     tw->SetFocus();
 }
 
-#define     SOLVE_SETUP_CUSTOM      0
-#define     SOLVE_SETUP_STANDARD    1
-
-
 void EfgShow::OnMenuCommand(int id)
 {
+  const double ZOOM_DELTA = 0.2;
+
   try {
     switch (id) {
-    case NODE_ADD:
-      tw->node_add();
-      break;
-    case NODE_DELETE:
-      tw->node_delete();
-      break;
-    case NODE_INSERT:
-      tw->node_insert();
-      break;
-    case NODE_LABEL:
-      tw->node_label();
-      break;
-    case NODE_SET_MARK:
-      tw->node_set_mark();
-      break;
-    case NODE_GOTO_MARK:
-      tw->node_goto_mark();
-      break;
-
-    case ACTION_DELETE:
-      tw->action_delete();
-      break;
-    case ACTION_INSERT:
-      tw->action_insert();
-      break;
-    case ACTION_APPEND:
-      tw->action_append();
-      break;
-    case ACTION_LABEL:
-      tw->action_label();
-      break;
-    case ACTION_PROBS:
-      tw->action_probs();
-      break;
-
-    case TREE_DELETE:
-      tw->tree_delete();
-      break;
-    case TREE_COPY:
-      tw->tree_copy();
-      break;
-    case TREE_MOVE:
-      tw->tree_move();
-      break;
-    case TREE_LABEL:
-      tw->tree_label();
-      SetFileName();
-      break;
-    case TREE_OUTCOMES_ATTACH:
-      tw->EditOutcomeAttach();
-      break;
-    case TREE_OUTCOMES_DETACH:
-      tw->EditOutcomeDetach();
-      break;
-    case TREE_OUTCOMES_LABEL:
-      tw->EditOutcomeLabel();
-      break;
-    case TREE_OUTCOMES_PAYOFFS:
-      tw->EditOutcomePayoffs();
-      break;
-    case TREE_OUTCOMES_NEW:
-      tw->EditOutcomeNew();
-      break;
-    case TREE_OUTCOMES_DELETE:
-      tw->EditOutcomeDelete();
-      break;
-    case TREE_PLAYERS:
-      tw->tree_players();
-      break;
-    case TREE_INFOSETS:
-      tw->tree_infosets();
-      break;
-
-    case INFOSET_MERGE:
-      tw->infoset_merge();
-      break;
-    case INFOSET_BREAK:
-      tw->infoset_break();
-      break;
-    case INFOSET_SPLIT:
-      tw->infoset_split();
-      break;
-    case INFOSET_JOIN:
-      tw->infoset_join();
-      break;
-    case INFOSET_LABEL:
-      tw->infoset_label();
-      break;
-    case INFOSET_SWITCH_PLAYER:
-      tw->infoset_switch_player();
-      break;
-    case INFOSET_REVEAL:
-      tw->infoset_reveal();
-      break;
-
-    case FILE_OUTPUT:
+    case efgmenuFILE_OUTPUT:
       tw->output();
       break;
-    case FILE_SAVE:
+    case efgmenuFILE_SAVE:
       tw->file_save();
       break;
-    case FILE_CLOSE:
+    case efgmenuFILE_CLOSE:
       GUI_RECORD("FILE:CLOSE");
       Close();
       break;
 
-    case SUPPORTS_SUPPORTS: 
-      ChangeSupport(CREATE_DIALOG);
+    case efgmenuEDIT_NODE_ADD:
+      tw->node_add();
       break;
-    case SUPPORTS_ELIMDOM: 
-      SolveElimDom();
+    case efgmenuEDIT_NODE_DELETE:
+      tw->node_delete();
+      break;
+    case efgmenuEDIT_NODE_INSERT:
+      tw->node_insert();
+      break;
+    case efgmenuEDIT_NODE_LABEL:
+      tw->node_label();
+      break;
+    case efgmenuEDIT_NODE_SET_MARK:
+      tw->node_set_mark();
+      break;
+    case efgmenuEDIT_NODE_GOTO_MARK:
+      tw->node_goto_mark();
       break;
 
-    case SUBGAME_MARKALL:
+    case efgmenuEDIT_ACTION_DELETE:
+      tw->action_delete();
+      break;
+    case efgmenuEDIT_ACTION_INSERT:
+      tw->action_insert();
+      break;
+    case efgmenuEDIT_ACTION_APPEND:
+      tw->action_append();
+      break;
+    case efgmenuEDIT_ACTION_LABEL:
+      tw->action_label();
+      break;
+    case efgmenuEDIT_ACTION_PROBS:
+      tw->action_probs();
+      break;
+
+    case efgmenuEDIT_INFOSET_MERGE:
+      tw->infoset_merge();
+      break;
+    case efgmenuEDIT_INFOSET_BREAK:
+      tw->infoset_break();
+      break;
+    case efgmenuEDIT_INFOSET_SPLIT:
+      tw->infoset_split();
+      break;
+    case efgmenuEDIT_INFOSET_JOIN:
+      tw->infoset_join();
+      break;
+    case efgmenuEDIT_INFOSET_LABEL:
+      tw->infoset_label();
+      break;
+    case efgmenuEDIT_INFOSET_PLAYER:
+      tw->infoset_switch_player();
+      break;
+    case efgmenuEDIT_INFOSET_REVEAL:
+      tw->infoset_reveal();
+      break;
+
+    case efgmenuEDIT_OUTCOMES_ATTACH:
+      tw->EditOutcomeAttach();
+      break;
+    case efgmenuEDIT_OUTCOMES_DETACH:
+      tw->EditOutcomeDetach();
+      break;
+    case efgmenuEDIT_OUTCOMES_LABEL:
+      tw->EditOutcomeLabel();
+      break;
+    case efgmenuEDIT_OUTCOMES_PAYOFFS:
+      tw->EditOutcomePayoffs();
+      break;
+    case efgmenuEDIT_OUTCOMES_NEW:
+      tw->EditOutcomeNew();
+      break;
+    case efgmenuEDIT_OUTCOMES_DELETE:
+      tw->EditOutcomeDelete();
+      break;
+
+    case efgmenuEDIT_TREE_DELETE:
+      tw->tree_delete();
+      break;
+    case efgmenuEDIT_TREE_COPY:
+      tw->tree_copy();
+      break;
+    case efgmenuEDIT_TREE_MOVE:
+      tw->tree_move();
+      break;
+    case efgmenuEDIT_TREE_LABEL:
+      tw->tree_label();
+      SetFileName();
+      break;
+    case efgmenuEDIT_TREE_PLAYERS:
+      tw->tree_players();
+      break;
+    case efgmenuEDIT_TREE_INFOSETS:
+      tw->tree_infosets();
+      break;
+
+    case efgmenuSUBGAME_MARKALL:
       tw->SubgameMarkAll();
       break;
-    case SUBGAME_MARK:
+    case efgmenuSUBGAME_MARK:
       tw->SubgameMark();
       break;
-    case SUBGAME_UNMARKALL:
+    case efgmenuSUBGAME_UNMARKALL:
       tw->SubgameUnmarkAll();
       break;
-    case SUBGAME_UNMARK:
+    case efgmenuSUBGAME_UNMARK:
       tw->SubgameUnmark();
       break;
-    case SUBGAME_COLLAPSEALL:
+    case efgmenuSUBGAME_COLLAPSEALL:
       tw->SubgameCollapseAll();
       break;
-    case SUBGAME_COLLAPSE:
+    case efgmenuSUBGAME_COLLAPSE:
       tw->SubgameCollapse();
       break;
-    case SUBGAME_EXPANDALL:
+    case efgmenuSUBGAME_EXPANDALL:
       tw->SubgameExpandAll();
       break;
-    case SUBGAME_EXPANDBRANCH:
+    case efgmenuSUBGAME_EXPANDBRANCH:
       tw->SubgameExpandBranch();
       break;
-    case SUBGAME_EXPAND:
+    case efgmenuSUBGAME_EXPAND:
       tw->SubgameExpand();
       break;
 
-    case INSPECT_SOLUTIONS: 
+    case efgmenuSUPPORTS_ELIMDOM: 
+      SolveElimDom();
+      break;
+    case efgmenuSUPPORTS_SELECT:
+      ChangeSupport(CREATE_DIALOG);
+      break;
+
+    case efgmenuINSPECT_SOLUTIONS: 
       InspectSolutions(CREATE_DIALOG);
       break;
-    case INSPECT_CURSOR:
+    case efgmenuINSPECT_CURSOR:
       node_inspect->Set(tw->Cursor());
       node_inspect->Show(TRUE);
       break;
-    case INSPECT_INFOSETS:
+    case efgmenuINSPECT_INFOSETS:
       features.iset_hilight = !features.iset_hilight;
       if (!features.iset_hilight) {
 	HilightInfoset(0, 0, 1);
 	HilightInfoset(0, 0, 2);
       }
-      GetMenuBar()->Check(m_inspectInfosetsItem, features.iset_hilight);
+      GetMenuBar()->Check(efgmenuINSPECT_INFOSETS, features.iset_hilight);
       break;
-    case INSPECT_ZOOM_WIN:
+    case efgmenuINSPECT_ZOOM_WIN:
       tw->display_zoom_win();
       break;
-    case INSPECT_GAMEINFO: 
+    case efgmenuINSPECT_GAMEINFO: 
       ShowGameInfo();
       break;
 
-    case SOLVE_CUSTOM_EFG_ENUMPURE:
-    case SOLVE_CUSTOM_EFG_LCP:
-    case SOLVE_CUSTOM_EFG_LP:
-    case SOLVE_CUSTOM_EFG_LIAP:
-    case SOLVE_CUSTOM_EFG_POLENUM:
-    case SOLVE_CUSTOM_EFG_QRE:
-    case SOLVE_CUSTOM_NFG_ENUMPURE:
-    case SOLVE_CUSTOM_NFG_ENUMMIXED:
-    case SOLVE_CUSTOM_NFG_LCP:
-    case SOLVE_CUSTOM_NFG_LP:
-    case SOLVE_CUSTOM_NFG_LIAP:
-    case SOLVE_CUSTOM_NFG_SIMPDIV:
-    case SOLVE_CUSTOM_NFG_POLENUM:
-    case SOLVE_CUSTOM_NFG_QRE:
-    case SOLVE_CUSTOM_NFG_QREGRID:
+    case efgmenuSOLVE_CUSTOM_EFG_ENUMPURE:
+    case efgmenuSOLVE_CUSTOM_EFG_LCP:
+    case efgmenuSOLVE_CUSTOM_EFG_LP:
+    case efgmenuSOLVE_CUSTOM_EFG_LIAP:
+    case efgmenuSOLVE_CUSTOM_EFG_POLENUM:
+    case efgmenuSOLVE_CUSTOM_EFG_QRE:
+    case efgmenuSOLVE_CUSTOM_NFG_ENUMPURE:
+    case efgmenuSOLVE_CUSTOM_NFG_ENUMMIXED:
+    case efgmenuSOLVE_CUSTOM_NFG_LCP:
+    case efgmenuSOLVE_CUSTOM_NFG_LP:
+    case efgmenuSOLVE_CUSTOM_NFG_LIAP:
+    case efgmenuSOLVE_CUSTOM_NFG_SIMPDIV:
+    case efgmenuSOLVE_CUSTOM_NFG_POLENUM:
+    case efgmenuSOLVE_CUSTOM_NFG_QRE:
+    case efgmenuSOLVE_CUSTOM_NFG_QREGRID:
       GUI_RECORD("SOLVE:SOLVE");
       Solve(id);
       break;
-    case SOLVE_NFG_REDUCED: 
+    case efgmenuSOLVE_NFG_REDUCED: 
       SolveNormalReduced();
       break;
-    case SOLVE_NFG_AGENT:
+    case efgmenuSOLVE_NFG_AGENT:
       SolveNormalAgent();
       break;
-    case SOLVE_STANDARD:
+    case efgmenuSOLVE_STANDARD:
       SolveStandard();
       break;
 
-#define ZOOM_DELTA  .2
-    case DISPLAY_SET_ZOOM:
+    case efgmenuPREFS_SET_ZOOM:
       tw->display_set_zoom();
       break;
-    case DISPLAY_INC_ZOOM:
-      tw->display_set_zoom(tw->display_get_zoom()+ZOOM_DELTA);
+    case efgmenuPREFS_INC_ZOOM:
+      tw->display_set_zoom(tw->display_get_zoom() + ZOOM_DELTA);
       break;
-    case DISPLAY_DEC_ZOOM:
-      tw->display_set_zoom(tw->display_get_zoom()-ZOOM_DELTA);
+    case efgmenuPREFS_DEC_ZOOM:
+      tw->display_set_zoom(tw->display_get_zoom() - ZOOM_DELTA);
       break;
-    case DISPLAY_LEGENDS:
+    case efgmenuPREFS_LEGEND:
       tw->display_legends();
       break;
-    case DISPLAY_SET_OPTIONS:
+    case efgmenuPREFS_DISPLAY:
       tw->display_options();
       break;
-    case DISPLAY_COLORS:
+    case efgmenuPREFS_COLORS:
       tw->display_colors();
       break;
-    case DISPLAY_SAVE_DEFAULT:
+    case efgmenuPREFS_SAVE_DEFAULT:
       tw->display_save_options();
       break;
-    case DISPLAY_LOAD_DEFAULT:
+    case efgmenuPREFS_LOAD_DEFAULT:
       tw->display_load_options();
       break;
-    case DISPLAY_SAVE_CUSTOM:
+    case efgmenuPREFS_SAVE_CUSTOM:
       tw->display_save_options(FALSE);
       break;
-    case DISPLAY_LOAD_CUSTOM:
+    case efgmenuPREFS_LOAD_CUSTOM:
       tw->display_load_options(FALSE);
       break;
-    case DISPLAY_REDRAW: 
+    case efgmenuPREFS_REDRAW: 
       /* redraws automatically after switch */ 
       break;
-    case DISPLAY_ACCELS:
+    case efgmenuPREFS_ACCELS:
       EditAccelerators(accelerators, MakeEventNames());
       WriteAccelerators(accelerators, "EfgAccelerators");
       break;
 
-    case GAMBIT_HELP_ABOUT:
+    case efgmenuHELP_ABOUT:
       wxHelpAbout();
       break;
-    case GAMBIT_HELP_CONTENTS:
+    case efgmenuHELP_CONTENTS:
       wxHelpContents(EFG_GUI_HELP);
       break;
     default:
@@ -1153,8 +1161,7 @@ void EfgShow::OnMenuCommand(int id)
     }
 
     // Most menu selections modify the display somehow, so redraw w/ exceptions
-    if (id != FILE_QUIT && id != FILE_CLOSE && id != TREE_OUTCOMES
-	&& id != SUPPORTS_SUPPORTS) {
+    if (id != efgmenuFILE_CLOSE && id != efgmenuSUPPORTS_SELECT) {
       tw->OnPaint();
       tw->SetFocus();
     }
@@ -1423,49 +1430,61 @@ const EFSupport *EfgShow::GetSupport(int which)
 void EfgShow::UpdateMenus(Node *p_cursor, Node *p_markNode)
 {
   wxMenuBar *menuBar = GetMenuBar();
-  menuBar->Enable(NODE_ADD, (p_cursor->NumChildren() > 0) ? FALSE : TRUE);
-  menuBar->Enable(NODE_DELETE, (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
-  menuBar->Enable(NODE_GOTO_MARK, (p_markNode) ? TRUE : FALSE);
-  menuBar->Enable(INFOSET_MERGE, (p_markNode && p_markNode->GetInfoset() &&
-				  p_cursor->GetInfoset() &&
-				  p_markNode->GetSubgameRoot() == p_cursor->GetSubgameRoot() &&
-				  p_markNode->GetPlayer() == p_cursor->GetPlayer()) ? TRUE : FALSE);
-  menuBar->Enable(INFOSET_BREAK, (p_cursor->GetInfoset()) ? TRUE : FALSE);
-  menuBar->Enable(INFOSET_SPLIT, (p_cursor->GetInfoset()) ? TRUE : FALSE);
-  menuBar->Enable(INFOSET_JOIN, (p_markNode && p_markNode->GetInfoset() &&
-				 p_cursor->GetInfoset() &&
-				 p_markNode->GetSubgameRoot() == p_cursor->GetSubgameRoot()) ? TRUE : FALSE);
-  menuBar->Enable(INFOSET_LABEL, (p_cursor->GetInfoset()) ? TRUE : FALSE);
-  menuBar->Enable(INFOSET_SWITCH_PLAYER,
+  menuBar->Enable(efgmenuEDIT_NODE_ADD,
+		  (p_cursor->NumChildren() > 0) ? FALSE : TRUE);
+  menuBar->Enable(efgmenuEDIT_NODE_DELETE,
+		  (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  menuBar->Enable(efgmenuEDIT_NODE_GOTO_MARK, (p_markNode) ? TRUE : FALSE);
+  menuBar->Enable(efgmenuEDIT_INFOSET_MERGE,
+		  (p_markNode && p_markNode->GetInfoset() &&
+		   p_cursor->GetInfoset() &&
+		   p_markNode->GetSubgameRoot() == p_cursor->GetSubgameRoot() &&
+		   p_markNode->GetPlayer() == p_cursor->GetPlayer()) ? TRUE : FALSE);
+  menuBar->Enable(efgmenuEDIT_INFOSET_BREAK, 
+		  (p_cursor->GetInfoset()) ? TRUE : FALSE);
+  menuBar->Enable(efgmenuEDIT_INFOSET_SPLIT,
+		  (p_cursor->GetInfoset()) ? TRUE : FALSE);
+  menuBar->Enable(efgmenuEDIT_INFOSET_JOIN, 
+		  (p_markNode && p_markNode->GetInfoset() &&
+		   p_cursor->GetInfoset() &&
+		   p_markNode->GetSubgameRoot() == p_cursor->GetSubgameRoot()) ? TRUE : FALSE);
+  menuBar->Enable(efgmenuEDIT_INFOSET_LABEL,
+		  (p_cursor->GetInfoset()) ? TRUE : FALSE);
+  menuBar->Enable(efgmenuEDIT_INFOSET_PLAYER,
 		  (p_cursor->GetInfoset() &&
 		   !p_cursor->GetPlayer()->IsChance()) ? TRUE : FALSE);
-  menuBar->Enable(INFOSET_REVEAL, (p_cursor->GetInfoset()) ? TRUE : FALSE);
+  menuBar->Enable(efgmenuEDIT_INFOSET_REVEAL, 
+		  (p_cursor->GetInfoset()) ? TRUE : FALSE);
 
-  menuBar->Enable(ACTION_LABEL,
+  menuBar->Enable(efgmenuEDIT_ACTION_LABEL,
 		  (p_cursor->GetInfoset() &&
 		   p_cursor->GetInfoset()->NumActions() > 0) ? TRUE : FALSE);
-  menuBar->Enable(ACTION_INSERT, (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
-  menuBar->Enable(ACTION_APPEND, (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
-  menuBar->Enable(ACTION_DELETE, (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
-  menuBar->Enable(ACTION_PROBS,
+  menuBar->Enable(efgmenuEDIT_ACTION_INSERT,
+		  (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  menuBar->Enable(efgmenuEDIT_ACTION_APPEND,
+		  (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  menuBar->Enable(efgmenuEDIT_ACTION_DELETE, 
+		  (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  menuBar->Enable(efgmenuEDIT_ACTION_PROBS,
 		  (p_cursor->GetInfoset() &&
 		   p_cursor->GetPlayer()->IsChance()) ? TRUE : FALSE);
 
-  menuBar->Enable(TREE_DELETE, (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
-  menuBar->Enable(TREE_COPY,
+  menuBar->Enable(efgmenuEDIT_TREE_DELETE,
+		  (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  menuBar->Enable(efgmenuEDIT_TREE_COPY,
 		  (p_markNode &&
 		   p_cursor->GetSubgameRoot() == p_markNode->GetSubgameRoot()) ? TRUE : FALSE);
-  menuBar->Enable(TREE_MOVE,
+  menuBar->Enable(efgmenuEDIT_TREE_MOVE,
 		  (p_markNode &&
 		   p_cursor->GetSubgameRoot() == p_markNode->GetSubgameRoot()) ? TRUE : FALSE);
 
-  menuBar->Enable(TREE_OUTCOMES_ATTACH,
+  menuBar->Enable(efgmenuEDIT_OUTCOMES_ATTACH,
 		  (ef.NumOutcomes() > 0) ? TRUE : FALSE);
-  menuBar->Enable(TREE_OUTCOMES_DETACH,
+  menuBar->Enable(efgmenuEDIT_OUTCOMES_DETACH,
 		  (p_cursor->GetOutcome()) ? TRUE : FALSE);
-  menuBar->Enable(TREE_OUTCOMES_LABEL,
+  menuBar->Enable(efgmenuEDIT_OUTCOMES_LABEL,
 		  (p_cursor->GetOutcome()) ? TRUE : FALSE);
-  menuBar->Enable(TREE_OUTCOMES_DELETE,
+  menuBar->Enable(efgmenuEDIT_OUTCOMES_DELETE,
 		  (ef.NumOutcomes() > 0) ? TRUE : FALSE);
 }
 
@@ -1597,7 +1616,7 @@ void EfgShow::ExecuteLoggedCommand(const gText& command,
     // FIXME! add commands.
     // FIXME! this has been changed since solve menu was rearranged!
     if (command == "SOLVE:SOLVE") {
-      Solve(SOLVE_CUSTOM_EFG_LIAP);
+      Solve(efgmenuSOLVE_CUSTOM_EFG_LIAP);
     }
     else if (command == "FILE:CLOSE")
     {
