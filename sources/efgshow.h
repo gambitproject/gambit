@@ -1,6 +1,6 @@
 //
-// FILE: efgshow.h -- Declarations of both type dependent and independent
-//                    classes for extensive form display code.
+// FILE: efgshow.h -- Declarations of classes for extensive form display code
+//
 // $Id$
 //
 
@@ -14,7 +14,6 @@
 #include "bsolnsf.h"
 #include "paramsd.h"
 
-class BaseTreeWindow;
 class EfgSolnShow;
 class EfgShowToolBar;
 class EFSupportInspectDialog;

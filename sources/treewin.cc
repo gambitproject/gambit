@@ -1,7 +1,7 @@
-//*************************************************************************
-//* treewin.cc: this file is a companion to treewin1.cc  This
-//* file includes all the drawing functions.
-//*************************************************************************
+//
+// FILE: treewin.cc -- Drawing functions for TreeWindow
+//
+//
 // $Id$
 //
 
@@ -17,316 +17,356 @@
 wxFont *outcome_font;
 wxBrush *white_brush;
 wxCursor *scissor_cursor;
+
 //-----------------------------------------------------------------------
 //                    MISCELANEOUS FUNCTIONS
 //-----------------------------------------------------------------------
-//Draw Line.  A quick and dirty way of easily drawing lines w/ set color
-//If the color is ==-1, the current color is used.
-//If -1<color<WX_COLOR_LIST_LENGTH, the corresponding color from the
-//wx_color_list is used.  If WX_COLOR_LIST_LENGTH<=color<2*WX_COLOR_LIST_LENGTH,
-//a color equal to color%WX_COLOR_LIST_LENGTH is used from the
-//wx_hilight_color_list
-inline void DrawLine(wxDC &dc,double x_s,double y_s,double x_e,double y_e,int color=0,int thick=0)
-{
-if (dc.Colour)
-{
-	if (color>-1 && color<WX_COLOR_LIST_LENGTH)
-		dc.SetPen(wxThePenList->FindOrCreatePen((char *)wx_color_list[color],(thick) ? 8 : 2,wxSOLID));
-	if (color>=WX_COLOR_LIST_LENGTH && color<2*WX_COLOR_LIST_LENGTH)
-		dc.SetPen(wxThePenList->FindOrCreatePen((char *)wx_hilight_color_list[color%WX_COLOR_LIST_LENGTH],2,wxSOLID));
-}
-else
-	dc.SetPen(wxThePenList->FindOrCreatePen("BLACK",2,wxSOLID));
-dc.DrawLine(x_s,y_s,x_e,y_e);
-}
-//Draw Rectangle.  A quick and dirty way of easily drawing rectangles w/ set color
-inline void DrawRectangle(wxDC &dc,int x_s,int y_s,int w,int h,int color=0)
-{
-if (color>-1)
-	dc.SetPen(wxThePenList->FindOrCreatePen((char *)wx_color_list[color],2,wxSOLID));
-dc.DrawRectangle(x_s,y_s,w,h);
-}
-//Draw Thin Line.  A quick and dirty way of easily drawing lines w/ set color
-inline void DrawThinLine(wxDC &dc,int x_s,int y_s,int x_e,int y_e,int color=0)
-{
-if (dc.Colour && color>-1)
-	dc.SetPen(wxThePenList->FindOrCreatePen((char *)wx_color_list[color],1,wxSOLID));
-else
-	dc.SetPen(wxThePenList->FindOrCreatePen("BLACK",1,wxSOLID));
 
-dc.DrawLine(x_s,y_s,x_e,y_e);
+//
+// Draw Line.  A quick and dirty way of easily drawing lines w/ set color
+// If the color is ==-1, the current color is used.
+// If -1<color<WX_COLOR_LIST_LENGTH, the corresponding color from the
+// wx_color_list is used.
+// If WX_COLOR_LIST_LENGTH<=color<2*WX_COLOR_LIST_LENGTH,
+// a color equal to color%WX_COLOR_LIST_LENGTH is used from the
+// wx_hilight_color_list
+//
+inline void DrawLine(wxDC &dc, double x_s, double y_s, double x_e, double y_e,
+		     int color = 0, int thick = 0)
+{
+  if (dc.Colour)  {
+    if (color>-1 && color<WX_COLOR_LIST_LENGTH)
+      dc.SetPen(wxThePenList->FindOrCreatePen((char *) wx_color_list[color],
+					      (thick) ? 8 : 2,wxSOLID));
+    if (color>=WX_COLOR_LIST_LENGTH && color<2*WX_COLOR_LIST_LENGTH)
+      dc.SetPen(wxThePenList->FindOrCreatePen
+		((char *) wx_hilight_color_list[color%WX_COLOR_LIST_LENGTH],
+		 2, wxSOLID));
+  }
+  else
+    dc.SetPen(wxThePenList->FindOrCreatePen("BLACK",2,wxSOLID));
+  dc.DrawLine(x_s,y_s,x_e,y_e);
 }
 
-//Draw Thin Line.  A quick and dirty way of easily drawing lines w/ set color
-inline void DrawDashedLine(wxDC &dc,int x_s,int y_s,int x_e,int y_e,int color=0)
+//
+// Draw Rectangle.
+// A quick and dirty way of easily drawing rectangles w/ set color
+//
+inline void DrawRectangle(wxDC &dc, int x_s, int y_s, int w, int h,
+			  int color = 0)
 {
-if (dc.Colour && color>-1)
-	dc.SetPen(wxThePenList->FindOrCreatePen((char *)wx_color_list[color],1,wxSHORT_DASH));
-else
-	dc.SetPen(wxThePenList->FindOrCreatePen("BLACK",1,wxSOLID));
-
-dc.DrawLine(x_s,y_s,x_e,y_e);
+  if (color>-1)
+    dc.SetPen(wxThePenList->FindOrCreatePen((char *) wx_color_list[color],
+					    2, wxSOLID));
+  dc.DrawRectangle(x_s,y_s,w,h);
 }
 
-//Draw Circle. A quick and dirty way of easily drawing a circle w/ set color
-inline void DrawCircle(wxDC &dc,int x,int y,int r,int color=0)
+//
+// Draw Thin Line.  A quick and dirty way of easily drawing lines w/ set color
+//
+inline void DrawThinLine(wxDC &dc, int x_s, int y_s, int x_e, int y_e,
+			 int color = 0)
 {
-	if (color>-1 && dc.Colour)
-		dc.SetPen(wxThePenList->FindOrCreatePen((char *)wx_color_list[color],3,wxSOLID));
-	else
-		dc.SetPen(wxThePenList->FindOrCreatePen("BLACK",3,wxSOLID));
-	dc.DrawEllipse(x-r,y-r,2*r,2*r);
+  if (dc.Colour && color>-1)
+    dc.SetPen(wxThePenList->FindOrCreatePen((char *)wx_color_list[color],1,wxSOLID));
+  else
+    dc.SetPen(wxThePenList->FindOrCreatePen("BLACK",1,wxSOLID));
+
+  dc.DrawLine(x_s,y_s,x_e,y_e);
+}
+
+//
+// Draw Dashed Line.  
+// A quick and dirty way of easily drawing lines w/ set color
+//
+inline void DrawDashedLine(wxDC &dc, int x_s, int y_s, int x_e, int y_e,
+			   int color = 0)
+{
+  if (dc.Colour && color>-1)
+    dc.SetPen(wxThePenList->FindOrCreatePen((char *) wx_color_list[color],
+					    1, wxSHORT_DASH));
+  else
+    dc.SetPen(wxThePenList->FindOrCreatePen("BLACK",1,wxSOLID));
+
+  dc.DrawLine(x_s,y_s,x_e,y_e);
+}
+
+//
+// Draw Circle. A quick and dirty way of easily drawing a circle w/ set color
+//
+inline void DrawCircle(wxDC &dc, int x, int y, int r, int color = 0)
+{
+  if (color>-1 && dc.Colour)
+    dc.SetPen(wxThePenList->FindOrCreatePen((char *) wx_color_list[color],
+					    3, wxSOLID));
+  else
+    dc.SetPen(wxThePenList->FindOrCreatePen("BLACK", 3, wxSOLID));
+  dc.DrawEllipse(x-r,y-r,2*r,2*r);
 }
 
 #define INFOSET_SPACING	10
 #define SUBGAME_LARGE_ICON_SIZE	20
-void DrawLargeSubgameIcon(wxDC &dc,const NodeEntry &entry,int nl)
-{
-dc.SetPen(wxThePenList->FindOrCreatePen("INDIAN RED",2,wxSOLID));
-dc.SetBrush(wxTheBrushList->FindOrCreateBrush("RED",wxSOLID));
-wxPoint points[3];
-int x0=entry.x+nl+entry.nums*INFOSET_SPACING-SUBGAME_LARGE_ICON_SIZE;
-int y0=entry.y;
-points[0].x=x0;
-points[0].y=y0;
-points[1].x=x0+SUBGAME_LARGE_ICON_SIZE;
-points[1].y=y0-SUBGAME_LARGE_ICON_SIZE/2;
-points[2].x=x0+SUBGAME_LARGE_ICON_SIZE;
-points[2].y=y0+SUBGAME_LARGE_ICON_SIZE/2;
-dc.DrawPolygon(3,points);
-}
 #define SUBGAME_SMALL_ICON_SIZE	10
-void DrawSmallSubgameIcon(wxDC &dc,const NodeEntry &entry)
+
+
+//
+// Draw collapsed subgame icons
+//
+void DrawLargeSubgameIcon(wxDC &dc, const NodeEntry &entry, int nl)
 {
-dc.SetPen(wxThePenList->FindOrCreatePen("INDIAN RED",2,wxSOLID));
-dc.SetBrush(wxTheBrushList->FindOrCreateBrush("RED",wxSOLID));
-wxPoint points[3];
-points[0].x=entry.x;
-points[0].y=entry.y;
-points[1].x=entry.x+SUBGAME_SMALL_ICON_SIZE;
-points[1].y=entry.y-SUBGAME_SMALL_ICON_SIZE/2;
-points[2].x=entry.x+SUBGAME_SMALL_ICON_SIZE;
-points[2].y=entry.y+SUBGAME_SMALL_ICON_SIZE/2;
-dc.DrawPolygon(3,points);
+  dc.SetPen(wxThePenList->FindOrCreatePen("INDIAN RED",2,wxSOLID));
+  dc.SetBrush(wxTheBrushList->FindOrCreateBrush("RED",wxSOLID));
+  wxPoint points[3];
+  int x0=entry.x+nl+entry.nums*INFOSET_SPACING-SUBGAME_LARGE_ICON_SIZE;
+  int y0=entry.y;
+  points[0].x=x0;
+  points[0].y=y0;
+  points[1].x=x0+SUBGAME_LARGE_ICON_SIZE;
+  points[1].y=y0-SUBGAME_LARGE_ICON_SIZE/2;
+  points[2].x=x0+SUBGAME_LARGE_ICON_SIZE;
+  points[2].y=y0+SUBGAME_LARGE_ICON_SIZE/2;
+  dc.DrawPolygon(3,points);
+}
+
+void DrawSmallSubgameIcon(wxDC &dc, const NodeEntry &entry)
+{
+  dc.SetPen(wxThePenList->FindOrCreatePen("INDIAN RED",2,wxSOLID));
+  dc.SetBrush(wxTheBrushList->FindOrCreateBrush("RED",wxSOLID));
+  wxPoint points[3];
+  points[0].x=entry.x;
+  points[0].y=entry.y;
+  points[1].x=entry.x+SUBGAME_SMALL_ICON_SIZE;
+  points[1].y=entry.y-SUBGAME_SMALL_ICON_SIZE/2;
+  points[2].x=entry.x+SUBGAME_SMALL_ICON_SIZE;
+  points[2].y=entry.y+SUBGAME_SMALL_ICON_SIZE/2;
+  dc.DrawPolygon(3,points);
 }
 
 #define SUBGAME_PICK_SIZE	30
+
 void DrawSubgamePickIcon(wxDC &dc,const NodeEntry &entry)
 {
-dc.SetPen(wxThePenList->FindOrCreatePen("BLACK",2,wxSOLID));
-dc.DrawLine(entry.x,entry.y-SUBGAME_PICK_SIZE/2,entry.x,entry.y+SUBGAME_PICK_SIZE/2);
-dc.DrawLine(entry.x,entry.y-SUBGAME_PICK_SIZE/2,entry.x+SUBGAME_PICK_SIZE/2,entry.y-SUBGAME_PICK_SIZE/2);
-dc.DrawLine(entry.x,entry.y+SUBGAME_PICK_SIZE/2,entry.x+SUBGAME_PICK_SIZE/2,entry.y+SUBGAME_PICK_SIZE/2);
+  dc.SetPen(wxThePenList->FindOrCreatePen("BLACK",2,wxSOLID));
+  dc.DrawLine(entry.x,entry.y-SUBGAME_PICK_SIZE/2,
+	      entry.x,entry.y+SUBGAME_PICK_SIZE/2);
+  dc.DrawLine(entry.x,entry.y-SUBGAME_PICK_SIZE/2,
+	      entry.x+SUBGAME_PICK_SIZE/2,entry.y-SUBGAME_PICK_SIZE/2);
+  dc.DrawLine(entry.x,entry.y+SUBGAME_PICK_SIZE/2,
+	      entry.x+SUBGAME_PICK_SIZE/2,entry.y+SUBGAME_PICK_SIZE/2);
 }
 
-//***********************************************************************
-//                             TREE RENDER
-//***********************************************************************
+//-----------------------------------------------------------------------
+//                      TreeRender: Member functions
+//-----------------------------------------------------------------------
 
-TreeRender::TreeRender(wxFrame *frame,const TreeWindow *parent_,const gList<NodeEntry *> &node_list_,
-						const Infoset * &hilight_infoset_,const Infoset * &hilight_infoset1_,
-						const Node *&mark_node_,const Node *&cursor_,const Node *&subgame_node_,
-						const TreeDrawSettings &draw_settings_)
-: wxCanvas(frame,-1,-1,-1,-1,0),
-parent(parent_),node_list(node_list_),hilight_infoset(hilight_infoset_),hilight_infoset1(hilight_infoset1_),
- mark_node(mark_node_),subgame_node(subgame_node_),
- cursor(cursor_),draw_settings(draw_settings_),flasher(0),painting(false)
-{
+TreeRender::TreeRender(wxFrame *frame, const TreeWindow *parent_,
+		       const gList<NodeEntry *> &node_list_,
+		       const Infoset * &hilight_infoset_,
+		       const Infoset * &hilight_infoset1_,
+		       const Node *&mark_node_,
+		       const Node *&cursor_, const Node *&subgame_node_,
+		       const TreeDrawSettings &draw_settings_)
+  : wxCanvas(frame,-1,-1,-1,-1,0),
+    parent(parent_), node_list(node_list_),
+    hilight_infoset(hilight_infoset_), hilight_infoset1(hilight_infoset1_),
+    mark_node(mark_node_), subgame_node(subgame_node_),
+    cursor(cursor_), draw_settings(draw_settings_), flasher(0), painting(false)
+{ }
 
-}
 
-//*********************************************************************
-// OnPaint-- Handle drawing events
-//*********************************************************************
+//
+// OnPaint: Handle drawing events
 void TreeRender::OnPaint(void)
 {
-if (painting) return; // prevent re-entry
-painting=true;
-Render(*(GetDC()));
-painting=false;
+  if (painting)   return; // prevent re-entry
+  painting = true;
+  Render(*GetDC());
+  painting = false;
 }
 
-// RenderLabels.  Draws all the text labels for the tree according to the
+//
+// RenderLabels:  Draws all the text labels for the tree according to the
 // settings in draw_settings.  Currently takes care of:labels node/branch,
 // outcomes.  Note: this function is getting very long, but I see no real
 // reason to split it at this point...
-// Note that outcomes and probs are drawn using calls to the templated
-// TreeWindow
-void TreeRender::RenderLabels(wxDC &dc,const NodeEntry *child_entry,const NodeEntry *entry)
+//
+void TreeRender::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
+			      const NodeEntry *entry)
 {
-gText 		label;		// temporary to hold the label
-const Node	*n=child_entry->n;
-float 		tw,th;
-bool			hilight=false;
+  gText	label = "";		// temporary to hold the label
+  const Node *n=child_entry->n;
+  float tw,th;
+  bool hilight=false;
+
 // First take care of labeling the node on top
-label="";
-switch (draw_settings.LabelNodeAbove())
-{
-	case NODE_ABOVE_NOTHING:
-		label="";break;
-	case NODE_ABOVE_LABEL:
-		label=n->GetName();break;
-	case NODE_ABOVE_PLAYER:
-		if (n->GetPlayer())	label=n->GetPlayer()->GetName(); else label=""; break;
-	case NODE_ABOVE_ISETLABEL:
-		if (n->GetInfoset()) label=n->GetInfoset()->GetName();break;
-	case NODE_ABOVE_ISETID:
-		if (n->GetInfoset())
-			label="("+ToText(n->GetPlayer()->GetNumber())+","+ToText(n->GetInfoset()->GetNumber())+")";
-		break;
-	case NODE_ABOVE_OUTCOME:
-		label=parent->OutcomeAsString(n,hilight);break;
-	case NODE_ABOVE_REALIZPROB:
-		label=parent->AsString(tRealizProb,n);break;
-	case NODE_ABOVE_BELIEFPROB:
-		label=parent->AsString(tBeliefProb,n);break;
-	case NODE_ABOVE_VALUE:
-		label=parent->AsString(tNodeValue,n);break;
-	default:
-		label="";break;
-}
-if (label!="")
-{
-	dc.SetFont(draw_settings.NodeAboveFont());
-	dc.GetTextExtent("0",&tw,&th);
-	gDrawText(dc,label,child_entry->x+child_entry->nums*INFOSET_SPACING+3,child_entry->y-th-9);
-}
+  switch (draw_settings.LabelNodeAbove())   {
+  case NODE_ABOVE_NOTHING:
+    label="";  break;
+  case NODE_ABOVE_LABEL:
+    label=n->GetName();  break;
+  case NODE_ABOVE_PLAYER:
+    if (n->GetPlayer())	
+      label=n->GetPlayer()->GetName();
+    else label="";
+    break;
+  case NODE_ABOVE_ISETLABEL:
+    if (n->GetInfoset()) label=n->GetInfoset()->GetName();break;
+  case NODE_ABOVE_ISETID:
+    if (n->GetInfoset())
+      label="("+ToText(n->GetPlayer()->GetNumber())+","+ToText(n->GetInfoset()->GetNumber())+")";
+    break;
+  case NODE_ABOVE_OUTCOME:
+    label=parent->OutcomeAsString(n,hilight);break;
+  case NODE_ABOVE_REALIZPROB:
+    label=parent->AsString(tRealizProb,n);break;
+  case NODE_ABOVE_BELIEFPROB:
+    label=parent->AsString(tBeliefProb,n);break;
+  case NODE_ABOVE_VALUE:
+    label=parent->AsString(tNodeValue,n);break;
+  default:
+    label="";break;
+  }
+  if (label!="")   {
+    dc.SetFont(draw_settings.NodeAboveFont());
+    dc.GetTextExtent("0",&tw,&th);
+    gDrawText(dc, label, child_entry->x+child_entry->nums*INFOSET_SPACING+3,
+	      child_entry->y-th-9);
+  }
+
 // Take care of labeling the node on the bottom
-label="";
-switch (draw_settings.LabelNodeBelow())
-{
-	case NODE_BELOW_NOTHING:
-		label="";break;
-	case NODE_BELOW_LABEL:
-		label=n->GetName();break;
-	case NODE_BELOW_PLAYER:
-		if (n->GetPlayer())	label=n->GetPlayer()->GetName(); else label=""; break;
-	case NODE_BELOW_ISETLABEL:
-		if (n->GetInfoset()) label=n->GetInfoset()->GetName();break;
-	case NODE_BELOW_ISETID:
-		if (n->GetInfoset())
-			label="("+ToText(n->GetPlayer()->GetNumber())+","+ToText(n->GetInfoset()->GetNumber())+")";
-		break;
-	case NODE_BELOW_OUTCOME:
-		label=parent->OutcomeAsString(n,hilight);break;
-	case NODE_BELOW_REALIZPROB:
-		label=parent->AsString(tRealizProb,n);break;
-	case NODE_BELOW_BELIEFPROB:
-		label=parent->AsString(tBeliefProb,n);break;
-	case NODE_BELOW_VALUE:
-		label=parent->AsString(tNodeValue,n);break;
-	default:
-		label="";break;
-}
-if (label!="")
-{
-	dc.SetFont(draw_settings.NodeBelowFont());
-	gDrawText(dc,label,child_entry->x+child_entry->nums*INFOSET_SPACING+3,child_entry->y+5);
-}
-if (child_entry->n!=entry->n)	// no branches for root
-{
+  label = "";
+  switch (draw_settings.LabelNodeBelow())   {
+  case NODE_BELOW_NOTHING:
+    label="";break;
+  case NODE_BELOW_LABEL:
+    label=n->GetName();break;
+  case NODE_BELOW_PLAYER:
+    if (n->GetPlayer())	label=n->GetPlayer()->GetName(); else label=""; break;
+  case NODE_BELOW_ISETLABEL:
+    if (n->GetInfoset()) label=n->GetInfoset()->GetName();break;
+  case NODE_BELOW_ISETID:
+    if (n->GetInfoset())
+      label="("+ToText(n->GetPlayer()->GetNumber())+","+ToText(n->GetInfoset()->GetNumber())+")";
+    break;
+  case NODE_BELOW_OUTCOME:
+    label=parent->OutcomeAsString(n,hilight);break;
+  case NODE_BELOW_REALIZPROB:
+    label=parent->AsString(tRealizProb,n);break;
+  case NODE_BELOW_BELIEFPROB:
+    label=parent->AsString(tBeliefProb,n);break;
+  case NODE_BELOW_VALUE:
+    label=parent->AsString(tNodeValue,n);break;
+  default:
+    label="";break;
+  }
+  
+  if (label!="")   {
+    dc.SetFont(draw_settings.NodeBelowFont());
+    gDrawText(dc,label,child_entry->x+child_entry->nums*INFOSET_SPACING+3,child_entry->y+5);
+  }
+  if (child_entry->n!=entry->n)   {   // no branches for root
 // Now take care of branches....
 // Take care of labeling the branch on the top
-label="";
-switch (draw_settings.LabelBranchAbove())
-{
-	case BRANCH_ABOVE_NOTHING:
-		label="";break;
-	case BRANCH_ABOVE_LABEL:
-		if (child_entry->child_number!=0)
-			label=entry->n->GetInfoset()->GetActionName(child_entry->child_number);
-		else
-			label="";break;
-	case BRANCH_ABOVE_PLAYER:
-		if (entry->n->GetPlayer()) label=entry->n->GetPlayer()->GetName();break;
-	case BRANCH_ABOVE_PROBS:
-		label=parent->AsString(tBranchProb,entry->n,child_entry->child_number);break;
-	case BRANCH_ABOVE_VALUE:
-		label=parent->AsString(tBranchVal,entry->n,child_entry->child_number);break;
-	default:
-		label="";break;
-}
-if (label!="")
-{
-	dc.SetFont(draw_settings.BranchAboveFont());
-	dc.GetTextExtent("0",&tw,&th);
-	gDrawText(dc,label,entry->x+entry->nums*INFOSET_SPACING+draw_settings.ForkLength()+draw_settings.NodeLength()+3,child_entry->y-th-5);
-}
+    label="";
+    switch (draw_settings.LabelBranchAbove())   {
+    case BRANCH_ABOVE_NOTHING:
+      label="";break;
+    case BRANCH_ABOVE_LABEL:
+      if (child_entry->child_number!=0)
+	label=entry->n->GetInfoset()->GetActionName(child_entry->child_number);
+      else
+	label="";break;
+    case BRANCH_ABOVE_PLAYER:
+      if (entry->n->GetPlayer()) label=entry->n->GetPlayer()->GetName();break;
+    case BRANCH_ABOVE_PROBS:
+      label=parent->AsString(tBranchProb,entry->n,child_entry->child_number);break;
+    case BRANCH_ABOVE_VALUE:
+      label=parent->AsString(tBranchVal,entry->n,child_entry->child_number);break;
+    default:
+      label="";break;
+    }
+    
+    if (label!="")  {
+      dc.SetFont(draw_settings.BranchAboveFont());
+      dc.GetTextExtent("0",&tw,&th);
+      gDrawText(dc,label,entry->x+entry->nums*INFOSET_SPACING+draw_settings.ForkLength()+draw_settings.NodeLength()+3,child_entry->y-th-5);
+    }
+
 // Take care of labeling the branch on the bottom
-label="";
-switch (draw_settings.LabelBranchBelow())
-{
-	case BRANCH_BELOW_NOTHING:
-		label="";break;
-	case BRANCH_BELOW_LABEL:
-		if (child_entry->child_number!=0)
-			label=entry->n->GetInfoset()->GetActionName(child_entry->child_number);
-		else
-			label="";break;
-	case BRANCH_BELOW_PLAYER:
-		if (entry->n->GetPlayer()) label=entry->n->GetPlayer()->GetName();break;
-	case BRANCH_BELOW_PROBS:
-		label=parent->AsString(tBranchProb,entry->n,child_entry->child_number);break;
-	case BRANCH_BELOW_VALUE:
-		label=parent->AsString(tBranchVal,entry->n,child_entry->child_number);break;
-	default:
-		label="";break;
-}
-if (label!="")
-{
-	dc.SetFont(draw_settings.BranchBelowFont());
-	gDrawText(dc,label,entry->x+entry->nums*INFOSET_SPACING+draw_settings.ForkLength()+draw_settings.NodeLength()+3,child_entry->y+5);
-}
-}
+    label="";
+    switch (draw_settings.LabelBranchBelow())    {
+    case BRANCH_BELOW_NOTHING:
+      label="";break;
+    case BRANCH_BELOW_LABEL:
+      if (child_entry->child_number!=0)
+	label=entry->n->GetInfoset()->GetActionName(child_entry->child_number);
+      else
+	label="";break;
+    case BRANCH_BELOW_PLAYER:
+      if (entry->n->GetPlayer()) label=entry->n->GetPlayer()->GetName();break;
+    case BRANCH_BELOW_PROBS:
+      label=parent->AsString(tBranchProb,entry->n,child_entry->child_number);break;
+    case BRANCH_BELOW_VALUE:
+      label=parent->AsString(tBranchVal,entry->n,child_entry->child_number);break;
+    default:
+      label="";break;
+    }
+    if (label!="")   {
+      dc.SetFont(draw_settings.BranchBelowFont());
+      gDrawText(dc,label,entry->x+entry->nums*INFOSET_SPACING+draw_settings.ForkLength()+draw_settings.NodeLength()+3,child_entry->y+5);
+    }
+  }
+
 // Now take care of displaying the terminal node labels
-label="";
-hilight=false;
-if (!child_entry->has_children)	// if the node is terminal
-{
-	switch (draw_settings.LabelNodeTerminal())
-	{
-		case NODE_TERMINAL_NOTHING:
-			label="";break;
-		case NODE_TERMINAL_OUTCOME:
-			label=parent->OutcomeAsString(n,hilight);break;
-		case NODE_TERMINAL_NAME:
-			if (n->GetOutcome()) label=n->GetOutcome()->GetName();break;
-		default:
-			label="";break;
-	}
-	if (label!="")
-	{
-		dc.SetFont(draw_settings.NodeTerminalFont());
-      if (hilight) {dc.SetBackgroundMode(wxSOLID);dc.SetTextBackground(wxLIGHT_GREY);}
-		gDrawText(dc,label,child_entry->x+draw_settings.NodeLength()+child_entry->nums*INFOSET_SPACING+10,child_entry->y-12);
-		if (hilight) {dc.SetBackgroundMode(wxTRANSPARENT);dc.SetTextBackground(wxWHITE);}
-	}
-}
+  label="";
+  hilight=false;
+  if (!child_entry->has_children)   {	// if the node is terminal
+    switch (draw_settings.LabelNodeTerminal())   {
+    case NODE_TERMINAL_NOTHING:
+      label="";break;
+    case NODE_TERMINAL_OUTCOME:
+      label=parent->OutcomeAsString(n,hilight);break;
+    case NODE_TERMINAL_NAME:
+      if (n->GetOutcome()) label=n->GetOutcome()->GetName();break;
+    default:
+      label="";break;
+    }
+    if (label!="")   {
+      dc.SetFont(draw_settings.NodeTerminalFont());
+      if (hilight)  {
+	dc.SetBackgroundMode(wxSOLID);
+	dc.SetTextBackground(wxLIGHT_GREY);
+      }
+      gDrawText(dc,label,child_entry->x+draw_settings.NodeLength()+child_entry->nums*INFOSET_SPACING+10,child_entry->y-12);
+      if (hilight)  {
+	dc.SetBackgroundMode(wxTRANSPARENT);
+	dc.SetTextBackground(wxWHITE);}
+    }
+  }
+
 // Now take care of displaying the right node labels, for non-terminal nodes
-else
-{
-	switch (draw_settings.LabelNodeRight())
-	{
-		case NODE_RIGHT_NOTHING:
-			label="";break;
-		case NODE_RIGHT_OUTCOME:
-			label=parent->OutcomeAsString(n,hilight);break;
-		case NODE_RIGHT_NAME:
-			if (n->GetOutcome()) label=n->GetOutcome()->GetName();break;
-		default:
-			label="";break;
-	}
-	if (label!="")
-	{
-		dc.SetFont(draw_settings.NodeRightFont());
-		gDrawText(dc,label,child_entry->x+draw_settings.NodeLength()+child_entry->nums*INFOSET_SPACING+10,child_entry->y-12);
-	}
+  else   {
+    switch (draw_settings.LabelNodeRight())   {
+    case NODE_RIGHT_NOTHING:
+      label="";break;
+    case NODE_RIGHT_OUTCOME:
+      label=parent->OutcomeAsString(n,hilight);break;
+    case NODE_RIGHT_NAME:
+      if (n->GetOutcome()) label=n->GetOutcome()->GetName();break;
+    default:
+      label="";break;
+    }
+    if (label!="")   {
+      dc.SetFont(draw_settings.NodeRightFont());
+      gDrawText(dc,label,child_entry->x+draw_settings.NodeLength()+child_entry->nums*INFOSET_SPACING+10,child_entry->y-12);
+    }
+  }
 }
 
-}
-//**************************************************************************
-//*     RENDER SUBTREE--RENDERING ROUTINE TO DRAW BRANCHES AND LABELS      *
-//**************************************************************************
+
+//
+// RenderSubtree: Render branches and labels
+//
 // The following speed optimizations have been added:
 // The algorithm now traverses the tree as a linear linked list, eliminating
 // expensive searches.  Since the region clipping implemented by wxwin seems
@@ -334,175 +374,196 @@ else
 // The offset is used to simulate scrollbars in the
 // zoom window.  It might be used for the main window if scrollbars prove to
 // be a limitation.
+//
 void TreeRender::RenderSubtree(wxDC &dc)
 {
-int xs,xe,ys,ye;	// x-start,x-end,y-start,y-end: coordinates for drawing branches
-NodeEntry entry,child_entry;
+  // x-start,x-end,y-start,y-end: coordinates for drawing branches 
+  int xs,xe,ys,ye;
+  NodeEntry entry,child_entry;
 // Determine the visible region on screen to implement clipping
-int x_start,y_start,width,height;
-ViewStart(&x_start,&y_start);
-GetClientSize(&width,&height);
+  int x_start,y_start,width,height;
+
+  ViewStart(&x_start,&y_start);
+  GetClientSize(&width,&height);
 // go through the list of nodes, plotting them
-for (int pos=1;pos<=node_list.Length();pos++)
-{
-	child_entry=*node_list[pos];	// must make a copy to use Translate
-	entry=*child_entry.parent;
+  for (int pos=1;pos<=node_list.Length();pos++)   {
+    child_entry=*node_list[pos];	// must make a copy to use Translate
+    entry=*child_entry.parent;
 
-	// if we are just a renderer, there can be no zoom!  For zoom, override JustRender
-	float zoom=(JustRender()) ? 1.000 : draw_settings.Zoom();
-	// Check if this node/labels are visible
-	if (!(child_entry.x+dc.device_origin_x<x_start*PIXELS_PER_SCROLL || entry.x+dc.device_origin_x>x_start*PIXELS_PER_SCROLL+width/zoom
-			|| (entry.y+dc.device_origin_y>y_start*PIXELS_PER_SCROLL+height/zoom && child_entry.y+dc.device_origin_y>y_start*PIXELS_PER_SCROLL+height/zoom)
-			|| (entry.y+dc.device_origin_y<y_start*PIXELS_PER_SCROLL && child_entry.y+dc.device_origin_y<y_start*PIXELS_PER_SCROLL)) ||
-			(entry.infoset.y+dc.device_origin_y<y_start*PIXELS_PER_SCROLL+height/zoom))
-	{
-		// draw the labels
-		RenderLabels(dc,&child_entry,&entry);
-		if (child_entry.child_number==1)	// only draw the node line once for all children
-		{
-			// draw the 'node' line
-			bool hilight=(hilight_infoset && entry.n->GetInfoset()==hilight_infoset) ||
-									 (hilight_infoset1 && entry.n->GetInfoset()==hilight_infoset1);
-			::DrawLine(dc,entry.x, entry.y,
-					entry.x+draw_settings.NodeLength()+entry.nums*INFOSET_SPACING,entry.y,
-					entry.color,hilight ? 1 : 0);
-			// show the infoset lines, if required by draw settings
-			::DrawCircle(dc,entry.x+entry.num*INFOSET_SPACING,entry.y,3,entry.color);
-			if (draw_settings.ShowInfosets())
-			{
-				if (entry.infoset.y!=-1)
-						::DrawThinLine(dc,entry.x+entry.num*INFOSET_SPACING,entry.y,entry.x+entry.num*INFOSET_SPACING,entry.infoset.y,entry.color);
-				if (entry.infoset.x!=-1)	// draw a little arrow in the dir of the iset
-					if (entry.infoset.x>entry.x) // iset is to the right
-						::DrawLine(dc,entry.x+entry.num*INFOSET_SPACING,entry.infoset.y,entry.x+(entry.num+1)*INFOSET_SPACING,entry.infoset.y,entry.color);
-					else												 // iset is to the left
-						::DrawLine(dc,entry.x+entry.num*INFOSET_SPACING,entry.infoset.y,entry.x+(entry.num-1)*INFOSET_SPACING,entry.infoset.y,entry.color);
-			}
-			// Draw a triangle to show sugame roots
-			if (entry.n->GetSubgameRoot()==entry.n)
-				if (entry.expanded) DrawSmallSubgameIcon(dc,entry);
-
-		}
-		if (child_entry.n==subgame_node)
-			DrawSubgamePickIcon(dc,child_entry);
-		// draw the 'branches'
-		if (child_entry.n->GetParent() && child_entry.in_sup)	// no branches for root node
-		{
-			xs=entry.x+draw_settings.NodeLength()+entry.nums*INFOSET_SPACING;
-			ys=entry.y;
-			xe=xs+draw_settings.ForkLength();
-			ye=child_entry.y;
-			::DrawLine(dc,xs,ys,xe,ye,entry.color);
-			// Draw the hilight...y=a+bx=ys+(ye-ys)/(xe-xs)*x
-			double prob=parent->ProbAsDouble(entry.n,child_entry.child_number);
-			if (prob>0)
-				::DrawLine(dc,xs,ys,xs+draw_settings.ForkLength()*prob,ys+(ye-ys)*prob,WX_COLOR_LIST_LENGTH-1);
-			xs=xe;
-			ys=ye;
-			xe=child_entry.x;
-			ye=ys;
-			::DrawLine(dc,xs,ye,xe,ye,entry.color);
-		}
-		else
-			{xe=entry.x;ye=entry.y;}
-		// Take care of terminal nodes (either real terminal or collapsed subgames)
-		if (!child_entry.has_children)
-		{
-			::DrawLine(dc,xe,ye,xe+draw_settings.NodeLength()+child_entry.nums*INFOSET_SPACING,ye,draw_settings.GetPlayerColor(-1));
-			// Collapsed subgame: subgame icon is drawn at this terminal node.
-			if (child_entry.n->GetSubgameRoot()==child_entry.n && !child_entry.expanded)
-				DrawLargeSubgameIcon(dc,child_entry,draw_settings.NodeLength());
-			// Marked Node: a circle is drawn at this terminal node
-			if (child_entry.n==mark_node)
-				::DrawCircle(dc,xe+child_entry.nums*INFOSET_SPACING+draw_settings.NodeLength(),ye,4,draw_settings.CursorColor());
-		}
-		// Draw a circle to show the marked node
-		if (entry.n==mark_node && child_entry.child_number==entry.n->NumChildren())
-			::DrawCircle(dc,entry.x+entry.nums*INFOSET_SPACING+draw_settings.NodeLength(),entry.y,4,draw_settings.CursorColor());
-
+    // if we are just a renderer, there can be no zoom! 
+    // For zoom, override JustRender
+    float zoom=(JustRender()) ? 1.000 : draw_settings.Zoom();
+    // Check if this node/labels are visible
+    if (!(child_entry.x+dc.device_origin_x<x_start*PIXELS_PER_SCROLL  |
+	  entry.x+dc.device_origin_x>x_start*PIXELS_PER_SCROLL+width/zoom ||
+	  (entry.y+dc.device_origin_y>y_start*PIXELS_PER_SCROLL+height/zoom &&
+	   child_entry.y+dc.device_origin_y>y_start*PIXELS_PER_SCROLL+height/zoom) ||
+	  (entry.y+dc.device_origin_y<y_start*PIXELS_PER_SCROLL && 
+	   child_entry.y+dc.device_origin_y<y_start*PIXELS_PER_SCROLL)) ||
+	(entry.infoset.y+dc.device_origin_y<y_start*PIXELS_PER_SCROLL+height/zoom))  {
+      // draw the labels
+      RenderLabels(dc,&child_entry,&entry);
+      if (child_entry.child_number==1)  {  // only draw the node line once for all children
+	// draw the 'node' line
+	bool hilight = (hilight_infoset &&
+			entry.n->GetInfoset()==hilight_infoset) ||
+			(hilight_infoset1 &&
+			 entry.n->GetInfoset()==hilight_infoset1);
+	::DrawLine(dc,entry.x, entry.y,
+		   entry.x+draw_settings.NodeLength()+entry.nums*INFOSET_SPACING,entry.y,
+		   entry.color,hilight ? 1 : 0);
+	// show the infoset lines, if required by draw settings
+	::DrawCircle(dc,entry.x+entry.num*INFOSET_SPACING,entry.y,3,entry.color);
+	if (draw_settings.ShowInfosets())   {
+	  if (entry.infoset.y!=-1)
+	    ::DrawThinLine(dc,entry.x+entry.num*INFOSET_SPACING,entry.y,entry.x+entry.num*INFOSET_SPACING,entry.infoset.y,entry.color);
+	  if (entry.infoset.x!=-1)	// draw a little arrow in the dir of the iset
+	    if (entry.infoset.x>entry.x) // iset is to the right
+	      ::DrawLine(dc,entry.x+entry.num*INFOSET_SPACING,entry.infoset.y,entry.x+(entry.num+1)*INFOSET_SPACING,entry.infoset.y,entry.color);
+	    else												 // iset is to the left
+	      ::DrawLine(dc,entry.x+entry.num*INFOSET_SPACING,entry.infoset.y,entry.x+(entry.num-1)*INFOSET_SPACING,entry.infoset.y,entry.color);
 	}
-}
+	// Draw a triangle to show sugame roots
+	if (entry.n->GetSubgameRoot()==entry.n)
+	  if (entry.expanded) DrawSmallSubgameIcon(dc,entry);
+	
+      }
+      if (child_entry.n==subgame_node)
+	DrawSubgamePickIcon(dc,child_entry);
+      // draw the 'branches'
+      if (child_entry.n->GetParent() && child_entry.in_sup)  {	// no branches for root node
+	xs=entry.x+draw_settings.NodeLength()+entry.nums*INFOSET_SPACING;
+	ys=entry.y;
+	xe=xs+draw_settings.ForkLength();
+	ye=child_entry.y;
+	::DrawLine(dc,xs,ys,xe,ye,entry.color);
+	// Draw the hilight...y=a+bx=ys+(ye-ys)/(xe-xs)*x
+	double prob=parent->ProbAsDouble(entry.n,child_entry.child_number);
+	if (prob>0)
+	  ::DrawLine(dc,xs,ys,xs+draw_settings.ForkLength()*prob,ys+(ye-ys)*prob,WX_COLOR_LIST_LENGTH-1);
+	xs=xe;
+	ys=ye;
+	xe=child_entry.x;
+	ye=ys;
+	::DrawLine(dc,xs,ye,xe,ye,entry.color);
+      }
+      else  {
+	xe=entry.x;
+	ye=entry.y;
+      }
+
+      // Take care of terminal nodes (either real terminal or collapsed subgames)
+      if (!child_entry.has_children)   {
+	::DrawLine(dc,xe,ye,xe+draw_settings.NodeLength()+child_entry.nums*INFOSET_SPACING,ye,draw_settings.GetPlayerColor(-1));
+	// Collapsed subgame: subgame icon is drawn at this terminal node.
+	if (child_entry.n->GetSubgameRoot()==child_entry.n && !child_entry.expanded)
+	  DrawLargeSubgameIcon(dc,child_entry,draw_settings.NodeLength());
+	// Marked Node: a circle is drawn at this terminal node
+	if (child_entry.n==mark_node)
+	  ::DrawCircle(dc,xe+child_entry.nums*INFOSET_SPACING+draw_settings.NodeLength(),ye,4,draw_settings.CursorColor());
+      }
+      // Draw a circle to show the marked node
+      if (entry.n==mark_node && child_entry.child_number==entry.n->NumChildren())
+	::DrawCircle(dc,entry.x+entry.nums*INFOSET_SPACING+draw_settings.NodeLength(),entry.y,4,draw_settings.CursorColor());
+    }
+  }
 }
 
 void TreeRender::UpdateCursor(const NodeEntry *entry)
 {
-if (entry->n->GetSubgameRoot()==entry->n && !entry->expanded)
-	flasher->SetFlashNode(entry->x+draw_settings.NodeLength()+entry->nums*INFOSET_SPACING-SUBGAME_LARGE_ICON_SIZE,
-												entry->y,
-												entry->x+draw_settings.NodeLength()+entry->nums*INFOSET_SPACING,
-												entry->y,subgameCursor);
-else
-	flasher->SetFlashNode(entry->x+entry->nums*INFOSET_SPACING,entry->y,
-											entry->x+draw_settings.NodeLength()+entry->nums*INFOSET_SPACING-8,
-											entry->y,nodeCursor);
-flasher->Flash();
+  if (entry->n->GetSubgameRoot()==entry->n && !entry->expanded)
+    flasher->SetFlashNode(entry->x+draw_settings.NodeLength()+entry->nums*INFOSET_SPACING-SUBGAME_LARGE_ICON_SIZE,
+			  entry->y,
+			  entry->x+draw_settings.NodeLength()+entry->nums*INFOSET_SPACING,
+			  entry->y,subgameCursor);
+  else
+    flasher->SetFlashNode(entry->x+entry->nums*INFOSET_SPACING,entry->y,
+			  entry->x+draw_settings.NodeLength()+entry->nums*INFOSET_SPACING-8,
+			  entry->y,nodeCursor);
+  flasher->Flash();
 }
 
 void TreeRender::Render(wxDC &dc)
-{RenderSubtree(dc);}
+{ 
+  RenderSubtree(dc);
+}
 
-Bool TreeRender::JustRender(void) const {return TRUE;}
+Bool TreeRender::JustRender(void) const 
+{
+  return TRUE;
+}
 
 void TreeRender::MakeFlasher(void)
 {
-flasher=(draw_settings.FlashingCursor()) ? new TreeNodeFlasher(GetDC()) : new TreeNodeCursor(GetDC());
+  flasher=(draw_settings.FlashingCursor()) ? new TreeNodeFlasher(GetDC()) :
+                                             new TreeNodeCursor(GetDC());
 }
+
 TreeRender::~TreeRender(void)
-{if (flasher) delete flasher;}
-
-//***********************************************************************
-//                       TREE ZOOM WINDOW
-//***********************************************************************
-
-TreeZoomWindow::TreeZoomWindow(wxFrame *frame,const TreeWindow *parent,const gList<NodeEntry *> &node_list_,
-						const Infoset * &hilight_infoset_,const Infoset * &hilight_infoset1_,
-						const Node *&mark_node_,const Node *&cursor_,const Node *&subgame_node_,
-						const TreeDrawSettings &draw_settings_,const NodeEntry *cursor_entry):
-						 TreeRender(new wxFrame(frame,"Zoom Window",-1,-1,250,250),parent,
-						 node_list_,(const Infoset *&)hilight_infoset_,(const Infoset *&)hilight_infoset1_,
-						 (const Node *&)mark_node_,(const Node *&)cursor_,(const Node *&)subgame_node_
-						 ,draw_settings_)
 {
-MakeFlasher();
-UpdateCursor(cursor_entry);
-GetParent()->Show(TRUE);
+  if (flasher) delete flasher;
+}
+
+//----------------------------------------------------------------------
+//                   TreeZoomWindow: Member functions
+//----------------------------------------------------------------------
+
+TreeZoomWindow::TreeZoomWindow(wxFrame *frame, const TreeWindow *parent,
+			       const gList<NodeEntry *> &node_list_,
+			       const Infoset * &hilight_infoset_,
+			       const Infoset * &hilight_infoset1_,
+			       const Node *&mark_node_,
+			       const Node *&cursor_,
+			       const Node *&subgame_node_,
+			       const TreeDrawSettings &draw_settings_,
+			       const NodeEntry *cursor_entry)
+  : TreeRender(new wxFrame(frame, "Zoom Window", -1, -1, 250, 250), parent,
+	       node_list_, hilight_infoset_, hilight_infoset1_,
+	       mark_node_, cursor_, subgame_node_,draw_settings_)
+{
+  MakeFlasher();
+  UpdateCursor(cursor_entry);
+  GetParent()->Show(TRUE);
 #ifdef wx_x
-SetSize(250,250);
+  SetSize(250,250);
 #endif
 }
 
+//
 // This Render function takes into account the current position of the cursor.
 // Calculates ox and oy so that the cursor is located in the middle of the
 // window.
-
+//
 void TreeZoomWindow::Render(wxDC &dc)
 {
-int width,height;
-GetClientSize(&width,&height);
-int xm=(xs+xe)/2,ym=(ys+ye)/2;	// coordinates of the middle of the cursor
-int ox=width/2-xm;int oy=height/2-ym;
-dc.SetDeviceOrigin(0,0); // should not be necessary, but its a bug
-Clear();dc.SetDeviceOrigin(ox,oy);
-TreeRender::Render(dc);
-flasher->Flash();
+  int width,height;
+  GetClientSize(&width,&height);
+  int xm=(xs+xe)/2, ym=(ys+ye)/2;	// coordinates of the middle of the cursor
+  int ox=width/2-xm;
+  int oy=height/2-ym;
+  dc.SetDeviceOrigin(0,0); // should not be necessary, but its a bug
+  Clear();
+  dc.SetDeviceOrigin(ox,oy);
+  TreeRender::Render(dc);
+  flasher->Flash();
 }
 
 void TreeZoomWindow::UpdateCursor(const NodeEntry *entry)
 {
-TreeRender::UpdateCursor(entry);
-flasher->GetFlashNode(xs,ys,xe,ye);
-Render(*GetDC());
+  TreeRender::UpdateCursor(entry);
+  flasher->GetFlashNode(xs,ys,xe,ye);
+  Render(*GetDC());
 }
 
 
 
-//***********************************************************************
-//                      TREE WINDOW
-//***********************************************************************
+//----------------------------------------------------------------------
+//                      TreeWindow: Member classes
+//----------------------------------------------------------------------
 
-//=====================================================================
-//                      DRAGGERS
-//=====================================================================
+//-------------------
+// Draggers
+//-------------------
 
 // Classes to take care of drag and drop features of the TreeWindow
 // Note that all of these depend on the parent having a function GotObject
@@ -523,531 +584,536 @@ Render(*GetDC());
 #define DRAG_CONTINUE   2
 #define DRAG_STOP       3
 
-/**************************************************************************
-												 NODE DRAGGER (used by TreeWindow)
 
-This class enables the user to grab a node and drag it to a terminal node.
+//--------------------
+// NodeDragger
+//--------------------
 
-When the mouse is released, a copy or move (if Control is down) action is
-
-performed.
-
-**************************************************************************/
-class TreeWindow::NodeDragger
-{
+//
+// This class enables the user to grab a node and drag it to a terminal node.
+// When the mouse is released, a copy or move (if Control is down) action is
+// performed.
+//
+class TreeWindow::NodeDragger   {
 private:
-	Efg &ef;
-	wxBitmap *m_b,*c_b;
-	wxMemoryDC *move_dc,*copy_dc;
-	TreeWindow *parent;
-	wxCanvasDC *dc;
-	int drag_now;
-	float x,y,ox,oy;	// position and old position
-	int c,oc; // control pressed and old control pressed
-	Node *start_node,*end_node;
-	void RedrawObject(void);
+  Efg &ef;
+  wxBitmap *m_b,*c_b;
+  wxMemoryDC *move_dc,*copy_dc;
+  TreeWindow *parent;
+  wxCanvasDC *dc;
+  int drag_now;
+  float x,y,ox,oy;	// position and old position
+  int c,oc; // control pressed and old control pressed
+  Node *start_node,*end_node;
+
+  void RedrawObject(void);
+
 public:
-	NodeDragger(TreeWindow *parent,Efg &ef);
-	~NodeDragger();
-	int OnEvent(wxMouseEvent &ev,Bool &nodes_changed);
-	int ControlDown(void) const;
-	int Dragging(void) const;
-	Node *StartNode(void);
-	Node *EndNode(void);
+  NodeDragger(TreeWindow *parent,Efg &ef);
+  ~NodeDragger();
+
+  int OnEvent(wxMouseEvent &ev,Bool &nodes_changed);
+  int ControlDown(void) const;
+  int Dragging(void) const;
+
+  Node *StartNode(void);
+  Node *EndNode(void);
 };
-// Constructor
+
 
 TreeWindow::NodeDragger::NodeDragger(TreeWindow *parent_,Efg &ef_)
-  : ef(ef_), parent(parent_), dc(parent_->GetDC()), drag_now(0)
+  : ef(ef_), parent(parent_), dc(parent_->GetDC()), drag_now(0),
+    start_node(0), end_node(0)
 {
 #include "bitmaps/copy.xpm"
 #include "bitmaps/move.xpm"
-c_b=new wxBitmap(copy_xpm);
-m_b=new wxBitmap(move_xpm);
-copy_dc=new wxMemoryDC(dc);
-copy_dc->SelectObject(c_b);
-move_dc=new wxMemoryDC(dc);
-move_dc->SelectObject(m_b);
-start_node=0;
-end_node=0;
+  c_b=new wxBitmap(copy_xpm);
+  m_b=new wxBitmap(move_xpm);
+  copy_dc=new wxMemoryDC(dc);
+  copy_dc->SelectObject(c_b);
+  move_dc=new wxMemoryDC(dc);
+  move_dc->SelectObject(m_b);
 }
-// Destructor
+
 TreeWindow::NodeDragger::~NodeDragger()
 {
-copy_dc->SelectObject(0);move_dc->SelectObject(0);
-delete c_b;delete m_b;delete move_dc;delete copy_dc;
+  copy_dc->SelectObject(0);
+  move_dc->SelectObject(0);
+  delete c_b;
+  delete m_b;
+  delete move_dc;
+  delete copy_dc;
 }
-// RedrawObject
+
 void TreeWindow::NodeDragger::RedrawObject(void)
 {
-static const int /*x_off=0,*/y_off=21;
-if (ox>=0) dc->Blit(ox,oy-y_off,32,32,(oc) ? move_dc : copy_dc,0,0,wxXOR);
-dc->Blit(x,y-y_off,32,32,(c) ? move_dc : copy_dc,0,0,wxXOR);
+  static const int /*x_off=0,*/y_off=21;
+  if (ox>=0) dc->Blit(ox,oy-y_off,32,32,(oc) ? move_dc : copy_dc,0,0,wxXOR);
+  dc->Blit(x,y-y_off,32,32,(c) ? move_dc : copy_dc,0,0,wxXOR);
 }
-// Event Handler
-int TreeWindow::NodeDragger::OnEvent(wxMouseEvent &ev,Bool &nodes_changed)
+
+int TreeWindow::NodeDragger::OnEvent(wxMouseEvent &ev, Bool &nodes_changed)
 {
-int ret=(drag_now) ? DRAG_CONTINUE : DRAG_NONE;
-if (ev.Dragging())
-{
-	ox=x;oy=y;oc=c;
-	ev.Position(&x,&y);c=ev.ControlDown();
-	if (!drag_now)
-	{
-		start_node=parent->GotObject(x,y,DRAG_NODE_START);
-		if (start_node)
-		{
-			int wx=(int)(x*parent->DrawSettings().Zoom());
-			int wy=(int)(y*parent->DrawSettings().Zoom());
-			parent->WarpPointer(wx,wy);
-			ox=-1;oc=0;c=0;drag_now=1;ret=DRAG_START;
-		}
-	}
-	if (drag_now)
-		{RedrawObject();if (ret!=DRAG_START) ret=DRAG_CONTINUE;}
+  int ret=(drag_now) ? DRAG_CONTINUE : DRAG_NONE;
+  if (ev.Dragging())   {
+    ox=x;oy=y;oc=c;
+    ev.Position(&x,&y);
+    c=ev.ControlDown();
+    if (!drag_now)   {
+      start_node=parent->GotObject(x,y,DRAG_NODE_START);
+      if (start_node)   {
+	int wx=(int)(x*parent->DrawSettings().Zoom());
+	int wy=(int)(y*parent->DrawSettings().Zoom());
+	parent->WarpPointer(wx,wy);
+	ox=-1;oc=0;c=0;drag_now=1;ret=DRAG_START;
+      }
+    }
+    if (drag_now)   {
+      RedrawObject();
+      if (ret!=DRAG_START) ret=DRAG_CONTINUE;
+    }
+  }
+  if (ev.LeftUp() && drag_now)   {
+    ox=-1;drag_now=0;
+    RedrawObject();
+    end_node=parent->GotObject(x,y,DRAG_NODE_END);
+    ev.Position(&x,&y);c=ev.ControlDown();
+    ret=DRAG_STOP;
+    if (start_node && end_node && start_node!=end_node)   {
+      if (c)
+	ef.MoveTree(start_node,end_node);    // move
+      else
+	ef.CopyTree(start_node,end_node);    // copy
+      nodes_changed=TRUE;
+      parent->OnPaint();
+    }
+  }
+  return ret;
 }
-if (ev.LeftUp() && drag_now)
-{
-	ox=-1;drag_now=0;
-	RedrawObject();
-	end_node=parent->GotObject(x,y,DRAG_NODE_END);
-	ev.Position(&x,&y);c=ev.ControlDown();
-	ret=DRAG_STOP;
-	if (start_node && end_node && start_node!=end_node)
-	{
-		if (c) ef.MoveTree(start_node,end_node);	// move
-		else	 ef.CopyTree(start_node,end_node);  // copy
-		nodes_changed=TRUE;
-		parent->OnPaint();
-	}
-}
-return ret;
-}
-// Data Access
+
 int TreeWindow::NodeDragger::ControlDown(void) const
-{return c;}
+{ return c; }
+
 int TreeWindow::NodeDragger::Dragging(void) const
-{return drag_now;}
+{ return drag_now; }
 
 Node *TreeWindow::NodeDragger::StartNode(void)
-{return start_node;}
+{ return start_node; }
+
 Node *TreeWindow::NodeDragger::EndNode(void)
-{return end_node;}
+{ return end_node; }
 
-/**************************************************************************
-												ISET DRAGGER (used by TreeWindow)
 
-This class enables the user to merge infosets by dragging a line from the
 
-first infoset's maker to the second one's.
+//--------------------
+// IsetDragger
+//--------------------
 
-**************************************************************************/
-class TreeWindow::IsetDragger
-{
+//
+// This class enables the user to merge infosets by dragging a line from the
+// first infoset's maker to the second one's.
+//
+
+class TreeWindow::IsetDragger   {
 private:
-	Efg &ef;
-	TreeWindow *parent;
-	wxCanvasDC *dc;
-	int drag_now;
-	float x,y,ox,oy,sx,sy;	// current, previous, start positions
-	Node *start_node,*end_node;
-	void RedrawObject(void);
+  Efg &ef;
+  TreeWindow *parent;
+  wxCanvasDC *dc;
+  int drag_now;
+  float x,y,ox,oy,sx,sy;	// current, previous, start positions
+  Node *start_node,*end_node;
+  
+  void RedrawObject(void);
+
 public:
-	IsetDragger(TreeWindow *parent,Efg &ef);
-	~IsetDragger();
-	int Dragging(void) const;
-	int OnEvent(wxMouseEvent &ev,Bool &infosets_changed);
-	Node *StartNode(void);
-	Node *EndNode(void);
+  IsetDragger(TreeWindow *parent,Efg &ef);
+  ~IsetDragger();
+
+  int Dragging(void) const;
+  int OnEvent(wxMouseEvent &ev,Bool &infosets_changed);
+
+  Node *StartNode(void);
+  Node *EndNode(void);
 };
 
-// Constructor
-TreeWindow::IsetDragger::IsetDragger(TreeWindow *parent_,Efg &ef_)
-  : ef(ef_), parent(parent_), dc(parent_->GetDC()), drag_now(0)
+TreeWindow::IsetDragger::IsetDragger(TreeWindow *parent_, Efg &ef_)
+  : ef(ef_), parent(parent_), dc(parent_->GetDC()), drag_now(0),
+    start_node(0), end_node(0)
 { }
-// Destructor
+
 TreeWindow::IsetDragger::~IsetDragger()
-{
-}
-// RedrawObject
+{ }
+
 void TreeWindow::IsetDragger::RedrawObject(void)
 {
-dc->SetLogicalFunction(wxXOR);
-if (ox>0) dc->DrawLine(sx,sy,ox,oy);
-dc->DrawLine(sx,sy,x,y);
-dc->SetLogicalFunction(wxCOPY);
+  dc->SetLogicalFunction(wxXOR);
+  if (ox>0) dc->DrawLine(sx,sy,ox,oy);
+  dc->DrawLine(sx,sy,x,y);
+  dc->SetLogicalFunction(wxCOPY);
 }
+
 // Event Handler
-int TreeWindow::IsetDragger::OnEvent(wxMouseEvent &ev,Bool &infosets_changed)
+int TreeWindow::IsetDragger::OnEvent(wxMouseEvent &ev, Bool &infosets_changed)
 {
-int ret=(drag_now) ? DRAG_CONTINUE : DRAG_NONE;;
-if (ev.Dragging())
-{
-	ox=x;oy=y;
-	ev.Position(&x,&y);
-	if (!drag_now)
-	{
-		start_node=parent->GotObject(x,y,DRAG_ISET_START);
-		if (start_node)
-		{
-			int wx=(int)(x*parent->DrawSettings().Zoom());
-			int wy=(int)(y*parent->DrawSettings().Zoom());
-			parent->WarpPointer(wx,wy);
-			sx=x;sy=y;ox=-1;drag_now=1;ret=DRAG_START;
-		}
+  int ret=(drag_now) ? DRAG_CONTINUE : DRAG_NONE;;
+  if (ev.Dragging())   {
+    ox=x;oy=y;
+    ev.Position(&x,&y);
+    if (!drag_now)   {
+      start_node=parent->GotObject(x,y,DRAG_ISET_START);
+      if (start_node)   {
+	int wx=(int)(x*parent->DrawSettings().Zoom());
+	int wy=(int)(y*parent->DrawSettings().Zoom());
+	parent->WarpPointer(wx,wy);
+	sx=x;sy=y;ox=-1;drag_now=1;ret=DRAG_START;
+      }
+    }
+    if (drag_now)   {
+      RedrawObject();
+      if (ret!=DRAG_START) ret=DRAG_CONTINUE;
+    }
+  }
+  if (ev.LeftUp() && drag_now)   {
+    ox=-1; drag_now=0;
+    RedrawObject();
+    end_node=parent->GotObject(x,y,DRAG_ISET_END);
+    ev.Position(&x,&y);
+    ret=DRAG_STOP;
+    if (start_node && end_node && start_node!=end_node)   {
+      Infoset *to=start_node->GetInfoset();
+      Infoset *from=end_node->GetInfoset();
+      if (to && from)   {
+	if (to->GetPlayer()==from->GetPlayer())   {
+	  gText iset_name=from->GetName();
+	  Infoset *miset=ef.MergeInfoset(to,from);
+	  miset->SetName(iset_name+":1");
+	  infosets_changed=TRUE;
+	  parent->OnPaint();
 	}
-	if (drag_now)
-		{RedrawObject();if (ret!=DRAG_START) ret=DRAG_CONTINUE;}
-}
-if (ev.LeftUp() && drag_now)
-{
-	ox=-1;drag_now=0;
-	RedrawObject();
-	end_node=parent->GotObject(x,y,DRAG_ISET_END);
-	ev.Position(&x,&y);
-	ret=DRAG_STOP;
-	if (start_node && end_node && start_node!=end_node)
-	{
-		Infoset *to=start_node->GetInfoset();
-		Infoset *from=end_node->GetInfoset();
-		if (to && from)
-		{
-			if (to->GetPlayer()==from->GetPlayer())
-			{
-				gText iset_name=from->GetName();
-				Infoset *miset=ef.MergeInfoset(to,from);
-				miset->SetName(iset_name+":1");
-				infosets_changed=TRUE;
-				parent->OnPaint();
-			}
-		}
-	}
-}
-return ret;
+      }
+    }
+  }
+  return ret;
 }
 
 int TreeWindow::IsetDragger::Dragging(void) const
-{return drag_now;}
+{ return drag_now; }
 
 Node *TreeWindow::IsetDragger::StartNode(void)
-{return start_node;}
+{ return start_node; }
 Node *TreeWindow::IsetDragger::EndNode(void)
-{return end_node;}
+{ return end_node; }
 
-/**************************************************************************
-												BRANCH DRAGGER (used by TreeWindow)
 
-This class allows the user to add branches to a node/infoset by dragging a
+//--------------------
+// BranchDragger
+//--------------------
 
-line from the base of the branches to the position the new branch is to
+//
+// This class allows the user to add branches to a node/infoset by dragging a
+// line from the base of the branches to the position the new branch is to
+// occupy.  If the node was terminal, a player dialog is opened to 
+// choose a player.
+//
 
-occupy.  If the node was terminal, a player dialog is opened to choose a player.
-
-**************************************************************************/
-class TreeWindow::BranchDragger
-{
+class TreeWindow::BranchDragger   {
 private:
-	Efg &ef;
-	TreeWindow *parent;
-	wxCanvasDC *dc;
-	int drag_now;
-	int br;
-	float x,y,ox,oy,sx,sy;	// current, previous, start positions
-	Node *start_node;
-	void RedrawObject(void);
+  Efg &ef;
+  TreeWindow *parent;
+  wxCanvasDC *dc;
+  int drag_now;
+  int br;
+  float x,y,ox,oy,sx,sy;	// current, previous, start positions
+  Node *start_node;
+	
+  void RedrawObject(void);
+
 public:
-	BranchDragger(TreeWindow *parent,Efg &ef);
-	~BranchDragger();
-	int Dragging(void) const;
-	int OnEvent(wxMouseEvent &ev,Bool &infosets_changed);
-	Node *StartNode(void);
-	int		BranchNum(void);
+  BranchDragger(TreeWindow *parent,Efg &ef);
+  ~BranchDragger();
+	
+  int Dragging(void) const;
+  int OnEvent(wxMouseEvent &ev,Bool &infosets_changed);
+  
+  Node *StartNode(void);
+  int BranchNum(void);
 };
 
-// Constructor
-TreeWindow::BranchDragger::BranchDragger(TreeWindow *parent_,Efg &ef_)
-  : ef(ef_), parent(parent_), dc(parent_->GetDC()),drag_now(0),br(0)
+
+TreeWindow::BranchDragger::BranchDragger(TreeWindow *parent_, Efg &ef_)
+  : ef(ef_), parent(parent_), dc(parent_->GetDC()), drag_now(0),
+    br(0), start_node(0)
 { }
-// Destructor
+
 TreeWindow::BranchDragger::~BranchDragger()
-{
-}
-// RedrawObject
+{ }
+
 void TreeWindow::BranchDragger::RedrawObject(void)
 {
-dc->SetLogicalFunction(wxXOR);
-if (ox>0) dc->DrawLine(sx,sy,ox,oy);
-dc->DrawLine(sx,sy,x,y);
-dc->SetLogicalFunction(wxCOPY);
+  dc->SetLogicalFunction(wxXOR);
+  if (ox>0) dc->DrawLine(sx,sy,ox,oy);
+  dc->DrawLine(sx,sy,x,y);
+  dc->SetLogicalFunction(wxCOPY);
 }
-// Event Handler
+
 #include "playersd.h"
-int TreeWindow::BranchDragger::OnEvent(wxMouseEvent &ev,Bool &infosets_changed)
+int TreeWindow::BranchDragger::OnEvent(wxMouseEvent &ev,
+				       Bool &infosets_changed)
 {
-int ret=(drag_now) ? DRAG_CONTINUE : DRAG_NONE;;
-if (ev.Dragging())
-{
-	ox=x;oy=y;
-	ev.Position(&x,&y);
-	if (!drag_now)
-	{
-		start_node=parent->GotObject(x,y,DRAG_BRANCH_START);
-		if (start_node)
-		{
-			int wx=(int)(x*parent->DrawSettings().Zoom());
-			int wy=(int)(y*parent->DrawSettings().Zoom());
-			parent->WarpPointer(wx,wy);
-			sx=x;sy=y;ox=-1;drag_now=1;ret=DRAG_START;
-		}
-	}
-	if (drag_now)
-		{RedrawObject();if (ret!=DRAG_START) ret=DRAG_CONTINUE;}
-}
-if (ev.LeftUp() && drag_now)
-{
-	ox=-1;drag_now=0;
-	RedrawObject();
-	if (parent->GotObject(x,y,DRAG_BRANCH_END))
-		br=(int)(x+0.5); // round x to an integer -- branch # is passed back this way
+  int ret=(drag_now) ? DRAG_CONTINUE : DRAG_NONE;
+  if (ev.Dragging())   {
+    ox=x;oy=y;
+    ev.Position(&x,&y);
+    if (!drag_now)   {
+
+      start_node=parent->GotObject(x,y,DRAG_BRANCH_START);
+      if (start_node)   {
+	int wx=(int)(x*parent->DrawSettings().Zoom());
+	int wy=(int)(y*parent->DrawSettings().Zoom());
+	parent->WarpPointer(wx,wy);
+	sx=x;sy=y;ox=-1;drag_now=1;ret=DRAG_START;
+      }
+    }
+    if (drag_now)  {
+      RedrawObject();
+      if (ret!=DRAG_START) ret=DRAG_CONTINUE;
+    }
+  }
+  if (ev.LeftUp() && drag_now)   {
+    ox=-1;drag_now=0;
+    RedrawObject();
+    if (parent->GotObject(x,y,DRAG_BRANCH_END))
+      br=(int)(x+0.5); // round x to an integer -- branch # is passed back this way
+    else
+      br=0;
+    ev.Position(&x,&y);
+    ret=DRAG_STOP;
+    if (start_node && br)   {
+      Infoset *iset=start_node->GetInfoset();
+      if (iset)   {
+	if (br>iset->NumActions())
+	  ef.InsertAction(iset);
 	else
-		br=0;
-	ev.Position(&x,&y);
-	ret=DRAG_STOP;
-	if (start_node && br)
-	{
-		Infoset *iset=start_node->GetInfoset();
-		if (iset)
-		{
-			if (br>iset->NumActions())
-				ef.InsertAction(iset);
-			else
-				ef.InsertAction(iset,iset->Actions()[br]);
-		}
-		else
-		{
-			PlayerNamesDialog PND(ef,parent->GetParent());
-			EFPlayer *player=PND.GetPlayer();
-			if (player) ef.AppendNode(start_node,player,1);
-		}
-		infosets_changed=TRUE;
-		parent->OnPaint();
-	}
-}
-return ret;
+	  ef.InsertAction(iset,iset->Actions()[br]);
+      }
+      else   {
+	PlayerNamesDialog PND(ef,parent->GetParent());
+	EFPlayer *player=PND.GetPlayer();
+	if (player) ef.AppendNode(start_node,player,1);
+      }
+      infosets_changed=TRUE;
+      parent->OnPaint();
+    }
+  }
+  return ret;
 }
 
 int TreeWindow::BranchDragger::Dragging(void) const
-{return drag_now;}
+{ return drag_now; }
 
 Node *TreeWindow::BranchDragger::StartNode(void)
-{return start_node;}
+{ return start_node; }
 
 int TreeWindow::BranchDragger::BranchNum(void)
-{return br;}
+{ return br; }
 
 
-/**************************************************************************
-												BRANCH DRAGGER (used by TreeWindow)
 
-This class allows the user to add branches to a node/infoset by dragging a
+//--------------------
+// OutcomeDragger
+//--------------------
 
-line from the base of the branches to the position the new branch is to
-
-occupy.  If the node was terminal, a player dialog is opened to choose a player.
-
-**************************************************************************/
-class TreeWindow::OutcomeDragger
-{
+class TreeWindow::OutcomeDragger   {
 private:
-	Efg &ef;
-	TreeWindow *parent;
-	int drag_now;
-	EFOutcome *outcome;
-	Node *start_node;
-	float x,y;
-	wxCursor *outcome_cursor;
+  Efg &ef;
+  TreeWindow *parent;
+  int drag_now;
+  EFOutcome *outcome;
+  Node *start_node;
+  float x,y;
+  wxCursor *outcome_cursor;
+
 public:
-	OutcomeDragger(TreeWindow *parent,Efg &ef);
-	~OutcomeDragger();
-	int Dragging(void) const;
-	int OnEvent(wxMouseEvent &ev,Bool &outcomes_changed);
+  OutcomeDragger(TreeWindow *parent, Efg &ef);
+  ~OutcomeDragger();
+
+  int Dragging(void) const;
+  int OnEvent(wxMouseEvent &ev,Bool &outcomes_changed);
 };
 
-// Constructor
-TreeWindow::OutcomeDragger::OutcomeDragger(TreeWindow *parent_,Efg &ef_)
-  : ef(ef_), parent(parent_), drag_now(0),outcome(0)
-{
-outcome_cursor=new wxCursor("OUTCOMECUR");
-}
-// Destructor
+TreeWindow::OutcomeDragger::OutcomeDragger(TreeWindow *parent_, Efg &ef_)
+  : ef(ef_), parent(parent_), drag_now(0), outcome(0),
+    outcome_cursor(new wxCursor("OUTCOMECUR"))
+{ }
+
 TreeWindow::OutcomeDragger::~OutcomeDragger()
 { }
-//Outcome *out=0;
-int TreeWindow::OutcomeDragger::OnEvent(wxMouseEvent &ev,Bool &outcomes_changed)
+
+int TreeWindow::OutcomeDragger::OnEvent(wxMouseEvent &ev,
+					Bool &outcomes_changed)
 {
-int ret=(drag_now) ? DRAG_CONTINUE : DRAG_NONE;
-if (ev.Dragging())
-{
-	if (!drag_now)
-	{
-		ev.Position(&x,&y);outcome=0;
-		start_node=parent->GotObject(x,y,DRAG_OUTCOME_START);
-		if (start_node)
-		{
-			outcome=start_node->GetOutcome();
-			if (outcome)
-			{
-//				int wx=(int)(x*parent->DrawSettings().Zoom());
-//				int wy=(int)(y*parent->DrawSettings().Zoom());
-//				parent->WarpPointer(wx,wy);
-				parent->SetCursor(outcome_cursor);
-				drag_now=1;ret=DRAG_START;
-			}
-		}
+  int ret=(drag_now) ? DRAG_CONTINUE : DRAG_NONE;
+  if (ev.Dragging())  {
+    if (!drag_now)  {
+      ev.Position(&x,&y);outcome=0;
+      start_node=parent->GotObject(x,y,DRAG_OUTCOME_START);
+      if (start_node)  {
+	outcome=start_node->GetOutcome();
+	if (outcome)   {
+	  parent->SetCursor(outcome_cursor);
+	  drag_now=1;ret=DRAG_START;
 	}
-}
-else
-if (drag_now)
-{
-	parent->SetCursor(wxSTANDARD_CURSOR);
-	ev.Position(&x,&y);Bool c=ev.ControlDown();
-	ret=DRAG_STOP;
-	Node *end_node=parent->GotObject(x,y,DRAG_OUTCOME_END);
-	if (end_node)
-	{
-		end_node->SetOutcome(outcome);
-		if (c) start_node->SetOutcome(0);	// move
-		outcomes_changed=1;
-		parent->OnPaint();
-	}
-	drag_now=0;
-}
-return ret;
+      }
+    }
+  }
+  else if (drag_now)   {
+    parent->SetCursor(wxSTANDARD_CURSOR);
+    ev.Position(&x,&y);
+    Bool c=ev.ControlDown();
+    ret=DRAG_STOP;
+    Node *end_node = parent->GotObject(x,y,DRAG_OUTCOME_END);
+    if (end_node)   {
+      end_node->SetOutcome(outcome);
+      if (c) start_node->SetOutcome(0);	// move
+      outcomes_changed=1;
+      parent->OnPaint();
+    }
+    drag_now=0;
+  }
+  return ret;
 }
 
 int TreeWindow::OutcomeDragger::Dragging(void) const
-{return drag_now;}
+{ return drag_now; }
 
 
-//=====================================================================
-//                      TREEWINDOW MEMBER FUNCTIONS
-//=====================================================================
+//----------------------------------------------------------------------
+//                      TreeWindow: Member functions
+//----------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-//                TREEWINDOW: CONSTRUCTOR AND DESTRUCTOR
-//---------------------------------------------------------------------
-TreeWindow::TreeWindow(Efg &ef_,EFSupport * &disp,EfgShow *frame_) 
-  : TreeRender(frame_,this,node_list,(const Infoset *&)hilight_infoset,(const Infoset *&)hilight_infoset1,
-	       (const Node *&)mark_node,(const Node *&)cursor,(const Node *&)subgame_node,draw_settings),
-    ef(ef_),disp_sup(disp),frame(frame_),pframe(frame_)
+//----------------------------------------------------------------------
+//                  TreeWindow: Constructor and destructor
+//----------------------------------------------------------------------
+
+TreeWindow::TreeWindow(Efg &ef_, EFSupport * &disp, EfgShow *frame_) 
+  : TreeRender(frame_, this, node_list, hilight_infoset, hilight_infoset1,
+	       mark_node, cursor, subgame_node, draw_settings),
+	       ef(ef_), disp_sup(disp), frame(frame_), pframe(frame_)
 {
 // Set the cursor to the root node
-cursor=ef.RootNode();
+  cursor=ef.RootNode();
 // Make sure that Chance player has a name
-ef.GetChance()->SetName("Chance");
+  ef.GetChance()->SetName("Chance");
 // Add the first subgame -- root subgame
-subgame_list.Append(SubgameEntry(ef.RootNode()));
+  subgame_list.Append(SubgameEntry(ef.RootNode()));
 // Create the flasher to flash the cursor or just a steady cursor
-MakeFlasher();
+  MakeFlasher();
 // Create provision for drag'n dropping nodes
-node_drag=new NodeDragger(this,ef);
+  node_drag=new NodeDragger(this,ef);
 // Create provision for merging isets by drag'n dropping
-iset_drag=new IsetDragger(this,ef);
+  iset_drag=new IsetDragger(this,ef);
 // Create provision for adding/creating braches by drag'n dropping
-branch_drag=new BranchDragger(this,ef);
+  branch_drag=new BranchDragger(this,ef);
 // Create provision for copying/moving outcomes by drag'n dropping
-outcome_drag=new OutcomeDragger(this,ef);
+  outcome_drag=new OutcomeDragger(this,ef);
 // No node has been marked yet--mark_node is invalid
-mark_node=0;old_mark_node=0;
+  mark_node=0;old_mark_node=0;
 // No isets are being hilighted
-hilight_infoset=0;hilight_infoset1=0;
+  hilight_infoset=0;hilight_infoset1=0;
 // No zoom window or outcome dialog
-zoom_window=0;
-outcome_font=wxTheFontList->FindOrCreateFont(9,wxSWISS,wxNORMAL,wxNORMAL);
-white_brush=wxTheBrushList->FindOrCreateBrush("WHITE",wxSOLID);
+  zoom_window=0;
+  outcome_font=wxTheFontList->FindOrCreateFont(9,wxSWISS,wxNORMAL,wxNORMAL);
+  white_brush=wxTheBrushList->FindOrCreateBrush("WHITE",wxSOLID);
 
 #ifdef wx_msw
-scissor_cursor=new wxCursor("SCISSORCUR");
+  scissor_cursor=new wxCursor("SCISSORCUR");
 #else
 #include "bitmaps/scissor.xbm"
-scissor_cursor=new wxCursor(scissor_bits,scissor_width,scissor_height,-1,-1,scissor_bits);
+  scissor_cursor=new wxCursor(scissor_bits, scissor_width, scissor_height,
+			      -1, -1, scissor_bits);
 #endif
 
-GetDC()->SetBackgroundMode(wxTRANSPARENT);
-AllowDoubleClick(TRUE);
+  GetDC()->SetBackgroundMode(wxTRANSPARENT);
+  AllowDoubleClick(TRUE);
 // Make sure the node_list gets recalculated the first time
-nodes_changed=TRUE;
-infosets_changed=TRUE;
-outcomes_changed=FALSE;
-must_recalc=FALSE;
-log=FALSE;
+  nodes_changed=TRUE;
+  infosets_changed=TRUE;
+  outcomes_changed=FALSE;
+  must_recalc=FALSE;
+  log=FALSE;
 // Create scrollbars
-SetScrollbars(PIXELS_PER_SCROLL,PIXELS_PER_SCROLL,60,60,4,4);
-draw_settings.set_x_steps(60);
-draw_settings.set_y_steps(60);
-//Render(*GetDC());   // can not do this here since virtual funcs are not yet done
-//ProcessCursor();
+  SetScrollbars(PIXELS_PER_SCROLL,PIXELS_PER_SCROLL,60,60,4,4);
+  draw_settings.set_x_steps(60);
+  draw_settings.set_y_steps(60);
+
 // Create a popup menu
-MakeMenus();
+  MakeMenus();
 }
 
 TreeWindow::~TreeWindow(void)
 {
-delete node_drag;delete iset_drag;delete branch_drag;delete outcome_drag;
-Show(FALSE);
+  delete node_drag;
+  delete iset_drag;
+  delete branch_drag;
+  delete outcome_drag;
+  Show(FALSE);
 }
 
 void TreeWindow::MakeMenus(void)
 {
-build_menu=new wxMenu(NULL,(wxFunction)OnPopup);
-	wxMenu *node_menu=new wxMenu;
-		node_menu->Append(NODE_ADD, "&Add","Add a node");
-		node_menu->Append(NODE_DELETE, "&Delete","Remove cursor node");
-		node_menu->Append(NODE_INSERT, "&Insert","Insert node at cursor");
-		node_menu->Append(NODE_LABEL, "&Label","Label cursor node");
-		node_menu->AppendSeparator();
-		node_menu->Append(NODE_SET_MARK, "Set &Mark","Mark cursor node");
-		node_menu->Append(NODE_GOTO_MARK, "Go&to Mark","Goto marked node");
-	wxMenu *action_menu=new wxMenu;
-		action_menu->Append(ACTION_DELETE, "&Delete","Delete an action from cursor iset");
-		action_menu->Append(ACTION_INSERT, "&Insert","Delete an action to cursor iset");
-		action_menu->Append(ACTION_LABEL, "&Label");
-		action_menu->Append(ACTION_PROBS, "&Probs","Set the chance player probs");
-	wxMenu *infoset_menu=new wxMenu;
-		infoset_menu->Append(INFOSET_MERGE, "&Merge","Merge cursor iset w/ marked");
-		infoset_menu->Append(INFOSET_BREAK, "&Break","Make cursor a new iset");
-		infoset_menu->Append(INFOSET_SPLIT, "&Split","Split iset at cursor");
-		infoset_menu->Append(INFOSET_JOIN, "&Join","Join cursor to marked iset");
-		infoset_menu->Append(INFOSET_LABEL, "&Label","Label cursor iset & actions");
-		infoset_menu->Append(INFOSET_SWITCH_PLAYER, "&Player","Change player of cursor iset");
-		infoset_menu->Append(INFOSET_REVEAL, "&Reveal","Reveal infoset to players");
-	wxMenu *tree_menu=new wxMenu;
-		tree_menu->Append(TREE_COPY, "&Copy","Copy tree from marked node");
-		tree_menu->Append(TREE_MOVE, "&Move","Move tree from marked node");
-		tree_menu->Append(TREE_DELETE, "&Delete","Delete recursively from cursor");
-		tree_menu->Append(TREE_LABEL, "&Label","Set the game label");
-		tree_menu->Append(TREE_PLAYERS, "&Players","Edit/View player names");
-		tree_menu->Append(TREE_INFOSETS, "&Infosets","Edit/View infosets");
-	build_menu->Append(BUILD_NODE, "&Node",node_menu,"Edit the node");
-	build_menu->Append(BUILD_ACTIONS, "&Actions",action_menu,"Edit actions");
-	build_menu->Append(BUILD_INFOSET, "&Infoset",infoset_menu,"Edit infosets");
-	build_menu->Append(TREE_OUTCOMES, "&Outcomes","Edit/View the payoffs");
-	build_menu->Append(BUILD_TREE, "&Tree",tree_menu,"Edit the tree");
-build_menu->SetClientData((char *)frame); // call back to parent later
+  build_menu=new wxMenu(NULL,(wxFunction)OnPopup);
+  wxMenu *node_menu=new wxMenu;
+  node_menu->Append(NODE_ADD, "&Add","Add a node");
+  node_menu->Append(NODE_DELETE, "&Delete","Remove cursor node");
+  node_menu->Append(NODE_INSERT, "&Insert","Insert node at cursor");
+  node_menu->Append(NODE_LABEL, "&Label","Label cursor node");
+  node_menu->AppendSeparator();
+  node_menu->Append(NODE_SET_MARK, "Set &Mark","Mark cursor node");
+  node_menu->Append(NODE_GOTO_MARK, "Go&to Mark","Goto marked node");
+
+  wxMenu *action_menu=new wxMenu;
+  action_menu->Append(ACTION_DELETE, "&Delete","Delete an action from cursor iset");
+  action_menu->Append(ACTION_INSERT, "&Insert","Delete an action to cursor iset");
+  action_menu->Append(ACTION_LABEL, "&Label");
+  action_menu->Append(ACTION_PROBS, "&Probs","Set the chance player probs");
+
+  wxMenu *infoset_menu=new wxMenu;
+  infoset_menu->Append(INFOSET_MERGE, "&Merge","Merge cursor iset w/ marked");
+  infoset_menu->Append(INFOSET_BREAK, "&Break","Make cursor a new iset");
+  infoset_menu->Append(INFOSET_SPLIT, "&Split","Split iset at cursor");
+  infoset_menu->Append(INFOSET_JOIN, "&Join","Join cursor to marked iset");
+  infoset_menu->Append(INFOSET_LABEL, "&Label","Label cursor iset & actions");
+  infoset_menu->Append(INFOSET_SWITCH_PLAYER, "&Player","Change player of cursor iset");
+  infoset_menu->Append(INFOSET_REVEAL, "&Reveal","Reveal infoset to players");
+
+  wxMenu *tree_menu=new wxMenu;
+  tree_menu->Append(TREE_COPY, "&Copy","Copy tree from marked node");
+  tree_menu->Append(TREE_MOVE, "&Move","Move tree from marked node");
+  tree_menu->Append(TREE_DELETE, "&Delete","Delete recursively from cursor");
+  tree_menu->Append(TREE_LABEL, "&Label","Set the game label");
+  tree_menu->Append(TREE_PLAYERS, "&Players","Edit/View player names");
+  tree_menu->Append(TREE_INFOSETS, "&Infosets","Edit/View infosets");
+
+  build_menu->Append(BUILD_NODE, "&Node",node_menu,"Edit the node");
+  build_menu->Append(BUILD_ACTIONS, "&Actions",action_menu,"Edit actions");
+  build_menu->Append(BUILD_INFOSET, "&Infoset",infoset_menu,"Edit infosets");
+  build_menu->Append(TREE_OUTCOMES, "&Outcomes","Edit/View the payoffs");
+  build_menu->Append(BUILD_TREE, "&Tree",tree_menu,"Edit the tree");
+  build_menu->SetClientData((char *)frame); // call back to parent later
 }
 
 
-// ******************************title****************
-gText TreeWindow::Title(void) const {return ef.GetTitle();}
-Bool TreeWindow::JustRender(void) const {return FALSE;}
+gText TreeWindow::Title(void) const
+{ return ef.GetTitle(); }
 
-gText	TreeWindow::AsString(TypedSolnValues what,const Node *n,int br) const
-{return frame->AsString(what,n,br);}
+Bool TreeWindow::JustRender(void) const 
+{ return FALSE; }
+
+gText TreeWindow::AsString(TypedSolnValues what, const Node *n, int br) const
+{ return frame->AsString(what,n,br); }
 
 double TreeWindow::ProbAsDouble(const Node *n,int action) const
-{
-return (double)frame->BranchProb(n,action);
-}
+{ return (double)frame->BranchProb(n,action); }
 
 gText TreeWindow::OutcomeAsString(const Node *n,bool &hilight) const
 {

@@ -1,10 +1,11 @@
-//****************************************************************************
-// Classes that are often used for the algorithm params dialogs.
-//****************************************************************************
+//
+// FILE: algdlgs.cc -- Classes that are often used for the algorithm
+//                     parameter dialogs
+//
 // $Id$
 //
 
-#include "gambitio.h"
+#include "gstream.h"
 #include "wxio.h"
 #include "algdlgs.h"
 

@@ -1,14 +1,19 @@
-// File: wxio.h--defines an input/output class based on gio for wxwindows
+//
+// FILE: wxio.h -- Defines an input/output class based on gstream for wxwindows
+//
 // This creates a text window that will accept output and provide input
 // using the << and >> redirection operators.  One instance of this class
 // will always be created and called gdebug, (see also gerror,gin,gout).
+//
 // $Id$
+//
+
 #ifndef 	WXIO_H
 #define WXIO_H
 
 #include <stdio.h>
 #include <assert.h>
-#include "gambitio.h"
+#include "gstream.h"
 
 class gWxIOFrame;
 class gWxOutput: public gOutput
