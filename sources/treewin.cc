@@ -55,9 +55,6 @@ wxCursor *scissor_cursor;
 //                    MISCELLANEOUS FUNCTIONS
 //-----------------------------------------------------------------------
 
-extern Bool LongStringConstraint(int type, char *value, char *label,
-                 char *msg_buffer);
-
 //
 // Draw Line.  A quick and dirty way of easily drawing lines with a set color.
 // If the color is == -1, the current color is used.
@@ -4005,52 +4002,12 @@ void TreeWindow::action_probs(void)
 //                       TREE-LABEL MENU HANDLER
 //***********************************************************************
 
-Bool LongStringConstraint(int type, char *value, char *label,
-			  char *msg_buffer)
-{
-  if (value && (strlen(value) >= 255) && (type == wxFORM_STRING)) {
-    sprintf(msg_buffer, "Value for %s should be %d characters or less\n",
-	    label, 255);
-    return FALSE;
-  }
-  else
-    return TRUE;
-}
-
-
 void TreeWindow::tree_label(void)
 {
-  char *label = 0;
-  MyDialogBox *tree_label_dialog = 0;
-  try {
-    label = new char[256];
-    strcpy(label, ef.GetTitle());
-
-    tree_label_dialog = new MyDialogBox(pframe, "Label Tree",
-                                                     EFG_TREE_HELP);
-    wxFormItem *label_item = 
-        wxMakeFormString("Label", &label, wxFORM_DEFAULT,
-                         new wxList(wxMakeConstraintFunction(LongStringConstraint), 0), 
-                         0, 0, 350);
-    tree_label_dialog->Add(label_item);
-    tree_label_dialog->AssociatePanel();
-    ((wxText *)label_item->PanelItem)->SetFocus();
-    tree_label_dialog->Go1();
-    
-    if (tree_label_dialog->Completed() == wxOK)
-      ef.SetTitle(label);
-    
-    delete tree_label_dialog;
-    delete [] label;
-  }
-  catch (gException &E) {
-    if (label)
-      delete [] label;
-    if (tree_label_dialog)
-      delete tree_label_dialog;
-    
-    guiExceptionDialog(E.Description(), pframe);
-  }
+  char *label = wxGetTextFromUser("Label of game", "Label Game",
+				  ef.GetTitle());
+  if (label)
+    ef.SetTitle(label);
 }
 
 //***********************************************************************

@@ -10,9 +10,6 @@
 #include "nfgconst.h"
 #include "nfplayer.h" 
 
-extern Bool LongStringConstraint(int type, char *value, char *label,
-                 char *msg_buffer);
-
 //======================================================================
 //                 NfgShow: Constructor and destructor
 //======================================================================
@@ -1521,7 +1518,17 @@ void NfgShow::Print(void)
 
 
 //**********************************LABELING CODE**************************
-// SetLabels: what == 0: game, what == 1: strats, what == 2: players
+
+void NfgShow::EditLabel(void)
+{
+  char *label = wxGetTextFromUser("Label of game", "Label Game",
+				  nf.GetTitle());
+  if (label) {
+    nf.SetTitle(label);
+    SetFileName(Filename());
+  }
+}
+
 
 #define LABEL_LENGTH    20
 #define ENTRIES_PER_ROW 3
@@ -1529,107 +1536,78 @@ void NfgShow::Print(void)
 // Call Spread->SetLabels afterwards to update the display
 void NfgShow::SetLabels(int what)
 {
-    int num_players = nf.NumPlayers();
+  int num_players = nf.NumPlayers();
+  
+  if (what == 1) { // label strategies
+    int max_strats = 0, i;
 
-    if (what == 0)  // label game
-    {
-        char *label = new char[256];
-
-        strcpy(label, nf.GetTitle());
-        MyDialogBox *nfg_label_dialog = 
-            new MyDialogBox(spread, "Label Game", NFG_EDIT_HELP);
-        nfg_label_dialog->Add(wxMakeFormString("Label", &label, wxFORM_DEFAULT,
-            new wxList(wxMakeConstraintFunction(LongStringConstraint), 0), 0, 0, 350));
-        nfg_label_dialog->Go();
-
-        if (nfg_label_dialog->Completed() == wxOK)
-        {
-            nf.SetTitle(label);
-            SetFileName(Filename()); // updates the title
-        }
-
-        delete nfg_label_dialog;
-        delete [] label;
+    for (i = 1; i <= num_players; i++) {
+      if (max_strats < disp_sup->NumStrats(i)) 
+	max_strats = disp_sup->NumStrats(i);
     }
 
-    if (what == 1) // label strategies
-    {
-        int max_strats = 0, i;
+    SpreadSheet3D *labels = 
+      new SpreadSheet3D(num_players, max_strats, 1, "Label Strategies", spread);
+    labels->DrawSettings()->SetLabels(S_LABEL_ROW);
+	
+    for (i = 1; i <= num_players; i++) { 
+      int j;
 
-        for (i = 1; i <= num_players; i++)
-        {
-            if (max_strats < disp_sup->NumStrats(i)) 
-                max_strats = disp_sup->NumStrats(i);
-        }
+      for (j = 1; j <= disp_sup->NumStrats(i); j++) {
+	labels->SetCell(i, j, disp_sup->Strategies(i)[j]->Name());
+	labels->SetType(i, j, 1, gSpreadStr);
+      } // note that we continue using j
 
-        SpreadSheet3D *labels = 
-            new SpreadSheet3D(num_players, max_strats, 1, "Label Strategies", spread);
-        labels->DrawSettings()->SetLabels(S_LABEL_ROW);
+      for (; j <= max_strats; j++)
+	labels->HiLighted(i, j, 1, TRUE);
 
-        for (i = 1; i <= num_players; i++)
-        {
-            int j;
-
-            for (j = 1; j <= disp_sup->NumStrats(i); j++)
-            {
-                labels->SetCell(i, j, disp_sup->Strategies(i)[j]->Name());
-                labels->SetType(i, j, 1, gSpreadStr);
-            } // note that we continue using j
-
-            for (; j <= max_strats; j++)
-                labels->HiLighted(i, j, 1, TRUE);
-
-            labels->SetLabelRow(i, nf.Players()[i]->GetName());
-        }
-
-        labels->Redraw();
-        labels->Show(TRUE);
-
-        while (labels->Completed() == wxRUNNING) 
-            wxYield(); // wait for ok/cancel
-
-        if (labels->Completed() == wxOK)
-        {
-            for (i = 1; i <= num_players; i++)
-                for (int j = 1; j <= disp_sup->NumStrats(i); j++)
-                    disp_sup->Strategies(i)[j]->SetName(labels->GetCell(i, j));
-        }
-
-        delete labels;
+      labels->SetLabelRow(i, nf.Players()[i]->GetName());
     }
 
-    if (what == 2) // label players
-    {
-        MyDialogBox *labels = new MyDialogBox(spread, "Label Players", NFG_EDIT_HELP);
-        char **player_labels = new char *[num_players+1];
-        int i;
+    labels->Redraw();
+    labels->Show(TRUE);
 
-        for (i = 1; i <= num_players; i++)
-        {
-            player_labels[i] = new char[LABEL_LENGTH];
-            strcpy(player_labels[i], nf.Players()[i]->GetName());
-            labels->Add(wxMakeFormString(ToText(i), &player_labels[i]));
+    while (labels->Completed() == wxRUNNING) 
+      wxYield(); // wait for ok/cancel
 
-            if (i % ENTRIES_PER_ROW == 0) 
-                labels->Add(wxMakeFormNewLine());
-        }
+    if (labels->Completed() == wxOK) {
+      for (i = 1; i <= num_players; i++)
+	for (int j = 1; j <= disp_sup->NumStrats(i); j++)
+	  disp_sup->Strategies(i)[j]->SetName(labels->GetCell(i, j));
+    }
+    
+    delete labels;
+  }
 
-        labels->Go();
+  if (what == 2)  { // label players
+    MyDialogBox *labels = new MyDialogBox(spread, "Label Players", NFG_EDIT_HELP);
+    char **player_labels = new char *[num_players+1];
+    int i;
 
-        if (labels->Completed() == wxOK)
-        {
-            for (i = 1; i <= num_players; i++) 
-                nf.Players()[i]->SetName(player_labels[i]);
-        }
-
-        for (i = 1; i <= num_players; i++) 
-            delete [] player_labels[i];
-
-        delete [] player_labels;
+    for (i = 1; i <= num_players; i++) {
+      player_labels[i] = new char[LABEL_LENGTH];
+      strcpy(player_labels[i], nf.Players()[i]->GetName());
+      labels->Add(wxMakeFormString(ToText(i), &player_labels[i]));
+      
+      if (i % ENTRIES_PER_ROW == 0) 
+	labels->Add(wxMakeFormNewLine());
     }
 
-    spread->SetLabels(disp_sup, what);
-    UpdateVals();
+    labels->Go();
+
+    if (labels->Completed() == wxOK) {
+      for (i = 1; i <= num_players; i++) 
+	nf.Players()[i]->SetName(player_labels[i]);
+    }
+
+    for (i = 1; i <= num_players; i++) 
+      delete [] player_labels[i];
+
+    delete [] player_labels;
+  }
+
+  spread->SetLabels(disp_sup, what);
+  UpdateVals();
 }
 
 
@@ -2147,7 +2125,7 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
   file_menu->Append(CLOSE_MENU,    "&Close",   "Exit");
   
   wxMenu *edit_menu = new wxMenu;
-  edit_menu->Append(NFG_EDIT_GAME,      "&Game",      "Edit the entire game");
+  edit_menu->Append(NFG_EDIT_GAME, "&Label", "Set the label of the game");
   edit_menu->Append(NFG_EDIT_STRATS,    "&Strats",    "Edit player strategies");
   edit_menu->Append(NFG_EDIT_PLAYERS,   "&Players",   "Edit players");
 
@@ -2492,7 +2470,7 @@ void NormalSpread::OnMenuCommand(int id)
       break;
 
     case NFG_EDIT_GAME: 
-      parent->SetLabels(0);
+      parent->EditLabel();
       break;
     case NFG_EDIT_STRATS: 
       parent->SetLabels(1);

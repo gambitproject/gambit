@@ -100,7 +100,9 @@ public:
   void Print(void);
   void SetOptions(void);
   void SetColors(void);
-  void SetLabels(int what); // what == 0: game, what == 1: strats, what == 2: players
+
+  void EditLabel(void);
+  void SetLabels(int what); // what == 1: strats, what == 2: players
 
   // Saving the game in native (.nfg) format
   Bool Save(void);
