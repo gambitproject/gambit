@@ -1,7 +1,7 @@
 //
 // FILE: vertenum.imp -- Implementation of Vertex Enumerator
 //
-//  $Id$ 
+//  @(#)vertenum.imp	2.8 7/7/97 
 //
 
 #include "vertenum.h"
@@ -408,9 +408,9 @@ NewVertEnum<T>::NewVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
   }
 
     // Spit out Vertsmod for debugging purposes
-  gout << "\n Vertsmod is:\n";
-  gout << Vertsmod;
-  gout << " So there.\n\n";
+  //gout << "\n Vertsmod is:\n";
+  //gout << Vertsmod;
+  //gout << " So there.\n\n";
 
 
     // Sets List to the vertices in the original basis
