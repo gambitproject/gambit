@@ -1,0 +1,12 @@
+#define IDI_ICON1	1
+gambit_icn ICON gambit.ico
+efg_icn ICON "efg.ico"
+
+SCISSORCUR	CURSOR	 bitmaps\scissor.cur
+OUTCOMECUR	CURSOR	 bitmaps\outcome.cur
+
+rcinclude wx.rc
+
+
+IDI_ICON1 ICON "nfg.ico"
+
