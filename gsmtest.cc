@@ -48,21 +48,12 @@ int main( void )
   FuncDescObj* func;
 
 
-/*
-  gFileOutput _sout( "sout" );
-  gOutput& sout = _sout;
-  gFileOutput _serr( "serr" );
-  gOutput& serr = _serr;
-*/
-
   machine = new GSM( 32, gin, gout, gerr );
-//  gsm = new GSM( 10, gin, gout, gerr );
 
   gList< Instruction* > program;
 
 
   gout << "Machine setup done\n";
-  // sout << "Machine setup done\n";
 
 
   gout << "*********************** press return to continue ************";
@@ -3574,8 +3565,6 @@ int main( void )
 
 
   gout << "\nDeleting machine\n";
-//  sout << "\nDeleting machine\n";
-//  delete gsm;
   delete machine;
 
   return 0;

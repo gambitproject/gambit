@@ -137,12 +137,9 @@ public:
   bool AddFunction( FuncDescObj* func );
 
   bool InitCallFunction ( const gString& funcname );
-  bool Bind             ( void );
-  bool BindVal          ( void );
-  bool BindRef          ( void );
-  bool Bind             ( const gString& param_name );
-  bool BindVal          ( const gString& param_name );
-  bool BindRef          ( const gString& param_name );
+  bool Bind             ( const gString& param_name = "" );
+  bool BindVal          ( const gString& param_name = "" );
+  bool BindRef          ( const gString& param_name = "" );
   bool CallFunction     ( void );
 
   GSM_ReturnCode Execute( gList<Instruction*>& program, 

@@ -476,45 +476,53 @@ bool GSM::Assign( void )
     {
       if( p1->Type() == p2->Type() )
       {
-	switch( p1->Type() )
+	if( p1->Original() == p2->Original() )
 	{
-	case porLIST:
-	  if( ( ( (ListPortion*) p1 )->DataType() == 
-	       ( (ListPortion*) p2 )->DataType() ) ||
-	     ( (ListPortion*) p1 )->DataType() == porUNKNOWN )
+	  delete p2;
+	  _Push( p1 );
+	}
+	else
+	{
+	  switch( p1->Type() )
 	  {
+	  case porLIST:
+	    if( ( ( (ListPortion*) p1 )->DataType() == 
+		 ( (ListPortion*) p2 )->DataType() ) ||
+	       ( (ListPortion*) p1 )->DataType() == porUNKNOWN )
+	    {
+	      p1->AssignFrom( p2 );
+	      delete p2;
+	      _Push( p1 );
+	    }
+	    else
+	    {
+	      _ErrorMessage( _StdErr, 56 );
+	      _Push( p2 );
+	      result = false;
+	      delete p1;
+	    }
+	    break;
+	    
+	  case porOUTPUT:
+	  case porINPUT:	
+	    _ErrorMessage( _StdErr, 52 );
+	    _Push( p2 );
+	    result = false;
+	    delete p1;
+	    break;
+	    
+	  case porNFG_FLOAT:
+	  case porNFG_RATIONAL:
+	  case porEFG_FLOAT:
+	  case porEFG_RATIONAL:
+	    assert( 0 );
+	    break;
+	    
+	  default:
 	    p1->AssignFrom( p2 );
 	    delete p2;
 	    _Push( p1 );
 	  }
-	  else
-	  {
-	    _ErrorMessage( _StdErr, 56 );
-	    _Push( p2 );
-	    result = false;
-	    delete p1;
-	  }
-	  break;
-	  
-	case porOUTPUT:
-	case porINPUT:	
-	  _ErrorMessage( _StdErr, 52 );
-	  _Push( p2 );
-	  result = false;
-	  delete p1;
-	  break;
-	  
-	case porNFG_FLOAT:
-	case porNFG_RATIONAL:
-	case porEFG_FLOAT:
-	case porEFG_RATIONAL:
-	  assert( 0 );
-	  break;
-	  
-	default:
-	  p1->AssignFrom( p2 );
-	  delete p2;
-	  _Push( p1 );
 	}
       }
       else
@@ -1035,45 +1043,52 @@ bool GSM::InitCallFunction( const gString& funcname )
 }
 
 
-bool GSM::Bind( void )
+bool GSM::Bind( const gString& param_name )
 {
-  return BindRef();
+  return BindRef( param_name );
 }
 
 
-bool GSM::BindVal( void )
+bool GSM::BindVal( const gString& param_name )
 {
   CallFuncObj* func;
   Portion*     param;
   Portion*     org_param;
-  bool         result;
+  bool         result = true;
 
 #ifndef NDEBUG
   _BindCheck();
 #endif // NDEBUG
 
-  func = _CallFuncStack->Pop();
-  param = _Pop();
-  
-  org_param = _ResolveRef( param );
-  param = org_param->ValCopy();
-  delete org_param;
 
-  if( param->Type() == porREFERENCE )
+  if( param_name != "" )
+    result = _BindCheck( param_name );
+
+  if( result )
   {
-    delete param;
-    param = new ErrorPortion;
+    func = _CallFuncStack->Pop();
+    param = _Pop();
+    
+    org_param = _ResolveRef( param );
+    param = org_param->ValCopy();
+    delete org_param;
+    
+    if( param->Type() == porREFERENCE )
+    {
+      delete param;
+      param = new ErrorPortion;
+    }
+    
+    result = func->SetCurrParam( param ); 
+    
+    _CallFuncStack->Push( func );
   }
-
-  result = func->SetCurrParam( param ); 
-
-  _CallFuncStack->Push( func );
 
   return result;
 }
 
 
-bool GSM::BindRef( void )
+bool GSM::BindRef( const gString& param_name )
 {
   CallFuncObj*       func;
   Portion*           param;
@@ -1083,55 +1098,24 @@ bool GSM::BindRef( void )
   _BindCheck();
 #endif // NDEBUG
 
-  func = _CallFuncStack->Pop();
-  param = _Pop();
-  
-  param = _ResolveRef( param );
+  if( param_name != "" )
+    result = _BindCheck( param_name );
 
-  result = func->SetCurrParam( param );
-
-  _CallFuncStack->Push( func );
-
-  return result;
-}
-
-
-
-
-bool GSM::Bind( const gString& param_name )
-{
-  int result = false;
-
-  if( _BindCheck( param_name ) )
+  if( result )
   {
-    result = Bind();
+    func = _CallFuncStack->Pop();
+    param = _Pop();
+    
+    param = _ResolveRef( param );
+    
+    result = func->SetCurrParam( param );
+    
+    _CallFuncStack->Push( func );
   }
+
   return result;
 }
 
-
-bool GSM::BindVal( const gString& param_name )
-{
-  int result = false;
-
-  if( _BindCheck( param_name ) )
-  {
-    result = BindVal();
-  }
-  return result;
-}
-
-
-bool GSM::BindRef( const gString& param_name )
-{
-  int result = false;
-
-  if( _BindCheck( param_name ) )
-  {
-    result = BindRef();
-  }
-  return result;
-}
 
 
 bool GSM::CallFunction( void )
@@ -1407,6 +1391,8 @@ void GSM::Output( void )
     p->Output( _StdOut );
     if( p->Type() == porREFERENCE )
       _StdOut << " (undefined)";
+    if( p->Original() != 0 )
+      gout << " " << (void*) p->Original()->Owner();
     _StdOut << "\n";
     
     _Push( p );

@@ -356,8 +356,7 @@ class Bind : public Instruction
  private:
   gString _FuncName;
  public:
-  Bind( void );
-  Bind( const gString& func_name );
+  Bind( const gString& func_name = "" );
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
   void Output( gOutput& s ) const;
@@ -369,8 +368,7 @@ class BindRef : public Instruction
  private:
   gString _FuncName;
  public:
-  BindRef( void );
-  BindRef( const gString& func_name );
+  BindRef( const gString& func_name = "" );
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
   void Output( gOutput& s ) const;
@@ -382,8 +380,7 @@ class BindVal : public Instruction
  private:
   gString _FuncName;
  public:
-  BindVal( void );
-  BindVal( const gString& func_name );
+  BindVal( const gString& func_name = "" );
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
   void Output( gOutput& s ) const;
