@@ -1,7 +1,7 @@
 //#
 //# FILE: gsmatrix.imp -- Implementation of square matrices
 //#
-//# @(#)gsmatrix.imp	1.2 7/21/95 - Determinant fixed by AMM on 10/9/95
+//# @(#)gsmatrix.imp	1.2 7/21/95 - Determinant fixed by AMM on 10/19/96
 //#
 
 #include "gsmatrix.h"
@@ -35,13 +35,8 @@ gSquareMatrix<T> &gSquareMatrix<T>::operator=(const gSquareMatrix<T> &M)
 }
 
 //-----------------------------------------------------------------------------
-//                gSquareMatrix<T>: Transpose, Inverse, Determinant
+//                gSquareMatrix<T>: Public member functions
 //-----------------------------------------------------------------------------
-
-template <class T> gSquareMatrix<T> gSquareMatrix<T>::Transpose(void) const
-{
-  return gSquareMatrix(gMatrix<T>::Transpose());
-}
 
 template <class T> gSquareMatrix<T> gSquareMatrix<T>::Invert(void) const
 {
@@ -121,16 +116,16 @@ template <class T> T gSquareMatrix<T>::Determinant(void) const
     // if not, we swap rows to bring this about
 
     if (M.data[row][row] == (T) 0)  {
-
       int swap_row = row;
       while (M.data[swap_row][row] == (T) 0) {
 	swap_row++;
+
 	if (swap_row > maxrow)  return (T) 0;   // matrix is singular
       }
 
       M.SwitchRows(row, swap_row);
-      for (int j = mincol; j <= maxcol; j++)
-	M.data[row][j] *= (T) -1;
+	  for (int j = mincol; j <= maxcol; j++)
+	    M.data[row][j] *= (T) -1;
     }
 
     // now do row operations to clear the row'th column
