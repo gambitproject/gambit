@@ -1,8 +1,8 @@
-//#
-//# FILE: nfg.h  -- Declaration to  BaseNfg class
-//#
-//# $Date$ $Id$
-//#
+//
+// FILE: nfg.h  -- Declaration of normal form representation
+//
+// $Date$ $Id$
+//
 
 #ifndef NFG_H
 #define NFG_H
@@ -14,10 +14,15 @@ class NFPlayer;
 class Strategy;
 class StrategyProfile;
 
+class BaseEfg;
+
 class BaseNfg {
- 
+// these friend declarations are awful... but they get the job done for now
+friend class Lexicon; 
+friend void SetEfg(BaseNfg *, BaseEfg *);
 protected:
   gString title;
+  BaseEfg *efg;
   gArray<NFPlayer *> players;
   gArray<int> dimensions;
   void IndexStrategies(void);
@@ -43,11 +48,13 @@ public:
   virtual DataType Type(void) const = 0;
   virtual bool IsConstSum(void) const = 0;
 
+
   int NumPlayers(void) const;
   int NumStrats(int pl) const;
   int ProfileLength(void) const;
   const gArray<int> &Dimensionality(void) const  { return dimensions; }
   const gArray<NFPlayer *> &PlayerList(void) const;
+  BaseEfg *AssociatedEfg(void) const   { return efg; }
 
 // operator to get strategy s of player p
 

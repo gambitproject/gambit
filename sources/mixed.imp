@@ -102,6 +102,12 @@ template <class T> T Nfg<T>::MaxPayoff(int pl) const
   return maxpay;
 }
 
+//
+// Note that the link with the associated efg, if any, is broken
+// only on this end, and the Lexicon of the efg is not deleted
+// This shouldn't be a problem, so the code has not been changed 
+// to delete the Lexicon immediately
+//
 template <class T> void Nfg<T>::SetPayoff(int pl, const gArray<int> &profile,
 					  const T &value)
 {
@@ -109,6 +115,7 @@ template <class T> void Nfg<T>::SetPayoff(int pl, const gArray<int> &profile,
   for (int i = 1; i <= profile.Length(); i++)
     index += players[i]->strategies[profile[i]]->index;
   payoffs[pl][index] = value;
+  efg = 0;
 }
 
 
@@ -116,6 +123,7 @@ template <class T> void Nfg<T>::SetPayoff(int pl, const StrategyProfile *p,
 					   const T &value)
 {
   payoffs[pl][p->index] = value;
+  efg = 0;
 }
 
 template <class T> 

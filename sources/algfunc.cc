@@ -114,21 +114,15 @@ Portion *GSM_AgentForm_Rational(Portion **param)
 Portion *GSM_Behav_Float(Portion **param)
 {
   MixedSolution<double> &mp = * (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
-  Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[1])->Value();
+
   Nfg<double> &N = *mp.BelongsTo(); 
+  const Efg<double> &E = *(const Efg<double> *) N.AssociatedEfg();
 
-  BehavSolution<double>* bp;
-
-  if(AssociatedNfg(&E) != &N)  
-    return new ErrorPortion("Normal and extensive form games not associated");
-  else
-  {
-    bp = new BehavSolution<double>(E);
-    MixedToBehav(N, mp, E, *bp);
-  }
+  BehavSolution<double> *bp = new BehavSolution<double>(E);
+  MixedToBehav(N, mp, E, *bp);
 
   Portion* por = new BehavValPortion(bp);
-  por->SetGame(param[1]->Game(), param[1]->GameIsEfg());
+  por->SetGame((void *) &E, true);
   return por;
 }
 
@@ -136,21 +130,15 @@ Portion *GSM_Behav_Rational(Portion **param)
 {
   MixedSolution<gRational> &mp = 
     * (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
-  Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[1])->Value();
+
   Nfg<gRational> &N = *mp.BelongsTo(); 
+  const Efg<gRational> &E = *(const Efg<gRational> *) N.AssociatedEfg();
 
-  BehavSolution<gRational>* bp;
-
-  if(AssociatedNfg(&E) != &N)  
-    return new ErrorPortion("Normal and extensive form games not associated");
-  else
-  {
-    bp = new BehavSolution<gRational>(E);
-    MixedToBehav(N, mp, E, *bp);
-  }
+  BehavSolution<gRational> *bp = new BehavSolution<gRational>(E);
+  MixedToBehav(N, mp, E, *bp);
 
   Portion* por = new BehavValPortion(bp);
-  por->SetGame(param[1]->Game(), param[1]->GameIsEfg());
+  por->SetGame((void *) &E, true);
   return por;
 }
 
@@ -1203,14 +1191,12 @@ void Init_algfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("Behav", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Behav_Float, porBEHAV_FLOAT, 2));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Behav_Float, porBEHAV_FLOAT, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("mixed", porMIXED_FLOAT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("efg", porEFG_FLOAT));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Behav_Rational, 
-				       porBEHAV_RATIONAL, 2));
+				       porBEHAV_RATIONAL, 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("mixed", porMIXED_RATIONAL));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("efg", porEFG_RATIONAL));
   gsm->AddFunction(FuncObj);
 
 

@@ -39,6 +39,19 @@ Lexicon::~Lexicon()
 {
   for (int i = 1; i <= strategies.Length(); i++)
     while (strategies[i].Length())  delete strategies[i].Remove(1);
+  if (N)
+    N->efg = 0;
+}
+
+void SetEfg(BaseNfg *nfg, BaseEfg *efg)
+{
+  nfg->efg = efg;
+}
+
+void Lexicon::MakeLink(BaseEfg *efg, BaseNfg *nfg)
+{
+  nfg->efg = efg;
+  N = nfg;
 }
 
 void Lexicon::MakeStrategy(EFPlayer *p)

@@ -14,6 +14,8 @@
 #include "mixed.h"
 #include "lexicon.h"
 
+void SetEfg(BaseNfg *, BaseEfg *);
+
 template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
 {
   int i;
@@ -26,7 +28,7 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
   for (i = 1; i <= E.NumPlayers(); i++)
     dim[i] = L->strategies[i].Length();
 
-  L->N = new Nfg<T>(dim);
+  L->MakeLink(&E, new Nfg<T>(dim));
   L->N->SetTitle(E.GetTitle());
   
   for (i = 1; i <= E.NumPlayers(); i++)   {
@@ -76,6 +78,7 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
   }
 
   E.lexicon = L;
+  SetEfg(E.lexicon->N, &E);
   return ((Nfg<T> *) E.lexicon->N);
 }
 
@@ -194,7 +197,6 @@ void BehavToMixed(const Efg<T> &E, const BehavProfile<T> &bp,
 }
 
 
-
 template <class T> Nfg<T> *MakeAfg(Efg<T> &E)
 {
   Nfg<T> *afg = new Nfg<T>(gArray<int>(E.Dimensionality()));
@@ -202,7 +204,6 @@ template <class T> Nfg<T> *MakeAfg(Efg<T> &E)
   if (!afg)   return 0;
 
   E.afg = afg;
-
   afg->SetTitle(E.GetTitle() + " (Agent Form)");
 
   for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)   {
@@ -244,6 +245,8 @@ template <class T> Nfg<T> *MakeAfg(Efg<T> &E)
     if (pl == 0)  break;
     pl = afg->NumPlayers();
   }
+
+  SetEfg(afg, &E); 
 
   return afg;
 }

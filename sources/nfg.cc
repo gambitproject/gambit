@@ -17,7 +17,7 @@
 
 
 BaseNfg::BaseNfg( const gArray<int> &dim)
-  :players(dim.Length()), dimensions(dim)
+  : efg(0), players(dim.Length()), dimensions(dim)
 {
   for (int i = 1; i <= players.Length(); i++){
     players[i] = new NFPlayer(i, this, dim[i]);
@@ -29,7 +29,8 @@ BaseNfg::BaseNfg( const gArray<int> &dim)
 }
 
 BaseNfg::BaseNfg (const BaseNfg &b)
-  : title(b.title), players(b.players.Length()), dimensions(b.dimensions)
+  : title(b.title), efg(0), players(b.players.Length()), 
+    dimensions(b.dimensions)
 {
   for (int i = 1; i <= players.Length(); i++){
     players[i] = new NFPlayer(i, this, dimensions[i]);
@@ -41,6 +42,7 @@ BaseNfg::BaseNfg (const BaseNfg &b)
   }
   IndexStrategies();
 }
+
 BaseNfg::~BaseNfg()
 {
   for (int i = 1; i <= players.Length(); i++)
