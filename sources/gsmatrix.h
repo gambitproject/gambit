@@ -1,7 +1,7 @@
 //#
 //# FILE: gsmatrix.h -- Implementation of square matrices
 //#
-//# $Id$
+//# @(#)gsmatrix.h	1.4 3/30/96
 //#
 
 #ifndef GSMATRIX_H
@@ -19,8 +19,10 @@ template <class T> class gSquareMatrix : public gMatrix<T>   {
 
     gSquareMatrix<T> &operator=(const gSquareMatrix<T> &);
 
-    gSquareMatrix<T> Invert(void) const;
-    T Determinant(void) const;
+      // TRANSPOSE, INVERSION, DETERMINANT
+    gSquareMatrix<T>  Transpose()       const;
+    gSquareMatrix<T>  Invert(void)      const;
+    T                 Determinant(void) const;
 };
 
 template <class T> gOutput& operator<<(gOutput &to, const gSquareMatrix<T> &M);
