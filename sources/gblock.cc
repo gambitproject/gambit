@@ -18,14 +18,10 @@
 
 TEMPLATE class gBlock<bool>;
 TEMPLATE class gBlock<int>;
-TEMPLATE class gBlock<int *>;
 TEMPLATE class gBlock<long>;
-TEMPLATE class gBlock<double>;
 TEMPLATE class gBlock<float>;
-TEMPLATE class gBlock<double *>;
-TEMPLATE class gBlock<gInteger>;
+TEMPLATE class gBlock<double>;
 TEMPLATE class gBlock<gRational>;
-TEMPLATE class gBlock<gRational *>;
 TEMPLATE class gBlock<gString>;
 TEMPLATE class gBlock<gBlock<int> >;
 TEMPLATE class gBlock<gBlock<double> >;
@@ -33,15 +29,12 @@ TEMPLATE class gBlock<gBlock<double> >;
 
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<bool> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<int> &);
-TEMPLATE gOutput &operator<<(gOutput &, const gBlock<int *> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<long> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<float> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<double> &);
-TEMPLATE gOutput &operator<<(gOutput &, const gBlock<double *> &);
-TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gInteger> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gRational> &);
-TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gRational *> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gString> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gBlock<int> > &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gBlock<double> > &);
+
 
