@@ -7,17 +7,18 @@
 
 CC = g++
 COPTS = -fguiding-decls
-CFLAGS=$(COPTS) $(INCDIR) -Dwx_motif
+CFLAGS=$(COPTS) $(INCDIR)
 
 # define variable for system name.  
 
-ifeq ($(shell uname -s), SunOS)
-SYSNAME = $(shell uname -s)_$(shell uname -r)
-else
-SYSNAME = $(shell uname -s)
-endif
+GUI = gtk
+#GUI = motif
 
-GUI = motif
+ifeq ($(SYSNAME), SunOS)
+MAKE    = /software/bin/gmake
+else
+MAKE    = make
+endif
 
 # define directory where object files are put
 
@@ -33,7 +34,7 @@ vpath %.o  $(OBJDIR)
 
 %.d: %.cc
 	@echo updating dependencies: $@
-	@$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) -I../sources/fake $< \
+	@$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) $(INCDIR) $< \
 		| sed '\''s/\($*\)\.o[ :]*/\1.o $@ : /g'\'' > $@; \
 		[ -s $@ ] || rm -f $@'
 
@@ -43,10 +44,17 @@ vpath %.o  $(OBJDIR)
 #   WXLIBDIR = location of wxwin libraries
 #   WXLIB    = any wx libraries used
 
-WXDIR = /users/gambit/wxwin
+ifeq ($(GUI), gtk)
+WXDIR = /home/gambit/wxwin2
 WXLIBDIR = -L$(WXDIR)/lib
-WXINCDIR = -I$(WXDIR)/include/base -I$(WXDIR)/include/x
+WXINCDIR = -I$(WXDIR)/include -D__WXGTK__
 WXLIB = -lwx_$(GUI)_$(SYSNAME)
+else # motif
+WXDIR = /home/gambit/wxwin2
+WXLIBDIR = -L$(WXDIR)/lib
+WXINCDIR = -I$(WXDIR)/include -D__WXMOTIF__
+WXLIB = -lwx_$(GUI)_$(SYSNAME)
+endif
 
 # Site Specific information:
 #
@@ -55,10 +63,12 @@ WXLIB = -lwx_$(GUI)_$(SYSNAME)
 #   XLIBDIR = location of X libraries
 #   XLIB    = any X libraries used
 
-ifeq ($(SYSNAME), SunOS_5.6)
-XINCDIR = -I/usr/local/X11R6.4/include/X11
-XLIBDIR = -L/usr/local/X11R6.4/lib 
-XLIB = -lsocket -lnsl -lX11 -lXm -lXmu -lXt -lgen -lm
+ifeq ($(SYSNAME), SunOS)
+ifeq ($(GUI), gtk)
+XLIB = -lgtk -lgdk -lpthread -lposix4
+else # motif
+XLIB = -lXm -lXmu -lXt -lX11 -lsocket -lnsl -lgen -lm
+endif # GUI=gtk
 else 
 ifeq ($(SYSNAME), HP-UX)
 DEFINES = -D_HPUX_SOURCE -DSVR4
@@ -70,7 +80,12 @@ XINCDIR = -I/usr/X11R6/include
 XLIBDIR = -L/usr/X11R6/lib 
 #XINCDIR = -I/usr/local/include/X11
 #XLIBDIR = -L/usr/local/X11/lib -L/usr/X11/lib
-XLIB = -lX11 -lXm -lXp -lXmu -lXext -lXt -lm
+ifeq ($(GUI), gtk)
+XLIB = -lgtk -lgdk -lpthread
+else # motif
+XLIB = -lX11 -lXm -lXp -lXpm -lXmu -lXext -lXt -lpthread -ldl -lm
+endif # GUI=gtk
+#XLIB = -lX11 -lXm -lXp -lXmu -lXext -lXt -lm
 endif
 endif
 
@@ -81,10 +96,9 @@ GUILIBS = $(WXLIB) $(XLIB)
 
 GUIOBJECTS= pxi.o axis.o pxicanvs.o wxmisc.o
 
-GENOBJECTS= general.o gambitio.o gmisc.o gstring.o
+GENOBJECTS= gambitio.o gmisc.o gstring.o
 
-DATOBJECTS= onedot.o equtrac.o equdata.o normequs.o ncalcset.o \
-	probvect.o expdata.o
+DATOBJECTS= equtrac.o equdata.o probvect.o expdata.o dlgpxi.o
 
 ALLOBJECTS= $(GUIOBJECTS) $(GENOBJECTS) $(DATOBJECTS)
 
@@ -96,9 +110,11 @@ $(OBJDIR):
 	mkdir $(OBJDIR)
 
 pxi_$(GUI)_$(SYSNAME): $(OBJDIR) $(ALLOBJECTS)
-	cd $(OBJDIR); $(CC) $(ALLOBJECTS) $(LIBDIR) $(GUILIBS) -o ../pxi_$(GUI)_$(SYSNAME); cd ..
+	cd $(OBJDIR); \
+	$(CC) $(ALLOBJECTS) $(LIBDIR) $(GUILIBS) -o ../pxi_$(GUI)_$(SYSNAME); cd ..
 
-pxi: pxi_$(GUI)_$(SYSNAME);
+pxi:
+	$(MAKE) pxi_$(GUI)_$(SYSNAME) GUI=$(GUI) SYSNAME=$(SYSNAME)
 
 distrib:
 	-strip pxi_$(GUI)_$(SYSNAME)
