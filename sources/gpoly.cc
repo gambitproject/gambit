@@ -1,5 +1,6 @@
 //#
 //# FILE: gpoly.cc -- Instantiation of gPoly class
+//# $Id$
 //#
 
 #include "gpoly.imp"
