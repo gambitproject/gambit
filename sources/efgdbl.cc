@@ -25,7 +25,12 @@ template <class T> class gNode;
 class gList<gString>;
 class gList<gRational>;
 class gList<Node *>;
-
+class gNode<Node *>;
+template <class T> class gArray;
+class EFPlayer;
+class EFOutcome;
+class gArray<EFPlayer *>;
+class gArray<EFOutcome *>;
 
 #define TEMPLATE
 #pragma option -Jgd

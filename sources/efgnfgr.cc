@@ -8,6 +8,8 @@
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
+template <class T> class Lexicon;
+class Lexicon<double>;
 #define TEMPLATE
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
