@@ -88,9 +88,6 @@ template<class T>
 bool QuikSolv<T>::AllRealRootsFromPelican(const gPolyList<gDouble> & sys, 
 					  gList<gVector<gDouble> > &ans) const
 {
-  //DEBUG
-  //  gout << "About to create PelView with sys: \n" << sys << "\n";
-
   try {
   PelView pel(sys);
 
@@ -187,7 +184,6 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
 
   gRectangle<gDouble> bigr = r.SameCenterDoubleSideLengths();
 
-  //  gVector<gDouble> Del(Dmnsn());
   gVector<gDouble> newpoint(Dmnsn());
 
   while (true) {
@@ -527,7 +523,8 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
 
   return false;
 
-/* - This is the code one could use in the event of failure.
+/* - This is code that was once used to call the Grobner basis solver
+     It will not work with T = gDouble or double, due to numerical instability
   gSolver<T> bigsolver(System.TermOrder(), System);
 
   if ( !bigsolver.IsZeroDimensional() ) return false;
