@@ -627,32 +627,34 @@ static Portion *GSM_MoveTree(Portion **param)
 // Name
 //----------
 
-static Portion *GSM_Name_EfgElements(Portion **param)
+static Portion *GSM_Name(Portion **param)
 {
   if (param[0]->Spec().Type == porNULL)
     return new TextPortion("");
 
   switch (param[0]->Spec().Type)  {
-    case porACTION:
-      return new TextPortion(((ActionPortion *) param[0])->Value()->
-				GetName());
-    case porINFOSET:
-      return new TextPortion(((InfosetPortion *) param[0])->Value()->
-				GetName());
-    case porNODE:
-      return new TextPortion(((NodePortion *) param[0])->Value()->
-				GetName());
-    case porEFOUTCOME:
-      return new TextPortion(((EfOutcomePortion *) param[0])->Value()->
-				GetName());
-    case porEFPLAYER:
-      return new TextPortion(((EfPlayerPortion *) param[0])->Value()->
-				GetName());
-    case porEFG:
-      return new TextPortion(((EfgPortion *) param[0])->Value()->
-				GetTitle());
-    default:
-      throw gclRuntimeError("Unknown type passed to Name[]");
+  case porACTION:
+    return new TextPortion(((ActionPortion *) param[0])->Value()->
+			   GetName());
+  case porINFOSET:
+    return new TextPortion(((InfosetPortion *) param[0])->Value()->
+			   GetName());
+  case porNODE:
+    return new TextPortion(((NodePortion *) param[0])->Value()->
+			   GetName());
+  case porEFOUTCOME:
+    return new TextPortion(((EfOutcomePortion *) param[0])->Value()->
+			   GetName());
+  case porEFPLAYER:
+    return new TextPortion(((EfPlayerPortion *) param[0])->Value()->
+			   GetName());
+  case porEFSUPPORT:
+    return new TextPortion(((EfSupportPortion *) param[0])->Value()->GetName());
+  case porEFG:
+    return new TextPortion(((EfgPortion *) param[0])->Value()->
+			   GetTitle());
+  default:
+    throw gclRuntimeError("Unknown type passed to Name[]");
   }
 }
 
@@ -1028,26 +1030,29 @@ static Portion *GSM_SetName(Portion **param)
   gText name(((TextPortion *) param[1])->Value());
   
   switch (param[0]->Spec().Type)   {
-    case porACTION:
-      ((Action *)((ActionPortion *) param[0])->Value())->SetName(name);
-      break;
-    case porINFOSET:
-      ((InfosetPortion *) param[0])->Value()->SetName(name);
-      break;
-    case porNODE:
-      ((NodePortion *) param[0])->Value()->SetName(name);
-      break;
-    case porEFOUTCOME:
-      ((EfOutcomePortion *) param[0])->Value()->SetName(name);
-      break;
-    case porEFPLAYER:
-      ((EfPlayerPortion *) param[0])->Value()->SetName(name);
-      break;
-    case porEFG:
-      ((EfgPortion *) param[0])->Value()->SetTitle(name);
-      break;
-    default:
-      throw gclRuntimeError("Bad type passed to SetName[]");
+  case porACTION:
+    (((ActionPortion *) param[0])->Value())->SetName(name);
+    break;
+  case porINFOSET:
+    ((InfosetPortion *) param[0])->Value()->SetName(name);
+    break;
+  case porNODE:
+    ((NodePortion *) param[0])->Value()->SetName(name);
+    break;
+  case porEFOUTCOME:
+    ((EfOutcomePortion *) param[0])->Value()->SetName(name);
+    break;
+  case porEFPLAYER:
+    ((EfPlayerPortion *) param[0])->Value()->SetName(name);
+    break;
+  case porEFSUPPORT:
+    ((EfSupportPortion *) param[0])->Value()->SetName(name);
+    break;
+  case porEFG:
+    ((EfgPortion *) param[0])->Value()->SetTitle(name);
+    break;
+  default:
+    throw gclRuntimeError("Bad type passed to SetName[]");
   }
 
   return param[0]->ValCopy();
@@ -1207,12 +1212,13 @@ void Init_efgfunc(GSM *gsm)
       { "MoveToInfoset[node->NODE, infoset->INFOSET] =: NODE",
 	GSM_MoveToInfoset },
       { "MoveTree[from->NODE, to->NODE] =: NODE", GSM_MoveTree },
-      { "Name[x->ACTION*] =: TEXT", GSM_Name_EfgElements },
-      { "Name[x->INFOSET*] =: TEXT", GSM_Name_EfgElements },
-      { "Name[x->NODE*] =: TEXT", GSM_Name_EfgElements },
-      { "Name[x->EFOUTCOME*] =: TEXT", GSM_Name_EfgElements },
-      { "Name[x->EFPLAYER*] =: TEXT", GSM_Name_EfgElements },
-      { "Name[x->EFG*] =: TEXT", GSM_Name_EfgElements },
+      { "Name[x->ACTION*] =: TEXT", GSM_Name },
+      { "Name[x->INFOSET*] =: TEXT", GSM_Name },
+      { "Name[x->NODE*] =: TEXT", GSM_Name },
+      { "Name[x->EFOUTCOME*] =: TEXT", GSM_Name },
+      { "Name[x->EFPLAYER*] =: TEXT", GSM_Name },
+      { "Name[x->EFSUPPORT*] =: TEXT", GSM_Name },
+      { "Name[x->EFG*] =: TEXT", GSM_Name },
       { "NewInfoset[player->EFPLAYER, actions->NUMBER] =: INFOSET",
 	GSM_NewInfoset },
       { "NewOutcome[efg->EFG] =: EFOUTCOME", GSM_NewOutcome },
@@ -1251,6 +1257,7 @@ void Init_efgfunc(GSM *gsm)
       { "SetName[x->NODE, name->TEXT] =: NODE", GSM_SetName },
       { "SetName[x->EFOUTCOME, name->TEXT] =: EFOUTCOME", GSM_SetName },
       { "SetName[x->EFPLAYER, name->TEXT] =: EFPLAYER", GSM_SetName },
+      { "SetName[x->EFSUPPORT, name->TEXT] =: EFSUPPORT", GSM_SetName },
       { "SetName[x->EFG, name->TEXT] =: EFG", GSM_SetName },
       { "SetOutcome[node->NODE, outcome->EFOUTCOME*] =: EFOUTCOME",
 	GSM_SetOutcome },

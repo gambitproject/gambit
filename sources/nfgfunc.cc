@@ -186,13 +186,12 @@ static Portion *GSM_LoadNfg(Portion **param)
 // Name
 //--------
 
-static Portion* GSM_Name_NfgElements( Portion** param )
+static Portion* GSM_Name(Portion **param)
 {
-  if( param[0]->Spec().Type == porNULL )
-    return new TextPortion( "" );
+  if (param[0]->Spec().Type == porNULL)
+    return new TextPortion("");
 
-  switch( param[0]->Spec().Type )
-  {
+  switch (param[0]->Spec().Type) {
   case porNFG:
     return new TextPortion(((NfgPortion*) param[0])->Value()->GetTitle());
   case porNFPLAYER:
@@ -203,6 +202,8 @@ static Portion* GSM_Name_NfgElements( Portion** param )
   case porNFOUTCOME:
     return new TextPortion(((NfOutcomePortion*) param[0])->Value()->
 			   GetName());
+  case porNFSUPPORT:
+    return new TextPortion(((NfSupportPortion*) param[0])->Value()->GetName());
   default:
     throw gclRuntimeError("Unknown type passed to Name[]");
   }
@@ -433,6 +434,14 @@ static Portion *GSM_SetName_NfOutcome(Portion **param)
   return param[0]->ValCopy();
 }
 
+static Portion *GSM_SetName_NfSupport(Portion **param)
+{
+  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  gText name = ((TextPortion *) param[1])->Value();
+  S->SetName(name);
+  return param[0]->RefCopy();
+}
+
 //------------
 // SetOutcome
 //------------
@@ -520,10 +529,11 @@ void Init_nfgfunc(GSM *gsm)
       { "Game[outcome->NFOUTCOME] =: NFG", GSM_Game_NfOutcome }, 
       { "IsConstSum[nfg->NFG] =: BOOLEAN", GSM_IsConstSum },
       { "LoadNfg[file->TEXT] =: NFG", GSM_LoadNfg },
-      { "Name[x->NFG*] =: TEXT", GSM_Name_NfgElements },
-      { "Name[x->NFPLAYER*] =: TEXT", GSM_Name_NfgElements },
-      { "Name[x->STRATEGY*] =: TEXT", GSM_Name_NfgElements },
-      { "Name[x->NFOUTCOME*] =: TEXT", GSM_Name_NfgElements },
+      { "Name[x->NFG*] =: TEXT", GSM_Name },
+      { "Name[x->NFPLAYER*] =: TEXT", GSM_Name },
+      { "Name[x->STRATEGY*] =: TEXT", GSM_Name },
+      { "Name[x->NFOUTCOME*] =: TEXT", GSM_Name },
+      { "Name[x->NFSUPPORT*] =: TEXT", GSM_Name },
       { "NewNfg[dim->LIST(INTEGER)] =: NFG", GSM_NewNfg },
       { "NewOutcome[nfg->NFG] =: NFOUTCOME", GSM_NewOutcome },
       { "Outcome[profile->LIST(STRATEGY)] =: NFOUTCOME", GSM_Outcome },
@@ -541,6 +551,7 @@ void Init_nfgfunc(GSM *gsm)
       { "SetName[x->STRATEGY, name->TEXT] =: STRATEGY", GSM_SetName_Strategy },
       { "SetName[x->NFOUTCOME, name->TEXT] =: NFOUTCOME",
 	GSM_SetName_NfOutcome },
+      { "SetName[x->NFSUPPORT, name->TEXT] =: NFSUPPORT", GSM_SetName_NfSupport },
       { "SetOutcome[profile->LIST(STRATEGY), outcome->NFOUTCOME] =: NFOUTCOME",
 	GSM_SetOutcome },
       { "SetPayoff[outcome->NFOUTCOME, player->NFPLAYER, payoff->NUMBER] =: NFOUTCOME", GSM_SetPayoff },
