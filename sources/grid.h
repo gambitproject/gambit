@@ -1,7 +1,7 @@
 //#
 //# FILE: grid.h -- Interface to grid-solve module
 //#
-//# @(#)grid.h	1.11 1/5/97
+//# $Id$
 //#
 
 #ifndef GRID_H
@@ -40,7 +40,7 @@ class GridSolveModule  {
 		virtual double Distance(const gVector<double> &a,const gVector<double> &b) const;
 	public:
 		GridSolveModule(const Nfg<double> &, const GridParams &, const NFSupport &);
-		~GridSolveModule();
+		virtual ~GridSolveModule();
 		void GridSolve(void);
 };
 

@@ -76,7 +76,7 @@ public:
 
 
 MixedProfileGrid::MixedProfileGrid(const Nfg<double> &N,const NFSupport &S, double step_):
-											MixedProfile<double>(N,S),step(step_)
+											MixedProfile<double>(N,S),step(step_),sums(0)
 {
 int i;
 for (i=1;i<=svlen.Length();i++)
