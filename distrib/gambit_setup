@@ -1,20 +1,34 @@
 #! /bin/sh
 
-GAMBIT=gambit0.96
-
 echo
 echo ------------------------------------------------------------
 echo Gambit GUI installation script.
 echo ------------------------------------------------------------
 
 echo
-echo The gambit binaries are now in $HOME/$GAMBIT/bin.
+echo The gambit binaries are now in `pwd`/bin.
 echo Please add this to your PATH environment variable
-echo in your .cshrc file.
+echo in your .cshrc file or move/copy them to a directory in
+echo your path.
+echo WARNING: please do not change this directory without re-running
+echo this installation script!
+
+echo
+echo The current binaries are:
+echo `ls bin/gambit_*`
+echo `ls bin/gcl_*`
+echo `ls bin/wxhelp_*`
+echo
+echo Making symbolic links to gambit, gui, and wxhelp.
+cd bin
+ln -s `echo gambit_*` gambit
+ln -s `echo gcl_*` gcl
+ln -s `echo wxhelp_*` wxhelp
+cd ..
 
 echo 
 echo Now executing gambit GUI startup script \(gui-init\).
-./$GAMBIT/misc/gui-init
+./misc/gui-init
 
 
 #
