@@ -28,7 +28,6 @@
 #include <values.h>
 #include <math.h>
 #include <stdlib.h>
-#include <new.h>
 
 #include "base/base.h"
 #include "math/rational.h"
@@ -39,12 +38,6 @@
 extern int GCLParse(GSM *p_gsm,
 		    const gText& line, const gText &file, int lineno,
 		    const gText& rawline);
-
-void gclNewHandler(void)
-{
-  throw gNewFailed();
-}
-
 
 typedef void (*fptr)(int);
 
@@ -125,8 +118,6 @@ char* _ExePath = NULL;
 
 int main(int argc, char *argv[])
 {
-  set_new_handler(gclNewHandler);
-
   try {
     _ExePath = new char[strlen(argv[0]) + 2];
 #ifdef __BORLANDC__

@@ -47,16 +47,16 @@ template <class T> void gSortList<T>::Swap(int a, int b)
 
   if (a == b)   return;
 
-  gNode *na, *nb;
+  typename gList<T>::gNode *na, *nb;
   int i;
   for (i = 1, na = head; i < a; i++, na = na->next);
   for (i = 1, nb = head; i < b; i++, nb = nb->next);
   
-  gNode na1 = *na;
+  typename gList<T>::gNode na1 = *na;
 
   if (na->next==nb || nb->next==na)   {  // adjacent
     if (nb->next==na)  {
-      gNode *t = nb;
+      typename gList<T>::gNode *t = nb;
       nb = na;
       na = t;
     }
