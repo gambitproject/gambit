@@ -46,7 +46,7 @@ if (trace && outname)
 		return (new gFileOutput(outname));
 }
 else
-	return 0;
+	return &gnull;
 }
 
 // Err File
@@ -61,7 +61,7 @@ if (trace && errname)
 		return (new gFileOutput(outname));
 }
 else
-	return 0;
+	return &gnull;
 }
 
 // Trace Level
