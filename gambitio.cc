@@ -248,10 +248,10 @@ int gFileOutput::GetWidth(void)
   return Width;
 }
 
-int gFileOutput::SetWidth(int w) 
+gOutput &gFileOutput::SetWidth(int w) 
 {
   Width = w;
-  return (w == Width);
+  return *this;
 }
 
 int gFileOutput::GetPrec(void) 
@@ -259,22 +259,22 @@ int gFileOutput::GetPrec(void)
   return Prec;
 }
 
-int gFileOutput::SetPrec(int p) 
+gOutput &gFileOutput::SetPrec(int p) 
 {
   Prec = p;
-  return (p == Prec);
+  return *this;
 }
 
-int gFileOutput::SetExpMode(void) 
+gOutput &gFileOutput::SetExpMode(void) 
 {
   Represent = 'e';
-  return (Represent == 'e');
+  return *this;
 }
 
-int gFileOutput::SetFloatMode(void) 
+gOutput &gFileOutput::SetFloatMode(void) 
 {
   Represent = 'f';
-  return (Represent == 'f');
+  return *this;
 }
 
 char gFileOutput::GetRepMode(void)
@@ -387,15 +387,15 @@ gNullOutput::~gNullOutput()   { }
 
 int gNullOutput::GetWidth(void) { return true; }
 
-int gNullOutput::SetWidth(int w) { return true; }
+gOutput &gNullOutput::SetWidth(int w) { return *this; }
 
 int gNullOutput::GetPrec(void) { return true; }
 
-int gNullOutput::SetPrec(int p) { return true; }
+gOutput &gNullOutput::SetPrec(int p) { return *this; }
 
-int gNullOutput::SetExpMode(void) { return true; }
+gOutput &gNullOutput::SetExpMode(void) { return *this; }
 
-int gNullOutput::SetFloatMode(void) { return true; }
+gOutput &gNullOutput::SetFloatMode(void) { return *this; }
 
 char gNullOutput::GetRepMode(void) { return true; }
 
