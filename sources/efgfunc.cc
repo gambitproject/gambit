@@ -56,6 +56,8 @@ Portion *GSM_ReadDefaultEfg(Portion **param)
 	else
 	  return 0;
       }
+      default:
+	return 0;
     }
   }
   else
@@ -69,18 +71,6 @@ Portion* GSM_CopyDefaultEfg( Portion** param )
   _CurrentGSM->DefaultEfg() = param[0]->ValCopy();
   return param[0]->ValCopy();
 }
-
-
-Portion* GSM_TestDefEfg( Portion** param )
-{
-  return param[0]->ValCopy();
-}
-
-
-
-
-
-
 
 //
 // Utility functions for converting gArrays to ListPortions
@@ -140,6 +130,59 @@ Portion *GSM_AppendNode(Portion **param)
   return new NodeValPortion(n->GetChild(1));
 }
 
+Portion *GSM_AttachOutcome(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  Outcome *c = ((OutcomePortion *) param[1])->Value();
+
+  if (n->BelongsTo() != c->BelongsTo())   return 0;
+  n->SetOutcome(c);
+  
+  return new NodeValPortion(n);
+}
+
+Portion *GSM_DeleteTree(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  n->BelongsTo()->DeleteTree(n);
+  return new NodeValPortion(n);
+}
+
+Portion *GSM_DetachOutcome(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  n->SetOutcome(0);
+  return new NodeValPortion(n);
+}
+
+Portion *GSM_InsertNode(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  Infoset *s = ((InfosetPortion *) param[1])->Value();
+
+  if (n->BelongsTo() != s->BelongsTo())   return 0;
+  n->BelongsTo()->InsertNode(n, s);
+
+  return new NodeValPortion(n->GetParent());
+}
+
+Portion *GSM_LeaveInfoset(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  return new InfosetValPortion(n->BelongsTo()->LeaveInfoset(n));
+}
+
+Portion *GSM_MergeInfosets(Portion **param)
+{
+  Infoset *s1 = ((InfosetPortion *) param[0])->Value();
+  Infoset *s2 = ((InfosetPortion *) param[1])->Value();
+  
+  if (s1->BelongsTo() != s2->BelongsTo())   return 0;
+  s1->BelongsTo()->MergeInfoset(s1, s2);
+  
+  return new InfosetValPortion(s1);
+}
+
 Portion *GSM_NewEfg(Portion **param)
 {
   bool rat = ((BoolPortion *) param[0])->Value();
@@ -184,14 +227,32 @@ Portion *GSM_NewInfoset2(Portion **param)
   ListPortion *actions = (ListPortion *) param[1];
   gString name = ((TextPortion *) param[2])->Value();
 
-  gout << actions->Length() << '\n';
-
   if (actions->Length() == 0)   return 0;
   Infoset *s = p->BelongsTo()->CreateInfoset(p, actions->Length());
   s->SetName(name);
   for (int i = 1; i <= actions->Length(); i++)
     s->SetActionName(i, ((TextPortion *) actions->Subscript(i))->Value());
   return new InfosetValPortion(s);
+}
+
+Portion *GSM_NewOutcomeFloat(Portion **param)
+{
+  ExtForm<double> &E = ((EfgPortion<double> *) param[0])->Value();
+  gString name = ((TextPortion *) param[1])->Value();
+
+  Outcome *c = E.NewOutcome();
+  c->SetName(name);
+  return new OutcomeValPortion(c);
+}
+
+Portion *GSM_NewOutcomeRational(Portion **param)
+{
+  ExtForm<gRational> &E = ((EfgPortion<gRational> *) param[0])->Value();
+  gString name = ((TextPortion *) param[1])->Value();
+
+  Outcome *c = E.NewOutcome();
+  c->SetName(name);
+  return new OutcomeValPortion(c);
 }
 
 Portion *GSM_NewPlayer(Portion **param)
@@ -202,6 +263,33 @@ Portion *GSM_NewPlayer(Portion **param)
   Player *p = E.NewPlayer();
   p->SetName(name);
   return new EfPlayerValPortion(p);
+}
+
+Portion *GSM_SetChanceProbs(Portion **param)
+{
+  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  ListPortion *p = (ListPortion *) param[1];
+
+  if (!s->GetPlayer()->IsChance())   return 0;
+  if (p->DataType() != s->BelongsTo()->Type())  return 0;
+  if (p->Length() != s->BelongsTo()->NumPlayers())   return 0;
+
+  int i;
+
+  switch (p->DataType())   {
+    case DOUBLE:
+      for (i = 1; i <= p->Length(); i++)
+	((ChanceInfoset<double> *) s)->SetActionProb
+          (i, ((FloatPortion *) p->Subscript(i))->Value());
+      break;
+    case RATIONAL:
+      for (i = 1; i <= p->Length(); i++)
+	((ChanceInfoset<gRational> *) s)->SetActionProb
+   	  (i, ((RationalPortion *) p->Subscript(i))->Value());
+      break;
+  }
+ 
+  return new InfosetValPortion(s);
 }
 
 Portion *GSM_SetNameAction(Portion **param)
@@ -254,6 +342,12 @@ Portion *GSM_SetNamePlayer(Portion **param)
   return param[0]->ValCopy();
 }
 
+/*
+Portion *GSM_SetOutcome(Portion **param)
+{
+  */
+
+
 //
 // Implementation of extensive form query functions, in alpha order
 //
@@ -262,6 +356,12 @@ Portion *GSM_Actions(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   return ArrayToList(s->GetActionList());
+}
+
+Portion *GSM_Chance(Portion **param)
+{
+  BaseExtForm &E = ((BaseEfgPortion *) param[0])->Value();
+  return new EfPlayerValPortion(E.GetChance());
 }
 
 Portion *GSM_ChanceProbs(Portion **param)
@@ -273,7 +373,17 @@ Portion *GSM_ChanceProbs(Portion **param)
       return ArrayToList((gArray<double> &) ((ChanceInfoset<double> *) n->GetInfoset())->GetActionProbs());
     case RATIONAL:
       return ArrayToList((gArray<gRational> &) ((ChanceInfoset<gRational> *) n->GetInfoset())->GetActionProbs());
+    default:
+      return 0;
   }
+}
+
+Portion *GSM_CopyTree(Portion **param)
+{
+  Node *n1 = ((NodePortion *) param[0])->Value();
+  Node *n2 = ((NodePortion *) param[1])->Value();
+
+  return new NodeValPortion(n1->BelongsTo()->CopyTree(n1, n2));
 }
 
 Portion *GSM_Infoset(Portion **param)
@@ -300,6 +410,14 @@ Portion *GSM_IsSuccessor(Portion **param)
   Node *n1 = ((NodePortion *) param[0])->Value();
   Node *n2 = ((NodePortion *) param[1])->Value();
   return new BoolValPortion(n1->BelongsTo()->IsSuccessor(n1, n2));
+}
+
+Portion *GSM_MoveTree(Portion **param)
+{
+  Node *n1 = ((NodePortion *) param[0])->Value();
+  Node *n2 = ((NodePortion *) param[1])->Value();
+
+  return new NodeValPortion(n1->BelongsTo()->MoveTree(n1, n2));
 }
 
 Portion *GSM_NameAction(Portion **param)
@@ -410,7 +528,16 @@ Portion *GSM_Outcomes(Portion **param)
   return ArrayToList(E->OutcomeList());
 }
 
-Portion *GSM_OutcomeVector(Portion **param)
+Portion *GSM_Parent(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  if (n->GetParent())
+    return new NodeValPortion(n->GetParent());
+  else
+    return 0;
+}
+
+Portion *GSM_Payoff(Portion **param)
 {
   Outcome *c = ((OutcomePortion *) param[0])->Value();
   switch (c->BelongsTo()->Type())   {
@@ -418,13 +545,22 @@ Portion *GSM_OutcomeVector(Portion **param)
       return ArrayToList((gArray<double> &) (OutcomeVector<double> &) *c);
     case RATIONAL:
       return ArrayToList((gArray<gRational> &) (OutcomeVector<gRational> &) *c);
+    default:
+      return 0;
   }
 }
-Portion *GSM_Parent(Portion **param)
+
+Portion *GSM_PlayerInfoset(Portion **param)
+{
+  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  return new EfPlayerValPortion(s->GetPlayer());
+}
+
+Portion *GSM_PlayerNode(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  if (n->GetParent())
-    return new NodeValPortion(n->GetParent());
+  if (n->GetPlayer())
+    return new EfPlayerValPortion(n->GetPlayer());
   else
     return 0;
 }
@@ -472,6 +608,8 @@ Portion *GSM_ReadEfg(Portion **param)
 	else
 	  return 0;
       }
+      default:
+	return 0;
     }
   }
   else
@@ -515,20 +653,45 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_CopyDefaultEfg, 0, "efg", porEFG);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("TestDefEfg");
-  FuncObj->SetFuncInfo(GSM_TestDefEfg, 1);
-  FuncObj->SetParamInfo(GSM_TestDefEfg, 0, "efg", porEFG,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, DEFAULT_EFG);
-  gsm->AddFunction(FuncObj);
-
 //-----------------------------------------------------------
 
   FuncObj = new FuncDescObj("AppendNode");
   FuncObj->SetFuncInfo(GSM_AppendNode, 2);
-  FuncObj->SetParamInfo(GSM_AppendNode, 0, "node", porNODE,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_AppendNode, 1, "infoset", porINFOSET,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_AppendNode, 0, "node", porNODE);
+  FuncObj->SetParamInfo(GSM_AppendNode, 1, "infoset", porINFOSET);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("AttachOutcome");
+  FuncObj->SetFuncInfo(GSM_AttachOutcome, 2);
+  FuncObj->SetParamInfo(GSM_AttachOutcome, 0, "node", porNODE);
+  FuncObj->SetParamInfo(GSM_AttachOutcome, 1, "outcome", porOUTCOME);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("DeleteTree");
+  FuncObj->SetFuncInfo(GSM_DeleteTree, 1);
+  FuncObj->SetParamInfo(GSM_DeleteTree, 0, "node", porNODE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("DetachOutcome");
+  FuncObj->SetFuncInfo(GSM_DetachOutcome, 1);
+  FuncObj->SetParamInfo(GSM_DetachOutcome, 0, "node", porNODE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("InsertNode");
+  FuncObj->SetFuncInfo(GSM_InsertNode, 2);
+  FuncObj->SetParamInfo(GSM_InsertNode, 0, "node", porNODE);
+  FuncObj->SetParamInfo(GSM_InsertNode, 1, "infoset", porINFOSET);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("LeaveInfoset");
+  FuncObj->SetFuncInfo(GSM_LeaveInfoset, 1);
+  FuncObj->SetParamInfo(GSM_LeaveInfoset, 0, "node", porNODE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("MergeInfosets");
+  FuncObj->SetFuncInfo(GSM_MergeInfosets, 2);
+  FuncObj->SetParamInfo(GSM_MergeInfosets, 0, "infoset1", porINFOSET);
+  FuncObj->SetParamInfo(GSM_MergeInfosets, 1, "infoset2", porINFOSET);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NewEfg");
@@ -541,62 +704,74 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("NewInfoset");
   FuncObj->SetFuncInfo(GSM_NewInfoset1, 3);
-  FuncObj->SetParamInfo(GSM_NewInfoset1, 0, "player", porEF_PLAYER,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_NewInfoset1, 0, "player", porEF_PLAYER);
   FuncObj->SetParamInfo(GSM_NewInfoset1, 1, "actions", porINTEGER);
   FuncObj->SetParamInfo(GSM_NewInfoset1, 2, "name", porTEXT,
 			new TextValPortion(""));
 
   FuncObj->SetFuncInfo(GSM_NewInfoset2, 3);
-  FuncObj->SetParamInfo(GSM_NewInfoset2, 0, "player", porEF_PLAYER,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_NewInfoset2, 0, "player", porEF_PLAYER);
   FuncObj->SetParamInfo(GSM_NewInfoset2, 1, "actions", porLIST | porTEXT);
   FuncObj->SetParamInfo(GSM_NewInfoset2, 2, "name", porTEXT,
 			new TextValPortion(""));
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("NewOutcome");
+  FuncObj->SetFuncInfo(GSM_NewOutcomeFloat, 2);
+  FuncObj->SetParamInfo(GSM_NewOutcomeFloat, 0, "efg", porEFG_FLOAT,
+		       NO_DEFAULT_VALUE, PASS_BY_VALUE, DEFAULT_EFG);
+  FuncObj->SetParamInfo(GSM_NewOutcomeFloat, 1, "name", porTEXT,
+		       new TextValPortion(""));
+
+  FuncObj->SetFuncInfo(GSM_NewOutcomeRational, 2);
+  FuncObj->SetParamInfo(GSM_NewOutcomeRational, 0, "efg", porEFG_RATIONAL,
+		       NO_DEFAULT_VALUE, PASS_BY_VALUE, DEFAULT_EFG);
+  FuncObj->SetParamInfo(GSM_NewOutcomeRational, 1, "name", porTEXT,
+		       new TextValPortion(""));
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("NewPlayer");
   FuncObj->SetFuncInfo(GSM_NewPlayer, 2);
   FuncObj->SetParamInfo(GSM_NewPlayer, 0, "efg", porEFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG);
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, DEFAULT_EFG);
   FuncObj->SetParamInfo(GSM_NewPlayer, 1, "name", porTEXT,
 			new TextValPortion(""));
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("SetChanceProbs");
+  FuncObj->SetFuncInfo(GSM_SetChanceProbs, 2);
+  FuncObj->SetParamInfo(GSM_SetChanceProbs, 0, "infoset", porINFOSET);
+  FuncObj->SetParamInfo(GSM_SetChanceProbs, 1, "probs",
+			porLIST | porFLOAT | porRATIONAL);
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("SetName");
   FuncObj->SetFuncInfo(GSM_SetNameAction, 2);
-  FuncObj->SetParamInfo(GSM_SetNameAction, 0, "x", porACTION,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetNameAction, 0, "x", porACTION);
   FuncObj->SetParamInfo(GSM_SetNameAction, 1, "name", porTEXT);
 
   FuncObj->SetFuncInfo(GSM_SetNameEfg, 2);
-  FuncObj->SetParamInfo(GSM_SetNameEfg, 0, "x", porEFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetNameEfg, 0, "x", porEFG);
   FuncObj->SetParamInfo(GSM_SetNameEfg, 1, "name", porTEXT);
 
   FuncObj->SetFuncInfo(GSM_SetNameInfoset, 2);
-  FuncObj->SetParamInfo(GSM_SetNameInfoset, 0, "x", porINFOSET,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetNameInfoset, 0, "x", porINFOSET);
   FuncObj->SetParamInfo(GSM_SetNameInfoset, 1, "name", porTEXT);
 
   FuncObj->SetFuncInfo(GSM_SetNameNfg, 2);
-  FuncObj->SetParamInfo(GSM_SetNameNfg, 0, "x", porNFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetNameNfg, 0, "x", porNFG);
   FuncObj->SetParamInfo(GSM_SetNameNfg, 1, "name", porTEXT);
 
   FuncObj->SetFuncInfo(GSM_SetNameNode, 2);
-  FuncObj->SetParamInfo(GSM_SetNameNode, 0, "x", porNODE,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetNameNode, 0, "x", porNODE);
   FuncObj->SetParamInfo(GSM_SetNameNode, 1, "name", porTEXT);
 
   FuncObj->SetFuncInfo(GSM_SetNameOutcome, 2);
-  FuncObj->SetParamInfo(GSM_SetNameOutcome, 0, "x", porOUTCOME,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetNameOutcome, 0, "x", porOUTCOME);
   FuncObj->SetParamInfo(GSM_SetNameOutcome, 1, "name", porTEXT);
 
   FuncObj->SetFuncInfo(GSM_SetNamePlayer, 2);
-  FuncObj->SetParamInfo(GSM_SetNamePlayer, 0, "x", porEF_PLAYER,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetNamePlayer, 0, "x", porEF_PLAYER);
   FuncObj->SetParamInfo(GSM_SetNamePlayer, 1, "name", porTEXT);
   gsm->AddFunction(FuncObj);
 
@@ -608,9 +783,21 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_Actions, 0, "infoset", porINFOSET);
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("Chance");
+  FuncObj->SetFuncInfo(GSM_Chance, 1);
+  FuncObj->SetParamInfo(GSM_Chance, 0, "efg", porEFG,
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, DEFAULT_EFG);
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("ChanceProbs");
   FuncObj->SetFuncInfo(GSM_ChanceProbs, 1);
   FuncObj->SetParamInfo(GSM_ChanceProbs, 0, "node", porNODE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("CopyTree");
+  FuncObj->SetFuncInfo(GSM_CopyTree, 2);
+  FuncObj->SetParamInfo(GSM_CopyTree, 0, "from", porNODE);
+  FuncObj->SetParamInfo(GSM_CopyTree, 1, "to", porNODE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Infoset");
@@ -633,6 +820,12 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_IsSuccessor, 2);
   FuncObj->SetParamInfo(GSM_IsSuccessor, 0, "node", porNODE);
   FuncObj->SetParamInfo(GSM_IsSuccessor, 1, "from", porNODE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("MoveTree");
+  FuncObj->SetFuncInfo(GSM_MoveTree, 2);
+  FuncObj->SetParamInfo(GSM_MoveTree, 0, "from", porNODE);
+  FuncObj->SetParamInfo(GSM_MoveTree, 1, "to", porNODE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Name");
@@ -715,14 +908,22 @@ void Init_efgfunc(GSM *gsm)
 			NO_DEFAULT_VALUE, PASS_BY_VALUE, DEFAULT_EFG );
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("OutcomeVector");
-  FuncObj->SetFuncInfo(GSM_OutcomeVector, 1);
-  FuncObj->SetParamInfo(GSM_OutcomeVector, 0, "outc", porOUTCOME);
-  gsm->AddFunction(FuncObj);
-
   FuncObj = new FuncDescObj("Parent");
   FuncObj->SetFuncInfo(GSM_Parent, 1);
   FuncObj->SetParamInfo(GSM_Parent, 0, "node", porNODE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Payoff");
+  FuncObj->SetFuncInfo(GSM_Payoff, 1);
+  FuncObj->SetParamInfo(GSM_Payoff, 0, "outcome", porOUTCOME);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Player");
+  FuncObj->SetFuncInfo(GSM_PlayerInfoset, 1);
+  FuncObj->SetParamInfo(GSM_PlayerInfoset, 0, "infoset", porINFOSET);
+
+  FuncObj->SetFuncInfo(GSM_PlayerNode, 1);
+  FuncObj->SetParamInfo(GSM_PlayerNode, 0, "node", porNODE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Players");
@@ -754,4 +955,5 @@ void Init_efgfunc(GSM *gsm)
 			NO_DEFAULT_VALUE, PASS_BY_VALUE, DEFAULT_EFG );
   gsm->AddFunction(FuncObj);
 }
+
 
