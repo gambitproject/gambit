@@ -18,7 +18,6 @@ private:
 
 protected:
   BehavListFilter m_options;
-  //  virtual void  SortFilter(bool inter = true);
 
   // Event handlers
   void OnSortFilter(wxCommandEvent &);

@@ -50,6 +50,8 @@
 #include "dlsupportselect.h"
 #include "dlefgeditsupport.h"
 
+#include "behavedit.h"
+
 //=====================================================================
 //                          class EfgToolbar
 //=====================================================================
@@ -248,7 +250,9 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuHELP_ABOUT, EfgShow::OnHelpAbout)
   EVT_MENU(efgmenuHELP_CONTENTS, EfgShow::OnHelpContents)
   EVT_MENU(efgmenuPROFILES_NEW, EfgShow::OnProfilesNew)
+  EVT_MENU(efgmenuPROFILES_CLONE, EfgShow::OnProfilesClone)
   EVT_MENU(efgmenuPROFILES_EDIT, EfgShow::OnProfilesEdit)
+  EVT_LIST_ITEM_ACTIVATED(idEFG_SOLUTION_LIST, EfgShow::OnProfilesEdit)
   EVT_MENU(efgmenuPROFILES_DELETE, EfgShow::OnProfilesDelete)
   EVT_SET_FOCUS(EfgShow::OnFocus)
   EVT_SIZE(EfgShow::OnSize)
@@ -300,7 +304,8 @@ EfgShow::EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent)
   m_cursorWindow = new EfgCursorWindow(this, m_nodeSashWindow);
   m_cursorWindow->Set(m_treeWindow->Cursor());
   m_cursorWindow->SetSize(200, 200);
-  m_cursorWindow->Show(true);
+  m_cursorWindow->Show(false);
+  m_nodeSashWindow->Show(false);
 
   m_solutionSashWindow = new wxSashWindow(this, idSOLUTIONWINDOW,
 					  wxDefaultPosition,
@@ -381,16 +386,37 @@ BehavSolution EfgShow::CreateSolution(void)
 
 void EfgShow::OnProfilesNew(wxCommandEvent &)
 {
-  m_solutionTable->Append(BehavSolution(BehavProfile<gNumber>(EFSupport(m_efg))));
-  ChangeSolution(m_solutionTable->Length());
+  BehavSolution profile(BehavProfile<gNumber>(EFSupport(m_efg)));
+
+  dialogBehavEditor dialog(this, profile);
+  if (dialog.ShowModal() == wxID_OK) {
+    m_solutionTable->Append(dialog.GetProfile());
+    ChangeSolution(m_solutionTable->Length());
+  }
+}
+
+void EfgShow::OnProfilesClone(wxCommandEvent &)
+{
+  BehavSolution profile((*m_solutionTable)[cur_soln]);
+
+  dialogBehavEditor dialog(this, profile);
+  if (dialog.ShowModal() == wxID_OK) {
+    m_solutionTable->Append(dialog.GetProfile());
+    ChangeSolution(m_solutionTable->Length());
+  }
+
 }
 
 void EfgShow::OnProfilesEdit(wxCommandEvent &)
 {
-  wxMessageDialog dialog(this, "Placeholder for profile editing dialog",
-			 (char *) (*m_solutionTable)[cur_soln].GetName(),
-			 wxOK | wxICON_HAND);
-  dialog.ShowModal();
+  if (cur_soln > 0) {
+    dialogBehavEditor dialog(this, (*m_solutionTable)[cur_soln]);
+
+    if (dialog.ShowModal() == wxID_OK) {
+      (*m_solutionTable)[cur_soln] = dialog.GetProfile();
+      ChangeSolution(cur_soln);
+    }
+  }
 }
 
 void EfgShow::OnProfilesDelete(wxCommandEvent &)
@@ -1825,10 +1851,12 @@ void EfgShow::OnSolveNormalAgent(wxCommandEvent &)
 void EfgShow::OnInspectSolutions(wxCommandEvent &)
 {
   if (m_solutionSashWindow->IsShown()) {
+    m_solutionTable->Show(false);
     m_solutionSashWindow->Show(false);
     GetMenuBar()->Check(efgmenuINSPECT_SOLUTIONS, false);
   }
   else {
+    m_solutionTable->Show(true);
     m_solutionSashWindow->Show(true);
     GetMenuBar()->Check(efgmenuINSPECT_SOLUTIONS, true);
   }
@@ -1840,11 +1868,13 @@ void EfgShow::OnInspectCursor(wxCommandEvent &)
 {
   if (m_cursorWindow->IsShown()) {
     m_cursorWindow->Show(false);
+    m_nodeSashWindow->Show(false);
     GetMenuBar()->Check(efgmenuINSPECT_CURSOR, false);
   }
   else {
     m_cursorWindow->Set(m_treeWindow->Cursor());
     m_cursorWindow->Show(true);
+    m_nodeSashWindow->Show(true);
     GetMenuBar()->Check(efgmenuINSPECT_CURSOR, true);
   }
 
@@ -2090,21 +2120,21 @@ void EfgShow::OnSashDrag(wxSashEvent &p_event)
 
   switch (p_event.GetId()) {
   case idNODEWINDOW:
-    if (m_solutionSashWindow) {
-      clientHeight -= m_solutionSashWindow->GetRect().height;
-    }
-    m_treeWindow->SetSize(p_event.GetDragRect().width, 40,
+    m_treeWindow->SetSize(p_event.GetDragRect().width,
+			  m_treeWindow->GetRect().y,
 			  clientWidth - p_event.GetDragRect().width,
-			  clientHeight - 40);
-    m_nodeSashWindow->SetSize(0, 40,
+			  m_treeWindow->GetRect().height);
+    m_nodeSashWindow->SetSize(m_nodeSashWindow->GetRect().x,
+			      m_nodeSashWindow->GetRect().y,
 			      p_event.GetDragRect().width,
-			      clientHeight - 40);
+			      m_nodeSashWindow->GetRect().height);
     break;
   case idSOLUTIONWINDOW:
-    m_treeWindow->SetSize(m_nodeSashWindow->GetRect().width, 40,
-			  clientWidth - m_nodeSashWindow->GetRect().width,
+    m_treeWindow->SetSize(m_treeWindow->GetRect().x, m_treeWindow->GetRect().y,
+			  m_treeWindow->GetRect().width,
 			  clientHeight - p_event.GetDragRect().height - 40);
-    m_nodeSashWindow->SetSize(0, 40,
+    m_nodeSashWindow->SetSize(m_nodeSashWindow->GetRect().x,
+			      m_nodeSashWindow->GetRect().y,
 			      m_nodeSashWindow->GetRect().width,
 			      clientHeight - p_event.GetDragRect().height - 40);
     m_solutionSashWindow->SetSize(0, clientHeight - p_event.GetDragRect().height,
@@ -2127,7 +2157,7 @@ void EfgShow::AdjustSizes(void)
     height -= m_solutionSashWindow->GetRect().height;
   }
 
-  if ((m_cursorWindow && m_cursorWindow->IsShown()) ||
+  if ((m_cursorWindow && m_nodeSashWindow->IsShown()) ||
       (m_treeZoomWindow && m_treeZoomWindow->IsShown())) {
     if (m_treeWindow) {
       m_treeWindow->SetSize(250, toolbarHeight,
@@ -2138,7 +2168,7 @@ void EfgShow::AdjustSizes(void)
     m_treeWindow->SetSize(0, toolbarHeight, width, height - toolbarHeight);
   }
 
-  if (m_cursorWindow && m_cursorWindow->IsShown()) {
+  if (m_cursorWindow && m_nodeSashWindow->IsShown()) {
     if (m_treeZoomWindow && m_treeZoomWindow->IsShown()) {
       m_nodeSashWindow->SetSize(0, toolbarHeight,
 				250, height - toolbarHeight - 200);

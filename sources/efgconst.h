@@ -129,8 +129,9 @@ typedef enum {
   // Menu items for profiles window
   efgmenuPROFILES_FILTER = 2000,
   efgmenuPROFILES_NEW = 2001,
-  efgmenuPROFILES_EDIT = 2002,
-  efgmenuPROFILES_DELETE = 2003
+  efgmenuPROFILES_CLONE = 2002,
+  efgmenuPROFILES_EDIT = 2003,
+  efgmenuPROFILES_DELETE = 2004
 
 } guiEfgMenuItems;
 

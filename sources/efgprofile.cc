@@ -29,6 +29,7 @@ EfgProfileList::EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent)
   m_menu->Append(efgmenuPROFILES_FILTER, "Sort/Filter...",
 		 "Sort and filter profiles");
   m_menu->Append(efgmenuPROFILES_NEW, "New", "Create a new profile");
+  m_menu->Append(efgmenuPROFILES_CLONE, "Clone", "Clone this profile");
   m_menu->Append(efgmenuPROFILES_EDIT, "Edit...", "Edit this profile");
   m_menu->Append(efgmenuPROFILES_DELETE, "Delete", "Delete this profile");
 
@@ -103,6 +104,7 @@ int EfgProfileList::Append(const BehavSolution &p_solution)
 
 void EfgProfileList::OnRightClick(wxMouseEvent &p_event)
 {
+  m_menu->Enable(efgmenuPROFILES_CLONE, m_parent->CurrentSolution() > 0);
   m_menu->Enable(efgmenuPROFILES_EDIT, m_parent->CurrentSolution() > 0);
   m_menu->Enable(efgmenuPROFILES_DELETE, m_parent->CurrentSolution() > 0);
   PopupMenu(m_menu, p_event.m_x, p_event.m_y);
