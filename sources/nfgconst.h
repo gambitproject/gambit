@@ -30,8 +30,9 @@
 #define NFG_SOLVE_CUSTOM_LP             503
 #define NFG_SOLVE_CUSTOM_LIAP           504
 #define NFG_SOLVE_CUSTOM_SIMPDIV        505
-#define NFG_SOLVE_CUSTOM_QRE          506
-#define NFG_SOLVE_CUSTOM_QREGRID      507
+#define NFG_SOLVE_CUSTOM_POLENUM        506
+#define NFG_SOLVE_CUSTOM_QRE            507
+#define NFG_SOLVE_CUSTOM_QREGRID        508
 
 #define NFG_DISPLAY_COLORS              200
 #define NFG_DISPLAY_ACCELS              202

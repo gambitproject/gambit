@@ -91,6 +91,14 @@ class NfgEnumG : public NfgSolutionG  {
   virtual bool SolveSetup(void) const;
 };
 
+class guiPolEnumNfg : public NfgSolutionG {
+public:
+  guiPolEnumNfg(const Nfg &, const NFSupport &, NfgShowInterface *);
+  virtual ~guiPolEnumNfg() { }
+  virtual gList<MixedSolution> Solve(void) const;
+  virtual bool SolveSetup(void) const;
+};
+
 class NfgZSumG : public NfgSolutionG   {
  public:
   NfgZSumG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);

@@ -742,6 +742,9 @@ void NfgShow::Solve(int id)
   case NFG_SOLVE_CUSTOM_SIMPDIV:
     solver = new NfgSimpdivG(nf, *sup, this);
     break;
+  case NFG_SOLVE_CUSTOM_POLENUM:
+    solver = new guiPolEnumNfg(nf, *sup, this);
+    break;
   case NFG_SOLVE_CUSTOM_QRE:
     solver = new NfgQreG(nf, *sup, this);
     break;

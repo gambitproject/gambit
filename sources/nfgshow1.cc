@@ -258,6 +258,8 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
 			  "Minimization of liapunov function");
   solveCustomMenu->Append(NFG_SOLVE_CUSTOM_SIMPDIV, "Simpdiv",
 			  "Solve via simplicial subdivision");
+  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_POLENUM, "PolEnum",
+			  "Enumeration by systems of polynomials");
   solveCustomMenu->Append(NFG_SOLVE_CUSTOM_QRE, "QRE",
 			  "Compute quantal response equilibrium");
   solveCustomMenu->Append(NFG_SOLVE_CUSTOM_QREGRID, "QREGrid",
@@ -501,6 +503,7 @@ void NormalSpread::OnMenuCommand(int id)
     case NFG_SOLVE_CUSTOM_LP:
     case NFG_SOLVE_CUSTOM_LIAP:
     case NFG_SOLVE_CUSTOM_SIMPDIV:
+    case NFG_SOLVE_CUSTOM_POLENUM:
     case NFG_SOLVE_CUSTOM_QRE:
     case NFG_SOLVE_CUSTOM_QREGRID:
       parent->Solve(id);

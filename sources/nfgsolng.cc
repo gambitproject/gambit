@@ -226,6 +226,36 @@ bool NfgSimpdivG::SolveSetup(void) const
 }
 
 //----------
+// PolEnum
+//----------
+
+#include "peprm.h"
+#include "polenum.h"
+
+guiPolEnumNfg::guiPolEnumNfg(const Nfg &p_nfg, const NFSupport &p_support,
+			     NfgShowInterface *p_parent)
+  : NfgSolutionG(p_nfg, p_support, p_parent)
+{ }
+
+gList<MixedSolution> guiPolEnumNfg::Solve(void) const
+{
+  guiPolEnumParamsSettings PES;
+  wxStatus status(parent->Frame(), "PolEnumSolve Algorithm");
+  PolEnumParams P(status);
+  PES.GetParams(P);
+  long nevals;
+  double time;
+  PolEnum(sup, P, solns, nevals, time);
+  return solns;
+}
+
+bool guiPolEnumNfg::SolveSetup(void) const
+{
+  guiPolEnumParamsDialog PEPD(parent->Frame());
+  return (PEPD.Completed() == wxOK);
+}
+
+//----------
 // Qre
 //----------
 
