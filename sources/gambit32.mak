@@ -7,10 +7,10 @@
 .AUTODEPEND
 
 # The following directories must be set or overriden for the target setup
-WXDIR = C:\WX2
-BCCDIR = C:\BORLAND\BCC55
-BISON = C:\CYGWIN\BIN\BISON
-
+WXDIR = D:\WX2
+BCCDIR = D:\BORLAND\BCC55
+BISON = D:\GAMBIT\BISONDOS\BISON
+	
 SOURCE_SUFFIX = .cc
 OBJECT_SUFFIX = .obj
 
@@ -79,6 +79,14 @@ wxgcl.res
 
 wxgcl.res :      ..\winsrc\res\wxgcl.rc 
     brc32 -r -fo.\wxgcl.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include ..\winsrc\res\wxgcl
+
+#
+# Notes on building bison parsers on DOS
+# gambit\bisondos\bison.exe is a bison-1.28 executable for DOS
+# To build the bison parsers, first set the environment variable
+# BISON_SIMPLE to the location of the bison.simple file, e.g.,
+# SET BISON_SIMPLE=c:\gambit\bisondos\bison.simple
+#
 
 gcompile.cc:     gcompile.yy
    $(BISON) -p gcl_yy -o gcompile.cc gcompile.yy
