@@ -130,7 +130,7 @@ int main( int /*argc*/, char* argv[] )
   _gsm = new GSM(256);
 
   GCLCompiler C;
-  gPreprocessor P(&gcmdline);
+  gPreprocessor P(&gcmdline, "Include[\"gclini.gcl\"]");
 
   while (!P.eof()) 
     C.Parse(P.GetLine(), P.GetFileName(), P.GetLineNumber());
