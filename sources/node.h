@@ -43,11 +43,18 @@ class Node    {
 
     int NumChildren(void) const    { return children.Length(); }
     Infoset *GetInfoset(void) const   { return infoset; }
+    bool IsTerminal(void) const { if (children.Length() == 0) return true; 
+                                  else return false; }
+    bool IsNonterminal(void) const { return !IsTerminal(); }
     EFPlayer *GetPlayer(void) const
       { if (!infoset)   return 0;
 	else  return infoset->GetPlayer(); }
 
     Node *GetChild(int i) const    { return children[i]; }
+    Node *GetChild(const Action& a) const    
+      { return children[a.GetNumber()]; }
+    Node *GetChild(const Action* a) const    
+    { return children[a->GetNumber()]; }
     Node *GetParent(void) const    { return parent; }
     Node *GetSubgameRoot(void) const  { return gameroot; }
     Node *NextSibling(void) const;
