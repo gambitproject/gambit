@@ -45,8 +45,9 @@ private:
 
   // Management of views
   gBlock<gbtGameView *> m_views;
-  bool m_showNfg, m_showOutcomes, m_showProfiles, m_showNfgSupports;
-  bool m_showEfgNavigate;
+  bool m_showOutcomes, m_showProfiles;
+  bool m_showEfgSupports, m_showEfgNavigate;
+  bool m_showNfg, m_showNfgSupports;
   
   void AddView(gbtGameView *);
   void RemoveView(gbtGameView *);
@@ -111,6 +112,9 @@ public:
 
   bool ShowEfgNavigate(void) const { return m_showEfgNavigate; }
   void SetShowEfgNavigate(bool p_show);
+
+  bool ShowEfgSupports(void) const { return m_showEfgSupports; }
+  void SetShowEfgSupports(bool p_show);
 
   // MARKED NODES
   void SetCursor(gbtEfgNode m_node);
@@ -183,7 +187,6 @@ public:
   gNumber ActionProb(const gbtEfgNode &, int br) const;
 
   // NORMAL FORM STATE
-  void MakeReducedNfg(void);
   gbtNfgGame GetNfg(void) const;
 
   gArray<int> GetContingency(void) const;

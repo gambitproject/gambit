@@ -31,6 +31,37 @@
 #include "efgsupport.h"
 #include "id.h"
 
+class EfgSupportWindow : public wxPanel, public gbtGameView {
+private:
+  wxChoice *m_supportList;
+  wxButton *m_prevButton, *m_nextButton;
+  wxTreeCtrl *m_actionTree;
+  gOrdMap<wxTreeItemId, gbtEfgAction> m_map;
+  wxMenu *m_menu;
+
+  void OnSupportList(wxCommandEvent &);
+  void OnSupportPrev(wxCommandEvent &);
+  void OnSupportNext(wxCommandEvent &);
+
+  void OnTreeItemCollapse(wxTreeEvent &);
+
+  void OnRightClick(wxMouseEvent &);
+
+  bool IsEfgView(void) const { return true; }
+  bool IsNfgView(void) const { return false; }
+
+public:
+  EfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~EfgSupportWindow() { }
+
+  int GetSupport(void) const { return m_supportList->GetSelection(); }
+  void ToggleItem(wxTreeItemId);
+
+  void OnUpdate(void);
+
+  DECLARE_EVENT_TABLE()
+};
+
 const int idACTIONTREE = 8003;
 
 class widgetActionTree : public wxTreeCtrl {
@@ -138,7 +169,7 @@ EfgSupportWindow::EfgSupportWindow(gbtGameDocument *p_doc,
   Show(true);
 }
 
-void EfgSupportWindow::OnUpdate(gbtGameView *)
+void EfgSupportWindow::OnUpdate(void)
 {
   m_supportList->Clear();
 
@@ -229,6 +260,69 @@ void EfgSupportWindow::ToggleItem(wxTreeItemId p_id)
   }
 
   m_doc->SetEfgSupport(m_supportList->GetSelection() + 1);
+}
+
+//-------------------------------------------------------------------------
+//                    class gbtEfgSupportFrame
+//-------------------------------------------------------------------------
+
+BEGIN_EVENT_TABLE(gbtEfgSupportFrame, wxFrame)
+  EVT_MENU(wxID_CLOSE, gbtEfgSupportFrame::Close)
+  EVT_CLOSE(gbtEfgSupportFrame::OnClose)
+END_EVENT_TABLE()
+
+gbtEfgSupportFrame::gbtEfgSupportFrame(gbtGameDocument *p_doc, 
+				       wxWindow *p_parent)
+  : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(300, 300)),
+    gbtGameView(p_doc)
+{
+  m_panel = new EfgSupportWindow(p_doc, this);
+
+  wxMenu *fileMenu = new wxMenu;
+  fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
+
+  wxMenu *editMenu = new wxMenu;
+
+  wxMenu *viewMenu = new wxMenu;
+
+  wxMenu *formatMenu = new wxMenu;
+
+  wxMenuBar *menuBar = new wxMenuBar;
+  menuBar->Append(fileMenu, "&File");
+  menuBar->Append(editMenu, "&Edit");
+  menuBar->Append(viewMenu, "&View");
+  menuBar->Append(formatMenu, "&Format");
+  SetMenuBar(menuBar);
+
+  Show(false);
+}
+
+gbtEfgSupportFrame::~gbtEfgSupportFrame()
+{ }
+
+void gbtEfgSupportFrame::OnClose(wxCloseEvent &p_event)
+{
+  m_doc->SetShowEfgSupports(false);
+  // Frame is now hidden; leave it that way, don't actually close
+  p_event.Veto();
+}
+
+void gbtEfgSupportFrame::OnUpdate(gbtGameView *p_sender)
+{
+  if (m_doc->ShowEfgSupports()) {
+    m_panel->OnUpdate();
+
+    if (m_doc->GetFilename() != "") {
+      SetTitle(wxString::Format("Gambit - Supports: [%s] %s", 
+				m_doc->GetFilename().c_str(), 
+				(char *) m_doc->GetEfg().GetTitle()));
+    }
+    else {
+      SetTitle(wxString::Format("Gambit - Supports: %s",
+				(char *) m_doc->GetEfg().GetTitle()));
+    }
+  }
+  Show(m_doc->ShowEfgSupports());
 }
 
 

@@ -27,38 +27,24 @@
 #ifndef EFGSHOW_H
 #define EFGSHOW_H
 
-#include "wx/listctrl.h"
-#include "wx/sashwin.h"
 #include "wx/printdlg.h"
-#include "wx/notebook.h"
+#include "gamedoc.h"
 
-#include "gambit.h"
-#include "nash/behavsol.h"
-
-class EfgSupportWindow;
 class TreeWindow;
 
 class EfgShow : public wxFrame, public gbtGameView {
 private:
   TreeWindow *m_treeWindow;
 
-  wxSashWindow *m_treeSashWindow, *m_nodeSashWindow;
-
-  wxNotebook *m_infoNotebook;
-  EfgSupportWindow *m_supportWindow;
-
   wxPageSetupData m_pageSetupData;
   wxPrintData m_printData;
 
   void MakeMenus(void);
   void MakeToolbar(void);
-  void AdjustSizes(void);
   
   // Event handlers
   void OnCloseWindow(wxCloseEvent &);
   void OnFocus(wxFocusEvent &);
-  void OnSize(wxSizeEvent &);
-  void OnSashDrag(wxSashEvent &);
 
   // Menu event handlers
   void OnFileNew(wxCommandEvent &);
@@ -126,8 +112,6 @@ private:
   void OnProfilesProperties(wxCommandEvent &);
   void OnProfilesReport(wxCommandEvent &);
   void OnProfileSelected(wxListEvent &);
-
-  void OnInfoNotebookPage(wxNotebookEvent &);
 
   // OVERRIDING DOCUMENT MEMBERS
   bool IsEfgView(void) const { return true; }

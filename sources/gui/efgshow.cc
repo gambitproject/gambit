@@ -139,9 +139,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(GBT_MENU_PROFILES_PROPERTIES, EfgShow::OnProfilesProperties)
   EVT_MENU(GBT_MENU_PROFILES_REPORT, EfgShow::OnProfilesReport)
   EVT_SET_FOCUS(EfgShow::OnFocus)
-  EVT_SIZE(EfgShow::OnSize)
   EVT_CLOSE(EfgShow::OnCloseWindow)
-  EVT_NOTEBOOK_PAGE_CHANGED(idINFONOTEBOOK, EfgShow::OnInfoNotebookPage)
 END_EVENT_TABLE()
 
 //---------------------------------------------------------------------
@@ -151,8 +149,7 @@ END_EVENT_TABLE()
 EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxFrame(p_parent, -1, "", wxPoint(0, 0), wxSize(600, 400)),
     gbtGameView(p_doc),
-    m_treeWindow(0),
-    m_supportWindow(0)
+    m_treeWindow(0)
 {
   SetSizeHints(300, 300);
 
@@ -180,30 +177,14 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   MakeMenus();
   MakeToolbar();
   
-  m_nodeSashWindow = new wxSashWindow(this, idNODEWINDOW,
-				      wxPoint(0, 40), wxSize(200, 200),
-				      wxNO_BORDER | wxSW_3D);
-  m_nodeSashWindow->SetSashVisible(wxSASH_RIGHT, true);
-
   m_treeWindow = new TreeWindow(m_doc, this);
-  m_treeWindow->SetSize(200, 40, 200, 200);
-
-  m_infoNotebook = new wxNotebook(m_nodeSashWindow, idINFONOTEBOOK);
 
   (void) new gbtEfgNavigateFrame(m_doc, this);
   (void) new gbtOutcomeFrame(m_doc, this);
-
-  m_supportWindow = new EfgSupportWindow(m_doc, m_infoNotebook);
-  m_supportWindow->SetSize(200, 200);
-  m_infoNotebook->AddPage(m_supportWindow, "Supports");
-  m_infoNotebook->SetSelection(0);
-
-  m_nodeSashWindow->Show(false);
-  m_nodeSashWindow->SetSashVisible(wxSASH_LEFT, false);
+  (void) new gbtEfgSupportFrame(m_doc, this);
   
   (void) new gbtProfileFrame(m_doc, this);
 
-  AdjustSizes();
   m_treeWindow->FitZoom();
 
   (void) new NfgShow(m_doc, this);
@@ -938,21 +919,7 @@ void EfgShow::OnViewOutcomes(wxCommandEvent &)
 
 void EfgShow::OnViewSupports(wxCommandEvent &)
 {
-  if (m_nodeSashWindow->IsShown() && m_infoNotebook->GetSelection() != 2) {
-    m_infoNotebook->SetSelection(2);
-    GetMenuBar()->Check(GBT_MENU_VIEW_SUPPORTS, true);
-  }
-  else if (m_nodeSashWindow->IsShown()) {
-    m_nodeSashWindow->Show(false);
-    GetMenuBar()->Check(GBT_MENU_VIEW_SUPPORTS, false);
-  }
-  else {
-    m_nodeSashWindow->Show(true);
-    m_infoNotebook->SetSelection(2);
-    GetMenuBar()->Check(GBT_MENU_VIEW_SUPPORTS, true);
-  }
-
-  AdjustSizes();
+  m_doc->SetShowEfgSupports(!m_doc->ShowEfgSupports());
 }
 
 const double ZOOM_DELTA = .1;
@@ -1322,27 +1289,6 @@ void EfgShow::OnProfileSelected(wxListEvent &p_event)
 //                  EfgShow: Non-menu event handlers
 //----------------------------------------------------------------------
 
-void EfgShow::OnInfoNotebookPage(wxNotebookEvent &p_event)
-{
-  if (!m_nodeSashWindow->IsShown()) {
-    return;
-  }
-
-  GetMenuBar()->Check(GBT_MENU_VIEW_OUTCOMES, false);
-  GetMenuBar()->Check(GBT_MENU_VIEW_SUPPORTS, false);
-
-  switch (p_event.GetSelection()) {
-  case 0:
-    GetMenuBar()->Check(GBT_MENU_VIEW_OUTCOMES, true);
-    break;
-  case 1:
-    GetMenuBar()->Check(GBT_MENU_VIEW_SUPPORTS, true);
-    break;
-  default:
-    break;
-  }
-}
-
 void EfgShow::OnCloseWindow(wxCloseEvent &p_event)
 {
   if (p_event.CanVeto() && m_doc->IsModified()) {
@@ -1362,43 +1308,6 @@ void EfgShow::OnFocus(wxFocusEvent &)
   m_treeWindow->SetFocus();
 }
 
-void EfgShow::OnSize(wxSizeEvent &)
-{
-  AdjustSizes();
-}
-
-void EfgShow::OnSashDrag(wxSashEvent &p_event)
-{
-  int clientWidth, clientHeight;
-  GetClientSize(&clientWidth, &clientHeight);
-
-  switch (p_event.GetId()) {
-  case idNODEWINDOW:
-    m_treeWindow->SetSize(p_event.GetDragRect().width,
-			  m_treeWindow->wxWindowBase::GetRect().y,
-			  clientWidth - p_event.GetDragRect().width,
-			  m_treeWindow->wxWindowBase::GetRect().height);
-    m_nodeSashWindow->SetSize(m_nodeSashWindow->GetRect().x,
-			      m_nodeSashWindow->GetRect().y,
-			      p_event.GetDragRect().width,
-			      m_nodeSashWindow->GetRect().height);
-    break;
-  }
-}
-
-void EfgShow::AdjustSizes(void)
-{
-  int width, height;
-  GetClientSize(&width, &height);
-
-  if (m_treeWindow) {
-    m_treeWindow->SetSize(0, 0, width, height);
-  }
-
-  if (m_treeWindow) {
-    m_treeWindow->SetFocus();
-  }
-}
 
 
 

@@ -30,22 +30,17 @@
 #endif  // WX_PRECOMP
 
 #include "base/base.h"
-#include "gamedoc.h"
 #include "game/efg.h"
 #include "game/efstrat.h"
 #include "game/nfg.h"
-
-// FIXME: It would be nice not to have these dependencies...
-// once all data manipulation is moved into this class, they should
-// be removable.
-#include "efgshow.h"
-#include "nfgshow.h"
+#include "gamedoc.h"
+#include "gambit.h"
 
 gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
   : m_filename(p_filename), m_modified(false),
-    m_showNfg(false), m_showOutcomes(false), 
-    m_showProfiles(false), m_showNfgSupports(false),
-    m_showEfgNavigate(false),
+    m_showOutcomes(false), m_showProfiles(false),
+    m_showEfgSupports(false), m_showEfgNavigate(false),
+    m_showNfg(false), m_showNfgSupports(false),
     m_efg(new gbtEfgGame(p_efg)), 
     m_cursor(0), m_copyNode(0), m_cutNode(0),
     m_curEfgSupport(0),
@@ -73,9 +68,9 @@ gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
 
 gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg, wxString p_filename)
   : m_filename(p_filename), m_modified(false),
-    m_showNfg(true), m_showOutcomes(false), 
-    m_showProfiles(false), m_showNfgSupports(false),
-    m_showEfgNavigate(false),
+    m_showOutcomes(false), m_showProfiles(false),
+    m_showEfgSupports(false), m_showEfgNavigate(false),
+    m_showNfg(true), m_showNfgSupports(false),
     m_efg(0),
     m_cursor(0), m_copyNode(0), m_cutNode(0),
     m_curEfgSupport(0), 
@@ -503,26 +498,6 @@ gbtNfgGame gbtGameDocument::GetNfg(void) const
   }
 }
 
-void gbtGameDocument::MakeReducedNfg(void)
-{
-  m_nfg = new gbtNfgGame(m_efg->GetReducedNfg(*m_curEfgSupport));
-  m_contingency = gArray<int>(m_nfg->NumPlayers());
-  for (int pl = 1; pl <= m_nfg->NumPlayers(); m_contingency[pl++] = 1);
-
-  m_curNfgSupport = new gbtNfgSupport(*m_nfg);
-  m_curNfgSupport->SetName("Full Support");
-  m_nfgSupports.Append(m_curNfgSupport);
-  (void) new NfgShow(this, 0);
-
-  m_mixedProfiles.Flush();
-  for (int i = 1; i <= m_behavProfiles.Length(); i++) {
-    BehavProfile<gNumber> profile(*m_behavProfiles[i].Profile());
-    MixedProfile<gNumber> mixed(profile);
-    AddProfile(MixedSolution(mixed, m_behavProfiles[i].Creator()));
-  }
-  UpdateViews(0, true, true);
-}
-
 gText gbtGameDocument::UniqueMixedProfileName(void) const
 {
   int number = m_mixedProfiles.Length() + 1;
@@ -641,6 +616,12 @@ void gbtGameDocument::SetShowNfgSupports(bool p_show)
 void gbtGameDocument::SetShowEfgNavigate(bool p_show)
 {
   m_showEfgNavigate = p_show;
+  UpdateViews(0, true, false);
+}
+
+void gbtGameDocument::SetShowEfgSupports(bool p_show)
+{
+  m_showEfgSupports = p_show;
   UpdateViews(0, true, false);
 }
 

@@ -32,32 +32,23 @@
 #include "gamedoc.h"
 #include "base/gmap.h"
 
-class EfgSupportWindow : public wxPanel, public gbtGameView {
+class EfgSupportWindow;
+
+class gbtEfgSupportFrame : public wxFrame, public gbtGameView {
 private:
-  wxChoice *m_supportList;
-  wxButton *m_prevButton, *m_nextButton;
-  wxTreeCtrl *m_actionTree;
-  gOrdMap<wxTreeItemId, gbtEfgAction> m_map;
-  wxMenu *m_menu;
+  EfgSupportWindow *m_panel;
 
-  void OnSupportList(wxCommandEvent &);
-  void OnSupportPrev(wxCommandEvent &);
-  void OnSupportNext(wxCommandEvent &);
-
-  void OnTreeItemCollapse(wxTreeEvent &);
-
-  void OnRightClick(wxMouseEvent &);
-
+  // Event handlers
+  void OnClose(wxCloseEvent &);
+  
+  // Overriding view members
   bool IsEfgView(void) const { return true; }
   bool IsNfgView(void) const { return false; }
   void OnUpdate(gbtGameView *);
 
 public:
-  EfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
-  virtual ~EfgSupportWindow() { }
-
-  int GetSupport(void) const { return m_supportList->GetSelection(); }
-  void ToggleItem(wxTreeItemId);
+  gbtEfgSupportFrame(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtEfgSupportFrame();
 
   DECLARE_EVENT_TABLE()
 };
