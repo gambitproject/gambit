@@ -88,29 +88,34 @@ gbtList<BehavSolution> gbtEfgNashEnumPoly::Solve(const gbtEfgSupport &p_support,
   gbtList<const gbtEfgSupport> singularSupports;
   gbtList<BehavSolution> solutions;
 
-  for (int i = 1; (i <= supports.Length() &&
-		   (m_stopAfter == 0 || m_stopAfter > solutions.Length()));
-       i++) {
-    p_status.Get();
-    p_status.SetProgress((double) (i-1) / (double) supports.Length());
-    long newevals = 0;
-    double newtime = 0.0;
-    gbtList<BehavSolution> newsolns;
-    bool is_singular = false;
+  try {
+    for (int i = 1; (i <= supports.Length() &&
+		     (m_stopAfter == 0 || m_stopAfter > solutions.Length()));
+	 i++) {
+      p_status.Get();
+      p_status.SetProgress((double) (i-1) / (double) supports.Length());
+      long newevals = 0;
+      double newtime = 0.0;
+      gbtList<BehavSolution> newsolns;
+      bool is_singular = false;
 
-    EfgPolEnumParams params;
-    params.stopAfter = 0;
-    EfgPolEnum(supports[i], params, newsolns, p_status, 
-	       newevals, newtime, is_singular);
-    for (int j = 1; j <= newsolns.Length(); j++) {
-      if (newsolns[j].IsANFNash()) {
-	solutions += newsolns[j];
+      EfgPolEnumParams params;
+      params.stopAfter = 0;
+      EfgPolEnum(supports[i], params, newsolns, p_status, 
+		 newevals, newtime, is_singular);
+      for (int j = 1; j <= newsolns.Length(); j++) {
+	if (newsolns[j].IsANFNash()) {
+	  solutions += newsolns[j];
+	}
+      }
+
+      if (is_singular) { 
+	singularSupports += supports[i];
       }
     }
-
-    if (is_singular) { 
-      singularSupports += supports[i];
-    }
+  }
+  catch (gbtSignalBreak &) {
+    // catch exception; return list of computed equilibria (if any)
   }
 
   return solutions;

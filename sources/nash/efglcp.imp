@@ -103,18 +103,23 @@ gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
     
   gbtList<BehavSolution> solutions;
 
-  if (m_stopAfter != 1) {
-    All_Lemke(p_support, ns1+ns2+1, tab, 0, A, solutions, p_status);
+  try {
+    if (m_stopAfter != 1) {
+      All_Lemke(p_support, ns1+ns2+1, tab, 0, A, solutions, p_status);
+    }
+    else {
+      tab.Pivot(ns1+ns2+1,0);
+      tab.SF_LCPPath(ns1+ns2+1, p_status);
+      
+      Add_BFS(tab);
+      tab.BasisVector(sol);
+      GetProfile(p_support, tab, profile.GetDPVector(), sol,
+		 p_support.GetGame().GetRoot(), 1, 1);
+      solutions.Append(BehavSolution(profile, "Lcp[EFG]"));
+    }
   }
-  else {
-    tab.Pivot(ns1+ns2+1,0);
-    tab.SF_LCPPath(ns1+ns2+1, p_status);
-
-    Add_BFS(tab);
-    tab.BasisVector(sol);
-    GetProfile(p_support, tab, profile.GetDPVector(), sol,
-	       p_support.GetGame().GetRoot(), 1, 1);
-    solutions.Append(BehavSolution(profile, "Lcp[EFG]"));
+  catch (gbtSignalBreak &) {
+    // catch exception; return list of computed equilibria (if any)
   }
 
   return solutions;

@@ -49,50 +49,56 @@ gbtList<BehavSolution> gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
   }
 
   int contNumber = 1;
-  do  {
-    p_status.Get();
-    p_status.SetProgress((double) contNumber / (double) ncont);
+  try {
+    do  {
+      p_status.Get();
+      p_status.SetProgress((double) contNumber / (double) ncont);
 
-    bool flag = true;
-    citer.GetProfile().InfosetProbs(probs);
+      bool flag = true;
+      citer.GetProfile().InfosetProbs(probs);
 
-    gbtEfgIterator eiter(citer);
-
-    for (int pl = 1; flag && pl <= p_support.GetGame().NumPlayers(); pl++)  {
-      gbtNumber current = citer.Payoff(pl);
-      for (int iset = 1;
-	   flag && iset <= p_support.GetGame().GetPlayer(pl).NumInfosets();
-	   iset++)  {
-      	if (probs(pl, iset) == gbtNumber(0))   continue;
-       	for (int act = 1; act <= p_support.NumActions(pl, iset); act++)  {
-	  eiter.Next(pl, iset);
-	  if (eiter.Payoff(pl) > current)  {
-	    flag = false;
-	    break;
+      gbtEfgIterator eiter(citer);
+      
+      for (int pl = 1; flag && pl <= p_support.GetGame().NumPlayers(); pl++)  {
+	gbtNumber current = citer.Payoff(pl);
+	for (int iset = 1;
+	     flag && iset <= p_support.GetGame().GetPlayer(pl).NumInfosets();
+	     iset++)  {
+	  if (probs(pl, iset) == gbtNumber(0))   continue;
+	  for (int act = 1; act <= p_support.NumActions(pl, iset); act++)  {
+	    eiter.Next(pl, iset);
+	    if (eiter.Payoff(pl) > current)  {
+	      flag = false;
+	      break;
+	    }
 	  }
-      	}
-      }
-    }
-
-    if (flag)  {
-      gbtBehavProfile<gbtNumber> temp(gbtEfgSupport(p_support.GetGame()));
-      // zero out all the entries, since any equilibria are pure
-      ((gbtVector<gbtNumber> &) temp).operator=(gbtNumber(0));
-      const gbtPureBehavProfile<gbtNumber> &profile = citer.GetProfile();
-      for (gbtEfgPlayerIterator player(p_support.GetGame());
-	   !player.End(); player++) {
-	for (gbtEfgInfosetIterator infoset(*player);
-	     !infoset.End(); infoset++) {
-	  temp((*player).GetId(),
-	       (*infoset).GetId(),
-	       profile.GetAction(*infoset).GetId()) = 1;
 	}
       }
 
-      solutions.Append(BehavSolution(temp, "EnumPure[EFG]"));
-    }
-    contNumber++;
-  }  while ((m_stopAfter == 0 || solutions.Length() < m_stopAfter) &&
-	    citer.NextContingency());
+      if (flag)  {
+	gbtBehavProfile<gbtNumber> temp(gbtEfgSupport(p_support.GetGame()));
+	// zero out all the entries, since any equilibria are pure
+	((gbtVector<gbtNumber> &) temp).operator=(gbtNumber(0));
+	const gbtPureBehavProfile<gbtNumber> &profile = citer.GetProfile();
+	for (gbtEfgPlayerIterator player(p_support.GetGame());
+	     !player.End(); player++) {
+	  for (gbtEfgInfosetIterator infoset(*player);
+	       !infoset.End(); infoset++) {
+	    temp((*player).GetId(),
+		 (*infoset).GetId(),
+		 profile.GetAction(*infoset).GetId()) = 1;
+	  }
+	}
+
+	solutions.Append(BehavSolution(temp, "EnumPure[EFG]"));
+      }
+      contNumber++;
+    }  while ((m_stopAfter == 0 || solutions.Length() < m_stopAfter) &&
+	      citer.NextContingency());
+  }
+  catch (gbtSignalBreak &) {
+    // catch exception; return list of computed equilibria (if any)
+  }
+
   return solutions;
 }

@@ -458,8 +458,8 @@ gbtNfgNashEnumPoly::gbtNfgNashEnumPoly(void)
   : m_stopAfter(0)
 { }
 
-gbtList<MixedSolution> gbtNfgNashEnumPoly::Solve(const gbtNfgSupport &p_support,
-					       gbtStatus &p_status)
+gbtList<MixedSolution> 
+gbtNfgNashEnumPoly::Solve(const gbtNfgSupport &p_support, gbtStatus &p_status)
 {
   p_status.SetProgress(0.0);
   p_status << "Step 1 of 2: Enumerating supports";
@@ -472,30 +472,35 @@ gbtList<MixedSolution> gbtNfgNashEnumPoly::Solve(const gbtNfgSupport &p_support,
   gbtList<const gbtNfgSupport> singularSupports;
   gbtList<MixedSolution> solutions;
 
-  for (int i = 1; (i <= supports.Length() &&
-		   (m_stopAfter == 0 || m_stopAfter > solutions.Length())); 
-       i++) {
-    p_status.Get();
-    p_status.SetProgress((double) (i-1) / (double) supports.Length());
-    long newevals = 0;
-    double newtime = 0.0;
-    gbtList<MixedSolution> newsolns;
-    bool is_singular = false;
-    
-    PolEnumParams params;
-    params.stopAfter = 0;
-    PolEnum(supports[i], params, newsolns, p_status,
-	    newevals, newtime, is_singular);
+  try { 
+    for (int i = 1; (i <= supports.Length() &&
+		     (m_stopAfter == 0 || m_stopAfter > solutions.Length())); 
+	 i++) {
+      p_status.Get();
+      p_status.SetProgress((double) (i-1) / (double) supports.Length());
+      long newevals = 0;
+      double newtime = 0.0;
+      gbtList<MixedSolution> newsolns;
+      bool is_singular = false;
+      
+      PolEnumParams params;
+      params.stopAfter = 0;
+      PolEnum(supports[i], params, newsolns, p_status,
+	      newevals, newtime, is_singular);
+      
+      for (int j = 1; j <= newsolns.Length(); j++) {
+	if (newsolns[j].IsNash()) {
+	  solutions += newsolns[j];
+	}
+      }
 
-    for (int j = 1; j <= newsolns.Length(); j++) {
-      if (newsolns[j].IsNash()) {
-	solutions += newsolns[j];
+      if (is_singular) { 
+	singularSupports += supports[i];
       }
     }
-
-    if (is_singular) { 
-      singularSupports += supports[i];
-    }
+  }
+  catch (gbtSignalBreak &) {
+    // catch exception; return list of computed equilibria (if any)
   }
 
   return solutions;

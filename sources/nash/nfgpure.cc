@@ -44,36 +44,41 @@ gbtList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
   }
 
   int contNumber = 1;
-  do  {
-    p_status.Get();
-    p_status.SetProgress((double) contNumber / (double) ncont);
+  try {
+    do  {
+      p_status.Get();
+      p_status.SetProgress((double) contNumber / (double) ncont);
 
-    bool flag = true;
-    gbtNfgIterator niter(citer);
+      bool flag = true;
+      gbtNfgIterator niter(citer);
     
-    for (int pl = 1; flag && pl <= nfg.NumPlayers(); pl++)  {
-      gbtNumber current = citer.GetPayoff(nfg.GetPlayer(pl));
-      for (int i = 1; i <= p_support.NumStrats(pl); i++)  {
-	niter.Next(pl);
-	if (niter.GetPayoff(nfg.GetPlayer(pl)) > current)  {
-	  flag = false;
-	  break;
+      for (int pl = 1; flag && pl <= nfg.NumPlayers(); pl++)  {
+	gbtNumber current = citer.GetPayoff(nfg.GetPlayer(pl));
+	for (int i = 1; i <= p_support.NumStrats(pl); i++)  {
+	  niter.Next(pl);
+	  if (niter.GetPayoff(nfg.GetPlayer(pl)) > current)  {
+	    flag = false;
+	    break;
+	  }
 	}
       }
-    }
-    
-    if (flag)  {
-      gbtMixedProfile<gbtNumber> temp(p_support.GetGame());
-      ((gbtVector<gbtNumber> &) temp).operator=(gbtNumber(0));
-      MixedSolution soln(temp, "EnumPure[NFG]");
-      for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
-	soln.SetStrategyProb(citer.GetProfile().GetStrategy(pl), 1);
+      
+      if (flag)  {
+	gbtMixedProfile<gbtNumber> temp(p_support.GetGame());
+	((gbtVector<gbtNumber> &) temp).operator=(gbtNumber(0));
+	MixedSolution soln(temp, "EnumPure[NFG]");
+	for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
+	  soln.SetStrategyProb(citer.GetProfile().GetStrategy(pl), 1);
+	}
+	solutions.Append(soln);
       }
-      solutions.Append(soln);
-    }
-    contNumber++;
-  }  while ((m_stopAfter == 0 || solutions.Length() < m_stopAfter) &&
-	    citer.NextContingency());
+      contNumber++;
+    }  while ((m_stopAfter == 0 || solutions.Length() < m_stopAfter) &&
+	      citer.NextContingency());
+  }
+  catch (gbtSignalBreak &) {
+    // catch exception; return list of computed equilibria (if any)
+  }
 
   return solutions;
 }
