@@ -87,6 +87,37 @@ Portion *GSM_WriteEfg(Portion **param)
     return 0;
 }
 
+//
+// A few temporary functions for modifying game parameters.  Don't document!
+// :-)
+//
+
+#include "infoset.h"
+#include "player.h"
+
+Portion *GSM_SetOutcome(Portion **param)
+{
+  ExtForm<double> *E = &((Efg_Portion<double> *) param[0])->Value();
+  int outc = (((numerical_Portion<gInteger> *) param[1])->Value()).as_long();
+  int pl   = (((numerical_Portion<gInteger> *) param[2])->Value()).as_long();
+  double value = (((numerical_Portion<double> *) param[3])->Value());
+
+  ((OutcomeVector<double> &) *E->OutcomeList()[outc])[pl] = value;
+  return new numerical_Portion<double>(value);
+}
+
+Portion *GSM_SetActionProb(Portion **param)
+{
+  ExtForm<double> *E = &((Efg_Portion<double> *) param[0])->Value();
+  int iset = (((numerical_Portion<gInteger> *) param[1])->Value()).as_long();
+  int act  = (((numerical_Portion<gInteger> *) param[2])->Value()).as_long();
+  double value = (((numerical_Portion<double> *) param[3])->Value());
+
+  ((ChanceInfoset<double> &) *E->GetChance()->InfosetList()[iset]).SetActionProb(act, value);
+  return new numerical_Portion<double>(value);
+}
+
+
 void Init_efgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
@@ -129,6 +160,22 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("LiapEfg");
   FuncObj->SetFuncInfo(GSM_LiapEfg, 1);
   FuncObj->SetParamInfo(GSM_LiapEfg, 0, "E", porEFG_DOUBLE, NO_DEFAULT_VALUE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("SetOutcome");
+  FuncObj->SetFuncInfo(GSM_SetOutcome, 4);
+  FuncObj->SetParamInfo(GSM_SetOutcome, 0, "E", porEFG_DOUBLE, NO_DEFAULT_VALUE);
+  FuncObj->SetParamInfo(GSM_SetOutcome, 1, "outc", porINTEGER, NO_DEFAULT_VALUE);
+  FuncObj->SetParamInfo(GSM_SetOutcome, 2, "pl", porINTEGER, NO_DEFAULT_VALUE);
+  FuncObj->SetParamInfo(GSM_SetOutcome, 3, "value", porDOUBLE, NO_DEFAULT_VALUE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("SetActionProb");
+  FuncObj->SetFuncInfo(GSM_SetActionProb, 4);
+  FuncObj->SetParamInfo(GSM_SetActionProb, 0, "E", porEFG_DOUBLE, NO_DEFAULT_VALUE);
+  FuncObj->SetParamInfo(GSM_SetActionProb, 1, "iset", porINTEGER, NO_DEFAULT_VALUE);
+  FuncObj->SetParamInfo(GSM_SetActionProb, 2, "act", porINTEGER, NO_DEFAULT_VALUE);
+  FuncObj->SetParamInfo(GSM_SetActionProb, 3, "value", porDOUBLE, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 }
 
