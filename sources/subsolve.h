@@ -26,7 +26,7 @@ template <class T> class SubgameSolver   {
     virtual void SolveSubgame(const Efg<T> &, gList<BehavProfile<T> > &) = 0;
 
     virtual void ViewSubgame(const Efg<T> &);
-    virtual void ViewNormal(Nfg<T> &);
+    virtual void ViewNormal(const Nfg<T> &, NFSupport &);
     virtual void SelectSolutions(const Efg<T> &, gList<BehavProfile<T> > &);
 
   public:

@@ -153,12 +153,10 @@ void SubgameSolver<T>::ViewSubgame(const Efg<T> &)
 // This is called in the normal-form solution modules after the normal
 // form is constructed.  Note especially that the Nfg is passed
 // non-const, so that strategies may be eliminated as seen fit.
-// There is no restriction that the payoffs or anything else cannot
-// get modified; if the called code does anything "weird", the solutions
-// will of course be bogus.
+// It is assumed that the NFSupport returned is "sensible"
 
 template <class T>
-void SubgameSolver<T>::ViewNormal(Nfg<T> &)
+void SubgameSolver<T>::ViewNormal(const Nfg<T> &, NFSupport &)
 { }
 
 // This is called for each subgame after the solutions have been computed
@@ -274,9 +272,11 @@ void NFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E,
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
-  ViewNormal(*N);
+  NFSupport S(*N);
 
-  MixedProfile<T> mp(*N);
+  ViewNormal(*N, S);
+
+  MixedProfile<T> mp(*N, S);
 
   NFLiapModule<T> M(*N, params, mp);
   
@@ -312,9 +312,11 @@ void LemkeBySubgame<T>::SolveSubgame(const Efg<T> &E,
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
-  ViewNormal(*N);
+  NFSupport S(*N);
 
-  MixedProfile<T> mp(*N);
+  ViewNormal(*N, S);
+
+  MixedProfile<T> mp(*N, S);
 
   LemkeModule<T> M(*N, params, mp.GetNFSupport());
   
@@ -350,9 +352,11 @@ void SimpdivBySubgame<T>::SolveSubgame(const Efg<T> &E,
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
-  ViewNormal(*N);
+  NFSupport S(*N);
 
-  MixedProfile<T> mp(*N);
+  ViewNormal(*N, S);
+
+  MixedProfile<T> mp(*N, S);
 
   SimpdivModule<T> M(*N, params, mp.GetNFSupport());
   
@@ -388,9 +392,11 @@ void EnumBySubgame<T>::SolveSubgame(const Efg<T> &E,
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
-  ViewNormal(*N);
+  NFSupport S(*N);
 
-  MixedProfile<T> mp(*N);
+  ViewNormal(*N, S);
+
+  MixedProfile<T> mp(*N, S);
 
   EnumModule<T> M(*N, params, mp.GetNFSupport());
   
@@ -425,7 +431,9 @@ void PureNashBySubgame<T>::SolveSubgame(const Efg<T> &E,
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
-  ViewNormal(*N);
+  NFSupport S(*N);
+
+  ViewNormal(*N, S);
 
   gList<MixedProfile<T> > sol;
   FindPureNash(*N, sol);
@@ -457,9 +465,11 @@ void ZSumBySubgame<T>::SolveSubgame(const Efg<T> &E,
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
-  ViewNormal(*N);
+  NFSupport S(*N);
 
-  MixedProfile<T> mp(*N);
+  ViewNormal(*N, S);
+
+  MixedProfile<T> mp(*N, S);
 
   ZSumModule<T> M(*N, params, mp.GetNFSupport());
   
