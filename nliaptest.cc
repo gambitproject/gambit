@@ -12,9 +12,9 @@ main()
 {
   Nfg<double> *N = 0;
   ReadNfgFile(gin, N);
-  NFLiapParams<double> P;
-  P.trace=2;
-//  P.tracefile=&gout;
+  NFLiapParams P;
+  P.trace=3;
+  P.tracefile=&gout;
 //  P.nequilib=1;
   MixedProfile<double> S(*N);
   NFLiapModule<double> M( *N, P, S);

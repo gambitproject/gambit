@@ -15,7 +15,7 @@
 
 class EFLiapParams : public LiapParams  {
 public:
-	EFLiapParams(void);
+	EFLiapParams(gStatus &status_=gstatus);
 };
 
 
@@ -36,6 +36,12 @@ template <class T> class EFLiapModule : public LiapModule<T>  {
 
 
 #endif    // ELIAP_H
+
+
+
+
+
+
 
 
 

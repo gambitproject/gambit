@@ -15,7 +15,8 @@
 //                     NFLiapParams: Member functions
 //-------------------------------------------------------------------------
 
-NFLiapParams::NFLiapParams(void)
+NFLiapParams::NFLiapParams(gStatus &status_)
+  : LiapParams(status_)
 { }
 
 //-------------------------------------------------------------------------
@@ -56,9 +57,9 @@ class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
 //------------------------------------------------------------------------
 
 template <class T>
-NFLiapFunc<T>::NFLiapFunc(const Nfg<T> &NF, const LiapParams &,
+NFLiapFunc<T>::NFLiapFunc(const Nfg<T> &NF, const LiapParams & LP,
 			  const MixedProfile<T>& s)
-  : gBC2FunctMin<T>(s.Length()), niters(0), nevals(0),
+  : gBC2FunctMin<T>(s.Length(),LP.status), niters(0), nevals(0),
     N(NF), p(s), pp(s)
 { }
 

@@ -14,7 +14,7 @@
 
 class NFLiapParams : public LiapParams  {
   public:
-    NFLiapParams(void);
+    NFLiapParams(gStatus &status_ = gstatus);
 };
 
 template <class T> class NFLiapModule : public LiapModule<T>  {

@@ -22,7 +22,8 @@
 //                     EFLiapParams<T>: Member functions
 //-------------------------------------------------------------------------
 
-EFLiapParams::EFLiapParams(void)
+EFLiapParams::EFLiapParams(gStatus &status_)
+  : LiapParams(status_)
 { }
 
 //-------------------------------------------------------------------------
@@ -61,8 +62,8 @@ class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
 //----------------------------------------------------------------------
 
 template <class T>
-EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams &)
-  : gBFunctMin<T>(EF.ProfileLength()), niters(0), nevals(0), E(EF),
+EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams &LP)
+  : gBFunctMin<T>(EF.ProfileLength(),LP.status), niters(0), nevals(0), E(EF),
     p(EF, false), pp(EF, false), cpay(EF.Dimensionality()),
     xi(p.Length(), p.Length())
 {

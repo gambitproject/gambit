@@ -403,7 +403,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
   gWatch watch;
 
   if(leash==0)leash=32000;  // not the best way to do this.  Change this!
-  bestz=(T)1.0e30;
+  bestz=(T)1.0e30;          // ditto
   mingrid=(T)(2);
   for(i=1;i<=params.nRestarts;i++)mingrid=mingrid*(T)(2);
   mingrid = ((T)(1))/mingrid;
@@ -418,34 +418,31 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
 //  *params.tracefile << "\ny = " << y;
   
   solutions.Flush();
-  for(soln=0;soln<params.stopAfter && !params.status.Get();soln++)
-    {
-      k=1;
-      d=(T) 1.0 / (T) k;
-      for(i=1;i<=nplayers;i++)
-	{
+  for(soln=0;soln<params.stopAfter && !params.status.Get();soln++) {
+    k=1;
+    d=(T) 1.0 / (T) k;
+    for(i=1;i<=nplayers;i++) {
 //	  *params.tracefile << "\n i = " << i;
-	  y(i,1)=(T)(1);
-	  for(j=1;j<=nstrats[i];j++)
-	    if(j>1)y(i,j)=(T)(0);
-	}
+      y(i,1)=(T)(1);
+      for(j=1;j<=nstrats[i];j++)
+	if(j>1)y(i,j)=(T)(0);
+    }
+    
+    for(qf=0,ii=0;qf!=1 && d > mingrid && !params.status.Get();ii++) {
+      params.status.SetProgress((double)ii/(double)params.nRestarts);
+      d=(T)(d/(T)2.0);
+      for(i=1;i<=nplayers;i++)
+	for(j=1;j<=nstrats[i];j++)
+	  v(i,j)=y(i,j);
+      maxz=simplex();
       
-      for(qf=0;qf!=1 && d > mingrid && !params.status.Get();)
-	{
-	  ii=0;
-	  d=(T)(d/(T)2.0);
-	  for(i=1;i<=nplayers;i++)
-	    for(j=1;j<=nstrats[i];j++)
-	      v(i,j)=y(i,j);
-	  maxz=simplex();
-	  
 //	  if(maxz<(T)(TOL) || nevals>=MAXIT)qf=1;
-	  if(maxz<(T)(TOL))qf=1;
-	}
-      *params.tracefile << "\nSimpDiv solution # " << soln+1 << " : " << y;
-      *params.tracefile << " maxz = " << maxz; 
-      solutions.Append(MixedProfile<T>(y));
-   }
+      if(maxz<(T)(TOL))qf=1;
+    }
+    *params.tracefile << "\nSimpDiv solution # " << soln+1 << " : " << y;
+    *params.tracefile << " maxz = " << maxz; 
+    solutions.Append(MixedProfile<T>(y));
+  }
   if(params.status.Get()) params.status.Reset();
 
   time = watch.Elapsed();
