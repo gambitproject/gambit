@@ -116,6 +116,68 @@ gOutput& operator << (gOutput& s, const gNumber& x)
   return s;
 }
 
+  //  Basically identical to the rational >> operator, but sets y to be 
+  // either a double or rational depending on input.
+gInput& operator >> (gInput& f, gNumber& y)
+{
+  char ch = ' ';
+  int sign = 1;
+  bool isDouble = false;
+  gInteger num = 0, denom = 1;
+
+  while (isspace(ch))    f >> ch;
+  
+  if (ch == '-')  { 
+    sign = -1;
+    f >> ch;
+  }
+  
+  while (ch >= '0' && ch <= '9')   {
+    num *= 10;
+    num += (int) (ch - '0');
+    f >> ch;
+  }
+  
+  if (ch == '/')  {
+    denom = 0;
+    f >> ch;
+    while (ch >= '0' && ch <= '9')  {
+      denom *= 10;
+      denom += (int) (ch - '0');
+      f >> ch;
+    }
+  }
+  else if (ch == '.')  {
+    isDouble = true;
+    denom = 1;
+    f >> ch;
+    while (ch >= '0' && ch <= '9')  {
+      denom *= 10;
+      num *= 10;
+      num += (int) (ch - '0');
+      f >> ch;
+    }
+  }
+
+  f.unget(ch);
+  gRational geez;
+  geez = gRational(sign * num, denom);
+  /*geez.normalize();*/
+
+  if (isDouble == true)
+  {
+    y = (double) geez;
+  }
+  else
+  {
+    y = geez;
+  }
+
+  return f;
+}
+
+
+
 double gNumber::GetDub() const
 {
   if (rep == DOUBLE)

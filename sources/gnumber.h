@@ -55,6 +55,7 @@ public:
   friend gNumber  operator - (const gNumber& x);
 
   friend gOutput&    operator << (gOutput& s, const gNumber& y);
+  friend gInput&     operator >> (gInput& s,  const gNumber& y);
 
   void             error(const char* msg) const;
   double           GetDub() const;
