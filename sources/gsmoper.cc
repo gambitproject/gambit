@@ -514,7 +514,7 @@ Portion* GSM_Power_Int_Int(Portion** param)
 {
   long base = ((IntPortion*) param[0])->Value();
   long exponent = ((IntPortion*) param[1])->Value();
-  return new IntValPortion( (long) pow( base, exponent ) );
+  return new IntValPortion( (long) pow( (double) base, (double) exponent ) );
 }
 
 Portion* GSM_Power_Float_Int(Portion** param)

@@ -28,7 +28,10 @@ typedef enum { DOUBLE, RATIONAL }  DataType;
 template <class T> T gmin(const T &a, const T &b);
 template <class T> T gmax(const T &a, const T &b);
 
+#ifndef hpux
 double abs(double a);
+#endif   // hpux
+
 int sign(const double &a);
 
 //
