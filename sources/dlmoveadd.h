@@ -11,7 +11,7 @@ typedef enum { NodeAddNew, NodeAddIset } NodeAddMode;
 
 class dialogMoveAdd : public guiAutoDialog {
 private:
-  Efg &m_efg;
+  FullEfg &m_efg;
   int m_branches;
 
   wxListBox *m_playerItem, *m_infosetItem;
@@ -32,7 +32,8 @@ private:
   const char *HelpString(void) const { return "Node Menu"; }
   
 public:
-  dialogMoveAdd(Efg &, const gText &, EFPlayer *player=0, Infoset *infoset=0,
+  dialogMoveAdd(FullEfg &, const gText &,
+		EFPlayer *player=0, Infoset *infoset=0,
                 int branches=2, wxFrame *frame=0);
   virtual ~dialogMoveAdd();
 

@@ -86,7 +86,8 @@ EFPlayer *dialogEfgSelectPlayer::GetPlayer(void)
 //                     dialogMoveAdd: Member functions
 //=========================================================================
 
-dialogMoveAdd::dialogMoveAdd(Efg &p_efg, const gText &p_title, EFPlayer *p_player,
+dialogMoveAdd::dialogMoveAdd(FullEfg &p_efg,
+			     const gText &p_title, EFPlayer *p_player,
 			     Infoset *p_infoset, int p_branches,
 			     wxFrame *p_frame)
   : guiAutoDialog(p_frame, p_title),
@@ -215,8 +216,11 @@ EFPlayer *dialogMoveAdd::GetPlayer(void) const
     return m_efg.GetChance();
   else if (playerNumber <= m_efg.NumPlayers())
     return m_efg.Players()[playerNumber];
-  else
-    return 0;
+  else {
+    EFPlayer *player = m_efg.NewPlayer();
+    player->SetName("Player" + m_efg.NumPlayers());
+    return player;
+  }
 }
 
 Infoset *dialogMoveAdd::GetInfoset(void) const
@@ -316,7 +320,7 @@ dialogActionSelect::dialogActionSelect(Infoset *p_infoset,
   : guiAutoDialog(p_parent, p_caption), m_infoset(p_infoset)
 {
   SetLabelPosition(wxVERTICAL);
-  m_actionList = new wxListBox(this, 0, p_label, 1, 1);
+  m_actionList = new wxListBox(this, 0, p_label, wxSINGLE, 1, 1);
   for (int act = 1; act <= p_infoset->NumActions(); act++) {
     m_actionList->Append(ToText(act) + ": " +
 			 p_infoset->Actions()[act]->GetName());
