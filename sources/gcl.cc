@@ -112,8 +112,18 @@ int main( int /*argc*/, char* argv[] )
 
   try {
     _ExePath = new char[strlen(argv[0]) + 2];
+#ifdef __BORLANDC__
+    // Apparently, Win95 surrounds the program name with explicit quotes;
+    // if this occurs, special case code
+    if (argv[0][0] == '"') {
+      strncpy(_ExePath, argv[0] + 1, strlen(argv[0]) - 2);
+    }
+    else {
+      strcpy(_ExePath, argv[0]);
+    }
+#else
     strcpy(_ExePath, argv[0]);
-    
+#endif  // __BORLANDC__    
 #ifdef __GNUG__
     const char SLASH = '/';
 #elif defined __BORLANDC__

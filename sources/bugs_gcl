@@ -230,19 +230,6 @@ not in the working directory.
   In function LoadEfg[], in file "console" at line 1:
   A segmentation fault has occurred
 
-
-//------------------------------
-
-Bug C33:  ExePath[] includes quotes on Windows
-
-This works fine on unix, but on Win95, ExePath includes leading and
-trailing quotes
-
-  GCL6:= Format["",quote->True] 
-  GCL7:= << ExePath[]              
-  ""C:\GAMBIT\SOURCES\BIN32\GCL32.EXE""
-
-
 //---------------  These are not bugs but suggested improvements ------------
 
 S1: A suggestion to add command line arguments.  Perhaps we should
