@@ -113,7 +113,7 @@ gbtNumber gbtNfgContingency::GetPayoff(const gbtGamePlayer &p_player) const
       behav[pl] = m_profile[pl]->GetBehavior();
     }
     gbtVector<gbtNumber> payoff(m_nfg->NumPlayers());
-    gbtGame(const_cast<gbtGameBase *>(rep))->Payoff(behav, payoff);
+    rep->Payoff(behav, payoff);
     return payoff[p_player->GetId()];
   }
 }

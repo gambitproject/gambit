@@ -66,7 +66,7 @@ public:
 
   int NumNodes(int pl, int iset) const;
   int NumNodes(const gbtGameInfoset &) const;
-  gbtPVector<int> NumNodes(void) const;
+  gbtPVector<int> TotalNumNodes(void) const;
 
   bool RemoveNode(const gbtGameNode &);
   void AddNode(const gbtGameNode &);

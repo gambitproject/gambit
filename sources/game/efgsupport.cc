@@ -639,6 +639,11 @@ void gbtEfgSupport::Dump(gbtOutput &p_output) const
   p_output << "} ";
 }
 
+gbtEfgSupport gbtEfgSupport::NewEfgSupport(void) const
+{
+  return gbtEfgSupport(*this);
+}
+
 gbtOutput& operator<<(gbtOutput&s, const gbtEfgSupport& e)
 {
   e.Dump(s);

@@ -33,15 +33,10 @@
 class gbtGameActionSet;
 
 //
-// We are in the process of migrating supports so they act like
-// "views" on a game -- they should support (no pun intended) all the
-// usual members of the underlying game (such as NumPlayers()) as well
-// as extra editing features to show/hide actions
-// 
-// This will eventually derive from gbtGame, providing the usual
-// extensive form operations
+// A gbtEfgSupport is an extensive form game, restricted to a subset of
+// the actions in the game.
 //
-class gbtEfgSupport : public gbtConstGameRep, public gbtConstEfgRep {
+class gbtEfgSupport : public gbtConstEfgRep {
 protected:
   gbtText m_label;
   gbtGame m_efg;
@@ -80,7 +75,6 @@ public:
 
   gbtGame GetTree(void) const { return m_efg; }
 
-  gbtText GetLabel(void) const { return m_label; }
   void SetLabel(const gbtText &p_label) { m_label = p_label; }
 
   int NumActions(int pl, int iset) const;
@@ -134,6 +128,9 @@ public:
   bool IsTree(void) const { return true; }
   bool IsMatrix(void) const { return false; }
 
+  gbtText GetLabel(void) const { return m_efg->GetLabel(); }
+  gbtText GetComment(void) const { return ""; }
+
   int NumPlayers(void) const { return m_efg->NumPlayers(); }
   gbtGamePlayer GetPlayer(int index) const { return m_efg->GetPlayer(index); }
 
@@ -146,20 +143,30 @@ public:
   gbtNumber MinPayoff(int pl = 0) const { return m_efg->MinPayoff(pl); }
 
   // IMPLEMENTATION OF gbtConstEfgRep INTERFACE
+
+  // DATA ACCESS -- GENERAL
+  bool IsPerfectRecall(void) const { return m_efg->IsPerfectRecall(); }
+
+  // DATA ACCESS -- NODES
+  int NumNodes(void) const { return m_efg->NumNodes(); }
+  gbtGameNode GetRoot(void) const { return m_efg->GetRoot(); }
+
+  // DATA ACCESS -- ACTIONS
   gbtPVector<int> NumActions(void) const;
   int BehavProfileLength(void) const;
 
-  // The following are just echoed from the base game.  In the future,
-  // derivation from gbtGame will handle these.
-  gbtText GetComment(void) const { return m_efg->GetComment(); }
+  // DATA ACCESS -- INFORMATION SETS
+  int TotalNumInfosets(void) const { return m_efg->TotalNumInfosets(); }
+  gbtArray<int> NumInfosets(void) const { return m_efg->NumInfosets(); }
+  int NumPlayerInfosets(void) const { return m_efg->NumPlayerInfosets(); }
+  int NumPlayerActions(void) const { return m_efg->NumPlayerActions(); }
+  gbtPVector<int> NumMembers(void) const { return m_efg->NumMembers(); }
+
+  // DATA ACCESS -- SUPPORTS
+  gbtEfgSupport NewEfgSupport(void) const;
+
   void SetComment(const gbtText &p_comment) { m_efg->SetComment(p_comment); }
   gbtGamePlayer GetChance(void) const { return m_efg->GetChance(); }
-  gbtArray<int> NumInfosets(void) const { return m_efg->NumInfosets(); }
-  gbtPVector<int> NumMembers(void) const { return m_efg->NumMembers(); }
-  int NumNodes(void) const { return m_efg->NumNodes(); }
-  int NumPlayerInfosets(void) const { return m_efg->NumPlayerInfosets(); }
-  gbtGameNode GetRoot(void) const { return m_efg->GetRoot(); }
-  bool IsPerfectRecall(void) const { return m_efg->IsPerfectRecall(); }
 
   void Dump(gbtOutput &) const;
 

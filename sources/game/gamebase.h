@@ -476,6 +476,8 @@ public:
   // derivation from gbtGame will handle these.
   gbtText GetComment(void) const { return m_nfg->GetComment(); }
   void SetComment(const gbtText &p_comment) { m_nfg->SetComment(p_comment); }
+
+  gbtNfgSupport NewNfgSupport(void) const { return Copy(); }
 };
 
 #endif  // GAMEBASE_H

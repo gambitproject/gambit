@@ -30,7 +30,7 @@
 
 template<>
 gbtNumber gbtBehavProfile<gbtNumber>::Payoff(const gbtGameOutcome &p_outcome,
-				      int pl) const
+					     int pl) const
 { 
   return p_outcome->GetPayoff(m_support.GetPlayer(pl));
 }

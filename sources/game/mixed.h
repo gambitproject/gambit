@@ -34,9 +34,7 @@ template <class T> class gbtRectArray;
 template <class T> class gbtBehavProfile;
 
 template <class T>
-class gbtMixedProfile : public gbtPVector<T>,
-                        public gbtConstGameRep,
-                        public gbtConstNfgRep {
+class gbtMixedProfile : public gbtPVector<T>, public gbtConstNfgRep {
 private:
   gbtNfgSupport m_support;
 
@@ -80,6 +78,8 @@ public:
   gbtText GetLabel(void) const { return ""; }
   void SetLabel(const gbtText &) { }
 
+  gbtText GetComment(void) const { return ""; }
+
   // IMPLEMENTATION OF gbtConstGameRep INTERFACE
   bool IsTree(void) const { return m_support->IsTree(); }
   bool IsMatrix(void) const { return m_support->IsMatrix(); }
@@ -101,6 +101,7 @@ public:
   virtual int MixedProfileLength(void) const
   { return m_support->MixedProfileLength(); }
 
+  gbtNfgSupport NewNfgSupport(void) const { return m_support->NewNfgSupport(); }
 };
 
 

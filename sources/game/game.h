@@ -30,22 +30,6 @@
 #include "base/base.h"
 #include "math/gmath.h"
 
-class gbtGameObjectDeleted : public gbtException {
-public:
-  virtual ~gbtGameObjectDeleted() { }
-
-  gbtText Description(void) const
-    { return "Game object deleted"; }
-};
-
-class gbtGameUndefinedOperation : public gbtException {
-public:
-  virtual ~gbtGameUndefinedOperation() { }
-
-  gbtText Description(void) const
-    { return "Undefined operation"; } 
-};
-
 //
 // A base class for all game object types, providing interfaces common
 // to all.
@@ -71,6 +55,21 @@ public:
   gbtText Description(void) const    { return "Error in gbtGame"; }
 };
 
+class gbtGameNullObject : public gbtGameException {
+public:
+  virtual ~gbtGameNullObject() { }
+};
+
+class gbtGameObjectDeleted : public gbtGameException {
+public:
+  virtual ~gbtGameObjectDeleted() { }
+};
+
+class gbtGameUndefinedOperation : public gbtGameException {
+public:
+  virtual ~gbtGameUndefinedOperation() { }
+};
+
 //
 // Forward declarations of game objects
 //
@@ -89,6 +88,8 @@ public:
   // DATA ACCESS -- GENERAL
   virtual bool IsTree(void) const = 0;
   virtual bool IsMatrix(void) const = 0;
+  virtual gbtText GetLabel(void) const = 0;
+  virtual gbtText GetComment(void) const = 0;
 
   // DATA ACCESS -- PLAYERS
   virtual int NumPlayers(void) const = 0;
@@ -102,55 +103,63 @@ public:
   virtual gbtNumber MaxPayoff(int pl = 0) const = 0;
 };
 
-class gbtConstNfgRep {
+class gbtConstNfgRep : public virtual gbtConstGameRep {
 public:
   // DATA ACCESS -- STRATEGIES
   virtual gbtArray<int> NumStrategies(void) const = 0; 
   virtual int MixedProfileLength(void) const = 0;
+
+  // DATA ACCESS -- SUPPORTS
+  virtual gbtNfgSupport NewNfgSupport(void) const = 0;
 };
 
-class gbtConstEfgRep {
+class gbtConstEfgRep : public virtual gbtConstGameRep {
 public:
+  // DATA ACCESS -- GENERAL
+  virtual bool IsPerfectRecall(void) const = 0;
+
+  // DATA ACCESS -- PLAYERS
+  virtual gbtGamePlayer GetChance(void) const = 0;
+
+  // DATA ACCESS -- NODES
+  virtual int NumNodes(void) const = 0;
+  virtual gbtGameNode GetRoot(void) const = 0;
+
   // DATA ACCESS -- ACTIONS
   virtual gbtPVector<int> NumActions(void) const = 0;
   virtual int BehavProfileLength(void) const = 0;
 
+  // DATA ACCESS -- INFORMATION SETS
+  virtual int TotalNumInfosets(void) const = 0;
   // The number of information sets in the game, by player
   // Does not include any chance information sets
   virtual gbtArray<int> NumInfosets(void) const = 0; 
+  virtual int NumPlayerInfosets(void) const = 0;
+  virtual int NumPlayerActions(void) const = 0;
+  virtual gbtPVector<int> NumMembers(void) const = 0;
+
+  // DATA ACCESS -- SUPPORTS
+  virtual gbtEfgSupport NewEfgSupport(void) const = 0;
 };
 
-class gbtGameRep : public gbtConstGameRep,
-		   public gbtConstNfgRep,
-		   public gbtConstEfgRep
-{
+class gbtGameRep : public gbtConstNfgRep, public gbtConstEfgRep {
 friend class gbtGame;
 public:
   // Formerly the copy constructor
   virtual gbtGame Copy(gbtGameNode) const = 0;
   
   // TITLE ACCESS AND MANIPULATION
-  virtual void SetLabel(const gbtText &s) = 0;
-  virtual gbtText GetLabel(void) const = 0;
-  
+  virtual void SetLabel(const gbtText &) = 0;
   virtual void SetComment(const gbtText &) = 0;
-  virtual gbtText GetComment(void) const = 0;
 
   // WRITING DATA FILES
   virtual void WriteEfg(gbtOutput &p_file) const = 0;
   virtual void WriteNfg(gbtOutput &p_file) const = 0;
 
   // DATA ACCESS -- GENERAL INFORMATION
-  virtual bool IsPerfectRecall(void) const = 0;
-  virtual bool IsPerfectRecall(gbtGameInfoset &, gbtGameInfoset &) const = 0;
   virtual long RevisionNumber(void) const = 0;
  
-  // DATA ACCESS -- NODES
-  virtual int NumNodes(void) const = 0;
-  virtual gbtGameNode GetRoot(void) const = 0;
-
   // DATA ACCESS -- PLAYERS
-  virtual gbtGamePlayer GetChance(void) const = 0;
   virtual gbtGamePlayer NewPlayer(void) = 0;
 
   // DATA ACCESS -- OUTCOMES
@@ -158,10 +167,6 @@ public:
 
   virtual void SetOutcomeIndex(int index, const gbtGameOutcome &outcome) = 0;
   virtual gbtGameOutcome GetOutcomeIndex(int index) const = 0;
-
-  // DATA ACCESS -- SUPPORTS
-  virtual gbtEfgSupport NewEfgSupport(void) const = 0;
-  virtual gbtNfgSupport NewNfgSupport(void) const = 0;
 
   // EDITING OPERATIONS
   virtual void DeleteEmptyInfosets(void) = 0;
@@ -178,25 +183,8 @@ public:
   virtual bool MarkSubgame(gbtGameNode) = 0;
   virtual void UnmarkSubgame(gbtGameNode) = 0;
   virtual void UnmarkSubgames(gbtGameNode) = 0;
-
-  virtual int TotalNumInfosets(void) const = 0;
-
-  virtual int NumPlayerInfosets(void) const = 0;
-  virtual int NumPlayerActions(void) const = 0;
-  virtual gbtPVector<int> NumMembers(void) const = 0;
-
-  // COMPUTING VALUES OF PROFILES
-  virtual void Payoff(const gbtPVector<int> &profile,
-		      gbtVector<gbtNumber> &payoff) const = 0;
-  virtual void Payoff(const gbtArray<gbtArray<int> > &profile,
-		      gbtArray<gbtNumber> &payoff) const = 0;
-  
-  virtual void InfosetProbs(const gbtPVector<int> &profile,
-			    gbtPVector<gbtNumber> &prob) const = 0;
 };
 
-
-class gbtEfgNullGame { };
 
 class gbtGame {
 private:
@@ -225,9 +213,9 @@ public:
   { return (m_rep != p_player.m_rep); }
   
   gbtGameRep *operator->(void) 
-  { if (!m_rep) throw gbtEfgNullGame(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
   const gbtGameRep *operator->(void) const 
-  { if (!m_rep) throw gbtEfgNullGame(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
 
   gbtGameRep *Get(void) const { return m_rep; }
   

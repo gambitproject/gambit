@@ -44,9 +44,7 @@ template <class T> class gbtMixedProfile;
 // 
 
 template <class T> 
-class gbtBehavProfile : private gbtDPVector<T>,
-                        public gbtConstGameRep,
-                        public gbtConstEfgRep {
+class gbtBehavProfile : private gbtDPVector<T>, public gbtConstEfgRep {
 protected:
   gbtEfgSupport m_support;
   mutable bool m_cached_data;
@@ -223,10 +221,14 @@ public:
   // IMPLEMENTATION OF gbtConstGameRep INTERFACE
   bool IsTree(void) const { return m_support.IsTree(); }
   bool IsMatrix(void) const { return m_support.IsMatrix(); }
-  
+
+  gbtText GetComment(void) const { return ""; }
+
+  // DATA ACCESS -- PLAYERS
   int NumPlayers(void) const { return m_support.NumPlayers(); }
   gbtGamePlayer GetPlayer(int index) const { return m_support.GetPlayer(index); }
-  
+
+  // DATA ACCESS -- OUTCOMES
   int NumOutcomes(void) const { return m_support.NumOutcomes(); }
   gbtGameOutcome GetOutcome(int index) const 
   { return m_support.GetOutcome(index); }
@@ -236,10 +238,31 @@ public:
   gbtNumber MinPayoff(int pl = 0) const { return m_support.MinPayoff(pl); }
 
   // IMPLEMENTATION OF gbtConstEfgRep INTERFACE
+
+  // DATA ACCESS -- GENERAL
+  bool IsPerfectRecall(void) const { return m_support.IsPerfectRecall(); }
+
+  // DATA ACCESS -- PLAYERS
+  gbtGamePlayer GetChance(void) const { return m_support.GetChance(); }
+
+  // DATA ACCESS -- NODES
+  int NumNodes(void) const { return m_support.NumNodes(); }
+  gbtGameNode GetRoot(void) const { return m_support.GetRoot(); }
+
+  // DATA ACCESS -- ACTIONS
   gbtPVector<int> NumActions(void) const { return m_support.NumActions(); }
   int BehavProfileLength(void) const { return m_support.BehavProfileLength(); }
 
+  // DATA ACCESS -- INFORMATION SETS
+  int TotalNumInfosets(void) const { return m_support.TotalNumInfosets(); }
   gbtArray<int> NumInfosets(void) const { return m_support.NumInfosets(); }
+  int NumPlayerInfosets(void) const { return m_support.NumPlayerInfosets(); }
+  int NumPlayerActions(void) const { return m_support.NumPlayerActions(); }
+  gbtPVector<int> NumMembers(void) const { return m_support.NumMembers(); }
+
+  // DATA ACCESS -- SUPPORTS
+  gbtEfgSupport NewEfgSupport(void) const { return m_support.NewEfgSupport(); }
+
 };
 
 

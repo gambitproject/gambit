@@ -32,7 +32,7 @@
 
 class gbtNfgSupport;
 
-class gbtNfgSupportRep : public gbtConstGameRep, public gbtConstNfgRep {
+class gbtNfgSupportRep : public gbtConstNfgRep {
 friend class gbtNfgSupport;
 private:
   bool gbtNfgSupportRep::Undominated(gbtNfgSupport &newS, int pl, bool strong,
@@ -105,9 +105,9 @@ public:
   { return (*m_rep != *p_support.m_rep); }
   
   gbtNfgSupportRep *operator->(void) 
-  { if (!m_rep) throw gbtEfgNullGame(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
   const gbtNfgSupportRep *operator->(void) const 
-  { if (!m_rep) throw gbtEfgNullGame(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
 
   //  gbtNfgSupportRep *Get(void) const { return m_rep; }
   

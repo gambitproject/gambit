@@ -358,7 +358,7 @@ bool gbtEfgBasis::IsValid(void) const
   return true;
 }
 
-gbtPVector<int> gbtEfgBasis::NumNodes(void) const
+gbtPVector<int> gbtEfgBasis::TotalNumNodes(void) const
 {
   gbtArray<int> foo(m_efg->NumPlayers());
   int i;
@@ -409,7 +409,7 @@ void gbtEfgBasis::AddNode(const gbtGameNode &n)
 bool gbtEfgBasis::IsConsistent(void) const
 {
   bigbasis = new gbtEfgBasis(m_efg);
-  nodeIndex = new gbtDPVector<int>(bigbasis->NumNodes());
+  nodeIndex = new gbtDPVector<int>(bigbasis->TotalNumNodes());
   actIndex = new gbtDPVector<int>(bigbasis->NumActions());
   MakeIndices();
   // gout << "\nactIndex:  " << (*actIndex);
@@ -611,7 +611,7 @@ void gbtEfgBasis::AddEquation4(int row, const gbtGameNode &n1,
 
 void gbtEfgBasis::GetConsistencySolution(const gbtVector<double> &x) const
 {
-  gbtDPVector<int> nodes(bigbasis->NumNodes());
+  gbtDPVector<int> nodes(bigbasis->TotalNumNodes());
   gbtDPVector<int> acts(bigbasis->NumActions());
   nodes = 0;
   acts = 0;
