@@ -1310,6 +1310,7 @@ Portion* GSM_Read_Undefined(Portion** param)
   char c = ' ';  
   gInput& input = ((InputPortion*) param[0])->Value();
   long old_pos = input.getpos();
+  gout << old_pos << '\n';
 
   Portion* result = 0;
 
@@ -1397,7 +1398,10 @@ Portion* GSM_Read_Undefined(Portion** param)
     catch (gclRuntimeError &) {
       delete param[1];
       param[1] = 0;
-      input.setpos(old_pos);
+      gout << old_pos << '\n'; 
+      // Not sure if this line is needed... if it's included,
+      // segfaults occur.
+      //      input.setpos(old_pos);
       throw gclRuntimeError("Cannot determine data type");
     }
   }
