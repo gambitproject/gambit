@@ -21,6 +21,7 @@ int Enum(const NFSupport &support, const EnumParams &params,
   if (params.precision == precDOUBLE)  {
     EnumModule<double> module(support, params);
     module.Enum();
+//    module.DoubleEnum();
     npivots = module.NumPivots();
     time = module.Time();
     solutions = module.GetSolutions();
@@ -28,6 +29,7 @@ int Enum(const NFSupport &support, const EnumParams &params,
   else if (params.precision == precRATIONAL)  {
     EnumModule<gRational> module(support, params);
     module.Enum();
+//    module.DoubleEnum();
     npivots = module.NumPivots();
     time = module.Time();
     solutions = module.GetSolutions();
