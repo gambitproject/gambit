@@ -5,6 +5,7 @@
 //#
 
 #include "basic.h"
+#include "garray.imp"
 #include "gblock.imp"
 #include "gstring.h"
 #include "rational.h"
@@ -23,6 +24,8 @@ TEMPLATE class gBlock<float>;
 TEMPLATE class gBlock<double>;
 TEMPLATE class gBlock<gRational>;
 TEMPLATE class gBlock<gString>;
+TEMPLATE class gArray<gBlock<int> >;
+TEMPLATE class gArray<gBlock<double> >;
 TEMPLATE class gBlock<gBlock<int> >;
 TEMPLATE class gBlock<gBlock<double> >;
 
@@ -34,6 +37,8 @@ TEMPLATE gOutput &operator<<(gOutput &, const gBlock<float> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<double> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gRational> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gString> &);
+TEMPLATE gOutput &operator<<(gOutput &, const gArray<gBlock<int> > &);
+TEMPLATE gOutput &operator<<(gOutput &, const gArray<gBlock<double> > &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gBlock<int> > &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gBlock<double> > &);
 

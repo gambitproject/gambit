@@ -10,7 +10,7 @@
 #include "gambitio.h"
 
 
-template <class T> gArray<T>::gArray(int len)	
+template <class T> gArray<T>::gArray(int len) : length(len)	
 {
   assert(len >= 0);
   data = (len > 0) ? new T[len] - 1 : 0;

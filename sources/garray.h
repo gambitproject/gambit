@@ -12,43 +12,42 @@
 #include "gambitio.h"
 
 template <class T> class gArray  {
- private:
-  int length;
-  T *data;
+  protected:
+    int length;
+    T *data;
 
- public:
+  public:
 //
 // Constructs a gArray of length 'len'
 //
-  gArray(int len = 0);
+    gArray(int len = 0);
 //
 // duplicate the input gArray<T> constant referrence
 //
-  gArray(const gArray<T> &);
+    gArray(const gArray<T> &);
 //
 // Destruct and deallocates gArray
 //
-  ~gArray();
+    virtual ~gArray();
 //
 // Copies data from input gArray
 //
-  gArray<T> &operator=(const gArray<T> &);
+    gArray<T> &operator=(const gArray<T> &);
 
 //
 // return length in the invoking gArray<T>
 //
-  int Length(void) const;
+    int Length(void) const;
 
-	
 //
 // Check bounds of index. Exit program if out of bounds
 //
-  const T &operator[](int index) const;
-  T &operator[](int index);
+    const T &operator[](int index) const;
+    T &operator[](int index);
 //
 // Output data of the array
 //
-  virtual void Dump(gOutput &) const;
+    virtual void Dump(gOutput &) const;
 };
 
 template <class T> gOutput &operator<<(gOutput &, const gArray<T> &);

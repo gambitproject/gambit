@@ -8,45 +8,15 @@
 #include <assert.h>
 #include "gblock.h"
 
-template <class T> gBlock<T>::gBlock(void)
-  : length(0), data(0)
-{ }
+template <class T> gBlock<T>::gBlock(int len) : gArray<T>(len)   { }
 
-template <class T> gBlock<T>::gBlock(int len)
-  : length(len), data((len) ? new T[len] : 0)
-{ }
+template <class T> gBlock<T>::gBlock(const gBlock<T> &b) : gArray<T>(b)  { }
 
-template <class T> gBlock<T>::gBlock(const gBlock<T> &b)
- : length(b.length)
-{
-  if (length)   {
-    data = new T[length];
-    for (int i = 0; i < length; i++)
-      data[i] = b.data[i];
-  }
-  else
-    data = 0;
-}
-
-template <class T> gBlock<T>::~gBlock()
-{ 
-  if (data)  delete [] data;
-}
+template <class T> gBlock<T>::~gBlock()   { }
 
 template <class T> gBlock<T> &gBlock<T>::operator=(const gBlock<T> &b)
 {
-  if (this != &b)   {
-    if (data)   delete [] data;
-  
-    length = b.length;
-    if (length)   {
-      data = new T[length];
-      for (int i = 0; i < length; i++)
-	data[i] = b.data[i];
-    }
-    else
-      data = 0;
-  }
+  gArray<T>::operator=(b);
   return *this;
 }
 
@@ -61,18 +31,6 @@ template <class T> int gBlock<T>::operator==(const gBlock<T> &b) const
 template <class T> int gBlock<T>::operator!=(const gBlock<T> &b) const
 {
   return !(*this == b);
-}
-
-template <class T> const T &gBlock<T>::operator[](int n) const
-{
-  assert(n >= 1 && n <= length);
-  return data[--n];
-}
-
-template <class T> T &gBlock<T>::operator[](int n)
-{
-  assert(n >= 1 && n <= length);
-  return data[--n];
 }
 
 template <class T> gBlock<T> gBlock<T>::operator+(const gBlock<T>& b) const
@@ -152,18 +110,8 @@ template <class T> int gBlock<T>::Find(const T &t) const
 template <class T> int gBlock<T>::Contains(const T &t) const
 { return Find(t); }
 
-template <class T> int gBlock<T>::Length(void) const
-{ return length; }
-
 template <class T> void gBlock<T>::Flush(void)
 { length = 0;  delete [] data;  data = 0; }
-
-template <class T> void gBlock<T>::Dump(gOutput &f) const
-{
-  f << "gBlock " << this << " contents\n";
-  for (int i = 0; i < length; i++)
-    f << (i + 1) << ": " << data[i] << '\n';
-}
 
 //
 // Uses the Dump function to output the gBlock.  Uses the << operator
