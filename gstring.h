@@ -12,7 +12,9 @@
 #endif    // __GNUG__
 
 #include <string.h>
-#include "gambitio.h"
+
+class gInput;
+class gOutput;
 
 class gString   {
   friend gInput& operator>>(gInput&, gString&);

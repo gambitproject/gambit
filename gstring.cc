@@ -1,8 +1,8 @@
-//
-// FILE: gstring.cc -- Implementation of String class
-//
-// $Id$
-//
+//#
+//# FILE: gstring.cc -- Implementation of String class
+//#
+//# $Id$
+//#
 
 #ifdef __GNUG__
 #pragma implementation "gstring.h"
@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
+#include "gambitio.h"
 #include "gstring.h"
 
 

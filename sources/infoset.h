@@ -12,8 +12,6 @@
 
 #include "player.h"
 
-#include "gconvert.h"
-
 class Node;
 
 class Action   {

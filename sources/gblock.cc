@@ -4,7 +4,7 @@
 //# $Id$
 //#
 
-#include "basic.h"
+#include "gmisc.h"
 #include "gblock.imp"
 #include "gstring.h"
 #include "rational.h"

@@ -5,7 +5,7 @@
 //#
 
 #include "garray.imp"
-#include "basic.h"
+#include "gmisc.h"
 #include "gstring.h"
 #include "rational.h"
 

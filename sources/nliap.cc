@@ -11,7 +11,6 @@
 #include "nliap.h"
 #include "gfunct.h"
 #include "rational.h"
-#include "grandom.h"
 
 //-------------------------------------------------------------------------
 //                     NFLiapParams<T>: Member functions

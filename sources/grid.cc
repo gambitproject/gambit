@@ -4,7 +4,7 @@
 //# $Id$ 
 //#
 
-#include "basic.h"
+#include "gmisc.h"
 #include "rational.h"
 #include "gmatrix.h"
 #include "normal.h"

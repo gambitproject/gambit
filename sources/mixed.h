@@ -7,7 +7,7 @@
 #ifndef MIXED_H
 #define MIXED_H
 
-#include "basic.h"
+#include "gmisc.h"
 
 class BaseNormalForm;
 

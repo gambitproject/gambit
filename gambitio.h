@@ -8,7 +8,7 @@
 #define GAMBITIO_H
 
 #include <stdio.h>
-#include "basic.h"
+#include "gmisc.h"
 
 #ifdef __GNUG__
 #pragma interface

@@ -7,7 +7,7 @@
 #ifndef GVECTOR_H
 #define GVECTOR_H
 
-#include "basic.h"
+#include "gmisc.h"
 #include "gambitio.h"
 #include "garray.h"
 

@@ -1,13 +1,13 @@
 //#
 //# FILE: behav.h -- Behavioral strategy profile classes
 //#
-//# @(#)behav.h	1.2 6/8/95
+//# $Id$
 //#
 
 #ifndef BEHAV_H
 #define BEHAV_H
 
-#include "basic.h"
+#include "gmisc.h"
 #include "gstring.h"
 
 class BaseExtForm;

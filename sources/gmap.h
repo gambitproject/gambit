@@ -7,7 +7,7 @@
 #ifndef GMAP_H
 #define GMAP_H
 
-#include "basic.h"
+#include "gmisc.h"
 #include "gambitio.h"
 #include "gmessage.h"
 

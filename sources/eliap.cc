@@ -13,7 +13,6 @@
 #include "gdpvect.h"
 #include "gmatrix.h"
 #include "rational.h"
-#include "grandom.h"
 
 #include "behav.h"
 #include "player.h"

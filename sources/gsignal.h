@@ -1,13 +1,13 @@
 //#
 //# FILE: gsignal.h -- Declaration of abstract signal-handling class
 //#
-//# @(#)gsignal.h	1.1 5/9/95
+//# $Id$
 //#
 
 #ifndef SIGNAL_H
 #define SIGNAL_H
 
-#include "basic.h"
+#include "gmisc.h"
 
 class gSignal   {
   public:
