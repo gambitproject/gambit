@@ -7,6 +7,19 @@ Bug D3: Bugs in Outcome interface
 For the extensive form, the outcome window does not stay on top when you
 select nodes while attaching outcomes to the game.
 
+[ This is a window manager-specific property.  It can be changed on dtwm 
+(Solaris CDE window manager) by setting the following options in your
+.Xdefaults or .Xresources file, re-running xrdb on that file, and
+restarting the window manager:
+
+Dtwm*focusAutoRaise:    False
+
+This means that the window that gets the keyboard focus will not raise
+above other windows.  Other window managers have similar options.  In
+Windows '95 the default is that the window with the focus is raised above
+all other windows except its children, as I understand it.  I don't know if
+this can be emulated on Unix systems. ]
+
 For the normal form, there are two outcome windows, one accessed by
 Edit->Outcomes, and the other by double click (Ctrl click on Linux).
 Why are there two different interfaces?  We should ditch the Ctrl-click
@@ -44,11 +57,9 @@ machine):
    Serial number of failed request:  379
    Current serial number in output stream:  391
 
-We should either fix this, or deliver a more informative error messsage.
-It is unlikely that it can be fixed because it's a known problem with 
+[ It is unlikely that it can be fixed because it's a known problem with 
 wxWindows, but it can be avoided by running netscape with a private colormap
-using "netscape -install".  Uncaught exceptions should bring up a dialog
-which suggests doing this (this is lame, but better than nothing).
+using "netscape -install". ]
 
 //------------------------------
 
@@ -88,10 +99,23 @@ Perhaps it is not implemented correctly.
 
 Bug D10: Drag and drop of outcomes don't always work in NFG
 
-When there are so many outcomes that you have to scroll to select
-the desired one, dragging and dropping of the outcome doesn't work.
-E.g. try 8x8.nfg.
+E.g. try 8x8.nfg.  There are two bugs here:
 
+1) When dragging an outcome to a part of the NFG that can only be reached
+   by the scrollbars, the outcome is placed (incorrectly) on the location
+   in the NFG that corresponds to where we would have been if the
+   scrollbars were in their initial position.  In other words, the
+   scrollbar offset is not taken into account.
+
+2) When there are so many outcomes that you have to scroll to select
+   the desired one, dragging and dropping of the outcome doesn't work.
+
+//------------------------------
+
+Bug D11: Scrolling problems
+
+For both EFGs and NFGs, using the arrow keys to scroll doesn't affect the
+scrollbar position and doesn't redraw the entire screen.
 
 //------------------------------
 
@@ -135,6 +159,20 @@ associated with a given location in the EF/NF game.  We should
 have "in place" editing, where you can edit the outcome right on the
 normal or extensive form dislpay.
 
+For NFG, at least, here is a proposed interface:
+
+The cursor can be placed anywhere on the text except on a comma separating
+entries in the outcome.  Text can be entered or deleted; it will come up in
+the same color as the text it is replacing.  Text cannot be added past a
+comma, and the comma can't be deleted.  To get to the next entry in the
+box, use tab; to get to the previous entry, use shift-tab.  Once at the end
+of the box, tab will move the entry to the next box.  If at the last box in
+the row, tab will move to the first box in the next row.  If in the last
+box in the array, tab will move to the first box in the array.  Similar
+rules hold for shift-tab in the other direction.  The arrow keys move the
+focus to a different box.  It would be nice to have a visible insert
+cursor, but this may be harder to achieve.
+
 //------------------------------
 
 Bug D18: Problems with PXI
@@ -168,6 +206,7 @@ GUI Bug 5.2
 RDM: Problem still exists (9/3/98).  Also, the Label->Strats dialog
 box (and perhaps others as well) can not be gotten rid of in any way,
 even after the main Gambit window has been dismissed (on Linux).
+N.B. the "close" button here refers to the window manager close button.
 
 //------------------------------
 
@@ -201,6 +240,10 @@ GUI Bug 5.6
 
 RDM: 9/3/98 On Linux, it gives the same problem as above, "wxWindows: could
 not execute wxhelp"
+
+[ This is not a bug.  The wxhelp program must be in the path and the
+WXHELPFILES environment variable must be set to point to the directory
+where the help files live. ]
 
 //------------------------------
 
