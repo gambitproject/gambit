@@ -109,7 +109,10 @@ EnumModule<T>::EnumModule(const NormalForm<T> &N, const EnumParams &p)
 
 template <class T> int EnumModule<T>::Enum(void)
 {
-  if (players != 2)   return 0;  // Ted -- is there a better way to do this?  
+      // Ted -- is there a better way to do this?  A lot of 
+      //        allocation before finding out there are too 
+      //        many players. (Same in Lemke module I think)
+  if (players != 2)   return 0;  
 
   gWatch watch;
 

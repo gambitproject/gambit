@@ -50,7 +50,6 @@ public:
 template <class T> class EnumModule  {
 private:
   BFS_List List;
-//  gList<gPVector<T> > solutions;
   EnumTableau<T> tab;
   EnumParams params;
   int rows,cols,level,players;
@@ -72,8 +71,13 @@ public:
 
       //  Ted -- I like 2nd form better, but does this ever get 
       //         de-allocated?  
+
 //  void GetSolutions(gList<gPVector<T> > &solutions) const;
   gList<gPVector<T> > &GetSolutions(void) const;
+
+      //  Ted -- Valuable information (the basis) is lost in this 
+      //         module by converting to gPVectors. Can 
+      //         we find a better way to do this.  
 };
 
 //
