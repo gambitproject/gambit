@@ -111,11 +111,11 @@ template <class T> int EnumModule<T>::Enum(void)
 
   const BFS_List &verts1(poly1.VertexList());
   const BFS_List &verts2(poly2.VertexList());
-  v1=verts1.Last();
-  v2=verts2.Last();
+  v1=verts1.Length();
+  v2=verts2.Length();
 
-//  v1=poly1.VertexList().Last();
-//  v2=poly2.VertexList().Last();
+//  v1=poly1.VertexList().Length();
+//  v2=poly2.VertexList().Length();
   if(params.trace>=2) 
     (*params.tracefile) << "\n v1 = " << v1 << ", v2 = " << v2;
 

@@ -160,7 +160,7 @@ template <class T> long VertEnum<T>::NumPivots() const
 template <class T> void VertEnum<T>::Dump(gOutput &to) const
 {
   // gout << "\nin VertEnum::Dump()";
-  for(int i=List.First();i<=List.Last();i++) {
+  for(int i=1;i<=List.Length();i++) {
     to << "\n";
     List[i].Dump(to);
   }

@@ -8,6 +8,7 @@
 
 #include "garray.imp"
 #include "gblock.imp"
+#include "glist.imp"
 #include "gmap.imp"
 #include "bfs.h"
 
@@ -64,6 +65,10 @@ TEMPLATE class gArray<BFS<double> >;
 TEMPLATE class gArray<BFS<gRational> >;
 TEMPLATE class gBlock<BFS<double> >;
 TEMPLATE class gBlock<BFS<gRational> >;
+TEMPLATE class gList<BFS<double> >;
+TEMPLATE class gList<BFS<gRational> >;
+TEMPLATE class gNode<BFS<double> >;
+TEMPLATE class gNode<BFS<gRational> >;
 
 TEMPLATE class gBaseMap<int, double>;
 TEMPLATE class gOrdMap<int, double>;
