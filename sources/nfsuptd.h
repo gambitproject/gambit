@@ -2,7 +2,7 @@
 // FILE: efsuptd.h -- Declarations of dialogs for dealing with NF
 // supports.
 //
-// $Id$
+// @(#)nfsuptd.h	2.2 3/29/97
 //
 
 #ifndef NFSUPTD_H
@@ -124,24 +124,25 @@ public:
 // Note can not delete the first support
 void NFSupportInspectDialog::OnRemoveSupport(void)
 {
+  int i;
   SupportRemoveDialog SRD(this,sups.Length());
   if (SRD.Completed()==wxOK)  {
-    gArray<bool> selected(SRD.Selected());
-    bool revert=false;
-    for (int i=sups.Length();i>=2;i--)
-      if (selected[i])  {
-	delete sups.Remove(i);
-	if (i==init_cur || i==init_disp && revert==false)  {
-	  wxMessageBox("Display/Current support deleted.\nReverting to full support");
-	  revert=true;
-	}
-      }
-    disp_item->Clear();cur_item->Clear();
-    for (int i=1;i<=sups.Length();i++)
-      {disp_item->Append(ToString(i));cur_item->Append(ToString(i));}
-    disp_item->SetSize(-1,-1,-1,-1);cur_item->SetSize(-1,-1,-1,-1);
-    disp_item->SetSelection(0);cur_item->SetSelection(0);
-    if (revert) bns->SupportInspect(SUPPORT_CHANGE);
+	 gArray<bool> selected(SRD.Selected());
+	 bool revert=false;
+	 for (i=sups.Length();i>=2;i--)
+		if (selected[i])  {
+			delete sups.Remove(i);
+			if (i==init_cur || i==init_disp && revert==false)  {
+			  wxMessageBox("Display/Current support deleted.\nReverting to full support");
+			  revert=true;
+			}
+		}
+	 disp_item->Clear();cur_item->Clear();
+	 for (i=1;i<=sups.Length();i++)
+		{disp_item->Append(ToString(i));cur_item->Append(ToString(i));}
+	 disp_item->SetSize(-1,-1,-1,-1);cur_item->SetSize(-1,-1,-1,-1);
+	 disp_item->SetSelection(0);cur_item->SetSelection(0);
+	 if (revert) bns->SupportInspect(SUPPORT_CHANGE);
   }
 }
 
