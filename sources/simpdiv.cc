@@ -445,8 +445,6 @@ template <class T> int SimpdivModule<T>::Simpdiv(gList<gPVector<T> > &solns)
       params.output << " maxz = " << maxz; 
       solns.Append(y);
     }
-
-  solns.Dump(gout);
 }
 
 
