@@ -153,18 +153,26 @@ void dialogNfgSolveStandard::OnChanged(void)
       }
       break;
     case 1:
-      if (m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg)) 
+      if (m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg)) {
 	m_description->SetValue("LpSolve");
-      else if (m_nfg.NumPlayers() == 2 && !IsConstSum(m_nfg))
+	m_precision->Enable(TRUE);
+      }
+      else if (m_nfg.NumPlayers() == 2 && !IsConstSum(m_nfg)) {
 	m_description->SetValue("LcpSolve");
+	m_precision->Enable(TRUE);
+      }
       else
 	m_description->SetValue("NOT IMPLEMENTED");
       break;
     case 2:
-      if (m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg)) 
+      if (m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg)) { 
 	m_description->SetValue("LpSolve");
-      else if (m_nfg.NumPlayers() == 2 && !IsConstSum(m_nfg))
+	m_precision->Enable(TRUE);
+      }
+      else if (m_nfg.NumPlayers() == 2 && !IsConstSum(m_nfg)) {
 	m_description->SetValue("LcpSolve");
+	m_precision->Enable(TRUE);
+      }
       else
 	m_description->SetValue("NOT IMPLEMENTED");
       break;
