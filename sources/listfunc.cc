@@ -14,7 +14,7 @@
 Portion *GSM_NthElement(Portion **param)
 {
   return ((ListPortion *) param[0])->Subscript
-    (((IntPortion *) param[1])->Value())->ValCopy();
+    (((IntPortion *) param[1])->Value());
 }
 
 Portion *GSM_Remove(Portion **param)

@@ -597,10 +597,13 @@ CallFuncObj::CallFuncObj( FuncDescObj* func, gOutput& s_out, gOutput& s_err )
 CallFuncObj::~CallFuncObj()
 {
   int index;
-  for( index = 0; index < _NumParams; index++ )
+  if( _ErrorOccurred )
   {
-    delete _RunTimeParamInfo[ index ].Ref;
-    delete _Param[ index ];
+    for( index = 0; index < _NumParams; index++ )
+    {
+      delete _RunTimeParamInfo[ index ].Ref;
+      delete _Param[ index ];
+    }
   }
   delete[] _RunTimeParamInfo;
   delete[] _Param;
