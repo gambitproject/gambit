@@ -879,7 +879,7 @@ bool BaseEfg::CheckTree(Node *n, Node *base)
 
 bool BaseEfg::IsLegalSubgame(Node *n)
 {
-  if (n->NumChildren() == 0 || n->GetPlayer()->IsChance())  
+  if (n->NumChildren() == 0)  
     return false;
 
   MarkTree(n, n);
