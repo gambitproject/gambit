@@ -30,6 +30,7 @@
 #include "game.h"
 
 #include "game-file.h"
+#include "tree-game.h"
 
 //=========================================================================
 //                  Temporary representation classes
@@ -577,7 +578,7 @@ static void BuildSubtree(gbtGame p_efg, gbtGameNode p_node,
   }
 }
 
-static void BuildEfg(gbtGame p_efg, gbtTreeFileGame &p_treeData)
+static void BuildEfg(gbtTreeGameRep *p_efg, gbtTreeFileGame &p_treeData)
 {
   p_efg->SetLabel(p_treeData.m_title);
   p_efg->SetComment(p_treeData.m_comment);
@@ -599,12 +600,14 @@ gbtGame ReadEfg(std::istream &p_file)
   gbtGameParserState parser(p_file);
   gbtTreeFileGame treeData;
 
-  gbtGame efg = NewEfg();
-
   try {
+    gbtTreeGameRep *efg = new gbtTreeGameRep();
+    // Putting this in the handle here ensures a reference to the game
+    // is counted while the game is being built
+    gbtGame efgHandle(efg);
     Parse(parser, treeData);
     BuildEfg(efg, treeData);
-    return efg;
+    return efgHandle;
   }
   catch (...) {
     // We'll just lump anything that goes wrong in here as a "parse error"

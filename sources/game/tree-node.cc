@@ -40,10 +40,12 @@
 
 gbtTreeNodeRep::gbtTreeNodeRep(gbtTreeGameRep *p_efg,
 			       gbtTreeNodeRep *p_parent)
-  : m_refCount(0), m_id(0), m_efg(p_efg), m_deleted(false),
+  : m_refCount(0), m_id(p_efg->m_nextNodeId++), m_efg(p_efg), m_deleted(false),
     m_infoset(0), m_parent(p_parent), m_outcome(0),
     m_whichbranch(0), m_ptr(0)
-{ }
+{ 
+  m_efg->m_numNodes++;
+}
 
 gbtTreeNodeRep::~gbtTreeNodeRep()
 {
@@ -69,6 +71,12 @@ bool gbtTreeNodeRep::Dereference(void)
     delete m_efg;
   }
   return (--m_refCount == 0 && m_deleted); 
+}
+
+void gbtTreeNodeRep::Delete(void)
+{ 
+  m_efg->m_numNodes--;
+  if (m_refCount == 0) delete this; else m_deleted = true; 
 }
 
 //----------------------------------------------------------------------

@@ -51,8 +51,7 @@ public:
   //@{
   void Reference(void);
   bool Dereference(void);
-  void Delete(void)
-    { if (m_refCount == 0) delete this; else m_deleted = true; }
+  void Delete(void);
   //@}
 
   /// @name General information about the node

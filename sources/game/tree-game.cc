@@ -46,10 +46,10 @@
 gbtTreeGameRep::gbtTreeGameRep(void)
   : m_refCount(0),
     m_hasComputed(false), m_label("UNTITLED"),
-    m_numNodes(1), m_chance(new gbtTreePlayerRep(this, 0))
+    m_numNodes(0), m_nextNodeId(1),
+    m_chance(new gbtTreePlayerRep(this, 0))
 {
   m_root = new gbtTreeNodeRep(this, 0);
-  m_root->m_id = 1;
 }
 
 gbtTreeGameRep::~gbtTreeGameRep()
@@ -234,6 +234,7 @@ void gbtTreeGameRep::Canonicalize(void)
 {
   m_numNodes = 0;
   NumberNodes(m_root);
+  m_nextNodeId = m_numNodes + 1;
 
   for (int pl = 0; pl <= m_players.Length(); pl++)  {
     gbtTreePlayerRep *player = (pl) ? m_players[pl] : m_chance;

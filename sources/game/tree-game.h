@@ -54,7 +54,7 @@ public:
   gbtBlock<gbtTreePlayerRep *> m_players;
   gbtBlock<gbtTreeOutcomeRep *> m_outcomes;
   gbtTreeNodeRep *m_root;
-  int m_numNodes;
+  int m_numNodes, m_nextNodeId;
   gbtTreePlayerRep *m_chance;
 
   /// @name Constructor and destructor
