@@ -111,9 +111,6 @@ template <class T> void MixedSolution<T>::SetIsProper(int i)
 template <class T> int MixedSolution<T>::IsProper()
 { EvalEquilibria(); return _IsProper; }
 
-template <class T> NFSupport MixedSolution<T>::Support() const
-{ return stratset; }
-
 
 template <class T> void MixedSolution<T>::SetGobit(T lambda, T value)
 {
@@ -148,7 +145,7 @@ template <class T> void MixedSolution<T>::Dump(gOutput& f) const
   f << " IsNash:"; DisplayTriState(f, _IsNash);
   f << " IsPerfect:"; DisplayTriState(f, _IsPerfect);
   f << " IsProper:"; DisplayTriState(f, _IsProper);
-  f << " Support:" << Support();
+  f << " Support:" << GetNFSupport();
   f << " GobitLambda:" << _GobitLambda;
   f << " GobitValue:" << _GobitValue;
   f << " LiapValue:" << _LiapValue;

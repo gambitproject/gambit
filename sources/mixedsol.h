@@ -44,7 +44,6 @@ public:
   int IsPerfect(); //Is it Perfect? Y/N/DK
   void SetIsProper(int);
   int IsProper(); //Is it Proper? Y/N/DK
-  NFSupport Support() const; //Support of Profile
 
   void SetGobit(T lambda, T value);
   T GobitLambda() const; // lambda from gobit alg
