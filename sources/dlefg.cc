@@ -411,15 +411,17 @@ int dialogActionLabel::s_actionsPerDialog = 8;
 
 dialogActionLabel::dialogActionLabel(Infoset *p_infoset, wxWindow *p_parent)
   : wxDialogBox(p_parent, "Label Actions", TRUE), m_infoset(p_infoset),
-    m_pageNumber(0), m_actionNames(p_infoset->NumActions())
+    m_pageNumber(0), m_backButton(0), m_nextButton(0),
+    m_actionNames(p_infoset->NumActions())
 {
+  SetAutoLayout(TRUE);
+  
   for (int act = 1; act <= m_infoset->NumActions(); act++)
     m_actionNames[act] = m_infoset->Actions()[act]->GetName();
 
-  m_actionLabels = new wxText *[gmin(m_infoset->NumActions(),
-				     s_actionsPerDialog)];
-  for (int act = 1; act <= gmin(m_infoset->NumActions(), s_actionsPerDialog);
-       act++) {
+  int numFields = gmin(m_infoset->NumActions(), s_actionsPerDialog);
+  m_actionLabels = new wxText *[numFields];
+  for (int act = 1; act <= numFields; act++) {
     m_actionLabels[act-1] = new wxText(this, 0, ToText(act) + "  ", "",
 				       -1, -1, -1, -1, wxFIXED_LENGTH);
     m_actionLabels[act-1]->SetValue(m_infoset->Actions()[act]->GetName());
@@ -431,17 +433,73 @@ dialogActionLabel::dialogActionLabel(Infoset *p_infoset, wxWindow *p_parent)
 					"<< Back");
     m_backButton->SetClientData((char *) this);
     m_backButton->Enable(FALSE);
+
+ 	 m_backButton->SetConstraints(new wxLayoutConstraints);
+  	 m_backButton->GetConstraints()->top.SameAs(m_actionLabels[numFields-1],
+                                               wxBottom, 10);
+    m_backButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
+    m_backButton->GetConstraints()->height.AsIs();
+    m_backButton->GetConstraints()->width.AsIs();
+
     m_nextButton = new wxButton(this, (wxFunction) CallbackNext,
 					"Next >>");
     m_nextButton->SetClientData((char *) this);
+ 	 m_nextButton->SetConstraints(new wxLayoutConstraints);
+  	 m_nextButton->GetConstraints()->top.SameAs(m_actionLabels[numFields-1],
+                                                 wxBottom, 10);
+    m_nextButton->GetConstraints()->left.SameAs(this, wxCentreX, 5);
+    m_nextButton->GetConstraints()->height.AsIs();
+    m_nextButton->GetConstraints()->width.AsIs();
   }
-
-  m_okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  NewLine();
+  
+  m_okButton = new wxButton(this, (wxFunction) CallbackOK, "OK");
   m_okButton->SetClientData((char *) this);
+
   m_cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
 					"Cancel");
   m_cancelButton->SetClientData((char *) this);
 
+  m_helpButton = new wxButton(this, (wxFunction) CallbackHelp,
+					"Help");
+  m_helpButton->SetClientData((char *) this);
+
+  m_cancelButton->SetConstraints(new wxLayoutConstraints);
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
+  m_cancelButton->GetConstraints()->height.AsIs();
+  m_cancelButton->GetConstraints()->width.AsIs();
+
+  m_okButton->SetConstraints(new wxLayoutConstraints);
+  if (m_backButton)  {
+    m_okButton->GetConstraints()->top.SameAs(m_backButton, wxBottom, 10);
+  }
+  else  {
+    m_okButton->GetConstraints()->top.SameAs(m_actionLabels[numFields-1],
+                                                 wxBottom, 10);
+  }
+  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
+  m_okButton->GetConstraints()->height.AsIs();
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+
+  m_helpButton->SetConstraints(new wxLayoutConstraints);
+  m_helpButton->GetConstraints()->centreY.SameAs(m_cancelButton, wxCentreY);
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->height.AsIs();
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+
+  for (int act = 1; act <= numFields; act++) {
+    m_actionLabels[act-1]->SetConstraints(new wxLayoutConstraints);
+    m_actionLabels[act-1]->GetConstraints()->top.AsIs();
+    m_actionLabels[act-1]->GetConstraints()->height.AsIs();
+    m_actionLabels[act-1]->GetConstraints()->left.SameAs(m_okButton, wxLeft);
+    m_actionLabels[act-1]->GetConstraints()->right.SameAs(m_helpButton, wxRight);
+  }
+
+  Layout();
+  int width, height;
+  m_actionLabels[0]->GetSize(&width, &height);
+  SetSize(-1, -1, width + 20, -1);
   Fit();
   Show(TRUE);
 }
@@ -468,6 +526,11 @@ Bool dialogActionLabel::OnClose(void)
   m_completed = wxCANCEL;
   Show(FALSE);
   return FALSE;
+}
+
+void dialogActionLabel::OnHelp(void)
+{
+  wxHelpContents("Action Menu");
 }
 
 void dialogActionLabel::OnBack(void)
