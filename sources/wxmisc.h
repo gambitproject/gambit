@@ -98,6 +98,42 @@ public:
 };
 
 
+//
+// A generic standard dialog box featuring automatic layout, frame control
+// handling, and standard button placement
+//
+class guiAutoDialog : public wxDialogBox {
+private:
+  int m_completed;
+
+  static void CallbackOk(wxButton &p_object, wxEvent &)
+    { ((guiAutoDialog *) p_object.GetClientData())->OnOk(); }
+  static void CallbackCancel(wxButton &p_object, wxEvent &)
+    { ((guiAutoDialog *) p_object.GetClientData())->OnClose(); }
+  static void CallbackHelp(wxButton &p_object, wxEvent &)
+    { ((guiAutoDialog *) p_object.GetClientData())->OnHelp(); }
+
+  Bool OnClose(void);
+
+protected:
+  wxButton *m_okButton, *m_cancelButton, *m_helpButton;
+
+  virtual const char *HelpString(void) const { return ""; }
+
+  void OnOk(void);
+  void OnCancel(void);
+  void OnHelp(void);
+
+public:
+  guiAutoDialog(wxWindow *p_parent, char *p_title);
+  virtual ~guiAutoDialog() { }
+
+  void Go(void);
+  int Completed(void) const { return m_completed; }
+};
+
+
+
 class FontDialogBox: public MyDialogBox
 {
 private:

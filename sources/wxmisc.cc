@@ -271,6 +271,78 @@ MyMessageBox::MyMessageBox(const char *message, const char *caption,
     Go();
 }
 
+//========================================================================
+//                     guiAutoDialog: Member functions
+//========================================================================
+
+guiAutoDialog::guiAutoDialog(wxWindow *p_parent, char *p_title)
+  : wxDialogBox(p_parent, p_title, TRUE)
+{
+  SetAutoLayout(TRUE);
+
+  m_okButton = new wxButton(this, (wxFunction) CallbackOk, "OK");
+  m_okButton->SetClientData((char *) this);
+  m_okButton->SetDefault();
+  m_okButton->SetConstraints(new wxLayoutConstraints);
+
+  m_cancelButton = new wxButton(this, (wxFunction) CallbackCancel, "Cancel");
+  m_cancelButton->SetClientData((char *) this);
+  m_cancelButton->SetConstraints(new wxLayoutConstraints);
+
+  m_helpButton = new wxButton(this, (wxFunction) CallbackHelp, "Help");
+  m_helpButton->SetClientData((char *) this);
+  m_helpButton->SetConstraints(new wxLayoutConstraints);
+}
+
+void guiAutoDialog::Go(void)
+{
+  Layout();
+  wxList *children = GetChildren();
+
+  int minX = 1000, minY = 1000, totalWidth = 0, totalHeight = 0;
+
+  for (wxNode *child = children->First(); child != 0; child = child->Next()) {
+    wxWindow *data = (wxWindow *) child->Data();
+    int x, y, width, height;
+    data->GetPosition(&x, &y);
+    data->GetSize(&width, &height);
+
+    minX = gmin(minX, x);
+    minY = gmin(minY, y);
+    totalWidth = gmax(totalWidth, x + width);
+    totalHeight = gmax(totalHeight, y + height);
+  }
+
+  SetSize(-1, -1, totalWidth - minX + 20, totalHeight - minY + 20);
+  Show(TRUE);
+}
+
+void guiAutoDialog::OnOk(void)
+{
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void guiAutoDialog::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool guiAutoDialog::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+void guiAutoDialog::OnHelp(void)
+{
+  wxHelpContents(HelpString());
+}
+
+
+
 
 // Implementation for a font selector
 FontDialogBox::FontDialogBox(wxWindow *parent, wxFont *def) 
