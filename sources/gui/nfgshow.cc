@@ -37,6 +37,7 @@
 #include "efgshow.h"
 #include "dlnfgeditsupport.h"
 #include "dlstrategies.h"
+#include "dleditcont.h"
 #include "dlnfgproperties.h"
 
 #include "algenumpure.h"
@@ -72,6 +73,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(wxID_EXIT, NfgShow::OnFileExit)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, NfgShow::OnFileMRUFile)
   EVT_MENU(NFG_EDIT_STRATS, NfgShow::OnEditStrategies)
+  EVT_MENU(NFG_EDIT_CONTINGENCY, NfgShow::OnEditContingency)
   EVT_MENU(NFG_EDIT_GAME, NfgShow::OnEditGame)
   EVT_MENU(NFG_VIEW_PROFILES, NfgShow::OnViewProfiles)
   EVT_MENU(NFG_VIEW_NAVIGATION, NfgShow::OnViewNavigation)
@@ -168,7 +170,7 @@ NfgShow::NfgShow(Nfg &p_nfg, wxWindow *p_parent)
   wxAcceleratorTable accel(6, entries);
   SetAcceleratorTable(accel);
 
-  CreateStatusBar(3);
+  CreateStatusBar();
   MakeToolbar();
 
   m_solutionSashWindow = new wxSashWindow(this, idSOLUTIONWINDOW,
@@ -319,7 +321,17 @@ void NfgShow::MakeMenus(void)
   fileMenu->Append(wxID_EXIT, "E&xit\tCtrl-X", "Exit Gambit");
   
   wxMenu *editMenu = new wxMenu;
+  editMenu->Append(wxID_CUT, "Cu&t", "Cut the current selection");
+  editMenu->Append(wxID_COPY, "&Copy", "Copy the current selection");
+  editMenu->Append(wxID_PASTE, "&Paste", "Paste from clipboard");
+  // For the moment, these are not implemented -- leave disabled
+  editMenu->Enable(wxID_CUT, false);
+  editMenu->Enable(wxID_COPY, false);
+  editMenu->Enable(wxID_PASTE, false);
+  editMenu->AppendSeparator();
   editMenu->Append(NFG_EDIT_STRATS, "&Strategies", "Edit strategy names");
+  editMenu->Append(NFG_EDIT_CONTINGENCY, "&Contingency",
+		   "Edit the selected contingency");
   editMenu->Append(NFG_EDIT_GAME, "&Game", "Edit game properties");
 
   wxMenu *viewMenu = new wxMenu;
@@ -487,17 +499,6 @@ void NfgShow::UpdateMenus(void)
 
   menu->Enable(NFG_VIEW_PROBABILITIES, m_solutionTable->Length() > 0);
   menu->Enable(NFG_VIEW_VALUES, m_solutionTable->Length() > 0);
-
-  SetStatusText((char *)
-		("Support: " + CurrentSupport()->GetName()), 1);
-  if (CurrentSolution() > 0) {
-    SetStatusText((char *) ("Solution: " + 
-			    ToText(CurrentSolution())),
-		  2);
-  }
-  else {
-    SetStatusText("No solution displayed", 2);
-  }
 }
 
 //----------------------------------------------------------------------
@@ -626,6 +627,21 @@ void NfgShow::OnEditStrategies(wxCommandEvent &)
   }
 }
 
+void NfgShow::OnEditContingency(wxCommandEvent &)
+{
+  dialogEditContingency dialog(this, m_nfg, GetProfile());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    if (dialog.GetOutcome() == 0) { 
+      m_nfg.SetOutcome(GetProfile(), 0);
+    }
+    else {
+      m_nfg.SetOutcome(GetProfile(), m_nfg.Outcomes()[dialog.GetOutcome()]);
+    }
+    m_table->RefreshTable();
+  }
+}
+
 void NfgShow::OnEditGame(wxCommandEvent &)
 {
   dialogNfgProperties dialog(this, m_nfg, m_filename);
@@ -745,7 +761,7 @@ void NfgShow::OnViewValues(wxCommandEvent &)
 void NfgShow::OnViewOutcomeLabels(wxCommandEvent &)
 {
   m_table->SetOutcomeValues(1 - m_table->OutcomeValues());
-  m_table->Refresh();
+  m_table->RefreshTable();
 }
 
 //----------------------------------------------------------------------

@@ -11,6 +11,7 @@
 #define NFGCONST_H
 
 #define NFG_EDIT_STRATS                 301
+const int NFG_EDIT_CONTINGENCY = 309;
 const int NFG_EDIT_GAME = 310;
 
 const int NFG_VIEW_PROFILES = 101;

@@ -69,6 +69,7 @@ private:
   void OnFileMRUFile(wxCommandEvent &);
 
   void OnEditStrategies(wxCommandEvent &);
+  void OnEditContingency(wxCommandEvent &);
   void OnEditGame(wxCommandEvent &);
 
   void OnViewProfiles(wxCommandEvent &);
