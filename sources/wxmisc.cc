@@ -1,5 +1,6 @@
-// File: wxmisc.cc -- a few general purpose functions that rely on and enhance
-// wxwin.
+//
+// FILE: wxmisc.cc -- a few general purpose functions that rely on and enhance
+//                    wxwin.
 // $Id$
 //
 
@@ -9,6 +10,8 @@
 #pragma hdr_stop
 #define WXMISC_C
 #include "wxmisc.h"
+
+#include "system.h"
 
 //***************************************************************************
 //                       RANDOM USEFUL FUNCTIONS
@@ -98,14 +101,23 @@ char *wxFindFile(const char *name)
 // appends a ".pxi" extension.
 char *wxOutputFile(const char *name)
 {
-    static char t_outfile[250];
-    strcpy(t_outfile, FileNameFromPath((char *)name)); // strip the path
-    char *period = strchr(t_outfile, '.'); // strip the extension
-    
-    if (period) t_outfile[period-t_outfile] = '\0';
-    strcat(t_outfile, ".pxi"); // add a ".pxi" extension
+  static char t_outfile[250];
+  static char slash[2];
+  slash[0] = System::Slash();
+  slash[1] = '\0';
 
-    return t_outfile;
+  if (strstr(slash, name)) {
+    strcpy(t_outfile, FileNameFromPath((char *)name)); // strip the path
+  }
+  else
+    strcpy(t_outfile, name);
+
+  char *period = strchr(t_outfile, '.'); // strip the extension
+  
+  if (period) t_outfile[period-t_outfile] = '\0';
+  strcat(t_outfile, ".pxi"); // add a ".pxi" extension
+  
+  return t_outfile;
 }
 
 
