@@ -202,3 +202,25 @@ void GuiRecorder::writeArgsToFile_newline(const gText& args)
 }
 
 
+// This function appends one or more arguments to the last logged command
+// and adds a newline.
+
+void GuiRecorder::writeArgToFile(const gText& object, 
+								 const gText& funcname,
+								 int location_in_func,
+								 const gText& arg)
+{
+    if (GuiRecorder::recording == false)
+    {
+        throw NoFileToWriteTo();
+    }
+    
+#ifdef GUIREC_DEBUG
+    printf("Recording to log file: %s\n", (char *)arg);
+#endif
+
+    (gOutput &)(*file) << "... , " << funcname << ", " << location_in_func << 
+		", " << arg << gText("\n");
+}
+
+

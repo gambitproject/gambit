@@ -18,11 +18,20 @@
 #include <stdio.h>
 #include <assert.h>
 
+
 // This is so other files can refer to the global 
 // GuiPlayback object.
 
 class GuiPlayback;
 extern GuiPlayback gui_playback;
+
+
+// Macros; these make accessing the logging state easier.
+
+#define GUI_PLAYBACK gui_playback.IsPlayingBack()
+
+#define GUI_READ_ARG(F,N) gui_playback.ReadArg(F,N)
+
 
 /*
  *
@@ -45,13 +54,11 @@ extern GuiPlayback gui_playback;
  *
  */
 
-// Q: should the callback function for a given class be located in the
-//    class or outside it?  Try outside for now i.e. in this class.
-
 class GuiPlayback
 {
 private:
     static bool instantiated;  // Only one instance is permitted.
+	static bool playing_back;  // Are we playing back now?
     FILE *fp;                  // File pointer.
 
     // Private methods.
@@ -66,6 +73,13 @@ public:
     {
     public:
         virtual ~FileNotFound()   { }
+        gText Description() const;
+    };
+
+    class FileNotOpen : public gException   
+    {
+    public:
+        virtual ~FileNotOpen()   { }
         gText Description() const;
     };
 
@@ -106,14 +120,19 @@ public:
 
     // ==========================================================
 
-    // Constructor, destructor.
+    // ------------ Constructor, destructor.
     GuiPlayback();
     ~GuiPlayback();
 
-    // Methods.
-    void Playback(const gText& filename);
+    // ------------ Methods.
+    bool  IsPlayingBack() const { return GuiPlayback::playing_back; }
+    void  Playback(const gText& filename);
+	gText ReadArg(const gText& funcname, int location_in_func);
 
-    // Debugging.
+	// Read an argument from the log file.
+	const gText& ReadArg();
+
+    // ------------ Debugging.
     bool is_GuiPlayback() const;
     void GuiPlayback_hello() const;
 };

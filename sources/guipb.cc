@@ -18,6 +18,7 @@ GuiPlayback gui_playback;
 
 // Initialize static class members.
 bool GuiPlayback::instantiated = false;
+bool GuiPlayback::playing_back = false;
 
 
 // ----------------------------------------------------------------------
@@ -79,6 +80,11 @@ gText strip_whitespace(const gText& s)
 gText GuiPlayback::FileNotFound::Description(void) const
 {
     return "The log file was not found.";
+}
+
+gText GuiPlayback::FileNotOpen::Description(void) const
+{
+    return "The log file is not open.";
 }
 
 
@@ -162,7 +168,9 @@ void GuiPlayback::Playback(const gText& filename)
 
     // Read in the file line-by-line and execute each line.
 
-    while(1)
+    GuiPlayback::playing_back = true;
+
+    while (1)
     {
         char *result = fgets(linebuf, MAX_LINELENGTH, fp);
 
@@ -172,8 +180,14 @@ void GuiPlayback::Playback(const gText& filename)
         line = linebuf;
         PlaybackLine(line);
     }
+
+    GuiPlayback::playing_back = false;
 }
 
+
+//
+// Play back a single line from the log file.
+//
 
 void GuiPlayback::PlaybackLine(const gText& line)
 {
@@ -264,6 +278,126 @@ void GuiPlayback::PlaybackLine(const gText& line)
     // Now execute the command.
 
     ExecuteCommand(object_name, command, arglist);
+}
+
+
+//
+// Read in a single argument from a separate line in the log file,
+// and return the argument.  Also check that the argument was read
+// in the correct location.
+//
+// FIXME: make it so we can attach string descriptors to thrown
+//        exceptions, specifically InvalidInputLine (or add a new
+//        one called InvalidArg and/or InvalidArgLine).
+//
+
+gText GuiPlayback::ReadArg(const gText& funcname, 
+						  int location_in_func)
+{
+#ifdef GUIPB_DEBUG
+    printf("in GuiPlayback::ReadArg...\n");
+    printf("funcname: %s\n", (char *)funcname);
+    printf("location in func: %d\n", location_in_func);
+#endif
+
+    // Low-level variables.
+    char  linebuf[MAX_LINELENGTH];
+    char *word;
+
+    // High-level variables.
+    gText firstarg, secondarg, lastarg;
+    int   funcloc;
+    
+    // Read in a new line.
+
+    if (fp == NULL)
+        throw FileNotOpen();
+
+    char *result = fgets(linebuf, MAX_LINELENGTH, fp);
+
+    if (result == NULL) // End of file or error.
+        throw InvalidInputLine();  // FIXME: change to MissingInputLine()
+
+#ifdef GUIPB_DEBUG
+    printf("reading line: %s\n", linebuf);
+#endif
+
+    // Process the line.
+    // The line consists of comma-separated fields.
+
+    if (strcmp(linebuf, "\n") == 0)
+        throw InvalidInputLine();  
+
+
+    // First check that the line is being played back in the 
+    // correct function, at the correct location. 
+
+    assert(linebuf != NULL);
+
+    // The first argument should be "...", which means that this is a
+    // continuation of a previous command.
+
+    word = strtok(linebuf, ",");
+
+    if (word == NULL)  // No tokens found.
+        throw InvalidInputLine();
+
+    firstarg = strip_whitespace(gText(word));
+
+    if (firstarg != "...")
+        throw InvalidInputLine();
+
+
+    // The next argument should be the name of the function where playback
+    // should be happening.
+
+    word = strtok(NULL, ",");
+
+    if (word == NULL)  // No more tokens.
+        throw InvalidInputLine();
+
+    secondarg = strip_whitespace(gText(word));
+
+    if (secondarg != funcname)
+        throw InvalidInputLine();
+
+#ifdef GUIPB_DEBUG
+    printf("GuiPlayback::ReadArg: function is OK.\n");
+#endif
+
+    // The next argument should be the location within the function where
+    // playback should be happening.
+
+    word = strtok(NULL, ",");
+
+    if (word == NULL)  // No more tokens.
+        throw InvalidInputLine();
+
+    funcloc = atoi(word);
+
+    if (funcloc != location_in_func)
+        throw InvalidInputLine();
+
+#ifdef GUIPB_DEBUG
+    printf("GuiPlayback::ReadArg: location in function is OK.\n");
+#endif
+
+    // If everything is OK, read the actual argument and return it
+    // as a string.  The receiving function can convert it to whatever
+    // it likes.
+
+    word = strtok(NULL, ",");
+
+    if (word == NULL)  // No more tokens.
+        throw InvalidInputLine();
+
+    lastarg = strip_whitespace(gText(word));
+    
+#ifdef GUIPB_DEBUG
+    printf("leaving GuiPlayback::ReadArg...\n");
+#endif
+
+    return lastarg;
 }
 
 

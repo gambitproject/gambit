@@ -1546,59 +1546,67 @@ void SpreadSheet3D::OnPrint1(void)
 void SpreadSheet3D::OnPrint(void)
 {
 #ifdef GUIREC_DEBUG
-printf("SpreadSheet3D::OnPrint: Printing contents of spreadsheet...\n");
+	printf("SpreadSheet3D::OnPrint: Printing contents of spreadsheet...\n");
 #endif
-    wxStringList extras("ASCII", NULL);
-    wxOutputDialogBox od(&extras);
-    
-    if (od.Completed() == wxOK)
-    {
-        if (!od.ExtraMedia())
-        {
-            Print(od.GetMedia(), od.GetOption());
-        }
-        else    // only one extra exists--must be ascii.
-        {
-            char *s = wxFileSelector("Save", NULL, NULL, NULL, "*.asc", wxSAVE);
-            
-            if (s)
-            {
-                gFileOutput out(s);
-                data[cur_level].Dump(out);
-                GUI_RECORD("PRINT");
-                GUI_RECORD_A("ASCII");
-                GUI_RECORD_AN(s);
-            }
-        }
-    }
+
+	if (GUI_PLAYBACK)
+	{
+		gText arg;
+		arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 1);
+
+		if (arg == "NoExtraMedia")
+		{
+			arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 2);
+			wxOutputMedia media = (wxOutputMedia)(atoi((char *)arg));
+			arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 3);
+			wxOutputOption option = (wxOutputOption)(atoi((char *)arg));
+			Print(media, option);
+		}
+		else // ExtraMedia
+		{
+			arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 2);
+			char *s = copystring(arg);
+
+			if (s)
+			{
+				gFileOutput out(s);
+				data[cur_level].Dump(out);
+			}
+		}
+	}
+	else
+	{
+		wxStringList extras("ASCII", NULL);
+		wxOutputDialogBox od(&extras);
+		
+		if (od.Completed() == wxOK)
+		{
+			GUI_RECORD("PRINT");
+
+			if (!od.ExtraMedia())
+			{
+				GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 1, "NoExtraMedia");
+				GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 2, ToText(od.GetMedia()));
+				GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 3, ToText(od.GetOption()));
+				Print(od.GetMedia(), od.GetOption());
+			}
+			else    // only one extra exists--must be ascii.
+			{
+				GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 1, "ExtraMedia");
+
+				char *s = wxFileSelector("Save", NULL, NULL, NULL, "*.asc", wxSAVE);
+				GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 2, gText(s));
+				
+				if (s)
+				{
+					gFileOutput out(s);
+					data[cur_level].Dump(out);
+				}
+			}
+		}
+	}
 }
 
-
-// This version of OnPrint is for GUI playback only.
-
-void SpreadSheet3D::OnPrint_Playback(char *type, char *s)
-{
-#ifdef GUIPB_DEBUG
-printf("SpreadSheet3D::OnPrint_Playback: Printing contents of spreadsheet...\n");
-#endif
-    
-    if (strcmp(type, "ASCII") == 0)
-    {
-        if (s != NULL)
-        {
-#ifdef GUIPB_DEBUG
-            printf("output to file: %s\n", s);
-#endif
-            gFileOutput out(s);
-            data[cur_level].Dump(out);
-        }
-        else
-        {
-            wxMessageBox("SpreadSheet3D::OnPrint_Playback: invalid filename.\n"
-                         "Command ignored.");
-        }
-    }
-}
 
 
 void    SpreadSheet3D::spread_print_func(wxButton   &ob, wxEvent &)
@@ -2018,7 +2026,7 @@ void SpreadSheet3D::ExecuteLoggedCommand(const gText& command,
     
     if (command == "PRINT")
     {
-        OnPrint_Playback((char *)arglist[1], (char *)arglist[2]);
+        OnPrint();
     }
     else
     {

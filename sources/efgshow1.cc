@@ -317,7 +317,7 @@ void EfgShow::OnMenuCommand(int id)
         break;
 
     case FILE_CLOSE:
-        GUI_RECORD_N("FILE:CLOSE");
+        GUI_RECORD("FILE:CLOSE");
         Close();
         break;
 
@@ -378,7 +378,7 @@ void EfgShow::OnMenuCommand(int id)
         break;
 
     case SOLVE_SOLVE: 
-        GUI_RECORD_N("SOLVE:SOLVE");
+        GUI_RECORD("SOLVE:SOLVE");
         Solve();
         break;
 

@@ -702,7 +702,6 @@ public:
                                  SpreadMoveDir how = SpreadMoveJump);
     virtual void OnOptionsChanged(unsigned int /*opts*/ = 0) { }
     virtual void OnPrint(void);
-	virtual void OnPrint_Playback(char *type, char *s);  // For GUI logging only.
     virtual void OnHelp(int =0);
     virtual Bool OnCharNew(wxKeyEvent &)          { return FALSE; }
     virtual Bool OnEventNew(wxMouseEvent &/*ev*/) { return FALSE; }

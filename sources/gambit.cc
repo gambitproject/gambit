@@ -376,10 +376,19 @@ void GambitFrame::LoadFile(char *s)
     Enable(FALSE); // do not want to allow anything while the dialog is up
     
     if (!s)
-        s = wxFileSelector("Load data file", NULL, NULL, NULL, "*.?fg");
+    {
+        if (GUI_PLAYBACK)
+        {
+            gText arg = GUI_READ_ARG("GambitFrame::LoadFile", 1);
+            s = copystring((char *) arg);
+        }
+        else
+        {
+            s = wxFileSelector("Load data file", NULL, NULL, NULL, "*.?fg");
+            GUI_RECORD_ARG("GambitFrame::LoadFile", 1, s);
+        }
+    }
 
-    GUI_RECORD_AN(s);
-    
     Enable(TRUE);
     if (!s) return;
     s = copystring(s);
@@ -387,10 +396,10 @@ void GambitFrame::LoadFile(char *s)
     if (strcmp(s, "") != 0)
     {
         char *filename = copystring(FileNameFromPath(s));
-        filename = wxStrLwr(filename); // ignore case
+        filename = wxStrLwr(filename);  // ignore case
         
 #ifndef EFG_ONLY
-        if (strstr(filename, ".nfg"))        // This must be a normal form.
+        if (strstr(filename, ".nfg"))       // This must be a normal form.
         {
             NfgGUI(0, s, 0, this);
             return;
@@ -421,7 +430,7 @@ void GambitFrame::OnMenuCommand(int id)
     switch (id)
     {
     case FILE_QUIT:
-        GUI_RECORD_N("FILE:QUIT");
+        GUI_RECORD("FILE:QUIT");
         GUI_RECORDER_CLOSE
         Close();    
         break;
@@ -433,14 +442,14 @@ void GambitFrame::OnMenuCommand(int id)
         
 #ifndef EFG_ONLY
     case FILE_NEW_NFG: 
-        GUI_RECORD_N("FILE:NEW_NFG");
+        GUI_RECORD("FILE:NEW_NFG");
         NfgGUI(0, gText(), 0, this);   
         break;
 #endif
         
 #ifndef NFG_ONLY
     case FILE_NEW_EFG: 
-        GUI_RECORD_N("FILE:NEW_EFG");
+        GUI_RECORD("FILE:NEW_EFG");
         EfgGUI(0, gText(), 0, this); 
         break;
 #endif
@@ -499,7 +508,7 @@ void GambitFrame::ExecuteLoggedCommand(const gText& command,
     }
     else if (command == "FILE:LOAD")
     {
-        LoadFile((char *)arglist[1]);
+        LoadFile();
     }
     else
     {
@@ -511,7 +520,7 @@ void GambitFrame::ExecuteLoggedCommand(const gText& command,
 // A general-purpose dialog box to display the description of the exception
 //
 void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
-			long p_style = wxOK | wxCENTRE)
+            long p_style = wxOK | wxCENTRE)
 {
   gText message = "An internal error occurred in Gambit:\n" + p_message;
   wxMessageBox(message, "Gambit Error", p_style, p_parent);

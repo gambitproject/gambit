@@ -24,24 +24,16 @@ extern GuiRecorder gui_recorder;
 
 #define GUI_RECORDING gui_recorder.IsRecording()
 
-// Write a line of the form: "object, command" to the log file without 
-// a newline at the end.
-#define GUI_RECORD(X) \
-if (gui_recorder.IsRecording()) { gui_recorder.writeToFile(get_log_name(), X); }
-
-// Append a string to the last line in the log file; don't add a newline at the end.
-#define GUI_RECORD_A(X) \
-if (gui_recorder.IsRecording()) { gui_recorder.writeArgsToFile(X); }
-
 // Write a line of the form: "object, command" to the log file with
 // a newline at the end.
-#define GUI_RECORD_N(X) \
+#define GUI_RECORD(X) \
 if (gui_recorder.IsRecording()) { gui_recorder.writeToFile_newline(get_log_name(), X); }
 
-// Append a string to the last line in the log file; add a newline at the end.
-#define GUI_RECORD_AN(X) \
-if (gui_recorder.IsRecording()) { gui_recorder.writeArgsToFile_newline(X); }
+// Make an "argument line" for a command that is being logged.
+#define GUI_RECORD_ARG(X, Y, Z) \
+if (gui_recorder.IsRecording()) { gui_recorder.writeArgToFile(get_log_name(), X, Y, Z); }
 
+// Close the log file.
 #define GUI_RECORDER_CLOSE if (gui_recorder.IsRecording()) { gui_recorder.closeFile(); }
 
 
@@ -111,6 +103,12 @@ public:
     void writeArgsToFile(const gText& args);
     void writeToFile_newline(const gText& object, const gText& command);
     void writeArgsToFile_newline(const gText& args);
+
+	// Write a single argument to the log file.
+    void writeArgToFile(const gText& object, 
+						const gText& funcname,
+						int location_in_func,
+						const gText& arg);
 };
 
 #endif  // GUIREC_H
