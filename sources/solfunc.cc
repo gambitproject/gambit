@@ -510,6 +510,22 @@ Portion *GSM_CentroidNFSupport(Portion **param)
   return por;
 }
 
+
+//---------------
+// GobitLambda
+//---------------
+
+Portion* GSM_Game_Mixed(Portion** param)
+{
+  return param[0]->Owner()->RefCopy();  
+}
+
+Portion* GSM_Game_Behav(Portion** param)
+{
+  return param[0]->Owner()->RefCopy();  
+}
+
+
 //---------------
 // GobitLambda
 //---------------
@@ -1616,6 +1632,14 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetFuncInfo(5, FuncInfoType(GSM_CentroidNFSupport,
 				       porMIXED, 1));
   FuncObj->SetParamInfo(5, 0, ParamInfoType("support", porNF_SUPPORT));
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("Game", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_Mixed, porNFG, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("mixed", porMIXED));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_Behav, porEFG, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("behav", porBEHAV));
   gsm->AddFunction(FuncObj);
 
 

@@ -68,13 +68,13 @@ TEMPLATE class gListSorter<gString>;
 class gFuncListSorter : public gListSorter<FuncDescObj*>
 {
 protected:
-	CompareResult Compare(FuncDescObj* const& a, FuncDescObj* const& b) const
-	{
-		if((a->FuncName()) < (b->FuncName()))
-			return GreaterThan;
-		else if((a->FuncName()) > (b->FuncName()))
+  CompareResult Compare(FuncDescObj* const& a, FuncDescObj* const& b) const
+  {
+    if((a->FuncName()) < (b->FuncName()))
+      return GreaterThan;
+    else if((a->FuncName()) > (b->FuncName()))
       return LessThan;
-		else
+    else
       return Equal;
   }
 public:
@@ -439,23 +439,7 @@ bool GSM::Assign( void )
   }
   else if(p1Spec == p2Spec)
   {
-    if(varname != "")
-    {
-			if(p2->IsReference())
-      {
-	_VarDefine(varname, p2->ValCopy());
-	delete p2;
-	delete p1;
-	_Push(_VarValue(varname)->RefCopy());
-      }
-      else
-      {
-	_VarDefine(varname, p2);
-	delete p1;
-	_Push(_VarValue(varname)->RefCopy());
-      }
-    }
-    else if(p1Spec.ListDepth == 0)
+    if(p1Spec.ListDepth == 0)
     {
       if(!(p1Spec.Type & (porINPUT|porOUTPUT))) 
       {
@@ -1493,7 +1477,47 @@ bool GSM::Subscript ( void )
 
 bool GSM::Child ( void )
 {
-  return _BinaryOperation( "NthChild" );
+  Portion* p2;
+  Portion* p1;
+
+  assert( _Depth() >= 2 );
+  p2 = _Pop();
+  p1 = _Pop();
+
+  p2 = _ResolveRef( p2 );
+  p1 = _ResolveRef( p1 );
+
+  
+  if(p1->Spec().ListDepth > 0 && p2->Spec().Type == porINTEGER)
+  {
+    int n = ((IntPortion *) p2)->Value();
+    bool result = true;
+    if (n <= 0 || n > ((ListPortion*) p1)->Length())
+    {
+      _ErrorMessage(_StdErr, 11);
+      result = false;
+    }
+    else
+    {
+      _Push(((ListPortion*) p1)->Subscript(n));
+      result = true;
+    }
+    delete p1;
+    delete p2;
+    return result;
+  }
+  else
+  {
+    _Push( p1 );
+    _Push( p2 );
+    
+    if( p1->Spec().ListDepth > 0 )
+      return _BinaryOperation( "NthElement" );
+    else
+      return _BinaryOperation( "NthChild" );
+  }
+
+  // return _BinaryOperation( "NthChild" );
 }
 
 

@@ -162,7 +162,7 @@ funcdecl:     DEFFUNC LBRACK NAME
 			 if (!DefineFunction())  YYERROR; } 
 
 TYPEopt:      { functype = "ANYTYPE" }
-          |   TYPEDEF NAME { functype = tval; }
+          |   TYPEDEF typename { functype = paramtype; }
 		
 formallist:
           |   formalparams

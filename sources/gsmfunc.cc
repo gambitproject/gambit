@@ -1257,7 +1257,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 
 
 
-
+  
 
   // This section makes the actual function call
 

@@ -160,6 +160,22 @@ Portion *GSM_ChanceProbs(Portion **param)
 }
 
 //---------------
+// Children
+//---------------
+
+Portion *GSM_Children(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  int child;
+  Portion* por = new ListValPortion();
+  for(child=1; child <= n->NumChildren(); child++)
+    ((ListPortion*) por)->Append(new NodeValPortion(n->GetChild(child)));
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
+}
+
+//---------------
 // CopyTree
 //---------------
 
@@ -1532,6 +1548,13 @@ void Init_efgfunc(GSM *gsm)
 				       PortionSpec(porFLOAT | porRATIONAL, 1),
 				       1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("infoset", porINFOSET));
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("Children", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Children, 
+				       PortionSpec(porNODE, 1), 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
   gsm->AddFunction(FuncObj);
 
 

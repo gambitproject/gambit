@@ -438,6 +438,7 @@ Portion* GSM_List( Portion** param )
     return new ErrorPortion( "Invalid list length" );
 
   p = new ListValPortion();
+  p->SetDataType( param[0]->Spec().Type );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
     p->Append( param[0]->ValCopy() );
   return p;
@@ -453,6 +454,7 @@ Portion* GSM_List_List( Portion** param )
     return new ErrorPortion( "Invalid list length" );
 
   p = new ListValPortion();
+  p->SetDataType( param[0]->Spec().Type );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
     p->Append( param[0]->ValCopy() );
   return p;
