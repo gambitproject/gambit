@@ -1699,7 +1699,8 @@ void TreeWindow::node_set_mark(void)
   if (mark_node != Cursor())
     mark_node = Cursor();
   else
-    mark_node = 0;                                   
+    mark_node = 0;
+  UpdateMenus();
 }
 
 //-------------------------
