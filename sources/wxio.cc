@@ -61,7 +61,7 @@ gWxOutput::~gWxOutput()
 }
 
 
-int gWxOutput::GetWidth(void)
+int gWxOutput::GetWidth(void) const
 {
     return Width;
 }
@@ -74,7 +74,7 @@ gOutput &gWxOutput::SetWidth(int w)
 }
 
 
-int gWxOutput::GetPrec(void)
+int gWxOutput::GetPrec(void) const
 {
     return Prec;
 }
@@ -101,7 +101,7 @@ gOutput &gWxOutput::SetFloatMode(void)
 }
 
 
-char gWxOutput::GetRepMode(void)
+char gWxOutput::GetRepMode(void) const
 {
     return Represent;
 }

@@ -43,13 +43,13 @@ public:
     bool IsValid(void) const;
 
     // Functions to control the appearance of the output
-    int GetWidth(void);
+    int GetWidth(void) const;
     gOutput &SetWidth(int w);
-    int GetPrec(void);
+    int GetPrec(void) const;
     gOutput &SetPrec(int p);
     gOutput &SetExpMode(void);
     gOutput &SetFloatMode(void);
-    char GetRepMode(void);
+    char GetRepMode(void) const;
 
     // Interface to the display window
     void OnClose(void);
