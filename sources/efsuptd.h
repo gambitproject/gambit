@@ -39,8 +39,8 @@ private:
 	}
 	void OnCur(int cur_sup)
 	{
-	cur_dim->SetValue(gpvect_to_string(sups[cur_sup]->Dimensionality(false)));
-	disp_dim->SetValue(gpvect_to_string(sups[cur_sup]->Dimensionality(false)));
+	cur_dim->SetValue(gpvect_to_string(sups[cur_sup]->Dimensionality()));
+	disp_dim->SetValue(gpvect_to_string(sups[cur_sup]->Dimensionality()));
 	disp_item->SetSelection(cur_sup-1);
 	}
 	void OnDisp(int disp_sup)
@@ -67,10 +67,10 @@ public:
 	wxForm *f=new wxForm(0);
 	SetLabelPosition(wxVERTICAL);
 	cur_dim=new wxText(this,0,"Current",
-											gpvect_to_string(sups[cur_sup]->Dimensionality(false)),
+											gpvect_to_string(sups[cur_sup]->Dimensionality()),
 											-1,-1,80,-1,wxREADONLY);
 	disp_dim=new wxText(this,0,"Display",
-											gpvect_to_string(sups[disp_sup]->Dimensionality(false)),
+											gpvect_to_string(sups[disp_sup]->Dimensionality()),
 											-1,-1,80,-1,wxREADONLY);
 	support_list=wxStringListInts(sups.Length());
 	cur_str=new char[10];strcpy(cur_str,ToString(cur_sup));
