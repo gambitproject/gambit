@@ -250,6 +250,10 @@ Mixed_ListPortion<gRational>::Mixed_ListPortion(const gList<MixedProfile<gRation
     Append(new MixedValPortion( new MixedProfile<gRational>(list[i])));
 }
 
+
+
+//-------------------------- LPSolve -----------------------------//
+
 #include "csum.h"
 
 Portion *GSM_ConstSumFloat(Portion **param)
@@ -295,6 +299,48 @@ Portion *GSM_ConstSumRational(Portion **param)
   por->AddDependency();
   return por;
 }
+
+Portion *GSM_ConstSumSupport(Portion **param)
+{
+  NFSupport& S = * ( (NfSupportPortion*) param[ 0 ] )->Value();
+  BaseNfg* N = (BaseNfg*) &( S.BelongsTo() );
+  Portion* por = 0;
+
+  ZSumParams ZP;
+
+  switch( N->Type() )
+  {
+  case DOUBLE:
+    {
+      ZSumModule<double> ZM( * (Nfg<double>*) N, ZP, S);
+      ZM.ZSum();
+      ((IntPortion *) param[1])->Value() = ZM.NumPivots();
+      ((FloatPortion *) param[2])->Value() = ZM.Time();
+      gList<MixedProfile<double> > solns;
+      ZM.GetSolutions(solns);  por = new Mixed_ListPortion<double>(solns);
+    }
+    break;
+  case RATIONAL:
+    {
+      ZSumModule<gRational> ZM( * (Nfg<gRational>*) N, ZP, S);
+      ZM.ZSum();
+      ((IntPortion *) param[1])->Value() = ZM.NumPivots();
+      ((FloatPortion *) param[2])->Value() = ZM.Time();
+      gList<MixedProfile<gRational> > solns;
+      ZM.GetSolutions(solns);  por = new Mixed_ListPortion<gRational>(solns);
+    }
+    break;
+  default:
+    assert( 0 );
+  }
+
+  assert( por != 0 );
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
+}
+
+
 
 
 //----------------------- EnumMixedSolve -------------------------//
@@ -393,8 +439,6 @@ Portion *GSM_EnumSupport(Portion **param)
 #include "ngobit.h"
 
 
-
-
 Portion *GSM_GobitNfg_NfgFloat(Portion **param)
 {
   int old_Funct_maxitsN = Funct_maxitsN;
@@ -490,7 +534,7 @@ Portion *GSM_GobitNfg_MixedFloat(Portion **param)
 
 
 
-
+//-------------------------- GobitGridSolve -------------------------//
 
 #include "grid.h"
 
@@ -499,7 +543,10 @@ Portion *GSM_GridSolveFloat(Portion **param)
   Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
   
   GridParams<double> GP;
-  GP.pxifile = &((OutputPortion *) param[1])->Value();
+  if( ((TextPortion*) param[1])->Value() != "" )
+    GP.pxifile = new gFileOutput( ((TextPortion*) param[1])->Value() );
+  else
+    GP.pxifile = &gnull;
   GP.minLam = ((FloatPortion *) param[2])->Value();
   GP.maxLam = ((FloatPortion *) param[3])->Value();
   GP.delLam = ((FloatPortion *) param[4])->Value();
@@ -522,12 +569,71 @@ Portion *GSM_GridSolveFloat(Portion **param)
   return por;
 }
 
+
+Portion *GSM_GridSolveSupport(Portion **param)
+{
+  NFSupport& S = * ( (NfSupportPortion*) param[ 0 ] )->Value();
+  BaseNfg* N = (BaseNfg*) &( S.BelongsTo() );
+  Portion* por = 0;
+
+  GridParams<double> GP;
+  if( ((TextPortion*) param[1])->Value() != "" )
+    GP.pxifile = new gFileOutput( ((TextPortion*) param[1])->Value() );
+  else
+    GP.pxifile = &gnull;
+  GP.minLam = ((FloatPortion *) param[2])->Value();
+  GP.maxLam = ((FloatPortion *) param[3])->Value();
+  GP.delLam = ((FloatPortion *) param[4])->Value();
+  GP.powLam = ((IntPortion *) param[5])->Value();
+  GP.delp = ((FloatPortion *) param[6])->Value();
+  GP.tol = ((FloatPortion *) param[7])->Value();
+
+  switch( N->Type() )
+  {
+  case DOUBLE:
+    {
+      GridSolveModule<double> GM( * (Nfg<double>*) N, GP, S);
+      GM.GridSolve();
+      // ((IntPortion *) param[8])->Value() = GM.NumEvals();
+      // ((FloatPortion *) param[9])->Value() = GM.Time();
+      gList<MixedProfile<double> > solns;
+      por = new Mixed_ListPortion<double>(solns);
+    }
+    break;
+  case RATIONAL:
+    {
+      return new ErrorPortion( "The rational version of GobitGridSolve is not implemented" );
+      /*
+      GridSolveModule<gRational> GM( * (Nfg<gRational>*) N, GP, S);
+      GM.GridSolve();
+      // ((IntPortion *) param[8])->Value() = GM.NumEvals();
+      // ((FloatPortion *) param[9])->Value() = GM.Time();
+      gList<MixedProfile<gRational> > solns;
+      por = new Mixed_ListPortion<gRational>(solns);
+      */
+    }
+    break;
+  default:
+    assert( 0 );
+  }
+
+  assert( por != 0 );
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
+}
+
+
+/*
 Portion *GSM_GridSolveRational(Portion **param)
 {
   Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
   
   GridParams<gRational> GP;
-  GP.pxifile = &((OutputPortion *) param[1])->Value();
+  if( ((TextPortion*) param[1])->Value() != "" )
+    GP.pxifile = new gFileOutput( ((TextPortion*) param[1])->Value() );
+  else
+    GP.pxifile = &gnull;
   GP.minLam = ((RationalPortion *) param[2])->Value();
   GP.maxLam = ((RationalPortion *) param[3])->Value();
   GP.delLam = ((RationalPortion *) param[4])->Value();
@@ -549,6 +655,7 @@ Portion *GSM_GridSolveRational(Portion **param)
   por->AddDependency();
   return por;
 }
+*/
 
 
 //---------------------------- LCPSolve -------------------------//
@@ -723,6 +830,8 @@ Portion *GSM_LiapNfg_MixedFloat(Portion **param)
 
 
 
+//---------------------- SimpDivSolve -------------------------//
+
 #include "simpdiv.h"
 
 Portion *GSM_SimpdivFloat(Portion **param)
@@ -765,6 +874,48 @@ Portion *GSM_SimpdivRational(Portion **param)
   
   Portion* por = new Mixed_ListPortion<gRational>(SM.GetSolutions());
   por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
+}
+
+
+Portion *GSM_SimpdivSupport(Portion **param)
+{
+  NFSupport& S = * ( (NfSupportPortion*) param[ 0 ] )->Value();
+  BaseNfg* N = (BaseNfg*) &( S.BelongsTo() );
+  Portion* por = 0;
+
+  SimpdivParams SP;
+  SP.stopAfter = ((IntPortion *) param[1])->Value();
+  SP.nRestarts = ((IntPortion *) param[2])->Value();
+  SP.leashLength = ((IntPortion *) param[3])->Value();
+
+  switch( N->Type() )
+  {
+  case DOUBLE:
+    {
+      SimpdivModule<double> SM( * (Nfg<double>*) N, SP, S);
+      SM.Simpdiv();
+      ((IntPortion *) param[4])->Value() = SM.NumEvals();
+      ((FloatPortion *) param[5])->Value() = SM.Time();
+      por = new Mixed_ListPortion<double>(SM.GetSolutions());
+    }
+    break;
+  case RATIONAL:
+    {
+      SimpdivModule<gRational> SM( * (Nfg<gRational>*) N, SP, S);
+      SM.Simpdiv();
+      ((IntPortion *) param[4])->Value() = SM.NumEvals();
+      ((FloatPortion *) param[5])->Value() = SM.Time();
+      por = new Mixed_ListPortion<gRational>(SM.GetSolutions());
+    }
+    break;
+  default:
+    assert( 0 );
+  }
+
+  assert( por != 0 );
+  por->SetOwner( param[ 0 ]->Owner() );
   por->AddDependency();
   return por;
 }
@@ -959,6 +1110,9 @@ Portion *GSM_NewSupport(Portion **param)
   return p;
 }
 
+
+//---------------------------- SaveNfg ------------------------//
+
 Portion *GSM_SaveNfg(Portion **param)
 {
   BaseNfg* N = ((NfgPortion*) param[0])->Value();
@@ -973,12 +1127,32 @@ Portion *GSM_SaveNfg(Portion **param)
   return param[0]->RefCopy();
 }
 
+Portion *GSM_SaveNfg_Support(Portion **param)
+{
+  NFSupport& S = * ( (NfSupportPortion*) param[ 0 ] )->Value();
+  BaseNfg* N = (BaseNfg*) &( S.BelongsTo() );
+  gString file = ((TextPortion *) param[1])->Value();
+  gFileOutput f(file);
+
+  if (!f.IsValid())
+    return new ErrorPortion("Unable to open file for output");
+
+  N->WriteNfgFile(f);
+
+  Portion* por = param[ 0 ]->ValCopy();
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
+}
+
 //---------------------------------------------------------------------
 
 
 void Init_nfgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
+
+  //------------------------ LPSolve -----------------------//
 
   FuncObj = new FuncDescObj("LPSolve");
   FuncObj->SetFuncInfo(GSM_ConstSumFloat, 3);
@@ -996,7 +1170,17 @@ void Init_nfgfunc(GSM *gsm)
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_ConstSumRational, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_ConstSumSupport, 3);
+  FuncObj->SetParamInfo(GSM_ConstSumSupport, 0, "support", porNF_SUPPORT );
+  FuncObj->SetParamInfo(GSM_ConstSumSupport, 1, "nPivots", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ConstSumSupport, 2, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+
   gsm->AddFunction(FuncObj);
+
+
 
   FuncObj = new FuncDescObj("ElimDom");
   FuncObj->SetFuncInfo(GSM_ElimDom, 3);
@@ -1044,21 +1228,23 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-
-  FuncObj = new FuncDescObj("LqreGridSolve");
+  
+  //----------------------- GobitGridSolve ----------------------//
+  
+  FuncObj = new FuncDescObj("GobitGridSolve");
   FuncObj->SetFuncInfo(GSM_GridSolveFloat, 10);
   FuncObj->SetParamInfo(GSM_GridSolveFloat, 0, "nfg", porNFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GridSolveFloat, 1, "pxifile", porOUTPUT,
-			new OutputValPortion(gnull));
+  FuncObj->SetParamInfo(GSM_GridSolveFloat, 1, "pxifile", porTEXT,
+			new TextValPortion("") );
   FuncObj->SetParamInfo(GSM_GridSolveFloat, 2, "minLam", porFLOAT,
-			new FloatValPortion(.01));
+			new FloatRefPortion(Gobit_default_minLam));
   FuncObj->SetParamInfo(GSM_GridSolveFloat, 3, "maxLam", porFLOAT,
-			new FloatValPortion(30));
+			new FloatRefPortion(Gobit_default_maxLam));
   FuncObj->SetParamInfo(GSM_GridSolveFloat, 4, "delLam", porFLOAT,
-			new FloatValPortion(.01));
+			new FloatRefPortion(Gobit_default_delLam));
   FuncObj->SetParamInfo(GSM_GridSolveFloat, 5, "powLam", porINTEGER,
-			new IntValPortion(1));
+		        new IntRefPortion( (long&) Gobit_default_powLam));
   FuncObj->SetParamInfo(GSM_GridSolveFloat, 6, "delp", porFLOAT,
 			new FloatValPortion(.01));
   FuncObj->SetParamInfo(GSM_GridSolveFloat, 7, "tol", porFLOAT,
@@ -1068,19 +1254,41 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_GridSolveFloat, 9, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
 
+  FuncObj->SetFuncInfo(GSM_GridSolveSupport, 10);
+  FuncObj->SetParamInfo(GSM_GridSolveSupport, 0, "support", porNF_SUPPORT );
+  FuncObj->SetParamInfo(GSM_GridSolveSupport, 1, "pxifile", porTEXT,
+			new TextValPortion("") );
+  FuncObj->SetParamInfo(GSM_GridSolveSupport, 2, "minLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_minLam));
+  FuncObj->SetParamInfo(GSM_GridSolveSupport, 3, "maxLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_maxLam));
+  FuncObj->SetParamInfo(GSM_GridSolveSupport, 4, "delLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_delLam));
+  FuncObj->SetParamInfo(GSM_GridSolveSupport, 5, "powLam", porINTEGER,
+		        new IntRefPortion( (long&) Gobit_default_powLam));
+  FuncObj->SetParamInfo(GSM_GridSolveSupport, 6, "delp", porFLOAT,
+			new FloatValPortion(.01));
+  FuncObj->SetParamInfo(GSM_GridSolveSupport, 7, "tol", porFLOAT,
+			new FloatValPortion(.01));
+  FuncObj->SetParamInfo(GSM_GridSolveSupport, 8, "nEvals", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GridSolveSupport, 9, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+
+  /*
   FuncObj->SetFuncInfo(GSM_GridSolveRational, 10);
   FuncObj->SetParamInfo(GSM_GridSolveRational, 0, "nfg", porNFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GridSolveRational, 1, "pxifile", porOUTPUT,
-			new OutputValPortion(gnull));
-  FuncObj->SetParamInfo(GSM_GridSolveRational, 2, "minLam", porRATIONAL,
-			new FloatValPortion(.01));
-  FuncObj->SetParamInfo(GSM_GridSolveRational, 3, "maxLam", porRATIONAL,
-			new FloatValPortion(30));
-  FuncObj->SetParamInfo(GSM_GridSolveRational, 4, "delLam", porRATIONAL,
-			new FloatValPortion(.01));
-  FuncObj->SetParamInfo(GSM_GridSolveRational, 5, "powLam", porINTEGER,
-			new IntValPortion(1));
+  FuncObj->SetParamInfo(GSM_GridSolveFloat, 1, "pxifile", porTEXT,
+			new TextValPortion("") );
+  FuncObj->SetParamInfo(GSM_GobitSolveFloat, 2, "minLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_minLam));
+  FuncObj->SetParamInfo(GSM_GobitSolveFloat, 3, "maxLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_maxLam));
+  FuncObj->SetParamInfo(GSM_GobitSolveFloat, 4, "delLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_delLam));
+  FuncObj->SetParamInfo(GSM_GobitSolveFloat, 5, "powLam", porINTEGER,
+		        new IntRefPortion( (long&) Gobit_default_powLam));
   FuncObj->SetParamInfo(GSM_GridSolveRational, 6, "delp", porRATIONAL,
 			new FloatValPortion(.01));
   FuncObj->SetParamInfo(GSM_GridSolveRational, 7, "tol", porRATIONAL,
@@ -1089,6 +1297,7 @@ void Init_nfgfunc(GSM *gsm)
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_GridSolveRational, 9, "time", porRATIONAL,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  */
   gsm->AddFunction(FuncObj);
 
 
@@ -1122,6 +1331,7 @@ void Init_nfgfunc(GSM *gsm)
 
 
 
+  //------------------------ SimpDivSolve ----------------------//
 
   FuncObj = new FuncDescObj("SimpDivSolve");
   FuncObj->SetFuncInfo(GSM_SimpdivFloat, 6);
@@ -1151,7 +1361,26 @@ void Init_nfgfunc(GSM *gsm)
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SimpdivRational, 5, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_SimpdivSupport, 6);
+  FuncObj->SetParamInfo(GSM_SimpdivSupport, 0, "support", porNF_SUPPORT );
+  FuncObj->SetParamInfo(GSM_SimpdivSupport, 1, "stopAfter", porINTEGER,
+			new IntValPortion(1));
+  FuncObj->SetParamInfo(GSM_SimpdivSupport, 2, "nRestarts", porINTEGER,
+			new IntValPortion(1));
+  FuncObj->SetParamInfo(GSM_SimpdivSupport, 3, "leashLength", porINTEGER,
+			new IntValPortion(0));
+  FuncObj->SetParamInfo(GSM_SimpdivSupport, 4, "nEvals", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SimpdivSupport, 5, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+
   gsm->AddFunction(FuncObj);
+
+
+
+
+  //----------------------------------------------------------//
 
   FuncObj = new FuncDescObj("CompressNfg");
   FuncObj->SetFuncInfo(GSM_CompressNfg, 1);
@@ -1225,11 +1454,20 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_LoadNfg, 0, "file", porTEXT);
   gsm->AddFunction(FuncObj);
 
+
+  //------------------------ SaveNfg ----------------------------//
+
   FuncObj = new FuncDescObj("SaveNfg");
+
   FuncObj->SetFuncInfo(GSM_SaveNfg, 2);
-  FuncObj->SetParamInfo(GSM_SaveNfg, 0, "nfg", porNFG, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SaveNfg, 0, "nfg", porNFG, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SaveNfg, 1, "file", porTEXT);
+
+  FuncObj->SetFuncInfo(GSM_SaveNfg_Support, 2);
+  FuncObj->SetParamInfo(GSM_SaveNfg_Support, 0, "support", porNF_SUPPORT );
+  FuncObj->SetParamInfo(GSM_SaveNfg_Support, 1, "file", porTEXT);
+
   gsm->AddFunction(FuncObj);
 
 }
