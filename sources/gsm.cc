@@ -912,39 +912,6 @@ bool GSM::Add (void)
 	(*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
     else
       result = false;
-
-/*
-    switch(p->Spec().Type)
-    {
-    case porINTEGER:
-      ((IntPortion*) p)->Value() += ((IntPortion*) p2)->Value();
-      break;
-    case porFLOAT:
-      ((FloatPortion*) p)->Value() += ((FloatPortion*) p2)->Value();
-      break;
-    case porRATIONAL:
-      ((RationalPortion*) p)->Value() += ((RationalPortion*) p2)->Value();
-      break;
-    case porMIXED_FLOAT:
-      (*((MixedSolution<double>*) ((MixedPortion*) p)->Value())) += 
-	(*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
-      break;
-    case porMIXED_RATIONAL:
-      (*((MixedSolution<gRational>*) ((MixedPortion*) p)->Value())) += 
-	(*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value()));
-      break;
-    case porBEHAV_FLOAT:
-      (*((BehavSolution<double>*) ((BehavPortion*) p)->Value())) += 
-	(*((BehavSolution<double>*) ((BehavPortion*) p2)->Value()));
-      break;
-    case porBEHAV_RATIONAL:
-      (*((BehavSolution<gRational>*) ((BehavPortion*) p)->Value())) += 
-	(*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
-      break;
-    default:
-      result = false;
-    }
-*/
   }
 
   if(result)
