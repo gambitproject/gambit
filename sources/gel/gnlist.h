@@ -40,79 +40,54 @@ private:
   
 
 public:
-  gNestedList( void ) { m_Dim.Append( 0 ); }
+    // NESTED LIST INTERNAL ERROR EXCEPTION CLASS
+  class InternalError : public gException  {
+    private:
+      int line;
 
-  gNestedList( const gList<int>& dim )
-    : m_Dim( dim ) { }
+    public:
+      InternalError(int l) : line(l)  { }
+      virtual ~InternalError()  { }
 
-  gNestedList( const gList<T>& data, const gList<int>& dim )
-    : m_Data( data ), m_Dim( dim ) { }
+      gText Description(void) const;
+  };
 
+    // CONSTRUCTORS, DESTRUCTOR, AND CONSTRUCTIVE OPERATORS
+  gNestedList(void) { m_Dim.Append(0); }
+  gNestedList(const gList<int>& dim)
+    : m_Dim(dim) { }
+  gNestedList(const gList<T> &data, const gList<int> &dim)
+    : m_Data(data), m_Dim(dim) { }
   virtual ~gNestedList() {}
 
-  const gList< int >& Dim( void ) const { return m_Dim; }
-  const gList< T >& Data( void ) const { return m_Data; }
-  gList< T >& Data( void ) { return m_Data; }
+// gNestedList<T> &operator=(const gNestedList<T> &);
+
+    // DATA ACCESS
+  const gList<int> &Dim(void) const { return m_Dim; }
+  const gList<T> &Data(void) const { return m_Data; }
+  gList<T> &Data(void) { return m_Data; }
   
-
-  gNestedList<T> NthElement( int i ) const;
-  int NumElements( void ) const;
-  bool Contains( const gNestedList<T>& t ) const;
-
-  void Output( gOutput& out ) const; 
-
-  // gNestedList<T> &operator=(const gNestedList<T> &);
-
-  bool operator==(const gNestedList<T> &b) const
-  { return Dim() == b.Dim() && Data() == b.Data(); }
-  bool operator!=(const gNestedList<T> &b) const
-  { return !operator==(b); }
-
+  gNestedList<T> NthElement(int i) const;
+  int NumElements(void) const;
+  bool Contains(const gNestedList<T> &) const;
 
   void Remove( int i );
   int Depth(void) const;
 
+  bool operator==(const gNestedList<T> &b) const;
+  bool operator!=(const gNestedList<T> &b) const;
 
-
-
-  //----------------------------------------------------------
-  // The following operations are not implemented (for now)
-  // to prevent confusion 
-  //----------------------------------------------------------
-
-  // const T &operator[](int) const;
-  // T &operator[](int);
-  
-  // gNestedList<T> operator+(const T &e) const;
-  // gNestedList<T>& operator+=(const T &e);
-  
-  // gNestedList<T> operator+(const gNestedList<T>& b) const;
-  // gNestedList<T>& operator+=(const gNestedList<T>& b);
-  
-  // gNestedList<T> &Combine(gNestedList<T> &b);
-  
-  // virtual int Append(const T &);
-  // int Insert(const T &, int);
-  // virtual T Remove(int);
-  
-  // int Find(const T &) const;
-  // bool Contains(const T &t) const;
-  // int Length(void) const;
-  
-  // void Flush(void);
-  // void Dump(gOutput &) const;
-
+  void Output(gOutput &out) const;
 };
 
 
-template <class T> 
-gOutput& operator<<( gOutput& out, const gNestedList<T>& list )
+template <class T> gOutput &operator<<(gOutput &out, const gNestedList<T> &list)
 {
-  list.Output( out );
+  list.Output(out);
   return out;
 }
 
 
-#endif // __gnlist_h__
+#endif   // GNLIST_H
 
 

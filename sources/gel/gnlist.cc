@@ -1,17 +1,24 @@
-
-
+//
+// FILE: gnlist.cc -- Instantiation of gNestedList classes
+//
 // $Id$
+//
 
-#include <assert.h>
-#include <stdlib.h>
+#include "gnlist.imp"
 
 #include "tristate.h"
 #include "gtext.h"
 #include "gnumber.h"
 
 
-#include "gnlist.imp"
+//
+// When instantiating for certain types T, we need to override the default
+// behavior of some list operations
+//
 
+//---------------------------------------------------
+// Overriden functions for gNestedList<gTriState *>
+//---------------------------------------------------
 
 void gNestedList<gTriState *>::Output( gOutput& out ) const
 {
@@ -21,7 +28,8 @@ void gNestedList<gTriState *>::Output( gOutput& out ) const
 
   if( m_Dim[1] == 0 ) // not a list
   {
-    assert( m_Dim.Length() == 1 );
+    if (m_Dim.Length() != 1)
+      throw InternalError(__LINE__);
     if (!Data()[1])
       out << "(NULL)";
     else  { 
@@ -42,7 +50,8 @@ void gNestedList<gTriState *>::Output( gOutput& out ) const
   {
     for (i = 1; i <= m_Dim.Length(); ++i )
     {
-      assert( m_Dim[i] != 0 );
+      if (m_Dim[i] == 0)
+        throw InternalError(__LINE__);
       for (j = 0; j < abs( m_Dim[i] ) - 1; ++j )
       {
 	if (!Data()[el])
@@ -78,6 +87,18 @@ void gNestedList<gTriState *>::Output( gOutput& out ) const
   }
 }
 
+bool gNestedList<gTriState *>::operator==(const gNestedList<gTriState *> &l) const
+{
+  if (m_Dim != l.m_Dim)   return false;
+  for (int i = 1; i <= m_Data.Length(); i++)
+    if (*m_Data[i] != *l.m_Data[i])  return false;
+  return true;
+}
+
+//---------------------------------------------------
+// Overriden functions for gNestedList<gNumber *>
+//---------------------------------------------------
+
 void gNestedList<gNumber *>::Output( gOutput& out ) const
 {
   int i;
@@ -86,7 +107,8 @@ void gNestedList<gNumber *>::Output( gOutput& out ) const
 
   if( m_Dim[1] == 0 ) // not a list
   {
-    assert( m_Dim.Length() == 1 );
+    if (m_Dim.Length() != 1)
+      throw InternalError(__LINE__);
 
     if (!Data()[1])
       out << "(NULL)";
@@ -97,7 +119,8 @@ void gNestedList<gNumber *>::Output( gOutput& out ) const
   {
     for (i = 1; i <= m_Dim.Length(); ++i )
     {
-      assert( m_Dim[i] != 0 );
+      if (m_Dim[i] == 0)
+        throw InternalError(__LINE__);
       for (j = 0; j < abs( m_Dim[i] ) - 1; ++j )
       {
 	if (!Data()[el])
@@ -122,6 +145,17 @@ void gNestedList<gNumber *>::Output( gOutput& out ) const
   }
 }
 
+bool gNestedList<gNumber *>::operator==(const gNestedList<gNumber *> &l) const
+{
+  if (m_Dim != l.m_Dim)   return false;
+  for (int i = 1; i <= m_Data.Length(); i++)
+    if (*m_Data[i] != *l.m_Data[i])  return false;
+  return true;
+}
+
+//---------------------------------------------------
+// Overriden functions for gNestedList<gText *>
+//---------------------------------------------------
 
 void gNestedList<gText *>::Output( gOutput& out ) const 
 {
@@ -131,7 +165,8 @@ void gNestedList<gText *>::Output( gOutput& out ) const
 
   if( m_Dim[1] == 0 ) // not a list
   {
-    assert( m_Dim.Length() == 1 );
+    if (m_Dim.Length() != 1)
+      throw InternalError(__LINE__);
 
     if (!Data()[1])
       out << "(NULL)";
@@ -142,7 +177,8 @@ void gNestedList<gText *>::Output( gOutput& out ) const
   {
     for (i = 1; i <= m_Dim.Length(); ++i )
     {
-      assert( m_Dim[i] != 0 );
+      if (m_Dim[i] == 0)
+        throw InternalError(__LINE__);
       for (j = 0; j < abs( m_Dim[i] ) - 1; ++j )
       {
 	if (!Data()[el])
@@ -165,6 +201,14 @@ void gNestedList<gText *>::Output( gOutput& out ) const
 	out << "}, ";
     }
   }
+}
+
+bool gNestedList<gText *>::operator==(const gNestedList<gText *> &l) const
+{
+  if (m_Dim != l.m_Dim)   return false;
+  for (int i = 1; i <= m_Data.Length(); i++)
+    if (*m_Data[i] != *l.m_Data[i])  return false;
+  return true;
 }
 
 
