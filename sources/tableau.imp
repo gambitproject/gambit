@@ -5,7 +5,7 @@
 //#
 
 #include "tableau.h"
-#include "normal.h"
+//#include "normal.h"
 #include "normiter.h"
 
     // These are the values recommended by Murtagh (1981) for 15 digit 
@@ -835,7 +835,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
 }
 
 template <class T>
-void LPTableau<T>::DualReversePivots(gList<gArray<int> > &list)
+void LPTableau<T>::DualReversePivots(gList<gArray<int> > &/*list*/)
 {
 }
 
