@@ -27,31 +27,29 @@
 #include "wx/grid.h"
 #include "nfgshow.h"
 
-class NfgOutcomeWindow : public wxGrid, public gbtGameView {
+class gbtNfgOutcomeWindow;
+
+class gbtOutcomeFrame : public wxFrame, public gbtGameView {
 private:
-  wxMenu *m_menu;
+  gbtNfgOutcomeWindow *m_grid;
 
-  void OnChar(wxKeyEvent &);
-  void OnCellChanged(wxGridEvent &);
-  void OnCellRightClick(wxGridEvent &);
-  void OnLabelRightClick(wxGridEvent &);
-
-  void OnPopupOutcomeNew(wxCommandEvent &);
-  void OnPopupOutcomeDelete(wxCommandEvent &);
-  void OnPopupOutcomeAttach(wxCommandEvent &);
-  void OnPopupOutcomeDetach(wxCommandEvent &);
+  // Event handlers
+  void OnClose(wxCloseEvent &);
+  void OnOutcomeNew(wxCommandEvent &);
+  void OnOutcomeDelete(wxCommandEvent &);
+  void OnOutcomeAttach(wxCommandEvent &);
+  void OnOutcomeDetach(wxCommandEvent &);
 
   // Overriding view members
-  bool IsEfgView(void) const { return false; }
+  bool IsEfgView(void) const { return true; }
   bool IsNfgView(void) const { return true; }
   void OnUpdate(gbtGameView *);
 
 public:
-  NfgOutcomeWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
-  virtual ~NfgOutcomeWindow() { }
+  gbtOutcomeFrame(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtOutcomeFrame();
 
   DECLARE_EVENT_TABLE()
 };
-
 
 #endif  // NFGOUTCOME_H

@@ -31,25 +31,31 @@
 #include "nfgoutcome.h"
 #include "numberedit.h"
 
-const int idPOPUP_NEW = 2001;
-const int idPOPUP_DELETE = 2002;
-const int idPOPUP_ATTACH = 2003;
-const int idPOPUP_DETACH = 2004;
+class gbtNfgOutcomeWindow : public wxGrid {
+private:
+  gbtGameDocument *m_doc;
 
-BEGIN_EVENT_TABLE(NfgOutcomeWindow, wxGrid)
-  EVT_KEY_DOWN(NfgOutcomeWindow::OnChar)
-  EVT_GRID_CELL_CHANGE(NfgOutcomeWindow::OnCellChanged)
-  EVT_GRID_CELL_RIGHT_CLICK(NfgOutcomeWindow::OnCellRightClick)
-  EVT_GRID_LABEL_RIGHT_CLICK(NfgOutcomeWindow::OnLabelRightClick)
-  EVT_MENU(idPOPUP_NEW, NfgOutcomeWindow::OnPopupOutcomeNew)
-  EVT_MENU(idPOPUP_DELETE, NfgOutcomeWindow::OnPopupOutcomeDelete)
-  EVT_MENU(idPOPUP_ATTACH, NfgOutcomeWindow::OnPopupOutcomeAttach)
-  EVT_MENU(idPOPUP_DETACH, NfgOutcomeWindow::OnPopupOutcomeDetach)
+  void OnChar(wxKeyEvent &);
+  void OnCellChanged(wxGridEvent &);
+
+public:
+  gbtNfgOutcomeWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtNfgOutcomeWindow() { }
+
+  void OnUpdate(void);
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(gbtNfgOutcomeWindow, wxGrid)
+  EVT_KEY_DOWN(gbtNfgOutcomeWindow::OnChar)
+  EVT_GRID_CELL_CHANGE(gbtNfgOutcomeWindow::OnCellChanged)
 END_EVENT_TABLE()
 
-NfgOutcomeWindow::NfgOutcomeWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
+gbtNfgOutcomeWindow::gbtNfgOutcomeWindow(gbtGameDocument *p_doc,
+					 wxWindow *p_parent)
   : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    gbtGameView(p_doc)
+    m_doc(p_doc)
 {
   CreateGrid(m_doc->GetNfg().NumOutcomes(),
 	     m_doc->GetNfg().NumPlayers() + 1);
@@ -63,25 +69,18 @@ NfgOutcomeWindow::NfgOutcomeWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
   SetSelectionMode(wxGridSelectRows);
   SetLabelSize(wxVERTICAL, 0);
   SetLabelValue(wxHORIZONTAL, "Name", 0);
-  SetDefaultCellAlignment(wxCENTER, wxCENTER);
   EnableDragRowSize(false);
-
-  AdjustScrollbars();
-
-  m_menu = new wxMenu("Outcomes");
-  m_menu->Append(idPOPUP_NEW, "New outcome", "Create a new outcome");
-  m_menu->Append(idPOPUP_DELETE, "Delete outcome", "Delete this outcome");
-  m_menu->AppendSeparator();
-  m_menu->Append(idPOPUP_ATTACH, "Attach outcome",
-		 "Attach this outcome at the cursor");
-  m_menu->Append(idPOPUP_DETACH, "Detach outcome",
-		 "Detach the outcome at the cursor");
 
   Show(true);
 }
 
-void NfgOutcomeWindow::OnUpdate(gbtGameView *)
+void gbtNfgOutcomeWindow::OnUpdate(void)
 {
+  SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
+  SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+  SetLabelFont(m_doc->GetPreferences().GetLabelFont());
+  SetColLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+  
   gbtNfgGame nfg = m_doc->GetNfg();
 
   if (GetRows() != nfg.NumOutcomes()) {
@@ -103,6 +102,8 @@ void NfgOutcomeWindow::OnUpdate(gbtGameView *)
     for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
       SetCellValue((char *) ToText(outcome.GetPayoff(nfg.GetPlayer(pl))),
 		   outc - 1, pl);
+      SetCellTextColour(m_doc->GetPreferences().PlayerColor(pl),
+			outc - 1, pl);
     }
   }
 
@@ -122,7 +123,7 @@ void NfgOutcomeWindow::OnUpdate(gbtGameView *)
 // This implements the automatic creation of a new outcome via
 // pressing return or down-arrow while in the last row
 //
-void NfgOutcomeWindow::OnChar(wxKeyEvent &p_event)
+void gbtNfgOutcomeWindow::OnChar(wxKeyEvent &p_event)
 {
   if (GetCursorRow() == GetRows() - 1 &&
       (p_event.GetKeyCode() == WXK_DOWN ||
@@ -149,7 +150,7 @@ void NfgOutcomeWindow::OnChar(wxKeyEvent &p_event)
   }
 }
 
-void NfgOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
+void gbtNfgOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
 {
   int row = p_event.GetRow();
   int col = p_event.GetCol();
@@ -166,56 +167,128 @@ void NfgOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
   }
 }
 
-void NfgOutcomeWindow::OnCellRightClick(wxGridEvent &p_event)
+//-------------------------------------------------------------------------
+//                      class gbtOutcomeFrame
+//-------------------------------------------------------------------------
+
+BEGIN_EVENT_TABLE(gbtOutcomeFrame, wxFrame)
+  EVT_MENU(wxID_CLOSE, gbtOutcomeFrame::Close)
+  EVT_MENU(GBT_NFG_MENU_OUTCOMES_NEW, gbtOutcomeFrame::OnOutcomeNew)
+  EVT_MENU(GBT_NFG_MENU_OUTCOMES_DELETE, gbtOutcomeFrame::OnOutcomeDelete)
+  EVT_MENU(GBT_NFG_MENU_OUTCOMES_ATTACH, gbtOutcomeFrame::OnOutcomeAttach)
+  EVT_MENU(GBT_NFG_MENU_OUTCOMES_DETACH, gbtOutcomeFrame::OnOutcomeDetach)
+  EVT_CLOSE(gbtOutcomeFrame::OnClose)
+END_EVENT_TABLE()
+
+gbtOutcomeFrame::gbtOutcomeFrame(gbtGameDocument *p_doc, wxWindow *p_parent)
+  : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(300, 200)),
+    gbtGameView(p_doc)
 {
-  PopupMenu(m_menu, p_event.GetPosition().x, p_event.GetPosition().y);
+  m_grid = new gbtNfgOutcomeWindow(p_doc, this);
+
+  wxMenu *fileMenu = new wxMenu;
+  fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
+
+  wxMenu *editMenu = new wxMenu;
+  editMenu->Append(GBT_NFG_MENU_OUTCOMES_NEW, "New",
+		   "Create a new outcome");
+  editMenu->Append(GBT_NFG_MENU_OUTCOMES_DELETE, "Delete",
+		   "Delete this outcome");
+  editMenu->AppendSeparator();
+  editMenu->Append(GBT_NFG_MENU_OUTCOMES_ATTACH, "Attach",
+		   "Attach this outcome at the cursor");
+  editMenu->Append(GBT_NFG_MENU_OUTCOMES_DETACH, "Detach",
+		   "Detach the outcome at the cursor");
+
+  wxMenu *viewMenu = new wxMenu;
+
+  wxMenu *formatMenu = new wxMenu;
+
+  wxMenuBar *menuBar = new wxMenuBar;
+  menuBar->Append(fileMenu, "&File");
+  menuBar->Append(editMenu, "&Edit");
+  menuBar->Append(viewMenu, "&View");
+  menuBar->Append(formatMenu, "&Format");
+  SetMenuBar(menuBar);
+
+  Show(false);
 }
 
-void NfgOutcomeWindow::OnLabelRightClick(wxGridEvent &p_event)
+gbtOutcomeFrame::~gbtOutcomeFrame()
+{ }
+
+void gbtOutcomeFrame::OnClose(wxCloseEvent &p_event)
 {
-  PopupMenu(m_menu, p_event.GetPosition().x, p_event.GetPosition().y);
+  m_doc->SetShowOutcomes(false);
+  // Frame is now hidden; leave it that way, don't actually close
+  p_event.Veto();
 }
 
-void NfgOutcomeWindow::OnPopupOutcomeNew(wxCommandEvent &)
+void gbtOutcomeFrame::OnUpdate(gbtGameView *p_sender)
+{
+  if (m_doc->ShowOutcomes()) {
+    m_grid->OnUpdate();
+    wxSize size = m_grid->GetBestSize();
+    SetClientSize(size);
+    m_grid->SetSize(size.GetWidth() + 1, size.GetHeight() + 1);
+    m_grid->SetScrollRate(0, 0);
+
+    if (m_doc->GetFilename() != "") {
+      SetTitle(wxString::Format("Gambit - Outcomes: [%s] %s", 
+				m_doc->GetFilename().c_str(), 
+				(char *) m_doc->GetNfg().GetTitle()));
+    }
+    else {
+      SetTitle(wxString::Format("Gambit - Outcomes: %s",
+				(char *) m_doc->GetNfg().GetTitle()));
+    }
+  }
+  Show(m_doc->ShowOutcomes());
+}
+
+void gbtOutcomeFrame::OnOutcomeNew(wxCommandEvent &)
 {
   gText outcomeName = m_doc->UniqueNfgOutcomeName();
   gbtNfgOutcome outcome = m_doc->GetNfg().NewOutcome();
   outcome.SetLabel(outcomeName);
   // Appending the row here keeps currently selected row selected
-  AppendRows();
+  m_grid->AppendRows();
   for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
     outcome.SetPayoff(m_doc->GetNfg().GetPlayer(pl), gNumber(0));
-    SetCellEditor(GetRows() - 1, pl, new NumberEditor);
+    m_grid->SetCellEditor(m_grid->GetRows() - 1, pl, new NumberEditor);
   }
   m_doc->UpdateViews(0, true, true);
 }
 
-void NfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
+void gbtOutcomeFrame::OnOutcomeDelete(wxCommandEvent &)
 {
-  if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
-    m_doc->GetNfg().DeleteOutcome(m_doc->GetNfg().GetOutcomeId(GetGridCursorRow() + 1));
+  if (m_grid->GetGridCursorRow() >= 0 && 
+      m_grid->GetGridCursorRow() < m_grid->GetRows()) {
+    m_doc->GetNfg().DeleteOutcome(m_doc->GetNfg().GetOutcomeId(m_grid->GetGridCursorRow() + 1));
   }
   m_doc->UpdateViews(0, true, true);
 }
 
-void NfgOutcomeWindow::OnPopupOutcomeAttach(wxCommandEvent &)
+void gbtOutcomeFrame::OnOutcomeAttach(wxCommandEvent &)
 {
-  if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
+  if (m_grid->GetGridCursorRow() >= 0 && 
+      m_grid->GetGridCursorRow() < m_grid->GetRows()) {
     StrategyProfile profile(m_doc->GetNfg());
     for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
       profile.Set(pl, m_doc->GetNfg().GetPlayer(pl).GetStrategy(m_doc->GetContingency()[pl]));
     }
-    profile.SetOutcome(m_doc->GetNfg().GetOutcomeId(GetGridCursorRow() + 1));
+    profile.SetOutcome(m_doc->GetNfg().GetOutcomeId(m_grid->GetGridCursorRow() + 1));
   }
+  m_doc->UpdateViews(0, true, true);
 }
 
-void NfgOutcomeWindow::OnPopupOutcomeDetach(wxCommandEvent &)
+void gbtOutcomeFrame::OnOutcomeDetach(wxCommandEvent &)
 {
   StrategyProfile profile(m_doc->GetNfg());
   for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
     profile.Set(pl, m_doc->GetNfg().GetPlayer(pl).GetStrategy(m_doc->GetContingency()[pl]));
   }
   profile.SetOutcome(0);
+  m_doc->UpdateViews(0, true, true);
 }
-
 

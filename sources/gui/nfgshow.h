@@ -43,7 +43,6 @@
 #include "nfgconst.h"
 
 class NfgNavigateWindow;
-class NfgOutcomeWindow;
 class NfgSupportWindow;
 class gbtNfgProfileGrid;
 class NfgTable;
@@ -56,12 +55,10 @@ private:
 
   wxSashWindow *m_infoSashWindow;
   NfgNavigateWindow *m_navigateWindow;
-  NfgOutcomeWindow *m_outcomeWindow;
   NfgSupportWindow *m_supportWindow;
 
   wxPageSetupData m_pageSetupData;
   wxPrintData m_printData;
-
   void MakeMenus(void);
   void MakeToolbar(void);
   void AdjustSizes(void);

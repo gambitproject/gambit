@@ -521,7 +521,12 @@ void gbtGameDocument::UpdateViews(gbtGameView *p_sender,
       m_views[i]->OnUpdate(p_sender);
     }
   }
+}
 
+void gbtGameDocument::SetShowOutcomes(bool p_show)
+{
+  m_showOutcomes = p_show;
+  UpdateViews(0, true, true);
 }
 
 void gbtGameDocument::SetShowProfiles(bool p_show)

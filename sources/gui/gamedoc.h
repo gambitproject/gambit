@@ -53,7 +53,7 @@ private:
   gList<MixedSolution> m_mixedProfiles;
 
   gbtPreferences m_prefs;
-  bool m_showProfiles;
+  bool m_showOutcomes, m_showProfiles;
 
   int m_rowPlayer, m_colPlayer;
   gArray<int> m_contingency;
@@ -88,6 +88,9 @@ public:
 
   gbtPreferences &GetPreferences(void) { return m_prefs; }
   const gbtPreferences &GetPreferences(void) const { return m_prefs; }
+
+  bool ShowOutcomes(void) const { return m_showOutcomes; }
+  void SetShowOutcomes(bool p_show);
 
   bool ShowProfiles(void) const { return m_showProfiles; }
   void SetShowProfiles(bool p_show);

@@ -130,7 +130,7 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
     gbtGameView(p_doc),
     m_table(0), 
     m_infoSashWindow(0),
-    m_navigateWindow(0), m_outcomeWindow(0), m_supportWindow(0)
+    m_navigateWindow(0), m_supportWindow(0)
 {
 #ifdef __WXMSW__
   SetIcon(wxIcon("nfg_icn"));
@@ -158,6 +158,7 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   MakeToolbar();
 
   (void) new gbtProfileFrame(m_doc, this);
+  (void) new gbtOutcomeFrame(m_doc, this);
 
   m_infoSashWindow = new wxSashWindow(this, idINFOWINDOW,
 				      wxPoint(0, 40), wxSize(200, 200),
@@ -171,10 +172,6 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   m_navigateWindow = new NfgNavigateWindow(m_doc, m_infoNotebook);
   m_navigateWindow->SetSize(200, 200);
   m_infoNotebook->AddPage(m_navigateWindow, "Navigation");
-
-  m_outcomeWindow = new NfgOutcomeWindow(m_doc, m_infoNotebook);
-  m_outcomeWindow->SetSize(200, 200);
-  m_infoNotebook->AddPage(m_outcomeWindow, "Outcomes");
 
   m_supportWindow = new NfgSupportWindow(m_doc, m_infoNotebook);
   m_supportWindow->SetSize(200, 200);
@@ -212,9 +209,10 @@ void NfgShow::OnUpdate(gbtGameView *)
   gArray<int> profile(m_doc->GetContingency());
   menu->Enable(GBT_NFG_MENU_FILE_EXPORT_COMLAB, m_doc->m_nfg->NumPlayers() == 2);
   menu->Check(GBT_NFG_MENU_VIEW_PROFILES, m_doc->ShowProfiles());
+  menu->Check(GBT_NFG_MENU_VIEW_OUTCOMES, m_doc->ShowOutcomes());
   menu->Enable(GBT_NFG_MENU_VIEW_PROBABILITIES, m_doc->IsProfileSelected());
   menu->Enable(GBT_NFG_MENU_VIEW_VALUES, m_doc->IsProfileSelected());
-  menu->Check(GBT_NFG_MENU_VIEW_OUTCOMES,
+  menu->Check(GBT_NFG_MENU_VIEW_OUTCOME_LABELS,
 	      m_doc->GetPreferences().OutcomeLabel() == GBT_OUTCOME_LABEL_LABEL);
 }
 
@@ -623,7 +621,6 @@ void NfgShow::OnViewNavigation(wxCommandEvent &)
     m_infoNotebook->SetSelection(0);
     m_navigateWindow->Show(true);
     GetMenuBar()->Check(GBT_NFG_MENU_VIEW_NAVIGATION, true);
-    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_OUTCOMES, false);
     GetMenuBar()->Check(GBT_NFG_MENU_VIEW_SUPPORTS, false);
   }
   else if (m_infoSashWindow->IsShown()) {
@@ -641,32 +638,14 @@ void NfgShow::OnViewNavigation(wxCommandEvent &)
 
 void NfgShow::OnViewOutcomes(wxCommandEvent &)
 {
-  if (m_infoSashWindow->IsShown() && m_infoNotebook->GetSelection() != 1) {
-    m_infoNotebook->SetSelection(1);
-    m_navigateWindow->Show(true);
-    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_OUTCOMES, true);
-    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_NAVIGATION, false);
-    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_SUPPORTS, false);
-  }
-  else if (m_infoSashWindow->IsShown()) {
-    m_infoSashWindow->Show(false);
-    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_OUTCOMES, false);
-  }
-  else {
-    m_infoSashWindow->Show(true);
-    m_infoNotebook->SetSelection(1);
-    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_OUTCOMES, true);
-  }
-
-  AdjustSizes();
+  m_doc->SetShowOutcomes(!m_doc->ShowOutcomes());
 }
 
 void NfgShow::OnViewSupports(wxCommandEvent &)
 {
-  if (m_infoSashWindow->IsShown() && m_infoNotebook->GetSelection() != 2) {
-    m_infoNotebook->SetSelection(2);
+  if (m_infoSashWindow->IsShown() && m_infoNotebook->GetSelection() != 1) {
+    m_infoNotebook->SetSelection(1);
     m_navigateWindow->Show(true);
-    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_OUTCOMES, false);
     GetMenuBar()->Check(GBT_NFG_MENU_VIEW_NAVIGATION, false);
     GetMenuBar()->Check(GBT_NFG_MENU_VIEW_SUPPORTS, true);
   }
