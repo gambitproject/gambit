@@ -110,7 +110,7 @@ int main()
 	out << "Please input which polynomial\n";
 	in >> input;
       } while (input < 1 || input > 4);
-      out << test[input]; //->Print(out);
+      out << *(test[input]); //->Print(out);
       out << "\n";
       break;
     case 5:
