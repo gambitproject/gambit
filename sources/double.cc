@@ -13,6 +13,7 @@
 #include "gvector.imp"
 #include "garray.imp"
 #include "gblock.imp"
+#include "glist.imp"
 #include <math.h>
 #include <values.h>
 #include <float.h>
@@ -251,6 +252,8 @@ TEMPLATE class gVector<gDouble>;
 TEMPLATE class gArray<gDouble>;
 TEMPLATE class gBlock<gDouble>;
 TEMPLATE gOutput & operator<< (gOutput&, const gVector<gDouble>&);
+TEMPLATE class gList<gDouble>;
+TEMPLATE class gNode<gDouble>;
 
 /*
 #include "gmisc.cc"

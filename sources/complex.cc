@@ -242,3 +242,9 @@ gComplex TOgComplex(const gString &s)
 //  gComplex answer(0,0);
 //  return answer; 
 }
+
+#include "glist.imp"
+
+template class gList<gComplex>;
+template class gNode<gComplex>;
+template gOutput& operator << (gOutput& output, const gList<gComplex>&);
