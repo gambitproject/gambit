@@ -167,7 +167,7 @@ static Portion *GSM_EnumPure_Nfg(Portion **param)
 
   gList<MixedSolution> solns;
   FindPureNash(S->Game(), *S, solns);
-  ((NumberPortion *) param[2])->Value() = watch.Elapsed();
+  ((NumberPortion *) param[3])->Value() = watch.Elapsed();
   return new Mixed_ListPortion(solns);
 }
 
