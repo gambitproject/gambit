@@ -14,11 +14,11 @@
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE class gSquareMatrix<float>;
+// TEMPLATE class gSquareMatrix<float>;
 TEMPLATE class gSquareMatrix<double>;
 TEMPLATE class gSquareMatrix<gRational>;
 
-TEMPLATE gOutput & operator<< (gOutput&, const gSquareMatrix<float>&);
+// TEMPLATE gOutput & operator<< (gOutput&, const gSquareMatrix<float>&);
 TEMPLATE gOutput & operator<< (gOutput&, const gSquareMatrix<double>&);
 TEMPLATE gOutput & operator<< (gOutput&, const gSquareMatrix<gRational>&);
 
