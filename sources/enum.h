@@ -10,6 +10,7 @@
 // SIAM 12 (1964): 778-780 for finding all extreme points of 
 // the Nash equilibrium components of a two person game. 
 // 
+// added comment to test RCS
 
 #ifndef ENUM_H
 #define ENUM_H
