@@ -47,8 +47,8 @@ public:
 		const EFSupport &);
   virtual ~SeqFormModule();
   
-  int Lemke(int dup = 0);
-  int All_Lemke(int dup, LTableau<T> &B, long &np);
+  int Lemke(void);
+  int All_Lemke(int dup, LTableau<T> &B, long &np, int depth);
   
   int Add_BFS(const LTableau<T> &tab);
   long NumPivots(void) const;

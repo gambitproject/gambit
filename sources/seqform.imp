@@ -30,7 +30,6 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
 
   ntot = ns1+ns2+ni1+ni2;
 
-
   A = new gMatrix<T>(1,ntot,0,ntot);
   b = new gVector<T>(1,ntot);
   int i,j;
@@ -43,7 +42,6 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
     for(j=A->MinCol();j<=A->MaxCol();j++)
       (*A)(i,j) = (T)0; 
   }
-
 
   // New code
   FillTableau(EF.RootNode(),prob,1,1,0,0);
@@ -69,7 +67,7 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
   // end new code
 
   /*
-    // old code
+    // old code with dual sets of inequalities
   FillTableau(EF.RootNode(),prob,1,1,0,0);
   for(i=A->MinRow();i<=A->MaxRow();i++) 
     (*A)(i,0) = -(T)1;
@@ -99,23 +97,18 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
 //  tab->Refactor();  // not necessary?
 //  tab->Pivot(ns1+ns2+ni1+1,0);
 //  tab->Dump(gout);
-
-
-
 }
 
 template <class T> SeqFormModule<T>::~SeqFormModule()
 { if(A) delete A; if(b) delete b; if(tab) delete tab;}
 
 //
-// Lemke is the most important routine.
-// It implements the Lemke-Howson algorithm, as refined by Eaves.
-// It is assumed that the starting point is a complementary basic
-// feasible solution.  If not it returns 0 without doing anything.
+// Lemke implements the Lemke's algorithm (as refined by Eaves 
+// for degenerate problems) for  Linear Complementarity
+// problems, starting from the primary ray.  
 //
 
-
-template <class T> int SeqFormModule<T>::Lemke(int dup)
+template <class T> int SeqFormModule<T>::Lemke(void)
 {
   BFS<T> cbfs((T) 0);
   int i;
@@ -124,92 +117,42 @@ template <class T> int SeqFormModule<T>::Lemke(int dup)
   
   gWatch watch;
   
-  T big_num = (T)1000;
-  int newsol;
   BehavProfile<T> profile(EF);
   gVector<T> sol(tab->MinRow(),tab->MaxRow());
     
-//  gVector<T> bnew(tab->MinRow(),tab->MaxRow());
-//  tab->BasisVector(bnew);
-//  gout << "\nbnew = " << bnew;
-
   solutions.Flush();
   List.Flush();
-  if ( params.stopAfter!=1 || dup==0) {
-    for (i = tab->MinRow();i <= tab->MaxRow();i++) 
-      if( (*b)[i]>=(T)0 && 
-	  (params.stopAfter==0 || solutions.Length() < params.stopAfter)) {
-      Basis<T> basis(*A);
 
-      (*A)(i,0)=-big_num;
-
-//      gout << "\n i = " << i << " basis = \n";
-//      basis.Dump(gout);
-      tab->SetBasis(basis);
-
-      tab->Pivot(ns1+ns2+1,0);
-      if(tab->SF_LCPPath(ns1+ns2+1,params.status)==1) {
-
-	// tab->GetBasis(basis);
-	// basis.Dump(gout);
-	gout << "\n i = " << i << " after LCPPath \n";
-	tab->Dump(gout);
-
-	newsol = Add_BFS(*tab);
-	tab->BasisVector(sol);
-	// gout << "\nsol = " << sol;
-	GetProfile(*tab, profile,sol,EF.RootNode(),1,1);
-	if(newsol) 
-	  solutions.Append(BehavSolution<T>(profile, EfgAlg_SEQFORM));
-	gout << "\nprofile = " << profile << "\n";
-      }
-      else {
-	gout << ": Dead End";
-	gout << "\n i = " << i << " after LCPPath \n";
-	tab->Dump(gout);
-	tab->BasisVector(sol);
-	GetProfile(*tab, profile,sol,EF.RootNode(),1,1);
-	gout << "\nprofile = " << profile << "\n";
-	newsol = 0;
-      }
-      (*A)(i,0)=-(T)1;
-      if(newsol)
-	All_Lemke(i,*tab,npivots);
-    }
-  }
+  if(params.stopAfter!=1) 
+    All_Lemke(ns1+ns2+1,*tab,npivots,0);
   else {
-
 
     tab->Pivot(ns1+ns2+1,0);
     tab->SF_LCPPath(ns1+ns2+1,params.status);
 
-// old code
-//    tab->Pivot(ns1+ns2+ni1+1,0);
-//    tab->LCPPath(ns1+ns2+ni1+1,params.status);
+    // old code, with dual set of constraints
+    // tab->Pivot(ns1+ns2+ni1+1,0);
+    // tab->LCPPath(ns1+ns2+ni1+1,params.status);
 
     Add_BFS(*tab);
+    tab->BasisVector(sol);
+    //  gout << "\nsol = " << sol;
+    GetProfile(*tab, profile,sol,EF.RootNode(),1,1);
+    //  gout << "\nprofile = " << profile << "\n";
+    solutions.Flush();
+    solutions.Append(BehavSolution<T>(profile, EfgAlg_SEQFORM));
   }
-  
+
+  gout << "\n";  
   if (params.trace >= 2)  {
     for (i = 1; i <= List.Length(); i++)   {
       List[i].Dump(*params.tracefile);
       (*params.tracefile) << "\n";
     }
   }
-/*
-  gVector<T> sol(tab->MinRow(),tab->MaxRow());
-  BehavProfile<T> profile(EF);
-//  gout << "\nsol = " << sol;
-  tab->BasisVector(sol);
-//  gout << "\nsol = " << sol;
-  GetProfile(*tab, profile,sol,EF.RootNode(),1,1);
-//  gout << "\nprofile = " << profile << "\n";
-  solutions.Flush();
-  solutions.Append(BehavSolution<T>(profile, EfgAlg_SEQFORM));
-*/
   
-//  if(params.trace >= 1)
-//    (*params.tracefile) << "\nN Pivots = " << npivots << "\n";
+  // if(params.trace >= 1)
+  //   (*params.tracefile) << "\nN Pivots = " << npivots << "\n";
 
   npivots=tab->NumPivots();
   time = watch.Elapsed();
@@ -228,17 +171,11 @@ template <class T> int SeqFormModule<T>::Add_BFS(const LTableau<T> &tableau)
     }
 
   if (List.Contains(cbfs))  return 0;
-  gout  << "\nFound CBFS";
-  gout  << "\nB = ";
-  tableau.Dump(gout);
-  gout  << "\ncbfs = ";
-  cbfs.Dump(gout);
-
-//  if(params.trace >=2) (*params.tracefile) << "\nFound CBFS";
-//  (*params.tracefile)  << "\nB = ";
-//  tab.Dump(*params.tracefile);
-//  (*params.tracefile)  << "\ncbfs = ";
-//  cbfs.Dump(*params.tracefile );
+  //  if(params.trace >=2) (*params.tracefile) << "\nFound CBFS";
+  //  (*params.tracefile)  << "\nB = ";
+  //  tableau.Dump(*params.tracefile);
+  //  (*params.tracefile)  << "\ncbfs = ";
+  //  cbfs.Dump(*params.tracefile );
   List.Append(cbfs);
   return 1;
 }
@@ -250,20 +187,22 @@ template <class T> int SeqFormModule<T>::Add_BFS(const LTableau<T> &tableau)
 // From each new accessible equilibrium, it follows
 // all possible paths, adding any new equilibria to the List.  
 //
-template <class T> int SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np)
+template <class T> int 
+SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
 {
-  int i;
-  int len,newsol,missing;
+  int i,len,newsol,missing;
   T p1,p2,aa;
-  T big_num = (T)1000;
+  T small_num = (T)1/(T)1000;
+
   np+=B.NumPivots();
   gVector<T> sol(tab->MinRow(),tab->MaxRow());
   BehavProfile<T> profile(EF);
 
-  gout << "\nIn All_Lemke()";
+  gout << "\nIn All_Lemke() depth: " << depth;
   
+  newsol =0;
   for (i = B.MinRow(); 
-       i <= B.MaxRow()  && !params.status.Get() &&
+       i <= B.MaxRow()  && !params.status.Get() && newsol ==0 &&
        (params.stopAfter==0 || solutions.Length() < params.stopAfter);
        i++)
     if (i != j)  {
@@ -275,42 +214,40 @@ template <class T> int SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &n
       params.status.SetProgress(p1+aa*(p2-p1));
       
       LTableau<T> BCopy(B);
-      (*A)(i,0)=-big_num;
+      (*A)(i,0)=-small_num;
 
-//      gout << "\nA";
-//      A->Dump(gout);
-//      gout << "\nb";
-//      b->Dump(gout);
-//      gout << "\nBCopy:\n";
-//      BCopy.Dump(gout);
-      newsol=0;
-      missing = BCopy.SF_PivotIn(0);
-//      assert(missing!=0);
-//      gout << "\nafter Pivot, missing: " << missing << "\n";
-//      BCopy.Dump(gout);
-      gout << "\nPath: " << i;
-      if(missing) {
-	if(BCopy.SF_LCPPath(-missing,params.status)==1) {
-	  gout << "\nafter LCPPath\n";
-	  BCopy.Dump(gout);
-	  
-	  newsol = Add_BFS(BCopy);
-	  BCopy.BasisVector(sol);
-	  // gout << "\nsol = " << sol;
-	  GetProfile(BCopy, profile,sol,EF.RootNode(),1,1);
-	  if(newsol)
-	    solutions.Append(BehavSolution<T>(profile, EfgAlg_SEQFORM));
-	  gout << "\nprofile = " << profile << "\n";
-	}
-	else {
-	  gout << ": Dead End";
-	  newsol = 0;
-	}
-
+      if(depth==0) {
+	BCopy.Pivot(j,0);
+	missing = -j;
       }
+      else
+	missing = BCopy.SF_PivotIn(0);
+
+      assert(missing);
+      // gout << "\nafter Pivot, missing: " << missing << "\n";
+      // BCopy.Dump(gout);
+
+      gout << "\nDepth: " << depth << " Path: " << i;
+      newsol=0;
+
+      if(BCopy.SF_LCPPath(-missing,params.status)==1) {
+	// gout << "\nafter LCPPath\n";
+	// BCopy.Dump(gout);
+	
+	newsol = Add_BFS(BCopy);
+	BCopy.BasisVector(sol);
+	// gout << "\nsol = " << sol;
+	GetProfile(BCopy, profile,sol,EF.RootNode(),1,1);
+	if(newsol)
+	  solutions.Append(BehavSolution<T>(profile, EfgAlg_SEQFORM)); 
+	// gout << "\nprofile = " << profile;
+      }
+      else 
+	gout << ": Dead End";
+      
       (*A)(i,0)=-(T)1;
       if(newsol)
-	All_Lemke(i,BCopy,npivots);
+	All_Lemke(i,BCopy,npivots,depth+1);
     }
   
   return 1;
