@@ -147,7 +147,9 @@ int PolEnumModule::SaveSolutions(const gList<gVector<gDouble> > &list)
       kk+=(support.NumStrats(i)-1);
     }
     index = solutions.Append(MixedSolution(profile, algorithmNfg_POLENUM));
-    solutions[index].SetEpsilon(0);
+    gNumber eps = (gNumber)0.0;
+    gEpsilon(eps);
+    solutions[index].SetEpsilon(eps);
     //    solutions[index].SetIsNash(triTRUE);
     // At this point we do not know that it is Nash, since there could
     // be a beneficial deviation to a nonsupport strategy.
