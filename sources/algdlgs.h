@@ -46,8 +46,8 @@ protected:
 
   Bool markSubgames;
 
-  char *dom_type_str,*dom_method_str;
-  wxStringList *dom_type_list,*dom_method_list;
+  char *dom_type_str,*dom_method_str, *m_domDepthStr;
+  wxStringList *dom_type_list,*dom_method_list, *m_domDepthList;
 
   gOutput *MakeOutputFile(const char *s, gOutput *&outp) const;
   void SaveDefaults(void); // Called automatically in the destructor

@@ -63,8 +63,10 @@ public:
 class EfgSolveStandardDialog : public EfgSolveSettings, public MyDialogBox {
 private:
   int m_standardType, m_standardNum;
-  char *m_standardTypeStr, *m_standardNumStr;
-  wxStringList *m_standardTypeList, *m_standardNumList;
+  gPrecision m_precision;
+
+  char *m_standardTypeStr, *m_standardNumStr, *m_precisionStr;
+  wxStringList *m_standardTypeList, *m_standardNumList, *m_precisionList;
 
   // PRIVATE MEMBER FUNCTIONS
   void StandardSettings(void);

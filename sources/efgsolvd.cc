@@ -68,17 +68,20 @@ EfgSolveStandardDialog::EfgSolveStandardDialog(const Efg &p_efg,
 					       wxWindow *p_parent)
   : EfgSolveSettings(p_efg, false),
     MyDialogBox(p_parent, "Standard Solution", EFG_STANDARD_HELP),
-    m_standardTypeStr(new char[20]), m_standardNumStr(new char[20])
+    m_standardTypeStr(new char[20]), m_standardNumStr(new char[20]),
+    m_precisionStr(new char[20])
 {
   gText defaultsFile("gambit.ini");
   wxGetResource(SOLN_SECT, "Efg-Standard-Type", &m_standardType, 
 		defaultsFile);
   wxGetResource(SOLN_SECT, "Efg-Standard-Num", &m_standardNum,
 		defaultsFile);
+  wxGetResource(PARAMS_SECTION, "Precision", &m_precisionStr, defaultsFile);
 
   m_standardTypeList = new wxStringList("Nash", "Subgame Perfect",
 					"Sequential", 0);
   m_standardNumList = new wxStringList("One", "Two", "All", 0);
+  m_precisionList = new wxStringList("Float", "Rational", 0);
 
   strcpy(m_standardTypeStr,
 	 (char *) m_standardTypeList->Nth(m_standardType)->Data());
@@ -91,11 +94,17 @@ EfgSolveStandardDialog::EfgSolveStandardDialog(const Efg &p_efg,
   Add(wxMakeFormString("Number", &m_standardNumStr, wxFORM_RADIOBOX,
 		       new wxList(wxMakeConstraintStrings(m_standardNumList),
 				  0)));
+  Add(wxMakeFormNewLine());
+  Add(wxMakeFormString("Precision", &m_precisionStr, wxFORM_RADIOBOX,
+		       new wxList(wxMakeConstraintStrings(m_precisionList),
+				  0), 0, wxHORIZONTAL));
   Go();
 
   if (Completed() == wxOK) {
     m_standardType = wxListFindString(m_standardTypeList, m_standardTypeStr);
     m_standardNum = wxListFindString(m_standardNumList, m_standardNumStr);
+    m_precision = ((wxListFindString(m_precisionList, m_precisionStr) == 0)
+		   ? precRATIONAL : precDOUBLE);
     StandardSettings();
     result = SD_SAVE;
   }
@@ -110,11 +119,16 @@ EfgSolveStandardDialog::~EfgSolveStandardDialog()
 		  defaultsFile);
   wxWriteResource(SOLN_SECT, "Efg-Standard-Num", m_standardNum,
 		  defaultsFile);
+  wxWriteResource(PARAMS_SECTION, "Precision", m_precisionStr,
+		  defaultsFile);
 
   delete [] m_standardTypeStr;
   delete [] m_standardNumStr;
+  delete [] m_precisionStr;
+
   delete m_standardTypeList;
   delete m_standardNumList;
+  delete m_precisionList;
 }
 
 void EfgSolveStandardDialog::StandardSettings(void)
@@ -291,6 +305,9 @@ void EfgSolveStandardDialog::StandardSettings(void)
   wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",(int)use_elimdom,defaults_file);
   wxWriteResource(SOLN_SECT,"Efg-Mark-Subgames",subgames,defaults_file);
   wxWriteResource(SOLN_SECT,"Efg-Interactive-Solns",pick_solns,defaults_file);
+
+  wxWriteResource(PARAMS_SECTION, "Precision", m_precisionStr,
+		  defaults_file);
 }
 
 

@@ -170,8 +170,17 @@ void OutputParamsDialog::MakeDominanceFields(void)
   Add(wxMakeFormMessage("Dominance elimination:"));
   Add(wxMakeFormNewLine());
 
-  Add(wxMakeFormBool("ElimDom before solve",&use_elimdom));
-  Add(wxMakeFormBool("Iterative Eliminate",&all));
+  m_domDepthList = new wxStringList("None", "Once", "Iterative", 0);
+  m_domDepthStr = new char[20];
+  if (use_elimdom && all)
+    strcpy(m_domDepthStr, "Iterative");
+  else if (use_elimdom && !all)
+    strcpy(m_domDepthStr, "Once");
+  else
+    strcpy(m_domDepthStr, "None");
+  Add(wxMakeFormString("Depth", &m_domDepthStr, wxFORM_RADIOBOX,
+		       new wxList(wxMakeConstraintStrings(m_domDepthList), 0),
+		       0, wxVERTICAL));
   Add(wxMakeFormNewLine());
 
   dom_type_list = new wxStringList("Weak", "Strong", 0);
