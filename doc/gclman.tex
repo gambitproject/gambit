@@ -4310,6 +4310,8 @@ Exp[x->NUMBER] =: NUMBER
 
 \bd
 Returns the value of the function ${\rm e}^{x}$.
+\item [Note:] Result is returned in \verb+Machine+ precision, regardless
+of the precision of \verb+x+.
 \item [See also:] \verb+Log+, \verb+Power+.
 \ed
 
@@ -5436,6 +5438,8 @@ Log[x->NUMBER] =: NUMBER
 \bd
 Computes the natural logarithm of \verb+x+.  It is an error if
 \verb+x+ is nonpositive.
+\item [Note:] Result is returned in \verb+Machine+ precision, regardless of
+the precision of \verb+x+.
 \item [See also:] \verb+Exp+, \verb+Power+.
 \ed
 
@@ -6142,6 +6146,8 @@ Power[x->NUMBER, y->NUMBER] =: NUMBER
 \bd
 Computes the value $x^{y}$.
 \item [Short form:] \verb%x ^ y%.
+\item [Note:] Not implemented for the case where \verb+x+ is of rational
+precision, and \verb+y+ is not an integer.
 \item [See also:] \verb+Exp+, \verb+Log+.
 \ed
 
