@@ -997,7 +997,7 @@ static char *wxOutputFile(const char *name)
   slash[1] = '\0';
 
   if (strstr(slash, name)) {
-    strcpy(t_outfile, FileNameFromPath((char *)name)); // strip the path
+    strcpy(t_outfile, gFileNameFromPath((char *)name)); // strip the path
   }
   else
     strcpy(t_outfile, name);
