@@ -142,7 +142,7 @@ exprlist:     expression  { emit(new Pop); }
         |     exprlist SEMI expression  { emit(new Pop); }
 
 expression:   E0
-          |   NAME ASSIGN  { emit(new PushRef(tval)); } expression { emit(new Assign()); }
+          |   expression ASSIGN E0 { emit(new Assign()); }
           ;
 
 E0:           E1

@@ -9,9 +9,9 @@
 
 class gGCLSignal : public gSignal   {
   private:
-    static bool sig = false;
+    bool sig;
 
-    static void Handler(int);
+    friend void gGCLSignalHandler(int);
 
   public:
     gGCLSignal(void);
@@ -21,9 +21,9 @@ class gGCLSignal : public gSignal   {
     void Reset(void);
 };
 
-gGCLSignal::gGCLSignal(void)
+gGCLSignal::gGCLSignal(void) : sig(false)
 {
-  signal(SIGINT, gGCLSignal::Handler);
+  signal(SIGINT, gGCLSignalHandler);
 }
 
 gGCLSignal::~gGCLSignal()
@@ -41,13 +41,17 @@ void gGCLSignal::Reset(void)
   sig = false;
 }
 
-void gGCLSignal::Handler(int)
-{
-  sig = true;
-}
-
 
 gGCLSignal _gbreak;
 gSignal &gbreak = _gbreak;
+
+
+void gGCLSignalHandler(int)
+{
+  _gbreak.sig = true;
+// This is here because some systems (Solaris) reset the signal handler to
+// default when using signal().
+  signal(SIGINT, gGCLSignalHandler);
+}
 
 

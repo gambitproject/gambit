@@ -14,10 +14,34 @@ Portion *GSM_DisplayNfg(Portion **param)
   return new Nfg_Portion<double>(*N);
 }
 
+
+#include "lemke.h"
+
+template <class T> class Mixed_List_Portion : public List_Portion   {
+  public:
+    Mixed_List_Portion(NormalForm<double> *, const gList<gPVector<T> > &);
+};
+
+Mixed_List_Portion<double>::Mixed_List_Portion(NormalForm<double> *N,
+			       const gList<gPVector<double> > &list)
+{
+  _DataType = porMIXED_DOUBLE;
+  for (int i = 1; i <= list.Length(); i++)
+    Append(new Mixed_Portion<double>(MixedProfile<double>(*N, list[i])));
+}
+
 Portion *GSM_Lemke(Portion **param)
 {
+  NormalForm<double> *N = &((Nfg_Portion<double> *) param[0])->Value();
 
-  return new numerical_Portion<gInteger>(1);
+  LemkeParams LP;
+  LemkeSolver<double> LS(*N, LP);
+  LS.Lemke();
+
+  ((numerical_Portion<double> *) param[2])->Value() = (double) LS.Time();
+  ((numerical_Portion<gInteger> *) param[3])->Value() = LS.NumPivots();
+
+  return new Mixed_List_Portion<double>(N, LS.GetSolutions());
 }
 
 Portion *GSM_ReadNfg(Portion **param)
@@ -40,12 +64,13 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, "N", porNFG, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Lemke", GSM_Lemke, 3);
+  FuncObj = new FuncDescObj("Lemke", GSM_Lemke, 4);
   FuncObj->SetParamInfo(0, "N", porNFG, NO_DEFAULT_VALUE);
   FuncObj->SetParamInfo(1, "nequilib", porINTEGER,
 			new numerical_Portion<gInteger>(0));
   FuncObj->SetParamInfo(2, "time", porDOUBLE, new numerical_Portion<double>(0),
 			PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(3, "npivots", porINTEGER, new numerical_Portion<gInteger>(0));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("ReadNfg", GSM_ReadNfg, 1);
@@ -54,3 +79,11 @@ void Init_nfgfunc(GSM *gsm)
 
 }
 
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
+
+TEMPLATE class Mixed_List_Portion<double>;
