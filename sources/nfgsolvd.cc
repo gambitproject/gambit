@@ -30,8 +30,6 @@ NfgSolveSettings::NfgSolveSettings(const Nfg &p_nfg, bool p_solving /*= true*/)
   wxGetResource(SOLN_SECT, "Nfg-Efg", &extensive, defaults_file);
   wxGetResource(SOLN_SECT, "Nfg-Standard-Type", &standard_type, defaults_file);
   wxGetResource(SOLN_SECT, "Nfg-Standard-Num", &standard_num, defaults_file);
-  wxGetResource(SOLN_SECT, "Nfg-Auto-Inspect-Solns", &auto_inspect,
-		defaults_file);
 }
 
 NfgSolveSettings::~NfgSolveSettings()
@@ -43,8 +41,6 @@ NfgSolveSettings::~NfgSolveSettings()
     wxWriteResource(SOLN_SECT, "Nfg-Standard-Type", standard_type,
 		    defaults_file);
     wxWriteResource(SOLN_SECT, "Nfg-Standard-Num", standard_num,
-		    defaults_file);
-    wxWriteResource(SOLN_SECT, "Nfg-Auto-Inspect-Solns", auto_inspect,
 		    defaults_file);
   }
 }

@@ -21,7 +21,7 @@ bool IsPerfectRecall(const Efg &, Infoset *&, Infoset *&);
 
 class EfgSolveSettings {
 protected:
-  Bool use_nfg,normal,subgames,pick_solns,auto_inspect;
+  Bool use_nfg,normal,subgames,pick_solns;
   int algorithm;
   char *defaults_file;
   int result;
@@ -43,7 +43,6 @@ public:
   NfgSolutionT GetNfgAlgorithm(void) const { return (NfgSolutionT) algorithm; }
 
   bool MarkSubgames(void) const { return subgames; }
-  bool AutoInspect(void) const { return auto_inspect; }
 };
 
 //

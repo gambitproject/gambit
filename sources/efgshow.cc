@@ -290,7 +290,7 @@ void EfgShow::SolveStandard(void)
 
   ChangeSolution(solns.VisibleLength());
   Enable(TRUE);
-  if (ESS.AutoInspect()) InspectSolutions(CREATE_DIALOG);
+  InspectSolutions(CREATE_DIALOG);
 }
 
 // Solve
@@ -714,9 +714,9 @@ void EfgShow::MakeMenus(void)
 
   wxMenu *edit_menu = new wxMenu;
   wxMenu *node_menu  = new wxMenu;
-  node_menu->Append(NODE_ADD,       "&Add",       "Add a node");
-  node_menu->Append(NODE_DELETE,    "&Delete",    "Remove cursor node");
-  node_menu->Append(NODE_INSERT,    "&Insert",    "Insert node at cursor");
+  node_menu->Append(NODE_ADD, "&Add Move", "Add a move");
+  node_menu->Append(NODE_DELETE, "&Delete Move", "Remove move at cursor");
+  node_menu->Append(NODE_INSERT, "&Insert Move", "Insert move at cursor");
   node_menu->Append(NODE_LABEL,     "&Label",     "Label cursor node");
   node_menu->AppendSeparator();
   node_menu->Append(NODE_SET_MARK,  "Set &Mark",  "Mark cursor node");

@@ -43,7 +43,6 @@ EfgSolveSettings::EfgSolveSettings(const Efg &p_efg, bool p_solving /*= true*/)
   wxGetResource(SOLN_SECT,"Efg-Nfg",&normal,defaults_file);
   wxGetResource(SOLN_SECT,"Efg-Mark-Subgames",&subgames,defaults_file);
   wxGetResource(SOLN_SECT,"Efg-Interactive-Solns",&pick_solns,defaults_file);
-  wxGetResource(SOLN_SECT,"Efg-Auto-Inspect-Solns",&auto_inspect,defaults_file);
 }
 
 EfgSolveSettings::~EfgSolveSettings()
@@ -54,7 +53,6 @@ EfgSolveSettings::~EfgSolveSettings()
     wxWriteResource(SOLN_SECT,alg_sect,algorithm,defaults_file);
     wxWriteResource(SOLN_SECT,"Efg-Nfg",normal,defaults_file);
     wxWriteResource(SOLN_SECT,"Efg-Interactive-Solns",pick_solns,defaults_file);
-    wxWriteResource(SOLN_SECT,"Efg-Auto-Inspect-Solns",auto_inspect,defaults_file);
   }
 }
 

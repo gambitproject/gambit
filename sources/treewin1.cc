@@ -65,7 +65,10 @@ void TreeWindow::node_add(void)
   static EFPlayer *player = 0;
   static Infoset *infoset = 0;
   static Efg *last_ef = 0; // need this to make sure player,infoset are valid
-    
+
+  if (cursor->NumChildren() > 0)  
+    return;
+ 
   if (last_ef != &ef)  {
     player = 0;
     infoset = 0;
@@ -82,51 +85,25 @@ void TreeWindow::node_add(void)
     branches = node_add_dialog.GetBranches();
     Bool set_names = FALSE;
 
-    if (cursor->NumChildren() == 0)  {
-      try {
-	if (mode == NodeAddNew) {
-	  ef.AppendNode(cursor, player, branches);
-	  set_names = node_add_dialog.SetNames();
-	}
-	else
-	  ef.AppendNode(cursor, infoset);
-
-	// take care of probs for chance nodes.
-	if (set_names) {
-	  node_label();
-	  infoset_label();
-	}
-
-	if (player == ef.GetChance())
-	  action_probs();
+    try {
+      if (mode == NodeAddNew) {
+	ef.AppendNode(cursor, player, branches);
+	set_names = node_add_dialog.SetNames();
       }
-      catch (gException &E) {
-	guiExceptionDialog(E.Description(), pframe);
+      else
+	ef.AppendNode(cursor, infoset);
+
+      if (set_names) {
+	node_label();
+	infoset_label();
       }
+
+      // take care of probs for chance nodes.
+      if (player == ef.GetChance())
+	action_probs();
     }
-    else {
-      try {
-	if (mode == NodeAddNew) {
-	  ef.InsertNode(cursor, player, branches);
-	  set_names = node_add_dialog.SetNames();
-	  cursor = cursor->GetParent(); // old cursor is now the child
-	}
-	else
-	  ef.InsertNode(cursor, infoset);
-
-	// take care of probs for chance nodes.
-	if (set_names) {
-	  node_label();
-	  infoset_label();
-	}
-
-	if (player == ef.GetChance())
-	  action_probs();
-	
-      }
-      catch (gException &E) {
-	guiExceptionDialog(E.Description(), pframe);
-      }
+    catch (gException &E) {
+      guiExceptionDialog(E.Description(), pframe);
     }
   }
 }

@@ -47,7 +47,7 @@ class NfgSolveSettings {
 protected:
   int algorithm;
   int result;
-  Bool extensive, auto_inspect;
+  Bool extensive;
   int standard_type, standard_num;
   bool solving;
 
@@ -63,7 +63,6 @@ public:
 
   NfgSolutionT GetAlgorithm(void) { return (NfgSolutionT)algorithm; }
   bool GetExtensive(void) const { return extensive; }
-  bool AutoInspect(void) const { return auto_inspect;  }
   int StandardType(void) const { return standard_type; }
   int StandardNum(void) const { return standard_num;  }
 };

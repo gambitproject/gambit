@@ -595,7 +595,7 @@ void NfgShow::Solve(int id)
     ChangeSolution(solns.VisibleLength());
     spread->EnableInspect(TRUE);
     
-    if (NSD.AutoInspect()) InspectSolutions(CREATE_DIALOG);
+    InspectSolutions(CREATE_DIALOG);
   }
 }
 
