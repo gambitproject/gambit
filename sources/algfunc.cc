@@ -940,23 +940,40 @@ static Portion *GSM_AllNashSolve_Nfg(Portion **param)
   params.stopAfter = ((NumberPortion *) param[1])->Value();
   params.tracefile = &((OutputPortion *) param[4])->Value();
   params.trace = ((NumberPortion *) param[5])->Value();
-
+  bool recurse = ((BoolPortion *) param[7])->Value();
   gList<MixedSolution> solutions;
   gList<const NFSupport> singular_supports;
 
-  try {
-    long nevals = 0;
-    double time = 0.0;
-    AllNashSolve(S, params, solutions, nevals, time, singular_supports);
-
-    ((NumberPortion *) param[2])->SetValue(nevals);
-    ((NumberPortion *) param[3])->SetValue(time);
-    ((NfSupport_ListPortion *) param[6])->SetValue(singular_supports);
+  if(recurse) {
+    try {
+      long nevals = 0;
+      double time = 0.0;
+      AllNashSolve(S, params, solutions, nevals, time, singular_supports);
+      
+      ((NumberPortion *) param[2])->SetValue(nevals);
+      ((NumberPortion *) param[3])->SetValue(time);
+      ((NfSupport_ListPortion *) param[6])->SetValue(singular_supports);
+    }
+    catch (gSignalBreak &) {
+      params.status.Reset();
+    }
   }
-  catch (gSignalBreak &) {
-    params.status.Reset();
+  else {
+    bool is_singular;
+    try {
+      long nevals;
+      double time;
+      PolEnum(S, params, solutions, nevals, time, is_singular);
+      ((NumberPortion *) param[2])->SetValue(nevals);
+      ((NumberPortion *) param[3])->SetValue(time);
+      if(is_singular)
+	singular_supports.Append(S);
+      ((NfSupport_ListPortion *) param[6])->SetValue(singular_supports);
+    }
+    catch (gSignalBreak &) {
+      params.status.Reset();
+    }
   }
-
   return new Mixed_ListPortion(solutions);
 }
 
@@ -1625,7 +1642,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new gclFunction("AllNashSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_AllNashSolve_Nfg, 
-				       PortionSpec(porMIXED, 1), 7));
+				       PortionSpec(porMIXED, 1), 8));
   FuncObj->SetParamInfo(0, 0, gclParameter("supersupport", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(0)));
@@ -1642,6 +1659,8 @@ void Init_algfunc(GSM *gsm)
 					   PortionSpec(porNFSUPPORT,1),
 					   new NfSupport_ListPortion(), 
 					   BYREF));
+  FuncObj->SetParamInfo(0, 7, gclParameter("recurse",porBOOLEAN, 
+					   new BoolPortion(true)));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new gclFunction("SeqEquilibSolve", 1);
