@@ -8,5 +8,5 @@ GUISUFFIX = _motif
 
 # XWindows information
 XINCDIR = -I/usr/include/X11
-XLIBDIR = -L/usr/openwin/lib/X11
+XLIBDIR = -L/usr/openwin/lib
 XLIB = -lXm -lXt -lX11 -lm -lg++ -lnsl -lsocket -lgen
