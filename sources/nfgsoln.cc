@@ -829,6 +829,7 @@ public:
   MixedSolnEdit(MixedSolution &soln_, wxFrame *parent);
   void OnSelectedMoved(int row, int col, SpreadMoveDir /*how*/);
   void OnOk(void);
+  Bool OnClose(void);
 };
 
 MixedSolnEdit::MixedSolnEdit(MixedSolution &soln_, wxFrame *parent)
@@ -879,6 +880,13 @@ MixedSolnEdit::MixedSolnEdit(MixedSolution &soln_, wxFrame *parent)
   MakeButtons(OK_BUTTON|CANCEL_BUTTON|PRINT_BUTTON|HELP_BUTTON);
   Redraw();
   Show(TRUE);
+}
+
+Bool MixedSolnEdit::OnClose(void)
+{
+  SetCompleted(wxCANCEL);
+  Show(FALSE);
+  return FALSE;
 }
 
 void MixedSolnEdit::OnSelectedMoved(int row, int col, SpreadMoveDir /*how*/)
