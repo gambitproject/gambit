@@ -1,19 +1,12 @@
 //#
 //# File: gpoly.h  --  Declaration of gPoly data type
-//# $Id$
+//# @(#)gpoly.h	1.6 12/12/95
 //#
 
 #ifndef GPOLY_H
 #define GPOLY_H
 
-#include <math.h>
-#include "gambitio.h"
-#include "gstring.h"
-#include "garray.h"
-#include "glist.h"
-#include "gblock.h"
-//#include "ufortify.hpp" // Memory Leak Checks
-//#include "ZFortify.hpp" //
+#include "pre_poly.h"
 
 // These classes are used to store and mathematically manipulate polynomials.
 // 
@@ -37,48 +30,6 @@
 
 template <class T> class gPoly; 
 
-// ***********************
-// gPolyFamily declaration
-// ***********************
-
-struct Variable{
-  gString Name;
-  int number;
-};
-
-template <class T> class gPolyFamily {
-  friend class gPoly<T>;
-private:
-  
-  int NoOfVars;
-
-  // list of variables defined (numbered 1..N)  
-  gBlock < Variable * > Variables;
-
-  // list of polynomials in the family
-  gList< gPoly <T> * > polys;
-
-
-
-public:
-  gPolyFamily(int nvars = 1);
-  ~gPolyFamily();
-  
-  // Return number of variables defined
-  int NumVariables(void) const;
-
-  // Return name of ith variable, fail assertionif out of range
-  const gString &GetVariableName(int i) const;
-
-  // Set name of ith variables, fail assertion if out of range
-  void SetVariableName(int i, const gString &);
-
-  // Create new variables(s)
-  void CreateVariables (int nvars = 1);
-
-  // Debugging output
-  void Dump(gOutput &) const;
-};
 
 // *******************
 //  gPoly declaration
@@ -99,89 +50,77 @@ template <class T> struct Power {
   Power<T> *next;
 };
 
-// global multiply by constant operators
-
-template <class T> gPoly<T> operator*(const T val, const gPoly<T> poly);
-template <class T> gPoly<T> operator*(const gPoly<T> poly, const T val);
-
-
-// actual gPoly class declaration.
+               // actual gPoly class declaration.
 
 template <class T> class gPoly {
   
-private:  
+private:
 
-  friend gPoly<T> operator*(const gPoly<T> poly, const T val);
-  friend gPoly<T> operator*(const T val, const gPoly<T> poly);
+  Power<T> *Root;         // root node of tree
+  const gVariableList *List;    // pointer to variable list of space
 
   // used for gString parsing;
-  int charnum;
-  char charc;
-  gString TheString;
-
-  // root node of tree
-  Power<T> *Root;
-
-  // pointer to family of which this is member
-  gPolyFamily<T> *Fam;
+  int charnum;   char charc;   gString TheString;
 
   //----------------------
   // some private members
   //----------------------
 
-  // Removes a tree beginning at source
-  void Remover(Power<T> *source);
+    // Construction, destruction, cleanliness
+  void     CreateTree(const gArray<int> &Powers, int i, Power<T> **p, T val);
+  Power<T> *CreatDupl( Power<T> *source ); // Copies a tree beginning at source
+  void     Remover(Power<T> *source);   // Removes a tree beginning at source
+  Power<T> *LowZero( Power<T> *start); // lowest Power<T> with a power of zero.
+  void     Collapsor(Power<T> *base, Power<T> *caller); 
+                    // erase needless 0 powers
+  void     ZeroCoefRemover(Power<T> *base, Power<T> *caller);
+                    // erase 0 coefficients
+  const Power<T>* Locator(const exp_vect &Powers, const Power<T> *p) const;
+  Power<T>* Locator(const gArray<int> &Powers, int i, Power<T> *p) const;
+                    // locates a term based on the Powers 
+  int      ZeroCheck(const gArray<int> &Powers) const;
+                     // last non-zero integer value of the array
+  Power<T> *ReverseList( Power<T> *start);
 
-  // Copies a tree begging at source
-  Power<T> *CreatDupl( Power<T> *source );
+    // Information
+  int      Equality(Power<T> *one, Power<T> *two) const;  
+                    // Recursive Equality checker
+  int      DegreeOfVar(int var_no, Power<T> *start) const;
+  int      TotalDegree(Power<T> *start) const;
+  void     count_monomials(Power<T> *base,int &count) const;
+                    // the number of monomials in the polynomial
+  void     newton_polytope(Power<T> *base, int &count, polyhedron &np) const;
+  bool     ExpVect(const Power<T> *here, 
+		   const Power<T> *target, 
+		   exp_vect& current) const;
+  Power<T>* OrderMaxMonomialDivisibleBy(const term_order& order,
+					const Power<T>* start,
+					const exp_vect& expv);
+  Power<T>* OrderMaxMonomialDivisibleBy(const term_order& order,
+					const exp_vect& expv);
 
-  // locates a term based on the Powers in the garray
-  Power<T> *Locator(const gArray<int> &Powers, int i, Power<T> *p) const;
+    // Arithmetic
+  Power<T> *Adder( Power<T> *One, Power<T> *Two);   // recursive tree adder.
+  void     Negate (Power<T> *start);
+  void     MultbyConst (T val, Power<T> *start);
+  Power<T> *Mult( Power<T> *one, Power<T> *two);
+                    // recursive tree multiplier.
+  void     DividebyConst(T val, Power<T> *start);
+  gPoly<T> DivideByPolynomial(const gPoly<T> den);
+  Power<T> *PrtlDrvtv(int num, Power<T> *start, int pow_of_var);
+  Power<T> *LdngCffcnt(int num, int degree, Power<T> *start, bool keep);
+  void     evaluator( const gArray<T> &values, Power<T> *, T woAns, T &) const;
+  Power<T> *EvalVar(int num, T val, Power<T> *start);
+                    // recursive part of the EvaluateOneVar
+  exp_vect LeadingPowProd(const term_order &, const Power<T>*) const;
+                    // recursive part of LeadingPowerProduct
+  T        LeadingCoeff(const term_order &, const Power<T>*) const;
+                    // recursive part of LeadingCoefficient
 
-  // returns the last non-zero integer value of the array
-  int ZeroCheck(const gArray<int> &Powers) const;
-
+    // Going back and forth from gStrings to gPoly's
   // prints the tree to a gString
   void printer(Power<T> *base, gString woCoef, gString &s, 
-	       gPolyFamily<T> *Famil) const;
-
-  // evaluates the tree based on the values of the array recursively
-  void evaluator( const gArray<T> &values, Power<T> *, T woAns, T &) const;
-
-  // recursive part of the EvaluateOneVar .
-  Power<T> *EvalVar(int num, T val, Power<T> *start);
-
-  // creates the rest of the tree if found results in null (for 
-  // SetCoef and the string parser.)
-  void CreateTree(const gArray<int> &Powers, int i, Power<T> **p, T val);
-
-  // gets rid of unneccesary 0 power terms (for sparsity)
-  void Collapsor(Power<T> *base, Power<T> *caller);
-
-  // gets rid of terms with zeros in the Coefficient
-  void ZeroCoefRemover(Power<T> *base, Power<T> *caller);
-
-  // finds the lowest (farthest down) Power<T> with a power of zero.
-  Power<T> *LowZero( Power<T> *start);
-
-  // recursive tree adder.
-  Power<T> *Adder( Power<T> *One, Power<T> *Two);
-
-  // negates the coefficients of a tree.
-  void Negate (Power<T> *start);
-
-  // Multiplies all the coefficients of a tree by constants.
-  void MultbyConst (T val, Power<T> *start);
-
-  // Divide all the coefficients of a tree by constants.
-  void DividebyConst(T val, Power<T> *start);
-
-  // Recursive Equality checker
-  int Equality( Power<T> *one, Power<T> *two);
-
-  // recursive tree multiplier.
-  Power<T> *Mult( Power<T> *one, Power<T> *two);
-
+	       const gVariableList* List) const;
   // gString input parser functions
   void String_Term(T nega);
   int String_Coeff(int nega);
@@ -191,89 +130,112 @@ private:
   int String_GetPow(void);
   void String_VarAndPow(gArray<int> &PowArray);
   void GetChar();
-
   // different instantiations of the GetCoefToString
   gString GetCoefToString (int val) const;
   gString GetCoefToString (long val) const;
   gString GetCoefToString (double val) const;
-  gString GetCoefToString (gRational val) const;
+  gString GetCoefToString (gRational val) const;  
+
+
+//Private friends
+  friend gPoly<T> operator*(const gPoly<T> poly, const T val);
+  friend gPoly<T> operator*(const T val, const gPoly<T> poly);
 
 public:
+
+  //---------------------------
+  // Construction, destruction:
+  //---------------------------
+
   // Null gPoly constructor
-  gPoly(gPolyFamily<T> *);
-
+  gPoly(const gVariableList *);
   // Constructs a gPoly equal to the SOP representation in the gString
-  gPoly(gPolyFamily<T> *, const gString &);
-
+  gPoly(const gVariableList *, const gString &);
+  // Constructs a constant gPoly
+  gPoly(const gVariableList *, const T &);
   // Constructs a gPoly equal to another;
   gPoly(const gPoly<T> &);
+  // Constructs a gPoly that is x_{var_no}^exp;
+  gPoly(const gVariableList *p, int var_no, int exp);
+  // Constructs a gPoly that is the monomial coeff*vars^exps;
+  gPoly(const gVariableList *p, exp_vect exps, T coeff);
 
-  // destructor
   ~gPoly();
+  
+  //Sets the coefficient of a term in a gPoly identified by the powers in
+  // the gArray. The term is created if it does not exist already
+  void SetCoef(const gArray<int> &Powers, const T &value);
 
   //----------
   //Operators:
   //----------
   
-  // sets two gPolys equal
-  gPoly<T> &operator=(const gPoly<T> &);
+  gPoly<T> &operator =  (const gPoly<T> &);
+  gPoly<T>  operator -  ();
+  gPoly<T>  operator -  (const gPoly<T> &);
+  void      operator -= (const gPoly<T> &);
+  gPoly<T>  operator +  (const gPoly<T> &);
+  void      operator += (const gPoly<T> &);
+  gPoly<T>  operator *  (const gPoly<T> &);
+  void      operator *= (const gPoly<T> &);
+  gPoly<T>  operator /  (const T val);        // division by a constant
+  gPoly<T>  operator /  (const gPoly<T> &);   // division by a polynomial
+  int       operator == (gPoly<T> &p) const;
+  int       operator != (gPoly<T> &p) const;;
+  gPoly<T> &operator =  (const gString &);  
+                        //Set polynomial equal to the SOP form in the string
 
-  // negation of a gPoly
-  gPoly<T> operator-();
+  //-------------
+  // Information:
+  //-------------
 
-  // subtration of gPolys
-  gPoly<T> operator-(const gPoly<T> &);
+  gVariableList* GetList(void) const; //Returns pointer to the List
+  int            DegreeOfVar(int var_no) const;
+  int            TotalDegree() const;
+  T              GetCoef(const gArray<int> &Powers) const;
+  T              GetCoef(const exp_vect &Powers) const;
+  gPoly<T>       LeadingCoefficient(int varnumber);
+  T              NumLeadCoeff() const;       // assumes Degree() == 0
+  T              Evaluate(const gArray<T> &values) const;
+  gPoly<T>       EvaluateOneVar(int varnumber, T val);
+  gPoly<T>       PartialDerivative(int varnumber);
+  int            No_Monomials() const;
+  polyhedron     NewtonPolytope() const;
+  exp_vect       ExpVect(const Power<T> *target) const;
 
-  void operator-=(const gPoly<T> &);
+  //--------------------
+  // Term Order Concepts
+  //--------------------
 
-  // addition of gPolys
-  gPoly<T> operator+(const gPoly<T> &);
+  exp_vect       LeadingPowerProduct(const term_order &) const;
+  T              LeadingCoefficient(const term_order &) const;
+  gPoly<T>       LeadingTerm(const term_order &) const;
+  void           ReduceByDivisionAtExpV(const term_order &, 
+					const gPoly<T> &, 
+					const exp_vect &);
+  void           ReduceByRepeatedDivision(const term_order &, 
+					  const gPoly<T> &);
+  gPoly<T>       S_Polynomial(const term_order &, 
+			      const gPoly<T> &) const;
 
-  void operator+=(const gPoly<T> &);
+  //---------------
+  // Printing Stuff
+  //---------------
 
-  // multiplication of gPolys
-  gPoly<T> operator*(const gPoly<T> &);
-
-  void operator*=(const gPoly<T> &);
-
-  // division of a gPoly by a constant
-  gPoly<T> operator/(const T val);
-  
-  // Returns true of two polys are equal
-  int operator==(gPoly<T> &p);
-  
-  //Set polynomial equal to the SOP form in the string
-  gPoly<T> &operator=(const gString &);
-
-  //Returns a pointer to the gPolyFamily of a gPoly;
-  gPolyFamily<T> *GetFamily(void) const;
-  
-  //Sets the coefficient of a term in a gPoly identified by the powers in
-  // the gArray. The term is created if it does not exist already
-  void SetCoef(const gArray<int> &Powers, const T &value);
-  
-  //Returns the Coefficient of the term identified by the gArray
-  T GetCoef(const gArray<int> &Powers) const;
-  
-  //Evaluates a gPoly with the values in the gArray
-  T Evaluate(const gArray<T> &values) const;
-  
-  //Evaluates the variable identified by varnumber with respect to the value
-  // val.
-  gPoly<T> EvaluateOneVar(int varnumber, T val);
-
-  //List Reverser
-  Power<T> *ReverseList( Power<T> *start);
-
-  // Print polynomial in SOP form
+  // Print Newton Polytope
+  void Print_Newt_Pltp(gOutput &) const;  // PROBABLY SHOULD GO ELSEWHERE
+  void Print_Newt_Pltp(gString &) const;
+ // Print polynomial in SOP form
   void Print(gOutput &) const;
   void Print(gString &) const;
 
   friend gOutput &operator<<(gOutput &f, const gPoly<T> &y);
-
 };
 
 
+// global multiply by scalar operators
+template <class T> gPoly<T> operator*(const T val, const gPoly<T> poly);
+template <class T> gPoly<T> operator*(const gPoly<T> poly, const T val);
 
 
 #endif //# GPOLY_H

@@ -1,83 +1,9 @@
 //#
 //# File: gpoly.imp  -- Implementation of gPoly data type
-//# $Id$
+//# @(#) gpoly.imp	1.3 8/2/95
 //#
 
 #include "gpoly.h"
-
-//-----------------------------------------------------------
-//                      gPolyFamily
-//-----------------------------------------------------------
-
-
-//-------------------------
-// Constructors/Destructors
-//-------------------------
-
-template <class T> gPolyFamily<T>::gPolyFamily(int nvars )
-{
-  Variable *nvar;
-  assert (nvars >= 1);
-
-  for (int i = 1; i <= nvars; i++){
-    nvar = new Variable;
-    nvar->Name = 'n';
-    nvar->Name += ToString(i);
-    nvar->number = i;
-    Variables.Append(nvar);
-  }
-  NoOfVars = nvars;  
-}
-
-template <class T> gPolyFamily<T>::~gPolyFamily()
-{
-  for (int i = 1; i <= NoOfVars; i++){ delete Variables[i]; }
-}
-
-//-----------------
-// Member Functions
-//-----------------
-
-template <class T> int gPolyFamily<T>::NumVariables(void) const
-{
-  return NoOfVars;
-}
-
-template <class T> const gString & gPolyFamily<T>::GetVariableName(int i)
-{
-  return ((Variables[i])->Name);
-}
-
-template <class T> void gPolyFamily<T>::SetVariableName
-(int i, const gString &s)
-{
-  (Variables[i])->Name = s;
-}
-
-template <class T> void gPolyFamily<T>::CreateVariables (int nvars )
-{
-  Variable *var;
-  for (int i = 1; i <= nvars; i++){
-    var = new Variable;
-    var->Name = 'x';
-    var->Name += ToString (NoOfVars + i);
-    Variables.Append(var);
-  }
-  NoOfVars = NoOfVars + nvars;
-}
-
-template <class T> void gPolyFamily<T>::Dump(gOutput &f) const
-{
-  f << "No of Variable: " << NoOfVars << "\n";
-  for (int i=1; i<=NoOfVars; i++) {
-    f << "#" << (Variables[i])->number << " is " 
-      << (Variables[i])->Name << "\n";
-  }
-  f << "The Polynomials in this family are:\n";
-  for (int n = 1; n <= polys.Length(); n++){  
-    polys[n]->Print(f); f << "\n";
-  }		
-}
 
 
 //---------------------------------------------------------------
@@ -89,33 +15,95 @@ template <class T> void gPolyFamily<T>::Dump(gOutput &f) const
 //---------------------------
 
 
-template <class T> gPoly<T>::gPoly(gPolyFamily<T> *p)
+template <class T> gPoly<T>::gPoly(const gVariableList *p)
 {
-  Fam = p; 
-  (p->polys) += this;
+  List = p; 
   Root = NULL;
 }
 
-template <class T> gPoly<T>::gPoly(gPolyFamily<T> *p, const gString &s)
+template <class T> gPoly<T>::gPoly(const gVariableList *p, const T &constant)
 {
-  Fam = p;
-  (p->polys) += this;
+  List = p;
+
+  if (constant == (T)0)
+    Root = NULL;
+  else
+    {
+      Root = new Power<T>;
+      Root->next = NULL;
+      Root->pow = 0;
+      Root->down = new term<T>;
+      
+      Root->down->Coef = constant;
+      Root->down->down = NULL;
+      Root->down->Var = (*List)[1];  
+    }
+                      // Since pow == 0, variable shouldn't matter
+}
+
+template <class T> gPoly<T>::gPoly(const gVariableList *p, const gString &s)
+{
+  List = p;
   Root = NULL;
   *this=s;
 }
+
+template <class T> gPoly<T>::gPoly(const gVariableList *p, int var_no, int exp)
+{
+  List = p;
+
+  Root = new Power<T>;
+  Root->next = NULL;
+  Root->pow = exp;             assert(exp >= 0);
+  Root->down = new term<T>;
+
+  Root->down->Coef = (T)1;
+  Root->down->down = NULL;
+  Root->down->Var = (*List)[var_no];  
+}
+
+template <class T> gPoly<T>::gPoly(const gVariableList *p, 
+				   exp_vect exps, 
+				   T coeff)
+{
+  List = p;
+
+  Root = new Power<T>;
+  Power<T>* q = Root;
+
+  for (int i = 1; i <= List->NumVariables(); i++)
+    {
+      q->next = NULL;
+      q->pow = exps[i];          assert(exps[i] >= 0);
+      q->down = new term<T>;
+
+
+      q->down->Var = (*List)[i];
+
+      if (i == List->NumVariables()) q->down->Coef = coeff;
+      else q->down->Coef = (T)1;
+
+      if (i < List->NumVariables()) 
+	{
+	  q->down->down = new Power<T>;
+	  q = q->down->down;
+	}
+      else q->down->down = NULL;
+    }
+
+  Collapsor(Root, NULL);
+}
+
 template <class T> gPoly<T>::gPoly(const gPoly<T> &p)
 {
-  Fam = p.Fam;
-  (p.Fam->polys) += this;
+  List = p.List;
   Root = NULL;
-  *this=p;
-  
+  *this=p;  
 }
 
 template <class T> gPoly<T>::~gPoly()
 {
   Remover(Root);
-  (Fam->polys).Remove((Fam->polys).Find(this));
 }
 
 //----------------------------------
@@ -125,7 +113,7 @@ template <class T> gPoly<T>::~gPoly()
 
 template<class T> gPoly<T> &gPoly<T>::operator=(const gPoly<T> &p)
 {
-  assert (Fam == p.Fam);
+  assert (List == p.List);
   
   if (this != &p) {
     Remover(Root);
@@ -150,7 +138,7 @@ template<class T> gPoly<T> gPoly<T>::operator-(const gPoly<T> &p)
 
 template<class T> void gPoly<T>::operator-=(const gPoly<T> &p)
 {
-  assert(Fam == p.Fam);
+  assert(List == p.List);
 
   gPoly<T> neg = p;
   Negate(neg.Root);
@@ -172,16 +160,15 @@ template<class T> gPoly<T> gPoly<T>::operator+(const gPoly<T> &p)
 
 template<class T> void gPoly<T>::operator+=(const gPoly<T> &p)
 {
+  assert(List == p.List);
+
   Power<T> *temp;
-  assert(Fam == p.Fam);
   temp = Adder(Root, p.Root);
   Remover (Root);
   Root = temp;
   ZeroCoefRemover(Root, NULL);
   Collapsor(Root, NULL);
 }
-
-
 
 template<class T> gPoly<T> gPoly<T>::operator*(const gPoly<T> &p)
 {
@@ -190,7 +177,6 @@ template<class T> gPoly<T> gPoly<T>::operator*(const gPoly<T> &p)
   return prod;
 }
 
-
 template<class T> gPoly<T> gPoly<T>::operator/(const T val)
 {
   gPoly<T> result(*this);
@@ -198,18 +184,32 @@ template<class T> gPoly<T> gPoly<T>::operator/(const T val)
   return result;
 }
 
-template<class T> int gPoly<T>::operator==(gPoly<T> &p)
+template<class T> gPoly<T> gPoly<T>::operator/(const gPoly<T> & den)
+{
+  return DivideByPolynomial(den);
+}
+
+template<class T> int gPoly<T>::operator==(gPoly<T> &p) const
 {
   int result;
-  if (Fam != p.Fam) result = 0;
+  if (List != p.List) result = 0;
   else result = Equality(Root, p.Root);
+  return result;
+}
+
+template<class T> int gPoly<T>::operator!=(gPoly<T> &p) const
+{
+  int result;
+  if (List != p.List) result = 1;
+  else result = !Equality(Root, p.Root);
   return result;
 }
 
 template<class T> void gPoly<T>::operator*=(const gPoly<T> &p)
 { 
+  assert(List == p.List);
+
   Power<T> *temp;
-  assert(Fam == p.Fam);
   temp = Mult(Root, p.Root);
   Remover(Root);
   Root = temp;
@@ -222,7 +222,7 @@ template <class T> gPoly<T> &gPoly<T>::operator=(const gString &Hold)
   charnum = 0;
   int contflag = 1;
   T nega = 1;
-  gArray<int> PowArray(Fam->NoOfVars);
+  gArray<int> PowArray(List->NumVariables());
   TheString = Hold + " +";
   Remover(Root);
   Root = NULL;
@@ -260,8 +260,8 @@ template <class T> gPoly<T> &gPoly<T>::operator=(const gString &Hold)
 
 template <class T> void gPoly<T>::String_Term(T nega)
 {
-  gArray<int> PowArray(Fam->NoOfVars);
-  for (int a=1; a<= Fam->NoOfVars; a++) PowArray[a] = 0;
+  gArray<int> PowArray(List->NumVariables());
+  for (int a=1; a<= List->NumVariables(); a++) PowArray[a] = 0;
   T val;
   val = String_Coeff(nega);
   
@@ -351,12 +351,12 @@ template <class T> void gPoly<T>::String_VarAndPow(gArray<int> &PowArray)
     charnum++;
     GetChar();
   }
-  if (charc == '^') { charnum++; GetChar(); pow = String_GetPow();}
+  if (charc == '^') { charnum++; GetChar(); pow = String_GetPow(); }
   else pow = 1;
-  for(varname = 1;varname <= Fam->NoOfVars && 
-      VarName != ((Fam->Variables)[varname])->Name;
+  for(varname = 1;varname <= List->NumVariables() &&  
+      VarName != (List->VariableWithNumber(varname))->Name;
       varname ++);
-  if (varname <= Fam->NoOfVars) PowArray[varname] = pow;
+  if (varname <= List->NumVariables()) PowArray[varname] = pow;
 }
 
 template <class T> void gPoly<T>::GetChar(void)
@@ -364,11 +364,20 @@ template <class T> void gPoly<T>::GetChar(void)
   charc = TheString[charnum];
 }
   
-template <class T> gPolyFamily<T> *gPoly<T>::GetFamily(void) const
+template <class T> gVariableList* gPoly<T>::GetList(void) const
 {
-  return (Fam);
+  return (gVariableList *)List;
 }
 
+template <class T> int gPoly<T>::DegreeOfVar(int var_no) const
+{
+  return DegreeOfVar(var_no, Root);
+}
+
+template <class T> int gPoly<T>::TotalDegree() const
+{
+  return TotalDegree(Root);
+}
 
 template <class T> void gPoly<T>::SetCoef(const gArray<int> &Powers, 
 				       const T &value)
@@ -376,7 +385,7 @@ template <class T> void gPoly<T>::SetCoef(const gArray<int> &Powers,
   Power<T> *found;
 
 
-  assert (Powers.First() == 1 && Powers.Last() == Fam->NoOfVars);
+  assert (Powers.First() == 1 && Powers.Last() == List->NumVariables());
   
   found = Locator(Powers,1,Root);
 
@@ -396,11 +405,26 @@ template <class T> void gPoly<T>::SetCoef(const gArray<int> &Powers,
 template <class T> T gPoly<T>::GetCoef(const gArray<int> &Powers) const
 {
   Power<T> *found;
-  assert (Powers.First() == 1 && Powers.Last() == Fam->NoOfVars);
+  assert (Powers.First() == 1 && Powers.Last() == List->NumVariables());
 
   found = Locator(Powers,1,Root);
   if (found == NULL) return (T (0) );
   else return (found->down->Coef);
+}
+
+template <class T> T gPoly<T>::GetCoef(const exp_vect &Powers) const
+{
+  const Power<T>* found = Locator(Powers,Root);
+  if (found == NULL) return (T)0;
+  return found->down->Coef;
+}
+
+template <class T> T gPoly<T>::NumLeadCoeff() const
+{
+  assert (TotalDegree() == 0);
+
+  if ( *this == gPoly<T>(List,(T)0) ) return (T)0;
+  else return Root->down->Coef;
 }
 
 template <class T> T gPoly<T>::Evaluate(const gArray<T> &values) const
@@ -411,10 +435,18 @@ template <class T> T gPoly<T>::Evaluate(const gArray<T> &values) const
 }  
   
 
+template <class T> void gPoly<T>::Print_Newt_Pltp(gOutput &f) const
+{
+  polyhedron np = NewtonPolytope();
+
+  f << "\n\n" << np;
+} 
+  
+
 template <class T> void gPoly<T>::Print(gOutput &f) const
 {
   gString answer;
-  printer (Root,"",answer,Fam);
+  printer (Root,"",answer,List);
   if (answer == "") answer = " 0";
   f << answer;
 } 
@@ -422,7 +454,7 @@ template <class T> void gPoly<T>::Print(gOutput &f) const
 template <class T> void gPoly<T>::Print(gString &s) const
 {  
   s = "";
-  printer(Root,"",s,Fam);
+  printer(Root,"",s,List);
 }
 
 
@@ -450,7 +482,7 @@ template <class T> Power<T> *gPoly<T>::CreatDupl(Power<T> *source)
       j->down->Coef = i->down->Coef;
       j->down->Var = i->down->Var;
       j->down->down = CreatDupl(i->down->down);
-      j->pow = i->pow;
+      j->pow = i->pow;                          assert(i->pow >= 0);
 
       if (i->next == NULL) j->next = NULL;
       else j->next = new Power<T>;
@@ -462,37 +494,48 @@ template <class T> Power<T> *gPoly<T>::CreatDupl(Power<T> *source)
 }
     
       
-template <class T> Power<T> 
-*gPoly<T>::Locator(const gArray<int> &Powers, int i, Power<T> *p) const
+template <class T> const Power<T>*
+gPoly<T>::Locator(const exp_vect &Powers, const Power<T> *p) const
+{
+  gArray<int> arrayexps(List->NumVariables());
+  for (int i = 1; i <= List->NumVariables(); i++)
+    arrayexps[i] = Powers[i];
+
+  return Locator(arrayexps,1,(Power<T>*)p);
+                   // Below is complicated, but debugged
+}
+      
+template <class T> Power<T>*
+gPoly<T>::Locator(const gArray<int> &Powers, int i, Power<T> *p) const
 {
   Power<T> *j;
   Power<T> *result;
 
   
-  if (( p != NULL && p->down->Var->number > Fam->Variables[i]->number ||
-      p == NULL) && Powers[i] == 0 && i < Fam->NoOfVars){
+  if (( p != NULL && p->down->Var->number > (*List)[i]->number ||
+      p == NULL) && Powers[i] == 0 && i < List->NumVariables()){
     result = Locator(Powers, i+1, p);
   }
-  else if (( p != NULL && p->down->Var->number > Fam->Variables[i]->number ||
-      p == NULL) && Powers[i] == 0 && i == Fam->NoOfVars){
+  else if (( p != NULL && p->down->Var->number > (*List)[i]->number ||
+      p == NULL) && Powers[i] == 0 && i == List->NumVariables()){
     result = p; 
   }
   else {
     for (j = p; j != NULL && j->pow < Powers[i] 
-	 && j->down->Var->number == Fam->Variables[i]->number; j = j->next) ;
+	 && j->down->Var->number == (*List)[i]->number; j = j->next) ;
     
     if (j == NULL || 
 	(j->pow > Powers[i] &&
-	 j->down->Var->number == Fam->Variables[i]->number)){         
+	 j->down->Var->number == (*List)[i]->number)){         
       result = NULL; 
     }
-    else if (i == Fam->NoOfVars && j->down->down == NULL ) 
+    else if (i == List->NumVariables() && j->down->down == NULL ) 
       result = j;
     else { 
       if (j->down->down != NULL)
 	result = Locator(Powers, i+1, j->down->down);
       else if (ZeroCheck(Powers) <= i && 
-	       j->down->Var->number == Fam->Variables[i]->number){
+	       j->down->Var->number == (*List)[i]->number){
 	result = j;
       }
       else result = NULL; 
@@ -510,45 +553,145 @@ template <class T> int gPoly<T>::ZeroCheck(const gArray<int> &Powers) const
   return j;
 }
 
+template <class T> polyhedron gPoly<T>::NewtonPolytope() const
+{
+  polyhedron newt_pol(List->NumVariables(), No_Monomials());
+  for (int i = 1; i <= No_Monomials(); i++)
+    for (int j = 1; j <= List->NumVariables(); j++)
+      newt_pol.set_coord(i,j-1,0);
+
+  int count = 0;
+
+  newton_polytope(Root, count, newt_pol); 
+
+  return newt_pol;
+}
+
+
+template <class T> void gPoly<T>::newton_polytope(Power<T> *base, 
+						  int &count, 
+					          polyhedron &np) 
+                                                const
+{
+  Power<T> *p;
+  Power<T> *q;
+
+  for (p = base; p!=NULL; p=p->next) {
+    count++;
+    int current_count = count;
+    q = p;
+    while ( q->down->down != NULL) {       
+      np.set_coord(current_count, q->down->Var->number - 1, q->pow);
+      q = q->down->down;
+      newton_polytope(q->next, count, np);
+    }
+    np.set_coord(current_count, q->down->Var->number - 1, q->pow);
+  }
+}
+
+
+template <class T> bool gPoly<T>::ExpVect(const Power<T>* here, 
+					  const Power<T>* target, 
+					  exp_vect& current) const
+{
+  if (here == target) {
+    Power<T>* p = (Power<T>*)here;
+    while (p != NULL) {
+      current.SetExp(p->down->Var->number,p->pow);
+      p = p->down->down;
+    }
+    return true;
+  }
+
+  exp_vect copy = current;
+  Power<T>* p = (Power<T>*)here;
+  while (p != NULL) {
+    if (p->next != NULL && ExpVect(p->next,target,copy)) {
+	current = copy;
+	return true;
+      }
+    copy.SetExp(p->down->Var->number,p->pow);
+    p = p->down->down;
+  }
+
+  return false;
+}
+
+
+template <class T> exp_vect gPoly<T>::ExpVect(const Power<T> *target) const
+{
+  exp_vect result(List);   // initializes to 0 vector
+  bool success = ExpVect(Root,target,result);     assert(success);
+  return result;
+}
+
+
+template <class T> void gPoly<T>::count_monomials(Power<T> *base, 
+						  int &count) const
+{
+  Power<T> *p;
+  Power<T> *q;
+
+  for (p = base; p!=NULL; p=p->next) {
+    count++;
+    q = p;
+    while ( q->down->down != NULL) {       
+      q = q->down->down;
+      count_monomials(q->next, count);
+    }
+  }
+}
+
+
+template <class T> int gPoly<T>::No_Monomials() const
+{
+  int count = 0;
+  count_monomials(Root, count);
+  return count;
+}
+
 
 template <class T> void gPoly<T>::printer(Power<T> *base, gString woCoef, 
 					  gString &s, 
-					  gPolyFamily<T> *Famil) const
+					  const gVariableList* List) const
 {
   gString wCoef, nwoCoef;
   Power<T> *p;
-  for (p = base; p!=NULL; p=p->next){
-    wCoef = "";
-    if ( p->down->down == NULL) {
-//      if (p->down->Coef != ((T) 1) || p->pow == 0 ){
-        wCoef = ' ';
-	wCoef += GetCoefToString(p->down->Coef);
-//      }
-      wCoef += woCoef;
-      if (p->pow != 0) {
-	wCoef += ' ';
-	wCoef += ((Famil->Variables)[p->down->Var->number])->Name;
-	if (p->pow != 1){
-	  wCoef += '^';
-	  wCoef += ToString(p->pow);
+  for (p = base; p!=NULL; p=p->next)
+    {
+      wCoef = "";
+      if ( p->down->down != NULL) 
+	{
+	  nwoCoef = woCoef;
+	  if (p->pow != 0){
+	    nwoCoef += ' ';
+	    nwoCoef += ((*List)[p->down->Var->number])->Name;
+	    if (p->pow != 1){
+	      nwoCoef += '^';
+	      nwoCoef += ToString(p->pow);
+	    }
+	  }
+	  printer(p->down->down, nwoCoef, s, List);
 	}
-      }      
-      if (s == "") s = wCoef;
-      else { s += " +"; s += wCoef;}
-    }
-    else {
-      nwoCoef = woCoef;
-      if (p->pow != 0){
-	nwoCoef += ' ';
-	nwoCoef += ((Famil->Variables)[p->down->Var->number])->Name;
-	if (p->pow != 1){
-	  nwoCoef += '^';
-	  nwoCoef += ToString(p->pow);
+      else
+	{
+	  wCoef = ' ';
+	  wCoef += GetCoefToString(p->down->Coef);
+	  wCoef += woCoef;
+	  if (p->pow != 0) 
+	    {
+	      wCoef += ' ';
+	      wCoef += ((*List)[p->down->Var->number])->Name;
+	      if (p->pow != 1)
+		{
+		  wCoef += '^';
+		  wCoef += ToString(p->pow);
+		}
+	    }      
+	  if (s == "") s = wCoef;
+	  else { s += " +"; s += wCoef;}
 	}
-      }
-      printer(p->down->down, nwoCoef, s, Famil);
     }
-  }
 }
 
 // ** different GetCoefToString for each instantiation **
@@ -627,17 +770,65 @@ template <class T> void gPoly<T>::ZeroCoefRemover(Power<T> *base,
     temp = p->next;
     if (p->down->down != NULL) ZeroCoefRemover(p->down->down, p);
     if  (p->down->Coef == (T) 0 && p->down->down == NULL){
-      if (caller == NULL && k == caller)  Root = p->next; 
+      if (caller == NULL && k == caller)  
+	Root = p->next; 
       else if (k == caller) { 
 	k->down->down = p->next; 
 	if (k!=NULL) k->down->Coef =(T)0;
       }
-      else k->next = p->next; 
+      else 
+	k->next = p->next; 
       delete (p->down);
       delete (p);
       p = k;
     }
   }
+}
+
+template <class T> int gPoly<T>::DegreeOfVar(int var_no, 
+					     Power<T> *start) const
+{
+  if (start == NULL) return 0;
+
+  int cur_max = 0;
+  Power<T>* Pp = start;
+  do {
+    if (Pp->down->Var->number == var_no && Pp->pow > cur_max)
+      cur_max = Pp->pow;
+    if (Pp->next != NULL) { 
+      int tmp = DegreeOfVar(var_no, Pp->next);
+      if (tmp > cur_max) cur_max = tmp;
+    }	
+    Pp = Pp->down->down;
+  }
+  while (Pp != NULL);
+
+  return cur_max;
+}
+
+template <class T> int gPoly<T>::TotalDegree(Power<T> *start) const
+{
+  if (start == NULL) {  return 0; }
+
+  int cur_max = 0;
+  int total = 0;
+
+  Power<T>* Pp = start;
+  do {
+    total += Pp->pow;
+
+    if (Pp->next != NULL) { 
+      int tmp = TotalDegree(Pp->next);
+      if (tmp > cur_max) cur_max = tmp;
+    }
+    Pp = Pp->down->down;
+  }
+  while (Pp != NULL);
+
+  if (total > cur_max)
+    return total;
+  else
+    return cur_max;
 }
 
 template <class T> void gPoly<T>::CreateTree(const gArray<int> &Powers, int i,
@@ -648,36 +839,36 @@ template <class T> void gPoly<T>::CreateTree(const gArray<int> &Powers, int i,
   
   k=*p;
   
-  if ( (*p != NULL && (*p)->down->Var->number > Fam->Variables[i]->number ||
-      *p == NULL) && Powers[i] == 0 && i < Fam->NoOfVars){
+  if ( (*p != NULL && (*p)->down->Var->number > (*List)[i]->number ||
+      *p == NULL) && Powers[i] == 0 && i < List->NumVariables()){
     CreateTree (Powers, i+1, p, val);
   }
   else {
 
     for (j = *p; j != NULL && j->pow < Powers[i] 
-	 && j->down->Var->number == Fam->Variables[i]->number; 
+	 && j->down->Var->number == (*List)[i]->number; 
 	 k = j, j = j->next) ;
  
     if (j == NULL || 
 	(j->pow > Powers[i] && 
-	 j->down->Var->number == Fam->Variables[i]->number)){         
+	 j->down->Var->number == (*List)[i]->number)){         
       
       temp = new Power<T>;
       if (*p==NULL || j==*p) { temp->next = *p; *p = temp; }
       else { temp->next = k->next; k->next = temp;}
       temp->down = new term<T>;
-      temp->down->Var = Fam->Variables[i];
+      temp->down->Var = (*List)[i];
       temp->down->down = NULL; 
-      temp->pow = Powers[i];
+      temp->pow = Powers[i];                 assert(Powers[i] >= 0);
       k = temp;
-      for (i++; i <= Fam->NoOfVars; i++){
+      for (i++; i <= List->NumVariables(); i++){
 	if (Powers[i] != 0){
 	  temp = new Power<T>;
 	  k->down->down = temp;
 	  temp->down = new term<T>;
-	  temp->down->Var = Fam->Variables[i];
+	  temp->down->Var = (*List)[i];
 	  temp->down->down = NULL;
-	  temp->pow = Powers[i];
+	  temp->pow = Powers[i];            assert(Powers[i] >= 0);
 	  temp->next = NULL;
 	  k = temp;
 	}
@@ -687,10 +878,10 @@ template <class T> void gPoly<T>::CreateTree(const gArray<int> &Powers, int i,
       
       
     }  
-    else if (j->down->Var->number > Fam->Variables[i]->number){
+    else if (j->down->Var->number > (*List)[i]->number){
       temp = new Power<T>;
       temp->down = new term<T>;
-      temp->down->Var = Fam->Variables[i];
+      temp->down->Var = (*List)[i];
       temp->down->down = j;
       temp->pow = 0;
       temp->next = NULL;
@@ -699,18 +890,19 @@ template <class T> void gPoly<T>::CreateTree(const gArray<int> &Powers, int i,
       CreateTree(Powers, i, p, val);
       
     }
-    else if (j->down->down == NULL && i < Fam->NoOfVars){
+    else if (j->down->down == NULL && i < List->NumVariables()){
       temp = new Power<T>;
       temp-> down = new term<T>;
       temp->down->Coef = j->down->Coef;
-      temp->down->Var = Fam->Variables[i+1];
+      temp->down->Var = (*List)[i+1];
       temp->down->down = NULL;
       temp->pow = 0;
       temp->next = NULL;
       j->down->down = temp;
       CreateTree(Powers, i+1, &(j->down->down), val);
     }
-    else if (i < Fam->NoOfVars) CreateTree(Powers, i+1, &(j->down->down), val);
+    else if (i < List->NumVariables()) 
+      CreateTree(Powers, i+1, &(j->down->down), val);
   }    
 }
 
@@ -821,7 +1013,7 @@ template <class T> Power<T> *gPoly<T>::Adder( Power<T> *One, Power<T> *Two)
 	  k = new Power<T>;
 	  k->next = NULL;
 	  k->down = new term<T>;
-	  k->pow = i->pow;
+	  k->pow = i->pow;                               assert(i->pow >= 0);
 	  k->down->Coef = j->down->Coef + i->down->Coef;
 	  k->down->Var = i->down->Var;
 	  k->down->down = NULL;
@@ -833,7 +1025,7 @@ template <class T> Power<T> *gPoly<T>::Adder( Power<T> *One, Power<T> *Two)
 	  k = new Power<T>;
 	  k->down = new term<T>;
 	  k->next = NULL;
-	  k->pow = i->pow;
+	  k->pow = i->pow;                assert(i->pow >= 0);
 	  k->down->Var = i->down->Var;
 
 	  if (i->down->down != NULL) k->down->down = CreatDupl(i->down->down);
@@ -878,7 +1070,7 @@ template <class T> Power<T> *gPoly<T>::Adder( Power<T> *One, Power<T> *Two)
 	  k = new Power<T>;
 	  k->next = NULL;
 	  k->down = new term<T>;
-	  k->pow = i->pow;
+	  k->pow = i->pow;              assert(i->pow >= 0);
 	  k->down->Var = i->down->Var;
 	  k->down->down = Adder (i->down->down, j->down->down);
 	  if (pk == NULL) kRoot = k;
@@ -919,13 +1111,48 @@ template <class T> void gPoly<T>::MultbyConst(T val, Power<T> *start)
 template <class T> void gPoly<T>::DividebyConst(T val, Power<T> *start)
 {
   assert(val != (T) 0);
-  for (Power<T> *p = start; p!=NULL; p=p->next){
-    if (p->down->down == NULL) p->down->Coef = (p->down->Coef) / val;
-    else DividebyConst(val, p->down->down);
-  }
+  for (Power<T> *p = start; p!=NULL; p=p->next)
+    {
+      if (p->down->down == NULL) 
+	p->down->Coef = (p->down->Coef) / val;
+      else DividebyConst(val, p->down->down);
+    }
 }
 
-template <class T> int gPoly<T>::Equality( Power<T> *one, Power<T> *two )
+
+template <class T> gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> den)
+{
+  assert( den != gPoly<T>(List,(T)0) );
+  assert(*this == gPoly<T>(List,(T)0) || den.TotalDegree() <= TotalDegree());
+
+  // assumes exact divisibility!
+
+  gPoly<T> result = gPoly<T>(List,(T)0);
+
+  if ( *this == gPoly<T>(List,(T)0) ) return result;
+  else if (den.TotalDegree() == 0)
+    { result = *this/den.NumLeadCoeff(); return result; }
+  else
+    {
+      int last = List->NumVariables();
+      while (den.DegreeOfVar(last) == 0) last--;
+
+      gPoly<T> remainder = *this;
+
+      while ( remainder != gPoly<T>(List,(T)0) )
+	{
+	  gPoly<T> quot = remainder.LeadingCoefficient(last) /
+	                     den.LeadingCoefficient(last);
+	  gPoly<T> power_of_last(List,last,remainder.DegreeOfVar(last) - 
+			                        den.DegreeOfVar(last));
+	  result += quot * power_of_last;
+	  remainder -= quot * power_of_last * den;
+	}
+    }
+  return result;
+}
+
+template <class T> int gPoly<T>::Equality( Power<T> *one, Power<T> *two ) const
 {
   Power<T> *k, *j;
   int result = 1;
@@ -955,28 +1182,29 @@ template <class T> Power<T> *gPoly<T>::Mult(Power<T> *One, Power<T> *Two)
 
   if (one == NULL || two == NULL)
     kRoot = NULL;
-  else if (one != NULL && two != NULL &&
-	   two->down->Var->number != one->down->Var->number){
 
+  else if (one != NULL && two != NULL &&
+	   two->down->Var->number != one->down->Var->number) {
     if (two->down->Var->number < one->down->Var->number){
       temp = one; one = two; two = temp;
     }
-      for (i = one; i != NULL; i = i->next, pk = k) {
-	k = new Power<T>;
-	k->down = new term<T>;
-	k->next = NULL;
-	k->pow = i->pow;	      
-	k->down->Var = i->down->Var;
-	if (i->down->down != NULL)
-	  k->down->down = Mult(i->down->down,two);
-	else {
-	  k->down->down = CreatDupl(two);
-	  MultbyConst(i->down->Coef, k->down->down);
-	}
-	if (pk == NULL) kRoot = k;
-	else pk->next = k;
+    for (i = one; i != NULL; i = i->next, pk = k) {
+      k = new Power<T>;
+      k->down = new term<T>;
+      k->next = NULL;
+      k->pow = i->pow;	             assert(i->pow >= 0);
+      k->down->Var = i->down->Var;
+      if (i->down->down != NULL)
+	k->down->down = Mult(i->down->down,two); // Recurse
+      else {
+	k->down->down = CreatDupl(two);
+	MultbyConst(i->down->Coef, k->down->down);
       }
+      if (pk == NULL) kRoot = k;
+      else pk->next = k;
+    }
   }
+
   else {
     pk = NULL;
     for (i = one; i != NULL; i = i->next, pk = k) {
@@ -984,7 +1212,7 @@ template <class T> Power<T> *gPoly<T>::Mult(Power<T> *One, Power<T> *Two)
 	k = new Power<T>;
 	k->down = new term<T>;
 	k->next = NULL;
-	k->pow = i->pow + j->pow;
+	k->pow = i->pow + j->pow;     assert(i->pow >= 0 && j->pow >= 0);
 	k->down->Var = i->down->Var;
 
 	if (i->down->down != NULL && j->down->down != NULL)
@@ -1064,6 +1292,223 @@ Power<T> *gPoly<T>::EvalVar( int num, T val, Power<T> *start)
     accumulator = start;
   }
   return accumulator;
+}
+
+template <class T>
+exp_vect  gPoly<T>::LeadingPowProd(const term_order & order, 
+				   const Power<T>* start) const
+{
+  exp_vect answer = ExpVect(start);
+  for (Power<T>* p = (Power<T>*)start; p != NULL; p = p->down->down)
+    if (p->next != NULL) 
+      {
+	exp_vect candidate = LeadingPowProd(order,p->next);
+
+/*
+//DEBUG
+	if (order.Greater(candidate,answer))
+	  gout << candidate << " Gr(reversedeglex) " << answer << "\n";
+	else
+	  gout << candidate << " LEq(reversedeglex) " << answer << "\n";
+*/
+
+	if (order.Greater(candidate,answer))
+	  answer = candidate;
+      }
+  return answer;
+}
+
+template <class T>
+Power<T>* gPoly<T>::OrderMaxMonomialDivisibleBy(const term_order& order,
+						const Power<T>* start,
+						const exp_vect& expv)
+{
+  Power<T>* answer;
+  if (ExpVect(start) >= expv)
+    answer = (Power<T>*)start;
+  else
+    answer = NULL;
+
+  for (Power<T>* p = (Power<T>*)start; p != NULL; p = p->down->down)
+    if (p->next != NULL) 
+      {
+	Power<T>* candidate = OrderMaxMonomialDivisibleBy(order,p->next,expv);
+	if ( candidate != NULL &&
+	     (answer == NULL || 
+	      order.Greater(ExpVect(candidate),ExpVect(answer))) )
+	  answer = candidate;
+      }
+  return answer;
+}
+
+template <class T>
+Power<T>* gPoly<T>::OrderMaxMonomialDivisibleBy(const term_order& order,
+						const exp_vect& expv)
+{
+  return OrderMaxMonomialDivisibleBy(order,Root,expv);
+}
+
+template <class T>
+T gPoly<T>::LeadingCoeff(const term_order & order, 
+				   const Power<T>* start) const
+{
+  T answer = (T)0;
+  Power<T>* p;
+  for (p = (Power<T>*)start; p != NULL; p = p->down->down)
+    if (p->down->down == NULL)
+      answer = p->down->Coef; 
+  exp_vect expv = ExpVect(start);
+
+  for (p = (Power<T>*)start; p != NULL; p = p->down->down)
+    if (p->next != NULL) {
+      exp_vect candidate = LeadingPowProd(order,p->next);
+      if (order.Greater(candidate,expv)) { 
+	answer = LeadingCoeff(order,p->next);
+	expv = candidate;
+      }
+    }
+  return answer;
+}
+
+template <class T> gPoly<T> gPoly<T>::PartialDerivative(int varnumber)
+{
+  gPoly<T> newPoly(*this); 
+
+  int pow_of_var = 0;
+
+  if (newPoly.Root != NULL)
+    {
+      newPoly.Root = newPoly.PrtlDrvtv(varnumber, newPoly.Root, pow_of_var);
+      newPoly.ZeroCoefRemover(newPoly.Root,NULL);
+      newPoly.Collapsor(newPoly.Root,NULL);
+    }
+  return (newPoly);
+}
+
+template <class T> Power<T> *gPoly<T>::PrtlDrvtv(int num, 
+						 Power<T> *start,
+						 int pow_of_var)
+{
+  Power<T> *q;
+  Power<T> *temp;
+
+  for (q = start; q != NULL; q = q->down->down)
+    { 	
+      if (q->down->Var->number == num)
+	{
+	  pow_of_var = q->pow;
+	  if (q->pow > 0) (q->pow)--;      assert(q->pow >= 0);
+	}
+      if (q->down->down == NULL) temp = q;
+
+      if (q->next != NULL) PrtlDrvtv(num, q->next, pow_of_var);     // Recurse
+    }
+  temp->down->Coef *= (T)pow_of_var;
+  return start;
+}
+
+template <class T> gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber)
+{
+  gPoly<T> newPoly(*this); 
+
+  int degree = DegreeOfVar(varnumber);
+
+  if (degree == 0)
+    return newPoly;
+  else
+    {
+      if (newPoly.Root != NULL)
+	{
+	  bool keep = false;
+	  newPoly.Root = newPoly.LdngCffcnt(varnumber, degree, 
+					    newPoly.Root, keep);
+	  newPoly.ZeroCoefRemover(newPoly.Root,NULL);
+	  newPoly.Collapsor(newPoly.Root,NULL);
+	}
+    }
+  return (newPoly);
+}
+
+template <class T> Power<T> *gPoly<T>::LdngCffcnt(int num, int degree, 
+						  Power<T> *start,
+						  bool keep)
+{
+  Power<T> *q;
+  Power<T> *temp;
+
+  for (q = start; q != NULL; q = q->down->down)
+    { 	
+      if (q->down->Var->number == num && q->pow == degree)
+	{ keep = true; q->pow = 0; }
+      if (q->down->down == NULL) temp = q;
+
+      if (q->next != NULL) LdngCffcnt(num, degree, q->next, keep);  // Recurse
+    }
+  if (degree != 0 && keep == false)
+    temp->down->Coef = (T)0;
+
+  return start;
+}
+
+//--------------------
+// Term Order Concepts
+//--------------------
+
+template <class T> 
+exp_vect gPoly<T>::LeadingPowerProduct(const term_order & order) const
+{
+  return LeadingPowProd(order,Root);
+}
+
+template <class T> 
+T gPoly<T>::LeadingCoefficient(const term_order & order) const
+{
+  return LeadingCoeff(order,Root);
+}
+
+template <class T>
+gPoly<T> gPoly<T>::LeadingTerm(const term_order & order) const
+{
+  return gPoly<T>(List,LeadingPowerProduct(order),LeadingCoefficient(order));
+}
+
+template <class T>
+void gPoly<T>::ReduceByDivisionAtExpV(const term_order & order, 
+				      const gPoly<T> & divisor, 
+				      const exp_vect & expv)
+{
+  assert(expv >= divisor.LeadingPowerProduct(order));
+
+  gPoly<T> factor(this->List, expv - divisor.LeadingPowerProduct(order), (T)1);
+
+  *this -= (GetCoef(expv) / divisor.LeadingCoefficient(order)) * 
+           factor * divisor;
+}
+
+template <class T>
+void gPoly<T>::ReduceByRepeatedDivision(const term_order & order, 
+					const gPoly<T> & divisor)
+{
+  Power<T>* exps = OrderMaxMonomialDivisibleBy(order,
+			       divisor.LeadingPowerProduct(order));
+  while (exps != NULL) {
+    ReduceByDivisionAtExpV(order, divisor, ExpVect(exps));
+    exps = OrderMaxMonomialDivisibleBy(order,
+      		       divisor.LeadingPowerProduct(order));
+  }
+}
+
+template <class T>
+gPoly<T> gPoly<T>::S_Polynomial(const term_order & order, 
+                                const gPoly<T> & arg2)
+{
+  exp_vect exp_lcm = 
+        (LeadingPowerProduct(order)).LCM(arg2.LeadingPowerProduct(order));
+  gPoly<T> lcm = gPoly<T>(List,exp_lcm,(T)1);
+  gPoly<T> L1 = lcm/LeadingTerm(order);
+  gPoly<T> L2 = lcm/arg2.LeadingTerm(order);
+
+  return L1*(*this) - L2*arg2;
 }
 
 
