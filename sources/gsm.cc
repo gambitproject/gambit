@@ -615,7 +615,7 @@ bool GSM::_BinaryOperation( const gString& funcname )
   Portion*   p2;
   Portion*   p1;
   gList< Instruction* > prog;
-  GSM_ReturnCode result;
+  int result;
 
 #ifndef NDEBUG
   if( _Depth() < 2 )
@@ -653,7 +653,7 @@ bool GSM::_BinaryOperation( const gString& funcname )
 bool GSM::_UnaryOperation( const gString& funcname )
 {
   gList< Instruction* > prog;
-  GSM_ReturnCode result;
+  int result;
 
 #ifndef NDEBUG
   if( _Depth() < 1 )
@@ -1154,9 +1154,9 @@ bool GSM::CallFunction( void )
 //                       Execute function
 //----------------------------------------------------------------------------
 
-GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool user_func )
+int GSM::Execute( gList< Instruction* >& program, bool user_func )
 {
-  GSM_ReturnCode  result          = rcSUCCESS;
+  int             result          = rcSUCCESS;
   bool            instr_success;
   bool            done            = false;
   Portion*        p;
@@ -1215,7 +1215,7 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool user_func )
 
     if( !instr_success )
     {
-      result = rcFAIL;
+      result = instruction->LineNumber();
       done = true;
       break;
     }
@@ -1248,7 +1248,7 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program,
 			      const FuncInfoType& func_info,
 			      Portion** param )
 {
-  GSM_ReturnCode rc_result;
+  int rc_result;
   Portion* result;
   Portion* result_copy;
   int i;
@@ -1277,7 +1277,7 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program,
     case 0:
       result = 
 	new ErrorPortion( (gString)
-			 "User-defined function Error: No return value\n" );
+			 "User-defined function Error: No return value" );
       break;
 
     default:
@@ -1295,13 +1295,19 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program,
       break;
     }
     break;
-  case rcFAIL:
-    result = 0;
-    break;
   case rcQUIT:
     result = 
       new ErrorPortion( (gString)
-		       "User-defined function Error: Interruption by user\n" );
+		       "User-defined function Error: Interruption by user" );
+    break;
+
+  default:
+    if( rc_result > 0 )
+      result = new ErrorPortion( (gString)
+				"User-define function Error on line " +
+				ToString( rc_result ) );
+    else
+      result = 0;
     break;
   }
 

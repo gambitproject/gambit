@@ -27,7 +27,7 @@
 
 int main( void )
 {
-  GSM_ReturnCode result;
+  int result;
   char cont;
   int i;
   double d_1 = (double) 7.5;
@@ -60,7 +60,7 @@ int main( void )
   gin >> cont;
 
 
-
+/*
   gout << "\n";
   machine->Push( d_1 );
   machine->Push( d_2 );
@@ -3566,8 +3566,40 @@ int main( void )
   gout << PortionTypeToText( TextToPortionType( "NUMERICAL" ) ) << "\n";
   gout << PortionTypeToText( TextToPortionType( "ALL" ) ) << "\n";
   
+*/
 
 
+  Instruction* ins;
+
+  gout << "\n\nTesting the instruction memory\n";
+  prog = new gList< Instruction* >;
+  ins = new Push<double>( 1 );
+  ins->LineNumber() = 1;
+  prog->Append( ins );
+  ins = new Push<double>( 2 );
+  ins->LineNumber() = 2;
+  prog->Append( ins );
+  ins = new Push<long>( 3 );
+  ins->LineNumber() = 3;
+  prog->Append( ins );
+  ins = new Add;
+  ins->LineNumber() = 4;
+  prog->Append( ins );
+  ins = new Dump;
+  ins->LineNumber() = 5;
+  prog->Append( ins );
+  ins = new Push<double>( 6 );
+  ins->LineNumber() = 6;
+  prog->Append( ins );
+
+  func = new FuncDescObj( "TestLine" );
+  func->SetFuncInfo( prog, 0 );
+  machine->AddFunction( func );
+  
+
+  machine->InitCallFunction( "TestLine" );
+  machine->CallFunction();
+  machine->Dump();
 
   gout << "\nDeleting machine\n";
   delete machine;

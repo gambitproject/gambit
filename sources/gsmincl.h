@@ -25,9 +25,9 @@ typedef enum
 
 
 
-typedef enum { rcFAIL, rcSUCCESS, rcQUIT } GSM_ReturnCode;
-
-
+#define rcFAIL     0
+#define rcSUCCESS -1
+#define rcQUIT    -2
 
 
 

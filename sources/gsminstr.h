@@ -52,12 +52,17 @@ typedef enum
 
 class Instruction
 {
- private:
+private:
   static int _NumInstructions;
-
- public:
+  
+protected:
+  int _LineNumber;
+ 
+public:
   Instruction( void );
   virtual ~Instruction();
+
+  int& LineNumber( void );
 
   virtual Opcode Type( void ) const = 0;
   virtual bool Execute( GSM& gsm ) const = 0;

@@ -138,8 +138,8 @@ public:
   bool BindRef          ( const gString& param_name = "" );
   bool CallFunction     ( void );
 
-  GSM_ReturnCode Execute( gList<Instruction*>& program, 
-			 bool user_func = false );
+  int Execute( gList<Instruction*>& program, 
+	      bool user_func = false );
   Portion* ExecuteUserFunc( gList<Instruction*>& program, 
 			   const FuncInfoType& func_info,
 			   Portion** param );

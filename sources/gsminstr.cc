@@ -28,6 +28,8 @@ Instruction::Instruction( void )
   _NumInstructions++;
   gout << "num of Instructions: " << _NumInstructions << "\n";
 #endif
+
+  _LineNumber = 0;
 }
 
 Instruction::~Instruction()
@@ -38,6 +40,8 @@ Instruction::~Instruction()
 #endif
 }
 
+int& Instruction::LineNumber( void )
+{ return _LineNumber; }
 
 
 //--------------------------------------------------------------------
