@@ -98,14 +98,6 @@ template <class T> T &gArray<T>::operator[](int index)
   return data[index];
 }
 
-template <class T> bool gArray<T>::Contains(const T& t) const
-{
-  for (int i = mindex; i <= maxdex; i++)
-    if ((*this)[i] == t) 
-      return true;
-  return false;
-}
-
 template <class T> void gArray<T>::Dump(gOutput &f) const
 {
   f << "{ ";

@@ -77,10 +77,6 @@ template <class T> class gArray  {
 //
     const T &operator[](int index) const;
     T &operator[](int index);
-// 
-// Does the array contain an instance?
-//
-    bool Contains(const T&) const;
 //
 // Output data of the array
 //
