@@ -31,7 +31,6 @@
 #include "nfplayer.h"
 #include "nfdom.h"
 #include "nfgciter.h"
-#include "yamamoto.h"
 
 #include "nfgsolvd.h"
 #include "nfgsolng.h"
@@ -114,8 +113,6 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
 	   NfgShow::OnToolsEquilibriumCustomLp)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_QRE,
 	   NfgShow::OnToolsEquilibriumCustomQre)
-  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_YAMAMOTO,
-	   NfgShow::OnToolsEquilibriumCustomYamamoto)
   EVT_MENU_RANGE(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMPURE,
 		 NFG_TOOLS_EQUILIBRIUM_CUSTOM_QREGRID,
 		 NfgShow::OnToolsEquilibriumCustom)
@@ -428,8 +425,7 @@ void NfgShow::MakeMenus(void)
 			  "Compute quantal response equilibrium");
   solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_QREGRID, "QREGrid",
 			  "Compute quantal response equilibrium");
-  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_YAMAMOTO, "Yamamoto",
-			  "Compute a proper equilibrium via Yamamoto's algorithm");
+
   solveMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM, "Custom", solveCustomMenu,
 		    "Solve with a particular algorithm");
   toolsMenu->Append(NFG_TOOLS_EQUILIBRIUM, "&Equilibrium", solveMenu,
@@ -1361,112 +1357,6 @@ void NfgShow::OnToolsEquilibriumCustomQre(wxCommandEvent &)
 		   "Notification", wxOK, this);
     }
   }
-}
-
-namespace YamamotoWizard {
-
-class SupportsPage : public wxWizardPageSimple {
-public:
-  SupportsPage(wxWizard *p_parent);
-};
-
-SupportsPage::SupportsPage(wxWizard *p_parent)
-  : wxWizardPageSimple(p_parent)
-{ 
-  wxStaticBox *box = new wxStaticBox(this, -1, "Choose Support");
-  wxStaticBoxSizer *sizer = new wxStaticBoxSizer(box, wxHORIZONTAL);
-					      
-  sizer->Add(new wxStaticText(this, -1, 
-			      "Yamamoto's algorithm computes a proper\n"
-			      "equilibrium.  Since proper equilibria\n"
-			      "never involve playing a dominated strategy\n"
-			      "with positive probability, the algorithm\n"
-			      "automatically will eliminate strictly\n"
-			      "dominated strategies."),
-	     0, wxEXPAND, 5);
-
-  SetAutoLayout(true);
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(sizer, 0, wxCENTRE | wxALL, 5);
-  
-  SetSizer(topSizer); 
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this); 
-  Layout();
-}
-
-class ParametersPage : public wxWizardPageSimple {
-public:
-  ParametersPage(wxWizard *p_parent);
-};
-
-ParametersPage::ParametersPage(wxWizard *p_parent)
-  : wxWizardPageSimple(p_parent)
-{ 
-  wxStaticBox *box = new wxStaticBox(this, -1, "Algorithm Parameters");
-  wxStaticBoxSizer *sizer = new wxStaticBoxSizer(box, wxHORIZONTAL);
-					      
-  sizer->Add(new wxStaticText(this, -1, 
-			      "Yamamoto's algorithm currently accepts\n"
-			      "no parameters.\n"),
-	     0, wxEXPAND, 5);
-
-  SetAutoLayout(true);
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(sizer, 0, wxCENTRE | wxALL, 5);
-  
-  SetSizer(topSizer); 
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this); 
-  Layout();
-}
-
-}  // YamamotoWizard
-
-void NfgShow::OnToolsEquilibriumCustomYamamoto(wxCommandEvent &)
-{
-  wxWizard *wizard = wxWizard::Create(this, -1, "Yamamoto's Algorithm Parameters");
-  YamamotoWizard::SupportsPage *page1 =
-    new YamamotoWizard::SupportsPage(wizard);
-  YamamotoWizard::ParametersPage *page2 =
-    new YamamotoWizard::ParametersPage(wizard);
-  page1->SetNext(page2);
-  page2->SetPrev(page1);
-
-  wxBeginBusyCursor();
-
-  if (wizard->RunWizard(page1)) {
-    gList<MixedSolution> solutions;
-    wxStatus status(this, "YamamotoSolve Progress");
-    
-    try {
-      Yamamoto(NFSupport(m_nfg), status, solutions);
-      if (solutions.Length() > 0) {
-	AddSolution(solutions[1], true);
-      }
-
-      if (solutions.Length() > 0 && !m_table->ShowProbs()) {
-	m_table->ToggleProbs();
-	GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
-	ChangeSolution(m_solutionTable->Length());
-	if (!m_solutionSashWindow->IsShown()) {
-	  m_solutionTable->Show(true);
-	  m_solutionSashWindow->Show(true);
-	  GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
-	  AdjustSizes();
-	}
-      }
-    }
-    catch (...) {
-
-    }
-  }
-
-  wxEndBusyCursor();
-
-  UpdateMenus();
 }
 
 //----------------------------------------------------------------------
