@@ -86,42 +86,6 @@ RS6k and catching exceptions.
 
 //------------------------------
 
-Bug C17  Bad line numbers for parse errors.  
-
-  148 mill:/home/mill/rdm/gambit/test newgcl
-  Include["gclini.gcl"]
-  Include["stdudfs.gcl"]
-  GCL1:= << Include["bcp.gcl"]    
-  True
-  parse error at line 56 in file bcp.gcl: identifier size
-
-but line 56 is a comment.  Here is a simpler example (RDM 12/27/98)
-
- Here is the file junk3.gcl:
- 
- -----------------------------  cut here --------------------------
- i:=0;
- While[i<3,
-   // This is a comment
-   i:=i+1;
-   // this is a parse error:
-   Help["help",udf->];
-   StdOut << "\n" << i;
- ];  
- ------------------------------ cut here -----------------------------
- 
- and here is the error message:
- 
-   GCL1:= << Include["junk3.gcl"]
-   True
-   parse error at line 4 in file junk3.gcl: ]
- 
- But the error is actually on line 6 (missing value for udf).  I am
- guessing it is getting screwed up by the comments inside the while
- While loop.
-
-//------------------------------
-
 Bug C18: Bug in LPSolve[] (or use the script gambit/test/csumsolve.gcl):
 
   GCL1:= << n:=LoadNfg["../nfg/cs1.nfg"]
@@ -255,43 +219,6 @@ speeded up.
 into the command line.  It would be better if after highlighting text
 in the GCL window, the right mouse button would bring up the context
 menu (as in Notepad) to allow to cut or paste text into the GCL window in the standard MS-windows way. 
-
-//------------------------------
-
-Bug C33:  Problems with addition and assignment of NUMBERs
-
-The following is running on mill:
-
-  53 mill:/home/mill/rdm/qrevote newgcl
-  Include["/home/mill/rdm/gambit/bin/gclini.gcl"]
-  Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
-  GCL1:= << x:=874093469074998296576.000000
-  874093469074998296576.000000
-  GCL2:= << x+1
-  874093469074998296576.000000
-  GCL3:= << y:=874093469074998296576
-  874093469074998296576
-  GCL4:= << y+1                     
-  874093469074998296577
-
-Note the first addition was wrong, but the second was correct.  Why?
-They should be the same number.
-
-  GCL5:= << x:=874093469074998296575.000000
-  874093469074998296576.000000
-  GCL6:= << x+1                            
-  874093469074998296576.000000
-
-It got that one right.
-
-  GCL7:= << x:=874093469074998296577.000000
-  874093469074998296576.000000
-
-It didn't even get that assignment right -- is the decimal point
-confusing it?  Is there a maximum NUMBER?
-
-
-
 
 //---------------  These are not bugs but suggested improvements ------------
 
