@@ -45,7 +45,7 @@ public:
   VertEnum(const gMatrix<T> &A, const gVector<T> &b, gStatus &status);
   ~VertEnum();
 
-  BFS_List VertexList() const;
+  const BFS_List &VertexList() const;
   long NumPivots() const;
   void Dump(gOutput &) const;
 };

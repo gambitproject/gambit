@@ -147,7 +147,7 @@ template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
   depth--;
 }
   
-template <class T> BFS_List VertEnum<T>::VertexList() const
+template <class T> const BFS_List &VertEnum<T>::VertexList() const
 { 
   return List;
 }

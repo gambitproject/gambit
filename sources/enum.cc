@@ -109,11 +109,13 @@ template <class T> int EnumModule<T>::Enum(void)
     (*params.tracefile) << "\nafter poly2, dt = " << dt << " time = " << time; 
   
 
-  BFS_List verts1(poly1.VertexList());
-  BFS_List verts2(poly2.VertexList());
+  const BFS_List &verts1(poly1.VertexList());
+  const BFS_List &verts2(poly2.VertexList());
   v1=verts1.Last();
   v2=verts2.Last();
 
+//  v1=poly1.VertexList().Last();
+//  v2=poly2.VertexList().Last();
   if(params.trace>=2) 
     (*params.tracefile) << "\n v1 = " << v1 << ", v2 = " << v2;
 
@@ -126,8 +128,10 @@ template <class T> int EnumModule<T>::Enum(void)
     params.status.SetProgress((double)(i-2)/(double)v2);
 //    gout << "\nProgress = " << (double)(i-2)/(double)v2;
     bfs1 = verts2[i];
+//    bfs1 = poly2.VertexList()[i];
     for(j=2;j<=v1;j++) {
       bfs2 = verts1[j];
+//      bfs2 = poly1.VertexList()[j];
 
       // check if solution is nash 
       // need only check complementarity, since it is feasible
