@@ -64,7 +64,14 @@
                                filenames(4), lines(4), \
                                gsm(256), quit(false)
 
-%define CONSTRUCTOR_CODE       filenames.Push("stdin"); lines.Push(1);
+%define CONSTRUCTOR_CODE       filenames.Push("stdin"); lines.Push(1); \
+                               inputs.Push(new gFileInput("gclini.gcl")); \
+			       if (!inputs.Peek()->IsValid())  \
+		                 delete inputs.Pop();  \
+			       else  {  \
+                                 filenames.Push("gclini.gcl"); \
+		                 lines.Push(1); \
+	                       }
 
 %token LOR
 %token LAND
@@ -127,8 +134,8 @@
 
 %%
 
-
-program:      toplevel EOC 
+program: 
+              toplevel EOC 	
               { if (!triv || !semi) emit(new Display); emit(new Pop); return 0; }
        |      error EOC   { RecoverFromError();  return 1; }
        |      error CRLF  { RecoverFromError();  return 1; }
@@ -695,6 +702,13 @@ int GCLCompiler::Parse(void)
   int command = 1;
 
   while (!quit && (inputs.Depth() > 0 || !gin.eof()))  {
+
+    while (inputs.Depth() && inputs.Peek()->eof())  {
+      delete inputs.Pop();
+      filenames.Pop();
+      lines.Pop();
+    }
+
     if (inputs.Depth() == 0)
       gout << "GCL" << command << ": ";
     matching.Flush();
