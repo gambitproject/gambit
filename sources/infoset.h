@@ -116,6 +116,7 @@ template <class T> class ChanceInfoset : public Infoset  {
   public:
     void SetActionProb(int i, const T &value)  { probs[i] = value; }
     const T &GetActionProb(int i) const   { return probs[i]; }
+    const gVector<T> &GetActionProbs(void) const  { return probs; }
 };
 
 
