@@ -185,7 +185,7 @@ NFSupport::NFSupport(const Nfg &N) : bnfg(&N), sups(N.NumPlayers())
 }
 
 NFSupport::NFSupport(const NFSupport &s)
-  : bnfg(s.bnfg), sups(s.sups.Length())
+  : bnfg(s.bnfg), sups(s.sups.Length()), m_name(s.m_name)
 {
   for (int i = 1; i <= sups.Length(); i++)
     sups[i] = new nfgSupportPlayer(*s.sups[i]);
@@ -200,6 +200,7 @@ NFSupport::~NFSupport()
 NFSupport &NFSupport::operator=(const NFSupport &s)
 {
   if (this != &s && bnfg == s.bnfg) {
+    m_name = s.m_name;
     for (int i = 1; i <= sups.Length(); i++)  {
       delete sups[i];
       sups[i] = new nfgSupportPlayer(*s.sups[i]);
@@ -316,26 +317,18 @@ bool NFSupport::IsValid(void) const
   return true;
 }
 
-void NFSupport::Dump(gOutput&s) const
+void NFSupport::Dump(gOutput &p_output) const
 {
-  int numplayers;
-  int i;
-  int j;
-  gArray<Strategy *> strat;
-
-  s << "{ ";
-  numplayers = Game().NumPlayers();
-  for( i = 1; i <= numplayers; i++ )
-  {
-    s << "{ ";
-    strat = Strategies( i );
-    for (j = 1; j <= strat.Length(); j++ )
-    {
-      s << "\"" << strat[j]->Name() << "\" ";
+  p_output << '"' << m_name << "\" { ";
+  for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
+    p_output << "{ ";
+    const gArray<Strategy *> &strategies = Strategies(pl);
+    for (int st = 1; st <= strategies.Length(); st++) {
+      p_output << "\"" << strategies[st]->Name() << "\" ";
     }
-    s << "} ";
+    p_output << "} ";
   }
-  s << "} ";
+  p_output << "} ";
 }
 
 gOutput& operator<<(gOutput& s, const NFSupport& n)

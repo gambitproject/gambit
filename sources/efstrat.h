@@ -1,5 +1,5 @@
 //
-// FILE: efstrat.h -- Supports and stuff for the extensive form games
+// FILE: efstrat.h -- Strategy-related classes for the extensive form games
 //
 // $Id$
 //
@@ -20,10 +20,10 @@ class Efg;
 
 
 class EFSupport {
-  protected:
-    gText name;
-    const Efg *befg;
-    gArray<EFActionSet *> sets;
+protected:
+  gText m_name;
+  const Efg *befg;
+  gArray<EFActionSet *> sets;
 
 public:
   EFSupport ( const Efg &);
@@ -33,6 +33,9 @@ public:
 
   bool operator==(const EFSupport &) const;
   bool operator!=(const EFSupport &) const;
+
+  const gText &GetName(void) const { return m_name; }
+  void SetName(const gText &p_name) { m_name = p_name; }
 
   // Return the number of players, infosets, actions in a support 
   int NumActions(int pl, int iset) const;

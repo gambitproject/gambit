@@ -48,6 +48,7 @@ class NFSupport {
 protected:
   const Nfg *bnfg;
   gArray <nfgSupportPlayer *> sups;
+  gText m_name;
   
 public:
   NFSupport(const Nfg &);
@@ -60,6 +61,9 @@ public:
 
   const Nfg &Game(void) const   { return *bnfg; }
   const Nfg *GamePtr(void) const { return bnfg; }
+
+  const gText &GetName(void) const { return m_name; }
+  void SetName(const gText &p_name) { m_name = p_name; }
   
   const gBlock<Strategy *> &Strategies(int pl) const;
   inline Strategy *GetStrategy(int pl, int i) const

@@ -281,7 +281,7 @@ EFSupport::EFSupport(const Efg &E)
 }
 
 EFSupport::EFSupport(const EFSupport &s)
-  : name(s.name), befg(s.befg), 
+  : m_name(s.m_name), befg(s.befg), 
     sets(s.sets.Length())
 {
   for (int i = 1; i <= sets.Length(); i++)
@@ -297,7 +297,7 @@ EFSupport::~EFSupport()
 EFSupport &EFSupport::operator=(const EFSupport &s)
 {
   if (this != &s && befg == s.befg) {
-    name = s.name;
+    m_name = s.m_name;
     for (int i = 1; i <= sets.Length(); i++)  {
       delete sets[i];
       sets[i] = new EFActionSet(*(s.sets[i]));
@@ -620,31 +620,24 @@ bool EFSupport::MayReach(const Node *n) const
 }
 
 
-void EFSupport::Dump(gOutput& s) const
+void EFSupport::Dump(gOutput &p_output) const
 {
-  int numplayers;
-  int i;
-  int j;
-  int k;
-
-  s << "{ ";
-  numplayers = befg->NumPlayers();
-  for (i = 1; i <= numplayers; i++)  {
-    EFPlayer& player = sets[i]->GetPlayer();
-    s << '"' << player.GetName() << "\" { ";
-    for (j = 1; j <= player.NumInfosets(); j++)  {
-      Infoset* infoset = player.Infosets()[j];
-      s << '"' << infoset->GetName() << "\" { ";
-      for (k = 1; k <= NumActions(i, j); k++)  {
-	const Action *action = sets[i]->ActionList(j)[k];
-	//	s << '"' << action->GetName() << "\" ";
-	s << action << ' ';
+  p_output << '"' << m_name << "\" { ";
+  for (int pl = 1; pl <= befg->NumPlayers(); pl++)  {
+    EFPlayer &player = sets[pl]->GetPlayer();
+    p_output << '"' << player.GetName() << "\" { ";
+    for (int iset = 1; iset <= player.NumInfosets(); iset++)  {
+      Infoset *infoset = player.Infosets()[iset];
+      p_output << '"' << infoset->GetName() << "\" { ";
+      for (int act = 1; act <= NumActions(pl, iset); act++)  {
+	const Action *action = sets[pl]->ActionList(iset)[act];
+	p_output << action << ' ';
       }
-      s << "} ";
+      p_output << "} ";
     }
-    s << "} ";
+    p_output << "} ";
   }
-  s << "} ";
+  p_output << "} ";
 }
 
 gOutput& operator<<(gOutput&s, const EFSupport& e)
