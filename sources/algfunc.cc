@@ -374,6 +374,27 @@ static Portion *GSM_QreGrid_Support(GSM &gsm, Portion **param)
   return new Mixed_ListPortion(solutions);
 }
 
+static Portion *GSM_Qre_Dynamics(GSM &p_gsm, Portion **p_param)
+{
+  MixedSolution &start = *((MixedPortion *) p_param[0])->Value();
+  double lambda = ((NumberPortion *) p_param[1])->Value();
+  double tmax = ((NumberPortion *) p_param[2])->Value();
+  gOutput *file = 0;
+  if (((TextPortion *) p_param[3])->Value() != "") {
+    file = new gFileOutput(((TextPortion *) p_param[3])->Value());
+  }
+
+  MixedProfile<double> output = LogitDynamics(MixedProfile<double>(start), 
+					      lambda, tmax,
+					      (file) ? *file : gnull);
+
+  if (file) {
+    delete file;
+  }
+
+  return new MixedPortion(new MixedSolution(output));
+}
+
 //---------------
 // QreSolve
 //---------------
@@ -1515,6 +1536,14 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 14, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
 
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new gclFunction(*gsm, "LogitDyn", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Qre_Dynamics, porMIXED, 4));
+  FuncObj->SetParamInfo(0, 0, gclParameter("start", porMIXED));
+  FuncObj->SetParamInfo(0, 1, gclParameter("lambda", porNUMBER));
+  FuncObj->SetParamInfo(0, 2, gclParameter("tmax", porNUMBER));
+  FuncObj->SetParamInfo(0, 3, gclParameter("output", porTEXT));
   gsm->AddFunction(FuncObj);
 
 

@@ -70,5 +70,9 @@ public:
 	     gList<MixedSolution> &);
 };
 
+MixedProfile<double> LogitDynamics(const MixedProfile<double> &p_start,
+				   double p_lambda, double p_tmax,
+				   gOutput &);
+
 #endif  // NFGQREGRID_H
 
