@@ -675,19 +675,40 @@ static Portion *GSM_LessEqual_Text(Portion** param)
 
 static Portion *GSM_And(Portion** param)
 {
-  return new BoolPortion(((BoolPortion*) param[0])->Value() &&
-			 ((BoolPortion*) param[1])->Value());
+  TriState x = ((BoolPortion *) param[0])->Value();
+  TriState y = ((BoolPortion *) param[1])->Value();
+
+  if (x == T_YES && y == T_YES)    
+    return new BoolPortion(T_YES);
+  else if (x == T_NO && y == T_NO)
+    return new BoolPortion(T_NO); 
+  else
+    return new BoolPortion(T_DONTKNOW);  
 }
 
 static Portion *GSM_Or(Portion** param)
 {
-  return new BoolPortion(((BoolPortion*) param[0])->Value() ||
-			 ((BoolPortion*) param[1])->Value());
+  TriState x = ((BoolPortion *) param[0])->Value();
+  TriState y = ((BoolPortion *) param[1])->Value();
+
+  if (x == T_YES || y == T_YES)    
+    return new BoolPortion(T_YES);
+  else if (x == T_DONTKNOW || y == T_DONTKNOW)
+    return new BoolPortion(T_DONTKNOW); 
+  else
+    return new BoolPortion(T_NO);
 }
 
 static Portion *GSM_Not(Portion** param)
 {
-  return new BoolPortion(!((BoolPortion*) param[0])->Value());
+  TriState x = ((BoolPortion *) param[0])->Value();
+
+  if (x == T_YES)
+    return new BoolPortion(T_NO);
+  else if (x == T_NO)
+    return new BoolPortion(T_YES);
+  else
+    return new BoolPortion(T_DONTKNOW); 
 }
 
 
