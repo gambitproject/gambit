@@ -17,7 +17,6 @@
 #endif   // __GNUG__, __BORLANDC__
 
 
-TEMPLATE class gArray<bool>;
 TEMPLATE class gArray<int>;
 TEMPLATE class gArray<long>;
 TEMPLATE class gArray<float>;
@@ -32,7 +31,6 @@ TEMPLATE class gArray<gArray<double> >;
 TEMPLATE bool operator==(const gArray<int> &, const gArray<int> &);
 TEMPLATE bool operator!=(const gArray<int> &, const gArray<int> &);
 
-TEMPLATE gOutput &operator<<(gOutput &, const gArray<bool> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gArray<int> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gArray<long> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gArray<float> &);
