@@ -944,7 +944,7 @@ template <class T> Portion* Efg_Portion<T>::Copy( bool new_data ) const
 
   if( new_data )
   {
-    new_value = new ExtForm<T>(); // ( *_Value );
+    new_value = new ExtForm<T>( *_Value );
     p = new Efg_Portion<T>( *new_value );
   }
   else

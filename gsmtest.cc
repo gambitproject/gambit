@@ -2093,8 +2093,6 @@ int main( void )
 
 
 
-
-
   machine->InitCallFunction( "VarTest" );
   machine->CallFunction();
   machine->Dump();
@@ -2118,6 +2116,47 @@ int main( void )
   machine->InitCallFunction( "VarTest" );
   machine->CallFunction();
   machine->Dump();
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+#endif
+
+
+  machine->PushRef( "x1" );
+  machine->Push( "test" );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x1" );
+  machine->Push( (gInteger) 0 );
+  machine->Subscript();
+  machine->Output();
+  machine->PushRef( "x1" );
+  machine->Push( (gInteger) 1 );
+  machine->Subscript();
+  machine->Output();
+  machine->PushRef( "x1" );
+  machine->Push( (gInteger) 2 );
+  machine->Subscript();
+  machine->Output();
+  machine->PushRef( "x1" );
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Output();
+  machine->PushRef( "x1" );
+  machine->Push( (gInteger) 4 );
+  machine->Subscript();
+  machine->Output();
+  machine->PushRef( "x1" );
+  machine->Push( (gInteger) 5 );
+  machine->Subscript();
+  machine->Output();
+  machine->PushRef( "x1" );
+  machine->Push( (double) 1 );
+  machine->Subscript();
+  machine->Output();
 
 
   gout << "*********************** Press Return to continue ************";

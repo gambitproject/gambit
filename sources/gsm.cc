@@ -539,6 +539,10 @@ bool GSM::Subscript ( void )
   Portion* real_list;
   Portion* element;
   Portion* shadow;
+
+  gString  old_string;
+  gString  new_string;
+  int      subscript;
   bool     result = true;
 
   assert( _Stack->Depth() >= 2 );
@@ -554,9 +558,21 @@ bool GSM::Subscript ( void )
     else
       p1 = 0;
 
-    if( p1 != 0 && p1->Type() == porLIST )
+    if( p1 != 0 )
     {
-      delete refp;
+      if( p1->Type() == porLIST )
+      {
+	delete refp;
+      }
+      else if( p1->Type() == porSTRING )
+      {
+	p1 = p1->Copy();
+	delete refp;
+      }
+      else
+      {
+	p1 = refp;
+      }
     }
     else
     {
@@ -599,6 +615,35 @@ bool GSM::Subscript ( void )
     else
     {
       _ErrorMessage( _StdErr, 19 );
+      _Stack->Push( new Error_Portion );
+      result = false;
+    }
+  }
+  else if( p1->Type() == porSTRING )
+  {
+    if( p2->Type() == porINTEGER )
+    {
+      subscript = ( (numerical_Portion<gInteger>*) p2 )->Value().as_long();
+      old_string = ( (gString_Portion*) p1 )->Value();
+      if( subscript >= 1 && subscript <= old_string.length() )
+      {
+	new_string = old_string[ subscript - 1 ];
+	delete p1;
+	p1 = new gString_Portion( new_string );
+	_Stack->Push( p1 );
+      }
+      else
+      {
+	_ErrorMessage( _StdErr, 36 );
+	delete p1;
+	_Stack->Push( new Error_Portion );
+	result = false;
+      }
+    }
+    else
+    {
+      _ErrorMessage( _StdErr, 37 );
+      delete p1;
       _Stack->Push( new Error_Portion );
       result = false;
     }
@@ -1254,6 +1299,12 @@ void GSM::_ErrorMessage
   case 35:
     s << "  Attempted to insert conflicting Portion\n";
     s << "  types into a List_Portion.\n";
+    break;
+  case 36:
+    s << "  Subscript out of range\n";
+    break;
+  case 37:
+    s << "  A non-integer index specified\n";
     break;
   default:
     s << "  General error\n";
