@@ -203,6 +203,13 @@ void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
 //                   TreeWindow: Drawing functions
 //---------------------------------------------------------------------
 
+void TreeWindow::RefreshTree(void)
+{
+  m_layout.BuildNodeList(*m_parent->GetSupport());
+  m_layout.Layout(*m_parent->GetSupport());
+  AdjustScrollbarSteps();
+}
+
 void TreeWindow::RefreshLayout(void)
 {
   m_layout.Layout(*m_parent->GetSupport());
@@ -281,15 +288,15 @@ void TreeWindow::EnsureCursorVisible(void)
   GetClientSize(&width, &height);
 
   int xx, yy;
-  CalcScrolledPosition((int) (entry->x * m_zoom - 20),
-		       (int) (entry->y * m_zoom), &xx, &yy);
+  CalcScrolledPosition((int) (entry->X() * m_zoom - 20),
+		       (int) (entry->Y() * m_zoom), &xx, &yy);
   if (xx < 0) {
     xScroll -= -xx / 50 + 1;
   }
   const int OUTCOME_LENGTH = 60;
-  CalcScrolledPosition((int) (entry->x * m_zoom + draw_settings.NodeSize() +
+  CalcScrolledPosition((int) (entry->X() * m_zoom + draw_settings.NodeSize() +
 			      OUTCOME_LENGTH),
-		       (int) (entry->y * m_zoom), &xx, &yy);
+		       (int) (entry->Y() * m_zoom), &xx, &yy);
   if (xx > width) {
     xScroll += (xx - width) / 50 + 1;
   }
@@ -300,13 +307,13 @@ void TreeWindow::EnsureCursorVisible(void)
     xScroll = GetScrollRange(wxHORIZONTAL);
   }
 
-  CalcScrolledPosition((int) (entry->x * m_zoom),
-		       (int) (entry->y * m_zoom - 20), &xx, &yy);
+  CalcScrolledPosition((int) (entry->X() * m_zoom),
+		       (int) (entry->Y() * m_zoom - 20), &xx, &yy);
   if (yy < 0) {
     yScroll -= -yy / 50 + 1;
   }
-  CalcScrolledPosition((int) (entry->x * m_zoom),
-		       (int) (entry->y * m_zoom + 20), &xx, &yy);
+  CalcScrolledPosition((int) (entry->X() * m_zoom),
+		       (int) (entry->Y() * m_zoom + 20), &xx, &yy);
   if (yy > height) {
     yScroll += (yy - height) / 50 + 1;
   }
@@ -442,25 +449,6 @@ void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
 	m_dragSource = node;
 	return;
       }
-
-      node = m_layout.NodeRightHitTest(x, y);
-      if (node && !node->Game()->GetOutcome(node).IsNull()) {
-	wxPoint hotSpot(p_event.GetPosition().x, p_event.GetPosition().y);
-#ifdef __WXMSW__
-	m_dragImage = new wxDragImage(wxBitmap("PAYOFF_BITMAP"),
-				      wxCursor(wxCURSOR_HAND), hotSpot);
-#else
-#include "bitmaps/payoff.xpm"
-	m_dragImage = new wxDragImage(wxBitmap(payoff_xpm),
-				      wxCursor(wxCURSOR_HAND), hotSpot);
-#endif  // __WXMSW__
-	m_dragMode = dragOUTCOME;
-	m_dragImage->BeginDrag(wxPoint(0, 0), this);
-	m_dragImage->Move(p_event.GetPosition());
-	m_dragImage->Show();
-	m_dragSource = node;
-	return;
-      }
     }
     else {
       m_dragImage->Move(p_event.GetPosition());
@@ -553,45 +541,6 @@ void TreeWindow::OnLeftDoubleClick(wxMouseEvent &p_event)
     Refresh();
     return;
   }
-
-  node = m_layout.SubgameHitTest(x, y);
-  if (node) {
-    SetCursorPosition(node);
-    Refresh();
-    return;
-  }
-
-  node = m_layout.NodeAboveHitTest(x, y);
-  if (node) {
-    // Action for clicking on node label -- currently undefined
-    return;
-  }
-
-  node = m_layout.NodeBelowHitTest(x, y);
-  if (node) {
-    // Action for clicking on node label -- currently undefined
-    return;
-  }
-
-  node = m_layout.NodeRightHitTest(x, y);
-  if (node) {
-    SetCursorPosition(node);
-    // Action for clicking on right label -- currently undefined
-  }
-
-  node = m_layout.BranchAboveHitTest(x, y);
-  if (node) {
-    SetCursorPosition(node->GetParent());
-    // Action for clicking on branch label -- currently undefined
-    return;
-  }
-
-  node = m_layout.BranchBelowHitTest(x, y);
-  if (node) {
-    SetCursorPosition(node->GetParent());
-    // Action for clicking on branch label -- currently undefined
-    return;
-  }
 }
 
 void TreeWindow::OnRightClick(wxMouseEvent &p_event)
@@ -628,14 +577,6 @@ bool TreeWindow::ProcessShift(wxMouseEvent &ev)
   if (node) {
     m_efg.DeleteTree(node);
     m_efg.DeleteEmptyInfosets();
-    Refresh();
-    return true;
-  }
-
-  node = m_layout.NodeRightHitTest(x, y);
-  if (node && !node->Game()->GetOutcome(node).IsNull()) {
-    node->Game()->SetOutcome(node, node->Game()->GetNullOutcome());
-    outcomes_changed = true;
     Refresh();
     return true;
   }
@@ -680,8 +621,8 @@ void TreeWindow::SupportChanged(void)
 {
   // Check if the cursor is still valid
   NodeEntry *ne = m_layout.GetNodeEntry(Cursor());
-  if (ne->child_number) {
-    if (!m_parent->GetSupport()->Find(Cursor()->GetInfoset()->Actions()[ne->child_number]))
+  if (ne->GetChildNumber() > 0) {
+    if (!m_parent->GetSupport()->Find(Cursor()->GetInfoset()->Actions()[ne->GetChildNumber()]))
       SetCursorPosition(m_efg.RootNode());
   }
 

@@ -83,6 +83,7 @@ public:
   virtual void OnDraw(wxDC &dc);
   void HilightInfoset(int pl,int iset);
 
+  void RefreshTree(void);
   void RefreshLayout(void);
   void RefreshLabels(void);
   void OutcomeChange(void) { outcomes_changed = true; }

@@ -17,12 +17,18 @@
 
 class NodeEntry {
 private:
-  Node *m_node;       // the corresponding node in the game
+  Node *m_node;        // the corresponding node in the game
+  NodeEntry *m_parent; // parent node
+  int m_x, m_y;        // Cartesian coordinates of node
+  NodeEntry *m_nextMember;  // entry of next information set member 
+  bool m_inSupport;    // true if node reachable in current support
+
   bool m_selected;    // true if node is selected
   bool m_cursor;      // true if node is 'cursor'
   bool m_subgameRoot, m_subgameMarked;
   int m_size;         // horizontal size of the node
   int m_token;        // token to draw for node
+  wxColour m_color;   // color of node
 
   int m_branchStyle;  // lines or fork-tine
   int m_branchLabel;  // horizontal or rotated
@@ -38,19 +44,28 @@ private:
   wxFont m_branchAboveFont, m_branchBelowFont;
 
 public:
-  int x, y;
-  wxColour color;
-  // pos of the next node in the infoset to connect to
-  struct { int x, y; } infoset;
-  int nums;           // sum of infosets previous to this level
-  int has_children;   // how many children this node has
-  int child_number;   // what branch # is this node from the parent
-  bool in_sup;        // is this node in cur_sup
-  NodeEntry *parent;
-
-  NodeEntry(Node *);
+  NodeEntry(Node *p_parent);
 
   Node *GetNode(void) const { return m_node; }
+
+  NodeEntry *GetParent(void) const { return m_parent; }
+  void SetParent(NodeEntry *p_parent) { m_parent = p_parent; }
+
+  int X(void) const { return m_x; }
+  void SetX(int p_x) { m_x = p_x; }
+  int Y(void) const { return m_y; }
+  void SetY(int p_y) { m_y = p_y; }
+
+  NodeEntry *GetNextMember(void) const { return m_nextMember; }
+  void SetNextMember(NodeEntry *p_member) { m_nextMember = p_member; }
+
+  bool InSupport(void) const { return m_inSupport; }
+  void SetInSupport(bool p_inSupport) { m_inSupport = p_inSupport; }
+
+  int GetChildNumber(void) const; 
+
+  const wxColour &GetColor(void) const { return m_color; }
+  void SetColor(const wxColour &p_color) { m_color = p_color; }
 
   bool IsCursor(void) const { return m_cursor; }
   void SetCursor(bool p_cursor);
@@ -116,8 +131,6 @@ public:
   const gNumber &GetActionProb(void) const { return m_actionProb; }
   void SetActionProb(const gNumber &p_prob) { m_actionProb = p_prob; }
 
-  int GetX(void) const;
-
   bool NodeHitTest(int p_x, int p_y) const;
 
   void Draw(wxDC &) const;
@@ -131,7 +144,8 @@ private:
   FullEfg &m_efg;
   TreeWindow *m_parent;
   gList<NodeEntry *> m_nodeList;
-  int m_maxX, m_maxY, m_maxlev;
+  int m_maxX, m_maxY, m_maxLevel;
+  int m_infosetSpacing;
 
   const int c_leftMargin, c_topMargin;
 
@@ -139,7 +153,10 @@ private:
 
   NodeEntry *NextInfoset(NodeEntry *);
   void CheckInfosetEntry(NodeEntry *);
-  int FillTable(Node *, const EFSupport &, int, int &, int &, int &, int &);
+
+  void BuildNodeList(Node *, const EFSupport &, int);
+
+  int LayoutSubtree(Node *, const EFSupport &, int &, int &, int &);
   void FillInfosetTable(Node *, const EFSupport &);
   void UpdateTableInfosets(void);
   void UpdateTableParents(void);
@@ -159,6 +176,7 @@ public:
   Node *PriorSameLevel(Node *) const;
   Node *NextSameLevel(Node *) const;
 
+  void BuildNodeList(const EFSupport &);
   void Layout(const EFSupport &);
   void GenerateLabels(void);
 
@@ -172,13 +190,7 @@ public:
   int MaxY(void) const { return m_maxY; }
 
   Node *NodeHitTest(int, int) const;
-  Node *NodeAboveHitTest(int, int) const;
-  Node *NodeBelowHitTest(int, int) const;
-  Node *NodeRightHitTest(int, int) const;
   Node *BranchHitTest(int, int) const;
-  Node *BranchAboveHitTest(int, int) const;
-  Node *BranchBelowHitTest(int, int) const;
-  Node *SubgameHitTest(int, int) const;
   Node *InfosetHitTest(int, int) const;
 
   void Render(wxDC &) const;

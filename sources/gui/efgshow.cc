@@ -255,6 +255,7 @@ EfgShow::EfgShow(FullEfg &p_efg, wxWindow *p_parent)
 
   m_treeWindow = new TreeWindow(this, this);
   m_treeWindow->SetSize(200, 40, 200, 200);
+  m_treeWindow->RefreshTree();
   m_treeWindow->RefreshLayout();
 
   m_infoNotebook = new wxNotebook(m_nodeSashWindow, idINFONOTEBOOK);
@@ -551,12 +552,13 @@ void EfgShow::OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged)
     m_currentSupport->SetName("Full Support");
     OnSupportsEdited();
   }
-
-  UpdateMenus();
-  if (p_nodesChanged || p_infosetsChanged) {
+  else if (p_nodesChanged) {
+    m_treeWindow->RefreshTree();
     m_treeWindow->RefreshLayout();
     m_treeWindow->Refresh();
   }
+  
+  UpdateMenus();
 }
 
 Node *EfgShow::Cursor(void) const

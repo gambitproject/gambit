@@ -22,17 +22,21 @@ const int NODE_TOKEN_CIRCLE = 2;
 const int NODE_TOKEN_DIAMOND = 3;
 
 const int BRANCH_STYLE_LINE = 0;
-const int BRNACH_STYLE_FORKTINE = 1;
+const int BRANCH_STYLE_FORKTINE = 1;
 
 const int BRANCH_LABEL_HORIZONTAL = 0;
 const int BRANCH_LABEL_ROTATED = 1;
 
+const int INFOSET_JOIN_LINES = 0;
+const int INFOSET_JOIN_CIRCLES = 1;
+
+const int INFOSET_CONNECT_NONE = 0;
+const int INFOSET_CONNECT_SAMELEVEL = 1;
+const int INFOSET_CONNECT_ALL = 2;
+
 const int SUBGAME_HIDDEN = 0;
 const int SUBGAME_ARC = 1;
 
-const int SHOWISET_NONE = 0;
-const int SHOWISET_SAME = 1;
-const int SHOWISET_ALL = 2;
 
 
 class TreeDrawSettings {

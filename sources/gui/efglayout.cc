@@ -21,7 +21,6 @@
 #include "efgshow.h"
 #include "legend.h"
 
-int INFOSET_SPACING = 40;
 int SUBGAME_LARGE_ICON_SIZE = 20;
 int SUBGAME_SMALL_ICON_SIZE = 10;
 int DELTA = 8;
@@ -72,13 +71,25 @@ inline void DrawCircle(wxDC &dc, int x, int y, int r, const wxColour &color)
 //-----------------------------------------------------------------------
 
 NodeEntry::NodeEntry(Node *p_node)
-  : m_node(p_node), m_selected(false), m_cursor(false),
+  : m_node(p_node), m_parent(0),
+    m_x(-1), m_y(-1), m_nextMember(0), m_inSupport(true),
+    m_selected(false), m_cursor(false),
     m_subgameRoot(false), m_subgameMarked(false), m_size(20),
     m_token(NODE_TOKEN_CIRCLE),
     m_branchStyle(BRANCH_STYLE_LINE), m_branchLabel(BRANCH_LABEL_HORIZONTAL),
     m_branchLength(0),
-    m_sublevel(0), m_actionProb(0), nums(0), in_sup(true)
+    m_sublevel(0), m_actionProb(0)
 { }
+
+int NodeEntry::GetChildNumber(void) const
+{
+  if (m_node->GetParent()) {
+    return m_node->GetAction()->GetNumber();
+  }
+  else {
+    return 0;
+  }
+}
 
 void NodeEntry::SetCursor(bool p_cursor)
 {
@@ -94,46 +105,48 @@ void NodeEntry::SetCursor(bool p_cursor)
 //
 void NodeEntry::Draw(wxDC &p_dc) const
 {
-  if (m_node->GetParent() && in_sup) {
+  if (m_node->GetParent() && m_inSupport) {
     DrawIncomingBranch(p_dc);
   }
 
-  p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, (IsSelected()) ? 4 : 2,
+  p_dc.SetPen(*wxThePenList->FindOrCreatePen(m_color, (IsSelected()) ? 4 : 2,
 					     wxSOLID));
   if (m_token == NODE_TOKEN_LINE) {
-    p_dc.DrawLine(x + m_sublevel * INFOSET_SPACING, y,
-		  x + m_sublevel * INFOSET_SPACING + m_size, y);
+    p_dc.DrawLine(m_x, m_y, m_x + m_size, m_y);
+    if (m_branchStyle == BRANCH_STYLE_FORKTINE) {
+      // "classic" Gambit style: draw a small 'token' to separate
+      // the fork from the node
+      p_dc.DrawEllipse(m_x - 1, m_y - 1, 3, 3);
+    }
   }
   else if (m_token == NODE_TOKEN_BOX) {
-    p_dc.SetBrush(*wxTRANSPARENT_BRUSH);
-    p_dc.DrawRectangle(x + m_sublevel * INFOSET_SPACING, y - m_size / 2,
-		       m_size, m_size);
+    p_dc.SetBrush(*wxWHITE_BRUSH);
+    p_dc.DrawRectangle(m_x, m_y - m_size / 2, m_size, m_size);
   }
   else if (m_token == NODE_TOKEN_DIAMOND) {
-    wxPoint points[4] = { wxPoint(x + m_size / 2, y - m_size / 2),
-			  wxPoint(x, y),
-			  wxPoint(x + m_size / 2, y + m_size / 2),
-			  wxPoint(x + m_size, y) };
-    p_dc.SetBrush(*wxTRANSPARENT_BRUSH);
-    p_dc.DrawPolygon(4, points, m_sublevel * INFOSET_SPACING);
+    wxPoint points[4] = { wxPoint(m_x + m_size / 2, m_y - m_size / 2),
+			  wxPoint(m_x, m_y),
+			  wxPoint(m_x + m_size / 2, m_y + m_size / 2),
+			  wxPoint(m_x + m_size, m_y) };
+    p_dc.SetBrush(*wxWHITE_BRUSH);
+    p_dc.DrawPolygon(4, points);
   }
   else {
     // Default: draw circles
-    p_dc.SetBrush(*wxTRANSPARENT_BRUSH);
-    p_dc.DrawEllipse(x + m_sublevel * INFOSET_SPACING, y - m_size / 2,
-		     m_size, m_size); 
+    p_dc.SetBrush(*wxWHITE_BRUSH);
+    p_dc.DrawEllipse(m_x, m_y - m_size / 2, m_size, m_size); 
   }
 
   int textWidth, textHeight;
   p_dc.GetTextExtent(m_nodeAboveLabel, &textWidth, &textHeight);
   p_dc.DrawText(m_nodeAboveLabel,
-		GetX() + (GetSize() - textWidth) / 2, y - textHeight - 9);
+		m_x + (m_size - textWidth) / 2, m_y - textHeight - 9);
   p_dc.GetTextExtent(m_nodeBelowLabel, &textWidth, &textHeight);
   p_dc.DrawText(m_nodeBelowLabel,
-		GetX() + (GetSize() - textWidth) / 2, y + 9);
+		m_x + (m_size - textWidth) / 2, m_y + 9);
   p_dc.GetTextExtent(m_nodeRightLabel, &textWidth, &textHeight);
   p_dc.DrawText(m_nodeRightLabel,
-		GetX() + GetSize() + 10, y - textHeight/2);
+		m_x + GetSize() + 10, m_y - textHeight/2);
 
   if (m_subgameRoot) {
     if (m_subgameMarked) {
@@ -142,22 +155,21 @@ void NodeEntry::Draw(wxDC &p_dc) const
     else {
       p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxLIGHT_GREY, 2, wxSOLID));
     }
-    p_dc.DrawLine(GetX() - GetSize() / 2, y,
-		  GetX() + 2 * GetSize(), y + 2 * GetSize());
-    p_dc.DrawLine(GetX() - GetSize() / 2, y,
-		  GetX() + 2 * GetSize(), y - 2 * GetSize());
+    p_dc.DrawLine(m_x - m_size / 2, m_y,
+		  m_x + 2 * m_size, m_y + 2 * m_size);
+    p_dc.DrawLine(m_x - m_size / 2, m_y,
+		  m_x + 2 * m_size, m_y - 2 * m_size);
   }
-
 }
 
 void NodeEntry::DrawIncomingBranch(wxDC &p_dc) const
 {
-  int xStart = parent->GetX() + parent->GetSize();
-  int xEnd = GetX();
-  int yStart = parent->y;
-  int yEnd = y;
+  int xStart = m_parent->m_x + m_parent->m_size;
+  int xEnd = m_x;
+  int yStart = m_parent->m_y;
+  int yEnd = m_y;
 
-  p_dc.SetPen(*wxThePenList->FindOrCreatePen(parent->color, 2, wxSOLID)); 
+  p_dc.SetPen(*wxThePenList->FindOrCreatePen(m_parent->m_color, 2, wxSOLID)); 
   if (m_branchStyle == BRANCH_STYLE_LINE) {
     p_dc.DrawLine(xStart, yStart, xEnd, yEnd);
 
@@ -256,23 +268,18 @@ void NodeEntry::DrawIncomingBranch(wxDC &p_dc) const
   }
 }
 
-int NodeEntry::GetX(void) const
-{
-  return (x + m_sublevel * INFOSET_SPACING);
-}
-
 bool NodeEntry::NodeHitTest(int p_x, int p_y) const
 {
-  if (p_x < GetX() || p_x >= GetX() + m_size) {
+  if (p_x < m_x || p_x >= m_x + m_size) {
     return false;
   }
 
   if (m_token == NODE_TOKEN_LINE) {
     const int DELTA = 8;  // a fudge factor for "almost" hitting the node
-    return (p_y >= y - DELTA && p_y <= y + DELTA);
+    return (p_y >= m_y - DELTA && p_y <= m_y + DELTA);
   }
   else {
-    return (p_y >= y - m_size / 2 && p_y <= y + m_size / 2);
+    return (p_y >= m_y - m_size / 2 && p_y <= m_y + m_size / 2);
   }
 }
 
@@ -281,7 +288,7 @@ bool NodeEntry::NodeHitTest(int p_x, int p_y) const
 //-----------------------------------------------------------------------
 
 efgTreeLayout::efgTreeLayout(FullEfg &p_efg, TreeWindow *p_parent)
-  : m_efg(p_efg), m_parent(p_parent),
+  : m_efg(p_efg), m_parent(p_parent), m_infosetSpacing(40),
     c_leftMargin(20), c_topMargin(40)
 { }
 
@@ -295,73 +302,6 @@ Node *efgTreeLayout::NodeHitTest(int p_x, int p_y) const
   return 0;
 }
 
-Node *efgTreeLayout::SubgameHitTest(int p_x, int p_y) const
-{
-  for (int i = 1; i <= m_nodeList.Length(); i++) {
-    NodeEntry *entry = m_nodeList[i];
-
-    if (entry->GetNode()->GetSubgameRoot() == entry->GetNode())  {
-      if (p_x > entry->x &&
-	  p_x < entry->x + SUBGAME_SMALL_ICON_SIZE &&
-	  p_y > entry->y - SUBGAME_SMALL_ICON_SIZE/2 &&
-	  p_y < entry->y + SUBGAME_SMALL_ICON_SIZE/2) {
-	return entry->GetNode();
-      }
-    }
-  }
-  return 0;
-}
-
-Node *efgTreeLayout::NodeAboveHitTest(int p_x, int p_y) const
-{
-  for (int i = 1; i <= m_nodeList.Length(); i++) {
-    NodeEntry *entry = m_nodeList[i];
-
-    if (p_x > entry->x + entry->nums * INFOSET_SPACING + 3 &&
-	p_x < entry->x + MAX_TW &&
-	p_y > entry->y - MAX_TH && 
-	p_y < entry->y + DELTA) {
-      return entry->GetNode();
-    }
-  }
-  return 0;
-}
-
-Node *efgTreeLayout::NodeBelowHitTest(int p_x, int p_y) const
-{
-  for (int i = 1; i <= m_nodeList.Length(); i++) {
-    NodeEntry *entry = m_nodeList[i];
-
-    if (p_x > entry->x + entry->nums * INFOSET_SPACING + 3 &&
-	p_x < entry->x + MAX_TW &&
-	p_y > entry->y + DELTA && 
-	p_y < entry->y + MAX_TH + DELTA)  {
-      return entry->GetNode();
-    }
-  }
-  return 0;
-}
-
-Node *efgTreeLayout::NodeRightHitTest(int p_x, int p_y) const
-{
-  // This is a fudge factor for hitting the outcome; this should be
-  // improved in an improved hit-test implementation
-  const int OUTCOME_LENGTH = 60;
-
-  for (int i = 1; i <= m_nodeList.Length(); i++) {
-    NodeEntry *entry = m_nodeList[i];
-
-    if (p_x > entry->x + m_parent->DrawSettings().NodeSize() + 10 &&
-	p_x < (entry->x + m_parent->DrawSettings().NodeSize() + 10 +
-	       OUTCOME_LENGTH * 3) &&
-	p_y > entry->y - DELTA &&
-	p_y < entry->y + DELTA) {
-      return entry->GetNode();
-    }
-  }
-  return 0;
-}
-
 Node *efgTreeLayout::BranchHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
@@ -369,17 +309,16 @@ Node *efgTreeLayout::BranchHitTest(int p_x, int p_y) const
     NodeEntry *parent_entry = GetNodeEntry(entry->GetNode()->GetParent());
 
     if (parent_entry) {
-      if (p_x > (parent_entry->x + m_parent->DrawSettings().NodeSize() + 
-		 parent_entry->GetSublevel() * INFOSET_SPACING + 10) &&
-	  p_x < (parent_entry->x + m_parent->DrawSettings().NodeSize() +
+      if (p_x > (parent_entry->X() + m_parent->DrawSettings().NodeSize() + 
+		 parent_entry->GetSublevel() * m_infosetSpacing + 10) &&
+	  p_x < (parent_entry->X() + m_parent->DrawSettings().NodeSize() +
 		 m_parent->DrawSettings().BranchLength() +
-		 parent_entry->GetSublevel() * INFOSET_SPACING)) {
+		 parent_entry->GetSublevel() * m_infosetSpacing)) {
 	// Good old slope/intercept method for finding a point on a line
-	int y0 = (parent_entry->y + 
-		  (int) (p_x - parent_entry->x - 
-			 m_parent->DrawSettings().NodeSize() -
-			 parent_entry->nums * INFOSET_SPACING) *
-		  (entry->y - parent_entry->y) / 
+	int y0 = (parent_entry->Y() + 
+		  (int) (p_x - parent_entry->X() - 
+			 m_parent->DrawSettings().NodeSize()) *
+		  (entry->Y() - parent_entry->Y()) / 
 		  m_parent->DrawSettings().BranchLength());
 
 	if (p_y > y0-2 && p_y < y0+2) {
@@ -392,56 +331,18 @@ Node *efgTreeLayout::BranchHitTest(int p_x, int p_y) const
 }
 
 
-
-Node *efgTreeLayout::BranchAboveHitTest(int p_x, int p_y) const
-{
-#ifdef UNUSED
-  // Needs to be updated for new tree style
-  for (int i = 1; i <= m_nodeList.Length(); i++) {
-    NodeEntry *entry = m_nodeList[i];
-
-    if (entry->parent &&
-	p_x > entry->x - m_parent->DrawSettings().BranchLength() &&
-	p_x < entry->x - m_parent->DrawSettings().BranchLength() + MAX_TW &&
-	p_y > entry->y - MAX_TH &&
-	p_y < entry->y + DELTA) {
-      return entry->GetNode();
-    }
-  }
-#endif
-  return 0;
-}
-
-Node *efgTreeLayout::BranchBelowHitTest(int p_x, int p_y) const
-{
-#ifdef UNUSED
-  for (int i = 1; i <= m_nodeList.Length(); i++) {
-    NodeEntry *entry = m_nodeList[i];
-
-    if (entry->parent &&
-	p_x > entry->x - m_parent->DrawSettings().BranchLength() &&
-	p_x < entry->x - m_parent->DrawSettings().BranchLength() + MAX_TW &&
-	p_y > entry->y + DELTA && 
-	p_y < entry->y + MAX_TH) {
-      return entry->GetNode();
-    }
-  }
-#endif
-  return 0;
-}
-
 Node *efgTreeLayout::InfosetHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     NodeEntry *entry = m_nodeList[i];
-    if (entry->infoset.y != -1 && entry->GetNode()->GetInfoset()) {
-      if (p_x > entry->x + entry->GetSublevel() * INFOSET_SPACING - 2 &&
-	  p_x < entry->x + entry->GetSublevel() * INFOSET_SPACING + 2) {
-	if (p_y > entry->y && p_y < entry->infoset.y) {
+    if (entry->GetNextMember() && entry->GetNode()->GetInfoset()) {
+      if (p_x > entry->X() + entry->GetSublevel() * m_infosetSpacing - 2 &&
+	  p_x < entry->X() + entry->GetSublevel() * m_infosetSpacing + 2) {
+	if (p_y > entry->Y() && p_y < entry->GetNextMember()->Y()) {
 	  // next iset is below this one
 	  return entry->GetNode();
 	}
-	else if (p_y > entry->infoset.y && p_y < entry->y) {
+	else if (p_y > entry->GetNextMember()->Y() && p_y < entry->Y()) {
 	  // next iset is above this one
 	  return entry->GetNode();
 	}
@@ -540,19 +441,19 @@ wxString efgTreeLayout::CreateNodeRightLabel(const NodeEntry *p_entry) const
 
 wxString efgTreeLayout::CreateBranchAboveLabel(const NodeEntry *p_entry) const
 {
-  const Node *parent = p_entry->parent->GetNode();
+  const Node *parent = p_entry->GetParent()->GetNode();
 
   switch (m_parent->DrawSettings().BranchAboveLabel()) {
   case BRANCH_ABOVE_NOTHING:
     return "";
   case BRANCH_ABOVE_LABEL:
-    return (const char *) parent->GetInfoset()->GetActionName(p_entry->child_number);
+    return (const char *) parent->GetInfoset()->GetActionName(p_entry->GetChildNumber());
   case BRANCH_ABOVE_PROBS:
     return (const char *) m_parent->Parent()->GetActionProb(parent,
-							    p_entry->child_number);
+							    p_entry->GetChildNumber());
   case BRANCH_ABOVE_VALUE:
     return (const char *) m_parent->Parent()->GetActionValue(parent,
-							     p_entry->child_number);
+							     p_entry->GetChildNumber());
   default:
     return "";
   }
@@ -560,19 +461,19 @@ wxString efgTreeLayout::CreateBranchAboveLabel(const NodeEntry *p_entry) const
 
 wxString efgTreeLayout::CreateBranchBelowLabel(const NodeEntry *p_entry) const
 {
-  const Node *parent = p_entry->parent->GetNode();
+  const Node *parent = p_entry->GetParent()->GetNode();
 
   switch (m_parent->DrawSettings().BranchBelowLabel()) {
   case BRANCH_BELOW_NOTHING:
     return "";
   case BRANCH_BELOW_LABEL:
-    return (const char *) parent->GetInfoset()->GetActionName(p_entry->child_number);
+    return (const char *) parent->GetInfoset()->GetActionName(p_entry->GetChildNumber());
   case BRANCH_BELOW_PROBS:
     return (const char *) m_parent->Parent()->GetActionProb(parent,
-							    p_entry->child_number);
+							    p_entry->GetChildNumber());
   case BRANCH_BELOW_VALUE:
     return (const char *) m_parent->Parent()->GetActionValue(parent,
-							     p_entry->child_number);
+							     p_entry->GetChildNumber());
   default:
     return "";
   }
@@ -639,98 +540,73 @@ Node *efgTreeLayout::NextSameLevel(Node *p_node) const
   return 0;
 }
 
-int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
-			   int &maxlev, int &maxy, int &miny, int &ycoord)
+int efgTreeLayout::LayoutSubtree(Node *p_node, const EFSupport &p_support,
+				 int &p_maxy, int &p_miny, int &p_ycoord)
 {
-  int y1 = -1, yn=0;
-  const TreeDrawSettings &draw_settings = m_parent->DrawSettings();
+  int y1 = -1, yn = 0;
+  const TreeDrawSettings &settings = m_parent->DrawSettings();
     
-  NodeEntry *entry = new NodeEntry(n);
-  if (n == m_efg.RootNode()) {
-    entry->child_number = 0;
-  }
-  else {
-    Node *parent = n->GetParent();
-    for (int i = 1; i <= parent->Game()->NumChildren(parent); i++) {
-      if (parent->GetChild(i) == n) {
-	entry->child_number = i;
-	break;
+  NodeEntry *entry = m_nodeList[p_node->GetNumber()];
+  entry->SetNextMember(0);
+  if (p_node->NumChildren() > 0) {
+    for (int i = 1; i <= p_node->NumChildren(); i++) {
+      yn = LayoutSubtree(p_node->GetChild(i), p_support,
+			 p_maxy, p_miny, p_ycoord);
+      if (y1 == -1) {
+	y1 = yn;
+      }
+
+      if (!p_node->GetPlayer()->IsChance() &&
+	  !p_support.Find(p_node->GetInfoset()->Actions()[i])) {
+	m_nodeList[p_node->GetChild(i)->GetNumber()]->SetInSupport(false);
       }
     }
-  }
-  m_nodeList += entry;
-  if (n->Game()->NumChildren(n) > 0) {
-    for (int i = 1; i <= n->Game()->NumChildren(n); i++) {
-      bool in_sup = true;
-      if (n->GetPlayer()->GetNumber())        // pn == 0 for chance nodes
-	in_sup = cur_sup.Find(n->GetInfoset()->Actions()[i]);
-      if (in_sup) {
-	yn = FillTable(n->GetChild(i), cur_sup, level+1,
-		       maxlev, maxy, miny, ycoord);
-	if (y1 == -1)  y1 = yn;
-      }
-      else {  // not in the support.
-	if (!draw_settings.RootReachable()) {
-	  // show only nodes reachable from root
-	  // still consider this node, but mark it as invisible
-	  yn = FillTable(n->GetChild(i), cur_sup, level+1,
-			 maxlev, maxy, miny, ycoord);
-	  if (y1 == -1)  y1 = yn;
-	  GetNodeEntry(n->GetChild(i))->in_sup = false;
-	}
-      }
-    }
-    entry->y = (y1 + yn) / 2;
+    entry->SetY((y1 + yn) / 2);
   }
   else {
-    entry->y = ycoord;
-    ycoord += draw_settings.TerminalSpacing();
+    entry->SetY(p_ycoord);
+    p_ycoord += settings.TerminalSpacing();
   }
     
-  entry->SetLevel(level);
-  entry->has_children = n->Game()->NumChildren(n);
-    
-  entry->infoset.y = -1;
-  entry->infoset.x = -1;
-  if (draw_settings.BranchStyle() == BRANCH_STYLE_LINE) {
-    entry->x = c_leftMargin + level * (draw_settings.NodeSize() +
-				       draw_settings.BranchLength());
+  if (settings.BranchStyle() == BRANCH_STYLE_LINE) {
+    entry->SetX(c_leftMargin + entry->GetLevel() * (settings.NodeSize() +
+						    settings.BranchLength()));
   }
   else {
-    entry->x = c_leftMargin + level * (draw_settings.NodeSize() +
-				       draw_settings.BranchLength() +
-				       draw_settings.TineLength());
+    entry->SetX(c_leftMargin + entry->GetLevel() * (settings.NodeSize() +
+						    settings.BranchLength() +
+						    settings.TineLength()));
   }
-  if (n->GetPlayer() && n->GetPlayer()->IsChance()) {
-    entry->color = wxGetApp().GetPreferences().GetChanceColor();
-    entry->SetToken(draw_settings.ChanceToken());
+  const UserPreferences &prefs = wxGetApp().GetPreferences();
+  if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
+    entry->SetColor(prefs.GetChanceColor());
+    entry->SetToken(settings.ChanceToken());
   }
-  else if (n->GetPlayer()) {
-    entry->color = wxGetApp().GetPreferences().GetPlayerColor(n->GetPlayer()->GetNumber());
-    entry->SetToken(draw_settings.PlayerToken());
+  else if (p_node->GetPlayer()) {
+    entry->SetColor(prefs.GetPlayerColor(p_node->GetPlayer()->GetNumber()));
+    entry->SetToken(settings.PlayerToken());
   }
   else {
-    entry->color = wxGetApp().GetPreferences().GetTerminalColor();
-    entry->SetToken(draw_settings.TerminalToken());
+    entry->SetColor(prefs.GetTerminalColor());
+    entry->SetToken(settings.TerminalToken());
   }  
   
-  entry->SetSize(draw_settings.NodeSize());
-  entry->SetBranchStyle(draw_settings.BranchStyle());
-  if (draw_settings.BranchStyle() == BRANCH_STYLE_LINE) {
-    entry->SetBranchLabelStyle(draw_settings.BranchLabels());
+  entry->SetSize(settings.NodeSize());
+  entry->SetBranchStyle(settings.BranchStyle());
+  if (settings.BranchStyle() == BRANCH_STYLE_LINE) {
+    entry->SetBranchLabelStyle(settings.BranchLabels());
   }
-  entry->SetBranchLength(draw_settings.BranchLength());
+  entry->SetBranchLength(settings.BranchLength());
 
-  if (draw_settings.SubgameStyle() == SUBGAME_ARC &&
-      n->Game()->IsLegalSubgame(n)) {
+  if (settings.SubgameStyle() == SUBGAME_ARC &&
+      p_node->Game()->IsLegalSubgame(p_node)) {
     entry->SetSubgameRoot(true);
-    entry->SetSubgameMarked(n->GetSubgameRoot() == n);
+    entry->SetSubgameMarked(p_node->GetSubgameRoot() == p_node);
   }
-  maxlev = gmax(level, maxlev);
-  maxy = gmax(entry->y, maxy);
-  miny = gmin(entry->y, miny);
+  p_maxy = gmax(entry->Y(), p_maxy);
+  p_miny = gmin(entry->Y(), p_miny);
     
-  return entry->y;
+  return entry->Y();
 }
 
 //
@@ -745,7 +621,7 @@ NodeEntry *efgTreeLayout::NextInfoset(NodeEntry *e)
     NodeEntry *e1 = m_nodeList[pos];
     // infosets are the same and the nodes are on the same level
     if (e->GetNode()->GetInfoset() == e1->GetNode()->GetInfoset()) {
-      if (draw_settings.InfosetConnect() == SHOWISET_ALL) {
+      if (draw_settings.InfosetConnect() == INFOSET_CONNECT_ALL) {
 	return e1;
       }
       else if (e->GetLevel() == e1->GetLevel()) {
@@ -766,7 +642,6 @@ void efgTreeLayout::CheckInfosetEntry(NodeEntry *e)
 {
   int pos;
   NodeEntry *infoset_entry, *e1;
-  const TreeDrawSettings &draw_settings = m_parent->DrawSettings();
   // Check if the infoset this entry belongs to (on this level) has already
   // been processed.  If so, make this entry->num the same as the one already
   // processed and return
@@ -778,9 +653,7 @@ void efgTreeLayout::CheckInfosetEntry(NodeEntry *e)
 	e->GetLevel() == e1->GetLevel() && e1->GetSublevel() > 0) {
       e->SetSublevel(e1->GetSublevel());
       if (infoset_entry) {
-	e->infoset.y = infoset_entry->y;
-	if (draw_settings.InfosetConnect() == SHOWISET_ALL)
-	  e->infoset.x = infoset_entry->x;
+	e->SetNextMember(infoset_entry);
       }
       return;
     }
@@ -803,10 +676,7 @@ void efgTreeLayout::CheckInfosetEntry(NodeEntry *e)
   }
   num++;
   e->SetSublevel(num);
-  e->infoset.y = infoset_entry->y;
-  if (draw_settings.InfosetConnect() == SHOWISET_ALL) {
-    e->infoset.x = infoset_entry->x;
-  }
+  e->SetNextMember(infoset_entry);
 }
 
 void efgTreeLayout::FillInfosetTable(Node *n, const EFSupport &cur_sup)
@@ -835,32 +705,30 @@ void efgTreeLayout::UpdateTableInfosets(void)
 {
   // Note that levels are numbered from 0, not 1.
   // create an array to hold max num for each level
-  gArray<int> nums(0, m_maxlev+1); 
+  gArray<int> nums(0, m_maxLevel + 1); 
     
-  for (int i = 0; i <= m_maxlev + 1; nums[i++] = 0);
-  NodeEntry *e;
+  for (int i = 0; i <= m_maxLevel + 1; nums[i++] = 0);
   // find the max e->num for each level
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
-    e = m_nodeList[pos];
-    nums[e->GetLevel()] = gmax(e->GetSublevel()+1, nums[e->GetLevel()]);
+    NodeEntry *entry = m_nodeList[pos];
+    nums[entry->GetLevel()] = gmax(entry->GetSublevel() + 1,
+				   nums[entry->GetLevel()]);
   }
     
-  // record the max e->num for each level for each node
-  for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
-    e = m_nodeList[pos];
-    e->nums = nums[e->GetLevel()];
+  for (int i = 0; i <= m_maxLevel; i++) {
+    nums[i+1] += nums[i];
   }
     
-  for (int i = 0; i <= m_maxlev; i++)  nums[i+1] += nums[i];
-    
-  // now add the needed length to each level, and set maxX
+  // now add the needed length to each level, and set maxX accordingly
   m_maxX = 0;
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
-    e = m_nodeList[pos];
-    if (e->GetLevel() != 0) {
-      e->x += nums[e->GetLevel()-1]*INFOSET_SPACING;
+    NodeEntry *entry = m_nodeList[pos];
+    if (entry->GetLevel() != 0) {
+      entry->SetX(entry->X() + 
+		  (nums[entry->GetLevel()-1] +
+		   entry->GetSublevel()) * m_infosetSpacing);
     }
-    m_maxX = gmax(m_maxX, e->x);
+    m_maxX = gmax(m_maxX, entry->X());
   }
 }
 
@@ -868,23 +736,27 @@ void efgTreeLayout::UpdateTableParents(void)
 {
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
     NodeEntry *e = m_nodeList[pos];
-    e->parent = (e->GetNode() == m_efg.RootNode()) ? e : GetValidParent(e->GetNode());
-    if (!GetValidChild(e->GetNode())) e->has_children = 0;
+    e->SetParent((e->GetNode() == m_efg.RootNode()) ? 
+		 e : GetValidParent(e->GetNode()));
   }
 }
 
 void efgTreeLayout::Layout(const EFSupport &p_support)
 {
-  while (m_nodeList.Length() > 0) {
-    delete m_nodeList.Remove(1);
+  // Kinda kludgey; probably should query draw settings whenever needed.
+  m_infosetSpacing = 
+    (m_parent->DrawSettings().InfosetJoin() == INFOSET_JOIN_LINES) ? 10 : 40;
+
+  if (m_nodeList.Length() != NumNodes(m_efg)) {
+    // A rebuild is in order; force it
+    BuildNodeList(p_support);
   }
 
-  int maxlev = 0, miny = 0, maxy = 0, ycoord = c_topMargin;
-  FillTable(m_efg.RootNode(), p_support, 0, maxlev, maxy, miny, ycoord);
-  m_maxlev = maxlev;
+  int miny = 0, maxy = 0, ycoord = c_topMargin;
+  LayoutSubtree(m_efg.RootNode(), p_support, maxy, miny, ycoord);
 
   const TreeDrawSettings &draw_settings = m_parent->DrawSettings();
-  if (draw_settings.InfosetConnect()) {
+  if (draw_settings.InfosetConnect() != INFOSET_CONNECT_NONE) {
     // FIXME! This causes lines to disappear... sometimes.
     FillInfosetTable(m_efg.RootNode(), p_support);
     UpdateTableInfosets();
@@ -899,6 +771,31 @@ void efgTreeLayout::Layout(const EFSupport &p_support)
   m_maxY = maxy + 25;
 }
 
+void efgTreeLayout::BuildNodeList(Node *p_node, const EFSupport &p_support,
+				  int p_level)
+{
+  NodeEntry *entry = new NodeEntry(p_node);
+  m_nodeList += entry;
+  entry->SetLevel(p_level);
+  if (p_node->NumChildren() > 0) {
+    for (int i = 1; i <= p_node->NumChildren(); i++) {
+      BuildNodeList(p_node->GetChild(i), p_support, p_level + 1);
+    }
+  }
+  m_maxLevel = gmax(p_level, m_maxLevel);
+}
+
+void efgTreeLayout::BuildNodeList(const EFSupport &p_support)
+{
+  while (m_nodeList.Length() > 0) {
+    delete m_nodeList.Remove(1);
+  }
+
+  m_maxLevel = 0;
+  BuildNodeList(m_efg.RootNode(), p_support, 0);
+}
+
+
 void efgTreeLayout::GenerateLabels(void)
 {
   const TreeDrawSettings &settings = m_parent->DrawSettings();
@@ -907,13 +804,13 @@ void efgTreeLayout::GenerateLabels(void)
     entry->SetNodeAboveLabel(CreateNodeAboveLabel(entry));
     entry->SetNodeBelowLabel(CreateNodeBelowLabel(entry));
     entry->SetNodeRightLabel(CreateNodeRightLabel(entry));
-    if (entry->child_number > 0) {
+    if (entry->GetChildNumber() > 0) {
       entry->SetBranchAboveLabel(CreateBranchAboveLabel(entry));
       entry->SetBranchAboveFont(settings.BranchAboveFont());
       entry->SetBranchBelowLabel(CreateBranchBelowLabel(entry));
       entry->SetBranchBelowFont(settings.BranchBelowFont());
       entry->SetActionProb(m_parent->Parent()->ActionProb(entry->GetNode()->GetParent(),
-							  entry->child_number));
+							  entry->GetChildNumber()));
     }
   }
 }
@@ -931,59 +828,71 @@ void efgTreeLayout::GenerateLabels(void)
 // performance will require a more sophisticated solution to the
 // problem.  (TLT 5/2001)
 //
-// The offset is used to simulate scrollbars in the
-// zoom window.  It might be used for the main window if scrollbars prove to
-// be a limitation.
-//
 void efgTreeLayout::RenderSubtree(wxDC &p_dc) const
 {
+  const TreeDrawSettings &settings = m_parent->DrawSettings();
+
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
     NodeEntry *entry = m_nodeList[pos];  
-    NodeEntry *parentEntry = entry->parent;
+    NodeEntry *parentEntry = entry->GetParent();
         
-    if (entry->child_number == 1) {
+    if (entry->GetChildNumber() == 1) {
       parentEntry->Draw(p_dc);
 
-      if (m_parent->DrawSettings().InfosetConnect()) {
-	if (parentEntry->infoset.y != -1) {
+      if (m_parent->DrawSettings().InfosetConnect() != INFOSET_CONNECT_NONE &&
+	  parentEntry->GetNextMember()) {
+	int nextX = parentEntry->GetNextMember()->X();
+	int nextY = parentEntry->GetNextMember()->Y();
+
+	if ((m_parent->DrawSettings().InfosetConnect() !=
+	     INFOSET_CONNECT_SAMELEVEL) ||
+	    parentEntry->X() == nextX) {
 #ifdef __WXGTK__
 	  // A problem with using styled pens and user scaling on wxGTK
-	  p_dc.SetPen(wxPen(parentEntry->color, 1, wxSOLID));
+	  p_dc.SetPen(wxPen(parentEntry->GetColor(), 1, wxSOLID));
 #else
-	  p_dc.SetPen(wxPen(parentEntry->color, 1, wxDOT));
+	  p_dc.SetPen(wxPen(parentEntry->GetColor(), 1, wxDOT));
 #endif   // __WXGTK__
-	  p_dc.DrawLine(parentEntry->GetX(), parentEntry->y, 
-			parentEntry->GetX(), parentEntry->infoset.y); 
-	  p_dc.DrawLine(parentEntry->GetX() + parentEntry->GetSize(), 
-			parentEntry->y,
-			parentEntry->GetX() + parentEntry->GetSize(), 
-			parentEntry->infoset.y);
-	}
+	  p_dc.DrawLine(parentEntry->X(), parentEntry->Y(), 
+			parentEntry->X(), nextY);
+	  if (settings.InfosetJoin() == INFOSET_JOIN_CIRCLES) {
+	    p_dc.DrawLine(parentEntry->X() + parentEntry->GetSize(), 
+			  parentEntry->Y(),
+			  parentEntry->X() + parentEntry->GetSize(), 
+			  nextY);
+	  }
 
-#ifdef UNUSED	  
-	if (entry.infoset.x != -1) {
-	  // Draw a little arrow in the direction of the iset.
-	  if (entry.infoset.x > entry.x) { // iset is to the right
-	    ::DrawLine(dc, 
-		       entry.x + entry.GetSublevel() * INFOSET_SPACING, 
-		       entry.infoset.y, 
-		       entry.x+(entry.GetSublevel()+1)*INFOSET_SPACING, 
-		       entry.infoset.y, entry.color);
-	  }
-	  else {  // iset is to the left
-	    ::DrawLine(dc, 
-		       entry.x + entry.GetSublevel() * INFOSET_SPACING, 
-		       entry.infoset.y, 
-		       entry.x + (entry.GetSublevel() - 1) * INFOSET_SPACING, 
-		       entry.infoset.y, 
-		       entry.color);
+	  if (parentEntry->GetNextMember()->X() != parentEntry->X()) {
+	    // Draw a little arrow in the direction of the iset.
+	    if (settings.InfosetJoin() == INFOSET_JOIN_LINES) {
+	      p_dc.DrawLine(parentEntry->X(), nextY, 
+			    parentEntry->X() + m_infosetSpacing * 
+			    ((parentEntry->GetNextMember()->X() > 
+			      parentEntry->X()) ? 1 : -1),
+			    nextY);
+
+	    }
+	    else {
+	      if (parentEntry->GetNextMember()->X() < parentEntry->X()) {
+		// information set is continued to the left
+		p_dc.DrawLine(parentEntry->X() + parentEntry->GetSize(),
+			      nextY,
+			      parentEntry->X() - m_infosetSpacing,
+			      nextY);
+	      }
+	      else {
+		// information set is continued to the right
+		p_dc.DrawLine(parentEntry->X(), nextY,
+			      parentEntry->X() + parentEntry->GetSize() +
+			      m_infosetSpacing, nextY);
+	      }
+	    }
 	  }
 	}
-#endif  // UNUSED
       }
     }
 
-    if (!entry->has_children) { 
+    if (entry->GetNode()->NumChildren() == 0) {
       entry->Draw(p_dc);
     }
 
