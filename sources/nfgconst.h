@@ -67,6 +67,14 @@
 #define NFG_HELP_ABOUT                  601
 #define NFG_HELP_CONTENTS               602
 
+#define NFG_PROFILES_FILTER             700
+#define NFG_PROFILES_NEW                701
+#define NFG_PROFILES_CLONE              702
+#define NFG_PROFILES_RENAME             703
+#define NFG_PROFILES_EDIT               704
+#define NFG_PROFILES_DELETE             705
+
+
 // Help system
 #define NFG_GUI_HELP                    "Normal Form GUI"
 #define NFG_OUTCOME_HELP                "Outcomes GUI"

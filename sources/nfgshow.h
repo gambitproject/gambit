@@ -8,6 +8,7 @@
 #define NFGSHOW_H
 
 #include "wx/wx.h"
+#include "wx/listctrl.h"
 #include "wx/sashwin.h"
 #include "wxmisc.h"
 
@@ -21,11 +22,12 @@
 #include "mixedsol.h"
 #include "nfgsolng.h"
 #include "solnlist.h"
-#include "msolnsf.h"
 
 #include "efgnfgi.h"
 
-class NfgSolnShow;
+const int idNFG_SOLUTION_LIST = 1900;
+
+class NfgProfileList;
 class NfgTable;
 class dialogNfgSupportInspect;
 
@@ -39,12 +41,11 @@ class NfgShow : public wxFrame,
 private:
   Nfg &m_nfg;
   gList<NFSupport *> supports;
-  MixedSolutionList solns;
 
   NfgPanel *m_panel;
   NfgToolbar *m_toolbar;
   NfgTable *m_table;
-  NfgSolnShow *m_solutionTable;
+  NfgProfileList *m_solutionTable;
 
   wxSashWindow *m_panelSashWindow, *m_solutionSashWindow;
 
@@ -60,7 +61,6 @@ private:
 
   int m_rowPlayer, m_colPlayer;
   NormalDrawSettings  draw_settings;
-  MSolnSortFilterOptions sf_options;
   gList<Accel>    accelerators;
   gText filename;
   
@@ -116,10 +116,17 @@ private:
   void OnPrefsSave(wxCommandEvent &);
   void OnPrefsLoad(wxCommandEvent &);
 
+  void OnProfilesNew(wxCommandEvent &);
+  void OnProfilesClone(wxCommandEvent &);
+  void OnProfilesRename(wxCommandEvent &);
+  void OnProfilesEdit(wxCommandEvent &);
+  void OnProfilesDelete(wxCommandEvent &);
+
   // Other event handlers
   void OnCloseWindow(wxCloseEvent &);
   void OnSize(wxSizeEvent &);
   void OnSashDrag(wxSashEvent &);
+  void OnSolutionSelected(wxListEvent &);
 
 public:
   NfgShow(Nfg &N, EfgNfgInterface *efg = 0, wxFrame *pframe = 0);
@@ -144,9 +151,7 @@ public:
   void ChangeSolution(int sol);
   MixedProfile<gNumber> CreateStartProfile(int how);
 
-  int NumSolutions(void) const { return solns.Length(); }
   int CurrentSolution(void) const { return cur_soln; }
-  const MixedSolutionList &Solutions(void) const { return solns; }
 
   // Project solutions to EF.
   void SolutionToExtensive(const MixedSolution &mp, bool set = false);

@@ -13,6 +13,7 @@
 #include "nfgpanel.h"
 #include "nfgtable.h"
 #include "nfgsoln.h"
+#include "nfgprofile.h"
 #include "nfgconst.h"
 
 #include "efg.h"
@@ -154,9 +155,16 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_PREFS_ACCELS, NfgShow::OnPrefsAccels)
   EVT_MENU(NFG_PREFS_SAVE, NfgShow::OnPrefsSave)
   EVT_MENU(NFG_PREFS_LOAD, NfgShow::OnPrefsLoad)
+  EVT_MENU(NFG_PROFILES_NEW, NfgShow::OnProfilesNew)
+  EVT_MENU(NFG_PROFILES_CLONE, NfgShow::OnProfilesClone)
+  EVT_MENU(NFG_PROFILES_RENAME, NfgShow::OnProfilesRename)
+  EVT_MENU(NFG_PROFILES_EDIT, NfgShow::OnProfilesEdit)
+  EVT_LIST_ITEM_ACTIVATED(idNFG_SOLUTION_LIST, NfgShow::OnProfilesEdit)
+  EVT_MENU(NFG_PROFILES_DELETE, NfgShow::OnProfilesDelete)
   EVT_SIZE(NfgShow::OnSize)
   EVT_CLOSE(NfgShow::OnCloseWindow)
-  EVT_SASH_DRAGGED_RANGE(idPANELWINDOW, idPANELWINDOW, NfgShow::OnSashDrag)
+  EVT_SASH_DRAGGED_RANGE(idPANELWINDOW, idSOLUTIONWINDOW, NfgShow::OnSashDrag)
+  EVT_LIST_ITEM_SELECTED(idNFG_SOLUTION_LIST, NfgShow::OnSolutionSelected)
 END_EVENT_TABLE()
 
 //======================================================================
@@ -166,7 +174,8 @@ END_EVENT_TABLE()
 NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
   : wxFrame(p_frame, -1, "", wxDefaultPosition, wxSize(500, 500)),
     EfgNfgInterface(gNFG, efg),
-    m_nfg(p_nfg), m_rowPlayer(1), m_colPlayer(2)
+    m_nfg(p_nfg), m_rowPlayer(1), m_colPlayer(2),
+    m_solutionTable(0), m_solutionSashWindow(0)
 {
 #ifdef __WXMSW__
   SetIcon(wxIcon("nfg_icn"));
@@ -193,8 +202,15 @@ NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
   m_panel->SetSize(200, 200);
 
   m_table = new NfgTable(this);
-  m_solutionTable = 0;  // no solution inspect window yet.
-  m_solutionSashWindow = 0;
+  
+  m_solutionSashWindow = new wxSashWindow(this, idSOLUTIONWINDOW,
+					  wxDefaultPosition,
+					  wxSize(600, 100));
+  m_solutionSashWindow->SetSashVisible(wxSASH_TOP, true);
+
+  m_solutionTable = new NfgProfileList(this, m_solutionSashWindow);
+  m_solutionTable->Show(true);
+  m_solutionSashWindow->Show(false);
 
   m_panelSashWindow->Show(true);
 
@@ -354,7 +370,7 @@ void NfgShow::UpdateSoln(void)
   // MixedSolution.Pure() is not yet implemented :( Add support for
   // displaying solutions created for supports other than m_currentSupport
 
-  MixedSolution soln = solns[cur_soln];
+  MixedSolution soln = (*m_solutionTable)[cur_soln];
   gNumber t_max;
   gArray<int> profile(m_nfg.NumPlayers());
 
@@ -424,7 +440,7 @@ void NfgShow::UpdateContingencyProb(const gArray<int> &profile)
 
   // The value in the maximum row&col cell corresponds to prob of being
   // at this contingency = Product(Prob(strat_here), all players except pl1, m_colPlayer)
-  const MixedSolution &soln = solns[cur_soln];
+  const MixedSolution &soln = (*m_solutionTable)[cur_soln];
 
   gNumber cont_prob(1);
 
@@ -506,23 +522,21 @@ void NfgShow::ClearSolutions(void)
 
 void NfgShow::ChangeSolution(int sol)
 {
-  ClearSolutions();
-
-  if (sol) {
-    cur_soln = sol;
+  cur_soln = sol;
     
-    if (cur_soln)
-      UpdateSoln();
+  if (cur_soln) {
+    UpdateSoln();
   }
-  else {
-    cur_soln = 0;
-    m_table->RemoveProbDisp();
-    m_table->RemoveValDisp();
-    m_table->OnChangeValues();
+  if (m_solutionTable) {
+    m_solutionTable->UpdateValues();
   }
 }
 
-
+void NfgShow::OnSolutionSelected(wxListEvent &p_event)
+{
+  ChangeSolution(p_event.m_itemIndex + 1);
+}
+ 
 // Remove solutions-permanently removes any solutions
 void NfgShow::RemoveSolutions(void)
 {
@@ -537,7 +551,7 @@ void NfgShow::RemoveSolutions(void)
   ClearSolutions();
 
   cur_soln = 0;
-  solns.Flush();
+  m_solutionTable->Flush();
 }
 
 
@@ -968,7 +982,7 @@ void NfgShow::OnSolveStandard(wxCommandEvent &)
   if (dialog.ShowModal() != wxID_OK)
     return;
 
-  int old_max_soln = solns.Length();  // used for extensive update
+  int old_max_soln = m_solutionTable->Length();  // used for extensive update
 
   guiNfgSolution *solver = 0;
 
@@ -1041,7 +1055,7 @@ void NfgShow::OnSolveStandard(wxCommandEvent &)
 
   try {
     solver->Eliminate();
-    solns += solver->Solve();
+    *m_solutionTable += solver->Solve();
     wxEndBusyCursor();
   }
   catch (gException &E) {
@@ -1051,7 +1065,7 @@ void NfgShow::OnSolveStandard(wxCommandEvent &)
     
   delete solver;
 
-  if (old_max_soln != solns.Length()) {
+  if (old_max_soln != m_solutionTable->Length()) {
     // Now, transfer the NEW solutions to extensive form if requested
     /*
     if (NSD.GetExtensive()) {
@@ -1063,7 +1077,7 @@ void NfgShow::OnSolveStandard(wxCommandEvent &)
       m_table->MakeProbDisp();
     }
 
-    ChangeSolution(solns.VisibleLength());
+    ChangeSolution(m_solutionTable->VisibleLength());
   }  
 
 }
@@ -1077,7 +1091,7 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
   if (!sup)
     sup = new NFSupport(m_nfg);
 
-  int old_max_soln = solns.Length();  // used for extensive update
+  int old_max_soln = m_solutionTable->Length();  // used for extensive update
 
   guiNfgSolution *solver;
 
@@ -1121,7 +1135,7 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
   try {
     if (go) {
       solver->Eliminate();
-      solns += solver->Solve();
+      *m_solutionTable += solver->Solve();
     }
     wxEndBusyCursor();
   }
@@ -1134,7 +1148,7 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
 
   if (!go)  return;
 
-  if (old_max_soln != solns.Length()) {
+  if (old_max_soln != m_solutionTable->Length()) {
     // Now, transfer the NEW solutions to extensive form if requested
     /*
     if (NSD.GetExtensive()) {
@@ -1146,28 +1160,23 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
       m_table->MakeProbDisp();
     }
 
-    ChangeSolution(solns.VisibleLength());
+    ChangeSolution(m_solutionTable->VisibleLength());
   }
 }
 
 void NfgShow::OnViewSolutions(wxCommandEvent &)
 {
-  if (solns.Length() == 0) {
-    wxMessageBox("Solution list currently empty");
-    return;
-  }
-
-  if (m_solutionTable) {
-    delete m_solutionTable;
-    m_solutionTable = 0;
+  if (m_solutionSashWindow->IsShown()) {
+    m_solutionTable->Show(false);
+    m_solutionSashWindow->Show(false);
+    GetMenuBar()->Check(NFG_VIEW_SOLUTIONS, false);
   }
   else {
-    m_solutionTable = new NfgSolnShow(solns, m_nfg.NumPlayers(), 
-				gmax(m_nfg.NumStrats()), 
-				cur_soln, draw_settings, 
-				sf_options, this);
     m_solutionTable->Show(true);
+    m_solutionSashWindow->Show(true);
+    GetMenuBar()->Check(NFG_VIEW_SOLUTIONS, true);
   }
+
   AdjustSizes();
 }
 
@@ -1226,6 +1235,34 @@ void NfgShow::OnViewGameInfo(wxCommandEvent &)
   message += "been modified\n";
 
   wxMessageBox((char *) message, "Game Information", wxOK, this);
+}
+
+void NfgShow::OnProfilesNew(wxCommandEvent &)
+{
+  MixedSolution profile = MixedProfile<gNumber>(NFSupport(m_nfg));
+
+  m_solutionTable->Append(profile);
+  ChangeSolution(m_solutionTable->Length());
+}
+
+void NfgShow::OnProfilesClone(wxCommandEvent &)
+{
+
+}
+
+void NfgShow::OnProfilesRename(wxCommandEvent &)
+{
+
+}
+
+void NfgShow::OnProfilesEdit(wxCommandEvent &)
+{
+
+}
+
+void NfgShow::OnProfilesDelete(wxCommandEvent &)
+{
+
 }
 
 void NfgShow::OnPrefsDisplayColumns(wxCommandEvent &)
@@ -1316,14 +1353,14 @@ void NfgShow::UpdateMenus(void)
 	       m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg));
   menu->Enable(NFG_SOLVE_CUSTOM_LCP, m_nfg.NumPlayers() == 2);
 
-  menu->Enable(NFG_VIEW_PROBABILITIES, NumSolutions() > 0);
-  menu->Enable(NFG_VIEW_VALUES, NumSolutions() > 0);
+  menu->Enable(NFG_VIEW_PROBABILITIES, m_solutionTable->Length() > 0);
+  menu->Enable(NFG_VIEW_VALUES, m_solutionTable->Length() > 0);
 
   SetStatusText((char *)
 		("Support: " + CurrentSupport()->GetName()), 1);
   if (CurrentSolution() > 0) {
     SetStatusText((char *) ("Solution: " + 
-			    ToText((int) Solutions()[CurrentSolution()].Id())),
+			    ToText((int) (*m_solutionTable)[CurrentSolution()].Id())),
 		  2);
   }
   else {
@@ -1339,9 +1376,9 @@ void NfgShow::AdjustSizes(void)
   if (m_toolbar) {
     m_toolbar->SetSize(0, 0, width, toolbarHeight);
   }
-  if (m_solutionTable && m_solutionTable->IsShown()) {
+  if (m_solutionSashWindow && m_solutionSashWindow->IsShown()) {
     int solnHeight = gmax(100, height / 3);
-    m_solutionTable->SetSize(0, height - solnHeight, width, solnHeight);
+    m_solutionSashWindow->SetSize(0, height - solnHeight, width, solnHeight);
     height -= solnHeight;
   }
   if (m_panel) {
