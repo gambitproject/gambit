@@ -29,10 +29,10 @@ class Instruction;
 
 class GSM
 {
- private:
+private:
   gOutput&                         _StdOut;
   gOutput&                         _StdErr;
-
+  
   gGrowableStack< Portion* >*      _Stack;
   gGrowableStack< CallFuncObj* >*  _CallFuncStack;
   RefHashTable*                    _RefTable;
@@ -50,11 +50,22 @@ class GSM
 
   void _StackPush ( Portion* p );
 
+  void _ErrorMessage
+    (
+     const int       error_num = 0,
+     const gInteger& num1      = 0, 
+     const gInteger& num2      = 0,
+     const gString&  str1      = "",
+     const gString&  str2      = "",
+     Portion*        por       = 0,
+     Instruction*    instr     = 0
+     ) const;
+
   // This function is located in gsmfunc.cc
   void InitFunctions( void );
 
 
- public:
+public:
   GSM( int size, gOutput& s_out = gout, gOutput& s_err = gerr );
   ~GSM();
 
@@ -70,7 +81,7 @@ class GSM
   bool Push ( const gRational& data );
   bool Push ( const gString&   data );
 
-/* These are commented out because the don't seem to be necessary */
+  /* These are commented out because the don't seem to be necessary */
 #if 0
   bool Push ( Outcome* data );
   bool Push ( Player*  data );
@@ -83,8 +94,7 @@ class GSM
 
   bool PushList ( const int num_of_elements );
 
-  bool PushRef  ( const gString& ref );
-  bool PushRef  ( const gString& ref, const gString& subref );
+  bool PushRef  ( const gString& ref, const gString& subref = "" );
   bool Assign   ( void );
   bool UnAssign ( void );
 
@@ -123,7 +133,7 @@ class GSM
   bool CallFunction     ( void );
 
   GSM_ReturnCode Execute( gList< Instruction* >& program );
-     
+  
   bool Pop ( void );
 
   void Output ( void );

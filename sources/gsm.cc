@@ -17,23 +17,19 @@
 //--------------------------------------------------------------------
 
 GSM::GSM( int size, gOutput& s_out, gOutput& s_err )
-     :_StdOut( s_out ), _StdErr( s_err )
+:_StdOut( s_out ), _StdErr( s_err )
 {
-
+  
 #ifndef NDEBUG
   if( size <= 0 )
-  {
-    _StdErr << "GSM Error: illegal stack size specified during initialization\n";
-    _StdErr << "           stack size requested: " << size << "\n";
-  }
-  assert( size > 0 );
+    _ErrorMessage( 1, size );
 #endif // NDEBUG
-
+  
   _Stack         = new gGrowableStack< Portion* >( size );
   _CallFuncStack = new gGrowableStack< CallFuncObj* >( size ) ;
   _RefTable      = new RefHashTable;
   _FuncTable     = new FunctionHashTable;
-
+  
   InitFunctions();  // This function is located in gsmfunc.cc
 }
 
@@ -79,55 +75,35 @@ void GSM::_StackPush( Portion* p )
 
 bool GSM::Push( const bool& data )
 {
-  Portion*  p;
-  
-  p = new bool_Portion( data );
-  _StackPush( p );
-
+  _StackPush( new bool_Portion( data ) );
   return true;
 }
 
 
 bool GSM::Push( const double& data )
 {
-  Portion*  p;
-  
-  p = new numerical_Portion<double>( data );
-  _StackPush( p );
-
+  _StackPush( new numerical_Portion<double>( data ) );
   return true;
 }
 
 
 bool GSM::Push( const gInteger& data )
 {
-  Portion*  p;
-
-  p = new numerical_Portion<gInteger>( data );
-  _StackPush( p );
-
+  _StackPush( new numerical_Portion<gInteger>( data ) );
   return true;
 }
 
 
 bool GSM::Push( const gRational& data )
 {
-  Portion*  p;
-
-  p = new numerical_Portion<gRational>( data );
-  _StackPush( p );
-
+  _StackPush( new numerical_Portion<gRational>( data ) );
   return true;
 }
 
 
 bool GSM::Push( const gString& data )
 {
-  Portion*  p;
-
-  p = new gString_Portion( data );
-  _StackPush( p );
-
+  _StackPush( new gString_Portion( data ) );
   return true;
 }
 
@@ -136,55 +112,35 @@ bool GSM::Push( const gString& data )
 #if 0
 bool GSM::Push( Outcome* data )
 {
-  Portion*  p;
-
-  p = new Outcome_Portion( data );
-  _StackPush( p );
-
+  _StackPush( Outcome_Portion( data ) );
   return true;
 }
 
 
 bool GSM::Push( Player* data )
 {
-  Portion*  p;
-
-  p = new Player_Portion( data );
-  _StackPush( p );
-
+  _StackPush( new Player_Portion( data ) );
   return true;
 }
 
 
 bool GSM::Push( Infoset* data )
 {
-  Portion*  p;
-
-  p = new Infoset_Portion( data );
-  _StackPush( p );
-
+  _StackPush( new Infoset_Portion( data ) );
   return true;
 }
 
 
 bool GSM::Push( Action* data )
 {
-  Portion*  p;
-
-  p = new Action_Portion( data );
-  _StackPush( p );
-
+  _StackPush( new Action_Portion( data ) );
   return true;
 }
 
 
 bool GSM::Push( Node* data )
 {
-  Portion*  p;
-
-  p = new Node_Portion( data );
-  _StackPush( p );
-
+  _StackPush( new Node_Portion( data ) );
   return true;
 }
 #endif
@@ -192,11 +148,7 @@ bool GSM::Push( Node* data )
 
 bool GSM::PushStream( const gString& data )
 {
-  Portion*  p;
-
-  p = new Stream_Portion( data );
-  _StackPush( p );
-
+  _StackPush( new Stream_Portion( data ) );
   return true;
 }
 
@@ -210,19 +162,10 @@ bool GSM::PushList( const int num_of_elements )
 
 #ifndef NDEBUG
   if( num_of_elements <= 0 )
-  {
-    _StdErr << "GSM Error: illegal number of elements requested to PushList()\n";
-    _StdErr << "           elements requested: " << num_of_elements << "\n";
-  }
-  assert( num_of_elements > 0 );
+    _ErrorMessage( 2, num_of_elements );
 
   if( num_of_elements > _Stack->Depth() )
-  {
-    _StdErr << "GSM Error: not enough elements in GSM to PushList()\n";
-    _StdErr << "           elements requested: " << num_of_elements << "\n";
-    _StdErr << "           elements available: " << _Stack->Depth() << "\n";
-  }
-  assert( num_of_elements <= _Stack->Depth() );
+    _ErrorMessage( 3, num_of_elements, _Stack->Depth() );
 #endif // NDEBUG
 
   list = new List_Portion;
@@ -248,24 +191,10 @@ bool GSM::PushList( const int num_of_elements )
 //     Reference related functions: PushRef(), Assign(), UnAssign()
 //---------------------------------------------------------------------
 
-bool GSM::PushRef( const gString& ref )
-{
-  Portion*  p;
-  
-  p = new Reference_Portion( ref );
-  _StackPush( p );
-
-  return true;
-}
-
 
 bool GSM::PushRef( const gString& ref, const gString& subref )
 {
-  Portion*  p;
-  
-  p = new Reference_Portion( ref, subref );
-  _StackPush( p );
-
+  _StackPush( new Reference_Portion( ref, subref ) );
   return true;
 }
 
@@ -282,10 +211,7 @@ bool GSM::Assign( void )
 
 #ifndef NDEBUG
   if( _Stack->Depth() < 2 )
-  {
-    _StdErr << "GSM Error: not enough operands to execute Assign()\n";
-  }
-  assert( _Stack->Depth() >= 2 );
+    _ErrorMessage( 4 );
 #endif // NDEBUG
 
   p2 = _Stack->Pop();
@@ -348,17 +274,15 @@ bool GSM::Assign( void )
 	  break;
 	  
 	default:
-	  _StdErr << "GSM Error: unknown type supports subvariables\n";
-	  assert(0);
+	  _ErrorMessage( 5 );
 	}
 
 	delete p2;
 	p1 = _ResolveRef( (Reference_Portion*) p1 );
       }
-      else
+      else // ( !( primary_ref->Type() & porALLOWS_SUBVARIABLES ) )
       {
-	_StdErr << "GSM Error: attempted to assign a sub-reference to a type\n";
-	_StdErr << "           that doesn't support such structures\n";
+	_ErrorMessage( 6 );
 	if( primary_ref->Type() == porERROR )
 	{
 	  delete primary_ref;
@@ -382,17 +306,15 @@ bool GSM::Assign( void )
     {
       p1->ShadowOf()->ParentList()->SetSubscript( index, p2 );
       delete p1;
-      p2_copy = p2->Copy();
-      _StackPush( p2_copy );
+      _StackPush( p2->Copy() );
       result = true;
     }
     else
     {
-      _StdErr << "GSM Error: no reference found to be assigned\n";
+      _ErrorMessage( 7 );
       delete p1;
       delete p2;
-      p = new Error_Portion;
-      _StackPush( p );
+      _StackPush( new Error_Portion );
       result = false;
     }
   }
@@ -411,10 +333,7 @@ bool GSM::UnAssign( void )
 
 #ifndef NDEBUG
   if( _Stack->Depth() < 1 )
-  {
-    _StdErr << "GSM Error: not enough operands to execute UnAssign()\n";
-  }
-  assert( _Stack->Depth() >= 1 );
+    _ErrorMessage( 8 );
 #endif // NDEBUG
 
   p1 = _Stack->Pop();
@@ -447,14 +366,12 @@ bool GSM::UnAssign( void )
 	  break;
 	  
 	default:
-	  _StdErr << "GSM Error: unknown type supports subvariables\n";
-	  assert(0);
+	  _ErrorMessage( 9 );
 	}
       }
       else
       {
-	_StdErr << "GSM Error: attempted to unassign a sub-reference of a type\n";
-	_StdErr << "           that doesn't support such structures\n";
+	_ErrorMessage( 10 );
 	if( primary_ref->Type() == porERROR )
 	{
 	  delete primary_ref;
@@ -467,7 +384,7 @@ bool GSM::UnAssign( void )
   }
   else // ( p1->Type() != porREFERENCE )
   {
-    _StdErr << "GSM Error: no reference found to be unassigned\n";
+    _ErrorMessage( 11 );
     result = false;
   }
   return result;
@@ -483,7 +400,6 @@ bool GSM::UnAssign( void )
 Portion* GSM::_ResolveRef( Reference_Portion* p )
 {
   Portion*  result = 0;
-  Portion*  temp;
   gString&  ref = p->Value();
   gString&  subvalue = p->SubValue();
 
@@ -507,8 +423,7 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
 	break;
 
       default:
-	_StdErr << "GSM Error: attempted to resolve a subvariable of a type\n";
-	_StdErr << "           that does not support subvariables\n";
+	_ErrorMessage( 12 );
 	result = new Error_Portion;
       }
       if( result != 0 )
@@ -524,8 +439,7 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
   }
   else
   {
-    _StdErr << "GSM Error: attempted to resolve an undefined reference\n";
-    _StdErr << "           \"" << ref << "\"\n";
+    _ErrorMessage( 13, 0, 0, ref );
     result = new Error_Portion;
   }
   delete p;
@@ -539,7 +453,6 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
 Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
 {
   Portion*  result = 0;
-  Portion*  temp;
   gString&  ref = p->Value();
   gString&  subvalue = p->SubValue();
 
@@ -578,8 +491,7 @@ Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
 	break;
 
       default:
-	_StdErr << "GSM Error: attempted to resolve the subvariable of a type\n";
-	_StdErr << "           that does not support subvariables\n";
+	_ErrorMessage( 14 );
 	result = new Error_Portion;
       }
     }
@@ -600,9 +512,7 @@ Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
 Portion* GSM::_ResolvePrimaryRefOnly( Reference_Portion* p )
 {
   Portion*  result = 0;
-  Portion*  temp;
   gString&  ref = p->Value();
-  gString   subvalue;
 
   if( _RefTable->IsDefined( ref ) )
   {
@@ -610,8 +520,7 @@ Portion* GSM::_ResolvePrimaryRefOnly( Reference_Portion* p )
   }
   else
   {
-    _StdErr << "GSM Error: attempted to resolve an undefined reference\n";
-    _StdErr << "           \"" << ref << "\"\n";
+    _ErrorMessage( 15, 0, 0, ref );
     result = new Error_Portion;
   }
 
@@ -643,11 +552,7 @@ bool GSM::_BinaryOperation( OperationMode mode )
 
 #ifndef NDEBUG
   if( _Stack->Depth() < 2 )
-  {
-    _StdErr << "GSM Error: not enough operands to perform binary operation\n";
-    result = false;
-  }
-  assert( _Stack->Depth() >= 2 );
+    _ErrorMessage( 16 );
 #endif // NDEBUG
   
   p2 = _Stack->Pop();
@@ -698,9 +603,7 @@ bool GSM::_BinaryOperation( OperationMode mode )
 
   else // ( p1->Type() != p2->Type() )
   {
-    _StdErr << "GSM Error: attempted operating on different types\n";
-    _StdErr << "           Type of Operand 1: " << p1->Type() << "\n";
-    _StdErr << "           Type of Operand 2: " << p2->Type() << "\n";
+    _ErrorMessage( 17, (int) p1->Type(), (int) p2->Type() );
     delete p1;
     delete p2;
     p1 = new Error_Portion;
@@ -736,7 +639,7 @@ bool GSM::_UnaryOperation( OperationMode mode )
   }
   else
   {
-    _StdErr << "GSM Error: not enough operands to perform unary operation\n";
+    _ErrorMessage( 18 );
     result = false;
   }
 
@@ -824,7 +727,7 @@ bool GSM::Subscript ( void )
       p1 = (*_RefTable)( ( (Reference_Portion*) refp )->Value() );
     else
       p1 = 0;
-       
+    
     if( p1 != 0 && p1->Type() == porLIST )
     {
       delete refp;
@@ -861,26 +764,21 @@ bool GSM::Subscript ( void )
       }
       else
       {
-	p = new Error_Portion;
-	_StackPush( p );
+	_StackPush( new Error_Portion );
       }
     }
     else
     {
-      _StdErr << "GSM Error: a non-integer element number passed as the\n";
-      _StdErr << "           subscript of a List\n";
-      p = new Error_Portion;
-      _StackPush( p );
+      _ErrorMessage( 19 );
+      _StackPush( new Error_Portion );
       result = false;
     }
   }
   else
   {
-    _StdErr << "GSM Error: attempted to take the subscript of a non-List\n";
-    _StdErr << "           Portion type\n";
+    _ErrorMessage( 20 );
     delete p1;
-    p = new Error_Portion;
-    _StackPush( p );
+    _StackPush( new Error_Portion );
     result = false;
   }
 
@@ -904,17 +802,10 @@ void GSM::AddFunction( FuncDescObj* func )
 void GSM::_BindCheck( void ) const
 {
   if( _CallFuncStack->Depth() <= 0 )
-  {
-    _StdErr << "GSM Error: the CallFunction() subsystem was not initialized by\n";
-    _StdErr << "           calling InitCallFunction() first\n";
-  }
-  assert( _CallFuncStack->Depth() > 0 );
+    _ErrorMessage( 21 );
 
   if( _Stack->Depth() <= 0 )
-  {
-    _StdErr << "GSM Error: no value found to assign to a function parameter\n";
-  }
-  assert( _Stack->Depth() > 0 );
+    _ErrorMessage( 22 );
 }
 #endif // NDEBUG
 
@@ -938,16 +829,12 @@ bool GSM::_BindCheck( const gString& param_name ) const
   }
   else if ( new_index == PARAM_NOT_FOUND )
   {
-    _StdErr << "FuncDescObj Error: parameter \"" << param_name;
-    _StdErr << "\" is not defined for\n";
-    _StdErr << "                   the function \"" << func->FuncName() << "\"\n";
+    _ErrorMessage( 23, 0, 0, param_name, func->FuncName() );
     result = false;
   }
   else // ( new_index == PARAM_AMBIGUOUS )
   {
-    _StdErr << "FuncDescObj Error: parameter \"" << param_name;
-    _StdErr << "\" is ambiguous in\n";
-    _StdErr << "                   the function \"" << func->FuncName() << "\"\n";
+    _ErrorMessage( 24, 0, 0, param_name, func->FuncName() );
     result = false;
   }
   return result;
@@ -966,8 +853,7 @@ bool GSM::InitCallFunction( const gString& funcname )
   }
   else // ( !_FuncTable->IsDefined( funcname ) )
   {
-    _StdErr << "GSM Error: undefined function name:\n";
-    _StdErr << "           InitCallFunction( \"" << funcname << "\" )\n";
+    _ErrorMessage( 25, 0, 0, funcname );
     result = false;
   }
   return result;
@@ -1131,11 +1017,7 @@ bool GSM::CallFunction( void )
 
 #ifndef NDEBUG
   if( _CallFuncStack->Depth() <= 0 )
-  {
-    _StdErr << "GSM Error: the CallFunction() subsystem was not initialized by\n";
-    _StdErr << "           calling InitCallFunction() first\n";
-  }
-  assert( _CallFuncStack->Depth() > 0 );
+    _ErrorMessage( 26 );
 #endif // NDEBUG
 
   func = _CallFuncStack->Pop();
@@ -1147,8 +1029,7 @@ bool GSM::CallFunction( void )
 
   if( return_value == 0 )
   {
-    _StdErr << "GSM Error: an error occurred while attempting to execute\n";
-    _StdErr << "           CallFunction( \"" << func->FuncName() << "\", ... )\n";
+    _ErrorMessage( 27, 0, 0, func->FuncName() );
     return_value = new Error_Portion;
     result = false;
   }
@@ -1188,16 +1069,14 @@ bool GSM::CallFunction( void )
 	      break;
 
 	    default:
-	      _StdErr << "GSM Error: attempted to assign the subvariable of a\n";
-	      _StdErr << "           type that does not support subvariables\n";
+	      _ErrorMessage( 28 );
 	      result = false;
 	    }
 	    delete param[ index ];
 	  }
 	  else // ( !_RefTable->IsDefined( refp->Value() ) )
 	  {
-	    _StdErr << "GSM Error: attempted to assign the sub-variable of\n";
-	    _StdErr << "           an undefined variable\n";
+	    _ErrorMessage( 29 );
 	    delete param[ index ];
 	    result = false;
 	  }
@@ -1222,10 +1101,7 @@ bool GSM::CallFunction( void )
 #ifndef NDEBUG
 	    else
 	    {
-	      _StdErr << "GSM Fatal Error:\n";
-	      _StdErr << "         returning function parameter information\n";
-	      _StdErr << "         (regarding lists) is invalid\n";
-	      assert(0);
+	      _ErrorMessage( 30 );
 	    }
 #endif // NDEBUG
 	  }
@@ -1234,10 +1110,7 @@ bool GSM::CallFunction( void )
 #ifndef NDEBUG
 	else if( ( refp != 0 ) && ( param[ index ] == 0 ) )
 	{
-	  _StdErr << "GSM Fatal Error; this should never occur\n";
-	  _StdErr << "Function: " << func->FuncName() << "\n";
-	  _StdErr << "index: " << index << ", refp: " << refp << "\n";
-	  assert(0);
+	  _ErrorMessage( 31, index, 0, func->FuncName(), "", refp );
 	}
 #endif // NDEBUG
       }
@@ -1296,7 +1169,7 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program )
       }
       else
       {
-	_StdErr << "GSM Error: IfGoto called on a unsupported data type\n";
+	_ErrorMessage( 32 );
 	_StackPush( p );
 	program_counter++;
 	instr_success = false;
@@ -1316,10 +1189,7 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program )
 
     if( !instr_success )
     {
-      _StdErr << "GSM Error: instruction #" << program_counter;
-      _StdErr << ": " << instruction << "\n";
-      _StdErr << "           was not executed successfully\n";
-      _StdErr << "           Program abnormally terminated.\n";
+      _ErrorMessage( 33, program_counter, 0, "", "", 0, instruction );
       result = rcFAIL;
       break;
     }
@@ -1353,7 +1223,7 @@ bool GSM::Pop( void )
   }
   else
   {
-    _StdErr << "GSM Error: Pop() called on an empty stack\n";
+    _ErrorMessage( 34 );
   }
   return result;
 }
@@ -1373,9 +1243,7 @@ void GSM::Output( void )
   {
     p = _Stack->Pop();
     if( p->Type() == porREFERENCE )
-    {
       p = _ResolveRef( (Reference_Portion*) p );
-    }
     p->Output( _StdOut );
     _StdOut << "\n";
     delete p;
@@ -1402,7 +1270,7 @@ void GSM::Dump( void )
     }
   }
   _StdOut << "\n";
- 
+  
   assert( _Stack->Depth() == 0 );
 }
 
@@ -1420,6 +1288,177 @@ void GSM::Flush( void )
 
   assert( _Stack->Depth() == 0 );
 }
+
+
+
+//-----------------------------------------------------------------------
+//                         _ErrorMessage
+//-----------------------------------------------------------------------
+
+void GSM::_ErrorMessage
+(
+ const int       error_num,
+ const gInteger& num1, 
+ const gInteger& num2,
+ const gString&  str1,
+ const gString&  str2,
+ Portion*        por,
+ Instruction*    instr
+ ) const
+{
+  _StdErr << "GSM Error " << error_num << " :\n";
+
+  switch( error_num )
+  {
+  case 1:
+    _StdErr << "  Illegal stack size specified during initialization\n";
+    _StdErr << "  Stack size requested: " << num1 << "\n";
+    assert( 0 );
+    break;
+  case 2:
+    _StdErr << "  Illegal number of elements requested to PushList()\n";
+    _StdErr << "  Elements requested: " << num1 << "\n";
+    assert( 0 );
+    break;
+  case 3:
+    _StdErr << "  Not enough elements in GSM to PushList()\n";
+    _StdErr << "  Elements requested: " << num1 << "\n";
+    _StdErr << "  Elements available: " << num2 << "\n";
+    assert( 0 );
+    break;
+  case 4:
+    _StdErr << "  Not enough operands to execute Assign()\n";
+    assert( 0 );
+    break;
+  case 5:
+    _StdErr << "  Unknown type supports subvariables\n";
+    assert(0);
+    break;
+  case 6:
+    _StdErr << "  Attempted to assign a sub-reference to a type\n";
+    _StdErr << "  that doesn't support such structures\n";
+    break;
+  case 7:
+    _StdErr << "  No reference found to be assigned\n";
+    break;
+  case 8:
+    _StdErr << "  Not enough operands to execute UnAssign()\n";
+    assert( 0 );
+    break;
+  case 9:
+    _StdErr << "  Unknown type supports subvariables\n";
+    assert(0);
+    break;
+  case 10:
+    _StdErr << "  Attempted to unassign a sub-reference of a type\n";
+    _StdErr << "  that doesn't support such structures\n";
+    break;
+  case 11:
+    _StdErr << "  No reference found to be unassigned\n";
+    break;
+  case 12:
+    _StdErr << "  Attempted to resolve a subvariable of a type\n";
+    _StdErr << "  that does not support subvariables\n";
+    break;
+  case 13:
+    _StdErr << "  Attempted to resolve an undefined reference\n";
+    _StdErr << "  \"" << str1 << "\"\n";
+    break;
+  case 14:
+    _StdErr << "  Attempted to resolve the subvariable of a type\n";
+    _StdErr << "  that does not support subvariables\n";
+    break;
+  case 15:
+    _StdErr << "  Attempted to resolve an undefined reference\n";
+    _StdErr << "  \"" << str1 << "\"\n";
+    break;
+  case 16:
+    _StdErr << "  Not enough operands to perform binary operation\n";
+    assert( 0 );
+    break;
+  case 17:
+    _StdErr << "  Attempted operating on different types\n";
+    _StdErr << "  Type of Operand 1: " << num1 << "\n";
+    _StdErr << "  Type of Operand 2: " << num2 << "\n";
+    break;
+  case 18:
+    _StdErr << "  Not enough operands to perform unary operation\n";
+    break;
+  case 19:
+    _StdErr << "  A non-integer element number passed as the\n";
+    _StdErr << "  subscript of a List\n";
+    break;
+  case 20:
+    _StdErr << "  Attempted to take the subscript of a non-List\n";
+    _StdErr << "  Portion type\n";
+    break;
+  case 21:
+    _StdErr << "  The CallFunction() subsystem was not initialized by\n";
+    _StdErr << "  calling InitCallFunction() first\n";
+    assert( 0 );
+    break;
+  case 22:
+    _StdErr << "  No value found to assign to a function parameter\n";
+    assert( 0 );
+    break;
+  case 23:
+    _StdErr << "  Parameter \"" << str1 << "\" is not defined for\n";
+    _StdErr << "  the function \"" << str2 << "\"\n";
+    break;
+  case 24:
+    _StdErr << "  Parameter \"" << str1 << "\" is ambiguous in\n";
+    _StdErr << "  the function \"" << str2 << "\"\n";
+    break;
+  case 25:
+    _StdErr << "  Undefined function name:\n";
+    _StdErr << "  InitCallFunction( \"" << str1 << "\" )\n";
+    break;
+  case 26:
+    _StdErr << "  The CallFunction() subsystem was not initialized by\n";
+    _StdErr << "  calling InitCallFunction() first\n";
+    assert( 0 );
+    break;
+  case 27:
+    _StdErr << "  An error occurred while attempting to execute\n";
+    _StdErr << "  CallFunction( \"" << str1 << "\", ... )\n";
+    break;
+  case 28:
+    _StdErr << "  Attempted to assign the subvariable of a\n";
+    _StdErr << "  type that does not support subvariables\n";
+    break;
+  case 29:
+    _StdErr << "  Attempted to assign the sub-variable of\n";
+    _StdErr << "  an undefined variable\n";
+    break;
+  case 30:
+    _StdErr << "  Fatal Error:\n";
+    _StdErr << "    Returning function parameter information\n";
+    _StdErr << "    (regarding lists) is invalid\n";
+    assert(0);
+    break;
+  case 31:
+    _StdErr << "  Fatal Error:\n";
+    _StdErr << "    Attempting to assign a null Portion to a reference\n";
+    _StdErr << "    Function: \"" << str1 << "\"\n";
+    _StdErr << "    Parameter index: " << num1 << "\n";
+    _StdErr << "    Reference: " << por << "\n";
+    assert(0);
+    break;
+  case 32:
+    _StdErr << "  Instruction IfGoto called on a non-boolean data type\n";
+    break;
+  case 33:
+    _StdErr << "  Instruction #" << num1 << ": " << instr << "\n";
+    _StdErr << "           was not executed successfully\n";
+    _StdErr << "           Program abnormally terminated.\n";
+    break;
+  case 34:
+    _StdErr << "GSM Error: Pop() called on an empty stack\n";
+    break;
+  }
+}
+
+
 
 
 
@@ -1445,9 +1484,9 @@ TEMPLATE class gList< Portion* >;
 TEMPLATE class gNode< Portion* >;
 
 /* already declared in readefg.y
-TEMPLATE class gList< gString >;
-TEMPLATE class gNode< gString >;
-*/
+   TEMPLATE class gList< gString >;
+   TEMPLATE class gNode< gString >;
+   */
 
 TEMPLATE class gList< FuncDescObj* >;
 TEMPLATE class gNode< FuncDescObj* >;
@@ -1469,5 +1508,7 @@ TEMPLATE class gGrowableStack< List_Portion* >;
 
 gOutput& operator << ( class gOutput& s, class Portion* (*funcname)() )
 { return s << funcname; }
+
+
 
 
