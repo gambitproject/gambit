@@ -12,6 +12,9 @@
 template class BaseTableau<double>;
 template class BaseTableau<gRational>;
 
+template class TableauInterface<double>;
+template class TableauInterface<gRational>;
+
 template class Tableau<double>;
 template class Tableau<gRational>;
 

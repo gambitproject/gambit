@@ -1,24 +1,23 @@
 //
-// FILE: tableau.h:  integer tableau classes  **CHANGE THIS FILENAME
+// FILE: tableau1.h:  new Tableau classes  
+//                    To use, rename tableau1.h,cc,imp to tableau.h,cc,imp
 //
 // $Id$
 //
 
-// CHANGE THESE NAMES
 #ifndef TABLEAU_H  
 #define TABLEAU_H
 
 #include "rational.h"
 #include "ludecomp.h"
 #include "bfs.h"
-// This is the rational to Integer conversion routine
 
 template <class T> class Tableau;
 template <class T> class LPTableau;
 
 
 // ---------------------------------------------------------------------------
-// Tableau Stuff
+//                          BaseTableau Stuff
 // ---------------------------------------------------------------------------
 
 
@@ -51,98 +50,127 @@ public:
   virtual long NumPivots() const = 0;
   
       // raw Tableau functions
-  virtual void Refactor() = 0;
+  virtual  void Refactor() = 0;
 };
 
-template <class T> class Tableau : public BaseTableau<T>{
-private:
-  int remap(int col_index) const;  // aligns the column indexes
-  long npivots;
-protected:
-  // We no longer need these, since there should be no tolerance for integers
-  T eps1,eps2;
+// ---------------------------------------------------------------------------
+//                           TableauInterface Stuff
+// ---------------------------------------------------------------------------
 
-  gVector<T> tmpcol; // temporary column vector, to avoid allocation
+template <class T> class TableauInterface : public BaseTableau<T>{
+protected:
   const gMatrix<T> *A;
   const gVector<T> *b;
-  Basis<T> basis;
-
-  // This version uses the full tableau, hence no LU decomposition
-  LUdecomp<T> B;
-
-  // Similarly, this is for the LU decompostion
-  gVector<T> solution;
-
-  gMatrix <gInteger> Tabdat;  // This caries the full tableau
-  // This may require a change in implementation, because it may be unweildly
-  // to carry this around
-  gVector<gInteger> Coeff;
-  gVector<int> nonbasic;
-
-  gInteger totdenom;  // This carries the denominator for Q data or 1 for Z
-  gInteger denom;  // This is the denominator for the simplex
-
+  Basis<T> basis; 
+  gVector<T> solution;  // current solution vector
+  gVector<T> tmpcol; // temporary column vector, to avoid allocation
+  long npivots;
+  T eps1,eps2;
 public:
-      // constructors and destructors
-  Tableau(const gMatrix<T> &A, const gVector<T> &b); 
-  Tableau(const Tableau<T>&);
-  virtual ~Tableau();
-  
-  Tableau<T>& operator=(const Tableau<T>&);
-  
-      // information
+  TableauInterface(const gMatrix<T> &A, const gVector<T> &b); 
+  TableauInterface(const TableauInterface<T>&);
+  virtual ~TableauInterface();
+
+  TableauInterface<T>& operator=(const TableauInterface<T>&);
+
+  // information
+
   int MinRow() const;
   int MaxRow() const;
   int MinCol() const;
   int MaxCol() const;
+
   const gMatrix<T> & Get_A(void) const;
   const gVector<T> & Get_b(void) const;
   
   bool Member(int i) const;
   int Label(int i) const;   // return variable in i'th position of Tableau
   int Find(int i) const;  // return Tableau position of variable i
-  
-  // pivoting
+
   int CanPivot(int outgoing,int incoming);
-  void Pivot(int outrow,int col);
-  // perform pivot operation -- outgoing is row, incoming is column
-  //  void CompPivot(int outlabel,int col);
   long NumPivots() const;
   long &NumPivots();
-
-  // marks/unmarks label to block it from entering basis
-  void Mark(int label);
-  void UnMark(int label);
-
-  // returns true if label is blocked from entering basis
-  bool IsBlocked(int label) const;
   
+  void Mark(int label);     // marks label to block it from entering basis
+  void UnMark(int label);   // unmarks label
+  bool IsBlocked(int label) const;   // returns true if label is blocked
   
-      // raw Tableau functions
-  // No LU decomposition
-  void Refactor();
   void BasisVector(gVector<T> &x) const; // solve M x = (*b)
   void GetColumn( int , gVector<T> &) const;  // raw column
-  void SolveColumn(int, gVector<T> &);  // column in new basis 
-  void SetConst(const gVector<T> &bnew);
-  void SetBasis( const Basis<T> &); // set new Tableau
   void GetBasis( Basis<T> & ) const; // return Basis for current Tableau
-  
+
+  BFS<T> GetBFS1(void) const; 
+  BFS<T> GetBFS(void) const;  // used in lpsolve for some reason
+  void Dump(gOutput &) const;
+  void BigDump(gOutput &);
+
+  virtual void Pivot(int outrow,int col) = 0; // pivot -- outgoing is row, incoming is column
+  virtual void SolveColumn(int, gVector<T> &) = 0;  // column in new basis 
+  virtual void Solve(const gVector<T> &b, gVector<T> &x) const = 0;  // solve M x = b
+  virtual void SolveT(const gVector<T> &c, gVector<T> &y) const= 0;  // solve y M = c
+
+  virtual void Refactor() = 0;
+  virtual void SetRefactor(int) = 0;
+
       // miscellaneous functions
   bool EqZero(T x) const;
   bool LtZero(T x) const;
   bool GtZero(T x) const;
   bool LeZero(T x) const;
   bool GeZero(T x) const;
-  // No error with integers
   T Epsilon(int i = 2) const;
+};
+
+// ---------------------------------------------------------------------------
+// Tableau Stuff
+// 
+// We have different implementations of Tableau for double and gRational, 
+// but with the same interface
+// ---------------------------------------------------------------------------
+
+// 
+// Tableau<double>
+//  
+
+class Tableau<double> : public TableauInterface<double>{
+protected:
+  LUdecomp<double> B;     // LU decomposition
+
+public:
+      // constructors and destructors
+  Tableau(const gMatrix<double> &A, const gVector<double> &b); 
+  Tableau(const Tableau<double>&);
+  virtual ~Tableau();
+  
+  Tableau<double>& operator=(const Tableau<double>&);
+  
+  // pivoting
+  void Pivot(int outrow,int col); // pivot -- outgoing is row, incoming is column
+  void SolveColumn(int, gVector<double> &);  // column in new basis 
+  void Solve(const gVector<double> &b, gVector<double> &x) const;  // solve M x = b
+  void SolveT(const gVector<double> &c, gVector<double> &y) const;  // solve y M = c
+  
+  // raw Tableau functions
+
+  void Refactor();
+  void SetRefactor(int);
+
+  void SetConst(const gVector<double> &bnew);
+  void SetBasis( const Basis<double> &); // set new Tableau
+  
   bool IsFeasible();
   bool IsLexMin();
-  BFS<T> GetBFS1(void) const; 
-  BFS<T> GetBFS(void) const;  // used in lpsolve for some reason
-  void Dump(gOutput &) const;
-  void BigDump(gOutput &);
 };
+
+// 
+// Tableau<gRational>  currently in tableau2.h
+//  
+
+// ---------------------------------------------------------------------------
+//  LPTableau Stuff (For Linear Programming code)
+// ---------------------------------------------------------------------------
+
+#include "tableau2.h"
 
 template <class T> class LPTableau : public Tableau<T> {
 private:
@@ -172,8 +200,6 @@ public:
       // Redefined functions
   void Refactor();
   void Pivot(int outrow,int col);
-  void Solve(const gVector<T> &b, gVector<T> &x) const;  // solve M x = b
-  void SolveT(const gVector<T> &c, gVector<T> &y) const;  // solve y M = c
   void ReversePivots(gList<gArray<int> > &);
   bool IsReversePivot(int i, int j);
   void DualReversePivots(gList<gArray<int> > &);

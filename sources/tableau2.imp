@@ -21,25 +21,24 @@ gInteger find_lcd(const gVector<gRational> &vec)
   return lcd;
 }
 
-//
-// Tableau method definitions 
-//
+// ---------------------------------------------------------------------------
+//                    Tableau method definitions 
+// ---------------------------------------------------------------------------
 
 // Constructor
 
-Tableau<gRational>::Tableau(const gMatrix<gRational> &A, const gVector<gRational> &b)
-  : npivots(0), tmpcol(A.MinRow(),A.MaxRow()), A(&A), b(&b), 
-    basis(A),B(basis), solution(A.MinRow(), A.MaxRow()),
-    Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()), 
-    Coeff(b.First(),b.Last()), nonbasic(A.MinCol(),A.MaxCol()),denom(1)
-{
-  //   gout << "\nMY CODE\n";
+Tableau<gRational>::Tableau(const gMatrix<gRational> &A, const gVector<gRational> &b) 
+  : TableauInterface(A,b), Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()),
+    Coeff(b.First(),b.Last()), nonbasic(A.MinCol(),A.MaxCol()),denom(1) {
+// gout << "\nMY CODE\n";
 
   int j;
   for(j=A.MinCol();j<=A.MaxCol();j++) 
     nonbasic[j] = j;
 
   totdenom = lcm(find_lcd(A),find_lcd(b));
+  assert(totdenom>0);
+
   for (int i = b.First();i<=b.Last();i++) {
     gRational x = b[i]*(gRational)totdenom;
     assert(x.denominator() == 1);
@@ -56,6 +55,27 @@ Tableau<gRational>::Tableau(const gMatrix<gRational> &A, const gVector<gRational
 }
 
 
+Tableau<gRational>::Tableau(const Tableau<gRational> &orig) 
+  : TableauInterface(orig), Tabdat(orig.Tabdat), Coeff(orig.Coeff), 
+    nonbasic(orig.nonbasic), totdenom(orig.totdenom), denom(orig.denom) 
+{ }
+
+Tableau<gRational>::~Tableau()
+{ }
+
+Tableau<gRational>& Tableau<gRational>::operator=(const Tableau<gRational> &orig)
+{
+  TableauInterface<gRational>::operator=(orig);
+  if(this!= &orig) {
+    Tabdat = orig.Tabdat;
+    Coeff = orig.Coeff;
+    nonbasic = orig.nonbasic;
+    totdenom = orig.totdenom;
+    denom = orig.denom;
+  }
+  return *this;
+}
+
 // Aligns the column indexes
 
 int Tableau<gRational>::remap(int col_index) const
@@ -66,10 +86,7 @@ int Tableau<gRational>::remap(int col_index) const
   return i;
 }
 
-//
 // pivoting operations
-//
-
 
 void Tableau<gRational>::Pivot(int outrow,int in_col)
 {
@@ -112,12 +129,10 @@ void Tableau<gRational>::Pivot(int outrow,int in_col)
     if(i!=row){
       for(j=Tabdat.MinCol();j<=Tabdat.MaxCol();++j){
 	if(j!=col){
-	  Tabdat(i,j) = (Tabdat(row,col)*Tabdat(i,j))-(Tabdat(row,j)*Tabdat(i,col));
-	  Tabdat(i,j) /= gRational(denom);
+	  Tabdat(i,j) = (Tabdat(row,col)*Tabdat(i,j)-Tabdat(row,j)*Tabdat(i,col))/denom;
 	}
       }
-      Coeff[i] = (Tabdat(row,col)*Coeff[i])-(Coeff[row]*Tabdat(i,col));
-      Coeff[i] /= gRational(denom);
+      Coeff[i] = (Tabdat(row,col)*Coeff[i]-Coeff[row]*Tabdat(i,col))/denom;
     }
   }
   // Step 2
@@ -133,6 +148,7 @@ void Tableau<gRational>::Pivot(int outrow,int in_col)
 
   // BigDump(gout);
   npivots++;
+
   basis.Pivot(outrow,in_col);
   nonbasic[col] = outlabel;
   
@@ -146,12 +162,8 @@ void Tableau<gRational>::Pivot(int outrow,int in_col)
 
 }
 
-
 void Tableau<gRational>::SolveColumn(int in_col, gVector<gRational> &out)
 {
-  // gout << "\nTableau<gRational>::SolveColumn  " << MinRow() << " " << MaxRow(); 
-  // gout << " col: " << in_col;
-  int col;
   gVector<gInteger> tempcol(out.First(),out.Last());
   
   if(Member(in_col)) {
@@ -159,12 +171,79 @@ void Tableau<gRational>::SolveColumn(int in_col, gVector<gRational> &out)
     out[Find(in_col)] = denom*sign(denom*totdenom);
   }
   else {
-    col = remap(in_col);
+    int col = remap(in_col);
     Tabdat.GetColumn(col,tempcol);
     for(int i=tempcol.First();i<=tempcol.Last();i++)
       out[i] = (gRational)(tempcol[i]) * (gRational)(sign(denom*totdenom));
-    //    out *= sign(denom*totdenom);
   }
+}
+
+void Tableau<gRational>::Refactor()
+{ }
+
+void Tableau<gRational>::SetRefactor(int)
+{ }
+
+void Tableau<gRational>::SetConst(const gVector<gRational> &bnew)
+{
+  b=&bnew;
+  //** this will have to be changed -- Need to start over and re-solve
+  //** current basis with bnew.  Here is where vertenum probably screws up (RDM)
+  // B.solve(*b, solution);
+}
+
+
+//** this function is not currently used.  Drop it?
+void Tableau<gRational>::SetBasis(const Basis<gRational> &in)
+{
+  basis= in;
+  //** this has to be changed -- Need to start over and pivot to new basis.  
+  // B.refactor();
+  // B.solve(*b, solution);
+}
+
+ // solve M x = b
+void Tableau<gRational>::Solve(const gVector<gRational> &b, gVector<gRational> &x) const
+{
+  //** Note --- commenting this out breaks LP<gRational> for now
+  //** need to add private GetInverse() function to get V = M^(-1) (M inverse)
+  //** then do x = V * b
+  // B.solve(b,x);
+}
+
+ // solve y M = c
+void Tableau<gRational>::SolveT(const gVector<gRational> &c, gVector<gRational> &y) const
+{
+  //** Note --- commenting this out breaks LP<gRational> for now
+  //** need to add private GetInverse() function to get V = M^(-1) (M inverse)
+  //** then do y = b * V
+  // B.solveT(c,y);
+}
+
+bool Tableau<gRational>::IsFeasible()
+{
+  // B.solve(*b, solution);
+  for(int i=solution.First();i<=solution.Last();i++)
+    if(solution[i]>=eps2) return false;
+  return true;
+}
+
+bool Tableau<gRational>::IsLexMin()
+{
+  int i,j;
+  for(i=MinRow();i<=MaxRow();i++)
+    if(EqZero(solution[i]))
+      for(j=-MaxRow();j<Label(i);j++) if(j!=0){
+	SolveColumn(j,tmpcol);
+	if(LtZero(tmpcol[i]))
+	  return 0;
+      }
+  return 1;
+}
+
+gOutput &operator<<(gOutput &to, const Tableau<gRational> &v)
+{
+  v.Dump(to); return to;
 }
 
 
