@@ -431,7 +431,7 @@ Infoset *BaseExtForm::SwitchPlayer(Infoset *s, Player *p)
   
   if (s->player == p)   return s;
 
-  s->player->infosets.Remove(s->players->infosets.Find(s));
+  s->player->infosets.Remove(s->player->infosets.Find(s));
   s->player = p;
   p->infosets.Append(s);
 
