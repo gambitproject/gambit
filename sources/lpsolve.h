@@ -1,15 +1,20 @@
 //#
 //# FILE: lpsolve.h -- Linear program solution module
 //#
-//# $Id$
+//# @(#)lpsolve.h	2.1 3/24/97
 //#
 
 #ifndef LPSOLVE_H
 #define LPSOLVE_H
 
 #include "tableau.h"
+#include "glist.h"
 #include "bfs.h"
 #include "gstatus.h"
+#include "gsmatrix.h"
+#include "vertenum.h"
+
+// #include "garray.h"
 
 //
 // This class implements a LP solver.  Its constructor takes as input a
@@ -28,9 +33,12 @@ private:
   int  well_formed, feasible, bounded, aborted, flag, nvars, neqns;
   T total_cost,eps1,eps2,eps3,tmin;
   BFS<T> opt_bfs,dual_bfs;
+  gList<BFS<T> > verts; // For GetAll
   const gMatrix<T> &A;   // needed?
   const gVector<T> &b, &c;  // needed?
   gMatrix<T> *AA;
+  gMatrix<T> *E; // For GetAll
+  gVector<T> *f; // For GetAll
   LPTableau<T> *tab;
   gVector<int> *UB, *LB;
   gVector<T> *ub, *lb, *xx, *cost; 
@@ -51,6 +59,7 @@ public:
   
   T OptimumCost(void) const;
   const gVector<T> &OptimumVector(void) const;
+  const gList< BFS<T> > &GetAll(void);
   
   int IsAborted(void) const;
   int IsWellFormed(void) const;

@@ -1,7 +1,7 @@
 //
 //# FILE: lpsolve.imp -- Implementation of LP solver
 //#
-//# $Id$ 
+//# @(#)lpsolve.imp	2.1 3/24/97 
 //#
 
 #include "lpsolve.h"
@@ -220,7 +220,7 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
       opt_bfs.Define(-i,dual_bfs(-i));
 
    // gout << "\n--- End LPSolve ---\n";
-  
+
 }
 
 //template <class T> LPSolve<T>::
@@ -409,6 +409,155 @@ template <class T> T LPSolve<T>::OptimumCost(void) const
 template <class T> const gVector<T> &LPSolve<T>::OptimumVector(void) const
 {
   return (*xx);
+}
+
+template <class T> const gList<BFS <T> > &LPSolve<T>::GetAll(void)
+{
+    // These will be the data sent to NewVertEnum
+  E = new gMatrix<T>(1 + A.NumRows() + A.NumColumns(),A.NumColumns());
+  f = new gVector<T>(1 + A.NumRows() + A.NumColumns());
+
+    // These keep track of where in E and f we are when constructing them
+  int i = E->MinRow();
+  int ii = f->First();
+
+    // Temporary variable
+  gArray<T> temp(A.NumColumns());
+
+    // Set first block of E to be A
+  for (int j = A.MinRow(); j<=A.MaxRow(); i++,j++)
+  {    
+    /*gout << "i: " << i << "\n";*/
+    A.GetRow(j,temp);
+    E->SetRow(i,temp);
+  }
+
+    // Set first block of f to be b
+  for (int j = b.First(); j<=b.Last(); ii++,j++)
+  {
+    (*f)[ii] = -b[j];
+  }
+
+    // Set next row of E to be (-c)
+  temp = c;
+  for (int j = temp.First(); j<=temp.Last(); j++)
+    temp[j] = -temp[j];
+  /*gout << "i: " << i << "\n";*/
+  E->SetRow(i,temp); 
+
+    // Set next element of f
+  gVector<T> temp2(c.Length());
+  int k=xx->First();
+  for (int j=temp2.First(); j<=temp2.Last(); j++, k++)
+    temp2[j] = (*xx)[k];
+  (*f)[ii] = (c * temp2);
+
+    // Increment counters for above row
+  i++;ii++;
+
+    // Create SquareMatrices Ident and NegIdent, n by n ident matrices.
+  gSquareMatrix<T> Ident(A.NumColumns());
+  Ident.MakeIdent();
+  gSquareMatrix<T> NegIdent(-Ident);
+
+
+    // Set last block of E to be Negident, last of f to be 0
+  for (int j = NegIdent.MinRow(); j<=NegIdent.MaxRow(); i++,j++,ii++)
+  {
+    /*gout << "i: " << i << "\n";*/
+    NegIdent.GetRow(j,temp);
+    E->SetRow(i,temp);
+    (*f)[ii] = 0;
+  }
+
+    // Because VertEnum must remain general for all given matrices, then VE 
+    // cannot access full_bfs to determine an appropriate basis.  Instead,
+    // E and f will be arranged such that the first n elements/rows form the
+    // independent basis, so that VE will pick them.
+
+    // Get full_bfs, which will tell me which rows to put first.
+  BFS<T> full_bfs;
+  full_bfs = tab->GetBFS1();
+
+    // Print out some useful stuff.
+  //gout << "Full_BFS: \n" << full_bfs << "\n\n";
+  //full_bfs.Dump(gout);
+  //gout << "\n\n";
+  //gout << "E: \n"    << (*E)    << "\n\n";
+
+    // Temporary variable of type T.
+  T ttemp;
+
+    //   Rearrange rows: This goes in two parts, depending on how the row must
+    // be looked up.
+
+    // FIrst replace basic elements in the first N rows with non-basic rows
+    // between the Nth and Kth rows.
+  int row1, row2;
+  for (row1=1, row2=(A.NumColumns()+1);  
+                          row1<=A.NumColumns() && row2<=A.NumRows();     row1++)
+  {
+    //gout << "Row1: " << row1 << "\n";
+    if (full_bfs.IsDefined(-row1))
+    {
+      while (full_bfs.IsDefined(-row2))
+        row2++;
+
+      if(row2 > A.NumRows())
+	break;
+
+        // Switch here
+      E->SwitchRows(row1, row2);
+      ttemp = ((*f)[row1]);
+      (*f)[row1] = (*f)[row2];
+      (*f)[row2] = ttemp;
+
+      //gout << "Switched row " << row1 << " for row " << row2 << "\n";
+
+      row2++;
+    }
+  }
+
+    // Now replace basic rows in the first N rows with non-basic rows in
+    // the interval [K+1,K+N+1].
+  for (row2=1; row1<=A.NumColumns(); row1++)
+  {
+    if (full_bfs.IsDefined(-row1))
+    {
+      while (full_bfs.IsDefined(row2))
+        row2++;
+
+        // Switch here
+      E->SwitchRows(row1, (row2 + A.NumRows() + 1) );
+      ttemp = ((*f)[row1]);
+      (*f)[row1] = (*f)[row2 + A.NumRows() + 1];
+      (*f)[row2 + A.NumRows() + 1] = ttemp;
+
+      //gout << "Switched row " << row1 << " for row ";
+      //gout << (row2 + A.NumRows() + 1) << "\n";
+
+      row2++;
+    }
+  }
+
+
+    // Output useful information
+  //gout << "A: \n"    << A       << "\n\n";
+  //gout << "b: \n"    << b       << "\n\n";
+  //gout << "c: \n"    << c       << "\n\n";
+  //gout << "xx: \n"   << (*xx)   << "\n\n";
+  //gout << "E: \n"    << (*E)    << "\n\n";
+  //gout << "f: \n"    << (*f)    << "\n\n";
+
+  NewVertEnum<T> AllSolutions((*E),(*f),temp2,status);
+
+  gList<BFS<T> > *vErts = new gList<BFS<T> >(AllSolutions.VertexList());
+
+  gout << "Here are the vertices: \n";
+  vErts->Dump(gout);
+  gout << "\n\n";
+  
+  return (*vErts);
 }
 
 template <class T> int LPSolve<T>::IsFeasible(void) const
