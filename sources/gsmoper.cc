@@ -92,7 +92,7 @@ Portion* GSM_Randomize_Number(Portion** param)
 //              Assign
 //-------------------------------------------
 
-
+/*
 Portion* GSM_Assign(Portion** param)
 {
   Portion* p = 0;
@@ -115,7 +115,7 @@ Portion* GSM_UnAssign(Portion** param)
 {
   return _gsm->UnAssignExt(param[0]);
 }
-
+*/
 Portion* GSM_Fake(Portion**)
 {
   assert(0);
@@ -3228,6 +3228,7 @@ void Init_gsmoper(GSM* gsm)
 
 
 
+/*
   FuncObj = new FuncDescObj("Assign", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Assign, porANYTYPE, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT));
@@ -3240,6 +3241,7 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT));
   gsm->AddFunction(FuncObj);
 
+  */
 
   FuncObj = new FuncDescObj("Date", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Date, porTEXT, 0));
