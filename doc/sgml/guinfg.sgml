@@ -163,4 +163,27 @@ small size.
 
 </sect2>
 
+<sect2 id="gui.nfg.file.export">
+<title>Exporting normal forms to other formats</title>
+
+<para>
+Normal form games can be exported to other formats for use with
+other applications.  The export options are available on the
+<guisubmenu>Export</guisubmenu> submenu on the <guimenu>File</guimenu>
+menu.  These include:
+<itemizedlist>
+<listitem>
+<para>
+<guimenuitem>HTML</guimenuitem>: Exports the game as a series of tables
+in HTML format.  The current row and column players are used in generating
+the tables, with successive tables used to indicate outcomes for 
+different strategy choices of the other players, if the game has more than
+two players.  A dialog prompts for the file in which to save the output.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</sect2>
+
 </sect1>
