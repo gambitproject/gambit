@@ -8,19 +8,6 @@ This needs to be added.  It should be added as an additional checkbox
 in both the standard solution settings, and in the custom algorithms.
 The Rational setting should be greyed out when not available.
 
-Bug D2: Greying out of efg window when solving
-
-When you launch a solution algorithm, in the GUI (observed on Linux),
-it greys out the menu options in the extensive form window and hangs.
-t seems to only happen when solving from the extensive form.  It
-happens on all of the extensive form algorithms I checked except
-EnumMixedSolve, and it happens even if you don't cancel the
-algorithm. It looks like it is not returning correctly from the
-solution algorithm once it completes the computation. I didn't notice
-the problem on any of the Normal form games I tried to solve, but I
-did not test all of the algorithms.
-
-
 Bug D3: Bugs in Outcome interface
 
 When filling in payoffs for outcomes in the extensive form outcome
@@ -44,36 +31,6 @@ Outcomes->Opt->Long/CompactFormat setting.
 
 
 -------------  older bugs that still need to be checked out ---------------
-
-GUI Bug 2: Solving a blank EFG causes assertion failure.  
-
-On Fri, 6 Mar 1998, Olson Collin K wrote:
-
-> Just out of curiosity, I tried to solve a fresh EF game palate and
-> received
-> 
-> Assert: support IsValid()
-> in file: EFG.CC, line 1058
-> 
-
-
-
-
-GUI Bug 3:  Game with no players?
-
-On Sat, 31 May 1997, Timothy Purcell wrote:
-
-> I've just downloaded a copy of Gambit (fantastic program btw.)
-> I was playing a rather innocuous extensive form game
-> 
-> node1(0.45,0.55)
-> node2(0.4,0.3,0.3) -off the 0.45 prob branch
-> node3(0.333,0.333,0.333) -off the 0.55 prob branch
-> 
-> and ran into an "Assertion failed" error.
-> 
-> the bug report was "Assert:SupportIsValid() in file EFG, line=1038"
-> 
 
 GUI Bug 4: Changing payoffs to a normal form game. 
 
