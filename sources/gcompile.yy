@@ -55,7 +55,6 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
   gInteger ival; \
   double dval; \
   gString tval, formal, funcname, paramtype, functype;  \
-  Portion* por; \
   gList<NewInstr*> program, *function; \
   gList<gString> formals, types; \
   gList<bool> refs; \
@@ -81,7 +80,7 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
   int Parse(void); \
   void Execute(void);
 
-%define CONSTRUCTOR_INIT     : por(0), function(0), formalstack(4), \
+%define CONSTRUCTOR_INIT     : function(0), formalstack(4), \
                                labels(4), \
                                listlen(4), matching(4), \
                                filenames(4), lines(4), \
@@ -206,8 +205,25 @@ formalparam:  NAME { formals.Append(tval); } binding
               { types.Append(paramtype); portions.Append(NO_DEFAULT_VALUE); } 
             | LBRACE NAME { formals.Append(tval); } binding
               { paramtype = ""; types.Append(paramtype); }
-              E9 { portions.Append(por); por = 0; } 
-              RBRACE
+              paramE9  RBRACE
+
+paramE9:      BOOLEAN { portions.Append( new BoolValPortion(bval) ); }
+  |           INTEGER { portions.Append( new IntValPortion(ival.as_long()) ); }
+  |           FLOAT   { portions.Append(  new FloatValPortion(dval) ); }
+  |           PLUS INTEGER  
+                   { portions.Append(  new IntValPortion(-ival.as_long()) ); }
+  |           PLUS FLOAT    
+                   { portions.Append(  new FloatValPortion(-dval) ); }
+  |           MINUS INTEGER  
+                   { portions.Append( new IntValPortion(-ival.as_long()) ); }
+  |           MINUS FLOAT    
+                   { portions.Append( new FloatValPortion(-dval) ); }
+  |           TEXT     { portions.Append(  new TextValPortion(tval) ); }
+  |           STDIN    { portions.Append(  new InputRefPortion(gin) ); }
+  |           STDOUT   { portions.Append(  new OutputRefPortion(gout) ); }
+  |           gNULL    { portions.Append(  new OutputRefPortion(gnull) ); }
+  ;
+
 
 typename:     starname
             | NAME { paramtype += tval; } optparen
@@ -388,7 +404,7 @@ E7:           E8
 		 { emit(new NewInstr(iSUBSCRIPT)); }
   ;
 
-E8:           E9            { delete por; }
+E8:           E9   
   |           LPAREN expression RPAREN
   |           NAME          { emit(new NewInstr(iPUSHREF, tval)); }
   |           function      { emit(new NewInstr(iCALL_FUNCTION)); }
@@ -396,20 +412,13 @@ E8:           E9            { delete por; }
                                 (long) listlen.Pop())); }
   ;
 
-E9:           BOOLEAN  { emit(new NewInstr(iPUSH_BOOL, bval));
-                         por = new BoolValPortion(bval); }
-  |           INTEGER  { emit(new NewInstr(iPUSH_INTEGER, ival.as_long()));
-                         por = new IntValPortion(ival.as_long()); }
-  |           FLOAT    { emit(new NewInstr(iPUSH_FLOAT, dval));
-                         por = new FloatValPortion(dval); }
-  |           TEXT     { emit(new NewInstr(iPUSH_TEXT, tval));
-                         por = new TextValPortion(tval); }
-  |           STDIN    { emit(new NewInstr(iPUSHINPUT, &gin));
-                         por = new InputRefPortion(gin); }
-  |           STDOUT   { emit(new NewInstr(iPUSHOUTPUT, &gout));
-                         por = new OutputRefPortion(gout); }
-  |           gNULL    { emit(new NewInstr(iPUSHOUTPUT, &gnull));
-                         por = new OutputRefPortion(gnull); }
+E9:           BOOLEAN  { emit(new NewInstr(iPUSH_BOOL, bval)); }
+  |           INTEGER  { emit(new NewInstr(iPUSH_INTEGER, ival.as_long())); }
+  |           FLOAT    { emit(new NewInstr(iPUSH_FLOAT, dval)); }
+  |           TEXT     { emit(new NewInstr(iPUSH_TEXT, tval)); }
+  |           STDIN    { emit(new NewInstr(iPUSHINPUT, &gin)); }
+  |           STDOUT   { emit(new NewInstr(iPUSHOUTPUT, &gout)); }
+  |           gNULL    { emit(new NewInstr(iPUSHOUTPUT, &gnull)); }
   ;
 
 function:     NAME LBRACK { emit(new NewInstr(iINIT_CALL_FUNCTION, tval)); } 
