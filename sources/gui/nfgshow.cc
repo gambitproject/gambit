@@ -214,9 +214,6 @@ gbtNfgFrame::gbtNfgFrame(gbtGameDocument *p_doc, wxWindow *p_parent)
   topSizer->SetSizeHints(this);
   Layout();
 
-  m_doc->SetShowNfg(true);
-  Show(true);
-
   m_doc->UpdateViews();
 }
 

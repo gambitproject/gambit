@@ -963,12 +963,6 @@ public:
   void RealizationProbs(const gbtMixedProfileTree<T> &,
 			int pl, const gbtArray<int> &, const gbtGameNode &);
 
-  class BadStuff : public gbtException  {
-  public:
-    virtual ~BadStuff();
-    gbtText Description(void) const;
-  };
-
   // CONSTRUCTORS, DESTRUCTOR
   gbtBehavProfileBase(const gbtEfgSupportBase &);
   gbtBehavProfileBase(const gbtBehavProfileBase<T> &);

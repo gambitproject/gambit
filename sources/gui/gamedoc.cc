@@ -39,7 +39,7 @@ gbtGameDocument::gbtGameDocument(gbtGame p_game, wxString p_filename)
   : m_filename(p_filename), m_modified(false),
     m_showOutcomes(false), m_showProfiles(false),
     m_showEfgSupports(false), m_showEfgNavigate(false),
-    m_showNfg(false), m_showNfgSupports(false),
+    m_showNfg(p_game->IsMatrix()), m_showNfgSupports(false),
     m_game(p_game), 
     m_cursor(0), m_copyNode(0), m_cutNode(0),
     m_efgSupports(this),
@@ -49,6 +49,8 @@ gbtGameDocument::gbtGameDocument(gbtGame p_game, wxString p_filename)
     m_curProfile(0)
 {
   for (int pl = 1; pl <= m_game->NumPlayers(); m_contingency[pl++] = 1);
+  m_behavProfiles.Append(gbtBehavNashSet());
+  m_mixedProfiles.Append(gbtMixedNashSet());
 }
 
 gbtGameDocument::~gbtGameDocument()

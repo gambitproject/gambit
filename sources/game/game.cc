@@ -1272,7 +1272,7 @@ static int Product(const gbtArray<int> &p_dim)
 gbtGameBase::gbtGameBase(const gbtArray<int> &p_dim)
   : sortisets(false), m_results(Product(p_dim)), root(0), chance(0)
 {
-  for (int pl = 1; pl <= m_players.Length(); pl++)  {
+  for (int pl = 1; pl <= p_dim.Length(); pl++)  {
     m_players.Append(new gbtGamePlayerBase(this, pl));
     m_players[pl]->m_label = ToText(pl);
     m_players[pl]->m_infosets.Append(new gbtGameInfosetBase(m_players[pl],

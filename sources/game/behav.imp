@@ -763,23 +763,40 @@ gbtBehavProfileBase<T>::operator gbtMixedProfile<T>(void) const
   return gbtMixedProfile<T>(new gbtMixedProfileTree<T>(*this));
 }
 
-// FIXME: NewBehavProfile() should preserve the values of the profile
-template <class T>
-gbtBehavProfile<double> gbtBehavProfileBase<T>::NewBehavProfile(double) const
+template <class T> gbtBehavProfile<double> 
+gbtBehavProfileBase<T>::NewBehavProfile(double) const
 {
-  return new gbtBehavProfileBase<double>(*m_support);
+  gbtBehavProfileBase<double> *profile = 
+    new gbtBehavProfileBase<double>(*m_support);
+  for (int i = 1; i <= BehavProfileLength(); i++) {
+    (*profile)[i] = (double) m_profile[i];
+  }
+
+  return profile;
 }
 
 template <class T> gbtBehavProfile<gbtRational>
 gbtBehavProfileBase<T>::NewBehavProfile(const gbtRational &) const
 {
-  return new gbtBehavProfileBase<gbtRational>(*m_support);
+  gbtBehavProfileBase<gbtRational> *profile = 
+    new gbtBehavProfileBase<gbtRational>(*m_support);
+  for (int i = 1; i <= BehavProfileLength(); i++) {
+    (*profile)[i] = m_profile[i];
+  }
+
+  return profile;
 }
 
-template <class T> gbtBehavProfile<gbtNumber>
+template <class T> gbtBehavProfile<gbtNumber> 
 gbtBehavProfileBase<T>::NewBehavProfile(const gbtNumber &) const
 {
-  return new gbtBehavProfileBase<gbtNumber>(*m_support);
+  gbtBehavProfileBase<gbtNumber> *profile = 
+    new gbtBehavProfileBase<gbtNumber>(*m_support);
+  for (int i = 1; i <= BehavProfileLength(); i++) {
+    (*profile)[i] = gbtNumber(m_profile[i]);
+  }
+
+  return profile;
 }
 
 
@@ -790,20 +807,12 @@ template <class T> void gbtBehavProfileBase<T>::Dump(gbtOutput &p_file) const
 
 
 
-template <class T> gbtBehavProfileBase<T>::BadStuff::~BadStuff()
-{ }
-
-template <class T> gbtText gbtBehavProfileBase<T>::BadStuff::Description(void) const
-{
-  return "Solution not installed in gbtBehavProfileRep";
-}
-
 //-----------------
 //   Output
 //-----------------
 
 template <class T> gbtOutput &operator<<(gbtOutput &p_file,
-				       const gbtBehavProfile<T> &p_profile)
+					 const gbtBehavProfile<T> &p_profile)
 {
   return p_file;
 }

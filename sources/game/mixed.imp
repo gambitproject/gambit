@@ -347,24 +347,40 @@ gbtMixedProfileTable<T> *gbtMixedProfileTable<T>::Copy(void) const
 }
 
 
-// FIXME: Semantics of these should be "copy-like", in that the returned
-// profile should be the same, up to the precision change
 template <class T> gbtMixedProfile<double> 
 gbtMixedProfileTable<T>::NewMixedProfile(double) const
 {
-  return new gbtMixedProfileTable<double>(*m_support);
+  gbtMixedProfileTable<double> *profile = 
+    new gbtMixedProfileTable<double>(*m_support);
+  for (int i = 1; i <= MixedProfileLength(); i++) {
+    (*profile)[i] = (double) m_profile[i];
+  }
+
+  return profile;
 }
 
 template <class T> gbtMixedProfile<gbtRational>
 gbtMixedProfileTable<T>::NewMixedProfile(const gbtRational &) const
 {
-  return new gbtMixedProfileTable<gbtRational>(*m_support);
+  gbtMixedProfileTable<gbtRational> *profile = 
+    new gbtMixedProfileTable<gbtRational>(*m_support);
+  for (int i = 1; i <= MixedProfileLength(); i++) {
+    (*profile)[i] = m_profile[i];
+  }
+
+  return profile;
 }
 
 template <class T> gbtMixedProfile<gbtNumber>
 gbtMixedProfileTable<T>::NewMixedProfile(const gbtNumber &) const
 {
-  return new gbtMixedProfileTable<gbtNumber>(*m_support);
+  gbtMixedProfileTable<gbtNumber> *profile = 
+    new gbtMixedProfileTable<gbtNumber>(*m_support);
+  for (int i = 1; i <= MixedProfileLength(); i++) {
+    (*profile)[i] = gbtNumber(m_profile[i]);
+  }
+
+  return profile;
 }
 
 template <class T>
@@ -503,24 +519,40 @@ gbtMixedProfileTree<T>::operator()(const gbtGameStrategy &p_strategy) const
   return m_profile(p_strategy->GetPlayer()->GetId(), p_strategy->GetId());
 }
 
-// FIXME: Semantics of these should be "copy-like", in that the returned
-// profile should be the same, up to the precision change
 template <class T> gbtMixedProfile<double> 
 gbtMixedProfileTree<T>::NewMixedProfile(double) const
 {
-  return new gbtMixedProfileTree<double>(*m_efgSupport);
+  gbtMixedProfileTree<double> *profile = 
+    new gbtMixedProfileTree<double>(*m_efgSupport);
+  for (int i = 1; i <= MixedProfileLength(); i++) {
+    (*profile)[i] = (double) m_profile[i];
+  }
+
+  return profile;
 }
 
 template <class T> gbtMixedProfile<gbtRational>
 gbtMixedProfileTree<T>::NewMixedProfile(const gbtRational &) const
 {
-  return new gbtMixedProfileTree<gbtRational>(*m_efgSupport);
+  gbtMixedProfileTree<gbtRational> *profile = 
+    new gbtMixedProfileTree<gbtRational>(*m_efgSupport);
+  for (int i = 1; i <= MixedProfileLength(); i++) {
+    (*profile)[i] = m_profile[i];
+  }
+
+  return profile;
 }
 
 template <class T> gbtMixedProfile<gbtNumber>
 gbtMixedProfileTree<T>::NewMixedProfile(const gbtNumber &) const
 {
-  return new gbtMixedProfileTree<gbtNumber>(*m_efgSupport);
+  gbtMixedProfileTree<gbtNumber> *profile = 
+    new gbtMixedProfileTree<gbtNumber>(*m_efgSupport);
+  for (int i = 1; i <= MixedProfileLength(); i++) {
+    (*profile)[i] = gbtNumber(m_profile[i]);
+  }
+
+  return profile;
 }
 
 template <class T>
