@@ -13,6 +13,7 @@
 #include "gstring.h"
 #include "rational.h"
 #include "glist.h"
+#include "ggrstack.h"
 #include "gsm.h"
 #include "gsminstr.h"
 
