@@ -146,14 +146,14 @@ template <class T>
 void PureBehavProfile<T>::Payoff(gArray<T> &payoff) const
 {
   for (int pl = 1; pl <= payoff.Length(); payoff[pl++] = (T) 0);
-  Payoff(E->RootNode(), (T) 1.0, payoff);
+  Payoff(E->RootNode(), (T) 1, payoff);
 }
 
 template <class T>
 void PureBehavProfile<T>::InfosetProbs(gPVector<T> &probs) const
 {
   ((gVector<T> &) probs).operator=((T) 0);
-  InfosetProbs(E->RootNode(), (T) 1.0, probs);
+  InfosetProbs(E->RootNode(), (T) 1, probs);
 }
 
 
@@ -392,8 +392,8 @@ void BehavProfile<T>::Payoff(Node *n, T prob, int pl, T &value) const
 
 template <class T> T BehavProfile<T>::Payoff(int pl) const
 {
-  T value = (T) 0.0;
-  Payoff(E->RootNode(), (T) 1.0, pl, value);
+  T value = (T) 0;
+  Payoff(E->RootNode(), (T) 1, pl, value);
   return value;
 }
 
@@ -471,7 +471,7 @@ void BehavProfile<T>::CondPayoff(gDPVector<T> &payoff,
   ((gVector<T> &) probs).operator=((T) 0);
 
   root->scratch = (T) 0;
-  CondPayoff(root, (T) 1.0, probs, payoff);
+  CondPayoff(root, (T) 1, probs, payoff);
 
   for (int i = 1; i <= E->NumPlayers(); i++)
     for (int j = 1; j <= (E->Players())[i]->infosets.Length(); j++)
@@ -482,7 +482,7 @@ void BehavProfile<T>::CondPayoff(gDPVector<T> &payoff,
 	// is probably not in general what we want.
 	// CondPayoff() was designed for use with Gobit in which case
 	// this doesn't happen. (?)   -- Ted
-	if (probs(i,j) != (T) 0.0)
+	if (probs(i,j) != (T) 0)
 	  payoff(i, j, k) /= probs(i, j);
 }
 
@@ -539,7 +539,7 @@ gArray<T> BehavProfile<T>::NodeRealizProbs(void) const
 
   gArray<T> NRProbs(maxindex);
   for (int ii = 1; ii <= maxindex; ii++) NRProbs[ii] = (T)0;
-  NodeRealizProbs(root, (T) 1.0, index, NRProbs);
+  NodeRealizProbs(root, (T) 1, index, NRProbs);
   return NRProbs;
 }
 
@@ -613,7 +613,7 @@ void BehavProfile<T>::NodeValues(BehavNode<T> *n, int pl,
   for (child = 1; child <= n->children.Length(); child++)
     n->children[child]->nval = n->nval;
  
-  T value = (T) 0.0;
+  T value = (T) 0;
   
   if (n->node->infoset == 0)   {
     valarray[tindex] = n->nval;
@@ -656,7 +656,7 @@ gArray<T> BehavProfile<T>::NodeValues(int pl) const
 
   gArray<T> valarray(maxindex); 
   for (int i = 1; i <= maxindex; i++)  valarray[i] = (T) 0;
-  root->nval = (T) 0.0;
+  root->nval = (T) 0;
 
   NodeValues(root, pl, valarray, index);
   return valarray;
