@@ -1584,21 +1584,18 @@ void TreeWindow::node_add(void)
   dialogMoveAdd dialog(ef, player, infoset, branches, pframe);
 
   if (dialog.Completed() == wxOK)  {
-    nodes_changed = TRUE;
     NodeAddMode mode = dialog.GetAddMode();
     player = dialog.GetPlayer();
     infoset = dialog.GetInfoset();
     branches = dialog.GetActions();
 
     try {
-      if (mode == NodeAddNew) {
+      if (mode == NodeAddNew) 
 	ef.AppendNode(Cursor(), player, branches);
-      }
       else
 	ef.AppendNode(Cursor(), infoset);
 
-      if (player == ef.GetChance())
-	action_probs();
+    nodes_changed = true;
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), pframe);
@@ -1626,24 +1623,19 @@ void TreeWindow::node_insert(void)
   dialogMoveAdd dialog(ef, player, infoset, branches, pframe);
 
   if (dialog.Completed() == wxOK)  {
-    nodes_changed = TRUE;
     NodeAddMode mode = dialog.GetAddMode();
     player = dialog.GetPlayer();
     infoset = dialog.GetInfoset();
     branches = dialog.GetActions();
 
     try {
-      if (mode == NodeAddNew) {
+      if (mode == NodeAddNew) 
 	ef.InsertNode(Cursor(), player, branches);
-      }
       else
 	ef.InsertNode(Cursor(), infoset);
 
+      nodes_changed = true;
       SetCursorPosition(Cursor()->GetParent());
-
-      // take care of probs for chance nodes.
-      if (player == ef.GetChance())
-	action_probs();
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), pframe);

@@ -331,6 +331,12 @@ gNumber FromText(const gText &s,gNumber &n)
   return n;
 }
 
+gNumber ToNumber(const gText &p_string)
+{
+  gNumber tmp;
+  return FromText(p_string, tmp);
+}
+
 gText EscapeQuotes(const gText &s)
 {
   gText ret;

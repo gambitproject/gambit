@@ -71,11 +71,11 @@ gText ToText(const gInteger &);
 gText ToText(const gRational &, bool approx = true);
 gText ToText(const gNumber &);
 
-double		FromText(const gText &s,double &d);
-gRational	FromText(const gText &s,gRational &r);
-gNumber		FromText(const gText &s,gNumber &n);
-double		ToDouble(const gText &);
-
+double FromText(const gText &, double &);
+gRational FromText(const gText &, gRational &);
+gNumber	FromText(const gText &, gNumber &);
+double ToDouble(const gText &);
+gNumber ToNumber(const gText &);    
 
 //
 /// Return a copy of the string with all quotes preceded by a backslash

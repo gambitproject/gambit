@@ -435,7 +435,7 @@ dialogActionProbs::dialogActionProbs(Infoset *p_infoset, wxWindow *p_parent)
 void dialogActionProbs::OnOK(void)
 {
   m_completed = wxOK;
-  m_actionProbs[m_actionList->GetSelection() + 1] = ToDouble(m_actionProb->GetValue());
+  m_actionProbs[m_actionList->GetSelection() + 1] = ToNumber(m_actionProb->GetValue());
   Show(FALSE);
 }
 
@@ -456,7 +456,7 @@ void dialogActionProbs::OnAction(int p_action)
 {
   if (p_action == m_lastSelection)  return;
   m_actionList->SetSelection(p_action);
-  m_actionProbs[m_lastSelection + 1] = ToDouble(m_actionProb->GetValue());
+  m_actionProbs[m_lastSelection + 1] = ToNumber(m_actionProb->GetValue());
   m_actionProb->SetValue(ToText(m_actionProbs[p_action + 1]));
   m_lastSelection = p_action;
 }
