@@ -271,7 +271,7 @@ static Portion *GSM_EnumPure_Nfg(GSM &gsm, Portion **param)
   try {
     nfgEnumPure solver;
     solver.SetStopAfter(((NumberPortion *) param[1])->Value());
-    solver.Solve(*support, gsm.GetStatusMonitor(), solutions);
+    solutions = solver.Solve(*support, gsm.GetStatusMonitor());
     ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
   }
   catch (gSignalBreak &) { }

@@ -221,7 +221,7 @@ bool EnumPureNfg(wxWindow *p_parent,
     algorithm.SetStopAfter(dialog.StopAfter());
     wxStatus status(p_parent, "EnumPureSolve Progress");
     try {
-      algorithm.Solve(p_support, status, p_solutions);
+      p_solutions = algorithm.Solve(p_support, status);
     }
     catch (gSignalBreak &) { }
     return true;

@@ -1,7 +1,10 @@
 //
-// FILE: nfgpure.h -- Interface to pure-strategy Nash equilibrium finder
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Algorithm to compute pure strategy equilibria on normal forms
 //
 
 #ifndef NFGPURE_H
@@ -9,10 +12,9 @@
 
 #include "base/base.h"
 #include "base/gstatus.h"
-#include "game/nfg.h"
-#include "mixedsol.h"
+#include "nfgalgorithm.h"
 
-class nfgEnumPure {
+class nfgEnumPure : public nfgNashAlgorithm {
 private:
   int m_stopAfter;
 
@@ -23,7 +25,7 @@ public:
   int StopAfter(void) const { return m_stopAfter; }
   void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
 
-  void Solve(const NFSupport &, gStatus &, gList<MixedSolution> &);
+  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
 };
 
 #endif // NFGPURE_H

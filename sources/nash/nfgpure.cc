@@ -1,7 +1,10 @@
 //
-// FILE: nfgpure.cc -- Find all pure strategy Nash equilibria
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Algorithm to compute pure strategy equilibria on normal forms
 //
 
 #include "nfgpure.h"
@@ -10,12 +13,12 @@
 #include "game/nfg.h"
 #include "game/nfgiter.h"
 #include "game/nfgciter.h"
-#include "game/mixed.h"
 
-void nfgEnumPure::Solve(const NFSupport &p_support,
-			gStatus &p_status, gList<MixedSolution> &p_solutions)
+gList<MixedSolution> nfgEnumPure::Solve(const NFSupport &p_support,
+					gStatus &p_status)
 {
   const Nfg &nfg = p_support.Game();
+  gList<MixedSolution> solutions;
   NfgContIter citer(p_support);
 
   int ncont = 1;
@@ -50,10 +53,10 @@ void nfgEnumPure::Solve(const NFSupport &p_support,
 	temp(pl, profile[pl]) = 1;
       }
       
-      p_solutions.Append(MixedSolution(temp, algorithmNfg_ENUMPURE));
+      solutions.Append(MixedSolution(temp, algorithmNfg_ENUMPURE));
     }
     contNumber++;
-  }  while ((m_stopAfter == 0 || p_solutions.Length() < m_stopAfter) &&
+  }  while ((m_stopAfter == 0 || solutions.Length() < m_stopAfter) &&
 	    citer.NextContingency());
 }
 

@@ -18,7 +18,7 @@ void efgEnumPureNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   gList<MixedSolution> solutions;
   nfgEnumPure solver;
   solver.SetStopAfter(m_stopAfter);
-  solver.Solve(support, p_status, solutions);
+  solutions = solver.Solve(support, p_status);
 
   for (int i = 1; i <= solutions.Length(); i++)  {
     MixedProfile<gNumber> profile(*solutions[i].Profile());
