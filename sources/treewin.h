@@ -1,14 +1,14 @@
-#define DisplayDevice wxDC
 //
 // FILE: treewin.h -- Interface for TreeWindow class
 //
-// $Id$
+// @(#)treewin.h	1.4 4/7/94
 //
 
 #ifndef TREEWINDOW_H
 #define TREEWINDOW_H
-#include <string.h>
-#include "treecons.h"
+#include "treecons.h"		//	Default values for tree display
+#include "twiniter.h"
+#include "flasher.h"
 
 class TreeDrawParams   {
 friend class DisplayOptionsForm;
@@ -19,8 +19,7 @@ friend class DisplayOptionsForm;
     Bool show_labels,show_outcomes,show_infosets;
 	// These are used internally
   	int x_scroll,y_scroll;
-    ExtFormIter *iterator;
-    gRect window;
+		gRect window;
 
   public:
 		TreeDrawParams(void)
@@ -34,7 +33,6 @@ friend class DisplayOptionsForm;
 			strcpy(chance_color,CHANCE_COLOR_DEFAULT);
 			strcpy(cursor_color,CURSOR_COLOR_DEFAULT);
 			show_labels=TRUE;show_outcomes=TRUE;show_infosets=FALSE;
-			iterator=0;
 		}
 
 		void SetXOrigin(int xo)        { x_origin = xo; }
@@ -49,8 +47,8 @@ friend class DisplayOptionsForm;
 		char *ChanceColor(void) 		   { return chance_color; }
 		char *CursorColor(void) 		   { return cursor_color; }
 
-    void SetIterator(ExtFormIter *i)     { iterator = i; }
-    ExtFormIter *Iterator(void) const    { return iterator; }
+//    void SetIterator(ExtFormIter *i)     { iterator = i; }
+//    ExtFormIter *Iterator(void) const    { return iterator; }
 
     void SetWindow(const gRect &r)    { window = r; }
 		gRect Window(void) const          { return window; }
@@ -74,75 +72,76 @@ typedef struct   {
 }  NodeEntry;
 
 
-class TreeNodeFlasher;
 
 class TreeWindow : public wxCanvas
 {
 friend class DisplayOptionsForm;
 		// Private variables
-		ExtForm *the_problem;
-    ExtFormIter *iterator;
-// TLT
-		Node mark_node;
-    TreeDrawParams draw_settings;
-		wxFrame *frame;				// parent frame
-		TreeNodeFlasher *_flasher;
-		// node_table has been moved here to facilitate the cursor and mouse control
-		NodeEntry *node_table;
+		Problem *the_problem;
+		wxFrame *frame;								// parent frame
+		Node mark_node;								// Used in mark/goto node operations
+		TreeDrawParams draw_settings;	// Stored drawing parameters
+    TreeWinIter *iterator;				// Used to process cursor keys
+		TreeNodeFlasher *flasher;			// Used to flash the cursor
+		wxList *node_list;						// Data for display coordinates of nodes
 		float zoom_factor;
 
     // Private Functions
-// TLT
-		void RenderSubtree(DisplayDevice &, Node &, NodeEntry *);
-		int TreeWindow::FillTable(NodeEntry *table, Node &n, int level);
-		void ProcessCursor(void);
-		void ProcessClick(int x,int y);
+		void 	RenderSubtree(wxDC &dc,const Node &n,wxList *node_list);
+		int 	FillTable(wxList *node_list,const Node &n, int level);
+		void 	ProcessCursor(void);
+		void 	ProcessClick(int x,int y);
+		long	NodeIndex(const Node &n) { return n[1]*100+n[2]*10+n[3];}
 	public:
-		TreeWindow(wxFrame *frame, int x, int y, int w, int h, ExtForm *p = 0,int style = wxRETAINED);
+		TreeWindow(wxFrame *frame, int x, int y, int w, int h, Problem *p = NULL,int style = wxRETAINED);
 		void OnPaint(void);
 		void OnEvent(wxMouseEvent& event);
     void OnChar(wxKeyEvent& ch);
 
-    int node_add(void);
-    int node_outcome(void);
-    int node_game(void);
-    int node_label(void);
-    int node_delete(void);
-    int node_insert(void);
-    int node_set_mark(void);
-    int node_goto_mark(void);
+		void node_add(void);
+		void node_outcome(void);
+		void node_game(void);
+		void node_label(void);
+		void node_delete(void);
+		void node_insert(void);
+		void node_set_mark(void);
+		void node_goto_mark(void);
 
-    int branch_label(void);
-    int branch_insert(void);
-    int branch_delete(void);
+		void branch_label(void);
+		void branch_insert(void);
+		void branch_delete(void);
 
-    int tree_delete(void);
-		int tree_copy(void);
-    int tree_label(void);
-		int tree_outcomes(void);
-		int tree_players(void);
+		void tree_delete(void);
+		void tree_copy(void);
+		void tree_label(void);
+		void tree_outcomes(void);
+		void tree_players(void);
 
-    int infoset_member(void);
-    int infoset_break(void);
-    int infoset_join(void);
+		void infoset_member(void);
+		void infoset_break(void);
+		void infoset_join(void);
 
-    int edit_outcome(void);
+    void edit_outcome(void);
 
-    gString Title(void) const   { return the_problem->TreeLabel(); }
+    gString Title(void) const   { return the_problem->GetTitle(); }
 
-		void Render(DisplayDevice &,int render_device);
+		void Render(wxDC &dc);
 		void SetZoom(void);
-    float GetZoom(void) {return zoom_factor;}
+		float GetZoom(void) {return zoom_factor;}
+
+		void	print_eps(void);			// output to postscript file
+		void	print(void);					// output to printer (WIN3.1 only)
+		void	print_mf(void);				// copy to clipboard (WIN3.1 only)
     ~TreeWindow();
 };
 
 class ExtensiveFrame : public wxFrame
 {
-  private:
+	private:
 
   public:
-		TreeWindow *tw;
-		ExtensiveFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int type, ExtForm * =0);
+		TreeWindow *tw;                                                                          
+		ExtensiveFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int type, Problem *p=NULL);
 		Bool OnClose(void);
 		void OnMenuCommand(int id);
     ~ExtensiveFrame();
@@ -153,7 +152,6 @@ class DisplayOptionsForm: public wxForm
  public:
 	void EditForm(TreeWindow *object, wxPanel *panel);
 };
-
 
 #endif   // TREEWINDOW_H
 

@@ -1,18 +1,20 @@
 //
 // FILE: gambit.cc -- Main program for Gambit GUI
 //
-// $Id$
+// @(#)gambit.cc	1.4 4/7/94
 //
 
 
 #include "wx.h"
 #include "wx_form.h"
 #include "extform.h"
+#include "display.h"
+#include "problem.h"
 #include "treewin.h"
 #include "const.h"
 #include "gambit.h"
 
-GambitFrame   *frame = NULL;
+GambitFrame   *gambit_frame = NULL;
 wxList 		my_children;
 wxCursor *arrow_cursor;
 GambitApp gambitApp;
@@ -33,7 +35,7 @@ wxFrame *GambitApp::OnInit(void)
 
 	arrow_cursor = new wxCursor(wxCURSOR_ARROW);
   // Create the main frame window
-	frame = new GambitFrame(NULL, "Gambit", 0, 0, 200, 100,wxMDI_PARENT | wxDEFAULT_FRAME);
+	gambit_frame = new GambitFrame(NULL, "Gambit", 0, 0, 200, 100,wxMDI_PARENT | wxDEFAULT_FRAME);
 
   // Give it an icon
 wxIcon *test_icon;
@@ -44,7 +46,7 @@ wxIcon *test_icon;
   test_icon = new wxIcon(aiai_bits, aiai_width, aiai_height);
 #endif
 
-  frame->SetIcon(test_icon);
+  gambit_frame->SetIcon(test_icon);
 
   // Make a menubar
 	wxMenu *file_menu = new wxMenu;
@@ -56,14 +58,14 @@ wxIcon *test_icon;
 	menu_bar->Append(file_menu, "&File");
 
   // Associate the menu bar with the frame
-  frame->SetMenuBar(menu_bar);
+  gambit_frame->SetMenuBar(menu_bar);
 
 //  wxCursor *cursor = new wxCursor(wxCURSOR_POINTER);
 //	frame->SetCursor(cursor);
 
 
   // Return the main frame window
-  return frame;
+	return gambit_frame;
 }
 
 // Define my frame constructor
@@ -115,7 +117,7 @@ void GambitFrame::OnMenuCommand(int id)
       break;
 		case FILE_NEW:
 		{
-			ExtensiveFrame *ef = new ExtensiveFrame(frame,"NEW",50,50,500,300,wxDEFAULT_FRAME);
+			ExtensiveFrame *ef = new ExtensiveFrame(gambit_frame,"NEW",50,50,500,300,wxDEFAULT_FRAME);
 			break;
 		}
 	}
