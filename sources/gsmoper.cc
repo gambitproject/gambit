@@ -883,7 +883,7 @@ Portion* GSM_NewInputStream( Portion** param )
 Portion* GSM_Write_numerical( Portion** param )
 {
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
-  s << param[ 1 ] << "\n";
+  s << param[ 1 ];
   return new OutputRefPortion( s );
 }
 
@@ -892,9 +892,9 @@ Portion* GSM_Write_gString( Portion** param )
 {
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
   if( ( (BoolPortion*) param[ 2 ] )->Value() )
-    s << param[ 1 ] << "\n";
+    s << param[ 1 ];
   else
-    s << ( (TextPortion*) param[ 1 ] )->Value() << "\n";
+    s << ( (TextPortion*) param[ 1 ] )->Value();
   return new OutputRefPortion( s );
 }
 
