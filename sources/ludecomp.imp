@@ -205,7 +205,7 @@ void LUdecomp<T>::apply(gVector<T> &v) const
   assert( mat.CheckColumn(v) );
 
   T tmp;
-  gListIter< LUupdate<T> > iter(updates);
+  gListIter< LUupdate<T> > iter((gList< LUupdate<T> > &) updates);
   for( iter.GoFirst(); ! iter.PastEnd(); iter++ )
     {
       LUupdate<T> *update= &iter.GetValue();
@@ -234,7 +234,7 @@ void LUdecomp<T>::applyT(gVector<T> &v) const
   assert( mat.CheckColumn(v) );
 
   T tmp;
-  gListIter< LUupdate<T> > iter(updates);
+  gListIter< LUupdate<T> > iter((gList< LUupdate<T> > &) updates);
   for( iter.GoLast(); !iter.PastBeginning(); iter--)
     {
       LUupdate<T> *update= &iter.GetValue();
@@ -264,7 +264,7 @@ void LUdecomp<T>::unapply(gVector<T> &v) const
   assert( mat.CheckColumn(v) );
 
   T tmp;
-  gListIter< LUupdate<T> > iter(updates);
+  gListIter< LUupdate<T> > iter((gList< LUupdate<T> > &) updates);
   for( iter.GoLast(); ! iter.PastBeginning(); iter-- )
     {
       LUupdate<T> update= iter.GetValue();
