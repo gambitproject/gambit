@@ -28,7 +28,7 @@ private:
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_USER; }    
   
 public:
-  SubgamePerfectChecker(const Efg &, const BehavProfile<gNumber> &, const gNumber & epsilon);
+  SubgamePerfectChecker(const Efg::Game &, const BehavProfile<gNumber> &, const gNumber & epsilon);
   virtual ~SubgamePerfectChecker();
   gTriState IsSubgamePerfect(void) {return isSubgamePerfect;}
 };
@@ -85,17 +85,17 @@ gOutput &operator<<(gOutput &p_file, EfgAlgType p_algorithm)
 
 BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
 			     EfgAlgType p_creator)
-  : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
+  : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.GetGame()))),
     m_precision(precDOUBLE),
     m_support(p_profile.Support()), m_creator(p_creator),
     m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
     m_epsilon(0.0), m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(), m_rnfRegret(), 
-    m_revision(p_profile.Game().RevisionNumber())
+    m_revision(p_profile.GetGame().RevisionNumber())
 {
   gEpsilon(m_epsilon);
-  for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
-    EFPlayer *player = Game().Players()[pl];  
+  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
+    EFPlayer *player = GetGame().Players()[pl];  
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       Infoset *infoset = player->Infosets()[iset];
       for (int act = 1; act <= infoset->NumActions(); act++) {
@@ -112,16 +112,16 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
 
 BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
 			     EfgAlgType p_creator)
-  : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
+  : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.GetGame()))),
     m_precision(precRATIONAL), 
     m_support(p_profile.Support()), m_creator(p_creator),
     m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
     m_qreLambda(-1), m_qreValue(-1), m_liapValue(), m_rnfRegret(), 
-    m_revision(p_profile.Game().RevisionNumber())
+    m_revision(p_profile.GetGame().RevisionNumber())
 {
   gEpsilon(m_epsilon);
-  for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
-    EFPlayer *player = Game().Players()[pl];  
+  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
+    EFPlayer *player = GetGame().Players()[pl];  
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       Infoset *infoset = player->Infosets()[iset];
       for (int act = 1; act <= infoset->NumActions(); act++) {
@@ -137,15 +137,15 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
 
 BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile, 
 			     EfgAlgType p_creator)
-  : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
+  : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.GetGame()))),
     m_precision(precRATIONAL),
     m_support(p_profile.Support()), m_creator(p_creator),
     m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
     m_qreLambda(-1), m_qreValue(-1), m_liapValue(), m_rnfRegret(), 
-    m_revision(p_profile.Game().RevisionNumber())
+    m_revision(p_profile.GetGame().RevisionNumber())
 {
-  for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
-    EFPlayer *player = Game().Players()[pl];  
+  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
+    EFPlayer *player = GetGame().Players()[pl];  
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       Infoset *infoset = player->Infosets()[iset];
       for (int act = 1; act <= infoset->NumActions(); act++) {
@@ -233,7 +233,7 @@ gTriState BehavSolution::GetANFNash(void) const
 gTriState BehavSolution::GetNash(void) const
 {
   gTriState answer = triUNKNOWN;
-  bool decomposes = HasSubgames(Game());
+  bool decomposes = HasSubgames(GetGame());
   // check subgame perfection if game decomposes (its faster)
   if(decomposes) 
     GetSubgamePerfect();
@@ -247,7 +247,7 @@ gTriState BehavSolution::GetNash(void) const
     //  else let Andy figure it out
     // Is perfect recall needed here, Andy?
     else 
-      if (IsPerfectRecall(m_profile->Game())) { 
+      if (IsPerfectRecall(m_profile->GetGame())) { 
 	// not sure MaxRegret does the right thing here
 	gNullStatus status;
 	answer = (m_profile->MaxRegret() <= m_epsilon  &&
@@ -272,7 +272,7 @@ gTriState BehavSolution::GetSubgamePerfect(void) const
 {
   gTriState answer;
   // Note -- HasSubgames should be cached in Efg
-  bool decomposes = HasSubgames(Game());
+  bool decomposes = HasSubgames(GetGame());
   if(!decomposes) GetNash();
   // if it was already resolved ...
   if(m_SubgamePerfect.Checked() == true) 
@@ -281,7 +281,7 @@ gTriState BehavSolution::GetSubgamePerfect(void) const
     // for complete profiles, use subgame perfect checker.  
     if(IsComplete()) {
       BehavProfile<gNumber> p(*this);
-      SubgamePerfectChecker checker(p.Game(),p, Epsilon());
+      SubgamePerfectChecker checker(p.GetGame(),p, Epsilon());
       gNullStatus status;
       checker.Solve(p.Support(), status);
       answer = checker.IsSubgamePerfect();
@@ -318,7 +318,7 @@ gTriState BehavSolution::GetSequential(void) const
       // check if game is perfect info
       // this should be in efg.h
       bool flag = true;
-      gPVector<int> v((Game()).NumMembers());
+      gPVector<int> v((GetGame()).NumMembers());
       for(int i=v.First();flag == true && i<=v.Last();i++)
 	if(v[i]>1) flag = false;
       if(flag==true) return triTRUE;
@@ -339,9 +339,9 @@ gNumber BehavSolution::GetLiapValue(void)
 void BehavSolution::LevelPrecision(void)
 {
   m_precision = precRATIONAL;
-  for (int pl = 1; m_precision == precRATIONAL && pl <= Game().NumPlayers();
+  for (int pl = 1; m_precision == precRATIONAL && pl <= GetGame().NumPlayers();
        pl++) {
-    EFPlayer *player = Game().Players()[pl];  
+    EFPlayer *player = GetGame().Players()[pl];  
     for (int iset = 1; (m_precision == precRATIONAL && 
 			iset <= player->NumInfosets()); iset++) {
       Infoset *infoset = player->Infosets()[iset];
@@ -354,8 +354,8 @@ void BehavSolution::LevelPrecision(void)
   }
 
   if (m_precision == precDOUBLE) {
-    for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
-      EFPlayer *player = Game().Players()[pl];  
+    for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
+      EFPlayer *player = GetGame().Players()[pl];  
       for (int iset = 1; iset <= player->NumInfosets(); iset++) {
 	Infoset *infoset = player->Infosets()[iset];
 	for (int act = 1; act <= infoset->NumActions(); act++) {
@@ -461,8 +461,8 @@ BehavSolution &BehavSolution::operator*=(const gNumber &p_constant)
 bool BehavSolution::IsComplete(void) const
 { 
   gNumber sum;
-  for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
-    EFPlayer *player = Game().Players()[pl];
+  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
+    EFPlayer *player = GetGame().Players()[pl];
     for (int iset = 1; iset <= player->NumInfosets(); iset++) { 
       Infoset *infoset = player->Infosets()[iset];
       sum = -1;
@@ -530,7 +530,7 @@ void BehavSolution::Invalidate(void) const
   // m_profile, and changes to outcome payoffs or chance probs of m_efg
   m_profile->Invalidate();
   m_profile->InitPayoffs(); 
-  m_support = EFSupport(m_profile->Game());
+  m_support = EFSupport(m_profile->GetGame());
   m_creator = algorithmEfg_USER;
   m_ANFNash.Invalidate();
   m_Nash.Invalidate();
@@ -540,7 +540,7 @@ void BehavSolution::Invalidate(void) const
   m_qreValue = -1;
   m_liapValue.Invalidate();
   m_rnfRegret.Invalidate();
-  m_revision = Game().RevisionNumber();
+  m_revision = GetGame().RevisionNumber();
 }
 
 //-----------------------------------------
@@ -550,7 +550,7 @@ void BehavSolution::Invalidate(void) const
 
 gPVector<gNumber> BehavSolution::GetRNFRegret(void) const 
 {
-  const Efg& E = Game(); 
+  const Efg::Game &E = GetGame(); 
   Lexicon L(E);  // we use the lexicon without allocating normal form.  
   
   for (int i = 1; i <= E.NumPlayers(); i++)
@@ -664,7 +664,7 @@ gOutput &operator<<(gOutput &p_file, const BehavSolution &p_solution)
   return p_file;
 }
 
-SubgamePerfectChecker::SubgamePerfectChecker(const Efg &E, const BehavProfile<gNumber> &s,
+SubgamePerfectChecker::SubgamePerfectChecker(const Efg::Game &E, const BehavProfile<gNumber> &s,
 					     const gNumber & epsilon)
   : SubgameSolver(1), subgame_number(0), eps(epsilon),  
     isSubgamePerfect(triTRUE), infoset_subgames(E.NumInfosets()), start(s)
@@ -672,7 +672,7 @@ SubgamePerfectChecker::SubgamePerfectChecker(const Efg &E, const BehavProfile<gN
   MarkedSubgameRoots(E, oldroots);
   gList<Node *> subroots;
   LegalSubgameRoots(E,subroots);
-  (start.Game()).MarkSubgames(subroots);
+  (start.GetGame()).MarkSubgames(subroots);
   
   for (int pl = 1; pl <= E.NumPlayers(); pl++)   {
     EFPlayer *player = E.Players()[pl];
@@ -732,7 +732,7 @@ void SubgamePerfectChecker::SolveSubgame(const FullEfg &E,
 }
 
 SubgamePerfectChecker::~SubgamePerfectChecker() { 
-  (start.Game()).UnmarkSubgames((start.Game()).RootNode());
-  (start.Game()).MarkSubgames(oldroots);
+  (start.GetGame()).UnmarkSubgames((start.GetGame()).RootNode());
+  (start.GetGame()).MarkSubgames(oldroots);
 }
 

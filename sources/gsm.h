@@ -25,7 +25,10 @@ class gRational;
 
 class Node;
 class Infoset;
-class Efg;
+
+namespace Efg {
+  class Game;
+}
 
 template <class T> class gList;
 template <class T> class gStack;
@@ -105,15 +108,15 @@ public:
   void InvalidateGameProfile( void* game, bool IsEfg );
   void UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec );  
 
-  void UnAssignEfgOutcome(Efg *game, const efgOutcome &outcome);
+  void UnAssignEfgOutcome(Efg::Game *game, const Efg::Outcome &outcome);
   // Unassigns a SINGLE given element of an Efg
-  void UnAssignEfgElement(Efg *game, PortionSpec spec, void* data );
+  void UnAssignEfgElement(Efg::Game *game, PortionSpec spec, void* data );
 
   // This function will unassign an infoset and all associated actions
-  void UnAssignEfgInfoset( Efg* game, Infoset* infoset );
+  void UnAssignEfgInfoset(Efg::Game *game, Infoset* infoset );
 
   // This function will unassign the subtree rooted by the given node
-  void UnAssignEfgSubTree( Efg* game, Node* node ); 
+  void UnAssignEfgSubTree(Efg::Game *game, Node* node ); 
 
 
   void GlobalVarDefine     ( const gText& var_name, Portion* p );

@@ -22,7 +22,7 @@ private:
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_LIAP_NFG; }    
 
 public:
-  efgLiapNfgSolve(const Efg &, const NFLiapParams &,
+  efgLiapNfgSolve(const Efg::Game &, const NFLiapParams &,
 		  const BehavProfile<gNumber> &, int max = 0);
   virtual ~efgLiapNfgSolve();
   

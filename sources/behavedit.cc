@@ -61,11 +61,11 @@ dialogBehavEditor::dialogBehavEditor(wxWindow *p_parent,
 				 wxPoint(5, 5), wxSize(200, 200));
   m_infosetTree->AddRoot((char *) p_profile.GetName());
 
-  Infoset *firstInfoset = p_profile.Game().Infosets()[1];
+  Infoset *firstInfoset = p_profile.GetGame().Infosets()[1];
   wxTreeItemId firstID;
 
-  for (int pl = 1; pl <= p_profile.Game().NumPlayers(); pl++) {
-    EFPlayer *player = p_profile.Game().Players()[pl];
+  for (int pl = 1; pl <= p_profile.GetGame().NumPlayers(); pl++) {
+    EFPlayer *player = p_profile.GetGame().Players()[pl];
     wxTreeItemId id = m_infosetTree->AppendItem(m_infosetTree->GetRootItem(),
 						(char *) player->GetName());
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
@@ -155,7 +155,7 @@ void dialogBehavEditor::OnSelChanged(wxTreeEvent &p_event)
   Infoset *oldInfoset = m_map.Lookup(p_event.GetOldItem());
 
   if (!oldInfoset) {
-    oldInfoset = m_profile.Game().Infosets()[1];
+    oldInfoset = m_profile.GetGame().Infosets()[1];
   }
 
   for (int act = 1; act <= oldInfoset->NumActions(); act++) {
@@ -195,7 +195,7 @@ void dialogBehavEditor::OnOK(wxCommandEvent &p_event)
   Infoset *infoset = m_map.Lookup(m_infosetTree->GetSelection());
 
   if (!infoset) {
-    infoset = m_profile.Game().Infosets()[1];
+    infoset = m_profile.GetGame().Infosets()[1];
   }
 
   for (int act = 1; act <= infoset->NumActions(); act++) {

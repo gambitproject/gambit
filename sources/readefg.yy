@@ -26,14 +26,14 @@ static gList<gText> actions, players;
 static gList<gNumber> values;
 static EFPlayer *player;
 static Infoset *infoset;
-static efgOutcome *outcome = 0;
+static Efg::Outcome *outcome = 0;
 static int i;
 static gText iset_name, outc_name;
 
-static void SetOutcome(const efgOutcome &, const gList<gNumber> &);
+static void SetOutcome(const Efg::Outcome &, const gList<gNumber> &);
 static void SetActionProbs(Infoset *, const gList<gNumber> &); 
 static bool CheckActionProbs(Infoset *, const gList<gNumber > &);
-static bool CheckOutcome(const efgOutcome &, const gList<gNumber> &);
+static bool CheckOutcome(const Efg::Outcome &, const gList<gNumber> &);
 static int Parse(void);
 static void CreateEfg(void);
 
@@ -299,7 +299,7 @@ int efg_yylex(void)
   }
 }
 
-void SetOutcome(const efgOutcome &p_outcome, const gList<gNumber> &p)
+void SetOutcome(const Efg::Outcome &p_outcome, const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++) {
      E->SetPayoff(p_outcome, i, p[i]);
@@ -319,7 +319,7 @@ bool CheckActionProbs(Infoset *s, const gList<gNumber> &p)
   return true;
 }
 
-bool CheckOutcome(const efgOutcome &p_outcome, const gList<gNumber> &p)
+bool CheckOutcome(const Efg::Outcome &p_outcome, const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++) {
     if (E->Payoff(p_outcome, E->Players()[i]) != p[i])   return false;
@@ -354,7 +354,7 @@ void CreateEfg(void)
   for (int pl = 1; pl <= players.Length(); pl++)
     E->NewPlayer()->SetName(players[pl]);
 
-  outcome = new efgOutcome(E->GetNullOutcome());
+  outcome = new Efg::Outcome(E->GetNullOutcome());
 }	
 
 FullEfg *ReadEfgFile(gInput &p_file)

@@ -16,7 +16,7 @@
 
 #include "lexicon.h"
 
-Lexicon::Lexicon(const Efg  &E)
+Lexicon::Lexicon(const Efg::Game &E)
   : N(0), strategies(E.NumPlayers())
 { }
 
@@ -28,12 +28,12 @@ Lexicon::~Lexicon()
     N->efg = 0;
 }
 
-void SetEfg(Nfg *nfg, const Efg *efg)
+void SetEfg(Nfg *nfg, const Efg::Game *efg)
 {
   nfg->efg = efg;
 }
 
-void Lexicon::MakeLink(const Efg *efg, Nfg *nfg)
+void Lexicon::MakeLink(const Efg::Game *efg, Nfg *nfg)
 {
   nfg->efg = efg;
   N = nfg;
@@ -60,12 +60,12 @@ void Lexicon::MakeReducedStrats(const EFSupport &S,
 
   if (!n->parent)  n->ptr = 0;
 
-  if (S.Game().NumChildren(n) > 0)  {
+  if (S.GetGame().NumChildren(n) > 0)  {
     if (n->infoset->player == p)  {
       if (n->infoset->flag == 0)  {
 	// we haven't visited this infoset before
 	n->infoset->flag = 1;
-	for (i = 1; i <= S.Game().NumChildren(n); i++)   {
+	for (i = 1; i <= S.GetGame().NumChildren(n); i++)   {
 	  if (S.Find(n->infoset->Actions()[i]))  {
 	    Node *m = n->GetChild(i);
 	    n->whichbranch = m;
@@ -119,7 +119,7 @@ namespace FullEfgNamespace {
 Nfg *MakeReducedNfg(const EFSupport &support)
 {
   int i;
-  const Efg &E = support.Game();
+  const Efg::Game &E = support.GetGame();
   Lexicon *L = new Lexicon(E);
   for (i = 1; i <= E.NumPlayers(); i++)
     L->MakeReducedStrats(support, E.Players()[i], E.RootNode(), NULL);
@@ -184,7 +184,7 @@ Nfg *MakeReducedNfg(const EFSupport &support)
   return ((FullEfg &) E).lexicon->N;
 }
 
-Nfg *MakeAfg(const Efg &E)
+Nfg *MakeAfg(const Efg::Game &E)
 {
   Nfg *afg = new Nfg(gArray<int>(E.NumActions()));
 

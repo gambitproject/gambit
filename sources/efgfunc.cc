@@ -177,7 +177,7 @@ static Portion *GSM_ChanceProb(GSM &, Portion **param)
   Infoset *infoset = action->BelongsTo();
   if (!infoset->GetPlayer()->IsChance()) 
     throw gclRuntimeError("Action must belong to the chance player");
-  Efg *efg = infoset->Game();
+  Efg::Game *efg = infoset->Game();
 
   return new NumberPortion(efg->GetChanceProb(infoset, action->GetNumber()));
 }
@@ -189,7 +189,7 @@ static Portion *GSM_ChanceProb(GSM &, Portion **param)
 static Portion *GSM_Children(GSM &, Portion **param)
 {
   const Node *n = ((NodePortion *) param[0])->Value();
-  Efg *e = ((FullEfg*) param[0]->Game());
+  Efg::Game *e = ((FullEfg*) param[0]->Game());
   return ArrayToList(e->Children(n));
 }
 
@@ -211,7 +211,7 @@ static Portion *GSM_CompressEfg(GSM &, Portion **param)
 {
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
 
-  return new EfgPortion(CompressEfg((FullEfg &) S->Game(), *S));
+  return new EfgPortion(CompressEfg((FullEfg &) S->GetGame(), *S));
 }
 
 //---------------
@@ -269,7 +269,7 @@ static Portion *GSM_DeleteEmptyInfoset(GSM &gsm, Portion **param)
 static Portion *GSM_DeleteMove(GSM &gsm, Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  Efg *e = ((FullEfg*) param[0]->Game());
+  Efg::Game *e = ((FullEfg*) param[0]->Game());
   Node *keep = ((NodePortion *) param[1])->Value();
 
   if (keep->GetParent() != n)
@@ -290,9 +290,9 @@ static Portion *GSM_DeleteMove(GSM &gsm, Portion **param)
 
 static Portion *GSM_DeleteOutcome(GSM &gsm, Portion **param)
 {
-  efgOutcome outcome = ((EfOutcomePortion *) param[0])->Value();
+  Efg::Outcome outcome = ((EfOutcomePortion *) param[0])->Value();
 
-  Efg *efg = outcome.Game();
+  Efg::Game *efg = outcome.GetGame();
 
   gList<Node *> nodes;
   Nodes(*efg, nodes);
@@ -305,8 +305,8 @@ static Portion *GSM_DeleteOutcome(GSM &gsm, Portion **param)
     }
   }
     
-  gsm.InvalidateGameProfile(outcome.Game(), true);
-  gsm.UnAssignEfgOutcome(outcome.Game(), outcome);
+  gsm.InvalidateGameProfile(outcome.GetGame(), true);
+  gsm.UnAssignEfgOutcome(outcome.GetGame(), outcome);
 
   efg->DeleteOutcome(outcome);
 
@@ -453,7 +453,7 @@ static Portion *GSM_InsertMove(GSM &gsm, Portion **param)
 
 static Portion *GSM_IsConstSum(GSM &, Portion **param)
 {
-  Efg &E = *((EfgPortion*) param[0])->Value();
+  Efg::Game &E = *((EfgPortion*) param[0])->Value();
   return new BoolPortion(E.IsConstSum());
 }
 
@@ -519,7 +519,7 @@ static Portion *GSM_LoadEfg(GSM &, Portion **param)
 static Portion *GSM_IsPerfectRecall(GSM &, Portion **param)
 {
   Infoset *s1, *s2;
-  Efg &efg = * ((EfgPortion *) param[0])->Value();
+  Efg::Game &efg = * ((EfgPortion *) param[0])->Value();
   return new BoolPortion(IsPerfectRecall(efg, s1, s2));
 }
 
@@ -626,7 +626,7 @@ static Portion *GSM_Name(GSM &, Portion **param)
     return new TextPortion(((NodePortion *) param[0])->Value()->
 			   GetName());
   case porEFOUTCOME:
-    return new TextPortion(((EfOutcomePortion *) param[0])->Value().Game()->GetOutcomeName(((EfOutcomePortion *) param[0])->Value()));
+    return new TextPortion(((EfOutcomePortion *) param[0])->Value().GetGame()->GetOutcomeName(((EfOutcomePortion *) param[0])->Value()));
   case porEFPLAYER:
     return new TextPortion(((EfPlayerPortion *) param[0])->Value()->
 			   GetName());
@@ -681,7 +681,7 @@ static Portion *GSM_NewInfoset(GSM &gsm, Portion **param)
 static Portion *GSM_NewOutcome(GSM &, Portion **param)
 {
   FullEfg *efg = ((EfgPortion *) param[0])->Value();
-  efgOutcome outcome = efg->NewOutcome();
+  Efg::Outcome outcome = efg->NewOutcome();
 
   return new EfOutcomePortion(outcome);
 }
@@ -719,7 +719,7 @@ static Portion *GSM_NextSibling(GSM &, Portion **param)
 
 static Portion *GSM_Nodes(GSM &, Portion **param)
 {
-  Efg *efg = ((EfgPortion *) param[0])->Value();
+  Efg::Game *efg = ((EfgPortion *) param[0])->Value();
 
   gList<Node *> nodes;
   Nodes(*efg, nodes);
@@ -735,7 +735,7 @@ static Portion *GSM_Nodes(GSM &, Portion **param)
 static Portion *GSM_NthChild(GSM &, Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  Efg *e = ((FullEfg*) param[0]->Game());
+  Efg::Game *e = ((FullEfg*) param[0]->Game());
 
   int child = ((NumberPortion *) param[1])->Value();
   if (child < 1 || child > e->NumChildren(n))  
@@ -755,7 +755,7 @@ static Portion *GSM_Outcome(GSM &, Portion **param)
   }
 
   Node *n = ((NodePortion *) param[0])->Value();
-  efgOutcome outcome = n->Game()->GetOutcome(n);
+  Efg::Outcome outcome = n->Game()->GetOutcome(n);
   if (outcome.IsNull()) {
     return new NullPortion(porEFOUTCOME);
   }
@@ -806,9 +806,9 @@ static Portion *GSM_Payoff(GSM &, Portion **param)
 {
   if (param[0]->Spec().Type == porNULL)
     return new NumberPortion(0);
-  efgOutcome outcome = ((EfOutcomePortion *) param[0])->Value();
+  Efg::Outcome outcome = ((EfOutcomePortion *) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
-  Efg *efg = player->Game();
+  Efg::Game *efg = player->Game();
 
   return new NumberPortion(efg->Payoff(outcome, player));
 }
@@ -835,7 +835,7 @@ static Portion *GSM_Player(GSM &, Portion **param)
 
 static Portion *GSM_Players(GSM &, Portion **param)
 {
-  Efg &E = *((EfgPortion*) param[0])->Value();
+  Efg::Game &E = *((EfgPortion*) param[0])->Value();
 
   return ArrayToList(E.Players());
 }
@@ -848,7 +848,7 @@ static Portion *GSM_Players(GSM &, Portion **param)
 
 static Portion *GSM_PossibleNashSupports(GSM &gsm, Portion **param)
 {
-  Efg &E = *((EfgPortion*) param[0])->Value();
+  Efg::Game &E = *((EfgPortion*) param[0])->Value();
 
   gList<const EFSupport> list =
     PossibleNashSubsupports(EFSupport(E), gsm.GetStatusMonitor());
@@ -863,7 +863,7 @@ static Portion *GSM_PossibleNashSupports(GSM &gsm, Portion **param)
 static Portion *GSM_PriorAction(GSM &, Portion** param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  Efg *e = ((FullEfg*) param[0]->Game());
+  Efg::Game *e = ((FullEfg*) param[0]->Game());
   const Action* a = LastAction(*e,n);
   if(a == 0)
     return new NullPortion(porACTION);
@@ -953,7 +953,7 @@ static Portion *GSM_Reveal(GSM &gsm, Portion **param)
 
 static Portion *GSM_RootNode(GSM &, Portion **param)
 {
-  Efg &E = *((EfgPortion*) param[0])->Value();
+  Efg::Game &E = *((EfgPortion*) param[0])->Value();
   return new NodePortion(E.RootNode());
 }
 
@@ -988,7 +988,7 @@ static Portion *GSM_SaveEfg(GSM &, Portion **param)
 static Portion *GSM_WriteSfg(GSM &, Portion **param)
 {
   gOutput &out = ((OutputPortion*) param[0])->Value();
-  const Efg *efg = ((EfgPortion*) param[1])->Value();
+  const Efg::Game *efg = ((EfgPortion*) param[1])->Value();
   if (!IsPerfectRecall(*efg)) 
     throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
 
@@ -1019,7 +1019,7 @@ void Recurse_Sfg(ListPortion *por, int pl, const Sfg &sfg, gIndexOdometer &index
 
 static Portion *GSM_Sfg(GSM &, Portion **param)
 {
-  const Efg *efg = ((EfgPortion*) param[0])->Value();
+  const Efg::Game *efg = ((EfgPortion*) param[0])->Value();
   if (!IsPerfectRecall(*efg)) 
     throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
 
@@ -1036,7 +1036,7 @@ static Portion *GSM_Sfg(GSM &, Portion **param)
 
 static Portion *GSM_SfgStrats(GSM &, Portion **param)
 {
-  const Efg *efg = ((EfgPortion*) param[0])->Value();
+  const Efg::Game *efg = ((EfgPortion*) param[0])->Value();
   if (!IsPerfectRecall(*efg)) 
     throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
   EFPlayer *pl = ((EfPlayerPortion*) param[1])->Value();
@@ -1057,7 +1057,7 @@ static Portion *GSM_SfgStrats(GSM &, Portion **param)
 
 static Portion *GSM_SfgConstraints(GSM &, Portion **param)
 {
-  const Efg *efg = ((EfgPortion*) param[0])->Value();
+  const Efg::Game *efg = ((EfgPortion*) param[0])->Value();
   if (!IsPerfectRecall(*efg)) 
     throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
   EFPlayer *pl = ((EfPlayerPortion*) param[1])->Value();
@@ -1151,7 +1151,7 @@ static Portion *GSM_SetName(GSM &, Portion **param)
     ((NodePortion *) param[0])->Value()->SetName(name);
     break;
   case porEFOUTCOME:
-    ((EfOutcomePortion *) param[0])->Value().Game()->SetOutcomeName(((EfOutcomePortion *) param[0])->Value(), name);
+    ((EfOutcomePortion *) param[0])->Value().GetGame()->SetOutcomeName(((EfOutcomePortion *) param[0])->Value(), name);
     break;
   case porEFPLAYER:
     ((EfPlayerPortion *) param[0])->Value()->SetName(name);
@@ -1177,9 +1177,9 @@ static Portion *GSM_SetName(GSM &, Portion **param)
 static Portion *GSM_SetOutcome(GSM &gsm, Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  efgOutcome outcome = ((EfOutcomePortion *) param[1])->Value();
+  Efg::Outcome outcome = ((EfOutcomePortion *) param[1])->Value();
 
-  outcome.Game()->SetOutcome(n, outcome);
+  outcome.GetGame()->SetOutcome(n, outcome);
 
   gsm.InvalidateGameProfile(n->Game(), true);
   
@@ -1197,14 +1197,14 @@ static Portion *GSM_SetOutcome(GSM &gsm, Portion **param)
 
 static Portion *GSM_SetPayoff(GSM &gsm, Portion **param)
 {
-  efgOutcome outcome = ((EfOutcomePortion *) param[0])->Value();
+  Efg::Outcome outcome = ((EfOutcomePortion *) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
   FullEfg *efg = player->Game();
   gNumber value = ((NumberPortion *) param[2])->Value();
 
   efg->SetPayoff(outcome, player->GetNumber(), value);
 
-  gsm.InvalidateGameProfile(outcome.Game(), true);
+  gsm.InvalidateGameProfile(outcome.GetGame(), true);
 
   return param[0]->ValCopy();
 }
@@ -1216,7 +1216,7 @@ static Portion *GSM_SetPayoff(GSM &gsm, Portion **param)
 
 static Portion *GSM_Subgames(GSM &, Portion **param)
 {
-  Efg& E = *((EfgPortion*) param[0])->Value();
+  Efg::Game &E = *((EfgPortion*) param[0])->Value();
   gList<Node *> list;
   LegalSubgameRoots(E, list);
 
@@ -1230,7 +1230,7 @@ static Portion *GSM_Subgames(GSM &, Portion **param)
 
 static Portion *GSM_Support(GSM &, Portion **param)
 {
-  Efg &E = * ((EfgPortion *) param[0])->Value();
+  Efg::Game &E = * ((EfgPortion *) param[0])->Value();
   Portion *por = new EfSupportPortion(new EFSupport(E));
   return por;
 }
@@ -1241,7 +1241,7 @@ static Portion *GSM_Support(GSM &, Portion **param)
 
 static Portion *GSM_Basis(GSM &, Portion **param)
 {
-  Efg &E = * ((EfgPortion *) param[0])->Value();
+  Efg::Game &E = * ((EfgPortion *) param[0])->Value();
   Portion *por = new EfBasisPortion(new EFBasis(E));
   return por;
 }
@@ -1257,7 +1257,7 @@ static Portion *GSM_UnDominated(GSM &gsm, Portion **param)
   bool conditional = ((BoolPortion *) param[2])->Value();
   gWatch watch;
 
-  gBlock<int> players(S->Game().NumPlayers());
+  gBlock<int> players(S->GetGame().NumPlayers());
   for (int i = 1; i <= players.Length(); i++)   players[i] = i;
 
   EFSupport *T = S->Undominated(strong, conditional, players,

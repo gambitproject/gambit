@@ -153,12 +153,12 @@ const int idGAMELISTCTRL = 1300;
 
 class Game {
 public:
-  Efg *m_efg;
+  Efg::Game *m_efg;
   EfgShow *m_efgShow;
   Nfg *m_nfg;
   NfgShow *m_nfgShow;
 
-  Game(Efg *p_efg) : m_efg(p_efg), m_efgShow(0), m_nfg(0), m_nfgShow(0) { }
+  Game(Efg::Game *p_efg) : m_efg(p_efg), m_efgShow(0), m_nfg(0), m_nfgShow(0) { }
   Game(Nfg *p_nfg) : m_efg(0), m_efgShow(0), m_nfg(p_nfg), m_nfgShow(0) { }
 };
 
@@ -678,7 +678,7 @@ void GambitFrame::UpdateGameList(void)
   }
 }
 
-void GambitFrame::AddGame(Efg *p_efg, EfgShow *p_efgShow)
+void GambitFrame::AddGame(Efg::Game *p_efg, EfgShow *p_efgShow)
 {
   Game *game = new Game(p_efg);
   game->m_efgShow = p_efgShow;
@@ -694,7 +694,7 @@ void GambitFrame::AddGame(Nfg *p_nfg, NfgShow *p_nfgShow)
   UpdateGameList();
 }
 
-void GambitFrame::AddGame(Efg *p_efg, Nfg *p_nfg, NfgShow *p_nfgShow)
+void GambitFrame::AddGame(Efg::Game *p_efg, Nfg *p_nfg, NfgShow *p_nfgShow)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
     if (m_gameList[i]->m_efg == p_efg) {
@@ -706,7 +706,7 @@ void GambitFrame::AddGame(Efg *p_efg, Nfg *p_nfg, NfgShow *p_nfgShow)
   UpdateGameList();
 }
 
-void GambitFrame::RemoveGame(Efg *p_efg)
+void GambitFrame::RemoveGame(Efg::Game *p_efg)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
     if (m_gameList[i]->m_efg == p_efg) {
@@ -750,7 +750,7 @@ void GambitFrame::OnGameSelected(wxListEvent &p_event)
   }
 }
 
-EfgShow *GambitFrame::GetWindow(const Efg *p_efg)
+EfgShow *GambitFrame::GetWindow(const Efg::Game *p_efg)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
     if (m_gameList[i]->m_efg == p_efg) {

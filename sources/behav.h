@@ -36,7 +36,7 @@ public:
   struct BehavAction;
   struct BehavNode;
 protected:
-  const Efg *m_efg;
+  const Efg::Game *m_efg;
   BehavNode *m_root;
   EFSupport m_support;
   gArray<BehavInfoset *> m_isets;
@@ -99,8 +99,8 @@ protected:
   void ComputeSolutionDataPass1(const Node *node);
   void ComputeSolutionData(void);
 
-  void BehaviorStrat(const Efg &, int, BehavNode *);
-  void RealizationProbs(const MixedProfile<T> &, const Efg &,
+  void BehaviorStrat(const Efg::Game &, int, BehavNode *);
+  void RealizationProbs(const MixedProfile<T> &, const Efg::Game &,
 			int pl, const gArray<int> *const, BehavNode *);
 
 public:
@@ -122,7 +122,7 @@ public:
     T realizProb, belief;
     gVector<T> nodeValue;
     
-    BehavNode(Efg *e, Node *n, int pl);
+    BehavNode(Efg::Game *e, Node *n, int pl);
     ~BehavNode();
     
     void ClearNodeProbs(void);
@@ -170,7 +170,7 @@ public:
 
   // GENERAL DATA ACCESS
 
-  Efg &Game(void) const   { return const_cast<Efg &>(*m_efg); }
+  Efg::Game &GetGame(void) const   { return const_cast<Efg::Game &>(*m_efg); }
   const EFSupport &Support(void) const   { return m_support; }
   
   const T &GetRealizProb(const Node *node);

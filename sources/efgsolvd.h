@@ -19,7 +19,7 @@ class dialogEfgSolveStandard : public guiAutoDialog {
 private:
   wxRadioBox *m_standardType, *m_standardNum, *m_precision;
   wxTextCtrl *m_description;
-  const Efg &m_efg;
+  const Efg::Game &m_efg;
 
   // Button event handler
   void OnChanged(wxCommandEvent &);
@@ -27,7 +27,7 @@ private:
   const char *HelpString(void) const { return "EFG Standard Solutions"; }
 
 public:
-  dialogEfgSolveStandard(wxWindow *p_parent, const Efg &p_efg);
+  dialogEfgSolveStandard(wxWindow *p_parent, const Efg::Game &p_efg);
   virtual ~dialogEfgSolveStandard();
 
   efgStandardType Type(void) const;

@@ -17,11 +17,11 @@ static void efgEnumPureSolve(const EFSupport &p_support,
 			     int p_stopAfter, gStatus &p_status)
 {
   EfgContIter citer(p_support);
-  gPVector<gNumber> probs(p_support.Game().NumInfosets());
+  gPVector<gNumber> probs(p_support.GetGame().NumInfosets());
 
   int ncont = 1;
-  for (int pl = 1; pl <= p_support.Game().NumPlayers(); pl++) {
-    EFPlayer *player = p_support.Game().Players()[pl];
+  for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
+    EFPlayer *player = p_support.GetGame().Players()[pl];
     for (int iset = 1; iset <= player->NumInfosets(); iset++)
       ncont *= p_support.NumActions(pl, iset);
   }
@@ -36,10 +36,10 @@ static void efgEnumPureSolve(const EFSupport &p_support,
 
     EfgIter eiter(citer);
 
-    for (int pl = 1; flag && pl <= p_support.Game().NumPlayers(); pl++)  {
+    for (int pl = 1; flag && pl <= p_support.GetGame().NumPlayers(); pl++)  {
       gNumber current = citer.Payoff(pl);
       for (int iset = 1;
-	   flag && iset <= p_support.Game().Players()[pl]->NumInfosets();
+	   flag && iset <= p_support.GetGame().Players()[pl]->NumInfosets();
 	   iset++)  {
       	if (probs(pl, iset) == gNumber(0))   continue;
        	for (int act = 1; act <= p_support.NumActions(pl, iset); act++)  {
@@ -53,16 +53,16 @@ static void efgEnumPureSolve(const EFSupport &p_support,
     }
 
     if (flag)  {
-      BehavProfile<gNumber> temp(EFSupport(p_support.Game()));
+      BehavProfile<gNumber> temp(EFSupport(p_support.GetGame()));
       // zero out all the entries, since any equilibria are pure
       ((gVector<gNumber> &) temp).operator=(gNumber(0));
       const PureBehavProfile<gNumber> &profile = citer.GetProfile();
-      for (int pl = 1; pl <= p_support.Game().NumPlayers(); pl++)  {
+      for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++)  {
 	for (int iset = 1;
-	     iset <= p_support.Game().Players()[pl]->NumInfosets();
+	     iset <= p_support.GetGame().Players()[pl]->NumInfosets();
 	     iset++)
 	  temp(pl, iset,
-	       profile.GetAction(p_support.Game().Players()[pl]->
+	       profile.GetAction(p_support.GetGame().Players()[pl]->
 				 Infosets()[iset])->GetNumber()) = 1;
       }
 

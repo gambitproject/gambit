@@ -156,7 +156,7 @@ void Portion::SetGame(const FullEfg *game)
       gout<<"Game "<<_Game<<" ref count-: "<< _gsm->GameRefCount(_Game) <<'\n';
 #endif
       if (GSM::GameRefCount(_Game) == 0)   
-	delete (Efg*) _Game;
+	delete (Efg::Game *) _Game;
     }
     
     _Game = (void *) game;
@@ -487,17 +487,17 @@ bool BoolPortion::IsReference(void) const
 
 gPool EfOutcomePortion::pool(sizeof(EfOutcomePortion));
 
-EfOutcomePortion::EfOutcomePortion(const efgOutcome &p_value)
-  : m_value(new efgOutcome(p_value)), m_ref(false)
+EfOutcomePortion::EfOutcomePortion(const Efg::Outcome &p_value)
+  : m_value(new Efg::Outcome(p_value)), m_ref(false)
 {
-  SetGame((FullEfg *) p_value.Game());
+  SetGame((FullEfg *) p_value.GetGame());
 }
 
-EfOutcomePortion::EfOutcomePortion(efgOutcome &p_value, bool p_ref)
+EfOutcomePortion::EfOutcomePortion(Efg::Outcome &p_value, bool p_ref)
   : m_value(&p_value), m_ref(p_ref)
 {
   if (!p_ref) {
-    SetGame((FullEfg *) p_value.Game());
+    SetGame((FullEfg *) p_value.GetGame());
   }
 }
 
@@ -508,16 +508,16 @@ EfOutcomePortion::~EfOutcomePortion()
   }
 }
 
-efgOutcome EfOutcomePortion::Value(void) const
+Efg::Outcome EfOutcomePortion::Value(void) const
 { return *m_value; }
 
-void EfOutcomePortion::SetValue(const efgOutcome &p_value)
+void EfOutcomePortion::SetValue(const Efg::Outcome &p_value)
 {
   if (m_ref) {
     ((EfOutcomePortion *) Original())->SetValue(p_value);
   }
   else {
-    SetGame((FullEfg *) p_value.Game());
+    SetGame((FullEfg *) p_value.GetGame());
     *m_value = p_value;
   }
 }
@@ -532,7 +532,7 @@ void EfOutcomePortion::Output(gOutput& s) const
   Portion::Output(s);
   
   s << "(EFOutcome) ";
-  s << " \"" << m_value->Game()->GetOutcomeName(*m_value) << "\"\n";
+  s << " \"" << m_value->GetGame()->GetOutcomeName(*m_value) << "\"\n";
 }
 
 gText EfOutcomePortion::OutputString(void) const
@@ -873,13 +873,13 @@ EfSupportPortion::rep::~rep()
 EfSupportPortion::EfSupportPortion(EFSupport *value)
   : m_rep(new struct rep(value)), m_ref(false)
 {
-  SetGame((FullEfg *) &m_rep->value->Game());
+  SetGame((FullEfg *) &m_rep->value->GetGame());
 }
 
 EfSupportPortion::EfSupportPortion(EFSupport &value)
   : m_rep(new struct rep(new EFSupport(value))), m_ref(false)
 {
-  SetGame((FullEfg *) &m_rep->value->Game());
+  SetGame((FullEfg *) &m_rep->value->GetGame());
 }
 
 EfSupportPortion::EfSupportPortion(const EfSupportPortion *p, bool ref)
@@ -887,7 +887,7 @@ EfSupportPortion::EfSupportPortion(const EfSupportPortion *p, bool ref)
 {
   m_rep->nref++;
   if (!m_ref) {
-    SetGame((FullEfg *) &m_rep->value->Game());
+    SetGame((FullEfg *) &m_rep->value->GetGame());
   }
 }
 
@@ -909,7 +909,7 @@ void EfSupportPortion::SetValue(EFSupport *value)
   else {
     if (--m_rep->nref == 0)  delete m_rep;
     m_rep = new rep(value);
-    SetGame((FullEfg *) &value->Game());
+    SetGame((FullEfg *) &value->GetGame());
   }
 }
 
@@ -958,14 +958,14 @@ gPool EfBasisPortion::pool(sizeof(EfBasisPortion));
 EfBasisPortion::EfBasisPortion(EFBasis *value)
   : _Value(new EFBasis *(value)), _ref(false)
 {
-  SetGame((FullEfg *) &value->Game());
+  SetGame((FullEfg *) &value->GetGame());
 }
 
 EfBasisPortion::EfBasisPortion(EFBasis *&value, bool ref)
   : _Value(&value), _ref(ref)
 {
   if (!_ref) {
-    SetGame((FullEfg *) &value->Game());
+    SetGame((FullEfg *) &value->GetGame());
   }
 }
 
@@ -986,7 +986,7 @@ void EfBasisPortion::SetValue(EFBasis *value)
     ((EfBasisPortion *) Original())->SetValue(value);
   }
   else {
-    SetGame((FullEfg *) &value->Game());
+    SetGame((FullEfg *) &value->GetGame());
     delete *_Value;
     *_Value = value;
   }
@@ -1422,7 +1422,7 @@ gPool BehavPortion::pool(sizeof(BehavPortion));
 BehavPortion::BehavPortion(BehavSolution *value)
   : rep(new struct behavrep(value)), _ref(false)
 {
-  SetGame((FullEfg *) &rep->value->Game());
+  SetGame((FullEfg *) &rep->value->GetGame());
 }
 
 BehavPortion::BehavPortion(const BehavPortion *p, bool ref)
@@ -1430,7 +1430,7 @@ BehavPortion::BehavPortion(const BehavPortion *p, bool ref)
 {
   rep->nref++;
   if (!_ref) {
-    SetGame((FullEfg *) &rep->value->Game());
+    SetGame((FullEfg *) &rep->value->GetGame());
   }
 }
 
@@ -1452,7 +1452,7 @@ void BehavPortion::SetValue(BehavSolution *value)
   else  {
     if (--rep->nref == 0)  delete rep;
     rep = new behavrep(value);
-    SetGame((FullEfg *) &value->Game());
+    SetGame((FullEfg *) &value->GetGame());
   }
 }
 
@@ -1466,9 +1466,9 @@ void BehavPortion::Output(gOutput& s) const
   Portion::Output(s);
   s << "(Behav) ";
 
-  for (int pl = 1; pl <= rep->value->Game().NumPlayers(); pl++)  {
+  for (int pl = 1; pl <= rep->value->GetGame().NumPlayers(); pl++)  {
     s << "{ ";
-    EFPlayer *player = rep->value->Game().Players()[pl];
+    EFPlayer *player = rep->value->GetGame().Players()[pl];
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
       s << "{ ";
       Infoset *infoset = player->Infosets()[iset];

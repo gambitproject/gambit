@@ -179,7 +179,7 @@ public:
   void OnSelectedMoved(const Node *n);
 
   // Solution interface to the algorithms
-  void PickSolutions(const Efg &, Node *, gList<BehavSolution> &);
+  void PickSolutions(const Efg::Game &, Node *, gList<BehavSolution> &);
 
   // Solution interface to normal form
   void AddSolution(const BehavSolution &, bool map);

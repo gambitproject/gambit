@@ -47,6 +47,8 @@ template <class T> class MixedProfile : public gPVector<T>  {
     MixedProfile<T> &operator=(const MixedProfile<T> &);
 
     Nfg &Game(void) const  { return const_cast<Nfg &>(*N); }
+    // For temporary compatibility; Game() is deprecated
+    Nfg &GetGame(void) const  { return const_cast<Nfg &>(*N); }
 
     T LiapValue(void) const;
     void Regret(gPVector<T> &value) const;

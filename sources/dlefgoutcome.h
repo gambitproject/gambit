@@ -18,7 +18,7 @@ public:
   dialogEfgOutcomeSelect(FullEfg &, wxWindow * = 0);
   virtual ~dialogEfgOutcomeSelect() { }
 
-  efgOutcome GetOutcome(void); 
+  Efg::Outcome GetOutcome(void); 
 };
 
 #endif  // DLEFGOUTCOME_H

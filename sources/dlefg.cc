@@ -36,7 +36,7 @@
 //                  dialogEfgSelectPlayer: Member functions
 //=========================================================================
 
-dialogEfgSelectPlayer::dialogEfgSelectPlayer(const Efg &p_efg, bool p_chance,
+dialogEfgSelectPlayer::dialogEfgSelectPlayer(const Efg::Game &p_efg, bool p_chance,
 					     wxWindow *p_parent)
   : guiAutoDialog(p_parent, "Select Player"),
     m_efg(p_efg), m_chance(p_chance)
@@ -532,7 +532,7 @@ gNumber dialogActionProbs::GetActionProb(int p_action) const
 //=========================================================================
 
 dialogEfgPayoffs::dialogEfgPayoffs(const FullEfg &p_efg, 
-				   const efgOutcome &p_outcome,
+				   const Efg::Outcome &p_outcome,
 				   wxWindow *p_parent)
   : guiPagedDialog(p_parent, "Change Payoffs", p_efg.NumPlayers()),
     m_outcome(p_outcome), m_efg(p_efg)
@@ -579,7 +579,7 @@ gText dialogEfgPayoffs::Name(void) const
 //                  dialogInfosetReveal: Member functions
 //=========================================================================
 
-dialogInfosetReveal::dialogInfosetReveal(const Efg &p_efg, wxWindow *p_parent)
+dialogInfosetReveal::dialogInfosetReveal(const Efg::Game &p_efg, wxWindow *p_parent)
   : guiAutoDialog(p_parent, "Reveal to Players"), m_efg(p_efg)
 {
 #ifdef __WXGTK__
@@ -866,7 +866,7 @@ dialogEfgOutcomeSelect::dialogEfgOutcomeSelect(FullEfg &p_efg,
   m_outcomeList = new wxListBox(this, -1);
   
   for (int outc = 1; outc <= m_efg.NumOutcomes(); outc++) {
-    efgOutcome outcome = m_efg.GetOutcome(outc);
+    Efg::Outcome outcome = m_efg.GetOutcome(outc);
     gText item = ToText(outc) + ": " + m_efg.GetOutcomeName(outcome);
     if (item == "")
       item = "Outcome" + ToText(outc);
@@ -899,7 +899,7 @@ dialogEfgOutcomeSelect::dialogEfgOutcomeSelect(FullEfg &p_efg,
   Layout();
 }
 
-efgOutcome dialogEfgOutcomeSelect::GetOutcome(void)
+Efg::Outcome dialogEfgOutcomeSelect::GetOutcome(void)
 {
   return m_efg.GetOutcome(m_outcomeList->GetSelection() + 1);
 }
@@ -917,7 +917,7 @@ END_EVENT_TABLE()
 dialogEfgEditSupport::dialogEfgEditSupport(const EFSupport &p_support,
 					   wxWindow *p_parent)
   : guiAutoDialog(p_parent, "Edit support"),
-    m_efg(p_support.Game()), m_support(p_support)
+    m_efg(p_support.GetGame()), m_support(p_support)
 {
   m_nameItem = new wxTextCtrl(this, -1);
   m_nameItem->SetValue((char *) p_support.GetName());

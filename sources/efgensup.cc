@@ -428,8 +428,8 @@ ActionCursorForSupport::GoToNext()
   int tempiset(iset);
   tempiset ++; 
 
-  while (temppl <= support->Game().NumPlayers()) {
-    while (tempiset <= support->Game().Players()[temppl]->NumInfosets()) {
+  while (temppl <= support->GetGame().NumPlayers()) {
+    while (tempiset <= support->GetGame().Players()[temppl]->NumInfosets()) {
       if (support->NumActions(temppl,tempiset) > 0) {
 	pl = temppl;
 	iset = tempiset;
@@ -458,7 +458,7 @@ int ActionCursorForSupport::ActionIndex() const
 
 const Infoset *ActionCursorForSupport::GetInfoset() const
 {
-  return support->Game().Players()[pl]->Infosets()[iset];
+  return support->GetGame().Players()[pl]->Infosets()[iset];
 }
 
 int ActionCursorForSupport::InfosetIndex() const
@@ -468,7 +468,7 @@ int ActionCursorForSupport::InfosetIndex() const
 
 const EFPlayer *ActionCursorForSupport::GetPlayer() const
 {
-  return support->Game().Players()[pl];
+  return support->GetGame().Players()[pl];
 }
 
 int ActionCursorForSupport::PlayerIndex() const
@@ -479,8 +479,8 @@ int ActionCursorForSupport::PlayerIndex() const
 bool 
 ActionCursorForSupport::IsLast() const
 {
-  if (pl == support->Game().NumPlayers())
-    if (iset == support->Game().Players()[pl]->NumInfosets())
+  if (pl == support->GetGame().NumPlayers())
+    if (iset == support->GetGame().Players()[pl]->NumInfosets())
       if (act == support->NumActions(pl,iset))
 	return true;
   return false;
@@ -536,13 +536,13 @@ InfosetGuaranteedActiveByPriorCommitments(const EFSupportWithActiveInfo *S,
   gList<const Node *> members = infoset->ListOfMembers();
   for (int i = 1; i <= members.Length(); i++) {
     const Node* current = members[i];
-    if ( current == S->Game().RootNode() )
+    if ( current == S->GetGame().RootNode() )
       return true;
     else
       while ( S->ActionIsActive((Action *)current->GetAction()) &&
 	      IsSubsequentTo(current->GetAction()) ) {
 	current = current->GetParent();
-	if ( current == S->Game().RootNode() )
+	if ( current == S->GetGame().RootNode() )
 	  return true;
       }
   }

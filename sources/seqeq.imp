@@ -14,7 +14,7 @@
 template <class T> class SequentialEquilibModule  {
 private:
   T eps;
-  const Efg &EF;
+  const Efg::Game &EF;
   const EFBasis &basis;
   const EFSupport &support;
   SeqEquilibParams params;
@@ -67,7 +67,7 @@ public:
 template <class T>SequentialEquilibModule<T>::
 SequentialEquilibModule(const EFBasis &b, const EFSupport &B,
 			const SeqEquilibParams &p)
-  : EF(b.Game()), basis(b), support(B), params(p), bigbasis(B.Game())
+  : EF(b.GetGame()), basis(b), support(B), params(p), bigbasis(B.GetGame())
 { 
   sigIndex = new gDPVector<int>(bigbasis.NumActions());
   muIndex = new gDPVector<int>(bigbasis.NumNodes());
@@ -125,10 +125,10 @@ SequentialEquilibModule(const EFBasis &b, const EFSupport &B,
 template <class T>SequentialEquilibModule<T>::
 SequentialEquilibModule(const BehavSolution &s,const EFBasis &b, const EFSupport &B,
 			const SeqEquilibParams &p)
-  : EF(b.Game()), basis(b), support(B), params(p), bigbasis(B.Game())
+  : EF(b.GetGame()), basis(b), support(B), params(p), bigbasis(B.GetGame())
 { 
   gList<Node *> list;
-  Nodes(s.Game(), list);
+  Nodes(s.GetGame(), list);
 
   sigIndex = new gDPVector<int>(bigbasis.NumActions());
   muIndex = new gDPVector<int>(bigbasis.NumNodes());

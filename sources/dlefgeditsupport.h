@@ -9,7 +9,7 @@
 
 class dialogEfgEditSupport : public guiAutoDialog {
 private:
-  const Efg &m_efg;
+  const Efg::Game &m_efg;
   EFSupport m_support;
   wxTextCtrl *m_nameItem;
   wxListBox *m_playerItem, *m_infosetItem, *m_actionItem;

@@ -72,9 +72,9 @@ ActionProbsSumToOneIneqs(const BehavSolution &p_solution,
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
-  for (int pl = 1; pl <= p_solution.Game().NumPlayers(); pl++) 
-    for (int i = 1; i <= p_solution.Game().Players()[pl]->NumInfosets(); i++) {
-      Infoset *current_infoset = p_solution.Game().Players()[pl]->Infosets()[i];
+  for (int pl = 1; pl <= p_solution.GetGame().NumPlayers(); pl++) 
+    for (int i = 1; i <= p_solution.GetGame().Players()[pl]->NumInfosets(); i++) {
+      Infoset *current_infoset = p_solution.GetGame().Players()[pl]->Infosets()[i];
       if ( !big_supp.HasActiveActionAt(current_infoset) ) {
 	int index_base = var_index[pl][i];
 	gPoly<gDouble> factor(&BehavStratSpace, (gDouble)1.0, &Lex);
@@ -170,13 +170,13 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
 			const Infoset *iset,
 			const Action *act)
 {
-  while (tempnode != p_solution.Game().RootNode()) {
+  while (tempnode != p_solution.GetGame().RootNode()) {
 
     const Action *last_action = tempnode->GetAction();
     Infoset *last_infoset = last_action->BelongsTo();
     
     if (last_infoset->IsChanceInfoset()) 
-      node_prob *= (gDouble) p_solution.Game().GetChanceProb(last_action);
+      node_prob *= (gDouble) p_solution.GetGame().GetChanceProb(last_action);
     else 
       if (dsupp.HasActiveActionAt(last_infoset)) {
 	if (last_infoset == iset) {
@@ -226,9 +226,9 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
-  gList<Node *> terminal_nodes = p_solution.Game().TerminalNodes();
+  gList<Node *> terminal_nodes = p_solution.GetGame().TerminalNodes();
 
-  const gArray<EFPlayer *> players = p_solution.Game().Players();
+  const gArray<EFPlayer *> players = p_solution.GetGame().Players();
   for (int pl = 1; pl <= players.Length(); pl++) {
     const gArray<Infoset *> isets_for_pl = players[pl]->Infosets();
     for (int i = 1; i <= isets_for_pl.Length(); i++) {
@@ -265,8 +265,8 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 					    isets_for_pl[i],
 					    acts_for_iset[j])) {
 		  node_prob *= 
-		    (gDouble) p_solution.Game().Payoff(terminal_nodes[n],
-						       p_solution.Game().Players()[pl]);
+		    (gDouble) p_solution.GetGame().Payoff(terminal_nodes[n],
+						       p_solution.GetGame().Players()[pl]);
 		  next_poly += node_prob;
 		}
 	      }
@@ -318,14 +318,14 @@ bool algExtendsToNash::ExtendsToNash(const BehavSolution &p_solution,
   int num_vars(0);
   gList<gList<int> > var_index;
   int pl;
-  for (pl = 1; pl <= p_solution.Game().NumPlayers(); pl++) {
+  for (pl = 1; pl <= p_solution.GetGame().NumPlayers(); pl++) {
 
     gList<int> list_for_pl;
 
-    for (int i = 1; i <= p_solution.Game().Players()[pl]->NumInfosets(); i++) {
+    for (int i = 1; i <= p_solution.GetGame().Players()[pl]->NumInfosets(); i++) {
       list_for_pl += num_vars;
-      if ( !big_supp.HasActiveActionAt(p_solution.Game().Players()[pl]->Infosets()[i]) ) {
-	num_vars += p_solution.Game().Players()[pl]->Infosets()[i]->NumActions() - 1;
+      if ( !big_supp.HasActiveActionAt(p_solution.GetGame().Players()[pl]->Infosets()[i]) ) {
+	num_vars += p_solution.GetGame().Players()[pl]->Infosets()[i]->NumActions() - 1;
       }
     }
     var_index += list_for_pl;
@@ -376,15 +376,15 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
 				   const int &i,
 				   const int &j)
 {
-  while (tempnode != p_solution.Game().RootNode()) {
+  while (tempnode != p_solution.GetGame().RootNode()) {
     const Action *last_action = tempnode->GetAction();
     Infoset *last_infoset = last_action->BelongsTo();
     
     if (last_infoset->IsChanceInfoset()) 
-      node_prob *= (gDouble)p_solution.Game().GetChanceProb(last_action);
+      node_prob *= (gDouble)p_solution.GetGame().GetChanceProb(last_action);
     else 
       if (big_supp.HasActiveActionAt(last_infoset)) {
-	if (last_infoset == p_solution.Game().Players()[pl]->Infosets()[i]) {
+	if (last_infoset == p_solution.GetGame().Players()[pl]->Infosets()[i]) {
 	  if (j != last_action->GetNumber()) 
 	    return false;
 	}
@@ -425,11 +425,11 @@ ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
-  gList<Node *> terminal_nodes = p_solution.Game().TerminalNodes();
+  gList<Node *> terminal_nodes = p_solution.GetGame().TerminalNodes();
 
-  for (int pl = 1; pl <= p_solution.Game().NumPlayers(); pl++)
-    for (int i = 1; i <= p_solution.Game().Players()[pl]->NumInfosets(); i++) {
-      Infoset *infoset = p_solution.Game().Players()[pl]->Infosets()[i];
+  for (int pl = 1; pl <= p_solution.GetGame().NumPlayers(); pl++)
+    for (int i = 1; i <= p_solution.GetGame().Players()[pl]->NumInfosets(); i++) {
+      Infoset *infoset = p_solution.GetGame().Players()[pl]->Infosets()[i];
       if (little_supp.MayReach(infoset)) 
 	for (int j = 1; j <= infoset->NumActions(); j++)
 	  if (!little_supp.ActionIsActive(pl,i,j)) {
@@ -449,8 +449,8 @@ ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 					 terminal_nodes[n],
 					 pl,i,j)) {
 		node_prob *= 
-		  (gDouble)p_solution.Game().Payoff(terminal_nodes[n],
-					 p_solution.Game().Players()[pl]);
+		  (gDouble)p_solution.GetGame().Payoff(terminal_nodes[n],
+					 p_solution.GetGame().Players()[pl]);
 		next_poly += node_prob;
 	      }
 	    }
@@ -496,14 +496,14 @@ bool algExtendsToAgentNash::ExtendsToAgentNash(const BehavSolution &p_solution,
   int num_vars(0);
   gList<gList<int> > var_index;
   int pl;
-  for (pl = 1; pl <= p_solution.Game().NumPlayers(); pl++) {
+  for (pl = 1; pl <= p_solution.GetGame().NumPlayers(); pl++) {
 
     gList<int> list_for_pl;
 
-    for (int i = 1; i <= p_solution.Game().Players()[pl]->NumInfosets(); i++) {
+    for (int i = 1; i <= p_solution.GetGame().Players()[pl]->NumInfosets(); i++) {
       list_for_pl += num_vars;
-      if ( !big_supp.HasActiveActionAt(p_solution.Game().Players()[pl]->Infosets()[i]) ) {
-	num_vars += p_solution.Game().Players()[pl]->Infosets()[i]->NumActions() - 1;
+      if ( !big_supp.HasActiveActionAt(p_solution.GetGame().Players()[pl]->Infosets()[i]) ) {
+	num_vars += p_solution.GetGame().Players()[pl]->Infosets()[i]->NumActions() - 1;
       }
     }
     var_index += list_for_pl;

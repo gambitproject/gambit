@@ -36,7 +36,10 @@ public:
 
 DECLARE_APP(GambitApp)
 
-class Efg;
+namespace Efg {
+  class Game;
+}
+
 class EfgShow;
 class Nfg;
 class NfgShow;
@@ -74,13 +77,13 @@ public:
 
   void LoadFile(const gText &);
 
-  void AddGame(Efg *, EfgShow *);
+  void AddGame(Efg::Game *, EfgShow *);
   void AddGame(Nfg *, NfgShow *);
-  void AddGame(Efg *, Nfg *, NfgShow *);
-  void RemoveGame(Efg *);
+  void AddGame(Efg::Game *, Nfg *, NfgShow *);
+  void RemoveGame(Efg::Game *);
   void RemoveGame(Nfg *);
 
-  EfgShow *GetWindow(const Efg *);
+  EfgShow *GetWindow(const Efg::Game *);
   NfgShow *GetWindow(const Nfg *);
 
   void SetActiveWindow(EfgShow *);

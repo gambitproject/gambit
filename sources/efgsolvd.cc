@@ -24,7 +24,7 @@ BEGIN_EVENT_TABLE(dialogEfgSolveStandard, guiAutoDialog)
 END_EVENT_TABLE()
 
 dialogEfgSolveStandard::dialogEfgSolveStandard(wxWindow *p_parent,
-					       const Efg &p_efg)
+					       const Efg::Game &p_efg)
   : guiAutoDialog(p_parent, "Standard Solution"), m_efg(p_efg)
 {
   wxString standardType = "Nash", standardNum = "One", precision = "Float";

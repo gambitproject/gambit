@@ -36,7 +36,7 @@ template class gBlock<FullEfgNamespace::Outcome *>;
 template class gArray<gBlock<bool> >;
 template class gBlock<gBlock<bool> >;
 
-template class gList<efgOutcome>;
+template class gList<Efg::Outcome>;
 
 class EFActionSet;
 class EFActionArray;

@@ -464,7 +464,7 @@ static Portion *GSM_SetActionProbs(GSM &, Portion **param)
   int InfosetNum = 0;
   
   BehavSolution *P = new BehavSolution(*((BehavPortion*) param[0])->Value());
-  Efg& E = P->Game();
+  Efg::Game &E = P->GetGame();
   gArray< EFPlayer* > player = E.Players();
   
   for(i = 1; i <= E.NumPlayers(); i++)

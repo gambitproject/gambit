@@ -9,7 +9,7 @@
 
 class dialogEfgPayoffs : public guiPagedDialog {
 private:
-  efgOutcome m_outcome;
+  Efg::Outcome m_outcome;
   const FullEfg &m_efg;
   gText m_name;
   wxTextCtrl *m_outcomeName;
@@ -17,7 +17,7 @@ private:
   const char *HelpString(void) const { return "Change Payoffs Dialog"; }
 
 public:
-  dialogEfgPayoffs(const FullEfg &, const efgOutcome &, wxWindow *parent);
+  dialogEfgPayoffs(const FullEfg &, const Efg::Outcome &, wxWindow *parent);
   virtual ~dialogEfgPayoffs() { }
 
   gArray<gNumber> Payoffs(void) const;

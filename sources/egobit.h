@@ -25,11 +25,11 @@ public:
 };
 
 
-void Qre(const Efg &, EFQreParams &,
+void Qre(const Efg::Game &, EFQreParams &,
 	 const BehavProfile<gNumber> &, gList<BehavSolution > &,
 	 gStatus &, long &nevals, long &nits);
 
-void KQre(const Efg &E, EFQreParams &params,
+void KQre(const Efg::Game &E, EFQreParams &params,
 	  const BehavProfile<gNumber> &start, gList<BehavSolution> &solutions, 
 	  gStatus &, long &nevals, long &nits);
 

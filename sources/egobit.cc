@@ -27,7 +27,7 @@ class EFQreFunc : public gFunction<double>   {
   private:
     long _nevals;
     bool _domain_err;
-    const Efg &_efg;
+    const Efg::Game &_efg;
     gVector<double> _Lambda;
     gPVector<double> _probs;
     BehavProfile<double> _p;
@@ -36,7 +36,7 @@ class EFQreFunc : public gFunction<double>   {
     double Value(const gVector<double> &);
 
   public:
-    EFQreFunc(const Efg &, const BehavProfile<gNumber> &);
+    EFQreFunc(const Efg::Game &, const BehavProfile<gNumber> &);
     virtual ~EFQreFunc();
     
     gVector<double> GetLambda()   { return _Lambda; }
@@ -46,8 +46,8 @@ class EFQreFunc : public gFunction<double>   {
     bool DomainErr(void) const { return _domain_err;}
 };
 
-EFQreFunc::EFQreFunc(const Efg &E,
-			 const BehavProfile<gNumber> &start)
+EFQreFunc::EFQreFunc(const Efg::Game &E,
+		     const BehavProfile<gNumber> &start)
   : _nevals(0L), _domain_err(false), _efg(E), 
     _Lambda(E.NumPlayers()),_probs(E.NumInfosets()),
     _p(start.Support())
@@ -84,7 +84,7 @@ double EFQreFunc::Value(const gVector<double> &v)
   return _p.QreValue(_Lambda,_domain_err);
 }
 
-static void WritePXIHeader(gOutput &pxifile, const Efg &E,
+static void WritePXIHeader(gOutput &pxifile, const Efg::Game &E,
 			   const EFQreParams &params)
 {
   int pl, iset, nisets = 0;
@@ -142,7 +142,7 @@ extern bool Powell(gPVector<double> &p, gMatrix<double> &xi,
 
 
 
-void Qre(const Efg &E, EFQreParams &params,
+void Qre(const Efg::Game &E, EFQreParams &params,
 	 const BehavProfile<gNumber> &start,
 	 gList<BehavSolution> &solutions, gStatus &p_status,
 	 long &nevals, long &nits)
@@ -315,7 +315,7 @@ class EFKQreFunc : public gFunction<double>   {
 private:
   long _nevals;
   bool _domain_err;
-  const Efg &_efg;
+  const Efg::Game &_efg;
   double _K;
   gPVector<double> _probs;
   BehavProfile<double> _p, _cpay;
@@ -324,8 +324,8 @@ private:
   const EFQreParams & params;
   
 public:
-  EFKQreFunc(const Efg &, const BehavProfile<gNumber> &, 
-		  const EFQreParams & params);
+  EFKQreFunc(const Efg::Game &, const BehavProfile<gNumber> &, 
+	     const EFQreParams & params);
   virtual ~EFKQreFunc();
   
   double Value(const gVector<double> &);
@@ -337,9 +337,9 @@ public:
 };
 
 
-EFKQreFunc::EFKQreFunc(const Efg &E,
-				 const BehavProfile<gNumber> &start, 
-				 const EFQreParams & p)
+EFKQreFunc::EFKQreFunc(const Efg::Game &E,
+		       const BehavProfile<gNumber> &start, 
+		       const EFQreParams & p)
   :_nevals(0L), _domain_err(false), _efg(E), _K(1.0),
    _probs(E.NumInfosets()),
    _p(start.Support()), _cpay(start.Support()),
@@ -492,7 +492,7 @@ extern bool OldPowell(gVector<double> &p, gMatrix<double> &xi,
 		      int maxits1, double tol1, int maxitsN, double tolN,
 		      gOutput &tracefile, int tracelevel, gStatus &status);
 
-void KQre(const Efg &E, EFQreParams &params,
+void KQre(const Efg::Game &E, EFQreParams &params,
 	  const BehavProfile<gNumber> &start, gList<BehavSolution> &solutions,
 	  gStatus &p_status, long &nevals, long &nits)
 {

@@ -15,16 +15,19 @@
 class Action;
 class EFPlayer;
 class EFActionSet;
-class Efg;  
+
+namespace Efg {
+  class Game;
+}
 
 class EFSupport {
 protected:
   gText m_name;
-  const Efg *m_efg;
+  const Efg::Game *m_efg;
   gArray<EFActionSet *> m_players;
 
 public:
-  EFSupport(const Efg &);
+  EFSupport(const Efg::Game &);
   EFSupport(const EFSupport &);
   virtual ~EFSupport();
   EFSupport &operator=(const EFSupport &);
@@ -32,7 +35,7 @@ public:
   bool operator==(const EFSupport &) const;
   bool operator!=(const EFSupport &) const;
 
-  const Efg &Game(void) const { return *m_efg; }
+  const Efg::Game &GetGame(void) const { return *m_efg; }
 
   const gText &GetName(void) const { return m_name; }
   void SetName(const gText &p_name) { m_name = p_name; }
@@ -126,7 +129,7 @@ protected:
 						 gList<Infoset *> *);
 
 public:
-  EFSupportWithActiveInfo ( const Efg &);
+  EFSupportWithActiveInfo ( const Efg::Game &);
   EFSupportWithActiveInfo ( const EFSupport &);
   EFSupportWithActiveInfo ( const EFSupportWithActiveInfo &);
   virtual ~EFSupportWithActiveInfo();

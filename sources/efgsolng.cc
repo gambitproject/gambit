@@ -37,16 +37,16 @@ protected:
   gList<Node *> m_subgameRoots;
   bool m_eliminate, m_iterative, m_strong;
   
-  void BaseSelectSolutions(int, const Efg &, gList<BehavSolution> &);
+  void BaseSelectSolutions(int, const Efg::Game &, gList<BehavSolution> &);
 
 public:
-  guiSubgameSolver(EfgShow *, const Efg &,
+  guiSubgameSolver(EfgShow *, const Efg::Game &,
 		 bool p_eliminate = false, bool p_iterative = false,
 		 bool p_strong = false);
   virtual ~guiSubgameSolver() { } 
 };
 
-guiSubgameSolver::guiSubgameSolver(EfgShow *p_parent, const Efg &p_efg,
+guiSubgameSolver::guiSubgameSolver(EfgShow *p_parent, const Efg::Game &p_efg,
 			       bool p_eliminate, bool p_iterative,
 			       bool p_strong)
   : m_parent(p_parent), m_pickSoln(false),
@@ -62,7 +62,7 @@ guiSubgameSolver::guiSubgameSolver(EfgShow *p_parent, const Efg &p_efg,
 //
 // Pick solutions to go on with, if so requested
 //
-void guiSubgameSolver::BaseSelectSolutions(int p_subgame, const Efg &p_efg, 
+void guiSubgameSolver::BaseSelectSolutions(int p_subgame, const Efg::Game &p_efg, 
 					 gList<BehavSolution> &p_solutions)
 {
   if (!m_pickSoln || p_solutions.Length() == 0) 
@@ -77,10 +77,10 @@ void guiSubgameSolver::BaseSelectSolutions(int p_subgame, const Efg &p_efg,
 
 class guiSubgameViaEfg : public guiSubgameSolver {
 protected:
-  void BaseViewSubgame(int, const Efg &, EFSupport &);
+  void BaseViewSubgame(int, const Efg::Game &, EFSupport &);
 
 public:
-  guiSubgameViaEfg(EfgShow *p_parent, const Efg &p_efg,
+  guiSubgameViaEfg(EfgShow *p_parent, const Efg::Game &p_efg,
 		   bool p_eliminate, bool p_iterative,
 		   bool p_strong)
     : guiSubgameSolver(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
@@ -88,7 +88,7 @@ public:
   virtual ~guiSubgameViaEfg() { } 
 };
 
-void guiSubgameViaEfg::BaseViewSubgame(int, const Efg &p_efg,
+void guiSubgameViaEfg::BaseViewSubgame(int, const Efg::Game &p_efg,
 				       EFSupport &p_support)
 { 
   if (!m_eliminate)  return;
@@ -127,7 +127,7 @@ protected:
   void BaseViewNormal(const Nfg &, NFSupport &);
 
 public:
-  guiSubgameViaNfg(EfgShow *p_parent, const Efg &p_efg,
+  guiSubgameViaNfg(EfgShow *p_parent, const Efg::Game &p_efg,
 		   bool p_eliminate, bool p_iterative,
 		   bool p_strong, bool p_mixed)
     : guiSubgameSolver(p_parent, p_efg, p_eliminate, p_iterative, p_strong),
@@ -215,14 +215,14 @@ void guiSubgameViaNfg::BaseViewNormal(const Nfg &p_nfg, NFSupport &p_support)
 
 class EFLiapBySubgameG : public efgLiapSolve, public guiSubgameViaEfg {
 protected:
-  void SelectSolutions(int p_subgame, const Efg &p_efg,
+  void SelectSolutions(int p_subgame, const Efg::Game &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
-  void ViewSubgame(int p_subgame, const Efg &p_efg, EFSupport &p_support)
+  void ViewSubgame(int p_subgame, const Efg::Game &p_efg, EFSupport &p_support)
     { BaseViewSubgame(p_subgame, p_efg, p_support); }
 
 public:
-  EFLiapBySubgameG(const Efg &p_efg, const EFLiapParams &p_params,
+  EFLiapBySubgameG(const Efg::Game &p_efg, const EFLiapParams &p_params,
 		   const BehavProfile<gNumber> &p_start, 
 		   bool p_eliminate, bool p_iterative, bool p_strong,
 		   int p_max = 0,
@@ -265,7 +265,7 @@ gList<BehavSolution> guiefgLiapEfg::Solve(const EFSupport &p_support) const
   params.tracefile = m_traceFile;
 
   try {
-    return EFLiapBySubgameG(p_support.Game(), params, start, m_eliminate,
+    return EFLiapBySubgameG(p_support.GetGame(), params, start, m_eliminate,
 			    m_eliminateAll, !m_eliminateWeak,
 			    0, m_parent).Solve(start.Support(), status);
   }
@@ -305,14 +305,14 @@ bool guiefgLiapEfg::SolveSetup(void)
 
 class NFLiapBySubgameG : public efgLiapNfgSolve, public guiSubgameViaNfg {
 protected:
-  void SelectSolutions(int p_subgame, const Efg &p_efg,
+  void SelectSolutions(int p_subgame, const Efg::Game &p_efg,
 			gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
   void ViewNormal(const Nfg &p_nfg, NFSupport &p_support)
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
-  NFLiapBySubgameG(const Efg &p_efg, const NFLiapParams &p_params,
+  NFLiapBySubgameG(const Efg::Game &p_efg, const NFLiapParams &p_params,
 		   const BehavSolution &p_start,
 		   bool p_eliminate, bool p_iterative, bool p_strong,
 		   bool p_mixed, int p_max = 0, 
@@ -341,10 +341,10 @@ gList<BehavSolution> guiefgLiapNfg::Solve(const EFSupport &p_support) const
   params.tracefile = m_traceFile;
 
   try {
-    return NFLiapBySubgameG(p_support.Game()
+    return NFLiapBySubgameG(p_support.GetGame()
 			    , params, start, m_eliminate, m_eliminateAll,
 			    !m_eliminateWeak, m_eliminateMixed,
-			    0, m_parent).Solve(EFSupport(p_support.Game()),
+			    0, m_parent).Solve(EFSupport(p_support.GetGame()),
 							 status);
   }
   catch (gSignalBreak &) {
@@ -390,14 +390,14 @@ bool guiefgLiapNfg::SolveSetup(void)
 
 class SeqFormBySubgameG : public efgLcpSolve, public guiSubgameViaEfg {
 protected:
-  void SelectSolutions(int p_subgame, const Efg &p_efg,
+  void SelectSolutions(int p_subgame, const Efg::Game &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
-  void ViewSubgame(int p_subgame, const Efg &p_efg, EFSupport &p_support)
+  void ViewSubgame(int p_subgame, const Efg::Game &p_efg, EFSupport &p_support)
     { BaseViewSubgame(p_subgame, p_efg, p_support); }
   
 public:
-  SeqFormBySubgameG(const Efg &p_efg, const EFSupport &p_support,
+  SeqFormBySubgameG(const Efg::Game &p_efg, const EFSupport &p_support,
 		    const SeqFormParams &p_params,
 		    bool p_eliminate, bool p_iterative, bool p_strong,
 		    int p_max = 0, EfgShow *p_parent = 0)
@@ -432,7 +432,7 @@ gList<BehavSolution> guiefgLcpEfg::Solve(const EFSupport &p_support) const
   params.tracefile = m_traceFile;
 
   try {
-    return SeqFormBySubgameG(p_support.Game(), p_support, params, m_eliminate,
+    return SeqFormBySubgameG(p_support.GetGame(), p_support, params, m_eliminate,
 			     m_eliminateAll, !m_eliminateWeak,
 			     0, m_parent).Solve(p_support, status);
   }
@@ -471,14 +471,14 @@ bool guiefgLcpEfg::SolveSetup(void)
 
 class LemkeBySubgameG : public efgLcpNfgSolve, public guiSubgameViaNfg {
 protected:
-  void SelectSolutions(int p_subgame, const Efg &p_efg,
+  void SelectSolutions(int p_subgame, const Efg::Game &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
   void ViewNormal(const Nfg &p_nfg, NFSupport &p_support)
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
-  LemkeBySubgameG(const Efg &p_efg, const EFSupport &p_support,
+  LemkeBySubgameG(const Efg::Game &p_efg, const EFSupport &p_support,
 		  const LemkeParams &p_params, bool p_eliminate,
 		  bool p_iterative, bool p_strong, bool p_mixed, int p_max = 0,
 		  EfgShow *p_parent = 0)
@@ -503,7 +503,7 @@ gList<BehavSolution> guiefgLcpNfg::Solve(const EFSupport &p_support) const
   params.tracefile = m_traceFile;
 
   try {
-    LemkeBySubgameG M(p_support.Game(),
+    LemkeBySubgameG M(p_support.GetGame(),
 		      p_support, params, m_eliminate, m_eliminateAll,
 		      !m_eliminateWeak, m_eliminateMixed, 0, m_parent);
     return M.Solve(p_support, status);
@@ -550,14 +550,14 @@ bool guiefgLcpNfg::SolveSetup(void)
 class guiSubgameEnumPureNfg : public efgEnumPureNfgSolve,
 			      public guiSubgameViaNfg {
 protected:
-  void SelectSolutions(int p_subgame, const Efg &p_efg,
+  void SelectSolutions(int p_subgame, const Efg::Game &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
   void ViewNormal(const Nfg &p_nfg, NFSupport &p_support)
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
-  guiSubgameEnumPureNfg(const Efg &p_efg, const EFSupport &p_support,
+  guiSubgameEnumPureNfg(const Efg::Game &p_efg, const EFSupport &p_support,
 			bool p_eliminate, bool p_iterative, bool p_strong,
 			bool p_mixed, int p_stopAfter, gStatus &p_status,
 			EfgShow *p_parent = 0)
@@ -577,7 +577,7 @@ gList<BehavSolution> guiefgEnumPureNfg::Solve(const EFSupport &p_support) const
   wxStatus status(m_parent, "EnumPureSolve Progress");
 
   try {
-    return guiSubgameEnumPureNfg(p_support.Game(),
+    return guiSubgameEnumPureNfg(p_support.GetGame(),
 				 p_support, m_eliminate, m_eliminateAll,
 				 !m_eliminateWeak, m_eliminateMixed,
 				 m_stopAfter,
@@ -614,14 +614,14 @@ bool guiefgEnumPureNfg::SolveSetup(void)
 
 class guiEnumPureEfgSubgame : public efgEnumPure, public guiSubgameViaEfg {
 protected:
-  void SelectSolutions(int p_subgame, const Efg &p_efg,
+  void SelectSolutions(int p_subgame, const Efg::Game &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
-  void ViewSubgame(int p_subgame, const Efg &p_efg, EFSupport &p_support)
+  void ViewSubgame(int p_subgame, const Efg::Game &p_efg, EFSupport &p_support)
     { BaseViewSubgame(p_subgame, p_efg, p_support); }
 
 public:
-  guiEnumPureEfgSubgame(const Efg &p_efg, const EFSupport &p_support,
+  guiEnumPureEfgSubgame(const Efg::Game &p_efg, const EFSupport &p_support,
 			int p_stopAfter, 
 			bool p_eliminate, bool p_iterative, bool p_strong,
 			gStatus &p_status, EfgShow *p_parent = 0)
@@ -640,7 +640,7 @@ gList<BehavSolution> guiefgEnumPureEfg::Solve(const EFSupport &p_support) const
   wxStatus status(m_parent, "EnumPureSolve Progress");
 
   try {
-    return guiEnumPureEfgSubgame(p_support.Game(), p_support, m_stopAfter,
+    return guiEnumPureEfgSubgame(p_support.GetGame(), p_support, m_stopAfter,
 				 m_eliminate, m_eliminateAll, !m_eliminateWeak,
 				 status, m_parent).Solve(p_support, status);
   }
@@ -680,14 +680,14 @@ bool guiefgEnumPureEfg::SolveSetup(void)
 
 class EnumBySubgameG : public EnumBySubgame, public guiSubgameViaNfg {
 protected:
-  void SelectSolutions(int p_subgame, const Efg &p_efg,
+  void SelectSolutions(int p_subgame, const Efg::Game &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
   void ViewNormal(const Nfg &p_nfg, NFSupport &p_support)
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
-  EnumBySubgameG(const Efg &p_efg, const EFSupport &p_support,
+  EnumBySubgameG(const Efg::Game &p_efg, const EFSupport &p_support,
 		 const EnumParams &p_params,
 		 bool p_eliminate, bool p_iterative, bool p_strong,
 		 bool p_mixed,
@@ -726,7 +726,8 @@ guiefgEnumMixedNfg::Solve(const EFSupport &p_support) const
   params.tracefile = m_traceFile;
 
   try {
-    EnumBySubgameG M(p_support.Game(), p_support, params, m_eliminate, m_eliminateAll,
+    EnumBySubgameG M(p_support.GetGame(), 
+		     p_support, params, m_eliminate, m_eliminateAll,
 		     !m_eliminateWeak, m_eliminateMixed, 0, m_parent);
     return M.Solve(p_support, status);
   }
@@ -772,14 +773,14 @@ bool guiefgEnumMixedNfg::SolveSetup(void)
 
 class ZSumBySubgameG : public efgLpNfgSolve, public guiSubgameViaNfg {
 protected:
-  void SelectSolutions(int p_number, const Efg &p_efg,
+  void SelectSolutions(int p_number, const Efg::Game &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_number, p_efg, p_solutions); }
   void ViewNormal(const Nfg &p_nfg, NFSupport &p_support)
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
-  ZSumBySubgameG(const Efg &p_efg, const EFSupport &p_support,
+  ZSumBySubgameG(const Efg::Game &p_efg, const EFSupport &p_support,
 		 const ZSumParams &p_params, bool p_eliminate,
 		 bool p_iterative, bool p_strong, bool p_mixed, int p_max = 0,
 		 EfgShow *p_parent = 0)
@@ -804,7 +805,7 @@ gList<BehavSolution> guiefgLpNfg::Solve(const EFSupport &p_support) const
   params.tracefile = m_traceFile;
 
   try {
-    ZSumBySubgameG M(p_support.Game(), p_support, params, m_eliminate, m_eliminateAll,
+    ZSumBySubgameG M(p_support.GetGame(), p_support, params, m_eliminate, m_eliminateAll,
 		     !m_eliminateWeak, m_eliminateMixed, 0, m_parent);
     return M.Solve(p_support, status);
   }
@@ -843,14 +844,14 @@ bool guiefgLpNfg::SolveSetup(void)
 
 class EfgCSumBySubgameG : public efgLpSolve, public guiSubgameViaEfg {
 protected:
-  void SelectSolutions(int p_number, const Efg &p_efg,
+  void SelectSolutions(int p_number, const Efg::Game &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_number, p_efg, p_solutions); }
-  void ViewSubgame(int p_number, const Efg &p_efg, EFSupport &p_support)
+  void ViewSubgame(int p_number, const Efg::Game &p_efg, EFSupport &p_support)
     { BaseViewSubgame(p_number, p_efg, p_support); }
 
 public:
-  EfgCSumBySubgameG(const Efg &p_efg, const EFSupport &p_support,
+  EfgCSumBySubgameG(const Efg::Game &p_efg, const EFSupport &p_support,
 		    const CSSeqFormParams &p_params, 
 		    bool p_eliminate, bool p_iterative, bool p_strong,
 		    int p_max = 0, EfgShow *p_parent = 0)
@@ -887,7 +888,7 @@ gList<BehavSolution> guiefgLpEfg::Solve(const EFSupport &p_support) const
   params.tracefile = m_traceFile;
 
   try {
-    EfgCSumBySubgameG M(p_support.Game(), p_support, params,
+    EfgCSumBySubgameG M(p_support.GetGame(), p_support, params,
 			m_eliminate, m_eliminateAll, !m_eliminateWeak,
 			0, m_parent);
     return M.Solve(p_support, status);
@@ -932,14 +933,14 @@ bool guiefgLpEfg::SolveSetup(void)
 
 class SimpdivBySubgameG : public efgSimpDivNfgSolve, public guiSubgameViaNfg {
 protected:
-  void SelectSolutions(int p_subgame, const Efg &p_efg,
+  void SelectSolutions(int p_subgame, const Efg::Game &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
   void ViewNormal(const Nfg &p_nfg, NFSupport &p_support)
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
-  SimpdivBySubgameG(const Efg &p_efg, const EFSupport &p_support,
+  SimpdivBySubgameG(const Efg::Game &p_efg, const EFSupport &p_support,
 		    const SimpdivParams &p_params, bool p_eliminate,
 		    bool p_iterative, bool p_strong, bool p_mixed, 
 		    int p_max = 0, EfgShow *p_parent = 0)
@@ -979,7 +980,7 @@ gList<BehavSolution> guiefgSimpdivNfg::Solve(const EFSupport &p_support) const
   params.tracefile = m_traceFile;
 
   try {
-    SimpdivBySubgameG M(p_support.Game(), p_support, params, m_eliminate, m_eliminateAll,
+    SimpdivBySubgameG M(p_support.GetGame(), p_support, params, m_eliminate, m_eliminateAll,
 			!m_eliminateWeak, m_eliminateMixed, 0, m_parent);
     return M.Solve(p_support, status);
   }
@@ -1028,12 +1029,12 @@ bool guiefgSimpdivNfg::SolveSetup(void)
 class guiPolEnumEfgByNfgSubgame : public efgPolEnumNfgSolve,
 				  public guiSubgameViaNfg {
 protected:
-  void SelectSolutions(int p_subgame, const Efg &p_efg,
+  void SelectSolutions(int p_subgame, const Efg::Game &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
   
 public:
-  guiPolEnumEfgByNfgSubgame(const Efg &p_efg, const EFSupport &p_support,
+  guiPolEnumEfgByNfgSubgame(const Efg::Game &p_efg, const EFSupport &p_support,
 			    const PolEnumParams &p_params,
 			    bool p_eliminate, bool p_iterative,
 			    bool p_strong, bool p_mixed, int p_max = 0,
@@ -1058,7 +1059,7 @@ gList<BehavSolution> guiefgPolEnumNfg::Solve(const EFSupport &p_support) const
   params.tracefile = m_traceFile;
 
   try {
-    guiPolEnumEfgByNfgSubgame M(p_support.Game(), p_support, params,
+    guiPolEnumEfgByNfgSubgame M(p_support.GetGame(), p_support, params,
 				m_eliminate, m_eliminateAll,
 				!m_eliminateWeak, m_eliminateMixed,
 				0, m_parent);
@@ -1098,14 +1099,14 @@ bool guiefgPolEnumNfg::SolveSetup(void)
 
 class EfgPolEnumBySubgameG : public efgPolEnumSolve, public guiSubgameViaEfg {
 protected:
-  void SelectSolutions(int p_subgame, const Efg &p_efg,
+  void SelectSolutions(int p_subgame, const Efg::Game &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
-  void ViewSubgame(int p_subgame, const Efg &p_efg, EFSupport &p_support)
+  void ViewSubgame(int p_subgame, const Efg::Game &p_efg, EFSupport &p_support)
     { BaseViewSubgame(p_subgame, p_efg, p_support); }
   
 public:
-  EfgPolEnumBySubgameG(const Efg &p_efg, const EFSupport &p_support,
+  EfgPolEnumBySubgameG(const Efg::Game &p_efg, const EFSupport &p_support,
 		       const EfgPolEnumParams &p_params,
 		       bool p_eliminate, bool p_iterative, bool p_strong,
 		       int p_max = 0, EfgShow *p_parent = 0)
@@ -1140,7 +1141,8 @@ gList<BehavSolution> guiefgPolEnumEfg::Solve(const EFSupport &p_support) const
   gList<BehavSolution> solutions;
 
   try {
-    return EfgPolEnumBySubgameG(p_support.Game(), p_support, params, m_eliminate,
+    return EfgPolEnumBySubgameG(p_support.GetGame(),
+				p_support, params, m_eliminate,
 				m_eliminateAll, !m_eliminateWeak,
 				0, m_parent).Solve(p_support, status);
   }
@@ -1198,7 +1200,7 @@ gList<BehavSolution> guiefgQreNfg::Solve(const EFSupport &p_support) const
   params.trace = m_traceLevel;
   params.tracefile = m_traceFile;
 
-  Nfg *N = MakeReducedNfg(EFSupport(p_support.Game()));
+  Nfg *N = MakeReducedNfg(EFSupport(p_support.GetGame()));
 
   MixedProfile<gNumber> startm(startb);
   
@@ -1303,7 +1305,7 @@ gList<BehavSolution> guiefgQreEfg::Solve(const EFSupport &p_support) const
   gList<BehavSolution> solns;
 
   try {
-    Qre(p_support.Game(), params, start, solns, status, nevals, nits);
+    Qre(p_support.GetGame(), params, start, solns, status, nevals, nits);
   }
   catch (gSignalBreak &) { }
 

@@ -34,7 +34,7 @@ private:
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_LIAP_EFG; }    
 
 public:
-  efgLiapSolve(const Efg &, const EFLiapParams &,
+  efgLiapSolve(const Efg::Game &, const EFLiapParams &,
 	       const BehavProfile<gNumber> &, int max = 0);
   virtual ~efgLiapSolve();
   

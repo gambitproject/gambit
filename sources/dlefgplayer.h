@@ -9,14 +9,14 @@
 
 class dialogEfgSelectPlayer : public guiAutoDialog {
 private:
-  const Efg &m_efg;
+  const Efg::Game &m_efg;
   bool m_chance;
   wxListBox *m_playerNameList;
 
   const char *HelpString(void) const { return "Infoset Menu"; }
 
 public:
-  dialogEfgSelectPlayer(const Efg &, bool p_chance = true, wxWindow * = 0);
+  dialogEfgSelectPlayer(const Efg::Game &, bool p_chance = true, wxWindow * = 0);
   virtual ~dialogEfgSelectPlayer() { } 
 
   EFPlayer *GetPlayer(void);

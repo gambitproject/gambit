@@ -10,7 +10,7 @@
 
 template <class T> class SeqFormModule  {
 private:
-  const Efg &EF;
+  const Efg::Game &EF;
   const EFSupport &support;
   const SeqFormParams &params;
   gMatrix<T> *A;
@@ -51,7 +51,7 @@ public:
 
 template <class T>
 SeqFormModule<T>::SeqFormModule(const EFSupport &S, const SeqFormParams &p) 
-  : EF(S.Game()), support(S), params(p), A(0), b(0), maxpay((T) 0), 
+  : EF(S.GetGame()), support(S), params(p), A(0), b(0), maxpay((T) 0), 
     npivots(0), isets1(S.ReachableInfosets(EF.Players()[1])),
     isets2(S.ReachableInfosets(EF.Players()[2])) 
 { 

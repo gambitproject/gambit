@@ -284,7 +284,7 @@ bool EFActionSet::HasActiveActionAt(const int &iset) const
 // EFSupport: Constructors, Destructors, Operators
 //--------------------------------------------------
 
-EFSupport::EFSupport(const Efg &p_efg) 
+EFSupport::EFSupport(const Efg::Game &p_efg) 
   : m_efg(&p_efg), m_players(p_efg.NumPlayers())
 {
   for (int pl = 1; pl <= m_players.Length(); pl++)
@@ -410,7 +410,7 @@ bool EFSupport::ActionIsActive(const int pl,
 			       const int act) const
 {
   return 
-    ActionIsActive(Game().Players()[pl]->GetInfoset(iset)->GetAction(act));
+    ActionIsActive(GetGame().Players()[pl]->GetInfoset(iset)->GetAction(act));
 }
 
 bool 
@@ -439,7 +439,7 @@ int EFSupport::NumDegreesOfFreedom(void) const
 {
   int answer(0);
 
-  gList<Infoset *> active_infosets = ReachableInfosets(Game().RootNode());
+  gList<Infoset *> active_infosets = ReachableInfosets(GetGame().RootNode());
   for (int i = 1; i <= active_infosets.Length(); i++)
     answer += NumActions(active_infosets[i]) - 1;
 
@@ -746,8 +746,8 @@ deactivate_this_and_lower_nodes_returning_deactivated_infosets(const Node *n,
 
 void EFSupportWithActiveInfo::InitializeActiveListsToAllActive()
 {
-  for (int pl = 0; pl <= Game().NumPlayers(); pl++) {
-    EFPlayer *player = (pl == 0) ? Game().GetChance() : Game().Players()[pl]; 
+  for (int pl = 0; pl <= GetGame().NumPlayers(); pl++) {
+    EFPlayer *player = (pl == 0) ? GetGame().GetChance() : GetGame().Players()[pl]; 
     gList<bool>         is_players_infoset_active;
     gList<gList<bool> > is_players_node_active;
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
@@ -765,8 +765,8 @@ void EFSupportWithActiveInfo::InitializeActiveListsToAllActive()
 
 void EFSupportWithActiveInfo::InitializeActiveListsToAllInactive()
 {
-  for (int pl = 0; pl <= Game().NumPlayers(); pl++) {
-    EFPlayer *player = (pl == 0) ? Game().GetChance() : Game().Players()[pl];
+  for (int pl = 0; pl <= GetGame().NumPlayers(); pl++) {
+    EFPlayer *player = (pl == 0) ? GetGame().GetChance() : GetGame().Players()[pl];
     gList<bool>         is_players_infoset_active;
     gList<gList<bool> > is_players_node_active;
 
@@ -788,11 +788,11 @@ void EFSupportWithActiveInfo::InitializeActiveLists()
 {
   InitializeActiveListsToAllInactive();
 
-  activate_this_and_lower_nodes(Game().RootNode());
+  activate_this_and_lower_nodes(GetGame().RootNode());
 }
 
 // Constructors and Destructor
-EFSupportWithActiveInfo::EFSupportWithActiveInfo(const Efg &E) 
+EFSupportWithActiveInfo::EFSupportWithActiveInfo(const Efg::Game &E) 
   : EFSupport(E), 
     is_infoset_active(0,E.NumPlayers()), 
     is_nonterminal_node_active(0,E.NumPlayers())
@@ -802,8 +802,8 @@ EFSupportWithActiveInfo::EFSupportWithActiveInfo(const Efg &E)
 
 EFSupportWithActiveInfo::EFSupportWithActiveInfo(const EFSupport& given)
   : EFSupport(given), 
-    is_infoset_active(0,given.Game().NumPlayers()), 
-    is_nonterminal_node_active(0,given.Game().NumPlayers())
+    is_infoset_active(0,given.GetGame().NumPlayers()), 
+    is_nonterminal_node_active(0,given.GetGame().NumPlayers())
 {
   InitializeActiveLists();
 }
@@ -811,7 +811,7 @@ EFSupportWithActiveInfo::EFSupportWithActiveInfo(const EFSupport& given)
 EFSupportWithActiveInfo::EFSupportWithActiveInfo(
 				  const EFSupportWithActiveInfo& given)
   : EFSupport(given.UnderlyingSupport()), 
-    //is_infoset_active(0,given.Game().NumPlayers()), 
+    //is_infoset_active(0,given.GetGame().NumPlayers()), 
         is_infoset_active(is_infoset_active), 
     is_nonterminal_node_active(given.is_nonterminal_node_active)
 {
@@ -876,8 +876,8 @@ const gList<const Node *>
 EFSupportWithActiveInfo::ReachableNonterminalNodes() const
 {
   gList<const Node *> answer;
-  for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
-    const EFPlayer *p = Game().Players()[pl];
+  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
+    const EFPlayer *p = GetGame().Players()[pl];
     for (int iset = 1; iset <= p->NumInfosets(); iset++)
       answer += ReachableNodesInInfoset(p->GetInfoset(iset));
   }
@@ -961,23 +961,23 @@ bool EFSupportWithActiveInfo::NodeIsActive(const Node *n) const
 
 bool EFSupportWithActiveInfo::HasActiveActionsAtActiveInfosets()
 {
-  for (int pl = 1; pl <= Game().NumPlayers(); pl++)
-    for (int iset = 1; iset <= Game().Players()[pl]->NumInfosets(); iset++) 
+  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++)
+    for (int iset = 1; iset <= GetGame().Players()[pl]->NumInfosets(); iset++) 
       if (InfosetIsActive(pl,iset))
-        if ( NumActions(Game().Players()[pl]->Infosets()[iset]) == 0 )
+        if ( NumActions(GetGame().Players()[pl]->Infosets()[iset]) == 0 )
           return false;
   return true;
 }
 
 bool EFSupportWithActiveInfo::HasActiveActionsAtActiveInfosetsAndNoOthers()
 {
-  for (int pl = 1; pl <= Game().NumPlayers(); pl++)
-    for (int iset = 1; iset <= Game().Players()[pl]->NumInfosets(); iset++) {
+  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++)
+    for (int iset = 1; iset <= GetGame().Players()[pl]->NumInfosets(); iset++) {
       if (InfosetIsActive(pl,iset))
-        if ( NumActions(Game().Players()[pl]->Infosets()[iset]) == 0 )
+        if ( NumActions(GetGame().Players()[pl]->Infosets()[iset]) == 0 )
           return false;
       if (!InfosetIsActive(pl,iset))
-        if ( NumActions(Game().Players()[pl]->Infosets()[iset]) > 0 )
+        if ( NumActions(GetGame().Players()[pl]->Infosets()[iset]) > 0 )
           return false;
       }
   return true;
@@ -991,16 +991,16 @@ void EFSupportWithActiveInfo::Dump(gOutput& s) const
   /*
   s << "\n";
 
-  for (int pl = 0; pl <= Game().NumPlayers(); pl++) {
+  for (int pl = 0; pl <= GetGame().NumPlayers(); pl++) {
   
     if (pl == 0)
       s << " Chance:  ";
     else 
       s << "Player " << pl << ":";
-    //    s << "(" << Game().Players()[pl]->NumInfosets() << ")";
+    //    s << "(" << GetGame().Players()[pl]->NumInfosets() << ")";
     //    s << "\n";
 
-    for (int iset = 1; iset <= Game().Players()[pl]->NumInfosets(); iset++) { 
+    for (int iset = 1; iset <= GetGame().Players()[pl]->NumInfosets(); iset++) { 
 
       s << "  Infoset " << iset << " is ";
       if (InfosetIsActive(pl,iset))
@@ -1009,12 +1009,12 @@ void EFSupportWithActiveInfo::Dump(gOutput& s) const
 	s << "inactive: ";
       
       s << "{";
-      for (int n = 1; n <= Game().NumNodesInInfoset(pl,iset); n++) {
+      for (int n = 1; n <= GetGame().NumNodesInInfoset(pl,iset); n++) {
 	if (NodeIsActive(pl,iset,n))
 	  s << "+";
 	else
 	  s << "0";
-	if (n < Game().NumNodesInInfoset(pl,iset))
+	if (n < GetGame().NumNodesInInfoset(pl,iset))
 	  s << ",";
       }
       s << "}";

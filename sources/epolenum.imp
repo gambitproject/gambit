@@ -15,7 +15,7 @@
 template <class T> class EfgPolEnumModule  {
 private:
   T eps;
-  const Efg &EF;
+  const Efg::Game &EF;
   const EFSupport &support;
   EfgPolEnumParams params;
   gSpace *Space;
@@ -86,8 +86,8 @@ public:
 template <class T>
 EfgPolEnumModule<T>::EfgPolEnumModule(const EFSupport &S,
 				      const EfgPolEnumParams &p)
-  : EF(S.Game()), support(S), params(p), count(0), nevals(0), SF(S),
-    is_singular(false), var(S.Game().NumPlayers())
+  : EF(S.GetGame()), support(S), params(p), count(0), nevals(0), SF(S),
+    is_singular(false), var(S.GetGame().NumPlayers())
 { 
 //  gEpsilon(eps,12);
 

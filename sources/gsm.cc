@@ -943,7 +943,7 @@ void GSM::UnAssignGameElement( void* game, bool /*IsEfg*/, PortionSpec spec )
 // UnAssignEfgElement
 //---------------------
 
-void GSM::UnAssignEfgElement( Efg* game, PortionSpec spec, void* data )
+void GSM::UnAssignEfgElement( Efg::Game *game, PortionSpec spec, void* data )
 {
   gStack< RefHashTable* > tempRefTableStack;
 
@@ -1018,7 +1018,7 @@ void GSM::UnAssignEfgElement( Efg* game, PortionSpec spec, void* data )
   }
 }
 
-void GSM::UnAssignEfgOutcome(Efg *game, const efgOutcome &data)
+void GSM::UnAssignEfgOutcome(Efg::Game *game, const Efg::Outcome &data)
 {
   gStack< RefHashTable* > tempRefTableStack;
 
@@ -1063,7 +1063,7 @@ void GSM::UnAssignEfgOutcome(Efg *game, const efgOutcome &data)
 
 
 
-void GSM::UnAssignEfgInfoset( Efg* game, Infoset* infoset )
+void GSM::UnAssignEfgInfoset(Efg::Game * game, Infoset* infoset )
 {
   for (int i = 1; i <= infoset->NumActions(); i++ )
     UnAssignEfgElement( game, porACTION, (Action *)infoset->Actions()[i] );
@@ -1071,7 +1071,7 @@ void GSM::UnAssignEfgInfoset( Efg* game, Infoset* infoset )
 }
 
 
-void GSM::UnAssignEfgSubTree( Efg* game, Node* node )
+void GSM::UnAssignEfgSubTree( Efg::Game * game, Node* node )
 {
   for (int i = 1; i <= game->NumChildren(node); i++)  {
     Infoset* infoset = node->GetInfoset();

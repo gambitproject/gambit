@@ -121,7 +121,7 @@ void EfSupport_ListPortion::SetValue(const gList<const EFSupport> &list)
 
 static Portion *GSM_AgentForm(GSM &, Portion **param)
 {
-  Efg &E = *((EfgPortion*) param[0])->Value();
+  Efg::Game &E = *((EfgPortion*) param[0])->Value();
   gWatch watch;
 
   Nfg *N = MakeAfg(E);
@@ -230,7 +230,7 @@ static Portion *GSM_EnumMixed_Efg(GSM &gsm, Portion **param)
   params.trace = ((NumberPortion *) param[7])->Value();
   params.cliques = ((BoolPortion *) param[8])->Value();
 
-  if (!IsPerfectRecall(support.Game())) {
+  if (!IsPerfectRecall(support.GetGame())) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with EnumMixed; results not guaranteed\n";
   }
 
@@ -290,7 +290,7 @@ static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
 
-  if (!IsPerfectRecall(support.Game())) {
+  if (!IsPerfectRecall(support.GetGame())) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with EnumPure; results not guaranteed\n";
   }
 
@@ -430,7 +430,7 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
   }
   else  {     // BEHAV
     BehavSolution &start = *((BehavPortion *) param[0])->Value();
-    Efg &E = start.Game();
+    Efg::Game &E = start.GetGame();
   
     if (!IsPerfectRecall(E)) {
       gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Qre; results not guaranteed\n";
@@ -725,12 +725,12 @@ static Portion *GSM_Lcp_Nfg(GSM &gsm, Portion **param)
 static Portion *GSM_Lcp_Efg(GSM &gsm, Portion **param)
 {
   EFSupport &support = *((EfSupportPortion*) param[0])->Value();
-  const Efg *E = &support.Game();
+  const Efg::Game *E = &support.GetGame();
 
   if (E->NumPlayers() > 2)
     throw gclRuntimeError("Only valid for two-person games");
 
-  if (!IsPerfectRecall(support.Game())) {
+  if (!IsPerfectRecall(support.GetGame())) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Lcp; results not guaranteed\n";
   }
 
@@ -841,7 +841,7 @@ Portion* GSM_Lcp_ListNumber(GSM &, Portion** param)
 static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
 {
   BehavProfile<gNumber> start(*((BehavPortion *) param[0])->Value());
-  Efg &E = start.Game();
+  Efg::Game &E = start.GetGame();
   const EFSupport &supp = (*((BehavPortion *) param[0])->Value()).Support();
   
   gsm.StartAlgorithmMonitor("LiapSolve Progress");
@@ -1054,7 +1054,7 @@ Portion* GSM_Lp_List(GSM &gsm, Portion** param)
 static Portion *GSM_Lp_Efg(GSM &gsm, Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
-  const Efg &E = support.Game();
+  const Efg::Game &E = support.GetGame();
   
   if (E.NumPlayers() > 2 || !E.IsConstSum())
     throw gclRuntimeError("Only valid for two-person zero-sum games");
@@ -1183,7 +1183,7 @@ static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
   gList<BehavSolution> solutions;
   gList<const EFSupport> singular_supports;
 
-  if (!IsPerfectRecall(S.Game())) {
+  if (!IsPerfectRecall(S.GetGame())) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with AllNash; results not guaranteed\n";
   }
   // If asNfg->True (salvaged from old PolEnum_Efg)  
@@ -1301,7 +1301,7 @@ static Portion *GSM_SequentialEquilib(GSM &gsm, Portion **param)
 
 static Portion *GSM_Nfg(GSM &, Portion **param)
 {
-  Efg &E = * ((EfgPortion*) param[0])->Value();
+  Efg::Game &E = * ((EfgPortion*) param[0])->Value();
   gWatch watch;
 
   Nfg *N = MakeReducedNfg(EFSupport(E));
@@ -1404,7 +1404,7 @@ static Portion *GSM_Simpdiv_Efg(GSM &gsm, Portion **param)
   if (!((BoolPortion *) param[1])->Value())
     throw gclRuntimeError("algorithm not implemented for extensive forms");
 
-  if (!IsPerfectRecall(support.Game())) {
+  if (!IsPerfectRecall(support.GetGame())) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Simpdiv; results not guaranteed\n";
   }
 

@@ -22,7 +22,7 @@
 //                    PureBehavProfile<T> member functions
 //-------------------------------------------------------------------------
 
-template <class T> PureBehavProfile<T>::PureBehavProfile(const Efg &efg)
+template <class T> PureBehavProfile<T>::PureBehavProfile(const Efg::Game &efg)
   : E(&efg), profile(efg.NumPlayers())
 {
   E->InitPayoffs();  // only needed for T=double, remove if class is detemplated
@@ -177,7 +177,7 @@ void PureBehavProfile<T>::InfosetProbs(gPVector<T> &probs) const
 }
 
 template <class T>
-const T PureBehavProfile<T>::Payoff(const efgOutcome &p_outcome,
+const T PureBehavProfile<T>::Payoff(const Efg::Outcome &p_outcome,
 				    const int &pl) const
 {
   if (!p_outcome.IsNull()) {
@@ -192,7 +192,7 @@ const T PureBehavProfile<T>::Payoff(const efgOutcome &p_outcome,
 //      Implementation of BehavNode
 //------------------------------------------------------------------------
 
-template <class T> BehavProfile<T>::BehavNode::BehavNode(Efg *e, Node *n, int pl)
+template <class T> BehavProfile<T>::BehavNode::BehavNode(Efg::Game *e, Node *n, int pl)
   : node(n), nval((T) 0), bval((T) 0), children(e->NumChildren(n)), 
     realizProb((T)0), belief((T)0), nodeValue(pl)
 {
@@ -244,7 +244,7 @@ template <class T> BehavProfile<T>::BehavAction::~BehavAction()
 template <class T>
 BehavProfile<T>::BehavProfile(const BehavProfile<T> &p_profile)
   : gDPVector<T>(p_profile), m_efg(p_profile.m_efg),
-    m_root(new BehavNode((Efg *)p_profile.m_efg, p_profile.m_efg->RootNode(),
+    m_root(new BehavNode((Efg::Game *)p_profile.m_efg, p_profile.m_efg->RootNode(),
 			 p_profile.m_efg->NumPlayers())),
     m_support(p_profile.m_support),
     m_isets(p_profile.m_isets.Length()), 
@@ -255,11 +255,11 @@ BehavProfile<T>::BehavProfile(const BehavProfile<T> &p_profile)
 
 template <class T> 
 BehavProfile<T>::BehavProfile(const BehavSolution &p_solution)
-  : gDPVector<T>(p_solution.Game().NumActions()), m_efg(&p_solution.Game()),
-    m_root(new BehavNode((Efg*)m_efg, p_solution.Game().RootNode(),
-			 p_solution.Game().NumPlayers())),
-    m_support(p_solution.Game()),
-    m_isets(p_solution.Game().TotalNumInfosets()), 
+  : gDPVector<T>(p_solution.GetGame().NumActions()), m_efg(&p_solution.GetGame()),
+    m_root(new BehavNode((Efg::Game *)m_efg, p_solution.GetGame().RootNode(),
+			 p_solution.GetGame().NumPlayers())),
+    m_support(p_solution.GetGame()),
+    m_isets(p_solution.GetGame().TotalNumInfosets()), 
     m_cached_data(false)
 
 {
@@ -276,8 +276,8 @@ BehavProfile<T>::BehavProfile(const BehavSolution &p_solution)
 
 template <class T> BehavProfile<T>::BehavProfile(const EFSupport &p_support) 
   : gDPVector<T>(p_support.NumActions()), 
-    m_efg(&p_support.Game()),
-    m_root(new BehavNode((Efg *)m_efg, m_efg->RootNode(), m_efg->NumPlayers())),
+    m_efg(&p_support.GetGame()),
+    m_root(new BehavNode((Efg::Game *)m_efg, m_efg->RootNode(), m_efg->NumPlayers())),
     m_support(p_support), m_isets(m_efg->TotalNumInfosets()), 
     m_cached_data(false)
 
@@ -288,11 +288,11 @@ template <class T> BehavProfile<T>::BehavProfile(const EFSupport &p_support)
 
 template <class T>
 BehavProfile<T>::BehavProfile(const MixedProfile<T> &p_profile)
-  : gDPVector<T>(p_profile.Game().AssociatedEfg()->NumActions()), 
-    m_efg(p_profile.Game().AssociatedEfg()),
-    m_root(new BehavNode((Efg *)m_efg, m_efg->RootNode(), m_efg->NumPlayers())),
+  : gDPVector<T>(p_profile.GetGame().AssociatedEfg()->NumActions()), 
+    m_efg(p_profile.GetGame().AssociatedEfg()),
+    m_root(new BehavNode((Efg::Game *)m_efg, m_efg->RootNode(), m_efg->NumPlayers())),
     m_support(*m_efg),  
-    m_isets(p_profile.Game().AssociatedEfg()->TotalNumInfosets()), 
+    m_isets(p_profile.GetGame().AssociatedEfg()->TotalNumInfosets()), 
     m_cached_data(false)
 
 {
@@ -300,7 +300,7 @@ BehavProfile<T>::BehavProfile(const MixedProfile<T> &p_profile)
 
   InitProfile();
 
-  if (m_efg->AssociatedAfg() == &p_profile.Game())   {
+  if (m_efg->AssociatedAfg() == &p_profile.GetGame())   {
     ((gVector<T> &) *this).operator=((gVector<T> &) p_profile);
     return;
   }
@@ -309,7 +309,7 @@ BehavProfile<T>::BehavProfile(const MixedProfile<T> &p_profile)
 
   BehavNode *n = m_root;
   const NFSupport &support = p_profile.Support();
-  const Nfg &nfg = p_profile.Game();
+  const Nfg &nfg = p_profile.GetGame();
 
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)   {
     n->ClearNodeProbs();
@@ -722,7 +722,7 @@ void BehavProfile<T>::ComputeSolutionData(void)
 }
 
 template <class T>
-void BehavProfile<T>::BehaviorStrat(const Efg &E, int pl,
+void BehavProfile<T>::BehaviorStrat(const Efg::Game &E, int pl,
 				    BehavNode *n)
 {
   for (int i = 1; i <= n->children.Length(); i++)   {
@@ -740,7 +740,7 @@ void BehavProfile<T>::BehaviorStrat(const Efg &E, int pl,
 
 template <class T>
 void BehavProfile<T>::RealizationProbs(const MixedProfile<T> &mp,
-				       const Efg &E, int pl,
+				       const Efg::Game &E, int pl,
 				       const gArray<int> *const actions,
 				       BehavNode *n)
 {
@@ -1005,14 +1005,14 @@ template <class T> gOutput &operator<<(gOutput &p_file,
 
 template <class T>
 BehavAssessment<T>::BehavAssessment(const EFSupport &p_support)
-  : BehavProfile<T>(p_support), m_beliefs(p_support.Game().NumMembers())
+  : BehavProfile<T>(p_support), m_beliefs(p_support.GetGame().NumMembers())
 {
   m_beliefs = BehavProfile<T>::Beliefs();
 }
 
 template <class T>
 BehavAssessment<T>::BehavAssessment(const BehavProfile<T> &p_profile)
-  : BehavProfile<T>(p_profile), m_beliefs(p_profile.Game().NumMembers())
+  : BehavProfile<T>(p_profile), m_beliefs(p_profile.GetGame().NumMembers())
 { 
   m_beliefs = BehavProfile<T>::Beliefs();
 }
@@ -1028,7 +1028,7 @@ template <class T> BehavAssessment<T>::~BehavAssessment()
 template <class T> BehavAssessment<T> &
 BehavAssessment<T>::operator=(const BehavAssessment<T> &p_assess)
 {
-  if (this != &p_assess && &Game() == &p_assess.Game()) {
+  if (this != &p_assess && &GetGame() == &p_assess.GetGame()) {
     BehavProfile<T>::operator=(p_assess);
     m_beliefs = p_assess.m_beliefs;
   }

@@ -18,8 +18,8 @@
 
 
 Sfg::Sfg(const EFSupport &S)
-  : EF(S.Game()), efsupp(S), seq(EF.NumPlayers()), isetFlag(S.Game().NumInfosets()),
-    isetRow(S.Game().NumInfosets()), infosets(EF.NumPlayers())
+  : EF(S.GetGame()), efsupp(S), seq(EF.NumPlayers()), isetFlag(S.GetGame().NumInfosets()),
+    isetRow(S.GetGame().NumInfosets()), infosets(EF.NumPlayers())
 { 
   int i;
   gArray<Infoset *> zero(EF.NumPlayers());

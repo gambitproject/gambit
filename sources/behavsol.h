@@ -80,7 +80,7 @@ public:
   BehavSolution &operator*=(const gNumber &);
 
   // GENERAL DATA ACCESS
-  Efg &Game(void) const { return m_profile->Game(); }
+  Efg::Game &GetGame(void) const { return m_profile->GetGame(); }
   const BehavProfile<gNumber> *Profile(void) const { CheckIsValid(); return m_profile; }
   gPrecision Precision(void) const { return m_precision; }
 
@@ -112,7 +112,7 @@ public:
   // Force the invalidation of cached data
   void Invalidate(void) const;
   void CheckIsValid(void) const {if(!IsValid()) Invalidate();}
-  bool IsValid(void) const {return (m_revision == Game().RevisionNumber());}
+  bool IsValid(void) const {return (m_revision == GetGame().RevisionNumber());}
 
   // COMPUTATION OF INTERESTING QUANTITIES
   gNumber Payoff(int pl) const   { return m_profile->Payoff(pl); }

@@ -37,7 +37,7 @@ protected:
   void GetConsistencySolution(const gVector<double> &x);
   
 public:
-  EFBasis(const Efg &);
+  EFBasis(const Efg::Game &);
   EFBasis(const EFBasis &b); 
   virtual ~EFBasis();
   EFBasis &operator=(const EFBasis &b);

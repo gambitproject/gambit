@@ -7,7 +7,7 @@
 #include "efgciter.h"
 #include "efgiter.h"
 
-EfgIter::EfgIter(Efg &efg)
+EfgIter::EfgIter(Efg::Game &efg)
   : _efg(&efg), _support(efg),
     _profile(efg), _current(_efg->NumInfosets()),
     _payoff(_efg->NumPlayers())
@@ -16,8 +16,8 @@ EfgIter::EfgIter(Efg &efg)
 }
 
 EfgIter::EfgIter(const EFSupport &s)
-  : _efg((Efg *) &s.Game()), _support(s),
-    _profile(s.Game()), _current(_efg->NumInfosets()),
+  : _efg((Efg::Game *) &s.GetGame()), _support(s),
+    _profile(s.GetGame()), _current(_efg->NumInfosets()),
     _payoff(_efg->NumPlayers())
 {
   First();
@@ -107,8 +107,8 @@ void EfgIter::Dump(gOutput &f) const
 
 EfgContIter::EfgContIter(const EFSupport &s)
   : _frozen_pl(0), _frozen_iset(0),
-    _efg(&s.Game()), _support(s),
-    _profile(s.Game()), _current(s.Game().NumInfosets()),
+    _efg(&s.GetGame()), _support(s),
+    _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
     _is_active(),
     _num_active_infosets(_efg->NumPlayers()),
     _payoff(_efg->NumPlayers())
@@ -127,8 +127,8 @@ EfgContIter::EfgContIter(const EFSupport &s)
 
 EfgContIter::EfgContIter(const EFSupport &s, const gList<Infoset *>& active)
   : _frozen_pl(0), _frozen_iset(0),
-    _efg(&s.Game()), _support(s),
-    _profile(s.Game()), _current(s.Game().NumInfosets()),
+    _efg(&s.GetGame()), _support(s),
+    _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
     _is_active(),
     _num_active_infosets(_efg->NumPlayers()),
     _payoff(_efg->NumPlayers())
@@ -253,8 +253,8 @@ void EfgContIter::Dump(gOutput &f) const
 
 
 EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s)
-  : _efg(&s.Game()), _support(s),
-    _profile(s.Game()), _current(s.Game().NumInfosets()),
+  : _efg(&s.GetGame()), _support(s),
+    _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
     _is_active(),
     _num_active_infosets(_efg->NumPlayers()),
     _payoff(_efg->NumPlayers())
@@ -273,8 +273,8 @@ EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s)
 
 EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s, 
 					       const gList<Infoset *>& active)
-  : _efg(&s.Game()), _support(s),
-    _profile(s.Game()), _current(s.Game().NumInfosets()),
+  : _efg(&s.GetGame()), _support(s),
+    _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
     _is_active(),
     _num_active_infosets(_efg->NumPlayers()),
     _payoff(_efg->NumPlayers())

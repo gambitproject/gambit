@@ -19,7 +19,7 @@ protected:
   gBlock<gNumber> m_payoffs;
   gBlock<gNumber> m_doublePayoffs;
 
-  Outcome(Efg *p_efg, int p_number)
+  Outcome(Efg::Game *p_efg, int p_number)
     : m_deleted(false), m_number(p_number), 
       m_payoffs(p_efg->NumPlayers()), m_doublePayoffs(p_efg->NumPlayers())
     { }

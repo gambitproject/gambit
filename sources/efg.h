@@ -22,125 +22,122 @@ template <class T> class BehavProfile;
 template <class T> class MixedProfile;
 template <class T> class PureBehavProfile;
 
-class Efg;
+namespace Efg {
+  class Outcome {
+    friend class Game;
 
-//
-// efgOutcome: "handle" class for referencing outcomes
-//
-class efgOutcome {
-friend class Efg;
-private:
-  int m_outcomeID;
-  Efg *m_efg;
+  private:
+    int m_outcomeID;
+    Game *m_efg;
 
-  int GetID(void) const { return m_outcomeID; }
+    int GetID(void) const { return m_outcomeID; }
 
-protected:
-  efgOutcome(int, Efg *);
-
-public:
-  // Default constructor for use with gArray
-  efgOutcome(void) : m_outcomeID(0), m_efg(0) { }
+  protected:
+    Outcome(int, Game *);
+    
+  public:
+    // Default constructor for use with gArray
+    Outcome(void) : m_outcomeID(0), m_efg(0) { }
   
-  bool operator==(const efgOutcome &p_outcome) const
+    bool operator==(const Outcome &p_outcome) const
     { return (m_outcomeID == p_outcome.m_outcomeID &&
 	      m_efg == p_outcome.m_efg); }
-  bool operator!=(const efgOutcome &p_outcome) const
+    bool operator!=(const Outcome &p_outcome) const
     { return !(*this == p_outcome); }
 
-  Efg *Game(void) const { return m_efg; }
-  bool IsNull(void) const { return (m_outcomeID == 0); }
-};
-
-inline gOutput &operator<<(gOutput &p_file, const efgOutcome &)
-{ return p_file; }
-
-
-class Efg {
-protected:
-  int GetOutcomeID(const efgOutcome &p_outcome) const
-    { return p_outcome.GetID(); }
-  
-public:
-  class Exception : public gException   {
-  public:
-    virtual ~Exception()   { }
-    gText Description(void) const    { return "Efg error"; }
+    Game *GetGame(void) const { return m_efg; }
+    bool IsNull(void) const { return (m_outcomeID == 0); }
   };
 
-  virtual ~Efg() { }
+  inline gOutput &operator<<(gOutput &p_file, const Outcome &)
+    { return p_file; }
 
-  virtual const gText &GetTitle(void) const = 0;
-  virtual long RevisionNumber(void) const = 0;
+  class Game {
+  protected:
+    int GetOutcomeID(const Outcome &p_outcome) const
+      { return p_outcome.GetID(); }
+    
+  public:
+    class Exception : public gException   {
+    public:
+      virtual ~Exception()   { }
+      gText Description(void) const    { return "Efg error"; }
+    };
 
-  virtual int NumPlayers(void) const = 0;
-  virtual const gArray<EFPlayer *> &Players(void) const = 0; 
-  virtual EFPlayer *GetChance(void) const = 0;
+    virtual ~Game() { }
+    
+    virtual const gText &GetTitle(void) const = 0;
+    virtual long RevisionNumber(void) const = 0;
+    
+    virtual int NumPlayers(void) const = 0;
+    virtual const gArray<EFPlayer *> &Players(void) const = 0; 
+    virtual EFPlayer *GetChance(void) const = 0;
 
-  virtual int ProfileLength(void) const = 0;
-  virtual int TotalNumInfosets(void) const = 0;
+    virtual int ProfileLength(void) const = 0;
+    virtual int TotalNumInfosets(void) const = 0;
 
-  virtual gArray<int> NumInfosets(void) const = 0;
-  virtual int NumPlayerInfosets(void) const = 0;
-  virtual int NumChanceInfosets(void) const = 0;
-  virtual gPVector<int> NumActions(void) const = 0;
-  virtual int NumPlayerActions(void) const = 0;
-  virtual int NumChanceActions(void) const = 0;
-  virtual gPVector<int> NumMembers(void) const = 0;
-  virtual gBlock<Infoset *> Infosets(void) const = 0;
+    virtual gArray<int> NumInfosets(void) const = 0;
+    virtual int NumPlayerInfosets(void) const = 0;
+    virtual int NumChanceInfosets(void) const = 0;
+    virtual gPVector<int> NumActions(void) const = 0;
+    virtual int NumPlayerActions(void) const = 0;
+    virtual int NumChanceActions(void) const = 0;
+    virtual gPVector<int> NumMembers(void) const = 0;
+    virtual gBlock<Infoset *> Infosets(void) const = 0;
   
-  virtual gNumber GetChanceProb(Infoset *, int) const = 0;
-  virtual gNumber GetChanceProb(const Action *) const = 0;
+    virtual gNumber GetChanceProb(Infoset *, int) const = 0;
+    virtual gNumber GetChanceProb(const Action *) const = 0;
 
-  virtual Node *RootNode(void) const = 0;
-  virtual bool IsSuccessor(const Node *n, const Node *from) const = 0;
-  virtual bool IsPredecessor(const Node *n, const Node *of) const = 0;
-  virtual gArray<int> PathToNode(const Node *) const = 0;
-  virtual const gArray<Node *> &Children(const Node *n) const = 0;
-  virtual int  NumChildren(const Node *n) const = 0;
-  virtual gList<Node *> TerminalNodes(void) const = 0;  
+    virtual Node *RootNode(void) const = 0;
+    virtual bool IsSuccessor(const Node *n, const Node *from) const = 0;
+    virtual bool IsPredecessor(const Node *n, const Node *of) const = 0;
+    virtual gArray<int> PathToNode(const Node *) const = 0;
+    virtual const gArray<Node *> &Children(const Node *n) const = 0;
+    virtual int  NumChildren(const Node *n) const = 0;
+    virtual gList<Node *> TerminalNodes(void) const = 0;  
 
-  virtual bool IsLegalSubgame(Node *n) = 0;
-  virtual void MarkSubgames(const gList<Node *> &list) = 0;
-  virtual bool MarkSubgame(Node *n) = 0;
-  virtual void UnmarkSubgame(Node *n) = 0;
-  virtual void UnmarkSubgames(Node *n) = 0;
+    virtual bool IsLegalSubgame(Node *n) = 0;
+    virtual void MarkSubgames(const gList<Node *> &list) = 0;
+    virtual bool MarkSubgame(Node *n) = 0;
+    virtual void UnmarkSubgame(Node *n) = 0;
+    virtual void UnmarkSubgames(Node *n) = 0;
+    
+    Outcome GetNullOutcome(void) const
+      { return Outcome(0, const_cast<Game *>(this)); }
+    virtual Outcome GetOutcome(const Node *const) const = 0;
+    virtual void SetOutcome(Node *, const Outcome &) = 0;
 
-  efgOutcome GetNullOutcome(void) const
-    { return efgOutcome(0, const_cast<Efg *>(this)); }
-  virtual efgOutcome GetOutcome(const Node *const) const = 0;
-  virtual void SetOutcome(Node *, const efgOutcome &) = 0
-;
-  virtual void SetOutcomeName(const efgOutcome &, const gText &) = 0;
-  virtual const gText &GetOutcomeName(const efgOutcome &) const = 0;
+    virtual void SetOutcomeName(const Outcome &, const gText &) = 0;
+    virtual const gText &GetOutcomeName(const Outcome &) const = 0;
 
-  virtual void DeleteOutcome(const efgOutcome &) = 0;
+    virtual void DeleteOutcome(const Outcome &) = 0;
 
-  virtual gNumber MinPayoff(int pl = 0) const = 0;
-  virtual gNumber MaxPayoff(int pl = 0) const = 0;
-  virtual bool IsConstSum(void) const = 0;
-  virtual void InitPayoffs(void) const = 0;
+    virtual gNumber MinPayoff(int pl = 0) const = 0;
+    virtual gNumber MaxPayoff(int pl = 0) const = 0;
+    virtual bool IsConstSum(void) const = 0;
+    virtual void InitPayoffs(void) const = 0;
 
-  virtual void SetPayoff(const efgOutcome &, int pl, const gNumber &value) = 0;
-  virtual gNumber Payoff(const efgOutcome &, const EFPlayer *) const = 0;
-  virtual gNumber Payoff(const Node *, const EFPlayer *) const = 0;
-  virtual gArray<gNumber> Payoff(const efgOutcome &) const = 0;
-  virtual void Payoff(const gPVector<int> &profile,
-		      gVector<gNumber> &payoff) const = 0;
-  virtual void Payoff(const gArray<gArray<int> *> &profile,
-		      gArray<gNumber> &payoff) const = 0;
+    virtual void SetPayoff(const Outcome &, int pl, const gNumber &value) = 0;
+    virtual gNumber Payoff(const Outcome &, const EFPlayer *) const = 0;
+    virtual gNumber Payoff(const Node *, const EFPlayer *) const = 0;
+    virtual gArray<gNumber> Payoff(const Outcome &) const = 0;
+    virtual void Payoff(const gPVector<int> &profile,
+			gVector<gNumber> &payoff) const = 0;
+    virtual void Payoff(const gArray<gArray<int> *> &profile,
+			gArray<gNumber> &payoff) const = 0;
 
-  virtual Nfg *AssociatedNfg(void) const = 0;
-  virtual Nfg *AssociatedAfg(void) const = 0;
-  virtual Lexicon *GetLexicon(void) const = 0;
-};
+    virtual Nfg *AssociatedNfg(void) const = 0;
+    virtual Nfg *AssociatedAfg(void) const = 0;
+    virtual Lexicon *GetLexicon(void) const = 0;
+  };
+}  // namespace Efg
 
 class EfgClient;
 
 namespace FullEfgNamespace {
   class Outcome;
 
-  class FullEfg : public Efg  {
+  class FullEfg : public Efg::Game  {
   private:
     // this is used to track memory leakage; #define MEMCHECK to use it
 #ifdef MEMCHECK
@@ -181,7 +178,7 @@ namespace FullEfgNamespace {
   
     void DeleteLexicon(void) const;
 
-    efgOutcome NewOutcome(int index);
+    Efg::Outcome NewOutcome(int index);
 
     void WriteEfgFile(gOutput &, Node *) const;
 
@@ -255,15 +252,15 @@ namespace FullEfgNamespace {
 
     // DATA ACCESS -- OUTCOMES
     int NumOutcomes(void) const;
-    efgOutcome GetOutcome(int index) const;
-    efgOutcome NewOutcome(void);
-    void DeleteOutcome(const efgOutcome &);
+    Efg::Outcome GetOutcome(int index) const;
+    Efg::Outcome NewOutcome(void);
+    void DeleteOutcome(const Efg::Outcome &);
 
-    efgOutcome GetOutcome(const Node *const) const;
-    void SetOutcome(Node *, const efgOutcome &);
+    Efg::Outcome GetOutcome(const Node *const) const;
+    void SetOutcome(Node *, const Efg::Outcome &);
 
-    void SetOutcomeName(const efgOutcome &, const gText &);
-    const gText &GetOutcomeName(const efgOutcome &) const;
+    void SetOutcomeName(const Efg::Outcome &, const gText &);
+    const gText &GetOutcomeName(const Efg::Outcome &) const;
  
     // EDITING OPERATIONS
     Infoset *AppendNode(Node *n, EFPlayer *p, int br);
@@ -297,10 +294,10 @@ namespace FullEfgNamespace {
     gNumber GetChanceProb(const Action *) const;
     gArray<gNumber> GetChanceProbs(Infoset *) const;
 
-    void SetPayoff(const efgOutcome &, int pl, const gNumber &value);
-    gNumber Payoff(const efgOutcome &, const EFPlayer *) const;
+    void SetPayoff(const Efg::Outcome &, int pl, const gNumber &value);
+    gNumber Payoff(const Efg::Outcome &, const EFPlayer *) const;
     gNumber Payoff(const Node *, const EFPlayer *) const;
-    gArray<gNumber> Payoff(const efgOutcome &) const;
+    gArray<gNumber> Payoff(const Efg::Outcome &) const;
 
     void InitPayoffs(void) const;
   
@@ -333,13 +330,13 @@ namespace FullEfgNamespace {
     Lexicon *GetLexicon(void) const { return lexicon; }
 
     friend Nfg *MakeReducedNfg(const EFSupport &);
-    friend Nfg *MakeAfg(const Efg &);
+    friend Nfg *MakeAfg(const Efg::Game &);
 
     // These are auxiliary functions used by the .efg file reader code
     Infoset *GetInfosetByIndex(EFPlayer *p, int index) const;
     Infoset *CreateInfosetByIndex(EFPlayer *p, int index, int br);
-    efgOutcome GetOutcomeByIndex(int index) const;
-    efgOutcome CreateOutcomeByIndex(int index);
+    Efg::Outcome GetOutcomeByIndex(int index) const;
+    Efg::Outcome CreateOutcomeByIndex(int index);
     void Reindex(void);
     Infoset *CreateInfoset(int n, EFPlayer *pl, int br);
 
@@ -365,7 +362,7 @@ FullEfg *ReadEfgFile(gInput &);
 
 template <class T> class PureBehavProfile   {
   protected:
-    const Efg *E;
+    const Efg::Game *E;
     gArray<gArray<const Action *> *> profile;
 
     //    void IndPayoff(const Node *n, const int &pl, const T, T &) const;
@@ -375,7 +372,7 @@ template <class T> class PureBehavProfile   {
     void InfosetProbs(Node *n, T, gPVector<T> &) const;
 
   public:
-    PureBehavProfile(const Efg &);
+    PureBehavProfile(const Efg::Game &);
     PureBehavProfile(const PureBehavProfile<T> &);
     ~PureBehavProfile();
 
@@ -390,14 +387,14 @@ template <class T> class PureBehavProfile   {
     // Information
     const Action *GetAction(const Infoset *) const;
     
-    const T Payoff(const efgOutcome &, const int &pl) const;
+    const T Payoff(const Efg::Outcome &, const int &pl) const;
     const T ChanceProb(const Infoset *, const int &act) const;
     
     const T Payoff(const Node *, const int &pl) const;
   //    T    Payoff(const int &pl) const;
     void Payoff(gArray<T> &payoff) const;
     void InfosetProbs(gPVector<T> &prob) const;
-    Efg &Game(void) const   { return const_cast< Efg& >( *E ); }
+    Efg::Game &GetGame(void) const   { return const_cast<Efg::Game &>(*E); }
 };
 
 

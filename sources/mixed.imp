@@ -320,12 +320,12 @@ void MixedProfile<T>::InitPayoffs(void) const
 
 template <class T>
 MixedProfile<T>::MixedProfile(const BehavProfile<T> &p_profile)
-  : gPVector<T>(p_profile.Game().AssociatedNfg()->NumStrats()),
-    N(p_profile.Game().AssociatedNfg()), support(*N)
+  : gPVector<T>(p_profile.GetGame().AssociatedNfg()->NumStrats()),
+    N(p_profile.GetGame().AssociatedNfg()), support(*N)
 {
   InitPayoffs();
   
-  const Efg &efg = p_profile.Game();
+  const Efg::Game &efg = p_profile.GetGame();
   for (int pl = 1; pl <= N->NumPlayers(); pl++)  {
     for (int st = 1; st <= N->NumStrats(pl); st++)  {
       T prob = (T) 1;

@@ -13,14 +13,14 @@ class EfgContIter;
 
 class EfgIter    {
   private:
-    const Efg *_efg;
+    const Efg::Game *_efg;
     EFSupport _support;
     PureBehavProfile<gNumber> _profile;
     gPVector<int> _current;
     mutable gVector<gNumber> _payoff;
 
   public:
-    EfgIter(Efg &);
+    EfgIter(Efg::Game &);
     EfgIter(const EFSupport &);
     EfgIter(const EfgIter &);
     EfgIter(const EfgContIter &);

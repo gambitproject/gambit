@@ -172,10 +172,10 @@ bool ElimDominatedForPlayer(const EFSupport &S, EFSupport &T,
 {
   bool action_was_eliminated = false;
 
-  for (int iset = 1; iset <= S.Game().Players()[pl]->NumInfosets();
+  for (int iset = 1; iset <= S.GetGame().Players()[pl]->NumInfosets();
        iset++, cumiset++) {
     status.SetProgress((double) cumiset /
-		       (double) S.Game().NumPlayerInfosets());
+		       (double) S.GetGame().NumPlayerInfosets());
     status.Get();
     if (ElimDominatedInInfoset(S, T, pl, iset, strong, conditional, status)) 
       action_was_eliminated = true;

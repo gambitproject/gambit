@@ -19,12 +19,16 @@
 #include "efstrat.h"
 
 //========================================================================
-//             class efgOutcome: Generic outcome handle class
+//             class Efg::Outcome: Generic outcome handle class
 //========================================================================
 
-efgOutcome::efgOutcome(int p_outcomeID, Efg *p_efg)
+namespace Efg {
+
+Outcome::Outcome(int p_outcomeID, Game *p_efg)
   : m_outcomeID(p_outcomeID), m_efg(p_efg)
 { }
+
+}  // namespace Efg
 
 //========================================================================
 //                    class FullEfg: Outcome classes 
@@ -34,13 +38,13 @@ efgOutcome::efgOutcome(int p_outcomeID, Efg *p_efg)
 //         class efgOutcomeFullEfg: FullEfg outcome handler class
 //------------------------------------------------------------------------
 
-class efgOutcomeFullEfg : public efgOutcome {
+class efgOutcomeFullEfg : public Efg::Outcome {
 public:
   efgOutcomeFullEfg(int, FullEfg *);
 };
 
 efgOutcomeFullEfg::efgOutcomeFullEfg(int p_outcomeID, FullEfg *p_efg)
-  : efgOutcome(p_outcomeID, p_efg)
+  : Efg::Outcome(p_outcomeID, p_efg)
 { }
 
 //------------------------------------------------------------------------
@@ -196,7 +200,7 @@ int Node::NumberInInfoset(void) const
     if (GetInfoset()->GetMember(i) == this)
       return i;
   //  This could be speeded up by adding a member to Node to keep track of this
-  throw Efg::Exception();
+  throw Efg::Game::Exception();
 }
 
 
@@ -222,13 +226,13 @@ Node *Node::PriorSibling(void) const
 const Action *Node::GetAction() const
 {
   if (this == Game()->RootNode()) 
-    throw Efg::Exception();
+    throw Efg::Game::Exception();
   
   const gArray<Action *> &actions = GetParent()->GetInfoset()->Actions();
   for (int i = 1; i <= actions.Length(); i++)
     if (this == GetParent()->GetChild(actions[i]))
       return actions[i];
-  throw Efg::Exception();
+  throw Efg::Game::Exception();
 }
 
 void Node::DeleteOutcome(FullEfgNamespace::Outcome *outc)
@@ -359,7 +363,7 @@ Infoset *FullEfg::GetInfosetByIndex(EFPlayer *p, int index) const
   return 0;
 }
 
-efgOutcome FullEfg::GetOutcomeByIndex(int index) const
+Efg::Outcome FullEfg::GetOutcomeByIndex(int index) const
 {
   for (int i = 1; i <= outcomes.Last(); i++) {
     if (outcomes[i]->m_number == index)  {
@@ -467,7 +471,7 @@ Infoset *FullEfg::CreateInfoset(int n, EFPlayer *p, int br)
   return s;
 }
 
-efgOutcome FullEfg::CreateOutcomeByIndex(int index)
+Efg::Outcome FullEfg::CreateOutcomeByIndex(int index)
 {
   NewOutcome(index);
   return efgOutcomeFullEfg(outcomes.Last(), this);
@@ -664,7 +668,7 @@ gBlock<Infoset *> FullEfg::Infosets() const
 int FullEfg::NumOutcomes(void) const
 { return outcomes.Last(); }
 
-efgOutcome FullEfg::NewOutcome(void)
+Efg::Outcome FullEfg::NewOutcome(void)
 {
   m_revision++;
   m_dirty = true;
@@ -672,7 +676,7 @@ efgOutcome FullEfg::NewOutcome(void)
   return efgOutcomeFullEfg(outcomes.Last(), this);
 }
 
-void FullEfg::DeleteOutcome(const efgOutcome &p_outcome)
+void FullEfg::DeleteOutcome(const Efg::Outcome &p_outcome)
 {
   m_revision++;
   m_dirty = true;
@@ -695,21 +699,21 @@ void FullEfg::DeleteOutcome(const efgOutcome &p_outcome)
   DeleteLexicon();
 }
 
-efgOutcome FullEfg::GetOutcome(int p_index) const
+Efg::Outcome FullEfg::GetOutcome(int p_index) const
 {
   return efgOutcomeFullEfg(p_index, const_cast<FullEfg *>(this));
 }
 
-void FullEfg::SetOutcomeName(const efgOutcome &p_outcome, const gText &p_name)
+void FullEfg::SetOutcomeName(const Efg::Outcome &p_outcome, const gText &p_name)
 {
-  if (p_outcome.Game() == this) {
+  if (p_outcome.GetGame() == this) {
     outcomes[GetOutcomeID(p_outcome)]->m_name = p_name;
   }
 }
 
-const gText &FullEfg::GetOutcomeName(const efgOutcome &p_outcome) const
+const gText &FullEfg::GetOutcomeName(const Efg::Outcome &p_outcome) const
 {
-  if (p_outcome.Game() == (Efg *) this) {
+  if (p_outcome.GetGame() == (Efg::Game *) this) {
     return outcomes[GetOutcomeID(p_outcome)]->m_name;
   }
   else {
@@ -717,7 +721,7 @@ const gText &FullEfg::GetOutcomeName(const efgOutcome &p_outcome) const
   }
 }
 
-efgOutcome FullEfg::GetOutcome(const Node *p_node) const
+Efg::Outcome FullEfg::GetOutcome(const Node *p_node) const
 {
   if (p_node->outcome) {
     return efgOutcomeFullEfg(p_node->outcome->m_number,
@@ -728,15 +732,15 @@ efgOutcome FullEfg::GetOutcome(const Node *p_node) const
   }
 }
 
-void FullEfg::SetOutcome(Node *p_node, const efgOutcome &p_outcome)
+void FullEfg::SetOutcome(Node *p_node, const Efg::Outcome &p_outcome)
 {
   p_node->outcome = outcomes[GetOutcomeID(p_outcome)];
 }
 
-void FullEfg::SetPayoff(const efgOutcome &p_outcome, int pl, 
+void FullEfg::SetPayoff(const Efg::Outcome &p_outcome, int pl, 
 			const gNumber &value)
 {
-  if (p_outcome.Game() != this || p_outcome.IsNull()) {
+  if (p_outcome.GetGame() != this || p_outcome.IsNull()) {
     return;
   }
 
@@ -745,10 +749,10 @@ void FullEfg::SetPayoff(const efgOutcome &p_outcome, int pl,
   outcomes[GetOutcomeID(p_outcome)]->m_payoffs[pl] = value;
 }
 
-gNumber FullEfg::Payoff(const efgOutcome &p_outcome,
+gNumber FullEfg::Payoff(const Efg::Outcome &p_outcome,
 			const EFPlayer *p_player) const
 {
-  if (p_outcome.Game() != (Efg *) this || p_outcome.IsNull()) {
+  if (p_outcome.GetGame() != (Efg::Game *) this || p_outcome.IsNull()) {
     return gNumber(0);
   }
 
@@ -760,9 +764,9 @@ gNumber FullEfg::Payoff(const Node *p_node, const EFPlayer *p_player) const
   return (p_node->outcome) ? p_node->outcome->m_payoffs[p_player->number] : gNumber(0);
 }
 
-gArray<gNumber> FullEfg::Payoff(const efgOutcome &p_outcome) const
+gArray<gNumber> FullEfg::Payoff(const Efg::Outcome &p_outcome) const
 {
-  if (p_outcome.Game() != (Efg *) this || p_outcome.IsNull()) {
+  if (p_outcome.GetGame() != (Efg::Game *) this || p_outcome.IsNull()) {
     gArray<gNumber> ret(players.Length());
     for (int i = 1; i <= ret.Length(); ret[i++] = 0);
     return ret;
@@ -953,7 +957,7 @@ const gArray<Node *> &FullEfg::Children(const Node *n) const
 int FullEfg::NumChildren(const Node *n) const
 { return n->children.Length(); }
 
-efgOutcome FullEfg::NewOutcome(int index)
+Efg::Outcome FullEfg::NewOutcome(int index)
 {
   m_revision++;
   m_dirty = true;

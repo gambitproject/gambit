@@ -457,7 +457,7 @@ const gText &EfgShow::Filename(void) const
 }
 
 
-void EfgShow::PickSolutions(const Efg &p_efg, Node *p_rootnode,
+void EfgShow::PickSolutions(const Efg::Game &p_efg, Node *p_rootnode,
 			    gList<BehavSolution> &p_solns)
 {
 #ifdef NOT_PORTED_YET
@@ -858,7 +858,7 @@ void EfgShow::OnFileSave(wxCommandEvent &)
 		   "Error", wxOK);
       if (efg)  delete efg;
     }
-    catch (Efg::Exception &) {
+    catch (Efg::Game::Exception &) {
       wxMessageBox("Internal exception in extensive form", "Error", wxOK);
       if (efg)  delete efg;
     }
@@ -915,7 +915,7 @@ void EfgShow::OnEditNodeAdd(wxCommandEvent &)
   static int branches = 2; // make this static so it remembers the last entry
   static EFPlayer *player = 0;
   static Infoset *infoset = 0;
-  static Efg *last_ef = 0; // need this to make sure player,infoset are valid
+  static Efg::Game *last_ef = 0; // need this to make sure player,infoset are valid
 
   if (last_ef != &m_efg)  {
     player = 0;
@@ -986,7 +986,7 @@ void EfgShow::OnEditNodeInsert(wxCommandEvent &)
   static int branches = 2; // make this static so it remembers the last entry
   static EFPlayer *player = 0;
   static Infoset *infoset = 0;
-  static Efg *last_ef = 0; // need this to make sure player,infoset are valid
+  static Efg::Game *last_ef = 0; // need this to make sure player,infoset are valid
 
   if (last_ef != &m_efg)  {
     player = 0;
@@ -1138,7 +1138,7 @@ void EfgShow::OnEditOutcomesDetach(wxCommandEvent &)
 
 void EfgShow::OnEditOutcomesLabel(wxCommandEvent &)
 {
-  efgOutcome outcome = m_efg.GetOutcome(Cursor());
+  Efg::Outcome outcome = m_efg.GetOutcome(Cursor());
 
   wxTextEntryDialog dialog(this, "New outcome label", "Label outcome",
 			   (char *) m_efg.GetOutcomeName(outcome));
@@ -1155,7 +1155,7 @@ void EfgShow::OnEditOutcomesPayoffs(wxCommandEvent &)
   dialogEfgPayoffs dialog(m_efg, m_efg.GetOutcome(Cursor()), this);
 
   if (dialog.ShowModal() == wxID_OK) {
-    efgOutcome outcome = m_efg.GetOutcome(Cursor());
+    Efg::Outcome outcome = m_efg.GetOutcome(Cursor());
     gArray<gNumber> payoffs(dialog.Payoffs());
 
     if (!outcome.IsNull()) {
@@ -1180,7 +1180,7 @@ void EfgShow::OnEditOutcomesNew(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      efgOutcome outcome = m_efg.NewOutcome();
+      Efg::Outcome outcome = m_efg.NewOutcome();
       gArray<gNumber> payoffs(dialog.Payoffs());
 
       for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
@@ -1361,7 +1361,7 @@ void EfgShow::OnEditMassAll(wxCommandEvent &)
   static int branches = 2; // make this static so it remembers the last entry
   static EFPlayer *player = 0;
   static Infoset *infoset = 0;
-  static Efg *last_ef = 0; // need this to make sure player,infoset are valid
+  static Efg::Game *last_ef = 0; // need this to make sure player,infoset are valid
 
   if (last_ef != &m_efg)  {
     player = 0;
@@ -1399,7 +1399,7 @@ void EfgShow::OnEditMassAction(wxCommandEvent &)
   static int branches = 2; // make this static so it remembers the last entry
   static EFPlayer *player = 0;
   static Infoset *infoset = 0;
-  static Efg *last_ef = 0; // need this to make sure player,infoset are valid
+  static Efg::Game *last_ef = 0; // need this to make sure player,infoset are valid
 
   if (m_efg.NumPlayerInfosets() == 0) {
     return;
