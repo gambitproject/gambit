@@ -165,7 +165,9 @@ public:
       // Redefined functions
   void Refactor();
   void Pivot(int outrow,int col);
+  void ReversePivots(gList<gArray<int> > &);
   bool IsReversePivot(int i, int j);
+  void DualReversePivots(gList<gArray<int> > &);
   bool IsDualReversePivot(int i, int j);
   BFS<T> DualBFS(void) const;
 };

@@ -9,6 +9,7 @@
 
 #include "tableau.h"
 #include "bfs.h"
+#include "gstatus.h"
 
 //
 // This class enumerates the vertices of the convex polyhedron 
@@ -31,11 +32,14 @@ private:
   gVector<T> btemp,c;
   BFS_List List;
   long npivots;
+  gStatus &status;
 
+  void Enum();
   void Search(LPTableau<T> &tab);
   void DualSearch(LPTableau<T> &tab);
 public:
   VertEnum(const gMatrix<T> &A, const gVector<T> &b);
+  VertEnum(const gMatrix<T> &A, const gVector<T> &b, gStatus &status);
   ~VertEnum();
 
   BFS_List VertexList() const;
