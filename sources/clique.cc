@@ -10,7 +10,19 @@
 /* =============== main =============== */
 int main()
 {
-  gArray<edge> edgelist(MAXEDGES);
+  gArray<edge> edgelist1(MAXEDGES);
+
+  int i,j, count = 0;
+  while (scanf("%d %d", &i, &j) != EOF) {
+    count ++;
+    edgelist1[count].node1=i;
+    edgelist1[count].node2=j;
+  }
+  gArray<edge> edgelist(count);
+  for(int i=1;i<=count;i++) {
+    edgelist[i].node1 = edgelist1[i].node1;
+    edgelist[i].node2 = edgelist1[i].node2;
+  }
   EnumCliques clique(edgelist,MAXINP1,MAXINP2);
   return 0 ;
 }
@@ -397,24 +409,19 @@ lists of edges representing its connected components
     co2[j] = 0;
   
   numco = 0;
-  newedge = 0;
-  
-  while (scanf("%d %d", &i, &j) != EOF) {
+  for(newedge = 1;newedge<=edgelist.Length();newedge++) {
+    i = edgelist[newedge].node1;
+    j = edgelist[newedge].node2;
+    
     if (i < 0 || i>= maxinp1 || j<0 || j>=maxinp2)
       printf("Edge (%d, %d) not in admitted range (0..%d, 0..%d), rejected\n",
 	     i,j, maxinp1-1, maxinp2-1) ;
-    else if (newedge >= MAXEDGES-1)
-      printf("max no. %d of edges exceeded, edge (%d, %d) rejected\n",
-	     MAXEDGES-1, i,j) ;
     else { 
       /* add edge (i,j) to current componentlist */
       int  ico, jco ;  /* current components of i,j  */
-      newedge ++;
-      edgelist[newedge].node1 = i;
-      edgelist[newedge].node2 = j;
       ico = co1[i] ;
       jco = co2[j] ;
-      
+	
       if (ico == 0) {
 	/*  i  has not yet been in a component before  */
 	if (jco == 0) {
