@@ -94,10 +94,6 @@ bool QuikSolv<T>::AllRealRootsFromPelican(const gPolyList<gDouble> & sys,
   if (!pel.FoundAllRoots())
     return false;
   ans = pel.RealRoots();
-
-  //DEBUG
-  //  gout << "Returned with the roots: \n" << ans << "\n";
-
   }
   catch (ErrorInPelican) {
     return false;
@@ -492,6 +488,7 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
     return true;
   }
 
+  /* - Commmented out 7/11/00 because g3.nfg does not work
   gList<gVector<gDouble> > answer;
   bool done = PelicanRoots(r, answer);
   if (done) {
@@ -499,6 +496,7 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
     HasBeenSolved = true; 
     return true;     
   }
+  */
 
   gArray<int> precedence(System.Length());  
             // Orders search for nonvanishing poly
