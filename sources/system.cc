@@ -98,16 +98,21 @@ int System::Spawn(const char *command)
 }
 
 
-// This returns the slash character for the system;
-//   forward '/' for UNIX, backward '\' for DOS/Windows
+// This returns the slash character for the system
 char System::Slash(void)
 {
-#ifdef __GNUG__
   return '/';
-#elif defined __BORLANDC__
-  return '\\';
-#endif   // __GNUG__, __BORLANDC__  
 }
+
+char *System::Slashify(char *path)
+{
+  for (int i = 0; i < strlen(path); i++)  {
+    if (path[i] == '/' || path[i] == '\\')
+      path[i] = Slash();
+  }
+  return path;
+}
+
 
 
 

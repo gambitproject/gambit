@@ -217,26 +217,8 @@ ITEM 0007:  Include file names not printable
 
 DATE:     9/8/1999 by TLT (was Bug C31 in bugs_gcl)
 AFFECTS:  GCL (MSWindows)
-STATUS:   OPEN
+STATUS:   CLOSED 9/8/1999 by TLT
 SEVERITY: MINOR
-DETAILS:
-
-Here, the GCL is being run from the directory c:\gambit96, and the
-gclini.gcl and stdudfs.gcl files are in c:\gambit96\bin.
-
-  Include["C:\gambit9in\gclini.gcl"]
-  Include["C:\gambit9in\stdudfs.gcl"]
-  GCL1: << Include["gcl\nqre.gcl"]
-  True
-  Include["gcl
-  qre.gcl"]
-
-Note that it does not print the names of the included files correctly,
-even though it locates and loads them all correctly.  Evidently it is
-treating the "\n" in the pathname "gcl\nqre.gcl" as a new line
-character when it prints it even though it actually loads the file OK.
-This is probably what is happening with the "\b" in "c:\gambit96\bin"
-also.
 
 ---------------
 

@@ -23,6 +23,7 @@ public:
   // This returns the slash character for the system;
   //   forward '/' for UNIX, backward '\' for DOS/Windows
   static char Slash(void);
+  static char *Slashify(char *path);
 };
 
 #endif  // SYSTEM_H
