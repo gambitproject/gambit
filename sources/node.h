@@ -32,6 +32,9 @@ class Node    {
     virtual void Resize(int) = 0;
 
   public:
+    // these are temporarily here for nfgefg
+    double nval, bval;
+
     bool IsValid(void) const     { return valid; }
     BaseExtForm *BelongsTo(void) const   { return E; }
 
