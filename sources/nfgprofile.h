@@ -11,7 +11,7 @@
 #include "nfgshow.h"
 #include "mixedfilter.h"
 
-class NfgProfileList : public wxListCtrl, public gSortList<MixedSolution> {
+class NfgProfileList : public wxListCtrl, public gList<MixedSolution> {
 private:
   NfgShow *m_parent;
   wxMenu *m_menu;

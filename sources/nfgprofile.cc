@@ -48,7 +48,7 @@ NfgProfileList::~NfgProfileList()
 void NfgProfileList::UpdateValues(void)
 {
   DeleteAllItems();
-  for (int i = 1; i <= VisibleLength(); i++) {
+  for (int i = 1; i <= Length(); i++) {
     const MixedSolution &solution = (*this)[i];
     InsertItem(i - 1, (char *) solution.GetName());
     SetItem(i - 1, 1, (char *) ToText(solution.Creator()));
@@ -65,7 +65,7 @@ void NfgProfileList::UpdateValues(void)
     }
   }
 
-  if (VisibleLength() > 0) {
+  if (Length() > 0) {
     wxListItem item;
     item.m_mask = wxLIST_MASK_STATE;
     item.m_itemId = m_parent->CurrentSolution() - 1;
@@ -93,7 +93,7 @@ int NfgProfileList::Append(const MixedSolution &p_solution)
     number++;
   }
 
-  (*this)[gSortList<MixedSolution>::Append(p_solution)].SetName("Profile" + ToText(number));
+  (*this)[gList<MixedSolution>::Append(p_solution)].SetName("Profile" + ToText(number));
   return Length();
 }
 
@@ -108,6 +108,7 @@ void NfgProfileList::OnRightClick(wxMouseEvent &p_event)
 
 void NfgProfileList::OnSortFilter(wxCommandEvent &)
 {
+#ifdef UNUSED
   dialogMixedFilter dialog(this, m_options);
 
   if (dialog.ShowModal() == wxID_OK) {
@@ -132,4 +133,5 @@ void NfgProfileList::OnSortFilter(wxCommandEvent &)
       m_parent->ChangeSolution((VisibleLength() > 0) ? 1 : 0);
     }
   }
+#endif  // UNUSED
 }

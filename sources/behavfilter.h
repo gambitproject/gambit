@@ -43,6 +43,7 @@ public:
 #define     NUM_BCREATORS       16
 
 typedef enum {
+  BSORT_NONE = 0,
   BSORT_BY_NAME = 1, BSORT_BY_CREATOR = 2,
   BSORT_BY_NASH = 3, BSORT_BY_PERFECT = 4,
   BSORT_BY_SEQ = 5, BSORT_BY_GVALUE = 6,

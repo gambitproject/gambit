@@ -11,13 +11,17 @@
 #include "efgshow.h"
 #include "behavfilter.h"
 
-class EfgProfileList : public wxListCtrl, public gSortList<BehavSolution> {
+class EfgProfileList : public wxListCtrl, public gList<BehavSolution> {
 private:
   EfgShow *m_parent;
   wxMenu *m_menu;
+  gBlock<int> m_displayOrder;
 
 protected:
   BehavListFilter m_options;
+
+  // Private members
+  void Resort(void);
 
   // Event handlers
   void OnSortFilter(wxCommandEvent &);

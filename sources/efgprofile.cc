@@ -52,8 +52,8 @@ EfgProfileList::~EfgProfileList()
 void EfgProfileList::UpdateValues(void)
 {
   DeleteAllItems();
-  for (int i = 1; i <= VisibleLength(); i++) {
-    const BehavSolution &solution = (*this)[i];
+  for (int i = 1; i <= Length(); i++) {
+    const BehavSolution &solution = (*this)[m_displayOrder[i]];
     InsertItem(i - 1, (char *) solution.GetName());
     SetItem(i - 1, 1, (char *) ToText(solution.Creator()));
     SetItem(i - 1, 2, (char *) ToText(solution.IsNash()));
@@ -71,7 +71,7 @@ void EfgProfileList::UpdateValues(void)
     }
   }
 
-  if (VisibleLength() > 0) {
+  if (Length() > 0) {
     wxListItem item;
     item.m_mask = wxLIST_MASK_STATE;
     item.m_itemId = m_parent->CurrentSolution() - 1;
@@ -79,6 +79,32 @@ void EfgProfileList::UpdateValues(void)
     item.m_stateMask = wxLIST_STATE_SELECTED;
     SetItem(item);
   }
+}
+
+void EfgProfileList::Resort(void)
+{
+  m_displayOrder = gBlock<int>(Length());
+  for (int i = 1; i <= m_displayOrder.Length(); i++) {
+    m_displayOrder[i] = i;
+  }
+
+  bool changed;
+
+  do { 
+    changed = false;
+    
+    for (int i = 1; i <= m_displayOrder.Length() - 1; i++) {
+      if (m_options.SortBy() == BSORT_BY_NASH &&
+	  ((*this)[m_displayOrder[i]].IsNash() <
+	   (*this)[m_displayOrder[i+1]].IsNash())) {
+	int foo = m_displayOrder[i];
+	m_displayOrder[i] = m_displayOrder[i+1];
+	m_displayOrder[i+1] = foo;
+	changed = true;
+      }
+    }
+  } while (changed);
+
 }
 
 int EfgProfileList::Append(const BehavSolution &p_solution)  
@@ -99,7 +125,8 @@ int EfgProfileList::Append(const BehavSolution &p_solution)
     number++;
   }
 
-  (*this)[gSortList<BehavSolution>::Append(p_solution)].SetName("Profile" + ToText(number));
+  (*this)[gList<BehavSolution>::Append(p_solution)].SetName("Profile" + ToText(number));
+  Resort();
   return Length();
 }
 
@@ -114,6 +141,7 @@ void EfgProfileList::OnRightClick(wxMouseEvent &p_event)
 
 void EfgProfileList::OnSortFilter(wxCommandEvent &)
 {
+#ifdef UNUSED
   dialogBehavFilter dialog(this, m_options);
 
   if (dialog.ShowModal() == wxID_OK) {
@@ -138,6 +166,7 @@ void EfgProfileList::OnSortFilter(wxCommandEvent &)
       m_parent->ChangeSolution((VisibleLength() > 0) ? 1 : 0);
     }
   }
+#endif  // UNUSED
 }
 
 void EfgProfileList::OnColumnClick(wxListEvent &p_event)
@@ -171,12 +200,17 @@ void EfgProfileList::OnColumnClick(wxListEvent &p_event)
     break;
   }
 
+  Resort();
+  UpdateValues();
+
+#ifdef UNUSED
   if (VisibleLength() > 0) {
     BehavSolution &currentSolution = (*this)[m_parent->CurrentSolution()];
     m_options.Sort(*this);
     UpdateValues();
     m_parent->ChangeSolution(this->Find(currentSolution));
   }
+#endif  // UNUSED
 }
 
 

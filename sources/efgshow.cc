@@ -1681,7 +1681,7 @@ void EfgShow::OnSolveStandard(wxCommandEvent &)
 
   delete solver;
 
-  ChangeSolution(m_solutionTable->VisibleLength());
+  ChangeSolution(m_solutionTable->Length());
   UpdateMenus();
 }
 
@@ -1781,7 +1781,7 @@ void EfgShow::OnSolveCustom(wxCommandEvent &p_event)
 
   delete solver;
  
-  ChangeSolution(m_solutionTable->VisibleLength());
+  ChangeSolution(m_solutionTable->Length());
   UpdateMenus();
   Enable(true);
 }

@@ -868,7 +868,7 @@ void NfgShow::OnSolveStandard(wxCommandEvent &)
       GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
     }
 
-    ChangeSolution(m_solutionTable->VisibleLength());
+    ChangeSolution(m_solutionTable->Length());
   }  
 
   UpdateMenus();
@@ -943,7 +943,7 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
       GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
     }
 
-    ChangeSolution(m_solutionTable->VisibleLength());
+    ChangeSolution(m_solutionTable->Length());
   }
 
   UpdateMenus();
