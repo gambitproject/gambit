@@ -96,7 +96,7 @@ public:
   };
   DoubleVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
 		 const gMatrix<T> &_A2, const gVector<T> &_b2, 
-		 gStatus &status_ = gstatus);
+		 gStatus &);
   ~DoubleVertEnum();
   const gList<BFS<T> > &VertexList() const;
   const gList<BFS<T> > &VertexList2() const;

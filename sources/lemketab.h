@@ -32,7 +32,7 @@ public:
 
   int SF_PivotIn(int i);
   int SF_ExitIndex(int i);
-  int SF_LCPPath(int dup, gStatus &status_ = gstatus); // follow a path of ACBFS's from one CBFS to another
+  int SF_LCPPath(int dup, gStatus &); // follow a path of ACBFS's from one CBFS to another
   int PivotIn(int i);
   int ExitIndex(int i);
   int LemkePath(int dup); // follow a path of ACBFS's from one CBFS to another
