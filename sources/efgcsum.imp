@@ -76,8 +76,8 @@ template <class T> void CSSeqFormModule<T>::Make_Abc()
   b = new gVector<T>(1,ns1+ni2);
   c = new gVector<T>(1,ns2+ni1);
 
-  maxpay = (T)EF.MaxPayoff(values)+(T)1;
-  minpay = (T)EF.MinPayoff(values)-(T)1;
+  maxpay = EF.MaxPayoff(values) + gNumber(1);
+  minpay = EF.MinPayoff(values) - gNumber(1);
 
   (*A) = (T)0;
   T prob = (T)1;
@@ -245,14 +245,14 @@ template <class T> void CSSeqFormModule<T>
 //       prob*(((OutcomeVector<T> &) *n->GetOutcome())[1]-minpay);
     gArray<gNumber> values(EF.Parameters()->Dmnsn());
     for (int j = 1; j <= values.Length(); values[j++] = gNumber(0));
-    (*A)(s1,s2) = (*A)(s1,s2) +
-       prob * (T) EF.Payoff(n->GetOutcome(), 1).Evaluate(values) - minpay;
+    (*A)(s1,s2) = gNumber((*A)(s1,s2)) +
+       gNumber(prob) * EF.Payoff(n->GetOutcome(), 1).Evaluate(values) - gNumber(minpay);
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
       for(i=1;i<=n->NumChildren();i++)
 	FillTableau(n->GetChild(i),
-		    prob*(T)EF.GetChanceProb(n->GetInfoset(), i),
+		    gNumber(prob) * EF.GetChanceProb(n->GetInfoset(), i),
 		    s1,s2,i1,i2);
     }
     int pl = n->GetPlayer()->GetNumber();

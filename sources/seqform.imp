@@ -69,7 +69,7 @@ SeqFormModule<T>::SeqFormModule(const EFSupport &S, const gArray<gNumber> &v,
   b = new gVector<T>(1,ntot);
   int i,j;
 
-  maxpay = (T)EF.MaxPayoff(values)+(T)1;
+  maxpay = EF.MaxPayoff(values) + gNumber(1);
 
   T prob = (T)1;
   for(i=A->MinRow();i<=A->MaxRow();i++) {
@@ -285,16 +285,16 @@ template <class T> void SeqFormModule<T>
   if(n->GetOutcome()) {
     gArray<gNumber> values(EF.Parameters()->Dmnsn());
     for (int j = 1; j <= values.Length(); values[j++] = gNumber(0));
-    (*A)(s1,ns1+s2) = (*A)(s1,ns1+s2) +
-       prob*(T) EF.Payoff(n->GetOutcome(), 1).Evaluate(values) - maxpay;
-    (*A)(ns1+s2,s1) = (*A)(ns1+s2,s1) +
-       prob*(T) EF.Payoff(n->GetOutcome(), 2).Evaluate(values) - maxpay;
+    (*A)(s1,ns1+s2) = gNumber((*A)(s1,ns1+s2)) +
+       gNumber(prob) * EF.Payoff(n->GetOutcome(), 1).Evaluate(values) - gNumber(maxpay);
+    (*A)(ns1+s2,s1) = gNumber((*A)(ns1+s2,s1)) +
+       gNumber(prob) * EF.Payoff(n->GetOutcome(), 2).Evaluate(values) - gNumber(maxpay);
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
       for(i=1;i<=n->NumChildren();i++)
 	FillTableau(n->GetChild(i),
-		    prob * (T) EF.GetChanceProb(n->GetInfoset(), i),
+		    gNumber(prob) * EF.GetChanceProb(n->GetInfoset(), i),
 		    s1,s2,i1,i2);
     }
     int pl = n->GetPlayer()->GetNumber();

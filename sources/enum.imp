@@ -72,15 +72,15 @@ template <class T> int EnumModule<T>::Enum(void)
   gVector<T> b1(1,n1);
   gVector<T> b2(1,n2);
 
-  min = (T) MinPayoff(NF, values) - (T)1;
+  min = MinPayoff(NF, values) - gNumber(1);
 
 
    // construct A1,A2,b1,b2  
 
   for (i=1; i<=n1; i++) {
     for (j=1; j<=n2; j++)  {
-      A1(i, j) = (T) NF.Payoff(iter.GetOutcome(), 1).Evaluate(values) - min;
-      A2(j, i) = (T) NF.Payoff(iter.GetOutcome(), 2).Evaluate(values) - min;
+      A1(i, j) = NF.Payoff(iter.GetOutcome(), 1).Evaluate(values) - gNumber(min);
+      A2(j, i) = NF.Payoff(iter.GetOutcome(), 2).Evaluate(values) - gNumber(min);
       iter.Next(2);
     }
     iter.Next(1);

@@ -41,7 +41,7 @@ template <class T> PureBehavProfile<T>::PureBehavProfile(const Efg &efg)
   for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
   for (int outc = 1; outc <= E->NumOutcomes(); outc++)
     for (int pl = 1; pl <= E->NumPlayers(); pl++)
-      (*payoffs)(outc, pl) = (T) E->Payoff(E->Outcomes()[outc], pl).Evaluate(values);
+      (*payoffs)(outc, pl) = E->Payoff(E->Outcomes()[outc], pl).Evaluate(values);
 
 }
 
@@ -221,7 +221,7 @@ template <class T> BehavProfile<T>::BehavProfile(const EFSupport &s,
   for (int i = 1; i <= paramvalues.Length(); paramvalues[i++] = gNumber(0));
   for (int outc = 1; outc <= E->NumOutcomes(); outc++)
     for (int pl = 1; pl <= E->NumPlayers(); pl++)
-      (*payoffs)(outc, pl) = (T) E->Payoff(E->Outcomes()[outc], pl).Evaluate(paramvalues);
+      (*payoffs)(outc, pl) = E->Payoff(E->Outcomes()[outc], pl).Evaluate(paramvalues);
 
 }
 

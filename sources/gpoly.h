@@ -192,6 +192,9 @@ template <class T> gPoly<T> operator*(const gPoly<T> &poly, const T val);
 
 template <class T> gText ToText(const gPoly<T> &p);
 
+template <class T> gOutput &operator<< (gOutput &f, const gPoly<T> &y);
+
+
 #endif //# GPOLY_H
 
 

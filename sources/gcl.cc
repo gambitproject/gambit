@@ -37,6 +37,7 @@ void SigSegFaultHandler(int)
   exit(1);
 }
 
+/*
 #define MATH_CONTINUE    0
 #define	MATH_IGNORE	 1
 #define	MATH_QUIT	 2
@@ -86,6 +87,7 @@ int matherr(struct exception *e)
 
   return 1;	// we did not really fix anything, but want no more warnings
 }
+*/
 
 GSM* _gsm;
 char* _SourceDir = NULL;

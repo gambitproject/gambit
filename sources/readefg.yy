@@ -125,16 +125,16 @@ node_name:         NAME     { path.Peek()->SetName(last_name); }
          ;
 
 player_number:     NUMBER
-                   { if (((gRational) last_number).denominator() != 1)  YYERROR;
-		     last_int = ((gRational) last_number).numerator().as_long();
+                   { if (last_number.operator gRational().denominator() != 1)  YYERROR;
+		     last_int = (last_number.operator gRational()).numerator().as_long();
 		     if (last_int <= 0 || last_int > E->NumPlayers()) YYERROR;
 		     player = E->Players()[last_int];
 		   }
              ;
 
 infoset_number:    NUMBER
-                   { if (((gRational) last_number).denominator() != 1)  YYERROR;
-		     iset_idx = ((gRational) last_number).numerator().as_long();
+                   { if (last_number.operator gRational().denominator() != 1)  YYERROR;
+		     iset_idx = last_number.operator gRational().numerator().as_long();
 		     infoset = E->GetInfosetByIndex(player, iset_idx);
 		   }
               ; 
@@ -210,8 +210,8 @@ actionprob:        NAME NUMBER
           ;
  
 outcome_number:    NUMBER
-                   { if (((gRational) last_number).denominator() != 1)  YYERROR;
-		     last_int = ((gRational) last_number).numerator().as_long();
+                   { if (last_number.operator gRational().denominator() != 1)  YYERROR;
+		     last_int = last_number.operator gRational().numerator().as_long();
 		     if (last_int > 0)  
 		       outcome = E->GetOutcomeByIndex(last_int);
 		   }

@@ -72,11 +72,11 @@ template <class T> void ZSumModule<T>::Make_Abc()
   c = new gVector<T>(1,m+1);
   NfgIter iter(support);
 
-  minpay = (T) MinPayoff(NF, values) - (T) 1;
+  minpay = MinPayoff(NF, values) - gNumber(1);
 
   for (i = 1; i <= k; i++)  {
     for (j = 1; j <= m; j++)  {
-      (*A)(i, j) = minpay - (T) NF.Payoff(iter.GetOutcome(), 1).Evaluate(values);
+      (*A)(i, j) = gNumber(minpay) - NF.Payoff(iter.GetOutcome(), 1).Evaluate(values);
       iter.Next(1);
     }
     (*A)(i,m+1) = (T)1;

@@ -181,7 +181,7 @@ gText ToText(const gNumber &n)
   if (n.GetPrecision() == precDOUBLE)
     return ToText((double) n);
   else
-    return ToText((gRational) n);
+    return ToText(n.operator gRational());
 }
 
 

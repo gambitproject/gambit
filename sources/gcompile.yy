@@ -67,6 +67,7 @@ gStack<gText> GCL_InputFileNames(4);
   double dval; \
   int ival; \
   \
+  virtual ~GCLCompiler()  { } \
   char nextchar(void); \
   void ungetchar(char c); \
   \
