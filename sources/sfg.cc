@@ -200,7 +200,7 @@ int Sfg::TotalNumSequences() const
   return tot;
 }
 
-int Sfg::TotalNumInfosets() const 
+int Sfg::NumPlayerInfosets() const 
 {
   int tot=0;
   for(int i=1;i<=infosets.Length();i++)

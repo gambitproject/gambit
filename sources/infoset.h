@@ -110,7 +110,6 @@ class ChanceInfoset : public Infoset  {
 
   private:
     gBlock<gNumber> probs;
-    gBlock<double> double_probs;
 
     ChanceInfoset(FullEfg *E, int n, EFPlayer *p, int br);
     virtual ~ChanceInfoset()    { }

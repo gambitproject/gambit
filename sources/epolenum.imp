@@ -80,7 +80,7 @@ EfgPolEnumModule<T>::EfgPolEnumModule(const EFSupport &S,
     (*params.tracefile) << "\nNumSequences: " << support.TotalNumSequences();
     SF.Dump(*(params.tracefile));
   }
-  num_vars = SF.TotalNumSequences()-SF.TotalNumInfosets()-SF.NumPlayers();
+  num_vars = SF.TotalNumSequences()-SF.NumPlayerInfosets()-SF.NumPlayers();
 
   Space = new gSpace(num_vars);
   Lex = new term_order(Space, lex);

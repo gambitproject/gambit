@@ -38,7 +38,7 @@ public:
   inline int NumInfosets(int pl) const {return infosets[pl].Length();}
   inline gArray<int> NumSequences() const {return seq;}
   int TotalNumSequences() const;
-  int TotalNumInfosets() const;
+  int NumPlayerInfosets() const;
   inline int NumPlayers() const {return EF.NumPlayers();}
   
   inline gArray<gNumber> Payoffs(const gArray<int> & index) const {return *((*SF)[index]);}

@@ -150,22 +150,22 @@ public:
 
   // GENERAL DATA ACCESS
   Efg &Game(void) const { return m_profile->Game(); }
-  const BehavProfile<gNumber> *Profile(void) const { return m_profile; }
+  const BehavProfile<gNumber> *Profile(void) const { if(!IsValid()) Invalidate(); return m_profile; }
   gPrecision Precision(void) const { return m_precision; }
 
   // Do probabilities sum to one (within m_epsilon) for each infoset?
   bool IsComplete(void) const;
 
   unsigned int Id(void) const { return m_id; }
-  EfgAlgType Creator(void) const { return m_creator; }
-  EFSupport Support(void) const { return m_support; }
+  EfgAlgType Creator(void) const { if(!IsValid()) Invalidate(); return m_creator; }
+  EFSupport Support(void) const { if(!IsValid()) Invalidate(); return m_support; }
   gTriState IsNash(void) const;
   gTriState IsANFNash(void) const;
   gTriState IsSubgamePerfect(void) const;
   gTriState IsSequential(void) const;
-  const gNumber &Epsilon(void) const { return m_epsilon; }
-  const gNumber &QreLambda(void) const { return m_qreLambda; }
-  const gNumber &QreValue(void) const { return m_qreValue; }
+  const gNumber &Epsilon(void) const { if(!IsValid()) Invalidate(); return m_epsilon; }
+  const gNumber &QreLambda(void) const { if(!IsValid()) Invalidate(); return m_qreLambda; }
+  const gNumber &QreValue(void) const { if(!IsValid()) Invalidate(); return m_qreValue; }
   const gNumber &LiapValue(void) const;
   const gDPVector<gNumber> &Beliefs(void) const;
   const gDPVector<gNumber> &Regret(void) const;
@@ -200,6 +200,20 @@ public:
   //     { return m_profile->GetValue(m_profile->Support().Actions(s)[act]); }
   const gNumber &GetValue(Action *act) const
     { return m_profile->GetValue(act); }
+
+  gNumber RealizProb(const Node *node) const
+    { return m_profile->GetRealizProb(node); }
+  gNumber BeliefProb(const Node *node) const
+    { return m_profile->GetBeliefProb(node); }
+  gVector<gNumber> NodeValue(const Node *node) const
+    { return m_profile->GetNodeValue(node); }
+  gNumber IsetProb(const Infoset *iset) const
+    { return m_profile->GetIsetProb(iset); }
+  gNumber ActionProb(const Action *act) const
+    { return m_profile->GetActionProb(act); }
+  gNumber ActionValue(const Action *act) const
+    { return m_profile->GetActionValue(act); }
+
 
   // TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO NASH, ANF NASH
   bool ExtendsToNash(const EFSupport &, const EFSupport &, gStatus &) const;

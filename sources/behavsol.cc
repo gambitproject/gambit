@@ -545,6 +545,7 @@ gTriState BehavSolution::IsSequential(void) const
 
 const gNumber &BehavSolution::LiapValue(void) const
 { 
+  if(!IsValid()) Invalidate();
   if (m_liapValue < (gNumber) 0)
     m_liapValue = m_profile->LiapValue();
   return m_liapValue; 
@@ -552,9 +553,11 @@ const gNumber &BehavSolution::LiapValue(void) const
 
 void BehavSolution::Invalidate(void) const
 {
+  m_profile->Invalidate();
   m_support = EFSupport(m_profile->Game());
   m_creator = algorithmEfg_USER;
   m_isANFNash = triUNKNOWN;
+  m_isNash = triUNKNOWN;
   m_isSubgamePerfect = triUNKNOWN;
   m_isSequential = triUNKNOWN;
   m_checkedANFNash = false;
@@ -586,6 +589,7 @@ void BehavSolution::Invalidate(void) const
 
 const gDPVector<gNumber> &BehavSolution::Beliefs(void) const
 { 
+  if(!IsValid()) Invalidate();
   if (!m_beliefs) 
     m_beliefs = new gDPVector<gNumber>(m_profile->Beliefs());
 
@@ -594,6 +598,7 @@ const gDPVector<gNumber> &BehavSolution::Beliefs(void) const
 
 const gDPVector<gNumber> &BehavSolution::Regret(void) const
 {
+  if(!IsValid()) Invalidate();
   if (!m_regret)  {
     m_regret = new gDPVector<gNumber>(Game().NumActions());
     m_profile->Gripe(*m_regret);
@@ -604,6 +609,7 @@ const gDPVector<gNumber> &BehavSolution::Regret(void) const
 
 const gPVector<gNumber> &BehavSolution::ReducedNormalFormRegret(void) const
 {
+  if(!IsValid()) Invalidate();
   if (!m_rnf_regret)  {
     const Efg& E = Game(); 
     Lexicon L(E);  // we use the lexicon without allocating normal form.  
@@ -670,6 +676,7 @@ BehavSolution::ActionProbsSumToOneIneqs(const gSpace &BehavStratSpace,
 					const gList<gList<int> > &var_index) 
   const
 {
+  if(!IsValid()) Invalidate();
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
   int pl;
@@ -697,6 +704,7 @@ bool BehavSolution::ANFNodeProbabilityPoly(gPoly<gDouble> & node_prob,
 					   const int &i,
 					   const int &j) const
 {
+  if(!IsValid()) Invalidate();
   while (tempnode != Game().RootNode()) {
 
     const Action *last_action = tempnode->GetAction();
@@ -745,6 +753,7 @@ BehavSolution::ANFExpectedPayoffDiffPolys(const gSpace &BehavStratSpace,
 					  const gList<gList<int> > &var_index) 
   const
 {
+  if(!IsValid()) Invalidate();
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
   gList<const Node *> terminal_nodes = Game().TerminalNodes();
@@ -789,6 +798,7 @@ BehavSolution::ExtendsToANFNashIneqs(const gSpace &BehavStratSpace,
 				     const EFSupport &big_supp,
 				     const gList<gList<int> > &var_index) const
 {
+  if(!IsValid()) Invalidate();
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
   answer += ActionProbsSumToOneIneqs(BehavStratSpace, 
 				     Lex, 
@@ -806,6 +816,7 @@ bool BehavSolution::ExtendsToNash(const EFSupport &little_supp,
 				  const EFSupport &big_supp,
 				        gStatus &m_status) const
 {
+  if(!IsValid()) Invalidate();
   // This asks whether there is a Nash extension of the BehavSolution to 
   // all information sets at which the behavioral probabilities are not
   // specified.  The assumption is that the support has active actions
@@ -863,6 +874,7 @@ bool BehavSolution::ExtendsToANFNash(const EFSupport &little_supp,
 				     const EFSupport &big_supp,
 				           gStatus &m_status) const
 {
+  if(!IsValid()) Invalidate();
   // This asks whether there is an ANF Nash extension of the BehavSolution to 
   // all information sets at which the behavioral probabilities are not
   // specified.  The assumption is that the support has active actions
@@ -969,6 +981,7 @@ BehavSolution::DeviationInfosets(const EFSupport & big_supp,
 				   const Infoset *iset,
 				   const Action *act) const 
 {
+  if(!IsValid()) Invalidate();
   gList<const Infoset *> answer;
   
   gList<const Node *> node_list = iset->ListOfMembers();
@@ -986,6 +999,7 @@ BehavSolution::DeviationSupports(const EFSupport & big_supp,
 				   const Infoset */*iset*/,
 				   const Action */*act*/) const 
 {
+  if(!IsValid()) Invalidate();
   gList<const EFSupport> answer;
 
   gArray<int> active_act_no(isetlist.Length());
@@ -1062,6 +1076,7 @@ BehavSolution::NashNodeProbabilityPoly(      gPoly<gDouble> & node_prob,
 				         const Infoset *iset,
 				         const Action *act) const 
 {
+  if(!IsValid()) Invalidate();
   while (tempnode != Game().RootNode()) {
 
     const Action *last_action = tempnode->GetAction();
@@ -1117,6 +1132,7 @@ BehavSolution::NashExpectedPayoffDiffPolys(const gSpace &BehavStratSpace,
 				          const gList<gList<int> > &var_index) 
   const
 {
+  if(!IsValid()) Invalidate();
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
   gList<const Node *> terminal_nodes = Game().TerminalNodes();
@@ -1179,6 +1195,7 @@ BehavSolution::ExtendsToNashIneqs(const gSpace &BehavStratSpace,
 				    const EFSupport &big_supp,
 				    const gList<gList<int> > &var_index) const
 {
+  if(!IsValid()) Invalidate();
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
   answer += ActionProbsSumToOneIneqs(BehavStratSpace, 
 				     Lex, 
@@ -1205,12 +1222,12 @@ void BehavSolution::Dump(gOutput &p_file) const
 
 void BehavSolution::DumpInfo(gOutput &p_file) const
 {
-  p_file << " Creator:"; DisplayEfgAlgType(p_file, m_creator);
+  p_file << " Creator:"; DisplayEfgAlgType(p_file, Creator());
   p_file << " IsNash:" << IsNash();
   p_file << " IsSubgamePerfect:" << IsSubgamePerfect();
   p_file << " IsSequential:" << IsSequential();
   p_file << " LiapValue:" << LiapValue();
-  if(m_creator == algorithmEfg_QRE_EFG || m_creator == algorithmEfg_QRE_NFG) {
+  if(Creator() == algorithmEfg_QRE_EFG || Creator() == algorithmEfg_QRE_NFG) {
     p_file << " QreLambda:" << m_qreLambda;
     p_file << " QreValue:" << m_qreValue;
   }

@@ -65,7 +65,7 @@ void guiSubgameSolver::BaseSelectSolutions(int p_subgame, const Efg &p_efg,
   if (!m_pickSoln || p_solutions.Length() == 0) 
     return;
 
-  if (p_solutions.Length() > 0 && p_efg.TotalNumInfosets() > 0)
+  if (p_solutions.Length() > 0 && p_efg.NumPlayerInfosets() > 0)
     m_parent->PickSolutions(p_efg, m_subgameRoots[p_subgame], p_solutions);
 }
 

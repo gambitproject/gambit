@@ -343,7 +343,10 @@ int EFSupport::NumActions(int pl, int iset) const
 
 int EFSupport::NumActions(const Infoset *i) const
 {
-  return m_players[i->GetPlayer()->GetNumber()]->NumActions(i->GetNumber());
+  if (i->GetPlayer()->IsChance())
+    return i->Actions().Length();
+  else
+    return m_players[i->GetPlayer()->GetNumber()]->NumActions(i->GetNumber());
 }
 
 const gArray<Action *> &EFSupport::Actions(int pl, int iset) const

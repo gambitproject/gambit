@@ -92,18 +92,8 @@ static Portion *GSM_ActionValue(Portion **param)
   if (infoset->GetPlayer()->IsChance())
     return new NullPortion(porNUMBER);
   else if (profile->Support().Find(action))  {
-    Efg *efg = &profile->Game();
-
-    gDPVector<gNumber> values(efg->NumActions());
-    gPVector<gNumber> probs(efg->NumInfosets());
-
-    profile->CondPayoff(values, probs);
-  
-    if (probs(infoset->GetPlayer()->GetNumber(),
-	      infoset->GetNumber()) > gNumber(0.0))
-      return new NumberPortion(values(infoset->GetPlayer()->GetNumber(),
-					infoset->GetNumber(),
-					profile->Support().Find(action)));
+    if(profile->IsetProb(infoset)>gNumber(0.0))
+      return new NumberPortion(profile->ActionValue(action));
     else
       return new NullPortion(porNUMBER);
   }
@@ -173,19 +163,11 @@ static Portion *GSM_Belief(Portion **param)
 {
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   Node* n = ((NodePortion*) param[1])->Value();
-  Efg *e = ((FullEfg *) param[11]->Game());
-
-  const gDPVector<gNumber> &values(bp->Beliefs());
+  Efg *e = ((FullEfg *) param[1]->Game());
   Infoset *s = n->GetInfoset();
-  const gArray<Node *> &members = s->Members();
-
   if (s->IsChanceInfoset() || e->NumChildren(n) == 0)
     return new NullPortion(porNUMBER);
-
-  int index;
-  for (index = 1; members[index] != n; index++);
-  return new NumberPortion(values(s->GetPlayer()->GetNumber(), 
-				    s->GetNumber(), index));
+  return new NumberPortion(bp->BeliefProb(n));
 }
 
 
@@ -298,19 +280,10 @@ static Portion *GSM_InfosetProb(Portion **param)
 
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   Infoset* s = ((InfosetPortion*) param[1])->Value();
-
-  Efg *E = &bp->Game();
-
-  gDPVector<gNumber> values(E->NumActions());
-  gPVector<gNumber> probs(E->NumInfosets());
-
-  bp->CondPayoff(values, probs);
-
   if (s->IsChanceInfoset())
     throw gclRuntimeError("Not implemented for chance infosets");
 
-  return new NumberPortion(probs(s->GetPlayer()->GetNumber(),
-				   s->GetNumber()));
+  return new NumberPortion(bp->IsetProb(s));
 }
 
 
@@ -445,17 +418,7 @@ static Portion *GSM_NodeValue(Portion **param)
   EFPlayer *p = ((EfPlayerPortion *) param[1])->Value();
   Node* n = ((NodePortion*) param[2])->Value();
 
-  Efg* E = &bp->Game();
-  gList<Node *> list;
-  Nodes(*E, list);
-  
-  int i;
-  int found = 0;
-  for(i=1; i<=list.Length(); i++)
-    if(n == list[i])
-      found = i;
-
-  return new NumberPortion(bp->NodeValues(p->GetNumber())[found]);
+  return new NumberPortion(bp->NodeValue(n)[p->GetNumber()]);
 }
 
 
@@ -480,17 +443,7 @@ static Portion *GSM_RealizProb(Portion **param)
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   Node* n = ((NodePortion*) param[1])->Value();
   
-  Efg* E = &bp->Game();
-  gList<Node *> list;
-  Nodes(*E, list);
-  
-  int i;
-  int found = 0;
-  for(i=1; i<=list.Length(); i++)
-    if(n == list[i])
-      found = i;
-  
-  return new NumberPortion(bp->NodeRealizProbs()[found]);
+  return new NumberPortion(bp->RealizProb(n)); 
 }  
 
 //----------------

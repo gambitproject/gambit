@@ -23,6 +23,7 @@ template <class T> class gRectArray;
 class BehavSolution;
 
 template <class T> class BehavProfile : public gDPVector<T>  {
+  friend BehavSolution;
 public:
   struct BehavInfoset;
   struct BehavAction;
@@ -32,6 +33,7 @@ protected:
   BehavNode *m_root;
   EFSupport m_support;
   gArray<BehavInfoset *> m_isets;
+  mutable bool m_cached_data;
   
   // functions for installing the BehavProfile in Efg 
   // Installation sets back-pointers in EFG to point to relevant 
@@ -42,16 +44,35 @@ protected:
   void InitPayoffs(void) const;
   void InitProfile(void);
 
+  const T &RealizProb(const Node *node) const;
+  const T &BeliefProb(const Node *node) const;
+  const gVector<T> &NodeValue(const Node *node) const;
+  T &RealizProb(const Node *node);
+  T &BeliefProb(const Node *node);
+  gVector<T> &NodeValue(const Node *node);
+ 
+  const T &IsetProb(const Infoset *iset) const;
+  const T &IsetValue(const Infoset *iset) const;
+  T &IsetProb(const Infoset *iset);
+  T &IsetValue(const Infoset *iset);
+
+  const T &ActionValue(const Action * act) const;
+  const T &ActionProb(const Action *) const;
+  T &ActionValue(const Action * act);
+  T &ActionProb(const Action *);
+
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
   void Payoff(Node *, T, int, T &) const;
   void NodeValues(BehavNode *, int, gArray<T> &, int &) const;
-  T NodeValue(Node *, int) const;
   void CondPayoff(Node *, T, gPVector<T> &, gDPVector<T> &) const;
   void NodeRealizProbs(BehavNode *, T, int &, gArray<T> &) const;
   void Beliefs(Node *, T, gDPVector<T> &, gPVector<T> &) const;
   const T Payoff(const EFOutcome *o, int pl) const;
-  const T ChanceProb(const Infoset *iset, int act) const;
+  const T &ChanceProb(const Action *act) const;
   
+  void ComputeSolutionDataPass2(const Node *node);
+  void ComputeSolutionDataPass1(const Node *node);
+  void ComputeSolutionData(void);
 
   void NodeRealizProbs(Node *node, T prob) const;
   
@@ -140,11 +161,10 @@ public:
   struct BehavNode {
     Node *node;
     T nval, bval;
-    gVector<T> scratch;
     gArray<BehavNode *> children;
     
     T realizProb, belief;
-    gVector<T> nodeValue, condPayoff;
+    gVector<T> nodeValue;
     
     BehavNode(Efg *e, Node *n, int pl);
     ~BehavNode();
@@ -155,6 +175,7 @@ public:
   struct BehavInfoset {
     Infoset *iset;
     gArray<BehavAction *> actions;
+    T value, prob;
     
     BehavInfoset(const EFSupport &s, Infoset *i, int pl);
     ~BehavInfoset();
@@ -162,7 +183,7 @@ public:
   struct BehavAction {
     Action *action;
     T *probability;
-    T condPayoff;
+    T condPayoff, gripe;
     
     BehavAction(Action *act, int pl);
     ~BehavAction();
@@ -194,8 +215,13 @@ public:
   // OPERATOR OVERLOADING
   bool operator==(const BehavProfile<T> &) const;
 
-  const T &ActionProb(Action *) const;
-  T &ActionProb(Action *);
+  const T &GetRealizProb(const Node *node);
+  const T &GetBeliefProb(const Node *node);
+  const gVector<T> &GetNodeValue(const Node *node);
+  const T &GetIsetProb(const Infoset *iset);
+  const T &GetIsetValue(const Infoset *iset);
+  const T &GetActionProb(const Action *act) const;
+  const T &GetActionValue(const Action *act);
 
   //  const T &operator()(Action *) const;
   //  T &operator()(Action *);
@@ -221,8 +247,7 @@ public:
 
   void NodeRealizProb(void) const;
   bool IsInstalled(void) const;  
-
-
+  void Invalidate(void) const {m_cached_data=false;}
 };
 
 

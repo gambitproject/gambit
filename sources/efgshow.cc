@@ -211,7 +211,7 @@ void EfgShow::SolveStandard(void)
 {
   // This is a guard against trying to solve the "trivial" game.
   // Most of the GUI code assumes information sets exist.
-  if (ef.TotalNumInfosets() == 0)  return;
+  if (ef.NumPlayerInfosets() == 0)  return;
 
   bool isPerfectRecall;
 
@@ -349,7 +349,7 @@ void EfgShow::Solve(int p_algorithm)
 {
   // This is a guard against trying to solve the "trivial" game.
   // Most of the GUI code assumes information sets exist.
-  if (ef.TotalNumInfosets() == 0)  return;
+  if (ef.NumPlayerInfosets() == 0)  return;
 
   // check that the game is perfect recall, if not give a warning
   if (!IsPerfectRecall(ef)) {

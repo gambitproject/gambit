@@ -119,7 +119,7 @@ const gList<const Node *> Infoset::ListOfMembers(void) const
 //------------------------------------------------------------------------
 
 ChanceInfoset::ChanceInfoset(FullEfg *E, int n, EFPlayer *p, int br)
-  : Infoset(E, n, p, br), probs(br), double_probs(br)
+  : Infoset(E, n, p, br), probs(br)
 {
   for (int i = 1; i <= br; probs[i++] = gRational(1, br));
 }
@@ -128,7 +128,6 @@ Action *ChanceInfoset::InsertAction(int where)
 { 
   Action *action = Infoset::InsertAction(where);
   probs.Insert((gNumber) 0, where);
-  double_probs.Insert((double) 0, where);
   return action;
 }
 
@@ -136,7 +135,6 @@ void ChanceInfoset::RemoveAction(int which)
 {
   Infoset::RemoveAction(which);
   probs.Remove(which);
-  double_probs.Remove(which);
 }
 
 void ChanceInfoset::PrintActions(gOutput &f) const
@@ -1484,12 +1482,7 @@ int FullEfg::NumChanceInfosets() const
 
 int FullEfg::TotalNumInfosets(void) const
 {
-  int foo=0;
-  
-  for (int i = 1; i <= players.Length(); i++)
-    foo += (NumInfosets())[i];
-
-  return foo;
+  return NumPlayerInfosets() + NumChanceInfosets();
 }
 
 gPVector<int> FullEfg::NumActions(void) const
@@ -1632,11 +1625,6 @@ void FullEfg::InitPayoffs(void) const
     for (int pl = 1; pl <= NumPlayers(); pl++)
       outcomes[outc]->double_payoffs[pl] = outcomes[outc]->payoffs[pl];
 
-  for (int iset = 1; iset <= NumChanceInfosets(); iset++) {
-    ChanceInfoset * infoset = (ChanceInfoset *) GetChance()->Infosets()[iset]; 
-    for (int act = 1; act <= infoset->NumActions(); act++)
-      infoset->double_probs[act] = infoset->probs[act];
-  }
   m_outcome_revision = RevisionNumber();
 }
 

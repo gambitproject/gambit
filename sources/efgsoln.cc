@@ -544,10 +544,10 @@ EfgSolnShow::EfgSolnShow(const Efg &ef_, BehavSolutionList &soln,
                          int cur_soln_, const GambitDrawSettings &draw_settings_,
                          BSolnSortFilterOptions &sf_options_,
                          EfgShow *parent_, unsigned int opts_)
-    : SpreadSheet3D(1+soln.Length()*ef_.TotalNumInfosets(), 4, 1, 2, "Solutions", parent_, ANY_BUTTON),
+    : SpreadSheet3D(1+soln.Length()*ef_.NumPlayerInfosets(), 4, 1, 2, "Solutions", parent_, ANY_BUTTON),
       ef(ef_), parent(parent_), gamb_draw_settings(draw_settings_),
       solns(soln), dim(ef_.NumActions()),
-      num_players(ef_.NumPlayers()), num_isets(ef_.TotalNumInfosets()),
+      num_players(ef_.NumPlayers()), num_isets(ef_.NumPlayerInfosets()),
       num_solutions(soln.Length()), cur_soln(cur_soln_),
       features(0, BSOLN_NUM_FEATURES-1), opts(opts_),
       sf_options(sf_options_)
@@ -1293,12 +1293,12 @@ void EfgSolnShow::delete_all_button(wxButton &ob, wxEvent &)
 BehavSolnEdit::BehavSolnEdit(BehavSolution &soln_,
                              int iset_disp, wxFrame *parent,
 			     int p_decimals)
-    : SpreadSheet3D(soln_.Game().TotalNumInfosets()+1,
+    : SpreadSheet3D(soln_.Game().NumPlayerInfosets()+1,
                     gmax(EFSupport(soln_.Game()).NumActions())+2,
                     1, 2, "Edit Behav Solution", parent, ANY_BUTTON),
       soln(soln_), dim(EFSupport(soln_.Game()).NumActions())
 {
-  num_isets = soln.Game().TotalNumInfosets();
+  num_isets = soln.Game().NumPlayerInfosets();
   Show(FALSE);
   int j;
   int max_dim = gmax(dim);
