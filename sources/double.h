@@ -23,7 +23,7 @@ is different from zero.
 #define _Double_h 1
 
 #include <math.h>
-#include "gstream.h"
+#include "base/gstream.h"
 // #include "objcount.h"
 
 class gDouble

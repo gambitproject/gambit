@@ -7,7 +7,7 @@
 #ifndef EFGPURE_H
 #define EFGPURE_H
 
-#include "glist.h"
+#include "base/base.h"
 #include "gstatus.h"
 #include "efg.h"
 #include "behavsol.h"

@@ -38,19 +38,19 @@ template class MixedProfile<gNumber>;
 template gOutput &operator<<(gOutput &, const MixedProfile<gNumber> &);
 
 
-#include "glist.imp"
+#include "base/glist.imp"
 
 template class gList<MixedProfile<double> >;
 template class gList<MixedProfile<gRational> >;
 template class gList<MixedProfile<gNumber> >;
 
-#include "grblock.imp"
+#include "base/grblock.imp"
 
 template class gRectBlock<double>;
 template class gRectBlock<gRational>;
 
-#include "garray.imp"
-#include "gblock.imp"
+#include "base/garray.imp"
+#include "base/gblock.imp"
 
 template class gArray<nfgSupportPlayer *>;
 template class gArray<Strategy *>;

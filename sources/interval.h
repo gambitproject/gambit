@@ -10,7 +10,7 @@
 //#include<stream.h>
 //#include<String.h>
 #include "rational.h"
-#include "gstream.h"
+#include "base/gstream.h"
 
 /* This file provides the template class
 

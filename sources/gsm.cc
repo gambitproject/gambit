@@ -9,23 +9,17 @@ class Portion;
 class CallFuncObj;
 class RefHashTable;
 
+#include "base/base.h"
 
 #include "gsm.h"
-#include "glist.h"
-#include "gstack.h"
 #include "portion.h"
 #include "gsmhash.h"
 #include "gsmfunc.h"
 #include "gsminstr.h"
 
-#include "gblock.h"
-
 #include "nfg.h"
 #include "mixedsol.h"
 #include "behavsol.h"
-
-#include "gslist.h"
-#include "garray.h"
 
 #include "efbasis.h"
 

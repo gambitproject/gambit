@@ -11,14 +11,9 @@
 
 #include <stdlib.h>
 #include <ctype.h>
-#include "gmisc.h"
 
-#include "gstream.h"
-
-#include "gtext.h"
+#include "base/base.h"
 #include "rational.h"
-#include "glist.h"
-#include "gstack.h"
 #include "gsm.h"
 #include "gsminstr.h"
 #include "gsmfunc.h"

@@ -6,11 +6,10 @@
 
 #include "nfgpure.h"
 
-#include "gstream.h"
+#include "base/base.h"
 #include "nfg.h"
 #include "nfgiter.h"
 #include "nfgciter.h"
-#include "glist.h"
 #include "mixed.h"
 
 void nfgEnumPure::Solve(const NFSupport &p_support,

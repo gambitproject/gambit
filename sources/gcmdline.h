@@ -12,10 +12,7 @@
 #include <termios.h>
 #endif  // __GNUG__
 
-#include "gstream.h"
-#include "gtext.h"
-#include "glist.h"
-#include "gstack.h"
+#include "base/base.h"
 
 class gclCommandLine : public gInput {
 private:

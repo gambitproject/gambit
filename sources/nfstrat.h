@@ -7,9 +7,7 @@
 #ifndef NFSTRAT_H
 #define NFSTRAT_H
 
-#include "gtext.h"
-#include "gblock.h"
-#include "gstream.h"
+#include "base/base.h"
 #include "gstatus.h"
 #include "gnumber.h"
 #include "nfplayer.h"

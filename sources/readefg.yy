@@ -2,16 +2,13 @@
 /*  $Id$ */
 #include <stdlib.h>
 #include <ctype.h>
-#include "gstream.h"
-#include "gtext.h"
+#include "base/base.h"
 #include "rational.h"
 #include "gnumber.h"
-#include "gstack.h"
-#include "glist.h"
 #include "efg.h"
 
 
-#include "gstack.imp"
+#include "base/gstack.imp"
 
 template class gStack<Node *>;
 %}

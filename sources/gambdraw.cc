@@ -69,8 +69,8 @@ void GambitDrawSettings::SaveOptions(void) const
   }
 }
 
-#include "garray.imp"
-#include "gblock.imp"
+#include "base/garray.imp"
+#include "base/gblock.imp"
 
 gOutput &operator<<(gOutput &p_stream, const wxColour &)
 { return p_stream; }

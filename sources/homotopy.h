@@ -7,8 +7,8 @@
 #ifndef HOMOTOPY_H
 #define HOMOTOPY_H
 
+#include "base/base.h"
 #include "algutils.h"
-#include "glist.h"
 
 #include "nfg.h"
 #include "mixedsol.h"

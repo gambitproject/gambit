@@ -9,8 +9,7 @@
 
 #include "wx/wx.h"
 
-#include "garray.h"
-#include "glist.h"
+#include "base/base.h"
 #include "treedraw.h"
 #include "efgconst.h"
 #include "efg.h"

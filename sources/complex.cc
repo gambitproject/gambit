@@ -8,13 +8,16 @@
 #pragma implementation
 #endif
 
-#include "complex.h"
-#include "gnulib.h"
+#include <stdio.h>
 #include <math.h>
 #include <values.h>
 #include <float.h>
 #include <assert.h>
 #include <ctype.h>
+
+#include "base/base.h"
+#include "complex.h"
+#include "gnulib.h"
 
 //--------------------------------------------------------------------------
 //                              class: gComplex
@@ -212,10 +215,6 @@ gComplex pow(const gComplex& x, const long y)
   }
 }
 
-#include <stdio.h>
-#include "gtext.h"
-
-
 //#define MYGCONVERT_BUFFER_LENGTH     64
 //char mygconvert_buffer[MYGCONVERT_BUFFER_LENGTH];
 //int myprecision = 2;
@@ -238,7 +237,7 @@ gComplex TOgComplex(const gText & /* s */)
   return gComplex(0, 0);
 }
 
-#include "glist.imp"
+#include "base/glist.imp"
 
 template class gList<gComplex>;
 template gOutput& operator << (gOutput& output, const gList<gComplex>&);

@@ -9,11 +9,7 @@
 #define PREPOLY_H
 
 #include <math.h>
-#include "gstream.h"
-#include "gtext.h"
-#include "garray.h"
-#include "glist.h"
-#include "gblock.h"
+#include "base/base.h"
 #include "rational.h"
 #include "gvector.h"
 

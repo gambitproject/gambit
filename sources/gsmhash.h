@@ -9,7 +9,7 @@
 #ifndef GSMHASH_H
 #define GSMHASH_H
 
-#include "ghash.h"
+#include "base/ghash.h"
 
 class Portion;
 class gclFunction;

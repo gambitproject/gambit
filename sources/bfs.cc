@@ -6,10 +6,10 @@
 
 #include "rational.h"
 
-#include "garray.imp"
-#include "gblock.imp"
-#include "glist.imp"
-#include "gmap.imp"
+#include "base/garray.imp"
+#include "base/gblock.imp"
+#include "base/glist.imp"
+#include "base/gmap.imp"
 #include "bfs.h"
 
 //--------------------------------------------------------------------------

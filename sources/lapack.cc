@@ -10,7 +10,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "gmisc.h"
+#include "base/base.h"
 #include "lapack.h"
 
 template <class T> gLapack<T>::gLapack(void)

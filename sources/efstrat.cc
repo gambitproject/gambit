@@ -7,7 +7,7 @@
 #include "efg.h"
 #include "efplayer.h"
 
-#include "glist.imp"
+#include "base/glist.imp"
 
 class EFActionArray   {
   friend class EFActionSet;

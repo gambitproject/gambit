@@ -4,9 +4,8 @@
 // $Id$
 //
 
+#include "base/base.h"
 #include "rectangl.h"
-#include "glist.h"
-
 
 //--------------------------------------------------------------------------
 //                   rectangle -- constructors and destructor

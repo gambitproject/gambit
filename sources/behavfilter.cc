@@ -250,7 +250,7 @@ void dialogBehavFilter::Update(BehavListFilter &p_filter)
   }
 }
 
-#include "gslist.imp"
+#include "base/gslist.imp"
 
 template class gSortList<BehavSolution>;
 template class gListSorter<BehavSolution>;

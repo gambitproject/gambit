@@ -7,7 +7,7 @@
 #ifndef ALGUTILS_H
 #define ALGUTILS_H
 
-#include "gstream.h"
+#include "base/gstream.h"
 #include "gstatus.h"
 #include "gnumber.h"
 

@@ -1,11 +1,12 @@
-//#
-//# FILE: gnarray.imp -- Implementation of n-dimensional arrays
-//#
-//#  $Id$
-//#
+//
+// FILE: gnarray.imp -- Implementation of n-dimensional arrays
+//
+// $Id$
+//
 
-#include "gnarray.h"
 #include <assert.h>
+#include "base/base.h"
+#include "gnarray.h"
 
 template <class T> gNArray<T>::gNArray(void)
   : storage_size(0), storage(0)

@@ -4,12 +4,12 @@
 // $Id$
 //
 
+#include "base/base.h"
 #include "efg.h"
 #include "nfg.h"
 #include "nfplayer.h"
 #include "nfstrat.h"
 #include "mixed.h"
-#include "glist.h"
 #include "nfgiter.h"
 #include "nfgciter.h"
 
@@ -237,8 +237,8 @@ Nfg *MakeAfg(const Efg &E)
 
 
 
-#include "glist.imp"
-#include "garray.imp"
+#include "base/glist.imp"
+#include "base/garray.imp"
 
 template class gList<Correspondence *>;
 template gOutput &operator<<(gOutput &, const gList<Correspondence *> &);

@@ -1,9 +1,7 @@
 %{
 /*  $Id$ */
 #include <ctype.h>
-#include "gmisc.h"
-#include "gstream.h"
-#include "glist.h"
+#include "base/base.h"
 #include "rational.h"
 #include "nfg.h"
 #include "nfplayer.h"

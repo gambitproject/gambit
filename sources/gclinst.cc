@@ -4,13 +4,13 @@
 // $Id$
 //
 
-#include "gtext.h"
+#include "base/base.h"
 
-#include "gstack.imp"
-#include "garray.imp"
-#include "gblock.imp"
-#include "glist.imp"
-#include "gslist.imp"
+#include "base/gstack.imp"
+#include "base/garray.imp"
+#include "base/gblock.imp"
+#include "base/glist.imp"
+#include "base/gslist.imp"
 
 class Portion;
 class EfgPortion;

@@ -7,8 +7,7 @@
 #ifndef EFSTRAT_H
 #define EFSTRAT_H
 
-#include "gtext.h"
-#include "gblock.h"
+#include "base/base.h"
 #include "efg.h"
 #include "gpvector.h"
 #include "gstatus.h"

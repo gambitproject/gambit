@@ -4,6 +4,7 @@
 // $Id$
 //
 
+#include "base/base.h"
 
 #include "gsm.h"
 #include "portion.h"
@@ -13,10 +14,8 @@
 #include "nfplayer.h"
 #include "nfdom.h"
 
-#include "glist.h"
 #include "mixed.h"
 
-#include "gwatch.h"
 #include "gstatus.h"
 
 //

@@ -4,7 +4,7 @@
 // $Id$
 //
 
-#include "gmisc.h"
+#include "base/gmisc.h"
 #include "nfg.h"
 #include "nfplayer.h"
 #include "nfstrat.h"

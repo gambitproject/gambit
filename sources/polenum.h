@@ -7,8 +7,8 @@
 #ifndef POLENUM_H
 #define POLENUM_H
 
+#include "base/base.h"
 #include "nfg.h"
-#include "glist.h"
 #include "algutils.h"
 #include "mixed.h"
 #include "mixedsol.h"

@@ -5,10 +5,11 @@
 // $Id$
 //
 
+#include "base/base.h"
+
 #include "portion.h"
 #include "gsmhash.h"
 
-#include "gstream.h"
 #include "gsm.h"
 
 #include "nfg.h"
@@ -1765,8 +1766,6 @@ bool InputPortion::IsReference(void) const
 //--------
 // List
 //--------
-
-#include "glist.h"
 
 gPool ListPortion::pool(sizeof(ListPortion));
 

@@ -7,9 +7,8 @@
 #ifndef GNUMBER_H
 #define GNUMBER_H
 
-#include "gmisc.h"
+#include "base/base.h"
 #include "rational.h"
-#include "gpool.h"
 
 class gOutput;
 

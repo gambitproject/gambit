@@ -9,8 +9,7 @@
 #ifndef GSMINSTR_H
 #define GSMINSTR_H
 
-#include "gtext.h"
-#include "gmisc.h"
+#include "base/base.h"
 #include "portion.h"
 
 class GSM;

@@ -5,7 +5,7 @@
 //
 
 #include "ludecomp.imp"
-#include "glist.imp"
+#include "base/glist.imp"
 #include "rational.h"
 
 template class EtaMatrix< double >;

@@ -8,7 +8,6 @@
 #define NODE_H
 
 #include "rational.h"
-#include "gblock.h"
 #include "efg.h"
 
 #ifdef __GNUG__

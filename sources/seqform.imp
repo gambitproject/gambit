@@ -4,9 +4,8 @@
 // $Id$ 
 //
 
-
+#include "base/base.h"
 #include "seqform.h"
-#include "gwatch.h"
 #include "lhtab.h"
 
 template <class T> class SeqFormModule  {

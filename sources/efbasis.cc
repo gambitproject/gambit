@@ -5,7 +5,7 @@
 //
 
 #include "efbasis.h"
-#include "garray.imp"
+#include "base/garray.imp"
 #include "gvector.h"
 #include "gpvector.h"
 #include "gdpvect.imp"

@@ -8,7 +8,7 @@
 #include "gstatus.h"
 
 #include "gsminstr.h"
-#include "gstream.h"
+#include "base/gstream.h"
 #include "gcmdline.h"
 
 #include "gsm.h"

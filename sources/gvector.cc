@@ -28,7 +28,7 @@ template gVector<gDouble> TogDouble(const gVector<gRational>&);
 template gVector<gDouble> TogDouble(const gVector<double>&);
 template gVector<gDouble> TogDouble(const gVector<gDouble>&);
 
-#include "glist.imp"
+#include "base/glist.imp"
 
 template class gList<gVector<double> >;
 template class gList<gVector<gRational> >;

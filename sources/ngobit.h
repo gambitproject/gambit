@@ -7,8 +7,8 @@
 #ifndef NGOBIT_H
 #define NGOBIT_H
 
+#include "base/base.h"
 #include "algutils.h"
-#include "glist.h"
 
 #include "nfg.h"
 #include "mixedsol.h"

@@ -7,10 +7,8 @@
 #ifndef GPARTLTR_H
 #define GPARTLTR_H
 
-//#include "gsolver.h"
-//#include "odometer.h"
+#include "base/base.h"
 #include "rectangl.h"
-#include "gtree.h"
 #include "gpoly.h"
 #include "gpolylst.h"
 

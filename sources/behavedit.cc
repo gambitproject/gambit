@@ -203,7 +203,7 @@ void dialogBehavEditor::OnOK(wxCommandEvent &p_event)
   p_event.Skip();
 }
 
-#include "gmap.imp"
+#include "base/gmap.imp"
 
 gOutput &operator<<(gOutput &p_output, wxTreeItemId)
 { return p_output; }

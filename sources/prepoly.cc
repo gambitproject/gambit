@@ -4,7 +4,7 @@
 // $Id$
 //
 
-#include "garray.h"
+#include "base/base.h"
 
 #ifdef __BORLANDC__
 bool operator!=(const gArray<int> &, const gArray<int> &);
@@ -12,7 +12,7 @@ bool operator!=(const gArray<int> &, const gArray<int> &);
 #endif   // __GNUG__, __BORLANDC__
 
 #include "prepoly.h"
-#include "glist.imp"
+#include "base/glist.imp"
 
 //-----------------------------------------------------------
 //                      gSpace

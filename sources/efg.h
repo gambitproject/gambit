@@ -7,12 +7,9 @@
 #ifndef EFG_H
 #define EFG_H
 
-#include "gtext.h"
-#include "gblock.h"
-#include "glist.h"
+#include "base/base.h"
 
 #include "gpvector.h"
-#include "grblock.h"
 #include "gnumber.h"
 
 class EFOutcome;

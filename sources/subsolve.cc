@@ -4,12 +4,12 @@
 // $Id$
 //
 
+#include "base/base.h"
 #include "gsignal.h"
 #include "efg.h"
 #include "efgutils.h"
 #include "nfg.h"
 #include "nfstrat.h"
-#include "gwatch.h"
 #include "rational.h"
 
 #include "subsolve.h"
@@ -286,7 +286,7 @@ gList<BehavSolution> SubgameSolver::Solve(const EFSupport &p_support,
 }
 
 
-#include "garray.imp"
+#include "base/garray.imp"
 
 template class gArray<gArray<Infoset *> *>;
 
@@ -298,7 +298,7 @@ template bool operator!=(const gArray<EFOutcome *> &,
 template gOutput &operator<<(gOutput &, const gArray<EFOutcome *> &);
 
 
-#include "glist.imp"
+#include "base/glist.imp"
 
 template class gList<EFOutcome *>;
 template class gList<gArray<EFOutcome *> >;

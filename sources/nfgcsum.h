@@ -7,8 +7,8 @@
 #ifndef NFGCSUM_H
 #define NFGCSUM_H
 
+#include "base/base.h"
 #include "nfg.h"
-#include "glist.h"
 #include "algutils.h"
 #include "mixedsol.h"
 

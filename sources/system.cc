@@ -14,7 +14,7 @@
 #include <windows.h>
 #endif   // __GNUG__, __BORLANDC__
 
-#include "gstream.h"
+#include "base/gstream.h"
 #include "system.h"
 
 const char *System::GetEnv(const char *name)

@@ -7,8 +7,7 @@
 #ifndef GAMBDRAW_H
 #define GAMBDRAW_H
 
-#include "gblock.h"
-#include "gtext.h"
+#include "base/base.h"
 
 class GambitDrawSettings {
 protected:

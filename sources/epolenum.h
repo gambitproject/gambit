@@ -8,8 +8,8 @@
 #ifndef EPOLENUM_H
 #define EPOLENUM_H
 
+#include "base/base.h"
 #include "efg.h"
-#include "glist.h"
 #include "algutils.h"
 #include "behav.h"
 #include "behavsol.h"

@@ -7,7 +7,7 @@
 #ifndef EFGCSUM_H
 #define EFGCSUM_H
 
-#include "glist.h"
+#include "base/base.h"
 #include "algutils.h"
 #include "tableau.h"
 #include "lpsolve.h"

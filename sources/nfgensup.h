@@ -4,10 +4,10 @@
 // $Id$
 //
 
+#include "base/base.h"
 #include "nfg.h"
 #include "rational.h"
 #include "gstatus.h"
-#include "glist.h"
 #include "nfdom.h"
 #include "nfgciter.h"
 

@@ -6,9 +6,7 @@
 // $Id$
 //
 
-
-
-#include "gtext.h"
+#include "base/base.h"
 
 template <class T> class gList;
 template <class T> class gNode;
@@ -18,13 +16,13 @@ template <class T> class gNode;
 #include "gsmfunc.h"
 
 
-#include "glist.imp"
+#include "base/glist.imp"
 
 template class gList< void* >;
 template class gList< Portion* >;
 template class gList< gclFunction* >;
 
-#include "ghash.imp"
+#include "base/ghash.imp"
 
 template class HashTable< gText, Portion* >;
 template class HashTable< gText, gclFunction* >;

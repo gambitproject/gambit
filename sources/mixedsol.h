@@ -7,10 +7,8 @@
 #ifndef MIXEDSOL_H
 #define MIXEDSOL_H
 
-#include "gmisc.h"
+#include "base/base.h"
 #include "mixed.h"
-#include "gstream.h"
-#include "gtext.h"
 #include "gnumber.h"
 #include "nfplayer.h"
 #include "nfg.h"

@@ -7,9 +7,8 @@
 #ifndef SIMPDIV_H
 #define SIMPDIV_H
 
+#include "base/base.h"
 #include "nfg.h"
-#include "glist.h"
-#include "grarray.h"
 #include "algutils.h"
 #include "mixedsol.h"
 

@@ -7,8 +7,8 @@
 #ifndef GRID_H
 #define GRID_H
 
+#include "base/base.h"
 #include "mixedsol.h"
-#include "glist.h"
 #include "algutils.h"
 
 class GridParams : public AlgParams  {

@@ -10,7 +10,7 @@
 #endif
 #define _Complex_h 1
 
-#include "gstream.h"
+#include "base/gstream.h"
 #include <math.h>
 
 class gComplex

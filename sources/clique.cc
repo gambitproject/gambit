@@ -6,7 +6,7 @@
 //
 
 #include "clique.h"
-#include "gtext.h"
+#include "base/base.h"
 
 // to compile as standalone,compile with -DSTANDALONE
 
@@ -649,6 +649,6 @@ gOutput& operator << (gOutput& s, const edge& y)
   return s;
 }
 
-#include "garray.imp"
+#include "base/garray.imp"
 template class gArray<edge>;
 

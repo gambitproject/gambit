@@ -7,7 +7,7 @@
 #ifndef SEQFORM_H
 #define SEQFORM_H
 
-#include "glist.h"
+#include "base/base.h"
 #include "algutils.h"
 #include "behavsol.h"
 

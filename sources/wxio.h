@@ -13,7 +13,7 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include "gstream.h"
+#include "base/gstream.h"
 
 class gWxIOFrame;
 class gWxOutput: public gOutput

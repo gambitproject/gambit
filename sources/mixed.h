@@ -7,7 +7,7 @@
 #ifndef MIXED_H
 #define MIXED_H
 
-#include "gmisc.h"
+#include "base/gmisc.h"
 #include "nfstrat.h"
 
 #include "gpvector.h"

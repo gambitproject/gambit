@@ -8,7 +8,7 @@
 #define HOMPACK_H
 
 // Includes //////////////////////////////////////////////////////////////
-#include "garray.h"
+#include "base/base.h"
 #include "gvector.h"
 #include "gmatrix.h"
 #include "stdio.h"

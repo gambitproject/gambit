@@ -4,9 +4,9 @@
 // $Id$
 //
 
+#include "base/base.h"
 #include "efgpure.h"
 
-#include "glist.h"
 #include "efg.h"
 #include "efgiter.h"
 #include "efgciter.h"

@@ -5,7 +5,7 @@
 //
 
 #include "gmatrix.h"
-#include "gtext.h"
+#include "base/base.h"
 
 template <class T> gText gMatrix<T>::DivideByZero::Description(void) const
 {

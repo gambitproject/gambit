@@ -1,0 +1,128 @@
+//
+// FILE: garray.imp - Implementation of gArray data type
+//
+// $Id$
+//
+
+#include <stdlib.h>
+#include <assert.h>
+#include "base/garray.h"
+
+
+template <class T> gArray<T>::gArray(unsigned int len) 
+  : mindex(1), maxdex(len), data((len) ? new T[len] - 1 : 0)   
+{ }
+
+template <class T> gArray<T>::gArray(int lo, int hi)
+  : mindex(lo), maxdex(hi)
+{
+  if (maxdex + 1 < mindex)   throw BadRange();
+  data = (maxdex >= mindex) ? new T[maxdex -mindex + 1] - mindex : 0;
+}
+
+template <class T> gArray<T>::gArray(const gArray<T> &a) 
+  : mindex(a.mindex), maxdex(a.maxdex),
+    data((maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : 0)
+{
+  for (int i = mindex; i <= maxdex; i++)
+    data[i] = a.data[i];
+}
+
+template <class T> gArray<T>::~gArray()
+{
+  if (maxdex >= mindex)  delete [] (data + mindex);
+}
+
+template <class T> gArray<T> & gArray<T>::operator=(const gArray<T> &a)
+{
+  if (this != &a) {
+    // We only reallocate if necessary.  This should be somewhat faster
+    // if many objects are of the same length.  Furthermore, it is
+    // _essential_ for the correctness of the gPVector and gDPVector
+    // assignment operator, since it assumes the value of data does
+    // not change.
+    if (!data || (data && (mindex != a.mindex || maxdex != a.maxdex)))  {
+      if (data)   delete [] (data + mindex);
+      mindex = a.mindex;   maxdex = a.maxdex;
+      data = (maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : 0;
+    }
+
+    for (int i = mindex; i <= maxdex; i++)
+      data[i] = a.data[i];
+  }
+
+  return *this;
+}
+
+template <class T> int gArray<T>::Length(void) const
+{
+  return maxdex - mindex + 1;
+}	
+
+template <class T> int gArray<T>::First(void) const
+{
+  return mindex;
+}	
+
+template <class T> int gArray<T>::Last(void) const
+{
+  return maxdex;
+}	
+
+template <class T> const T &gArray<T>::operator[](int index) const
+{
+  if (index < mindex || index > maxdex) 
+    throw BadIndex();
+  return data[index];
+}	
+
+template <class T> T &gArray<T>::operator[](int index)
+{
+  if (index < mindex || index > maxdex)
+    throw BadIndex();
+  return data[index];
+}
+
+template <class T> void gArray<T>::Dump(gOutput &f) const
+{
+  f << "{ ";
+  for (int i = mindex; i <= maxdex; i++)
+    f << data[i] << ' ';
+  f << '}';
+}
+
+template <class T> bool operator==(const gArray<T> &a, const gArray<T> &b)
+{
+  if (a.First() != b.First() || a.Last() != b.Last())   return false;
+  for (int i = a.First(); i <= a.Last(); i++)
+    if (a[i] != b[i])   return false;
+  return true;
+}
+
+template <class T> bool operator!=(const gArray<T> &a, const gArray<T> &b)
+{
+  return !(a == b);
+}
+
+template <class T> gOutput &operator<<(gOutput &f, const gArray<T> &a)
+{
+  a.Dump(f);
+  return f;
+}
+
+
+template <class T> gArray<T>::BadIndex::~BadIndex()
+{ }
+
+template <class T> gText gArray<T>::BadIndex::Description(void) const
+{
+  return "Bad index in gArray";
+}
+
+template <class T> gArray<T>::BadRange::~BadRange()
+{ }
+
+template <class T> gText gArray<T>::BadRange::Description(void) const
+{
+  return "Bad range in gArray";
+}

@@ -44,10 +44,10 @@ that this technique is easily extended to n steps.
 */
 
 #include <math.h>
+#include "base/base.h"
 #include "mixed.h"
 #include "grid.h"
 #include "nfg.h"
-#include "gwatch.h"
 
 #define MAX_GRID		1		// only two steps for now (0,1)
 

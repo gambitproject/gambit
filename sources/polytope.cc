@@ -4,7 +4,7 @@
 //  $Id$
 //
 
-#include "gmisc.h"
+#include "base/gmisc.h"
 #include "polytope.imp"
 #include "rational.h"
 

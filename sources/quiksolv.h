@@ -7,12 +7,13 @@
 #ifndef QUIKSOLV_H
 #define QUIKSOLV_H
 
+#include "base/base.h"
+
 #include "gstatus.h"
 
 #include "gsolver.h"
 #include "odometer.h"
 #include "rectangl.h"
-#include "gtree.h"
 #include "gpoly.h"
 #include "gpolylst.h"
 #include "gpartltr.h"

@@ -7,8 +7,8 @@
 #ifndef NFGALLEQ_H
 #define NFGALLEQ_H
 
+#include "base/base.h"
 #include "nfg.h"
-#include "glist.h"
 #include "gstatus.h"
 #include "mixed.h"
 #include "mixedsol.h"

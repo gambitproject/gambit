@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <iostream.h>
 #include <fstream.h>
-#include "gstream.h"
+#include "base/gstream.h"
 #include "rational.h"
 #include "dualtope.h"
 

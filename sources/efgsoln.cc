@@ -6,9 +6,8 @@
 
 #include "wx/wx.h"
 #include "wxmisc.h"
-#include "garray.h"
+#include "base/base.h"
 #include "rational.h"
-#include "gmisc.h"
 #include "efgsoln.h"
 #include "treedraw.h"
 #include "treewin.h"

@@ -3,7 +3,7 @@
 //
 
 #include "lptab.h"
-#include "gtext.h"
+#include "base/base.h"
 
 // ---------------------------------------------------------------------------
 //                   LPTableau member definitions 

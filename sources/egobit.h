@@ -7,8 +7,8 @@
 #ifndef EGOBIT_H
 #define EGOBIT_H
 
+#include "base/base.h"
 #include "algutils.h"
-#include "glist.h"
 
 #include "efg.h"
 #include "behavsol.h"

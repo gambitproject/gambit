@@ -1,0 +1,68 @@
+//
+// FILE: gstack.imp -- Implementation of stack type
+//
+// $Id$
+//
+
+#include "base/gstack.h"
+
+template <class T> gStack<T>::gStack(int md) : depth(0), max_depth(md)
+{
+  if (md <= 0)   throw StackUnderflow();
+  contents = new T[md];
+}
+
+template <class T> gStack<T>::~gStack()
+{
+  delete [] contents;
+}
+
+template <class T> int gStack<T>::Depth(void) const
+{ return depth; }
+
+template <class T> int gStack<T>::MaxDepth(void) const
+{ return max_depth; }
+
+template <class T> void gStack<T>::Push(T new_el)
+{
+  if (depth >= max_depth)
+    Resize(max_depth + 10);
+
+  contents[depth++] = new_el;
+}
+
+template <class T> T gStack<T>::Pop(void)
+{
+  if (depth <= 0)   throw StackUnderflow();
+  return contents[--depth];
+}
+
+template <class T> T& gStack<T>::Peek(void)
+{
+  if (depth <= 0)   throw StackUnderflow();
+  return contents[depth - 1];
+}
+
+template <class T> T gStack<T>::Peek(void) const
+{
+  if (depth <= 0)   throw StackUnderflow();
+  return contents[depth - 1];
+}
+
+template <class T> void gStack<T>::Flush(void)
+{
+  depth = 0;
+}
+
+template <class T> void gStack<T>::Resize(int new_max_depth)
+{
+  if (new_max_depth > depth)   {
+    T *new_contents = new T[new_max_depth];
+    for (int i = 0; i < depth; i++)
+      new_contents[i] = contents[i];
+    delete [] contents;
+    contents = new_contents;
+    max_depth = new_max_depth;
+  }
+}
+

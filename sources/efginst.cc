@@ -8,9 +8,9 @@
 
 class ChanceInfoset;
 
-#include "garray.imp"
-#include "gblock.imp"
-#include "glist.imp"
+#include "base/garray.imp"
+#include "base/gblock.imp"
+#include "base/glist.imp"
 
 template class gArray<EFPlayer *>;
 template class gBlock<EFPlayer *>;

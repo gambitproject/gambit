@@ -1,0 +1,137 @@
+//
+// FILE: ghash.imp -- Implementation of hash table member functions
+//
+// $Id$
+//
+
+#include "base/base.h"
+#include "base/ghash.h"
+
+//-------------------------------------------------------------------------
+//              HashTable<K, T>: Constructor, Destructor
+//-------------------------------------------------------------------------
+
+template <class K, class T> HashTable<K, T>::HashTable(uint p_numBuckets)
+  : m_numBuckets(p_numBuckets)
+{
+  if (m_numBuckets <= 0)
+    assert(0);
+  else {
+    m_keyBucket = new gList<K>[m_numBuckets];
+    m_valueBucket = new gList<T>[m_numBuckets];
+  }
+}
+
+template <class K, class T> HashTable<K, T>::~HashTable()
+{
+  delete [] m_keyBucket;
+  delete [] m_valueBucket;
+}
+
+//-------------------------------------------------------------------------
+//              HashTable<K, T>: Private member functions
+//-------------------------------------------------------------------------
+
+template <class K, class T>
+int HashTable<K, T>::ValidatedHash(const K &p_key) const
+{
+  int i = Hash(p_key);
+
+  if ((i < 0) || (i >= m_numBuckets))
+    throw InternalError("Bad hash bucket number");
+  return i;
+}
+
+//-------------------------------------------------------------------------
+//              HashTable<K, T>: Public member functions
+//-------------------------------------------------------------------------
+
+template <class K, class T> void HashTable<K, T>::Flush(void)
+{
+  for (int i = 0; i < m_numBuckets; i++) {
+    while (m_keyBucket[i].Length() > 0) {
+      m_keyBucket[i].Remove(1);
+      DeleteAction(m_valueBucket[i].Remove(1));
+    }
+  }
+}
+
+template <class K, class T> int HashTable<K, T>::IsDefined(K p_key) const
+{
+  return m_keyBucket[ValidatedHash(p_key)].Find(p_key);
+}
+
+template <class K, class T> void HashTable<K, T>::Define(K p_key, T p_value)
+{
+  int bucket = ValidatedHash(p_key);
+  if (!IsDefined(p_key)) {
+    m_keyBucket[bucket].Append(p_key);
+    m_valueBucket[bucket].Append(p_value);
+  }
+  else {
+    DeleteAction(operator()(p_key));
+    (*this)(p_key) = p_value;
+  }
+}
+
+template <class K, class T> T HashTable<K, T>::Remove(K p_key)
+{
+  int position = IsDefined(p_key);
+  if (position != 0) {
+    int bucket = ValidatedHash(p_key);
+    m_keyBucket[bucket].Remove(position);
+    return m_valueBucket[bucket].Remove(position);
+  }
+  else
+    throw BadKey();
+}
+
+
+template <class K, class T> void HashTable<K, T>::Remove(T value)
+{
+  for (int i = 0; i < m_numBuckets; i++) {
+    for (int j = 1; j <= m_keyBucket[i].Length(); j++) {
+      if (operator()( m_keyBucket[i][j] ) == value) {
+	T removed_value = Remove( m_keyBucket[i][j] );
+	assert( removed_value == value );
+	DeleteAction( removed_value );
+	break;
+      }
+    }
+  }
+}
+  
+template <class K, class T> T HashTable<K, T>::operator()( K key ) const
+{
+  int i;
+  int position;
+  T   return_value;
+
+  position = IsDefined( key );
+  if( position != 0 )
+  {
+    i = ValidatedHash( key );
+    return_value = (m_valueBucket[ i ])[position];    
+  }
+  else {
+    throw BadKey();
+  }
+  return return_value;
+}
+
+  
+template <class K, class T> T& HashTable<K, T>::operator()( K key )
+{
+  int i;
+  int position;
+
+  position = IsDefined( key );
+  if( position != 0 )
+  {
+    i = ValidatedHash( key );
+    return (m_valueBucket[ i ])[position];    
+  }
+  else {
+    throw BadKey();
+  }
+}

@@ -7,7 +7,7 @@
 #ifndef GAMBIT_H
 #define GAMBIT_H
 
-#include "gtext.h"
+#include "base/base.h"
 #include "wx/wx.h"
 #include "wx/config.h"    // for wxConfig
 #include "wx/docview.h"   // for wxFileHistory

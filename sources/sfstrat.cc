@@ -11,9 +11,9 @@
 // Sequence:  Member functions
 //--------------------------------------
 
-#include "glist.imp"
-#include "gblock.imp"
-#include "garray.imp"
+#include "base/glist.imp"
+#include "base/garray.imp"
+#include "base/gblock.imp"
 
 gList<const Action *> Sequence::History(void) const 
 { 

@@ -107,7 +107,7 @@ endif
 # Combine the site dependent and independent data
 
 LIBDIR = $(WXLIBDIR) $(XLIBDIR)
-INCDIR = $(WXINCDIR) $(XINCDIR) -Ibitmaps
+INCDIR = -I. -I../include $(WXINCDIR) $(XINCDIR) -Ibitmaps
 GUILIBS = $(WXLIB) $(XLIB)
 
 # Include the list of files, which defines
@@ -128,7 +128,7 @@ $(OBJDIR):
 	mkdir $(OBJDIR)
 
 gcl_$(SYSNAME):	$(OBJDIR) $(TTYGCL_OBJECTS)
-	cd $(OBJDIR); $(CC) $(TTYGCL_OBJECTS) -o ../gcl_$(SYSNAME) -lm; cd ..
+	cd $(OBJDIR); $(CC) $(TTYGCL_OBJECTS) -o ../gcl_$(SYSNAME) -L../base -lgambit_base -lm; cd ..
 
 gcl:	
 ifndef SYSNAME
@@ -141,7 +141,7 @@ endif
 gui_$(GUI)_$(SYSNAME):	$(OBJDIR) $(ALLGUI_OBJECTS)
 	cd $(OBJDIR); \
 	$(CC) $(ALLGUI_OBJECTS) $(LIBDIR) $(GUILIBS) \
-	    -o ../gui_$(GUI)_$(SYSNAME); cd ..
+	    -o ../gui_$(GUI)_$(SYSNAME) -L../base -lgambit_base; cd ..
 
 gui:
 ifndef SYSNAME
@@ -159,7 +159,7 @@ endif
 wxgcl_$(GUI)_$(SYSNAME):	$(OBJDIR) $(WXGCL_OBJECTS)
 	cd $(OBJDIR); \
 	$(CC) $(WXGCL_OBJECTS) $(LIBDIR) $(GUILIBS) \
-	    -o ../wxgcl_$(GUI)_$(SYSNAME); cd ..
+	    -o ../wxgcl_$(GUI)_$(SYSNAME) -L../base -lgambit_base; cd ..
 
 wxgcl:
 ifndef SYSNAME

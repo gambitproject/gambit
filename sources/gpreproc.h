@@ -8,9 +8,8 @@
 #ifndef GPREPROC_H
 #define GPREPROC_H
 
+#include "base/base.h"
 #include "gcmdline.h"
-#include "gtext.h"
-#include "gstack.h"
 
 class GSM;
 

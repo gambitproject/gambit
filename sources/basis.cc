@@ -4,7 +4,7 @@
 //
 
 #include "basis.h"
-#include "gtext.h"
+#include "base/base.h"
 
 // ---------------------------------------------------------------------------
 // Class Basis

@@ -14,7 +14,7 @@
 #include "wxmisc.h"
 
 #include "nfgdraw.h"
-#include "gmisc.h"
+#include "base/gmisc.h"
 
 #include "nfg.h"
 #include "nfgiter.h"

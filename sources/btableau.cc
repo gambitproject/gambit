@@ -1,12 +1,12 @@
-//#
-//# FILE: btableau.cc -- Base Tableau class instantiations
-//#
-//# $Id$
-//#
+//
+// FILE: btableau.cc -- Base Tableau class instantiations
+//
+// $Id$
+//
 
 #include "rational.h"
 #include "gmatrix.imp"
-#include "grarray.imp"
+#include "base/grarray.imp"
 #include "btableau.imp"
 
 template class BaseTableau<double>;

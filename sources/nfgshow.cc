@@ -1277,6 +1277,6 @@ void NormalDrawSettings::SaveSettings(void) const
   config.Write("NfgDisplay/Outcome-Values", (long) m_outcomeValues);
 }
 
-#include "glist.imp"
+#include "base/glist.imp"
 template class gList<NFSupport *>;
 

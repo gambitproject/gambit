@@ -4,7 +4,7 @@
 // $Id$
 //
 
-#include "gstream.h"
+#include "base/gstream.h"
 
 gFileInput _gin(stdin);
 gInput &gin = _gin;

@@ -5,7 +5,7 @@
 //
 
 #include "gsmatrix.h"
-#include "gtext.h"
+#include "base/base.h"
 
 //-----------------------------------------------------------------------------
 //     gSquareMatrix<T>: Constructors, destructor, constructive operators

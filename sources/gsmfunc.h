@@ -9,7 +9,7 @@
 #define GSMFUNC_H
 
 #include "gsmincl.h"
-#include "gtext.h"
+#include "base/base.h"
 
 class gOutput;
 

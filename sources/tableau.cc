@@ -1,13 +1,14 @@
-//#
-//# FILE: tableau.cc -- tableau and basis class instantiations
-//#
-//# $Id$
-//#
+//
+// FILE: tableau.cc -- tableau and basis class instantiations
+//
+// $Id$
+//
 
 #include "rational.h"
 #include "tableau.imp"
 #include "gmatrix.imp"
-#include "grarray.imp"
+#include "base/grarray.imp"
+
 
 
 

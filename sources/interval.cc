@@ -6,7 +6,7 @@
 
 #include <assert.h>
 #include "interval.imp"
-#include "glist.imp"
+#include "base/glist.imp"
 #include "double.h"
 #include "gnumber.h"
 

@@ -527,5 +527,5 @@ gText gCmdLineInput::UpdatePromptNum( gText cmdBuf ) const
   return cmdBuf;
 }
 
-#include "gstack.imp"
+#include "base/gstack.imp"
 template class gStack<bool>;

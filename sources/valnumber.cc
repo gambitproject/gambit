@@ -15,7 +15,7 @@
 #endif  // __BORLANDC__
 
 #include "valnumber.h"
-#include "gtext.h"
+#include "base/base.h"
 
 #include <ctype.h>
 #include <string.h>

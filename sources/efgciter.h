@@ -7,7 +7,7 @@
 #ifndef EFGCITER_H
 #define EFGCITER_H
 
-#include "gblock.h"
+#include "base/base.h"
 
 #include "efg.h"
 

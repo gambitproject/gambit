@@ -5,7 +5,7 @@
 //
 
 #include "tableau.h"
-#include "gtext.h"
+#include "base/base.h"
 
 // ---------------------------------------------------------------------------
 //                   Tableau<double> method definitions

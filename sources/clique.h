@@ -164,7 +164,7 @@
 #define CLIQUE_H
 
 #include <stdio.h>
-#include "garray.h"
+#include "base/base.h"
 
 #define MAX(A,B)  ((A) > (B) ? (A) : (B))
 #define MIN(A,B)  ((A) < (B) ? (A) : (B))

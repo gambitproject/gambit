@@ -28,7 +28,7 @@ template class polynomial<gNumber>;
 template gOutput& operator << (gOutput& output, 
 			       const polynomial<gNumber>& x);
 
-#include "glist.imp"
+#include "base/glist.imp"
 template class gList< polynomial<gRational> >;
 template gOutput& operator << (gOutput& output, 
 			       const gList<polynomial<gRational> >&);

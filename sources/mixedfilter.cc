@@ -240,7 +240,7 @@ void dialogMixedFilter::Update(MixedListFilter &p_filter)
   }
 }
 
-#include "gslist.imp"
+#include "base/gslist.imp"
 
 template class gSortList<MixedSolution>;
 template class gListSorter<MixedSolution>;

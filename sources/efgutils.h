@@ -10,7 +10,6 @@
 
 #include "efg.h"
 #include "node.h"
-#include "glist.h"
 
 // returns a glist of all nodes in the extensive form
 void Nodes (const Efg &befg, gList <Node *> &list);

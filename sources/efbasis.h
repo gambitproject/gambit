@@ -7,10 +7,7 @@
 #ifndef EFBASIS_H
 #define EFBASIS_H
 
-#include "gtext.h"
-#include "gblock.h"
-#include "gstream.h"
-#include "glist.h"
+#include "base/base.h"
 #include "efg.h"
 
 class EFNodeSet;

@@ -11,12 +11,12 @@
 #include "double.h"
 #include "gnulib.h"
 #include "gvector.imp"
-#include "garray.imp"
-#include "grarray.imp"
+#include "base/garray.imp"
+#include "base/gblock.imp"
+#include "base/grarray.imp"
 #include "gmatrix.imp"
-#include "gblock.imp"
 #include "monomial.imp"
-#include "glist.imp"
+#include "base/glist.imp"
 #include <math.h>
 #include <values.h>
 #include <float.h>
@@ -230,10 +230,6 @@ gDouble pow(const gDouble& x, const gDouble& y)
 {
   return gDouble(pow(x.dbl, y.dbl));
 }
-
-#include <stdio.h>
-#include "gtext.h"
-
 
 #define MYGCONVERT_BUFFER_LENGTH     64
 char mygconvert_buffer[MYGCONVERT_BUFFER_LENGTH];

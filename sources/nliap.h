@@ -7,8 +7,8 @@
 #ifndef NLIAP_H
 #define NLIAP_H
 
+#include "base/base.h"
 #include "algutils.h"
-#include "glist.h"
 
 #include "nfg.h"
 #include "mixed.h"

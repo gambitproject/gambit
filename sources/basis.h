@@ -6,9 +6,9 @@
 #ifndef BASIS_H
 #define BASIS_H
 
+#include "base/base.h"
 #include "gmatrix.h"
 #include "gvector.h"
-#include "gblock.h"
 
 //---------------------------------------------------------------------------
 // Class Basis

@@ -7,16 +7,12 @@
 #ifdef __GNUG__
 #pragma implementation
 #endif
-#include "gstream.h"
+#include "base/base.h"
 #include "gnumber.h"
-#include "gmisc.h"
 #include <math.h>
 #include <values.h>
 #include <float.h>
 #include <ctype.h>
-
-#include "gtext.h"
-
 
 gText gNumber::DivideByZero::Description(void) const
 { return "Divide by zero in gNumber"; }

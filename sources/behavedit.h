@@ -10,7 +10,7 @@
 #include "wx/treectrl.h"
 #include "wx/grid.h"
 
-#include "gmap.h"
+#include "base/base.h"
 
 class dialogBehavEditor : public wxDialog {
 private:

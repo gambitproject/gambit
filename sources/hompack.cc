@@ -8,7 +8,7 @@
 #include <iomanip.h>
 #include <iostream.h>
 #include <math.h>
-#include "gmisc.h"
+#include "base/gmisc.h"
 #include "hompack.h"
 #include "lapack.h"
 #include "homotopy.h"

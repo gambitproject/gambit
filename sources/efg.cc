@@ -4,9 +4,8 @@
 //  $Id$
 //
 
-#include "garray.h"
+#include "base/base.h"
 #include "rational.h"
-#include "glist.h"
 
 #ifdef __GNUG__
 #pragma implementation "outcome.h"

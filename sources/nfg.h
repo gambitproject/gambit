@@ -7,9 +7,7 @@
 #ifndef NFG_H
 #define NFG_H
 
-#include "gblock.h"
-#include "gtext.h"
-#include "grblock.h"
+#include "base/base.h"
 #include "gnumber.h"
 #include "nfplayer.h"
 

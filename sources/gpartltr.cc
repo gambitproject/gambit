@@ -5,7 +5,7 @@
 // $Id$
 //
 
-#include "glist.imp"
+#include "base/glist.imp"
 #include "gpartltr.imp"
 
 template class TreeOfPartials<gDouble>;

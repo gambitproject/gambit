@@ -4,18 +4,17 @@
 # $Id$
 #
 
-GLIB_SOURCES = gmisc.cc gstream.cc garray.cc gblock.cc gtext.cc integer.cc \
+GLIB_SOURCES = integer.cc \
                rational.cc gnulib.cc gvector.cc gpvector.cc gdpvect.cc \
-               grarray.cc gmatrix.cc gsmatrix.cc gwatch.cc \
-               glist.cc gfuncmin.cc gfunc.cc system.cc gnumber.cc \
-               grblock.cc gnarray.cc gpool.cc
+               gmatrix.cc gsmatrix.cc \
+               gfuncmin.cc gfunc.cc system.cc gnumber.cc gnarray.cc
 
 GLIB_OBJECTS = $(GLIB_SOURCES:.cc=$(OBJECT_SUFFIX))
 
 
 GPOLY_SOURCES = prepoly.cc gpoly.cc monomial.cc interval.cc double.cc \
                 poly.cc complex.cc quiksolv.cc gpartltr.cc gsolver.cc \
-                odometer.cc rectangl.cc gtree.cc ideal.cc gpolylst.cc \
+                odometer.cc rectangl.cc ideal.cc gpolylst.cc \
                 linrcomb.cc ineqsolv.cc
 
 GPOLY_OBJECTS = $(GPOLY_SOURCES:.cc=$(OBJECT_SUFFIX))

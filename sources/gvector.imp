@@ -5,7 +5,7 @@
 //
 
 #include "gvector.h"
-#include "gtext.h"
+#include "base/base.h"
 
 template <class T> gText gVector<T>::BadDim::Description(void) const
 {

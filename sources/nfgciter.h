@@ -7,7 +7,7 @@
 #ifndef NFGCITER_H
 #define NFGCITER_H
 
-#include "gblock.h"
+#include "base/base.h"
 #include "nfplayer.h"
 
 class StrategyProfile;

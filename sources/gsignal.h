@@ -7,8 +7,7 @@
 #ifndef GSIGNAL_H
 #define GSIGNAL_H
 
-#include "gmisc.h"
-#include "gtext.h"
+#include "base/base.h"
 
 class gSignalBreak : public gException {
  public:

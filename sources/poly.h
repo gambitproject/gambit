@@ -5,11 +5,10 @@
 //
 
 #include <assert.h>
+#include "base/base.h"
 #include "rational.h"
-#include "gstream.h"
 #include "interval.h"
 #include "gvector.h"
-#include "glist.h"
 #include "double.h"
 #include "complex.h"
 

@@ -5,7 +5,7 @@
 // $Id$
 //
 
-#include "gstream.h"
+#include "base/gstream.h"
 #include "system.h"
 #include "wxio.h"
 #include "gambit.h"

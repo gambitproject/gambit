@@ -7,9 +7,9 @@
 #ifndef LEMKE_H
 #define LEMKE_H
 
+#include "base/base.h"
 #include "nfg.h"
 #include "mixedsol.h"
-#include "glist.h"
 #include "algutils.h"
 
 class LemkeParams : public AlgParams    {

@@ -9,8 +9,8 @@
 #define GTABLEAU_H
 
 #include <assert.h>
-#include "gmisc.h"
-#include "gstream.h"
+#include "base/gmisc.h"
+#include "base/gstream.h"
 #include "gmatrix.h"
 #include "gblock.h"
 #include "gmap.h"

@@ -7,8 +7,7 @@
 #ifndef GSM_H
 #define GSM_H
 
-#include "gstream.h"
-#include "gtext.h"
+#include "base/base.h"
 #include "gsmincl.h"
 #include "gsminstr.h"
 #include "gsmhash.h"

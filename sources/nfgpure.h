@@ -7,9 +7,9 @@
 #ifndef NFGPURE_H
 #define NFGPURE_H
 
+#include "base/base.h"
 #include "nfg.h"
 #include "mixedsol.h"
-#include "glist.h"
 #include "gstatus.h"
 
 class nfgEnumPure {

@@ -7,8 +7,7 @@
 #ifndef LEXICON_H
 #define LEXICON_H
 
-
-#include "glist.h"
+#include "base/base.h"
 
 typedef gArray<int> Correspondence;
 class Nfg;

@@ -7,14 +7,12 @@
 #ifndef LPSOLVE_H
 #define LPSOLVE_H
 
+#include "base/base.h"
 #include "lptab.h"
-#include "glist.h"
 #include "bfs.h"
 #include "gstatus.h"
 #include "gsmatrix.h"
 #include "vertenum.h"
-
-// #include "garray.h"
 
 //
 // This class implements a LP solver.  Its constructor takes as input a

@@ -8,7 +8,7 @@
 #define GNARRAY_H
 
 #include <assert.h>
-#include "gstream.h"
+#include "base/gstream.h"
 #include "gvector.h"
 
 //

@@ -10,7 +10,7 @@
 #include "wx/font.h"
 #include "wx/button.h"
 
-#include "gblock.h"
+#include "base/base.h"
 #include "treecons.h"
 #include "gambdraw.h"
 

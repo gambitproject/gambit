@@ -5,10 +5,10 @@
 //
 
 #include "monomial.imp"
-#include "glist.imp"
+#include "base/glist.imp"
 #include "double.h"
-#include "garray.imp"
-#include "gblock.imp"
+#include "base/garray.imp"
+#include "base/gblock.imp"
 #include "gnumber.h"
 
 template class gMono<int>;

@@ -9,8 +9,7 @@
 #ifndef GSMINCL_H
 #define GSMINCL_H
 
-#include "gtext.h"
-#include "gmisc.h"
+#include "base/base.h"
 
 class gOutput;
 

@@ -7,13 +7,11 @@
 #ifndef SFG_H
 #define SFG_H
 
+#include "base/base.h"
 #include "efg.h"
 #include "odometer.h"
-#include "garray.h"
-#include "grarray.h"
 #include "gnarray.h"
 #include "sfstrat.h"
-#include "glist.h"
 
 class Sfg  {
 private:

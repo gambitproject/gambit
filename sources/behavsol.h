@@ -7,10 +7,8 @@
 #ifndef BEHAVSOL_H
 #define BEHAVSOL_H
 
-#include "gmisc.h"
+#include "base/base.h"
 #include "behav.h"
-#include "gstream.h"
-#include "gtext.h"
 #include "gnumber.h"
 #include "efg.h"
 #include "algutils.h"  // needed for gFact

@@ -8,9 +8,9 @@
 #include "gpolylst.imp"
 #include "double.h"
 #include "gnumber.h"
-#include "glist.imp"
-#include "garray.imp"
-#include "grarray.imp"
+#include "base/glist.imp"
+#include "base/garray.imp"
+#include "base/grarray.imp"
 #include "gmatrix.imp"
 
 //template class gPolyList<int>;

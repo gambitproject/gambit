@@ -16,7 +16,7 @@
 #include "wxmisc.h"
 
 #include "system.h"
-#include "gmisc.h"
+#include "base/gmisc.h"
 
 //***************************************************************************
 //                       RANDOM USEFUL FUNCTIONS

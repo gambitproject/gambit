@@ -4,20 +4,18 @@
 // $Id$
 //
 
+#include "base/base.h"
+
 #include "gsm.h"
 #include "portion.h"
 #include "gsmfunc.h"
 
-#include "gmisc.h"
 #include "rational.h"
 
 #include "nfg.h"
 #include "efg.h"
 
-#include "gwatch.h"
 #include "gsmatrix.h"
-
-
 
 
 //---------

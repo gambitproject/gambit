@@ -110,7 +110,7 @@ gText PortionSpecToText(const PortionSpec& spec)
 }
 
 
-#include "gstream.h"
+#include "base/gstream.h"
 #include "gsm.h"
 
 PortionSpec TextToPortionSpec(const gText& text)

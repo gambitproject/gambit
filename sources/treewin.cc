@@ -9,7 +9,7 @@
 #include "wx/dragimag.h"
 #include "wxmisc.h"
 
-#include "gmisc.h"
+#include "base/gmisc.h"
 #include "efg.h"
 #include "legendc.h"
 #include "treewin.h"
@@ -19,7 +19,7 @@
 #include "legend.h"
 
 #include "efgutils.h"
-#include "glist.imp"
+#include "base/glist.imp"
 
 extern int INFOSET_SPACING;
 extern int SUBGAME_LARGE_ICON_SIZE;

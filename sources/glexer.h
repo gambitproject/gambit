@@ -7,7 +7,7 @@
 #ifndef GLEXER_H
 #define GLEXER_H
 
-#include "gstream.h"
+#include "base/gstream.h"
 #include "gtext.h"
 #include "gnumber.h"
 

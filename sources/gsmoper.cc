@@ -13,13 +13,12 @@
 #endif
 #include <time.h>
 
-#include "gmisc.h"
+#include "base/base.h"
 #include "gsm.h"
 #include "portion.h"
 #include "gsmfunc.h"
 
 #include "rational.h"
-#include "gblock.h"
 
 #include "mixedsol.h"
 #include "behavsol.h"
@@ -28,8 +27,7 @@
 #include "efg.h"
 
 #include "system.h"
-#include "gstack.h"
-#include "gtext.h"
+#include "base/base.h"
 
 
 #include "gcmdline.h"

@@ -1,14 +1,14 @@
-//#
-//# FILE: gfunc.h -- Abstract base classes for implementation of functions
-//#
-//# $Id$
-//#
+//
+// FILE: gfunc.h -- Abstract base classes for implementation of functions
+//
+// $Id$
+//
 
 
 #ifndef GFUNC_H
 #define GFUNC_H
-#include "gmisc.h"
-#include "gtext.h"
+
+#include "base/base.h"
 
 template <class T> class gVector;
 template <class T> class gMatrix;

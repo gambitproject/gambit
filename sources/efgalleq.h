@@ -7,8 +7,8 @@
 #ifndef EFGALLEQ_H
 #define EFGALLEQ_H
 
+#include "base/base.h"
 #include "efg.h"
-#include "glist.h"
 #include "gstatus.h"
 #include "behav.h"
 #include "behavsol.h"

@@ -17,8 +17,7 @@ significant index is the first ("leftmost").
 #ifndef ODOMETER_H
 #define ODOMETER_H
 
-#include "gblock.h"
-
+#include "base/base.h"
 
 // *****************************
 //      class gIndexOdometer

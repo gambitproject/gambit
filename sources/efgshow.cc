@@ -2328,7 +2328,7 @@ Node *EfgShow::Cursor(void) const
   return m_treeWindow->Cursor();
 }
 
-#include "glist.imp"
+#include "base/glist.imp"
 
 template class gList<EFSupport *>;
 

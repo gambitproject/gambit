@@ -4,6 +4,7 @@
 // $Id$
 //
 
+#include "base/base.h"
 #include "gpvector.imp"
 #include "rational.h"
 #include "gnumber.h"

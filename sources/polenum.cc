@@ -4,7 +4,8 @@
 // $Id$
 //
 
-#include "gwatch.h"
+#include "base/base.h"
+
 #include "nfg.h"
 #include "nfgiter.h"
 #include "nfgciter.h"

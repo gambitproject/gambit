@@ -6,10 +6,10 @@
 
 #include "sfg.h"
 #include "sfstrat.h"
-#include "garray.imp"
+#include "base/garray.imp"
 #include "gnarray.imp"
-#include "grarray.imp"
-#include "glist.imp"
+#include "base/grarray.imp"
+#include "base/glist.imp"
 
 //----------------------------------------------------
 // Sfg: Constructors, Destructors, Operators

@@ -9,8 +9,7 @@
 
 #include "wx/wx.h"
 
-#include "garray.h"
-#include "gslist.h"
+#include "base/base.h"
 #include "behavsol.h"
 
 class BehavListFilter : public gListSorter<BehavSolution>,

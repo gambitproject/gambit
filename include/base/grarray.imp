@@ -1,0 +1,336 @@
+//
+// FILE: grarray.imp -- Implementation of base rectangular array class
+//
+// $Id$
+//
+
+#include "base/base.h"
+
+template <class T> gText gRectArray<T>::BadDim::Description(void) const
+{
+  return "Dimensionality mismatch in gRectArray";
+}
+
+template <class T> gText gRectArray<T>::BadIndex::Description(void) const
+{
+  return "Index out of range in gRectArray";
+}
+
+//------------------------------------------------------------------------
+//            gRectArray<T>: Private/protected member functions
+//------------------------------------------------------------------------
+
+template <class T> bool gRectArray<T>::CheckRow(int row) const
+{
+  return (minrow <= row && row <= maxrow);
+}
+
+template <class T> bool gRectArray<T>::CheckRow(const gArray<T> &v) const
+{
+  return (v.First() == mincol && v.Last() == maxcol);
+}
+
+template <class T> bool gRectArray<T>::CheckColumn(int col) const
+{
+  return (mincol <= col && col <= maxcol);
+}
+
+template <class T> bool gRectArray<T>::CheckColumn(const gArray<T> &v) const
+{
+  return (v.First() == minrow && v.Last() == maxrow);
+}
+
+template <class T> bool gRectArray<T>::Check(int row, int col) const
+{
+  return (CheckRow(row) && CheckColumn(col));
+}
+
+template <class T>
+bool gRectArray<T>::CheckBounds(const gRectArray<T> &m) const
+{
+  return (minrow == m.minrow && maxrow == m.maxrow &&
+	  mincol == m.mincol && maxcol == m.maxcol);
+}
+
+//------------------------------------------------------------------------
+//     gRectArray<T>: Constructors, destructor, constructive operators
+//------------------------------------------------------------------------
+
+template <class T> gRectArray<T>::gRectArray(void)
+  : minrow(1), maxrow(0), mincol(1), maxcol(0), data(0)
+{ }
+
+template <class T> gRectArray<T>::gRectArray(unsigned int rows,
+					     unsigned int cols)
+  : minrow(1), maxrow(rows), mincol(1), maxcol(cols)
+{
+  data = (rows > 0) ? new T *[maxrow] - 1 : 0;
+  for (int i = 1; i <= maxrow;
+       data[i++] = (cols > 0) ? new T[maxcol] - 1 : 0);
+}
+
+template <class T>
+gRectArray<T>::gRectArray(int minr, int maxr, int minc, int maxc)
+  : minrow(minr), maxrow(maxr), mincol(minc), maxcol(maxc)
+{
+  data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : 0;
+  for (int i = minrow; i <= maxrow;
+       data[i++] = (maxcol - mincol + 1) ? new T[maxcol - mincol + 1] - mincol : 0);
+}
+
+template <class T> gRectArray<T>::gRectArray(const gRectArray<T> &a)
+  : minrow(a.minrow), maxrow(a.maxrow), mincol(a.mincol), maxcol(a.maxcol)
+{
+  data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : 0;
+  for (int i = minrow; i <= maxrow; i++)  {
+    data[i] = (maxcol >= mincol) ? new T[maxcol - mincol + 1] - mincol : 0;
+    for (int j = mincol; j <= maxcol; j++)
+      data[i][j] = a.data[i][j];
+  }
+}
+
+template <class T> gRectArray<T>::~gRectArray()
+{
+  for (int i = minrow; i <= maxrow; i++)
+    if (data[i])  delete [] (data[i] + mincol);
+  if (data)  delete [] (data + minrow);
+}
+
+template <class T>
+gRectArray<T> &gRectArray<T>::operator=(const gRectArray<T> &a)
+{
+  if (this != &a)   {
+    int i;
+    for (i = minrow; i <= maxrow; i++)
+      if (data[i])  delete [] (data[i] + mincol);
+    if (data)  delete [] (data + minrow);
+
+    minrow = a.minrow;
+    maxrow = a.maxrow;
+    mincol = a.mincol;
+    maxcol = a.maxcol;
+    
+    data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : 0;
+  
+    for (i = minrow; i <= maxrow; i++)  {
+      data[i] = (maxcol >= mincol) ? new T[maxcol - mincol + 1] - mincol : 0;
+      for (int j = mincol; j <= maxcol; j++)
+	data[i][j] = a.data[i][j];
+    }
+  }
+    
+  return *this;
+}
+
+//------------------------------------------------------------------------
+//                  gRectArray<T>: Data access members
+//------------------------------------------------------------------------
+
+template <class T> int gRectArray<T>::NumRows(void) const
+{ return maxrow - minrow + 1; }
+
+template <class T> int gRectArray<T>::NumColumns(void) const
+{ return maxcol - mincol + 1; }
+
+template <class T> int gRectArray<T>::MinRow(void) const    { return minrow; }
+template <class T> int gRectArray<T>::MaxRow(void) const    { return maxrow; }
+template <class T> int gRectArray<T>::MinCol(void) const { return mincol; }
+template <class T> int gRectArray<T>::MaxCol(void) const { return maxcol; }
+
+template <class T> T &gRectArray<T>::operator()(int r, int c)
+{
+  if (!Check(r, c))  throw BadIndex();
+
+  return data[r][c];
+}
+
+template <class T> const T &gRectArray<T>::operator()(int r, int c) const
+{
+  if (!Check(r, c))  throw BadIndex();
+
+  return data[r][c];
+}
+
+template <class T> void gRectArray<T>::Dump(gOutput &f) const
+{
+  f << "{ ";
+  for (int i = minrow; i <= maxrow; i++)  {
+    if (i > 1)  f << "\n  ";
+    f << "{ ";
+    for (int j = mincol; j <= maxcol; j++)
+      f << data[i][j] << ' ';
+    f << "}";
+  }
+  f << " }\n";
+}
+
+template <class T> gOutput &operator<<(gOutput &f, const gRectArray<T> &a)
+{
+  a.Dump(f);   return f;
+}
+
+//------------------------------------------------------------------------
+//                   gRectArray<T>: Row and column rotation
+//------------------------------------------------------------------------
+
+template <class T> void gRectArray<T>::RotateUp(int lo, int hi)
+{
+  if (lo < minrow || hi < lo || maxrow < hi)  throw BadIndex();
+
+  T *temp = data[lo];
+  for (int k = lo; k < hi; k++)
+    data[k] = data[k + 1];
+  data[hi] = temp;
+}
+
+template <class T> void gRectArray<T>::RotateDown(int lo, int hi)
+{
+  if (lo < minrow || hi < lo || maxrow < hi)  throw BadIndex();
+
+  T *temp = data[hi];
+  for (int k = hi; k > lo; k--)
+    data[k] = data[k - 1];
+  data[lo] = temp;
+}
+
+template <class T> void gRectArray<T>::RotateLeft(int lo, int hi)
+{
+  if (lo < mincol || hi < lo || maxcol < hi)   throw BadIndex();
+  
+  T temp;
+  for (int i = minrow; i <= maxrow; i++)  {
+    T *row = data[i];
+    temp = row[lo];
+    for (int j = lo; j < hi; j++)
+      row[j] = row[j + 1];
+    row[hi] = temp;
+  }
+}
+
+template <class T> void gRectArray<T>::RotateRight(int lo, int hi)
+{
+  if (lo < mincol || hi < lo || maxcol < hi)   throw BadIndex();
+
+  for (int i = minrow; i <= maxrow; i++)  {
+    T *row = data[i];
+    T temp = row[hi];
+    for (int j = hi; j > lo; j--)
+      row[j] = row[j - 1];
+    row[lo] = temp;
+  }
+}
+
+//-------------------------------------------------------------------------
+//                 gRectArray<T>: Row manipulation functions
+//-------------------------------------------------------------------------
+
+template <class T> void gRectArray<T>::SwitchRow(int row, gArray<T> &v)
+{
+  if (!CheckRow(row))  throw BadIndex();
+  if (!CheckRow(v))    throw BadDim();
+
+  T *rowptr = data[row];
+  T tmp;
+  for (int i = mincol; i <= maxcol; i++)  {
+    tmp = rowptr[i];
+    rowptr[i] = v[i];
+    v[i] = tmp;
+  }
+}
+
+template <class T> void gRectArray<T>::SwitchRows(int i, int j)
+{
+  if (!CheckRow(i) || !CheckRow(j))   throw BadIndex();
+  T *temp = data[j];
+  data[j] = data[i];
+  data[i] = temp;
+}
+
+template <class T> void gRectArray<T>::GetRow(int row, gArray<T> &v) const
+{
+  if (!CheckRow(row))   throw BadIndex();
+  if (!CheckRow(v))     throw BadDim();
+
+  T *rowptr = data[row];
+  for (int i = mincol; i <= maxcol; i++)
+    v[i] = rowptr[i];
+}
+
+template <class T> void gRectArray<T>::SetRow(int row, const gArray<T> &v)
+{
+  if (!CheckRow(row))   throw BadIndex();
+  if (!CheckRow(v))     throw BadDim();
+
+  T *rowptr = data[row];
+  for (int i = mincol; i <= maxcol; i++)
+    rowptr[i] = v[i];
+}
+
+//-------------------------------------------------------------------------
+//                gRectArray<T>: Column manipulation functions
+//-------------------------------------------------------------------------
+
+template <class T> void gRectArray<T>::SwitchColumn(int col, gArray<T> &v)
+{
+  if (!CheckColumn(col))   throw BadIndex();
+  if (!CheckColumn(v))     throw BadDim();
+
+  for (int i = minrow; i <= maxrow; i++)   {
+    T tmp = data[i][col];
+    data[i][col] = v[i];
+    v[i] = tmp;
+  }
+}
+
+template <class T> void gRectArray<T>::SwitchColumns(int a, int b)
+{
+  if (!CheckColumn(a) || !CheckColumn(b))   throw BadIndex();
+
+  for (int i = minrow; i <= maxrow; i++)   {
+    T tmp = data[i][a];
+    data[i][a] = data[i][b];
+    data[i][b] = tmp;
+  }
+}
+
+template <class T> void gRectArray<T>::GetColumn(int col, gArray<T> &v) const
+{
+  if (!CheckColumn(col))  throw BadIndex();
+  if (!CheckColumn(v))    throw BadDim();
+
+  for (int i = minrow; i <= maxrow; i++)
+    v[i] = data[i][col];
+}
+
+template <class T> void gRectArray<T>::SetColumn(int col, const gArray<T> &v)
+{
+  if (!CheckColumn(col))   throw BadIndex();
+  if (!CheckColumn(v))     throw BadDim();
+
+  for (int i = minrow; i <= maxrow; i++)
+    data[i][col] = v[i];
+}
+
+//-------------------------------------------------------------------------
+//                gRectArray<T>: Transpose
+//-------------------------------------------------------------------------
+
+template <class T> gRectArray<T> gRectArray<T>::Transpose(void) const
+{
+  gRectArray<T> tmp(mincol, maxcol, minrow, maxrow);
+ 
+  for (int i = minrow; i <= maxrow; i++)
+    for (int j = mincol; j <= maxrow; j++)
+      tmp(j,i) = (*this)(i,j);
+
+  return tmp;
+}
+
+
+
+
+
+
+
+
+

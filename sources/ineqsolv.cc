@@ -7,7 +7,7 @@
 
 #include "ineqsolv.imp"
 #include "double.h"
-#include "grarray.imp"
+#include "base/grarray.imp"
 
 template class IneqSolv<gRational>;
 template gOutput &operator<<(gOutput &f, const IneqSolv<gRational> &y);

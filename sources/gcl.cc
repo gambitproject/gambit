@@ -10,11 +10,9 @@
 #include <stdlib.h>
 #include <new.h>
 
+#include "base/base.h"
 #include "rational.h"
-#include "gtext.h"
-#include "glist.h"
 #include "gsmconsole.h"
-#include "gstack.h"
 #include "gcompile.h"
 #include "gcmdline.h"
 #include "gpreproc.h"

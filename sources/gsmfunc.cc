@@ -7,10 +7,8 @@
 
 #include <ctype.h>
 
+#include "base/base.h"
 #include "gsmfunc.h"
-
-#include "glist.h"
-#include "gstack.h"
 
 #include "gsm.h"
 #include "portion.h"

@@ -8,7 +8,7 @@
 #ifndef BFS_H
 #define BFS_H
 
-#include "gmap.h"
+#include "base/gmap.h"
 
 template <class T> class BFS : public gOrdMap<int, T>  {
   public:

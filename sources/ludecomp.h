@@ -8,10 +8,9 @@
 #ifndef LUDECOMP_H
 #define LUDECOMP_H
 
+#include "base/base.h"
 #include "gmatrix.h"
 #include "gvector.h"
-#include "glist.h"
-#include "gstream.h"
 #include "basis.h"
 
 template <class T> class Tableau;

@@ -12,6 +12,6 @@ template class gSolver<gRational>;
 template class gSolver<gDouble>;
 
 #include "gvector.imp"
-#include "glist.imp"
+#include "base/glist.imp"
 
 

@@ -10,8 +10,7 @@
 #include "wx/grid.h"
 
 #include <stdio.h>
-#include "garray.h"
-#include "gnumber.h"
+#include "base/base.h"
 
 //
 // A generic standard dialog box featuring automatic layout, frame control
@@ -95,7 +94,6 @@ bool    IsDelete(wxKeyEvent &ev);
 // of: "text[/C{#}]", where # is the number of the color to select
 // from the gambit_color_list.  Also allows sup/superscripts
 // Note: uses gString
-#include "gtext.h"
 void gDrawText(wxDC &dc, const gText &s, float x, float y);
 
 // Calculates the size of the string when parsed as gDrawText

@@ -8,14 +8,9 @@
 #ifndef PORTION_H
 #define PORTION_H
 
+#include "base/base.h"
 #include "gsmincl.h"
-#include "gblock.h"
-#include "glist.h"
-#include "gtext.h"
 #include "gnumber.h"
-
-#include "gpool.h"
-
 
 //-------------
 // Portion

@@ -109,9 +109,9 @@ gText ToText(const gPoly<gNumber> &p)
 }
 
 
-#include "glist.imp"
-#include "garray.imp"
-#include "gblock.imp"
+#include "base/glist.imp"
+#include "base/garray.imp"
+#include "base/gblock.imp"
 
 template class gArray< gPoly< gRational > *>;
 template class gArray< Variable * >;

@@ -7,10 +7,11 @@
 #ifndef VERTENUM_H
 #define VERTENUM_H
 
+#include "base/base.h"
 #include "lptab.h"
 #include "bfs.h"
+
 #include "gstatus.h"
-#include "garray.h"
 #include "gmatrix.h"
 #include "gsmatrix.h"
 
