@@ -1,5 +1,5 @@
 // File: Spread.h, header file for spread.cc
-// $Id$
+// @(#)spread.h	1.21 8/16/96
 // This file implements a 3-D spreadsheet type dialog box.  It can have
 // unlimited dimensions for both rows/columns and the number of layers.
 // At the moment each cell contains only a gString, but functions for
@@ -467,6 +467,10 @@ protected:
 	virtual wxMenuBar *MakeMenuBar(long menus);
 	void SetMenuBar(wxMenuBar *bar);
 	virtual void MakeButtons(long buttons);
+	void OnOk1(void); // These are necessary to allow for overloading of the next
+	void OnCancel1(void); // level functions (OnOk, etc) since the static funcs
+	void OnPrint1(void); // must call the SpreadSheet3D versions.
+	void OnHelp1(void);
 public:
 	// Constructor
 	SpreadSheet3D(int rows,int cols,int levels,char *title,
@@ -483,7 +487,7 @@ public:
 	virtual void OnDoubleClick(int ,int ,int ,const gString &) { }
 	virtual void OnSelectedMoved(int row,int col,SpreadMoveDir how=SpreadMoveJump);
 	virtual void OnPrint(void);
-	virtual void OnHelp(int =0) { }
+	virtual void OnHelp(int =0);
 	virtual Bool OnCharNew(wxKeyEvent &) {return FALSE;}
 	void CanvasFocus(void) {data[cur_level].SetFocus();}
 	// General data access

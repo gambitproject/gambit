@@ -1,6 +1,6 @@
 // File: spread.cc -- Defines a 3 dimensional spreadsheet/table control.  Used
 // extensively in gambit.
-// $Id$
+// @(#)spread.cc	1.33 8/23/96
 #include <stdio.h>
 #include "wx.h"
 #include "wx_mf.h"
@@ -984,18 +984,21 @@ for (int i=1;i<=levels;i++)
 
 // Callback functions
 void	SpreadSheet3D::spread_ok_func(wxButton	&ob,wxEvent &)
-{((SpreadSheet3D *)ob.GetClientData())->OnOk();}
+{((SpreadSheet3D *)ob.GetClientData())->OnOk1();}
+void SpreadSheet3D::OnOk1(void) {OnOk();}
 void SpreadSheet3D::OnOk(void)
 {
 	SetCompleted(wxOK);
 	Show(FALSE);
 }
+void	SpreadSheet3D::OnCancel1(void) {OnCancel();}
 void	SpreadSheet3D::OnCancel(void)
 {
 	SetCompleted(wxCANCEL);
 	Show(FALSE);
 }
 
+void SpreadSheet3D::OnPrint1(void) {OnPrint();}
 void SpreadSheet3D::OnPrint(void)
 {
 wxStringList extras("ASCII",0);
@@ -1018,16 +1021,20 @@ if (od.Completed()==wxOK)
 
 
 void	SpreadSheet3D::spread_print_func(wxButton	&ob,wxEvent &)
-{((SpreadSheet3D *)ob.GetClientData())->OnPrint();}
+{((SpreadSheet3D *)ob.GetClientData())->OnPrint1();}
 
 void	SpreadSheet3D::spread_cancel_func(wxButton	&ob,wxEvent &)
-{((SpreadSheet3D *)ob.GetClientData())->OnCancel();}  
+{((SpreadSheet3D *)ob.GetClientData())->OnCancel1();}
 
 void SpreadSheet3D::spread_slider_func(wxSlider &ob,wxCommandEvent &)
 {((SpreadSheet3D *)ob.GetClientData())->SetLevel(ob.GetValue());}
 
 void	SpreadSheet3D::spread_help_func(wxButton	&ob,wxEvent &)
-{((SpreadSheet3D *)ob.GetClientData())->OnHelp();}
+{((SpreadSheet3D *)ob.GetClientData())->OnHelp1();}
+
+void SpreadSheet3D::OnHelp1(void) {OnHelp();}
+
+void SpreadSheet3D::OnHelp(int ) { }
 
 void	SpreadSheet3D::spread_change_func(wxButton	&ob,wxEvent &)
 {

@@ -1,7 +1,7 @@
 //#
 //# FILE: wxio.cc -- Implementation of more complicated I/O functions
 //#
-// $Id$
+// @(#)wxio.cc	1.14 8/29/96
 #include "wx.h"
 #include "wxio.h"
 
@@ -26,7 +26,7 @@ Show(TRUE);
 
 Bool gWxIOFrame::OnClose(void)
 {
-parent->OnClose();
+//parent->OnClose();
 return TRUE;
 }
 //************************************ G WX OUTPUT ****************************
@@ -174,7 +174,7 @@ void gWxOutput::OnClose(void)
 {
 if (frame)
 {
-	delete frame;
+	frame->Close();
 	frame=0;
 }
 }

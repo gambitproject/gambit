@@ -1,7 +1,7 @@
 //*************************************************************************
 //* Treewin.cc: This file contains the type-specific (templated) portion of
 //* the extensive form rendering code.
-// $Id$
+// @(#)treewin.cc	1.35 9/19/96
 //
 #include "wx.h"
 #include "wx_form.h"
@@ -154,6 +154,27 @@ for (int d=0;d<=num_d;d++)
 }
 }
 
+
+//***********************************************************************
+//                      FILE-SAVE MENU HANDLER
+//***********************************************************************
+template <class T> Efg<T> *CompressEfg(const Efg<T> &, const EFSupport &);
+template <class T> void TreeWindow<T>::file_save(void)
+{
+gString filename=frame->GetFileName();
+gString s=wxFileSelector("Save data file",wxPathOnly(filename),wxFileNameFromPath(filename),".efg", "*.efg",wxSAVE|wxOVERWRITE_PROMPT);
+if (s!="")
+{
+	// Change description if saving under a different filename
+	if (filename!="untitled.efg" && s!=filename) tree_label();
+	gFileOutput out((const char *)s);
+	// Compress the efg to the current support
+	Efg<T> *E=CompressEfg(ef,*frame->GetSupport(0));
+	E->WriteEfgFile(out);
+	delete E;
+	frame->SetFileName(s);
+}
+}
 
 #ifdef __GNUG__
 	#define TEMPLATE template

@@ -1,12 +1,15 @@
 // File: efsuptd.h -- Declarations of dialogs for dealing with EF
 // supports.
 // $Id$
-
+#ifndef EFSUPTD_H
+#define EFSUPTD_H
+#include "elimdomd.h"
 class EFSupportInspectDialog:public wxDialogBox
 {
 private:
 	BaseExtensiveShow *bes;
-	const gList<EFSupport *> &sups;
+	gList<EFSupport *> &sups;
+	int init_disp,init_cur;
 	wxText *cur_dim,*disp_dim;
 	wxChoice *disp_item,*cur_item;
 	wxCheckBox *root_item;
@@ -21,11 +24,14 @@ private:
 	static void new_sup_func(wxButton &ob,wxEvent &)
 	{((EFSupportInspectDialog *)ob.GetClientData())->OnNewSupport();}
 	static void change_sup_func(wxButton &ob,wxEvent &)
-	{((BaseExtensiveShow *)ob.GetClientData())->SupportInspect(SUPPORT_CHANGE);}
+	{((EFSupportInspectDialog *)ob.GetClientData())->OnChangeSupport();}
 	static void help_func(wxButton &,wxEvent &)
 	{wxHelpContents(EFG_SUPPORTS_HELP);}
 	static void close_func(wxButton &ob,wxEvent &)
 	{((BaseExtensiveShow *)ob.GetClientData())->SupportInspect(SUPPORT_CLOSE);}
+	static void remove_sup_func(wxButton &ob,wxEvent &)
+	{((EFSupportInspectDialog *)ob.GetClientData())->OnRemoveSupport();}
+
 // High level event handlers
 	void OnNewSupport(void)
 	{
@@ -37,6 +43,11 @@ private:
 		cur_item->SetSize(-1,-1,-1,-1);
 	}
 	}
+	void OnRemoveSupport(void);
+	void OnChangeSupport(void)
+	{
+	bes->SupportInspect(SUPPORT_CHANGE);init_disp=DispSup();init_cur=CurSup();
+	}
 	void OnCur(int cur_sup)
 	{
 	cur_dim->SetValue(gpvect_to_string(sups[cur_sup]->Dimensionality()));
@@ -45,7 +56,6 @@ private:
 	}
 	void OnDisp(int disp_sup)
 	{disp_dim->SetValue(gpvect_to_string(sups[disp_sup]->Dimensionality()));}
-
 // Utility funcs
 	static gString gpvect_to_string(const gPVector<int> &a)
 	{
@@ -60,10 +70,11 @@ private:
 	return tmp;
 	}
 public:
-	EFSupportInspectDialog(const gList<EFSupport *> &sups_,int cur_sup,
+	EFSupportInspectDialog(gList<EFSupport *> &sups_,int cur_sup,
 											int disp_sup,BaseExtensiveShow *bes_,wxWindow *parent=0)
 		: wxDialogBox(parent,"Supports"),bes(bes_),sups(sups_)
 	{
+  init_disp=disp_sup;init_cur=cur_sup;
 	wxForm *f=new wxForm(0);
 	SetLabelPosition(wxVERTICAL);
 	cur_dim=new wxText(this,0,"Current",
@@ -86,12 +97,15 @@ public:
 	wxFormItem *root_fitem=wxMakeFormBool("Root reachable only",&root_reachable);
 	f->Add(root_fitem);
 	f->Add(wxMakeFormNewLine());
+	wxFormItem *newsup_fitem=wxMakeFormButton("New",(wxFunction)new_sup_func);
+	f->Add(newsup_fitem);
+	wxFormItem *rmvsup_fitem=wxMakeFormButton("Remove",(wxFunction)remove_sup_func);
+	f->Add(rmvsup_fitem);
+	f->Add(wxMakeFormNewLine());
 	wxFormItem *close_fitem=wxMakeFormButton("Close",(wxFunction)close_func);
 	f->Add(close_fitem);
 	wxFormItem *cngsup_fitem=wxMakeFormButton("Apply",(wxFunction)change_sup_func);
 	f->Add(cngsup_fitem);
-	wxFormItem *newsup_fitem=wxMakeFormButton("New",(wxFunction)new_sup_func);
-	f->Add(newsup_fitem);
 	wxFormItem *help_fitem=wxMakeFormButton("?",(wxFunction)help_func);
 	f->Add(help_fitem);
 	f->AssociatePanel(this);
@@ -102,7 +116,8 @@ public:
 	disp_item->SetClientData((char *)this);
 	disp_item->Callback((wxFunction)disp_func);
 	((wxButton *)newsup_fitem->GetPanelItem())->SetClientData((char *)this);
-	((wxButton *)cngsup_fitem->GetPanelItem())->SetClientData((char *)bes);
+	((wxButton *)rmvsup_fitem->GetPanelItem())->SetClientData((char *)this);
+	((wxButton *)cngsup_fitem->GetPanelItem())->SetClientData((char *)this);
 	((wxButton *)help_fitem->GetPanelItem())->SetClientData((char *)this);
 	((wxButton *)close_fitem->GetPanelItem())->SetClientData((char *)bes);
 	root_item=(wxCheckBox *)root_fitem->GetPanelItem();
@@ -116,3 +131,30 @@ public:
 };
 
 
+// Note can not delete the first support
+void EFSupportInspectDialog::OnRemoveSupport(void)
+{
+SupportRemoveDialog SRD(this,sups.Length());
+if (SRD.Completed()==wxOK)
+{
+gArray<bool> selected(SRD.Selected());
+bool revert=false;
+for (int i=sups.Length();i>=2;i--)
+	if (selected[i])
+	{
+		delete sups.Remove(i);
+		if (i==init_cur || i==init_disp && revert==false)
+		{
+			wxMessageBox("Display/Current support deleted.\nReverting to full support");
+			revert=true;
+		}
+	}
+disp_item->Clear();cur_item->Clear();
+for (i=1;i<=sups.Length();i++)
+	{disp_item->Append(ToString(i));cur_item->Append(ToString(i));}
+disp_item->SetSize(-1,-1,-1,-1);cur_item->SetSize(-1,-1,-1,-1);
+disp_item->SetSelection(0);cur_item->SetSelection(0);
+if (revert) bes->SupportInspect(SUPPORT_CHANGE);
+}
+}
+#endif

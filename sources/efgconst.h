@@ -2,7 +2,7 @@
 // FILE: efgconst.h -- constants used in extform gui for each menu item, and
 // some extra features.
 //
-// @(#)efgconst.h	1.16 8/16/96
+// $Id$
 //
 
 #ifndef EFGCONST_H
@@ -47,6 +47,7 @@
 #define	TREE_MOVE								1307
 #define TREE_OUTCOMES   				1308
 #define	TREE_SUBGAMES						1309
+#define	TREE_INFOSETS						1310
 
 #define SUBGAME_SOLVE						1350
 #define SUBGAME_CLEARALL					1352

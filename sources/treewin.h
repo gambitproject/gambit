@@ -128,12 +128,15 @@ private:
 	class NodeDragger;						// Class to take care of tree copy/move by
 	NodeDragger *node_drag;				// drag and dropping nodes.
 	class IsetDragger;						// Class to take care of iset join by
-  IsetDragger *iset_drag;				// drag and dropping.
+	IsetDragger *iset_drag;				// drag and dropping.
+	class BranchDragger;					// Class to take care of branch addition by
+	BranchDragger *branch_drag;		/// drag and dropping
 	// Private Functions
 	int 	FillTable(const Node *n,int level);
 	void 	ProcessCursor(void);
 	void 	ProcessClick(wxMouseEvent &ev);
 	void 	ProcessDClick(wxMouseEvent &ev);
+	bool	ProcessShift(wxMouseEvent &ev);
 	NodeEntry *GetNodeEntry(const Node *n);
 	NodeEntry *NextInfoset(const NodeEntry * const e);
 	NodeEntry *GetValidParent(const Node *n);
@@ -184,6 +187,7 @@ public:
 	void tree_move(void);
 	void tree_label(void);
 	void tree_players(void);
+	void tree_infosets(void);
 	virtual void tree_outcomes(const gString out_name=gString()) =0;
 
 	void infoset_merge(void);
@@ -221,7 +225,7 @@ public:
 	void	print_mf(wxOutputOption fit,bool save_mf=false);				// copy to clipboard (WIN3.1 only)
 	Bool	logging(void);
 
-	void	file_save(void);
+	virtual void	file_save(void) =0 ;
 
 	gString Title(void) const;
 
@@ -235,8 +239,8 @@ public:
 	const Node *Cursor(void) const {return cursor;}
 	// Hilight the subgame root for the currently active subgame
 	void	SetSubgamePickNode(const Node *n);
-	// Check if a node is about to be dragged
-	Node *GotObject(float &mx,float &my,int what); // 0-nonterminal,1-terminal
+	// Check if a drag'n'drop object has been activated
+	Node *GotObject(float &mx,float &my,int what); 
 	// Used by a child outcomes inspect when it is close
 	void OutcomeDialogDied(void);
 };
@@ -263,6 +267,7 @@ public:
 	void tree_outcomes(const gString out_name=gString());
 	void action_probs(void);
 	void node_outcome(const gString out_name);
+	void	file_save(void);
 };
 
 #endif   // TREEWINDOW_H

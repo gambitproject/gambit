@@ -1,7 +1,7 @@
 //
 // FILE: gambit.cc -- Main program for Gambit GUI
 //
-// $Id$
+// @(#)gambit.cc	1.41 9/2/96
 //
 #include <assert.h>
 #include <string.h>
@@ -26,9 +26,8 @@ extern wxApp *wxTheApp=1;
 #endif
 GambitApp gambitApp;
 
-typedef void (*fptr)(int);
-
-void SigFPEHandler(int )
+typedef void ( *fptr)(int);
+void SigFPEHandler(int type)
 {
 signal(SIGFPE, (fptr)SigFPEHandler);  //  reinstall signal handler
 wxMessageBox("A floating point error has occured!\nThe results returned may be invalid");
@@ -209,8 +208,10 @@ new GambitToolBar(gambit_frame);
 wxInitHelp("gambit","Gambit -- Graphics User Interface, Version 0.94\n\nDeveloped by Richard D. McKelvey (rdm@hss.caltech.edu)\nMain Programmer:  Theodore Turocy (magyar@hss.caltech.edu)\nFront End: Eugene Grayver (egrayver@hss.caltech.edu)\nCalifornia Institute of Technology, 1996.\nFunding provided by the National Science Foundation");
 
 gambit_frame->Show(TRUE);
-// Set up the error handling functions:
+// Set up the error handling functions.
+#ifndef __BORLANDC__ // For some reason this does not work w/ BC++ (crash on exit)
 signal(SIGFPE, (fptr)SigFPEHandler);
+#endif
 
 // Process command line arguments, if any
 if (argc>1) gambit_frame->LoadFile(argv[1]);
@@ -243,7 +244,7 @@ Enable(TRUE);
 if (!s) return;
 s=copystring(s);
 if (strcmp(s,"")!=0)
-{     
+{
 	char *filename=copystring(FileNameFromPath(s));
 	filename=wxStrLwr(filename); // ignore case
 #ifndef EFG_ONLY
@@ -254,7 +255,6 @@ if (strcmp(s,"")!=0)
 	if (strstr(filename,".efg"))		// This must be an extensive form
 		{ExtensiveFormGUI(0,s,0,this);return;}
 #endif
-printf("Neither an efg or a nfg\n");
 	wxMessageBox("Unknown file type");	// If we got here, there is something wrong
 }
 delete [] s;

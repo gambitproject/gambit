@@ -149,108 +149,54 @@ public:
 	int  Completed(void) const {return completed;}
 };
 
-#ifdef ELIMDOM_NFG // the rest of the dominance dialogs are only used in the NFG
-class BaseNormShow;
-class SupportInspectDialog:public wxDialogBox
+class SupportRemoveDialog: public wxDialogBox
 {
 private:
-	BaseNormShow *bns;
-	const gList<NFSupport *> &sups;
-	wxText *cur_dim,*disp_dim;
-	wxChoice *disp_item,*cur_item;
-	char *cur_str,*disp_str;
-	wxStringList *support_list;
-// Low level event handlers
-	static void cur_func(wxChoice &ob,wxEvent &)
-	{((SupportInspectDialog *)ob.GetClientData())->OnCur(ob.GetSelection()+1);}
-	static void disp_func(wxChoice &ob,wxEvent &)
-	{((SupportInspectDialog *)ob.GetClientData())->OnDisp(ob.GetSelection()+1);}
-	static void new_sup_func(wxButton &ob,wxEvent &)
-	{((SupportInspectDialog *)ob.GetClientData())->OnNewSupport();}
-	static void change_sup_func(wxButton &ob,wxEvent &)
-	{((BaseNormShow *)ob.GetClientData())->SupportInspect(SUPPORT_CHANGE);}
-	static void help_func(wxButton &,wxEvent &)
-	{wxHelpContents(NFG_SUPPORTS_HELP);}
-	static void close_func(wxButton &ob,wxEvent &)
-	{((BaseNormShow *)ob.GetClientData())->SupportInspect(SUPPORT_CLOSE);}
-// High level event handlers
-	void OnNewSupport(void)
+	int num_sups;
+	wxListBox *sups_item;
+	int completed;
+	static void all_func(wxCheckBox &ob,wxEvent &ev)
 	{
-	if (bns->MakeSupport())
+	SupportRemoveDialog *parent=(SupportRemoveDialog *)ob.GetClientData();
+	for (int i=1;i<=parent->num_sups;i++)
+		parent->sups_item->SetSelection(i-1,ob.GetValue());
+	}
+	static void ok_func(wxButton &ob,wxEvent &ev)
 	{
-		disp_item->Append(ToString(sups.Length()));
-		disp_item->SetSize(-1,-1,-1,-1);
-		cur_item->Append(ToString(sups.Length()));
-		cur_item->SetSize(-1,-1,-1,-1);
+	SupportRemoveDialog *parent=(SupportRemoveDialog *)ob.GetClientData();
+	parent->Show(FALSE);parent->completed=wxOK;
 	}
-	}
-	void OnCur(int cur_sup)
-  {
-	cur_dim->SetValue(array_to_string(sups[cur_sup]->SupportDimensions()));
-	disp_dim->SetValue(array_to_string(sups[cur_sup]->SupportDimensions()));
-	disp_item->SetSelection(cur_sup-1);
-	}
-
-	void OnDisp(int disp_sup)
-	{disp_dim->SetValue(array_to_string(sups[disp_sup]->SupportDimensions()));}
-
-// Utility funcs
-	static gString array_to_string(const gArray<int> &a)
+	static void cancel_func(wxButton &ob,wxEvent &ev)
 	{
-	gString tmp='(';
-	for (int i=1;i<=a.Length();i++) tmp+=ToString(a[i])+((i==a.Length()) ? ")" : ",");
-	return tmp;
+	SupportRemoveDialog *parent=(SupportRemoveDialog *)ob.GetClientData();
+	parent->Show(FALSE);parent->completed=wxCANCEL;
 	}
 public:
-	SupportInspectDialog(const gList<NFSupport *> &sups_,int cur_sup,int disp_sup,BaseNormShow *bns_,wxWindow *parent=0)
-		: wxDialogBox(parent,"Supports"),bns(bns_),sups(sups_)
+	SupportRemoveDialog(wxWindow *parent,int num_sups_):
+		wxDialogBox(parent,"Remove Support(s)",TRUE),num_sups(num_sups_)
 	{
-	wxForm *f=new wxForm(0);
-	SetLabelPosition(wxVERTICAL);
-	cur_dim=new wxText(this,0,"Current",
-											array_to_string(sups[cur_sup]->SupportDimensions()),
-											-1,-1,80,-1,wxREADONLY);
-	disp_dim=new wxText(this,0,"Display",
-											array_to_string(sups[disp_sup]->SupportDimensions()),
-											-1,-1,80,-1,wxREADONLY);
-	support_list=wxStringListInts(sups.Length());
-	cur_str=new char[10];strcpy(cur_str,ToString(cur_sup));
-	disp_str=new char[10];strcpy(disp_str,ToString(disp_sup));
-	wxFormItem *cur_fitem=wxMakeFormString("",&cur_str,wxFORM_CHOICE,
-					new wxList(wxMakeConstraintStrings(support_list),0));
-	f->Add(cur_fitem);
-	f->Add(wxMakeFormMessage("      ")); // fix the spacing... not neat but..
-	wxFormItem *disp_fitem=wxMakeFormString("",&disp_str,wxFORM_CHOICE,
-					new wxList(wxMakeConstraintStrings(support_list),0));
-	f->Add(disp_fitem);
-	f->Add(wxMakeFormNewLine());
-	wxFormItem *close_fitem=wxMakeFormButton("Close",(wxFunction)close_func);
-	f->Add(close_fitem);
-	wxFormItem *cngsup_fitem=wxMakeFormButton("Apply",(wxFunction)change_sup_func);
-	f->Add(cngsup_fitem);
-	wxFormItem *newsup_fitem=wxMakeFormButton("New",(wxFunction)new_sup_func);
-	f->Add(newsup_fitem);
-	wxFormItem *help_fitem=wxMakeFormButton("?",(wxFunction)help_func);
-	f->Add(help_fitem);
-	f->AssociatePanel(this);
-	cur_item=(wxChoice *)cur_fitem->GetPanelItem();
-	cur_item->Callback((wxFunction)cur_func);
-	cur_item->SetClientData((char *)this);
-	disp_item=(wxChoice *)disp_fitem->GetPanelItem();
-	disp_item->SetClientData((char *)this);
-	disp_item->Callback((wxFunction)disp_func);
-	((wxButton *)newsup_fitem->GetPanelItem())->SetClientData((char *)this);
-	((wxButton *)cngsup_fitem->GetPanelItem())->SetClientData((char *)bns);
-	((wxButton *)help_fitem->GetPanelItem())->SetClientData((char *)this);
-	((wxButton *)close_fitem->GetPanelItem())->SetClientData((char *)bns);
+	wxStringList *support_list=wxStringListInts(num_sups);
+	sups_item=new wxListBox(this,0,"Supports",wxMULTIPLE,-1,-1,-1,-1,num_sups,support_list->ListToArray(),wxLB_MULTIPLE	);
+	wxCheckBox *all_item=new wxCheckBox(this,(wxFunction)all_func,"All");
+	all_item->SetClientData((char *)this);
+	NewLine();
+	wxButton *ok_button=new wxButton(this,(wxFunction)ok_func,"Ok");
+	wxButton *cancel_button=new wxButton(this,(wxFunction)cancel_func,"Cancel");
+	ok_button->SetClientData((char *)this);
+	cancel_button->SetClientData((char *)this);
 	Fit();
 	Show(TRUE);
 	}
-	// Data Access members
-	int 	CurSup(void) {return cur_item->GetSelection()+1;}
-	int 	DispSup(void) {return disp_item->GetSelection()+1;}
+	gArray<bool> Selected(void)
+	{
+	gArray<bool> selected(num_sups);
+	for (int i=1;i<=num_sups;i++)
+		selected[i]=(sups_item->Selected(i-1)) ? true : false;
+	return selected;
+	}
+	int Completed(void)
+  {return completed;}
 };
 
-#endif // ELIMDOM_NFG
 #endif
 
