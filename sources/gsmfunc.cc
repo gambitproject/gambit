@@ -1203,15 +1203,21 @@ gclMatchLevel TypeMatch(Portion* p, PortionSpec ExpectedSpec,
   gclMatchLevel matchtype = matchEXACT;
 
   if (CalledSpec.Type == porNUMBER && ExpectedSpec.Type == porINTEGER) {
-    if (nullPortion)
-      matchtype = matchNONE;
+    if (nullPortion) {
+      if (!return_type_check) {
+	matchtype = matchNONE;
+      }
+    }
     else if ((CalledSpec.ListDepth > 0 && ((ListPortion *) p)->IsInteger()) ||
 	     (CalledSpec.ListDepth == 0 && ((NumberPortion *) p)->Value().IsInteger()))
       CalledSpec.Type = porINTEGER;
   }
   else if (CalledSpec.Type == porNUMBER && ExpectedSpec.Type == porNUMBER) {
-    if (nullPortion)
-      matchtype = matchNONE;
+    if (nullPortion) {
+      if (!return_type_check) {
+	matchtype = matchNONE;
+      }
+    }
     else if ((CalledSpec.ListDepth > 0 && ((ListPortion *) p)->IsInteger()) ||
 	     (CalledSpec.ListDepth == 0 && ((NumberPortion *) p)->Value().IsInteger()))
       matchtype = matchSUPERTYPE;
