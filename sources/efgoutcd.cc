@@ -1,5 +1,8 @@
-// File: efgoutcd.cc -- code for the EFG outcome editing dialog
+//
+// FILE: efgoutcd.cc -- code for the EFG outcome editing dialog
+//
 // $Id$
+//
 
 #include "wx.h"
 #include "wxmisc.h"
@@ -9,49 +12,46 @@
 #include "efgoutcd.h"
 #include "efgshow.h"
 
-/****************************************************************************
- *                     EFG OUTCOME DIALOG
- ****************************************************************************/
-class EfgOutcomeDialogC: public SpreadSheet3D
-{
+class EfgOutcomeDialogC: public SpreadSheet3D {
 private:
-    static void outcome_attach_func(wxButton &ob, wxEvent &);
-    static void outcome_detach_func(wxButton &ob, wxEvent &);
-    static void outcome_delete_func(wxButton &ob, wxEvent &);
-    static void settings_func(wxButton &ob, wxEvent &);
+  static void outcome_attach_func(wxButton &ob, wxEvent &);
+  static void outcome_detach_func(wxButton &ob, wxEvent &);
+  static void outcome_delete_func(wxButton &ob, wxEvent &);
+  static void settings_func(wxButton &ob, wxEvent &);
 
 protected:
-    EfgOutcomeDialog *parent;
-    Efg &ef;
-    TreeWindow *tw;
-    int prev_outc_num;
-    class OutcomeDragger;
-    OutcomeDragger *outcome_drag;
-    void OnAttach(void);
-    void OnDetach(void);
-    virtual void OnDelete(void);
-    void OnSettings(void);
-    void CheckOutcome(int outc_num);
-    virtual void PayoffPos(int outc_num, int player, int *row, int *col) = 0;
-    virtual void NamePos(int outc_num, int *row, int *col) = 0;
-    virtual Bool OnEventNew(wxMouseEvent &ev);
+  EfgOutcomeDialog *parent;
+  Efg &ef;
+  TreeWindow *tw;
+  int prev_outc_num;
+  class OutcomeDragger;
+  OutcomeDragger *outcome_drag;
+
+  void OnAttach(void);
+  void OnDetach(void);
+  virtual void OnDelete(void);
+  void OnSettings(void);
+  void CheckOutcome(int outc_num);
+  virtual void PayoffPos(int outc_num, int player, int *row, int *col) = 0;
+  virtual void NamePos(int outc_num, int *row, int *col) = 0;
+  virtual Bool OnEventNew(wxMouseEvent &ev);
 
 public:
-    EfgOutcomeDialogC(int rows, int cols, Efg &ef,
-                      TreeWindow *tw, EfgOutcomeDialog *parent);
-    void SetCurOutcome(const gText &out_name);
-    void OnHelp(int );
+  EfgOutcomeDialogC(int rows, int cols, Efg &ef,
+		    TreeWindow *tw, EfgOutcomeDialog *parent);
+  void SetCurOutcome(const gText &out_name);
+  void OnHelp(int );
 
-    // This implements the behavior that a new row is created automatically
-    // below the greatest ENTERED row.  Also, if we move to a new row, the
-    // previous row is automatically saved in the ef.
-    virtual void OnSelectedMoved(int , int , SpreadMoveDir ) { };
-    virtual void OnDoubleClick(int , int , int , const gText &);
-    virtual void UpdateValues(void);
-    virtual void OnOk(void);
-    virtual int  OutcomeNum(int row = 0, int col = 0) = 0;
-    virtual int  PlayerNum(int row = 0, int col = 0) = 0;
-    virtual Bool OnClose(void);
+  // This implements the behavior that a new row is created automatically
+  // below the greatest ENTERED row.  Also, if we move to a new row, the
+  // previous row is automatically saved in the ef.
+  virtual void OnSelectedMoved(int , int , SpreadMoveDir ) { };
+  virtual void OnDoubleClick(int , int , int , const gText &) { }
+  virtual void UpdateValues(void);
+  virtual void OnOk(void);
+  virtual int  OutcomeNum(int row = 0, int col = 0) = 0;
+  virtual int  PlayerNum(int row = 0, int col = 0) = 0;
+  virtual Bool OnClose(void);
 };
 
 wxCursor *outcome_cursor;
@@ -395,42 +395,6 @@ void EfgOutcomeDialogC::CheckOutcome(int outc_num)
 
     if (outcomes_changed) 
         tw->node_outcome(-1);
-}
-
-
-void EfgOutcomeDialogC::OnDoubleClick(int row, int col, 
-                                      int /*level*/, const gText &)
-{
-    static bool busy = false;
-
-    if (busy) 
-        return;
-
-    int outc_num = OutcomeNum(row, col);
-    EFOutcome *tmp = ef.Outcomes()[outc_num];
-    int pl = PlayerNum(row, col);
-    busy = true;
-
-    if (pl == 0) 
-        return; // double click only edits player payoffs.
-
-    gText s0 = ToText(ef.Payoff(tmp, pl));
-    int x = GetSheet()->MaxX(col-1)+TEXT_OFF;
-    int y = GetSheet()->MaxY(row-1)+TEXT_OFF;
-    GetSheet()->ClientToScreen(&x, &y);
-    gText s1 = gGetTextLine(s0, this, x, y);
-
-    if (s1 != "" && s0 != s1)
-    {
-        gNumber payoff;
-        FromText(s1, payoff);
-        ef.SetPayoff(tmp, pl, payoff);
-        UpdateValues();
-        tw->node_outcome(-1);
-        Repaint();
-    }
-
-    busy = false;
 }
 
 /****************************************************************************
