@@ -1,29 +1,24 @@
 //
 // FILE: vertenum.imp -- Implementation of Vertex Enumerator
 //
-// $Id$ 
+// @(#)vertenum.imp	2.5 5/25/97 
 //
 
 #include "vertenum.h"
 
+/////////////////////////////////////////////////////////////////////////////
+// This is the original VertEnum class //
+/////////////////////////////////////////////////////////////////////////////
+
 template <class T>
-VertEnum<T>::VertEnum(const gMatrix<T> &A, const gVector<T> &b, 
+VertEnum<T>::VertEnum(const gMatrix<T> &_A, const gVector<T> &_b, 
 		      gStatus &status_)
-  : mult_opt(0), depth(0), A(A), b(b), btemp(b), c(A.MinCol(),A.MaxCol()), 
-    npivots(0), nodes(0), status(status_) 
+  : mult_opt(0), depth(0), A(_A), b(_b), 
+    btemp(_b), c(_A.MinCol(),_A.MaxCol()), npivots(0), nodes(0), 
+    status(status_) 
 {
   Enum();
 }
-
-template <class T>
-VertEnum<T>::VertEnum(const gMatrix<T> &A, const gVector<T> &b, 
-		      const gVector<T> &, gStatus &status_)
-  : mult_opt(0), depth(0), A(A), b(b), btemp(b), c(A.MinCol(),A.MaxCol()), 
-    npivots(0), nodes(0), status(status_) 
-{
-  Enum();
-}
-
 
 template <class T> VertEnum<T>::~VertEnum()
 { }
@@ -147,7 +142,7 @@ template <class T> void VertEnum<T>::Vertices(gList<gVector<T> > &verts) const
   for(int i=1;i<=List.Length();i++) {
     gVector<T> vert(A.NumColumns());
     vert = (T)0;
-    for(int j=1;j<=b.Length();j++) 
+    for(int j=1;j<=vert.Length();j++) 
       if(List[i].IsDefined(j)) vert[j]=-List[i](j);
     verts.Append(vert);
   }
@@ -167,5 +162,301 @@ template <class T> void VertEnum<T>::Dump(gOutput &to) const
   }
 }
 
+
+///////////////////////////////////////////////////////////////////////////
+// Here is the stuff for the NewVertEnum class //
+///////////////////////////////////////////////////////////////////////////
+
+
+// This will be the constructor for my project blah blah blah
+template <class T>
+NewVertEnum<T>::NewVertEnum(const gMatrix<T> &_A, const gVector<T> &_b, 
+		      const gVector<T> &start, gStatus &status_)
+               : mult_opt(0), depth(0), A((gMatrix<T> *)&_A),
+                 b((gVector<T> *)&_b), C(_A), d(_b), btemp(_b), 
+                 c(_A.MinCol(),_A.MaxCol()), npivots(0), 
+                 nodes(0), status(status_)
+{
+  // Here I need to convert C -> A, where A is such that Enum will work
+
+  // First I need to find the change in location between the given vertex and 
+  // the origin, W=Z-Z0 (Z0 is the same as start)
+  
+    // Set number of dimensions and inequalities
+  n = C.NumColumns();
+  k = C.NumRows();
+
+    // Print out some handy info
+  /*gout << "\n";*/
+  /*gout << "d is: "     << d      << "\n\n";*/
+  /*gout << "start: "    << start  << "\n\n";*/
+  /*gout << "C is: \n"   << C      << "\n"  ;*/
+  /*gout << "n is "      << n      << ", k is " << k << "\n\n";*/
+
+    // Create A and b to be of the proper dimensions
+  A = new gMatrix<T>(k-n,n);
+  b = new gVector<T>(k-n);
+
+    // D holds those elements of d which correspond to C2
+  gVector<T> D(k-n); 
+
+    // Make sure all of the arguments have the proper dimensions
+  if ( C.NumColumns() != start.Length() || C.NumRows() != d.Length() )
+  {
+    gout << "The dimensions of the values given are incorrect.\n\n";
+    return;
+  }
+
+    // Check that all d are less than or equal to zero
+  int i; // Counter int
+  for (i=d.First(); i<=d.Last(); i++)
+  {
+    if (d[i] > (T)0)
+    {
+      gout << "The value for the second argument should always be <= to 0.\n\n";
+      return;
+    }
+  }
+  
+    // C1 stores ineq's which go through start, C2 holds the rest of them.
+  gSquareMatrix<T> C1(n);
+  gMatrix<T> C2(k-n,n);
+
+    // Used to store row when copying.
+  gArray<T> temp(n); 
+
+    // Keep track of how full C1 and C2 are
+  int C1Count=C1.MinRow(); 
+  int C2Count=C2.MinRow();
+
+    // W holds translation which brings start to the origin
+  gVector<T> W = start;
+
+    // RS keeps track of where the rows of C go.
+  gVector<int> RS(k);
+
+    // W gets negative start   (gVect's unary minus doesn't like me)
+  for (i=start.First(); i<=start.Last(); i++)
+  {
+    W[i] = - start[i];
+  }
+  
+    // Print out W
+  /*gout << "W: " << W << "\n\n";*/
+
+    // Keeps total for each row
+  T total = 0;  
+    // Two counters because of possibly wierd indexing
+  int k;  // Counting int.
+  int j;  // Counting int.
+
+    // Find n rows such that C*Z0 + d = 0, and set c1 = to them
+  for (i=C.MinRow(), k=d.First(); i<=C.MaxRow(), k<=d.Last(); i++, k++)
+  {
+    total = (T) 0;
+
+      // if (C.Row(i)*Z0 + d[k] == 0) (if line goes through start)
+    for (j=C.MinCol(); j<=C.MaxCol(); j++)  // For each element in a row
+    {
+      total +=  C(i,j) *  start[j];         // Add value of j'th element of 
+                                            // the current row to the total;
+    }
+    total +=  d[k];
+    if (total == 0)
+    {
+      if (C1Count <= C1.MaxRow()) // If there is room left in C1
+      {
+          // Here I set a row of C1 = to the current row of C
+        C.GetRow(i, temp);
+        C1.SetRow(C1Count, temp);
+
+          // Adds what happened to RS
+        RS[i] = 1;
+
+          // Lets me know which rows go through start
+        /*gout << "Row " << i << " hits the starting point.\n";*/
+
+          // Spits out current state of C1
+        /*gout << "\n C1 is now: \n";*/
+        /*C1.Dump( gout );*/
+
+        C1Count++;
+      } else  // If we are out of room in C1
+      {
+        gout << "WARNING: more than " << n << "inequalities hit the starting ";
+        gout << "point.\n" << "Results are not reliable\n\n";
+
+        // Here I need to add it to C2
+        C.GetRow(i, temp);
+        C2.SetRow(C2Count, temp);
+
+          // Adds what happened to RS
+        RS[i] = 2;
+
+        C2Count++;
+      }
+    } else  // If it doesn't go through start
+    {
+      if (C2Count <= C2.MaxRow())  // If we have room left in C2
+      {
+        // Here I need to add it to C2
+        C.GetRow(i, temp);
+        C2.SetRow(C2Count, temp);
+
+          // Adds what happened to RS
+        RS[i] = 2;
+
+          // Spits current state of C2
+        /*gout << " C2 is now: \n";*/
+        /*C2.Dump( gout );*/
+
+        C2Count++;
+      } else  // We are out of room in C2
+      {
+        gout << "Hey, there are not enough inequalities which hit start.\n";
+        return;
+      }
+    }
+    
+  }
+
+    // Make sure determinant is not 0 before inverting
+  if (C1.Determinant() == 0)
+  {
+    gout << "We're sorry, C1 cannot be inverted.\n\n";
+    return;
+  }
+ 
+    // Invert C1
+  gSquareMatrix<T> CInv = ( C1.Inverse());
+
+    // Set CINV to be -CINV (unary minus operator for matrix class doesn't work)
+/*  for ( i=CInv.MinRow();i<=CInv.MaxRow();i++)
+  {
+    for ( j=CInv.MinCol();j<=CInv.MaxCol();j++)
+    {
+      CInv(i,j) = -CInv(i,j);
+    }
+  }
+  */
+  CInv = -CInv;
+
+    // Set D to be elements of d which correspond to C2
+  for (i=d.First(),j=D.First(); i<=d.Last(); i++)
+  {
+    if (RS[i] == 2)
+    {
+      D[j] = d[i];
+      j++;
+    }
+  }
+
+    // Set A
+  /**A = (C * (CInv) );*/
+  *A = (C2 * (CInv) );
+
+    // Set b (or D)
+  /**b = C * start + d;*/
+  *b = (C2 * start) + D;
+
+    // Spit out some useful information
+  /*gout << "\n";*/
+  /*gout << " C1 is: \n"     << C1           << "\n\n";*/
+  /*gout << " C2 is: \n"     << C2           << "\n\n";*/
+  /*gout << " C1^-1 is: \n"  << C1.Invert()  << "\n\n";*/
+  /*gout << " D is: \n"      << D            << "\n\n";*/
+  /*gout << " RS is: \n"     << RS           << "\n\n";*/
+  /*gout << " A is: \n"      << *A           << "\n\n";*/
+  /*gout << " b is: \n"      << *b            << "\n\n";*/
+
+    // Here I create a new VertEnum with the normalized info.  It calculates
+    // the vertices in the normalized frame, which I retrieve with the
+    // VertexList() command
+  VertEnum<T>* vertenum = NULL;
+  vertenum = new VertEnum<T>( *A, *b );
+
+  List = vertenum->VertexList();
+
+    // Here I will convert the results back into the original form.
+
+    // These will hold the normalized and un-normalized vertices
+  gMatrix<T> VERTS(List.Length(),n);
+  gMatrix<T> VERTSMOD(List.Length(),n);
+
+    // Sets VERTS to be the normalized vertices
+  for(i=VERTS.MinRow();i<=VERTS.MaxRow();i++) {
+    gVector<T> vert(A->NumColumns());
+    vert = (T)0;
+    for(j=1;j<=vert.Length();j++) 
+      if(List[i].IsDefined(j)) vert[j]=-List[i](j);
+    VERTS.SetRow(i, vert);
+  }
+
+    // Spit out VERTS for debugging purposes
+  /*gout << "\n VERTS is:\n";*/
+  /*gout << VERTS;*/
+  /*gout << "\n So there.\n";*/
+
+    // Sets VERTSMOD to the un-normalized vertices
+  for(i=VERTS.MinRow();i<=VERTS.MaxRow();i++) 
+  {
+    gVector<T> vert(A->NumColumns());
+    vert = (T)0;
+    VERTS.GetRow(i,vert);
+    VERTSMOD.SetRow(i,( (CInv * vert) + start) );
+  }
+
+    // Spit out VERTSMOD for debugging purposes
+  /*gout << "\n VERTSMOD is:\n";*/
+  /*gout << VERTSMOD;*/
+  /*gout << "\n So there.\n";*/
+
+
+    // Sets List to the vertices in the original basis
+  for(i=VERTSMOD.MinRow();i<=VERTSMOD.MaxRow();i++) {
+    gVector<T> vert(A->NumColumns());
+    vert = (T)0;
+    VERTSMOD.GetRow(i,vert);
+    for(j=1;j<=vert.Length();j++) 
+    {
+        List[i](j) = -vert[j];
+    }
+  }
+
+} // All done!
+
+template <class T> NewVertEnum<T>::~NewVertEnum()
+{ }
+
+  
+template <class T> const gList<BFS<T> > &NewVertEnum<T>::VertexList() const
+{ 
+  return List;
+}
+
+template <class T> void NewVertEnum<T>::Vertices(gList<gVector<T> > &verts) const
+{ 
+  for(int i=1;i<=List.Length();i++) {
+    gVector<T> vert(A->NumColumns());
+    vert = (T)0;
+    for(int j=1;j<=vert.Length();j++) 
+      if(List[i].IsDefined(j)) vert[j]=-List[i](j);
+    verts.Append(vert);
+  }
+}
+
+template <class T> long NewVertEnum<T>::NumPivots() const
+{
+  return npivots;
+}
+
+template <class T> void NewVertEnum<T>::Dump(gOutput &to) const
+{
+  // gout << "\nin VertEnum::Dump()";
+  for(int i=1;i<=List.Length();i++) {
+    to << "\n";
+    List[i].Dump(to);
+  }
+}
 
 
