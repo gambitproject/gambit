@@ -59,13 +59,14 @@ public:
 
 
 template <class T> class MixedProfile;
+template <class T> class NfgFile;
 
 #include "gpvector.h"
 
 template <class T> class Nfg : public BaseNfg {
 
 friend class MixedProfile<T>;
-
+friend class NfgFile<T>;
 private:
   gArray<T *> payoffs;
 

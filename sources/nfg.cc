@@ -8,7 +8,7 @@
 #include <limits.h>
 #include "nfg.h"
 #include "nfg.imp"
-#include "niter.h"
+#include "nfgiter.h"
 #include "rational.h"
 #include "gnarray.h"
 #include "gpset.h"
@@ -191,3 +191,18 @@ DataType BaseMixedProfile::Type(void) const
   return N->Type();
 }
 
+
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
+
+#include "garray.imp"
+#include "gblock.imp"
+
+TEMPLATE class gArray<Support *>;
+TEMPLATE class gArray<Strategy *>;
+TEMPLATE class gArray<NFPlayer *>;
+TEMPLATE class gBlock<Strategy *>;
