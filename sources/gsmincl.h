@@ -16,11 +16,20 @@
 typedef enum 
 { 
   opERROR, 
-  opADD, opSUB, opMUL, opDIV, opNEG,
-  opINTDIV, opMOD,
+
+  opNEG,
+  opADD, opSUB, opMUL, opDIV, 
+  opINTDIV, opMOD, 
+  opEXP, opLOG,
+  opPOW_INT, opPOW_FLOAT,
+
   opEQU, opNEQ, opGTN, opLTN, opGEQ, opLEQ,
+
   opAND, opOR, opNOT,
-  opSUBSCRIPT
+
+  opSUBSCRIPT,
+
+  opINTEGER, opFLOAT, opRATIONAL
 } OperationMode;
 
 

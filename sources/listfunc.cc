@@ -48,7 +48,10 @@ Portion *GSM_NthChar(Portion **param)
   if (n < 0 || n >= text.length())   return 0;
   return new TextValPortion(text[n-1]);
 }
-						   
+
+
+//--------------------------- Text ---------------------------
+
 Portion *GSM_TextInt(Portion **param)
 {
   return new TextValPortion(ToString(((IntPortion *) param[0])->Value()));
@@ -69,6 +72,27 @@ Portion *GSM_TextText(Portion **param)
   return param[0]->ValCopy();
 }
 
+
+//------------------------ Integer --------------------------
+
+Portion *GSM_IntegerRational(Portion **param)
+{
+  return new IntValPortion((long) ((RationalPortion *) param[0])->Value());
+}
+
+Portion *GSM_IntegerInteger(Portion **param)
+{
+  return param[0]->ValCopy();
+}
+
+Portion *GSM_IntegerFloat(Portion **param)
+{
+  return new IntValPortion((long) ((FloatPortion *) param[0])->Value());
+}
+
+
+//------------------------ Float --------------------------
+
 Portion *GSM_FloatRational(Portion **param)
 {
   return new FloatValPortion((double) ((RationalPortion *) param[0])->Value());
@@ -84,6 +108,8 @@ Portion *GSM_FloatFloat(Portion **param)
   return param[0]->ValCopy();
 }
 
+//------------------------- Rational ------------------------
+
 Portion *GSM_RationalFloat(Portion **param)
 {
   return new RationalValPortion(((FloatPortion *) param[0])->Value());
@@ -98,6 +124,10 @@ Portion *GSM_RationalRational(Portion **param)
 {
   return param[0]->ValCopy();
 }
+
+
+
+//----------------------------- Stop Watch ----------------------
 
 #include "gwatch.h"
 
@@ -179,40 +209,39 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_NthChar, 1, "n", porINTEGER);
   gsm->AddFunction(FuncObj);
 
+
+  //--------------------------- Text -----------------------
+
   FuncObj = new FuncDescObj("Text");
   FuncObj->SetFuncInfo(GSM_TextInt, 1, x_Int);
-  // FuncObj->SetParamInfo(GSM_TextInt, 0, "x", porINTEGER);
-
   FuncObj->SetFuncInfo(GSM_TextFloat, 1, x_Float);
-  // FuncObj->SetParamInfo(GSM_TextFloat, 0, "x", porFLOAT);
-
   FuncObj->SetFuncInfo(GSM_TextRat, 1, x_Rational);
-  // FuncObj->SetParamInfo(GSM_TextRat, 0, "x", porRATIONAL);
-
   FuncObj->SetFuncInfo(GSM_TextText, 1);
   FuncObj->SetParamInfo(GSM_TextText, 0, "x", porTEXT);
   gsm->AddFunction(FuncObj);
   
+  //-------------------------- Integer ------------------------
+
+  FuncObj = new FuncDescObj("Integer");
+  FuncObj->SetFuncInfo(GSM_IntegerRational, 1, x_Rational);
+  FuncObj->SetFuncInfo(GSM_IntegerInteger, 1, x_Int);
+  FuncObj->SetFuncInfo(GSM_IntegerFloat, 1, x_Float);
+  gsm->AddFunction(FuncObj);
+
+  //-------------------------- Float ------------------------
+
   FuncObj = new FuncDescObj("Float");
   FuncObj->SetFuncInfo(GSM_FloatRational, 1, x_Rational);
-  // FuncObj->SetParamInfo(GSM_FloatRational, 0, "x", porRATIONAL);
-
   FuncObj->SetFuncInfo(GSM_FloatInteger, 1, x_Int);
-  // FuncObj->SetParamInfo(GSM_FloatInteger, 0, "x", porINTEGER);
-
   FuncObj->SetFuncInfo(GSM_FloatFloat, 1, x_Float);
-  // FuncObj->SetParamInfo(GSM_FloatFloat, 0, "x", porFLOAT);
   gsm->AddFunction(FuncObj);
+
+  //------------------------ Rational --------------------------
 
   FuncObj = new FuncDescObj("Rational");
   FuncObj->SetFuncInfo(GSM_RationalFloat, 1, x_Float);
-  // FuncObj->SetParamInfo(GSM_RationalFloat, 0, "x", porFLOAT);
-  
   FuncObj->SetFuncInfo(GSM_RationalInteger, 1, x_Int);
-  // FuncObj->SetParamInfo(GSM_RationalInteger, 0, "x", porINTEGER);
-
   FuncObj->SetFuncInfo(GSM_RationalRational, 1, x_Rational);
-  // FuncObj->SetParamInfo(GSM_RationalRational, 0, "x", porRATIONAL);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("StartWatch");

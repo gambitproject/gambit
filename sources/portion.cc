@@ -2482,6 +2482,19 @@ void ListPortion::Flush( void )
 }
 
 
+Portion* ListPortion::operator[]( int index )
+{
+  if( index >= 1 && index <= _Value->Length() )
+  {
+    assert( (*_Value)[ index ] != 0 );
+    return (*_Value)[ index ];
+  }
+  else
+    return 0;
+}
+
+
+
 Portion* ListPortion::Subscript( int index )
 {
   Portion* p;

@@ -1,3 +1,4 @@
+
 //#
 //# FILE: gsm.cc  implementation of GSM (Stack machine)
 //#
@@ -700,7 +701,15 @@ bool GSM::Dot ( void )
 { return _BinaryOperation( "Dot" ); }
 
 bool GSM::Divide ( void )
-{ return _BinaryOperation( "Divide" ); }
+{ 
+  return _BinaryOperation( "Divide" ); 
+/*
+  if( _StackStack->Peek()->Peek()->Type() == porINTEGER )
+    return _BinaryOperation( "IntegerDivide" ); 
+  else
+    return _BinaryOperation( "Divide" ); 
+*/
+}
 
 bool GSM::Negate( void )
 { return _UnaryOperation( "Negate" ); }

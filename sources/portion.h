@@ -1030,6 +1030,12 @@ public:
   int      Length     ( void ) const;
   void     Flush      ( void );
 
+  // Use operator[] when you just want to check the info on an element;
+  Portion* operator[]( int index );
+
+  // Use Subscript() when you want to extract a copy of an element
+  // Warning: Subscript() already makes a copy; 
+  //          don't calling ValCopy() or RefCopy() on Subscript() !
   Portion* Subscript( int index );
 };
 

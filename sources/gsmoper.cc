@@ -409,20 +409,6 @@ Portion* GSM_Multiply_BehavRational2( Portion** param )
   return result;
 }
 
-Portion* GSM_Dot_Integer(Portion **param)
-{
-  return new ErrorPortion("Not implemented yet");
-}
-
-Portion* GSM_Dot_Rational(Portion **param)
-{
-  return new ErrorPortion("Not implemented yet");
-}
-
-Portion* GSM_Dot_Float(Portion **param)
-{
-  return new ErrorPortion("Not implemented yet");
-}
 
 
 //---------------------------- GSM_Divide -------------------------------
@@ -445,6 +431,7 @@ Portion* GSM_Divide_double( Portion** param )
   return result;
 }
 
+
 Portion* GSM_Divide_int( Portion** param )
 {
   Portion* result = 0;
@@ -460,6 +447,8 @@ Portion* GSM_Divide_int( Portion** param )
   }
   return result;
 }
+
+
 
 Portion* GSM_Divide_gRational( Portion** param )
 {
@@ -481,8 +470,7 @@ Portion* GSM_Divide_gRational( Portion** param )
 
 
 
-//---------------------------- GSM_Divide -------------------------------
-
+//-------------------------- GSM_IntegerDivide -------------------------------
 
 Portion* GSM_IntegerDivide_int( Portion** param )
 {
@@ -501,6 +489,8 @@ Portion* GSM_IntegerDivide_int( Portion** param )
   }
   return result;
 }
+
+
 
 
 //---------------------- GSM_Exp, GSM_Log --------------------
@@ -546,21 +536,21 @@ Portion* GSM_Power_Int_Float(Portion** param)
 {
   long base = ((IntPortion*) param[0])->Value();
   double exponent = ((FloatPortion*) param[1])->Value();
-  return new IntValPortion( (long) pow( (double) base, exponent ) );
+  return new FloatValPortion( (double) pow( (double) base, exponent ) );
 }
 
 Portion* GSM_Power_Float_Float(Portion** param)
 {
   double base = ((FloatPortion*) param[0])->Value();
   double exponent = ((FloatPortion*) param[1])->Value();
-  return new FloatValPortion( pow( base, exponent ) );
+  return new FloatValPortion( (double) pow( base, exponent ) );
 }
 
 Portion* GSM_Power_Rational_Float(Portion** param)
 {
   gRational base = ((RationalPortion*) param[0])->Value();
   double exponent = ((FloatPortion*) param[1])->Value();
-  return new RationalValPortion( pow( base, ((long) exponent) ) );
+  return new FloatValPortion( (double) pow( base, ((long) exponent) ) );
 }
 
 
@@ -1862,20 +1852,6 @@ void Init_gsmoper( GSM* gsm )
 
   gsm->AddFunction( FuncObj );
 
-  FuncObj = new FuncDescObj("Dot");
-  
-  FuncObj->SetFuncInfo(GSM_Dot_Integer, 2);
-  FuncObj->SetParamInfo(GSM_Dot_Integer, 0, "x", porLIST | porINTEGER);
-  FuncObj->SetParamInfo(GSM_Dot_Integer, 1, "y", porLIST | porINTEGER);
-
-  FuncObj->SetFuncInfo(GSM_Dot_Float, 2);
-  FuncObj->SetParamInfo(GSM_Dot_Float, 0, "x", porLIST | porFLOAT);
-  FuncObj->SetParamInfo(GSM_Dot_Float, 1, "y", porLIST | porFLOAT);
-  
-  FuncObj->SetFuncInfo(GSM_Dot_Rational, 2);
-  FuncObj->SetParamInfo(GSM_Dot_Rational, 0, "x", porLIST | porRATIONAL);
-  FuncObj->SetParamInfo(GSM_Dot_Rational, 1, "y", porLIST | porRATIONAL);
-  gsm->AddFunction(FuncObj);
 
   //----------------------- Divide -------------------------
 

@@ -29,6 +29,7 @@ extern void Init_nfgfunc( GSM* );
 extern void Init_efgfunc( GSM* );
 extern void Init_algfunc(GSM *);
 extern void Init_listfunc(GSM *);
+extern void Init_listmath(GSM *);
 void Init_userfunc( GSM* );
 
 void GSM::InitFunctions( void )
@@ -37,6 +38,7 @@ void GSM::InitFunctions( void )
   Init_gsmoper( this );
 
   Init_listfunc(this);
+  Init_listmath(this);
 
   Init_nfgfunc(this);
   Init_efgfunc(this);
@@ -538,7 +540,9 @@ bool FuncDescObj::Combine( FuncDescObj* newfunc )
 	   ( _FuncInfo[ f_index ].ParamInfo[ index ].Name ==
 	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].Name ) &&
 	   ( _FuncInfo[ f_index ].ParamInfo[ index ].Type &
-	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].Type )
+	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].Type ) &&
+	   ( ( _FuncInfo[ f_index ].ParamInfo[ index ].Type & 
+	    ( newfunc->_FuncInfo[ i ].ParamInfo[ index ].Type ) != porLIST ) )
 	   // PortionTypeMatch( _FuncInfo[ f_index ].ParamInfo[ index ].Type,
 	   // newfunc->_FuncInfo[ i ].ParamInfo[ index ].Type ) 
 	   )
