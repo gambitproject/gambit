@@ -10,7 +10,8 @@
 #include <assert.h>
 #include <string.h>
 #include "basic.h"
-#include "output.h"
+#include "gambitio.h"
+#include "gmessage.h"
 
 #ifdef __GNUC__
 #define INLINE inline
@@ -277,6 +278,28 @@ template <class T> INLINE void gMap<T>::Dump(output& to) const
 
 //======================================
 
+template <class K, class T> class gBaseMapMessage : public gMessage  {
+  friend class gBaseMap<K, T>;
+  friend class gBaseMapIter<K, T>;
+
+  private:
+    enum MessageType { DEFINE, REMOVE } mod_type;
+    int mod_position;
+
+    gBaseMapMessage(int pos, MessageType t)
+      : mod_type(t), mod_position(pos)  { }
+
+  public:
+    int Type(void) const    { return mod_type; }
+
+    int operator==(const gMessage &m) const
+      { if (Type() != m.Type())   return 0;
+	const gBaseMapMessage<K, T> &mm = (const gBaseMapMessage<K, T> &) m;
+	return (mod_position == mm.mod_position &&
+		mod_type == mm.mod_type);
+      }
+};
+
 //
 // The gBaseMap and its derived classes implement associative arrays --
 // that is, arrays which are indexed not necessarily by consecutive
@@ -290,7 +313,7 @@ template <class T> INLINE void gMap<T>::Dump(output& to) const
 // This is the abstract class from which all Map classes are derived
 //
 template <class K, class T> class gBaseMap : public gSender {
-  friend class gBaseMapIter<K,T>;
+  friend class gBaseMapIter<K, T>;
   protected:
     int length;
     T _default;
@@ -299,8 +322,6 @@ template <class K, class T> class gBaseMap : public gSender {
 
     T &Insert(const K &key, int where, const T &value);
     T Delete(int where);
-
-    void Send(const MapMessage<K,T> &);
 
   public:
 //
@@ -403,14 +424,14 @@ T &gBaseMap<K, T>::Insert(const K &key, int entry, const T &value)
 
 template <class K, class T> INLINE T gBaseMap<K, T>::Delete(int where)
 {
+  Send(gBaseMapMessage<K, T>(where, gBaseMapMessage<K, T>::REMOVE));
+
   if (length == 1)  {
     T ret = values[0];
     delete keys;
     delete values;
     keys = 0;
     values = 0;
-    MapMessage<K,T> M(MapMessage<K,T>::EMPTY);
-    Send(M);
     return ret;
   }
 
@@ -424,7 +445,7 @@ template <class K, class T> INLINE T gBaseMap<K, T>::Delete(int where)
 
   memcpy(new_keys + where, keys + where + 1,
 	 (length - where - 1) * sizeof(K));
-  memcpy(new_values + where, new_values + where + 1,
+  memcpy(new_values + where, values + where + 1,
 	 (length - where - 1) * sizeof(T));
 
   delete keys;
@@ -434,8 +455,6 @@ template <class K, class T> INLINE T gBaseMap<K, T>::Delete(int where)
   values = new_values;
 
   length--;
-  MapMessage<K,T> M(MapMessage<K,T>::SUBTRACTED);
-  Send(M);
   return ret;
 }
 
@@ -444,28 +463,6 @@ template <class K, class T> INLINE void gBaseMap<K, T>::Dump(output &f) const
   for (int i = 0; i < length; i++)
     f << keys[i] << " --> " << values[i] << '\n';
 }
-
-//
-// MapMessage is a message being passed back and forth by the various g...Map
-// classes and g...MapIter classes.
-//
-// <note> This class is derived from the gMessage class found in "gmessage.h"
-//
-template <class K, class T> class MapMessage : public gMessage {
-  friend class gBaseMap<K,T>;
-  friend class gBaseMapIter<K,T>;
- private:
-  enum MessageType {DELETE,ADDED,SUBTRACTED,EMPTY} changeType;
- public:
-  MapMessage(const MessageType type) : changeType(type) {}
-  uint Type() const { return changeType; }
-  int operator==(const MapMessage<K,T> &m) const
-    {
-      if(Type() == m.Type()) return 1;
-      else return 0;
-    }
-};
-  
 
 //
 // The gOrdMap is an ordered map.  That is, the index class has all the
