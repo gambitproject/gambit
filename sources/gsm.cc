@@ -172,7 +172,6 @@ bool GSM::PushList( const int num_of_elements )
     if( list->Insert( p, 1 ) == 0 )
     {
       result = false;
-      break;
     }
   }
   _Stack->Push( list );
@@ -437,7 +436,8 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
       }
       if( result != 0 )
       {
-	result = result->Copy();
+	if( result->Type() != porERROR )
+	  result = result->Copy();
       }
       else
       {
@@ -457,7 +457,7 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
 }
 
 
-Portion* GSM::_ResolveRefWithoutCopy( Reference_Portion* p )
+Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
 {
   Portion*  result = 0;
   Portion*  temp;
@@ -495,6 +495,11 @@ Portion* GSM::_ResolveRefWithoutCopy( Reference_Portion* p )
 	{
 	  result = 0;
 	}
+      case porLIST:
+	((List_Portion*) result )->GetSubscript( atoi( subvalue ) );
+	if( result != 0 )
+	  result = result->Copy();
+	break;
 
       default:
 	gerr << "GSM Error: attempted to resolve the subvariable of a type\n";
@@ -603,6 +608,10 @@ bool GSM::_BinaryOperation( OperationMode mode )
 	_Stack->Push( p1 );
 	return false;
       }
+    }
+    if( mode == opSUBSCRIPT )
+    {
+      delete p;
     }
   }
 
@@ -864,6 +873,10 @@ bool GSM::Bind( void )
   gString ref;
   Reference_Portion* refp;
 
+#ifndef NDEBUG
+  _BindCheck();
+#endif // NDEBUG
+
   func = _CallFuncStack->Peek();
   param = _Stack->Peek();
 
@@ -906,6 +919,17 @@ bool GSM::BindVal( void )
   {
     result = func->SetCurrParam( param ); 
   }
+  else
+  {
+    delete param;
+    func->SetCurrParamIndex( func->GetCurrParamIndex() + 1 );
+  }
+
+  if( !result )  // == false
+  {
+    func->SetErrorOccurred();
+  }
+
   _CallFuncStack->Push( func );
   return result;
 }
@@ -938,13 +962,15 @@ bool GSM::BindRef( void )
       ref = ( (Reference_Portion*) param )->Value();
       subref = ( (Reference_Portion*) param )->SubValue();
       func->SetCurrParamRef( (Reference_Portion*)( param->Copy() ) );
-      param = _ResolveRefWithoutCopy( (Reference_Portion*) param );
+      param = _ResolveRefWithoutError( (Reference_Portion*) param );
       if( param != 0 )
+      {
 	if( param->Type() == porERROR )
 	{
 	  delete param;
 	  result = false;
 	}
+      }
     }
     else // ( param->Type() != porREFERENCE )
     {
@@ -966,24 +992,29 @@ bool GSM::BindRef( void )
   }
 
   
-  if( result == true )
+  if( result )  // == true
   {
     if( param != 0 )
     {
       result = _FuncParamCheck( func, param->Type() );
       if( result == true )
       {
-	result = func->SetCurrParam( param ); 
+	result = func->SetCurrParam( param );
+      }
+      else
+      {
+	delete param;
+	func->SetCurrParamIndex( func->GetCurrParamIndex() + 1 );
       }
     }
     else
     {
-      func->SetCurrParamIndex( func->GetCurrParamIndex() + 1 ); 
+      func->SetCurrParamIndex( func->GetCurrParamIndex() + 1 );
     }
   }
-  else
+
+  if( !result )  // == false
   {
-    func->SetCurrParam( 0 ); 
     func->SetErrorOccurred();
   }
 
@@ -1077,7 +1108,6 @@ bool GSM::CallFunction( void )
       refp = func->GetCurrParamRef();
       if( refp != 0 && param[ index ] != 0 )
       {
-	gout << "index: " << index << refp << "\n";
 	if( refp->SubValue() == "" )
 	{
 	  _RefTable->Define( refp->Value(), param[ index ] );

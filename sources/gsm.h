@@ -36,7 +36,7 @@ class GSM
   FunctionHashTable*               _FuncTable;
 
   Portion* _ResolveRef            ( Reference_Portion* p );
-  Portion* _ResolveRefWithoutCopy ( Reference_Portion* p );
+  Portion* _ResolveRefWithoutError ( Reference_Portion* p );
   Portion* _ResolvePrimaryRefOnly ( Reference_Portion* p );
 
   bool _UnaryOperation  ( OperationMode mode );

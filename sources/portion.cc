@@ -585,13 +585,18 @@ void List_Portion::Output( gOutput& s ) const
   int i;
   int length = _Value.Length();
 
+  s << " { ";
   if( length >= 1 )
   {
-    gout << " {" << _Value[ 1 ];
+    s << _Value[ 1 ];
+    for( i = 2; i <= length; i++ )
+    {
+      s << "," << _Value[ i ];
+    }
   }
-  for( i = 2; i <= length; i++ )
+  else
   {
-    gout << "," << _Value[ i ];
+    s << "empty";
   }
   s << " }";
 }
@@ -618,11 +623,21 @@ int List_Portion::Insert( Portion* item, int index )
   
   if( _Value.Length() == 0 )  // creating a new list
   {
-    if( item->Type() == porLIST )
-      _DataType = ( (List_Portion*) item )->_DataType;
+    if( item->Type() != porERROR )
+    {
+      if( item->Type() == porLIST )
+	_DataType = ( (List_Portion*) item )->_DataType;
+      else
+	_DataType = item->Type();
+      result = _Value.Insert( item, index );
+    }
     else
-      _DataType = item->Type();
-    result = _Value.Insert( item, index );
+    {
+      gerr << "Portion Error: attempted to insert an Error_Portion\n";
+      gerr << "               into a List_Portion.\n";
+      delete item;
+      result = 0;
+    }
   }
   else  // inserting into an existing list
   {
