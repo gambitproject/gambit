@@ -28,6 +28,7 @@ class gRational;
 template <class T> class gList;
 template <class T> class gGrowableStack;
 
+#define GCL_VERSION   0.93
 
 class GSM
 {
