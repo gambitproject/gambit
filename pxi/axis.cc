@@ -14,7 +14,7 @@
 
 /***************************** PLOT AXIS X ********************************/
 void PlotAxis_X(wxDC& dc, float x_start,float x_end,float y_start,
-		float y_end,int ch,int cw,int num_plots,int plot_type,
+		float y_end,int ch,int cw,int num_plots,int plots,int plot_type,
 		unsigned int features,float log_step)
 {
   int i1;
@@ -24,7 +24,7 @@ void PlotAxis_X(wxDC& dc, float x_start,float x_end,float y_start,
   
   assert(num_plots==1 || num_plots==2);
   num_plots-=1;	       // convert from 1,2 to 0,1
-  for (int i=0;i<=num_plots;i++) {
+  for (int i=0;i<plots;i++) {
     if (features&DRAW_AXIS) {
       dc.DrawLine(XOFF,XOFF+(ch/2)*num_plots*i,XOFF,(ch-XOFF)-(ch/2)*num_plots*(1-i));
       dc.DrawLine(XOFF,(ch-XOFF)-(ch/2)*num_plots*(1-i),cw-XOFF,(ch-XOFF)-(ch/2)*num_plots*(1-i));
@@ -164,7 +164,7 @@ void PlotAxis_2(wxDC& dc,float x_start,float x_end,float y_start,
 // Draws a triangular axis set for the pseudo-3D mode in PXI.  It can plot one or
 // two triangles, corresponding to num_plots = 0,1 respectively.  Note that the
 // axis scaling is not currently used.
-void PlotAxis_3(wxDC& dc, int ch,int cw,int num_plots, unsigned int features, wxString label[])
+void PlotAxis_3(wxDC& dc, int ch,int cw,int num_plots, int plots, unsigned int features, wxString label[])
 {
   int i;
   float side;
@@ -176,7 +176,7 @@ void PlotAxis_3(wxDC& dc, int ch,int cw,int num_plots, unsigned int features, wx
   else
     side=((ch-2*XOFF)/TAN60)*2;
   
-  for (i=0;i<num_plots;i++) {      	// draw the two triangles
+  for (i=0;i<plots;i++) {      	// draw the two triangles
     dc.DrawLine(
 		XOFF+cw/2*i,        ch-XOFF,
 		XOFF+side+cw/2*i,   ch-XOFF);               // bottom

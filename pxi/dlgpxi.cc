@@ -161,7 +161,7 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
   if(draw_settings.one_or_two==2) num_plots = 2;
   
   m_whichPlotItem = new wxListBox(this, idSETTINGS_WHICH_PLOT_LISTBOX);
-  for (int i = 1; i <= num_plots; i++) {
+  for (int i = 1; i <= draw_settings.GetNumPlots(); i++) {
     char tmp[80];
     sprintf(tmp, "Plot %d", i);
     m_whichPlotItem->Append(tmp);
@@ -234,7 +234,7 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
   m_plotMode = new wxRadioBox(this, -1, "Plot Mode",
 			      wxDefaultPosition, 
 #ifdef __WXMOTIF__ // bug in wxmotif
-			      wxSize(250,25), wxDefaultSize,3, plotModeChoices, 0, wxRA_SPECIFY_COLS
+			      wxSize(250,25),3, plotModeChoices, 0, wxRA_SPECIFY_COLS
 #else
 			      wxDefaultSize,3, plotModeChoices, 0, wxRA_SPECIFY_ROWS
 #endif
@@ -250,16 +250,16 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
   m_colorMode = new wxRadioBox(this, -1, "Color Mode",
 			       wxDefaultPosition, 
 #ifdef __WXMOTIF__ // bug in wxmotif
-			       wxSize(250,25),wxDefaultSize,3, colorModeChoices, 0, wxRA_SPECIFY_COLS
+			       wxSize(250,25),3, colorModeChoices, 0, wxRA_SPECIFY_COLS
 #else
 			       wxDefaultSize,3, colorModeChoices, 0, wxRA_SPECIFY_ROWS
 #endif
 			       );  
-  if (draw_settings.color_mode == PXI_PLOT_X) 
+  if (draw_settings.color_mode == COLOR_EQU) 
     m_colorMode->SetSelection(0);
-  else if (draw_settings.color_mode == PXI_PLOT_2) 
+  else if (draw_settings.color_mode == COLOR_PROB) 
     m_colorMode->SetSelection(1);
-  else if (draw_settings.color_mode == PXI_PLOT_3) 
+  else if (draw_settings.color_mode == COLOR_NONE) 
     m_colorMode->SetSelection(2);
   
   wxBoxSizer *modeSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -316,7 +316,7 @@ dialogDrawSettings::~dialogDrawSettings()
 
 void dialogDrawSettings::OnWhichPlot(wxCommandEvent &)
 {
-  int i = m_whichPlotItem->GetSelection()+1; 
+  int whichplot = m_whichPlotItem->GetSelection()+1; 
 
   m_whichIsetItem->Clear();
   for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
@@ -324,44 +324,28 @@ void dialogDrawSettings::OnWhichPlot(wxCommandEvent &)
     sprintf(tmp, "Infoset %d", iset);
     m_whichIsetItem->Append(tmp);
   }
-  if(i==1)
-    for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
-      if (draw_settings.plot_top.Contains(iset)) 
-	m_whichIsetItem->SetSelection(iset-1, true);
-    }
-  else
-    for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
-      if (draw_settings.plot_bottom.Contains(iset)) 
-	m_whichIsetItem->SetSelection(iset-1, true);
-    }
+  for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
+    if (draw_settings.GetMyPlot(whichplot).Contains(iset)) 
+      m_whichIsetItem->SetSelection(iset-1, true);
+  }
 }
 
 void dialogDrawSettings::OnWhichInfoset(wxCommandEvent &)
 {
-  int i = m_whichPlotItem->GetSelection()+1; 
+  int whichplot = m_whichPlotItem->GetSelection()+1; 
   int j = 0;
-  if(i==1)
-    for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
-      bool flag = m_whichIsetItem->Selected(iset-1);
-      bool member = draw_settings.plot_top.Contains(iset);
-      if (flag && !member) {
-	draw_settings.plot_top.Append(iset);
-	j = iset;
-      }
-      else if (!flag && member) 
-	draw_settings.plot_top.Remove(draw_settings.plot_top.Find(iset));
+
+  for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
+    bool flag = m_whichIsetItem->Selected(iset-1);
+    bool member = draw_settings.GetMyPlot(whichplot).Contains(iset);
+    if (flag && !member) {
+      draw_settings.GetMyPlot(whichplot).Append(iset);
+      j = iset;
     }
-  else 
-    for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
-      bool flag = m_whichIsetItem->Selected(iset-1);
-      bool member = draw_settings.plot_bottom.Contains(iset);
-      if (flag && !member) {
-	draw_settings.plot_bottom.Append(iset);
-	j = iset;
-      }
-      else if(!flag && member)
-	draw_settings.plot_bottom.Remove(draw_settings.plot_bottom.Find(iset));
-    }
+    else if (!flag && member) 
+      draw_settings.GetMyPlot(whichplot).Remove(draw_settings.GetMyPlot(whichplot).Find(iset));
+  }
+
   if(j) {
     m_infosetItem->SetSelection(j-1);
     wxCommandEvent event;
@@ -428,8 +412,7 @@ void dialogDrawSettings::Run()
     if(mode==1)draw_settings.color_mode=COLOR_PROB;
     if(mode==2)draw_settings.color_mode=COLOR_NONE;
 
-    draw_settings.one_or_two=1;
-    if(m_twoPlots->GetValue()) draw_settings.one_or_two = 2;
+    draw_settings.SetPlotsPerPage(m_twoPlots->GetValue()+1);
     draw_settings.connect_dots = m_connectDots->GetValue();
     draw_settings.restart_overlay_colors = m_restartColors->GetValue();
   };

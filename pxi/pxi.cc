@@ -277,10 +277,14 @@ BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   EVT_MENU(PXI_PREFS_FONT_LABEL, PxiChild::OnPrefsFontLabel)
   EVT_MENU(PXI_PREFS_FONT_OVERLAY, PxiChild::OnPrefsFontOverlay)
   EVT_MENU(PXI_PREFS_COLORS, PxiChild::OnPrefsColors)
+  EVT_MENU(PXI_PAGE_NEXT, PxiChild::OnNextPage)
+  EVT_MENU(PXI_PAGE_PREV, PxiChild::OnPreviousPage)
   EVT_MENU(PXI_HELP_ABOUT, PxiChild::OnHelpAbout)
   EVT_MENU(PXI_HELP_CONTENTS, PxiChild::OnHelpContents)
   EVT_SIZE(PxiChild::OnSize)
   EVT_CLOSE(PxiChild::OnCloseWindow)
+  EVT_CHAR_HOOK(PxiChild::OnChar)
+  EVT_LEFT_DOWN(PxiChild::OnEvent)
 END_EVENT_TABLE()
 
 void PxiChild::OnQuit(wxCommandEvent &)
@@ -291,8 +295,9 @@ void PxiChild::OnQuit(wxCommandEvent &)
 void PxiChild::OnOverlayData(wxCommandEvent &)
 {
   dialogOverlayData dialog(this, canvas);
-  wxClientDC dc(this);
-  canvas->Update(dc,PXI_UPDATE_SCREEN);
+  canvas->Render();
+  //  wxClientDC dc(this);
+  //  canvas->Update(dc,PXI_UPDATE_SCREEN);
 }
 
 void PxiChild::OnOverlayFile(wxCommandEvent &)
@@ -331,6 +336,18 @@ void PxiChild::OnFileOutput(wxCommandEvent &)
     }
 }
 
+void PxiChild::OnNextPage(wxCommandEvent &)
+{
+  canvas->SetNextPage();
+  canvas->Render();
+}
+
+void PxiChild::OnPreviousPage(wxCommandEvent &)
+{
+  canvas->SetPreviousPage();
+  canvas->Render();
+}
+
 void PxiChild::OnPrefsColors(wxCommandEvent &)
 {
   wxColourData data;
@@ -349,7 +366,7 @@ void PxiChild::OnPrefsFontLabel(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     canvas->draw_settings->SetLabelFont(dialog.GetFontData().GetChosenFont());
-    canvas->Refresh();
+    canvas->Render();
   }
 }
 
@@ -360,7 +377,7 @@ void PxiChild::OnPrefsFontAxis(wxCommandEvent &)
   wxFontDialog dialog(this, &data);
   if (dialog.ShowModal() == wxID_OK) {
     canvas->draw_settings->SetAxisFont(dialog.GetFontData().GetChosenFont());
-    canvas->Refresh();
+    canvas->Render();
   }
 }
 
@@ -372,7 +389,7 @@ void PxiChild::OnPrefsFontOverlay(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     canvas->draw_settings->SetOverlayFont(dialog.GetFontData().GetChosenFont());
-    canvas->Refresh();
+    canvas->Render();
   }
 }
 
@@ -389,8 +406,7 @@ void PxiChild::OnHelpContents(wxCommandEvent &)
 void PxiChild::OnDisplayOptions(wxCommandEvent &)
 {
   canvas->DrawSettings()->SetOptions(this);
-  wxClientDC dc(this);
-  canvas->Update(dc,PXI_UPDATE_SCREEN);
+  canvas->Render();
 }
 
 PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
@@ -444,6 +460,11 @@ void PxiChild::MakeMenus(void)
 		     "Set display fonts");
 
   prefs_menu->Append(PXI_PREFS_COLORS,"&Colors", "Change Colors");
+
+  wxMenu *page_menu = new wxMenu;
+  page_menu->Append(PXI_PAGE_PREV,"&Previous (PgUp)", "Previous Page");
+  page_menu->Append(PXI_PAGE_NEXT,"&Next     (PgDn)", "Next Page");
+
   wxMenu *help_menu = new wxMenu;
   help_menu->Append(PXI_HELP_ABOUT,"&About", "About Plot X");
   help_menu->Append(PXI_HELP_CONTENTS,"&Contents", "Table of Contents");
@@ -455,6 +476,7 @@ void PxiChild::MakeMenus(void)
   menu_bar->Append(data_menu, "&Data");
   menu_bar->Append(display_menu, "&Display");
   menu_bar->Append(prefs_menu, "&Prefs");
+  menu_bar->Append(page_menu, "P&age");
   menu_bar->Append(help_menu, "&Help");
 
   // Associate the menu bar with the frame
@@ -503,7 +525,7 @@ void PxiCanvas::StopIt(void)
     //	if (!updating)
     {
       draw_settings->ResetSetStop();
-      Refresh();
+      Render();
     }
   }
 }
@@ -518,6 +540,14 @@ void PxiCanvas::NewExpData(ExpDataParams &P)
 void PxiCanvas::OnChar(wxKeyEvent &ev)
 {
   switch(ev.KeyCode()) {
+  case WXK_PRIOR:
+    SetPreviousPage();
+    Render();
+    break;
+  case WXK_NEXT:
+    SetNextPage();
+    Render();
+    break;
   case PXI_KEY_STOP:
     StopIt();
     break;
@@ -551,7 +581,7 @@ void PxiCanvas::OnEvent(wxMouseEvent &ev)
       tmp_label.y=labels[clicked_on].y;
       labels[clicked_on]=tmp_label;
     }
-    Refresh();
+    Render();
   }
 }
 
@@ -574,7 +604,9 @@ PxiCanvas::PxiCanvas(wxFrame *frame, const wxPoint &p_position,
 #ifdef __WXMSW__
 void PxiChild::print(wxOutputOption fit, bool preview)
 {
-  wxPrinterDC dc(NULL, NULL, NULL);  // Defaults to EPS under UNIX,
+  wxPrintData  data;
+  wxPrinterDC dc(data);
+  //  wxPrinterDC dc(NULL, NULL, NULL);  // Defaults to EPS under UNIX,
   // normal Windows printing under Win 3.1
   if (dc.Ok()) {
     dc.StartDoc("PXI printout");
@@ -583,7 +615,7 @@ void PxiChild::print(wxOutputOption fit, bool preview)
     dc.EndPage();
     dc.EndDoc();
   }
-  this->canvas->Update(*(this->canvas->GetDC()),PXI_UPDATE_SCREEN);
+  this->canvas->Update(dc,PXI_UPDATE_SCREEN);
 }
 #else
 void PxiChild::print(wxOutputOption fit, bool preview)
@@ -597,34 +629,56 @@ void PxiChild::print(wxOutputOption fit, bool preview)
 
 
 
+#ifdef __WXMSW__
+#include "wx/dcclient.h"
+#include "wx/dc.h"
+#include "wx/dcps.h"
+#include "wx/dcprint.h"
+#include "wx/cmndata.h"
 void PxiChild::print_eps(wxOutputOption fit)
 {
-#ifdef __WXMSW__
+  /*
+// can't get this to work !!
+  wxPrintData data;
+  wxPostScriptDC dc(data);
+  if (dc.Ok()) {
+    dc.StartDoc("Pxi printout");
+    dc.StartPage();
+    canvas->Update(dc,PXI_UPDATE_FILE);
+    dc.EndPage();
+    dc.EndDoc();
+  }
+  */
+}
 #else
+void PxiChild::print_eps(wxOutputOption fit)
+{
   wxPostScriptDC dc("junk.ps",true, this);
   if (dc.Ok()) {
     dc.StartDoc("Pxi printout");
     dc.StartPage();
-    this->canvas->Update(dc,PXI_UPDATE_FILE);
+    canvas->Update(dc,PXI_UPDATE_FILE);
     dc.EndPage();
     dc.EndDoc();
   }
-#endif // __WXMSW__
 }
+#endif // __WXMSW__
 
 #ifdef __WXMSW__
+
+#include "wx/metafile.h"
 void PxiChild::print_mf(wxOutputOption fit, bool save_mf)
 {
   wxMetaFileDC dc;
   if (dc.Ok()) {
-    this->canvas->Update(dc,PXI_UPDATE_METAFILE);
+    canvas->Update(dc,PXI_UPDATE_METAFILE);
     wxMetaFile *mf = dc.Close();
     if (mf) {
       mf->SetClipboard((int)(dc.MaxX()+10),(int)(dc.MaxY()+10));
       delete mf;
     }
   }
-  this->canvas->Update(*(this->canvas->GetDC()),PXI_UPDATE_SCREEN);
+  this->canvas->Update(dc,PXI_UPDATE_SCREEN);
 }
 #else
 void PxiChild::print_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
@@ -634,21 +688,22 @@ void PxiChild::print_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
 #endif __WXMSW__
 
 #ifdef __WXMSW__
+#include "wx/gdicmn.h"
 void PxiChild::save_mf(wxOutputOption fit, bool save_mf)
 {
   char *s=copystring(wxFileSelector("Save Metafile",NULL,NULL,NULL,"*.wmf"));
   if (s) {
     wxMetaFileDC dc(s);
     if (dc.Ok()) {
-      this->canvas->Update(dc,PXI_UPDATE_METAFILE);
+      canvas->Update(dc,PXI_UPDATE_METAFILE);
       wxMetaFile *mf = dc.Close();
       if (mf) {
 	delete mf;
-	wxMakeMetaFilePlaceable(s,dc.MinX(),dc.MinY(),dc.MaxX(),dc.MaxY());
+//	::wxMakeMetaFilePlaceable(s,dc.MinX(),dc.MinY(),dc.MaxX(),dc.MaxY());
       }
     }
     delete [] s;
-    this->canvas->Update(*(this->canvas->GetDC()),PXI_UPDATE_SCREEN);
+    canvas->Update(dc,PXI_UPDATE_SCREEN);
   }
 }
 #else
@@ -657,9 +712,6 @@ void PxiChild::save_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
   wxMessageBox("Metafiles are not supported under X");
 }
 #endif // __WXMSW__
-
-// Define the behaviour for the frame closing
-// - must delete all frames except for the main one.
 
 // Define the repainting behaviour
 void PxiCanvas::OnPaint(wxPaintEvent &)
@@ -672,6 +724,8 @@ void PxiCanvas::OnPaint(wxPaintEvent &)
   painting = false;
 }
 
+// Define the behaviour for the frame closing
+
 void PxiFrame::OnCloseWindow(wxCloseEvent &)
 {
   wxKillHelp();
@@ -683,18 +737,20 @@ void PxiFrame::OnCloseWindow(wxCloseEvent &)
 //*************************************************************************
 
 PxiDrawSettings::PxiDrawSettings(FileHeader &header)
-  : overlay_font(8,wxSWISS,wxNORMAL,wxBOLD),
-    label_font(8,wxSWISS,wxNORMAL,wxBOLD), 
-    axis_font(8,wxSWISS,wxNORMAL,wxBOLD),
+  : overlay_font(10,wxSWISS,wxNORMAL,wxBOLD),
+    label_font(10,wxSWISS,wxNORMAL,wxBOLD), 
+    axis_font(10,wxSWISS,wxNORMAL,wxBOLD),
     clear_brush("BLACK",wxTRANSPARENT),
     exp_data_brush("BLACK",wxSOLID), 
     axis_text_color("BLUE")
 {
   int i,j;
+  whichpage=1;
   overlay_symbol=OVERLAY_NUMBER;
   overlay_lines=FALSE;
   overlay_token_size=DEF_TOKEN_SIZE;
-  color_mode=COLOR_EQU;
+  //  color_mode=COLOR_EQU;
+  color_mode=COLOR_PROB;
   restart_overlay_colors=TRUE;
   connect_dots=FALSE;
   data_mode=header.DataType();
@@ -704,7 +760,6 @@ PxiDrawSettings::PxiDrawSettings(FileHeader &header)
   data_min=header.DataMin();data_max=header.DataMax();
   
   num_infosets=header.NumInfosets();
-  one_or_two=(header.NumInfosets()>1) ? 2 : 1;
   // Create the 'what to display where' data structures
   // Default is to show first 1/2 of the infosets with all their strategies
   // on the top portion of the graph (in two graph mode) and the rest on the
@@ -715,10 +770,14 @@ PxiDrawSettings::PxiDrawSettings(FileHeader &header)
     strategy_show[i]=show_player_strategies(header.NumStrategies(i));
     for (j=1;j<=header.NumStrategies(i);j++) strategy_show[i][j]=TRUE;
   }
-  plot_top=gBlock<int>(num_infosets/2);
-  for (i=1;i<=num_infosets/2;i++) plot_top[i]=i;
-  plot_bottom=gBlock<int>(num_infosets-num_infosets/2);
-  for (i=1+num_infosets/2;i<=num_infosets;i++) plot_bottom[i-num_infosets/2]=i;
+
+  myplot=gBlock< gBlock<int> >(num_infosets);
+  for (i=1;i<=num_infosets;i++) {
+    myplot[i]=gBlock<int>(1);
+    myplot[i][1]=i;
+  }
+  SetPlotsPerPage( (header.NumInfosets()>1) ? 2 : 1);  // also sets maxpage, whichpage
+
   // Default features are everything on
   plot3_features=DRAW_AXIS|DRAW_LABELS;
   plotx_features=DRAW_AXIS|DRAW_TICKS|DRAW_NUMS;
@@ -736,27 +795,30 @@ Bool PxiDrawSettings::CheckPlot3Mode(void)
 {
   int i;
   // Check if there are 3 or over strategy_show for each player
-  int top, bottom;
-  for (top=1;top<=GetPlotTop();top++)
-    if (strategy_show[GetPlotTop(top)].Length()<3) {
+  int page = whichpage;
+  int bottom = 2*page, top = 2*page-1;
+  int t, b;
+
+  for (t=1;t<=GetMyPlot(top).Length();t++)
+    if (strategy_show[GetMyPlot(top)[t]].Length()<3) {
       wxMessageBox("Each player must have at least 3 strategies!");
       return FALSE;
     }
-  for (bottom=1;bottom<=GetPlotBottom();bottom++)
-    if (strategy_show[GetPlotBottom(bottom)].Length()<3) {
+  for (b=1;b<=GetMyPlot(bottom).Length();b++)
+    if (strategy_show[GetMyPlot(bottom)[b]].Length()<3) {
       wxMessageBox("Each player must have at least 3 strategies!");
       return FALSE;
     }
   
   // Check if only two strategies have been selected for each player (add all of them up)
   int num_strategies=0;
-  for (top=1;top<=GetPlotTop();top++)
-    for (i=1;i<=strategy_show[GetPlotTop(top)].Length();i++)
-      num_strategies+=(GetStrategyShow(GetPlotTop(top),i)) ? 1 : 0;
-  for (bottom=1;bottom<=GetPlotBottom();bottom++)
-    for (i=1;i<=strategy_show[GetPlotBottom(bottom)].Length();i++)
-      num_strategies+=(GetStrategyShow(GetPlotBottom(bottom),i)) ? 1 : 0;
-  if (num_strategies>2*(GetPlotTop()+GetPlotBottom())) {
+  for (t=1;t<=GetMyPlot(top).Length();t++)
+    for (i=1;i<=strategy_show[GetMyPlot(top)[t]].Length();i++)
+      num_strategies+=(GetStrategyShow(GetMyPlot(top)[t],i)) ? 1 : 0;
+  for (b=1;b<=GetMyPlot(bottom).Length();b++)
+    for (i=1;i<=strategy_show[GetMyPlot(bottom)[b]].Length();i++)
+      num_strategies+=(GetStrategyShow(GetMyPlot(bottom)[b],i)) ? 1 : 0;
+  if (num_strategies>2*(GetMyPlot(top).Length()+GetMyPlot(bottom).Length())) {
     wxMessageBox("Only two strategies per player allowed!");
     return FALSE;
   }

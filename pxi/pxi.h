@@ -46,6 +46,8 @@
 #define	PXI_PREFS_FONT_AXIS    131
 #define	PXI_PREFS_FONT_OVERLAY  132
 #define	PXI_PREFS_FONT_LABEL    133
+#define	PXI_PAGE_NEXT           135
+#define	PXI_PAGE_PREV           136
 
 #define	PXI_PLOT_X              0
 #define	PXI_PLOT_3              1
@@ -104,26 +106,35 @@ class PxiDrawSettings
 {
 friend class dialogDrawSettings;
 private:
-  int 		plot_mode;
-  int		data_mode;
-  int		one_or_two;
-  Bool		connect_dots;
-  int		color_mode;
-  Bool		restart_overlay_colors;
-  int		num_infosets;
-  typedef	gBlock<Bool> show_player_strategies;
+  int 		plot_mode;    // PXI_PLOT_X, PXI_PLOT_2, or PXI_PLOT_3
+  int           data_mode;    // Can be either 1-Log or 0-Linear
+  int           one_or_two;   // Plots per page
+  int           whichpage;    // current page number
+  int           maxpage;       // maximum page number
+  int           plots_per_page; // Plots per page
+  int		color_mode;   // COLOR_EQU, COLOR_PROB, or COLOR_NONE
+  int           num_infosets; // total number of infosets
+  Bool		connect_dots;   // connect dots on plot.  
+  Bool          restart_overlay_colors; // new set of colors for each overlay 
+
+  typedef	gBlock<Bool> show_player_strategies; 
   friend	gOutput &operator<<(gOutput &op,const show_player_strategies &p);
-  gBlock<show_player_strategies>	strategy_show;
-  gBlock<int>	plot_top,plot_bottom;
-  float		stop_min,stop_max,data_min,data_max;
-  double	l_start,l_stop,l_step;
-  wxFont	overlay_font, label_font, axis_font;
+
+  gBlock<show_player_strategies> strategy_show;  // strategies to plot for each infoset
+  gBlock< gBlock<int> >	         myplot;         // infosets to plot for each plot
+
+  double	stop_min,stop_max;               // plot limits on X (lambda) variable
+  double        data_min,data_max;               // plot limits on Y variable
+  double	l_start,l_stop,l_step;           // data limits on X (lambda)
+  wxFont	overlay_font, label_font, axis_font; 
   wxBrush       clear_brush, exp_data_brush;
   wxColour      axis_text_color;
-  int		overlay_symbol;
-  Bool		overlay_lines;
-  int		overlay_token_size;
-  unsigned int plot3_features,plotx_features,plot2_features;
+  int		overlay_symbol;      // one of : OVERLAY_TOKEN | OVERLAY_NUMBER
+  Bool		overlay_lines;       // connect overlay points?
+  int		overlay_token_size;  
+  unsigned int  plotx_features;  // Plot features, using bit arithmetic -- one of 
+  unsigned int  plot2_features;  // DRAW_AXIS|DRAW_TICKS|DRAW_NUMS|DRAW_LABELS|DRAW_SQUARE
+  unsigned int  plot3_features;
   Bool CheckPlot3Mode(void);
   Bool CheckPlot2Mode(void);
 public:
@@ -136,7 +147,9 @@ public:
   int 	GetPlotMode(void) {return plot_mode;}
   // NumPlots, returns either 1 or 2, corresponding to # of grids/plots per page
   //   currently only works for PlotX
-  int	GetNumPlots(void) {return one_or_two;}
+  int	GetPlotsPerPage(void) {return one_or_two;}
+  // NumInfosets returns total number of infosets
+  int	GetNumInfosets(void) {return num_infosets;}
   // DataMode, returns one of DATA_TYPE_ARITH | DATA_TYPE_LOG indicating data type
   int	GetDataMode(void) {return data_mode;}
   // ColorMode, how to color the data: by equilibrium #, prob #, or just a constant
@@ -157,14 +170,12 @@ public:
   double GetDataMin(void) {return data_min;}
   // DataMax, returns the largest value of y to plot
   double GetDataMax(void) {return data_max;}
-  // If called with no arguments or 0, returns the total # of players to be
-  //   displayed on the top plot for PlotX mode, or the left triangle for
-  //   Plot3 mode.  If called with an argument, returns the actual player #
-  int	GetPlotTop(int i=0)
-    {if (i==0) return plot_top.Length(); else return plot_top[i];}
-  // PlotBottom, see PlotTop
-  int	GetPlotBottom(int i=0)
-    {if (i==0) return plot_bottom.Length(); else return plot_bottom[i];}
+
+  //  Gets the list of infosets for plot i
+  gBlock<int> &GetMyPlot(int i=1) // UNSAFE -- allow calling code to change elements of myplot!!
+    {if(i>=1 &&i<=myplot.Length()) return myplot[i];}
+  int GetNumPlots(void) {return myplot.Length();}
+
   // OverlayFont, if the experimental data overlay is done using the number
   //   of the point in the file, this font is used to display that number
   const wxFont &GetOverlayFont(void) const {return overlay_font;}
@@ -193,6 +204,19 @@ public:
   unsigned int PlotFeatures(void);
 
   // Set* functions
+
+  void SetPage(int i) {if(i>0 && i<=maxpage) whichpage = i;}
+  void SetMaxPages(int i) {if(i>0) maxpage = i;SetPage(1);}
+  void SetPlotsPerPage(int n) 
+    {
+      if(n>=1 || n<=2) 
+	one_or_two=n; 
+      int npl=GetNumPlots(); 
+      SetMaxPages(npl-((n*npl-npl)/n));  // to get the least integer greater than npl/n
+    }
+  void SetNextPage(void) {SetPage(whichpage+1);}
+  void SetPreviousPage(void) {SetPage(whichpage-1);}
+  int GetPage(void) {return whichpage;}
 
   void SetPlotFeatures(unsigned int feat);
   void SetOptions(wxWindow *parent);
@@ -241,6 +265,7 @@ private:
   Bool	stopped;
   double cur_e;
   bool painting;
+  //  int whichpage, maxpage, plots_per_page;
   void PlotData_X(wxDC& dc,int ch,int cw,const FileHeader &f_header,int level);
   void PlotData_3(wxDC& dc,int ch,int cw,const FileHeader &f_header,int level);
   void PlotData_2(wxDC& dc,int ch,int cw,const FileHeader &f_header);
@@ -269,7 +294,10 @@ public:
   void OnEvent(wxMouseEvent &ev);
   void ShowDetail(void);
   void StopIt(void);
-  void Refresh(void) { wxPaintEvent paint; OnPaint(paint); }
+  void Render(void) {wxClientDC dc(this); dc.BeginDrawing();Render(dc);dc.EndDrawing();}
+  void Render(wxDC &dc) {Update(dc,PXI_UPDATE_SCREEN);}
+  void SetNextPage(void) {draw_settings->SetNextPage();}
+  void SetPreviousPage(void) {draw_settings->SetPreviousPage();}
 
   PxiDrawSettings *DrawSettings(void) {return draw_settings;}
   void NewExpData(ExpDataParams &P);
@@ -324,9 +352,12 @@ private:
   void OnPrefsFontLabel(wxCommandEvent &);
   void OnPrefsFontOverlay(wxCommandEvent &);
   void OnPrefsColors(wxCommandEvent &);
+  void OnNextPage(wxCommandEvent &);
+  void OnPreviousPage(wxCommandEvent &);
   void OnHelpAbout(wxCommandEvent &);
   void OnHelpContents(wxCommandEvent &);
-
+  void OnChar(wxKeyEvent &ev) {canvas->OnChar(ev);}
+  void OnEvent(wxMouseEvent &ev) {canvas->OnEvent(ev);}
   void MakeMenus(void);
 public:
   PxiChild(PxiFrame *p_parent, const wxString &p_title);

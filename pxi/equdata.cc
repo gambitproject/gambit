@@ -4,10 +4,16 @@
 
 //***********************CONSTRUCTORS FOR FILE HEADER***********************
 FileHeader::FileHeader(const char *in_filename)
-{file_name=in_filename;gFileInput in(in_filename);Init(in);}
+{
+  file_name=in_filename;
+  gFileInput in(in_filename);
+  Init(in);
+}
 
 FileHeader::FileHeader(gInput &in)
-{Init(in);}
+{
+  Init(in);
+}
 
 FileHeader::FileHeader(const FileHeader &F):
   merror(F.merror),q_step(F.q_step),e_step(F.e_step),e_start(F.e_start),e_stop(F.e_stop),data_type(F.data_type),
@@ -20,38 +26,48 @@ FileHeader::FileHeader(const FileHeader &F):
 
 FileHeader &FileHeader::operator=(const FileHeader &F)
 {
-  merror=F.merror;q_step=F.q_step;e_step=F.e_step;e_start=F.e_start;e_stop=F.e_stop;data_type=F.data_type;
+  merror=F.merror;
+  q_step=F.q_step;
+  e_step=F.e_step;
+  e_start=F.e_start;
+  e_stop=F.e_stop;
+  data_type=F.data_type;
   strategies=F.strategies;
-  num_columns=F.num_columns;num_infosets=F.num_infosets;
-  e_column=F.e_column;delta_column=F.delta_column;prob_cols=F.prob_cols;
+  num_columns=F.num_columns;
+  num_infosets=F.num_infosets;
+  e_column=F.e_column;
+  delta_column=F.delta_column;
+  prob_cols=F.prob_cols;
   //  matrix=(F.matrix) ? new NormalMatrix(*F.matrix) : 0;
   file_name=F.file_name;
-  data_max=F.data_max;data_min=F.data_min;
+  data_max=F.data_max;
+  data_min=F.data_min;
   return (*this);
 }
 
 void FileHeader::Init(gInput &in)
 {
   int iset,ok=0;
-  merror=-1;q_step=-1;
+  merror=-1;
+  q_step=-1;
   // Get dimensionality
   ok=FindStringInFile(in,"Dimensionality:");assert(ok);
-  in>>num_infosets;
+  in >> num_infosets;
   strategies=gBlock<int>(num_infosets);
   for (iset=1;iset<=num_infosets;iset++) in>>strategies[iset];
   // Get the x/y data settings/scales
   ok=FindStringInFile(in,"Settings:");assert(ok);
-  in>>e_start>>e_stop>>e_step>>data_min>>data_max>>data_type;
+  in >> e_start >> e_stop >> e_step >> data_min >> data_max >> data_type;
   // Get the data format
   ok=FindStringInFile(in,"DataFormat:");assert(ok);
-  in>>num_columns;
-  in>>e_column>>delta_column;
+  in >> num_columns;
+  in >> e_column >> delta_column;
   prob_cols=gBlock< gBlock<int> >(num_infosets);
   for (iset=1;iset<=num_infosets;iset++)
     prob_cols[iset]=gBlock<int>(strategies[iset]);
   for (iset=1;iset<=num_infosets;iset++)
     for (int st=1;st<=strategies[iset];st++)
-      in>>prob_cols[iset][st];
+      in >> prob_cols[iset][st];
   // Get the optional data
   // Get the game matrix if available
   ok=FindStringInFile(in,"Game:");
@@ -102,7 +118,7 @@ void DataLine::Init(void)
     data[iset]=	PointNd(header.NumStrategies(iset));
 }
 //************************** INPUT/OUTPUT FOR DATALINE *******************
-int	DataLine::Read(gInput &in)
+int DataLine::Read(gInput &in)
 {
   int i;
   gBlock<double>	data_cols(header.NumColumns());

@@ -36,12 +36,12 @@ void PxiCanvas::PlotLabels(wxDC &dc, int ch,int cw)
 double PxiCanvas::CalcY_X(double y,int ch,int plot)
 {
   double y0;
-  y0=(plot==TOP_PLOT) ? (ch-XOFF)-(ch/2)*(draw_settings->GetNumPlots()-1) : (ch-XOFF);
+  y0=(plot==TOP_PLOT) ? (ch-XOFF)-(ch/2)*(draw_settings->GetPlotsPerPage()-1) : (ch-XOFF);
   y=gmax(y,draw_settings->GetDataMin());
   y=gmin(y,draw_settings->GetDataMax());
   y-=draw_settings->GetDataMin();	// set DataMin to correspond to 0
   y/=(draw_settings->GetDataMax()-draw_settings->GetDataMin());	// normalize to [0,1]
-  y=y0-y*(ch-ch/2*(draw_settings->GetNumPlots()-1)-2*XOFF);	// scale to screen size
+  y=y0-y*(ch-ch/2*(draw_settings->GetPlotsPerPage()-1)-2*XOFF);	// scale to screen size
   return y;
 }
 /******************************** CALC X X************************************/
@@ -140,12 +140,16 @@ void PxiCanvas::PlotData_X(wxDC& dc,int ch,int cw,const FileHeader &f_header,int
   int	st;
   double	x,y;
   int	iset;
-  int	point_color;
+  int	point_color=1;
   static int color_start;		// makes each overlay file be plotted a different color set
   int max_equ=0;
   int new_equ=0;
   if (level==1) color_start=0;
-  
+  int page = draw_settings->GetPage();
+  int nplots = draw_settings->GetPlotsPerPage();
+  int top = nplots*(page-1)+1, bottom = top+1;
+  if(bottom>draw_settings->GetNumPlots())bottom=0;  
+
   EquTracker equs;		// init the EquTracker class
   
   gFileInput f(f_header.FileName());
@@ -153,6 +157,55 @@ void PxiCanvas::PlotData_X(wxDC& dc,int ch,int cw,const FileHeader &f_header,int
   int ok=FindStringInFile(f,"Data:");assert(ok);
   f>>probs;
   if (draw_settings->GetColorMode()!=COLOR_EQU && prev_point) (*prev_point)=probs;
+  
+  if (true) {
+    wxString title;
+    title.Printf("Plot %d",top);
+    wxCoord tw,th;
+    dc.GetTextExtent(title,&tw,&th);
+    dc.DrawText(title, cw/2-tw/2, XOFF-th);
+    int lev=0;
+    for (int t=1;t<=draw_settings->GetMyPlot(top).Length();t++) {
+      iset=draw_settings->GetMyPlot(top)[t];
+      for (st=1;st<=f_header.NumStrategies(iset);st++) {
+	if (draw_settings->GetStrategyShow(iset,st)) {
+	  wxString key;
+	  key.Printf("Strategy %d",st);
+	  wxCoord tw,th;
+	  if (draw_settings->GetColorMode()==COLOR_PROB) 
+	    dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
+	  dc.DrawLine(cw-2*XOFF-tw, XOFF+3*th*lev/2+th/2,cw-XOFF-tw, XOFF+3*th*lev/2+th/2);
+	  dc.GetTextExtent(key,&tw,&th);
+	  dc.DrawText(key, cw-XOFF-tw, XOFF+3*th*lev/2);
+	  lev++;
+	}
+      }
+    }
+    if (draw_settings->GetPlotsPerPage()==2 && bottom) {
+      title.Printf("Plot %d",bottom);
+      wxCoord tw,th;
+      dc.GetTextExtent(title,&tw,&th);
+      dc.DrawText(title, cw/2-tw/2, XOFF+(ch/2)-th);
+      int lev=0;
+      for (int t=1;t<=draw_settings->GetMyPlot(bottom).Length();t++) {
+	iset=draw_settings->GetMyPlot(bottom)[t];
+	for (st=1;st<=f_header.NumStrategies(iset);st++) {
+	  if (draw_settings->GetStrategyShow(iset,st)) {
+	    wxString key;
+	    key.Printf("Strategy %d",st);
+	    wxCoord tw,th;
+	    if (draw_settings->GetColorMode()==COLOR_PROB) 
+	      dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
+	    dc.DrawLine(cw-2*XOFF-tw, XOFF+ch/2+3*th*lev/2+th/2,cw-XOFF-tw, XOFF+ch/2+3*th*lev/2+th/2);
+	    dc.SetTextForeground(wxColour(*equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID));
+	    dc.GetTextExtent(key,&tw,&th);
+	    dc.DrawText(key, cw-XOFF-tw, XOFF+ch/2+3*th*lev/2);
+	    lev++;
+	  }
+	}
+      }
+    }
+  }
   
   while (!probs.Done() && f.IsValid()) {
     //---------------------------if cur_e is in active range ------------
@@ -167,13 +220,13 @@ void PxiCanvas::PlotData_X(wxDC& dc,int ch,int cw,const FileHeader &f_header,int
       if (point_color>max_equ) max_equ=point_color;
       // next line sets the correct color
       dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(point_color+color_start)%NUM_COLORS+1],1,wxSOLID)));
-      for (int top=1;top<=draw_settings->GetPlotTop();top++) {
-	iset=draw_settings->GetPlotTop(top);
+      for (int t=1;t<=draw_settings->GetMyPlot(top).Length();t++) {
+	iset=draw_settings->GetMyPlot(top)[t];
 	for (st=1;st<=f_header.NumStrategies(iset);st++) {
 				// plot the data point
 	  y=CalcY_X(probs[iset][st],ch,TOP_PLOT);
 	  if (draw_settings->GetStrategyShow(iset,st)/* && draw_settings->RangeY(probs[iset][st])*/) {
-	    if (draw_settings->GetColorMode()==COLOR_PROB)
+	    if (draw_settings->GetColorMode()==COLOR_PROB) 
 	      dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
 	    if (draw_settings->ConnectDots() && !new_equ)
 	      dc.DrawLine(CalcX_X(prev_point->E(),cw),CalcY_X((*prev_point)[iset][st],ch,TOP_PLOT),x,y);
@@ -185,20 +238,20 @@ void PxiCanvas::PlotData_X(wxDC& dc,int ch,int cw,const FileHeader &f_header,int
 	}
       }
       
-      if (draw_settings->GetNumPlots()==2) {
-	for (int bottom=1;bottom<=draw_settings->GetPlotBottom();bottom++) {
-	  iset=draw_settings->GetPlotBottom(bottom);
+      if (draw_settings->GetPlotsPerPage()==2 && bottom) {
+	for (int b=1;b<=draw_settings->GetMyPlot(bottom).Length();b++) {
+	  iset=draw_settings->GetMyPlot(bottom)[b];
 	  for (st=1;st<=f_header.NumStrategies(iset);st++) {
 	    y=CalcY_X(probs[iset][st],ch,BOTTOM_PLOT);
 	    if (draw_settings->GetStrategyShow(iset,st) /* && draw_settings->RangeY(probs[iset][st])*/) {
-	    if (draw_settings->GetColorMode()==COLOR_PROB)
-	    dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
-	    if (draw_settings->ConnectDots() && !new_equ)
-	    dc.DrawLine(CalcX_X(prev_point->E(),cw),CalcY_X((*prev_point)[iset][st],ch,BOTTOM_PLOT),x,y);
-	    else
-	    dc.DrawPoint(x,y);
-	    // if there is an experimental data point for this cur_e, plot it
-	    if (exp_data)	DrawExpPoint_X(dc,probs.E(),iset,st,ch,cw,BOTTOM_PLOT);
+	      if (draw_settings->GetColorMode()==COLOR_PROB)
+		dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
+	      if (draw_settings->ConnectDots() && !new_equ)
+		dc.DrawLine(CalcX_X(prev_point->E(),cw),CalcY_X((*prev_point)[iset][st],ch,BOTTOM_PLOT),x,y);
+	      else
+		dc.DrawPoint(x,y);
+	      // if there is an experimental data point for this cur_e, plot it
+	      if (exp_data)	DrawExpPoint_X(dc,probs.E(),iset,st,ch,cw,BOTTOM_PLOT);
 	    }
 	  }
 	}
@@ -250,9 +303,12 @@ void PxiCanvas::PlotData_2(wxDC& dc,int ch,int cw,const FileHeader &f_header)
 {
   double	x,y;
   int	iset;
-  int		point_color;			// color of the pixel, corresponds to equilibrium #
+  int		point_color=1;			// color of the pixel, corresponds to equilibrium #
   int new_equ=0;
   int side=gmin(ch,cw);	// maintain square aspect ration that fits in this window
+  int page = draw_settings->GetPage();
+  int nplots = draw_settings->GetPlotsPerPage();
+  int top = nplots*(page-1)+1, bottom = top+1;
   
   // where the actual data gets read in
   gFileInput f(f_header.FileName());
@@ -272,7 +328,7 @@ void PxiCanvas::PlotData_2(wxDC& dc,int ch,int cw,const FileHeader &f_header)
     {
       //------------------- if the cur_e is in range, display it -----------
       if (probs.E()<draw_settings->GetStopMax() && probs.E()>draw_settings->GetStopMin()) {
-	iset=draw_settings->GetPlotTop(1);
+	iset=draw_settings->GetMyPlot(top)[1];
 	point_color=equs.Check_Equ(probs,&new_equ,prev_point);
 	dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[point_color%NUM_COLORS+1],3,wxSOLID)));
 	/*------------------ ISET #1: plot the point in color ----------------------*/
@@ -301,11 +357,11 @@ double PxiCanvas::CalcX_3(double p1,double p2,int ch,int cw,int plot)
   double side;
   // Determine which dimension imposes the size constraint--the vert or horiz
   // Note: the bit of trig here is self explanatory...
-  if ((cw/draw_settings->GetNumPlots()-2*XOFF)/2*TAN60<=(ch-2*XOFF))	// if the constraint is horizontal
-    side=cw/draw_settings->GetNumPlots()-2*XOFF;			// two triangles must fit, with XOFF in between
+  if ((cw/draw_settings->GetPlotsPerPage()-2*XOFF)/2*TAN60<=(ch-2*XOFF))	// if the constraint is horizontal
+    side=cw/draw_settings->GetPlotsPerPage()-2*XOFF;			// two triangles must fit, with XOFF in between
   else
     side=((ch-2*XOFF)/TAN60)*2;
-  double x0=(plot==TOP_PLOT) ? XOFF+side : XOFF+side+cw/draw_settings->GetNumPlots();
+  double x0=(plot==TOP_PLOT) ? XOFF+side : XOFF+side+cw/draw_settings->GetPlotsPerPage();
   p1/=(draw_settings->GetDataMax()-draw_settings->GetDataMin()); // normalize to [0,1]
   p2/=(draw_settings->GetDataMax()-draw_settings->GetDataMin()); // normalize to [0,1]
   
@@ -315,8 +371,8 @@ double PxiCanvas::CalcX_3(double p1,double p2,int ch,int cw,int plot)
 double PxiCanvas::CalcY_3(double p1,int ch,int cw)
 {
   double side;
-  if ((cw/draw_settings->GetNumPlots()-2*XOFF)/2*TAN60<=(ch-2*XOFF))	// if the constraint is horizontal
-    side=cw/draw_settings->GetNumPlots()-2*XOFF;			// two triangles must fit, with XOFF in between
+  if ((cw/draw_settings->GetPlotsPerPage()-2*XOFF)/2*TAN60<=(ch-2*XOFF))	// if the constraint is horizontal
+    side=cw/draw_settings->GetPlotsPerPage()-2*XOFF;			// two triangles must fit, with XOFF in between
   else
     side=((ch-2*XOFF)/TAN60)*2;
   
@@ -329,7 +385,7 @@ double PxiCanvas::CalcY_3(double p1,int ch,int cw)
 // data overlay
 void PxiCanvas::DrawExpPoint_3(wxDC &dc,double cur_e,int iset,int st1,int st2,int ch,int cw,int plot)
 {
-  exp_data_struct	*s=0;
+  exp_data_struct *s=0;
   double x,y;
   gBlock<int> point_nums;
   
@@ -368,9 +424,13 @@ void PxiCanvas::PlotData_3(wxDC& dc,int ch,int cw,const FileHeader &f_header,int
   double x,y;
   int iset;
   int new_equ=0;
+  int page = draw_settings->GetPage();
+  int nplots = draw_settings->GetPlotsPerPage();
+  int top = nplots*(page-1)+1, bottom = top+1;
+  if(bottom>draw_settings->GetNumPlots())nplots=1;  
   // where the actual data gets read in
   
-  int point_color;                 // color of the pixel, corresponds to equilibrium #
+  int point_color=1;                 // color of the pixel, corresponds to equilibrium #
   
   gFileInput f(f_header.FileName());
   DataLine *prev_point=(draw_settings->ConnectDots()) ? new DataLine : NULL;
@@ -388,9 +448,9 @@ void PxiCanvas::PlotData_3(wxDC& dc,int ch,int cw,const FileHeader &f_header,int
       wxPen *cpen=wxThePenList->FindOrCreatePen(equ_colors[(point_color+color_start)%NUM_COLORS+1],3,wxSOLID);
       //      if (dc.current_pen!=cpen) dc.SetPen(cpen);
       dc.SetPen(*cpen);
-      for (int plots=0;plots<draw_settings->GetNumPlots();plots++) {	// draw one or two triangle plots
-	for (int iset_num=1;iset_num<=((plots) ?  draw_settings->GetPlotBottom() : draw_settings->GetPlotTop());iset_num++) {
-	  iset=(plots) ? draw_settings->GetPlotBottom(iset_num) : draw_settings->GetPlotTop(iset_num);
+      for (int plots=0;plots<nplots;plots++) {	// draw one or two triangle plots
+	for (int iset_num=1;iset_num<=((plots) ?  draw_settings->GetMyPlot(bottom).Length() : draw_settings->GetMyPlot(top).Length());iset_num++) {
+	  iset=(plots) ? draw_settings->GetMyPlot(bottom)[iset_num] : draw_settings->GetMyPlot(top)[iset_num];
 				/*------------------ plot the point in color ----------------------*/
 	  int st1=0,st2=0;	// which two strategies to plot
 	  int i=1;
@@ -428,17 +488,21 @@ void PxiCanvas::Update(wxDC& dc,int device)
   const wxFont &font = draw_settings->GetAxisFont(); 
   wxBeginBusyCursor();
   GetClientSize(&cw,&ch);
+  int page = draw_settings->GetPage();
+  int nplots = draw_settings->GetPlotsPerPage();
+  int top = nplots*(page-1)+1, bottom = top+1;
+  if(bottom>draw_settings->GetNumPlots())nplots=1;  
 
   if (device==PXI_UPDATE_SCREEN) {
     dc.SetBackground(*wxWHITE_BRUSH);
     dc.Clear();
   }
   else {
-#ifdef wx_msw
+#ifdef __WXMSW__
     // For printing, scale the picture
     if (device==PXI_UPDATE_PRINTER) {
       // This will print each plot in a square box
-      float width,height;
+      wxCoord width,height;
       dc.GetSize(&width,&height);
       cw=width*0.8;ch=height*0.8;
       dc.SetDeviceOrigin(width*0.1,height*0.1);
@@ -457,21 +521,28 @@ void PxiCanvas::Update(wxDC& dc,int device)
   dc.SetBrush(draw_settings->GetClearBrush());
  
   if (draw_settings->GetPlotMode()==PXI_PLOT_X) {
-    PlotAxis_X(dc,draw_settings->GetStopMin(),draw_settings->GetStopMax(),draw_settings->GetDataMin(),
-	       draw_settings->GetDataMax(),ch,cw,draw_settings->GetNumPlots(),
+    PlotAxis_X(dc,draw_settings->GetStopMin(),draw_settings->GetStopMax(),
+	       draw_settings->GetDataMin(),draw_settings->GetDataMax(),
+	       ch,cw,draw_settings->GetPlotsPerPage(),nplots,
 	       draw_settings->GetDataMode(),draw_settings->PlotFeatures(),headers[1].EStep());
-    for (int i=1;i<=headers.Length();i++) PlotData_X(dc,ch,cw,headers[i],i);
+    for (int i=1;i<=headers.Length();i++) 
+      PlotData_X(dc,ch,cw,headers[i],i);
   }
+  
   if (draw_settings->GetPlotMode()==PXI_PLOT_2) {
     PlotAxis_2(dc,0,1,0,1,ch,cw,draw_settings->PlotFeatures());
-    for (int i=1;i<=headers.Length();i++) PlotData_2(dc,ch,cw,headers[i]);
+    for (int i=1;i<=headers.Length();i++) 
+      PlotData_2(dc,ch,cw,headers[i]);
   }
+
   int iset;
   if (draw_settings->GetPlotMode()==PXI_PLOT_3) {
+
+    //  Yuck -- clean up this mess:
     wxString labels[] = {"1", "2", "3", "1", "2", "3"};
-    for (int plots=0;plots<draw_settings->GetNumPlots();plots++) {	// which plot
-      for (int iset_num=1;iset_num<=((plots) ?  draw_settings->GetPlotBottom() : draw_settings->GetPlotTop());iset_num++) {
-	iset=(plots) ? draw_settings->GetPlotBottom(iset_num) : draw_settings->GetPlotTop(iset_num);
+    for (int plots=0;plots<nplots;plots++) {	// which plot
+      for (int iset_num=1;iset_num<=((plots) ?  draw_settings->GetMyPlot(bottom).Length() : draw_settings->GetMyPlot(top).Length());iset_num++) {
+	iset=(plots) ? draw_settings->GetMyPlot(bottom)[iset_num] : draw_settings->GetMyPlot(top)[iset_num];
 	int st1=0,st2=0,st3=0;	// which two strategies to plot
 	int i=1;
 	while(!st1) {if (draw_settings->GetStrategyShow(iset,i)) st1=i;i++;}
@@ -486,13 +557,12 @@ void PxiCanvas::Update(wxDC& dc,int device)
 	if(plots==0)labels[2]=tmp; else labels[5]=tmp;
       }
     }
-    PlotAxis_3(dc,ch,cw,draw_settings->GetNumPlots(),draw_settings->PlotFeatures(), labels);
-    for (int i=1;i<=headers.Length();i++) PlotData_3(dc,ch,cw,headers[i],i);
+
+    PlotAxis_3(dc,ch,cw,draw_settings->GetPlotsPerPage(),nplots, draw_settings->PlotFeatures(), labels);
+    for (int i=1;i<=headers.Length();i++) 
+      PlotData_3(dc,ch,cw,headers[i],i);
   }
-  if (device==PXI_UPDATE_SCREEN)
-    Refresh();
   wxEndBusyCursor();
 }
-
 
 
