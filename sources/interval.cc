@@ -7,6 +7,7 @@
 #include "interval.imp"
 #include "glist.imp"
 #include "double.h"
+#include "gnumber.h"
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -34,3 +35,8 @@ TEMPLATE class gInterval<gDouble>;
 TEMPLATE class gList< gInterval<gDouble> >;
 TEMPLATE class gNode< gInterval<gDouble> >;
 TEMPLATE gOutput& operator << (gOutput& output, const gInterval<gDouble>& x);
+
+TEMPLATE class gInterval<gNumber>;
+TEMPLATE class gList< gInterval<gNumber> >;
+TEMPLATE class gNode< gInterval<gNumber> >;
+TEMPLATE gOutput& operator << (gOutput& output, const gInterval<gNumber>& x);

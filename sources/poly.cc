@@ -5,6 +5,7 @@
 
 #include "poly.imp"
 #include "double.h"
+#include "gnumber.h"
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -29,6 +30,10 @@ TEMPLATE class polynomial<gDouble>;
 TEMPLATE gOutput& operator << (gOutput& output, 
 			       const polynomial<gDouble>& x);
 
+TEMPLATE class polynomial<gNumber>;
+TEMPLATE gOutput& operator << (gOutput& output, 
+			       const polynomial<gNumber>& x);
+
 #include "glist.imp"
 TEMPLATE class gNode< polynomial<gRational> >;
 TEMPLATE class gList< polynomial<gRational> >;
@@ -45,4 +50,9 @@ TEMPLATE gOutput& operator << (gOutput& output,
 
 TEMPLATE class gNode< polynomial<gDouble> >;
 TEMPLATE class gList< polynomial<gDouble> >;
+
+TEMPLATE class gNode< polynomial<gNumber> >;
+TEMPLATE class gList< polynomial<gNumber> >;
+TEMPLATE gOutput& operator << (gOutput& output, 
+			       const gList<polynomial<gNumber> >&);
 
