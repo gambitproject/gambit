@@ -204,7 +204,7 @@ void guiSubgameViaNfg::BaseViewNormal(const Nfg &p_nfg, NFSupport &p_support)
 
 LiapSolveParamsDialog::LiapSolveParamsDialog(wxWindow *p_parent,
 					     bool p_subgames, bool p_vianfg)
-  : dialogAlgorithm("LiapSolve Parameters", p_parent)
+  : dialogAlgorithm("LiapSolve Parameters", p_vianfg, p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
 }
@@ -397,7 +397,7 @@ bool guiefgLiapNfg::SolveSetup(void)
 
 LcpSolveDialog::LcpSolveDialog(wxWindow *p_parent, bool p_subgames,
 			       bool p_vianfg)
-  : dialogAlgorithm("LcpSolve Parameters", p_parent)
+  : dialogAlgorithm("LcpSolve Parameters", p_vianfg, p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
   Go();
@@ -696,7 +696,8 @@ bool guiefgEnumPureEfg::SolveSetup(void)
 EnumSolveParamsDialog::EnumSolveParamsDialog(wxWindow *p_parent,
 					     bool p_subgames,
 					     bool p_vianfg)
-  : dialogAlgorithm("EnumMixedSolve Params", p_parent, ENUMMIXED_HELP)
+  : dialogAlgorithm("EnumMixedSolve Params", p_vianfg, p_parent,
+		    ENUMMIXED_HELP)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
   Go();
@@ -814,7 +815,7 @@ bool guiefgEnumMixedNfg::SolveSetup(void)
 
 LPSolveParamsDialog::LPSolveParamsDialog(wxWindow *p_parent, bool p_subgames,
 					 bool p_vianfg)
-  : dialogAlgorithm("LpSolve Parameters", p_parent, LP_HELP)
+  : dialogAlgorithm("LpSolve Parameters", p_vianfg, p_parent, LP_HELP)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
   Go();
@@ -990,7 +991,7 @@ bool guiefgLpEfg::SolveSetup(void)
 
 SimpdivSolveParamsDialog::SimpdivSolveParamsDialog(wxWindow *p_parent /*=0*/,
 						   bool p_subgames /*=false*/)
-  : dialogAlgorithm("SimpdivSolve Params", p_parent, SIMPDIV_HELP)
+  : dialogAlgorithm("SimpdivSolve Params", true, p_parent, SIMPDIV_HELP)
 {
   MakeCommonFields(true, p_subgames, true);
   Go();
@@ -1087,7 +1088,7 @@ bool guiefgSimpdivNfg::SolveSetup(void)
 guiPolEnumParamsDialog::guiPolEnumParamsDialog(wxWindow *p_parent,
 					       bool p_subgames,
 					       bool p_vianfg)
-  : dialogAlgorithm("PolEnumSolve Parameters", p_parent)
+  : dialogAlgorithm("PolEnumSolve Parameters", p_vianfg, p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
   Go();
@@ -1358,7 +1359,7 @@ bool guiefgQreEfg::SolveSetup(void)
 
 GridSolveParamsDialog::GridSolveParamsDialog(wxWindow *p_parent,
 					     const gText &/*p_filename*/)
-  : dialogAlgorithm("QreAllSolve Params", p_parent, QRE_HELP)
+  : dialogAlgorithm("QreAllSolve Params", true, p_parent, QRE_HELP)
 {
   MakeCommonFields(true, false, true);
   Go();

@@ -37,6 +37,7 @@ private:
   void OnDepth(void);
 
 protected:
+  bool m_usesNfg, m_subgames;
   int m_completed;
   wxRadioBox *m_depthChoice, *m_typeChoice, *m_methodChoice;
   wxCheckBox *m_markSubgames, *m_selectSolutions;
@@ -50,8 +51,8 @@ protected:
   void Go(void) { Fit(); Show(TRUE); }
 
 public:
-  dialogAlgorithm(const gText &, wxWindow *parent = 0, 
-		     const char *help_str = 0);
+  dialogAlgorithm(const gText &, bool, wxWindow *parent = 0, 
+		  const char *help_str = 0);
   virtual ~dialogAlgorithm();
 
   int Completed(void) const { return m_completed; }

@@ -32,15 +32,43 @@ Bool wxGetResourceStr(char *section, char *entry, char *value, char *file)
 //            dialogAlgorithm: Member function definitions
 //========================================================================
 
-dialogAlgorithm::dialogAlgorithm(const gText &p_label,
+dialogAlgorithm::dialogAlgorithm(const gText &p_label, bool p_usesNfg,
 				 wxWindow *p_parent, 
 				 const char */*help_str*/)
-  : wxDialogBox(p_parent, p_label, TRUE), m_depthChoice(0), m_typeChoice(0),
+  : wxDialogBox(p_parent, p_label, TRUE),
+    m_usesNfg(p_usesNfg), m_depthChoice(0), m_typeChoice(0),
     m_methodChoice(0), m_markSubgames(0)
 { }
 
 dialogAlgorithm::~dialogAlgorithm(void)
-{ }
+{
+  if (m_completed == wxOK) {
+    if (m_usesNfg) {
+      wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Depth",
+		      m_depthChoice->GetSelection(), "gambit.ini");
+      if (m_depthChoice->GetSelection() != 0) {
+	wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Type",
+			m_typeChoice->GetSelection(), "gambit.ini");
+	wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Method",
+			m_methodChoice->GetSelection(), "gambit.ini");
+      }
+    }
+    else {
+      wxWriteResource("Soln-Defaults", "Efg-ElimDom-Depth",
+		      m_depthChoice->GetSelection(), "gambit.ini");
+      if (m_depthChoice->GetSelection() != 0)
+	wxWriteResource("Soln-Defaults", "Efg-ElimDom-Type",
+			m_typeChoice->GetSelection(), "gambit.ini");
+    }
+
+    if (m_subgames) {
+      wxWriteResource("Soln-Defaults", "Efg-Mark-Subgames",
+		      m_markSubgames->GetValue(), "gambit.ini");
+      wxWriteResource("Soln-Defaults", "Efg-Interactive-Solns",
+		      m_selectSolutions->GetValue(), "gambit.ini");
+    }
+  }
+}
 
 void dialogAlgorithm::OnOK(void)
 {
@@ -71,16 +99,29 @@ void dialogAlgorithm::OnDepth(void)
 
 void dialogAlgorithm::DominanceFields(bool p_usesNfg)
 {
-  if (p_usesNfg)
+  int depth = 0, type = 0, method = 0;
+
+  if (p_usesNfg) {
     (void) new wxMessage(this, "Eliminate dominated mixed strategies");
-  else
+    wxGetResource("Soln-Defaults", "Nfg-ElimDom-Depth", &depth, "gambit.ini");
+    wxGetResource("Soln-Defaults", "Nfg-ElimDom-Type", &type, "gambit.ini");
+    wxGetResource("Soln-Defaults", "Nfg-ElimDom-Method", &method,
+		  "gambit.ini");
+  }
+  else {
     (void) new wxMessage(this, "Eliminate dominated behavior strategies");
+    wxGetResource("Soln-Defaults", "Efg-ElimDom-Depth", &depth, "gambit.ini");
+    wxGetResource("Soln-Defaults", "Efg-ElimDom-Type", &type, "gambit.ini");
+  }
   NewLine();
 
   char *depthChoices[] = { "None", "Once", "Iterative" };
   m_depthChoice = new wxRadioBox(this, (wxFunction) CallbackDepth, "Depth",
 				 -1, -1, -1, -1, 3, depthChoices);
   m_depthChoice->SetClientData((char *) this);
+  if (depth >= 0 && depth <= 2) 
+    m_depthChoice->SetSelection(depth);
+
   NewLine();
 
   char *typeChoices[] = { "Weak", "Strong" };
@@ -88,32 +129,44 @@ void dialogAlgorithm::DominanceFields(bool p_usesNfg)
 				2, typeChoices);
   if (m_depthChoice->GetSelection() == 0)
     m_typeChoice->Enable(FALSE);
+  else if (type == 0 || type == 1)
+    m_typeChoice->SetSelection(type);
 
   if (p_usesNfg) {
     char *methodChoices[] = { "Pure", "Mixed" };
     m_methodChoice = new wxRadioBox(this, 0, "Method", -1, -1, -1, -1,
 				    2, methodChoices);
-    if (m_depthChoice->GetSelection() == 0)
+    if (m_depthChoice->GetSelection() == 0) 
       m_methodChoice->Enable(FALSE);
+    else if (method == 0 || method == 1)
+      m_methodChoice->SetSelection(method);
   }
   NewLine();
 }
 
 void dialogAlgorithm::SubgameFields(void)
 {
+  Bool mark = false, select = false;
   (void) new wxMessage(this, "Subgames");
   NewLine();
 
-  m_markSubgames = new wxCheckBox(this, 0, "Mark subgames before solving");
+  wxGetResource("Soln-Defaults", "Efg-Mark-Subgames", &mark, "gambit.ini");
+  wxGetResource("Soln-Defaults", "Efg-Interactive-Solns", &select,
+		"gambit.ini");
+
+  m_markSubgames = new wxCheckBox(this, 0, "Mark subgames before solving",
+				  mark);
   NewLine();
   m_selectSolutions = new wxCheckBox(this, 0,
-				     "Interactively select subgame solutions");
+				     "Interactively select subgame solutions",
+				     select);
   NewLine();
 }
 
 void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
 				       bool p_usesNfg)
 {
+  m_subgames = p_subgames;
   if (p_dominance)   DominanceFields(p_usesNfg);
   if (p_subgames)    SubgameFields();
   AlgorithmFields();
@@ -133,7 +186,7 @@ void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
 PxiParamsDialog::PxiParamsDialog(const char *alg, const char *label, 
                                  const char *fn, wxWindow *parent,
                                  const char *help_str)
-  : dialogAlgorithm(label, parent, help_str)
+  : dialogAlgorithm(label, false, parent, help_str)
 { }
 
 // Make Pxi Fields
@@ -174,7 +227,7 @@ PxiParamsDialog::~PxiParamsDialog() { }
 
 dialogEnumPure::dialogEnumPure(wxWindow *p_parent, bool p_subgames,
 			       bool p_vianfg)
-  : dialogAlgorithm("EnumPureSolve Parameters", p_parent)
+  : dialogAlgorithm("EnumPureSolve Parameters", p_vianfg, p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
   Go();
@@ -182,7 +235,7 @@ dialogEnumPure::dialogEnumPure(wxWindow *p_parent, bool p_subgames,
 
 dialogEnumPure::~dialogEnumPure()
 {
-  wxWriteResource("Algorithm Params", "EnumPure-stopAfter", StopAfter(),
+  wxWriteResource("Algorithm Params", "StopAfter", StopAfter(),
 		  "gambit.ini");
 }
 
@@ -192,7 +245,7 @@ void dialogEnumPure::AlgorithmFields(void)
   NewLine();
 
   int stopAfter = 0;
-  wxGetResource("Algorithm Params", "EnumPure-stopAfter", &stopAfter,
+  wxGetResource("Algorithm Params", "StopAfter", &stopAfter,
 		"gambit.ini");
   
   m_findAll = new wxCheckBox(this, (wxFunction) CallbackAll, "Find all");
