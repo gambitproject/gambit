@@ -328,6 +328,10 @@ wxFrame *GambitApp::OnInit(void)
     if (argc > 1) 
         gambit_frame->LoadFile(argv[1]);
 
+    // Set current directory.
+
+    gambitApp.SetCurrentDir(gText(wxGetWorkingDirectory()));
+
     // If playing back a log file, read in the log file and
     // execute the log file commands one by one.
 
@@ -386,17 +390,8 @@ void GambitFrame::LoadFile(char *s)
         {
             Enable(FALSE); // Don't allow anything while the dialog is up.
 
-            //s = wxFileSelector("Load data file", NULL, NULL, NULL, "*.?fg");
-
-            // Load current directory into default path.
-			// NOTE: it might be better to store the default path somewhere
-			//       else e.g. as a field in the GambitFrame object.
-
-            static char path[1024] = "";
-            if (strcmp(path, "") == 0)
-                strcpy(path, wxGetWorkingDirectory());
-
-            s = wxFileSelector("Load data file", path, NULL, NULL, "*.?fg");
+            s = wxFileSelector("Load data file", gambitApp.CurrentDir(), 
+                               NULL, NULL, "*.?fg");
 
             Enable(TRUE);
 
@@ -404,7 +399,7 @@ void GambitFrame::LoadFile(char *s)
                 return;
 
             // Save the current directory.
-            strcpy(path, wxPathOnly(s));
+            gambitApp.SetCurrentDir(gText(wxPathOnly(s)));
 
             GUI_RECORD_ARG("GambitFrame::LoadFile", 1, s);
 

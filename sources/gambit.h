@@ -22,9 +22,15 @@ extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
 
 class GambitApp: public wxApp
 {
+private:
+	gText current_dir; /* Current position in directory tree. */
+
 public:
     wxFrame *OnInit(void);
     int OnExit(void);
+
+	const gText& CurrentDir()              { return current_dir; }
+	void  SetCurrentDir(const gText& dir)  { current_dir = dir; }
 };
 
 
