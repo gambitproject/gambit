@@ -52,6 +52,7 @@ protected:
   static bool _WriteListCommas;
   static long _WriteListLF;
   static long _WriteListIndent;
+  static long _WriteSolutionInfo;
 
 public:
   static void _SetWriteWidth( long );
@@ -62,6 +63,7 @@ public:
   static void _SetWriteListCommas( bool );
   static void _SetWriteListLF( long );
   static void _SetWriteListIndent( long );
+  static void _SetWriteSolutionInfo( long );
 
 
   virtual ~Portion();

@@ -115,6 +115,9 @@
 %token INTEGER
 %token FLOAT
 %token TEXT
+%token gINPUT
+%token gOUTPUT
+%token gNULL
 
 
 %token CRLF
@@ -332,6 +335,9 @@ E8:           BOOLEAN       { emit(new Push<bool>(bval)); }
   |           INTEGER       { emit(new Push<long>(ival.as_long())); }
   |           FLOAT         { emit(new Push<double>(dval)); }
   |           TEXT          { emit(new Push<gString>(tval)); }
+  |           gINPUT        { emit(new PushInput(gin)); }
+  |           gOUTPUT       { emit(new PushOutput(gout)); }
+  |           gNULL         { emit(new PushOutput(gnull)); }
   |           LPAREN expression RPAREN
   |           NAME          { emit(new PushRef(tval)); }
   |           function      { emit(new CallFunction()); }
@@ -450,6 +456,15 @@ static struct tokens toktable[] =
     case TEXT:
       gerr << "text string " << tval << '\n';
       break;
+    case gINPUT:
+      gerr << "INPUT\n";
+      break;
+    case gOUTPUT:
+      gerr << "OUTPUT\n";
+      break;
+    case gNULL:
+      gerr << "NULL\n";
+      break;
     default:
       gerr << yychar << '\n';
       break;
@@ -518,6 +533,9 @@ I_dont_believe_Im_doing_this:
       bval = false;
       return BOOLEAN;
     }
+    else if (s == "INPUT")  return gINPUT;
+    else if (s == "OUTPUT") return gOUTPUT;
+    else if (s == "NULL")   return gNULL;
     else if (s == "AND")    return LAND;
     else if (s == "OR")     return LOR;
     else if (s == "NOT")    return LNOT;

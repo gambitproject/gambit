@@ -58,6 +58,7 @@ bool Portion::_WriteListBraces = true;
 bool Portion::_WriteListCommas = true;
 long Portion::_WriteListLF = 0;
 long Portion::_WriteListIndent = 2;
+long Portion::_WriteSolutionInfo = 2;
 
 void Portion::_SetWriteWidth( long x )
 { _WriteWidth = x; }
@@ -75,6 +76,8 @@ void Portion::_SetWriteListLF( long x )
 { _WriteListLF = x; }
 void Portion::_SetWriteListIndent( long x )
 { _WriteListIndent = x; }
+void Portion::_SetWriteSolutionInfo( long x )
+{ _WriteSolutionInfo = x; }
 
 
 
@@ -1473,13 +1476,20 @@ void MixedPortion::Output( gOutput& s ) const
   }
   else
   {
+    s << "(Mixed) ";
     switch( (*_Value)->Type() )
     {
-    case DOUBLE:
-      s << "(Mixed) " << * (MixedSolution<double>*) (*_Value); 
+    case DOUBLE: 
+      if(_WriteSolutionInfo>1)
+	s << (MixedSolution<double>) *(MixedSolution<double>*)(*_Value); 
+      else
+	s << (MixedProfile<double>) *(MixedSolution<double>*)(*_Value); 
       break;
     case RATIONAL:
-      s << "(Mixed) " << * (MixedSolution<gRational>*) (*_Value); 
+      if(_WriteSolutionInfo>1)
+	s << (MixedSolution<gRational>) *(MixedSolution<gRational>*)(*_Value); 
+      else
+	s << (MixedProfile<gRational>) *(MixedSolution<gRational>*)(*_Value); 
       break;
     default:
       assert( 0 );
@@ -1643,13 +1653,20 @@ void BehavPortion::Output( gOutput& s ) const
   }
   else
   {
+    s << "(Behav) ";
     switch( (*_Value)->Type() )
     {
     case DOUBLE:
-      s << "(Behav) " << * (BehavSolution<double>*) (*_Value); 
+      if(_WriteSolutionInfo>1)
+	s << (BehavSolution<double>) *(BehavSolution<double>*)(*_Value); 
+      else
+	s << (BehavProfile<double>) *(BehavSolution<double>*)(*_Value); 
       break;
     case RATIONAL:
-      s << "(Behav) " << * (BehavSolution<gRational>*) (*_Value); 
+      if(_WriteSolutionInfo>1)
+	s << (BehavSolution<gRational>) *(BehavSolution<gRational>*)(*_Value); 
+      else
+	s << (BehavProfile<gRational>) *(BehavSolution<gRational>*)(*_Value); 
       break;
     default:
       assert( 0 );

@@ -1322,7 +1322,7 @@ bool _WriteListBraces = true;
 bool _WriteListCommas = true;
 long _WriteListLF = 0;
 long _WriteListIndent = 2;
-
+long _WriteSolutionInfo = 2;
 
 
 void GSM_SetWriteOptions( void )
@@ -1335,6 +1335,7 @@ void GSM_SetWriteOptions( void )
   Portion::_SetWriteListCommas( _WriteListCommas );
   Portion::_SetWriteListLF( _WriteListLF );
   Portion::_SetWriteListIndent( _WriteListIndent );
+  Portion::_SetWriteSolutionInfo( _WriteSolutionInfo );
 }
 
 
@@ -1348,6 +1349,7 @@ Portion* GSM_SetFormat( Portion** param )
   _WriteListCommas = ( (BoolPortion*) param[ 5 ] )->Value();
   _WriteListLF = ( (IntPortion*) param[ 6 ] )->Value();
   _WriteListIndent = ( (IntPortion*) param[ 7 ] )->Value();
+  _WriteSolutionInfo = ( (IntPortion*) param[ 8 ] )->Value();
 
   GSM_SetWriteOptions();
 
@@ -2620,7 +2622,7 @@ void Init_gsmoper( GSM* gsm )
 
 
   FuncObj = new FuncDescObj( "SetFormat" );
-  FuncObj->SetFuncInfo( GSM_SetFormat, 8 );
+  FuncObj->SetFuncInfo( GSM_SetFormat, 9 );
   FuncObj->SetParamInfo( GSM_SetFormat, 0, "width", porINTEGER, 
 			new IntRefPortion( _WriteWidth ) );
   FuncObj->SetParamInfo( GSM_SetFormat, 1, "precis", porINTEGER,
@@ -2637,6 +2639,8 @@ void Init_gsmoper( GSM* gsm )
 			new IntRefPortion( _WriteListLF ) );
   FuncObj->SetParamInfo( GSM_SetFormat, 7, "listIndent", porINTEGER,
 			new IntRefPortion( _WriteListIndent ) );
+  FuncObj->SetParamInfo( GSM_SetFormat, 8, "solutionInfo", porINTEGER,
+			new IntRefPortion( _WriteSolutionInfo ) );
   gsm->AddFunction( FuncObj );
 
 

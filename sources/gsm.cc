@@ -73,12 +73,14 @@ GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
   
   // global function default variables initialization
   // these should be done before InitFunctions() is called
+  /*
   if( _NumObj == 0 )
   {
     _INPUT  = new InputRefPortion( _StdIn );
     _OUTPUT = new OutputRefPortion( _StdOut );
     _NULL   = new OutputRefPortion( gnull );
   }
+  */
 
   _StackStack    = new gGrowableStack< gGrowableStack< Portion* >* >( 1 );
   _StackStack->Push( new gGrowableStack< Portion* >( size ) );
@@ -111,12 +113,14 @@ GSM::~GSM()
   delete _StackStack->Pop();
   delete _StackStack;
 
+  /*
   if( _NumObj == 0 )
   {
     delete _INPUT;
     delete _OUTPUT;
     delete _NULL;
   }
+  */
 }
 
 
@@ -248,10 +252,12 @@ bool GSM::_VarIsDefined( const gString& var_name ) const
 
   assert( var_name != "" );
 
+  /*
   if( var_name == "OUTPUT" || var_name == "INPUT" || var_name == "NULL" )
     result = true;
   else
-    result = _RefTableStack->Peek()->IsDefined( var_name );
+  */
+  result = _RefTableStack->Peek()->IsDefined( var_name );
   return result;
 }
 
@@ -265,11 +271,14 @@ bool GSM::_VarDefine( const gString& var_name, Portion* p )
 
   assert( var_name != "" );
 
+  /*
   if( var_name == "OUTPUT" || var_name == "INPUT" || var_name == "NULL" )
   {
     read_only = true;
   }
-  else if( _RefTableStack->Peek()->IsDefined( var_name ) )
+  else 
+  */
+  if( _RefTableStack->Peek()->IsDefined( var_name ) )
   {
     old_value = (*_RefTableStack->Peek())( var_name );
     if( old_value->Type() != p->Type() )
@@ -321,7 +330,7 @@ Portion* GSM::_VarValue( const gString& var_name ) const
   Portion* result;
 
   assert( var_name != "" );
-
+  /*
   if( var_name == "INPUT" )
     result = _INPUT;
   else if( var_name == "OUTPUT" )
@@ -332,7 +341,8 @@ Portion* GSM::_VarValue( const gString& var_name ) const
   {
     result = (*_RefTableStack->Peek())( var_name );
   }
-
+  */
+  result = (*_RefTableStack->Peek())( var_name );
   return result;
 }
 
@@ -343,6 +353,7 @@ Portion* GSM::_VarRemove( const gString& var_name )
 
   assert( var_name != "" );
 
+  /*
   if( var_name == "INPUT" || var_name == "OUTPUT" || var_name == "NULL" )
   {
     _ErrorMessage( _StdErr, 55, 0, 0, var_name );
@@ -352,6 +363,8 @@ Portion* GSM::_VarRemove( const gString& var_name )
   {
     result = _RefTableStack->Peek()->Remove( var_name );
   }
+  */
+  result = _RefTableStack->Peek()->Remove( var_name );
   return result;
 }
 
