@@ -107,10 +107,10 @@ void Lexicon::MakeReducedStrats(const EFSupport &S,
     MakeStrategy(p);
 }
 
-Nfg *MakeReducedNfg(const Efg &E, const EFSupport &support)
+Nfg *MakeReducedNfg(const EFSupport &support)
 {
   int i;
-
+  const Efg &E = support.Game();
   Lexicon *L = new Lexicon(E);
   for (i = 1; i <= E.NumPlayers(); i++)
     L->MakeReducedStrats(support, E.Players()[i], E.RootNode(), NULL);

@@ -91,7 +91,7 @@ static Portion *GSM_Behav(Portion **param)
   const Efg &E = *(const Efg *) N.AssociatedEfg();
 
   BehavProfile<gNumber> *bp = new BehavProfile<gNumber>(EFSupport(E));
-  MixedToBehav(N, MixedProfile<gNumber>(mp), E, *bp);
+  MixedToBehav(MixedProfile<gNumber>(mp), *bp);
   
   // hack to get output profile to be all one precision
   gPrecision prec = precRATIONAL;
@@ -989,7 +989,7 @@ static Portion *GSM_Nfg(Portion **param)
   Efg &E = * ((EfgPortion*) param[0])->Value();
   gWatch watch;
 
-  Nfg *N = MakeReducedNfg(E, EFSupport(E));
+  Nfg *N = MakeReducedNfg(EFSupport(E));
 
   ((NumberPortion *) param[1])->SetValue(watch.Elapsed());
 

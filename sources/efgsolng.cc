@@ -651,14 +651,14 @@ guiNGobitBySubgame::guiNGobitBySubgame(const Efg &p_efg,
   GSPD.GetParams(&P);
 
   EFSupport ES = EFSupport(p_efg);
-  Nfg *N = MakeReducedNfg(p_efg, ES);
+  Nfg *N = MakeReducedNfg(ES);
   NFSupport *S = new NFSupport(*N);
   ViewNormal(*N, S);
 
   BehavProfile<gNumber> startb = m_parent->CreateStartProfile(GSPD.StartOption());
   MixedProfile<gNumber> startm(*N);
   
-  BehavToMixed(p_efg, startb, *N, startm);
+  BehavToMixed(startb, startm);
 	
   long nevals, nits;
   gList<MixedSolution> nfg_solns;
@@ -667,7 +667,7 @@ guiNGobitBySubgame::guiNGobitBySubgame(const Efg &p_efg,
     GSPD.RunPxi();
   
     for (int i = 1; i <= nfg_solns.Length(); i++) {
-      MixedToBehav(*N, nfg_solns[i], p_efg, startb);
+      MixedToBehav(nfg_solns[i], startb);
       m_solutions.Append(BehavSolution(startb, EfgAlg_GOBIT));
     }
 
@@ -756,7 +756,7 @@ guiGobitAllBySubgame::guiGobitAllBySubgame(const Efg &p_efg,
   GridParams P(status);
   GSPD.GetParams(P);
   
-  Nfg *N = MakeReducedNfg(p_efg, p_support);
+  Nfg *N = MakeReducedNfg(p_support);
   NFSupport *S = new NFSupport(*N);
   ViewNormal(*N, S);
 

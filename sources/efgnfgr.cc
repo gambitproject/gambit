@@ -27,17 +27,17 @@ template void ClearNodeProbs(BehavNode<gRational> *);
 
 template void ClearNodeProbs(BehavNode<gNumber> *);
 
-template void MixedToBehav(const Nfg &, const MixedProfile<gRational> &,
-			   const Efg &, BehavProfile<gRational> &);
+template void MixedToBehav(const MixedProfile<gRational> &,
+			   BehavProfile<gRational> &);
 
-template void MixedToBehav(const Nfg &, const MixedProfile<gNumber> &,
-			   const Efg &, BehavProfile<gNumber> &);
+template void MixedToBehav(const MixedProfile<gNumber> &,
+			   BehavProfile<gNumber> &);
 
-template void BehavToMixed(const Efg &, const BehavProfile<gRational> &,
-			   const Nfg &, MixedProfile<gRational> &);
+template void BehavToMixed(const BehavProfile<gRational> &,
+			   MixedProfile<gRational> &);
 
-template void BehavToMixed(const Efg &, const BehavProfile<gNumber> &,
-			   const Nfg &, MixedProfile<gNumber> &);
+template void BehavToMixed(const BehavProfile<gNumber> &,
+			   MixedProfile<gNumber> &);
 
 template void RealizationProbs(const Nfg &N, const MixedProfile<gRational> &mp,
 			       const Efg &E, BehavProfile<gRational> &bp,

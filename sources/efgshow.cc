@@ -535,7 +535,7 @@ bool EfgShow::SolveNormal(void)
     {
         Nfg *N;
         if (strcmp(normal_str, "Reduced") == 0)
-            N = MakeReducedNfg(ef, *cur_sup);
+            N = MakeReducedNfg(*cur_sup);
         else
             N = MakeAfg(ef);
         if (N) NfgGUI(N, "", (EfgNfgInterface *)this, this);

@@ -10,7 +10,7 @@
 int PureNashBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 				    gList<BehavSolution> &solns)
 {
-  Nfg *N = MakeReducedNfg(E, sup);
+  Nfg *N = MakeReducedNfg(sup);
 
   NFSupport *S = new NFSupport(*N);
 
@@ -21,7 +21,7 @@ int PureNashBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
   for (int i = 1; i <= sol.Length(); i++)  {
     BehavProfile<gNumber> bp(sup);
-    MixedToBehav(*N, MixedProfile<gNumber>(sol[i]), E, bp);
+    MixedToBehav(MixedProfile<gNumber>(sol[i]), bp);
     solns.Append(bp);
   }
 

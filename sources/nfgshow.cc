@@ -991,8 +991,6 @@ NFSupport *NfgShow::MakeSolnSupport(void)
 
 #ifndef NFG_ONLY
 #include "efg.h"
-void MixedToBehav(const Nfg &N, const MixedProfile<gNumber> &mp, 
-                  const Efg &E, BehavProfile<gNumber> &bp);
 #endif
 
 void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)
@@ -1003,7 +1001,7 @@ void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)
     // assert(mp != Solution());
     EFSupport S(*InterfaceObjectEfg());
     BehavProfile<gNumber> bp(S);
-    MixedToBehav(nf, mp, *InterfaceObjectEfg(), bp);
+    MixedToBehav(mp, bp);
     SolutionToEfg(bp, set);
 #endif
 }

@@ -10,7 +10,7 @@
 int ZSumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 				gList<BehavSolution> &solns)
 {
-  Nfg *N = MakeReducedNfg(E, sup);
+  Nfg *N = MakeReducedNfg(sup);
 
   NFSupport *S = new NFSupport(*N);
 
@@ -25,7 +25,7 @@ int ZSumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
   for (int i = 1; i <= solutions.Length(); i++)  {
     BehavProfile<gNumber> bp(sup);
-    MixedToBehav(*N, MixedProfile<gNumber>(solutions[i]), E, bp);
+    MixedToBehav(MixedProfile<gNumber>(solutions[i]), bp);
     solns.Append(bp);
   }
 

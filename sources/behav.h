@@ -22,8 +22,7 @@ template <class T> class gRectArray;
 class BehavSolution;
 
 template <class T> class BehavProfile : public gDPVector<T>  {
-friend void MixedToBehav(const Nfg &, const MixedProfile<T> &,
-			 const Efg &, BehavProfile<T> &);
+friend void MixedToBehav(const MixedProfile<T> &, BehavProfile<T> &);
 protected:
   const Efg *m_efg;
   BehavNode<T> *m_root;
