@@ -1,0 +1,60 @@
+//#
+//# FILE: glpsolv2.imp -- Implementation of LP solver
+//#
+//# @(#)glpsolv2.imp	1.3 7/18/95
+//#
+
+#include "glpsolv2.h"
+
+
+
+#ifdef __GNUG__
+#define INLINE inline
+#elif defined __BORLANDC__
+#define INLINE
+#else
+#error Unsupported compiler type
+#endif   // __GNUG__, __BORLANDC__
+
+template <class T> INLINE gLPTableau2<T>::gLPTableau2(const gMatrix<T> &A, 
+						      const gVector<T> &B,
+						      const gVector<T> &C,
+						      const gMatrix<T> &D, 
+						      const gVector<T> &E) 
+	  : gTableau<T>(1, B.Length() + 1, 0, 0, B.Length() + 1, B.Length()),
+             // We probably want to just dispose of this last construction
+	    feasible(1), bounded(1), well_formed(1), optimum(1, C.Length())
+{
+// Check to make sure the sizes of the matrix and vectors match up properly
+  if (A.NumRows() != B.Length() ||
+      A.NumColumns() != C.Length())   {
+    well_formed = 0;
+    return;
+  }
+
+// Construct the matrices to be fed to glpsolve.h.
+  gMatrix<T> A0(A.NumRows(), 2 * A.NumColumns());
+  gVector<T> B0(B.Length()), C0(2 * C.Length());
+
+  int i;
+  for (i = 1; i <= A.NumRows(); i++)         // Set A0
+    for (int j = 1; j <= A.NumColumns(); j++)
+      { A0(i,j) = A(i,j); A0(i + A.NumColumns(),j) = -A(i,j); }
+  
+  B0 = B;                                    // Set B0
+
+  for (i = 1; i <= C.Length(); i++)          // Copy C to C0
+    { C0[i] = C[i]; C0[i + C.Length()] = -C[i]; }
+
+// Get the constructor in glpsolve.h to do the actual work
+  gLPTableau<T> Tableau0(A0, B0, C0);
+
+// Report findings
+  well_formed = Tableau0.IsWellFormed();
+  feasible = Tableau0.IsFeasible();
+  bounded = Tableau0.IsBounded();
+  for (int j = 1; j <= C.Length(); j++)
+    optimum = Tableau0.OptimumVector()[j] 
+            - Tableau0.OptimumVector()[j + C.Length()];
+  cost = Tableau0.OptimumCost();
+}   
