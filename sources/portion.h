@@ -645,8 +645,6 @@ protected:
 
 public:
   MixedPortion(MixedSolution *);
-  MixedPortion(MixedProfile<double> *);
-  MixedPortion(MixedProfile<gRational> *);
   virtual ~MixedPortion();
 
   MixedSolution *Value(void) const;
@@ -679,8 +677,6 @@ protected:
 
 public:
   BehavPortion(BehavSolution *);
-  BehavPortion(BehavProfile<double> *);
-  BehavPortion(BehavProfile<gRational> *);
   virtual ~BehavPortion();
 
   BehavSolution *Value(void) const;

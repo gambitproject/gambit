@@ -1229,18 +1229,6 @@ MixedPortion::MixedPortion(MixedSolution *value)
   SetGame(&value->Game());
 }
 
-MixedPortion::MixedPortion(MixedProfile<double> *value)
-  : _Value(new MixedSolution *(new MixedSolution(*value)))
-{
-  SetGame(&value->Game());
-}
-
-MixedPortion::MixedPortion(MixedProfile<gRational> *value)
-  : _Value(new MixedSolution *(new MixedSolution(*value)))
-{
-  SetGame(&value->Game());
-}
-
 MixedPortion::MixedPortion(MixedSolution *&value, bool ref)
   : _Value(&value), _ref(ref)
 {
@@ -1311,18 +1299,6 @@ bool MixedPortion::IsReference(void) const
 
 BehavPortion::BehavPortion(BehavSolution *value)
   : _Value(new BehavSolution *(value)), _ref(false)
-{
-  SetGame(&value->Game());
-}
-
-BehavPortion::BehavPortion(BehavProfile<double> *value)
-  : _Value(new BehavSolution *(new BehavSolution(*value)))
-{
-  SetGame(&value->Game());
-}
-
-BehavPortion::BehavPortion(BehavProfile<gRational> *value)
-  : _Value(new BehavSolution *(new BehavSolution(*value)))
 {
   SetGame(&value->Game());
 }
