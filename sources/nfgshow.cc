@@ -448,17 +448,16 @@ void NfgShow::Solve(int id)
   NfgSolveSettings NSD(nf);
 
   // If we have more than 1 support, we must have created it explicitly.
-  // In that case use the currently set support.  Otherwise, only the
-  // default support exists and we should use a support dictated by
-  // dominance defaults.
+  // In that case use the currently set support. 
+  // Otherwise, use the full support.
   NFSupport *sup = (supports.Length() > 1) ? cur_sup : 0;
 
   if (!sup)
-    sup = MakeSolnSupport();
+    sup = new NFSupport(nf);
 
   int old_max_soln = solns.Length();  // used for extensive update
 
-  NfgSolutionG *solver;
+  guiNfgSolution *solver;
 
   switch (id) {
   case NFG_SOLVE_CUSTOM_ENUMPURE:
@@ -468,25 +467,25 @@ void NfgShow::Solve(int id)
     solver = new guinfgEnumMixed(*sup, this);
     break;
   case NFG_SOLVE_CUSTOM_LCP:      
-    solver = new guinfgLcp(nf, *sup, this);
+    solver = new guinfgLcp(*sup, this);
     break;
   case NFG_SOLVE_CUSTOM_LP:       
-    solver = new NfgZSumG(nf, *sup, this);
+    solver = new guinfgLp(*sup, this);
     break;
   case NFG_SOLVE_CUSTOM_LIAP:
-    solver = new guinfgLiap(nf, *sup, this);
+    solver = new guinfgLiap(*sup, this);
     break;
   case NFG_SOLVE_CUSTOM_SIMPDIV:
-    solver = new NfgSimpdivG(nf, *sup, this);
+    solver = new guinfgSimpdiv(*sup, this);
     break;
   case NFG_SOLVE_CUSTOM_POLENUM:
-    solver = new guiPolEnumNfg(nf, *sup, this);
+    solver = new guinfgPolEnum(*sup, this);
     break;
   case NFG_SOLVE_CUSTOM_QRE:
-    solver = new NfgQreG(nf, *sup, this);
+    solver = new guinfgQre(*sup, this);
     break;
   case NFG_SOLVE_CUSTOM_QREGRID:
-    solver = new NfgQreAllG(nf, *sup, this);
+    solver = new guinfgQreAll(*sup, this);
     break;
   default:
     // shouldn't happen.  we'll ignore silently
@@ -498,8 +497,10 @@ void NfgShow::Solve(int id)
   wxBeginBusyCursor();
 
   try {
-    if (go)
+    if (go) {
+      solver->Eliminate();
       solns += solver->Solve();
+    }
     wxEndBusyCursor();
   }
   catch (gException &E) {
@@ -551,7 +552,7 @@ void NfgShow::SolveStandard(void)
 
   int old_max_soln = solns.Length();  // used for extensive update
 
-  NfgSolutionG *solver;
+  guiNfgSolution *solver;
 
   switch (NSD.GetAlgorithm()) {
   case NFG_ENUMPURE_SOLUTION:
@@ -561,22 +562,22 @@ void NfgShow::SolveStandard(void)
     solver = new guinfgEnumMixed(*sup, this);
     break;
   case NFG_LCP_SOLUTION:
-    solver = new guinfgLcp(nf, *sup, this);
+    solver = new guinfgLcp(*sup, this);
     break;
   case NFG_LP_SOLUTION:
-    solver = new NfgZSumG(nf, *sup, this);
+    solver = new guinfgLp(*sup, this);
     break;
   case NFG_LIAP_SOLUTION:
-    solver = new guinfgLiap(nf, *sup, this);
+    solver = new guinfgLiap(*sup, this);
     break;
   case NFG_SIMPDIV_SOLUTION:
-    solver = new NfgSimpdivG(nf, *sup, this);
+    solver = new guinfgSimpdiv(*sup, this);
     break;
   case NFG_QRE_SOLUTION:
-    solver = new NfgQreG(nf, *sup, this);
+    solver = new guinfgQre(*sup, this);
     break;
   case NFG_QREALL_SOLUTION:
-    solver = new NfgQreAllG(nf, *sup, this);
+    solver = new guinfgQreAll(*sup, this);
     break;
   default:
     // shouldn't happen.  we'll ignore silently
@@ -586,6 +587,7 @@ void NfgShow::SolveStandard(void)
   wxBeginBusyCursor();
 
   try {
+    solver->Eliminate();
     solns += solver->Solve();
     wxEndBusyCursor();
   }
