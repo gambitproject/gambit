@@ -109,9 +109,6 @@ Basis<T>::~Basis()
 }
 
 
-
-
-
 // checking functions
 
 template <class T>
@@ -376,3 +373,313 @@ void Basis<T>::MultiplyT(const gVector<T> &in, gVector<T> &out) const
       out[i]= in*tmpcol;
     }
 }
+
+
+
+
+// BasisCode method definitions
+
+template <class T>
+BasisCode::BasisCode(const Tableau<T> &tab)
+: unitflag(tab.A.MinRow(),tab.A.MaxRow()),
+  column(tab.A.MinRow(),tab.A.MaxRow())
+{
+  tableau= &tab;
+  tab.AddCode(this);
+
+  unitflag=1;
+  for(int i=column.Min(); i<=column.Max(); i++)
+    column[i]= i;
+}
+
+template <class T>
+BasisCode::BasisCode(const Tableau<T> &tab, const gTuple<int> &v)
+: unitflag(tab.A.MinRow(),tab.A.MaxRow()),
+  column(tab.A.MinRow(),tab.A.MaxRow())
+{
+  assert( tab.NegOK() );
+  assert( v.Min()==column.Min() && v.Max()==column.Max() );
+
+  tableau= &tab;
+  tab.AddCode(this);
+
+  for(int i=v.Min(); i<=v.Max(); i++)
+    {
+      if( v[i]<0 )
+	{
+	  assert( tab.A.CheckRow(-v[i]) );
+	  unitflag[i]=1;
+	  column[i]= -v[i];
+	}
+      else
+	{
+	  assert( tab.A.CheckCol(v[i]) );
+	  unitflag[i]=0;
+	  column[i]= v[i];
+	}
+}
+
+template <class T>
+BasisCode::BasisCode(const Tableau<T> &tab,
+		     const gTuple<bool> &flag,
+		     const gTuple<int> &v)
+: unitflag(tab.A.MinRow(),tab.A.MaxRow()),
+  column(tab.A.MinRow(),tab.A.MaxRow())
+{
+  unitflag= flag;
+  column= v;
+
+  tableau= &tab;
+  tab.AddCode(this);
+
+  for(int i=v.Min(); i<=v.Max(); i++)
+    {
+      if( flag[i] )
+	assert( tab.A.CheckRow(v[i]) );
+      else
+	assert( tab.A.CheckCol(v[i]) );
+    }
+}
+
+template <class T>
+BasisCode::BasisCode(const BasisCode<T> &code)
+: unitflag(code.unitflag),
+  column(code.column)
+{
+  tableau= &tab;
+  tab.AddCode(this);
+}
+
+
+template <class T>
+void BasisCode::NewBasis()
+{
+  unitflag=1;
+  for(int i=column.Min(); i<=column.Max(); i++)
+    column[i]= i;
+}
+
+template <class T>
+void BasisCode::NewBasis(const gTuple<int> &v)
+{
+  assert( NegOK() );
+  assert( v.Min()==column.Min() && v.Max()==column.Max() );
+
+  for(int i=v.Min(); i<=v.Max(); i++)
+    {
+      if( v[i]<0 )
+	{
+	  assert( tableau->A.CheckRow(-v[i]) );
+	  unitflag[i]=1;
+	  column[i]= -v[i];
+	}
+      else
+	{
+	  assert( tableau->A.CheckCol(v[i]) );
+	  unitflag[i]=0;
+	  column[i]= v[i];
+	}
+}
+
+template <class T>
+void BasisCode::NewBasis(const gTuple<bool> &flag, const gTuple<int> &v)
+{
+
+  unitflag= flag;
+  column= v;
+
+  for(int i=v.Min(); i<=v.Max(); i++)
+    {
+      if( flag[i] )
+	assert( tableau->A.CheckRow(v[i]) );
+      else
+	assert( tableau->A.CheckCol(v[i]) );
+    }
+}
+
+template <class T>
+BasisCode<T>& BasisCode::operator=(const BasisCode<T> &code)
+{
+  assert( tableau==code.tableau );
+
+  unitflag= code.unitflag;
+  column= code.column;
+}
+
+template <class T>
+BasisCode::~BasisCode()
+{
+  tableau->A.RemoveCode();
+}
+
+
+// ordinary BasisCode methods:
+
+template <class T>
+void BasisCode::change(int basisnum, int col)
+{
+  assert( negOK() );
+
+  if( column<0 )
+    {
+      assert( tableau->CheckRow(col) );
+      unitflag[basisnum]= 1;
+      column[basisnum]= -col;
+    }
+  else
+    {
+      assert( tableau->CheckCol(col) );
+      unitflag[basisnum]= 0;
+      column[basisnum]= col;
+    }
+}
+
+template <class T>
+void BasisCode::change(int basisnum, bool flag, int col)
+{
+  if( flag )
+    assert( tableau->CheckRow(col) );
+  else
+    assert( tableau->CheckCol(col) );
+  unitflag[basisnum]= flag;
+  column[basisnum]= column;
+}
+
+template <class T>
+void BasisCode::swap(int a, int b)
+{
+  bool tb= unitflag[a];
+  unitflag[a]=unitflag[b];
+  unitflag[b]= tb;
+
+  int tc= column[a];
+  column[a]=column[b];
+  column[b]= tc;
+}
+
+template <class T>
+bool BasisCode::member(int col) const;
+{
+  assert( NegOK() );
+
+  if(col<0)
+    {
+      for(int i=column.Min(); i<=column.Max(); i++)
+	if( unitflag[i]==1 && column[i]==-col )
+	  return 1;
+    }
+  else
+    {
+      for(int i=column.Min(); i<=column.Max(); i++)
+	if( unitflag[i]==0 && column[i]==col )
+	  return 1;
+    }
+  return 0;
+}
+
+template <class T>
+bool BasisCode::member(bool flag, int col) const;
+{
+  if(flag)
+    {
+      for(int i=column.Min(); i<=column.Max(); i++)
+	if( unitflag[i]==1 && column[i]==col )
+	  return 1;
+    }
+  else
+    {
+      for(int i=column.Min(); i<=column.Max(); i++)
+	if( unitflag[i]==0 && column[i]==col )
+	  return 1;
+    }
+  return 0;
+}
+
+template <class T>
+int BasisCode::find(int col) const
+{
+  assert( NegOK() );
+
+  if(col<0)
+    {
+      for(int i=column.Min(); i<=column.Max(); i++)
+	if( unitflag[i]==1 && column[i]==-col )
+	  return i; // returns basis index
+    }
+  else
+    {
+      for(int i=column.Min(); i<=column.Max(); i++)
+	if( unitflag[i]==0 && column[i]==col )
+	  return i; // returns basis index
+    }
+  assert(0); // couldn't find column (also, assumes there are no duplicates)
+}
+
+template <class T>
+int BasisCode::find(bool flag, int col)
+{
+  if(flag)
+    {
+      for(int i=column.Min(); i<=column.Max(); i++)
+	if( unitflag[i]==1 && column[i]==col )
+	  return i;
+    }
+  else
+    {
+      for(int i=column.Min(); i<=column.Max(); i++)
+	if( unitflag[i]==0 && column[i]==col )
+	  return i;
+    }
+  assert(0);
+}
+
+template <class T>
+void BasisCode::column(int basisnum, int &index) const;
+{
+  assert(NegOK());
+
+  if( unitflag[basisnum] )
+    index= -column[basisnum];
+  else
+    index= column[basisnum];
+}
+
+template <class T>
+void BasisCode::column(int basisnum, int &flag, int &col) const
+{
+  flag= unitflag[basisnum];
+  col= column[basisnum];
+}
+
+template <class T>
+void BasisCode::BasisSelect(const gVector<T>&rowv, int gVector<T> &colv) const
+{
+  assert(column.Check(colv) && tableau->b.Check(rowv));
+
+  for(int i=column.First(); i<=column.Last(); i++)
+    {
+      if(unitflag[i])
+	colv[i]= 0;
+      else
+	colv[i]= rowv[column[i]];
+    }
+}
+
+template <class T>
+void BasisCode::BasisSelect(const gVector<T> &unitv,
+			    const gVector<T> &rowv,
+			    gVector<T> &colv ) const
+{
+  assert(column.Check(colv) && column.Check(unitv) && tableau->b.Check(rowv));
+
+  for(int i=column.First(); i<=column.Last(); i++)
+    {
+      if(unitflag[i])
+	colv[i]= unitv[column[i]];
+      else
+	colv[i]= rowv[column[i]];
+    }
+}
+
+
+  

@@ -11,7 +11,7 @@
 #include "ludecomp.h"
 
 template <class T> class Basis;
-class BasisCode;
+template <class T> class BasisCode;
 
 template <class T> class Tableau {
   friend class Basis<T>;
@@ -27,7 +27,10 @@ template <class T> class Tableau {
 
 class BasisCode<T> {
   friend class Basis;
+ private:
+  bool NegOK();
  protected:
+  Tableau<T> *tableau;
   gTuple<bool> unitflag;
   gTuple<int> column;
  public:
@@ -53,14 +56,14 @@ class BasisCode<T> {
   bool member(int column) const;
   bool member(bool unitflag, int column) const;
     // return true iff column is a basis member
-  void find(int column, int &basisnum) const;
-  void find(bool unitflag, int column, int &basisnum) const;
+  int find(int column) const;
+  int find(bool unitflag, int column) const;
     // finds basis index corresponding to column number,
     // fails assert if column not in basis
   void column(int basisnum, int &index) const;
   void column(int basisnum, bool &unitflag, int &column) const;
     // finds column number corresponding to basis index
-  void BasisSelect(const gVector<T>&rowv, gvector<T> &colv) const;
+  void BasisSelect(const gVector<T>&rowv, gVector<T> &colv) const;
     // select row elements according to basis (unit column elements are 0)
   void BasisSelect(const gVector<T>&unitv,
 		   const gVector<T>&rowv,
