@@ -1,7 +1,7 @@
 //#
 //# FILE: grid.cc -- Grid-search solution module
 //#
-//# @(#)grid.cc	1.8 2/7/95
+//# $Id$
 //#
 
 #ifdef __GNUG__
@@ -20,7 +20,8 @@
 
 template <class T>
 GridParams<T>::GridParams(void) :
-	plev(0),outfile(0),errfile(0),pxifile(0),update_func(0)
+	plev(0),outfile(0),errfile(0),pxifile(0),update_func(0),
+	minLam(.01), maxLam(30), delLam(.01), tol((T) 1.0e-10)
 { }
 template <class T>
 GridParams<T>::GridParams(const GridParams<T> &p) :
@@ -30,10 +31,6 @@ GridParams<T>::GridParams(const GridParams<T> &p) :
 	delp(p.delp),tol(p.tol),type(p.type)
 
 { }
-
-template <class T>
-GridParams<T>::~GridParams(void)
-{}
 
 template <class T>
 int GridParams<T>::Ok(void) const
@@ -199,4 +196,11 @@ TEMPLATE class GridSolveModule<gRational>;
 TEMPLATE class GridParams<double>;
 TEMPLATE class GridParams<gRational>;
 
+#include "g2dblock.imp"
+
+TEMPLATE class PayoffClass<double>;
+TEMPLATE class PayoffClass<gRational>;
+
+TEMPLATE class g2DBlock<PayoffClass<double> >;
+TEMPLATE class g2DBlock<PayoffClass<gRational> >;
 
