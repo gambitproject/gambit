@@ -5,7 +5,7 @@
 //# $Id$
 //#
 
-#include "gsmoper.h"
+#include "gsm.h"
 
 Portion* GSM_Assign( Portion** param )
 {
