@@ -42,7 +42,7 @@ void AllSubsupportsRECURSIVE(const gbtNfgSupport *s,
 
   do {
     Strategy *str_ptr = (Strategy *)c_copy.GetStrategy();
-    if ( sact->StrategyIsActive(str_ptr) ) {
+    if (sact->Contains(str_ptr) ) {
       sact->RemoveStrategy(str_ptr);
       AllSubsupportsRECURSIVE(s,sact,&c_copy,list);
       sact->AddStrategy(str_ptr);
@@ -113,7 +113,7 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport *s,
   do {
     Strategy *this_strategy = (Strategy *)scanner.GetStrategy();
     bool delete_this_strategy = false;
-    if ( sact->StrategyIsActive(this_strategy) ) 
+    if ( sact->Contains(this_strategy) ) 
       if (sact->IsDominated(this_strategy,strong) ) 
 	delete_this_strategy = true;
 	
@@ -155,7 +155,7 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport *s,
     StrategyCursorForSupport c_copy(*c);
     
     do {
-      if ( sact->StrategyIsActive((Strategy *)c_copy.GetStrategy()) &&
+      if ( sact->Contains((Strategy *)c_copy.GetStrategy()) &&
 	   sact->NumStrats(c_copy.PlayerIndex()) > 1 ) {
 
 	Strategy *str_ptr = (Strategy *)c_copy.GetStrategy();
@@ -212,7 +212,7 @@ void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
   do {
     Strategy *this_strategy = (Strategy *)scanner.GetStrategy();
     bool delete_this_strategy = false;
-    if ( sact->StrategyIsActive(this_strategy) ) 
+    if ( sact->Contains(this_strategy) ) 
       if (sact->IsDominated(this_strategy,true) ) {
 	delete_this_strategy = true;
       }
@@ -244,7 +244,7 @@ void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
     StrategyCursorForSupport c_copy(*c);
     do {
       Strategy *str_ptr = (Strategy *)c_copy.GetStrategy();
-      if (sact->StrategyIsActive(str_ptr) &&
+      if (sact->Contains(str_ptr) &&
 	  sact->NumStrats(str_ptr->GetPlayer()) > 1 ) {
 	sact->RemoveStrategy(str_ptr); 
 	PossibleNashSubsupportsRECURSIVE(s,sact,&c_copy,list,status);
@@ -257,8 +257,9 @@ void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
 gList<const gbtNfgSupport> SortSupportsBySize(gList<const gbtNfgSupport> &list) 
 {
   gArray<int> sizes(list.Length());
-  for (int i = 1; i <= list.Length(); i++)
-    sizes[i] = list[i].TotalNumStrats();
+  for (int i = 1; i <= list.Length(); i++) {
+    sizes[i] = list[i].ProfileLength();
+  }
 
   gArray<int> listproxy(list.Length());
   for (int i = 1; i <= list.Length(); i++)
@@ -321,11 +322,11 @@ gList<const gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
     bool remove = false;
     do {
       Strategy *strat = (Strategy *)crsr.GetStrategy();
-      if (current.StrategyIsActive(strat)) 
+      if (current.Contains(strat)) 
 	for (int j = 1; j <= strat->GetPlayer().NumStrategies(); j++) {
 	  Strategy *other_strat = strat->GetPlayer().GetStrategy(j);
 	  if (other_strat != strat)
-	    if (current.StrategyIsActive(other_strat)) {
+	    if (current.Contains(other_strat)) {
 	      if (current.Dominates(other_strat,strat,false)) 
 		remove = true;
 	    }

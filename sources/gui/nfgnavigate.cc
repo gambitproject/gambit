@@ -162,7 +162,7 @@ void NfgNavigateWindow::SetSupport(const gbtNfgSupport &p_support)
     m_stratProfile[pl-1]->Clear();
     gbtNfgPlayer player = m_support.Game().GetPlayer(pl);
     for (int st = 1; st <= player.NumStrategies(); st++) {
-      if (m_support.Find(player.GetStrategy(st))) {
+      if (m_support.Contains(player.GetStrategy(st))) {
 	m_stratProfile[pl-1]->Append((char *) (ToText(st) + ": " +
 					       player.GetStrategy(st)->Name()));
       }

@@ -44,7 +44,7 @@ MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
   gEpsilon(m_epsilon);
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
     for (int st = 1; st <= Game().NumStrats(pl); st++) {
-      int index = p_profile.Support().Find(Game().Strategies(pl)[st]);
+      int index = p_profile.Support().GetIndex(Game().Strategies(pl)[st]);
       if (index > 0)
 	m_profile(pl, st) = p_profile(pl, index);
       else
@@ -64,7 +64,7 @@ MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
   gEpsilon(m_epsilon);
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
     for (int st = 1; st <= Game().NumStrats(pl); st++) {
-      int index = p_profile.Support().Find(Game().Strategies(pl)[st]);
+      int index = p_profile.Support().GetIndex(Game().Strategies(pl)[st]);
       if (index > 0)
 	m_profile(pl, st) = p_profile(pl, index);
       else
@@ -83,7 +83,7 @@ MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
 {
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
     for (int st = 1; st <= Game().NumStrats(pl); st++) {
-      int index = p_profile.Support().Find(Game().Strategies(pl)[st]);
+      int index = p_profile.Support().GetIndex(Game().Strategies(pl)[st]);
       if (index > 0)
 	m_profile(pl, st) = p_profile(pl, index);
       else

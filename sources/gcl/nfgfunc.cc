@@ -379,7 +379,7 @@ static Portion *GSM_StrategyNumber(GSM &, Portion **param)
   Strategy *s = ((StrategyPortion *) param[0])->Value();
   gbtNfgSupport *support = ((NfSupportPortion *) param[1])->Value();
 
-  return new NumberPortion(support->Find(s));
+  return new NumberPortion(support->GetIndex(s));
 }
 
 //------------------

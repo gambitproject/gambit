@@ -92,8 +92,8 @@ public:
 
 PolEnumModule::PolEnumModule(const gbtNfgSupport &S, const PolEnumParams &p)
   : NF(S.Game()), support(S), params(p), 
-    Space(support.TotalNumStrats()-NF.NumPlayers()), 
-    Lex(&Space, lex), num_vars(support.TotalNumStrats()-NF.NumPlayers()), 
+    Space(support.ProfileLength()-NF.NumPlayers()), 
+    Lex(&Space, lex), num_vars(support.ProfileLength()-NF.NumPlayers()), 
     count(0), nevals(0), is_singular(false)
 { 
 //  gEpsilon(eps,12);
@@ -241,7 +241,7 @@ PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
     int k;
     for(k=1;k<=NF.NumPlayers();k++) 
       if(i!=k) 
-	term*=Prob(k,support.Find(profile[k]));
+	term*=Prob(k,support.GetIndex(profile[k]));
     gDouble coeff,ap,bp;
     ap = (double)NF.Payoff(A.GetOutcome(), i);
     bp = (double)NF.Payoff(B.GetOutcome(), i);

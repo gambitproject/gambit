@@ -59,12 +59,9 @@ public:
   void Set(int p, const Strategy  *const s);
 };
 
-
-class Nfg;
-
 class gbtNfgSupport {
 protected:
-  const Nfg *bnfg;
+  const Nfg *m_nfg;
   // This really could be a gPVector<bool> probably, but we'll keep
   // it this way for now to placate possibly older compilers.
   gPVector<int> m_strategies;
@@ -74,43 +71,44 @@ protected:
 		   gOutput &tracefile, gStatus &status) const;
 
 public:
+  // LIFECYCLE
   gbtNfgSupport(const Nfg &);
-  gbtNfgSupport(const gbtNfgSupport &s); 
-  virtual ~gbtNfgSupport();
-  gbtNfgSupport &operator=(const gbtNfgSupport &s);
+  ~gbtNfgSupport() { }
+  gbtNfgSupport &operator=(const gbtNfgSupport &);
 
-  bool operator==(const gbtNfgSupport &s) const;
-  bool operator!=(const gbtNfgSupport &s) const;
+  // OPERATORS
+  bool operator==(const gbtNfgSupport &) const;
+  bool operator!=(const gbtNfgSupport &p_support) const
+  { return !(*this == p_support); }
 
-  const Nfg &Game(void) const   { return *bnfg; }
-  const Nfg *GamePtr(void) const { return bnfg; }
+  // DATA ACCESS: GENERAL
+  const Nfg &Game(void) const   { return *m_nfg; }
 
   const gText &GetName(void) const { return m_name; }
   void SetName(const gText &p_name) { m_name = p_name; }
   
-  gArray<Strategy *> Strategies(int pl) const;
-  Strategy *GetStrategy(int pl, int i) const
-    { return Strategies(pl)[i]; }
-  int GetNumber(const Strategy *s) const;
-
+  // DATA ACCESS: STRATEGIES
   int NumStrats(int pl) const;
   int NumStrats(const gbtNfgPlayer &p_player) const 
     { return NumStrats(p_player.GetId()); }
   gArray<int> NumStrats(void) const;
-  int TotalNumStrats(void) const;
+  int ProfileLength(void) const;
 
+  gArray<Strategy *> Strategies(int pl) const;
+  Strategy *GetStrategy(int pl, int st) const
+    { return Strategies(pl)[st]; }
+  int GetIndex(const Strategy *) const;
+  bool Contains(const Strategy *) const;
+
+  // MANIPULATION
   void AddStrategy(Strategy *);
-  bool RemoveStrategy(Strategy *);
+  void RemoveStrategy(Strategy *);
   
+  // DATA ACCESS: PROPERTIES
   bool IsSubset(const gbtNfgSupport &s) const;
   bool IsValid(void) const;
 
-  // returns the index of the strategy in the support if it exists,
-  // otherwise returns zero
-  int Find(Strategy *) const; 
-  bool StrategyIsActive(Strategy *) const;
-
-  // Domination 
+  // DOMINANCE AND ELIMINATION OF STRATEGIES
   bool Dominates(Strategy *s, Strategy *t, bool strong) const;
   bool IsDominated(Strategy *s, bool strong) const; 
 
@@ -120,10 +118,11 @@ public:
 				 const gArray<int> &players,
 				 gOutput &, gStatus &status) const;
 
-  void Dump(gOutput &) const;
+  // OUTPUT
+  void Output(gOutput &) const;
 };
 
-gOutput &operator<<(gOutput &f, const gbtNfgSupport &);
+gOutput &operator<<(gOutput &, const gbtNfgSupport &);
 
 #endif  // NFSTRAT_H
 

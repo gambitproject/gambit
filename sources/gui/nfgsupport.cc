@@ -165,7 +165,7 @@ void NfgSupportWindow::UpdateValues(void)
 
       wxTreeItemId stratID = m_strategyTree->AppendItem(id, 
 						       (char *) strategy->Name());
-      if (m_parent->GetSupport()->Find(strategy)) {
+      if (m_parent->GetSupport()->Contains(strategy)) {
 	m_strategyTree->SetItemTextColour(stratID, *wxBLACK);
       }
       else {
@@ -208,7 +208,7 @@ void NfgSupportWindow::ToggleItem(wxTreeItemId p_id)
     return;
   }
 
-  if (m_parent->GetSupport()->Find(strategy) &&
+  if (m_parent->GetSupport()->Contains(strategy) &&
       m_parent->GetSupport()->NumStrats(strategy->GetPlayer()) > 1) {
     m_parent->GetSupport()->RemoveStrategy(strategy);
     m_strategyTree->SetItemTextColour(p_id, *wxLIGHT_GREY);

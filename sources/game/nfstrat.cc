@@ -89,77 +89,55 @@ void StrategyProfile::Set(int p, const Strategy *const s)
   profile[p] = (Strategy *)s;
 }
 
-//-----------------------------------------------
-// gbtNfgSupport: Ctors, Dtor, Operators
-//-----------------------------------------------
+//==========================================================================
+//                         class gbtNfgSupport
+//==========================================================================
 
-gbtNfgSupport::gbtNfgSupport(const Nfg &N) : 
-  bnfg(&N), m_strategies(N.NumStrats())
+//--------------------------------------------------------------------------
+//                   class gbtNfgSupport: Lifecycle
+//--------------------------------------------------------------------------
+
+gbtNfgSupport::gbtNfgSupport(const Nfg &p_nfg)
+  : m_nfg(&p_nfg), m_strategies(p_nfg.NumStrats())
 { 
+  // Initially, all strategies are contained in the support
   m_strategies = 1;
 }
 
-gbtNfgSupport::gbtNfgSupport(const gbtNfgSupport &s)
-  : bnfg(s.bnfg), m_strategies(s.m_strategies), m_name(s.m_name)
-{ }
-
-gbtNfgSupport::~gbtNfgSupport()
-{ }
-
-gbtNfgSupport &gbtNfgSupport::operator=(const gbtNfgSupport &s)
+gbtNfgSupport &gbtNfgSupport::operator=(const gbtNfgSupport &p_support)
 {
-  if (this != &s && bnfg == s.bnfg) {
-    m_name = s.m_name;
-    m_strategies = s.m_strategies;
+  if (this != &p_support && m_nfg == p_support.m_nfg) {
+    m_name = p_support.m_name;
+    m_strategies = p_support.m_strategies;
   }
   return *this;
 }
 
-bool gbtNfgSupport::operator==(const gbtNfgSupport &s) const
+//--------------------------------------------------------------------------
+//                   class gbtNfgSupport: Operators
+//--------------------------------------------------------------------------
+
+bool gbtNfgSupport::operator==(const gbtNfgSupport &p_support) const
 {
-  return (bnfg == s.bnfg && m_strategies == s.m_strategies);
+  return (m_nfg == p_support.m_nfg && m_strategies == p_support.m_strategies);
 }
   
-bool gbtNfgSupport::operator!=(const gbtNfgSupport &s) const
-{
-  return !(*this == s);
-}
-
-//------------------------
-// gbtNfgSupport: Members
-//------------------------
-
-gArray<Strategy *> gbtNfgSupport::Strategies(int pl) const
-{
-  gBlock<Strategy *> ret;
-  for (int st = 1; st <= bnfg->NumStrats(pl); st++) {
-    if (m_strategies(pl, st)) {
-      ret += bnfg->GetPlayer(pl).GetStrategy(st);
-    }
-  }
-  return ret;
-}
-
-int gbtNfgSupport::GetNumber(const Strategy *s) const
-{
-  int pl = s->GetPlayer().GetId();
-  gArray<Strategy *> strats = Strategies(pl);
-  for (int i = 1; i <= strats.Length(); i++) {
-    if (strats[i] == s) {
-      return i;
-    }
-  }
-  return 0;
-}
+//--------------------------------------------------------------------------
+//            class gbtNfgSupport: Data access -- strategies
+//--------------------------------------------------------------------------
 
 int gbtNfgSupport::NumStrats(int pl) const
 {
-  return Strategies(pl).Length();
+  int total = 0;
+  for (int st = 1; st <= m_strategies.Lengths()[pl]; st++) {
+    total += m_strategies(pl, st);
+  }
+  return total;
 }
 
 gArray<int> gbtNfgSupport::NumStrats(void) const
 {
-  gArray<int> ret(bnfg->NumPlayers());
+  gArray<int> ret(m_nfg->NumPlayers());
 
   for (int pl = 1; pl <= ret.Length(); pl++) {
     ret[pl] = NumStrats(pl);
@@ -167,7 +145,7 @@ gArray<int> gbtNfgSupport::NumStrats(void) const
   return ret;
 }
 
-int gbtNfgSupport::TotalNumStrats(void) const
+int gbtNfgSupport::ProfileLength(void) const
 {
   int total = 0;
   for (int i = 1; i <= m_strategies.Length(); i++) {
@@ -176,40 +154,61 @@ int gbtNfgSupport::TotalNumStrats(void) const
   return total;
 }
 
-int gbtNfgSupport::Find(Strategy *s) const
+gArray<Strategy *> gbtNfgSupport::Strategies(int pl) const
 {
-  return GetNumber(s);
+  gBlock<Strategy *> ret;
+  for (int st = 1; st <= m_nfg->NumStrats(pl); st++) {
+    if (m_strategies(pl, st)) {
+      ret += m_nfg->GetPlayer(pl).GetStrategy(st);
+    }
+  }
+  return ret;
 }
 
-bool gbtNfgSupport::StrategyIsActive(Strategy *s) const
+int gbtNfgSupport::GetIndex(const Strategy *p_strategy) const
 {
-  if (Find(s) > 0)
-    return true;
-  else
-    return false;
+  int pl = p_strategy->GetPlayer().GetId();
+  gArray<Strategy *> strats = Strategies(pl);
+  for (int st = 1; st <= strats.Length(); st++) {
+    if (strats[st] == p_strategy) {
+      return st;
+    }
+  }
+  return 0;
 }
+
+bool gbtNfgSupport::Contains(const Strategy *p_strategy) const
+{
+  return m_strategies(p_strategy->GetPlayer().GetId(), p_strategy->Number());
+}
+
+//--------------------------------------------------------------------------
+//                  class gbtNfgSupport: Manipulation
+//--------------------------------------------------------------------------
 
 void gbtNfgSupport::AddStrategy(Strategy *s)
 {
   m_strategies(s->GetPlayer().GetId(), s->Number()) = 1;
 }
 
-bool gbtNfgSupport::RemoveStrategy(Strategy *s)
+void gbtNfgSupport::RemoveStrategy(Strategy *s)
 {
   m_strategies(s->GetPlayer().GetId(), s->Number()) = 0;
-  return false;
 }
 
-// Returns true if all strategies in this belong to s
+//--------------------------------------------------------------------------
+//           class gbtNfgSupport: Data access -- properties
+//--------------------------------------------------------------------------
+
 bool gbtNfgSupport::IsSubset(const gbtNfgSupport &s) const
 {
-  if (bnfg != s.bnfg)  return false;
-  for (int pl = 1; pl <= bnfg->NumPlayers(); pl++) {
+  if (m_nfg != s.m_nfg)  return false;
+  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
     if (NumStrats(pl) > s.NumStrats(pl)) {
       return false;
     }
 
-    for (int st = 1; st <= bnfg->NumStrats(pl); st++) {
+    for (int st = 1; st <= m_nfg->NumStrats(pl); st++) {
       if (m_strategies(pl, st) && !s.m_strategies(pl, st)) {
 	return false;
       }
@@ -220,7 +219,7 @@ bool gbtNfgSupport::IsSubset(const gbtNfgSupport &s) const
 
 bool gbtNfgSupport::IsValid(void) const
 {
-  for (int pl = 1; pl <= bnfg->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
     if (NumStrats(pl) == 0) {
       return false;
     }
@@ -228,7 +227,7 @@ bool gbtNfgSupport::IsValid(void) const
   return true;
 }
 
-void gbtNfgSupport::Dump(gOutput &p_output) const
+void gbtNfgSupport::Output(gOutput &p_output) const
 {
   p_output << '"' << m_name << "\" { ";
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
@@ -242,9 +241,9 @@ void gbtNfgSupport::Dump(gOutput &p_output) const
   p_output << "} ";
 }
 
-gOutput& operator<<(gOutput& s, const gbtNfgSupport& n)
+gOutput& operator<<(gOutput &p_stream, const gbtNfgSupport &p_support)
 {
-  n.Dump(s);
-  return s;
+  p_support.Output(p_stream);
+  return p_stream;
 }
 
