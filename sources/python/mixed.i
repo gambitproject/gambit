@@ -33,7 +33,7 @@ public:
   void SetCentroid(void) { (*self)->SetCentroid(); }
 
   //--------------------------------------------------------------------
-  //                    Payoff information
+  //                      Payoff information
   //--------------------------------------------------------------------
   double GetPayoff(const gbtGamePlayer &p) const
     { return (*self)->GetPayoff(p); }
@@ -42,6 +42,12 @@ public:
 
   double GetLiapValue(bool penalty) const
     { return (*self)->GetLiapValue(penalty); }
+
+  //--------------------------------------------------------------------
+  //              Restricting and unrestricting profiles
+  //--------------------------------------------------------------------
+  gbtMixedProfileDouble Unrestrict(void) const
+    { return (*self)->Unrestrict(); }
 };
 
 
@@ -81,4 +87,10 @@ public:
 
   gbtRational GetLiapValue(bool penalty) const
     { return (*self)->GetLiapValue(penalty); }
+
+  //--------------------------------------------------------------------
+  //              Restricting and unrestricting profiles
+  //--------------------------------------------------------------------
+  gbtMixedProfileRational Unrestrict(void) const
+    { return (*self)->Unrestrict(); }
 }

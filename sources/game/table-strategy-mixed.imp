@@ -344,6 +344,45 @@ T gbtTableMixedProfileRep<T>::GetLiapValue(bool penalize) const
   return result;
 }
 
+//----------------------------------------------------------------------
+//   class gbtTableMixedProfileRep<T>: Restricting and unrestricting
+//----------------------------------------------------------------------
+
+template <class T> gbtMixedProfile<T>
+gbtTableMixedProfileRep<T>::Unrestrict(void) const
+{
+  if (!m_game->m_unrestrictedGame) {
+    throw gbtGameUndefinedException();
+  }
+
+  gbtTableMixedProfileRep<T> *rep = 
+    new gbtTableMixedProfileRep<T>(m_game->m_unrestrictedGame);
+
+  for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
+    gbtTablePlayerRep *player = m_game->m_unrestrictedGame->m_players[pl];
+    for (int st = 1; st <= player->NumStrategies(); st++) {
+      gbtTableStrategyRep *strategy = player->m_infosets[1]->m_actions[st];
+      
+      int st1;
+      for (st1 = 1; st1 <= m_game->m_players[pl]->NumStrategies(); st1++) {
+	if (strategy->m_index <= 
+	    m_game->m_players[pl]->m_infosets[1]->m_actions[st1]->m_index) {
+	  break;
+	}
+      }
+      if (st1 < m_game->m_players[pl]->NumStrategies()) {
+	rep->m_profile(pl, st) = m_profile(pl, st1);
+      }
+      else {
+	rep->m_profile(pl, st) = (T) 0;
+      }  
+    }
+  }
+  
+
+  return rep;
+}
+
 template <class T> 
 std::ostream &operator<<(std::ostream &f, const gbtTableMixedProfileRep<T> &p)
 { p.Dump(f);  return f; }

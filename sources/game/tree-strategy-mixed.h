@@ -88,6 +88,12 @@ public:
 
   T GetLiapValue(bool penalize) const;
   //@}
+
+  /// @name Restricting and unrestricting profiles
+  //@{
+  gbtMixedProfile<T> Unrestrict(void) const
+    { throw gbtGameUndefinedException(); }
+  //@}
 };
 
 #endif  // TABLE_STRATEGY_MIXED_H

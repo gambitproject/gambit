@@ -217,4 +217,30 @@ This length is the total number of strategies for all players.
 
 </sect2>
 
+<sect2 id="apiref.mixed.unrestrict">
+<title>Unrestrict</title>
+<indexterm><primary>Unrestrict</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtMixedProfile&lt;T&gt; gbtMixedProfile&lt;T&gt;::Unrestrict(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>Unrestrict</function> maps the profile to the equivalent
+profile on the unrestricted game.  Probabilities for all strategies
+that appear in the unrestricted game, but not the restricted game,
+are set to zero.  If the profile is defined on a game that is not
+the restriction of another game, a 
+<errorname>gbtGameUndefinedException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) is thrown.
+</para>
+
+</sect2>
+
+
 </sect1>

@@ -87,6 +87,11 @@ public:
 
   //@}
 
+  /// @name Restricting and unrestricting profiles
+  //@{
+  gbtMixedProfile<T> Unrestrict(void) const; 
+  //@}
+
   /// @name Member functions private to the implementation
   //@{
   T GetPayoff(gbtTablePlayerRep *, long index, int pl) const;

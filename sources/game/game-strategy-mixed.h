@@ -124,6 +124,15 @@ public:
   /// Computes the Liapunov value of the profile.
   virtual T GetLiapValue(bool penalty) const = 0;
   //@}
+
+  //!
+  //! @name Restricting and unrestricting profiles
+  //!
+  //@{
+  /// Map profile up to the unrestricted game (if defined on a restriction)
+  virtual gbtMixedProfile<T> Unrestrict(void) const = 0;
+  //@}
+
 };
 
 //
