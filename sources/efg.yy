@@ -67,7 +67,7 @@ int yylex(void);
 
 %%
 
-efgfile:    LBRACE NAME 
+efgfile:    LBRACE NAME  { p->title = *last_name; } 
             players outcomes games RBRACE  { return 0; }
 
 /* Parsing the player list */
