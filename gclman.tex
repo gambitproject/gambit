@@ -1,7 +1,7 @@
 %
 % FILE: gclman.tex -- source for GCL manual
 %
-% @(#)gclman.tex	1.73 12/13/95
+% $Id$
 %
 \documentstyle[widetext,chicagob]{article}
 \renewcommand{\baselinestretch}{.9}
@@ -24,7 +24,7 @@ Minnesota
 Theodore Turocy\\Northwestern University
 }
 
-\date{Version 0.91\\ \today\\ \jobname.tex}
+\date{Version 0.94\\ \today\\ \jobname.tex}
 
 \maketitle
 
@@ -166,6 +166,7 @@ Type name	& Description \\ \hline
 {\tt FLOAT} 	& floating-point number \\
 {\tt RATIONAL} 	& rational number with arbitrary precision \\
 {\tt TEXT}	& string of arbitrary length \\
+{\tt INPUT}	& output stream \\
 {\tt OUTPUT}	& output stream \\ \hline
 {\tt EFG}	& extensive form game \\
 {\tt EFPLAYER}	& a player in an extensive form game \\
@@ -186,10 +187,10 @@ Type name	& Description \\ \hline
 \medskip
 
 The remainder of this section details the rules concerning the types
-{\tt BOOL}, {\tt INTEGER}, {\tt FLOAT}, {\tt RATIONAL}, {\tt TEXT}, and
-{\tt OUTPUT}, as well as general rules for typing.  The extensive form
-and normal form types, and their related types, are detailed later in
-special sections.
+{\tt BOOL}, {\tt INTEGER}, {\tt FLOAT}, {\tt RATIONAL}, {\tt TEXT},
+{\tt INPUT} and {\tt OUTPUT}, as well as general rules for typing.
+The extensive form and normal form types, and their related types, are
+detailed later in special sections.
 
 \subsubsection{Boolean}
 
@@ -230,11 +231,16 @@ is not required.  To specify a {\tt TEXT} constant, surround the
 text with double-quote characters ({\tt "}).  Constants may not span
 more than one input line.
 
+\subsubsection{Input}
+
+The {\tt INPUT} type is a reference to an input stream, generally a file
+on disk.  Its principal use is to read in external data. 
+
 \subsubsection{Output}
 
-The {\tt OUTPUT} type is a reference to an output stream, generally a file
-on disk.  Its principal use is as a logging file for formatting output
-from an extended command language job.
+The {\tt OUTPUT} type is a reference to an output stream, generally a
+file on disk.  Its principal use is as a logging file for writing
+formatting output from an extended command language job.  
 
 \subsubsection{List}
 
@@ -249,9 +255,10 @@ list containing the first five integers:
 { 1, 2, 3, 4, 5 }
 \end{verbatim}
 
-\noindent In the same manner, lists of any type may be created and manipulated.
-Lists may be nested to any depth; however, the type of all the elements
-of the list and any sublists must always be the same.  Hence
+\noindent In the same manner, lists of any type may be created and
+manipulated.  Lists may be nested to any depth; however, the type of
+all the elements of the list and any sublists must always be the same.
+Hence
 
 \begin{verbatim}
 { 3, { 4, 6 }, 23 }
@@ -266,9 +273,9 @@ of the list and any sublists must always be the same.  Hence
 
 \noindent is not, since the second element is a {\tt LIST(FLOAT)}.
 
-Lists are distinct in type from each other and from their scalar equivalents.
-That is to say, {\tt LIST(INTEGER)} is not the same time as
-{\tt LIST(FLOAT)}, nor is it the same type as {\tt INTEGER}.
+Lists are distinct in type from each other and from their scalar
+equivalents.  That is to say, {\tt LIST(INTEGER)} is not the same time
+as {\tt LIST(FLOAT)}, nor is it the same type as {\tt INTEGER}.
 
 \subsection{Variables}
 
@@ -308,7 +315,7 @@ Assign[y, 3.0]
 \end{verbatim}
 
 \noindent The first call defines {\tt y} to be of type {\tt INTEGER}.  The
-second call, then, is interpreted as {\tt Assign[INTEGER, FLOAT]}, which does
+second is interpreted as {\tt Assign[ INTEGER, FLOAT]}, which does
 not match the definition of {\tt Assign}.
 
 An existing variable may be deleted by the use of the {\tt UnAssign} function
@@ -350,10 +357,10 @@ number is given for run time errors.
 
 \subsection{Function calls}
 
-A function call consists of the name of a function, and a list of parameters
-upon which the function is to operate.  Functions return a value, which
-may in turn be used as a parameter to another function call, allowing more
-complex computations to be expressed.
+A function call consists of the name of a function, and a list of
+parameters upon which the function is to operate.  Functions return a
+value, which may in turn be used as a parameter to another function
+call, allowing more complex computations to be expressed.
 
 A simple example of a function call is
 
@@ -361,10 +368,10 @@ A simple example of a function call is
 Plus[x->1, y->2]
 \end{verbatim}
 
-This calls the function named {\tt Plus}, with parameter \verb+x+ set to
-the value 1 and \verb+y+ set to the value 2.  Since {\tt Plus} is the function
-for addition of two integers, the value returned would be, as you might
-expect, 3.
+This calls the function named {\tt Plus}, with parameter \verb+x+ set
+to the value 1 and \verb+y+ set to the value 2.  Since {\tt Plus} is
+the function for addition of two integers, the value returned would
+be, as you might expect, 3.
 
 In the addition example above, we called a function which is listed in
 the function reference as
@@ -442,19 +449,15 @@ variations listed in the function reference:
 Plus[x->INTEGER, y->INTEGER] =: INTEGER
 Plus[x->FLOAT, y->FLOAT] =: FLOAT
 Plus[x->RATIONAL, y->RATIONAL] =: RATIONAL
-Plus[x->TEXT, y->TEXT] =: TEXT
-Plus[x->LIST(T), y->LIST(T) =: LIST(T)
 Plus[x->MIXED, y->MIXED] =: MIXED
 Plus[x->BEHAV, y->BEHAV] =: BEHAV
 \end{verbatim}
 
-\noindent In fact, not all the versions of {\tt Plus} implement addition;
-for example, the {\tt TEXT} version concatenates two strings.  This is a
-good example of function {\it overloading}.  This means that one function
-name may have several possible parameter lists, sometimes called
-{\it signatures}.  The GCL interpreter is capable of determining which
-version of the function to use by analyzing the names and types of the
-parameters used.
+\noindent This is a good example of function {\it overloading}.  This
+means that one function name may have several possible parameter
+lists, sometimes called {\it signatures}.  The GCL interpreter is
+capable of determining which version of the function to use by
+analyzing the names and types of the parameters used.
 
 Since a function may have multiple signatures, it is conceivable that
 a function call might be ambiguous, in the sense that its parameters match
@@ -507,8 +510,7 @@ in a ``short form'' call, and the order of parameters is therefore
 significant.
 
 Here is a list of the functions thus abbreviated, and their ``short form''
-equivalents:\marginpar[]{The changes to {\tt Concat} and {\tt Power} are
-pending}
+equivalents:
 
 \medskip
 
@@ -518,6 +520,7 @@ And[x, y]		& x \&\& y, x AND y \\
 Assign[x, y]		& x := y \\
 Concat[x, y]            & x \& y \\
 Divide[x, y]		& x / y or x DIV y \\
+Dot[x, y]		& x . y \\
 Equal[x, y]		& x = y \\
 Greater[x, y]		& x > y \\
 GreaterEqual[x, y]	& x >= y \\
@@ -534,7 +537,9 @@ Or[x, y]		& x || y, x OR y \\
 Paren[x]		& (x) \\ 
 Plus[x, y]		& x + y \\
 Power[x, y]	 	& x $\wedge$ y \\
+Read[in,x]		& in >> x \\
 Times[x, y]		& x * y \\
+Write[out,x]		& out << x \\
 \end{tabular}
 }
 
@@ -565,6 +570,8 @@ The order of precedence for built-in functions is as follows:
 \item
 \verb+:=+
 \item
+\verb+>> <<+
+\item
 \verb+||+
 \item
 \verb+&&+
@@ -575,7 +582,7 @@ The order of precedence for built-in functions is as follows:
 \item
 \verb&+ - &\verb+&+
 \item
-\verb+* / DIV MOD $\wedge$+
+\verb+* . / DIV MOD+ $\wedge$
 \item
 \verb&(unary) + -&
 \item
@@ -612,7 +619,7 @@ are evaluated in a special way (since their parameters are expressions
 and sequences of statements); they also have no ``formal'' names for
 their parameters.
 
-\subsubsection{Conditional execution with {\tt If[]}}
+\subsubsection{Conditional execution with {\tt If}}
 
 The function \verb+If[]+ allows execution of a sequence of statements
 only under certain conditions.  The syntax of the function is
@@ -657,7 +664,77 @@ statements which result in the definition of new variables.
 
 \subsubsection{Repetitive execution with {\tt While}}
 
+Often in writing programs it is necessary to execute a block of statements
+repeatedly, usually with different values for variables.  To this end
+the GCL provides a special function \verb+While+ as a generalized looping
+construct.  The syntax of the function is
+
+\begin{verbatim}
+While[boolean-expression, statement-list]
+\end{verbatim}
+
+The function is interpreted as follows: While \verb+boolean-expression+
+evalutes to \verb+True+, execute the statements in \verb+statement-list+.
+Note that the evaluation of the boolean takes place at the beginning of
+the execution of a block, so it is only important whether the value is
+\verb+True+ or \verb+False+ at the beginning of the block, and not at
+some point in the middle.
+
+This simple loop generates the numbers from one to ten:
+
+\begin{verbatim}
+i := 0;
+While[i <= 10, i := i + 1];
+\end{verbatim}
+
+\noindent Alternately, one can create a list of the values one through ten with
+a small modification:
+
+\begin{verbatim}
+i := 1;
+list := { };
+While[i <= 10, list := list + { i }; i := i + 1;]
+\end{verbatim}
+
+As with \verb+If+, be wary of declaring a variable implicitly inside a loop.
+A variable is declared only when the corresponding statement is executed;
+so, if the \verb+boolean-expression+ is \verb+False+ the first time it is
+evaluated, the body of the loop never executes, and no variables which
+appear in the loop are considered to be defined.
+
 \subsubsection{Special looping with {\tt For}}
+
+The function \verb+For+ is a specialized looping construct, useful mostly
+in cases where some index variable is used to iterate a list or some sequence.
+The general syntax for \verb+For+ is
+
+\begin{verbatim}
+For[statement-list, boolean-expression, statement-list, statement-list]
+\end{verbatim}
+
+\noindent The call is interpreted as follows:
+\begin{itemize}
+\item Execute the statements in
+the first \verb+statement-list+ (this is called the {\em initialization}).
+\item Evaluate the \verb+boolean-expression+ (called the {\em guard}).
+\item If the \verb+boolean-expression+ is \verb+False+, terminate the loop and
+continue with the first statement after the loop.  If it is \verb+True+,
+execute the third \verb+statement-list+, called the {\em body} of the loop.
+\item Execute the second \verb+statement-list+, called the {\em increment},
+and return to the evaluation of the guard.
+\end{itemize}
+
+Returning to the examples in the \verb+While+ section, we see another way
+of writing the two loops:
+
+\begin{verbatim}
+For[i := 1, i <= 10, i := i + 1, i];
+
+For[i := 1, list := { }; i <= 10, list := list + {i}; i := i + 1;]
+\end{verbatim}
+
+\noindent The two methods are completely equivalent, but it is often
+more convenient to use the structure afforded by the \verb+For+ function.
 
 
 \section{Advanced topics}
@@ -668,11 +745,13 @@ The function {\tt Include[TEXT]} is used to insert the contents of the file
 given into the input stream, as if they had been typed directly by the user.
 This can be particularly useful in conjunction with user defined functions, in that
 a library of useful functions can be constructed and included into the program
-easily.
+asily.
 
-The {\tt Include} directive may only appear at the ``top level'' of the
-program.  That is to say, it cannot be used inside a loop, function declaration, or expression.  However, files may be nested arbitrarily deep using
-{\tt Include}, so you can include a file which in turn includes other files.
+The {\tt Include} directive may only appear at the ``top level'' of
+the program.  That is to say, it cannot be used inside a loop,
+function declaration, or expression.  However, files may be nested
+arbitrarily deep using {\tt Include}, so you can include a file which
+in turn includes other files.
   
 \subsection{User defined functions}
 
@@ -756,6 +835,166 @@ parameter \verb+x+, since the value of \verb+i+ inside \verb+FooFunc+ is
 always 13, regardless of the value of \verb+i+ outside of the function.
 
 
+\subsection{Lists as arguments to functions}
+
+Almost all of the functions in the GCL are ``listable''.  This means
+that if there is a version of the function which takes a type \verb+T+
+as the data type for a parameter, then it can be called with
+\verb+LIST(T)+ as well.  This results in the function generating a
+list of the corresponding length and data type as its output.  For
+example, consider a function 
+
+\begin{verbatim}
+Foo[x->T,y->S] =: R
+\end{verbatim}
+
+\noindent
+where \verb+T+, \verb+S+, and \verb+R+ represent arbitrary data types.
+Then if \verb+a+ is a \verb+LIST(T)+, and \verb+b+ is of type
+\verb+S+, then \verb+c := Foo[a,b]+ generates \verb+c+ of type
+\verb+LIST(R)+, where the length of \verb+c+ is equal to the length of
+\verb+a+, and where \verb+c[[i]] = Foo[a[[i]],b]+.  
+
+If \verb+Foo[]+ is called with both \verb+a+ and \verb+b+ being lists
+of the correct data type, then the GCL checks whether the length of
+\verb+a+ and \verb+b+ is the same.  If not, it generates a
+dimensionality error. If they are of the same dimension, then 
+\verb+c := Foo[a,b]+ generates \verb+c+ of type \verb+LIST(R)+, where the
+length of \verb+c+ is equal to the length of \verb+a+, and where
+\verb+c[[i]] = Foo[a[[i]],b[[i]]]+.
+
+Note that the above rules implicitly define versions of \verb+Foo[]+
+of the following forms:
+
+\begin{verbatim}
+Foo[x->LIST(T),y->S] =: LIST(R)
+Foo[x->T,y->LIST(S)] =: LIST(R)
+Foo[x->LIST(T),y->LIST(S)] =: LIST(R)
+\end{verbatim}
+
+The same rules apply recursively using these function prototypes as
+well.  So if \verb+a+ is of type \verb+LIST(LIST(T))+, and \verb+b+ is
+of type \verb+S+, the command \verb+c := Foo[a, b]+ results in
+a listable call to \verb+Foo[x->LIST(T),y->S]+.  Thus, \verb+c+ is of
+type \verb+LIST(LIST(R))+, where \verb+c[[i]] = +
+\verb+Foo[a[[i]],b]+.  Hence, \verb+c[[i]][[j]] = +
+\verb+Foo[a[[i]][[j]],b]+.
+
+Note that many vector and matrix math operations follow directly as
+listable calls to the basic arithmetic functions.  For example:
+
+\begin{verbatim}
+GCL1: a:={{1,2},{3,4}};
+GCL2: 2*a
+{{2,4},{6,8}}
+GCL3: a+Transpose[a]
+{{2,5},{5,8}}
+\end{verbatim}
+
+While most functions in the GCL are listable, there are some
+exceptions.  Built in functions that are not listable are noted as
+such in the Function Reference section of this document.  
+
+Listability of functions is a powerful tool of the GCL. Many GCL
+programs using flow control statements can be written using listable
+function calls instead.  It is encouraged to use listable functions as
+much as possible because it typically leads to more concise, easier to
+read GCL programs, and in addition the programs typically run much
+faster than they would if flow control satements were used instead.
+This is because listable calls to functions are executed in compiled
+code, while flow control statements are executed in interpreted code.
+
+\subsection{Input and Output}
+
+Data can be read from an input stream by the Read[] function.  So if
+\verb+in+ is an input stream (i. e., of type INPUT) then a successful
+call of \verb+Read[in,x]+ will read the exposed data (see function
+reference for definition of ``exposed data'') from the input stream,
+\verb+in+, assign \verb+x+ to have that type and value, and position
+the file pointer at the end of the exposed data, to be ready for the
+next call of Read[].  \verb+Read[in,x]+ has the short form \verb+in >>
+x+.  Since the return value of \verb+Read[in,x]+ is \verb+in+, these
+commands can be chained.  In other words,
+
+\begin{verbatim}
+in >> x >> y
+\end{verbatim}
+ 
+\noindent
+is equivalent to 
+
+\begin{verbatim}
+Read[in,x]
+Read[in,y]
+\end{verbatim}
+
+\noindent
+In the statement \verb+Read[in,x]+, if \verb+x+ is undefined, then its
+data type is determined from the exposed data in the input stream.  On
+the other hand if \verb+x+ is previously defined, then the Read[]
+function will expect to find the corresponding data type in the input
+stream, and a file read error will be generated if the exposed data is
+of the wrong data type.  If \verb+x+ is previously defined to be a
+LIST(T), then \verb+Read[in,x]+ will successively read elements into
+each element of the list.  If the wrong data type is found for any
+element of the list, a file read error will be returned.  Thus, if the
+file \verb+"file.out"+ contains the following data
+
+\begin{verbatim}
+25 1/3 "This is a text string!" False 3.14159 
+{{1, 0},{0, 1}}
+1 2 3 4 5
+\end{verbatim}
+
+then the following GCL code
+
+\begin{verbatim}
+in:=Input["file.dat"]
+x:=List[0,5]
+in >> i >> r >> t >> b >> f >> l >> x
+\end{verbatim}
+
+\noindent
+opens an input stream, consisting of the file \verb+"file.dat"+, and
+then reads data from the input stream into the corresponding
+variables.  After the last statement, 
+\verb+i+ is an INTEGER with value \verb+25+, 
+\verb+r+ is a RATIONAL with value \verb+1/3+, 
+\verb+t+ is a TEXT with value \verb+"This is a text string!"+, 
+\verb+b+ is a BOOL with value \verb+False+, 
+\verb+f+ is a FLOAT with value \verb+3.14159+, 
+\verb+l+ is a LIST(LIST(INTEGER)) with value \verb+{{1,0},{0,1}}+, and 
+\verb+x+ is a LIST(INTEGER) with value \verb+{1,2,3,4,5}+.  
+
+Data can be written to an output stream by the use of the Write[]
+function.  Thus, the following commands
+
+\begin{verbatim}
+out:=Output["file.out"]
+x:=0/1;y:={0.0,0.0}
+Write[out,x]
+Write[out,y]
+\end{verbatim}
+
+creates an output stream, \verb+out+, and then writes out a RATIONAL
+number, followed by a list of two FLOATs.  \verb+Write[out,x]+ has the
+short form \verb+out >> x+.  Since the return value of Write[] is
+\verb+out+, these commands can be chained.  So the two lines writing out
+\verb+x+ and \verb+y+ in the above example could be written instead
+
+\begin{verbatim}
+out << x << y
+\end{verbatim}
+ 
+The SetFormat[] function can be used to control the formatting of data
+written to an output stream.  Note that the Read[] and Write[]
+functions are not listable.
+
+The Read[] and Write[] functions can only be used with certain data
+types (see function documentation).  Reading and writing of EFG and
+NFG from external files can be done with the LoadEfg[], SaveEfg[],
+LoadNfg[] and SaveNfg[] functions.  
+
 \subsection{Extensive forms}
 
 \subsubsection{Creating a new extensive form}
@@ -812,12 +1051,7 @@ win := SetPayoff[NewOutcome[e, "Win"],{ante,-ante}];
 winbig := SetPayoff[NewOutcome[e, "Win Big"],{ante+raise,-ante-raise}];
 lose := SetPayoff[NewOutcome[e, "Lose"],{-ante,ante}];
 losebig := SetPayoff[NewOutcome[e, "Lose Big"],{-ante-raise,ante+raise}];
-AttachOutcome[n#1#1#1,winbig];
-AttachOutcome[n#1#1#2,win];
-AttachOutcome[n#1#2,lose];
-AttachOutcome[n#2#1#1,losebig];
-AttachOutcome[n#2#1#2,win];
-AttachOutcome[n#2#2,lose];
+AttachOutcome[TerminalNodes[e],{winbig,win,win,losebig,win,lose}]
 \end{verbatim}
 
 \subsubsection{Saving and loading extensive forms}
@@ -840,6 +1074,36 @@ been saved to an external file, it can be loaded by the command
 \begin{verbatim}
 e := LoadEfg["filename.efg" ]
 \end{verbatim}
+
+\subsubsection{Subgames}
+
+Gambit implements and supports the concept of a game theoretic
+subgame.  When an extensive form is first created, no subgames (except
+for the default ROOT subgame) are defined.  The function
+\verb+MarkSubgames[]+ can be used to mark all of the subgames in the
+extensive form, and \verb+MarkThisSubgame[]+ can be used to check
+whether a specific node is a subgame root, and mark it if it is.
+Similarly, subgames can be unmarked by using \verb+UnmarkSubgames[]+
+and \verb+UnmarkThisSubgame[]+.  The function \verb+SubgameRoots[]+
+returns a list of all currently marked subgame roots.  
+
+All of the solution algorithms (with the current exception of the 
+GobitSolve[] algorithms) make use of the marked subgames.  When non-trivial 
+subgames are marked, then the solution algorithms will solve the 
+extensive form game by recursion through the marked subgames.  Thus, a 
+subgame is solved only when all subgames following it have been 
+solved.  
+
+If all subgames are marked, then any Nash equilibrium found will be a
+subgame perfect Nash equilibrium.  Note that the solution algorithms
+only respect marked subgames, and hence if you want the solution
+algorithms to make use of subgames, you must mark the subgames.
+
+\noindent
+[Note: If there are non trivial marked subgames, the solution
+algorithms currently only return one equilibrium (the first
+found) in each subgame.  If no non-trivial subgames are marked, then
+as many solutions as are requested will be found.]
 
 \subsection{Normal forms}
 
@@ -882,13 +1146,7 @@ the command \verb+Behav+.  Thus
 \begin{verbatim}
 n := Nfg[e];
 m := LcpSolve[n];
-i :=1;
-b := {};
-While[ i<=Length[m],
-  b := b +{ Behav[m[[i]],e] };
-  i:=i+1;
-  ];
-b
+b := Behav[m,e]
 \end{verbatim}
 
 \noindent
@@ -950,14 +1208,17 @@ finds all pure strategy Nash equilibrium.  Optionally it can be set to
 find the first \verb+k+ Nash equilibria.  This algorithm will work on
 any normal form game.  
 
-The {\tt EnumMixedSolve} function enumerates all Nash equilibria (pure and
-mixed) for a given support of a two person normal form
-game.  More precisely, it finds the set of extreme points of the
-components of the set of Nash equilibria.  The procedure is to
-enumerate the set of complementary basic feasible solutions. (See, eg
-\cite[1964]{Man:64}.)  By default, all equilibria are found.
-Optionally, it can be set to find the first \verb+k+ equilibria.  
-This algorithm works only on two-person normal form games.  
+The {\tt EnumMixedSolve} function enumerates all Nash equilibria (pure
+and mixed) for a given support of a two person normal form game.  More
+precisely, it finds the set of extreme Nash equilibria, as defined in
+\cite[1964]{Man:64}.  For any normal form game, as shown in
+Mangasarian, every Nash equilibrium can be expressed as a convex
+combination of the extreme Nash equilibria.  For generic games, there
+are just a finite number of Nash equilibria, which coincide with the
+extreme equilibria.  By default, all extreme equilibria are found.
+Optionally, the algorithm can be set to find the first \verb+k+
+equilibria.  This algorithm works only on two-person normal form
+games.
 
 \subsection{Gobit}
 
@@ -1101,6 +1362,7 @@ refer to the following, alphabetically organized, section.
 
 \begin{verbatim}
 Assign[x<->T, y->T] =: T
+Clear[]
 Include[file->TEXT]
 NewFunction[name[argument-list], body]
 Quit
@@ -1110,10 +1372,10 @@ UnAssign[x<->T] =: T
 \subsection{Flow Control}
 
 \begin{verbatim}
-For[statement-list, guard, statement-list, statement-list]
-If[guard, statement-list]
-If[guard, statement-list, statement-list]
-While[guard, statement-list]
+For[statement-list, boolean-expression, statement-list, statement-list]
+If[boolean-expression, statement-list]
+If[boolean-expression, statement-list, statement-list]
+While[boolean-expression, statement-list]
 \end{verbatim}
 
 \subsection{Lists}
@@ -1127,6 +1389,7 @@ Contains[list->LIST(T), x->T] =: BOOL
 Length[list->LIST(T)] =: INTEGER
 NthElement[list->LIST(T),n->INTEGER] =: T 
 Remove[list->LIST(T), n->INTEGER] =: LIST(T)
+Transpose[x->LIST(LIST(T))] := LIST(LIST(T))
 \end{verbatim}
 
 \subsection{String Functions}
@@ -1138,7 +1401,7 @@ prior to version 0.92.
 Concat[x->TEXT, y->TEXT] =: TEXT
 Greater[x->TEXT, y->TEXT] =: BOOL
 GreaterEqual[x->TEXT, y->TEXT] =: BOOL
-Length[text->TEXT] =: INTEGER
+NumChars[text->TEXT] =: INTEGER
 Less[x->TEXT, y->TEXT] =: BOOL
 LessEqual[x->TEXT, y->TEXT] =: BOOL
 NthChar[text->TEXT, n->INTEGER] =: TEXT
@@ -1148,23 +1411,23 @@ NthChar[text->TEXT, n->INTEGER] =: TEXT
 \subsection{Input and Output}
 
 \begin{verbatim}
+Input[file->TEXT] =: INPUT
 LoadEfg[file->TEXT] =: EFG
 LoadNfg[file->TEXT] =: NFG
 Output[file->TEXT] =: OUTPUT
+Read[input->INPUT, x<->T] =: INPUT  
+      for T = BEHAV,BOOL,FLOAT,INTEGER,MIXED,RATIONAL,TEXT,LIST(T)
 SaveEfg[efg<->EFG, file->TEXT] =: EFG
 SaveNfg[nfg<->NFG, file->TEXT] =: NFG
 SaveNfg[support->NFSUPPORT, file->TEXT] =: NFSUPPORT
-SetFormat[{width->INTEGER}, {precis->INTEGER}, 
-          {expmode->BOOL}, {quoted->BOOL}] =: OUTPUT
-Write[output->OUTPUT, x->BEHAV] =: OUTPUT
-Write[output->OUTPUT, x->BOOL] =: OUTPUT 
-Write[output->OUTPUT, x<->EFG] =: OUTPUT
-Write[output->OUTPUT, x->FLOAT] =: OUTPUT
-Write[output->OUTPUT, x->INTEGER] =: OUTPUT
-Write[output->OUTPUT, x->MIXED] =: OUTPUT
-Write[output->OUTPUT, x<->NFG] =: OUTPUT
-Write[output->OUTPUT, x->RATIONAL] =: OUTPUT
-Write[output->OUTPUT, x->TEXT] =: OUTPUT
+SetFormat[ {width->INTEGER}, {precis->INTEGER}, {expmode->BOOL},
+                {quote->BOOL}, {listBraces->BOOL},
+                {listCommas->BOOL}, {listLF->INTEGER},
+                {listIndent->INTEGER} ] := BOOL
+Write[output->OUTPUT, x->T] =: OUTPUT  
+      for T = BEHAV,BOOL,FLOAT,INTEGER,MIXED,RATIONAL,TEXT,LIST(T)
+Write[output->OUTPUT, x<->T] =: OUTPUT 
+      for T = EFG, NFG
 \end{verbatim}
 
 \subsection{Logic}
@@ -1179,46 +1442,34 @@ Or[x->BOOL, y->BOOL] =: BOOL
 
 \subsection{Arithmetic}
 
-\marginpar{The vector versions of these functions are pending.}
 \begin{verbatim}
-Divide[x->FLOAT, y->FLOAT] =: FLOAT
-Divide[x->RATIONAL, y->RATIONAL] =: RATIONAL
+ArgMax[x->LIST(T)] := INTEGER
+       for T = FLOAT, INTEGER, RATIONAL
+Divide[x->T, y->T] =: T
+       for T = FLOAT, RATIONAL  
+Dot[x->LIST(T), y->LIST(T)] =: T
+       for T = FLOAT, INTEGER, RATIONAL
 Exp[x->FLOAT] =: FLOAT
-Greater[x->FLOAT, y->FLOAT] =: BOOL
-Greater[x->INTEGER, y->INTEGER] =: BOOL
-Greater[x->RATIONAL, y->RATIONAL] =: BOOL
-GreaterEqual[x->FLOAT, y->FLOAT] =: BOOL
-GreaterEqual[x->INTEGER, y->INTEGER] =: BOOL
-GreaterEqual[x->RATIONAL, y->RATIONAL] =: BOOL
+Greater[x->T, y->T] =: BOOL
+       for T = FLOAT, INTEGER, RATIONAL
+GreaterEqual[x->T, y->T] =: BOOL
+       for T = FLOAT, INTEGER, RATIONAL
 IntegerDivide[x->INTEGER, y->INTEGER] =: INTEGER
-Less[x->FLOAT, y->FLOAT] =: BOOL
-Less[x->INTEGER, y->INTEGER] =: BOOL
-Less[x->RATIONAL, y->RATIONAL] =: BOOL
+Less[x->T, y->T] =: BOOL
+       for T = FLOAT, INTEGER, RATIONAL
 LessEqual[x->FLOAT, y->FLOAT] =: BOOL
-LessEqual[x->INTEGER, y->INTEGER] =: BOOL
-LessEqual[x->RATIONAL, y->RATIONAL] =: BOOL
+       for T = FLOAT, INTEGER, RATIONAL
 Log[x->FLOAT] =: FLOAT
 Minus[x->FLOAT, y->FLOAT] =: FLOAT
-Minus[x->INTEGER, y->INTEGER] =: INTEGER
-Minus[x->LIST(T), y->LIST(T)] =: LIST(T)
-Minus[x->RATIONAL, y->RATIONAL] =: RATIONAL
-Minus[x->MIXED, y->MIXED] =: MIXED
-Minus[x->BEHAV, y->BEHAV] =: BEHAV
+       for T = FLOAT, INTEGER, RATIONAL, MIXED, BEHAV
 Modulus[x->INTEGER, y->INTEGER] =: INTEGER
 Negate[x->FLOAT] =: FLOAT
-Negate[x->INTEGER] =: INTEGER
-Negate[x->RATIONAL] =: RATIONAL
+       for T = FLOAT, INTEGER, RATIONAL
 Paren[x->T] =: T
 Plus[x->FLOAT, y->FLOAT] =: FLOAT
-Plus[x->INTEGER, y->INTEGER] =: INTEGER
-Plus[x->LIST(T), y->LIST(T)] =: LIST(T)
-Plus[x->RATIONAL, y->RATIONAL] =: RATIONAL
-Plus[x->MIXED, y->MIXED] =: MIXED
-Plus[x->BEHAV, y->BEHAV] =: BEHAV
+       for T = FLOAT, INTEGER, RATIONAL, MIXED, BEHAV
 Times[x->FLOAT, y->FLOAT] =: FLOAT
-Times[x->INTEGER, y->INTEGER] =: INTEGER
-Times[x->LIST(T), y->LIST(T)] =: T
-Times[x->RATIONAL, y->RATIONAL] =: RATIONAL
+       for T = FLOAT, INTEGER, RATIONAL,
 Times[x->FLOAT, y->MIXED] =: MIXED
 Times[x->MIXED, y->FLOAT] =: MIXED
 Times[x->RATIONAL, y->MIXED] =: MIXED
@@ -1232,11 +1483,15 @@ Times[x->BEHAV, y->RATIONAL] =: BEHAV
 \subsection{Extensive Form Manipulation}
 
 \begin{verbatim}
+AddAction[support->EFSUPPORT, infoset->INFOSET, 
+          action->ACTION] =: EFSUPPORT
 AppendAction[infoset->INFOSET] =: ACTION
 AppendNode[node->NODE, infoset->INFOSET] =: NODE
 AttachOutcome[node->NODE, outcome->OUTCOME] =: OUTCOME
-Behav[efg<->EFG, {list->LIST(LIST(LIST(FLOAT)))}] =: BEHAV
-Behav[efg<->EFG, {list->LIST(LIST(LIST(RATIONAL)))}] =: BEHAV
+Behav[efg<->EFG | support->EFSUPPORT, 
+      {list->LIST(LIST(LIST(FLOAT)))}] =: BEHAV
+Behav[efg<->EFG | support->EFSUPPORT, 
+      {list->LIST(LIST(LIST(RATIONAL)))}] =: BEHAV
 CopyTree[from->NODE, to->NODE] =: NODE
 DeleteAction[infoset->INFOSET, action->ACTION] =: ACTION
 DeleteNode[node->NODE, keep->NODE] =: NODE
@@ -1247,6 +1502,9 @@ InsertAction[infoset->INFOSET, at->ACTION] =: ACTION
 InsertNode[node->NODE, infoset->INFOSET] =: NODE
 JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
 LeaveInfoset[node->NODE] =: INFOSET
+MarkSubgames[efg<->EFG] =: LIST(NODE)
+MarkSubgames[node->NODE] =: LIST(NODE)
+MarkThisSubgame[node->NODE] =: BOOL
 MergeInfosets[infoset1->INFOSET,
                infoset2->INFOSET] =: INFOSET
 MoveTree[from->NODE, to->NODE] =: NODE
@@ -1259,6 +1517,8 @@ NewOutcome[efg<->EFG, {name->TEXT}] =: OUTCOME
 NewPlayer[efg<->EFG, {name->TEXT}] =: EFPLAYER 
 NewSupport[efg<->EFG] =: EFSUPPORT
 RandomEfg[efg<->EFG, {seed->INTEGER}] =: EFG
+RemoveAction[support->EFSUPPORT, infoset->INFOSET, 
+             action->ACTION] =: EFSUPPORT
 Reveal[infoset->INFOSET, who->LIST(EFPLAYER))] =: INFOSET
 SetChanceProbs[infoset->INFOSET, probs->LIST(FLOAT)] =: INFOSET
 SetChanceProbs[infoset->INFOSET, probs->LIST(RATIONAL)] =: INFOSET
@@ -1274,6 +1534,10 @@ SetPayoff[outcome->OUTCOME, payoff->LIST(FLOAT)] =: OUTCOME
 SetPayoff[outcome->OUTCOME, payoff->LIST(RATIONAL)] =: OUTCOME
 SetPayoff[node->NODE, payoff->LIST(FLOAT)] =: OUTCOME
 SetPayoff[node->NODE, payoff->LIST(RATIONAL)] =: OUTCOME
+SubgameRoots[efg<->EFG] =: LIST(NODE)
+UnmarkSubgames[efg<->EFG] =: LIST(NODE)
+UnmarkSubgames[node->NODE] =: LIST(NODE)
+UnmarkThisSubgame[node->NODE] =: NODE
 \end{verbatim}
 
 \subsection{Normal Form Manipulation}
@@ -1299,8 +1563,10 @@ SetPayoff[list->LIST(INTEGER), payoffs->LIST(RATIONAL)] =: LIST(INTEGER)
 Float[x->INTEGER] =: FLOAT
 Float[x->FLOAT] =: FLOAT
 Float[x->RATIONAL] =: FLOAT
-List[mixed->MIXED] =: LIST(LIST(T))
-List[behav->BEHAV] =: LIST(LIST(LIST(T)))
+List[x<->T, {length->INTEGER},{delta->T}] =: LIST(T)
+List[x->T, {length->INTEGER},{delta->T}] =: LIST(T)
+ListForm[mixed->MIXED] =: LIST(LIST(T))
+ListForm[behav->BEHAV] =: LIST(LIST(LIST(T)))
 Nfg[efg<->EFG, {time<->FLOAT}] =: NFG
 Rational[x->INTEGER] =: RATIONAL
 Rational[x->FLOAT] =: RATIONAL
@@ -1316,9 +1582,15 @@ Text[x->TEXT] =: TEXT
 \begin{verbatim}
 Behav[mixed->MIXED] =: BEHAV
 ElimDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
-   {time<->FLOAT}] =: NFSUPPORT 
+        {time<->FLOAT} =: NFSUPPORT
+ElimAllDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
+        {time<->FLOAT} =: NFSUPPORT
+EnumMixedSolve[efg<->EFG, {asNfg->BOOL}, {stopAfter->INTEGER},
+               {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
 EnumMixedSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
                {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
+EnumPureSolve[efg<->EFG, {asNfg->BOOL}, {stopAfter->INTEGER},
+              {time<->FLOAT}] =: LIST(BEHAV)
 EnumPureSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
               {time<->FLOAT}] =: LIST(MIXED) 
 GobitSolve[efg<->EFG | start->BEHAV, {pxifile->TEXT},
@@ -1338,11 +1610,11 @@ GobitGridSolve[nfg<->NFG | support->NFSUPPORT, {pxifile->TEXT},
               {delLam->FLOAT}, {powLam->INTEGER}, 
               {delp->FLOAT}, {tol->FLOAT},
               {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-LcpSolve[efg<->EFG, {stopAfter->INTEGER},
+LcpSolve[efg<->EFG, {asNfg->BOOL}, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
 LcpSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-LiapSolve[efg<->EFG | start->BEHAV, 
+LiapSolve[efg<->EFG | start->BEHAV, {asNfg->BOOL},
           {stopAfter->INTEGER}, {nTries->INTEGER},
           {maxitsN->INTEGER}, {tolN->FLOAT},
           {maxits1->INTEGER}, {tol1->FLOAT},
@@ -1352,7 +1624,9 @@ LiapSolve[nfg<->NFG | start->MIXED,
           {maxitsN->INTEGER}, {tolN->FLOAT},
           {maxits1->INTEGER}, {tol1->FLOAT},
           {time<->FLOAT}, {nEvals<->INTEGER}] =: LIST(MIXED)
-LpSolve[ nfg<->NFG | support->NFSUPPORT, {nPivots<->INTEGER},
+LpSolve[efg<->EFG,
+        {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
+LpSolve[nfg<->NFG | support->NFSUPPORT, {nPivots<->INTEGER},
         {time<->FLOAT}] =: LIST(MIXED)
 SetOptions[alg->TEXT, param->TEXT, value->T] =: T
 SimpDivSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
@@ -1368,13 +1642,26 @@ Centroid[efg<->EFG | support->EFSUPPORT] =: BEHAV
 Centroid[nfg<->NFG | support->NFSUPPORT] =: MIXED
 Chance[efg<->EFG] =: EFPLAYER
 ChanceProbs[infoset->INFOSET] =: LIST(T)
+GobitLambda[strategy->BEHAV(T) | MIXED(T)] =: T
+GobitValue[strategy->BEHAV(T) | MIXED(T)] =: T
 HasOutcome[node->NODE] =: BOOL
 Infoset[node->NODE] =: INFOSET
 Infosets[player->EFPLAYER] =: LIST(INFOSET)
+IsNash[strategy->MIXED] =: BOOL
+IsNash[strategy->BEHAV] =: BOOL
+IsntPerfect[strategy->MIXED] =: BOOL
+IsntProper[strategy->MIXED] =: BOOL
+IsntSequential[strategy->BEHAV] =: BOOL
+IsntSubgamePerfect[strategy->BEHAV] =: BOOL
+IsPerfect[strategy->MIXED] =: BOOL
 IsPredecessor[node->NODE, of->NODE] =: BOOL
+IsProper[strategy->MIXED] =: BOOL
+IsSequential[strategy->BEHAV] =: BOOL
+IsSubgamePerfect[strategy->BEHAV] =: BOOL
 IsRoot[node->NODE] =: BOOL
 IsSuccessor[node->NODE, from->NODE] =: BOOL
 LastAction[node->NODE] =: ACTION
+LiapValue[strategy->BEHAV(T) | MIXED(T)] =: T
 Members[infoset->INFOSET] =: LIST(NODE)
 Name[x->ACTION] =: TEXT
 Name[x<->EFG] =: TEXT
@@ -1389,7 +1676,7 @@ NextSibling[node->NODE] =: NODE
 Nodes[efg<->EFG] =: LIST(NODE)
 NonterminalNodes[efg<->EFG] =: LIST(NODE)
 NthChild[node->NODE, n->INTEGER] =: NODE
-NumActions[infoset->INFOSET] =: INTEGER
+NumActions[infoset->INFOSET, {support->EFSUPPORT}] =: INTEGER
 NumChildren[node->NODE] := INTEGER
 NumInfosets[player->EFPLAYER] =: INTEGER
 NumMembers[infoset->INFOSET] =: INTEGER
@@ -1411,6 +1698,8 @@ Players[nfg<->NFG] =: LIST(NFPLAYER)
 PriorSibling[node->NODE] =: NODE
 RealizProbs[strategy->BEHAV] =: LIST(T)
 RootNode[efg<->EFG] =: NODE
+Support[strategy->MIXED] =: NFSUPPORT
+Support[strategy->BEHAV] =: EFSUPPORT
 TerminalNodes[efg<->EFG] =: LIST(NODE)
 \end{verbatim}
 
@@ -1442,6 +1731,7 @@ parameters which are not necessary for the procedure to function.
 
 %--A--
 
+
 \item
 \protect \large \begin{verbatim} 
 Actions[infoset->INFOSET] =: LIST(ACTION)
@@ -1457,8 +1747,10 @@ Returns the list of actions available at the information set
 
 \item
 \protect \large \begin{verbatim}
-ActionValues[strategy->BEHAV, infoset->INFOSET] =: LIST(FLOAT)
-ActionValues[strategy->BEHAV, infoset->INFOSET] =: LIST(RATIONAL)
+ActionValues[strategy->BEHAV, 
+             infoset->INFOSET] =: LIST(FLOAT)
+ActionValues[strategy->BEHAV, 
+             infoset->INFOSET] =: LIST(RATIONAL)
 \end{verbatim}\normalsize
 
 \bd
@@ -1471,8 +1763,23 @@ all players obey the behavioral strategy profile \verb+strategy+.
 \ed
 
 \item
+\protect \large \begin{verbatim} 
+AddAction[support->EFSUPPORT, infoset->INFOSET, 
+          action->ACTION] =: EFSUPPORT
+\end{verbatim}\normalsize
+
+\bd 
+Adds the action \verb+action+, from \verb+infoset+ to the
+EFSUPPORT \verb+support+.
+\item
+[See also:] {\tt RemoveAction}
+\ed
+
+
+\item
 \protect \large \begin{verbatim}
-AddStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT
+AddStrategy[support->NFSUPPORT, 
+            strategy->STRATEGY] =: NFSUPPORT
 \end{verbatim}\normalsize
 
 \bd
@@ -1482,6 +1789,17 @@ support, no action is taken.  The modified support is returned.
 \item
 [See also:] {\tt NewSupport}, {\tt RemoveStrategy}.
 \ed
+
+\item
+\protect \large \begin{verbatim}
+Afg[efg<->EFG] =: NFG
+\end{verbatim}\normalsize
+
+\bd
+Returns the agent normal form associated with the extensive form game
+\verb+efg+.
+\ed
+
 
 \item 
 \protect \large \begin{verbatim}
@@ -1523,6 +1841,18 @@ Returns the first child of \verb+node+.
 [See also:] {\tt InsertNode}, {\tt NewInfoset}.
 \ed
 
+
+\item 
+\protect \large \begin{verbatim}
+ArgMax[x->LIST(T)] := INTEGER
+       for T = FLOAT, INTEGER, RATIONAL
+\end{verbatim} \normalsize
+
+\bd
+Returns the index of the first element of the list which attains the
+maximum value. 
+\ed
+
 \item 
 \protect \large \begin{verbatim}
 Assign[x<->T, y->T] =: T
@@ -1555,12 +1885,14 @@ attached outcomes.
 
 \item
 \protect \large \begin{verbatim}
-Behav[efg<->EFG, list->LIST(LIST(LIST(T)))] =: BEHAV
+Behav[efg<->EFG | support->EFSUPPORT, 
+      {list->LIST(LIST(LIST(FLOAT)))}] =: BEHAV
+Behav[efg<->EFG | support->EFSUPPORT, 
+      {list->LIST(LIST(LIST(RATIONAL)))}] =: BEHAV
 \end{verbatim}\normalsize
 
-\bd
-Creates a behavioral profile for the game \verb+efg+ with values equal
-to that in \verb+list+.  
+\bd Creates a behavioral profile for the game \verb+efg+, or EFSUPPORT
+\verb+support+ with values equal to that in \verb+list+.
 \item
 [See also:] {\tt Mixed}.
 \ed
@@ -1645,14 +1977,24 @@ the given information set does not belong to the chance player.
 
 \item
 \protect \large \begin{verbatim}
+Clear[]
+\end{verbatim}\normalsize
+
+\bd
+Unassigns all currently defined variables.
+\ed
+
+\item
+\protect \large \begin{verbatim}
 Concat[x->LIST(T), y->LIST(T)] =: LIST(T)
 \end{verbatim}\normalsize
 
-\marginpar{This function is pending.}
 \bd
 Returns the concatenation of the lists \verb+x+ and \verb+y+.
 \item
 [Short form:] \verb%x & y%
+\item
+[Note:] This function is not listable.
 \item
 [Note:] Prior to version 0.92 this function was named {\tt Plus}.
 \ed
@@ -1662,12 +2004,13 @@ Returns the concatenation of the lists \verb+x+ and \verb+y+.
 Concat[x->TEXT, y->TEXT] =: TEXT
 \end{verbatim} \normalsize
 
-\marginpar{This function is pending.}
 \bd
 Returns the concatenation of the text strings \verb+x+
 and \verb+y+.
 \item
 [Short form:] \verb%x & y%
+\item
+[Note:] This function is not listable.
 \item
 [Note:] Prior to version 0.92 this function was named {\tt Plus}.
 \ed
@@ -1680,6 +2023,8 @@ Contains[list->LIST(T), x->T] =: BOOL
 \bd
 Returns whether the value \verb+x+ is contained in the list
 \verb+list+.
+\item
+[Note:] This function is not listable.
 \item
 [See also:] {\tt Length}, {\tt Subscript}.
 \ed
@@ -1746,22 +2091,6 @@ having no outcome attached; this is equivalent to an implicit call to
 
 \item
 \protect \large \begin{verbatim}
-DeleteSubgame[node->NODE] =: NODE
-\end{verbatim}\normalsize
-
-\marginpar{This function is part of the proposed subgame interface.}
-\bd
-If \verb+node+ is the root of a defined subgame in its extensive form,
-that subgame is undefined.  It is not permitted to undefine the root
-subgame.  If \verb+node+ is not the root of a subgame, no action is
-taken.  The node rooting the subgame to which \verb+node+ belongs after
-the operation is returned.
-\item
-[See also:] {\tt FindSubgames}, {\tt NewSubgame}, {\tt SubgameRoots}
-\ed
-
-\item
-\protect \large \begin{verbatim}
 DeleteTree[node->NODE] =: NODE
 \end{verbatim}\normalsize
 
@@ -1787,8 +2116,8 @@ action is taken.  Returns \verb+node+.
 
 \item 
 \protect \large \begin{verbatim}
-Divide[x->FLOAT, y->FLOAT] =: FLOAT
-Divide[x->RATIONAL, y->RATIONAL] =: RATIONAL
+Divide[x->T, y->T] =: T
+       for T = FLOAT, RATIONAL  
 \end{verbatim} \normalsize
 
 \bd
@@ -1797,6 +2126,20 @@ Returns the quotient $x / y$.
 [Short form:] \verb+x / y+
 \item
 [See also:] {\tt IntegerDivide}
+\ed
+
+\item
+\protect \large \begin{verbatim}
+Dot[x->LIST(T), y->LIST(T)] =: T
+       for T = FLOAT, INTEGER, RATIONAL
+\end{verbatim}\normalsize
+
+\bd
+Returns the dot product of $x$ and $y$, where the lists are treated as vectors.
+It is a run-time error to attempt to multiply two lists of different
+lengths.
+\item
+[Short form:] \verb%x . y%
 \ed
 
 %--E--
@@ -1809,10 +2152,24 @@ ElapsedTime[] =: FLOAT
 \bd
 If the system stopwatch is currently running, returns the
 time elapsed since the stopwatch was started.  If the system stopwatch
-is not runnign, returns the time elapsed during the last period during which
+is not running, returns the time elapsed during the last period during which
 the stopwatch was running.
 \item
 [See also:] {\tt IsWatchRunning}, {\tt StartWatch}, {\tt StopWatch}.
+\ed
+
+
+\item
+\protect \large \begin{verbatim}
+ElimAllDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
+        {time<->FLOAT} =: NFSUPPORT
+\end{verbatim} \normalsize
+
+\bd Iteratively eliminates dominated strategies until no further
+elimination is possible.  Operation and parameters are the same as in
+{\tt ElimDom}.
+\item
+[See also:] {\tt ElimDom}.  
 \ed
 
 \item
@@ -1832,38 +2189,84 @@ found.  The optional parameter \verb+time+, if specified, upon completion
 contains the amount of time consumed by the elimination.  (Note that in
 the current implementation, only strategies that are dominated by
 other {\em pure} strategies are eliminated.)  
+\item
+[See also:] {\tt ElimAllDom}.  
 \ed
 
 \item
 \protect \large \begin{verbatim}
-EnumMixedSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
-               {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
+EnumMixedSolve[efg<->EFG, {asNfg->BOOL}, 
+               {stopAfter->INTEGER}, {nPivots<->INTEGER}, 
+               {time<->FLOAT}] =: LIST(BEHAV)
+EnumMixedSolve[nfg<->NFG | support->NFSUPPORT, 
+               {stopAfter->INTEGER}, {nPivots<->INTEGER}, 
+               {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
 \bd
 Returns the extreme points of the set of all Nash equilibria (pure or
-mixed) for a given support, \verb+support+, of a two person normal form
-game.  By default, all equilibria are found; the optional parameter
-\verb+stopAfter+ may be used to specify a maximum number of
-equilibria.  Upon completion, \verb+nPivots+ returns the number of
-pivots done by the algorithm, and
-\verb+time+ returns the amount of time consumed by the function.
+mixed) for a two person game.  The extensive form version converts
+each marked subgame into its associated reduced normal form, enumerates
+equilibria, and reassembles the behavioral profiles.  The normal form
+and support versions operate directly on the given normal form or support
+of the normal form.
+
+The following optional parameters may be used to modify the behavior
+of the algorithm:
+\bd
 \item
+[asNfg:] By default, this is \verb+False+.  If it is specified to be
+\verb+True+, the extensive form game is solved by recursively converting
+its marked subgames into normal form, solving, and reconstructing the
+solution as a behavioral profile.  {\it Note that currently this algorithm
+is only supported on the normal form, so this parameter
+must always be specified and {\tt True}.  Future versions will implement
+the algorithm on extensive forms.}
+\item
+[stopAfter:] By default, all equilibria are found.  This parameter may
+be used to specify a maximum number of equilibria to be found.
+\item
+[nPivots:] Upon completion, contains the number of pivots done by the
+algorithm.
+\item
+[time:] Upon completion, returns the elapsed time during the execution
+of the algorithm.
+\ed
+\item
+[Note:] Prior to version .93, this algorithm computed the set of all
+complementary basic feasible solutions, rather than the set of extreme
+Nash equilibria.  \
+item
 [See also:] {\tt EnumPureSolve}.
 \ed
 
 \item
 \protect \large \begin{verbatim}
-EnumPureSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
-              {time<->FLOAT}] =: LIST(MIXED) 
+EnumPureSolve[efg<->EFG, {asNfg->BOOL},
+        {stopAfter->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
+EnumPureSolve[nfg<->NFG | support->NFSUPPORT,
+        {stopAfter->INTEGER}, {time<->FLOAT}] =: LIST(MIXED) 
 \end{verbatim}\normalsize
 
 \bd
-Returns all pure strategy Nash equilibria in the support, \verb+support+,
-of a normal form game.  By default, all equilibria are found; the optional
-parameter \verb+stopAfter+ may be used to specify a maximum number of
-equilibria.  Upon completion, \verb+time+ returns the amount of time
-consumed by the function. 
+Returns all pure strategy Nash equilibria of a game.  The behavior
+of the algorithm may be modified by the following optional parameters:
+\bd
+\item
+[asNfg:] By default, this is \verb+False+.  If it is specified to be
+\verb+True+, the extensive form game is solved by recursively converting
+its marked subgames into normal form, solving, and reconstructing the
+solution as a behavioral profile.  {\it Note that currently this algorithm
+is only supported on the normal form, so this parameter
+must always be specified and {\tt True}.  Future versions will implement
+the algorithm on extensive forms.}
+\item
+[stopAfter:] By default, all equilibria are found.  This parameter may
+be used to specify a maximum number of equilibria to be found.
+\item
+[time:] Upon completion, returns the elapsed time during the execution
+of the algorithm.
+\ed
 \item
 [See also:] {\tt EnumMixedSolve}.
 \ed
@@ -1899,23 +2302,6 @@ value \verb+x+.
 
 \item
 \protect \large \begin{verbatim}
-FindSubgames[efg<->EFG] =: LIST(NODE)
-FindSubgames[node->NODE] =: LIST(NODE)
-\end{verbatim} \normalsize
-
-\marginpar{This function is part of the proposed subgame interface.}
-\bd
-Defines all legal game theoretic subgames in a subtree of an extensive
-form.  The first version finds all subgames in the entire tree; the
-second version finds subgames only in the subtree rooted in \verb+node+.
-Both versions return the list of nodes which are roots of newly-defined
-subgames.
-\item
-[See also:] {\tt DeleteSubgame}, {\tt NewSubgame}, {\tt SubgameRoots}
-\ed
-
-\item
-\protect \large \begin{verbatim}
 Float[x->INTEGER] =: FLOAT
 Float[x->FLOAT] =: FLOAT
 Float[x->RATIONAL] =: FLOAT
@@ -1931,7 +2317,8 @@ of precision.
 
 \item
 \protect \large \begin{verbatim}
-For[statement-list, guard, statement-list, statement-list]
+For[statement-list, boolean-expression, 
+    statement-list, statement-list]
 \end{verbatim}\normalsize
 
 \bd
@@ -1946,10 +2333,10 @@ on control structures for complete information.
 \item
 \protect \large \begin{verbatim}
 GobitGridSolve[nfg<->NFG | support->NFSUPPORT, {pxifile->TEXT},
-              {minLam->FLOAT}, {maxLam->FLOAT}, 
-              {delLam->FLOAT}, {powLam->INTEGER}, 
-              {delp->FLOAT}, {tol->FLOAT},
-              {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
+         {minLam->FLOAT}, {maxLam->FLOAT}, 
+         {delLam->FLOAT}, {powLam->INTEGER}, 
+         {delp->FLOAT}, {tol->FLOAT},
+         {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
 \bd
@@ -1974,18 +2361,30 @@ is $0.02$.
 
 \item
 \protect \large \begin{verbatim}
+GobitLambda[strategy->BEHAV(T) | MIXED(T)] =: T
+\end{verbatim}\normalsize
+
+\bd
+Returns the value of \verb+lambda+ for mixed or behavior solutions
+computed by the GobitSolve[] algorithm. 
+\item
+[See also:] {\tt GobitSolve}, {\tt GobitGridSolve}, {\tt GobitValue}
+\ed
+
+\item
+\protect \large \begin{verbatim}
 GobitSolve[efg<->EFG | start->BEHAV, {pxifile->TEXT},
-           {minLam->FLOAT}, {maxLam->FLOAT},
-           {delLam->FLOAT}, {powLam->INTEGER},
-           {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
-           {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
-           {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(BEHAV)
+         {minLam->FLOAT}, {maxLam->FLOAT},
+         {delLam->FLOAT}, {powLam->INTEGER},
+         {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
+         {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
+         {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(BEHAV)
 GobitSolve[nfg<->NFG | start->MIXED, {pxifile->TEXT},
-           {minLam->FLOAT}, {maxLam->FLOAT},
-           {delLam->FLOAT}, {powLam->INTEGER},
-           {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
-           {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
-           {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(MIXED)
+         {minLam->FLOAT}, {maxLam->FLOAT},
+         {delLam->FLOAT}, {powLam->INTEGER},
+         {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
+         {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
+         {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
 \bd 
@@ -2022,13 +2421,13 @@ the profile for the last value of $\lambda$ computed is returned.
 optimization routine.  The default value is $200$.
 \item
 [tolN:] Sets the tolerance for the $n$-dimensional optimization routine.
-The default is $1.0^{-10}$.
+The default is 1.0e-10.
 \item
 [maxits1:] Sets the maximum number of iterations for the 1-dimensional
 optimization routine.  The default is $100$.
 \item
 [tol1:] Sets the tolerance for the 1-dimensional optimization routine.
-The default is $2.0^{-10}$.
+The default is 2.0e-10.
 \item
 [time:] Upon completion, contains the amount of time consumed by the
 algorithm.
@@ -2039,13 +2438,28 @@ performed by the algorithm.
 [nIters:] Upon completion, contains the number of iterations performed
 by the algorithm.
 \ed
+
+\item
+[Note:] The extensive form version does not pay attention to any marked
+subgames.
 \ed
 
 \item
 \protect \large \begin{verbatim}
-Greater[x->INTEGER, y->INTEGER] =: BOOL
-Greater[x->FLOAT, y->FLOAT] =: BOOL
-Greater[x->RATIONAL, y->RATIONAL] =: BOOL
+GobitValue[strategy->BEHAV(T) | MIXED(T)] =: T
+\end{verbatim}\normalsize
+
+\bd
+Returns the value of the Gobit objective function for mixed or behavior solutions
+computed by the GobitSolve[] algorithm. 
+\item
+[See also:] {\tt GobitSolve}, {\tt GobitGridSolve}, {\tt GobitLambda}
+\ed
+
+\item
+\protect \large \begin{verbatim}
+Greater[x->T, y->T] =: BOOL
+       for T = FLOAT, INTEGER, RATIONAL
 \end{verbatim}\normalsize
 
 \bd
@@ -2073,9 +2487,8 @@ the string \verb+y+, using the native character set of the machine.
 
 \item
 \protect \large \begin{verbatim}
-GreaterEqual[x->INTEGER, y->INTEGER] =: BOOL
-GreaterEqual[x->FLOAT, y->FLOAT] =: BOOL
-GreaterEqual[x->RATIONAL, y->RATIONAL] =: BOOL
+GreaterEqual[x->T, y->T] =: BOOL
+       for T = FLOAT, INTEGER, RATIONAL
 \end{verbatim}\normalsize
 
 \bd
@@ -2121,8 +2534,8 @@ with it.
 
 \item 
 \protect \large \begin{verbatim}
-If[guard, statement-list]
-If[guard, statement-list, statement-list]
+If[boolean-expression, statement-list]
+If[boolean-expression, statement-list, statement-list]
 \end{verbatim} \normalsize
   
 \bd
@@ -2185,6 +2598,17 @@ Returns the list of information sets at which player
 
 \item
 \protect \large \begin{verbatim}
+Input[file->TEXT] =: INPUT
+\end{verbatim}\normalsize
+
+\bd
+Opens a new input stream for reading from the file \verb+text+.
+\item
+[See also:]  {\tt Output}, {\tt Read}, {\tt Write}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
 InsertAction[infoset->INFOSET, at->ACTION] =: ACTION
 \end{verbatim}\normalsize
 
@@ -2212,6 +2636,19 @@ becomes the first child of the new node.  Returns the new node.
 [See also:] {\tt AppendNode}, {\tt NewInfoset}.
 \ed
 
+\item
+\protect \large \begin{verbatim}
+Integer[x->FLOAT] =: INTEGER
+Integer[x->INTEGER] =: INTEGER
+Integer[x->RATIONAL] =: INTEGER
+\end{verbatim} \normalsize
+
+\bd
+Converts \verb+x+ into a value of type \verb+INTEGER+.
+\item
+[See also:] {\tt Float}, {\tt Rational}.
+\ed
+
 \item 
 \protect \large \begin{verbatim}
 IntegerDivide[x->INTEGER, y->INTEGER] =: INTEGER
@@ -2223,7 +2660,92 @@ towards zero.
 \item
 [Short form:] \verb%x DIV y%
 \item
-[See also:] \verb+Modulus+.
+[See also:] \verb+Divide+, \verb+Modulus+.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+IsConstSum[efg<->EFG] =: BOOL
+IsConstSum[nfg<->NFG] =: BOOL
+\end{verbatim}\normalsize
+
+\bd
+Returns whether an extensive form game \verb+efg+ or a normal form
+game \verb+nfg+ game, as appropriate, is constant sum.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+IsNash[strategy->MIXED] =: BOOL
+IsNash[strategy->BEHAV] =: BOOL
+\end{verbatim}\normalsize
+
+\bd Returns whether the mixed or behavior strategy profile
+\verb+strategy+ is a Nash equilibrium of the corresponding game.  
+\ed
+
+\item
+\protect \large \begin{verbatim}
+IsntPerfect[strategy->MIXED] =: BOOL
+\end{verbatim}\normalsize
+
+\bd Returns \verb+True+ if the mixed strategy profile \verb+strategy+
+is known by Gambit not to be a perfect Nash equilibrium, and \verb+False+
+otherwise.  
+\item
+[See also:] {\tt IsPerfect}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+IsntProper[strategy->MIXED] =: BOOL
+\end{verbatim}\normalsize
+
+\bd Returns \verb+True+ if the mixed strategy profile \verb+strategy+
+is known by Gambit not to be a proper Nash equilibrium, and \verb+False+
+otherwise.  
+\item
+[See also:] {\tt IsProper}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+IsntSequential[strategy->BEHAV] =: BOOL
+\end{verbatim}\normalsize
+
+\bd Returns \verb+True+ if the behavior strategy profile
+\verb+strategy+ is known by Gambit not to be a sequential Nash
+equilibrium, and \verb+False+ otherwise. 
+\item
+[See also:] {\tt IsSequential}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+IsntSubgamePerfect[strategy->BEHAV] =: BOOL
+\end{verbatim}\normalsize
+
+\bd Returns \verb+True+ if the behavior strategy profile
+\verb+strategy+ is known by Gambit not to be a SubgamePerfect Nash
+equilibrium, and \verb+False+ otherwise. 
+\item
+[See also:] {\tt IsSubgamePerfect}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+IsPerfect[strategy->MIXED] =: BOOL
+\end{verbatim}\normalsize
+
+\bd Returns \verb+True+ if the mixed strategy profile \verb+strategy+
+is known by Gambit to be a perfect Nash equilibrium, and \verb+False+
+otherwise.  There is currently no definitive test in Gambit for
+whether an arbitrary profile is perfect, so it is possible for a
+perfect equilibrium to return \verb+False+.  However some of the
+algorithms (notably the \verb+LcpSolve[]+ will only return perfect
+equilibria, which are marked as such.  
+\item
+[See also:] {\tt IsntPerfect}.
 \ed
 
 \item
@@ -2241,6 +2763,20 @@ a node is considered its own predecessor.
 
 \item
 \protect \large \begin{verbatim}
+IsProper[strategy->MIXED] =: BOOL
+\end{verbatim}\normalsize
+
+\bd Returns \verb+True+ if the mixed strategy profile \verb+strategy+
+is known by Gambit to be a proper Nash equilibrium, and \verb+False+
+otherwise.  There is currently no definitive test in Gambit for
+whether an arbitrary profile is proper, so it is possible for a
+perfect equilibrium to return \verb+False+.  
+\item
+[See also:] {\tt IsntProper}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
 IsRoot[node->NODE] =: BOOL
 \end{verbatim}\normalsize
 
@@ -2249,6 +2785,38 @@ Returns whether the node \verb+node+ is the root node of its
 extensive form.
 \item
 [See also:] {\tt Parent}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+IsSequential[strategy->BEHAV] =: BOOL
+\end{verbatim}\normalsize
+
+\bd Returns \verb+True+ if the behavior strategy profile
+\verb+strategy+ is known by Gambit to be an approximation to a
+Sequential Nash equilibrium, and \verb+False+ otherwise.  There is
+currently no definitive test in Gambit for whether an arbitrary
+profile is sequential.  However any Nash equilibrium of an extensive
+form game which is computed via the \verb+LiapSolve+ or
+\verb+GobitSolve+ algorithms will also be sequential.
+\item
+[See also:] {\tt IsntSequential}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+IsSubgamePerfect[strategy->BEHAV] =: BOOL
+\end{verbatim}\normalsize
+
+\bd Returns \verb+True+ if the behavior strategy profile
+\verb+strategy+ is known by Gambit to be a SubgamePerfect Nash
+equilibrium, and \verb+False+ otherwise.  There is currently no
+definitive test in Gambit for whether an arbitrary profile is subgame
+perfect.  However any Nash equilibrium of an extensive form game which
+is computed when all subgames are marked will only return a subgame
+perfect equilibrium.  
+\item
+[See also:] {\tt IsntSubgamePerfect}.
 \ed
 
 \item
@@ -2277,22 +2845,21 @@ Returns whether the system stopwatch is currently running.
 
 %--J--
 
-% Not yet implemented
-%\item
-%\protect \large \begin{verbatim}
-%JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
-%\end{verbatim}\normalsize
-%
-%\bd
-%Makes the node \verb+node+ a member of the information set
-%\verb+infoset+.  If the previous information set of \verb+node+ was
-%a singleton (i.e., it contained only \verb+node+), it is removed from the
-%extensive form.  It is a run-time error if the number of actions at the
-%information set does not match the number of branches at the node.
-%Returns the node \verb+node+.
-%\item
-%[See also:] {\tt LeaveInfoset}, {\tt MergeInfosets}.
-%\ed
+\item
+\protect \large \begin{verbatim}
+JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
+\end{verbatim}\normalsize
+
+\bd
+Makes the node \verb+node+ a member of the information set
+\verb+infoset+.  If the previous information set of \verb+node+ was
+a singleton (i.e., it contained only \verb+node+), it is removed from the
+extensive form.  It is a run-time error if the number of actions at the
+information set does not match the number of branches at the node.
+Returns the node \verb+node+.
+\item
+[See also:] {\tt LeaveInfoset}, {\tt MergeInfosets}.
+\ed
 
 %--K--
 
@@ -2311,7 +2878,7 @@ the root node of the tree and thus has no such action.
 
 \item
 \protect \large \begin{verbatim}
-LcpSolve[efg<->EFG | support->EFSUPPORT, {stopAfter->INTEGER},
+LcpSolve[efg<->EFG, {asNfg->BOOL}, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
 LcpSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
@@ -2322,9 +2889,16 @@ Solves the game as a linear complementarity problem, using the
 Lemke-Howson algorithm for normal form games, and the
 Koller-Meggiddo-Stengel sequence form for extensive form games.  
 
+
 The behavior of the algorithm may be modified by the following
 optional parameters:
 \bd
+\item
+[asNfg:] By default, extensive forms are solved by the sequence form.
+By setting this parameter to \verb+True+, each marked subgame of the extensive
+form is converted to its corresponding reduced normal form, solved
+via Lemke-Howson, and the mixed strategy solutions converted back into
+behavioral profiles.
 \item
 [stopAfter:] Specifies the maximum number of equilibria to find.  If
 not specified, the default value is zero, which means that all
@@ -2353,18 +2927,6 @@ Returns information set to which \verb+node+ belongs upon completion.
 
 \item
 \protect \large \begin{verbatim}
-Length[text->TEXT] =: INTEGER
-\end{verbatim}\normalsize
-
-\bd
-Returns the number of characters in the text string
-\verb+text+.
-\item
-[See also:] {\tt NthChar}.
-\ed
-
-\item
-\protect \large \begin{verbatim}
 Length[list->LIST(T)] =: INTEGER
 \end{verbatim}\normalsize
 
@@ -2376,9 +2938,8 @@ Returns the number of elements in the list \verb+list+.
 
 \item
 \protect \large \begin{verbatim}
-Less[x->INTEGER, y->INTEGER] =: BOOL
-Less[x->FLOAT, y->FLOAT] =: BOOL
-Less[x->RATIONAL, y->RATIONAL] =: BOOL
+Less[x->T, y->T] =: BOOL
+       for T = FLOAT, INTEGER, RATIONAL
 \end{verbatim}\normalsize
 
 \bd
@@ -2406,9 +2967,8 @@ the string \verb+y+, using the native character set of the machine.
 
 \item
 \protect \large \begin{verbatim}
-LessEqual[x->INTEGER, y->INTEGER] =: BOOL
 LessEqual[x->FLOAT, y->FLOAT] =: BOOL
-LessEqual[x->RATIONAL, y->RATIONAL] =: BOOL
+       for T = FLOAT, INTEGER, RATIONAL
 \end{verbatim}\normalsize
 
 \bd
@@ -2436,7 +2996,7 @@ the string \verb+y+, using the native character set of the machine.
 
 \item
 \protect \large \begin{verbatim}
-LiapSolve[efg<->EFG | start->BEHAV, 
+LiapSolve[efg<->EFG | start->BEHAV, {asNfg->BOOL},
           {stopAfter->INTEGER}, {nTries->INTEGER},
           {maxitsN->INTEGER}, {tolN->FLOAT},
           {maxits1->INTEGER}, {tol1->FLOAT},
@@ -2449,26 +3009,33 @@ LiapSolve[nfg<->NFG | start->MIXED,
 \end{verbatim}\normalsize
 
 
-\bd
-Searches for a Nash by minimizing a Lyapunov function which is zero
-exactly at Nash equilibria.  The algorithm starts from the initial
-starting point determined by the parameter \verb+start+.  The algorithm is
-not guaranteed to find a Nash equilibrium from any fixed starting
-point.  The algorithm thus incorporates the capability of restarting.
-If a Nash equilibrium is not found, it will keep searching from new
-randomly chosen starting points until a Nash equilibrium has been
-found or the maximum number of tries (parameter \verb+ntries+) is exceeded,
-whichever comes first.  The list of solutions found is returned.
+\bd Searches for a Nash equilibrium by minimizing a Lyapunov function
+which is zero exactly at Nash equilibria.  The algorithm starts from
+the initial starting point determined by the parameter \verb+start+.
+The algorithm is not guaranteed to find a Nash equilibrium from any
+fixed starting point.  The algorithm thus incorporates the capability
+of restarting.  If a Nash equilibrium is not found, it will keep
+searching from new randomly chosen starting points until a Nash
+equilibrium has been found or the maximum number of tries (parameter
+\verb+ntries+) is exceeded, whichever comes first.  The list of
+solutions found is returned.
 
 The behavior of the algorithm may be modified by specifying the following
 optional parameters:
 \bd
 \item
+[asNfg:] By default, extensive forms are solved in the extensive form.
+By setting this parameter to \verb+True+, each marked subgame of the
+extensive form is converted to its corresponding reduced normal form game,
+solved, and the overall behavioral profile reconstructed from these
+solutions.
+\item
 [start:] Sets the starting profile for the descent algorithm.  The
-default is the centroid.
+default (that is, when the game is passed instead of a strategy
+profile) is the centroid.
 \item
 [nTries:] Sets the maximum number of attempts at finding each
-equilibrium. Default is 10
+equilibrium. Default is 10.
 \item
 [stopAfter:] Sets the number of equilibria to find.  Has a default
 value of 1.  
@@ -2489,23 +3056,47 @@ Default is 2.0e-10.
 \item
 [nEvals:] Returns the number of function evaluations for the operation.
 \ed
+
+\item
+[Note:] Solution of extensive form via normal form is not currently
+available; if \verb+start->+ \verb+BEHAV+ is specified, subgame markings are ignored.
 \ed
-
-
 
 \item
 \protect \large \begin{verbatim}
-List[mixed->MIXED] =: LIST(LIST(T))
-List[behav->BEHAV] =: LIST(LIST(LIST(T)))
+LiapValue[strategy->MIXED(T) | BEHAV(T)] =: T
+\end{verbatim} \normalsize
+
+\bd Returns the Liapunov function value for the mixed or behavior
+strategy profile \verb+strategy+.  This value is zero exactly when the
+profile is a Nash equilibrium of the normal form game.  \ed
+
+\item
+\protect \large \begin{verbatim}
+List[x<->T, {length->INTEGER},{delta->T}] =: LIST(T)
+List[x->T, {length->INTEGER},{delta->T}] =: LIST(T)
 \end{verbatim}\normalsize
 
-\bd 
-Returns the probabilities of each strategy for each player for a
+\bd Creates an initialized list of dimension \verb+length+ whose
+$i^{th}$ entry is \verb&x + (i * delta)&.  The type \verb+T+ of the list is
+the same as the type of \verb+x+.  The default length is 1. The
+default \verb+delta+ is 0.   
+\item
+[Note:] This function is not listable.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+ListForm[mixed->MIXED] =: LIST(LIST(T))
+ListForm[behav->BEHAV] =: LIST(LIST(LIST(T)))
+\end{verbatim}\normalsize
+
+\bd Returns the probabilities of each strategy for each player for a
 mixed strategy profile, or the probabilities of each action at each
-information of each player for a behavior strategy profile.  The
-ordering of information sets is in indexed traversal order.  The type
-\verb+T+ of the list is the same as the type of \verb+behav+ or
-\verb+mixed+.
+information of each player for a behavior strategy profile in the form
+of a nested list.  The ordering of information sets is in indexed
+traversal order.  The type \verb+T+ of the list is the same as the
+type of \verb+behav+ or \verb+mixed+.
 \item
 [See also:] {\tt Behav, Mixed}.
 \ed
@@ -2547,6 +3138,8 @@ Computes the natural logarithm of \verb+x+.
 
 \item
 \protect \large \begin{verbatim}
+LpSolve[efg<->EFG,
+        {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
 LpSolve[nfg<->NFG | support->NFSUPPORT, {nPivots<->INTEGER},
         {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
@@ -2559,10 +3152,45 @@ specified, upon return it contains the number of pivots required to
 compute the solution.  If \verb+time+ is specified, upon return it
 contains the time elapsed in computing the solution.
 \item
+[Note:] The extensive form version implicitly creates the associated
+reduced normal form for computation of equilibrium.
+\item
 [See also:] {\tt LcpSolve}.
 \ed
 
 %--M--
+
+\item
+\protect \large \begin{verbatim}
+MarkSubgames[efg<->EFG] =: LIST(NODE)
+MarkSubgames[node->NODE] =: LIST(NODE)
+\end{verbatim} \normalsize
+
+\bd
+Defines all legal game theoretic subgames in a subtree of an extensive
+form.  The first version finds all subgames in the entire tree; the
+second version finds subgames only in the subtree rooted in \verb+node+.
+Both versions return the list of nodes which are roots of defined
+subgames after the operation.
+\item
+[See also:] {\tt MarkThisSubgame}, {\tt SubgameRoots}, {\tt UnmarkSubgames},
+{\tt UnmarkThisSubgame}
+\ed
+
+\item
+\protect \large \begin{verbatim}
+MarkThisSubgame[node->NODE] =: BOOL
+\end{verbatim}\normalsize
+
+\bd
+If \verb+node+ is the root node of a subgame in the game theoretic
+sense, defines a new subgame rooted at \verb+node+ in its extensive
+form game.  If \verb+node+ is not a subgame root, this function has
+no effect.  Returns \verb+True+ if \verb+node+ is marked after termination.
+\item
+[See also:] {\tt MarkSubgames}, {\tt SubgameRoots}, {\tt UnmarkSubgames},
+{\tt UnmarkThisSubgame}
+\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -2589,11 +3217,8 @@ and \verb+infoset1+ is returned.
 
 \item 
 \protect \large \begin{verbatim}
-Minus[x->INTEGER, y->INTEGER] =: INTEGER
 Minus[x->FLOAT, y->FLOAT] =: FLOAT
-Minus[x->RATIONAL, y->RATIONAL] =: RATIONAL
-Minus[x->MIXED, y->MIXED] =: MIXED
-Minus[x->BEHAV, y->BEHAV] =: BEHAV
+       for T = FLOAT, INTEGER, RATIONAL, MIXED, BEHAV
 \end{verbatim} \normalsize
 
 \bd
@@ -2602,26 +3227,10 @@ Returns the difference $x - y$.
 [Short form:] \verb+x - y+
 \ed
 
-
 \item
 \protect \large \begin{verbatim}
-Minus[x->LIST(T), y->LIST(T)] =: LIST(T)
-\end{verbatim} \normalsize
-
-\marginpar{This function is pending}
-\bd
-Returns the difference of $x$ and $y$, where the lists are treated
-as vectors.  Lists of any dimensionality may be added; but it is a
-run-time error if the lists do not have exactly the same
-dimensionality.
-\item
-[Short form:] \verb%x - y%
-\ed
-
-
-\item
-\protect \large \begin{verbatim}
-Mixed[nfg<->NFG | support->NFSUPPORT, list->LIST(LIST(T))] =: MIXED
+Mixed[nfg<->NFG | support->NFSUPPORT, 
+      list->LIST(LIST(T))] =: MIXED
 \end{verbatim}\normalsize
 
 \bd
@@ -2683,8 +3292,7 @@ Returns the name of the object \verb+x+.
 \item 
 \protect \large \begin{verbatim}
 Negate[x->FLOAT] =: FLOAT
-Negate[x->INTEGER] =: INTEGER
-Negate[x->RATIONAL] =: RATIONAL
+       for T = FLOAT, INTEGER, RATIONAL
 \end{verbatim} \normalsize
 
 \bd
@@ -2780,21 +3388,6 @@ Defines a new player in the extensive form game \verb+efg+.
 By default the player is named with the empty string; the optional parameter
 \verb+name+, if specified, gives the name of the new player.  Returns the
 newly created player.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-NewSubgame[node->NODE] =: NODE
-\end{verbatim}\normalsize
-
-\marginpar{This function is part of the proposed subgame interface.}
-\bd
-If \verb+node+ is the root node of a subgame in the game theoretic
-sense, defines a new subgame rooted at \verb+node+ in its extensive
-form game.  If \verb+node+ is not a subgame root, this function has
-no effect.
-\item
-[See also:] {\tt DeleteSubgame}, {\tt FindSubgames}, {\tt SubgameRoots}
 \ed
 
 \item
@@ -2921,7 +3514,7 @@ in a string is indexed by 1.
 \item
 [Short form:] \verb+text[[n]]+.
 \item
-[See also:] {\tt Length}.
+[See also:] {\tt NumChars}.
 \ed
 
 \item
@@ -2949,19 +3542,34 @@ By convention, the first element of a list is indexed by 1.
 \item
 [Short form:] \verb+list[[n]]+.
 \item
+[Note:] This function is not listable.
+\item
 [See also:] {\tt Length}.
 \ed
 
 \item
 \protect \large \begin{verbatim}
-NumActions[infoset->INFOSET] =: INTEGER
+NumActions[infoset->INFOSET, {support->EFSUPPORT}] =: INTEGER
 \end{verbatim}\normalsize
 
 \bd
 Returns the number of actions defined at the information
-set \verb+infoset+.
+set \verb+infoset+ of EFSUPPORT \verb+support+.  The default support
+is the full support of the game of which \verb+infoset+ is a member.  
 \item
 [See also:] {\tt Actions}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+NumChars[text->TEXT] =: INTEGER
+\end{verbatim}\normalsize
+
+\bd
+Returns the number of characters in the text string
+\verb+text+.
+\item
+[See also:] {\tt NthChar}.
 \ed
 
 \item
@@ -3103,7 +3711,7 @@ Output[file->TEXT] =: OUTPUT
 \bd
 Opens a new output stream for writing to the file \verb+text+.
 \item
-[See also:] {\tt SetFormat}, {\tt Write}.
+[See also:]  {\tt Input}, {\tt SetFormat}, {\tt Write}.
 \ed
 
 %--P--
@@ -3225,34 +3833,14 @@ game \verb+nfg+.
 
 \item 
 \protect \large \begin{verbatim}
-Plus[x->INTEGER, y->INTEGER] =: INTEGER
 Plus[x->FLOAT, y->FLOAT] =: FLOAT
-Plus[x->RATIONAL, y->RATIONAL] =: RATIONAL
-Plus[x->MIXED, y->MIXED] =: MIXED
-Plus[x->BEHAV, y->BEHAV] =: BEHAV
+       for T = FLOAT, INTEGER, RATIONAL, MIXED, BEHAV
 \end{verbatim} \normalsize
 
 \bd
 Returns the sum of \verb+x+ and \verb+y+.
 \item
 [Short form:] \verb%x + y%
-\ed
-
-\item
-\protect \large \begin{verbatim}
-Plus[x->LIST(T), y->LIST(T)] =: LIST(T)
-\end{verbatim}\normalsize
-
-\marginpar{This function is pending.}
-\bd
-Returns the sum of $x$ and $y$, where the lists are treated as vectors.
-Lists of any dimensionality may be added; but it is a run-time error
-if the lists do not have exactly the same dimensionality.
-\item
-[Short form:] \verb%x + y%
-\item
-[Note:] This function is new in version 0.92.  The function {\tt Plus}
-from earlier versions has been renamed {\tt Concat}.
 \ed
 
 \item
@@ -3270,7 +3858,6 @@ Power[x->INTEGER, y->INTEGER] =: INTEGER
 Power[x->FLOAT, y->FLOAT] =: FLOAT
 \end{verbatim} \normalsize
 
-\marginpar{This function is pending.}
 \bd
 Computes the value $x^{y}$.
 \item
@@ -3350,6 +3937,38 @@ type {\tt RATIONAL}.
 
 \item
 \protect \large \begin{verbatim}
+Read[input->INPUT, x<->T] =: INPUT  
+      for T = BEHAV,BOOL,FLOAT,INTEGER,MIXED,
+              RATIONAL,TEXT,LIST(T)
+\end{verbatim}\normalsize
+
+\bd Reads data of type T from the input stream and assigns it to
+\verb+x+.  If \verb+x+ is undefined, then its data type is determined
+from the exposed data in the input stream.  If \verb+x+ is previously
+defined, then the Read[] function will expect to find the
+corresponding data type in the input stream, and a file read error
+will be generated if the exposed data is of the wrong data type.  If
+\verb+x+ is previously defined to be a LIST(T), then \verb+Read[in,x]+
+will successively read elements into each element of the list.  If the
+wrong data type is found for any element of the list, a file read
+error will be returned.
+
+The ``exposed data'' in the input stream consists of the following: If
+first character is a double quote (\verb+"+), then the exposed data
+consists of all characters up until the next double quote.  If the
+first character is a \verb+{+, then the exposed data consists of all
+the characters up until the next matching \verb+}+.  Otherwise, the
+exposed data consists of all characters until the next whitespace.
+\item
+[Short form:] \verb+input >> x+
+\item
+[Note:] This function is not listable
+\item
+[See also:] {\tt Input},  {\tt Write}
+\ed
+
+\item
+\protect \large \begin{verbatim}
 RealizProbs[strategy->BEHAV] =: LIST(FLOAT)
 RealizProbs[strategy->BEHAV] =: LIST(RATIONAL)
 \end{verbatim}\normalsize
@@ -3371,11 +3990,27 @@ Remove[list->LIST(T), n->INTEGER] =: LIST(T)
 Returns a new list consisting of the elements of list
 \verb+list+ with the \verb+n+th element removed.  {\tt Remove} does not
 modify the input list \verb+list+.
+\item
+[Note:] This function is not listable.
 \ed
 
 \item
 \protect \large \begin{verbatim}
-RemoveStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT
+RemoveAction[support->EFSUPPORT, infoset->INFOSET, 
+             action->ACTION] =: EFSUPPORT
+\end{verbatim}\normalsize
+
+\bd
+Removes the action \verb+action+, of \verb+infoset+  from the 
+EFSUPPORT \verb+support+.
+\item
+[See also:] {\tt AddAction}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+RemoveStrategy[support->NFSUPPORT, 
+               strategy->STRATEGY] =: NFSUPPORT
 \end{verbatim}\normalsize
 
 \bd
@@ -3454,7 +4089,8 @@ of the game.  Returns \verb+support+.
 
 \item
 \protect \large \begin{verbatim} 
-SetComponent[behav<->BEHAV, infoset->INFOSET, list->LIST(T)] =: BEHAV 
+SetComponent[behav<->BEHAV, infoset->INFOSET, 
+             list->LIST(T)] =: BEHAV 
 \end{verbatim}\normalsize
 
 \bd
@@ -3465,7 +4101,8 @@ Returns \verb+behav+.
 
 \item
 \protect \large \begin{verbatim} 
-SetComponent[mixed<->MIXED, player->PLAYER, list->LIST(T)] =: MIXED 
+SetComponent[mixed<->MIXED, player->PLAYER, 
+             list->LIST(T)] =: MIXED 
 \end{verbatim}\normalsize
 
 \bd
@@ -3476,8 +4113,10 @@ Returns \verb+mixed+.
 
 \item
 \protect \large \begin{verbatim} 
-SetChanceProbs[infoset->INFOSET, probs->LIST(FLOAT)] =: INFOSET
-SetChanceProbs[infoset->INFOSET, probs->LIST(RATIONAL)] =: INFOSET
+SetChanceProbs[infoset->INFOSET, 
+               probs->LIST(FLOAT)] =: INFOSET
+SetChanceProbs[infoset->INFOSET, 
+               probs->LIST(RATIONAL)] =: INFOSET
 \end{verbatim}\normalsize
 
 \bd
@@ -3492,17 +4131,33 @@ player.  Returns \verb+infoset+.
 
 \item
 \protect \large \begin{verbatim}
-SetFormat[{width->INTEGER}, {precis->INTEGER}, 
-          {expmode->BOOL}, {quoted->BOOL} ] =: BOOL
+SetFormat[ {width->INTEGER}, {precis->INTEGER}, {expmode->BOOL},
+                {quote->BOOL}, {listBraces->BOOL},
+                {listCommas->BOOL}, {listLF->INTEGER},
+                {listIndent->INTEGER} ] := BOOL
 \end{verbatim}\normalsize
 
-\bd 
-Sets the formatting style for output on output streams.
-\verb+width+ sets the width of the field for floating point numbers,
-\verb+precis+ sets the number of decimal places shown for floating
-point numbers, and \verb+expmode+ sets whether output is in
-exponential format or not.  Finally, \verb+quoted+ determines whether
-quotes are printed before and after text strings.
+\bd Sets the formatting style for output on output streams.  The
+parameters have the following effect:
+\bd
+\item[\verb+width+] Sets the width for a numeric field. If the width
+of the data is greater than this width, the width is overridden (default = 0).
+\item[\verb+precis+] Sets the number of decimal places shown for floating
+point numbers.
+\item[\verb+expmode+] Sets whether floating point numbers are in
+exponential format or not.
+\item[\verb+quote+] Determines whether quotes are printed before and
+after text strings.
+\item[\verb+listBraces+] Determines if LISTs are delimited with
+braces.
+\item[\verb+listCommas+] Determines if LIST elements are delimited
+with commas.
+\item[\verb+listLF+] Number of levels of LIST that are displayed with
+a line feed.  
+\item[\verb+listIndent+] Number of spaces to indent each level of a
+LIST. 
+\ed
+
 \item
 [See also:] {\tt Write}.
 \ed
@@ -3577,20 +4232,32 @@ strategies in \verb+list+ are defined.  Returns \verb+list+.
 
 \item
 \protect \large \begin{verbatim}
-SimpDivSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
-             {nRestarts->INTEGER}, {leashLength->INTEGER},
-             {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
+SimpDivSolve[efg<->EFG, {asNfg->BOOL}, 
+       {stopAfter->INTEGER}, {nRestarts->INTEGER}, 
+       {leashLength->INTEGER}, {nEvals<->INTEGER}, 
+       {time<->FLOAT}] =: LIST(BEHAV)
+SimpDivSolve[nfg<->NFG | support->NFSUPPORT, 
+       {stopAfter->INTEGER}, {nRestarts->INTEGER}, 
+       {leashLength->INTEGER}, {nEvals<->INTEGER}, 
+       {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
 \bd
-Computes a Nash equilibrium to a the normal form game \verb+nfg+, or the
-game associated with \verb+support+, based on a simplicial subdivision
+Computes a Nash equilibrium for a game using a simplicial subdivision
 algorithm.  The list of solutions found is returned.
 
 The behavior of the algorithm may be modified by several optional
 parameters:
 
 \bd
+\item
+[asNfg:] By default, this is \verb+False+.  If it is specified to be
+\verb+True+, the extensive form game is solved by recursively converting
+its marked subgames into normal form, solving, and reconstructing the
+solution as a behavioral profile.  {\it Note that currently simplicial
+subdivision is only supported on the normal form, so this parameter
+must always be specified and {\tt True}.  Future versions will include
+a simplicial subdivision algorithm on extensive forms.}
 \item
 [stopAfter:] Maximum number of equilibria to find. Default is 1.  
 \item 
@@ -3611,17 +4278,17 @@ different from 0, the algorithm is no longer guaranteed to converge.
 StartWatch[] =: FLOAT
 \end{verbatim}\normalsize
 
-\bd
-Starts the system stopwatch running.  If the stopwatch
-is already running, {\tt StartWatch} has no effect.  Returns the amount
-of time since the stopwatch was started.
+\bd Starts the system stopwatch running.  This command has no
+effect if the stopwatch is already running.
+Returns the amount of time since the stopwatch was started.
 \item
 [See also:] {\tt ElapsedTime}, {\tt IsWatchRunning}, {\tt StopWatch}.
 \ed
 
 \item
 \protect \large \begin{verbatim}
-Strategies[player->NFPLAYER, {support->NFSUPPORT}] =: LIST(STRATEGY)
+Strategies[player->NFPLAYER, 
+           {support->NFSUPPORT}] =: LIST(STRATEGY)
 \end{verbatim}\normalsize
 
 \bd
@@ -3649,13 +4316,22 @@ on the stopwatch.
 SubgameRoots[efg<->EFG] =: LIST(NODE)
 \end{verbatim}\normalsize
 
-\marginpar{This function is part of the proposed subgame interface.}
-\bd
-Returns the list of nodes which are roots of subgames in the extensive
-form {\tt efg}.  The ordering of the list is such that all children
-of a node are listed before a node.
+\bd Returns the list of nodes which are roots of marked subgames in
+the extensive form {\tt efg}.  The ordering of the list is such that
+all children of a node are listed before a node.
 \item
-[See also:] {\tt DeleteSubgame}, {\tt NewSubgame}, {\tt FindSubgames}.
+[See also:] {\tt MarkSubgames}, {\tt MarkThisSubgame}, {\tt UnmarkSubgames},
+{\tt UnmarkThisSubgame}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+Support[strategy->MIXED] =: NFSUPPORT
+Support[strategy->BEHAV] =: EFSUPPORT
+\end{verbatim}\normalsize
+
+\bd Returns the support of the mixed or behavior strategy
+\verb+strategy+.  
 \ed
 
 %--T--
@@ -3689,8 +4365,7 @@ Converts the object \verb+x+ into the equivalent text object.
 \item 
 \protect \large \begin{verbatim}
 Times[x->FLOAT, y->FLOAT] =: FLOAT
-Times[x->INTEGER, y->INTEGER] =: INTEGER
-Times[x->RATIONAL, y->RATIONAL] =: RATIONAL
+       for T = FLOAT, INTEGER, RATIONAL,
 Times[x->FLOAT, y->MIXED] =: MIXED
 Times[x->MIXED, y->FLOAT] =: MIXED
 Times[x->RATIONAL, y->MIXED] =: MIXED
@@ -3710,18 +4385,14 @@ type, it computes the scalar product of the scalar and the profile.
 \ed
 
 \item
-\protect \large \begin{verbatim}
-Times[x->LIST(T), y->LIST(T)] =: T
+\protect \large \begin{verbatim} 
+Transpose[x->LIST(LIST(T))] := LIST(LIST(T))
 \end{verbatim}\normalsize
 
-\marginpar{This function is pending.}
 \bd
-Returns the dot product of $x$ and $y$, where the lists are treated as vectors.
-It is a run-time error to attempt to multiply two lists of different
-lengths.
-\item
-[Short form:] \verb%x * y%
+Returns the transpose of a rectangular matrix. Fails if the 
 \ed
+
 
 
 %--U--
@@ -3738,13 +4409,57 @@ last value of the variable.
 [See also:] {\tt Assign}.
 \ed
 
+\item
+\protect \large \begin{verbatim}
+UnmarkSubgames[efg<->EFG] =: LIST(NODE)
+UnmarkSubgames[node->NODE] =: LIST(NODE)
+\end{verbatim}\normalsize
+
+\bd
+Unmarks all subgames in a subtree.  If \verb+efg+ is given, unmarks all
+subgames in the extensive form (except the root subgame, which is always
+marked).  If \verb+node+ is given, unmarks all subgames in the subtree
+rooted at \verb+node+.  Returns the list of subgames marked at the
+end of the operation.
+\item
+[See also:] {\tt MarkSubgames}, {\tt MarkThisSubgame}, {\tt SubgameRoots},
+{\tt UnmarkThisSubgame}
+\ed
+
+\item
+\protect \large \begin{verbatim}
+UnmarkThisSubgame[node->NODE] =: NODE
+\end{verbatim}\normalsize
+
+\bd
+If \verb+node+ is the root of a defined subgame in its extensive form,
+that subgame is undefined.  It is not permitted to undefine the root
+subgame.  If \verb+node+ is not the root of a subgame, no action is
+taken.  The node rooting the subgame to which \verb+node+ belongs after
+the operation is returned.
+\item
+[See also:] {\tt MarkSubgames}, {\tt MarkThisSubgame}, {\tt SubgameRoots},
+{\tt UnmarkSubgames}
+\ed
+
 %--V--
+
+\item
+\protect \large \begin{verbatim}
+Version[] =: FLOAT
+\end{verbatim} \normalsize
+
+\bd
+Returns the version number of the command language.
+\item
+[Note:] This function was introduced in version 0.93 of the command language.
+\ed
 
 %--W--
 
 \item 
 \protect \large \begin{verbatim}
-While[guard, statements]
+While[boolean-expression, statement-list]
 \end{verbatim} \normalsize
   
 \bd
@@ -3756,22 +4471,22 @@ See the section on control structures for complete information.
 
 \item
 \protect \large \begin{verbatim}
-Write[output->OUTPUT, x->BEHAV] =: OUTPUT 
-Write[output->OUTPUT, x->BOOL] =: OUTPUT 
-Write[output->OUTPUT, x<->EFG] =: OUTPUT
-Write[output->OUTPUT, x->FLOAT] =: OUTPUT
-Write[output->OUTPUT, x->INTEGER] =: OUTPUT
-Write[output->OUTPUT, x->MIXED] =: OUTPUT
-Write[output->OUTPUT, x<->NFG] =: OUTPUT
-Write[output->OUTPUT, x->RATIONAL] =: OUTPUT
-Write[output->OUTPUT, x->TEXT] =: OUTPUT
+Write[output->OUTPUT, x->T] =: OUTPUT  
+      for T = BEHAV,BOOL,FLOAT,INTEGER,MIXED,
+              RATIONAL,TEXT,LIST(T)
+Write[output->OUTPUT, x<->T] =: OUTPUT 
+      for T = EFG, NFG
 \end{verbatim}\normalsize
 
 \bd
 Does a formatted write of the object \verb+x+ to the
-output stream \verb+output+.  
+output stream \verb+output+.
 \item
-[See also:] {\tt Output}, {\tt SetFormat}
+[Short form:] \verb+output << x+
+\item
+[Note:] This function is not listable
+\item
+[See also:] {\tt Output}, {\tt SetFormat}, {\tt Read}
 \ed
 
 %--X--
@@ -3785,130 +4500,4 @@ output stream \verb+output+.
 \addcontentsline{toc}{chapter}{Bibliography}
 \bibliography{gambit}
 \end{document}
-
-
-
-\section{Language Description}
-
-\subsection{Grammar and syntax}
-
-The central paradigm of the GCL is that we can think of every legal
-statement as a function call, which operates on some set of parameters and
-returns a value.  Many commonly used functions have a more convenient
-``short form'' format for additional terseness and readability.
-
-Each function is identified by its \verb+FunctionName+, which is a
-unique \verb+Name+.  A \verb+Name+ is any sequence of upper or lower
-case letters or numbers beginning with a letter.  The set of all
-built-in functions is listed in the Function Reference section of this
-manual.
-
-A statement in the GCL has the
-following syntax
-\begin{verbatim}
-FunctionName[ArgumentList]
-\end{verbatim}
-where \verb+FunctionName+ is a unique name, and \verb+ArgumentList+ is
-a sequence of arguments, separated by commas, each of which takes one
-of the following two forms:
-\begin{verbatim}
-ArgumentName->argval
-\end{verbatim}
-or
-\begin{verbatim}
-ArgumentName<->argref
-\end{verbatim}
-
-Each function, when originally created, is given a list of formal
-argument names, and each formal argument is assigned a data type,
-which is one of the allowable data types listed in the section below
-on data types.  For each of the built in functions, the formal
-arguments and their data types are listed in the entry for that
-function in the Function Reference section.  In the above syntax,
-\verb+ArgumentName+, must be one of the list of possible formal
-arguments for the given function, and \verb+argval+ or \verb+argref+
-is any function that evaluates to correct data type for the
-corresponding argument. 
-
-The arguments to a function can be either optional or required.
-Required arguments must be specified in \verb+ArgumentList+ when the
-function is called.  Each optional argument has a default value, which
-is also determined when the function is created.  Optional arguments
-need only be specified when the default is to be changed.
-
-The arguments to a function can be specified in any order, as long as
-the above syntax for the \verb+ArgumentList+ is used.  However, the
-argument list for a function can also be called without specifying the 
-prefix \verb+ArgumentName->+ or \verb+ArgumentName<->+ as long as the 
-arguments are specified in the correct order.  In fact a mixture is 
-allowed in which the prefix is specified for some arguments and not
-specified for others as long as all of the arguments which do not
-include the prefix preceed those that do.  In this case, it is assumed
-that those that do not include a prefix are in the correct order.  
-
-Arguments can be passed in one of two ways, either by value or by
-reference.  To pass an argument by value, the syntax is
-\verb+ArgumentName->argval+.  If an argument is passed by value, then the
-function whose name is specified in \verb+argval+ cannot be called
-or changed by the function \verb+FunctionName+ unless it is in some
-other way made visible to the function (specifically, if it is called
-by reference in a different argument to the same function, or if it is a
-funcion of global scope -- described below).  To pass by reference,
-the syntax is \verb+ArgumentName<->argref+.  If an argument is passed
-by reference, then the function whose name is specified in
-\verb+argref+ can be called and changed by the function
-\verb+FunctionName+.  
-
-Finally, a function with no required arguments can be called by just
-specifying the function name.  That function is then called with
-default values for all optional arguments (if there are any.)
-
-Summarizing, a rough description of the formal grammar of the GCL
-follows:
-
-\begin{verbatim}
-Name: [A-Za-z]([A-Za-z0-9_])
-
-Statement: FunctionName
-        | FunctionName[ArgumentList]
-
-FunctionName: Name
-
-ArgumentList: Argument
-        | Argument, Argumentlist
-
-Argument: ArgumentName -> Statement
-        | ArgumentName <-> Statement
-        | Statement
-
-ArgumentName: Name
-\end{verbatim}
-
-\subsection{Variables}
-
-
-
-
-\begin{verbatim}
-e := NewEfg[];
-n := RootNode[e];
-ent := NewPlayer[e,"Entrant"];
-entiset := NewInfoset[ ent , {"Enter", "Out"} ];
-AppendNode[n, entiset];
-inc := NewPlayer[e,"Incumbent"];
-inciset := NewInfoset[ inc , {"Fight", "Aquiesce"} ];
-AppendNode[n#1, inciset]; 
-\end{verbatim}
-
-can be used to build up the game tree for one stage of a chain store
-game.  One can then attach outcomes and set payoffs as follows:
-
-\begin{verbatim}
-o1:=AttachOutcome[node#1#1,NewOutcome[efg]];
-o2:=AttachOutcome[node#1#2,NewOutcome[efg]];
-o3:=AttachOutcome[node#2,NewOutcome[efg]];
-SetPayoff[o1, {-0.5,-1.0}];
-SetPayoff[o2, {0.5,0.0}];
-SetPayoff[o3, {0.0,0.5}];
-\end{verbatim}
 
