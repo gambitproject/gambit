@@ -288,8 +288,8 @@ bool guinfgLp::SolveSetup(void)
 // Liap
 //--------
 
+#include "dlliap.h"
 #include "nliap.h"
-#include "liapprm.h"
 
 guinfgLiap::guinfgLiap(const NFSupport &p_support, NfgShowInterface *p_parent)
   : guiNfgSolution(p_support, p_parent)
@@ -317,7 +317,7 @@ gList<MixedSolution> guinfgLiap::Solve(void)
 
 bool guinfgLiap::SolveSetup(void)
 {
-  LiapSolveParamsDialog dialog(m_parent->Frame(), true);
+  dialogLiap dialog(m_parent->Frame(), true);
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
@@ -343,7 +343,7 @@ bool guinfgLiap::SolveSetup(void)
 //----------
 
 #include "simpdiv.h"
-#include "simpprm.h"
+#include "dlsimpdiv.h"
 
 guinfgSimpdiv::guinfgSimpdiv(const NFSupport &p_support,
 			     NfgShowInterface *p_parent)
@@ -372,7 +372,7 @@ gList<MixedSolution> guinfgSimpdiv::Solve(void)
 
 bool guinfgSimpdiv::SolveSetup(void)
 {
-  SimpdivSolveParamsDialog dialog(m_parent->Frame());
+  dialogSimpdiv dialog(m_parent->Frame());
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();

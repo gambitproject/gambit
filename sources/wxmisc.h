@@ -247,7 +247,24 @@ public:
   virtual ~wxIntegerItem() { }
 
   void SetInteger(int p_value);
-  int GetInteger(void) { return m_value; }
+  int GetInteger(void) const { return m_value; }
+};
+
+#include "gnumber.h"
+
+class wxNumberItem : public wxText {
+private:
+  gNumber m_value;
+
+  static void EventCallback(wxNumberItem &p_object, wxCommandEvent &p_event);
+
+public:
+  wxNumberItem(wxPanel *p_parent, char *p_label, const gNumber &p_default,
+	       int p_x = -1, int p_y = -1, int p_w = -1, int p_h = -1);
+  virtual ~wxNumberItem() { }
+
+  void SetNumber(const gNumber &p_value);
+  gNumber GetNumber(void) const { return m_value; }
 };
 
 #endif // WXMISC_H

@@ -443,3 +443,136 @@ int dialogLcp::StopAfter(void) const
     return m_stopAfter->GetInteger(); 
 }
 
+//=======================================================================
+//                       dialogLiap: Member functions
+//=======================================================================
+
+#include "dlliap.h"
+
+dialogLiap::dialogLiap(wxWindow *p_parent, bool p_subgames, bool p_vianfg)
+  : dialogAlgorithm("LiapSolve Parameters", p_vianfg, p_parent)
+{
+  MakeCommonFields(true, p_subgames, p_vianfg);
+  Go();
+}
+
+dialogLiap::~dialogLiap()
+{
+  if (m_completed == wxOK) {
+    wxWriteResource("Algorithm Params", "Liap-nTries", NumTries(), 
+		    "gambit.ini");
+    wxWriteResource("Algorithm Params", "Func-tolND", 
+		    (float) TolND(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "Func-tol1D", 
+		    (float) Tol1D(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "Func-maxitsND",
+		    MaxitsND(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "Func-maxits1D",
+		    Maxits1D(), "gambit.ini");
+  }
+}
+
+void dialogLiap::AlgorithmFields(void)
+{
+  (void) new wxMessage(this, "Algorithm parameters:");
+  NewLine();
+
+  StopAfterField();
+  NewLine();
+
+  int nTries = 0;
+  wxGetResource("Algorithm Params", "Liap-nTries", &nTries, "gambit.ini");
+  m_nTries = new wxIntegerItem(this, "nTries", nTries, -1, -1, 100, -1);
+  NewLine();
+
+  float tolND = 1e-8;
+  wxGetResource("Algorithm Params", "Func-tolND", &tolND, "gambit.ini");
+  m_tolND = new wxNumberItem(this, "Tol n-D", tolND, -1, -1, 150, -1);
+  float tol1D = 1e-8;
+  wxGetResource("Algorithm Params", "Func-tol1D", &tol1D, "gambit.ini");
+  m_tol1D = new wxNumberItem(this, "Tol 1-D", tol1D, -1, -1, 150, -1);
+  NewLine();
+
+  int maxitsND = 0;
+  wxGetResource("Algorithm Params", "Func-maxitsND", &maxitsND, "gambit.ini");
+  m_maxitsND = new wxIntegerItem(this, "Iterations n-D", maxitsND,
+				 -1, -1, 150, -1);
+  int maxits1D = 0;
+  wxGetResource("Algorithm Params", "Func-maxits1D", &maxits1D, "gambit.ini");
+  m_maxits1D = new wxIntegerItem(this, "Iterations 1-D", maxits1D,
+				 -1, -1, 150, -1);
+  NewLine();
+
+  int startOption = 0;
+  wxGetResource("Algorithm Params", "Start-Option", &startOption,
+		"gambit.ini");
+  char *startOptions[] = { "Default", "Saved", "Prompt" };
+  m_startOption = new wxRadioBox(this, 0, "Start", -1, -1, -1, -1,
+				 3, startOptions);
+  if (startOption >= 0 && startOption <= 2)
+    m_startOption->SetSelection(startOption);
+  NewLine();
+}
+
+int dialogLiap::StopAfter(void) const
+{
+  if (m_findAll->GetValue())
+    return 0;
+  else
+    return m_stopAfter->GetInteger(); 
+}
+
+//=======================================================================
+//                    dialogSimpdiv: Member functions
+//=======================================================================
+
+#include "dlsimpdiv.h"
+
+dialogSimpdiv::dialogSimpdiv(wxWindow *p_parent, bool p_subgames)
+  : dialogAlgorithm("SimpdivSolve Parameters", true, p_parent, SIMPDIV_HELP)
+{
+  MakeCommonFields(true, p_subgames, true);
+  Go();
+}
+dialogSimpdiv::~dialogSimpdiv()
+{
+  if (m_completed == wxOK) {
+    wxWriteResource("Algorithm Params", "Simpdiv-nRestarts", NumRestarts(),
+		    "gambit.ini");
+    wxWriteResource("Algorithm Params", "Simpdiv-leashLength", LeashLength(),
+		    "gambit.ini");
+  }
+}
+
+void dialogSimpdiv::AlgorithmFields(void)
+{
+  (void) new wxMessage(this, "Algorithm parameters:");
+  NewLine();
+  StopAfterField();
+  NewLine();
+  PrecisionField();
+  NewLine();
+
+  int nRestarts = 0;
+  wxGetResource("Algorithm Params", "Simpdiv-nRestarts", &nRestarts,
+		"gambit.ini");
+  m_nRestarts = new wxIntegerItem(this, "# restarts", nRestarts,
+				  -1, -1, 100, -1);
+
+  int leashLength = 0;
+  wxGetResource("Algorithm Params", "Simpdiv-leashLength", &leashLength,
+		"gambit.ini");
+  m_leashLength = new wxIntegerItem(this, "Leash length", leashLength,
+				    -1, -1, 100, -1);
+  NewLine();
+}  
+
+int dialogSimpdiv::StopAfter(void) const
+{
+  if (m_findAll->GetValue())
+    return 0;
+  else
+    return m_stopAfter->GetInteger(); 
+}
+
+

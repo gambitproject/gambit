@@ -1106,6 +1106,10 @@ gText gPathOnly(const char *name)
 }
 
 
+//------------------------------------------------------------------------
+//                class wxIntegerItem: Member functions
+//------------------------------------------------------------------------
+
 static bool IsInteger(wxText &p_item)
 {
   char *entry = p_item.GetValue();
@@ -1118,7 +1122,7 @@ static bool IsInteger(wxText &p_item)
 wxIntegerItem::wxIntegerItem(wxPanel *p_parent, char *p_label, int p_default,
 			     int p_x, int p_y, int p_width, int p_height)
   : wxText(p_parent, (wxFunction) EventCallback, p_label, "",
-	   p_x, p_y, p_width, p_height), m_value(0)
+	   p_x, p_y, p_width, p_height), m_value(p_default)
 {
   // Passing a nonempty string to the wxText ctor affects the default
   // sizing.  So, we set after the fact instead.
@@ -1140,6 +1144,60 @@ void wxIntegerItem::EventCallback(wxIntegerItem &p_item,
 }
 
 void wxIntegerItem::SetInteger(int p_value)
+{
+  m_value = p_value;
+}
+
+
+//------------------------------------------------------------------------
+//                 class wxNumberItem: Member functions
+//------------------------------------------------------------------------
+
+static bool IsNumber(wxText &p_item)
+{
+  int i;
+  char *entry = p_item.GetValue();
+
+  for (i = 0; isdigit(entry[i]) && entry[i] != '\0'; i++);
+  if (entry[i] == '\0')
+    return true;
+  else if (entry[i] == '.' || entry[i] == '/') {
+    for (i++; isdigit(entry[i]) && entry[i] != '\0'; i++);
+    return (entry[i] == '\0');
+  }
+  else
+    return false;
+}
+
+wxNumberItem::wxNumberItem(wxPanel *p_parent, char *p_label,
+			   const gNumber &p_default,
+			   int p_x, int p_y, int p_width, int p_height)
+  : wxText(p_parent, (wxFunction) EventCallback, p_label, "",
+	   p_x, p_y, p_width, p_height), m_value(p_default)
+{
+  // Passing a nonempty string to the wxText ctor affects the default
+  // sizing.  So, we set after the fact instead.
+  int toTextPrecision = ToTextPrecision();
+  ToTextPrecision(10);
+  SetValue(ToText(p_default));
+  ToTextPrecision(toTextPrecision);
+}
+
+void wxNumberItem::EventCallback(wxNumberItem &p_item,
+				 wxCommandEvent &p_event)
+{
+  if (p_event.eventType == wxEVENT_TYPE_TEXT_COMMAND) {
+    if (!IsNumber(p_item)) {
+      p_item.SetNumber(p_item.GetNumber());
+      p_item.SetValue(ToText(p_item.GetNumber()));
+    }
+    else {
+      p_item.SetNumber(ToNumber(p_item.GetValue()));
+    }
+  }
+}
+
+void wxNumberItem::SetNumber(const gNumber &p_value)
 {
   m_value = p_value;
 }

@@ -197,46 +197,13 @@ void guiSubgameViaNfg::BaseViewNormal(const Nfg &p_nfg, NFSupport &p_support)
 //                              LiapSolve
 //========================================================================
 
-#include "nliap.h"
-#include "eliap.h"
-#include "liapsub.h"
-#include "liapprm.h"
-
-LiapSolveParamsDialog::LiapSolveParamsDialog(wxWindow *p_parent,
-					     bool p_subgames, bool p_vianfg)
-  : dialogAlgorithm("LiapSolve Parameters", p_vianfg, p_parent)
-{
-  MakeCommonFields(true, p_subgames, p_vianfg);
-}
-
-LiapSolveParamsDialog::~LiapSolveParamsDialog()
-{
-}
-
-void LiapSolveParamsDialog::AlgorithmFields(void)
-{
-  m_nTries = new wxText(this, 0, "nTries");
-  NewLine();
-  m_tolND = new wxText(this, 0, "Tol n-D");
-  NewLine();
-  m_tol1D = new wxText(this, 0, "Tol 1-D");
-  NewLine();
-  m_maxitsND = new wxText(this, 0, "Iterations n-D");
-  NewLine();
-  m_maxits1D = new wxText(this, 0, "Iterations 1-D");
-  NewLine();
-
-  char *startOptions[] = { "Default", "Saved", "Prompt" };
-  m_startOption = new wxRadioBox(this, 0, "Start", -1, -1, -1, -1,
-				 3, startOptions);
-  NewLine();
-
-  Go();
-}
+#include "dlliap.h"
 
 //---------------------
 // Liapunov on efg
 //---------------------
+
+#include "eliap.h"
 
 class EFLiapBySubgameG : public efgLiapSolve, public guiSubgameViaEfg {
 protected:
@@ -287,7 +254,7 @@ gList<BehavSolution> guiefgLiapEfg::Solve(void) const
 
 bool guiefgLiapEfg::SolveSetup(void)
 { 
-  LiapSolveParamsDialog dialog(m_parent->Frame(), true);
+  dialogLiap dialog(m_parent->Frame(), true);
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
@@ -311,6 +278,8 @@ bool guiefgLiapEfg::SolveSetup(void)
 //---------------------
 // Liapunov on nfg
 //---------------------
+
+#include "liapsub.h"
 
 class NFLiapBySubgameG : public efgLiapNfgSolve, public guiSubgameViaNfg {
 protected:
@@ -362,7 +331,7 @@ gList<BehavSolution> guiefgLiapNfg::Solve(void) const
 
 bool guiefgLiapNfg::SolveSetup(void)
 {
-  LiapSolveParamsDialog dialog(m_parent->Frame(), true);
+  dialogLiap dialog(m_parent->Frame(), true, true);
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
@@ -896,34 +865,13 @@ bool guiefgLpEfg::SolveSetup(void)
 //                           SimpdivSolve
 //========================================================================
 
+#include "dlsimpdiv.h"
+
 //---------------------
 // Simpdiv on nfg
 //---------------------
 
 #include "simpsub.h"
-#include "simpprm.h"
-
-SimpdivSolveParamsDialog::SimpdivSolveParamsDialog(wxWindow *p_parent /*=0*/,
-						   bool p_subgames /*=false*/)
-  : dialogAlgorithm("SimpdivSolve Params", true, p_parent, SIMPDIV_HELP)
-{
-  MakeCommonFields(true, p_subgames, true);
-  Go();
-}
-
-void SimpdivSolveParamsDialog::AlgorithmFields(void)
-{
-  (void) new wxMessage(this, "Algorithm parameters");
-  m_nRestarts = new wxText(this, 0, "# restarts");
-  NewLine();
-  m_leashLength = new wxText(this, 0, "Leash");
-  NewLine();
-  m_stopAfter = new wxText(this, 0, "Stop after");
-  NewLine();
-  char *precisionChoices[2] = { "Float", "Rational" };
-  m_precision = new wxRadioBox(this, 0, "Precision", -1, -1, -1, -1,
-			       2, precisionChoices);
-}  
 
 class SimpdivBySubgameG : public efgSimpDivNfgSolve, public guiSubgameViaNfg {
 protected:
@@ -971,7 +919,7 @@ gList<BehavSolution> guiefgSimpdivNfg::Solve(void) const
 
 bool guiefgSimpdivNfg::SolveSetup(void)
 {
-  SimpdivSolveParamsDialog dialog(m_parent->Frame(), true); 
+  dialogSimpdiv dialog(m_parent->Frame(), true); 
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
