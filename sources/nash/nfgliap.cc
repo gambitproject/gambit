@@ -220,11 +220,11 @@ gbtNfgNashLiap::gbtNfgNashLiap(void)
     m_tol1(2.0e-10), m_tolN(1.0e-10)
 { }
 
-gbtList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
-					   gbtStatus &p_status)
+gbtList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgGame &p_game,
+					     gbtStatus &p_status)
 {
   static const double ALPHA = .00000001;
-  gbtMixedProfile<double> p = p_support->NewMixedProfile(0.0);
+  gbtMixedProfile<double> p = p_game->NewMixedProfile(0.0);
   NFLiapFunc F(p->GetGame(), p);
 
   // if starting vector not interior, perturb it towards centroid

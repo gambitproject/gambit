@@ -106,6 +106,8 @@ public:
   { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
 
   gbtNfgSupportRep *Get(void) const { return m_rep; }
+
+  operator gbtNfgGame(void) const { return m_rep; }
   
   // Questionable whether this should be provided
   bool IsNull(void) const { return (m_rep == 0); }

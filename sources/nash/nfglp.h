@@ -30,9 +30,10 @@
 
 template <class T> class gbtNfgNashLp : public gbtNfgNashAlgorithm {
 private:
-  int Add_BFS(const gbtNfgSupport &, /*const*/ gbtLPSolver<T> &B,
+  int Add_BFS(const gbtNfgGame &, /*const*/ gbtLPSolver<T> &B,
 	      gbtList<gbtBasicFeasibleSolution<T> > &);
-  void GetSolutions(const gbtNfgSupport &, const gbtList<gbtBasicFeasibleSolution<T> > &,
+  void GetSolutions(const gbtNfgGame &,
+		    const gbtList<gbtBasicFeasibleSolution<T> > &,
 		    gbtList<MixedSolution > &,
 		    const T &) const;
 
@@ -41,7 +42,7 @@ public:
   virtual ~gbtNfgNashLp() { }
 
   gbtText GetAlgorithm(void) const { return "Lp[NFG]"; }
-  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
+  gbtList<MixedSolution> Solve(const gbtNfgGame &, gbtStatus &);
 };
 
 #endif  // NFGLP_H

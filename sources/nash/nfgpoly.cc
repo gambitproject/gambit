@@ -460,12 +460,12 @@ gbtNfgNashEnumPoly::gbtNfgNashEnumPoly(void)
 { }
 
 gbtList<MixedSolution> 
-gbtNfgNashEnumPoly::Solve(const gbtNfgSupport &p_support, gbtStatus &p_status)
+gbtNfgNashEnumPoly::Solve(const gbtNfgGame &p_game, gbtStatus &p_status)
 {
   p_status.SetProgress(0.0);
   p_status << "Step 1 of 2: Enumerating supports";
-  gbtList<gbtNfgSupport> supports = PossibleNashSubsupports(p_support,
-							    p_status);
+  gbtList<gbtNfgSupport> supports =
+    PossibleNashSubsupports(p_game->NewNfgSupport(), p_status);
 
   p_status.SetProgress(0.0);
   p_status << "Step 2 of 2: Computing equilibria";

@@ -109,6 +109,7 @@ public:
 };
 
 class gbtConstNfgRep : public virtual gbtConstGameRep {
+  friend class gbtNfgGame;
 public:
   // DATA ACCESS -- STRATEGIES
   virtual gbtArray<int> NumStrategies(void) const = 0; 
@@ -124,6 +125,43 @@ public:
   virtual gbtMixedProfile<double> NewMixedProfile(double) const = 0;
   virtual gbtMixedProfile<gbtRational> NewMixedProfile(const gbtRational &) const = 0;
   virtual gbtMixedProfile<gbtNumber> NewMixedProfile(const gbtNumber &) const = 0;
+};
+
+class gbtNfgGame {
+private:
+  gbtConstNfgRep *m_rep;
+
+public:
+  gbtNfgGame(void) : m_rep(0) { }
+  gbtNfgGame(gbtConstNfgRep *p_rep)
+    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
+  gbtNfgGame(const gbtNfgGame &p_nfg)
+    : m_rep(p_nfg.m_rep) { if (m_rep) m_rep->Reference(); }
+  ~gbtNfgGame() { if (m_rep && m_rep->Dereference()) delete m_rep; }
+  
+  gbtNfgGame &operator=(const gbtNfgGame &p_nfg) {
+    if (this != &p_nfg) {
+      if (m_rep && m_rep->Dereference()) delete m_rep;
+      m_rep = p_nfg.m_rep;
+      if (m_rep) m_rep->Reference();
+    }
+    return *this;
+  }
+
+  bool operator==(const gbtNfgGame &p_nfg) const
+  { return (m_rep == p_nfg.m_rep); }
+  bool operator!=(const gbtNfgGame &p_nfg) const
+  { return (m_rep != p_nfg.m_rep); }
+  
+  gbtConstNfgRep *operator->(void) 
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
+  const gbtConstNfgRep *operator->(void) const 
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
+
+  gbtConstNfgRep *Get(void) const { return m_rep; }
+  
+  // Questionable whether this should be provided
+  bool IsNull(void) const { return (m_rep == 0); }
 };
 
 class gbtConstEfgRep : public virtual gbtConstGameRep {

@@ -410,7 +410,7 @@ template <class T> T gbtNfgNashSimpdiv<T>::getlabel(gbtMixedProfile<T> &yy,
 //-------------------------------------------------------------------------
 
 template <class T> gbtList<MixedSolution>
-gbtNfgNashSimpdiv<T>::Solve(const gbtNfgSupport &p_support,
+gbtNfgNashSimpdiv<T>::Solve(const gbtNfgGame &p_game,
 			    gbtStatus &p_status)
 {
   int qf,i,j,k,ii;
@@ -430,7 +430,7 @@ gbtNfgNashSimpdiv<T>::Solve(const gbtNfgSupport &p_support,
   }
   mingrid = ((T)(1))/mingrid;
   
-  gbtMixedProfile<T> y = p_support->NewMixedProfile((T) 0.0);
+  gbtMixedProfile<T> y = p_game->NewMixedProfile((T) 0.0);
   ((gbtVector<T> &) y).operator=((T) 0);
 
   // In principle, this algorithm can be started from any point
@@ -439,9 +439,9 @@ gbtNfgNashSimpdiv<T>::Solve(const gbtNfgSupport &p_support,
   gbtList<MixedSolution> solutions;
   k=1;
   d=(T) 1.0 / (T) k;
-  for(i=1;i<=p_support->NumPlayers();i++) {
+  for(i=1;i<=p_game->NumPlayers();i++) {
     y(i,1)=(T)(1);
-    for(j=1;j<=p_support->GetPlayer(i)->NumStrategies();j++)
+    for(j=1;j<=p_game->GetPlayer(i)->NumStrategies();j++)
       if(j>1)y(i,j)=(T)(0);
   }
     

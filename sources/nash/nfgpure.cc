@@ -32,15 +32,14 @@
 #include "game/nfgciter.h"
 
 gbtList<MixedSolution> 
-gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
-			  gbtStatus &p_status)
+gbtNfgNashEnumPure::Solve(const gbtNfgGame &p_game, gbtStatus &p_status)
 {
   gbtList<MixedSolution> solutions;
-  gbtNfgContIterator citer(p_support);
+  gbtNfgContIterator citer(p_game);
 
   int ncont = 1;
-  for (int pl = 1; pl <= p_support->NumPlayers(); pl++) {
-    ncont *= p_support->GetPlayer(pl)->NumStrategies();
+  for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
+    ncont *= p_game->GetPlayer(pl)->NumStrategies();
   }
 
   int contNumber = 1;
@@ -52,11 +51,11 @@ gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
       bool flag = true;
       gbtNfgIterator niter(citer);
     
-      for (int pl = 1; flag && pl <= p_support->NumPlayers(); pl++)  {
-	gbtNumber current = citer.GetPayoff(p_support->GetPlayer(pl));
-	for (int i = 1; i <= p_support->GetPlayer(pl)->NumStrategies(); i++)  {
+      for (int pl = 1; flag && pl <= p_game->NumPlayers(); pl++)  {
+	gbtNumber current = citer.GetPayoff(p_game->GetPlayer(pl));
+	for (int i = 1; i <= p_game->GetPlayer(pl)->NumStrategies(); i++)  {
 	  niter.Next(pl);
-	  if (niter.GetPayoff(p_support->GetPlayer(pl)) > current)  {
+	  if (niter.GetPayoff(p_game->GetPlayer(pl)) > current)  {
 	    flag = false;
 	    break;
 	  }
@@ -64,11 +63,11 @@ gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
       }
       
       if (flag)  {
-	gbtMixedProfile<gbtNumber> temp = p_support->GetGame()->NewMixedProfile(gbtNumber(0));
+	gbtMixedProfile<gbtNumber> temp = p_game->NewMixedProfile(gbtNumber(0));
 	((gbtVector<gbtNumber> &) temp).operator=(gbtNumber(0));
 	MixedSolution soln(temp, "EnumPure[NFG]");
-	for (int pl = 1; pl <= p_support->NumPlayers(); pl++) {
-	  soln.SetStrategyProb(citer.GetContingency()->GetStrategy(p_support->GetPlayer(pl)), 1);
+	for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
+	  soln.SetStrategyProb(citer.GetContingency()->GetStrategy(p_game->GetPlayer(pl)), 1);
 	}
 	solutions.Append(soln);
       }

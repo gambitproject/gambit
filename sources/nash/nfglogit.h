@@ -55,7 +55,7 @@ public:
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
 
   gbtText GetAlgorithm(void) const { return "Qre"; }
-  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
+  gbtList<MixedSolution> Solve(const gbtNfgGame &, gbtStatus &);
 };  
 
 #endif  // NFGLOGIT_H

@@ -34,10 +34,13 @@ template <class T> class gbtNfgNashLcp : public gbtNfgNashAlgorithm  {
 private:
   int m_stopAfter, m_maxDepth;
 
-  int AddBfs(gbtLemkeHowsonTableau<T> &, gbtList<gbtBasicFeasibleSolution<T> > &);
-  gbtList<MixedSolution> AddSolutions(const gbtNfgSupport &,
-				    const gbtList<gbtBasicFeasibleSolution<T> > &, const T &);
-  void AllLemke(const gbtNfgSupport &, int, gbtLemkeHowsonTableau<T> &B, gbtList<gbtBasicFeasibleSolution<T> > &,
+  int AddBfs(gbtLemkeHowsonTableau<T> &,
+	     gbtList<gbtBasicFeasibleSolution<T> > &);
+  gbtList<MixedSolution> AddSolutions(const gbtNfgGame &,
+				      const gbtList<gbtBasicFeasibleSolution<T> > &, const T &);
+  void AllLemke(const gbtNfgGame &, int, 
+		gbtLemkeHowsonTableau<T> &B, 
+		gbtList<gbtBasicFeasibleSolution<T> > &,
 		int depth, gbtStatus &);
   
 public:
@@ -51,7 +54,7 @@ public:
   void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
 
   gbtText GetAlgorithm(void) const { return "Lcp[NFG]"; }
-  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
+  gbtList<MixedSolution> Solve(const gbtNfgGame &, gbtStatus &);
 };
 
 #endif  // NFGLCP_H

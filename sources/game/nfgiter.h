@@ -34,24 +34,23 @@ template <class T> class gbtArray;
 
 class gbtNfgContIterator;
 
-//
-// This class is useful for iterating around the normal form.
-//
 
+//
+// This is a generic class useful for iterating around the normal form.
+// It depends only on the gbtNfgGame interface, so it can be used with
+// any implementation providing that interface.
+//
 class gbtNfgIterator    {
 private:
-  gbtNfgSupport m_support;
-  gbtArray<int> current_strat;
-  gbtNfgContingency profile;
+  gbtNfgGame m_nfg;
+  gbtArray<int> m_current;
+  gbtNfgContingency m_profile;
 
 public:
-  gbtNfgIterator(gbtGame);
-  gbtNfgIterator(const gbtNfgSupport &s);
+  gbtNfgIterator(const gbtNfgGame &);
   gbtNfgIterator(const gbtNfgIterator &);
   gbtNfgIterator(const gbtNfgContIterator &);
   ~gbtNfgIterator();
-
-  gbtNfgIterator &operator=(const gbtNfgIterator &);
 
   void First(void);
   int Next(int p);
@@ -63,9 +62,7 @@ public:
   gbtGameOutcome GetOutcome(void) const;
 
   gbtNumber GetPayoff(const gbtGamePlayer &p_player) const 
-    { return profile->GetPayoff(p_player); }
-
-  const gbtNfgSupport &GetSupport(void) const { return m_support; }
+    { return m_profile->GetPayoff(p_player); }
 };
 
 #endif   // NFGITER_H

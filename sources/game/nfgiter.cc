@@ -32,44 +32,29 @@
 // gbtNfgIterator:  Constructors, Destructors, Operators
 //--------------------------------------------------------------------------
 
-gbtNfgIterator::gbtNfgIterator(gbtGame p_nfg)
-  : m_support(p_nfg->NewNfgSupport()),
-    current_strat(m_support->NumPlayers()), 
-    profile(m_support->NewContingency())
+gbtNfgIterator::gbtNfgIterator(const gbtNfgGame &p_nfg)
+  : m_nfg(p_nfg),
+    m_current(m_nfg->NumPlayers()),
+    m_profile(m_nfg->NewContingency())
 {
   First();
 }
 
-gbtNfgIterator::gbtNfgIterator(const gbtNfgSupport &p_support) 
-  : m_support(p_support),
-    current_strat(m_support->NumPlayers()),
-    profile(m_support->NewContingency())
-{
-  First();
-}
-
-gbtNfgIterator::gbtNfgIterator(const gbtNfgIterator &it)
-  : m_support(it.m_support), current_strat(it.current_strat), 
-    profile(it.profile)
+gbtNfgIterator::gbtNfgIterator(const gbtNfgIterator &p_iterator)
+  : m_nfg(p_iterator.m_nfg), 
+    m_current(p_iterator.m_current),
+    m_profile(p_iterator.m_profile)
 { }
 
 gbtNfgIterator::gbtNfgIterator(const gbtNfgContIterator &p_iterator)
-  : m_support(p_iterator.m_support),
-    current_strat(p_iterator.m_current), profile(p_iterator.m_profile)
+  : m_nfg(p_iterator.m_nfg),
+    m_current(p_iterator.m_current),
+    m_profile(p_iterator.m_profile)
 { }
 
 gbtNfgIterator::~gbtNfgIterator()
 { }
 
-gbtNfgIterator &gbtNfgIterator::operator=(const gbtNfgIterator &it)
-{
-  if (this != &it)  {
-    profile = it.profile;
-    current_strat = it.current_strat;
-    m_support = it.m_support;
-  }
-  return *this;
-}
 
 //-----------------------------
 // gbtNfgIterator: Member Functions
@@ -77,56 +62,56 @@ gbtNfgIterator &gbtNfgIterator::operator=(const gbtNfgIterator &it)
 
 void gbtNfgIterator::First(void)
 {
-  for (int i = 1; i <= m_support->NumPlayers(); i++)  {
-    gbtGameStrategy s = m_support->GetPlayer(i)->GetStrategy(1);
-    profile->SetStrategy(s);
-    current_strat[i] = 1;
+  for (int i = 1; i <= m_nfg->NumPlayers(); i++)  {
+    gbtGameStrategy s = m_nfg->GetPlayer(i)->GetStrategy(1);
+    m_profile->SetStrategy(s);
+    m_current[i] = 1;
   }
 }
 
 int gbtNfgIterator::Next(int p)
 {
-  if (current_strat[p] < m_support->GetPlayer(p)->NumStrategies())  {
-    gbtGameStrategy s = m_support->GetPlayer(p)->GetStrategy(++(current_strat[p]));
-    profile->SetStrategy(s);
+  if (m_current[p] < m_nfg->GetPlayer(p)->NumStrategies())  {
+    gbtGameStrategy s = m_nfg->GetPlayer(p)->GetStrategy(++(m_current[p]));
+    m_profile->SetStrategy(s);
     return 1;
   }
   else {
-    gbtGameStrategy s = m_support->GetPlayer(p)->GetStrategy(1);
-    profile->SetStrategy(s);
-    current_strat[p] = 1;
+    gbtGameStrategy s = m_nfg->GetPlayer(p)->GetStrategy(1);
+    m_profile->SetStrategy(s);
+    m_current[p] = 1;
     return 0;
   }
 }
 
 int gbtNfgIterator::Set(int p, int s)
 {
-  if (p <= 0 || p > m_support->NumPlayers() ||
-      s <= 0 || s > m_support->GetPlayer(p)->NumStrategies())
+  if (p <= 0 || p > m_nfg->NumPlayers() ||
+      s <= 0 || s > m_nfg->GetPlayer(p)->NumStrategies())
     return 0;
   
-  profile->SetStrategy(m_support->GetPlayer(p)->GetStrategy(s));
+  m_profile->SetStrategy(m_nfg->GetPlayer(p)->GetStrategy(s));
   return 1;
 }
 
 void gbtNfgIterator::Get(gbtArray<int> &t) const
 {
-  for (int i = 1; i <= m_support->NumPlayers(); i++) {
-    t[i] = profile->GetStrategy(m_support->GetPlayer(i))->GetId();
+  for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
+    t[i] = m_profile->GetStrategy(m_nfg->GetPlayer(i))->GetId();
   }
 }
 
 void gbtNfgIterator::Set(const gbtArray<int> &t)
 {
-  for (int i = 1; i <= m_support->NumPlayers(); i++){
-    profile->SetStrategy(m_support->GetPlayer(i)->GetStrategy(t[i]));
-    current_strat[i] = t[i];
+  for (int i = 1; i <= m_nfg->NumPlayers(); i++){
+    m_profile->SetStrategy(m_nfg->GetPlayer(i)->GetStrategy(t[i]));
+    m_current[i] = t[i];
   } 
 }
 
 gbtGameOutcome gbtNfgIterator::GetOutcome(void) const
 {
-  return profile->GetOutcome();
+  return m_profile->GetOutcome();
 }
 
 
@@ -134,11 +119,11 @@ gbtGameOutcome gbtNfgIterator::GetOutcome(void) const
 // gbtNfgContIterator: Constructor, Destructor
 //-------------------------------------
 
-gbtNfgContIterator::gbtNfgContIterator(const gbtNfgSupport &p_support)
-  : m_support(p_support), 
-    m_current(m_support->NumPlayers()),
-    m_profile(m_support->NewContingency()),
-    m_thawed(m_support->NumPlayers())
+gbtNfgContIterator::gbtNfgContIterator(const gbtNfgGame &p_nfg)
+  : m_nfg(p_nfg),
+    m_current(m_nfg->NumPlayers()),
+    m_profile(m_nfg->NewContingency()),
+    m_thawed(m_nfg->NumPlayers())
 {
   for (int i = 1; i <= m_thawed.Length(); i++) {
     m_thawed[i] = i;
@@ -157,7 +142,7 @@ gbtNfgContIterator::~gbtNfgContIterator()
 void gbtNfgContIterator::First(void)
 {
   for (int i = 1; i <= m_thawed.Length(); i++) {
-    m_profile->SetStrategy(m_support->GetPlayer(m_thawed[i])->GetStrategy(1));
+    m_profile->SetStrategy(m_nfg->GetPlayer(m_thawed[i])->GetStrategy(1));
     m_current[m_thawed[i]] = 1;
   }	
 }
@@ -195,14 +180,14 @@ int gbtNfgContIterator::Next(gbtGamePlayer p_player)
     return 0;
   }
 
-  if (m_current[p] < m_support->GetPlayer(p)->NumStrategies())  {
-    gbtGameStrategy s = m_support->GetPlayer(p)->GetStrategy(++(m_current[p]));
+  if (m_current[p] < m_nfg->GetPlayer(p)->NumStrategies())  {
+    gbtGameStrategy s = m_nfg->GetPlayer(p)->GetStrategy(++(m_current[p]));
     m_profile->SetStrategy(s);
     First();
     return 1;
   }
   else {
-    gbtGameStrategy s = m_support->GetPlayer(p)->GetStrategy(1);
+    gbtGameStrategy s = m_nfg->GetPlayer(p)->GetStrategy(1);
     m_profile->SetStrategy(s);
     m_current[p] = 1;
     First();
@@ -217,12 +202,12 @@ int gbtNfgContIterator::NextContingency(void)
 
   while (1)   {
     int pl = m_thawed[j];
-    if (m_current[pl] < m_support->GetPlayer(pl)->NumStrategies()) {
-      gbtGameStrategy s = m_support->GetPlayer(pl)->GetStrategy(++(m_current[pl]));
+    if (m_current[pl] < m_nfg->GetPlayer(pl)->NumStrategies()) {
+      gbtGameStrategy s = m_nfg->GetPlayer(pl)->GetStrategy(++(m_current[pl]));
       m_profile->SetStrategy(s);
       return 1;
     }
-    m_profile->SetStrategy(m_support->GetPlayer(pl)->GetStrategy(1));
+    m_profile->SetStrategy(m_nfg->GetPlayer(pl)->GetStrategy(1));
     m_current[pl] = 1;
     j--;
     if (j == 0) {

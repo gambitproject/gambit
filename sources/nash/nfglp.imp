@@ -33,13 +33,13 @@ template <class T> gbtNfgNashLp<T>::gbtNfgNashLp(void)
 { }
 
 template <class T> 
-gbtList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgSupport &p_support,
-					    gbtStatus &p_status)
+gbtList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgGame &p_game,
+					      gbtStatus &p_status)
 {
   gbtBasicFeasibleSolution<T> cbfs((T) 0);
   
-  if (p_support->NumPlayers() != 2 ||
-      !p_support->IsConstSum()) {
+  if (p_game->NumPlayers() != 2 ||
+      !p_game->IsConstSum()) {
     return gbtList<MixedSolution>();
   }
   
@@ -47,18 +47,18 @@ gbtList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgSupport &p_support,
   
   int i,j,m,k;
   
-  m = p_support->GetPlayer(1)->NumStrategies();
-  k = p_support->GetPlayer(2)->NumStrategies();
+  m = p_game->GetPlayer(1)->NumStrategies();
+  k = p_game->GetPlayer(2)->NumStrategies();
   gbtMatrix<T> A(1,k+1,1,m+1);
   gbtVector<T> b(1,k+1);
   gbtVector<T> c(1,m+1);
-  gbtNfgIterator iter(p_support);
+  gbtNfgIterator iter(p_game);
 
-  T minpay = p_support->MinPayoff() - gbtNumber(1);
+  T minpay = p_game->MinPayoff() - gbtNumber(1);
 
   for (i = 1; i <= k; i++)  {
     for (j = 1; j <= m; j++)  {
-      A(i, j) = gbtNumber(minpay) - iter.GetPayoff(p_support->GetPlayer(1));
+      A(i, j) = gbtNumber(minpay) - iter.GetPayoff(p_game->GetPlayer(1));
       iter.Next(1);
     }
     A(i,m+1) = (T)1;
@@ -77,15 +77,15 @@ gbtList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgSupport &p_support,
   gbtLPSolver<T> LP(A,b,c,1,p_status);
 
   if (!LP.IsAborted()) {
-    Add_BFS(p_support, LP, bfsList); 
+    Add_BFS(p_game, LP, bfsList); 
   }
 
   gbtList<MixedSolution> solutions;
-  GetSolutions(p_support, bfsList, solutions, LP.Epsilon());
+  GetSolutions(p_game, bfsList, solutions, LP.Epsilon());
   return solutions;
 }
 
-template <class T> int gbtNfgNashLp<T>::Add_BFS(const gbtNfgSupport &p_support,
+template <class T> int gbtNfgNashLp<T>::Add_BFS(const gbtNfgGame &p_game,
 						/*const*/ gbtLPSolver<T> &lp,
 						gbtList<gbtBasicFeasibleSolution<T> > &p_list)
 {
@@ -94,26 +94,26 @@ template <class T> int gbtNfgNashLp<T>::Add_BFS(const gbtNfgSupport &p_support,
   // gbtLPSolver<T>::GetAll() does not currently work correctly; for now,
   // LpSolve is restricted to returning only one equilibrium
   lp.OptBFS(cbfs);
-  cbfs.Remove(p_support->GetGame()->GetPlayer(1)->NumStrategies()+1);
-  cbfs.Remove(-p_support->GetGame()->GetPlayer(2)->NumStrategies()-1);
+  cbfs.Remove(p_game->GetPlayer(1)->NumStrategies()+1);
+  cbfs.Remove(-p_game->GetPlayer(2)->NumStrategies()-1);
   if (p_list.Contains(cbfs))  return 0;
   p_list.Append(cbfs);
   return 1;
 }
 
 template <class T>
-void gbtNfgNashLp<T>::GetSolutions(const gbtNfgSupport &p_support,
+void gbtNfgNashLp<T>::GetSolutions(const gbtNfgGame &p_game,
 				   const gbtList<gbtBasicFeasibleSolution<T> > &p_list,
 				   gbtList<MixedSolution > &solutions,
 				   const T &p_epsilon) const
 {
   int index;
-  int n1 = p_support->GetPlayer(1)->NumStrategies();
-  int n2 = p_support->GetPlayer(2)->NumStrategies();
+  int n1 = p_game->GetPlayer(1)->NumStrategies();
+  int n2 = p_game->GetPlayer(2)->NumStrategies();
   solutions.Flush();
 
   for (int i = 1; i <= p_list.Length(); i++)    {
-    gbtMixedProfile<T> profile = p_support->NewMixedProfile((T) 0.0);
+    gbtMixedProfile<T> profile = p_game->NewMixedProfile((T) 0.0);
     int j;
     for (j = 1; j <= n1; j++) 
       if (p_list[i].IsDefined(j))   

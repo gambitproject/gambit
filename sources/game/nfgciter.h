@@ -43,13 +43,13 @@
 class gbtNfgContIterator    {
 friend class gbtNfgIterator;
 private:
-  gbtNfgSupport m_support;
+  gbtNfgGame m_nfg;
   gbtArray<int> m_current;
   gbtNfgContingency m_profile;
   gbtBlock<int> m_frozen, m_thawed;
   
 public:
-  gbtNfgContIterator(const gbtNfgSupport &);
+  gbtNfgContIterator(const gbtNfgGame &);
   ~gbtNfgContIterator();
   
   void First(void);

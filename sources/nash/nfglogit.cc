@@ -490,7 +490,7 @@ gbtNfgNashLogit::gbtNfgNashLogit(void)
   : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
 { }
 
-gbtList<MixedSolution> gbtNfgNashLogit::Solve(const gbtNfgSupport &p_support,
+gbtList<MixedSolution> gbtNfgNashLogit::Solve(const gbtNfgGame &p_game,
 					      gbtStatus &p_status)
 {
   gbtList<MixedSolution> solutions;
@@ -498,7 +498,7 @@ gbtList<MixedSolution> gbtNfgNashLogit::Solve(const gbtNfgSupport &p_support,
 #if GBT_WITH_MP_FLOAT
   gbtMixedProfile<gbtMPFloat> start(p_support);
 #else
-  gbtMixedProfile<double> start = p_support->NewMixedProfile(0.0);
+  gbtMixedProfile<double> start = p_game->NewMixedProfile(0.0);
 #endif  // GBT_WITH_MP_FLOAT
 
   try {

@@ -55,7 +55,7 @@ public:
   void SetCliques(bool p_cliques) { m_cliques = p_cliques; }
 
   gbtText GetAlgorithm(void) const { return "EnumMixed[NFG]"; }
-  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
+  gbtList<MixedSolution> Solve(const gbtNfgGame &, gbtStatus &);
 };
 
 #endif  // NFGMIXED_H

@@ -28,19 +28,11 @@
 
 template class gbtLemkeHowsonTableau<double>;
 template class gbtLemkeHowsonTableau<gbtRational>;
-template gbtMatrix<double> Make_A1(const gbtGame &,
-				 const gbtNfgSupport &, const double &);
-template gbtMatrix<gbtRational> Make_A1(const gbtGame &,
-				    const gbtNfgSupport &, const gbtRational &);
-template gbtVector<double> Make_b1(const gbtGame &,
-				 const gbtNfgSupport &, const double &);
-template gbtVector<gbtRational> Make_b1(const gbtGame &,
-				    const gbtNfgSupport &, const gbtRational &);
-template gbtMatrix<double> Make_A2(const gbtGame &,
-				 const gbtNfgSupport &, const double &);
-template gbtMatrix<gbtRational> Make_A2(const gbtGame &,
-				    const gbtNfgSupport &, const gbtRational &);
-template gbtVector<double> Make_b2(const gbtGame &,
-				 const gbtNfgSupport &, const double &);
-template gbtVector<gbtRational> Make_b2(const gbtGame &,
-				    const gbtNfgSupport &, const gbtRational &);
+template gbtMatrix<double> Make_A1(const gbtNfgGame &, const double &);
+template gbtMatrix<gbtRational> Make_A1(const gbtNfgGame &, const gbtRational &);
+template gbtVector<double> Make_b1(const gbtNfgGame &, const double &);
+template gbtVector<gbtRational> Make_b1(const gbtNfgGame &, const gbtRational &);
+template gbtMatrix<double> Make_A2(const gbtNfgGame &, const double &);
+template gbtMatrix<gbtRational> Make_A2(const gbtNfgGame &, const gbtRational &);
+template gbtVector<double> Make_b2(const gbtNfgGame &, const double &);
+template gbtVector<gbtRational> Make_b2(const gbtNfgGame &, const gbtRational &);

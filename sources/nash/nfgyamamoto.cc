@@ -289,19 +289,19 @@ static double PDenom(double p_lambda, int p_m)
   return total;
 }
 
-gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
-					       gbtStatus &p_status)
+gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgGame &p_game,
+						 gbtStatus &p_status)
 {
   // In the notation of Yamamoto's paper, profile(i,j)=x_{ij}
   // and lambda=t
-  gbtMixedProfile<double> profile = p_support->NewMixedProfile(0.0);
+  gbtMixedProfile<double> profile = p_game->NewMixedProfile(0.0);
   double lambda = 1.0;
   double initialsign = -1.0; 
   gbtList<gbtMatrix<int> > partitions;
-  gbtMatrix<double> H(p_support->MixedProfileLength(),
-		      p_support->MixedProfileLength() + 1);
+  gbtMatrix<double> H(p_game->MixedProfileLength(),
+		      p_game->MixedProfileLength() + 1);
 
-  for (int pl = 1; pl <= p_support->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
     partitions.Append(RankStrategies(profile, pl));
   }
 
@@ -327,16 +327,16 @@ gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
 
     //    gout << lambda << ' ' << profile << '\n';
     // Check for inequalities
-    for (int pl = 1; pl <= p_support->NumPlayers(); pl++) {
+    for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
       int strats = 0;
-      for (int part = 1; part < p_support->GetPlayer(pl)->NumStrategies(); part++) {
+      for (int part = 1; part < p_game->GetPlayer(pl)->NumStrategies(); part++) {
 	if (NumMembers(partitions[pl], part) > 0 &&
 	    NumMembers(partitions[pl], part + 1) > 0) {
 	  if (Payoff(profile, pl, partitions[pl], part) <=
 	      Payoff(profile, pl, partitions[pl], part + 1)) {
 	    // Combine partitions part and part+1
 	    partitions[pl].SetRow(part, partitions[pl].Row(part) + partitions[pl].Row(part+1));
-	    for (int p = part + 1; p < p_support->GetPlayer(pl)->NumStrategies(); p++) {
+	    for (int p = part + 1; p < p_game->GetPlayer(pl)->NumStrategies(); p++) {
 	      partitions[pl].SetRow(p, partitions[pl].Row(p+1));
 	    }  
 	    for (int col = 1; col <= partitions[pl].NumColumns(); col++) {
@@ -355,11 +355,11 @@ gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
 					      part);
 	    double totX = 0.0, totP = 0.0;
 	    for (int i = 1; i < sortstrats.Length(); i++) {
-	      totP += pow(lambda, (double) (strats + i - 1)) / PDenom(lambda, p_support->GetPlayer(pl)->NumStrategies());
+	      totP += pow(lambda, (double) (strats + i - 1)) / PDenom(lambda, p_game->GetPlayer(pl)->NumStrategies());
 	      totX += profile(pl, sortstrats[i]);
 	      if (totX >= totP) {
 		//		gout << pl << " " << part << " " << totP << " " << totX << "Xaler!\n";
-		for (int p = part + 1; p < p_support->GetPlayer(pl)->NumStrategies(); p++) {
+		for (int p = part + 1; p < p_game->GetPlayer(pl)->NumStrategies(); p++) {
 		  partitions[pl].SetRow(p+1, partitions[pl].Row(p));
 		}  
 		for (int col = 1; col <= partitions[pl].NumColumns(); col++) {

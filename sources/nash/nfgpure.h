@@ -43,7 +43,7 @@ public:
   void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
 
   gbtText GetAlgorithm(void) const { return "EnumPure"; }
-  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
+  gbtList<MixedSolution> Solve(const gbtNfgGame &, gbtStatus &);
 };
 
 #endif // NFGPURE_H

@@ -29,14 +29,10 @@
 #include "game/game.h"
 #include "nfglcp.h"
 
-template <class T> gbtMatrix<T> Make_A1(const gbtGame &,
-				      const gbtNfgSupport &, const T &);
-template <class T> gbtVector<T> Make_b1(const gbtGame &,
-				      const gbtNfgSupport &, const T &);
-template <class T> gbtMatrix<T> Make_A2(const gbtGame &,
-				      const gbtNfgSupport &, const T &);
-template <class T> gbtVector<T> Make_b2(const gbtGame &,
-				      const gbtNfgSupport &, const T &);
+template <class T> gbtMatrix<T> Make_A1(const gbtNfgGame &, const T &);
+template <class T> gbtVector<T> Make_b1(const gbtNfgGame &, const T &);
+template <class T> gbtMatrix<T> Make_A2(const gbtNfgGame &, const T &);
+template <class T> gbtVector<T> Make_b2(const gbtNfgGame &, const T &);
 
 
 //---------------------------------------------------------------------------
@@ -44,32 +40,32 @@ template <class T> gbtVector<T> Make_b2(const gbtGame &,
 //---------------------------------------------------------------------------
 
 template <class T> 
-gbtList<MixedSolution> gbtNfgNashLcp<T>::Solve(const gbtNfgSupport &p_support,
-					     gbtStatus &p_status)
+gbtList<MixedSolution> gbtNfgNashLcp<T>::Solve(const gbtNfgGame &p_game,
+					       gbtStatus &p_status)
 {
   gbtBasicFeasibleSolution<T> cbfs((T) 0);
 
-  if (p_support->NumPlayers() != 2) {
+  if (p_game->NumPlayers() != 2) {
     return gbtList<MixedSolution>();
   }
 
   gbtList<gbtBasicFeasibleSolution<T> > bfsList;
 
   try {
-    gbtMatrix<T> A1 = Make_A1(p_support->GetGame(), p_support, (T) 0);
-    gbtVector<T> b1 = Make_b1(p_support->GetGame(), p_support, (T) 0);
-    gbtMatrix<T> A2 = Make_A2(p_support->GetGame(), p_support, (T) 0);
-    gbtVector<T> b2 = Make_b2(p_support->GetGame(), p_support, (T) 0);
+    gbtMatrix<T> A1 = Make_A1(p_game, (T) 0);
+    gbtVector<T> b1 = Make_b1(p_game, (T) 0);
+    gbtMatrix<T> A2 = Make_A2(p_game, (T) 0);
+    gbtVector<T> b2 = Make_b2(p_game, (T) 0);
     gbtLemkeHowsonTableau<T> B(A1,A2,b1,b2);
     if (m_stopAfter != 1) {
-      AllLemke(p_support,0,B,bfsList,m_maxDepth, p_status);
+      AllLemke(p_game,0,B,bfsList,m_maxDepth, p_status);
     }
     else  {
       B.LemkePath(1);
       AddBfs(B, bfsList);
     }
 
-    return AddSolutions(p_support, bfsList, B.Epsilon());
+    return AddSolutions(p_game, bfsList, B.Epsilon());
   }
   catch (gbtSignalBreak &E) {
     // for now, we won't give *any* solutions -- but we should list
@@ -99,9 +95,10 @@ template <class T> int gbtNfgNashLcp<T>::AddBfs(gbtLemkeHowsonTableau<T> &p_tabl
 // From each new accessible equilibrium, it follows
 // all possible paths, adding any new equilibria to the List.  
 //
-template <class T> void gbtNfgNashLcp<T>::AllLemke(const gbtNfgSupport &p_support,
-					    int j, gbtLemkeHowsonTableau<T> &B,
-					    gbtList<gbtBasicFeasibleSolution<T> > &p_list,
+template <class T> 
+void gbtNfgNashLcp<T>::AllLemke(const gbtNfgGame &p_game,
+				int j, gbtLemkeHowsonTableau<T> &B,
+				gbtList<gbtBasicFeasibleSolution<T> > &p_list,
 					    int depth,
 					    gbtStatus &p_status)
 {
@@ -126,24 +123,24 @@ template <class T> void gbtNfgNashLcp<T>::AllLemke(const gbtNfgSupport &p_suppor
       p_status.SetProgress(p1 + aa * (p2 - p1));
       gbtLemkeHowsonTableau<T> Bcopy(B);
       Bcopy.LemkePath(i);
-      AllLemke(p_support,i,Bcopy, p_list, depth+1, p_status);
+      AllLemke(p_game,i,Bcopy, p_list, depth+1, p_status);
     }
   }
   return;
 }
 
-template <class T>
-gbtList<MixedSolution> gbtNfgNashLcp<T>::AddSolutions(const gbtNfgSupport &p_support,
-					     const gbtList<gbtBasicFeasibleSolution<T> > &p_list,
-					     const T &epsilon)
+template <class T> gbtList<MixedSolution>
+gbtNfgNashLcp<T>::AddSolutions(const gbtNfgGame &p_game,
+			       const gbtList<gbtBasicFeasibleSolution<T> > &p_list,
+			       const T &epsilon)
 {
   int i,j;
-  int n1 = p_support->GetPlayer(1)->NumStrategies();
-  int n2 = p_support->GetPlayer(2)->NumStrategies();
+  int n1 = p_game->GetPlayer(1)->NumStrategies();
+  int n2 = p_game->GetPlayer(2)->NumStrategies();
   gbtList<MixedSolution> solutions;
 
   for (i = 1; i <= p_list.Length(); i++)    {
-    gbtMixedProfile<T> profile = p_support->NewMixedProfile((T) 0);
+    gbtMixedProfile<T> profile = p_game->NewMixedProfile((T) 0);
     T sum = (T) 0;
 
     for (j = 1; j <= n1; j++)

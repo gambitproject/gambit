@@ -1418,7 +1418,7 @@ void gbtGameBase::WriteNfg(gbtOutput &p_file) const
     p_file << "\n";
   }
   else {
-    gbtNfgIterator iter(NewNfgSupport());
+    gbtNfgIterator iter((gbtNfgGame) NewNfgSupport());
     ::WriteNfg(const_cast<gbtGameBase *>(this), iter, NumPlayers(), p_file);
   }
 }
