@@ -291,6 +291,8 @@ void gRectBlock<T>::InsertColumn(int col, const gArray<T> &v)
       new_data[i][col] = v[i];
       for (j = col + 1; j <= maxcol; j++)
 	new_data[i][j] = oldrow[j-1];
+	  data[i] = new_data[i];
+	  delete [] (oldrow + mincol);
     }
   }
   catch (...)   {   // probably a failure of new
