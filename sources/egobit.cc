@@ -34,6 +34,7 @@ EFGobitParams<T>::EFGobitParams(gOutput &out, gOutput &pxi, gStatus &status_)
 template <class T>
 class EFGobitFunc : public GobitFunc<T>, public gBFunctMin<T>  {
   private:
+  long niters, nevals;
     T Lambda;
     gPVector<T> probs;
     BehavProfile<T> p, pp, cpay;
@@ -53,6 +54,10 @@ class EFGobitFunc : public GobitFunc<T>, public gBFunctMin<T>  {
     // These two are inherited virtual functions from GobitFunc
     void Optimize(T Lambda, int &iter, T &value);
     void Output(gOutput &f, int format = 0) const;
+    long NumIters(void) const;
+    long NumEvals(void) const;
+
+    const BehavProfile<T> &GetProfile(void) const;
 };
 
 //-------------------------------------------------------------------------
@@ -61,7 +66,7 @@ class EFGobitFunc : public GobitFunc<T>, public gBFunctMin<T>  {
 
 template <class T>
 EFGobitFunc<T>::EFGobitFunc(const Efg<T> &EF, const GobitParams<T> &P)
-  :gBFunctMin<T>(EF.ProfileLength(true)),
+  :gBFunctMin<T>(EF.ProfileLength(true)), niters(0), nevals(0), 
                  probs(EF.Dimensionality().Lengths()),
 		 p(EF, true), pp(EF, true), cpay(EF),
 		 xi(p.Length(), p.Length()), E(EF)
@@ -73,7 +78,7 @@ EFGobitFunc<T>::EFGobitFunc(const Efg<T> &EF, const GobitParams<T> &P)
 template <class T>
 EFGobitFunc<T>::EFGobitFunc(const Efg<T> &EF, const GobitParams<T> &P,
 			    const BehavProfile<T> &s)
-  :gBFunctMin<T>(EF.ProfileLength(true)),
+  :gBFunctMin<T>(EF.ProfileLength(true)), niters(0), nevals(0), 
 		 probs(EF.Dimensionality().Lengths()),
 		 p(EF, true), pp(EF, true), cpay(EF),
 		 xi(p.Length(), p.Length()), E(EF)
@@ -100,6 +105,7 @@ template <class T> T EFGobitFunc<T>::Value(const gVector<T> &v)
 {
   static const T PENALTY1 = (T) 10000.0;
 
+  nevals++;
   (gVector<T> &) p = v;
   T val((T) 0), prob, psum, z;
 
@@ -192,6 +198,22 @@ template <class T> void EFGobitFunc<T>::Output(gOutput &f, int format) const
 
 }
 
+template <class T> const BehavProfile<T> &EFGobitFunc<T>::GetProfile(void) const
+{
+  return pp;
+}
+
+template <class T> long  EFGobitFunc<T>::NumIters(void) const
+{
+  return niters;
+}
+
+template <class T> long EFGobitFunc<T>::NumEvals(void) const
+{
+  return nevals;
+}
+
+
 //------------------------------------------------------------------------
 //                  EFGobitModule<T>: Member functions
 //------------------------------------------------------------------------
@@ -210,6 +232,12 @@ EFGobitModule<T>::EFGobitModule(const Efg<T> &EF, EFGobitParams<T> &p,
 template <class T> EFGobitModule<T>::~EFGobitModule()
 { }
 
+template <class T>
+const gList<BehavProfile<T> > &EFGobitModule<T>::GetSolutions(void) const
+{
+  return solutions;
+}
+
 template <class T> GobitFunc<T> *EFGobitModule<T>::CreateFunc(void)
 {
   if (start) {
@@ -217,6 +245,12 @@ template <class T> GobitFunc<T> *EFGobitModule<T>::CreateFunc(void)
     return new EFGobitFunc<T>(E, params, s); 
   }
   return new EFGobitFunc<T>(E, params);
+}
+
+template <class T>
+void EFGobitModule<T>::AddSolution(const GobitFunc<T> *const F)
+{
+  solutions.Append(((EFGobitFunc<T> *) F)->GetProfile());
 }
 
 #ifdef __GNUG__

@@ -28,30 +28,34 @@ NFGobitParams<T>::NFGobitParams(gOutput &out, gOutput &pxi, gStatus &status_)
 
 template <class T>
 class NFGobitFunc : public GobitFunc<T>, public gBC2FunctMin<T>  {
-  private:
-    T Lambda;
-    gPVector<T> p, pp;
-    const NormalForm<T> &N;
-    gVector<T> **scratch1, **scratch2;
+private:
+  int niters, nevals;
+  T Lambda;
+  gPVector<T> p, pp;
+  const NormalForm<T> &N;
+  gVector<T> **scratch1, **scratch2;
+  
+      // These three are inherited virtual functions from gBC2FunctMin<T>:
+  int Deriv(const gVector<T> &v, gVector<T> &d);
+  int Hess(const gVector<T> &v, gMatrix<T> &d);
+  T Value(const gVector<T> &x);
 
-    // These three are inherited virtual functions from gBC2FunctMin<T>:
-    int Deriv(const gVector<T> &v, gVector<T> &d);
-    int Hess(const gVector<T> &v, gMatrix<T> &d);
-    T Value(const gVector<T> &x);
-
-    // Used in computation of Deriv() above
-    T GobitDerivValue(int i, int j, const gPVector<T> &v);
-
-  public:
-    NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P);
-    NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P,
+      // Used in computation of Deriv() above
+  T GobitDerivValue(int i, int j, const gPVector<T> &v);
+  
+public:
+  NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P);
+  NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P,
 	      const gPVector<T> &s);
-    virtual ~NFGobitFunc();
-
-    void Init(void);
-    // These two are inherited virtual functions from GobitFunc
-    void Optimize(T Lambda, int &iter, T &value);
-    void Output(gOutput &f, int format = 0) const;
+  virtual ~NFGobitFunc();
+  
+  void Init(void);
+      // These two are inherited virtual functions from GobitFunc
+  void Optimize(T Lambda, int &iter, T &value);
+  void Output(gOutput &f, int format = 0) const;
+  long NumIters(void) const;
+  long NumEvals(void) const;
+  const gPVector<T> &GetProfile(void) const;
 };
 
 
@@ -62,7 +66,7 @@ class NFGobitFunc : public GobitFunc<T>, public gBC2FunctMin<T>  {
 template <class T> NFGobitFunc<T>
 ::NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P)
   : gBC2FunctMin<T>(NF.ProfileLength()), p(NF.Dimensionality()),
-		    pp(NF.Dimensionality()), N(NF)
+    niters(0), nevals(0), pp(NF.Dimensionality()), N(NF)
 { 
   Init();
   N.Centroid(pp);
@@ -71,8 +75,8 @@ template <class T> NFGobitFunc<T>
 template <class T>NFGobitFunc<T>
 ::NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P,
 	      const gPVector<T>& s)
-  : gBC2FunctMin<T>(NF.ProfileLength()), p(NF.Dimensionality()),
-		    pp(NF.Dimensionality()), N(NF)
+  : gBC2FunctMin<T>(NF.ProfileLength()), niters(0), nevals(0), 
+    p(NF.Dimensionality()), pp(NF.Dimensionality()), N(NF)
 {
   Init();
   pp = s;
@@ -99,6 +103,21 @@ template <class T> NFGobitFunc<T>::~NFGobitFunc()
 
   delete (scratch1 + 1);
   delete (scratch2 + 1);
+}
+
+template <class T> const gPVector<T> &NFGobitFunc<T>::GetProfile(void) const
+{
+  return pp;
+}
+
+template <class T> long NFGobitFunc<T>::NumIters(void) const
+{
+  return niters;
+}
+
+template <class T> long NFGobitFunc<T>::NumEvals(void) const
+{
+  return nevals;
 }
 
 //-------------------------------------------------------------------------
@@ -154,6 +173,7 @@ T NFGobitFunc<T>::GobitDerivValue(int i, int j, const gPVector<T> &v)
 
 template <class T> T NFGobitFunc<T>::Value(const gVector<T> &v)
 {
+  nevals++;
   p = v;
   T val((T) 0), z;
   
@@ -223,6 +243,12 @@ template <class T>NFGobitModule<T>
 template <class T> NFGobitModule<T>::~NFGobitModule()
 { }
 
+template <class T>
+const gList<MixedProfile<T> > &NFGobitModule<T>::GetSolutions(void) const
+{
+  return solutions;
+}
+
 template <class T> GobitFunc<T> *NFGobitModule<T>::CreateFunc(void)
 {
 
@@ -233,6 +259,12 @@ template <class T> GobitFunc<T> *NFGobitModule<T>::CreateFunc(void)
   }
   return new NFGobitFunc<T>(N, params);
 
+}
+
+template <class T>
+void NFGobitModule<T>::AddSolution(const GobitFunc<T> *const F)
+{
+  solutions.Append(MixedProfile<T>(N, ((NFGobitFunc<T> *) F)->GetProfile()));
 }
 
 #define BIGNUM 1.0e100
