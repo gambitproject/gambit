@@ -589,7 +589,7 @@ QuikSolv<T>::ARootExistsRecursion(const gRectangle<gDouble>& r,
 				  const gRectangle<gDouble>& smallrect, 
 				        gArray<int>& precedence)    const
 {
-  if (smallrect.DiameterSquared() == (gDouble)0.0) {
+  if (smallrect.MaximalSideLength() == (gDouble)0.0) {
     sample = smallrect.Center();
     return true;
   }
