@@ -20,7 +20,7 @@ template <class T> gMatrix<T> Make_A1(const Nfg<T> &, const NFSupport &S)
   n2=S.NumStrats(2);
   gMatrix<T> A1(1,n1,n1+1,n1+n2);
   NfgIter<T> iter(&S); 
-  T min = (T) 0, x; 
+  T min = (T) 1, x; 
   
   for (i = 1; i <= n1; i++)   {
     for (j = 1; j <= n2; j++)  {
@@ -56,7 +56,7 @@ template <class T> gMatrix<T> Make_A2(const Nfg<T> &, const NFSupport &S)
   n2=S.NumStrats(2);
   gMatrix<T> A2(n1+1,n1+n2,1,n1);
   NfgIter<T> iter(&S); 
-  T min = (T) 0, x; 
+  T min = (T) 1, x; 
   
   for (i = 1; i <= n1; i++)   {
     for (j = 1; j <= n2; j++)  {
