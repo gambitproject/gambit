@@ -1,7 +1,7 @@
 //
 // FILE: nfgfunc.cc -- Normal form command language builtins
 //
-// $Id$
+// @(#)nfgfunc.cc	1.89 08/30/96
 //
 
 
