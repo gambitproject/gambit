@@ -1,0 +1,81 @@
+//#
+//# FILE: garray.imp - Implementation of gArray data type
+//#
+//# $Id$
+//#
+
+#include <stdlib.h>
+#include <assert.h>
+#include "garray.h"
+#include "gambitio.h"
+
+
+template <class T> gArray<T>::gArray(int len)	
+{
+  assert(len >= 0);
+  data = (len > 0) ? new T[len] - 1 : 0;
+}
+
+template <class T> gArray<T>::gArray(const gArray<T> &a) : length(a.length)
+{
+  if (length > 0)	{
+    data = new T[length] - 1;
+    for (int i = 0; i < length; i++)
+      data[i] = a.data[i];
+  }
+  else if (length == 0)
+    data = 0;
+}
+
+template <class T> gArray<T>::~gArray()
+{
+  if (length > 0)  delete [] (data + 1);
+}
+
+template <class T> gArray<T> & gArray<T>::operator=(const gArray<T> &a)
+{
+  if (this != &a) {
+    if (data)   delete [] (data + 1);
+
+    length = a.length;
+    if (length)   {
+      data = new T[length];
+      for (int i = 0; i < length; i++)
+	data[i] = a.data[i];
+    }
+    else
+      data = 0;
+  }
+  return *this;
+}
+
+template <class T> int gArray<T>::Length(void) const
+{	
+  return length;
+}
+
+template <class T> const T &gArray<T>::operator[](int index) const
+{
+  assert(index >= 1 && index <= length);
+  return data[index];
+}	
+
+template <class T> T &gArray<T>::operator[](int index)
+{
+  assert(index >= 1 && index <= length);
+  return data[index];
+}
+
+template <class T> void gArray<T>::Dump(gOutput &f) const
+{
+  f << "{ ";
+  for (int i = 1; i <= length; i++)
+    f << data[i] << ' ';
+  f << '}';
+}
+
+template <class T> gOutput &operator<<(gOutput &f, const gArray<T> &a)
+{
+  a.Dump(f);
+  return f;
+}
