@@ -386,7 +386,7 @@ BehavSolution EfgShow::CreateSolution(void)
 
 void EfgShow::OnProfilesNew(wxCommandEvent &)
 {
-  BehavSolution profile(BehavProfile<gNumber>(EFSupport(m_efg)));
+  BehavSolution profile = BehavProfile<gNumber>(EFSupport(m_efg));
 
   dialogBehavEditor dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
