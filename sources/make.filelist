@@ -55,7 +55,7 @@ ALG_OBJECTS = $(ALG_SOURCES:.cc=$(OBJECT_SUFFIX))
 GCL_SOURCES = gsm.cc gsmfunc.cc gsmoper.cc gsmhash.cc gsminstr.cc portion.cc \
               nfgfunc.cc efgfunc.cc listfunc.cc algfunc.cc solfunc.cc \
               gsmutils.cc gcompile.cc gsmincl.cc gcmdline.cc \
-              gpreproc.cc gclinst.cc gclsig.cc
+              gpreproc.cc gclinst.cc
 
 GCL_OBJECTS = $(GCL_SOURCES:.cc=$(OBJECT_SUFFIX))
 
