@@ -20,9 +20,9 @@ typedef struct NODEENTRY {
 		int has_children;	// how many children this node has
 		int child_number;	// what branch # is this node from the parent
 		bool in_sup;			// is this node in disp_sup
-		bool expanded;		// is this subgame root expanded or collapsed
 		const Node *n;
 		NODEENTRY *parent;
+		bool expanded;		// is this subgame root expanded or collapsed
 		void Translate(int ox,int oy) {x+=ox;y+=oy;if (infoset_y!=-1) infoset_y+=oy;}
 		NODEENTRY(void) { }
 		NODEENTRY(const NODEENTRY &e): x(e.x),y(e.y),level(e.level),color(e.color),

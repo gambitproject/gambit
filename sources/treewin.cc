@@ -118,7 +118,7 @@ if (!outcome_dialog)	// creating a new one
 	for (i=1;i<=ef.NumOutcomes();i++)
 	{
 		OutcomeVector<T> *tmp=(OutcomeVector<T> *)(ef.OutcomeList()[i]);
-		for (int j=1;j<=num_players;j++)
+		for (j=1;j<=num_players;j++)
 			outcome_dialog->SetCell(i,j,ToString((*tmp)[j]));
 		outcome_dialog->SetCell(i,cols+1,tmp->GetName());
 		old_names[i]=tmp->GetName();
