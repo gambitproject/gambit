@@ -214,10 +214,11 @@ TreeRender::TreeRender(wxFrame *frame, TreeWindow *parent_,
                        const Node *&cursor_, const Node *&subgame_node_,
                        const TreeDrawSettings &draw_settings_)
     : wxCanvas(frame, -1, -1, -1, -1, 0),
-      parent(parent_), node_list(node_list_),
+      node_list(node_list_),
       hilight_infoset(hilight_infoset_), hilight_infoset1(hilight_infoset1_),
-      mark_node(mark_node_), subgame_node(subgame_node_),
-      cursor(cursor_), draw_settings(draw_settings_), flasher(0), painting(false)
+      mark_node(mark_node_), subgame_node(subgame_node_), cursor(cursor_),
+      parent(parent_), draw_settings(draw_settings_),
+      flasher(0), painting(false)
 { }
 
 
