@@ -48,5 +48,5 @@ gambit_SOURCES = \
 
 gambit_LDADD = -lgambit
 
-EXTRA_DIST = borland.mak gambit.rc
+EXTRA_DIST = borland.mak gambit.rc gambit.xpm gambit32.cfg
 
