@@ -13,7 +13,7 @@
 #include "nfgiter.h"
 #include "nfgciter.h"
 
-#include "lexicon.h"
+
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -23,6 +23,7 @@
 #endif   // __GNUG__, __BORLANDC__
 #include "glist.imp"
 #include "garray.imp"
+#include "lexicon.h"
 
 TEMPLATE class gList<Correspondence *>;
 TEMPLATE class gNode<Correspondence *>;
