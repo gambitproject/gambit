@@ -23,6 +23,7 @@ template gVector<int> operator*(const gVector<int> &,
 				const gMatrix<int> &);
 
 template gOutput &operator<<(gOutput &, const gMatrix<double> &);
+template gOutput &operator<<(gOutput &, const gMatrix<long double> &);
 template gOutput &operator<<(gOutput &, const gMatrix<gRational> &);
 template gOutput &operator<<(gOutput &, const gMatrix<gInteger> &);
 template gOutput &operator<<(gOutput &, const gMatrix<int> &);
