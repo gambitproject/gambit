@@ -17,7 +17,7 @@
 #include "basic.h"
 #include "gstring.h"
 
-
+#include "portion.h"
 
 
 #define NO_DEFAULT_VALUE  (Portion*)  0
@@ -26,6 +26,8 @@
 
 #define PASS_BY_REFERENCE true
 
+class FuncDescObj;
+class CallFuncObj;
 
 class gInteger;
 class GSM;
@@ -37,25 +39,81 @@ template <class T> class gList;
 template <class T> class RefCountHashTable;
 
 
-struct ParamInfoType
+class ParamInfoType
 {
+friend FuncDescObj;
+friend CallFuncObj;
+  
+private:
   gString      Name;
   PortionType  Type;
   Portion*     DefaultValue;
   bool         PassByReference;
 
-  ParamInfoType( const gString& name, const PortionType& type,
-		Portion* default_value, const bool pass_by_ref )
-    :Name(name), Type(type), DefaultValue(default_value), 
-  PassByReference(pass_by_ref)
-  { }
-
+public:
   ParamInfoType( void )
   {
     Name = "";
     Type = porERROR;
-    DefaultValue = 0;
+    DefaultValue = NO_DEFAULT_VALUE;
     PassByReference = 0;
+  }
+
+  ParamInfoType( const ParamInfoType& param_info )
+    :
+  Name( param_info.Name ),
+  Type( param_info.Type ),
+  DefaultValue( param_info.DefaultValue ),
+  PassByReference( param_info.PassByReference )
+  {
+    /*
+    if( DefaultValue != NO_DEFAULT_VALUE )
+    {
+      DefaultValue = DefaultValue->Copy();
+    }
+    */
+  }
+
+  /*
+  operator = ( const ParamInfoType& param_info )
+  {
+    Name = param_info.Name;
+    Type = param_info.Type;
+    delete DefaultValue;
+    DefaultValue = param_info.DefaultValue;
+    PassByReference = param_info.PassByReference;
+    if( DefaultValue != NO_DEFAULT_VALUE )
+    {
+      DefaultValue = DefaultValue->Copy();
+    }
+  }
+  */
+
+
+  ParamInfoType
+    ( 
+     const gString& name, 
+     const PortionType& type,
+     Portion* default_value, 
+     const bool pass_by_ref = false 
+     )
+      :
+  Name( name ), 
+  Type( type ), 
+  DefaultValue( default_value ), 
+  PassByReference( pass_by_ref )
+  { 
+    /*
+    if( DefaultValue != NO_DEFAULT_VALUE )
+      DefaultValue = DefaultValue->Copy();
+      */
+  }
+
+  ~ParamInfoType()
+  {
+    /*
+    delete DefaultValue;
+    */
   }
 };
 
@@ -96,8 +154,8 @@ protected:
   int            _NumFuncs;
   FuncInfoType*  _FuncInfo;
 
-
-  public:
+  
+public:
   FuncDescObj( FuncDescObj& func );
   FuncDescObj( const gString& func_name );
   virtual ~FuncDescObj();
@@ -133,13 +191,13 @@ protected:
      Portion*          default_value,
      const bool        pass_by_reference = false
      );
-
+  
   void SetParamInfo
-    ( 
-     Portion*          (*func_ptr)(Portion**),
-     const ParamInfoType     param_info[]
+    (
+     Portion* (*func_ptr)(Portion**),
+     const ParamInfoType param_info[]
      );
-
+  
   gString FuncName ( void ) const;
 };
 

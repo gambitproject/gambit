@@ -50,10 +50,10 @@ int main( void )
 
   gout << "Machine setup done\n";
 
-#ifdef INTERACTIVE
+
   gout << "*********************** press return to continue ************";
   gin >> cont;
-#endif
+
 
 
 
@@ -1829,7 +1829,7 @@ int main( void )
   gin >> cont;
 #endif
 
-/*
+
   machine->InitCallFunction( "GobitEfg" );
   machine->PushRef( "E" );
   machine->Bind( "E" );
@@ -1842,7 +1842,7 @@ int main( void )
 
   machine->PushRef( "time" );
   machine->Dump();
-*/
+
 
 #endif // CRASHTEST
 
@@ -1882,7 +1882,7 @@ int main( void )
 
 
 
-/*
+
   machine->PushRef( "F" );
   machine->InitCallFunction( "ReadEfg" );
   machine->Push( "e02.efg" );
@@ -1920,7 +1920,7 @@ int main( void )
   machine->CallFunction();
   machine->Assign();
   machine->Dump();
-*/
+
 
 #ifdef INTERACTIVE
   gout << "*********************** Press Return to continue ************";
@@ -2012,12 +2012,12 @@ int main( void )
 #endif
 
 
-
+#ifdef CRASHTEST
   machine->PushRef( "xyz" );
   machine->Push( (gInteger) 2 );
   machine->Subscript();
   machine->Dump();
-
+#endif // CRASHTEST
 
 #ifdef INTERACTIVE
   gout << "*********************** Press Return to continue ************";
@@ -2059,6 +2059,14 @@ int main( void )
   func->SetFuncInfo( prog, 0 );
   machine->AddFunction( func );
 
+  prog = new gList< Instruction* >;
+  prog->Append( new Push<double>( 4 ) );
+  prog->Append( new Dump );
+
+  func = new FuncDescObj( "TestUsr4" );
+  func->SetFuncInfo( prog, 0 );
+  machine->AddFunction( func );
+
 
 
 
@@ -2088,13 +2096,19 @@ int main( void )
 
   machine->PushRef( "x" );
   machine->Dump();
-  
+
+  machine->Push( (double) 1 );
+  machine->Push( (double) 2 );
+  machine->Push( (double) 3 );
+  machine->InitCallFunction( "TestUsr4" );
+  machine->CallFunction();
+  machine->Dump();
 
 
-#ifdef INTERACTIVE
+
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
-#endif
+
 
 
   gout << "\nDeleting machine\n";

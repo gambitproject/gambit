@@ -79,6 +79,10 @@ FuncDescObj::FuncDescObj( FuncDescObj& func )
 
     for( index = 0; index < _FuncInfo[ f_index ].NumParams; index ++ )
     {
+      /*
+      _FuncInfo[ f_index ].ParamInfo[ index ] =
+	ParamInfoType( func._FuncInfo[ f_index ].ParamInfo[ index ] );
+	*/
       _FuncInfo[ f_index ].ParamInfo[ index ].Name =
 	func._FuncInfo[ f_index ].ParamInfo[ index ].Name;
       _FuncInfo[ f_index ].ParamInfo[ index ].Type =
@@ -367,6 +371,11 @@ void FuncDescObj::_SetParamInfo
     param_type;
   _FuncInfo[ f_index ].ParamInfo[ param_index ].DefaultValue = 
     param_default_value;
+/*
+  if( _FuncInfo[ f_index ].ParamInfo[ param_index ].DefaultValue != 0 )
+    _FuncInfo[ f_index ].ParamInfo[ param_index ].DefaultValue = 
+      _FuncInfo[ f_index ].ParamInfo[ param_index ].DefaultValue->Copy();
+*/
   _FuncInfo[ f_index ].ParamInfo[ param_index ].PassByReference = 
     param_pass_by_reference;
 }
@@ -392,7 +401,7 @@ void FuncDescObj::SetParamInfo
 
  for( i = 0; i < _FuncInfo[ f_index ].NumParams; i++ )
  {
-   _FuncInfo[ f_index ].ParamInfo[ i ] = param_info[ i ];
+   _FuncInfo[ f_index ].ParamInfo[ i ] = ParamInfoType( param_info[ i ] );
  }
 }
 

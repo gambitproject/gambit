@@ -11,11 +11,9 @@
 
 #include "gsmhash.h"
 
-
+#include "gstring.h"
 #include "portion.h"
 #include "gsmfunc.h"
-#include "gstring.h"
-
 
 
 
@@ -46,7 +44,7 @@ int FunctionHashTable::NumBuckets() const
 { return 26; }
 
 int FunctionHashTable::Hash( const gString& funcname ) const 
-{ return (int)( funcname[0] % 26 ); }
+{ return (int)( funcname[0] ) % 26; }
 
 void FunctionHashTable::DeleteAction( FuncDescObj* func ) 
 { delete func; }
