@@ -48,9 +48,9 @@ dialogAbout::dialogAbout(wxWindow *p_parent,
 		0, wxALIGN_CENTER, 5);
   topSizer->Add(new wxStaticText(this, -1, "Part of the Gambit Project"),
 		0, wxTOP | wxALIGN_CENTER, 5);
-  topSizer->Add(new wxStaticText(this, -1, "http://www.hss.caltech.edu/gambit"),
+  topSizer->Add(new wxStaticText(this, -1, "http://econweb.tamu.edu/gambit"),
 		0, wxALIGN_CENTER, 5);
-  topSizer->Add(new wxStaticText(this, -1, "gambit@hss.caltech.edu"),
+  topSizer->Add(new wxStaticText(this, -1, "gambit@econmail.tamu.edu"),
 		0, wxALIGN_CENTER, 5);
 
   topSizer->Add(new wxStaticText(this, -1, "Built with " wxVERSION_STRING),
@@ -58,7 +58,7 @@ dialogAbout::dialogAbout(wxWindow *p_parent,
   topSizer->Add(new wxStaticText(this, -1, "http://www.wxwindows.org"),
 		0, wxALIGN_CENTER, 5);
 
-  topSizer->Add(new wxStaticText(this, -1, "Copyright (C) 2002"),
+  topSizer->Add(new wxStaticText(this, -1, "Copyright (C) 2003"),
 		0, wxTOP | wxALIGN_CENTER, 5);
   topSizer->Add(new wxStaticText(this, -1, "The Gambit Project"),
 		0, wxALIGN_CENTER, 5);
