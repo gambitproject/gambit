@@ -93,8 +93,8 @@ NodeAddDialog::NodeAddDialog(Efg &ef_,EFPlayer *player,Infoset *infoset,int bran
     ev.commandInt = player_item->FindString("Chance");
   else
     ev.commandInt = 0;
-  
   player_item->Command(ev);
+
   // Fake an infoset selection
   if (infoset)
     {
@@ -119,9 +119,14 @@ EFPlayer *NodeAddDialog::ResolvePlayer(const char *name)
   if (!strcmp(name, "New Player"))   return 0;
   
   char tmp[30];
+  strncpy(tmp, name, 29);
   int i;
-  for (i = 0; name[i] != ':'; i++);
-  strncpy(tmp, name, i);
+  for (i = 0; ; i++) {
+    if (tmp[i] == ':') {
+      tmp[i] = '\0';
+      break;
+    }
+  }
   return ef.Players()[atoi(tmp)];
   // return ef.Players()[1];
 }
