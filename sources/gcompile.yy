@@ -31,6 +31,7 @@
   gList<Instruction *> program; \
   gGrowableStack<gString> formalstack; \
   gGrowableStack<int> labels, listlen; \
+  gGrowableStack<char> matching; \
   GSM gsm; \
   bool quit; \
   \
@@ -39,11 +40,11 @@
   \
   void emit(Instruction *); \
   \
-  int Parse(const gString &s); \
+  int Parse(void); \
   void Execute(void);
 
 %define CONSTRUCTOR_INIT     : index(0), gsm(256), formalstack(4), labels(4), \
-                               listlen(4), quit(false)
+                               listlen(4), matching(4), quit(false)
 
 %token LOR
 %token LAND
@@ -66,6 +67,7 @@
 %token LBRACE
 %token RBRACE
 %token RARROW
+%token LARROW
 %token DBLARROW
 %token COMMA
 
@@ -142,7 +144,7 @@ exprlist:     expression  { emit(new Pop); }
         |     exprlist SEMI expression  { emit(new Pop); }
 
 expression:   E0
-          |   expression ASSIGN E0 { emit(new Assign()); }
+          |   E0 ASSIGN expression { emit(new Assign()); }
           ;
 
 E0:           E1
@@ -231,12 +233,16 @@ listel:       expression   { listlen.Push(listlen.Pop() + 1); }
 
 char GCLCompiler::nextchar(void)
 {
-  return input_text[index++];
+  char c;
+
+  gin >> c;
+
+  return c;
 }
 
 void GCLCompiler::ungetchar(char c)
 {
-  index--;
+  gin.unget(c);
 }
 
 void GCLCompiler::yyerror(char *s)
@@ -244,18 +250,24 @@ void GCLCompiler::yyerror(char *s)
   gerr << "Error: " << s << '\n';
 }
 
+const char CR = (char) 10;
+
 int GCLCompiler::yylex(void)
 {
   char c;
+
+I_dont_believe_Im_doing_this:
 
   while (1)  {
     char d;
     do  {
       c = nextchar();
-    }  while (isspace(c));
+    }  while (isspace(c) && c != CR);
     if (c == '/')  {
-      if ((d = nextchar()) == '/')
-	while ((d = nextchar()) != '\n');
+      if ((d = nextchar()) == '/')  {
+	while ((d = nextchar()) != CR);
+	return EOF;
+      }
       else if (d == '*')  {
 	int done = 0;
 	while (!done)  {
@@ -341,10 +353,14 @@ int GCLCompiler::yylex(void)
   switch (c)  {
     case ',':   return COMMA;
     case ';':   return SEMI;
-    case '(':   return LPAREN;
-    case ')':   return RPAREN;
-    case '{':   return LBRACE;
-    case '}':   return RBRACE;
+    case '(':   matching.Push('(');  return LPAREN;
+    case ')':   if (matching.Depth() > 0 && matching.Peek() == '(')
+                  matching.Pop();
+                return RPAREN;
+    case '{':   matching.Push('{');  return LBRACE;
+    case '}':   if (matching.Depth() > 0 && matching.Peek() == '{')
+                  matching.Pop();
+                return RBRACE;
     case '+':   return PLUS;
     case '-':   c = nextchar();
                 if (c == '>')  return RARROW;
@@ -354,9 +370,19 @@ int GCLCompiler::yylex(void)
     case '%':   return PERCENT;
     case '=':   return EQU;
     case '[':   c = nextchar();
-                if (c == '[')  return DBLLBRACK;
-                else   { ungetchar(c);  return LBRACK; }
-    case ']':   return RBRACK;
+                if (c == '[')   {
+		  matching.Push('[');
+		  matching.Push('[');
+		  return DBLLBRACK;
+		}
+                else   {
+		  ungetchar(c);
+		  matching.Push('[');
+		  return LBRACK;
+		}
+    case ']':   if (matching.Depth() > 0 && matching.Peek() == '[')
+                  matching.Pop();
+                return RBRACK;
     case ':':   c = nextchar();
                 if (c == '=')  return ASSIGN;
                 else   { ungetchar(c);  return ':'; }  
@@ -370,8 +396,7 @@ int GCLCompiler::yylex(void)
 		  c = nextchar();
 		  if (c == '>')   return DBLARROW;
 		  ungetchar(c);
-		  ungetchar('-');
-		  return LTN;
+		  return LARROW;
 		}
     case '>':   c = nextchar();
                 if (c == '=')  return GEQ;
@@ -382,14 +407,16 @@ int GCLCompiler::yylex(void)
     case '|':   c = nextchar();
                 if (c == '|')  return LOR;
                 else   { ungetchar(c);  return '|'; }
+    case CR:    if (matching.Depth())
+                  goto I_dont_believe_Im_doing_this;
+                return EOF;
     default:    return c;
   }
 }
 
-int GCLCompiler::Parse(const gString &s)
+int GCLCompiler::Parse(void)
 {
-  input_text = s;
-  index = 0;
+  matching.Flush();
   if (!yyparse())  {
     Execute();
     return 0;
@@ -416,19 +443,17 @@ void GCLCompiler::Execute(void)
 #include "ggrstack.imp"
 
 #ifdef __GNUG__
-template class gStack<gString>;
-template class gGrowableStack<gString>;
-
-template class gStack<int>;
-template class gGrowableStack<int>;
+#define TEMPLATE template
 #elif defined __BORLANDC__
 #pragma option -Jgd
-class gStack<gString>;
-class gGrowableStack<gString>;
+#define TEMPLATE
+#endif   // __GNUG__
 
-class gStack<int>;
-class gGrowableStack<int>;
-#endif   // __GNUG__, __BORLANDC__
+TEMPLATE class gStack<gString>;
+TEMPLATE class gGrowableStack<gString>;
 
+TEMPLATE class gStack<int>;
+TEMPLATE class gGrowableStack<int>;
 
-
+TEMPLATE class gStack<char>;
+TEMPLATE class gGrowableStack<char>;

@@ -12,11 +12,9 @@ main()
   GCLCompiler C;
   
   while (!C.quit)   {
-    strcpy(buffer, "");
     gout << "GCL" << command++ << ": ";
-    fgets(buffer, 255, stdin);
     if (feof(stdin))   break;
-    C.Parse(buffer);
+    C.Parse();
   }
 }
 
