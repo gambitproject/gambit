@@ -507,7 +507,6 @@ TEMPLATE class ZSumG<double>;
 TEMPLATE class ZSumG<gRational>;
 
 // Efg Csum
-#include "efgcsum.h"
 template <class T> class EfgCSumBySubgameG:
 													public CSSeqFormBySubgame<T>,public BaseBySubgameG<T>
 {
