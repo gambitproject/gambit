@@ -121,17 +121,17 @@ int main()
 */
 
   // Set up the rectangle of search
-  gVector<gRational> bottoms(4); 
-  gVector<gRational> tops(4); 
+  gVector<gDouble> bottoms(4); 
+  gVector<gDouble> tops(4); 
   for (int i = 1; i <= 4; i++) {
-    bottoms[i] = (gRational)-4; tops[i] = (gRational)4;
+    bottoms[i] = (gDouble)-4.0; tops[i] = (gDouble)4.0;
   }
   //  bottoms[1] = (gRational)2; tops[1] = (gRational)3;
   //  bottoms[2] = (gRational)1; tops[2] = (gRational)2;
   //  bottoms[3] = (gRational)-4; tops[3] = (gRational)-3;
   //  bottoms[4] = (gRational)-1; tops[4] = (gRational)0;
 
-  gRectangle<gRational> Cube(bottoms, tops); 
+  gRectangle<gDouble> Cube(bottoms, tops); 
 
   // First System
   gPolyList<gRational> test_bss1(&Space,&ReverseDegLex);
@@ -198,6 +198,8 @@ int main()
   timer.Stop();
   gout << "The EquiSolv computation of roots Using FindRoots took " 
     << (int)timer.Elapsed() << " seconds.\n\n";
+
+exit(0);
 
   // Second System
 
