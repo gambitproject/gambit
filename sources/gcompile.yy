@@ -62,7 +62,7 @@ gStack<gText> GCL_InputFileNames(4);
   gclExpression *exprtree; \
   gTriState bval; \
   double dval; \
-  int ival; \
+  gInteger ival; \
   \
   virtual ~GCLCompiler()  { } \
   char nextchar(void); \
@@ -586,7 +586,7 @@ int GCLCompiler::yylex(void)
     }
     else  {
       ungetchar(c);
-      ival = atoi((char *) s);
+      ival = atoI((char *) s);
       return INTEGER;
     }
   }
