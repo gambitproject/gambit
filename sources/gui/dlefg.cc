@@ -551,6 +551,7 @@ dialogEfgPayoffs::dialogEfgPayoffs(const FullEfg &p_efg,
   }
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(m_outcomeName, 0, wxALL, 5);
   topSizer->Add(m_grid, 0, wxALL, 5);
   topSizer->Add(m_buttonSizer, 0, wxALL, 5);
 
