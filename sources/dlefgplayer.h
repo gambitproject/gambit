@@ -13,12 +13,7 @@ private:
   bool m_chance;
   wxListBox *m_playerNameList;
 
-  static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((dialogEfgSelectPlayer *) p_object.GetClientData())->OnOk(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((dialogEfgSelectPlayer *) p_object.GetClientData())->OnCancel(); }
-  static void CallbackHelp(wxButton &, wxEvent &)
-    { wxHelpContents(EFG_TREE_HELP); }
+  const char *HelpString(void) const { return "Infoset Menu"; }
 
 public:
   dialogEfgSelectPlayer(const Efg &, bool p_chance = true, wxWindow * = 0);

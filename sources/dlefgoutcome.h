@@ -1,32 +1,23 @@
 //
 // FILE: dlefgoutcome.h -- Outcome selection dialog
 //
-//
+// $Id$
 //
 
 #ifndef DLEFGOUTCOME_H
 #define DLEFGOUTCOME_H
 
-class dialogEfgOutcomeSelect : public wxDialogBox {
+class dialogEfgOutcomeSelect : public guiAutoDialog {
 private:
   Efg &m_efg;
-  int m_outcomeSelected, m_completed;
   wxListBox *m_outcomeList;
 
-  static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((dialogEfgOutcomeSelect *) p_object.GetClientData())->OnOK(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((dialogEfgOutcomeSelect *) p_object.GetClientData())->OnCancel(); }
-
-  void OnOK(void);
-  void OnCancel(void);
-  Bool OnClose(void);
+  const char *HelpString(void) const { return "Outcome Menu"; }
 
 public:
   dialogEfgOutcomeSelect(Efg &, wxWindow * = 0);
   virtual ~dialogEfgOutcomeSelect() { }
 
-  int Completed(void) const { return m_completed; }
   EFOutcome *GetOutcome(void); 
 };
 
