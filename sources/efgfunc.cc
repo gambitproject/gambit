@@ -1352,19 +1352,18 @@ Portion *GSM_List_BehavFloat(Portion **param)
 
   BehavProfile<double> *P = 
     (BehavProfile<double>*) ((BehavPortion*) param[0])->Value();
-  Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0]->Owner())->Value();
+
   por = new ListValPortion();
 
-  
-  for( i = 1; i <= E.NumPlayers(); i++ )
+  for( i = 1; i <= P->DPLengths().Length(); i++ )
   {
     p1 = new ListValPortion();
 
-    for( j = 1; j <= E.PlayerList()[i]->NumInfosets(); j++ )
+    for( j = 1; j <= P->DPLengths()[i]; j++ )
     {
       p2 = new ListValPortion();
 
-      for( k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++ )
+      for( k = 1; k <= P->Lengths()[j]; k++ )
       {
 	p3 = new FloatValPortion( (*P)( i, j, k ) );
 	((ListPortion*) p2)->Append( p3 );
@@ -1391,22 +1390,20 @@ Portion *GSM_List_BehavRational(Portion **param)
 
   BehavProfile<gRational> *P = 
     (BehavProfile<gRational>*) ((BehavPortion*) param[0])->Value();
-  Efg<gRational> &E = 
-    * (Efg<gRational>*) ((EfgPortion*) param[0]->Owner())->Value();
+
   por = new ListValPortion();
 
-  
-  for( i = 1; i <= E.NumPlayers(); i++ )
+  for( i = 1; i <= P->DPLengths().Length(); i++ )
   {
     p1 = new ListValPortion();
 
-    for( j = 1; j <= E.PlayerList()[i]->NumInfosets(); j++ )
+    for( j = 1; j <= P->DPLengths()[i]; j++ )
     {
       p2 = new ListValPortion();
 
-      for( k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++ )
+      for( k = 1; k <= P->Lengths()[j]; k++ )
       {
-	p3 = new RationalValPortion( (*P)( i, j, k ) );
+	p3 = new FloatValPortion( (*P)( i, j, k ) );
 	((ListPortion*) p2)->Append( p3 );
       }
       ((ListPortion*) p1)->Append( p2 );

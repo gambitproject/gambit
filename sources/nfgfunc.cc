@@ -1261,14 +1261,14 @@ Portion *GSM_List_MixedFloat(Portion **param)
 
   MixedProfile<double> *P = 
     (MixedProfile<double>*) ((MixedPortion*) param[0])->Value();
-  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0]->Owner())->Value();
+
   por = new ListValPortion();
 
-  for( i = 1; i <= N.NumPlayers(); i++ )
+  for( i = 1; i <= P->Lengths().Length(); i++ )
   {
     p1 = new ListValPortion();
 
-    for( j = 1; j <= N.NumStrats( i ); j++ )
+    for( j = 1; j <= P->Lengths()[i]; j++ )
     {
       p2 = new FloatValPortion( (*P)( i, j ) );
       ((ListValPortion*) p1)->Append( p2 );
@@ -1276,6 +1276,7 @@ Portion *GSM_List_MixedFloat(Portion **param)
 
     ((ListValPortion*) por)->Append( p1 );
   }
+
   return por;
 }
 
@@ -1290,15 +1291,14 @@ Portion *GSM_List_MixedRational(Portion **param)
 
   MixedProfile<gRational> *P = 
     (MixedProfile<gRational>*) ((MixedPortion*) param[0])->Value();
-  Nfg<gRational> &N = 
-    * (Nfg<gRational>*) ((NfgPortion*) param[0]->Owner())->Value();
+
   por = new ListValPortion();
 
-  for( i = 1; i <= N.NumPlayers(); i++ )
+  for( i = 1; i <= P->Lengths().Length(); i++ )
   {
     p1 = new ListValPortion();
 
-    for( j = 1; j <= N.NumStrats( i ); j++ )
+    for( j = 1; j <= P->Lengths()[i]; j++ )
     {
       p2 = new RationalValPortion( (*P)( i, j ) );
       ((ListValPortion*) p1)->Append( p2 );
@@ -1306,6 +1306,7 @@ Portion *GSM_List_MixedRational(Portion **param)
 
     ((ListValPortion*) por)->Append( p1 );
   }
+
   return por;
 }
 
