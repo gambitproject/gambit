@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.h  --  Declaration of gPoly data type
 // 
-// @(#)gpoly.h	1.8 03 Jun 1997
+// $Id$
 //
 
 #ifndef GPOLY_H
@@ -187,7 +187,9 @@ public:
   // Conversion:
   //-------------
 
+#ifdef GDOUBLE
 template <class T>  gPoly<gDouble>         TogDouble(const gPoly<T>&);
+#endif   // GDOUBLE
 
 #ifndef MINI_POLY
 // global multiply by scalar operators

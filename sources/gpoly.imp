@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.imp  -- Implementation of gPoly data type
 //
-// @(#)gpoly.imp	1.10 03 Jun 1997
+// $Id$
 //
 
 #include "gpoly.h"
@@ -773,6 +773,7 @@ template <class T> gString &operator<<(gString &t, const gPoly<T> &p)
 //           Conversion
 //----------------------------------
 
+#ifdef GDOUBLE
 template<class T>  
 gPoly<gDouble>  TogDouble(const gPoly<T>& given) 
 {
@@ -789,6 +790,7 @@ gPoly<gDouble>  TogDouble(const gPoly<T>& given)
   
   return answer;
 }
+#endif   // GDOUBLE
 
 template <class T> gOutput &operator<<(gOutput &f, const gPoly<T> &p)
 {
