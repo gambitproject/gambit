@@ -412,22 +412,6 @@ int dialogEnumMixed::StopAfter(void) const
     return m_stopAfter->GetInteger(); 
 }
 
-wxEnumStatus::wxEnumStatus(wxFrame *p_parent)
-  : wxStatus(p_parent, "EnumMixedSolve"), pass(0)
-{ }
-
-void wxEnumStatus::SetProgress(double p_value)
-{
-  if (p_value > -.5)  {
-    m_value = (int) ((p_value + pass) / 3.0 * 100.0);
-    Update(m_value);
-  }
-  else {
-    pass++;
-  }
-  wxYield();
-}
-
 //=======================================================================
 //                        dialogLp: Member functions
 //=======================================================================
@@ -643,29 +627,6 @@ int dialogPolEnum::StopAfter(void) const
     return 0;
   else
     return m_stopAfter->GetInteger(); 
-}
-
-wxPolEnumStatus::wxPolEnumStatus(wxFrame *p_parent)
-  : wxStatus(p_parent, "PolEnumSolve"), pass(0)
-{ }
-
-void wxPolEnumStatus::SetProgress(double p_value)
-{
-  if (p_value > -.5)  {
-    if (pass == 0)  {
-      // allocate a quarter of the time to enumerating supports
-      m_value = (int) (p_value/4.0  * 100.0);
-    }
-    else {
-      // and the rest to computing the solutions
-      m_value = (int) ((3.0*p_value + pass) / 4.0 * 100.0);
-    }
-    Update(m_value);
-  }
-  else {
-    pass++;
-  }
-  wxYield();
 }
 
 //=======================================================================

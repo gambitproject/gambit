@@ -9,7 +9,9 @@
 
 wxStatus::wxStatus(wxWindow *p_parent, const gText &p_caption)
   : wxProgressDialog((char *) p_caption, "", 100, p_parent,
-		     wxPD_AUTO_HIDE | wxPD_CAN_ABORT | wxPD_APP_MODAL),
+		     wxPD_AUTO_HIDE | wxPD_CAN_ABORT | wxPD_APP_MODAL |
+		     wxPD_ELAPSED_TIME | wxPD_ESTIMATED_TIME |
+		     wxPD_REMAINING_TIME),
     m_width(0), m_prec(6), m_represent('f'), m_sig(false), m_value(0)
 { }
 
@@ -46,7 +48,10 @@ gOutput &wxStatus::operator<<(float x)
 { return *this; }
 
 gOutput &wxStatus::operator<<(const char *x)
-{ return *this; }
+{
+  Update(m_value, x);
+  return *this; 
+}
 
 gOutput &wxStatus::operator<<(const void *x)
 { return *this; }

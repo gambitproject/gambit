@@ -712,9 +712,10 @@ guiefgEnumMixedNfg::guiefgEnumMixedNfg(EfgShow *p_parent,
   m_markSubgames = false;
 }
 
-gList<BehavSolution> guiefgEnumMixedNfg::Solve(const EFSupport &p_support) const
+gList<BehavSolution>
+guiefgEnumMixedNfg::Solve(const EFSupport &p_support) const
 {
-  wxEnumStatus status(m_parent);
+  wxStatus status(m_parent, "EnumMixedSolve Progress");
   EnumParams params;
   params.stopAfter = m_stopAfter;
   params.precision = m_precision;
@@ -1046,7 +1047,7 @@ guiefgPolEnumNfg::guiefgPolEnumNfg(EfgShow *p_parent)
 
 gList<BehavSolution> guiefgPolEnumNfg::Solve(const EFSupport &p_support) const
 {
-  wxPolEnumStatus status(m_parent);
+  wxStatus status(m_parent, "PolEnumSolve Progress");
   status.SetProgress(0.0);
   PolEnumParams params;
   params.stopAfter = m_stopAfter;
@@ -1126,7 +1127,7 @@ guiefgPolEnumEfg::guiefgPolEnumEfg(EfgShow *p_parent, int p_stopAfter)
 
 gList<BehavSolution> guiefgPolEnumEfg::Solve(const EFSupport &p_support) const
 {
-  wxPolEnumStatus status(m_parent);
+  wxStatus status(m_parent, "PolEnumSolve Progress");
   status.SetProgress(0.0);
   EfgPolEnumParams params;
   params.stopAfter = m_stopAfter;

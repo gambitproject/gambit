@@ -24,17 +24,6 @@ public:
     { return (m_precision->GetSelection() == 0) ? precDOUBLE : precRATIONAL; }
 };
 
-#include "wxstatus.h"
-
-class wxEnumStatus : public wxStatus {
-private:
-  int pass;
-
-public:
-  wxEnumStatus(wxFrame *p_parent);
-  void SetProgress(double p_value);
-};
-
 #endif  // DLENUMMIXED_H
 
 

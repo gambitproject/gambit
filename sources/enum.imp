@@ -208,32 +208,34 @@ template <class T> int EnumModule<T>::Enum(gStatus &p_status)
 
   // enumerate vertices of A1 x + b1 <= 0 and A2 x + b2 <= 0
 
-  p_status.SetProgress((double)0);
+  p_status.SetProgress(0.0);
+  p_status << "Step 1 of 3: Enumerating vertices for player 1";
 
   time = watch.Elapsed();
-  double dt = (double)0;
+  double dt = 0.0;
   if(params.trace>=2) 
     (*params.tracefile) << "\nat start,    dt = " << dt << " time = " << time; 
   
-
   VertEnum<T> poly1(A1,b1,p_status);
-  p_status.SetProgress(-(double)(1));
+
+  p_status.SetProgress(0.0);
+  p_status << "Step 2 of 3: Enumerating vertices for player 2";
 
   dt = watch.Elapsed()-time;
   time = watch.Elapsed();
+
   if(params.trace>=2) 
     (*params.tracefile) << "\nafter poly1, dt = " << dt << " time = " << time; 
-  
 
   VertEnum<T> poly2(A2,b2,p_status);
-  p_status.SetProgress(-(double)1);
 
+  p_status.SetProgress(0.0);
+  p_status << "Step 3 of 3: Searching for equilibria";
   
   dt = watch.Elapsed()-time;
   time = watch.Elapsed();
   if(params.trace>=2) 
     (*params.tracefile) << "\nafter poly2, dt = " << dt << " time = " << time; 
-  
 
   const gList<BFS<T> > &verts1(poly1.VertexList());
   const gList<BFS<T> > &verts2(poly2.VertexList());

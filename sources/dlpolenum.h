@@ -23,16 +23,5 @@ public:
   int StopAfter(void) const;
 };
 
-#include "wxstatus.h"
-
-class wxPolEnumStatus : public wxStatus {
-private:
-  int pass;
-
-public:
-  wxPolEnumStatus(wxFrame *p_parent);
-  void SetProgress(double p_value);
-};
-
 #endif  // DLPOLENUM_H
 

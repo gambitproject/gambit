@@ -163,7 +163,7 @@ guinfgEnumMixed::guinfgEnumMixed(NfgShow *p_parent,
 
 gList<MixedSolution> guinfgEnumMixed::Solve(const NFSupport &p_support)
 {
-  wxEnumStatus status(m_parent);
+  wxStatus status(m_parent, "EnumMixedSolve Progress");
 
   EnumParams params;
   params.stopAfter = m_stopAfter;
@@ -491,7 +491,7 @@ guinfgPolEnum::guinfgPolEnum(NfgShow *p_parent,
 
 gList<MixedSolution> guinfgPolEnum::Solve(const NFSupport &p_support)
 {
-  wxPolEnumStatus status(m_parent);
+  wxStatus status(m_parent, "PolEnumSolve Progress");
   PolEnumParams params;
   params.stopAfter = m_stopAfter;
   params.trace = m_traceLevel;

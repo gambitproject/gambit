@@ -126,9 +126,11 @@ int AllEFNashSolve(const EFSupport &S, const EfgPolEnumParams &params,
 		   long &nevals, double &time,
 		   gList<const EFSupport> &singular_supports)
 {
-  p_status.SetProgress((double)0);
+  p_status.SetProgress(0.0);
+  p_status << "Step 1 of 2: Enumerating supports";
   AllEFNashSolveModule module(S, params, p_status);
-  p_status.SetProgress(-(double)(1)); // trigger second pass
+  p_status.SetProgress(0.0); 
+  p_status << "Step 2 of 2: Computing equilibria";
   module.NashEnum(p_status);
   nevals = module.NumEvals();
   time = module.Time();
