@@ -615,11 +615,10 @@ List_Portion::List_Portion( void )
 List_Portion::List_Portion( const gBlock<Portion*>& value )
 {
   int i;
-  int length;
   int type_match;
   int result;
 
-  for( i = 1, length = value.Length(); i <= length; i++ )
+  for( i = 1; i <= value.Length(); i++ )
   {
     result = Insert( value[ i ]->Copy(), i );
     assert( result != 0 );
@@ -658,6 +657,46 @@ bool List_Portion::TypeCheck( Portion* item )
   {
     if( ( (List_Portion*) item )->_DataType == _DataType )
       result = true;
+  }
+  return result;
+}
+
+
+
+Portion* List_Portion::Operation( Portion* p, OperationMode mode )
+{
+  Portion*  result = 0;
+  int i;
+  int append_result;
+
+  if( p == 0 )      // unary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );      
+    }
+  }
+  else               // binary operations
+  {
+    gBlock<Portion*>& p_value = ( (List_Portion*) p )->_Value;
+    switch( mode )
+    {
+    case opADD:
+      for( i = 1; i <= p_value.Length(); i++ )
+      {
+	append_result = Append( p_value[ i ]->Copy() );
+	if( append_result == 0 )
+	{
+	  result = new Error_Portion( _ErrorMessage( 8 ) );
+	  break;
+	}
+      }
+      break;
+    default:
+      result = Portion::Operation( p, mode );
+    }
+    delete p;
   }
   return result;
 }
@@ -1211,6 +1250,10 @@ gString Portion::_ErrorMessage( const int error_num, const gString& str )
   case 7:
     result += "  Attempted to set an element of a List_Portion\n";
     result += "  to one with a conflicting Portion type\n";
+    break;
+  case 8:
+    result += "  Attempted to insert conflicting Portion\n";
+    result += "  types into a List_Portion.\n";
     break;
   }
   return result;

@@ -2159,6 +2159,99 @@ int main( void )
   machine->Output();
 
 
+#ifdef INTERACTIVE
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+#endif
+
+  machine->PushRef( "x1" );
+  machine->Push( (gInteger) 1 );
+  machine->Push( (gInteger) 2 );
+  machine->Push( (gInteger) 3 );
+  machine->PushList( 3 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x2" );
+  machine->Push( (double) 4 );
+  machine->Push( (double) 5 );
+  machine->Push( (double) 6 );
+  machine->PushList( 3 );
+  machine->Assign();
+  machine->Dump();
+
+
+  gout << "\n4 combinations of Add & Assign\n";
+
+
+  machine->PushRef( "x3" );
+  machine->PushRef( "x1" );
+  machine->PushRef( "x2" );
+  machine->Add();
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x1" );
+  machine->PushRef( "x2" );
+  machine->PushRef( "x3" );
+  machine->Dump();
+
+
+
+  machine->PushRef( "x3" );
+  machine->InitCallFunction( "Plus" );
+  machine->PushRef( "x1" );
+  machine->Bind();
+  machine->PushRef( "x2" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x1" );
+  machine->PushRef( "x2" );
+  machine->PushRef( "x3" );
+  machine->Dump();
+
+
+
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "x3" );
+  machine->Bind();
+  machine->PushRef( "x1" );
+  machine->PushRef( "x2" );
+  machine->Add();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "x1" );
+  machine->PushRef( "x2" );
+  machine->PushRef( "x3" );
+  machine->Dump();
+
+
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "x3" );
+  machine->Bind();
+  machine->InitCallFunction( "Plus" );
+  machine->PushRef( "x1" );
+  machine->Bind();
+  machine->PushRef( "x2" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "x1" );
+  machine->PushRef( "x2" );
+  machine->PushRef( "x3" );
+  machine->Dump();
+
+
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
 
@@ -2172,4 +2265,3 @@ int main( void )
 
   return 0;
 }
-

@@ -179,6 +179,7 @@ class List_Portion : public Portion
   Portion*          Copy      ( bool new_data ) const;
   PortionType       Type      ( void ) const;
   PortionType       DataType  ( void ) const;
+  Portion*          Operation ( Portion* p, OperationMode mode );
   void              Output    ( gOutput& s ) const;
 
   int      Append     ( Portion* item );

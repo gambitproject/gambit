@@ -417,16 +417,21 @@ bool GSM::_BinaryOperation( OperationMode mode )
     result = new Error_Portion;
   }
 
-  _Stack->Push( p1 );
 
   if( result == 0 )
+  {
+    _Stack->Push( p1 );
     return true;
+  }
   else
   {
     assert( result->Type() == porERROR );
     if( ( (Error_Portion*) result )->Value() != "" )
       result->Output( _StdErr );
     delete result;
+    delete p1;
+    p1 = new Error_Portion;
+    _Stack->Push( p1 );
     return false;
   }
 }

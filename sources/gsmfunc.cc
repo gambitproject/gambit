@@ -477,9 +477,16 @@ bool CallFuncObj::_TypeMatch( Portion* p, PortionType ExpectedType ) const
   {
     if( CalledType == porLIST )
     {
-      CalledType = ( (List_Portion*) p )->DataType();
-      ExpectedListType = ExpectedType & ~porLIST;
-      result = CalledType & ExpectedListType;
+      if( ExpectedType == porLIST )
+      {
+	result = true;
+      }
+      else
+      {
+	CalledType = ( (List_Portion*) p )->DataType();
+	ExpectedListType = ExpectedType & ~porLIST;
+	result = CalledType & ExpectedListType;
+      }
     }
   }
   else // normal type checking
@@ -774,7 +781,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
     }
   }
 
-  /* This section makes the actual fuunction call */
+  /* This section makes the actual function call */
   if( !_ErrorOccurred )
   {
     if( !_FuncInfo[ _FuncIndex ].UserDefined )
@@ -796,7 +803,6 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
     else if( result->Type() == porERROR )
     {
       result->Output( _StdErr );
-      _StdErr << "\n";
       delete result;
       result = 0;
       _ErrorOccurred = true;

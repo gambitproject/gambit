@@ -66,6 +66,32 @@ Portion* GSM_Add_gRational( Portion** param )
   return result;
 }
 
+Portion* GSM_Add_List( Portion** param )
+{
+  Portion* result = 0;
+  int i;
+  int append_result;
+
+  gBlock<Portion*>& p_value = ( (List_Portion*) param[ 1 ] )->Value();
+  result = new List_Portion( ( (List_Portion*) param[ 0 ] )->Value() );
+  for( i = 1; i <= p_value.Length(); i++ )
+  {
+    append_result = ( (List_Portion*) result )->Append( p_value[ i ]->Copy() );
+    if( append_result == 0 )
+    {
+      delete result;
+      result = new Error_Portion
+	( (gString)
+	 "GSM_Add Error:\n" +
+	 "  Attempted to insert conflicting Portion\n" +
+	 "  types into a List_Portion\n"
+	 );
+      break;
+    }
+  }
+  return result;
+}
+
 
 
 /*---------------------- GSM_Subtract ------------------------*/
@@ -157,7 +183,11 @@ Portion* GSM_Divide_double( Portion** param )
   }
   else
   {
-    result = new Error_Portion( "GSM_Divide Error: division by zero" );
+    result = new Error_Portion
+      ( (gString)
+       "GSM_Divide Error:\n" +
+       "  Division by zero\n" 
+       );
   }
   return result;
 }
@@ -175,7 +205,11 @@ Portion* GSM_Divide_gInteger( Portion** param )
   }
   else
   {
-    result = new Error_Portion( "GSM_Divide Error: division by zero" );
+    result = new Error_Portion
+      ( (gString)
+       "GSM_Divide Error:\n" +
+       "  Division by zero\n" 
+       );
   }
   return result;
 }
@@ -193,7 +227,11 @@ Portion* GSM_Divide_gRational( Portion** param )
   }
   else
   {
-    result = new Error_Portion( "GSM_Divide Error: division by zero" );
+    result = new Error_Portion
+      ( (gString)
+       "GSM_Divide Error:\n" +
+       "  Division by zero\n" 
+       );
   }
   return result;
 }
@@ -267,7 +305,11 @@ Portion* GSM_Modulus_gInteger( Portion** param )
   }
   else
   {
-    result = new Error_Portion( "GSM_Divide Error: division by zero" );
+    result = new Error_Portion
+      ( (gString)
+       "GSM_Modulus Error:\n" +
+       "  Division by zero\n" 
+       );
   }
   return result;
 }
@@ -701,6 +743,12 @@ void Init_gsmoper( GSM* gsm )
 			porRATIONAL, NO_DEFAULT_VALUE );
   FuncObj->SetParamInfo( GSM_Add_gRational, 1, "y", 
 			porRATIONAL, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_Add_List, 2 );
+  FuncObj->SetParamInfo( GSM_Add_List, 0, "x", 
+			porLIST, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_Add_List, 1, "y", 
+			porLIST, NO_DEFAULT_VALUE );
 
   gsm->AddFunction( FuncObj );
 
