@@ -116,8 +116,8 @@ NfgSolveStandardDialog::~NfgSolveStandardDialog()
 
 void NfgSolveStandardDialog::StandardSettings(void)
 {
-  int  stopAfter, dom_type;
-  bool use_elimdom, all;
+  int  stopAfter=1, dom_type = DOM_WEAK;
+  bool use_elimdom = TRUE, all=TRUE;
 
   // a separate case for each of the possible alg/num/game combinations
   // One Nash 2 person

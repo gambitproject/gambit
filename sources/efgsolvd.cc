@@ -133,8 +133,8 @@ EfgSolveStandardDialog::~EfgSolveStandardDialog()
 
 void EfgSolveStandardDialog::StandardSettings(void)
 {
-  int stopAfter,max_solns,dom_type;
-  bool use_elimdom,all;
+  int stopAfter=1,max_solns=1,dom_type=DOM_WEAK;
+  bool use_elimdom=true,all=true;
 
   Infoset *bad1,*bad2;
   bool perf=IsPerfectRecall(ef,bad1,bad2);
