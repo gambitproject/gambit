@@ -1,7 +1,7 @@
 //
 // FILE: gmatrix.imp -- Implementation of gMatrix method functions
 //
-// $Id$
+// @(#)gmatrix.imp	2.1 3/24/97
 //
 
 #include "gmatrix.h"
@@ -45,6 +45,26 @@ template <class T> gMatrix<T> &gMatrix<T>::operator=(const T &c)
       (*this)(i, j) = c;
   return *this;
 }
+
+
+
+
+template <class T> gMatrix<T> gMatrix<T>::operator-(void)
+{
+  gMatrix<T> tmp(minrow,maxrow,mincol,maxcol);
+  for(int i=minrow; i<=maxrow; i++)
+    for(int j=mincol; j<=maxcol; j++)
+      tmp(i,j)= -(*this)(i,j);
+  return tmp;
+}
+
+
+
+
+
+
+
+
 
 
 //-------------------------------------------------------------------------
