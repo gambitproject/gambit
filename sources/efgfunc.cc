@@ -847,6 +847,23 @@ static Portion *GSM_Players(Portion **param)
   return ArrayToList(E.Players());
 }
 
+//------------------------
+// PossibleNashSupports
+//------------------------
+
+#include "efgensup.h"
+
+static Portion *GSM_PossibleNashSupports(Portion **param)
+{
+  Efg &E = *((EfgPortion*) param[0])->Value();
+
+  gList<const EFSupport> list = 
+    PossibleNashSubsupports(EFSupport(E), gstatus);
+
+  Portion *por = ArrayToList(list);
+  return por;
+}
+
 //--------------
 // PriorAction
 //--------------
@@ -1241,6 +1258,7 @@ void Init_efgfunc(GSM *gsm)
       { "Support[efg->EFG] =: EFSUPPORT", GSM_Support },
       { "Basis[efg->EFG] =: EFBASIS", GSM_Basis },
       { "UnmarkSubgame[node->NODE] =: NODE", GSM_UnmarkSubgame },
+      { "PossibleNashSupports[efg->EFG] =: LIST(EFSUPPORT)", GSM_PossibleNashSupports },
       { 0, 0 }
     };
 
@@ -1249,6 +1267,7 @@ void Init_efgfunc(GSM *gsm)
     gsm->AddFunction(new gclFunction(ftable[i].sig, ftable[i].func,
 				     funcLISTABLE | funcGAMEMATCH));
 
+  // Adding ElimDom
   FuncObj = new gclFunction("ElimDom", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_ElimDom_Efg, porEFSUPPORT, 6));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porEFSUPPORT));
@@ -1265,6 +1284,7 @@ void Init_efgfunc(GSM *gsm)
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
+  // Adding NewEfg
   FuncObj = new gclFunction("NewEfg", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_NewEfg, porEFG, 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("players", PortionSpec(porTEXT,1),
