@@ -1659,7 +1659,18 @@ void EfgShow::OnToolsNormalReduced(wxCommandEvent &)
     return;
   }
 
-  Nfg *nfg = MakeReducedNfg(*m_currentSupport);
+  Nfg *nfg = 0;
+  try {
+    nfg = MakeReducedNfg(*m_currentSupport);
+  }
+  catch (...) {
+    wxMessageDialog msgDialog(this,
+			      "An internal exception occurred while converting",
+			      "Gambit exception", wxOK);
+    msgDialog.ShowModal();
+    return;
+  }
+
   if (nfg) {
     NfgShow *nfgShow = new NfgShow(*nfg, m_parent);
     nfgShow->SetFilename("");
@@ -1692,8 +1703,18 @@ void EfgShow::OnToolsNormalAgent(wxCommandEvent &)
       return;
     }
   }
-    
-  Nfg *N = MakeAfg(m_efg);
+
+  Nfg *N = 0;
+  try {
+    N = MakeAfg(m_efg);
+  }
+  catch (...) {
+    wxMessageDialog msgDialog(this,
+			      "An internal exception occurred while converting",
+			      "Gambit exception", wxOK);
+    msgDialog.ShowModal();
+    return;
+  }
   if (N) {
     (void) new NfgShow(*N, m_parent);
   }
