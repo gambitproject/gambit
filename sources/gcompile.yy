@@ -6,7 +6,7 @@
 //# Jan L. A. van de Snepscheut, who wrote a program after which
 //# this code is modeled.
 //#
-//# $Id$
+//# @(#)gcompile.yy	1.61 9/11/96
 //#
 
 #include <stdlib.h>
@@ -21,6 +21,25 @@
 #include "gsminstr.h"
 #include "gsmfunc.h"
 #include "portion.h"
+
+#include "gstack.imp"
+
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#pragma option -Jgd
+#define TEMPLATE
+#endif   // __GNUG__
+
+TEMPLATE class gStack<gString>;
+TEMPLATE class gStack<int>;
+TEMPLATE class gStack<char>;
+TEMPLATE class gStack<gInput *>;
+
+#include "glist.imp"
+
+TEMPLATE class gList<bool>;
+TEMPLATE class gNode<bool>;
 
 extern GSM* _gsm;  // defined at the end of gsm.cc
 
@@ -848,7 +867,7 @@ bool GCLCompiler::DeleteFunction(void)
   FuncDescObj *func = new FuncDescObj(funcname, 1);
   bool error = false;
 
-  PortionSpec funcspec;
+	PortionSpec funcspec;
 
   funcspec = TextToPortionSpec(functype);
   if (funcspec.Type != porERROR) {
@@ -878,7 +897,7 @@ bool GCLCompiler::DeleteFunction(void)
       else
 	func->SetParamInfo(0, i - 1, 
                           ParamInfoType(formals[i], spec,
-			                portions[i], BYVAL));
+											portions[i], BYVAL));
     }
     else   {
       error = true;
@@ -908,22 +927,4 @@ void GCLCompiler::Execute(void)
   gsm.Flush();
 }
 
-#include "gstack.imp"
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#pragma option -Jgd
-#define TEMPLATE
-#endif   // __GNUG__
-
-TEMPLATE class gStack<gString>;
-TEMPLATE class gStack<int>;
-TEMPLATE class gStack<char>;
-TEMPLATE class gStack<gInput *>;
-
-#include "glist.imp"
-
-TEMPLATE class gList<bool>;
-TEMPLATE class gNode<bool>;
 
