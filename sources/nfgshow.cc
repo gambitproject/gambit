@@ -10,6 +10,8 @@
 
 #include "wxstatus.h"
 #include "nfgshow.h"
+#include "nfgpanel.h"
+#include "nfgtable.h"
 #include "nfgsoln.h"
 #include "nfgconst.h"
 
@@ -33,198 +35,8 @@
 #include "dlelim.h"
 #include "dlsupportselect.h"
 
-class NfgPanel : public wxPanel {
-private:
-  NfgShow *m_parent;
-  wxChoice *m_rowChoice, *m_colChoice, **m_stratProfile;
-
-  // Event handlers
-  void OnStrategyChange(wxCommandEvent &);
-  void OnRowPlayerChange(wxCommandEvent &);
-  void OnColPlayerChange(wxCommandEvent &);
-  
-public:
-  NfgPanel(NfgShow *);
-  virtual ~NfgPanel() { }
-
-  void SetProfile(const gArray<int> &p_profile);
-  gArray<int> GetProfile(void) const;
-
-  void SetSupport(const NFSupport &);
-  void SetStrategy(int p_player, int p_strategy);
-
-  DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(NfgPanel, wxPanel)
-  EVT_CHOICE(idSTRATEGY_CHOICE, NfgPanel::OnStrategyChange)
-  EVT_CHOICE(idROWPLAYER_CHOICE, NfgPanel::OnRowPlayerChange)
-  EVT_CHOICE(idCOLPLAYER_CHOICE, NfgPanel::OnColPlayerChange)
-END_EVENT_TABLE()
-
-NfgPanel::NfgPanel(NfgShow *p_parent)
-  : wxPanel(p_parent, -1, wxPoint(0, 40), wxSize(300, 100)),
-	    m_parent(p_parent)
-{
-  SetAutoLayout(true);
-  m_rowChoice = new wxChoice(this, idROWPLAYER_CHOICE);
-  m_colChoice = new wxChoice(this, idCOLPLAYER_CHOICE);
-
-  for (int pl = 1; pl <= m_parent->Game().NumPlayers(); pl++) {
-    wxString playerName = (char *) (ToText(pl) + ": " +
-				    m_parent->Game().Players()[pl]->GetName());
-    m_rowChoice->Append(playerName);
-    m_colChoice->Append(playerName);
-  }
-
-  m_rowChoice->SetSelection(0);
-  m_colChoice->SetSelection(1);
-
-  wxStaticText *rowLabel = new wxStaticText(this, -1, "Row player");
-  wxStaticText *columnLabel = new wxStaticText(this, -1, "Column player");
-
-  rowLabel->SetConstraints(new wxLayoutConstraints);
-  rowLabel->GetConstraints()->centreY.SameAs(m_rowChoice, wxCentreY);
-  rowLabel->GetConstraints()->left.SameAs(this, wxLeft, 10);
-  rowLabel->GetConstraints()->width.SameAs(columnLabel, wxWidth);
-  rowLabel->GetConstraints()->height.AsIs();
-  
-  m_rowChoice->SetConstraints(new wxLayoutConstraints);
-  m_rowChoice->GetConstraints()->top.SameAs(this, wxTop, 10);
-  m_rowChoice->GetConstraints()->left.SameAs(rowLabel, wxRight, 10);
-  m_rowChoice->GetConstraints()->width.AsIs();
-  m_rowChoice->GetConstraints()->height.AsIs();
-
-  columnLabel->SetConstraints(new wxLayoutConstraints);
-  columnLabel->GetConstraints()->centreY.SameAs(m_colChoice, wxCentreY);
-  columnLabel->GetConstraints()->left.SameAs(this, wxLeft, 10);
-  columnLabel->GetConstraints()->width.AsIs();
-  columnLabel->GetConstraints()->height.AsIs();
-
-  m_colChoice->SetConstraints(new wxLayoutConstraints);
-  m_colChoice->GetConstraints()->top.SameAs(m_rowChoice, wxBottom);
-  m_colChoice->GetConstraints()->left.SameAs(columnLabel, wxRight, 10);
-  m_colChoice->GetConstraints()->width.AsIs();
-  m_colChoice->GetConstraints()->height.AsIs();
-
-  m_stratProfile = new wxChoice *[m_parent->Game().NumPlayers()];
-  for (int pl = 1; pl <= m_parent->Game().NumPlayers(); pl++) {
-    m_stratProfile[pl-1] = new wxChoice(this, idSTRATEGY_CHOICE);
-    
-    NFPlayer *player = m_parent->Game().Players()[pl];
-    for (int st = 1; st <= player->NumStrats(); st++) {
-      m_stratProfile[pl-1]->Append((char *) (ToText(st) + ": " +
-					     player->Strategies()[st]->Name()));
-    }
-    m_stratProfile[pl-1]->SetSelection(0);
-
-    wxStaticText *profileLabel = new wxStaticText(this, -1,
-						  (char *) ("Player " + ToText(pl)));
-
-    profileLabel->SetConstraints(new wxLayoutConstraints);
-    profileLabel->GetConstraints()->left.SameAs(this, wxLeft, 10);
-    profileLabel->GetConstraints()->centreY.SameAs(m_stratProfile[pl-1],
-						   wxCentreY);
-    profileLabel->GetConstraints()->width.SameAs(columnLabel, wxWidth);
-    profileLabel->GetConstraints()->height.AsIs();
-
-    m_stratProfile[pl-1]->SetConstraints(new wxLayoutConstraints);
-    m_stratProfile[pl-1]->GetConstraints()->left.SameAs(m_rowChoice, wxLeft);
-    if (pl > 1) {
-      m_stratProfile[pl-1]->GetConstraints()->top.SameAs(m_stratProfile[pl-2],
-							 wxBottom);
-    }
-    else {
-      m_stratProfile[pl-1]->GetConstraints()->top.SameAs(m_colChoice,
-							 wxBottom, 10);
-    }
-    m_stratProfile[pl-1]->GetConstraints()->width.AsIs();
-    m_stratProfile[pl-1]->GetConstraints()->height.AsIs();
-  }
-
-  Layout();
-  Show(true);
-}
-
-void NfgPanel::SetProfile(const gArray<int> &p_profile)
-{
-  for (int i = 1; i <= p_profile.Length(); i++) {
-    m_stratProfile[i-1]->SetSelection(p_profile[i] - 1);
-  }
-}
-
-gArray<int> NfgPanel::GetProfile(void) const
-{
-  gArray<int> profile(m_parent->Game().NumPlayers());
-  for (int i = 1; i <= profile.Length(); i++) {
-    profile[i] = m_stratProfile[i-1]->GetSelection() + 1;
-  }
-  return profile;
-}
-
-void NfgPanel::SetStrategy(int p_player, int p_strategy)
-{
-  m_stratProfile[p_player-1]->SetSelection(p_strategy-1);
-}
-
-void NfgPanel::OnStrategyChange(wxCommandEvent &)
-{
-  for (int pl = 1; pl <= m_parent->Game().NumPlayers(); pl++) {
-    m_parent->SetStrategy(pl, m_stratProfile[pl-1]->GetSelection() + 1);
-  }
-}
-
-void NfgPanel::OnRowPlayerChange(wxCommandEvent &)
-{
-  int oldRowPlayer = m_parent->GetRowPlayer();
-  int newRowPlayer = m_rowChoice->GetSelection() + 1;
-
-  if (newRowPlayer == oldRowPlayer) {
-    return;
-  }
-
-  if (newRowPlayer == m_colChoice->GetSelection() + 1) {
-    m_colChoice->SetSelection(oldRowPlayer - 1);
-    m_parent->SetPlayers(newRowPlayer, oldRowPlayer);
-  }
-  else {
-    m_parent->SetPlayers(newRowPlayer, m_colChoice->GetSelection() + 1);
-  }
-}
-
-void NfgPanel::OnColPlayerChange(wxCommandEvent &)
-{
-  int oldColPlayer = m_parent->GetColPlayer();
-  int newColPlayer = m_colChoice->GetSelection() + 1;
-
-  if (newColPlayer == oldColPlayer) {
-    return;
-  }
-
-  if (newColPlayer == m_rowChoice->GetSelection() + 1) {
-    m_rowChoice->SetSelection(oldColPlayer - 1);
-    m_parent->SetPlayers(oldColPlayer, newColPlayer);
-  }
-  else {
-    m_parent->SetPlayers(m_colChoice->GetSelection() + 1, newColPlayer);
-  }
-}
-
-void NfgPanel::SetSupport(const NFSupport &p_support)
-{
-  for (int pl = 1; pl <= m_parent->Game().NumPlayers(); pl++) {
-    m_stratProfile[pl-1]->Clear();
-    NFPlayer *player = m_parent->Game().Players()[pl];
-    for (int st = 1; st <= player->NumStrats(); st++) {
-      if (p_support.Find(player->Strategies()[st])) {
-	m_stratProfile[pl-1]->Append((char *) (ToText(st) + ": " +
-					       player->Strategies()[st]->Name()));
-      }
-    }
-    m_stratProfile[pl-1]->SetSelection(0);
-  }
-}
-
+const int idPANELWINDOW = 3001;
+const int idSOLUTIONWINDOW = 3002;
 
 //=====================================================================
 //                       class NfgToolbar
@@ -305,329 +117,6 @@ void NfgToolbar::OnMouseEnter(wxCommandEvent &p_event)
 }
 
 //======================================================================
-//                          class NfgTable
-//======================================================================
-
-class NfgTable : public wxGrid {
-private:
-  NfgShow *m_parent;
-
-  struct ns_features_struct {
-    int prob, dom, val; /* these are actually int, not bool 0 or 1 */
-    bool verbose;
-    ns_features_struct(void) :prob(0), dom(0), val(0), verbose(TRUE) { }
-    ns_features_struct(const ns_features_struct &s): prob(s.prob), dom(s.dom),
-      val(s.val), verbose(s.verbose) { }
-  } features;
-
-  // Event handlers
-  void OnLeftDoubleClick(wxMouseEvent &);
-
-  // Overriding wxGrid member functions
-  void OnSelectCell(int p_row, int p_col);
-
-public:
-  NfgTable(NfgShow *);
-  virtual ~NfgTable() { }
-
-  void SetProfile(const gArray<int> &profile);
-  void SetStrategy(int p_player, int p_strategy);
-
-  void SetPlayers(int p_rowPlayer, int p_colPlayer);
-
-  // Functions to create an extra row&col to display probs, dominators, values
-  void MakeProbDisp(void);
-  void RemoveProbDisp(void);
-  int  HaveProbs(void) const { return features.prob; }
-  void MakeDomDisp(void);
-  void RemoveDomDisp(void);
-  int  HaveDom(void) const { return features.dom; }
-  void MakeValDisp(void);
-  void RemoveValDisp(void);
-  int  HaveVal(void) const { return features.val; }
-  
-  int GetDecimals(void) const { return m_parent->GetDecimals(); }
-
-  void OnChangeValues(void);
-  virtual void OnChangeLabels(void);
-
-  DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(NfgTable, wxGrid)
-  EVT_LEFT_DCLICK(NfgTable::OnLeftDoubleClick)
-END_EVENT_TABLE()
-
-NfgTable::NfgTable(NfgShow *p_parent)
-  : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    m_parent(p_parent)
-{
-  CreateGrid(p_parent->CurrentSupport()->NumStrats(1),
-	     p_parent->CurrentSupport()->NumStrats(2));
-  SetGridCursor(0, 0);
-  SetEditable(false);
-  AdjustScrollbars();
-  Show(true);
-}
-
-void NfgTable::SetProfile(const gArray<int> &p_profile)
-{
-  SetGridCursor(p_profile[m_parent->GetRowPlayer()],
-		p_profile[m_parent->GetColPlayer()]);
-}
-
-void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
-{ 
-  const NFSupport &support = *m_parent->CurrentSupport();
-
-  if (support.NumStrats(p_rowPlayer) > GetRows()) {
-    InsertRows(0, support.NumStrats(p_rowPlayer) - GetRows() + features.dom);
-  }
-  else if (support.NumStrats(p_rowPlayer) < GetRows()) {
-    DeleteRows(0, GetRows() - support.NumStrats(p_rowPlayer) - features.dom);
-  }
-
-  if (support.NumStrats(p_colPlayer) > GetCols()) {
-    InsertCols(0, support.NumStrats(p_colPlayer) - GetCols() + features.dom);
-  }
-  else if (support.NumStrats(p_colPlayer) < GetCols()) {
-    DeleteCols(0, GetCols() - support.NumStrats(p_colPlayer) - features.dom);
-  }
-
-  AdjustScrollbars();
-  OnChangeValues();
-}
-
-void NfgTable::SetStrategy(int p_player, int p_strategy)
-{
-  if (p_player == m_parent->GetRowPlayer()) {
-    SetGridCursor(p_strategy - 1, GetCursorColumn());
-  }
-  else if (p_player == m_parent->GetColPlayer()) {
-    SetGridCursor(GetCursorRow(), p_strategy - 1);
-  }
-}
-
-void NfgTable::OnSelectCell(int p_row, int p_col)
-{
-  if (p_row < m_parent->CurrentSupport()->NumStrats(m_parent->GetRowPlayer()))
-    m_parent->SetStrategy(m_parent->GetRowPlayer(), p_row + 1);
-  if (p_col < m_parent->CurrentSupport()->NumStrats(m_parent->GetColPlayer()))
-    m_parent->SetStrategy(m_parent->GetColPlayer(), p_col + 1);
-}
-
-void NfgTable::OnChangeLabels(void)
-{
-  const NFSupport *support = m_parent->CurrentSupport();
-  gArray<int> profile = m_parent->GetProfile();
-  int rowPlayer = m_parent->GetRowPlayer();
-  int colPlayer = m_parent->GetColPlayer();
-
-  for (int i = 1; i <= support->NumStrats(colPlayer); i++) {
-    SetLabelValue(wxHORIZONTAL,
-		  (char *) support->Strategies(colPlayer)[i]->Name(),
-		  i - 1);
-  }
-  
-  for (int i = 1; i <= support->NumStrats(rowPlayer); i++) {
-    SetLabelValue(wxVERTICAL,
-		  (char *) support->Strategies(rowPlayer)[i]->Name(),
-		  i - 1);
-  }
-
-  if (features.dom) {
-    SetLabelValue(wxHORIZONTAL, "Domin",
-		  support->NumStrats(colPlayer) + features.prob);
-    SetLabelValue(wxVERTICAL, "Domin",
-		  support->NumStrats(rowPlayer) + features.prob);
-  }
-}
-
-void NfgTable::OnChangeValues(void)
-{
-  const Nfg &nfg = m_parent->Game();
-  const NFSupport &support = *m_parent->CurrentSupport();
-
-  NfgIter iterator(support);
-  iterator.Set(m_parent->GetProfile());
-
-  for (int i = 1; i <= support.NumStrats(m_parent->GetRowPlayer()); i++) {
-    for (int j = 1; j <= support.NumStrats(m_parent->GetColPlayer()); j++) {
-      iterator.Set(m_parent->GetRowPlayer(), i);
-      iterator.Set(m_parent->GetColPlayer(), j);
-      gText pay_str;
-      NFOutcome *outcome = iterator.GetOutcome();
-
-      if (m_parent->getNormalDrawSettings().OutcomeValues()) {
-	for (int k = 1; k <= nfg.NumPlayers(); k++) {
-	  pay_str += ToText(nfg.Payoff(outcome, k), GetDecimals());
-	  
-	  if (k != nfg.NumPlayers())
-	    pay_str += ',';
-	}
-      }
-      else {
-	if (outcome) {
-	  pay_str = outcome->GetName();
-
-	  if (pay_str == "")
-	    pay_str = "Outcome" + ToText(outcome->GetNumber());
-	}
-	else {
-	  pay_str = "Null";
-	}
-      }
-
-      SetCellValue((char *) pay_str, i - 1, j - 1);
-    }
-
-    if (HaveDom()) { 
-      int dom_pos = GetCols() - HaveVal();
-      Strategy *strategy = support.Strategies(m_parent->GetRowPlayer())[i];
-      if (support.IsDominated(strategy, true)) {
-	SetCellValue("S", i - 1, dom_pos - 1);
-      }
-      else if (support.IsDominated(strategy, false)) {
-	SetCellValue("W", i - 1, dom_pos - 1);
-      }
-      else {
-        SetCellValue("N", i - 1, dom_pos - 1);
-      }
-    }
-  }
-   
-  if (HaveDom()) {
-    for (int j = 1; j <= support.NumStrats(m_parent->GetColPlayer()); j++) {
-      int dom_pos = GetRows() - HaveVal();
-      Strategy *strategy = support.Strategies(m_parent->GetColPlayer())[j];
-      if (support.IsDominated(strategy, true)) { 
-	SetCellValue("S", dom_pos - 1, j - 1);
-      }
-      else if (support.IsDominated(strategy, false)) {
-	SetCellValue("W", dom_pos - 1, j - 1);
-      }
-      else {
-	SetCellValue("N", dom_pos - 1, j - 1);
-      }
-    }
-  }
-}
-
-
-
-//************ extra features for displaying dominance, probs, vals **********
-// these features each create an extra row and columns.  They always go in
-// order: 1. Prob, 2. Domin, 3. Value.  Make sure to update the labels if a
-// feature is turned on/off.  Note that if you turn on a feature that is
-// already on, no new rows/cols will be created, but the labels will be
-// updated.
-
-void NfgTable::MakeProbDisp(void)
-{
-  /*
-  int row = m_parent->CurrentSupport()->NumStrats(m_parent->GetRowPlayer()) + 1;
-  int col = m_parent->CurrentSupport()->NumStrats(m_parent->GetColPlayer()) + 1;
-
-  if (!features.prob) {
-    AppendRows();
-    //SetSelectableRow(row, FALSE);
-    AppendCols();
-v    //SetSelectableCol(col, FALSE);
-  }
-
-  // Note: this insures that Prob is always the FIRST extra after the
-  // regular data, and Domin is AFTER the prob.
-  SetLabelValue(wxVERTICAL, "Prob", row-1);
-  SetLabelValue(wxHORIZONTAL, "Prob", col-1);
-  features.prob = 1;
-  */
-}
-
-
-void NfgTable::RemoveProbDisp(void)
-{
-  /* 
- if (features.prob) {
-    int row = dimensionality[pl1] + 1;
-    int col = dimensionality[m_colPlayer] + 1;
-    DeleteRows(row);
-    DeleteCols(col);
-    features.prob = 0;
-  }
-  */
-}
-
-void NfgTable::MakeDomDisp(void)
-{
-  if (!features.dom) {
-    features.dom = 1;
-    SetEditable(true);
-    AppendRows();
-    AppendCols();
-    UpdateDimensions();
-    AdjustScrollbars();
-    SetEditable(false);
-    OnChangeValues();
-  }
-}
-
-
-void NfgTable::RemoveDomDisp(void)
-{
-  if (features.dom) {
-    features.dom = 0;
-    SetEditable(true);
-    DeleteRows();
-    DeleteCols();
-    UpdateDimensions();
-    AdjustScrollbars();
-    SetEditable(false);
-    OnChangeValues();
-  }
-}
-
-void NfgTable::MakeValDisp(void)
-{
-  /*
-  int row = dimensionality[pl1] + features.prob + features.dom + 1;
-  int col = dimensionality[m_colPlayer] + features.prob + features.dom + 1;
-
-  if (!features.val) {
-    InsertRows(row);
-    InsertCols(col);
-  }
-  
-  SetLabelValue(wxVERTICAL, "Value", row-1);
-  SetLabelValue(wxHORIZONTAL, "Value", col-1);
-  features.val = 1;
-  */
-}
-
-
-void NfgTable::RemoveValDisp(void)
-{
-  /*
-  if (features.val) {
-    int row = dimensionality[pl1] + features.prob + features.dom + 1;
-    int col = dimensionality[m_colPlayer] + features.prob + features.dom + 1;
-    DeleteRows(row);
-    DeleteCols(col);
-    features.val = 0;
-  }
-  */
-}
-
-void NfgTable::OnLeftDoubleClick(wxMouseEvent &p_event)
-{
-#ifdef UNUSED
-  int row, col;
-  if (CellHitTest(p_event.GetX(), p_event.GetY(), &row, &col)) {
-    m_parent->OutcomePayoffs(row+1, col+1); 
-  }
-#endif  // UNUSED
-}
-
-//======================================================================
 //                           class NfgShow
 //======================================================================
 
@@ -667,6 +156,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_PREFS_LOAD, NfgShow::OnPrefsLoad)
   EVT_SIZE(NfgShow::OnSize)
   EVT_CLOSE(NfgShow::OnCloseWindow)
+  EVT_SASH_DRAGGED_RANGE(idPANELWINDOW, idPANELWINDOW, NfgShow::OnSashDrag)
 END_EVENT_TABLE()
 
 //======================================================================
@@ -693,9 +183,20 @@ NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
   MakeMenus();
   CreateStatusBar(3);
   m_toolbar = new NfgToolbar(this);
-  m_panel = new NfgPanel(this);
+
+  m_panelSashWindow = new wxSashWindow(this, idPANELWINDOW,
+				       wxPoint(0, 40), wxSize(200, 200),
+				       wxNO_BORDER | wxSW_3D);
+  m_panelSashWindow->SetSashVisible(wxSASH_RIGHT, true);
+
+  m_panel = new NfgPanel(this, m_panelSashWindow);
+  m_panel->SetSize(200, 200);
+
   m_table = new NfgTable(this);
   m_solutionTable = 0;  // no solution inspect window yet.
+  m_solutionSashWindow = 0;
+
+  m_panelSashWindow->Show(true);
 
   // Create the accelerators
   //  ReadAccelerators(accelerators, "NfgAccelerators", wxGetApp().ResourceFile());
@@ -1832,21 +1333,22 @@ void NfgShow::UpdateMenus(void)
 
 void NfgShow::AdjustSizes(void)
 {
+  const int toolbarHeight = 40;
   int width, height;
   GetClientSize(&width, &height);
+  if (m_toolbar) {
+    m_toolbar->SetSize(0, 0, width, toolbarHeight);
+  }
   if (m_solutionTable && m_solutionTable->IsShown()) {
     int solnHeight = gmax(100, height / 3);
     m_solutionTable->SetSize(0, height - solnHeight, width, solnHeight);
     height -= solnHeight;
   }
   if (m_panel) {
-    m_panel->SetSize(0, 40, 200, height - 40);
+    m_panelSashWindow->SetSize(0, 40, 200, height - 40);
   }
   if (m_table) {
     m_table->SetSize(200, 40, width - 200, height - 40);
-  }
-  if (m_toolbar) {
-    m_toolbar->SetSize(0, 0, width, 40);
   }
 }
 
@@ -1854,6 +1356,37 @@ void NfgShow::AdjustSizes(void)
 void NfgShow::OnSize(wxSizeEvent &)
 {
   AdjustSizes();
+}
+
+void NfgShow::OnSashDrag(wxSashEvent &p_event)
+{
+  int clientWidth, clientHeight;
+  GetClientSize(&clientWidth, &clientHeight);
+
+  switch (p_event.GetId()) {
+  case idPANELWINDOW:
+    m_table->SetSize(p_event.GetDragRect().width,
+		     m_table->GetRect().y,
+		     clientWidth - p_event.GetDragRect().width,
+		     m_table->GetRect().height);
+    m_panelSashWindow->SetSize(m_panelSashWindow->GetRect().x,
+			       m_panelSashWindow->GetRect().y,
+			       p_event.GetDragRect().width,
+			       m_panelSashWindow->GetRect().height);
+    break;
+  case idSOLUTIONWINDOW:
+    m_table->SetSize(m_table->GetRect().x, m_table->GetRect().y,
+		     m_table->GetRect().width,
+		     clientHeight - p_event.GetDragRect().height - 40);
+    m_panelSashWindow->SetSize(m_panelSashWindow->GetRect().x,
+			       m_panelSashWindow->GetRect().y,
+			       m_panelSashWindow->GetRect().width,
+			       clientHeight - p_event.GetDragRect().height - 40);
+    m_solutionSashWindow->SetSize(0, clientHeight - p_event.GetDragRect().height,
+				  clientWidth, p_event.GetDragRect().width);
+    break;
+  }
+
 }
 
 #include "nfgaccl.h"

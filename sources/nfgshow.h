@@ -1,5 +1,5 @@
 //
-// FILE: nfgshow.h -- header declarations for classes used in Normal Form GUI
+// FILE: nfgshow.h -- Declaration of normal form display class
 //
 // $Id$
 //
@@ -8,6 +8,7 @@
 #define NFGSHOW_H
 
 #include "wx/wx.h"
+#include "wx/sashwin.h"
 #include "wxmisc.h"
 
 #include "nfgdraw.h"
@@ -44,6 +45,8 @@ private:
   NfgToolbar *m_toolbar;
   NfgTable *m_table;
   NfgSolnShow *m_solutionTable;
+
+  wxSashWindow *m_panelSashWindow, *m_solutionSashWindow;
 
   struct StartingPoints {
     MixedSolutionList profiles;
@@ -116,6 +119,7 @@ private:
   // Other event handlers
   void OnCloseWindow(wxCloseEvent &);
   void OnSize(wxSizeEvent &);
+  void OnSashDrag(wxSashEvent &);
 
 public:
   NfgShow(Nfg &N, EfgNfgInterface *efg = 0, wxFrame *pframe = 0);
