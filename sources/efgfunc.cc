@@ -11,14 +11,6 @@
 
 #include "extform.h"
 
-Portion *GSM_NewEfg(Portion **param)
-{
-  ExtForm<double> *E = new ExtForm<double>;
-  return new EfgValPortion<double>(*E);
-}
-
-
-
 extern GSM* _CurrentGSM;
 
 Portion* GSM_DefaultEfg( Portion** param )
@@ -110,6 +102,13 @@ Portion *ArrayToList(const gArray<gRational> &A)
   return ret;
 }
 
+Portion *ArrayToList(const gArray<Action *> &A)
+{
+  ListPortion *ret = new ListValPortion;
+  for (int i = 1; i <= A.Length(); i++)
+    ret->Append(new ActionValPortion(A[i]));
+  return ret;
+}
 
 Portion *ArrayToList(const gArray<Player *> &A)
 {
@@ -141,7 +140,31 @@ Portion *GSM_AppendNode(Portion **param)
   return new NodeValPortion(n->GetChild(1));
 }
 
-Portion *GSM_NewInfoset(Portion **param)
+Portion *GSM_NewEfg(Portion **param)
+{
+  bool rat = ((BoolPortion *) param[0])->Value();
+  
+  if (rat)   {
+    ExtForm<gRational> *E = new ExtForm<gRational>;
+    ListPortion *players = (ListPortion *) param[1];
+    for (int i = 1; i <= players->Length(); i++)
+      E->NewPlayer()->SetName(((TextPortion *) players->Subscript(i))->Value());
+    return new EfgValPortion<gRational>(*E);
+  }
+  else  {
+    ExtForm<double> *E = new ExtForm<double>;
+    ListPortion *players = (ListPortion *) param[1];
+    for (int i = 1; i <= players->Length(); i++)
+      E->NewPlayer()->SetName(((TextPortion *) players->Subscript(i))->Value());
+    return new EfgValPortion<double>(*E);
+  }
+}
+
+
+//
+// The version specifying just the number of actions
+//
+Portion *GSM_NewInfoset1(Portion **param)
 {
   Player *p = ((EfPlayerPortion *) param[0])->Value();
   int n = ((IntPortion *) param[1])->Value();
@@ -152,6 +175,25 @@ Portion *GSM_NewInfoset(Portion **param)
   return new InfosetValPortion(s);
 }
  
+//
+// The version specifying a list of names for actions
+//
+Portion *GSM_NewInfoset2(Portion **param)
+{
+  Player *p = ((EfPlayerPortion *) param[0])->Value();
+  ListPortion *actions = (ListPortion *) param[1];
+  gString name = ((TextPortion *) param[2])->Value();
+
+  gout << actions->Length() << '\n';
+
+  if (actions->Length() == 0)   return 0;
+  Infoset *s = p->BelongsTo()->CreateInfoset(p, actions->Length());
+  s->SetName(name);
+  for (int i = 1; i <= actions->Length(); i++)
+    s->SetActionName(i, ((TextPortion *) actions->Subscript(i))->Value());
+  return new InfosetValPortion(s);
+}
+
 Portion *GSM_NewPlayer(Portion **param)
 {
   BaseExtForm &E = ((BaseEfgPortion *) param[0])->Value();
@@ -162,9 +204,65 @@ Portion *GSM_NewPlayer(Portion **param)
   return new EfPlayerValPortion(p);
 }
 
+Portion *GSM_SetNameAction(Portion **param)
+{
+  Action *a = ((ActionPortion *) param[0])->Value();
+  gString name = ((TextPortion *) param[1])->Value();
+  a->SetName(name);
+  return param[0]->ValCopy();
+}
+
+Portion *GSM_SetNameEfg(Portion **param)
+{
+  BaseExtForm &E = ((BaseEfgPortion *) param[0])->Value();
+  gString name = ((TextPortion *) param[1])->Value();
+  E.SetTitle(name);
+  return param[0]->ValCopy();
+}
+
+Portion *GSM_SetNameInfoset(Portion **param)
+{
+  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  gString name = ((TextPortion *) param[1])->Value();
+  s->SetName(name);
+  return param[0]->ValCopy();
+}
+
+extern Portion *GSM_SetNameNfg(Portion **);
+
+Portion *GSM_SetNameNode(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  gString name = ((TextPortion *) param[1])->Value();
+  n->SetName(name);
+  return param[0]->ValCopy();
+}
+
+Portion *GSM_SetNameOutcome(Portion **param)
+{
+  Outcome *c = ((OutcomePortion *) param[0])->Value();
+  gString name = ((TextPortion *) param[1])->Value();
+  c->SetName(name);
+  return param[0]->ValCopy();
+}
+
+Portion *GSM_SetNamePlayer(Portion **param)
+{
+  Player *p = ((EfPlayerPortion *) param[0])->Value();
+  gString name = ((TextPortion *) param[0])->Value();
+  p->SetName(name);
+  return param[0]->ValCopy();
+}
+
 //
 // Implementation of extensive form query functions, in alpha order
 //
+
+Portion *GSM_Actions(Portion **param)
+{
+  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  return ArrayToList(s->GetActionList());
+}
 
 Portion *GSM_ChanceProbs(Portion **param)
 {
@@ -191,11 +289,23 @@ Portion *GSM_IsPredecessor(Portion **param)
   return new BoolValPortion(n1->BelongsTo()->IsPredecessor(n1, n2));
 }
 
+Portion *GSM_IsRoot(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  return new BoolValPortion(n->GetParent() == 0);
+}
+
 Portion *GSM_IsSuccessor(Portion **param)
 {
   Node *n1 = ((NodePortion *) param[0])->Value();
   Node *n2 = ((NodePortion *) param[1])->Value();
   return new BoolValPortion(n1->BelongsTo()->IsSuccessor(n1, n2));
+}
+
+Portion *GSM_NameAction(Portion **param)
+{
+  Action *a = ((ActionPortion *) param[0])->Value();
+  return new TextValPortion(a->GetName());
 }
 
 Portion *GSM_NameEfg(Portion **param)
@@ -209,6 +319,8 @@ Portion *GSM_NamePlayer(Portion **param)
   Player *p = ((EfPlayerPortion *) param[0])->Value();
   return new TextValPortion(p->GetName());
 }
+
+extern Portion *GSM_NameNfg(Portion **);
 
 Portion *GSM_NameNode(Portion **param)
 {
@@ -389,10 +501,6 @@ void Init_efgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
-  FuncObj = new FuncDescObj("NewEfg");
-  FuncObj->SetFuncInfo(GSM_NewEfg, 0);
-  gsm->AddFunction(FuncObj);
-
   FuncObj = new FuncDescObj("DefaultEfg");
   FuncObj->SetFuncInfo(GSM_DefaultEfg, 0);
   gsm->AddFunction(FuncObj);
@@ -423,12 +531,27 @@ void Init_efgfunc(GSM *gsm)
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("NewEfg");
+  FuncObj->SetFuncInfo(GSM_NewEfg, 2);
+  FuncObj->SetParamInfo(GSM_NewEfg, 0, "rational", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_NewEfg, 1, "players", porLIST | porTEXT,
+			new ListValPortion);
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("NewInfoset");
-  FuncObj->SetFuncInfo(GSM_NewInfoset, 3);
-  FuncObj->SetParamInfo(GSM_NewInfoset, 0, "player", porEF_PLAYER,
+  FuncObj->SetFuncInfo(GSM_NewInfoset1, 3);
+  FuncObj->SetParamInfo(GSM_NewInfoset1, 0, "player", porEF_PLAYER,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_NewInfoset, 1, "actions", porINTEGER);
-  FuncObj->SetParamInfo(GSM_NewInfoset, 2, "name", porTEXT,
+  FuncObj->SetParamInfo(GSM_NewInfoset1, 1, "actions", porINTEGER);
+  FuncObj->SetParamInfo(GSM_NewInfoset1, 2, "name", porTEXT,
+			new TextValPortion(""));
+
+  FuncObj->SetFuncInfo(GSM_NewInfoset2, 3);
+  FuncObj->SetParamInfo(GSM_NewInfoset2, 0, "player", porEF_PLAYER,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_NewInfoset2, 1, "actions", porLIST | porTEXT);
+  FuncObj->SetParamInfo(GSM_NewInfoset2, 2, "name", porTEXT,
 			new TextValPortion(""));
   gsm->AddFunction(FuncObj);
 
@@ -440,7 +563,50 @@ void Init_efgfunc(GSM *gsm)
 			new TextValPortion(""));
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("SetName");
+  FuncObj->SetFuncInfo(GSM_SetNameAction, 2);
+  FuncObj->SetParamInfo(GSM_SetNameAction, 0, "x", porACTION,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetNameAction, 1, "name", porTEXT);
+
+  FuncObj->SetFuncInfo(GSM_SetNameEfg, 2);
+  FuncObj->SetParamInfo(GSM_SetNameEfg, 0, "x", porEFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetNameEfg, 1, "name", porTEXT);
+
+  FuncObj->SetFuncInfo(GSM_SetNameInfoset, 2);
+  FuncObj->SetParamInfo(GSM_SetNameInfoset, 0, "x", porINFOSET,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetNameInfoset, 1, "name", porTEXT);
+
+  FuncObj->SetFuncInfo(GSM_SetNameNfg, 2);
+  FuncObj->SetParamInfo(GSM_SetNameNfg, 0, "x", porNFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetNameNfg, 1, "name", porTEXT);
+
+  FuncObj->SetFuncInfo(GSM_SetNameNode, 2);
+  FuncObj->SetParamInfo(GSM_SetNameNode, 0, "x", porNODE,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetNameNode, 1, "name", porTEXT);
+
+  FuncObj->SetFuncInfo(GSM_SetNameOutcome, 2);
+  FuncObj->SetParamInfo(GSM_SetNameOutcome, 0, "x", porOUTCOME,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetNameOutcome, 1, "name", porTEXT);
+
+  FuncObj->SetFuncInfo(GSM_SetNamePlayer, 2);
+  FuncObj->SetParamInfo(GSM_SetNamePlayer, 0, "x", porEF_PLAYER,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetNamePlayer, 1, "name", porTEXT);
+  gsm->AddFunction(FuncObj);
+
+
 //-----------------------------------------------------------
+
+  FuncObj = new FuncDescObj("Actions");
+  FuncObj->SetFuncInfo(GSM_Actions, 1);
+  FuncObj->SetParamInfo(GSM_Actions, 0, "infoset", porINFOSET);
+  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("ChanceProbs");
   FuncObj->SetFuncInfo(GSM_ChanceProbs, 1);
@@ -458,6 +624,11 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_IsPredecessor, 1, "of", porNODE);
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("IsRoot");
+  FuncObj->SetFuncInfo(GSM_IsRoot, 1);
+  FuncObj->SetParamInfo(GSM_IsRoot, 0, "node", porNODE);
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("IsSuccessor");
   FuncObj->SetFuncInfo(GSM_IsSuccessor, 2);
   FuncObj->SetParamInfo(GSM_IsSuccessor, 0, "node", porNODE);
@@ -465,12 +636,17 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Name");
+  FuncObj->SetFuncInfo(GSM_NameAction, 1);
+  FuncObj->SetParamInfo(GSM_NameAction, 0, "x", porACTION);
+
   FuncObj->SetFuncInfo(GSM_NameEfg, 1);
-  FuncObj->SetParamInfo(GSM_NameEfg, 0, "efg", porEFG, 
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, DEFAULT_EFG);
+  FuncObj->SetParamInfo(GSM_NameEfg, 0, "x", porEFG); 
 
   FuncObj->SetFuncInfo(GSM_NamePlayer, 1);
   FuncObj->SetParamInfo(GSM_NamePlayer, 0, "x", porEF_PLAYER);
+
+  FuncObj->SetFuncInfo(GSM_NameNfg, 1);
+  FuncObj->SetParamInfo(GSM_NameNfg, 0, "x", porNFG);
 
   FuncObj->SetFuncInfo(GSM_NameNode, 1);
   FuncObj->SetParamInfo(GSM_NameNode, 0, "x", porNODE);
