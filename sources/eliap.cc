@@ -10,8 +10,8 @@
 #include "gmatrix.h"
 
 EFLiapParams::EFLiapParams(gStatus &s)
-  : trace(0), maxits1(100), maxitsN(20), tol1(2.0e-10), tolN(1.0e-10),
-    tracefile(0), status(s)
+  : trace(0), nTries(10), stopAfter(1), maxits1(100), maxitsN(20),
+    tol1(2.0e-10), tolN(1.0e-10), tracefile(&gnull), status(s)
 { }
 
 
@@ -86,6 +86,30 @@ double EFLiapFunc::Value(const gVector<double> &v)
 }
 
 
+static void PickRandomProfile(BehavProfile<double> &p)
+{
+  double sum, tmp;
+
+  for (int pl = 1; pl <= p.BelongsTo()->NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= p.BelongsTo()->PlayerList()[pl]->NumInfosets();
+	 iset++)  {
+      sum = 0.0;
+      int act;
+    
+      for (act = 1; act < p.GetEFSupport().NumActions(pl, iset); act++)  {
+	do
+	  tmp = Uniform();
+	while (tmp + sum > 1.0);
+	p(pl, iset, act) = tmp;
+	sum += tmp;
+      }
+    
+      p(pl, iset, act) = 1.0 - sum;
+    }
+  }
+}
+
+
 extern bool Powell(gVector<double> &p,
 		   gMatrix<double> &xi,
 		   gFunction<double> &func,
@@ -99,7 +123,6 @@ bool Liap(const Efg<double> &E, EFLiapParams &params,
 	  gList<BehavSolution<double> > &solutions,
 	  long &nevals, long &niters)
 {
-  int i;
   EFLiapFunc F(E, start);
 
   BehavProfile<double> p(start);
@@ -111,12 +134,17 @@ bool Liap(const Efg<double> &E, EFLiapParams &params,
   int iter;
   bool found;
 
-  if (found = Powell(p, xi, F, value, iter,
-		     params.maxits1, params.tol1, params.maxitsN, params.tolN,
-		     (params.tracefile) ? *params.tracefile : gnull))
-  {
-    i = solutions.Append(BehavSolution<double>(p, id_LIAP));
-    solutions[i].SetLiap(value);
+  for (int i = 1; i <= params.nTries && solutions.Length() < params.stopAfter;
+       i++)   {
+    if (i > 1)  PickRandomProfile(p);
+
+    if (found = Powell(p, xi, F, value, iter,
+		       params.maxits1, params.tol1, params.maxitsN, params.tolN,
+		       *params.tracefile))  {
+      int index = solutions.Append(BehavSolution<double>(p, id_LIAP));
+      solutions[index].SetLiap(value);
+    }
+    
   }
 
   nevals = F.NumEvals();

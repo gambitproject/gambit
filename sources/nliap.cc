@@ -9,8 +9,8 @@
 #include "gfunc.h"
 
 NFLiapParams::NFLiapParams(gStatus &s)
-  : trace(0), maxits1(100), maxitsN(20), tol1(2.0e-10), tolN(1.0e-10),
-    tracefile(0), status(s)
+  : trace(0), nTries(10), stopAfter(1), maxits1(100), maxitsN(20),
+    tol1(2.0e-10), tolN(1.0e-10), tracefile(&gnull), status(s)
 { }
 
 
@@ -110,8 +110,6 @@ double NFLiapFunc::Value(const gVector<double> &v)
 
   ((gVector<double> &) _p).operator=(v);
   
-  _p.Dump(gerr);
-
   MixedProfile<double> tmp(_p);
   gPVector<double> payoff(_p);
 
@@ -148,9 +146,27 @@ double NFLiapFunc::Value(const gVector<double> &v)
     result += BIG2 * x * x;   // penalty for not summing to 1
   }
 
-  gerr << "   " << result << '\n';
-
   return result;
+}
+
+static void PickRandomProfile(MixedProfile<double> &p)
+{
+  double sum, tmp;
+
+  for (int pl = 1; pl <= p.BelongsTo()->NumPlayers(); pl++)  {
+    sum = 0.0;
+    int st;
+    
+    for (st = 1; st < p.GetNFSupport().NumStrats(pl); st++)  {
+      do
+	tmp = Uniform();
+      while (tmp + sum > 1.0);
+      p(pl, st) = tmp;
+      sum += tmp;
+    }
+    
+    p(pl, st) = 1.0 - sum;
+  }
 }
 
 extern bool DFP(gVector<double> &p,
@@ -171,26 +187,28 @@ bool Liap(const Nfg<double> &N, NFLiapParams &params,
   double value;
   int iter;
   bool found;
-  int index;
-  bool add;
 
-  if (found = DFP(p, F, value, iter, params.maxits1, params.tol1,
-		  params.maxitsN, params.tolN))
-  {
-    add = false;
-    if((params.status.Get() != 1) || 
-       (params.status.Get() == 1 && p.IsNash()))
-      add = true;
-    if(add)
-    {
-    index = solutions.Append(MixedSolution<double>(p, id_LIAP));
-    solutions[index].SetLiap(value);
-    if(params.status.Get() != 1)
-      solutions[index].SetIsNash(T_YES);
-    }   
+  solutions.Flush();
 
+  for (int i = 1; i <= params.nTries && solutions.Length() < params.stopAfter;
+       i++)   {
+    if (i > 1)   PickRandomProfile(p);
+
+    if (found = DFP(p, F, value, iter, params.maxits1, params.tol1,
+		    params.maxitsN, params.tolN))  {
+      bool add = false;
+      if ((!params.status.Get()) || 
+	  (params.status.Get() && p.IsNash()))
+	add = true;
+      if (add)  {
+	int index = solutions.Append(MixedSolution<double>(p, id_LIAP));
+	solutions[index].SetLiap(value);
+	if (!params.status.Get())
+	  solutions[index].SetIsNash(T_YES);
+      }   
+    }
   }
-  
+
   nevals = F.NumEvals();
   niters = 0L;
 

@@ -17,7 +17,7 @@
 
 class EFLiapParams  {
   public:
-    int trace, maxits1, maxitsN;
+    int trace, nTries, stopAfter, maxits1, maxitsN;
     double tol1, tolN;
     gOutput *tracefile;
     gStatus &status;

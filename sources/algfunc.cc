@@ -353,6 +353,9 @@ Portion *GSM_GobitEfg_EfgFloat(Portion **param)
   EP.maxits1 = ((IntPortion *) param[9])->Value();
   EP.tol1 = ((FloatPortion *) param[10])->Value();
 
+  EP.tracefile = &((OutputPortion *) param[14])->Value();
+  EP.trace = ((IntPortion *) param[15])->Value();
+
   gWatch watch;
   
   gList<BehavSolution<double> > solutions;
@@ -393,6 +396,9 @@ Portion *GSM_GobitEfg_BehavFloat(Portion **param)
   EP.maxits1 = ((IntPortion *) param[9])->Value();
   EP.tol1 = ((FloatPortion *) param[10])->Value();
   
+  EP.tracefile = &((OutputPortion *) param[14])->Value();
+  EP.trace = ((IntPortion *) param[15])->Value();
+
   gWatch watch;
 
   gList<BehavSolution<double> > solutions;
@@ -459,10 +465,11 @@ Portion *GSM_LiapEfg_EfgFloat(Portion **param)
     params.maxits1 = ((IntPortion *) param[6])->Value();
     params.tol1 = ((FloatPortion *) param[7])->Value();
 
-/*
-    LP.stopAfter = ((IntPortion *) param[2])->Value();
-    LP.nTries = ((IntPortion *) param[3])->Value();
-    */
+    params.stopAfter = ((IntPortion *) param[2])->Value();
+    params.nTries = ((IntPortion *) param[3])->Value();
+
+    params.tracefile = &((OutputPortion *) param[10])->Value();
+    params.trace = ((IntPortion *) param[11])->Value();
 
     NFLiapBySubgame LM(E, params, start);
     LM.Solve();
@@ -475,20 +482,16 @@ Portion *GSM_LiapEfg_EfgFloat(Portion **param)
   else  {
     EFLiapParams params;
 
-    if (((TextPortion *) param[10])->Value() != "")
-      params.tracefile = new gFileOutput(((TextPortion *) param[10])->Value());
-    else
-      params.tracefile = &gnull;
-
     params.maxitsN = ((IntPortion *) param[4])->Value();
     params.tolN = ((FloatPortion *) param[5])->Value();
     params.maxits1 = ((IntPortion *) param[6])->Value();
     params.tol1 = ((FloatPortion *) param[7])->Value();
 
-/*
-    LP.stopAfter = ((IntPortion *) param[2])->Value();
-    LP.nTries = ((IntPortion *) param[3])->Value();
-    */
+    params.stopAfter = ((IntPortion *) param[2])->Value();
+    params.nTries = ((IntPortion *) param[3])->Value();
+
+    params.tracefile = &((OutputPortion *) param[10])->Value();
+    params.trace = ((IntPortion *) param[11])->Value();
 
     EFLiapBySubgame LM(E, params, start);
 
@@ -498,9 +501,6 @@ Portion *GSM_LiapEfg_EfgFloat(Portion **param)
 
     ((FloatPortion *) param[8])->Value() = LM.Time();
     ((IntPortion *) param[9])->Value() = LM.NumEvals();
-
-    if (params.tracefile != &gnull)
-      delete params.tracefile;
   }
 
   Portion *por = new Behav_ListPortion<double>(solns);
@@ -514,32 +514,38 @@ Portion *GSM_LiapEfg_BehavFloat(Portion **param)
   BehavSolution<double> &start = 
     * (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
   Efg<double> &E = *( start.BelongsTo() );
+  
+  if (((BoolPortion *) param[1])->Value())   {
+    return new ErrorPortion("This function not implemented yet");
+  }
+  else  {
+    EFLiapParams LP;
 
-  EFLiapParams LP;
+    LP.stopAfter = ((IntPortion *) param[2])->Value();
+    LP.nTries = ((IntPortion *) param[3])->Value();
 
-/*
-  LP.stopAfter = ((IntPortion *) param[1])->Value();
-  LP.nTries = ((IntPortion *) param[2])->Value();
-  */
+    LP.maxitsN = ((IntPortion *) param[4])->Value();
+    LP.tolN = ((FloatPortion *) param[5])->Value();
+    LP.maxits1 = ((IntPortion *) param[6])->Value();
+    LP.tol1 = ((FloatPortion *) param[7])->Value();
+    
+    LP.tracefile = &((OutputPortion *) param[10])->Value();
+    LP.trace = ((IntPortion *) param[11])->Value();
 
-  LP.maxitsN = ((IntPortion *) param[3])->Value();
-  LP.tolN = ((FloatPortion *) param[4])->Value();
-  LP.maxits1 = ((IntPortion *) param[5])->Value();
-  LP.tol1 = ((FloatPortion *) param[6])->Value();
+    long niters;
+    gWatch watch;
+    gList<BehavSolution<double> > solutions;
+    Liap(E, LP, start, solutions,
+	 ((IntPortion *) param[8])->Value(),
+	 niters);
 
-  long niters;
-  gWatch watch;
-  gList<BehavSolution<double> > solutions;
-  Liap(E, LP, start, solutions,
-       ((IntPortion *) param[8])->Value(),
-       niters);
+    ((FloatPortion *) param[7])->Value() = watch.Elapsed();
 
-  ((FloatPortion *) param[7])->Value() = watch.Elapsed();
-
-  Portion *por = new Behav_ListPortion<double>(solutions);
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
-  return por;
+    Portion *por = new Behav_ListPortion<double>(solutions);
+    por->SetOwner(param[0]->Owner());
+    por->AddDependency();
+    return por;
+  }
 }
 
 
@@ -558,7 +564,10 @@ Portion *GSM_LcpSolveEfgFloat(Portion **param)
   if (((BoolPortion *) param[1])->Value())  {
     LemkeParams LP;
     LP.stopAfter = ((IntPortion *) param[2])->Value();
-
+/*
+    LP.tracefile = &((OutputPortion *) param[5])->Value();
+    LP.trace = ((IntPortion *) param[6])->Value();
+    */
     LemkeBySubgame<double> LM(E, LP);
 
     LM.Solve();
@@ -571,7 +580,10 @@ Portion *GSM_LcpSolveEfgFloat(Portion **param)
   else   {
     SeqFormParams SP;
     SP.stopAfter = ((IntPortion *) param[2])->Value();
-
+/*
+    SP.tracefile = &((OutputPortion *) param[5])->Value();
+    SP.trace = ((IntPortion *) param[6])->Value();
+    */
     SeqFormBySubgame<double> SM(E, SP);
     
     SM.Solve();
@@ -598,7 +610,10 @@ Portion *GSM_LcpSolveEfgRational(Portion **param)
   if (((BoolPortion *) param[1])->Value())  {
     LemkeParams LP;
     LP.stopAfter = ((IntPortion *) param[2])->Value();
-
+/*
+    LP.tracefile = &((OutputPortion *) param[5])->Value();
+    LP.trace = ((IntPortion *) param[6])->Value();
+    */
     LemkeBySubgame<gRational> LM(E, LP);
     
     LM.Solve();
@@ -611,7 +626,10 @@ Portion *GSM_LcpSolveEfgRational(Portion **param)
   else   {
     SeqFormParams SP;
     SP.stopAfter = ((IntPortion *) param[2])->Value();
-
+/*
+    SP.tracefile = &((OutputPortion *) param[5])->Value();
+    SP.trace = ((IntPortion *) param[6])->Value();
+    */
     SeqFormBySubgame<gRational> SM(E, SP);
     
     SM.Solve();
@@ -688,6 +706,9 @@ Portion *GSM_SimpdivEfgFloat(Portion **param)
   SP.nRestarts = ((IntPortion *) param[3])->Value();
   SP.leashLength = ((IntPortion *) param[4])->Value();
 
+  SP.tracefile = &((OutputPortion *) param[7])->Value();
+  SP.trace = ((IntPortion *) param[8])->Value();
+
   SimpdivBySubgame<double> SM(E, SP);
   SM.Solve();
 
@@ -713,6 +734,9 @@ Portion *GSM_SimpdivEfgRational(Portion **param)
   SP.stopAfter = ((IntPortion *) param[2])->Value();
   SP.nRestarts = ((IntPortion *) param[3])->Value();
   SP.leashLength = ((IntPortion *) param[4])->Value();
+
+  SP.tracefile = &((OutputPortion *) param[7])->Value();
+  SP.trace = ((IntPortion *) param[8])->Value();
 
   SimpdivBySubgame<gRational> SM(E, SP);
 
@@ -741,6 +765,9 @@ Portion *GSM_LpSolveEfgFloat(Portion **param)
 
   ZSumParams ZP;
 
+  ZP.tracefile = &((OutputPortion *) param[3])->Value();
+  ZP.trace = ((IntPortion *) param[4])->Value();
+
   ZSumBySubgame<double> ZM(E, ZP);
 
   ZM.Solve();
@@ -765,6 +792,9 @@ Portion *GSM_LpSolveEfgRational(Portion **param)
     return new ErrorPortion("Only valid for two-person zero-sum games");
 
   ZSumParams ZP;
+
+  ZP.tracefile = &((OutputPortion *) param[3])->Value();
+  ZP.trace = ((IntPortion *) param[4])->Value();
 
   ZSumBySubgame<gRational> ZM(E, ZP);
 
@@ -837,6 +867,9 @@ Portion *GSM_EnumMixedEfgFloat(Portion **param)
 
   EnumParams EP;
   EP.stopAfter = ((IntPortion *) param[2])->Value();
+
+  EP.tracefile = &((OutputPortion *) param[5])->Value();
+  EP.trace = ((IntPortion *) param[6])->Value();
   
   EnumBySubgame<double> EM(E, EP);
   
@@ -862,6 +895,9 @@ Portion *GSM_EnumMixedEfgRational(Portion **param)
   EnumParams EP;
   EP.stopAfter = ((IntPortion *) param[2])->Value();
   
+  EP.tracefile = &((OutputPortion *) param[5])->Value();
+  EP.trace = ((IntPortion *) param[6])->Value();
+
   EnumBySubgame<gRational> EM(E, EP);
   
   EM.Solve();
@@ -1081,7 +1117,7 @@ void Init_algfunc(GSM *gsm)
   FuncDescObj *FuncObj;
 
   FuncObj = new FuncDescObj("GobitSolve");
-  FuncObj->SetFuncInfo(GSM_GobitEfg_EfgFloat, 14);
+  FuncObj->SetFuncInfo(GSM_GobitEfg_EfgFloat, 16);
   FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 0, "efg", porEFG_FLOAT, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 1, "pxifile", porTEXT,
@@ -1110,8 +1146,12 @@ void Init_algfunc(GSM *gsm)
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 13, "nIters", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 14, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 15, "tracelevel", porINTEGER,
+			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_GobitEfg_BehavFloat, 14);
+  FuncObj->SetFuncInfo(GSM_GobitEfg_BehavFloat, 16);
   FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 0, "start", porBEHAV_FLOAT);
   FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 1, "pxifile", porTEXT,
 			new TextValPortion("") );
@@ -1139,9 +1179,12 @@ void Init_algfunc(GSM *gsm)
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 13, "nIters", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 14, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 15, "tracelevel", porINTEGER,
+			new IntValPortion(0));
 
-
-  FuncObj->SetFuncInfo(GSM_GobitNfg_NfgFloat, 14);
+  FuncObj->SetFuncInfo(GSM_GobitNfg_NfgFloat, 16);
   FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 0, "nfg", porNFG_FLOAT, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 1, "pxifile", porTEXT,
@@ -1170,8 +1213,12 @@ void Init_algfunc(GSM *gsm)
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 13, "nIters", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 14, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 15, "tracelevel", porINTEGER,
+			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_GobitNfg_MixedFloat, 14);
+  FuncObj->SetFuncInfo(GSM_GobitNfg_MixedFloat, 16);
   FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 0, "start", porMIXED_FLOAT);
   FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 1, "pxifile", porTEXT,
 			new TextValPortion("") );
@@ -1199,6 +1246,10 @@ void Init_algfunc(GSM *gsm)
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 13, "nIters", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 14, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 15, "tracelevel", porINTEGER,
+			new IntValPortion(0));
 
   gsm->AddFunction(FuncObj);
 
@@ -1237,7 +1288,7 @@ void Init_algfunc(GSM *gsm)
   //------------------------- LiapSolve ------------------------------//
 
   FuncObj = new FuncDescObj("LiapSolve");
-  FuncObj->SetFuncInfo(GSM_LiapEfg_EfgFloat, 11);
+  FuncObj->SetFuncInfo(GSM_LiapEfg_EfgFloat, 12);
   FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 0, "efg", porEFG_FLOAT, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 1, "asNfg", porBOOL,
@@ -1258,29 +1309,37 @@ void Init_algfunc(GSM *gsm)
 			new FloatValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 9, "nEvals", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 10, "tracefile", porTEXT,
-			new TextValPortion(""));
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 10, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 11, "tracelevel", porINTEGER,
+			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_LiapEfg_BehavFloat, 9);
+  FuncObj->SetFuncInfo(GSM_LiapEfg_BehavFloat, 12);
   FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 0, "start", porBEHAV_FLOAT );
-  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 1, "stopAfter", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 1, "asNfg", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 2, "stopAfter", porINTEGER,
 		        new IntValPortion(1));
-  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 2, "nTries", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 3, "nTries", porINTEGER,
 		        new IntValPortion(10));
-  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 3, "maxitsN", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 4, "maxitsN", porINTEGER,
 			new IntValPortion(20));
-  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 4, "tolN", porFLOAT,
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 5, "tolN", porFLOAT,
 			new FloatValPortion(1.0e-10));
-  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 5, "maxits1", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 6, "maxits1", porINTEGER,
 			new IntValPortion(100));
-  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 6, "tol1", porFLOAT,
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 7, "tol1", porFLOAT,
 			new FloatValPortion(2.0e-10));
-  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 7, "time", porFLOAT,
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 8, "time", porFLOAT,
 			new FloatValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 8, "nEvals", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 9, "nEvals", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 10, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 11, "tracelevel", porINTEGER,
+			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_LiapNfg_NfgFloat, 9);
+  FuncObj->SetFuncInfo(GSM_LiapNfg_NfgFloat, 11);
   FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 0, "nfg", porNFG_FLOAT, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 1, "stopAfter", porINTEGER,
@@ -1299,8 +1358,12 @@ void Init_algfunc(GSM *gsm)
 			new FloatValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 8, "nEvals", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 9, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 10, "tracelevel", porINTEGER,
+			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_LiapNfg_MixedFloat, 9);
+  FuncObj->SetFuncInfo(GSM_LiapNfg_MixedFloat, 11);
   FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 0, "start", porMIXED_FLOAT );
   FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 1, "stopAfter", porINTEGER,
 		        new IntValPortion(1));
@@ -1318,6 +1381,10 @@ void Init_algfunc(GSM *gsm)
 			new FloatValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 8, "nEvals", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 9, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 10, "tracelevel", porINTEGER,
+			new IntValPortion(0));
 
   gsm->AddFunction(FuncObj);
 
@@ -1325,7 +1392,7 @@ void Init_algfunc(GSM *gsm)
   //------------------------- LcpSolve -------------------------//
 
   FuncObj = new FuncDescObj("LcpSolve");
-  FuncObj->SetFuncInfo(GSM_LcpSolveEfgFloat, 5);
+  FuncObj->SetFuncInfo(GSM_LcpSolveEfgFloat, 7);
   FuncObj->SetParamInfo(GSM_LcpSolveEfgFloat, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LcpSolveEfgFloat, 1, "asNfg", porBOOL,
@@ -1336,8 +1403,12 @@ void Init_algfunc(GSM *gsm)
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LcpSolveEfgFloat, 4, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LcpSolveEfgFloat, 5, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_LcpSolveEfgFloat, 6, "tracelevel", porINTEGER,
+			new IntValPortion(0));
   
-  FuncObj->SetFuncInfo(GSM_LcpSolveEfgRational, 5);
+  FuncObj->SetFuncInfo(GSM_LcpSolveEfgRational, 7);
   FuncObj->SetParamInfo(GSM_LcpSolveEfgRational, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LcpSolveEfgRational, 1, "asNFG", porBOOL,
@@ -1348,6 +1419,10 @@ void Init_algfunc(GSM *gsm)
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LcpSolveEfgRational, 4, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LcpSolveEfgRational, 5, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_LcpSolveEfgRational, 6, "tracelevel", porINTEGER,
+			new IntValPortion(0));
 
 /*
   FuncObj->SetFuncInfo(GSM_LemkeEfgSupport, 4);
@@ -1361,7 +1436,7 @@ void Init_algfunc(GSM *gsm)
   */
 
 
-  FuncObj->SetFuncInfo(GSM_LemkeNfgFloat, 4);
+  FuncObj->SetFuncInfo(GSM_LemkeNfgFloat, 6);
   FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 0, "nfg",
 			porNFG_FLOAT, NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE );
@@ -1373,8 +1448,12 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 3, "time", 
 			porFLOAT, new FloatValPortion(0),
 			PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 4, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 5, "tracelevel", porINTEGER,
+			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_LemkeNfgRational, 4);
+  FuncObj->SetFuncInfo(GSM_LemkeNfgRational, 6);
   FuncObj->SetParamInfo(GSM_LemkeNfgRational, 0, "nfg",
 			porNFG_RATIONAL, NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE );
@@ -1386,8 +1465,12 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_LemkeNfgRational, 3, "time", 
 			porFLOAT, new FloatValPortion(0),
 			PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LemkeNfgRational, 4, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_LemkeNfgRational, 5, "tracelevel", porINTEGER,
+			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_LemkeNfgSupport, 4);
+  FuncObj->SetFuncInfo(GSM_LemkeNfgSupport, 6);
   FuncObj->SetParamInfo(GSM_LemkeNfgSupport, 0, "support", porNF_SUPPORT );
   FuncObj->SetParamInfo(GSM_LemkeNfgSupport, 1, "stopAfter", 
 			porINTEGER, new IntValPortion(0));
@@ -1397,12 +1480,16 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_LemkeNfgSupport, 3, "time", 
 			porFLOAT, new FloatValPortion(0),
 			PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LemkeNfgSupport, 4, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_LemkeNfgSupport, 5, "tracelevel", porINTEGER,
+			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
 
   //------------------------- SimpDivSolve -------------------------//
 
   FuncObj = new FuncDescObj("SimpDivSolve");
-  FuncObj->SetFuncInfo(GSM_SimpdivEfgFloat, 7);
+  FuncObj->SetFuncInfo(GSM_SimpdivEfgFloat, 9);
   FuncObj->SetParamInfo(GSM_SimpdivEfgFloat, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SimpdivEfgFloat, 1, "asNfg", porBOOL,
@@ -1417,8 +1504,12 @@ void Init_algfunc(GSM *gsm)
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SimpdivEfgFloat, 6, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SimpdivEfgFloat, 7, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_SimpdivEfgFloat, 8, "tracelevel", porINTEGER,
+			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_SimpdivEfgRational, 7);
+  FuncObj->SetFuncInfo(GSM_SimpdivEfgRational, 9);
   FuncObj->SetParamInfo(GSM_SimpdivEfgRational, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SimpdivEfgRational, 1, "asNfg", porBOOL,
@@ -1433,32 +1524,44 @@ void Init_algfunc(GSM *gsm)
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SimpdivEfgRational, 6, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SimpdivEfgRational, 7, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_SimpdivEfgRational, 8, "tracelevel", porINTEGER,
+			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
 
   //-------------------------- LpSolve ------------------------------//
 
   FuncObj = new FuncDescObj("LpSolve");
-  FuncObj->SetFuncInfo(GSM_LpSolveEfgFloat, 3);
+  FuncObj->SetFuncInfo(GSM_LpSolveEfgFloat, 5);
   FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 1, "nPivots", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 3, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 4, "tracelevel", porINTEGER,
+			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_LpSolveEfgRational, 3);
+  FuncObj->SetFuncInfo(GSM_LpSolveEfgRational, 5);
   FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 1, "nPivots", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 3, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 4, "tracelevel", porINTEGER,
+			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
 
   //-------------------------EnumMixedSolve-------------------------
 
   FuncObj = new FuncDescObj("EnumMixedSolve");
-  FuncObj->SetFuncInfo(GSM_EnumMixedEfgFloat, 5);
+  FuncObj->SetFuncInfo(GSM_EnumMixedEfgFloat, 7);
   FuncObj->SetParamInfo(GSM_EnumMixedEfgFloat, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetParamInfo(GSM_EnumMixedEfgFloat, 1, "asNfg", porBOOL,
@@ -1469,8 +1572,12 @@ void Init_algfunc(GSM *gsm)
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_EnumMixedEfgFloat, 4, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_EnumMixedEfgFloat, 5, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_EnumMixedEfgFloat, 6, "tracelevel", porINTEGER,
+			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_EnumMixedEfgRational, 5);
+  FuncObj->SetFuncInfo(GSM_EnumMixedEfgRational, 7);
   FuncObj->SetParamInfo(GSM_EnumMixedEfgRational, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetParamInfo(GSM_EnumMixedEfgRational, 1, "asNfg", porBOOL,
@@ -1481,6 +1588,10 @@ void Init_algfunc(GSM *gsm)
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_EnumMixedEfgRational, 4, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_EnumMixedEfgRational, 5, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_EnumMixedEfgRational, 6, "tracelevel", porINTEGER,
+			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
 
   //-------------------------- EnumPureSolve ------------------------//
@@ -1495,6 +1606,10 @@ void Init_algfunc(GSM *gsm)
 			new IntValPortion(0));
   FuncObj->SetParamInfo(GSM_EnumPureEfgFloat, 3, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_EnumPureEfgFloat, 4, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_EnumPureEfgFloat, 5, "tracelevel", porINTEGER,
+			new IntValPortion(0));
 
   FuncObj->SetFuncInfo(GSM_EnumPureEfgRational, 4);
   FuncObj->SetParamInfo(GSM_EnumPureEfgRational, 0, "efg", porEFG_RATIONAL,
@@ -1505,6 +1620,10 @@ void Init_algfunc(GSM *gsm)
 			new IntValPortion(0));
   FuncObj->SetParamInfo(GSM_EnumPureEfgRational, 3, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_EnumPureEfgRational, 4, "tracefile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_EnumPureEfgRational, 5, "tracelevel", porINTEGER,
+			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
 
 
