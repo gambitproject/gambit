@@ -6452,10 +6452,9 @@ exposed data consists of all characters until the next whitespace.
 \item\lex{ReadText}
 \protect \large \begin{verbatim}
 ReadText[input<->INPUT, {x<->}, until->TEXT] =: INPUT
-ReadText[input<->INPUT, {x<->}, n->NUMBER] =: INPUT
+ReadText[input<->INPUT, {x<->}, n->INTEGER] =: INPUT
 \end{verbatim}\normalsize
 
-{\it for} {\tt T = BOOLEAN, NUMBER, TEXT} 
 \bd 
 Reads data of type \verb+TEXT+ from the input stream and assigns it to
 \verb+x+.  The first signature reads from \verb+input+ until the
