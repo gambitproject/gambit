@@ -65,6 +65,7 @@ class ExtForm    {
     void WriteEfgFile(gOutput &f) const;
 
 	//# DATA ACCESS -- GENERAL INFORMATION
+    int NumSubgames(void) const;
     int NumNodes(void) const;
     int NumNodes(int game) const;
     int NumNodes(int game, int pl) const;
@@ -88,6 +89,10 @@ class ExtForm    {
     gString GetNodeLabel(const Node &n) const;
     int GetOutcome(const Node &n) const;
     int GetNextGame(const Node &n) const;
+
+        //# TREE MODIFICATION ROUTINES -- PLAYERS
+    gString GetPlayerLabel(int) const;
+    void LabelPlayer(int, const gString &);
 
         //# TREE MODIFICATION ROUTINES -- SUBGAMES
     int CreateSubgame(void);
@@ -143,6 +148,7 @@ class ExtForm    {
     void SetOutcomeValue(int outc, int pl, gNumber value);
 
         //# MANAGEMENT OF VARIABLES
+    gString GetUniqueVariable(void) const;
     int IsVariableDefined(const gString &name) const;
     Node GetNodeVariable(const gString &name) const;
     int SetNodeVariable(const gString &name, const Node &node);

@@ -9,6 +9,8 @@
 #include "outcome.h"
 #include "gmapiter.h"
 
+int generator = 0;
+
 //#--------------------------------------------------------------------------
 //#                ExtForm: Constructors and Destructors 
 //#--------------------------------------------------------------------------
@@ -106,6 +108,11 @@ const gString &ExtForm::GetTitle(void) const
 //#              ExtForm: Data access -- general information
 //#--------------------------------------------------------------------------
 
+int ExtForm::NumSubgames(void) const
+{
+  return nodes.Length();
+}
+
 //
 // Returns the total number of nodes in all subgames
 //
@@ -181,6 +188,22 @@ int ExtForm::NumOutcomes(void) const
   return outcomes.Length();
 }
 
+//#--------------------------------------------------------------------------
+//#                  ExtForm: Player-related Operations
+//#--------------------------------------------------------------------------
+
+gString ExtForm::GetPlayerLabel(int pl) const
+{
+  if (pl >= 0 && pl <= NumPlayers())
+    return players[pl];
+  return "";
+}
+
+void ExtForm::LabelPlayer(int pl, const gString &name)
+{
+  if (pl >= 0 && pl <= NumPlayers())
+    players[pl] = name;
+}
 
 //#--------------------------------------------------------------------------
 //#                  ExtForm: Subgame-related Operations
@@ -338,6 +361,16 @@ Node ExtForm::DeleteNode(const Node &n, int keep)
     foo = DeleteTerminalNode(DeleteTree(nodes(game)->GetChildNumber(foo, 2)));
   nodes(game)->DeleteInternalNode(foo, ret);
   return ret;
+}
+
+void ExtForm::SetOutcome(const Node &n, int outcome)
+{
+  if (!outcomes.IsDefined(outcome))  return;
+  
+  int game = n.GetGame();
+  if (!nodes.IsDefined(game) || !nodes(game)->IsMember(n))  return;
+
+  nodes(game)->SetOutcome(n, outcome);
 }
 
 //#--------------------------------------------------------------------------
@@ -536,6 +569,15 @@ void ExtForm::LabelAction(int game, int pl, int iset, int act,
   if (nodes.IsDefined(game) && pl >= 0 && pl <= players.Last() &&
       iset > 0 && iset <= nodes(game)->NumInfosets(pl))
     nodes(game)->SetActionName(pl, iset, act, label);
+}
+
+gString ExtForm::GetActionLabel(const Node &n, int act) const
+{
+  int game = n.GetGame();
+
+  if (nodes.IsDefined(game) && nodes(game)->IsMember(n))
+    return nodes(game)->GetActionName(n.GetPlayer(), n.GetInfoset(), act);
+  return "";
 }
 
 //
@@ -1051,3 +1093,34 @@ int ExtForm::GetNextGame(const Node &n) const
     return 0;
 }
 
+//-------------------------------------------------------------------------
+//                    ExtForm: Variable Management
+//-------------------------------------------------------------------------
+
+int ExtForm::IsVariableDefined(const gString &name) const
+{
+  return nodes(1)->IsVariableDefined(name);
+}
+
+Node ExtForm::GetNodeVariable(const gString &name) const
+{
+  return nodes(1)->GetNodeVariable(name);
+}
+
+int ExtForm::SetNodeVariable(const gString &name, const Node &node)
+{
+  return nodes(1)->SetNodeVariable(name, node);
+}
+
+void ExtForm::RemoveNodeVariable(const gString &name)
+{
+  nodes(1)->RemoveNodeVariable(name);
+}
+
+gString ExtForm::GetUniqueVariable(void) const
+{
+  char buffer[20];
+
+  sprintf(buffer, "_tmp%d", generator++);
+  return buffer;
+}
