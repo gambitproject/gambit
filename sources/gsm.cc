@@ -1880,8 +1880,8 @@ void GSM::Help(void)
       _StdOut << "Sorting function list...\n";
       sorter.Sort();
       for(i=1; i<=funcslist.Length(); i++)
-	funcslist[i]->Dump(_StdOut);
-	//_StdOut << ' ' << funcslist[i]->FuncName() << "[]\n";
+	//funcslist[i]->Dump(_StdOut);
+	_StdOut << ' ' << funcslist[i]->FuncName() << "[]\n";
     }
 
     delete p;
