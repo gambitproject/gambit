@@ -13,8 +13,8 @@ BCCDIR = C:\BC5
 SOURCE_SUFFIX = .cc
 OBJECT_SUFFIX = .obj
 
-EXTRACPPFLAGS = -v 
-EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
+EXTRACPPFLAGS = -v- 
+EXTRALINKFLAGS = -Tpe -aa -v- -V4.0 -c
 
 !include make.filelist
 
@@ -37,10 +37,10 @@ GCLLIBS=cw32mti import32 ole2w32 bfc40 bfcs40
 
 LINKFLAGS= /Tpe /L$(WXLIBDIR);$(BCCDIR)\lib $(EXTRALINKFLAGS)
 OPT = -Od
-DEBUG_FLAGS= -v
+DEBUG_FLAGS= -v-
 
 
-CPPFLAGS= -D_AFXDLL $(WXINC) -I..\winsrc -I$(BCCDIR)\include\mfc $(EXTRACPPFLAGS) $(OPT) @$(CFG)
+CPPFLAGS= $(WXINC) $(EXTRACPPFLAGS) $(OPT) @$(CFG)
 
 all: gambit gcl
 
@@ -56,22 +56,6 @@ gambit.res
 
 gambit.res :      ..\winsrc\res\gambit.rc 
     brc32 -r -fo.\gambit.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include ..\winsrc\res\gambit
-
-gcl:	$(MFCGCL_OBJECTS) gcl.res winedit.res
-  ilink32 $(LINKFLAGS) @&&!
-c0w32.obj $(MFCGCL_OBJECTS) gwstream.obj
-gcl
-nul
-$(GCLLIBS)
-
-gcl.res winedit.res
-!
-
-gcl.res :      ..\winsrc\res\gcl.rc 
-    brc32 -r -fo.\gcl.res /i$(BCCDIR)\include /i$(BCCDIR)\include\mfc /i..\winsrc ..\winsrc\res\gcl
-
-winedit.res :      ..\winsrc\res\winedit.rc 
-    brc32 -r -fo.\winedit.res /i$(BCCDIR)\include /i$(BCCDIR)\include\mfc /i..\winsrc ..\winsrc\res\winedit
 
 wxgcl:	$(WXGCL_OBJECTS)  wxgcl.res
   ilink32 $(LINKFLAGS) @&&!
