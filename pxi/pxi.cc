@@ -852,7 +852,7 @@ void PxiChild::print_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
 {
   wxMessageBox("Metafiles are not supported under X");
 }
-#endif __WXMSW__
+#endif // __WXMSW__
 
 #ifdef __WXMSW__
 #include "wx/gdicmn.h"
@@ -897,6 +897,14 @@ void PxiFrame::OnCloseWindow(wxCloseEvent &)
 {
   wxKillHelp();
   Destroy();
+}
+
+void PxiCanvas::SetScale(double x) 
+{
+  m_scale = x; 
+  SetScrollbars((int) m_ppu, (int) m_ppu,
+		(int) (GetScale()*Width()/m_ppu),
+		(int) (GetScale()*Height()/m_ppu));
 }
 
 //*************************************************************************

@@ -142,5 +142,5 @@ const int idSETTINGS_OVERLAY_BUTTON = 2022;
 const int idSETTINGS_PLOT_MODE = 2023;
 const int idSETTINGS_PLOT_BUTTON = 2024;
 
-#endif EXPDPRM_H
+#endif 
 

@@ -329,8 +329,7 @@ public:
 
 // Define a new canvas
 
-class PxiCanvas: public wxScrolledWindow
-{
+class PxiCanvas : public wxScrolledWindow {
 friend class PxiChild;
 public:
   typedef struct LABELSTRUCT {
@@ -369,11 +368,7 @@ private:
   bool GetLandscape(void) 
     {return m_landscape;}
   double GetScale(void) const {return m_scale;} 
-  void SetScale(double x) 
-    {
-      m_scale = x; 
-      SetScrollbars(m_ppu,m_ppu,GetScale()*Width()/m_ppu, GetScale()*Height()/m_ppu);
-    }
+  void SetScale(double x);
 
   void DoPlot_X(wxDC& dc,const PlotInfo &thisplot,
 		int x0, int y0, int cw,int ch, int level=1);
@@ -411,7 +406,8 @@ private:
   double CalcY_3(double p1,int x0, int y0, int ch,int cw);
   double CalcX_3(double p1,double p2,int x0, int y0, int ch,int cw, const PlotInfo &thisplo);
   
-  void DrawToken(wxDC &dc,double x,double y,int st);
+  void DrawToken(wxDC &dc, int x, int y, int st);
+
 public:
   PxiCanvas(wxFrame *frame, const wxPoint &p_position,
 	    const wxSize &p_size, int style=0,const char *file_name=NULL);

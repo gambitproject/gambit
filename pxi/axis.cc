@@ -170,16 +170,16 @@ void PlotAxis_3(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, int cw,int c
   dc.DrawLine(x0,        y0,
 	      x0+cw,     y0);               // bottom
   dc.DrawLine(x0,        y0,
-	      x0+cw/2,   y0-PXI_3_HEIGHT);  // left side
+	      (int) (x0+cw/2), (int) (y0-PXI_3_HEIGHT));  // left side
   dc.DrawLine(x0+cw,     y0,
-	      x0+cw/2,   y0-PXI_3_HEIGHT);  // right side
+	      (int) (x0+cw/2), (int) (y0-PXI_3_HEIGHT));  // right side
   if (thisplot.ShowAxis()) { 		// now draw the bisectors
     dc.DrawLine(x0,          y0,
-		x0+cw*3/4, y0-PXI_3_HEIGHT/2);
+		(int) (x0+cw*3/4), (int) (y0-PXI_3_HEIGHT/2));
     dc.DrawLine(x0+cw,     y0,
-		x0+cw/4,   y0-PXI_3_HEIGHT/2);
-    dc.DrawLine(x0+cw/2,   y0-PXI_3_HEIGHT,
-		x0+cw/2,   y0);
+		(int) (x0+cw/4), (int) (y0-PXI_3_HEIGHT/2));
+    dc.DrawLine((int) (x0+cw/2), (int) (y0-PXI_3_HEIGHT),
+		(int) (x0+cw/2),   y0);
   }
   if (thisplot.ShowSquare()) {
     wxCoord tw,th;
@@ -188,7 +188,7 @@ void PlotAxis_3(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, int cw,int c
 		x0-tw,        y0);
     dc.GetTextExtent(label[0],&tw,&th);
     dc.DrawText(label[0],
-		x0+cw/2-tw/2, y0-PXI_3_HEIGHT-th);
+		(int) (x0+cw/2-tw/2), (int) (y0-PXI_3_HEIGHT-th));
     dc.GetTextExtent(label[1],&tw,&th);
     dc.DrawText(label[1],
 		x0+cw,        y0);

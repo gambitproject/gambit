@@ -29,7 +29,8 @@ void PxiCanvas::PlotLabels(wxDC &dc, int ch,int cw)
   for (int i=1;i<=labels.Length();i++) {
     wxCoord tw,th;
     dc.GetTextExtent(labels[i].label,&tw,&th);
-    dc.DrawText(labels[i].label,labels[i].x*cw-tw/2,labels[i].y*ch-th/2);
+    dc.DrawText(labels[i].label,(int) (labels[i].x*cw-tw/2),
+		(int) (labels[i].y*ch-th/2));
   }
 }
 /******************************** CALC Y X************************************/
@@ -65,7 +66,7 @@ double PxiCanvas::CalcX_X(double x,int x0, int cw, const PlotInfo &thisplot)
 // each strategy #.  Otherwise, we just draw an ellipse.  Note that each token is
 // a 8x8 image.
 #define		NUM_TOKENS		7
-void PxiCanvas::DrawToken(wxDC &dc,double x,double y,int st)
+void PxiCanvas::DrawToken(wxDC &dc, int x, int y, int st)
 {
   int ts=draw_settings->GetTokenSize();	// token dimensions are 2ts x 2ts
   if (draw_settings->GetColorMode()==COLOR_PROB) {
@@ -73,11 +74,16 @@ void PxiCanvas::DrawToken(wxDC &dc,double x,double y,int st)
     dc.SetBrush(*wxBLACK_BRUSH);
     switch (st%NUM_TOKENS) {
     case 0: // x (cross diag)
-      dc.DrawLine(x-ts,y-ts,x+ts,y+ts);dc.DrawLine(x-ts,y+ts,x+ts,y-ts);break;
+      dc.DrawLine((int) (x-ts), (int) (y-ts), (int) (x+ts), (int) (y+ts));
+      dc.DrawLine((int) (x-ts), (int) (y+ts), (int) (x+ts), (int) (y-ts));
+      break;
     case 1: // + (cross rect)
-      dc.DrawLine(x-ts,y,x+ts,y);dc.DrawLine(x,y-ts,x,y+ts);break;
+      dc.DrawLine((int) (x-ts), y, (int) (x+ts), y);
+      dc.DrawLine(x, (int) (y-ts), x, (int) (y+ts));
+      break;
     case 2:	// circle
-      dc.DrawEllipse(x-ts,y-ts,2*ts,2*ts);break;
+      dc.DrawEllipse((int) (x-ts), (int) (y-ts), 2*ts, 2*ts);
+      break;
     case 3: // triangle upsidedown
       dc.DrawLine(x-ts,y-ts,x,y+ts);dc.DrawLine(x,y+ts,x+ts,y-ts);dc.DrawLine(x-ts,y-ts,x+ts,y-ts);break;
     case 4: // triangle rightsideup
@@ -109,8 +115,9 @@ void PxiCanvas::DrawExpPoint_X(wxDC &dc,const PlotInfo &thisplot,double cur_e,in
     y=CalcY_X((*s).probs[iset][st],y0,ch,thisplot);
     x=CalcX_X(s->e,x0,cw,thisplot);
     dc.SetBrush(draw_settings->GetDataBrush());
-    if (draw_settings->GetOverlaySym()==OVERLAY_TOKEN)
-      DrawToken(dc,x,y,st);
+    if (draw_settings->GetOverlaySym()==OVERLAY_TOKEN) {
+      DrawToken(dc, (int) x, (int) y, st);
+    }
     else {
       char tmp[10];
       sprintf(tmp,"%d",point_nums[i]);
@@ -118,13 +125,13 @@ void PxiCanvas::DrawExpPoint_X(wxDC &dc,const PlotInfo &thisplot,double cur_e,in
       dc.SetTextForeground(*wxBLACK);
       wxCoord tw,th;
       dc.GetTextExtent(tmp,&tw,&th);
-      dc.DrawText(tmp,x-tw/2,y-th/2);
+      dc.DrawText(tmp, (int) (x-tw/2), (int) (y-th/2));
       //      dc.DrawText(tmp,x-3,y-6);
     }
     if (draw_settings->GetOverlayLines() && st!=1) {
       dc.SetBrush(*wxBLACK_BRUSH);
       int y1=(int)CalcY_X((*s).probs[iset][st-1],y0,ch,thisplot);
-      dc.DrawLine(x,y,x,y1);
+      dc.DrawLine((int) x, (int) y, (int) x, (int) y1);
     }
     delete s;
   }
@@ -203,10 +210,14 @@ void PxiCanvas::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0,
 	  if (thisplot.GetStrategyShow(iset,st)/* && draw_settings->RangeY(probs[iset][st])*/) {
 	    if (draw_settings->GetColorMode()==COLOR_PROB) 
 	      dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
-	    if (draw_settings->ConnectDots() && !new_equ)
-	      dc.DrawLine(CalcX_X(prev_point->E(),x0, cw,thisplot),CalcY_X((*prev_point)[iset][st],y0,ch,thisplot),x,y);
-	    else
-	      dc.DrawPoint(x,y);
+	    if (draw_settings->ConnectDots() && !new_equ) {
+	      dc.DrawLine((int) CalcX_X(prev_point->E(),x0, cw,thisplot),
+			  (int) CalcY_X((*prev_point)[iset][st],y0,ch,thisplot),
+			  (int) x, (int) y);
+	    }
+	    else {
+	      dc.DrawPoint((int) x, (int) y);
+	    }
 	    // if there is an experimental data point for this cur_e, plot it
 	    if (exp_data)
 	      DrawExpPoint_X(dc,thisplot,probs.E(),iset,st,x0,y0,ch,cw);
@@ -241,7 +252,7 @@ void PxiCanvas::DrawExpPoint_2(wxDC &dc, const PlotInfo &thisplot, double cur_e,
     if (draw_settings->GetOverlaySym()==OVERLAY_TOKEN) {
       int ts=draw_settings->GetTokenSize();	// token dimentions are 2ts x 2ts
       dc.SetBrush(draw_settings->GetDataBrush());
-      dc.DrawEllipse(x-ts,y-ts,2*ts,2*ts);
+      dc.DrawEllipse((int) (x-ts), (int) (y-ts), 2*ts, 2*ts);
     }
     else {
       char tmp[10];
@@ -250,7 +261,7 @@ void PxiCanvas::DrawExpPoint_2(wxDC &dc, const PlotInfo &thisplot, double cur_e,
       dc.SetTextForeground(*wxBLACK);
       wxCoord tw,th;
       dc.GetTextExtent(tmp,&tw,&th);
-      dc.DrawText(tmp,x-tw/2,y-th/2);
+      dc.DrawText(tmp, (int) (x-tw/2), (int) (y-th/2));
       //      dc.DrawText(tmp,x-3,y-6);
     }
     delete s;
@@ -295,14 +306,16 @@ void PxiCanvas::PlotData_2(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int
 	if (draw_settings->ConnectDots() && !new_equ) {
 	  double prev_x=x0+(*prev_point)[pl1][st1]*cw;
 	  double prev_y=y0-(*prev_point)[pl2][st2]*ch;
-	  dc.DrawLine(prev_x,prev_y,x,y);
+	  dc.DrawLine((int) prev_x, (int) prev_y, (int) x, (int) y);
 	}
-	else
-	  dc.DrawPoint(x,y);
-	dc.DrawPoint(x,y);
+	else {
+	  dc.DrawPoint((int) x, (int) y);
+	}
+	dc.DrawPoint((int) x, (int) y);
 	// if there is an experimental data point for this cur_e, plot it
-	if (exp_data) 
+	if (exp_data) {
 	  DrawExpPoint_2(dc,thisplot,probs.E(),pl1,st1,pl2,st2, x0,y0,cw,ch);
+	}
       }
       f>>probs;
     }
@@ -345,7 +358,7 @@ void PxiCanvas::DrawExpPoint_3(wxDC &dc,const PlotInfo &thisplot,double cur_e,in
     if (draw_settings->GetOverlaySym()==OVERLAY_TOKEN) {
       int ts=draw_settings->GetTokenSize();	// token dimentions are 2ts x 2ts
       dc.SetBrush(draw_settings->GetDataBrush());
-      dc.DrawEllipse(x-ts,y-ts,2*ts,2*ts);
+      dc.DrawEllipse((int) (x-ts), (int) (y-ts), 2*ts, 2*ts);
     }
     else {
       wxString tmp;
@@ -354,7 +367,7 @@ void PxiCanvas::DrawExpPoint_3(wxDC &dc,const PlotInfo &thisplot,double cur_e,in
       dc.SetTextForeground(*wxBLACK);
       wxCoord tw,th;
       dc.GetTextExtent(tmp,&tw,&th);
-      dc.DrawText(tmp,x-tw/2,y-th/2);
+      dc.DrawText(tmp, (int) (x-tw/2), (int) (y-th/2));
     }
     delete s;
   }
@@ -412,13 +425,15 @@ void PxiCanvas::PlotData_3(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int
 	if (draw_settings->ConnectDots() && !new_equ) {
 	  double prev_x=CalcX_3((*prev_point)[iset][st1],(*prev_point)[iset][st2],x0,y0,cw,ch,thisplot);
 	  double prev_y=CalcY_3((*prev_point)[iset][st1],x0,y0,ch,cw);
-	  dc.DrawLine(prev_x,prev_y,x,y);
+	  dc.DrawLine((int) prev_x, (int) prev_y, (int) x, (int) y);
 	}
-	else
-	  dc.DrawPoint(x,y);
-				// if there is an experimental data point for this cur_e, plot it
-	if (exp_data) 
+	else {
+	  dc.DrawPoint((int) x, (int) y);
+	}
+	// if there is an experimental data point for this cur_e, plot it
+	if (exp_data) {
 	  DrawExpPoint_3(dc,thisplot,probs.E(),iset,st1,st2,x0,y0,cw,ch);
+	}
       }
     }
     /*------------------ read in a line of data-----------------*/
