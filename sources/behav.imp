@@ -1,0 +1,274 @@
+//#
+//# FILE: extform.imp -- Implementation of templated extensive form members
+//#
+//# $Id$
+//#
+
+#include "extform.h"
+#include "node.h"
+#include "player.h"
+#include "outcome.h"
+#include "infoset.h"
+
+template <class T> class TypedNode : public Node    {
+  public:
+    gVector<T> *scratch;
+
+    TypedNode(Node *parent, int pl);
+    virtual ~TypedNode();
+
+    void Resize(int pl);
+};
+
+template <class T> TypedNode<T>::TypedNode(Node *p, int pl) 
+  : Node(p), scratch(new gVector<T>(pl))   { }
+
+template <class T> TypedNode<T>::~TypedNode()   { delete scratch; }
+
+template <class T> void TypedNode<T>::Resize(int pl)
+{ 
+  delete scratch;
+  scratch = new gVector<T>(pl); 
+  for (int i = children.Length(); i; i--)
+    ((TypedNode<T> *) children[i])->Resize(pl);
+}
+
+
+//------------------------------------------------------------------------
+//      ExtForm<T>: Constructor, destructors, constructive operators
+//------------------------------------------------------------------------
+
+template <class T> ExtForm<T>::ExtForm(void)
+{ root = new TypedNode<T>(0, 0); }
+
+template <class T> ExtForm<T>::~ExtForm()
+{ }
+
+//------------------------------------------------------------------------
+//            ExtForm<T>: Private and protected member functions
+//------------------------------------------------------------------------
+
+template <class T> Infoset *ExtForm<T>::CreateInfoset(int n, Player *p, int br)
+{
+  Infoset *s = (p->IsChance()) ? new ChanceInfoset<T>(n, p, br) :
+               new Infoset(n, p, br);
+
+  s->name = "(" + ToString(p->number) + "," + ToString(n) + ")";
+  return s;
+}
+
+template <class T> Node *ExtForm<T>::CreateNode(Node *parent) const
+{ return new TypedNode<T>(parent, players.Length()); }
+
+//------------------------------------------------------------------------
+//                 ExtForm<T>: Operations on outcomes
+//------------------------------------------------------------------------
+
+template <class T> OutcomeVector<T> *ExtForm<T>::NewOutcome(void)
+{
+  OutcomeVector<T> *ret = new OutcomeVector<T>(players.Length());
+  outcomes.Append(ret);
+  ret->name = "Outcome " + ToString(outcomes.Length());
+  return ret;
+}
+
+template <class T>
+OutcomeVector<T> *ExtForm<T>::GetOutcome(const gString &s) const
+{
+  if (s == "")   return 0;
+  for (int i = 1; i <= outcomes.Length(); i++)
+    if (outcomes[i]->GetName() == s)   return (OutcomeVector<T> *) outcomes[i];
+
+  return 0;
+}
+
+//------------------------------------------------------------------------
+//                   ExtForm<T>: Payoff computation
+//------------------------------------------------------------------------
+
+#include "gdpvect.h"
+
+template <class T>
+void ExtForm<T>::Payoff(Node *n, T prob, int pl, T &value,
+			const BehavProfile<T> &profile) const
+{
+  if (n->outcome)
+    value += prob * ((OutcomeVector<T> &) *n->outcome)[pl];
+  if (n->children.Length())
+    if (profile.IsTruncated())   {
+      T p = (T) 0.0;
+      for (int i = 1, npl = n->infoset->player->number,
+	   iset = n->infoset->number; i < n->children.Length(); i++)  {
+	p += ((npl) ? profile(npl, iset, i) :
+	      ((ChanceInfoset<T> *) n->infoset)->probs[i]);
+	Payoff(n->children[i],
+	       prob * ((npl) ? profile(npl, iset, i) :
+		       ((ChanceInfoset<T> *) n->infoset)->probs[i]),
+	       pl, value, profile);
+      }
+      Payoff(n->children[i], prob * (1 - p), pl, value, profile);
+    }
+    else  {
+      for (int i = 1, npl = n->infoset->player->number,
+	   iset = n->infoset->number; i <= n->children.Length(); i++)
+	Payoff(n->children[i],
+	       prob * ((npl) ? profile(npl, iset, i) :
+		       ((ChanceInfoset<T> *) n->infoset)->probs[i]),
+	       pl, value, profile);
+    }
+}
+
+template <class T>
+T ExtForm<T>::Payoff(int pl, const BehavProfile<T> &profile) const
+{
+  T value = (T) 0.0;
+  Payoff(root, (T) 1.0, pl, value, profile);
+  return value;
+}
+
+template <class T>
+gVector<T> ExtForm<T>::CondPayoff(Node *n, T prob,
+				  const gVector<T> &value,
+				  const BehavProfile<T> &profile,
+				  gPVector<T> &probs,
+				  gDPVector<T> &payoff) const
+{
+  gVector<T> cumvalue(value);
+
+  if (n->infoset && n->infoset->player->number)
+    probs(n->infoset->player->number, n->infoset->number) += prob;
+  
+  if (profile.IsTruncated() && n->children.Length())   {
+    T p = (T) 0.0;
+    
+    for (int i = 1; i < n->children.Length(); i++)   {
+      T newprob;
+      if (n->infoset->player->number == 0)
+	newprob = ((ChanceInfoset<T> *) n->infoset)->probs[i];
+      else
+	newprob = profile(n->infoset->player->number, n->infoset->number, i);
+
+      p += newprob;
+      
+      gVector<T> newvalue(CondPayoff(n->children[i], prob * newprob,
+				     value, profile, probs, payoff));
+
+      for (int j = 1, l = value.Length(); j <= l; j++)
+	cumvalue[j] += newvalue[j] * newprob;
+    
+      if (n->infoset->player->number)   {
+	payoff(n->infoset->player->number, n->infoset->number, i) +=
+	  newvalue[n->infoset->player->number] * prob;
+	if (n->outcome)
+	  payoff(n->infoset->player->number, n->infoset->number, i) +=
+	  ((OutcomeVector<T> &) *n->outcome)[n->infoset->player->number];
+      }
+    }
+
+    gVector<T> newvalue(CondPayoff(n->children[i], prob * (1 - p),
+				   value, profile, probs, payoff));
+
+    for (int j = 1, l = value.Length(); j <= l; j++)
+      cumvalue[j] += newvalue[j] * (1 - p);
+
+    if (n->infoset->player->number)   {
+      payoff(n->infoset->player->number, n->infoset->number, i) +=
+	newvalue[n->infoset->player->number] * prob;
+      if (n->outcome)
+	payoff(n->infoset->player->number, n->infoset->number, i) +=
+	((OutcomeVector<T> &) *n->outcome)[n->infoset->player->number];
+    }
+  }
+  else  {
+    for (int i = 1; i <= n->children.Length(); i++)   {
+      T newprob;
+      if (n->infoset->player->number == 0)
+	newprob = ((ChanceInfoset<T> *) n->infoset)->probs[i];
+      else
+	newprob = profile(n->infoset->player->number, n->infoset->number, i);
+      
+      gVector<T> newvalue(CondPayoff(n->children[i], prob * newprob,
+				     value, profile, probs, payoff));
+
+      for (int j = 1, l = value.Length(); j <= l; j++)
+	cumvalue[j] += newvalue[j] * newprob;
+    
+      if (n->infoset->player->number)   {
+	payoff(n->infoset->player->number, n->infoset->number, i) +=
+	  newvalue[n->infoset->player->number] * prob;
+	if (n->outcome)
+	  payoff(n->infoset->player->number, n->infoset->number, i) +=
+	  ((OutcomeVector<T> &) *n->outcome)[n->infoset->player->number];
+      }
+    }
+  }
+
+  if (n->outcome)
+    cumvalue += ((OutcomeVector<T> &) *n->outcome);
+
+  return cumvalue;
+}
+
+template <class T> void ExtForm<T>::CondPayoff(const BehavProfile<T> &profile,
+					       gDPVector<T> &payoff,
+					       gPVector<T> &probs) const
+{
+  ((gVector<T> &) payoff).operator=((T) 0);
+  ((gVector<T> &) probs).operator=((T) 0);
+
+  gVector<T> value(players.Length());
+  value = (T) 0;
+
+  CondPayoff(root, (T) 1.0, value, profile, probs, payoff);
+
+  for (int i = 1; i <= players.Length(); i++)
+    for (int j = 1; j <= players[i]->infosets.Length(); j++)
+      for (int k = 1; k <= players[i]->infosets[j]->actions.Length(); k++)
+	// Note that bad things happen if probs(i, j, k) == 0
+	payoff(i, j, k) /= probs(i, j);
+}
+
+//template <class T> gDPVector<T> *ExtForm<T>::NewBehavProfile(void) const
+//{
+//  return new gDPVector<T>(Dimensionality());
+//}
+
+template <class T> int ExtForm<T>::ProfileLength(bool trunc) const
+{
+  int sum = 0;
+
+  for (int i = 1; i <= players.Length(); i++)
+    for (int j = 1; j <= players[i]->infosets.Length(); j++)
+      sum += players[i]->infosets[j]->actions.Length() - ((trunc) ? 1 : 0);
+
+  return sum;
+}
+
+template <class T> gPVector<int> ExtForm<T>::Dimensionality(bool trunc) const
+{
+  gTuple<int> foo(players.Length());
+  for (int i = 1; i <= players.Length(); i++)
+    foo[i] = players[i]->infosets.Length();
+
+  gPVector<int> bar(foo);
+  for (i = 1; i <= players.Length(); i++)
+    for (int j = 1; j <= players[i]->infosets.Length(); j++)
+      bar(i, j) = players[i]->infosets[j]->actions.Length() -((trunc) ? 1 : 0);
+
+  return bar;
+}  
+
+template <class T> void ExtForm<T>::Centroid(BehavProfile<T> &profile) const
+{
+  T center;
+
+  for (int i = 1; i <= players.Length(); i++)
+    for (int j = 1; j <= players[i]->infosets.Length(); j++)  {
+      center = ((T) 1 / (T) players[i]->infosets[j]->actions.Length());
+      for (int k = 1; k < players[i]->infosets[j]->actions.Length(); k++)
+	profile(i, j, k) = center;
+      if (!profile.IsTruncated())   profile(i, j, k) = center;
+    }
+}
+
+
