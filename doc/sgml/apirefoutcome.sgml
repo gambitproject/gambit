@@ -12,9 +12,10 @@
 <formalpara>
 <title>C++/Python usage</title>
 <para>
-This part of the interface is currently in flux in C++ and Python.
-Consult the source code or the Gambit development team for information
-if you require this function.
+<synopsis>
+void gbtEfgOutcome::DeleteOutcome(void)
+void gbtNfgOutcome::DeleteOutcome(void)
+</synopsis>
 </para>
 </formalpara>
 
@@ -33,7 +34,8 @@ DeleteOutcome[outcome->NFOUTCOME] =: BOOLEAN
 <parameter>outcome</parameter> from its game.  All nodes (for
 extensive forms) or contingencies (for normal forms) with the
 specified outcome attached are reset to having no outcome attached.
-The extensive form version returns the list of nodes to which the
+In the GCL,
+the extensive form version returns the list of nodes to which the
 outcome was attached; the normal form version returns
 <literal>True</literal>.
 </para>
@@ -105,17 +107,18 @@ The empty string is returned if the outcome object is null.
 
 </sect2>
 
-
-<sect2 id="apiref.outcome.payoff">
-<title>Payoff</title>
-<indexterm><primary>Payoff</primary></indexterm>
+<sect2 id="apiref.outcome.getpayoff">
+<title>GetPayoff</title>
+<indexterm><primary>GetPayoff</primary></indexterm>
+<indexterm><primary>Payoff (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
 <para>
-This part of the interface is currently in flux in C++ and Python.
-Consult the source code or the Gambit development team for information
-if you require this function.
+<synopsis>
+gNumber gbtEfgOutcome::GetPayoff(gbtEfgPlayer) const
+gNumber gbtNfgOutcome::GetPayoff(gbtNfgPlayer) const
+</synopsis>
 </para>
 </formalpara>
 
@@ -137,10 +140,18 @@ An error occurs if the parameters are not from the
 same game.
 </para>
 
+<note>
+<para>
+The Python implementation always returns a floating point number, even
+if the value of the outcome is specified as a rational number in the game.
+This will be improved in the near future (hopefully, because Guido approves
+a rational number class for Python!)
+</para>
+</note>
+
 </sect2>
 
-
-<sect2>
+<sect2 id="apiref.outcome.setlabel">
 <title>SetLabel</title>
 <indexterm><primary>SetLabel</primary></indexterm>
 <indexterm><primary>SetName (GCL function)</primary></indexterm>
@@ -180,9 +191,10 @@ sets the text label of the outcome.  The GCL version returns the outcome.
 <formalpara>
 <title>C++/Python usage</title>
 <para>
-This part of the interface is currently in flux in C++ and Python.
-Consult the source code or the Gambit development team for information
-if you require this function.
+<synopsis>
+void gbtEfgOutcome::SetPayoff(gbtEfgPlayer, gNumber)
+void gbtNfgOutcome::SetPayoff(gbtNfgPlayer, gNumber)
+</synopsis>
 </para>
 </formalpara>
 
@@ -205,6 +217,16 @@ SetPayoff[outcome->NFOUTCOME, player->NFPLAYER,
 <parameter>outcome</parameter> and <parameter>player</parameter> are
 not from the same game.  Returns <parameter>outcome</parameter>.
 </para>
+
+<note>
+<para>
+The Python implementation results in a floating point number being
+assigned as the payoff; there is no direct way to set a payoff to rational
+precision.
+This will be improved in the near future (hopefully, because Guido approves
+a rational number class for Python!)
+</para>
+</note>
 
 </sect2>
 

@@ -73,6 +73,18 @@ PyTypeObject Efoutcometype = {      /* main python type-descriptor */
  *****************************************************************************/
 
 static PyObject *
+efoutcome_deleteoutcome(efoutcomeobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  self->m_efoutcome->DeleteOutcome();
+  Py_INCREF(Py_None);
+  return Py_None;
+}  
+
+static PyObject *
 efoutcome_getgame(efoutcomeobject *self, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
@@ -95,6 +107,23 @@ efoutcome_getlabel(efoutcomeobject *self, PyObject *args)
 }
 
 static PyObject *
+efoutcome_getpayoff(efoutcomeobject *self, PyObject *args)
+{
+  PyObject *player;
+
+  if (!PyArg_ParseTuple(args, "O", &player)) {
+    return NULL;
+  }
+
+  if (!is_efplayerobject(player)) {
+    return NULL;
+  }
+
+  return Py_BuildValue("d",
+		       (double) self->m_efoutcome->GetPayoff(*((efplayerobject *) player)->m_efplayer));
+}
+
+static PyObject *
 efoutcome_setlabel(efoutcomeobject *self, PyObject *args)
 {
   char *label;
@@ -108,10 +137,33 @@ efoutcome_setlabel(efoutcomeobject *self, PyObject *args)
   return Py_None;
 }
 
+static PyObject *
+efoutcome_setpayoff(efoutcomeobject *self, PyObject *args)
+{
+  PyObject *player;
+  double payoff;
+
+  if (!PyArg_ParseTuple(args, "Od", &player, &payoff)) {
+    return NULL;
+  }
+
+  if (!is_efplayerobject(player)) {
+    return NULL;
+  }
+
+  self->m_efoutcome->SetPayoff(*((efplayerobject *) player)->m_efplayer,
+			       payoff);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
 static struct PyMethodDef efoutcome_methods[] = {
+  { "DeleteOutcome", (PyCFunction) efoutcome_deleteoutcome, 1 },
   { "GetGame", (PyCFunction) efoutcome_getgame, 1 }, 
   { "GetLabel", (PyCFunction) efoutcome_getlabel, 1 },
+  { "GetPayoff", (PyCFunction) efoutcome_getpayoff, 1 },
   { "SetLabel", (PyCFunction) efoutcome_setlabel, 1 },
+  { "SetPayoff", (PyCFunction) efoutcome_setpayoff, 1 },
   { NULL, NULL }
 };
 
@@ -208,6 +260,18 @@ PyTypeObject Nfoutcometype = {      /* main python type-descriptor */
  *****************************************************************************/
 
 static PyObject *
+nfoutcome_deleteoutcome(nfoutcomeobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  self->m_nfoutcome->DeleteOutcome();
+  Py_INCREF(Py_None);
+  return Py_None;
+}  
+
+static PyObject *
 nfoutcome_getgame(nfoutcomeobject *self, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
@@ -230,6 +294,23 @@ nfoutcome_getlabel(nfoutcomeobject *self, PyObject *args)
 }
 
 static PyObject *
+nfoutcome_getpayoff(nfoutcomeobject *self, PyObject *args)
+{
+  PyObject *player;
+
+  if (!PyArg_ParseTuple(args, "O", &player)) {
+    return NULL;
+  }
+
+  if (!is_nfplayerobject(player)) {
+    return NULL;
+  }
+
+  return Py_BuildValue("d",
+		       (double) self->m_nfoutcome->GetPayoff(*((nfplayerobject *) player)->m_nfplayer));
+}
+
+static PyObject *
 nfoutcome_setlabel(nfoutcomeobject *self, PyObject *args)
 {
   char *label;
@@ -243,10 +324,33 @@ nfoutcome_setlabel(nfoutcomeobject *self, PyObject *args)
   return Py_None;
 }
 
+static PyObject *
+nfoutcome_setpayoff(nfoutcomeobject *self, PyObject *args)
+{
+  PyObject *player;
+  double payoff;
+
+  if (!PyArg_ParseTuple(args, "Od", &player, &payoff)) {
+    return NULL;
+  }
+
+  if (!is_nfplayerobject(player)) {
+    return NULL;
+  }
+
+  self->m_nfoutcome->SetPayoff(*((nfplayerobject *) player)->m_nfplayer,
+			       payoff);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
 static struct PyMethodDef nfoutcome_methods[] = {
+  { "DeleteOutcome", (PyCFunction) nfoutcome_deleteoutcome, 1 },
   { "GetGame", (PyCFunction) nfoutcome_getgame, 1 }, 
   { "GetLabel", (PyCFunction) nfoutcome_getlabel, 1 },
+  { "GetPayoff", (PyCFunction) nfoutcome_getpayoff, 1 },
   { "SetLabel", (PyCFunction) nfoutcome_setlabel, 1 },
+  { "SetPayoff", (PyCFunction) nfoutcome_setpayoff, 1 },
   { NULL, NULL }
 };
 
