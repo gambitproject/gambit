@@ -38,9 +38,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
   Thanks to the creators of the algorithms.
 */
 
-#ifdef __GNUG__
-#pragma implementation
-#endif
 #include <ctype.h>
 #include <float.h>
 #include <limits.h>
@@ -49,6 +46,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "base/gstream.h"
 #include "math/integer.h"
 
+#if !USE_GNU_MP
 // internal Integer representation
 class IntRep {
 public:
@@ -72,8 +70,6 @@ IntRep*  add(const IntRep*, int, const IntRep*, int, IntRep*);
 IntRep*  add(const IntRep*, int, long, IntRep*);
 IntRep*  multiply(const IntRep*, const IntRep*, IntRep*);
 IntRep*  multiply(const IntRep*, long, IntRep*);
-IntRep*  lshift(const IntRep*, long, IntRep*);
-IntRep*  lshift(const IntRep*, const IntRep*, int, IntRep*);
 IntRep*  power(const IntRep*, long, IntRep*);
 IntRep*  div(const IntRep*, const IntRep*, IntRep*);
 IntRep*  mod(const IntRep*, const IntRep*, IntRep*);
@@ -536,53 +532,6 @@ int Iisdouble(const IntRep* rep)
     }
   }
   return 1;
-}
-
-// real division of num / den
-
-double ratio(const gInteger& num, const gInteger& den)
-{
-  gInteger q, r;
-  divide(num, den, q, r);
-  double d1 = q.as_double();
- 
-  if (d1 >= DBL_MAX || d1 <= -DBL_MAX || sign(r) == 0)
-    return d1;
-  else      // use as much precision as available for fractional part
-  {
-    double  d2 = 0.0;
-    double  d3 = 0.0; 
-    int cont = 1;
-    for (int i = den.rep->len - 1; i >= 0 && cont; --i)
-    {
-		unsigned short a = (unsigned short) (I_RADIX >> 1);
-      while (a != 0)
-      {
-        if (d2 + 1.0 == d2) // out of precision when we get here
-        {
-          cont = 0;
-          break;
-        }
-
-        d2 *= 2.0;
-        if (den.rep->s[i] & a)
-          d2 += 1.0;
-
-        if (i < r.rep->len)
-        {
-          d3 *= 2.0;
-          if (r.rep->s[i] & a)
-            d3 += 1.0;
-        }
-
-        a >>= 1;
-      }
-    }
-
-    if (sign(r) < 0)
-      d3 = -d3;
-    return d1 + d3 / d2;
-  }
 }
 
 // comparison functions
@@ -1396,8 +1345,13 @@ IntRep* div(const IntRep* x, long y, IntRep* q)
 }
 
 
-void divide(const gInteger& Ix, long y, gInteger& Iq, long& rem)
+void divide(const gInteger &Ix, long y, gInteger &Iq, long &rem)
 {
+#if USE_GNU_MP
+  gInteger Iy(y), Irem;
+  mpz_tdiv_qr(Iq.m_value, Irem.m_value, Ix.m_value, Iy.m_value);
+  rem = Irem.as_long();
+#else
   const IntRep* x = Ix.rep;
   nonnil(x);
   IntRep* q = Iq.rep;
@@ -1478,11 +1432,15 @@ void divide(const gInteger& Ix, long y, gInteger& Iq, long& rem)
   q->sgn = samesign;
   Icheck(q);
   Iq.rep = q;
+#endif  // !USE_GNU_MP
 }
 
 
-void divide(const gInteger& Ix, const gInteger& Iy, gInteger& Iq, gInteger& Ir)
+void divide(const gInteger &Ix, const gInteger &Iy, gInteger &Iq, gInteger &Ir)
 {
+#if USE_GNU_MP
+  mpz_tdiv_qr(Iq.m_value, Ir.m_value, Ix.m_value, Iy.m_value);
+#else
   const IntRep* x = Ix.rep;
   nonnil(x);
   const IntRep* y = Iy.rep;
@@ -1554,6 +1512,7 @@ void divide(const gInteger& Ix, const gInteger& Iy, gInteger& Iq, gInteger& Ir)
   Iq.rep = q;
   Icheck(r);
   Ir.rep = r;
+#endif // USE_GNU_MP
 }
 
 IntRep* mod(const IntRep* x, const IntRep* y, IntRep* r)
@@ -1675,6 +1634,30 @@ IntRep* mod(const IntRep* x, long y, IntRep* r)
   return r;
 }
 
+IntRep*  Compl(const IntRep* src, IntRep* r)
+{
+  nonnil(src);
+  r = Icopy(r, src);
+  unsigned short* s = r->s;
+  unsigned short* top = &(s[r->len - 1]);
+  while (s < top)
+  {
+    unsigned short cmp = ~(*s);
+    *s++ = cmp;
+  }
+  unsigned short a = *s;
+  unsigned short b = 0;
+  while (a != 0)
+  {
+    b <<= 1;
+    if (!(a & 1)) b |= 1;
+    a >>= 1;
+  }
+  *s = b;
+  Icheck(r);
+  return r;
+}
+
 IntRep* lshift(const IntRep* x, long y, IntRep* r)
 {
   nonnil(x);
@@ -1756,30 +1739,6 @@ IntRep* lshift(const IntRep* x, const IntRep* yy, int negatey, IntRep* r)
     y = -y;
 
   return lshift(x, y, r);
-}
-
-IntRep*  Compl(const IntRep* src, IntRep* r)
-{
-  nonnil(src);
-  r = Icopy(r, src);
-  unsigned short* s = r->s;
-  unsigned short* top = &(s[r->len - 1]);
-  while (s < top)
-  {
-    unsigned short cmp = ~(*s);
-    *s++ = cmp;
-  }
-  unsigned short a = *s;
-  unsigned short b = 0;
-  while (a != 0)
-  {
-    b <<= 1;
-    if (!(a & 1)) b |= 1;
-    a >>= 1;
-  }
-  *s = b;
-  Icheck(r);
-  return r;
 }
 
 // A  version of knuth's algorithm B / ex. 4.5.3.34
@@ -1958,18 +1917,6 @@ IntRep* negate(const IntRep* src, IntRep* dest)
   return dest;
 }
 
-gInteger lcm(const gInteger& x, const gInteger& y)
-{
-  gInteger r, g;
-  if (sign(x) == 0 || sign(y) == 0)
-    g = 1;
-  else 
-    g = gcd(x, y);
-  div(x, g, r);
-  mul(r, y, r);
-  return r;
-}
-
 IntRep* atoIntRep(const char* s, int base)
 {
   int sl = strlen(s);
@@ -2015,11 +1962,6 @@ gText Itoa(const IntRep *x, int base, int width)
     fmtbase += " ";
   }
   return cvtItoa(x, fmtbase, fmtlen, base, 0, width, 0, ' ', 'X', 0);
-}
-
-gOutput& operator<<(gOutput &s, const gInteger &y)
-{
-  return s << Itoa(y.rep);
 }
 
 gText cvtItoa(const IntRep *x, gText fmt, int& fmtlen, int base, int showbase,
@@ -2119,49 +2061,50 @@ gInput &operator>>(gInput& s, gInteger& y)
 {
   char sgn = 0;
   char ch;
-  y.rep = Icopy_zero(y.rep);
+  y = 0;
 
   do  {
-	 s.get(ch);
+    s.get(ch);
   }  while (isspace(ch));
 
   s.unget(ch);
 
-  while (s.get(ch))
-  {
-	 if (ch == '-')
-	 {
-		if (sgn == 0)
-		  sgn = '-';
-		else
-		  break;
-	 }
-	 else
-	 {
-		if (ch >= '0' && ch <= '9')
-		{
-		  long digit = ch - '0';
-		  y *= 10;
-		  y += digit;
-		}
-		else
-		  break;
-	 }
+  while (s.get(ch)) {
+    if (ch == '-') {
+      if (sgn == 0)
+	sgn = '-';
+      else
+	break;
+    }
+    else {
+      if (ch >= '0' && ch <= '9') {
+	long digit = ch - '0';
+	y *= 10;
+	y += digit;
+      }
+      else
+	break;
+    }
   }
   s.unget(ch);
 
-  if (sgn == '-')
-	 y.negate();
+  if (sgn == '-') {
+    y.negate();
+  }
 
   return s;
 }
+#endif  // !USE_GNU_MP
 
 //------------------------------------------------------------------------
 //                    gInteger: Private member functions
 //------------------------------------------------------------------------
 
-int gInteger::OK(void) const
+bool gInteger::OK(void) const
 {
+#if USE_GNU_MP
+  return true;
+#else
   if (rep != 0) {
     int l = rep->len;
     int s = rep->sgn;
@@ -2170,11 +2113,13 @@ int gInteger::OK(void) const
     Icheck(rep);                  // and correctly adjusted
     v &= rep->len == l;
     v &= rep->sgn == s;
-    if (v)
+    if (v) {
       return v;
+    }
   }
   error("invariant failure");
   return 0;
+#endif // USE_GNU_MP
 }
 
 void gInteger::error(const char *) const
@@ -2184,46 +2129,87 @@ void gInteger::error(const char *) const
 //                          gInteger: Lifecycle
 //------------------------------------------------------------------------
 
+#if USE_GNU_MP
+gInteger::gInteger(void)
+{ mpz_init_set_ui(m_value, 0); }
+#else
 gInteger::gInteger(void) 
   : rep(&_ZeroRep)
 { }
+#endif // !USE_GNU_MP
 
+#if USE_GNU_MP
+gInteger::gInteger(int y)
+{ mpz_init_set_ui(m_value, y); }
+#else
 gInteger::gInteger(int y) 
   : rep(Icopy_long(0, (long) y)) 
 { }
+#endif // !USE_GNU_MP
 
+#if USE_GNU_MP
+gInteger::gInteger(long y)
+{ mpz_init_set_si(m_value, y); }
+#else
 gInteger::gInteger(long y) 
   : rep(Icopy_long(0, y)) 
 { }
+#endif // !USE_GNU_MP
 
+#if USE_GNU_MP
+gInteger::gInteger(unsigned long y)
+{ mpz_init_set_ui(m_value, y); }
+#else
 gInteger::gInteger(unsigned long y) 
   : rep(Icopy_ulong(0, y)) 
 { }
+#endif // !USE_GNU_MP
 
+#if !USE_GNU_MP
 gInteger::gInteger(IntRep *r) 
   : rep(r)
 { }
+#endif // !USE_GNU_MP
 
+#if USE_GNU_MP
+gInteger::gInteger(const gInteger &y)
+{ mpz_init_set(m_value, y.m_value); }
+#else
 gInteger::gInteger(const gInteger &y) 
   : rep(Icopy(0, y.rep)) 
 { }
+#endif // !USE_GNU_MP
 
 gInteger::~gInteger() 
 { 
+#if USE_GNU_MP
+  mpz_clear(m_value);
+#else
   if (rep && !STATIC_IntRep(rep)) {
     delete rep;
   }
+#endif // !USE_GNU_MP
 }
 
 gInteger &gInteger::operator=(const gInteger &y)
 {
+#if USE_GNU_MP
+  if (this != &y) {
+    mpz_set(m_value, y.m_value);
+  }
+#else
   rep = Icopy(rep, y.rep);
+#endif // USE_GNU_MP
   return *this;
 }
 
 gInteger &gInteger::operator=(long y)
 {
+#if USE_GNU_MP
+  mpz_set_si(m_value, y);
+#else
   rep = Icopy_long(rep, y); 
+#endif // USE_GNU_MP
   return *this;
 }
 
@@ -2389,139 +2375,195 @@ gInteger operator%(const gInteger &x, long y)
 
 // procedural versions
 
-int compare(const gInteger& x, const gInteger& y)
+int compare(const gInteger &x, const gInteger &y)
 {
+#if USE_GNU_MP
+  return mpz_cmp(x.m_value, y.m_value);
+#else
   return compare(x.rep, y.rep);
+#endif // USE_GNU_MP
 }
 
-int ucompare(const gInteger& x, const gInteger& y)
+int compare(const gInteger &x, long y)
 {
-  return ucompare(x.rep, y.rep);
-}
-
-int compare(const gInteger& x, long y)
-{
+#if USE_GNU_MP
+  return mpz_cmp_si(x.m_value, y);
+#else
   return compare(x.rep, y);
+#endif // USE_GNU_MP
 }
 
-int ucompare(const gInteger& x, long y)
+int compare(long x, const gInteger &y)
 {
-  return ucompare(x.rep, y);
-}
-
-int compare(long x, const gInteger& y)
-{
+#if USE_GNU_MP
+  return mpz_cmp_si(y.m_value, x);
+#else
   return -compare(y.rep, x);
+#endif // USE_GNU_MP
 }
 
-int ucompare(long x, const gInteger& y)
+void add(const gInteger &x, const gInteger &y, gInteger &dest)
 {
-  return -ucompare(y.rep, x);
-}
-
-void  add(const gInteger& x, const gInteger& y, gInteger& dest)
-{
+#if USE_GNU_MP
+  mpz_add(dest.m_value, x.m_value, y.m_value);
+#else
   dest.rep = add(x.rep, 0, y.rep, 0, dest.rep);
+#endif // USE_GNU_MP
 }
 
-void  sub(const gInteger& x, const gInteger& y, gInteger& dest)
+void sub(const gInteger &x, const gInteger &y, gInteger &dest)
 {
+#if USE_GNU_MP
+  mpz_sub(dest.m_value, x.m_value, y.m_value);
+#else
   dest.rep = add(x.rep, 0, y.rep, 1, dest.rep);
+#endif // USE_GNU_MP
 }
 
-void  mul(const gInteger& x, const gInteger& y, gInteger& dest)
+void mul(const gInteger &x, const gInteger &y, gInteger &dest)
 {
+#if USE_GNU_MP
+  mpz_mul(dest.m_value, x.m_value, y.m_value);
+#else
   dest.rep = multiply(x.rep, y.rep, dest.rep);
+#endif // USE_GNU_MP
 }
 
-void  div(const gInteger& x, const gInteger& y, gInteger& dest)
+void div(const gInteger &x, const gInteger &y, gInteger &dest)
 {
+#if USE_GNU_MP
+  mpz_tdiv_q(dest.m_value, x.m_value, y.m_value);
+#else
   dest.rep = div(x.rep, y.rep, dest.rep);
+#endif // USE_GNU_MP
 }
 
-void  mod(const gInteger& x, const gInteger& y, gInteger& dest)
+void mod(const gInteger &x, const gInteger &y, gInteger &dest)
 {
+#if USE_GNU_MP
+  mpz_tdiv_r(dest.m_value, x.m_value, y.m_value);
+#else
   dest.rep = mod(x.rep, y.rep, dest.rep);
+#endif // USE_GNU_MP
 }
 
-void  lshift(const gInteger& x, const gInteger& y, gInteger& dest)
+void pow(const gInteger &x, const gInteger &y, gInteger &dest)
 {
-  dest.rep = lshift(x.rep, y.rep, 0, dest.rep);
-}
-
-void  rshift(const gInteger& x, const gInteger& y, gInteger& dest)
-{
-  dest.rep = lshift(x.rep, y.rep, 1, dest.rep);
-}
-
-void  pow(const gInteger& x, const gInteger& y, gInteger& dest)
-{
+#if USE_GNU_MP
+  gInteger one(1);
+  mpz_powm(dest.m_value, x.m_value, y.m_value, one.m_value);
+#else
   dest.rep = power(x.rep, Itolong(y.rep), dest.rep); // not incorrect
+#endif // USE_GNU_MP
 }
 
-void  add(const gInteger& x, long y, gInteger& dest)
+void add(const gInteger &x, long y, gInteger &dest)
 {
+#if USE_GNU_MP
+  if (y >= 0) {
+    mpz_add_ui(dest.m_value, x.m_value, y);
+  }
+  else {
+    mpz_sub_ui(dest.m_value, x.m_value, -y);
+  }
+#else
   dest.rep = add(x.rep, 0, y, dest.rep);
+#endif // USE_GNU_MP
 }
 
-void  sub(const gInteger& x, long y, gInteger& dest)
+void sub(const gInteger &x, long y, gInteger &dest)
 {
+#if USE_GNU_MP
+  if (y >= 0) {
+    mpz_sub_ui(dest.m_value, x.m_value, y);
+  }
+  else {
+    mpz_add_ui(dest.m_value, x.m_value, -y);
+  }
+#else
   dest.rep = add(x.rep, 0, -y, dest.rep);
+#endif // USE_GNU_MP
 }
 
-void  mul(const gInteger& x, long y, gInteger& dest)
+void mul(const gInteger &x, long y, gInteger &dest)
 {
+#if USE_GNU_MP
+  mpz_mul_si(dest.m_value, x.m_value, y);
+#else
   dest.rep = multiply(x.rep, y, dest.rep);
+#endif // USE_GNU_MP
 }
 
-void  div(const gInteger& x, long y, gInteger& dest)
+void div(const gInteger &x, long y, gInteger &dest)
 {
+#if USE_GNU_MP
+  if (y > 0) {
+    mpz_tdiv_q_ui(dest.m_value, x.m_value, y);
+  }
+  else {
+    mpz_tdiv_q_ui(dest.m_value, x.m_value, -y);
+    dest.negate();
+  }
+#else
   dest.rep = div(x.rep, y, dest.rep);
+#endif // USE_GNU_MP
 }
 
-void  mod(const gInteger& x, long y, gInteger& dest)
+void mod(const gInteger& x, long y, gInteger& dest)
 {
+#if USE_GNU_MP
+  if (y > 0) {
+    mpz_tdiv_r_ui(dest.m_value, x.m_value, y);
+  }
+  else {
+    mpz_tdiv_r_ui(dest.m_value, x.m_value, -y);
+    dest.negate();
+  }
+#else
   dest.rep = mod(x.rep, y, dest.rep);
+#endif // USE_GNU_MP
 }
 
-void  lshift(const gInteger& x, long y, gInteger& dest)
+void pow(const gInteger &x, long y, gInteger &dest)
 {
-  dest.rep = lshift(x.rep, y, dest.rep);
-}
-
-void  rshift(const gInteger& x, long y, gInteger& dest)
-{
-  dest.rep = lshift(x.rep, -y, dest.rep);
-}
-
-void  pow(const gInteger& x, long y, gInteger& dest)
-{
+#if USE_GNU_MP
+  mpz_pow_ui(dest.m_value, x.m_value, y);
+#else
   dest.rep = power(x.rep, y, dest.rep);
+#endif // USE_GNU_MP
 }
 
-void abs(const gInteger& x, gInteger& dest)
+void abs(const gInteger &x, gInteger &dest)
 {
+#if USE_GNU_MP
+  mpz_abs(dest.m_value, x.m_value);
+#else
   dest.rep = abs(x.rep, dest.rep);
+#endif // USE_GNU_MP
 }
 
-void negate(const gInteger& x, gInteger& dest)
+void negate(const gInteger &x, gInteger &dest)
 {
+#if USE_GNU_MP
+  mpz_neg(dest.m_value, x.m_value);
+#else
   dest.rep = negate(x.rep, dest.rep);
+#endif // USE_GNU_MP
 }
 
-void  add(long x, const gInteger& y, gInteger& dest)
+void add(long x, const gInteger &y, gInteger &dest)
 {
-  dest.rep = add(y.rep, 0, x, dest.rep);
+  add(y, x, dest);
 }
 
-void  sub(long x, const gInteger& y, gInteger& dest)
+void sub(long x, const gInteger& y, gInteger& dest)
 {
-  dest.rep = add(y.rep, 1, x, dest.rep);
+  sub(y, x, dest);
 }
 
-void  mul(long x, const gInteger& y, gInteger& dest)
+void mul(long x, const gInteger& y, gInteger& dest)
 {
-  dest.rep = multiply(y.rep, x, dest.rep);
+  mul(y, x, dest);
 }
 
 void  gInteger::operator += (const gInteger& y)
@@ -2555,8 +2597,6 @@ void gInteger::operator -- ()
   add(*this, -1, *this);
 }
 
-
-
 void gInteger::operator *= (const gInteger& y)
 {
   mul(*this, y, *this);
@@ -2588,31 +2628,42 @@ void gInteger::negate()
 }
 
 
-int sign(const gInteger& x)
+int sign(const gInteger &x)
 {
+#if USE_GNU_MP
+  return mpz_sgn(x.m_value);
+#else
   return (x.rep->len == 0) ? 0 : ( (x.rep->sgn == 1) ? 1 : -1 );
+#endif // USE_GNU_MP
 }
 
-int even(const gInteger& y)
+bool even(const gInteger &y)
 {
+#if USE_GNU_MP
+  return mpz_even_p(y.m_value);
+#else
   return y.rep->len == 0 || !(y.rep->s[0] & 1);
+#endif // USE_GNU_MP
 }
 
-int odd(const gInteger& y)
+bool odd(const gInteger &y)
 {
+#if USE_GNU_MP
+  return mpz_odd_p(y.m_value);
+#else
   return y.rep->len > 0 && (y.rep->s[0] & 1);
+#endif // USE_GNU_MP
 }
 
-gText Itoa(const gInteger& y, int base, int width)
+gText Itoa(const gInteger &y, int base, int width)
 {
+#if USE_GNU_MP
+  char buf[mpz_sizeinbase(y.m_value, base) + 2];
+  mpz_get_str(buf, base, y.m_value);
+  return gText(buf);
+#else
   return Itoa(y.rep, base, width);
-}
-
-
-
-long lg(const gInteger& x) 
-{
-  return lg(x.rep);
+#endif // USE_GNU_MP
 }
 
 gInteger sqr(const gInteger& x) 
@@ -2621,36 +2672,6 @@ gInteger sqr(const gInteger& x)
   mul(x, x, r);
   return r;
 }
-
-/*
-gInteger operator <<  (const gInteger& x, const gInteger& y)
-{
-  gInteger r;
-  lshift(x, y, r);
-  return r;
-}
-
-gInteger operator <<  (const gInteger& x, long y)
-{
-  gInteger r;
-  lshift(x, y, r);
-  return r;
-}
-
-gInteger operator >>  (const gInteger& x, const gInteger& y) 
-{
-  gInteger r;
-  rshift(x, y, r);
-  return r;
-}
-
-gInteger operator >>  (const gInteger& x, long y)
-{
-  gInteger r;
-  rshift(x, y, r);
-  return r;
-}
-*/
 
 gInteger pow(const gInteger& x, long y)
 {
@@ -2673,8 +2694,6 @@ gInteger pow(const gInteger& x, const gInteger& y)
   return r;
 }
 
-
-
 gInteger abs(const gInteger& x) 
 {
   gInteger r;
@@ -2689,26 +2708,57 @@ gInteger operator - (const gInteger& x)
   return r;
 }
 
-gInteger  atoI(const char* s, int base) 
+gInteger atoI(const char *s, int base) 
 {
+#if USE_GNU_MP
+  gInteger r;
+  mpz_init(r.m_value);
+  mpz_set_str(r.m_value, s, base);
+  return r;
+#else
   gInteger r;
   r.rep = atoIntRep(s, base);
   return r;
+#endif // USE_GNU_MP
 }
 
-gInteger  gcd(const gInteger& x, const gInteger& y)
+gInteger gcd(const gInteger &x, const gInteger &y)
 {
+#if USE_GNU_MP
+  gInteger r;
+  mpz_gcd(r.m_value, x.m_value, y.m_value);
+  return r;
+#else
   gInteger r;
   r.rep = gcd(x.rep, y.rep);
   return r;
+#endif // USE_GNU_MP
 }
 
-void gInteger::operator %= (const gInteger& y)
+gInteger lcm(const gInteger& x, const gInteger& y)
+{
+#if USE_GNU_MP
+  gInteger r;
+  mpz_lcm(r.m_value, x.m_value, y.m_value);
+  return r;
+#else
+  gInteger r, g;
+  if (sign(x) == 0 || sign(y) == 0)
+    g = 1;
+  else 
+    g = gcd(x, y);
+  div(x, g, r);
+  mul(r, y, r);
+  return r;
+#endif // !USE_GNU_MP
+}
+
+void gInteger::operator%=(const gInteger& y)
 {
   *this = *this % y; // mod(*this, y, *this) doesn't work.
 }
 
-void gInteger::operator %= (long y)
+void gInteger::operator%=(long y)
 {
   *this = *this % y; // mod(*this, y, *this) doesn't work.
 }
@@ -2717,4 +2767,34 @@ gText ToText(const gInteger &i)
 {
   return gText(Itoa(i));
 }
+
+bool gInteger::fits_in_long(void) const 
+{
+#if USE_GNU_MP
+  return mpz_fits_slong_p(m_value);
+#else
+  return Iislong(rep);
+#endif // USE_GNU_MP
+}
+
+long gInteger::as_long(void) const
+{
+#if USE_GNU_MP
+  return mpz_get_si(m_value);
+#else
+  return Itolong(rep); 
+#endif // USE_GNU_MP
+}
+
+gOutput &operator<<(gOutput &s, const gInteger &y)
+{
+#if USE_GNU_MP
+  char buf[mpz_sizeinbase(y.m_value, 10) + 2];
+  mpz_get_str(buf, 10, y.m_value);
+  return s << buf;
+#else
+  return s << Itoa(y.rep);
+#endif // !USE_GNU_MP
+}
+
 

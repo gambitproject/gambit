@@ -206,9 +206,9 @@ int sign(const gRational &x)
 gInteger gRational::GetNumerator(void) const 
 {
 #if USE_GNU_MP
-  char buffer[mpz_sizeinbase(mpq_numref(m_value), 10) + 2];
-  mpz_get_str(buffer, 10, mpq_numref(m_value));
-  return atoI(buffer);
+  gInteger r;
+  mpq_get_num(r.m_value, m_value);
+  return r;
 #else
   return num;
 #endif  // USE_GNU_MP
@@ -217,9 +217,9 @@ gInteger gRational::GetNumerator(void) const
 gInteger gRational::GetDenominator(void) const 
 {
 #if USE_GNU_MP
-  char buffer[mpz_sizeinbase(mpq_denref(m_value), 10) + 2];
-  mpz_get_str(buffer, 10, mpq_denref(m_value));
-  return atoI(buffer);
+  gInteger r;
+  mpq_get_den(r.m_value, m_value);
+  return r;
 #else
   return den;
 #endif  // USE_GNU_MP

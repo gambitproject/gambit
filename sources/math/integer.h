@@ -38,16 +38,27 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 class gInput;
 class gOutput;
-class IntRep;
 
-long     Itolong(const IntRep*);
-double   Itodouble(const IntRep*);
-int      Iislong(const IntRep*);
-int      Iisdouble(const IntRep*);
+#if USE_GNU_MP
+#include <gmp.h>
+#else
+class IntRep;
+long Itolong(const IntRep*);
+double Itodouble(const IntRep*);
+int Iislong(const IntRep*);
+int Iisdouble(const IntRep*);
+#endif  // !USE_GNU_MP
 
 class gInteger {
+#if USE_GNU_MP
+  friend class gRational;
+#endif // USE_GNU_MP
 protected:
+#if USE_GNU_MP
+  mpz_t m_value;
+#else
   IntRep *rep;
+#endif  // !USE_GNU_MP
 
 public:
   // LIFECYCLE
@@ -55,7 +66,9 @@ public:
   gInteger(int);
   gInteger(long);
   gInteger(unsigned long);
+#if !USE_GNU_MP
   gInteger(IntRep *);
+#endif // !USE_GNU_MP
   gInteger(const gInteger &);
   ~gInteger();
 
@@ -114,15 +127,13 @@ public:
 // (constructive binary operations are inlined below)
 
 // builtin Integer functions that must be friends
+  friend double ratio(const gInteger &, const gInteger &);
 
-  friend long     lg (const gInteger&); // floor log base 2 of abs(x)
-  friend double   ratio(const gInteger& x, const gInteger& y);
-                  // return x/y as a double
-
-  friend gInteger  gcd(const gInteger&, const gInteger&);
-  friend int      even(const gInteger&); // true if even
-  friend int      odd(const gInteger&); // true if odd
-  friend int      sign(const gInteger&); // returns -1, 0, +1
+  friend gInteger gcd(const gInteger &, const gInteger &);
+  friend gInteger lcm(const gInteger &, const gInteger &);
+  friend bool even(const gInteger &);
+  friend bool odd(const gInteger &);
+  friend int sign(const gInteger &); // returns -1, 0, +1
 
 // procedural versions of operators
 
@@ -161,21 +172,18 @@ public:
   friend void     mul(long x, const gInteger& y, gInteger& dest);
 
 // coercion & conversion
-
-  int             fits_in_long() const { return Iislong(rep); }
-  int             fits_in_double() const { return Iisdouble(rep); }
-  long		  as_long() const { return Itolong(rep); }
-  double	  as_double() const { return Itodouble(rep); }
+  bool fits_in_long(void) const;
+  long as_long(void) const;
 
   friend gText Itoa(const gInteger& x, int base = 10, int width = 0);
-  friend gInteger  atoI(const char* s, int base = 10);
+  friend gInteger atoI(const char* s, int base = 10);
   
-  friend gInput& operator >> (gInput &s, gInteger& y);
-  friend gOutput& operator << (gOutput &s, const gInteger& y);
+  friend gInput& operator>>(gInput &s, gInteger& y);
+  friend gOutput& operator<<(gOutput &s, const gInteger& y);
 
 // error detection
-  void   error(const char* msg) const;
-  int             OK() const;  
+  void error(const char* msg) const;
+  bool OK(void) const;  
 };
 
 
@@ -188,11 +196,14 @@ public:
 
 
 extern gInteger  sqrt(const gInteger&); // floor of square root
-extern gInteger  lcm(const gInteger& x, const gInteger& y); // least common mult
 
 gText ToText(const gInteger &);
 
 #endif  // INTEGER_H
+
+
+
+
 
 
 
