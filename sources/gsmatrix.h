@@ -10,17 +10,24 @@
 #include "gmatrix.h"
 
 template <class T> class gSquareMatrix : public gMatrix<T>   {
+public:
+  class MatrixSingular : public gException {
   public:
-    gSquareMatrix(void);
-    gSquareMatrix(int size);
-    gSquareMatrix(const       gMatrix<T> &M);
-    gSquareMatrix(const gSquareMatrix<T> &M);
-    virtual ~gSquareMatrix();
+    virtual ~MatrixSingular() { }
+    
+    gText Description(void) const;
+  };
 
-    gSquareMatrix<T> &operator=(const gSquareMatrix<T> &);
+  gSquareMatrix(void);
+  gSquareMatrix(int size);
+  gSquareMatrix(const gMatrix<T> &);
+  gSquareMatrix(const gSquareMatrix<T> &);
+  virtual ~gSquareMatrix();
 
-    gSquareMatrix<T> Inverse(void) const;
-    T Determinant(void) const;
+  gSquareMatrix<T> &operator=(const gSquareMatrix<T> &);
+
+  gSquareMatrix<T> Inverse(void) const;
+  T Determinant(void) const;
 };
 
 template <class T> gOutput& operator<<(gOutput &to, const gSquareMatrix<T> &M);
