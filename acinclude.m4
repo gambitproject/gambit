@@ -49,6 +49,7 @@ indows is installed (optional)],
     no_wx=yes
   else
     WX_CFLAGS=`$WX_CONFIG $wx_config_args --cflags`
+    WX_CXXFLAGS=`$WX_CONFIG $wx_config_args --cxxflags`
     WX_LIBS=`$WX_CONFIG $wx_config_args --libs`
     wx_config_major_version=`$WX_CONFIG $wx_config_args --version | \
            sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
@@ -68,6 +69,7 @@ indows is installed (optional)],
      ifelse([$3], , :, [$3])
   fi
   AC_SUBST(WX_CFLAGS)
+  AC_SUBST(WX_CXXFLAGS)
   AC_SUBST(WX_LIBS)
 ])
 

@@ -44,11 +44,11 @@ if test "$WXCONFIG" != 1; then
     ])
 fi
 
-CXXFLAGS="${CXXFLAGS} ${WX_CFLAGS}"
+CXXFLAGS="${CXXFLAGS} ${WX_CXXFLAGS}"
 CXXFLAGS=`echo $CXXFLAGS | sed 's/-fno-exceptions//g'`
 LDFLAGS="${LDFLAGS} ${WX_LIBS}"
 
-GUI_LIBS="$WX_LIBS"
+GUI_LIBS="${WX_LIBS}"
 AC_SUBST(GUI_LIBS)
 
 AC_OUTPUT(Makefile sources/Makefile \

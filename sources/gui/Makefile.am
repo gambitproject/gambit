@@ -7,14 +7,14 @@ AM_CPPFLAGS = -I$(top_srcdir)/sources
 include filelist.in
 
 gambit_LDADD = \
+        $(GUI_LIBS) \
 	$(top_builddir)/sources/nash/libnash.a \
 	$(top_builddir)/sources/game/libgame.a \
 	$(top_builddir)/sources/poly/libpoly.a \
 	$(top_builddir)/sources/pelican/libpelican.a \
 	$(top_builddir)/sources/numerical/libnumerical.a \
 	$(top_builddir)/sources/math/libmath.a \
-	$(top_builddir)/sources/base/libbase.a \
-        $(GUI_LIBS)
+	$(top_builddir)/sources/base/libbase.a
 
 
 
