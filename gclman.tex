@@ -1552,22 +1552,26 @@ Support[nfg<->NFG] =: NFSUPPORT
 \subsection{Mixed and Behavior Strategies}
 
 \begin{verbatim}
-ActionValues[strategy->BEHAV, 
-             infoset->INFOSET] =: LIST(FLOAT)
-ActionValues[strategy->BEHAV, 
-             infoset->INFOSET] =: LIST(RATIONAL)
+ActionValue[strategy->BEHAV(T), action->ACTION] =: T,
+ActionValues[strategy->BEHAV(T), infoset->INFOSET] =: LIST(T)
+   for T = FLOAT, RATIONAL
 Behav[efg<->EFG | support->EFSUPPORT, 
       {list->LIST(LIST(LIST(FLOAT)))}] =: BEHAV
 Behav[efg<->EFG | support->EFSUPPORT, 
       {list->LIST(LIST(LIST(RATIONAL)))}] =: BEHAV
 Behav[mixed->MIXED] =: BEHAV
+Belief[strategy<->BEHAV(T), node->NODE] =: T
 Beliefs[strategy<->BEHAV(T)] =: LIST(LIST(LIST((T)))
+  for T = FLOAT, RATIONAL
+Game[mixed->MIXED] =: NFG
+Game[behav->BEHAV] =: EFG
 GobitLambda[x->BEHAV(T) | MIXED(T)] =: T
 GobitValue[x->BEHAV(T) | MIXED(T)] =: T
 Gripe[behav->BEHAV(T)] =: LIST(LIST(LIST(T)))
 Gripe[mixed->BEHAV(T)] =: LIST(LIST(T))
-InfosetProbs[strategy->BEHAV] =: LIST(FLOAT)
-InfosetProbs[strategy->BEHAV] =: LIST(RATIONAL)
+InfosetProb[strategy->BEHAV(T), infoset->INFOSET] =: T,
+InfosetProbs[strategy->BEHAV(T)] =: LIST(T)
+  for T = FLOAT, RATIONAL
 IsNash[strategy->MIXED] =: BOOLEAN
 IsNash[strategy->BEHAV] =: BOOLEAN
 IsPerfect[strategy->MIXED] =: BOOLEAN
@@ -1587,11 +1591,14 @@ Mixed[nfg<->NFG, list->LIST(LIST(FLOAT))] =: MIXED
 Mixed[nfg<->NFG, list->LIST(LIST(RATIONAL))] =: MIXED
 Mixed[support->NFSUPPORT, {list->LIST(LIST(FLOAT))}] =: MIXED
 Mixed[support->NFSUPPORT, {list->LIST(LIST(RATIONAL))}] =: MIXED
-NodeValues[strategy->BEHAV, player->EFPLAYER] =: LIST(FLOAT)
-NodeValues[strategy->BEHAV, player->EFPLAYER] =: LIST(RATIONAL)
+NodeValue[strategy->BEHAV(T), player->EFPLAYER, node->NODE] =: LIST(T)
+NodeValues[strategy->BEHAV(T), player->EFPLAYER] =: LIST(T)
+   for T = FLOAT, RATIONAL
 Payoff[strategy->BEHAV] =: LIST(T)
 Payoff[strategy->MIXED] =: LIST(T)
+RealizProb[strategy->BEHAV(T), node->NODE] =: T
 RealizProbs[strategy->BEHAV(T)] =: LIST(T)
+   for T = FLOAT, RATIONAL
 SetComponent[mixed<->MIXED, player->PLAYER, list->LIST(T)] =: MIXED 
 SetComponent[behav<->BEHAV, infoset->INFOSET, list->LIST(T)] =: BEHAV 
 Support[strategy->MIXED] =: NFSUPPORT
@@ -1685,6 +1692,7 @@ Centroid[efg<->EFG | support->EFSUPPORT] =: BEHAV
 Centroid[nfg<->NFG | support->NFSUPPORT] =: MIXED
 Chance[efg<->EFG] =: EFPLAYER
 ChanceProbs[infoset->INFOSET] =: LIST(T)
+Children[node->NODE] =: LIST(NODE)
 HasOutcome[node->NODE] =: BOOLEAN
 Help[x->TEXT] =: LIST(TEXT)
 HelpVars[x->TEXT] =: LIST(TEXT)
@@ -1765,16 +1773,15 @@ parameters which are not necessary for the procedure to function.
 
 \item
 \protect \large \begin{verbatim}
-ActionValues[strategy->BEHAV, 
-             infoset->INFOSET] =: LIST(FLOAT)
-ActionValues[strategy->BEHAV, 
-             infoset->INFOSET] =: LIST(RATIONAL)
+ActionValue[strategy->BEHAV(T), action->ACTION] =: T,
+ActionValues[strategy->BEHAV(T), infoset->INFOSET] =: LIST(T)
+   for T = FLOAT, RATIONAL
 \end{verbatim}\normalsize
 
-\bd
-Returns the list of values at information set \verb+infoset+ for each
-action for the player making the decision at \verb+infoset+, assuming that
-all players obey the behavioral strategy profile \verb+strategy+.
+\bd Returns the value at action \verb+a+ or list of values at
+information set \verb+infoset+ for each action for the player making
+the decision at \verb+infoset+, assuming that all players obey the
+behavioral strategy profile \verb+strategy+.
 \item
 [See also:] {\tt Beliefs}, {\tt InfosetProbs}, {\tt NodeValues},
 {\tt RealizProbs}.
@@ -1941,18 +1948,18 @@ behavioral profile on the associated extensive form game \verb+efg+.
 
 \item
 \protect \large \begin{verbatim}
+Belief[strategy<->BEHAV(T), node->NODE] =: T
 Beliefs[strategy<->BEHAV(T)] =: LIST(LIST(LIST((T)))
-                for T = FLOAT, RATIONAL
+  for T = FLOAT, RATIONAL
 \end{verbatim}\normalsize
 
-\bd 
-Returns a list of the conditional probabilities of being at a node
-given that a player knows he/she is in that node's information set, if
-all players are playing the behavioral strategy profile
-\verb+strategy+.  The list is ordered first by player, then
-by information set number, and then by node number (in the projection
-of the prefix-traversal order of the game tree) of the nodes within
-the information set.  
+\bd Returns the conditional probability of being at \verb+node+ given
+that a player is in that node's information set, assuming all players
+are playing the behavioral strategy profile \verb+strategy+.  The
+second version returns a nested list of these values.  The list is
+ordered first by player, then by information set number, and then by
+node number (in the projection of the prefix-traversal order of the
+game tree) of the nodes within the information set.
 \item
 [See also:] {\tt ActionValues}, {\tt InfosetProbs},
 {\tt NodeValues}, {\tt RealizProbs}.
@@ -2009,6 +2016,18 @@ ChanceProbs[infoset->INFOSET] =: LIST(RATIONAL)
 Returns the vector of probabilities over the actions at
 information set \verb+infoset+ as a list.  A run-time error results if
 the given information set does not belong to the chance player.
+\ed
+
+\item
+\protect \large \begin{verbatim} 
+Children[node->NODE] =: LIST(NODE)
+\end{verbatim}\normalsize
+
+\bd
+Returns the list of children of the node \verb+node+.
+\item
+[See also:] {\tt NumChildren}, {\tt NextSibling}, {\tt PriorSibling},
+{\tt Parent}.
 \ed
 
 \item
@@ -2391,6 +2410,17 @@ on control structures for complete information.
 
 \item
 \protect \large \begin{verbatim}
+Game[mixed->MIXED] =: NFG
+Game[behav->BEHAV] =: EFG
+\end{verbatim} \normalsize
+
+\bd
+Returns the game associated with the profile \verb+mixed+ or
+\verb+behav+.  
+\ed
+
+\item
+\protect \large \begin{verbatim}
 GobitGridSolve[nfg<->NFG | support->NFSUPPORT, {pxifile->TEXT},
          {minLam->FLOAT}, {maxLam->FLOAT}, 
          {delLam->FLOAT}, {powLam->INTEGER}, 
@@ -2679,16 +2709,16 @@ a terminal node will result in a run-time error.
 
 \item
 \protect \large \begin{verbatim}
-InfosetProbs[strategy->BEHAV] =: LIST(FLOAT)
-InfosetProbs[strategy->BEHAV] =: LIST(RATIONAL)
+InfosetProb[strategy->BEHAV(T), infoset->INFOSET] =: T,
+InfosetProbs[strategy->BEHAV(T)] =: LIST(T)
+  for T = FLOAT, RATIONAL
 \end{verbatim}\normalsize
 
-\bd
-Returns a (nested) list of the probabilities of reaching all information
-sets in an extensive form game, given that all players obey the
-behavioral strategy profile \verb+strategy+.  The $i$th element
-in the list returned is a list of the probabilities for the information
-sets owned by player $i$.
+\bd Returns the probability of reaching \verb+infoset+ under the
+behavior strategy \verb+strategy+.  The second version returns a
+(nested) list of these probabilities, where the $i$th element in the
+list returned is a list of the probabilities for the information sets
+owned by player $i$.
 \item
 [See also:] {\tt ActionValues}, {\tt Beliefs}, {\tt NodeValues},
 {\tt RealizProbs}.
@@ -3602,14 +3632,15 @@ Returns the list of nodes in the extensive form game
 
 \item
 \protect \large \begin{verbatim}
-NodeValues[strategy->BEHAV, player->EFPLAYER] =: LIST(FLOAT)
-NodeValues[strategy->BEHAV, player->EFPLAYER] =: LIST(RATIONAL)
+NodeValue[strategy->BEHAV(T), player->EFPLAYER, node->NODE] =: LIST(T)
+NodeValues[strategy->BEHAV(T), player->EFPLAYER] =: LIST(T)
+   for T = FLOAT, RATIONAL
 \end{verbatim}\normalsize
 
 \bd
-Returns a list containing the expected payoff to the player \verb+player+
-at each node in an extensive form game, given that all players are obeying
-the behavioral strategy profile \verb+strategy+.  The list is ordered
+Returns the value to \verb+player+ from being at \verb+node+ under the
+behavior profile \verb+strategy+.  The second version returns a list
+of these values for all the nodes of the tree.  The list is ordered
 in the prefix traversal order of the tree, the same order as returned
 by the function {\tt Nodes}.
 \item
@@ -3888,7 +3919,7 @@ Parent[node->NODE] =: NODE
 \bd
 Returns the parent node of \verb+node+.
 \item
-[See also:] {\tt IsRoot}.
+[See also:] {\tt IsRoot}, {\tt Children}.
 \ed
 
 \item
@@ -4135,16 +4166,17 @@ exposed data consists of all characters until the next whitespace.
 
 \item
 \protect \large \begin{verbatim}
+RealizProb[strategy->BEHAV(T), node->NODE] =: T
 RealizProbs[strategy->BEHAV(T)] =: LIST(T)
+   for T = FLOAT, RATIONAL
 \end{verbatim}\normalsize
 
-\bd
-Returns the list of realization probabilities for the
-nodes in an extensive form given that the players are using the behavioral
-strategy profile \verb+strategy+.  The list is ordered in the prefix-traversal
-of the nodes in the tree, the same order in which the {\tt Nodes} function
-returns the nodes in the tree.
-\ed
+\bd Returns the realization probability for \verb+node+ under the
+behavioral strategy profile \verb+strategy+.  The second version gives
+a list of probabilities for all the nodes in the extensive form.  The
+list is ordered in the prefix-traversal of the nodes in the tree, the
+same order in which the {\tt Nodes} function returns the nodes in the
+tree.  \ed
 
 \item
 \protect \large \begin{verbatim}
