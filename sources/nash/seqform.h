@@ -1,42 +1,51 @@
 //
-// FILE: seqform.h -- Interface to Sequence Form solution module
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Interface to algorithm to solve extensive forms using linear
+// complementarity program from sequence form
 //
 
 #ifndef SEQFORM_H
 #define SEQFORM_H
 
-#include "base/base.h"
-#include "nash/algutils.h"
-#include "nash/subsolve.h"
-#include "behavsol.h"
+#include "efgalgorithm.h"
+#include "numerical/lemketab.h"
 
-class SeqFormParams : public AlgParams {
-public:
-  int maxdepth;
-  
-  SeqFormParams(void);
-};
-
-#ifdef UNUSED
-class efgLcpSolve : public SubgameSolver  {
+template <class T> class efgLcp : public efgNashAlgorithm {
 private:
-  int npivots;
-  SeqFormParams params;
-  gArray<gNumber> values;
+  int m_stopAfter, m_maxDepth;
 
-  void SolveSubgame(const FullEfg &, const EFSupport &,
-		    gList<BehavSolution> &, gStatus &);
-  EfgAlgType AlgorithmID(void) const { return algorithmEfg_LCP_EFG; }    
+  int ns1,ns2,ni1,ni2;
+  T maxpay,eps;
+  gList<BFS<T> > List;
+  gList<Infoset *> isets1, isets2;
+
+  void FillTableau(const EFSupport &, gMatrix<T> &, const Node *, T,
+		   int, int, int, int);
+  int Add_BFS(const LTableau<T> &tab);
+  int All_Lemke(const EFSupport &, int dup, LTableau<T> &B,
+		int depth, gMatrix<T> &, gList<BehavSolution> &, gStatus &);
+  
+  void GetProfile(const EFSupport &, const LTableau<T> &tab, 
+		  gDPVector<T> &, const gVector<T> &, 
+		  const Node *n, int,int);
 
 public:
-  efgLcpSolve(const SeqFormParams &, int max = 0);
-  virtual ~efgLcpSolve();
+  efgLcp(void);
+  virtual ~efgLcp();
   
-  int NumPivots(void) const  { return npivots; }
+  int StopAfter(void) const { return m_stopAfter; }
+  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
+
+  int MaxDepth(void) const { return m_maxDepth; }
+  void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
+
+  gText GetAlgorithm(void) const { return "Lcp"; }
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
 };
-#endif  // UNUSED
 
 #endif    // SEQFORM_H
 

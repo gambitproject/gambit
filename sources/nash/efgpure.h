@@ -22,6 +22,9 @@ public:
   efgEnumPure(void) : m_stopAfter(0) { }
   virtual ~efgEnumPure() { }
 
+  int StopAfter(void) const { return m_stopAfter; }
+  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
+
   gText GetAlgorithm(void) const { return "EnumPure[EFG]"; }
   gList<BehavSolution> Solve(const EFSupport &, gStatus &);
 };
