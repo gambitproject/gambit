@@ -35,13 +35,11 @@ struct PortionSpecTextType
 };  
 
 
-#define NUM_PortionSpecs 26
+#define NUM_PortionSpecs 25
 #define NUM_CompositePortionSpecs 2
 
 PortionSpecTextType _PortionSpecText[] =
 {
-  { porERROR,              "ERROR" },
-  
   { porBOOL,               "BOOLEAN" },
   { porNUMBER,             "NUMBER" },
   { porTEXT,               "TEXT" },
@@ -113,12 +111,12 @@ gText PortionSpecToText(const PortionSpec& spec)
 
 
 #include "gstream.h"
+#include "gsm.h"
 
 PortionSpec TextToPortionSpec(const gText& text)
 {
-  int i;
   gText t = text;
-  PortionSpec result = porERROR;
+  PortionSpec result = 0;
 
   while(t.Left(5) == "LIST(")
   {
@@ -130,19 +128,20 @@ PortionSpec TextToPortionSpec(const gText& text)
     result.ListDepth = NLIST;
     t = t.Mid(t.Length()-7, 7);
   }
-  for(i=0; i<NUM_PortionSpecs; i++)
-    if(t.Left(strlen(_PortionSpecText[i].Text)) == _PortionSpecText[i].Text)
-    {
+  for (int i = 0; i < NUM_PortionSpecs; i++)  
+    if (t.Left(strlen(_PortionSpecText[i].Text)) == _PortionSpecText[i].Text) {
       result.Type = result.Type | _PortionSpecText[i].Type;
       t = t.Right(t.Length() - strlen(_PortionSpecText[i].Text));
-		if(t.Left(1) == "*")
-      {
+      if(t.Left(1) == "*") {
 	result.Null = true;
 	t.Remove(0);
       }
       if(t.Left(1) == " ")
 	t.Remove(0);
     }
+
+  if (result == 0)
+    throw gclRuntimeError("");
 
   return result;
 }

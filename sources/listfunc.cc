@@ -407,7 +407,6 @@ Portion* GSM_List( Portion** param )
 {
   ListPortion* p;
   int i;
-  assert( param[0]->Spec().Type != porERROR );  
 
   if( ((NumberPortion*) param[1])->Value() < gNumber(0))
     throw gclRuntimeError( "Invalid list Length" );
@@ -423,7 +422,6 @@ Portion* GSM_List_List( Portion** param )
 {
   ListPortion* p;
   int i;
-  assert( param[0]->Spec().Type != porERROR );  
 
   if( ((NumberPortion*) param[1])->Value() < gNumber(0) )
     throw gclRuntimeError( "Invalid list Length" );
@@ -458,7 +456,6 @@ Portion* GSM_List_Nfg( Portion** param )
 {
   ListPortion* p;
   int i;
-  assert( param[0]->Spec().Type != porERROR );  
 
   if( ((NumberPortion*) param[1])->Value() < gNumber(0) )
     throw gclRuntimeError( "Invalid list Length" );
@@ -479,7 +476,6 @@ Portion* GSM_List_Efg( Portion** param )
 {
   ListPortion* p;
   int i;
-  assert( param[0]->Spec().Type != porERROR );  
 
   if( ((NumberPortion*) param[1])->Value() < gNumber(0) )
     throw gclRuntimeError( "Invalid list Length" );

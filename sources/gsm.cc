@@ -642,12 +642,6 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
     result_copy = 0;
   }
 
-  if (result->Spec().Type == porERROR)  {
-//    gout << result << '\n'; 
-//      delete result;
-//      result = 0;
-    }
-
   for(i = 0; i < func_info.NumParams; i++)
   {
     if(func_info.ParamInfo[i].PassByReference)

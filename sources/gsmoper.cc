@@ -1074,18 +1074,17 @@ Portion* GSM_Read_List(Portion** param, PortionSpec spec,
 	input.unget(c);      
     }
 
-    if((*list)[i]->Spec() == spec)
-      p = (*func)(sub_param);
-    else
-      p = GSM_Read_List(sub_param, spec, func, ListFormat);
-
-    if(p->Spec().Type == porERROR)
-    {
-      input.setpos(old_pos);
-      return p;
+    try  {
+      if ((*list)[i]->Spec() == spec)
+        p = (*func)(sub_param);
+      else
+        p = GSM_Read_List(sub_param, spec, func, ListFormat);
     }
-    else
-    {
+    catch (...)  {
+      input.setpos(old_pos);
+      throw;
+    }
+
       // okay, complicated things going on here
       // we want to delete the return value, but
       //   p is actually swapped with sub_param[0] in the
@@ -1100,7 +1099,6 @@ Portion* GSM_Read_List(Portion** param, PortionSpec spec,
       // delete and swap
       delete sub_param[0];
       sub_param[0] = p;
-    }
   }
 
   if(ListFormat)
@@ -1133,31 +1131,44 @@ Portion* GSM_Read_List(Portion** param, PortionSpec spec,
 Portion* GSM_Read_List_Bool(Portion** param)
 {
   Portion* temp = param[1]->ValCopy();
-  Portion* p = GSM_Read_List(param, porBOOL, GSM_Read_Bool, false);
-  if(p->Spec().Type == porERROR)
-    ((ListPortion*) param[1])->AssignFrom(temp);
-  delete temp;
-  return p;
+  try  {
+    Portion* p = GSM_Read_List(param, porBOOL, GSM_Read_Bool, false);
+    delete temp;
+    return p;
+  }
+  catch (gclRuntimeError &)  {
+    ((ListPortion *) param[1])->AssignFrom(temp);
+    delete temp;
+    throw;
+  }
 }
 
 Portion* GSM_Read_List_Number(Portion** param)
 {
   Portion* temp = param[1]->ValCopy();
-  Portion* p = GSM_Read_List(param, porNUMBER, GSM_Read_Number, false);
-  if(p->Spec().Type == porERROR)
-    ((ListPortion*) param[1])->AssignFrom(temp);
-  delete temp;
-  return p;
+  try  {
+    Portion* p = GSM_Read_List(param, porNUMBER, GSM_Read_Number, false);
+    delete temp;
+    return p;
+  }
+  catch (gclRuntimeError &)  {
+    ((ListPortion *) param[1])->AssignFrom(temp);
+    throw;
+  }
 }
 
 Portion* GSM_Read_List_Text(Portion** param)
 {
   Portion* temp = param[1]->ValCopy();
-  Portion* p = GSM_Read_List(param, porTEXT, GSM_Read_Text, false);
-  if(p->Spec().Type == porERROR)
-    ((ListPortion*) param[1])->AssignFrom(temp);
-  delete temp;
-  return p;
+  try  {
+    Portion* p = GSM_Read_List(param, porTEXT, GSM_Read_Text, false);
+    delete temp;
+    return p;
+  }
+  catch (gclRuntimeError &)  {
+    ((ListPortion *) param[1])->AssignFrom(temp);
+    throw;
+  }
 }
 
 

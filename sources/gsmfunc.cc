@@ -208,69 +208,62 @@ Portion* CallFuncObj::CallListFunction(GSM* gsm, Portion** ParamIn)
     {
       result = CallListFunction(gsm, CurrParam);
     }
-    else
-    {
-      bool error_call = false;
-      for(j = 0; j < NumParams; j++)
-      {
-	if(CurrParam[j]->IsReference())
-	  CurrParam[j] = CurrParam[j]->RefCopy();
-	else
-	  CurrParam[j] = CurrParam[j]->ValCopy();
-	if(CurrParam[j]->Spec().Type == porERROR)
-	  error_call = true;
+    else  {
+      for (j = 0; j < NumParams; j++)  {
+	      if (CurrParam[j]->IsReference()) {
+	        CurrParam[j] = CurrParam[j]->RefCopy();
+        }
+	      else  {
+	        CurrParam[j] = CurrParam[j]->ValCopy();
+        }
       }
 
       bool null_call = false;
-      for(j = 0; j < NumParams; j++)
+      for (j = 0; j < NumParams; j++)
 	if(CurrParam[j]->Spec().Null && 
-	   !_FuncInfo[_FuncIndex].ParamInfo[j].Spec.Null)
-	{
+	   !_FuncInfo[_FuncIndex].ParamInfo[j].Spec.Null) {
 	  null_call = true;
 	  break;
 	}
 
-      if(!error_call && !null_call)
-	result = CallNormalFunction( gsm, CurrParam );
-
-      else if(null_call)
-      {
+      if (!null_call) {
+	try { 
+	  result = CallNormalFunction(gsm, CurrParam);
+	}
+	catch (gclRuntimeError &E) {
+	  _StdErr << _FuncName << "[]: ";
+	  _StdErr << E.Description() << "\n";
+	  _ErrorOccurred = true;
+	  _ErrorMessage(_StdErr, 27, p->Length()+1, _FuncName);
+	  throw gclRuntimeError("");
+	}
+      }
+      else if (null_call)  {
 	throw gclRuntimeError("Null argument encountered");
       }
       else
 	throw gclRuntimeError("Error in arguments");
 
-      for(j = 0; j < NumParams; j++)
+      for (j = 0; j < NumParams; j++)
 	delete CurrParam[j];
     }
 
-    if( result == 0 )
+    if (result == 0)
       throw gclRuntimeError("");
 
-    if(result->Spec().Type == porERROR)
-    {
-      _StdErr << _FuncName << "[]: ";
-      result->Output(_StdErr);
-      _StdErr << "\n";
-      delete result;
-      _ErrorOccurred = true;
-      _ErrorMessage(_StdErr, 27, p->Length()+1, _FuncName);
-      throw gclRuntimeError("");
-    }
-    else
-    {
-      if(result->Spec().Type == porUNDEFINED &&
-	 ((recurse && result->Spec().ListDepth > 
-	   _FuncInfo[_FuncIndex].ReturnSpec.ListDepth) ||
-	  (!recurse && result->Spec().ListDepth == 
-	   _FuncInfo[_FuncIndex].ReturnSpec.ListDepth)))
+    if(result->Spec().Type == porUNDEFINED &&
+       ((recurse && result->Spec().ListDepth > 
+	 _FuncInfo[_FuncIndex].ReturnSpec.ListDepth) ||
+	(!recurse && result->Spec().ListDepth == 
+	 _FuncInfo[_FuncIndex].ReturnSpec.ListDepth)))
       {
 	assert(result->Spec().ListDepth > 0);
 	((ListPortion*) result)->
 	  SetDataType(_FuncInfo[_FuncIndex].ReturnSpec.Type);      
       }
       p->Append(result);
-    }
+
+
   }
 
   delete[] CurrParam;
@@ -285,11 +278,9 @@ Portion* CallFuncObj::CallListFunction(GSM* gsm, Portion** ParamIn)
 //                      ParamInfoType
 //---------------------------------------------------------------
 
-
 ParamInfoType::ParamInfoType(void)
 :
  Name(""), 
- Spec(PortionSpec(porERROR)), 
  DefaultValue(REQUIRED), 
  PassByReference(BYVAL)
 {}
@@ -327,7 +318,7 @@ FuncInfoType::FuncInfoType(void)
 :
  UserDefined(false),
  FuncPtr(0),
- ReturnSpec(PortionSpec(porERROR)),
+ ReturnSpec(PortionSpec(porUNDEFINED)),
  Flag( funcLISTABLE ),
  NumParams(0),
  ParamInfo(0)
@@ -943,10 +934,7 @@ PortionSpec ToSpec(gText &str, int num /* =0 */)
   else if (str == "OUTPUT*")
     return PortionSpec(porOUTPUT, num, porNULLSPEC);
   else
-  {
-    gout << "ERROR: incorrect type, " << str << ", in function definition\n\n";
-    assert(0);
-  }
+    throw gclRuntimeError("ERROR: incorrect type, " + str + ", in function definition");
 }
 
 void FuncDescObj::SetParamInfo(int funcindex, int index, 
@@ -1174,9 +1162,7 @@ bool FuncDescObj::UDF( void ) const
 
 bool FuncDescObj::BIF( void ) const
 {
-  int i = 0;
-  for( i = 0; i < _NumFuncs; i++ )
-  {
+  for (int i = 0; i < _NumFuncs; i++)  {
     if( !_FuncInfo[i].UserDefined )
       return true;
   }
@@ -1613,25 +1599,21 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
   bool match_ok;
 
 
-
   // Attempt to identify the function being called out of all the
   // overloaded versions.
   
-  if(_FuncIndex == -1 && _NumFuncs == 1)
+  if (_FuncIndex == -1 && _NumFuncs == 1)
     _FuncIndex = 0;
   
-  if(_FuncIndex == -1)
-  {
+  if (_FuncIndex == -1) {
     param_upper_bound = 0;
-    for(index = 0; index < _NumParams; index++)
-    {
+    for (index = 0; index < _NumParams; index++) {
       if(_Param[index] != 0 || _RunTimeParamInfo[index].Ref != 0)
 	param_upper_bound = index;
     }
     
     param_sets_matched = 0;
-    for(f_index = 0; f_index < _NumFuncs; f_index++)
-    {
+    for (f_index = 0; f_index < _NumFuncs; f_index++)  {
       match_ok = true;
       if(param_upper_bound >= _FuncInfo[f_index].NumParams)
 	match_ok = false;
@@ -1639,24 +1621,17 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
       if(!_FuncMatch[f_index])
 	match_ok = false;
 
-      for(index = 0;
-	  index < _FuncInfo[f_index].NumParams;
-	  index++)
-      {
-	if(_Param[index] != 0)
-	{
+      for (index = 0; index < _FuncInfo[f_index].NumParams; index++)   {
+	if(_Param[index] != 0) {
 	  // parameter is defined
-	  if(!_TypeMatch
-	     (_Param[index],
-	      _FuncInfo[f_index].ParamInfo[index].Spec,
-	      (_FuncInfo[f_index].Flag & funcLISTABLE) ))
+	  if(!_TypeMatch(_Param[index],
+			 _FuncInfo[f_index].ParamInfo[index].Spec,
+			 (_FuncInfo[f_index].Flag & funcLISTABLE)))
 	    match_ok = false;
 	}
-	else
-	{
+	else {
 	  // parameter is undefined
-	  if(_RunTimeParamInfo[index].Ref != 0)
-	  {
+	  if(_RunTimeParamInfo[index].Ref != 0) {
 	    // specified undefined variable
 	    if(!_FuncInfo[f_index].ParamInfo[index].PassByReference)
 	      match_ok = false;
@@ -1667,19 +1642,16 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 	}
       }
       
-      if(match_ok)
-      {
+      if(match_ok) {
 	curr_f_index = f_index;
 	param_sets_matched++;
       }
     }
 
-    if(param_sets_matched == 1)
-    {
+    if(param_sets_matched == 1) {
       _FuncIndex = curr_f_index;
     }
-    else
-    {
+    else {
       if(param_sets_matched > 1)
 	_ErrorMessage(_StdErr, 5, 0, _FuncName);
       else
@@ -1688,28 +1660,12 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
     }
   }
   
-
-
-  
-  if(_FuncIndex != -1)
-  {
-    for(index = 0; 
-	index < _FuncInfo[_FuncIndex].NumParams; 
-	index++)
-    {
-      if(_Param[index] != 0)
-      {
-	if(_Param[index]->Spec().Type == porERROR)
-	{
-	  _ErrorMessage(_StdErr, 6, index + 1, _FuncName,
-			_FuncInfo[_FuncIndex].ParamInfo[index].Name);
-	  _ErrorOccurred = true;
-	}
-	else if(!_TypeMatch
-		(_Param[index], 
-		 _FuncInfo[_FuncIndex].ParamInfo[index].Spec,
-		 (_FuncInfo[_FuncIndex].Flag & funcLISTABLE) ))
-	{
+  if (_FuncIndex != -1) {
+    for(index = 0; index < _FuncInfo[_FuncIndex].NumParams; index++) {
+      if(_Param[index] != 0) {
+	if(!_TypeMatch(_Param[index], 
+		       _FuncInfo[_FuncIndex].ParamInfo[index].Spec,
+		       (_FuncInfo[_FuncIndex].Flag & funcLISTABLE))) {
 	  _ErrorMessage(_StdErr, 7, index + 1, _FuncName, 
 			_FuncInfo[_FuncIndex].ParamInfo[index].Name);
 	  _ErrorOccurred = true;
@@ -1717,8 +1673,6 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
       }
     }
   }
-
-
 
 
   // at this point _FuncIndex should be defined; i.e. the function
@@ -1878,23 +1832,21 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
       // normal func call
       result = CallNormalFunction( gsm, _Param );
     }
-    else // listed function call
-    {
-      result = CallListFunction(gsm, _Param);
+    else { // listed function call
+      try {
+	result = CallListFunction(gsm, _Param);
+      }
+      catch (gclRuntimeError &E) {
+	_StdErr << _FuncName << "[]: ";
+	_StdErr << E.Description() << '\n';
+	_ErrorOccurred = true;
+	throw gclRuntimeError("");
+      }
     }
 
     if(result == 0)
     {
       _ErrorMessage(_StdErr, 20, 0, _FuncName);
-      _ErrorOccurred = true;
-      throw gclRuntimeError("");
-    }
-    else if(result->Spec().Type == porERROR)
-    {
-      _StdErr << _FuncName << "[]: ";
-      result->Output(_StdErr);
-      _StdErr << "\n";
-      delete result;
       _ErrorOccurred = true;
       throw gclRuntimeError("");
     }

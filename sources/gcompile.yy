@@ -703,58 +703,56 @@ void GCLCompiler::RecoverFromError(void)
 gclExpression *GCLCompiler::DefineFunction(gclExpression *expr)
 {
   FuncDescObj *func = new FuncDescObj(funcname, 1);
-  bool error = false;
-
   PortionSpec funcspec;
 
-  funcspec = TextToPortionSpec(functype);
-  if (funcspec.Type != porERROR) {
-    FuncInfoType funcinfo = 
-      FuncInfoType(expr, funcspec, formals.Length());
-
-    funcbody = current_rawline;
-    if( !strstr((const char *) funcbody, "/*Private*/" ) )
-      funcinfo.Desc = funcbody;
-    else
-      funcinfo.Desc = "/*Private*/";
-
-    if( funcdesc.Length() > 0 )
-      funcinfo.Desc += "\n\n" + funcdesc;
-    funcdesc = "";
-
-    func->SetFuncInfo(0, funcinfo);
+  try {
+    funcspec = TextToPortionSpec(functype);
   }
-  else {
-    error = true;
+  catch (gclRuntimeError &)  {
     gerr << "Error: Unknown type " << functype << ", " << 
-      PortionSpecToText(funcspec) << " as return type in declaration of " << 
-      funcname << "[]\n";
+      " as return type in declaration of " << funcname << "[]\n";
+    return new gclConstExpr(new BoolPortion(false));;
   }
+
+  FuncInfoType funcinfo = 
+    FuncInfoType(expr, funcspec, formals.Length());
+
+  funcbody = current_rawline;
+  if( !strstr((const char *) funcbody, "/*Private*/" ) )
+    funcinfo.Desc = funcbody;
+  else
+    funcinfo.Desc = "/*Private*/";
+
+  if( funcdesc.Length() > 0 )
+    funcinfo.Desc += "\n\n" + funcdesc;
+  funcdesc = "";
+  
+  func->SetFuncInfo(0, funcinfo);
 
   for (int i = 1; i <= formals.Length(); i++)   {
     PortionSpec spec;
     if(portions[i])
       spec = portions[i]->Spec();
-    else
-      spec = TextToPortionSpec(types[i]);
+    else {
+      try {
+	spec = TextToPortionSpec(types[i]);
+      }
+      catch (gclRuntimeError &) {
+	gerr << "Error: Unknown type " << types[i] << ", " << 
+	  PortionSpecToText(spec) << " for parameter " << formals[i] <<
+	  " in declaration of " << funcname << "[]\n";
+	return new gclConstExpr(new BoolPortion(false));;
+      }
+    }
 
-    if (spec.Type != porERROR)   {
-      if (refs[i])
-	func->SetParamInfo(0, i - 1, 
-                          ParamInfoType(formals[i], spec,
-			                portions[i], BYREF));
+    if (refs[i])
+      func->SetParamInfo(0, i - 1, 
+			 ParamInfoType(formals[i], spec,
+				       portions[i], BYREF));
       else
 	func->SetParamInfo(0, i - 1, 
-                          ParamInfoType(formals[i], spec,
-			                portions[i], BYVAL));
-    }
-    else   {
-      error = true;
-      gerr << "Error: Unknown type " << types[i] << ", " << 
-	PortionSpecToText(spec) << " for parameter " << formals[i] <<
-	 " in declaration of " << funcname << "[]\n";
-      break;
-    }
+			   ParamInfoType(formals[i], spec,
+					 portions[i], BYVAL));
   }
 
 
@@ -762,11 +760,8 @@ gclExpression *GCLCompiler::DefineFunction(gclExpression *expr)
   types.Flush();
   refs.Flush();
   portions.Flush();
-//  function = 0;
-  if (!error)
-    return new gclFunctionDef(func, expr);
-  else
-    return new gclConstExpr(new BoolPortion(false));;
+  
+  return new gclFunctionDef(func, expr);
 }
 
 
@@ -776,20 +771,19 @@ bool GCLCompiler::DeleteFunction(void)
   FuncDescObj *func = new FuncDescObj(funcname, 1);
   bool error = false;
 
-	PortionSpec funcspec;
+  PortionSpec funcspec;
 
-  funcspec = TextToPortionSpec(functype);
-  if (funcspec.Type != porERROR) {
-    func->SetFuncInfo(0, FuncInfoType(function, funcspec, formals.Length()));
+  try  {
+    funcspec = TextToPortionSpec(functype);
   }
-  else {
-    error = true;
+  catch (gclRuntimeError &)  {
     gerr << "Error: Unknown type " << functype << ", " << 
       PortionSpecToText(funcspec) << " as return type in declaration of " << 
       funcname << "[]\n";
+    return;
   }
 
-//  function->Dump(gout);
+  func->SetFuncInfo(0, FuncInfoType(function, funcspec, formals.Length()));
 
   for (int i = 1; i <= formals.Length(); i++)   {
     PortionSpec spec;
@@ -831,14 +825,7 @@ bool GCLCompiler::DeleteFunction(void)
 
 int GCLCompiler::Execute(void)
 {
-  Portion *result = gsm.Execute(exprtree); 
-
-  if (result)  {
-    if (result->Spec().Type == porERROR)
-      gout << "GCL: " << result << '\n';
-
-    delete result;
-  }
+  delete gsm.Execute(exprtree); 
   return rcSUCCESS;
 }
 

@@ -14,28 +14,6 @@
 
 class gOutput;
 
-typedef enum
-{ 
-  opERROR,
-
-  opNEG,
-  opADD, opSUB, opMUL, opDIV, 
-  opINTDIV, opMOD,
-
-  opEXP, opLOG,
-  opPOW_INT, opPOW_FLOAT,
-
-  opEQU, opNEQ, opGTN, opLTN, opGEQ, opLEQ,
-
-  opAND, opOR, opNOT,
-
-  opSUBSCRIPT,
-
-  opINTEGER, opFLOAT, opRATIONAL
-} OperationMode;
-
-
-
 #define rcFAIL     0
 #define rcSUCCESS -1
 #define rcQUIT    -2
@@ -43,9 +21,6 @@ typedef enum
 
 #define  porNULLSPEC  true
 
-
-
-#define  porERROR              ( 0x00000000 )
 #define  porBOOL               ( 0x00000001 )
 #define  porPRECISION          ( 0x00000002 )
 #define  porNUMBER             ( 0x00000008 )
@@ -92,7 +67,7 @@ public:
   PortionSpec(const PortionSpec& spec)
     : Type(spec.Type), ListDepth(spec.ListDepth), Null(spec.Null)
     {}
-  PortionSpec(unsigned long type = porERROR,
+  PortionSpec(unsigned long type = 0,
 	      signed short listdepth = 0,
 	      bool null = false )
     : Type(type), ListDepth(listdepth), Null(null)

@@ -43,12 +43,7 @@ PortionSpec gclSemiExpr::Type(void) const
 
 Portion *gclSemiExpr::Evaluate(void) 
 {
-  Portion *lv = lhs->Evaluate();
-  if (lv->Spec().Type == porERROR)
-    return lv;
-
-  delete lv;
-  
+  delete lhs->Evaluate();
   return rhs->Evaluate();
 }
 
@@ -222,8 +217,6 @@ Portion *gclFunctionCall::Evaluate(void)
 
   for (int i = 1; i <= params->req->NumParams(); i++)   {
     Portion *val = (*params->req)[i]->Evaluate();
-    if (val->Spec().Type == porERROR)  
-      return val;
     if (val->Spec().Type == porREFERENCE)   {
       if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value()))
 	call->SetCurrParam(_gsm.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), AUTO_VAL_OR_REF);
@@ -239,8 +232,6 @@ Portion *gclFunctionCall::Evaluate(void)
   for (int i = 1; i <= params->opt->NumParams(); i++)  {
     call->SetCurrParamIndex(params->opt->FormalName(i));
     Portion *val = (*params->opt)[i]->Evaluate();
-    if (val->Spec().Type == porERROR)
-      return val;
     if (val->Spec().Type == porREFERENCE)   {
       if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value()))
 	call->SetCurrParam(_gsm.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), true);
@@ -293,15 +284,15 @@ gclAssignment::~gclAssignment()
 Portion *gclAssignment::Evaluate(void)
 {
   Portion *lhs = variable->Evaluate();
-  if (lhs->Spec().Type == porERROR)
-    return lhs;
-  
-  Portion *rhs = value->Evaluate();  
-  if (rhs->Spec().Type == porERROR)
-    return rhs;
-
-  // Assign() will delete lhs and rhs
-  return _gsm.Assign(lhs, rhs);
+  try  {
+    Portion *rhs = value->Evaluate();
+      // Assign() will delete lhs and rhs
+    return _gsm.Assign(lhs, rhs);
+  }
+  catch (gclRuntimeError &)  {
+    delete lhs;
+    throw;
+  }
 }
 
 
@@ -365,25 +356,21 @@ void gclListConstant::Append(gclExpression *expr)
 Portion *gclListConstant::Evaluate(void)
 {
   ListPortion *ret = new ListPortion;
-  bool ErrorOccurred = false;
 
-  for (int i = 1; i <= values.Length(); i++)
-  {
-    Portion *v = values[i]->Evaluate();
-    if (v->Spec().Type == porERROR)
-      ErrorOccurred = true;
-    _gsm._ResolveRef(v);
-    int index = ret->Append(v);
-    if( index == 0 )
-      ErrorOccurred = true;
-  }
+  try  {
+    for (int i = 1; i <= values.Length(); i++)  {
+      Portion *v = values[i]->Evaluate();
+      _gsm._ResolveRef(v);
+      // not clear what causes this condition...?
+      if (ret->Append(v) == 0)
+        throw gclRuntimeError("");
+    }
 
-  if( !ErrorOccurred )
     return ret;
-  else
-  {
+  }
+  catch (...)   {
     delete ret;
-    throw gclRuntimeError("");
+    throw;
   }
 }
 
@@ -418,20 +405,24 @@ gclConditional::~gclConditional()
 Portion *gclConditional::Evaluate(void)
 {
   Portion *guardval = guard->Evaluate();
-  if (guardval->Spec().Type == porERROR)
-    return guardval;
   _gsm._ResolveRef(guardval);
   if (guardval->Spec().Type != porBOOL ||
       guardval->Spec().ListDepth > 0)
     throw gclRuntimeError("Guard must evaluate to BOOLEAN");
 
-  Portion *ret;
-  if (((BoolPortion *) guardval)->Value() == T_YES)
-    ret = truebr->Evaluate();
-  else
-    ret = falsebr->Evaluate();
-  delete guardval;
-  return ret;
+  try  {
+    Portion *ret;
+    if (((BoolPortion *) guardval)->Value() == T_YES)
+      ret = truebr->Evaluate();
+    else
+      ret = falsebr->Evaluate();
+    delete guardval;
+    return ret;
+  }
+  catch (...)   {
+    delete guardval;
+    throw;
+  }
 }
 
 gclWhileExpr::gclWhileExpr(gclExpression *g, gclExpression *b)
@@ -449,12 +440,26 @@ Portion *gclWhileExpr::Evaluate(void)
   Portion *ret = new NullPortion(porNUMBER);
 
   while (1)   {
-    Portion *guardval = guard->Evaluate();
-    if (guardval->Spec().Type == porERROR)
-      return guardval;
-    _gsm._ResolveRef(guardval);
+    Portion *guardval;
+    try  {
+      guardval = guard->Evaluate();
+    }
+    catch (...)  {
+      delete ret;
+      throw;
+    }
+
+    try  {
+      _gsm._ResolveRef(guardval);
+    }
+    catch (...)   {
+      delete guardval;
+      delete ret;
+      throw;
+    }
+    
     if (guardval->Spec().Type != porBOOL ||
-	guardval->Spec().ListDepth > 0)
+        guardval->Spec().ListDepth > 0)
       throw gclRuntimeError("Guard must evaluate to BOOLEAN");
 
     if (((BoolPortion *) guardval)->Value() != T_YES)  {
@@ -465,8 +470,6 @@ Portion *gclWhileExpr::Evaluate(void)
     delete guardval;
     delete ret;
     ret = body->Evaluate();
-    if (ret->Spec().Type == porERROR)
-      return ret;
   }
 }
 
@@ -488,20 +491,36 @@ Portion *gclForExpr::Evaluate(void)
 {
   Portion *ret = new NullPortion(porNUMBER);
 
-  Portion *i = init->Evaluate();
-  if (i->Spec().Type == porERROR)
-    return i;
-
-  delete i;
+  try  {
+    delete init->Evaluate();
+  }
+  catch (...)   {
+    delete ret;
+    throw;
+  }
 
   while (1)   {
-    Portion *guardval = guard->Evaluate();
+    Portion *guardval;
 
-    if (guardval->Spec().Type == porERROR)
-      return guardval;
-    _gsm._ResolveRef(guardval);
+    try  {
+      guardval = guard->Evaluate();
+    }
+    catch (...)  {
+      delete ret;
+      throw;
+    }
+
+    try  {
+      _gsm._ResolveRef(guardval);
+    }
+    catch (...)  {
+      delete ret;
+      delete guardval;
+      throw;
+    }
+
     if (guardval->Spec().Type != porBOOL ||
-	guardval->Spec().ListDepth > 0)
+	      guardval->Spec().ListDepth > 0)
       throw gclRuntimeError("Guard must evaluate to BOOLEAN"); 
 
     if (((BoolPortion *) guardval)->Value() != T_YES)  {
@@ -513,13 +532,13 @@ Portion *gclForExpr::Evaluate(void)
     delete ret;
     ret = body->Evaluate();
 
-    if (ret->Spec().Type == porERROR)
-      return ret;
-
-    Portion *s = step->Evaluate();
-    if (s->Spec().Type == porERROR)
-      return s;
-    delete s;
+    try   {
+      delete step->Evaluate();
+    }
+    catch (...)  {
+      delete ret;
+      throw;
+    }
   }
 }
     

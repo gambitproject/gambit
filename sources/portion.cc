@@ -181,6 +181,7 @@ void Portion::SetGame(const Efg *game)
   }
 }
 
+
 //--------
 // Null
 //--------
@@ -1937,8 +1938,6 @@ int ListPortion::Insert(Portion* item, int index)
       assert(item->Spec().ListDepth > 0);
       ((ListPortion*) item)->rep->_DataType = rep->_DataType;
     }
-    else if(item_type.Type == porERROR)
-      result = rep->value->Insert(item, index);
     else
       delete item;
   }
