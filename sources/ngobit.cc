@@ -1,7 +1,7 @@
 //#
 //# FILE: ngobit.cc -- Implementation of normal form Gobit algorithm
 //#
-//# @(#)ngobit.cc	1.20 5/1/95
+//# $Id$
 //#
 
 #include <math.h>
@@ -12,12 +12,13 @@
 //                     NFGobitParams<T>: Member functions
 //-------------------------------------------------------------------------
 
-template <class T> NFGobitParams<T>::NFGobitParams(void)
+template <class T> NFGobitParams<T>::NFGobitParams(gStatus &status_=gstatus)
+	: GobitParams<T>(status_)
 { }
 
 template <class T> NFGobitParams<T>::NFGobitParams(gOutput &out, gOutput &err,
-						   gOutput &pxi)
-  : GobitParams<T>(out, err, pxi)
+							 gOutput &pxi,gStatus &status_=gstatus)
+  : GobitParams<T>(out, err, pxi,status_)
 { }
 
 //-------------------------------------------------------------------------

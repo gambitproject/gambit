@@ -18,12 +18,13 @@
 //                     EFGobitParams<T>: Member functions
 //-------------------------------------------------------------------------
 
-template <class T> EFGobitParams<T>::EFGobitParams(void)
+template <class T> EFGobitParams<T>::EFGobitParams(gStatus &status_=gstatus)
+	: GobitParams<T>(status_)
 { }
 
 template <class T> EFGobitParams<T>::EFGobitParams(gOutput &out, gOutput &err,
-						   gOutput &pxi)
-  : GobitParams<T>(out, err, pxi)
+							 gOutput &pxi,gStatus &status_=gstatus)
+  : GobitParams<T>(out, err, pxi,status_)
 { }
 
 //-------------------------------------------------------------------------
