@@ -191,7 +191,13 @@ int EFActionSet::OriNumber ( int iset, Action *a)
 // checks for a valid EFActionSet, fails assertion if not
 void EFActionSet::ActionSetValid(void)
 {
-  assert(infosets.Length() > 0);
+// I changed this line because I think this is more correct.
+// The number of infosets for a player need not be nonzero
+// (in fact, it's very convenient at times to have "inactive" players) - Ted
+
+//  assert(infosets.Length() > 0);
+  assert(infosets.Length() == efp->NumInfosets());
+
   for (int i = 1; i <= infosets.Length(); i++)
     assert(infosets[i]->acts.Length() > 0);
 }
