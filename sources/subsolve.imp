@@ -49,8 +49,9 @@ void SubgameSolver::FindSubgames(Node *n, gList<BehavSolution> &solns,
       for (int subsoln = 1; subsoln <= subsolns.Length() &&
 	   (max_solns == 0 || newsolns.Length() <= max_solns); subsoln++)  {
 	BehavProfile<gNumber> bp(thissolns[soln]);
+	BehavProfile<gNumber> tmp(subsolns[subsoln]);
 	for (int j = 1; j <= bp.Length(); j++)
-	  bp[j] += subsolns[subsoln][j];
+	  bp[j] += tmp[j];
 	newsolns.Append(bp);
 	
 	newsubrootvalues.Append(subrootvalues[soln]);
