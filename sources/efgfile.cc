@@ -363,11 +363,13 @@ void write_node(FILE *f, struct node *n)
     int br = 1;
     
     for (struct node *m = n->firstbranch; m != NULLnode; 
-	 m = m->nextbranch, br++)
-      if (!strcmp(m->branchname, ""))
+	 m = m->nextbranch, br++)  {
+      if (!strcmp(m->branchname, ""))  
 	fprintf(f, " \"%d\"", br);
       else
 	fprintf(f, " \"%s\"", m->branchname);
+      fprintf(f, " %lf ", m->probability);
+    }
     
     fprintf(f, " } ");
 
@@ -408,8 +410,9 @@ void write_efg_file(FILE *f)
        p = p->nextplayer)   {
     fprintf(f, " \"Player %d\"", p->plyrnumber);
     int iset = 1;
-    for (struct iset *s = p->firstiset; s != NULLiset; s = s->nextplyriset)
-      s->isetplyrnumber = iset++;
+    for (struct iset *s = whichpblm->firstinfoset; s != NULLiset;
+	 s = s->nextiset) 
+      if (s->playr == p)   s->isetplyrnumber = iset++;
   }
 
   fprintf(f, " }\n");
