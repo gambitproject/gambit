@@ -165,8 +165,8 @@ int main( int /*argc*/, char* argv[] )
   }
 
   catch (gclQuitOccurred &e) {
-    //    gCmdLineInput::RestoreTermAttr();
-    //return 0;
+    gCmdLineInput::RestoreTermAttr(); 
+    return 0;
   }
   // The last line of defense for exceptions:
   catch (gException &w)  {
