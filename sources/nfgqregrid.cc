@@ -258,7 +258,9 @@ double QreNfgGrid::Distance(const gVector<double> &a,
 {
   double dist = 0.0;
   for (int i = 1; i <= a.Length(); i++) {
-    dist += abs(a[i]-b[i]);
+    if (abs(a[i] - b[i]) > dist) {
+      dist = abs(a[i] - b[i]);
+    }
   }
   return dist;
 }
@@ -290,14 +292,11 @@ bool QreNfgGrid::CheckEqu(MixedProfile<double> &p_profile,
   p_profile.SetRow(p_staticPlayer, 
 		   UpdateFunc(p_profile, p_staticPlayer, p_lambda));
   
-  double objFunc = 0.0;
-
   MixedProfile<double> newProfile(p_profile);
   for (int pl = 1; pl <= p_profile.Game().NumPlayers(); pl++) {
     if (pl != p_staticPlayer) {
       newProfile.SetRow(pl, UpdateFunc(p_profile, pl, p_lambda));
-      objFunc += Distance(newProfile.GetRow(pl), p_profile.GetRow(pl));
-      if (objFunc > p_tol)  {
+      if (Distance(newProfile.GetRow(pl), p_profile.GetRow(pl)) > p_tol) {
 	return false;
       }
     }
@@ -379,22 +378,32 @@ static bool Polish(MixedProfile<double> &p_profile, double p_lambda)
   gSquareMatrix<double> J(p_profile.Length());
 
   for (int iter = 1; iter <= 100; iter++) {
-    Jacobian(f, J, p_profile, p_lambda);
+    try {
+      Jacobian(f, J, p_profile, p_lambda);
 
-    gVector<double> step = J.Inverse() * f;
-    for (int i = 1; i <= p_profile.Length(); i++) {
-      p_profile[i] -= step[i];
-    }
-
-    if (Norm(step) <= .0000001 * (1.0 + Norm(p_profile))) {
+      gVector<double> step = J.Inverse() * f;
       for (int i = 1; i <= p_profile.Length(); i++) {
-	if (p_profile[i] < 0.0) {
+	p_profile[i] -= step[i];
+      }
+
+      if (Norm(step) <= .0000001 * (1.0 + Norm(p_profile))) {
+	for (int i = 1; i <= p_profile.Length(); i++) {
+	  if (p_profile[i] < 0.0) {
+	    return false;
+	  }
+	}
+	return true;
+      }
+    }
+    catch (gSquareMatrix<double>::MatrixSingular &) {
+      // check to see if maybe by dumb luck we have a solution
+      for (int i = 1; i <= f.Length(); i++) {
+	if (f[i] > .0001) {
 	  return false;
 	}
       }
       return true;
     }
-    
   }
 
   return false;
@@ -430,13 +439,6 @@ void QreNfgGrid::Solve(const NFSupport &p_support, gOutput &p_pxifile,
     gList<MixedSolution> cursolns;
 
     p_status.Get();
-    if (m_powLam == 0)  {
-      lambda += m_delLam;
-    } 
-    else  {
-      lambda *= (m_delLam + 1.0);
-    }
-
     MixedProfileIterator iter1(centroid, m_delp1, 1.0, staticPlayer);
 
     do {
@@ -472,6 +474,13 @@ void QreNfgGrid::Solve(const NFSupport &p_support, gOutput &p_pxifile,
 
     if (m_fullGraph || step == numSteps) {
       p_solutions += cursolns;
+    }
+
+    if (m_powLam == 0)  {
+      lambda += m_delLam;
+    } 
+    else  {
+      lambda *= (m_delLam + 1.0);
     }
   }
   
