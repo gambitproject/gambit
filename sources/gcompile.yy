@@ -175,7 +175,7 @@ E5:           E6
   |           E5 STAR E6    { emit(new Mul); }
   |           E5 SLASH E6   { emit(new Div); }
   |           E5 PERCENT E6 { emit(new Mod); }
-  |           E5 DIV E6     { emit(new IntDiv); }
+/*  |           E5 DIV E6     { emit(new IntDiv); } */
   ;
 
 E6:           PLUS E7
