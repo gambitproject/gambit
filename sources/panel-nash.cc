@@ -28,6 +28,7 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
+#include "sheet.h"    // for wxSheet
 
 #include "panel-nash.h"
 
@@ -191,6 +192,294 @@ void gbtTextWindow::OnLeftDown(wxMouseEvent &)
 }
 
 
+BEGIN_DECLARE_EVENT_TYPES()
+  DECLARE_EVENT_TYPE(GBT_MIXED_PROFILE_SELECTED, 7779)
+END_DECLARE_EVENT_TYPES()
+
+#define EVT_MIXED_PROFILE_SELECTED(fn) \
+    DECLARE_EVENT_TABLE_ENTRY( \
+        GBT_MIXED_PROFILE_SELECTED, wxID_ANY, wxID_ANY, \
+        (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+        (wxObject *) NULL \
+    ),
+
+DEFINE_EVENT_TYPE(GBT_MIXED_PROFILE_SELECTED)
+
+const int GBT_ID_MIXED_PROFILE_CTRL = 2000;
+
+class gbtMixedProfileCtrl : public wxSheet, public gbtGameView {
+private:
+  gbtList<gbtMixedProfile<double> > &m_eqa;
+
+  // Overriding wxSheet members for data access
+  wxString GetCellValue(const wxSheetCoords &);
+  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const;
+
+  // Event handlers
+  void OnRowSelected(wxSheetRangeSelectEvent &);
+
+public:
+  gbtMixedProfileCtrl(wxWindow *p_parent, gbtGameDocument *p_doc,
+		      gbtList<gbtMixedProfile<double> > &p_eqa);
+
+  void OnUpdate(void);
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(gbtMixedProfileCtrl, wxSheet)
+  EVT_SHEET_RANGE_SELECTED(GBT_ID_MIXED_PROFILE_CTRL,
+			   gbtMixedProfileCtrl::OnRowSelected)
+END_EVENT_TABLE()
+
+gbtMixedProfileCtrl::gbtMixedProfileCtrl(wxWindow *p_parent,
+					 gbtGameDocument *p_doc,
+					 gbtList<gbtMixedProfile<double> > &p_eqa)
+  : wxSheet(p_parent, GBT_ID_MIXED_PROFILE_CTRL), gbtGameView(p_doc),
+    m_eqa(p_eqa)
+{
+  CreateGrid(m_eqa.Length(), p_doc->GetGame()->NumPlayers());
+
+  EnableEditing(false);
+  DisableDragRowSize();
+  DisableDragColSize();
+  SetCursorCellHighlightColour(*wxWHITE);
+  SetSelectionMode(wxSHEET_SelectRows);
+
+  AutoSizeRows();
+  AutoSizeColumns();
+  for (int col = 0; col <= GetNumberCols(); col++) {
+    if (GetColWidth(col) < GetRowHeight(col)) {
+      SetColWidth(col, GetRowHeight(col));
+    }
+  }
+  AdjustScrollbars();
+}
+
+static wxString ToMyerson(const gbtMixedProfile<double> &p_profile,
+			  const gbtGamePlayer &p_player)
+{
+  wxString ret = "";
+  for (int st = 1; st <= p_player->NumStrategies(); st++) {
+    gbtGameStrategy strategy = p_player->GetStrategy(st);
+    if (p_profile->GetStrategyProb(strategy) > 0.0) {
+      if (ret != "") {
+	ret += " + ";
+      }
+
+      if (strategy->GetLabel() != "") {
+	ret += wxString::Format("%f*[%s]",
+				p_profile->GetStrategyProb(strategy),
+				strategy->GetLabel().c_str());
+      }
+      else {
+	ret += wxString::Format("%f*[<%d>]",
+				p_profile->GetStrategyProb(strategy), st);
+      }
+    }
+  }
+
+  return ret;
+}
+
+wxString gbtMixedProfileCtrl::GetCellValue(const wxSheetCoords &p_coords)
+{
+  if (IsRowLabelCell(p_coords)) {
+    return wxString::Format("%d", p_coords.GetRow() + 1);
+  }
+  else if (IsColLabelCell(p_coords)) {
+    return m_doc->GetGame()->GetPlayer(p_coords.GetCol() + 1)->GetLabel().c_str();
+  }
+  else if (IsCornerLabelCell(p_coords)) {
+    return "#";
+  }
+
+  return ToMyerson(m_eqa[p_coords.GetRow() + 1],
+		   m_doc->GetGame()->GetPlayer(p_coords.GetCol() + 1));
+}
+
+wxSheetCellAttr gbtMixedProfileCtrl::GetAttr(const wxSheetCoords &p_coords,
+					     wxSheetAttr_Type) const
+{
+  if (IsRowLabelCell(p_coords)) {
+    wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
+    attr.SetFont(wxFont(12, wxSWISS, wxNORMAL, wxBOLD));
+    attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+    attr.SetOrientation(wxHORIZONTAL);
+    attr.SetReadOnly(true);
+    attr.SetForegroundColour(*wxBLACK);
+    return attr;
+  }
+  else if (IsColLabelCell(p_coords)) {
+    wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
+    attr.SetFont(wxFont(12, wxSWISS, wxNORMAL, wxBOLD));
+    attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+    attr.SetOrientation(wxHORIZONTAL);
+    attr.SetReadOnly(true);
+    attr.SetForegroundColour(m_doc->GetPlayerColor(p_coords.GetCol() + 1));
+    return attr;
+  }
+  else if (IsCornerLabelCell(p_coords)) {
+    wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
+    attr.SetFont(wxFont(12, wxSWISS, wxNORMAL, wxBOLD));
+    attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+    attr.SetOrientation(wxHORIZONTAL);
+    attr.SetReadOnly(true);
+    attr.SetForegroundColour(*wxBLACK);
+    return attr;
+  }
+
+  wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
+  attr.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+  attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+  attr.SetOrientation(wxHORIZONTAL);
+  attr.SetReadOnly(true);
+  attr.SetForegroundColour(m_doc->GetPlayerColor(p_coords.GetCol() + 1));
+  return attr;
+}
+
+
+void gbtMixedProfileCtrl::OnUpdate(void)
+{
+  if (m_eqa.Length() > GetNumberRows()) {
+    AppendRows(m_eqa.Length() - GetNumberRows());
+  }
+  else if (m_eqa.Length() < GetNumberRows()) {
+    DeleteRows(GetNumberRows() - m_eqa.Length());
+  }
+
+  AutoSizeRows();
+  AutoSizeColumns();
+  for (int col = 0; col <= GetNumberCols(); col++) {
+    if (GetColWidth(col) < GetRowHeight(col)) {
+      SetColWidth(col, GetRowHeight(col));
+    }
+  }
+  AdjustScrollbars();
+}
+
+void gbtMixedProfileCtrl::OnRowSelected(wxSheetRangeSelectEvent &p_event)
+{
+  if (p_event.Selecting()) {
+    wxCommandEvent event(GBT_MIXED_PROFILE_SELECTED);
+    event.SetInt(p_event.GetTopRow() + 1);
+    wxPostEvent(this, event);
+  }
+}
+
+
+class gbtMixedProfileDetail : public wxSheet, public gbtGameView {
+private:
+  gbtList<gbtMixedProfile<double> > &m_eqa;
+  int m_index;
+
+  // Overriding wxSheet members for data access
+  wxString GetCellValue(const wxSheetCoords &);
+  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const;
+
+public:
+  gbtMixedProfileDetail(wxWindow *p_parent, gbtGameDocument *p_doc,
+			gbtList<gbtMixedProfile<double> > &p_eqa);
+
+  void OnUpdate(void);
+
+  void SetIndex(int p_index) { m_index = p_index; ForceRefresh(); }
+};
+
+gbtMixedProfileDetail::gbtMixedProfileDetail(wxWindow *p_parent,
+					     gbtGameDocument *p_doc,
+					     gbtList<gbtMixedProfile<double> > &p_eqa)
+  : wxSheet(p_parent, -1), gbtGameView(p_doc),
+    m_eqa(p_eqa), m_index(0)
+{
+  CreateGrid(1 + p_doc->GetGame()->NumPlayers(), 1);
+
+  EnableEditing(false);
+  DisableDragRowSize();
+  DisableDragColSize();
+  SetCursorCellHighlightColour(*wxWHITE);
+  SetColLabelHeight(1);
+
+  AutoSizeRows();
+  AutoSizeColumns();
+  for (int col = 0; col <= GetNumberCols(); col++) {
+    if (GetColWidth(col) < GetRowHeight(col)) {
+      SetColWidth(col, GetRowHeight(col));
+    }
+  }
+  AdjustScrollbars();
+}
+
+void gbtMixedProfileDetail::OnUpdate(void)
+{
+  ForceRefresh();
+}
+
+wxString gbtMixedProfileDetail::GetCellValue(const wxSheetCoords &p_coords)
+{
+  if (IsRowLabelCell(p_coords)) {
+    if (p_coords.GetRow() == 0) {
+      return "Lyapunov";
+    }
+    else {
+      gbtGamePlayer player = m_doc->GetGame()->GetPlayer(p_coords.GetRow());
+      if (player->GetLabel() != "") {
+	return wxString::Format("Payoff to %s", player->GetLabel().c_str());
+      }
+      else {
+	return wxString::Format("Payoff to Player %d", p_coords.GetRow());
+      }
+    }
+  }
+  else if (IsColLabelCell(p_coords) || IsCornerLabelCell(p_coords)) {
+    return "";
+  }
+
+  if (m_index == 0)  return "";
+
+  if (p_coords.GetRow() == 0) {
+    return wxString::Format("%f", m_eqa[m_index]->GetLiapValue(false));
+  }
+  else {
+    return wxString::Format("%f", 
+			    m_eqa[m_index]->GetPayoff(m_doc->GetGame()->GetPlayer(p_coords.GetRow())));
+  }
+}
+
+wxSheetCellAttr gbtMixedProfileDetail::GetAttr(const wxSheetCoords &p_coords,
+					       wxSheetAttr_Type) const
+{
+  if (p_coords.GetRow() == 0) {
+    wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
+    if (IsRowLabelCell(p_coords)) {
+      attr.SetFont(wxFont(12, wxSWISS, wxNORMAL, wxBOLD));
+    }
+    else {
+      attr.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+    }
+    attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+    attr.SetOrientation(wxHORIZONTAL);
+    attr.SetReadOnly(true);
+    attr.SetForegroundColour(*wxBLACK);
+    return attr;
+  }
+  else {
+    wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
+    if (IsRowLabelCell(p_coords)) {
+      attr.SetFont(wxFont(12, wxSWISS, wxNORMAL, wxBOLD));
+    }
+    else {
+      attr.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
+    }
+    attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+    attr.SetOrientation(wxHORIZONTAL);
+    attr.SetReadOnly(true);
+    attr.SetForegroundColour(m_doc->GetPlayerColor(p_coords.GetRow()));
+    return attr;
+  }
+  return GetSheetRefData()->m_defaultGridCellAttr;
+}
+
 BEGIN_EVENT_TABLE(gbtNashPanel, wxPanel)
   EVT_BUTTON(GBT_BUTTON_START, gbtNashPanel::OnStartButton)
   EVT_BUTTON(GBT_BUTTON_CANCEL, gbtNashPanel::OnCancelButton)
@@ -198,13 +487,16 @@ BEGIN_EVENT_TABLE(gbtNashPanel, wxPanel)
   EVT_MENU(GBT_MENU_COUNT_ONE, gbtNashPanel::OnMenu)
   EVT_MENU(GBT_MENU_COUNT_ALL, gbtNashPanel::OnMenu)
   EVT_BUTTON(GBT_BUTTON_COUNT, gbtNashPanel::OnCountButton)
+  EVT_MIXED_PROFILE_SELECTED(gbtNashPanel::OnProfileSelected)
 END_EVENT_TABLE()
 
 gbtNashPanel::gbtNashPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
   : wxPanel(p_parent, -1), gbtGameView(p_doc),
     m_countValue(GBT_MENU_COUNT_ONE), m_thread(0)
 {
-  wxStaticBoxSizer *sizer = 
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  wxStaticBoxSizer *paramSizer = 
     new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC,
 					 "Computing Nash equilibria"),
 			 wxVERTICAL);
@@ -216,7 +508,7 @@ gbtNashPanel::gbtNashPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
   m_count = new gbtTextWindow(this, GBT_BUTTON_COUNT, "one Nash equilibrium");
   m_count->SetUnderline(true);
   countSizer->Add(m_count, 0, wxALL | wxALIGN_CENTER, 5);
-  sizer->Add(countSizer, 0, wxALL | wxALIGN_CENTER, 5);
+  paramSizer->Add(countSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   
@@ -227,9 +519,29 @@ gbtNashPanel::gbtNashPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
   buttonSizer->Add(m_cancelButton, 0, wxALL | wxALIGN_CENTER, 5);
   m_cancelButton->Enable(false);
 
-  sizer->Add(buttonSizer, 0, wxALIGN_CENTER, 0);
+  paramSizer->Add(buttonSizer, 0, wxALIGN_CENTER, 0);
+
+  topSizer->Add(paramSizer, 1, wxALL | wxEXPAND, 5);
+
+  wxStaticBoxSizer *listSizer = 
+    new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC,
+					 "List of computed equilibria"),
+			 wxVERTICAL);
+  m_profileCtrl = new gbtMixedProfileCtrl(this, p_doc, m_eqa);
+  listSizer->Add(m_profileCtrl, 1, wxALL | wxEXPAND, 5);
+
+  topSizer->Add(listSizer, 1, wxALL | wxEXPAND, 5);
+
+  wxStaticBoxSizer *detailSizer = 
+    new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC,
+					 "Equilibrium details"),
+			 wxVERTICAL);
+  m_profileDetail = new gbtMixedProfileDetail(this, p_doc, m_eqa);
+  detailSizer->Add(m_profileDetail, 1, wxALL | wxEXPAND, 5);
   
-  SetSizer(sizer);
+  topSizer->Add(detailSizer, 1, wxALL | wxEXPAND, 5);
+
+  SetSizer(topSizer);
   Layout();
 }
 
@@ -262,6 +574,7 @@ void gbtNashPanel::OnThreadDone(wxCommandEvent &)
   m_thread = 0;
   m_cancelButton->Enable(false);
   m_startButton->Enable(true);
+  m_profileCtrl->OnUpdate();
 }
 
 void gbtNashPanel::OnUpdate(void)
@@ -291,4 +604,9 @@ void gbtNashPanel::OnMenu(wxCommandEvent &p_event)
   default:
     break;
   }
+}
+
+void gbtNashPanel::OnProfileSelected(wxCommandEvent &p_event)
+{
+  m_profileDetail->SetIndex(p_event.GetInt());
 }

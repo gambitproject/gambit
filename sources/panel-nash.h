@@ -30,12 +30,16 @@
 #include "game-document.h"
 
 class gbtTextWindow;
+class gbtMixedProfileCtrl;
+class gbtMixedProfileDetail;
 
 class gbtNashPanel : public wxPanel, public gbtGameView {
 private:
   gbtTextWindow *m_count;
   int m_countValue;
   wxButton *m_startButton, *m_cancelButton;
+  gbtMixedProfileCtrl *m_profileCtrl;
+  gbtMixedProfileDetail *m_profileDetail;
   wxThread *m_thread;
   gbtList<gbtMixedProfile<double> > m_eqa;
 
@@ -44,7 +48,8 @@ private:
   void OnStartButton(wxCommandEvent &);
   void OnCancelButton(wxCommandEvent &);
   void OnThreadDone(wxCommandEvent &);
-
+  void OnProfileSelected(wxCommandEvent &);
+  
   void OnCountButton(wxCommandEvent &);
   void OnMenu(wxCommandEvent &);
   
