@@ -3,21 +3,27 @@
 
 #ifndef NFGOUTCD_H
 #define NFGOUTCD_H
+
 class NfgOutcomeDialogC;
 class NfgOutcomeDialog
 {
 protected:
-	NfgOutcomeDialogC *d;
-	NfgShow *ns;
+    NfgOutcomeDialogC *d;
+    NfgShow *ns;
+
 public:
-	NfgOutcomeDialog(Nfg &nf,NfgShow *ns);
-	~NfgOutcomeDialog();
-	void SetOutcome(const gText &outc_name);
-   void UpdateVals(void);
-	void OnOk(void);
+    NfgOutcomeDialog(Nfg &nf,NfgShow *ns);
+    ~NfgOutcomeDialog();
+    void SetOutcome(const gText &outc_name);
+    void UpdateVals(void);
+    void OnOk(void);
 };
 
-#define SHORT_ENTRY_OUTCOMES	0
-#define LONG_ENTRY_OUTCOMES		1
-#endif
+
+#define SHORT_ENTRY_OUTCOMES    0
+#define LONG_ENTRY_OUTCOMES     1
+
+#endif  // NFGOUTCD_H
+
+
 
