@@ -1,7 +1,7 @@
 //
 // FILE: solfunc.cc -- GCL functions on profiles and solutions
 //
-// @(#)solfunc.cc	1.31 1/27/97
+// $Id$
 //
 
 #include "gsm.h"
@@ -80,18 +80,28 @@ static Portion *GSM_ActionProbs_Float(Portion **param)
 {
   BehavSolution<double> *profile =
     (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
-  Infoset *infoset = ((InfosetPortion *) param[1])->Value();
   const EFSupport *support = &profile->GetEFSupport();
+  const BaseEfg &efg = support->BelongsTo();
 
   ListPortion *por = new ListValPortion;
-  for (int act = 1; act <= infoset->NumActions(); act++)   {
-    if (support->Find(infoset->GetActionList()[act]))
-      por->Append(new FloatValPortion(
-	      (*profile)(infoset->GetPlayer()->GetNumber(),
-			 infoset->GetNumber(),
-			 support->Find(infoset->GetActionList()[act]))));
-    else
-      por->Append(new FloatValPortion(0.0));
+  for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
+    EFPlayer *player = efg.PlayerList()[pl];
+    ListPortion *p1 = new ListValPortion;
+    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
+      Infoset *infoset = player->InfosetList()[iset];
+      ListPortion *p2 = new ListValPortion;
+      for (int act = 1; act <= infoset->NumActions(); act++)   {
+	if (support->Find(infoset->GetActionList()[act]))
+	  p2->Append(new FloatValPortion(
+	   	       (*profile)(player->GetNumber(),
+				  infoset->GetNumber(),
+				  support->Find(infoset->GetActionList()[act]))));
+	else
+	  p2->Append(new FloatValPortion(0.0));
+      }
+      p1->Append(p2);
+    }
+    por->Append(p1);
   }
 
   return por;
@@ -101,18 +111,28 @@ static Portion *GSM_ActionProbs_Rational(Portion **param)
 {
   BehavSolution<gRational> *profile =
     (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
-  Infoset *infoset = ((InfosetPortion *) param[1])->Value();
   const EFSupport *support = &profile->GetEFSupport();
+  const BaseEfg &efg = support->BelongsTo();
 
   ListPortion *por = new ListValPortion;
-  for (int act = 1; act <= infoset->NumActions(); act++)   {
-    if (support->Find(infoset->GetActionList()[act]))
-      por->Append(new RationalValPortion(
-	      (*profile)(infoset->GetPlayer()->GetNumber(),
-			 infoset->GetNumber(),
-			 support->Find(infoset->GetActionList()[act]))));
-    else
-      por->Append(new RationalValPortion(0));
+  for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
+    EFPlayer *player = efg.PlayerList()[pl];
+    ListPortion *p1 = new ListValPortion;
+    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
+      Infoset *infoset = player->InfosetList()[iset];
+      ListPortion *p2 = new ListValPortion;
+      for (int act = 1; act <= infoset->NumActions(); act++)   {
+	if (support->Find(infoset->GetActionList()[act]))
+	  p2->Append(new RationalValPortion(
+	   	       (*profile)(player->GetNumber(),
+				  infoset->GetNumber(),
+				  support->Find(infoset->GetActionList()[act]))));
+	else
+	  p2->Append(new RationalValPortion(0.0));
+      }
+      p1->Append(p2);
+    }
+    por->Append(p1);
   }
 
   return por;
@@ -189,31 +209,35 @@ static Portion *GSM_ActionValue_Rational(Portion **param)
 static Portion *GSM_ActionValues_Float(Portion **param)
 {
   BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
-  Infoset *s = ((InfosetPortion *) param[1])->Value();
 
-  ListPortion *por = new ListValPortion;
-  
-  if (s->GetPlayer()->IsChance())  {
-    for (int i = 1; i <= s->NumActions(); i++)
-      por->Append(new NullPortion(porFLOAT));
-    return por;
-  }
-
+  const EFSupport &support = bp->GetEFSupport(); 
   Efg<double> *E = bp->BelongsTo();
-
+  ListPortion *por = new ListValPortion; 
+  
   gDPVector<double> values(E->Dimensionality());
   gPVector<double> probs(E->Dimensionality().Lengths());
 
   bp->CondPayoff(values, probs);
   
-  gVector<double> ret(s->NumActions());
-  for (int i = 1; i <= s->NumActions(); i++)  {
-    if (bp->GetEFSupport().Find(s->GetActionList()[i]) &&
-        probs(s->GetPlayer()->GetNumber(), s->GetNumber()) > 0)
-      por->Append(new FloatValPortion(values(s->GetPlayer()->GetNumber(), s->GetNumber(),
-		      bp->GetEFSupport().Find(s->GetActionList()[i]))));
-    else
-      por->Append(new NullPortion(porFLOAT));
+  for (int pl = 1; pl <= E->NumPlayers(); pl++)  {
+    EFPlayer *player = E->PlayerList()[pl];
+    ListPortion *p1 = new ListValPortion;
+    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
+      Infoset *infoset = player->InfosetList()[iset];
+      ListPortion *p2 = new ListValPortion;
+ 
+      gVector<double> ret(infoset->NumActions());
+      for (int act = 1; act <= infoset->NumActions(); act++)  {
+	if (support.Find(infoset->GetActionList()[act]) &&
+	    probs(pl, iset) > 0)
+	  p2->Append(new FloatValPortion(values(pl, iset,
+		      support.Find(infoset->GetActionList()[act]))));
+	else
+	  p2->Append(new NullPortion(porFLOAT));
+      }
+      p1->Append(p2);
+    }
+    por->Append(p1);
   }
 
   return por;
@@ -222,31 +246,35 @@ static Portion *GSM_ActionValues_Float(Portion **param)
 static Portion *GSM_ActionValues_Rational(Portion **param)
 {
   BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
-  Infoset *s = ((InfosetPortion *) param[1])->Value();
 
-  ListPortion *por = new ListValPortion;
-  
-  if (s->GetPlayer()->IsChance())  {
-    for (int i = 1; i <= s->NumActions(); i++)
-      por->Append(new NullPortion(porRATIONAL));
-    return por;
-  }
-
+  const EFSupport &support = bp->GetEFSupport(); 
   Efg<gRational> *E = bp->BelongsTo();
-
+  ListPortion *por = new ListValPortion; 
+  
   gDPVector<gRational> values(E->Dimensionality());
   gPVector<gRational> probs(E->Dimensionality().Lengths());
 
   bp->CondPayoff(values, probs);
   
-  gVector<gRational> ret(s->NumActions());
-  for (int i = 1; i <= s->NumActions(); i++)  {
-    if (bp->GetEFSupport().Find(s->GetActionList()[i]) &&
-        probs(s->GetPlayer()->GetNumber(), s->GetNumber()) > (gRational)0)
-      por->Append(new RationalValPortion(values(s->GetPlayer()->GetNumber(), s->GetNumber(),
-		      bp->GetEFSupport().Find(s->GetActionList()[i]))));
-    else
-      por->Append(new NullPortion(porRATIONAL));
+  for (int pl = 1; pl <= E->NumPlayers(); pl++)  {
+    EFPlayer *player = E->PlayerList()[pl];
+    ListPortion *p1 = new ListValPortion;
+    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
+      Infoset *infoset = player->InfosetList()[iset];
+      ListPortion *p2 = new ListValPortion;
+ 
+      gVector<double> ret(infoset->NumActions());
+      for (int act = 1; act <= infoset->NumActions(); act++)  {
+	if (support.Find(infoset->GetActionList()[act]) &&
+	    probs(pl, iset) > 0)
+	  p2->Append(new RationalValPortion(values(pl, iset,
+		      support.Find(infoset->GetActionList()[act]))));
+	else
+	  p2->Append(new NullPortion(porRATIONAL));
+      }
+      p1->Append(p2);
+    }
+    por->Append(p1);
   }
 
   return por;
@@ -1458,17 +1486,23 @@ static Portion *GSM_StrategyProbs_Float(Portion **param)
 {
   MixedSolution<double> *profile =
     (MixedSolution<double> *) ((BehavPortion *) param[0])->Value();
-  NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
   const NFSupport *support = &profile->GetNFSupport();
+  const BaseNfg &nfg = support->BelongsTo();
 
   ListPortion *por = new ListValPortion;
-  for (int st = 1; st <= player->NumStrats(); st++)   {
-    if (support->Contains(player->StrategyList()[st]))
-      por->Append(new FloatValPortion(
+  for (int pl = 1; pl <= nfg.NumPlayers(); pl++)  {
+    NFPlayer *player = nfg.PlayerList()[pl];
+    ListPortion *p1 = new ListValPortion;
+
+    for (int st = 1; st <= player->NumStrats(); st++)   {
+      if (support->Contains(player->StrategyList()[st]))
+	p1->Append(new FloatValPortion(
 	      (*profile)(player->GetNumber(),
 			 support->Contains(player->StrategyList()[st]))));
-    else
-      por->Append(new FloatValPortion(0.0));
+      else
+	p1->Append(new FloatValPortion(0.0));
+    }
+    por->Append(p1);
   }
 
   return por;
@@ -1478,17 +1512,23 @@ static Portion *GSM_StrategyProbs_Rational(Portion **param)
 {
   MixedSolution<gRational> *profile =
     (MixedSolution<gRational> *) ((BehavPortion *) param[0])->Value();
-  NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
   const NFSupport *support = &profile->GetNFSupport();
+  const BaseNfg &nfg = support->BelongsTo();
 
   ListPortion *por = new ListValPortion;
-  for (int st = 1; st <= player->NumStrats(); st++)   {
-    if (support->Contains(player->StrategyList()[st]))
-      por->Append(new RationalValPortion(
+  for (int pl = 1; pl <= nfg.NumPlayers(); pl++)  {
+    NFPlayer *player = nfg.PlayerList()[pl];
+    ListPortion *p1 = new ListValPortion;
+
+    for (int st = 1; st <= player->NumStrats(); st++)   {
+      if (support->Contains(player->StrategyList()[st]))
+	p1->Append(new RationalValPortion(
 	      (*profile)(player->GetNumber(),
 			 support->Contains(player->StrategyList()[st]))));
-    else
-      por->Append(new RationalValPortion(0.0));
+      else
+	p1->Append(new RationalValPortion(0.0));
+    }
+    por->Append(p1);
   }
 
   return por;
@@ -1534,16 +1574,12 @@ void Init_solfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("ActionProbs", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ActionProbs_Float, 
-				       PortionSpec(porFLOAT, 1), 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
+				       PortionSpec(porFLOAT, 3), 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV_FLOAT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", porINFOSET));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ActionProbs_Rational, 
-				       PortionSpec(porRATIONAL, 1), 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
+				       PortionSpec(porRATIONAL, 3), 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV_RATIONAL));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("infoset", porINFOSET));
   gsm->AddFunction(FuncObj);
 
 
@@ -1563,16 +1599,12 @@ void Init_solfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("ActionValues", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ActionValues_Float, 
-				       PortionSpec(porFLOAT, 1), 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
+				       PortionSpec(porFLOAT, 3), 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV_FLOAT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", porINFOSET));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ActionValues_Rational, 
-				       PortionSpec(porRATIONAL, 1), 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
+				       PortionSpec(porRATIONAL, 3), 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV_RATIONAL));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("infoset", porINFOSET));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Behav", 1);
@@ -1952,16 +1984,12 @@ void Init_solfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("StrategyProbs", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_StrategyProbs_Float, 
-				       PortionSpec(porFLOAT, 1), 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
+				       PortionSpec(porFLOAT, 2), 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED_FLOAT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porNFPLAYER));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_StrategyProbs_Rational, 
-				       PortionSpec(porRATIONAL, 1), 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
+				       PortionSpec(porRATIONAL, 2), 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED_RATIONAL));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porNFPLAYER));
   gsm->AddFunction(FuncObj);
 
 
