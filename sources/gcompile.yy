@@ -614,8 +614,7 @@ int GCLCompiler::Parse(const gString &line, const gString &file, int lineno)
         Execute();
         if (exprtree)   delete exprtree;
       }
-      
-      gsm.Clear();
+
       return 1;
     }
   }
