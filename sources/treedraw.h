@@ -1,4 +1,4 @@
-// File: treedraw.h -- contains the definition of the configuration class 
+// File: treedraw.h -- contains the definition of the configuration class
 // for the extensive form
 // $Id$
 #ifndef TREEDRAW_H
@@ -19,7 +19,7 @@ class TreeDrawSettings:public GambitDrawSettings
   // Colors
 		int chance_color,cursor_color;
   // Labeling info
-		Bool show_infosets;
+		int show_infosets;
 		int	 	node_above_label,node_below_label,branch_above_label,
 					branch_below_label,node_terminal_label,node_right_label;
 		Bool color_coded_outcomes;
@@ -61,7 +61,7 @@ class TreeDrawSettings:public GambitDrawSettings
 		int		MaxY(void) const					{ return max_y;}
 		void	SetMaxY(int m)						{ max_y=m;}
 	// Controls the display of infoset lines (turn of to speed up)
-		void	SetShowInfosets(Bool _s) 	{show_infosets=_s;}
+		void	SetShowInfosets(int _s) 	{show_infosets=_s;}
 		int		ShowInfosets(void) const  {return show_infosets;}
 		void	SetOutcomeLength(int l) 	{outcome_length=l;}
 		int		OutcomeLength(void) const	{return outcome_length;}
@@ -126,4 +126,7 @@ class TreeDrawSettings:public GambitDrawSettings
 		int	y_steps(void)	const {return ysteps;}
 		void	set_y_steps(int ys)	{ysteps=ys;}
 };
+#define SHOWISET_NONE	0
+#define SHOWISET_SAME	1
+#define SHOWISET_ALL	2
 #endif

@@ -1,6 +1,6 @@
 // File: treedraw.cc -- contains the configuration class for the extensive
 // form
-// $Id$
+// @(#)treedraw.cc	1.17 6/18/96
 #include "wx.h"
 #include "wx_form.h"
 #pragma hdrstop
@@ -47,14 +47,18 @@ tree_options_dialog->Form()->Add(wxMakeFormShort("Y Spacing    ",&y_spacing,wxFO
 											 new wxList(wxMakeConstraintRange(Y_SPACING_MIN, Y_SPACING_MAX), 0),
 											 NULL,wxHORIZONTAL));
 tree_options_dialog->Form()->Add(wxMakeFormNewLine());
-tree_options_dialog->Form()->Add(wxMakeFormBool("Show Infosets",&show_infosets,wxFORM_CHECKBOX));
 tree_options_dialog->Form()->Add(wxMakeFormBool("Flashing Cursor",&flashing_cursor,wxFORM_CHECKBOX));
-tree_options_dialog->Form()->Add(wxMakeFormNewLine());
 tree_options_dialog->Form()->Add(wxMakeFormBool("Color Coded Outcomes",&color_coded_outcomes,wxFORM_CHECKBOX));
+tree_options_dialog->Form()->Add(wxMakeFormNewLine());
+wxStringList *iset_list=new wxStringList("None","Same Level","All Levels",0);
+char *iset_str=new char[20];strcpy(iset_str,(char *)iset_list->Nth(show_infosets)->Data());
+tree_options_dialog->Add(wxMakeFormString("Show Infoset Lines",&iset_str,wxFORM_RADIOBOX,
+							 new wxList(wxMakeConstraintStrings(iset_list), 0),0,wxVERTICAL));
 tree_options_dialog->Form()->Add(wxMakeFormNewLine());
 tree_options_dialog->Add(wxMakeFormShort("Output precision",&num_prec,wxFORM_SLIDER,new wxList(wxMakeConstraintRange(0, 16), 0)));
 
 tree_options_dialog->Go();
+show_infosets=wxListFindString(iset_list,iset_str);
 }
 
 // SetLegends

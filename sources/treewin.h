@@ -14,7 +14,7 @@
 
 typedef struct NODEENTRY {
 		int x, y, level, color;
-		int infoset_y;	// y of the next node in the infoset to connect to
+		struct {int x,y;} infoset;	// pos of the next node in the infoset to connect to
 		int	num;				// # of the infoset line on this level
 		int nums;				// sum of infosets previous to this level
 		int has_children;	// how many children this node has
@@ -23,10 +23,10 @@ typedef struct NODEENTRY {
 		const Node *n;
 		NODEENTRY *parent;
 		bool expanded;		// is this subgame root expanded or collapsed
-		void Translate(int ox,int oy) {x+=ox;y+=oy;if (infoset_y!=-1) infoset_y+=oy;}
+		void Translate(int ox,int oy) {x+=ox;y+=oy;if (infoset.y!=-1) {infoset.y+=oy;infoset.x+=ox;}}
 		NODEENTRY(void) { }
 		NODEENTRY(const NODEENTRY &e): x(e.x),y(e.y),level(e.level),color(e.color),
-																	 infoset_y(e.infoset_y),num(e.num),
+																	 infoset(e.infoset),num(e.num),
 																	 nums(e.nums),has_children(e.has_children),
 																	 child_number(e.child_number),in_sup(e.in_sup),
 																	 n(e.n),expanded(e.expanded) { }
@@ -48,8 +48,9 @@ private:
 	const BaseTreeWindow *parent;
 	const gList<NodeEntry *> &node_list;
 	const Infoset * &hilight_infoset;		// Hilight infoset from the solution disp
+	const Infoset * &hilight_infoset1;	// Hilight infoset by pressing control
 	const Node	*&mark_node;							// Used in mark/goto node operations
-  const Node *&subgame_node;
+	const Node *&subgame_node;
 	const Node	 *&cursor;								// Used to process cursor keys, stores current pos
 	// Private Functions
 	void	RenderLabels(wxDC &dc,const NodeEntry *child_entry,const NodeEntry *entry);
@@ -59,7 +60,7 @@ protected:
 	TreeNodeCursor *flasher;			// Used to flash/display the cursor
 public:
 	TreeRender(wxFrame *frame,const BaseTreeWindow *parent,const gList<NodeEntry *> &node_list,
-						const Infoset * &hilight_infoset_,
+						const Infoset * &hilight_infoset_,const Infoset * &hilight_infoset1_,
 						const Node *&mark_node_,const Node *&cursor,const Node *&subgame_node,
 						const TreeDrawSettings &draw_settings_);
 	~TreeRender(void);
@@ -82,7 +83,7 @@ private:
 	int xs,ys,xe,ye;
 public:
 	TreeZoomWindow(wxFrame *frame,const BaseTreeWindow *parent,const gList<NodeEntry *> &node_list,
-						const Infoset * &hilight_infoset_,
+						const Infoset * &hilight_infoset_,const Infoset * &hilight_infoset1_,
 						const Node *&mark_node_,const Node *&cursor,const Node *&subgame_node,
 						const TreeDrawSettings &draw_settings_,const NodeEntry *cursor_entry);
 	virtual void Render(wxDC &dc,int ox=0,int oy=0);
@@ -122,6 +123,7 @@ private:
 	Bool		need_clear;						// Do we need to clear the screen?
 	gOutput	*log;									// Are we saving each action to a file?
 	Infoset *hilight_infoset;			// Hilight infoset from the solution disp
+	Infoset *hilight_infoset1;	  // Hilight infoset by pressing control
 	TreeRender *zoom_window;
 	wxMenu	*build_menu;					// a popup menu, equivalent to top level build
 	class NodeDragger;						// Class to take care of tree copy/move by
@@ -129,7 +131,7 @@ private:
 	class IsetDragger;						// Class to take care of iset join by
   IsetDragger *iset_drag;				// drag and dropping.
 	// Private Functions
-	int 	FillTable(const Node *n,const Node *subgame, int level);
+	int 	FillTable(const Node *n,int level);
 	void 	ProcessCursor(void);
 	void 	ProcessClick(int x,int y);
 	NodeEntry *GetNodeEntry(const Node *n);
