@@ -28,7 +28,7 @@ gInteger find_lcd(const gVector<gRational> &vec)
 // Constructor
 
 Tableau<gRational>::Tableau(const gMatrix<gRational> &A, const gVector<gRational> &b) 
-  : TableauInterface(A,b), Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()),
+  : TableauInterface<gRational>(A,b), Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()),
     Coeff(b.First(),b.Last()), nonbasic(A.MinCol(),A.MaxCol()),denom(1), 
     tmpcol(b.First(),b.Last()){
 // gout << "\nMY CODE\n";
@@ -57,7 +57,7 @@ Tableau<gRational>::Tableau(const gMatrix<gRational> &A, const gVector<gRational
 
 
 Tableau<gRational>::Tableau(const Tableau<gRational> &orig) 
-  : TableauInterface(orig), Tabdat(orig.Tabdat), Coeff(orig.Coeff), 
+  : TableauInterface<gRational>(orig), Tabdat(orig.Tabdat), Coeff(orig.Coeff), 
     nonbasic(orig.nonbasic), totdenom(orig.totdenom), denom(orig.denom), 
     tmpcol(orig.tmpcol)
 { }

@@ -248,14 +248,14 @@ T TableauInterface<T>::Epsilon(int i) const
 // Constructors and Destructor
  
 Tableau<double>::Tableau(const gMatrix<double> &A, const gVector<double> &b)
-  : TableauInterface(A,b), B(basis), tmpcol(b.First(),b.Last())
+  : TableauInterface<double>(A,b), B(basis), tmpcol(b.First(),b.Last())
 {
   Solve(b, solution);
 };
 
 
-Tableau<double>::Tableau(const Tableau<double> &orig) 
-  : TableauInterface(orig), B(orig.B,basis), tmpcol(orig.tmpcol)
+Tableau<double>::Tableau(const Tableau<double> &orig)
+  : TableauInterface<double>(orig), B(orig.B,basis), tmpcol(orig.tmpcol)
 { }
 
 Tableau<double>::~Tableau()
