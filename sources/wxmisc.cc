@@ -145,6 +145,23 @@ void wxKillHelp(void)
     }
 }
 
+// Need this function since the default wxGeResource takes a char **value,
+// and replaces it with a newly created string (while deleting the old one).
+// This is NOT what we want.
+
+Bool wxGetResourceStr(char *section, char *entry, gText &value, char *file)
+{
+  char *tmp_str = 0;
+  Bool ok = wxGetResource(section, entry, &tmp_str, file);
+
+  if (ok) {
+    value = tmp_str;
+    delete [] tmp_str;
+  }
+
+  return ok;
+}
+
 
 
 //***************************************************************************

@@ -281,6 +281,8 @@ void wxHelpContents(const char *name);
 void wxHelpAbout(const char *help_str = 0);
 void wxKillHelp(void);
 
+Bool wxGetResourceStr(char *section, char *entry, gText &value, char *file);
+
 
 #define CREATE_DIALOG       0
 #define DESTROY_DIALOG      1

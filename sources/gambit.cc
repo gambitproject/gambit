@@ -247,8 +247,14 @@ wxFrame *GambitApp::OnInit(void)
   file_menu->Append(FILE_QUIT,   "&Quit",                "Quit program");
 
   m_recentFiles = new wxFileHistory(5);
-  m_recentFiles->FileHistoryLoad(m_resourceFile, "Gambit");
   m_recentFiles->FileHistoryUseMenu(file_menu);
+  for (int i = 5; i >= 1; i--) {
+    gText fileName;
+    wxGetResourceStr("Gambit", "file" + ToText(i), fileName, m_resourceFile);
+    if (fileName != "") {
+      gambitApp.AddFileToHistory(fileName);
+    }
+  }
 
   wxMenu *help_menu = new wxMenu;
   help_menu->Append(GAMBIT_HELP_CONTENTS, "&Contents",   "Table of contents");
@@ -299,6 +305,10 @@ wxFrame *GambitApp::OnInit(void)
   return gambit_frame;
 }
 
+void GambitApp::AddFileToHistory(const gText &p_file)
+{
+  m_recentFiles->AddFileToHistory(p_file);
+}
 
 int GambitApp::OnExit(void)
 {
@@ -382,23 +392,25 @@ void GambitFrame::OnMenuCommand(int id)
   case FILE_QUIT:
     Close();
     break;
-        
   case FILE_LOAD:
     LoadFile();
     break;
-        
+  case wxID_FILE1:
+  case wxID_FILE2:
+  case wxID_FILE3:
+  case wxID_FILE4:
+  case wxID_FILE5:
+    LoadFile(gambitApp.GetHistoryFile(id - wxID_FILE1));
+    break;
   case FILE_NEW_NFG: 
     NfgGUI(0, "", 0, this);
     break;
-
   case FILE_NEW_EFG: 
     EfgGUI(0, "", 0, this);
     break;
-        
   case GAMBIT_HELP_ABOUT:
     wxHelpAbout(); 
     break;
-        
   case GAMBIT_HELP_CONTENTS: 
     wxHelpContents(GAMBIT_GUI_HELP);
     break;

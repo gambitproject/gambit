@@ -32,8 +32,9 @@ public:
 
   const gText &ResourceFile(void)  { return m_resourceFile; }
 
-  void AddFileToHistory(const gText &p_name)
-    { m_recentFiles->AddFileToHistory(p_name); }
+  void AddFileToHistory(const gText &p_name);
+  gText GetHistoryFile(int i)
+    { return m_recentFiles->GetHistoryFile(i); }
 };
 
 extern GambitApp gambitApp;
