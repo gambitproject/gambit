@@ -24,12 +24,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef EFSTRAT_H
-#define EFSTRAT_H
+#ifndef EFGSUPPORT_H
+#define EFGSUPPORT_H
 
-#include "base/base.h"
 #include "base/gstatus.h"
-#include "math/gpvector.h"
 #include "game.h"
 
 class gbtGameActionSet;
@@ -49,6 +47,28 @@ protected:
   gbtGame m_efg;
   gbtArray<gbtGameActionSet *> m_players;
 
+  // The following members were added from a derived class.
+  // The proper factoring of these features is uncertain...
+  gbtArray<gbtList<bool> >         is_infoset_active;
+  gbtArray<gbtList<gbtList<bool> > > is_nonterminal_node_active;
+
+  void InitializeActiveListsToAllActive();
+  void InitializeActiveListsToAllInactive();
+  void InitializeActiveLists();
+
+  bool infoset_has_active_nodes(const int pl, const int iset) const;
+  bool infoset_has_active_nodes(const gbtGameInfoset &) const;
+  void activate_this_and_lower_nodes(const gbtGameNode &);
+  void deactivate_this_and_lower_nodes(const gbtGameNode &);
+
+  void activate(const gbtGameNode &);
+  void deactivate(const gbtGameNode &);
+  void activate(const gbtGameInfoset &);
+  void deactivate(const gbtGameInfoset &);
+
+  void deactivate_this_and_lower_nodes_returning_deactivated_infosets(
+                                                 const gbtGameNode &,
+						 gbtList<gbtGameInfoset> *);
 public:
   gbtEfgSupport(const gbtGame &);
   gbtEfgSupport(const gbtEfgSupport &);
@@ -80,8 +100,8 @@ public:
   gbtGameAction GetAction(int pl, int iset, int index) const;
 
   // Action editing functions
-  virtual void AddAction(const gbtGameAction &);
-  virtual bool RemoveAction(const gbtGameAction &);
+  void AddAction(const gbtGameAction &);
+  bool RemoveAction(const gbtGameAction &);
 
   // Number of Sequences for the player
   int NumSequences(int pl) const;
@@ -106,9 +126,9 @@ public:
   bool IsDominated(const gbtGameAction &,
 		   bool strong, bool conditional) const;
   gbtEfgSupport Undominated(bool strong, bool conditional,
-			 const gbtArray<int> &players,
-			 gbtOutput &, // tracefile 
-			 gbtStatus &status) const;
+			    const gbtArray<int> &players,
+			    gbtOutput &, // tracefile 
+			    gbtStatus &status) const;
 
 
   // The following are just echoed from the base game.  In the future,
@@ -130,75 +150,29 @@ public:
   bool IsPerfectRecall(void) const { return m_efg->IsPerfectRecall(); }
 
   void Dump(gbtOutput &) const;
-};
 
-gbtOutput &operator<<(gbtOutput &f, const gbtEfgSupport &);
-
-
-// The following class keeps a record of which nodes and infosets are 
-// reached by sequences of actions in the support.  This record is
-// updated as actions are added and removed.
-// BUG - The interface above does not entirely agree with the one
-// below vis-a-vis common elements.
-
-class gbtEfgSupportWithActiveInfo : public gbtEfgSupport {
-protected:
-  gbtArray<gbtList<bool> >         is_infoset_active;
-  gbtArray<gbtList<gbtList<bool> > > is_nonterminal_node_active;
-
-  void InitializeActiveListsToAllActive();
-  void InitializeActiveListsToAllInactive();
-  void InitializeActiveLists();
-
-  void activate(const gbtGameNode &);
-  void deactivate(const gbtGameNode &);
-  void activate(const gbtGameInfoset &);
-  void deactivate(const gbtGameInfoset &);
-  bool infoset_has_active_nodes(const int pl, const int iset) const;
-  bool infoset_has_active_nodes(const gbtGameInfoset &) const;
-  void activate_this_and_lower_nodes(const gbtGameNode &);
-  void deactivate_this_and_lower_nodes(const gbtGameNode &);
-  void deactivate_this_and_lower_nodes_returning_deactivated_infosets(
-                                                 const gbtGameNode &,
-						 gbtList<gbtGameInfoset> *);
-
-public:
-  gbtEfgSupportWithActiveInfo(const gbtGame &);
-  gbtEfgSupportWithActiveInfo(const gbtEfgSupport &);
-  gbtEfgSupportWithActiveInfo(const gbtEfgSupportWithActiveInfo &);
-  virtual ~gbtEfgSupportWithActiveInfo();
-
-  // Operators
-  gbtEfgSupportWithActiveInfo &operator=(const gbtEfgSupportWithActiveInfo &);
-  bool operator==(const gbtEfgSupportWithActiveInfo &) const;
-  bool operator!=(const gbtEfgSupportWithActiveInfo &) const;
+  // The subsequent members were merged from a derived class.
 
   // Find the reachable nodes at an infoset
   gbtList<gbtGameNode> ReachableNodesInInfoset(const gbtGameInfoset &) const;
-  gbtList<gbtGameNode> ReachableNonterminalNodes() const;
 
-  // Action editing functions
-  void AddAction(const gbtGameAction &);
-  bool RemoveAction(const gbtGameAction &);
+  bool HasActiveActionsAtActiveInfosets(void);
+  bool HasActiveActionsAtActiveInfosetsAndNoOthers(void);
+
+  bool InfosetIsActive(const gbtGameInfoset &) const;
+
   bool RemoveActionReturningDeletedInfosets(const gbtGameAction &,
 					    gbtList<gbtGameInfoset> *);
-  //  void GoToNextSubsupportOf(const gbtEfgSupport &);
-
   // Information
   bool InfosetIsActive(const int pl, const int iset) const;
-  bool InfosetIsActive(const gbtGameInfoset &) const;
   int  NumActiveNodes(const int pl, const int iset) const;
   int  NumActiveNodes(const gbtGameInfoset &) const;
   bool NodeIsActive(const int pl, const int iset, const int node) const;
   bool NodeIsActive(const gbtGameNode &) const;
 
-  bool HasActiveActionsAtActiveInfosets();
-  bool HasActiveActionsAtActiveInfosetsAndNoOthers();
-
-  void Dump(gbtOutput& s) const;
+  gbtList<gbtGameNode> ReachableNonterminalNodes() const;
 };
 
-gbtOutput &operator<<(gbtOutput &f, const gbtEfgSupportWithActiveInfo &);
+gbtOutput &operator<<(gbtOutput &f, const gbtEfgSupport &);
 
-
-#endif  // EFSTRAT_H
+#endif  // EFGSUPPORT_H

@@ -30,7 +30,7 @@
 #include "game.h"
 #include "nfgiter.h"
 #include "nfgciter.h"
-#include "nfstrat.h"
+#include "nfgsupport.h"
 #include "nfdom.h"
 
 #include "nfdommix.imp"

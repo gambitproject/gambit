@@ -26,7 +26,7 @@
 
 #include "game.h"
 #include "gamebase.h"
-#include "nfstrat.h"
+#include "nfgsupport.h"
 
 #include "base/garray.imp"
 #include "base/gblock.imp"

@@ -35,7 +35,7 @@
 // We begin by simply enumerating all subsupports.
 
 void AllSubsupportsRECURSIVE(const gbtEfgSupport *s,
-			     gbtEfgSupportWithActiveInfo *sact,
+			     gbtEfgSupport *sact,
 			     gbtAllActionIterator *c,
 			     gbtList<gbtEfgSupport> *list);
 
@@ -49,7 +49,7 @@ gbtList<gbtEfgSupport> AllSubsupports(const gbtEfgSupport &S);
 // actions at each unreached infoset.  
 
 void AllInequivalentSubsupportsRECURSIVE(const gbtEfgSupport *s,
-					 gbtEfgSupportWithActiveInfo *sact,
+					 gbtEfgSupport *sact,
 					 gbtAllActionIterator *c,
 					 gbtList<gbtEfgSupport> *list);
 
@@ -65,7 +65,7 @@ gbtList<gbtEfgSupport> AllInequivalentSubsupports(const gbtEfgSupport &S);
 // dominated, and thus part of an allowed subsupport.
 
 void AllUndominatedSubsupportsRECURSIVE(const gbtEfgSupport *s,
-					gbtEfgSupportWithActiveInfo *sact,
+					gbtEfgSupport *sact,
 					gbtAllActionIterator *c,
 					bool strong,
 					bool conditional,
@@ -89,7 +89,7 @@ gbtList<gbtEfgSupport> AllUndominatedSubsupports(const gbtEfgSupport &S,
 // infosets.
 
 void PossibleNashSubsupportsRECURSIVE(const gbtEfgSupport *s,
-					    gbtEfgSupportWithActiveInfo *sact,
+					    gbtEfgSupport *sact,
 				            gbtAllActionIterator *c,
 					    gbtList<gbtEfgSupport> *list,
 				      const gbtStatus &status);

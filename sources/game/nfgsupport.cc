@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Implementation of strategy classes for normal forms
+// Implementation of support class for normal forms
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,10 +24,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "base/base.h"
-#include "nfstrat.h"
 #include "game.h"
-#include "gamebase.h"
+#include "nfgsupport.h"
+//#include "gamebase.h"
 
 //==========================================================================
 //                         class gbtNfgSupport

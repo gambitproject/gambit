@@ -24,8 +24,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef NFGSUPPORT_H
-#define NFGSUPPORT_H
+#ifndef GUI_NFGSUPPORT_H
+#define GUI_NFGSUPPORT_H
 
 #include <wx/treectrl.h>
 #include "nfgshow.h"
@@ -69,4 +69,4 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
-#endif  // NFGSUPPORT_H
+#endif  // GUI_NFGSUPPORT_H

@@ -48,7 +48,7 @@ bool gbtEfgSupport::Dominates(const gbtGameAction &a, const gbtGameAction &b,
     throw gbtEfgDominanceException
       ("Dominates(..) needs actions in same infoset.\n");
 
-  const gbtEfgSupportWithActiveInfo SAct(*this);
+  const gbtEfgSupport SAct(*this);
   gbtGamePlayer player = infoset->GetPlayer();
   int pl = player->GetId();
   bool equal = true;

@@ -30,7 +30,7 @@
 template <class T> class gbtArray;
 
 #include "nfgcont.h"
-#include "nfstrat.h"
+#include "nfgsupport.h"
 
 class gbtNfgContIterator;
 

@@ -24,8 +24,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef EFGSUPPORT_H
-#define EFGSUPPORT_H
+#ifndef GUI_EFGSUPPORT_H
+#define GUI_EFGSUPPORT_H
 
 #include <wx/treectrl.h>
 #include "efgshow.h"
@@ -71,4 +71,4 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
-#endif  // EFGSUPPORT_H
+#endif  // GUI_EFGSUPPORT_H

@@ -27,7 +27,7 @@
 #include "lhtab.h"
 #include "game/game.h"
 #include "game/nfgiter.h"
-#include "game/nfstrat.h"
+#include "game/nfgsupport.h"
 
 //---------------------------------------------------------------------------
 //                        LemkeHowson gbtTableau: member functions

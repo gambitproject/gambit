@@ -37,7 +37,7 @@
 #include <wx/splash.h>
 
 #include "game/game.h"
-#include "game/nfstrat.h"
+#include "game/nfgsupport.h"
 #include "game/nfgciter.h"
 
 #include "gambit.h"

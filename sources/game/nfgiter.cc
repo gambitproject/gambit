@@ -25,8 +25,8 @@
 //
 
 #include "nfgiter.h"
-#include "nfstrat.h"
 #include "nfgciter.h"
+#include "nfgsupport.h"
 
 //--------------------------------------------------------------------------
 // gbtNfgIterator:  Constructors, Destructors, Operators

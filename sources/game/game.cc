@@ -29,7 +29,7 @@
 
 #include "game.h"
 #include "efgutils.h"
-#include "efstrat.h"
+#include "efgsupport.h"
 #include "actiter.h"
 #include "nfgiter.h"
 

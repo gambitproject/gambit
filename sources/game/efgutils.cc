@@ -26,7 +26,7 @@
 
 #include "math/gdpvect.h"
 #include "efgutils.h"
-#include "efstrat.h"
+#include "efgsupport.h"
 
 
 // recursive functions

@@ -27,7 +27,7 @@
 #ifndef EFGSHOW_H
 #define EFGSHOW_H
 
-#include "wx/printdlg.h"
+#include <wx/printdlg.h>
 #include "gamedoc.h"
 
 class gbtTreeView;

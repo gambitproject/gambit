@@ -30,7 +30,7 @@
 #include "base/base.h"
 #include "math/gdpvect.h"
 #include "math/gmatrix.h"
-#include "efstrat.h"
+#include "efgsupport.h"
 
 class gbtGame;
 template <class T> class gbtMixedProfile;

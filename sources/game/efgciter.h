@@ -31,7 +31,7 @@
 
 #include "game.h"
 #include "efgcont.h"
-#include "efstrat.h"
+#include "efgsupport.h"
 
 class gbtEfgIterator;
 

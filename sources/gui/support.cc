@@ -24,10 +24,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "base/base.h"
 #include "game/game.h"
-#include "game/efstrat.h"
-#include "game/nfstrat.h"
+#include "game/efgsupport.h"
+#include "game/nfgsupport.h"
 
 #include "support.h"
 #include "gamedoc.h"    // to define gbtGameDocument

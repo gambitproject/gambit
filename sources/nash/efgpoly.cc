@@ -85,7 +85,7 @@ gbtList<BehavSolution> gbtEfgNashEnumPoly::Solve(const gbtEfgSupport &p_support,
   p_status.SetProgress(0.0);
   p_status << "Step 2 of 2: Computing equilibria";
 
-  gbtList<const gbtEfgSupport> singularSupports;
+  gbtList<gbtEfgSupport> singularSupports;
   gbtList<BehavSolution> solutions;
 
   try {

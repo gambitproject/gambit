@@ -31,7 +31,7 @@
 
 #include "base/base.h"
 #include "game/game.h"
-#include "game/efstrat.h"
+#include "game/efgsupport.h"
 #include "gamedoc.h"
 #include "gambit.h"
 

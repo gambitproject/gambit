@@ -27,9 +27,8 @@
 #ifndef EFBASIS_H
 #define EFBASIS_H
 
-#include "base/base.h"
 #include "game/game.h"
-#include "game/efstrat.h"
+#include "game/efgsupport.h"
 
 class gbtGameNodeSet;
 

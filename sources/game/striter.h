@@ -27,7 +27,7 @@
 #ifndef STRITER_H
 #define STRITER_H
 
-#include "nfstrat.h"
+#include "nfgsupport.h"
 
 class gbtStrategyIterator {
 protected:

@@ -28,7 +28,7 @@
 #define NFGCITER_H
 
 #include "nfgcont.h"
-#include "nfstrat.h"
+#include "nfgsupport.h"
 
 //
 // This class is useful for iterating around the normal form.  This iterator

@@ -30,7 +30,7 @@
 #endif  // WX_PRECOMP
 
 #include "game/game.h"
-#include "game/nfstrat.h"
+#include "game/nfgsupport.h"
 #include "dlnfgstrategies.h"
 
 //=========================================================================

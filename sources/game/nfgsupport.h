@@ -1,10 +1,10 @@
 //
 // $Source$
-// $Date$
+// $Date$n
 // $Revision$
 //
 // DESCRIPTION:
-// Interface to strategy classes for normal forms
+// Interface to support class for normal forms
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,14 +24,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef NFSTRAT_H
-#define NFSTRAT_H
+#ifndef NFGSUPPORT_H
+#define NFGSUPPORT_H
 
-#include "base/base.h"
 #include "base/gstatus.h"
-#include "math/gnumber.h"
-#include "math/gpvector.h"
-#include "nfstrat.h"
 #include "game.h"
 
 //

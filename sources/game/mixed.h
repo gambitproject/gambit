@@ -27,10 +27,8 @@
 #ifndef MIXED_H
 #define MIXED_H
 
-#include "base/gmisc.h"
-#include "math/gpvector.h"
 #include "game.h"
-#include "nfstrat.h"
+#include "nfgsupport.h"
 
 template <class T> class gbtRectArray;
 template <class T> class gbtBehavProfile;

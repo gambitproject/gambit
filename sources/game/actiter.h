@@ -27,7 +27,7 @@
 #ifndef ACTITER_H
 #define ACTITER_H
 
-#include "efstrat.h"
+#include "efgsupport.h"
 
 class gbtAllActionIterator {
 protected:
