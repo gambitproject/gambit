@@ -44,11 +44,11 @@ protected:
 public:
   virtual ~Portion();
 
-  void AddDependency( void );
-  void RemoveDependency( void );
-
   bool IsValid( void ) const;
   void SetInvalid( void );
+
+  virtual void AddDependency( void );
+  virtual void RemoveDependency( void );
 
   virtual void SetOwner( Portion* p );
   Portion* Owner( void ) const;
@@ -833,6 +833,9 @@ protected:
 public:
   virtual ~ListPortion();
 
+  void AddDependency( void );
+  void RemoveDependency( void );
+
   void SetOwner( Portion* p );
 
   gBlock< Portion* >& Value( void ) const;
@@ -896,11 +899,3 @@ gOutput& operator << ( gOutput& s, Portion* p );
 
 
 #endif // PORTION_H
-
-
-
-
-
-
-
-

@@ -1722,6 +1722,30 @@ gBlock< Portion* >& ListPortion::Value( void ) const
 { return *_Value; }
 
 
+void ListPortion::AddDependency( void )
+{ 
+  int i;
+  int length;
+
+  Portion::AddDependency();
+  for( i = 1, length = _Value->Length(); i <= length; i++ )
+  {
+    (*_Value)[ i ]->AddDependency();
+  }
+}
+
+void ListPortion::RemoveDependency( void )
+{ 
+  int i;
+  int length;
+
+  Portion::RemoveDependency();
+  for( i = 1, length = _Value->Length(); i <= length; i++ )
+  {
+    (*_Value)[ i ]->RemoveDependency();
+  }
+}
+
 void ListPortion::SetOwner( Portion* p )
 { 
   int i;
@@ -1740,13 +1764,19 @@ PortionType ListPortion::Type( void ) const
 { return porLIST; }
 
 Portion* ListPortion::ValCopy( void ) const
-{ return new ListValPortion( *_Value ); }
+{ 
+  Portion* p =new ListValPortion( *_Value ); 
+  p->SetOwner( Owner() );
+  p->AddDependency();
+  return p;
+}
 
 Portion* ListPortion::RefCopy( void ) const
 { 
   Portion* p = new ListRefPortion( *_Value ); 
   ( (ListPortion*) p )->_DataType = _DataType;
   p->SetOriginal( Original() );
+  p->SetOwner( Owner() );
   return p;
 }
 
@@ -1915,6 +1945,7 @@ int ListPortion::Append( Portion* item )
 int ListPortion::Insert( Portion* item, int index )
 {
   int result = 0;
+  PortionType item_type;
 
 #ifndef NDEBUG
   if( item->Type() == porREFERENCE )
@@ -1928,13 +1959,15 @@ int ListPortion::Insert( Portion* item, int index )
   
   if( _Value->Length() == 0 )  // creating a new list
   {
-    if( PortionTypeMatch( item->Type(), _DataType ) || 
+    if( item->Type() == porLIST )
+      item_type = ( (ListPortion*) item )->_DataType;
+    else
+      item_type = item->Type();
+
+    if( PortionTypeMatch( item_type, _DataType ) || 
        _DataType == porUNKNOWN )
     {
-      if( item->Type() == porLIST )
-	_DataType = ( (ListPortion*) item )->_DataType;
-      else
-	_DataType = item->Type();
+      _DataType = item_type;
       result = _Value->Insert( item, index );
       _Owner = item->Original()->Owner();
     }

@@ -2938,7 +2938,6 @@ int main( void )
 
 
 
-#if 0
   machine->PushRef( "E" );
   machine->InitCallFunction( "ReadEfg" );
   machine->InitCallFunction( "Input" );
@@ -2950,7 +2949,6 @@ int main( void )
   machine->Assign();
   machine->Output();
   // machine->Pop();
-#endif // 0
 
   machine->Dump();
 
@@ -3218,7 +3216,7 @@ int main( void )
   machine->Subscript();
   machine->Dump();
 
-#if 0  
+
   machine->PushRef( "lE" );
   machine->Push( (long) 2 );
   machine->Subscript();
@@ -3233,7 +3231,7 @@ int main( void )
 
   machine->Assign();
   machine->Dump();
-#endif // 0
+
 
   machine->PushRef( "lE" );
   machine->Push( (long) 2 );
