@@ -9,6 +9,8 @@
 #include "garray.imp"
 #include "gnarray.imp"
 #include "grarray.imp"
+#include "glist.imp"
+#include "gblock.imp"
 
 //----------------------------------------------------
 // Sfg: Constructors, Destructors, Operators
@@ -16,8 +18,8 @@
 
 
 Sfg::Sfg(const EFSupport &S)
-  : EF(S.Game()), efsupp(S), seq(EF.NumPlayers()),isets(EF.NumPlayers()),
-    isetFlag(S.Game().NumInfosets()),isetRow(S.Game().NumInfosets())
+  : EF(S.Game()), efsupp(S), seq(EF.NumPlayers()), isetFlag(S.Game().NumInfosets()),
+    isetRow(S.Game().NumInfosets()), infosets(EF.NumPlayers())
 { 
   int i;
   gArray<int> zero(EF.NumPlayers());
@@ -27,7 +29,6 @@ Sfg::Sfg(const EFSupport &S)
 
   for(i=1;i<=EF.NumPlayers();i++) {
     seq[i]=1;
-    isets[i]=0;
     zero[i]=0;
     one[i]=1;
   }
@@ -51,7 +52,7 @@ Sfg::Sfg(const EFSupport &S)
 
   E = new gArray<gRectArray<gNumber> *> (EF.NumPlayers());
   for(i=1;i<=EF.NumPlayers();i++) {
-    (*E)[i] = new gRectArray<gNumber>(isets[i]+1,seq[i]);
+    (*E)[i] = new gRectArray<gNumber>(infosets[i].Length()+1,seq[i]);
     for(int j = (*(*E)[i]).MinRow();j<=(*(*E)[i]).MaxRow();j++)
       for(int k = (*(*E)[i]).MinCol();k<=(*(*E)[i]).MaxCol();k++)
 	(*(*E)[i])(j,k)=(gNumber)0;
@@ -160,9 +161,9 @@ GetSequenceDims(const Node *n)
     
       bool flag = false;
       if(!isetFlag(pl,iset)) {   // on first visit to iset, create new sequences
-	isets[pl]++;
+	infosets[pl].Append(n->GetInfoset());
 	isetFlag(pl,iset)=1;
-	isetRow(pl,iset)=isets[pl]+1;
+	isetRow(pl,iset)=infosets[pl].Length()+1;
 	flag =true;
       }
       for(i=1;i<=n->NumChildren();i++) {
@@ -204,16 +205,16 @@ int Sfg::TotalNumSequences() const
 int Sfg::TotalNumInfosets() const 
 {
   int tot=0;
-  for(int i=1;i<=isets.Length();i++)
-    tot+=isets[i];
+  for(int i=1;i<=infosets.Length();i++)
+    tot+=infosets[i].Length();
   return tot;
 }
 
-int Sfg::InfosetNumber(int pl, int j) const 
+int Sfg::InfosetRowNumber(int pl, int j) const 
 {
   if(j==1) return 0;
   int isetnum = (*sequences)[pl]->Find(j)->GetInfoset()->GetNumber();
-  return isetRow(pl,isetnum)-1;
+  return isetRow(pl,isetnum);
 }
 
 int Sfg::ActionNumber(int pl, int j) const
@@ -268,3 +269,6 @@ template class gNArray<gArray<gNumber> *>;
 template class gArray<gRectArray<gNumber> *>;
 template gOutput &operator<<(gOutput &, const gArray<gNumber> &);
 template gOutput &operator<<(gOutput &, const gRectArray<gNumber> &);
+template class gArray<gList<Infoset *> >;
+template gOutput &operator<<(gOutput &, const gArray<gList<Infoset *> > &);
+template gOutput &operator<<(gOutput &, const gList<Infoset *> &);

@@ -13,6 +13,8 @@
 #include "grarray.h"
 #include "gnarray.h"
 #include "sfstrat.h"
+#include "glist.h"
+#include "gblock.h"
 
 class Sfg  {
 private:
@@ -21,8 +23,9 @@ private:
   gArray<SFSequenceSet *> *sequences;
   gNArray<gArray<gNumber> *> *SF;  // sequence form
   gArray<gRectArray<gNumber> *> *E;   // constraint matrices for sequence form.  
-  gArray<int> seq,isets;
+  gArray<int> seq;
   gPVector<int> isetFlag,isetRow;
+  gArray<gList<Infoset *> > infosets;
 
   void MakeSequenceForm(const Node *, gNumber,gArray<int>, gArray<int>,
 		      gArray<Sequence *>);
@@ -33,9 +36,8 @@ public:
   virtual ~Sfg();  
 
   inline int NumSequences(int pl) const {return seq[pl];}
-  inline int NumInfosets(int pl) const {return isets[pl];}
+  inline int NumInfosets(int pl) const {return infosets[pl].Length();}
   inline gArray<int> NumSequences() const {return seq;}
-  inline gArray<int> NumInfosets() const {return isets;}
   int TotalNumSequences() const;
   int TotalNumInfosets() const;
   inline int NumPlayers() const {return EF.NumPlayers();}
@@ -44,7 +46,7 @@ public:
   /*inline*/ gNumber Payoff(const gArray<int> & index,int pl) const {return Payoffs(index)[pl];}
 
   gRectArray<gNumber> Constraints(int player) const {return *((*E)[player]);};
-  int InfosetNumber(int pl, int sequence) const;
+  int InfosetRowNumber(int pl, int sequence) const;
   int ActionNumber(int pl, int sequence) const;
   const Infoset* GetInfoset(int pl, int sequence) const;
   const Action*  GetAction(int pl, int sequence) const;
