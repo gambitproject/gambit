@@ -446,7 +446,7 @@ void write_efg_file(FILE *f)
   mark_nodes();
 
   for (struct game *g = whichpblm->firstgame; g != NULLgame; g = g->nextgame) {
-    fprintf(f, "{ \"%s\"\n", whichpblm->title);
+    fprintf(f, "{ %d \"%s\"\n", g->gamenumber, whichpblm->title);
     write_infosets(f, g->gamenumber);
     fprintf(f, "\n");
     write_nodes(f, g->gamenumber);
