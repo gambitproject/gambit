@@ -39,7 +39,7 @@ private:
   long npivots;
   double time;
   int ns1,ns2,ni1,ni2;
-  BFS_List List;
+  gList<BFS<T> > List;
   void FillTableau(const Node *, T ,int ,int , int ,int );
 
 public:

@@ -39,7 +39,7 @@ private:
   T minpay;
   long npivots;
   double time;
-  BFS_List List;
+  gList<BFS<T> > List;
 
 public:
   ZSumModule(const Nfg<T> &N, const ZSumParams &p, const NFSupport &);

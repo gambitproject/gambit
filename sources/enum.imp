@@ -93,8 +93,8 @@ template <class T> int EnumModule<T>::Enum(void)
     (*params.tracefile) << "\nafter poly2, dt = " << dt << " time = " << time; 
   
 
-  const BFS_List &verts1(poly1.VertexList());
-  const BFS_List &verts2(poly2.VertexList());
+  const gList<BFS<T> > &verts1(poly1.VertexList());
+  const gList<BFS<T> > &verts2(poly2.VertexList());
   v1=verts1.Length();
   v2=verts2.Length();
 

@@ -38,7 +38,7 @@ template <class T> int LemkeModule<T>::Lemke(int dup)
 
   gWatch watch;
 
-  List = BFS_List();
+  List.Flush();
 
   gMatrix<T> A1(Make_A1(NF, support));
   gVector<T> b1(Make_b1(NF, support));

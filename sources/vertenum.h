@@ -30,7 +30,7 @@ private:
   const gMatrix<T> &A;   
   const gVector<T> &b;
   gVector<T> btemp,c;
-  BFS_List List;
+  gList<BFS<T> > List;
   long npivots,nodes;
   gStatus &status;
   gList<long> visits,branches;
@@ -45,7 +45,7 @@ public:
   VertEnum(const gMatrix<T> &A, const gVector<T> &b, gStatus &status);
   ~VertEnum();
 
-  const BFS_List &VertexList() const;
+  const gList<BFS<T> > &VertexList() const;
   long NumPivots() const;
   void Dump(gOutput &) const;
 };

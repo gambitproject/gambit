@@ -1,8 +1,8 @@
 //
-//# FILE: vertenum.imp -- Implementation of Vertex Enumerator
-//#
-//# $Id$ 
-//#
+// FILE: vertenum.imp -- Implementation of Vertex Enumerator
+//
+// $Id$ 
+//
 
 #include "vertenum.h"
 
@@ -137,7 +137,7 @@ template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
   depth--;
 }
   
-template <class T> const BFS_List &VertEnum<T>::VertexList() const
+template <class T> const gList<BFS<T> > &VertEnum<T>::VertexList() const
 { 
   return List;
 }

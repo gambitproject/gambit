@@ -68,7 +68,7 @@ template <class T> int CSSeqFormModule<T>::CSSeqForm(int /*dup*/)
   if(!IsConstSum()) return 0;;
   gWatch watch;
   
-  List = BFS_List();  // Ted -- is this necessary?
+  List.Flush();
   
   Make_Abc();
   LPSolve<T> LP(*A,*b,*c,ni2);

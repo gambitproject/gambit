@@ -22,9 +22,6 @@ template <class T> class BFS : public gOrdMap<int, T>  {
 
 template <class T> gOutput &operator<<(gOutput &, const BFS<T> &);
 
-// This is not the best way to do this, but you can't template typedefs...
-#define BFS_List       gList< BFS<T> >
-
 #endif   // BFS_H
 
 

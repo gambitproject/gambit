@@ -80,7 +80,7 @@ template <class T> int SeqFormModule<T>::Lemke(int /*dup*/)
   
   gWatch watch;
   
-  List = BFS_List();
+  List.Flush();
   LCPPath();
   Add_BFS(*tab);
   

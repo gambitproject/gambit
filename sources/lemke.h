@@ -1,8 +1,8 @@
-//#
-//# FILE: lemke.h -- Interface to Lemke solution module
-//#
-//# $Id$
-//#
+//
+// FILE: lemke.h -- Interface to Lemke solution module
+//
+// $Id$
+//
 
 #ifndef LEMKE_H
 #define LEMKE_H
@@ -33,7 +33,7 @@ private:
   const LemkeParams &params;
   long npivots;
   double time;
-  BFS_List List;
+  gList<BFS<T> > List;
   gList<MixedSolution<T> > solutions;
 
 public:

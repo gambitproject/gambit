@@ -39,7 +39,7 @@ private:
   T maxpay,eps;
   long npivots;
   double time;
-  BFS_List List;
+  gList<BFS<T> > List;
   gList< BehavSolution<T> > solutions;
 
 public:

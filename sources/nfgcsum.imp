@@ -74,7 +74,7 @@ template <class T> int ZSumModule<T>::ZSum(int /*dup*/)
   if(!IsConstSum()) return 0;;
   gWatch watch;
   
-  List = BFS_List();  // Ted -- is this necessary?
+  List.Flush();
   
   Make_Abc();
   LPSolve<T> LP(*A,*b,*c,1);
