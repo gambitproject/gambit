@@ -935,7 +935,7 @@ extern NumberPortion _WriteGameDecimals;
 
 static Portion *GSM_SaveEfg(GSM &, Portion **param)
 {
-  gText text = AsText(param[0]);
+  gText text = AsText(param[1]);
 
   try { 
     gFileOutput f(text);
