@@ -220,7 +220,7 @@ gComplex pow(const gComplex& x, const long y)
 //char mygconvert_buffer[MYGCONVERT_BUFFER_LENGTH];
 //int myprecision = 2;
 
-gString ToString(const gComplex /* d */)
+gText ToString(const gComplex /* d */)
 {
   gout << "\nError: ToString(gComplex) must be defined for compilation,";
   gout << " but is not functional.\n";
@@ -229,7 +229,7 @@ gString ToString(const gComplex /* d */)
 
 // conversions from strings to numbers
 
-gComplex TOgComplex(const gString & /* s */)
+gComplex TOgComplex(const gText & /* s */)
 { 
   gout << "\nError: TOgComplex must be defined for compilation,";
   gout << " but is not functional.\n";
