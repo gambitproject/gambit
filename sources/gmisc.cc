@@ -64,9 +64,9 @@ inline
 #endif   // __BORLANDC__
 int sign(const double &a)
 {
-  if (a > 0.0)   return 1;
-  if (a < 0.0)   return -1;
-  return 0;
+	if (a > 0.0)   return 1;
+	if (a < 0.0)   return -1;
+	return 0;
 }
 
 //--------------------------------------------------------------------------
@@ -99,7 +99,12 @@ int precision = 2;
 
 void ToStringPrecision(int i)
 {
-  precision = i;
+	precision = i;
+}
+
+int ToStringPrecision(void)
+{
+	return precision;
 }
 
 gString ToString(int i)
