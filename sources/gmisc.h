@@ -57,6 +57,9 @@ gString ToString(double);
 gString ToString(const gInteger &);
 gString ToString(const gRational &, bool approx = true);
 
+double		FromString(const gString &s,double &d);
+gRational	FromString(const gString &s,gRational &r);
+
 double ToDouble(const gString &);
 
 #endif    // GMISC_H

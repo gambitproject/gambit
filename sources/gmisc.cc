@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <limits.h>
+#include <ctype.h>
 
 //--------------------------------------------------------------------------
 //                      Simple mathematical functions
@@ -124,6 +125,63 @@ gString ToString(const gRational &r, bool approx)
   }
 
   return gString(gconvert_buffer);
+}
+
+
+// conversions from strings to numbers
+
+gRational FromString(const gString &f,gRational &y)
+{
+	char ch = ' ';
+	int sign = 1;
+	int index=0,length=f.length();
+	gInteger num = 0, denom = 1;
+
+	while (isspace(ch) && index<=length)    ch=f[index++];
+
+	if (ch == '-' && index<=length)  {
+		sign = -1;
+		ch=f[index++];
+	}
+
+	while (ch >= '0' && ch <= '9' && index<=length)   {
+		num *= 10;
+		num += (int) (ch - '0');
+		ch=f[index++];
+	}
+
+	if (ch == '/')  {
+		denom = 0;
+		ch=f[index++];
+		while (ch >= '0' && ch <= '9' && index<=length)  {
+			denom *= 10;
+			denom += (int) (ch - '0');
+			ch=f[index++];
+		}
+	}
+	else if (ch == '.')  {
+		denom = 1;
+		ch=f[index++];
+		while (ch >= '0' && ch <= '9' && index<=length)  {
+			denom *= 10;
+			num *= 10;
+			num += (int) (ch - '0');
+			ch=f[index++];
+		}
+	}
+
+	y = gRational(sign * num, denom);
+	return y;
+}
+
+// this two-step process allows us to read in a double using either the
+// standard form xxx.xxxx or a/b form.
+double FromString(const gString &f,double &d)
+{
+gRational R;
+FromString(f,R);
+d=(double)R;
+return d;
 }
 
 double ToDouble(const gString &s)
