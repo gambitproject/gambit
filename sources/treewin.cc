@@ -1,7 +1,7 @@
 //
 // FILE: treewin.cc -- Drawing functions for TreeWindow
 //
-// $Id$
+// @(#)treewin.cc	2.12 02/17/98
 //
 
 #include "wx.h"
@@ -393,7 +393,7 @@ void TreeRender::RenderSubtree(wxDC &dc)
     // For zoom, override JustRender
     float zoom=(JustRender()) ? 1.000 : draw_settings.Zoom();
     // Check if this node/labels are visible
-    if (!(child_entry.x+dc.device_origin_x<x_start*PIXELS_PER_SCROLL  |
+    if (!(child_entry.x+dc.device_origin_x<x_start*PIXELS_PER_SCROLL  ||
 	  entry.x+dc.device_origin_x>x_start*PIXELS_PER_SCROLL+width/zoom ||
 	  (entry.y+dc.device_origin_y>y_start*PIXELS_PER_SCROLL+height/zoom &&
 	   child_entry.y+dc.device_origin_y>y_start*PIXELS_PER_SCROLL+height/zoom) ||
@@ -997,7 +997,8 @@ int TreeWindow::OutcomeDragger::Dragging(void) const
 TreeWindow::TreeWindow(Efg &ef_, EFSupport * &disp, EfgShow *frame_) 
   : TreeRender(frame_, this, node_list, hilight_infoset, hilight_infoset1,
 	       mark_node, cursor, subgame_node, draw_settings),
-	       ef(ef_), disp_sup(disp), frame(frame_), pframe(frame_)
+	       ef(ef_), disp_sup(disp), frame(frame_), pframe(frame_),
+         copied_infoset(0)
 {
 // Set the cursor to the root node
   cursor=ef.RootNode();
@@ -1114,7 +1115,7 @@ gText TreeWindow::AsString(TypedSolnValues what, const Node *n, int br) const
 double TreeWindow::ProbAsDouble(const Node *n,int action) const
 { return (double)frame->BranchProb(n,action); }
 
-gText TreeWindow::OutcomeAsString(const Node *n,bool &hilight) const
+gText TreeWindow::OutcomeAsString(const Node *n,bool &/*hilight*/) const
 {
   if (n->GetOutcome())   {
     EFOutcome *tv = n->GetOutcome();

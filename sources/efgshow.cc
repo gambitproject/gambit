@@ -535,7 +535,6 @@ AddSeparator();
 AddTool(NODE_ADD, ToolbarAddBitmap);
 AddTool(NODE_DELETE, ToolbarDeleteBitmap);
 AddTool(TREE_OUTCOMES, ToolbarPayoffBitmap);
-AddTool(BUILD_PARAMS, ToolbarParamBitmap);
 AddSeparator();
 AddTool(SOLVE_SOLVE, ToolbarSolveBitmap);
 AddTool(INSPECT_SOLUTIONS, ToolbarInspectBitmap);

@@ -1,7 +1,7 @@
 //
 // FILE: efgshow1.cc -- remainder of the extensive form gui stuff
 //
-// $Id$
+// @(#)efgshow1.cc	1.5 02/11/98
 //
 
 #include "wx.h"
@@ -50,6 +50,16 @@ wxMenu *file_menu=new wxMenu;
 	file_menu->Append(FILE_LOG,"&Logging","Start/stop logging gcl",TRUE);
 	file_menu->Append(FILE_CLOSE,"&Close","Close this window");
 	log_item=file_menu->FindItem("Logging");
+
+ edit_menu = new wxMenu;
+  wxMenu *edit_copy_menu = new wxMenu;
+    edit_copy_menu->Append(EDIT_COPY_INFOSET, "&Infoset", "Infoset");
+    edit_copy_menu->Append(EDIT_COPY_OUTCOME, "&Outcome", "Outcome");
+    edit_copy_menu->Append(EDIT_COPY_SUBTREE, "&Subtree", "Subtree");
+  edit_menu->Append(EDIT_COPY, "&Copy", edit_copy_menu);
+  edit_menu->Append(EDIT_PASTE, "&Paste", "Paste");
+  edit_menu->Enable(EDIT_PASTE, FALSE);
+
 wxMenu *build_menu=new wxMenu;
 	wxMenu *node_menu=new wxMenu;
 		node_menu->Append(NODE_ADD, "&Add","Add a node");
@@ -84,7 +94,6 @@ wxMenu *build_menu=new wxMenu;
 	build_menu->Append(BUILD_INFOSET, "&Infoset",infoset_menu,"Edit infosets");
 	build_menu->Append(TREE_OUTCOMES, "&Outcomes","Edit/View the payoffs");
 	build_menu->Append(BUILD_TREE, "&Tree",tree_menu,"Edit the tree");
-	build_menu->Append(BUILD_PARAMS,  "&Params","Set/Edit parameters");
 wxMenu *subgame_menu=new wxMenu;
 	subgame_menu->Append(SUBGAME_SOLVE,"Mark &All","Scan tree for subgames");
 	subgame_menu->Append(SUBGAME_SET,"&Mark","Set node subgame root");
@@ -131,6 +140,7 @@ wxMenu *help_menu = new wxMenu;
 
 wxMenuBar *menu_bar=new wxMenuBar;
 	menu_bar->Append(file_menu,"&File");
+  menu_bar->Append(edit_menu, "&Edit");
 	menu_bar->Append(build_menu,"&Build");
 	menu_bar->Append(subgame_menu,"Sub&games");
 	menu_bar->Append(supports_menu,"S&upports");
@@ -182,6 +192,22 @@ void EfgShow::OnMenuCommand(int id)
 {
 switch (id)
 {
+  case EDIT_COPY_INFOSET:
+    tw->edit_copy_infoset();
+    edit_menu->Enable(EDIT_PASTE, TRUE);
+    edit_menu->SetLabel(EDIT_PASTE, "&Paste Infoset");
+    break;
+  case EDIT_COPY_OUTCOME:
+    tw->edit_copy_outcome();
+    edit_menu->Enable(EDIT_PASTE, TRUE);
+    edit_menu->SetLabel(EDIT_PASTE, "&Paste Outcome");
+    break;
+  case EDIT_COPY_SUBTREE:
+    tw->edit_copy_subtree();
+    edit_menu->Enable(EDIT_PASTE, TRUE);
+    edit_menu->SetLabel(EDIT_PASTE, "&Paste Subtree");
+    break;
+  case EDIT_PASTE:  tw->edit_paste();  break;
 // Node menus
 	case NODE_ADD:tw->node_add();break;
 	case NODE_DELETE:tw->node_delete();break;
@@ -474,7 +500,7 @@ void EfgShow::SetFileName(const gText &s)
 if (s!="") filename=s; else filename="untitled.efg";
 // Title the window
 #ifndef _HPUX_SOURCE // for some strange reason SetTitle crashes on hp
-SetTitle("["+gText(wxFileNameFromPath(filename))+"] "+ef.GetTitle());
+SetTitle("["+filename+"] "+ef.GetTitle());
 #endif
 }
 // Show some game info

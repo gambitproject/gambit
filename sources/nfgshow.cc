@@ -1,7 +1,7 @@
 //
 // FILE: NfgShow.cc -- normal form GUI
 //
-// $Id$
+// @(#)nfgshow.cc	1.9 02/16/98
 //
 
 #include "wx.h"
@@ -605,7 +605,7 @@ void NfgShow::SetFileName(const gText &s)
 {
 if (s!="") filename=s; else filename="untitled.nfg";
 // Title the window
-spread->SetTitle("["+gText(wxFileNameFromPath(filename))+"] "+nf.GetTitle());
+spread->SetTitle("["+filename+"] "+nf.GetTitle());
 }
 
 const gText &NfgShow::Filename(void) const

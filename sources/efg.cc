@@ -1,7 +1,7 @@
 //
 // FILE: efg.cc -- Implementation of extensive form data type
 //
-// $Id$
+// @(#)efg.cc	2.31 02/21/98
 //
 
 class Node;
