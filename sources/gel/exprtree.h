@@ -197,16 +197,18 @@ private:                                              \
 public:                                               \
   funcclass( gelExpression<type1>* x ) : op1(x) {}    \
   virtual ~funcclass() { delete op1; }                \
-  gNestedList<T> Evaluate( gelVariableTable *vt ) const     \
-  {                                                   \
-    gNestedList<type1> arg1 = op1->Evaluate( vt );    \
-    gNestedList<T> ret( arg1.Dim() );                 \
-    int i = 0;                                        \
-    for( i = 1; i <= arg1.Data().Length(); ++i )      \
-      ret.Data().Append( EvalItem( arg1.Data()[i] ) );       \
-    return ret;                                       \
-  }                                                   \
-};
+  gNestedList<T> Evaluate( gelVariableTable *vt ) const;     \
+};                                                    \
+                                                      \
+gNestedList<T> funcclass :: Evaluate(gelVariableTable *vt) const    \
+{                                                     \
+  gNestedList<type1> arg1 = op1->Evaluate( vt );      \
+  gNestedList<T> ret( arg1.Dim() );                   \
+  for (int i = 1; i <= arg1.Data().Length(); i++)     \
+    ret.Data().Append(EvalItem(arg1.Data()[i]));      \
+  return ret;                                         \
+}
+
 
 
 // This one is for non-listed functions
@@ -240,19 +242,20 @@ public:                                               \
              gelExpression<type2>* x2 )               \
     : op1(x1), op2(x2) {}                             \
   virtual ~funcclass() { delete op1; delete op2; }    \
-  gNestedList<T> Evaluate( gelVariableTable *vt ) const     \
-  {                                                   \
-    gNestedList<type1> arg1 = op1->Evaluate( vt );    \
-    gNestedList<type2> arg2 = op2->Evaluate( vt );    \
-    gNestedList<T> ret( arg1.Dim() );                 \
-    assert( arg1.Data().Length() == arg2.Data().Length() );         \
-    assert( arg1.Dim() == arg2.Dim() );               \
-    int i = 0;                                        \
-    for( i = 1; i <= arg1.Data().Length(); ++i )             \
-      ret.Data().Append( EvalItem( arg1.Data()[i], arg2.Data()[i] ) );     \
-    return ret;                                       \
-  }                                                   \
-};
+  gNestedList<T> Evaluate( gelVariableTable *vt ) const;     \
+};                                                    \
+                                                      \
+gNestedList<T> funcclass::Evaluate(gelVariableTable *vt) const     \
+{                                                   \
+  gNestedList<type1> arg1 = op1->Evaluate( vt );    \
+  gNestedList<type2> arg2 = op2->Evaluate( vt );    \
+  gNestedList<T> ret( arg1.Dim() );                 \
+  assert( arg1.Data().Length() == arg2.Data().Length() );         \
+  assert( arg1.Dim() == arg2.Dim() );               \
+  for (int i = 1; i <= arg1.Data().Length(); i++)             \
+    ret.Data().Append(EvalItem(arg1.Data()[i], arg2.Data()[i]));     \
+  return ret;                                       \
+}                                                   \
 
 
 // This one is for non-listed functions
