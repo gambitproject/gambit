@@ -53,7 +53,7 @@ MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
     m_support(p_profile.Support()), 
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
     m_liapValue(), m_epsilon(0.0), m_qreLambda(-1), m_qreValue(-1),
-    m_id(0), m_revision(p_profile.Game().RevisionNumber())
+    m_revision(p_profile.Game().RevisionNumber())
 {
   gEpsilon(m_epsilon);
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
@@ -72,7 +72,7 @@ MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
   : m_profile(NFSupport(p_profile.Game())), m_precision(precRATIONAL),
     m_support(p_profile.Support()),
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
-    m_liapValue(), m_qreLambda(-1), m_qreValue(-1), m_id(0), 
+    m_liapValue(), m_qreLambda(-1), m_qreValue(-1),
     m_revision(p_profile.Game().RevisionNumber())
 {
   gEpsilon(m_epsilon);
@@ -92,7 +92,7 @@ MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
   : m_profile(NFSupport(p_profile.Game())), m_precision(precRATIONAL),
     m_support(p_profile.Support()),
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
-    m_liapValue(), m_qreLambda(-1), m_qreValue(-1),m_id(0), 
+    m_liapValue(), m_qreLambda(-1), m_qreValue(-1),
     m_revision(p_profile.Game().RevisionNumber())
 {
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
@@ -121,7 +121,7 @@ MixedSolution::MixedSolution(const MixedSolution &p_solution)
     m_epsilon(p_solution.m_epsilon),
     m_qreLambda(p_solution.m_qreLambda),
     m_qreValue(p_solution.m_qreValue), 
-    m_id(p_solution.m_id), 
+    m_name(p_solution.m_name), 
     m_revision(p_solution.m_revision)
 { }
 
@@ -142,7 +142,7 @@ MixedSolution &MixedSolution::operator=(const MixedSolution &p_solution)
     m_epsilon = p_solution.m_epsilon;
     m_qreLambda = p_solution.m_qreLambda;
     m_qreValue = p_solution.m_qreValue;
-    m_id = p_solution.m_id;
+    m_name = p_solution.m_name;
     m_revision = p_solution.m_revision;
   }
   return *this;

@@ -8,8 +8,6 @@
 #ifndef NFGSOLN_H
 #define NFGSOLN_H
 
-#include "msolnsf.h"
-
 //****************************************************************************
 //                       MIXED SOLUTION SHOW
 //****************************************************************************
@@ -19,43 +17,6 @@
 #define		MSOLN_O_EFGNFG		16
 
 class NfgShow;
-
-class NfgSolnShow : public wxGrid {
-protected:
-  NfgShow *parent;
-  gSortList<MixedSolution> &solns;
-  int 	num_players,cur_soln,num_solutions;
-  NormalDrawSettings	&norm_draw_settings;
-  gBlock<bool> features;
-  static char *feature_names[];
-  static int   feature_width[];
-  MSolnSortFilterOptions &sf_options;
-  void		UpdateSoln(int row,int col);
-  int		FeaturePos(int feature);
-  int		SolnNum(int row);
-  int		SolnPos(int soln_num);
-  void		UpdateValues(void);
-  virtual void	OnRemove(bool all);
-  virtual void	OnAdd(void);
-  virtual void	OnEdit(void);
-  virtual void	SortFilter(bool inter=true);
-  virtual void	SetOptions(void);
-
-  // Overriding wxGrid event handling
-  virtual void OnSelectCell(int row, int col);
-
-public:
-  NfgSolnShow(gSortList<MixedSolution> &soln,int num_players,int max_strats,
-	      int cur_soln_,NormalDrawSettings	&ds,
-	      MSolnSortFilterOptions &sf_options,
-	      NfgShow *parent_=0);
-  // Allow solution transfer to an EFG
-  void SolutionToExtensive(void);
-  // Double clicking on a solution will update the parent
-  void OnDoubleClick(int row,int col,int level,const gText &value);
-  // Take care of some options changes
-  void OnOptionsChanged(unsigned int options=0);
-};
 
 //****************************************************************************
 //                       MIXED SOLUTION PICKER (single)

@@ -9,6 +9,7 @@
 
 #include "wx/listctrl.h"
 #include "nfgshow.h"
+#include "mixedfilter.h"
 
 class NfgProfileList : public wxListCtrl, public gSortList<MixedSolution> {
 private:
@@ -16,6 +17,7 @@ private:
   wxMenu *m_menu;
 
 protected:
+  MixedListFilter m_options;
 
   // Event handlers
   void OnSortFilter(wxCommandEvent &);

@@ -138,8 +138,6 @@ public:
   int GetColPlayer(void) const { return m_colPlayer; }
   
   void ClearSolutions(void);
-  void RemoveSolutions(void);
-  MixedSolution CreateSolution(void);
   void ChangeSolution(int sol);
 
   int CurrentSolution(void) const { return cur_soln; }

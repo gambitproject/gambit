@@ -37,7 +37,7 @@ protected:
   mutable gFact<gNumber> m_liapValue;
   mutable gNumber m_epsilon, m_qreLambda, m_qreValue;
   gArray<gNumber> m_payoff;
-  unsigned int m_id;
+  gText m_name;
   mutable long m_revision;
   
   gTriState GetNash(void) const;
@@ -76,7 +76,7 @@ public:
   // Do probabilities sum to one (within m_epsilon) for each player?)
   bool IsComplete(void) const;
 
-  unsigned int Id(void) const { return m_id; }
+  const gText &GetName(void) const { return m_name; }
   NfgAlgType Creator(void) const { CheckIsValid(); return m_creator; }
   const NFSupport &Support(void) const { CheckIsValid(); return m_support; }
   const gTriState &IsNash(void) const;
@@ -87,7 +87,7 @@ public:
   const gNumber &QreValue(void) const { CheckIsValid(); return m_qreValue; }
   const gNumber &LiapValue(void) const;
 
-  void SetId(unsigned int p_id) { m_id = p_id; }
+  void SetName(const gText &p_name) { m_name = p_name; }
   void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
   void SetQre(const gNumber &p_qreLambda, const gNumber &p_qreValue)
     { m_qreLambda = p_qreLambda; m_qreValue = p_qreValue; }

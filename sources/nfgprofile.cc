@@ -13,6 +13,7 @@
 //-------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(NfgProfileList, wxListCtrl)
+  EVT_MENU(NFG_PROFILES_FILTER, NfgProfileList::OnSortFilter)
   EVT_RIGHT_DOWN(NfgProfileList::OnRightClick)
 END_EVENT_TABLE()
 
@@ -49,7 +50,7 @@ void NfgProfileList::UpdateValues(void)
   DeleteAllItems();
   for (int i = 1; i <= VisibleLength(); i++) {
     const MixedSolution &solution = (*this)[i];
-    InsertItem(i - 1, (char *) ToText((int) solution.Id()));
+    InsertItem(i - 1, (char *) solution.GetName());
     SetItem(i - 1, 1, (char *) ToText(solution.Creator()));
     SetItem(i - 1, 2, (char *) ToText(solution.IsNash()));
     SetItem(i - 1, 3, (char *) ToText(solution.IsPerfect()));
@@ -76,7 +77,24 @@ void NfgProfileList::UpdateValues(void)
 
 int NfgProfileList::Append(const MixedSolution &p_solution)
 {
-  return gSortList<MixedSolution>::Append(p_solution);
+  int number = Length() + 1;
+  while (1) {
+    int i;
+    for (i = 1; i <= Length(); i++) {
+      if ((*this)[i].GetName() == "Profile" + ToText(number)) {
+	break;
+      }
+    }
+
+    if (i > Length()) {
+      break;
+    }
+    
+    number++;
+  }
+
+  (*this)[gSortList<MixedSolution>::Append(p_solution)].SetName("Profile" + ToText(number));
+  return Length();
 }
 
 void NfgProfileList::OnRightClick(wxMouseEvent &p_event)
@@ -86,4 +104,32 @@ void NfgProfileList::OnRightClick(wxMouseEvent &p_event)
   m_menu->Enable(NFG_PROFILES_EDIT, m_parent->CurrentSolution() > 0);
   m_menu->Enable(NFG_PROFILES_DELETE, m_parent->CurrentSolution() > 0);
   PopupMenu(m_menu, p_event.m_x, p_event.m_y);
+}
+
+void NfgProfileList::OnSortFilter(wxCommandEvent &)
+{
+  dialogMixedFilter dialog(this, m_options);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    dialog.Update(m_options);
+
+    if (VisibleLength() > 0) {
+      MixedSolution &currentSolution = (*this)[m_parent->CurrentSolution()];
+      m_options.Filter(*this);
+      m_options.Sort(*this);
+      UpdateValues();
+      if (this->Find(currentSolution) <= VisibleLength()) {
+	m_parent->ChangeSolution(this->Find(currentSolution));
+      }
+      else {
+	m_parent->ChangeSolution(1);
+      }
+    }
+    else {
+      m_options.Filter(*this);
+      m_options.Sort(*this);
+      UpdateValues();
+      m_parent->ChangeSolution((VisibleLength() > 0) ? 1 : 0);
+    }
+  }
 }

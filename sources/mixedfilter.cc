@@ -1,98 +1,92 @@
 //
-// FILE: behavfilter.cc -- Implements sorting/filtering of behavior profiles
+// FILE: mixedfilter.cc -- Implements sorting and filtering of mixed profiles
 //
 // $Id$
 //
 
-#include "behavfilter.h"
+#include "wx/wx.h"
+#include "mixedfilter.h"
 
-static EfgAlgType filter_cr_id[NUM_BCREATORS] =
+NfgAlgType filter_cr_id[NUM_MCREATORS] =
 {
-  algorithmEfg_USER,
-  algorithmEfg_ENUMPURE_EFG, algorithmEfg_ENUMPURE_NFG,
-  algorithmEfg_ENUMMIXED_NFG,
-  algorithmEfg_LCP_EFG, algorithmEfg_LCP_NFG,
-  algorithmEfg_LP_EFG, algorithmEfg_LP_NFG,
-  algorithmEfg_LIAP_EFG, algorithmEfg_LIAP_NFG,
-  algorithmEfg_SIMPDIV_NFG,
-  algorithmEfg_POLENUM_EFG, algorithmEfg_POLENUM_NFG,
-  algorithmEfg_QRE_EFG, algorithmEfg_QRE_NFG,
-  algorithmEfg_QREALL_NFG
+  algorithmNfg_USER,
+  algorithmNfg_ENUMPURE, algorithmNfg_ENUMMIXED,
+  algorithmNfg_LCP, algorithmNfg_LP, algorithmNfg_LIAP,
+  algorithmNfg_SIMPDIV, algorithmNfg_POLENUM,
+  algorithmNfg_QRE, algorithmNfg_QREALL
 };
 
-static gTriState filter_tri_id[3] = 
-{ triTRUE, triFALSE, triUNKNOWN };
+gTriState filter_tri_id[3] = { triTRUE, triFALSE, triUNKNOWN };
+
 
 //-------------------------------------------------------------------------
-//                 class BehavListFilter: Member functions
+//                 class MixedListFilter: Member functions
 //-------------------------------------------------------------------------
 
-BehavListFilter::BehavListFilter(void)
-  : m_filterCreator(NUM_BCREATORS), m_filterNash(3), 
-    m_filterPerfect(3), m_filterSequential(3)
+MixedListFilter::MixedListFilter(void)
+  : m_filterCreator(NUM_MCREATORS), m_filterNash(3), m_filterPerfect(3),
+    m_filterProper(3)
 {
-  m_sortBy = BSORT_BY_NAME;
+  m_sortBy = MSORT_BY_NAME;
 
-  for (int i = 1; i <= NUM_BCREATORS; i++) {
+  for (int i = 1; i <= NUM_MCREATORS; i++) { 
     m_filterCreator[i] = true;
   }
 
   for (int i = 1; i <= 3; i++) {
     m_filterNash[i] = true;
     m_filterPerfect[i] = true;
-    m_filterSequential[i] = true;
+    m_filterProper[i] = true;
   }
 }
-int &BehavListFilter::SortBy(void)
+
+int &MixedListFilter::SortBy(void)
 { return m_sortBy; }
 
-int BehavListFilter::SortBy(void) const
+int MixedListFilter::SortBy(void) const
 { return m_sortBy; }
 
-gArray<bool> &BehavListFilter::FilterCreator(void)
+gArray<bool> &MixedListFilter::FilterCreator(void)
 { return m_filterCreator; }
 
-const gArray<bool> &BehavListFilter::FilterCreator(void) const
+const gArray<bool> &MixedListFilter::FilterCreator(void) const
 { return m_filterCreator; }
 
-gArray<bool> &BehavListFilter::FilterNash(void)
+gArray<bool> &MixedListFilter::FilterNash(void)
 { return m_filterNash; }
 
-const gArray<bool> &BehavListFilter::FilterNash(void) const
+const gArray<bool> &MixedListFilter::FilterNash(void) const
 { return m_filterNash; }
 
-gArray<bool> &BehavListFilter::FilterPerfect(void)
+gArray<bool> &MixedListFilter::FilterPerfect(void)
 { return m_filterPerfect; }
 
-const gArray<bool> &BehavListFilter::FilterPerfect(void) const
+const gArray<bool> &MixedListFilter::FilterPerfect(void) const
 { return m_filterPerfect; }
 
-gArray<bool> &BehavListFilter::FilterSequential(void)
-{ return m_filterSequential; }
+gArray<bool> &MixedListFilter::FilterProper(void)
+{ return m_filterProper; }
 
-const gArray<bool> &BehavListFilter::FilterSequential(void) const
-{ return m_filterSequential; }
+const gArray<bool> &MixedListFilter::FilterProper(void) const
+{ return m_filterProper; }
 
-bool BehavListFilter::Passes(const BehavSolution &p_solution) const
+bool MixedListFilter::Passes(const MixedSolution &p_solution) const
 {
-  for (int i = 1; i <= NUM_BCREATORS; i++) {
-    if (filter_cr_id[i-1] == p_solution.Creator() && !m_filterCreator[i]) {
+  for (int i = 1; i <= NUM_MCREATORS; i++) {
+    if (filter_cr_id[i] == p_solution.Creator() && !FilterCreator()[i])
       return false;
-    }
   }
 
-  for (int i = 1; i <= 3; i++) {
-    if (filter_tri_id[i-1] == p_solution.IsNash() && !m_filterNash[i]) {
+  for (int i = 1; i <= 3; i++)  {
+    if (filter_tri_id[i] == p_solution.IsNash() && !FilterNash()[i]) {
+      return false;
+    }
+    
+    if (filter_tri_id[i] == p_solution.IsPerfect() && !FilterPerfect()[i]) {
       return false;
     }
 
-    if (filter_tri_id[i-1] == p_solution.IsSubgamePerfect() &&
-	!m_filterPerfect[i]) {
-      return false;
-    }
-
-    if (filter_tri_id[i-1] == p_solution.IsSequential() && 
-	!m_filterSequential[i]) {
+    if (filter_tri_id[i] == p_solution.IsProper() && !FilterProper()[i]) {
       return false;
     }
   }
@@ -100,32 +94,32 @@ bool BehavListFilter::Passes(const BehavSolution &p_solution) const
   return true;
 }
 
-bool BehavListFilter::LessThan(const BehavSolution &a,
-			       const BehavSolution &b) const
+bool MixedListFilter::LessThan(const MixedSolution &a,
+			       const MixedSolution &b) const
 {
   switch (SortBy()) {
-  case BSORT_BY_NAME:
+  case MSORT_BY_NAME:
     return (a.GetName() < b.GetName());
 
-  case BSORT_BY_CREATOR:
+  case MSORT_BY_CREATOR:
     return (ToText(a.Creator()) < ToText(b.Creator()));
 
-  case BSORT_BY_NASH:
+  case MSORT_BY_NASH:
     return (a.IsNash() < b.IsNash());
 
-  case BSORT_BY_PERFECT:
-    return (a.IsSubgamePerfect() < b.IsSubgamePerfect());
+  case MSORT_BY_PERFECT:
+    return (a.IsPerfect() < b.IsPerfect());
 
-  case BSORT_BY_SEQ:
-    return (a.IsSequential() < b.IsSequential());
+  case MSORT_BY_PROPER:
+    return (a.IsProper() < b.IsProper());
 
-  case BSORT_BY_GVALUE:
+  case MSORT_BY_GVALUE:
     return (a.QreValue() < b.QreValue());
 
-  case BSORT_BY_GLAMBDA:
+  case MSORT_BY_GLAMBDA:
     return (a.QreLambda() < b.QreLambda());
 
-  case BSORT_BY_LVALUE:
+  case MSORT_BY_LVALUE:
     return (a.LiapValue() < b.LiapValue());
 
   default: 
@@ -135,18 +129,17 @@ bool BehavListFilter::LessThan(const BehavSolution &a,
   return false;
 }
 
-
 //-------------------------------------------------------------------------
-//                 class BehavFilterDialog: Member functions
+//                 class dialogMixedFilter: Member functions
 //-------------------------------------------------------------------------
 
-dialogBehavFilter::dialogBehavFilter(wxWindow *p_parent,
-				     const BehavListFilter &p_filter)
+dialogMixedFilter::dialogMixedFilter(wxWindow *p_parent,
+				     const MixedListFilter &p_filter)
   : wxDialog(p_parent, -1, "Sorting and Filtering Options",
 	     wxDefaultPosition, wxDefaultSize)
 {
   wxString sortByChoices[] =
-  { "Id", "Creator", "Nash", "Perfect", "Sequential",
+  { "Name", "Creator", "Nash", "Perfect", "Properl",
     "QreValue", "QreLambda", "LiapValue" };
 
   m_sortBy = new wxRadioBox(this, -1, "Sort By",
@@ -158,16 +151,13 @@ dialogBehavFilter::dialogBehavFilter(wxWindow *p_parent,
   
   wxString creatorChoices[] = {
     "User Defined",
-    "EnumPure[EFG]", "EnumPure[NFG]", "EnumMixed[NFG]",
-    "Lcp[EFG]", "Lcp[NFG]", "Lp[EFG]", "Lp[NFG]",
-    "Liap[EFG]", "Liap[NFG]", "Simpdiv[NFG]",
-    "PolEnum[EFG]", "PolEnum[NFG]",
-    "Qre[EFG]", "Qre[NFG]", "QreAll[NFG]"
+    "EnumPure", "EnumMixed", "Lcp", "Lp", "Liap", "Simpdiv", "PolEnum",
+    "Qre", "QreAll"
   };
 
   m_filterCreator = new wxListBox(this, -1, 
 				  wxDefaultPosition, wxDefaultSize,
-				  NUM_BCREATORS, creatorChoices,
+				  NUM_MCREATORS, creatorChoices,
 				  wxLB_MULTIPLE);
   filterCreatorSizer->Add(m_filterCreator, 0, wxALL, 5);
 
@@ -187,31 +177,31 @@ dialogBehavFilter::dialogBehavFilter(wxWindow *p_parent,
 				  3, tristateChoices, wxLB_MULTIPLE);
   filterPerfectSizer->Add(m_filterPerfect, 0, wxALL, 5);
 
-  wxBoxSizer *filterSequentialSizer = new wxBoxSizer(wxVERTICAL);
-  filterSequentialSizer->Add(new wxStaticText(this, -1, "Sequential"),
+  wxBoxSizer *filterProperSizer = new wxBoxSizer(wxVERTICAL);
+  filterProperSizer->Add(new wxStaticText(this, -1, "Proper"),
 			     0, wxALL, 5);
-  m_filterSequential = new wxListBox(this, -1,
+  m_filterProper = new wxListBox(this, -1,
 				     wxDefaultPosition, wxDefaultSize,
 				     3, tristateChoices, wxLB_MULTIPLE);
-  filterSequentialSizer->Add(m_filterSequential, 0, wxALL, 5);
+  filterProperSizer->Add(m_filterProper, 0, wxALL, 5);
 
   wxStaticBoxSizer *filterSizer =
     new wxStaticBoxSizer(new wxStaticBox(this, -1, "Filter By"), wxHORIZONTAL);
   filterSizer->Add(filterCreatorSizer, 0, wxALL, 5);
   filterSizer->Add(filterNashSizer, 0, wxALL, 5);
   filterSizer->Add(filterPerfectSizer, 0, wxALL, 5);
-  filterSizer->Add(filterSequentialSizer, 0, wxALL, 5);
+  filterSizer->Add(filterProperSizer, 0, wxALL, 5);
 
   m_sortBy->SetSelection(p_filter.SortBy()-1);
 
-  for (int i = 0; i < NUM_BCREATORS; i++) {
+  for (int i = 0; i < NUM_MCREATORS; i++) {
     m_filterCreator->SetSelection(i, p_filter.FilterCreator()[i+1]);
   }
 
   for (int i = 0; i < 3; i++) {
     m_filterNash->SetSelection(i, p_filter.FilterNash()[i+1]);
     m_filterPerfect->SetSelection(i, p_filter.FilterPerfect()[i+1]);
-    m_filterSequential->SetSelection(i, p_filter.FilterSequential()[i+1]);
+    m_filterProper->SetSelection(i, p_filter.FilterProper()[i+1]);
   }
 
   wxButton *okButton = new wxButton(this, wxID_OK, "OK");
@@ -235,24 +225,24 @@ dialogBehavFilter::dialogBehavFilter(wxWindow *p_parent,
   topSizer->SetSizeHints(this);
 }
 
-void dialogBehavFilter::Update(BehavListFilter &p_filter)
+void dialogMixedFilter::Update(MixedListFilter &p_filter)
 {
   p_filter.SortBy() = m_sortBy->GetSelection()+1;
 
-  for (int i = 1; i <= NUM_BCREATORS; i++) {
+  for (int i = 1; i <= NUM_MCREATORS; i++) {
     p_filter.FilterCreator()[i] = m_filterCreator->Selected(i-1);
   }
 
   for (int i = 1; i <= 3; i++) {
     p_filter.FilterNash()[i] = m_filterNash->Selected(i-1);
     p_filter.FilterPerfect()[i] = m_filterPerfect->Selected(i-1);
-    p_filter.FilterSequential()[i] = m_filterSequential->Selected(i-1);
+    p_filter.FilterProper()[i] = m_filterProper->Selected(i-1);
   }
 }
 
 #include "gslist.imp"
 
-template class gSortList<BehavSolution>;
-template class gListSorter<BehavSolution>;
-template class gListFilter<BehavSolution>;
+template class gSortList<MixedSolution>;
+template class gListSorter<MixedSolution>;
+template class gListFilter<MixedSolution>;
 

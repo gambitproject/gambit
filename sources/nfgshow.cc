@@ -174,8 +174,8 @@ END_EVENT_TABLE()
 NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
   : wxFrame(p_frame, -1, "", wxDefaultPosition, wxSize(500, 500)),
     EfgNfgInterface(gNFG, efg),
-    m_nfg(p_nfg), m_rowPlayer(1), m_colPlayer(2),
-    m_solutionTable(0), m_solutionSashWindow(0)
+    m_nfg(p_nfg), m_solutionTable(0), m_solutionSashWindow(0),
+    m_rowPlayer(1), m_colPlayer(2)
 {
 #ifdef __WXMSW__
   SetIcon(wxIcon("nfg_icn"));
@@ -362,7 +362,7 @@ void NfgShow::SetStrategy(int p_player, int p_strategy)
 
 void NfgShow::UpdateSoln(void)
 {
-  if (!cur_soln)  return;
+  if (!cur_soln || !m_table->HaveProbs())  return;
 
   // The profile is obvious for pure strategy: just set the display strat
   // to the nonzero solution strategy.  However, for mixed equs, we set
@@ -534,33 +534,10 @@ void NfgShow::ChangeSolution(int sol)
 
 void NfgShow::OnSolutionSelected(wxListEvent &p_event)
 {
-  ChangeSolution(p_event.m_itemIndex + 1);
+  cur_soln = p_event.m_itemIndex + 1;
+  UpdateSoln();
 }
  
-// Remove solutions-permanently removes any solutions
-void NfgShow::RemoveSolutions(void)
-{
-#ifdef NOT_PORTED_YET
-  if (m_solutionTable) {
-    m_solutionTable->Show(FALSE);
-    delete m_solutionTable;
-    m_solutionTable = 0;
-  }
-#endif  // NOT_PORTED_YET
-
-  ClearSolutions();
-
-  cur_soln = 0;
-  m_solutionTable->Flush();
-}
-
-
-
-MixedSolution NfgShow::CreateSolution(void)
-{
-  return MixedSolution(MixedProfile<gNumber>(*m_currentSupport));
-}
-
 void NfgShow::SetFileName(const gText &s)
 {
   if (s != "")
@@ -636,7 +613,6 @@ void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
     outc->SetName(dialog.Name());
 
     m_table->OnChangeValues();
-    RemoveSolutions();
     InterfaceDied();
   }
 }
@@ -1083,15 +1059,16 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
     return;
   }
 
-  bool go = solver->SolveSetup();
+  if (!solver->SolveSetup()) {
+    delete solver;
+    return;
+  }
 
   wxBeginBusyCursor();
 
   try {
-    if (go) {
-      NFSupport support = solver->Eliminate(*m_currentSupport);
-      *m_solutionTable += solver->Solve(support);
-    }
+    NFSupport support = solver->Eliminate(*m_currentSupport);
+    *m_solutionTable += solver->Solve(support);
     wxEndBusyCursor();
   }
   catch (gException &E) {
@@ -1100,8 +1077,6 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
   }
     
   delete solver;
-
-  if (!go)  return;
 
   if (old_max_soln != m_solutionTable->Length()) {
     // Now, transfer the NEW solutions to extensive form if requested
@@ -1315,7 +1290,7 @@ void NfgShow::UpdateMenus(void)
 		("Support: " + CurrentSupport()->GetName()), 1);
   if (CurrentSolution() > 0) {
     SetStatusText((char *) ("Solution: " + 
-			    ToText((int) (*m_solutionTable)[CurrentSolution()].Id())),
+			    ToText(CurrentSolution())),
 		  2);
   }
   else {
