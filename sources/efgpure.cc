@@ -44,7 +44,7 @@ static int FindPureNash(const EFSupport &p_support,
     if (flag)  {
       BehavProfile<gNumber> temp(p_support);
       // zero out all the entries, since any equilibria are pure
-      ((gVector<gNumber> &) temp).operator=(0);
+      ((gVector<gNumber> &) temp).operator=(gNumber(0));
       const PureBehavProfile<gNumber> &profile = citer.GetProfile();
       for (int pl = 1; pl <= p_support.Game().NumPlayers(); pl++)  {
 	for (int iset = 1; iset <= p_support.Game().Players()[pl]->NumInfosets();
