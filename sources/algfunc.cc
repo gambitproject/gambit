@@ -1121,7 +1121,7 @@ Portion* GSM_VertEnum_Float( Portion** param )
 
   ListPortion* list = new ListValPortion();
   int i = 0;
-  for( i = 1; i < verts.Length(); ++i )
+  for( i = 1; i <= verts.Length(); ++i )
   {
     list->Append( ArrayToList( verts[i] ) );
   }
@@ -1152,7 +1152,7 @@ Portion* GSM_VertEnum_Rational( Portion** param )
 
   ListPortion* list = new ListValPortion();
   int i = 0;
-  for( i = 1; i < verts.Length(); ++i )
+  for( i = 1; i <= verts.Length(); ++i )
   {
     list->Append( ArrayToList( verts[i] ) );
   }
