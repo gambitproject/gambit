@@ -1,0 +1,98 @@
+//#
+//# FILE: readnfg.imp -- Type-dependent file-reading code
+//#
+//# $Id$
+//#
+
+#include "glist.h"
+#include "readnfg.h"
+
+template <class T> class NfgFile : public NfgFileReader   {
+  public:
+    NfgFile(gInput &, Nfg<T> *&);
+    virtual ~NfgFile();
+
+    int Parse(void);
+    bool CreateNfg(const gList<gString> &, const gList<gRational> &,
+		   const gList<gString> &);
+    void SetPayoff(int cont, int pl, const gRational &);
+    DataType Type(void) const;
+};
+
+template <class T> NfgFile<T>::NfgFile(gInput &f, Nfg<T> *& N)
+  : NfgFileReader(f, (BaseNfg *&) N)
+{ }
+
+template <class T> NfgFile<T>::~NfgFile()
+{ }
+
+template <class T> bool NfgFile<T>::CreateNfg(const gList<gString> &players,
+					      const gList<gRational> &dims,
+					      const gList<gString> &strats)
+{
+  if (players.Length() != dims.Length())   return false;
+
+  gArray<int> dim(dims.Length());
+  ncont = 1;
+  for (int i = 1; i <= dim.Length(); i++)  {
+    dim[i] = (int) dims[i];
+    ncont *= dim[i];
+    if (dim[i] <= 0)   return false;
+  }
+
+  N = new Nfg<T>(dim);
+  int strat = 1;
+  for (i = 1; i <= dim.Length(); i++)  {
+    N->PlayerList()[i]->SetName(players[i]);
+    if (strats.Length() > 0)
+      for (int j = 1; j <= dim[i]; j++)
+	N->PlayerList()[i]->StrategyList()[j]->name = strats[strat++];
+  }
+  return true;
+}
+
+template <class T> void NfgFile<T>::SetPayoff(int cont, int pl,
+					      const gRational &value)
+{
+  ((Nfg<T> *) N)->payoffs[pl][cont] = (T) value;
+}
+
+template <class T> int NfgFile<T>::Parse(void)
+{
+  infile.seekp(0);
+  static char *prologue = { "NFG 1 " };
+  char c;
+  for (int i = 0; i < strlen(prologue); i++)  {
+    infile.get(c);
+    if (c != prologue[i])  return 1;
+  }
+
+  infile.get(c);
+  switch (c)   {
+    case 'D':
+      break;
+    case 'R':
+      break;
+    default:
+      return 1;
+  }
+  return yyparse();
+}
+
+template <class T> int ReadNfgFile(gInput &f, Nfg<T> *& N)
+{
+  assert(!N);
+
+  NfgFile<T> R(f, N);
+  
+  if (R.Parse())   {
+    gout << "parse error :(\n";
+    if (N)   { delete N;  N = 0; }
+    return 0;
+  }
+
+  return 1;
+}
+
+
+
