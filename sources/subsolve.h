@@ -1,7 +1,7 @@
 //#
 //# FILE: subsolve.h -- Interface to generic subgame solver
 //#
-//# @(#)subsolve.h	1.4 12/18/95
+//# $Id$
 //#
 
 #ifndef SUBSOLVE_H
