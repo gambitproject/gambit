@@ -32,12 +32,16 @@ private:
   static void CallbackAll(wxCheckBox &p_object, wxEvent &)
     { ((dialogAlgorithm *) p_object.GetClientData())->OnAll(); } 
 
+  static void CallbackTrace(wxRadioBox &p_object, wxEvent &)
+    { ((dialogAlgorithm *) p_object.GetClientData())->OnTrace(); }
+
   void OnOK(void);
   void OnCancel(void);
   Bool OnClose(void);
 
   void OnDepth(void);
   void OnAll(void);
+  void OnTrace(void);
 
 protected:
   bool m_usesNfg, m_subgames;
@@ -49,8 +53,13 @@ protected:
   wxCheckBox *m_findAll;
   wxRadioBox *m_precision;
 
+  wxRadioBox *m_traceDest;
+  wxText *m_traceFile;
+  wxIntegerItem *m_traceLevel;
+
   void DominanceFields(bool p_mixed);
   void SubgameFields(void);
+  void TraceFields(void);
 
   void StopAfterField(void);
   void PrecisionField(void);
@@ -79,6 +88,9 @@ public:
     { return (m_typeChoice->GetSelection() == 0); }
   bool EliminateMixed(void) const
     { return (m_methodChoice && m_methodChoice->GetSelection() == 1); }
+
+  gOutput *TraceFile(void) const;
+  int TraceLevel(void) const;
 
   virtual gPrecision Precision(void) const { return precDOUBLE; }
 };

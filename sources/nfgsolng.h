@@ -25,6 +25,8 @@ protected:
   NfgShowInterface *m_parent;
 
   bool m_eliminate, m_eliminateAll, m_eliminateWeak, m_eliminateMixed;
+  gOutput *m_traceFile;
+  int m_traceLevel;
 
 public:
   guiNfgSolution(const NFSupport &, NfgShowInterface *);

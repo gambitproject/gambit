@@ -241,6 +241,8 @@ gList<BehavSolution> guiefgLiapEfg::Solve(void) const
   params.maxits1 = m_maxits1D;
   params.maxitsN = m_maxitsND;
   params.nTries = m_nTries;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
 
   try {
     return EFLiapBySubgameG(m_efg, params, start, m_eliminate,
@@ -269,6 +271,8 @@ bool guiefgLiapEfg::SolveSetup(void)
     m_nTries = dialog.NumTries();
     m_startOption = dialog.StartOption();
 
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else
@@ -318,7 +322,9 @@ gList<BehavSolution> guiefgLiapNfg::Solve(void) const
   params.maxits1 = m_maxits1D;
   params.maxitsN = m_maxitsND;
   params.nTries = m_nTries;
-  
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
+
   try {
     return NFLiapBySubgameG(m_efg, params, start, m_eliminate, m_eliminateAll,
 			    !m_eliminateWeak, m_eliminateMixed,
@@ -347,6 +353,8 @@ bool guiefgLiapNfg::SolveSetup(void)
     m_nTries = dialog.NumTries();
     m_startOption = dialog.StartOption();
 
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else
@@ -394,6 +402,8 @@ gList<BehavSolution> guiefgLcpEfg::Solve(void) const
   SeqFormParams params(status);
   params.stopAfter = m_stopAfter;
   params.precision = m_precision;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
 
   try {
     return SeqFormBySubgameG(m_efg, m_support, params, m_eliminate,
@@ -417,6 +427,9 @@ bool guiefgLcpEfg::SolveSetup(void)
 
     m_stopAfter = dialog.StopAfter();
     m_precision = dialog.Precision();
+
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else
@@ -461,6 +474,8 @@ gList<BehavSolution> guiefgLcpNfg::Solve(void) const
   LemkeParams params(status);
   params.stopAfter = m_stopAfter;
   params.precision = m_precision;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
 
   try {
     LemkeBySubgameG M(m_efg, m_support, params, m_eliminate, m_eliminateAll,
@@ -485,6 +500,9 @@ bool guiefgLcpNfg::SolveSetup(void)
 
     m_stopAfter = dialog.StopAfter();
     m_precision = dialog.Precision();
+
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else
@@ -666,6 +684,8 @@ gList<BehavSolution> guiefgEnumMixedNfg::Solve(void) const
   EnumParams params(status);
   params.stopAfter = m_stopAfter;
   params.precision = m_precision;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
 
   try {
     EnumBySubgameG M(m_efg, m_support, params, m_eliminate, m_eliminateAll,
@@ -690,6 +710,9 @@ bool guiefgEnumMixedNfg::SolveSetup(void)
 
     m_stopAfter = dialog.StopAfter();
     m_precision = dialog.Precision();
+
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else
@@ -740,6 +763,8 @@ gList<BehavSolution> guiefgLpNfg::Solve(void) const
   ZSumParams params;
   params.stopAfter = m_stopAfter;
   params.precision = m_precision;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
 
   try {
     ZSumBySubgameG M(m_efg, m_support, params, m_eliminate, m_eliminateAll,
@@ -764,6 +789,9 @@ bool guiefgLpNfg::SolveSetup(void)
 
     m_stopAfter = 1;
     m_precision = dialog.Precision();
+
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else
@@ -807,7 +835,9 @@ gList<BehavSolution> guiefgLpEfg::Solve(void) const
   CSSeqFormParams params(status);
   params.stopAfter = m_stopAfter;
   params.precision = m_precision;
- 
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
+
   try {
     EfgCSumBySubgameG M(m_efg, m_support, params,
 			m_eliminate, m_eliminateAll, !m_eliminateWeak,
@@ -831,6 +861,9 @@ bool guiefgLpEfg::SolveSetup(void)
 
     m_stopAfter = 1;
     m_precision = dialog.Precision();
+
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else
@@ -882,6 +915,8 @@ gList<BehavSolution> guiefgSimpdivNfg::Solve(void) const
   params.precision = m_precision;
   params.nRestarts = m_nRestarts;
   params.leashLength = m_leashLength;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
 
   try {
     SimpdivBySubgameG M(m_efg, m_support, params, m_eliminate, m_eliminateAll,
@@ -908,6 +943,9 @@ bool guiefgSimpdivNfg::SolveSetup(void)
     m_precision = dialog.Precision();
     m_nRestarts = dialog.NumRestarts();
     m_leashLength = dialog.LeashLength();
+
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
 
     return true;
   }
@@ -957,6 +995,8 @@ gList<BehavSolution> guiefgPolEnumNfg::Solve(void) const
   status.SetProgress(0.0);
   PolEnumParams params(status);
   params.stopAfter = m_stopAfter;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
 
   try {
     guiPolEnumEfgByNfgSubgame M(m_efg, m_support, params,
@@ -982,6 +1022,9 @@ bool guiefgPolEnumNfg::SolveSetup(void)
     m_markSubgames = dialog.MarkSubgames();
 
     m_stopAfter = dialog.StopAfter();
+
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else

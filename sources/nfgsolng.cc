@@ -147,6 +147,8 @@ gList<MixedSolution> guinfgEnumMixed::Solve(void)
   EnumParams params(status);
   params.stopAfter = m_stopAfter;
   params.precision = m_precision;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
 
   long npivots;
   double time;
@@ -170,6 +172,9 @@ bool guinfgEnumMixed::SolveSetup(void)
 
     m_stopAfter = dialog.StopAfter();
     m_precision = dialog.Precision();
+
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else
@@ -195,6 +200,8 @@ gList<MixedSolution> guinfgLcp::Solve(void)
   LemkeParams params(status);
   params.stopAfter = m_stopAfter;
   params.precision = m_precision;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
 
   int npivots;
   double time;
@@ -219,6 +226,8 @@ bool guinfgLcp::SolveSetup(void)
     m_stopAfter = dialog.StopAfter();
     m_precision = dialog.Precision();
 
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else
@@ -244,6 +253,8 @@ gList<MixedSolution> guinfgLp::Solve(void)
   ZSumParams params;
   params.stopAfter = m_stopAfter;
   params.precision = m_precision;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
 
   int npivots;
   double time;
@@ -267,6 +278,9 @@ bool guinfgLp::SolveSetup(void)
 
     m_stopAfter = 1;
     m_precision = dialog.Precision();
+
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else
@@ -293,6 +307,8 @@ gList<MixedSolution> guinfgLiap::Solve(void)
   params.maxits1 = m_maxits1D;
   params.maxitsN = m_maxitsND;
   params.nTries = m_nTries;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
 
   MixedProfile<gNumber> start(m_parent->CreateStartProfile(m_startOption));
   long nevals, nits;
@@ -321,6 +337,8 @@ bool guinfgLiap::SolveSetup(void)
     m_nTries = dialog.NumTries();
     m_startOption = dialog.StartOption();
 
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else
@@ -347,6 +365,8 @@ gList<MixedSolution> guinfgSimpdiv::Solve(void)
   params.precision = m_precision;
   params.nRestarts = m_nRestarts;
   params.leashLength = m_leashLength;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
 
   int nevals, niters;
   double time;
@@ -374,6 +394,8 @@ bool guinfgSimpdiv::SolveSetup(void)
     m_nRestarts = dialog.NumRestarts();
     m_leashLength = dialog.LeashLength();
 
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else
@@ -397,6 +419,8 @@ gList<MixedSolution> guinfgPolEnum::Solve(void)
   wxStatus status(m_parent->Frame(), "PolEnumSolve Algorithm");
   PolEnumParams params(status);
   params.stopAfter = m_stopAfter;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
 
   long nevals;
   double time;
@@ -419,6 +443,9 @@ bool guinfgPolEnum::SolveSetup(void)
     m_eliminateMixed = dialog.EliminateMixed();
 
     m_stopAfter = dialog.StopAfter();
+
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else

@@ -114,6 +114,12 @@ void dialogAlgorithm::OnAll(void)
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
+void dialogAlgorithm::OnTrace(void)
+{
+  m_traceFile->Enable(m_traceDest->GetSelection() == 2);
+  m_traceLevel->Enable(m_traceDest->GetSelection() != 0);
+}
+
 void dialogAlgorithm::DominanceFields(bool p_usesNfg)
 {
   int depth = 0, type = 0, method = 0;
@@ -180,6 +186,25 @@ void dialogAlgorithm::SubgameFields(void)
   NewLine();
 }
 
+void dialogAlgorithm::TraceFields(void)
+{
+  (void) new wxMessage(this, "Trace options");
+  NewLine();
+  char *traceChoices[] = { "None", "Window", "File" };
+  NewLine();
+  m_traceDest = new wxRadioBox(this, (wxFunction) CallbackTrace,
+			       "Destination", -1, -1, -1, -1,
+			       3, traceChoices);
+  m_traceDest->SetClientData((char *) this);
+  NewLine();
+  m_traceFile = new wxText(this, 0, "File name");
+  m_traceFile->Enable(FALSE);
+  NewLine();
+  m_traceLevel = new wxIntegerItem(this, "Level", 0, -1, -1, 100, -1);
+  m_traceLevel->Enable(FALSE);
+  NewLine();
+}
+
 void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
 				       bool p_usesNfg)
 {
@@ -187,6 +212,7 @@ void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
   if (p_dominance)   DominanceFields(p_usesNfg);
   if (p_subgames)    SubgameFields();
   AlgorithmFields();
+  TraceFields();
 
   wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
   okButton->SetClientData((char *) this);
@@ -224,6 +250,33 @@ void dialogAlgorithm::PrecisionField(void)
 			       2, precisionChoices);
   if (precision == 0 || precision == 1)
     m_precision->SetSelection(precision);;
+}
+
+gOutput *dialogAlgorithm::TraceFile(void) const
+{
+  switch (m_traceDest->GetSelection()) {
+  case 0:
+    return 0;
+  case 1:
+    return new gWxOutput;
+  case 2:
+    try {
+      return new gFileOutput(m_traceFile->GetValue());
+    }
+    catch (gFileOutput::OpenFailed &E) {
+      return 0;
+    }
+  default:
+    return 0;
+  }
+}
+
+int dialogAlgorithm::TraceLevel(void) const
+{
+  if (m_traceDest->GetSelection() == 0)
+    return 0;
+  else
+    return m_traceLevel->GetInteger();
 }
 
 //=======================================================================

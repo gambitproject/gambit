@@ -31,6 +31,9 @@ protected:
 
   bool m_eliminate, m_eliminateAll, m_eliminateWeak, m_eliminateMixed;
   bool m_markSubgames;
+  
+  gOutput *m_traceFile;
+  int m_traceLevel;
 
 public:
   guiEfgSolution(const EFSupport &S, EfgShowInterface *parent);
