@@ -585,7 +585,7 @@ PortionType OutcomePortion::Type( void ) const
   default:
     assert( 0 );
   }
-  return porUNKNOWN; 
+  return porUNDEFINED; 
 }
 
 void OutcomePortion::Output( gOutput& s ) const
@@ -1418,7 +1418,7 @@ PortionType MixedPortion::Type( void ) const
       assert( 0 );
     }
   }
-  return porUNKNOWN;
+  return porUNDEFINED;
 }
 
 void MixedPortion::Output( gOutput& s ) const
@@ -1584,7 +1584,7 @@ PortionType BehavPortion::Type( void ) const
     default:
       assert( 0 );
     }
-    return porUNKNOWN;
+    return porUNDEFINED;
   }
 }
 
@@ -1750,7 +1750,7 @@ PortionType NfgPortion::Type( void ) const
   default:
     assert( 0 );
   }
-  return porUNKNOWN;
+  return porUNDEFINED;
 }
 
 void NfgPortion::Output( gOutput& s ) const
@@ -1899,7 +1899,7 @@ PortionType EfgPortion::Type( void ) const
   default:
     assert( 0 );
   }
-  return porUNKNOWN;
+  return porUNDEFINED;
 }
 
 void EfgPortion::Output( gOutput& s ) const
@@ -2160,7 +2160,7 @@ bool InputRefPortion::IsReference( void ) const
 ListPortion::ListPortion( void )
 { 
   _ContainsListsOnly = true;
-  _DataType = porUNKNOWN;
+  _DataType = porUNDEFINED;
 }
 
 ListPortion::~ListPortion()
@@ -2261,8 +2261,8 @@ void ListPortion::AssignFrom( Portion* p )
 
   assert( p->Type() == Type() );
   assert( PortionTypeMatch( ( (ListPortion*) p )->_DataType, _DataType ) || 
-	 _DataType == porUNKNOWN || 
-	 ( (ListPortion*) p )->_DataType == porUNKNOWN );
+	 _DataType == porUNDEFINED || 
+	 ( (ListPortion*) p )->_DataType == porUNDEFINED );
 
   RemoveDependency();
 
@@ -2369,7 +2369,7 @@ bool ListPortion::ContainsListsOnly( void ) const
 
 void ListPortion::SetDataType( PortionType data_type )
 {
-  assert( _DataType == porUNKNOWN );
+  assert( _DataType == porUNDEFINED );
   ( (ListPortion*) Original() )->_DataType = data_type;
   _DataType = data_type;
 }
@@ -2435,7 +2435,7 @@ int ListPortion::Insert( Portion* item, int index )
   if( _Value->Length() == 0 )  // creating a new list
   {
     if( PortionTypeMatch( item_type, _DataType ) || 
-       _DataType == porUNKNOWN )
+       _DataType == porUNDEFINED )
     {
       _DataType = item_type;
       result = _Value->Insert( item, index );
@@ -2450,7 +2450,7 @@ int ListPortion::Insert( Portion* item, int index )
   {
     if( PortionTypeMatch( item_type, _DataType ) )
       result = _Value->Insert( item, index );
-    else if( item_type == porUNKNOWN )
+    else if( item_type == porUNDEFINED )
     {
       result = _Value->Insert( item, index );
       assert( item->Type() == porLIST );
@@ -2611,7 +2611,7 @@ PortionTypeTextType _PortionTypeText[] =
   { porOUTPUT,           "OUTPUT" },
   { porINPUT,            "INPUT" },
 
-  { porUNKNOWN,          "UNKNOWN" },
+  { porUNDEFINED,        "UNDEFINED" },
 
   { porNFG,              "NFG" },
   { porEFG,              "EFG" },

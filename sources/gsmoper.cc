@@ -17,23 +17,47 @@
 
 
 
+Portion* GSM_Assign_Undefined( Portion** param )
+{
+  assert( param[0] == 0 );
+  param[0] = param[1]->ValCopy();
+  return param[0]->RefCopy();
+}
+
+
+
+
 Portion* GSM_Assign( Portion** param )
 {
   Portion* result = 0;
 
-  if( param[ 0 ] != 0 && param[ 1 ] != 0 &&
-     param[ 0 ]->Type() == param[ 1 ]->Type() )
-  {
+  assert( param[0] != 0 );
+  assert( param[1] != 0 );
+
+  if( param[ 0 ]->Type() == param[ 1 ]->Type() )
+  {    
     if( param[ 0 ]->Type() != porLIST )
     {
-      param[ 0 ]->AssignFrom( param[ 1 ] );
-      result = param[ 0 ]->RefCopy();
+      if( !(param[0]->Type() & (porINPUT|porOUTPUT)) )
+      {
+	param[ 0 ]->AssignFrom( param[ 1 ] );
+	result = param[ 0 ]->RefCopy();
+      }
+      else
+	result = 
+	  new ErrorPortion( "Cannot assign to an INPUT or OUTPUT variable" );
     }
     else if( ( (ListPortion*) param[ 0 ] )->DataType() ==
 	    ( (ListPortion*) param[ 1 ] )->DataType() )
     {
-      param[ 0 ]->AssignFrom( param[ 1 ] );
-      result = param[ 0 ]->RefCopy();
+      if( !( ((ListPortion*)param[0])->DataType() & (porINPUT|porOUTPUT) ) )
+      {
+	param[ 0 ]->AssignFrom( param[ 1 ] );
+	result = param[ 0 ]->RefCopy();
+      }
+      else
+	result = 
+	  new ErrorPortion( "Cannot assign to an INPUT or OUTPUT variable" );
     }
     else
     {
@@ -42,9 +66,7 @@ Portion* GSM_Assign( Portion** param )
   }
   else
   {
-    delete param[ 0 ];
-    param[ 0 ] = param[ 1 ]->ValCopy();
-    result = param[ 0 ]->RefCopy();
+    result = new ErrorPortion( "Attempted to change the type of a variable" );
   }
 
   return result;
@@ -1259,7 +1281,12 @@ Portion* GSM_NewInputStream( Portion** param )
   assert( param[ 0 ]->Type() == porTEXT );
 
   g = new gFileInput( ( (TextPortion*) param[ 0 ] )->Value() );
-  result = new InputValPortion( *g );
+
+  if( g->IsValid() )
+    result = new InputValPortion( *g );
+  else
+    result = new ErrorPortion( (gString) "Error opening file \"" + 
+			      ( (TextPortion*) param[ 0 ] )->Value() + '\"' );
   
   return result;
 }
@@ -2010,16 +2037,19 @@ void Init_gsmoper( GSM* gsm )
 
 
   //---------------------- Assign ------------------------
-  /*
   FuncObj = new FuncDescObj( (gString) "Assign" );
   FuncObj->SetFuncInfo( GSM_Assign, 2 );
-  FuncObj->SetParamInfo( GSM_Assign, 0, "x", 
-			porANYTYPE, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo( GSM_Assign, 1, "y", 
-			porANYTYPE );
+  FuncObj->SetParamInfo( GSM_Assign, 0, "x", porANYTYPE,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo( GSM_Assign, 1, "y", porANYTYPE );
+
+  FuncObj->SetFuncInfo( GSM_Assign_Undefined, 2 );
+  FuncObj->SetParamInfo( GSM_Assign_Undefined, 0, "x", porUNDEFINED, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo( GSM_Assign_Undefined, 1, "y", porANYTYPE );
   gsm->AddFunction( FuncObj );
-  */
+
+
 
 
   ParamInfoType xy_Int[] =

@@ -279,7 +279,7 @@ bool GSM::_VarDefine( const gString& var_name, Portion* p )
       if( ( (ListPortion*) old_value )->DataType() != 
 	 ( (ListPortion*) p )->DataType() )
       {
-	if( ( (ListPortion*) p )->DataType() == porUNKNOWN )
+	if( ( (ListPortion*) p )->DataType() == porUNDEFINED )
 	{
 	  ( (ListPortion*) p )->
 	    SetDataType( ( (ListPortion*) old_value )->DataType() );
@@ -383,6 +383,10 @@ bool GSM::PushRef( const gString& ref )
 
 bool GSM::Assign( void )
 {
+
+  return _BinaryOperation( "Assign" );
+
+
   Portion*  p2_copy;
   Portion*  p2;
   Portion*  p1;
@@ -466,7 +470,7 @@ bool GSM::Assign( void )
 	  case porLIST:
 	    if( PortionTypeMatch(( (ListPortion*) p1 )->DataType(),
 				 ( (ListPortion*) p2 )->DataType() ) ||
-	       ( (ListPortion*) p1 )->DataType() == porUNKNOWN )
+	       ( (ListPortion*) p1 )->DataType() == porUNDEFINED )
  	    {
 	      p1->Original()->AssignFrom( p2 );
 	      delete p2;
@@ -755,6 +759,10 @@ bool GSM::OR ( void )
 
 bool GSM::NOT ( void )
 { return _UnaryOperation( "Not" ); }
+
+
+bool GSM::Read ( void )
+{ return _BinaryOperation( "Read" ); }
 
 bool GSM::Write ( void )
 { return _BinaryOperation( "Write" ); }

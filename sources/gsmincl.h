@@ -85,7 +85,7 @@ typedef unsigned long PortionType;
 #define  porOUTPUT     ( 0x100000 )
 #define  porINPUT      ( 0x200000 )
 
-#define  porUNKNOWN    ( 0x400000 )
+#define  porUNDEFINED  ( 0x400000 )
 
 #define  porSTRATEGY   ( 0x02000000 )
 #define  porNF_SUPPORT ( 0x04000000 )
@@ -93,7 +93,7 @@ typedef unsigned long PortionType;
 
 #define  porNUMERICAL  ( porFLOAT | porINTEGER | porRATIONAL )
 #define  porANYLIST    ( 0xFFFFFFFF )
-#define  porANYTYPE    ( porANYLIST & ~porREFERENCE )
+#define  porANYTYPE    ( porANYLIST & ~porREFERENCE & ~porUNDEFINED )
 
 
 #endif // GSMINCL_H

@@ -175,6 +175,14 @@ void Child::Output( gOutput& s ) const
 { s << "Child"; }
 
 
+Opcode Read::Type( void ) const
+{ return iREAD; }
+bool Read::Execute( GSM& gsm ) const
+{ return gsm.Read(); }
+void Read::Output( gOutput& s ) const
+{ s << "Read"; }
+
+
 Opcode Write::Type( void ) const
 { return iWRITE; }
 bool Write::Execute( GSM& gsm ) const

@@ -455,7 +455,8 @@ void Init_listfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("NthElement");
   FuncObj->SetFuncInfo(GSM_NthElement, 2, NO_PREDEFINED_PARAMS, NON_LISTABLE);
-  FuncObj->SetParamInfo(GSM_NthElement, 0, "list", porANYLIST | porLIST);
+  FuncObj->SetParamInfo(GSM_NthElement, 0, "list", porANYLIST | porLIST,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetParamInfo(GSM_NthElement, 1, "n", porINTEGER);
   gsm->AddFunction(FuncObj);
 

@@ -58,6 +58,7 @@ void Init_userfunc( GSM* gsm )
   prog->Append( new PushRef( "y" ) );
   prog->Append( new Assign );
   
+  /*
   func = new FuncDescObj( "Assign" );
   func->SetFuncInfo( prog, 2 );
   func->SetParamInfo( prog, 0, "x", 
@@ -66,6 +67,7 @@ void Init_userfunc( GSM* gsm )
   func->SetParamInfo( prog, 1, "y", 
 		     porANYTYPE );
   gsm->AddFunction( func );
+  */
 
 }
 
@@ -136,6 +138,11 @@ int CallFuncObj::_ListNestedLevel( ListPortion* p )
 
 bool CallFuncObj::_ListNestedCheck( Portion* p, const ParamInfoType& info )
 {
+  if( p == 0 && info.Type == porUNDEFINED )
+    return false;
+  else
+    assert( p != 0 );
+
   if( p->Type() == porLIST )
   {
     if( info.Type & porLIST )
@@ -858,7 +865,13 @@ _TypeMatch( Portion* p, PortionType ExpectedType, bool Listable )
   PortionType CalledType;
   PortionType ExpectedListType;
 
-  assert( p != 0 );
+
+  if( p == 0 && ExpectedType == porUNDEFINED )
+    return true;
+  else
+    assert( p != 0 );
+
+
 
   CalledType = p->Type();
   
@@ -876,7 +889,7 @@ _TypeMatch( Portion* p, PortionType ExpectedType, bool Listable )
 	ExpectedListType = ExpectedType & ~porLIST;
 	if(CalledType & ExpectedListType)
 	  result = true; 
-	else if( CalledType == porUNKNOWN )
+	else if( CalledType == porUNDEFINED )
 	{
 	  result = true;
 	  ( (ListPortion*) p )->SetDataType( ExpectedListType );
@@ -1032,24 +1045,17 @@ bool CallFuncObj::SetCurrParam( Portion *param, bool auto_val_or_ref )
 
     // check whether undefined variables are allowed
     AllowUndefinedRef = false;
-    if( _FuncName == "Assign" )
+    for( f_index = 0; f_index < _NumFuncs; f_index++ )
     {
-      AllowUndefinedRef = true;      
-    }
-    else
-    {
-      for( f_index = 0; f_index < _NumFuncs; f_index++ )
+      if( _CurrParamIndex < _FuncInfo[ f_index ].NumParams )
       {
-	if( _CurrParamIndex < _FuncInfo[ f_index ].NumParams )
-	{
-	  if(_FuncInfo[f_index].ParamInfo[_CurrParamIndex].PassByReference &&
-	     (_FuncInfo[f_index].ParamInfo[_CurrParamIndex].DefaultValue!=0 ||
-	      _FuncName == "Assign" ) || 
-	     _FuncInfo[f_index].UserDefined )
-	    AllowUndefinedRef = true;
-	  else
-	    _FuncMatch[ f_index ] = false;
-	}
+	if((_FuncInfo[f_index].ParamInfo[_CurrParamIndex].PassByReference &&
+	    _FuncInfo[f_index].ParamInfo[_CurrParamIndex].DefaultValue != 0)|| 
+	   _FuncInfo[f_index].UserDefined ||
+	   _FuncInfo[f_index].ParamInfo[_CurrParamIndex].Type == porUNDEFINED )
+	  AllowUndefinedRef = true;
+	else
+	  _FuncMatch[ f_index ] = false;
       }
     }
 
@@ -1143,7 +1149,8 @@ bool CallFuncObj::SetCurrParam( Portion *param, bool auto_val_or_ref )
   _RunTimeParamInfo[ _CurrParamIndex ].Ref = ref_param;
   _CurrParamIndex++;
   _NumParamsDefined++;
-  
+
+
   return true;
 }
 
@@ -1242,6 +1249,8 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
     }
   }
   
+
+
   
   if( _FuncIndex != -1 )
   {
@@ -1272,6 +1281,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 
 
 
+
   // at this point _FuncIndex should be defined; i.e. the function
   // matching stage is done.  Now to weed out some particular errors:
 
@@ -1299,7 +1309,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	if( _Param[ index ] == 0 )
 	{
 	  if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue == 0 )
-	  {
+	  {	    
 	    if( _FuncInfo[ _FuncIndex ].UserDefined )
 	    {
 	      // default values for undefined variables
@@ -1331,7 +1341,8 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 		_ErrorOccurred = true;
 	      }
 	    }
-	    else if( _FuncName != "Assign" )
+	    else if( _FuncInfo[_FuncIndex].ParamInfo[index].Type != 
+		    porUNDEFINED )
 	    {
 	      _ErrorMessage( _StdErr, 9, index + 1, _FuncName, 
 			    _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
@@ -1360,6 +1371,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       }
     }
   }
+
 
 
 
@@ -1400,6 +1412,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       }
     }
   }
+
 
 
 
@@ -1449,7 +1462,6 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
   }
 
 
-
   
   if( !_ErrorOccurred )
   {
@@ -1486,6 +1498,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 
   if( result == 0 )
     result = new ErrorPortion;
+
 
   return result;
 }
