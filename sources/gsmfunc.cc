@@ -812,9 +812,8 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
   int param_sets_matched;
   Portion* result = 0;
 
-  int params_matched;
-  int params_to_match;
   int params_defined;
+  bool match_ok;
 
   if( _FuncIndex == -1 && _NumFuncs == 1 )
     _FuncIndex = 0;
@@ -832,8 +831,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
     param_sets_matched = 0;
     for( f_index = 0; f_index < _NumFuncs; f_index++ )
     {
-      params_to_match = 0;
-      params_matched = 0;
+      match_ok = true;
 
       for( index = 0; 
 	  index < _FuncInfo[ f_index ].NumParams; 
@@ -841,23 +839,21 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       {
 	if( _Param[ index ] != 0 )
 	{
-	  if( _TypeMatch( _Param[ index ], 
-			 _FuncInfo[ f_index ].ParamInfo[ index ].Type ) )
-	    params_matched++;
+	  if( !_TypeMatch( _Param[ index ], 
+			  _FuncInfo[ f_index ].ParamInfo[ index ].Type ) )
+	    match_ok = false;
 	}
 	else
 	{
-	  if( _FuncInfo[ f_index ].ParamInfo[ index ].PassByReference &&
-	     _RunTimeParamInfo[ index ].Ref != 0 )
-	    params_matched++;
+	  if( _RunTimeParamInfo[ index ].Ref != 0 )
+	  {
+	    if( !_FuncInfo[ f_index ].ParamInfo[ index ].PassByReference )
+	      match_ok = false;
+	  }
 	}
-
-	if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue == 0 )
-	  params_to_match++;
       }
 
-      if( params_matched >= params_to_match && 
-	 params_defined <= params_matched )
+      if( match_ok )
       {
 	curr_f_index = f_index;
 	param_sets_matched++;
