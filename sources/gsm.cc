@@ -581,7 +581,7 @@ bool GSM::Assign( void )
 	    (*(Efg<gRational>*) ((EfgPortion*) p2)->Value()); 
 	  break;
 	default:
-	  _ErrorMessage(_StdErr, 67, 0, 0, PortionSpecToText(p1Spec.Type));
+	  _ErrorMessage(_StdErr, 67, 0, 0, PortionSpecToText(p1Spec));
 	  assert(0);	  
 	}
 	_Push(p1->RefCopy()); 
@@ -2358,7 +2358,8 @@ Portion* GSM::HelpVars(gString varname)
   if( _RefTableStack->Peek()->IsDefined( varname ) )
   {
     result = new ListValPortion();
-    ((ListPortion*) result)->Append(new TextValPortion(varname + ":" + PortionSpecToText( (*(_RefTableStack->Peek()))(varname)->Spec().Type )));
+    ((ListPortion*) result)->Append(new TextValPortion(varname + ":" + 
+      PortionSpecToText( (*(_RefTableStack->Peek()))(varname)->Spec())));
   }
   else
   {
@@ -2417,7 +2418,8 @@ Portion* GSM::HelpVars(gString varname)
     sorter.Sort();
     result = new ListValPortion();
     for(i=1; i<=varslist.Length(); i++)
-      ((ListPortion*) result)->Append(new TextValPortion(varslist[i] + ":" + PortionSpecToText( (*(_RefTableStack->Peek()))(varslist[i])->Spec().Type )));
+      ((ListPortion*) result)->Append(new TextValPortion(varslist[i] + ":" + 
+	PortionSpecToText( (*(_RefTableStack->Peek()))(varslist[i])->Spec())));
   }
 
   if(!result)

@@ -34,7 +34,7 @@ struct PortionSpecTextType
 };  
 
 
-#define NumPortionSpecs 34
+#define NumPortionSpecs 35
 
 PortionSpecTextType _PortionSpecText[] =
 {
@@ -69,6 +69,8 @@ PortionSpecTextType _PortionSpecText[] =
 
   { porOUTPUT,           "OUTPUT" },
   { porINPUT,            "INPUT" },
+
+  { porNULL,             "NULL" },
 
   { porUNDEFINED,        "UNDEFINED" },
 

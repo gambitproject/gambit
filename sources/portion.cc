@@ -2150,7 +2150,7 @@ void ListPortion::Output(gOutput& s, long ListLF) const
   int length = _Value->Length();
   
   if(_WriteListBraces) s << '{';
-  if(_WriteListLF > ListLF) s << '\n';
+  // if(_WriteListLF > ListLF) s << '\n';
   if(length >= 1)
   {
     for(i = 1; i <= length; i++)
@@ -2160,9 +2160,12 @@ void ListPortion::Output(gOutput& s, long ListLF) const
 	if(_WriteListCommas) s << ',';
 	if(_WriteListLF > ListLF) 
 	  s << '\n';
+	if(_WriteListLF > ListLF) 
+	  for(c = 0; c < (ListLF+1) * _WriteListIndent; c++)
+	    s << ' ';
       }
-      if(_WriteListLF > ListLF) 
-	for(c = 0; c < (ListLF+1) * _WriteListIndent; c++)
+      else
+	if(_WriteListLF > ListLF) 
 	  s << ' ';
       if((*_Value)[ i ]->IsValid())
       {
@@ -2188,9 +2191,11 @@ void ListPortion::Output(gOutput& s, long ListLF) const
   s << ' ';
   if(_WriteListLF > ListLF) 
   {
+    /*
     s << '\n';
     for(c = 0; c < ListLF * _WriteListIndent; c++)
       s << ' ';
+      */
   }
   if(_WriteListBraces)
     s << '}';

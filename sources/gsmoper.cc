@@ -487,7 +487,7 @@ Portion* GSM_Divide_int( Portion** param )
   }
   else
   {
-    result = new NullPortion(porFLOAT);
+    result = new NullPortion(porRATIONAL);
     //result = new ErrorPortion( "Division by zero" );
   }
   return result;
@@ -508,7 +508,7 @@ Portion* GSM_Divide_gRational( Portion** param )
   }
   else
   {
-    result = new NullPortion(porFLOAT);
+    result = new NullPortion(porRATIONAL);
     //result = new ErrorPortion( "Division by zero" );
   }
   return result;
@@ -2360,7 +2360,7 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Divide_double, porFLOAT, 
 				       2, xy_Float));
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Divide_int, 
-				       porINTEGER, 2, xy_Int));
+				       porRATIONAL, 2, xy_Int));
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Divide_gRational, 
 				       porRATIONAL, 2, xy_Rational));
   gsm->AddFunction(FuncObj);  
