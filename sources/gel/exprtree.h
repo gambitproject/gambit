@@ -60,11 +60,6 @@ class MixedSolution;
 
 
 
-class gDimMismatchException : public gException   
-{
-public:
-  virtual gText Description(void) const { return "Dimension mismatch"; }
-}; 
 
 
 
@@ -73,11 +68,15 @@ public:
 class gelVariableTable;
 class gelSignature;
 
+
+const int MAX_DEPTH = 32767;
+
 class gelExpr   
 {
 public:
   virtual ~gelExpr();
   virtual gelType Type(void) const = 0;
+  virtual int Depth( void ) const = 0;
   virtual void Execute(gelVariableTable *) const = 0;
 }; 
 
@@ -86,6 +85,7 @@ template <class T> class gelExpression : public gelExpr
 public:
   virtual ~gelExpression();
   gelType Type(void) const;
+  virtual int Depth( void ) const { return MAX_DEPTH; }
   void Execute(gelVariableTable *) const;
   virtual gNestedList<T> Evaluate(gelVariableTable *) const = 0;
 };
@@ -111,6 +111,7 @@ public:
   gelConstant(T);
   gelConstant(const gNestedList<T> &);
   virtual ~gelConstant();
+  virtual int Depth( void ) const { return m_Value.Depth(); }
   gNestedList<T> Evaluate(gelVariableTable *) const;
 };
 
@@ -334,9 +335,21 @@ public:
 	 const gelExpression<T>* exp );
   virtual ~gelUDF();
 
+  virtual int Depth( void ) const { return m_Signature.Depth(); }
   gNestedList<T> Evaluate(gelVariableTable *) const;
 };
 
+
+
+
+
+
+
+class gDimMismatchException : public gException   
+{
+public:
+  virtual gText Description(void) const { return "Dimension mismatch"; }
+}; 
 
 
 class gelRuntimeError : public gException   {
