@@ -1,0 +1,31 @@
+% **************** H&SS narrow margins---yuck!
+%	8-1-91, kcb
+%	rev. 7-10-96
+%
+% We don't want to overwrite our letterhead, so
+\@ifundefined{opening}{
+\topmargin 0in
+\textheight 9in
+\advance\textheight by -\headheight
+\advance\textheight by -\headsep
+}%
+{\topmargin -.25in
+\textheight 9in
+}
+\ifcase \@ptsize %	 	changes for 10 pt
+    \oddsidemargin .375in
+    \evensidemargin .375in
+    \textwidth 5.75in
+    \marginparwidth .75in
+\or % 				changes for 11 pt
+    \oddsidemargin .125in
+    \evensidemargin .125in
+    \textwidth 6.25in
+    \marginparwidth 1in
+\or % 				changes for 12 pt
+    \oddsidemargin .125in
+    \evensidemargin .125in
+    \textwidth 6.25in
+    \marginparwidth .85in
+\fi
+
