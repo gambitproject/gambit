@@ -59,11 +59,10 @@ public:
 
 template <class T> class TableauInterface : public BaseTableau<T>{
 protected:
-  const gMatrix<T> *A;
-  const gVector<T> *b;
+  const gMatrix<T> *A;  // should this be private?
+  const gVector<T> *b;  // should this be private?
   Basis<T> basis; 
-  gVector<T> solution;  // current solution vector
-  gVector<T> tmpcol; // temporary column vector, to avoid allocation
+  gVector<T> solution;  // current solution vector. should this be private?
   long npivots;
   T eps1,eps2;
 public:
@@ -87,7 +86,6 @@ public:
   int Label(int i) const;   // return variable in i'th position of Tableau
   int Find(int i) const;  // return Tableau position of variable i
 
-  int CanPivot(int outgoing,int incoming);
   long NumPivots() const;
   long &NumPivots();
   
@@ -104,6 +102,7 @@ public:
   void Dump(gOutput &) const;
   void BigDump(gOutput &);
 
+  virtual int CanPivot(int outgoing,int incoming) = 0;
   virtual void Pivot(int outrow,int col) = 0; // pivot -- outgoing is row, incoming is column
   virtual void SolveColumn(int, gVector<T> &) = 0;  // column in new basis 
   virtual void Solve(const gVector<T> &b, gVector<T> &x) const = 0;  // solve M x = b
@@ -133,8 +132,9 @@ public:
 //  
 
 class Tableau<double> : public TableauInterface<double>{
-protected:
+private:
   LUdecomp<double> B;     // LU decomposition
+  gVector<double> tmpcol; // temporary column vector, to avoid allocation
 
 public:
       // constructors and destructors
@@ -145,6 +145,7 @@ public:
   Tableau<double>& operator=(const Tableau<double>&);
   
   // pivoting
+  int CanPivot(int outgoing,int incoming);
   void Pivot(int outrow,int col); // pivot -- outgoing is row, incoming is column
   void SolveColumn(int, gVector<double> &);  // column in new basis 
   void Solve(const gVector<double> &b, gVector<double> &x) const;  // solve M x = b
@@ -170,7 +171,7 @@ public:
 //  LPTableau Stuff (For Linear Programming code)
 // ---------------------------------------------------------------------------
 
-#include "tableau2.h"
+#include "tableau3.h"
 
 template <class T> class LPTableau : public Tableau<T> {
 private:

@@ -9,13 +9,15 @@
 class Tableau<gRational> : public TableauInterface<gRational>{
 private:
   int remap(int col_index) const;  // aligns the column indexes
-protected:
+  gMatrix<gRational> GetInverse();
 
   gMatrix<gInteger> Tabdat;  // This caries the full tableau
   gVector<gInteger> Coeff;   // and coeffieient vector
   gVector<int> nonbasic;     //** nonbasic variables -- should be moved to Basis
   gInteger totdenom;  // This carries the denominator for Q data or 1 for Z
   gInteger denom;  // This is the denominator for the simplex
+
+  gVector<gRational> tmpcol; // temporary column vector, to avoid allocation
 
 public:
       // constructors and destructors
@@ -26,6 +28,7 @@ public:
   Tableau<gRational>& operator=(const Tableau<gRational>&);
   
   // pivoting
+  int CanPivot(int outgoing,int incoming);
   void Pivot(int outrow,int col); // pivot -- outgoing is row, incoming is column
   void SolveColumn(int, gVector<gRational> &);  // column in new basis 
   

@@ -29,7 +29,8 @@ gInteger find_lcd(const gVector<gRational> &vec)
 
 Tableau<gRational>::Tableau(const gMatrix<gRational> &A, const gVector<gRational> &b) 
   : TableauInterface(A,b), Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()),
-    Coeff(b.First(),b.Last()), nonbasic(A.MinCol(),A.MaxCol()),denom(1) {
+    Coeff(b.First(),b.Last()), nonbasic(A.MinCol(),A.MaxCol()),denom(1), 
+    tmpcol(b.First(),b.Last()){
 // gout << "\nMY CODE\n";
 
   int j;
@@ -51,13 +52,15 @@ Tableau<gRational>::Tableau(const gMatrix<gRational> &A, const gVector<gRational
       Tabdat(i,j) = x.numerator();
     }
   for (int i = b.First();i<=b.Last();i++) 
+    //** solution[i] = (gRational)Coeff[i]/(gRational)totdenom;
     solution[i] = (gRational)Coeff[i];
 }
 
 
 Tableau<gRational>::Tableau(const Tableau<gRational> &orig) 
   : TableauInterface(orig), Tabdat(orig.Tabdat), Coeff(orig.Coeff), 
-    nonbasic(orig.nonbasic), totdenom(orig.totdenom), denom(orig.denom) 
+    nonbasic(orig.nonbasic), totdenom(orig.totdenom), denom(orig.denom), 
+    tmpcol(orig.tmpcol)
 { }
 
 Tableau<gRational>::~Tableau()
@@ -72,6 +75,7 @@ Tableau<gRational>& Tableau<gRational>::operator=(const Tableau<gRational> &orig
     nonbasic = orig.nonbasic;
     totdenom = orig.totdenom;
     denom = orig.denom;
+    tmpcol = orig.tmpcol;
   }
   return *this;
 }
@@ -86,7 +90,28 @@ int Tableau<gRational>::remap(int col_index) const
   return i;
 }
 
+gMatrix<gRational> Tableau<gRational>::GetInverse()
+{
+  gVector<gRational> mytmpcol(tmpcol.First(),tmpcol.Last());
+  gMatrix<gRational> inv(MinRow(),MaxRow(),MinRow(),MaxRow());
+  for(int i=inv.MinCol();i<=inv.MaxCol();i++){
+    SolveColumn(-i,mytmpcol);
+    inv.SetColumn(i,mytmpcol);
+  }
+  return inv;
+}
+
+
 // pivoting operations
+
+int Tableau<gRational>::CanPivot(int outlabel, int col)
+{
+  SolveColumn(col,tmpcol);
+  gRational val = tmpcol[basis.Find(outlabel)];
+  if(val == (gRational)0) return 0;
+  //   if(val <=eps2 && val >= -eps2) return 0;
+  return 1;  
+}
 
 void Tableau<gRational>::Pivot(int outrow,int in_col)
 {
@@ -153,40 +178,75 @@ void Tableau<gRational>::Pivot(int outrow,int in_col)
   nonbasic[col] = outlabel;
   
   for (i = solution.First();i<=solution.Last();i++) 
+    //** solution[i] = (gRational)(Coeff[i])/(gRational)(denom*totdenom);
     solution[i] = (gRational)(Coeff[i]*sign(denom*totdenom));
 
   // BigDump(gout);
-  // gout << "\ndenom: " << denom << " totdenom: " << totdenom;
-  // gout << " product: " << denom*totdenom;
-  // gout << "\nTabdat: loc 2\n" << Tabdat;
-
+  // Refactor();
 }
 
 void Tableau<gRational>::SolveColumn(int in_col, gVector<gRational> &out)
 {
-  gVector<gInteger> tempcol(out.First(),out.Last());
-  
+  gVector<gInteger> tempcol(tmpcol.First(),tmpcol.Last());
   if(Member(in_col)) {
     out = (gRational)0;
     out[Find(in_col)] = denom*sign(denom*totdenom);
+    //** out[Find(in_col)] = (gRational)1;
   }
   else {
     int col = remap(in_col);
     Tabdat.GetColumn(col,tempcol);
     for(int i=tempcol.First();i<=tempcol.Last();i++)
       out[i] = (gRational)(tempcol[i]) * (gRational)(sign(denom*totdenom));
+    //** out[i] = (gRational)(tempcol[i])/(gRational)(denom*totdenom);
   }
 }
 
-void Tableau<gRational>::Refactor()
-{ }
 
+void Tableau<gRational>::Refactor()
+{ 
+  gVector<gRational> mytmpcol(tmpcol);
+  //** Note -- we may need to recompute totdenom here, if A and b have changed. 
+  // gout << "\ndenom: " << denom << " totdenom: " << totdenom;
+  totdenom = lcm(find_lcd(*A),find_lcd(*b));
+  assert(totdenom>0);
+  // gout << "\ndenom: " << denom << " totdenom: " << totdenom;
+
+  int i,j;
+  gMatrix<gRational> inv(GetInverse());
+  gMatrix<gRational> Tabnew(Tabdat.MinRow(),Tabdat.MaxRow(),Tabdat.MinCol(),Tabdat.MaxCol());
+  for(i=nonbasic.First();i<=nonbasic.Last();i++) {
+    GetColumn(nonbasic[i],mytmpcol);
+    if(nonbasic[i]>=0) mytmpcol*=totdenom;
+    Tabnew.SetColumn(i,inv * mytmpcol * (gRational)sign(denom*totdenom));
+  }
+
+  // gout << "\nTabdat:\n" << Tabdat;
+  // gout << "\nTabnew:\n" << Tabnew;
+
+  gVector<gRational> Coeffnew(Coeff.First(),Coeff.Last());
+  Coeffnew = inv * (*b) * totdenom * (gRational)sign(denom*totdenom);
+
+  // gout << "\nCoeff:\n" << Coeff;
+  // gout << "\nCoeffew:\n" << Coeffnew;
+
+  for(i=Tabdat.MinRow();i<=Tabdat.MaxRow();i++) {
+    assert(Coeffnew[i].denominator() == 1);
+    Coeff[i] = Coeffnew[i].numerator();
+    for(j=Tabdat.MinCol();j<=Tabdat.MaxCol();j++) {
+      assert(Tabnew(i,j).denominator() == 1);
+      Tabdat(i,j) = Tabnew(i,j).numerator();
+    }
+  }
+}
+  
 void Tableau<gRational>::SetRefactor(int)
 { }
 
 void Tableau<gRational>::SetConst(const gVector<gRational> &bnew)
 {
   b=&bnew;
+  Refactor();
   //** this will have to be changed -- Need to start over and re-solve
   //** current basis with bnew.  Here is where vertenum probably screws up (RDM)
   // B.solve(*b, solution);
@@ -208,7 +268,8 @@ void Tableau<gRational>::Solve(const gVector<gRational> &b, gVector<gRational> &
   //** Note --- commenting this out breaks LP<gRational> for now
   //** need to add private GetInverse() function to get V = M^(-1) (M inverse)
   //** then do x = V * b
-  // B.solve(b,x);
+  x = GetInverse() * b *  (gRational)denom*(gRational)sign(denom*totdenom);
+  //** gout << "\nTableau<gRational>::Solve(), x: " << x;
 }
 
  // solve y M = c
@@ -216,8 +277,11 @@ void Tableau<gRational>::SolveT(const gVector<gRational> &c, gVector<gRational> 
 {
   //** Note --- commenting this out breaks LP<gRational> for now
   //** need to add private GetInverse() function to get V = M^(-1) (M inverse)
-  //** then do y = b * V
-  // B.solveT(c,y);
+  //** then do y = c * V
+  y = (c * GetInverse()) *  (gRational)denom * (gRational)sign(denom*totdenom);
+  //** gout << "\nTableau<gRational>::SolveT(), y: " << y;
+  //   gout << "\nc: " << c;
+  //** gout << "\ndenom: " << denom << " totdenom: " << totdenom;;
 }
 
 bool Tableau<gRational>::IsFeasible()
