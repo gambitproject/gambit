@@ -29,6 +29,14 @@ the grid, evaluate the following objective function:
 v(p,q) = | p - f_p(q,f_r(p,q)) | + | q - f_q(p,f_r(p,q)) |
 
 Then keep any values of (p,q,f_r(p,q)) where v(p,q) < tolerance.
+
+NEW:  To speed up the grid searches on large games, we introduce a two step
+search.  The initial search uses a rough grid (params.delp1) and a
+corresponding large tolerance (params.tol1).  If an EQU is found, a new
+search is started on a hypercube centered around the point found in previous
+step, with a finer grid (params.delp2) and a smaller tolerance (params.tol2).
+To enable this two step process, the the params.multi_grid to nonzero.  Note
+that this technique is easily extended to n steps.
 */
 
 #include <math.h>
@@ -36,6 +44,8 @@ Then keep any values of (p,q,f_r(p,q)) where v(p,q) < tolerance.
 #include "grid.h"
 #include "nfg.h"
 #include "gwatch.h"
+
+#define MAX_GRID		1		// only two steps for now (0,1)
 
 static int max(const gArray<int> &a)
 {
@@ -61,6 +71,7 @@ static double eps=1e-8;	// epsilon to allow == operator for floating point
 
 class MixedProfileGrid: public MixedProfile<double>
 {
+friend class MixedProfileGrid1;
 private:
 	double step;
 	gArray<double> sums;
@@ -138,14 +149,105 @@ void MixedProfileGrid::SetStatic(int static_player_)
 int MixedProfileGrid::GetStatic(void) const
 {return static_player;}
 
-GridParams::GridParams(gStatus &st)
-	: minLam(.01), maxLam(30), delLam(.01), delp(.01), tol(.01), powLam(1),
-		trace(0), tracefile(&gnull), pxifile(&gnull), status(st)
-{ }
+// ***************************************************************************
+// MIXED PROFILE GRID 1
+// ***************************************************************************
+// This class is similar to the MixedProfileGrid.  It generates a grid of
+// stepsize step in the region around the point defined by M with a radius of
+// size.  It is used to generate a 'finer' grid around a potential EQU point
+// in GridSolve.  In that case, size=rough_grid/2.
+// In this example, * is the point of interest, step=1, rough_grid=4
+// .    .    .    .
+// .    .  .....  .
+// .    .  .....  .
+// .    .  ..*..  .
+// .    .  .....  .
+// .    .  .....  .
+// .    .    .    .
+
+class MixedProfileGrid1: public MixedProfile<double>
+{
+private:
+	double step;
+	MixedProfile<double> min_val,max_val;
+	int static_player;
+	gArray<double> sums;
+	bool Inc1(int row);
+public:
+	MixedProfileGrid1(const MixedProfile<double> &M,double step,double size,int static_player);
+	bool Inc(void);
+};
+
+MixedProfileGrid1::MixedProfileGrid1(const MixedProfile<double> &M,
+																	double step_,double size,int static_player_):
+											MixedProfile<double>(M),step(step_),min_val(M),max_val(M),
+											static_player(static_player_)
+{
+sums=gArray<double>(svlen.Length());
+for (int i=1;i<=svlen.Length();i++)
+{
+	sums[i]=0;
+	for (int j=1;j<=svlen[i]-1;j++)
+	{  // Precalc these to save time.  Memory is cheap.
+		if (min_val(i,j)>=size) min_val(i,j)-=size; else min_val(i,j)=0;
+		(*this)(i,j)=min_val(i,j);		// start at the minimum
+		sums[i]+=(*this)(i,j);
+		if (max_val(i,j)<=1-size) max_val(i,j)+=size; else max_val(i,j)=1;
+	}
+	(*this)(i,j)=1-sums[i];  // last_player's strat = 1-Sum[previous]
+}
+}
+
+bool MixedProfileGrid1::Inc1(int row)
+{
+int dim=svlen[row];
+if (dim!=1)		// dim==1 is an annoying special case
+{
+	double &sum=sums[row];
+	do
+	{
+		for (int i=1;i<=dim-1;i++)
+			if ((*this)(row,i)<max_val(row,i)-step+eps)
+				{(*this)(row,i)+=step;sum+=step;break;}
+			else
+				{
+					sum-=((*this)(row,i)-min_val(row,i));(*this)(row,i)=min_val(row,i);
+					if (i==dim-1) {(*this)(row,dim)=1-sum;return false;}
+				}
+	} while (sum>1+eps);
+	(*this)(row,dim)=1-sum;
+	return true;
+}
+else	// dim==1
+{
+	return false;
+}
+}
+
+bool MixedProfileGrid1::Inc(void)
+{
+for (int i=1;i<=svlen.Length();i++)
+{
+	if (i==static_player) continue;
+	if (Inc1(i))
+		return true;
+	else
+		if (i==svlen.Length()) return false;
+}
+return false; // return from here only when static_player==svlen.Length
+}
+
+
 
 // ***************************************************************************
 // GRID SOLVE
 // ***************************************************************************
+
+GridParams::GridParams(gStatus &st)
+	: minLam(.01), maxLam(30), delLam(.01), delp1(.01), tol1(.01),tol2(0.01),
+		powLam(1), delp2(0.01), trace(0), tracefile(&gnull), pxifile(&gnull),
+		status(st)
+{ }
 
 // Output header
 void GridSolveModule::OutputHeader(gOutput &out)
@@ -175,7 +277,7 @@ out<<params.minLam<<'\n'<<params.maxLam<<'\n'<<params.delLam<<'\n';
 out<<0<<'\n'<<1<<'\n'<<params.powLam<<'\n';
 
 out<<"Extra:\n";
-out<<1<<'\n'<<params.tol<<'\n'<<params.delp<<'\n';
+out<<1<<'\n'<<params.tol1<<'\n'<<params.delp1<<'\n';
 
 out<<"DataFormat:\n";
 int numcols = N.ProfileLength() + 2;
@@ -225,23 +327,34 @@ return r;
 
 
 // Note: static_player just refers to the player w/ the greatest # of strats.
-bool GridSolveModule::CheckEqu(MixedProfile<double> P,double lam)
+bool GridSolveModule::CheckEqu(MixedProfile<double> P,double lam,int cur_grid)
 {
 P.SetRow(static_player,UpdateFunc(P,static_player,lam));
 
 int pl;
 double obj_func=0.0;
+double tol=(cur_grid==0) ? params.tol1 : params.tol2;
 for (pl=1;pl<=N.NumPlayers();pl++)
 	if (pl!=static_player)
 	{
 		P_calc.SetRow(pl,UpdateFunc(P,pl,lam));
 		obj_func+=Distance(P_calc.GetRow(pl),P.GetRow(pl));
-		if (obj_func>params.tol) return false;
+		if (obj_func>tol) return false;
 	}
 
 // If we got here, objective function is < tolerance -- have an EQU point
-OutputResult(*params.pxifile,P,lam,obj_func); // Output it to file
-if (params.trace>0) OutputResult(*params.tracefile,P,lam,obj_func);
+if (params.multi_grid==0 || cur_grid==MAX_GRID)	// this is it, we are done
+{
+	OutputResult(*params.pxifile,P,lam,obj_func); // Output it to file
+	if (params.trace>0) OutputResult(*params.tracefile,P,lam,obj_func);
+}
+else								// now redo the search on a finer grid around this point
+{
+	cur_grid++;
+	MixedProfileGrid1 P1(P,params.delp2,params.delp1/2,static_player);
+	do {CheckEqu(P1,lam,cur_grid);} while (P1.Inc())	;
+}
+
 return true;
 }
 
@@ -269,13 +382,13 @@ if (params.powLam==0)
 	num_steps=(int)((params.maxLam-params.minLam)/params.delLam);
 else
 	num_steps=(int)(log(params.maxLam/params.minLam)/log(params.delLam+1));
-MixedProfileGrid M(N,S,params.delp);
+MixedProfileGrid M(N,S,params.delp1);
 M.SetStatic(static_player);
 double lam=params.minLam;
 for (int step=1;step<num_steps && !params.status.Get();step++)
 {
 	if (params.powLam==0)  lam=lam+params.delLam; else lam=lam*(params.delLam+1);
-	do {CheckEqu(M,lam);} while (M.Inc())	;
+	do {CheckEqu(M,lam,0);} while (M.Inc())	;
 	params.status.SetProgress((double)step/(double)num_steps);
 }
 // Record the time taken and close the output file

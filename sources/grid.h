@@ -12,7 +12,8 @@
 
 class GridParams   {
 	public:
-		double minLam, maxLam, delLam, delp, tol;
+		double minLam, maxLam, delLam, delp1, delp2, tol1,tol2;
+		int multi_grid;
 		int powLam, trace;
 		gOutput *tracefile, *pxifile;
 		gStatus &status;
@@ -27,12 +28,12 @@ class GridSolveModule  {
 		const GridParams &params;
 		gArray<int> num_strats;
 		MixedProfile<double> P_calc;
-    gVector<double> tmp; // scratch
+		gVector<double> tmp; // scratch
 		double lam;
 		int static_player;
 
 		gVector<double> UpdateFunc(const MixedProfile<double> &P,int pl,double lam);
-		bool CheckEqu(MixedProfile<double> P,double lam);
+		bool CheckEqu(MixedProfile<double> P,double lam,int cur_grid);
 		void OutputHeader(gOutput &out);
 		void OutputResult(gOutput &out,const MixedProfile<double> P,double lam,double obj_func);
 	protected:
