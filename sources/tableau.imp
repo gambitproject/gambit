@@ -415,11 +415,12 @@ template <class T> BFS<T> Tableau<T>::GetBFS() const
 template <class T> BFS<T> Tableau<T>::GetBFS1() const
 {
   BFS<T> cbfs((T) 0);
-  for(int i=-MaxRow();i<=-MinRow();i++) {
+int i;
+  for(i=-MaxRow();i<=-MinRow();i++) {
     if(Member(i)) 
       cbfs.Define(i,solution[basis.Find(i)]);
   }
-  for(int i=MinCol();i<=MaxCol();i++) {
+  for(i=MinCol();i<=MaxCol();i++) {
     if(Member(i)) 
       cbfs.Define(i,solution[basis.Find(i)]);
   }
