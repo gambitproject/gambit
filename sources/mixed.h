@@ -34,6 +34,7 @@ template <class T> class NormalForm;
 template <class T> class MixedProfile 
   : public BaseMixedProfile, public gPVector<T>  {
   public:
+    MixedProfile(NormalForm<T> &);
     MixedProfile(NormalForm<T> &, const gPVector<T> &);
     ~MixedProfile();
 
