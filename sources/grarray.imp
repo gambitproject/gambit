@@ -2,6 +2,9 @@
 //# FILE: grarray.imp -- Implementation of base rectangular array class
 //#
 //# $Id$
+
+
+
 //#
 
 #include "grarray.h"
@@ -290,6 +293,23 @@ template <class T> void gRectArray<T>::SetColumn(int col, const gArray<T> &v)
   for (int i = minrow; i <= maxrow; i++)
     data[i][col] = v[i];
 }
+
+//-------------------------------------------------------------------------
+//                gRectArray<T>: Transpose
+//-------------------------------------------------------------------------
+
+template <class T> gRectArray<T> gRectArray<T>::Transpose() const
+{
+  gRectArray<T> tmp(mincol, maxcol, minrow, maxrow);
+ 
+  for (int i = minrow; i <= maxrow; i++)
+    for (int j = mincol; j <= maxrow; j++)
+      tmp(j,i) = (*this)(i,j);
+
+  return tmp;
+}
+
+
 
 
 
