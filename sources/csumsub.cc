@@ -11,15 +11,13 @@ void efgLpNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
 				 gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);
-
-  NFSupport *S = new NFSupport(*N);
-
-  ViewNormal(*N, S);
+  NFSupport support(*N);
+  ViewNormal(*N, support);
 
   int npiv;
   double time;
   gList<MixedSolution> solutions;
-  ZSum(*S, params, solutions, npiv, time);
+  ZSum(support, params, solutions, npiv, time);
 
   npivots += npiv;
 
@@ -29,7 +27,6 @@ void efgLpNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
     solns.Append(bp);
   }
 
-  delete S;
   delete N;
 }
 

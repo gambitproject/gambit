@@ -10,16 +10,13 @@ void efgSimpDivNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
 				      gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);
-
-  NFSupport *S = new NFSupport(*N);
-
-  ViewNormal(*N, S);
+  NFSupport support(*N);
+  ViewNormal(*N, support);
 
   gList<MixedSolution> solutions;
-  int nev;
-  int nit;
+  int nev, nit;
   double time;
-  Simpdiv(*S, params, solutions, nev, nit, time);
+  Simpdiv(support, params, solutions, nev, nit, time);
 
   nevals += nev;
 
@@ -29,7 +26,6 @@ void efgSimpDivNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
     solns.Append(bp);
   }
 
-  delete S;
   delete N;
 }
 

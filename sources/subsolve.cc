@@ -83,14 +83,10 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
     // this prevents double-counting of outcomes at roots of subgames
     // by convention, we will just put the payoffs in the parent subgame
     foo.RootNode()->SetOutcome(0);
-    
-    ViewSubgame(subgame_number, foo);
-    
+
     gList<Node *> nodes;
     Nodes(efg, n, nodes);
     
-    gList<BehavSolution> sol;
-
     EFSupport subsupport(foo);
     // here, we build the support for the subgame
     for (int pl = 1; pl <= foo.NumPlayers(); pl++)  {
@@ -124,6 +120,10 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
 	}
       }
     }
+
+    ViewSubgame(subgame_number, foo, subsupport);
+    
+    gList<BehavSolution> sol;
 
     bool interrupted = false;
 
@@ -216,10 +216,9 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
 // in derived classes to allow interactive access to the solution process
 
 // This is called immediately after the subgame is constructed in the
-// solution process.  Mostly to allow viewing of the subgame, but probably
-// isn't generally useful.
+// solution process. 
 
-void SubgameSolver::ViewSubgame(int, const Efg &)
+void SubgameSolver::ViewSubgame(int, const Efg &, EFSupport &)
 { }
 
 // This is called in the normal-form solution modules after the normal
@@ -227,7 +226,7 @@ void SubgameSolver::ViewSubgame(int, const Efg &)
 // non-const, so that strategies may be eliminated as seen fit.
 // It is assumed that the NFSupport returned is "sensible"
 
-void SubgameSolver::ViewNormal(const Nfg &, NFSupport *&)
+void SubgameSolver::ViewNormal(const Nfg &, NFSupport &)
 { }
 // This is called for each subgame after the solutions have been computed
 // The idea is for the called code to possibly allow for viewing or

@@ -10,10 +10,8 @@ void efgPolEnumNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
 				      gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);
-
-  NFSupport *S = new NFSupport(*N);
-  
-  ViewNormal(*N, S);
+  NFSupport support(*N);
+  ViewNormal(*N, support);
   
   gList<MixedSolution> solutions;
 
@@ -21,7 +19,7 @@ void efgPolEnumNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
   double time;
 
   try {
-    PolEnum(*S, params, solutions, neval, time);
+    PolEnum(support, params, solutions, neval, time);
 
     nevals += neval;
   
@@ -30,12 +28,9 @@ void efgPolEnumNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
       MixedToBehav(*N, MixedProfile<gNumber>(solutions[i]), E, bp);
       solns.Append(bp);
     }
-
-    delete S;
     delete N;
   }
   catch (...) {
-    delete S;
     delete N;
     throw;
   }

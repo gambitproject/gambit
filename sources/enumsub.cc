@@ -10,17 +10,15 @@ void EnumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 				 gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);
-
-  NFSupport *S = new NFSupport(*N);
-  
-  ViewNormal(*N, S);
+  NFSupport support(*N);
+  ViewNormal(*N, support);
   
   gList<MixedSolution> solutions;
 
   long npiv;
   double time;
 
-  Enum(*S, params, solutions, npiv, time);
+  Enum(support, params, solutions, npiv, time);
 
   npivots += npiv;
   
@@ -30,7 +28,6 @@ void EnumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
     solns.Append(bp);
   }
 
-  delete S;
   delete N;
 }
 

@@ -27,16 +27,15 @@ void efgLiapNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
   }
 
   Nfg *N = MakeReducedNfg(sup);
+  NFSupport support(*N);
 
-  NFSupport *S = new NFSupport(*N);
+  ViewNormal(*N, support);
 
-  ViewNormal(*N, S);
-
-  MixedProfile<double> mp(*S);
+  MixedProfile<double> mp(support);
 
   BehavToMixed(E, bp, *N, mp);
 
-  MixedProfile<gNumber> st(*S);
+  MixedProfile<gNumber> st(support);
   for (int i = 1; i <= st.Length(); i++)
     st[i] = mp[i];
 
@@ -53,7 +52,6 @@ void efgLiapNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
     solns.Append(bp);
   }
 
-  delete S;
   delete N;
 }
 

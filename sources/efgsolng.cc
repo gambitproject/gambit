@@ -38,7 +38,8 @@ protected:
   bool m_eliminate, m_iterative, m_strong;
   
   void BaseSelectSolutions(int, const Efg &, gList<BehavSolution> &);
-  void BaseViewNormal(const Nfg &, NFSupport *&);
+  void BaseViewNormal(const Nfg &, NFSupport &);
+  void BaseViewSubgame(int, const Efg &, EFSupport &);
 
 public:
   BaseBySubgameG(EfgShowInterface *, const Efg &,
@@ -70,9 +71,13 @@ void BaseBySubgameG::BaseSelectSolutions(int p_subgame, const Efg &p_efg,
     m_parent->PickSolutions(p_efg, m_subgameRoots[p_subgame], p_solutions);
 }
 
+void BaseBySubgameG::BaseViewSubgame(int, const Efg &, EFSupport &)
+{ 
+}
+
 #include "nfstrat.h"
 
-void BaseBySubgameG::BaseViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
+void BaseBySubgameG::BaseViewNormal(const Nfg &p_nfg, NFSupport &p_support)
 {
   if (!m_eliminate)  return;
 
@@ -82,7 +87,7 @@ void BaseBySubgameG::BaseViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
 
 
   if (m_iterative) {
-    NFSupport *oldSupport = p_support, *newSupport;
+    NFSupport *oldSupport = new NFSupport(p_support), *newSupport;
     while ((newSupport = ComputeDominated(oldSupport->Game(), 
 					  *oldSupport, m_strong,
 					  players, gnull, gstatus)) != 0) {
@@ -90,15 +95,16 @@ void BaseBySubgameG::BaseViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
       oldSupport = newSupport;
     }
 
-    p_support = oldSupport;
+    p_support = *oldSupport;
+    delete oldSupport;
   }
   else {
     NFSupport *newSupport;
-    if ((newSupport = ComputeDominated(p_support->Game(), 
-				       *p_support, m_strong,
+    if ((newSupport = ComputeDominated(p_support.Game(), 
+				       p_support, m_strong,
 				       players, gnull, gstatus)) != 0) {
-      delete p_support;
-      p_support = newSupport;
+      p_support = *newSupport;
+      delete newSupport;
     }
   }
 }
@@ -108,7 +114,7 @@ void BaseBySubgameG::BaseViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
 //=========================================================================
 
 //========================================================================
-//                               LcpSolve
+//                              LiapSolve
 //========================================================================
 
 #include "nliap.h"
@@ -157,6 +163,8 @@ protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
+  void ViewSubgame(int p_subgame, const Efg &p_efg, EFSupport &p_support)
+    { BaseViewSubgame(p_subgame, p_efg, p_support); }
 
 public:
   EFLiapBySubgameG(const Efg &p_efg, const EFLiapParams &p_params,
@@ -227,7 +235,7 @@ protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 			gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
-  void ViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
+  void ViewNormal(const Nfg &p_nfg, NFSupport &p_support)
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
@@ -328,6 +336,8 @@ protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
+  void ViewSubgame(int p_subgame, const Efg &p_efg, EFSupport &p_support)
+    { BaseViewSubgame(p_subgame, p_efg, p_support); }
   
 public:
   SeqFormBySubgameG(const Efg &p_efg, const EFSupport &p_support,
@@ -397,7 +407,7 @@ protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
-  void ViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
+  void ViewNormal(const Nfg &p_nfg, NFSupport &p_support)
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
@@ -477,7 +487,7 @@ protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
-  void ViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
+  void ViewNormal(const Nfg &p_nfg, NFSupport &p_support)
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
@@ -539,6 +549,8 @@ protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
+  void ViewSubgame(int p_subgame, const Efg &p_efg, EFSupport &p_support)
+    { BaseViewSubgame(p_subgame, p_efg, p_support); }
 
 public:
   guiEnumPureEfgSubgame(const Efg &p_efg, const EFSupport &p_support,
@@ -645,7 +657,7 @@ protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
-  void ViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
+  void ViewNormal(const Nfg &p_nfg, NFSupport &p_support)
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
@@ -743,7 +755,7 @@ protected:
   void SelectSolutions(int p_number, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_number, p_efg, p_solutions); }
-  void ViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
+  void ViewNormal(const Nfg &p_nfg, NFSupport &p_support)
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
@@ -812,6 +824,8 @@ protected:
   void SelectSolutions(int p_number, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_number, p_efg, p_solutions); }
+  void ViewSubgame(int p_number, const Efg &p_efg, EFSupport &p_support)
+    { BaseViewSubgame(p_number, p_efg, p_support); }
 
 public:
   EfgCSumBySubgameG(const Efg &p_efg, const EFSupport &p_support,
@@ -907,7 +921,7 @@ protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
     { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
-  void ViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
+  void ViewNormal(const Nfg &p_nfg, NFSupport &p_support)
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
@@ -1334,7 +1348,7 @@ void GridSolveParamsDialog::AlgorithmFields(void)
 
 class QreAllBySubgameG : public BaseBySubgameG {
 protected:
-  void ViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
+  void ViewNormal(const Nfg &p_nfg, NFSupport &p_support)
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
@@ -1354,18 +1368,17 @@ QreAllBySubgameG::QreAllBySubgameG(const Efg &p_efg,
   GridParams params(status);
 
   Nfg *N = MakeReducedNfg(p_support);
-  NFSupport *S = new NFSupport(*N);
+  NFSupport S(*N);
   ViewNormal(*N, S);
 
   gList<MixedSolution> solns;
   try {
-    GridSolve(*S, params, solns);
+    GridSolve(S, params, solns);
   }
   catch (gSignalBreak &) { }
 
   //dialog.RunPxi();
   delete N;
-  delete S;
 }
 
 guiefgQreAllNfg::guiefgQreAllNfg(const EFSupport &p_support, 

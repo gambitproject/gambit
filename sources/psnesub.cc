@@ -11,13 +11,11 @@ void efgEnumPureNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
 				       gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);
-
-  NFSupport *S = new NFSupport(*N);
-
-  ViewNormal(*N, S);
+  NFSupport support(*N);
+  ViewNormal(*N, support);
 
   gList<MixedSolution> solutions;
-  FindPureNash(*S, m_stopAfter, m_status, solutions);
+  FindPureNash(support, m_stopAfter, m_status, solutions);
 
   for (int i = 1; i <= solutions.Length(); i++)  {
     BehavProfile<gNumber> bp(sup);
@@ -25,7 +23,6 @@ void efgEnumPureNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
     solns.Append(bp);
   }
 
-  delete S;
   delete N;
 }
 
