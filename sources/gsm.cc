@@ -376,7 +376,148 @@ bool GSM::Assign( void )
     {
       if(!(p1->Type() & (porINPUT|porOUTPUT))) 
       {
-	p1->AssignFrom(p2);
+	//p1->AssignFrom(p2);
+	switch(p1->Type())
+	{
+	case porINTEGER:
+	  ((IntPortion*) p1)->Value() = ((IntPortion*) p2)->Value();
+	  break;
+	case porFLOAT:
+	  ((FloatPortion*) p1)->Value() = ((FloatPortion*) p2)->Value();
+	  break;
+	case porRATIONAL:
+	  ((RationalPortion*) p1)->Value() = ((RationalPortion*) p2)->Value();
+	  break;
+	case porTEXT:
+	  ((TextPortion*) p1)->Value() = ((TextPortion*) p2)->Value();
+	  break;
+	case porBOOL:
+	  ((BoolPortion*) p1)->Value() = ((BoolPortion*) p2)->Value();
+	  break;
+	case porOUTCOME_FLOAT:
+	case porOUTCOME_RATIONAL:
+	  p1->RemoveDependency();
+	  ((OutcomePortion*) p1)->Value() = ((OutcomePortion*) p2)->Value();
+	  p1->SetOwner( p2->Owner() );
+	  p1->SetIsValid( p2->IsValid() );
+	  p1->AddDependency();
+	  break;
+	case porPLAYER_NFG:
+	  p1->RemoveDependency();
+	  ((NfPlayerPortion*) p1)->Value() = ((NfPlayerPortion*) p2)->Value();
+	  p1->SetOwner( p2->Owner() );
+	  p1->SetIsValid( p2->IsValid() );
+	  p1->AddDependency();
+	  break;
+	case porSTRATEGY:
+	  p1->RemoveDependency();
+	  ((StrategyPortion*) p1)->Value() = ((StrategyPortion*) p2)->Value();
+	  p1->SetOwner( p2->Owner() );
+	  p1->SetIsValid( p2->IsValid() );
+	  p1->AddDependency();
+	  break;
+	case porNF_SUPPORT:
+	  p1->RemoveDependency();
+	  ((NfSupportPortion*) p1)->Value() =((NfSupportPortion*) p2)->Value();
+	  p1->SetOwner( p2->Owner() );
+	  p1->SetIsValid( p2->IsValid() );
+	  p1->AddDependency();
+	  break;
+	case porEF_SUPPORT:
+	  p1->RemoveDependency();
+	  ((EfSupportPortion*) p1)->Value() =((EfSupportPortion*) p2)->Value();
+	  p1->SetOwner( p2->Owner() );
+	  p1->SetIsValid( p2->IsValid() );
+	  p1->AddDependency();
+	  break;
+	case porPLAYER_EFG:
+	  p1->RemoveDependency();
+	  ((EfPlayerPortion*) p1)->Value() = ((EfPlayerPortion*) p2)->Value();
+	  p1->SetOwner( p2->Owner() );
+	  p1->SetIsValid( p2->IsValid() );
+	  p1->AddDependency();
+	  break;
+	case porINFOSET:
+	  p1->RemoveDependency();
+	  ((InfosetPortion*) p1)->Value() = ((InfosetPortion*) p2)->Value();
+	  p1->SetOwner( p2->Owner() );
+	  p1->SetIsValid( p2->IsValid() );
+	  p1->AddDependency();
+	  break;
+	case porNODE:
+	  p1->RemoveDependency();
+	  ((NodePortion*) p1)->Value() = ((NodePortion*) p2)->Value();
+	  p1->SetOwner( p2->Owner() );
+	  p1->SetIsValid( p2->IsValid() );
+	  p1->AddDependency();
+	  break;
+	case porACTION:
+	  p1->RemoveDependency();
+	  ((ActionPortion*) p1)->Value() = ((ActionPortion*) p2)->Value();
+	  p1->SetOwner( p2->Owner() );
+	  p1->SetIsValid( p2->IsValid() );
+	  p1->AddDependency();
+	  break;
+	case porMIXED_FLOAT:
+	  p1->RemoveDependency();
+	  (*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) = 
+	    (*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
+	  p1->SetOwner( p2->Owner() );
+	  p1->SetIsValid( p2->IsValid() );
+	  p1->AddDependency();
+	  break;
+	case porMIXED_RATIONAL:
+	  p1->RemoveDependency();
+	  (*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) = 
+	    (*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value()));
+	  p1->SetOwner( p2->Owner() );
+	  p1->SetIsValid( p2->IsValid() );
+	  p1->AddDependency();
+	  break;
+	case porBEHAV_FLOAT:
+	  p1->RemoveDependency();
+	  (*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) = 
+	    (*((BehavSolution<double>*) ((BehavPortion*) p2)->Value()));
+	  p1->SetOwner( p2->Owner() );
+	  p1->SetIsValid( p2->IsValid() );
+	  p1->AddDependency();
+	  break;
+	case porBEHAV_RATIONAL:
+	  p1->RemoveDependency();
+	  (*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) = 
+	    (*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
+	  p1->SetOwner( p2->Owner() );
+	  p1->SetIsValid( p2->IsValid() );
+	  p1->AddDependency();
+	  break;
+	case porNFG_FLOAT:
+	  ((NfgPortion*) p1)->RemoveAllDependents();
+	  delete ((NfgPortion*) p1)->Value();
+	  ((NfgPortion*) p1)->Value() = new Nfg<double>
+	    (*(Nfg<double>*) ((NfgPortion*) p2)->Value()); 
+	  break;
+	case porNFG_RATIONAL:
+	  ((NfgPortion*) p1)->RemoveAllDependents();
+	  delete ((NfgPortion*) p1)->Value();
+	  ((NfgPortion*) p1)->Value() =  new Nfg<gRational>
+	    (*(Nfg<gRational>*) ((NfgPortion*) p2)->Value()); 
+	  break;
+	case porEFG_FLOAT:
+	  ((EfgPortion*) p1)->RemoveAllDependents();
+	  delete ((EfgPortion*) p1)->Value();
+	  ((EfgPortion*) p1)->Value() = new Efg<double>
+	    (*(Efg<double>*) ((EfgPortion*) p2)->Value()); 
+	  break;
+	case porEFG_RATIONAL:
+	  ((EfgPortion*) p1)->RemoveAllDependents();
+	  delete ((EfgPortion*) p1)->Value();
+	  ((EfgPortion*) p1)->Value() =  new Efg<gRational>
+	    (*(Efg<gRational>*) ((EfgPortion*) p2)->Value()); 
+	  break;
+	default:
+	  _ErrorMessage(_StdErr, 67, 0, 0, PortionTypeToText(p1->Type()));
+	  assert(0);	  
+	}
 	_Push(p1->RefCopy()); 
 	delete p2;
       }
@@ -392,7 +533,7 @@ bool GSM::Assign( void )
     {
       if( !( ((ListPortion*) p1)->DataType() & (porINPUT|porOUTPUT) ) )
       {
-	p1->AssignFrom(p2);
+	((ListPortion*) p1)->AssignFrom(p2);
 	_Push(p1->RefCopy());
 	delete p2;
       }
@@ -835,30 +976,7 @@ bool GSM::EqualTo ( void )
   if(p1->Type()==p2->Type())
   {
     result = true;
-    if(p1->Type()==porBOOL)   
-      b = (((BoolPortion*) p1)->Value() == ((BoolPortion*) p2)->Value());
-    else if(p1->Type()==porINTEGER)   
-      b = (((IntPortion*) p1)->Value() == ((IntPortion*) p2)->Value());
-    else if(p1->Type()==porFLOAT)
-      b = (((FloatPortion*) p1)->Value() == ((FloatPortion*) p2)->Value());
-    else if(p1->Type()==porRATIONAL)
-      b = (((RationalPortion*) p1)->Value()==((RationalPortion*) p2)->Value());
-    else if(p1->Type()==porTEXT)
-      b = (((TextPortion*) p1)->Value() == ((TextPortion*) p2)->Value());
-    else if(p1->Type()==porMIXED_FLOAT)
-      b = ((*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) == 
-	   (*((MixedSolution<double>*) ((MixedPortion*) p2)->Value())));
-    else if(p1->Type()==porMIXED_RATIONAL)
-      b = ((*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) == 
-	   (*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value())));
-    else if(p1->Type()==porBEHAV_FLOAT)
-      b = ((*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) == 
-	   (*((BehavSolution<double>*) ((BehavPortion*) p2)->Value())));
-    else if(p1->Type()==porBEHAV_RATIONAL)
-      b = ((*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) == 
-	   (*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value())));
-    else
-      result = false;
+    b = PortionEqual(p1, p2, result);
   }
 
   if(result)
@@ -883,30 +1001,7 @@ bool GSM::NotEqualTo ( void )
   if(p1->Type()==p2->Type())
   {
     result = true;
-    if(p1->Type()==porBOOL)   
-      b = (((BoolPortion*) p1)->Value() != ((BoolPortion*) p2)->Value());
-    else if(p1->Type()==porINTEGER)   
-      b = (((IntPortion*) p1)->Value() != ((IntPortion*) p2)->Value());
-    else if(p1->Type()==porFLOAT)
-      b = (((FloatPortion*) p1)->Value() != ((FloatPortion*) p2)->Value());
-    else if(p1->Type()==porRATIONAL)
-      b = (((RationalPortion*) p1)->Value()!=((RationalPortion*) p2)->Value());
-    else if(p1->Type()==porTEXT)
-      b = (((TextPortion*) p1)->Value() != ((TextPortion*) p2)->Value());
-    else if(p1->Type()==porMIXED_FLOAT)
-      b = ((*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) != 
-	   (*((MixedSolution<double>*) ((MixedPortion*) p2)->Value())));
-    else if(p1->Type()==porMIXED_RATIONAL)
-      b = ((*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) != 
-	   (*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value())));
-    else if(p1->Type()==porBEHAV_FLOAT)
-      b = ((*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) != 
-	   (*((BehavSolution<double>*) ((BehavPortion*) p2)->Value())));
-    else if(p1->Type()==porBEHAV_RATIONAL)
-      b = ((*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) != 
-	   (*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value())));
-    else
-      result = false;
+    b = !PortionEqual(p1, p2, result);
   }
 
   if(result)
@@ -1758,6 +1853,8 @@ void GSM::_ErrorMessage
   case 66:
     s << "Attempted to change the type of a variable\n";
     break;
+  case 67:
+    s << "Assigning to an unknown type: " << str1 << "\n";
   default:
     s << "General error " << error_num << "\n";
   }

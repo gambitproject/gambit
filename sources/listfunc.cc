@@ -24,7 +24,9 @@ Portion *GSM_Remove(Portion **param)
     (((IntPortion *) param[1])->Value());
   return ret;
 }
-					    
+
+
+
 Portion *GSM_Contains(Portion **param)
 {
   return new BoolValPortion(((ListPortion *) param[0])->Contains(param[1]));

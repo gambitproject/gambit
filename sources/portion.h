@@ -85,9 +85,6 @@ public:
   virtual Portion* ValCopy( void ) const = 0;
   virtual Portion* RefCopy( void ) const = 0;
 
-  virtual void AssignFrom( Portion* p ) = 0;
-  virtual bool operator == ( Portion* p ) const;
-
   virtual bool IsReference( void ) const = 0;
 };
 
@@ -111,8 +108,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
   bool IsReference( void ) const;
 };
 
@@ -136,8 +131,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );  
-  bool operator == ( Portion* p ) const;
   bool IsReference( void ) const;
 };
 
@@ -163,8 +156,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 class IntValPortion : public IntPortion
@@ -202,8 +193,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 class FloatValPortion : public FloatPortion
@@ -242,8 +231,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 class RationalValPortion : public RationalPortion
@@ -284,8 +271,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 class TextValPortion : public TextPortion
@@ -324,8 +309,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 class BoolValPortion : public BoolPortion
@@ -374,8 +357,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 class OutcomeValPortion : public OutcomePortion
@@ -415,8 +396,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 class NfPlayerValPortion : public NfPlayerPortion
@@ -460,8 +439,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 class StrategyValPortion : public StrategyPortion
@@ -504,8 +481,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 class NfSupportValPortion : public NfSupportPortion
@@ -546,8 +521,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 class EfSupportValPortion : public EfSupportPortion
@@ -588,8 +561,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 class EfPlayerValPortion : public EfPlayerPortion
@@ -631,8 +602,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 class InfosetValPortion : public InfosetPortion
@@ -673,8 +642,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 class NodeValPortion : public NodePortion
@@ -715,8 +682,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 class ActionValPortion : public ActionPortion
@@ -762,8 +727,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 
@@ -807,8 +770,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 
@@ -854,11 +815,10 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 
   void AddDependent( Portion* p );
   void RemoveDependent( Portion* p );
+  void RemoveAllDependents(void);
 };
 
 
@@ -902,11 +862,10 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 
   void AddDependent( Portion* p );
   void RemoveDependent( Portion* p );
+  void RemoveAllDependents(void);
 };
 
 
@@ -948,8 +907,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 class OutputValPortion : public OutputPortion
@@ -989,8 +946,6 @@ public:
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
-  void AssignFrom( Portion* p );
-  bool operator == ( Portion* p ) const;
 };
 
 class InputValPortion : public InputPortion
@@ -1054,7 +1009,7 @@ public:
 
   int      Append     ( Portion* item );
   int      Insert     ( Portion* item, int index );
-  int      Contains   ( Portion* item ) const;
+  bool     Contains   ( Portion* item ) const;
   Portion* Remove     ( int index );
   int      Length     ( void ) const;
   void     Flush      ( void );
@@ -1106,6 +1061,8 @@ int TextToPortionListDepth( const gString& text );
 void PrintPortionTypeSpec( gOutput& s, PortionType type );
 
 gOutput& operator << ( gOutput& s, Portion* p );
+
+bool PortionEqual(Portion* p1, Portion* p2, bool& type_found);
 
 
 #endif // PORTION_H

@@ -115,6 +115,7 @@
 %token QUIT
 %token DEFFUNC
 %token INCLUDE
+%token ASSIGNFUNC
 %token UNASSIGN
 %token CLEAR
 %token HELP
@@ -190,9 +191,13 @@ statement:    { triv = true; statementcount++; }
          |    conditional { triv = false; }
          |    whileloop { triv = false; }
          |    forloop   { triv = false; }
+         |    assignment
          |    unassignment
          |    helpstmt
          |    QUIT     { triv = false; quit = true; emit(new Quit); }
+
+assignment:   ASSIGNFUNC LBRACK NAME { emit(new PushRef(tval)); }
+              COMMA expression RBRACK { emit(new Assign); }
 
 unassignment: UNASSIGN LBRACK NAME RBRACK
               { emit(new PushRef(tval));
@@ -571,6 +576,7 @@ I_dont_believe_Im_doing_this:
     else if (s == "Quit")   return QUIT;
     else if (s == "NewFunction")   return DEFFUNC;
     else if (s == "Include")   return INCLUDE;
+    else if (s == "Assign")  return ASSIGNFUNC;
     else if (s == "UnAssign")  return UNASSIGN;
     else if (s == "Help") return HELP;
     else if (s == "Clear")   return CLEAR;

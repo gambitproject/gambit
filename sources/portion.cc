@@ -118,11 +118,6 @@ Portion::~Portion()
 #endif
 }
 
-
-bool Portion::operator == ( Portion* ) const
-{ return false; }
-
-
 bool Portion::IsValid( void ) const
 { return Original()->_IsValid; }
 
@@ -211,20 +206,6 @@ Portion* ErrorPortion::ValCopy( void ) const
 Portion* ErrorPortion::RefCopy( void ) const
 { return new ErrorPortion( _Value ); }
 
-void ErrorPortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() == Type() );
-  _Value = ( (ErrorPortion*) p )->_Value;
-}
-
-bool ErrorPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( _Value == ( (ErrorPortion*) p )->_Value );
-  else
-    return false;
-}
-
 bool ErrorPortion::IsReference( void ) const
 { return false; }
 
@@ -256,20 +237,6 @@ Portion* ReferencePortion::ValCopy( void ) const
 
 Portion* ReferencePortion::RefCopy( void ) const
 { return new ReferencePortion( _Value ); }
-
-void ReferencePortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() == Type() );
-  _Value = ( (ReferencePortion*) p )->_Value;
-}
-
-bool ReferencePortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( _Value == ( (ReferencePortion*) p )->_Value );
-  else
-    return false;
-}
 
 bool ReferencePortion::IsReference( void ) const
 { return false; }
@@ -306,21 +273,6 @@ Portion* IntPortion::RefCopy( void ) const
   p->SetOriginal( Original() );
   return p;
 }
-
-void IntPortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() == Type() );
-  *_Value = *( ( (IntPortion*) p )->_Value );
-}
-
-bool IntPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( *_Value == *( (IntPortion*) p )->_Value );
-  else
-    return false;
-}
-
 
 IntValPortion::IntValPortion( long value )
 { _Value = new long( value ); }
@@ -373,21 +325,6 @@ Portion* FloatPortion::RefCopy( void ) const
   p->SetOriginal( Original() );
   return p;
 }
-
-void FloatPortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() == Type() );
-  *_Value = *( ( (FloatPortion*) p )->_Value );
-}
-
-bool FloatPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( *_Value == *( (FloatPortion*) p )->_Value );
-  else
-    return false;
-}
-
 
 FloatValPortion::FloatValPortion( double value )
 { _Value = new double( value ); }
@@ -442,21 +379,6 @@ Portion* RationalPortion::RefCopy( void ) const
   p->SetOriginal( Original() );
   return p;
 }
-
-void RationalPortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() == Type() );
-  *_Value = *( ( (RationalPortion*) p )->_Value );
-}
-
-bool RationalPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( *_Value == *( (RationalPortion*) p )->_Value );
-  else
-    return false;
-}
-
 
 RationalValPortion::RationalValPortion( gRational value )
 { _Value = new gRational( value ); }
@@ -514,21 +436,6 @@ Portion* TextPortion::RefCopy( void ) const
   return p;
 }
 
-void TextPortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() == Type() );
-  *_Value = *( ( (TextPortion*) p )->_Value );
-}
-
-bool TextPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( *_Value == *( (TextPortion*) p )->_Value );
-  else
-    return false;
-}
-
-
 TextValPortion::TextValPortion( gString value )
 { _Value = new gString( value ); }
 
@@ -585,21 +492,6 @@ Portion* BoolPortion::RefCopy( void ) const
   p->SetOriginal( Original() );
   return p;
 }
-
-void BoolPortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() == Type() );
-  *_Value = *( ( (BoolPortion*) p )->_Value );
-}
-
-bool BoolPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( *_Value == *( (BoolPortion*) p )->_Value );
-  else
-    return false;
-}
-
 
 BoolValPortion::BoolValPortion( bool value )
 { _Value = new bool( value ); }
@@ -683,25 +575,6 @@ Portion* OutcomePortion::RefCopy( void ) const
   return p;
 }
 
-void OutcomePortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() == Type() );
-  RemoveDependency();
-  *_Value = *( ( (OutcomePortion*) p )->_Value );
-  SetOwner( p->Owner() );
-  SetIsValid( p->IsValid() );
-  AddDependency();
-}
-
-bool OutcomePortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( *_Value == *( (OutcomePortion*) p )->_Value );
-  else
-    return false;
-}
-
-
 OutcomeValPortion::OutcomeValPortion( Outcome* value )
 { _Value = new Outcome*( value ); }
 
@@ -770,25 +643,6 @@ Portion* NfPlayerPortion::RefCopy( void ) const
   p->SetOwner( Owner() );
   return p;
 }
-
-void NfPlayerPortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() == Type() );
-  RemoveDependency();
-  *_Value = *( ( (NfPlayerPortion*) p )->_Value );
-  SetOwner( p->Owner() );
-  SetIsValid( p->IsValid() );
-  AddDependency();
-}
-
-bool NfPlayerPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( *_Value == *( (NfPlayerPortion*) p )->_Value );
-  else
-    return false;
-}
-
 
 NfPlayerValPortion::NfPlayerValPortion( NFPlayer* value )
 { _Value = new NFPlayer*( value ); }
@@ -868,25 +722,6 @@ Portion* StrategyPortion::RefCopy( void ) const
   return p;
 }
 
-void StrategyPortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() == Type() );
-  RemoveDependency();
-  *_Value = *( ( (StrategyPortion*) p )->_Value );
-  SetOwner( p->Owner() );
-  SetIsValid( p->IsValid() );
-  AddDependency();
-}
-
-bool StrategyPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( *_Value == *( (StrategyPortion*) p )->_Value );
-  else
-    return false;
-}
-
-
 StrategyValPortion::StrategyValPortion( Strategy* value )
 { _Value = new Strategy*( value ); }
 
@@ -957,29 +792,6 @@ Portion* NfSupportPortion::RefCopy( void ) const
   return p;
 }
 
-void NfSupportPortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() == Type() );
-  RemoveDependency();
-  *_Value = *( ( (NfSupportPortion*) p )->_Value );
-  SetOwner( p->Owner() );
-  SetIsValid( p->IsValid() );
-  AddDependency();
-}
-
-bool NfSupportPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-  {
-    assert( *_Value != 0 && *( (NfSupportPortion*) p )->_Value != 0 );
-    // this calls the operator == in NFSupport
-    return ( **_Value == **( (NfSupportPortion*) p )->_Value );
-  }
-  else
-    return false;
-}
-
-
 NfSupportValPortion::NfSupportValPortion( NFSupport* value )
 { _Value = new NFSupport*( value ); }
 
@@ -1047,29 +859,6 @@ Portion* EfSupportPortion::RefCopy( void ) const
   p->SetOwner( Owner() );
   return p;
 }
-
-void EfSupportPortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() == Type() );
-  RemoveDependency();
-  *_Value = *( ( (EfSupportPortion*) p )->_Value );
-  SetOwner( p->Owner() );
-  SetIsValid( p->IsValid() );
-  AddDependency();
-}
-
-bool EfSupportPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-  {
-    assert( *_Value != 0 && *( (EfSupportPortion*) p )->_Value != 0 );
-    // this calls the operator == in NFSupport
-    return ( **_Value == **( (EfSupportPortion*) p )->_Value );
-  }
-  else
-    return false;
-}
-
 
 EfSupportValPortion::EfSupportValPortion( EFSupport* value )
 { _Value = new EFSupport*( value ); }
@@ -1140,25 +929,6 @@ Portion* EfPlayerPortion::RefCopy( void ) const
   return p;
 }
 
-void EfPlayerPortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() == Type() );
-  RemoveDependency();
-  *_Value = *( ( (EfPlayerPortion*) p )->_Value );
-  SetOwner( p->Owner() );
-  SetIsValid( p->IsValid() );
-  AddDependency();
-}
-
-bool EfPlayerPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( *_Value == *( (EfPlayerPortion*) p )->_Value );
-  else
-    return false;
-}
-
-
 EfPlayerValPortion::EfPlayerValPortion( EFPlayer* value )
 { _Value = new EFPlayer*( value ); }
 
@@ -1227,25 +997,6 @@ Portion* InfosetPortion::RefCopy( void ) const
   return p;
 }
 
-void InfosetPortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() == Type() );
-  RemoveDependency();
-  *_Value = *( ( (InfosetPortion*) p )->_Value );
-  SetOwner( p->Owner() );
-  SetIsValid( p->IsValid() );
-  AddDependency();
-}
-
-bool InfosetPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( *_Value == *( (InfosetPortion*) p )->_Value );
-  else
-    return false;
-}
-
-
 InfosetValPortion::InfosetValPortion( Infoset* value )
 { _Value = new Infoset*( value ); }
 
@@ -1313,25 +1064,6 @@ Portion* NodePortion::RefCopy( void ) const
   p->SetOwner( Owner() );
   return p;
 }
-
-void NodePortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() == Type() );
-  RemoveDependency();
-  *_Value = *( ( (NodePortion*) p )->_Value );
-  SetOwner( p->Owner() );
-  SetIsValid( p->IsValid() );
-  AddDependency();
-}
-
-bool NodePortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( *_Value == *( (NodePortion*) p )->_Value );
-  else
-    return false;
-}
-
 
 NodeValPortion::NodeValPortion( Node* value )
 { _Value = new Node*( value ); }
@@ -1402,25 +1134,6 @@ Portion* ActionPortion::RefCopy( void ) const
   p->SetOwner( Owner() );
   return p;
 }
-
-void ActionPortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() == Type() );
-  RemoveDependency();
-  *_Value = *( ( (ActionPortion*) p )->_Value );
-  SetOwner( p->Owner() );
-  SetIsValid( p->IsValid() );
-  AddDependency();
-}
-
-bool ActionPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( *_Value == *( (ActionPortion*) p )->_Value );
-  else
-    return false;
-}
-
 
 ActionValPortion::ActionValPortion( Action* value )
 { _Value = new Action*( value ); }
@@ -1554,49 +1267,6 @@ Portion* MixedPortion::RefCopy( void ) const
   p->SetOwner( Owner() );
   return p;
 }
-
-void MixedPortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() & porMIXED );
-
-  RemoveDependency();
-
-  delete *_Value;
-
-  if( !( (MixedPortion*) p )->Value() )
-  {
-    *_Value = 0;
-  }
-  else
-  {
-    switch( ( (MixedPortion*) p )->Value()->Type() )
-    {
-    case DOUBLE:
-      *_Value = new MixedSolution<double>
-	( * (MixedSolution<double>*) ( (MixedPortion*) p )->Value() ); 
-      break;
-    case RATIONAL:
-      *_Value =  new MixedSolution<gRational>
-	( * (MixedSolution<gRational>*) ( (MixedPortion*) p )->Value() ); 
-      break;
-    default:
-      assert( 0 );
-    }
-  }
-
-  SetOwner( p->Owner() );
-  SetIsValid( p->IsValid() );
-  AddDependency();
-}
-
-bool MixedPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( *_Value == *( (MixedPortion*) p )->_Value );
-  else
-    return false;
-}
-
 
 MixedValPortion::MixedValPortion( BaseMixedProfile* value )
 { _Value = new BaseMixedProfile*( value ); }
@@ -1733,49 +1403,6 @@ Portion* BehavPortion::RefCopy( void ) const
   return p;
 }
 
-void BehavPortion::AssignFrom( Portion* p )
-{
-  assert( p->Type() & porBEHAV );
-
-  RemoveDependency();
-
-  delete *_Value;
-
-  if( !( (BehavPortion*) p )->Value() )
-  {
-    *_Value = 0;
-  }
-  else
-  {
-    switch( ( (BehavPortion*) p )->Value()->Type() )
-    {
-    case DOUBLE:
-      *_Value = new BehavSolution<double>
-	( * (BehavSolution<double>*) ( (BehavPortion*) p )->Value() ); 
-      break;
-    case RATIONAL:
-      *_Value =  new BehavSolution<gRational>
-	( * (BehavSolution<gRational>*) ( (BehavPortion*) p )->Value() ); 
-      break;
-    default:
-      assert( 0 );
-    }
-  }
-
-  SetOwner( p->Owner() );
-  SetIsValid( p->IsValid() );
-  AddDependency();
-}
-
-bool BehavPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( *_Value == *( (BehavPortion*) p )->_Value );
-  else
-    return false;
-}
-
-
 BehavValPortion::BehavValPortion( BaseBehavProfile* value )
 { _Value = new BaseBehavProfile*( value ); }
 
@@ -1871,37 +1498,11 @@ Portion* NfgPortion::RefCopy( void ) const
   return p;
 }
 
-void NfgPortion::AssignFrom( Portion* p )
+void NfgPortion::RemoveAllDependents(void)
 {
-  assert( p->Type() & porNFG );
-
   while( ( (NfgPortion*) Original() )->_Dependent->Length() > 0 )
     ( (NfgPortion*) Original() )->_Dependent->Remove( 1 )->SetIsValid( false );
-  delete *_Value;
-
-  switch( ( (NfgPortion*) p )->Value()->Type() )
-  {
-  case DOUBLE:
-    *_Value = new Nfg<double>
-      ( * (Nfg<double>*) ( (NfgPortion*) p )->Value() ); 
-    break;
-  case RATIONAL:
-    *_Value =  new Nfg<gRational>
-      ( * (Nfg<gRational>*) ( (NfgPortion*) p )->Value() ); 
-    break;
-  default:
-    assert( 0 );
-  }
 }
-
-bool NfgPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( *_Value == *( (NfgPortion*) p )->_Value );
-  else
-    return false;
-}
-
 
 
 
@@ -2024,37 +1625,11 @@ Portion* EfgPortion::RefCopy( void ) const
   return p;
 }
 
-void EfgPortion::AssignFrom( Portion* p )
+void EfgPortion::RemoveAllDependents(void)
 {
-  assert( p->Type() & porEFG );
-
   while( ( (EfgPortion*) Original() )->_Dependent->Length() > 0 )
     ( (EfgPortion*) Original() )->_Dependent->Remove( 1 )->SetIsValid( false );
-  delete *_Value;
-
-  switch( ( (EfgPortion*) p )->Value()->Type() )
-  {
-  case DOUBLE:
-    *_Value = new Efg<double>
-      ( * (Efg<double>*) ( (EfgPortion*) p )->Value() ); 
-    break;
-  case RATIONAL:
-    *_Value =  new Efg<gRational>
-      ( * (Efg<gRational>*) ( (EfgPortion*) p )->Value() ); 
-    break;
-  default:
-    assert( 0 );
-  }
 }
-
-bool EfgPortion::operator == ( Portion *p ) const
-{
-  if( p->Type() == Type() )
-    return ( *_Value == *( (EfgPortion*) p )->_Value );
-  else
-    return false;
-}
-
 
 void EfgPortion::AddDependent( Portion* p )
 {
@@ -2136,25 +1711,6 @@ Portion* OutputPortion::RefCopy( void ) const
   return p;
 }
 
-void OutputPortion::AssignFrom( Portion* )
-{
-/*
-  assert( p->Type() == Type() );
-  *_Value = *( ( (OutputPortion*) p )->_Value );
-*/
-  assert( 0 );
-}
-
-bool OutputPortion::operator == ( Portion * ) const
-{
-/*
-  assert( p->Type() == Type() );
-  return ( *_Value == *( (OutputPortion*) p )->_Value );
-*/
-  return false;
-}
-
-
 OutputValPortion::OutputValPortion( gOutput& value )
 { _Value = &value; }
 
@@ -2208,25 +1764,6 @@ Portion* InputPortion::RefCopy( void ) const
   p->SetOriginal( Original() );
   return p;
 }
-
-void InputPortion::AssignFrom( Portion* )
-{
-/*
-  assert( p->Type() == Type() );
-  *_Value = *( ( (InputPortion*) p )->_Value );
-*/
-  assert( 0 );
-}
-
-bool InputPortion::operator == ( Portion *) const
-{
-/*
-  assert( p->Type() == Type() );
-  return ( *_Value == *( (InputPortion*) p )->_Value );
-*/
-  return false;
-}
-
 
 InputValPortion::InputValPortion( gInput& value )
 { _Value = &value; }
@@ -2382,11 +1919,14 @@ void ListPortion::AssignFrom( Portion* p )
   AddDependency();
 }
 
-bool ListPortion::operator == ( Portion *p ) const
+bool ListPortion::operator == ( Portion* p ) const
 {
   bool result = true;
   int i;
   int length = _Value->Length();
+  Portion* p1;
+  Portion* p2;
+  bool type_found;
 
   if( p->Type() == Type() )
   {
@@ -2394,19 +1934,26 @@ bool ListPortion::operator == ( Portion *p ) const
     {
       for( i = 1; i <= length; i++ )
       {
-	result = result & 
-	  ( (*_Value)[ i ] == ( *( (ListPortion*) p )->_Value )[ i ] );
+	p1 = (*_Value)[i];
+	p2 = (*(((ListPortion*) p)->_Value))[i];
+	if(p1->Type() == p2->Type())
+	{
+	  if(p1->Type() == porLIST)
+	    result = result &
+	      ( ((ListPortion*) p1)->operator==(p2));
+	  else
+	    result = result &
+	      PortionEqual(p1, p2, type_found);
+	}
+	else
+	  result = false;
       }
     }
     else
-    {
       result = false;
-    }
   }
   else
-  {
     result = false;
-  }
   return result;
 }
 
@@ -2596,23 +2143,31 @@ int ListPortion::Insert( Portion* item, int index )
 }
 
 
-int ListPortion::Contains( Portion* item ) const
+bool ListPortion::Contains( Portion* p2 ) const
 {
-  int result = 0;
   int i;
   int length = _Value->Length();
+  bool type_found;
+  Portion* p1;
 
-  for( i = 1; i < length; i++ )
+  for( i = 1; i <= length; i++ )
   {
-    if( (*_Value)[ i ]->operator == ( item ) )
+    p1 = (*_Value)[i];
+    if(p1->Type() != porLIST)
     {
-      result = i;
-      break;
+      if(PortionEqual(p1, p2, type_found))
+	return true;
+    }      
+    else 
+    {
+      if(p2->Type() == porLIST && ((ListPortion*) p1)->operator==(p2))
+	return true;
+      if(((ListPortion*) p1)->Contains(p2))
+	return true;
     }
   }
-  return result;
+  return false;
 }
-
 
 
 Portion* ListPortion::Remove( int index )
@@ -2851,3 +2406,57 @@ gOutput& operator << ( gOutput& s, Portion* p )
   return s;
 }
 
+
+bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
+{
+  bool b = false;
+
+  if(p1->Type() != p2->Type()) 
+    return false;
+
+  type_found = true;
+
+  if(p1->Type()==porBOOL)   
+    b = (((BoolPortion*) p1)->Value() == ((BoolPortion*) p2)->Value());
+  else if(p1->Type()==porINTEGER)   
+    b = (((IntPortion*) p1)->Value() == ((IntPortion*) p2)->Value());
+  else if(p1->Type()==porFLOAT)
+    b = (((FloatPortion*) p1)->Value() == ((FloatPortion*) p2)->Value());
+  else if(p1->Type()==porRATIONAL)
+    b = (((RationalPortion*) p1)->Value()==((RationalPortion*) p2)->Value());
+  else if(p1->Type()==porTEXT)
+      b = (((TextPortion*) p1)->Value() == ((TextPortion*) p2)->Value());
+  
+  else if(p1->Type()==porNODE)
+    b = (((NodePortion*) p1)->Value() == ((NodePortion*) p2)->Value());
+  else if(p1->Type()==porACTION)
+      b = (((ActionPortion*) p1)->Value() == ((ActionPortion*) p2)->Value());
+  else if(p1->Type()==porINFOSET)
+    b = (((InfosetPortion*) p1)->Value() == ((InfosetPortion*) p2)->Value());
+  else if(p1->Type()==porOUTCOME)
+    b = (((OutcomePortion*) p1)->Value() == ((OutcomePortion*) p2)->Value());
+  else if(p1->Type()==porPLAYER_NFG)
+    b = (((NfPlayerPortion*) p1)->Value() == ((NfPlayerPortion*) p2)->Value());
+  else if(p1->Type()==porSTRATEGY)
+    b = (((StrategyPortion*) p1)->Value() == ((StrategyPortion*) p2)->Value());
+  else if(p1->Type()==porNF_SUPPORT)
+    b = (((NfSupportPortion*) p1)->Value()==((NfSupportPortion*) p2)->Value());
+  else if(p1->Type()==porEF_SUPPORT)
+    b = (((EfSupportPortion*) p1)->Value()==((EfSupportPortion*) p2)->Value());
+  
+  else if(p1->Type()==porMIXED_FLOAT)
+    b = ((*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) == 
+	 (*((MixedSolution<double>*) ((MixedPortion*) p2)->Value())));
+  else if(p1->Type()==porMIXED_RATIONAL)
+    b = ((*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) == 
+	 (*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value())));
+  else if(p1->Type()==porBEHAV_FLOAT)
+    b = ((*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) == 
+	 (*((BehavSolution<double>*) ((BehavPortion*) p2)->Value())));
+  else if(p1->Type()==porBEHAV_RATIONAL)
+    b = ((*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) == 
+	 (*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value())));
+  else
+    type_found = false;
+  return b;
+}
