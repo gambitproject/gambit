@@ -686,9 +686,6 @@ Portion *GSM_LpSolveEfgFloat(Portion **param)
 {
   Efg<double> &E = * (Efg<double> *) ((EfgPortion*) param[0])->Value();
   
-  if (!((BoolPortion *) param[1])->Value())  
-    return new ErrorPortion("algorithm not implemented for extensive forms");
-
   ZSumParams ZP;
 
   ZSumBySubgame<double> ZM(E, ZP);
@@ -696,8 +693,8 @@ Portion *GSM_LpSolveEfgFloat(Portion **param)
 
   solns.Append(ZM.Solve());
 
-  ((IntPortion *) param[2])->Value() = ZM.NumPivots();
-  ((FloatPortion *) param[3])->Value() = ZM.Time();
+  ((IntPortion *) param[1])->Value() = ZM.NumPivots();
+  ((FloatPortion *) param[2])->Value() = ZM.Time();
   
   Portion* por = new Behav_ListPortion<double>(solns);
   por->SetOwner( param[ 0 ]->Original() );
@@ -709,9 +706,6 @@ Portion *GSM_LpSolveEfgRational(Portion **param)
 {
   Efg<gRational> &E = * (Efg<gRational> *) ((EfgPortion*) param[0])->Value();
   
-  if (!((BoolPortion *) param[1])->Value())  
-    return new ErrorPortion("algorithm not implemented for extensive forms");
-
   ZSumParams ZP;
 
   ZSumBySubgame<gRational> ZM(E, ZP);
@@ -719,8 +713,8 @@ Portion *GSM_LpSolveEfgRational(Portion **param)
 
   solns.Append(ZM.Solve());
 
-  ((IntPortion *) param[2])->Value() = ZM.NumPivots();
-  ((FloatPortion *) param[3])->Value() = ZM.Time();
+  ((IntPortion *) param[1])->Value() = ZM.NumPivots();
+  ((FloatPortion *) param[2])->Value() = ZM.Time();
   
   Portion* por = new Behav_ListPortion<gRational>(solns);
   por->SetOwner( param[ 0 ]->Original() );
@@ -1353,24 +1347,20 @@ void Init_algfunc(GSM *gsm)
   //-------------------------- LpSolve ------------------------------//
 
   FuncObj = new FuncDescObj("LpSolve");
-  FuncObj->SetFuncInfo(GSM_LpSolveEfgFloat, 4);
+  FuncObj->SetFuncInfo(GSM_LpSolveEfgFloat, 3);
   FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 1, "asNfg", porBOOL,
-			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 2, "nPivots", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 1, "nPivots", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 3, "time", porFLOAT,
+  FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
 
-  FuncObj->SetFuncInfo(GSM_LpSolveEfgRational, 4);
+  FuncObj->SetFuncInfo(GSM_LpSolveEfgRational, 3);
   FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 1, "asNfg", porBOOL,
-			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 2, "nPivots", porINTEGER,
+  FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 1, "nPivots", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 3, "time", porFLOAT,
+  FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
