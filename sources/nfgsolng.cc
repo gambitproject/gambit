@@ -240,7 +240,7 @@ NfgGobitG::NfgGobitG(const Nfg &p_nfg, const NFSupport &p_support,
 gList<MixedSolution> NfgGobitG::Solve(void) const
 {
   GobitParamsSettings GSPD(parent->Filename());
-  wxStatus *status = new wxStatus(parent->Frame(), "Gobit Algorithm");
+  wxStatus *status = new wxStatus(parent->Frame(), "QRE Algorithm");
   NFGobitParams P(*status);
   GSPD.GetParams(P);
 
@@ -275,7 +275,7 @@ NfgGobitAllG::NfgGobitAllG(const Nfg &p_nfg, const NFSupport &p_support,
 gList<MixedSolution> NfgGobitAllG::Solve(void) const
 {
   GridParamsSettings GSPD(parent->Filename());
-  wxStatus *status = new wxStatus(parent->Frame(), "GobitGrid Solve");
+  wxStatus *status = new wxStatus(parent->Frame(), "QRE Grid Solve");
   GridParams P(*status);
   GSPD.GetParams(P);
   GridSolve(sup, P, solns);

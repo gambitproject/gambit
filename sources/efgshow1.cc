@@ -124,7 +124,7 @@ void EfgShow::MakeMenus(void)
                  "Solve by linear program");
   solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_LIAP, "Liapunov",
                  "Liapunov function minimization");
-  solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_GOBIT, "Gobit",
+  solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_GOBIT, "QRE",
                  "Compute quantal response equilibria");
   solveCustomMenu->Append(SOLVE_CUSTOM_EFG, "Extensive form",
               solveCustomEfgMenu,
@@ -143,9 +143,9 @@ void EfgShow::MakeMenus(void)
                  "Liapunov function minimization");
   solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_SIMPDIV, "Simpdiv",
                  "Simplicial subdivision");
-  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_GOBIT, "Gobit",
+  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_GOBIT, "QRE",
                  "Compute quantal response equilibria");
-  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_GOBITGRID, "GobitGrid",
+  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_GOBITGRID, "QRE Grid",
                  "Compute quantal response equilibria");
   solveCustomMenu->Append(SOLVE_CUSTOM_NFG, "Normal form",
               solveCustomNfgMenu,

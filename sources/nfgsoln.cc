@@ -154,7 +154,7 @@ char *NfgSolnShow::feature_names[MSOLN_NUM_FEATURES] =
 {
     "Update Dynamically", "Zero Prob", "Equ Values",
     "Creator", "Nash", "Perfect", "Proper",
-    "Gobit Lambda", "Gobit Value", "Liap Value"
+    "QRE Lambda", "QRE Value", "Liap Value"
 };
 
 int NfgSolnShow::feature_width[MSOLN_NUM_FEATURES] = 

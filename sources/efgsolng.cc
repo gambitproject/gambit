@@ -1137,7 +1137,7 @@ void GobitParamsSettings::GetParams(NFGobitParams &p_params)
 
 GobitSolveParamsDialog::GobitSolveParamsDialog(wxWindow *p_parent,
 					       const gText p_filename)
-  : PxiParamsDialog("Gobit","GobitSolve Params", p_filename, p_parent,
+  : PxiParamsDialog("Gobit","QRESolve Params", p_filename, p_parent,
 		    GOBIT_HELP),
     GobitParamsSettings(p_filename), PxiParamsSettings("Gobit", p_filename)
 {
@@ -1210,7 +1210,7 @@ NGobitBySubgameG::NGobitBySubgameG(const Efg &p_efg,
   : BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
 {
   GobitParamsSettings GSPD(m_parent->Filename());
-  wxStatus status(m_parent->Frame(), "Gobit Algorithm");
+  wxStatus status(m_parent->Frame(), "QRE Algorithm");
   NFGobitParams P(status);
   GSPD.GetParams(P);
 
@@ -1283,7 +1283,7 @@ EfgEGobitG::EfgEGobitG(const Efg &p_efg, const EFSupport &p_support,
 gList<BehavSolution> EfgEGobitG::Solve(void) const
 {
   GobitParamsSettings GSPD(parent->Filename());
-  wxStatus status(parent->Frame(), "Gobit Algorithm");
+  wxStatus status(parent->Frame(), "QRE Algorithm");
   BehavProfile<gNumber> start = parent->CreateStartProfile(GSPD.StartOption());
   EFGobitParams P(status);
   GSPD.GetParams(P);
@@ -1382,7 +1382,7 @@ void GridParamsSettings::GetParams(GridParams &p_params)
 
 GridSolveParamsDialog::GridSolveParamsDialog(wxWindow *p_parent,
 					     const gText &p_filename)
-  : MyDialogBox(p_parent, "GobitGridSolve Params", GOBIT_HELP),
+  : MyDialogBox(p_parent, "QREGridSolve Params", GOBIT_HELP),
     GridParamsSettings(p_filename), PxiParamsSettings("Grid", p_filename)
 {
   SetLabelPosition(wxVERTICAL);
@@ -1482,7 +1482,7 @@ GobitAllBySubgameG::GobitAllBySubgameG(const Efg &p_efg,
   : BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
 {
   GridParamsSettings GSPD(m_parent->Filename());
-  wxStatus status(m_parent->Frame(), "GobitAll Solve");
+  wxStatus status(m_parent->Frame(), "QRE All Solve");
   GridParams P(status);
   GSPD.GetParams(P);
 

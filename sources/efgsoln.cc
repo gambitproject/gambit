@@ -483,7 +483,7 @@ char *EfgSolnShow::feature_names[BSOLN_NUM_FEATURES] =
 {
     "Update Dynamically", "Equ Values",
     "Creator", "Nash", "SubgPerf", "Sequential",
-    "Gobit Lambda", "Gobit Value", "Liap Value"
+    "QRE Lambda", "QRE Value", "Liap Value"
 };
 
 int EfgSolnShow::feature_width[BSOLN_NUM_FEATURES] = 
