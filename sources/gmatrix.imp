@@ -651,6 +651,18 @@ gMatrix<T>::MakeIdent(void)
     }
 }
 
+template <class T> void gMatrix<T>::RotateDown(int lo, int hi)
+{
+  assert( CheckRow(lo) && CheckRow(hi) );
+  assert(lo<=hi);
+      // Rotate data rows
+  T *temp;
+  temp=data[hi];
+  for(int k=hi; k>lo; k--)
+    data[k]=data[k-1];
+  data[lo]=temp;
+}
+
 template <class T> void
 gMatrix<T>::RotateUp(int lo, int hi)
 {
