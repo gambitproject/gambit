@@ -152,22 +152,16 @@ gNumber gelfuncNumChars::EvalItem( gText x1 ) const
 DECLARE_BINARY(gelfuncNthElement, gText, gNumber, gText)
 
 
-#ifdef USE_EXCEPTIONS
 class gelExceptionNonInteger : public gException  {
   public:
     virtual ~gelExceptionNonInteger()   { }
     gText Description(void) const  { return "Expected integer index"; }
 };
-#endif   // USE_EXCEPTIONS
 
 gText gelfuncNthElement::EvalItem( gText x1, gNumber x2 ) const
 {
-#ifdef USE_EXCEPTIONS
   if (!x2.IsInteger())   
     throw gelExceptionNonInteger();
-#else
-  assert( x2.IsInteger() );
-#endif   // USE_EXCEPTIONS
   return x1[x2 - gNumber(1)];
 }
 
