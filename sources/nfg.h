@@ -107,6 +107,9 @@ public:
 
 
 class NfgPayoffs   {
+  friend class BaseNfg;
+  private:
+    virtual void BreakLink(void) = 0;
   public:
     virtual ~NfgPayoffs()  { }
     virtual DataType Type(void) const = 0;

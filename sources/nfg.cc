@@ -116,26 +116,20 @@ int BaseNfg::ProfileLength(void) const
   return nprof;
 }
 
-//
-// Note that the link with the associated efg, if any, is broken
-// only on this end, and the Lexicon of the efg is not deleted
-// This shouldn't be a problem, so the code has not been changed 
-// to delete the Lexicon immediately
-//
 void BaseNfg::SetOutcome(const gArray<int> &profile, NFOutcome *outcome)
 {
   int index = 1;
   for (int i = 1; i <= profile.Length(); i++)
     index += players[i]->strategies[profile[i]]->index;
   results[index] = outcome;
-//  BreakLink();
+  paytable->BreakLink();
 }
 
 
 void BaseNfg::SetOutcome(const StrategyProfile &p, NFOutcome *outcome)
 {
   results[p.index + 1] = outcome;
-//  BreakLink();
+  paytable->BreakLink();
 }
 
 NFOutcome *BaseNfg::GetOutcome(const gArray<int> &profile) const 
