@@ -216,7 +216,7 @@ class Mod : public Instruction
 
 //----------------------------- relational operators ----------------------
 
-class EQU : public Instruction
+class Equ : public Instruction
 {
  public:
   Opcode Type( void ) const;
@@ -224,7 +224,7 @@ class EQU : public Instruction
 };
 
 
-class NEQ : public Instruction
+class Neq : public Instruction
 {
  public:
   Opcode Type( void ) const;
@@ -232,7 +232,7 @@ class NEQ : public Instruction
 };
 
 
-class GTN : public Instruction
+class Gtn : public Instruction
 {
  public:
   Opcode Type( void ) const;
@@ -240,7 +240,7 @@ class GTN : public Instruction
 };
 
 
-class LTN : public Instruction
+class Ltn : public Instruction
 {
  public:
   Opcode Type( void ) const;
@@ -248,7 +248,7 @@ class LTN : public Instruction
 };
 
 
-class GEQ : public Instruction
+class Geq : public Instruction
 {
  public:
   Opcode Type( void ) const;
@@ -256,7 +256,7 @@ class GEQ : public Instruction
 };
 
 
-class LEQ : public Instruction
+class Leq : public Instruction
 {
  public:
   Opcode Type( void ) const;

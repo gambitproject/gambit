@@ -143,7 +143,7 @@ template <class T>
 	result = Portion::Operation( p, mode );
       }
       break;
-    case opMODULOUS:
+    case opMODULUS:
       if( Type() == porINTEGER )
       {
 	// This is coded as is because the compiler complains when 

@@ -161,45 +161,45 @@ bool IntDiv::Execute( GSM &gsm ) const
 Opcode Mod::Type( void ) const
 { return iMOD; }
 bool Mod::Execute( GSM &gsm ) const
-{ return gsm.Modulous(); }
+{ return gsm.Modulus(); }
 
 
 
 //----------------------------- relational operators ----------------------
 
-Opcode EQU::Type( void ) const
+Opcode Equ::Type( void ) const
 { return iEQU; }
-bool EQU::Execute( GSM& gsm ) const
+bool Equ::Execute( GSM& gsm ) const
 { return gsm.EqualTo(); }
 
 
-Opcode NEQ::Type( void ) const
+Opcode Neq::Type( void ) const
 { return iNEQ; }
-bool NEQ::Execute( GSM& gsm ) const
+bool Neq::Execute( GSM& gsm ) const
 { return gsm.NotEqualTo(); }
 
 
-Opcode GTN::Type( void ) const
+Opcode Gtn::Type( void ) const
 { return iGTN; }
-bool GTN::Execute( GSM& gsm ) const
+bool Gtn::Execute( GSM& gsm ) const
 { return gsm.GreaterThan(); }
 
 
-Opcode LTN::Type( void ) const
+Opcode Ltn::Type( void ) const
 { return iLTN; }
-bool LTN::Execute( GSM& gsm ) const
+bool Ltn::Execute( GSM& gsm ) const
 { return gsm.LessThan(); }
 
 
-Opcode GEQ::Type( void ) const
+Opcode Geq::Type( void ) const
 { return iGEQ; }
-bool GEQ::Execute( GSM& gsm ) const
+bool Geq::Execute( GSM& gsm ) const
 { return gsm.GreaterThanOrEqualTo(); }
 
 
-Opcode LEQ::Type( void ) const
+Opcode Leq::Type( void ) const
 { return iLEQ; }
-bool LEQ::Execute( GSM& gsm ) const
+bool Leq::Execute( GSM& gsm ) const
 { return gsm.LessThanOrEqualTo(); }
 
 

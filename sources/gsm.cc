@@ -539,8 +539,8 @@ bool GSM::Negate( void )
 bool GSM::IntegerDivide ( void )
 { return _BinaryOperation( opINTEGER_DIVIDE ); }
 
-bool GSM::Modulous ( void )
-{ return _BinaryOperation( opMODULOUS ); }
+bool GSM::Modulus ( void )
+{ return _BinaryOperation( opMODULUS ); }
 
 
 bool GSM::EqualTo ( void )

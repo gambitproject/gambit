@@ -76,7 +76,7 @@ class GSM
   bool Negate   ( void );
 
   bool IntegerDivide ( void );
-  bool Modulous      ( void );
+  bool Modulus      ( void );
 
   bool EqualTo              ( void );
   bool NotEqualTo           ( void );
