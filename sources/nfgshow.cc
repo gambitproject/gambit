@@ -1438,22 +1438,85 @@ void NormalDrawSettings::SaveSettings(void) const
 #include "wx_tbar.h"
 #endif
 
-class NfgShowToolBar :   // no reason to have yet another .h file for just this
+//=====================================================================
+//                       class GambitToolBar
+//=====================================================================
+
 #ifdef wx_msw
-    public wxButtonBar
+class NfgShowToolBar : public wxButtonBar {
 #else
-public wxToolBar
+class NfgShowToolBar : public wxToolBar {
 #endif
-{
 private:
-    wxFrame *parent;
+  wxFrame *parent;
 
 public:
-    NfgShowToolBar(wxFrame *frame);
-    Bool OnLeftClick(int toolIndex, Bool toggled);
-    void OnMouseEnter(int toolIndex);
+  NfgShowToolBar(wxFrame *frame);
+  Bool OnLeftClick(int toolIndex, Bool toggled);
+  void OnMouseEnter(int toolIndex);
 };
 
+NfgShowToolBar::NfgShowToolBar(wxFrame *frame)
+#ifdef wx_msw
+  : wxButtonBar(frame, 0, 0, -1, -1, 0, wxVERTICAL, 1), parent(frame)
+#else
+  : wxToolBar(frame, 0, 0, -1, -1, 0, wxHORIZONTAL, 30), parent(frame)
+#endif
+{
+#ifdef wx_msw
+  wxBitmap *saveBitmap = new wxBitmap("SAVE_BITMAP");
+  wxBitmap *printBitmap = new wxBitmap("PRINT_BITMAP");
+  wxBitmap *solveBitmap = new wxBitmap("SOLVE_BITMAP");
+  wxBitmap *helpBitmap = new wxBitmap("HELP_BITMAP");
+  wxBitmap *optionsBitmap = new wxBitmap("OPTIONS_BITMAP");
+  wxBitmap *inspectBitmap = new wxBitmap("INSPECT_BITMAP");
+#else
+#include "bitmaps/save.xpm"
+#include "bitmaps/print.xpm"
+#include "bitmaps/solve.xpm"
+#include "bitmaps/help.xpm"
+#include "bitmaps/options.xpm"
+#include "bitmaps/inspect.xpm"
+  wxBitmap *saveBitmap = new wxBitmap(save_xpm);
+  wxBitmap *printBitmap = new wxBitmap(print_xpm);
+  wxBitmap *solveBitmap = new wxBitmap(solve_xpm);
+  wxBitmap *helpBitmap = new wxBitmap(help_xpm);
+  wxBitmap *optionsBitmap = new wxBitmap(options_xpm);
+  wxBitmap *inspectBitmap = new wxBitmap(inspect_xpm);
+#endif // wx_msw
+
+  SetMargins(2, 2);
+#ifdef wx_msw
+  SetDefaultSize(33, 30);
+#endif
+  GetDC()->SetBackground(wxLIGHT_GREY_BRUSH);
+
+  AddTool(NFG_FILE_SAVE, saveBitmap);
+  AddTool(OUTPUT_MENU, printBitmap);
+  AddSeparator();
+  AddTool(NFG_SOLVE_STANDARD, solveBitmap);
+  AddTool(NFG_VIEW_SOLUTIONS, inspectBitmap);
+  AddSeparator();
+  AddTool(OPTIONS_MENU, optionsBitmap);
+  AddSeparator();
+  AddTool(HELP_MENU_CONTENTS, helpBitmap);
+
+  CreateTools();
+  Layout();
+}
+
+
+Bool NfgShowToolBar::OnLeftClick(int tool, Bool )
+{
+    parent->OnMenuCommand(tool);
+    return TRUE;
+}
+
+
+void NfgShowToolBar::OnMouseEnter(int tool)
+{
+    parent->SetStatusText(parent->GetMenuBar()->GetHelpString(tool));
+}
 
 // Note that the menubar required for the normal form display is too
 // different from the default SpreadSheet3D one to warrant an override of
@@ -1489,15 +1552,13 @@ NormalSpread::NormalSpread(const NFSupport *sup, int _pl1, int _pl2, NfgShow *p,
     SetIcon(frame_icon);
     toolbar = new NfgShowToolBar(this);
 
-    int i;
     wxPanel *sub_panel = Panel();
 
     // Create the list boxes for choosing which players to display for row/col
     const Nfg &nf = sup->Game();
     char **player_names = new char *[num_players];
 
-    for (i = 0; i < num_players; i++)
-    {
+    for (int i = 0; i < num_players; i++) {
         if (features.verbose && nf.Players()[i+1]->GetName() != "")
             player_names[i] = copystring(nf.Players()[i+1]->GetName());
         else
@@ -1511,7 +1572,7 @@ NormalSpread::NormalSpread(const NFSupport *sup, int _pl1, int _pl2, NfgShow *p,
                               "Col Player", -1, -1, -1, -1, num_players, player_names);
     sub_panel->SetLabelPosition(wxHORIZONTAL);
 
-    for (i = 0; i < num_players; i++) 
+    for (int i = 0; i < num_players; i++) 
     {
         delete [] player_names[i];
     }
@@ -1528,7 +1589,7 @@ NormalSpread::NormalSpread(const NFSupport *sup, int _pl1, int _pl2, NfgShow *p,
     (void)new wxMessage(sub_panel, "Profile:");
     sub_panel->NewLine();
 
-    for (i = 1; i <= num_players; i++)
+    for (int i = 1; i <= num_players; i++)
     {
         char **strat_profile_str = new char *[dimensionality[i]];
         int j;
@@ -2153,66 +2214,6 @@ void NormalSpread::OnOptionsChanged(unsigned int options)
 }
 
 
-//****************************************************************************
-//                                  NORMAL FORM TOOLBAR
-//****************************************************************************
-
-NfgShowToolBar::NfgShowToolBar(wxFrame *frame):
-#ifdef wx_msw
-    wxButtonBar(frame, 0, 0, -1, -1, 0, wxVERTICAL, 1)
-#else
-    wxToolBar(frame, 0, 0, -1, -1, 0, wxHORIZONTAL, 30)
-#endif
-{
-    parent = frame;
-
-    // Load palette bitmaps
-#include "bitmaps/save.xpm"
-#include "bitmaps/print.xpm"
-#include "bitmaps/solve.xpm"
-#include "bitmaps/help.xpm"
-#include "bitmaps/options.xpm"
-#include "bitmaps/inspect.xpm"
-    wxBitmap *ToolbarSaveBitmap = new wxBitmap(save_xpm);
-    wxBitmap *ToolbarPrintBitmap = new wxBitmap(print_xpm);
-    wxBitmap *ToolbarSolveBitmap = new wxBitmap(solve_xpm);
-    wxBitmap *ToolbarHelpBitmap = new wxBitmap(help_xpm);
-    wxBitmap *ToolbarOptionsBitmap = new wxBitmap(options_xpm);
-    wxBitmap *ToolbarInspectBitmap = new wxBitmap(inspect_xpm);
-
-    // Save, Print | Outcomes | Solve, Inspect | Options | Help
-    // Create the toolbar
-    SetMargins(2, 2);
-#ifdef wx_msw
-    SetDefaultSize(33, 30);
-#endif
-    GetDC()->SetBackground(wxLIGHT_GREY_BRUSH);
-
-    AddTool(NFG_FILE_SAVE, ToolbarSaveBitmap);
-    AddTool(OUTPUT_MENU, ToolbarPrintBitmap);
-    AddSeparator();
-    AddTool(NFG_SOLVE_STANDARD, ToolbarSolveBitmap);
-    AddTool(NFG_VIEW_SOLUTIONS, ToolbarInspectBitmap);
-    AddSeparator();
-    AddTool(OPTIONS_MENU, ToolbarOptionsBitmap);
-    AddSeparator();
-    AddTool(HELP_MENU_CONTENTS, ToolbarHelpBitmap);
-    CreateTools();
-    Layout();
-}
-
-
-Bool NfgShowToolBar::OnLeftClick(int tool, Bool )
-{
-    parent->OnMenuCommand(tool);
-    return TRUE;
-}
-
-
-void NfgShowToolBar::OnMouseEnter(int tool)
-{
-    parent->SetStatusText(parent->GetMenuBar()->GetHelpString(tool));
-}
 
 
 

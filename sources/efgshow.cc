@@ -39,7 +39,6 @@ class guiEfgShowToolBar : public wxButtonBar {
 #else
 class guiEfgShowToolBar : public wxToolBar {
 #endif   // wx_msw
-
 private:
   wxFrame *m_parent;
 
@@ -58,7 +57,19 @@ guiEfgShowToolBar::guiEfgShowToolBar(wxFrame *p_frame)
 #endif  // wx_msw
     m_parent(p_frame)
 {
-    // Load palette bitmaps
+#ifdef wx_msw
+  wxBitmap *saveBitmap = new wxBitmap("SAVE_BITMAP");
+  wxBitmap *printBitmap = new wxBitmap("PRINT_BITMAP");
+  wxBitmap *deleteBitmap = new wxBitmap("DELETE_BITMAP");
+  wxBitmap *solveBitmap = new wxBitmap("SOLVE_BITMAP");
+  wxBitmap *zoominBitmap = new wxBitmap("ZOOMIN_BITMAP");
+  wxBitmap *zoomoutBitmap = new wxBitmap("ZOOMOUT_BITMAP");
+  wxBitmap *helpBitmap = new wxBitmap("HELP_BITMAP");
+  wxBitmap *addBitmap = new wxBitmap("ADD_BITMAP");
+  wxBitmap *optionsBitmap = new wxBitmap("OPTIONS_BITMAP");
+  wxBitmap *makenfBitmap = new wxBitmap("NFG_BITMAP");
+  wxBitmap *inspectBitmap = new wxBitmap("INSPECT_BITMAP");
+#else
 #include "bitmaps/save.xpm"
 #include "bitmaps/print.xpm"
 #include "bitmaps/delete.xpm"
@@ -70,42 +81,41 @@ guiEfgShowToolBar::guiEfgShowToolBar(wxFrame *p_frame)
 #include "bitmaps/options.xpm"
 #include "bitmaps/makenf.xpm"
 #include "bitmaps/inspect.xpm"
-  wxBitmap *ToolbarSaveBitmap = new wxBitmap(save_xpm);
-  wxBitmap *ToolbarPrintBitmap = new wxBitmap(print_xpm);
-  wxBitmap *ToolbarDeleteBitmap = new wxBitmap(delete_xpm);
-  wxBitmap *ToolbarSolveBitmap = new wxBitmap(solve_xpm);
-  wxBitmap *ToolbarZoominBitmap = new wxBitmap(zoomin_xpm);
-  wxBitmap *ToolbarZoomoutBitmap = new wxBitmap(zoomout_xpm);
-  wxBitmap *ToolbarHelpBitmap = new wxBitmap(help_xpm);
-  wxBitmap *ToolbarAddBitmap = new wxBitmap(add_xpm);
-  wxBitmap *ToolbarOptionsBitmap = new wxBitmap(options_xpm);
-  wxBitmap *ToolbarMakenfBitmap = new wxBitmap(makenf_xpm);
-  wxBitmap *ToolbarInspectBitmap = new wxBitmap(inspect_xpm);
+  wxBitmap *saveBitmap = new wxBitmap(save_xpm);
+  wxBitmap *printBitmap = new wxBitmap(print_xpm);
+  wxBitmap *deleteBitmap = new wxBitmap(delete_xpm);
+  wxBitmap *solveBitmap = new wxBitmap(solve_xpm);
+  wxBitmap *zoominBitmap = new wxBitmap(zoomin_xpm);
+  wxBitmap *zoomoutBitmap = new wxBitmap(zoomout_xpm);
+  wxBitmap *helpBitmap = new wxBitmap(help_xpm);
+  wxBitmap *addBitmap = new wxBitmap(add_xpm);
+  wxBitmap *optionsBitmap = new wxBitmap(options_xpm);
+  wxBitmap *makenfBitmap = new wxBitmap(makenf_xpm);
+  wxBitmap *inspectBitmap = new wxBitmap(inspect_xpm);
+#endif  // wx_msw
     
-  // Save, Print | Add, Delete, Outcomes | Solve, Inspect, MakeNF |
-  // ZoomIn, ZoomOut, Options | Help
-  // Create the toolbar
   SetMargins(2, 2);
 #ifdef wx_msw
   SetDefaultSize(33, 30);
 #endif  // wx_msw
   GetDC()->SetBackground(wxLIGHT_GREY_BRUSH);
-    
-  AddTool(efgmenuFILE_SAVE, ToolbarSaveBitmap);
-  AddTool(efgmenuFILE_OUTPUT, ToolbarPrintBitmap);
+
+  AddTool(efgmenuFILE_SAVE, saveBitmap);
+  AddTool(efgmenuFILE_OUTPUT, printBitmap);
   AddSeparator();
-  AddTool(efgmenuEDIT_NODE_ADD, ToolbarAddBitmap);
-  AddTool(efgmenuEDIT_NODE_DELETE, ToolbarDeleteBitmap);
+  AddTool(efgmenuEDIT_NODE_ADD, addBitmap);
+  AddTool(efgmenuEDIT_NODE_DELETE, deleteBitmap);
   AddSeparator();
-  AddTool(efgmenuSOLVE_STANDARD, ToolbarSolveBitmap);
-  AddTool(efgmenuINSPECT_SOLUTIONS, ToolbarInspectBitmap);
-  AddTool(efgmenuSOLVE_NFG_REDUCED, ToolbarMakenfBitmap);
+  AddTool(efgmenuSOLVE_STANDARD, solveBitmap);
+  AddTool(efgmenuINSPECT_SOLUTIONS, inspectBitmap);
+  AddTool(efgmenuSOLVE_NFG_REDUCED, makenfBitmap);
   AddSeparator();
-  AddTool(efgmenuPREFS_INC_ZOOM, ToolbarZoominBitmap);
-  AddTool(efgmenuPREFS_DEC_ZOOM, ToolbarZoomoutBitmap);
-  AddTool(efgmenuPREFS_DISPLAY, ToolbarOptionsBitmap);
+  AddTool(efgmenuPREFS_INC_ZOOM, zoominBitmap);
+  AddTool(efgmenuPREFS_DEC_ZOOM, zoomoutBitmap);
+  AddTool(efgmenuPREFS_DISPLAY, optionsBitmap);
   AddSeparator();
-  AddTool(efgmenuHELP_CONTENTS, ToolbarHelpBitmap);
+  AddTool(efgmenuHELP_CONTENTS, helpBitmap);
+
   CreateTools();
   Layout();
 }

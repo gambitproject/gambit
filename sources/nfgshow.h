@@ -9,7 +9,6 @@
 
 #include "wx.h"
 #include "wxmisc.h"
-#include "wx_split.h"
 
 #include "spread.h"
 #include "nfgdraw.h"
@@ -56,7 +55,6 @@ private:
   MixedSolutionList solns;
 
   wxFrame *m_frame;
-  wxSplitterWindow *m_splitter;
 
   struct StartingPoints {
     MixedSolutionList profiles;

@@ -36,10 +36,10 @@ extern GambitApp gambitApp;
 
 class GambitFrame : public wxFrame {
 public:
-    GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int type);
-    Bool OnClose(void);
-    void OnMenuCommand(int id);
-    void LoadFile(char *s = 0);
+  GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int type);
+  Bool OnClose(void);
+  void OnMenuCommand(int id);
+  void LoadFile(char *s = 0);
 };
 
 

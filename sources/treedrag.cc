@@ -34,10 +34,15 @@ TreeWindow::NodeDragger::NodeDragger(TreeWindow *parent_, Efg &ef_)
   : ef(ef_), parent(parent_), dc(parent_->GetDC()), drag_now(0),
     start_node(0), end_node(0)
 {
+#ifdef wx_msw
+  c_b = new wxBitmap("COPY_BITMAP");
+  m_b = new wxBitmap("MOVE_BITMAP");
+#else
 #include "bitmaps/copy.xpm"
 #include "bitmaps/move.xpm"
   c_b = new wxBitmap(copy_xpm);
   m_b = new wxBitmap(move_xpm);
+#endif // wx_msw
   copy_dc = new wxMemoryDC(dc);
   copy_dc->SelectObject(c_b);
   move_dc = new wxMemoryDC(dc);
