@@ -125,6 +125,8 @@ public:
   gOutput &ErrorStream(void) const { return _StdErr; }
 
   virtual gStatus &GetStatusMonitor(void) = 0;
+  gStatus *StartAlgorithmMonitor(const gText &);
+  void EndAlgorithmMonitor(gStatus *);
 };
 
 

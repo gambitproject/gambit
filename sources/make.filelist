@@ -75,7 +75,7 @@ MFCGCL_SOURCES = $(ALLGCL_SOURCES) gcl.cc ..\winsrc\stdafx.cc \
 
 MFCGCL_OBJECTS = $(MFCGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
 
-WXGCL_SOURCES = $(ALLGCL_SOURCES) wxgcl.cc gclstatus.cc gio.cc
+WXGCL_SOURCES = $(ALLGCL_SOURCES) wxgcl.cc gio.cc
 
 WXGCL_OBJECTS = $(WXGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
 

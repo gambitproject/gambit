@@ -1,5 +1,5 @@
 //
-// FILE: wxgcl.cc -- Experimental wxWindows front-end for GCL
+// FILE: wxgcl.cc -- wxWindows-based front-end for GCL
 //
 // $Id$
 //
@@ -9,7 +9,8 @@
 #include "wx/fontdlg.h"
 
 #include "wxgcl.h"
-#include "gsmconsole.h"
+#include "gsm.h"
+#include "gnullstatus.h"
 #include "gcmdline.h"
 #include "gpreproc.h"
 #include "gcompile.h"
@@ -129,6 +130,19 @@ gOutput &wxOutputWindowStream::operator<<(const void *x)
   return *this;
 }
 
+class wxGSM : public GSM {
+private:
+  gNullStatus m_status;
+
+public:
+  wxGSM(gInput &p_input, gOutput &p_output, gOutput &p_error)
+    : GSM(p_input, p_output, p_error) { }
+  virtual ~wxGSM() { }
+
+  gStatus &GetStatusMonitor(void) { return m_status; }
+};
+
+
 IMPLEMENT_APP(GclApp)
 
 class GclFrame : public wxFrame {
@@ -239,7 +253,7 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
   _ExePath = new char[1024];
   strncpy(_ExePath, wxGetWorkingDirectory(), 1023);
 
-  m_environment = new gsmConsole(gin, *m_outputStream, *m_outputStream);
+  m_environment = new wxGSM(gin, *m_outputStream, *m_outputStream);
   m_compiler = new GCLCompiler(*m_environment);
   wxCommandLine cmdline(20);
   gPreprocessor preproc(*m_environment, &cmdline, "Include[\"gclini.gcl\"]");

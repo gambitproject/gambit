@@ -1080,7 +1080,6 @@ void GSM::GlobalVarRemove     ( const gText& var_name )
   delete _GlobalRefTable.Remove(var_name);
 }
 
-
 gclRuntimeError::gclRuntimeError(const gText &s)
   : message(s)
 { }
