@@ -48,22 +48,12 @@ class Strategy;
 class NFSupport;
 class MixedSolution;
 
-#include <assert.h>
 
 #include "gnlist.h"
 
 #include "tristate.h"
 #include "gtext.h"
 #include "funcmisc.h"
-
-
-
-
-
-
-
-
-
 
 class gelVariableTable;
 class gelSignature;

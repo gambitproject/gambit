@@ -26,7 +26,7 @@ class gelEnvironment   {
     void Register( gelSignature* sig );
     gelExpr *Match(const gText &, gelExpr *);
     gelExpr *Match(const gText &, gelExpr *, gelExpr *);
-    gelExpr *Match(const gText &, const gArray<gelExpr *> &);
+    gelExpr *Match(const gText &, gBlock<gelExpr *> &);
 };
 
 

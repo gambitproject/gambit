@@ -141,6 +141,29 @@ gelParamInfo::gelParamInfo(const gText &s)
     if (index >= length || s[index] != '}')
       throw gelBadFunctionSig();
     m_Default = word;
+    if (m_Default == "True")  {
+      m_DefaultVal.bval = new gTriState(triTRUE);
+      m_Type = gelBOOLEAN;
+    }
+    else if (m_Default == "False")  {
+      m_DefaultVal.bval = new gTriState(triFALSE);
+      m_Type = gelBOOLEAN;
+    }
+    else if (m_Default == "Maybe")  {
+      m_DefaultVal.bval = new gTriState(triMAYBE);
+      m_Type = gelBOOLEAN;
+    }
+    else if (isdigit(m_Default[0]) || m_Default[0] == '-' || m_Default[0] == '.') {
+      m_DefaultVal.nval = new gNumber;
+      FromText(m_Default, *m_DefaultVal.nval);
+    }
+    else if (m_Default[0] == '"')  {
+      m_DefaultVal.tval = new gText;
+      for (int i = 1; i < m_Default.Length() - 1; i++)
+        *m_DefaultVal.tval += m_Default[i];
+    }
+    else
+      throw gelBadFunctionSig();
   }
   else
   {
@@ -149,6 +172,30 @@ gelParamInfo::gelParamInfo(const gText &s)
   }
 }
 
+gelParamInfo::~gelParamInfo()
+{
+  if (m_Optional)   {
+    if (m_Type == gelBOOLEAN)
+      delete m_DefaultVal.bval;
+    else if (m_Type == gelNUMBER)
+      delete m_DefaultVal.nval;
+    else if (m_Type == gelTEXT)
+      delete m_DefaultVal.tval;
+  }
+}
+
+gelExpr *gelParamInfo::DefaultVal(void) const
+{
+  if (!m_Optional)
+    throw gelInternalError("Asked for default value of required parameter");
+  if (m_Type == gelBOOLEAN)
+    return new gelConstant<gTriState *>(new gTriState(*m_DefaultVal.bval));
+  else if (m_Type == gelNUMBER)
+    return new gelConstant<gNumber *>(new gNumber(*m_DefaultVal.nval));
+  else   /* if (m_Type == gelTEXT) */
+    return new gelConstant<gText *>(new gText(*m_DefaultVal.tval));
+
+}
 
 gOutput &operator<<(gOutput &f, const gelSignature &)  { return f; }
 
@@ -269,12 +316,15 @@ gelSignature::~gelSignature()
 }
 
 bool gelSignature::Matches(const gText &n,
-			   const gArray<gelExpr *> &actuals) const
+			   gBlock<gelExpr *> &actuals) const
 {
   if (n != m_Name ||
-      actuals.Length() != m_Parameters.Length())
+      actuals.Length() > m_Parameters.Length())
     return false;
-  
+
+  gArray<gelExpr *> matched(m_Parameters.Length());
+  for (int i = 1; i <= matched.Length(); matched[i++] = 0);
+
   for (int i = 1; i <= actuals.Length(); i++)   {
     if (m_Parameters[i]->Type() != gelANYTYPE &&
         ( ( actuals[i]->Type() != m_Parameters[i]->Type() ) ||
@@ -282,6 +332,14 @@ bool gelSignature::Matches(const gText &n,
       return false;
   }
 
+  for (int i = actuals.Length() + 1; i <= matched.Length(); i++)  {
+    if (!m_Parameters[i]->IsOptional())   return false;
+    matched[i] = m_Parameters[i]->DefaultVal();
+  }
+
+  for (int i = actuals.Length() + 1; i <= matched.Length(); i++)
+    actuals.Append(matched[i]);
+    
   return true;
 }
 
@@ -535,7 +593,7 @@ void gelEnvironment::Register(gelSignature *sig)
 }
 
 gelExpr *gelEnvironment::Match(const gText &name,
-			       const gArray<gelExpr *> &actuals)
+			       gBlock<gelExpr *> &actuals)
 {
   for (int i = 1; i <= actuals.Length(); i++)
     if (!actuals[i])
@@ -543,14 +601,14 @@ gelExpr *gelEnvironment::Match(const gText &name,
 
   for (int i = 1; i <= signatures.Length(); i++)
     if (signatures[i]->Matches(name, actuals))
-      return signatures[i]->Evaluate( actuals );
+      return signatures[i]->Evaluate(actuals);
 
   return 0;
 }
 
 gelExpr *gelEnvironment::Match(const gText &name, gelExpr *op1, gelExpr *op2)
 {
-  gArray<gelExpr *> actuals(2);
+  gBlock<gelExpr *> actuals(2);
   actuals[1] = op1;
   actuals[2] = op2;
   return Match(name, actuals);
@@ -558,7 +616,7 @@ gelExpr *gelEnvironment::Match(const gText &name, gelExpr *op1, gelExpr *op2)
 
 gelExpr *gelEnvironment::Match(const gText &name, gelExpr *op)
 {
-  gArray<gelExpr *> actuals(1);
+  gBlock<gelExpr *> actuals(1);
   actuals[1] = op;
   return Match(name, actuals);
 }

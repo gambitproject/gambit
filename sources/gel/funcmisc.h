@@ -10,7 +10,7 @@
 #include "gnumber.h"
 #include "gtext.h"
 #include "glist.h"
-#include "garray.h"
+#include "gblock.h"
 #include "exprtree.h"
 
 class gelExpr;
@@ -47,14 +47,24 @@ private:
   gelType m_Type;
   int m_Depth;
   gText m_Default;
+  union  {
+    gTriState *bval;
+    gNumber *nval;
+    gText *tval;
+  } m_DefaultVal;
   bool m_Optional;
   bool m_ByReference;
   
 public:
   gelParamInfo(const gText &fn);
-  const gText& Name( void ) const { return m_Name; }
-  gelType Type( void ) const { return m_Type; }
-  int Depth( void ) const { return m_Depth; }
+  ~gelParamInfo();
+
+  const gText& Name(void) const { return m_Name; }
+  gelType Type(void) const { return m_Type; }
+  int Depth(void) const { return m_Depth; }
+
+  bool IsOptional(void) const   { return m_Optional; }
+  gelExpr *DefaultVal(void) const;
 };
 
 class gelSignature   
@@ -87,7 +97,7 @@ public:
   
 
   bool Matches(const gText &,
-	       const gArray<gelExpr *> &) const;
+	       gBlock<gelExpr *> &) const;
   bool operator==(const gelSignature &) const  { return false; } 
   bool operator!=(const gelSignature &) const  { return false; }
   
