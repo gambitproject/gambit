@@ -53,8 +53,8 @@ gStack<gText> GCL_InputFileNames(4);
   char nextchar(void); \
   void ungetchar(char c); \
   \
-  gclExpression *DefineFunction(gclExpression *expr); \
-  bool DeleteFunction(void); \
+  gclExpression *NewFunction(gclExpression *expr); \
+  gclExpression *DeleteFunction(void); \
   void RecoverFromError(void); \
   \
   int Parse(const gText& line, const gText &file, int lineno, \
@@ -121,7 +121,7 @@ gStack<gText> GCL_InputFileNames(4);
 %token IF
 %token WHILE
 %token FOR
-%token DEFFUNC
+%token NEWFUNC
 %token DELFUNC
 %token TYPEDEF
 %token INCLUDE
@@ -258,12 +258,15 @@ function:        IF LBRACK expression COMMA expression COMMA
 	|        FOR LBRACK expression COMMA expression COMMA
                             expression COMMA expression RBRACK
               { $$ = new gclForExpr($3, $5, $7, $9); }
-        |        DEFFUNC { if (in_funcdecl) YYERROR;  in_funcdecl = true; }
+        |        NEWFUNC { if (in_funcdecl) YYERROR;  in_funcdecl = true; }
                   LBRACK signature COMMA 
                   { funcbody = ""; record_funcbody = true; }
                   expression RBRACK
                   { record_funcbody = false; in_funcdecl = false;
-                    $$ = DefineFunction($7); }
+                    $$ = NewFunction($7); }
+        |        DELFUNC { if (in_funcdecl) YYERROR; }
+                  LBRACK signature RBRACK
+                  { $$ = DeleteFunction(); }
         |        funcname LBRACK  { funcnames.Push(tval); } parameterlist RBRACK
               { $$ = new gclFunctionCall(funcnames.Pop(), $4,
 					 current_line, current_file); }
@@ -406,7 +409,7 @@ static struct tokens toktable[] =
     { DOT, "." }, { CARET, "^" }, { UNDERSCORE, "_" },
     { AMPER, "&" }, { WRITE, "<<" }, { READ, ">>" }, { DOLLAR, "$" },
     { IF, "If" }, { WHILE, "While" }, { FOR, "For" },
-    { DEFFUNC, "NewFunction" }, { DELFUNC, "DeleteFunction" },
+    { NEWFUNC, "NewFunction" }, { DELFUNC, "DeleteFunction" },
     { TYPEDEF, "=:" }, { INCLUDE, "Include" },
     { PERCENT, "%" }, { DIV, "DIV" }, { LPAREN, "(" }, { RPAREN, ")" },
     { CRLF, "carriage return" }, { EOC, "carriage return" },
@@ -497,7 +500,7 @@ int GCLCompiler::yylex(void)
     else if (s == "If")     return IF;
     else if (s == "While")  return WHILE;
     else if (s == "For")    return FOR;
-    else if (s == "NewFunction")   return DEFFUNC;
+    else if (s == "NewFunction")   return NEWFUNC;
     else if (s == "DeleteFunction")   return DELFUNC;
     else if (s == "Float")   return FLOATPREC;
     else if (s == "Rational")  return RATIONALPREC;
@@ -707,7 +710,7 @@ void GCLCompiler::RecoverFromError(void)
 }
     
 
-gclExpression *GCLCompiler::DefineFunction(gclExpression *expr)
+gclExpression *GCLCompiler::NewFunction(gclExpression *expr)
 {
   gclFunction *func = new gclFunction(funcname, 1);
   PortionSpec funcspec;
@@ -772,11 +775,9 @@ gclExpression *GCLCompiler::DefineFunction(gclExpression *expr)
 }
 
 
-bool GCLCompiler::DeleteFunction(void)
+gclExpression *GCLCompiler::DeleteFunction(void)
 {
-/*
   gclFunction *func = new gclFunction(funcname, 1);
-  bool error = false;
 
   PortionSpec funcspec;
 
@@ -787,46 +788,43 @@ bool GCLCompiler::DeleteFunction(void)
     gerr << "Error: Unknown type " << functype << ", " << 
       PortionSpecToText(funcspec) << " as return type in declaration of " << 
       funcname << "[]\n";
-    return;
+    return new gclConstExpr(new BoolPortion(false));
   }
 
-  func->SetFuncInfo(0, gclSignature(function, funcspec, formals.Length()));
+  func->SetFuncInfo(0, gclSignature((gclExpression *) 0, funcspec, formals.Length()));
 
   for (int i = 1; i <= formals.Length(); i++)   {
     PortionSpec spec;
-    if(portions[i])
-      spec = portions[i]->Spec();
-    else
-      spec = TextToPortionSpec(types[i]);
 
-    if (spec.Type != porERROR)   {
+    try {
+      if (portions[i])
+	spec = portions[i]->Spec();
+      else
+	spec = TextToPortionSpec(types[i]);
+      
       if (refs[i])
 	func->SetParamInfo(0, i - 1, 
-                          gclParameter(formals[i], spec,
+			   gclParameter(formals[i], spec,
 			                portions[i], BYREF));
       else
 	func->SetParamInfo(0, i - 1, 
-                          gclParameter(formals[i], spec,
-											portions[i], BYVAL));
+			   gclParameter(formals[i], spec,
+					portions[i], BYVAL));
     }
-    else   {
-      error = true;
+    catch (gclRuntimeError &) {
       gerr << "Error: Unknown type " << types[i] << ", " << 
 	PortionSpecToText(spec) << " for parameter " << formals[i] <<
-	 " in declaration of " << funcname << "[]\n";
-      break;
+	" in declaration of " << funcname << "[]\n";
+      return new gclConstExpr(new BoolPortion(false));
     }
   }
 
-  if (!error)  gsm.DeleteFunction(func);
   formals.Flush();
   types.Flush();
   refs.Flush();
   portions.Flush();
-  function = 0;
-  return !error;
-*/
-  return false;
+
+  return new gclDeleteFunction(func);
 }
 
 #include "gstatus.h"
