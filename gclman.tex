@@ -610,18 +610,20 @@ GetTitle[E->EFG] =: TEXT
 
 ----------
 
-Gobit[N->NFG, {nequilib->INTEGER}, {type->INTEGER},
+Gobit[N->NFG, E->EFG, {nequilib->INTEGER}, {type->INTEGER},
 	{maxitsOpt->INTEGER}, {maxitsBrent->INTEGER}, {minLam->RATIONAL},
 	{maxLam->RATIONAL}, {delLam->RATIONAL}, {tolDFP->RATIONAL},
 	{tolBrent}->RATIONAL}, {time<->RATIONAL}, 
 	{output->TEXT}, {pxifile->TEXT}] =: INTEGER
 
    -	Description:  Computes the Gobit solution for the specified problem in
-	normal form.  
+	either extensive or normal form.  
    -	Return value:  XXXX.
-   -	Required parameters
+   -	Required parameters:  Exactly one of the following
 	  *  N:  The problem in normal form for which the Gobit solution is to
 		be found.
+	  *  E:  The problem in extensive form for which the Gobit solution 
+		is to be found.
    -	Optional parameters:
 	  *  nequilib:  Sets the number of equilibria to find.  Has a default 
 		value of 1.  
