@@ -2080,6 +2080,59 @@ Portion* GSM_Help(Portion** param)
   return _gsm.Help(((TextPortion*) param[0])->Value());
 }
 
+gString GetLine(gInput& f)
+{
+  char c = 0;
+  gString result;
+  while(f.IsValid())
+  {
+    f >> c;
+    if(f.eof())
+      break;
+    if(c != '\n')
+      result += c;
+    else
+      break;
+  }
+  return result;
+}
+
+Portion* GSM_Manual(Portion** param)
+{
+  gString txt = ((TextPortion*) param[0])->Value();
+  gOutput& s = ((OutputPortion*) param[1])->Value();
+  ListPortion* Prototypes = (ListPortion*) _gsm.Help(txt);
+  int i;
+
+  for(i=1; i<=Prototypes->Length(); i++)
+  {
+    assert(Prototypes->DataType() == porTEXT);
+    s << ((TextPortion*) (*Prototypes)[i])->Value() << '\n';
+  }
+
+  gFileInput f("gcl.man");
+  gString line;
+  bool found = false;
+  while(f.IsValid() && !f.eof() && !found)
+  {
+    line = GetLine(f);
+    if(line.length() == txt.length()+2)
+      if(line==(gString)'['+txt+']')
+	found = true;
+  }
+  if(found)
+    while(f.IsValid() && !f.eof())
+    {
+      line = GetLine(f);
+      if(line.length()>=1)
+	if(line.left(1) == '[' && line.right(1) == ']')
+	  break;
+      s << line << '\n';
+    }
+    
+  return new BoolValPortion(found);
+}
+
 Portion* GSM_HelpVars(Portion** param)
 {
   return _gsm.HelpVars(((TextPortion*) param[0])->Value());
@@ -2731,6 +2784,13 @@ void Init_gsmoper( GSM* gsm )
   FuncObj = new FuncDescObj( (gString) "Help" );
   FuncObj->SetFuncInfo( GSM_Help, 1 );
   FuncObj->SetParamInfo( GSM_Help, 0, "x", porTEXT );
+  gsm->AddFunction( FuncObj );
+
+  FuncObj = new FuncDescObj( (gString) "Manual" );
+  FuncObj->SetFuncInfo( GSM_Manual, 2 );
+  FuncObj->SetParamInfo( GSM_Manual, 0, "x", porTEXT );
+  FuncObj->SetParamInfo( GSM_Manual, 1, "y", porOUTPUT,
+			new OutputRefPortion(gout));
   gsm->AddFunction( FuncObj );
 
   FuncObj = new FuncDescObj( (gString) "HelpVars" );
