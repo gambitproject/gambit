@@ -12,6 +12,7 @@
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
 #include "wx/wizard.h"
+#include "wx/image.h"
 
 #include "gambit.h"
 #include "wxmisc.h"
@@ -117,10 +118,11 @@ bool GambitApp::OnInit(void)
 					      wxPoint(0, 0), wxDefaultSize);
 
   // Set up the help system.
-  wxString helpDir = wxGetWorkingDirectory();
-  config.Read("Help-Directory", &helpDir);
+  //  m_help.SetTempDir(".");
+  wxInitAllImageHandlers();
+  m_help.AddBook("help/guiman.hhp");
+  m_help.AddBook("help/gclman.hhp");
 
-  wxInitHelp(gText(helpDir.c_str()) + "/gambit"); 
   gambitFrame->Show(true);
 
   // Set up the error handling functions.
@@ -185,6 +187,8 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
 
   wxMenu *helpMenu = new wxMenu;
   helpMenu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
+  helpMenu->Append(wxID_HELP_INDEX, "&Index", "Index of help file");
+  helpMenu->AppendSeparator();
   helpMenu->Append(wxID_ABOUT, "&About", "About Gambit");
   
   wxMenuBar *menuBar = new wxMenuBar(wxMB_DOCKABLE);
@@ -224,6 +228,7 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
   topSizer->SetSizeHints(this);
 
   Layout();
+
 }
 
 GambitFrame::~GambitFrame()
@@ -257,7 +262,7 @@ void GambitFrame::MakeToolbar(void)
   toolBar->AddTool(wxID_OPEN, wxBITMAP(open), wxNullBitmap, false,
 		   -1, -1, 0, "Open file", "Open a saved game");
   toolBar->AddSeparator();
-  toolBar->AddTool(wxID_HELP, wxBITMAP(help), wxNullBitmap, false,
+  toolBar->AddTool(wxID_HELP_CONTENTS, wxBITMAP(help), wxNullBitmap, false,
 		   -1, -1, 0, "Help", "Table of contents");
 
   toolBar->Realize();
@@ -274,6 +279,7 @@ BEGIN_EVENT_TABLE(GambitFrame, wxFrame)
   EVT_MENU(wxID_EXIT, wxWindow::Close)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, GambitFrame::OnMRUFile)
   EVT_MENU(wxID_HELP_CONTENTS, GambitFrame::OnHelpContents)
+  EVT_MENU(wxID_HELP_INDEX, GambitFrame::OnHelpIndex)
   EVT_MENU(wxID_ABOUT, GambitFrame::OnHelpAbout)
   EVT_CLOSE(GambitFrame::OnCloseWindow)
   EVT_LIST_ITEM_SELECTED(idGAMELISTCTRL, GambitFrame::OnGameSelected)
@@ -614,7 +620,12 @@ void GambitFrame::OnHelpAbout(wxCommandEvent &)
 
 void GambitFrame::OnHelpContents(wxCommandEvent &)
 {
-  wxHelpContents(GAMBIT_GUI_HELP);
+  wxGetApp().HelpController().DisplaySection("Main page");
+}
+
+void GambitFrame::OnHelpIndex(wxCommandEvent &)
+{
+  wxGetApp().HelpController().DisplayContents();
 }
 
 void GambitFrame::LoadFile(const gText &p_filename)
@@ -694,7 +705,6 @@ void GambitFrame::OnCloseWindow(wxCloseEvent &)
     }
   }
 
-  wxKillHelp();
   //  wout->OnClose(); werr->OnClose();
   Destroy();
 }

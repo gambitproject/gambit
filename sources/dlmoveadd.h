@@ -20,7 +20,7 @@ private:
   void OnPlayer(wxCommandEvent &);
   void OnInfoset(wxCommandEvent &);
 
-  const char *HelpString(void) const { return "Add Move Dialog"; }
+  const char *HelpString(void) const { return "Add move"; }
   
 public:
   dialogMoveAdd(wxWindow *, FullEfg &, const gText &,

@@ -11,6 +11,7 @@
 #include "wx/wx.h"
 #include "wx/config.h"    // for wxConfig
 #include "wx/docview.h"   // for wxFileHistory
+#include "wx/wxhtml.h"    // for wxHtmlHelpController
 #include "wx/listctrl.h"
 
 extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
@@ -20,6 +21,7 @@ extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
 class GambitApp : public wxApp {
 private:
   gText m_currentDir; /* Current position in directory tree. */
+  wxHtmlHelpController m_help;
 
   bool OnInit(void);
 
@@ -28,6 +30,8 @@ public:
   
   const gText &CurrentDir(void)  { return m_currentDir; }
   void SetCurrentDir(const gText &p_dir)  { m_currentDir = p_dir; }
+
+  wxHtmlHelpController &HelpController(void) { return m_help; }
 };
 
 DECLARE_APP(GambitApp)
@@ -38,19 +42,23 @@ class Nfg;
 class NfgShow;
 class Game;
 
+const int wxID_HELP_INDEX = 1310;
+
 class GambitFrame : public wxFrame {
 private:
   wxFileHistory m_fileHistory;
   wxListCtrl *m_gameListCtrl;
-  
+
   gBlock<Game *> m_gameList;
 
   // Menu event handlers
   void OnNew(wxCommandEvent &);
   void OnLoad(wxCommandEvent &);
   void OnMRUFile(wxCommandEvent &);
-  void OnHelpAbout(wxCommandEvent &);
+
   void OnHelpContents(wxCommandEvent &);
+  void OnHelpIndex(wxCommandEvent &);
+  void OnHelpAbout(wxCommandEvent &);
 
   // Other event handlers
   void OnCloseWindow(wxCloseEvent &);
@@ -81,9 +89,7 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
-#define GAMBIT_GUI_HELP "GAMBIT GUI"
-
-const int GAMBIT_VERSION = 96;
+const int GAMBIT_VERSION = 97;
 
 #endif // GAMBIT_H
 

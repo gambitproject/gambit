@@ -712,9 +712,11 @@ void EfgShow::MakeMenus(void)
   prefsMenu->Append(efgmenuPREFS_SAVE, "&Save");
   prefsMenu->Append(efgmenuPREFS_LOAD, "&Load");
   
-  wxMenu *help_menu = new wxMenu;
-  help_menu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
-  help_menu->Append(wxID_ABOUT, "&About", "About Gambit");
+  wxMenu *helpMenu = new wxMenu;
+  helpMenu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
+  helpMenu->Append(wxID_HELP_INDEX, "&Index", "Index of help file");
+  helpMenu->AppendSeparator();
+  helpMenu->Append(wxID_ABOUT, "&About", "About Gambit");
 
   wxMenuBar *menu_bar = new wxMenuBar(wxMB_DOCKABLE);
   menu_bar->Append(fileMenu, "&File");
@@ -724,7 +726,7 @@ void EfgShow::MakeMenus(void)
   menu_bar->Append(solve_menu,    "&Solve");
   menu_bar->Append(inspect_menu,  "&Inspect");
   menu_bar->Append(prefsMenu,     "&Prefs");
-  menu_bar->Append(help_menu,     "&Help");
+  menu_bar->Append(helpMenu,      "&Help");
 
   // Set the menu bar
   SetMenuBar(menu_bar);
@@ -764,7 +766,7 @@ void EfgShow::MakeToolbar(void)
 		   "Generate reduced normal form");
   toolBar->AddSeparator();
 
-  toolBar->AddTool(wxID_HELP, wxBITMAP(help), wxNullBitmap, false,
+  toolBar->AddTool(wxID_HELP_CONTENTS, wxBITMAP(help), wxNullBitmap, false,
 		   -1, -1, 0, "Help", "Table of contents");
 
   toolBar->Realize();

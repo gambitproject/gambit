@@ -28,6 +28,8 @@ protected:
 public:
   guiAutoDialog(wxWindow *p_parent, char *p_title);
   virtual ~guiAutoDialog();
+
+  DECLARE_EVENT_TABLE()
 };
 
 /**
@@ -84,11 +86,6 @@ gText gFileNameFromPath(const char *path);
 // Returns the path only from a path name.  The function wxPathOnly()
 // crashes when there is no path
 gText gPathOnly(const char *name);
-
-// Functions to implement online help system.
-void wxInitHelp(const char *file_name);
-void wxHelpContents(const char *name);
-void wxKillHelp(void);
 
 // in efgsolvd.cc, nfgsolvd.cc
 const int idTYPE_RADIOBOX = 501;

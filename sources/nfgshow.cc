@@ -278,6 +278,8 @@ void NfgShow::MakeMenus(void)
 
   wxMenu *helpMenu = new wxMenu;
   helpMenu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
+  helpMenu->Append(wxID_HELP_INDEX, "&Index", "Index of help file");
+  helpMenu->AppendSeparator();
   helpMenu->Append(wxID_ABOUT, "&About", "About Gambit");
 
   wxMenuBar *menuBar = new wxMenuBar(wxMB_DOCKABLE);
