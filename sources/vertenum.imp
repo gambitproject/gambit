@@ -133,6 +133,17 @@ template <class T> const gList<BFS<T> > &VertEnum<T>::VertexList() const
   return List;
 }
 
+template <class T> void VertEnum<T>::Vertices(gList<gVector<T> > &verts) const
+{ 
+  for(int i=1;i<=List.Length();i++) {
+    gVector<T> vert(b.Length());
+    vert = (T)0;
+    for(int j=1;j<=b.Length();j++) 
+      if(List[i].IsDefined(j)) vert[j]=-List[i](j);
+    verts.Append(vert);
+  }
+}
+
 template <class T> long VertEnum<T>::NumPivots() const
 {
   return npivots;

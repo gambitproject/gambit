@@ -31,6 +31,7 @@ private:
   const gVector<T> &b;
   gVector<T> btemp,c;
   gList<BFS<T> > List;
+  gList<gVector<T> > Verts;
   long npivots,nodes;
   gStatus &status;
   gList<long> visits,branches;
@@ -45,11 +46,14 @@ public:
   ~VertEnum();
 
   const gList<BFS<T> > &VertexList() const;
+  void Vertices(gList<gVector<T> > &verts) const;
   long NumPivots() const;
   void Dump(gOutput &) const;
 };
 
 #endif   // VERTENUM_H
+
+
 
 
 
