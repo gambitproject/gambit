@@ -6,12 +6,12 @@
 #pragma hdrstop
 #include "gmisc.h"
 #include "treewin.h"
+#include "extshow.h"
 #include "legendc.h"
 
 #define BAD_NODE Node(-1,-1,-1,-1)
 
 #define INFOSET_SPACING	10
-extern char *gambit_color_list[GAMBIT_COLOR_LIST_LENGTH];
 
 wxFont *outcome_font;
 wxFont *fixed_font;
@@ -20,7 +20,7 @@ wxBrush *white_brush;
 char tempstr[20];
 
 template <class T>
-char *OutcomeToString(const gVector<T> &v,TreeDrawParams *draw_settings,Bool color_coded=TRUE)
+char *OutcomeToString(const gVector<T> &v,TreeDrawSettings *draw_settings,Bool color_coded=TRUE)
 {
 char tempstr[20];
 static gString gvts;
@@ -43,10 +43,17 @@ return (char *)gvts;
 
 //###
 //Draw Line.  A quick and dirty way of easily drawing lines w/ set color
+//If the color is ==-1, the current color is used.
+//If -1<color<WX_COLOR_LIST_LENGTH, the corresponding color from the
+//wx_color_list is used.  If WX_COLOR_LIST_LENGTH<=color<2*WX_COLOR_LIST_LENGTH,
+//a color equal to color%WX_COLOR_LIST_LENGTH is used from the
+//wx_hilight_color_list
 inline void DrawLine(wxDC &dc,int x_s,int y_s,int x_e,int y_e,int color=0)
 {
-if (color>-1)
-	dc.SetPen(wxThePenList->FindOrCreatePen(gambit_color_list[color],2,wxSOLID));
+if (color>-1 && color<WX_COLOR_LIST_LENGTH)
+	dc.SetPen(wxThePenList->FindOrCreatePen((char *)wx_color_list[color],2,wxSOLID));
+if (color>=WX_COLOR_LIST_LENGTH && color<2*WX_COLOR_LIST_LENGTH)
+	dc.SetPen(wxThePenList->FindOrCreatePen((char *)wx_hilight_color_list[color%WX_COLOR_LIST_LENGTH],2,wxSOLID));
 dc.DrawLine(x_s,y_s,x_e,y_e);
 }
 //###
@@ -54,7 +61,7 @@ dc.DrawLine(x_s,y_s,x_e,y_e);
 inline void DrawRectangle(wxDC &dc,int x_s,int y_s,int w,int h,int color=0)
 {
 if (color>-1)
-	dc.SetPen(wxThePenList->FindOrCreatePen(gambit_color_list[color],2,wxSOLID));
+	dc.SetPen(wxThePenList->FindOrCreatePen((char *)wx_color_list[color],2,wxSOLID));
 dc.DrawRectangle(x_s,y_s,w,h);
 }
 //###
@@ -62,22 +69,14 @@ dc.DrawRectangle(x_s,y_s,w,h);
 inline void DrawThinLine(wxDC &dc,int x_s,int y_s,int x_e,int y_e,int color=0)
 {
 if (color>-1)
-	dc.SetPen(wxThePenList->FindOrCreatePen(gambit_color_list[color],.5,wxSOLID));
+	dc.SetPen(wxThePenList->FindOrCreatePen((char *)wx_color_list[color],.5,wxSOLID));
 dc.DrawLine(x_s,y_s,x_e,y_e);
-}
-//###
-//Draw Text. A quick and dirty way of easily drawing text w/ set color
-inline void DrawText(wxDC &dc,char *s,int x,int y,int color=0)
-{
-if (color>-1)
-	dc.SetPen(wxThePenList->FindOrCreatePen(gambit_color_list[color],2,wxSOLID));
-dc.DrawText(s,x,y);
 }
 //Draw Circle. A quick and dirty way of easily drawing a circle w/ set color
 inline void DrawCircle(wxDC &dc,int x,int y,int r,int color=0)
 {
 	if (color>-1)
-		dc.SetPen(wxThePenList->FindOrCreatePen(gambit_color_list[color],2,wxSOLID));
+		dc.SetPen(wxThePenList->FindOrCreatePen((char *)wx_color_list[color],2,wxSOLID));
 	else
 		dc.SetPen(wxThePenList->FindOrCreatePen("WHITE",2,wxSOLID));
 	dc.DrawEllipse(x-r,y-r,2*r,2*r);
@@ -480,6 +479,7 @@ gString 		label;		// temporary to hold the label
 NodeEntry 	*entry=child_entry->parent;
 Node 				 n=child_entry->n;
 int					 o;
+T						prob;
 float tw,th;
 // First take care of labeling the node on top
 switch (draw_settings.LabelNodeAbove())
@@ -548,9 +548,8 @@ switch (draw_settings.LabelBranchAbove())
 	case BRANCH_ABOVE_INFOSET:
 		sprintf(tempstr,"(%d,%d)",entry->n[1],entry->n[2]);label=tempstr;break;
 	case BRANCH_ABOVE_PROBS:
-		if (entry->n[1]==0)
-			label=ToString(the_problem->GetActionProb(entry->n,child_entry->child_number));
-		else label="";break;
+		prob=frame->GetActionProb(entry->n,child_entry->child_number);
+		if (prob>-.5)	label=ToString(prob);	else label="";break;
 	default:
 		label="";break;
 }
@@ -576,9 +575,8 @@ switch (draw_settings.LabelBranchBelow())
 	case BRANCH_BELOW_INFOSET:
 		sprintf(tempstr,"(%d,%d)",entry->n[1],entry->n[2]);label=tempstr;break;
 	case BRANCH_BELOW_PROBS:
-		if (entry->n[1]==0)
-			label=ToString(the_problem->GetActionProb(entry->n,child_entry->child_number));
-		else label="";break;
+		prob=frame->GetActionProb(entry->n,child_entry->child_number);
+		if (prob>-.5)	label=ToString(prob);	else label="";break;
 	default:
 		label="";break;
 }
@@ -671,20 +669,25 @@ while (n)
 	  {
 			xs=entry->x+draw_settings.NodeLength()+entry->nums*INFOSET_SPACING;
 			ys=entry->y;
-			xe=xs+draw_settings.BranchLength()/2;
-		  ye=child_entry->y;
+			int bl=draw_settings.BranchLength()/2;
+			xe=xs+bl;
+			ye=child_entry->y;
 			::DrawLine(dc,xs,ys,xe,ye,entry->color);
+			// Draw the hilight...y=a+bx=ys+(ye-ys)/(xe-xs)*x
+			double prob=(double)frame->GetActionProb(entry->n,child_entry->child_number);;
+			if (prob>=0)
+				::DrawLine(dc,xs,ys,xs+bl*prob,ys+(ye-ys)*prob,WX_COLOR_LIST_LENGTH-1);
 			xs=xe;
 			ys=ye;
 			xe=child_entry->x;
-		  ye=ys;
+			ye=ys;
 			::DrawLine(dc,xs,ye,xe,ye,entry->color);
 		}
 		else
 		{xe=entry->x;ye=entry->y;}
 		if (!child_entry->has_children)
 			::DrawLine(dc,xe,ye,xe+draw_settings.NodeLength(),ye,draw_settings.GetPlayerColor(-1));
-  }
+	}
 	n=n->Next();
 }
 }            
@@ -692,7 +695,7 @@ while (n)
 //**************************************************************************
 //*                  RENDER--THE MAIN RENDERING ROUTINE                    *
 //**************************************************************************
-template <class T>
+template <class T>        
 void TreeWindow<T>::Render(wxDC &dc)
 {
 Bool need_clear=TRUE;
@@ -773,20 +776,20 @@ if (x_steps>draw_settings.x_steps() || y_steps>draw_settings.y_steps())
 }
 
 // If cursor is active, make sure it is visible
-if (iterator != NULL)
+if (iterator)
 {
 	NodeEntry *entry=GetNodeEntry(iterator->Cursor());
 	// check if in the visible x-dimention
 	xs=entry->x;
 	xe=(entry->x+draw_settings.NodeLength()/2)*draw_settings.Zoom();
 	if (xs<x_start*PIXELS_PER_SCROLL || xe > x_start*PIXELS_PER_SCROLL+width)
-		x_start=entry->x*draw_settings.Zoom()/(PIXELS_PER_SCROLL*draw_settings.Zoom())-1;
+		x_start=(entry->x*draw_settings.Zoom()/(PIXELS_PER_SCROLL*draw_settings.Zoom())-1);
 	if (x_start<0) x_start=0;
 	// check if in the visible y-dimention
 	ys=entry->y;
 	ye=ys;
 	if (ys-10<y_start*PIXELS_PER_SCROLL || ye+20>y_start*PIXELS_PER_SCROLL+height/draw_settings.Zoom())
-			y_start=(entry->y*draw_settings.Zoom()-height/2)/(PIXELS_PER_SCROLL*draw_settings.Zoom())-1;
+			y_start=int((entry->y*draw_settings.Zoom()-height/2)/(PIXELS_PER_SCROLL*draw_settings.Zoom())-1);
 			if (y_start<0) y_start=0;
 	// now update the flasher
 		flasher->SetFlashNode(entry->x+(entry->num+1)*INFOSET_SPACING+5,entry->y-4,
@@ -839,11 +842,11 @@ for (int i=0;i<node_list->Number();i++)
 		#define TEMPLATE
 	#endif   // __GNUG__, __BORLANDC__
 	TEMPLATE class TreeWindow<double> ;
-	TEMPLATE char *OutcomeToString(const gVector<double> &v,TreeDrawParams *draw_settings,Bool color_coded=TRUE);
+	TEMPLATE char *OutcomeToString(const gVector<double> &v,TreeDrawSettings *draw_settings,Bool color_coded=TRUE);
 
 	#ifdef GRATIONAL
 		TEMPLATE class TreeWindow<gRational> ;
-		TEMPLATE char *OutcomeToString(const gVector<gRational> &v,TreeDrawParams *draw_settings,Bool color_coded=TRUE);
+		TEMPLATE char *OutcomeToString(const gVector<gRational> &v,TreeDrawSettings *draw_settings,Bool color_coded=TRUE);
 	#endif
 #else
 	// ##

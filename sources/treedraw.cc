@@ -6,18 +6,16 @@
 #include "treedraw.h"
 #include "legendc.h"
 
-char	 *gambit_color_list[GAMBIT_COLOR_LIST_LENGTH]=
-							{"GREEN","PALE GREEN","RED","BLUE","YELLOW","VIOLET","SALMON","ORCHID",
-							 "TURQUOISE","BROWN","BLACK"};
-
-TreeDrawParams::TreeDrawParams(void)
-{
-player_colors=new wxList(wxKEY_INTEGER);
+TreeDrawSettings::TreeDrawSettings(void)
+{ 
 zoom_factor=1.0;
-if (!FileExists("\\windows\\gambit.ini"))
+wxPathList path_list;
+path_list.AddEnvList("PATH");
+char *file_name=path_list.FindValidPath("gambit.ini");
+if (!file_name)
 {
 	// if there is no ini file yet, use the hard coded defaults and create
-  // the ini file from them.
+	// the ini file from them.
 	flashing_cursor=FLASHING_CURSOR_DEFAULT;
 	branch_length=BRANCH_LENGTH_DEFAULT;
 	node_length=NODE_LENGTH_DEFAULT;
@@ -27,9 +25,9 @@ if (!FileExists("\\windows\\gambit.ini"))
 	chance_color=CHANCE_COLOR_DEFAULT;
 	cursor_color=CURSOR_COLOR_DEFAULT;
 	show_infosets=SHOW_INFOSETS_DEFAULT;
-	node_above_label=NODE_ABOVE_NOTHING;
-	node_below_label=NODE_BELOW_LABEL;
-	branch_above_label=BRANCH_ABOVE_INFOSET;
+	node_above_label=NODE_ABOVE_LABEL;
+	node_below_label=NODE_BELOW_INFOSET;
+	branch_above_label=BRANCH_ABOVE_LABEL;
 	branch_below_label=BRANCH_BELOW_PROBS;
 	node_terminal_label=NODE_TERMINAL_OUTCOME;
 	node_above_font=new wxFont(12,wxSWISS,wxNORMAL,wxNORMAL);
@@ -42,44 +40,19 @@ if (!FileExists("\\windows\\gambit.ini"))
 else
 {
 	// if the ini file exists, read the defaults from it
+	x_origin=0;y_origin=0;
 	node_above_font=NULL;
 	node_below_font=NULL;
 	branch_above_font=NULL;
 	branch_below_font=NULL;
 	node_terminal_font=NULL;
 
-	LoadOptions();
+	LoadOptions(file_name);
 }
 }
 
-// SetPlayerColor: used to specify alternate coloring scheme for players
-// If this is not called, default scheme is used
-void TreeDrawParams::SetPlayerColor(int pl,int _cl)
-{
-pl+=1;	// convert player numbering from -1... to 0....
-wxNode *n=player_colors->Find(pl);
-if (n!=NULL) player_colors->DeleteNode(n);
-player_colors_struct *cl=new player_colors_struct;
-cl->cl=_cl;
-cl->pl=pl;
-player_colors->Append(pl,(wxObject *)cl);
-}
-// GetPlayerColor: used to get the players display color.  It has either
-// been previously set with SetPlayerColor, or the default is returned.
-// The default is just the player number + 1.  This number is then used for
-// indexing into the gambit_color_list array.
-int TreeDrawParams::GetPlayerColor(int pl)
-{
 
-pl+=1;	// convert player numbering from -1... to 0....
-wxNode *n=player_colors->Find(pl);
-if (n!=NULL)
-	return ((player_colors_struct *)n->Data())->cl;
-else
-	return (pl%GAMBIT_COLOR_LIST_LENGTH);
-}
-
-void TreeDrawParams::SetOptions(void)
+void TreeDrawSettings::SetOptions(void)
 {
 wxFont fixed_font(12,wxMODERN,wxNORMAL,wxNORMAL);
 MyDialogBox *tree_options_dialog=new MyDialogBox(NULL,"Draw Options");
@@ -112,19 +85,19 @@ tree_options_dialog->Go();
 #define	BAF	12
 #define	BBF	13
 #define	NTF	14
-typedef struct {int what_font;TreeDrawParams *draw_settings;} draw_params_legend_struct;
-void draw_params_legends_func(wxButton &ob,wxCommandEvent &ev)
+#pragma argsused		// turn off the ev not used message
+void TreeDrawSettings::draw_params_legends_func(wxButton &ob,wxCommandEvent &ev)
 {
 FontDialogBox *f;
 draw_params_legend_struct *dpls=(draw_params_legend_struct *)ob.GetClientData();
 // The following case makes sure that the currently set font comes up first
 switch (dpls->what_font)
 {
-	case NAF: f=new FontDialogBox((wxFrame *)ob.GetParent(),dpls->draw_settings->NodeAboveFont());break;
-	case NBF: f=new FontDialogBox((wxFrame *)ob.GetParent(),dpls->draw_settings->NodeBelowFont());break;
-	case BAF: f=new FontDialogBox((wxFrame *)ob.GetParent(),dpls->draw_settings->BranchAboveFont());break;
-	case BBF: f=new FontDialogBox((wxFrame *)ob.GetParent(),dpls->draw_settings->BranchBelowFont());break;
-	case NTF: f=new FontDialogBox((wxFrame *)ob.GetParent(),dpls->draw_settings->NodeTerminalFont());break;
+	case NAF: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->NodeAboveFont());break;
+	case NBF: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->NodeBelowFont());break;
+	case BAF: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->BranchAboveFont());break;
+	case BBF: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->BranchBelowFont());break;
+	case NTF: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->NodeTerminalFont());break;
 }
 
 if (f->Completed())
@@ -137,12 +110,12 @@ if (f->Completed())
 		case BAF: dpls->draw_settings->SetBranchAboveFont(the_font);break;
 		case BBF: dpls->draw_settings->SetBranchBelowFont(the_font);break;
 		case NTF: dpls->draw_settings->SetNodeTerminalFont(the_font);break;
-  }
+	}
 }
 delete f;
 }
 
-void TreeDrawParams::SetLegends(void)
+void TreeDrawSettings::SetLegends(void)
 {
 #include "legend.h"
 int i;
@@ -249,7 +222,7 @@ if (display_legend_dialog->Completed())
 	SetLabelNodeBelow(node_below_src[node_below_num].l_id);
 	SetLabelBranchAbove(branch_above_src[branch_above_num].l_id);
 	SetLabelBranchBelow(branch_below_src[branch_below_num].l_id);
-  SetLabelNodeTerminal(node_terminal_src[node_terminal_num].l_id);
+	SetLabelNodeTerminal(node_terminal_src[node_terminal_num].l_id);
 }
 
 // Clean up...
@@ -260,16 +233,16 @@ delete [] branch_below_str;
 delete [] node_terminal_str;
 delete display_legend_dialog;
 }
+
 // Save options.  Uses the resource writing capability of wxwin to create
 // the file "gambit.ini" to which to write all the current settings from
 // draw_settings.  The file is ASCII and can be edited by hand if necessary.
-void TreeDrawParams::SaveOptions(char *s)
+void TreeDrawSettings::SaveOptions(char *s)
 {
-char *s_tempstr=new char[100];
 char *file_name;
 
-if (s==NULL) file_name=copystring("gambit.ini");
-else				 file_name=copystring(s);
+file_name=copystring((s) ? s : "gambit.ini");
+
 wxWriteResource("Gambit","Branch-Length",branch_length,file_name);
 wxWriteResource("Gambit","Node-Length",node_length,file_name);
 wxWriteResource("Gambit","Outcome-Length",outcome_length,file_name);
@@ -289,37 +262,27 @@ wxWriteResource("Gambit","Node-Below-Font",wxFontToString(node_below_font),file_
 wxWriteResource("Gambit","Branch-Above-Font",wxFontToString(branch_above_font),file_name);
 wxWriteResource("Gambit","Branch-Below-Font",wxFontToString(branch_below_font),file_name);
 wxWriteResource("Gambit","Node-Terminal-Font",wxFontToString(node_terminal_font),file_name);
-// Save the player color settings
-wxWriteResource("Gambit","Num-Player-Colors",player_colors->Number(),file_name);
-wxNode *n=player_colors->First();
-char *s_tempstr1=new char[100];
-player_colors_struct *pcs;
-int i=0;
-while (n)
-{
-	pcs=(player_colors_struct *)n->Data();
-	sprintf(s_tempstr,"%d %d",pcs->pl,pcs->cl);
-	sprintf(s_tempstr1,"Player-Color-%d",i);
-	wxWriteResource("Gambit",s_tempstr1,s_tempstr,file_name);
-	n=n->Next();i++;
-}
+GambitDrawSettings::SaveOptions(file_name);
 delete [] file_name;
-delete [] s_tempstr1;
-delete [] s_tempstr;
 }
 // Load options.  Uses the resource writing capability of wxwin to read from
 // the file file_name all the current settings for the
 // draw_settings.  The file is ASCII and can be edited by hand if necessary.
-void TreeDrawParams::LoadOptions(char *s)
+void TreeDrawSettings::LoadOptions(char *file_name)
 {
-char *file_name;
-if (s==NULL) file_name=copystring("gambit.ini");
-else				 file_name=copystring(s);
-if (!FileExists("\\windows\\gambit.ini"))
+if (!file_name)
+{
+	wxPathList path_list;
+	path_list.AddEnvList("PATH");
+	file_name=path_list.FindValidPath("gambit.ini");
+}
+
+if (!FileExists(file_name))
 {
 	wxMessageBox("Configuration file not found","Error",wxOK | wxCENTRE);
 	return;
 }
+file_name=copystring(file_name);	// must do this: file_name was temp
 wxGetResource("Gambit","Branch-Length",&branch_length,file_name);
 wxGetResource("Gambit","Node-Length",&node_length,file_name);
 wxGetResource("Gambit","Outcome-Length",&outcome_length,file_name);
@@ -345,34 +308,18 @@ wxGetResource("Gambit","Branch-Below-Font",&l_tempstr,file_name);
 SetBranchBelowFont(wxStringToFont(l_tempstr));
 wxGetResource("Gambit","Node-Terminal-Font",&l_tempstr,file_name);
 SetNodeTerminalFont(wxStringToFont(l_tempstr));
-// Load the player color settings
-int num_player_colors;
-wxGetResource("Gambit","Num-Player-Colors",&num_player_colors,file_name);
-player_colors->DeleteContents(TRUE);
-player_colors->Clear();	// start with a blank player color list
-char *l_tempstr1=new char[100];
-player_colors_struct *pcs;
-for (int i=0;i<num_player_colors;i++)
-{
-	sprintf(l_tempstr1,"Player-Color-%d",i);
-	wxGetResource("Gambit",l_tempstr1,&l_tempstr,file_name);
-	pcs=new player_colors_struct;
-	sscanf(l_tempstr,"%d %d",&(pcs->pl),&(pcs->cl));
-	SetPlayerColor(pcs->pl,pcs->cl);
-}
+GambitDrawSettings::LoadOptions(file_name);
 delete [] file_name;
-delete [] l_tempstr1;
-delete [] l_tempstr;
 }
 
 //********************************* SET ZOOM *******************************
-void TreeDrawParams::SetZoom(float z)
+void TreeDrawSettings::SetZoom(float z)
 {
 #define MAX_ZOOM	10
 #define MIN_ZOOM	.1
 if (z<-.5)			// if this is not an inc/dec action
 {
-	float t_zoom_factor;
+	float t_zoom_factor=zoom_factor;
 	MyDialogBox *zoom_dialog = new MyDialogBox(NULL, "Set Zoom");
 	zoom_dialog->Form()->Add(wxMakeFormFloat("Zoom [0.1-10]", &t_zoom_factor, wxFORM_DEFAULT,
 							 new wxList(wxMakeConstraintRange(MIN_ZOOM,MAX_ZOOM), 0)));
@@ -386,4 +333,3 @@ else
 	if (z>=MIN_ZOOM && z<=MAX_ZOOM)	zoom_factor=z;
 }
 }
-

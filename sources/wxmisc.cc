@@ -1,6 +1,7 @@
 #include "wx.h"
 #include "wx_form.h"
 #pragma hdr_stop
+#define WXMISC_C
 #include "wxmisc.h"
 #include "general.h"
 //***************************************************************************
@@ -41,6 +42,15 @@ wxFont *wxStringToFont(char *s)
 int si,f,st,w,u;
 sscanf(s,"%d %d %d %d %d",&si,&f,&st,&w,&u);
 return (new wxFont(si,f,st,w,u));
+}
+
+// FindFile
+char *wxFindFile(const char *name)
+{
+wxPathList path_list;
+path_list.AddEnvList("PATH");
+char *file_name=path_list.FindValidPath((char *)name);
+return  (file_name) ? copystring(file_name) : 0;
 }
 
 //***************************************************************************
@@ -277,21 +287,19 @@ return	 (ch==WXK_UP || ch==WXK_DOWN || ch==WXK_LEFT || ch==WXK_RIGHT ||
 Bool	IsEnter(wxKeyEvent &ev)
 {return (ev.KeyCode()=='m' && ev.ControlDown());}
 Bool	IsNumeric(wxKeyEvent &ev)
-{long ch=ev.KeyCode(); return ((ch>'0' && ch<'9') || ch=='+' || ch=='-' ||	ch=='.');}
+{long ch=ev.KeyCode(); return ((ch>='0' && ch<='9') || ch=='-' ||	ch=='.');}
 Bool	IsAlphaNum(wxKeyEvent &ev)
 {return !(IsCursor(ev) || IsDelete(ev) || IsEnter(ev));}
 Bool	IsDelete(wxKeyEvent &ev)
 {
-return ((ev.KeyCode()==WXK_DELETE && ev.ControlDown()) ||
-				 (ev.KeyCode()==WXK_BACK && ev.ControlDown()));
+return ((ev.KeyCode()==WXK_DELETE) ||
+				 (ev.KeyCode()==104 && ev.ControlDown()));
 }
 
 
 // gDrawTextGetNum will scan the string, starting at position i,
 // for a number.  It will stop at the first non-digit character.
 #include <ctype.h>
-#define GAMBIT_COLOR_LIST_LENGTH	11
-extern char *gambit_color_list[GAMBIT_COLOR_LIST_LENGTH];
 int gDrawTextGetNum(const gString &s,int *i)
 {
 gString tmp;
@@ -304,7 +312,7 @@ return atoi((char *)tmp);
 // Besides providing the same features, it also supports imbedded codes
 // to change the color of the output text.  The codes have the format
 // of: "text[/C{#}]", where # is the number of the color to select
-// from the gambit_color_list.  To print a \, use a \\.
+// from the wx_color_list.  To print a \, use a \\.
 void gDrawText(wxDC &dc,const gString &s,float x,float y)
 {
 int i=0,c;
@@ -330,8 +338,8 @@ while(i<s.length())
 				x+=dx;i++;
 				break;
 			case 'C' :
-				c=gDrawTextGetNum(s,&i);
-				dc.SetTextForeground(wxTheColourDatabase->FindColour(gambit_color_list[c]));
+				c=(gDrawTextGetNum(s,&i)%WX_COLOR_LIST_LENGTH);
+				dc.SetTextForeground(wxTheColourDatabase->FindColour(wx_color_list[c]));
 				break;
 			default:
 				wxError("Unknown code in gDrawText");

@@ -3,8 +3,11 @@
 //#
 
 #ifdef __GNUG__
-#pragma implementation "gambitio.h"
+#pragma implementation "wxio.h"
 #endif   // __GNUG__
 
 #include "wxio.h"
+
+gWxOutput *wout=0;
+gWxOutput *werr=0;
 

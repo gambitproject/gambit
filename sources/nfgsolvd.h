@@ -9,20 +9,27 @@ private:
 	wxDialogBox *d;
 	wxButton *cancel_button,*solve_button,*inspect_button;
 	wxRadioBox *algorithm_box;
-	int result,algorithm;
+	wxCheckBox *extensive_box;
+	NfgSolutionT algorithm;
+	int result,extensive;
 	gBlock<int> solns;
 public:
-	NfgSolveParamsDialog(const gBlock<int> &got_solns,wxWindow *parent=0):solns(got_solns)
+// Constructor
+	NfgSolveParamsDialog(const gBlock<int> &got_solns,int have_efg,wxWindow *parent=0):solns(got_solns)
 	{
 		d=new wxDialogBox(parent,"Solutions",TRUE);
-		char *algorithm_list[5];
+		char *algorithm_list[NFG_NUM_SOLUTIONS];
 		algorithm_list[NFG_PURENASH_SOLUTION]="Pure Nash";
 		algorithm_list[NFG_LEMKE_SOLUTION]="Lemke";
 		algorithm_list[NFG_LYAPUNOV_SOLUTION]="Lyapunov";
 		algorithm_list[NFG_ELIMDOM_SOLUTION]="ElimDom";
+		algorithm_list[NFG_GRID_SOLUTION]="GridSolve";
 		algorithm_list[NFG_ALL_SOLUTION]="All";
-		algorithm_box=new	wxRadioBox(d,(wxFunction)algorithm_box_func,"Algorithm",-1,-1,-1,-1,5,algorithm_list,2);
+		algorithm_box=new	wxRadioBox(d,(wxFunction)algorithm_box_func,"Algorithm",-1,-1,-1,-1,6,algorithm_list,2);
 		algorithm_box->SetClientData((char *)this);
+		d->NewLine();
+		extensive_box=new wxCheckBox(d,0,"Extensive Form");
+		if (!have_efg) extensive_box->Enable(FALSE);
 		d->NewLine();
 		solve_button=new wxButton(d,(wxFunction)solve_button_func,"Solve");
 		solve_button->SetClientData((char *)this);
@@ -34,12 +41,15 @@ public:
 		d->Fit();
 		d->Show(TRUE);
 	}
+	~NfgSolveParamsDialog(void) {delete d;}
+// Main event handler
 	void OnEvent(int event)
 	{
 	if (event!=SD_ALGORITHM)	// one of the buttons
 	{
 		result=event;algorithm=algorithm_box->GetSelection();
-		d->Show(FALSE); delete d;
+		extensive=extensive_box->GetValue();
+		d->Show(FALSE);
 	}
 	else	// new algorithm selected
 	{
@@ -47,9 +57,11 @@ public:
 		solve_button->Enable(algorithm_box->GetSelection()!=NFG_ALL_SOLUTION);
 	}
 	}
+// Data access
 	int GetAlgorithm(void) {return algorithm;}
 	int GetResult(void) {return result;}
-
+	int GetExtensive(void) {return extensive;}
+// Static event handlers
 	static void solve_button_func(wxButton &ob,wxEvent &ev)
 	{
 		NfgSolveParamsDialog *parent=(NfgSolveParamsDialog *)ob.GetClientData();

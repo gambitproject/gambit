@@ -140,8 +140,6 @@ class gWxOutput: public gOutput
 //
 		~gWxOutput()   {if (f) delete f->GetParent();}
 
-
-
 //
 // Output primitives for the basic types
 
@@ -165,4 +163,10 @@ class gWxOutput: public gOutput
 		int IsValid(void) const {return ok;}
 
 };
+
+#define gWXOUT		"wout"
+#define gWXERR		"werr"
+#define gWXIN			"win"
+
+extern gWxOutput *wout,*werr;
 #endif   // WXIO_H

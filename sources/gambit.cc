@@ -4,11 +4,10 @@
 // @(#)gambit.cc	1.4 4/7/94
 //
 
-
+#pragma hdrstop
 #include "wx.h"
 #include "wx_help.h"
 #include "extform.h"
-#pragma hdrstop
 #include "const.h"
 #include "gambit.h"
 #include "normgui.h"
@@ -18,13 +17,13 @@ GambitFrame   *gambit_frame = NULL;
 wxHelpInstance *help_instance = NULL;
 wxList 		my_children;
 wxCursor *arrow_cursor;
+#ifdef __AIX
+extern wxApp *wxTheApp=1;
+#endif
 GambitApp gambitApp;
 //---------------------------------------------------------------------
 //                     GAMBITFRAME: CONSTRUCTOR
 //---------------------------------------------------------------------
-#ifdef wx_x
-#include "aiai.xbm"
-#endif
 
 // The `main program' equivalent, creating the windows and returning the
 // main frame
@@ -34,15 +33,15 @@ arrow_cursor = new wxCursor(wxCURSOR_ARROW);
 // Create the main frame window
 gambit_frame = new GambitFrame(NULL, "Gambit", 0, 0, 200, 100,wxMDI_PARENT | wxDEFAULT_FRAME);
 // Give it an icon
-wxIcon *test_icon;
+wxIcon *frame_icon;
 #ifdef wx_msw
-	test_icon = new wxIcon("aiai_icn");
-#endif
-#ifdef wx_x
-	test_icon = new wxIcon(aiai_bits, aiai_width, aiai_height);
+	frame_icon = new wxIcon("gambit_icn");
+#else
+	#include "gambit.xbm"
+	frame_icon = new wxIcon(gambit_bits, gambit_width, gambit_height);
 #endif
 
-gambit_frame->SetIcon(test_icon);
+gambit_frame->SetIcon(frame_icon);
 
 // Make a menubar
 wxMenu *file_menu = new wxMenu;
@@ -88,10 +87,14 @@ if (!s) s=copystring(wxFileSelector("Load data file", NULL, NULL, NULL, "*.?fg")
 if (s)
 {
 	char *filename=FileNameFromPath(s);
+#ifndef EFG_ONLY
 	if (StringMatch(".nfg",filename))		// This must be a normal form
-		{NormalFormGUI(NULL,s,this);return;}
+		{NormalFormGUI(0,s,0,this);return;}
+#endif
+#ifndef NFG_ONLY
 	if (StringMatch(".efg",filename))		// This must be an extensive form
-		{ExtensiveFormGUI(NULL,s,this);return;}
+		{ExtensiveFormGUI(0,s,0,this);return;}
+#endif
 	wxMessageBox("Unknown file type");	// If we got here, there is something wrong
 	delete [] s;
 }
@@ -111,12 +114,16 @@ void GambitFrame::OnMenuCommand(int id)
 		case FILE_LOAD:
 			file_load();
 			break;
+#ifndef EFG_ONLY
 		case FILE_NEW_NFG:
-			NormalFormGUI(NULL,gString(),this);
+			NormalFormGUI(0,gString(),0,this);
 			break;
+#endif
+#ifndef NFG_ONLY
 		case FILE_NEW_EFG:
-			ExtensiveFormGUI(NULL,gString(),this);
+			ExtensiveFormGUI(0,gString(),0,this);
 			break;
+#endif
 		case HELP_ABOUT:
 			(void)wxMessageBox("Gambit Front End\nAuthor: Eugene Grayver egrayver@cco.caltech.edu\n(c) Caltech EPS, 1994", "About Gambit");
 			break;

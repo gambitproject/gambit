@@ -14,6 +14,22 @@
 #include <stdio.h>
 #include "wx_timer.h"
 #include "wx_form.h"
+
+#define WX_COLOR_LIST_LENGTH 11
+#ifndef WXMISC_C
+extern const char *wx_color_list[WX_COLOR_LIST_LENGTH];
+extern const char *wx_hilight_color_list[WX_COLOR_LIST_LENGTH];
+#else
+const char *wx_color_list[WX_COLOR_LIST_LENGTH]=
+						{"GREEN","RED","BLUE","YELLOW","VIOLET RED","SALMON","ORCHID",
+						 "TURQUOISE","BROWN","PALE GREEN","BLACK"};
+const char *wx_hilight_color_list[WX_COLOR_LIST_LENGTH]=
+						{"PALE GREEN","INDIAN RED","MEDIUM BLUE","YELLOW GREEN",
+						 "MEDIUM VIOLET RED","TAN","MEDIUM ORCHID","MEDIUM TURQUOISE",
+						 "KHAKI","SEA GREEN","DARK GREY"};
+#endif
+
+
 class MyForm: public wxForm
 {
 private:
@@ -142,4 +158,8 @@ Bool	IsDelete(wxKeyEvent &ev);
 // from the gambit_color_list.  Note: uses gString
 #include "gstring.h"
 void gDrawText(wxDC &dc,const gString &s,float x,float y);
+
+// FindFile: finds the specified file in the path.  User deletes the
+// result
+char *wxFindFile(const char *name);
 #endif //WXMISC_H

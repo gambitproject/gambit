@@ -9,38 +9,44 @@ private:
 	wxDialogBox *d;
 	wxButton *cancel_button,*solve_button,*inspect_button;
 	wxRadioBox *algorithm_box;
-	int result,algorithm;
+	wxCheckBox *normal_box;
+	int result,algorithm,normal;
 	gBlock<int> solns;
 public:
-	EfgSolveParamsDialog(const gBlock<int> &got_solns,wxWindow *parent=NULL)
+	EfgSolveParamsDialog(const gBlock<int> &got_solns,int have_nfg,wxWindow *parent=0):
+				solns(got_solns)
 	{
-		solns=got_solns;
 		d=new wxDialogBox(parent,"Solutions",TRUE);
-		wxPanel *p=new wxPanel(d);
-		char *algorithm_list[3];
+		char *algorithm_list[4];
 		algorithm_list[EFG_NORMAL_SOLUTION]="Create NF";
-		algorithm_list[EFG_EGAMBIT_SOLUTION]="eGambit";
+		algorithm_list[EFG_EGOBIT_SOLUTION]="eGobit";
+		algorithm_list[EFG_ELIAP_SOLUTION]="eLiap";
 		algorithm_list[EFG_ALL_SOLUTION]="All";
-		algorithm_box=new	wxRadioBox(p,(wxFunction)algorithm_box_func,"Algorithm",-1,-1,-1,-1,3,algorithm_list,2);
+		algorithm_box=new	wxRadioBox(d,(wxFunction)algorithm_box_func,"Algorithm",-1,-1,-1,-1,4,algorithm_list,2);
 		algorithm_box->SetClientData((char *)this);
-		p->NewLine();
-		solve_button=new wxButton(p,(wxFunction)solve_button_func,"Solve");
+		d->NewLine();
+		normal_box=new wxCheckBox(d,0,"Normal Form");
+		if (!have_nfg) normal_box->Enable(FALSE);
+		d->NewLine();
+		solve_button=new wxButton(d,(wxFunction)solve_button_func,"Solve");
 		solve_button->SetClientData((char *)this);
-		inspect_button=new wxButton(p,(wxFunction)inspect_button_func,"Look");
+		inspect_button=new wxButton(d,(wxFunction)inspect_button_func,"Look");
 		inspect_button->SetClientData((char *)this);
-		cancel_button=new wxButton(p,(wxFunction)cancel_button_func,"Cancel");
+		cancel_button=new wxButton(d,(wxFunction)cancel_button_func,"Cancel");
 		cancel_button->SetClientData((char *)this);
 		OnEvent(SD_ALGORITHM);
-		p->Fit();
 		d->Fit();
 		d->Show(TRUE);
 	}
+	~EfgSolveParamsDialog(void)
+	{delete d;}
 	void OnEvent(int event)
 	{
 	if (event!=SD_ALGORITHM)	// one of the buttons
 	{
 		result=event;algorithm=algorithm_box->GetSelection();
-		d->Show(FALSE); delete d;
+		normal=normal_box->GetValue();
+		d->Show(FALSE);
 	}
 	else	// new algorithm selected
 	{
