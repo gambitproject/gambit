@@ -92,25 +92,11 @@ template <class T> class EquiSolv {
   // Ask whether we can prove that there is no root other than 
   // the one produced by the last step
 
-   gPoly<gDouble> TranslateOfMono(const gMono<gDouble>&, 
-				  const gVector<gDouble>&)               const;
-   gPoly<gDouble> TranslateOfPoly(const gPoly<gDouble>&, 
-				  const gVector<gDouble>&)               const;
-   gPolyList<gDouble> TranslateOfSystem(const gPolyList<gDouble>&,
-				  const gVector<gDouble>&)               const;
-   gPoly<gDouble> MonoInNewCoordinates(const gMono<gDouble>&, 
-				 const gSquareMatrix<gDouble>&)          const;
-   gPoly<gDouble> PolyInNewCoordinates(const gPoly<gDouble>&, 
-				 const gSquareMatrix<gDouble>&)          const;
-   gPolyList<gDouble> SystemInNewCoordinates(const gPolyList<gDouble>&,
-				       const gSquareMatrix<gDouble>&)    const;
    gDouble MaxDistanceFromPointToVertexAfterTransformation(
 				      const gRectangle<gDouble>&,
 				      const gVector<gDouble>&,
 				      const gSquareMatrix<gDouble>&)     const;
 
-   gDouble MaximalContributionOfHigherOrderTerms(const gPoly<gDouble>&,
-						 const gDouble&)         const;
    bool HasNoOtherRootsIn(const gRectangle<gDouble>&,
 			  const gVector<gDouble>&,
 			  const gSquareMatrix<gDouble>&)                 const;

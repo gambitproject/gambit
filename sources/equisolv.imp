@@ -343,95 +343,6 @@ bool EquiSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
 // Is the Newton root the only root?
 //------------------------------------
 
-template<class T> 
-gPoly<gDouble> EquiSolv<T>::TranslateOfMono(const gMono<gDouble>& m, 
-				      const gVector<gDouble>& new_origin) const
-{
-  gPoly<gDouble> answer(AmbientSpace(), (gDouble)1, TermOrder());
-
-  for (int i = 1; i <= Dmnsn(); i++) {
-    if (m.ExpV()[i] > 0) {
-      gPoly<gDouble> lt(AmbientSpace(), i, 1, TermOrder());
-      lt += gPoly<gDouble>(AmbientSpace(), new_origin[i], TermOrder());
-      for (int j = 1; j <= m.ExpV()[i]; j++)
-	answer *= lt;
-    }
-  }
-
-  answer *= m.Coef();
-
-  return answer;
-}
-
-template<class T> 
-gPoly<gDouble>  EquiSolv<T>::TranslateOfPoly(const gPoly<gDouble>& p, 
-				       const gVector<gDouble>& new_origin) const
-{
-  gPoly<gDouble> answer(AmbientSpace(), TermOrder());
-  for (int i = 1; i <= p.MonomialList().Length(); i++) 
-    answer += TranslateOfMono(p.MonomialList()[i],new_origin);
-  return answer;
-}
-
-
-template<class T> 
-gPolyList<gDouble>  EquiSolv<T>::TranslateOfSystem(const gPolyList<gDouble>& old,
-					     const gVector<gDouble>& new_origin) 
-const
-{
-  gList<gPoly<gDouble> > new_polys;
-  for (int i = 1; i <= UnderlyingEquations().Length(); i++)
-    new_polys += gPoly<gDouble>( TranslateOfPoly(old[i],new_origin) );
-  return gPolyList<gDouble>(AmbientSpace(),TermOrder(),new_polys);
-}
-
-
-template<class T> 
-gPoly<gDouble>  EquiSolv<T>::MonoInNewCoordinates(const gMono<gDouble>& m, 
-					    const gSquareMatrix<gDouble>& M) const
-{
-  assert(M.NumRows() == Dmnsn());
-
-  gPoly<gDouble> answer(AmbientSpace(), (gDouble)1, TermOrder());
-
-  for (int i = 1; i <= Dmnsn(); i++) {
-    if (m.ExpV()[i] > 0) {
-      gPoly<gDouble> linearform(AmbientSpace(), (gDouble)0, TermOrder());
-      for (int j = 1; j <= Dmnsn(); j++) {
-	exp_vect exps(AmbientSpace(), j, 1);
-	linearform += gPoly<gDouble>(AmbientSpace(), exps, M(i,j), TermOrder());
-      }
-      for (int k = 1; k <= m.ExpV()[i]; k++) answer *= linearform;
-    }
-  }
-
-  answer *= m.Coef();
-
-  return answer;
-}
-
-template<class T> 
-gPoly<gDouble> EquiSolv<T>::PolyInNewCoordinates(const gPoly<gDouble>& p, 
-					   const gSquareMatrix<gDouble>& M) const
-{
-  gPoly<gDouble> answer(AmbientSpace(), TermOrder());
-  for (int i = 1; i <= p.MonomialList().Length(); i++) 
-    answer += MonoInNewCoordinates(p.MonomialList()[i],M);
-  return answer;
-}
-
-
-template<class T> gPolyList<gDouble> 
-EquiSolv<T>::SystemInNewCoordinates(const gPolyList<gDouble>& old,
-				    const gSquareMatrix<gDouble>& M) const
-{
-  gList<gPoly<gDouble> > new_polys;
-  for (int i = 1; i <= UnderlyingEquations().Length(); i++)
-    new_polys += gPoly<gDouble>( PolyInNewCoordinates(old[i],M) );
-  return gPolyList<gDouble>(AmbientSpace(),TermOrder(),new_polys);
-}
-
-
 template<class T>
    gDouble EquiSolv<T>::MaxDistanceFromPointToVertexAfterTransformation(
 				      const gRectangle<gDouble>& r,
@@ -463,33 +374,18 @@ template<class T>
 }
 
 template<class T>
-gDouble EquiSolv<T>::MaximalContributionOfHigherOrderTerms(
-						 const gPoly<gDouble>& p,
-						 const gDouble& radius)  const
-{
-  gDouble maxcon = (gDouble)0;
-  for (int i = 1; i <= p.MonomialList().Length(); i++) 
-    if (p.MonomialList()[i].TotalDegree() > 1) 
-      maxcon += p.MonomialList()[i].Coef() * 
-	            pow(radius,p.MonomialList()[i].TotalDegree());
-
-  return maxcon;
-}
-
-
-template<class T>
 bool EquiSolv<T>::HasNoOtherRootsIn(const gRectangle<gDouble>& r,
 			  const gVector<gDouble>& p,
 			  const gSquareMatrix<gDouble>& M)  const
 {
-  gPolyList<gDouble> system1 = TranslateOfSystem(gDoubleSystem, p);
-  gPolyList<gDouble> system2 = SystemInNewCoordinates(system1,M);
+  gPolyList<gDouble> system1 = gDoubleSystem.TranslateOfSystem(p);
+  gPolyList<gDouble> system2 = system1.SystemInNewCoordinates(M);
 
   gDouble radius = MaxDistanceFromPointToVertexAfterTransformation(r,p,M);
 
   gDouble max = (gDouble)0;
   for (int i = 1; i <= Dmnsn(); i++)
-    max += MaximalContributionOfHigherOrderTerms(system2[i],radius);
+    max += system2[i].MaximalValueOfNonlinearPart(radius);
 
   if (max >= radius) return false;
   else               return true;
