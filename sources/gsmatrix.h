@@ -10,9 +10,6 @@
 #include "gmatrix.h"
 
 template <class T> class gSquareMatrix : public gMatrix<T>   {
-  private:
-    gSquareMatrix<T> GetSubMatrix(const gArray<int> &, const gArray<int> &) const;
-
   public:
     gSquareMatrix(void);
     gSquareMatrix(int size);
