@@ -941,7 +941,12 @@ void EfgShow::OnEditNode(wxCommandEvent &)
   dialogEditNode dialog(this, Cursor());
   if (dialog.ShowModal() == wxID_OK) {
     Cursor()->SetName(dialog.GetNodeName().c_str());
-    m_efg.SetOutcome(Cursor(), m_efg.GetOutcome(dialog.GetOutcome()));
+    if (dialog.GetOutcome() > 0) {
+      m_efg.SetOutcome(Cursor(), m_efg.GetOutcome(dialog.GetOutcome()));
+    }
+    else {
+      m_efg.SetOutcome(Cursor(), 0);
+    }
 
     if (m_efg.IsLegalSubgame(Cursor())) {
       if (dialog.MarkedSubgame()) {
