@@ -9,10 +9,15 @@
 // display only/disable editing by setting Editable attribute.  The labeling
 // of rows and columns is possible through the use of LabelRow/Col functions
 // or through the use of the AutoLabel feature.  The spreadsheet can be set
-// to allow edition of rows and columns through the SetGrow function.  A row
-// can be added at the end of the matrix by pressing Ctrl-ENTER with the
-// hilighed cell on the bottom row.  A column is added using Ctrl-Shift-ENTER
-// Printing is supported through the Print command
+// to allow edition of rows, columns, levels through the SetChage funnction.  A row
+// can be added at the end of the matrix by pressing F2 with the
+// hilighed cell on the bottom row.  A column is added using F3. A level by F4
+// Optionally, a button can be added to execute the add row/col/level by
+// using the '| CHANGE_BUTTON' in the buttons field of the constructor
+// Printing is supported through the Print command/Print button enabled by
+// setting the '| PRINT_BUTTON' in the buttons field of the constructor
+// The user can create additional buttons on the spreadsheet by calling the
+// AddButton function.
 #ifndef	SPREAD_H
 #define	SPREAD_H
 
@@ -20,11 +25,13 @@
 #define	wxRUNNING	12345
 #endif
 
+#include "glist.h"
+#include "gtuple.h"
 #include "gtuplem.h"
 #include "gstring.h"
 
-#define	XSTEPS							10    // Scroll steps horizontally
-#define	YSTEPS							10		// Scroll steps vertically
+#define	XSTEPS							20    // Scroll steps horizontally
+#define	YSTEPS							20		// Scroll steps vertically
 
 #define	TEXT_OFF						8			// Offset of the text from the grid line
 #define	LINE_OFF						3			// Offset of the border from the grid line
@@ -38,40 +45,103 @@
 #define	ROW_LABEL_WIDTH			30
 #define	COL_LABEL_HEIGHT		30
 
+//********************** SPREAD SHEET DATA SETTINGS ***********************
+// Both the DataSettings and DrawSettings employ a pseudo-reference
+// counting mechanism.  Since it is desirable to be able to use the
+// same settings for more than one spreadsheet, or to be able to
+// recreate a spredsheet, a copy of these classes can be obtained by
+// calling GetThis().  This will increment the internal reference
+// count.  The spreadsheet should not delete the classes if ref_cnt
+// is non-zero.
+class SpreadSheetDataSettings
+{
+#define	S_CAN_GROW_ROW			1	// Or these together to allow size changes
+#define	S_CAN_GROW_COL			2
+#define S_CAN_GROW_LEVEL		4
+#define	S_CAN_SHRINK_ROW		8
+#define	S_CAN_SHRINK_COL		16
+#define	S_CAN_SHRINK_LEVEL	32
+#define	S_AUTO_LABEL_ROW		1
+#define	S_AUTO_LABEL_COL		2
+#define	S_AUTO_LABEL_LEVEL	4
+private:
+	int			change;
+	int			auto_label;
+	gString	auto_label_row;
+	gString	auto_label_col;
+	gString auto_label_level;
+public:
+	int ref_cnt;	// reference counter
+	SpreadSheetDataSettings *GetThis(void) {ref_cnt++; return this;}
+	// Constructor
+	SpreadSheetDataSettings(void) 	{change=0;auto_label=0;}
+	// Grow/Shrink the spreadsheet--add/remove rows, columns, and levels
+	Bool	Change(int what)		{return change&what;}
+	// Set the grow
+	void	SetChange(int c)		{change=c;}
+	// Automatic labeling for rows/columns.  Use SetAutoLabel to choose what
+	// to label.  Then use SetAutoLabelStr to set the fmt parameter to the
+	// sprintf(temp,fmt,row/col) function.
+	int		AutoLabel(int l)	{return auto_label&l;}
+	void	SetAutoLabel(int l)	{auto_label=l;}
+	void	SetAutoLabelStr(const gString s,int what);
+	gString	AutoLabelStr(int what) const;
+};
 
 //********************** SPREAD SHEET DRAW SETTINGS ***********************
+class SpreadSheet3D;
 class SpreadSheetDrawSettings
 {
 #define	S_LABEL_ROW	1
 #define	S_LABEL_COL	2
 private:
-	int 		row_height,col_width;
+	SpreadSheet3D *parent;
+	int 		row_height,default_col_width;
+	gBlock<int> col_width;
 	int			total_height,total_width,real_height,real_width;
 	int			x_scroll,y_scroll;
 	int			x_start,y_start;
-  int			panel_size;
+	int			panel_size;
 	Bool		scrolling;
+	Bool		vert_fit,horiz_fit,show_labels,col_dim_char;
 	int			labels;
 	wxFont	*data_font;
+	wxFont  *label_font;
+	// Functions to read/write the configuration file
+	// Note: this always writes to file 'gambit.ini', section [SpreadSheet3D]
+	void		SaveOptions(const char *s=NULL);
+	int			LoadOptions(const char *s=NULL);
 public:
+	int ref_cnt;	// reference counter
+	SpreadSheetDrawSettings *GetThis(void) {ref_cnt++; return this;}
 	// Constructor
-	SpreadSheetDrawSettings(void);
+	SpreadSheetDrawSettings(SpreadSheet3D *_parent,int cols);
+	// A way to set many options through a dialog
+	void SetOptions(void);
+		// static functions for the above
+	static void spread_options_lfont_func(wxButton &ob,wxEvent &ev);
+	static void spread_options_dfont_func(wxButton &ob,wxEvent &ev);
+	// Allows to use a previously created settings w/ this parent
+	void SetParent(SpreadSheet3D *_parent) {parent=_parent;}
+	// Inform the class that a new column was added.
+	void AddCol(void) {col_width.Append(DEFAULT_COL_WIDTH);}
 	// Data Access, Get* functions
-	  // These functions control the dimentions of each cell i.e. Width X Height
+		// These functions control the dimentions of each cell i.e. Width X Height
 	int	GetRowHeight(void)	{return row_height;}
-	int	GetColWidth(void)		{return col_width;}
-	  // GetWidth/Height return the size of the virtual canvas if scrollbars are on (GetVirtualSize)
+	int	GetColWidth(int col=0)		{if (col) return col_width[col]; else return col_width[1];}
+		// GetWidth/Height return the size of the virtual canvas if scrollbars are on (GetVirtualSize)
 	int GetWidth(void)			{return total_width;}
 	int GetHeight(void)			{return total_height;}
-	  // GetRealWidth/Height returns the physical size of the window (GetClientSize)
+		// GetRealWidth/Height returns the physical size of the window (GetClientSize)
 	int GetRealWidth(void)	{return real_width;}
 	int GetRealHeight(void)	{return real_height;}
-  	// Controls what font to use for the cell contents [###: fix rowheight/colwidth to use the font]
-	wxFont	*GetFont(void)	{return	data_font;}
-  	// Start position of actual grid
+		// Controls what font to use for the cell contents [###: fix rowheight/colwidth to use the font]
+	wxFont	*GetDataFont(void)	{return	data_font;}
+	wxFont  *GetLabelFont(void) {return label_font;}
+		// Start position of actual grid
 	int			XStart(void)		{return (x_start==-1) ? RowLabels()*ROW_LABEL_WIDTH : x_start;}
 	int			YStart(void)		{return (y_start==-1) ? ColLabels()*COL_LABEL_HEIGHT : y_start;}
-  	// These are nonzero if scrollbars are on.  Used to calculate scroll position
+		// These are nonzero if scrollbars are on.  Used to calculate scroll position
 	int			XScroll(void)		{return x_scroll;}
 	int			YScroll(void)		{return y_scroll;}
 	Bool		Scrolling(void)	{return scrolling;}
@@ -83,59 +153,19 @@ public:
 	void		SetPanelSize(int _s)	{panel_size=_s;}
 		// Set* functions
 	void	SetRowHeight(int _r)	{row_height=_r;}
-	void	SetColWidth(int	_c)		{col_width=_c;}
+	void	SetColWidth(int	_c,int col=0);
 	void 	SetWidth(int _w)			{total_width=_w;}
 	void	SetHeight(int _h)			{total_height=_h;}
 	void	SetRealWidth(int _w)	{real_width=_w;}
 	void	SetRealHeight(int _h)	{real_height=_h;}
-	void	SetFont(wxFont *_f)		{if (data_font) delete data_font;data_font=_f;}
+	void	SetDataFont(wxFont *_f)	{if (data_font) delete data_font;	data_font=_f;	}
+	void	SetLabelFont(wxFont *_f){if (label_font) delete label_font;label_font=_f;}
 	void	SetXScroll(int _s)		{x_scroll=_s;}
 	void	SetYScroll(int _s)		{y_scroll=_s;}
 	void	SetScrolling(Bool _s)	{scrolling=_s;}
 	void	SetLabels(int _l)			{labels=_l;}
 	void	SetXStart(int _x)			{x_start=_x;}
 	void	SetYStart(int _y)			{y_start=_y;}
-};
-//********************** SPREAD SHEET DATA SETTINGS ***********************
-class SpreadSheetDataSettings
-{
-#define	S_CAN_GROW_ROW		1
-#define	S_CAN_GROW_COL		2
-#define	S_CAN_SHRINK_ROW	4
-#define	S_CAN_SHRINK_COL	8
-#define	S_AUTO_LABEL_ROW	1
-#define	S_AUTO_LABEL_COL	2
-private:
-	int			grow;
-	int			shrink;
-	int			auto_label;
-  gString	auto_label_row;
-	gString	auto_label_col;
-public:
-	SpreadSheetDataSettings(void)
-	{grow=0;shrink=0;}
-	// Grow/Shrink the spreadsheet--add/remove rows and columns
-	int		GrowRow(void)			{return grow&S_CAN_GROW_ROW;}
-	int		GrowCol(void)			{return grow&S_CAN_GROW_COL;}
-	int 	ShrinkRow(void)		{return	shrink&S_CAN_SHRINK_ROW;}
-	int 	ShrinkCol(void)		{return	shrink&S_CAN_SHRINK_COL;}
-	void	SetGrow(int _g)		{grow=_g;}
-	void	SetShrink(int _s)	{shrink=_s;}
-	// Automatic labeling for rows/columns.  Use SetAutoLabel to choose what
-	// to label.  Then use SetAutoLabelStr to set the fmt parameter to the
-	// sprintf(temp,fmt,row/col) function.
-	int		AutoLabel(int _l)	{return auto_label&_l;}
-	void	SetAutoLabel(int _l)	{auto_label=_l;}
-	void	SetAutoLabelStr(const gString _s,int what)
-	{
-		if (what==S_AUTO_LABEL_ROW)	auto_label_row=_s;
-		if (what==S_AUTO_LABEL_COL)	auto_label_col=_s;
-	}
-	gString	AutoLabelStr(int what) const
-	{
-  	if (what==S_AUTO_LABEL_ROW)	return auto_label_row;
-		if (what==S_AUTO_LABEL_COL)	return auto_label_col;
-	}
 };
 
 //********************* SPREAD SHEET CANVAS *******************************
@@ -152,8 +182,10 @@ class SpreadCell {
 								SpreadCell(void)	{row=1;col=1;editing=FALSE;}
 								~SpreadCell(void)	{}
 								void Reset(const char *s=NULL)	{editing=FALSE;str=s;}
-								void operator=(const SpreadCell &cell)
-								{row=cell.row;col=cell.col;str=cell.str;editing=FALSE;}
+								void CheckValid(int rows,int cols)
+								{if (row<1) row=1;if (col<1) col=1;if (row>rows) row=rows;if (col>cols) col=cols;}
+								SpreadCell &operator=(const SpreadCell &cell)
+								{row=cell.row;col=cell.col;str=cell.str;editing=FALSE;return (*this);}
 								};
 private:
 	SpreadSheetDrawSettings 	*draw_settings;
@@ -164,6 +196,7 @@ private:
 	// functions
 	void ProcessCursor(int ch);
 	void UpdateCell(wxDC &dc,SpreadCell &cell);
+	void DrawCell(wxDC &dc,int row,int col);
 public:
 	// Constructor
 	SpreadSheetC(SpreadSheet *_sheet,wxFrame *parent,int x,int y,int w,int h);
@@ -176,35 +209,53 @@ public:
 	// Desired size--minimum size that would fit the sheet without scrolling
 	// It is never less than MIN_SHEET_WIDTH and never greater than MAX_SHEET_WIDTH
 	void	DesiredSize(int *w,int *h);
+	int	 MaxX(int col=-1);
+	// CheckScrollbars
+	void	CheckScrollbars(void);
+	// LabelExtent.  Since only the actual canvas can tell the extent...
+	void GetLabelExtent(char *str,float *x,float *y)
+		{SetFont(draw_settings->GetLabelFont());GetTextExtent(str,x,y);}
+	// DataExtent
+	void GetDataExtent(float *x,float *y,const char *str=0)
+		{SetFont(draw_settings->GetDataFont());
+		 GetTextExtent((str) ? str : "W",x,y);
+		 (*x)+=2*TEXT_OFF;(*y)+=2*TEXT_OFF;
+		}
 	// Data Access
 	int		Row(void)	{return cell.row;}
-  int		Col(void)	{return cell.col;}
+	int		Col(void)	{return cell.col;}
+	void	SetRow(int r)	{cell.row=r;ProcessCursor(0);}
+	void 	SetCol(int c)	{cell.col=c;ProcessCursor(0);}
 	// Printing
-  void Print(void);
+	void Print(int device);
 };
 
 enum gSpreadValType {gSpreadNum,gSpreadStr};
 //----------------------------Spread Data Cell----------------------------
+#define		S_HILIGHT	1
+#define		S_BOLD		2
+#define		S_ITALIC	4
 class SpreadDataCell
 {
-friend gOutput &operator<<(gOutput &op,const SpreadDataCell &c);
+friend gOutput &operator<<(gOutput &op,const SpreadDataCell &s);
 private:
 	Bool							entered;
 	gSpreadValType		val_type;
 	gString						value;
+	long							attributes;
 public:
 	// Constructor
-	SpreadDataCell(void) {entered=FALSE;val_type=gSpreadNum;}
+	SpreadDataCell(void) {entered=FALSE;val_type=gSpreadNum;attributes=0;}
 	SpreadDataCell(const SpreadDataCell &C)
 	{
 		entered=C.entered;val_type=C.val_type;
-		value=C.value;
+		value=C.value;attributes=C.attributes;
 	}
 	// Assignment operators
 	SpreadDataCell &operator=(const SpreadDataCell &C)
 	{
 		entered=C.entered;val_type=C.val_type;
-		value=C.value;
+		value=C.value;attributes=C.attributes;
 		return (*this);
 	}
 	SpreadDataCell &operator=(const gString &S)
@@ -212,20 +263,28 @@ public:
 	// Equality
 	int operator==(const SpreadDataCell &C) {return value==C.value;}
 	int operator!=(const SpreadDataCell &C) {return !(value==C.value);}
-	// Cast/conversion operators
-//	operator gString() const   { return value; }
 	// General info
 	Bool	Entered(void) {return entered;}
-  void	Entered(Bool _e)	{entered=_e;}
+	void	Entered(Bool _e)	{entered=_e;}
+	void	SetAttributes(long a) {attributes=a;}
+	Bool	HiLighted(void)	{return attributes&S_HILIGHT;}
+	void	HiLighted(Bool _e)	{if (_e) attributes|=S_HILIGHT; else attributes&=(~S_HILIGHT);}
+	Bool	Bold(void) {return attributes&S_BOLD;}
+	void 	Bold(Bool _b) {if (_b) attributes|=S_BOLD; else attributes&=(~S_BOLD);}
 	void	SetType(gSpreadValType _type) {val_type=_type;}
 	gSpreadValType	GetType(void)	{return val_type;}
 	gString					&GetValue(void)	{return value;}
-	void						SetValue(gString &S) {value=S;}
+	void						SetValue(const gString &S) {value=S;}
+	// Erase all the data in the cell, including clearing all cell attributes
+	void 	Clear(void) {entered=FALSE;value=gString();attributes=0;}
 };
+gOutput &operator<<(gOutput &op,const gBlock<SpreadDataCell> &s);
+
 //-------------------------------------------------------------------------
 //************************ SPREAD SHEET ***********************************
 class SpreadSheet
 {
+friend gOutput &operator<<(gOutput &op,const SpreadSheet &s);
 private:
 	SpreadSheetC	*sheet;
 	gMatrix1<SpreadDataCell> data;
@@ -244,46 +303,14 @@ public:
 	// Sizing info for the canvas ...
 	void SetSize(int xs,int ys,int xe,int ye);
 	void GetSize(int *w,int *h) {sheet->DesiredSize(w,h);}
+	void CheckSize(void) {sheet->CheckScrollbars();}
+	void GetLabelExtent(char *str,float *x,float *y)	{sheet->GetLabelExtent(str,x,y);}
+	void GetDataExtent(float *x,float *y,const char *str=0)	{sheet->GetDataExtent(x,y,str);}
 	// Row/Col manipulation
-	void AddRow(int row=-1)
-	{
-  	int i;
-  	// add a new row to the matrix
-		data.AddRow((const gTuple<SpreadDataCell>)gTuple<SpreadDataCell>(1,cols));
-		// Copy the cell types from the previous row
-		for (i=1;i<=cols;i++) data[rows+1][i].SetType(data[rows][i].GetType());
-		// add a new entry to the row_labels
-		rows++;
-		row_labels.Insert(rows);
-		if (active) sheet->OnPaint();
-	}
-	void AddCol(int col=-1)
-	{
-  	// add a new column to the matrix
-		data.AddColumn((const gTuple<SpreadDataCell>)gTuple<SpreadDataCell>(1,rows));
-		// add a new entry to the col_labels
-		cols++;
-    col_labels.Insert(cols);
-		if (active) sheet->OnPaint();
-	}
-	void DelRow(int row)
-	{
-  	// remove a row from the matrix
-		data.RemoveRow(row);
-		// remove an entry from the row_labels;
-    row_labels.Contract(rows);
-		rows--;
-		if (active) sheet->OnPaint();
-	}
-	void DelCol(int col)
-	{
-  	// remove a column from the matrix
-		data.RemoveColumn(col);
-		// remove an entry from the col_labels
-    col_labels.Contract(cols);
-		cols--;
-		if (active) sheet->OnPaint();
-	}
+	void AddRow(void);
+	void AddCol(void);
+	void DelRow(int row);
+	void DelCol(int col);
 	// Data access stuff for the canvas
 	int		GetRows(void)			{return rows;}
 	int		GetCols(void)			{return cols;}
@@ -292,16 +319,19 @@ public:
 	{
 	sheet->Show(_s);
 	if (_s) {sheet->SetFocus();sheet->OnPaint();}
-  active=_s;
+	active=_s;
 	}
 	// General data access
-	void		SetValue(int row,int col,gString &s) {data[row][col]=s;data[row][col].Entered(TRUE);}
+	void		SetValue(int row,int col,const gString &s) {data[row][col]=s;data[row][col].Entered(TRUE);}
 	gString &GetValue(int row,int col) {return data[row][col].GetValue();}
 	gString &GetLabel(void)	{return label;}
-	void		SetLabel(gString &s) {label=s;}
-	gTuple<SpreadDataCell> &operator[](int i){assert(i>0&&i<=rows);return data[i];}
+	void		SetLabel(const gString &s) {label=s;}
+	gBlock<SpreadDataCell> &operator[](int i){assert(i>0&&i<=rows);return data[i];}
 	void		SetType(int row,int col,gSpreadValType t) {data[row][col].SetType(t);}
 	gSpreadValType GetType(int row,int col) {return data[row][col].GetType();}
+	int			GetLevel(void)	{return level;}
+	// Erase all the data in the spreadsheet, including clearing all cell attributes
+	void Clear(void);
 	// Checking if the cell has something in it
 	Bool		EnteredCell(int row,int col) {return data[row][col].Entered();}
 	// Row/Column labeling
@@ -314,116 +344,151 @@ public:
 	// Accessing the currently hilighted cell
 	int			CurRow(void)	{return sheet->Row();}
 	int			CurCol(void)	{return sheet->Col();}
+	void		SetCurRow(int r)	{sheet->SetRow(r);}
+	void		SetCurCol(int c)	{sheet->SetCol(c);}
 	// These operators are necessary to use the gMatrix1 class
 	int operator==(const SpreadSheet &C) {return data==C.data;}
 	int operator!=(const SpreadSheet &C) {return data!=C.data;}
 	// Printing
-  void Print(void) {sheet->Print();}
+	void Print(int device) {sheet->Print(device);}
+	// Forced updating
+	void Repaint(void) {sheet->OnPaint();}
 	// Debugging
 	void		Dump(gOutput &out) {data.Dump(out);}
 };
-gOutput &operator<<(gOutput &op,const SpreadSheet &s);
-gOutput &operator<<(gOutput &op,const SpreadSheet3D &s);
-gOutput &operator<<(gOutput &op,const SpreadDataCell &s);
 //**************************** SPREAD SHEET 3D ******************************
+#define	PRINT_BUTTON		1
+#define	CHANGE_BUTTON		2
+#define	OK_BUTTON				4
+#define	CANCEL_BUTTON		8
+#define OPTIONS_BUTTON	16
 class SpreadSheet3D: public wxFrame
 {
+friend gOutput &operator<<(gOutput &op,const SpreadSheet3D &s);
 private:
-	gTuple<SpreadSheet>	data;
+	gList<SpreadSheet>	data;
 	SpreadSheetDrawSettings 	*draw_settings;
 	SpreadSheetDataSettings		*data_settings;
 	int										cur_level;
 	wxPanel								*panel;
-  wxSlider							*level_item;
+	wxSlider							*level_item;
+	int										panel_x,panel_y,panel_new_line;
 	int										completed;
 	int										levels;
 	Bool									editable;
-  gString								label;
+	int										buttons;
+	gString								label;
+	void	SavePanelPos(void)	{panel->GetCursor(&panel_x,&panel_y);}
+protected:
+	wxPanel *Panel(void) {return panel;}
 public:
 	// Constructor
-	SpreadSheet3D(int rows,int cols,int levels,char *title,wxFrame *parent=NULL,Bool _printable=FALSE);
+	SpreadSheet3D(int rows,int cols,int levels,char *title,
+					wxFrame *parent=NULL,int _buttons=OK_BUTTON | CANCEL_BUTTON,
+					SpreadSheetDrawSettings *drs=NULL,SpreadSheetDataSettings *_dts=NULL);
 	// Destructor
-	~SpreadSheet3D(void) {delete draw_settings;delete data_settings;}
+	~SpreadSheet3D(void)
+	{
+		if (--draw_settings->ref_cnt==0) delete draw_settings;
+		if (--data_settings->ref_cnt==0) delete data_settings;
+	}
 	// Windows Events Handlers
 	void Update(wxDC *dc=NULL);
 	void OnSize(int w,int h);
 	static void spread_slider_func(wxSlider &ob,wxCommandEvent &ev);
 	static void spread_ok_func(wxButton	&ob,wxEvent &ev);
-	static void spread_cancel_func(wxButton	&ob,wxEvent &ev);
-	static void	spread_print_func(wxButton	&ob,wxEvent &ev);
+	static void spread_cancel_func(wxButton	 &ob,wxEvent &ev);
+	static void	spread_print_func(wxButton	 &ob,wxEvent &ev);
+	static void spread_change_func(wxButton  &ob,wxEvent &ev);
+	static void spread_options_func(wxButton &ob,wxEvent &ev);
+	virtual void OnOk(void);
+	virtual void OnCancel(void);
+	virtual void OnDoubleClick(int row,int col,int level,const gString &value) { }
+	virtual void OnSelectedMoved(int row,int col) { }
+	virtual void OnPrint(void);
 	// General data access
 	void		SetType(int row,int col,gSpreadValType t) {data[cur_level].SetType(row,col,t);}
 	gSpreadValType GetType(int row,int col) {return data[cur_level].GetType(row,col);}
 	void		SetType(int row,int col,int level,gSpreadValType t) {data[level].SetType(row,col,t);}
 	gSpreadValType GetType(int row,int col,int level) {return data[level].GetType(row,col);}
 	SpreadSheet &operator[](int i){assert(i>0&&i<=levels);return data[i];}
-	void		SetCell(int row,int col,gString &s)
+	void		SetCell(int row,int col,const gString &s)
 		{data[cur_level].SetValue(row,col,s);}
 	gString &GetCell(int row,int col)
 		{return data[cur_level].GetValue(row,col);}
-	void		SetCell(int row,int col,int level,gString &s)
+	void		SetCell(int row,int col,int level,const gString &s)
 		{assert(level>0 && level<=levels);data[level].SetValue(row,col,s);}
 	gString &GetCell(int row,int col,int level)
 		{assert(level>0 && level<=levels);return data[level].GetValue(row,col);}
+	// Erase all the data in the spreadsheet, including clearing all cell attributes
+	void Clear(int level=0) {if (level==0) level=cur_level;data[level].Clear();}
 	// Accesing different levels
 	void		SetLevel(int _l);
 	int			GetLevel(void)		{return cur_level;}
 	// Accessing the currently hilighted cell
 	int			CurRow(int level=0) {if (level==0) level=cur_level;return data[level].CurRow();}
 	int			CurCol(int level=0) {if (level==0) level=cur_level;return data[level].CurCol();}
+	void		SetCurRow(int r,int level=0)	{if (level==0) level=cur_level;data[level].SetCurRow(r);}
+	void		SetCurCol(int c,int level=0)	{if (level==0) level=cur_level;data[level].SetCurCol(c);}
 	// Checking if the cell has something in it
 	Bool		EnteredCell(int row,int col,int level=0)
 		{if (level==0) level=cur_level;return data[level].EnteredCell(row,col);}
 	// Accessing dimentions
 	int			GetRows(void)		{return data[cur_level].GetRows();}
 	int			GetCols(void)		{return data[cur_level].GetCols();}
-	// Row/Col manipulation
-	void AddRow(int row=-1){for(int i=1;i<=levels;i++) data[i].AddRow(row);Redraw();}
-	void AddCol(int col=-1){for(int i=1;i<=levels;i++) data[i].AddCol(col);Redraw();}
-	void DelRow(int row){for(int i=1;i<=levels;i++) data[i].DelRow(row);Redraw();}
-	void DelCol(int col){for(int i=1;i<=levels;i++) data[i].DelCol(col);Redraw();}
+	// Row/Col/Level manipulation
+	void AddRow(void){for(int i=1;i<=levels;i++) data[i].AddRow();Redraw();}
+	void AddCol(void){for(int i=1;i<=levels;i++) data[i].AddCol();DrawSettings()->AddCol(); Redraw();}
+	void AddLevel(void);
+	void DelRow(int row=0){for(int i=1;i<=levels;i++) data[i].DelRow(row);Redraw();}
+	void DelCol(int col=0){for(int i=1;i<=levels;i++) data[i].DelCol(col);Redraw();}
+	void DelLevel(void);
 	// Row/Column labeling
-	void		SetLabelRow(int row,const gString &s,int level=0)
-	{
-	if (level==0)
-		for (level=1;level<=levels;level++)
-			data[level].SetLabelRow(row,s);
-	 else
-			data[level].SetLabelRow(row,s);
-  }
-	void		SetLabelCol(int col,const gString &s,int level=0)
-	{
-	if (level==0)
-		for (level=1;level<=levels;level++)
-			data[level].SetLabelCol(col,s);
-	 else
-			data[level].SetLabelCol(col,s);
-  }
+	void		SetLabelRow(int row,const gString &s,int level=0);
+	void		SetLabelCol(int col,const gString &s,int level=0);
+	void		SetLabelLevel(const gString &s,int level=0)
+		{if (level==0) level=cur_level;data[level].SetLabel(s);}
 	void		SetLabelRow(const gTuple<gString> &vs,int level=0)
-			{if (level==0) level=cur_level;data[level].SetLabelRow(vs);}
+		{if (level==0) level=cur_level;data[level].SetLabelRow(vs);}
 	void		SetLabelCol(const gTuple<gString> &vs,int level=0)
-			{if (level==0) level=cur_level;data[level].SetLabelCol(vs);}
+		{if (level==0) level=cur_level;data[level].SetLabelCol(vs);}
 	gString	GetLabelRow(int row,int level=0)
-			{if (level==0) level=cur_level;return data[level].GetLabelCol(row);}
-	gString	GetLabelCol(int col,int level=0) 
-			{if (level==0) level=cur_level;return data[level].GetLabelRow(col);}
+		{if (level==0) level=cur_level;return data[level].GetLabelCol(row);}
+	gString	GetLabelCol(int col,int level=0)
+		{if (level==0) level=cur_level;return data[level].GetLabelRow(col);}
+	gString GetLabelLevel(int level=0)
+		{if (level==0) level=cur_level;return data[level].GetLabel();}
 	// User Interface
 	int			Completed(void)	{return completed;}
 	void		SetCompleted(int c) 	{completed=c;}
 	Bool		Editable(void)	{return editable;}
 	void		SetEditable(Bool _e) {editable=_e;}
-	// Drawing parameters
+	Bool		HiLighted(int row,int col,int level=0)
+		{if (level==0) level=cur_level;return data[level][row][col].HiLighted();}
+	void		HiLighted(int row,int col,int level=0,Bool _e=FALSE)
+		{if (level==0) level=cur_level;data[level][row][col].HiLighted(_e);}
+	Bool		Bold(int row,int col,int level=0)
+		{if (level==0) level=cur_level;return data[level][row][col].Bold();}
+	void		Bold(int row,int col,int level=0,Bool _e=FALSE)
+		{if (level==0) level=cur_level;data[level][row][col].Bold(_e);}
+	// Drawing/Data parameters
 	SpreadSheetDrawSettings *DrawSettings(void)	{return draw_settings;}
 	SpreadSheetDataSettings *DataSettings(void)	{return data_settings;}
-	wxPanel	*Panel(void)	{return panel;}
+	// Some low level info about the canvases
+	void GetDataExtent(float *x,float *y,const char *str=0)	{data[cur_level].GetDataExtent(x,y,str);}
 	// Labeling
 	void	FitLabels(void);
 	void	Resize(void);
 	void	Redraw(void);
+	void 	Repaint(void) {data[cur_level].Repaint();}
 	// Printing
-	void Print(void) {data[cur_level].Print();}
+	void Print(int device) {data[cur_level].Print(device);}
+	// Adding buttons
+	wxButton *AddButton(char *label,wxFunction fun);
+	wxPanel *AddPanel(void);
+	void			AddButtonNewLine(void) {panel_new_line=TRUE;}
 	// Debugging
-  void		Dump(void);
+	void		Dump(void);
 };
 
 #endif

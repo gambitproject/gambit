@@ -17,7 +17,7 @@ class GambitFrame : public wxFrame
     Bool OnClose(void);
     void OnMenuCommand(int id);
 		void Draw(wxDC& dc);
-		void file_load(void);
+		void file_load(char *s=0);
 };
 
 

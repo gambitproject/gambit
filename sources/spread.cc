@@ -1,57 +1,232 @@
 #include <stdio.h>
 #include "wx.h"
+#include "wx_mf.h"
 #pragma		hdr_stop
 #include	"general.h"
+#include 	"wxmisc.h"
 #include	"spread.h"
-
+#include "g2dblock.h"
 //Global GDI objects
 wxPen		*grid_line_pen;
 wxPen		*grid_border_pen;
-wxPen		*hilight_pen;
-wxPen		*lolight_pen;
+wxPen		*s_selected_pen;
+wxPen		*s_hilight_pen;
+wxPen		*s_white_pen;
 wxBrush	*s_white_brush;
-wxFont	*label_font;
+wxBrush *s_hilight_brush;
 
-gOutput &operator<<(gOutput &op,const SpreadSheet3D &s) {};
-gOutput &operator<<(gOutput &op,const SpreadSheet &s) {};
-gOutput &operator<<(gOutput &op,const SpreadDataCell &c) {};
-//**************************** SPREAD SHEET SETTINGS ***********************
-SpreadSheetDrawSettings::SpreadSheetDrawSettings(void)
+gOutput &operator<<(gOutput &op,const SpreadSheet3D &s) {return op;}
+gOutput &operator<<(gOutput &op,const SpreadSheet &s) {return op;}
+gOutput &operator<<(gOutput &op,const SpreadDataCell &c) {return op;}
+//inline gOutput &operator<<(gOutput &op,const gTuple<SpreadDataCell> &c) {return op;}
+//**************************** SPREAD SHEET DRAW SETTINGS ****************
+SpreadSheetDrawSettings::SpreadSheetDrawSettings(SpreadSheet3D *_parent,int cols):
+		col_width(cols)
 {
-row_height=DEFAULT_ROW_HEIGHT;
-col_width=DEFAULT_COL_WIDTH;
-labels=0;
-data_font=wxTheFontList->FindOrCreateFont(10,wxMODERN,wxNORMAL,wxNORMAL);
+ref_cnt=1;
+parent=_parent;
+if (!LoadOptions())
+{
+	row_height=DEFAULT_ROW_HEIGHT;
+	default_col_width=DEFAULT_COL_WIDTH;
+	col_dim_char=FALSE;
+	labels=0;
+	vert_fit=TRUE;
+	data_font=wxTheFontList->FindOrCreateFont(11,wxMODERN,wxNORMAL,wxNORMAL);
+	label_font=wxTheFontList->FindOrCreateFont(12,wxMODERN,wxNORMAL,wxNORMAL);
+	SaveOptions();
+}
+
+for (int i=1;i<=col_width.Length();i++) col_width[i]=DEFAULT_COL_WIDTH;
 x_scroll=y_scroll=0;scrolling=FALSE;
 x_start=-1;y_start=-1;
 }
 
+void	SpreadSheetDrawSettings::SetOptions(void)
+{
+ref_cnt=1;
+Bool vertfit=vert_fit,col_dim=col_dim_char,labels_col=ColLabels(),labels_row=RowLabels();
+int horiz,vert=row_height;
+char *horiz_opt=new char[20];
+float tw,th;			// figure out the font size for data display
+
+parent->GetDataExtent(&tw,&th);
+horiz=(col_dim_char) ? col_width[1]/tw : col_width[1]/10;
+strcpy(horiz_opt,"pixels");
+MyDialogBox *options_dialog=new MyDialogBox((wxWindow *)parent,"Options");
+options_dialog->Form()->Add(wxMakeFormMessage("Fonts"));
+wxFormItem *lfont_but=wxMakeFormButton("Label",(wxFunction)spread_options_lfont_func);
+options_dialog->Form()->Add(lfont_but);
+wxFormItem *dfont_but=wxMakeFormButton("Data",(wxFunction)spread_options_dfont_func);
+options_dialog->Form()->Add(dfont_but);
+options_dialog->Form()->Add(wxMakeFormNewLine());
+options_dialog->Form()->Add(wxMakeFormMessage("Cell size"));
+options_dialog->Form()->Add(wxMakeFormNewLine());
+options_dialog->Form()->Add(wxMakeFormShort("Horiz",&horiz,wxFORM_SLIDER,new wxList(wxMakeConstraintRange(0, 50), 0)));
+options_dialog->Form()->Add(wxMakeFormBool("char",&col_dim));
+wxStringList *column_list=new wxStringList;
+char *col_str=new char[10];char tmp_str[10];
+column_list->Add("All");
+for (int i=1;i<=col_width.Length();i++)
+{
+	sprintf(tmp_str,"%d",i);
+	column_list->Add(tmp_str);
+}
+options_dialog->Form()->Add(wxMakeFormString("Col",&col_str,wxFORM_CHOICE,
+	new wxList(wxMakeConstraintStrings(column_list),0)));
+options_dialog->Form()->Add(wxMakeFormNewLine());
+options_dialog->Form()->Add(wxMakeFormShort("Vert",&vert,wxFORM_SLIDER,new wxList(wxMakeConstraintRange(0, 50), 0)));
+options_dialog->Form()->Add(wxMakeFormBool("Fit to font",&vertfit));
+options_dialog->Form()->Add(wxMakeFormNewLine());
+options_dialog->Form()->Add(wxMakeFormMessage("Show Labels"));
+options_dialog->Form()->Add(wxMakeFormBool("row",&labels_row));
+options_dialog->Form()->Add(wxMakeFormBool("col",&labels_col));
+options_dialog->Form()->Add(wxMakeFormNewLine());
+Bool save=FALSE;
+options_dialog->Form()->Add(wxMakeFormBool("Save now",&save));
+options_dialog->Form()->AssociatePanel(options_dialog);
+((wxButton *)dfont_but->GetPanelItem())->SetClientData((char *)this);
+((wxButton *)lfont_but->GetPanelItem())->SetClientData((char *)this);
+options_dialog->Go1();
+if (options_dialog->Completed()==wxOK)
+{
+	vert_fit=vertfit;
+	col_dim_char=col_dim;
+	// if the length of the column is measured in chars
+	int which_col=wxListFindString(column_list,col_str);
+	SetColWidth((col_dim) ? tw*horiz : horiz*10,which_col);
+	// if we want to fit the row height to the font size
+	row_height=(vert_fit) ? tw+2*TEXT_OFF : row_height;
+	labels=0;
+	if (labels_row) labels|=S_LABEL_ROW;
+	if (labels_col) labels|=S_LABEL_COL;
+	if (save) SaveOptions();
+}
+delete options_dialog;delete col_str;
+parent->Redraw();
+}
+
+#pragma argsused		// turn off the ev not used message
+void	SpreadSheetDrawSettings::spread_options_lfont_func(wxButton	&ob,wxEvent &ev)
+{
+SpreadSheetDrawSettings  *draw_settings=(SpreadSheetDrawSettings *)ob.GetClientData();
+FontDialogBox *f=new FontDialogBox(NULL,draw_settings->GetLabelFont());
+if (f->Completed()==wxOK)
+	draw_settings->SetLabelFont(f->MakeFont());
+delete f;
+}
+
+#pragma argsused		// turn off the ev not used message
+void	SpreadSheetDrawSettings::spread_options_dfont_func(wxButton	&ob,wxEvent &ev)
+{
+SpreadSheetDrawSettings *draw_settings=(SpreadSheetDrawSettings *)ob.GetClientData();
+FontDialogBox *f=new FontDialogBox(NULL,draw_settings->GetDataFont());
+if (f->Completed()==wxOK)
+	draw_settings->SetDataFont(f->MakeFont());
+delete f;
+}
+
+void	SpreadSheetDrawSettings::SaveOptions(const char const*s)
+{
+char *file_name;
+const char *sn="SpreadSheet3D";	// section name
+file_name=copystring((s) ? s : "gambit.ini");
+
+wxWriteResource(sn,"Row-Height",row_height,file_name);
+wxWriteResource(sn,"Default-Column-Width",default_col_width,file_name);
+wxWriteResource(sn,"Col-Dim-Char",col_dim_char,file_name);
+wxWriteResource(sn,"Fit-Text-Vert",vert_fit,file_name);
+wxWriteResource(sn,"Fit-Text-Horiz",horiz_fit,file_name);
+wxWriteResource(sn,"Show-Labels",show_labels,file_name);
+wxWriteResource(sn,"Data-Font",wxFontToString(data_font),file_name);
+wxWriteResource(sn,"Label-Font",wxFontToString(label_font),file_name);
+
+delete [] file_name;
+}
+
+int	SpreadSheetDrawSettings::LoadOptions(const char const *s)
+{
+char *file_name;
+const char *sn="SpreadSheet3D";	// section name
+file_name=copystring((s) ? s : "gambit.ini");
+// now try finding this file in our path
+wxPathList *path_list=new wxPathList;
+path_list->AddEnvList("PATH");
+file_name=path_list->FindValidPath(file_name);
+if (file_name) file_name=copystring(file_name); else return 0;
+
+char *font_str=new char[100];
+wxGetResource(sn,"Row-Height",&row_height,file_name);
+wxGetResource(sn,"Default-Column-Width",&default_col_width,file_name);
+wxGetResource(sn,"Col-Dim-Char",&col_dim_char,file_name);
+wxGetResource(sn,"Fit-Text-Vert",&vert_fit,file_name);
+wxGetResource(sn,"Fit-Text-Horiz",&horiz_fit,file_name);
+wxGetResource(sn,"Show-Labels",&show_labels,file_name);
+wxGetResource(sn,"Data-Font",&font_str,file_name);
+data_font=wxStringToFont(font_str);
+wxGetResource(sn,"Label-Font",&font_str,file_name);
+label_font=wxStringToFont(font_str);
+
+delete [] file_name;
+return 1;
+}
+
+
+// Column width
+void SpreadSheetDrawSettings::SetColWidth(int	_c,int col)
+{
+if
+	(col) col_width[col]=_c;
+else
+	for (int i=1;i<=col_width.Length();i++) col_width[i]=_c;
+}
+
+//**************************** SPREAD SHEET DATA SETTINGS ****************
+void SpreadSheetDataSettings::SetAutoLabelStr(const gString s,int what)
+{
+switch (what)
+{
+	case S_AUTO_LABEL_ROW 	:	auto_label_row=s; 	break;
+	case S_AUTO_LABEL_COL 	:	auto_label_col=s; 	break;
+	case S_AUTO_LABEL_LEVEL :	auto_label_level=s; break;
+}
+}
+gString	SpreadSheetDataSettings::AutoLabelStr(int what) const
+{
+gString label;
+switch (what)
+{
+	case S_AUTO_LABEL_ROW 	:	label=auto_label_row; 		break;
+	case S_AUTO_LABEL_COL 	:	label=auto_label_col; 		break;
+	case S_AUTO_LABEL_LEVEL :	label=auto_label_level; 	break;
+	default									: label="";									break;
+}
+return label;
+}
+
 //**************************** SPREAD SHEET CANVAS ***********************
 // Constructor
-SpreadSheetC::SpreadSheetC(SpreadSheet *_sheet,wxFrame *parent,int x,int y,int w,int h): wxCanvas(parent,x,y,w,h)
+SpreadSheetC::SpreadSheetC(SpreadSheet *_sheet,wxFrame *parent,int x,int y,int w,int h): wxCanvas(parent,x,y,w,h,0)
 {
 top_frame=(SpreadSheet3D *)parent;
 sheet=_sheet;
 draw_settings=top_frame->DrawSettings();
 data_settings=top_frame->DataSettings();
+// Allow double clicking on canvas
+AllowDoubleClick(TRUE);
 // Give myself some scrollbars if necessary
-int x_step=-1,y_step=-1;
-if (sheet->GetCols()*draw_settings->GetColWidth()>MAX_SHEET_WIDTH)
-	x_step=sheet->GetCols()*draw_settings->GetColWidth()/XSTEPS+1;
-if (sheet->GetRows()*draw_settings->GetRowHeight()>MAX_SHEET_HEIGHT)
-	y_step=sheet->GetRows()*draw_settings->GetRowHeight()/YSTEPS+1;
-
-if (x_step>0 || y_step>0)
-{
-	// Note that due to a bug in SetClientSize, we must either have no or both scrollbars
-	if(x_step<=0) x_step=sheet->GetCols()*draw_settings->GetColWidth()/XSTEPS+1;
-	if(y_step<=0)y_step=sheet->GetRows()*draw_settings->GetRowHeight()/YSTEPS+1;
-	SetScrollbars(x_step,y_step,XSTEPS,YSTEPS,4,4);
-	draw_settings->SetXScroll(x_step);draw_settings->SetYScroll(y_step);
-	draw_settings->SetScrolling(TRUE);
-}
+CheckScrollbars();
 Show(FALSE);	// Do not update myself until told by the parent
 }
+
+int SpreadSheetC::MaxX(int col)
+{
+int temp=draw_settings->XStart();
+if (col<0) col=sheet->GetCols();
+for (int i=1;i<=col;i++)	temp+=draw_settings->GetColWidth(i);
+return temp;
+}
+
 
 void SpreadSheetC::OnSize(int _w,int _h)
 {
@@ -66,26 +241,59 @@ draw_settings->SetRealWidth(_w);
 // Desired Size
 void	SpreadSheetC::DesiredSize(int *w,int *h)
 {
-*w=min(draw_settings->XStart()+sheet->GetCols()*draw_settings->GetColWidth()+3,MAX_SHEET_WIDTH);
-*h=min(draw_settings->YStart()+(sheet->GetRows()+1)*draw_settings->GetRowHeight()+1,MAX_SHEET_HEIGHT);
+*w=min(MaxX(),MAX_SHEET_WIDTH);
+*h=min(draw_settings->YStart()+(sheet->GetRows()+1)*draw_settings->GetRowHeight()+3,MAX_SHEET_HEIGHT);
 *w=max(*w,MIN_SHEET_WIDTH);
 *h=max(*h,MIN_SHEET_HEIGHT);
 }
+
+// Check Scrollbars
+void	SpreadSheetC::CheckScrollbars(void)
+{
+int x_step=-1,y_step=-1;
+
+if (MaxX()>MAX_SHEET_WIDTH)
+	x_step=MaxX()/XSTEPS+5;
+if (sheet->GetRows()*draw_settings->GetRowHeight()>MAX_SHEET_HEIGHT)
+	y_step=(draw_settings->YStart()+(sheet->GetRows()+1)*draw_settings->GetRowHeight())/YSTEPS+5;
+
+if (x_step>0 || y_step>0)
+{
+	// Note that due to a bug in SetClientSize, we must either have no or both scrollbars
+	if(x_step<=0) x_step=MaxX()/XSTEPS+5;
+	if(y_step<=0) y_step=(draw_settings->YStart()+(sheet->GetRows()+1)*draw_settings->GetRowHeight())/YSTEPS+5;
+	if (x_step!=draw_settings->XScroll() || y_step!=draw_settings->YScroll())
+	{
+		((wxCanvas *)this)->SetScrollbars(x_step,y_step,XSTEPS,YSTEPS,4,4);
+		draw_settings->SetXScroll(x_step);draw_settings->SetYScroll(y_step);
+		draw_settings->SetScrolling(TRUE);
+	}
+}
+
+}
+
 // Paint message handler
 void SpreadSheetC::OnPaint(void)
 {Update(*(GetDC()));}
 // Mouse message handler
 void SpreadSheetC::OnEvent(wxMouseEvent &ev)
 {
-if (ev.LeftDown())
+if (ev.LeftDown() || ev.ButtonDClick())
 {
 	float x,y;
 	ev.Position(&x,&y);
 	cell.row=(y-draw_settings->YStart())/draw_settings->GetRowHeight()+1;
-	cell.col=(x-draw_settings->XStart())/draw_settings->GetColWidth()+1;
-  if (cell.row<1) cell.row=1;
+	cell.col=0;int i=1;
+	while (!cell.col && i<=sheet->GetCols())
+		{if (x<MaxX(i)) cell.col=i;i++;}
+	if (cell.row<1) cell.row=1;
+	if (cell.row>sheet->GetRows()) cell.row=sheet->GetRows();
 	if (cell.col<1) cell.col=1;
-	ProcessCursor(0);
+	if (cell.col>sheet->GetCols()) cell.col=sheet->GetCols();
+	top_frame->OnSelectedMoved(cell.row,cell.col);
+	if (ev.LeftDown() && !ev.ControlDown()) ProcessCursor(1);
+	if (ev.ButtonDClick() || (ev.LeftDown() && ev.ControlDown()))
+		top_frame->OnDoubleClick(cell.row,cell.col,sheet->GetLevel(),sheet->GetValue(cell.row,cell.col));
 }
 }
 
@@ -94,30 +302,30 @@ void SpreadSheetC::OnChar(wxKeyEvent &ev)
 {
 int ch=ev.KeyCode();
 // Cursor keys to move the hilight
-if (IsCursor(ch))	{ProcessCursor(ch);return;}
-// Ctrl-Enter on the last row to add a row
-if (ch==106 && ev.ControlDown() && !ev.ShiftDown())
+if (IsCursor(ev) || IsEnter(ev))	{ProcessCursor(ch);return;}
+// F2 on the last row to add a row
+if (ch==WXK_F2)
 {
-	if (data_settings->GrowRow() && cell.row==sheet->GetRows()) top_frame->AddRow();
+	if (data_settings->Change(S_CAN_GROW_ROW) && cell.row==sheet->GetRows()) top_frame->AddRow();
 	return;
 }
-// Ctrl-Shift-Enter on the last column to add a column
-if (ch==106 && ev.ControlDown() && ev.ShiftDown())
+// F3 on the last column to add a column
+if (ch==WXK_F3)
 {
-	if (data_settings->GrowCol() && cell.col==sheet->GetCols()) top_frame->AddCol();
+	if (data_settings->Change(S_CAN_GROW_COL) && cell.col==sheet->GetCols()) top_frame->AddCol();
 	return;
 }
 // Otherwise, if editing is enabled, just process the key
 {
 	if (top_frame->Editable())
-  {
-		if (((*sheet)[cell.row][cell.col].GetType()==gSpreadNum && IsNumeric(ch)) ||
-				((*sheet)[cell.row][cell.col].GetType()==gSpreadStr && IsAlphaNum(ch)))
+	{
+		if (((*sheet)[cell.row][cell.col].GetType()==gSpreadNum && IsNumeric(ev)) ||
+				((*sheet)[cell.row][cell.col].GetType()==gSpreadStr && IsAlphaNum(ev)))
 		{
 			if (cell.editing==FALSE) cell.editing=TRUE;
 			cell.str+=ch;
 		}
-		if (IsDelete(ch) && ev.ControlDown())
+		if (IsDelete(ev))
 		{
 			if (cell.editing==FALSE) cell.editing=TRUE;
 			cell.str.remove(cell.str.length()-1);
@@ -144,6 +352,7 @@ default:
 }
 cell.Reset(sheet->GetValue(cell.row,cell.col));
 UpdateCell(*(GetDC()),cell);
+top_frame->OnSelectedMoved(cell.row,cell.col);
 top_frame->SetStatusText(cell.str);
 // Make sure the cursor is visible
 if (draw_settings->Scrolling())
@@ -152,8 +361,8 @@ if (draw_settings->Scrolling())
 	if (draw_settings->YStart()+cell.row*draw_settings->GetRowHeight()>draw_settings->GetRealHeight())
 		y_scroll=(draw_settings->YStart()+cell.row*draw_settings->GetRowHeight())/draw_settings->YScroll()-1;
 	if (y_scroll<0) y_scroll=0;
-	if (draw_settings->XStart()+cell.col*draw_settings->GetColWidth()>draw_settings->GetRealWidth())
-		x_scroll=(draw_settings->YStart()+cell.col*draw_settings->GetColWidth())/draw_settings->XScroll()-1;
+	if (MaxX(cell.col-1)>draw_settings->GetRealWidth())
+		x_scroll=MaxX(cell.col-1)/draw_settings->XScroll()-1;
 	if (x_scroll<0) x_scroll=0;
 	Scroll(x_scroll,y_scroll);
 }
@@ -161,87 +370,165 @@ if (draw_settings->Scrolling())
 
 void SpreadSheetC::UpdateCell(wxDC &dc,SpreadCell &cell)
 {
-// erase the old hiligth
-dc.SetBrush(s_white_brush);
-dc.SetPen(lolight_pen);
-dc.DrawRectangle(	draw_settings->XStart()+(old_cell.col-1)*draw_settings->GetColWidth()+LINE_OFF,
-									draw_settings->YStart()+(old_cell.row-1)*draw_settings->GetRowHeight()+LINE_OFF,
-									draw_settings->GetColWidth()-LINE_OFF,
-									draw_settings->GetRowHeight()-LINE_OFF);
+// Check for the validity of the cell/old_cell
+cell.CheckValid(sheet->GetRows(),sheet->GetCols());
+old_cell.CheckValid(sheet->GetRows(),sheet->GetCols());
+// erase the old hilight
+DrawCell(dc,old_cell.row,old_cell.col);
 // draw the new hilight
 dc.SetBrush(wxTRANSPARENT_BRUSH);
-dc.SetPen(hilight_pen);
-dc.DrawRectangle(	draw_settings->XStart()+(cell.col-1)*draw_settings->GetColWidth()+LINE_OFF,
+dc.SetPen(s_selected_pen);
+dc.DrawRectangle(	MaxX(cell.col-1)+LINE_OFF,
 									draw_settings->YStart()+(cell.row-1)*draw_settings->GetRowHeight()+LINE_OFF,
-									draw_settings->GetColWidth()-LINE_OFF,
-									draw_settings->GetRowHeight()-LINE_OFF);
-// Update the value in the old_cell
-dc.DrawText(sheet->GetValue(old_cell.row,old_cell.col),
-						draw_settings->XStart()+(old_cell.col-1)*draw_settings->GetColWidth()+TEXT_OFF,
-						draw_settings->YStart()+(old_cell.row-1)*draw_settings->GetRowHeight()+TEXT_OFF);
+									draw_settings->GetColWidth(cell.col)-2*LINE_OFF,
+									draw_settings->GetRowHeight()-2*LINE_OFF);
+// Update the status line text on the topmost frame
+top_frame->SetStatusText(cell.str);
 // Save the new cell
 old_cell=cell;
 }
 
+// Draw a cell
+void SpreadSheetC::DrawCell(wxDC &dc,int row,int col)
+{
+dc.SetFont(draw_settings->GetDataFont());
+dc.SetBackgroundMode(wxTRANSPARENT);
+if ((*sheet)[row][col].HiLighted())
+	{dc.SetBrush(s_hilight_brush);dc.SetPen(s_hilight_pen);}
+else
+	{dc.SetBrush(s_white_brush);dc.SetPen(s_white_pen);}
+if ((*sheet)[row][col].Bold())
+{
+	wxFont *cur=draw_settings->GetDataFont();
+	dc.SetFont(wxTheFontList->FindOrCreateFont(
+		cur->GetPointSize(),cur->GetFamily(),
+		cur->GetStyle(),wxBOLD,cur->GetUnderlined()));
+}
+dc.DrawRectangle(	MaxX(col-1)+LINE_OFF,
+									draw_settings->YStart()+(row-1)*draw_settings->GetRowHeight()+LINE_OFF,
+									draw_settings->GetColWidth(col)-2*LINE_OFF,
+									draw_settings->GetRowHeight()-2*LINE_OFF);
+dc.SetClippingRegion(MaxX(col-1)+TEXT_OFF,
+									draw_settings->YStart()+(row-1)*draw_settings->GetRowHeight()+TEXT_OFF,
+									draw_settings->GetColWidth(col)-2*TEXT_OFF,
+									draw_settings->GetRowHeight()-2*TEXT_OFF);
+dc.DrawText(sheet->GetValue(row,col),
+							MaxX(col-1)+TEXT_OFF,
+							draw_settings->YStart()+(row-1)*draw_settings->GetRowHeight()+TEXT_OFF);
+dc.DestroyClippingRegion();
+}
 
 // Updating
 void SpreadSheetC::Update(wxDC &dc)
 {
 int row,col;
 // Draw the grid
-dc.Clear();
+if (dc.__type!=wxTYPE_DC_METAFILE) dc.Clear();
 dc.SetBrush(wxTRANSPARENT_BRUSH);
 dc.SetPen(grid_line_pen);
 for (row=1;row<=sheet->GetRows();row++)
 	dc.DrawLine(draw_settings->XStart(),draw_settings->YStart()+row*draw_settings->GetRowHeight(),
-						 draw_settings->XStart()+sheet->GetCols()*draw_settings->GetColWidth()+1,
+						 MaxX()+1,
 						 draw_settings->YStart()+row*draw_settings->GetRowHeight());
 for (col=1;col<=sheet->GetCols();col++)
-	dc.DrawLine(draw_settings->XStart()+col*draw_settings->GetColWidth(),draw_settings->YStart(),
-							draw_settings->XStart()+col*draw_settings->GetColWidth(),
+	dc.DrawLine(MaxX(col),draw_settings->YStart(),
+							MaxX(col),
 							draw_settings->YStart()+sheet->GetRows()*draw_settings->GetRowHeight()+1);
 dc.SetPen(grid_border_pen);
+dc.SetBrush(wxTRANSPARENT_BRUSH);
 dc.DrawRectangle(	draw_settings->XStart(),draw_settings->YStart(),
-									sheet->GetCols()*draw_settings->GetColWidth()+2,
+									MaxX()-draw_settings->XStart(),
 									sheet->GetRows()*draw_settings->GetRowHeight()+2);
 // Draw the labels if any
-dc.SetFont(label_font);
+dc.SetFont(draw_settings->GetLabelFont());
 if (draw_settings->RowLabels())
 	for (row=1;row<=sheet->GetRows();row++)
 		dc.DrawText(sheet->GetLabelRow(row),0,draw_settings->YStart()+(row-1)*draw_settings->GetRowHeight()+TEXT_OFF);
 if (draw_settings->ColLabels())
 	for (col=1;col<=sheet->GetCols();col++)
-		dc.DrawText(sheet->GetLabelCol(col),draw_settings->XStart()+(col-1)*draw_settings->GetColWidth()+TEXT_OFF,0);
+		dc.DrawText(sheet->GetLabelCol(col),MaxX(col-1)+TEXT_OFF,0);
 // Fill in the cells
-dc.SetFont(draw_settings->GetFont());
 for (row=1;row<=sheet->GetRows();row++)
 	for (col=1;col<=sheet->GetCols();col++)
-	{
-		dc.DrawText(sheet->GetValue(row,col),
-							draw_settings->XStart()+(col-1)*draw_settings->GetColWidth()+TEXT_OFF,
-							draw_settings->YStart()+(row-1)*draw_settings->GetRowHeight()+TEXT_OFF);
-	}
+		DrawCell(dc,row,col);
 
 // Hilight the currently selected cell
 UpdateCell(dc,cell);
 }
 
-void SpreadSheetC::Print(void)
+void GetRes(wxDC &dc,float *horiz,float *vert)
 {
-#ifdef wx_msw
-wxPrinterDC dc(NULL, NULL, NULL);
-if (dc.Ok())
+int old_mode=dc.GetMapMode();
+dc.SetMapMode(MM_METRIC);
+int dev_x=dc.LogicalToDeviceX(10);
+*horiz=dev_x/10.0;
+int dev_y=dc.LogicalToDeviceY(10);
+*vert=dev_y/10.0;
+dc.SetMapMode(old_mode);
+}
+
+void SpreadSheetC::Print(int device)
 {
-	dc.StartDoc(sheet->GetLabel());
-  dc.StartPage();
-	Update(dc);
-  dc.EndPage();
-	dc.EndDoc();
+if (device==wxMEDIA_PRINTER)
+{
+	#ifdef wx_msw
+	wxPrinterDC dc_pr(NULL, NULL, NULL,FALSE);
+	if (dc_pr.Ok())
+	{
+		// using scaling to achieve WYSIWYG look.  This uses the DPI of
+		// the Printer and the DPI of the screen
+		float res_scr_x,res_scr_y,res_prn_x,res_prn_y;
+		GetRes(*GetDC(),&res_scr_x,&res_scr_y);
+		GetRes(dc_pr,&res_prn_x,&res_prn_y);
+		dc_pr.SetUserScale(res_prn_x/res_scr_x,res_prn_y/res_scr_y);
+		dc_pr.StartDoc(sheet->GetLabel());
+		dc_pr.StartPage();
+		Update(dc_pr);
+		dc_pr.EndPage();
+		dc_pr.EndDoc();
+	}
+	#else
+	wxMessageBox("Printing not supported under X");
+	#endif
 }
-#else
-wxMessageBox("Printing not supported under X");
-#endif
+if (device==wxMEDIA_CLIPBOARD || device==wxMEDIA_METAFILE)
+{
+	#ifdef wx_msw
+	char *metafile_name=NULL;
+	if (device==wxMEDIA_METAFILE)
+		metafile_name=copystring(wxFileSelector("Save Metafile",0,0,".wmf","*.wmf"));
+	wxMetaFileDC dc_mf(metafile_name);
+	if (dc_mf.Ok())
+	{
+		Update(dc_mf);
+		wxMetaFile *mf = dc_mf.Close();
+		if (mf)
+		{
+			Bool success=mf->SetClipboard((int)(dc_mf.MaxX()+10),(int)(dc_mf.MaxY()+10));
+			if (!success) wxMessageBox("Copy Failed","Error",wxOK | wxCENTRE,this);
+			delete mf;
+		}
+		if (device==wxMEDIA_METAFILE)
+			wxMakeMetaFilePlaceable(metafile_name,0,0,(int)(dc_mf.MaxX()+10),(int)(dc_mf.MaxY()+10));
+	}
+	#else
+	wxMessageBox("Metafiles not supported under X");
+	#endif
 }
+if (device==wxMEDIA_PS)
+{
+	wxPostScriptDC dc_ps(NULL,TRUE);
+	if (dc_ps.Ok())
+	{
+		dc_ps.StartDoc("");
+		dc_ps.StartPage();
+		Update(dc_ps);
+		dc_ps.EndPage();
+		dc_ps.EndDoc();
+	}
+}
+}
+
 
 
 
@@ -250,8 +537,8 @@ SpreadSheet::SpreadSheet(int _rows,int _cols,int _level,char *title,wxFrame *par
 {
 rows=_rows;cols=_cols;level=_level;
 data=gMatrix1<SpreadDataCell>(rows,cols);
-row_labels=gTuple<gString>(1,rows);
-col_labels=gTuple<gString>(1,cols);
+row_labels=gTuple<gString>(rows);
+col_labels=gTuple<gString>(cols);
 int h,w;
 parent->GetClientSize(&w,&h);
 sheet=new SpreadSheetC(this,parent,0,0,w,h-DEFAULT_BUTTON_SPACE);
@@ -269,8 +556,8 @@ void SpreadSheet::Init(int _rows,int _cols,int _level,char *title,wxFrame *paren
 {
 rows=_rows;cols=_cols;level=_level;
 data=gMatrix1<SpreadDataCell>(rows,cols);
-row_labels=gTuple<gString>(1,rows);
-col_labels=gTuple<gString>(1,cols);
+row_labels=gTuple<gString>(rows);
+col_labels=gTuple<gString>(cols);
 int h,w;
 parent->GetClientSize(&w,&h);
 sheet=new SpreadSheetC(this,parent,0,0,w,h-DEFAULT_BUTTON_SPACE);
@@ -283,39 +570,101 @@ else
 	label=tmp;
 }
 }
+
+void SpreadSheet::Clear(void)
+{
+for (int i=1;i<=rows;i++)
+	for (int j=1;j<=cols;j++)
+		data[i][j].Clear();
+}
+
+void SpreadSheet::AddRow(void)
+{
+int i;
+// add a new row to the matrix
+data.AddRow((const gBlock<SpreadDataCell>)gBlock<SpreadDataCell>(cols));
+// Copy the cell types from the previous row
+for (i=1;i<=cols;i++) data[rows+1][i].SetType(data[rows][i].GetType());
+// add a new entry to the row_labels
+rows++;
+row_labels.Expand(1);
+//if (active) sheet->OnPaint();
+}
+
+void SpreadSheet::AddCol(void)
+{
+// add a new column to the matrix
+data.AddColumn((const gBlock<SpreadDataCell>)gBlock<SpreadDataCell>(rows));
+// add a new entry to the col_labels
+cols++;
+col_labels.Expand(1);
+//if (active) sheet->OnPaint();
+}
+
+void SpreadSheet::DelRow(int row)
+{
+if (rows<2) return;
+if (row==0) row=rows;
+// remove a row from the matrix
+data.RemoveRow(row);
+// remove an entry from the row_labels;
+row_labels.Contract(rows);
+rows--;
+//if (active) sheet->OnPaint();
+}
+
+void SpreadSheet::DelCol(int col)
+{
+if (cols<2) return;
+if (col==0) col=cols;
+// remove a column from the matrix
+data.RemoveColumn(col);
+// remove an entry from the col_labels
+col_labels.Contract(cols);
+cols--;
+//if (active) sheet->OnPaint();
+}
+
+
 void SpreadSheet::SetSize(int xs,int ys,int xe,int ye)
 {
 sheet->SetSize(xs,ys,xe,ye);
 }
 
 //**************************** SPREAD SHEET 3D *****************************
-SpreadSheet3D::SpreadSheet3D(int rows,int cols,int _levels,char *title,wxFrame *parent,Bool _printable):
-		wxFrame(parent,title)
+SpreadSheet3D::SpreadSheet3D(int rows,int cols,int _levels,char *title,
+					wxFrame *parent,int _buttons,SpreadSheetDrawSettings *drs,
+					SpreadSheetDataSettings *dts):	wxFrame(parent,title)
 {
 assert(rows>0);assert(cols>0);assert(_levels>0);
 // Initialize some global GDI objects
 grid_line_pen=wxThePenList->FindOrCreatePen("BLACK",1,wxDOT);
 grid_border_pen=wxThePenList->FindOrCreatePen("BLUE",3,wxSOLID);
-hilight_pen=wxThePenList->FindOrCreatePen("GREEN",2,wxSOLID);
-lolight_pen=wxThePenList->FindOrCreatePen("WHITE",2,wxSOLID);
+s_selected_pen=wxThePenList->FindOrCreatePen("GREEN",2,wxSOLID);
+s_white_pen=wxThePenList->FindOrCreatePen("WHITE",2,wxSOLID);
+s_hilight_pen=wxThePenList->FindOrCreatePen("LIGHT GREY",2,wxSOLID);
 s_white_brush=wxTheBrushList->FindOrCreateBrush("WHITE",wxSOLID);
-label_font=wxTheFontList->FindOrCreateFont(12,wxSWISS,wxNORMAL,wxNORMAL);
+s_hilight_brush=wxTheBrushList->FindOrCreateBrush("LIGHT GREY",wxSOLID);
 // Initialize the draw settings
-draw_settings=new SpreadSheetDrawSettings;
-data_settings=new SpreadSheetDataSettings;
+draw_settings=(drs) ? drs : new SpreadSheetDrawSettings(this,cols);
+draw_settings->SetParent(this);
+data_settings=(dts) ? dts : new SpreadSheetDataSettings;
 // Initialize local variables
 completed=wxRUNNING;
 editable=TRUE;
 levels=_levels;
 label=title;
-data=gTuple<SpreadSheet>(1,levels);
+buttons=_buttons;
+data=gList<SpreadSheet>(levels);
 // have to do this in two steps since arrays can not take constructors
 for (int i=1;i<=levels;i++) data[i].Init(rows,cols,i,NULL,this);
 // Turn on level #1
 cur_level=0;
 SetLevel(1);
 // Create the panel
-int h,w,v_spacing=0;
+int h,w;
+panel_x=panel_y=0;
+panel_new_line=FALSE;
 GetClientSize(&w,&h);
 panel=new wxPanel(this,0,h-DEFAULT_BUTTON_SPACE,w,DEFAULT_BUTTON_SPACE,wxBORDER);
 if (levels>1)	// create a slider to choose the active level
@@ -323,20 +672,34 @@ if (levels>1)	// create a slider to choose the active level
 	level_item=new wxSlider(panel,(wxFunction)SpreadSheet3D::spread_slider_func,NULL,1,1,levels,140);
 	level_item->SetClientData((char *)this);
 	panel->NewLine();
-  v_spacing+=10;
+	SavePanelPos();
 }
-wxButton	*ok=new wxButton(panel,(wxFunction)SpreadSheet3D::spread_ok_func,"OK");
-wxButton	*cancel=new wxButton(panel,(wxFunction)SpreadSheet3D::spread_cancel_func,"Cancel");
-if (_printable)
+if (buttons&OK_BUTTON)
 {
-	wxButton	*print=new wxButton(panel,(wxFunction)SpreadSheet3D::spread_print_func,"P");
+	wxButton	*ok=AddButton("OK",(wxFunction)SpreadSheet3D::spread_ok_func);
+	ok->SetClientData((char*)this);
+}
+if (buttons&CANCEL_BUTTON)
+{
+	wxButton	*cancel=AddButton("Cancel",(wxFunction)SpreadSheet3D::spread_cancel_func);
+	cancel->SetClientData((char*)this);
+}
+if (buttons&PRINT_BUTTON)
+{
+	wxButton *print=AddButton("P",(wxFunction)SpreadSheet3D::spread_print_func);
 	print->SetClientData((char*)this);
 }
-v_spacing+=25;
-panel->SetVerticalSpacing(v_spacing);
-panel->NewLine();
-ok->SetClientData((char*)this);
-cancel->SetClientData((char*)this);
+if (buttons&OPTIONS_BUTTON)
+{
+	wxButton *options=AddButton("Config",(wxFunction)SpreadSheet3D::spread_options_func);
+	options->SetClientData((char*)this);
+}
+if (buttons&CHANGE_BUTTON)
+{
+	AddButtonNewLine();
+	wxButton *change=AddButton("Grow/Shrink",(wxFunction)SpreadSheet3D::spread_change_func);
+	change->SetClientData((char *)this);
+}
 CreateStatusLine(2);
 // Size this frame according to the sheet dimentions
 Resize();
@@ -356,21 +719,36 @@ for (int i=1;i<=levels;i++) data[i].SetSize(0,0,w,h-DrawSettings()->PanelSize())
 void	SpreadSheet3D::spread_ok_func(wxButton	&ob,wxEvent &ev)
 {
 	SpreadSheet3D *parent=(SpreadSheet3D *)ob.GetClientData();
-  parent->SetCompleted(wxOK);
-	parent->Show(FALSE);
+	parent->OnOk();
 }
+void SpreadSheet3D::OnOk(void)
+{
+	SetCompleted(wxOK);
+	Show(FALSE);
+}
+
+void SpreadSheet3D::OnPrint(void)
+{
+wxOutputDialogBox od;
+if (od.Completed()==wxOK) Print(od.GetSelection());
+}
+
 #pragma argsused		// turn off the ev not used message
 void	SpreadSheet3D::spread_print_func(wxButton	&ob,wxEvent &ev)
 {
 	SpreadSheet3D *parent=(SpreadSheet3D *)ob.GetClientData();
-	parent->Print();
+	parent->OnPrint();
 }
 #pragma argsused		// turn off the ev not used message
 void	SpreadSheet3D::spread_cancel_func(wxButton	&ob,wxEvent &ev)
 {
 	SpreadSheet3D *parent=(SpreadSheet3D *)ob.GetClientData();
-	parent->SetCompleted(wxCANCEL);
-	parent->Show(FALSE);
+	parent->OnCancel();
+}
+void	SpreadSheet3D::OnCancel(void)
+{
+	SetCompleted(wxCANCEL);
+	Show(FALSE);
 }
 #pragma argsused		// turn off the ev not used message
 void SpreadSheet3D::spread_slider_func(wxSlider &ob,wxCommandEvent &ev)
@@ -378,9 +756,70 @@ void SpreadSheet3D::spread_slider_func(wxSlider &ob,wxCommandEvent &ev)
 ((SpreadSheet3D *)ob.GetClientData())->SetLevel(ob.GetValue());
 }
 
+#pragma argsused		// turn off the ev not used message
+void	SpreadSheet3D::spread_change_func(wxButton	&ob,wxEvent &ev)
+{
+SpreadSheet3D *parent=(SpreadSheet3D *)ob.GetClientData();
+// Create the Grow/Shrink dialog box
+MyDialogBox *gs=new MyDialogBox(0,"Grow/Shrink");
+char *choices[6]={"Add Row","Add Column","Add Level","Del Row","Del Column","Del Level"};
+wxRadioBox *rb=new wxRadioBox(gs,NULL,NULL,-1,-1,-1,-1,6,choices,2);
+if (!parent->DataSettings()->Change(S_CAN_GROW_ROW)) rb->Enable(0,FALSE);
+if (!parent->DataSettings()->Change(S_CAN_GROW_COL)) rb->Enable(1,FALSE);
+if (!parent->DataSettings()->Change(S_CAN_GROW_LEVEL)) rb->Enable(2,FALSE);
+if (!parent->DataSettings()->Change(S_CAN_SHRINK_ROW)) rb->Enable(3,FALSE);
+if (!parent->DataSettings()->Change(S_CAN_SHRINK_COL)) rb->Enable(4,FALSE);
+if (!parent->DataSettings()->Change(S_CAN_SHRINK_LEVEL)) rb->Enable(5,FALSE);
+
+gs->Go();
+if (gs->Completed()==wxOK)
+{
+	switch (rb->GetSelection())
+	{
+	case	0: parent->AddRow(); 		break;
+	case	1: parent->AddCol(); 		break;	
+	case	2: parent->AddLevel();	break;	
+	case	3: parent->DelRow();		break;
+	case	4: parent->DelCol();		break;
+  case	5: parent->DelLevel();	break;
+  }
+}
+delete gs;
+}
+
+#pragma argsused		// turn off the ev not used message
+void	SpreadSheet3D::spread_options_func(wxButton	&ob,wxEvent &ev)
+{
+	SpreadSheet3D *parent=(SpreadSheet3D *)ob.GetClientData();
+	parent->DrawSettings()->SetOptions();
+}
+
+
+void SpreadSheet3D::DelLevel(void)
+{
+if (levels<2) return;
+data.Remove(levels);
+levels--;
+delete level_item;
+level_item=new wxSlider(panel,(wxFunction)SpreadSheet3D::spread_slider_func,NULL,1,1,levels,140);
+level_item->SetClientData((char *)this);
+Redraw();
+}
+
+void SpreadSheet3D::AddLevel(void)
+{
+data.Append(SpreadSheet());
+levels++;
+data[levels].Init(data[1].GetRows(),data[1].GetCols(),levels,NULL,this);
+//((wxWindow *)level_item)->Enable(FALSE);
+level_item=new wxSlider(panel,(wxFunction)SpreadSheet3D::spread_slider_func,NULL,1,1,levels,140);
+level_item->SetClientData((char *)this);
+Redraw();
+}
+
 void SpreadSheet3D::Dump(void)
 {
-gOutput	out("spread.out");
+gFileOutput	out("spread.out");
 out<<levels<<"\n";
 for (int i=1;i<=levels;i++){ data[i].Dump(out);out<<"\n\n";}
 }
@@ -391,9 +830,26 @@ assert(_l>0&&_l<=levels);
 if (cur_level) data[cur_level].SetActive(FALSE);
 cur_level=_l;
 data[cur_level].SetActive(TRUE);
-gString tmp=label+':'+data[cur_level].GetLabel();
+gString tmp=label+":"+data[cur_level].GetLabel();
 SetTitle(tmp);
 }
+
+void SpreadSheet3D::SetLabelRow(int row,const gString &s,int level)
+{
+if (level==0)
+	for (level=1;level<=levels;level++) data[level].SetLabelRow(row,s);
+else
+	data[level].SetLabelRow(row,s);
+}
+void SpreadSheet3D::SetLabelCol(int col,const gString &s,int level)
+{
+if (level==0)
+	for (level=1;level<=levels;level++)
+		data[level].SetLabelCol(col,s);
+else
+	data[level].SetLabelCol(col,s);
+}
+
 
 void SpreadSheet3D::FitLabels(void)
 {
@@ -404,7 +860,7 @@ if (draw_settings->RowLabels())
 {
 	for (i=1;i<=data[1].GetRows();i++)
 	{
-		GetTextExtent(data[cur_level].GetLabelRow(i),&w,&h);
+		data[1].GetLabelExtent(data[cur_level].GetLabelRow(i),&w,&h);
 		if (w>max_w) max_w=w;
 	}
   draw_settings->SetXStart(max_w+3);
@@ -413,7 +869,7 @@ if (draw_settings->ColLabels())
 {
 	for (i=1;i<=data[1].GetCols();i++)
 	{
-		GetTextExtent(data[cur_level].GetLabelCol(i),&w,&h);
+		data[1].GetLabelExtent(data[cur_level].GetLabelCol(i),&w,&h);
 		if (h>max_h) max_h=h;
 	}
 	draw_settings->SetYStart(max_h+3);
@@ -423,8 +879,14 @@ if (draw_settings->ColLabels())
 void SpreadSheet3D::Resize(void)
 {
 int w,h,w1,h1;
+// Update the row height in draw_settings
+float tw,th;
+data[cur_level].GetDataExtent(&tw,&th);
+DrawSettings()->SetRowHeight(th);
 data[cur_level].GetSize(&w,&h);
+for (int i=1;i<=data.Length();i++) data[i].CheckSize();
 Panel()->Fit();Panel()->GetSize(&w1,&h1);
+w=max(w,w1);
 DrawSettings()->SetPanelSize(h1);
 Panel()->SetSize(0,h-DrawSettings()->PanelSize(),w,DrawSettings()->PanelSize());
 SetClientSize(w,h+DrawSettings()->PanelSize());
@@ -454,3 +916,37 @@ if (data_settings->AutoLabel(S_AUTO_LABEL_COL))
 FitLabels();
 Resize();
 }
+
+wxButton *SpreadSheet3D::AddButton(char *label,wxFunction fun)
+{
+#ifdef wx_msw
+panel->RealAdvanceCursor();
+SavePanelPos();
+if (panel_new_line)
+	{panel_y+=40;panel_x=PANEL_LEFT_MARGIN;panel_new_line=FALSE;}
+wxButton *button=new wxButton(panel,fun,label,panel_x,panel_y);
+#else
+if (panel_new_line) panel->NewLine();
+wxButton *button=new wxButton(panel,fun,label);
+#endif
+
+return button;
+}
+wxPanel *SpreadSheet3D::AddPanel(void)
+{
+#ifdef wx_msw
+panel->RealAdvanceCursor();
+SavePanelPos();
+if (panel_new_line)
+	{panel_y+=40;panel_x=PANEL_LEFT_MARGIN;panel_new_line=FALSE;}
+wxPanel *sub_panel=new wxPanel(panel,panel_x,panel_y);
+return sub_panel;
+#else
+//if (panel_new_line) panel->NewLine();
+//wxPanel *sub_panel=new wxPanel(panel);
+panel->NewLine();
+return panel;
+#endif
+}
+
+
