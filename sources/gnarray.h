@@ -29,8 +29,8 @@ template <class T> class gNArray   {
     T *storage;
     gVector<int> dim;
 
-    void DumpFrom(output &, int, gVector<int> &) const;
-    void ReadFrom(input &, const gVector<int> &, gVector<int> &, int);
+    void DumpFrom(gOutput &, int, gVector<int> &) const;
+    void ReadFrom(gInput &, const gVector<int> &, gVector<int> &, int);
 
     T operator[](long l) const
       { assert(l >= 0 && l < storage_size);
@@ -55,8 +55,8 @@ template <class T> class gNArray   {
 
     const gVector<int> &Dimensionality(void) const   { return dim; }
 
-    void Input(input &, const gVector<int> &, int);
-    void Output(output &) const;
+    void Input(gInput &, const gVector<int> &, int);
+    void Output(gOutput &) const;
 };
 
 template <class T> INLINE gNArray<T>::gNArray(const gVector<int> &d)
@@ -133,7 +133,7 @@ template <class T> INLINE T &gNArray<T>::operator[](const gVector<int> &v)
   return storage[location];
 }
 
-template <class T> INLINE void gNArray<T>::Output(output &f) const
+template <class T> INLINE void gNArray<T>::Output(gOutput &f) const
 {
   if (dim.Length() > 0)   {
     gVector<int> v(1, dim.Length());
@@ -142,7 +142,7 @@ template <class T> INLINE void gNArray<T>::Output(output &f) const
 }
 
 template <class T> INLINE
-void gNArray<T>::DumpFrom(output &f, int offset, gVector<int> &v) const
+void gNArray<T>::DumpFrom(gOutput &f, int offset, gVector<int> &v) const
 {
   for (int i = 1; i <= dim[offset]; i++)   {
     v[offset] = i;
@@ -154,14 +154,14 @@ void gNArray<T>::DumpFrom(output &f, int offset, gVector<int> &v) const
 }
 
 template <class T> INLINE
-void gNArray<T>::Input(input &f, const gVector<int> &norder, int i)
+void gNArray<T>::Input(gInput &f, const gVector<int> &norder, int i)
 {
   gVector<int> strat(1, i);
   ReadFrom(f, norder, strat, i);
 }
 
 template <class T> INLINE
-void gNArray<T>::ReadFrom(input &f, const gVector<int> &norder,
+void gNArray<T>::ReadFrom(gInput &f, const gVector<int> &norder,
 			  gVector<int> &strat, int i)
 {
   for (int j = 1; j <= dim[norder[i]]; j++)   {
@@ -192,9 +192,9 @@ template <class T> class gIndexedNArray : private gNArray<T>   {
     
     const gVector<int> &Dimensionality(void) const   { return dim; }
 
-    void Input(input &f, const gVector<int> &v, int i)
+    void Input(gInput &f, const gVector<int> &v, int i)
       { gNArray<T>::Input(f, v, i); }
-    void Output(output &f) const
+    void Output(gOutput &f) const
       { gNArray<T>::Output(f); }
 };
 
