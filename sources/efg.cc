@@ -556,6 +556,12 @@ void Efg::WriteEfgFile(gOutput &f) const
   for (int i = 1; i <= players.Length(); i++)
     f << '"' << EscapeQuotes(players[i]->name) << "\" ";
   f << "}\n";
+  if (parameters->Dmnsn() > 0)   {
+    f << "{ ";
+    for (int var = 1; var <= parameters->Dmnsn(); var++)
+      f << '"' << EscapeQuotes(parameters->GetVariableName(var)) << "\" ";
+    f << "}\n";
+  }
   f << "\"" << EscapeQuotes(comment) << "\"\n\n";
 
   WriteEfgFile(f, root);
