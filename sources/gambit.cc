@@ -42,6 +42,7 @@ extern wxApp *wxTheApp = 1;
 
 
 GambitApp gambitApp;
+GambitFrame *main_gambit_frame;
 
 typedef void (*fptr)(int);
 
@@ -343,6 +344,7 @@ wxFrame *GambitApp::OnInit(void)
     }
 
     // Return the main frame window.
+	main_gambit_frame = gambit_frame;
     return gambit_frame;
 }
 

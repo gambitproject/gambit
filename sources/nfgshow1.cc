@@ -9,6 +9,9 @@
 #include "nfplayer.h"
 #include "nfgoutcd.h"
 
+#include "gambit.h"
+
+
 //**************************************************************************
 //                         NORMAL FORM GAME SHOW
 //**************************************************************************
@@ -684,19 +687,30 @@ void NormalDrawSettings::OutcomeOptions(void)
     MyDialogBox *options_dialog = new MyDialogBox(0, "Outcome Display");
     wxStringList *opt_list = new wxStringList("Payoff Values", "Outcome Name", 0);
     char *opt_str = new char[25];
-    strcpy(opt_str, (char *)opt_list->Nth(outcome_disp)->Data());
-    options_dialog->Add(wxMakeFormString("Display as", &opt_str, wxFORM_RADIOBOX,
-                                         new wxList(wxMakeConstraintStrings(opt_list), 0)));
-    options_dialog->Go();
 
-    if (options_dialog->Completed() == wxOK)
+    if (opt_list->Nth(outcome_disp) == NULL)
     {
-        char *defaults_file = "gambit.ini";
-        outcome_disp = wxListFindString(opt_list, opt_str);
-        wxWriteResource("Gambit", "NFOutcome-Display", outcome_disp, defaults_file);
+        guiExceptionDialog("Invalid value for NFOutcome-Display; check \"gambit.ini\" file.\n",
+                           main_gambit_frame);
+    }
+    else
+    {
+        strcpy(opt_str, (char *)opt_list->Nth(outcome_disp)->Data());
+        options_dialog->Add(wxMakeFormString("Display as", &opt_str, wxFORM_RADIOBOX,
+                                             new wxList(wxMakeConstraintStrings(opt_list), 0)));
+        options_dialog->Go();
+        
+        if (options_dialog->Completed() == wxOK)
+        {
+            char *defaults_file = "gambit.ini";
+            outcome_disp = wxListFindString(opt_list, opt_str);
+            wxWriteResource("Gambit", "NFOutcome-Display", outcome_disp, defaults_file);
+        }
     }
 
     delete options_dialog;
+    delete opt_str;
+    delete opt_list;
 }
 
 

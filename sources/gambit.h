@@ -14,6 +14,12 @@
 #include "guipb.h"
 // ----------------------------
 
+class GambitFrame;
+extern GambitFrame *main_gambit_frame;
+extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
+                               long p_style = wxOK | wxCENTRE);
+
+
 class GambitApp: public wxApp
 {
 public:
