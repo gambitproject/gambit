@@ -134,8 +134,10 @@ gString ToString(const gInteger &i)
 // to be VERY large numbers due to an inherent imprecision of floating point.
 // I.e. 0.50 can become 50001/100000.  This may cause serious display problems.
 // However, since the main point of using rationals is to have PRECISE answers,
-// no attempt will be made to 'approx reduce' the fractions.
-gString ToString(const gRational &r, bool approx)
+// no attempt will be made to 'approx reduce' the fractions.  Thus the 
+// approximation feature is disabled for now.
+
+gString ToString(const gRational &r, bool )
 {
 /*
   if (approx)   {
