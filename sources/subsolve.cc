@@ -187,8 +187,6 @@ void LemkeBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
-  N->WriteNfgFile(gout);
-
   MixedProfile<T> mp(*N);
 
   LemkeModule<T> M(*N, params, mp.GetNFSupport());
