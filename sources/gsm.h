@@ -55,6 +55,9 @@ class GSM
   void Push( const gRational& data );
   void Push( const gString&   data );
 
+  void PushList( const int num_of_elements );
+
+
   void PushRef( const gString& data );
 
   void Assign( void );
@@ -80,6 +83,8 @@ class GSM
   void NOT ( void );
 
   void Concatenate( void );
+
+  
 
   static void AddFunction(const gString& funcname, FuncDescObj *func );
   static int FunctionParamCheck(const PortionType stack_param_type, 

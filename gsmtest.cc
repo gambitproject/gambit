@@ -85,6 +85,7 @@ int main( void )
   machine->Dump();
 */  
 
+
   gout << "Assigning x = (double)7\n";
   machine->PushRef( x );
   machine->Push( (double)7 );
@@ -128,6 +129,7 @@ int main( void )
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
+
 
   gout << "Testing boolean operations:\n";
   gout << "Pushing false\n";
@@ -291,6 +293,62 @@ int main( void )
   gout << "Testing CallFunction( \"Angle\" )\n";
   machine->CallFunction( (gString) "Angle" );
   machine->Dump();
+
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+  machine->Push( (double) 7 );
+  machine->Push( (double) 8 );
+  machine->Push( (double) 9 );
+  machine->Push( (double) 10 );
+  machine->Push( (double) 11 );
+  machine->PushList( 4 );
+  machine->Dump();
+
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+  
+  gout << "Testing nested List structures\n";
+  machine->Push( (double) 1 );
+  machine->Push( (double) 2 );
+  machine->Push( (double) 3 );
+  machine->Push( (double) 4 );
+  machine->Push( (double) 5 );
+  machine->PushList( 3 );
+  machine->Push( (double) 6 );
+  machine->Push( (double) 7 );
+  machine->PushList( 4 );
+  machine->Push( (double) 8 );
+  machine->PushList( 3 );
+  machine->Push( (double) 9 );
+  machine->Push( (double) 10 );
+  machine->Push( (double) 11 );
+  machine->PushList( 4 );
+  machine->Dump();
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+  
+  gout << "Testing nested List structures\n";
+  machine->Push( (double) 1 );
+  machine->Push( (double) 2 );
+  machine->Push( (gRational) 3 );
+  machine->Push( (double) 4 );
+  machine->Push( (double) 5 );
+  machine->PushList( 3 );
+  machine->Push( (double) 6 );
+  machine->Push( (double) 7 );
+  machine->PushList( 4 );
+  machine->Push( (double) 8 );
+  machine->PushList( 3 );
+  machine->Push( (double) 9 );
+  machine->Push( (double) 10 );
+  machine->Push( (double) 11 );
+  machine->PushList( 4 );
+  machine->Dump();
+
 
   delete machine;
 

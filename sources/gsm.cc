@@ -55,15 +55,15 @@ void GSM::AddFunction(const gString& funcname, FuncDescObj *func )
 }
 
 int GSM::FunctionParamCheck(const PortionType stack_param_type, 
-			    const PortionType func_param_type )
+                            const PortionType func_param_type )
 {
   int result = false;
   if( stack_param_type == func_param_type )
     result = true;
   else if(func_param_type == porNUMERICAL &&
-	  (stack_param_type == porDOUBLE ||
-	   stack_param_type == porINTEGER ||
-	   stack_param_type == porRATIONAL ) )
+          (stack_param_type == porDOUBLE ||
+           stack_param_type == porINTEGER ||
+           stack_param_type == porRATIONAL ) )
     result = true;
   return result;
 }
@@ -87,12 +87,12 @@ void GSM::CallFunction( const gString& funcname )
       type_match = FunctionParamCheck( param_list[ i ]->Type(), func->ParamType( i ) );
       if( !type_match )
       {
-	gerr << "** GSM Error: a mismatched parameter type found while executing\n";
-	gerr << "              CallFunction( \"" << funcname << "\" )\n\n";
-	gerr << "   Error at Parameter # : i " << "\n";
-	gerr << "            Expected type: " << func->ParamType( i ) << "\n";
-	gerr << "            Type found:    " << param_list[i]->Type() << "\n";
-	assert(0);
+        gerr << "** GSM Error: a mismatched parameter type found while executing\n";
+        gerr << "              CallFunction( \"" << funcname << "\" )\n\n";
+        gerr << "   Error at Parameter # : i " << "\n";
+        gerr << "            Expected type: " << func->ParamType( i ) << "\n";
+        gerr << "            Type found:    " << param_list[i]->Type() << "\n";
+        assert(0);
       }
     }
     p = func->CallFunction( param_list );
@@ -151,55 +151,6 @@ int GSM::MaxDepth( void ) const
 
 
 
-//-------------------------------------------------------
-  //  Assign & UnAssign functions 
-//-------------------------------------------------------
-
-
-void GSM::Assign( void )
-{
-  int result = 0;
-  Portion *p2, *p1;
-  gString ref;
-
-  if( stack->Depth() > 1 )
-  {
-    p2 = stack->Pop();
-    p1 = stack->Pop();
-
-    if( ( p2->Type() != porREFERENCE ) && ( p1->Type() == porREFERENCE ) )
-    {
-      ref = ( (Reference_Portion *)p1 )->Value();
-
-      if( !RefTable->IsDefined( ref ) )
-	RefTable->Define( ref, p2 );
-      else
-	(*RefTable)( ref ) = p2;
-
-      stack->Push( p2 );
-      delete p1;
-    }
-    else
-    {
-      if( p2->Type() == porREFERENCE )
-	gerr << "** GSM Error: no value found to assign to a reference\n";
-      if ( p1->Type() != porREFERENCE )
-	gerr << "** GSM Error: no reference found to be assigned\n";
-      assert(0);
-    }
-  }
-}
-
-
-void GSM::UnAssign( const gString& ref )
-{
-  if( RefTable->IsDefined( ref ) )
-  {
-    RefTable->Remove( ref );
-  }
-}
-
-
 
 //------------------------------------------------------------------------
   // Push() functions
@@ -240,11 +191,89 @@ void GSM::Push( const gString& data )
   stack->Push( p );
 }
 
+
+void GSM::PushList( const int num_of_elements )
+{
+  int i;
+  Portion *p;
+  List_Portion *list;
+  PortionType type;
+
+  assert( num_of_elements > 0 );
+
+  list = new List_Portion;
+  if( num_of_elements <= stack->Depth() )
+  {
+    for( i = 1; i <= num_of_elements; i++ )
+    {
+      p = stack->Pop();
+      list->Insert( p, 1 );
+    }
+    stack->Push( list );
+  }
+  else
+  {
+    gerr << "** GSM Error: not enough elements in GSM to PushList()\n";
+    gerr << "              elements requested: " << num_of_elements << "\n";
+    gerr << "              elements available: " << stack->Depth() << "\n";
+    assert(0);
+  }
+}
+
+
+
+//----------------------------------------------------------------------
+  // Reference related functions: PushRef(), Assign(), UnAssign()
+//---------------------------------------------------------------------
+
 void GSM::PushRef( const gString& data )
 {
   Portion *p;
   p = new Reference_Portion( data );
   stack->Push( p );
+}
+
+
+
+
+void GSM::Assign( void )
+{
+  int result = 0;
+  Portion *p2, *p1;
+  gString ref;
+
+  if( stack->Depth() > 1 )
+  {
+    p2 = stack->Pop();
+    p1 = stack->Pop();
+
+    if( ( p2->Type() != porREFERENCE ) && ( p1->Type() == porREFERENCE ) )
+    {
+      ref = ( (Reference_Portion *)p1 )->Value();
+      RefTable->Define( ref, p2->Copy() );
+      delete p2;
+
+      p1 = resolve_ref( (Reference_Portion *)p1 );
+      stack->Push( p1 );
+    }
+    else
+    {
+      if( p2->Type() == porREFERENCE )
+        gerr << "** GSM Error: no value found to assign to a reference\n";
+      if ( p1->Type() != porREFERENCE )
+        gerr << "** GSM Error: no reference found to be assigned\n";
+      assert(0);
+    }
+  }
+}
+
+
+void GSM::UnAssign( const gString& ref )
+{
+  if( RefTable->IsDefined( ref ) )
+  {
+    RefTable->Remove( ref );
+  }
 }
 
 
@@ -264,6 +293,7 @@ Portion *GSM::resolve_ref( Reference_Portion *p )
   if( RefTable->IsDefined( ref ) )
   {
     result = (*RefTable)( ref )->Copy();
+    delete p;
   }
   else
   {
@@ -298,14 +328,14 @@ void GSM::binary_operation( OperationMode mode )
     {
       result = p1->Operation( p2, mode );
       if(mode == opEQUAL_TO ||
-	 mode == opNOT_EQUAL_TO ||
-	 mode == opGREATER_THAN ||
-	 mode == opLESS_THAN ||
-	 mode == opGREATER_THAN_OR_EQUAL_TO ||
-	 mode == opLESS_THAN_OR_EQUAL_TO )
+         mode == opNOT_EQUAL_TO ||
+         mode == opGREATER_THAN ||
+         mode == opLESS_THAN ||
+         mode == opGREATER_THAN_OR_EQUAL_TO ||
+         mode == opLESS_THAN_OR_EQUAL_TO )
       {
-	delete p1;
-	p1 = new bool_Portion( (bool) result );
+        delete p1;
+        p1 = new bool_Portion( (bool) result );
       }
       stack->Push( p1 );
     }
