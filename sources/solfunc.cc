@@ -259,8 +259,6 @@ static Portion* GSM_Game_EfgTypes(Portion** param)
     return 0;
 }
 
-
-
 //---------------
 // GobitLambda
 //---------------
@@ -843,6 +841,7 @@ void Init_solfunc(GSM *gsm)
       { "Game[profile->BEHAV] =: EFG", GSM_Game_EfgTypes },
       { "Game[support->NFSUPPORT] =: NFG", GSM_Game_NfSupport },
       { "Game[support->EFSUPPORT] =: EFG", GSM_Game_EfgTypes },
+      { "Game[basis->EFBASIS] =: EFG", GSM_Game_EfgTypes },
       { "GobitLambda[profile->MIXED] =: NUMBER", GSM_GobitLambda_Mixed },
       { "GobitLambda[profile->BEHAV] =: NUMBER", GSM_GobitLambda_Behav },
       { "GobitValue[profile->MIXED] =: NUMBER", GSM_GobitValue_Mixed },

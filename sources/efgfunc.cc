@@ -443,6 +443,16 @@ static Portion *GSM_IsConstSum(Portion **param)
   return new BoolPortion(E.IsConstSum());
 }
 
+//---------------
+// IsConsistent
+//---------------
+
+static Portion *GSM_IsBasisConsistent(Portion **param)
+{
+  EFBasis *basis = ((EfBasisPortion *) param[0])->Value();
+  return new BoolPortion(basis->IsConsistent());
+}
+
 //----------------
 // IsPredecessor
 //----------------
@@ -1123,6 +1133,7 @@ void Init_efgfunc(GSM *gsm)
 	GSM_InsertActionAt },
       { "InsertMove[infoset->INFOSET, node->NODE] =: NODE",
 	GSM_InsertMove },
+      { "IsConsistent[basis->EFBASIS] =: BOOLEAN", GSM_IsBasisConsistent },
       { "IsConstSum[efg->EFG] =: BOOLEAN", GSM_IsConstSum },
       { "IsPerfectRecall[efg->EFG] =: BOOLEAN", GSM_IsPerfectRecall },
       { "IsPredecessor[node->NODE, of->NODE] =: BOOLEAN",
