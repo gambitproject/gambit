@@ -230,16 +230,48 @@ private:
   void DrawCellBorder(wxDC &, const wxSheetCoords &);
   void DrawColLabels(wxDC &, const wxArrayInt &);
 
+  // Event handlers
+  void OnLabelRightDown(wxSheetEvent &);
+  void OnMenuRowStrategyBefore(wxCommandEvent &);
+  void OnMenuRowStrategyAfter(wxCommandEvent &);
+  void OnMenuColStrategyBefore(wxCommandEvent &);
+  void OnMenuColStrategyAfter(wxCommandEvent &);
+
 public:
   gbtMatrixSheet(gbtTableMatrix *m_view);
 
   // Implementation of gbtGameView members
   void OnUpdate(void);
+
+  DECLARE_EVENT_TABLE()
 };
+
+const int GBT_SHEET_MATRIX = 3000;
+const int GBT_MENU_ROW_STRATEGY_BEFORE = 3001;
+const int GBT_MENU_ROW_STRATEGY_AFTER = 4001;
+const int GBT_MENU_COL_STRATEGY_BEFORE = 5001;
+const int GBT_MENU_COL_STRATEGY_AFTER = 6001;
+
+BEGIN_EVENT_TABLE(gbtMatrixSheet, wxSheet)
+  EVT_SHEET_LABEL_RIGHT_DOWN(GBT_SHEET_MATRIX,
+			     gbtMatrixSheet::OnLabelRightDown)
+  EVT_MENU_RANGE(GBT_MENU_ROW_STRATEGY_BEFORE,
+		 GBT_MENU_ROW_STRATEGY_BEFORE + 1000,
+		 gbtMatrixSheet::OnMenuRowStrategyBefore)
+  EVT_MENU_RANGE(GBT_MENU_ROW_STRATEGY_AFTER,
+		 GBT_MENU_ROW_STRATEGY_AFTER + 1000,
+		 gbtMatrixSheet::OnMenuRowStrategyAfter)
+  EVT_MENU_RANGE(GBT_MENU_COL_STRATEGY_BEFORE,
+		 GBT_MENU_COL_STRATEGY_BEFORE + 1000,
+		 gbtMatrixSheet::OnMenuColStrategyBefore)
+  EVT_MENU_RANGE(GBT_MENU_COL_STRATEGY_AFTER,
+		 GBT_MENU_COL_STRATEGY_AFTER + 1000,
+		 gbtMatrixSheet::OnMenuColStrategyAfter)
+END_EVENT_TABLE()
 
 
 gbtMatrixSheet::gbtMatrixSheet(gbtTableMatrix *p_view)
-  : wxSheet(p_view, -1), gbtGameView(p_view->GetDocument()),
+  : wxSheet(p_view, GBT_SHEET_MATRIX), gbtGameView(p_view->GetDocument()),
     m_view(p_view)
 {
   CreateGrid(m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer())->NumStrategies(),
@@ -259,6 +291,51 @@ gbtMatrixSheet::gbtMatrixSheet(gbtTableMatrix *p_view)
     }
   }
   AdjustScrollbars();
+}
+
+void gbtMatrixSheet::OnLabelRightDown(wxSheetEvent &p_event)
+{
+  wxMenu *menu = new wxMenu;
+  if (IsRowLabelCell(p_event.GetCoords())) {
+    menu->Append(GBT_MENU_ROW_STRATEGY_BEFORE + p_event.GetRow() + 1, 
+		 "Add strategy before");
+    menu->Append(GBT_MENU_ROW_STRATEGY_AFTER + p_event.GetRow() + 1, 
+		 "Add strategy after");
+  }
+  else {
+    menu->Append(GBT_MENU_COL_STRATEGY_BEFORE + 
+		 (p_event.GetCol() / m_doc->GetGame()->NumPlayers()) + 1, 
+		 "Add strategy before");
+    menu->Append(GBT_MENU_COL_STRATEGY_AFTER + 
+		 (p_event.GetCol() / m_doc->GetGame()->NumPlayers()) + 1, 
+		 "Add strategy after");
+  }
+
+  PopupMenu(menu, p_event.GetPosition().x, p_event.GetPosition().y);
+}
+
+void gbtMatrixSheet::OnMenuRowStrategyBefore(wxCommandEvent &p_event)
+{
+  m_doc->InsertStrategy(m_view->GetRowPlayer(),
+			p_event.GetId() - GBT_MENU_ROW_STRATEGY_BEFORE);
+}
+
+void gbtMatrixSheet::OnMenuRowStrategyAfter(wxCommandEvent &p_event)
+{
+  m_doc->InsertStrategy(m_view->GetRowPlayer(),
+			p_event.GetId() - GBT_MENU_ROW_STRATEGY_AFTER + 1);
+}
+
+void gbtMatrixSheet::OnMenuColStrategyBefore(wxCommandEvent &p_event)
+{
+  m_doc->InsertStrategy(m_view->GetColPlayer(),
+			p_event.GetId() - GBT_MENU_COL_STRATEGY_BEFORE);
+}
+
+void gbtMatrixSheet::OnMenuColStrategyAfter(wxCommandEvent &p_event)
+{
+  m_doc->InsertStrategy(m_view->GetColPlayer(),
+			p_event.GetId() - GBT_MENU_COL_STRATEGY_AFTER + 1);
 }
 
 static bool wxRectIsEmpty(const wxRect &rect)
