@@ -6202,13 +6202,14 @@ no prior sibling, the null node is returned.
 
 \item\lex{Quit}
 \protect \large \begin{verbatim}
-*Quit[]
+Quit
+Quit[{value->INTEGER:=0}] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
-Exits the command language.  
-\item [Notes:] Special function. The brackets \verb+[]+ are optional; not
-listable; not documented in \verb+Help+ or \verb+Manual+.  
+Exits the command language, returning \verb+value+ to the operating system.
+\item [Notes:] Not listable.  The brackets \verb+[]+ are optional; if they
+are not present, it is treated as \verb+Quit[0]+.
 \ed
 
 %--R--
