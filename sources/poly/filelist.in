@@ -1,0 +1,14 @@
+libpoly_a_SOURCES = \
+	gpartltr.cc \
+	gpoly.cc \
+	gpolylst.cc \
+	gsolver.cc \
+	ideal.cc \
+	ineqsolv.cc \
+	interval.cc \
+	monomial.cc \
+	pelclass.cc \
+	poly.cc \
+	prepoly.cc \
+	quiksolv.cc \
+	rectangl.cc

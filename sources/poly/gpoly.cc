@@ -65,7 +65,9 @@ TEMPLATE_SPECIALIZATION() gNumber gPoly<gNumber>::String_Coeff(gNumber nega)
 }
 
 template class gPoly<gRational>;
+#ifndef __BCC55__
 template gPoly<gRational> operator*(const gRational val, const gPoly<gRational> &poly);
+#endif  // _BCC55__
 template gPoly<gRational> operator*(const gPoly<gRational> &poly, const gRational val);
 
 template gPoly<gDouble> TogDouble(const gPoly<gRational>&);
@@ -77,7 +79,9 @@ template gText &operator<<(gText &, const gPoly<gRational> &);
 #endif  // __BCC55__
 
 template class gPoly<gNumber>;
+#ifndef __BCC55__
 template gPoly<gNumber> operator*(const gNumber val, const gPoly<gNumber> &poly);
+#endif  // __BCC55__
 template gPoly<gNumber> operator*(const gPoly<gNumber> &poly, const gNumber val);
 
 template gPoly<gDouble> TogDouble(const gPoly<gNumber>&);
@@ -95,7 +99,9 @@ template gPoly<double> operator*(const gPoly<double> &poly, const double val);
 #endif // UNUSED
 
 template class gPoly<gDouble>;
+#ifndef __BCC55__
 template gPoly<gDouble> operator*(const gDouble val, const gPoly<gDouble> &poly);
+#endif  // __BCC55__
 template gPoly<gDouble> operator*(const gPoly<gDouble> &poly, const gDouble val);
 template gPoly<gDouble> operator+(const gDouble val, const gPoly<gDouble> &poly);
 template gPoly<gDouble> operator+(const gPoly<gDouble> &poly, const gDouble val);
