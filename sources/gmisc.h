@@ -1,8 +1,8 @@
-//#
-//# FILE: gmisc.h -- Miscellaneous generally-useful functions
-//#
-//# $Id$ 
-//#
+//
+// FILE: gmisc.h -- Miscellaneous generally-useful functions
+//
+// $Id$ 
+//
 
 #ifndef GMISC_H
 #define GMISC_H
@@ -82,6 +82,12 @@ gRational	FromString(const gString &s,gRational &r);
 
 double ToDouble(const gString &);
 
+
+//
+/// Return a copy of the string with all quotes preceded by a backslash
+//
+gString EscapeQuotes(const gString &);
+
 //
 // Type dependent epsilon
 //
@@ -90,6 +96,23 @@ void gEpsilon(double &v, int i = 8);
 void gEpsilon(gRational &v, int i = 8);
 
 #endif    // GMISC_H
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

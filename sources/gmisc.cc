@@ -299,6 +299,19 @@ double ToDouble(const gString &s)
 { return strtod(s, NULL); }
 
 
+gString EscapeQuotes(const gString &s)
+{
+  gString ret;
+  
+  for (int i = 0; i < s.length(); i++)  {
+    if (s[i] == '"')   ret += '\\';
+    ret += s[i];
+  }
+
+  return ret;
+}
+
+
 //------------------------ TriState functions -----------------//
 
 gString NameTriState(TriState i)
