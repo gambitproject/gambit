@@ -502,9 +502,15 @@ bool FuncDescObj::Combine(FuncDescObj* newfunc)
 	  (index < newfunc->_FuncInfo[i].NumParams); 
 	  index++)
       {
+	/*
 	if((_FuncInfo[f_index].ParamInfo[index].DefaultValue == 0 && 
 	    newfunc->_FuncInfo[i].ParamInfo[index].DefaultValue == 0) &&
 	   (_FuncInfo[f_index].ParamInfo[index].Name ==
+	    newfunc->_FuncInfo[i].ParamInfo[index].Name) &&
+	   (_FuncInfo[f_index].ParamInfo[index].Spec ==
+	    newfunc->_FuncInfo[i].ParamInfo[index].Spec))
+	    */
+	if((_FuncInfo[f_index].ParamInfo[index].Name ==
 	    newfunc->_FuncInfo[i].ParamInfo[index].Name) &&
 	   (_FuncInfo[f_index].ParamInfo[index].Spec ==
 	    newfunc->_FuncInfo[i].ParamInfo[index].Spec))
@@ -550,8 +556,8 @@ bool FuncDescObj::Combine(FuncDescObj* newfunc)
 
       if(same_params)
       {
+	gerr << "New function ambiguous with " << FuncList()[f_index+1] <<'\n';
 	result = false;
-	break;
       }
     }
 
@@ -579,6 +585,73 @@ bool FuncDescObj::Combine(FuncDescObj* newfunc)
   delete newfunc;
   return finalresult;
 }
+
+
+bool FuncDescObj::Delete(FuncDescObj* newfunc)
+{
+  bool result = true;
+  bool finalresult = true;
+  bool same_params;
+  int i;
+  int j;
+  int f_index;
+  int delete_index;
+  int index;
+
+  for(i = 0; i < newfunc->_NumFuncs; i++)
+  {
+    result = false;
+    for(f_index = 0; f_index < _NumFuncs; f_index++)
+    {
+      if(_FuncInfo[f_index].NumParams == newfunc->_FuncInfo[i].NumParams) 
+      {
+	same_params = true;
+	for(index = 0; 
+	    index < _FuncInfo[f_index].NumParams;
+	    index++)
+	{
+	  if((_FuncInfo[f_index].ParamInfo[index].DefaultValue == 0 && 
+	      newfunc->_FuncInfo[i].ParamInfo[index].DefaultValue == 0) &&
+	     (_FuncInfo[f_index].ParamInfo[index].Name ==
+	      newfunc->_FuncInfo[i].ParamInfo[index].Name) &&
+	     (_FuncInfo[f_index].ParamInfo[index].Spec ==
+	      newfunc->_FuncInfo[i].ParamInfo[index].Spec))
+	  {
+	    same_params = same_params & true;
+	  }
+	  else
+	  {
+	    same_params = false;
+	    break;
+	  }
+	}
+	
+	if(same_params)
+	{
+	  delete_index = f_index;
+	  result = true;
+	  break;
+	}
+      }
+    }
+
+    if(result)
+    {
+      FuncInfoType* NewFuncInfo = new FuncInfoType[_NumFuncs-1];
+      for(j=0; j<delete_index; j++)
+	NewFuncInfo[j] = _FuncInfo[j];
+      for(j=delete_index+1; j<_NumFuncs; j++)
+	NewFuncInfo[j-1] = _FuncInfo[j];
+      delete[] _FuncInfo;
+      _FuncInfo = NewFuncInfo;
+      _NumFuncs--;
+    }
+    finalresult = finalresult & result;
+  }
+  delete newfunc;
+  return finalresult;
+}
+
 
 
 gString FuncDescObj::FuncName(void) const
@@ -750,6 +823,8 @@ bool CallFuncObj::_TypeMatch(Portion* p, PortionSpec ExpectedSpec,
     else if(CalledSpec.ListDepth > 0 && ExpectedSpec.ListDepth == 1 && 
 	    !Listable)
       result = true;
+    else if(CalledSpec.ListDepth > 0 && ExpectedSpec.ListDepth == NLIST)
+      result = true;
   }
   else if(CalledSpec.Type == porUNDEFINED && CalledSpec.ListDepth > 0)
   {
@@ -759,36 +834,6 @@ bool CallFuncObj::_TypeMatch(Portion* p, PortionSpec ExpectedSpec,
       result = true;
     }
   }
-
-
-  /*
-  if(CalledSpec == ExpectedSpec)
-    result = true;
-  else if((CalledSpec.Type & ExpectedSpec.Type) &&
-	  (CalledSpec.ListDepth == ExpectedSpec.ListDepth))
-    result = true;
-  else if(CalledSpec.ListDepth == ExpectedSpec.ListDepth)
-    if(CalledSpec.Type & ExpectedSpec.Type)
-      result = true;
-    else if(CalledSpec.Type == porUNDEFINED && CallSpec.ListDepth > 0)
-    {
-      ((ListPortion*) p)->SetDataType(ExpectedSpec.Type);
-      result = true;
-    }
-  else if((CalledSpec.Type & ExpectedSpec.Type) &&
-	  (!Listable) &&
-	  (CalledSpec.ListDepth>0) &&
-	  (ExpectedSpec.ListDepth>0))
-    result = true;
-  else if((CalledSpec.ListDepth > ExpectedSpec.ListDepth))
-    if((CalledSpec.Type & ExpectedSpec.Type) && Listable)
-      result = true;
-    else if(ExpectedSpec.ListDepth == 0 && CalledSpec.Type == porUNDEFINED)
-    {
-      ((ListPortion*) p)->SetDataType(ExpectedSpec.Type);
-      result = true;
-    }
-    */
 
   return result;
 }
@@ -1479,35 +1524,10 @@ gString CallFuncObj::_ParamName(const int index) const
 
 void CallFuncObj::Dump(gOutput& f) const
 {
-  int i;
-  int j;
-  bool first = true;
-
   if(_FuncIndex < 0)
     f << FuncName() << "[]\n";
   else
-  {
-    i = _FuncIndex;
-    f << _FuncName << '[';
-    for(j = 0; j < _FuncInfo[i].NumParams; j++)
-    {
-      if(_RunTimeParamInfo[j].Defined)
-      {
-	if(!first) f << ", ";
-	first = false;      
-	// if(_FuncInfo[i].ParamInfo[j].DefaultValue) f << '{';
-	f << _FuncInfo[i].ParamInfo[j].Name;
-	if(_FuncInfo[i].ParamInfo[j].PassByReference) f << '<';
-	f << "->";
-	// if(_FuncInfo[i].ParamInfo[j].DefaultValue)
-	//   f << _FuncInfo[i].ParamInfo[j].DefaultValue;
-	// else
-	f << PortionSpecToText(_FuncInfo[i].ParamInfo[j].Spec);
-	// if(_FuncInfo[i].ParamInfo[j].DefaultValue) f << '}';
-      }
-    }
-    f << "] =: " << PortionSpecToText(_FuncInfo[i].ReturnSpec) << '\n';
-  }
+    f << FuncList()[_FuncIndex] << '\n';
 }
 
 

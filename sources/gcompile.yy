@@ -55,6 +55,7 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
   \
   void emit(NewInstr*); \
   bool DefineFunction(void); \
+  bool DeleteFunction(void); \
   void RecoverFromError(void); \
   int ProgLength(void); \
   \
@@ -117,6 +118,7 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
 %token FOR
 %token QUIT
 %token DEFFUNC
+%token DELFUNC
 %token TYPEDEF
 %token INCLUDE
 
@@ -145,6 +147,7 @@ program:
 toplevel:     statements
         |     include toplevel
         |     funcdecl toplevel
+        |     delfunc toplevel
 
 statements:   statement
           |   statements sep statement
@@ -160,6 +163,13 @@ funcdecl:     DEFFUNC LBRACK NAME
               LBRACK formallist RBRACK TYPEopt COMMA statements
               RBRACK   { if (!triv && !semi) emit(new NewInstr(iOUTPUT));
 			 if (!DefineFunction())  YYERROR; } 
+
+delfunc:      DELFUNC LBRACK NAME
+              { funcname = tval; function = new gList<NewInstr*>; 
+                statementcount = 0; }
+              LBRACK formallist RBRACK TYPEopt
+              RBRACK   { if (!triv && !semi) emit(new NewInstr(iOUTPUT));
+			 if (!DeleteFunction())  YYERROR; } 
 
 TYPEopt:      { functype = "ANYTYPE" }
           |   TYPEDEF { paramtype = ""; } typename 
@@ -462,7 +472,10 @@ static struct tokens toktable[] =
     { LARROW, "<-" }, { COMMA, "," }, { HASH, "#" },
     { DOT, "." }, { CARET, "^" }, { AMPER, "&" }, { WRITE, "<<" }, { READ, ">>" },
     { IF, "If" }, { WHILE, "While" }, { FOR, "For" },
-    { QUIT, "Quit" }, { DEFFUNC, "NewFunction" }, { TYPEDEF, "=:" },
+    { QUIT, "Quit" }, 
+    { DEFFUNC, "NewFunction" }, 
+    { DELFUNC, "DeleteFunction" },
+    { TYPEDEF, "=:" },
     { INCLUDE, "Include" },
     { PERCENT, "%" }, { DIV, "DIV" }, { LPAREN, "(" }, { RPAREN, ")" },
     { CRLF, "carriage return" }, { EOC, "carriage return" }, { 0, 0 }
@@ -584,6 +597,7 @@ I_dont_believe_Im_doing_this:
     else if (s == "For")    return FOR;
     else if (s == "Quit")   return QUIT;
     else if (s == "NewFunction")   return DEFFUNC;
+    else if (s == "DeleteFunction")   return DELFUNC;
     else if (s == "Include")   return INCLUDE;
     else  { tval = s; return NAME; }
   }
@@ -827,6 +841,63 @@ bool GCLCompiler::DefineFunction(void)
   function = 0;
   return !error;
 }
+
+
+bool GCLCompiler::DeleteFunction(void)
+{
+  FuncDescObj *func = new FuncDescObj(funcname, 1);
+  bool error = false;
+
+  PortionSpec funcspec;
+
+  funcspec = TextToPortionSpec(functype);
+  if (funcspec.Type != porERROR) {
+    func->SetFuncInfo(0, FuncInfoType(function, funcspec, formals.Length()));
+  }
+  else {
+    error = true;
+    gerr << "Error: Unknown type " << functype << ", " << 
+      PortionSpecToText(funcspec) << " as return type in declaration of " << 
+      funcname << "[]\n";
+  }
+
+//  function->Dump(gout);
+
+  for (int i = 1; i <= formals.Length(); i++)   {
+    PortionSpec spec;
+    if(portions[i])
+      spec = portions[i]->Spec();
+    else
+      spec = TextToPortionSpec(types[i]);
+
+    if (spec.Type != porERROR)   {
+      if (refs[i])
+	func->SetParamInfo(0, i - 1, 
+                          ParamInfoType(formals[i], spec,
+			                portions[i], BYREF));
+      else
+	func->SetParamInfo(0, i - 1, 
+                          ParamInfoType(formals[i], spec,
+			                portions[i], BYVAL));
+    }
+    else   {
+      error = true;
+      gerr << "Error: Unknown type " << types[i] << ", " << 
+	PortionSpecToText(spec) << " for parameter " << formals[i] <<
+	 " in declaration of " << funcname << "[]\n";
+      break;
+    }
+  }
+
+  if (!error)  gsm.DeleteFunction(func);
+  formals.Flush();
+  types.Flush();
+  refs.Flush();
+  portions.Flush();
+  function = 0;
+  return !error;
+}
+
 
 void GCLCompiler::Execute(void)
 {

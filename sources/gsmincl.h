@@ -92,6 +92,7 @@ typedef enum
 
 #define  porANYTYPE    ( 0xFFFFFFFF )
 
+#define  NLIST 32767
 
 
 class PortionSpec

@@ -144,6 +144,7 @@ public:
   bool Write ( void );
   
   bool AddFunction( FuncDescObj* func );
+  bool DeleteFunction( FuncDescObj* func );
 
   bool InitCallFunction ( const gString& funcname );
   bool Bind           ( const gString& param_name = "" );

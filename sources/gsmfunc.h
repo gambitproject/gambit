@@ -138,6 +138,7 @@ public:
   void SetParamInfo(int funcindex, const ParamInfoType paraminfo[]);
   
   bool Combine( FuncDescObj* newfunc );
+  bool Delete( FuncDescObj* newfunc );
 
   gString FuncName ( void ) const;
 

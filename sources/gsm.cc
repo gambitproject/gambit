@@ -1547,6 +1547,28 @@ bool GSM::AddFunction(FuncDescObj* func)
 }
 
 
+bool GSM::DeleteFunction(FuncDescObj* func)
+{
+  FuncDescObj *old_func;
+  bool result;
+  assert(func != 0);
+  if(!_FuncTable->IsDefined(func->FuncName()))
+  {
+    _ErrorMessage(_StdErr, 73, 0, 0, old_func->FuncName());
+    return false;
+  }
+  else
+  {
+    old_func = (*_FuncTable)(func->FuncName());
+    result = old_func->Delete(func);
+    if(!result)
+      _ErrorMessage(_StdErr, 72, 0, 0, old_func->FuncName());
+    return result;
+  }
+}
+
+
+
 #ifndef NDEBUG
 void GSM::_BindCheck(void) const
 {
@@ -2515,6 +2537,12 @@ void GSM::_ErrorMessage
     break;
   case 71:
     s << "Cannot assign to a value not directly associated with a variable\n";
+    break;
+  case 72:
+    s << "No matching function prototype found\n";
+    break;
+  case 73:
+    s << "Function " << str1 << "[] not found\n";
     break;
   default:
     s << "General error " << error_num << "\n";

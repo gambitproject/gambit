@@ -105,8 +105,11 @@ gString PortionSpecToText(const PortionSpec& spec)
 	else
 	  result = result + " " + _PortionSpecText[i].Text;
   
-  for(i=0; i<spec.ListDepth; i++)
-    result = (gString) "LIST(" + result + ")";    
+  if(spec.ListDepth != NLIST)
+    for(i=0; i<spec.ListDepth; i++)
+      result = (gString) "LIST(" + result + ')';
+  else
+    result = (gString) "NLIST(" + result + ')';
   return result;
 }
 
@@ -123,6 +126,11 @@ PortionSpec TextToPortionSpec(const gString& text)
   {
     result.ListDepth++;
     t = t.mid(t.length()-6, 6);
+  }
+  if(t.left(6) == "NLIST(")
+  {
+    result.ListDepth = NLIST;
+    t = t.mid(t.length()-7, 7);
   }
   for(i=0; i<NumPortionSpecs; i++)
     if(t.left(strlen(_PortionSpecText[i].Text)) == _PortionSpecText[i].Text)
