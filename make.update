@@ -1,0 +1,80 @@
+# $Id$
+# An update script/makefile combination to create/update GAMBIT components
+# and automatically place them onto the primary GAMBIT ftp site.
+
+# Usage: 
+#update TARGET=[gui,gcl,src,guidoc,gcldoc] HOST=[sun4,aix,hp] GUI=[motif,xview]
+
+# This can be started on any of the hss machines and it will update the files
+# on the appropriate platform using rsh.
+
+# A site configuration file must exist in the same directory.  It must be
+# called make.site_$(GUI)_$(HOST) where GUI and HOST are appropriate to the
+# machine.  If a nongui target is being built, _$(GUI) is set to 'none'. 
+
+MACHINE_sun4=dosh.hum.caltech.edu
+MACHINE_rs6000=ironbark.hum.caltech.edu
+MACHINE_hp=jilt.hum.caltech.edu
+MACHINE_latex=hss.caltech.edu
+
+HOST=none
+GUI=none
+TARGET=none
+
+all:
+#Check which targets we are building, if all, build all
+ifeq ($(TARGET),none)
+	@$(MAKE) -f make.update error \
+		ERRORNAME='Must specify a TARGET [gui,gcl,src,guidoc,gcldoc]'
+endif
+ifeq ($(TARGET),all)
+	@$(MAKE)  -f make.update TARGET=gui HOST=$(HOST) GUI=$(GUI)
+	@$(MAKE)  -f make.update TARGET=gcl HOST=$(HOST) GUI=$(GUI)
+	@$(MAKE)  -f make.update TARGET=src HOST=$(HOST) GUI=$(GUI)
+endif	
+#Check GUI target options
+ifeq ($(TARGET),gui)
+#Check if a valid GUI type is specified for a gui target
+ifeq ($(GUI),none)
+	@$(MAKE) -f make.update error \
+		ERRORNAME='Must specify a GUI type [motif,xview]'
+endif
+#Check which gui platforms to build
+ifeq ($(GUI),all)
+	@$(MAKE) -f make.update TARGET=gui HOST=$(HOST) GUI=motif
+	@$(MAKE) -f make.update TARGET=gui HOST=$(HOST) GUI=xview	
+endif
+endif
+#Check which hosts to build on
+ifeq ($(HOST),none)
+	@$(MAKE) -f make.update error \
+		ERRORNAME='Must specify a HOST type [sun4,rs6000]'
+endif
+ifeq ($(HOST),all)
+	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=sun4 GUI=$(GUI)
+	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=rs6000 GUI=$(GUI)
+endif
+
+#Do the actual building
+ifeq ($(TARGET),gui)
+	rsh $(MACHINE_$(HOST)) "cd ~/distrib; \
+		make -f make.distr gui HOST=$(HOST) GUI=$(GUI)"
+endif
+ifeq ($(TARGET),gcl)
+	rsh $(MACHINE_$(HOST)) "cd ~/distrib; \
+		make -f make.distr gcl HOST=$(HOST) GUI=$(GUI)"
+endif
+ifeq ($(TARGET),src) # Build sources only on DOSH
+	rsh $(MACHINE_sun4) "cd ~/distrib; make -f make.distr src"
+endif
+ifeq ($(TARGET),gclman) # Build manuals only on hss (latex machine)
+	rsh $(MACHINE_latex) "cd /home/ironbark/gambit/distrib/manuals/gclman;\
+				make"
+endif
+error:
+	@echo $(ERRORNAME)
+	@tryagain # intentionally cause an error to drop out of MAKE
+
+
+
+

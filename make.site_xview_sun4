@@ -1,0 +1,12 @@
+# Setup the information needed for the gui compilation using XVIEW on SUN4
+# Edit the following where appropriate
+# WxWin information
+
+WXGUI = -Dwx_ol
+GUISUFFIX = _ol
+
+# XWindows information
+XINCDIR = -I/usr/include/X11
+XLIBDIR = -L/usr/lib/X11
+XLIB = -lxview -lolgx -lX11 -lm -lg++
+
