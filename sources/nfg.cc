@@ -94,6 +94,8 @@ void NFGameForm::DeleteOutcome(NFOutcome *outcome)
 {
   paytable->DeleteOutcome(outcome->GetNumber());
   delete outcomes.Remove(outcome->GetNumber());
+  for (int outc = 1; outc <= outcomes.Length(); outc++)
+    outcomes[outc]->number = outc;
 }
 
 const gArray<Strategy *> &NFGameForm::Strategies(int p) const
