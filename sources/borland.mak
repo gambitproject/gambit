@@ -7,7 +7,7 @@
 # Main makefile for Borland C++
 #
 
-all:  base math numerical pelican poly game nash gcl gui wxgcl
+all:  base math numerical pelican poly game nash gui 
 
 base:
 	cd base
