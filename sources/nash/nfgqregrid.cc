@@ -284,7 +284,7 @@ gVector<double> QreNfgGrid::UpdateFunc(const MixedProfile<double> &p_profile,
   gVector<double> tmp(p_profile.Support().NumStrats(p_player));
   double denom = 0.0;
   for (int st = 1; st <= r.Length(); st++) {
-    double p = p_profile.Payoff(p_player, p_player, st);
+    double p = p_profile.Payoff(p_player, p_profile.Support().GetStrategy(p_player, st));
     tmp[st] = exp(p_lambda * p);
     denom += tmp[st];
   }
@@ -327,7 +327,7 @@ static void Jacobian(gVector<double> &p_vector,
   gPVector<double> logitterms(p_profile.Lengths());
   for (int pl = 1; pl <= p_profile.GetGame().NumPlayers(); pl++) {
     for (int st = 1; st <= p_profile.Support().NumStrats(pl); st++) {
-      logitterms(pl, st) = exp(p_lambda * p_profile.Payoff(pl, pl, st));
+      logitterms(pl, st) = exp(p_lambda * p_profile.Payoff(pl, p_profile.Support().GetStrategy(pl, st)));
     }
   }
 

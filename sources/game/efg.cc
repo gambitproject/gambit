@@ -31,7 +31,6 @@
 #include "efgutils.h"
 #include "efstrat.h"
 #include "actiter.h"
-#include "lexicon.h"
 #include "nfg.h"
 
 // Declarations of internal structures
@@ -45,7 +44,7 @@ gbt_efg_game_rep::gbt_efg_game_rep(void)
   : m_refCount(1),
     sortisets(true), m_revision(0), 
     m_outcome_revision(-1), title("UNTITLED"),
-    chance(new gbt_efg_player_rep(this, 0)), afg(0), lexicon(0)
+    chance(new gbt_efg_player_rep(this, 0)), afg(0), m_reducedNfg(0)
 {
   root = new gbt_efg_node_rep(this, 0);
 }
@@ -57,16 +56,12 @@ gbt_efg_game_rep::~gbt_efg_game_rep()
 
   for (int i = 1; i <= players.Length(); delete players[i++]);
   for (int i = 1; i <= outcomes.Last(); delete outcomes[i++]);
-
-  if (lexicon)   delete lexicon;
-  lexicon = 0;
 }
 
 void gbt_efg_game_rep::DeleteLexicon(void) 
 {
-  if (lexicon)  {
-    delete lexicon;
-    lexicon = 0;
+  if (m_reducedNfg) {
+    m_reducedNfg = 0;
   }
 }
 
@@ -1284,19 +1279,9 @@ void gbtEfgGame::Payoff(const gArray<gArray<int> *> &profile,
   Payoff(rep->root, 1, profile, payoff);
 }
 
-gbtNfgGame gbtEfgGame::AssociatedNfg(void) const
+bool gbtEfgGame::HasReducedNfg(void) const
 {
-  if (rep->lexicon) {
-    return rep->lexicon->m_nfg;
-  }
-  else {
-    return 0;
-  }
-}
-
-bool gbtEfgGame::HasAssociatedNfg(void) const
-{
-  return rep->lexicon;
+  return rep->m_reducedNfg;
 }
 
 gbtNfgGame gbtEfgGame::AssociatedAfg(void) const
@@ -1304,7 +1289,3 @@ gbtNfgGame gbtEfgGame::AssociatedAfg(void) const
   return rep->afg;
 }
 
-Lexicon *gbtEfgGame::GetLexicon(void) const
-{
-  return rep->lexicon;
-}

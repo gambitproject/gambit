@@ -69,15 +69,16 @@ double NFLiapFunc::LiapDerivValue(int i1, int j1,
     psum = 0.0;
     for (j = 1; j <= p.Support().NumStrats(i); j++)  {
       psum += p(i,j);
-      x1 = p.Payoff(i, i, j) - p.Payoff(i);
+      x1 = p.Payoff(i, p.Support().GetStrategy(i, j)) - p.Payoff(i);
       if (i1 == i) {
 	if (x1 > 0.0) {
-	  x -= x1 * p.Payoff(i, i1, j1);
+	  x -= x1 * p.Payoff(i, p.Support().GetStrategy(i1, j1));
 	}
       }
       else {
 	if (x1 > 0.0) {
-	  x += x1 * (p.Payoff(i, i, j, i1, j1) - p.Payoff(i, i1, j1));
+	  x += x1 * (p.Payoff(i, i, j, i1, j1) - 
+		     p.Payoff(i, p.Support().GetStrategy(i1, j1)));
 	}
       }
     }

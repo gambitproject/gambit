@@ -141,9 +141,11 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   SetIcon(wxIcon(nfg_bits, nfg_width, nfg_height));
 #endif  // __WXMSW__
 
+  printf("creating support in nfgshow\n");
   m_doc->m_curNfgSupport = new gbtNfgSupport(*m_doc->m_nfg);   // base support
   m_doc->m_curNfgSupport->SetName("Full Support");
   m_doc->m_nfgSupports.Append(m_doc->m_curNfgSupport);
+  printf("support created in nfgshow\n");
 
   MakeMenus();
 
@@ -587,12 +589,16 @@ void NfgShow::OnEditContingency(wxCommandEvent &)
   dialogEditContingency dialog(this, m_doc->GetNfg(), m_doc->GetContingency());
 
   if (dialog.ShowModal() == wxID_OK) {
+    StrategyProfile profile(m_doc->GetNfg());
+    for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
+      profile.Set(pl, m_doc->GetNfg().GetPlayer(pl).GetStrategy(m_doc->GetContingency()[pl]));
+    }
+
     if (dialog.GetOutcome() == 0) { 
-      m_doc->GetNfg().SetOutcome(m_doc->GetContingency(), 0);
+      profile.SetOutcome(0);
     }
     else {
-      m_doc->GetNfg().SetOutcome(m_doc->GetContingency(),
-				 m_doc->GetNfg().GetOutcomeId(dialog.GetOutcome()));
+      profile.SetOutcome(m_doc->GetNfg().GetOutcomeId(dialog.GetOutcome()));
     }
     m_doc->UpdateViews(0, false, true);
   }

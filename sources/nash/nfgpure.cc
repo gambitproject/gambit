@@ -36,7 +36,7 @@ gList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
 {
   gbtNfgGame nfg = p_support.GetGame();
   gList<MixedSolution> solutions;
-  NfgContIter citer(p_support);
+  gbtNfgContIterator citer(p_support);
 
   int ncont = 1;
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
@@ -52,10 +52,10 @@ gList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
     NfgIter niter(citer);
     
     for (int pl = 1; flag && pl <= nfg.NumPlayers(); pl++)  {
-      gNumber current = citer.GetOutcome().GetPayoff(nfg.GetPlayer(pl));
+      gNumber current = citer.GetPayoff(nfg.GetPlayer(pl));
       for (int i = 1; i <= p_support.NumStrats(pl); i++)  {
 	niter.Next(pl);
-	if (niter.GetOutcome().GetPayoff(nfg.GetPlayer(pl)) > current)  {
+	if (niter.GetPayoff(nfg.GetPlayer(pl)) > current)  {
 	  flag = false;
 	  break;
 	}
@@ -65,12 +65,11 @@ gList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
     if (flag)  {
       MixedProfile<gNumber> temp(p_support.GetGame());
       ((gVector<gNumber> &) temp).operator=(gNumber(0));
-      gArray<int> profile = citer.Get();
-      for (int pl = 1; pl <= profile.Length(); pl++) {
-	temp(pl, profile[pl]) = 1;
+      MixedSolution soln(temp, "EnumPure[NFG]");
+      for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
+	soln.Set(citer.GetProfile().Get(pl), 1);
       }
-      
-      solutions.Append(MixedSolution(temp, "EnumPure[NFG]"));
+      solutions.Append(soln);
     }
     contNumber++;
   }  while ((m_stopAfter == 0 || solutions.Length() < m_stopAfter) &&

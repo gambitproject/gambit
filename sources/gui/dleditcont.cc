@@ -42,6 +42,11 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
 {
   SetAutoLayout(true);
 
+  StrategyProfile profile(p_nfg);
+  for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
+    profile.Set(pl, p_nfg.GetPlayer(pl).GetStrategy(p_cont[pl]));
+  }
+
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
   wxStaticBoxSizer *contSizer =
@@ -98,7 +103,7 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
     }
 
     m_outcome->Append((const char *) item);
-    if (p_nfg.GetOutcome(p_cont) == outcome) {
+    if (profile.GetOutcome() == outcome) {
       m_outcome->SetSelection(outc);
     }
   }

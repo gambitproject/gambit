@@ -65,12 +65,9 @@ template <class T> class MixedProfile : public gPVector<T>  {
     T LiapValue(void) const;
     void Regret(gPVector<T> &value) const;
     T MaxRegret(void) const;
-    bool IsPure(void) const;
-    bool IsPure(int pl) const;
     void Centroid(void);
 
     T Payoff(int pl) const;
-    T Payoff(int pl, int player1, int strat1) const;
     T Payoff(int pl, gbtNfgStrategy) const;
     T Payoff(int pl, int player1, int strat1, int player2, int strat2) const;
     void Payoff(int pl, int const_pl, gVector<T> &payoff) const;

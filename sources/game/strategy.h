@@ -55,6 +55,8 @@ public:
 
   gbtNfgPlayer GetPlayer(void) const;
   long GetIndex(void) const;
+
+  const gArray<int> *const GetBehavior(void) const;
 };
 
 gOutput &operator<<(gOutput &, const gbtNfgStrategy &);

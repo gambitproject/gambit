@@ -364,13 +364,11 @@ wxString NfgGridTable::GetValue(int row, int col)
       profile.Set(pl, support.GetStrategy(pl, strategy[pl]));
     }
 
-    gbtNfgOutcome outcome = m_doc->GetNfg().GetOutcome(profile);
     if (m_doc->GetPreferences().OutcomeLabel() == GBT_OUTCOME_LABEL_PAYOFFS) {
       wxString ret = "";
       for (int pl = 1; pl <= strategy.Length(); pl++) {
-	ret += wxString::Format("%s",
-				(char *) ToText(outcome.GetPayoff(m_doc->GetNfg().GetPlayer(pl)),
-						m_doc->GetPreferences().NumDecimals()));
+	ret += (char *) ToText(profile.GetPayoff(m_doc->GetNfg().GetPlayer(pl)),
+			       m_doc->GetPreferences().NumDecimals());
 	if (pl < strategy.Length()) {
 	  ret += wxString(",");
 	}
@@ -379,6 +377,7 @@ wxString NfgGridTable::GetValue(int row, int col)
       return ret;
     }
     else {
+      gbtNfgOutcome outcome = profile.GetOutcome();
       if (!outcome.IsNull()) {
 	wxString ret = (char *) outcome.GetLabel();
 	if (ret == "") {

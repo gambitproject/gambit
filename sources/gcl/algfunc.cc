@@ -828,7 +828,7 @@ static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
 static Portion *GSM_Nfg(GSM &, Portion **param)
 {
   gbtEfgGame efg = AsEfg(param[0]);
-  gbtNfgGame nfg = MakeReducedNfg(EFSupport(efg));
+  gbtNfgGame nfg = efg.GetReducedNfg(EFSupport(efg));
   return new NfgPortion(nfg);
 }
 

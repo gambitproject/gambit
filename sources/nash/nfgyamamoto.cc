@@ -57,7 +57,7 @@ static double Payoff(const MixedProfile<double> &p_profile, int p_player,
 {
   for (int st = 1; st <= p_profile.Support().NumStrats(p_player); st++) {
     if (p_partition(p_index, st) > 0) {
-      return p_profile.Payoff(p_player, p_player, st);
+      return p_profile.Payoff(p_player, p_profile.Support().GetStrategy(p_player, st));
     }
   }
   

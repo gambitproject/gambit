@@ -58,6 +58,17 @@ void gbt_efg_node_rep::DeleteOutcome(gbt_efg_outcome_rep *p_outcome)
   }
 }
 
+gbt_efg_node_rep *gbt_efg_node_rep::NextSibling(void)
+{
+  int childNumber = m_parent->m_children.Find(this);
+  if (childNumber == m_parent->m_children.Length()) {
+    return 0;
+  }
+  else {
+    return m_parent->m_children[childNumber + 1];
+  }
+}
+
 gbtEfgNode::gbtEfgNode(void)
   : rep(0)
 { }
@@ -252,10 +263,7 @@ int gbtEfgNode::NumberInInfoset(void) const
 gbtEfgNode gbtEfgNode::NextSibling(void) const  
 {
   if (!rep || !rep->m_parent)   return 0;
-  if (rep->m_parent->m_children.Find(rep) == rep->m_parent->m_children.Length())
-    return 0;
-  else
-    return rep->m_parent->m_children[rep->m_parent->m_children.Find(rep) + 1];
+  return rep->NextSibling();
 }
 
 gbtEfgNode gbtEfgNode::PriorSibling(void) const

@@ -114,6 +114,7 @@ struct gbt_efg_node_rep {
   ~gbt_efg_node_rep();
 
   void DeleteOutcome(gbt_efg_outcome_rep *outc);
+  gbt_efg_node_rep *NextSibling(void);
 };
 
 struct gbt_efg_game_rep {
@@ -128,7 +129,7 @@ struct gbt_efg_game_rep {
   gbt_efg_node_rep *root;
   gbt_efg_player_rep *chance;
   gbtNfgGame afg;
-  mutable Lexicon *lexicon;
+  gbt_nfg_game_rep *m_reducedNfg;
 
   gbt_efg_game_rep(void);
   ~gbt_efg_game_rep();

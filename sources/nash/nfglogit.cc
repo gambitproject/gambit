@@ -137,8 +137,8 @@ static void QreLHS(const gbtNfgSupport &p_support, const gVector<double> &p_poin
     for (int st = 2; st <= p_support.NumStrats(pl); st++) {
       p_lhs[++rowno] = log(profile(pl, st) / profile(pl, 1));
       p_lhs[rowno] -= (lambda * 
-		       (profile.Payoff(pl, pl, st) -
-			profile.Payoff(pl, pl, 1)));
+		       (profile.Payoff(pl, p_support.GetStrategy(pl, st)) -
+			profile.Payoff(pl, p_support.GetStrategy(pl, 1))));
       p_lhs[rowno] *= profile(pl, 1) * profile(pl, st);
     }
   }
@@ -197,7 +197,9 @@ static void QreJacobian(const gbtNfgSupport &p_support,
 	}
       }
 
-      p_matrix(p_matrix.NumRows(), rowno) = -profile(pl1, 1) * profile(pl1, st1) * (profile.Payoff(pl1, pl1, st1) - profile.Payoff(pl1, pl1, 1));
+      p_matrix(p_matrix.NumRows(), rowno) = -profile(pl1, 1) * profile(pl1, st1) *
+	(profile.Payoff(pl1, p_support.GetStrategy(pl1, st1)) -
+	 profile.Payoff(pl1, p_support.GetStrategy(pl1, 1)));
     }
   }
 }

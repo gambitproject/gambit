@@ -25,7 +25,6 @@
 //
 
 #include "behav.h"
-#include "lexicon.h"
 #include "mixed.imp"
 #include "math/rational.h"
 

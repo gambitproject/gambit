@@ -36,12 +36,18 @@
 class StrategyProfile;
 class Lexicon;
 class gbtEfgGame;
+class EFSupport;
+template <class T> class MixedProfile;
 
 struct gbt_nfg_game_rep;
 
 class gbtNfgGame  {
 friend class Lexicon;
 friend class NfgFileReader;
+friend class StrategyProfile;
+friend class MixedProfile<double>;
+friend class MixedProfile<gRational>;
+friend class MixedProfile<gNumber>;
 friend void SetEfg(gbtNfgGame, gbtEfgGame);
 protected:
   gbt_nfg_game_rep *rep;
@@ -88,11 +94,6 @@ public:
 
   gbtNfgOutcome GetOutcomeId(int p_id) const;
   int NumOutcomes(void) const;
-
-  void SetOutcome(const gArray<int> &profile, const gbtNfgOutcome &outcome);
-  gbtNfgOutcome GetOutcome(const gArray<int> &profile) const;
-  void SetOutcome(const StrategyProfile &p, const gbtNfgOutcome &outcome);
-  gbtNfgOutcome GetOutcome(const StrategyProfile &p) const;
 
   void SetOutcomeIndex(int index, const gbtNfgOutcome &outcome);
   gbtNfgOutcome GetOutcomeIndex(int index) const;

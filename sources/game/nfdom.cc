@@ -29,19 +29,15 @@
 bool gbtNfgSupport::Dominates(gbtNfgStrategy s, gbtNfgStrategy t,
 			      bool strong) const
 {
-  NfgContIter A(*this), B(*this);
+  gbtNfgContIterator A(*this), B(*this);
 
-  A.Freeze(s.GetPlayer());
-  A.Set(s);
-  B.Freeze(s.GetPlayer());
-  B.Set(t);  
+  A.Freeze(s);
+  B.Freeze(t);  
 
   if (strong)  {
     do  {
-      gNumber ap = ((!A.GetOutcome().IsNull()) ? 
-		    A.GetOutcome().GetPayoff(s.GetPlayer()) : gNumber(0));
-      gNumber bp = ((!B.GetOutcome().IsNull()) ? 
-		    B.GetOutcome().GetPayoff(s.GetPlayer()) : gNumber(0));
+      gNumber ap = A.GetPayoff(s.GetPlayer());
+      gNumber bp = B.GetPayoff(s.GetPlayer());
 
       if (ap <= bp)  {
 	return false;
@@ -55,10 +51,8 @@ bool gbtNfgSupport::Dominates(gbtNfgStrategy s, gbtNfgStrategy t,
   bool equal = true;
   
   do   {
-    gNumber ap = ((!A.GetOutcome().IsNull()) ? 
-		  A.GetOutcome().GetPayoff(s.GetPlayer()) : gNumber(0));
-    gNumber bp = ((!B.GetOutcome().IsNull()) ? 
-		  B.GetOutcome().GetPayoff(s.GetPlayer()) : gNumber(0));
+    gNumber ap = A.GetPayoff(s.GetPlayer());
+    gNumber bp = B.GetPayoff(s.GetPlayer());
 
     if (ap < bp)   { 
       return false;

@@ -53,9 +53,9 @@ gbtNfgGame CompressNfg(const gbtNfgGame &nfg, const gbtNfgSupport &S)
     }
   }
 
-  NfgContIter oiter(S);
+  gbtNfgContIterator oiter(S);
   gbtNfgSupport newS(N);
-  NfgContIter niter(newS);
+  gbtNfgContIterator niter(newS);
   
   do   {
     if (!oiter.GetOutcome().IsNull()) {

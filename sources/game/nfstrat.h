@@ -36,11 +36,13 @@
 class StrategyProfile   {
 friend class gbtNfgGame;
 private:
+  gbtNfgGame m_nfg; 
   long index;
   gArray<gbtNfgStrategy> profile;
   
 public:
   StrategyProfile(const gbtNfgGame &);
+  StrategyProfile(const gbtNfgGame &, const gArray<int> &);
   StrategyProfile(const StrategyProfile &p);
 
   ~StrategyProfile();
@@ -48,12 +50,16 @@ public:
   StrategyProfile &operator=(const StrategyProfile &);
   
   bool IsValid(void) const; 
-  
   long GetIndex(void) const;
   
   gbtNfgStrategy operator[](int p) const;
   gbtNfgStrategy Get(int p) const;
   void Set(int p, gbtNfgStrategy);
+
+  void SetOutcome(const gbtNfgOutcome &);
+  gbtNfgOutcome GetOutcome(void) const;
+
+  gNumber GetPayoff(const gbtNfgPlayer &) const;
 };
 
 class gbtNfgSupport {

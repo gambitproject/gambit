@@ -260,8 +260,8 @@ static Portion* GSM_Outcome(GSM &, Portion** param)
     profile.Set(i, strat);
   }
   
-  if (!nfg.GetOutcome(profile).IsNull()) {
-    return new NfOutcomePortion(nfg.GetOutcome(profile));
+  if (!profile.GetOutcome().IsNull()) {
+    return new NfOutcomePortion(profile.GetOutcome());
   }
   else {
     return new NullPortion(porNFOUTCOME);
@@ -453,7 +453,7 @@ static Portion* GSM_SetOutcome(GSM &gsm, Portion** param)
   
   gbtNfgOutcome outcome = ((NfOutcomePortion *) param[1])->Value();
 
-  nfg.SetOutcome(profile, outcome);
+  profile.SetOutcome(outcome);
 
   return param[1]->ValCopy();
 }

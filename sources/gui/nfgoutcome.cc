@@ -201,14 +201,21 @@ void NfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
 void NfgOutcomeWindow::OnPopupOutcomeAttach(wxCommandEvent &)
 {
   if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
-    m_doc->GetNfg().SetOutcome(m_doc->GetContingency(),
-			       m_doc->GetNfg().GetOutcomeId(GetGridCursorRow() + 1));
+    StrategyProfile profile(m_doc->GetNfg());
+    for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
+      profile.Set(pl, m_doc->GetNfg().GetPlayer(pl).GetStrategy(m_doc->GetContingency()[pl]));
+    }
+    profile.SetOutcome(m_doc->GetNfg().GetOutcomeId(GetGridCursorRow() + 1));
   }
 }
 
 void NfgOutcomeWindow::OnPopupOutcomeDetach(wxCommandEvent &)
 {
-  m_doc->GetNfg().SetOutcome(m_doc->GetContingency(), 0);
+  StrategyProfile profile(m_doc->GetNfg());
+  for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
+    profile.Set(pl, m_doc->GetNfg().GetPlayer(pl).GetStrategy(m_doc->GetContingency()[pl]));
+  }
+  profile.SetOutcome(0);
 }
 
 

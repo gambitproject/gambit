@@ -412,8 +412,12 @@ gNumber gbtGameDocument::ActionProb(const gbtEfgNode &p_node, int p_action) cons
 
 void gbtGameDocument::MakeReducedNfg(void)
 {
-  m_nfg = new gbtNfgGame(::MakeReducedNfg(*m_curEfgSupport));
+  m_nfg = new gbtNfgGame(m_efg->GetReducedNfg(*m_curEfgSupport));
   m_contingency = gArray<int>(m_nfg->NumPlayers());
+  printf("m_nfg->NumPlayers() = %d\n", m_nfg->NumPlayers());
+  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
+    printf("strategies for %d = %d\n", pl, m_nfg->GetPlayer(pl).NumStrategies());
+  }
   for (int pl = 1; pl <= m_nfg->NumPlayers(); m_contingency[pl++] = 1);
   (void) new NfgShow(this, 0);
 

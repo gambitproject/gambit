@@ -102,7 +102,7 @@ static bool ParsePayoffs(gbtNfgGame p_nfg, const gText &p_payoffs)
   }
   EatWhitespace(p_payoffs, i);
   gbtNfgSupport support(p_nfg);
-  NfgContIter iter(support);
+  gbtNfgContIterator iter(support);
   while (p_payoffs[i++] == '[') {
     gText pay;
     iter.SetOutcome(p_nfg.NewOutcome());

@@ -32,7 +32,7 @@ template <class T> class gArray;
 class StrategyProfile;
 #include "nfg.h"
 #include "nfstrat.h"
-class NfgContIter;
+class gbtNfgContIterator;
 
 //
 // This class is useful for iterating around the normal form.
@@ -49,7 +49,7 @@ public:
   NfgIter(gbtNfgGame);
   NfgIter(const gbtNfgSupport &s);
   NfgIter(const NfgIter &);
-  NfgIter(const NfgContIter &);
+  NfgIter(const gbtNfgContIterator &);
   ~NfgIter();
 
   NfgIter &operator=(const NfgIter &);
@@ -61,10 +61,11 @@ public:
   void Get(gArray<int> &t) const;
   void Set(const gArray<int> &t);
 
-  long GetIndex(void) const;
-
   gbtNfgOutcome GetOutcome(void) const;
   void SetOutcome(gbtNfgOutcome);
+
+  gNumber GetPayoff(const gbtNfgPlayer &p_player) const 
+    { return profile.GetPayoff(p_player); }
 
   const gbtNfgSupport &Support(void) const { return support; }
 };

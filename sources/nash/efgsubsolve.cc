@@ -138,7 +138,7 @@ void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
 	sol = m_efgAlgorithm->Solve(subsupport, p_status);
       }
       else if (m_nfgAlgorithm) {
-	gbtNfgGame nfg = MakeReducedNfg(subsupport);
+	gbtNfgGame nfg = foo.GetReducedNfg(subsupport);
 	gbtNfgSupport support(nfg);
 
 	gList<MixedSolution> nfgSolutions;

@@ -233,22 +233,20 @@ PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
 {
   StrategyProfile profile(m_nfg);
 
-  NfgContIter A(support), B(support);
-  A.Freeze(i);
-  A.Set(i, strat1);
-  B.Freeze(i);
-  B.Set(i, strat2);
+  gbtNfgContIterator A(support), B(support);
+  A.Freeze(support.GetStrategy(i, strat1));
+  B.Freeze(support.GetStrategy(i, strat2));
   gPoly<gDouble> equation(&Space,&Lex);
   do {
     gPoly<gDouble> term(&Space,(gDouble)1,&Lex);
-    profile = A.Profile();
+    profile = A.GetProfile();
     int k;
     for(k=1;k<=m_nfg.NumPlayers();k++) 
       if(i!=k) 
 	term*=Prob(k,support.GetIndex(profile[k]));
     gDouble coeff,ap,bp;
-    ap = (double) A.GetOutcome().GetPayoff(m_nfg.GetPlayer(i));
-    bp = (double) B.GetOutcome().GetPayoff(m_nfg.GetPlayer(i));
+    ap = (double) A.GetPayoff(m_nfg.GetPlayer(i));
+    bp = (double) B.GetPayoff(m_nfg.GetPlayer(i));
     coeff = ap - bp;
     term*=coeff;
     equation+=term;

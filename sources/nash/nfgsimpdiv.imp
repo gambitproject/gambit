@@ -377,7 +377,7 @@ template <class T> T gbtNfgNashSimpdiv<T>::getlabel(MixedProfile<T> &yy,
     maxval=((T)(-1000000));
     jj=0;
     for(j=1;j<=yy.Support().NumStrats(i);j++) {
-      pay=yy.Payoff(i,i,j);
+      pay=yy.Payoff(i, yy.Support().GetStrategy(i,j));
       payoff+=(yy(i,j)*pay);
       if(pay>maxval) {
 	maxval=pay;

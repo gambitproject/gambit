@@ -27,22 +27,24 @@
 #include "base/base.h"
 #include "nfg.h"
 #include "nfstrat.h"
+#include "nfgint.h"
+#include "efg.h"
 
 //--------------------------------------------------------
 // StrategyProfile: Constructors, Destructors, Operators
 //--------------------------------------------------------
 
-StrategyProfile::StrategyProfile(const gbtNfgGame &N)
-  : index(0L), profile(N.NumPlayers())
+StrategyProfile::StrategyProfile(const gbtNfgGame &p_nfg)
+  : m_nfg(p_nfg), index(0L), profile(m_nfg.NumPlayers())
 {
-  for (int pl = 1; pl <= N.NumPlayers(); pl++)   {
-    profile[pl] = N.GetPlayer(pl).GetStrategy(1);
+  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++)   {
+    profile[pl] = m_nfg.GetPlayer(pl).GetStrategy(1);
     index += profile[pl].GetIndex();
   }
 }
 
 StrategyProfile::StrategyProfile(const StrategyProfile &p)
-: index(p.index), profile(p.profile)
+  : m_nfg(p.m_nfg), index(p.index), profile(p.profile)
 { }
 
 StrategyProfile::~StrategyProfile()
@@ -51,6 +53,7 @@ StrategyProfile::~StrategyProfile()
 StrategyProfile &StrategyProfile::operator=(const StrategyProfile &p)
 {
   if (this != &p) {
+    m_nfg = p.m_nfg;
     index = p.index;
     profile = p.profile;
   }
@@ -89,6 +92,35 @@ void StrategyProfile::Set(int p, gbtNfgStrategy s)
   profile[p] = s;
 }
 
+void StrategyProfile::SetOutcome(const gbtNfgOutcome &outcome)
+{
+  m_nfg.rep->m_results[index + 1] = outcome.rep;
+  m_nfg.rep->m_revision++;
+  m_nfg.BreakLink();
+}
+
+gbtNfgOutcome StrategyProfile::GetOutcome(void) const
+{
+  return m_nfg.rep->m_results[index + 1];
+}
+
+gNumber StrategyProfile::GetPayoff(const gbtNfgPlayer &p_player) const
+{
+  if (m_nfg.rep->m_results.Length() > 0) {
+    return m_nfg.rep->m_results[index + 1]->m_payoffs[p_player.GetId()];
+  }
+  else {
+    gArray<gArray<int> *> behav(m_nfg.NumPlayers());
+    for (int pl = 1; pl <= behav.Length(); pl++) {
+      // Casting away const -- sloppy
+      behav[pl] = (gArray<int> *) profile[pl].GetBehavior();
+    }
+    gVector<gNumber> payoff(m_nfg.NumPlayers());
+    gbtEfgGame(m_nfg.rep->m_efg).Payoff(behav, payoff);
+    return payoff[p_player.GetId()];
+  }
+}
+
 //==========================================================================
 //                         class gbtNfgSupport
 //==========================================================================
@@ -102,6 +134,8 @@ gbtNfgSupport::gbtNfgSupport(const gbtNfgGame &p_nfg)
 { 
   // Initially, all strategies are contained in the support
   m_strategies = 1;
+  gStandardOutput gout;
+  gout << m_strategies << '\n';
 }
 
 gbtNfgSupport &gbtNfgSupport::operator=(const gbtNfgSupport &p_support)

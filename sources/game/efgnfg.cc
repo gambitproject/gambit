@@ -33,173 +33,114 @@
 #include "nfgiter.h"
 #include "nfgciter.h"
 
-#include "lexicon.h"
-
 // For access to internals
 #include "efgint.h"
 #include "nfgint.h"
 
-
-Lexicon::Lexicon(const gbtEfgGame &p_efg)
-  : m_nfg(0), strategies(p_efg.NumPlayers())
-{ }
-
-Lexicon::~Lexicon()
+static void MakeStrategy(gbt_nfg_game_rep *p_nfg, gbtEfgPlayer p_player)
 {
-  for (int i = 1; i <= strategies.Length(); i++)
-    while (strategies[i].Length())  delete strategies[i].Remove(1);
-  if (m_nfg != 0) {
-    m_nfg.rep->m_efg = 0;
+  gArray<int> *behav = new gArray<int>(p_player.NumInfosets());
+  gText label = "";
+
+  // FIXME: This is a rather lame labeling scheme.
+  for (int iset = 1; iset <= p_player.NumInfosets(); iset++)  {
+    if (p_player.GetInfoset(iset).GetFlag()) {
+      (*behav)[iset] = p_player.GetInfoset(iset).GetWhichBranch();
+      label += ToText((*behav)[iset]);
+    }
+    else {
+      (*behav)[iset] = 0;
+      label += "*";
+    }
   }
+
+  gbt_nfg_player_rep *player = p_nfg->m_players[p_player.GetId()];
+  gbt_nfg_strategy_rep *strategy = new gbt_nfg_strategy_rep(player);
+  strategy->m_behav = behav;
+  strategy->m_label = label;
+  player->m_strategies.Append(strategy);
+  strategy->m_id = player->m_strategies.Length();
 }
 
-void SetEfg(gbtNfgGame nfg, gbtEfgGame efg)
+static void MakeReducedStrats(gbt_nfg_game_rep *p_nfg,
+			      const EFSupport &S,
+			      gbt_efg_player_rep *p,
+			      gbt_efg_node_rep *n,
+			      gbt_efg_node_rep *nn)
 {
-  nfg.rep->m_efg = efg.rep;
-}
+  if (!n->m_parent)  n->m_ptr = 0;
 
-void Lexicon::MakeLink(gbtEfgGame efg, gbtNfgGame nfg)
-{
-  nfg.rep->m_efg = efg.rep;
-  m_nfg = nfg;
-}
-
-void Lexicon::MakeStrategy(gbtEfgPlayer p)
-{
-  lexCorrespondence *c = new lexCorrespondence(p.NumInfosets());
-  
-  for (int i = 1; i <= p.NumInfosets(); i++)  {
-    if (p.GetInfoset(i).GetFlag())
-      (*c)[i] = p.GetInfoset(i).GetWhichBranch();
-    else
-      (*c)[i] = 0;
-  }
-  strategies[p.GetId()].Append(c);
-}
-
-void Lexicon::MakeReducedStrats(const EFSupport &S,
-				gbtEfgPlayer p, gbtEfgNode n, gbtEfgNode nn)
-{
-  int i;
-  gbtEfgNode m, mm;
-
-  if (n.GetParent().IsNull())  n.rep->m_ptr = 0;
-
-  if (n.NumChildren() > 0)  {
-    if (n.GetInfoset().GetPlayer() == p)  {
-      if (!n.GetInfoset().GetFlag())  {
+  if (n->m_children.Length() > 0)  {
+    if (n->m_infoset->m_player == p)  {
+      if (!n->m_infoset->m_flag)  {
 	// we haven't visited this infoset before
-	n.GetInfoset().SetFlag(true);
-	for (i = 1; i <= n.NumChildren(); i++)   {
-	  if (S.Contains(n.GetInfoset().GetAction(i)))  {
-	    gbtEfgNode m = n.GetChild(i);
-	    n.rep->m_whichbranch = m.rep;
-	    n.GetInfoset().SetWhichBranch(i);
-	    MakeReducedStrats(S, p, m, nn);
+	n->m_infoset->m_flag = true;
+	for (int i = 1; i <= n->m_children.Length(); i++)   {
+	  if (S.Contains(n->m_infoset->m_actions[i]))  {
+	    gbt_efg_node_rep *m = n->m_children[i];
+	    n->m_whichbranch = m;
+	    n->m_infoset->m_whichbranch = i;
+	    MakeReducedStrats(p_nfg, S, p, m, nn);
 	  }
 	}
-	n.GetInfoset().SetFlag(false);
+	n->m_infoset->m_flag = false;
       }
       else  {
 	// we have visited this infoset, take same action
-	MakeReducedStrats(S, p, n.rep->m_children[n.GetInfoset().GetWhichBranch()], nn);
+	MakeReducedStrats(p_nfg, S, p,
+			  n->m_children[n->m_infoset->m_whichbranch],
+			  nn);
       }
     }
     else  {
-      n.rep->m_ptr = NULL;
-      if (nn != NULL)
-	n.rep->m_ptr = nn.rep->m_parent;
-      n.rep->m_whichbranch = n.rep->m_children[1];
-      if (n.rep->m_infoset) 
-	n.GetInfoset().SetWhichBranch(0);
-      MakeReducedStrats(S, p, n.GetChild(1), n.GetChild(1));
+      n->m_ptr = NULL;
+      if (nn != NULL) {
+	n->m_ptr = nn->m_parent;
+      }
+      n->m_whichbranch = n->m_children[1];
+      if (n->m_infoset) { 
+	n->m_infoset->m_whichbranch = 0;
+      }
+      MakeReducedStrats(p_nfg, S, p, n->m_children[1], n->m_children[1]);
     }
   }
-  else if (!nn.IsNull())  {
-    for (; ; nn = nn.rep->m_parent->m_ptr->m_whichbranch)  {
-      m = nn.NextSibling();
-      if (!m.IsNull() || nn.rep->m_parent->m_ptr == NULL)   break;
+  else if (nn)  {
+    gbt_efg_node_rep *m;
+    for (; ; nn = nn->m_parent->m_ptr->m_whichbranch)  {
+      m = nn->NextSibling();
+      if (m || nn->m_parent->m_ptr == NULL)   break;
     }
-    if (!m.IsNull())  {
-      mm = m.rep->m_parent->m_whichbranch;
-      m.rep->m_parent->m_whichbranch = m.rep;
-      MakeReducedStrats(S, p, m, m);
-      m.rep->m_parent->m_whichbranch = mm.rep;
+    if (m)  {
+      gbt_efg_node_rep *mm = m->m_parent->m_whichbranch;
+      m->m_parent->m_whichbranch = m;
+      MakeReducedStrats(p_nfg, S, p, m, m);
+      m->m_parent->m_whichbranch = mm;
     }
-    else
-      MakeStrategy(p);
+    else {
+      MakeStrategy(p_nfg, p);
+    }
   }
-  else
-    MakeStrategy(p);
+  else {
+    MakeStrategy(p_nfg, p);
+  }
 }
 
-gbtNfgGame MakeReducedNfg(const EFSupport &support)
+gbtNfgGame gbtEfgGame::GetReducedNfg(const EFSupport &p_support) const
 {
-  int i;
-  gbtEfgGame efg = support.GetGame();
-  Lexicon *L = new Lexicon(efg);
-  for (i = 1; i <= efg.NumPlayers(); i++) {
-    L->MakeReducedStrats(support, efg.GetPlayer(i), efg.RootNode(), NULL);
+  if (rep->m_reducedNfg) {
+    return rep->m_reducedNfg;
   }
-
-  gArray<int> dim(efg.NumPlayers());
-  for (i = 1; i <= efg.NumPlayers(); i++)
-    dim[i] = (L->strategies[i].Length()) ? L->strategies[i].Length() : 1;
-
-  L->MakeLink(efg, gbtNfgGame(dim));
-  L->m_nfg.SetTitle(efg.GetTitle());
-
-  for (i = 1; i <= efg.NumPlayers(); i++)   {
-    L->m_nfg.GetPlayer(i).SetLabel(efg.GetPlayer(i).GetLabel());
-    for (int j = 1; j <= L->strategies[i].Length(); j++)   {
-      gText name;
-      for (int k = 1; k <= L->strategies[i][j]->Length(); k++)
-	if ((*L->strategies[i][j])[k] > 0)
-	  name += ToText((*L->strategies[i][j])[k]);
-        else
-	  name += "*";
-      L->m_nfg.GetPlayer(i).GetStrategy(j).SetLabel(name);
-    }
+  
+  gbt_nfg_game_rep *nfg = new gbt_nfg_game_rep(rep);
+  nfg->m_title = rep->title;
+  nfg->m_dimensions = gArray<int>(NumPlayers());
+  for (int pl = 1; pl <= NumPlayers(); pl++) {
+    nfg->m_players.Append(new gbt_nfg_player_rep(nfg, pl, 0));
+    nfg->m_players[pl]->m_label = rep->players[pl]->m_label;
+    MakeReducedStrats(nfg, p_support, rep->players[pl], rep->root, NULL);
+    nfg->m_dimensions[pl] = nfg->m_players[pl]->m_strategies.Length();
   }
-
-  gbtNfgSupport S(L->m_nfg);
-  NfgContIter iter(S);
-  gArray<gArray<int> *> corr(efg.NumPlayers());
-  gArray<int> corrs(efg.NumPlayers());
-  for (i = 1; i <= efg.NumPlayers(); i++)  {
-    corrs[i] = 1;
-    corr[i] = L->strategies[i][1];
-  }
-
-  gArray<gNumber> value(efg.NumPlayers());
-
-  int pl = efg.NumPlayers();
-  while (1)  {
-    efg.Payoff(corr, value);
-
-    iter.SetOutcome(L->m_nfg.NewOutcome());
-    for (int j = 1; j <= efg.NumPlayers(); j++)
-      iter.GetOutcome().SetPayoff(L->m_nfg.GetPlayer(j), value[j]);
-
-    iter.NextContingency();
-    while (pl > 0)   {
-      corrs[pl]++;
-      if (corrs[pl] <= L->strategies[pl].Length())  {
-	corr[pl] = L->strategies[pl][corrs[pl]];
-	break;
-      }
-      corrs[pl] = 1;
-      corr[pl] = L->strategies[pl][1];
-      pl--;
-    }
-
-    if (pl == 0)  break;
-    pl = efg.NumPlayers();
-  }
-
-  efg.rep->lexicon = L;
-  SetEfg(efg.rep->lexicon->m_nfg, efg);
-  return efg.rep->lexicon->m_nfg;
+  return (rep->m_reducedNfg = nfg);
 }
 
 gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
@@ -233,9 +174,7 @@ gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
   while (1)  {
     p_efg.Payoff(profile, payoff);
 
-    if (iter.GetIndex() >= 0) {
-      iter.SetOutcome(afg.NewOutcome());
-    }
+    iter.SetOutcome(afg.NewOutcome());
 
     for (int epl = 1, npl = 1; epl <= p_efg.NumPlayers(); epl++)
       for (int iset = 1; iset <= p_efg.GetPlayer(epl).NumInfosets(); iset++, npl++)
@@ -255,21 +194,6 @@ gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
     pl = afg.NumPlayers();
   }
 
-  SetEfg(afg, p_efg);
-
   return afg;
 }
-
-
-#include "base/glist.imp"
-#include "base/garray.imp"
-
-template class gList<lexCorrespondence *>;
-template gOutput &operator<<(gOutput &, const gList<lexCorrespondence *> &);
-template class gArray<gList<lexCorrespondence *> >;
-
-
-
-
-
 

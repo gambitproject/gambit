@@ -32,7 +32,6 @@
 #include "math/gpvector.h"
 
 class EFSupport;
-class Lexicon;
 class gbtNfgGame;
 template <class T> class BehavProfile;
 template <class T> class MixedProfile;
@@ -77,7 +76,6 @@ private:
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
   friend class BehavProfile<gNumber>;
-  friend class Lexicon;
   friend void SetEfg(gbtNfgGame, gbtEfgGame);
 
 protected:
@@ -198,12 +196,10 @@ public:
 
   void InfosetProbs(const gPVector<int> &profile, gPVector<gNumber> &prob) const;
     
-  gbtNfgGame AssociatedNfg(void) const;
-  bool HasAssociatedNfg(void) const;
+  gbtNfgGame GetReducedNfg(const EFSupport &) const;
+  bool HasReducedNfg(void) const;
   gbtNfgGame AssociatedAfg(void) const;
-  Lexicon *GetLexicon(void) const;
 
-  friend gbtNfgGame MakeReducedNfg(const EFSupport &);
   friend gbtNfgGame MakeAfg(const gbtEfgGame &);
 };
 

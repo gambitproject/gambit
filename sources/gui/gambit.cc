@@ -118,16 +118,16 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
       }
       if (dialog.CreateOutcomes()) {
 	gbtNfgSupport support(nfg);
-	NfgContIter iter(support);
+	gbtNfgContIterator iter(support);
 	iter.First();
 	do {
 	  gbtNfgOutcome outcome = nfg.NewOutcome();
 	  for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
 	    outcome.SetPayoff(nfg.GetPlayer(pl), 0);
 	    outcome.SetLabel(outcome.GetLabel() +
-			     ToText(iter.Profile()[pl].GetId()));
+			     ToText(iter.GetProfile()[pl].GetId()));
 	  }
-	  nfg.SetOutcome(iter.Profile(), outcome);
+	  iter.SetOutcome(outcome);
 	} while (iter.NextContingency());
       }
       (void) new NfgShow(new gbtGameDocument(nfg), 0);

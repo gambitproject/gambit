@@ -31,10 +31,7 @@
 #include "nfgint.h"
 #include "efg.h"
 #include "efgint.h"
-#include "lexicon.h"
 #include "nfgiter.h"
-
-
 
 //----------------------------------------------------------------------
 //                gbt_nfg_outcome_rep: Declaration
@@ -199,9 +196,16 @@ gOutput &operator<<(gOutput &p_stream, const gbtNfgOutcome &)
 struct gbt_nfg_player_rep;
 
 gbt_nfg_strategy_rep::gbt_nfg_strategy_rep(gbt_nfg_player_rep *p_player)
-  : m_id(0), m_player(p_player), m_deleted(false), m_index(0L),
-    m_refCount(0)
+  : m_id(0), m_player(p_player), m_behav(0),
+    m_deleted(false), m_index(0L), m_refCount(0)
 { }
+
+gbt_nfg_strategy_rep::~gbt_nfg_strategy_rep()
+{
+  if (m_behav) {
+    delete m_behav;
+  }
+}
 
 gbtNfgStrategy::gbtNfgStrategy(void)
   : rep(0)
@@ -289,6 +293,16 @@ gbtNfgPlayer gbtNfgStrategy::GetPlayer(void) const
 {
   if (rep) {
     return rep->m_player;
+  }
+  else {
+    return 0;
+  }
+}
+
+const gArray<int> *const gbtNfgStrategy::GetBehavior(void) const
+{ 
+  if (rep) {
+    return rep->m_behav;
   }
   else {
     return 0;
@@ -416,6 +430,11 @@ gbtNfgStrategy gbtNfgPlayer::GetStrategy(int st) const
   return (rep) ? rep->m_strategies[st] : 0;
 }
 
+gbt_nfg_game_rep::gbt_nfg_game_rep(gbt_efg_game_rep *p_efg)
+  : m_refCount(1), m_revision(0), m_outcomeRevision(-1),
+    m_efg(p_efg)
+{ }
+
 static int Product(const gArray<int> &p_dim)
 {
   int accum = 1;
@@ -476,11 +495,7 @@ gbtNfgGame::~gbtNfgGame()
 {
   if (rep && --rep->m_refCount == 0) {
     if (rep->m_efg)  {
-      gbt_efg_game_rep *tmp = rep->m_efg;
-      // note that Lexicon dtor unsets the efg member...
-      
-      delete rep->m_efg->lexicon;
-      tmp->lexicon = 0;
+      // FIXME: Work on efg<->nfg integration
     }
     delete rep;
   }
@@ -513,11 +528,7 @@ bool gbtNfgGame::operator!=(const gbtNfgGame &p_nfg) const
 void gbtNfgGame::BreakLink(void)
 {
   if (rep->m_efg)  {
-    gbt_efg_game_rep *tmp = rep->m_efg;
-    // note that Lexicon dtor unsets the efg member...
-
-    delete rep->m_efg->lexicon;
-    tmp->lexicon = 0;
+    //  FIXME: work on efg<->nfg integration 
   }
   rep->m_efg = 0;
 }
@@ -681,44 +692,9 @@ gbtNfgOutcome gbtNfgGame::GetOutcomeIndex(int p_index) const
   return rep->m_results[p_index];
 }
 
-void gbtNfgGame::SetOutcome(const gArray<int> &p_profile,
-			    const gbtNfgOutcome &p_outcome)
-{
-  int index = 1;
-  for (int i = 1; i <= p_profile.Length(); i++) {
-    index += rep->m_players[i]->m_strategies[p_profile[i]]->m_index;
-  }
-  rep->m_results[index] = p_outcome.rep;
-  rep->m_revision++;
-  BreakLink();
-}
-
-
-void gbtNfgGame::SetOutcome(const StrategyProfile &p, 
-			    const gbtNfgOutcome &outcome)
-{
-  rep->m_results[p.index + 1] = outcome.rep;
-  rep->m_revision++;
-  BreakLink();
-}
-
 void gbtNfgGame::SetOutcomeIndex(int p_index, const gbtNfgOutcome &p_outcome)
 {
   rep->m_results[p_index] = p_outcome.rep;
-}
-
-gbtNfgOutcome gbtNfgGame::GetOutcome(const gArray<int> &profile) const 
-{
-  int index = 1;
-  for (int i = 1; i <= profile.Length(); i++) {
-    index += rep->m_players[i]->m_strategies[profile[i]]->m_index;
-  }
-  return rep->m_results[index];
-}
-
-gbtNfgOutcome gbtNfgGame::GetOutcome(const StrategyProfile &p) const
-{
-  return rep->m_results[p.index + 1];
 }
 
 // ---------------------------------------

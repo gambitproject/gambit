@@ -29,8 +29,7 @@
 
 #include "base/base.h"
 #include "player.h"
-
-class StrategyProfile;
+#include "nfstrat.h"
 
 //
 // This class is useful for iterating around the normal form.  This iterator
@@ -42,44 +41,36 @@ class StrategyProfile;
 // to hold constant.  The iteration is based on an index that goes from 1 to
 // the total number of possible contingencies in increments of 1.
 //
-class NfgContIter    {
+class gbtNfgContIterator    {
 friend class NfgIter;
 private:
-  gbtNfgSupport support;
-  gArray<int> current_strat;
+  gbtNfgSupport m_support;
+  gArray<int> m_current;
   gbtNfgGame m_nfg;
-  StrategyProfile profile;
-  gBlock<int> frozen, thawed;
+  StrategyProfile m_profile;
+  gBlock<int> m_frozen, m_thawed;
   
 public:
-  NfgContIter(const gbtNfgSupport &s);
-  ~NfgContIter();
+  gbtNfgContIterator(const gbtNfgSupport &);
+  ~gbtNfgContIterator();
   
   void First(void);
   
-  void Freeze(const gBlock<int> &);
-  void Freeze(int);
-  void Freeze(gbtNfgPlayer p_player) { Freeze(p_player.GetId()); }
-  void Thaw(int);
-  
-  // These next two only work on frozen strategies
-  void Set(int pl, int num);
-  void Set(gbtNfgStrategy);
-  int Next(int pl);
-  
-  const StrategyProfile &Profile(void) const;
+  void Freeze(gbtNfgStrategy);
+  void Thaw(gbtNfgPlayer);
 
-  gArray<int> Get(void) const;
-  void Get(gArray<int> &t) const;
+  // This only has an effect if the player is currently frozen
+  int Next(gbtNfgPlayer);
   
+  const StrategyProfile &GetProfile(void) const { return m_profile; }
+
   int NextContingency(void);
   
-  long GetIndex(void) const;
-  
-  gbtNfgOutcome GetOutcome(void) const;
-  void SetOutcome(gbtNfgOutcome);
-  
-  void Dump(gOutput &) const;
+  gbtNfgOutcome GetOutcome(void) const { return m_profile.GetOutcome(); }
+  void SetOutcome(gbtNfgOutcome p_outcome) { m_profile.SetOutcome(p_outcome); }
+
+  gNumber GetPayoff(const gbtNfgPlayer &p_player) const 
+    { return m_profile.GetPayoff(p_player); }
 };
 
 #endif   // NFGCITER_H

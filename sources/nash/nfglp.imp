@@ -58,7 +58,7 @@ gList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgSupport &p_support,
 
   for (i = 1; i <= k; i++)  {
     for (j = 1; j <= m; j++)  {
-      A(i, j) = gNumber(minpay) - iter.GetOutcome().GetPayoff(p_support.GetGame().GetPlayer(1));
+      A(i, j) = gNumber(minpay) - iter.GetPayoff(p_support.GetGame().GetPlayer(1));
       iter.Next(1);
     }
     A(i,m+1) = (T)1;

@@ -1297,7 +1297,7 @@ void EfgShow::OnToolsNormalReduced(wxCommandEvent &)
     }
   }
     
-  if (m_doc->m_efg->AssociatedNfg() != 0) {
+  if (m_doc->m_efg->HasReducedNfg() != 0) {
     return;
   }
 

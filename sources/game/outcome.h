@@ -75,6 +75,7 @@ class gbtNfgPlayer;
 
 class gbtNfgOutcome {
 friend class gbtNfgGame;
+friend class StrategyProfile;
 protected:
   struct gbt_nfg_outcome_rep *rep;
 

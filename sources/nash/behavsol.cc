@@ -27,7 +27,6 @@
 #include "math/gmath.h"
 #include "behavsol.h"
 #include "behavextend.h"
-#include "game/lexicon.h"  // needed for ReducedNormalFormRegrets
 
 // we probably want to break this out into another file (rdm)
 
@@ -542,28 +541,24 @@ void BehavSolution::Invalidate(void) const
 gPVector<gNumber> BehavSolution::GetRNFRegret(void) const 
 {
   gbtEfgGame efg = GetGame();
-  Lexicon L(efg);  // we use the lexicon without allocating normal form.  
+  gbtNfgGame nfg = efg.GetReducedNfg(EFSupport(efg));
   
-  for (int i = 1; i <= efg.NumPlayers(); i++) {
-    L.MakeReducedStrats(m_support, efg.GetPlayer(i), efg.RootNode(), NULL);
-  }
-  
-  gArray<int> dim(efg.NumPlayers());
-  for (int i = 1; i <= efg.NumPlayers(); i++)
-    dim[i] = (L.strategies[i].Length()) ? L.strategies[i].Length() : 1;
-  
-  gPVector<gNumber> regret(dim); 
+  gPVector<gNumber> regret(nfg.NumStrats());
   
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
     gNumber pay = Payoff(pl);
-    for (int st = 1; st <= (L.strategies[pl]).Length(); st++) {
+    gbtNfgPlayer player = nfg.GetPlayer(pl);
+    for (int st = 1; st <= player.NumStrategies(); st++) {
       BehavProfile<gNumber> scratch(*m_profile);
-      const gArray<int> *const actions = L.strategies[pl][st];
-      for(int j = 1;j<=(*actions).Length();j++) {
+      const gArray<int> *const actions = player.GetStrategy(st).GetBehavior();
+      for (int j = 1; j <= actions->Length(); j++) {
 	int a = (*actions)[j];
-	for (int k = 1;k<=scratch.Support().NumActions(pl,j);k++)
-	  scratch(pl,j,k) = (gNumber)0;
-	if(a>0)scratch(pl,j,a) = (gNumber)1;
+	for (int k = 1; k <= scratch.Support().NumActions(pl,j); k++) {
+	  scratch(pl, j, k) = (gNumber) 0;
+	}
+	if (a > 0) {
+	  scratch(pl, j, a) = (gNumber) 1;
+	}
       }
       gNumber pay2 = scratch.Payoff(pl);
       // use pay - pay instead of zero to get correct precision
