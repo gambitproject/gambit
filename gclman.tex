@@ -377,7 +377,7 @@ is not, since the second element is a LIST(FLOAT).
 
 \subsection{Numeric types}
 
-There are four numeric data types supported: BOOLEAN, INTEGER,
+Four numeric data types are supported: BOOLEAN, INTEGER,
 RATIONAL and FLOAT.  
 
 \begin{itemize}
@@ -446,19 +446,19 @@ the shorthand \verb+a DIV b+.
 \subsection{Order of precedence}
 
 When functions are written in their canonical forms, no ambiguity
-arises in the order of evaluation:  In order to evaluate a function,
+arises in the order of evaluation: In order to evaluate a function,
 all arguments must be evaluated first.  Arguments are evaluated in the
-natural order (i. e., in the default order given in the Function
-Reference section for built-in functions, or specified when the function is
-created for user defined functions.  If another function is
-encountered as an argument to a function, it is evaluated at that
-time.  This leads to a recursive structure of evaluation, which stops
-only when an argument being evaluated is a constant function (i. e., a
-function with no arguments).  
+natural order.  For built in functions, this is the default order
+given in the Function Reference section.  For user defined functions,
+it is the order specified when the function is created.  If another
+function is encountered as an argument to a function, it is evaluated
+at that time.  This leads to a recursive structure of evaluation,
+which stops only when an argument being evaluated is a constant
+function (i. e., a function with no arguments).
 
-When shorthand forms are used, then ambiguity can arise in the order
-of evaluation.  Thus, the statement \verb&a + b * c&, could be
-evaluated as \verb+Plus[a,Times[b,c]]+ or as
+When shorthand forms are used, then ambiguity can arise in the
+intended order of evaluation.  For example, the statement \verb&a + b * c&,
+could be meant as \verb+Plus[a,Times[b,c]]+ or as
 \verb+Times[Plus[a,b],c]+.  In order to resolve such ambiguities, all
 functions that have a shorthand representation are given an order of
 precedence.  When a statement is parsed by the GCL, it is first
@@ -469,7 +469,7 @@ precedence with its canonical form, and so on, until all shorthand
 expression have been eliminated.  
 
 The order of precedence for built-in functions is as follows:
-\begin{itemize}
+\bd
 \item
 \verb+()+
 \item
@@ -490,7 +490,7 @@ The order of precedence for built-in functions is as follows:
 \verb&(unary) + -&
 \item
 \verb+[[ ]]+
-\end{itemize}
+\ed
 
 Thus, the statement \verb&a + b * c& would become 
 \begin{verbatim}
@@ -498,6 +498,7 @@ Plus[a,b*c]
 Plus[a,Times[b,c]]
 \end{verbatim}
 
+\noindent
 On the other hand, the statement \verb&( a + b ) * c& would become 
 \begin{verbatim}
 Paren[a+b]*c
@@ -505,6 +506,7 @@ Paren[Plus[a,b]]*c
 Times[Paren[Plus[a,b]],c]
 \end{verbatim}
 
+\noindent
 which, since \verb+Paren+ is just the identity mapping, is equivalent to
 \begin{verbatim}
 Times[Plus[a,b],c]
