@@ -11,8 +11,8 @@
 
 template <class T> class gRectBlock: public gRectArray<T>  
 {
-
  public:
+  gRectBlock(void);
   gRectBlock(int nrows, int ncols);
   gRectBlock(int minr, int maxr, int minc, int maxc);
   gRectBlock(const gRectBlock<T> &);

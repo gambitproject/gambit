@@ -12,6 +12,8 @@
 //            Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 
+template <class T> gRectBlock<T>::gRectBlock(void)   { }
+
 template <class T> gRectBlock<T>::gRectBlock(int nrows, int ncols)
      : gRectArray<T>(nrows, ncols)
 {
