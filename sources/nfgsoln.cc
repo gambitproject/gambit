@@ -14,121 +14,123 @@
 #include "nfplayer.h"
 
 
-//****************************************************************************
-//                   SORTER FILTER OPTIONS DIALOG
-//****************************************************************************
+//=========================================================================
+//                      class dialogMixedSortFilter
+//=========================================================================
 
-class MSolnSortFilterDialog:public wxDialogBox
-{
+class dialogMixedSortFilter : public guiAutoDialog {
 private:
-    MSolnSortFilterOptions &options;
-    wxRadioBox *sortby;
-    wxListBox *filter_creator, *filter_nash, *filter_perfect, *filter_proper;
-
-    static void ok_func(wxButton &ob, wxEvent &)
-    {
-        ((MSolnSortFilterDialog *)ob.GetClientData())->OnOk();
-    }
-
-    static void cancel_func(wxButton &ob, wxEvent &)
-    {
-        ((MSolnSortFilterDialog *)ob.GetClientData())->OnCancel();
-    }
-
-    static void help_func(wxButton &, wxEvent &)
-    {
-        wxHelpContents(NFG_SOLN_SORT_HELP);
-    }
-
-    void OnOk(void);
-    void OnCancel(void);
-    int completed;
+  MSolnSortFilterOptions &options;
+  wxRadioBox *m_sortBy;
+  wxListBox *m_filterCreator, *m_filterNash, *m_filterPerfect, *m_filterProper;
 
 public:
-    MSolnSortFilterDialog(MSolnSortFilterOptions &options);
-    int Completed(void);
+  dialogMixedSortFilter(MSolnSortFilterOptions &options);
+  virtual ~dialogMixedSortFilter();
 };
 
 
-MSolnSortFilterDialog::MSolnSortFilterDialog(MSolnSortFilterOptions &options_)
-    : wxDialogBox(0, "Sort & Filter", TRUE), options(options_)
+dialogMixedSortFilter::dialogMixedSortFilter(MSolnSortFilterOptions &options_)
+  : guiAutoDialog(0, "Sort & Filter"), options(options_)
 {
-    SetLabelPosition(wxVERTICAL);
-    char *sort_by_str[] =
-    { "ID", "Creator", "Nash", "Perfect", "Proper", "G Value", "G Lambda", "L Value" };
+  SetLabelPosition(wxVERTICAL);
 
-    sortby = new wxRadioBox(this, 0, "Sort By", -1, -1, -1, -1, 8, sort_by_str, 2, wxVERTICAL);
-    NewLine();
-    NewLine();
-    (void)new wxGroupBox(this, "Filter By", 12, 95, 464, 150, 0, "gbox");
+  char *sortByChoices[] = { "ID", "Creator", "Nash", "Perfect", 
+			    "Qre Value", "Qre Lambda", "Liap Value" };
+  m_sortBy = new wxRadioBox(this, 0, "Sort By", 1, 1, -1, -1,
+			    7, sortByChoices, 2, wxVERTICAL);
+  m_sortBy->SetSelection(options.SortBy() - 1);
+  m_sortBy->SetConstraints(new wxLayoutConstraints);
+  m_sortBy->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_sortBy->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_sortBy->GetConstraints()->width.AsIs();
+  m_sortBy->GetConstraints()->height.AsIs();
 
-    filter_creator = new wxListBox(this, 0, "Creator", wxMULTIPLE, 55, -1, 140, 85, 
-                                   NUM_MCREATORS, options.filter_cr_str + 1);
-    filter_nash = new wxListBox(this, 0, "Nash", wxMULTIPLE, -1, -1, 44, 85, 3, 
-                                options.filter_tri_str + 1);
-    filter_perfect = new wxListBox(this, 0, "Perfect", wxMULTIPLE, -1, -1, 56, 85, 3, 
-                                   options.filter_tri_str + 1);
-    filter_proper = new wxListBox(this, 0, "Proper", wxMULTIPLE, -1, -1, 78, 85, 3, 
-                                  options.filter_tri_str + 1);
+  wxGroupBox *filterGroup = new wxGroupBox(this, "Filter By");
 
-    NewLine();
-    wxButton *ok = new wxButton(this, (wxFunction)ok_func, "Ok");
-    ok->SetClientData((char *)this);
-    wxButton *cancel = new wxButton(this, (wxFunction)cancel_func, "Cancel");
-    cancel->SetClientData((char *)this);
-    wxButton *help = new wxButton(this, (wxFunction)help_func, "Help");
-    help->SetClientData((char *)this);
-    Fit();
+  m_filterCreator = new wxListBox(this, 0, "Creator", wxMULTIPLE,
+				  1, 1, -1, -1, 
+				  NUM_MCREATORS, options.filter_cr_str + 1);
+  int listWidth = m_filterCreator->GetCharWidth() * 14;
+  for (int i = 1; i <= NUM_MCREATORS; i++)
+    m_filterCreator->SetSelection(i - 1, options.FilterCr()[i]);
+  m_filterCreator->SetConstraints(new wxLayoutConstraints);
+  m_filterCreator->GetConstraints()->top.SameAs(filterGroup, wxTop, 20);
+  m_filterCreator->GetConstraints()->left.SameAs(filterGroup, wxLeft, 10);
+  m_filterCreator->GetConstraints()->height.AsIs();
+  m_filterCreator->GetConstraints()->width.Absolute(listWidth);
 
-    // Now setup the data
-    sortby->SetSelection(options.SortBy() - 1);
-    int i;
+  m_filterNash = new wxListBox(this, 0, "Nash", wxMULTIPLE, 1, 1, -1, -1,
+			       3, options.filter_tri_str + 1);
+  m_filterNash->SetConstraints(new wxLayoutConstraints);
+  m_filterNash->GetConstraints()->top.SameAs(m_filterCreator, wxTop);
+  m_filterNash->GetConstraints()->left.SameAs(m_filterCreator, wxRight, 10);
+  m_filterNash->GetConstraints()->height.AsIs();
+  m_filterNash->GetConstraints()->width.PercentOf(m_filterCreator,
+						  wxWidth, 75);
 
-    for (i = 1; i <= NUM_MCREATORS; i++)
-        filter_creator->SetSelection(i - 1, options.FilterCr()[i]);
+  m_filterPerfect = new wxListBox(this, 0, "Perfect", wxMULTIPLE, 1, 1, -1, -1,
+				  3, options.filter_tri_str + 1);
+  m_filterPerfect->SetConstraints(new wxLayoutConstraints);
+  m_filterPerfect->GetConstraints()->top.SameAs(m_filterNash, wxTop);
+  m_filterPerfect->GetConstraints()->left.SameAs(m_filterNash, wxRight, 10);
+  m_filterPerfect->GetConstraints()->height.AsIs();
+  m_filterPerfect->GetConstraints()->width.PercentOf(m_filterCreator,
+						     wxWidth, 75);
 
-    for (i = 1; i <= 3; i++)
-    {
-        filter_nash->SetSelection(i - 1, options.FilterNash()[i]);
-        filter_perfect->SetSelection(i - 1, options.FilterPerfect()[i]);
-        filter_proper->SetSelection(i - 1, options.FilterProper()[i]);
+  m_filterProper = new wxListBox(this, 0, "Proper", wxMULTIPLE, 1, 1, -1, -1,
+				 3, options.filter_tri_str + 1);
+  m_filterProper->SetConstraints(new wxLayoutConstraints);
+  m_filterProper->GetConstraints()->top.SameAs(m_filterPerfect, wxTop);
+  m_filterProper->GetConstraints()->left.SameAs(m_filterPerfect, wxRight, 10);
+  m_filterProper->GetConstraints()->height.AsIs();
+  m_filterProper->GetConstraints()->width.PercentOf(m_filterCreator,
+						    wxWidth, 75);
+
+  filterGroup->SetConstraints(new wxLayoutConstraints);
+  filterGroup->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  filterGroup->GetConstraints()->top.SameAs(m_sortBy, wxBottom, 10);
+  filterGroup->GetConstraints()->right.SameAs(m_filterProper, wxRight, -10);
+  filterGroup->GetConstraints()->bottom.SameAs(m_filterCreator, wxBottom, -10);
+
+  m_okButton->GetConstraints()->top.SameAs(filterGroup, wxBottom, 10);
+  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
+
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
+
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_helpButton->GetConstraints()->height.AsIs();
+
+  for (int i = 1; i <= 3; i++) {
+    m_filterNash->SetSelection(i - 1, options.FilterNash()[i]);
+    m_filterPerfect->SetSelection(i - 1, options.FilterPerfect()[i]);
+    m_filterProper->SetSelection(i - 1, options.FilterProper()[i]);
+  }
+
+  Go();
+}
+
+dialogMixedSortFilter::~dialogMixedSortFilter()
+{
+  if (Completed() == wxOK) {
+    options.SortBy() = m_sortBy->GetSelection() + 1;
+
+    for (int i = 1; i <= NUM_MCREATORS; i++)
+      options.FilterCr()[i] = m_filterCreator->Selected(i - 1);
+
+    for (int i = 1; i <= 3; i++) {
+      options.FilterNash()[i] = m_filterNash->Selected(i - 1);
+      options.FilterPerfect()[i] = m_filterPerfect->Selected(i - 1);
+      options.FilterProper()[i] = m_filterProper->Selected(i - 1);
     }
-
-    Show(TRUE);
-}
-
-
-void MSolnSortFilterDialog::OnOk(void)
-{
-    // update the MSolnSortFilterOptions
-    options.SortBy() = sortby->GetSelection() + 1;
-    int i;
-
-    for (i = 1; i <= NUM_MCREATORS; i++)
-        options.FilterCr()[i] = filter_creator->Selected(i - 1);
-
-    for (i = 1; i <= 3; i++)
-    {
-        options.FilterNash()[i] = filter_nash->Selected(i - 1);
-        options.FilterPerfect()[i] = filter_perfect->Selected(i - 1);
-        options.FilterProper()[i] = filter_proper->Selected(i - 1);
-    }
-
-    completed = wxOK;
-    Show(FALSE);
-}
-
-
-void MSolnSortFilterDialog::OnCancel(void)
-{
-    completed = wxCANCEL;
-    Show(FALSE);
-}
-
-
-int MSolnSortFilterDialog::Completed(void)
-{
-    return completed;
+  }
 }
 
 
@@ -467,91 +469,184 @@ int NfgSolnShow::FeaturePos(int feature)
     }
 }
 
-
-// SetOptions
 void NfgSolnShow::settings_button(wxButton &ob, wxEvent &)
 {
     ((NfgSolnShow *)ob.GetClientData())->SetOptions();
     ((NfgSolnShow *)ob.GetClientData())->CanvasFocus();
 }
 
+class dialogMixedSettings : public guiAutoDialog {
+private:
+  wxCheckBox *m_dynamic, *m_zeroProb;
+  wxCheckBox *m_values, *m_creator, *m_nash, *m_perfect;
+  wxCheckBox *m_qreLambda, *m_qreValue, *m_liapValue;
+
+public:
+  dialogMixedSettings(wxWindow *, const gArray<Bool> &);
+  virtual ~dialogMixedSettings() { }
+
+  bool UpdateDynamically(void) const { return m_dynamic->GetValue(); }
+  bool ShowZeroProbs(void) const { return m_zeroProb->GetValue(); }
+
+  bool ShowValues(void) const { return m_values->GetValue(); }
+  bool ShowCreator(void) const { return m_creator->GetValue(); }
+  bool ShowNash(void) const { return m_nash->GetValue(); }
+  bool ShowPerfect(void) const { return m_perfect->GetValue(); }
+  bool ShowQreLambda(void) const { return m_qreLambda->GetValue(); }
+  bool ShowQreValue(void) const { return m_qreValue->GetValue(); }
+  bool ShowLiapValue(void) const { return m_liapValue->GetValue(); }
+};
+
+dialogMixedSettings::dialogMixedSettings(wxWindow *p_parent,
+					 const gArray<Bool> &p_options)
+  : guiAutoDialog(p_parent, "Display options")
+{
+  m_dynamic = new wxCheckBox(this, 0, "Update dynamically", 1, 1, -1, -1);
+  m_dynamic->SetValue(p_options[0]);
+  m_dynamic->SetConstraints(new wxLayoutConstraints);
+  m_dynamic->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_dynamic->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_dynamic->GetConstraints()->width.AsIs();
+  m_dynamic->GetConstraints()->height.AsIs();
+
+  m_zeroProb = new wxCheckBox(this, 0, "Show zero probability strategies",
+			      1, 1, -1, -1);
+  m_zeroProb->SetValue(p_options[1]);
+  m_zeroProb->SetConstraints(new wxLayoutConstraints);
+  m_zeroProb->GetConstraints()->top.SameAs(m_dynamic, wxBottom, 10);
+  m_zeroProb->GetConstraints()->left.SameAs(m_dynamic, wxLeft);
+  m_zeroProb->GetConstraints()->width.AsIs();
+  m_zeroProb->GetConstraints()->height.AsIs();
+
+  wxGroupBox *propertyGroup = new wxGroupBox(this, "Show properties");
+
+  m_creator = new wxCheckBox(this, 0, "Creator", 1, 1, -1, -1);
+  m_creator->SetValue(p_options[3]);
+  m_creator->SetConstraints(new wxLayoutConstraints);
+  m_creator->GetConstraints()->top.SameAs(propertyGroup, wxTop, 20);
+  m_creator->GetConstraints()->left.SameAs(propertyGroup, wxLeft, 10);
+  m_creator->GetConstraints()->width.AsIs();
+  m_creator->GetConstraints()->height.AsIs();
+
+  m_nash = new wxCheckBox(this, 0, "Nash", 1, 1, -1, -1);
+  m_nash->SetValue(p_options[4]);
+  m_nash->SetConstraints(new wxLayoutConstraints);
+  m_nash->GetConstraints()->top.SameAs(m_creator, wxBottom, 10);
+  m_nash->GetConstraints()->left.SameAs(m_creator, wxLeft);
+  m_nash->GetConstraints()->width.AsIs();
+  m_nash->GetConstraints()->height.AsIs();
+
+  m_perfect = new wxCheckBox(this, 0, "Perfect", 1, 1, -1, -1);
+  m_perfect->SetValue(p_options[5]);
+  m_perfect->SetConstraints(new wxLayoutConstraints);
+  m_perfect->GetConstraints()->top.SameAs(m_nash, wxBottom, 10);
+  m_perfect->GetConstraints()->left.SameAs(m_nash, wxLeft);
+  m_perfect->GetConstraints()->width.AsIs();
+  m_perfect->GetConstraints()->height.AsIs();
+
+  m_values = new wxCheckBox(this, 0, "Equilibrium values", 1, 1, -1, -1);
+  m_values->SetValue(p_options[2]);
+  m_values->SetConstraints(new wxLayoutConstraints);
+  m_values->GetConstraints()->top.SameAs(m_creator, wxTop);
+  m_values->GetConstraints()->left.SameAs(m_perfect, wxRight, 10);
+  m_values->GetConstraints()->width.AsIs();
+  m_values->GetConstraints()->height.AsIs();
+
+  m_qreValue = new wxCheckBox(this, 0, "Qre value", 1, 1, -1, -1);
+  m_qreValue->SetValue(p_options[8]);
+  m_qreValue->SetConstraints(new wxLayoutConstraints);
+  m_qreValue->GetConstraints()->top.SameAs(m_values, wxBottom, 10);
+  m_qreValue->GetConstraints()->left.SameAs(m_values, wxLeft);
+  m_qreValue->GetConstraints()->width.AsIs();
+  m_qreValue->GetConstraints()->height.AsIs();
+					   
+  m_qreLambda = new wxCheckBox(this, 0, "Qre lambda", 1, 1, -1, -1);
+  m_qreLambda->SetValue(p_options[7]);
+  m_qreLambda->SetConstraints(new wxLayoutConstraints);
+  m_qreLambda->GetConstraints()->top.SameAs(m_qreValue, wxBottom, 10);
+  m_qreLambda->GetConstraints()->left.SameAs(m_qreValue, wxLeft);
+  m_qreLambda->GetConstraints()->width.AsIs();
+  m_qreLambda->GetConstraints()->height.AsIs();
+
+  m_liapValue = new wxCheckBox(this, 0, "Liap value", 1, 1, -1, -1);
+  m_liapValue->SetValue(p_options[9]);
+  m_liapValue->SetConstraints(new wxLayoutConstraints);
+  m_liapValue->GetConstraints()->top.SameAs(m_qreLambda, wxBottom, 10);
+  m_liapValue->GetConstraints()->left.SameAs(m_qreLambda, wxLeft);
+  m_liapValue->GetConstraints()->height.AsIs();
+  m_liapValue->GetConstraints()->width.AsIs();
+
+  propertyGroup->SetConstraints(new wxLayoutConstraints);
+  propertyGroup->GetConstraints()->top.SameAs(m_zeroProb, wxBottom, 10);
+  propertyGroup->GetConstraints()->left.SameAs(m_zeroProb, wxLeft);
+  propertyGroup->GetConstraints()->bottom.SameAs(m_liapValue, wxBottom, -10);
+  propertyGroup->GetConstraints()->right.SameAs(m_values, wxRight, -10);
+
+  m_okButton->GetConstraints()->top.SameAs(propertyGroup, wxBottom, 10);
+  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
+
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
+
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_helpButton->GetConstraints()->height.AsIs();
+
+  Go();
+}
 
 void NfgSolnShow::SetOptions(void)
 {
-    gArray<Bool> new_features = features;
+  dialogMixedSettings dialog(this, features);
 
-    MyDialogBox *options_dialog = 
-        new MyDialogBox(this, "Settings", NFG_SOLVE_INSPECT_OPTIONS_HELP);
+  gArray<Bool> newFeatures = features;
 
-    for (int i = 0; i < MSOLN_NUM_FEATURES; i++)
-    {
-        options_dialog->Add(wxMakeFormBool(feature_names[i], &new_features[i],
-                                           wxFORM_DEFAULT, 0, 0, 0, 150));
+  if (dialog.Completed() == wxOK) {
+    newFeatures[0] = dialog.UpdateDynamically();
+    newFeatures[1] = dialog.ShowZeroProbs();
+    newFeatures[2] = dialog.ShowValues();
+    newFeatures[3] = dialog.ShowCreator();
+    newFeatures[4] = dialog.ShowNash();
+    newFeatures[5] = dialog.ShowPerfect();
+    newFeatures[7] = dialog.ShowQreLambda();
+    newFeatures[8] = dialog.ShowQreValue();
+    newFeatures[9] = dialog.ShowLiapValue();
 
-        if (i % 2 == 0) 
-            options_dialog->Add(wxMakeFormNewLine());
+    for (int i = MSOLN_NUM_FEATURES - 1; i >= 0; i--) {
+      if (features[i] && !newFeatures[i]) {
+	if (feature_width[i]) 
+	  DelCol(FeaturePos(i));
+
+	features[i] = 0;
+      }
     }
 
-    Bool save_def = TRUE;
-    options_dialog->Add(wxMakeFormNewLine());
-    options_dialog->Add(wxMakeFormBool("Save Default", &save_def));
-    options_dialog->Go();
+    for (int i = 0; i < MSOLN_NUM_FEATURES; i++) {
+      if (newFeatures[i] && !features[i]) {
+	if (feature_width[i]) {
+	  int col = FeaturePos(i) + 1;
+	  AddCol(col);
+	  SetCell(1, col, feature_names[i]);
+	  Bold(1, col, 0, TRUE);
 
-    if (options_dialog->Completed() == wxOK)
-    {
-        // check if we turned anything off
-        int i;
-
-        for (i = MSOLN_NUM_FEATURES - 1; i >= 0; i--)
-        {
-            if (features[i] && !new_features[i])
-            {
-                if (feature_width[i]) 
-                    DelCol(FeaturePos(i));
-
-                features[i] = 0;
-            }
-        }
-
-        // now check if we turned anything on
-        for (i = 0; i < MSOLN_NUM_FEATURES; i++)
-        {
-            if (new_features[i] && !features[i])
-            {
-                if (feature_width[i])
-                {
-                    int col = FeaturePos(i) + 1;
-                    AddCol(col);
-                    SetCell(1, col, feature_names[i]);
-                    Bold(1, col, 0, TRUE);
-
-                    if (feature_width[i] == -1)  // precision dependent
-                        DrawSettings()->SetColWidth(2 + ToTextPrecision(), col);
-                    else                         // precision independent
-                        DrawSettings()->SetColWidth(feature_width[i], col);
-                }
-
-                features[i] = 1;
-            }
-        }
-
-        // save as default, if desired
-        char *defaults_file = gambitApp.ResourceFile();
-
-        if (save_def)
-        {
-            for (i = 0; i < MSOLN_NUM_FEATURES; i++)
-            {
-                wxWriteResource(MSOLN_SHOW_SECT, feature_names[i], 
-                                features[i], defaults_file);
-            }
-        }
-
-        UpdateValues();
-        Repaint();
+	  if (feature_width[i] == -1)  // precision dependent
+	    DrawSettings()->SetColWidth(2 + ToTextPrecision(), col);
+	  else                         // precision independent
+	    DrawSettings()->SetColWidth(feature_width[i], col);
+	}
+	
+	features[i] = 1;
+      }
     }
 
-    delete options_dialog;
+    UpdateValues();
+    Repaint();
+  }
 }
 
 
@@ -705,17 +800,12 @@ void NfgSolnShow::sortfilt_button(wxButton &ob, wxEvent &)
 
 void NfgSolnShow::SortFilter(bool inter)
 {
-    int completed;
+  int completed = wxOK;
 
-    if (inter)          // interactive or automatic
-    {
-        MSolnSortFilterDialog D(sf_options);
-        completed = D.Completed();
-    }
-    else
-    {
-        completed = wxOK;
-    }
+  if (inter)  { 
+    // interactive or automatic
+    completed = dialogMixedSortFilter(sf_options).Completed();
+  }
 
     if (completed == wxOK)
     {
