@@ -3372,6 +3372,15 @@ Pvector psys_to_Pvec(psys sys){
  return PV;
 }
 
+// WARNING: RDM added the following just to get to compile under BCC
+//            I have no idea if this is correct!!!  
+#ifdef __BORLANDC__ 
+double drand48()
+{
+  rand();
+}
+#endif // __BORLANDC__
+
 /*-------------------------------------------------------------------
  init_hom  takes a Pvector and loads the above data structures 
            to hold a representation of the system.

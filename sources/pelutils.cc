@@ -506,6 +506,14 @@ fprintf(stderr /* was Pel_Err */,"Warning:%s\n",m)
 
 void srand48(long int seedval);
 
+// WARNING: RDM added the following just to get to compile under BCC
+//            I have no idea if this is correct!!!  
+#ifdef __BORLANDC__
+void srand48(long int seedval)
+{
+  srand(seedval);
+}
+#endif // __BORLANDC__
 /*
 ** rand_seed  -- seed the random number generator with seedval.
 */
@@ -521,6 +529,8 @@ void rand_seed(long int seedval){ srand48(seedval);}
 int rand_int(int low, int high){
       return (int)(low+drand48()*(high-low)+.499999999999); 
 }
+
+
 
 /*
 **rand_double  -- return a random integer r with low<=r<=high
