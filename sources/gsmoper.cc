@@ -1299,7 +1299,7 @@ Portion* GSM_NewInputStream( Portion** param )
     result = new InputValPortion( *g );
   else
     result = new ErrorPortion( (gString) "Error opening file \"" + 
-			      ( (TextPortion*) param[ 0 ] )->Value() + '\"' );
+			      ( (TextPortion*) param[ 0 ] )->Value() + "\"" );
   
   return result;
 }
