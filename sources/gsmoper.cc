@@ -1152,8 +1152,8 @@ void Init_gsmoper( GSM* gsm )
   gsm->AddFunction( FuncObj );
 
   FuncObj = new FuncDescObj( (gString) "NewInput" );
-  FuncObj->SetFuncInfo( GSM_NewOutputStream, 1 );
-  FuncObj->SetParamInfo( GSM_NewOutputStream, 0, "file",
+  FuncObj->SetFuncInfo( GSM_NewInputStream, 1 );
+  FuncObj->SetParamInfo( GSM_NewInputStream, 0, "file",
 			porSTRING, NO_DEFAULT_VALUE );
   gsm->AddFunction( FuncObj );
 
