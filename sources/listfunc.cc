@@ -1,7 +1,7 @@
 //
 // FILE: listfunc.cc -- List and text oriented function implementations
 //
-// @(#)listfunc.cc	2.3 4/28/97
+// $Id$
 //
 
 #include <assert.h>
@@ -17,6 +17,26 @@
 #include "efg.h"
 
 
+
+//---------
+// Concat
+//---------
+
+static Portion* GSM_Concat_List(Portion** param)
+{
+  const gList<Portion*>& p_value = ((ListPortion*) param[1])->Value();
+  Portion *result = new ListPortion(((ListPortion*) param[0])->Value());
+  for (int i = 1; i <= p_value.Length(); i++)  {
+    int append_result = ((ListPortion*) result)->Append(p_value[i]->ValCopy());
+    if(append_result == 0)  {
+      delete result;
+      result = new ErrorPortion
+	("Attempted concatenating lists of different types");
+      break;
+    }
+  }
+  return result;
+}
 
 
 //------------
@@ -694,6 +714,16 @@ void Init_listfunc(GSM *gsm)
     ParamInfoType( "x", porNUMBER )
   };
 
+
+
+  FuncObj = new FuncDescObj("Concat", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Concat_List, 
+				       PortionSpec(porANYTYPE, 1), 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", 
+					    PortionSpec(porANYTYPE, NLIST)));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("y", 
+					    PortionSpec(porANYTYPE, NLIST)));
+  gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("Index", 2);
