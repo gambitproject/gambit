@@ -11,7 +11,6 @@
 #include "system.h"
 
 #include "gsm.h"
-extern GSM *_gsm;
 
 //-------------------------------------------------------------------------
 //            gPreprocessor: private auxiliary member functions
@@ -119,10 +118,10 @@ bool gPreprocessor::IsQuoteEscapeSequence(const gText &p_line) const
 
 
 
-gPreprocessor::gPreprocessor(gclCommandLine *p_cmdline,
+gPreprocessor::gPreprocessor(GSM &p_environment, gclCommandLine *p_cmdline,
 			     const char *p_cmd /* = NULL */) 
-  : m_CmdLine(p_cmdline), m_PrevFileName("console"), m_PrevLineNumber(1),
-    m_StartupString(p_cmd)
+  : m_environment(p_environment), m_CmdLine(p_cmdline),
+    m_PrevFileName("console"), m_PrevLineNumber(1), m_StartupString(p_cmd)
 {
   m_InputStack.Push(m_CmdLine);
   m_FileNameStack.Push(m_PrevFileName);
@@ -354,8 +353,8 @@ gText gPreprocessor::GetLine(void)
 	  }
 	  else {
 	    line += "False";
-	    _gsm->ErrorStream() << "GCL Warning: Include file \"" << filename;
-	    _gsm->ErrorStream() << "\" not found.\n";
+	    m_environment.ErrorStream() << "GCL Warning: Include file \"" << filename;
+	    m_environment.ErrorStream() << "\" not found.\n";
 	  }
 
 	  line += restOfLine;
@@ -384,8 +383,9 @@ gText gPreprocessor::GetLine(void)
   if (continuation)
     SetPrompt(true);
 
-  if (error)
-    _gsm->ErrorStream() << "GCL Error: " << errorMsg << '\n';
+  if (error) {
+    m_environment.ErrorStream() << "GCL Error: " << errorMsg << '\n';
+  }
 
   if (m_InputStack.Peek()->eof()) {
     if (m_InputStack.Depth() > 1) {

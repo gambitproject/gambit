@@ -14,14 +14,10 @@
 #include "nfg.h"
 #include "efg.h"
 
-extern GSM* _gsm;  // defined at the end of gsm.cc
-
-
 
 //-----------
 // Portion
 //-----------
-
 
 gNumber Portion::_WriteWidth = 0;
 gNumber Portion::_WritePrecis = 6;
@@ -128,6 +124,7 @@ bool Portion::GameIsEfg(void) const
 
 void Portion::SetGame(const Nfg *game)
 {
+#ifdef NOT_PORTED_YET
   if (game != _Game)  {
     if (_Game)  { 
       _gsm->GameRefCount(_Game)--;
@@ -148,10 +145,12 @@ void Portion::SetGame(const Nfg *game)
 #endif
     }
   }
+#endif  // NOT_PORTED_YET
 }
 
 void Portion::SetGame(const FullEfg *game)
 {
+#ifdef NOT_PORTED_YET
   if (game != _Game)  {
     if (_Game)  {
       _gsm->GameRefCount(_Game)--;
@@ -172,6 +171,7 @@ void Portion::SetGame(const FullEfg *game)
 #endif
     }
   }
+#endif  // NOT_PORTED_YET
 }
 
 

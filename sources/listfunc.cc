@@ -14,13 +14,17 @@
 #include "nfg.h"
 #include "efg.h"
 
+#include "gwatch.h"
+#include "gsmatrix.h"
+
+
 
 
 //---------
 // Concat
 //---------
 
-static Portion* GSM_Concat_List(Portion** param)
+static Portion* GSM_Concat_List(GSM &, Portion** param)
 {
   const gList<Portion*>& p_value = ((ListPortion*) param[1])->Value();
   Portion *result = new ListPortion(((ListPortion*) param[0])->Value());
@@ -39,7 +43,7 @@ static Portion* GSM_Concat_List(Portion** param)
 // Index
 //------------
 
-Portion* GSM_Index( Portion** param )
+static Portion* GSM_Index(GSM &, Portion** param)
 {
   ListPortion* result = new ListPortion();
   ListPortion& list = *(ListPortion*) param[0];
@@ -58,9 +62,8 @@ Portion* GSM_Index( Portion** param )
 // Flatten
 //-------------------
 
-
-void GSM_Flatten_Top(ListPortion* list, int levels, int depth, 
-		     ListPortion* result)
+static void GSM_Flatten_Top(ListPortion* list, int levels, int depth, 
+			    ListPortion* result)
 {
   int Length = list->Length();
   int i;
@@ -88,8 +91,8 @@ void GSM_Flatten_Top(ListPortion* list, int levels, int depth,
   }
 }
 
-void GSM_Flatten_Bottom(ListPortion* list, int levels, int depth, 
-			ListPortion* result)
+static void GSM_Flatten_Bottom(ListPortion* list, int levels, int depth, 
+			       ListPortion* result)
 {
   int Length = result->Length();
   int i;
@@ -119,7 +122,7 @@ void GSM_Flatten_Bottom(ListPortion* list, int levels, int depth,
   }
 }
 
-Portion* GSM_Flatten(Portion** param)
+static Portion* GSM_Flatten(GSM &, Portion** param)
 {
   // if levels > 0, flatten from bottom
   ListPortion* list;
@@ -139,7 +142,7 @@ Portion* GSM_Flatten(Portion** param)
 }
 
 
-bool ListDimCheck(ListPortion* p0, ListPortion* p1)
+static bool ListDimCheck(ListPortion* p0, ListPortion* p1)
 {
   int i;
   int Length;
@@ -160,7 +163,7 @@ bool ListDimCheck(ListPortion* p0, ListPortion* p1)
   return true;
 }
 
-ListPortion* GSM_Filter_Aid(ListPortion* p0, ListPortion* p1)
+static ListPortion* GSM_Filter_Aid(ListPortion* p0, ListPortion* p1)
 {
   int i;
   int Length = p0->Length();
@@ -179,7 +182,7 @@ ListPortion* GSM_Filter_Aid(ListPortion* p0, ListPortion* p1)
   return list;
 }
 
-Portion* GSM_Filter(Portion** param)
+static Portion* GSM_Filter(GSM &, Portion** param)
 {
   if(!ListDimCheck((ListPortion*) param[0], (ListPortion*) param[1]))
     throw gclRuntimeError("Mismatching list dimensions");
@@ -190,8 +193,9 @@ Portion* GSM_Filter(Portion** param)
 }
 
 
-Portion* GSM_Sort(Portion** param, bool (*compfunc)(Portion*, Portion*), 
-		  bool altsort = false)
+static Portion* GSM_Sort(Portion** param, 
+			 bool (*compfunc)(Portion*, Portion*), 
+			 bool altsort = false)
 {
   // If altsort, param[1] is rearranged using the sorted result of param[0]
 
@@ -277,11 +281,15 @@ Portion* GSM_Sort(Portion** param, bool (*compfunc)(Portion*, Portion*),
 }
 
 
-bool GSM_Compare_Integer(Portion* p1, Portion* p2)
+static bool GSM_Compare_Integer(Portion* p1, Portion* p2)
 { return ((NumberPortion*) p1)->Value() > ((NumberPortion*) p2)->Value(); }
-Portion* GSM_Sort_Integer(Portion** param)
+
+#ifdef UNUSED
+static Portion* GSM_Sort_Integer(GSM &, Portion** param)
 { return GSM_Sort(param, GSM_Compare_Integer); }
-Portion* GSM_Sort_By_Integer(Portion** param)
+#endif  // UNUSED
+
+static Portion* GSM_Sort_By_Integer(GSM &, Portion** param)
 {
   Portion* p[2]; 
   p[0] = param[1]; 
@@ -291,9 +299,9 @@ Portion* GSM_Sort_By_Integer(Portion** param)
 
 bool GSM_Compare_Number(Portion* p1, Portion* p2)
 { return ((NumberPortion*) p1)->Value() > ((NumberPortion*) p2)->Value(); }
-Portion* GSM_Sort_Number(Portion** param)
+Portion* GSM_Sort_Number(GSM &, Portion** param)
 { return GSM_Sort(param, GSM_Compare_Number); }
-Portion* GSM_Sort_By_Number(Portion** param)
+static Portion* GSM_Sort_By_Number(GSM &, Portion** param)
 {
   Portion* p[2]; 
   p[0] = param[1]; 
@@ -301,11 +309,11 @@ Portion* GSM_Sort_By_Number(Portion** param)
   return GSM_Sort(p, GSM_Compare_Number, true);
 }
 
-bool GSM_Compare_Text(Portion* p1, Portion* p2)
+static bool GSM_Compare_Text(Portion* p1, Portion* p2)
 { return ((TextPortion*) p1)->Value() > ((TextPortion*) p2)->Value(); }
-Portion* GSM_Sort_Text(Portion** param)
+static Portion* GSM_Sort_Text(GSM &, Portion** param)
 { return GSM_Sort(param, GSM_Compare_Text); }
-Portion* GSM_Sort_By_Text(Portion** param)
+static Portion* GSM_Sort_By_Text(GSM &, Portion** param)
 {
   Portion* p[2]; 
   p[0] = param[1]; 
@@ -316,7 +324,7 @@ Portion* GSM_Sort_By_Text(Portion** param)
 
 
 
-Portion *GSM_NthElement(Portion **param)
+static Portion *GSM_NthElement(GSM &, Portion **param)
 {
   int n = ((NumberPortion *) param[1])->Value();
   if(n <= 0 || n > ((ListPortion *) param[0])->Length())
@@ -325,36 +333,34 @@ Portion *GSM_NthElement(Portion **param)
     return ((ListPortion *) param[0])->SubscriptCopy(n);
 }
 
-Portion *GSM_Remove(Portion **param)
+static Portion *GSM_Remove(GSM &, Portion **param)
 {
   ListPortion *ret = (ListPortion *) param[0]->ValCopy();
   delete ret->Remove(((NumberPortion *) param[1])->Value());
   return ret;
 }
 
-
-
-Portion *GSM_Contains(Portion **param)
+static Portion *GSM_Contains(GSM &, Portion **param)
 {
   return new BoolPortion(((ListPortion *) param[0])->Contains(param[1]));
 }
 
-Portion *GSM_NumElements(Portion **param)
+static Portion *GSM_NumElements(GSM &, Portion **param)
 {
   return new NumberPortion(((ListPortion *) param[0])->Length());
 }
 
-Portion *GSM_LengthList(Portion **param)
+static Portion *GSM_LengthList(GSM &, Portion **param)
 {
   return new NumberPortion(((ListPortion *) param[0])->Length());
 }
 
-Portion *GSM_LengthText(Portion **param)
+static Portion *GSM_LengthText(GSM &, Portion **param)
 {
   return new NumberPortion(((TextPortion *) param[0])->Value().Length());
 }
 
-Portion *GSM_NthElementText(Portion **param)
+static Portion *GSM_NthElementText(GSM &, Portion **param)
 {
   gText text(((TextPortion *) param[0])->Value());
   int n = ((NumberPortion *) param[1])->Value();
@@ -366,12 +372,12 @@ Portion *GSM_NthElementText(Portion **param)
 
 //--------------------------- Text ---------------------------
 
-Portion *GSM_Text_Number(Portion **param)
+static Portion *GSM_Text_Number(GSM &, Portion **param)
 {
   return new TextPortion(ToText(((NumberPortion *) param[0])->Value()));
 }
 
-Portion *GSM_TextText(Portion **param)
+static Portion *GSM_TextText(GSM &, Portion **param)
 {
   return param[0]->ValCopy();
 }
@@ -379,43 +385,39 @@ Portion *GSM_TextText(Portion **param)
 
 //------------------------ Integer --------------------------
 
-Portion *GSM_IntegerNumber(Portion **param)
+static Portion *GSM_IntegerNumber(GSM &, Portion **param)
 {
   return new NumberPortion((long) ((NumberPortion *) param[0])->Value());
 }
 
 
-//----------------------------- Stop Watch ----------------------
-
-#include "gwatch.h"
-
 gWatch _gcl_watch(0);
 
-Portion *GSM_StartWatch(Portion **)
+static Portion *GSM_StartWatch(GSM &, Portion **)
 {
   _gcl_watch.Start();
   return new NumberPortion(0.0);
 }
 
-Portion *GSM_StopWatch(Portion **)
+static Portion *GSM_StopWatch(GSM &, Portion **)
 {
   _gcl_watch.Stop();
   return new NumberPortion(_gcl_watch.Elapsed());
 }
 
-Portion *GSM_ElapsedTime(Portion **)
+static Portion *GSM_ElapsedTime(GSM &, Portion **)
 {
   return new NumberPortion(_gcl_watch.Elapsed());
 }
 
-Portion *GSM_IsWatchRunning(Portion **)
+static Portion *GSM_IsWatchRunning(GSM &, Portion **)
 {
   return new BoolPortion(_gcl_watch.IsRunning());
 }
 
 //--------------------------- List ------------------------------
 
-Portion* GSM_List( Portion** param )
+static Portion* GSM_List(GSM &, Portion** param)
 {
   ListPortion* p;
   int i;
@@ -430,7 +432,7 @@ Portion* GSM_List( Portion** param )
   return p;
 }
 
-Portion* GSM_List_List( Portion** param )
+static Portion* GSM_List_List(GSM &, Portion **param)
 {
   ListPortion* p;
   int i;
@@ -445,8 +447,7 @@ Portion* GSM_List_List( Portion** param )
   return p;
 }
 
-
-Portion* GSM_List_Number( Portion** param )
+static Portion* GSM_List_Number(GSM &, Portion **param)
 {
   ListPortion* p;
   int i;
@@ -463,8 +464,7 @@ Portion* GSM_List_Number( Portion** param )
   return p;
 }
 
-
-Portion* GSM_List_Nfg( Portion** param )
+static Portion* GSM_List_Nfg(GSM &, Portion **param)
 {
   ListPortion* p;
   int i;
@@ -483,8 +483,7 @@ Portion* GSM_List_Nfg( Portion** param )
   return p;
 }
 
-
-Portion* GSM_List_Efg( Portion** param )
+static Portion* GSM_List_Efg(GSM &, Portion **param)
 {
   ListPortion* p;
   int i;
@@ -505,13 +504,7 @@ Portion* GSM_List_Efg( Portion** param )
 }
 
 
-
-
-
-//------------------------ Dot --------------------------------
-
-
-Portion* GSM_Dot_Check( ListPortion* p1, ListPortion* p2 )
+static Portion* GSM_Dot_Check( ListPortion* p1, ListPortion* p2 )
 {
   int i;
   if( p1->Length() != p2->Length() )
@@ -522,7 +515,7 @@ Portion* GSM_Dot_Check( ListPortion* p1, ListPortion* p2 )
   return 0;
 }
 
-Portion* GSM_Dot(Portion **param)
+static Portion* GSM_Dot(GSM &, Portion **param)
 {
   int i;
   Portion* p;
@@ -543,10 +536,7 @@ Portion* GSM_Dot(Portion **param)
   return p;
 }
 
-
-//--------------------------- ArgMax -------------------------
-
-Portion* GSM_ArgMax( Portion** param )
+static Portion* GSM_ArgMax(GSM &, Portion **param)
 {
   Portion* p;
   gRational max = 0;
@@ -575,10 +565,7 @@ Portion* GSM_ArgMax( Portion** param )
   return new NumberPortion( index );
 }
 
-
-//--------------------------- Transpose -------------------------
-
-Portion* GSM_Transpose( Portion** param )
+static Portion* GSM_Transpose(GSM &, Portion **param)
 {
   int i;
   int j;
@@ -613,9 +600,7 @@ Portion* GSM_Transpose( Portion** param )
   return p;
 }
 
-#include "gsmatrix.h"
-
-Portion* GSM_Inverse( Portion** param )
+static Portion* GSM_Inverse(GSM &, Portion **param)
 {
   int i;
   int Length;
@@ -686,10 +671,6 @@ Portion* GSM_Inverse( Portion** param )
 }
 
 
-
-
-//--------------------------- Init_listfunc ------------------------------
-
 void Init_listfunc(GSM *gsm)
 {
   gclFunction *FuncObj;
@@ -703,9 +684,7 @@ void Init_listfunc(GSM *gsm)
     gclParameter( "x", porNUMBER )
   };
 
-
-
-  FuncObj = new gclFunction("Concat", 1);
+  FuncObj = new gclFunction(*gsm, "Concat", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Concat_List, 
 				       PortionSpec(porANYTYPE, 1), 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", 
@@ -715,7 +694,7 @@ void Init_listfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new gclFunction("Index", 2);
+  FuncObj = new gclFunction(*gsm, "Index", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Index, 
 				       PortionSpec(porINTEGER, 1), 2, 0,
 				       funcNONLISTABLE ));
@@ -731,7 +710,7 @@ void Init_listfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new gclFunction("NumElements", 1);
+  FuncObj = new gclFunction(*gsm, "NumElements", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_NumElements, porINTEGER, 1,
 				       0, funcNONLISTABLE ));
   FuncObj->SetParamInfo(0, 0, gclParameter("list", 
@@ -739,19 +718,19 @@ void Init_listfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new gclFunction("Length", 1);
+  FuncObj = new gclFunction(*gsm, "Length", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_LengthList, porINTEGER, 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("list", 
                               PortionSpec(porANYTYPE, 1, porNULLSPEC )));
   gsm->AddFunction(FuncObj);
 			
-  FuncObj = new gclFunction("NumChars", 1);
+  FuncObj = new gclFunction(*gsm, "NumChars", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_LengthText, porINTEGER, 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("text", porTEXT));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new gclFunction("Contains", 2);
+  FuncObj = new gclFunction(*gsm, "Contains", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Contains, porBOOLEAN, 2,
 				       0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, gclParameter("list", 
@@ -767,7 +746,7 @@ void Init_listfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new gclFunction("NthElement", 1);
+  FuncObj = new gclFunction(*gsm, "NthElement", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_NthElement, porANYTYPE, 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("list", 
 					    PortionSpec(porANYTYPE, NLIST),
@@ -775,7 +754,7 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 1, gclParameter("n", porINTEGER));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new gclFunction("Remove", 1);
+  FuncObj = new gclFunction(*gsm, "Remove", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Remove, 
 				       PortionSpec(porANYTYPE, 1), 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("list",
@@ -783,7 +762,7 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 1, gclParameter("n", porNUMBER));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new gclFunction("NthElement", 1);
+  FuncObj = new gclFunction(*gsm, "NthElement", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_NthElementText, porTEXT, 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("text", porTEXT));
   FuncObj->SetParamInfo(0, 1, gclParameter("n", porINTEGER));
@@ -792,7 +771,7 @@ void Init_listfunc(GSM *gsm)
 
   //--------------------------- Text -----------------------
   
-  FuncObj = new gclFunction("Text", 2);
+  FuncObj = new gclFunction(*gsm, "Text", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Text_Number, porTEXT, 1, x_Number));
   FuncObj->SetFuncInfo(1, gclSignature(GSM_TextText, porTEXT, 1));
   FuncObj->SetParamInfo(1, 0, gclParameter("x", porTEXT));
@@ -801,31 +780,31 @@ void Init_listfunc(GSM *gsm)
 
   //-------------------------- Integer ------------------------
 
-  FuncObj = new gclFunction("Integer", 1);
+  FuncObj = new gclFunction(*gsm, "Integer", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_IntegerNumber, porNUMBER,
 				       1, x_Number));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new gclFunction("StartWatch", 1);
+  FuncObj = new gclFunction(*gsm, "StartWatch", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_StartWatch, porNUMBER, 0));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new gclFunction("StopWatch", 1);
+  FuncObj = new gclFunction(*gsm, "StopWatch", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_StopWatch, porNUMBER, 0));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new gclFunction("ElapsedTime", 1);
+  FuncObj = new gclFunction(*gsm, "ElapsedTime", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_ElapsedTime, porNUMBER, 0));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new gclFunction("IsWatchRunning", 1);
+  FuncObj = new gclFunction(*gsm, "IsWatchRunning", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_IsWatchRunning, porBOOLEAN, 0));
   gsm->AddFunction(FuncObj);
 
 
   //-------------------------- List -----------------------------
 
-  FuncObj = new gclFunction("List", 5);
+  FuncObj = new gclFunction(*gsm, "List", 5);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_List, PortionSpec(porANYTYPE, 1), 
 				       2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", porANYTYPE & 
@@ -867,7 +846,7 @@ void Init_listfunc(GSM *gsm)
 
   //--------------------------- Dot ----------------------------
 
-  FuncObj = new gclFunction("Dot", 1);
+  FuncObj = new gclFunction(*gsm, "Dot", 1);
   
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Dot, porNUMBER, 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", PortionSpec(porNUMBER,1)));
@@ -876,13 +855,13 @@ void Init_listfunc(GSM *gsm)
 
   //----------------------- ArgMax ------------------------
 
-  FuncObj = new gclFunction("ArgMax", 1);
+  FuncObj = new gclFunction(*gsm, "ArgMax", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_ArgMax, porNUMBER, 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", PortionSpec(porNUMBER,1)));
   gsm->AddFunction(FuncObj);
 
   //------------------ Transpose -----------------------
-  FuncObj = new gclFunction("Transpose", 1);
+  FuncObj = new gclFunction(*gsm, "Transpose", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Transpose, 
 				       PortionSpec(porANYTYPE, 2), 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", PortionSpec(porANYTYPE,2), 
@@ -890,7 +869,7 @@ void Init_listfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   //------------------ Inverse -----------------------
-  FuncObj = new gclFunction("Inverse", 1);
+  FuncObj = new gclFunction(*gsm, "Inverse", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Inverse, 
 				       PortionSpec(porNUMBER,2), 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", PortionSpec(porNUMBER,2), 
@@ -898,7 +877,7 @@ void Init_listfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   //------------------ Sort -----------------------
-  FuncObj = new gclFunction("Sort", 5);
+  FuncObj = new gclFunction(*gsm, "Sort", 5);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Sort_Number,
 				       PortionSpec(porNUMBER, 1), 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", PortionSpec(porNUMBER,1)));
@@ -921,7 +900,7 @@ void Init_listfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new gclFunction("Filter", 1);
+  FuncObj = new gclFunction(*gsm, "Filter", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Filter, 
 				       PortionSpec(porANYTYPE, 1), 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", 
@@ -930,7 +909,7 @@ void Init_listfunc(GSM *gsm)
 					    PortionSpec(porBOOLEAN, NLIST)));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new gclFunction("Flatten", 1);
+  FuncObj = new gclFunction(*gsm, "Flatten", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Flatten, 
 				       PortionSpec(porANYTYPE, 1), 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", 

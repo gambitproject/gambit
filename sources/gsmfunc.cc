@@ -22,8 +22,6 @@
 #include "nfstrat.h"
 #include "efstrat.h"
 
-extern GSM *_gsm;
-
 // This function is called once at the first instance of GSM.
 // The Init function of each module should be placed in this function:
 // Each Init() function should take the argument "this" so each instance
@@ -100,7 +98,7 @@ gclSignature::gclSignature(const gclSignature& funcinfo)
     ParamInfo[i] = funcinfo.ParamInfo[i];
 }
 
-gclSignature::gclSignature(Portion* (*funcptr)(Portion**),
+gclSignature::gclSignature(Portion *(*funcptr)(GSM &, Portion **),
 			   PortionSpec returnspec, int numparams,
 			   gclParameter* paraminfo, FuncFlagType flag)
   : UserDefined(false), FuncPtr(funcptr), ReturnSpec(returnspec),
@@ -136,7 +134,8 @@ gclSignature::~gclSignature()
 RefCountHashTable< gclExpression* > gclFunction::_RefCountTable;
 
 
-gclFunction::gclFunction(gclFunction& func)
+gclFunction::gclFunction(gclFunction &func)
+  : m_environment(func.m_environment)
 {
   int index;
   int f_index;
@@ -182,17 +181,18 @@ gclFunction::gclFunction(gclFunction& func)
 }
 
 
-gclFunction::gclFunction(const gText& func_name, int numfuncs)
-: _FuncName(func_name), _NumFuncs(numfuncs)
+gclFunction::gclFunction(GSM &p_environment,
+			 const gText& func_name, int numfuncs)
+  : _FuncName(func_name), _NumFuncs(numfuncs), m_environment(p_environment)
 {
   _FuncInfo = new gclSignature[_NumFuncs];
 }
 
-
-  // Assumes one argument, which has a prototype func_proto
-gclFunction::gclFunction( const gText& func_proto, 
-                          Portion* (*funcptr)(Portion**),
-                          FuncFlagType FFT /* = funcLISTABLE */  )
+// Assumes one argument, which has a prototype func_proto
+gclFunction::gclFunction(GSM &p_environment, const gText& func_proto, 
+                         Portion *(*funcptr)(GSM &, Portion**),
+                         FuncFlagType FFT /* = funcLISTABLE */)
+  : m_environment(p_environment)
 {
   _NumFuncs = 1;
   _FuncInfo = new gclSignature[1];
@@ -208,7 +208,7 @@ gclFunction::gclFunction( const gText& func_proto,
 
   _FuncName = func_name;
 
-  SetFuncInfo(0,func_proto,funcptr, FFT);
+  SetFuncInfo(0, func_proto, funcptr, FFT);
 }
 
 
@@ -260,10 +260,9 @@ void gclFunction::SetFuncInfo(int funcindex, const gText& s)
   // is called with all data passed as arguments rather than a string.
 
 void gclFunction::SetFuncInfo(int funcindex, const gText& s,
-                              Portion* (*funcptr)(Portion**), 
-                              FuncFlagType FFT /* = funcLISTABLE */  )
+                              Portion* (*funcptr)(GSM &, Portion **), 
+                              FuncFlagType FFT /* = funcLISTABLE */)
 {
-
   char ch = ' ';
   int index=0, length=s.Length();
   int numArgs=0;
@@ -345,10 +344,9 @@ void gclFunction::SetFuncInfo(int funcindex, const gText& s,
           reqList.Append((Portion*)tmp);
           word = "BOOLEAN";
         }
-        else if (word == "StdOut")
-        {
-          OutputPortion* tmp = new OutputPortion(_gsm->OutputStream());
-          reqList.Append((Portion*)tmp);
+        else if (word == "StdOut") {
+          OutputPortion* tmp = new OutputPortion(m_environment.OutputStream());
+          reqList.Append((Portion*) tmp);
           word = "OUTPUT";
         }
         else if (word == "NullOut")
@@ -421,9 +419,8 @@ void gclFunction::SetFuncInfo(int funcindex, const gText& s,
 
         } // If it is int or float
 
-        else
-        {
-          _gsm->OutputStream() << "Unknown optional type!!\n\n";
+        else {
+	  m_environment.OutputStream() << "Unknown optional type!!\n\n";
           int* silly = new int;
           reqList.Append( (Portion *)silly);
           word = "MIXED";    // TEMPORARY ONLY SO THAT IT WORKS -- REMOVE!!
@@ -1050,7 +1047,7 @@ Portion *CallFuncObj::CallNormalFunction(GSM *gsm, Portion **param)
 
   try {
     if (!_FuncInfo[m_funcIndex].UserDefined)
-      return _FuncInfo[m_funcIndex].FuncPtr(param);
+      return _FuncInfo[m_funcIndex].FuncPtr(*gsm, param);
     else 
       return gsm->ExecuteUserFunc(*(_FuncInfo[m_funcIndex].FuncInstr), 
 				  _FuncInfo[m_funcIndex], param,
@@ -1060,8 +1057,9 @@ Portion *CallFuncObj::CallNormalFunction(GSM *gsm, Portion **param)
     throw;
   }
   catch (...) {
-    _gsm->OutputStream() << "In function " << _FuncName << "[], in file \"" << m_file;
-    _gsm->OutputStream() << "\" at line " << ToText(m_line) << ":\n";
+    gsm->OutputStream() << "In function " << _FuncName 
+			<< "[], in file \"" << m_file;
+    gsm->OutputStream() << "\" at line " << ToText(m_line) << ":\n";
     throw;
   }
 }

@@ -34,7 +34,7 @@ template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
 // ActionProb
 //----------------
 
-static Portion *GSM_ActionProb(Portion **param)
+static Portion *GSM_ActionProb(GSM &, Portion **param)
 {
   const BehavSolution *profile = ((BehavPortion *) param[0])->Value();
   Action* action = ((ActionPortion*) param[1])->Value();
@@ -55,7 +55,7 @@ static Portion *GSM_ActionProb(Portion **param)
 // ActionValue
 //------------------
 
-static Portion *GSM_ActionValue(Portion **param)
+static Portion *GSM_ActionValue(GSM &, Portion **param)
 {
   BehavSolution *profile = ((BehavPortion *) param[0])->Value();
   Action* action = ((ActionPortion*) param[1])->Value();
@@ -77,7 +77,7 @@ static Portion *GSM_ActionValue(Portion **param)
 // Behav
 //--------------
 
-static Portion *GSM_Behav(Portion **param)
+static Portion *GSM_Behav(GSM &, Portion **param)
 {
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
   return new BehavPortion(new BehavSolution(BehavProfile<gNumber>(*S)));
@@ -87,7 +87,7 @@ static Portion *GSM_Behav(Portion **param)
 // Belief
 //-------------
 
-static Portion *GSM_Belief(Portion **param)
+static Portion *GSM_Belief(GSM &, Portion **param)
 {
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   Node* n = ((NodePortion*) param[1])->Value();
@@ -101,19 +101,19 @@ static Portion *GSM_Belief(Portion **param)
 // Game
 //-------
 
-static Portion* GSM_Game_Mixed(Portion** param)
+static Portion* GSM_Game_Mixed(GSM &, Portion** param)
 {
   return new NfgPortion(&((MixedPortion *) param[0])->Value()->Game());
 }
 
-static Portion *GSM_Game_NfSupport(Portion **param)
+static Portion *GSM_Game_NfSupport(GSM &, Portion **param)
 {
   Nfg *N = (Nfg *) &((NfSupportPortion *) param[0])->Value()->Game();
 
   return new NfgPortion(N);
 }
 
-static Portion* GSM_Game_EfgTypes(Portion** param)
+static Portion* GSM_Game_EfgTypes(GSM &, Portion** param)
 {
   if(param[0]->Game())  {
     assert(param[0]->GameIsEfg());
@@ -127,13 +127,13 @@ static Portion* GSM_Game_EfgTypes(Portion** param)
 // Creator
 //---------------
 
-static Portion *GSM_Creator_Behav(Portion** param)
+static Portion *GSM_Creator_Behav(GSM &, Portion** param)
 {
   BehavSolution *bs = ((BehavPortion*) param[0])->Value();
   return new TextPortion(ToText(bs->Creator()));
 }
 
-static Portion *GSM_Creator_Mixed(Portion** param)
+static Portion *GSM_Creator_Mixed(GSM &, Portion** param)
 {
   MixedSolution *ms = ((MixedPortion*) param[0])->Value();
   return new TextPortion(ToText(ms->Creator()));
@@ -143,7 +143,7 @@ static Portion *GSM_Creator_Mixed(Portion** param)
 // QreLambda
 //---------------
 
-static Portion *GSM_QreLambda_Behav(Portion** param)
+static Portion *GSM_QreLambda_Behav(GSM &, Portion** param)
 {
   BehavSolution *bs = ((BehavPortion*) param[0])->Value();
   if (bs->Creator() != algorithmEfg_QRE_EFG &&
@@ -152,7 +152,7 @@ static Portion *GSM_QreLambda_Behav(Portion** param)
   return new NumberPortion(bs->QreLambda());
 }
 
-static Portion *GSM_QreLambda_Mixed(Portion** param)
+static Portion *GSM_QreLambda_Mixed(GSM &, Portion** param)
 {
   MixedSolution *bs = ((MixedPortion*) param[0])->Value();
   if (bs->Creator() != algorithmNfg_QRE && 
@@ -165,7 +165,7 @@ static Portion *GSM_QreLambda_Mixed(Portion** param)
 // QreValue
 //--------------
 
-static Portion *GSM_QreValue_Behav(Portion** param)
+static Portion *GSM_QreValue_Behav(GSM &, Portion** param)
 {
   BehavSolution *bs = ((BehavPortion*) param[0])->Value();
   if (bs->Creator() != algorithmEfg_QRE_EFG &&
@@ -174,7 +174,7 @@ static Portion *GSM_QreValue_Behav(Portion** param)
   return new NumberPortion(bs->QreValue());
 }
 
-static Portion *GSM_QreValue_Mixed(Portion** param)
+static Portion *GSM_QreValue_Mixed(GSM &, Portion** param)
 {
   MixedSolution *bs = ((MixedPortion*) param[0])->Value();
   if (bs->Creator() != algorithmNfg_QRE && 
@@ -188,7 +188,7 @@ static Portion *GSM_QreValue_Mixed(Portion** param)
 // InfosetProb
 //----------------
 
-static Portion *GSM_InfosetProb(Portion **param)
+static Portion *GSM_InfosetProb(GSM &, Portion **param)
 {
   if( param[1]->Spec().Type == porNULL )
     return new NullPortion( porNUMBER );
@@ -205,7 +205,7 @@ static Portion *GSM_InfosetProb(Portion **param)
 // InfosetValue
 //----------------
 
-static Portion *GSM_InfosetValue(Portion **param)
+static Portion *GSM_InfosetValue(GSM &, Portion **param)
 {
   if( param[1]->Spec().Type == porNULL )
     return new NullPortion( porNUMBER );
@@ -222,19 +222,19 @@ static Portion *GSM_InfosetValue(Portion **param)
 // IsNash
 //---------
 
-static Portion *GSM_IsNash_Behav(Portion **param)
+static Portion *GSM_IsNash_Behav(GSM &, Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
   return new BoolPortion(P->IsNash());
 }
 
-static Portion *GSM_IsANFNash_Behav(Portion **param)
+static Portion *GSM_IsANFNash_Behav(GSM &, Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
   return new BoolPortion(P->IsANFNash());
 }
 
-static Portion *GSM_IsNash_Mixed(Portion **param)
+static Portion *GSM_IsNash_Mixed(GSM &, Portion **param)
 {
   MixedSolution *P = ((MixedPortion*) param[0])->Value();
   return new BoolPortion(P->IsNash());
@@ -245,7 +245,7 @@ static Portion *GSM_IsNash_Mixed(Portion **param)
 // IsPerfect
 //-------------
 
-static Portion *GSM_IsPerfect(Portion **param)
+static Portion *GSM_IsPerfect(GSM &, Portion **param)
 {
   MixedSolution *P = ((MixedPortion*) param[0])->Value();
   return new BoolPortion(P->IsPerfect());
@@ -255,7 +255,7 @@ static Portion *GSM_IsPerfect(Portion **param)
 // IsSequential
 //---------------
 
-static Portion *GSM_IsSequential(Portion **param)
+static Portion *GSM_IsSequential(GSM &, Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
   return new BoolPortion(P->IsSequential());
@@ -266,7 +266,7 @@ static Portion *GSM_IsSequential(Portion **param)
 // IsSubgamePerfect
 //--------------------
 
-static Portion *GSM_IsSubgamePerfect(Portion **param)
+static Portion *GSM_IsSubgamePerfect(GSM &, Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
   return new BoolPortion(P->IsSubgamePerfect());
@@ -276,13 +276,13 @@ static Portion *GSM_IsSubgamePerfect(Portion **param)
 // LiapValue
 //-------------
 
-static Portion *GSM_LiapValue_Behav(Portion **param)
+static Portion *GSM_LiapValue_Behav(GSM &, Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
   return new NumberPortion(P->LiapValue());
 }
 
-static Portion *GSM_LiapValue_Mixed(Portion **param)
+static Portion *GSM_LiapValue_Mixed(GSM &, Portion **param)
 {
   MixedSolution *P = ((MixedPortion*) param[0])->Value();
   return new NumberPortion(P->LiapValue());
@@ -292,13 +292,13 @@ static Portion *GSM_LiapValue_Mixed(Portion **param)
 // Accuracy
 //-------------
 
-static Portion *GSM_Accuracy_Behav(Portion **param)
+static Portion *GSM_Accuracy_Behav(GSM &, Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
   return new NumberPortion(P->Epsilon());
 }
 
-static Portion *GSM_Accuracy_Mixed(Portion **param)
+static Portion *GSM_Accuracy_Mixed(GSM &, Portion **param)
 {
   MixedSolution *P = ((MixedPortion*) param[0])->Value();
   return new NumberPortion(P->Epsilon());
@@ -308,7 +308,7 @@ static Portion *GSM_Accuracy_Mixed(Portion **param)
 // Mixed
 //----------
 
-Portion* GSM_Mixed(Portion** param)
+Portion* GSM_Mixed(GSM &, Portion** param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   return new MixedPortion(new MixedSolution(MixedProfile<gNumber>(*S)));
@@ -318,7 +318,7 @@ Portion* GSM_Mixed(Portion** param)
 // NodeValue
 //----------------
 
-static Portion *GSM_NodeValue(Portion **param)
+static Portion *GSM_NodeValue(GSM &, Portion **param)
 {
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   EFPlayer *p = ((EfPlayerPortion *) param[1])->Value();
@@ -331,7 +331,7 @@ static Portion *GSM_NodeValue(Portion **param)
 // RealizProb
 //----------------
 
-static Portion *GSM_RealizProb(Portion **param)
+static Portion *GSM_RealizProb(GSM &, Portion **param)
 {
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   Node* n = ((NodePortion*) param[1])->Value();
@@ -343,7 +343,7 @@ static Portion *GSM_RealizProb(Portion **param)
 // Regret
 //-----------
 
-static Portion *GSM_Regret_Mixed(Portion **param)
+static Portion *GSM_Regret_Mixed(GSM &, Portion **param)
 {
   MixedProfile<gNumber> P(*((MixedPortion*) param[0])->Value());
   Strategy* s = ((StrategyPortion*) param[1])->Value();
@@ -356,7 +356,7 @@ static Portion *GSM_Regret_Mixed(Portion **param)
   return new NumberPortion(v(p->GetNumber(), s->Number()));
 }
 
-static Portion *GSM_Regret_Behav(Portion **param)
+static Portion *GSM_Regret_Behav(GSM &, Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
 
@@ -372,7 +372,7 @@ static Portion *GSM_Regret_Behav(Portion **param)
 // Regrets
 //------------
 
-static Portion *GSM_Regrets_Mixed(Portion **param)
+static Portion *GSM_Regrets_Mixed(GSM &, Portion **param)
 {
   MixedProfile<gNumber> profile(*((MixedPortion *) param[0])->Value());
 
@@ -394,7 +394,7 @@ static Portion *GSM_Regrets_Mixed(Portion **param)
   return por;
 }
 
-static Portion *GSM_NfgRegrets_Behav(Portion **param)
+static Portion *GSM_NfgRegrets_Behav(GSM &, Portion **param)
 {
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   gPVector<gNumber> v((*bp).ReducedNormalFormRegret());
@@ -417,7 +417,7 @@ static Portion *GSM_NfgRegrets_Behav(Portion **param)
 // SetActionProb
 //-------------------
 
-static Portion *GSM_SetActionProb(Portion **param)
+static Portion *GSM_SetActionProb(GSM &, Portion **param)
 {
   BehavSolution *P = new BehavSolution(*((BehavPortion *) param[0])->Value());
   Action *action = ((ActionPortion *) param[1])->Value();
@@ -433,7 +433,7 @@ static Portion *GSM_SetActionProb(Portion **param)
 // SetActionProbs
 //-----------------
 
-static Portion *GSM_SetActionProbs(Portion **param)
+static Portion *GSM_SetActionProbs(GSM &, Portion **param)
 {
   int i;
   int j;
@@ -493,7 +493,7 @@ static Portion *GSM_SetActionProbs(Portion **param)
 // SetStrategyProb
 //-------------------
 
-static Portion *GSM_SetStrategyProb(Portion **param)
+static Portion *GSM_SetStrategyProb(GSM &, Portion **param)
 {
   MixedSolution *P = new MixedSolution(*((MixedPortion *) param[0])->Value());
   Strategy *strategy = ((StrategyPortion *) param[1])->Value();
@@ -507,7 +507,7 @@ static Portion *GSM_SetStrategyProb(Portion **param)
 // SetStrategyProbs
 //-------------------
 
-static Portion *GSM_SetStrategyProbs(Portion **param)
+static Portion *GSM_SetStrategyProbs(GSM &, Portion **param)
 {
   NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
 
@@ -538,7 +538,7 @@ static Portion *GSM_SetStrategyProbs(Portion **param)
 // StrategyProb
 //----------------
 
-static Portion *GSM_StrategyProb(Portion **param)
+static Portion *GSM_StrategyProb(GSM &, Portion **param)
 {
   const MixedSolution *profile = ((MixedPortion *) param[0])->Value();
   Strategy* strategy = ((StrategyPortion*) param[1])->Value();
@@ -549,7 +549,7 @@ static Portion *GSM_StrategyProb(Portion **param)
 // StrategyProbs
 //----------------
 
-static Portion *GSM_StrategyProbs(Portion **param)
+static Portion *GSM_StrategyProbs(GSM &, Portion **param)
 {
   const MixedSolution *profile = ((MixedPortion *) param[0])->Value();
   const Nfg &nfg = profile->Game();
@@ -576,7 +576,7 @@ static Portion *GSM_StrategyProbs(Portion **param)
 // StrategyValue
 //------------------
 
-static Portion *GSM_StrategyValue(Portion **param)
+static Portion *GSM_StrategyValue(GSM &, Portion **param)
 {
   MixedSolution *profile = ((MixedPortion *) param[0])->Value();
   Strategy *strategy = ((StrategyPortion*) param[1])->Value();
@@ -588,13 +588,13 @@ static Portion *GSM_StrategyValue(Portion **param)
 // Support
 //---------------
 
-static Portion *GSM_Support_Behav(Portion** param)
+static Portion *GSM_Support_Behav(GSM &, Portion** param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
   return new EfSupportPortion(new EFSupport(P->Support()));
 }
 
-static Portion *GSM_Support_Mixed(Portion** param)
+static Portion *GSM_Support_Mixed(GSM &, Portion** param)
 {
   MixedSolution *P = ((MixedPortion *) param[0])->Value();
   return new NfSupportPortion(new NFSupport(P->Support()));
@@ -603,7 +603,7 @@ static Portion *GSM_Support_Mixed(Portion** param)
 
 void Init_solfunc(GSM *gsm)
 {
-  static struct { char *sig; Portion *(*func)(Portion **); } ftable[] =
+  static struct { char *sig; Portion *(*func)(GSM &, Portion **); } ftable[] =
     { { "Accuracy[profile->BEHAV] =: NUMBER", GSM_Accuracy_Behav },
       { "Accuracy[profile->MIXED] =: NUMBER", GSM_Accuracy_Mixed },
       { "ActionProb[profile->BEHAV, action->ACTION] =: NUMBER",
@@ -661,8 +661,9 @@ void Init_solfunc(GSM *gsm)
       { 0, 0 }
     };
 
-  for (int i = 0; ftable[i].sig != 0; i++) 
-    gsm->AddFunction(new gclFunction(ftable[i].sig, ftable[i].func,
+  for (int i = 0; ftable[i].sig != 0; i++) {
+    gsm->AddFunction(new gclFunction(*gsm, ftable[i].sig, ftable[i].func,
 				     funcLISTABLE | funcGAMEMATCH));
+  }
 }
 

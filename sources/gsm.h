@@ -123,6 +123,8 @@ public:
 
   gOutput &OutputStream(void) const { return _StdOut; }
   gOutput &ErrorStream(void) const { return _StdErr; }
+
+  gStatus &GetStatusMonitor(void) { return gstatus; }
 };
 
 

@@ -15,8 +15,6 @@
 #include "gsmfunc.h"
 #include "gsmhash.h"
 
-extern GSM &_gsm;
-
 //-------------
 // Base class
 //-------------
@@ -39,7 +37,7 @@ PortionSpec gclQuitExpression::Type(void) const
   return porBOOLEAN;
 }
 
-Portion *gclQuitExpression::Evaluate(void)
+Portion *gclQuitExpression::Evaluate(GSM &)
 {
   throw gclQuitOccurred(0);
 }
@@ -63,10 +61,10 @@ PortionSpec gclSemiExpr::Type(void) const
   return rhs->Type();
 }
 
-Portion *gclSemiExpr::Evaluate(void) 
+Portion *gclSemiExpr::Evaluate(GSM &p_environment) 
 {
-  delete lhs->Evaluate();
-  return rhs->Evaluate();
+  delete lhs->Evaluate(p_environment);
+  return rhs->Evaluate(p_environment);
 }
 
 
@@ -217,20 +215,21 @@ PortionSpec gclFunctionCall::Type(void) const
 }
 
 
-Portion *gclFunctionCall::Evaluate(void)
+Portion *gclFunctionCall::Evaluate(GSM &p_environment)
 {
-  if (!_gsm._FuncTable->IsDefined(name))  
+  if (!p_environment._FuncTable->IsDefined(name)) {
     throw gclRuntimeError("Undefined function " + name);
+  }
 
-  gstatus.Get();
+  p_environment.GetStatusMonitor().Get();
 
-  CallFuncObj call((*_gsm._FuncTable)(name), m_line, m_file);
+  CallFuncObj call((*p_environment._FuncTable)(name), m_line, m_file);
   
   for (int i = 1; i <= params->req->NumParams(); i++)   {
-    Portion *val = (*params->req)[i]->Evaluate();
+    Portion *val = (*params->req)[i]->Evaluate(p_environment);
     if (val->Spec().Type == porREFERENCE)   {
-      if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value())) {
-	call.SetCurrParam(_gsm.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), AUTO_VAL_OR_REF);
+      if (p_environment.VarIsDefined(((ReferencePortion *) val)->Value())) {
+	call.SetCurrParam(p_environment.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), AUTO_VAL_OR_REF);
 	delete val;
       }
       else  {
@@ -243,10 +242,10 @@ Portion *gclFunctionCall::Evaluate(void)
   
   for (int i = 1; i <= params->opt->NumParams(); i++)  {
     call.SetCurrParamIndex(params->opt->FormalName(i));
-    Portion *val = (*params->opt)[i]->Evaluate();
+    Portion *val = (*params->opt)[i]->Evaluate(p_environment);
     if (val->Spec().Type == porREFERENCE)   {
-      if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value()))
-	call.SetCurrParam(_gsm.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), true);
+      if (p_environment.VarIsDefined(((ReferencePortion *) val)->Value()))
+	call.SetCurrParam(p_environment.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), true);
       else  {
 	call.SetCurrParam(val);
       }
@@ -260,12 +259,12 @@ Portion *gclFunctionCall::Evaluate(void)
 
   try {
     param = new Portion *[call.NumParams()];
-    ret = call.CallFunction(&_gsm, param);
+    ret = call.CallFunction(&p_environment, param);
       
     for (int index = 0; index < call.NumParams(); index++)   {
       ReferencePortion *refp = call.GetParamRef(index);
       if (refp != 0)  {
-	_gsm.VarDefine(refp->Value(), param[index]->ValCopy());
+	p_environment.VarDefine(refp->Value(), param[index]->ValCopy());
       }
     }
 
@@ -295,13 +294,13 @@ gclAssignment::~gclAssignment()
   delete value;
 }
 
-Portion *gclAssignment::Evaluate(void)
+Portion *gclAssignment::Evaluate(GSM &p_environment)
 {
-  Portion *lhs = variable->Evaluate();
+  Portion *lhs = variable->Evaluate(p_environment);
   Portion *rhs;
 
   try  {
-    rhs = value->Evaluate();
+    rhs = value->Evaluate(p_environment);
   }
   catch (gclRuntimeError &)  {
     delete lhs;
@@ -309,7 +308,7 @@ Portion *gclAssignment::Evaluate(void)
   }
 
   // Assign() will delete lhs and rhs
-  return _gsm.Assign(lhs, rhs);
+  return p_environment.Assign(lhs, rhs);
 }
 
 
@@ -326,10 +325,10 @@ gclUnAssignment::~gclUnAssignment()
   delete variable;
 }
 
-Portion *gclUnAssignment::Evaluate(void)
+Portion *gclUnAssignment::Evaluate(GSM &p_environment)
 {
-  Portion *lhs = variable->Evaluate();
-  _gsm.UnAssign(lhs);
+  Portion *lhs = variable->Evaluate(p_environment);
+  p_environment.UnAssign(lhs);
   return new BoolPortion(true);
 }
   
@@ -352,7 +351,7 @@ PortionSpec gclConstExpr::Type(void) const
   return value->Spec();
 }
 
-Portion *gclConstExpr::Evaluate(void)
+Portion *gclConstExpr::Evaluate(GSM &)
 {
   return value->ValCopy();
 }
@@ -380,14 +379,14 @@ void gclListConstant::Append(gclExpression *expr)
   values.Append(expr);
 }
 
-Portion *gclListConstant::Evaluate(void)
+Portion *gclListConstant::Evaluate(GSM &p_environment)
 {
   ListPortion *ret = new ListPortion;
 
   try  {
     for (int i = 1; i <= values.Length(); i++)  {
-      Portion *v = values[i]->Evaluate();
-      _gsm._ResolveRef(v);
+      Portion *v = values[i]->Evaluate(p_environment);
+      p_environment._ResolveRef(v);
       // v is deleted by ListPortion::Append if this call fails
       ret->Append(v);
     }
@@ -414,7 +413,7 @@ gclVarName::~gclVarName()
   delete value;
 }
 
-Portion *gclVarName::Evaluate(void)
+Portion *gclVarName::Evaluate(GSM &)
 {
   if (((ReferencePortion *) value)->Value() == "Quit")
     throw gclQuitOccurred(0);
@@ -439,20 +438,22 @@ gclConditional::~gclConditional()
   delete falsebr;
 }
 
-Portion *gclConditional::Evaluate(void)
+Portion *gclConditional::Evaluate(GSM &p_environment)
 {
-  Portion *guardval = guard->Evaluate();
-  _gsm._ResolveRef(guardval);
+  Portion *guardval = guard->Evaluate(p_environment);
+  p_environment._ResolveRef(guardval);
   if (guardval->Spec().Type != porBOOLEAN ||
       guardval->Spec().ListDepth > 0)
     throw gclRuntimeError("Guard must evaluate to BOOLEAN");
 
   try  {
     Portion *ret;
-    if (((BoolPortion *) guardval)->Value() == triTRUE)
-      ret = truebr->Evaluate();
-    else
-      ret = falsebr->Evaluate();
+    if (((BoolPortion *) guardval)->Value() == triTRUE) {
+      ret = truebr->Evaluate(p_environment);
+    }
+    else {
+      ret = falsebr->Evaluate(p_environment);
+    }
     delete guardval;
     Portion *retcopy = ret->ValCopy();
     delete ret;
@@ -479,14 +480,14 @@ gclWhileExpr::~gclWhileExpr()
   delete body;
 }
 
-Portion *gclWhileExpr::Evaluate(void)
+Portion *gclWhileExpr::Evaluate(GSM &p_environment)
 {
   Portion *ret = new NullPortion(porNUMBER);
 
   while (1)   {
     Portion *guardval;
     try  {
-      guardval = guard->Evaluate();
+      guardval = guard->Evaluate(p_environment);
     }
     catch (...)  {
       delete ret;
@@ -494,7 +495,7 @@ Portion *gclWhileExpr::Evaluate(void)
     }
 
     try  {
-      _gsm._ResolveRef(guardval);
+      p_environment._ResolveRef(guardval);
     }
     catch (...)   {
       delete guardval;
@@ -514,9 +515,9 @@ Portion *gclWhileExpr::Evaluate(void)
     delete guardval;
     delete ret;
 
-    gstatus.Get();
+    p_environment.GetStatusMonitor().Get();
 
-    ret = body->Evaluate();
+    ret = body->Evaluate(p_environment);
   }
 }
 
@@ -538,12 +539,12 @@ gclForExpr::~gclForExpr()
   delete body;
 }
 
-Portion *gclForExpr::Evaluate(void)
+Portion *gclForExpr::Evaluate(GSM &p_environment)
 {
   Portion *ret = new NullPortion(porNUMBER);
 
   try  {
-    delete init->Evaluate();
+    delete init->Evaluate(p_environment);
   }
   catch (...)   {
     delete ret;
@@ -554,7 +555,7 @@ Portion *gclForExpr::Evaluate(void)
     Portion *guardval;
 
     try  {
-      guardval = guard->Evaluate();
+      guardval = guard->Evaluate(p_environment);
     }
     catch (...)  {
       delete ret;
@@ -562,7 +563,7 @@ Portion *gclForExpr::Evaluate(void)
     }
 
     try  {
-      _gsm._ResolveRef(guardval);
+      p_environment._ResolveRef(guardval);
     }
     catch (...)  {
       delete ret;
@@ -584,12 +585,12 @@ Portion *gclForExpr::Evaluate(void)
     delete guardval;
     delete ret;
 
-    gstatus.Get();
+    p_environment.GetStatusMonitor().Get();
 
-    ret = body->Evaluate();
+    ret = body->Evaluate(p_environment);
 
     try   {
-      delete step->Evaluate();
+      delete step->Evaluate(p_environment);
     }
     catch (...)  {
       delete ret;
@@ -610,9 +611,9 @@ gclFunctionDef::gclFunctionDef(gclFunction *f, gclExpression *b)
 gclFunctionDef::~gclFunctionDef()
 { }
 
-Portion *gclFunctionDef::Evaluate(void)
+Portion *gclFunctionDef::Evaluate(GSM &p_environment)
 {
-  _gsm.AddFunction(func);
+  p_environment.AddFunction(func);
   return new BoolPortion(true);
 }
 
@@ -627,9 +628,9 @@ gclDeleteFunction::gclDeleteFunction(gclFunction *p_function)
 gclDeleteFunction::~gclDeleteFunction()
 { }
 
-Portion *gclDeleteFunction::Evaluate(void)
+Portion *gclDeleteFunction::Evaluate(GSM &p_environment)
 {
-  _gsm.DeleteFunction(func);
+  p_environment.DeleteFunction(func);
   return new BoolPortion(true);
 }
 

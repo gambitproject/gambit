@@ -12,8 +12,11 @@
 #include "gtext.h"
 #include "gstack.h"
 
+class GSM;
+
 class gPreprocessor  {
 private:
+  GSM &m_environment;
   gclCommandLine *m_CmdLine;
 
   gStack<gInput *> m_InputStack;
@@ -35,7 +38,7 @@ private:
   bool IsQuoteEscapeSequence(const gText &p_line) const;
 
 public:
-  gPreprocessor(gclCommandLine *p_cmdline, const char *p_cmd = NULL); 
+  gPreprocessor(GSM &, gclCommandLine *p_cmdline, const char *p_cmd = NULL); 
   ~gPreprocessor();
 
   //----------------------------------------------

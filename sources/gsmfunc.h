@@ -5,16 +5,11 @@
 // $Id$
 //
 
-
-
-
 #ifndef GSMFUNC_H
 #define GSMFUNC_H
 
-
 #include "gsmincl.h"
 #include "gtext.h"
-
 
 class gOutput;
 
@@ -32,14 +27,10 @@ typedef unsigned int    FuncFlagType;
 
 #define NO_PREDEFINED_PARAMS ( (gclParameter*) 0 )
 
-
 #define AUTO_VAL_OR_REF      true
-
 
 #define PARAM_NOT_FOUND   ( (int)      -1 )
 #define PARAM_AMBIGUOUS   ( (int)      -2 )
-
-
 
 
 class gclFunction;
@@ -78,7 +69,7 @@ class gclSignature  {
 public:
   bool UserDefined;
   union  {
-    Portion *(*FuncPtr)(Portion **);
+    Portion *(*FuncPtr)(GSM &, Portion **);
     gclExpression *FuncInstr;
   };
   PortionSpec ReturnSpec;
@@ -89,7 +80,7 @@ public:
 
   gclSignature(void);
   gclSignature(const gclSignature& funcinfo);
-  gclSignature(Portion* (*funcptr)(Portion**),
+  gclSignature(Portion *(*funcptr)(GSM &, Portion**),
 	       PortionSpec returnspec, int numparams,
 	       gclParameter* paraminfo = 0, FuncFlagType = funcLISTABLE);
   gclSignature(gclExpression* funcinstr, PortionSpec returnspec,
@@ -111,19 +102,20 @@ protected:
   gText        _FuncName;
   int            _NumFuncs;
   gclSignature*  _FuncInfo;
+  GSM &m_environment;
 
-  
 public:
-  gclFunction(const gText& func_name, int numfuncs);
-  gclFunction(const gText& func_proto, Portion* (*funcptr)(Portion**),
-                   FuncFlagType = funcLISTABLE  );
+  gclFunction(GSM &m_environment, const gText& func_name, int numfuncs);
+  gclFunction(GSM &m_environment, const gText& func_proto,
+	      Portion *(*funcptr)(GSM &, Portion **),
+	      FuncFlagType = funcLISTABLE);
   virtual ~gclFunction();
 
   void SetFuncInfo(int funcindex, gclSignature funcinfo);
   void SetFuncInfo(int funcindex, const gText& s);
   void SetFuncInfo(int funcindex, const gText& s, 
-                   Portion* (*funcptr)(Portion**), 
-                   FuncFlagType = funcLISTABLE  );
+                   Portion* (*funcptr)(GSM &, Portion **), 
+                   FuncFlagType = funcLISTABLE);
   void SetParamInfo(int funcindex, int index, const gclParameter paraminfo);  
   void SetParamInfo(int funcindex, const gclParameter paraminfo[]);
   

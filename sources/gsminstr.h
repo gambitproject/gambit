@@ -13,6 +13,8 @@
 #include "gmisc.h"
 #include "portion.h"
 
+class GSM;
+
 class gclExpression  {
 protected:
   int m_line;
@@ -24,7 +26,7 @@ public:
   virtual ~gclExpression()  { }
   
   virtual PortionSpec Type(void) const   { return porANYTYPE; }
-  virtual Portion *Evaluate(void) = 0;
+  virtual Portion *Evaluate(GSM &) = 0;
 };
 
 
@@ -47,7 +49,7 @@ class gclQuitExpression : public gclExpression  {
     virtual ~gclQuitExpression()  { } 
 
     PortionSpec Type(void) const;
-    Portion *Evaluate(void);
+    Portion *Evaluate(GSM &);
 };
 
 
@@ -60,7 +62,7 @@ class gclSemiExpr : public gclExpression  {
     virtual ~gclSemiExpr();
 
     PortionSpec Type(void) const;
-    Portion *Evaluate(void);
+    Portion *Evaluate(GSM &);
 };
 
 class gclReqParameterList  {
@@ -116,7 +118,7 @@ class gclFunctionCall : public gclExpression   {
     gText name;
     gclParameterList *params;
     
-    Portion *(*funcptr)(Portion **);
+    Portion *(*funcptr)(GSM &, Portion **);
     PortionSpec type;    
 
   public:
@@ -130,7 +132,7 @@ class gclFunctionCall : public gclExpression   {
     virtual ~gclFunctionCall();
 
     PortionSpec Type(void) const;
-    Portion *Evaluate(void);
+    Portion *Evaluate(GSM &);
 };
 
 
@@ -142,7 +144,7 @@ class gclAssignment : public gclExpression  {
     gclAssignment(gclExpression *value, gclExpression *var);
     virtual ~gclAssignment();
 
-    Portion *Evaluate(void);
+    Portion *Evaluate(GSM &);
 };
 
 class gclUnAssignment : public gclExpression  {
@@ -153,7 +155,7 @@ class gclUnAssignment : public gclExpression  {
     gclUnAssignment(gclExpression *var);
     virtual ~gclUnAssignment();
 
-    Portion *Evaluate(void);
+    Portion *Evaluate(GSM &);
 };
 
 class gclFunction;
@@ -167,7 +169,7 @@ class gclFunctionDef : public gclExpression  {
     gclFunctionDef(gclFunction *f, gclExpression *b);
     virtual ~gclFunctionDef();
 
-    Portion *Evaluate(void);
+    Portion *Evaluate(GSM &);
 };
 
 class gclDeleteFunction : public gclExpression  {
@@ -178,7 +180,7 @@ public:
   gclDeleteFunction(gclFunction *f);
   virtual ~gclDeleteFunction();
 
-  Portion *Evaluate(void);
+  Portion *Evaluate(GSM &);
 };
 
 class gclConstExpr : public gclExpression    {
@@ -190,7 +192,7 @@ class gclConstExpr : public gclExpression    {
     virtual ~gclConstExpr();
 
     PortionSpec Type(void) const;
-    Portion *Evaluate(void);
+    Portion *Evaluate(GSM &);
 };
 
 class gclListConstant : public gclExpression  {
@@ -204,7 +206,7 @@ class gclListConstant : public gclExpression  {
 
     void Append(gclExpression *);
 
-    Portion *Evaluate(void);
+    Portion *Evaluate(GSM &);
 };
 
 
@@ -216,7 +218,7 @@ class gclVarName : public gclExpression   {
     gclVarName(const gText &);
     virtual ~gclVarName();
 
-    Portion *Evaluate(void);
+    Portion *Evaluate(GSM &);
 };
 
 
@@ -230,7 +232,7 @@ class gclConditional : public gclExpression  {
                    gclExpression *iftrue, gclExpression *iffalse);
     virtual ~gclConditional();
 
-    Portion *Evaluate(void);
+    Portion *Evaluate(GSM &);
 };
 
 class gclWhileExpr : public gclExpression  {
@@ -241,7 +243,7 @@ class gclWhileExpr : public gclExpression  {
     gclWhileExpr(gclExpression *guard, gclExpression *body);
     virtual ~gclWhileExpr();
 
-    Portion *Evaluate(void);
+    Portion *Evaluate(GSM &);
 };
 
 class gclForExpr : public gclExpression  {
@@ -253,7 +255,7 @@ class gclForExpr : public gclExpression  {
                gclExpression *step, gclExpression *body);
     virtual ~gclForExpr();
 
-    Portion *Evaluate(void);
+    Portion *Evaluate(GSM &);
 };
 
 

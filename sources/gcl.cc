@@ -96,7 +96,6 @@ int matherr(struct exception *e)
 #endif
 
 
-GSM* _gsm;
 char* _SourceDir = NULL;
 char* _ExePath = NULL;
 
@@ -183,11 +182,11 @@ int main( int /*argc*/, char* argv[] )
     signal(SIGINT, gGCLStatusHandler);
 #endif
 
-    _gsm = new GSM;
+    GSM *gsm = new GSM;
 
-    GCLCompiler C;
+    GCLCompiler C(*gsm);
     gCmdLineInput gcmdline(20);
-    gPreprocessor P(&gcmdline, "Include[\"gclini.gcl\"]");
+    gPreprocessor P(*gsm, &gcmdline, "Include[\"gclini.gcl\"]");
     while (!P.eof()) {
       gText line = P.GetLine();
       gText fileName = P.GetFileName();
@@ -199,7 +198,7 @@ int main( int /*argc*/, char* argv[] )
     }
 
     delete[] _SourceDir;
-    delete _gsm;
+    delete gsm;
 
 
     // this is normally done in destructor for gCmdLineInput,

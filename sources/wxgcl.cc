@@ -14,7 +14,6 @@
 #include "gpreproc.h"
 #include "gcompile.h"
 
-GSM *_gsm;
 char *_SourceDir = 0;
 char *_ExePath = 0;
 
@@ -139,7 +138,8 @@ private:
   wxOutputWindowStream *m_outputStream;
   gList<gText> m_history;
 
-  GCLCompiler m_compiler;
+  GSM *m_environment;
+  GCLCompiler *m_compiler;
 
   // Menu event handlers
   void OnSaveLog(wxCommandEvent &);
@@ -239,23 +239,25 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
   _ExePath = new char[1024];
   strncpy(_ExePath, wxGetWorkingDirectory(), 1023);
 
-  _gsm = new GSM(gin, *m_outputStream, *m_outputStream);
+  m_environment = new GSM(gin, *m_outputStream, *m_outputStream);
+  m_compiler = new GCLCompiler(*m_environment);
   wxCommandLine cmdline(20);
-  gPreprocessor preproc(&cmdline, "Include[\"gclini.gcl\"]");
+  gPreprocessor preproc(*m_environment, &cmdline, "Include[\"gclini.gcl\"]");
   try {
     while (!preproc.eof()) {
       gText line = preproc.GetLine();
       gText fileName = preproc.GetFileName();
       int lineNumber = preproc.GetLineNumber();
       gText rawLine = preproc.GetRawLine();
-      m_compiler.Parse(line, fileName, lineNumber, rawLine);
+      m_compiler->Parse(line, fileName, lineNumber, rawLine);
     }
   }
   catch (gclQuitOccurred &) {
 
   }
   catch (gException &w)  {
-    _gsm->OutputStream() << "GCL EXCEPTION:" << w.Description() << "; Caught in GclFrame::GclFrame()\n";
+    m_environment->OutputStream() << "GCL EXCEPTION:" << w.Description()
+				  << "; Caught in GclFrame::GclFrame()\n";
   }
 }
 
@@ -365,7 +367,7 @@ void GclFrame::OnTextEnter(wxCommandEvent &)
   m_outputWindow->AppendText("\n");
 
   wxCommandLine cmdline(20);
-  gPreprocessor preproc(&cmdline,
+  gPreprocessor preproc(*m_environment, &cmdline,
 			gText(m_inputWindow->GetValue().c_str()) + "\n");
   try {
     while (!preproc.eof()) {
@@ -373,14 +375,15 @@ void GclFrame::OnTextEnter(wxCommandEvent &)
       gText fileName = preproc.GetFileName();
       int lineNumber = preproc.GetLineNumber();
       gText rawLine = preproc.GetRawLine();
-      m_compiler.Parse(line, fileName, lineNumber, rawLine);
+      m_compiler->Parse(line, fileName, lineNumber, rawLine);
     }
   }
   catch (gclQuitOccurred &) {
 
   }
   catch (gException &w)  {
-    _gsm->OutputStream() << "GCL EXCEPTION:" << w.Description() << "; Caught in GclFrame::OnTextEnter()\n";
+    m_environment->OutputStream() << "GCL EXCEPTION:" << w.Description() 
+				  << "; Caught in GclFrame::OnTextEnter()\n";
   }
   m_inputWindow->SetValue("<< ");
   m_inputWindow->SetInsertionPointEnd();

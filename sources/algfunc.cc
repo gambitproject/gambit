@@ -19,8 +19,6 @@
 
 #include "vertenum.h"
 
-extern GSM *_gsm;
-
 extern Portion *ArrayToList(const gArray<int> &A);
 extern Portion *ArrayToList(const gArray<double> &A);
 extern Portion *ArrayToList(const gArray<gRational> &A);
@@ -122,8 +120,7 @@ void EfSupport_ListPortion::SetValue(const gList<const EFSupport> &list)
 // AgentForm
 //-------------
 
-
-static Portion *GSM_AgentForm(Portion **param)
+static Portion *GSM_AgentForm(GSM &, Portion **param)
 {
   Efg &E = *((EfgPortion*) param[0])->Value();
   gWatch watch;
@@ -168,7 +165,7 @@ EfgAlgType NfgAlgType2EfgAlgType(NfgAlgType algtype)
   }
 }
 
-static Portion *GSM_Behav(Portion **param)
+static Portion *GSM_Behav(GSM &, Portion **param)
 {
   MixedSolution &mp = *((MixedPortion*) param[0])->Value();
   BehavProfile<gNumber> *bp = new BehavProfile<gNumber>(MixedProfile<gNumber>(mp));
@@ -186,7 +183,7 @@ static Portion *GSM_Behav(Portion **param)
 
 #include "enum.h"
 
-static Portion *GSM_EnumMixed_Nfg(Portion **param)
+static Portion *GSM_EnumMixed_Nfg(GSM &, Portion **param)
 {
   NFSupport* S = ((NfSupportPortion*) param[0])->Value();
 
@@ -215,7 +212,7 @@ static Portion *GSM_EnumMixed_Nfg(Portion **param)
 
 #include "enumsub.h"
 
-static Portion *GSM_EnumMixed_Efg(Portion **param)
+static Portion *GSM_EnumMixed_Efg(GSM &gsm, Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
 
@@ -230,7 +227,7 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
   params.cliques = ((BoolPortion *) param[8])->Value();
 
   if (!IsPerfectRecall(support.Game())) {
-    _gsm->OutputStream() << "WARNING: Solving game of imperfect recall with EnumMixed; results not guaranteed\n";
+    gsm.OutputStream() << "WARNING: Solving game of imperfect recall with EnumMixed; results not guaranteed\n";
   }
 
   gList<BehavSolution> solutions;
@@ -254,7 +251,7 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
 
 #include "nfgpure.h"
 
-static Portion *GSM_EnumPure_Nfg(Portion **param)
+static Portion *GSM_EnumPure_Nfg(GSM &gsm, Portion **param)
 {
   NFSupport *support = ((NfSupportPortion*) param[0])->Value();
 
@@ -264,11 +261,11 @@ static Portion *GSM_EnumPure_Nfg(Portion **param)
   try {
     nfgEnumPure solver;
     solver.SetStopAfter(((NumberPortion *) param[1])->Value());
-    solver.Solve(*support, gstatus, solutions);
+    solver.Solve(*support, gsm.GetStatusMonitor(), solutions);
     ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
   }
   catch (gSignalBreak &) {
-    gstatus.Reset();
+    gsm.GetStatusMonitor().Reset();
   }
 
   return new Mixed_ListPortion(solutions);
@@ -277,12 +274,12 @@ static Portion *GSM_EnumPure_Nfg(Portion **param)
 #include "efgpure.h"
 #include "psnesub.h"
 
-static Portion *GSM_EnumPure_Efg(Portion **param)
+static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
 
   if (!IsPerfectRecall(support.Game())) {
-    _gsm->OutputStream() << "WARNING: Solving game of imperfect recall with EnumPure; results not guaranteed\n";
+    gsm.OutputStream() << "WARNING: Solving game of imperfect recall with EnumPure; results not guaranteed\n";
   }
 
   if (((BoolPortion *) param[1])->Value())   {
@@ -291,12 +288,12 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
     try {
       efgEnumPureNfgSolve algorithm(support,
 				    ((NumberPortion *) param[2])->Value(),
-				    gstatus);
+				    gsm.GetStatusMonitor());
       algorithm.Solve(support);
       ((NumberPortion *) param[4])->SetValue(algorithm.Time());
     }
     catch (gSignalBreak &) {
-      gstatus.Reset();
+      gsm.GetStatusMonitor().Reset();
     }
     return new Behav_ListPortion(solutions);
   }
@@ -305,12 +302,13 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
 
     try {
       gWatch watch;
-      efgEnumPure algorithm(((NumberPortion *) param[2])->Value(), gstatus);
+      efgEnumPure algorithm(((NumberPortion *) param[2])->Value(), 
+			    gsm.GetStatusMonitor());
       solutions = algorithm.Solve(support);
       ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
     }
     catch (gSignalBreak &) {
-      gstatus.Reset();
+      gsm.GetStatusMonitor().Reset();
     }
     return new Behav_ListPortion(solutions);
   }
@@ -322,7 +320,7 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
 
 #include "grid.h"
 
-static Portion *GSM_QreGrid_Support(Portion **param)
+static Portion *GSM_QreGrid_Support(GSM &, Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
 
@@ -371,7 +369,7 @@ static Portion *GSM_QreGrid_Support(Portion **param)
 #include "ngobit.h"
 #include "egobit.h"
 
-static Portion *GSM_Qre_Start(Portion **param)
+static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
 {
   if (param[0]->Spec().Type == porMIXED)  {
     MixedSolution &start = *((MixedPortion *) param[0])->Value();
@@ -419,7 +417,7 @@ static Portion *GSM_Qre_Start(Portion **param)
     Efg &E = start.Game();
   
     if (!IsPerfectRecall(E)) {
-      _gsm->OutputStream() << "WARNING: Solving game of imperfect recall with Qre; results not guaranteed\n";
+      gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Qre; results not guaranteed\n";
     }
 
     EFQreParams EP;
@@ -469,7 +467,7 @@ static Portion *GSM_Qre_Start(Portion **param)
 
 #include "homotopy.h"
 
-static Portion *GSM_Hom_Start(Portion **param)
+static Portion *GSM_Hom_Start(GSM &, Portion **param)
 {
   if (param[0]->Spec().Type == porMIXED)  {
     MixedSolution &start = *((MixedPortion *) param[0])->Value();
@@ -518,7 +516,7 @@ static Portion *GSM_Hom_Start(Portion **param)
     Efg &E = start.Game();
   
     if (!IsPerfectRecall(E)) {
-      _gsm->OutputStream() << "WARNING: Solving game of imperfect recall with Qre; results not guaranteed\n";
+      gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Qre; results not guaranteed\n";
     }
 
     EFQreParams EP;
@@ -569,7 +567,7 @@ static Portion *GSM_Hom_Start(Portion **param)
 // KQreSolve
 //---------------
 
-static Portion *GSM_KQre_Start(Portion **param)
+static Portion *GSM_KQre_Start(GSM &gsm, Portion **param)
 {
   if (param[0]->Spec().Type == porMIXED)  {
     MixedSolution &start = *((MixedPortion *) param[0])->Value();
@@ -617,7 +615,7 @@ static Portion *GSM_KQre_Start(Portion **param)
     Efg &E = start.Game();
   
     if (!IsPerfectRecall(E)) {
-      _gsm->OutputStream() << "WARNING: Solving game of imperfect recall with KQre; results not guaranteed\n";
+      gsm.OutputStream() << "WARNING: Solving game of imperfect recall with KQre; results not guaranteed\n";
     }
 
     EFQreParams EP;
@@ -668,7 +666,7 @@ static Portion *GSM_KQre_Start(Portion **param)
 
 #include "lemke.h"
 
-static Portion *GSM_Lcp_Nfg(Portion **param)
+static Portion *GSM_Lcp_Nfg(GSM &, Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
   const Nfg *N = &S.Game();
@@ -700,7 +698,7 @@ static Portion *GSM_Lcp_Nfg(Portion **param)
 #include "seqform.h"
 #include "lemkesub.h"
 
-static Portion *GSM_Lcp_Efg(Portion **param)
+static Portion *GSM_Lcp_Efg(GSM &gsm, Portion **param)
 {
   EFSupport &support = *((EfSupportPortion*) param[0])->Value();
   const Efg *E = &support.Game();
@@ -709,7 +707,7 @@ static Portion *GSM_Lcp_Efg(Portion **param)
     throw gclRuntimeError("Only valid for two-person games");
 
   if (!IsPerfectRecall(support.Game())) {
-    _gsm->OutputStream() << "WARNING: Solving game of imperfect recall with Lcp; results not guaranteed\n";
+    gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Lcp; results not guaranteed\n";
   }
 
   if (((BoolPortion *) param[1])->Value())   {
@@ -758,7 +756,7 @@ static Portion *GSM_Lcp_Efg(Portion **param)
 
 #include "lemketab.h"
 
-Portion* GSM_Lcp_ListNumber(Portion** param)
+Portion* GSM_Lcp_ListNumber(GSM &, Portion** param)
 {
   if (((PrecisionPortion *) param[2])->Value() == precDOUBLE) {
     gMatrix<double> *a = ListToMatrix_Float((ListPortion*) param[0]);
@@ -809,7 +807,7 @@ Portion* GSM_Lcp_ListNumber(Portion** param)
 #include "liapsub.h"
 #include "eliap.h"
 
-static Portion *GSM_Liap_Behav(Portion **param)
+static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
 {
   BehavProfile<gNumber> start(*((BehavPortion *) param[0])->Value());
   Efg &E = start.Game();
@@ -846,7 +844,7 @@ static Portion *GSM_Liap_Behav(Portion **param)
     EFLiapParams LP;
 
     if (!IsPerfectRecall(E)) {
-      _gsm->OutputStream() << "WARNING: Solving game of imperfect recall with Liap; results not guaranteed\n";
+      gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Liap; results not guaranteed\n";
     }
 
     LP.stopAfter = ((NumberPortion *) param[2])->Value();
@@ -877,7 +875,7 @@ static Portion *GSM_Liap_Behav(Portion **param)
 
 #include "nliap.h"
 
-static Portion *GSM_Liap_Mixed(Portion **param)
+static Portion *GSM_Liap_Mixed(GSM &, Portion **param)
 {
   MixedProfile<gNumber> start(*((MixedPortion *) param[0])->Value());
   Nfg &N = start.Game();
@@ -916,7 +914,7 @@ static Portion *GSM_Liap_Mixed(Portion **param)
 
 #include "nfgcsum.h"
 
-static Portion *GSM_Lp_Nfg(Portion **param)
+static Portion *GSM_Lp_Nfg(GSM &, Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
   const Nfg *N = &S.Game();
@@ -949,7 +947,7 @@ static Portion *GSM_Lp_Nfg(Portion **param)
 
 #include "lpsolve.h"
 
-Portion* GSM_Lp_List(Portion** param)
+Portion* GSM_Lp_List(GSM &, Portion** param)
 {
   if (((PrecisionPortion *) param[4])->Value() == precDOUBLE)  {
     gMatrix<double>* a = ListToMatrix_Float((ListPortion*) param[0]);
@@ -1007,7 +1005,7 @@ Portion* GSM_Lp_List(Portion** param)
 #include "csumsub.h"
 #include "efgcsum.h"
 
-static Portion *GSM_Lp_Efg(Portion **param)
+static Portion *GSM_Lp_Efg(GSM &gsm, Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
   const Efg &E = support.Game();
@@ -1016,7 +1014,7 @@ static Portion *GSM_Lp_Efg(Portion **param)
     throw gclRuntimeError("Only valid for two-person zero-sum games");
 
   if (!IsPerfectRecall(E)) {
-    _gsm->OutputStream() << "WARNING: Solving game of imperfect recall with Lp; results not guaranteed\n";
+    gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Lp; results not guaranteed\n";
   }
 
   if (((BoolPortion *) param[1])->Value())   {
@@ -1070,7 +1068,7 @@ static Portion *GSM_Lp_Efg(Portion **param)
 #include "nfgalleq.h"
 
 
-static Portion *GSM_PolEnumSolve_Nfg(Portion **param)
+static Portion *GSM_PolEnumSolve_Nfg(GSM &, Portion **param)
 {
   const NFSupport &S = *((NfSupportPortion*) param[0])->Value();
   PolEnumParams params;
@@ -1117,7 +1115,7 @@ static Portion *GSM_PolEnumSolve_Nfg(Portion **param)
 #include "efgalleq.h"
 #include "polensub.h"
 
-static Portion *GSM_PolEnumSolve_Efg(Portion **param)
+static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
 {
   const EFSupport &S = *((EfSupportPortion*) param[0])->Value();
   bool recurse = ((BoolPortion *) param[8])->Value();
@@ -1125,7 +1123,7 @@ static Portion *GSM_PolEnumSolve_Efg(Portion **param)
   gList<const EFSupport> singular_supports;
 
   if (!IsPerfectRecall(S.Game())) {
-    _gsm->OutputStream() << "WARNING: Solving game of imperfect recall with AllNash; results not guaranteed\n";
+    gsm.OutputStream() << "WARNING: Solving game of imperfect recall with AllNash; results not guaranteed\n";
   }
   // If asNfg->True (salvaged from old PolEnum_Efg)  
   if (((BoolPortion *) param[1])->Value()) {
@@ -1190,13 +1188,13 @@ static Portion *GSM_PolEnumSolve_Efg(Portion **param)
 
 #include "seqeq.h"
 
-static Portion *GSM_SequentialEquilib(Portion **param)
+static Portion *GSM_SequentialEquilib(GSM &gsm, Portion **param)
 {
   EFBasis &basis = *((EfBasisPortion *) param[0])->Value();
   EFSupport &support = *((EfSupportPortion *) param[1])->Value();
   
   if (!IsPerfectRecall(support.Game())) {
-    _gsm->OutputStream() << "WARNING: Solving game of imperfect recall with SequentialEquilib; results not guaranteed\n";
+    gsm.OutputStream() << "WARNING: Solving game of imperfect recall with SequentialEquilib; results not guaranteed\n";
   }
 
   double time;
@@ -1227,7 +1225,7 @@ static Portion *GSM_SequentialEquilib(Portion **param)
 // Nfg
 //---------
 
-static Portion *GSM_Nfg(Portion **param)
+static Portion *GSM_Nfg(GSM &, Portion **param)
 {
   Efg &E = * ((EfgPortion*) param[0])->Value();
   gWatch watch;
@@ -1248,7 +1246,7 @@ static Portion *GSM_Nfg(Portion **param)
 // Payoff
 //----------
 
-Portion* GSM_Payoff_Behav(Portion** param)
+Portion* GSM_Payoff_Behav(GSM &, Portion** param)
 {
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
@@ -1256,7 +1254,7 @@ Portion* GSM_Payoff_Behav(Portion** param)
   return new NumberPortion(bp->Payoff(player->GetNumber()));
 }
 
-Portion* GSM_Payoff_Mixed(Portion** param)
+Portion* GSM_Payoff_Mixed(GSM &, Portion** param)
 {
   MixedProfile<gNumber> mp(*((MixedPortion*) param[0])->Value());
   NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
@@ -1270,7 +1268,7 @@ Portion* GSM_Payoff_Mixed(Portion** param)
 
 #include "simpdiv.h"
 
-static Portion *GSM_Simpdiv_Nfg(Portion **param)
+static Portion *GSM_Simpdiv_Nfg(GSM &, Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
   SimpdivParams SP;
@@ -1318,7 +1316,7 @@ static Portion *GSM_Simpdiv_Nfg(Portion **param)
 
 #include "simpsub.h"
 
-static Portion *GSM_Simpdiv_Efg(Portion **param)
+static Portion *GSM_Simpdiv_Efg(GSM &gsm, Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
 
@@ -1326,7 +1324,7 @@ static Portion *GSM_Simpdiv_Efg(Portion **param)
     throw gclRuntimeError("algorithm not implemented for extensive forms");
 
   if (!IsPerfectRecall(support.Game())) {
-    _gsm->OutputStream() << "WARNING: Solving game of imperfect recall with Simpdiv; results not guaranteed\n";
+    gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Simpdiv; results not guaranteed\n";
   }
 
   SimpdivParams params;
@@ -1351,7 +1349,7 @@ static Portion *GSM_Simpdiv_Efg(Portion **param)
   return new Behav_ListPortion(solutions);
 }
 
-static Portion *GSM_VertEnum(Portion** param)
+static Portion *GSM_VertEnum(GSM &, Portion** param)
 {
   if (((PrecisionPortion *) param[2])->Value() == precDOUBLE)  {
     gMatrix<double>* A = ListToMatrix_Float((ListPortion*) param[0]);
@@ -1397,7 +1395,7 @@ void Init_algfunc(GSM *gsm)
 {
   gclFunction *FuncObj;
 
-  FuncObj = new gclFunction("AgentForm", 1);
+  FuncObj = new gclFunction(*gsm, "AgentForm", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_AgentForm, porNFG, 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("efg", porEFG));
   FuncObj->SetParamInfo(0, 1, gclParameter("time", porNUMBER,
@@ -1406,14 +1404,14 @@ void Init_algfunc(GSM *gsm)
 
 
 
-  FuncObj = new gclFunction("Behav", 1);
+  FuncObj = new gclFunction(*gsm, "Behav", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Behav, porBEHAV, 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("mixed", porMIXED));
   gsm->AddFunction(FuncObj);
 
 
 
-  FuncObj = new gclFunction("EnumMixedSolve", 2);
+  FuncObj = new gclFunction(*gsm, "EnumMixedSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_EnumMixed_Nfg, 
 				       PortionSpec(porMIXED, 1), 8));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
@@ -1457,7 +1455,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new gclFunction("EnumPureSolve", 2);
+  FuncObj = new gclFunction(*gsm, "EnumPureSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_EnumPure_Nfg, 
 				       PortionSpec(porMIXED, 1), 5));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
@@ -1490,7 +1488,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new gclFunction("QreGridSolve", 1);
+  FuncObj = new gclFunction(*gsm, "QreGridSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_QreGrid_Support, 
 				       PortionSpec(porMIXED, 1), 15));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
@@ -1527,7 +1525,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new gclFunction("QreSolve", 1);
+  FuncObj = new gclFunction(*gsm, "QreSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Qre_Start, 
 				       PortionSpec(porMIXED | porBEHAV, 1), 13));
   FuncObj->SetParamInfo(0, 0, gclParameter("start",
@@ -1560,7 +1558,7 @@ void Init_algfunc(GSM *gsm)
 
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new gclFunction("HomSolve", 1);
+  FuncObj = new gclFunction(*gsm, "HomSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Hom_Start, 
 				       PortionSpec(porMIXED | porBEHAV, 1), 13));
   FuncObj->SetParamInfo(0, 0, gclParameter("start",
@@ -1594,7 +1592,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 #ifdef INTERNAL_VERSION
-  FuncObj = new gclFunction("KQreSolve", 1);
+  FuncObj = new gclFunction(*gsm, "KQreSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_KQre_Start, 
 				       PortionSpec(porMIXED | porBEHAV , 1), 13));
   FuncObj->SetParamInfo(0, 0, gclParameter("start",
@@ -1628,7 +1626,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 #endif // INTERNAL_VERSION
 
-  FuncObj = new gclFunction("LcpSolve", 3);
+  FuncObj = new gclFunction(*gsm, "LcpSolve", 3);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Lcp_Nfg, 
 				       PortionSpec(porMIXED, 1), 7));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
@@ -1677,7 +1675,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new gclFunction("LiapSolve", 2);
+  FuncObj = new gclFunction(*gsm, "LiapSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Liap_Behav,
 				       PortionSpec(porBEHAV, 1), 9));
   FuncObj->SetParamInfo(0, 0, gclParameter("start", porBEHAV));
@@ -1721,7 +1719,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new gclFunction("LpSolve", 3);
+  FuncObj = new gclFunction(*gsm, "LpSolve", 3);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Lp_Nfg, 
 				       PortionSpec(porMIXED, 1), 6));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
@@ -1772,14 +1770,14 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new gclFunction("Nfg", 1);
+  FuncObj = new gclFunction(*gsm, "Nfg", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Nfg, porNFG, 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("efg", porEFG));
   FuncObj->SetParamInfo(0, 1, gclParameter("time", porNUMBER,
 					    new NumberPortion(0), BYREF));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new gclFunction("PolEnumSolve", 2);
+  FuncObj = new gclFunction(*gsm, "PolEnumSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_PolEnumSolve_Nfg, 
 				       PortionSpec(porMIXED, 1), 8));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
@@ -1825,7 +1823,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 #ifdef INTERNAL_VERSION
-  FuncObj = new gclFunction("SeqEquilibSolve", 1);
+  FuncObj = new gclFunction(*gsm, "SeqEquilibSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_SequentialEquilib, 
 				       PortionSpec(porBEHAV, 1), 8));
   FuncObj->SetParamInfo(0, 0, gclParameter("basis", porEFBASIS));
@@ -1847,7 +1845,7 @@ void Init_algfunc(GSM *gsm)
 
 #endif // INTERNAL_VERSION
 
-  FuncObj = new gclFunction("Payoff", 2);
+  FuncObj = new gclFunction(*gsm, "Payoff", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Payoff_Behav, porNUMBER, 2,
 				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, gclParameter("profile", porBEHAV));
@@ -1861,7 +1859,7 @@ void Init_algfunc(GSM *gsm)
 
 
 
-  FuncObj = new gclFunction("SimpDivSolve", 2);
+  FuncObj = new gclFunction(*gsm, "SimpDivSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Simpdiv_Nfg,
 				       PortionSpec(porMIXED, 1), 9));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
@@ -1907,7 +1905,7 @@ void Init_algfunc(GSM *gsm)
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new gclFunction("VertEnum", 1);
+  FuncObj = new gclFunction(*gsm, "VertEnum", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_VertEnum,
 				       PortionSpec(porNUMBER, 2), 3));
   FuncObj->SetParamInfo(0, 0, gclParameter("A", PortionSpec(porNUMBER,2),

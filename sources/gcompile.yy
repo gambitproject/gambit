@@ -26,7 +26,6 @@
 
 #include "system.h"
 
-extern GSM* _gsm;  // defined at the end of gsm.cc
 gStack<gText> GCL_InputFileNames(4);
 
 %}
@@ -61,7 +60,9 @@ gStack<gText> GCL_InputFileNames(4);
             const gText& rawline); \
   int Execute(void); 
 
-%define CONSTRUCTOR_INIT     : gsm(*_gsm), \
+%define CONSTRUCTOR_PARAM    GSM &p_environment
+
+%define CONSTRUCTOR_INIT     : gsm(p_environment), \
                                record_funcbody( false ), \
                                in_funcdecl(false)
 
@@ -305,7 +306,7 @@ constant:        BOOLEAN
         |        TEXT
           { $$ = new gclConstExpr(new TextPortion(tval)); }
         |        STDOUT
-          { $$ = new gclConstExpr(new OutputPortion(gout)); }
+          { $$ = new gclConstExpr(new OutputPortion(gsm.OutputStream())); }
         |        gNULL
           { $$ = new gclConstExpr(new OutputPortion(gnull)); }
         |        FLOATPREC
@@ -359,7 +360,7 @@ formalparam:     NAME  { formals.Append(tval); }  binding
                  { paramtype = ""; types.Append(paramtype); }
                  expression RBRACE
                  { {
-                   Portion *_p_ = $6->Evaluate();
+                   Portion *_p_ = $6->Evaluate(gsm);
                    if (_p_->Spec().Type != porREFERENCE)
                      portions.Append(_p_);
                    else  {
@@ -417,47 +418,47 @@ static struct tokens toktable[] =
     { FLOATPREC, "Float" }, { RATIONALPREC, "Rational" }, { 0, 0 }
 };
 
-  _gsm->ErrorStream() << s << " at line " << current_line << " in file " << current_file
+  gsm.ErrorStream() << s << " at line " << current_line << " in file " << current_file
        << ": ";
 
   for (int i = 0; toktable[i].tok != 0; i++)
     if (toktable[i].tok == yychar)   {
-      _gsm->ErrorStream() << toktable[i].name << '\n';
+      gsm.ErrorStream() << toktable[i].name << '\n';
       return;
     }
 
   switch (yychar)   {
     case NAME:
-      _gsm->ErrorStream() << "identifier " << tval << '\n';
+      gsm.ErrorStream() << "identifier " << tval << '\n';
       break;
     case BOOLEAN:
       if (bval == triTRUE)
-     	_gsm->ErrorStream() << "True\n";
+     	gsm.ErrorStream() << "True\n";
       else if (bval == triFALSE)
-        _gsm->ErrorStream() << "False\n";
+        gsm.ErrorStream() << "False\n";
       else  /* (bval == triUNKNOWN) */
-        _gsm->ErrorStream() << "Unknown\n";
+        gsm.ErrorStream() << "Unknown\n";
       break;
     case FLOAT:
-      _gsm->ErrorStream() << "floating-point constant " << dval << '\n';
+      gsm.ErrorStream() << "floating-point constant " << dval << '\n';
       break;
     case INTEGER:
-      _gsm->ErrorStream() << "integer constant " << ival << '\n';
+      gsm.ErrorStream() << "integer constant " << ival << '\n';
       break;
     case TEXT:
-      _gsm->ErrorStream() << "text string " << tval << '\n';
+      gsm.ErrorStream() << "text string " << tval << '\n';
       break;
     case STDOUT:
-      _gsm->ErrorStream() << "StdOut\n";
+      gsm.ErrorStream() << "StdOut\n";
       break;
     case gNULL:
-      _gsm->ErrorStream() << "NullOut\n";
+      gsm.ErrorStream() << "NullOut\n";
       break;
     default:
       if (isprint(yychar) && !isspace(yychar))
-        _gsm->ErrorStream() << ((char) yychar) << '\n';
+        gsm.ErrorStream() << ((char) yychar) << '\n';
       else 
-        _gsm->ErrorStream() << "nonprinting character " << yychar << '\n';
+        gsm.ErrorStream() << "nonprinting character " << yychar << '\n';
       break;
   }    
 }
@@ -713,14 +714,14 @@ void GCLCompiler::RecoverFromError(void)
 
 gclExpression *GCLCompiler::NewFunction(gclExpression *expr)
 {
-  gclFunction *func = new gclFunction(funcname, 1);
+  gclFunction *func = new gclFunction(gsm, funcname, 1);
   PortionSpec funcspec;
 
   try {
     funcspec = TextToPortionSpec(functype);
   }
   catch (gclRuntimeError &)  {
-    _gsm->ErrorStream() << "Error: Unknown type " << functype << ", " << 
+    gsm.ErrorStream() << "Error: Unknown type " << functype << ", " << 
       " as return type in declaration of " << funcname << "[]\n";
     return new gclConstExpr(new BoolPortion(false));;
   }
@@ -749,7 +750,7 @@ gclExpression *GCLCompiler::NewFunction(gclExpression *expr)
 	spec = TextToPortionSpec(types[i]);
       }
       catch (gclRuntimeError &) {
-	_gsm->ErrorStream() << "Error: Unknown type " << types[i] << ", " << 
+	gsm.ErrorStream() << "Error: Unknown type " << types[i] << ", " << 
 	  PortionSpecToText(spec) << " for parameter " << formals[i] <<
 	  " in declaration of " << funcname << "[]\n";
 	return new gclConstExpr(new BoolPortion(false));;
@@ -778,7 +779,7 @@ gclExpression *GCLCompiler::NewFunction(gclExpression *expr)
 
 gclExpression *GCLCompiler::DeleteFunction(void)
 {
-  gclFunction *func = new gclFunction(funcname, 1);
+  gclFunction *func = new gclFunction(gsm, funcname, 1);
 
   PortionSpec funcspec;
 
@@ -786,7 +787,7 @@ gclExpression *GCLCompiler::DeleteFunction(void)
     funcspec = TextToPortionSpec(functype);
   }
   catch (gclRuntimeError &)  {
-    _gsm->ErrorStream() << "Error: Unknown type " << functype << ", " << 
+    gsm.ErrorStream() << "Error: Unknown type " << functype << ", " << 
       PortionSpecToText(funcspec) << " as return type in declaration of " << 
       funcname << "[]\n";
     return new gclConstExpr(new BoolPortion(false));
@@ -813,7 +814,7 @@ gclExpression *GCLCompiler::DeleteFunction(void)
 					portions[i], BYVAL));
     }
     catch (gclRuntimeError &) {
-      _gsm->ErrorStream() << "Error: Unknown type " << types[i] << ", " << 
+      gsm.ErrorStream() << "Error: Unknown type " << types[i] << ", " << 
 	PortionSpecToText(spec) << " for parameter " << formals[i] <<
 	" in declaration of " << funcname << "[]\n";
       return new gclConstExpr(new BoolPortion(false));
@@ -841,13 +842,13 @@ int GCLCompiler::Execute(void)
     throw;
   }
   catch (gclRuntimeError &E) {
-    _gsm->OutputStream() << "ERROR: " << E.Description() << '\n';
+    gsm.OutputStream() << "ERROR: " << E.Description() << '\n';
   }
   catch (gException &E) {
-    _gsm->OutputStream() << "EXCEPTION: " << E.Description() << '\n';
+    gsm.OutputStream() << "EXCEPTION: " << E.Description() << '\n';
   }
 
-  gstatus.Reset();
+  gsm.GetStatusMonitor().Reset();
 
   return rcSUCCESS;
 }
