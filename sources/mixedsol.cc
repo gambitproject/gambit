@@ -49,7 +49,7 @@ void DisplayNfgAlgType(gOutput &p_file, NfgAlgType p_algorithm)
 
 MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
 			     NfgAlgType p_creator)
-  : m_profile(NFSupport(p_profile.Game())),
+  : m_profile(NFSupport(p_profile.Game())), m_precision(precDOUBLE),
     m_creator(p_creator), m_isNash(triUNKNOWN), m_isPerfect(triUNKNOWN),
     m_isProper(triUNKNOWN), m_epsilon(0.0),
     m_gobitLambda(-1), m_gobitValue(-1),
@@ -69,7 +69,7 @@ MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
 
 MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
 			     NfgAlgType p_creator)
-  : m_profile(NFSupport(p_profile.Game())),
+  : m_profile(NFSupport(p_profile.Game())), m_precision(precRATIONAL),
     m_creator(p_creator), m_isNash(triUNKNOWN), m_isPerfect(triUNKNOWN),
     m_isProper(triUNKNOWN), m_gobitLambda(-1), m_gobitValue(-1),
     m_liapValue(-1), m_id(0)
@@ -88,7 +88,7 @@ MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
 
 MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
 			     NfgAlgType p_creator)
-  : m_profile(NFSupport(p_profile.Game())),
+  : m_profile(NFSupport(p_profile.Game())), m_precision(precRATIONAL),
     m_creator(p_creator), m_isNash(triUNKNOWN), m_isPerfect(triUNKNOWN),
     m_isProper(triUNKNOWN), m_gobitLambda(-1), m_gobitValue(-1),
     m_liapValue(-1), m_id(0)
@@ -103,10 +103,12 @@ MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
 	m_profile(pl, st) = gNumber(0);
     }
   }
+  LevelPrecision();
 }
 
 MixedSolution::MixedSolution(const MixedSolution &p_solution)
-  : m_profile(p_solution.m_profile), m_creator(p_solution.m_creator), 
+  : m_profile(p_solution.m_profile),
+    m_precision(p_solution.m_precision), m_creator(p_solution.m_creator), 
     m_isNash(p_solution.m_isNash), m_isPerfect(p_solution.m_isPerfect),
     m_isProper(p_solution.m_isProper), m_epsilon(p_solution.m_epsilon),
     m_gobitLambda(p_solution.m_gobitLambda),
@@ -114,12 +116,14 @@ MixedSolution::MixedSolution(const MixedSolution &p_solution)
     m_liapValue(p_solution.m_liapValue), m_id(p_solution.m_id)
 { }
 
-MixedSolution::~MixedSolution() { }
+MixedSolution::~MixedSolution()
+{ }
 
 MixedSolution &MixedSolution::operator=(const MixedSolution &p_solution)
 {
   if (this != &p_solution)  {
     m_profile = p_solution.m_profile;
+    m_precision = p_solution.m_precision;
     m_creator = p_solution.m_creator;
     m_isNash = p_solution.m_isNash;
     m_isPerfect = p_solution.m_isPerfect;
@@ -150,6 +154,30 @@ void MixedSolution::EvalEquilibria(void) const
   }
 }
 
+void MixedSolution::LevelPrecision(void)
+{
+  m_precision = precRATIONAL;
+  for (int pl = 1; m_precision == precRATIONAL && pl <= Game().NumPlayers();
+       pl++) {
+    NFPlayer *player = Game().Players()[pl];  
+    for (int st = 1; (m_precision == precRATIONAL && 
+		      st <= player->NumStrats()); st++) {
+      if (m_profile(pl, st).Precision() == precDOUBLE)
+	m_precision = precDOUBLE;
+    }
+  }
+
+  if (m_precision == precDOUBLE) {
+    for (int pl = 1; m_precision == precRATIONAL && pl <= Game().NumPlayers();
+	 pl++) {
+      NFPlayer *player = Game().Players()[pl];  
+      for (int st = 1; (m_precision == precRATIONAL && 
+			st <= player->NumStrats()); st++) {
+	m_profile(pl, st) = (double) m_profile(pl, st);
+      }
+    }
+  }
+}
 
 //------------------------
 // Operator overloading
@@ -172,19 +200,26 @@ bool MixedSolution::Equals(const MixedProfile<double> &p_profile) const
 bool MixedSolution::operator==(const MixedSolution &p_solution) const
 { return (m_profile == p_solution.m_profile); }
 
-gNumber &MixedSolution::operator()(int p_player, int p_strategy)
+void MixedSolution::Set(Strategy *p_strategy, const gNumber &p_value)
 { 
   Invalidate();
-  return m_profile(p_player, p_strategy);
+  m_profile(p_strategy->Player()->GetNumber(), p_strategy->Number()) = p_value;
+  if (p_value.Precision() != m_precision)
+    LevelPrecision();
 }
 
-const gNumber &MixedSolution::operator()(int p_player, int p_strategy) const
-{ return m_profile(p_player, p_strategy); }
+const gNumber &MixedSolution::operator()(Strategy *p_strategy) const
+{
+  NFPlayer *player = p_strategy->Player();
+  return m_profile(player->GetNumber(), p_strategy->Number()); 
+}
 
 MixedSolution &MixedSolution::operator+=(const MixedSolution &p_solution)
 {
   Invalidate();
   m_profile += p_solution.m_profile;
+  if (m_precision == precRATIONAL && p_solution.m_precision == precDOUBLE)
+    m_precision = precDOUBLE;
   return *this;
 }
 
@@ -192,6 +227,8 @@ MixedSolution &MixedSolution::operator-=(const MixedSolution &p_solution)
 {
   Invalidate();
   m_profile -= p_solution.m_profile; 
+  if (m_precision == precRATIONAL && p_solution.m_precision == precDOUBLE)
+    m_precision = precDOUBLE;
   return *this;
 }
 
@@ -199,6 +236,8 @@ MixedSolution &MixedSolution::operator*=(const gNumber &p_constant)
 { 
   Invalidate(); 
   m_profile *= p_constant;
+  if (m_precision == precRATIONAL && p_constant.Precision() == precDOUBLE)
+    m_precision = precDOUBLE;
   return *this; 
 }
 

@@ -36,9 +36,11 @@ template <class T> MixedProfile<T>::MixedProfile(const MixedSolution &p)
   : gPVector<T>(p.Game().NumStrats()), N(&p.Game()), support(p.Game()),
     payoffs(new gRectArray<T>(p.Game().NumOutcomes(), p.Game().NumPlayers()))
 {
-  for (int pl = 1; pl <= N->NumPlayers(); pl++)
+  for (int pl = 1; pl <= N->NumPlayers(); pl++) {
+    NFPlayer *player = N->Players()[pl];
     for (int st = 1; st <= N->NumStrats(pl); st++)
-      (*this)(pl, st) = p(pl, st);
+      (*this)(pl, st) = p(player->Strategies()[st]);
+  }
 
   for (int outc = 1; outc <= N->NumOutcomes(); outc++)
     for (int pl = 1; pl <= N->NumPlayers(); pl++)

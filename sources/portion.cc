@@ -1271,14 +1271,15 @@ void MixedPortion::Output(gOutput& s) const
     s << "{ ";
     NFPlayer *player = rep->value->Game().Players()[pl];
     for (int st = 1; st <= player->NumStrats(); st++) {
+      Strategy *strategy = player->Strategies()[st];
       if (_WriteSolutionLabels == triTRUE) {
-	if ((*rep->value)(pl, st) > gNumber(0)) {
-	  s << player->Strategies()[st]->Name() << '=';
-	  s << (*rep->value)(pl, st) << ' ';
+	if ((*rep->value)(strategy) > gNumber(0)) {
+	  s << strategy->Name() << '=';
+	  s << (*rep->value)(strategy) << ' ';
 	}
       }
       else
-	s << (*rep->value)(pl, st) << ' ';
+	s << (*rep->value)(strategy) << ' ';
       }
     s << "}";
   }

@@ -38,6 +38,7 @@ void DisplayNfgAlgType(gOutput& o, NfgAlgType i);
 class MixedSolution   {
 protected:
   MixedProfile<gNumber> m_profile;
+  gPrecision m_precision;
   mutable NfgAlgType m_creator;
   mutable gTriState m_isNash, m_isPerfect, m_isProper;
   mutable gNumber m_epsilon, m_gobitLambda, m_gobitValue, m_liapValue;
@@ -45,32 +46,33 @@ protected:
   unsigned int m_id;
   
   void EvalEquilibria(void) const;
-  
+  void LevelPrecision(void);
+
 public:
   // CONSTRUCTORS, DESTRUCTOR, AND CONSTRUCTIVE OPERATORS
-  MixedSolution(const MixedProfile<double> &, NfgAlgType creator = NfgAlg_USER);
-  MixedSolution(const MixedProfile<gRational> &, NfgAlgType creator = NfgAlg_USER);
-  MixedSolution(const MixedProfile<gNumber> &, NfgAlgType creator = NfgAlg_USER);
+  MixedSolution(const MixedProfile<double> &, NfgAlgType = NfgAlg_USER);
+  MixedSolution(const MixedProfile<gRational> &, NfgAlgType = NfgAlg_USER);
+  MixedSolution(const MixedProfile<gNumber> &, NfgAlgType = NfgAlg_USER);
   MixedSolution(const MixedSolution &);
   virtual ~MixedSolution();
 
   MixedSolution &operator=(const MixedSolution &);
-
 
   // OPERATOR OVERLOADING
   bool Equals(const MixedProfile<double> &s) const;
   bool operator==(const MixedSolution &) const;
   bool operator!=(const MixedSolution &S) const { return !(*this == S); } 
 
-  gNumber &operator()(int, int);
-  const gNumber &operator()(int, int) const;
+  void Set(Strategy *, const gNumber &);
+  const gNumber &operator()(Strategy *) const;
 
   MixedSolution &operator+=(const MixedSolution &);
   MixedSolution &operator-=(const MixedSolution &);
   MixedSolution &operator*=(const gNumber &);
 
   // GENERAL DATA ACCESS
-  Nfg &Game(void) const  { return m_profile.Game(); }
+  Nfg &Game(void) const { return m_profile.Game(); }
+  gPrecision Precision(void) const { return m_precision; }
 
   // Do probabilities sum to one (within m_epsilon) for each player?)
   bool IsComplete(void) const;

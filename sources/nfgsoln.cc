@@ -643,21 +643,22 @@ void NfgSolnShow::UpdateValues(void)
             SetCell(cur_pos + (j - 1), FeaturePos(MSOLN_PLAYER), pl_name); 
             int k1 = 1;
 
-            for (int k = 1; k <= cur_vector.Lengths()[j]; k++)    // print the probs
-            {
-                if (features[MSOLN_ZERPROB] || cur_vector(j, k) > gNumber(0))
-                {
-                    tmp_str = "\\C{" + ToText(norm_draw_settings.GetPlayerColor(j)) + "}";
+            for (int k = 1; k <= cur_vector.Lengths()[j]; k++) {
+	      // print the probs
+	      Strategy *strategy = sup.Game().Players()[j]->Strategies()[k];
+	      if (features[MSOLN_ZERPROB]
+		  || cur_vector(strategy) > gNumber(0)) {
+		tmp_str = "\\C{" + ToText(norm_draw_settings.GetPlayerColor(j)) + "}";
 
-                    if (sup.Strategies(j)[k]->Name() != "")
-                        tmp_str += sup.Strategies(j)[k]->Name();
-                    else
-                        tmp_str += ToText(k);
+		if (sup.Strategies(j)[k]->Name() != "")
+		  tmp_str += sup.Strategies(j)[k]->Name();
+		else
+		  tmp_str += ToText(k);
 
-                    tmp_str += ": " + ToText(cur_vector(j, k));
-                    SetCell(cur_pos + (j - 1), sp + k1, tmp_str);
-                    k1++;
-                }
+		tmp_str += ": " + ToText(cur_vector(strategy));
+		SetCell(cur_pos + (j - 1), sp + k1, tmp_str);
+		k1++;
+	      }
             }
 
             for (; k1 <= cur_vector.Lengths()[j]; k1++) 
@@ -859,13 +860,15 @@ public:
             DrawSettings()->SetColWidth(2 + ToTextPrecision(), i + 1);
         }
 
-        for (i = 1; i <= num_players; i++)        // enter values
-        {
-            for (j = 1; j <= dim[i]; j++) 
-                SetCell(i + 1, j + 1, ToText(soln(i, j)));
+        for (i = 1; i <= num_players; i++)  {
+	  // enter values
+	  for (j = 1; j <= dim[i]; j++) {
+	    Strategy *strategy = soln.Game().Players()[i]->Strategies()[j];
+	    SetCell(i + 1, j + 1, ToText(soln(strategy)));
+	  }
 
-            for (j = dim[i] + 1; j <= max_dim; j++) 
-                HiLighted(i + 1, j + 1, 1, TRUE);
+	  for (j = dim[i] + 1; j <= max_dim; j++) 
+	    HiLighted(i + 1, j + 1, 1, TRUE);
         }
 
         SetCurCol(2);
@@ -894,11 +897,14 @@ public:
     // OnOK
     void OnOk(void)
     {
-        for (int i = 1; i <= dim.Length(); i++)
-            for (int j = 1; j <= dim[i]; j++)
-                FromText(GetCell(i + 1, j + 1), soln(i, j));
-        SetCompleted(wxOK);
-        Show(FALSE);
+      for (int i = 1; i <= dim.Length(); i++)
+	for (int j = 1; j <= dim[i]; j++) {
+	  gNumber value;
+	  FromText(GetCell(i + 1, j + 1), value);
+	  soln.Set(soln.Game().Players()[i]->Strategies()[j], value);
+	}
+      SetCompleted(wxOK);
+      Show(FALSE);
     }
 };
 

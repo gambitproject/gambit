@@ -237,22 +237,23 @@ void NfgShow::UpdateSoln(void)
 
 void NfgShow::UpdateContingencyProb(const gArray<int> &profile)
 {
-    if (!cur_soln || !spread->HaveProbs()) 
-        return;
+  if (!cur_soln || !spread->HaveProbs()) 
+    return;
 
-    // The value in the maximum row&col cell corresponds to prob of being
-    // at this contingency = Product(Prob(strat_here), all players except pl1, pl2)
-    const MixedSolution &soln = solns[cur_soln];
+  // The value in the maximum row&col cell corresponds to prob of being
+  // at this contingency = Product(Prob(strat_here), all players except pl1, pl2)
+  const MixedSolution &soln = solns[cur_soln];
 
-    gNumber cont_prob(1);
+  gNumber cont_prob(1);
 
-    for (int i = 1; i <= nf.NumPlayers(); i++)
-    {
-        if (i != pl1 && i != pl2)
-            cont_prob *= soln(i, profile[i]);
+  for (int i = 1; i <= nf.NumPlayers(); i++) {
+    if (i != pl1 && i != pl2) {
+      NFPlayer *player = nf.Players()[i];
+      cont_prob *= soln(player->Strategies()[profile[i]]);
     }
+  }
 
-    spread->SetCell(rows+1, cols+1, ToText(cont_prob));
+  spread->SetCell(rows+1, cols+1, ToText(cont_prob));
 }
 
 

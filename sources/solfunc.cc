@@ -606,10 +606,9 @@ static Portion *GSM_SetActionProbs(Portion **param)
 static Portion *GSM_SetStrategyProb(Portion **param)
 {
   MixedSolution *P = new MixedSolution(*((MixedPortion *) param[0])->Value());
-  Strategy *s = ((StrategyPortion *) param[1])->Value();
+  Strategy *strategy = ((StrategyPortion *) param[1])->Value();
   gNumber value = ((NumberPortion *) param[2])->Value();
-  int player = s->Player()->GetNumber();
-  (*P)(player, s->Number()) = value;
+  P->Set(strategy, value);
   ((MixedPortion *) param[0])->SetValue(P);
   return param[0]->RefCopy();
 }
@@ -620,32 +619,25 @@ static Portion *GSM_SetStrategyProb(Portion **param)
 
 static Portion *GSM_SetStrategyProbs(Portion **param)
 {
-  int j;
-  Portion* p2;
-  int PlayerNum = ((NfPlayerPortion *) param[1])->Value()->GetNumber();
+  NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
 
   MixedSolution *P = new MixedSolution(*((MixedPortion *) param[0])->Value());
   Nfg& N = P->Game();
   
-  if (((ListPortion*) param[2])->Length() != 
-      N.NumStrats(PlayerNum))  {
+  if (((ListPortion*) param[2])->Length() != player->NumStrats()) {
     delete P;
     throw gclRuntimeError("Mismatching number of strategies");
   }
 
-  for(j = 1; j <= N.NumStrats(PlayerNum); j++)
-  {
-    p2 = ((ListPortion*) param[2])->SubscriptCopy(j);
-    if(p2->Spec().ListDepth > 0)
-    {
+  for (int st = 1; st <= player->NumStrats(); st++) {
+    Portion *p2 = ((ListPortion*) param[2])->SubscriptCopy(st);
+    if (p2->Spec().ListDepth > 0) {
       delete p2;
       delete P;
       throw gclRuntimeError("Mismatching dimensionality");
     }
 
-    assert(p2->Spec().Type == porNUMBER);
-    (*P)(PlayerNum, j) = ((NumberPortion*) p2)->Value();
-
+    P->Set(player->Strategies()[st], ((NumberPortion*) p2)->Value());
     delete p2;
   }
 
@@ -661,10 +653,7 @@ static Portion *GSM_StrategyProb(Portion **param)
 {
   const MixedSolution *profile = ((MixedPortion *) param[0])->Value();
   Strategy* strategy = ((StrategyPortion*) param[1])->Value();
-  NFPlayer* player = strategy->Player();
-  
-  return new NumberPortion((*profile)
-			   (player->GetNumber(), strategy->Number()));
+  return new NumberPortion((*profile)(strategy));
 }
 
 //----------------
@@ -681,8 +670,11 @@ static Portion *GSM_StrategyProbs(Portion **param)
     NFPlayer *player = nfg.Players()[pl];
     ListPortion *p1 = new ListPortion;
 
-    for (int st = 1; st <= player->NumStrats(); st++)  
-      p1->Append(new NumberPortion((*profile)(player->GetNumber(), st)));
+    for (int st = 1; st <= player->NumStrats(); st++) {
+      Strategy *strategy = player->Strategies()[st];
+      p1->Append(new NumberPortion((*profile)(strategy)));
+    }
+
     por->Append(p1);
   }
 
