@@ -1,7 +1,7 @@
 # Setup the information needed for the gui compilation using MOTIF on SOLARIS
 # Edit the following where appropriate
 # WxWin information
-WXDIR = /home/ironbark/gambit/wxwin
+WXDIR = /home/gostek/gambit/wxwin
 
 WXGUI = -Dwx_motif
 GUISUFFIX = _motif

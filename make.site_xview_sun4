@@ -1,8 +1,7 @@
 # Setup the information needed for the gui compilation using XVIEW on SUN4
 # Edit the following where appropriate
 # WxWin information
-
-WXDIR = /home/ironbark/gambit/wxwin
+WXDIR = /home/gostek/gambit/wxwin
 
 WXGUI = -Dwx_xview 
 GUISUFFIX = _ol
