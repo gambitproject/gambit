@@ -145,14 +145,14 @@ void TableauInterface<T>::GetBasis(Basis<T> &out) const
 }
 
 template <class T>
-BFS<T> TableauInterface<T>::GetBFS() const
+BFS<T> TableauInterface<T>::GetBFS()
 {
+  Solve(*b,solution);  // this should not be necessary here
   BFS<T> cbfs((T) 0);
   for(int i=MinCol();i<=MaxCol();i++) {
     if(Member(i)) 
       cbfs.Define(i,solution[basis.Find(i)]);
   }
-  gout << "\ncbfs: " << cbfs;
   return cbfs;
 }
 

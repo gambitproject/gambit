@@ -97,7 +97,7 @@ public:
   void GetBasis( Basis<T> & ) const; // return Basis for current Tableau
 
   BFS<T> GetBFS1(void) const; 
-  BFS<T> GetBFS(void) const;  // used in lpsolve for some reason
+  BFS<T> GetBFS(void);  // used in lpsolve for some reason
   void Dump(gOutput &) const;
   void BigDump(gOutput &);
 
