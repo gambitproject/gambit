@@ -4,7 +4,7 @@
 // of the algorithms that will not work with this number of players.
 // Please list these explicitly
 // Only work for 2 players: Lemke, Enum
-// $Id$
+// @(#)nfgsolvd.h	1.15 4/16/96
 
 #define SD_CANCEL			-1
 #define SD_PARAMS			1
@@ -236,7 +236,7 @@ public:
 	strcpy(standard_num_str,(char *)standard_num_list->Nth(standard_num)->Data());
 	Add(wxMakeFormString("Type",&standard_type_str,wxFORM_RADIOBOX,
 			 new wxList(wxMakeConstraintStrings(standard_type_list), 0)));
-	Add(wxMakeFormString("Type",&standard_num_str,wxFORM_RADIOBOX,
+	Add(wxMakeFormString("Number",&standard_num_str,wxFORM_RADIOBOX,
 			 new wxList(wxMakeConstraintStrings(standard_num_list), 0)));
 	Go();
 	}

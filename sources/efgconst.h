@@ -2,7 +2,7 @@
 // FILE: efgconst.h -- constants used in extform gui for each menu item, and
 // some extra features.
 //
-// $Id$
+// @(#)efgconst.h	1.9 4/16/96
 //
 
 #ifndef EFGCONST_H
@@ -113,7 +113,8 @@
 #define EFG_MAKE_SUPPORT_HELP "Creating EF Supports"
 #define EFG_SUPPORTS_HELP			"Examining EF Supports"
 #define EFG_STANDARD_HELP			"EFG Standard Solutions"
-#define EFG_CUSTOM_HELP			    "EFG Custom Solutions"
+#define EFG_CUSTOM_HELP			  "EFG Custom Solutions"
+#define EFG_SUBGAMESOLN_HELP	"EFG Solutions and Subgames"
 
 // sections in the defaults file(s)
 #define		SOLN_SECT				"Soln-Defaults"

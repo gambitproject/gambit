@@ -156,7 +156,7 @@ protected:
 	subg=FALSE;
 	gerr<<"Not guaranteed to find all solutions for 'All Sequential'\n";
 	}
-
+	pick_solns=false; // pick solution subgames off for all standard solns
 	// -------- now write the new settings to file
 	wxWriteResource(SOLN_SECT,"Use-Nfg",use_nfg,defaults_file);
 	char *alg_sect=(use_nfg) ? "Nfg-Algorithm" : "Efg-Algorithm";
@@ -167,6 +167,7 @@ protected:
 	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Type",dom_type,defaults_file);
 	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",use_elimdom,defaults_file);
 	wxWriteResource(SOLN_SECT,"Efg-Mark-Subgames",subg,defaults_file);
+	wxWriteResource(SOLN_SECT,"Efg-Interactive-Solns",pick_solns,defaults_file);
 }
 public:
 	EfgSolveSettings(const BaseEfg &ef_):ef(ef_)
@@ -326,7 +327,7 @@ public:
 	strcpy(standard_num_str,(char *)standard_num_list->Nth(standard_num)->Data());
 	Add(wxMakeFormString("Type",&standard_type_str,wxFORM_RADIOBOX,
 			 new wxList(wxMakeConstraintStrings(standard_type_list), 0)));
-	Add(wxMakeFormString("Type",&standard_num_str,wxFORM_RADIOBOX,
+	Add(wxMakeFormString("Number",&standard_num_str,wxFORM_RADIOBOX,
 			 new wxList(wxMakeConstraintStrings(standard_num_list), 0)));
 	Go();
 	}
