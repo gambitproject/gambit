@@ -1,8 +1,8 @@
-//#
-//# FILE: mixed.h -- Mixed strategy profile classes
-//#
-//# $Id$
-//#
+//
+// FILE: mixed.h -- Mixed strategy profile classes
+//
+// $Id$
+//
 
 #ifndef MIXED_H
 #define MIXED_H
@@ -55,13 +55,11 @@ template <class T> class MixedProfile
 		gVector<T> &value) const;
     
   public:
-    
-
     MixedProfile(const Nfg<T> &, bool truncated = false);
     MixedProfile(const Nfg<T> &, const NFSupport &);
     MixedProfile(const Nfg<T> &, const gPVector<T> &);
     MixedProfile(const MixedProfile<T> &);
-    ~MixedProfile();
+    virtual ~MixedProfile();
 
     MixedProfile<T> &operator=(const MixedProfile<T> &);
 
@@ -70,7 +68,7 @@ template <class T> class MixedProfile
     T LiapValue(void) const;
     bool IsNash(void) const;
     void Gripe(gPVector<T> &value) const;
-    T MaxGripe() const;
+    T MaxGripe(void) const;
     bool IsPure(void) const;
     bool IsPure(int pl) const;
     void Centroid(void);

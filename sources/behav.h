@@ -1,8 +1,8 @@
-//#
-//# FILE: behav.h -- Behavioral strategy profile classes
-//#
-//# $Id$
-//#
+//
+// FILE: behav.h -- Behavioral strategy profile classes
+//
+// $Id$
+//
 
 #ifndef BEHAV_H
 #define BEHAV_H
@@ -50,16 +50,16 @@ template <class T> class BehavProfile
     void NodeValues(Node *n, int pl, gArray<T> &valarray,
 		    int &index) const;
     void CondPayoff(Node *n, T prob, gPVector<T> &, gDPVector<T> &) const;
-    void NodeRealizProbs(Node *n, T prob, int &index, gArray<T> &NRProbs);
+    void NodeRealizProbs(Node *n, T prob, int &index, gArray<T> &NRProbs) const;
     void Beliefs(Node *n, T prob, gDPVector<T> &BProbs, 
-		 gPVector<T> &gpv);
+		 gPVector<T> &gpv) const;
 
   public:
     BehavProfile(const Efg<T> &, bool truncated = false);
     BehavProfile(const Efg<T> &, const gDPVector<T> &);
     BehavProfile(const EFSupport &);
     BehavProfile(const BehavProfile<T> &);
-    ~BehavProfile();
+    virtual ~BehavProfile();
 
     BehavProfile<T> &operator=(const BehavProfile<T> &);
 
@@ -73,8 +73,9 @@ template <class T> class BehavProfile
     T Payoff(int pl) const;
     gArray<T> NodeValues(int pl) const;
     void CondPayoff(gDPVector<T> &value, gPVector<T> &probs) const;
-    gArray<T> NodeRealizProbs(void);
-    gDPVector<T> Beliefs(void);
+    gArray<T> NodeRealizProbs(void) const;
+    gDPVector<T> Beliefs(void) const
+;
 
     T LiapValue(void) const;
     bool IsNash(void) const;

@@ -513,7 +513,7 @@ template <class T> void BehavProfile<T>::Gripe(gDPVector<T> &value) const
   }
 }
 
-template <class T> T BehavProfile<T>::MaxGripe() const
+template <class T> T BehavProfile<T>::MaxGripe(void) const
 {
   int i;
   T maxgripe = (T)0;;
@@ -712,7 +712,7 @@ void BehavProfile<T>::CondPayoff( gDPVector<T> &payoff,
 
 template <class T>
 void BehavProfile<T>::NodeRealizProbs(Node *n, T prob, int &index, 
-				      gArray<T> &NRProbs)
+				      gArray<T> &NRProbs) const
 {
 
   NRProbs[index] = prob;
@@ -757,7 +757,7 @@ void BehavProfile<T>::NodeRealizProbs(Node *n, T prob, int &index,
 }
 
 template <class T> 
-gArray<T> BehavProfile<T>::NodeRealizProbs( void )
+gArray<T> BehavProfile<T>::NodeRealizProbs(void) const
 {
   int index = 1, maxindex = (NumNodes(*BelongsTo()));
 
@@ -773,7 +773,7 @@ gArray<T> BehavProfile<T>::NodeRealizProbs( void )
 
 template <class T>
 void BehavProfile<T>::Beliefs(Node *n, T prob,
-			      gDPVector<T> &BProbs, gPVector<T> &gpv)
+			      gDPVector<T> &BProbs, gPVector<T> &gpv) const
 {
   int pl = (n->infoset) ? n->infoset->player->number : -1;
   int iset = (n->infoset) ? n->infoset->number : 0;
@@ -816,7 +816,7 @@ void BehavProfile<T>::Beliefs(Node *n, T prob,
 	  prob * newprob, BProbs, gpv);
 }
 
-template <class T> gDPVector<T> BehavProfile<T>::Beliefs(void)
+template <class T> gDPVector<T> BehavProfile<T>::Beliefs(void) const
 {
   gDPVector<T> BProbs(((Efg<T> *)E)->BeliefDimensionality());
   BProbs = (T)0;
