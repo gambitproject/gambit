@@ -100,25 +100,23 @@ static Portion *GSM_Chance(Portion **param)
 
 static Portion *GSM_ChanceProb(Portion **param)
 {
-  Portion* por;
   Action *action = ((ActionPortion *) param[0])->Value();
   Infoset *infoset = action->BelongsTo();
   if (!infoset->GetPlayer()->IsChance()) 
     return new ErrorPortion("Action must belong to the chance player");
+  BaseEfg *efg = infoset->BelongsTo();
 
-  switch (infoset->BelongsTo()->Type())   {
+  switch (efg->Type())   {
     case DOUBLE:
-      por = new FloatValPortion(((ChanceInfoset<double> *) infoset)->GetActionProb(action->GetNumber()));
+      return new FloatValPortion(((Efg<double> *) efg)->GetChanceProb(infoset, action->GetNumber()));
       break;
     case RATIONAL:
-      por = new RationalValPortion(((ChanceInfoset<gRational> *) infoset)->GetActionProb(action->GetNumber()));
+      return new FloatValPortion(((Efg<gRational> *) efg)->GetChanceProb(infoset, action->GetNumber()));
       break;
     default:
       assert(0);
       return 0;
   }
-
-  return por;
 }
 
 //---------------
@@ -1071,29 +1069,26 @@ static Portion *GSM_SetChanceProbs(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   ListPortion *p = (ListPortion *) param[1];
+  BaseEfg *efg = s->BelongsTo();
 
   if (!s->GetPlayer()->IsChance())
     return new ErrorPortion
       ("Information set does not belong to chance player");
   
-  if ((s->BelongsTo()->Type() == DOUBLE && p->Spec().Type != porFLOAT) ||
-      (s->BelongsTo()->Type() == RATIONAL && p->Spec().Type != porRATIONAL))
+  if ((efg->Type() == DOUBLE && p->Spec().Type != porFLOAT) ||
+      (efg->Type() == RATIONAL && p->Spec().Type != porRATIONAL))
     return new ErrorPortion("Probability list does not match game type");
   if (p->Length() != s->NumActions())  
     return new ErrorPortion("Wrong number of probabilities");
 
-  int i;
-
   switch (p->Spec().Type)   {
     case porFLOAT:
-      for (i = 1; i <= p->Length(); i++) 
-	((ChanceInfoset<double> *) s)->SetActionProb
-          (i, ((FloatPortion *) (*p)[i])->Value());
+      for (int i = 1; i <= p->Length(); i++) 
+	((Efg<double> *) efg)->SetChanceProb(s, i, ((FloatPortion *) (*p)[i])->Value());
       break;
     case porRATIONAL:
       for (i = 1; i <= p->Length(); i++)
-	((ChanceInfoset<gRational> *) s)->SetActionProb
-   	  (i, ((RationalPortion *) (*p)[i])->Value());
+	((Efg<gRational> *) efg)->SetChanceProb(s, i, ((RationalPortion *) (*p)[i])->Value());
       break;
   }
 

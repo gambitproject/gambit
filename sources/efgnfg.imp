@@ -205,7 +205,7 @@ void RealizationProbs(const Nfg<T> &N, const MixedProfile<T> &mp,
 	prob = (T) 0.0;
     }
     else  {   // n.GetPlayer() == 0
-      prob = (T) ((ChanceInfoset<T> *) n->GetInfoset())->GetActionProb(i);
+      prob = E.GetChanceProb(n->GetInfoset(), i);
     }
 
     Node *child = n->GetChild(i);

@@ -18,7 +18,6 @@
 
 class Node;
 
-template <class T> class ChanceInfoset;
 template <class T> class Lexicon;
 
 class Action   {
@@ -28,8 +27,6 @@ class Action   {
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
   friend class Infoset;
-  friend class ChanceInfoset<double>;
-  friend class ChanceInfoset<gRational>;
   private:
     int number;
     gString name;
@@ -95,30 +92,6 @@ class Infoset   {
     int NumMembers(void) const   { return members.Length(); }
 
     int GetNumber(void) const    { return number; }
-};
-
-template <class T> class ChanceInfoset : public Infoset  {
-  friend class BaseEfg;
-  friend class Efg<double>;
-  friend class Efg<gRational>;
-  friend class BehavProfile<double>;
-  friend class BehavProfile<gRational>;
-
-  private:
-    gBlock<T> probs;
-
-    ChanceInfoset(BaseEfg *E, int n, EFPlayer *p, int br);
-    virtual ~ChanceInfoset()    { }
-
-    void PrintActions(gOutput &f) const;
-
-  public:
-    Action *InsertAction(int where);
-    void RemoveAction(int which);
-
-    void SetActionProb(int i, const T &value)  { probs[i] = value; }
-    const T &GetActionProb(int i) const   { return probs[i]; }
-    const gArray<T> &GetActionProbs(void) const  { return probs; }
 };
 
 

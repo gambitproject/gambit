@@ -42,8 +42,8 @@ static Portion *GSM_ActionProb_Float(Portion **param)
   EFPlayer* player = infoset->GetPlayer();
   
   if (player->IsChance())
-    return new FloatValPortion(((ChanceInfoset<double> *) infoset)->
-			       GetActionProbs()[action->GetNumber()]);  
+    return new FloatValPortion(((Efg<double> *) infoset->BelongsTo())->
+			       GetChanceProb(infoset, action->GetNumber()));
   else if (profile->Support().Find(action))
     return new FloatValPortion((*profile)
 			       (player->GetNumber(),
@@ -62,8 +62,8 @@ static Portion *GSM_ActionProb_Rational(Portion **param)
   EFPlayer* player = infoset->GetPlayer();
   
   if (player->IsChance())
-    return new RationalValPortion(((ChanceInfoset<gRational> *) infoset)->
-				  GetActionProbs()[action->GetNumber()]);  
+    return new RationalValPortion(((Efg<gRational> *) infoset->BelongsTo())->
+				  GetChanceProb(infoset, action->GetNumber()));
   else if (profile->Support().Find(action))
     return new RationalValPortion((*profile)(player->GetNumber(),
 					     infoset->GetNumber(),

@@ -23,11 +23,11 @@ Efg<gRational> *ConvertEfg(const Efg<double> &orig)
   EFPlayer *echance = E->GetChance();
   
   for (int iset = 1; iset <= echance->NumInfosets(); iset++)  {
-    ChanceInfoset<double> *s1 = (ChanceInfoset<double> *) ochance->Infosets()[iset];
-    ChanceInfoset<gRational> *s2 = (ChanceInfoset<gRational> *) echance->Infosets()[iset];
+    Infoset *s1 = ochance->Infosets()[iset];
+    Infoset *s2 = echance->Infosets()[iset];
 
     for (int act = 1; act <= s2->NumActions(); act++)
-      s2->SetActionProb(act, gRational(s1->GetActionProb(act)));
+      E->SetChanceProb(s2, act, gRational(orig.GetChanceProb(s1, act)));
   }
 
   return E;
@@ -50,11 +50,11 @@ Efg<double> *ConvertEfg(const Efg<gRational> &orig)
   EFPlayer *echance = E->GetChance();
   
   for (int iset = 1; iset <= echance->NumInfosets(); iset++)  {
-    ChanceInfoset<gRational> *s1 = (ChanceInfoset<gRational> *) ochance->Infosets()[iset];
-    ChanceInfoset<double> *s2 = (ChanceInfoset<double> *) echance->Infosets()[iset];
+    Infoset *s1 = ochance->Infosets()[iset];
+    Infoset *s2 = echance->Infosets()[iset];
 
     for (int act = 1; act <= s2->NumActions(); act++)
-      s2->SetActionProb(act, (double) s1->GetActionProb(act));
+      E->SetChanceProb(s2, act, (double) orig.GetChanceProb(s1, act));
   }
 
   return E;

@@ -217,6 +217,10 @@ template <class T> class Efg : public BaseEfg   {
     T Payoff(EFOutcome *, int pl) const;
     gVector<T> Payoff(EFOutcome *) const;
 
+    void SetChanceProb(Infoset *, int, const T &);
+    T GetChanceProb(Infoset *, int) const;
+    gArray<T> GetChanceProbs(Infoset *) const;
+
         //# COMPUTING VALUES OF PROFILES
 
     void Payoff(const gPVector<int> &profile, gVector<T> &payoff) const;

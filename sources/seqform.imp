@@ -167,8 +167,8 @@ template <class T> void SeqFormModule<T>
     if(n->GetPlayer()->IsChance()) {
       for(i=1;i<=n->NumChildren();i++)
 	FillTableau(n->GetChild(i),
-		    prob*((ChanceInfoset<T> *)n->GetInfoset())\
-		    ->GetActionProb(i),s1,s2,i1,i2);
+		    prob * EF.GetChanceProb(n->GetInfoset(), i), 
+		    s1,s2,i1,i2);
     }
     int pl = n->GetPlayer()->GetNumber();
     if(pl==1) {

@@ -39,6 +39,31 @@ template <class T> void TypedNode<T>::Resize(int pl)
 //           ChanceInfoset<T>: Member function definitions
 //------------------------------------------------------------------------
 
+template <class T> class ChanceInfoset : public Infoset  {
+  friend class BaseEfg;
+  friend class Efg<double>;
+  friend class Efg<gRational>;
+  friend class BehavProfile<double>;
+  friend class BehavProfile<gRational>;
+
+  private:
+    gBlock<T> probs;
+
+    ChanceInfoset(BaseEfg *E, int n, EFPlayer *p, int br);
+    virtual ~ChanceInfoset()    { }
+
+    void PrintActions(gOutput &f) const;
+
+  public:
+    Action *InsertAction(int where);
+    void RemoveAction(int which);
+
+    void SetActionProb(int i, const T &value)  { probs[i] = value; }
+    const T &GetActionProb(int i) const   { return probs[i]; }
+    const gArray<T> &GetActionProbs(void) const  { return probs; }
+};
+
+
 template <class T>
 ChanceInfoset<T>::ChanceInfoset(BaseEfg *E, int n, EFPlayer *p, int br)
   : Infoset(E, n, p, br), probs(br)
@@ -48,20 +73,15 @@ ChanceInfoset<T>::ChanceInfoset(BaseEfg *E, int n, EFPlayer *p, int br)
 
 template <class T> Action *ChanceInfoset<T>::InsertAction(int where)
 { 
-  Action *action = new Action(where, "", this);
-  actions.Insert(action, where);
+  Action *action = Infoset::InsertAction(where);
   probs.Insert((T) 0, where);
-  for (; where <= actions.Length(); where++)
-    actions[where]->number = where;
   return action;
 }
 
 template <class T> void ChanceInfoset<T>::RemoveAction(int which)
 {
-  delete actions.Remove(which);
+  Infoset::RemoveAction(which);
   probs.Remove(which);
-  for (; which <= actions.Length(); which++)
-    actions[which]->number = which;
 }
 
 template <class T> void ChanceInfoset<T>::PrintActions(gOutput &f) const
@@ -297,6 +317,29 @@ template <class T> gVector<T> Efg<T>::Payoff(EFOutcome *outc) const
   gVector<T> ret(NumPlayers());
   payoffs.GetRow(outc->GetNumber(), ret);
   return ret;
+}
+
+template <class T> void Efg<T>::SetChanceProb(Infoset *infoset,
+					      int act, const T &value)
+{
+  if (infoset->IsChanceInfoset())  
+    ((ChanceInfoset<T> *) infoset)->SetActionProb(act, value);
+}
+
+template <class T> T Efg<T>::GetChanceProb(Infoset *infoset, int act) const
+{
+  if (infoset->IsChanceInfoset())
+    return ((ChanceInfoset<T> *) infoset)->GetActionProb(act);
+  else
+    return (T) 0;
+}
+
+template <class T> gArray<T> Efg<T>::GetChanceProbs(Infoset *infoset) const
+{
+  if (infoset->IsChanceInfoset())
+    return ((ChanceInfoset<T> *) infoset)->GetActionProbs();
+  else
+    return gArray<T>(infoset->NumActions());
 }
 
 template <class T> bool Efg<T>::IsConstSum(void) const
