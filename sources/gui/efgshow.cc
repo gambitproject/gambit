@@ -108,15 +108,15 @@ void gbtCmdDeleteTree::Do(gbtGameDocument *p_doc)
 //---------------------------------------------------------------------
 
 //
-// Deletes a node, keeping a subtree rooted at one child
+// Deletes the incoming move
 //
 class gbtCmdDeleteMove : public gbtGameCommand {
 private:
-  gbtEfgNode m_keep;
+  gbtEfgNode m_node;
 
 public:
-  gbtCmdDeleteMove(gbtEfgNode p_keep)
-    : m_keep(p_keep) { }
+  gbtCmdDeleteMove(gbtEfgNode p_node)
+    : m_node(p_node) { }
   virtual ~gbtCmdDeleteMove() { }
 
   void Do(gbtGameDocument *);
@@ -127,9 +127,9 @@ public:
 
 void gbtCmdDeleteMove::Do(gbtGameDocument *p_doc)  
 {
-  m_keep.GetParent().DeleteMove(m_keep);
+  m_node.DeleteMove();
   p_doc->GetEfg().DeleteEmptyInfosets();
-  p_doc->SetCursor(m_keep);
+  p_doc->SetCursor(m_node);
 }
 
 //---------------------------------------------------------------------
@@ -946,7 +946,7 @@ void gbtEfgFrame::OnEditDelete(wxCommandEvent &)
 	m_doc->Submit(new gbtCmdDeleteTree(m_doc->GetCursor()));
       }
       else {
-	m_doc->Submit(new gbtCmdDeleteMove(dialog.KeepNode()));
+	m_doc->Submit(new gbtCmdDeleteMove(m_doc->GetCursor()));
       }
     }
   }

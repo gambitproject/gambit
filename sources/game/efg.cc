@@ -174,31 +174,32 @@ void gbt_efg_game_rep::InsertMove(gbt_efg_node_rep *p_node,
 }
 
 //
-// Delete a node from the tree.  Delete all subtrees from children
-// of the node, except the one rooted at 'p_keep', which is assumed
-// to be a child of 'p_node'.  Both nodes assumed to be valid.
+// Delete the move prior to 'p_node' from the tree. 
+// 'p_node' is assumed to be valid and assumed to have a parent.
+// NOTE: This is an API change in version 0.97.1.1: before this, this
+// function deleted a move, keeping a child node.
 //
-void gbt_efg_game_rep::DeleteMove(gbt_efg_node_rep *p_node,
-				  gbt_efg_node_rep *p_keep)
+void gbt_efg_game_rep::DeleteMove(gbt_efg_node_rep *p_node)
 {
   // turn infoset sorting off during tree deletion -- problems will occur
   sortisets = false;
 
-  p_node->m_children.Remove(p_node->m_children.Find(p_keep));
-  DeleteTree(p_node);
-  p_keep->m_parent = p_node->m_parent;
-  if (p_node->m_parent) {
-    p_node->m_parent->m_children[p_node->m_parent->m_children.Find(p_node)] = p_keep;
+  gbt_efg_node_rep *parent = p_node->m_parent;
+  parent->m_children.Remove(parent->m_children.Find(p_node));
+  DeleteTree(parent);
+  p_node->m_parent = parent->m_parent;
+  if (parent->m_parent) {
+    parent->m_parent->m_children[parent->m_parent->m_children.Find(parent)] = p_node;
   }
   else {
-    root = p_keep;
+    root = p_node;
   }
 
-  if (p_node->m_refCount == 0) {
-    delete p_node;
+  if (parent->m_refCount == 0) {
+    delete parent;
   }
   else {
-    p_node->m_deleted = true;
+    parent->m_deleted = true;
   }
 
   m_revision++;

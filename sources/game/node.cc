@@ -366,13 +366,13 @@ gbtEfgNode gbtEfgNode::InsertMove(gbtEfgInfoset p_infoset)
   return GetParent();
 }
 
-void gbtEfgNode::DeleteMove(gbtEfgNode p_keep)
+void gbtEfgNode::DeleteMove(void)
 {
-  if (IsNull() || p_keep.IsNull()) {
+  if (IsNull()) {
     throw gbtEfgNullObject();
   }
 
-  if (p_keep.GetParent() != *this) {
+  if (GetParent().IsNull()) {
     return;
   }
 
@@ -380,7 +380,7 @@ void gbtEfgNode::DeleteMove(gbtEfgNode p_keep)
   // Is this necessary?  (Or, more likely, will be moot once subgame
   // implementation is improved!)
   GetGame().UnmarkSubgames(*this);
-  rep->m_efg->DeleteMove(rep, p_keep.rep);
+  rep->m_efg->DeleteMove(rep);
 }
 
 void gbtEfgNode::DeleteTree(void)

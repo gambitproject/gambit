@@ -128,6 +128,16 @@ mixed_getpayoff(mixedobject *self, PyObject *args)
 }
 
 static PyObject *
+mixed_getqrelambda(mixedobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  return Py_BuildValue("d", (double) self->m_profile->QreLambda());
+}
+
+static PyObject *
 mixed_getstrategyprob(mixedobject *self, PyObject *args)
 {
   PyObject *strategy;
@@ -255,6 +265,7 @@ static struct PyMethodDef mixed_methods[] = {
   { "GetLabel", (PyCFunction) mixed_getlabel, 1 },
   { "GetLiapValue", (PyCFunction) mixed_getliapvalue, 1 },
   { "GetPayoff", (PyCFunction) mixed_getpayoff, 1 },
+  { "GetQreLambda", (PyCFunction) mixed_getqrelambda, 1 },
   { "GetStrategyProb", (PyCFunction) mixed_getstrategyprob, 1 },
   { "GetStrategyValue", (PyCFunction) mixed_getstrategyvalue, 1 },
   { "IsNash", (PyCFunction) mixed_isnash, 1 },

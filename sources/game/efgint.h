@@ -142,7 +142,7 @@ struct gbt_efg_game_rep {
   void DeleteLexicon(void);
 
   void InsertMove(gbt_efg_node_rep *, gbt_efg_infoset_rep *);
-  void DeleteMove(gbt_efg_node_rep *, gbt_efg_node_rep *);
+  void DeleteMove(gbt_efg_node_rep *);
   void DeleteTree(gbt_efg_node_rep *);
 
   gbt_efg_infoset_rep *NewInfoset(gbt_efg_player_rep *,

@@ -86,7 +86,8 @@ public:
   void SetOutcome(const gbtEfgOutcome &);
 
   gbtEfgNode InsertMove(gbtEfgInfoset);
-  void DeleteMove(gbtEfgNode p_keep);
+  // Note: Starting in 0.97.1.1, this now deletes the *parent* move
+  void DeleteMove(void);
   void DeleteTree(void);
 
   void JoinInfoset(gbtEfgInfoset);

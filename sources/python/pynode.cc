@@ -72,17 +72,11 @@ PyTypeObject Nodetype = {      /* main python type-descriptor */
 static PyObject *
 node_deletemove(nodeobject *self, PyObject *args)
 {
-  PyObject *keep;
-
-  if (!PyArg_ParseTuple(args, "O", &keep)) {
+  if (!PyArg_ParseTuple(args, "")) {
     return NULL;
   }
 
-  if (!is_nodeobject(keep)) {
-    return NULL;
-  }
-
-  self->m_node->DeleteMove(*((nodeobject *) keep)->m_node);
+  self->m_node->DeleteMove();
   Py_INCREF(Py_None);
   return Py_None;
 }
