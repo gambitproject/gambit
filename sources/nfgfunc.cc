@@ -75,7 +75,8 @@ Portion *GSM_ElimAllDom_NfSupport(Portion **param)
   while( new_T )
   {
     old_T = new_T;
-    new_T = ComputeDominated(*old_T, strong, players, gout);
+    new_T = ComputeDominated(*old_T, strong, players,
+			     ((OutputPortion *) param[3])->Value());
   }
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
@@ -102,7 +103,8 @@ Portion *GSM_ElimAllDom_Nfg(Portion **param)
   while( new_T )
   {
     old_T = new_T;
-    new_T = ComputeDominated(*old_T, strong, players, gout);
+    new_T = ComputeDominated(*old_T, strong, players,
+			     ((OutputPortion *) param[3])->Value());
   }
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
@@ -127,7 +129,8 @@ Portion *GSM_ElimDom_NfSupport(Portion **param)
   int i;
   for (i = 1; i <= players.Length(); i++)   players[i] = i;
 
-  NFSupport *T = ComputeDominated(*S, strong, players, gout);
+  NFSupport *T = ComputeDominated(*S, strong, players,
+				  ((OutputPortion *) param[3])->Value());
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
@@ -149,7 +152,8 @@ Portion *GSM_ElimDom_Nfg(Portion **param)
   int i;
   for (i = 1; i <= players.Length(); i++)   players[i] = i;
 
-  NFSupport *T = ComputeDominated(*S, strong, players, gout);
+  NFSupport *T = ComputeDominated(*S, strong, players,
+				  ((OutputPortion *) param[3])->Value());
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
@@ -159,6 +163,63 @@ Portion *GSM_ElimDom_Nfg(Portion **param)
   por->AddDependency();
   return por;
 }
+
+//-----------------
+// ElimMixedDom
+//-----------------
+
+// WARNING:  This is a purely speculative function, don't include in
+//           official distributions unless I say so!  --  Ted
+
+NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
+				 const gArray<int> &players,
+				 gOutput &tracefile);
+
+Portion *GSM_ElimMixedDom_NfSupport(Portion **param)
+{
+  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  bool strong = ((BoolPortion *) param[1])->Value();
+  
+  gWatch watch;
+  gBlock<int> players(S->BelongsTo().NumPlayers());
+  int i;
+  for (i = 1; i <= players.Length(); i++)   players[i] = i;
+
+  NFSupport *T = ComputeMixedDominated(*S, strong, players,
+				       ((OutputPortion *) param[3])->Value());
+
+  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
+  
+  Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
+
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+
+
+Portion *GSM_ElimMixedDom_Nfg(Portion **param)
+{
+  NFSupport *S = new NFSupport( * ((NfgPortion *) param[0])->Value() );
+  bool strong = ((BoolPortion *) param[1])->Value();
+  
+  gWatch watch;
+  gBlock<int> players(S->BelongsTo().NumPlayers());
+  int i;
+  for (i = 1; i <= players.Length(); i++)   players[i] = i;
+
+  NFSupport *T = ComputeMixedDominated(*S, strong, players,
+				       ((OutputPortion *) param[3])->Value());
+
+  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
+  
+  Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
+
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+  
 
 //----------
 // Float
@@ -579,6 +640,32 @@ void Init_nfgfunc(GSM *gsm)
 			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
 
+
+  FuncObj = new FuncDescObj("ElimMixedDom");
+  FuncObj->SetFuncInfo(GSM_ElimMixedDom_NfSupport, 5);
+  FuncObj->SetParamInfo(GSM_ElimMixedDom_NfSupport, 0, "support", porNF_SUPPORT);
+  FuncObj->SetParamInfo(GSM_ElimMixedDom_NfSupport, 1, "strong", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_ElimMixedDom_NfSupport, 2, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimMixedDom_NfSupport, 3, "traceFile", porOUTPUT,
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimMixedDom_NfSupport, 4, "traceLevel", porINTEGER,
+			new IntValPortion(0));
+
+  FuncObj->SetFuncInfo(GSM_ElimMixedDom_Nfg, 5);
+  FuncObj->SetParamInfo(GSM_ElimMixedDom_Nfg, 0, "nfg", porNFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimMixedDom_Nfg, 1, "strong", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_ElimMixedDom_Nfg, 2, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimMixedDom_Nfg, 3, "traceFile", porOUTPUT,
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimMixedDom_Nfg, 4, "traceLevel", porINTEGER,
+			new IntValPortion(0));
+
+  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Float");
   FuncObj->SetFuncInfo(GSM_Float_Nfg, 1);
