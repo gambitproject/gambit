@@ -99,7 +99,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, NfgShow::OnToolsDominance)
   EVT_MENU(GBT_MENU_TOOLS_EQUILIBRIUM, NfgShow::OnToolsEquilibrium)
   EVT_MENU(GBT_MENU_TOOLS_QRE, NfgShow::OnToolsQre)
-  EVT_MENU(GBT_MENU_TOOLS_CH, NfgShow::OnToolsCH)
+  // EVT_MENU(GBT_MENU_TOOLS_CH, NfgShow::OnToolsCH)
   EVT_MENU(wxID_ABOUT, NfgShow::OnHelpAbout)
   EVT_MENU(GBT_MENU_SUPPORTS_DUPLICATE, NfgShow::OnSupportDuplicate)
   EVT_MENU(GBT_MENU_SUPPORTS_DELETE, NfgShow::OnSupportDelete)
@@ -161,7 +161,7 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   topSizer->SetSizeHints(this);
   Layout();
   Show(true);
-  m_doc->UpdateViews(0, true, true);
+  m_doc->UpdateViews();
 }
 
 NfgShow::~NfgShow()
@@ -526,7 +526,7 @@ void NfgShow::OnEditStrategies(wxCommandEvent &)
 	player.GetStrategy(st).SetLabel(dialog.GetStrategyName(pl, st));
       }
     }
-    m_doc->UpdateViews(0, false, true);
+    m_doc->UpdateViews();
   }
 }
 
@@ -546,7 +546,7 @@ void NfgShow::OnEditContingency(wxCommandEvent &)
     else {
       profile.SetOutcome(m_doc->GetNfg().GetOutcome(dialog.GetOutcome()));
     }
-    m_doc->UpdateViews(0, false, true);
+    m_doc->UpdateViews();
   }
 }
 
@@ -597,7 +597,7 @@ void NfgShow::OnViewValues(wxCommandEvent &)
 void NfgShow::OnViewOutcomeLabels(wxCommandEvent &)
 {
   m_doc->GetPreferences().SetOutcomeLabel(1 - m_doc->GetPreferences().OutcomeLabel());
-  m_doc->UpdateViews(0, false, true);
+  m_doc->UpdateViews();
 }
 
 //----------------------------------------------------------------------
@@ -615,7 +615,7 @@ void NfgShow::OnFormatDisplayColors(wxCommandEvent &)
       m_doc->GetPreferences().SetPlayerColor(pl, dialog.GetPlayerColor(pl));
     }
     m_doc->GetPreferences().SaveOptions();
-    m_doc->UpdateViews(this, true, true);
+    m_doc->UpdateViews(this);
   }
 }
 
@@ -627,7 +627,7 @@ void NfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->GetPreferences().SetNumDecimals(dialog.GetValue());
     m_doc->GetPreferences().SaveOptions();
-    m_doc->UpdateViews(0, false, true);
+    m_doc->UpdateViews();
   }
 }
 
@@ -640,7 +640,7 @@ void NfgShow::OnFormatFontData(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->GetPreferences().SetDataFont(dialog.GetFontData().GetChosenFont());
     m_doc->GetPreferences().SaveOptions();
-    m_doc->UpdateViews(0, false, true);
+    m_doc->UpdateViews();
   }
 }
 
@@ -653,7 +653,7 @@ void NfgShow::OnFormatFontLabels(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->GetPreferences().SetLabelFont(dialog.GetFontData().GetChosenFont());
     m_doc->GetPreferences().SaveOptions();
-    m_doc->UpdateViews(0, false, true);
+    m_doc->UpdateViews();
   }
 }
 
@@ -800,6 +800,9 @@ void NfgShow::OnToolsQre(wxCommandEvent &)
   }
 }
 
+#ifdef UNUSED
+// Commented out for now, until this gets implemented
+
 void NfgShow::OnToolsCH(wxCommandEvent &)
 {
   dialogNfgCH dialog(this, m_doc->GetNfgSupport());
@@ -834,6 +837,8 @@ void NfgShow::OnToolsCH(wxCommandEvent &)
   }
 
 }
+
+#endif  // UNUSED
 
 
 //----------------------------------------------------------------------

@@ -768,7 +768,7 @@ void gbtProfileFrame::OnViewGrid(wxCommandEvent &)
 		       m_doc->GetNfg().NumPlayers());
   }
   m_doc->GetPreferences().SetProfileStyle(GBT_PROFILES_GRID);
-  m_doc->UpdateViews(this, true, true);
+  m_doc->UpdateViews(this);
 }
 
 void gbtProfileFrame::OnViewMyerson(wxCommandEvent &)
@@ -784,7 +784,7 @@ void gbtProfileFrame::OnViewMyerson(wxCommandEvent &)
 		       m_doc->GetNfg().NumPlayers());
   }
   m_doc->GetPreferences().SetProfileStyle(GBT_PROFILES_MYERSON);
-  m_doc->UpdateViews(this, true, true);
+  m_doc->UpdateViews(this);
 }
 
 void gbtProfileFrame::OnViewVector(wxCommandEvent &)
@@ -800,7 +800,7 @@ void gbtProfileFrame::OnViewVector(wxCommandEvent &)
 		       m_doc->GetNfg().NumPlayers());
   }
   m_doc->GetPreferences().SetProfileStyle(GBT_PROFILES_VECTOR);
-  m_doc->UpdateViews(this, true, true);
+  m_doc->UpdateViews(this);
 }
 
 void gbtProfileFrame::OnClose(wxCloseEvent &p_event)

@@ -131,21 +131,21 @@ void gbtGameDocument::OnTreeChanged(bool p_nodesChanged,
 void gbtGameDocument::SetCursor(gbtEfgNode p_node)
 {
   m_cursor = p_node;
-  UpdateViews(0, true, false);
+  UpdateViews();
 }
 
 void gbtGameDocument::SetCopyNode(gbtEfgNode p_node)
 {
   m_copyNode = p_node;
   m_cutNode = 0;
-  UpdateViews(0, true, false);
+  UpdateViews();
 }
 
 void gbtGameDocument::SetCutNode(gbtEfgNode p_node)
 {
   m_cutNode = 0;
   m_copyNode = p_node;
-  UpdateViews(0, true, false);
+  UpdateViews();
 }
 
 //==========================================================================
@@ -234,66 +234,66 @@ void gbtGameDocument::SetEfgSupport(int p_index)
 {
   if (p_index >= 1 && p_index <= m_efgSupports.Length()) {
     m_curEfgSupport = m_efgSupports[p_index];
-    UpdateViews(0, true, false);
+    UpdateViews();
   }
 }
 
 void gbtGameDocument::AddEfgSupport(EFSupport *p_support)
 {
   m_efgSupports.Append(p_support);
-  UpdateViews(0, true, false);
+  UpdateViews();
 }
 
 void gbtGameDocument::DeleteEfgSupport(void)
 {
   delete m_efgSupports.Remove(m_efgSupports.Find(m_curEfgSupport));
   m_curEfgSupport = m_efgSupports[1];
-  UpdateViews(0, true, false);
+  UpdateViews();
 }
 
 void gbtGameDocument::AddAction(gbtEfgAction p_action)
 {
   m_curEfgSupport->AddAction(p_action);
-  UpdateViews(0, true, false);
+  UpdateViews();
 }
 
 void gbtGameDocument::RemoveAction(gbtEfgAction p_action)
 {
   m_curEfgSupport->RemoveAction(p_action);
-  UpdateViews(0, true, false);
+  UpdateViews();
 }
 
 void gbtGameDocument::DeleteNfgSupport(void)
 {
   delete m_nfgSupports.Remove(m_nfgSupports.Find(m_curNfgSupport));
   m_curNfgSupport = m_nfgSupports[1];
-  UpdateViews(0, false, true);
+  UpdateViews();
 }
 
 void gbtGameDocument::AddNfgSupport(gbtNfgSupport *p_support)
 {
   m_nfgSupports.Append(p_support);
-  UpdateViews(0, false, true);
+  UpdateViews();
 }
 
 void gbtGameDocument::SetNfgSupport(int p_index)
 {
   if (p_index >= 1 && p_index <= m_nfgSupports.Length()) {
     m_curNfgSupport = m_nfgSupports[p_index];
-    UpdateViews(0, false, true);
+    UpdateViews();
   }
 }
 
 void gbtGameDocument::AddStrategy(gbtNfgStrategy p_strategy)
 {
   m_curNfgSupport->AddStrategy(p_strategy);
-  UpdateViews(0, true, false);
+  UpdateViews();
 }
 
 void gbtGameDocument::RemoveStrategy(gbtNfgStrategy p_strategy)
 {
   m_curNfgSupport->RemoveStrategy(p_strategy);
-  UpdateViews(0, true, false);
+  UpdateViews();
 }
 
 
@@ -334,25 +334,25 @@ void gbtGameDocument::AddProfile(const BehavSolution &p_profile)
 		      p_profile.Creator());
   m_mixedProfiles.Append(mixed);
 
-  UpdateViews(0, true, true);
+  UpdateViews();
 }
 
 void gbtGameDocument::SetCurrentProfile(int p_index)
 {
   m_curProfile = p_index;
-  UpdateViews(0, true, true);
+  UpdateViews();
 }
 
 void gbtGameDocument::SetCurrentProfile(const BehavSolution &p_profile)
 {
   m_behavProfiles[m_curProfile] = p_profile;
-  UpdateViews(0, true, true);
+  UpdateViews();
 }
 
 void gbtGameDocument::SetCurrentProfile(const MixedSolution &p_profile)
 {
   m_mixedProfiles[m_curProfile] = p_profile;
-  UpdateViews(0, true, true);
+  UpdateViews();
 }
 
 void gbtGameDocument::RemoveProfile(int p_index)
@@ -368,7 +368,7 @@ void gbtGameDocument::RemoveProfile(int p_index)
     m_curProfile = 0;
   }
 
-  UpdateViews(0, true, true);
+  UpdateViews();
 }
 
 //==========================================================================
@@ -532,7 +532,7 @@ void gbtGameDocument::AddProfile(const MixedSolution &p_profile)
     m_behavProfiles.Append(BehavProfile<gNumber>(*p_profile.Profile()));
   }
 
-  UpdateViews(0, true, true);
+  UpdateViews();
 }
 
 gArray<int> gbtGameDocument::GetContingency(void) const
@@ -543,7 +543,7 @@ gArray<int> gbtGameDocument::GetContingency(void) const
 void gbtGameDocument::SetContingency(const gArray<int> &p_contingency)
 {
   m_contingency = p_contingency;
-  UpdateViews(0, false, true);
+  UpdateViews();
 }
 
 void gbtGameDocument::SetRowPlayer(int p_player)
@@ -552,7 +552,7 @@ void gbtGameDocument::SetRowPlayer(int p_player)
     m_colPlayer = m_rowPlayer;
   }
   m_rowPlayer = p_player;
-  UpdateViews(0, false, true);
+  UpdateViews();
 }
 
 void gbtGameDocument::SetColPlayer(int p_player)
@@ -561,7 +561,7 @@ void gbtGameDocument::SetColPlayer(int p_player)
     m_rowPlayer = m_colPlayer;
   }
   m_colPlayer = p_player;
-  UpdateViews(0, false, true);
+  UpdateViews();
 }
 
 //==========================================================================
@@ -578,51 +578,47 @@ void gbtGameDocument::RemoveView(gbtGameView *p_view)
   m_views.Remove(m_views.Find(p_view));
 }
 
-void gbtGameDocument::UpdateViews(gbtGameView *p_sender,
-				  bool p_efgViews, bool p_nfgViews)
+void gbtGameDocument::UpdateViews(gbtGameView *p_sender /* =0 */)
 {
   for (int i = 1; i <= m_views.Length(); i++) {
-    if ((m_views[i]->IsEfgView() && p_efgViews) ||
-	(m_views[i]->IsNfgView() && p_nfgViews)) {
-      m_views[i]->OnUpdate(p_sender);
-    }
+    m_views[i]->OnUpdate(p_sender);
   }
 }
 
 void gbtGameDocument::SetShowNfg(bool p_show)
 {
   m_showNfg = p_show;
-  UpdateViews(0, true, true);
+  UpdateViews();
 }
 
 void gbtGameDocument::SetShowOutcomes(bool p_show)
 {
   m_showOutcomes = p_show;
-  UpdateViews(0, true, true);
+  UpdateViews();
 }
 
 void gbtGameDocument::SetShowProfiles(bool p_show)
 {
   m_showProfiles = p_show;
-  UpdateViews(0, true, true);
+  UpdateViews();
 }
 
 void gbtGameDocument::SetShowNfgSupports(bool p_show)
 {
   m_showNfgSupports = p_show;
-  UpdateViews(0, false, true);
+  UpdateViews();
 }
 
 void gbtGameDocument::SetShowEfgNavigate(bool p_show)
 {
   m_showEfgNavigate = p_show;
-  UpdateViews(0, true, false);
+  UpdateViews();
 }
 
 void gbtGameDocument::SetShowEfgSupports(bool p_show)
 {
   m_showEfgSupports = p_show;
-  UpdateViews(0, true, false);
+  UpdateViews();
 }
 
 void gbtGameDocument::Submit(gbtGameCommand *p_command)
@@ -634,7 +630,7 @@ void gbtGameDocument::Submit(gbtGameCommand *p_command)
     guiExceptionDialog("", wxGetApp().GetTopWindow());
   }
 
-  UpdateViews(0, true, true);
+  UpdateViews();
 
   // Someday, we might save the command for undo/redo; for now, 
   // just delete it.
