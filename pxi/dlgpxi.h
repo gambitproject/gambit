@@ -50,40 +50,6 @@ public:
 
 // ----------------------------------------------------------------------
 //
-//     dialogDrawSettings
-//
-// ----------------------------------------------------------------------
-
-class dialogDrawSettings : public guiAutoDialog {
-private:
-  PxiDrawSettings &draw_settings;       // draw settings, see above
-  wxListBox *m_actionItem, *m_plotItem, *m_isetItem;
-  wxNumberItem *m_minLam, *m_maxLam, *m_minY, *m_maxY;
-  wxButton *m_overlayButton, *m_plotButton;
-  wxRadioBox *m_plotMode, *m_colorMode;
-  wxCheckBox *m_twoPlots, *m_connectDots, *m_restartColors;
-  
-  int whichiset;
-  
-  void OnWhichPlot(wxCommandEvent &);
-  void OnWhichInfoset(wxCommandEvent &);
-  void OnInfoset(wxCommandEvent &);
-  void OnAction(wxCommandEvent &);
-  void OnOverlay(wxCommandEvent &);
-  void OnPlot(wxCommandEvent &);
-  void OnPlotMode(wxCommandEvent &);
-  PlotInfo & ThisPlot(void);
-
-  void Run(void);
-public:
-  dialogDrawSettings(wxWindow *, PxiDrawSettings &);
-  virtual ~dialogDrawSettings();
-  
-  DECLARE_EVENT_TABLE()
-};
-
-// ----------------------------------------------------------------------
-//
 //     dialogPlotOptions
 //
 // ----------------------------------------------------------------------
@@ -134,14 +100,6 @@ public:
 
 const int idEXPDATA_BROWSE1_BUTTON = 3051;
 const int idEXPDATA_BROWSE2_BUTTON = 3052;
-
-const int idSETTINGS_WHICH_PLOT_LISTBOX = 2018;
-const int idSETTINGS_WHICH_INFOSET_LISTBOX = 2019;
-const int idSETTINGS_INFOSET_LISTBOX = 2020;
-const int idSETTINGS_ACTION_LISTBOX = 2021;
-const int idSETTINGS_OVERLAY_BUTTON = 2022;
-const int idSETTINGS_PLOT_MODE = 2023;
-const int idSETTINGS_PLOT_BUTTON = 2024;
 
 #endif 
 

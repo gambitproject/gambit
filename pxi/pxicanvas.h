@@ -11,6 +11,7 @@
 #define PXICANVAS_H
 
 #include "pxi.h"
+#include "pxiconf.h"
 
 class PxiCanvas : public wxScrolledWindow {
 friend class PxiChild;
@@ -27,6 +28,7 @@ public:
     int operator!=(const LABELSTRUCT &l)
       {return !(*this==l);}
   } label_struct;
+
 private:
   PxiDrawSettings *draw_settings;       // draw settings, see above
 
