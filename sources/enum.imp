@@ -10,9 +10,6 @@
 
 #include "enum.h"
 
-void Epsilon_T(double &v, int i);
-void Epsilon_T(gRational &v, int i);
-
 //-------------------------------------------------------------------------
 //                    EnumModule<T>: Member functions
 //-------------------------------------------------------------------------
@@ -23,7 +20,7 @@ EnumModule<T>::EnumModule(const Nfg<T> &N, const EnumParams &p,
   : NF(N), support(S), params(p), rows(S.NumStrats(1)), cols(S.NumStrats(2)), 
     level(0), count(0), npivots(0)
 { 
-  Epsilon_T(eps,2);
+  gEpsilon(eps);
 }
 
 

@@ -7,20 +7,6 @@
 #include "lemketab.h"
 
 
-/*
-    // These are the values recommended by Murtagh (1981) for 15 digit 
-    // accuracy in LP problems 
-void Epsilon_LTab(double &v, int i)
-{
-  if(i==1)v=(double)1.0e-5;
-  if(i==2)v=(double)1.0e-8;
-  if(i==3)v=(double)1.0e-6;
-}
-
-void Epsilon_LTab(gRational &v, int i) { v = (gRational)0;}
-
-*/
-
 //---------------------------------------------------------------------------
 //                        Lemke Tableau: member functions
 //---------------------------------------------------------------------------
@@ -32,15 +18,11 @@ void Epsilon_LTab(gRational &v, int i) { v = (gRational)0;}
 template <class T> LTableau<T>::LTableau(const gMatrix<T> &A, 
 					 const gVector<T> &b)
   : Tableau<T>(A,b)
-{ 
-//  Epsilon_LTab(eps2,2);
-} 
+{ } 
 
 template <class T> LTableau<T>::LTableau(Tableau<T> &tab)
   : Tableau<T>(tab) 
-{
-//  Epsilon_LTab(eps2,2);
-}
+{ }
 
 template <class T> LTableau<T>::~LTableau(void) 
 { }

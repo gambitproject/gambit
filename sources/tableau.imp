@@ -6,17 +6,6 @@
 
 #include "tableau.h"
 
-    // These are the values recommended by Murtagh (1981) for 15 digit 
-    // accuracy in LP problems 
-void Epsilon_T(double &v, int i)
-{
-  if(i==1)v=(double)1.0e-5;
-  if(i==2)v=(double)1.0e-8;
-  if(i==3)v=(double)1.0e-6;
-}
-
-void Epsilon_T(gRational &v, int) { v = (gRational)0;}
-
 //
 // Tableau method definitions
 //
@@ -29,8 +18,10 @@ Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
     basis(A),  B(basis),
     solution(A.MinRow(),A.MaxRow()) 
 {
-  Epsilon_T(eps1,1);
-  Epsilon_T(eps2,2);
+    // These are the values recommended by Murtagh (1981) for 15 digit 
+    // accuracy in LP problems 
+  gEpsilon(eps1,5);
+  gEpsilon(eps2);
 //  gout << "\nA = " << A << "\ndim A: " << A.MinRow() << " " << A.MaxRow();
 //  gout << " " << A.MinCol() << " " << A.MaxCol();
 //  gout << "\nbasis = ";
