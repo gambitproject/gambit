@@ -11,6 +11,7 @@
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
+#include "wx/notebook.h"
 #include "wx/fontdlg.h"
 #include "wx/colordlg.h"
 #include "wx/printdlg.h"
@@ -38,8 +39,6 @@ BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   //  EVT_MENU(PXI_PREFS_SCALE, PxiChild::OnPrefsScaleMenu)
   EVT_MENU_RANGE(PXI_PREFS_SCALE_1, PXI_PREFS_SCALE_8, PxiChild::OnPrefsScale)
   EVT_MENU(PXI_PREFS_COLORS, PxiChild::OnPrefsColors)
-  EVT_MENU(PXI_PAGE_NEXT, PxiChild::OnNextPage)
-  EVT_MENU(PXI_PAGE_PREV, PxiChild::OnPreviousPage)
   EVT_MENU(wxID_ABOUT, PxiChild::OnHelpAbout)
   EVT_MENU(wxID_HELP_CONTENTS, PxiChild::OnHelpContents)
   EVT_SIZE(PxiChild::OnSize)
@@ -55,14 +54,15 @@ void PxiChild::OnQuit(wxCommandEvent &)
 
 void PxiChild::OnOverlayData(wxCommandEvent &)
 {
-  dialogOverlayData dialog(this, canvas);
-  canvas->Render();
+  //  dialogOverlayData dialog(this, canvas);
+  //  canvas->Render();
   //  wxClientDC dc(this);
   //  canvas->Update(dc,PXI_UPDATE_SCREEN);
 }
 
 void PxiChild::OnOverlayFile(wxCommandEvent &)
 {
+#ifdef NOT_PORTED_YET
   char *s=copystring(wxFileSelector("Load Overlay",NULL,NULL,NULL,"*.out"));
   if (s) {
     FileHeader temp_header(s);
@@ -74,11 +74,12 @@ void PxiChild::OnOverlayFile(wxCommandEvent &)
   }
   wxClientDC dc(this);
   canvas->Update(dc,PXI_UPDATE_SCREEN);
+#endif  // NOT_PORTED_YET
 }
 
 void PxiChild::OnFileDetail(wxCommandEvent &)
 {
-  canvas->ShowDetail();
+  //  canvas->ShowDetail();
 }
 
 void PxiChild::OnFilePageSetup(wxCommandEvent &)
@@ -92,6 +93,7 @@ void PxiChild::OnFilePageSetup(wxCommandEvent &)
 
 void PxiChild::OnFilePrintPreview(wxCommandEvent &)
 {
+#ifdef NOT_PORTED_YET
   wxPrintDialogData data(m_printData);
   wxPrintPreview *preview 
     = new wxPrintPreview(new PxiPrintout(*canvas, "PXI printout"), 
@@ -108,10 +110,12 @@ void PxiChild::OnFilePrintPreview(wxCommandEvent &)
 					     wxSize(600, 650));
   frame->Initialize();
   frame->Show(true);
+#endif  // NOT_PORTED_YET
 }
 
 void PxiChild::OnFilePrint(wxCommandEvent &)
 {
+#ifdef NOT_PORTED_YET
   wxPrintDialogData data(m_printData);
   wxPrinter printer(&data);
   PxiPrintout printout(*canvas, "PXI printout");
@@ -123,18 +127,7 @@ void PxiChild::OnFilePrint(wxCommandEvent &)
   else {
     m_printData = printer.GetPrintDialogData().GetPrintData();
   }
-}
-
-void PxiChild::OnNextPage(wxCommandEvent &)
-{
-  canvas->SetNextPage();
-  canvas->Render();
-}
-
-void PxiChild::OnPreviousPage(wxCommandEvent &)
-{
-  canvas->SetPreviousPage();
-  canvas->Render();
+#endif  // NOT_PORTED_YET
 }
 
 void PxiChild::OnPrefsColors(wxCommandEvent &)
@@ -149,6 +142,7 @@ void PxiChild::OnPrefsColors(wxCommandEvent &)
 
 void PxiChild::OnPrefsFontLabel(wxCommandEvent &)
 {
+#ifdef NOT_PORTED_YET
   wxFontData data;
   data.SetInitialFont(canvas->draw_settings->GetLabelFont());  
   wxFontDialog dialog(this, &data);
@@ -157,10 +151,12 @@ void PxiChild::OnPrefsFontLabel(wxCommandEvent &)
     canvas->draw_settings->SetLabelFont(dialog.GetFontData().GetChosenFont());
     canvas->Render();
   }
+#endif  // NOT_PORTED_YET
 }
 
 void PxiChild::OnPrefsFontAxis(wxCommandEvent &)
 {
+#ifdef NOT_PORTED_YET
   wxFontData data;
   data.SetInitialFont(canvas->draw_settings->GetAxisFont());  
   wxFontDialog dialog(this, &data);
@@ -168,10 +164,12 @@ void PxiChild::OnPrefsFontAxis(wxCommandEvent &)
     canvas->draw_settings->SetAxisFont(dialog.GetFontData().GetChosenFont());
     canvas->Render();
   }
+#endif  // NOT_PORTED_YET
 }
 
 void PxiChild::OnPrefsFontOverlay(wxCommandEvent &)
 {
+#ifdef NOT_PORTED_YET
   wxFontData data;
   data.SetInitialFont(canvas->draw_settings->GetOverlayFont());  
   wxFontDialog dialog(this, &data);
@@ -180,11 +178,12 @@ void PxiChild::OnPrefsFontOverlay(wxCommandEvent &)
     canvas->draw_settings->SetOverlayFont(dialog.GetFontData().GetChosenFont());
     canvas->Render();
   }
+#endif  // NOT_PORTED_YET
 }
-
 
 void PxiChild::OnPrefsZoomOut(wxCommandEvent &event)
 {
+#ifdef NOT_PORTED_YET
   double scale = canvas->GetScale();
   int i=1;
   while(scale > scaleValues[i] && i< scaleValues.Length()) {i++;}
@@ -192,34 +191,41 @@ void PxiChild::OnPrefsZoomOut(wxCommandEvent &event)
   canvas->SetScale(scaleValues[i]);
   MarkScaleMenu();
   canvas->Render();
+#endif  // NOT_PORTED_YET
 }
 
 void PxiChild::OnPrefsZoomIn(wxCommandEvent &event)
 {
+#ifdef NOT_PORTED_YET
   double scale = canvas->GetScale();
   int i=scaleValues.Length();
   while(scale < scaleValues[i] && i>1) {i--;}
   if(i<scaleValues.Length())i++;
   canvas->SetScale(scaleValues[i]);
   MarkScaleMenu();
-  canvas->Render();
+  canvas->Render()
+#endif // NOT_PORTED_YET
 }
 
 void PxiChild::OnPrefsScale(wxCommandEvent &event)
 {
+#ifdef NOT_PORTED_YET
   double scale = scaleValues[event.GetSelection() - PXI_PREFS_SCALE_1+1];
   canvas->SetScale(scale);
   MarkScaleMenu();
   canvas->Render();
+#endif  // NOT_PORTED_YET
 }
 
 void PxiChild::MarkScaleMenu(void)
 {
+#ifdef NOT_PORTED_YET
   for(int i=0;i<8;i++) {
     GetMenuBar()->Check(PXI_PREFS_SCALE_1+i,false);
     if(canvas->GetScale() == scaleValues[i+1])
       GetMenuBar()->Check(PXI_PREFS_SCALE_1+i,true);
   }
+#endif  // NOT_PORTED_YET
 }
 
 void PxiChild::OnHelpAbout(wxCommandEvent &)
@@ -236,13 +242,15 @@ void PxiChild::OnHelpContents(wxCommandEvent &)
 
 void PxiChild::OnDisplayOptions(wxCommandEvent &)
 {
+#ifdef NOT_PORTED_YET
   canvas->DrawSettings()->SetOptions(this);
   canvas->Render();
+#endif  // NOT_PORTED_YET
 }
 
 PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
-  wxFrame(p_parent, -1, p_filename, wxPoint(0,0),wxSize(480,480), 
-	  wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT), parent(p_parent)
+  wxFrame(p_parent, -1, p_filename, wxPoint(0,0), wxSize(480,480)),
+  parent(p_parent), m_fileHeader(p_filename)
 {
   scaleValues=gBlock<double>(8);
   for(int i=1;i<=scaleValues.Length();i++)
@@ -264,8 +272,16 @@ PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
 
   int width, height;
   GetClientSize(&width, &height);
-    // save the canvas in subframe
-  canvas = new PxiCanvas(this, wxPoint(0, 0), wxSize(width, height),wxRETAINED,p_filename);
+
+  wxNotebook *plotBook = new wxNotebook(this, -1, wxDefaultPosition,
+					wxDefaultSize, wxNB_BOTTOM);
+  
+  for (int i = 1; i <= m_fileHeader.NumInfosets(); i++) {
+    PxiCanvas *canvas = new PxiCanvas(plotBook,
+				      wxPoint(0, 0), wxSize(width, height),
+				      m_fileHeader, i);
+    plotBook->AddPage(canvas, wxString::Format("Plot %d", i));
+  }
 
   MarkScaleMenu();
   Show(true);
@@ -318,10 +334,6 @@ void PxiChild::MakeMenus(void)
   prefs_menu->Append(PXI_PREFS_ZOOM_OUT,"Zoom &Out", "Zoom Out");
   prefs_menu->Append(PXI_PREFS_ZOOM_IN,"Zoom &In", "Zoom In");
   
-  wxMenu *page_menu = new wxMenu;
-  page_menu->Append(PXI_PAGE_PREV,"&Previous (PgUp)", "Previous Page");
-  page_menu->Append(PXI_PAGE_NEXT,"&Next     (PgDn)", "Next Page");
-
   wxMenu *help_menu = new wxMenu;
   help_menu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
   help_menu->Append(wxID_HELP_INDEX, "&Index", "Index of help file");
@@ -336,7 +348,6 @@ void PxiChild::MakeMenus(void)
   menu_bar->Append(data_menu, "&Data");
   menu_bar->Append(display_menu, "&Display");
   menu_bar->Append(prefs_menu, "&Prefs");
-  menu_bar->Append(page_menu, "P&age");
   menu_bar->Append(help_menu, "&Help");
 
   // Associate the menu bar with the frame

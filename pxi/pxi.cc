@@ -69,7 +69,8 @@
 #include "wx/printdlg.h"
 
 gOutput &operator<<(gOutput &op,const PxiCanvas::LABELSTRUCT &l) 
-{op<<l.x<<' '<<l.y<<' '<<l.label<<'\n';return op;}
+  //{op<<l.x<<' '<<l.y<<' '<<l.label<<'\n';return op;}
+{ return op; }
 
 void mem_handler(void)
 {wxFatalError("Memory Error");}
@@ -251,8 +252,6 @@ void PlotInfo::Init(const FileHeader &header, int plot_number)
     for (int j=1;j<=header.NumStrategies(i);j++) 
       strategies[i][j]=true;
   }
-  isets = gBlock<int>(1);
-  isets[1]=plot_number;
   float l_start = header.EStart(); 
   float l_stop = header.EStop(); 
   float l_step = header.EStep();
@@ -272,7 +271,6 @@ PlotInfo &PlotInfo::operator=(const PlotInfo &p)
     showLabels = p.showLabels;
     showSquare = p.showSquare;
     number = p.number;    
-    isets = p.isets;
     strategies = p.strategies;
     for(int i = 1; i<=strategies.Length(); i++) {
       strategies[i] = p.strategies[i];
@@ -323,7 +321,8 @@ bool PxiPrintout::OnBeginDocument(int startPage, int endPage)
 
 void PxiPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int *selPageTo)
 {
-  int max =  (canvas.DrawSettings())->GetMaxPage();
+  //  int max =  (canvas.DrawSettings())->GetMaxPage();
+  int max = 1;
   *minPage =1;
   *maxPage = max;
   *selPageFrom = 1;
@@ -332,9 +331,7 @@ void PxiPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int 
 
 bool PxiPrintout::HasPage(int pageNum)
 {
-  if(pageNum>=1 && pageNum <=  canvas.DrawSettings()->GetMaxPage())
-    return true;
-  return false;
+  return (pageNum == 1);
 }
 
 

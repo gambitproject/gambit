@@ -23,8 +23,7 @@ typedef	gBlock<double> PointNd;
 gOutput &operator<<(gOutput &op,const PointNd &p);
 gOutput &operator<<(gOutput &op,const gBlock<PointNd> &p);
 
-class FileHeader
-{
+class FileHeader {
 friend gOutput &operator<<(gOutput &op,const FileHeader &f);
 private:
   int num_infosets;
@@ -37,11 +36,12 @@ private:
   int e_column,delta_column;
   gBlock< gBlock<int> > prob_cols;            // [iset][strategy]
   //  NormalMatrix *matrix;	// optional
-  wxString file_name;
+  wxString m_filename;
+
 public:
   // Constructors
   FileHeader(void):strategies(),prob_cols()/* ,matrix(0)*/	{}
-  FileHeader(const char *in_filename);
+  FileHeader(const wxString &p_filename);
   FileHeader(gInput &in);
   FileHeader(const FileHeader &F);
   // Post-Constructor
@@ -71,7 +71,7 @@ public:
   double DataMax(void) const {return data_max;}
   double DataMin(void) const {return data_min;}
   //  NormalMatrix *Matrix(void) const {return matrix;}
-  wxString FileName(void) const {return file_name;}
+  const wxString &FileName(void) const { return m_filename; }
 };
 
 inline gInput  &operator>>(gInput &in,FileHeader &f) {f.Init(in); return in;}

@@ -18,11 +18,6 @@ private:
   wxBrush       clear_brush, exp_data_brush;
   wxColour      axis_text_color;
   
-  int           plots_per_page; // Plots per page
-  int           maxpage;       // maximum page number
-  int           whichpage;    // current page number
-  int           whichplot;    // current plot
-  
   int		overlay_symbol;      // one of : OVERLAY_TOKEN | OVERLAY_NUMBER
   Bool		overlay_lines;       // connect overlay points?
   int		overlay_token_size;  
@@ -32,22 +27,18 @@ private:
   Bool		connect_dots;   // connect dots on plot.  
   Bool          restart_overlay_colors; // new set of colors for each overlay 
   
-  int           num_infosets; // total number of infosets
   double	l_start,l_stop,l_step;           // data limits on X (lambda)
   
-  gBlock< PlotInfo> thisplot;
+  PlotInfo thisplot;
   
   Bool CheckPlot3Mode(void);
   Bool CheckPlot2Mode(void);
 
 public:
-  PxiDrawSettings(FileHeader &header);
+  PxiDrawSettings(const FileHeader &p_header, int p_index);
   
   // Get* functions
   
-  int GetPlotsPerPage(void) const {return plots_per_page;}
-  // NumInfosets returns total number of infosets
-  int GetNumInfosets(void) const {return num_infosets;}
   // DataMode, returns one of DATA_TYPE_ARITH | DATA_TYPE_LOG indicating data type
   int GetDataMode(void) const {return data_mode;}
   // ColorMode, how to color the data: by equilibrium #, prob #, or just a constant
@@ -63,8 +54,8 @@ public:
   // DelL, return the lambda step
   double GetDelL(void) const {return l_step;}
 
-  PlotInfo &GetPlotInfo(int i=1) {return thisplot[i];}
-  int GetNumPlots(void) const {return thisplot.Length();}
+  PlotInfo &GetPlotInfo(void) { return thisplot; }
+  int GetNumPlots(void) const { return 1; }
   
   // OverlayFont, if the experimental data overlay is done using the number
   //   of the point in the file, this font is used to display that number
@@ -91,23 +82,6 @@ public:
   void SetRestartOverlayColors(bool flag) {restart_overlay_colors = flag;}
 
   // Set* functions
-
-  void SetPage(int i) {if(i>0 && i<=maxpage) whichpage = i;}
-  void SetMaxPages(int i) {if(i>0) maxpage = i;SetPage(1);}
-  void SetPlotsPerPage(int n) 
-    {
-      if(n>=1 || n<=2) 
-	plots_per_page = n; 
-      int npl=GetNumPlots(); 
-      SetMaxPages(npl-((n*npl-npl)/n));  // to get the least integer greater than npl/n
-    }
-  void SetNextPage(void) {SetPage(whichpage+1);}
-  void SetPreviousPage(void) {SetPage(whichpage-1);}
-  int GetPage(void) const {return whichpage;}
-  int GetMaxPage(void) const {return maxpage;}
-
-  void SetWhichPlot(int i) {if( i>=1 && i<=GetNumPlots()) whichplot=i;}
-  int GetWhichPlot(void) const {return whichplot;}
 
   void SetOptions(wxWindow *parent);
 

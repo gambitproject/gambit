@@ -15,22 +15,18 @@
 #include "pxiconf.h"
 #include "dlgpxi.h"
 
-PxiDrawSettings::PxiDrawSettings(FileHeader &header)
+PxiDrawSettings::PxiDrawSettings(const FileHeader &p_header, int p_index)
   : overlay_font(10,wxSWISS,wxNORMAL,wxBOLD),label_font(10,wxSWISS,wxNORMAL,wxBOLD), 
     axis_font(10,wxSWISS,wxNORMAL,wxBOLD), clear_brush("BLACK",wxTRANSPARENT),
-    exp_data_brush("BLACK",wxSOLID), axis_text_color("BLUE"), plots_per_page(2), 
-    maxpage(1), whichpage(1), whichplot(1), overlay_symbol(OVERLAY_NUMBER),
+    exp_data_brush("BLACK",wxSOLID), axis_text_color("BLUE"), 
+    overlay_symbol(OVERLAY_NUMBER),
     overlay_lines(FALSE), overlay_token_size(DEF_TOKEN_SIZE), 
-    data_mode(header.DataType()), color_mode(COLOR_PROB),
+    data_mode(p_header.DataType()), color_mode(COLOR_PROB),
     connect_dots(FALSE), restart_overlay_colors(TRUE), 
-    num_infosets(header.NumInfosets()), 
-    l_start(header.EStart()), l_stop(header.EStop()), l_step(header.EStep())
+    l_start(p_header.EStart()), l_stop(p_header.EStop()),
+    l_step(p_header.EStep())
 {
-  thisplot=gBlock< PlotInfo >(num_infosets);
-  for (int i=1;i<=num_infosets;i++)
-    thisplot[i].Init(header,i);
-
-  SetPlotsPerPage( (num_infosets>1) ? 2 : 1);  // also sets maxpage, whichpage
+  thisplot.Init(p_header, p_index);
 }
 
 // Plot3 mode is now more flexible: it works great (by default) on 2d player
@@ -148,7 +144,6 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
 {
   wxString tmp;
   int num_plots = 1;
-  if(draw_settings.GetPlotsPerPage()==2) num_plots = 2;
   
   m_plotItem = new wxListBox(this, idSETTINGS_WHICH_PLOT_LISTBOX);
   for (int i = 1; i <= draw_settings.GetNumPlots(); i++) {
@@ -156,7 +151,7 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
     m_plotItem->Append(tmp);
   }
   m_plotItem->SetSelection(0);
-  const PlotInfo &thisplot(draw_settings.GetPlotInfo(1));
+  const PlotInfo &thisplot(draw_settings.GetPlotInfo());
   
   m_isetItem = new wxListBox(this, idSETTINGS_WHICH_INFOSET_LISTBOX, 
 				  wxDefaultPosition, wxDefaultSize,0,0,
@@ -244,11 +239,10 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
   m_overlayButton = new wxButton(this, idSETTINGS_OVERLAY_BUTTON, "Overlay");
   m_plotButton = new wxButton(this, idSETTINGS_PLOT_BUTTON, "Plot");
   
+  // The multi-plot feature is undergoing changes; disable this item
   m_twoPlots = new wxCheckBox(this, -1, "Two Plots");
-  if(draw_settings.GetPlotsPerPage()==2)
-    m_twoPlots->SetValue(true);
-  else
-    m_twoPlots->SetValue(false);
+  m_twoPlots->SetValue(false);
+  m_twoPlots->Enable(false);
 
   m_connectDots = new wxCheckBox(this, -1, "Connect Dots");
   m_connectDots->SetValue(draw_settings.ConnectDots());
@@ -288,7 +282,7 @@ dialogDrawSettings::~dialogDrawSettings()
 
 PlotInfo & dialogDrawSettings::ThisPlot(void)
 {
-  return draw_settings.GetPlotInfo(m_plotItem->GetSelection()+1);
+  return draw_settings.GetPlotInfo();
 }
 
 void dialogDrawSettings::OnWhichPlot(wxCommandEvent &ev)
@@ -303,11 +297,11 @@ void dialogDrawSettings::OnWhichPlot(wxCommandEvent &ev)
   }
   bool mark = true;
   whichiset = 0;
-  for (int iset = 1; iset <= thisplot.GetNumIsets(); iset++) {
-    if (thisplot.Contains(iset)) {
-      m_isetItem->SetSelection(iset-1, true);
-      if(mark) {whichiset = iset; mark = false;}
-    }
+
+  m_isetItem->SetSelection(thisplot.GetPlotNumber()-1, true);
+  if (mark) {
+    whichiset = thisplot.GetPlotNumber()-1; 
+    mark = false;
   }
 
   m_plotMode->SetSelection(thisplot.GetPlotMode());
@@ -347,18 +341,7 @@ void dialogDrawSettings::OnWhichInfoset(wxCommandEvent &)
   bool flag = false;
   wxString tmp;
 
-  for (int iset = 1; iset <= thisplot.GetNumIsets(); iset++) {
-    bool selected = m_isetItem->Selected(iset-1);
-    bool member = thisplot.Contains(iset);
-    if (selected && !member) {
-      thisplot.AddInfoset(iset);
-      flag = true;
-      whichiset = iset;
-    }
-    else if (!selected && member) {
-      thisplot.RemoveInfoset(iset);
-    } 
-  }
+  whichiset = thisplot.GetPlotNumber();
   
   if(flag) {
     m_actionItem->Clear();
@@ -426,7 +409,6 @@ void dialogDrawSettings::Run()
     if(mode==1)draw_settings.SetColorMode(COLOR_PROB);
     if(mode==2)draw_settings.SetColorMode(COLOR_NONE);
 
-    draw_settings.SetPlotsPerPage(m_twoPlots->GetValue()+1);
     draw_settings.SetConnectDots(m_connectDots->GetValue());
     draw_settings.SetRestartOverlayColors(m_restartColors->GetValue());
   };

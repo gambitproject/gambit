@@ -69,7 +69,6 @@ const int wxID_HELP_INDEX = 1310;
 
 #define	PXI_NO_SET_STOP      -1.0
 #define	PXI_SET_STOP          127
-#define	PXI_KEY_STOP          WXK_SPACE
 #define	PXI_DISPLAY_OPTIONS   128
 
 #define PXI_DATA_OVERLAY_DATA 215
@@ -151,8 +150,6 @@ private:
   double y_min,y_max;                  // plot limits on Y variable
   int number;                         // plot number
 
-  gBlock<int> isets;                  // infosets to plot for each plot
-
   // Bool instead of bool needeed here for template ambiguity in gBlock for BC
   typedef gBlock<Bool> show_actions;
   friend gOutput &operator<<(gOutput &op,const show_actions &p);
@@ -162,20 +159,16 @@ private:
 public:
   PlotInfo(void);
   ~PlotInfo(void);
+
   PlotInfo &operator=(const PlotInfo &p);       
   bool operator==(const PlotInfo &p);       
   bool operator!=(const PlotInfo &p) {return !(*this == p);}  
 
   void Init(const FileHeader &, int num);
 
-  const gBlock<int> &GetIsets(void) const {return isets;}
-  bool Contains(int iset) const {return isets.Contains(iset);}
-  void AddInfoset(int iset) {if(iset>=1 && iset <=GetNumIsets()) isets.Append(iset);}
-  void RemoveInfoset(int iset) {isets.Remove(isets.Find(iset));}
-
   bool GetStrategyShow(int j, int k) const {return strategies[j][k];}
   int GetNumStrats(int j) const {return strategies[j].Length();}
-  int GetNumIsets(void) const {return strategies.Length();}
+  int GetNumIsets(void) const { return 1; }
   int GetPlotNumber(void) const {return number;}
   void SetPlotNumber(int i) {number=i;}
 

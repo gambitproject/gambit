@@ -30,20 +30,19 @@ public:
   } label_struct;
 
 private:
-  PxiDrawSettings *draw_settings;       // draw settings, see above
-
+  const FileHeader &m_header;
+  PxiDrawSettings m_drawSettings;
   ExpData *exp_data;                    // experimental data overlay
   gBlock<label_struct> labels;          // labels for generic text
   DataLine probs;                       // a line of data
-  gBlock<FileHeader> headers;           // all the basic info about the file
   Bool	stopped;
   double cur_e;
-  bool painting;
   bool m_landscape;                     // landscap mode if true
   int m_width, m_height;                // width, height of page
   double m_scale;                        // scaling factor
   double m_ppu;                        // pixels per scroll unit
   wxMemoryDC *m_dc;        // stored DC
+  int m_page;
 
   int Width(void) const 
     {if(m_landscape) return m_height; return m_width;}
@@ -100,24 +99,22 @@ private:
   void OnEvent(wxMouseEvent &ev);
 
 public:
-  PxiCanvas(wxFrame *frame, const wxPoint &p_position,
-	    const wxSize &p_size, int style=0,const char *file_name=NULL);
+  PxiCanvas(wxWindow *p_parent, const wxPoint &p_position,
+	    const wxSize &p_size, const FileHeader &, int p_page);
   virtual ~PxiCanvas();
 
   void Update(wxDC& dc,int device);
   void ShowDetail(void);
-  void StopIt(void);
 
   void Render(void);
-  void SetPage(int page) {draw_settings->SetPage(page);}
-  void SetNextPage(void) {draw_settings->SetNextPage();}
-  void SetPreviousPage(void) {draw_settings->SetPreviousPage();}
+  void SetPage(int page) { }
+  void SetNextPage(void) { }
+  void SetPreviousPage(void) { }
 
-  PxiDrawSettings *DrawSettings(void) {return draw_settings;}
+  PxiDrawSettings &DrawSettings(void) { return m_drawSettings; }
   void NewExpData(ExpDataParams &P);
-  wxString PxiName(void) const {return headers[1].FileName();}
-  const FileHeader &Header(int i) {return headers[i];}
-  void  AppendHeader(const FileHeader &h) {headers.Append(h);}
+  wxString PxiName(void) const { return m_header.FileName(); }
+  const FileHeader &Header(void) { return m_header; }
 
   DECLARE_EVENT_TABLE()
 };

@@ -3,10 +3,11 @@
 
 
 //***********************CONSTRUCTORS FOR FILE HEADER***********************
-FileHeader::FileHeader(const char *in_filename)
+
+FileHeader::FileHeader(const wxString &p_filename)
+  : m_filename(p_filename)
 {
-  file_name=in_filename;
-  gFileInput in(in_filename);
+  gFileInput in(m_filename);
   Init(in);
 }
 
@@ -20,7 +21,7 @@ FileHeader::FileHeader(const FileHeader &F):
   strategies(F.strategies),num_columns(F.num_columns),num_infosets(F.num_infosets),
   e_column(F.e_column),delta_column(F.delta_column),prob_cols(F.prob_cols),
   //  matrix((F.matrix) ? new NormalMatrix(*F.matrix) : 0),file_name(F.file_name),
-  file_name(F.file_name),
+  m_filename(F.m_filename),
   data_max(F.data_max),data_min(F.data_min)
 { }
 
@@ -39,7 +40,7 @@ FileHeader &FileHeader::operator=(const FileHeader &F)
   delta_column=F.delta_column;
   prob_cols=F.prob_cols;
   //  matrix=(F.matrix) ? new NormalMatrix(*F.matrix) : 0;
-  file_name=F.file_name;
+  m_filename = F.m_filename;
   data_max=F.data_max;
   data_min=F.data_min;
   return (*this);

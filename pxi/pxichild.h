@@ -16,7 +16,7 @@
 class PxiChild : public wxFrame {
 private:
   PxiFrame *parent;
-  PxiCanvas *canvas;
+  FileHeader m_fileHeader;
 
   wxPrintData m_printData;
   wxPageSetupData m_pageSetupData;
@@ -40,12 +40,11 @@ private:
   void OnPrefsColors(wxCommandEvent &);
   void OnPrefsZoomIn(wxCommandEvent &);
   void OnPrefsZoomOut(wxCommandEvent &);
-  void OnNextPage(wxCommandEvent &);
-  void OnPreviousPage(wxCommandEvent &);
+
   void OnHelpAbout(wxCommandEvent &);
   void OnHelpContents(wxCommandEvent &);
-  void OnChar(wxKeyEvent &ev) {canvas->OnChar(ev);}
-  void OnEvent(wxMouseEvent &ev) {canvas->OnEvent(ev);}
+  void OnChar(wxKeyEvent &ev) { /* canvas->OnChar(ev); */ }
+  void OnEvent(wxMouseEvent &ev) { /* canvas->OnEvent(ev); */ }
 
   void MakeMenus(void);
   void MakeToolbar(void);

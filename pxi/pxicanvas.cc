@@ -36,7 +36,7 @@ void PxiCanvas::PlotLabels(wxDC &dc, int ch,int cw)
 {
   dc.SetTextForeground(*wxBLACK);
   //dc.SetBackgroundMode(wxTRANSPARENT);
-  dc.SetFont(draw_settings->GetLabelFont());
+  dc.SetFont(m_drawSettings.GetLabelFont());
   for (int i=1;i<=labels.Length();i++) {
     wxCoord tw,th;
     dc.GetTextExtent(labels[i].label,&tw,&th);
@@ -59,14 +59,14 @@ double PxiCanvas::CalcY_X(double y,int y0,int ch, const PlotInfo &thisplot)
 
 double PxiCanvas::CalcX_X(double x,int x0, int cw, const PlotInfo &thisplot)
 {
-  if (draw_settings->GetDataMode()==DATA_TYPE_ARITH) {
+  if (m_drawSettings.GetDataMode()==DATA_TYPE_ARITH) {
     x-=thisplot.GetMinX(); // set MinX to correspond to 0
     x/=(thisplot.GetMaxX()-thisplot.GetMinX()); // normalize to [0,1]
     x=x0+x*cw; // scale to screen size
   }
   else {
-    double max_t=(log(thisplot.GetMaxX()/thisplot.GetMinX())/log(draw_settings->GetDelL()));
-    double t=log(x/thisplot.GetMinX())/log(draw_settings->GetDelL());
+    double max_t=(log(thisplot.GetMaxX()/thisplot.GetMinX())/log(m_drawSettings.GetDelL()));
+    double t=log(x/thisplot.GetMinX())/log(m_drawSettings.GetDelL());
     x=x0+(t/max_t)*cw; // scale to screen size
   }
   return x;
@@ -79,8 +79,8 @@ double PxiCanvas::CalcX_X(double x,int x0, int cw, const PlotInfo &thisplot)
 #define		NUM_TOKENS		7
 void PxiCanvas::DrawToken(wxDC &dc, int x, int y, int st)
 {
-  int ts=draw_settings->GetTokenSize();	// token dimensions are 2ts x 2ts
-  if (draw_settings->GetColorMode()==COLOR_PROB) {
+  int ts=m_drawSettings.GetTokenSize();	// token dimensions are 2ts x 2ts
+  if (m_drawSettings.GetColorMode()==COLOR_PROB) {
     dc.SetPen(*wxBLACK_PEN);
     dc.SetBrush(*wxBLACK_BRUSH);
     switch (st%NUM_TOKENS) {
@@ -125,21 +125,21 @@ void PxiCanvas::DrawExpPoint_X(wxDC &dc,const PlotInfo &thisplot,double cur_e,in
     
     y=CalcY_X((*s).probs[iset][st],y0,ch,thisplot);
     x=CalcX_X(s->e,x0,cw,thisplot);
-    dc.SetBrush(draw_settings->GetDataBrush());
-    if (draw_settings->GetOverlaySym()==OVERLAY_TOKEN) {
+    dc.SetBrush(m_drawSettings.GetDataBrush());
+    if (m_drawSettings.GetOverlaySym()==OVERLAY_TOKEN) {
       DrawToken(dc, (int) x, (int) y, st);
     }
     else {
       char tmp[10];
       sprintf(tmp,"%d",point_nums[i]);
-      dc.SetFont(draw_settings->GetOverlayFont());
+      dc.SetFont(m_drawSettings.GetOverlayFont());
       dc.SetTextForeground(*wxBLACK);
       wxCoord tw,th;
       dc.GetTextExtent(tmp,&tw,&th);
       dc.DrawText(tmp, (int) (x-tw/2), (int) (y-th/2));
       //      dc.DrawText(tmp,x-3,y-6);
     }
-    if (draw_settings->GetOverlayLines() && st!=1) {
+    if (m_drawSettings.GetOverlayLines() && st!=1) {
       dc.SetBrush(*wxBLACK_BRUSH);
       int y1=(int)CalcY_X((*s).probs[iset][st-1],y0,ch,thisplot);
       dc.DrawLine((int) x, (int) y, (int) x, (int) y1);
@@ -156,7 +156,6 @@ void PxiCanvas::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0,
    */
 {
   double x,y;
-  int iset;
   int point_color=1;
   static int color_start;		// makes each overlay file be plotted a different color set
   if (level==1) color_start=0;
@@ -166,11 +165,11 @@ void PxiCanvas::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0,
   EquTracker equs;		// init the EquTracker class
   
   gFileInput f(f_header.FileName());
-  DataLine *prev_point=(draw_settings->ConnectDots()) ? new DataLine : 0;
+  DataLine *prev_point=(m_drawSettings.ConnectDots()) ? new DataLine : 0;
   int ok=FindStringInFile(f,"Data:");assert(ok);
   f>>probs;
 
-  if (draw_settings->GetColorMode()!=COLOR_EQU && prev_point) 
+  if (m_drawSettings.GetColorMode()!=COLOR_EQU && prev_point) 
     (*prev_point)=probs;
   
   if (true) {
@@ -180,22 +179,19 @@ void PxiCanvas::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0,
     dc.GetTextExtent(title,&tw,&th);
     dc.DrawText(title, x0+cw/2-tw/2, y0-ch-th);
     int lev=0;
-    for (int t=1;t<=thisplot.GetIsets().Length();t++) {
-      iset=thisplot.GetIsets()[t];
-      for (int st=1;st<=f_header.NumStrategies(iset);st++) {
-	if (thisplot.GetStrategyShow(iset,st)) {
-	  wxString key;
-	  key.Printf("Strategy %d",st);
-	  wxCoord tw,th;
-	  dc.GetTextExtent(key,&tw,&th);
-	  if (draw_settings->GetColorMode()==COLOR_PROB) 
-	    dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
-	  dc.DrawLine(
-		      x0+cw-tw-cw/20,   y0-ch+3*th*lev/2+th/2,
-		      x0+cw-tw,         y0-ch+3*th*lev/2+th/2);
-	  dc.DrawText(key, x0+cw-tw, y0-ch+3*th*lev/2);
-	  lev++;
-	}
+
+    for (int st=1; st <= f_header.NumStrategies(m_page); st++) {
+      if (thisplot.GetStrategyShow(m_page, st)) {
+	wxString key;
+	key.Printf("Strategy %d",st);
+	wxCoord tw,th;
+	dc.GetTextExtent(key,&tw,&th);
+	if (m_drawSettings.GetColorMode()==COLOR_PROB) 
+	  dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
+	dc.DrawLine(x0+cw-tw-cw/20,   y0-ch+3*th*lev/2+th/2,
+		    x0+cw-tw,         y0-ch+3*th*lev/2+th/2);
+	dc.DrawText(key, x0+cw-tw, y0-ch+3*th*lev/2);
+	lev++;
       }
     }
   }
@@ -206,42 +202,41 @@ void PxiCanvas::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0,
       x=CalcX_X(probs.E(),x0,cw,thisplot);
       // plot the infosets that are selected for the top graph
       // if we have experimental data, get it
-      if (draw_settings->GetColorMode()==COLOR_EQU)
+      if (m_drawSettings.GetColorMode()==COLOR_EQU)
 	point_color=equs.Check_Equ(probs,&new_equ,prev_point);
-      if (draw_settings->GetColorMode()==COLOR_NONE)
+      if (m_drawSettings.GetColorMode()==COLOR_NONE)
 	point_color=2;
       if (point_color>max_equ) max_equ=point_color;
       // next line sets the correct color
       dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(point_color+color_start)%NUM_COLORS+1],1,wxSOLID)));
-      for (int t=1;t<=thisplot.GetIsets().Length();t++) {
-	iset=thisplot.GetIsets()[t];
-	for (int st=1;st<=f_header.NumStrategies(iset);st++) {
-				// plot the data point
-	  y=CalcY_X(probs[iset][st],y0, ch,thisplot);
-	  if (thisplot.GetStrategyShow(iset,st)/* && draw_settings->RangeY(probs[iset][st])*/) {
-	    if (draw_settings->GetColorMode()==COLOR_PROB) 
-	      dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
-	    if (draw_settings->ConnectDots() && !new_equ) {
-	      dc.DrawLine((int) CalcX_X(prev_point->E(),x0, cw,thisplot),
-			  (int) CalcY_X((*prev_point)[iset][st],y0,ch,thisplot),
-			  (int) x, (int) y);
-	    }
-	    else {
-	      dc.DrawPoint((int) x, (int) y);
-	    }
-	    // if there is an experimental data point for this cur_e, plot it
-	    if (exp_data)
-	      DrawExpPoint_X(dc,thisplot,probs.E(),iset,st,x0,y0,ch,cw);
+
+      for (int st = 1; st <= f_header.NumStrategies(m_page); st++) {
+	// plot the data point
+	y = CalcY_X(probs[m_page][st],y0, ch,thisplot);
+	if (thisplot.GetStrategyShow(m_page,st)) {
+	  if (m_drawSettings.GetColorMode()==COLOR_PROB) 
+	    dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
+	  if (m_drawSettings.ConnectDots() && !new_equ) {
+	    dc.DrawLine((int) CalcX_X(prev_point->E(),x0, cw,thisplot),
+			(int) CalcY_X((*prev_point)[m_page][st],y0,ch,thisplot),
+			(int) x, (int) y);
+	  }
+	  else {
+	    dc.DrawPoint((int) x, (int) y);
+	  }
+	  // if there is an experimental data point for this cur_e, plot it
+	  if (exp_data) {
+	    DrawExpPoint_X(dc,thisplot,probs.E(),m_page,st,x0,y0,ch,cw);
 	  }
 	}
       }
     }
     // read in a line of strategies (for all infosets)
-    if (draw_settings->GetColorMode()!=COLOR_EQU && prev_point) (*prev_point)=probs;
+    if (m_drawSettings.GetColorMode()!=COLOR_EQU && prev_point) (*prev_point)=probs;
     f>>probs;
   }
   if (prev_point) delete prev_point;
-  if (!draw_settings->RestartOverlayColors()) color_start+=max_equ;
+  if (!m_drawSettings.RestartOverlayColors()) color_start+=max_equ;
 }
 
 /**************************** PLOT DATA 2 *********************************/
@@ -260,15 +255,15 @@ void PxiCanvas::DrawExpPoint_2(wxDC &dc, const PlotInfo &thisplot, double cur_e,
     x=x0+(*s).probs[pl1][st1]*cw;
     y=y0-(*s).probs[pl2][st2]*ch;
     
-    if (draw_settings->GetOverlaySym()==OVERLAY_TOKEN) {
-      int ts=draw_settings->GetTokenSize();	// token dimentions are 2ts x 2ts
-      dc.SetBrush(draw_settings->GetDataBrush());
+    if (m_drawSettings.GetOverlaySym()==OVERLAY_TOKEN) {
+      int ts=m_drawSettings.GetTokenSize();	// token dimentions are 2ts x 2ts
+      dc.SetBrush(m_drawSettings.GetDataBrush());
       dc.DrawEllipse((int) (x-ts), (int) (y-ts), 2*ts, 2*ts);
     }
     else {
       char tmp[10];
       sprintf(tmp,"%d",point_nums[i]);
-      dc.SetFont(draw_settings->GetOverlayFont());
+      dc.SetFont(m_drawSettings.GetOverlayFont());
       dc.SetTextForeground(*wxBLACK);
       wxCoord tw,th;
       dc.GetTextExtent(tmp,&tw,&th);
@@ -292,7 +287,7 @@ void PxiCanvas::PlotData_2(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int
   
   // where the actual data gets read in
   gFileInput f(f_header.FileName());
-  DataLine *prev_point=(draw_settings->ConnectDots()) ? new DataLine : NULL;
+  DataLine *prev_point=(m_drawSettings.ConnectDots()) ? new DataLine : NULL;
   int ok=FindStringInFile(f,"Data:");assert(ok);
   
   EquTracker equs;		// init the EquTracker class
@@ -304,32 +299,29 @@ void PxiCanvas::PlotData_2(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int
       if (thisplot.GetStrategyShow(j,i))
 	if (pl1==0) {pl1=j;st1=i;} else {pl2=j;st2=i;}
   
-  while (!probs.Done() && !f.eof())
-    {
-      //------------------- if the cur_e is in range, display it -----------
-      if (probs.E()<thisplot.GetMaxY() && probs.E()>thisplot.GetMinY()) {
-	iset=thisplot.GetIsets()[1];
-	point_color=equs.Check_Equ(probs,&new_equ,prev_point);
-	dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[point_color%NUM_COLORS+1],3,wxSOLID)));
-	/*------------------ ISET #1: plot the point in color ----------------------*/
-	x=x0+probs[pl1][st1]*cw;
-	y=y0-probs[pl2][st2]*ch;
-	if (draw_settings->ConnectDots() && !new_equ) {
-	  double prev_x=x0+(*prev_point)[pl1][st1]*cw;
-	  double prev_y=y0-(*prev_point)[pl2][st2]*ch;
-	  dc.DrawLine((int) prev_x, (int) prev_y, (int) x, (int) y);
-	}
-	else {
-	  dc.DrawPoint((int) x, (int) y);
-	}
-	dc.DrawPoint((int) x, (int) y);
-	// if there is an experimental data point for this cur_e, plot it
-	if (exp_data) {
-	  DrawExpPoint_2(dc,thisplot,probs.E(),pl1,st1,pl2,st2, x0,y0,cw,ch);
-	}
+  while (!probs.Done() && !f.eof()) {
+    if (probs.E()<thisplot.GetMaxY() && probs.E()>thisplot.GetMinY()) {
+      point_color=equs.Check_Equ(probs,&new_equ,prev_point);
+      dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[point_color%NUM_COLORS+1],3,wxSOLID)));
+
+      x=x0+probs[pl1][st1]*cw;
+      y=y0-probs[pl2][st2]*ch;
+      if (m_drawSettings.ConnectDots() && !new_equ) {
+	double prev_x=x0+(*prev_point)[pl1][st1]*cw;
+	double prev_y=y0-(*prev_point)[pl2][st2]*ch;
+	dc.DrawLine((int) prev_x, (int) prev_y, (int) x, (int) y);
       }
-      f>>probs;
+      else {
+	dc.DrawPoint((int) x, (int) y);
+      }
+      dc.DrawPoint((int) x, (int) y);
+      // if there is an experimental data point for this cur_e, plot it
+      if (exp_data) {
+	DrawExpPoint_2(dc,thisplot,probs.E(),pl1,st1,pl2,st2, x0,y0,cw,ch);
+      }
     }
+    f>>probs;
+  }
   if (prev_point) delete prev_point;
   PlotLabels(dc,ch,cw);
 }
@@ -366,15 +358,15 @@ void PxiCanvas::DrawExpPoint_3(wxDC &dc,const PlotInfo &thisplot,double cur_e,in
     
     y=CalcY_3((*s).probs[iset][st1],x0,y0,cw,ch);
     x=CalcX_3((*s).probs[iset][st1],(*s).probs[iset][st2],x0,y0,ch,cw,thisplot);
-    if (draw_settings->GetOverlaySym()==OVERLAY_TOKEN) {
-      int ts=draw_settings->GetTokenSize();	// token dimentions are 2ts x 2ts
-      dc.SetBrush(draw_settings->GetDataBrush());
+    if (m_drawSettings.GetOverlaySym()==OVERLAY_TOKEN) {
+      int ts=m_drawSettings.GetTokenSize();	// token dimentions are 2ts x 2ts
+      dc.SetBrush(m_drawSettings.GetDataBrush());
       dc.DrawEllipse((int) (x-ts), (int) (y-ts), 2*ts, 2*ts);
     }
     else {
       wxString tmp;
       tmp.Printf("%d",point_nums[i]);
-      dc.SetFont(draw_settings->GetOverlayFont());
+      dc.SetFont(m_drawSettings.GetOverlayFont());
       dc.SetTextForeground(*wxBLACK);
       wxCoord tw,th;
       dc.GetTextExtent(tmp,&tw,&th);
@@ -401,11 +393,11 @@ void PxiCanvas::PlotData_3(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int
   EquTracker equs;                // init the EquTracker class
   
   gFileInput f(f_header.FileName());
-  DataLine *prev_point=(draw_settings->ConnectDots()) ? new DataLine : NULL;
+  DataLine *prev_point=(m_drawSettings.ConnectDots()) ? new DataLine : NULL;
   int ok=FindStringInFile(f,"Data:");assert(ok);
   f>>probs;
 
-  if (draw_settings->GetColorMode()!=COLOR_EQU && prev_point) 
+  if (m_drawSettings.GetColorMode()!=COLOR_EQU && prev_point) 
     (*prev_point)=probs;
   
   if (true) {
@@ -419,40 +411,48 @@ void PxiCanvas::PlotData_3(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int
   while (!probs.Done() && !f.eof()) {
     //------------------- if the cur_e is in range, display it -----------
     if (thisplot.RangeX(probs.E())) {
-      point_color=(draw_settings->GetColorMode()==COLOR_EQU) ? equs.Check_Equ(probs,&new_equ,prev_point) : 2;
+      point_color=(m_drawSettings.GetColorMode()==COLOR_EQU) ? equs.Check_Equ(probs,&new_equ,prev_point) : 2;
       if (point_color>max_equ) max_equ=point_color;
       wxPen *cpen=wxThePenList->FindOrCreatePen(equ_colors[(point_color+color_start)%NUM_COLORS+1],3,wxSOLID);
       //      if (dc.current_pen!=cpen) dc.SetPen(cpen);
       dc.SetPen(*cpen);
-      for (int iset_num=1;iset_num<=thisplot.GetIsets().Length();iset_num++) {
-	iset= thisplot.GetIsets()[iset_num];
-	/*------------------ plot the point in color ----------------------*/
-	int st1=0,st2=0;	// which two strategies to plot
-	int i=1;
-	while(!st1) {if (thisplot.GetStrategyShow(iset,i)) st1=i;i++;}
-	while(!st2) {if (thisplot.GetStrategyShow(iset,i)) st2=i;i++;}
-	x=CalcX_3(probs[iset][st1],probs[iset][st2],x0,y0,cw,ch,thisplot);
-	y=CalcY_3(probs[iset][st1],x0,y0,cw,ch);
-	if (draw_settings->ConnectDots() && !new_equ) {
-	  double prev_x=CalcX_3((*prev_point)[iset][st1],(*prev_point)[iset][st2],x0,y0,cw,ch,thisplot);
-	  double prev_y=CalcY_3((*prev_point)[iset][st1],x0,y0,ch,cw);
-	  dc.DrawLine((int) prev_x, (int) prev_y, (int) x, (int) y);
+
+      int st1=0,st2=0;	// which two strategies to plot
+      int i=1;
+      while (!st1) {
+	if (thisplot.GetStrategyShow(m_page, i)) {
+	  st1=i;
 	}
-	else {
-	  dc.DrawPoint((int) x, (int) y);
+	i++;
+      }
+      while (!st2) {
+	if (thisplot.GetStrategyShow(m_page, i)) {
+	  st2=i;
 	}
-	// if there is an experimental data point for this cur_e, plot it
-	if (exp_data) {
-	  DrawExpPoint_3(dc,thisplot,probs.E(),iset,st1,st2,x0,y0,cw,ch);
-	}
+	i++;
+      }
+      x=CalcX_3(probs[m_page][st1],probs[m_page][st2],x0,y0,cw,ch,thisplot);
+      y=CalcY_3(probs[m_page][st1],x0,y0,cw,ch);
+
+      if (m_drawSettings.ConnectDots() && !new_equ) {
+	double prev_x=CalcX_3((*prev_point)[iset][st1],(*prev_point)[iset][st2],x0,y0,cw,ch,thisplot);
+	double prev_y=CalcY_3((*prev_point)[iset][st1],x0,y0,ch,cw);
+	dc.DrawLine((int) prev_x, (int) prev_y, (int) x, (int) y);
+      }
+      else {
+	dc.DrawPoint((int) x, (int) y);
+      }
+      // if there is an experimental data point for this cur_e, plot it
+      if (exp_data) {
+	DrawExpPoint_3(dc,thisplot,probs.E(),iset,st1,st2,x0,y0,cw,ch);
       }
     }
-    /*------------------ read in a line of data-----------------*/
-    if (draw_settings->GetColorMode()!=COLOR_EQU && prev_point) (*prev_point)=probs;
+
+    if (m_drawSettings.GetColorMode()!=COLOR_EQU && prev_point) (*prev_point)=probs;
     f>>probs;
   }
   if (prev_point) delete prev_point;
-  if (!draw_settings->RestartOverlayColors()) color_start+=max_equ;
+  if (!m_drawSettings.RestartOverlayColors()) color_start+=max_equ;
   PlotLabels(dc,ch,cw);
 }
 
@@ -461,7 +461,7 @@ void PxiCanvas::PlotData_3(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int
 void PxiCanvas::Update(wxDC& dc,int device)
 {
   int cw,ch;
-  const wxFont &font = draw_settings->GetAxisFont(); 
+  const wxFont &font = m_drawSettings.GetAxisFont(); 
   wxBeginBusyCursor();
   GetClientSize(&cw,&ch);
   cw=850/2;ch=1100/2;
@@ -523,34 +523,25 @@ void PxiCanvas::Update(wxDC& dc,int device)
   }
 
   dc.SetFont(font);
-  dc.SetTextForeground(draw_settings->GetAxisTextColor());
+  dc.SetTextForeground(m_drawSettings.GetAxisTextColor());
   dc.SetPen(*wxBLACK_PEN);
-  dc.SetBrush(draw_settings->GetClearBrush());
+  dc.SetBrush(m_drawSettings.GetClearBrush());
   
-  int page = draw_settings->GetPage();
-  int nplots = draw_settings->GetPlotsPerPage();
+  const PlotInfo &thisplot(m_drawSettings.GetPlotInfo());
+  dc.SetPen(*wxBLACK_PEN);
 
-  for(int j=1;j<=nplots;j++) {
-    int whichplot =  nplots*(page-1)+j;
-    if(whichplot <= draw_settings->GetNumPlots()) {
-      const PlotInfo &thisplot(draw_settings->GetPlotInfo(whichplot));
-      dc.SetPen(*wxBLACK_PEN);
-      for (int i=1;i<=headers.Length();i++) {
-	// used for square aspect ratio that fits in window
-	int side=gmin(cw-2*XOFF, ch/nplots-2*XOFF);	
+  // used for square aspect ratio that fits in window
+  int side=gmin(cw-2*XOFF, ch-2*XOFF);	
 
-	switch(thisplot.GetPlotMode()) { 
-	case PXI_PLOT_X:
-	  DoPlot_X(dc,thisplot,XOFF,j*(ch/nplots)-XOFF,cw-2*XOFF, ch/nplots-2*XOFF, i);
-	  break;
-	case PXI_PLOT_2:
-	  DoPlot_2(dc,thisplot,XOFF,j*(ch/nplots)-XOFF, side, side, i);
-	  break;
-	case PXI_PLOT_3:
-	  DoPlot_3(dc,thisplot,XOFF,j*(ch/nplots)-XOFF, side, side, i);
-	}
-      }
-    }
+  switch(thisplot.GetPlotMode()) { 
+  case PXI_PLOT_X:
+    DoPlot_X(dc,thisplot,XOFF,ch-XOFF,cw-2*XOFF, ch-2*XOFF, 1);
+    break;
+  case PXI_PLOT_2:
+    DoPlot_2(dc,thisplot,XOFF,ch-XOFF, side, side, 1);
+    break;
+  case PXI_PLOT_3:
+    DoPlot_3(dc,thisplot,XOFF,ch-XOFF, side, side, 1);
   }
   wxEndBusyCursor();
 }
@@ -561,9 +552,9 @@ void PxiCanvas::DoPlot_X(wxDC& dc, const PlotInfo &thisplot,
   // This function plots n-dimensional data on a rectangular grid.  The x-axis
   //  are error value
 {
-  PlotAxis_X(dc,thisplot,x0,y0,cw,ch,draw_settings->GetDataMode(),
-	     headers[1].EStep());
-  PlotData_X(dc,thisplot,x0,y0,cw,ch, headers[level],level);
+  PlotAxis_X(dc,thisplot,x0,y0,cw,ch,m_drawSettings.GetDataMode(),
+	     m_header.EStep());
+  PlotData_X(dc,thisplot,x0,y0,cw,ch, m_header, 1);
 }
 
 
@@ -571,73 +562,66 @@ void PxiCanvas::DoPlot_2(wxDC& dc, const PlotInfo &thisplot,
 			 int x0, int y0, int cw,int ch, int level)
 {
   PlotAxis_2(dc,thisplot,x0,y0,cw,ch);
-  PlotData_2(dc,thisplot,x0,y0,cw,ch,headers[level], level);
+  PlotData_2(dc,thisplot,x0,y0,cw,ch, m_header, 1);
 }
 
 void PxiCanvas::DoPlot_3(wxDC& dc, const PlotInfo &thisplot,
 			 int x0, int y0, int cw,int ch, int level)
 {
   wxString labels[] = {"", "", ""};
-  for (int i=1;i<=thisplot.GetIsets().Length();i++) {
-    int iset= thisplot.GetIsets()[i];
-    int st1=0,st2=0,st3=0;  // which two strategies to plot
-    int j=1;
-    while(!st1) {if (thisplot.GetStrategyShow(iset,j)) st1=j;j++;}
-    while(!st2) {if (thisplot.GetStrategyShow(iset,j)) st2=j;j++;}
-    st3=j;
-    labels[0].Printf("%d",st1);
-    labels[1].Printf("%d",st2); 
-    labels[2].Printf("%d",st3);
+  int st1=0,st2=0,st3=0;  // which two strategies to plot
+  int j=1;
+  while (!st1) {
+    if (thisplot.GetStrategyShow(m_page,j)) {
+      st1=j;
+    }
+    j++;
   }
+  while (!st2) {
+    if (thisplot.GetStrategyShow(m_page,j)) {
+      st2=j;
+    }
+    j++;
+  }
+
+  st3=j;
+  labels[0].Printf("%d",st1);
+  labels[1].Printf("%d",st2); 
+  labels[2].Printf("%d",st3);
+
   dc.SetPen(*wxBLACK_PEN);
   PlotAxis_3(dc,thisplot,x0,y0,cw,ch,labels);
-  PlotData_3(dc,thisplot,x0,y0,cw,ch,headers[level], level);
+  PlotData_3(dc,thisplot,x0,y0,cw,ch, m_header, 1);
 }
 
 void PxiCanvas::ShowDetail(void)
 {
   char tempstr[200];
-  FileHeader header=headers[1];
   wxString message;
   int		i1,i;
-  sprintf(tempstr,"Detail for: %s\n",(const char *)FileNameFromPath(header.FileName()));
+  sprintf(tempstr, "Detail for: %s\n",
+	  (const char *) FileNameFromPath(m_header.FileName()));
   message+=tempstr;
-  sprintf(tempstr,"Error (lambda) step:  %4.4f\n",header.EStep());
+  sprintf(tempstr,"Error (lambda) step:  %4.4f\n",m_header.EStep());
   message+=tempstr;
-  sprintf(tempstr,"Error (lambda) start: %4.4f\n",header.EStart());
+  sprintf(tempstr,"Error (lambda) start: %4.4f\n",m_header.EStart());
   message+=tempstr;
-  sprintf(tempstr,"Error (lambda) stop : %4.4f\n",header.EStop());
+  sprintf(tempstr,"Error (lambda) stop : %4.4f\n",m_header.EStop());
   message+=tempstr;
-  sprintf(tempstr,"Minimum data value  : %4.4f\n",header.DataMin());
+  sprintf(tempstr,"Minimum data value  : %4.4f\n",m_header.DataMin());
   message+=tempstr;
-  sprintf(tempstr,"Maximum data value  : %4.4f\n",header.DataMax());
+  sprintf(tempstr,"Maximum data value  : %4.4f\n",m_header.DataMax());
   message+=tempstr;
-  sprintf(tempstr,"Data type:  %s\n",(header.DataType()==DATA_TYPE_ARITH) ? "Arithmetic" : "Logarithmic");
+  sprintf(tempstr,"Data type:  %s\n",(m_header.DataType()==DATA_TYPE_ARITH) ? "Arithmetic" : "Logarithmic");
   message+=tempstr;
   message+="\n";
-  if (header.MError()>-.99) {
-    sprintf(tempstr,"Probability step :    %4.4f\n",header.QStep());
+  if (m_header.MError()>-.99) {
+    sprintf(tempstr,"Probability step :    %4.4f\n",m_header.QStep());
     message+=tempstr;
-    sprintf(tempstr,"Margin of error:      %4.4f\n",header.MError());
+    sprintf(tempstr,"Margin of error:      %4.4f\n",m_header.MError());
     message+=tempstr;
   }
   wxMessageBox(message,"File Details",wxOK);
-}
-
-void PxiCanvas::StopIt(void)
-{
-#ifdef NOT_IMPLEMENTED
-  if (draw_settings->GetStopMax()==draw_settings->GetMaxL()) {
-    //	if (updating) draw_settings->SetStopMax(cur_e);
-  }
-  else {
-    //	if (!updating)
-    {
-      draw_settings->ResetSetStop();
-      Render();
-    }
-  }
-#endif // NOT_IMPLEMENTED
 }
 
 void PxiCanvas::NewExpData(ExpDataParams &P) 
@@ -657,9 +641,6 @@ void PxiCanvas::OnChar(wxKeyEvent &ev)
   case WXK_NEXT:
     SetNextPage();
     Render();
-    break;
-  case PXI_KEY_STOP:
-    StopIt();
     break;
   default:
     wxScrolledWindow::OnChar(ev);
@@ -699,19 +680,16 @@ BEGIN_EVENT_TABLE(PxiCanvas, wxScrolledWindow)
   EVT_PAINT(PxiCanvas::OnPaint)
 END_EVENT_TABLE()
 
-// Define a constructor for my canvas
-PxiCanvas::PxiCanvas(wxFrame *frame, const wxPoint &p_position,
-		     const wxSize &p_size, int style,const char *file_name):
-  wxScrolledWindow(frame, -1, p_position, p_size, style),
-  exp_data(NULL),draw_settings(NULL), probs(file_name), painting(false), 
-  m_landscape(false), m_width(850/2), m_height(1100/2), m_scale(1.0), 
-  m_ppu(25),
-  m_dc(new wxMemoryDC)
+PxiCanvas::PxiCanvas(wxWindow *p_parent, const wxPoint &p_position,
+		     const wxSize &p_size,
+		     const FileHeader &p_header, int p_page)
+  : wxScrolledWindow(p_parent, -1, p_position, p_size),
+    m_header(p_header), m_drawSettings(m_header, p_page),
+    exp_data(NULL), probs(p_header.FileName()),
+    m_landscape(false), m_width(850/2), m_height(1100/2), m_scale(1.0), 
+    m_ppu(25),
+    m_dc(new wxMemoryDC), m_page(p_page)
 {
-  headers.Append(FileHeader(file_name));
-  draw_settings=new PxiDrawSettings(headers[1]);
-  frame->SetTitle(headers[1].FileName());
-
   // fit to 8 1/2 x 11 inch  
   SetScale(1.0);
 
@@ -728,14 +706,9 @@ PxiCanvas::~PxiCanvas()
 
 void PxiCanvas::OnPaint(wxPaintEvent &)
 {
-  if (painting) 
-    return; // prevent re-entry
-  painting = true;
-
   wxPaintDC dc(this);
   dc.Blit(0, 0, GetSize().GetWidth(), GetSize().GetHeight(),
 	  m_dc, 0, 0);
-  painting = false;
 }
 
 void PxiCanvas::Render(void)
