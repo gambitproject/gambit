@@ -1,7 +1,7 @@
 //#
 //# FILE: readnfg.imp -- Type-dependent file-reading code
 //#
-//# $Id$
+//# @(#)readnfg.imp	1.2 12/19/95
 //#
 
 #include "glist.h"
