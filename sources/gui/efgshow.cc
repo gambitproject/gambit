@@ -271,8 +271,8 @@ EfgShow::EfgShow(FullEfg &p_efg, GambitFrame *p_parent)
   m_infoNotebook->AddPage(m_supportWindow, "Supports");
   m_infoNotebook->SetSelection(0);
 
-  m_nodeSashWindow->Show(true);
-  m_nodeSashWindow->SetSashVisible(wxSASH_LEFT, true);
+  m_nodeSashWindow->Show(false);
+  m_nodeSashWindow->SetSashVisible(wxSASH_LEFT, false);
   
   m_solutionSashWindow = new wxSashWindow(this, idSOLUTIONWINDOW,
 					  wxDefaultPosition,
@@ -825,7 +825,7 @@ void EfgShow::MakeMenus(void)
   viewMenu->AppendSeparator();
   viewMenu->Append(efgmenuVIEW_NAVIGATION, "&Navigation",
 		   "Display navigation window", true);
-  viewMenu->Check(efgmenuVIEW_NAVIGATION, true);
+  viewMenu->Check(efgmenuVIEW_NAVIGATION, false);
   viewMenu->Append(efgmenuVIEW_OUTCOMES, "&Outcomes",
 		   "Display and edit outcomes", true);
   viewMenu->Check(efgmenuVIEW_OUTCOMES, false);
