@@ -286,6 +286,19 @@ template <class T> T gList<T>::Remove(int num)
   return ret;
 }
 
+template <class T> bool gList<T>::HasARedundancy()
+{
+  int i = 1; int j = 2;		
+  while (i < Length()) {
+    if ((*this)[i] == (*this)[j])
+      return true;
+    else 
+      j++;
+    if (j > Length()) { i++; j = i+1; }
+  }
+  return false;
+}
+
 template <class T> void gList<T>::RemoveRedundancies()
 {
   int i = 1; int j = 2;		
