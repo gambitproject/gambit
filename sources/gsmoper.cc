@@ -2401,7 +2401,7 @@ Portion* GSM_Manual(Portion** param)
 {
   gString txt = ((TextPortion*) param[0])->Value();
   gOutput& s = ((OutputPortion*) param[1])->Value();
-  ListPortion* Prototypes = (ListPortion*) _gsm->Help(txt, true, true);
+  ListPortion* Prototypes = (ListPortion*) _gsm->Help(txt, true, true, true);
   int i;
   int body;
 

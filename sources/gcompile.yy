@@ -57,7 +57,7 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
   int statementcount; \
   gInteger ival; \
   double dval; \
-  gString tval, formal, funcname, paramtype, functype;  \
+  gString tval, formal, funcname, funcdesc,  paramtype, functype;  \
   gList<NewInstr*> program, *function, *optparam; \
   gList<gString> formals, types; \
   gList<bool> refs; \
@@ -179,8 +179,12 @@ funcdecl:     DEFFUNC LBRACK NAME
               { funcname = tval; function = new gList<NewInstr*>; 
                 statementcount = 0; }
               LBRACK formallist RBRACK TYPEopt COMMA statements
+              optfuncdesc
               RBRACK   { if (!triv && !semi) emit(new NewInstr(iOUTPUT));
 			 if (!DefineFunction())  YYERROR; } 
+
+optfuncdesc:  | { funcdesc = ""; }
+              COMMA TEXT { funcdesc = tval; }
 
 delfunc:      DELFUNC LBRACK NAME
               { funcname = tval; function = new gList<NewInstr*>; 
@@ -837,7 +841,11 @@ bool GCLCompiler::DefineFunction(void)
 
   funcspec = TextToPortionSpec(functype);
   if (funcspec.Type != porERROR) {
-    func->SetFuncInfo(0, FuncInfoType(function, funcspec, formals.Length()));
+    FuncInfoType funcinfo = 
+      FuncInfoType(function, funcspec, formals.Length());
+    funcinfo.Desc = funcdesc;
+    funcdesc = "";
+    func->SetFuncInfo(0, funcinfo);
   }
   else {
     error = true;
@@ -874,7 +882,9 @@ bool GCLCompiler::DefineFunction(void)
     }
   }
 
-  if (!error)  gsm.AddFunction(func);
+
+  if( !error )
+    gsm.AddFunction(func);
   formals.Flush();
   types.Flush();
   refs.Flush();

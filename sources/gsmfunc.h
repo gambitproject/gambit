@@ -46,6 +46,7 @@ class NewInstr;
 class Portion;
 class ListPortion;
 class ReferencePortion;
+class gString;
 
 template <class T> class gList;
 template <class T> class RefCountHashTable;
@@ -87,6 +88,7 @@ public:
   bool                 GameMatch;
   int                  NumParams;
   ParamInfoType*       ParamInfo;
+  gString              Desc;
 
   FuncInfoType(void);
   FuncInfoType(const FuncInfoType& funcinfo);
@@ -144,7 +146,8 @@ public:
   bool UDF( void ) const;
   bool BIF( void ) const;
 
-  gList<gString> FuncList(bool udf = true, bool bif = true) const;
+  gList<gString> FuncList(bool udf = true, bool bif = true, 
+			  bool getdesc = false) const;
   void Dump(gOutput& f, int i) const;
   void Dump(gOutput& f) const;
 };

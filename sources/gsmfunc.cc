@@ -305,7 +305,8 @@ FuncInfoType::FuncInfoType(const FuncInfoType& funcinfo)
  ReturnSpec(funcinfo.ReturnSpec),
  Listable(funcinfo.Listable),
  GameMatch(funcinfo.GameMatch),
- NumParams(funcinfo.NumParams)
+ NumParams(funcinfo.NumParams),
+ Desc( funcinfo.Desc )
 {
   int i;
   if(!UserDefined)
@@ -719,7 +720,7 @@ bool FuncDescObj::BIF( void ) const
 
 
 
-gList<gString> FuncDescObj::FuncList( bool udf, bool bif ) const
+gList<gString> FuncDescObj::FuncList( bool udf, bool bif, bool getdesc ) const
 {
   gList<gString> list;
   gString f;
@@ -750,6 +751,17 @@ gList<gString> FuncDescObj::FuncList( bool udf, bool bif ) const
       }
       f += "] =: ";
       f += PortionSpecToText(_FuncInfo[i].ReturnSpec);
+
+      if( getdesc && _FuncInfo[i].UserDefined )
+	f += '\n';
+
+      if( getdesc && _FuncInfo[i].Desc.length() > 0 )
+      {
+	f += '\n';
+	f += _FuncInfo[i].Desc;
+	f += '\n';
+      }
+
       list.Append(f);
     }
   }

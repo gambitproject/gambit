@@ -175,7 +175,7 @@ public:
 
   Portion* PopValue( void );
 
-  Portion* Help(gString text, bool udf, bool bif);
+  Portion* Help(gString text, bool udf, bool bif, bool getdesc = false );
   Portion* HelpVars(gString text);
   Portion* UnAssignExt( void );
 
