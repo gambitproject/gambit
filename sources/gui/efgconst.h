@@ -28,8 +28,13 @@
 #define EFGCONST_H
 
 typedef enum {
+  efgmenuFILE_IMPORT = 1112,
+  efgmenuFILE_IMPORT_COMLAB = 1113,
   efgmenuFILE_EXPORT = 1110,
   efgmenuFILE_EXPORT_POSTSCRIPT = 1111,
+  efgmenuFILE_EXPORT_JPEG = 1114,
+  efgmenuFILE_EXPORT_BMP = 1115,
+  efgmenuFILE_EXPORT_PNG = 1116,
 
   efgmenuEDIT_INSERT = 1100,
   efgmenuEDIT_DELETE = 1101,

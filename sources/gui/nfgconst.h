@@ -27,8 +27,11 @@
 #ifndef NFGCONST_H
 #define NFGCONST_H
 
+const int NFG_FILE_IMPORT = 198;
+const int NFG_FILE_IMPORT_COMLAB = 199;
 const int NFG_FILE_EXPORT = 200;
 const int NFG_FILE_EXPORT_HTML = 201;
+const int NFG_FILE_EXPORT_COMLAB = 202;
 
 const int NFG_EDIT_STRATS = 301;
 const int NFG_EDIT_CONTINGENCY = 309;

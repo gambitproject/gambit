@@ -60,6 +60,7 @@ public:
   void OnFileNew(wxWindow *);
   void OnFileOpen(wxWindow *);
   void OnFileMRUFile(wxCommandEvent &);
+  void OnFileImportComLab(wxWindow *);
 
   void OnHelpContents(void);
   void OnHelpIndex(void);

@@ -83,6 +83,10 @@ private:
   void OnFileNew(wxCommandEvent &);
   void OnFileOpen(wxCommandEvent &);
   void OnFileSave(wxCommandEvent &);
+  void OnFileImportComLab(wxCommandEvent &);
+  void OnFileExportBMP(wxCommandEvent &);
+  void OnFileExportJPEG(wxCommandEvent &);
+  void OnFileExportPNG(wxCommandEvent &);
   void OnFileExportPS(wxCommandEvent &);
   void OnFilePageSetup(wxCommandEvent &);
   void OnFilePrintPreview(wxCommandEvent &);

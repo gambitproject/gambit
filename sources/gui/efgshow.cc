@@ -89,6 +89,10 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(wxID_CLOSE, EfgShow::Close)
   EVT_MENU(wxID_SAVE, EfgShow::OnFileSave)
   EVT_MENU(wxID_SAVEAS, EfgShow::OnFileSave)
+  EVT_MENU(efgmenuFILE_IMPORT_COMLAB, EfgShow::OnFileImportComLab)
+  EVT_MENU(efgmenuFILE_EXPORT_BMP, EfgShow::OnFileExportBMP)
+  EVT_MENU(efgmenuFILE_EXPORT_JPEG, EfgShow::OnFileExportJPEG)
+  EVT_MENU(efgmenuFILE_EXPORT_PNG, EfgShow::OnFileExportPNG)
   EVT_MENU(efgmenuFILE_EXPORT_POSTSCRIPT, EfgShow::OnFileExportPS)
   EVT_MENU(wxID_PRINT_SETUP, EfgShow::OnFilePageSetup)
   EVT_MENU(wxID_PREVIEW, EfgShow::OnFilePrintPreview)
@@ -580,8 +584,20 @@ void EfgShow::MakeMenus(void)
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_SAVE, "&Save\tCtrl-S", "Save this game");
   fileMenu->Append(wxID_SAVEAS, "Save &as", "Save game to a different file");
+  fileMenu->AppendSeparator();
+  wxMenu *fileImportMenu = new wxMenu;
+  fileImportMenu->Append(efgmenuFILE_IMPORT_COMLAB, "&ComLabGames",
+			 "Import a game saved in ComLabGames format");
+  fileMenu->Append(efgmenuFILE_IMPORT, "&Import", fileImportMenu,
+		   "Import a game from various formats");
   wxMenu *fileExportMenu = new wxMenu;
-  fileExportMenu->Append(efgmenuFILE_EXPORT_POSTSCRIPT, "&PostScript",
+  fileExportMenu->Append(efgmenuFILE_EXPORT_BMP, "&BMP",
+			 "Save a rendering of the game as a Windows bitmap");
+  fileExportMenu->Append(efgmenuFILE_EXPORT_JPEG, "&JPEG",
+			 "Save a rendering of the game as a JPEG image");
+  fileExportMenu->Append(efgmenuFILE_EXPORT_PNG, "&PNG",
+			 "Save a rendering of the game as a PNG image");
+  fileExportMenu->Append(efgmenuFILE_EXPORT_POSTSCRIPT, "Post&Script",
 			 "Save a printout of the game in PostScript format");
   fileExportMenu->Enable(efgmenuFILE_EXPORT_POSTSCRIPT, wxUSE_POSTSCRIPT);
   fileMenu->Append(efgmenuFILE_EXPORT, "&Export", fileExportMenu,
@@ -889,6 +905,69 @@ void EfgShow::OnFilePrint(wxCommandEvent &)
   }
   else {
     m_printData = printer.GetPrintDialogData().GetPrintData();
+  }
+}
+
+void EfgShow::OnFileImportComLab(wxCommandEvent &)
+{
+  wxGetApp().OnFileImportComLab(this);
+}
+
+void EfgShow::OnFileExportBMP(wxCommandEvent &)
+{
+  wxFileDialog dialog(this, "Choose output file", wxGetApp().CurrentDir(), "",
+		      "Windows bitmap files (*.bmp)|*.bmp", wxSAVE);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    wxMemoryDC dc;
+    wxBitmap bitmap(m_treeWindow->m_layout.MaxX(),
+		    m_treeWindow->m_layout.MaxY());
+    dc.SelectObject(bitmap);
+    m_treeWindow->OnDraw(dc, 1.0);
+    if (!bitmap.SaveFile(dialog.GetPath(), wxBITMAP_TYPE_BMP)) {
+      wxMessageBox(wxString::Format("An error occurred in writing '%s'.\n",
+				    dialog.GetPath().c_str()),
+		   "Error", wxOK, this);
+    }
+  }
+}
+
+void EfgShow::OnFileExportJPEG(wxCommandEvent &)
+{
+  wxFileDialog dialog(this, "Choose output file", wxGetApp().CurrentDir(), "",
+		      "JPEG files (*.jpeg)|*.jpeg|"
+		      "JPEG files (*.jpg)|*.jpg", wxSAVE);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    wxMemoryDC dc;
+    wxBitmap bitmap(m_treeWindow->m_layout.MaxX(),
+		    m_treeWindow->m_layout.MaxY());
+    dc.SelectObject(bitmap);
+    m_treeWindow->OnDraw(dc, 1.0);
+    if (!bitmap.SaveFile(dialog.GetPath(), wxBITMAP_TYPE_JPEG)) {
+      wxMessageBox(wxString::Format("An error occurred in writing '%s'.\n",
+				    dialog.GetPath().c_str()),
+		   "Error", wxOK, this);
+    }
+  }
+}
+
+void EfgShow::OnFileExportPNG(wxCommandEvent &)
+{
+  wxFileDialog dialog(this, "Choose output file", wxGetApp().CurrentDir(), "",
+		      "PNG files (*.png)|*.png", wxSAVE);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    wxMemoryDC dc;
+    wxBitmap bitmap(m_treeWindow->m_layout.MaxX(),
+		    m_treeWindow->m_layout.MaxY());
+    dc.SelectObject(bitmap);
+    m_treeWindow->OnDraw(dc, 1.0);
+    if (!bitmap.SaveFile(dialog.GetPath(), wxBITMAP_TYPE_PNG)) {
+      wxMessageBox(wxString::Format("An error occurred in writing '%s'.\n",
+				    dialog.GetPath().c_str()),
+		   "Error", wxOK, this);
+    }
   }
 }
 
