@@ -100,7 +100,7 @@ template <class T> class gBlock    {
 //
 // Print the contents of the block (for debugging purposes)
 //
-    void Dump(output &) const;
+    void Dump(gOutput &) const;
 
 };
 
@@ -145,13 +145,13 @@ template <class T> INLINE gBlock<T> &gBlock<T>::operator=(const gBlock<T> &b)
 template <class T> inline const T &gBlock<T>::operator[](int n) const
 {
   assert(n >= 1 && n <= length);
-  return contents[--n];
+  return data[--n];
 }
 
 template <class T> inline T &gBlock<T>::operator[](int n)
 {
   assert(n >= 1 && n <= length);
-  return contents[--n];
+  return data[--n];
 }
 
 template <class T> INLINE int gBlock<T>::InsertAt(const T &t, int n)
