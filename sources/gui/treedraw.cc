@@ -169,19 +169,19 @@ panelNodes::panelNodes(wxWindow *p_parent, const TreeDrawSettings &p_settings)
   wxString tokenChoices[] = { "Line", "Box", "Circle", "Diamond" };
   m_chanceToken = new wxRadioBox(this, -1, "Chance nodes",
 				 wxDefaultPosition, wxDefaultSize,
-				 4, tokenChoices);
+				 4, tokenChoices, 1, wxRA_SPECIFY_COLS);
   m_chanceToken->SetSelection(p_settings.ChanceToken());
   tokenSizer->Add(m_chanceToken, 0, wxALL, 5);
 
   m_playerToken = new wxRadioBox(this, -1, "Player nodes",
 				 wxDefaultPosition, wxDefaultSize,
-				 4, tokenChoices);
+				 4, tokenChoices, 1, wxRA_SPECIFY_COLS);
   m_playerToken->SetSelection(p_settings.PlayerToken());
   tokenSizer->Add(m_playerToken, 0, wxALL, 5);
 
   m_terminalToken = new wxRadioBox(this, -1, "Terminal nodes",
 				   wxDefaultPosition, wxDefaultSize,
-				   4, tokenChoices);
+				   4, tokenChoices, 1, wxRA_SPECIFY_COLS);
   m_terminalToken->SetSelection(p_settings.TerminalToken());
   tokenSizer->Add(m_terminalToken, 0, wxALL, 5);
   topSizer->Add(tokenSizer, 0, wxALL, 5);
@@ -247,14 +247,14 @@ panelBranches::panelBranches(wxWindow *p_parent,
   wxString styleChoices[] = { "Straight line", "Fork-Tine" };
   m_branchStyle = new wxRadioBox(this, -1, "Branch style",
 				 wxDefaultPosition, wxDefaultSize,
-				 2, styleChoices);
+				 2, styleChoices, 1, wxRA_SPECIFY_COLS);
   m_branchStyle->SetSelection(p_settings.BranchStyle());
   styleSizer->Add(m_branchStyle, 0, wxALL, 5);
 
   wxString labelChoices[] = { "Horizontal", "Rotated" };
   m_branchLabels = new wxRadioBox(this, -1, "Branch labels",
 				  wxDefaultPosition, wxDefaultSize,
-				  2, labelChoices);
+				  2, labelChoices, 1, wxRA_SPECIFY_COLS);
   m_branchLabels->SetSelection(p_settings.BranchLabels());
   styleSizer->Add(m_branchLabels, 0, wxALL, 5);
 
@@ -313,14 +313,14 @@ panelInfosets::panelInfosets(wxWindow *p_parent,
   m_infosetConnect = new wxRadioBox(this, -1,
 				    "Connect information set members",
 				    wxDefaultPosition, wxDefaultSize,
-				    3, connectChoices);
+				    3, connectChoices, 1, wxRA_SPECIFY_COLS);
   m_infosetConnect->SetSelection(p_settings.InfosetConnect());
   styleSizer->Add(m_infosetConnect, 0, wxALL, 5);
 
   wxString joinChoices[] = { "Lines", "Circles" };
   m_infosetJoin = new wxRadioBox(this, -1, "Join style",
 				 wxDefaultPosition, wxDefaultSize,
-				 2, joinChoices);
+				 2, joinChoices, 1, wxRA_SPECIFY_COLS);
   m_infosetJoin->SetSelection(p_settings.InfosetJoin());
   styleSizer->Add(m_infosetJoin, 0, wxALL, 5);
 
@@ -352,7 +352,7 @@ panelSubgames::panelSubgames(wxWindow *p_parent,
   wxString styleChoices[] = { "Do not show", "Use arcs" };
   m_subgameStyle = new wxRadioBox(this, -1, "Subgame display",
 				  wxDefaultPosition, wxDefaultSize,
-				  2, styleChoices);
+				  2, styleChoices, 1, wxRA_SPECIFY_COLS);
   m_subgameStyle->SetSelection(p_settings.SubgameStyle());
   topSizer->Add(m_subgameStyle, 0, wxALL | wxCENTER, 5);
 
