@@ -1071,6 +1071,10 @@ public:
   virtual ~ListPortion();
 
   virtual void SetGame(void* game, bool efg);
+
+  bool BelongsToGame( void* game ) const;  
+  bool MatchGameData( void* game, void* data ) const;  
+
   bool ContainsListsOnly(void) const;
 
 

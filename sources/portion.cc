@@ -2050,6 +2050,69 @@ void ListPortion::SetGame(void* game, bool efg)
 }
 
 
+bool ListPortion::BelongsToGame( void* game ) const
+{
+  int i;
+  for(i=1; i<=_Value->Length(); i++)
+    if( (*_Value)[i]->Spec().ListDepth == 0 )
+    {
+      if( (*_Value)[i]->Game() == game )
+	return true;
+    }
+    else
+    {
+      if( ((ListPortion*) (*_Value)[i])->BelongsToGame( game ) )
+	return true;
+    }
+  return false;
+}
+
+
+
+bool ListPortion::MatchGameData( void* game, void* data ) const
+{
+  int i;
+  for(i=1; i<=_Value->Length(); i++)
+  {
+    PortionSpec spec = (*_Value)[i]->Spec();
+    if( (*_Value)[i]->Spec().ListDepth == 0 )
+    {
+      if( spec.Type & porEFSUPPORT )
+      {
+	if( ((EfSupportPortion*) (*_Value)[i])->Value() == data )
+	  return true;
+      }
+      if( spec.Type & porEFPLAYER )
+      {
+	if( ((EfPlayerPortion*) (*_Value)[i])->Value() == data )
+	  return true;
+      }
+      if( spec.Type & porINFOSET )
+      {
+	if( ((InfosetPortion*) (*_Value)[i])->Value() == data )
+	  return true;
+      }
+      if( spec.Type & porNODE )
+      {
+	if( ((NodePortion*) (*_Value)[i])->Value() == data )
+	  return true;
+      }
+      if( spec.Type & porACTION )
+      {
+	if( ((ActionPortion*) (*_Value)[i])->Value() == data )
+	  return true;
+      }
+    }
+    else
+    {
+      if( ((ListPortion*) (*_Value)[i])->MatchGameData( game, data ) )
+	return true;
+    }
+  }
+  return false;
+}
+
+
 
 gList< Portion* >& ListPortion::Value(void) const
 { return *_Value; }

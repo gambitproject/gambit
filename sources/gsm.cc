@@ -2502,12 +2502,25 @@ void GSM::UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec )
 
   for( i = 1; i <= varslist.Length(); i++ )
   {
-    if( varslist[i]->Game() == game )
+    if( varslist[i]->Spec().ListDepth == 0 )
     {
-      assert( varslist[i]->GameIsEfg() == IsEfg );
-      if( varslist[i]->Spec().Type & spec.Type )
+      if( varslist[i]->Game() == game )
       {
-	_RefTableStack->Peek()->Remove( varslist[i] );
+	assert( varslist[i]->GameIsEfg() == IsEfg );
+	if( varslist[i]->Spec().Type & spec.Type )
+	{
+	  _RefTableStack->Peek()->Remove( varslist[i] );
+	}
+      }
+    }
+    else
+    {
+      if( ((ListPortion*) varslist[i])->BelongsToGame( game ) )
+      {
+	if( varslist[i]->Spec().Type & spec.Type )
+	{
+	  _RefTableStack->Peek()->Remove( varslist[i] );
+	}
       }
     }
   }
@@ -2539,11 +2552,11 @@ void GSM::UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data )
 
   for( i = 1; i <= varslist.Length(); i++ )
   {
-    if( varslist[i]->Game() == game )
+    if( varslist[i]->Spec().ListDepth == 0 )
     {
-      assert( varslist[i]->GameIsEfg() );
-      if( varslist[i]->Spec().Type & spec.Type )
+      if( varslist[i]->Game() == game )
       {
+	assert( varslist[i]->GameIsEfg() );
 	if( spec.Type & porEFSUPPORT )
 	{
 	  if( ((EfSupportPortion*) varslist[i])->Value() == data )
@@ -2570,6 +2583,12 @@ void GSM::UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data )
 	    _RefTableStack->Peek()->Remove( varslist[i] );
 	}
       }
+    }
+    else // varslist[i] is a list
+    {
+      if( spec.Type & varslist[i]->Spec().Type )
+	if( ((ListPortion*) varslist[i])->MatchGameData( game, data ) )
+	  _RefTableStack->Peek()->Remove( varslist[i] );	
     }
   }
 }
