@@ -25,7 +25,7 @@ Portion *GSM_EfgToNfg(Portion **param)
   return new NfgValPortion<double>(*N);
 }
 
-template <class T> class Behav_ListPortion : public ListPortion   {
+template <class T> class Behav_ListPortion : public ListValPortion   {
   public:
     Behav_ListPortion(ExtForm<T> *, const gList<BehavProfile<T> > &);
     virtual ~Behav_ListPortion()   { }

@@ -107,6 +107,9 @@ bool ErrorPortion::operator == ( Portion *p ) const
     return false;
 }
 
+bool ErrorPortion::IsReference( void ) const
+{ return false; }
+
 //---------------------------------------------------------------------
 //                          Reference class
 //---------------------------------------------------------------------
@@ -146,6 +149,9 @@ bool ReferencePortion::operator == ( Portion *p ) const
   else
     return false;
 }
+
+bool ReferencePortion::IsReference( void ) const
+{ return false; }
 
 
 //---------------------------------------------------------------------
@@ -194,12 +200,18 @@ IntValPortion::IntValPortion( long value )
 IntValPortion::~IntValPortion()
 { delete _Value; }
 
+bool IntValPortion::IsReference( void ) const
+{ return false; }
+
 
 IntRefPortion::IntRefPortion( long& value )
 { _Value = &value; }
 
 IntRefPortion::~IntRefPortion()
 { }
+
+bool IntRefPortion::IsReference( void ) const
+{ return true; }
 
 
 //---------------------------------------------------------------------
@@ -248,11 +260,18 @@ FloatValPortion::FloatValPortion( double value )
 FloatValPortion::~FloatValPortion()
 { delete _Value; }
 
+bool FloatValPortion::IsReference( void ) const
+{ return false; }
+
+
 FloatRefPortion::FloatRefPortion( double& value )
 { _Value = &value; }
 
 FloatRefPortion::~FloatRefPortion()
 { }
+
+bool FloatRefPortion::IsReference( void ) const
+{ return true; }
 
 
 
@@ -303,12 +322,18 @@ RationalValPortion::RationalValPortion( gRational value )
 RationalValPortion::~RationalValPortion()
 { delete _Value; }
 
+bool RationalValPortion::IsReference( void ) const
+{ return false; }
+
 
 RationalRefPortion::RationalRefPortion( gRational& value )
 { _Value = &value; }
 
 RationalRefPortion::~RationalRefPortion()
 { }
+
+bool RationalRefPortion::IsReference( void ) const
+{ return true; }
 
 
 
@@ -359,12 +384,18 @@ TextValPortion::TextValPortion( gString value )
 TextValPortion::~TextValPortion()
 { delete _Value; }
 
+bool TextValPortion::IsReference( void ) const
+{ return false; }
+
 
 TextRefPortion::TextRefPortion( gString& value )
 { _Value = &value; }
 
 TextRefPortion::~TextRefPortion()
 { }
+
+bool TextRefPortion::IsReference( void ) const
+{ return true; }
 
 
 
@@ -418,12 +449,18 @@ BoolValPortion::BoolValPortion( bool value )
 BoolValPortion::~BoolValPortion()
 { delete _Value; }
 
+bool BoolValPortion::IsReference( void ) const
+{ return false; }
+
 
 BoolRefPortion::BoolRefPortion( bool& value )
 { _Value = &value; }
 
 BoolRefPortion::~BoolRefPortion()
 { }
+
+bool BoolRefPortion::IsReference( void ) const
+{ return true; }
 
 
 
@@ -477,12 +514,18 @@ OutcomeValPortion::OutcomeValPortion( Outcome* value )
 OutcomeValPortion::~OutcomeValPortion()
 { delete _Value; }
 
+bool OutcomeValPortion::IsReference( void ) const
+{ return false; }
+
 
 OutcomeRefPortion::OutcomeRefPortion( Outcome*& value )
 { _Value = &value; }
 
 OutcomeRefPortion::~OutcomeRefPortion()
 { }
+
+bool OutcomeRefPortion::IsReference( void ) const
+{ return true; }
 
 
 
@@ -536,12 +579,18 @@ EfPlayerValPortion::EfPlayerValPortion( Player* value )
 EfPlayerValPortion::~EfPlayerValPortion()
 { delete _Value; }
 
+bool EfPlayerValPortion::IsReference( void ) const
+{ return false; }
+
 
 EfPlayerRefPortion::EfPlayerRefPortion( Player*& value )
 { _Value = &value; }
 
 EfPlayerRefPortion::~EfPlayerRefPortion()
 { }
+
+bool EfPlayerRefPortion::IsReference( void ) const
+{ return true; }
 
 
 
@@ -594,12 +643,18 @@ InfosetValPortion::InfosetValPortion( Infoset* value )
 InfosetValPortion::~InfosetValPortion()
 { delete _Value; }
 
+bool InfosetValPortion::IsReference( void ) const
+{ return false; }
+
 
 InfosetRefPortion::InfosetRefPortion( Infoset*& value )
 { _Value = &value; }
 
 InfosetRefPortion::~InfosetRefPortion()
 { }
+
+bool InfosetRefPortion::IsReference( void ) const
+{ return true; }
 
 
 
@@ -652,12 +707,18 @@ NodeValPortion::NodeValPortion( Node* value )
 NodeValPortion::~NodeValPortion()
 { delete _Value; }
 
+bool NodeValPortion::IsReference( void ) const
+{ return false; }
+
 
 NodeRefPortion::NodeRefPortion( Node*& value )
 { _Value = &value; }
 
 NodeRefPortion::~NodeRefPortion()
 { }
+
+bool NodeRefPortion::IsReference( void ) const
+{ return true; }
 
 
 
@@ -712,12 +773,18 @@ ActionValPortion::ActionValPortion( Action* value )
 ActionValPortion::~ActionValPortion()
 { delete _Value; }
 
+bool ActionValPortion::IsReference( void ) const
+{ return false; }
+
 
 ActionRefPortion::ActionRefPortion( Action*& value )
 { _Value = &value; }
 
 ActionRefPortion::~ActionRefPortion()
 { }
+
+bool ActionRefPortion::IsReference( void ) const
+{ return true; }
 
 
 
@@ -773,12 +840,18 @@ template <class T> MixedValPortion<T>::MixedValPortion( MixedProfile<T>& value)
 template <class T> MixedValPortion<T>::~MixedValPortion()
 { delete _Value; }
 
+template <class T> bool MixedValPortion<T>::IsReference( void ) const
+{ return false; }
+
 
 template <class T> MixedRefPortion<T>::MixedRefPortion( MixedProfile<T>& value)
 { _Value = &value; }
 
 template <class T> MixedRefPortion<T>::~MixedRefPortion()
 { }
+
+template <class T> bool MixedRefPortion<T>::IsReference( void ) const
+{ return true; }
 
 
 
@@ -849,12 +922,18 @@ template <class T> BehavValPortion<T>::BehavValPortion( BehavProfile<T>& value)
 template <class T> BehavValPortion<T>::~BehavValPortion()
 { delete _Value; }
 
+template <class T> bool BehavValPortion<T>::IsReference( void ) const
+{ return false; }
+
 
 template <class T> BehavRefPortion<T>::BehavRefPortion( BehavProfile<T>& value)
 { _Value = &value; }
 
 template <class T> BehavRefPortion<T>::~BehavRefPortion()
 { }
+
+template <class T> bool BehavRefPortion<T>::IsReference( void ) const
+{ return true; }
 
 
 
@@ -931,11 +1010,18 @@ template <class T> NfgValPortion<T>::NfgValPortion( NormalForm<T>& value )
 template <class T> NfgValPortion<T>::~NfgValPortion()
 { delete _Value; }
 
+template <class T> bool NfgValPortion<T>::IsReference( void ) const
+{ return false; }
+
+
 template <class T> NfgRefPortion<T>::NfgRefPortion( NormalForm<T>& value)
 { _Value = &value; }
 
 template <class T> NfgRefPortion<T>::~NfgRefPortion()
 { }
+
+template <class T> bool NfgRefPortion<T>::IsReference( void ) const
+{ return true; }
 
 
 
@@ -1016,11 +1102,18 @@ template <class T> EfgValPortion<T>::EfgValPortion( ExtForm<T>& value )
 template <class T> EfgValPortion<T>::~EfgValPortion()
 { delete _Value; }
 
+template <class T> bool EfgValPortion<T>::IsReference( void ) const
+{ return false; }
+
+
 template <class T> EfgRefPortion<T>::EfgRefPortion( ExtForm<T>& value)
 { _Value = &value; }
 
 template <class T> EfgRefPortion<T>::~EfgRefPortion()
 { }
+
+template <class T> bool EfgRefPortion<T>::IsReference( void ) const
+{ return true; }
 
 
 
@@ -1097,12 +1190,18 @@ OutputValPortion::OutputValPortion( gOutput& value )
 OutputValPortion::~OutputValPortion()
 { delete _Value; }
 
+bool OutputValPortion::IsReference( void ) const
+{ return false; }
+
 
 OutputRefPortion::OutputRefPortion( gOutput& value )
 { _Value = &value; }
 
 OutputRefPortion::~OutputRefPortion()
 { }
+
+bool OutputRefPortion::IsReference( void ) const
+{ return true; }
 
 
 
@@ -1163,12 +1262,18 @@ InputValPortion::InputValPortion( gInput& value )
 InputValPortion::~InputValPortion()
 { delete _Value; }
 
+bool InputValPortion::IsReference( void ) const
+{ return false; }
+
 
 InputRefPortion::InputRefPortion( gInput& value )
 { _Value = &value; }
 
 InputRefPortion::~InputRefPortion()
 { }
+
+bool InputRefPortion::IsReference( void ) const
+{ return true; }
 
 
 
@@ -1273,12 +1378,18 @@ ListValPortion::~ListValPortion()
   delete _Value;
 }
 
+bool ListValPortion::IsReference( void ) const
+{ return false; }
+
 
 ListRefPortion::ListRefPortion( gBlock< Portion* >& value )
 { _Value = &value; }
 
 ListRefPortion::~ListRefPortion()
 { }
+
+bool ListRefPortion::IsReference( void ) const
+{ return true; }
 
 
 
@@ -1450,7 +1561,96 @@ Portion* ListPortion::Subscript( int index ) const
 //--------------------------------------------------------------------
 
 
+struct PortionTypeTextType
+{
+  const PortionType Type;
+  const gString     Text;
+  
+  PortionTypeTextType( const PortionType& type, const gString& text ) 
+    : Type( type ), Text( text )
+    { }
+};
 
+
+#define NumPortionTypes 31
+
+PortionTypeTextType _PortionTypeText[] =
+{
+  PortionTypeTextType( porERROR,          "ERROR" ),
+
+  PortionTypeTextType( porBOOL,           "BOOLEAN" ),
+  PortionTypeTextType( porFLOAT,          "FLOAT" ),
+  PortionTypeTextType( porINTEGER,        "INTEGER" ),
+  PortionTypeTextType( porRATIONAL,       "RATIONAL" ),
+  PortionTypeTextType( porTEXT,           "TEXT" ),
+  PortionTypeTextType( porLIST,           "LIST" ),
+  PortionTypeTextType( porNFG_FLOAT,      "NFG_FLOAT" ),
+  PortionTypeTextType( porNFG_RATIONAL,   "NFG_RATIONAL" ),
+  PortionTypeTextType( porNFG,            "NFG" ),
+  PortionTypeTextType( porEFG_FLOAT,      "EFG_FLOAT" ),
+  PortionTypeTextType( porEFG_RATIONAL,   "EFG_RATIONAL" ),
+  PortionTypeTextType( porEFG,            "EFG" ),
+  PortionTypeTextType( porMIXED_FLOAT,    "MIXED_FLOAT" ),
+  PortionTypeTextType( porMIXED_RATIONAL, "MIXED_RATIONAL" ),
+  PortionTypeTextType( porMIXED,          "MIXED" ),
+  PortionTypeTextType( porBEHAV_FLOAT,    "BEHAV_FLOAT" ),
+  PortionTypeTextType( porBEHAV_RATIONAL, "BEHAV_RATIONAL" ),
+  PortionTypeTextType( porBEHAV,          "BEHAV" ),
+
+  PortionTypeTextType( porOUTCOME,        "OUTCOME" ),
+  PortionTypeTextType( porEF_PLAYER,      "EF_PLAYER" ),
+  PortionTypeTextType( porINFOSET,        "INFOSET" ),
+  PortionTypeTextType( porNODE,           "NODE" ),
+  PortionTypeTextType( porACTION,         "ACTION" ),
+
+  PortionTypeTextType( porREFERENCE,      "REFERENCE" ),
+
+  PortionTypeTextType( porOUTPUT,         "OUTPUT" ),
+  PortionTypeTextType( porINPUT,          "INPUT" ),
+
+  PortionTypeTextType( porUNKNOWN,        "UNKNOWN" ),
+
+  PortionTypeTextType( porNUMERICAL,      "NUMERICAL" ),
+  PortionTypeTextType( porALL,            "ALL" ),
+  PortionTypeTextType( porVALUE,          "VALUE" )
+};
+
+
+
+
+gString PortionTypeToText( const PortionType& type )
+{
+  int i;
+  for( i = 0; i < NumPortionTypes; i++ )
+  {
+    if( _PortionTypeText[ i ].Type == type )
+    {
+      return _PortionTypeText[ i ].Text;
+      break;
+    }
+  }
+  return _PortionTypeText[ 0 ].Text;
+}
+
+
+PortionType TextToPortionType( const gString& text )
+{
+  int i;
+  for( i = 0; i < NumPortionTypes; i++ )
+  {
+    if( _PortionTypeText[ i ].Text == text )
+    {
+      return _PortionTypeText[ i ].Type;
+      break;
+    }
+  }
+  return _PortionTypeText[ 0 ].Type;
+}
+
+
+
+
+// This will be changed to use PortionTypeToText() eventually
 void PrintPortionTypeSpec( gOutput& s, PortionType type )
 {
   if( type == porERROR )

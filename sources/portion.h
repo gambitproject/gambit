@@ -19,6 +19,7 @@
 
 
 
+
 //---------------------------------------------------------------------
 //                          base class
 //---------------------------------------------------------------------
@@ -41,6 +42,8 @@ public:
 
   virtual void AssignFrom( Portion* p ) = 0;
   virtual bool operator == ( Portion* p ) const;
+
+  virtual bool IsReference( void ) const = 0;
 };
 
 
@@ -65,6 +68,7 @@ public:
   Portion* RefCopy( void ) const;
   void AssignFrom( Portion* p );
   bool operator == ( Portion* p ) const;
+  bool IsReference( void ) const;
 };
 
 
@@ -89,6 +93,7 @@ public:
   Portion* RefCopy( void ) const;
   void AssignFrom( Portion* p );  
   bool operator == ( Portion* p ) const;
+  bool IsReference( void ) const;
 };
 
 
@@ -122,6 +127,7 @@ class IntValPortion : public IntPortion
 public:
   IntValPortion( long value );
   virtual ~IntValPortion();
+  bool IsReference( void ) const;
 };
 
 class IntRefPortion : public IntPortion
@@ -129,6 +135,7 @@ class IntRefPortion : public IntPortion
 public:
   IntRefPortion( long& value );
   virtual ~IntRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -159,6 +166,7 @@ class FloatValPortion : public FloatPortion
 public:
   FloatValPortion( double value );
   virtual ~FloatValPortion();
+  bool IsReference( void ) const;
 };
 
 class FloatRefPortion : public FloatPortion
@@ -166,6 +174,7 @@ class FloatRefPortion : public FloatPortion
 public:
   FloatRefPortion( double& value );
   virtual ~FloatRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -197,6 +206,7 @@ class RationalValPortion : public RationalPortion
 public:
   RationalValPortion( gRational value );
   virtual ~RationalValPortion();
+  bool IsReference( void ) const;
 };
 
 class RationalRefPortion : public RationalPortion
@@ -204,6 +214,7 @@ class RationalRefPortion : public RationalPortion
 public:
   RationalRefPortion( gRational& value );
   virtual ~RationalRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -237,6 +248,7 @@ class TextValPortion : public TextPortion
 public:
   TextValPortion( gString value );
   virtual ~TextValPortion();
+  bool IsReference( void ) const;
 };
 
 class TextRefPortion : public TextPortion
@@ -244,6 +256,7 @@ class TextRefPortion : public TextPortion
 public:
   TextRefPortion( gString& value );
   virtual ~TextRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -275,6 +288,7 @@ class BoolValPortion : public BoolPortion
 public:
   BoolValPortion( bool value );
   virtual ~BoolValPortion();
+  bool IsReference( void ) const;
 };
 
 class BoolRefPortion : public BoolPortion
@@ -282,6 +296,7 @@ class BoolRefPortion : public BoolPortion
 public:
   BoolRefPortion( bool& value );
   virtual ~BoolRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -323,6 +338,7 @@ class OutcomeValPortion : public OutcomePortion
 public:
   OutcomeValPortion( Outcome* value );
   virtual ~OutcomeValPortion();
+  bool IsReference( void ) const;
 };
 
 class OutcomeRefPortion : public OutcomePortion
@@ -330,6 +346,7 @@ class OutcomeRefPortion : public OutcomePortion
 public:
   OutcomeRefPortion( Outcome*& value );
   virtual ~OutcomeRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -363,6 +380,7 @@ class EfPlayerValPortion : public EfPlayerPortion
 public:
   EfPlayerValPortion( Player* value );
   virtual ~EfPlayerValPortion();
+  bool IsReference( void ) const;
 };
 
 class EfPlayerRefPortion : public EfPlayerPortion
@@ -370,6 +388,7 @@ class EfPlayerRefPortion : public EfPlayerPortion
 public:
   EfPlayerRefPortion( Player*& value );
   virtual ~EfPlayerRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -404,6 +423,7 @@ class InfosetValPortion : public InfosetPortion
 public:
   InfosetValPortion( Infoset* value );
   virtual ~InfosetValPortion();
+  bool IsReference( void ) const;
 };
 
 class InfosetRefPortion : public InfosetPortion
@@ -411,6 +431,7 @@ class InfosetRefPortion : public InfosetPortion
 public:
   InfosetRefPortion( Infoset*& value );
   virtual ~InfosetRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -444,6 +465,7 @@ class NodeValPortion : public NodePortion
 public:
   NodeValPortion( Node* value );
   virtual ~NodeValPortion();
+  bool IsReference( void ) const;
 };
 
 class NodeRefPortion : public NodePortion
@@ -451,6 +473,7 @@ class NodeRefPortion : public NodePortion
 public:
   NodeRefPortion( Node*& value );
   virtual ~NodeRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -484,6 +507,7 @@ class ActionValPortion : public ActionPortion
 public:
   ActionValPortion( Action* value );
   virtual ~ActionValPortion();
+  bool IsReference( void ) const;
 };
 
 class ActionRefPortion : public ActionPortion
@@ -491,6 +515,7 @@ class ActionRefPortion : public ActionPortion
 public:
   ActionRefPortion( Action*& value );
   virtual ~ActionRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -527,6 +552,7 @@ template <class T> class MixedValPortion : public MixedPortion<T>
 public:
   MixedValPortion( MixedProfile<T>& value );
   virtual ~MixedValPortion();
+  bool IsReference( void ) const;
 };
 
 template <class T> class MixedRefPortion : public MixedPortion<T>
@@ -534,6 +560,7 @@ template <class T> class MixedRefPortion : public MixedPortion<T>
 public:
   MixedRefPortion( MixedProfile<T>& value );
   virtual ~MixedRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -568,6 +595,7 @@ template <class T> class BehavValPortion : public BehavPortion<T>
 public:
   BehavValPortion( BehavProfile<T>& value );
   virtual ~BehavValPortion();
+  bool IsReference( void ) const;
 };
 
 template <class T> class BehavRefPortion : public BehavPortion<T>
@@ -575,6 +603,7 @@ template <class T> class BehavRefPortion : public BehavPortion<T>
 public:
   BehavRefPortion( BehavProfile<T>& value );
   virtual ~BehavRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -628,6 +657,7 @@ template <class T> class NfgValPortion : public NfgPortion<T>
 public:
   NfgValPortion( NormalForm<T>& value );
   ~NfgValPortion();
+  bool IsReference( void ) const;
 };
 
 template <class T> class NfgRefPortion : public NfgPortion<T>
@@ -635,6 +665,7 @@ template <class T> class NfgRefPortion : public NfgPortion<T>
 public:
   NfgRefPortion( NormalForm<T>& value );
   ~NfgRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -689,6 +720,7 @@ template <class T> class EfgValPortion : public EfgPortion<T>
 public:
   EfgValPortion( ExtForm<T>& value );
   ~EfgValPortion();
+  bool IsReference( void ) const;
 };
 
 template <class T> class EfgRefPortion : public EfgPortion<T>
@@ -696,6 +728,7 @@ template <class T> class EfgRefPortion : public EfgPortion<T>
 public:
   EfgRefPortion( ExtForm<T>& value );
   ~EfgRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -726,6 +759,7 @@ class OutputValPortion : public OutputPortion
 public:
   OutputValPortion( gOutput& value );
   virtual ~OutputValPortion();
+  bool IsReference( void ) const;
 };
 
 class OutputRefPortion : public OutputPortion
@@ -733,6 +767,7 @@ class OutputRefPortion : public OutputPortion
 public:
   OutputRefPortion( gOutput& value );
   virtual ~OutputRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -765,6 +800,7 @@ class InputValPortion : public InputPortion
 public:
   InputValPortion( gInput& value );
   virtual ~InputValPortion();
+  bool IsReference( void ) const;
 };
 
 class InputRefPortion : public InputPortion
@@ -772,6 +808,7 @@ class InputRefPortion : public InputPortion
 public:
   InputRefPortion( gInput& value );
   virtual ~InputRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -821,6 +858,7 @@ public:
   ListValPortion( void );
   ListValPortion( gBlock< Portion* >& value );
   virtual ~ListValPortion();
+  bool IsReference( void ) const;
 };
 
 class ListRefPortion : public ListPortion
@@ -828,6 +866,7 @@ class ListRefPortion : public ListPortion
 public:
   ListRefPortion( gBlock< Portion* >& value );
   virtual ~ListRefPortion();
+  bool IsReference( void ) const;
 };
 
 
@@ -836,6 +875,8 @@ public:
 
 
 
+gString PortionTypeToText( const PortionType& type );
+PortionType TextToPortionType( const gString& text );
 
 
 void PrintPortionTypeSpec( gOutput& s, PortionType type );

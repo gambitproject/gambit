@@ -63,7 +63,7 @@ Portion *GSM_ElimDom(Portion **param)
 }
 
 
-template <class T> class Mixed_ListPortion : public ListPortion   {
+template <class T> class Mixed_ListPortion : public ListValPortion   {
   public:
     Mixed_ListPortion(NormalForm<double> *, const gList<gPVector<T> > &);
 };
