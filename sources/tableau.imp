@@ -6,11 +6,43 @@
 
 #include "tableau.h"
 
+// Tableau definitions
+
+template <class T>Tableau<T>::Tableau(void)
+  : A() , b()
+{ }
+
+template <class T>Tableau<T>::Tableau(int n1, int n2)
+  : A(1,n1,1,n2), b(1,n1)
+{ }
+
+template <class T>Tableau<T>
+::Tableau(const gMatrix<T>& A, const gVector<T>& b) 
+  : A(A) , b(b)
+{ }
+
+template <class T>Tableau<T>::~Tableau(void)
+{ }
 
 // Basis method definitions
 
 template <class T>
-Basis<T>::Basis(Tableau<T> &tab, const BasisCode<T> &code)
+Basis<T>::Basis(const Tableau<T> &tab)
+: tableau(&tab),
+  columns(tab),
+  B(tab.A.MinRow(), tab.A.MaxRow()),
+  basis(tab.A.MinRow(),tab.A.MaxRow()),
+  dual(tab.A.MinRow(),tab.A.MaxRow()),
+  unitcost(tab.A.MinRow(),tab.A.MaxRow()),
+  cost(tab.A.MinCol(),tab.A.MaxCol()),
+  costdefined(0)
+{
+  B.refactor(tab.A, columns.unitflag, columns.column);
+  B.solve(tab.b, basis);
+};
+
+template <class T>
+Basis<T>::Basis(const Tableau<T> &tab, const BasisCode<T> &code)
 : tableau(&tab),
   columns(code),
   B(tab.A.MinRow(), tab.A.MaxRow()),
@@ -26,7 +58,7 @@ Basis<T>::Basis(Tableau<T> &tab, const BasisCode<T> &code)
 };
 
 template <class T>
-Basis<T>::Basis(Tableau<T> &tab, const gVector<T> &c, const BasisCode<T> &code)
+Basis<T>::Basis(const Tableau<T> &tab, const gVector<T> &c, const BasisCode<T> &code)
 : tableau(&tab),
   columns(code),
   B(tab.A.MinRow(), tab.A.MaxRow()),
@@ -47,7 +79,7 @@ Basis<T>::Basis(Tableau<T> &tab, const gVector<T> &c, const BasisCode<T> &code)
 }
 
 template <class T>
-Basis<T>::Basis(Tableau<T> &tab,
+Basis<T>::Basis(const Tableau<T> &tab,
 		const gVector<T> &uc,
 		const gVector<T> &c,
 		const BasisCode<T> &code)
@@ -282,9 +314,9 @@ void Basis<T>::SolveColumn(bool flag, int col, gVector<T> &out) const
     tableau->A.GetColumn(col,tmpcol);
   B.solve(tmpcol,out);
 }
-
+/*
 template <class T>
-void SetBasis(const BasisCode<T> &in)
+void Basis<T>::SetBasis(const BasisCode<T> &in)
 {
   columns= in;
   B.refactor(template->A, code.columns);
@@ -292,7 +324,7 @@ void SetBasis(const BasisCode<T> &in)
   if( costdefined )
     SolveDual();
 }
-
+*/
 template <class T>
 void Basis<T>::GetBasis(BasisCode<T> &out) const
 {
@@ -300,33 +332,49 @@ void Basis<T>::GetBasis(BasisCode<T> &out) const
 }
 
 template <class T>
-void Basis<T>::Pivot(int outgoing, int incoming)
+int Basis<T>::CanPivot(int outlabel, int inlabel)
 {
-  assert( NegOK() );
-
-  if( incoming<0 )
-    Pivot(outgoing, 1, -incoming);
-  else
-    Pivot(outgoing, 0, incoming);
+  gVector<T> tmpcol(MinRow(),MaxRow());
+  SolveColumn(inlabel,tmpcol);
+  if(tmpcol[columns.find(outlabel)] == (T)0) return 0;
+  return 1;  
 }
 
 template <class T>
-void Basis<T>::Pivot(int outgoing, bool inflag,int incoming)
+void Basis<T>::CompPivot(int outlabel, int inlabel)
 {
-  assert( RowIndex(outgoing) );
-  assert( inflag ? RowIndex(incoming) : ColIndex(incoming) );
+    Pivot(columns.find(outlabel),inlabel);
+    Pivot(columns.find(-inlabel),-outlabel);
+}
+
+template <class T>
+void Basis<T>::Pivot(int outrow, int inlabel)
+{
+  assert( NegOK() );
+
+  if( inlabel<0 )
+    Pivot(outrow, 1, -inlabel);
+  else
+    Pivot(outrow, 0, inlabel);
+}
+
+template <class T>
+void Basis<T>::Pivot(int outrow, bool inflag,int inlabel)
+{
+  assert( RowIndex(outrow) );
+  assert( inflag ? RowIndex(inlabel) : ColIndex(inlabel) );
 
   gVector<T> tmpcol(MinRow(),MaxRow());
 
-  for(int i=outgoing; i<MaxRow(); i++)
+  for(int i=outrow; i<MaxRow(); i++)
     columns.swap(i,i+1);
-  columns.change(MaxRow(), inflag,incoming);
+  columns.change(MaxRow(), inflag,inlabel);
 
   if( inflag )
-    { tmpcol=(T)0; tmpcol[incoming]=(T)1; }
+    { tmpcol=(T)0; tmpcol[inlabel]=(T)1; }
   else
-    tableau->A.GetColumn(incoming, tmpcol);
-  B.update(outgoing, tmpcol);
+    tableau->A.GetColumn(inlabel, tmpcol);
+  B.update(outrow, tmpcol);
 
   B.solve(tableau->b, basis);
   if( costdefined )
@@ -379,6 +427,41 @@ void Basis<T>::MultiplyT(const gVector<T> &in, gVector<T> &out) const
     }
 }
 
+template <class T>
+bool Basis<T>::IsNash() const
+{ for(int i=basis.First();i<=basis.Last();i++)
+    if(basis[i]>(T) 0) return 0;
+  return 1;
+}
+
+template <class T>
+BFS<T> Basis<T>::GetBFS() const
+{ 
+  BFS<T> cbfs((T) 0);
+  for(int i=columns.column.First();i<=columns.column.Last();i++) {
+    if(Member(i)) 
+      cbfs.Define(i,basis[columns.find(i)]);
+  }
+  return cbfs;
+}
+
+template <class T> gOutput &operator<<(gOutput &to, const Basis<T> &v)
+{
+  v.Dump(to); return to;
+}
+
+template <class T>
+void Basis<T>::Dump(gOutput &to) const
+{ columns.Dump(to);basis.Dump(to); }
+
+template <class T>
+bool Basis<T>::Member(int i) const
+{ return columns.member(i);}
+
+template <class T>
+bool Basis<T>::Member(int i,bool flag) const
+{ return columns.member(i,flag);}
+
 
 
 
@@ -391,9 +474,11 @@ BasisCode<T>::BasisCode(const Tableau<T> &tab)
 {
   tableau= &tab;
 
-  unitflag=1;
+//  unitflag=1;
   for(int i=column.First(); i<=column.Last(); i++)
     column[i]= i;
+  for(i=unitflag.First(); i<=unitflag.Last(); i++)
+    unitflag[i]= 1;
 }
 
 template <class T>
@@ -455,9 +540,12 @@ BasisCode<T>::BasisCode(const BasisCode<T> &code)
 template <class T>
 void BasisCode<T>::NewBasis()
 {
-  unitflag=1;
+//  unitflag=1;
   for(int i=column.First(); i<=column.Last(); i++)
     column[i]= i;
+  for(i=unitflag.First(); i<=unitflag.Last(); i++)
+    unitflag[i]= 1;
+
 }
 
 template <class T>
@@ -683,6 +771,21 @@ void BasisCode<T>::BasisSelect(const gVector<T> &unitv,
 	colv[i]= rowv[column[i]];
     }
 }
+
+template <class T>
+bool BasisCode<T>::NegOK() const
+{ return tableau->A.MinCol()>0 && tableau->A.MinRow()>0; }
+
+template <class T> gOutput &operator<<(gOutput &to, const BasisCode<T> &v)
+{
+  v.Dump(to); return to;
+}
+
+template <class T>
+void BasisCode<T>::Dump(gOutput &to) const
+{ column.Dump(to);unitflag.Dump(to); }
+
+
 
 
   

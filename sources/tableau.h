@@ -9,6 +9,7 @@
 
 // includes
 #include "ludecomp.h"
+#include "gtableau.h"
 
 template <class T> class Tableau;
 template <class T> class Basis;
@@ -18,10 +19,12 @@ template <class T> class Tableau {
   friend class Basis<T>;
   friend class BasisCode<T>;
  protected:
-  const gMatrix<T> A;
-  const gVector<T> b;
+  gMatrix<T> A;
+  gVector<T> b;
 
  public:
+  Tableau(void);
+  Tableau(int n1, int n2);
   Tableau(const gMatrix<T>&, const gVector<T>&);
   ~Tableau();
 };
@@ -73,6 +76,7 @@ class BasisCode {
 		   const gVector<T>&rowv,
 		   gVector<T>&colv
 		   ) const; // as above, but unit column elements nonzero
+  void Dump(gOutput &) const;
 };
 
 template <class T> class Basis {
@@ -91,7 +95,7 @@ template <class T> class Basis {
   int MaxCol() const;
   bool RowIndex(int) const;
  protected:
-  Tableau<T> *tableau;
+  const Tableau<T> *tableau;
   BasisCode<T> columns;
   LUdecomp<T> B;
   gVector<T> basis;
@@ -102,10 +106,11 @@ template <class T> class Basis {
   bool costdefined;
 
  public:
-  Basis(Tableau<T> &, const BasisCode<T> &);
-  Basis(Tableau<T> &, const gVector<T> &cost, const BasisCode<T> &);
+  Basis(const Tableau<T> &);
+  Basis(const Tableau<T> &, const BasisCode<T> &);
+  Basis(const Tableau<T> &, const gVector<T> &cost, const BasisCode<T> &);
     // unit column cost == 0
-  Basis(Tableau<T> &,
+  Basis(const Tableau<T> &,
 	const gVector<T> &unitcost,
 	const gVector<T> &cost,
 	const BasisCode<T> &); // unit column cost given
@@ -129,9 +134,13 @@ template <class T> class Basis {
   void SolveColumn(int, gVector<T> &) const;
   void SolveColumn(bool,int,gVector<T>&) const;
     // tableau column in terms of basis
-  void Pivot(int outgoing,int incoming);
-  void Pivot(int outgoing, bool inflag,int incoming);
+  bool Member(int i) const;
+  bool Member(int i,bool flag) const;
+  int CanPivot(int outgoing,int incoming);
+  void Pivot(int outrow,int inlabel);
+  void Pivot(int outrow, bool inflag,int inlabel);
     // perform pivot operation -- outgoing is row, incoming is column
+  void CompPivot(int outlabel,int inlabel);
   void SetBasis( const BasisCode<T> &); // set new basis
   void GetBasis( BasisCode<T> & ) const; // return BasisCode for current basis
 
@@ -140,6 +149,22 @@ template <class T> class Basis {
   void SolveT(const gVector<T> &, gVector<T> &) const;
   void Multiply(const gVector<T> &, gVector<T>& ) const;
   void MultiplyT(const gVector<T> &, gVector<T> &) const;
+
+  BFS<T> GetBFS(void);
+  bool IsNash(void);
+  void Dump(gOutput &) const;
 };
+
+
+#ifdef __GNUG__
+#include "rational.h"
+gOutput &operator<<(gOutput &, const Basis<double> &);
+gOutput &operator<<(gOutput &, const Basis<gRational> &);
+gOutput &operator<<(gOutput &, const BasisCode<double> &);
+gOutput &operator<<(gOutput &, const BasisCode<gRational> &);
+#elif defined __BORLANDC__
+template <class T> gOutput &operator<<(gOutput &, const Basis<T> &);
+template <class T> gOutput &operator<<(gOutput &, const BasisCode<T> &);
+#endif   // __GNUG__, __BORLANDC__
 
 #endif     // TABLEAU_H

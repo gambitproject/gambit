@@ -24,3 +24,11 @@ TEMPLATE class Basis<gRational>;
 
 TEMPLATE class BasisCode<double>;
 TEMPLATE class BasisCode<gRational>;
+
+/*
+TEMPLATE gOutput & operator<< {gOutput&, const BasisCode<double>&);
+TEMPLATE gOutput & operator<< {gOutput&, const BasisCode<gRational>&);
+TEMPLATE gOutput & operator<< {gOutput&, const Basis<double>&);
+TEMPLATE gOutput & operator<< {gOutput&, const Basis<gRational>&);
+*/
+
