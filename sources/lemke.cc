@@ -62,8 +62,8 @@ LemkeTableau<T>::LemkeTableau(const NormalForm<T> &NF,
 		   NF.NumStrats(1) + NF.NumStrats(2),
 		   0, NF.NumStrats(1) + NF.NumStrats(2) + 1,
 		   NF.NumStrats(1) + NF.NumStrats(2)),
-		   N(NF), output(ofile), printlevel(plev),
-		   num_strats(NF.NumStrats(1) + NF.NumStrats(2)),
+		   N(NF), num_strats(NF.NumStrats(1) + NF.NumStrats(2)),
+		   output(ofile), printlevel(plev),
 		   num_pivots(0)
 {
   NormalIter<T> iter(N);

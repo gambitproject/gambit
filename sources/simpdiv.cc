@@ -23,7 +23,7 @@
 #include "simpdiv.h"
 
 SimpdivParams::SimpdivParams(gStatus &status_)
-  : number(1), plev(0), ndivs(20), leash(0), output(&gnull), status(status_)
+  : plev(0), number(1), ndivs(20), leash(0), output(&gnull), status(status_)
 { }
 
 //-------------------------------------------------------------------------
@@ -32,10 +32,10 @@ SimpdivParams::SimpdivParams(gStatus &status_)
 
 template <class T> SimpdivModule<T>::SimpdivModule(const NormalForm<T> &n,
 						   const SimpdivParams &p)
-  : rep(n), params(p), ab(n.Dimensionality()), nstrats(n.Dimensionality()),
-    y(n.Dimensionality()), pi(n.ProfileLength(), 2),
-    labels(n.ProfileLength(), 2), ylabel(2), nevals(0), nits(0),
+  : rep(n), params(p), nevals(0), nits(0), nstrats(n.Dimensionality()),
+    ylabel(2), labels(n.ProfileLength(), 2), pi(n.ProfileLength(), 2),
     U(n.Dimensionality()), TT(n.Dimensionality()),
+    ab(n.Dimensionality()), y(n.Dimensionality()),
     besty(n.Dimensionality()), v(n.Dimensionality())
 { }
 
@@ -51,8 +51,9 @@ template <class T> T SimpdivModule<T>::simplex(void)
 {
   int i, j, k, h, jj, hh,ii, kk,tot;
   T maxz;
-  
- step0:;
+
+// Label step0 not currently used, hence commented
+// step0:;
   ibar=1;
   t=0;
   for(j=1;j<=nplayers;j++)
@@ -80,7 +81,8 @@ template <class T> T SimpdivModule<T>::simplex(void)
     *params.output << " maxz = " << maxz; 
   }
   
- case1a:;
+// Label case1a not currently used, hence commented
+// case1a:;
   if(TT(j,h)==0 && U(j,h)==0)
     {
       if(params.plev>=4) *params.output << " Case 1a "; 
@@ -351,7 +353,7 @@ template <class T> int SimpdivModule<T>::get_c(int j, int h)
 
 template <class T> T SimpdivModule<T>::getlabel(gPVector<T> &yy)
 {
-  int i,j,ii,jj;
+  int i,j,jj;
   T maxz,payoff,maxval;
   
   nits++;
@@ -439,8 +441,9 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
       *params.output << "\nSimpDiv solution # " << soln+1 << " : " << y;
       *params.output << " maxz = " << maxz; 
       solutions.Append(y);
-    }
-	if(params.status.Get()) params.status.Reset();
+   }
+  if(params.status.Get()) params.status.Reset();
+  return 1;
 }
 
 

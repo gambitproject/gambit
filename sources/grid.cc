@@ -16,22 +16,22 @@
 
 template <class T>
 GridParams<T>::GridParams(void) :
+	minLam(.01), maxLam(30), delLam(.01), delp(.01), tol(.01),
 	plev(0),outfile(0),errfile(0),pxifile(0),
-	minLam(.01), maxLam(30), delLam(.01), tol(.01), delp(.01),
 	status(gstatus)
 { }
 template <class T>
 GridParams<T>::GridParams(const GridParams<T> &p) :
-	plev(p.plev),outfile(p.outfile),errfile(p.errfile),
-	pxifile(p.pxifile),
-	minLam(p.minLam),maxLam(p.maxLam),delLam(p.delLam),
-	delp(p.delp),tol(p.tol),type(p.type),status(p.status)
+	minLam(p.minLam), maxLam(p.maxLam), delLam(p.delLam),
+	delp(p.delp), tol(p.tol), type(p.type),
+	plev(p.plev), outfile(p.outfile), errfile(p.errfile),
+	pxifile(p.pxifile), status(p.status)
 
 { }
 template <class T>
 GridParams<T>::GridParams(gStatus &st):
-	plev(0),outfile(0),errfile(0),pxifile(0),
-	minLam(.01), maxLam(30), delLam(.01), tol(.01), delp(.01),
+	minLam(.01), maxLam(30), delLam(.01), delp(.01), tol(.01),
+	plev(0), outfile(0), errfile(0), pxifile(0),
 	status(st)
 { }
 
@@ -43,10 +43,11 @@ return 1;
 }
 
 template <class T>
-GridSolveModule<T>::GridSolveModule(const NormalForm<T> &r,const GridParams<T> &param)
-	: nf(r), params(param), x(r.NumStrats(1)), p(r.NumStrats(1)),
-		y(r.NumStrats(2)), q_calc(r.NumStrats(2)),
-		matrix(r.NumStrats(1),r.NumStrats(2))
+GridSolveModule<T>::GridSolveModule(const NormalForm<T> &r,
+				    const GridParams<T> &param)
+	: nf(r), p(r.NumStrats(1)), x(r.NumStrats(1)),
+		q_calc(r.NumStrats(2)), y(r.NumStrats(2)), params(param),
+		matrix(r.NumStrats(1), r.NumStrats(2))
 {}
 
 template <class T>

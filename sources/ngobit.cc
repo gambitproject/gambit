@@ -61,8 +61,8 @@ class NFGobitFunc : public GobitFunc<T>, public gBC2FunctMin<T>  {
 
 template <class T> NFGobitFunc<T>
 ::NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P)
-  : gBC2FunctMin<T>(NF.ProfileLength()), N(NF), p(NF.Dimensionality()),
-		    pp(NF.Dimensionality())
+  : gBC2FunctMin<T>(NF.ProfileLength()), p(NF.Dimensionality()),
+		    pp(NF.Dimensionality()), N(NF)
 { 
   Init();
   N.Centroid(pp);
@@ -71,8 +71,8 @@ template <class T> NFGobitFunc<T>
 template <class T>NFGobitFunc<T>
 ::NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P,
 	      const gPVector<T>& s)
-  : gBC2FunctMin<T>(NF.ProfileLength()), N(NF), p(NF.Dimensionality()),
-		    pp(NF.Dimensionality())
+  : gBC2FunctMin<T>(NF.ProfileLength()), p(NF.Dimensionality()),
+		    pp(NF.Dimensionality()), N(NF)
 {
   Init();
   pp = s;

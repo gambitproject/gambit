@@ -61,8 +61,8 @@ class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
 
 template <class T>
 NFLiapFunc<T>::NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P)
-  : gBC2FunctMin<T>(NF.ProfileLength()), N(NF), p(NF.Dimensionality()),
-		    pp(NF.Dimensionality()),  niters(0), nevals(0)
+  : gBC2FunctMin<T>(NF.ProfileLength()), niters(0), nevals(0), N(NF),
+    p(NF.Dimensionality()), pp(NF.Dimensionality())
 {
   N.Centroid(pp);
 }
@@ -71,8 +71,8 @@ NFLiapFunc<T>::NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P)
 template <class T>
 NFLiapFunc<T>::NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P,
 			  const gPVector<T>& s)
-  : gBC2FunctMin<T>(NF.ProfileLength()), N(NF), p(NF.Dimensionality()),
-		    pp(NF.Dimensionality()),  niters(0), nevals(0)
+  : gBC2FunctMin<T>(NF.ProfileLength()), niters(0), nevals(0),
+    N(NF), p(NF.Dimensionality()), pp(NF.Dimensionality())
 {
   pp = s;
 }
@@ -189,6 +189,7 @@ template <class T> int NFLiapFunc<T>::Deriv(const gVector<T> &v, gVector<T> &d)
       ii++;
     }
   }
+  return 1;
 }
 
 template <class T> T NFLiapFunc<T>::
