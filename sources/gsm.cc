@@ -1275,7 +1275,14 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program,
   case rcSUCCESS:
     switch( _Depth() )
     {
-    case 1:
+    case 0:
+      result = new ErrorPortion( (gString)
+				 "GSM Error 43 :\n" +
+				 "  User-defined function Error:\n" +
+				 "    No return value\n" );
+      break;
+
+    default:
       result = _Pop();
       result = _ResolveRef( result );
       result_copy = result->ValCopy();
@@ -1288,18 +1295,6 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program,
 	result = 0;
       }
       break;
-    case 0:
-      result = new ErrorPortion( (gString)
-				 "GSM Error 43 :\n" +
-				 "  User-defined function Error:\n" +
-				 "    No return value\n" );
-      break;
-    default:
-      result = new ErrorPortion( (gString)
-				 "GSM Error 44 :\n" + 
-				 "  User-defined function Error:\n" +
-				 "    Too many values left on stack;\n" +
-				 "    return value ambiguous\n" );
     }
     break;
   case rcFAIL:

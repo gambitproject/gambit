@@ -810,7 +810,7 @@ template <class T> PortionType MixedPortion<T>::Type( void ) const
 { return porMIXED; }
 
 template <class T> void MixedPortion<T>::Output( gOutput& s ) const
-{ s << "(Mixed)"; }
+{ s << "(Mixed) " << *_Value; }
 
 template <class T> Portion* MixedPortion<T>::ValCopy( void ) const
 {
@@ -895,7 +895,7 @@ template <class T> PortionType BehavPortion<T>::Type( void ) const
 { return porBEHAV; }
 
 template <class T> void BehavPortion<T>::Output( gOutput& s ) const
-{ s << "(Behav)"; }
+{ s << "(Behav) " << *_Value; }
 
 template <class T> Portion* BehavPortion<T>::ValCopy( void ) const
 {
