@@ -29,6 +29,7 @@
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
 #include "efgsupport.h"
+#include "id.h"
 
 const int idACTIONTREE = 8003;
 
@@ -57,16 +58,16 @@ widgetActionTree::widgetActionTree(EfgSupportWindow *p_parent)
   : wxTreeCtrl(p_parent, idACTIONTREE), m_parent(p_parent)
 { 
   m_menu = new wxMenu;
-  m_menu->Append(GBT_EFG_MENU_SUPPORT_DUPLICATE, "Duplicate support",
+  m_menu->Append(GBT_MENU_SUPPORTS_DUPLICATE, "Duplicate support",
 		 "Duplicate this support");
-  m_menu->Append(GBT_EFG_MENU_SUPPORT_DELETE, "Delete support",
+  m_menu->Append(GBT_MENU_SUPPORTS_DELETE, "Delete support",
 		 "Delete this support");
 }
 
 void widgetActionTree::OnRightClick(wxTreeEvent &p_event)
 {
   // Cannot delete the "full support"
-  m_menu->Enable(GBT_EFG_MENU_SUPPORT_DELETE, (m_parent->GetSupport() > 0));
+  m_menu->Enable(GBT_MENU_SUPPORTS_DELETE, (m_parent->GetSupport() > 0));
   PopupMenu(m_menu, p_event.GetPoint());
 }
 

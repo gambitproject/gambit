@@ -40,7 +40,6 @@
 #include "nash/mixedsol.h"
 
 #include "gambit.h"
-#include "nfgconst.h"
 
 class NfgNavigateWindow;
 class NfgTable;

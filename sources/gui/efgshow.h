@@ -33,7 +33,6 @@
 #include "wx/notebook.h"
 
 #include "gambit.h"
-#include "efgconst.h"
 #include "nash/behavsol.h"
 
 class EfgProfileList;

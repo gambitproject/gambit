@@ -32,7 +32,7 @@
 #include "wx/tokenzr.h"  // for wxStringTokenizer
 #include "nfgshow.h"
 #include "nfgtable.h"
-#include "nfgconst.h"
+#include "id.h"
 
 //---------------------------------------------------------------------
 //                   class gbtPayoffVectorRenderer
@@ -688,7 +688,7 @@ void NfgTable::OnLeftDoubleClick(wxGridEvent &p_event)
       p_event.GetRow() < m_doc->GetNfgSupport().NumStrats(m_doc->GetRowPlayer()) &&
       p_event.GetCol() < m_doc->GetNfgSupport().NumStrats(m_doc->GetColPlayer())) {
     wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
-			 GBT_NFG_MENU_EDIT_CONTINGENCY);
+			 GBT_MENU_EDIT_CONTINGENCY);
     GetParent()->AddPendingEvent(event);
   }
 }

@@ -30,6 +30,7 @@
 #endif  // WX_PRECOMP
 #include "nfgoutcome.h"
 #include "numberedit.h"
+#include "id.h"
 
 class gbtNfgOutcomeWindow : public wxGrid {
 private:
@@ -173,10 +174,10 @@ void gbtNfgOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
 
 BEGIN_EVENT_TABLE(gbtOutcomeFrame, wxFrame)
   EVT_MENU(wxID_CLOSE, gbtOutcomeFrame::Close)
-  EVT_MENU(GBT_NFG_MENU_OUTCOMES_NEW, gbtOutcomeFrame::OnOutcomeNew)
-  EVT_MENU(GBT_NFG_MENU_OUTCOMES_DELETE, gbtOutcomeFrame::OnOutcomeDelete)
-  EVT_MENU(GBT_NFG_MENU_OUTCOMES_ATTACH, gbtOutcomeFrame::OnOutcomeAttach)
-  EVT_MENU(GBT_NFG_MENU_OUTCOMES_DETACH, gbtOutcomeFrame::OnOutcomeDetach)
+  EVT_MENU(GBT_MENU_OUTCOMES_NEW, gbtOutcomeFrame::OnOutcomeNew)
+  EVT_MENU(GBT_MENU_OUTCOMES_DELETE, gbtOutcomeFrame::OnOutcomeDelete)
+  EVT_MENU(GBT_MENU_OUTCOMES_ATTACH, gbtOutcomeFrame::OnOutcomeAttach)
+  EVT_MENU(GBT_MENU_OUTCOMES_DETACH, gbtOutcomeFrame::OnOutcomeDetach)
   EVT_CLOSE(gbtOutcomeFrame::OnClose)
 END_EVENT_TABLE()
 
@@ -190,14 +191,14 @@ gbtOutcomeFrame::gbtOutcomeFrame(gbtGameDocument *p_doc, wxWindow *p_parent)
   fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
 
   wxMenu *editMenu = new wxMenu;
-  editMenu->Append(GBT_NFG_MENU_OUTCOMES_NEW, "New",
+  editMenu->Append(GBT_MENU_OUTCOMES_NEW, "New",
 		   "Create a new outcome");
-  editMenu->Append(GBT_NFG_MENU_OUTCOMES_DELETE, "Delete",
+  editMenu->Append(GBT_MENU_OUTCOMES_DELETE, "Delete",
 		   "Delete this outcome");
   editMenu->AppendSeparator();
-  editMenu->Append(GBT_NFG_MENU_OUTCOMES_ATTACH, "Attach",
+  editMenu->Append(GBT_MENU_OUTCOMES_ATTACH, "Attach",
 		   "Attach this outcome at the cursor");
-  editMenu->Append(GBT_NFG_MENU_OUTCOMES_DETACH, "Detach",
+  editMenu->Append(GBT_MENU_OUTCOMES_DETACH, "Detach",
 		   "Detach the outcome at the cursor");
 
   wxMenu *viewMenu = new wxMenu;

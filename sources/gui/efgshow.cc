@@ -47,7 +47,7 @@
 #include "game/nfg.h"
 #include "nash/efglogit.h"
 
-#include "efgconst.h"
+#include "id.h"
 #include "treewin.h"
 #include "efgprint.h"
 #include "efgshow.h"
@@ -89,11 +89,11 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(wxID_CLOSE, EfgShow::Close)
   EVT_MENU(wxID_SAVE, EfgShow::OnFileSave)
   EVT_MENU(wxID_SAVEAS, EfgShow::OnFileSave)
-  EVT_MENU(GBT_EFG_MENU_FILE_IMPORT_COMLAB, EfgShow::OnFileImportComLab)
-  EVT_MENU(GBT_EFG_MENU_FILE_EXPORT_BMP, EfgShow::OnFileExportBMP)
-  EVT_MENU(GBT_EFG_MENU_FILE_EXPORT_JPEG, EfgShow::OnFileExportJPEG)
-  EVT_MENU(GBT_EFG_MENU_FILE_EXPORT_PNG, EfgShow::OnFileExportPNG)
-  EVT_MENU(GBT_EFG_MENU_FILE_EXPORT_POSTSCRIPT, EfgShow::OnFileExportPS)
+  EVT_MENU(GBT_MENU_FILE_IMPORT_COMLAB, EfgShow::OnFileImportComLab)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_BMP, EfgShow::OnFileExportBMP)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_JPEG, EfgShow::OnFileExportJPEG)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_PNG, EfgShow::OnFileExportPNG)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_POSTSCRIPT, EfgShow::OnFileExportPS)
   EVT_MENU(wxID_PRINT_SETUP, EfgShow::OnFilePageSetup)
   EVT_MENU(wxID_PREVIEW, EfgShow::OnFilePrintPreview)
   EVT_MENU(wxID_PRINT, EfgShow::OnFilePrint)
@@ -102,44 +102,44 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(wxID_CUT, EfgShow::OnEditCut)
   EVT_MENU(wxID_COPY, EfgShow::OnEditCopy)
   EVT_MENU(wxID_PASTE, EfgShow::OnEditPaste)
-  EVT_MENU(GBT_EFG_MENU_EDIT_INSERT, EfgShow::OnEditInsert)
-  EVT_MENU(GBT_EFG_MENU_EDIT_DELETE, EfgShow::OnEditDelete)
-  EVT_MENU(GBT_EFG_MENU_EDIT_REVEAL, EfgShow::OnEditReveal)
-  EVT_MENU(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME, EfgShow::OnEditToggleSubgame)
-  EVT_MENU(GBT_EFG_MENU_EDIT_MARK_SUBGAME_TREE, EfgShow::OnEditMarkSubgameTree)
-  EVT_MENU(GBT_EFG_MENU_EDIT_UNMARK_SUBGAME_TREE, EfgShow::OnEditUnmarkSubgameTree)
-  EVT_MENU(GBT_EFG_MENU_EDIT_NODE, EfgShow::OnEditNode)
-  EVT_MENU(GBT_EFG_MENU_EDIT_MOVE, EfgShow::OnEditMove)
-  EVT_MENU(GBT_EFG_MENU_EDIT_GAME, EfgShow::OnEditGame)
-  EVT_MENU(GBT_EFG_MENU_VIEW_PROFILES, EfgShow::OnViewProfiles)
-  EVT_MENU(GBT_EFG_MENU_VIEW_NAVIGATION, EfgShow::OnViewCursor)
-  EVT_MENU(GBT_EFG_MENU_VIEW_OUTCOMES, EfgShow::OnViewOutcomes)
-  EVT_MENU(GBT_EFG_MENU_VIEW_SUPPORTS, EfgShow::OnViewSupports)
-  EVT_MENU(GBT_EFG_MENU_VIEW_ZOOMIN, EfgShow::OnViewZoomIn)
-  EVT_MENU(GBT_EFG_MENU_VIEW_ZOOMOUT, EfgShow::OnViewZoomOut)
-  EVT_MENU(GBT_EFG_MENU_VIEW_SUPPORT_REACHABLE, EfgShow::OnViewSupportReachable)
-  EVT_MENU(GBT_EFG_MENU_FORMAT_FONTS_ABOVENODE, EfgShow::OnFormatFontsAboveNode)
-  EVT_MENU(GBT_EFG_MENU_FORMAT_FONTS_BELOWNODE, EfgShow::OnFormatFontsBelowNode)
-  EVT_MENU(GBT_EFG_MENU_FORMAT_FONTS_AFTERNODE, EfgShow::OnFormatFontsAfterNode)
-  EVT_MENU(GBT_EFG_MENU_FORMAT_FONTS_ABOVEBRANCH, EfgShow::OnFormatFontsAboveBranch)
-  EVT_MENU(GBT_EFG_MENU_FORMAT_FONTS_BELOWBRANCH, EfgShow::OnFormatFontsBelowBranch)
-  EVT_MENU(GBT_EFG_MENU_FORMAT_DISPLAY_LAYOUT, EfgShow::OnFormatDisplayLayout)
-  EVT_MENU(GBT_EFG_MENU_FORMAT_DISPLAY_LEGEND, EfgShow::OnFormatDisplayLegend)
-  EVT_MENU(GBT_EFG_MENU_FORMAT_DISPLAY_COLORS, EfgShow::OnFormatDisplayColors)
-  EVT_MENU(GBT_EFG_MENU_FORMAT_DISPLAY_DECIMALS, EfgShow::OnFormatDisplayDecimals)
-  EVT_MENU(GBT_EFG_MENU_TOOLS_DOMINANCE, EfgShow::OnToolsDominance)
-  EVT_MENU(GBT_EFG_MENU_TOOLS_EQUILIBRIUM, EfgShow::OnToolsEquilibrium)
-  EVT_MENU(GBT_EFG_MENU_TOOLS_QRE, EfgShow::OnToolsQre)
-  EVT_MENU(GBT_EFG_MENU_TOOLS_NFG_REDUCED, EfgShow::OnToolsNormalReduced)
-  EVT_MENU(GBT_EFG_MENU_TOOLS_NFG_AGENT, EfgShow::OnToolsNormalAgent)
+  EVT_MENU(GBT_MENU_EDIT_INSERT, EfgShow::OnEditInsert)
+  EVT_MENU(GBT_MENU_EDIT_DELETE, EfgShow::OnEditDelete)
+  EVT_MENU(GBT_MENU_EDIT_REVEAL, EfgShow::OnEditReveal)
+  EVT_MENU(GBT_MENU_EDIT_TOGGLE_SUBGAME, EfgShow::OnEditToggleSubgame)
+  EVT_MENU(GBT_MENU_EDIT_MARK_SUBGAME_TREE, EfgShow::OnEditMarkSubgameTree)
+  EVT_MENU(GBT_MENU_EDIT_UNMARK_SUBGAME_TREE, EfgShow::OnEditUnmarkSubgameTree)
+  EVT_MENU(GBT_MENU_EDIT_NODE, EfgShow::OnEditNode)
+  EVT_MENU(GBT_MENU_EDIT_MOVE, EfgShow::OnEditMove)
+  EVT_MENU(GBT_MENU_EDIT_GAME, EfgShow::OnEditGame)
+  EVT_MENU(GBT_MENU_VIEW_PROFILES, EfgShow::OnViewProfiles)
+  EVT_MENU(GBT_MENU_VIEW_NAVIGATION, EfgShow::OnViewCursor)
+  EVT_MENU(GBT_MENU_VIEW_OUTCOMES, EfgShow::OnViewOutcomes)
+  EVT_MENU(GBT_MENU_VIEW_SUPPORTS, EfgShow::OnViewSupports)
+  EVT_MENU(GBT_MENU_VIEW_ZOOMIN, EfgShow::OnViewZoomIn)
+  EVT_MENU(GBT_MENU_VIEW_ZOOMOUT, EfgShow::OnViewZoomOut)
+  EVT_MENU(GBT_MENU_VIEW_SUPPORT_REACHABLE, EfgShow::OnViewSupportReachable)
+  EVT_MENU(GBT_MENU_FORMAT_FONTS_ABOVENODE, EfgShow::OnFormatFontsAboveNode)
+  EVT_MENU(GBT_MENU_FORMAT_FONTS_BELOWNODE, EfgShow::OnFormatFontsBelowNode)
+  EVT_MENU(GBT_MENU_FORMAT_FONTS_AFTERNODE, EfgShow::OnFormatFontsAfterNode)
+  EVT_MENU(GBT_MENU_FORMAT_FONTS_ABOVEBRANCH, EfgShow::OnFormatFontsAboveBranch)
+  EVT_MENU(GBT_MENU_FORMAT_FONTS_BELOWBRANCH, EfgShow::OnFormatFontsBelowBranch)
+  EVT_MENU(GBT_MENU_FORMAT_DISPLAY_LAYOUT, EfgShow::OnFormatDisplayLayout)
+  EVT_MENU(GBT_MENU_FORMAT_DISPLAY_LEGEND, EfgShow::OnFormatDisplayLegend)
+  EVT_MENU(GBT_MENU_FORMAT_DISPLAY_COLORS, EfgShow::OnFormatDisplayColors)
+  EVT_MENU(GBT_MENU_FORMAT_DISPLAY_DECIMALS, EfgShow::OnFormatDisplayDecimals)
+  EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, EfgShow::OnToolsDominance)
+  EVT_MENU(GBT_MENU_TOOLS_EQUILIBRIUM, EfgShow::OnToolsEquilibrium)
+  EVT_MENU(GBT_MENU_TOOLS_QRE, EfgShow::OnToolsQre)
+  EVT_MENU(GBT_MENU_TOOLS_NFG_REDUCED, EfgShow::OnToolsNormalReduced)
+  EVT_MENU(GBT_MENU_TOOLS_NFG_AGENT, EfgShow::OnToolsNormalAgent)
   EVT_MENU(wxID_ABOUT, EfgShow::OnHelpAbout)
-  EVT_MENU(GBT_EFG_MENU_SUPPORT_DUPLICATE, EfgShow::OnSupportDuplicate)
-  EVT_MENU(GBT_EFG_MENU_SUPPORT_DELETE, EfgShow::OnSupportDelete)
-  EVT_MENU(GBT_EFG_MENU_PROFILES_NEW, EfgShow::OnProfilesNew)
-  EVT_MENU(GBT_EFG_MENU_PROFILES_DUPLICATE, EfgShow::OnProfilesDuplicate)
-  EVT_MENU(GBT_EFG_MENU_PROFILES_DELETE, EfgShow::OnProfilesDelete)
-  EVT_MENU(GBT_EFG_MENU_PROFILES_PROPERTIES, EfgShow::OnProfilesProperties)
-  EVT_MENU(GBT_EFG_MENU_PROFILES_REPORT, EfgShow::OnProfilesReport)
+  EVT_MENU(GBT_MENU_SUPPORTS_DUPLICATE, EfgShow::OnSupportDuplicate)
+  EVT_MENU(GBT_MENU_SUPPORTS_DELETE, EfgShow::OnSupportDelete)
+  EVT_MENU(GBT_MENU_PROFILES_NEW, EfgShow::OnProfilesNew)
+  EVT_MENU(GBT_MENU_PROFILES_DUPLICATE, EfgShow::OnProfilesDuplicate)
+  EVT_MENU(GBT_MENU_PROFILES_DELETE, EfgShow::OnProfilesDelete)
+  EVT_MENU(GBT_MENU_PROFILES_PROPERTIES, EfgShow::OnProfilesProperties)
+  EVT_MENU(GBT_MENU_PROFILES_REPORT, EfgShow::OnProfilesReport)
   EVT_LIST_ITEM_ACTIVATED(idEFG_SOLUTION_LIST, EfgShow::OnProfilesProperties)
   EVT_LIST_ITEM_SELECTED(idEFG_SOLUTION_LIST, EfgShow::OnProfileSelected)
   EVT_SET_FOCUS(EfgShow::OnFocus)
@@ -226,7 +226,7 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   Show(true);
   // Force this at end to make sure item is unchecked; under MSW,
   // the ordering of events in creating the window leaves this checked
-  GetMenuBar()->Check(GBT_EFG_MENU_VIEW_NAVIGATION, false);
+  GetMenuBar()->Check(GBT_MENU_VIEW_NAVIGATION, false);
   m_doc->UpdateViews(0, true, true);
 }
 
@@ -249,28 +249,28 @@ void EfgShow::OnUpdate(gbtGameView *)
   menuBar->Enable(wxID_PASTE, (!m_doc->GetCutNode().IsNull() || 
 			       !m_doc->GetCopyNode().IsNull()));
 
-  menuBar->Enable(GBT_EFG_MENU_EDIT_INSERT, !cursor.IsNull());
-  menuBar->Enable(GBT_EFG_MENU_EDIT_DELETE, cursor.NumChildren() > 0);
-  menuBar->Enable(GBT_EFG_MENU_EDIT_REVEAL, 
+  menuBar->Enable(GBT_MENU_EDIT_INSERT, !cursor.IsNull());
+  menuBar->Enable(GBT_MENU_EDIT_DELETE, cursor.NumChildren() > 0);
+  menuBar->Enable(GBT_MENU_EDIT_REVEAL, 
 		  !cursor.GetInfoset().IsNull());
 
-  menuBar->Enable(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
+  menuBar->Enable(GBT_MENU_EDIT_TOGGLE_SUBGAME,
 		  (!cursor.IsNull() && m_doc->GetEfg().IsLegalSubgame(cursor) &&
 		   !cursor.GetParent().IsNull()));
-  menuBar->Enable(GBT_EFG_MENU_EDIT_MARK_SUBGAME_TREE,
+  menuBar->Enable(GBT_MENU_EDIT_MARK_SUBGAME_TREE,
 		  (!cursor.IsNull() && m_doc->GetEfg().IsLegalSubgame(cursor)));
-  menuBar->Enable(GBT_EFG_MENU_EDIT_UNMARK_SUBGAME_TREE,
+  menuBar->Enable(GBT_MENU_EDIT_UNMARK_SUBGAME_TREE,
 		  (!cursor.IsNull() && m_doc->GetEfg().IsLegalSubgame(cursor)));
-  menuBar->SetLabel(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
+  menuBar->SetLabel(GBT_MENU_EDIT_TOGGLE_SUBGAME,
 		    (!cursor.IsNull() && !cursor.GetParent().IsNull() &&
 		     m_doc->GetEfg().IsLegalSubgame(cursor) &&
 		     cursor.GetSubgameRoot() == cursor) ?
 		    "Unmark &subgame" : "Mark &subgame");
 
-  menuBar->Enable(GBT_EFG_MENU_EDIT_NODE, !cursor.IsNull());
-  menuBar->Enable(GBT_EFG_MENU_EDIT_MOVE,
+  menuBar->Enable(GBT_MENU_EDIT_NODE, !cursor.IsNull());
+  menuBar->Enable(GBT_MENU_EDIT_MOVE,
 		  !cursor.IsNull() && !cursor.GetInfoset().IsNull());
-  menuBar->Check(GBT_EFG_MENU_VIEW_SUPPORT_REACHABLE,
+  menuBar->Check(GBT_MENU_VIEW_SUPPORT_REACHABLE,
 		 m_doc->GetPreferences().RootReachable());
 
   if (m_doc->GetFilename() != "") {
@@ -299,21 +299,21 @@ void EfgShow::MakeMenus(void)
   fileMenu->Append(wxID_SAVEAS, "Save &as", "Save game to a different file");
   fileMenu->AppendSeparator();
   wxMenu *fileImportMenu = new wxMenu;
-  fileImportMenu->Append(GBT_EFG_MENU_FILE_IMPORT_COMLAB, "&ComLabGames",
+  fileImportMenu->Append(GBT_MENU_FILE_IMPORT_COMLAB, "&ComLabGames",
 			 "Import a game saved in ComLabGames format");
-  fileMenu->Append(GBT_EFG_MENU_FILE_IMPORT, "&Import", fileImportMenu,
+  fileMenu->Append(GBT_MENU_FILE_IMPORT, "&Import", fileImportMenu,
 		   "Import a game from various formats");
   wxMenu *fileExportMenu = new wxMenu;
-  fileExportMenu->Append(GBT_EFG_MENU_FILE_EXPORT_BMP, "&BMP",
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_BMP, "&BMP",
 			 "Save a rendering of the game as a Windows bitmap");
-  fileExportMenu->Append(GBT_EFG_MENU_FILE_EXPORT_JPEG, "&JPEG",
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_JPEG, "&JPEG",
 			 "Save a rendering of the game as a JPEG image");
-  fileExportMenu->Append(GBT_EFG_MENU_FILE_EXPORT_PNG, "&PNG",
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_PNG, "&PNG",
 			 "Save a rendering of the game as a PNG image");
-  fileExportMenu->Append(GBT_EFG_MENU_FILE_EXPORT_POSTSCRIPT, "Post&Script",
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_POSTSCRIPT, "Post&Script",
 			 "Save a printout of the game in PostScript format");
-  fileExportMenu->Enable(GBT_EFG_MENU_FILE_EXPORT_POSTSCRIPT, wxUSE_POSTSCRIPT);
-  fileMenu->Append(GBT_EFG_MENU_FILE_EXPORT, "&Export", fileExportMenu,
+  fileExportMenu->Enable(GBT_MENU_FILE_EXPORT_POSTSCRIPT, wxUSE_POSTSCRIPT);
+  fileMenu->Append(GBT_MENU_FILE_EXPORT, "&Export", fileExportMenu,
 		   "Export the game in various formats");
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_PRINT_SETUP, "Page Se&tup",
@@ -329,92 +329,92 @@ void EfgShow::MakeMenus(void)
   editMenu->Append(wxID_COPY, "&Copy", "Copy the current selection");
   editMenu->Append(wxID_PASTE, "&Paste", "Paste from clipboard");
   editMenu->AppendSeparator();
-  editMenu->Append(GBT_EFG_MENU_EDIT_INSERT, "&Insert", "Insert a move");
-  editMenu->Append(GBT_EFG_MENU_EDIT_DELETE, "&Delete...", "Delete an object");
-  editMenu->Append(GBT_EFG_MENU_EDIT_REVEAL, "&Reveal", 
+  editMenu->Append(GBT_MENU_EDIT_INSERT, "&Insert", "Insert a move");
+  editMenu->Append(GBT_MENU_EDIT_DELETE, "&Delete...", "Delete an object");
+  editMenu->Append(GBT_MENU_EDIT_REVEAL, "&Reveal", 
 		   "Reveal choice at node");
   editMenu->AppendSeparator();
-  editMenu->Append(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME, "Mark &subgame",
+  editMenu->Append(GBT_MENU_EDIT_TOGGLE_SUBGAME, "Mark &subgame",
 		   "Mark or unmark the subgame at this node");
-  editMenu->Append(GBT_EFG_MENU_EDIT_MARK_SUBGAME_TREE, "Mar&k subgame tree",
+  editMenu->Append(GBT_MENU_EDIT_MARK_SUBGAME_TREE, "Mar&k subgame tree",
 		   "Mark all subgames in this subtree");
-  editMenu->Append(GBT_EFG_MENU_EDIT_UNMARK_SUBGAME_TREE, "&Unmark subgame tree",
+  editMenu->Append(GBT_MENU_EDIT_UNMARK_SUBGAME_TREE, "&Unmark subgame tree",
 		   "Unmark all subgames in this subtree");
   editMenu->AppendSeparator();
-  editMenu->Append(GBT_EFG_MENU_EDIT_NODE, "&Node",
+  editMenu->Append(GBT_MENU_EDIT_NODE, "&Node",
 		   "Edit properties of the node");
-  editMenu->Append(GBT_EFG_MENU_EDIT_MOVE, "&Move",
+  editMenu->Append(GBT_MENU_EDIT_MOVE, "&Move",
 		   "Edit properties of the move");
-  editMenu->Append(GBT_EFG_MENU_EDIT_GAME, "&Game",
+  editMenu->Append(GBT_MENU_EDIT_GAME, "&Game",
 		   "Edit properties of the game");
 
   wxMenu *toolsMenu = new wxMenu;
 
-  toolsMenu->Append(GBT_EFG_MENU_TOOLS_DOMINANCE, "&Dominance",
+  toolsMenu->Append(GBT_MENU_TOOLS_DOMINANCE, "&Dominance",
 		    "Find undominated actions");
-  toolsMenu->Append(GBT_EFG_MENU_TOOLS_EQUILIBRIUM, "&Equilibrium",
+  toolsMenu->Append(GBT_MENU_TOOLS_EQUILIBRIUM, "&Equilibrium",
 		    "Compute Nash equilibria and refinements");
-  toolsMenu->Append(GBT_EFG_MENU_TOOLS_QRE, "&Qre",
+  toolsMenu->Append(GBT_MENU_TOOLS_QRE, "&Qre",
 		    "Compute quantal response equilibria");
 
   wxMenu *toolsNfgMenu = new wxMenu;
-  toolsNfgMenu->Append(GBT_EFG_MENU_TOOLS_NFG_REDUCED, "Reduced",
+  toolsNfgMenu->Append(GBT_MENU_TOOLS_NFG_REDUCED, "Reduced",
 		       "Generate reduced normal form");
-  toolsNfgMenu->Append(GBT_EFG_MENU_TOOLS_NFG_AGENT, "Agent",
+  toolsNfgMenu->Append(GBT_MENU_TOOLS_NFG_AGENT, "Agent",
 		       "Generate agent normal form");
-  toolsMenu->Append(GBT_EFG_MENU_TOOLS_NFG, "Normal form", toolsNfgMenu,
+  toolsMenu->Append(GBT_MENU_TOOLS_NFG, "Normal form", toolsNfgMenu,
 		    "Create a normal form representation of this game");
 
   
   wxMenu *viewMenu = new wxMenu;
-  viewMenu->Append(GBT_EFG_MENU_VIEW_PROFILES, "&Profiles",
+  viewMenu->Append(GBT_MENU_VIEW_PROFILES, "&Profiles",
 		   "Display/hide profiles window", true);
-  viewMenu->Check(GBT_EFG_MENU_VIEW_PROFILES, false);
+  viewMenu->Check(GBT_MENU_VIEW_PROFILES, false);
   viewMenu->AppendSeparator();
-  viewMenu->Append(GBT_EFG_MENU_VIEW_NAVIGATION, "&Navigation",
+  viewMenu->Append(GBT_MENU_VIEW_NAVIGATION, "&Navigation",
 		   "Display navigation window", true);
-  viewMenu->Check(GBT_EFG_MENU_VIEW_NAVIGATION, false);
-  viewMenu->Append(GBT_EFG_MENU_VIEW_OUTCOMES, "&Outcomes",
+  viewMenu->Check(GBT_MENU_VIEW_NAVIGATION, false);
+  viewMenu->Append(GBT_MENU_VIEW_OUTCOMES, "&Outcomes",
 		   "Display and edit outcomes", true);
-  viewMenu->Check(GBT_EFG_MENU_VIEW_OUTCOMES, false);
-  viewMenu->Append(GBT_EFG_MENU_VIEW_SUPPORTS, "&Supports",
+  viewMenu->Check(GBT_MENU_VIEW_OUTCOMES, false);
+  viewMenu->Append(GBT_MENU_VIEW_SUPPORTS, "&Supports",
 		   "Display and edit supports", true);
-  viewMenu->Check(GBT_EFG_MENU_VIEW_SUPPORTS, false);
+  viewMenu->Check(GBT_MENU_VIEW_SUPPORTS, false);
   viewMenu->AppendSeparator();
-  viewMenu->Append(GBT_EFG_MENU_VIEW_ZOOMIN, "Zoom &in",
+  viewMenu->Append(GBT_MENU_VIEW_ZOOMIN, "Zoom &in",
 		   "Increase display magnification");
-  viewMenu->Append(GBT_EFG_MENU_VIEW_ZOOMOUT, "Zoom &out",
+  viewMenu->Append(GBT_MENU_VIEW_ZOOMOUT, "Zoom &out",
 		   "Decrease display magnification");
   viewMenu->AppendSeparator();
-  viewMenu->Append(GBT_EFG_MENU_VIEW_SUPPORT_REACHABLE, "&Root Reachable",
+  viewMenu->Append(GBT_MENU_VIEW_SUPPORT_REACHABLE, "&Root Reachable",
 		   "Display only nodes that are support-reachable",
 		   true);
   
   wxMenu *formatMenu = new wxMenu;
   wxMenu *formatDisplayMenu = new wxMenu;
-  formatDisplayMenu->Append(GBT_EFG_MENU_FORMAT_DISPLAY_LAYOUT, "&Layout",
+  formatDisplayMenu->Append(GBT_MENU_FORMAT_DISPLAY_LAYOUT, "&Layout",
 			    "Set tree layout parameters");
-  formatDisplayMenu->Append(GBT_EFG_MENU_FORMAT_DISPLAY_LEGEND, "Le&gends",
+  formatDisplayMenu->Append(GBT_MENU_FORMAT_DISPLAY_LEGEND, "Le&gends",
 			    "Set legends");
-  formatDisplayMenu->Append(GBT_EFG_MENU_FORMAT_DISPLAY_COLORS, "&Colors",
+  formatDisplayMenu->Append(GBT_MENU_FORMAT_DISPLAY_COLORS, "&Colors",
 			    "Set colors");
-  formatDisplayMenu->Append(GBT_EFG_MENU_FORMAT_DISPLAY_DECIMALS, "&Decimal Places",
+  formatDisplayMenu->Append(GBT_MENU_FORMAT_DISPLAY_DECIMALS, "&Decimal Places",
 			   "Set number of decimal places to display");
-  formatMenu->Append(GBT_EFG_MENU_FORMAT_DISPLAY, "&Display", formatDisplayMenu,
+  formatMenu->Append(GBT_MENU_FORMAT_DISPLAY, "&Display", formatDisplayMenu,
 		     "Set display options");
   
   wxMenu *formatFontsMenu = new wxMenu;
-  formatFontsMenu->Append(GBT_EFG_MENU_FORMAT_FONTS_ABOVENODE, "Above Node",
+  formatFontsMenu->Append(GBT_MENU_FORMAT_FONTS_ABOVENODE, "Above Node",
 			 "Font for label above nodes");
-  formatFontsMenu->Append(GBT_EFG_MENU_FORMAT_FONTS_BELOWNODE, "Below Node",
+  formatFontsMenu->Append(GBT_MENU_FORMAT_FONTS_BELOWNODE, "Below Node",
 			 "Font for label below nodes");
-  formatFontsMenu->Append(GBT_EFG_MENU_FORMAT_FONTS_AFTERNODE, "After Node",
+  formatFontsMenu->Append(GBT_MENU_FORMAT_FONTS_AFTERNODE, "After Node",
 			 "Font for label to right of nodes");
-  formatFontsMenu->Append(GBT_EFG_MENU_FORMAT_FONTS_ABOVEBRANCH, "Above Branch",
+  formatFontsMenu->Append(GBT_MENU_FORMAT_FONTS_ABOVEBRANCH, "Above Branch",
 			 "Font for label above branches");
-  formatFontsMenu->Append(GBT_EFG_MENU_FORMAT_FONTS_BELOWBRANCH, "Below Branch",
+  formatFontsMenu->Append(GBT_MENU_FORMAT_FONTS_BELOWBRANCH, "Below Branch",
 			 "Font for label below branches");
-  formatMenu->Append(GBT_EFG_MENU_FORMAT_FONTS, "&Fonts", formatFontsMenu,
+  formatMenu->Append(GBT_MENU_FORMAT_FONTS, "&Fonts", formatFontsMenu,
 		     "Set display fonts");
   
   wxMenu *helpMenu = new wxMenu;
@@ -463,9 +463,9 @@ void EfgShow::MakeToolbar(void)
 		   -1, -1, 0, "Print", "Print this game");
   toolBar->AddSeparator();
 
-  toolBar->AddTool(GBT_EFG_MENU_VIEW_ZOOMIN, wxBITMAP(zoomin), wxNullBitmap,
+  toolBar->AddTool(GBT_MENU_VIEW_ZOOMIN, wxBITMAP(zoomin), wxNullBitmap,
 		   false, -1, -1, 0, "Zoom in", "Increase magnification");
-  toolBar->AddTool(GBT_EFG_MENU_VIEW_ZOOMOUT, wxBITMAP(zoomout), wxNullBitmap,
+  toolBar->AddTool(GBT_MENU_VIEW_ZOOMOUT, wxBITMAP(zoomout), wxNullBitmap,
 		   false, -1, -1, 0, "Zoom out", "Decrease magnification");
   toolBar->AddSeparator();
 
@@ -941,12 +941,12 @@ void EfgShow::OnViewProfiles(wxCommandEvent &)
   if (m_solutionSashWindow->IsShown()) {
     m_profileTable->Show(false);
     m_solutionSashWindow->Show(false);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_PROFILES, false);
+    GetMenuBar()->Check(GBT_MENU_VIEW_PROFILES, false);
   }
   else {
     m_profileTable->Show(true);
     m_solutionSashWindow->Show(true);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_PROFILES, true);
+    GetMenuBar()->Check(GBT_MENU_VIEW_PROFILES, true);
   }
 
   AdjustSizes();
@@ -957,18 +957,18 @@ void EfgShow::OnViewCursor(wxCommandEvent &)
   if (m_nodeSashWindow->IsShown() && m_infoNotebook->GetSelection() != 0) {
     m_infoNotebook->SetSelection(0);
     m_navigateWindow->Show(true);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_NAVIGATION, true);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_OUTCOMES, false);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_SUPPORTS, false);
+    GetMenuBar()->Check(GBT_MENU_VIEW_NAVIGATION, true);
+    GetMenuBar()->Check(GBT_MENU_VIEW_OUTCOMES, false);
+    GetMenuBar()->Check(GBT_MENU_VIEW_SUPPORTS, false);
   }
   else if (m_nodeSashWindow->IsShown()) {
     m_nodeSashWindow->Show(false);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_NAVIGATION, false);
+    GetMenuBar()->Check(GBT_MENU_VIEW_NAVIGATION, false);
   }
   else {
     m_nodeSashWindow->Show(true);
     m_infoNotebook->SetSelection(0);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_NAVIGATION, true);
+    GetMenuBar()->Check(GBT_MENU_VIEW_NAVIGATION, true);
   }
 
   AdjustSizes();
@@ -979,18 +979,18 @@ void EfgShow::OnViewOutcomes(wxCommandEvent &)
   if (m_nodeSashWindow->IsShown() && m_infoNotebook->GetSelection() != 1) {
     m_infoNotebook->SetSelection(1);
     m_navigateWindow->Show(true);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_OUTCOMES, true);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_NAVIGATION, false);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_SUPPORTS, false);
+    GetMenuBar()->Check(GBT_MENU_VIEW_OUTCOMES, true);
+    GetMenuBar()->Check(GBT_MENU_VIEW_NAVIGATION, false);
+    GetMenuBar()->Check(GBT_MENU_VIEW_SUPPORTS, false);
   }
   else if (m_nodeSashWindow->IsShown()) {
     m_nodeSashWindow->Show(false);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_OUTCOMES, false);
+    GetMenuBar()->Check(GBT_MENU_VIEW_OUTCOMES, false);
   }
   else {
     m_nodeSashWindow->Show(true);
     m_infoNotebook->SetSelection(1);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_OUTCOMES, true);
+    GetMenuBar()->Check(GBT_MENU_VIEW_OUTCOMES, true);
   }
 
   AdjustSizes();
@@ -1000,18 +1000,18 @@ void EfgShow::OnViewSupports(wxCommandEvent &)
 {
   if (m_nodeSashWindow->IsShown() && m_infoNotebook->GetSelection() != 2) {
     m_infoNotebook->SetSelection(2);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_NAVIGATION, false);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_OUTCOMES, false);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_SUPPORTS, true);
+    GetMenuBar()->Check(GBT_MENU_VIEW_NAVIGATION, false);
+    GetMenuBar()->Check(GBT_MENU_VIEW_OUTCOMES, false);
+    GetMenuBar()->Check(GBT_MENU_VIEW_SUPPORTS, true);
   }
   else if (m_nodeSashWindow->IsShown()) {
     m_nodeSashWindow->Show(false);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_SUPPORTS, false);
+    GetMenuBar()->Check(GBT_MENU_VIEW_SUPPORTS, false);
   }
   else {
     m_nodeSashWindow->Show(true);
     m_infoNotebook->SetSelection(2);
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_SUPPORTS, true);
+    GetMenuBar()->Check(GBT_MENU_VIEW_SUPPORTS, true);
   }
 
   AdjustSizes();
@@ -1237,7 +1237,7 @@ void EfgShow::OnToolsEquilibrium(wxCommandEvent &)
       if (!m_solutionSashWindow->IsShown()) {
 	m_profileTable->Show(true);
 	m_solutionSashWindow->Show(true);
-	GetMenuBar()->Check(GBT_EFG_MENU_VIEW_PROFILES, true);
+	GetMenuBar()->Check(GBT_MENU_VIEW_PROFILES, true);
 	AdjustSizes();
       }
     }
@@ -1425,19 +1425,19 @@ void EfgShow::OnInfoNotebookPage(wxNotebookEvent &p_event)
     return;
   }
 
-  GetMenuBar()->Check(GBT_EFG_MENU_VIEW_OUTCOMES, false);
-  GetMenuBar()->Check(GBT_EFG_MENU_VIEW_NAVIGATION, false);
-  GetMenuBar()->Check(GBT_EFG_MENU_VIEW_SUPPORTS, false);
+  GetMenuBar()->Check(GBT_MENU_VIEW_OUTCOMES, false);
+  GetMenuBar()->Check(GBT_MENU_VIEW_NAVIGATION, false);
+  GetMenuBar()->Check(GBT_MENU_VIEW_SUPPORTS, false);
 
   switch (p_event.GetSelection()) {
   case 0:
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_NAVIGATION, true);
+    GetMenuBar()->Check(GBT_MENU_VIEW_NAVIGATION, true);
     break;
   case 1:
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_OUTCOMES, true);
+    GetMenuBar()->Check(GBT_MENU_VIEW_OUTCOMES, true);
     break;
   case 2:
-    GetMenuBar()->Check(GBT_EFG_MENU_VIEW_SUPPORTS, true);
+    GetMenuBar()->Check(GBT_MENU_VIEW_SUPPORTS, true);
     break;
   default:
     break;

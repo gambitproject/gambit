@@ -28,7 +28,6 @@
 #define EFGLAYOUT_H
 
 #include "base/base.h"
-#include "efgconst.h"
 #include "game/efg.h"
 #include "gamedoc.h"
 

@@ -26,7 +26,7 @@
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
 #include "nfgprofile.h"
-#include "nfgconst.h"
+#include "id.h"
 
 //-------------------------------------------------------------------------
 //                      class gbtNfgProfileTable
@@ -423,19 +423,19 @@ gbtProfileFrame::gbtProfileFrame(gbtGameDocument *p_doc, wxWindow *p_parent)
   m_grid = new gbtNfgProfileGrid(p_doc, this);
 
   wxMenu *fileMenu = new wxMenu;
-  fileMenu->Append(GBT_NFG_MENU_PROFILES_REPORT, "Report",
+  fileMenu->Append(GBT_MENU_PROFILES_REPORT, "Report",
 		   "Generate a report with information on profiles");
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
 
   wxMenu *editMenu = new wxMenu;
-  editMenu->Append(GBT_NFG_MENU_PROFILES_NEW, "New",
+  editMenu->Append(GBT_MENU_PROFILES_NEW, "New",
 		   "Create a new profile");
-  editMenu->Append(GBT_NFG_MENU_PROFILES_DUPLICATE, "Duplicate",
+  editMenu->Append(GBT_MENU_PROFILES_DUPLICATE, "Duplicate",
 		   "Duplicate this profile");
-  editMenu->Append(GBT_NFG_MENU_PROFILES_DELETE, "Delete",
+  editMenu->Append(GBT_MENU_PROFILES_DELETE, "Delete",
 		   "Delete this profile");
-  editMenu->Append(GBT_NFG_MENU_PROFILES_PROPERTIES, "Properties",
+  editMenu->Append(GBT_MENU_PROFILES_PROPERTIES, "Properties",
 		   "View and edit properties of this profile");
 
   wxMenu *viewMenu = new wxMenu;
