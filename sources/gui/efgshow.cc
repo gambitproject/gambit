@@ -422,6 +422,7 @@ gText EfgShow::GetActionProb(const Node *p_node, int p_act) const
     return ToText(m_efg.GetChanceProb(p_node->GetInfoset(), p_act),
 		  NumDecimals());
   }
+
   return ToText(GetCurrentProfile().ActionProb(p_node->GetInfoset()->Actions()[p_act]),
 		NumDecimals());
 }

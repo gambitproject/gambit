@@ -28,7 +28,8 @@ private:
   int m_level;        // depth of the node in tree
   int m_sublevel;     // # of the infoset line on this level
 
-  wxString m_nodeAboveLabel, m_nodeBelowLabel;
+  wxString m_nodeAboveLabel, m_nodeBelowLabel, m_nodeRightLabel;
+  wxString m_branchAboveLabel, m_branchBelowLabel;
 
 public:
   int x, y;
@@ -70,9 +71,24 @@ public:
   void SetNodeBelowLabel(const wxString &p_label)
     { m_nodeBelowLabel = p_label; }
 
+  const wxString &GetNodeRightLabel(void) const { return m_nodeRightLabel; }
+  void SetNodeRightLabel(const wxString &p_label)
+    { m_nodeRightLabel = p_label; }
+
+  const wxString &GetBranchAboveLabel(void) const 
+    { return m_branchAboveLabel; }
+  void SetBranchAboveLabel(const wxString &p_label)
+    { m_branchAboveLabel = p_label; }
+
+  const wxString &GetBranchBelowLabel(void) const 
+    { return m_branchBelowLabel; }
+  void SetBranchBelowLabel(const wxString &p_label)
+    { m_branchBelowLabel = p_label; }
+
   int GetX(void) const;
 
   void Draw(wxDC &) const;
+  void DrawIncomingBranch(wxDC &) const;
 };
 
 class SubgameEntry {
@@ -110,9 +126,10 @@ private:
 
   wxString CreateNodeAboveLabel(const NodeEntry *) const;
   wxString CreateNodeBelowLabel(const NodeEntry *) const;
+  wxString CreateNodeRightLabel(const NodeEntry *) const;
+  wxString CreateBranchAboveLabel(const NodeEntry *) const;
+  wxString CreateBranchBelowLabel(const NodeEntry *) const;
 
-  void RenderLabels(wxDC &dc, const NodeEntry *child_entry,
-		    const NodeEntry *entry) const;
   void RenderSubtree(wxDC &dc) const;
 
 public:
@@ -123,6 +140,7 @@ public:
   Node *NextSameLevel(Node *) const;
 
   void Layout(const EFSupport &);
+  void GenerateLabels(void);
 
   // The following member functions are for temporary compatibility only
   NodeEntry *GetNodeEntry(Node *p_node) const

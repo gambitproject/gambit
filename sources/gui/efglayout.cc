@@ -101,7 +101,7 @@ void DrawSmallSubgameIcon(wxDC &dc, const NodeEntry &entry)
 NodeEntry::NodeEntry(Node *p_node)
   : m_node(p_node), m_selected(false), m_cursor(false), m_size(20),
     m_token(tokenELLIPSE),
-    m_sublevel(0), nums(0)
+    m_sublevel(0), nums(0), in_sup(true)
 { }
 
 void NodeEntry::SetCursor(bool p_cursor)
@@ -135,9 +135,30 @@ void NodeEntry::Draw(wxDC &p_dc) const
     p_dc.DrawRectangle(GetX() + m_size - 3, y - 3, 7, 7);
   }      
 
+  DrawIncomingBranch(p_dc);
+
+  int textWidth, textHeight;
+  p_dc.GetTextExtent(m_nodeAboveLabel, &textWidth, &textHeight);
+  p_dc.DrawText(m_nodeAboveLabel,
+		GetX() + (GetSize() - textWidth) / 2, y - textHeight - 9);
+  p_dc.GetTextExtent(m_nodeBelowLabel, &textWidth, &textHeight);
+  p_dc.DrawText(m_nodeBelowLabel,
+		GetX() + (GetSize() - textWidth) / 2, y + 9);
+  p_dc.GetTextExtent(m_nodeRightLabel, &textWidth, &textHeight);
+  p_dc.DrawText(m_nodeRightLabel,
+		GetX() + GetSize() + 10, y - textHeight/2);
+}
+
+void NodeEntry::DrawIncomingBranch(wxDC &p_dc) const
+{
   if (m_node->GetParent() && in_sup) {
-    ::DrawLine(p_dc, parent->GetX() + parent->GetSize(), parent->y, 
-	       GetX(), y, parent->color);
+    int xStart = parent->GetX() + parent->GetSize();
+    int xEnd = GetX();
+    int yStart = parent->y;
+    int yEnd = y;
+
+    p_dc.SetPen(*wxThePenList->FindOrCreatePen(parent->color, 2, wxSOLID)); 
+    p_dc.DrawLine(xStart, yStart, xEnd, yEnd);
 #ifdef UNUSED
       // Draw the highlight... y = a + bx = ys + (ye-ys) / (xe-xs) * x
     double prob = m_parent->Parent()->ActionProb(entry.n,  child_entry.child_number);
@@ -146,12 +167,33 @@ void NodeEntry::Draw(wxDC &p_dc) const
 		 (ys + (ye - ys) * prob), *wxBLACK);
     }
 #endif  // UNUSED
-  }
+    
+    int textWidth, textHeight;
+    p_dc.GetTextExtent(m_branchAboveLabel, &textWidth, &textHeight);
+    if (yStart != yEnd) {
+      // this is a sloping branch
+      p_dc.DrawText(m_branchAboveLabel,
+		    (xStart + xEnd - textWidth) / 2,
+		    (yStart + yEnd) / 2 - textHeight);
+    }
+    else {
+      // this is a flat branch
+      p_dc.DrawText(m_branchAboveLabel,
+		    (xStart + xEnd - textWidth) / 2, y - textHeight - 7);
+    }
 
-  int tw, th;
-  p_dc.GetTextExtent(m_nodeAboveLabel, &tw, &th);
-  p_dc.DrawText(m_nodeAboveLabel, GetX(), y - th - 9);
-  p_dc.DrawText(m_nodeBelowLabel, GetX(), y + 9);
+    p_dc.GetTextExtent(m_branchBelowLabel, &textWidth, &textHeight);
+    if (yStart != yEnd) {
+      // this is a sloping branch
+      p_dc.DrawText(m_branchBelowLabel,
+		    (xStart + xEnd - textWidth) / 2,
+		    (yStart + yEnd) / 2);
+    }
+    else if (yStart == yEnd) {
+      p_dc.DrawText(m_branchBelowLabel,
+		    (xStart + xEnd - textWidth) / 2, y + 7);
+    }
+  }
 }
 
 int NodeEntry::GetX(void) const
@@ -410,7 +452,71 @@ wxString efgTreeLayout::CreateNodeBelowLabel(const NodeEntry *p_entry) const
     return "";
   }
 }
-    
+
+wxString efgTreeLayout::CreateNodeRightLabel(const NodeEntry *p_entry) const
+{    
+  const Node *node = p_entry->GetNode();
+
+  switch (m_parent->DrawSettings().LabelNodeRight()) { 
+  case NODE_RIGHT_NOTHING:
+    return "";
+  case NODE_RIGHT_OUTCOME:
+    return (const char *) m_parent->OutcomeAsString(node);
+  case NODE_RIGHT_NAME:
+    if (!node->Game()->GetOutcome(node).IsNull()) {
+      return (const char *) m_efg.GetOutcomeName(node->Game()->GetOutcome(node));
+    }
+    else {
+      return "";
+    }
+  default:
+    return "";
+  }
+}
+
+wxString efgTreeLayout::CreateBranchAboveLabel(const NodeEntry *p_entry) const
+{
+  const Node *parent = p_entry->parent->GetNode();
+
+  switch (m_parent->DrawSettings().LabelBranchAbove()) {
+  case BRANCH_ABOVE_NOTHING:
+    return "";
+  case BRANCH_ABOVE_LABEL:
+    return (const char *) parent->GetInfoset()->GetActionName(p_entry->child_number);
+  case BRANCH_ABOVE_PLAYER:
+    return (const char *) parent->GetPlayer()->GetName();
+  case BRANCH_ABOVE_PROBS:
+    return (const char *) m_parent->Parent()->GetActionProb(parent,
+							    p_entry->child_number);
+  case BRANCH_ABOVE_VALUE:
+    return (const char *) m_parent->Parent()->GetActionValue(parent,
+							     p_entry->child_number);
+  default:
+    return "";
+  }
+}
+
+wxString efgTreeLayout::CreateBranchBelowLabel(const NodeEntry *p_entry) const
+{
+  const Node *parent = p_entry->parent->GetNode();
+
+  switch (m_parent->DrawSettings().LabelBranchBelow()) {
+  case BRANCH_BELOW_NOTHING:
+    return "";
+  case BRANCH_BELOW_LABEL:
+    return (const char *) parent->GetInfoset()->GetActionName(p_entry->child_number);
+  case BRANCH_BELOW_PLAYER:
+    return (const char *) parent->GetPlayer()->GetName();
+  case BRANCH_BELOW_PROBS:
+    return (const char *) m_parent->Parent()->GetActionProb(parent,
+							    p_entry->child_number);
+  case BRANCH_BELOW_VALUE:
+    return (const char *) m_parent->Parent()->GetActionValue(parent,
+							     p_entry->child_number);
+  default:
+    return "";
+  }
+}
 
 NodeEntry *efgTreeLayout::GetValidParent(Node *e)
 {
@@ -493,10 +599,18 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
   SubgameEntry &subgame_entry = GetSubgameEntry(n->GetSubgameRoot());
     
   NodeEntry *entry = new NodeEntry(n);
-  entry->SetSize(draw_settings.NodeLength());
-  entry->in_sup = true;
-  entry->SetNodeAboveLabel(CreateNodeAboveLabel(entry));
-  entry->SetNodeBelowLabel(CreateNodeBelowLabel(entry));
+  if (n == m_efg.RootNode()) {
+    entry->child_number = 0;
+  }
+  else {
+    Node *parent = n->GetParent();
+    for (int i = 1; i <= parent->Game()->NumChildren(parent); i++) {
+      if (parent->GetChild(i) == n) {
+	entry->child_number = i;
+	break;
+      }
+    }
+  }
   m_nodeList += entry;
   if (n->Game()->NumChildren(n)>0 && subgame_entry.expanded) {
     for (int i = 1; i <= n->Game()->NumChildren(n); i++) {
@@ -528,16 +642,6 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
     
   entry->SetLevel(level);
   entry->has_children = n->Game()->NumChildren(n);
-  // Find out what branch of the parent this node is on
-  if (n == m_efg.RootNode()) {
-    entry->child_number = 0;
-  }
-  else {
-    Node *parent = n->GetParent();
-    for (int i = 1; i <= parent->Game()->NumChildren(parent); i++)
-      if (parent->GetChild(i) == n)
-	entry->child_number = i;
-  }
     
   entry->infoset.y = -1;
   entry->infoset.x = -1;
@@ -555,7 +659,7 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
   }  
   
   entry->expanded = subgame_entry.expanded;
-    
+  entry->SetSize(draw_settings.NodeLength());
   maxlev = gmax(level, maxlev);
   maxy = gmax(entry->y, maxy);
   miny = gmin(entry->y, miny);
@@ -723,143 +827,25 @@ void efgTreeLayout::Layout(const EFSupport &p_support)
   }
 
   UpdateTableParents();
+  GenerateLabels();
 
   m_maxX += draw_settings.NodeLength() + draw_settings.OutcomeLength();
   m_maxY = maxy + 25;
 }
 
-//
-// RenderLabels:  Draws all the text labels for the tree according to the
-// settings in draw_settings.  Currently takes care of:labels node/branch,
-// outcomes.  Note: this function is getting very long, but I see no real
-// reason to split it at this point...
-//
-void efgTreeLayout::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
-			       const NodeEntry *entry) const
+void efgTreeLayout::GenerateLabels(void)
 {
-  gText label = "";     // temporary to hold the label
-  const Node *n = child_entry->GetNode();
-  long tw, th;
-  bool hilight = false;
-    
-  if (child_entry->GetNode() != entry->GetNode()) {   // no branches for root
-    // Now take care of branches....
-    // Take care of labeling the branch on the top.
-    switch (m_parent->DrawSettings().LabelBranchAbove()) {
-    case BRANCH_ABOVE_NOTHING:
-      label = "";
-      break;
-            
-    case BRANCH_ABOVE_LABEL:
-      if (child_entry->child_number != 0)
-	label = entry->GetNode()->GetInfoset()->GetActionName(child_entry->child_number);
-      else
-	label = "";
-      break;
-            
-    case BRANCH_ABOVE_PLAYER:
-      if (entry->GetNode()->GetPlayer()) 
-	label = entry->GetNode()->GetPlayer()->GetName();
-      break;
-            
-    case BRANCH_ABOVE_PROBS:
-      label = m_parent->Parent()->GetActionProb(entry->GetNode(),
-						child_entry->child_number);
-      break;
-      
-    case BRANCH_ABOVE_VALUE:
-      label = m_parent->Parent()->GetActionValue(entry->GetNode(),
-						 child_entry->child_number);
-      break;
-            
-    default:
-      label = "";
-      break;
+  for (int i = 1; i <= m_nodeList.Length(); i++) {
+    NodeEntry *entry = m_nodeList[i];
+    entry->SetNodeAboveLabel(CreateNodeAboveLabel(entry));
+    entry->SetNodeBelowLabel(CreateNodeBelowLabel(entry));
+    entry->SetNodeRightLabel(CreateNodeRightLabel(entry));
+    if (entry->child_number > 0) {
+      entry->SetBranchAboveLabel(CreateBranchAboveLabel(entry));
+      entry->SetBranchBelowLabel(CreateBranchBelowLabel(entry));
     }
-    
-    if (label != "") {
-      dc.SetFont(m_parent->DrawSettings().BranchAboveFont());
-      dc.GetTextExtent("0", &tw, &th);
-      gDrawText(dc, label, 
-		entry->x + entry->nums * INFOSET_SPACING + 
-		m_parent->DrawSettings().ForkLength() +
-		m_parent->DrawSettings().NodeLength() + 3,
-		child_entry->y - th - 5);
-    }
-        
-    // Take care of labeling the branch on the bottom.
-    switch (m_parent->DrawSettings().LabelBranchBelow()) { 
-    case BRANCH_BELOW_NOTHING:
-      label = "";
-      break;
-            
-    case BRANCH_BELOW_LABEL:
-      if (child_entry->child_number != 0)
-	label = entry->GetNode()->GetInfoset()->GetActionName(child_entry->child_number);
-      else
-	label = "";
-      break;
-            
-    case BRANCH_BELOW_PLAYER:
-      if (entry->GetNode()->GetPlayer()) 
-	label = entry->GetNode()->GetPlayer()->GetName();
-      break;
-      
-    case BRANCH_BELOW_PROBS:
-      label = m_parent->Parent()->GetActionProb(entry->GetNode(), child_entry->child_number);
-      break;
-            
-    case BRANCH_BELOW_VALUE:
-      label = m_parent->Parent()->GetActionValue(entry->GetNode(), child_entry->child_number);
-      break;
-            
-    default:
-      label = "";
-      break;
-    }
-        
-    if (label != "") {
-      dc.SetFont(m_parent->DrawSettings().BranchBelowFont());
-      gDrawText(dc, label,
-		entry->x + entry->nums * INFOSET_SPACING + 
-		m_parent->DrawSettings().ForkLength() +
-		m_parent->DrawSettings().NodeLength() + 3,
-		child_entry->y + 5);
-    }
-  }
-    
-  // Now take care of displaying the terminal node labels.
-  hilight = false;
-    
-  switch (m_parent->DrawSettings().LabelNodeRight()) { 
-  case NODE_RIGHT_NOTHING:
-    label = "";
-    break;
-            
-  case NODE_RIGHT_OUTCOME:
-    label = m_parent->OutcomeAsString(n);
-    break;
-            
-  case NODE_RIGHT_NAME:
-    if (!n->Game()->GetOutcome(n).IsNull()) {
-      label = m_efg.GetOutcomeName(n->Game()->GetOutcome(n));
-    }
-    break;
-            
-  default:
-    label = "";
-    break;
-  }
-        
-  if (label != "") { 
-    dc.SetFont(m_parent->DrawSettings().NodeRightFont());
-    gDrawText(dc, label,
-	      child_entry->x + m_parent->DrawSettings().NodeLength() +
-	      child_entry->nums * INFOSET_SPACING + 10,
-	      child_entry->y - 12);
   }
 }
-
 
 //
 // RenderSubtree: Render branches and labels
@@ -884,8 +870,6 @@ void efgTreeLayout::RenderSubtree(wxDC &p_dc) const
     NodeEntry *entry = m_nodeList[pos];  
     NodeEntry *parentEntry = entry->parent;
         
-    RenderLabels(p_dc, entry, parentEntry);
-
     if (entry->child_number == 1) {
       parentEntry->Draw(p_dc);
 
