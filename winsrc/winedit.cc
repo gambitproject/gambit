@@ -325,4 +325,17 @@ void WinGetArgs(int *argc,char ***argv) // taken from the wx_win code
 }
 
 
+//
+// Provide default input and output streams
+//
 
+#include "gwstream.h"
+
+gFileInput _gin(stdin);
+gInput &gin = _gin;
+
+gWinOutput _gout;
+gOutput &gout = _gout;
+
+gWinOutput _gerr;
+gOutput &gerr = _gerr;

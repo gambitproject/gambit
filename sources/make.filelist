@@ -68,10 +68,10 @@ TTYGCL_SOURCES = $(ALLGCL_SOURCES) gclstats.cc gio.cc gcl.cc
 
 TTYGCL_OBJECTS = $(TTYGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
 
-MFCGCL_SOURCES = $(ALLGCL_SOURCES) gio.cc gcl.cc ..\winsrc\stdafx.cc \
+MFCGCL_SOURCES = $(ALLGCL_SOURCES) gcl.cc ..\winsrc\stdafx.cc \
                  ..\winsrc\winedit.cc ..\winsrc\wineditdoc.cc \
-                 ..\winsrc\wineditview.cc ..\winsrc\mainfrm.cc gwstream.cc \
-                 gclstats.cc
+                 ..\winsrc\wineditview.cc ..\winsrc\mainfrm.cc \
+                 ..\winsrc\gwstream.cc gclstats.cc
 
 MFCGCL_OBJECTS = $(MFCGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
 

@@ -1,14 +1,15 @@
 //
 // FILE: gwstream.cc -- MFC-based stream classes
 //
-
+// $Id$
+//
 
 #include "stdafx.h"
 #include "MainFrm.h"
 #include "WinEditDoc.h"
 #include "WinEditView.h"
 
-#include "gstream.h"
+#include "gwstream.h"
 
 //--------------------------------------------------------------------------
 //                         gWinOutput member functions

@@ -226,13 +226,21 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
 				  wxDefaultPosition, wxDefaultSize,
 				  wxTE_MULTILINE | wxTE_READONLY);
   m_outputStream = new wxOutputWindowStream(m_outputWindow);
+#ifdef __WXMSW__
+  m_inputWindow = new wxTextCtrl(splitter, idINPUT_WINDOW, "",
+				 wxDefaultPosition, wxDefaultSize,
+				 wxTE_PROCESS_ENTER);
+#else
   m_inputWindow = new wxTextCtrl(splitter, idINPUT_WINDOW, "",
 				 wxDefaultPosition, wxDefaultSize,
 				 wxTE_MULTILINE | wxTE_PROCESS_ENTER);
+#endif  // __WXMSW__
   splitter->SplitHorizontally(m_outputWindow, m_inputWindow, 300);
+
   m_inputWindow->SetFocus();
   m_inputWindow->SetValue("<< ");
-
+  m_inputWindow->SetInsertionPointEnd();
+  
   Show(true);
 
   _SourceDir = new char[1024];
@@ -303,7 +311,7 @@ void GclFrame::OnSaveScript(wxCommandEvent &)
     try {
       gFileOutput file(dialog.GetPath().c_str());
       for (int i = 1; i <= m_history.Length(); i++) {
-	file << m_history[i] << '\n';
+	file << ((char *) m_history[i]) << '\n';
       }
     }
     catch (gFileOutput::OpenFailed &) {
@@ -384,6 +392,7 @@ void GclFrame::OnTextEnter(wxCommandEvent &)
     _gsm->OutputStream() << "GCL EXCEPTION:" << w.Description() << "; Caught in GclFrame::OnTextEnter()\n";
   }
   m_inputWindow->SetValue("<< ");
+  m_inputWindow->SetInsertionPointEnd();
   m_outputWindow->AppendText("\n");
 }
 
