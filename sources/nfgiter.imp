@@ -22,7 +22,7 @@ template <class T> NfgIter<T>::NfgIter (Nfg<T> &N)
   First();
 }
 template <class T> NfgIter<T>::NfgIter(const NFSupport *s) 
-: N((Nfg<T> *) s->sups[1]->nfp->N), current_strat((s->sups).Length()),
+: N((Nfg<T> *) s->bnfg), current_strat((s->sups).Length()),
   profile(new StrategyProfile(s->sups.Length()))
 {
   stratset = s;
