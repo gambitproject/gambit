@@ -1,5 +1,5 @@
 //
-// FILE: extgui.h -- the wrapper class for creating the extensive form GUI
+// FILE: efggui.h -- the wrapper class for creating the extensive form GUI
 //
 // $Id$
 //
@@ -13,7 +13,7 @@ class EfgNfgInterface;
 
 class EfgGUI {
 private:
-  int GetEfgParams(wxFrame *parent);
+  int GetParams(Efg &, wxFrame *parent);
 
 public:
   EfgGUI(Efg *p_efg, const gText &p_filename,

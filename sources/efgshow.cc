@@ -1635,6 +1635,7 @@ void EfgShow::UpdateMenus(Node *p_cursor, Node *p_markNode)
 
 
 #include "efggui.h"
+#include "dlefgplayers.h"
 
 //-------------------------------------------------------------------------
 //                        EfgGUI: Member functions
@@ -1646,11 +1647,12 @@ EfgGUI::EfgGUI(Efg *p_efg, const gText &p_filename,
   if (!p_efg) {
     // must create a new extensive form from scratch or file
     if (p_filename == "") {  // from scratch
-      int numPlayers;
-      if ((numPlayers = GetEfgParams(p_parent)) > 0) {
-	p_efg = new Efg;
-	for (int i = 1; i <= numPlayers; i++)
-	  p_efg->NewPlayer();
+      p_efg = new Efg;
+      p_efg->NewPlayer();
+      p_efg->NewPlayer();
+      if (!GetParams(*p_efg, p_parent)) {
+	delete p_efg;
+	p_efg = 0;
       }
     }
     else {
@@ -1679,24 +1681,10 @@ EfgGUI::EfgGUI(Efg *p_efg, const gText &p_filename,
     efgShow->SetFileName(p_filename);
 }
 
-
-#define MAX_PLAYERS           100
-
-int EfgGUI::GetEfgParams(wxFrame *parent)
+int EfgGUI::GetParams(Efg &p_efg, wxFrame *p_parent)
 {
-  static int num_players = 2;
-
-  // Get the number of players first
-  MyDialogBox dialog(parent, "Create new extensive form");
-  dialog.Form()->Add(wxMakeFormShort("How many players",
-					 &num_players, wxFORM_TEXT,
-					 new wxList(wxMakeConstraintRange(1, MAX_PLAYERS), 0), 
-					 NULL, 0, 220));
-  dialog.Go();
-  if (dialog.Completed() == wxOK)
-    return num_players;
-  else
-    return 0;
+  dialogEfgPlayers dialog(p_efg, p_parent);
+  return (dialog.Completed() == wxOK);
 }
 
 template class SolutionList<BehavSolution>;
