@@ -357,6 +357,23 @@ Portion *GSM_RandomEfgSeedRational(Portion **param)
   return param[0]->RefCopy();
 }  
 
+Portion *GSM_Reveal(Portion **param)
+{
+  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  ListPortion *players = (ListPortion *) param[1];
+
+  gBlock<EFPlayer *> player(players->Length());
+  for (int i = 1; i <= players->Length(); i++)
+    player[i] = ((EfPlayerPortion *) players->Subscript(i))->Value();
+  
+  s->BelongsTo()->Reveal(s, player);
+
+  Portion *por = new InfosetValPortion(s);
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+
 Portion *GSM_SetChanceProbs(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
@@ -1027,6 +1044,12 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_RandomEfgSeedRational, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_RandomEfgSeedRational, 1, "seed", porINTEGER);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Reveal");
+  FuncObj->SetFuncInfo(GSM_Reveal, 2);
+  FuncObj->SetParamInfo(GSM_Reveal, 0, "infoset", porINFOSET);
+  FuncObj->SetParamInfo(GSM_Reveal, 1, "who", porLIST | porPLAYER_EFG);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("SetChanceProbs");
