@@ -1,7 +1,7 @@
 //
 // FILE: treewin.h -- Interface for TreeWindow class
 //
-// $Id$
+// @(#)treewin.h	1.19 7/4/95
 //
 
 #ifndef TREEWINDOW_H
@@ -94,6 +94,7 @@ public:
 	void node_delete(void);
 	void node_set_mark(void);
 	void node_goto_mark(void);
+	void node_switch_player(void);
 #ifdef SUBGAMES
 	void node_subgame(int _game);
 #endif
@@ -119,6 +120,7 @@ public:
 	void infoset_join(void);
 	void infoset_label(void);
   void infoset_action_label(void);
+	void infoset_switch_player(void);
 
 	void edit_outcome(void);
 	void display_legends(void);
