@@ -32,7 +32,7 @@
 
 CC = g++ 
 CFLAGS = -O2 -Wall -DGDOUBLE -D__NO_MATH_INLINES -Dwx_motif $(DEFINES) \
-	-DUNIX -fguiding-decls -fno-implicit-templates $(INCDIR) 
+	-D__GNUG__ -fguiding-decls -fno-implicit-templates $(INCDIR) 
 
 # define variable for system name.  
 

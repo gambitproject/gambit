@@ -2645,7 +2645,7 @@ void TreeWindow::file_save(void)
                              wxFileNameFromPath(filename), ".efg", "*.efg",
                              wxSAVE|wxOVERWRITE_PROMPT);
 
-#ifdef UNIX
+#ifdef __GNUG__
     // Overwrite protection doesn't work in Unix, so we
     // have to check explicitly.
 
