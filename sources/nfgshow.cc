@@ -619,12 +619,12 @@ void NfgTable::RemoveValDisp(void)
 
 void NfgTable::OnLeftDoubleClick(wxMouseEvent &p_event)
 {
-#ifndef __WXMSW__
+#ifdef UNUSED
   int row, col;
   if (CellHitTest(p_event.GetX(), p_event.GetY(), &row, &col)) {
     m_parent->OutcomePayoffs(row+1, col+1); 
   }
-#endif  // __WXMSW__
+#endif  // UNUSED
 }
 
 //======================================================================
