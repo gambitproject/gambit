@@ -1368,13 +1368,40 @@ bool GSM::Subscript ( void )
   p2 = _ResolveRef( p2 );
   p1 = _ResolveRef( p1 );
 
-  _Push( p1 );
-  _Push( p2 );
-
-  if( p1->Spec().ListDepth > 0 )
-    return _BinaryOperation( "NthElement" );
+  if(p1->Spec().ListDepth > 0 && p2->Spec().Type == porINTEGER)
+  {
+    _Push(((ListPortion*) p1)->Subscript(((IntPortion*) p2)->Value()));
+    delete p1;
+    delete p2;
+    return true;
+  }
+  if(p1->Spec().Type == porTEXT && p2->Spec().Type == porINTEGER)
+  {
+    gString text(((TextPortion *) p1)->Value());
+    int n = ((IntPortion *) p2)->Value();
+    delete p1;
+    delete p2;
+    if (n < 0 || n >= text.length())
+    {
+      _Push(new ErrorPortion);
+      return false;
+    }
+    else
+    {
+      _Push(new TextValPortion(text[n-1]));
+      return true;
+    }
+  }
   else
-    return _BinaryOperation( "NthChar" );
+  {
+    _Push( p1 );
+    _Push( p2 );
+    
+    if( p1->Spec().ListDepth > 0 )
+      return _BinaryOperation( "NthElement" );
+    else
+      return _BinaryOperation( "NthChar" );
+  }
 }
 
 
