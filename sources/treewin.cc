@@ -206,7 +206,7 @@ void DrawSubgamePickIcon(wxDC &dc, const NodeEntry &entry)
 //                      TreeRender: Member functions
 //-----------------------------------------------------------------------
 
-TreeRender::TreeRender(wxFrame *frame, const TreeWindow *parent_,
+TreeRender::TreeRender(wxFrame *frame, TreeWindow *parent_,
                        const gList<NodeEntry *> &node_list_,
                        const Infoset * &hilight_infoset_,
                        const Infoset * &hilight_infoset1_,
@@ -765,7 +765,7 @@ TreeRender::~TreeRender(void)
 //                   TreeZoomWindow: Member functions
 //----------------------------------------------------------------------
 
-TreeZoomWindow::TreeZoomWindow(wxFrame *frame, const TreeWindow *parent,
+TreeZoomWindow::TreeZoomWindow(wxFrame *frame, TreeWindow *parent,
                                const gList<NodeEntry *> &node_list_,
                                const Infoset * &hilight_infoset_,
                                const Infoset * &hilight_infoset1_,
@@ -812,6 +812,13 @@ void TreeZoomWindow::UpdateCursor(const NodeEntry *entry)
     Render(*GetDC());
 }
 
+/*
+Bool TreeZoomWindow::OnClose(void)
+{
+  parent->delete_zoom_win();
+  return FALSE;
+}
+*/
 
 
 //----------------------------------------------------------------------

@@ -833,7 +833,6 @@ void EfgShow::MakeMenus(void)
   inspect_menu->AppendSeparator();
   inspect_menu->Append(INSPECT_GAMEINFO, "Game&Info",
                "Information about this game");
-  m_inspectCursorItem = inspect_menu->FindItem("&Cursor");
   m_inspectInfosetsItem = inspect_menu->FindItem("&Infosets");
   
   wxMenu *prefs_menu = new wxMenu;
@@ -847,7 +846,6 @@ void EfgShow::MakeMenus(void)
   prefs_menu->Append(DISPLAY_LOAD_DEFAULT, "Load Default");
   prefs_menu->Append(DISPLAY_SAVE_CUSTOM,  "Save Custom");
   prefs_menu->Append(DISPLAY_LOAD_CUSTOM,  "Load Custom");
-  zoom_win_item = prefs_menu->FindItem("Zoom &Window");
   
   wxMenu *help_menu = new wxMenu;
   help_menu->Append(GAMBIT_HELP_CONTENTS, "&Contents", "Table of contents");
@@ -1031,7 +1029,7 @@ void EfgShow::OnMenuCommand(int id)
       GetMenuBar()->Check(m_inspectInfosetsItem, features.iset_hilight);
       break;
     case INSPECT_ZOOM_WIN:
-      GetMenuBar()->Check(zoom_win_item, tw->display_zoom_win());
+      tw->display_zoom_win();
       break;
     case INSPECT_GAMEINFO: 
       ShowGameInfo();

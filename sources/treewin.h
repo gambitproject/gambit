@@ -53,7 +53,6 @@ class TreeNodeCursor;
 class TreeRender : public wxCanvas
 {
 private:
-    const TreeWindow *parent;
     const gList<NodeEntry *> &node_list;
     const Infoset * &hilight_infoset;    // Hilight infoset from the solution display
     const Infoset * &hilight_infoset1;   // Hilight infoset by pressing control
@@ -68,12 +67,13 @@ private:
     void RenderSubtree(wxDC &dc);
     
 protected:
+    TreeWindow *parent;
     const TreeDrawSettings &draw_settings;  // Stores drawing parameters
     TreeNodeCursor *flasher;                // Used to flash/display the cursor
     bool painting;                          // Used to prevent re-entry.
 
 public:
-    TreeRender(wxFrame *frame, const TreeWindow *parent,
+    TreeRender(wxFrame *frame, TreeWindow *parent,
                const gList<NodeEntry *> &node_list,
                const Infoset * &hilight_infoset_,
                const Infoset * &hilight_infoset1_,
@@ -97,26 +97,26 @@ public:
 };
 
 
-class TreeZoomWindow : public TreeRender
-{
+class TreeZoomWindow : public TreeRender {
 private:
-    // Real xs,ys,xe,ye: true (untranslated) coordinates of the cursor.  
-    // Need this if we repaint due to events other than cursor movement.  
-    // See ::Render()
-    int xs, ys, xe, ye;
+  // Real xs,ys,xe,ye: true (untranslated) coordinates of the cursor.  
+  // Need this if we repaint due to events other than cursor movement.  
+  // See ::Render()
+  int xs, ys, xe, ye;
 
 public:
-    TreeZoomWindow(wxFrame *frame, const TreeWindow *parent,
-                   const gList<NodeEntry *> &node_list,
-                   const Infoset * &hilight_infoset_,
-                   const Infoset * &hilight_infoset1_,
-                   const Node *&mark_node_, const Node *&cursor,
-                   const Node *&subgame_node,
-                   const TreeDrawSettings &draw_settings_,
-                   const NodeEntry *cursor_entry);
-    virtual void Render(wxDC &dc);
-    // Makes sure the cursor is always in the center of the window
-    virtual void UpdateCursor(const NodeEntry *entry);
+  TreeZoomWindow(wxFrame *frame, TreeWindow *parent,
+		 const gList<NodeEntry *> &node_list,
+		 const Infoset * &hilight_infoset_,
+		 const Infoset * &hilight_infoset1_,
+		 const Node *&mark_node_, const Node *&cursor,
+		 const Node *&subgame_node,
+		 const TreeDrawSettings &draw_settings_,
+		 const NodeEntry *cursor_entry);
+  virtual void Render(wxDC &dc);
+  // Makes sure the cursor is always in the center of the window
+  virtual void UpdateCursor(const NodeEntry *entry);
+  //  Bool OnClose(void);
 };
 
 
@@ -267,7 +267,8 @@ public:
     void display_set_zoom(float z=-1);
     void display_zoom_fit(void);
     float display_get_zoom(void);
-    Bool display_zoom_win(void);
+    void display_zoom_win(void);
+    void delete_zoom_win(void);
     
     void  file_save(void);
     void  output(void);

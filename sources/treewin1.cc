@@ -1469,26 +1469,26 @@ void TreeWindow::print_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
 //***********************************************************************
 //                      DISPLAY-ZOOM WINDOW MENU HANDLER
 //***********************************************************************
-Bool TreeWindow::display_zoom_win(void)
+void TreeWindow::display_zoom_win(void)
 {
-    if (zoom_window)   // already exists, delete it
-    { 
-        // note that zoom_window itself is just the canvas, must delete the frame!
-        delete zoom_window->GetParent();
-        zoom_window = 0;
-    }
-    else   
-    {
-        zoom_window = 
-            new TreeZoomWindow(pframe, this, node_list, 
-                               (const Infoset *&)hilight_infoset,
-                               (const Infoset *&)hilight_infoset1, 
-                               (const Node *&)mark_node, 
-                               (const Node *&)cursor,
-                               (const Node *&)subgame_node, 
-                               draw_settings, GetNodeEntry(cursor));
-    }
-    return (zoom_window) ? TRUE : FALSE;
+  if (!zoom_window) {
+    zoom_window = (new TreeZoomWindow(pframe, this, node_list, 
+				      (const Infoset *&)hilight_infoset,
+				      (const Infoset *&)hilight_infoset1, 
+				      (const Node *&)mark_node, 
+				      (const Node *&)cursor,
+				      (const Node *&)subgame_node, 
+				      draw_settings, GetNodeEntry(cursor)));
+  }
+  else {
+    delete zoom_window;
+    zoom_window = 0;
+  }
+}
+
+void TreeWindow::delete_zoom_win(void)
+{
+  zoom_window = 0;
 }
 
 //***********************************************************************
