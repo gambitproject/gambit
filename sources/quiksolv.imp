@@ -128,11 +128,56 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
 
   gRectangle<gDouble> bigr = r.SameCenterDoubleSideLengths();
 
-  while (true) {
-    gSquareMatrix<gDouble> Df = TreesOfPartials.SquareDerivativeMatrix(point);
+  gVector<gDouble> Del(Dmnsn());
 
-    //    if (Df.Determinant() == (gDouble)0) return false;
-    gVector<gDouble> Del = - (Df.Inverse() * oldevals);
+  while (true) {
+    try {
+    gSquareMatrix<gDouble> Df = TreesOfPartials.SquareDerivativeMatrix(point);
+    Del = - (Df.Inverse() * oldevals);
+    }
+    catch (gSquareMatrix<gDouble>::MatrixSingular &) {
+      bool nonsingular = false;
+      int direction = 1;
+      while (direction < Dmnsn() && !nonsingular) {
+	gVector<gDouble> perturbed_point(point);
+	if (r.UpperBoundOfCoord(direction) > point[direction])
+	  perturbed_point[direction] += 
+	    (r.UpperBoundOfCoord(direction) - point[direction])/10;
+	else
+	  perturbed_point[direction] += 
+	    (r.LowerBoundOfCoord(direction) - point[direction])/10;
+	nonsingular = true;
+
+	try {
+	  gSquareMatrix<gDouble> Df = 
+	    TreesOfPartials.SquareDerivativeMatrix(perturbed_point);
+	  Del = - (Df.Inverse() * oldevals);
+	}
+	catch (gSquareMatrix<gDouble>::MatrixSingular &) {
+	  nonsingular = false;
+	}
+	direction++;
+      }
+      if (!nonsingular) {
+	gVector<gDouble> perturbed_point(point);
+	if (r.UpperBoundOfCoord(direction) > point[direction])
+	  perturbed_point[direction] += 
+	    (r.UpperBoundOfCoord(direction) - point[direction])/10;
+	else
+	  perturbed_point[direction] += 
+	    (r.LowerBoundOfCoord(direction) - point[direction])/10;
+	gSquareMatrix<gDouble> Df = 
+	  TreesOfPartials.SquareDerivativeMatrix(perturbed_point);
+	Del = - (Df.Inverse() * oldevals);
+      }
+      gVector<gDouble> perturbed_point(point);
+      if (r.UpperBoundOfCoord(direction) > point[direction])
+	perturbed_point[direction] += 
+	  (r.UpperBoundOfCoord(direction) - point[direction])/10;
+      else
+	perturbed_point[direction] += 
+	  (r.LowerBoundOfCoord(direction) - point[direction])/10;
+    }
 
     if ( !bigr.Contains(point + Del) ) return false;
     point += Del;
@@ -415,7 +460,7 @@ QuikSolv<T>::FindRootsRecursion(      gList<gVector<gDouble> >* rootlistptr,
   m_status.Get();
 
   if ( SystemHasNoRootsIn(r, precedence) ) 
-    return; // newlist; 
+    return;
 
   gVector<gDouble> point = r.Center();
 
@@ -451,29 +496,6 @@ QuikSolv<T>::FindRootsRecursion(      gList<gVector<gDouble> >* rootlistptr,
 			   roots_found);
       } 
     }
-  
-/* - OLD CODE; KEEP UNTIL THE REPLACEMENT ABOVE SEEMS TO WORK
-  gArray<int> zeros(Dmnsn());
-  gArray<int> ones(Dmnsn());
-  for (int j = 1; j <= Dmnsn(); j++)
-    { zeros[j] = 0; ones[j] = 1; }
-  gIndexOdometer topbottoms(zeros,ones);
-  while (topbottoms.Turn() && 
-                 (max_no_roots == 0 || *roots_found < max_no_roots)) {
-    if (iterations >= max_iterations) return;
-    else {
-      iterations++;
-      FindRootsRecursion(rootlistptr,
-			 r.Orthant(topbottoms.CurrentIndices()),
-			 max_iterations, 
-			 precedence, 
-			 iterations,
-			 max_no_roots,
-			 roots_found);
-    }
-  }
-*/
-
   return; 
 }
 
