@@ -183,7 +183,7 @@ void Gobit(const Nfg<double> &N, NFGobitParams &params,
     num_steps = (int) ((params.maxLam - params.minLam) / params.delLam);
   else
     num_steps = (int) (log(params.maxLam / params.minLam) /
-		       log(params.delLam));
+		       log(params.delLam + 1.0));
 
   MixedProfile<double> p(start);
 
