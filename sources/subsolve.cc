@@ -19,7 +19,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
 {
   int i;
   int failed;
-  const Efg &efg = p_support.Game();
+  Efg &efg = (Efg &) p_support.Game();
   bool marked = AllSubgamesMarked(efg);
   
   gList<BehavProfile<gNumber> > thissolns;
@@ -245,15 +245,14 @@ void SubgameSolver::Solve(const EFSupport &p_support)
 
   gList<EFOutcome *> values;
 
-  ((gVector<gNumber> &) solution).operator=(gNumber(0));
+  solution = new BehavProfile<gNumber>(p_support);
+  ((gVector<gNumber> &) *solution).operator=(gNumber(0));
 
   Efg efg(p_support.Game());
   infosets = gArray<gArray<Infoset *> *>(efg.NumPlayers());
 
   for (int i = 1; i <= efg.NumPlayers(); i++)
     infosets[i] = new gArray<Infoset *>(efg.Players()[i]->Infosets());
-  
-  solution = new BehavProfile<gNumber>(p_support);
 
   EFSupport support(efg);
 
