@@ -1,0 +1,241 @@
+//
+// FILE: tableau3.imp: implementation of Tableau classes for gRational
+//
+// $Id$
+//
+gInteger find_lcd(const gMatrix<gRational> &mat)
+{
+  gInteger lcd(1);
+  for(int i=mat.MinRow();i<=mat.MaxRow();i++)
+    for(int j=mat.MinCol();j<=mat.MaxCol();j++) 
+      lcd = lcm(mat(i,j).denominator(),lcd);
+  return lcd;
+}
+
+gInteger find_lcd(const gVector<gRational> &vec)
+{
+  gInteger lcd(1);
+  for(int i=vec.First();i<=vec.Last();i++)
+    lcd = lcm(vec[i].denominator(),lcd);
+  return lcd;
+}
+
+//
+// Tableau method definitions 
+//
+
+// Constructor
+
+Tableau<gRational>::Tableau(const gMatrix<gRational> &A, const gVector<gRational> &b)
+  : TableauInterface(A,b), Det(1),
+    InvDat(A.MinRow(),A.MaxRow(),A.MinRow(),A.MaxRow())
+{
+  //   gout << "\nMY CODE\n";
+  InvDat.MakeIdent();
+  solution = b;
+}
+
+// Copy Constructor
+
+Tableau<gRational>::Tableau(const Tableau<gRational> &orig) 
+  : TableauInterface(orig), Det(orig.Det), InvDat(orig.InvDat)
+{ }
+
+// Destructor
+
+Tableau<gRational>::~Tableau()
+{ }
+
+
+// = operator
+
+Tableau<gRational>& Tableau<gRational>::operator=(const Tableau<gRational> &orig)
+{
+  TableauInterface<gRational>::operator=(orig);
+  if(this!= &orig) {
+    InvDat = orig.InvDat;
+    Det = orig.Det;
+  }
+  return *this;
+}
+
+//
+// pivoting operations
+//
+
+void Tableau<gRational>::Pivot(int outrow, int in_col)
+{
+  //gout << "\n BIGDUMP 1 \n";
+  //BigDump(gout);
+  //gout << "\n OTHER STUFF\n";
+  int i;
+
+  //int outlabel = Label(outrow);
+  //gout << "\noutrow:" << outrow;
+  //gout << " outlabel: " << outlabel;
+  //gout << " inlabel: " << in_col;
+
+  //  gout << InvDat << '\n';
+  /*
+  for (i=(*A).MinCol();i<=(*A).MaxCol();++i){
+    gVector <gRational> Temp(InvDat.MinRow(),InvDat.MaxRow());
+    SolveColumn(i,Temp);
+    gout << Temp << '\n';
+  }
+  gout << '\n';
+  */
+
+  // This is the Pivot Column, calculated here
+  gVector<gRational> PivotColumn((*A).MinRow(),(*A).MaxRow());
+
+  // This is the multiplier for newInverse=k*multiplier*OldInverse
+  gMatrix<gRational> TempMatrix((*A).MinRow(),(*A).MaxRow(),(*A).MinRow(),(*A).MaxRow());
+
+  // pivot in the new basis
+  basis.Pivot(outrow,in_col);
+  
+  // The paper states that the pivot column = Inverse*Aj
+  if(in_col<0){
+    for(i=PivotColumn.First();i<=PivotColumn.Last();++i)
+      if(i==abs(in_col)){
+	PivotColumn[i]=1;
+      }
+      else{
+	PivotColumn[i]=0;
+      }
+  }
+  else{
+    (*A).GetColumn(in_col,PivotColumn);
+  }
+  PivotColumn=InvDat*PivotColumn;
+ 
+  PivotColumn=PivotColumn/Det;
+  // gout << "\nPIVOTCOLUMN: \n" << PivotColumn << '\n';
+
+  // Check here too
+  for (i=TempMatrix.MinRow();i<=TempMatrix.MaxRow();++i){
+    TempMatrix(i,i)= PivotColumn[outrow];
+    TempMatrix(i,outrow)=-PivotColumn[i];
+  }
+  TempMatrix(outrow,outrow)=(gRational)1;
+
+  //gout << "\nDET: \n" << Det << '\n';
+  //gout << "\nPivotColumn: \n" << PivotColumn << '\n';
+  //gout << "\nTEMP MATRIX: \n" << TempMatrix << "\nInvDat: \n" << InvDat << '\n'; 
+  InvDat= TempMatrix*InvDat;
+  Det*= PivotColumn[outrow];
+
+  // Update solution
+  solution=(InvDat*(*b))/Det;
+
+
+  // gout << solution << '\n';
+  //gout << "\nDET: \n" << Det << '\n';
+  //gout << "PIVOT:" << '\n';
+  //gout << InvDat << '\n';
+  ++npivots;
+  // BigDump(gout);
+}
+
+
+void Tableau<gRational>::SolveColumn(int in_col, gVector<gRational> &out)
+{
+  int i;
+  
+  if(in_col<0){
+    for(i=out.First();i<=out.Last();++i){
+      if(i==abs(in_col)){out[i]=1;}
+      else{out[i]=0;}
+    }
+  }
+  else{
+    (*A).GetColumn(in_col,out);
+  }
+  // gout << "SOLVECOLUMN:" << '\n';
+  // gout << InvDat << '\n';
+
+  out = (InvDat*out)/Det;
+
+}
+
+// Generic code I don't really need, but someone downstream does
+
+void Tableau<gRational>::Refactor()
+{ }
+
+void Tableau<gRational>::SetRefactor(int)
+{ }
+
+void Tableau<gRational>::SetConst(const gVector<gRational> &bnew)
+{
+  b=&bnew;
+  //** this will have to be changed -- Need to start over and re-solve
+  //** current basis with bnew.  Here is where vertenum probably screws up (RDM)
+  // B.solve(*b, solution);
+}
+
+
+//** this function is not currently used.  Drop it?
+void Tableau<gRational>::SetBasis(const Basis<gRational> &in)
+{
+  basis= in;
+  //** this has to be changed -- Need to start over and pivot to new basis.  
+  // B.refactor();
+  // B.solve(*b, solution);
+}
+
+ // solve M x = b
+void Tableau<gRational>::Solve(const gVector<gRational> &b, gVector<gRational> &x) const
+{
+  //** Note --- commenting this out breaks LP<gRational> for now
+  //** need to add private GetInverse() function to get V = M^(-1) (M inverse)
+  //** then do x = V * b
+  // B.solve(b,x);
+}
+
+ // solve y M = c
+void Tableau<gRational>::SolveT(const gVector<gRational> &c, gVector<gRational> &y) const
+{
+  //** Note --- commenting this out breaks LP<gRational> for now
+  //** need to add private GetInverse() function to get V = M^(-1) (M inverse)
+  //** then do y = b * V
+  // B.solveT(c,y);
+}
+
+bool Tableau<gRational>::IsFeasible()
+{
+  // B.solve(*b, solution);
+  for(int i=solution.First();i<=solution.Last();i++)
+    if(solution[i]>=eps2) return false;
+  return true;
+}
+
+bool Tableau<gRational>::IsLexMin()
+{
+  int i,j;
+  for(i=MinRow();i<=MaxRow();i++)
+    if(EqZero(solution[i]))
+      for(j=-MaxRow();j<Label(i);j++) if(j!=0){
+	SolveColumn(j,tmpcol);
+	if(LtZero(tmpcol[i]))
+	  return 0;
+      }
+  return 1;
+}
+
+gOutput &operator<<(gOutput &to, const Tableau<gRational> &v)
+{
+  v.Dump(to); return to;
+}
+
+
+
+
+
+
+
+
+
+
+
+
