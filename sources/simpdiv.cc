@@ -192,10 +192,10 @@ template <class T> T SimpdivModule<T>::simplex(void)
  step2:;
   if(plev>=4) gout << "  Step 2 "; 
   getY(y,i);
-  pi.RotateUp(i,t+1);
+  pi.RotateDown(i,t+1);
   pi(i,1)=j;
   pi(i,2)=h;
-  labels.RotateUp(i+1,t+2);
+  labels.RotateDown(i+1,t+2);
   ibar=i+1;
   t++;
   getnexty(y,i);
@@ -276,8 +276,8 @@ template <class T> T SimpdivModule<T>::simplex(void)
   h=pi(i-1,2);
   TT(j,h)=0;
   if(y(j,h)<=(T)(0) || (v(j,h)-y(j,h))>=((T)(leash))*d)U(j,h)=1;
-  labels.RotateDown(i,t+1);
-  pi.RotateDown(i-1,t);
+  labels.RotateUp(i,t+1);
+  pi.RotateUp(i-1,t);
   t--;
   ii=1;
   while(labels(ii,1)!=j || labels(ii,2)!=h) {ii++;}
@@ -287,9 +287,9 @@ template <class T> T SimpdivModule<T>::simplex(void)
   if(plev>=4) gout << "  Step 5 "; 
   k=kk;
 
-  labels.RotateUp(1,t+1);
+  labels.RotateDown(1,t+1);
   ibar=1;
-  pi.RotateUp(1,t);
+  pi.RotateDown(1,t);
   U(j,k)=0;
   jj=pi(1,1);
   hh=pi(1,2);
@@ -334,7 +334,7 @@ template <class T> void SimpdivModule<T>::update(int j, int i)
     ibar=i;
   }
   else if(i==1) {
-    labels.RotateDown(1,t+1);
+    labels.RotateUp(1,t+1);
     ibar=t+1;
     jj=pi(1,1);
     hh=pi(1,2);
@@ -346,11 +346,11 @@ template <class T> void SimpdivModule<T>::update(int j, int i)
 	k++;
 	if(k>nstrats[jj])k=1;
       }
-      pi.RotateDown(1,t);
+      pi.RotateUp(1,t);
     }
   }
   else if(i==t+1) {
-    labels.RotateUp(1,t+1);
+    labels.RotateDown(1,t+1);
     ibar=1;
     jj=pi(t,1);
     hh=pi(t,2);
@@ -362,7 +362,7 @@ template <class T> void SimpdivModule<T>::update(int j, int i)
 	k++;
 	if(k>nstrats[jj])k=1;
       }
-      pi.RotateUp(1,t);
+      pi.RotateDown(1,t);
     }
   }
 }
