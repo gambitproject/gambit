@@ -86,8 +86,8 @@ template <class T> void Random(Efg<T> &efg, int seed = 0)
 
 #include "rational.h"
 
-TEMPLATE void Random(Efg<double> &efg, int seed = 0);
-TEMPLATE void Random(Efg<gRational> &efg, int seed = 0);
+TEMPLATE void Random(Efg<double> &efg, int seed );
+TEMPLATE void Random(Efg<gRational> &efg, int seed);
 
 
 

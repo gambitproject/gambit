@@ -34,7 +34,7 @@ private:
 
 public:
 
-  NFPlayer( int n, BaseNfg *n, int num );
+  NFPlayer( int n, BaseNfg *no, int num );
   virtual ~NFPlayer();
 
   BaseNfg *BelongsTo(void) const;
