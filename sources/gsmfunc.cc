@@ -85,7 +85,6 @@ ParamInfoType::ParamInfoType( void )
   Type = porERROR;
   DefaultValue = NO_DEFAULT_VALUE;
   PassByReference = 0;
-  Option = 0;
 }
 
 ParamInfoType::ParamInfoType( const ParamInfoType& param_info )
@@ -93,8 +92,7 @@ ParamInfoType::ParamInfoType( const ParamInfoType& param_info )
  Name( param_info.Name ),
  Type( param_info.Type ),
  DefaultValue( param_info.DefaultValue ),
- PassByReference( param_info.PassByReference ),
- Option( param_info.Option )
+ PassByReference( param_info.PassByReference )
 { }
 
 ParamInfoType::ParamInfoType
@@ -102,15 +100,13 @@ ParamInfoType::ParamInfoType
  const gString& name, 
  const PortionType& type,
  Portion* default_value, 
- const bool pass_by_ref,
- const int option
+ const bool pass_by_ref
  )
 :
  Name( name ), 
  Type( type ), 
  DefaultValue( default_value ), 
- PassByReference( pass_by_ref ),
- Option( option )
+ PassByReference( pass_by_ref )
 { }
 
 ParamInfoType::~ParamInfoType()
@@ -122,7 +118,6 @@ ParamInfoType& ParamInfoType::operator = ( const ParamInfoType& param_info )
   Type = param_info.Type;
   DefaultValue = param_info.DefaultValue;
   PassByReference = param_info.PassByReference;
-  Option = param_info.Option;
   return *this;
 }
 
@@ -331,8 +326,7 @@ void FuncDescObj::SetParamInfo
  const gString&     param_name, 
  const PortionType  param_type, 
  Portion*           param_default_value,
- const bool         param_pass_by_reference,
- const int          param_option
+ const bool         param_pass_by_reference
  )
 {
   int i;
@@ -354,8 +348,7 @@ void FuncDescObj::SetParamInfo
      param_name, 
      param_type, 
      param_default_value,
-     param_pass_by_reference,
-     param_option
+     param_pass_by_reference
      );
 }
 
@@ -367,8 +360,7 @@ void FuncDescObj::SetParamInfo
  const gString&         param_name, 
  const PortionType      param_type, 
  Portion*               param_default_value,
- const bool             param_pass_by_reference,
- const int              param_option
+ const bool             param_pass_by_reference
  )
 {
   int i;
@@ -390,8 +382,7 @@ void FuncDescObj::SetParamInfo
      param_name, 
      param_type, 
      param_default_value,
-     param_pass_by_reference,
-     param_option
+     param_pass_by_reference
      );
 }
 
@@ -403,8 +394,7 @@ void FuncDescObj::_SetParamInfo
  const gString&     param_name, 
  const PortionType  param_type, 
  Portion*           param_default_value,
- const bool         param_pass_by_reference,
- const int          param_option
+ const bool         param_pass_by_reference
  )
 {
   int index;
@@ -469,8 +459,6 @@ void FuncDescObj::_SetParamInfo
     param_default_value;
   _FuncInfo[ f_index ].ParamInfo[ param_index ].PassByReference = 
     param_pass_by_reference;
-  _FuncInfo[ f_index ].ParamInfo[ param_index ].Option = 
-    param_option;
 }
 
 
@@ -806,37 +794,11 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	  index < _FuncInfo[ f_index ].NumParams; 
 	  index++ )
       {
-	if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue == 0 &&
-	   _FuncInfo[ f_index ].ParamInfo[ index ].Option == 0 )
-	{
-	  params_to_match++;
-	}
-
 	if( _Param[ index ] != 0 )
 	{
 	  if( _TypeMatch( _Param[ index ], 
 			 _FuncInfo[ f_index ].ParamInfo[ index ].Type ) )
 	    params_matched++;
-	}
-	else
-	{
-	  switch( _FuncInfo[ f_index ].ParamInfo[ index ].Option )
-	  {
-	  case DEFAULT_NFG:
-	    if( gsm->DefaultNfg()->Type() & 
-	       _FuncInfo[ f_index ].ParamInfo[ index ].Type )
-	    {
-	      params_matched++;
-	    }
-	    break;
-	  case DEFAULT_EFG:
-	    if( gsm->DefaultEfg()->Type() & 
-	       _FuncInfo[ f_index ].ParamInfo[ index ].Type )
-	    {
-	      params_matched++;
-	    }
-	    break;
-	  }
 	}
       }
 
@@ -876,45 +838,6 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
     }
   }
 
-
-
- 
-  if( !_ErrorOccurred )
-  { 
-    if( _FuncIndex < 0 || _FuncIndex >= _NumFuncs )
-    {
-      _ErrorMessage( _StdErr, 8, 0, _FuncName );
-      _ErrorOccurred = true;
-    }
-    else
-    {
-      for( index = 0; 
-	  index < _FuncInfo[ _FuncIndex ].NumParams; 
-	  index++ )
-      {
-	if( _Param[ index ] == 0 )
-	{
-	  switch( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Option )
-	  {
-	  case DEFAULT_NFG:
-	    if( gsm->DefaultNfg()->Type() & 
-	       _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Type )
-	    {
-	      _Param[ index ] = gsm->DefaultNfg()->ValCopy();
-	    }
-	    break;
-	  case DEFAULT_EFG:
-	    if( gsm->DefaultEfg()->Type() & 
-	       _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Type )
-	    {
-	      _Param[ index ] = gsm->DefaultEfg()->ValCopy();
-	    }
-	    break;
-	  }
-	}
-      }
-    }
-  }
   
   if( !_ErrorOccurred )
   {

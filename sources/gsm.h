@@ -42,9 +42,6 @@ private:
   Portion* _INPUT;
   Portion* _NULL;
 
-  Portion* _DefaultNfg;
-  Portion* _DefaultEfg;
-  
   gGrowableStack< gGrowableStack< Portion* >* >* _StackStack;
   gGrowableStack< CallFuncObj* >*                _CallFuncStack;
   gGrowableStack< RefHashTable* >*               _RefTableStack;

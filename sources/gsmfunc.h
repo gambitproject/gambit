@@ -56,7 +56,6 @@ private:
   PortionType  Type;
   Portion*     DefaultValue;
   bool         PassByReference;
-  int          Option;
 
 public:
   ParamInfoType( void );
@@ -66,8 +65,7 @@ public:
      const gString& name, 
      const PortionType& type,
      Portion* default_value = NO_DEFAULT_VALUE, 
-     const bool pass_by_ref = false,
-     const int option = 0
+     const bool pass_by_ref = false
      );
   ~ParamInfoType();
 
@@ -107,8 +105,7 @@ private:
      const gString&    name,
      const PortionType type,
      Portion*          default_value,
-     const bool        pass_by_reference,
-     const int         option
+     const bool        pass_by_reference
      );
 
 protected:
@@ -144,8 +141,7 @@ public:
      const gString&    name,
      const PortionType type,
      Portion*          default_value = NO_DEFAULT_VALUE,
-     const bool        pass_by_reference = PASS_BY_VALUE,
-     const int         option = 0
+     const bool        pass_by_reference = PASS_BY_VALUE
      );
 
   void SetParamInfo
@@ -155,8 +151,7 @@ public:
      const gString&    name,
      const PortionType type,
      Portion*          default_value = NO_DEFAULT_VALUE,
-     const bool        pass_by_reference = PASS_BY_VALUE,
-     const int         option = 0
+     const bool        pass_by_reference = PASS_BY_VALUE
      );
   
   void SetParamInfo

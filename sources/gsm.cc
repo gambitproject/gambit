@@ -27,13 +27,6 @@
 
 
 
-//--------------------------------------------------------------------
-//              global variables
-//--------------------------------------------------------------------
-
-// There must be a better way to do this
-GSM* _CurrentGSM = 0;
-
 
 //--------------------------------------------------------------------
 //              implementation of GSM (Stack machine)
@@ -59,9 +52,6 @@ GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
     _INPUT  = new InputRefPortion( _StdIn );
     _OUTPUT = new OutputRefPortion( _StdOut );
     _NULL   = new OutputRefPortion( gnull );
-
-    _DefaultNfg = new NfgValPortion( new NormalForm<double> );
-    _DefaultEfg = new EfgValPortion( new Efg<double> );
   }
 
   _StackStack    = new gGrowableStack< gGrowableStack< Portion* >* >( 1 );
@@ -97,9 +87,6 @@ GSM::~GSM()
 
   if( _NumObj == 0 )
   {
-    delete _DefaultNfg;
-    delete _DefaultEfg;
-    
     delete _INPUT;
     delete _OUTPUT;
     delete _NULL;
@@ -117,13 +104,6 @@ int GSM::MaxDepth( void ) const
 {
   return _StackStack->Peek()->MaxDepth();
 }
-
-
-Portion*& GSM::DefaultNfg( void )
-{ return _DefaultNfg; }
-
-Portion*& GSM::DefaultEfg( void )
-{ return _DefaultEfg; }
 
 
 
@@ -1121,7 +1101,6 @@ bool GSM::CallFunction( void )
   num_params = func->NumParams();
   param = new Portion*[ num_params ];
 
-  _CurrentGSM = this;
   return_value = func->CallFunction( this, param );
 
   if( return_value == 0 )

@@ -240,7 +240,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj = new FuncDescObj("GobitEfg");
   FuncObj->SetFuncInfo(GSM_GobitEfg, 11);
   FuncObj->SetParamInfo(GSM_GobitEfg, 0, "efg", porEFG_FLOAT, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE, DEFAULT_EFG );
+			PASS_BY_REFERENCE );
   FuncObj->SetParamInfo(GSM_GobitEfg, 1, "pxifile", porOUTPUT,
 			new OutputRefPortion(gnull));
   FuncObj->SetParamInfo(GSM_GobitEfg, 2, "time", porFLOAT,
@@ -266,7 +266,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj = new FuncDescObj("LiapEfg");
   FuncObj->SetFuncInfo(GSM_LiapEfg, 6);
   FuncObj->SetParamInfo(GSM_LiapEfg, 0, "efg", porEFG_FLOAT, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE, DEFAULT_EFG );
+			PASS_BY_REFERENCE );
   FuncObj->SetParamInfo(GSM_LiapEfg, 1, "time", porFLOAT,
 			new FloatValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LiapEfg, 2, "nEvals", porINTEGER,
@@ -282,7 +282,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj = new FuncDescObj("LemkeEfg");
   FuncObj->SetFuncInfo(GSM_LemkeEfgFloat, 4);
   FuncObj->SetParamInfo(GSM_LemkeEfgFloat, 0, "efg", porEFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG);
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LemkeEfgFloat, 1, "stopAfter", porINTEGER,
 			new IntValPortion(0));
   FuncObj->SetParamInfo(GSM_LemkeEfgFloat, 2, "nPivots", porINTEGER,
@@ -293,7 +293,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(GSM_LemkeEfgRational, 4);
   FuncObj->SetParamInfo(GSM_LemkeEfgRational, 0, "efg", porEFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG);
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LemkeEfgRational, 1, "stopAfter", porINTEGER,
 			new IntValPortion(0));
   FuncObj->SetParamInfo(GSM_LemkeEfgRational, 2, "nPivots", porINTEGER,
@@ -325,14 +325,14 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_NfgFloat, 2);
   FuncObj->SetParamInfo(GSM_NfgFloat, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE, DEFAULT_EFG );
+			PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_NfgFloat, 1, "time", porFLOAT,
 			new FloatValPortion(0), PASS_BY_REFERENCE);
 
   FuncObj->SetFuncInfo(GSM_NfgRational, 2);
   FuncObj->SetParamInfo(GSM_NfgRational, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE, DEFAULT_EFG );
+			PASS_BY_REFERENCE );
   FuncObj->SetParamInfo(GSM_NfgRational, 1, "time", porFLOAT,
 			new FloatValPortion(0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);

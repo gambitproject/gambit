@@ -13,66 +13,6 @@
 
 
 
-extern GSM* _CurrentGSM;
-
-Portion* GSM_DefaultEfg( Portion** param )
-{
-  return _CurrentGSM->DefaultEfg()->ValCopy();
-}
-
-Portion *GSM_ReadDefaultEfg(Portion **param)
-{
-  gInput &f = ((InputPortion *) param[0])->Value();
-
-  if (f.IsValid())   {
-    DataType type;
-    bool valid;
-
-    EfgFileType(f, valid, type);
-    if (!valid)   return new ErrorPortion("Not a valid .efg file\n");
-    
-    switch (type)   {
-      case DOUBLE:  {
-	Efg<double> *E = 0;
-	ReadEfgFile((gInput &) f, E);
-	
-	if (E)  {
-	  delete _CurrentGSM->DefaultEfg();
-	  _CurrentGSM->DefaultEfg() = new EfgValPortion(E);
-	  return new BoolValPortion( true );
-	}
-	else
-	  return new ErrorPortion("Not a valid .efg file\n");
-      }
-      case RATIONAL:   {
-	Efg<gRational> *E = 0;
-	ReadEfgFile((gInput &) f, E);
-	
-	if (E)  {
-	  delete _CurrentGSM->DefaultEfg();
-	  _CurrentGSM->DefaultEfg() = new EfgValPortion(E);
-	  return new BoolValPortion( true );
-	}
-	else
-	  return new ErrorPortion("Not a valid .efg file\n");
-      }
-      default:
-	assert(0);
-	return 0;
-    }
-  }
-  else
-    return new ErrorPortion("Unable to open file for reading.\n");
-}
-
-
-Portion* GSM_CopyDefaultEfg( Portion** param )
-{
-  delete _CurrentGSM->DefaultEfg();
-  _CurrentGSM->DefaultEfg() = param[0]->ValCopy();
-  return param[0]->ValCopy();
-}
-
 //
 // Utility functions for converting gArrays to ListPortions
 // (perhaps these are more generally useful and should appear elsewhere?
@@ -888,21 +828,6 @@ void Init_efgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
-  FuncObj = new FuncDescObj("DefaultEfg");
-  FuncObj->SetFuncInfo(GSM_DefaultEfg, 0);
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("ReadDefaultEfg");
-  FuncObj->SetFuncInfo(GSM_ReadDefaultEfg, 1);
-  FuncObj->SetParamInfo(GSM_ReadDefaultEfg, 0, "file", porINPUT);
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("CopyDefaultEfg");
-  FuncObj->SetFuncInfo(GSM_CopyDefaultEfg, 1);
-  FuncObj->SetParamInfo(GSM_CopyDefaultEfg, 0, "efg", porEFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  gsm->AddFunction(FuncObj);
-
 //-----------------------------------------------------------
 
   FuncObj = new FuncDescObj("AppendAction");
@@ -997,13 +922,13 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("NewOutcome");
   FuncObj->SetFuncInfo(GSM_NewOutcomeFloat, 2);
   FuncObj->SetParamInfo(GSM_NewOutcomeFloat, 0, "efg", porEFG_FLOAT,
-		       NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG);
+		       NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_NewOutcomeFloat, 1, "name", porTEXT,
 		       new TextValPortion(""));
 
   FuncObj->SetFuncInfo(GSM_NewOutcomeRational, 2);
   FuncObj->SetParamInfo(GSM_NewOutcomeRational, 0, "efg", porEFG_RATIONAL,
-		       NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG);
+		       NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_NewOutcomeRational, 1, "name", porTEXT,
 		       new TextValPortion(""));
   gsm->AddFunction(FuncObj);
@@ -1011,7 +936,7 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("NewPlayer");
   FuncObj->SetFuncInfo(GSM_NewPlayer, 2);
   FuncObj->SetParamInfo(GSM_NewPlayer, 0, "efg", porEFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG);
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_NewPlayer, 1, "name", porTEXT,
 			new TextValPortion(""));
   gsm->AddFunction(FuncObj);
@@ -1077,25 +1002,25 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Centroid");
   FuncObj->SetFuncInfo(GSM_CentroidEfgFloat, 1);
   FuncObj->SetParamInfo(GSM_CentroidEfgFloat, 0, "efg", porEFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG);
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
 
   FuncObj->SetFuncInfo(GSM_CentroidEfgRational, 1);
   FuncObj->SetParamInfo(GSM_CentroidEfgRational, 0, "efg", porEFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG);
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
 
   FuncObj->SetFuncInfo(GSM_CentroidNfgFloat, 1);
   FuncObj->SetParamInfo(GSM_CentroidNfgFloat, 0, "nfg", porNFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_NFG);
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
 
   FuncObj->SetFuncInfo(GSM_CentroidNfgRational, 1);
   FuncObj->SetParamInfo(GSM_CentroidNfgRational, 0, "nfg", porNFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_NFG);
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Chance");
   FuncObj->SetFuncInfo(GSM_Chance, 1);
   FuncObj->SetParamInfo(GSM_Chance, 0, "efg", porEFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG);
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("ChanceProbs");
@@ -1196,16 +1121,16 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("NumOutcomes");
   FuncObj->SetFuncInfo(GSM_NumOutcomes, 1);
   FuncObj->SetParamInfo(GSM_NumOutcomes, 0, "efg", porEFG, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG);
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NumPlayers");
   FuncObj->SetFuncInfo(GSM_NumPlayersEfg, 1);
   FuncObj->SetParamInfo(GSM_NumPlayersEfg, 0, "efg", porEFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG);
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetFuncInfo(GSM_NumPlayersNfg, 1);
   FuncObj->SetParamInfo(GSM_NumPlayersNfg, 0, "nfg", porNFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_NFG);
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Outcome");
@@ -1216,7 +1141,7 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Outcomes");
   FuncObj->SetFuncInfo(GSM_Outcomes, 1);
   FuncObj->SetParamInfo(GSM_Outcomes, 0, "efg", porEFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG );
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Parent");
@@ -1243,7 +1168,7 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Players");
   FuncObj->SetFuncInfo(GSM_Players, 1);
   FuncObj->SetParamInfo(GSM_Players, 0, "efg", porEFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG );
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("PriorSibling");
@@ -1259,14 +1184,14 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("RootNode");
   FuncObj->SetFuncInfo(GSM_RootNode, 1);
   FuncObj->SetParamInfo(GSM_RootNode, 0, "efg", porEFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG );
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("WriteEfg");
   FuncObj->SetFuncInfo(GSM_WriteEfg, 2);
   FuncObj->SetParamInfo(GSM_WriteEfg, 0, "output", porOUTPUT);
   FuncObj->SetParamInfo(GSM_WriteEfg, 1, "efg", porEFG, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG );
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   gsm->AddFunction(FuncObj);
 }
 
