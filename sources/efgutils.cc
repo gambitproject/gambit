@@ -8,42 +8,42 @@
 
 // recursive functions
 
-void NDoChild (Node *n, gList <Node *> &list)
+static void NDoChild (Node *n, gList <Node *> &list)
 { 
   list.Append(n);
   for (int i = 1; i <= n->NumChildren(); i++)
     NDoChild ( n->GetChild(i), list);
 }
 
-void TNDoChild (Node *n, gList <Node *> &list)
+static void TNDoChild (Node *n, gList <Node *> &list)
 {
   if (n->NumChildren() == 0) list.Append(n);
   for (int i = 1; i <= n->NumChildren(); i++)
     TNDoChild ( n->GetChild(i), list);
 }
 
-void NTNDoChild (Node *n, gList <Node *> &list)
+static void NTNDoChild (Node *n, gList <Node *> &list)
 {
   if (n->NumChildren() != 0) list.Append(n);
   for (int i = 1; i <= n->NumChildren(); i++)
     NTNDoChild ( n->GetChild(i), list);
 }
 
-void MSRDoChild(Node *n, gList<Node *> &list)
+static void MSRDoChild(Node *n, gList<Node *> &list)
 {
   for (int i = 1; i <= n->NumChildren(); i++)
     MSRDoChild(n->GetChild(i), list);
   if (n->GetSubgameRoot() == n)  list.Append(n);
 }
 
-void LSRDoChild(Node *n, gList<Node *> &list)
+static void LSRDoChild(Node *n, gList<Node *> &list)
 {
   for (int i = 1; i <= n->NumChildren(); i++)
     LSRDoChild(n->GetChild(i), list);
   if (n->BelongsTo()->IsLegalSubgame(n))   list.Append(n);
 }
 
-void CSDoChild(Node *n, gList<Node *> &list)
+static void CSDoChild(Node *n, gList<Node *> &list)
 {
   if (n->GetSubgameRoot() == n)
     list.Append(n);
