@@ -13,9 +13,11 @@
 #include "efplayer.h"
 #include "infoset.h"
 
+/*  Old code with both sets of constraints
 void Epsilon(double &v) {v=(double).0000000001; }
 
 void Epsilon(gRational &v) {v=(gRational)0; }
+*/
 
 
 //---------------------------------------------------------------------------
@@ -41,7 +43,10 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
   ns2=NumSequences(2);
   ni1=NumInfosets(1)+1;
   ni2=NumInfosets(2)+1;
+  /*  Old code with both sets of constraints
   ntot = ns1+ns2+2*(ni1+ni2)+2;
+  */
+  ntot = ns1+ns2+(ni1+ni2)+2;
   A = new gMatrix<T>(1,ntot,0,ntot);
   b = new gVector<T>(1,ntot);
   T newpay;
@@ -62,6 +67,7 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
   FillTableau(EF.RootNode(),prob,1,1,0,0);
   for(i=A->MinRow();i<=A->MaxRow();i++) 
     (*A)(i,0) = -(T)1;
+  /*  Old code with both sets of constraints
   (*A)(1,ns1+ns2+1) = -(T)1;
   (*A)(1,ns1+ns2+ni1+1) = (T)1;
   (*A)(ns1+ns2+1,1) = (T)1;
@@ -74,6 +80,14 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
   (*b)[ns1+ns2+ni1+1] = (T)1;
   (*b)[ns1+ns2+ni1+ni1+1] = -(T)1;
   (*b)[ns1+ns2+ni1+ni1+ni2+1] = (T)1;
+  */
+
+  (*A)(1,ns1+ns2+1) = (T)1;
+  (*A)(ns1+ns2+1,1) = -(T)1;
+  (*A)(ns1+1,ns1+ns2+ni1+1) = (T)1;
+  (*A)(ns1+ns2+ni1+1,ns1+1) = -(T)1;
+  (*b)[ns1+ns2+1] = (T)1;
+  (*b)[ns1+ns2+ni1+1] = (T)1;
 //  gout.SetWidth(1).SetPrec(1);
 //  gout << "\n";
 //  A->Dump(gout);
@@ -180,9 +194,10 @@ template <class T> double SeqFormModule<T>::Time(void) const
 template <class T> void SeqFormModule<T>
 ::FillTableau(const Node *n, T prob,int s1,int s2, int i1,int i2)
 {
+  /*  Old code with both sets of constraints
   T EPSILON;
-//  EPSILON = eps;
   Epsilon(EPSILON);
+  */
 
 //  gout << "\ns1,s2,i1,i2: " << s1 << " " << s2  << " " << i1  << " " << i2;
 //  gout << " prob = " << prob;
@@ -206,6 +221,8 @@ template <class T> void SeqFormModule<T>
       snew=1;
       for(i=1;i<i1;i++)
 	snew+=n->GetPlayer()->InfosetList()[i]->NumActions();
+
+      /*  Old code with both sets of constraints
       (*A)(s1,ns1+ns2+i1+1) = (T)1 - EPSILON;
       (*A)(s1,ns1+ns2+ni1+i1+1) = -(T)1 - EPSILON;
       (*A)(ns1+ns2+i1+1,s1) = -(T)1 + EPSILON;
@@ -217,12 +234,23 @@ template <class T> void SeqFormModule<T>
 	(*A)(ns1+ns2+ni1+i1+1,snew+i) = -(T)1;
 	FillTableau(n->GetChild(i),prob,snew+i,s2,i1,i2);
       }
+      */
+
+      (*A)(s1,ns1+ns2+i1+1) = -(T)1;
+      (*A)(ns1+ns2+i1+1,s1) = (T)1;
+      for(i=1;i<=n->NumChildren();i++) {
+	(*A)(snew+i,ns1+ns2+i1+1) = (T)1;
+	(*A)(ns1+ns2+i1+1,snew+i) = -(T)1;
+	FillTableau(n->GetChild(i),prob,snew+i,s2,i1,i2);
+      }
     }
     if(pl==2) {
       i2=n->GetInfoset()->GetNumber();
       snew=1;
       for(i=1;i<i2;i++)
 	snew+=n->GetPlayer()->InfosetList()[i]->NumActions();
+
+      /*  Old code with both sets of constraints
       (*A)(ns1+s2,ns1+ns2+ni1+ni1+i2+1) = (T)1 - EPSILON;
       (*A)(ns1+s2,ns1+ns2+ni1+ni1+ni2+i2+1) = -(T)1 - EPSILON;
       (*A)(ns1+ns2+ni1+ni1+i2+1,ns1+s2) = -(T)1 + EPSILON;
@@ -232,6 +260,15 @@ template <class T> void SeqFormModule<T>
 	(*A)(ns1+snew+i,ns1+ns2+ni1+ni1+ni2+i2+1) = (T)1;
 	(*A)(ns1+ns2+ni1+ni1+i2+1,ns1+snew+i) = (T)1;
 	(*A)(ns1+ns2+ni1+ni1+ni2+i2+1,ns1+snew+i) = -(T)1;
+	FillTableau(n->GetChild(i),prob,s1,snew+i,i1,i2);
+      }
+      */
+
+      (*A)(ns1+s2,ns1+ns2+ni1+i2+1) = -(T)1;
+      (*A)(ns1+ns2+ni1+i2+1,ns1+s2) = (T)1;
+      for(i=1;i<=n->NumChildren();i++) {
+	(*A)(ns1+snew+i,ns1+ns2+ni1+i2+1) = (T)1;
+	(*A)(ns1+ns2+ni1+i2+1,ns1+snew+i) = -(T)1;
 	FillTableau(n->GetChild(i),prob,s1,snew+i,i1,i2);
       }
     }
