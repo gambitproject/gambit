@@ -128,6 +128,11 @@ to use HTML for all our help files.  If Windows help supports HTML this
 would be much easier.
 
 
+Bug D13: Interrupting solution causes cursor to remain a watch.
+
+This is self-explanatory.
+
+
 
 
 
