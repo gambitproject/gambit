@@ -7,18 +7,37 @@
 #ifndef NFG_H
 #define NFG_H
 
-#include "garray.h"
+#include "gblock.h"
 #include "gtext.h"
 #include "grblock.h"
 #include "gnumber.h"
 
 class NFOutcome;
-
-
-#include "gblock.h"
-
 class NFPlayer;
-class Strategy;
+
+class Strategy   {
+friend class Nfg;
+friend class NFPlayer;
+private:
+  int m_number;
+  NFPlayer *m_player;
+  long m_index;
+  gText m_name;
+
+  Strategy(NFPlayer *);
+  Strategy(const Strategy &);
+  Strategy &operator=(const Strategy &);
+  ~Strategy();
+
+public:
+  const gText &Name(void) const { return m_name; }
+  void SetName(const gText &s)  { m_name = s; }
+
+  NFPlayer *Player(void) const  { return m_player; }
+  int Number(void) const        { return m_number; }
+  long Index(void) const        { return m_index; }
+};
+
 class StrategyProfile;
 
 #ifndef NFG_ONLY

@@ -109,14 +109,14 @@ gArray<int> NfgContIter::Get(void) const
 {
   gArray<int> current(N->NumPlayers());
   for (int i = 1; i <= current.Length(); i++)
-    current[i] = profile[i]->number;
+    current[i] = profile[i]->Number();
   return current;
 }
 
 void NfgContIter::Get(gArray<int> &t) const
 {
   for (int i = 1; i <= N->NumPlayers(); i++)
-    t[i] = profile[i]->number;
+    t[i] = profile[i]->Number();
 }
 
 NFOutcome *NfgContIter::GetOutcome(void) const
@@ -133,7 +133,7 @@ void NfgContIter::Dump(gOutput &f) const
 {
   f << "{ ";
   for (int i = 1; i <= N->NumPlayers(); i++)
-    f << profile[i]->number << ' ';
+    f << profile[i]->Number() << ' ';
   f << '}';
 }
 

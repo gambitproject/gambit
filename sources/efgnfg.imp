@@ -103,7 +103,7 @@ void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
     ClearNodeProbs(n);
 
     for (int st = 1; st <= support.NumStrats(pl); st++)  {
-      int snum = support.Strategies(pl)[st]->number;
+      int snum = support.Strategies(pl)[st]->Number();
       if (mp(pl, st) > (T) 0)  {
 	const gArray<int> *const actions = E.lexicon->strategies[pl][snum];
 

@@ -12,20 +12,8 @@
 #include "gstream.h"
 
 class NFPlayer;
-
-struct Strategy   {
-  int number;
-  NFPlayer *nfp;
-  long index;
-  gText name;
-
-  Strategy(NFPlayer *);
-  Strategy(const Strategy &s);
-  Strategy &operator=(const Strategy &s);
-  ~Strategy();
-};
-
 class Nfg;
+class Strategy;
 
 class StrategyProfile   {
   friend class Nfg;

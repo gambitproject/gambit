@@ -132,7 +132,7 @@ static Portion *GSM_Game_NfPlayer(Portion **param)
 
 static Portion *GSM_Game_Strategy(Portion **param)
 {
-  Nfg &N = ((StrategyPortion *) param[0])->Value()->nfp->Game();
+  Nfg &N = ((StrategyPortion *) param[0])->Value()->Player()->Game();
 
   return new NfgPortion(&N);
 }
@@ -195,7 +195,7 @@ static Portion* GSM_Name_NfgElements( Portion** param )
     return new TextPortion(((NfPlayerPortion*) param[0])->Value()->
 			      GetName());
   case porSTRATEGY:
-    return new TextPortion(((StrategyPortion*) param[0])->Value()->name);
+    return new TextPortion(((StrategyPortion*) param[0])->Value()->Name());
   case porNFOUTCOME:
     return new TextPortion(((NfOutcomePortion*) param[0])->Value()->
 			   GetName());
@@ -244,7 +244,7 @@ static Portion* GSM_Outcome(Portion** param)
   int i;
 
   Nfg &nfg = 
-    ((StrategyPortion *) (*((ListPortion *) param[0]))[1])->Value()->nfp->Game();
+    ((StrategyPortion *) (*((ListPortion *) param[0]))[1])->Value()->Player()->Game();
   
   if (nfg.NumPlayers() != ((ListPortion *) param[0])->Length())
     throw gclRuntimeError("Invalid profile");
@@ -253,7 +253,7 @@ static Portion* GSM_Outcome(Portion** param)
   for (i = 1; i <= nfg.NumPlayers(); i++)  {
     Strategy *strat =
       ((StrategyPortion *) (*((ListPortion *) param[0]))[i])->Value();
-    if (strat->nfp->GetNumber() != i)
+    if (strat->Player()->GetNumber() != i)
       throw gclRuntimeError("Invalid profile");
     profile.Set(i, strat);
   }
@@ -303,8 +303,7 @@ static Portion *GSM_Player(Portion **param)
 
   Strategy *s = ((StrategyPortion *) param[0])->Value();
 
-  Portion* por = new NfPlayerPortion(s->nfp);
-  return por;
+  return new NfPlayerPortion(s->Player());
 }
 
 //------------
@@ -390,7 +389,7 @@ static Portion *GSM_SetName_Strategy(Portion **param)
 {
   Strategy *s = ((StrategyPortion *) param[0])->Value();
   gText name = ((TextPortion *) param[1])->Value();
-  s->name = name;
+  s->SetName(name);
   return param[0]->ValCopy();
 }
 
@@ -409,7 +408,7 @@ static Portion *GSM_SetName_NfOutcome(Portion **param)
 static Portion* GSM_SetOutcome(Portion** param)
 {
   Nfg &nfg = 
-    ((StrategyPortion *) (*((ListPortion *) param[0]))[1])->Value()->nfp->Game();
+    ((StrategyPortion *) (*((ListPortion *) param[0]))[1])->Value()->Player()->Game();
   
   if (nfg.NumPlayers() != ((ListPortion *) param[0])->Length())
     throw gclRuntimeError("Invalid profile");
@@ -418,7 +417,7 @@ static Portion* GSM_SetOutcome(Portion** param)
   for (int i = 1; i <= nfg.NumPlayers(); i++)  {
     Strategy *strat =
       ((StrategyPortion *) (*((ListPortion *) param[0]))[i])->Value();
-    if (strat->nfp->GetNumber() != i)
+    if (strat->Player()->GetNumber() != i)
       throw gclRuntimeError("Invalid profile");
     profile.Set(i, strat);
   }

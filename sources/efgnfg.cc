@@ -131,7 +131,7 @@ Nfg *MakeReducedNfg(const Efg &E, const EFSupport &support)
 	  name += ToText((*L->strategies[i][j])[k]);
         else
 	  name += "*";
-      L->N->Players()[i]->Strategies()[j]->name = name;
+      L->N->Players()[i]->Strategies()[j]->SetName(name);
     }
   }
 
@@ -189,7 +189,7 @@ Nfg *MakeAfg(const Efg &E)
       Infoset *s = E.Players()[epl]->Infosets()[iset];
       for (int act = 1; act <= s->NumActions(); act++)  {
 	Strategy *st = afg->Strategies(npl)[act];
-	st->name = ToText(act);
+	st->SetName(ToText(act));
       }
     }
   }

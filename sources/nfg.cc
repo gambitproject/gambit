@@ -11,6 +11,26 @@
 #include "nfstrat.h"
 #include "nfplayer.h"
 
+//--------------------------------------
+// Strategy:  Constructors, Destructors
+//--------------------------------------
+
+Strategy::Strategy(NFPlayer *p) : m_number(0), m_player(p), m_index(0L)
+{ }
+
+Strategy::Strategy(const Strategy &s) : m_player(s.m_player), m_name(s.m_name)
+{ }
+
+Strategy &Strategy::operator=(const Strategy &s)
+{
+  m_player = s.m_player;
+  m_name = s.m_name;
+  return *this;
+}
+
+Strategy::~Strategy()
+{ }
+
 
 //----------------------------------------------------
 // Nfg: Constructors, Destructors, Operators
@@ -32,7 +52,7 @@ Nfg::Nfg(const gArray<int> &dim)
     players[pl] = new NFPlayer(pl, this, dim[pl]);
 	  players[pl]->name = ToText(pl);
     for (int st = 1; st <= players[pl]->NumStrats(); st++)
-      players[pl]->strategies[st]->name = ToText(st);
+      players[pl]->strategies[st]->m_name = ToText(st);
   }
   IndexStrategies();
 
@@ -50,7 +70,7 @@ Nfg::Nfg(const Nfg &b)
     players[pl]->name = b.players[pl]->name;
     for (int st = 1; st <= players[pl]->NumStrats(); st++)  {
       *(players[pl]->strategies[st]) = *(b.players[pl]->strategies[st]);
-      players[pl]->strategies[st]->nfp = players[pl];
+      players[pl]->strategies[st]->m_player = players[pl];
     }
   }
   IndexStrategies();
@@ -128,7 +148,7 @@ void Nfg::WriteNfgFile(gOutput &f) const
     NFPlayer *player = Players()[i];
     f << "{ ";
     for (int j = 1; j <= player->NumStrats(); j++)
-      f << '"' << EscapeQuotes(player->Strategies()[j]->name) << "\" ";
+      f << '"' << EscapeQuotes(player->Strategies()[j]->Name()) << "\" ";
     f << "}\n";
   }
   
@@ -224,7 +244,7 @@ void Nfg::SetOutcome(const gArray<int> &profile, NFOutcome *outcome)
 {
   int index = 1;
   for (int i = 1; i <= profile.Length(); i++)
-    index += players[i]->strategies[profile[i]]->index;
+    index += players[i]->strategies[profile[i]]->m_index;
   results[index] = outcome;
   BreakLink();
 }
@@ -240,7 +260,7 @@ NFOutcome *Nfg::GetOutcome(const gArray<int> &profile) const
 {
   int index = 1;
   for (int i = 1; i <= profile.Length(); i++)
-	 index += players[i]->strategies[profile[i]]->index;
+	 index += players[i]->strategies[profile[i]]->m_index;
   return results[index];
 }
 
@@ -274,8 +294,8 @@ void Nfg::IndexStrategies(void)
     int j;
     for (j = 1; j <= NumStrats(i); j++)  {
       Strategy *s = (players[i])->strategies[j];
-      s->number = j;
-      s->index = (j - 1) * offset;
+      s->m_number = j;
+      s->m_index = (j - 1) * offset;
     }
 	 assert(j - 1 == NumStrats(i));
     offset *= (j - 1);

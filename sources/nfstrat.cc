@@ -8,27 +8,6 @@
 #include "nfplayer.h"
 #include "nfg.h"
 
-//--------------------------------------
-// Strategy:  Constructors, Destructors
-//--------------------------------------
-
-Strategy::Strategy(NFPlayer *p) : number (0), nfp(p), index(0L)
-{ }
-
-Strategy::Strategy(const Strategy &s) : nfp(s.nfp), name(s.name)
-{ }
-
-Strategy &Strategy::operator=(const Strategy &s)
-{
-  nfp = s.nfp;
-  name = s.name;
-  return (*this);
-}
-
-Strategy::~Strategy()
-{ }
-
-
 //--------------------------------------------------------
 // StrategyProfile: Constructors, Destructors, Operators
 //--------------------------------------------------------
@@ -38,7 +17,7 @@ StrategyProfile::StrategyProfile(const Nfg &N)
 {
   for (int pl = 1; pl <= N.NumPlayers(); pl++)   {
     profile[pl] = N.Strategies(pl)[1];
-    index += profile[pl]->index;
+    index += profile[pl]->Index();
   }
 }
 
@@ -86,7 +65,7 @@ return profile[p];
 
 void StrategyProfile::Set(int p, Strategy *const s)
 {
-  index += (((s) ? s->index : 0L) - ((profile[p]) ? profile[p]->index : 0L));
+  index += (((s) ? s->Index() : 0L) - ((profile[p]) ? profile[p]->Index() : 0L));
   profile[p] = s;
 }
 
@@ -163,15 +142,15 @@ bool NFStrategySet::operator==(const NFStrategySet &s)
 // Append a strategies to the NFStrategySet
 void NFStrategySet::AddStrategy(Strategy *s) 
 { 
-  assert (nfp == s->nfp);
-  strategies.Append(s); 
+  if (nfp == s->Player())
+    strategies.Append(s); 
 }
 
 // Removes a strategy pointer. Returns true if the strategy was successfully
 // removed, false otherwise.
 bool NFStrategySet::RemoveStrategy( Strategy *s ) 
 { 
-  assert (nfp == s->nfp);
+  if (nfp != s->Player())  return false;
   int t; 
   t = strategies.Find(s); 
   if (t>0) strategies.Remove(t); 
@@ -271,17 +250,17 @@ int NFSupport::TotalNumStrats(void) const
 
 int NFSupport::Find(Strategy *s) const
 {
-  return sups[s->nfp->GetNumber()]->GetNFStrategySet().Find(s);
+  return sups[s->Player()->GetNumber()]->GetNFStrategySet().Find(s);
 }
 
 void NFSupport::AddStrategy(Strategy *s)
 {
-  sups[s->nfp->GetNumber()]->AddStrategy(s);
+  sups[s->Player()->GetNumber()]->AddStrategy(s);
 }
 
 bool NFSupport::RemoveStrategy(Strategy *s)
 {
-  return sups[s->nfp->GetNumber()]->RemoveStrategy(s);
+  return sups[s->Player()->GetNumber()]->RemoveStrategy(s);
 }
 
 
@@ -319,7 +298,7 @@ void NFSupport::Dump(gOutput&s) const
     strat = Strategies( i );
     for (j = 1; j <= strat.Length(); j++ )
     {
-      s << "\"" << strat[ j ]->name << "\" ";
+      s << "\"" << strat[j]->Name() << "\" ";
     }
     s << "} ";
   }

@@ -92,7 +92,7 @@ int NfgIter::Set(int p, int s)
 void NfgIter::Get(gArray<int> &t) const
 {
   for (int i = 1; i <= N->NumPlayers(); i++)
-    t[i] = profile[i]->number;
+    t[i] = profile[i]->Number();
 }
 
 void NfgIter::Set(const gArray<int> &t)

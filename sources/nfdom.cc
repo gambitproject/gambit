@@ -75,11 +75,11 @@ bool ComputeDominated(const Nfg &N, const NFSupport &S, NFSupport &newS,
 
       for (int inc = min + 1; inc <= dis; )  {
 	if (Dominates(N, S, pl, set[min+1], set[dis+1], strong))  {
-	  tracefile << S.Strategies(pl)[set[dis+1]]->number << " dominated by " << S.Strategies(pl)[set[min+1]]->number << '\n';
+	  tracefile << S.Strategies(pl)[set[dis+1]]->Number() << " dominated by " << S.Strategies(pl)[set[min+1]]->Number() << '\n';
 	  dis--;
 	}
 	else if (Dominates(N, S, pl, set[dis+1], set[min+1], strong))  {
-	  tracefile << S.Strategies(pl)[set[min+1]]->number << " dominated by " << S.Strategies(pl)[set[dis+1]]->number << '\n';
+	  tracefile << S.Strategies(pl)[set[min+1]]->Number() << " dominated by " << S.Strategies(pl)[set[dis+1]]->Number() << '\n';
 	  foo = set[dis+1];
 	  set[dis+1] = set[min+1];
 	  set[min+1] = foo;

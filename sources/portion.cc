@@ -609,13 +609,13 @@ gPool StrategyPortion::pool(sizeof(StrategyPortion));
 StrategyPortion::StrategyPortion(Strategy *value)
   : _Value(new Strategy *(value)), _ref(false)
 {
-  SetGame(&value->nfp->Game());
+  SetGame(&value->Player()->Game());
 }
 
 StrategyPortion::StrategyPortion(Strategy *&value, bool ref)
   : _Value(&value), _ref(ref)
 {
-  SetGame(&value->nfp->Game());
+  SetGame(&value->Player()->Game());
 }
 
 StrategyPortion::~StrategyPortion()
@@ -628,7 +628,7 @@ Strategy *StrategyPortion::Value(void) const
 
 void StrategyPortion::SetValue(Strategy *value)
 {
-  SetGame(&value->nfp->Game());
+  SetGame(&value->Player()->Game());
   *_Value = value;
 }
 
@@ -640,7 +640,7 @@ void StrategyPortion::Output(gOutput& s) const
   Portion::Output(s);
   s << "(Strategy) " << *_Value;
   if(*_Value)
-    s << " \"" << (*_Value)->name << "\""; 
+    s << " \"" << (*_Value)->Name() << "\""; 
 }
 
 gText StrategyPortion::OutputString(void) const

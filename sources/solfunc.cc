@@ -500,13 +500,13 @@ static Portion *GSM_Regret_Mixed(Portion **param)
 {
   MixedSolution *P = ((MixedPortion*) param[0])->Value();
   Strategy* s = ((StrategyPortion*) param[1])->Value();
-  NFPlayer* p = s->nfp;
+  NFPlayer* p = s->Player();
   Nfg &n = p->Game();
 
   gPVector<gNumber> v(n.NumStrats());
   P->Regret(v);
 
-  return new NumberPortion(v(p->GetNumber(), s->number));
+  return new NumberPortion(v(p->GetNumber(), s->Number()));
 }
 
 static Portion *GSM_Regret_Behav(Portion **param)
@@ -645,7 +645,7 @@ static Portion *GSM_SetStrategyProb(Portion **param)
   MixedSolution *P = new MixedSolution(*((MixedPortion *) param[0])->Value());
   Strategy *s = ((StrategyPortion *) param[1])->Value();
   gNumber value = ((NumberPortion *) param[2])->Value();
-  int player = s->nfp->GetNumber();
+  int player = s->Player()->GetNumber();
   int strat = (*P).Support().Strategies(player).Find(s);
 
   if(strat !=0)
@@ -712,7 +712,7 @@ static Portion *GSM_StrategyProb(Portion **param)
 {
   const MixedSolution *profile = ((MixedPortion *) param[0])->Value();
   Strategy* strategy = ((StrategyPortion*) param[1])->Value();
-  NFPlayer* player = strategy->nfp;
+  NFPlayer* player = strategy->Player();
   
   if (profile->Support().Strategies(player->GetNumber()).Find(strategy))
     return new NumberPortion((*profile)

@@ -245,7 +245,7 @@ bool NfgFileReader::CreateNfg(const gList<gText> &players,
     N->Players()[i]->SetName(players[i]);
     if (strats.Length() > 0)
       for (int j = 1; j <= dim[i]; j++)
-	N->Strategies(i)[j]->name = strats[strat++];
+	N->Strategies(i)[j]->SetName(strats[strat++]);
   }
 
   return true;

@@ -21,7 +21,7 @@ Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S)
     NFPlayer *player = N->Players()[pl];
     player->SetName(nfg.Players()[pl]->GetName());
     for (int st = 1; st <= N->NumStrats(pl); st++) 
-      player->Strategies()[st]->name = S.Strategies(pl)[st]->name;
+      player->Strategies()[st]->SetName(S.Strategies(pl)[st]->Name());
   }
 
   for (int outc = 1; outc <= nfg.NumOutcomes(); outc++)  {
