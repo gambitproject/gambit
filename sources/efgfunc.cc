@@ -85,7 +85,7 @@ Portion *GSM_AppendNode(Portion **param)
   Infoset *s = ((InfosetPortion *) param[1])->Value();
 
   if (n->BelongsTo() != s->BelongsTo()) 
-    return new ErrorPortion("Node and information set from different games\n");
+    return new ErrorPortion("Node and information set from different games");
   n->BelongsTo()->AppendNode(n, s);
 
   Portion* por = new NodeValPortion(n->GetChild(1));
@@ -100,7 +100,7 @@ Portion *GSM_AttachOutcome(Portion **param)
   Outcome *c = ((OutcomePortion *) param[1])->Value();
 
   if (n->BelongsTo() != c->BelongsTo())
-    return new ErrorPortion("Node and outcome from different games\n");
+    return new ErrorPortion("Node and outcome from different games");
   n->SetOutcome(c);
   
   Portion* por = new OutcomeValPortion(c);
@@ -127,9 +127,9 @@ Portion *GSM_DeleteNode(Portion **param)
   Node *keep = ((NodePortion *) param[1])->Value();
 
   if (n->BelongsTo() != keep->BelongsTo())
-    return new ErrorPortion("The nodes are from different games\n");
+    return new ErrorPortion("The nodes are from different games");
   if (keep->GetParent() != n)
-    return new ErrorPortion("keep is not a child of node\n");
+    return new ErrorPortion("keep is not a child of node");
 
   Portion* por = new NodeValPortion(n->BelongsTo()->DeleteNode(n, keep));
   por->SetOwner( param[ 0 ]->Owner() );
@@ -184,7 +184,7 @@ Portion *GSM_InsertNode(Portion **param)
   Infoset *s = ((InfosetPortion *) param[1])->Value();
 
   if (n->BelongsTo() != s->BelongsTo()) 
-    return new ErrorPortion("Node and information set from different games\n");
+    return new ErrorPortion("Node and information set from different games");
   n->BelongsTo()->InsertNode(n, s);
 
   Portion* por = new NodeValPortion(n->GetParent());
@@ -209,7 +209,7 @@ Portion *GSM_MergeInfosets(Portion **param)
   Infoset *s2 = ((InfosetPortion *) param[1])->Value();
   
   if (s1->BelongsTo() != s2->BelongsTo())
-    return new ErrorPortion("Information sets from different games\n");
+    return new ErrorPortion("Information sets from different games");
   s1->BelongsTo()->MergeInfoset(s1, s2);
   
   Portion* por = new InfosetValPortion(s1);
@@ -267,7 +267,7 @@ Portion *GSM_NewInfoset2(Portion **param)
   gString name = ((TextPortion *) param[2])->Value();
 
   if (actions->Length() == 0)
-    return new ErrorPortion("Must have at least one action\n");
+    return new ErrorPortion("Must have at least one action");
   Infoset *s = p->BelongsTo()->CreateInfoset(p, actions->Length());
   s->SetName(name);
   for (int i = 1; i <= actions->Length(); i++)
@@ -380,12 +380,14 @@ Portion *GSM_SetChanceProbs(Portion **param)
   ListPortion *p = (ListPortion *) param[1];
 
   if (!s->GetPlayer()->IsChance())
-    return new ErrorPortion("Information set does not belong to chance player\n");
+    return new ErrorPortion
+      ("Information set does not belong to chance player");
+  
   if ((s->BelongsTo()->Type() == DOUBLE && p->DataType() != porFLOAT) ||
       (s->BelongsTo()->Type() == RATIONAL && p->DataType() != porRATIONAL))
-    return new ErrorPortion("Probability list does not match game type\n");
+    return new ErrorPortion("Probability list does not match game type");
   if (p->Length() != s->NumActions())  
-    return new ErrorPortion("Wrong number of probabilities\n");
+    return new ErrorPortion("Wrong number of probabilities");
 
   int i;
 
@@ -465,7 +467,7 @@ Portion *GSM_SetPayoffFloat(Portion **param)
   ListPortion *p = (ListPortion *) param[1];
 
   if (c->Length() != p->Length())
-    return new ErrorPortion("Wrong number of entries in payoff vector\n");
+    return new ErrorPortion("Wrong number of entries in payoff vector");
 
   for (int i = 1; i <= c->Length(); i++)
     (*c)[i] = ((FloatPortion *) p->Subscript(i))->Value();
@@ -483,7 +485,7 @@ Portion *GSM_SetPayoffRational(Portion **param)
   ListPortion *p = (ListPortion *) param[1];
 
   if (c->Length() != p->Length()) 
-    return new ErrorPortion("Wrong number of entries in payoff vector\n");
+    return new ErrorPortion("Wrong number of entries in payoff vector");
 
   for (int i = 1; i <= c->Length(); i++)
     (*c)[i] = ((RationalPortion *) p->Subscript(i))->Value();
@@ -549,7 +551,8 @@ Portion *GSM_ChanceProbs(Portion **param)
   Portion* por;
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   if (!s->GetPlayer()->IsChance()) 
-    return new ErrorPortion("Only chance information sets have action probabilities\n");
+    return new ErrorPortion
+      ("Only chance information sets have action probabilities");
 
   switch (s->BelongsTo()->Type())   {
     case DOUBLE:
@@ -574,7 +577,7 @@ Portion *GSM_CopyTree(Portion **param)
   Node *n2 = ((NodePortion *) param[1])->Value();
 
   if (n1->BelongsTo() != n2->BelongsTo())
-    return new ErrorPortion("n1 and n2 belong to different trees\n");
+    return new ErrorPortion("n1 and n2 belong to different trees");
 
   Portion* por = new NodeValPortion(n1->BelongsTo()->CopyTree(n1, n2));
   por->SetOwner( param[ 0 ]->Owner() );
@@ -587,7 +590,7 @@ Portion *GSM_Infoset(Portion **param)
   Node *n = ((NodePortion *) param[0])->Value();
 
   if (!n->GetInfoset())
-    return new ErrorPortion("Terminal nodes have no information set\n");
+    return new ErrorPortion("Terminal nodes have no information set");
   Portion* por = new InfosetValPortion(n->GetInfoset());
   por->SetOwner( param[ 0 ]->Owner() );
   por->AddDependency();
@@ -630,7 +633,7 @@ Portion *GSM_MoveTree(Portion **param)
   Node *n2 = ((NodePortion *) param[1])->Value();
 
   if (n1->BelongsTo() != n2->BelongsTo())
-    return new ErrorPortion("n1 and n2 belong to different trees\n");
+    return new ErrorPortion("n1 and n2 belong to different trees");
 
   Portion* por = new NodeValPortion(n1->BelongsTo()->MoveTree(n1, n2));
   por->SetOwner( param[ 0 ]->Owner() );
@@ -684,7 +687,7 @@ Portion *GSM_NextSibling(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value()->NextSibling();
   if (!n)
-    return new ErrorPortion("Node is the last sibling\n");
+    return new ErrorPortion("Node is the last sibling");
   
   Portion* por = new NodeValPortion(n);
   por->SetOwner( param[ 0 ]->Owner() );
@@ -697,7 +700,7 @@ Portion *GSM_NthChild(Portion **param)
   Node *n = ((NodePortion *) param[0])->Value();
   int child = ((IntPortion *) param[1])->Value();
   if (child < 1 || child > n->NumChildren())  
-    return new ErrorPortion("Child number out of range\n");
+    return new ErrorPortion("Child number out of range");
 
   Portion* por = new NodeValPortion(n->GetChild(child));
   por->SetOwner( param[ 0 ]->Owner() );
@@ -749,7 +752,7 @@ Portion *GSM_Outcome(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
   if (!n->GetOutcome())
-    return new ErrorPortion("No outcome attached to node\n");
+    return new ErrorPortion("No outcome attached to node");
 
   Portion* por = new OutcomeValPortion(n->GetOutcome());
   por->SetOwner( param[ 0 ]->Owner() );
@@ -771,7 +774,7 @@ Portion *GSM_Parent(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
   if (!n->GetParent())
-    return new ErrorPortion("Node is the root node\n");
+    return new ErrorPortion("Node is the root node");
 
   Portion* por = new NodeValPortion(n->GetParent());
   por->SetOwner( param[ 0 ]->Owner() );
@@ -815,7 +818,7 @@ Portion *GSM_PlayerNode(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
   if (!n->GetPlayer())
-    return new ErrorPortion("Node is a terminal node\n");
+    return new ErrorPortion("Node is a terminal node");
 
   Portion* por = new EfPlayerValPortion(n->GetPlayer());
   por->SetOwner( param[ 0 ]->Owner() );
@@ -839,7 +842,7 @@ Portion *GSM_PriorSibling(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value()->PriorSibling();
   if (!n)
-    return new ErrorPortion("Node is the first sibling\n");
+    return new ErrorPortion("Node is the first sibling");
   
   Portion* por = new NodeValPortion(n);
   por->SetOwner( param[ 0 ]->Owner() );
@@ -858,7 +861,7 @@ Portion *GSM_LoadEfg(Portion **param)
     bool valid;
 
     EfgFileType(f, valid, type);
-    if (!valid)   return new ErrorPortion("Not a valid .efg file\n");
+    if (!valid)   return new ErrorPortion("Not a valid .efg file");
     
     switch (type)   {
       case DOUBLE:  {
@@ -868,7 +871,7 @@ Portion *GSM_LoadEfg(Portion **param)
 	if (E)
 	  return new EfgValPortion(E);
 	else
-	  return new ErrorPortion("Not a valid .efg file\n");
+	  return new ErrorPortion("Not a valid .efg file");
       }
       case RATIONAL:   {
 	Efg<gRational> *E = 0;
@@ -877,7 +880,7 @@ Portion *GSM_LoadEfg(Portion **param)
 	if (E)
 	  return new EfgValPortion(E);
 	else
-	  return new ErrorPortion("Not a valid .efg file\n");
+	  return new ErrorPortion("Not a valid .efg file");
       }
       default:
 	assert(0);
@@ -885,7 +888,7 @@ Portion *GSM_LoadEfg(Portion **param)
     }
   }
   else
-    return new ErrorPortion("Unable to open file for reading\n");
+    return new ErrorPortion("Unable to open file for reading");
 }
 
 Portion *GSM_RootNode(Portion **param)
@@ -905,7 +908,7 @@ Portion *GSM_SaveEfg(Portion **param)
   gFileOutput f(text);
 
   if (!f.IsValid())
-    return new ErrorPortion("Cannot open file for writing\n");
+    return new ErrorPortion("Cannot open file for writing");
 
   E->WriteEfgFile(f);
 

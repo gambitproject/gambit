@@ -531,7 +531,7 @@ Portion *GSM_LoadNfg(Portion **param)
     bool valid;
 
     NfgFileType(f, valid, type);
-    if (!valid)   return new ErrorPortion("Not a valid .nfg file\n");
+    if (!valid)   return new ErrorPortion("Not a valid .nfg file");
     
     switch (type)   {
       case DOUBLE:  {
@@ -541,7 +541,7 @@ Portion *GSM_LoadNfg(Portion **param)
 	if (N)
 	  return new NfgValPortion(N);
 	else
-	  return new ErrorPortion("Not a valid .nfg file\n");
+	  return new ErrorPortion("Not a valid .nfg file");
       }
       case RATIONAL:   {
 	Nfg<gRational> *N = 0;
@@ -550,7 +550,7 @@ Portion *GSM_LoadNfg(Portion **param)
 	if (N)
 	  return new NfgValPortion(N);
 	else
-	  return new ErrorPortion("Not a valid .nfg file\n");
+	  return new ErrorPortion("Not a valid .nfg file");
       }
       default:
 	assert(0);
@@ -558,7 +558,7 @@ Portion *GSM_LoadNfg(Portion **param)
     }
   }
   else
-    return new ErrorPortion("Unable to open file for reading\n");
+    return new ErrorPortion("Unable to open file for reading");
 
 }
 
@@ -636,7 +636,7 @@ Portion *GSM_SaveNfg(Portion **param)
   gFileOutput f(file);
 
   if (!f.IsValid())
-    return new ErrorPortion("Unable to open file for output\n");
+    return new ErrorPortion("Unable to open file for output");
 
   N.WriteNfgFile(f);
   return new OutputRefPortion(f);

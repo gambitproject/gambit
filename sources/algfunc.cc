@@ -68,7 +68,7 @@ Portion *GSM_NfgFloat(Portion **param)
   if (N)
     return new NfgValPortion(N);
   else
-    return new ErrorPortion("Conversion to reduced nfg failed.\n");
+    return new ErrorPortion("Conversion to reduced nfg failed");
 }
 
 Portion *GSM_NfgRational(Portion **param)
@@ -83,7 +83,7 @@ Portion *GSM_NfgRational(Portion **param)
   if (N)
     return new NfgValPortion(N);
   else
-    return new ErrorPortion("Conversion to reduced nfg failed.\n");
+    return new ErrorPortion("Conversion to reduced nfg failed");
 }
 
 template <class T> class Behav_ListPortion : public ListValPortion   {
@@ -257,10 +257,10 @@ Portion *GSM_ActionValuesFloat(Portion **param)
   Infoset *s = ((InfosetPortion *) param[1])->Value();
 
   if (s->BelongsTo() != bp->BelongsTo())
-    return new ErrorPortion("Profile and infoset must belong to same game\n");
+    return new ErrorPortion("Profile and infoset must belong to same game");
   
   if (s->GetPlayer()->IsChance())
-    return new ErrorPortion("Infoset must belong to personal player\n");
+    return new ErrorPortion("Infoset must belong to personal player");
 
   Efg<double> *E = bp->BelongsTo();
 
@@ -282,10 +282,10 @@ Portion *GSM_ActionValuesRational(Portion **param)
   Infoset *s = ((InfosetPortion *) param[1])->Value();
 
   if (s->BelongsTo() != bp->BelongsTo())
-    return new ErrorPortion("Profile and infoset must belong to same game\n");
+    return new ErrorPortion("Profile and infoset must belong to same game");
   
   if (s->GetPlayer()->IsChance())
-    return new ErrorPortion("Infoset must belong to personal player\n");
+    return new ErrorPortion("Infoset must belong to personal player");
 
   Efg<gRational> *E = bp->BelongsTo();
 
@@ -359,7 +359,7 @@ Portion *GSM_NodeValuesFloat(Portion **param)
   EFPlayer *p = ((EfPlayerPortion *) param[1])->Value();
 
   if (bp->BelongsTo() != p->BelongsTo())
-    return new ErrorPortion("Profile and player are from different games\n");
+    return new ErrorPortion("Profile and player are from different games");
 
   return ArrayToList(bp->BelongsTo()->NodeValues(p->GetNumber(), *bp));
 }
@@ -370,7 +370,7 @@ Portion *GSM_NodeValuesRational(Portion **param)
   EFPlayer *p = ((EfPlayerPortion *) param[1])->Value();
 
   if (bp->BelongsTo() != p->BelongsTo())
-    return new ErrorPortion("Profile and player are from different games\n");
+    return new ErrorPortion("Profile and player are from different games");
 
   return ArrayToList(bp->BelongsTo()->NodeValues(p->GetNumber(), *bp));
 }

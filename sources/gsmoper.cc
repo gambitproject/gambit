@@ -35,7 +35,7 @@ Portion* GSM_Assign( Portion** param )
     }
     else
     {
-      result = new ErrorPortion( "Attempted to change the type of a list\n" );
+      result = new ErrorPortion( "Attempted to change the type of a list" );
     }
   }
   else
@@ -116,11 +116,7 @@ Portion* GSM_Add_List( Portion** param )
     {
       delete result;
       result = new ErrorPortion
-	( (gString)
-	 "GSM_Add Error:\n" +
-	 "  Attempted to insert conflicting Portion\n" +
-	 "  types into a ListPortion\n"
-	 );
+	( "Attempted concatenating lists of different types" );
       break;
     }
   }
@@ -218,11 +214,7 @@ Portion* GSM_Divide_double( Portion** param )
   }
   else
   {
-    result = new ErrorPortion
-      ( (gString)
-       "GSM_Divide Error:\n" +
-       "  Division by zero\n" 
-       );
+    result = new ErrorPortion( "Division by zero" );
   }
   return result;
 }
@@ -240,11 +232,7 @@ Portion* GSM_Divide_int( Portion** param )
   }
   else
   {
-    result = new ErrorPortion
-      ( (gString)
-       "GSM_Divide Error:\n" +
-       "  Division by zero\n" 
-       );
+    result = new ErrorPortion( "Division by zero" );
   }
   return result;
 }
@@ -262,11 +250,7 @@ Portion* GSM_Divide_gRational( Portion** param )
   }
   else
   {
-    result = new ErrorPortion
-      ( (gString)
-       "GSM_Divide Error:\n" +
-       "  Division by zero\n" 
-       );
+    result = new ErrorPortion( "Division by zero" );
   }
   return result;
 }
@@ -340,11 +324,7 @@ Portion* GSM_Modulus_int( Portion** param )
   }
   else
   {
-    result = new ErrorPortion
-      ( (gString)
-       "GSM_Modulus Error:\n" +
-       "  Division by zero\n" 
-       );
+    result = new ErrorPortion( "Division by zero" );
   }
   return result;
 }
