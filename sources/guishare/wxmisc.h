@@ -97,9 +97,6 @@ const int idEFSUPPORT_INFOSET_LISTBOX = 1042;
 const int idEFSUPPORT_ACTION_LISTBOX = 1043;
 const int idEFG_BROWSE_BUTTON = 1051;
 
-// in dlsupport.cc
-const int idMETHOD_BOX = 1200;
-
 // in nfgshow.cc
 const int idSTRATEGY_CHOICE = 2001;
 const int idROWPLAYER_CHOICE = 2002;

@@ -49,7 +49,7 @@
 #include "algqregrid.h"
 #include "algsimpdiv.h"
 
-#include "dlelim.h"
+#include "dlelimmixed.h"
 
 //=====================================================================
 //                 Implementation of class NfgShow
@@ -804,8 +804,9 @@ void NfgShow::OnFormatLoad(wxCommandEvent &)
 void NfgShow::OnToolsDominance(wxCommandEvent &)
 {
   gArray<gText> playerNames(m_nfg.NumPlayers());
-  for (int pl = 1; pl <= playerNames.Length(); pl++)
+  for (int pl = 1; pl <= playerNames.Length(); pl++) {
     playerNames[pl] = m_nfg.Players()[pl]->GetName();
+  }
   dialogElimMixed dialog(this, playerNames);
 
   if (dialog.ShowModal() == wxID_OK) {

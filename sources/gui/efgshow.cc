@@ -48,7 +48,7 @@
 #include "dllayout.h"
 #include "dllegends.h"
 
-#include "dlelim.h"
+#include "dlelimbehav.h"
 
 #include "algenumpure.h"
 #include "algenummixed.h"
