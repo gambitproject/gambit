@@ -890,6 +890,45 @@ static Portion *GSM_PolEnum_Nfg(Portion **param)
   return new Mixed_ListPortion(solutions);
 }
 
+//------------------
+// NfgAllNashSolve
+//------------------
+
+#include "nfgalleq.h"
+
+static Portion *GSM_NfgAllNash_Nfg(Portion **param)
+{
+  Nfg &N = *((NfgPortion*) param[0])->Value();
+  NFSupport* S = new NFSupport(N);
+
+  //DEBUG
+  //  gout << "We did indeed get to this point.\n";
+  //  gout << "The game is:\n" << S->Game() << "\n";
+  //  exit(0);
+
+  PolEnumParams params;
+  params.stopAfter = ((NumberPortion *) param[1])->Value();
+  params.precision = ((PrecisionPortion *) param[2])->Value();
+  params.tracefile = &((OutputPortion *) param[5])->Value();
+  params.trace = ((NumberPortion *) param[6])->Value();
+  
+  gList<MixedSolution> solutions;
+
+  try {
+    long nevals = 0;
+    double time = 0.0;
+    NfgAllNash(S->Game(), params, solutions, nevals, time);
+
+    ((NumberPortion *) param[3])->SetValue(nevals);
+    ((NumberPortion *) param[4])->SetValue(time);
+  }
+  catch (gSignalBreak &) {
+    params.status.Reset();
+  }
+
+  return new Mixed_ListPortion(solutions);
+}
+
 #include "epolenum.h"
 #include "polensub.h"
 
@@ -1552,6 +1591,25 @@ void Init_algfunc(GSM *gsm)
 					    new OutputPortion(gnull), 
 					    BYREF));
   FuncObj->SetParamInfo(1, 7, gclParameter("traceLevel", porNUMBER,
+					    new NumberPortion(0)));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new gclFunction("NfgAllNash", 2);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_NfgAllNash_Nfg, 
+				       PortionSpec(porMIXED, 1), 7));
+  FuncObj->SetParamInfo(0, 0, gclParameter("nfg", porNFG));
+  FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porINTEGER,
+					    new NumberPortion(0)));
+  FuncObj->SetParamInfo(0, 2, gclParameter("precision", porPRECISION,
+              new PrecisionPortion(precDOUBLE)));
+  FuncObj->SetParamInfo(0, 3, gclParameter("nEvals", porINTEGER,
+					    new NumberPortion(0), BYREF));
+  FuncObj->SetParamInfo(0, 4, gclParameter("time", porNUMBER,
+					    new NumberPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(0, 5, gclParameter("traceFile", porOUTPUT,
+					    new OutputPortion(gnull), 
+					    BYREF));
+  FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
