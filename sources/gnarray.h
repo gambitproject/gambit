@@ -1,7 +1,7 @@
 //#
 //# FILE: gnarray.h -- Implementation of an N-dimensional array
 //#
-//# @(#)gnarray.h	1.12 6/2/95
+//# $Id$
 //#
 
 #ifndef GNARRAY_H
@@ -16,13 +16,13 @@
 //
 template <class T> class gNArray   {
   protected:
-		long storage_size;
+    long storage_size;
 #ifdef __BORLANDC__
-	#define GHUGE	huge
+#define GHUGE	huge
 #else
-	#define GHUGE
+#define GHUGE
 #endif
-    T HUGE *storage;
+    T GHUGE *storage;
     gArray<int> dim;
 
     void DumpFrom(gOutput &, int, gVector<int> &) const;
