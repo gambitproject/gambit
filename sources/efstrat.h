@@ -14,39 +14,41 @@
 
 class Action;
 class EFPlayer;
-class EFActionArray;
 class EFActionSet;
 class Efg;  
-
 
 class EFSupport {
 protected:
   gText m_name;
-  const Efg *befg;
-  gArray<EFActionSet *> sets;
+  const Efg *m_efg;
+  gArray<EFActionSet *> m_players;
 
 public:
-  EFSupport ( const Efg &);
-  EFSupport ( const EFSupport &);
+  EFSupport(const Efg &);
+  EFSupport(const EFSupport &);
   virtual ~EFSupport();
   EFSupport &operator=(const EFSupport &);
 
   bool operator==(const EFSupport &) const;
   bool operator!=(const EFSupport &) const;
 
+  const Efg &Game(void) const { return *m_efg; }
+
   const gText &GetName(void) const { return m_name; }
   void SetName(const gText &p_name) { m_name = p_name; }
 
-  // Return the number of players, infosets, actions in a support 
   int NumActions(int pl, int iset) const;
-  int NumActions(const Infoset &) const;
   int NumActions(const Infoset *) const;
   gPVector<int> NumActions(void) const;
 
-  // Returns the position of the action in the support.  Returns zero
-  // if it is not there.
+  // Checks to see that every infoset in the support has at least one
+  // action in it.
+  bool IsValid(void) const;
+
+  // Returns the position of the action in the support. 
+  // Returns zero if the action is not contained in the support
   int Find(Action *) const;
-  int Find(int, int, Action *) const;
+
   bool ActionIsActive(const int pl, const int iset, const int act) const;
   bool ActionIsActive(Action *) const;
   bool AllActionsInSupportAtInfosetAreActive(const EFSupport &,
@@ -54,42 +56,30 @@ public:
 
   // Find the active actions at an infoset
   const gArray<Action *> &Actions(int pl, int iset) const;
-  const gArray<Action *> &Actions(const Infoset &) const;
   const gArray<Action *> &Actions(const Infoset *) const;
   gList<Action *> ListOfActions(const Infoset *) const;
-  const EFActionArray    *ActionArray(const Infoset *) const;
 
   // Action editing functions
-  virtual  void AddAction(const Action *);
-  virtual  bool RemoveAction(const Action *);
-
-  // Returns the Efg associated with this Support.
-  const Efg &Game(void) const;
-  const Node *RootNode(void) const;
-
-  // Checks to see that every infoset in the support has at least one
-  // action in it.
-  bool IsValid(void) const;
+  virtual void AddAction(const Action *);
+  virtual bool RemoveAction(const Action *);
 
   // Number of Sequences for the player
   int NumSequences(int pl) const;
-  int TotalNumSequences() const;
+  int TotalNumSequences(void) const;
 
   // Reachable Nodes and Information Sets
-  const gList<const Node *>    ReachableNonterminalNodes(const Node *) const;
-  const gList<const Node *>    ReachableNonterminalNodes(const Node *,
-							 Action *) const;
-  const gList<const Infoset *> ReachableInfosets(const Node *) const;
-  const gList<const Infoset *> ReachableInfosets(const Node *,
-						 Action *) const;
-  const gList<const Infoset *> ReachableInfosets(const EFPlayer *) const;
+  gList<Node *> ReachableNonterminalNodes(const Node *) const;
+  gList<Node *> ReachableNonterminalNodes(const Node *, Action *) const;
+  gList<Infoset *> ReachableInfosets(const Node *) const;
+  gList<Infoset *> ReachableInfosets(const Node *, Action *) const;
+  gList<Infoset *> ReachableInfosets(const EFPlayer *) const;
 
   bool AlwaysReaches(const Infoset *) const;
   bool AlwaysReachesFrom(const Infoset *, const Node *) const;
   bool MayReach(const Node *) const;
   bool MayReach(const Infoset *) const;
 
-  void Dump(gOutput& s) const;
+  void Dump(gOutput &) const;
 };
 
 gOutput &operator<<(gOutput &f, const EFSupport &);

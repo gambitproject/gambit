@@ -23,7 +23,7 @@ private:
   double time;
   gList<BFS<T> > List;
   gList<BehavSolution> solutions;
-  gList<const Infoset *> isets1, isets2;
+  gList<Infoset *> isets1, isets2;
 
 public:
   SeqFormModule(const EFSupport &, const SeqFormParams &p);

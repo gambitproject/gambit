@@ -65,7 +65,7 @@ bool Dominates(const EFSupport &S,
     
     for (int n = 1; n <= nodelist.Length(); n++) {
       
-      gList<const Infoset *> L;
+      gList<Infoset *> L;
       L += S.ReachableInfosets(nodelist[n],aAct);
       L += S.ReachableInfosets(nodelist[n],bAct);
       L.RemoveRedundancies();

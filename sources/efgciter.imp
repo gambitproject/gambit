@@ -173,7 +173,7 @@ EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s)
 }
 
 EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s, 
-				   const gList<const Infoset *>& active)
+					       const gList<Infoset *>& active)
   : _efg(&s.Game()), _support(s),
     _profile(s.Game()), _current(s.Game().NumInfosets()),
     _is_active(),

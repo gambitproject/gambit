@@ -9,8 +9,6 @@
 
 #include "glist.imp"
 
-template class gList<const Infoset *>;
-
 class EFActionArray   {
   friend class EFActionSet;
 protected:
@@ -273,52 +271,53 @@ bool EFActionSet::IsValid(void) const
 // EFSupport: Constructors, Destructors, Operators
 //--------------------------------------------------
 
-EFSupport::EFSupport(const Efg &E) 
-: befg(&E), sets(E.NumPlayers())
+EFSupport::EFSupport(const Efg &p_efg) 
+  : m_efg(&p_efg), m_players(p_efg.NumPlayers())
 {
-  for (int i = 1; i <= sets.Length(); i++)
-    sets[i] = new EFActionSet(*(E.Players()[i]));
+  for (int pl = 1; pl <= m_players.Length(); pl++)
+    m_players[pl] = new EFActionSet(*(p_efg.Players()[pl]));
 }
 
-EFSupport::EFSupport(const EFSupport &s)
-  : m_name(s.m_name), befg(s.befg), 
-    sets(s.sets.Length())
+EFSupport::EFSupport(const EFSupport &p_support)
+  : m_name(p_support.m_name), m_efg(p_support.m_efg),
+    m_players(p_support.m_players.Length())
 {
-  for (int i = 1; i <= sets.Length(); i++)
-    sets[i] = new EFActionSet(*(s.sets[i]));
+  for (int pl = 1; pl <= m_players.Length(); pl++)
+    m_players[pl] = new EFActionSet(*(p_support.m_players[pl]));
 }
 
 EFSupport::~EFSupport()
 {
-  for (int i = 1; i <= sets.Length(); i++)
-    delete sets[i];
+  for (int pl = 1; pl <= m_players.Length(); pl++)
+    delete m_players[pl];
 }
 
-EFSupport &EFSupport::operator=(const EFSupport &s)
+EFSupport &EFSupport::operator=(const EFSupport &p_support)
 {
-  if (this != &s && befg == s.befg) {
-    m_name = s.m_name;
-    for (int i = 1; i <= sets.Length(); i++)  {
-      delete sets[i];
-      sets[i] = new EFActionSet(*(s.sets[i]));
+  if (this != &p_support && m_efg == p_support.m_efg) {
+    m_name = p_support.m_name;
+    for (int pl = 1; pl <= m_players.Length(); pl++)  {
+      delete m_players[pl];
+      m_players[pl] = new EFActionSet(*(p_support.m_players[pl]));
     }
   }
   return *this;
 }
 
-bool EFSupport::operator==(const EFSupport &s) const
+bool EFSupport::operator==(const EFSupport &p_support) const
 {
-  if (sets.Length() != s.sets.Length())
+  if (m_players.Length() != p_support.m_players.Length())
     return false;
 
-  int i;
-  for (i = 1; i <= sets.Length() && *(sets[i]) == *(s.sets[i]); i++);
-  return (i > sets.Length());
+  int pl;
+  for (pl = 1; (pl <= m_players.Length() &&
+		*(m_players[pl]) == *(p_support.m_players[pl])); pl++);
+  return (pl > m_players.Length());
 }
 
-bool EFSupport::operator!=(const EFSupport &s) const
+bool EFSupport::operator!=(const EFSupport &p_support) const
 {
-  return !(*this == s);
+  return !(*this == p_support);
 }
 
 //-----------------------------
@@ -327,56 +326,25 @@ bool EFSupport::operator!=(const EFSupport &s) const
 
 int EFSupport::NumActions(int pl, int iset) const
 {
-  return sets[pl]->NumActions(iset);
-}
-
-int EFSupport::NumActions(const Infoset &i) const
-{
-  return sets[i.GetPlayer()->GetNumber()]->NumActions(i.GetNumber());
+  return m_players[pl]->NumActions(iset);
 }
 
 int EFSupport::NumActions(const Infoset *i) const
 {
-  return sets[i->GetPlayer()->GetNumber()]->NumActions(i->GetNumber());
+  return m_players[i->GetPlayer()->GetNumber()]->NumActions(i->GetNumber());
 }
 
 const gArray<Action *> &EFSupport::Actions(int pl, int iset) const
 {
-  return sets[pl]->ActionList(iset);
-}
-
-const gArray<Action *> &EFSupport::Actions(const Infoset &i) const
-{
-  if (i.GetPlayer()->IsChance())
-    return i.Actions();
-  else
-    return sets[i.GetPlayer()->GetNumber()]->ActionList(i.GetNumber());
+  return m_players[pl]->ActionList(iset);
 }
 
 const gArray<Action *> &EFSupport::Actions(const Infoset *i) const
 {
-  /*
-  //DEBUG
-  gout << "In Actions, i->GetNumber() = " << i->GetNumber() << ".\n";
-  gout << "In Actions, i->GetPlayer() = " << i->GetPlayer() << ".\n";
-  gout << "In Actions, i->GetPlayer()->GetNumber() = " << i->GetPlayer()->GetNumber() << ".\n";
-
-  if (i->GetPlayer()->IsChance()) {
-    gout << "Got in 1.\n";
-    return i->Actions();
-    gout << "Got out 1.\n";
-  }
-  else {
-    gout << "Got in 2.\n";
-    return sets[i->GetPlayer()->GetNumber()]->ActionList(i->GetNumber());
-    gout << "Got out 2.\n";
-  }
-  */
-
   if (i->GetPlayer()->IsChance())
     return i->Actions();
   else
-    return sets[i->GetPlayer()->GetNumber()]->ActionList(i->GetNumber());
+    return m_players[i->GetPlayer()->GetNumber()]->ActionList(i->GetNumber());
 }
 
 gList<Action *> EFSupport::ListOfActions(const Infoset *i) const
@@ -388,48 +356,33 @@ gList<Action *> EFSupport::ListOfActions(const Infoset *i) const
   return answer;
 }
 
-const EFActionArray* EFSupport::ActionArray(const Infoset *i) const
-{
-  return sets[i->GetPlayer()->GetNumber()]->ActionArray(i);
-}
-
-const Efg &EFSupport::Game(void) const
-{
-  return *befg;
-}
-
-const Node *EFSupport::RootNode(void) const
-{
-  return befg->RootNode();
-}
-
 int EFSupport::Find(Action *a) const
 {
-  if (a->BelongsTo()->Game() != befg)  assert(0);
+  if (a->BelongsTo()->Game() != m_efg)  assert(0);
 
   int pl = a->BelongsTo()->GetPlayer()->GetNumber();
 
-  return sets[pl]->Find(a);
+  return m_players[pl]->Find(a);
 }
-
+/*
 int EFSupport::Find(int p_player, int p_infoset, Action *p_action) const
 {
-  return sets[p_player]->Find(p_infoset, p_action);
+  return m_players[p_player]->Find(p_infoset, p_action);
 }
-
+*/
 bool EFSupport::ActionIsActive(Action *a) const
 {
   //DEBUG
   //  if (a == NULL) { gout << "Action* is null.\n"; exit(0); }
 
-  if (a->BelongsTo()->Game() != befg)   
+  if (a->BelongsTo()->Game() != m_efg)   
     return false;
 
   int pl = a->BelongsTo()->GetPlayer()->GetNumber();
 
   if (pl == 0) return true; // Chance
 
-  int act = sets[pl]->Find(a);
+  int act = m_players[pl]->Find(a);
   if (act == 0) 
     return false;
   else
@@ -458,23 +411,23 @@ EFSupport::AllActionsInSupportAtInfosetAreActive(const EFSupport &S,
 
 bool EFSupport::IsValid(void) const
 {
-  if (sets.Length() != befg->NumPlayers())   return false;
-  for (int i = 1; i <= sets.Length(); i++)
-    if (!sets[i]->IsValid())  return false;
+  if (m_players.Length() != m_efg->NumPlayers())   return false;
+  for (int i = 1; i <= m_players.Length(); i++)
+    if (!m_players[i]->IsValid())  return false;
 
   return true;
 }
 
 gPVector<int> EFSupport::NumActions(void) const
 {
-  gArray<int> foo(befg->NumPlayers());
+  gArray<int> foo(m_efg->NumPlayers());
   int i;
-  for (i = 1; i <= befg->NumPlayers(); i++)
-    foo[i] = sets[i]->GetPlayer().NumInfosets();
+  for (i = 1; i <= m_efg->NumPlayers(); i++)
+    foo[i] = m_players[i]->GetPlayer().NumInfosets();
 
   gPVector<int> bar(foo);
-  for (i = 1; i <= befg->NumPlayers(); i++)
-    for (int j = 1; j <= sets[i]->GetPlayer().NumInfosets(); j++)
+  for (i = 1; i <= m_efg->NumPlayers(); i++)
+    for (int j = 1; j <= m_players[i]->GetPlayer().NumInfosets(); j++)
       bar(i, j) = NumActions(i,j);
 
   return bar;
@@ -485,7 +438,7 @@ bool EFSupport::RemoveAction(const Action *s)
   Infoset *infoset = s->BelongsTo();
   EFPlayer *player = infoset->GetPlayer();
  
-  return sets[player->GetNumber()]->RemoveAction(infoset->GetNumber(), 
+  return m_players[player->GetNumber()]->RemoveAction(infoset->GetNumber(), 
 						 (Action *)s);
 }
 
@@ -494,37 +447,35 @@ void EFSupport::AddAction(const Action *s)
   Infoset *infoset = s->BelongsTo();
   EFPlayer *player = infoset->GetPlayer();
 
-  sets[player->GetNumber()]->AddAction(infoset->GetNumber(), 
+  m_players[player->GetNumber()]->AddAction(infoset->GetNumber(), 
 				       (Action *)s);
 }
 
 int EFSupport::NumSequences(int j) const
 {
-  if (j < befg->Players().First() || j > befg->Players().Last()) return 1;
-  gList<const Infoset *> isets;
-  isets = ReachableInfosets(befg->GetPlayer(j));
+  if (j < m_efg->Players().First() || j > m_efg->Players().Last()) return 1;
+  gList<Infoset *> isets = ReachableInfosets(m_efg->GetPlayer(j));
   int num = 1;
-  for(int i = 1;i<= isets.Length();i++)
+  for(int i = 1; i <= isets.Length(); i++)
     num+=NumActions(isets[i]);
   return num;
 }
 
-int EFSupport::TotalNumSequences() const
+int EFSupport::TotalNumSequences(void) const
 {
   int total = 0;
-  for (int i = 1 ; i <= befg->NumPlayers(); i++)
+  for (int i = 1 ; i <= m_efg->NumPlayers(); i++)
     total += NumSequences(i);
   return total;
 }
 
-const gList<const Node *> 
-EFSupport::ReachableNonterminalNodes(const Node *n) const
+gList<Node *> EFSupport::ReachableNonterminalNodes(const Node *n) const
 {
-  gList<const Node *> answer;
+  gList<Node *> answer;
   if (n->IsNonterminal()) {
-    const EFActionArray *actions = ActionArray(n->GetInfoset());
-    for (int i = 1; i <= actions->Length(); i++) {
-      const Node *nn = n->GetChild((*actions)[i]);
+    const gArray<Action *> &actions = Actions(n->GetInfoset());
+    for (int i = 1; i <= actions.Length(); i++) {
+      Node *nn = n->GetChild(actions[i]);
       if (nn->IsNonterminal()) {
 	answer += nn;
 	answer += ReachableNonterminalNodes(nn);
@@ -534,11 +485,11 @@ EFSupport::ReachableNonterminalNodes(const Node *n) const
   return answer;
 }
 
-const gList<const Node *> 
-EFSupport::ReachableNonterminalNodes(const Node *n, Action *a) const
+gList<Node *> EFSupport::ReachableNonterminalNodes(const Node *n,
+						   Action *a) const
 {
-  gList<const Node *> answer;
-  const Node *nn = n->GetChild(a);
+  gList<Node *> answer;
+  Node *nn = n->GetChild(a);
   if (nn->IsNonterminal()) {
     answer += nn;
     answer += ReachableNonterminalNodes(nn);
@@ -546,33 +497,31 @@ EFSupport::ReachableNonterminalNodes(const Node *n, Action *a) const
   return answer;
 }
 
-const gList<const Infoset *> EFSupport::ReachableInfosets(const EFPlayer *p) const
+gList<Infoset *> EFSupport::ReachableInfosets(const EFPlayer *p) const
 { 
-  gArray<Infoset *> isets;
-  gList<const Infoset *> answer;
+  gArray<Infoset *> isets = p->Infosets();
+  gList<Infoset *> answer;
 
-  isets = p->Infosets();
   for (int i = isets.First(); i <= isets.Last(); i++)
-    if(MayReach(isets[i]))
+    if (MayReach(isets[i]))
       answer += isets[i];
   return answer;
 }
 
-const gList<const Infoset *> EFSupport::ReachableInfosets(const Node *n) const
+gList<Infoset *> EFSupport::ReachableInfosets(const Node *n) const
 {
-  gList<const Infoset *> answer;
-  gList<const Node *> nodelist = ReachableNonterminalNodes(n);
+  gList<Infoset *> answer;
+  gList<Node *> nodelist = ReachableNonterminalNodes(n);
   for (int i = 1; i <= nodelist.Length(); i++)
     answer += nodelist[i]->GetInfoset();
   answer.RemoveRedundancies();
   return answer;
 }
 
-const gList<const Infoset *> 
-EFSupport::ReachableInfosets(const Node *n, Action *a) const
+gList<Infoset *> EFSupport::ReachableInfosets(const Node *n, Action *a) const
 {
-  gList<const Infoset *> answer;
-  gList<const Node *> nodelist = ReachableNonterminalNodes(n,a);
+  gList<Infoset *> answer;
+  gList<Node *> nodelist = ReachableNonterminalNodes(n,a);
   for (int i = 1; i <= nodelist.Length(); i++)
     answer += nodelist[i]->GetInfoset();
   answer.RemoveRedundancies();
@@ -581,7 +530,7 @@ EFSupport::ReachableInfosets(const Node *n, Action *a) const
 
 bool EFSupport::AlwaysReaches(const Infoset *i) const
 {
-  return AlwaysReachesFrom(i,RootNode());
+  return AlwaysReachesFrom(i, m_efg->RootNode());
 }
 
 bool EFSupport::AlwaysReachesFrom(const Infoset *i, const Node *n) const
@@ -609,7 +558,7 @@ bool EFSupport::MayReach(const Infoset *i) const
 
 bool EFSupport::MayReach(const Node *n) const
 {
-  if (n == RootNode())
+  if (n == m_efg->RootNode())
     return true;
   else {
     if (!ActionIsActive((Action*)n->GetAction()))
@@ -623,14 +572,14 @@ bool EFSupport::MayReach(const Node *n) const
 void EFSupport::Dump(gOutput &p_output) const
 {
   p_output << '"' << m_name << "\" { ";
-  for (int pl = 1; pl <= befg->NumPlayers(); pl++)  {
-    EFPlayer &player = sets[pl]->GetPlayer();
+  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
+    EFPlayer &player = m_players[pl]->GetPlayer();
     p_output << '"' << player.GetName() << "\" { ";
     for (int iset = 1; iset <= player.NumInfosets(); iset++)  {
       Infoset *infoset = player.Infosets()[iset];
       p_output << '"' << infoset->GetName() << "\" { ";
       for (int act = 1; act <= NumActions(pl, iset); act++)  {
-	const Action *action = sets[pl]->ActionList(iset)[act];
+	const Action *action = m_players[pl]->ActionList(iset)[act];
 	p_output << action << ' ';
       }
       p_output << "} ";
