@@ -56,9 +56,7 @@ protected:
 
   gArray<NFOutcome *> results;
 
-#ifndef NFG_ONLY
   const Efg *efg;
-#endif  // NFG_ONLY
 
   // PRIVATE AUXILIARY MEMBER FUNCTIONS
   void IndexStrategies(void);
@@ -118,9 +116,7 @@ public:
   friend gNumber MinPayoff(const Nfg &, int pl = 0);
   friend gNumber MaxPayoff(const Nfg &, int pl = 0);
 
-#ifndef NFG_ONLY
   const Efg *AssociatedEfg(void) const   { return efg; }
-#endif   // NFG_ONLY
 };
 
 int ReadNfgFile(gInput &, Nfg *&);

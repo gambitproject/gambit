@@ -44,7 +44,7 @@ int Nfg::Product(const gArray<int> &dim)
 }
   
 Nfg::Nfg(const gArray<int> &dim)
-  : m_dirty(false), dimensions(dim), players(dim.Length()),
+  : m_dirty(false), title("UNTITLED"), dimensions(dim), players(dim.Length()),
     results(Product(dim)), efg(0)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
@@ -86,10 +86,8 @@ Nfg::Nfg(const Nfg &b)
                      outcomes[b.results[cont]->GetNumber()] : (NFOutcome *) 0;
 }
 
-#ifndef NFG_ONLY
 #include "efg.h"
 #include "lexicon.h"
-#endif   // NFG_ONLY
 
 Nfg::~Nfg()
 {
@@ -98,7 +96,6 @@ Nfg::~Nfg()
   for (int outc = 1; outc <= outcomes.Length(); outc++)
     delete outcomes[outc];
 
-#ifndef NFG_ONLY
   if (efg)  {
     const Efg *tmp = efg;
     // note that Lexicon dtor unsets the efg member...
@@ -107,13 +104,10 @@ Nfg::~Nfg()
     tmp->lexicon = 0;
   }
   efg = 0;
-#endif   // NFG_ONLY
-
 }
 
 void Nfg::BreakLink(void)
 {
-#ifndef NFG_ONLY
   if (efg)  {
     const Efg *tmp = efg;
     // note that Lexicon dtor unsets the efg member...
@@ -122,7 +116,6 @@ void Nfg::BreakLink(void)
     tmp->lexicon = 0;
   }
   efg = 0;
-#endif   // NFG_ONLY
 }
 
 //-------------------------------

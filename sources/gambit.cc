@@ -387,63 +387,55 @@ GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h
 
 void GambitFrame::LoadFile(char *s)
 {    
-    if (!s)
-    {
-        if (GUI_PLAYBACK)
-        {
-            gText arg = GUI_READ_ARG("GambitFrame::LoadFile", 1);
-            s = copystring((char *) arg);
-        }
-        else
-        {
-            Enable(FALSE); // Don't allow anything while the dialog is up.
-
-            s = wxFileSelector("Load data file", gambitApp.CurrentDir(), 
-                               NULL, NULL, "*.?fg");
-
-            Enable(TRUE);
-
-            if (!s) 
-                return;
-
-            // Save the current directory.
-            // WARNING: since wxFileSelector returns the address of
-            // a global buffer in wxxt, we have to copy s to a new
-            // location.  This is probably also a memory leak.
-            char *new_s = copystring(s);
-	    gText path(gPathOnly(s));
-            gambitApp.SetCurrentDir(path);
-	    s = new_s;
-
-            GUI_RECORD_ARG("GambitFrame::LoadFile", 1, s);
-        }
+  if (!s) {
+    if (GUI_PLAYBACK) {
+      gText arg = GUI_READ_ARG("GambitFrame::LoadFile", 1);
+      s = copystring((char *) arg);
     }
+    else {
+      Enable(FALSE); // Don't allow anything while the dialog is up.
+
+      s = wxFileSelector("Load data file", gambitApp.CurrentDir(), 
+			 NULL, NULL, "*.?fg");
+
+      Enable(TRUE);
+
+      if (!s) 
+	return;
+      
+      // Save the current directory.
+      // WARNING: since wxFileSelector returns the address of
+      // a global buffer in wxxt, we have to copy s to a new
+      // location.  This is probably also a memory leak.
+      char *new_s = copystring(s);
+      gText path(gPathOnly(s));
+      gambitApp.SetCurrentDir(path);
+      s = new_s;
+      
+      GUI_RECORD_ARG("GambitFrame::LoadFile", 1, s);
+    }
+  }
     
-    if (strcmp(s, "") != 0)
-    {
-      gText filename(gFileNameFromPath(s));
-      filename = filename.Dncase();
+  if (strcmp(s, "") != 0) {
+    gText filename(gFileNameFromPath(s));
+    filename = filename.Dncase();
 
-#ifndef EFG_ONLY
-        if (strstr((const char *)filename, ".nfg"))       // This must be a normal form.
-        {
-            NfgGUI(0, s, 0, this);
-            return;
-        }
-#endif
-        
-#ifndef NFG_ONLY
-        if (strstr((const char *)filename, ".efg"))       // This must be an extensive form.
-        {
-            EfgGUI(0, s, 0, this);
-            return;
-        }
-#endif
-
-        wxMessageBox("Unknown file type");  // If we got here, there is something wrong.
+    if (strstr((const char *) filename, ".nfg")) {
+      // This must be a normal form.
+      NfgGUI(0, s, 0, this);
+      return;
     }
-    // RDM:  I don't think the following should be here.  
-    //    delete [] s;
+    else if (strstr((const char *) filename, ".efg")) {
+      // This must be an extensive form.
+      EfgGUI(0, s, 0, this);
+      return;
+    }
+
+    wxMessageBox("Unknown file type");
+  }
+
+  // RDM:  I don't think the following should be here.  
+  //    delete [] s;
 }
 
 
