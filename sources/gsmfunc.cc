@@ -678,8 +678,8 @@ int CallFuncObj::NumParams( void ) const
 { return _NumParams; }
 
 
-bool CallFuncObj::
-_TypeMatch( Portion* p, PortionSpec ExpectedSpec, bool Listable )
+bool CallFuncObj::_TypeMatch( Portion* p, PortionSpec ExpectedSpec, 
+			     bool Listable, bool return_type_check)
 {
   bool        result = false;
   PortionSpec CalledSpec;
@@ -703,6 +703,9 @@ _TypeMatch( Portion* p, PortionSpec ExpectedSpec, bool Listable )
       result = true;
     else if(CalledSpec.ListDepth > 0 && ExpectedSpec.ListDepth == 1 && 
 	    !Listable)
+      result = true;
+    else if(CalledSpec.ListDepth >= ExpectedSpec.ListDepth && 
+	    !Listable && return_type_check)
       result = true;
   }
   else if(CalledSpec.Type == porUNDEFINED && CalledSpec.ListDepth > 0)
@@ -1298,7 +1301,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       _ErrorOccurred = true;
     }    
     else if(!_TypeMatch(result, _FuncInfo[_FuncIndex].ReturnSpec, 
-			list_op && _FuncInfo[_FuncIndex].Listable))
+			list_op && _FuncInfo[_FuncIndex].Listable, true))
     {
       _ErrorMessage(_StdErr, 28, 0, _FuncName, 
 		    PortionSpecToText(_FuncInfo[_FuncIndex].ReturnSpec),

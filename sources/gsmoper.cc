@@ -1274,6 +1274,31 @@ Portion* GSM_Write_Behav( Portion** param )
 }
 
 
+Portion* GSM_Write_NfSupport( Portion** param )
+{
+  assert(param[1]->Spec().Type & porNF_SUPPORT);
+  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  s << param[1];
+  return param[0]->RefCopy();
+}
+
+Portion* GSM_Write_EfSupport( Portion** param )
+{
+  assert(param[1]->Spec().Type & porEF_SUPPORT);
+  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  s << param[1];
+  return param[0]->RefCopy();
+}
+
+Portion* GSM_Write_Strategy( Portion** param )
+{
+  assert(param[1]->Spec().Type & porSTRATEGY);
+  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  s << param[1];
+  return param[0]->RefCopy();
+}
+
+
 Portion* GSM_Write_Nfg( Portion** param )
 {
   assert(param[1]->Spec().Type & porNFG);
@@ -2597,7 +2622,7 @@ void Init_gsmoper( GSM* gsm )
 
   GSM_SetWriteOptions();
 
-  FuncObj = new FuncDescObj("Write", 7);
+  FuncObj = new FuncDescObj("Write", 10);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Write_numerical, 
 				       porOUTPUT, 2, 0, NON_LISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("output", porOUTPUT,
@@ -2645,6 +2670,25 @@ void Init_gsmoper( GSM* gsm )
 			("x", PortionSpec(porBOOL | porINTEGER | porFLOAT | 
 					  porTEXT | porRATIONAL | porMIXED |
 					  porBEHAV, 1)));
+
+  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Write_NfSupport, 
+				       porOUTPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(7, 0, ParamInfoType("output", porOUTPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(7, 1, ParamInfoType("x", porNF_SUPPORT));
+
+  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Write_EfSupport, 
+				       porOUTPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(8, 0, ParamInfoType("output", porOUTPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(8, 1, ParamInfoType("x", porEF_SUPPORT));
+
+  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Write_Strategy, 
+				       porOUTPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(9, 0, ParamInfoType("output", porOUTPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(9, 1, ParamInfoType("x", porSTRATEGY));
+
   gsm->AddFunction(FuncObj);
 
 

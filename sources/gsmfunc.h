@@ -170,7 +170,8 @@ class CallFuncObj : public FuncDescObj
 
   gString _ParamName( const int index ) const;
 
-  static bool _TypeMatch( Portion* p, PortionSpec ExpectedSpec, bool Listable);
+  static bool _TypeMatch(Portion* p, PortionSpec ExpectedSpec, 
+			 bool Listable, bool return_type_check = false);
 
   static bool _ListDimMatch( ListPortion* p1, ListPortion* p2 );
   static bool _ListNestedCheck( Portion* p, const ParamInfoType& info );
