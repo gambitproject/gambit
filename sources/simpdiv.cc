@@ -114,7 +114,8 @@ template <class T> int SimpdivModule<T>::Simpdiv(int number)
 	      v(i,j)=y(i,j);
 	  maxz=simplex();
 	  
-	  if(maxz<(T)(TOL) || nevals>=MAXIT)qf=1;
+//	  if(maxz<(T)(TOL) || nevals>=MAXIT)qf=1;
+	  if(maxz<(T)(TOL))qf=1;
 	}
       gout << "\nSimpDiv solution # " << soln+1 << " : " << y;
       gout << " maxz = " << maxz; 
@@ -148,7 +149,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
   h=ylabel[2];
   labels(ibar,1)=j;
   labels(ibar,2)=h;
-  if(nits>=MAXIT)goto end;
+//  if(nits>=MAXIT)goto end;
   if(plev>=4) {
     gout << "\n Step 1, j = " << j << " h= " << h; 
     gout << " maxz = " << maxz; 
@@ -313,7 +314,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
     gout << "\ngrid = " << d << " maxz = " << maxz;
     if(plev>= 3) {
       gout << " j = " << j << " h = " << h;  
-      gout << " nits = " <<nits << " leash = " << leash;
+      gout << " nits = " <<nits;
     }
   } 
   for(i=1;i<=nplayers;i++)
