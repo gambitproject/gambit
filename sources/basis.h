@@ -51,8 +51,8 @@ public:
   int MinCol() const;    // First Column label
   int MaxCol() const;     // Last Column label
 
-  inline bool IsRegColumn( int col ) const;
-  inline bool IsSlackColumn( int col ) const; 
+  bool IsRegColumn( int col ) const;
+  bool IsSlackColumn( int col ) const; 
 
   //remove outindex, insert label, return outlabel
   int Pivot(int outindex, int col); 
