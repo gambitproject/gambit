@@ -172,11 +172,13 @@ Portion *GSM_WriteNfg(Portion **param)
   return new numerical_Portion<gInteger>(1);
 }
 
+/*
 Portion *GSM_NumPlayers(Portion **param)
 {
   NormalForm<double> *N = &((Nfg_Portion<double> *) param[0])->Value();
   return new numerical_Portion<gInteger>(N->NumPlayers());
 }
+*/
 
 void Init_nfgfunc(GSM *gsm)
 {
@@ -237,11 +239,12 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_LiapNfg, 0, "N", porNFG_DOUBLE, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 
+/*
   FuncObj = new FuncDescObj("NumPlayers");
   FuncObj->SetFuncInfo(GSM_NumPlayers, 1);
   FuncObj->SetParamInfo(GSM_NumPlayers, 0, "N", porNFG_DOUBLE, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
-
+  */
   FuncObj = new FuncDescObj("PureNash");
   FuncObj->SetFuncInfo(GSM_PureNash, 1);
   FuncObj->SetParamInfo(GSM_PureNash, 0, "N", porNFG_DOUBLE, NO_DEFAULT_VALUE);
