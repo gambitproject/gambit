@@ -3610,6 +3610,7 @@ appreciate getting feedback on this.
 # Behav 
   Belief 
   Beliefs 
+  Creator
   QreLambda 
   QreValue 
   InfosetProb 
@@ -4065,6 +4066,22 @@ structure.
 
 \item
 [See also:] \verb+MoveTree+.
+\ed
+
+\item\lex{Creator}
+\protect \large \begin{verbatim}
+Creator[profile->MIXED] =: TEXT
+Creator[profile->BEHAV] =: TEXT
+\end{verbatim}\normalsize
+
+\bd 
+Returns the GCL function name (excluding the ``Solve'' suffix) of
+the algorithm that was called to create the profile. For
+BEHAV profiles, the string includes an indication of whether the
+extensive or normal form version of the algorithm was used.  Thus,
+\verb+Liap[EFG]+ and \verb+Liap[NFG]+ are used to identify the
+extensive and normal form versions of the algorithm.  A profile
+created by the user is identified by \verb+User+.  
 \ed
 
 %--D--
