@@ -328,6 +328,21 @@ Portion *GSM_MergeInfosets(Portion **param)
   return por;
 }
 
+Portion *GSM_JoinInfoset(Portion **param)
+{
+  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  Node *n = ((NodePortion *) param[1])->Value();
+  
+  if (s->BelongsTo() != n->BelongsTo())
+    return new ErrorPortion("Information set and node from different games");
+  s->BelongsTo()->JoinInfoset(s, n);
+  
+  Portion* por = new InfosetValPortion(s);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
+}
+
 Portion *GSM_NewEfg(Portion **param)
 {
   bool rat = ((BoolPortion *) param[0])->Value();
@@ -1966,6 +1981,12 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_MergeInfosets, 2);
   FuncObj->SetParamInfo(GSM_MergeInfosets, 0, "infoset1", porINFOSET);
   FuncObj->SetParamInfo(GSM_MergeInfosets, 1, "infoset2", porINFOSET);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("JoinInfoset");
+  FuncObj->SetFuncInfo(GSM_JoinInfoset, 2);
+  FuncObj->SetParamInfo(GSM_JoinInfoset, 0, "infoset", porINFOSET);
+  FuncObj->SetParamInfo(GSM_JoinInfoset, 1, "node", porNODE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NewEfg");
