@@ -409,7 +409,7 @@ BSolnSortFilterDialog::BSolnSortFilterDialog(BSolnSortFilterOptions &options_)
                             sort_by_str, 2, wxVERTICAL, "sortby");
     NewLine();
     NewLine();
-    new wxGroupBox(this, "Filter By", 12, 95, 464, 150, 0, "gbox");
+    (void)new wxGroupBox(this, "Filter By", 12, 95, 464, 150, 0, "gbox");
     filter_creator = new wxListBox(this, 0, "Creator", wxMULTIPLE,
                                    55, -1, 140, 85, NUM_BCREATORS, options.filter_cr_str+1);
     filter_nash = new wxListBox(this, 0, "Nash", wxMULTIPLE, 
@@ -1440,7 +1440,7 @@ EfgSolnPicker::EfgSolnPicker(const Efg &ef_, BehavSolutionList &soln,
     //wxCheckBox *pick_all_box = new wxCheckBox(Panel(), (wxFunction)pick_all_func, "All");
     pick_all_button = new wxButton(Panel(), (wxFunction)pick_all_func, "     ");
     pick_all_button->SetClientData((char *)this);
-    new wxMessage(Panel(), "       Double click on a solution # to toggle it");
+    (void)new wxMessage(Panel(), "       Double click on a solution # to toggle it");
     Redraw();
     pick_all = !pick_all;       // OnPickAll() will toggle automatically ...
     OnPickAll();
