@@ -61,6 +61,7 @@ gelType gelExpression<gOutput *>::Type(void) const  { return gelOUTPUT; }
 template class gelConstant<gNumber *>;
 template class gelConstant<gTriState *>;
 template class gelConstant<gText *>;
+template class gelConstant<gOutput *>;
 
 gelConstant<gNumber *>::gelConstant(gNumber *v)
 { m_Value[1] = v; }
@@ -84,6 +85,12 @@ gelConstant<gText *>::gelConstant(const gNestedList<gText *>& v)
   : m_Value(v) { }
 gelConstant<gText *>::~gelConstant()   { }
 gNestedList<gText *> gelConstant<gText *>::Evaluate(gelVariableTable *) const 
+{ return m_Value; }
+
+gelConstant<gOutput *>::gelConstant(gOutput *s)
+{ m_Value[1] = s; }
+gelConstant<gOutput *>::~gelConstant()   { }
+gNestedList<gOutput *> gelConstant<gOutput *>::Evaluate(gelVariableTable *) const
 { return m_Value; }
 
 

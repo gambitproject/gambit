@@ -51,6 +51,7 @@ private:
     gTriState *bval;
     gNumber *nval;
     gText *tval;
+    gOutput *oval;
   } m_DefaultVal;
   bool m_Optional;
   bool m_ByReference;

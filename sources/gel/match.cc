@@ -153,6 +153,14 @@ gelParamInfo::gelParamInfo(const gText &s)
       m_DefaultVal.bval = new gTriState(triMAYBE);
       m_Type = gelBOOLEAN;
     }
+    else if (m_Default == "Stdout")  {
+      m_DefaultVal.oval = new gFileOutput(stdout);
+      m_Type = gelOUTPUT;
+    }
+    else if (m_Default == "Stderr")  {
+      m_DefaultVal.oval = new gFileOutput(stderr);
+      m_Type = gelOUTPUT;
+    }
     else if (isdigit(m_Default[0]) || m_Default[0] == '-' || m_Default[0] == '.') {
       m_DefaultVal.nval = new gNumber;
       FromText(m_Default, *m_DefaultVal.nval);
@@ -181,6 +189,8 @@ gelParamInfo::~gelParamInfo()
       delete m_DefaultVal.nval;
     else if (m_Type == gelTEXT)
       delete m_DefaultVal.tval;
+    else if (m_Type == gelOUTPUT)
+      delete m_DefaultVal.oval;
   }
 }
 
@@ -192,9 +202,12 @@ gelExpr *gelParamInfo::DefaultVal(void) const
     return new gelConstant<gTriState *>(new gTriState(*m_DefaultVal.bval));
   else if (m_Type == gelNUMBER)
     return new gelConstant<gNumber *>(new gNumber(*m_DefaultVal.nval));
-  else   /* if (m_Type == gelTEXT) */
+  else if (m_Type == gelTEXT)
     return new gelConstant<gText *>(new gText(*m_DefaultVal.tval));
-
+  else if (m_Type == gelOUTPUT)
+    return new gelConstant<gOutput *>(m_DefaultVal.oval);
+  else
+    return 0;
 }
 
 gOutput &operator<<(gOutput &f, const gelSignature &)  { return f; }
