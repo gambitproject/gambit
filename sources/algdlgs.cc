@@ -279,7 +279,7 @@ PxiParamsSettings::PxiParamsSettings(const char *alg, const char *fn)
     wxGetResourceStr(PARAMS_SECTION, "Pxi-Saved-Name", pxiname, defaults_file);
   
   if (naming_option == DEFAULT_NAME)
-    strcpy(pxiname, FileNameFromPath(wxOutputFile(filename)));
+    strcpy(pxiname, (const char *)gFileNameFromPath(wxOutputFile(filename)));
   
   if (naming_option == PROMPT_NAME) {
     if (FromDialog()) { // will be set later.  this is just the dialog settings

@@ -1089,4 +1089,14 @@ gText gGetTextLine(const gText &s0, wxFrame *parent, int x, int y,
     return result_str;
 }
 
+gText gFileNameFromPath(char *path)
+{
+  gText filename(path);
+  if(strstr("/",path) || strstr("\\",path))
+    filename = FileNameFromPath(path);
+  filename = filename.Dncase();
+  return filename;
+}
+
+
 

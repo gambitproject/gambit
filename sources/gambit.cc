@@ -417,15 +417,9 @@ void GambitFrame::LoadFile(char *s)
     
     if (strcmp(s, "") != 0)
     {
-      //  char *filename = copystring(FileNameFromPath(s));
-      //  filename = wxStrLwr(filename);  // ignore case
-      // FileNameFromPath() is buggy if there is no path, so do following instead
 
-      gText filename(s);
-      if(strstr("/",s) || strstr("\\",s))
-	filename = FileNameFromPath(s);
-      filename = filename.Dncase();
-        
+      gText filename(gFileNameFromPath(s));
+
 #ifndef EFG_ONLY
         if (strstr((const char *)filename, ".nfg"))       // This must be a normal form.
         {

@@ -1704,7 +1704,7 @@ TreeWindow::SubgameEntry &TreeWindow::GetSubgameEntry(const Node *n)
 // are not in the support.
 int TreeWindow::FillTable(const Node *n, int level)
 {
-    int y1 = -1, yn;
+    int y1 = -1, yn=0;
     
     SubgameEntry &subgame_entry = GetSubgameEntry(n->GetSubgameRoot());
     
@@ -2750,7 +2750,7 @@ void TreeWindow::file_save(void)
   static int s_nDecimals = 6;
   gText filename = frame->Filename();
   gText s = wxFileSelector("Save data file", wxPathOnly(filename),
-               wxFileNameFromPath(filename), ".efg", "*.efg",
+               (char *)gFileNameFromPath(filename), ".efg", "*.efg",
                wxSAVE | wxOVERWRITE_PROMPT);
 
 #ifdef __GNUG__

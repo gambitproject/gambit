@@ -206,6 +206,11 @@ gText gPlainText(const gText &s);
 gText gGetTextLine(const gText &s0 = "", wxFrame *parent = 0, int x = -1, int y = -1,
                    const char *title = "", bool titlebar = false);
 
+// Returns the file name from a path.  The function FileNameFromPath()
+// crashes when there is no path
+
+gText gFileNameFromPath(char *path);
+
 // FindFile: finds the specified file in the path.  User deletes the
 // result
 char *wxFindFile(const char *name);
