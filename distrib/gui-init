@@ -1,21 +1,21 @@
 #! /bin/csh
 
 echo This program will check and possibly update your Gambit GUI configuration
-echo file: ~/.gambit.ini
-if (-f ~/.gambit.ini) then
+echo file: ~/.gambitrc
+if (-f ~/.gambitrc) then
 	echo Previous Gambit GUI init file found.
 else 
 	echo Creating a new Gambit GUI init file
-	cp ./gambit.ini ~/.gambit.ini
+	cp ./.gambitrc ~/.gambitrc
 endif
 
-grep -s "Root-Dir" ~/.gambit.ini
+grep -s "Root-Dir" ~/.gambitrc
 if ($status) then
 	set gambit_install_dir = `pwd | sed -e 's/\/[^/]*$//'`
 	echo Setting the local install dir to : $gambit_install_dir
-	echo "Install.Root-Dir:       " $gambit_install_dir >> ~/.gambit.ini
+	echo "Install.Root-Dir:       " $gambit_install_dir >> ~/.gambitrc
 	echo Setting the local help dir to : $gambit_install_dir/doc
-	echo "Install.Help-Dir:       " $gambit_install_dir/doc >> ~/.gambit.ini
+	echo "Install.Help-Dir:       " $gambit_install_dir/doc >> ~/.gambitrc
 else
 	echo Local dir variables already set, no changes made
 endif
