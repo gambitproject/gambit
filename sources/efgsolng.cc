@@ -465,22 +465,7 @@ bool guiefgLcpNfg::SolveSetup(void)
 //========================================================================
 
 #include "psnesub.h"
-#include "purenprm.h"
-
-PureNashSolveParamsDialog::PureNashSolveParamsDialog(wxWindow *p_parent /*=0*/,
-						     bool p_subgames/*=false*/,
-						     bool p_vianfg/*=false*/)
-  : dialogAlgorithm("EnumPureSolve Params", p_parent)
-{
-  MakeCommonFields(true, p_subgames, p_vianfg);
-  Go();
-}
-
-void PureNashSolveParamsDialog::AlgorithmFields(void)
-{
-  (void) new wxMessage(this, "Algorithm parameters:");
-  m_stopAfter = new wxText(this, 0, "Stop after");
-}
+#include "dlenumpure.h"
 
 //---------------------
 // EnumPure on nfg
@@ -525,7 +510,7 @@ gList<BehavSolution> guiefgEnumPureNfg::Solve(void) const
 
 bool guiefgEnumPureNfg::SolveSetup(void)
 {
-  PureNashSolveParamsDialog dialog(m_parent->Frame(), true, true); 
+  dialogEnumPure dialog(m_parent->Frame(), true, true); 
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
@@ -581,14 +566,14 @@ gList<BehavSolution> guiefgEnumPureEfg::Solve(void) const
 
 bool guiefgEnumPureEfg::SolveSetup(void)
 {
-  PureNashSolveParamsDialog PNPD(m_parent->Frame(), true);
+  dialogEnumPure dialog(m_parent->Frame(), true);
 
-  if (PNPD.Completed() == wxOK) {
-    m_eliminate = PNPD.Eliminate();
-    m_eliminateAll = PNPD.EliminateAll();
-    m_eliminateWeak = PNPD.EliminateWeak();
-    m_eliminateMixed = PNPD.EliminateMixed();
-    m_markSubgames = PNPD.MarkSubgames();
+  if (dialog.Completed() == wxOK) {
+    m_eliminate = dialog.Eliminate();
+    m_eliminateAll = dialog.EliminateAll();
+    m_eliminateWeak = dialog.EliminateWeak();
+    m_eliminateMixed = dialog.EliminateMixed();
+    m_markSubgames = dialog.MarkSubgames();
     return true;
   }
   else

@@ -149,3 +149,31 @@ void PxiParamsDialog::MakePxiFields(void)
 // Destructor
 PxiParamsDialog::~PxiParamsDialog() { }
 
+
+
+//=======================================================================
+//                   dialogEnumPure: Member functions
+//=======================================================================
+
+#include "dlenumpure.h"
+
+dialogEnumPure::dialogEnumPure(wxWindow *p_parent, bool p_subgames,
+			       bool p_vianfg)
+  : dialogAlgorithm("EnumPureSolve Parameters", p_parent)
+{
+  MakeCommonFields(true, p_subgames, p_vianfg);
+  Go();
+}
+
+dialogEnumPure::~dialogEnumPure()
+{ }
+
+void dialogEnumPure::AlgorithmFields(void)
+{
+  (void) new wxMessage(this, "Algorithm parameters:");
+  m_stopAfter = new wxIntegerItem(this, "Stop after");
+  NewLine();
+}
+
+int dialogEnumPure::StopAfter(void) const
+{ return (int) ToDouble(m_stopAfter->GetValue()); }

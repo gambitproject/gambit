@@ -36,7 +36,7 @@ NfgSolutionG::NfgSolutionG(const Nfg &p_nfg, const NFSupport &p_support,
 //-----------
 
 #include "nfgpure.h"
-#include "purenprm.h"
+#include "dlenumpure.h"
 
 NfgEnumPureG::NfgEnumPureG(const Nfg &p_nfg, const NFSupport &p_support,
 			   NfgShowInterface *p_parent)
@@ -56,7 +56,7 @@ gList<MixedSolution> NfgEnumPureG::Solve(void) const
 
 bool NfgEnumPureG::SolveSetup(void)
 {
-  PureNashSolveParamsDialog dialog(parent->Frame());
+  dialogEnumPure dialog(parent->Frame());
 
   if (dialog.Completed() == wxOK) {
     m_stopAfter = dialog.StopAfter();

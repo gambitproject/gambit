@@ -1104,3 +1104,37 @@ gText gPathOnly(const char *name)
     path = wxPathOnly((char *)name);
   return path;
 }
+
+
+static bool IsInteger(wxText &p_item)
+{
+  char *entry = p_item.GetValue();
+  for (int i = 0; entry[i] != '\0'; i++) {
+    if (!isdigit(entry[i]))  return false;
+  }
+  return true;
+}
+
+wxIntegerItem::wxIntegerItem(wxPanel *p_parent, char *p_label)
+  : wxText(p_parent, (wxFunction) EventCallback, p_label), m_value(0)
+{ }
+
+void wxIntegerItem::EventCallback(wxIntegerItem &p_item,
+				  wxCommandEvent &p_event)
+{
+  if (p_event.eventType == wxEVENT_TYPE_TEXT_COMMAND) {
+    if (!IsInteger(p_item)) {
+      p_item.SetInteger(p_item.GetInteger());
+      p_item.SetValue(ToText(p_item.GetInteger()));
+    }
+    else {
+      p_item.SetInteger(atoi(p_item.GetValue()));
+    }
+  }
+}
+
+void wxIntegerItem::SetInteger(int p_value)
+{
+  m_value = p_value;
+}
+

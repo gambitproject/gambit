@@ -33,7 +33,7 @@ private:
   static void CallbackCancel(wxButton &p_object, wxEvent &)
     { ((dialogAlgorithm *) p_object.GetClientData())->OnCancel(); }
 
-  void OnOK(void);
+  virtual void OnOK(void);
   void OnCancel(void);
   Bool OnClose(void);
 

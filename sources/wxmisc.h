@@ -233,5 +233,23 @@ void wxKillHelp(void);
 #define DESTROY_DIALOG      1
 #define UPDATE_DIALOG       2
 
+
+//
+// Some specialized panel items that implement constraints
+//
+class wxIntegerItem : public wxText {
+private:
+  int m_value;
+
+  static void EventCallback(wxIntegerItem &p_object, wxCommandEvent &p_event);
+
+public:
+  wxIntegerItem(wxPanel *p_parent, char *p_label);
+  virtual ~wxIntegerItem() { }
+
+  void SetInteger(int p_value);
+  int GetInteger(void) { return m_value; }
+};
+
 #endif // WXMISC_H
 
