@@ -57,16 +57,50 @@ indows is installed (optional)],
            sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
     wx_config_micro_version=`$WX_CONFIG $wx_config_args --version | \
            sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
+
+    wx_requested_major_version=`echo $min_wx_version | \
+           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
+    wx_requested_minor_version=`echo $min_wx_version | \
+           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
+    wx_requested_micro_version=`echo $min_wx_version | \
+           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
+
+    wx_ver_ok=""
+    if test $wx_config_major_version -gt $wx_requested_major_version; then
+      wx_ver_ok=yes
+    else
+      if test $wx_config_major_version -eq $wx_requested_major_version; then
+         if test $wx_config_minor_version -gt $wx_requested_minor_version; then
+            wx_ver_ok=yes
+         else
+            if test $wx_config_minor_version -eq $wx_requested_minor_version; then
+               if test $wx_config_micro_version -ge $wx_requested_micro_version; then
+                  wx_ver_ok=yes
+               fi
+            fi
+         fi
+      fi
+    fi
+
+    if test "x$wx_ver_ok" = x ; then
+      no_wx=yes
+    fi
   fi
 
   if test "x$no_wx" = x ; then
      AC_MSG_RESULT(yes (version $wx_config_major_version.$wx_config_minor_version.$wx_config_micro_version))
      ifelse([$2], , :, [$2])     
   else
-     AC_MSG_RESULT(no)
-     WX_CFLAGS=""
-     WX_LIBS=""
-     ifelse([$3], , :, [$3])
+    if test "x$wx_config_major_version" = x; then
+      dnl no wx-config at all
+      AC_MSG_RESULT(no)
+    else
+      AC_MSG_RESULT(no (version $wx_config_major_version.$wx_config_minor_version.$wx_config_micro_version) is not new enough)
+    fi
+
+    WX_CFLAGS=""
+    WX_LIBS=""
+    ifelse([$3], , :, [$3])
   fi
   AC_SUBST(WX_CFLAGS)
   AC_SUBST(WX_CXXFLAGS)
