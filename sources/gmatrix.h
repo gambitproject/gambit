@@ -79,6 +79,7 @@ public:
   gVector<T> GetRow(int) const;
   void GetRow(int, gVector<T>&) const;
   void SetRow(int, const gVector<T>&);
+  void MakeIdent(void);  // set matrix to identity matrix
 
   void AddColumn(const gVector<T> &);
   void RemoveColumn(int);

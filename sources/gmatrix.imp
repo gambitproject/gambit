@@ -642,16 +642,13 @@ gMatrix<T>::SetRow(int row, const gVector<T> &v)
 }
 
 template <class T> void
-gMatrix<T>::RotateDown(int lo, int hi)
+gMatrix<T>::MakeIdent(void)
 {
-  assert( CheckRow(lo) && CheckRow(hi) );
-  assert(lo<=hi);
-      // Rotate data rows
-  T *temp;
-  temp=data[hi];
-  for(int k=hi; k>lo; k--)
-    data[k]=data[k-1];
-  data[lo]=temp;
+  for(int i=minrow;i<=maxrow;i++) 
+    for(int j=mincol;j<=maxcol;j++) {
+      if(i==j) (*this)(i,j) = (T) 1;
+      else (*this)(i,j)=(T) 0;
+    }
 }
 
 template <class T> void
