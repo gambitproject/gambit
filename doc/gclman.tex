@@ -6068,6 +6068,21 @@ PolEnumSolve[support->EFSUPPORT, {asNfg->False}, {stopAfter->0},
 Solves for all totally mixed equilibrium on the support.  
 \verb+support+.  
 
+The algorithm starts with a cube containing the space of possible
+solutions and proceeds recursively.  The recursion step begins with a
+subcube.  The subcube is discarded if the cube is irrelevant in the
+sense of lying outside the space of possible solutions.  Otherwise a
+modified Newton's method is used to search for a solution in the
+subcube.  In the event that such a solution is found, Taylor's series
+information at the solution is used to inquire whether the solution is
+necessarily the unique solution in the subcube.  If Newton's method
+leaves the subcube before finding a solution, Taylor's series
+information at the center is used to inquire whether we can be sure
+that the subcube contains no solutions.  If neither of these
+procedures resolves the issue, the subcube is subdivided and this
+recursion is performed on each smaller subcube.  {\it Singular
+solutions may cause a fatal error.}
+
 The following optional parameters may be used to modify the behavior
 of the algorithm:
 \bd
@@ -6108,8 +6123,14 @@ PossibleNashSupports[efg->EFG] =: LIST(EFSUPPORT)
 
 \bd
 %\marginpar{give better  description and cite}
-Returns a list of supports that could contain a completely mixed Nash
-equilibrium.
+Returns the list of supports that could be the supports of Nash
+equilibria.  Specifically, the supports returned are those in which no
+pure strategy is weakly dominated by another strategy in the support,
+since such a pure strategy would have a lower expected payoff for any
+mixed strategy vector that assigned positive probability to all
+elements of the support and no other strategies, and no pure strategy
+in the support is strictly dominated (relative to the support) by a
+pure strategy outside the support.
 \item [See also:] \verb+PolEnumSolve+.
 \ed
 
