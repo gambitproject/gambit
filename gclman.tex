@@ -1308,17 +1308,20 @@ NthChar[text->TEXT, n->INTEGER] =: TEXT
 \subsection{Input and Output}
 
 \begin{verbatim}
+Input[file->TEXT] =: INPUT
 LoadEfg[file->TEXT] =: EFG
 LoadNfg[file->TEXT] =: NFG
 Output[file->TEXT] =: OUTPUT
+Read[input->INPUT, x<->T] =: INPUT  
+      for T = BOOL,FLOAT,INTEGER,RATIONAL,TEXT,LIST(T)
 SaveEfg[efg<->EFG, file->TEXT] =: EFG
 SaveNfg[nfg<->NFG, file->TEXT] =: NFG
 SaveNfg[support->NFSUPPORT, file->TEXT] =: NFSUPPORT
 SetFormat[{width->INTEGER}, {precis->INTEGER}, 
           {expmode->BOOL}, {quote->BOOL} ] =: BOOL
-Write[x->T, {output->OUTPUT}] =: OUTPUT  
+Write[output->OUTPUT, x->T] =: OUTPUT  
       for T = BEHAV,BOOL,FLOAT,INTEGER,MIXED,RATIONAL,TEXT,LIST(T)
-Write[x<->T, {output->OUTPUT}] =: OUTPUT 
+Write[output->OUTPUT, x<->T] =: OUTPUT 
       for T = EFG, NFG
 \end{verbatim}
 
@@ -1455,7 +1458,7 @@ SetPayoff[list->LIST(INTEGER), payoffs->LIST(RATIONAL)] =: LIST(INTEGER)
 Float[x->INTEGER] =: FLOAT
 Float[x->FLOAT] =: FLOAT
 Float[x->RATIONAL] =: FLOAT
-List[x->T, {length->INTEGER}] =: LIST(T)
+List[x->T, {length->INTEGER},{delta->T}] =: LIST(T)
 ListForm[mixed->MIXED] =: LIST(LIST(T))
 ListForm[behav->BEHAV] =: LIST(LIST(LIST(T)))
 Nfg[efg<->EFG, {time<->FLOAT}] =: NFG
@@ -2416,6 +2419,17 @@ Returns the list of information sets at which player
 
 \item
 \protect \large \begin{verbatim}
+Input[file->TEXT] =: INPUT
+\end{verbatim}\normalsize
+
+\bd
+Opens a new input stream for reading from the file \verb+text+.
+\item
+[See also:]  {\tt Output}, {\tt Read}, {\tt Write}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
 InsertAction[infoset->INFOSET, at->ACTION] =: ACTION
 \end{verbatim}\normalsize
 
@@ -2740,12 +2754,13 @@ available; if \verb+start->+ \verb+BEHAV+ is specified, subgame markings are ign
 
 \item
 \protect \large \begin{verbatim}
-List[x->T, {length->INTEGER}] =: LIST(T)
+List[x->T, {length->INTEGER},{delta->T}] =: LIST(T)
 \end{verbatim}\normalsize
 
-\bd Creates an initialized list of dimension \verb+length+ all of
-whose entries are equal to \verb+x+.  The type \verb+T+ of the list is
-the same as the type of \verb+x+.  The default length is 1.  
+\bd Creates an initialized list of dimension \verb+length+ whose
+$i^{th}$ entry is \verb&x + (i * delta)&.  The type \verb+T+ of the list is
+the same as the type of \verb+x+.  The default length is 1. The
+default \verb+delta+ is 0.   
 \ed
 
 \item
@@ -3374,7 +3389,7 @@ Output[file->TEXT] =: OUTPUT
 \bd
 Opens a new output stream for writing to the file \verb+text+.
 \item
-[See also:] {\tt SetFormat}, {\tt Write}.
+[See also:]  {\tt Input}, {\tt SetFormat}, {\tt Write}.
 \ed
 
 %--P--
@@ -3596,6 +3611,22 @@ Converts the value \verb+x+ to the equivalent value of
 type {\tt RATIONAL}.
 \item
 [See also:] {\tt Float}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+Read[input->INPUT, x<->T] =: INPUT  
+      for T = BOOL,FLOAT,INTEGER,RATIONAL,TEXT,LIST(T)
+\end{verbatim}\normalsize
+
+\bd
+Reads data of type T from the input stream and assigns it to \verb+x+.
+Causes a run time error if the data at the input stream is of the
+incorrect type. 
+\item
+[Note:] This function is not listable
+\item
+[See also:] {\tt Input},  {\tt Write}
 \ed
 
 \item
@@ -4065,20 +4096,20 @@ See the section on control structures for complete information.
 
 \item
 \protect \large \begin{verbatim}
-Write[x->T, {output->OUTPUT}] =: OUTPUT  
-     for T=BEHAV,BOOL,FLOAT,INTEGER,MIXED,RATIONAL,TEXT,LIST(T)
-Write[x<->T, {output->OUTPUT}] =: OUTPUT 
-     for T=EFG, NFG
+Write[output->OUTPUT, x->T] =: OUTPUT  
+      for T = BEHAV,BOOL,FLOAT,INTEGER,MIXED,
+              RATIONAL,TEXT,LIST(T)
+Write[output->OUTPUT, x<->T] =: OUTPUT 
+      for T = EFG, NFG
 \end{verbatim}\normalsize
 
 \bd
 Does a formatted write of the object \verb+x+ to the
-output stream \verb+output+.  The default output is the standard
-output, ``OUTPUT''.  
+output stream \verb+output+.
 \item
 [Note:] This function is not listable
 \item
-[See also:] {\tt Output}, {\tt SetFormat}
+[See also:] {\tt Output}, {\tt SetFormat}, {\tt Read}
 \ed
 
 %--X--
