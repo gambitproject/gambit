@@ -24,8 +24,8 @@ return t;
 // Constructor
 
 NfgShow::NfgShow(Nfg &N,EfgNfgInterface *efg,wxFrame *pframe_)
-  : nf(N),nf_iter(N),pframe(pframe_),EfgNfgInterface(gNFG,efg),
-    param_sets(N.Parameters(),"Nfg Params")
+              :EfgNfgInterface(gNFG,efg), nf(N), nf_iter(N),
+               param_sets(N.Parameters(),"Nfg Params"),pframe(pframe_)
 
 {
 pl1=1;pl2=2;		// use the defaults
@@ -105,7 +105,7 @@ if (sup_to==sup_from) return from;
 gArray<int> dim_from=sup_from.NumStrats();
 gArray<int> dim_to=sup_to.NumStrats();
 assert(dim_from.Length()==dim_to.Length());
-MixedProfile<gNumber> to(sup_to.Game(),sup_to);
+MixedProfile<gNumber> to(sup_to,from.ParameterValues());
 for (int i=1;i<=dim_to.Length();i++)
 	for (int j=1;j<=dim_to[i];j++)
 	{
@@ -206,7 +206,7 @@ class NFChangePayoffs: public MyDialogBox
 	wxText **payoff_items;
 	wxChoice *outcome_item;
 
-	static void outcome_func(wxChoice &ob,wxEvent &ev)
+	static void outcome_func(wxChoice &ob,wxEvent &)
 	{((NFChangePayoffs *)ob.GetClientData())->OnOutcome();}
 	void OnOutcome(void);
 public:
@@ -499,7 +499,7 @@ spread->EnableInspect(FALSE);
 
 MixedSolution NfgShow::CreateSolution(void)
 {
-return MixedSolution(MixedProfile<gNumber>(nf,*cur_sup));
+return MixedSolution(MixedProfile<gNumber>(*cur_sup,param_sets.CurSet()));
 }
 
 
@@ -650,7 +650,7 @@ gString NfgShow::GetFileName(void) const
 
 MixedProfile<gNumber> NfgShow::CreateStartProfile(int how)
 {
-MixedSolution start(MixedProfile<gNumber>(nf,*cur_sup));
+MixedSolution start(MixedProfile<gNumber>(*cur_sup,param_sets.CurSet()));
 if (how==0)	start.Centroid();
 if (how==1 || how==2)
 {
@@ -718,7 +718,8 @@ void NfgShow::SolutionToExtensive(const MixedSolution &mp,bool set)
 #ifndef NFG_ONLY
 assert(InterfaceOk());	// we better have someone to send solutions to
 //assert(mp!=Solution());
-BehavProfile<gNumber> bp(*InterfaceObjectEfg());
+EFSupport S(*InterfaceObjectEfg());
+BehavProfile<gNumber> bp(S,param_sets.CurSet());
 MixedToBehav(nf,mp,*InterfaceObjectEfg(),bp);
 SolutionToEfg(bp,set);
 #endif
