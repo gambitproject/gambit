@@ -2594,14 +2594,14 @@ Correspondingly, in the reduced normal form game, the strategies in
 which the first player takes the second action at the first
 information set is eliminated.  
 
-A user defined function \tindex{IterativelyUnDominated} can be used to
+A user defined function \tindex{IterativeUnDominated} can be used to
 iteratively eliminate dominated strategies in a game, until no further
 dominance elimination is possible.  This function returns the final
 support.  So the commands
 
 \begin{verbatim}
 n:=LoadNfg["mygame.nfg"];
-s:=IterativelyUnDominated[n,strong->True,mixed->True];
+s:=IterativeUnDominated[n,strong->True,mixed->True];
 \end{verbatim}
 
 \noindent
@@ -3038,7 +3038,7 @@ Function Reference section of the manual (or via the
 
 \begin{verbatim}
 ms:=MarkedSubgames[e];UnMarkSubgames[e];
-s:=IterativelyUnDominated[Nfg[e],strong->True];
+s:=IterativeUnDominated[Nfg[e],strong->True];
 If[NumPlayers[e] = 2, 
   m:=EnumMixedSolve[s,0,precision],
   << InfiniteLoopWarning[stopAfter,nTries];
@@ -3547,7 +3547,7 @@ appreciate getting feedback on this.
   AddStrategy
   Basis
   IsDominated
-# IterativelyUnDominated
+# IterativeUnDominated
 # NthElement
   PossibleNashSupports
   RemoveAction
@@ -7413,7 +7413,7 @@ Searches for all Nash equilibria of the extensive form game
 
 \begin{verbatim}
   ms:=MarkedSubgames[e];UnMarkSubgames[e];
-  s:=IterativelyUnDominated[Nfg[e],strong->True];
+  s:=IterativeUnDominated[Nfg[e],strong->True];
   If[NumPlayers[e] = 2, 
     m:=EnumMixedSolve[s,0,precision],
     << InfiniteLoopWarning[stopAfter,nTries];
@@ -7434,7 +7434,7 @@ Searches for all Nash equilibria of the normal form game
 \verb+n+.  Returns a list containing the equilibria found.
 
 \begin{verbatim}
-  s:=IterativelyUnDominated[n,strong->True];
+  s:=IterativeUnDominated[n,strong->True];
   If[NumPlayers[n] = 2, 
     EnumMixedSolve[s,0,precision],
     << InfiniteLoopWarning[stopAfter,nTries];
@@ -7473,7 +7473,7 @@ Searches for all Perfect Nash equilibria of the normal form game
 
 \begin{verbatim}
    If[NumPlayers[n] = 2, 
-    s:=IterativelyUnDominated[n,mixed->True];
+    s:=IterativeUnDominated[n,mixed->True];
     m:=EnumMixedSolve[s,0,precision];
     Filter[m,IsPerfect[m]],
     << " Not implemented for n-person games";
@@ -7959,9 +7959,9 @@ false.
 \end{verbatim} 
 \ed
 
-\item\lex{IterativelyUnDominated}
+\item\lex{IterativeUnDominated}
 \protect \large \begin{verbatim}
-IterativelyUnDominated[s->EFSUPPORT, {strong->False}, {time<->0.000000}, 
+IterativeUnDominated[s->EFSUPPORT, {strong->False}, {time<->0.000000}, 
                        {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
 \end{verbatim}\normalsize
 
@@ -7976,9 +7976,9 @@ Successively eliminates dominated strategies in \verb+s+. See
 \end{verbatim} 
 \ed
 
-\item\lex{IterativelyUnDominated}
+\item\lex{IterativeUnDominated}
 \protect \large \begin{verbatim}
-IterativelyUnDominated[s->NFSUPPORT, {strong->False}, {mixed->False}, 
+IterativeUnDominated[s->NFSUPPORT, {strong->False}, {mixed->False}, 
            {precision->Rational}, {time<->0.000000}, 
            {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
 \end{verbatim}\normalsize
@@ -7994,9 +7994,9 @@ Successively eliminates dominated strategies in \verb+s+. See
 \end{verbatim} 
 \ed
 
-\item\lex{IterativelyUnDominated}
+\item\lex{IterativeUnDominated}
 \protect \large \begin{verbatim}
-IterativelyUnDominated[nfg->NFG, {strong->False}, {mixed->False}, 
+IterativeUnDominated[nfg->NFG, {strong->False}, {mixed->False}, 
            {precision->Rational}, {time<->0.000000}, 
            {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
 \end{verbatim}\normalsize
@@ -8005,13 +8005,13 @@ IterativelyUnDominated[nfg->NFG, {strong->False}, {mixed->False},
 Successively eliminates dominated strategies in \verb+nfg+.  See
 \verb+UnDominated+ for description of parameters.  
 \begin{verbatim}
-  IterativelyUnDominated[Support[nfg],strong,mixed,precision,time,traceFile,traceLevel];
+  IterativeUnDominated[Support[nfg],strong,mixed,precision,time,traceFile,traceLevel];
 \end{verbatim} 
 \ed
 
-\item\lex{IterativelyUnDominated}
+\item\lex{IterativeUnDominated}
 \protect \large \begin{verbatim}
-IterativelyUnDominated[efg->EFG, {strong->False}, {time<->0.000000}, 
+IterativeUnDominated[efg->EFG, {strong->False}, {time<->0.000000}, 
            {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
 \end{verbatim}\normalsize
 
@@ -8019,7 +8019,7 @@ IterativelyUnDominated[efg->EFG, {strong->False}, {time<->0.000000},
 Successively eliminates dominated strategies in \verb+nfg+. See
 \verb+UnDominated+ for description of parameters.  
 \begin{verbatim}
-  IterativelyUnDominated[Support[efg],strong,time,traceFile,traceLevel];
+  IterativeUnDominated[Support[efg],strong,time,traceFile,traceLevel];
 \end{verbatim} 
 \ed
 
@@ -8628,7 +8628,7 @@ Finds one Nash equilibrium of the normal form game \verb+n+.
 Returns a singleton list containing the equilibrium found.
 
 \begin{verbatim}
-  s:=IterativelyUnDominated[n];
+  s:=IterativeUnDominated[n];
   If[NumPlayers[n] = 2,
     If[IsConstSum[n],LpSolve[s,1,precision],LcpSolve[s,1,precision]],
     SimpDivSolve[s,stopAfter->1,nRestarts->16,precision->precision]
@@ -8647,7 +8647,7 @@ Finds one Perfect Nash equilibrium of the normal form game
 
 \begin{verbatim}
   If[NumPlayers[n] = 2, 
-    s:=IterativelyUnDominated[n];
+    s:=IterativeUnDominated[n];
     LcpSolve[s,1,precision],
     << " Not implemented for n-person games";
     List[Centroid[Support[n]],0] // return empty set of mixed
