@@ -434,6 +434,7 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
     gList<MixedSolution> solutions;
     for (int i = 1; i <= qreCorresp.NumPoints(1); i++) {
       solutions.Append(qreCorresp.GetPoint(1, i));
+      solutions[solutions.Length()].SetQre(qreCorresp.GetParameter(1, i), 0);
     }
     return new Mixed_ListPortion(solutions);
   }
