@@ -35,11 +35,10 @@ private:
   TreeZoomWindow *m_treeZoomWindow;
 
   int m_currentProfile;
-
   gList<EFSupport *> m_supports;
   EFSupport *m_currentSupport;
 
-  EfgProfileList *m_solutionTable;
+  EfgProfileList *m_profileTable;
   wxString m_filename;
   wxSashWindow *m_treeSashWindow, *m_nodeSashWindow, *m_toolSashWindow;
   wxSashWindow *m_solutionSashWindow;
@@ -52,8 +51,6 @@ private:
   wxPageSetupData m_pageSetupData;
   wxPrintData m_printData;
   
-  wxString m_script;
-
   void NodeInspect(bool insp);
 
   struct es_features {
@@ -113,55 +110,52 @@ private:
   void OnEditTreePlayers(wxCommandEvent &);
   void OnEditTreeInfosets(wxCommandEvent &);
 
-  void OnEditMassAll(wxCommandEvent &);
-  void OnEditMassAction(wxCommandEvent &);
-
-  void OnSubgamesMarkAll(wxCommandEvent &);
-  void OnSubgamesMark(wxCommandEvent &);
-  void OnSubgamesUnMarkAll(wxCommandEvent &);
-  void OnSubgamesUnMark(wxCommandEvent &);
-  void OnSubgamesCollapseAll(wxCommandEvent &);
-  void OnSubgamesCollapse(wxCommandEvent &);
-  void OnSubgamesExpandAll(wxCommandEvent &);
-  void OnSubgamesExpandBranch(wxCommandEvent &);
-  void OnSubgamesExpand(wxCommandEvent &);
-  void OnSubgamesView(wxCommandEvent &);
-
-  void OnSupportUndominated(wxCommandEvent &);
-  void OnSupportNew(wxCommandEvent &);
-  void OnSupportEdit(wxCommandEvent &);
-  void OnSupportDelete(wxCommandEvent &);
-  void OnSupportSelectFromList(wxCommandEvent &);
-  void OnSupportSelectPrevious(wxCommandEvent &);
-  void OnSupportSelectNext(wxCommandEvent &);
-  void OnSupportReachable(wxCommandEvent &);
-
-  void OnSolveStandard(wxCommandEvent &);
-  void OnSolveCustom(wxCommandEvent &);
-  void OnSolveQre(wxCommandEvent &);
-  void OnSolveNormalReduced(wxCommandEvent &);
-  void OnSolveNormalAgent(wxCommandEvent &);
-
   void OnViewProfiles(wxCommandEvent &);
   void OnViewCursor(wxCommandEvent &);
   void OnViewOutcomes(wxCommandEvent &);
   void OnViewSupports(wxCommandEvent &);
   void OnViewInfosets(wxCommandEvent &);
+  void OnViewZoomIn(wxCommandEvent &);
+  void OnViewZoomOut(wxCommandEvent &);
   void OnViewGameInfo(wxCommandEvent &);
-  void OnViewScript(wxCommandEvent &);
 
-  void OnPrefsZoomIn(wxCommandEvent &);
-  void OnPrefsZoomOut(wxCommandEvent &);
-  void OnPrefsLegend(wxCommandEvent &);
-  void OnPrefsFontsAboveNode(wxCommandEvent &);
-  void OnPrefsFontsBelowNode(wxCommandEvent &);
-  void OnPrefsFontsAfterNode(wxCommandEvent &);
-  void OnPrefsFontsAboveBranch(wxCommandEvent &);
-  void OnPrefsFontsBelowBranch(wxCommandEvent &);
-  void OnPrefsDisplayLayout(wxCommandEvent &);
-  void OnPrefsDisplayDecimals(wxCommandEvent &);
-  void OnPrefsSave(wxCommandEvent &);
-  void OnPrefsLoad(wxCommandEvent &);
+  void OnFormatLegend(wxCommandEvent &);
+  void OnFormatFontsAboveNode(wxCommandEvent &);
+  void OnFormatFontsBelowNode(wxCommandEvent &);
+  void OnFormatFontsAfterNode(wxCommandEvent &);
+  void OnFormatFontsAboveBranch(wxCommandEvent &);
+  void OnFormatFontsBelowBranch(wxCommandEvent &);
+  void OnFormatDisplayLayout(wxCommandEvent &);
+  void OnFormatDisplayDecimals(wxCommandEvent &);
+  void OnFormatSave(wxCommandEvent &);
+  void OnFormatLoad(wxCommandEvent &);
+
+  void OnToolsSubgamesMarkAll(wxCommandEvent &);
+  void OnToolsSubgamesMark(wxCommandEvent &);
+  void OnToolsSubgamesUnMarkAll(wxCommandEvent &);
+  void OnToolsSubgamesUnMark(wxCommandEvent &);
+  void OnToolsSubgamesCollapseAll(wxCommandEvent &);
+  void OnToolsSubgamesCollapse(wxCommandEvent &);
+  void OnToolsSubgamesExpandAll(wxCommandEvent &);
+  void OnToolsSubgamesExpandBranch(wxCommandEvent &);
+  void OnToolsSubgamesExpand(wxCommandEvent &);
+  void OnToolsSubgamesView(wxCommandEvent &);
+
+  void OnToolsSupportUndominated(wxCommandEvent &);
+  void OnToolsSupportNew(wxCommandEvent &);
+  void OnToolsSupportEdit(wxCommandEvent &);
+  void OnToolsSupportDelete(wxCommandEvent &);
+  void OnToolsSupportSelectFromList(wxCommandEvent &);
+  void OnToolsSupportSelectPrevious(wxCommandEvent &);
+  void OnToolsSupportSelectNext(wxCommandEvent &);
+  void OnToolsSupportReachable(wxCommandEvent &);
+
+  void OnToolsEquilibriumStandard(wxCommandEvent &);
+  void OnToolsEquilibriumCustom(wxCommandEvent &);
+  void OnToolsEquilibriumQre(wxCommandEvent &);
+
+  void OnToolsNormalReduced(wxCommandEvent &);
+  void OnToolsNormalAgent(wxCommandEvent &);
 
   void OnProfilesNew(wxCommandEvent &);
   void OnProfilesClone(wxCommandEvent &);
@@ -180,9 +174,9 @@ public:
   virtual ~EfgShow();
 
   // PROFILE ACCESS AND MANIPULATION
-  void RemoveSolutions(void);
-  void ChangeSolution(int soln);
-  int CurrentSolution(void) const { return m_currentProfile; }
+  void RemoveProfiles(void);
+  void ChangeProfile(int soln);
+  int CurrentProfile(void) const { return m_currentProfile; }
   const BehavSolution &GetCurrentProfile(void) const;
 
   gText GetRealizProb(const Node *) const;
@@ -200,7 +194,7 @@ public:
   void PickSolutions(const Efg::Game &, Node *, gList<BehavSolution> &);
 
   // Solution interface to normal form
-  void AddSolution(const BehavSolution &, bool map);
+  void AddProfile(const BehavSolution &, bool map);
   FullEfg *Game(void) { return &m_efg; }
 
 

@@ -1325,7 +1325,7 @@ void NfgShow::AddSolution(const MixedSolution &p_profile, bool p_map)
 {
   m_solutionTable->Append(p_profile);
   if (m_nfg.AssociatedEfg() && p_map) {
-    m_parent->GetWindow(m_nfg.AssociatedEfg())->AddSolution(BehavProfile<gNumber>(p_profile), false);
+    m_parent->GetWindow(m_nfg.AssociatedEfg())->AddProfile(BehavProfile<gNumber>(p_profile), false);
   }
   m_solutionTable->UpdateValues();
   UpdateMenus();

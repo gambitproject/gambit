@@ -30,7 +30,7 @@ EfgProfileList::EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent)
 	   wxDefaultSize),
     m_parent(p_efgShow)
 {
-  m_menu = new wxMenu("Solutions");
+  m_menu = new wxMenu("Profiles");
   m_menu->Append(efgmenuPROFILES_FILTER, "Sort/Filter...",
 		 "Sort and filter profiles");
   m_menu->Append(efgmenuPROFILES_NEW, "New", "Create a new profile");
@@ -105,7 +105,7 @@ void EfgProfileList::UpdateValues(void)
   }
 
   for (int i = 1; i <= m_displayOrder.Length(); i++) {
-    if (m_displayOrder[i] == m_parent->CurrentSolution()) {
+    if (m_displayOrder[i] == m_parent->CurrentProfile()) {
       for (int j = 0; j < GetCols(); j++) {
 	SetCellTextColour(i - 1, j, *wxRED);
       }
@@ -189,16 +189,16 @@ int EfgProfileList::Append(const BehavSolution &p_solution)
 
 void EfgProfileList::OnLeftClick(wxGridEvent &p_event)
 {
-  m_parent->ChangeSolution(m_displayOrder[p_event.GetRow() + 1]);
+  m_parent->ChangeProfile(m_displayOrder[p_event.GetRow() + 1]);
   p_event.Veto();
 }
 
 void EfgProfileList::OnRightClick(wxGridEvent &p_event)
 {
-  m_menu->Enable(efgmenuPROFILES_CLONE, m_parent->CurrentSolution() > 0);
-  m_menu->Enable(efgmenuPROFILES_RENAME, m_parent->CurrentSolution() > 0);
-  m_menu->Enable(efgmenuPROFILES_EDIT, m_parent->CurrentSolution() > 0);
-  m_menu->Enable(efgmenuPROFILES_DELETE, m_parent->CurrentSolution() > 0);
+  m_menu->Enable(efgmenuPROFILES_CLONE, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(efgmenuPROFILES_RENAME, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(efgmenuPROFILES_EDIT, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(efgmenuPROFILES_DELETE, m_parent->CurrentProfile() > 0);
   PopupMenu(m_menu, p_event.GetPosition().x, p_event.GetPosition().y);
 }
 
