@@ -1378,8 +1378,6 @@ Portion* GSM_Manual(Portion** param)
 
 
 
-
-
   // This section is very inelegantly adopted from gcompile.yy...
   // This section and its gcompile.yy parallel should be converted into
   // one function...
@@ -1403,6 +1401,45 @@ Portion* GSM_Manual(Portion** param)
   gText ManFileName;
 
   ManFileName = (gText) name;
+  f = 0;
+#ifdef USE_EXCEPTIONS
+  try {
+  f = new gFileInput( ManFileName );
+  }
+  catch(gFileInput::OpenFailed &) {
+    if( search ) {
+      if(!man_found && (System::GetEnv( "HOME" ) != NULL))  {
+        ManFileName = (gText) System::GetEnv( "HOME" ) + SLASH + name;
+        try{
+        f = new gFileInput( ManFileName );
+        }
+        catch(gFileInput::OpenFailed &) { f = NULL; }
+        if(f) { man_found = true;}
+      }
+      if( !man_found && (System::GetEnv( "GCLLIB" ) != NULL) ) {
+        ManFileName = (gText) System::GetEnv( "GCLLIB" ) + SLASH + name;
+        try{
+        f = new gFileInput( ManFileName );
+        }
+        catch(gFileInput::OpenFailed &) { f = NULL; }
+        if (f) {man_found = true;}
+      }
+      if( !man_found && (SOURCE != NULL) ) {
+        ManFileName = (gText) SOURCE + SLASH + name;
+        try{
+        f = new gFileInput( ManFileName );
+        }
+        catch(gFileInput::OpenFailed &) { f = NULL; }
+        if (f) {man_found = true;}
+      }
+    }
+  }
+
+  // End bad section
+
+  if (f == NULL)
+    return new BoolPortion(false);
+#else
   f = new gFileInput( ManFileName );
   if (!f->IsValid())
   {
@@ -1468,7 +1505,7 @@ Portion* GSM_Manual(Portion** param)
 
   if (f == NULL)
     return new BoolPortion(false);
-
+#endif // USE_EXCEPTIONS
 
   gText line;
   gText line_out;
