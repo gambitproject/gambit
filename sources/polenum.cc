@@ -115,7 +115,7 @@ int PolEnumModule::PolEnum(void)
       }
   }
   catch (gSignalBreak &) { }
-  catch (gSquareMatrix<gDouble>::MatrixSingular &) {
+  catch (gSquareMatrix<gDouble>::MatrixSingular) {
     is_singular = true;
   }
   timer.Stop();

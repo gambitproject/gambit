@@ -135,7 +135,7 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
     try {
       newpoint = NewtonPolishOnce(point);
     }
-    catch (gSquareMatrix<gDouble>::MatrixSingular &) {
+    catch (gSquareMatrix<gDouble>::MatrixSingular) {
       bool nonsingular = false;
       int direction = 1;
       while (direction < Dmnsn() && !nonsingular) {
@@ -152,7 +152,7 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
 	  newpoint = point + 
 	    (NewtonPolishOnce(perturbed_point) - perturbed_point);
 	}
-	catch (gSquareMatrix<gDouble>::MatrixSingular &) {
+	catch (gSquareMatrix<gDouble>::MatrixSingular) {
 	  nonsingular = false;
 	}
 	direction++;
