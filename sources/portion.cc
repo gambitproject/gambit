@@ -2173,7 +2173,7 @@ int ListPortion::Insert( Portion* item, int index )
 	_Owner = item->Original()->Owner();
       result = _Value->Insert( item, index );
     }
-    else if( item_type == porUNDEFINED )
+    else if( item_type.Type == porUNDEFINED )
     {
       if( _Value->Length() == 0 )
 	_Owner = item->Original()->Owner();
@@ -2181,6 +2181,8 @@ int ListPortion::Insert( Portion* item, int index )
       assert( item->Spec().ListDepth > 0 );
       ((ListPortion*) item)->_DataType = _DataType;
     }
+    else if(item_type.Type == porERROR)
+      result = _Value->Insert( item, index );
     else
       delete item;
   }

@@ -118,16 +118,7 @@ CallListFunction( GSM* gsm, Portion** ParamIn )
 	if( ParamIn[i]->Spec().ListDepth > 0 && 
 	   ParamIn[j]->Spec().ListDepth > 0)
 	  if(!_ListDimMatch((ListPortion*)ParamIn[i],(ListPortion*)ParamIn[j]))
-	  {
-	    gout << "NumParams: " << NumParams << " i: " << i << " j: " << j << '\n';
-	    gout << "i: " << ((ListPortion*)ParamIn[i])->Length() << '\n';
-	    gout << "j: " << ((ListPortion*)ParamIn[j])->Length() << '\n';
-	    gout << "i: " << PortionSpecToText(ParamIn[i]->Spec()) << '\n';
-	    gout << "j: " << PortionSpecToText(ParamIn[j]->Spec()) << '\n';
-	    gout << "i: " << ParamIn[i] << '\n';
-	    gout << "j: " << ParamIn[j] << '\n';
 	    return new ErrorPortion( "Mismatched dimensionalities" );
-	  }
     }
   }
 
@@ -164,20 +155,40 @@ CallListFunction( GSM* gsm, Portion** ParamIn )
     }
     else
     {
+      bool error_call = false;
       for( j = 0; j < NumParams; j++ )
+      {
         CurrParam[j] = CurrParam[j]->RefCopy();
+	if(CurrParam[j]->Spec().Type == porERROR)
+	  error_call = true;
+      }
 
-      if( !_FuncInfo[ _FuncIndex ].UserDefined )
-	result = _FuncInfo[ _FuncIndex ].FuncPtr( CurrParam );
+      if(!error_call)
+	if( !_FuncInfo[ _FuncIndex ].UserDefined )
+	  result = _FuncInfo[ _FuncIndex ].FuncPtr( CurrParam );
+	else
+	  result = gsm->ExecuteUserFunc( *(_FuncInfo[ _FuncIndex ].FuncInstr), 
+					_FuncInfo[ _FuncIndex ], CurrParam );
       else
-	result = gsm->ExecuteUserFunc( *(_FuncInfo[ _FuncIndex ].FuncInstr), 
-				      _FuncInfo[ _FuncIndex ], CurrParam );
-
+	result = new ErrorPortion("Error in arguments");
+      
       for( j = 0; j < NumParams; j++ )
 	delete CurrParam[j];
     }
 
-    p->Append( result );
+    if(result->Spec().Type == porERROR)
+    {
+      _StdErr << _FuncName << "[]: ";
+      result->Output( _StdErr );
+      _StdErr << "\n";
+      delete result;
+      result = new ErrorPortion;
+      _ErrorOccurred = true;
+      _ErrorMessage(_StdErr, 27, p->Length()+1, _FuncName);
+      p->Append(new ErrorPortion);
+    }
+    else
+      p->Append( result );
   }
 
   delete[] CurrParam;
@@ -1613,6 +1624,10 @@ void CallFuncObj::_ErrorMessage
   case 26:
     s << str1 << "[]: Type mismatch on parameter #" << num1 << ", \"";
     s << str2 << "\"; expected " << str3 << ", got " << str4 << "\n";
+    break;
+  case 27:
+    s << "Error occurred at element #" << num1;
+    s << " during listed function call to " << str1 << "[]\n";
     break;
   default:
     s << "General error\n";
