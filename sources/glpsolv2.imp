@@ -37,12 +37,18 @@ template <class T> INLINE gLPTableau2<T>::gLPTableau2(const gMatrix<T> &A,
   int i;
   for (i = 1; i <= A.NumRows(); i++)         // Set A0
     for (int j = 1; j <= A.NumColumns(); j++)
-      { A0(i,j) = A(i,j); A0(i + A.NumColumns(),j) = -A(i,j); }
+      { A0(i,j) = A(i,j); A0(i, j + A.NumColumns()) = -A(i,j); }
+
+  gout << "Allocated A0...\n";
   
   B0 = B;                                    // Set B0
 
+  gout << "Allocated B0...\n";
+
   for (i = 1; i <= C.Length(); i++)          // Copy C to C0
     { C0[i] = C[i]; C0[i + C.Length()] = -C[i]; }
+
+  gout << "Allocated C0...\n";
 
 // Get the constructor in glpsolve.h to do the actual work
   gLPTableau<T> Tableau0(A0, B0, C0);
