@@ -35,8 +35,20 @@ template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
 Portion *GSM_Actions(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
+  EFSupport* sup = ((EfSupportPortion*) param[1])->Value();
+  int i;
 
-  Portion* por = ArrayToList(s->GetActionList());
+  Portion* por;
+  if(!sup)
+    por = ArrayToList(s->GetActionList());
+  else
+  {
+    por = new ListValPortion();
+    for(i=1; i<=s->GetActionList().Length(); i++)
+      if(sup->Contains(s->GetActionList()[i]))
+	((ListPortion*) por)->
+	  Append(new ActionValPortion(s->GetActionList()[i]));
+  }
   por->SetOwner( param[ 0 ]->Owner() );
   por->AddDependency();
   return por;
@@ -381,7 +393,7 @@ Portion *GSM_ElimDom_Efg(Portion **param)
   
   Portion *por = (T) ? new EfSupportValPortion(T) : new EfSupportValPortion(new EFSupport(*S));
 
-  por->SetOwner(param[0]->Owner());
+  por->SetOwner(param[0]->Original());
   por->AddDependency();
   return por;
 }
@@ -422,7 +434,9 @@ Portion *GSM_Infoset_Node(Portion **param)
   Node *n = ((NodePortion *) param[0])->Value();
 
   if (!n->GetInfoset())
-    return new ErrorPortion("Terminal nodes have no information set");
+    return new NullPortion(porINFOSET);
+  //return new ErrorPortion("Terminal nodes have no information set");
+
   Portion* por = new InfosetValPortion(n->GetInfoset());
   por->SetOwner( param[ 0 ]->Owner() );
   por->AddDependency();
@@ -435,7 +449,9 @@ Portion *GSM_Infoset_Action(Portion **param)
   Action *a = ((ActionPortion *) param[0])->Value();
 
   if (!a->BelongsTo())
-    return new ErrorPortion("Terminal nodes have no information set");
+    return new NullPortion(porINFOSET);
+  //return new ErrorPortion("Terminal nodes have no information set");
+
   Portion* por = new InfosetValPortion(a->BelongsTo());
   por->SetOwner( param[ 0 ]->Owner() );
   por->AddDependency();
@@ -960,7 +976,8 @@ Portion *GSM_NthChild(Portion **param)
   Node *n = ((NodePortion *) param[0])->Value();
   int child = ((IntPortion *) param[1])->Value();
   if (child < 1 || child > n->NumChildren())  
-    return new ErrorPortion("Child number out of range");
+    return new NullPortion(porNODE);
+  //return new ErrorPortion("Child number out of range");
 
   Portion* por = new NodeValPortion(n->GetChild(child));
   por->SetOwner( param[ 0 ]->Owner() );
@@ -1526,8 +1543,10 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Actions", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Actions, 
-				       PortionSpec(porACTION, 1), 1));
+				       PortionSpec(porACTION, 1), 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("infoset", porINFOSET));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porEF_SUPPORT, 
+					    new EfSupportValPortion(0)));
   gsm->AddFunction(FuncObj);
 
 

@@ -13,6 +13,8 @@
 #include "behavsol.h"
 #include "mixedsol.h"
 
+#include "nfplayer.h"
+
 #include "efgutils.h"
 
 //
@@ -53,6 +55,7 @@ Portion *GSM_ActionProb_Float(Portion **param)
   for(i=1; i<=e->NumPlayers(); i++)
     if(e->PlayerList()[i] == p)
       player = i;
+  assert(player > 0);
   assert(infoset > 0);
   assert(action > 0);
 
@@ -93,6 +96,7 @@ Portion *GSM_ActionProb_Rational(Portion **param)
   for(i=1; i<=e->NumPlayers(); i++)
     if(e->PlayerList()[i] == p)
       player = i;
+  assert(player > 0);
   assert(infoset > 0);
   assert(action > 0);
 
@@ -581,7 +585,8 @@ Portion* GSM_Belief_Float(Portion **param)
     if(members[i] == n)
       found = i;
   if(!found)
-    return new ErrorPortion("Node not a member of belief vector");
+    return new NullPortion(porFLOAT);
+  //return new ErrorPortion("Node not a member of belief vector");
   return new FloatValPortion(values(s->GetPlayer()->GetNumber(), 
 				    s->GetNumber(), found));
 }
@@ -599,7 +604,8 @@ Portion* GSM_Belief_Rational(Portion **param)
     if(members[i] == n)
       found = i;
   if(!found)
-    return new ErrorPortion("Node not a member of belief vector");
+    return new NullPortion(porRATIONAL);
+  //return new ErrorPortion("Node not a member of belief vector");
   return new RationalValPortion(values(s->GetPlayer()->GetNumber(), 
 				       s->GetNumber(), found));
 }
@@ -702,17 +708,39 @@ Portion *GSM_CentroidNFSupport(Portion **param)
 
 
 //---------------
-// GobitLambda
+// Game
 //---------------
 
 Portion* GSM_Game_Mixed(Portion** param)
 {
-  return param[0]->Owner()->RefCopy();  
+  if(param[0]->Owner())
+    return param[0]->Owner()->RefCopy();  
+  else
+    return 0;
 }
 
 Portion* GSM_Game_Behav(Portion** param)
 {
-  return param[0]->Owner()->RefCopy();  
+  if(param[0]->Owner())
+    return param[0]->Owner()->RefCopy();  
+  else
+    return 0;
+}
+
+Portion* GSM_Game_NFSupport(Portion** param)
+{
+  if(param[0]->Owner())
+    return param[0]->Owner()->RefCopy();  
+  else
+    return 0;
+}
+
+Portion* GSM_Game_EFSupport(Portion** param)
+{
+  if(param[0]->Owner())
+    return param[0]->Owner()->RefCopy();  
+  else
+    return 0;
 }
 
 
@@ -724,13 +752,17 @@ Portion* GSM_GobitLambda_BehavFloat(Portion** param)
 {
   BehavSolution<double>* bs = 
     (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+  if(bs->Creator() != EfgAlg_GOBIT)
+    return new NullPortion(porFLOAT);
   return new FloatValPortion( bs->GobitLambda() );
 }
 
 Portion* GSM_GobitLambda_BehavRational(Portion** param)
-{
+{  
   BehavSolution<double>* bs = 
-    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();  
+  if(bs->Creator() != EfgAlg_GOBIT)
+    return new NullPortion(porRATIONAL);
   return new RationalValPortion( bs->GobitLambda() );
 }
 
@@ -738,6 +770,8 @@ Portion* GSM_GobitLambda_MixedFloat(Portion** param)
 {
   MixedSolution<double>* bs = 
     (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+  if(bs->Creator() != NfgAlg_GOBIT)
+    return new NullPortion(porFLOAT);
   return new FloatValPortion( bs->GobitLambda() );
 }
 
@@ -745,6 +779,8 @@ Portion* GSM_GobitLambda_MixedRational(Portion** param)
 {
   MixedSolution<double>* bs = 
     (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+  if(bs->Creator() != NfgAlg_GOBIT)
+    return new NullPortion(porRATIONAL);
   return new RationalValPortion( bs->GobitLambda() );
 }
 
@@ -756,6 +792,8 @@ Portion* GSM_GobitValue_BehavFloat(Portion** param)
 {
   BehavSolution<double>* bs = 
     (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+  if(bs->Creator() != EfgAlg_GOBIT)
+    return new NullPortion(porFLOAT);
   return new FloatValPortion( bs->GobitValue() );
 }
 
@@ -763,6 +801,8 @@ Portion* GSM_GobitValue_BehavRational(Portion** param)
 {
   BehavSolution<double>* bs = 
     (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+  if(bs->Creator() != EfgAlg_GOBIT)
+    return new NullPortion(porRATIONAL);
   return new RationalValPortion( bs->GobitValue() );
 }
 
@@ -770,6 +810,8 @@ Portion* GSM_GobitValue_MixedFloat(Portion** param)
 {
   MixedSolution<double>* bs = 
     (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+  if(bs->Creator() != NfgAlg_GOBIT)
+    return new NullPortion(porFLOAT);
   return new FloatValPortion( bs->GobitValue() );
 }
 
@@ -777,6 +819,8 @@ Portion* GSM_GobitValue_MixedRational(Portion** param)
 {
   MixedSolution<double>* bs = 
     (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+  if(bs->Creator() != NfgAlg_GOBIT)
+    return new NullPortion(porRATIONAL);
   return new RationalValPortion( bs->GobitValue() );
 }
 
@@ -804,7 +848,8 @@ Portion *GSM_InfosetProb_Float(Portion **param)
       found1 = i;
   
   if(!found1)
-    return new ErrorPortion("Infoset not found in strategy set");
+    return new NullPortion(porFLOAT);
+  //return new ErrorPortion("Infoset not found in strategy set");
   else
     p = E->PlayerList()[found1];
 
@@ -839,7 +884,8 @@ Portion *GSM_InfosetProb_Rational(Portion **param)
       found1 = i;
   
   if(!found1)
-    return new ErrorPortion("Infoset not found in strategy set");
+    return new NullPortion(porRATIONAL);
+  //return new ErrorPortion("Infoset not found in strategy set");
   else
     p = E->PlayerList()[found1];
 
@@ -1252,86 +1298,157 @@ Portion *GSM_Gripe_MixedRational(Portion **param)
   return por;
 }
 
-Portion *GSM_Gripe_BehavFloat(Portion **param)
+
+
+
+Portion *GSM_Gripe_MixedFloat_Strategy(Portion **param)
 {
-  int i;
-  int j;
-  int k;
-  Portion* p1;
-  Portion* p2;
-  Portion* p3;
-  Portion* por;
-
-  BehavSolution<double> *P = 
-    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
-
-  gDPVector<double> v(*P);
-
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+  gPVector<double> v(*P);
   P->Gripe(v);
 
-  por = new ListValPortion();
+  Strategy* s = ((StrategyPortion*) param[1])->Value();
+  NFPlayer* p = s->nfp;
+  BaseNfg* n = p->BelongsTo();
+  
+  int i = 0;
+  int player = 0;
+  int strategy = 0;
+  for(i=1; i<=p->NumStrats(); i++)
+    if(p->StrategyList()[i] == s)
+      strategy = i;
+  for(i=1; i<=n->NumPlayers(); i++)
+    if(n->PlayerList()[i] == p)
+      player = i;
+  assert(player > 0);
+  assert(strategy > 0);
 
-  for( i = 1; i <= P->DPLengths().Length(); i++ )
-  {
-    p1 = new ListValPortion();
+  return new FloatValPortion(v(player, strategy));
+}
 
-    for( j = 1; j <= P->DPLengths()[i]; j++ )
-    {
-      p2 = new ListValPortion();
+Portion *GSM_Gripe_MixedRational_Strategy(Portion **param)
+{
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
+  gPVector<gRational> v(*P);
+  P->Gripe(v);
 
-      for( k = 1; k <= P->Lengths()[j]; k++ )
-      {
-	p3 = new FloatValPortion( v( i, j, k ) );
-	((ListPortion*) p2)->Append( p3 );
-      }
-      ((ListPortion*) p1)->Append( p2 );
-    }
-    ((ListPortion*) por)->Append( p1 );
-  }
+  Strategy* s = ((StrategyPortion*) param[1])->Value();
+  NFPlayer* p = s->nfp;
+  BaseNfg* n = p->BelongsTo();
+  
+  int i = 0;
+  int player = 0;
+  int strategy = 0;
+  for(i=1; i<=p->NumStrats(); i++)
+    if(p->StrategyList()[i] == s)
+      strategy = i;
+  for(i=1; i<=n->NumPlayers(); i++)
+    if(n->PlayerList()[i] == p)
+      player = i;
+  assert(player > 0);
+  assert(strategy > 0);
 
-  return por;
+  return new RationalValPortion(v(player, strategy));
+}
 
+
+
+
+
+
+Portion *GSM_Gripe_BehavFloat(Portion **param)
+{
+  BehavSolution<double> *P = 
+    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+  gDPVector<double> v(*P);
+  P->Gripe(v);
+  return gDPVectorToList(v);
 }
 
 
 Portion *GSM_Gripe_BehavRational(Portion **param)
 {
-  int i;
-  int j;
-  int k;
-  Portion* p1;
-  Portion* p2;
-  Portion* p3;
-  Portion* por;
+  BehavSolution<gRational> *P = 
+    (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
+  gDPVector<gRational> v(*P);
+  P->Gripe(v);
+  return gDPVectorToList(v);
+}
 
+
+Portion *GSM_Gripe_BehavFloat_Action(Portion **param)
+{
+  BehavSolution<double> *P = 
+    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+
+  gDPVector<double> v(*P);
+  P->Gripe(v);
+
+  Action* a = ((ActionPortion*) param[1])->Value();
+  Infoset* s = a->BelongsTo();
+  EFPlayer* p = s->GetPlayer();
+  BaseEfg* e = p->BelongsTo();
+  
+  int i = 0;
+  int player = 0;
+  int infoset = 0;
+  int action = 0;
+  for(i=1; i<=s->NumActions(); i++)
+    if(s->GetActionList()[i] == a)
+      action = i;
+  for(i=1; i<=p->NumInfosets(); i++)
+    if(p->InfosetList()[i] == s)
+      infoset = i;
+  for(i=1; i<=e->NumPlayers(); i++)
+    if(e->PlayerList()[i] == p)
+      player = i;
+  assert(player > 0);
+  assert(infoset > 0);
+  assert(action > 0);
+
+  if (!s->GetPlayer()->IsChance()) 
+    return new FloatValPortion(v(player, infoset, action));
+  else
+    return new NullPortion(porFLOAT);
+}
+
+
+Portion *GSM_Gripe_BehavRational_Action(Portion **param)
+{
   BehavSolution<gRational> *P = 
     (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
 
   gDPVector<gRational> v(*P);
-
   P->Gripe(v);
 
-  por = new ListValPortion();
+  Action* a = ((ActionPortion*) param[1])->Value();
+  Infoset* s = a->BelongsTo();
+  EFPlayer* p = s->GetPlayer();
+  BaseEfg* e = p->BelongsTo();
+  
+  int i = 0;
+  int player = 0;
+  int infoset = 0;
+  int action = 0;
+  for(i=1; i<=s->NumActions(); i++)
+    if(s->GetActionList()[i] == a)
+      action = i;
+  for(i=1; i<=p->NumInfosets(); i++)
+    if(p->InfosetList()[i] == s)
+      infoset = i;
+  for(i=1; i<=e->NumPlayers(); i++)
+    if(e->PlayerList()[i] == p)
+      player = i;
+  assert(player > 0);
+  assert(infoset > 0);
+  assert(action > 0);
 
-  for( i = 1; i <= P->DPLengths().Length(); i++ )  {
-    p1 = new ListValPortion();
-
-    for( j = 1; j <= P->DPLengths()[i]; j++ )
-    {
-      p2 = new ListValPortion();
-
-      for( k = 1; k <= P->Lengths()[j]; k++ )
-      {
-	p3 = new RationalValPortion( v( i, j, k ) );
-	((ListPortion*) p2)->Append( p3 );
-      }
-      ((ListPortion*) p1)->Append( p2 );
-    }
-    ((ListPortion*) por)->Append( p1 );
-  }
-
-  return por;
-
+  if (!s->GetPlayer()->IsChance()) 
+    return new RationalValPortion(v(player, infoset, action));
+  else
+    return new NullPortion(porRATIONAL);
 }
 
 
@@ -2027,11 +2144,16 @@ void Init_solfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Game", 2);
+  FuncObj = new FuncDescObj("Game", 4);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_Mixed, porNFG, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("mixed", porMIXED));
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_Behav, porEFG, 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("behav", porBEHAV));
+
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Game_NFSupport, porNFG, 1));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Game_EFSupport, porEFG, 1));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("support", porEF_SUPPORT));
   gsm->AddFunction(FuncObj);
 
 
@@ -2251,7 +2373,7 @@ void Init_solfunc(GSM *gsm)
 
 
 
-  FuncObj = new FuncDescObj("Gripe", 4);
+  FuncObj = new FuncDescObj("Gripe", 8);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Gripe_BehavFloat, 
 				       PortionSpec(porFLOAT, 3), 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("behav", porBEHAV_FLOAT));
@@ -2265,6 +2387,25 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Gripe_MixedRational, 
 				       PortionSpec(porRATIONAL, 2), 1));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("mixed", porMIXED_RATIONAL));
+
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Gripe_BehavFloat_Action, 
+				       porFLOAT, 2));
+  FuncObj->SetParamInfo(4, 0, ParamInfoType("behav", porBEHAV_FLOAT));
+  FuncObj->SetParamInfo(4, 1, ParamInfoType("action", porACTION));
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Gripe_BehavRational_Action, 
+				       porRATIONAL, 2));
+  FuncObj->SetParamInfo(5, 0, ParamInfoType("behav", porBEHAV_RATIONAL));
+  FuncObj->SetParamInfo(5, 1, ParamInfoType("action", porACTION));
+
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Gripe_MixedFloat_Strategy, 
+				       porFLOAT, 2));
+  FuncObj->SetParamInfo(6, 0, ParamInfoType("mixed", porMIXED_FLOAT));
+  FuncObj->SetParamInfo(6, 1, ParamInfoType("strategy", porSTRATEGY));
+  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Gripe_MixedRational_Strategy, 
+				       porRATIONAL, 2));
+  FuncObj->SetParamInfo(7, 0, ParamInfoType("mixed", porMIXED_RATIONAL));
+  FuncObj->SetParamInfo(7, 1, ParamInfoType("strategy", porSTRATEGY));
+
   gsm->AddFunction(FuncObj);
 
 
