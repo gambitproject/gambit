@@ -1970,10 +1970,14 @@ void Init_gsmoper(GSM* gsm)
 
   FuncObj = new FuncDescObj("Print", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Print, porANYTYPE, 1, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x",
+					    PortionSpec(porANYTYPE, 0, 
+							porNULLSPEC)));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Print, PortionSpec(porANYTYPE, NLIST), 1, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", PortionSpec(porANYTYPE, NLIST)));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", 
+					    PortionSpec(porANYTYPE, NLIST,
+						      porNULLSPEC)));
   gsm->AddFunction(FuncObj);
 
 
